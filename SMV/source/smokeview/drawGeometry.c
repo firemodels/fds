@@ -85,29 +85,39 @@ float *set_normal(float *v1, float *v2, float *v3, float normal[3]){
   return normal;
 }
 
-/* ------------------ in_box ------------------------ */
+/* ------------------ in_solid ------------------------ */
 
-int in_box(float box_bounds[6], float *xyz){
-  if(xyz[0]<box_bounds[0]||xyz[0]>box_bounds[1])return 0;
-  if(xyz[1]<box_bounds[2]||xyz[1]>box_bounds[3])return 0;
-  if(xyz[2]<box_bounds[4]||xyz[2]>box_bounds[5])return 0;
-  return 1;
-}
-
-/* ------------------ in_tetra ------------------------ */
-
-int in_tetra(plane *tetra_planes, float *xyz){
+int in_solid(plane *planes, int nplanes, float *xyz, int plane_index){
   int i;
 
-  for(i=0;i<4;i++){
+  for(i=0;i<nplanes;i++){
     plane *pi;
     float diff[3];
 
-    pi = tetra_planes + i;
+    if(i==plane_index)continue;
+    pi = planes + i;
     VECDIFF3(pi->x0,xyz,diff);
-    if(DOT3(pi->n,diff)<0)return 0;
+    if(DOT3(pi->n,diff)>0.0)return 0;
   }
   return 1;
+}
+
+/* ------------------ get_edge_plane_intersection ------------------------ */
+
+float *get_edge_plane_intersection(edge *e, plane *p, float xyz[3]){
+  float t, v1mx0[3], v2mv1[3];
+  float denom;
+
+  VECDIFF3(p->x0,e->v1,v1mx0);
+  VECDIFF3(e->v1,e->v2,v2mv1);
+  denom=DOT3(p->n,v2mv1);
+  if(denom==0.0)return NULL;
+  t = -DOT3(p->n,v1mx0)/denom;
+  if(t<0.0||t>1.0)return NULL;
+  xyz[0] = e->v1[0]*(1.0-t) + t*e->v2[0];
+  xyz[1] = e->v1[1]*(1.0-t) + t*e->v2[1];
+  xyz[2] = e->v1[2]*(1.0-t) + t*e->v2[2];
+  return xyz;
 }
 
 /* ------------------ GetVerts ------------------------ */
@@ -147,10 +157,10 @@ int GetVerts(float boxbounds[6],
   set_plane(set_vert(0.0,0.0, 1.0,normal),set_vert(*xmin,*ymin,*zmax,vert0),box_planes+5);
 
 
-  set_plane(set_normal(v4,v1,v2,normal),v1,tetra_planes);
-  set_plane(set_normal(v4,v2,v3,normal),v2,tetra_planes+1);
-  set_plane(set_normal(v4,v3,v1,normal),v3,tetra_planes+2);
-  set_plane(set_normal(v2,v1,v3,normal),v1,tetra_planes+3);
+  set_plane(set_normal(v2,v1,v4,normal),v1,tetra_planes);
+  set_plane(set_normal(v3,v2,v4,normal),v2,tetra_planes+1);
+  set_plane(set_normal(v1,v3,v4,normal),v3,tetra_planes+2);
+  set_plane(set_normal(v3,v1,v2,normal),v1,tetra_planes+3);
 
   set_edge(v1,v2,tetra_edges);
   set_edge(v2,v3,tetra_edges+1);
@@ -189,30 +199,87 @@ int GetVerts(float boxbounds[6],
   set_vert2(v4[0],v4[1],v4[2],tetra_verts+3);
 
   nv=0;
+
+  // find tetrahedron verts that are inside the box
+
   for(i=0;i<4;i++){
     float *v,*tv;
 
     tv = tetra_verts[i].v;
     v = verts[nv].v;
-    if(in_box(box_bounds,tv)==1){
+    if(in_solid(box_planes,6,tv,-1)==1){
       v[0]=tv[0];
       v[1]=tv[1];
       v[2]=tv[2];
       nv++;
     }
   }
+
+  // find box verts that inside the tetrahedron
+
   for(i=0;i<8;i++){
     float *v,*bv;
 
     bv = box_verts[i].v;
     v = verts[nv].v;
-    if(in_tetra(tetra_planes,bv)==1){
+    if(in_solid(tetra_planes,4,bv,-1)==1){
       v[0]=bv[0];
       v[1]=bv[1];
       v[2]=bv[2];
       nv++;
     }
   }
+
+  // find tetrahedron edge - box intersections
+
+  for(i=0;i<6;i++){
+    int j;
+    edge *ei;
+
+    ei = tetra_edges + i;
+
+    for(j=0;j<6;j++){
+      plane *bj;
+      float xyz[3],*xyzptr;
+      float *v;
+
+      bj = box_planes + j;
+      xyzptr = get_edge_plane_intersection(ei,bj,xyz);
+      v = verts[nv].v;
+      if(xyzptr!=NULL&&in_solid(box_planes,6,xyzptr,j)==1){
+        v[0]=xyz[0];
+        v[1]=xyz[1];
+        v[2]=xyz[2];
+        nv++;
+      }
+    }
+  }
+
+  // find box edge - tetra intersections
+
+  for(i=0;i<12;i++){
+    int j;
+    edge *ei;
+
+    ei = box_edges + i;
+
+    for(j=0;j<4;j++){
+      plane *bj;
+      float xyz[3],*xyzptr;
+      float *v;
+
+      bj = tetra_planes + j;
+      xyzptr = get_edge_plane_intersection(ei,bj,xyz);
+      v = verts[nv].v;
+      if(xyzptr!=NULL&&in_solid(tetra_planes,4,xyzptr,j)==1){
+        v[0]=xyz[0];
+        v[1]=xyz[1];
+        v[2]=xyz[2];
+        nv++;
+      }
+    }
+  }
+
   *nverts=nv;
   return nv;
 }
@@ -295,12 +362,7 @@ void DrawGeomTest(int option){
     glBegin(GL_POINTS);
     glColor3fv(foregroundcolor);
     for(i=0;i<nverts;i++){
-      vert *vi;
-      float *v;
-
-      vi = verts + i;
-      v = vi->v;
-      glVertex3f(v[0],v[1],v[2]);
+      glVertex3fv(verts[i].v);
     }
     glEnd();
     glPopMatrix();
