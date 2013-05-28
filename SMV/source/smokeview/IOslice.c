@@ -91,32 +91,32 @@ int makeslicesizefile(char *file, char *sizefile, int compression_type);
          }
 
 #define GET_VEC_DXYZ(U,DU,n) \
-         DU=0.0;           \
-         if(U!=NULL){       \
-           int i11a;  \
+         if(U==NULL){       \
+           DU=0.0;           \
+         }\
+         else{\
            if(U->compression_type==1){\
-             i11a=U->iqsliceframe[(n)];\
-             DU=U->qval256[i11a];\
+             DU=U->qval256[U->iqsliceframe[(n)]];\
            }                                  \
            else{                              \
              DU = U->qslice[(n)];               \
            }                                  \
          }                                   \
-         DU *= 0.05*vecfactor/vrange
+         DU *= 0.05*vecfactor2*vecfactor/vrange
 
 #define GET_VEC_DXYZ_TERRAIN(U,DU) \
-         DU=0.0;           \
-         if(U!=NULL){       \
-           int i11a;  \
+         if(U==NULL){\
+           DU=0.0;\
+         }\
+         else{       \
            if(U->compression_type==1){\
-             i11a=f1*U->iqsliceframe[n1]+f2*U->iqsliceframe[n2];\
-             DU=U->qval256[i11a];\
+             DU=U->qval256[(int)(f1*U->iqsliceframe[n1]+f2*U->iqsliceframe[n2])];\
            }                                  \
            else{                              \
              DU=f1*U->qslice[n1]+f2*U->qslice[n2];               \
            }                                  \
          }                                   \
-         DU *= 0.05*vecfactor/vrange
+         DU *= 0.05*vecfactor2*vecfactor/vrange
 
 /* ------------------ out_slice ------------------------ */
 
@@ -739,8 +739,7 @@ void readfed(int file_index, int flag, int file_type, int *errorcode){
 /* ------------------ readvslice ------------------------ */
 
 void readvslice(int ivslice, int flag, int *errorcode){
-  vslicedata *vd,*vslicei;
-  slicedata *u=NULL,*v=NULL,*w=NULL,*val=NULL;
+  vslicedata *vd;
   float valmin, valmax;
   int display;
   int i;
@@ -755,6 +754,8 @@ void readvslice(int ivslice, int flag, int *errorcode){
   if(flag==UNLOAD){
     if(vd->loaded==0)return;
     if(vd->iu!=-1){
+      slicedata *u=NULL;
+
       u = sliceinfo + vd->iu;
       display=u->display;
       if(u->loaded==1)readslice(u->file,vd->iu,UNLOAD,errorcode);
@@ -762,6 +763,8 @@ void readvslice(int ivslice, int flag, int *errorcode){
       u->vloaded=0;
     }
     if(vd->iv!=-1){
+      slicedata *v=NULL;
+
       v = sliceinfo + vd->iv;
       display=v->display;
       if(v->loaded==1)readslice(v->file,vd->iv,UNLOAD,errorcode);
@@ -769,6 +772,8 @@ void readvslice(int ivslice, int flag, int *errorcode){
       v->vloaded=0;
     }
     if(vd->iw!=-1){
+      slicedata *w=NULL;
+
       w = sliceinfo + vd->iw;
       display=w->display;
       if(w->loaded==1)readslice(w->file,vd->iw,UNLOAD,errorcode);
@@ -776,6 +781,8 @@ void readvslice(int ivslice, int flag, int *errorcode){
       w->vloaded=0;
     }
     if(vd->ival!=-1){
+      slicedata *val=NULL;
+
       val = sliceinfo + vd->ival;
       display=val->display;
       if(val->loaded==1)readslice(val->file,vd->ival,UNLOAD,errorcode);
@@ -791,6 +798,8 @@ void readvslice(int ivslice, int flag, int *errorcode){
     return;
   }
   if(vd->iu!=-1){
+    slicedata *u=NULL;
+
     u = sliceinfo + vd->iu;
     vd->u=u;
     readslice(u->file,vd->iu,LOAD,errorcode);
@@ -808,6 +817,8 @@ void readvslice(int ivslice, int flag, int *errorcode){
     u->vloaded=1;
   }
   if(vd->iv!=-1){
+    slicedata *v=NULL;
+
     v = sliceinfo + vd->iv;
     vd->v=v;
     readslice(v->file,vd->iv,LOAD,errorcode);
@@ -826,6 +837,8 @@ void readvslice(int ivslice, int flag, int *errorcode){
     v->vloaded=1;
   }
   if(vd->iw!=-1){
+    slicedata *w=NULL;
+
     w = sliceinfo + vd->iw;
     vd->w=w;
     readslice(w->file,vd->iw,LOAD,errorcode);
@@ -845,6 +858,8 @@ void readvslice(int ivslice, int flag, int *errorcode){
   }
   vd->type=-1;
   if(vd->ival!=-1){
+    slicedata *val=NULL;
+
     val = sliceinfo + vd->ival;
     vd->val=val;
     readslice(val->file,vd->ival,LOAD,errorcode);
@@ -872,22 +887,30 @@ void readvslice(int ivslice, int flag, int *errorcode){
   valmax=-100000.0;
   valmin=100000.0;
   for(i=0;i<nvsliceinfo;i++){
+    vslicedata *vslicei;
+
     vslicei = vsliceinfo + i;
     if(vslicei->loaded==0)continue;
     if(vslicei->iu!=-1){
+      slicedata *u=NULL;
+
       u=sliceinfo + vslicei->iu;
-      if(u->valmin<valmin)valmin=u->valmin;
-      if(u->valmax>valmax)valmax=u->valmax;
+      valmin=MIN(u->valmin,valmin);
+      valmax=MAX(u->valmax,valmax);
     }
     if(vslicei->iv!=-1){
+      slicedata *v=NULL;
+
       v=sliceinfo + vslicei->iv;
-      if(v->valmin<valmin)valmin=v->valmin;
-      if(v->valmax>valmax)valmax=v->valmax;
+      valmin=MIN(v->valmin,valmin);
+      valmax=MAX(v->valmax,valmax);
     }
     if(vslicei->iw!=-1){
+      slicedata *w=NULL;
+
       w=sliceinfo + vslicei->iw;
-      if(w->valmin<valmin)valmin=w->valmin;
-      if(w->valmax>valmax)valmax=w->valmax;
+      valmin=MIN(w->valmin,valmin);
+      valmax=MAX(w->valmax,valmax);
     }
   }
   velocity_range = valmax - valmin;

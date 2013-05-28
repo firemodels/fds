@@ -1740,14 +1740,6 @@ void initvars(void){
   large_font=GLUT_BITMAP_HELVETICA_12;
   small_font=GLUT_BITMAP_HELVETICA_10;
 
-  veclengths[0]=0.25;
-  veclengths[1]=0.40;
-  veclengths[2]=0.63;
-  veclengths[3]=1.00;
-  veclengths[4]=1.59;
-  veclengths[5]=2.52;
-  veclengths[6]=4.00;
-
   texture_origin[0]=0.0;
   texture_origin[1]=0.0;
   texture_origin[2]=0.0;
@@ -1800,7 +1792,6 @@ void initvars(void){
   reset_frame=0;
   reset_time=0.0,start_frametime=0.0,stop_frametime=0.0;
   reset_time_flag=0;
-  velocity_range=0;
   RenderOnceNow=0, RenderOnceNowR=0, RenderOnceNowL=0;
 
   nsorted_surfidlist=0;

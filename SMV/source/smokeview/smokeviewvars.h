@@ -456,8 +456,7 @@ SVEXTERN int which_face;
 SVEXTERN int showfontmenu;
 SVEXTERN int showlightmenu;
 
-SVEXTERN float SVDECL(vecfactor,1.0),SVDECL(veclength,0.0);
-SVEXTERN int SVDECL(iveclengths,0);
+SVEXTERN float SVDECL(vecfactor,1.0),SVDECL(veclength,0.0),SVDECL(vecfactor2,1.0);
 
 SVEXTERN int glui_active;
 
@@ -821,7 +820,6 @@ SVEXTERN int nsmoothblocks,nopenvents,nopenvents_nonoutline,ndummyvents,ntranspa
 SVEXTERN int nventcolors;
 SVEXTERN float SVDECL(**ventcolors,NULL);
 SVEXTERN int ntotal_smooth_blockages;
-SVEXTERN float veclengths[NVECLENGTHS];
 SVEXTERN float texture_origin[3];
 
 SVEXTERN int vslicecolorbarflag;
@@ -913,7 +911,7 @@ SVEXTERN int titlesafe_offsetBASE;
 SVEXTERN int   reset_frame;
 SVEXTERN float reset_time,start_frametime,stop_frametime;
 SVEXTERN int reset_time_flag;
-SVEXTERN float velocity_range;
+SVEXTERN float SVDECL(velocity_range,0.0);
 SVEXTERN int niso_compressed;
 SVEXTERN int nslice_loaded, npatch_loaded;
 SVEXTERN int SVDECL(*slice_loaded_list,NULL), SVDECL(*patch_loaded_list,NULL);

@@ -1168,16 +1168,6 @@ void keyboard_up_CB(unsigned char key, int x, int y){
   resetclock=1;
 }
 
-/* ------------------ get_vecfactor ------------------------ */
-
-float get_vecfactor(int *ivec){
-  float vec;
-  if(*ivec>NVECLENGTHS-1)*ivec=0;
-  if(*ivec<0)*ivec=NVECLENGTHS-1;
-  vec=veclengths[*ivec];
-  return vec;
-}
-
 #ifdef pp_GPU_CULL_STATE
 /* ------------------ print_gpu_cull_state ------------------------ */
 
@@ -1256,43 +1246,46 @@ void keyboard(unsigned char key, int flag){
 
   switch (key2){
     case 'a':
-      if((rotation_type==EYE_CENTERED||(visVector==1&&ReadPlot3dFile==1)||showvslice==1||isZoneFireModel==1)){
-        if(rotation_type==EYE_CENTERED){
-          handle_move_keys(256+key2);
-        }
-        else{
-          iveclengths += FlowDir;
-          vecfactor = get_vecfactor(&iveclengths);
-          update_vector_widgets();
-
-          if(isZoneFireModel==1){
-            if(iveclengths==0){
-              zone_ventfactor=1.0;
+      switch (keystate){
+        case GLUT_ACTIVE_ALT:
+        case GLUT_ACTIVE_CTRL:
+          if((visVector==1&&ReadPlot3dFile==1)||showvslice==1)vecfactor2/=1.5;
+          PRINTF("vector length multiplier: %f\n",vecfactor2);
+          break;
+        default:
+          if((rotation_type==EYE_CENTERED||(visVector==1&&ReadPlot3dFile==1)||showvslice==1||isZoneFireModel==1)){
+            if(rotation_type==EYE_CENTERED){
+              handle_move_keys(256+key2);
             }
             else{
-              if(FlowDir>0){
-                zone_ventfactor*=1.5;
-              } 
-              else{
-                zone_ventfactor/=1.5;
+              vecfactor2*=1.5;
+              PRINTF("vector length multiplier: %f\n",vecfactor2);
+
+              if(isZoneFireModel==1){
+                if(FlowDir>0){
+                  zone_ventfactor*=1.5;
+                } 
+                else{
+                  zone_ventfactor/=1.5;
+                }
+                PRINTF("zone vent factor: %f\n",zone_ventfactor);
+              }
+              if(visVector==1&&ReadPlot3dFile==1){
+                gbsave=current_mesh;
+                for(i=0;i<nmeshes;i++){
+                  gbi = meshinfo + i;
+                  if(gbi->plot3dfilenum==-1)continue;
+                  update_current_mesh(gbi);
+                  updateplotslice(1);
+                  updateplotslice(2);
+                  updateplotslice(3);
+                }
+                update_current_mesh(gbsave);
               }
             }
+            return;
           }
-          PRINTF("iveclengths=%i\n",iveclengths);
-          if(visVector==1&&ReadPlot3dFile==1){
-            gbsave=current_mesh;
-            for(i=0;i<nmeshes;i++){
-              gbi = meshinfo + i;
-              if(gbi->plot3dfilenum==-1)continue;
-              update_current_mesh(gbi);
-              updateplotslice(1);
-              updateplotslice(2);
-              updateplotslice(3);
-            }
-            update_current_mesh(gbsave);
-          }
-        }
-        return;
+          break;
       }
       break;
     case 'A':
@@ -1685,7 +1678,7 @@ void keyboard(unsigned char key, int flag){
             }
             if(show_plot3dkeywords==1){
               fprintf(scriptoutstream,"PLOT3DPROPS\n");
-              fprintf(scriptoutstream," %i %i %i %i\n",plotn,visVector,iveclengths,contour_type);
+              fprintf(scriptoutstream," %i %i 4 %i\n",plotn,visVector,contour_type);
             }
           }
           if(clip_rendered_scene!=0){

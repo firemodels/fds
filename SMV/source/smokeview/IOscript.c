@@ -1035,19 +1035,11 @@ void script_plot3dprops(scriptdata *scripti){
   if(visiso==1)updatesurface();
   updateplot3dlistindex();
 
-  iveclengths = scripti->ival3;
-  if(iveclengths>=0){
-    vecfactor = get_vecfactor(&iveclengths);
-  }
-  else{
-    if(scripti->fval>=0.0){
-      vecfactor=scripti->fval;
-    }
-    iveclengths=0;
-  }
+  vecfactor=1.0;
+  if(scripti->fval>=0.0)vecfactor=scripti->fval;
   update_vector_widgets();
 
-  PRINTF("script: iveclengths=%i\n",iveclengths);
+  PRINTF("script: vecfactor=%f\n",vecfactor);
 
   contour_type=CLAMP(scripti->ival4,0,2);
   update_plot3d_display();

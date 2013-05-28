@@ -413,8 +413,6 @@ void _Sniff_Errors(char *whereat);
 #define COLORBAR_TRANSPARENT -13
 #define COLORBAR_RESET -4
 
-#define NVECLENGTHS 7
-
 #define LOAD 0
 #define UNLOAD 1
 #define RESETBOUNDS 2
