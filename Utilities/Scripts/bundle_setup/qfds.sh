@@ -2,7 +2,7 @@
 # $Date$ 
 # $Revision$
 # $Author$
-
+#
 PROG=$0
 
 # setup default queue name
@@ -164,7 +164,7 @@ fi
 TITLE="$infile"
 
 if [ $nprocesses -gt 1 ] ; then
-  MPIRUN="$MPIDIST mpirun -np $nprocesses"
+  MPIRUN="$MPIDIST/bin/mpirun -np $nprocesses"
   TITLE="$infile(MPI)"
 fi
 if [ "$USE_SMOKEVIEW" == "y" ] ; then
