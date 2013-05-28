@@ -4011,7 +4011,7 @@ void VentMenu(int value){
     visOpenVents=1;
     visDummyVents=1;
     visOtherVents=1;
-    VentMenu(23);
+    visCircularVents=VENT_CIRCLE;
     break;
   case 14:
     visOpenVents=1-visOpenVents;
@@ -4042,7 +4042,7 @@ void VentMenu(int value){
      visOpenVents=0;
      visDummyVents=0;
      visOtherVents=0;
-     VentMenu(25);
+     visCircularVents=VENT_HIDE;
      break;
    case 23:
      visCircularVents=VENT_CIRCLE;
@@ -5394,16 +5394,16 @@ updatemenu=0;
         if(visOtherVents==0)glutAddMenuEntry(_("Other"),21);
       }
       if(visOpenVents==1&&visDummyVents==1&&visOtherVents==1){
-        glutAddMenuEntry(_("*Show all"),HIDE_ALL_VENTS);
+        glutAddMenuEntry(_("*Show all"),SHOW_ALL_VENTS);
       }
       else{
-        glutAddMenuEntry(_("Show all"),HIDE_ALL_VENTS);
+        glutAddMenuEntry(_("Show all"),SHOW_ALL_VENTS);
       }
       if(visOpenVents==0&&visDummyVents==0&&visOtherVents==0){
-        glutAddMenuEntry(_("*Hide all"),SHOW_ALL_VENTS);
+        glutAddMenuEntry(_("*Hide all"),HIDE_ALL_VENTS);
       }
       else{
-        glutAddMenuEntry(_("Hide all"),SHOW_ALL_VENTS);
+        glutAddMenuEntry(_("Hide all"),HIDE_ALL_VENTS);
       }
       glutAddMenuEntry("-",-1);
       if(nopenvents_nonoutline>0){
