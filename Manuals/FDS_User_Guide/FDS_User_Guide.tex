@@ -5642,11 +5642,12 @@ As before, we use primitive species rather than mixtures. A {\ct REAC} line is n
 \mathrm{a \, X + b \, Y + M \rightarrow X_aY_b + M }
 \end{equation}
 
-However, for the purposes of inputting into FDS, since M is neither a product nor a species it would not be specifed in the chemical reaction using either {\ct REACTION} or {\ct NU}.  It would be given a rate exponent using {\ct N\_S} to indicate that its presence is required.
+However, for the purposes of inputting into FDS, since M is neither a product nor a species it would not be specified in the chemical reaction using either {\ct REACTION} or {\ct NU}.  It would be given a rate exponent using {\ct N\_S} to indicate that its presence is required.
 
-As discussed previously (Section~\ref{info:heat_of_combustion}), energy release is calculated using the net change of species at a time step along with the enthalpy of formation of each species. This approach makes specifying an endothermic reaction, such as the reversible CO$_2$ reaction (R3), no different than typical FDS exothermic combustion reactions.
+As discussed previously (Section~\ref{info:heat_of_combustion}), energy release is calculated using the net change of species in a time step along with the enthalpy of formation of each species. This approach makes specifying an endothermic reaction, such as the reversible CO$_2$ reaction (R3), no different than typical FDS exothermic combustion reactions.
 
-
+\paragraph{Remark}
+A limitation of using finite-rate reactions in an LES calculation is reduced temperature resolution. Finite-rate reactions are temperature dependent and the temperature in a large scale calculation is smeared out over a mesh cell. Setting {\ct TEMPERATURE\_DEPENDENT\_REACTION = .TRUE.} on the {\ct MISC} line will have FDS compute a local cell temperature based on the instantaneous energy release. This temperature is used only as the source temperature in the time integration of the finite-rate reactions. This temperature can be outputted using the {\ct QUANTITY='FLAME TEMPERATURE'}. 
 
 
 \section{Special Topic: Aerosol Deposition}
@@ -9119,7 +9120,6 @@ Here, the {\ct ID} is just a label in the output file. When an output quantity i
 {\ct TIME}                                      & Section~\ref{info:DEVC}                       & s              & D            \\ \hline
 {\ct TIME STEP}                                 & $\delta t$, Numerical time step               & s              & D            \\ \hline
 {\ct TRANSMISSION}                              & Section~\ref{info:beam_detector}              & \%/m           & D            \\ \hline
-{\ct TURBULENCE RESOLUTION}                     & Section~\ref{info:meshquality}                &                & D,S          \\ \hline
 {\ct U-VELOCITY}                                & Gas velocity component, $u$                   & m/s            & D,I,P,S      \\ \hline
 {\ct V-VELOCITY}                                & Gas velocity component, $v$                   & m/s            & D,I,P,S      \\ \hline
 {\ct W-VELOCITY}                                & Gas velocity component, $w$                   & m/s            & D,I,P,S      \\ \hline
@@ -9132,8 +9132,6 @@ Here, the {\ct ID} is just a label in the output file. When an output quantity i
 {\ct WALL CLOCK TIME}                           & Elapsed wall clock time                       & s              & D            \\ \hline
 {\ct WALL TEMPERATURE}                          & Surface temperature                           & $^\circ$C      & B,D          \\ \hline
 {\ct WALL THICKNESS}                            & Section~\ref{info:material_components}        & m              & B,D          \\ \hline
-{\ct WAVELET ERROR}$^{*****}$                   & Section~\ref{info:meshquality}                &                & S            \\ \hline
-{\ct YPLUS}                                     & Section~\ref{info:yplus}                      &                & B,D          \\ \hline
 \end{longtable}
 
 \noindent
@@ -9143,8 +9141,7 @@ $^{**}$                \> Quantity requires the specification of a particle name
 $^{***}$               \> Add {\ct VELO\_INDEX=1} to the input line if you want to multiply the velocity by the sign of $u$. \\
                        \> Use the indices 2 and 3 for $v$ and $w$, respectively.\\
 $^{****}$              \> Quantity requires the specification of a gas species using {\ct SPEC\_ID}. \\
-                       \> Do not use for {\ct MIXTURE FRACTION}.\\
-$^{*****}$             \> Quantity requires specification of an additional scalar using {\ct QUANTITY2}.
+                       \> Do not use for {\ct MIXTURE FRACTION}.
 \end{tabbing}
 
 
@@ -9183,9 +9180,11 @@ be found in Volume~1 of the FDS Technical Reference Guide~\cite{FDS_Math_Guide}.
 {\ct CELL W}                                    & $(w_{i,j,k}+w_{i,j,k-1})/2$                       & m/s            & D,I,S        \\ \hline
 {\ct EMISSIVITY}                                & Surface emissivity (usually constant)             &                & B,D          \\ \hline
 {\ct EXTINCTION}                                & Section \ref{info:extinct_out}                    &                & D,S          \\ \hline
+{\ct FLAME TEMPERATURE}                         & Section \ref{info:finite}                         & $^\circ$C      & D,I,P,S
+\\ \hline
 {\ct F\_X, F\_Y, F\_Z}                          & Momentum terms, $F_x$, $F_y$, $F_z$               & m/s$^2$        & D,I,P,S      \\ \hline
 {\ct GAS TEMPERATURE}                           & Gas Temperature near wall                         & $^\circ$C      & B,D          \\ \hline
-{\ct H}                                         & $\calH=|\bu|^2/2 + \tp/\rho_0$                 & (m/s)$^2$      & D,I,P,S      \\ \hline
+{\ct H}                                         & $\calH=|\bu|^2/2 + \tp/\rho_0$                    & (m/s)$^2$      & D,I,P,S      \\ \hline
 {\ct HEAT TRANSFER COEFFICIENT}                 & Convective heat transfer                          & \si{W/(m$^2$.K)} & B,D          \\ \hline
 {\ct HRRPUL}                                    & $\int \dq''' \, \d x \, \d y$                     & kW/m           & D            \\ \hline
 {\ct INTEGRATED INTENSITY}                      & $U=\int I \, \d \bs$                              & kW/m$^2$       & D,I,P,S      \\ \hline
@@ -9208,13 +9207,20 @@ be found in Volume~1 of the FDS Technical Reference Guide~\cite{FDS_Math_Guide}.
 {\ct STRAIN RATE X}                             & $\partial w/\partial y + \partial v/\partial z$   & 1/s            & D,I,P,S      \\ \hline
 {\ct STRAIN RATE Y}                             & $\partial u/\partial z + \partial w/\partial x$   & 1/s            & D,I,P,S      \\ \hline
 {\ct STRAIN RATE Z}                             & $\partial v/\partial x + \partial u/\partial y$   & 1/s            & D,I,P,S      \\ \hline
+{\ct TURBULENCE RESOLUTION}                     & Section~\ref{info:meshquality}                &                & D,S          \\ \hline
 {\ct VELOCITY ERROR}                            & Section \ref{info:PRES}                           &                & B            \\ \hline
 {\ct VORTICITY X}                               & $\partial w/\partial y - \partial v/\partial z$   & 1/s            & D,I,P,S      \\ \hline
 {\ct VORTICITY Y}                               & $\partial u/\partial z - \partial w/\partial x$   & 1/s            & D,I,P,S      \\ \hline
 {\ct VORTICITY Z}                               & $\partial v/\partial x - \partial u/\partial y$   & 1/s            & D,I,P,S      \\ \hline
 {\ct WALL VISCOSITY}                            & Near-wall viscosity, $\mu_w$                      & \si{kg/(m.s)}  & B,D          \\ \hline
+{\ct WAVELET ERROR}$^{*****}$                   & Section~\ref{info:meshquality}                    &                & S            \\ \hline
+{\ct YPLUS}                                     & Section~\ref{info:yplus}                          &                & B,D          \\ \hline
 \end{longtable}
 
+\noindent
+\begin{tabbing}
+$^{*****}$ \hspace{0.25in} \=  Quantity requires specification of an additional scalar using {\ct QUANTITY2}. \
+\end{tabbing}
 
 \clearpage
 \section{Summary of HVAC Output Quantities}
