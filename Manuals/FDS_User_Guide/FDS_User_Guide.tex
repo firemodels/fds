@@ -220,7 +220,7 @@ Andreas Vischer                         & Wijnveld//Ingenieure, Osnabr\"{u}ck, G
 
 The software described in this document, Fire Dynamics Simulator (FDS), is a computational
 fluid dynamics (CFD) model of fire-driven fluid flow. FDS solves numerically a form of the
-Navier-Stokes equations appropriate for low-speed, thermally-driven flow
+Navier-Stokes equations appropriate for low-speed (Ma < 0.3), thermally-driven flow
 with an emphasis on smoke and heat transport from fires.
 The formulation of the equations and the numerical algorithm are contained in the FDS Technical Reference Guide~\cite{FDS_Math_Guide}.
 Verification and Validation of the model are discussed in the FDS Verification~\cite{FDS_Verification_Guide} and Validation~\cite{FDS_Validation_Guide} Guides.
@@ -264,7 +264,7 @@ the Finite Volume Method (FVM).  Using approximately 100 discrete
 angles, the finite volume solver requires about 20~\% of the total CPU
 time of a calculation, a modest cost given the complexity of radiation
 heat transfer. The absorption coefficients of the gas-soot mixtures
-are computed using the RadCal narrow-band model.  Liquid droplets can
+are computed using the RadCal narrow-band model~\cite{RadCal}.  Liquid droplets can
 absorb and scatter thermal radiation. This is important in cases
 involving mist sprinklers, but also plays a role in all sprinkler
 cases.  The absorption and scattering coefficients are based on Mie
@@ -494,8 +494,7 @@ Smokeview has a simple menu-driven interface. FDS does not. However, there are v
 that have been developed to generate the text file containing the input parameters needed by FDS.
 
 This guide describes how to obtain FDS and Smokeview and how to use FDS.
-A separate document~\cite{Smokeview_Users_Guide} describes how to use Smokeview. Other tools related to
-FDS and Smokeview can be found at the web site.
+A separate document~\cite{Smokeview_Users_Guide} describes how to use Smokeview.
 
 \section{How to Acquire FDS and Smokeview}
 \label{info:acquire}
@@ -596,7 +595,7 @@ You can start FDS from a DOS or Linux/Unix command prompt as follows:
 \subsubsection{MS Windows}
 
 Open up a Command Prompt window (click Start, then Run, then type ``cmd''), and change directories (``cd'') to where the
-input file for the case is located, then run the code by typing at the command prompt
+input file for the case is located, then run the code by typing at the command prompt:
 \begin{lstlisting}
 fds job_name.fds
 \end{lstlisting}
@@ -637,9 +636,7 @@ fds job_name.fds >& job_name.err &
 \end{lstlisting}
 Note that in the latter case, the screen output is stored in the
 file {\ct job\_name.err} and the detailed diagnostics are saved
-automatically in a file {\ct CHID.out}, where {\ct CHID} is a
-character string, usually the same as {\ct job\_name}, designated
-in the input file. It is preferable to run jobs in the background
+automatically in a file {\ct CHID.out}. It is preferable to run jobs in the background
 so as to free the console for other uses. To see output while an
 FDS job is running type:
 \begin{lstlisting}
@@ -871,7 +868,7 @@ cut and pasted from other applications or word-processing software. Make sure ze
 O's are O's. Make sure 1's are not !'s. Make sure apostrophes are used to designate character strings.
 Make sure the text file on a Unix/Linux machine was not created on a DOS machine, and {\em vice versa}.
 Make sure that all the parameters listed are still being used -- new versions of FDS often drop or
-change parameters to force you to re-examine old input files.
+change parameters forcing you to re-examine old input files.
 
 \item [{\bf Numerical Instability Errors}:]
 It is possible that during an FDS calculation the flow
@@ -998,7 +995,7 @@ describe the scenario.
 The input file is saved with a name such as {\ct job\_name.fds},
 where {\ct job\_name} is any character string that helps to identify
 the simulation. If this same string is repeated under the {\ct HEAD} namelist group within the
-input file, then all of the output files associated with the calculation will then have this common name.
+input file, then all of the output files associated with the calculation will then have this common prefix name.
 
 There should be no blank spaces in the job name. Instead use the underscore
 character to represent a space.  Using an underscore characters instead of a space also applies
@@ -1026,7 +1023,7 @@ end the record with a slash or else the data will not be understood. Do not add 
 parameters and values appropriate for that group. Otherwise, FDS will stop immediately upon execution.
 
 Parameters within a namelist record can be separated by either commas, spaces, or line breaks. It is recommended that you use
-commas or line breaks, and never use tab stops. Some machines do not recognize the spaces or the length of the tab stops.
+commas or line breaks, and never use tab stops. Some computers do not recognize the spaces or the length of the tab stops.
 Comments and notes can be written into the file so long as nothing comes
 before the ampersand except a space and nothing comes between the ampersand
 and the slash except appropriate parameters corresponding
@@ -1068,7 +1065,7 @@ To ensure that FDS reads the entire input file, add
 as the last line at the end of the input file. This completes the file from {\ct \&HEAD} to {\ct \&TAIL}. FDS does not even look for
 this last line. It just forces the ``end of file'' character past relevant input.
 
-Another general rule of thumb when writing input files is to only add to the file parameters that are to change from their
+Another general rule of thumb when writing input files is to only add parameters that make change from the
 default value. That way, you can more easily distinguish between what you want and what FDS wants.
 Add comments liberally to the file, so long as
 these comments do not fall within the namelist records.
@@ -1112,7 +1109,7 @@ Validation Suite} removed for clarity.
 It is recommended that when looking at a new scenario,
 first select a pre-written input file that resembles the case,
 make the necessary changes, then run the case at fairly low
-resolution to determine if the geometry is set up correctly.
+mesh resolution to determine if the geometry is set up correctly.
 It is best to start off with a relatively simple file that captures the main
 features of the problem without getting tied down with too much detail that
 might mask a fundamental flaw in the calculation. Initial calculations ought
@@ -1192,14 +1189,14 @@ two parameters, as in this example:
 \end{lstlisting}
 \begin{description}
 \item {\ct CHID} is a string of 30 characters or less used to tag the output files. If, for example, {\ct CHID='WTC\_05'}, it is convenient to name the input data file {\ct WTC\_05.fds} so that the input file can be associated with the output files. No periods or spaces are allowed in {\ct CHID} because the output files are tagged with suffixes that are meaningful to certain computer operating systems.  If {\ct CHID} is not specified, then it will be set to the name of the input file minus everything at and beyond the first period.
-\item {\ct TITLE} is a string of 60 characters or less that describes the simulation. It is simply descriptive text that is passed to various output files.
+\item {\ct TITLE} is a string of 60 characters or less that describes the simulation. It is simply a descriptive text that is passed to various output files.
 \end{description}
 
 
 \section{Simulation Time: The \texorpdfstring{{\tt TIME}}{TIME} Namelist Group (Table \ref{tbl:TIME})}
 \label{info:TIME}
 
-{\ct TIME} is the name of a group of parameters time define the time
+{\ct TIME} is the name of a group of parameters that define the time
 duration of the simulation and the initial time step used to advance
 the solution of the discretized equations.
 
@@ -1384,7 +1381,7 @@ Coarse meshes are best used in regions where temporal and spatial gradients of k
 quantities are small or unimportant. Be aware, however, that unsynchronized time steps are more likely to lead to numerical instabilities.
 
 By default, the time steps in each mesh are synchronized.
-With this setting, all meshes are active each iteration.
+With this setting, all meshes are active during each iteration.
 For a single-processor, multiple mesh calculation, this strategy reduces
 and may even eliminate any benefit seen by using multiple meshes. However, in a
 parallel calculation, if a particular mesh is inactive during an iteration because
@@ -2090,7 +2087,7 @@ To modify the local initial temperature, add lines of the form,
 \begin{lstlisting}
 &INIT XB=0.0,0.1,0.0,0.025,0.0,0.1, TEMPERATURE=60. /
 \end{lstlisting}
-This indicates that the temperature shall be 60~$^\circ$C instead of the ambient within the bounds given by {\ct XB}. The {\ct INIT} construct may be useful in examining the influence of stack effect in a building, where the temperature is different inside and out. If you wanted to initialize both temperature and species in the same volume, both quantities would use the same {\ct INIT} line,
+This indicates that the temperature shall be 60~$^\circ$C instead of the ambient within the bounds given by {\ct XB}. The {\ct INIT} construct may be useful in examining the influence of stack effect in a building, where the temperature is different inside and outside. If you wanted to initialize both temperature and species in the same volume, both quantities would use the same {\ct INIT} line,
 \begin{lstlisting}
 &INIT XB=0.0,0.1,0.0,0.025,0.0,0.1,
       MASS_FRACTION(1)=0.21, SPEC_ID(1)='OXYGEN',
@@ -2132,7 +2129,7 @@ this is when air is pushed through a tunnel. If the tunnel has forced flow at on
 as that which is forced at the other end. Without any heat addition, the air is assumed incompressible. Information is passed through the tunnel
 instantaneously in the model via a solution of a linear system of equations for the pressure. For a single mesh, the solution of this Poisson equation for
 the pressure is very accurate. However, for multiple meshes, there is potentially a delay in information passing throughout the domain because the Poisson
-equation is solved on each individual mesh, without any influence from the larger computational domain. The details of the numerics can be found in the
+equation is solved on each individual mesh, without any influence from the larger computational domain. The details of the numerical approach can be found in the
 FDS Technical Reference Guide.
 
 
@@ -2184,7 +2181,7 @@ In this example, air is pushed through a 30~cm long, two-dimensional channel at 
 \includegraphics[width=\textwidth]{SCRIPT_FIGURES/dancing_eddies}
 \end{center}
 \caption[Results of the {\ct dancing\_eddies} test cases]{(Top) Comparison of pressure traces in the channel for two different settings
-of {\ct VELOCITY\_TOLERANCE}, the default value on the left and a tighter tolerance on the right. (Bottom) A contour plot of the pressure after 2~s.}
+of {\ct VELOCITY\_TOLERANCE}, the default value on the left and a tighter tolerance on the right. (Bottom) A contour plot of the pressure after 2~s with the default tolerance.}
 \label{dancing_eddies}
 \end{figure}
 
@@ -2201,7 +2198,7 @@ In Section \ref{sec:periodic}, we discuss how to set periodic boundaries.  By de
 \section{Setting Limits: The \texorpdfstring{{\tt CLIP}}{CLIP} Namelist Group (Table \ref{tbl:CLIP})}
 \label{info:CLIP}
 
-The algorithms in FDS are designed to work within a certain range of values for the thermodynamic quantities density, temperature and mass fraction. To prevent unphysical results,
+The algorithms in FDS are designed to work within a certain range of values for density, temperature and mass fraction. To prevent unphysical results,
 there are bounds placed on these variables to prevent a single spurious value from causing a numerical instability. It also prevents out of range
 errors from calls to temperature-dependent look-up tables. By default, FDS determines the lowest and highest values of the variables based on your input, but it is not
 possible in all cases to anticipate just how low or high a given value might be. Thus,
@@ -2327,7 +2324,7 @@ When obstructions overlap, Smokeview renders both obstructions independently of 
 
 \subsection{Preventing Obstruction Removal}
 
-Obstructions can be protected from the {\ct HOLE} punching feature. Sometimes it is convenient to create a door or window using a {\ct HOLE}. For example, suppose a {\ct HOLE} is punched in a wall to represent a door or window. An obstruction can be defined to fill this hole (presumably to be removed or colored differently or whatever) so long as the phrase {\ct PERMIT\_HOLE=.FALSE.} is included on the {\ct OBST} line. In general, any obstruction can be made impenetrable to a {\ct HOLE} using this phrase. By default, {\ct PERMIT\_HOLE=.TRUE.}, meaning that an obstruction is assumed to be penetrable unless otherwise directed. Note that if an penetrable  obstruction and an impenetrable  obstruction overlap, the obstruction with {\ct PERMIT\_HOLE=.FALSE.} should be listed first.
+Obstructions can be protected from the {\ct HOLE} punching feature. Sometimes it is convenient to create a door or window using a {\ct HOLE}. For example, suppose a {\ct HOLE} is punched in a wall to represent a door or window. An obstruction can be defined to fill this hole (presumably to be removed or colored differently or whatever) so long as the phrase {\ct PERMIT\_HOLE=.FALSE.} is included on the {\ct OBST} line. In general, any obstruction can be made impenetrable to a {\ct HOLE} using this phrase. By default, {\ct PERMIT\_HOLE=.TRUE.}, meaning that an obstruction is assumed to be penetrable unless otherwise directed. Note that if a penetrable  obstruction and an impenetrable  obstruction overlap, the obstruction with {\ct PERMIT\_HOLE=.FALSE.} should be listed first.
 
 If the obstruction is not to be removed or rejected for any reason, set {\ct REMOVABLE=.FALSE.} This is sometimes needed to stop
 FDS from removing the obstruction if it is embedded within another, like a door within a wall.
@@ -2434,8 +2431,7 @@ mesh, possibly leading to confusion about whether a plane is a solid
 wall or an open boundary. Check the geometry in Smokeview to assure that
 the {\ct VENT}s are properly specified. Use color as much as
 possible to double-check the set-up.  More detail on color in
-Section~\ref{info:colors} and Table \ref{tab:colors}. Also, the parameter {\ct OUTLINE=.TRUE.} causes the
-{\ct VENT} to be drawn as an outline in Smokeview.
+Section~\ref{info:colors} and Table \ref{tab:colors}. Also, the parameter {\ct OUTLINE=.TRUE.} on the {\ct VENT} line causes the {\ct VENT} to be drawn as an outline in Smokeview.
 
 
 \subsection{Special Vents}
