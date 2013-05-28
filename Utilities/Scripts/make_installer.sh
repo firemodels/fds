@@ -268,16 +268,16 @@ unalias smokediff6 >& /dev/null
 
 setenv FDSBINDIR \`pwd\`/bin
 
-# define openmpi library locations:
-#   32/64 bit gigabit ethernet
+# environment for 64 bit Infiniband
 
-set MPIDIST32=/shared/openmpi_32
-set MPIDIST64=/shared/openmpi_64
+if ( "\\\$platform" == "intel64ib" ) then
+setenv MPIDIST /shared/openmpi_64ib
+endif
 
 # environment for 64 bit gigabit ethernet
 
 if ( "\\\$platform" == "intel64" ) then
-setenv MPIDIST \\\$MPIDIST64
+setenv MPIDIST /shared/openmpi_64
 endif
 
 # environment for 32 bit gigabit ethernet
@@ -295,14 +295,18 @@ set path=(\\\$FDSBINDIR \\\$MPIDIST/bin ~/bin \\\$path)
 
 if ( \\\$?IFORT_COMPILER ) then
 
-if ( -e \\\$IFORT_COMPILER/bin/ifortvars.csh ) then
+if ( -e \\\$IFORT_COMPILER/bin/compilervars.csh ) then
+
+if ( "\\\$platform" == "intel64ib" ) then
+source \\\$IFORT_COMPILER/bin/compilervars.csh intel64
+endif
 
 if ( "\\\$platform" == "intel64" ) then
-source \\\$IFORT_COMPILER/bin/ifortvars.csh intel64
+source \\\$IFORT_COMPILER/bin/compilervars.csh intel64
 endif
 
 if ( "\\\$platform" == "ia32" ) then
-source \\\$IFORT_COMPILER/bin/ifortvars.csh ia32
+source \\\$IFORT_COMPILER/bin/compilervars.csh ia32
 endif
 
 endif
@@ -333,20 +337,17 @@ unalias smokediff6 >& /dev/null
 export FDSBINDIR=\`pwd\`/bin
 SHORTCUTDIR=\$SHORTCUTDIR
 
-# define openmpi library locations:
-#   32/64 bit gigabit ethernet
-
-MPIDIST32=/shared/openmpi_32
-MPIDIST64=/shared/openmpi_64
-
-# environment for 64 bit gigabit ethernet
+# environment for MPI
 
 case "\\\$platform" in
+  "intel64ib" )
+    export MPIDIST=/shared/openmpi_64ib
+  ;;
   "intel64" )
-    export MPIDIST=\\\$MPIDIST64
+    export MPIDIST=/shared/openmpi_64
   ;;
   "ia32" )
-    export MPIDIST=\\\$MPIDIST32
+    export MPIDIST=/shared/openmpi_32
   ;;
 esac
 
@@ -357,11 +358,14 @@ export PATH=\\\$FDSBINDIR:\\\$SHORTCUTDIR:\\\$MPIDIST/bin:\\\$PATH
 
 # if compilers are present then pre-define environment for their use
 
-if [ -e "\\\$IFORT_COMPILER/bin/ifortvars.sh" ]
+if [ -e "\\\$IFORT_COMPILER/bin/compilervars.sh" ]
 then
 case "\\\$platform" in
   "intel64" | "ia32" )
-    source \\\$IFORT_COMPILER/bin/ifortvars.sh \\\$platform
+    source \\\$IFORT_COMPILER/bin/compilervars.sh \\\$platform
+  ;;
+  "intel64ib" )
+    source \\\$IFORT_COMPILER/bin/compilervars.sh intel64
   ;;
 esac
 fi
