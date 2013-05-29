@@ -7,7 +7,7 @@
 % -------------------  Introduction ------------------------
 
 \section{Introduction}
-This \paper\ documents the physics and associated numerical algorithms used by Smokeview~\cite{Smokeview_Users_Guide} to visualize smoke and fire.  Smokeview is a companion to the Fire Dynamics Simulator (FDS)~\cite{FDS_Math_Guide} and CFAST~\cite{Jones:2009}, fire models which generate   simulation data Smokeview uses to perform these visualizations. FDS is a computational fluid dynamics model of fire-driven fluid flow. FDS numerically solves a form of the Navier-Stokes equations appropriate for low-speed, thermally-driven flow with an emphasis on smoke and heat transport from fires.  CFAST is a zone fire model used to calculate the evolving distribution of smoke, fire gases and temperature throughout compartments of a constructed facility due to a fire.
+This \paper\ documents the physics and associated numerical algorithms used by Smokeview~\cite{Smokeview_Users_Guide} to visualize smoke and fire.  Smokeview is a companion to the Fire Dynamics Simulator (FDS)~\cite{FDS_Math_Guide} and CFAST~\cite{Jones:2009}, fire models which generate   simulation data that Smokeview uses to perform these visualizations. FDS is a computational fluid dynamics model of fire-driven fluid flow. FDS numerically solves a form of the Navier-Stokes equations appropriate for low-speed, thermally-driven flow with an emphasis on smoke and heat transport from fires.  CFAST is a zone fire model used to calculate the evolving distribution of smoke, fire gases and temperature throughout compartments of a constructed facility due to a fire.
 
 Realistic visualization of fire calculation methods are important for applications where one wishes to observe qualitative effects of fire and smoke rather than determine quantitative characteristics of data such as temperature or velocity.  This would be the case for a fire fighter using a computer based fire fighting simulator. Realistic visualization methods, however, complement but do not replace other more traditional visualization methods such as 2D contouring or 3D iso-surfacing which are better suited for quantitatively analyzing data.
 
@@ -22,7 +22,7 @@ The separation distance between slice planes becomes smaller as more planes are 
 
 The second approach, a volume rendering method, also integrates a simplified form of the radiation transport equation, but over the entire data mesh.  The integration occurs from the front of the solution domain (relative to the observer) to the back, rather than across just one slice plane. By performing the entire integral at once instead of in pieces, the volume rendered method does not suffer from the round off errors of the slice rendered method.  The intermediate computational terms in the volume rendered method are stored using full precision arithmetic rather than 8 bits.  A volume rendered method then computes opacity across multiple grid planes.  As a result, there is only one plane of data displayed.  The video hardware is again exploited, but this time to compute a line integral for each pixel in the observer's view.  Opacities and color for both methods are computed using transfer functions using soot density and temperature data obtained from a fire simulation.
 
-This \paper\ is organized as follows.  A model for visualizing smoke and fire is discussed.  This model, the radiative transport equation (RTE), is simplified in several ways, one of which gives the Beer-Lambert law.  Two methods are then discussed for visualizing smoke  both using a form of the RTE.  The first method, slice rendering,  uses a series of partially transparent slices to represent smoke and fire. The second method, volume rendering, solves the RTE over the entire domain. Finally, several areas where the visualization methods may be improved are given.
+This \paper\ is organized as follows.  A model for visualizing smoke and fire is discussed.  This model, the radiative transport equation (RTE), is simplified in several ways, one of which gives the Beer-Lambert law.  Two methods are then discussed for visualizing smoke  both using a form of the RTE.  The first method, slice rendering,  uses a series of partially transparent slices to represent smoke and fire. The second method, volume rendering, solves the RTE over the entire domain. Finally, several areas for which the visualization methods may be improved are given.
 
 % -------------------  Radiation Transport Equation ------------------------
 
@@ -104,7 +104,7 @@ radiance.} \label{figRadiance}
 
 \subsection{Approximating the Radiation Transport Equation}
 
-The RTE may be simplified in several ways depending on which terms are included or ignored.  This section derives a solution to one approximation where the in-scattering integral term in (\ref{eq:fullrte}) is neglected and the absorption and out-scattering coefficients are combined (both are loss terms) using $\sigt=\siga+\sigs$.  This simplification then only includes interactions between light and smoke due to absorption,  out-scattering and emission.  Note that the Beer-Lambert law results if the emission term is also dropped.
+The RTE may be simplified in several ways depending on which terms are included or ignored.  This section derives an approximate solution in which the in-scattering integral term in (\ref{eq:fullrte}) is neglected and the absorption and out-scattering coefficients are combined (both are loss terms) using $\sigt=\siga+\sigs$.  This simplification then only includes interactions between light and smoke due to absorption,  out-scattering and emission.  Note that the Beer-Lambert law results if the emission term is also dropped.
 
 Equation (\ref{eq:fullrte}) is then approximated by neglecting the integral term and using $\sigt=\siga+\sigs$ to obtain
 
@@ -235,7 +235,7 @@ of the light source {\em behind}\ the smoke, then
 observer computed as a weighted average of source and emitted
 colors where each weight is the optical depth from the observer to
 the corresponding color location.  These emitted colors can be
-determined from a black body temperature curve or from a colormap
+determined from a blackbody temperature curve or from a colormap
 meant to show variations in temperature in terms of color.
 
 
@@ -261,13 +261,13 @@ The strategy then for volume rendering an image is for each pixel in the 2D proj
 \item convert the emitted radiances along the integration path to colors and
 \item form a weighted average of these these colors using either equation (\ref{eq:discrete_rte2}) or (\ref{eq:color}) where the weights are optical depths obtained using (\ref{eq:alpha2}) .
 \end{enumerate}
-The conversion from radiance to color may be based on a black body temperature curve if realistic flame colors are the goal or arbitrary if only a qualitative view of the fire is the goal.
+The conversion from radiance to color may be based on a blackbody temperature curve if realistic flame colors are the goal or arbitrary if only a qualitative view of the fire is the goal.
 Equations (\ref{eq:alpha2}) and ({\ref{eq:color}) are equivalent to the recursions presented in Ref.~\cite[Chapter 39]{gpugems} for performing volume rendering.
 
 % -------------------  Splitting the Radiation Transport Equation ------------------------
 
 \subsection{Splitting the Radiation Transport Equation}
-This section discusses splitting the RTE, so that it may be solved separately on multiple meshes or multiple slice planes.  The final solution is then obtained by  appropriately combining solutions obtained on each mesh or slice plane.
+This section discusses splitting the the Radiation Transport Equation (RTE), so that it may be solved separately on multiple meshes or multiple slice planes.  The final solution is then obtained by  appropriately combining solutions obtained on each mesh or slice plane.
 
 It is more practical to draw smoke one mesh at a time when visualizing multiple mesh cases since required data may not be easily accessible from all meshes, especially if the GPU\footnote{graphics processing unit of the video card}\ is used for drawing.  The RTE solution or equivalently the computed radiance and smoke opacity require  properties for the entire line of sight which may encompass more than one data mesh.  This section discusses how  radiance and opacity may be computed by combining solutions from each individual mesh along the line of sight.  For example, as illustrated in Figure \ref{figsmokesetup3}, consider an interval $[x_0,x_N]$ that is split at $D$ into two sub-intervals $[x_0,D]$ and $[D,x_N]$.  The goal then is to compute a radiance and opacity for $[x_0,x_N]$ using radiances and opacities computed on  the two sub-intervals.
 
@@ -326,7 +326,7 @@ Equations (\ref{eq:alpha_summary}) and (\ref{eq:C_summary}) may then be used to 
 \section{Slice Rendering}
 A slice rendering algorithm for visualizing smoke consists of splitting the RTE across individual slice planes within a single mesh.  The 3D computational domain is partitioned into a series of 2D slices.  The RTE is then solved on each slice.  Each slice solution only accounts for conditions between adjacent slices.  The individual partially transparent slice solutions are then combined using video hardware to form the final image.   Problems can occur with numerical round off error if two slices are too close together which require solution methods  involving data volumes rather than data slices. These methods are discussed in the next section.
 
-There are many ways to slice a 3D data set.  The slice orientation is chosen to be the one most perpendicular to the viewer's line of sight where possible choices are slice planes parallel to the three cartesian coordinate planes (XY, XZ, YZ) or planes diagonal to the data.  The opacity at each grid node is computed using the distance $\Delta x$ between adjacent YZ planes and soot density data computed by the fire model.  If slice orientations other than YZ are displayed, then opacities are adjusted if the distance between planes is different than $\Delta x$.  Opacity data is computed and compressed using run length encoding as a preprocessing step and decompressed one frame at a time as data is displayed.
+There are many ways to slice a 3D data set.  The slice orientation is chosen to be the one most perpendicular to the viewer's line of sight, for which possible choices are slice planes parallel to the three cartesian coordinate planes (XY, XZ, YZ) or planes diagonal to the data.  The opacity at each grid node is computed using the distance $\Delta x$ between adjacent YZ planes and soot density data computed by the fire model.  If slice orientations other than YZ are displayed, then opacities are adjusted if the distance between planes is different than $\Delta x$.  Opacity data is computed and compressed using run length encoding as a preprocessing step and decompressed one frame at a time as data is displayed.
 
 % -------------------  Computing Opacity ------------------------
 
@@ -334,7 +334,7 @@ There are many ways to slice a 3D data set.  The slice orientation is chosen to 
 Computing opacity at slice plane nodes is illustrated in Figure
 \ref{figsmokesetup}. A ray travels from the background to the
 observer through intervening smoke. Light is absorbed or scattered
-by the smoke as the ray passes each slice plane . Emission effects
+by the smoke as the ray passes each slice plane. Emission effects
 are accounted for by coloring the smoke.  Scattering effects
 presently are only accounted for in the value of the total mass
 extinction coefficient.  Light losses are assumed to be from both
@@ -564,7 +564,7 @@ For example, suppose that a 1~m column of smoke has opacity of 0.5.  Substitutin
 \begin{eqnarray}
 \Delta x = \frac{\ln(254/255)}{\ln(1/2)}
 \end{eqnarray}
-Therefore, the opacity, $\alpha$, will truncate to zero (for this example) whenever $\Delta x<\ln(254/255)/\ln(1/2)\approx 0.00567$~.  Equivalently, the opacity truncates to zero when $N>\ln(1/2)/\ln(254/255)\approx 177$, where $N$ is the number of grid planes in the 1~m column of smoke.  Smoke drawn in this situation will be {\em invisible}.
+Therefore, the opacity, $\alpha$, will truncate to zero (for this example) whenever $\Delta x<\ln(254/255)/\ln(1/2)\approx 0.00567$.  Equivalently, the opacity truncates to zero when $N>\ln(1/2)/\ln(254/255)\approx 177$, where $N$ is the number of grid planes in the 1~m column of smoke.  Smoke drawn in this situation will be {\em invisible}.
 
 To overcome this problem, the RTE needs to be solved across the full 3D data mesh where intermediate smoke opacities are stored using full precision arithmetic.  One such algorithm is discussed in the next section.
 
@@ -608,8 +608,8 @@ The image, in a), is as viewed by the observer.  The other two images, b) and c)
 
 Three example colormaps  are illustrated in Figure \ref{fig:colormaps}.
 The black/orange colormap in Figure \ref{fig:colormaps}a
-is used to produce an image.  If the temperature is below a user specified value, the color is black, representing soot (where emission is not significant).  If the temperature is above this value then it is a shade of orange, representing emission from a fire.  The particular shade chosen is based on the color emitted by a black body source.
-The black to white colormap in Figure \ref{fig:colormaps}b along with an extinction coefficient appropriate for infrared could be used to simulate the effect of a thermal imager by using black for cool temperatures and white for warm temperatures.
+is used to produce an image.  If the temperature is below a user specified value, the color is black, representing soot (where emission is not significant).  If the temperature is above this value then it is a shade of orange, representing emission from a fire.  The particular shade chosen is based on the color emitted by a blackbody source.
+The black to white colormap in Figure \ref{fig:colormaps}b along with an extinction coefficient appropriate for infrared wavelengths could be used to simulate the effect of a thermal imager by using black for cool temperatures and white for warm temperatures.
 The rainbow colormap in Figure \ref{fig:colormaps}c produces non-realistic images which can still be of value for highlighting data of interest.
 
 \begin{figure}[\figoptions]
@@ -623,7 +623,7 @@ b) black to white\\
 c) rainbow
 \end{tabular}
 \end{center}
-\caption[Example colormaps used for converting temperature to color.]
+\caption[Example linear colormaps used for converting temperature to color.]
 {Example colormaps used for converting temperature to color.}
 \label{fig:colormaps}
 \end{figure}
@@ -665,7 +665,7 @@ The values $C_i$ and $\alpha_i$ are the color and opacity at the $i$'th step.
 The OpenGL call, {\tt   glBlendFunc(GL\_ONE,GL\_ONE\_MINUS\_SRC\_ALPHA); }, is used to implement this mixing mode in Smokeview.
 \end{enumerate}
 
-A limitation of the volume rendering procedure is the large file sizes required to store the full precision being used in computations.  For example, smoke flow computed on a 128$\times$128$\times$128 mesh for 1024 time steps requires 16 gigabytes to store data for visualization.  As with the slice rendering method, compression procedures are implemented using the ZLIB library~\cite{ZLIB} to reduce this size.
+A limitation of the volume rendering procedure is the large file sizes required to store the full precision being used in computations.  For example, smoke flow computed on a 128$\times$128$\times$128 mesh for 1024 time steps requires 16 gigabytes to store data for visualization.  As with the slice rendering method, compression procedures are implemented using the ZLIB library~\cite{ZLIB} to reduce the file size.
 
 
 % -------------------  Future Work ------------------------
