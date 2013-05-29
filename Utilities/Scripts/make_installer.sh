@@ -283,34 +283,13 @@ endif
 # environment for 32 bit gigabit ethernet
 
 if ( "\\\$platform" == "ia32" ) then
-setenv MPIDIST \\\$MPIDIST32
+setenv MPIDIST /shared/openmpi_32
 endif
 
 # Update LD_LIBRARY_PATH and PATH variables
 
 setenv $LDLIBPATH \\\$MPIDIST/lib:\\\$$LDLIBPATH
 set path=(\\\$FDSBINDIR \\\$MPIDIST/bin ~/bin \\\$path)
-
-# if compilers are present then pre-define environment for their use
-
-if ( \\\$?IFORT_COMPILER ) then
-
-if ( -e \\\$IFORT_COMPILER/bin/compilervars.csh ) then
-
-if ( "\\\$platform" == "intel64ib" ) then
-source \\\$IFORT_COMPILER/bin/compilervars.csh intel64
-endif
-
-if ( "\\\$platform" == "intel64" ) then
-source \\\$IFORT_COMPILER/bin/compilervars.csh intel64
-endif
-
-if ( "\\\$platform" == "ia32" ) then
-source \\\$IFORT_COMPILER/bin/compilervars.csh ia32
-endif
-
-endif
-endif
 
 CSHRC
 
@@ -340,35 +319,31 @@ SHORTCUTDIR=\$SHORTCUTDIR
 # environment for MPI
 
 case "\\\$platform" in
+BASH
+if [ "$ostype" == "LINUX" ]
+then
+cat << BASH >> \$BASHFDS
   "intel64ib" )
     export MPIDIST=/shared/openmpi_64ib
+    RUNTIMELIBDIR=\\\$FDSBINDIR/LIB64
   ;;
+BASH
+fi
+cat << BASH >> \$BASHFDS
   "intel64" )
     export MPIDIST=/shared/openmpi_64
+    RUNTIMELIBDIR=\\\$FDSBINDIR/LIB64
   ;;
   "ia32" )
     export MPIDIST=/shared/openmpi_32
+    RUNTIMELIBDIR=\\\$FDSBINDIR/LIB32
   ;;
 esac
 
 # Update LD_LIBRARY_PATH and PATH variables
 
-export $LDLIBPATH=\\\$MPIDIST/lib:\\\$$LDLIBPATH
+export $LDLIBPATH=\\\$MPIDIST/lib:\\\$RUNTIMELIBDIR:\\\$$LDLIBPATH
 export PATH=\\\$FDSBINDIR:\\\$SHORTCUTDIR:\\\$MPIDIST/bin:\\\$PATH
-
-# if compilers are present then pre-define environment for their use
-
-if [ -e "\\\$IFORT_COMPILER/bin/compilervars.sh" ]
-then
-case "\\\$platform" in
-  "intel64" | "ia32" )
-    source \\\$IFORT_COMPILER/bin/compilervars.sh \\\$platform
-  ;;
-  "intel64ib" )
-    source \\\$IFORT_COMPILER/bin/compilervars.sh intel64
-  ;;
-esac
-fi
 
 BASH
 
