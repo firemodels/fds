@@ -400,6 +400,13 @@ mpi_intel_linux_64_db : obj = fds_mpi_intel_linux_64_db
 mpi_intel_linux_64_db : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) $(LFLAGS) -o $(obj) $(obj_mpi)
 
+mpi_intel_linux_64ib_db : FFLAGS = -m64 -check -warn unused -O0 -auto -WB -traceback -g -fpe0 -fltconsistency -vec_report0
+mpi_intel_linux_64ib_db : LFLAGS = -static-intel
+mpi_intel_linux_64ib_db : FCOMPL = mpif77
+mpi_intel_linux_64ib_db : obj = fds_mpi_intel_linux_64ib_db
+mpi_intel_linux_64ib_db : setup $(obj_mpi)
+	$(FCOMPL) $(FFLAGS) $(LFLAGS) -o $(obj) $(obj_mpi)
+
 openmp_mpi_intel_linux_64_db : FFLAGS = -m64 -check -warn unused -O0 -auto -WB -traceback -g -fpe0 -fltconsistency -vec_report0
 openmp_mpi_intel_linux_64_db : LFLAGS = -static-intel
 openmp_mpi_intel_linux_64_db : FCOMPL = mpif77
