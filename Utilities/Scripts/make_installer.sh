@@ -334,12 +334,10 @@ cat << BASH >> \$BASHFDS
   "intel64" )
     export MPIDIST=/shared/openmpi_64
     RUNTIMELIBDIR=\\\$FDSBINDIR/LIB64
-    export FDSNETWORK=ethernet
   ;;
   "ia32" )
     export MPIDIST=/shared/openmpi_32
     RUNTIMELIBDIR=\\\$FDSBINDIR/LIB32
-    export FDSNETWORK=ethernet
   ;;
 esac
 
