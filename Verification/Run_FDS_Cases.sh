@@ -74,9 +74,14 @@ else
   PLATFORM2=linux_32
 fi
 
+IB=
+if [ "$FDSNETWORK" == "infiniband" ]; then
+  IB=ib
+fi
+
 export BACKGROUND=$SVNROOT/Utilities/background/intel_$PLATFORM2/background
 export FDS=$SVNROOT/FDS_Compilation/${OPENMP}intel_$PLATFORM$DEBUG/fds_${OPENMP}intel_$PLATFORM$DEBUG
-export FDSMPI=$SVNROOT/FDS_Compilation/mpi_intel_$PLATFORM$DEBUG/fds_mpi_intel_$PLATFORM$DEBUG
+export FDSMPI=$SVNROOT/FDS_Compilation/mpi_intel_$PLATFORM$IB$DEBUG/fds_mpi_intel_$PLATFORM$IB$DEBUG
 
 
 if [ "$queue" != "" ]; then
