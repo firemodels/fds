@@ -24,6 +24,7 @@ then
   echo "Alternate queues (vis, fire60s or fire70s) are set using the -q option."
   echo ""
   echo " -d directory [default: .]"
+  echo " -i use Infiniband"
   echo " -n processes per node - maximum number of processes per node [default: "
   echo "    (serial: 1, parallel: 8 for new cluster and fire70s, 4 for the fire60s" 
   echo "                          and vis queues)]"
@@ -54,6 +55,10 @@ SKIPFRAME=1
 STARTFRAME=0
 exe2=
 ABORTRUN=n
+IB=
+if [ "$FDSNETWORK" == "infiniband" ] ; then
+IB=ib
+fi
 
 # read in parameters from command line
 
@@ -62,7 +67,6 @@ do
 case $OPTION  in
   d)
   dir="$OPTARG"
-  ;;
   f)
    FDSROOT="$OPTARG"
    use_repository=1
@@ -129,7 +133,7 @@ else
 # only set the input file using the command line, the fds exe is defined
 # using the repository (serial if nprocesses==1 parallel otherwise)
   then
-  exe=$FDSROOT/FDS_Compilation/mpi_intel_linux_64/fds_mpi_intel_linux_64
+  exe=$FDSROOT/FDS_Compilation/mpi_intel_linux_64$IB/fds_mpi_intel_linux_64$IB
  else
   if [ "$USE_SMOKEVIEW" == "y" ] ; then
 # for now only one instance of smokeview can occur per node
