@@ -173,6 +173,11 @@ cp $mandir/FDS_Technical_Reference_Guide.pdf $bundledir/Documentation/.
 echo Copy objects.svo
 cp $forbundle/objects.svo $bundledir/bin/objects.svo
 
+if ($?INTELLIB) then
+echo copying  run time libraries
+cp -r $INTELLIB $bundledir/bin/$DESTLIB
+endif
+
 echo
 echo Getting the FDS release notes from the repository
 svn export --quiet --force http://fds-smv.googlecode.com/svn/wiki/FDS_Release_Notes.wiki $bundle_setup/FDS_Release_Notes.wiki
