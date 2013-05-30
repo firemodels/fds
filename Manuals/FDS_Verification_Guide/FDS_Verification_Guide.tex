@@ -1806,6 +1806,9 @@ Tests similar to those in Section~\ref{droplet_absorption} are performed for sol
 \label{part_attenuation}
 
 This case is a qualitative assessment of the attenuation of thermal radiation by four different types of particles. In each case, the radiation is computed inside a one meter cube with one hot and five cold walls. The radiative heat flux is monitored on the wall that is opposite the hot wall. In each case, 10~g of non-evaporating, monodisperse, 100~$\mu$m particles with a density of 1,000~kg/m$^3$ are placed inside the cube. Five different cases are computed. The reference case contains no particles. The four other cases contain transparent particles, water droplets, fuel droplets, and opaque particles. Different methods to specify the refractive index are tested. For water and fuel droplets, the FDS internal tables are used. For transparent particles, the refractive index is $\hbox{m} = 1.0+0\,i$. For opaque particles, the refractive index is $\hbox{m} = 1.5+0.5 \,i$. The resulting heat fluxes are plotted in Fig.~\ref{part_attenuation_figure}. The transparent particles do not attenuate the radiation, and the relatively opaque particles give the highest attenuation. The heat fluxes through water and fuel droplets fall between the two extremes.
+
+This case also demonstrates the finite convergence rate of the radiation calculations with scattering media. As can be seen, the radiation field is not converged to its final value instantaneously because there are no internal iterations in the radiation solver. As a result, a slight increase of the heat flux is observed after 0.5 s, which is the third time step, i.e. the second call of the radiation solver. Further, smaller increase can be seen three steps later. In real applications with small time steps, the time lag of the radiation field is small.
+
 \begin{figure}[h]
 \begin{center}
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/part_attenuation}
