@@ -24,7 +24,6 @@ then
   echo "Alternate queues (vis, fire60s or fire70s) are set using the -q option."
   echo ""
   echo " -d directory [default: .]"
-  echo " -i use Infiniband"
   echo " -n processes per node - maximum number of processes per node [default: "
   echo "    (serial: 1, parallel: 8 for new cluster and fire70s, 4 for the fire60s" 
   echo "                          and vis queues)]"
@@ -66,7 +65,8 @@ while getopts 'd:f:n:p:q:rsxy:z:' OPTION
 do
 case $OPTION  in
   d)
-  dir="$OPTARG"
+   dir="$OPTARG"
+   ;;
   f)
    FDSROOT="$OPTARG"
    use_repository=1
@@ -74,19 +74,19 @@ case $OPTION  in
   n)
    nprocesses_per_node="$OPTARG"
    nprocesses_per_node_defined=1
-  ;;
+   ;;
   p)
    nprocesses="$OPTARG"
-  ;;
+   ;;
   q)
    queue="$OPTARG"
-  ;;
+   ;;
   r)
    use_repository=1
-  ;;
+   ;;
   s)
    USE_SMOKEVIEW="y"
-  ;;
+   ;;
   x)
    VOLRENDER=y
    ;;
@@ -202,7 +202,7 @@ if ! [ -e $in_full_file ]; then
   ABORTRUN=y
 fi
 if ! [ -e $exe ]; then
-  echo "The program name, $exe, does not exist. Run aborted."
+  echo "The program, $exe, does not exist. Run aborted."
   ABORTRUN=y
 fi
 if [ -e $outlog ]; then
