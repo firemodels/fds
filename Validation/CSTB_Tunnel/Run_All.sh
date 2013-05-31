@@ -1,18 +1,19 @@
 #!/bin/bash -f
 
 export SVNROOT=`pwd`/../..
-export FDS=$SVNROOT/FDS_Compilation/intel_linux_64/fds_intel_linux_64
-export RUNFDS=$SVNROOT/Utilities/Scripts/runfds.sh
+export QFDS=/usr/local/bin/qfds.sh
 export BASEDIR=`pwd`
 export INDIR=Current_Results
+# qq="-q fire80s"
+qq=
 
 # uncomment following line to stop all cases
-#export STOPFDS=1
+export STOPFDS=1
 
 /bin/sh -c "cp $BASEDIR/FDS_Input_Files/*.fds $BASEDIR/$INDIR"
 
-$RUNFDS $INDIR CSTB_Tunnel_Test_2
-$RUNFDS $INDIR CSTB_Tunnel_Test_27
+$QFDS -r $qq -d $INDIR CSTB_Tunnel_Test_2.fds
+$QFDS -r $qq -d $INDIR CSTB_Tunnel_Test_27.fds
 
 echo FDS cases submitted
 
