@@ -162,14 +162,14 @@ REAL(EB),INTENT(OUT):: Q_OUT
 REAL(EB),INTENT(INOUT) :: ZZ_GET(0:N_TRACKED_SPECIES)
 REAL(EB) :: ZZ_0(0:N_TRACKED_SPECIES),DZZDT1_1(0:N_TRACKED_SPECIES),DZZDT1_2(0:N_TRACKED_SPECIES),DZZDT2_1(0:N_TRACKED_SPECIES), &
             DZZDT2_2(0:N_TRACKED_SPECIES),DZZDT4_1(0:N_TRACKED_SPECIES),DZZDT4_2(0:N_TRACKED_SPECIES),RATE_CONSTANT(1:N_REACTIONS),&
-            RATE_CONSTANT2(1:N_REACTIONS),ERR_EST,ERR_TOL,ZZ_TEMP(0:N_TRACKED_SPECIES),&
+            RATE_CONSTANT2(1:N_REACTIONS),ERR_EST,ERR_TOL,ZZ_TEMP(0:N_TRACKED_SPECIES),TMP_0,TMP_1,TMP_2,TMP_4,&
             A1(0:N_TRACKED_SPECIES),A2(0:N_TRACKED_SPECIES),A4(0:N_TRACKED_SPECIES),Q_SUM,Q_CALC,&
             DT_SUB,DT_SUB_NEW,DT_ITER,ZZ_STORE(0:N_TRACKED_SPECIES,0:3),TV(0:2),ZZ_DIFF(0:2),&
             ZZ_MIXED(0:N_TRACKED_SPECIES),ZZ_GET_0(0:N_TRACKED_SPECIES),ZETA0,ZETA,ZETA1,CELL_VOLUME,CELL_MASS,&
             DZZDT(0:N_TRACKED_SPECIES),SMIX_MIX_MASS_0(0:N_TRACKED_SPECIES),SMIX_MIX_MASS(0:N_TRACKED_SPECIES),TOTAL_MIX_MASS,&
-            TAU_D,TAU_G,TAU_U,DELTA,TMP_GUESS_1,CP_BAR_GUESS,CP_BAR_0,TMP_MIXED_ZONE,ZZ_CHECK(0:N_TRACKED_SPECIES)
+            TAU_D,TAU_G,TAU_U,DELTA,CP_BAR_0,TMP_MIXED_ZONE,ZZ_CHECK(0:N_TRACKED_SPECIES)
 REAL(EB), PARAMETER :: DT_SUB_MIN=1.E-10_EB,ZZ_MIN=1.E-10_EB
-INTEGER :: NR,NS,NSS,ITER,TVI,RICH_ITER,TMP_ITER,TIME_ITER,TIME_ITER_MAX,SR
+INTEGER :: NR,NS,NSS,ITER,TVI,RICH_ITER,TIME_ITER,TIME_ITER_MAX,SR
 INTEGER, PARAMETER :: SUB_DT1=1,SUB_DT2=2,SUB_DT4=4,TV_ITER_MIN=5,RICH_ITER_MAX=10
 LOGICAL :: EXTINCT(1:N_REACTIONS)
 TYPE(REACTION_TYPE),POINTER :: RN=>NULL()
@@ -193,7 +193,7 @@ ELSE
    ELSE
       MIX_TIME(I,J,K)= MAX(TAU_CHEM,TAU_D)
    ENDIF
-ENDIF 
+ENDIF
 
 ZZ_STORE(:,:) = 0._EB
 Q_OUT = 0._EB
@@ -216,23 +216,16 @@ CELL_MASS = RHO(I,J,K)*CELL_VOLUME
 TOTAL_MIX_MASS = (1._EB-ZETA0)*CELL_MASS
 SMIX_MIX_MASS_0 = ZZ_GET*TOTAL_MIX_MASS
 SMIX_MIX_MASS = SMIX_MIX_MASS_0
-
 TMP_MIXED_ZONE = TMP(I,J,K)
-IF (TEMPERATURE_DEPENDENT_REACTION) THEN
-   TMP_FLAME(I,J,K) = TMP_MIXED_ZONE
-   TMP_GUESS_1 = TMP_MIXED_ZONE  
-ENDIF
+IF (TEMPERATURE_DEPENDENT_REACTION) TMP_FLAME(I,J,K) = TMP_MIXED_ZONE
 
 INTEGRATION_LOOP: DO TIME_ITER = 1,TIME_ITER_MAX
    ZETA1 = ZETA0*EXP(-(DT_ITER+DT_SUB)/MIX_TIME(I,J,K))
    SMIX_MIX_MASS = MAX(0._EB,SMIX_MIX_MASS_0 + (ZETA-ZETA1)*CELL_MASS*ZZ_GET_0)
    TOTAL_MIX_MASS = SUM(SMIX_MIX_MASS)
    ZZ_MIXED = SMIX_MIX_MASS/(TOTAL_MIX_MASS)
-   IF (TEMPERATURE_DEPENDENT_REACTION) &
-   TMP_MIXED_ZONE = ((ZETA-ZETA1)*CELL_MASS*TMP(I,J,K) + SUM(SMIX_MIX_MASS_0)*TMP_GUESS_1)/(TOTAL_MIX_MASS)
-   
-   IF (SUPPRESSION .AND. TIME_ITER == 1) CALL DETERMINE_EXTINCTION(ZZ_MIXED,TMP_MIXED_ZONE,EXTINCT)
-   
+   TMP_MIXED_ZONE = ((ZETA-ZETA1)*CELL_MASS*TMP(I,J,K) + SUM(SMIX_MIX_MASS_0)*TMP_MIXED_ZONE)/(TOTAL_MIX_MASS)
+   IF (SUPPRESSION .AND. TIME_ITER == 1) CALL DETERMINE_EXTINCTION(ZZ_MIXED,TMP_MIXED_ZONE,EXTINCT) 
    IF (.NOT. ALL(EXTINCT)) THEN
       RK2_IF: IF (COMBUSTION_ODE /= RK2_RICHARDSON) THEN ! Explicit Euler 
          DO SR=0,SERIES_REAC
@@ -256,23 +249,27 @@ INTEGRATION_LOOP: DO TIME_ITER = 1,TIME_ITER_MAX
             ENDDO REACTION_LOOP1 
             A1 = ZZ_0 + DZZDT1_1*DT_SUB
             ZZ_MIXED = A1
-         ENDDO
+         ENDDO 
          IF (TIME_ITER > 1) CALL SHUTDOWN('ERROR: Error in Simple Chemistry')
          IF (ALL(DZZDT1_1 < 0._EB)) EXIT INTEGRATION_LOOP
       ELSE RK2_IF ! RK2 w/ Richardson
-         ERR_EST = 10._EB*ERR_TOL
+         ERR_EST = MAX(10._EB,10._EB*ERR_TOL)
          RICH_EX_LOOP: DO RICH_ITER =1,RICH_ITER_MAX
-            DT_SUB = DT_SUB_NEW       
+            DT_SUB = DT_SUB_NEW
+            IF (DT_ITER + DT_SUB > DT) THEN
+               DT_SUB = DT - DT_ITER      
+            ENDIF
             !--------------------
             ! Calculate A1 term
             ! Time step = DT_SUB
             !--------------------
             ZZ_0 = ZZ_MIXED
-            ODE_LOOP1: DO NS = 1, SUB_DT1
+            TMP_0 = TMP_MIXED_ZONE
+            ODE_LOOP1: DO NS = 1,SUB_DT1
                DO SR=0,SERIES_REAC
                   DZZDT1_1 = 0._EB
                   RATE_CONSTANT = 0._EB
-                  CALL COMPUTE_RATE_CONSTANT(RATE_CONSTANT,ZZ_0,I,J,K,DT_SUB,TMP_MIXED_ZONE)
+                  CALL COMPUTE_RATE_CONSTANT(RATE_CONSTANT,ZZ_0,I,J,K,DT_SUB,TMP_0)
                   REACTION_LOOP1_1: DO NR = 1, N_REACTIONS
                      RN => REACTION(NR)
                      IF (.NOT. RN%FAST_CHEMISTRY .AND. SR < SERIES_REAC) RATE_CONSTANT(NR) = 0._EB
@@ -288,7 +285,9 @@ INTEGRATION_LOOP: DO TIME_ITER = 1,TIME_ITER_MAX
                      ENDIF
                      DZZDT1_1 = DZZDT1_1+DZZDT
                   ENDDO REACTION_LOOP1_1
-                  A1 = ZZ_0 + DZZDT1_1*DT_SUB           
+                  CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_0,CP_BAR_0,TMP_0)
+                  TMP_1 = TMP_0 + (1._EB-RADIATIVE_FRACTION)*SUM(-SPECIES_MIXTURE%H_F*DZZDT1_1*DT_SUB)/CP_BAR_0
+                  A1 = ZZ_0 + DZZDT1_1*DT_SUB
                   IF (ALL(REACTION(:)%FAST_CHEMISTRY) .AND. SR == SERIES_REAC) THEN ! All fast reactions solve explicit Euler 
                      A4 = A1
                      A2 = A1
@@ -297,7 +296,7 @@ INTEGRATION_LOOP: DO TIME_ITER = 1,TIME_ITER_MAX
                   ENDIF
                   DZZDT1_2 = 0._EB
                   RATE_CONSTANT2 = 0._EB
-                  CALL COMPUTE_RATE_CONSTANT(RATE_CONSTANT2,A1,I,J,K,DT_SUB,TMP_MIXED_ZONE)
+                  CALL COMPUTE_RATE_CONSTANT(RATE_CONSTANT2,A1,I,J,K,DT_SUB,TMP_1)
                   REACTION_LOOP1_2: DO NR = 1, N_REACTIONS
                      RN => REACTION(NR)
                      IF (.NOT. RN%FAST_CHEMISTRY .AND. SR < SERIES_REAC) RATE_CONSTANT(NR) = 0._EB
@@ -313,9 +312,13 @@ INTEGRATION_LOOP: DO TIME_ITER = 1,TIME_ITER_MAX
                      ENDIF
                      DZZDT1_2 = DZZDT1_2+DZZDT
                   ENDDO REACTION_LOOP1_2
+                  CALL GET_AVERAGE_SPECIFIC_HEAT(A1,CP_BAR_0,TMP_1)
+                  TMP_1 = TMP_1 + (1._EB-RADIATIVE_FRACTION)*SUM(-SPECIES_MIXTURE%H_F*DZZDT1_2*DT_SUB)/CP_BAR_0
+                  TMP_1 = 0.5_EB*(TMP_1 + TMP_0)
                   A1 = A1 + DZZDT1_2*DT_SUB
                   A1 = 0.5_EB*(ZZ_0 + A1)
                   ZZ_0 = A1
+                  TMP_0 = TMP_1
                ENDDO
             ENDDO ODE_LOOP1
             !--------------------
@@ -323,11 +326,12 @@ INTEGRATION_LOOP: DO TIME_ITER = 1,TIME_ITER_MAX
             ! Time step = DT_SUB/2
             !--------------------
             ZZ_0 = ZZ_MIXED
+            TMP_0 = TMP_MIXED_ZONE
             ODE_LOOP2: DO NS = 1, SUB_DT2
                DO SR=0,SERIES_REAC
                   DZZDT2_1 = 0._EB
                   RATE_CONSTANT = 0._EB
-                  CALL COMPUTE_RATE_CONSTANT(RATE_CONSTANT,ZZ_0,I,J,K,DT_SUB,TMP_MIXED_ZONE)
+                  CALL COMPUTE_RATE_CONSTANT(RATE_CONSTANT,ZZ_0,I,J,K,DT_SUB,TMP_0)
                   REACTION_LOOP2_1: DO NR = 1, N_REACTIONS
                      RN => REACTION(NR)
                      IF (.NOT. RN%FAST_CHEMISTRY .AND. SR < SERIES_REAC) RATE_CONSTANT(NR) = 0._EB
@@ -343,10 +347,12 @@ INTEGRATION_LOOP: DO TIME_ITER = 1,TIME_ITER_MAX
                      ENDIF
                      DZZDT2_1 = DZZDT2_1+DZZDT
                   ENDDO REACTION_LOOP2_1
+                  CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_0,CP_BAR_0,TMP_0)
+                  TMP_2 = TMP_0 + (1._EB-RADIATIVE_FRACTION)*SUM(-SPECIES_MIXTURE%H_F*DZZDT2_1*DT_SUB*0.5_EB)/CP_BAR_0
                   A2 = ZZ_0 + DZZDT2_1*(DT_SUB*0.5_EB)
                   DZZDT2_2 = 0._EB
                   RATE_CONSTANT2 = 0._EB
-                  CALL COMPUTE_RATE_CONSTANT(RATE_CONSTANT2,A2,I,J,K,DT_SUB,TMP_MIXED_ZONE)      
+                  CALL COMPUTE_RATE_CONSTANT(RATE_CONSTANT2,A2,I,J,K,DT_SUB,TMP_2)
                   REACTION_LOOP2_2: DO NR = 1, N_REACTIONS
                      RN => REACTION(NR)
                      IF (.NOT. RN%FAST_CHEMISTRY .AND. SR < SERIES_REAC) RATE_CONSTANT(NR) = 0._EB
@@ -362,9 +368,13 @@ INTEGRATION_LOOP: DO TIME_ITER = 1,TIME_ITER_MAX
                      ENDIF
                      DZZDT2_2 = DZZDT2_2+DZZDT
                   ENDDO REACTION_LOOP2_2
+                  CALL GET_AVERAGE_SPECIFIC_HEAT(A2,CP_BAR_0,TMP_2)
+                  TMP_2 = TMP_2 + (1._EB-RADIATIVE_FRACTION)*SUM(-SPECIES_MIXTURE%H_F*DZZDT2_2*DT_SUB*0.5_EB)/CP_BAR_0
+                  TMP_2 = 0.5_EB*(TMP_2 + TMP_0)
                   A2 = A2 + DZZDT2_2*(DT_SUB*0.5_EB)
                   A2 = 0.5_EB*(ZZ_0 + A2)
                   ZZ_0 = A2
+                  TMP_0 = TMP_2
                ENDDO
             ENDDO ODE_LOOP2
             !--------------------
@@ -372,11 +382,12 @@ INTEGRATION_LOOP: DO TIME_ITER = 1,TIME_ITER_MAX
             ! Time step = DT_SUB/4
             !-------------------- 
             ZZ_0 = ZZ_MIXED
+            TMP_0 = TMP_MIXED_ZONE
             ODE_LOOP4: DO NS = 1, SUB_DT4
                DO SR=0,SERIES_REAC
                   DZZDT4_1 = 0._EB
                   RATE_CONSTANT = 0._EB
-                  CALL COMPUTE_RATE_CONSTANT(RATE_CONSTANT,ZZ_0,I,J,K,DT_SUB,TMP_MIXED_ZONE)
+                  CALL COMPUTE_RATE_CONSTANT(RATE_CONSTANT,ZZ_0,I,J,K,DT_SUB,TMP_0)
                   REACTION_LOOP4_1: DO NR = 1, N_REACTIONS
                      RN => REACTION(NR)
                      IF (.NOT. RN%FAST_CHEMISTRY .AND. SR < SERIES_REAC) RATE_CONSTANT(NR) = 0._EB
@@ -392,10 +403,12 @@ INTEGRATION_LOOP: DO TIME_ITER = 1,TIME_ITER_MAX
                      ENDIF
                      DZZDT4_1 = DZZDT4_1+DZZDT
                   END DO REACTION_LOOP4_1
+                  CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_0,CP_BAR_0,TMP_0)
+                  TMP_4 = TMP_0 + (1._EB-RADIATIVE_FRACTION)*SUM(-SPECIES_MIXTURE%H_F*DZZDT4_1*DT_SUB*0.25_EB)/CP_BAR_0
                   A4 = ZZ_0 + DZZDT4_1*(DT_SUB*0.25_EB)
                   DZZDT4_2 = 0._EB
                   RATE_CONSTANT2 = 0._EB
-                  CALL COMPUTE_RATE_CONSTANT(RATE_CONSTANT2,A4,I,J,K,DT_SUB,TMP_MIXED_ZONE)
+                  CALL COMPUTE_RATE_CONSTANT(RATE_CONSTANT2,A4,I,J,K,DT_SUB,TMP_4)
                   REACTION_LOOP4_2: DO NR = 1, N_REACTIONS
                      RN => REACTION(NR)
                      IF (.NOT. RN%FAST_CHEMISTRY .AND. SR < SERIES_REAC) RATE_CONSTANT(NR) = 0._EB
@@ -411,27 +424,33 @@ INTEGRATION_LOOP: DO TIME_ITER = 1,TIME_ITER_MAX
                      ENDIF
                      DZZDT4_2 = DZZDT4_2+DZZDT
                   ENDDO REACTION_LOOP4_2
+                  CALL GET_AVERAGE_SPECIFIC_HEAT(A4,CP_BAR_0,TMP_4)
+                  TMP_4 = TMP_4 + (1._EB-RADIATIVE_FRACTION)*SUM(-SPECIES_MIXTURE%H_F*DZZDT4_2*DT_SUB*0.25_EB)/CP_BAR_0
+                  TMP_4 = 0.5_EB*(TMP_4 + TMP_0)
                   A4 = A4 + DZZDT4_2*(DT_SUB*0.25_EB)
                   A4 = 0.5_EB*(ZZ_0 + A4)
                   ZZ_0 = A4
+                  TMP_0 = TMP_4
                ENDDO
             ENDDO ODE_LOOP4
             ! Species Error Analysis
             ERR_EST = MAXVAL(ABS((4._EB*A4-5._EB*A2+A1)))/45._EB  ! Estimate Error
+            DT_SUB_NEW = MIN(MAX(DT_SUB*(ERR_TOL/(ERR_EST+TWO_EPSILON_EB))**(0.25_EB),DT_SUB_MIN),DT-DT_ITER) ! New Time Step
             IF (ERR_EST <= ERR_TOL) EXIT RICH_EX_LOOP
-            DT_SUB_NEW = MAX(DT_SUB*(ERR_TOL/(ERR_EST))**(0.25_EB),DT_SUB_MIN) ! Determine New Time Step
             ZETA1 = ZETA0*EXP(-(DT_ITER+DT_SUB_NEW)/MIX_TIME(I,J,K))
             SMIX_MIX_MASS =  MAX(0._EB,SMIX_MIX_MASS_0 + (ZETA-ZETA1)*CELL_MASS*ZZ_GET_0)
             TOTAL_MIX_MASS = SUM(SMIX_MIX_MASS)
             ZZ_MIXED = SMIX_MIX_MASS/(TOTAL_MIX_MASS)
          ENDDO RICH_EX_LOOP
          ZZ_MIXED = (4._EB*A4-A2)*ONTH
+         TMP_MIXED_ZONE = (4._EB*TMP_4-TMP_2)*ONTH
       ENDIF RK2_IF
    ENDIF 
-
    DT_ITER = DT_ITER + DT_SUB
    ITER = ITER + 1
-   MAX_CHEM_SUBIT = MAX(MAX_CHEM_SUBIT,ITER)
+   IF (OUTPUT_CHEM_IT) THEN
+      CHEM_SUBIT(I,J,K) = ITER
+   ENDIF
    ZZ_GET =  ZETA1*ZZ_GET_0 + (1._EB-ZETA1)*ZZ_MIXED !Combine mixed and unmixed 
 !   IF (ABS(SUM(ZZ_GET-ZZ_TEMP)) > TWO_EPSILON_EB) CALL SHUTDOWN('ERROR: Error in Species')
 
@@ -446,21 +465,16 @@ INTEGRATION_LOOP: DO TIME_ITER = 1,TIME_ITER_MAX
       EXIT INTEGRATION_LOOP
    ELSE 
       Q_CALC = Q_CALC+Q_SUM
-      Q_OUT = Q_CALC/DT 
-   ENDIF 
-
-   IF (TEMPERATURE_DEPENDENT_REACTION) THEN
-      TMP_GUESS_1 = TMP_MIXED_ZONE
-      TMP_ITER = 0
-      CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET_0,CP_BAR_0,TMP(I,J,K))
-      DO TMP_ITER = 1,3
-         CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_MIXED,CP_BAR_GUESS,TMP_GUESS_1)
-         TMP_GUESS_1 = (CP_BAR_0*TMP(I,J,K) + (1._EB-RADIATIVE_FRACTION)*Q_CALC/RHO(I,J,K))/CP_BAR_GUESS
-      ENDDO  
-      TMP_MIXED_ZONE = TMP_GUESS_1
-      TMP_FLAME(I,J,K) = TMP_GUESS_1
+      Q_OUT = Q_CALC/DT
    ENDIF
-
+   ! Temperature Dependence 
+   IF (TEMPERATURE_DEPENDENT_REACTION) THEN
+      IF (COMBUSTION_ODE /= RK2_RICHARDSON) THEN
+         CALL GET_AVERAGE_SPECIFIC_HEAT(A1,CP_BAR_0,TMP_0)
+         TMP_MIXED_ZONE = TMP_0 + (1._EB-RADIATIVE_FRACTION)*SUM(-SPECIES_MIXTURE%H_F*DZZDT1_1)/CP_BAR_0
+      ENDIF
+      TMP_FLAME(I,J,K) = TMP_MIXED_ZONE
+   ENDIF
    ! Total Variation Scheme
    IF (N_REACTIONS > 1) THEN
       DO NS = 0,N_TRACKED_SPECIES
@@ -512,7 +526,7 @@ EQ_RATIO = 0._EB
 
 DO NRR = 1,N_REACTIONS
    RNN => REACTION(NRR)
-   IF(RNN%HEAT_OF_COMBUSTION > 0._EB) THEN     
+   IF(RNN%HEAT_OF_COMBUSTION > 0._EB) THEN
       DO NS = 0,N_TRACKED_SPECIES
          IF (RNN%NU(NS) < 0._EB .AND. NS /= RNN%FUEL_SMIX_INDEX) THEN
             MASS_OX_STOICH = MASS_OX_STOICH + ABS(ZZ_MIXED_IN(RNN%FUEL_SMIX_INDEX)*RNN%NU_MW_O_MW_F(NS)) !Stoich mass O2
@@ -545,7 +559,7 @@ SELECT CASE (EXTINCT_MOD)
             IF(EXTINCT_1(ZZ_MIXED_IN,TMP_MIXED_ZONE,NRR)) THEN
                EXTINCT(NRR) = .TRUE.
             ELSE
-               EXTINCT(NRR) = .FALSE.   
+               EXTINCT(NRR) = .FALSE.
             ENDIF
          ENDIF
          IF (.NOT. RNN%FAST_CHEMISTRY) EXTINCT(NRR) = .TRUE.
@@ -620,7 +634,7 @@ DO NRR = 1,N_REACTIONS
                   ZZ_FUEL_EXTINCT(NS) = ZZ_MIXED_IN(NS)
                   ZZ_DIL_EXTINCT(NS) = ZZ_DIL_EXTINCT(NS) - ZZ_MIXED_IN(NS)
                ENDIF
-               FUEL_COUNT(NS) = FUEL_COUNT(NS) + 1     
+               FUEL_COUNT(NS) = FUEL_COUNT(NS) + 1
             ELSE
                IF (OX_COUNT(NS) < 1) THEN 
                   ZZ_EXTINCT(2) = ZZ_EXTINCT(2) + ZZ_MIXED_IN(NS) ! lumped oxidizer
@@ -653,7 +667,7 @@ ELSE
    ! Search reactants to find limiting reactant and express it as fuel mass. This is the amount of fuel that can burn.
    DZ_FUEL = MIN(ZZ_EXTINCT(1),(FAST_COUNT/F_A_EXTINCT)*ZZ_EXTINCT(2))
    
-   ! Get the specific heat for the fuel at the current and critical flame temperatures   
+   ! Get the specific heat for the fuel at the current and critical flame temperatures
    CALL GET_SENSIBLE_ENTHALPY(ZZ_FUEL_EXTINCT,H_F_0,TMP_MIXED_ZONE) 
    CALL GET_SENSIBLE_ENTHALPY(ZZ_FUEL_EXTINCT,H_F_N,RNN%CRIT_FLAME_TMP)
    
@@ -670,7 +684,7 @@ ELSE
    ! Normalize diluent only composition
    ZZ_DIL_EXTINCT = ZZ_DIL_EXTINCT/SUM(ZZ_DIL_EXTINCT)
 
-   ! Get the specific heat for the fuel and diluent at the current and critical flame temperatures   
+   ! Get the specific heat for the fuel and diluent at the current and critical flame temperatures
    CALL GET_SENSIBLE_ENTHALPY(ZZ_FUEL_EXTINCT,H_F_0,TMP_MIXED_ZONE) 
    CALL GET_SENSIBLE_ENTHALPY(ZZ_DIL_EXTINCT,H_G_0,TMP_MIXED_ZONE) 
    H_F_N = 0._EB
@@ -682,13 +696,13 @@ ELSE
       CALL GET_SENSIBLE_ENTHALPY(ZZ_DIL_EXTINCT,H_G_N_TEMP,RNN%CRIT_FLAME_TMP)
       H_G_N = H_G_N + ZZ_FUEL_EXTINCT(RNN%FUEL_SMIX_INDEX)*H_G_N_TEMP
    ENDDO
-   ! Find how much oxidizer is needed.  
+   ! Find how much oxidizer is needed.
    DZ_AIR = DZ_FUEL*(F_A_EXTINCT/FAST_COUNT)
 
    ! Determine how much "non-fuel" is needed to provide the limting reactant.
    DZ_NONFUEL = DZ_AIR + (DZ_AIR/ZZ_EXTINCT(2))*(ZZ_EXTINCT(3) + ZZ_EXTINCT(1)-DZ_FUEL)
 
-   ! See if enough energy is released to raise the fuel and required "air" temperatures above the critical flame temp.   
+   ! See if enough energy is released to raise the fuel and required "air" temperatures above the critical flame temp.
    IF (DZ_FUEL*H_F_0 + DZ_NONFUEL*H_G_0 + DZ_FUEL*HOC_EXTINCT < &
         DZ_FUEL*H_F_N + DZ_NONFUEL*H_G_N) EXTINCT_2 = .TRUE.
 ENDIF
@@ -715,7 +729,7 @@ EQ_RATIO = 0._EB
 
 DO NRR = 1,N_REACTIONS
    RNN => REACTION(NRR)
-   IF(RNN%HEAT_OF_COMBUSTION > 0._EB) THEN     
+   IF(RNN%HEAT_OF_COMBUSTION > 0._EB) THEN
       DO NS = 0,N_TRACKED_SPECIES
          IF (RNN%NU(NS) < 0._EB .AND. NS /= RNN%FUEL_SMIX_INDEX) THEN
             MASS_OX_STOICH = MASS_OX_STOICH + ABS(ZZ_MIXED_IN(RNN%FUEL_SMIX_INDEX)*RNN%NU_MW_O_MW_F(NS)) !Stoich mass O2
@@ -740,7 +754,7 @@ DO NRR = 1,N_REACTIONS
    ENDIF
 ENDDO
 
-IF (MASS_OX_STOICH > MASS_OX) THEN ! Oxidizer limited exothermic
+IF (MASS_OX_STOICH >= MASS_OX) THEN ! Oxidizer limited exothermic
    DZ_F(:) = 0._EB
    DZ_FR(:) = 0._EB
    DZ_FRAC_F(:) = 0._EB
@@ -751,13 +765,13 @@ IF (MASS_OX_STOICH > MASS_OX) THEN ! Oxidizer limited exothermic
          IF (RNN%FAST_CHEMISTRY .AND. RNN%HEAT_OF_COMBUSTION > 0._EB ) THEN
             DO NS = 0,N_TRACKED_SPECIES
                IF (RNN%NU(NS) < 0._EB) ZZ_MIXED_FR(NS) = ZZ_MIXED_FR(NS) - ABS(ZZ_MIXED_IN(NS)/RNN%NU_MW_O_MW_F(NS))
-               ZZ_MIXED_FR(NS) = MAX(0._EB,ZZ_MIXED_FR(NS)) 
+               ZZ_MIXED_FR(NS) = MAX(0._EB,ZZ_MIXED_FR(NS))
             ENDDO
          ENDIF   
       ENDDO
    ENDIF   
    DO NRR = 1,N_REACTIONS
-      RNN => REACTION(NRR)                 
+      RNN => REACTION(NRR)
       IF (.NOT. RNN%FAST_CHEMISTRY .AND. RNN%HEAT_OF_COMBUSTION > 0._EB) THEN
          CALL GET_MASS_FRACTION_ALL(ZZ_MIXED_FR,YY_PRIMITIVE)
          DZ_FR(NRR) = AA(NRR)*EXP(-EE(NRR)/(R0*TMP_MIXED_ZONE))*RHO(I,J,K)**RNN%RHO_EXPONENT
@@ -781,7 +795,7 @@ IF (MASS_OX_STOICH > MASS_OX) THEN ! Oxidizer limited exothermic
             ENDDO
          ENDIF
          DO NS = 0,N_TRACKED_SPECIES
-            IF (RNN%NU(NS) < 0._EB) THEN            
+            IF (RNN%NU(NS) < 0._EB) THEN
                DZ_FR(NRR) = MIN(DZ_FR(NRR),-ZZ_MIXED_FR(NS)/RNN%NU_MW_O_MW_F(NS)/DT_SUB)
             ENDIF      
          ENDDO
@@ -789,7 +803,7 @@ IF (MASS_OX_STOICH > MASS_OX) THEN ! Oxidizer limited exothermic
       IF (RNN%FAST_CHEMISTRY .AND. RNN%HEAT_OF_COMBUSTION > 0._EB) THEN
          DZ_F(NRR) = 1.E10_EB
          DO NS = 0,N_TRACKED_SPECIES
-            IF (RNN%NU(NS) < 0._EB) THEN            
+            IF (RNN%NU(NS) < 0._EB) THEN
                DZ_F(NRR) = MIN(DZ_F(NRR),-ZZ_MIXED_IN(NS)/RNN%NU_MW_O_MW_F(NS))
             ENDIF      
          ENDDO
