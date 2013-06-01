@@ -1,34 +1,34 @@
 #!/bin/bash -f
 
 export SVNROOT=`pwd`/../..
-export FDSMPI=$SVNROOT/FDS_Compilation/mpi_intel_linux_64/fds_mpi_intel_linux_64
-export RUNFDSMPI=$SVNROOT/Utilities/Scripts/runfdsmpi.sh
+export QFDS=/usr/local/bin/qfds.sh
 export BASEDIR=`pwd`
 export INDIR=Current_Results
-source ~/.bashrc_fds intel64
+# qq="-q fire80s"
+qq=
 
 # uncomment following line to stop all cases
-#export STOPFDS=1
+# export STOPFDS=1
 
 /bin/sh -c "cp $BASEDIR/FDS_Input_Files/*.fds $BASEDIR/$INDIR"
 
-$RUNFDSMPI 4 $INDIR SE4
-$RUNFDSMPI 4 $INDIR SE5
-$RUNFDSMPI 4 $INDIR SE6
-$RUNFDSMPI 4 $INDIR SE7
-$RUNFDSMPI 4 $INDIR SE8
-$RUNFDSMPI 4 $INDIR SE9
-$RUNFDSMPI 4 $INDIR SE10
-$RUNFDSMPI 4 $INDIR SE11
-$RUNFDSMPI 4 $INDIR SE12
-$RUNFDSMPI 4 $INDIR SE13
-$RUNFDSMPI 4 $INDIR SE14
-$RUNFDSMPI 4 $INDIR SE15
-$RUNFDSMPI 4 $INDIR SE16
-$RUNFDSMPI 4 $INDIR SE17
-$RUNFDSMPI 4 $INDIR SE18
-$RUNFDSMPI 4 $INDIR SE19
-$RUNFDSMPI 4 $INDIR SE20
-$RUNFDSMPI 4 $INDIR SE21
+$QFDS -r -p 4 $qq -d $INDIR SE4.fds
+$QFDS -r -p 4 $qq -d $INDIR SE5.fds
+$QFDS -r -p 4 $qq -d $INDIR SE6.fds
+$QFDS -r -p 4 $qq -d $INDIR SE7.fds
+$QFDS -r -p 4 $qq -d $INDIR SE8.fds
+$QFDS -r -p 4 $qq -d $INDIR SE9.fds
+$QFDS -r -p 4 $qq -d $INDIR SE10.fds
+$QFDS -r -p 4 $qq -d $INDIR SE11.fds
+$QFDS -r -p 4 $qq -d $INDIR SE12.fds
+$QFDS -r -p 4 $qq -d $INDIR SE13.fds
+$QFDS -r -p 4 $qq -d $INDIR SE14.fds
+$QFDS -r -p 4 $qq -d $INDIR SE15.fds
+$QFDS -r -p 4 $qq -d $INDIR SE16.fds
+$QFDS -r -p 4 $qq -d $INDIR SE17.fds
+$QFDS -r -p 4 $qq -d $INDIR SE18.fds
+$QFDS -r -p 4 $qq -d $INDIR SE19.fds
+$QFDS -r -p 4 $qq -d $INDIR SE20.fds
+$QFDS -r -p 4 $qq -d $INDIR SE21.fds
 
 echo FDS cases submitted

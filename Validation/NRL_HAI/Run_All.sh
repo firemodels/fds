@@ -1,24 +1,25 @@
-#!/bin/bash -f
+#!/bin/bash
 
 export SVNROOT=`pwd`/../..
-export FDS=$SVNROOT/FDS_Compilation/intel_linux_64/fds_intel_linux_64
-export RUNFDS=$SVNROOT/Utilities/Scripts/runfds.sh
+export QFDS=/usr/local/bin/qfds.sh
 export BASEDIR=`pwd`
 export INDIR=Current_Results
+# qq="-q fire80s"
+qq=
 
 # uncomment following line to stop all cases
-# export STOPFDS=1
+#export STOPFDS=1
 
 /bin/sh -c "cp $BASEDIR/FDS_Input_Files/*.fds $BASEDIR/$INDIR"
 
-$RUNFDS $INDIR NRL_HAI_1
-$RUNFDS $INDIR NRL_HAI_2
-$RUNFDS $INDIR NRL_HAI_3 
-$RUNFDS $INDIR NRL_HAI_4
-$RUNFDS $INDIR NRL_HAI_5 
-$RUNFDS $INDIR NRL_HAI_6 
-$RUNFDS $INDIR NRL_HAI_7 
-$RUNFDS $INDIR NRL_HAI_8 
-$RUNFDS $INDIR NRL_HAI_9 
+$QFDS -r $qq -d $INDIR NRL_HAI_1.fds
+$QFDS -r $qq -d $INDIR NRL_HAI_2.fds
+$QFDS -r $qq -d $INDIR NRL_HAI_3.fds 
+$QFDS -r $qq -d $INDIR NRL_HAI_4.fds
+$QFDS -r $qq -d $INDIR NRL_HAI_5.fds 
+$QFDS -r $qq -d $INDIR NRL_HAI_6.fds 
+$QFDS -r $qq -d $INDIR NRL_HAI_7.fds 
+$QFDS -r $qq -d $INDIR NRL_HAI_8.fds 
+$QFDS -r $qq -d $INDIR NRL_HAI_9.fds 
 
 echo FDS cases submitted
