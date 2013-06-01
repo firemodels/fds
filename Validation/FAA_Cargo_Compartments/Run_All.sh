@@ -1,4 +1,4 @@
-#!/bin/bash -f
+#!/bin/bash
 
 # This script runs the a set of Validation Cases on a linux machine with
 # a batch queuing system

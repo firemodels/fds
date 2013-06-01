@@ -15,9 +15,9 @@ qq=
 
 /bin/sh -c "cp $BASEDIR/FDS_Input_Files/*.fds $BASEDIR/$INDIR"
 
-$QFDS -r -p 3 -d $INDIR ATF_Corridors_050_kW.fds
-$QFDS -r -p 3 -d $INDIR ATF_Corridors_100_kW.fds
-$QFDS -r -p 3 -d $INDIR ATF_Corridors_240_kW.fds
-$QFDS -r -p 3 -d $INDIR ATF_Corridors_250_kW.fds
-$QFDS -r -p 3 -d $INDIR ATF_Corridors_500_kW.fds
-$QFDS -r -p 3 -d $INDIR ATF_Corridors_Mix_kW.fds
+$QFDS -r $qq -p 3 -d $INDIR ATF_Corridors_050_kW.fds
+$QFDS -r $qq -p 3 -d $INDIR ATF_Corridors_100_kW.fds
+$QFDS -r $qq -p 3 -d $INDIR ATF_Corridors_240_kW.fds
+$QFDS -r $qq -p 3 -d $INDIR ATF_Corridors_250_kW.fds
+$QFDS -r $qq -p 3 -d $INDIR ATF_Corridors_500_kW.fds
+$QFDS -r $qq -p 3 -d $INDIR ATF_Corridors_Mix_kW.fds
