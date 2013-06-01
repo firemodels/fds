@@ -30,6 +30,7 @@ CFAST_SVNROOT="$FIREBOT_HOME_DIR/cfast"
 TIME_LOG=$FIREBOT_DIR/output/timings
 ERROR_LOG=$FIREBOT_DIR/output/errors
 WARNING_LOG=$FIREBOT_DIR/output/warnings
+DB=_db
 IB=
 if [ "$FDSNETWORK" == "infiniband" ] ; then
 IB=ib
@@ -334,7 +335,7 @@ check_compile_fds_db()
 compile_fds_mpi_db()
 {
    # Clean and compile FDS MPI debug
-   cd $FDS_SVNROOT/FDS_Compilation/mpi_intel_linux_64$IB_db
+   cd $FDS_SVNROOT/FDS_Compilation/mpi_intel_linux_64$IB$DB
    make -f ../makefile clean &> /dev/null
    ./make_fds.sh &> $FIREBOT_DIR/output/stage2b
 }
@@ -342,8 +343,8 @@ compile_fds_mpi_db()
 check_compile_fds_mpi_db()
 {
    # Check for errors in FDS MPI debug compilation
-   cd $FDS_SVNROOT/FDS_Compilation/mpi_intel_linux_64$IB_db
-   if [ -e "fds_mpi_intel_linux_64$IB_db" ]
+   cd $FDS_SVNROOT/FDS_Compilation/mpi_intel_linux_64$IB$DB
+   if [ -e "fds_mpi_intel_linux_64$IB$DB" ]
    then
       stage2b_success=true
    else
