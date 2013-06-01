@@ -1,4 +1,4 @@
-#!/bin/bash -f
+#!/bin/bash
 
 export SVNROOT=`pwd`/../..
 export QFDS=/usr/local/bin/qfds.sh

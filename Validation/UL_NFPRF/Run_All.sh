@@ -1,50 +1,51 @@
-#!/bin/bash -f
+#!/bin/bash
 
 export SVNROOT=`pwd`/../..
-export FDS=$SVNROOT/FDS_Compilation/intel_linux_64/fds_intel_linux_64
-export RUNFDS=$SVNROOT/Utilities/Scripts/runfds.sh
+export QFDS=/usr/local/bin/qfds.sh
 export BASEDIR=`pwd`
 export INDIR=Current_Results
+# qq="-q fire80s"
+qq=
 
 # uncomment following line to stop all cases
 # export STOPFDS=1
 
 /bin/sh -c "cp $BASEDIR/FDS_Input_Files/*.fds $BASEDIR/$INDIR"
 
-$RUNFDS $INDIR UL_NFPRF_1_01 
-$RUNFDS $INDIR UL_NFPRF_1_02 
-$RUNFDS $INDIR UL_NFPRF_1_03 
-$RUNFDS $INDIR UL_NFPRF_1_04 
-$RUNFDS $INDIR UL_NFPRF_1_05 
-$RUNFDS $INDIR UL_NFPRF_1_06 
-$RUNFDS $INDIR UL_NFPRF_1_07 
-$RUNFDS $INDIR UL_NFPRF_1_08 
-$RUNFDS $INDIR UL_NFPRF_1_09 
-$RUNFDS $INDIR UL_NFPRF_1_10 
-$RUNFDS $INDIR UL_NFPRF_1_11 
-$RUNFDS $INDIR UL_NFPRF_1_12 
-$RUNFDS $INDIR UL_NFPRF_1_13 
-$RUNFDS $INDIR UL_NFPRF_1_14 
-$RUNFDS $INDIR UL_NFPRF_1_15 
-$RUNFDS $INDIR UL_NFPRF_1_16 
-$RUNFDS $INDIR UL_NFPRF_1_17 
-$RUNFDS $INDIR UL_NFPRF_1_18 
-$RUNFDS $INDIR UL_NFPRF_1_19 
-$RUNFDS $INDIR UL_NFPRF_1_20 
-$RUNFDS $INDIR UL_NFPRF_1_21 
-$RUNFDS $INDIR UL_NFPRF_1_22 
+$QFDS -r $qq -d $INDIR UL_NFPRF_1_01.fds
+$QFDS -r $qq -d $INDIR UL_NFPRF_1_02.fds 
+$QFDS -r $qq -d $INDIR UL_NFPRF_1_03.fds 
+$QFDS -r $qq -d $INDIR UL_NFPRF_1_04.fds 
+$QFDS -r $qq -d $INDIR UL_NFPRF_1_05.fds 
+$QFDS -r $qq -d $INDIR UL_NFPRF_1_06.fds 
+$QFDS -r $qq -d $INDIR UL_NFPRF_1_07.fds 
+$QFDS -r $qq -d $INDIR UL_NFPRF_1_08.fds 
+$QFDS -r $qq -d $INDIR UL_NFPRF_1_09.fds 
+$QFDS -r $qq -d $INDIR UL_NFPRF_1_10.fds 
+$QFDS -r $qq -d $INDIR UL_NFPRF_1_11.fds 
+$QFDS -r $qq -d $INDIR UL_NFPRF_1_12.fds 
+$QFDS -r $qq -d $INDIR UL_NFPRF_1_13.fds 
+$QFDS -r $qq -d $INDIR UL_NFPRF_1_14.fds 
+$QFDS -r $qq -d $INDIR UL_NFPRF_1_15.fds 
+$QFDS -r $qq -d $INDIR UL_NFPRF_1_16.fds 
+$QFDS -r $qq -d $INDIR UL_NFPRF_1_17.fds 
+$QFDS -r $qq -d $INDIR UL_NFPRF_1_18.fds 
+$QFDS -r $qq -d $INDIR UL_NFPRF_1_19.fds 
+$QFDS -r $qq -d $INDIR UL_NFPRF_1_20.fds 
+$QFDS -r $qq -d $INDIR UL_NFPRF_1_21.fds 
+$QFDS -r $qq -d $INDIR UL_NFPRF_1_22.fds 
 
-$RUNFDS $INDIR UL_NFPRF_2_01 
-$RUNFDS $INDIR UL_NFPRF_2_02 
-$RUNFDS $INDIR UL_NFPRF_2_03 
-$RUNFDS $INDIR UL_NFPRF_2_04 
-$RUNFDS $INDIR UL_NFPRF_2_05 
-$RUNFDS $INDIR UL_NFPRF_2_06 
-$RUNFDS $INDIR UL_NFPRF_2_07 
-$RUNFDS $INDIR UL_NFPRF_2_08 
-$RUNFDS $INDIR UL_NFPRF_2_09 
-$RUNFDS $INDIR UL_NFPRF_2_10 
-$RUNFDS $INDIR UL_NFPRF_2_11 
-$RUNFDS $INDIR UL_NFPRF_2_12 
+$QFDS -r $qq -d $INDIR UL_NFPRF_2_01.fds 
+$QFDS -r $qq -d $INDIR UL_NFPRF_2_02.fds 
+$QFDS -r $qq -d $INDIR UL_NFPRF_2_03.fds 
+$QFDS -r $qq -d $INDIR UL_NFPRF_2_04.fds 
+$QFDS -r $qq -d $INDIR UL_NFPRF_2_05.fds 
+$QFDS -r $qq -d $INDIR UL_NFPRF_2_06.fds 
+$QFDS -r $qq -d $INDIR UL_NFPRF_2_07.fds 
+$QFDS -r $qq -d $INDIR UL_NFPRF_2_08.fds 
+$QFDS -r $qq -d $INDIR UL_NFPRF_2_09.fds 
+$QFDS -r $qq -d $INDIR UL_NFPRF_2_10.fds 
+$QFDS -r $qq -d $INDIR UL_NFPRF_2_11.fds 
+$QFDS -r $qq -d $INDIR UL_NFPRF_2_12.fds 
 
 echo FDS cases submitted

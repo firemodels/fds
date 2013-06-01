@@ -1,21 +1,22 @@
-#!/bin/bash -f
+#!/bin/bash
 
 export SVNROOT=`pwd`/../..
-export FDS=$SVNROOT/FDS_Compilation/intel_linux_64/fds_intel_linux_64
-export RUNFDS=$SVNROOT/Utilities/Scripts/runfds.sh
+export QFDS=/usr/local/bin/qfds.sh
 export BASEDIR=`pwd`
 export INDIR=Current_Results
+# qq="-q fire80s"
+qq=
 
 # uncomment following line to stop all cases
 # export STOPFDS=1
 
 /bin/sh -c "cp $BASEDIR/FDS_Input_Files/*.fds $BASEDIR/$INDIR"
 
-$RUNFDS $INDIR WTC_01 
-$RUNFDS $INDIR WTC_02 
-$RUNFDS $INDIR WTC_03 
-$RUNFDS $INDIR WTC_04 
-$RUNFDS $INDIR WTC_05 
-$RUNFDS $INDIR WTC_06 
+$QFDS -r $qq -d $INDIR WTC_01.fds 
+$QFDS -r $qq  -d $INDIR WTC_02.fds
+$QFDS -r $qq -d $INDIR WTC_03.fds 
+$QFDS -r $qq  -d $INDIR WTC_04.fds 
+$QFDS -r $qq  -d $INDIR WTC_05.fds 
+$QFDS -r $qq -d $INDIR WTC_06.fds 
 
 echo FDS cases submitted

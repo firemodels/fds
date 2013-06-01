@@ -1,51 +1,52 @@
-#!/bin/bash -f
+#!/bin/bash
 
 export SVNROOT=`pwd`/../..
-export FDS=$SVNROOT/FDS_Compilation/intel_linux_64/fds_intel_linux_64
-export RUNFDS=$SVNROOT/Utilities/Scripts/runfds.sh
+export QFDS=/usr/local/bin/qfds.sh
 export BASEDIR=`pwd`
 export INDIR=Current_Results
+# qq="-q fire80s"
+qq=
 
 # uncomment following line to stop all cases
 # export STOPFDS=1
 
 /bin/sh -c "cp $BASEDIR/FDS_Input_Files/*.fds $BASEDIR/$INDIR"
 
-$RUNFDS $INDIR Vettori_Sloped_FSSW 
-$RUNFDS $INDIR Vettori_Sloped_FSSD 
-$RUNFDS $INDIR Vettori_Sloped_FSSC 
-$RUNFDS $INDIR Vettori_Sloped_FSFW 
-$RUNFDS $INDIR Vettori_Sloped_FSFD 
-$RUNFDS $INDIR Vettori_Sloped_FSFC 
-$RUNFDS $INDIR Vettori_Sloped_FOFW 
-$RUNFDS $INDIR Vettori_Sloped_FOFD 
-$RUNFDS $INDIR Vettori_Sloped_FOFC 
-$RUNFDS $INDIR Vettori_Sloped_FOSW 
-$RUNFDS $INDIR Vettori_Sloped_FOSD 
-$RUNFDS $INDIR Vettori_Sloped_FOSC 
-$RUNFDS $INDIR Vettori_Sloped_13SSW 
-$RUNFDS $INDIR Vettori_Sloped_13SSD 
-$RUNFDS $INDIR Vettori_Sloped_13SSC 
-$RUNFDS $INDIR Vettori_Sloped_13SFW 
-$RUNFDS $INDIR Vettori_Sloped_13SFD 
-$RUNFDS $INDIR Vettori_Sloped_13SFC 
-$RUNFDS $INDIR Vettori_Sloped_13OFW 
-$RUNFDS $INDIR Vettori_Sloped_13OFD 
-$RUNFDS $INDIR Vettori_Sloped_13OFC 
-$RUNFDS $INDIR Vettori_Sloped_13OSW 
-$RUNFDS $INDIR Vettori_Sloped_13OSD 
-$RUNFDS $INDIR Vettori_Sloped_13OSC 
-$RUNFDS $INDIR Vettori_Sloped_24SSW 
-$RUNFDS $INDIR Vettori_Sloped_24SSD 
-$RUNFDS $INDIR Vettori_Sloped_24SSC 
-$RUNFDS $INDIR Vettori_Sloped_24SFW 
-$RUNFDS $INDIR Vettori_Sloped_24SFD 
-$RUNFDS $INDIR Vettori_Sloped_24SFC 
-$RUNFDS $INDIR Vettori_Sloped_24OFW 
-$RUNFDS $INDIR Vettori_Sloped_24OFD 
-$RUNFDS $INDIR Vettori_Sloped_24OFC 
-$RUNFDS $INDIR Vettori_Sloped_24OSW 
-$RUNFDS $INDIR Vettori_Sloped_24OSD 
-$RUNFDS $INDIR Vettori_Sloped_24OSC 
+$QFDS -r $qq -d $INDIR Vettori_Sloped_FSSW.fds 
+$QFDS -r $qq -d $INDIR Vettori_Sloped_FSSD.fds 
+$QFDS -r $qq -d $INDIR Vettori_Sloped_FSSC.fds 
+$QFDS -r $qq -d $INDIR Vettori_Sloped_FSFW.fds 
+$QFDS -r $qq -d $INDIR Vettori_Sloped_FSFD.fds 
+$QFDS -r $qq -d $INDIR Vettori_Sloped_FSFC.fds 
+$QFDS -r $qq -d $INDIR Vettori_Sloped_FOFW.fds 
+$QFDS -r $qq -d $INDIR Vettori_Sloped_FOFD.fds 
+$QFDS -r $qq -d $INDIR Vettori_Sloped_FOFC.fds 
+$QFDS -r $qq -d $INDIR Vettori_Sloped_FOSW.fds 
+$QFDS -r $qq -d $INDIR Vettori_Sloped_FOSD.fds 
+$QFDS -r $qq -d $INDIR Vettori_Sloped_FOSC.fds 
+$QFDS -r $qq -d $INDIR Vettori_Sloped_13SSW.fds 
+$QFDS -r $qq -d $INDIR Vettori_Sloped_13SSD.fds 
+$QFDS -r $qq -d $INDIR Vettori_Sloped_13SSC.fds 
+$QFDS -r $qq -d $INDIR Vettori_Sloped_13SFW.fds 
+$QFDS -r $qq -d $INDIR Vettori_Sloped_13SFD.fds 
+$QFDS -r $qq -d $INDIR Vettori_Sloped_13SFC.fds 
+$QFDS -r $qq -d $INDIR Vettori_Sloped_13OFW.fds 
+$QFDS -r $qq -d $INDIR Vettori_Sloped_13OFD.fds 
+$QFDS -r $qq -d $INDIR Vettori_Sloped_13OFC.fds 
+$QFDS -r $qq -d $INDIR Vettori_Sloped_13OSW.fds 
+$QFDS -r $qq -d $INDIR Vettori_Sloped_13OSD.fds 
+$QFDS -r $qq -d $INDIR Vettori_Sloped_13OSC.fds 
+$QFDS -r $qq -d $INDIR Vettori_Sloped_24SSW.fds 
+$QFDS -r $qq -d $INDIR Vettori_Sloped_24SSD.fds 
+$QFDS -r $qq -d $INDIR Vettori_Sloped_24SSC.fds 
+$QFDS -r $qq -d $INDIR Vettori_Sloped_24SFW.fds 
+$QFDS -r $qq -d $INDIR Vettori_Sloped_24SFD.fds 
+$QFDS -r $qq -d $INDIR Vettori_Sloped_24SFC.fds 
+$QFDS -r $qq -d $INDIR Vettori_Sloped_24OFW.fds 
+$QFDS -r $qq -d $INDIR Vettori_Sloped_24OFD.fds 
+$QFDS -r $qq -d $INDIR Vettori_Sloped_24OFC.fds 
+$QFDS -r $qq -d $INDIR Vettori_Sloped_24OSW.fds 
+$QFDS -r $qq -d $INDIR Vettori_Sloped_24OSD.fds 
+$QFDS -r $qq -d $INDIR Vettori_Sloped_24OSC.fds 
 
 echo FDS cases submitted
