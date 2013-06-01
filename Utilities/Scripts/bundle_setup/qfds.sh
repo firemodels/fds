@@ -23,6 +23,7 @@ then
   echo "The parallel FDS is invoked by using -p to specifying multiple processes."
   echo "Alternate queues (vis, fire60s or fire70s) are set using the -q option."
   echo ""
+  echo " -b use debug version"
   echo " -d directory [default: .]"
   echo " -n processes per node - maximum number of processes per node [default: "
   echo "    (serial: 1, parallel: 8 for new cluster and fire70s, 4 for the fire60s" 
@@ -43,6 +44,7 @@ fi
 # default parameter settings
 
 use_repository=0
+use_debug=0
 FDSROOT=~/FDS-SMV
 MPIRUN=
 nprocesses_per_node_defined=0
@@ -55,15 +57,19 @@ STARTFRAME=0
 exe2=
 ABORTRUN=n
 IB=
+DB=
 if [ "$FDSNETWORK" == "infiniband" ] ; then
 IB=ib
 fi
 
 # read in parameters from command line
 
-while getopts 'd:f:n:p:q:rsxy:z:' OPTION
+while getopts 'bd:f:n:p:q:rsxy:z:' OPTION
 do
 case $OPTION  in
+  b)
+   use_debug=1
+   ;;
   d)
    dir="$OPTARG"
    ;;
@@ -111,6 +117,9 @@ if [ "$USE_SMOKEVIEW" == "y" ] ; then
     queue=fire70s
   fi
 fi
+if [ "$use_debug" == "1" ] ; then
+DB=_db
+fi
 
 # set number of processes per node  to 4 if the fire60s queue is being used
 # (the fire60s only have 4 cores)
@@ -133,7 +142,7 @@ else
 # only set the input file using the command line, the fds exe is defined
 # using the repository (serial if nprocesses==1 parallel otherwise)
   then
-  exe=$FDSROOT/FDS_Compilation/mpi_intel_linux_64$IB/fds_mpi_intel_linux_64$IB
+  exe=$FDSROOT/FDS_Compilation/mpi_intel_linux_64$IB$DB/fds_mpi_intel_linux_64$IB$DB
  else
   if [ "$USE_SMOKEVIEW" == "y" ] ; then
 # for now only one instance of smokeview can occur per node
@@ -142,7 +151,7 @@ else
     exe="$FDSROOT/Verification/scripts/runsmv_single.sh"
     exe2="-x -y $STARTFRAME -z $SKIPFRAME"
   else
-    exe=$FDSROOT/FDS_Compilation/intel_linux_64/fds_intel_linux_64
+    exe=$FDSROOT/FDS_Compilation/intel_linux_64$DB/fds_intel_linux_64$DB
   fi
  fi
  in=$1
@@ -170,6 +179,9 @@ TITLE="$infile"
 if [ $nprocesses -gt 1 ] ; then
   MPIRUN="$MPIDIST/bin/mpirun -np $nprocesses"
   TITLE="$infile(MPI)"
+  if [ $FDSNETWORK == "infiniband" ] ; then
+    TITLE="$infile(MPI_IB)"
+  fi
 fi
 if [ "$USE_SMOKEVIEW" == "y" ] ; then
   TITLE="$infile(SMV)"
