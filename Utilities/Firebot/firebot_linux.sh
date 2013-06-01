@@ -30,6 +30,10 @@ CFAST_SVNROOT="$FIREBOT_HOME_DIR/cfast"
 TIME_LOG=$FIREBOT_DIR/output/timings
 ERROR_LOG=$FIREBOT_DIR/output/errors
 WARNING_LOG=$FIREBOT_DIR/output/warnings
+IB=
+if [ "$FDSNETWORK" == "infiniband" ] ; then
+IB=ib
+fi
 
 function usage {
 echo "firebot.sh [ -q queue_name -r revision_number -s -u svn_username -y ]"
@@ -330,7 +334,7 @@ check_compile_fds_db()
 compile_fds_mpi_db()
 {
    # Clean and compile FDS MPI debug
-   cd $FDS_SVNROOT/FDS_Compilation/mpi_intel_linux_64_db
+   cd $FDS_SVNROOT/FDS_Compilation/mpi_intel_linux_64$IB_db
    make -f ../makefile clean &> /dev/null
    ./make_fds.sh &> $FIREBOT_DIR/output/stage2b
 }
@@ -338,8 +342,8 @@ compile_fds_mpi_db()
 check_compile_fds_mpi_db()
 {
    # Check for errors in FDS MPI debug compilation
-   cd $FDS_SVNROOT/FDS_Compilation/mpi_intel_linux_64_db
-   if [ -e "fds_mpi_intel_linux_64_db" ]
+   cd $FDS_SVNROOT/FDS_Compilation/mpi_intel_linux_64$IB_db
+   if [ -e "fds_mpi_intel_linux_64$IB_db" ]
    then
       stage2b_success=true
    else
@@ -600,7 +604,7 @@ check_compile_fds()
 compile_fds_mpi()
 {
    # Clean and compile FDS MPI
-   cd $FDS_SVNROOT/FDS_Compilation/mpi_intel_linux_64
+   cd $FDS_SVNROOT/FDS_Compilation/mpi_intel_linux_64$IB
    make -f ../makefile clean &> /dev/null
    ./make_fds.sh &> $FIREBOT_DIR/output/stage4b
 }
@@ -608,8 +612,8 @@ compile_fds_mpi()
 check_compile_fds_mpi()
 {
    # Check for errors in FDS MPI compilation
-   cd $FDS_SVNROOT/FDS_Compilation/mpi_intel_linux_64
-   if [ -e "fds_mpi_intel_linux_64" ]
+   cd $FDS_SVNROOT/FDS_Compilation/mpi_intel_linux_64$IB
+   if [ -e "fds_mpi_intel_linux_64$IB" ]
    then
       stage4b_success=true
    else

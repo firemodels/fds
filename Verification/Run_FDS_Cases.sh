@@ -8,6 +8,10 @@ cases=all
 size=64
 DEBUG=
 OPENMP=
+IB=
+if [ "$FDSNETWORK" == "infiniband" ] ; then
+IB=ib
+fi
 
 function usage {
 echo "Run_FDS_Cases.sh [ -c cases -d -h -o -q queue_name -s ]"
@@ -75,8 +79,10 @@ else
 fi
 
 IB=
+if [ "$size" == "64" ]; then
 if [ "$FDSNETWORK" == "infiniband" ]; then
   IB=ib
+fi
 fi
 
 export BACKGROUND=$SVNROOT/Utilities/background/intel_$PLATFORM2/background

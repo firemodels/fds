@@ -16,7 +16,10 @@ function usage {
   echo
   exit
 }
-
+IB=
+if [ "$FDSNETWORK" == "infiniband" ] ; then
+IB=_IB
+fi
 if [ "$JOBPREFIX" == "" ]; then
   JOBPREFIX=VV_
 fi
@@ -96,12 +99,12 @@ if [ -e $outlog ]; then
 fi
 cat << EOF > $scriptfile
 #!/bin/bash
-#PBS -N $JOBPREFIX$infile(MPI)
+#PBS -N $JOBPREFIX$infile(MPI$IB)
 #PBS -l nodes=$nnodes:ppn=$nprocs
 #PBS -S /bin/bash
 #PBS -e $outerr
 #PBS -o $outlog
-#\$ -N $JOBPREFIX$infile(MPI)
+#\$ -N $JOBPREFIX$infile(MPI$IB)
 #\$ -pe mpi $nthreads
 #\$ -S /bin/bash
 #\$ -e $outerr
