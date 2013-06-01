@@ -1,35 +1,34 @@
 #!/bin/bash -f
 
 export SVNROOT=`pwd`/../..
-export FDS=$SVNROOT/FDS_Compilation/intel_linux_64/fds_intel_linux_64
-export RUNFDS=$SVNROOT/Utilities/Scripts/runfds.sh
-export FDSMPI=$SVNROOT/FDS_Compilation/mpi_intel_linux_64/fds_mpi_intel_linux_64
-export RUNFDSMPI=$SVNROOT/Utilities/Scripts/runfdsmpi.sh
+export QFDS=/usr/local/bin/qfds.sh
 export BASEDIR=`pwd`
 export INDIR=Current_Results
-source ~/.bashrc_fds intel64
+# qq="-q fire80s"
+qq=
+:q
 
 # uncomment following line to stop all cases
-# export STOPFDS=1
+#export STOPFDS=1
 
 /bin/sh -c "cp $BASEDIR/FDS_Input_Files/*.fds $BASEDIR/$INDIR"
 
-$RUNFDS $INDIR McCaffrey_14_kW 
-$RUNFDS $INDIR McCaffrey_22_kW 
-$RUNFDS $INDIR McCaffrey_33_kW 
-$RUNFDS $INDIR McCaffrey_45_kW 
-$RUNFDS $INDIR McCaffrey_57_kW 
+$QFDS -r $qq -d $INDIR McCaffrey_14_kW.fds 
+$QFDS -r $qq -d $INDIR McCaffrey_22_kW.fds 
+$QFDS -r $qq -d $INDIR McCaffrey_33_kW.fds 
+$QFDS -r $qq -d $INDIR McCaffrey_45_kW.fds 
+$QFDS -r $qq -d $INDIR McCaffrey_57_kW.fds 
 
-$RUNFDS $INDIR McCaffrey_14_kW_coarse
-$RUNFDS $INDIR McCaffrey_22_kW_coarse
-$RUNFDS $INDIR McCaffrey_33_kW_coarse
-$RUNFDS $INDIR McCaffrey_45_kW_coarse
-$RUNFDS $INDIR McCaffrey_57_kW_coarse
+$QFDS -r $qq -d $INDIR McCaffrey_14_kW_coarse.fds
+$QFDS -r $qq -d $INDIR McCaffrey_22_kW_coarse.fds
+$QFDS -r $qq -d $INDIR McCaffrey_33_kW_coarse.fds
+$QFDS -r $qq -d $INDIR McCaffrey_45_kW_coarse.fds
+$QFDS -r $qq -d $INDIR McCaffrey_57_kW_coarse.fds
 
-$RUNFDSMPI 4 $INDIR McCaffrey_14_kW_fine
-$RUNFDSMPI 4 $INDIR McCaffrey_22_kW_fine
-$RUNFDSMPI 4 $INDIR McCaffrey_33_kW_fine
-$RUNFDSMPI 4 $INDIR McCaffrey_45_kW_fine
-$RUNFDSMPI 4 $INDIR McCaffrey_57_kW_fine
+$QFDS -p 4 -r $qq -d $INDIR McCaffrey_14_kW_fine.fds
+$QFDS -p 4 -r $qq -d $INDIR McCaffrey_22_kW_fine.fds
+$QFDS -p 4 -r $qq -d $INDIR McCaffrey_33_kW_fine.fds
+$QFDS -p 4 -r $qq -d $INDIR McCaffrey_45_kW_fine.fds
+$QFDS -p 4 -r $qq -d $INDIR McCaffrey_57_kW_fine.fds
 
 echo FDS cases submitted
