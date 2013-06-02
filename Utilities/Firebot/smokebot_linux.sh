@@ -34,6 +34,12 @@ esac
 done
 shift $(($OPTIND-1))
 
+DB=_db
+IB=
+if [ "$FDSNETWORK" == "infiniband" ] ; then
+IB=ib
+fi
+
 FIREBOT_USERNAME="`whoami`"
 
 cd
@@ -322,6 +328,15 @@ compile_fds_db()
    ./make_fds.sh &> $FIREBOT_DIR/output/stage2a
 }
 
+compile_fds_mpi_db()
+{
+   # Clean and compile mpi FDS debug
+   cd $FDS_SVNROOT/FDS_Compilation/mpi_intel_linux_64$IB$DB
+   rm -f fds_mpi_intel_linux_64$IB$DB
+   make --makefile ../makefile clean &> /dev/null
+   ./make_fds.sh &> $FIREBOT_DIR/output/stage2b
+}
+
 check_compile_fds_db()
 {
    # Check for errors in FDS debug compilation
@@ -347,6 +362,36 @@ check_compile_fds_db()
       echo "" >> $WARNING_LOG
    # if the executable does not exist then an email has already been sent
       if [ -e "fds_intel_linux_64_db" ] ; then
+        THIS_FDS_FAILED=1
+      fi
+   fi
+}
+
+check_compile_fds_mpi_db()
+{
+   # Check for errors in FDS debug compilation
+   cd $FDS_SVNROOT/FDS_Compilation/intel_mpi_linux_64$IB$DB
+   if [ -e "fds_mpi_intel_linux_64$IB$DB" ]
+   then
+      stage2b_success=true
+   else
+      echo "Errors from Stage 2b - Compile FDS MPI debug:" >> $ERROR_LOG
+      cat $FIREBOT_DIR/output/stage2b >> $ERROR_LOG
+      echo "" >> $ERROR_LOG
+      THIS_FDS_FAILED=1
+   fi
+
+   # Check for compiler warnings/remarks
+   if [[ `grep -A 5 -E 'warning|remark' ${FIREBOT_DIR}/output/stage2b` == "" ]]
+   then
+      # Continue along
+      :
+   else
+      echo "Stage 2b warnings:" >> $WARNING_LOG
+      grep -A 5 -E 'warning|remark' ${FIREBOT_DIR}/output/stage2b >> $WARNING_LOG
+      echo "" >> $WARNING_LOG
+   # if the executable does not exist then an email has already been sent
+      if [ -e "fds_mpi_intel_linux_64$IB$DB" ] ; then
         THIS_FDS_FAILED=1
       fi
    fi
@@ -454,6 +499,15 @@ compile_fds()
    ./make_fds.sh &> $FIREBOT_DIR/output/stage4a
 }
 
+compile_fds_mpi()
+{
+   # Clean and compile FDS
+   cd $FDS_SVNROOT/FDS_Compilation/mpi_intel_linux_64$IB
+   rm -f fds_mpi_intel_linux_64$IB
+   make --makefile ../makefile clean &> /dev/null
+   ./make_fds.sh &> $FIREBOT_DIR/output/stage4b
+}
+
 check_compile_fds()
 {
    # Check for errors in FDS compilation
@@ -480,6 +534,31 @@ check_compile_fds()
    fi
 }
 
+check_compile_fds_mpi()
+{
+   # Check for errors in FDS compilation
+   cd $FDS_SVNROOT/FDS_Compilation/mpi_intel_linux_64$IB
+   if [ -e "fds_mpi_intel_linux_64$IB" ]
+   then
+      stage4b_success=true
+   else
+      echo "Errors from Stage 4b - Compile FDS release:" >> $ERROR_LOG
+      cat $FIREBOT_DIR/output/stage4b >> $ERROR_LOG
+      echo "" >> $ERROR_LOG
+   fi
+
+   # Check for compiler warnings/remarks
+   # 'performing multi-file optimizations' and 'generating object file' are part of a normal compile
+   if [[ `grep -A 5 -E 'warning|remark' ${FIREBOT_DIR}/output/stage4b | grep -v 'performing multi-file optimizations' | grep -v 'generating object file'` == "" ]]
+   then
+      # Continue along
+      :
+   else
+      echo "Stage 4b warnings:" >> $WARNING_LOG
+      grep -A 5 -E 'warning|remark' ${FIREBOT_DIR}/output/stage4b | grep -v 'performing multi-file optimizations' | grep -v 'generating object file' >> $WARNING_LOG
+      echo "" >> $WARNING_LOG
+   fi
+}
 #  ===================================================
 #  = Stage 5 - Run verification cases (release mode) =
 #  ===================================================
@@ -962,6 +1041,11 @@ check_svn_checkout
 compile_fds_db
 check_compile_fds_db
 
+### Stage 2b ###
+# No stage dependencies
+compile_fds_mpi_db
+check_compile_fds_mpi_db
+
 ### Stage 3 ###
 if [[ $stage2a_success ]] ; then
    run_verification_cases_debug
@@ -974,8 +1058,14 @@ if [[ $stage2a_success ]] ; then
    check_compile_fds
 fi
 
+### Stage 4a ###
+if [[ $stage2b_success ]] ; then
+   compile_fds_mpi
+   check_compile_fds_mpi
+fi
+
 ### Stage 5 ###
-if [[ $stage4a_success ]] ; then
+if [[ $stage4a_success && $stage4b_success ]] ; then
    run_verification_cases_release
    check_verification_cases_release
 fi
@@ -991,7 +1081,7 @@ compile_smv_db
 check_compile_smv_db
 
 ### Stage 6c ###
-if [[ $stage4a_success && $stage6b_success ]] ; then
+if [[ $stage4a_success && $stage4b_sucessess && $stage6b_success ]] ; then
   make_smv_pictures_db
   check_smv_pictures_db
 fi
@@ -1001,7 +1091,7 @@ compile_smv
 check_compile_smv
 
 ### Stage 6e ###
-if [[ $stage4a_success && $stage6d_success ]] ; then
+if [[ $stage4a_success && $stage4b_success && $stage6d_success ]] ; then
   make_smv_pictures
   check_smv_pictures
 fi
@@ -1014,13 +1104,13 @@ then
 fi
 
 ### Stage 7 ###
-if [[ $stage4a_success ]] ; then
+if [[ $stage4a_success && $stage4b_success ]] ; then
   generate_timing_stats
   archive_timing_stats
 fi
 
 ### Stage 8 ###
-if [[ $stage4a_success && $stage6d_success ]] ; then
+if [[ $stage4a_success && $stage4b_success && $stage6d_success ]] ; then
   make_smv_user_guide
   make_smv_technical_guide
   make_smv_verification_guide
