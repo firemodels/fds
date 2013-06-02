@@ -70,11 +70,15 @@ else
   PLATFORM=linux$size
   PLATFORM2=linux_32
 fi
-
+IB=
+if [ "$FDSNETWORK" == "infiniband" ] ; then
+IB=ib
+fi
 
 export BACKGROUND=$SVNROOT/Utilities/background/intel_$PLATFORM2/background
 export FDSEXE=$SVNROOT/FDS_Compilation/${OPENMP}intel_$PLATFORM$DEBUG/fds_${OPENMP}intel_$PLATFORM$DEBUG
 export FDS=$FDSEXE
+export FDSMPI=$SVNROOT/FDS_Compilation/mpi_intel_$PLATFORM$IB$DEBUG/fds_mpi_intel_$PLATFORM$IB$DEBUG
 export CFAST=~/cfast/CFAST/intel_$PLATFORM/cfast6_$PLATFORM
 
 SMVUGDIR=$SVNROOT/Manuals/SMV_User_Guide/SCRIPT_FIGURES
@@ -104,6 +108,7 @@ fi
 
 export RUNCFAST="$SVNROOT/Utilities/Scripts/runcfast.sh $queue"
 export RUNFDS="$SVNROOT/Utilities/Scripts/runfds.sh $queue"
+export RUNFDSMPI="$SVNROOT/Utilities/Scripts/runfdsmpi.sh $queue"
 
 if [ $RUN_OPENMP ]; then
   export RUNFDS="$SVNROOT/Utilities/Scripts/runfdsopenmp.sh $queue" 
@@ -112,6 +117,7 @@ fi
 echo "" | $FDSEXE 2> $SVNROOT/Manuals/SMV_User_Guide/SCRIPT_FIGURES/fds.version
 
 scripts/SMV_Cases.sh
+scripts/SMV_MPI_Cases.sh
 
 cp $SMVUGDIR/*.png $SMVVSDIR/.
 cp $SMVVGDIR/*.png $SMVVSDIR/.
