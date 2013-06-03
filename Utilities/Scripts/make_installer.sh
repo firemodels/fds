@@ -319,18 +319,11 @@ SHORTCUTDIR=\$SHORTCUTDIR
 # environment for MPI
 
 case "\\\$platform" in
-BASH
-if [ "$ostype" == "LINUX" ]
-then
-cat << BASH >> \$BASHFDS
   "intel64ib" )
     export MPIDIST=/shared/openmpi_64ib
     RUNTIMELIBDIR=\\\$FDSBINDIR/LIB64
     export FDSNETWORK=infiniband
   ;;
-BASH
-fi
-cat << BASH >> \$BASHFDS
   "intel64" )
     export MPIDIST=/shared/openmpi_64
     RUNTIMELIBDIR=\\\$FDSBINDIR/LIB64
@@ -340,6 +333,19 @@ cat << BASH >> \$BASHFDS
     RUNTIMELIBDIR=\\\$FDSBINDIR/LIB32
   ;;
 esac
+
+# environment for compilers
+
+if [ "\\\$IFORT_COMPILER" != "" ]; then
+case "\\\$platform" in
+  "intel64ib"|"intel64" )
+    source \\\$IFORT_COMPILER/bin/compilervars.sh intel64
+  ;;
+  "ia32" )
+    source \\\$IFORT_COMPILER/bin/compilervars.sh ia32
+  ;;
+esac
+fi
 
 # Update LD_LIBRARY_PATH and PATH variables
 
