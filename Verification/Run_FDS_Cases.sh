@@ -84,10 +84,12 @@ if [ "$FDSNETWORK" == "infiniband" ]; then
   IB=ib
 fi
 fi
+echo "dbg2 IB=$IB"
 
 export BACKGROUND=$SVNROOT/Utilities/background/intel_$PLATFORM2/background
 export FDS=$SVNROOT/FDS_Compilation/${OPENMP}intel_$PLATFORM$DEBUG/fds_${OPENMP}intel_$PLATFORM$DEBUG
 export FDSMPI=$SVNROOT/FDS_Compilation/mpi_intel_$PLATFORM$IB$DEBUG/fds_mpi_intel_$PLATFORM$IB$DEBUG
+echo "dbg2 FDSMPI=$FDSMPI"
 
 
 if [ "$queue" != "" ]; then
