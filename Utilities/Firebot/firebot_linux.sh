@@ -35,7 +35,6 @@ IB=
 if [ "$FDSNETWORK" == "infiniband" ] ; then
 IB=ib
 fi
-echo "dbg IB=$IB"
 
 function usage {
 echo "firebot.sh [ -q queue_name -r revision_number -s -u svn_username -y ]"
@@ -1325,8 +1324,6 @@ if [[ $stage2a_success && $stage2b_success ]] ; then
    run_verification_cases_debug
    check_verification_cases_debug
 fi
-echo "dbg stopping firebot"
-exit
 
 ### Stage 4a ###
 compile_fds
