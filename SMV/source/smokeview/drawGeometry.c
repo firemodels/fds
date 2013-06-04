@@ -1996,13 +1996,12 @@ void update_cadtextcoords(cadquad *quadi){
   l1 = sqrt(nx*nx+ny*ny);
   l2 = l1*sqrt(nx*nx+ny*ny+nz*nz);
 
-
   for(i=0;i<4;i++){
     float qx, qy, qz;
 
-    qx=DENORMALIZE_X(xyz[3*i]) - t_origin[0];
-    qy=DENORMALIZE_Y(xyz[3*i]+1) - t_origin[1];
-    qz=DENORMALIZE_Z(xyz[3*i]+2) - t_origin[2];
+    qx=DENORMALIZE_X(xyz[3*i+0]) - t_origin[0];
+    qy=DENORMALIZE_Y(xyz[3*i+1]) - t_origin[1];
+    qz=DENORMALIZE_Z(xyz[3*i+2]) - t_origin[2];
 
     if(l1!=0.0){
       txy[2*i]=(ny*qx-nx*qy)/l1;
@@ -2017,43 +2016,6 @@ void update_cadtextcoords(cadquad *quadi){
     txy[2*i]=1.0-txy[2*i];
     txy[2*i+1]=1.0-txy[2*i+1];
   }
-
-
-
-
-}
-
-/* ------------------ newtextptr ------------------------ */
-
-char *newtextptr(char ***list,int *nlist,char *this,char *last){
-  int i,n;
-  char *thisname;
-  unsigned int n_thisname;
-  char **from_list, **to_list;
-
-  if(last!=NULL&&strcmp(this,last)==0)return last;
-  if(this==NULL)return NULL;
-
-  from_list=*list;
-  n=*nlist;
-  for(i=0;i<n;i++){
-    if(strcmp(from_list[i],this)==0)return from_list[i];
-  }
-  
-  n++;
-  NewMemory((void **)&to_list,n*sizeof(char **));
-  for(i=0;i<n-1;i++){
-    to_list[i]=from_list[i];
-  }
-  n_thisname=strlen(this);
-  NewMemory((void *)&thisname,n_thisname+1);
-  strcpy(thisname,this);
-  to_list[n-1]=thisname;
-  FREEMEMORY(from_list);
-
-  *nlist=n;
-  *list=to_list;
-  return thisname;
 }
 
 /* ------------------ drawcadgeom ------------------------ */
@@ -2117,13 +2079,9 @@ void drawcadgeom(const cadgeom *cd){
 /* ------------------ drawcadgeom2 ------------------------ */
 
 void drawcad2geom(const cadgeom *cd, int trans_flag){
-  int ii,i;
-  float *xyzpoint;
-  float *txypoint;
-  float *normal;
+  int ii;
   float *thiscolor,*lastcolor; 
-  cadquad *quadi;
-  int colorindex,colorindex2;
+  int colorindex;
   texture *lasttexture;
   float last_block_shininess;
 
@@ -2138,8 +2096,12 @@ void drawcad2geom(const cadgeom *cd, int trans_flag){
   glBegin(GL_QUADS);
   colorindex=0;
   for(ii=0;ii<cd->nquads;ii++){
+    float *xyzpoint;
     texture *texti;
     float this_block_shininess;
+    float *normal;
+    cadquad *quadi;
+    int i;
 
     i=cd->order[ii];
     ASSERT(i>=0&&i<cd->nquads);
@@ -2153,6 +2115,7 @@ void drawcad2geom(const cadgeom *cd, int trans_flag){
     if(thiscolor!=lastcolor){
       if(thiscolor[0]<0.0){
         GLfloat *colorptr;
+        int colorindex2;
 
         colorindex2 = 15 + (15*colorindex % 230);
         colorptr = &rgb_cad[colorindex2][0];
@@ -2193,7 +2156,12 @@ void drawcad2geom(const cadgeom *cd, int trans_flag){
     lasttexture=NULL;
     glBegin(GL_QUADS);
     for(ii=0;ii<cd->nquads;ii++){
+      float *xyzpoint;
       texture *texti;
+      float *txypoint;
+      float *normal;
+      cadquad *quadi;
+      int i;
     
       i=cd->order[ii];
       ASSERT(i>=0&&i<cd->nquads);
