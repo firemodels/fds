@@ -2114,7 +2114,7 @@ void drawcadgeom(const cadgeom *cd){
 
 }
 
-/* ------------------ drawcadgeom ------------------------ */
+/* ------------------ drawcadgeom2 ------------------------ */
 
 void drawcad2geom(const cadgeom *cd, int trans_flag){
   int ii,i;
