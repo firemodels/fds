@@ -24,16 +24,18 @@ cadgeom *current_cadgeom;
 #ifdef pp_GEOMTEST
 
 typedef struct {
+  float v[3];
+} vert;
+
+typedef struct {
   float n[3], x0[3];
+  vert *verts[4];
 } plane;
 
 typedef struct {
   float v1[3], v2[3];
 } edge;
 
-typedef struct {
-  float v[3];
-} vert;
 
 /* ------------------ set_edge ------------------------ */
 
@@ -56,6 +58,16 @@ void set_plane(float *normal, float *vert, plane *planeinfo){
   planeinfo->x0[0]=vert[0];
   planeinfo->x0[1]=vert[1];
   planeinfo->x0[2]=vert[2];
+}
+
+
+/* ------------------ set_plane_vert ------------------------ */
+
+void set_plane_vert(vert *v1, vert *v2, vert *v3, vert *v4, plane *planeinfo){
+  planeinfo->verts[0]=v1;
+  planeinfo->verts[1]=v2;
+  planeinfo->verts[2]=v3;
+  planeinfo->verts[3]=v4;
 }
 
 /* ------------------ set_vert ------------------------ */
@@ -123,7 +135,7 @@ float *get_edge_plane_intersection(edge *e, plane *p, float xyz[3]){
 /* ------------------ GetVerts ------------------------ */
 
 int GetVerts(float boxbounds[6], 
-              float *v1, float *v2, float *v3, float *v4, 
+              float *v0, float *v1, float *v2, float *v3, 
               vert *verts, int *nverts){
 
 // box: 6 planes, 8 vertices, 12 edges
@@ -132,7 +144,7 @@ int GetVerts(float boxbounds[6],
 // max vertices box_edges*tetra_planes + tetra_edges*box_planes + box_verts + tetra_verts 
 //                12*4 + 6*6 +8 + 4= 48+36+12=96
 
-  int i;
+  int i, j;
   plane box_planes[6], tetra_planes[4];
   edge box_edges[12], tetra_edges[6];
   vert box_verts[8], tetra_verts[4];
@@ -156,18 +168,17 @@ int GetVerts(float boxbounds[6],
   set_plane(set_vert(0.0,0.0,-1.0,normal),set_vert(*xmin,*ymin,*zmin,vert0),box_planes+4);
   set_plane(set_vert(0.0,0.0, 1.0,normal),set_vert(*xmin,*ymin,*zmax,vert0),box_planes+5);
 
+  set_plane(set_normal(v1,v0,v3,normal),v0,tetra_planes);
+  set_plane(set_normal(v2,v1,v3,normal),v1,tetra_planes+1);
+  set_plane(set_normal(v0,v2,v3,normal),v2,tetra_planes+2);
+  set_plane(set_normal(v2,v0,v1,normal),v0,tetra_planes+3);
 
-  set_plane(set_normal(v2,v1,v4,normal),v1,tetra_planes);
-  set_plane(set_normal(v3,v2,v4,normal),v2,tetra_planes+1);
-  set_plane(set_normal(v1,v3,v4,normal),v3,tetra_planes+2);
-  set_plane(set_normal(v3,v1,v2,normal),v1,tetra_planes+3);
-
-  set_edge(v1,v2,tetra_edges);
-  set_edge(v2,v3,tetra_edges+1);
-  set_edge(v3,v1,tetra_edges+2);
-  set_edge(v1,v4,tetra_edges+3);
-  set_edge(v2,v4,tetra_edges+4);
-  set_edge(v3,v4,tetra_edges+5);
+  set_edge(v0,v1,tetra_edges);
+  set_edge(v1,v2,tetra_edges+1);
+  set_edge(v2,v0,tetra_edges+2);
+  set_edge(v0,v3,tetra_edges+3);
+  set_edge(v1,v3,tetra_edges+4);
+  set_edge(v2,v3,tetra_edges+5);
 
   set_edge(set_vert(*xmin,*ymin,*zmin,vert1),set_vert(*xmax,*ymin,*zmin,vert2),box_edges);
   set_edge(set_vert(*xmin,*ymax,*zmin,vert1),set_vert(*xmax,*ymax,*zmin,vert2),box_edges+1);
@@ -193,85 +204,98 @@ int GetVerts(float boxbounds[6],
   set_vert2(*xmin,*ymax,*zmax,box_verts+6);
   set_vert2(*xmax,*ymax,*zmax,box_verts+7);
 
-  set_vert2(v1[0],v1[1],v1[2],tetra_verts);
-  set_vert2(v2[0],v2[1],v2[2],tetra_verts+1);
-  set_vert2(v3[0],v3[1],v3[2],tetra_verts+2);
-  set_vert2(v4[0],v4[1],v4[2],tetra_verts+3);
+  set_plane_vert(box_verts,  box_verts+2,box_verts+4,box_verts+6,box_planes+0);
+  set_plane_vert(box_verts+1,box_verts+3,box_verts+5,box_verts+7,box_planes+1);
+  set_plane_vert(box_verts,  box_verts+1,box_verts+4,box_verts+5,box_planes+2);
+  set_plane_vert(box_verts+2,box_verts+3,box_verts+6,box_verts+7,box_planes+3);
+  set_plane_vert(box_verts,  box_verts+1,box_verts+2,box_verts+3,box_planes+4);
+  set_plane_vert(box_verts+4,box_verts+5,box_verts+6,box_verts+7,box_planes+5);
+
+  set_vert2(v0[0],v0[1],v0[2],tetra_verts);
+  set_vert2(v1[0],v1[1],v1[2],tetra_verts+1);
+  set_vert2(v2[0],v2[1],v2[2],tetra_verts+2);
+  set_vert2(v3[0],v3[1],v3[2],tetra_verts+3);
+
+  set_plane_vert(tetra_verts+1,tetra_verts,tetra_verts+3,NULL,tetra_planes);
+  set_plane_vert(tetra_verts+2,tetra_verts+1,tetra_verts+3,NULL,tetra_planes+1);
+  set_plane_vert(tetra_verts,tetra_verts+2,tetra_verts+3,NULL,tetra_planes+2);
+  set_plane_vert(tetra_verts+2,tetra_verts,tetra_verts+1,NULL,tetra_planes+3);
 
   nv=0;
 
-  // find tetrahedron verts that are inside the box
-
-  for(i=0;i<4;i++){
-    float *v,*tv;
-
-    tv = tetra_verts[i].v;
-    v = verts[nv].v;
-    if(in_solid(box_planes,6,tv,-1)==1){
-      v[0]=tv[0];
-      v[1]=tv[1];
-      v[2]=tv[2];
-      nv++;
-    }
-  }
-
-  // find box verts that inside the tetrahedron
-
-  for(i=0;i<8;i++){
-    float *v,*bv;
-
-    bv = box_verts[i].v;
-    v = verts[nv].v;
-    if(in_solid(tetra_planes,4,bv,-1)==1){
-      v[0]=bv[0];
-      v[1]=bv[1];
-      v[2]=bv[2];
-      nv++;
-    }
-  }
-
   // find tetrahedron edge - box intersections
 
-  for(i=0;i<6;i++){
-    int j;
-    edge *ei;
+  for(j=0;j<6;j++){
+    plane *boxplanej;
+    float xyz[3],*xyzptr;
+    float *v;
 
-    ei = tetra_edges + i;
+    boxplanej = box_planes + j;
+    for(i=0;i<6;i++){
+      edge *tetraedgei;
 
-    for(j=0;j<6;j++){
-      plane *bj;
-      float xyz[3],*xyzptr;
-      float *v;
+      tetraedgei = tetra_edges + i;
 
-      bj = box_planes + j;
-      xyzptr = get_edge_plane_intersection(ei,bj,xyz);
-      v = verts[nv].v;
+      xyzptr = get_edge_plane_intersection(tetraedgei,boxplanej,xyz);
       if(xyzptr!=NULL&&in_solid(box_planes,6,xyzptr,j)==1){
+        v = verts[nv].v;
         v[0]=xyz[0];
         v[1]=xyz[1];
         v[2]=xyz[2];
         nv++;
       }
     }
+
+    // see if vertices for box plane are inside tetrahedron
+
+    for(i=0;i<4;i++){
+      float *xyz;
+      int jj;
+
+      xyz = boxplanej->verts[i]->v;
+      jj = boxplanej->verts[i]-box_verts;
+      if(in_solid(tetra_planes,4,xyz,-1)==1){
+        v = verts[nv].v;
+        v[0]=xyz[0];
+        v[1]=xyz[1];
+        v[2]=xyz[2];
+        nv++;
+      }
+    }
+
   }
 
-  // find box edge - tetra intersections
+  // find box edge - tetrahedron intersections
 
-  for(i=0;i<12;i++){
-    int j;
-    edge *ei;
+  for(j=0;j<4;j++){
+    plane *tetraplanej;
+    float xyz[3],*xyzptr;
+    float *v;
 
-    ei = box_edges + i;
+    tetraplanej = tetra_planes + j;
+    for(i=0;i<12;i++){
+      edge *boxedgei;
 
-    for(j=0;j<4;j++){
-      plane *bj;
-      float xyz[3],*xyzptr;
-      float *v;
+      boxedgei = box_edges + i;
 
-      bj = tetra_planes + j;
-      xyzptr = get_edge_plane_intersection(ei,bj,xyz);
-      v = verts[nv].v;
+      xyzptr = get_edge_plane_intersection(boxedgei,tetraplanej,xyz);
       if(xyzptr!=NULL&&in_solid(tetra_planes,4,xyzptr,j)==1){
+        v = verts[nv].v;
+        v[0]=xyz[0];
+        v[1]=xyz[1];
+        v[2]=xyz[2];
+        nv++;
+      }
+    }
+
+        // see if vertices for tetra plane are inside box
+
+    for(i=0;i<3;i++){
+      float *xyz;
+
+      xyz = tetraplanej->verts[i]->v;
+      if(in_solid(box_planes,6,xyz,-1)==1){
+        v = verts[nv].v;
         v[0]=xyz[0];
         v[1]=xyz[1];
         v[2]=xyz[2];
@@ -281,6 +305,7 @@ int GetVerts(float boxbounds[6],
   }
 
   *nverts=nv;
+  ASSERT(nv<101);
   return nv;
 }
 
