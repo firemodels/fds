@@ -28,13 +28,14 @@ typedef struct {
 } vert;
 
 typedef struct {
-  float n[3], x0[3];
-  vert *verts[4];
-} plane;
-
-typedef struct {
   float v1[3], v2[3];
 } edge;
+
+typedef struct {
+  float n[3], x0[3];
+  vert *verts[4];
+  edge *edges[4];
+} plane;
 
 
 /* ------------------ set_edge ------------------------ */
@@ -60,6 +61,15 @@ void set_plane(float *normal, float *vert, plane *planeinfo){
   planeinfo->x0[2]=vert[2];
 }
 
+
+/* ------------------ set_plane_vert ------------------------ */
+
+void set_plane_edge(edge *e1, edge *e2, edge *e3, edge *e4, plane *planeinfo){
+  planeinfo->edges[0]=e1;
+  planeinfo->edges[1]=e2;
+  planeinfo->edges[2]=e3;
+  planeinfo->edges[3]=e4;
+}
 
 /* ------------------ set_plane_vert ------------------------ */
 
@@ -148,11 +158,16 @@ int GetVerts(float boxbounds[6],
   plane box_planes[6], tetra_planes[4];
   edge box_edges[12], tetra_edges[6];
   vert box_verts[8], tetra_verts[4];
+  int facennodes[100], nfaces;
+  vert *faceptr[100];
 
   float *xmin, *xmax, *ymin, *ymax, *zmin, *zmax;
   float normal[3], vert0[3], vert1[3], vert2[3];
   float *vertptr;
   int nv;
+
+  faceptr[0]=verts;
+  nfaces=0;
 
   xmin = boxbounds;
   xmax = boxbounds+1;
@@ -211,6 +226,18 @@ int GetVerts(float boxbounds[6],
   set_plane_vert(box_verts,  box_verts+1,box_verts+2,box_verts+3,box_planes+4);
   set_plane_vert(box_verts+4,box_verts+5,box_verts+6,box_verts+7,box_planes+5);
 
+  set_plane_edge(box_edges+4,  box_edges+6,box_edges+ 8,box_edges+10,box_planes+0);
+  set_plane_edge(box_edges+5,  box_edges+7,box_edges+ 9,box_edges+11,box_planes+1);
+  set_plane_edge(box_edges+0,  box_edges+2,box_edges+ 8,box_edges+ 9,box_planes+2);
+  set_plane_edge(box_edges+1,  box_edges+3,box_edges+10,box_edges+11,box_planes+3);
+  set_plane_edge(box_edges+0,  box_edges+1,box_edges+ 4,box_edges+ 5,box_planes+4);
+  set_plane_edge(box_edges+2,  box_edges+3,box_edges+ 6,box_edges+ 7,box_planes+5);
+
+  set_plane_edge(tetra_edges+0,  tetra_edges+3,tetra_edges+ 4,NULL,tetra_planes+0);
+  set_plane_edge(tetra_edges+1,  tetra_edges+4,tetra_edges+ 5,NULL,tetra_planes+1);
+  set_plane_edge(tetra_edges+2,  tetra_edges+3,tetra_edges+ 5,NULL,tetra_planes+2);
+  set_plane_edge(tetra_edges+0,  tetra_edges+1,tetra_edges+ 2,NULL,tetra_planes+3);
+
   set_vert2(v0[0],v0[1],v0[2],tetra_verts);
   set_vert2(v1[0],v1[1],v1[2],tetra_verts+1);
   set_vert2(v2[0],v2[1],v2[2],tetra_verts+2);
@@ -223,18 +250,23 @@ int GetVerts(float boxbounds[6],
 
   nv=0;
 
-  // find tetrahedron edge - box intersections
+  // look for vertices on each box plane
 
   for(j=0;j<6;j++){
     plane *boxplanej;
     float xyz[3],*xyzptr;
     float *v;
+    int nnodes;
+    int ii,jj;
 
+    nnodes=0;
     boxplanej = box_planes + j;
     for(i=0;i<6;i++){
       edge *tetraedgei;
 
       tetraedgei = tetra_edges + i;
+
+      // add intersection of tetrahedron edge and box plane (if on box)
 
       xyzptr = get_edge_plane_intersection(tetraedgei,boxplanej,xyz);
       if(xyzptr!=NULL&&in_solid(box_planes,6,xyzptr,j)==1){
@@ -242,41 +274,75 @@ int GetVerts(float boxbounds[6],
         v[0]=xyz[0];
         v[1]=xyz[1];
         v[2]=xyz[2];
+        nnodes++;
         nv++;
       }
     }
 
-    // see if vertices for box plane are inside tetrahedron
+    // add intersection of box edge and tetrahedron plane (if on tetrahedron)
+
+    for(jj=0;jj<4;jj++){
+      int kk;
+      edge *edgejj;
+
+      edgejj = boxplanej->edges[jj];
+
+      for(kk=0;kk<4;kk++){
+        plane *tetraplanekk;
+
+        tetraplanekk = tetra_planes + kk;
+        xyzptr = get_edge_plane_intersection(edgejj,tetraplanekk,xyz);
+        if(xyzptr!=NULL&&in_solid(tetra_planes,4,xyzptr,kk)==1){
+          v = verts[nv].v;
+          v[0]=xyz[0];
+          v[1]=xyz[1];
+          v[2]=xyz[2];
+          nnodes++;
+          nv++;
+        }
+      }
+    }
+
+    // add box plane vertices if inside tetrahedron
 
     for(i=0;i<4;i++){
       float *xyz;
       int jj;
 
       xyz = boxplanej->verts[i]->v;
-      jj = boxplanej->verts[i]-box_verts;
       if(in_solid(tetra_planes,4,xyz,-1)==1){
         v = verts[nv].v;
         v[0]=xyz[0];
         v[1]=xyz[1];
         v[2]=xyz[2];
+        nnodes++;
         nv++;
       }
     }
-
+    if(nnodes>0){
+      facennodes[nfaces]=nnodes;
+      nfaces++;
+      faceptr[nfaces]=faceptr[nfaces-1]+nnodes;
+    }
   }
 
-  // find box edge - tetrahedron intersections
+  // look for vertices on each tetrahedron plane
 
   for(j=0;j<4;j++){
     plane *tetraplanej;
     float xyz[3],*xyzptr;
     float *v;
+    int nnodes;
+    int jj;
 
+    nnodes=0;
     tetraplanej = tetra_planes + j;
     for(i=0;i<12;i++){
       edge *boxedgei;
 
       boxedgei = box_edges + i;
+
+      // add intersection of box edge and tetrahedron  plane (if on tetrahedron)
 
       xyzptr = get_edge_plane_intersection(boxedgei,tetraplanej,xyz);
       if(xyzptr!=NULL&&in_solid(tetra_planes,4,xyzptr,j)==1){
@@ -284,11 +350,36 @@ int GetVerts(float boxbounds[6],
         v[0]=xyz[0];
         v[1]=xyz[1];
         v[2]=xyz[2];
+        nnodes++;
         nv++;
       }
     }
 
-        // see if vertices for tetra plane are inside box
+    // add intersection of tetrahedron edge and box plane (if on box)
+
+    for(jj=0;jj<3;jj++){
+      int kk;
+      edge *edgejj;
+
+      edgejj = tetraplanej->edges[jj];
+
+      for(kk=0;kk<6;kk++){
+        plane *boxplanekk;
+
+        boxplanekk = box_planes + kk;
+        xyzptr = get_edge_plane_intersection(edgejj,boxplanekk,xyz);
+        if(xyzptr!=NULL&&in_solid(box_planes,6,xyzptr,kk)==1){
+          v = verts[nv].v;
+          v[0]=xyz[0];
+          v[1]=xyz[1];
+          v[2]=xyz[2];
+          nnodes++;
+          nv++;
+        }
+      }
+    }
+
+    // add tetrahedron plane vertices if inside box
 
     for(i=0;i<3;i++){
       float *xyz;
@@ -299,10 +390,20 @@ int GetVerts(float boxbounds[6],
         v[0]=xyz[0];
         v[1]=xyz[1];
         v[2]=xyz[2];
+        nnodes++;
         nv++;
       }
     }
+    if(nnodes>0){
+      facennodes[nfaces]=nnodes;
+      nfaces++;
+      faceptr[nfaces]=faceptr[nfaces-1]+nnodes;
+    }
   }
+  for(i=0;i<nfaces;i++){
+    printf("face=%i vertices=%i\n",i,facennodes[i]);
+  }
+  printf("nfaces=%i\n\n",nfaces);
 
   *nverts=nv;
   ASSERT(nv<101);
