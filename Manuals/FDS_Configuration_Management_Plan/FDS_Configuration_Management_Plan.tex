@@ -133,9 +133,7 @@ not affiliated with NIST, VTT, or its software development collaborators.
 
 \label{acksection}
 
-The idea for this Guide originated with Jason Floyd, a co-developer of FDS and practicing engineer at Hughes Associates, Inc. He readily saw the need
-for a clear description of the process of developing and maintaining FDS and Smokeview. Bryan Klein of NIST instituted a number of the internet tools that
-are described in the Guide, including the source code repository, issue tracking system, and discussion group sites.
+The idea for this Guide originated with Jason Floyd, a co-developer of FDS and practicing engineer at Hughes Associates, Inc. He readily saw the need for a clear description of the process of developing and maintaining FDS and Smokeview. Bryan Klein, currently with Thunderhead Engineering, Inc., instituted a number of the internet tools that are described in the Guide, including the source code repository, issue tracking system, and discussion group sites.
 
 
 \newpage
@@ -185,10 +183,10 @@ requests.
 
 
 Currently, FDS is developed by the NIST Engineering Laboratory, Fire Research Division, in cooperation with VTT Technical Research Centre of Finland.
-The developers at NIST and VTT have formed a loose collaboration of interested stake holders, including:
+The developers at NIST and VTT have formed a loose collaboration of interested stakeholders, including:
 \begin{itemize}
 \item The various contributors listed at the start of this report,
-\item The Society of Fire Protection Engineers (SFPE) who conduct training classes on the use of FDS,
+\item The Society of Fire Protection Engineers (SFPE) which conducts training classes on the use of FDS,
 \item Fire protection engineering firms that use the software,
 \item Some recipients of external grants awarded by the NIST Fire Research Division,
 \item Engineering departments at various universities with a particular emphasis on fire.
@@ -217,14 +215,9 @@ Members of the FDS and Smokeview team share in the development and maintenance r
 \item Maintaining the Technical Reference and Users Guides
 \item Maintaining a suite of sample cases to demonstrate model use
 \item Maintaining a suite of verification and validation cases to test model accuracy and reliability
-\item Developing and maintaining a ``Road Map'' of future development
+\item Developing and updating a ``Roadmap'' of future development
 \end{enumerate}
-Most decisions concerning these various tasks are made individually or by consensus of the team members.
-In the event of a disagreement over technical issues, the decision is made by Kevin McGrattan, leader of the Fire Modeling Group in the Fire Research Division of BFRL,
-in consultation with team members at VTT, Finland.
-Non-technical issues are addressed by Anthony Hamins, Chief of the Fire Research Division, or by
-Shyam Sunder, Director of EL, depending on the nature of the issue. All policies and procedures described in this document are
-subject to review by NIST in consultation with VTT, Finland.
+Most decisions concerning these various tasks are made individually or by consensus of the team members. In the event of a disagreement over a technical issue, the resolution is facilitated by the principal developers at NIST and VTT. Non-technical issues are addressed by the chief of the Fire Research Division at NIST or the respective counterpart at VTT. All policies and procedures described in this document are subject to review by NIST in consultation with VTT.
 
 
 \section{Intended Uses}
@@ -233,12 +226,12 @@ Throughout its development, FDS has been aimed at solving practical fire problem
 tool to study fundamental fire dynamics and combustion. FDS can be used to model the following phenomena:
 \begin{itemize}
 \setlength{\itemsep}{0.0in}
-\item Low speed transport of heat and combustion products from fire
+\item Low speed transport of heat and combustion products from a fire
 \item Radiative and convective heat transfer between the gas and solid surfaces
 \item Pyrolysis
 \item Flame spread and fire growth
 \item Sprinkler, heat detector, and smoke detector activation
-\item Sprinkler sprays and suppression by water
+\item Sprinkler sprays and suppression by water or other agents
 \end{itemize}
 Although FDS was designed specifically for fire simulations, it can be used for other low-speed fluid flow simulations that do not necessarily
 include fire or thermal effects. To date, about half of the applications of the model have been for design of smoke control systems and
@@ -320,35 +313,12 @@ Ref.~\cite{Smokeview_Users_Guide}.
 Following is a brief description of the major components of FDS. Detailed information regarding the assumptions and governing equations associated
 with the model is provided in Volume~1 of the FDS Technical Reference Guide~\cite{FDS_Tech_Guide}.
 \begin{description}
-\item[Hydrodynamic Model] FDS
-solves numerically a form of the Navier-Stokes equations appropriate for low-speed, thermally-driven flow with an emphasis on smoke and heat
-transport from fires. The core algorithm is an explicit predictor-corrector scheme that is second order accurate in space and time. Turbulence is
-treated by means of the Smagorinsky form of Large Eddy Simulation (LES). It is possible to perform a Direct Numerical Simulation (DNS) if the
-underlying numerical grid is fine enough. LES is the default mode of operation.
-\item[Combustion Model]
-For most applications, FDS uses a combustion model based on the mixing limited, infinitely fast reaction of lumped species. Lumped species are
-conserved scalar quantities that represent a mixture of species such as air which is a mixture of nitrogen, oxygen, water vapor, and carbon dioxide.
-In FDS versions prior to 6, these lumped species were referred to as mixture fraction parameters.  As with FDS 5, the reaction of fuel and oxygen is
-not necessarily instantaneous and complete, and there are several optional schemes that are designed to predict the extent of combustion in
-under-ventilated spaces. The mass fractions of all of the major reactants and products can be derived from the lumped species by means of ``state
-relations,'' expressions arrived at by a combination of simplified analysis and measurement.
-\item[Radiation Transport] Radiative heat transfer is included in the
-model via the solution of the radiation transport equation for a gray gas. In a limited number of cases, a wide band model can be used in place of
-the gray gas model to provide a better spectral accuracy. The radiation equation is solved using a technique similar to a finite volume method for
-convective transport, thus the name given to it is the Finite Volume Method (FVM). Using approximately 100 discrete angles, the finite volume solver
-requires about 20~\% of the total CPU time of a calculation, a modest cost given the complexity of radiation heat transfer.  Water droplets can
-absorb and scatter thermal radiation. This is important in cases involving mist sprinklers, but also plays a role in all sprinkler cases. The
-absorption and scattering coefficients are based on Mie theory. The scattering from the gaseous species and soot is not included in the model.
-\item[Geometry]
-FDS approximates the governing equations on one or more rectilinear grids. The user prescribes rectangular obstructions that are forced to conform
-with the underlying grid.
-\item[Boundary Conditions]
-All solid surfaces are assigned thermal boundary conditions, plus information about the burning behavior of the material. Heat and mass transfer to
-and from solid surfaces is usually handled with empirical correlations, although it is possible to compute directly the heat and mass transfer when
-performing a Direct Numerical Simulation (DNS).
-\item[Sprinklers and Detectors] The activation of sprinklers and heat and smoke detectors
-is modeled using fairly simple correlations of thermal inertia for sprinklers and heat detectors, and transport lag for smoke detectors. Sprinkler
-sprays are modeled by Lagrangian particles that represent a sampling of the water droplets ejected from the sprinkler.
+\item[Hydrodynamic Model] FDS solves numerically a form of the Navier-Stokes equations appropriate for low-speed, thermally-driven flow with an emphasis on smoke and heat transport from fires. The core algorithm is an explicit predictor-corrector scheme that is second order accurate in space and time. Turbulence is treated by means of Large Eddy Simulation (LES). It is possible to perform a Direct Numerical Simulation (DNS) if the underlying numerical grid is fine enough. LES is the default mode of operation.
+\item[Combustion Model] For most applications, FDS uses a combustion model based on the mixing limited, infinitely fast reaction of lumped species. Lumped species are conserved scalar quantities that represent a mixture of species such as air which is a mixture of nitrogen, oxygen, water vapor, and carbon dioxide. In FDS versions prior to 6, these lumped species were referred to as mixture fraction parameters.  As with FDS 5, the reaction of fuel and oxygen is not necessarily instantaneous and complete, and there are several optional schemes that are designed to predict the extent of combustion in under-ventilated spaces. The mass fractions of all of the major reactants and products can be derived from the lumped species by means of ``state relations,'' expressions arrived at by a combination of simplified analysis and measurement.
+\item[Radiation Transport] Radiative heat transfer is included in the model via the solution of the radiation transport equation for a gray gas. In a limited number of cases, a wide band model can be used in place of the gray gas model to provide a better spectral accuracy. The radiation equation is solved using a technique similar to a finite volume method for convective transport, thus the name given to it is the Finite Volume Method (FVM). Using approximately 100 discrete angles, the finite volume solver requires about 20~\% of the total CPU time of a calculation, a modest cost given the complexity of radiation heat transfer.  Water droplets can absorb and scatter thermal radiation. This is important in cases involving mist sprinklers, but also plays a role in all sprinkler cases. The absorption and scattering coefficients are based on Mie theory. The scattering from the gaseous species and soot is not included in the model.
+\item[Geometry] FDS approximates the governing equations on one or more rectilinear grids. The user prescribes rectangular obstructions that are forced to conform with the underlying grid.
+\item[Boundary Conditions] All solid surfaces are assigned thermal boundary conditions, plus information about the burning behavior of the material. Heat and mass transfer to and from solid surfaces is usually handled with empirical correlations, although it is possible to compute directly the heat and mass transfer when performing a Direct Numerical Simulation (DNS).
+\item[Sprinklers and Detectors] The activation of sprinklers and heat and smoke detectors is modeled using fairly simple correlations of thermal inertia for sprinklers and heat detectors, and transport lag for smoke detectors. Sprinkler sprays are modeled by Lagrangian particles that represent a sampling of the water droplets ejected from the sprinkler.
 \end{description}
 
 
@@ -357,48 +327,11 @@ sprays are modeled by Lagrangian particles that represent a sampling of the wate
 Although FDS can address most fire scenarios, there are limitations in all of its various algorithms. Some of the more prominent limitations of the
 model are listed here.
 \begin{description}
-\item[Low Speed Flow Assumption] The use of FDS is limited to low-speed\footnote{Mach numbers less than about 0.3} flow
-with an emphasis on smoke and heat transport from fires. This assumption rules out using the model for any scenario involving flow speeds approaching
-the speed of sound, such as explosions, choke flow at nozzles, and detonations.
-\item[Rectilinear Geometry] The efficiency of FDS is due to the simplicity of its rectilinear numerical grid and the
-use of a fast, direct solver for the pressure field. This can be a limitation in some situations where certain geometric features do not conform to
-the rectangular grid, although most building components do. There are techniques in FDS to lessen the effect of ``sawtooth'' obstructions used to
-represent non-rectangular objects, but these cannot be expected to produce good results if, for example, the intent of the calculation is to study
-boundary layer effects. For most practical large-scale simulations, the increased grid resolution afforded by the fast pressure solver offsets the
-approximation of a curved boundary by small rectangular grid cells.
-\item[Fire Growth and Spread]
-Because the model was originally designed to analyze industrial-scale fires, it can be used reliably when the heat release rate (HRR) of the fire is
-specified and the transport of heat and exhaust products is the principal aim of the simulation. In these cases, the model predicts flow velocities
-and temperatures to an accuracy within 10~\% to 20~\% of experimental measurements, depending on the resolution of the numerical grid \footnote{It is
-extremely rare to find measurements of local velocities and/or temperatures from fire experiments that have reported error estimates that are less
-than 10~\%. Thus, the most accurate calculations using FDS do not introduce significantly greater errors in these quantities than the vast majority
-of fire experiments.}. However, for fire scenarios where the heat release rate is {\em predicted} rather than {\em specified}, the uncertainty of the
-model is higher. There are several reasons for this: (1) properties of real materials and real fuels are often unknown or difficult to obtain, (2)
-the physical processes of combustion, radiation and solid phase heat transfer are more complicated than their mathematical representations in FDS,
-(3) the results of calculations are sensitive to both the numerical and physical parameters. Current research is aimed at improving this situation,
-but it is safe to say that modeling fire growth and spread will always require a higher level of user skill and judgment than that required for
-modeling the transport of smoke and heat from specified fires.
-\item[Combustion]
-For most applications, FDS uses a mixing-controlled, lumped species based combustion model. Lumped species are conserved scalar quantities that
-represent mixtures of gas species.  For most applications, these mixtures are air, fuel plus an optional diluent, and combustion products.  In its
-simplest form, the model assumes that combustion is mixing-controlled, and that the reaction of fuel and oxygen is infinitely fast, regardless of the
-temperature. For large-scale, well-ventilated fires, this is a good assumption. However, if a fire is in an under-ventilated compartment, or if a
-suppression agent like water mist or CO$_2$ is introduced, fuel and oxygen are allowed to mix and not burn, according to a few empirically-based
-criteria. The physical mechanisms underlying these phenomena are complex, and are tied closely to the flame temperature and local strain rate,
-neither of which are readily-available in a large scale fire simulation. Subgrid-scale modeling of gas phase suppression and extinction is still an
-area of active research in the combustion community. Until reliable models can be developed for building-scale fire simulations, simple empirical
-rules can be used that prevent burning from taking place when the atmosphere immediately surrounding the fire cannot sustain the combustion.
-\item[Radiation] Radiative heat transfer is included in the model via
-the solution of the radiation transport equation (RTE) for a gray gas, and in some limited cases using a wide band model.  The RTE is solved using a
-technique similar to finite volume methods for convective transport, thus the name given to it is the Finite Volume Method (FVM). There are several
-limitations of the model. First, the absorption coefficient for the smoke-laden gas is a complex function of its composition and temperature. Because
-of the simplified combustion model, the chemical composition of the smokey gases, especially the soot content, can effect both the absorption and
-emission of thermal radiation.  Second, the radiation transport is discretized via approximately 100 solid angles, although the user may choose to
-use more angles. For targets far away from a localized source of radiation, like a growing fire, the discretization can lead to a non-uniform
-distribution of the radiant energy. This error is called ``ray effect'' and can be seen in the visualization of surface temperatures, where ``hot
-spots'' show the effect of the finite number of solid angles. The problem can be lessened by the inclusion of more solid angles, but at a price of
-longer computing times. In most cases, the radiative flux to far-field targets is not as important as those in the near-field, where coverage by the
-default number of angles is much better.
+\item[Low Speed Flow Assumption] The use of FDS is limited to low-speed\footnote{Mach numbers less than about 0.3} flow with an emphasis on smoke and heat transport from fires. This assumption rules out using the model for any scenario involving flow speeds approaching the speed of sound, such as explosions, choke flow at nozzles, and detonations.
+\item[Rectilinear Geometry] The efficiency of FDS is due to the simplicity of its rectilinear numerical grid and the use of a fast, direct solver for the pressure field. This can be a limitation in some situations where certain geometric features do not conform to the rectangular grid, although most building components do. For most practical large-scale simulations, the increased grid resolution afforded by the fast pressure solver offsets the approximation of a curved boundary by small rectangular grid cells.
+\item[Fire Growth and Spread] Because the model was originally designed to analyze industrial-scale fires, it can be used reliably when the heat release rate (HRR) of the fire is specified and the transport of heat and exhaust products is the principal aim of the simulation. In these cases, the model predicts flow velocities and temperatures to an accuracy within 10~\% to 20~\% of experimental measurements, depending on the resolution of the numerical grid \footnote{It is rare to find measurements of local velocities and/or temperatures from fire experiments that have reported error estimates that are less than 10~\%. Thus, the most accurate calculations using FDS do not introduce significantly greater errors in these quantities than the vast majority of fire experiments.}. However, for fire scenarios where the heat release rate is {\em predicted} rather than {\em specified}, the uncertainty of the model is larger. There are several reasons for this: (1) properties of real materials and real fuels are often unknown or difficult to obtain, (2) the physical processes of combustion, radiation and solid phase heat transfer are more complicated than their mathematical representations in FDS, (3) the results of calculations are sensitive to both the numerical and physical parameters. Current research is aimed at improving this situation, but it is safe to say that modeling fire growth and spread will always require a higher level of user skill and judgment than that required for modeling the transport of smoke and heat from specified fires.
+\item[Combustion] For most applications, FDS uses a mixing-controlled, lumped species based combustion model. Lumped species are conserved scalar quantities that represent mixtures of gas species.  For most applications, the lumped species are air, fuel, and combustion products.  In its simplest form, the model assumes that combustion is mixing-controlled, and that the reaction of fuel and oxygen is infinitely fast, regardless of the temperature. For large-scale, well-ventilated fires, this is a good assumption. However, if a fire is in an under-ventilated compartment, or if a suppression agent like water mist or CO$_2$ is introduced, fuel and oxygen are allowed to mix and not burn, according to a few empirically-based criteria. The physical mechanisms underlying these phenomena are complex, and are tied closely to the flame temperature and local strain rate, neither of which are calculated in a large scale fire simulation. Subgrid-scale modeling of gas phase suppression and extinction is still an area of active research. Until reliable models can be developed for building-scale fire simulations, simple empirical rules can be used that prevent burning from taking place when the atmosphere immediately surrounding the fire cannot sustain combustion.
+\item[Radiation] Radiative heat transfer is included in the model via the solution of the radiation transport equation (RTE) for a gray gas, and in some limited cases using a wide band model.  The RTE is solved using a technique similar to finite volume methods for convective transport, thus the name given to it is the Finite Volume Method (FVM). There are several limitations of the model. First, the absorption coefficient for the smoke-laden gas is a complex function of its composition and temperature. Because of the simplified combustion model, the chemical composition of the smokey gases, especially the soot content, can effect both the absorption and emission of thermal radiation.  Second, the radiation transport is discretized via approximately 100 solid angles, although the user may choose to use more angles. For targets far away from a localized source of radiation, like a growing fire, the discretization can lead to a non-uniform distribution of the radiant energy. This error is called ``ray effect'' and can be seen in the visualization of surface temperatures, where ``hot spots'' show the effect of the finite number of solid angles. The problem can be lessened by the inclusion of more solid angles, but at a price of longer computing times. In most cases, the radiative flux to far-field targets is not as important as those in the near-field, where coverage by the default number of angles is much better.
 \end{description}
 
 
@@ -413,8 +346,7 @@ default number of angles is much better.
 
 \chapter{Software Maintenance}
 
-Software maintenance consists of the following components:
-control of the project files and documents, procedures for making changes, and procedures for testing new versions.
+Software maintenance consists of the following components: control of the project files and documents, procedures for making changes, and procedures for testing new versions.
 
 
 \section{Document Identification and Control}
@@ -431,8 +363,7 @@ Under this system a centralized repository containing all project files resides 
 Subversion uses a single integer that identifies the version of the entire repository rather than of a specific file
 (i.e., anytime a change is made to the repository all files are incremented in version number).  A record of version number when a specific file was last changed is maintained.
 
-As an open source program, any individual can obtain a copy of the repository or retrieve specific versions
-repository.  Only Team Members described in the previous chapter can commit changes to the repository.
+As an open source program, any individual can obtain a copy of the repository or retrieve specific versions of the repository.  Only Team Members described in the previous chapter can commit changes to the repository.
 
 The current location of the FDS repository is \href{http://fds-smv.googlecode.com/svn/trunk/}
 {\textct{http://fds-smv.googlecode.com/svn/trunk/}}. The repository contains the following files:
@@ -443,77 +374,35 @@ The current location of the FDS repository is \href{http://fds-smv.googlecode.co
 \item Input files for software testing, verification testing, and validation testing
 \item Experimental data files used for validation testing
 \item Scripts and post-processing utilities used for software testing
-\item Web pages and wikis
+\item Web pages and wikis containing notes and other information
 \end{enumerate}
 
-In the event of a unexpected change to the Google Code service and/or the FDS repository, each member of the development team, plus interested third parties, has a copy of the repository on their local computer. At NIST, the staff computers are regularly backed up as well. Thus, there is very little chance that the project repository will be lost. If need be, the files can be moved to another open source software development site, such as SourceForge. It is expected that if Google decides to end its support for Google Code, it will provide its users with the full history of the project.
+In the event of an unexpected change to the Google Code service and/or the FDS repository, each member of the development team, plus interested third parties, has a copy of the repository on their local computer. At NIST, the staff computers are regularly backed up as well. Thus, there is very little chance that the project repository will be lost. If need be, the files could be moved to another open source software development site, such as SourceForge. It is expected that if Google decides to end its support for Google Code, it will provide its users with the full history of the project.
 
 \subsection{Version Identification}
 
-At the start of an FDS simulation FDS writes header information to the Smokeview output file, FDS output file,
-and the FDS log file.  This header information contains the version of FDS used to perform that simulation.
-While each release is tagged with a specific version number (e.g., 5.0.1), there may be many commits of source
-code, documentation, or other files to the SVN repository before a new version is released with an incremented
-version number.  Thus, if a developer or a user who performs their own compilation between baseline releases
-discovers an error, the version number written to the output files may not be sufficient to identify the
-specific set of source code files used.  Rather one would need to know the SVN revision number of the most
-recently committed source file.
+At the start of a simulation, FDS writes header information to the Smokeview output file, FDS output file, and the FDS log file.  This header information contains the version of FDS used to perform that simulation. While each release is tagged with a specific version number (e.g., 5.0.1), there may be many commits of source code, documentation, or other files to the SVN repository before a new version is released with an incremented version number.  Thus, if a developer or a user who performs their own compilation between baseline releases discovers an error, the version number written to the output files may not be sufficient to identify the specific set of source code files used.  Rather one would need to know the SVN revision number of the most recently committed source file. This is accomplished by using source file tagging. In each source file, a series of character parameter strings are defined. For example, near the top of the source file {\ct main.f90} are lines of the form:
+\begin{lstlisting}
+CHARACTER(255), PARAMETER :: mainid='$Id$'
+CHARACTER(255), PARAMETER :: mainrev='$Revision$'
+CHARACTER(255), PARAMETER :: maindate='$Date$'
+\end{lstlisting}
+The lines contain the name of the source file, the version of the file (this reflects only the source file version and not the overall release version number), the date and time of the file version, and the person who checked the file into the repository. Upon compiling, these strings will be stored in the executable file.  The user can search the executable file for strings beginning with \textct{\$Id:}, which results in a list of all source files compiled and their version. Within the SVN archive, any specific version of a source file can be extracted and differences between versions can be determined.
 
-This is accomplished by using source file tagging.  In each source file a series of character parameter
-strings are defined.  For example, near the top of the file called main.f90 at revision 3144 are lines of the form:
-
-\begin{figure}[ht!]
-\includegraphics[width=\textwidth]{FIGURES/RevisionStrings}
-\caption{\bf Example of Revision Identification Strings in main.f90}
-\label{fig:revstrings}
-\end{figure}
-
-\noindent
-The string contains the name of the source file, the version of the file (this reflects only the source
-file version and not the overall release version number), the date and time of the file version, and
-the person who checked the file in to the archive.  Upon compiling, these strings will be stored in the
-executable file.  The user is then capable of searching the executable file, for example, for strings
-beginning with \textct{\$Id:}.  This will result in a list of all source files compiled and their version.
-Within the SVN archive any specific version of a source file can be extracted and differences between
-versions can be determined.
-
-Within the source code a series of subroutines were created, one per source file, which parses the \textct{\$Id:} in
-each file and extracts from it the SVN revision number.  Each of these subroutines is called at the start
-of an FDS run and the largest (and hence most recent) revision number is determined.  This number is written
-along with the FDS version number to the output header information.  A user can now identify specifically
-the source code used for a particular compilation of FDS when reporting an error.
+Within the source code a series of subroutines were created, one per source file, which parses the \textct{\$Id:} in each file and extracts from it the SVN revision number.  Each of these subroutines is called at the start of an FDS run and the largest (and hence most recent) revision number is determined.  This number is written along with the FDS version number to the output header information.  A user can now identify specifically the source code used for a particular compilation of FDS when reporting an error.
 
 
-
-
-\clearpage
 \section{Development Process}
 
-Changes are made to the FDS source code daily, and tracked via revision control software. However, these daily changes do not constitute a change to
-the version number. After the developers determine that enough changes have been made to the source, they release a new minor upgrade, 5.2.12 to
-5.2.13, for example. This happens every few weeks. A change from 5.2 to 5.3 might happen only a few times a year, when significant improvements have
-been made to the model physics.
+Changes are made to the FDS source code daily, and tracked via revision control software. However, these daily changes do not constitute a change to the version number. After the developers determine that enough changes have been made to the source, they release a new minor upgrade, 5.2.12 to 5.2.13, for example. This happens every few weeks. A change from 5.2 to 5.3 might happen only a few times a year, when significant improvements have been made to the model physics or numerics.
 
-There is no formal process by which FDS is updated. Each developer works on various routines, and makes changes as warranted. Minor bugs are fixed
-without any communication (the developers are in different locations), but more significant changes are discussed via email or telephone calls. A
-suite of simple verification calculations (included in this document) are routinely run to ensure that the daily bug fixes have not altered any of
-the important algorithms. A suite of validation calculations (also included here) are run with each significant upgrade. Significant changes to FDS
-are made based on the following criteria, in no particular order:
+There is no formal process by which FDS is updated. Each developer works on various routines, and makes changes as warranted. Minor bugs are fixed without any communication (the developers are in different locations), but more significant changes are discussed via email or telephone calls. A suite of simple verification calculations (included in this document) are run each night to ensure that the daily bug fixes have not altered any of the important algorithms. A suite of validation calculations (also included here) are run with each significant upgrade. Significant changes to FDS are made based on the following criteria, in no particular order:
 \begin{description}
-\item[Better Physics:] The goal of any model is to be {\em predictive}, but it also must be reliable. FDS is a blend of empirical and
-deterministic sub-models, chosen based on their robustness, consistency, and reliability. Any new sub-model must demonstrate that it is of comparable
-or superior accuracy to its empirical counterpart.
-\item[Modest CPU Increase:] If a proposed algorithm doubles the calculation time but yields only a marginal improvement in accuracy, it is
-likely to be rejected. Also, the various routines in FDS are expected to consume CPU time in proportion to their overall importance. For example, the
-radiation transport algorithm consumes about 25~\% of the CPU time, consistent with the fact that about one-fourth to one-third of the fire's energy
-is emitted as thermal radiation.
-\item[Simpler Algorithm:] If a new algorithm does what the old one did using fewer lines of code, it is almost always accepted, so long as
-it does not decrease functionality.
-\item[Increased or Comparable Accuracy:] The validation experiments that are part of this guide serve as the metric for new routines. It is
-not enough for a new algorithm to perform well in a few cases. It must show clear improvement across the suite of experiments. If the accuracy is
-only comparable to the previous version, then some other criteria must be satisfied.
-\item[Acceptance by the Fire Protection Community:] Especially in regard to fire-specific devices, like sprinklers and smoke detectors, the
-algorithms in FDS often are based on their acceptance among the practicing engineers.
+\item[Better Physics:] The goal of any model is to be {\em predictive}, but it also must be reliable. FDS is a blend of empirical and deterministic sub-models, chosen based on their robustness, consistency, and reliability. Any new sub-model must demonstrate that it is of comparable or superior accuracy to its empirical counterpart.
+\item[Modest CPU Increase:] If a proposed algorithm doubles the calculation time but yields only a marginal improvement in accuracy, it is likely to be rejected. Also, the various routines in FDS are expected to consume CPU time in proportion to their overall importance. For example, the radiation transport algorithm consumes about 25~\% of the CPU time, consistent with the fact that about one-fourth to one-third of the fire's energy is emitted as thermal radiation.
+\item[Simpler Algorithm:] If a new algorithm does what the old one did using fewer lines of code, it is almost always accepted, so long as it does not decrease functionality or accuracy.
+\item[Increased or Comparable Accuracy:] The validation experiments that are part of this guide serve as the metric for new routines. It is not enough for a new algorithm to perform well in a few cases. It must show clear improvement across the entire suite of experiments. If the accuracy is only comparable to the previous version, then some other criteria must be satisfied.
+\item[Acceptance by the Fire Protection Community:] Especially in regard to fire-specific devices, like sprinklers and smoke detectors, the algorithms in FDS often are based on their acceptance among the practicing engineers.
 \end{description}
 
 
@@ -521,64 +410,40 @@ algorithms in FDS often are based on their acceptance among the practicing engin
 
 \subsection{Creating a Change Request}
 
-Change requests are submitted using the FDS Issue Tracker.  The Issue Tracker is an online service that is part of
-Google Code.  To submit a new issue to the tracker or to provide follow up comments, the user must sign in with a Google Account.
-The current location of the Issue Tracker can be found through a link under the 'Support' section of the menu
-on the FDS-SMV website \href{http://code.google.com/p/fds-smv/issues/list}{[Link to Tracker]}.
+Change requests are submitted using the FDS Issue Tracker.  The Issue Tracker is an online service that is part of GoogleCode. To submit a new issue to the tracker or to provide follow up comments, the user must sign in using his or her Google account credentials. The current location of the Issue Tracker can be found through a link under the 'Support' section of the menu
+on the FDS-SMV website.
 
-A change request is initiated by opening a new issue.  The issue report contains the baseline identification (version number, compile date, and SVN revision number),
-operating system, and a description of the defect or enhancement request.  Input files or other supporting documentation can be attached.
-
+A change request is initiated by opening a new issue.  The issue report contains the baseline identification (version number, compile date, and SVN revision number), operating system, and a description of the defect or enhancement request.  Input files or other supporting documentation can be attached.
 \begin{figure}[ht!]
 \includegraphics[width=\textwidth]{FIGURES/NewIssue}
 \caption{\bf Screenshot of issue tracker reporting form}
 \label{fig:issueform}
 \end{figure}
-
-If the issue is opened by a user, it will be given a status of 'New' until it is reviewed by a developer.  If the
-issue is opened by a developer, the developer can immediate assign a status and an owner.
+If the issue is opened by a user, it will be given a status of 'New' until it is reviewed by a developer.  If the issue is opened by a developer, the developer can immediate assign a status and an owner.
 
 \subsection{Processing a Change Request}
 
-A change request may be evaluated by any member of the development team.
-If the request duplicates an existing request, then the issue status is changed to \textct{Duplicate} and the
+A change request may be evaluated by any member of the development team. If the request duplicates an existing request, then the issue status is changed to \textct{Duplicate} and the
 requestor is sent the issue number of the existing request.
 
-If the request is for an enhancement to FDS, then then the issue type is changed to \textct{Type-Enhancement} and the
-component type is declared. The request is evaluated for suitability.  If it is a valid enhancement
-request, then the status is changed to \textct{Accepted}.  If the request is not to
-be addressed under the next baseline, then the status will be changed to \textct{OnHold}.  If the request is denied, then
-the status is changed to \textct{WontFix}.  An accepted request will be assigned to a developer.
+If the request is for an enhancement to FDS, then the issue type is changed to \textct{Type-Enhancement} and the component type is declared. The request is evaluated for suitability.  If it is a valid enhancement request, then the status is changed to \textct{Accepted}.  If the request is not to be addressed under the next baseline, then the status will be changed to \textct{OnHold}.  If the request is denied, then the status is changed to \textct{WontFix}.  An accepted request will be assigned to a developer.
 
-If the request is identifying a defect in FDS, then the issue type is changed to \textct{Type-Defect} and the
-component type is declared.  The defect is evaluated for validity.  If insufficient information has
-been provided in the request, then the status is changed to \textct{MoreInfo} and a description of the additional
-information required is sent to the requestor.  If the defect is due to user error or is the intended function of FDS,
-then the status is changed to \textct{Invalid}.  If the defect is valid, then the request reviewer will change the
-status to \textct{Accepted} and assign the request to a developer.
+If the request is identifying a defect in FDS, then the issue type is changed to \textct{Type-Defect} and the component type is declared.  The defect is evaluated for validity.  If insufficient information has been provided in the request, then the status is changed to \textct{MoreInfo} and a description of the additional information required is sent to the requestor.  If the defect is due to user error or is the intended function of FDS, then the status is changed to \textct{Invalid}.  If the defect is valid, then the request reviewer will change the status to \textct{Accepted} and assign the request to a developer.
 
-Once a change request has be addressed by a developer and changes submitted to the repository, the request status
-is changed to \textct{Fixed}.  Once either the requestor or another developer has verified that the changes address
-the original request, then the status is changed to \textct{Verified}.
+Once a change request has be addressed by a developer and changes submitted to the repository, the request status is changed to \textct{Fixed}.  Once either the requestor or another developer has verified that the changes address the original request, then the status is changed to \textct{Verified}.
 
 
 \subsection{Committing Changes}
 
-Once a developer has addressed a change request, the modified files are committed to the SVN repository.  A description
-of the changes will be added to the SVN change log.  This description first identifies the primary component being
-changed (for example: FDS Source or FDS Documentation).  This component identification will be followed by a brief
-summary of the changes made.  The issue identifier will be included as part of that brief description.
+Once a developer has addressed a change request, the modified files are committed to the SVN repository.  A description of the changes will be added to the SVN change log.  This description first identifies the primary component being changed (for example: FDS Source or FDS Documentation).  This component identification will be followed by a brief summary of the changes made.  The issue identifier will be included as part of that brief description.
 
 Changes to the FDS source code and supporting documentation are reviewed by other members of the team. There is no formal system with which changes are reviewed because the frequency of changes makes it impractical. As a general rule, all team members watch for unintentional commits of copyrighted material or algorithms, and also proprietary data or case studies collected from an end user. FDS itself does not include copyrighted or proprietary data, but occasionally this kind of information is submitted by an end user who has submitted a bug report.
 
 \subsection{Change Verification}
 
-Once a change has been committed and the issue tracker updated to reflect that the issue has been \textct{Fixed},
-the changes will be verified.  Verification can be done by either the requester of the change or by another
-developer.  Once the changes have been verified to solve the problem reported in the issue, the issue status will
-be changed to \textct{Verified}.  At this point the issue is closed.
+Once a change has been committed and the issue tracker updated to reflect that the issue has been \textct{Fixed}, the changes will be verified.  Verification can be done by either the requester of the change or by another developer.  Once the changes have been verified to solve the problem reported in the issue, the issue status will be changed to \textct{Verified}.  At this point the issue is closed.
 
-\clearpage
+
 \section{Firebot: Automated Error Checking and Regression Testing}
 
 The FDS codebase undergoes an automated build, verification, validation, and regression testing process, which is similar to a continuous integration system that automates the build/testing cycle for a project. This automated process is referred to as Firebot (\underline{F}DS automat\underline{I}c ve\underline{R}ification and validation t\underline{E}st \underline{BOT}). The Firebot build/test process helps the FDS-SMV development team by performing automatic error checking and collecting performance and accuracy statistics between FDS revisions.
@@ -621,154 +486,65 @@ Scripts in the FDS verification and validation suites are used to generate plots
 
 The FDS User~\cite{FDS_Users_Guide}, Technical Reference~\cite{FDS_Math_Guide}, Verification~\cite{FDS_Verification_Guide}, and Validation~\cite{FDS_Validation_Guide} Guides, FDS Configuration Management Plan, and SMV User, Technical, and Verification Guides are compiled to ensure that all figures and equations can be compiled without any \LaTeX\ errors.
 
-\clearpage
+
 
 \section{Issuing New Releases}
 
-The decision to change versions of the software is made by consensus of the development team, usually after it is determined that enough
-changes have been made to warrant a new release. There is no formal process to determine when a new release is to be issued. However, once the
-decision is made, the new version is given a number, it is tested, and then posted to the official download site.
+The decision to change versions of the software is made by consensus of the development team, usually after it is determined that enough changes have been made to warrant a new release. There is no formal process to determine when a new release is to be issued. However, once the decision is made, the new version is given a number, it is tested, and then posted to the official download site.
 
 \subsection{Version Number}
 
-New versions of FDS and Smokeview are identified using a specific numbering convention, for example, {\em FDS 5.2.5}.
-The version number consists of three integers separated by periods, where the first number
-is the {\em major} release, the second is the {\em minor} release, and the third is the {\em maintenance}
-release.  Major releases occur every few years, and as the name implies dramatically changed functionality of the
-model. Minor releases occur every few months, and may cause minor changes in functionality.
-Release notes can help you decide whether the changes should effect the type of applications that you typically do.
-Maintenance releases are either just bug fixes or the addition of minor enhancements (such as a new output quantity),
-and should not affect code functionality.
+New versions of FDS and Smokeview are identified using a specific numbering convention, for example, FDS 5.2.5. The version number consists of three integers separated by periods, where the first number is the {\em major} release, the second is the {\em minor} release, and the third is the {\em maintenance} release.  Major releases occur every few years, and as the name implies, significantly change the functionality of the model. Minor releases occur every few months, and may cause minor changes in functionality. Release notes indicate whether the changes affect a particular model feature. Maintenance releases are either just bug fixes or the addition of minor enhancements (such as a new output quantity), and should not affect code functionality.
 
-For each release of FDS there is a unique Subversion (SVN) repository revision number associated with it.
-For example, FDS version 5.3.0 was built from files in the repository at SVN revision number 3193.
-The document connecting the release version to the SVN revision number is found in the {\em FDS Release Notes} wiki page
-located at \href{http://code.google.com/p/fds-smv/wiki/FDS_Release_Notes}{\textct{http://code.google.com/p/fds-smv/wiki/FDS\_Release\_Notes}}
-The SVN revision number allows users to checkout or update their local copy of the project files from the repository to the same state as any previous release of the software.
+For each release of FDS there is a unique Subversion (SVN) repository revision number associated with it. For example, FDS version 5.3.0 was built from files in the repository at SVN revision number 3193. The wiki, ``FDS Release Notes,'' indicates the SVN revision number of each release. The SVN revision number allows users to checkout or update their local copy of the project files from the repository to the same state as any previous release of the software.
 
 \subsection{Testing a New Release}
 
-Each proposed release undergoes software testing.  There are two sets of input files that are used to test new releases --
-a verification suite and a validation suite. The verification suite consists of a range of calculations, from ones that just test a feature to
-ones that compare FDS results with analytical solutions of the governing equations. The validation suite consists of simulations of a wide range
-of experiments.
+Each proposed release undergoes testing. There are two sets of input files that are used to test new releases -- a verification suite and a validation suite. The verification suite consists of a range of calculations, from ones that just test a feature to ones that compare FDS results with analytical solutions of the governing equations. The validation suite consists of simulations of a wide range of experiments.
 
-Testing will depend upon the type of baseline release:
-maintenance, minor, or major. A maintenance release occurs every few weeks.
-Each maintenance release is tested with the verification suite during the nightly Firebot testing.
+The level of testing depends upon the type of baseline release: maintenance, minor, or major. A maintenance release occurs every few weeks. Each maintenance release is tested with the verification suite during the nightly Firebot testing.
 
-A minor release occurs every three to six months.
-Each minor release is tested with both the verification and validation suites. The validation cases take considerably longer to run, but the
-procedure is similar -- the results are plotted and compared to the experimental measurements using an automated plotting package that
-essentially redraws all of the plots and graphs in the FDS Validation Guide. The old and new guides are compared to assess whether or not
-the new version of the model has become noticeably less accurate than the old. Work is underway to better quantify this procedure.
+A minor release occurs every three to six months. Each minor release is tested with both the verification and validation suites. The validation cases take considerably longer to run, but the procedure is similar -- the results are plotted and compared to the experimental measurements using an automated plotting package that essentially redraws all of the plots and graphs in the FDS Validation Guide. The old and new guides are compared to assess whether or not the new version of the model has become noticeably less accurate than the old. Work is underway to better quantify the results.
 
-A major release of FDS occurs every few years. As the name implies, major changes are made to the algorithm, requiring months of beta testing, and several
-runs through the V\&V suites.
+A major release of FDS occurs every few years. As the name implies, major changes are made to the algorithm, requiring months of beta testing, and several runs through the V\&V suites.
 
 
 \subsection{Announcing a New Version}
 
-Following successful completion of the required baseline testing, a baseline can be released.  Prior to release, the
-version identification information within the FDS source code will be updated to reflect the new baseline.  FDS
-documentation will be updated to reflect the new baseline.  The baseline will be compiled and new executable files
-or installation packages will be placed on the FDS download site.  Prior baselines will be deprecated.  The
-current FDS download site is \href{http://code.google.com/p/fds-smv/downloads/list}
-{\textct{http://code.google.com/p/fds-smv/downloads/list}}.
-
+Following successful completion of the required baseline testing, a new version is released.  Prior to release, the version identification information within the FDS source code is updated.  FDS documentation is updated to include the new version number.  The new version is compiled and new installation packages are uploaded to the FDS download site.  Prior versions are deprecated.
 
 
 
 
 \chapter{Peer Review Process}
 
-FDS is reviewed both internally and externally. All documents issued by the National Institute of Standards and Technology are formally reviewed
-internally by members of the staff. The theoretical basis of FDS is laid out in the present document, and is subject to internal review by staff
-members who are not active participants in the development of the model, but who are members of the Fire Research Division and are considered experts
-in the fields of fire and combustion. Externally, papers detailing various parts of FDS are regularly published in peer-reviewed journals and
-conference proceedings. In addition, FDS is used world-wide by fire protection engineering firms who review the technical details of the model
-related to their particular application. Some of these firms also publish in the open literature reports documenting internal efforts to validate the
-model for a particular use. Many of these studies are referenced in Volume 3 of the FDS Technical Reference Guide~\cite{FDS_Tech_Guide}.
+FDS is reviewed both internally and externally. All documents issued by the National Institute of Standards and Technology are formally reviewed internally by members of the staff. The theoretical basis of FDS is laid out in the present document, and is subject to internal review by staff members who are not active participants in the development of the model, but who are members of the Fire Research Division and are experts in the fields of fire and combustion. Externally, papers detailing various parts of FDS are regularly published in peer-reviewed journals and conference proceedings. In addition, FDS is used world-wide by fire protection engineering firms who review the technical details of the model related to their particular application. Some of these firms also publish in the open literature reports documenting internal efforts to validate the model for a particular use. Many of these studies are referenced in Volume 3 of the FDS Technical Reference Guide~\cite{FDS_Tech_Guide}.
 
 
 \section{Survey of the Relevant Fire and Combustion Literature}
 
 \label{Relevantdocs}
 
-FDS has two separate manuals -- the FDS Technical Reference Guide~\cite{FDS_Tech_Guide} and the FDS User's Guide~\cite{FDS_Users_Guide}. The
-Technical Reference Guide is broken into three volumes: (1)~Mathematical Model, (2)~Verification, and (3)~Experimental Validation. Smokeview has its
-own User's Guide~\cite{Smokeview_Users_Guide}. The FDS and Smokeview User Guides only describe the mechanics of using the computer programs. The
-Technical Reference Guides provides the theory, algorithm details, and verification and validation work.
+FDS has two separate manuals -- the FDS Technical Reference Guide~\cite{FDS_Tech_Guide} and the FDS User's Guide~\cite{FDS_Users_Guide}. The Technical Reference Guide is broken into four volumes: (1)~Mathematical Model, (2)~Verification, (3)~Validation, and (4)~Configuration Management Plan. Smokeview has its own User's Guide~\cite{Smokeview_Users_Guide}. The FDS and Smokeview User Guides only describe the mechanics of using the computer programs. The Technical Reference Guides provides the theory, algorithm details, and verification and validation assessments.
 
-There are numerous sources that describe various parts of the model. The basic set of equations solved in FDS was formulated by Rehm and Baum in the
-{\em Journal of Research of the National Bureau of Standards}~\cite{Rehm:1}.  The basic hydrodynamic algorithm evolved at NIST through the 1980s and
-1990s, incorporating fairly well-known numerical schemes that are documented in books by Anderson, Tannehill and Pletcher~\cite{Anderson:1}, Peyret
-and Taylor~\cite{Peyret:1}, and Ferziger and Peri\'{c}~\cite{Ferziger:1}. This last book provides a good description of the large eddy simulation
-technique and provides references to many current publications on the subject.  Numerical techniques appropriate for combustion systems are described
-by Oran and Boris~\cite{Oran:1}.  The mixture fraction combustion model is described in a review article by Bilger~\cite{Bilger:AnnRev}. Basic heat
-transfer theory is provided by Holman~\cite{Holman:1} and Incropera~\cite{Incropera:1}. Thermal radiation is described in Siegel and
-Howell~\cite{Siegel:1}.
+There are numerous sources that describe various parts of the model. The basic set of equations solved in FDS was formulated by Rehm and Baum in the {\em Journal of Research of the National Bureau of Standards}~\cite{Rehm:1}.  The basic hydrodynamic algorithm evolved at NIST through the 1980s and 1990s, incorporating fairly well-known numerical schemes that are documented in books by Anderson, Tannehill and Pletcher~\cite{Anderson:1}, Peyret and Taylor~\cite{Peyret:1}, and Ferziger and Peri\'{c}~\cite{Ferziger:1}. This last book provides a good description of the large eddy simulation technique and provides references to many current publications on the subject.  Numerical techniques appropriate for combustion systems are described by Oran and Boris~\cite{Oran:1}.  The mixture fraction combustion model is described in a review article by Bilger~\cite{Bilger:AnnRev}. Basic heat transfer theory is provided by Holman~\cite{Holman:1} and Incropera~\cite{Incropera:1}. Thermal radiation is described in Siegel and Howell~\cite{Siegel:1}.
 
-Much of the current knowledge of fire science and engineering is found in the {\em SFPE Handbook of Fire Protection Engineering}~\cite{SFPE}. Popular
-textbooks in fire protection engineering include those by Drysdale~\cite{Drysdale:1} and Quintiere~\cite{Quintiere:2}. On-going research in fire and
-combustion is documented in several periodicals and conference proceedings. The International Association of Fire Safety Science (IAFSS) organizes a
-conference every two years, the proceedings of which are frequently referenced by fire researchers. Interscience Communications, a London-based
-publisher of several fire-related journals, hosts a conference known as Interflam roughly every three years in the United Kingdom. The Combustion
-Institute hosts an international symposium on combustion every two years, and in addition to the proceedings of this symposium, the organization
-publishes its own journal, {\em Combustion and Flame}. The papers appearing in the IAFSS conference proceedings, the Combustion Symposium
-proceedings, and {\em Combustion and Flame} are all peer-reviewed, while those appearing in the Interflam proceedings are selected based on the
-submission of a short abstract. Both the Society for Fire Protection Engineers (SFPE) and the National Fire Protection Association (NFPA) publish
-peer-reviewed technical journals entitled the {\em Journal of Fire Protection Engineering} and {\em Fire Technology}. Other often-cited,
-peer-reviewed technical journals include the {\em Fire Safety Journal}, {\em Fire and Materials}, {\em Combustion Science and Technology}, {\em
-Combustion Theory and Modeling} and the {\em Journal of Heat Transfer}.
+Much of the current knowledge of fire science and engineering is found in the {\em SFPE Handbook of Fire Protection Engineering}~\cite{SFPE}. Popular textbooks in fire protection engineering include those by Drysdale~\cite{Drysdale:1} and Quintiere~\cite{Quintiere:2}. On-going research in fire and combustion is documented in several periodicals and conference proceedings. The International Association of Fire Safety Science (IAFSS) organizes a conference every two years, the proceedings of which are frequently referenced by fire researchers. Interscience Communications, a London-based publisher of several fire-related journals, hosts a conference known as Interflam roughly every three years in the United Kingdom. The Combustion Institute hosts an international symposium on combustion every two years, and in addition to the proceedings of this symposium, the organization publishes its own journal, {\em Combustion and Flame}. The papers appearing in the IAFSS conference proceedings, the Combustion Symposium proceedings, and {\em Combustion and Flame} are all peer-reviewed, while those appearing in the Interflam proceedings are selected based on the submission of a short abstract. Both the Society for Fire Protection Engineers (SFPE) and the National Fire Protection Association (NFPA) publish peer-reviewed technical journals entitled the {\em Journal of Fire Protection Engineering} and {\em Fire Technology}, respectively. Other often-cited, peer-reviewed technical journals include the {\em Fire Safety Journal}, {\em Fire and Materials}, {\em Combustion Science and Technology}, {\em Combustion Theory and Modeling} and the {\em Journal of Heat Transfer}.
 
-Research at NIST is documented in various ways beyond contributions made by staff to external journals and conferences. NIST publishes several forms
-of internal reports, special publications, and its own journal called the {\em Journal of Research of NIST}. An internal report, referred to as a
-NISTIR (NIST Inter-agency Report), is a convenient means to disseminate information, especially when the quantity of data exceeds what could normally
-be accepted by a journal. Often parts of a NISTIR are published externally, with the NISTIR itself serving as the complete record of the work
-performed. Previous versions of the FDS Technical Reference Guide and User's Guide were published as NISTIRs. The current FDS and Smokeview manuals
-are being published as NIST Special Publications, distinguished from NISTIRs by the fact that they are permanently archived. Work performed by an
-outside person or organization working under a NIST grant or contract is published in the form of a NIST Grant/Contract Report (GCR). All work
-performed by the staff of the Building and Fire Research Laboratory at NIST beyond 1993 is permanently stored in electronic form and made freely
-available via the Internet and yearly-released compact disks (CDs) or other electronic media.
+Research at NIST is documented in various ways beyond contributions made by staff to external journals and conferences. NIST publishes several forms of internal reports, technical notes, special publications, and its own journal called the {\em Journal of Research of NIST}. An internal report, referred to as a NISTIR (NIST Inter-agency Report), is a convenient means to disseminate information, especially when the quantity of data exceeds what could normally be accepted by a journal. Often parts of a NISTIR are published externally, with the NISTIR itself serving as the complete record of the work performed. Previous versions of the FDS Technical Reference Guide and User's Guide were published as NISTIRs. The current FDS and Smokeview manuals are being published as NIST Special Publications, distinguished from NISTIRs by the fact that they are permanently archived. Work performed by an outside person or organization working under a NIST grant or contract is published in the form of a NIST Grant/Contract Report (GCR). All work performed by the staff of the Fire Research Division at NIST beyond 1993 is permanently stored in electronic form and made freely available via the Internet.
 
 
 
 
 \section{Review of the Theoretical Basis of the Model}
+\label{JustAA} 
 
-\label{JustAA} The technical approach and assumptions of the model have been presented in the peer-reviewed scientific literature and at technical
-conferences cited in the previous section. The major assumptions of the model, for example the large eddy simulation technique and the combustion
-model, have undergone a roughly 40 year development and are now documented in popular introductory text books. More specific sub-models, like the
-sprinkler spray routine or the various pyrolysis models, have yet to be developed to this extent. As a consequence, all documents produced by NIST
-staff are required to go through an internal editorial review and approval process. This process is designed to ensure compliance with the technical
-requirements, policy, and editorial quality required by NIST. The technical review includes a critical evaluation of the technical content and
-methodology, statistical treatment of data, uncertainty analysis, use of appropriate reference data and units, and bibliographic references. The FDS
-and Smokeview manuals are first reviewed by a member of the Fire Research Division, then by the immediate supervisor of the author of the document,
-then by the chief of the Fire Research Division, and finally by a reader from outside the division. Both the immediate supervisor and the division
-chief are technical experts in the field. Once the document has been reviewed, it is then brought before the Editorial Review Board (ERB), a body of
-representatives from all the NIST laboratories. At least one reader is designated by the Board for each document that it accepts for review. This
-last reader is selected based on technical competence and impartiality. The reader is usually from outside the division producing the document and is
-responsible for checking that the document conforms with NIST policy on units, uncertainty and scope. He/she does not need to be a technical expert
-in fire or combustion.
+The technical approach and assumptions of the model have been presented in the peer-reviewed scientific literature and at technical conferences cited in the previous section. The major assumptions of the model, for example the large eddy simulation technique and the combustion model, have undergone a roughly 40 year development and are now documented in popular introductory text books. More specific sub-models, like the sprinkler spray routine or the various pyrolysis models, have yet to be developed to this extent. As a consequence, all documents produced by NIST staff are required to go through an internal editorial review and approval process. This process is designed to ensure compliance with the technical requirements, policy, and editorial quality required by NIST. The technical review includes a critical evaluation of the technical content and methodology, statistical treatment of data, uncertainty analysis, use of appropriate reference data and units, and bibliographic references. The FDS and Smokeview manuals are first reviewed by a member of the Fire Research Division, then by the immediate supervisor of the author of the document, then by the chief of the Fire Research Division, and finally by a reader from outside the division. Both the immediate supervisor and the division
+chief are technical experts in the field. Once the document has been reviewed, it is then brought before the Editorial Review Board (ERB), a body of representatives from all the NIST laboratories. At least one reader is designated by the Board for each document that it accepts for review. This last reader is selected based on technical competence and impartiality. The reader is usually from outside the division producing the document and is responsible for checking that the document conforms with NIST policy on units, uncertainty and scope. He/she does not need to be a technical expert in fire or combustion.
 
-Recently, the US Nuclear Regulatory Commission (US NRC) published a seven-volume report on its own verification and validation study of five
-different fire models used for nuclear power plant applications~\cite{NUREG_1824}. Two of the models are essentially a set of empirically-based
-correlations in the form of engineering ``spread sheets.'' Two of the models are classic two-zone fire models, one of which is the NIST developed
-CFAST. FDS is the sole CFD model in the study. More on the study and its results can be found in Volume~3 of the FDS Technical Reference
-Guide~\cite{FDS_Tech_Guide}.
+The US Nuclear Regulatory Commission (US NRC) published a seven-volume report on its own verification and validation study of five different fire models used for nuclear power plant applications~\cite{NUREG_1824}. Two of the models are essentially a set of empirically-based correlations in the form of engineering ``spread sheets.'' Two of the models are classic two-zone fire models, one of which is the NIST developed CFAST. FDS is the sole CFD model in the study. More on the study and its results can be found in Volume~3 of the FDS Technical Reference Guide~\cite{FDS_Tech_Guide}.
 
-Besides formal internal and peer review, FDS is subjected to continuous scrutiny because it is available free of charge to the general public and is
-used internationally by those involved in fire safety design and post-fire reconstruction. The quality of the FDS and Smokeview User Guides is
-checked implicitly by the fact that the majority of model users have not taken a formal training course in the actual use of the model, but are able
-to read the supporting documents, perform a few sample simulations, and then systematically build up a level of expertise appropriate for their
-applications. The developers receive daily feedback from users on the clarity of the documentation and add clarifications when needed. Before new
-versions of the model are released, there is a several month ``beta test'' period in which users test the new version using the updated
-documentation. This process is similar, although less formal, to that which most computer software programs undergo. Also, the source code for FDS is
-released publicly, and has been used at various universities world-wide, both in the classroom as a teaching tool as well as for research. As a
-result, flaws in the theoretical development and the computer program itself have been identified and corrected. As FDS continues to evolve, the user
-base will continue to serve as a means to evaluate the model. We consider this process as important to the development of FDS as the formal internal
-and external peer-review processes.
+Besides formal internal and peer review, FDS is subjected to continuous scrutiny because it is available free of charge to the general public and is used internationally by those involved in fire safety design and post-fire reconstruction. The quality of the FDS and Smokeview User Guides is checked implicitly by the fact that the majority of model users have not taken a formal training course in the actual use of the model, but are able to read the supporting documents, perform a few sample simulations, and then systematically build up a level of expertise appropriate for their applications. The developers receive daily feedback from users on the clarity of the documentation and add clarifications when needed. Before new versions of the model are released, there is a several month ``beta test'' period in which users test the new version using the updated documentation. This process is similar, although less formal, to that which most computer software programs undergo. Also, the source code for FDS is released publicly, and has been used at various universities world-wide, both in the classroom as a teaching tool as well as for research. As a result, flaws in the theoretical development and the computer program itself have been identified and corrected. As FDS continues to evolve, the user base will continue to serve as a means to evaluate the model. We consider this process as important to the development of FDS as the formal internal and external peer-review processes.
 
 
 
