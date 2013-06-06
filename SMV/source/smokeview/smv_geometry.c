@@ -44,36 +44,72 @@ void drawtetra_outline(float *v1, float *v2, float *v3, float *v4, unsigned char
 /* ----------------------- drawfilledtetra ----------------------------- */
 
 void drawfilledtetra(float *v1, float *v2, float *v3, float *v4, unsigned char *rgbcolor){
+  float diff1[3],diff2[3],cross[3];
+
+
   glBegin(GL_TRIANGLES);
   if(rgbcolor!=NULL)glColor3ubv(rgbcolor);
+
+  VECDIFF3(v2,v1,diff1);
+  VECDIFF3(v2,v4,diff2);
+  CROSS(diff1,diff2,cross);
+  glNormal3f(cross[0],cross[1],cross[2]);
   glVertex3fv(v1);
   glVertex3fv(v2);
   glVertex3fv(v4);
 
+  VECDIFF3(v4,v1,diff1);
+  VECDIFF3(v4,v2,diff2);
+  CROSS(diff1,diff2,cross);
+  glNormal3f(cross[0],cross[1],cross[2]);
   glVertex3fv(v1);
   glVertex3fv(v4);
   glVertex3fv(v2);
 
+  VECDIFF3(v3,v2,diff1);
+  VECDIFF3(v3,v4,diff2);
+  CROSS(diff1,diff2,cross);
+  glNormal3f(cross[0],cross[1],cross[2]);
   glVertex3fv(v2);
   glVertex3fv(v3);
   glVertex3fv(v4);
 
+  VECDIFF3(v4,v2,diff1);
+  VECDIFF3(v4,v3,diff2);
+  CROSS(diff1,diff2,cross);
+  glNormal3f(cross[0],cross[1],cross[2]);
   glVertex3fv(v2);
   glVertex3fv(v4);
   glVertex3fv(v3);
 
+  VECDIFF3(v1,v4,diff1);
+  VECDIFF3(v4,v3,diff2);
+  CROSS(diff1,diff2,cross);
+  glNormal3f(cross[0],cross[1],cross[2]);
   glVertex3fv(v1);
   glVertex3fv(v4);
   glVertex3fv(v3);
 
+  VECDIFF3(v3,v1,diff1);
+  VECDIFF3(v3,v4,diff2);
+  CROSS(diff1,diff2,cross);
+  glNormal3f(cross[0],cross[1],cross[2]);
   glVertex3fv(v1);
   glVertex3fv(v3);
   glVertex3fv(v4);
 
+  VECDIFF3(v3,v1,diff1);
+  VECDIFF3(v3,v2,diff2);
+  CROSS(diff1,diff2,cross);
+  glNormal3f(cross[0],cross[1],cross[2]);
   glVertex3fv(v1);
   glVertex3fv(v3);
   glVertex3fv(v2);
 
+  VECDIFF3(v2,v1,diff1);
+  VECDIFF3(v2,v3,diff2);
+  CROSS(diff1,diff2,cross);
+  glNormal3f(cross[0],cross[1],cross[2]);
   glVertex3fv(v1);
   glVertex3fv(v2);
   glVertex3fv(v3);

@@ -426,6 +426,16 @@ void DrawGeomTest(int option){
   v3 = v2 + 3;
   v4 = v3 + 3;
 
+  if(option==0){
+    float specular[4]={0.4,0.4,0.4,1.0};
+
+    glEnable(GL_LIGHTING);
+    glMaterialfv(GL_FRONT_AND_BACK,GL_SHININESS,&block_shininess);
+    glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,block_ambient2);
+    glMaterialfv(GL_FRONT_AND_BACK,GL_SPECULAR,specular);
+    glEnable(GL_COLOR_MATERIAL);
+  }
+
   initTetraClipInfo(&tetra_clipinfo,v1,v2,v3,v4);
 
   xmin = box_bounds;
@@ -494,7 +504,12 @@ void DrawGeomTest(int option){
     glPopMatrix();
   }
   if(option==0)setClipPlanes(NULL,CLIP_OFF);
+  if(option==0){
+    glDisable(GL_LIGHTING);
+    glDisable(GL_COLOR_MATERIAL);
+  }
 }
+
 #endif
 
   /* ------------------ DrawCircVentsApproxSolid ------------------------ */
