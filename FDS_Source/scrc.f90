@@ -332,9 +332,10 @@ INTEGER, PARAMETER :: NSCARC_CELLTYPE_NONE          =  0, &
                       NSCARC_CELLTYPE_FINE0         = -3, &      ! special fine-grid cell
                       NSCARC_CELLTYPE_SFINE         = -1, &      ! strongly coupled fine-grid cell
                       NSCARC_CELLTYPE_WFINE         = -2, &      ! weakly   coupled fine-grid cell
-                      NSCARC_CELLTYPE_ZPNT          = -4, &      ! special z-point
-                      NSCARC_CELLTYPE_FPNT          = -5, &      ! special f-point
-                      NSCARC_CELLTYPE_CPNT          = -6         ! special c-point
+                      NSCARC_CELLTYPE_FPNT          = -1, &      ! special f-point
+                      NSCARC_CELLTYPE_ZPNT          = -2, &      ! special z-point
+                      NSCARC_CELLTYPE_SFPNT         = -3, &      ! special sf-point
+                      NSCARC_CELLTYPE_CPNT          =  2         ! special c-point
 
 INTEGER, PARAMETER :: NSCARC_INTERPOL_NONE          =  0, &
                       NSCARC_INTERPOL_STANDARD      =  1, &      ! standard interpolation
@@ -426,7 +427,7 @@ INTEGER :: TYPE_INITIAL    = NSCARC_INITIAL_NONE
 INTEGER :: TYPE_EXCHANGE   = NSCARC_EXCHANGE_NONE
 INTEGER :: TYPE_VECTOR     = NSCARC_VECTOR_NONE
 INTEGER :: TYPE_DIRECT     = NSCARC_DIRECT_NONE
-INTEGER :: TYPE_LATEX      = NSCARC_LATEX_NONE
+INTEGER :: TYPE_LATEX      = NSCARC_LATEX_ALL
 INTEGER :: TYPE_DUMP       = NSCARC_DUMP_RHS
 INTEGER :: TYPE_LAYER      = NSCARC_LAYER_ONE
 
@@ -5290,8 +5291,6 @@ SELECT CASE (NTYPE)
          SCF%NP   = 0
          SCF%NR   = 0
          SCF%NCCI = 0
-         SCF%NCCE = SCF%NCC
-         SCF%NCE0 = SCF%NC+1
       
          DO IC = 1, SCF%NC
             SELECT CASE (SCF%CELLTYPE(IC))
@@ -5305,8 +5304,18 @@ SELECT CASE (NTYPE)
                   SCF%NR  = SCF%NP
             END SELECT
          ENDDO
+
          SCF%NCCI = SCF%NCC
+         SCF%NCCE = SCF%NCC
+         SCF%NCE0 = SCF%NC+1
       
+IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) THEN
+   WRITE(SCARC_LU,*) 'NCC =',SCF%NCC
+   WRITE(SCARC_LU,*) 'NCCE=',SCF%NCCE
+   WRITE(SCARC_LU,*) 'NP  =',SCF%NP 
+   WRITE(SCARC_LU,*) 'NR  =',SCF%NR 
+ENDIF
+
          !!! Determine number of coarse and fine cells and check correctness of computation
          IF (SCF%NCC + SCF%NCF /= SCF%NC) THEN
             WRITE(*,*) 'Error in AMG standard coarsening, N_CELLS_COARSE + N_CELLS_FINE = ', SCF%NCC + SCF%NCF, &
@@ -5387,8 +5396,7 @@ SELECT CASE (NTYPE)
          !!!
          !!! Determine new numbering for coarse cells in interior of mesh
          !!!
-         !IF (TYPE_COARSENING < NSCARC_COARSENING_GMG) THEN
-         IF (TYPE_COARSENING == 100000) THEN        !!! ONLY TEMPORARILY, DON'T DO IT
+         IF (TYPE_COARSENING < NSCARC_COARSENING_GMG) THEN
             ICP   = 0
             DO IC = 1, SCF%NC
                IF (SCF%CELLTYPE(IC) == NSCARC_CELLTYPE_COARSE) THEN
@@ -5406,6 +5414,8 @@ SELECT CASE (NTYPE)
       !!! Determine extended sizes for extended prolongation and restriction matrix
       TRANSFER_MESHES_LOOP2: DO NM = NMESHES_MIN, NMESHES_MAX
       
+IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,*) 'NM =',NM
+
          SCF => SCARC(NM)%COMPACT(NL)
 
          SCF%NPE  = SCF%NP
@@ -5416,6 +5426,7 @@ SELECT CASE (NTYPE)
          TRANSFER_OTHER_MESHES_LOOP2: DO NOM = 1, NMESHES
       
             IF (NOM == NM) CYCLE TRANSFER_OTHER_MESHES_LOOP2
+
             OS => SCARC(NM)%OSCARC(NOM)
             IF (OS%NICMAX_S==0 .AND. OS%NICMAX_R==0) CYCLE TRANSFER_OTHER_MESHES_LOOP2
 
@@ -5443,16 +5454,16 @@ SELECT CASE (NTYPE)
             SCF%NCCE = SCF%NCCE + OSCF%NCC
             SCF%NCFE = SCF%NCFE + OSCF%NCF
       
-IF (TYPE_DEBUG > NSCARC_DEBUG_LESS) WRITE(SCARC_LU,*) '==============  NM=',NM,': NOM=',NOM
-IF (TYPE_DEBUG > NSCARC_DEBUG_LESS) WRITE(SCARC_LU,*) 'SCF%NPE =',SCF%NPE,': OSCF%NP=',OSCF%NP
-IF (TYPE_DEBUG > NSCARC_DEBUG_LESS) WRITE(SCARC_LU,*) 'SCF%NRE =',SCF%NRE,': OSCF%NR=',OSCF%NR
-IF (TYPE_DEBUG > NSCARC_DEBUG_LESS) WRITE(SCARC_LU,*) 'SCF%NCCE=',SCF%NCCE,': OSCF%NCC=',OSCF%NCC
-IF (TYPE_DEBUG > NSCARC_DEBUG_LESS) WRITE(SCARC_LU,*) 'SCF%NCFE=',SCF%NCFE,': OSCF%NCF=',OSCF%NCF
+IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,*) '==============  NM=',NM,': NOM=',NOM
+IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,*) 'SCF%NPE =',SCF%NPE,': SCF%NP=',SCF%NP
+IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,*) 'SCF%NRE =',SCF%NRE,': SCF%NR=',SCF%NR
+IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,*) 'SCF%NCCE=',SCF%NCCE,': SCF%NCCE=',SCF%NCCE
+IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,*) 'SCF%NCFE=',SCF%NCFE,': SCF%NCFE=',SCF%NCFE
          ENDDO TRANSFER_OTHER_MESHES_LOOP2
 
       ENDDO TRANSFER_MESHES_LOOP2
 
-      !!! Determine extended sizes for extendes prolongation and restriction matrix
+      !!! Determine extended sizes for extended prolongation and restriction matrix
       TRANSFER_MESHES_LOOP3: DO NM = NMESHES_MIN, NMESHES_MAX
       
          SCF => SCARC(NM)%COMPACT(NL)
@@ -5462,21 +5473,24 @@ IF (TYPE_DEBUG > NSCARC_DEBUG_LESS) WRITE(SCARC_LU,*) 'SCF%NCFE=',SCF%NCFE,': OS
          SCC%NCE = SCF%NCCE
          SCC%NW  = SCF%NCW
 
+IF (TYPE_DEBUG > NSCARC_DEBUG_LESS) WRITE(SCARC_LU,*) 'SCC%NC =',SCC%NC
+IF (TYPE_DEBUG > NSCARC_DEBUG_LESS) WRITE(SCARC_LU,*) 'SCC%NCE=',SCC%NCE
+IF (TYPE_DEBUG > NSCARC_DEBUG_LESS) WRITE(SCARC_LU,*) 'SCC%NW =',SCC%NW
 IF (TYPE_DEBUG > NSCARC_DEBUG_LESS) WRITE(SCARC_LU,*) 'ALLOCATING SCC%WALL in length ', SCC%NW, ' to ', SCC%NW
          ALLOCATE (SCC%WALL(1:SCC%NW), STAT=IERR)
          CALL CHKMEMERR ('SCARC', 'SCC%WALL', IERR)
 
-IF (TYPE_DEBUG > NSCARC_DEBUG_LESS) WRITE(SCARC_LU,*) 'ALLOCATING SCC%CELLTYPE in length ', SCC%NCE, ' to ', SCC%NCE
+IF (TYPE_DEBUG > NSCARC_DEBUG_LESS) WRITE(SCARC_LU,*) 'ALLOCATING SCC%CELLTYPE in length ', 1, ' to ', SCC%NCE
          ALLOCATE (SCC%CELLTYPE(1:SCC%NCE), STAT=IERR)
          CALL CHKMEMERR ('SCARC', 'SCC%CELLTYPE', IERR)
          SCC%CELLTYPE = NSCARC_CELLTYPE_NONE
 
-IF (TYPE_DEBUG > NSCARC_DEBUG_LESS) WRITE(SCARC_LU,*) 'ALLOCATING SCC%MEASURE in length ', SCC%NCE, ' to ', SCC%NCE
+IF (TYPE_DEBUG > NSCARC_DEBUG_LESS) WRITE(SCARC_LU,*) 'ALLOCATING SCC%MEASURE in length ', 1, ' to ', SCC%NCE
          ALLOCATE (SCC%MEASURE(1:SCC%NCE), STAT=IERR)
          CALL CHKMEMERR ('SCARC', 'SCC%MEASURE', IERR)
          SCC%MEASURE = NSCARC_MEASURE_NONE
 
-IF (TYPE_DEBUG > NSCARC_DEBUG_LESS) WRITE(SCARC_LU,*) 'ALLOCATING SCC%INTERNAL_BDRY_CELL in length ', SCC%NC, ' to ', SCC%NC
+IF (TYPE_DEBUG > NSCARC_DEBUG_LESS) WRITE(SCARC_LU,*) 'ALLOCATING SCC%INTERNAL_BDRY_CELL in length ', 1, ' to ', SCC%NC
          ALLOCATE(SCC%INTERNAL_BDRY_CELL(SCC%NC), STAT=IERR)
          CALL ChkMemErr('SCARC_SETUP_WALLINFO','INTERNAL_BDRY_CELL',IERR)
          SCC%INTERNAL_BDRY_CELL = NSCARC_LAYER_NONE
@@ -5485,13 +5499,15 @@ IF (TYPE_DEBUG > NSCARC_DEBUG_LESS) WRITE(SCARC_LU,*) 'ALLOCATING SCC%INTERNAL_B
          CALL ChkMemErr('SCARC_SETUP_WALLINFO','WALL_INDEX',IERR)
          SCC%WALL_INDEX = 0
 
+         IF (SCC%NCE > SCC%NC) THEN
 IF (TYPE_DEBUG > NSCARC_DEBUG_LESS) WRITE(SCARC_LU,*) 'ALLOCATING SCC%WALL_PTR in length ', SCC%NC+1, ' to ', SCC%NCE
-         ALLOCATE(SCC%WALL_PTR(SCC%NC+1:SCC%NCE), STAT=IERR)
-         CALL ChkMemErr('SCARC_SETUP_WALLINFO','WALL_PTR',IERR)
+            ALLOCATE(SCC%WALL_PTR(SCC%NC+1:SCC%NCE), STAT=IERR)
+            CALL ChkMemErr('SCARC_SETUP_WALLINFO','WALL_PTR',IERR)
 
 IF (TYPE_DEBUG > NSCARC_DEBUG_LESS) WRITE(SCARC_LU,*) 'ALLOCATING SCC%EXT_PTR in length ', SCC%NC+1, ' to ', SCC%NCE
-         ALLOCATE(SCC%EXT_PTR(SCC%NC+1:SCC%NCE), STAT=IERR)
-         CALL ChkMemErr('SCARC_SETUP_WALLINFO','EXT_PTR',IERR)
+            ALLOCATE(SCC%EXT_PTR(SCC%NC+1:SCC%NCE), STAT=IERR)
+            CALL ChkMemErr('SCARC_SETUP_WALLINFO','EXT_PTR',IERR)
+         ENDIF
 
       ENDDO TRANSFER_MESHES_LOOP3
 
@@ -5521,6 +5537,7 @@ CALL SCARC_DEBUG_QUANTITY (NSCARC_DEBUG_MATRIX, NLEVEL_MIN,'SETUP_COARSENING', '
 LEVEL_LOOP: DO NL = NLEVEL_MIN, NLEVEL_MAX-1
 !LEVEL_LOOP: DO NL = NLEVEL_MIN, NLEVEL_MIN
    
+IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,*) '======== STARTING COARENING LEVEL ', NL
    !!!-------------------------------------------------------------------------------------------------
    !!! Determine coarser meshes corresponding to requested coarsening strategy
    !!!  --- allocate necessary arrays
@@ -5562,11 +5579,11 @@ LEVEL_LOOP: DO NL = NLEVEL_MIN, NLEVEL_MAX-1
       CALL CHKMEMERR ('SCARC_SETUP_COARSENING', 'SCF%S_ROW', IERR)
       CALL SCARC_COPY_INTEGER(SCF%A_ROW, SCF%S_ROW, 1, SCF%NC+1)
 
-      ALLOCATE (SCF%ST_COL(SCF%NA+1), STAT=IERR)
+      ALLOCATE (SCF%ST_COL(SCF%NAE+1), STAT=IERR)
       CALL CHKMEMERR ('SCARC_SETUP_COARSENING', 'SCF%ST_COL', IERR)
       SCF%ST_COL = 0
 
-      ALLOCATE (SCF%ST_ROW(SCF%NC+1), STAT=IERR)
+      ALLOCATE (SCF%ST_ROW(SCF%NCE+1), STAT=IERR)
       CALL CHKMEMERR ('SCARC_SETUP_COARSENING', 'SCF%ST_ROW', IERR)
       SCF%ST_ROW = 0
 
@@ -5608,12 +5625,11 @@ LEVEL_LOOP: DO NL = NLEVEL_MIN, NLEVEL_MAX-1
          CALL SCARC_SETUP_CELLTYPES (NSCARC_COARSENING_GMG, NL)
       CASE (NSCARC_COARSENING_RS3)
          CALL SCARC_SETUP_COLORING  (NSCARC_COARSENING_RS3, NL)
-         !CALL SCARC_SETUP_CELLTYPES (NSCARC_COARSENING_RS3, NL)
       CASE (NSCARC_COARSENING_FALGOUT)
-         !CALL SCARC_SETUP_MEASURES  (NSCARC_COARSENING_RS3, NL)
-         !CALL SCARC_SETUP_CELLTYPES (NSCARC_COARSENING_RS3, NL)
-         !CALL SCARC_SETUP_MEASURES  (NSCARC_COARSENING_FALGOUT, NL)
-         !CALL SCARC_SETUP_CELLTYPES (NSCARC_COARSENING_FALGOUT, NL)
+IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,*) 'COLORING PASS , FIRST RS3'
+         CALL SCARC_SETUP_COLORING  (NSCARC_COARSENING_RS3, NL)
+IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,*) 'COLORING PASS , THEN FALGOUT'
+         CALL SCARC_SETUP_COLORING  (NSCARC_COARSENING_FALGOUT, NL)
    END SELECT
 
    CALL SCARC_DEBUG_QUANTITY(NSCARC_DEBUG_CELLTYPE, NL, 'SETUP_CELLTYPES', 'CELLTYPEE')
@@ -5641,8 +5657,10 @@ IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,*) 'MYDEBUG: AFTER EXCHANGE O
 
       SCF => SCARC(NM)%COMPACT(NL)            
 
-!WRITE(SCARC_LU,*) 'ALLOCATING P in size ', SCF%NPE
-!WRITE(SCARC_LU,*) 'ALLOCATING R in size ', SCF%NRE
+IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) THEN
+   WRITE(SCARC_LU,*) 'ALLOCATING P in size ', SCF%NPE
+   WRITE(SCARC_LU,*) 'ALLOCATING R in size ', SCF%NRE
+ENDIF
 
       !!! ---------------- allocate prolongation matrix including row and column pointers
       ALLOCATE (SCF%P(SCF%NPE+10), STAT=IERR)
@@ -5715,27 +5733,23 @@ IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,*) 'MYDEBUG: AFTER EXCHANGE O
       ENDDO OTHER_MESH_LOOP2
    ENDDO
 
-IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,*) 'MYDEBUG: AFTER Allocation of arrays, TYPE_COARSENING=', TYPE_COARSENING
-
    !!! determine prolongation and restriction matrix for the corresponding level
    IF (TYPE_COARSENING >= NSCARC_COARSENING_GMG) THEN
       CALL SCARC_SETUP_RESTRICTION(NL)
       CALL SCARC_SETUP_PROLONGATION(NL)
-      CALL SCARC_DEBUG_QUANTITY (NSCARC_DEBUG_RESTRICTION, NL, 'SETUP_RESTRICTION', 'FINAL RESTRIC2')
-      CALL SCARC_DEBUG_QUANTITY (NSCARC_DEBUG_PROLONGATION, NL, 'SETUP_PROLONGATION', 'FINAL PROLONG2')
       CALL SCARC_SETUP_OVERLAPS (NSCARC_MATRIX_GMG, NL)
-   CALL SCARC_DEBUG_QUANTITY (NSCARC_DEBUG_WALLINFO , NL+1, 'SETUP_SYSTEM', 'WALLINFO')
    ELSE
-IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,*) 'MYDEBUG: BEFORE setup of prolongation matrix '
       CALL SCARC_SETUP_PROLONGATION(NL)
-IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,*) 'MYDEBUG: AFTER  setup of prolongation matrix '
       CALL SCARC_SETUP_OVERLAPS (NSCARC_MATRIX_PROLONGATION, NL)
-IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,*) 'MYDEBUG: AFTER  setup of overlaps '
-      !CALL SCARC_SETUP_RESTRICTION(NL)
    ENDIF
 
+   !!!
+   !!! ONLY DEBUGGING - START
+   !!!
+   CALL SCARC_DEBUG_QUANTITY (NSCARC_DEBUG_PROLONGATION, NL, 'SETUP_PROLONGATION', 'FINAL PROL')
+   CALL SCARC_DEBUG_QUANTITY (NSCARC_DEBUG_RESTRICTION, NL, 'SETUP_RESTRICTION', 'FINAL REST')
+   CALL SCARC_DEBUG_QUANTITY (NSCARC_DEBUG_WALLINFO , NL+1, 'SETUP_SYSTEM', 'WALLINFO')
 
-   !!! Print latex information if requested (only temporarily for debugging purposes)
    IF (TYPE_LATEX == NSCARC_LATEX_ALL) THEN
       CALL SCARC_LATEX_GRID(NSCARC_LATEX_STAGGERED,NL)
       CALL SCARC_LATEX_GRID(NSCARC_LATEX_EQUAL,NL)
@@ -5744,7 +5758,6 @@ IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,*) 'MYDEBUG: AFTER  setup of 
    !!! print out matrix in debug mode
    IF (TYPE_DEBUG >= NSCARC_DEBUG_LESS .AND. NL>=1) THEN
       SCF => SCARC(1)%COMPACT(1)            
-WRITE(*,*) 'PRINTING LATEX_MATRIX'
       CALL SCARC_LATEX_MATRIX (SCF%P, SCF%P_ROW, SCF%P_COL, SCF%NC, SCF%NCC, NM, NL, 'P')
       CALL SCARC_LATEX_MATRIX (SCF%R, SCF%R_ROW, SCF%R_COL, SCF%NCC, SCF%NC, NM, NL, 'R')
       CALL SCARC_LATEX_MATRIX2(SCF%A, SCF%A_ROW, SCF%A_COL, SCF%NC, SCF%NC, 1, 1, 'A')
@@ -5753,13 +5766,16 @@ WRITE(*,*) 'PRINTING LATEX_MATRIX'
      CALL SCARC_LATEX_MATRIX2(SCARC(1)%COMPACT(1)%P, SCARC(1)%COMPACT(1)%P_ROW, SCARC(1)%COMPACT(1)%P_COL, &
                               SCARC(1)%COMPACT(1)%NC, SCARC(1)%COMPACT(1)%NCC, 1, 1, 'P')
    ENDIF
+   !!!
+   !!! ONLY DEBUGGING - END
+   !!!
 
-   !!!------------------------------------------------------------------------------------------------
+   !!!---------------------------------------------------------------------------------------------
    !!! Allocate coarse grid matrix including pointer arrays
    !!! Note: number of cells on coarse level corresponds to number of c-points on fine level
    !!! Compute coarse grid matrix by multiplication with restriction and prolongation matrix:
    !!!  A_coarse := R * A_fine * P
-   !!!------------------------------------------------------------------------------------------------
+   !!!---------------------------------------------------------------------------------------------
    DO NM = NMESHES_MIN, NMESHES_MAX
 
       SCF => SCARC(NM)%COMPACT(NL)                 ! Pointer to fine level
@@ -5768,19 +5784,6 @@ WRITE(*,*) 'PRINTING LATEX_MATRIX'
       SCC%NC  = SCF%NCC
       SCC%NCE = SCF%NCCE
       SCC%NW  = SCF%NCW
-   
-      !!! Allocate coarse matrix structures
-      ALLOCATE (SCC%A(20*SCF%NCCE*10), STAT=IERR)
-      CALL CHKMEMERR ('SCARC_SETUP_COARSENING', 'SCC%A', IERR)
-      SCC%A = 0.0_EB
-   
-      ALLOCATE (SCC%A_COL(20*SCF%NCCE*10), STAT=IERR)
-      CALL CHKMEMERR ('SCARC_SETUP_COARSENING', 'SCC%A_COL', IERR)
-      SCC%A_COL = 0
-
-      ALLOCATE (SCC%A_ROW(SCF%NCCE+1), STAT=IERR)
-      CALL CHKMEMERR ('SCARC_SETUP_COARSENING', 'SCC%A_ROW', IERR)
-      SCC%A_ROW = 0
    
       !!! Allocate WALL-information for coarser grids (own and neighboring grids)
       ALLOCATE(SCC%GHOST_PTR(SCC%NC+1:SCC%NCE), STAT=IERR)
@@ -5807,10 +5810,8 @@ WRITE(*,*) 'PRINTING LATEX_MATRIX'
 
    ENDDO
 
-   CALL SCARC_SETUP_SUBDIVISION_AMG(NL)          !HIER NOCHMAL CHECKEN !!!!
-   IF (NMESHES > 1) THEN
-      CALL SCARC_SETUP_WALLINFO_AMG (NL)          !HIER NOCHMAL CHECKEN !!!!
-   ENDIF
+   IF (NMESHES>1) CALL SCARC_SETUP_WALLINFO_AMG (NL)          !HIER NOCHMAL CHECKEN !!!!
+   CALL SCARC_SETUP_SUBDIVISION_AMG(NL)                       !HIER NOCHMAL CHECKEN !!!!
 
    CALL SCARC_DEBUG_QUANTITY (NSCARC_DEBUG_SUBDIVISION  , NL+1, 'SETUP_SYSTEM', 'SUBDIVISION new level')
    !CALL SCARC_TRANSFER_MATRIX (NL)
@@ -5827,6 +5828,19 @@ WRITE(*,*) 'PRINTING LATEX_MATRIX'
    !ENDIF
 
    CALL SCARC_DEBUG_QUANTITY (NSCARC_DEBUG_MATRIX , NL+1, 'SETUP_COARSENING', 'AMG_MATRIX_FINAL')
+
+!!!!! IMPORTANT : Deallocate auxiliary arrays !!!!!!!
+!!!!! IMPORTANT : Deallocate auxiliary arrays !!!!!!!
+!!!!! IMPORTANT : Deallocate auxiliary arrays !!!!!!!
+!!!!! IMPORTANT : Deallocate auxiliary arrays !!!!!!!
+!!!!! IMPORTANT : Deallocate auxiliary arrays !!!!!!!
+!!!!! IMPORTANT : Deallocate auxiliary arrays !!!!!!!
+!!!!! IMPORTANT : Deallocate auxiliary arrays !!!!!!!
+
+   IF (SCC%NC <= 4) THEN
+      NLEVEL_MAX = NL + 1
+      EXIT LEVEL_LOOP
+   ENDIF
 
 ENDDO LEVEL_LOOP
 
@@ -6000,7 +6014,7 @@ MESHES_LOOP1: DO NM = NMESHES_MIN, NMESHES_MAX
       
       IF (IOR_LAST /= IOR0) SCC%SUBDIVISION(1,IOR0) = IW
       SCC%SUBDIVISION(2,IOR0) = SCC%SUBDIVISION(2,IOR0) + 1
-      
+
       NOM= SCC%WALL(IW)%NOM
    
       IF (NOM /= 0) THEN
@@ -6024,6 +6038,13 @@ MESHES_LOOP1: DO NM = NMESHES_MIN, NMESHES_MAX
    
    ENDDO WALLCELL_LOOP
 
+   IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) THEN
+     WRITE(SCARC_LU,*) 'SETTING SUBDIVISION for mesh ', NM, ' on level ', NL
+     WRITE(SCARC_LU,'(a,7i8)') 'SUBDIVISION (1,.): ', (SCC%SUBDIVISION(1, IOR0), IOR0=-3,3)
+     WRITE(SCARC_LU,'(a,7i8)') 'SUBDIVISION (2,.): ', (SCC%SUBDIVISION(2, IOR0), IOR0=-3,3)
+     WRITE(SCARC_LU,'(a,7i8)') 'SUBDIVISION (3,.): ', (SCC%SUBDIVISION(3, IOR0), IOR0=-3,3)
+   ENDIF
+      
 ENDDO MESHES_LOOP1
          
 END SUBROUTINE SCARC_SETUP_SUBDIVISION_AMG
@@ -6457,6 +6478,7 @@ STRENGTH_MESHES_LOOP: DO NM = NMESHES_MIN, NMESHES_MAX
    STRENGTH_CELL_LOOP2: DO IC = 1, SC%NC
       SC%S_ROW(IC) = IS
       DO ICOL = SC%A_ROW(IC), SC%A_ROW(IC+1)-1
+         !IF (SC%S_COL(ICOL) > -1.AND.SC%S_COL(ICOL)<=SC%NC) THEN
          IF (SC%S_COL(ICOL) > -1) THEN
             SC%S_COL(IS) = SC%S_COL(ICOL)
             WRITE(SCARC_LU,*) 'S_COL(',IS,')=',SC%S_COL(ICOL)
@@ -6473,9 +6495,11 @@ STRENGTH_MESHES_LOOP: DO NM = NMESHES_MIN, NMESHES_MAX
       DO IC = 1, SC%NC
          WRITE(SCARC_LU,'(i5,a,20i9)') IC,':',(SC%S_COL(IP),IP=SC%S_ROW(IC),SC%S_ROW(IC+1)-1)
       ENDDO
+      WRITE(SCARC_LU,*) 'SIZE(ST_ROW)=',SIZE(SC%ST_ROW)
+      WRITE(SCARC_LU,*) 'SIZE(ST_COL)=',SIZE(SC%ST_COL)
    ENDIF
 
-   DO IC = 1, SC%NC+1
+   DO IC = 1, SC%NCE+1
       SC%ST_ROW(IC) = 0
    ENDDO
 
@@ -6487,7 +6511,7 @@ STRENGTH_MESHES_LOOP: DO NM = NMESHES_MIN, NMESHES_MAX
    ENDDO 
    SC%ST_ROW(1) = 1
 
-   DO IC = 1, SC%NC
+   DO IC = 1, SC%NCE
       SC%ST_ROW(IC+1)= SC%ST_ROW(IC+1) + SC%ST_ROW(IC) 
       IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) &
          WRITE(SCARC_LU,*) 'B: ST_ROW(',IC+1,')=',SC%ST_ROW(IC+1)
@@ -6502,7 +6526,7 @@ STRENGTH_MESHES_LOOP: DO NM = NMESHES_MIN, NMESHES_MAX
          SC%ST_ROW(IPOS) = SC%ST_ROW(IPOS) + 1
       ENDDO
    ENDDO 
-   DO IC = SC%NC+1, 2, -1
+   DO IC = SC%NCE+1, 2, -1
       SC%ST_ROW(IC) = SC%ST_ROW(IC-1)
       IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) &
          WRITE(SCARC_LU,*) 'D: ST_ROW(',IC,')=',SC%ST_ROW(IC)
@@ -6511,9 +6535,9 @@ STRENGTH_MESHES_LOOP: DO NM = NMESHES_MIN, NMESHES_MAX
 
    IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) THEN
       WRITE(SCARC_LU,*) '---------------------- ST_ROW:', SC%NC
-      WRITE(SCARC_LU,'(4i9)') (SC%ST_ROW(IC), IC=1,SC%NC+1)
+      WRITE(SCARC_LU,'(4i9)') (SC%ST_ROW(IC), IC=1,SC%NCE+1)
       WRITE(SCARC_LU,*) '---------------------- ST_COL:'
-      DO IC = 1, SC%NC
+      DO IC = 1, SC%NCE
          WRITE(SCARC_LU,'(i5,a,20i9)') IC,':',(SC%ST_COL(IP),IP=SC%ST_ROW(IC),SC%ST_ROW(IC+1)-1)
       ENDDO
    ENDIF
@@ -6529,9 +6553,9 @@ END SUBROUTINE SCARC_SETUP_STRENGTH_MATRIX
 SUBROUTINE SCARC_SETUP_COLORING(NTYPE, NL)
 INTEGER, PARAMETER  :: NCOUPLINGS = 20
 INTEGER, INTENT(IN) :: NTYPE, NL
-INTEGER :: NM, IC, JC, KC, ICOL, JCOL, IRAND, REMAINING_CELLS
-INTEGER :: FCELL = -1, ZCELL =-2, CTILDE2 = -1, CTILDE
-LOGICAL :: BEMPTY=.FALSE., BNONEMPTY=.FALSE.
+INTEGER :: NM, IC0, IC, JC, KC, ICOL, JCOL, IRAND, REMAINING_CELLS, ICG, IGRAPH
+INTEGER :: FCELL = -1, ZCELL =-2, ICT2 = -1, ICT
+LOGICAL :: BEMPTY=.FALSE., BNONEMPTY=.FALSE., BINTERNAL
 REAL(EB) :: RAND_NUM, MEASURE, NEW_MEASURE
 REAL(EB) :: MEASURE_MAX, EPS
 TYPE (SCARC_COMPACT_TYPE), POINTER :: SC
@@ -6563,10 +6587,13 @@ SELECT CASE (NTYPE)
       WRITE(SCARC_LU,*) (SC%CELLTYPE(IC), IC=1, SC%NC)
    ENDIF
 
+         !!! Currently the measures are computed as row sums of ST (number of influences for IC)
          RS3_MEASURE_LOOP0: DO IC = 1, SC%NC
             SC%MEASURE(IC) = SC%ST_ROW(IC+1)-SC%ST_ROW(IC) 
          ENDDO RS3_MEASURE_LOOP0
 
+
+         !!! Subdivide in fine and coarse grid cells
          RS3_MEASURE_LOOP1: DO IC = 1, SC%NC
             
             IF (SC%S_ROW(IC+1)-SC%S_ROW(IC) == 0) THEN
@@ -6716,61 +6743,78 @@ CALL SCARC_DEBUG_QUANTITY(NSCARC_DEBUG_CELLTYPE, NL, 'SETUP_COLORING', 'CELLTYPE
             IF (SC%CELLTYPE(IC) == NSCARC_CELLTYPE_COARSE0) SC%CELLTYPE(IC) = NSCARC_CELLTYPE_COARSE
          ENDDO
 
-         !!! Second pass: inter-processor exchange
-         DO IC = 1, SC%NC
-            SC%GRAPH(IC) = -1
-         ENDDO
-         DO IC = 1, SC%NC
-     IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,*) '=============== IC =',IC 
-            IF (CTILDE2 /= IC) CTILDE = -1
-            IF (SC%CELLTYPE(IC) == NSCARC_CELLTYPE_FINE) THEN
-               DO ICOL = SC%S_ROW(IC), SC%S_ROW(IC+1)-1
-                  JC = SC%S_COL(ICOL)
-                  IF (JC <= SC%NC) THEN
-                  IF (SC%CELLTYPE(JC) > 0) THEN
-                     SC%GRAPH(JC) = IC
-     IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,*) 'GRAPH(',JC,')=',SC%GRAPH(JC)
-                  ENDIF
-                  ENDIF
-               ENDDO
-               DO ICOL = SC%S_ROW(IC), SC%S_ROW(IC+1)-1
-                  JC = SC%S_COL(ICOL)
-                  IF (JC <= SC%NC) THEN
-                  IF (SC%CELLTYPE(JC) == NSCARC_CELLTYPE_FINE) THEN
-     IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,*) 'HALLOOOOO: CELLTYPE(',JC,')=',SC%CELLTYPE(JC)
-                     BEMPTY = .TRUE.
-                     DO JCOL = SC%S_ROW(JC), SC%S_ROW(JC+1)-1
-                        KC = SC%S_COL(JCOL)
-                        IF (SC%GRAPH(KC) == IC) THEN
-                           BEMPTY = .FALSE.
-                           EXIT
-                        ENDIF
-                        IF (BEMPTY) THEN
-                           IF (BNONEMPTY) THEN
-                              SC%CELLTYPE(IC) = NSCARC_CELLTYPE_COARSE
-     IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,*) 'CELLTYPE(',IC,')=',SC%CELLTYPE(IC)
-                              IF (CTILDE > -1) THEN
-                                 SC%CELLTYPE(CTILDE) = NSCARC_CELLTYPE_FINE
-     IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,*) 'CELLTYPE(',CTILDE,')=',SC%CELLTYPE(CTILDE)
-                                 CTILDE = -1
-                              ENDIF
-                              BNONEMPTY = .FALSE.
-                              EXIT
-                           ELSE
-                              CTILDE = JC
-                              CTILDE2 = IC
-                              SC%CELLTYPE(JC) = NSCARC_CELLTYPE_COARSE
-     IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,*) 'CELLTYPE(',JC,')=',SC%CELLTYPE(JC)
-                              BNONEMPTY = .FALSE.
+         !!! exchange information with neighboring meshes
+         IF (NMESHES > 1) THEN
+
+            DO IC = 1, SC%NC
+               SC%GRAPH(IC) = -1
+            ENDDO
+
+            IC0 = 1
+            DO IC = 1, SC%NC
+        IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,*) 'GRAPH::: =============== IC =',IC 
+        IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,*) 'GRAPH:::0  CELLTYPE(',IC,')=',SC%CELLTYPE(IC)
+               IF (ICT2 /= IC) ICT = -1
+        IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,*) 'GRAPH:::0  ICT=',ICT
+   
+               IF (SC%CELLTYPE(IC) == NSCARC_CELLTYPE_FINE) THEN
+
+                  DO ICOL = SC%S_ROW(IC), SC%S_ROW(IC+1)-1
+                     JC = SC%S_COL(ICOL)
+                     IF (JC <= SC%NC) THEN
+                     IF (SC%CELLTYPE(JC) >= NSCARC_CELLTYPE_COARSE) THEN
+                        SC%GRAPH(JC) = IC
+        IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,*) 'GRAPH::: GRAPH(',JC,')=',SC%GRAPH(JC)
+                     ENDIF
+                     ENDIF
+                  ENDDO
+   
+                  !!! Hier fehlt noch die Abfrage nach Nachbarmesh !!!
+   
+                  DO ICOL = SC%S_ROW(IC), SC%S_ROW(IC+1)-1
+                     JC = SC%S_COL(ICOL)
+                     IF (JC <= SC%NC) THEN
+                     IF (SC%CELLTYPE(JC) == NSCARC_CELLTYPE_FINE) THEN
+        IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,*) 'GRAPH:::1  CELLTYPE(',JC,')=',SC%CELLTYPE(JC)
+                    !!! DIESER PART WIRD ERST FÜR ANDERE VERFEINERUNGEN AKTIV
+                    !!! ACHTUNG: DANN NOCHMAL ÜBERPRÜFEN
+                        BEMPTY = .TRUE.
+                        DO JCOL = SC%S_ROW(JC), SC%S_ROW(JC+1)-1
+                           KC = SC%S_COL(JCOL)
+                           IF (SC%GRAPH(KC) == IC) THEN
+                              BEMPTY = .FALSE.
                               EXIT
                            ENDIF
-                        ENDIF
-                     ENDDO
-                  ENDIF
-                  ENDIF
-               ENDDO
-            ENDIF
-         ENDDO
+                           IF (BEMPTY) THEN
+                              IF (BNONEMPTY) THEN
+                                 SC%CELLTYPE(IC) = NSCARC_CELLTYPE_COARSE
+        IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,*) 'GRAPH:::2  CELLTYPE(',IC,')=',SC%CELLTYPE(IC)
+                                 IF (ICT > -1) THEN
+                                    SC%CELLTYPE(ICT) = NSCARC_CELLTYPE_FINE
+        IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,*) 'GRAPH:::3  CELLTYPE(',ICT,')=',SC%CELLTYPE(ICT)
+                                    ICT = -1
+                                 ENDIF
+                                 !! Hier fehlt noch Nachbaranteil
+                                 BNONEMPTY = .FALSE.
+                                 EXIT
+                              ELSE
+                                 ICT  = JC
+                                 ICT2 = IC
+                                 SC%CELLTYPE(JC) = NSCARC_CELLTYPE_COARSE
+        IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,*) 'GRAPH::: CELLTYPE(',JC,')=',SC%CELLTYPE(JC)
+                                 BNONEMPTY = .FALSE.
+                                 EXIT
+                                 IC0 = IC0 - 1
+                              ENDIF
+                           ENDIF
+                        ENDDO
+                     ENDIF
+                     ENDIF
+                  ENDDO
+               ENDIF
+               IC0 = IC0 + 1 !!! Achtung, nochmal prüfen, eventuell IC0 als Index verwenden?
+            ENDDO
+         ENDIF
 
 
          DO IC = 1, SC%NC
@@ -6782,9 +6826,11 @@ CALL SCARC_DEBUG_QUANTITY(NSCARC_DEBUG_CELLTYPE, NL, 'SETUP_COLORING', 'CELLTYPE
       ENDDO RS3_MESH_LOOP
 
       !!! Exchange CELLTYPE-data along internal boundaries
-      CALL SCARC_DEBUG_QUANTITY(NSCARC_DEBUG_CELLTYPE, NL, 'SETUP_COLORING', 'CELLTYPE BEFORE EXCHANGE')
       IF (NMESHES > 1) CALL SCARC_EXCHANGE (NSCARC_EXCHANGE_CELLTYPE, NL)
-      CALL SCARC_DEBUG_QUANTITY(NSCARC_DEBUG_CELLTYPE, NL, 'SETUP_COLORING', 'CELLTYPE AFTER EXCHANGE')
+
+
+      CALL SCARC_DEBUG_QUANTITY(NSCARC_DEBUG_CELLTYPE, NL, 'SETUP_COLORING', 'CELLTYPE BEFORE LAST EXCHANGE')
+      CALL SCARC_DEBUG_QUANTITY(NSCARC_DEBUG_CELLTYPE, NL, 'SETUP_COLORING', 'CELLTYPE AFTER LAST EXCHANGE')
 
       !!! Third pass: identify fine cells along boundary and get their coarse neighbors
       RS3_MESH_LOOP2: DO NM = NMESHES_MIN, NMESHES_MAX
@@ -6797,53 +6843,153 @@ CALL SCARC_DEBUG_QUANTITY(NSCARC_DEBUG_CELLTYPE, NL, 'SETUP_COLORING', 'CELLTYPE
    CASE (NSCARC_COARSENING_FALGOUT)
 
       FCELL = ZCELL
-      FALGOUT_LOOP: DO NM = NMESHES_MIN, NMESHES_MAX
+      FALGOUT_MESHES_LOOP1: DO NM = NMESHES_MIN, NMESHES_MAX
 
          SC => SCARC(NM)%COMPACT(NL)
 
-         !!! First determine the measure of each cell and add a random number between (0,1)
-         SC%MEASURE = NSCARC_MEASURE_NONE
-         FALGOUT_MEASURE_LOOP: DO IC = 1, SC%NC
-            DO ICOL = SC%A_ROW(IC)+1, SC%A_ROW(IC+1)-1
-               IF (STRONGLY_COUPLED(SC%A, SC%A_ROW, IC, ICOL)) SC%MEASURE(IC) = SC%MEASURE(IC) + 1.0_EB
-            ENDDO
-            SC%MEASURE(IC) = SC%MEASURE(IC) + 0.01_EB
+         !!! Reset the measures as row sums of ST (number of influences for IC) plus random number
+         !!! to make them unique
+         FALGOUT_CELL_LOOP1: DO IC = 1, SC%NC
+            RAND_NUM = 0.01_EB
             DO IRAND = 1, 5
                CALL RANDOM_NUMBER(RAND_NUM)
-               RAND_NUM = RAND_NUM/10**(IRAND-1)
-               WRITE(SCARC_LU,*) 'IRAND=',IRAND,': RAND_NUM=',RAND_NUM, 10**(IRAND)
+               RAND_NUM = RAND_NUM + RAND_NUM/10**(IRAND-1)
                SC%MEASURE(IC) = SC%MEASURE(IC) + RAND_NUM
             ENDDO
-         ENDDO FALGOUT_MEASURE_LOOP
+            SC%MEASURE(IC) = SC%S_ROW(IC+1)-SC%S_ROW(IC) + RAND_NUM
+         ENDDO FALGOUT_CELL_LOOP1
 
-CALL SCARC_DEBUG_QUANTITY(NSCARC_DEBUG_MEASURE, NL, 'SETUP_COLORING', 'MEASURE AFTER FIRST FALGOUT LOOP ')
-      ENDDO FALGOUT_LOOP
+      ENDDO FALGOUT_MESHES_LOOP1
+
+CALL SCARC_DEBUG_QUANTITY(NSCARC_DEBUG_MEASURE, NL, 'SETUP_COLORING', 'MEASURE1 FALGOUT LOOP ')
+
+      IF (NMESHES > 1) CALL SCARC_EXCHANGE (NSCARC_EXCHANGE_MEASURE , NL)
+
+CALL SCARC_DEBUG_QUANTITY(NSCARC_DEBUG_MEASURE, NL, 'SETUP_COLORING', 'MEASURE2 FALGOUT LOOP ')
+
+      FALGOUT_MESHES_LOOP2: DO NM = NMESHES_MIN, NMESHES_MAX
+
+         ! Is it a cell with a neighboring cell in another mesh?
+         FALGOUT_INTERNAL_CELL_LOOP1: DO IC = 1, SC%NC
+
+            BINTERNAL = .FALSE.
+            DO ICOL = SC%S_ROW(IC), SC%S_ROW(IC+1)-1
+               JC = SC%S_COL(ICOL)
+               IF (JC > SC%NC) THEN
+                  BINTERNAL = .TRUE.
+                  EXIT
+               ENDIF
+            ENDDO
+            IF (BINTERNAL .OR. SC%CELLTYPE(IC) == NSCARC_CELLTYPE_FINE) SC%CELLTYPE(IC)=NSCARC_CELLTYPE_NONE
+           IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,*) 'A: CELLTYPE(',IC,')=',SC%CELLTYPE(IC)
+          
+         ENDDO FALGOUT_INTERNAL_CELL_LOOP1
+
+         FALGOUT_EXTENDED_CELL_LOOP: DO IC = SC%NC+1, SC%NCE
+            SC%GRAPH(IC)    = IC
+            SC%CELLTYPE(IC) = NSCARC_CELLTYPE_NONE
+         ENDDO FALGOUT_EXTENDED_CELL_LOOP
+
+         ICG = 1
+         FALGOUT_INTERNAL_CELL_LOOP2: DO IC = 1, SC%NC
+
+            IF (SC%CELLTYPE(IC) == NSCARC_CELLTYPE_ZPNT) THEN
+               IF (SC%MEASURE(IC) >= 1.0_EB .OR. (SC%S_ROW(IC+1)-SC%S_ROW(IC)) > 0) THEN
+                  SC%CELLTYPE(IC) = NSCARC_CELLTYPE_NONE
+                  SC%GRAPH(ICG) = IC
+                  ICG = ICG + 1
+               ELSE
+                  SC%CELLTYPE(IC) = NSCARC_CELLTYPE_FINE
+               ENDIF
+            ELSE IF (SC%CELLTYPE(IC) == NSCARC_CELLTYPE_SFPNT) THEN
+               SC%MEASURE(IC) = NSCARC_MEASURE_NONE
+            ELSE
+               SC%GRAPH(ICG) = IC
+               IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,*) 'B: GRAPH(',IC,')=',SC%GRAPH(IC)
+               ICG = ICG + 1
+            ENDIF
+
+         ENDDO FALGOUT_INTERNAL_CELL_LOOP2
+         
+         IGRAPH = ICG-1
+         IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,*) 'IGRAPH=',IGRAPH
+
+         FALGOUT_INTERNAL_CELL_LOOP3: DO ICG = 1, IGRAPH
+            IC = SC%GRAPH(ICG)
+
+            !!! Coarse cells don't interpolate from influencing neighbors
+            IF (SC%CELLTYPE(IC) > NSCARC_CELLTYPE_NONE) THEN
+
+               SC%CELLTYPE(IC) = NSCARC_CELLTYPE_COARSE
+
+               DO ICOL = SC%S_ROW(IC), SC%S_ROW(IC+1)-1
+                  JC = SC%S_COL(ICOL)
+                  IF (JC > -1) THEN
+                     !!! remove edge from S
+                     SC%S_COL(ICOL) = - SC%S_COL(ICOL) - 1
+
+                     !!! decrement measures of unmarked neighbors correspondingly
+                     IF (SC%CELLTYPE(JC) == NSCARC_CELLTYPE_NONE) THEN
+                        SC%MEASURE(JC) = SC%MEASURE(JC) - 1
+                     ENDIF
+                  
+                  ENDIF 
+               ENDDO
 
 
-   CASE (NSCARC_COARSENING_BDRY)
-         !!! set measures on boundary layer to zero and decrease probability of a neighboring cell to be a coarse cell
-!         RS3_MEASURE_BDRY_LOOP: DO IW = 1, SC%NW
-!            IF (SC%WALL(IW)%NOM == 0) CYCLE RS3_MEASURE_BDRY_LOOP
-!            IC = SC%WALL(IW)%ICW
-!            IF (SC%CELLTYPE(IC) == NSCARC_CELLTYPE_COARSE) THEN              ! check here 
-!               DO ICOL = SC%A_ROW(IC)+1, SC%A_ROW(IC+1)-1
-!                  JC = SC%A_COL(ICOL)
-!                  IF (JC<=SC%NC.AND.STRONGLY_COUPLED(SC%A, SC%A_ROW, IC, ICOL)) THEN
-!                     IF (SC%INTERNAL_BDRY_CELL(JC)/=0) THEN
-!                        SC%MEASURE(JC) = SC%MEASURE(JC) - 1.0_EB
-!                     ENDIF
-!                  ENDIF
-!               ENDDO
-!            ENDIF
-!            SC%MEASURE(IC) = NSCARC_MEASURE_NONE
-!         ENDDO RS3_MEASURE_BDRY_LOOP
-!CALL SCARC_DEBUG_QUANTITY(NSCARC_DEBUG_MEASURE, NL, 'SETUP_COLORING', 'MEASURE AFTER BDRY  RS3 ')
+            ELSE
+
+               !!! dependencies which are already marked
+               DO ICOL = SC%S_ROW(IC), SC%S_ROW(IC+1)-1
+                  JC = SC%S_COL(ICOL)
+                  IF (JC < 0) JC = -JC - 1
+                  
+                  IF (SC%CELLTYPE(JC) > NSCARC_CELLTYPE_NONE) THEN
+
+                     !!! remove edge from S
+                     IF (SC%S_COL(JC) > -1) SC%S_COL(ICOL) = -SC%S_COL(ICOL) - 1
+
+                     !!! temporarily modify CELLTYPE
+                     SC%CELLTYPE(JC) = NSCARC_CELLTYPE_CPNT
+
+                  ELSE IF (SC%CELLTYPE(JC) > NSCARC_CELLTYPE_SFPNT) THEN
+                     !!! remove edge from S
+                     IF (SC%S_COL(JC) > -1) SC%S_COL(ICOL) = -SC%S_COL(ICOL) - 1
+                  ENDIF
+
+               ENDDO
+
+               !!! dependencies which aren't marked yet
+               DO ICOL = SC%S_ROW(IC), SC%S_ROW(IC+1)-1
+
+ 
+                  JC = SC%S_COL(ICOL)
+                  IF (JC < 0) JC = -JC - 1
+                  
+                  IF (SC%CELLTYPE(JC) > NSCARC_CELLTYPE_NONE) THEN
+                     !!! remove edge from S
+                     IF (SC%S_COL(JC) > -1) SC%S_COL(ICOL) = -SC%S_COL(ICOL) - 1
+                     !!! temporarily modify CELLTYPE
+                     SC%CELLTYPE(JC) = NSCARC_CELLTYPE_CPNT
+
+                  ELSE IF (SC%CELLTYPE(JC) > NSCARC_CELLTYPE_SFPNT) THEN
+                     !!! remove edge from S
+                     IF (SC%S_COL(JC) > -1) SC%S_COL(ICOL) = -SC%S_COL(ICOL) - 1
+                  ENDIF
+
+               ENDDO
+
+            ENDIF
+            
+            
+         ENDDO FALGOUT_INTERNAL_CELL_LOOP3
+       
+        
+          
+
+      ENDDO FALGOUT_MESHES_LOOP2
 
 END SELECT
-
-!CALL SCARC_DEBUG_QUANTITY(NSCARC_DEBUG_MEASURE, NL, 'SETUP_COLORING', 'MEASURE BEFORE EXCHANGE')
-!IF (NMESHES > 1) CALL SCARC_EXCHANGE (NSCARC_EXCHANGE_MEASURE, NL)
-!CALL SCARC_DEBUG_QUANTITY(NSCARC_DEBUG_MEASURE, NL, 'SETUP_COLORING', 'MEASURE AFTER  EXCHANGE')
 
 END SUBROUTINE SCARC_SETUP_COLORING
 
@@ -7780,7 +7926,7 @@ IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,'(a,i3,a,i4,a,i4,a,i4)') &
          INTERNAL_CELL_LOOP2_CLASSICAL2: DO IC = 1, SC%NC
      
             !!! For a C-point IC, use identity and set mapping
-            IF (SC%CELLTYPE(IC) == NSCARC_CELLTYPE_COARSE) THEN
+            IF (SC%CELLTYPE(IC) >= NSCARC_CELLTYPE_COARSE) THEN
 
                SC%P_ROW(IC) = ICOL_CURRENT
                SC%P_COL(ICOL_CURRENT) = SC%F2C_MAP(IC)
@@ -8413,7 +8559,7 @@ IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) THEN
    WRITE(SCARC_LU,'(a,i3,a,i3,a,i3)') 'M_ROW'
    WRITE(SCARC_LU,'(8i5)') (M_ROW(IC), IC=1, NC+1)
    WRITE(SCARC_LU,'(a,i3,a,i3,a,i3)') 'M_COL'
-   WRITE(SCARC_LU,'(8i5)') (M_COL(IC), IC=1, 26)
+   WRITE(SCARC_LU,'(8i5)') (M_COL(IC), IC=1, NC)
 ENDIF
 
 !!! identify the number of non-zero entries in every column of M (corresponds to a row in MT) 
@@ -8463,7 +8609,7 @@ END SUBROUTINE SCARC_CMATRIX_TRANSPOSE
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 SUBROUTINE SCARC_SETUP_SYSTEM_AMG(NL)
 INTEGER, INTENT(IN) :: NL
-INTEGER :: NM
+INTEGER :: NM, IERR = 0
 INTEGER :: IOWN, IOWN_INIT=0, IOWN_SAVE
 INTEGER :: INBR, INBR_INIT=0, INBR_SAVE
 INTEGER :: ICOL1, ICOL2, ICOL3, IC0, IC1, IC2, IC3
@@ -8555,8 +8701,24 @@ MESHES_LOOP_SYSTEM_AMG: DO NM = NMESHES_MIN, NMESHES_MAX
 
    ENDDO LOOP1_C_CELLS
 
-   SCC%A_ROW(SCF%NCC+1) = IOWN  
+   !!! Determine size of matrix RAP  == SCC%A 
    SCC%NA = IOWN
+
+   IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,*) 'AllOCATION RAP in length ', SCC%NA
+
+   !!! Allocate coarse matrix structures
+   ALLOCATE (SCC%A(SCC%NA+1), STAT=IERR)
+   CALL CHKMEMERR ('SCARC_SETUP_COARSENING', 'SCC%A', IERR)
+   SCC%A = 0.0_EB
+   
+   ALLOCATE (SCC%A_COL(SCC%NA+1), STAT=IERR)
+   CALL CHKMEMERR ('SCARC_SETUP_COARSENING', 'SCC%A_COL', IERR)
+   SCC%A_COL = 0
+
+   ALLOCATE (SCC%A_ROW(SCC%NC+1), STAT=IERR)
+   CALL CHKMEMERR ('SCARC_SETUP_COARSENING', 'SCC%A_ROW', IERR)
+   SCC%A_ROW = 0
+   SCC%A_ROW(SCF%NCC+1) = IOWN  
 
    SCF%A_TAG = 0
    SCF%P_TAG = 0
@@ -8564,7 +8726,6 @@ MESHES_LOOP_SYSTEM_AMG: DO NM = NMESHES_MIN, NMESHES_MAX
    IOWN = 1
    INBR = 1
 
-   !!! Determine size of matrix RAP
    !!! loop over interior c-cells
    LOOP2_C_CELLS: DO IC0 = 1, SCF%NCC
 
@@ -8713,17 +8874,17 @@ MESHES_LOOP_SYSTEM_AMG: DO NM = NMESHES_MIN, NMESHES_MAX
 
    ENDDO LOOP2_C_CELLS
    IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) THEN
-      WRITE(SCARC_LU,*) 'MYDEBUG: 0: ======== RAP 11: RAP_diag_i  ======================'
+      WRITE(SCARC_LU,*) 'MYDEBUG: 0: ======== RAP 11: RAP_diag_i  ================= NCC:', SCF%NCC
       DO IC1 = 1, SCF%NCC+1
          !WRITE(SCARC_LU,*) 'A_ROW(',IC1,')=',SCF%A_ROW(IC1)
          WRITE(SCARC_LU,'(a,i5)') 'MYDEBUG: 0: ', SCC%A_ROW(IC1)-1
       ENDDO
-      WRITE(SCARC_LU,*) 'MYDEBUG: 0: ======== RAP 11: RAP_diag_i  ======================'
+      WRITE(SCARC_LU,*) 'MYDEBUG: 0: ======== RAP 11: RAP_diag_i  ================= NA :', SCF%NA
       DO IC1 = 1, SCC%NA
          !WRITE(SCARC_LU,*) 'A_COL(',IC1,')=',SCF%A_COL(IC1)
          WRITE(SCARC_LU,'(a,i5)') 'MYDEBUG: 0: ', SCC%A_COL(IC1)-1
       ENDDO
-      WRITE(SCARC_LU,*) 'MYDEBUG: 0: ======== RAP 11: RAP_diag_i  ======================'
+      WRITE(SCARC_LU,*) 'MYDEBUG: 0: ======== RAP 11: RAP_diag_i  ================= NA :=', SCF%NA
       DO IC1 = 1, SCC%NA
          !WRITE(SCARC_LU,*) 'A(',IC1,')=',SCF%A(IC1)
          WRITE(SCARC_LU,'(a,f12.6)') 'MYDEBUG: 0: ', -SCC%A(IC1)
@@ -10456,15 +10617,6 @@ IF (TYPE_SCOPE == NSCARC_SCOPE_MAIN) THEN
 !ELSE IF (TYPE_SCOPE == NSCARC_SCOPE_COARSE) THEN
 !   CALL SCARC_VECTOR_COPY (CG%X, CG%F, 1.0_EB, NL)                         
 ENDIF
-
-!WRITE(*,*) 'CG%X und F final:'
-!IF (NMESHES==1) THEN
-!WRITE(*,'(6f20.12)') SCARC(1)%COMPACT(1)%X(17025),SCARC(1)%COMPACT(1)%X(17153),SCARC(1)%COMPACT(1)%X(17281),&
-!                     SCARC(1)%COMPACT(1)%X(17409),SCARC(1)%COMPACT(1)%X(17537),SCARC(1)%COMPACT(1)%X(17665)
-!ELSE
-!WRITE(*,'(6f20.12)') SCARC(1)%COMPACT(1)%X(8833),SCARC(1)%COMPACT(1)%X(8961),SCARC(1)%COMPACT(1)%X(9089),&
-!                     SCARC(2)%COMPACT(1)%X(8193),SCARC(2)%COMPACT(1)%X(8321),SCARC(2)%COMPACT(1)%X(8449)
-!ENDIF
 
 !CALL SCARC_DEBUG_LEVEL (CG%X, 'SCARC_METHOD_CG', 'X FINAL', NL)
 !CALL SCARC_DEBUG_LEVEL (CG%F, 'SCARC_METHOD_CG', 'F FINAL', NL)
@@ -15417,7 +15569,7 @@ SELECT CASE (NTYPE)
    !!!----------------------------------------------------------------------------------------------------
    CASE (NSCARC_DEBUG_CELLTYPE)
 
-      IF (TYPE_DEBUG >= NSCARC_DEBUG_MEDIUM) THEN
+      IF (TYPE_DEBUG >= NSCARC_DEBUG_LESS) THEN
        IF (NMESHES == 4 .OR. NMESHES==1) THEN                !!! only temporarily
          DO NM = NMESHES_MIN, NMESHES_MAX
            WRITE(SCARC_LU,1000) CROUTINE, CNAME, NM, NL
@@ -16011,29 +16163,34 @@ SELECT CASE(NTYPE)
                IC1=SCARC(NM)%COMPACT(NL0)%CELLTYPE(IC)
                IF (IC1>0) THEN
                    WRITE(MLATEX,3002) 'L2','L2',I,K,I,K
+WRITE(SCARC_LU,*) 'IN LATEX_MATRIX for LEVEL ', NL,': NCC=',SCARC(NM)%COMPACT(NL0)%NCC
                    IF (SCARC(NM)%COMPACT(NL0)%NCC>=1) THEN
                    IF (NL==1) CYCLE
                    IC2=SCARC(NM)%COMPACT(NL0+1)%CELLTYPE(IC1)
                    IF (IC2>0) THEN
                       WRITE(MLATEX,3002) 'L3','L3',I,K,I,K
+WRITE(SCARC_LU,*) 'IN LATEX_MATRIX for LEVEL ', NL,': NCC=',SCARC(NM)%COMPACT(NL0+1)%NCC
                       IF (SCARC(NM)%COMPACT(NL0+1)%NCC>=1) THEN
                       IF (NL==2) CYCLE
                       IC3=SCARC(NM)%COMPACT(NL0+2)%CELLTYPE(IC2)
                       IF (IC3>0) THEN
                          WRITE(MLATEX,3002) 'L4','L4',I,K,I,K
+WRITE(SCARC_LU,*) 'IN LATEX_MATRIX for LEVEL ', NL,': NCC=',SCARC(NM)%COMPACT(NL0+2)%NCC
                          IF (SCARC(NM)%COMPACT(NL0+2)%NCC>=1) THEN
                          IF (NL==3) CYCLE
                          IC4=SCARC(NM)%COMPACT(NL0+3)%CELLTYPE(IC3)
                          IF (IC4>0) THEN
                             WRITE(MLATEX,3002) 'L5','L5',I,K,I,K
+WRITE(SCARC_LU,*) 'IN LATEX_MATRIX for LEVEL ', NL,': NCC=',SCARC(NM)%COMPACT(NL0+3)%NCC
                             IF (SCARC(NM)%COMPACT(NL0+3)%NCC>=1) THEN
                             IF (NL==4) CYCLE
                             IC5=SCARC(NM)%COMPACT(NL0+4)%CELLTYPE(IC4)
                             IF (IC5>0) THEN
                                WRITE(MLATEX,3002) 'L6','L6',I,K,I,K
-                               IF (SCARC(NM)%COMPACT(NL0+3)%NCC>=1) THEN
+WRITE(SCARC_LU,*) 'IN LATEX_MATRIX for LEVEL ', NL,': NCC=',SCARC(NM)%COMPACT(NL+4)%NCC
+                               IF (SCARC(NM)%COMPACT(NL0+4)%NCC>=1) THEN
                                IF (NL==5) CYCLE
-                               IC6=SCARC(NM)%COMPACT(NL0+4)%CELLTYPE(IC4)
+                               IC6=SCARC(NM)%COMPACT(NL0+5)%CELLTYPE(IC4)
                                IF (IC6>0) THEN
                                   WRITE(MLATEX,3002) 'L7','L7',I,K,I,K
                                ENDIF
