@@ -7,7 +7,7 @@ USE TRAN
 USE MESH_POINTERS
 USE OUTPUT_DATA
 USE COMP_FUNCTIONS, ONLY: SECOND, CHECKREAD, SHUTDOWN, CHECK_XB
-USE MEMORY_FUNCTIONS, ONLY: ChkMemErr
+USE MEMORY_FUNCTIONS, ONLY: ChkMemErr,REALLOCATE2D
 USE COMP_FUNCTIONS, ONLY: GET_INPUT_FILE
 USE MISC_FUNCTIONS, ONLY: SEARCH_CONTROLLER
 USE EVAC, ONLY: READ_EVAC
@@ -31,7 +31,7 @@ REAL(EB) :: XB(6),TEXTURE_ORIGIN(3)
 REAL(EB) :: PBX,PBY,PBZ
 REAL(EB) :: MW_MIN,MW_MAX
 REAL(EB) :: REAC_ATOM_ERROR,REAC_MASS_ERROR,HUMIDITY=-1._EB
-INTEGER  :: I,J,K,IZERO,IOS
+INTEGER  :: I,J,K,IZERO,IOS,N_INIT_RESERVED
 TYPE (MESH_TYPE), POINTER :: M=>NULL()
 TYPE(OBSTRUCTION_TYPE), POINTER :: OB=>NULL()
 TYPE (VENTS_TYPE), POINTER :: VT=>NULL()
@@ -86,6 +86,11 @@ IF (.NOT.EX) THEN
    IF (MYID==0) WRITE(LU_ERR,'(A,A,A)') "ERROR: The file, ", TRIM(FN_INPUT),", does not exist in the current directory"
    STOP
 ENDIF
+
+! Allocate the global orientation vector
+
+N_ORIENTATION_VECTOR = 0
+ALLOCATE(ORIENTATION_VECTOR(3,10))
 
 ! Open the input file
 
@@ -3197,13 +3202,13 @@ USE MATH_FUNCTIONS, ONLY : GET_RAMP_INDEX
 USE DEVICE_VARIABLES, ONLY : PROPERTY_TYPE, PROPERTY, N_PROP
 USE RADCONS, ONLY : MIE_NDG
 USE MATH_FUNCTIONS, ONLY: NORM2,GET_TABLE_INDEX
-INTEGER :: SAMPLING_FACTOR,N,NN,ILPC,IPC,RGB(3),I_DUMMY(6),N_STRATA
+INTEGER :: SAMPLING_FACTOR,N,NN,ILPC,IPC,RGB(3),I_DUMMY(6),N_STRATA,N_LAGRANGIAN_CLASSES_READ
 REAL(EB) :: DIAMETER, GAMMA_D,AGE,INITIAL_TEMPERATURE,HEAT_OF_COMBUSTION, &
             VERTICAL_VELOCITY,HORIZONTAL_VELOCITY,MAXIMUM_DIAMETER,MINIMUM_DIAMETER,SIGMA_D, &
             SURFACE_TENSION,BREAKUP_RATIO,BREAKUP_GAMMA_D,BREAKUP_SIGMA_D,&
             DENSE_VOLUME_FRACTION,REAL_REFRACTIVE_INDEX,COMPLEX_REFRACTIVE_INDEX
 REAL(EB) :: DRAG_COEFFICIENT,FREE_AREA_FRACTION
-REAL(EB), DIMENSION(1000,3) :: ORIENTATION
+REAL(EB), DIMENSION(3,10) :: ORIENTATION
 REAL(EB), DIMENSION(3) :: OR_TEMP
 CHARACTER(30) :: SPEC_ID,DEVC_ID,CTRL_ID,QUANTITIES(1:10),QUANTITIES_SPEC_ID(1:10),SURF_ID,DRAG_LAW,PROP_ID, &
                  RADIATIVE_PROPERTY_TABLE='null',CNF_RAMP_ID='null',BREAKUP_CNF_RAMP_ID='null',DISTRIBUTION,BREAKUP_DISTRIBUTION
@@ -3225,20 +3230,26 @@ NAMELIST /PART/ AGE,BREAKUP,BREAKUP_CNF_RAMP_ID,BREAKUP_DISTRIBUTION,BREAKUP_GAM
 
 REWIND(LU_INPUT)
 N_LAGRANGIAN_CLASSES = 0
+N_LAGRANGIAN_CLASSES_READ = 0
 
 COUNT_PART_LOOP: DO
    CALL CHECKREAD('PART',LU_INPUT,IOS)
    IF (IOS==1) EXIT COUNT_PART_LOOP
    READ(LU_INPUT,PART,END=219,ERR=220,IOSTAT=IOS)
-   N_LAGRANGIAN_CLASSES = N_LAGRANGIAN_CLASSES + 1
+   N_LAGRANGIAN_CLASSES_READ = N_LAGRANGIAN_CLASSES_READ + 1
    220 IF (IOS>0) CALL SHUTDOWN('ERROR: Problem with PART line')
 ENDDO COUNT_PART_LOOP
 219 REWIND(LU_INPUT)
 
-IF (N_LAGRANGIAN_CLASSES>0) PARTICLE_FILE = .TRUE.
+! Create a target particle if necessary
+
+N_LAGRANGIAN_CLASSES = N_LAGRANGIAN_CLASSES_READ
+
+IF (N_INIT_RESERVED>0) N_LAGRANGIAN_CLASSES = N_LAGRANGIAN_CLASSES_READ + 1
 
 ! Allocate the derived type array to hold information about the particle classes
 
+IF (N_LAGRANGIAN_CLASSES>0) PARTICLE_FILE = .TRUE.
 ALLOCATE(LAGRANGIAN_PARTICLE_CLASS(N_LAGRANGIAN_CLASSES),STAT=IZERO)
 CALL ChkMemErr('READ','N_LAGRANGIAN_CLASSES',IZERO)
 
@@ -3248,60 +3259,25 @@ ILPC = 0
 
 READ_PART_LOOP: DO N=1,N_LAGRANGIAN_CLASSES
 
-   BREAKUP                  = .FALSE.
-   BREAKUP_RATIO            = 3._EB/7._EB  ! ratio of child Sauter mean to parent size in Bag breakup regime
-   BREAKUP_GAMMA_D          = 2.4_EB
-   BREAKUP_SIGMA_D          = -99999.9_EB
-   CTRL_ID                  = 'null'
-   DENSE_VOLUME_FRACTION    = 1.E-5_EB     ! Limiting volume fraction for drag reduction
-   DEVC_ID                  = 'null'
-   INITIAL_TEMPERATURE      = TMPA - TMPM  ! C
-   HEAT_OF_COMBUSTION       = -1._EB       ! kJ/kg
-   DIAMETER                 = -1._EB       !
-   MAXIMUM_DIAMETER         = 1.E9_EB      ! microns, meant to be infinitely large and not used
-   MINIMUM_DIAMETER         = -1._EB       ! microns, below which the PARTICLE evaporates in one time step
-   MONODISPERSE             = .FALSE.
-   N_STRATA                 = 7
-   GAMMA_D                  = 2.4_EB
-   SIGMA_D                  = -99999.9_EB
-   AGE                      = 1.E6_EB      ! s
-   ID                       = 'null'
-   PERIODIC_X               = .FALSE.
-   PERIODIC_Y               = .FALSE.
-   PERIODIC_Z               = .FALSE.
-   PROP_ID                  = 'null'
-   ORIENTATION              = 0._EB
-   QUANTITIES               = 'null'
-   QUANTITIES_SPEC_ID       = 'null'
-   RADIATIVE_PROPERTY_TABLE = 'null'
-   RGB                      = -1
-   SPEC_ID                  = 'null'
-   SURF_ID                  = 'null'
-   SURFACE_TENSION          = 72.8E-3_EB  ! N/m, applies for water
-   COLOR                    = 'null'
-   SAMPLING_FACTOR          = -1
-   STATIC                   = .FALSE.
-   MASSLESS                 = .FALSE.
-   TARGET_ONLY              = .FALSE.
-   TURBULENT_DISPERSION     = .FALSE.
-   REAL_REFRACTIVE_INDEX    = 1.33_EB
-   COMPLEX_REFRACTIVE_INDEX = 0.01_EB
-   VERTICAL_VELOCITY        = 0.5_EB
-   HORIZONTAL_VELOCITY      = 0.2_EB
-   DRAG_LAW                 = 'SPHERE'
-   DRAG_COEFFICIENT         = -1._EB
-   DISTRIBUTION             = 'ROSIN-RAMMLER-LOGNORMAL'
-   CNF_RAMP_ID              = 'null'
-   CHECK_DISTRIBUTION       = .FALSE.
-   BREAKUP_DISTRIBUTION     = 'ROSIN-RAMMLER-LOGNORMAL'
-   BREAKUP_CNF_RAMP_ID      = 'null'
-   FREE_AREA_FRACTION       = 0.5_EB
-
    ! Read the PART line from the input file or set up special PARTICLE_CLASS class for water PARTICLEs or tracers
 
-   CALL CHECKREAD('PART',LU_INPUT,IOS)
-   IF (IOS==1) EXIT READ_PART_LOOP
-   READ(LU_INPUT,PART)
+   IF (N<=N_LAGRANGIAN_CLASSES_READ) THEN
+
+      CALL CHECKREAD('PART',LU_INPUT,IOS)
+      IF (IOS==1) EXIT READ_PART_LOOP
+      CALL SET_PART_DEFAULTS
+      READ(LU_INPUT,PART)
+  
+   ELSE
+
+      ! Create a class of particles that is just a target
+
+      CALL SET_PART_DEFAULTS
+      ID = 'RESERVED TARGET PARTICLE'
+      TARGET_ONLY = .TRUE.
+      STATIC = .TRUE.
+   
+   ENDIF
 
    LPC => LAGRANGIAN_PARTICLE_CLASS(N)
 
@@ -3531,15 +3507,18 @@ READ_PART_LOOP: DO N=1,N_LAGRANGIAN_CLASSES
    LPC%N_ORIENTATION = 0
 
    DO NN=1,10
-      IF (ANY(ABS(ORIENTATION(NN,1:3))>TWO_EPSILON_EB)) LPC%N_ORIENTATION = LPC%N_ORIENTATION + 1
+      IF (ANY(ABS(ORIENTATION(1:3,NN))>TWO_EPSILON_EB)) LPC%N_ORIENTATION = LPC%N_ORIENTATION + 1
    ENDDO
 
    IF (LPC%N_ORIENTATION>0) THEN
-      ALLOCATE(LPC%ORIENTATION(1:LPC%N_ORIENTATION,1:3),STAT=IZERO)
-      CALL ChkMemErr('READ','ORIENTATION',IZERO)
+      LPC%ORIENTATION_INDEX = N_ORIENTATION_VECTOR + 1
       DO NN=1,LPC%N_ORIENTATION
-         OR_TEMP(1:3) = ORIENTATION(NN,1:3)
-         LPC%ORIENTATION(NN,1:3)   = ORIENTATION(NN,1:3)/ NORM2(OR_TEMP)
+         OR_TEMP(1:3) = ORIENTATION(1:3,NN)
+         N_ORIENTATION_VECTOR = N_ORIENTATION_VECTOR + 1
+         IF (N_ORIENTATION_VECTOR>UBOUND(ORIENTATION_VECTOR,DIM=2)) THEN
+            ORIENTATION_VECTOR => REALLOCATE2D(ORIENTATION_VECTOR,1,3,1,N_ORIENTATION_VECTOR+10)
+         ENDIF
+         ORIENTATION_VECTOR(1:3,N_ORIENTATION_VECTOR) = ORIENTATION(1:3,NN)/ NORM2(OR_TEMP)
       ENDDO
    ENDIF
 
@@ -3593,6 +3572,62 @@ DO ILPC=1,N_LAGRANGIAN_CLASSES
    LPC=>LAGRANGIAN_PARTICLE_CLASS(ILPC)
    IF (LPC%HEAT_OF_COMBUSTION > 0._EB) LPC%ADJUST_EVAPORATION = LPC%HEAT_OF_COMBUSTION/REACTION(1)%HEAT_OF_COMBUSTION
 ENDDO
+
+CONTAINS
+
+
+SUBROUTINE SET_PART_DEFAULTS
+
+BREAKUP                  = .FALSE.
+BREAKUP_RATIO            = 3._EB/7._EB  ! ratio of child Sauter mean to parent size in Bag breakup regime
+BREAKUP_GAMMA_D          = 2.4_EB
+BREAKUP_SIGMA_D          = -99999.9_EB
+CTRL_ID                  = 'null'
+DENSE_VOLUME_FRACTION    = 1.E-5_EB     ! Limiting volume fraction for drag reduction
+DEVC_ID                  = 'null'
+INITIAL_TEMPERATURE      = TMPA - TMPM  ! C
+HEAT_OF_COMBUSTION       = -1._EB       ! kJ/kg
+DIAMETER                 = -1._EB       !
+MAXIMUM_DIAMETER         = 1.E9_EB      ! microns, meant to be infinitely large and not used
+MINIMUM_DIAMETER         = -1._EB       ! microns, below which the PARTICLE evaporates in one time step
+MONODISPERSE             = .FALSE.
+N_STRATA                 = 7
+GAMMA_D                  = 2.4_EB
+SIGMA_D                  = -99999.9_EB
+AGE                      = 1.E6_EB      ! s
+ID                       = 'null'
+PERIODIC_X               = .FALSE.
+PERIODIC_Y               = .FALSE.
+PERIODIC_Z               = .FALSE.
+PROP_ID                  = 'null'
+ORIENTATION              = 0._EB
+QUANTITIES               = 'null'
+QUANTITIES_SPEC_ID       = 'null'
+RADIATIVE_PROPERTY_TABLE = 'null'
+RGB                      = -1
+SPEC_ID                  = 'null'
+SURF_ID                  = 'null'
+SURFACE_TENSION          = 72.8E-3_EB  ! N/m, applies for water
+COLOR                    = 'null'
+SAMPLING_FACTOR          = -1
+STATIC                   = .FALSE.
+MASSLESS                 = .FALSE.
+TARGET_ONLY              = .FALSE.
+TURBULENT_DISPERSION     = .FALSE.
+REAL_REFRACTIVE_INDEX    = 1.33_EB
+COMPLEX_REFRACTIVE_INDEX = 0.01_EB
+VERTICAL_VELOCITY        = 0.5_EB
+HORIZONTAL_VELOCITY      = 0.2_EB
+DRAG_LAW                 = 'SPHERE'
+DRAG_COEFFICIENT         = -1._EB
+DISTRIBUTION             = 'ROSIN-RAMMLER-LOGNORMAL'
+CNF_RAMP_ID              = 'null'
+CHECK_DISTRIBUTION       = .FALSE.
+BREAKUP_DISTRIBUTION     = 'ROSIN-RAMMLER-LOGNORMAL'
+BREAKUP_CNF_RAMP_ID      = 'null'
+FREE_AREA_FRACTION       = 0.5_EB
+
+END SUBROUTINE SET_PART_DEFAULTS
 
 END SUBROUTINE READ_PART
 
@@ -8268,6 +8303,10 @@ COUNT_LOOP: DO
 ENDDO COUNT_LOOP
 11 REWIND(LU_INPUT)
 
+! Add reserved INIT lines
+
+N_INIT = N_INIT + N_INIT_RESERVED
+
 ! If there are no INIT lines, return
 
 IF (N_INIT==0) RETURN
@@ -8277,47 +8316,36 @@ CALL ChkMemErr('READ','INITIALIZATION',IZERO)
 
 NN = 0
 
-INIT_LOOP: DO N=1,N_INIT_READ
+INIT_LOOP: DO N=1,N_INIT_READ+N_INIT_RESERVED
 
-   ! Set default values
+   IF (N<=N_INIT_READ) THEN
 
-   CELL_CENTERED             = .FALSE.
-   CTRL_ID                   = 'null'
-   DENSITY                   = -1000._EB
-   DEVC_ID                   = 'null'
-   DIAMETER                  = -1._EB
-   DT_INSERT                 = -1._EB
-   DX                        =  0._EB
-   DY                        =  0._EB
-   DZ                        =  0._EB
-   HEIGHT                    = -1._EB
-   HRRPUV                    =  0._EB
-   ID                        = 'null'
-   MASS_FRACTION             =  0._EB
-   MASS_PER_TIME             = -1._EB
-   MASS_PER_VOLUME           = -1._EB
-   MULT_ID                   = 'null'
-   N_PARTICLES               =  0
-   N_PARTICLES_PER_CELL     = 0
-   PART_ID                   = 'null'
-   RADIUS                    = -1._EB
-   SHAPE                     = 'BLOCK'
-   SPEC_ID                   = 'null'
-   TEMPERATURE               = -1000._EB
-   UVW                       = 0._EB
-   XB(1)                     = -1000000._EB
-   XB(2)                     =  1000000._EB
-   XB(3)                     = -1000000._EB
-   XB(4)                     =  1000000._EB
-   XB(5)                     = -1000000._EB
-   XB(6)                     =  1000000._EB
-   XYZ                       = -1000000._EB
+      ! Read in the INIT lines
 
-   ! Read in the INIT lines
+      CALL CHECKREAD('INIT',LU_INPUT,IOS)
+      IF (IOS==1) EXIT INIT_LOOP
+      CALL SET_INIT_DEFAULTS
+      READ(LU_INPUT,INIT)
+ 
+   ELSE
 
-   CALL CHECKREAD('INIT',LU_INPUT,IOS)
-   IF (IOS==1) EXIT INIT_LOOP
-   READ(LU_INPUT,INIT)
+      ! Use information from a DEVC line to create an INIT line for 'RADIATIVE HEAT FLUX GAS'
+
+      CALL SET_INIT_DEFAULTS
+      DV => DEVICE(INIT_RESERVED(N-N_INIT_READ)%DEVC_INDEX)
+      XYZ(1) = DV%X
+      XYZ(2) = DV%Y
+      XYZ(3) = DV%Z
+      DX = INIT_RESERVED(N-N_INIT_READ)%DX
+      DY = INIT_RESERVED(N-N_INIT_READ)%DY
+      DZ = INIT_RESERVED(N-N_INIT_READ)%DZ
+      PART_ID = 'RESERVED TARGET PARTICLE'
+      N_PARTICLES = INIT_RESERVED(N-N_INIT_READ)%N_PARTICLES
+      ID = DV%ID
+      DEVC_ID = DV%ID
+      DV%CURRENT_STATE = .TRUE.
+
+   ENDIF
 
    ! Transform XYZ into XB if necessary
 
@@ -8543,6 +8571,47 @@ ENDDO DEVICE_LOOP
 
 REWIND(LU_INPUT)
 
+CONTAINS
+
+
+SUBROUTINE SET_INIT_DEFAULTS
+
+! Set default values
+
+CELL_CENTERED             = .FALSE.
+CTRL_ID                   = 'null'
+DENSITY                   = -1000._EB
+DEVC_ID                   = 'null'
+DIAMETER                  = -1._EB
+DT_INSERT                 = -1._EB
+DX                        =  0._EB
+DY                        =  0._EB
+DZ                        =  0._EB
+HEIGHT                    = -1._EB
+HRRPUV                    =  0._EB
+ID                        = 'null'
+MASS_FRACTION             =  0._EB
+MASS_PER_TIME             = -1._EB
+MASS_PER_VOLUME           = -1._EB
+MULT_ID                   = 'null'
+N_PARTICLES               =  0
+N_PARTICLES_PER_CELL      = 0
+PART_ID                   = 'null'
+RADIUS                    = -1._EB
+SHAPE                     = 'BLOCK'
+SPEC_ID                   = 'null'
+TEMPERATURE               = -1000._EB
+UVW                       = 0._EB
+XB(1)                     = -1000000._EB
+XB(2)                     =  1000000._EB
+XB(3)                     = -1000000._EB
+XB(4)                     =  1000000._EB
+XB(5)                     = -1000000._EB
+XB(6)                     =  1000000._EB
+XYZ                       = -1000000._EB
+
+END SUBROUTINE SET_INIT_DEFAULTS
+
 END SUBROUTINE READ_INIT
 
 
@@ -8721,11 +8790,13 @@ SUBROUTINE READ_DEVC
 ! Just read in the DEViCes and the store the info in DEVICE()
 
 USE DEVICE_VARIABLES, ONLY: DEVICE_TYPE, DEVICE, N_DEVC, N_DEVC_TIME, N_DEVC_LINE,MAX_DEVC_LINE_POINTS, DEVC_PIPE_OPERATING
-INTEGER  :: NN,NM,MESH_NUMBER,N_DEVC_READ,IOR,TRIP_DIRECTION,VELO_INDEX,POINTS,I_POINT,PIPE_INDEX
-REAL(EB) :: DEPTH,ORIENTATION(3),ROTATION,SETPOINT,FLOWRATE,BYPASS_FLOWRATE,DELAY,XYZ(3),CONVERSION_FACTOR,SMOOTHING_FACTOR
+USE MATH_FUNCTIONS, ONLY: NORM2
+INTEGER  :: NN,NM,MESH_NUMBER,N_DEVC_READ,IOR,TRIP_DIRECTION,VELO_INDEX,POINTS,I_POINT,PIPE_INDEX,ORIENTATION_INDEX
+REAL(EB) :: DEPTH,ORIENTATION(3),ROTATION,SETPOINT,FLOWRATE,BYPASS_FLOWRATE,DELAY,XYZ(3),CONVERSION_FACTOR,SMOOTHING_FACTOR,&
+            OR_TEMP(3)
 CHARACTER(30) :: QUANTITY,QUANTITY2,PROP_ID,CTRL_ID,DEVC_ID,INIT_ID,SURF_ID,STATISTICS,PART_ID,MATL_ID,SPEC_ID,UNITS, &
                  DUCT_ID,NODE_ID(2),X_ID,Y_ID,Z_ID,NO_UPDATE_DEVC_ID,NO_UPDATE_CTRL_ID
-LOGICAL :: INITIAL_STATE,LATCH,DRY,TIME_AVERAGED,EVACUATION,HIDE_COORDINATES,RELATIVE,OUTPUT
+LOGICAL :: INITIAL_STATE,LATCH,DRY,TIME_AVERAGED,EVACUATION,HIDE_COORDINATES,RELATIVE,OUTPUT,NEW_ORIENTATION_VECTOR
 TYPE (DEVICE_TYPE), POINTER :: DV=>NULL()
 NAMELIST /DEVC/ BYPASS_FLOWRATE,CONVERSION_FACTOR,CTRL_ID,DELAY,DEPTH,DEVC_ID,DRY,DUCT_ID,EVACUATION,FLOWRATE,FYI,&
                 HIDE_COORDINATES,ID,INITIAL_STATE,INIT_ID,IOR,LATCH,MATL_ID,NODE_ID, &
@@ -8762,8 +8833,12 @@ IF (N_DEVC==0) RETURN
 
 ! Allocate DEVICE array to hold all information for each device
 
-ALLOCATE(DEVICE(N_DEVC),STAT=IZERO)
-CALL ChkMemErr('READ','DEVICE',IZERO)
+ALLOCATE(DEVICE(N_DEVC),STAT=IZERO) ; CALL ChkMemErr('READ','DEVICE',IZERO)
+
+! Speceial case for QUANTITY='RADIATIVE HEAT FLUX GAS'
+
+ALLOCATE(INIT_RESERVED(N_DEVC),STAT=IZERO) ; CALL ChkMemErr('READ','INIT_RESERVED',IZERO)
+N_INIT_RESERVED = 0
 
 ! Read in the DEVC lines, keeping track of TIME-history devices, and LINE array devices
 
@@ -8799,6 +8874,31 @@ READ_DEVC_LOOP: DO NN=1,N_DEVC_READ
                        TRIM(STATISTICS)=='TIME MAX') ) THEN
       WRITE(MESSAGE,'(A,A,A)')  'ERROR: DEVC ',TRIM(ID),' cannot compute STATISTICS. Set POINTS>1.'
       CALL SHUTDOWN(MESSAGE)
+   ENDIF
+
+   ! Add ORIENTATION to global list
+
+   NEW_ORIENTATION_VECTOR = .TRUE.
+   ORIENTATION_INDEX = 0
+
+   DO I=1,N_ORIENTATION_VECTOR
+      IF (ORIENTATION(1)==ORIENTATION_VECTOR(1,I) .AND. &
+          ORIENTATION(2)==ORIENTATION_VECTOR(2,I) .AND. &
+          ORIENTATION(3)==ORIENTATION_VECTOR(3,I)) THEN
+         NEW_ORIENTATION_VECTOR = .FALSE.
+         ORIENTATION_INDEX = I
+         EXIT
+      ENDIF
+   ENDDO
+
+   IF (NEW_ORIENTATION_VECTOR) THEN
+      OR_TEMP(1:3) = ORIENTATION(1:3)
+      N_ORIENTATION_VECTOR = N_ORIENTATION_VECTOR + 1
+      IF (N_ORIENTATION_VECTOR>UBOUND(ORIENTATION_VECTOR,DIM=2)) THEN
+         ORIENTATION_VECTOR => REALLOCATE2D(ORIENTATION_VECTOR,1,3,1,N_ORIENTATION_VECTOR+10)
+      ENDIF
+      ORIENTATION_VECTOR(1:3,N_ORIENTATION_VECTOR) = ORIENTATION(1:3)/ NORM2(OR_TEMP)
+      ORIENTATION_INDEX = N_ORIENTATION_VECTOR
    ENDIF
 
    ! Reorder XB coordinates if necessary
@@ -8879,10 +8979,11 @@ READ_DEVC_LOOP: DO NN=1,N_DEVC_READ
          ENDIF
       ENDIF
 
-      ! Determine if the DEVC is a TIME or LINE device
-
       ! Don't print out clocks
+
       IF (QUANTITY=='TIME' .AND. NO_UPDATE_DEVC_ID=='null' .AND. NO_UPDATE_CTRL_ID=='null' ) OUTPUT = .FALSE.
+
+      ! Determine if the DEVC is a TIME or LINE device
 
       IF (POINTS==1 .AND. OUTPUT)      N_DEVC_TIME = N_DEVC_TIME + 1
       IF (POINTS>1 .AND. I_POINT==1)   N_DEVC_LINE = N_DEVC_LINE + 1
@@ -8893,64 +8994,64 @@ READ_DEVC_LOOP: DO NN=1,N_DEVC_READ
 
       DV => DEVICE(N_DEVC)
 
-      DV%RELATIVE         = RELATIVE
-      DV%CONVERSION_FACTOR= CONVERSION_FACTOR
-      DV%DEPTH            = DEPTH
-      DV%IOR              = IOR
-      DV%ID               = ID
-      IF (POINTS>1)DV%LINE= N_DEVC_LINE
-      DV%POINT            = I_POINT
-      DV%MESH             = MESH_NUMBER
-      DV%ORDINAL          = NN
-      DV%ORIENTATION(1:3) = ORIENTATION(1:3)/SQRT(ORIENTATION(1)**2+ORIENTATION(2)**2+ORIENTATION(3)**2)
-      DV%PROP_ID          = PROP_ID
-      DV%CTRL_ID          = CTRL_ID
-      DV%DEVC_ID          = DEVC_ID
-      DV%CTRL_ID          = CTRL_ID
-      DV%SURF_ID          = SURF_ID
-      DV%PART_ID          = PART_ID
-      DV%MATL_ID          = MATL_ID
-      DV%SPEC_ID          = SPEC_ID
-      DV%DUCT_ID          = DUCT_ID
-      DV%INIT_ID          = INIT_ID
-      DV%NODE_ID          = NODE_ID
-      DV%QUANTITY         = QUANTITY
-      DV%QUANTITY2        = QUANTITY2
-      DV%ROTATION         = ROTATION*TWOPI/360._EB
-      DV%SETPOINT         = SETPOINT
-      DV%LATCH            = LATCH
-      DV%OUTPUT           = OUTPUT
-      DV%TRIP_DIRECTION   = TRIP_DIRECTION
-      DV%INITIAL_STATE    = INITIAL_STATE
-      DV%CURRENT_STATE    = INITIAL_STATE
-      DV%PRIOR_STATE      = INITIAL_STATE
-      DV%FLOWRATE         = FLOWRATE
-      DV%BYPASS_FLOWRATE  = BYPASS_FLOWRATE
-      DV%SMOOTHING_FACTOR = SMOOTHING_FACTOR
-      DV%STATISTICS       = STATISTICS
-      DV%TIME_AVERAGED    = TIME_AVERAGED
-      DV%SURF_INDEX       = 0
-      DV%UNITS            = UNITS
-      DV%DELAY            = DELAY / TIME_SHRINK_FACTOR
-      DV%X1               = XB(1)
-      DV%X2               = XB(2)
-      DV%Y1               = XB(3)
-      DV%Y2               = XB(4)
-      DV%Z1               = XB(5)
-      DV%Z2               = XB(6)
-      DV%X                = XYZ(1)
-      DV%Y                = XYZ(2)
-      DV%Z                = XYZ(3)
+      DV%RELATIVE          = RELATIVE
+      DV%CONVERSION_FACTOR = CONVERSION_FACTOR
+      DV%DEPTH             = DEPTH
+      DV%IOR               = IOR
+      DV%ID                = ID
+      IF (POINTS>1)DV%LINE = N_DEVC_LINE
+      DV%POINT             = I_POINT
+      DV%MESH              = MESH_NUMBER
+      DV%ORDINAL           = NN
+      DV%ORIENTATION_INDEX = ORIENTATION_INDEX
+      DV%PROP_ID           = PROP_ID
+      DV%CTRL_ID           = CTRL_ID
+      DV%DEVC_ID           = DEVC_ID
+      DV%CTRL_ID           = CTRL_ID
+      DV%SURF_ID           = SURF_ID
+      DV%PART_ID           = PART_ID
+      DV%MATL_ID           = MATL_ID
+      DV%SPEC_ID           = SPEC_ID
+      DV%DUCT_ID           = DUCT_ID
+      DV%INIT_ID           = INIT_ID
+      DV%NODE_ID           = NODE_ID
+      DV%QUANTITY          = QUANTITY
+      DV%QUANTITY2         = QUANTITY2
+      DV%ROTATION          = ROTATION*TWOPI/360._EB
+      DV%SETPOINT          = SETPOINT
+      DV%LATCH             = LATCH
+      DV%OUTPUT            = OUTPUT
+      DV%TRIP_DIRECTION    = TRIP_DIRECTION
+      DV%INITIAL_STATE     = INITIAL_STATE
+      DV%CURRENT_STATE     = INITIAL_STATE
+      DV%PRIOR_STATE       = INITIAL_STATE
+      DV%FLOWRATE          = FLOWRATE
+      DV%BYPASS_FLOWRATE   = BYPASS_FLOWRATE
+      DV%SMOOTHING_FACTOR  = SMOOTHING_FACTOR
+      DV%STATISTICS        = STATISTICS
+      DV%TIME_AVERAGED     = TIME_AVERAGED
+      DV%SURF_INDEX        = 0
+      DV%UNITS             = UNITS
+      DV%DELAY             = DELAY / TIME_SHRINK_FACTOR
+      DV%X1                = XB(1)
+      DV%X2                = XB(2)
+      DV%Y1                = XB(3)
+      DV%Y2                = XB(4)
+      DV%Z1                = XB(5)
+      DV%Z2                = XB(6)
+      DV%X                 = XYZ(1)
+      DV%Y                 = XYZ(2)
+      DV%Z                 = XYZ(3)
       IF (X_ID=='null') X_ID = TRIM(ID)//'-x'
       IF (Y_ID=='null') Y_ID = TRIM(ID)//'-y'
       IF (Z_ID=='null') Z_ID = TRIM(ID)//'-z'
-      DV%X_ID             = X_ID
-      DV%Y_ID             = Y_ID
-      DV%Z_ID             = Z_ID
-      DV%DRY              = DRY
-      DV%EVACUATION       = EVACUATION
-      DV%VELO_INDEX       = VELO_INDEX
-      DV%PIPE_INDEX       = PIPE_INDEX
+      DV%X_ID              = X_ID
+      DV%Y_ID              = Y_ID
+      DV%Z_ID              = Z_ID
+      DV%DRY               = DRY
+      DV%EVACUATION        = EVACUATION
+      DV%VELO_INDEX        = VELO_INDEX
+      DV%PIPE_INDEX        = PIPE_INDEX
       DV%NO_UPDATE_DEVC_ID = NO_UPDATE_DEVC_ID
       DV%NO_UPDATE_CTRL_ID = NO_UPDATE_CTRL_ID
 
@@ -8970,6 +9071,25 @@ READ_DEVC_LOOP: DO NN=1,N_DEVC_READ
                ABS(XB(5)-XB(6))> SPACING(XB(6))) DV%LINE_COORD_CODE = 23
          ELSE
             DV%LINE_COORD_CODE = 0
+         ENDIF
+      ENDIF
+
+      ! Special case for QUANTITY='RADIATIVE HEAT FLUX GAS'. Save information to create INIT line.
+
+      IF (DV%QUANTITY=='RADIATIVE HEAT FLUX GAS') THEN
+         DV%INIT_ID = DV%ID
+         IF (DV%POINT==1) THEN
+            N_INIT_RESERVED = N_INIT_RESERVED + 1
+            INIT_RESERVED(N_INIT_RESERVED)%DEVC_INDEX = N_DEVC
+            INIT_RESERVED(N_INIT_RESERVED)%N_PARTICLES = POINTS
+            IF (POINTS>1) THEN
+               INIT_RESERVED(N_INIT_RESERVED)%XYZ(1) = XB(1)
+               INIT_RESERVED(N_INIT_RESERVED)%XYZ(2) = XB(3)
+               INIT_RESERVED(N_INIT_RESERVED)%XYZ(3) = XB(5)
+               INIT_RESERVED(N_INIT_RESERVED)%DX = (XB(2)-XB(1))/(REAL(POINTS,EB)-1)
+               INIT_RESERVED(N_INIT_RESERVED)%DY = (XB(4)-XB(3))/(REAL(POINTS,EB)-1)
+               INIT_RESERVED(N_INIT_RESERVED)%DZ = (XB(6)-XB(5))/(REAL(POINTS,EB)-1)
+            ENDIF
          ENDIF
       ENDIF
 
