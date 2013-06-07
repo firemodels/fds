@@ -68,8 +68,8 @@ loglog(k,E3,'k-');
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Key_Font_Size)
 axis([10 1000 1/1e6 1000/1e6])
-ylabel('E(k) (m^3/s^2)','FontSize',Title_Font_Size)
-xlabel('k (1/m)','FontSize',Title_Font_Size)
+ylabel('$E(k)$ (m$^3$/s$^2$)','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter)
+xlabel('$k$ (1/m)','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter)
 
 % Add lines to indicate cutoff wavenumbers
 loglog( [k0*N/2,k0*N/2],[1e-10,1e-2],'k--'); % LES Nyquist limit

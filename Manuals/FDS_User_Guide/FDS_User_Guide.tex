@@ -33,6 +33,8 @@
 
 \normalsize
 
+\authortitlesigs
+
 \vfill
 
 \flushright{
@@ -60,13 +62,8 @@ VTT Technical Research Centre of Finland \\ [.3in]
 \vspace{.25in}
 
 \normalsize
-\flushright{
-Fire Research Division \\
-Engineering Laboratory \\
-Gaithersburg, Maryland, USA  \\
-\hspace{1in} \\
-VTT Technical Research Centre of Finland \\
-Espoo, Finland }
+
+\authorsigs
 
 
 \vspace{.25in}
@@ -4981,7 +4978,7 @@ Species that can absorb and emit thermal radiation are defined via the parameter
 &SPEC ID='ETHANOL', RADCAL_ID='METHANOL' /
 \end{lstlisting}
 would use the RadCal absorptivities for {\ct METHANOL} when computing the absorptivity of {\ct ETHANOL}. For absorbing species not present in RadCal, it is recommended to choose a RadCal surrogate with similar molecular functional groups and molecular mass. The infrared spectrum is greatly affected by the species molecular functional groups.
- 
+
 Species molecular mass also affects the spectrum: a heavier species of a given molecular functional group tends to absorb and emit more infrared radiation than a lighter species of the same functional group.  For simple chemistry, if the fuel is not present in Table~\ref{tab:gasspecies} and no {\ct FUEL\_RADCAL\_ID} is provided on the {\ct REAC} line, then the absorption properties of methane will be used.
 
 \subsubsection{Liquids}
@@ -5647,7 +5644,7 @@ However, for the purposes of inputting into FDS, since M is neither a product no
 As discussed previously (Section~\ref{info:heat_of_combustion}), energy release is calculated using the net change of species in a time step along with the enthalpy of formation of each species. This approach makes specifying an endothermic reaction, such as the reversible CO$_2$ reaction (R3), no different than typical FDS exothermic combustion reactions.
 
 \paragraph{Remark}
-A limitation of using finite-rate reactions in an LES calculation is reduced temperature resolution. Finite-rate reactions are temperature dependent and the temperature in a large scale calculation is smeared out over a mesh cell. Setting {\ct TEMPERATURE\_DEPENDENT\_REACTION = .TRUE.} on the {\ct MISC} line will have FDS compute a local cell temperature based on the instantaneous energy release. This temperature is used only as the source temperature in the time integration of the finite-rate reactions. This temperature can be outputted using the {\ct QUANTITY='FLAME TEMPERATURE'}. 
+A limitation of using finite-rate reactions in an LES calculation is reduced temperature resolution. Finite-rate reactions are temperature dependent and the temperature in a large scale calculation is smeared out over a mesh cell. Setting {\ct TEMPERATURE\_DEPENDENT\_REACTION = .TRUE.} on the {\ct MISC} line will have FDS compute a local cell temperature based on the instantaneous energy release. This temperature is used only as the source temperature in the time integration of the finite-rate reactions. This temperature can be outputted using the {\ct QUANTITY='FLAME TEMPERATURE'}.
 
 
 \section{Special Topic: Aerosol Deposition}
@@ -6134,19 +6131,15 @@ output the surface temperature of a single particle.
 \subsection{Drag}
 \label{info:particle_drag}
 
-For massive particles the default drag law (i.e., the drag coefficient correlation as a function of the Reynolds number based on particle diameter) is that of a sphere. To invoke the cylinder drag law set {\ct DRAG\_LAW} to {\ct 'CYLINDER'} on the {\ct PART} line and to invoke the screen drag law (see Section~\ref{info:particle_screen}) set to {\ct 'SCREEN'}  If neither of these options is applicable, you may specify a constant value of the drag coefficient for a particle class (a specific {\ct PART\_ID}) by setting a {\ct DRAG\_COEFFICIENT} on {\ct PART}.
-The {\ct DRAG\_COEFFICIENT} over-rides the {\ct DRAG\_LAW}.
+For massive particles the default drag law (i.e., the drag coefficient correlation as a function of the Reynolds number based on particle diameter) is that of a sphere. To invoke the cylinder drag law set {\ct DRAG\_LAW} to {\ct 'CYLINDER'} on the {\ct PART} line and to invoke the screen drag law (see Section~\ref{info:particle_screen}) set to {\ct 'SCREEN'}  If neither of these options is applicable, you may specify a constant value of the drag coefficient for a particle class (a specific {\ct PART\_ID}) by setting a {\ct DRAG\_COEFFICIENT} on {\ct PART}. The {\ct DRAG\_COEFFICIENT} over-rides the {\ct DRAG\_LAW}.
 
 \subsection{Splitting particles}
 \label{info:particle_split}
 
-If the radiation around the particle is not uniform, it may be useful to split the particle by orientations. This can be done by using the parameter {\ct ORIENTATION(1:N,1:3)} to specify {\ct N} unique directions for the particle. For example,
-
+If the radiation around the particle is not uniform, it may be useful to split the particle by orientations. This can be done by using the parameter {\ct ORIENTATION(1:3,1:N)} to specify {\ct N} unique directions for the particle. For example,
 \begin{lstlisting}
-&PART ..., ORIENTATION(1,3)=1., ORIENTATION(2,3)=-1. /
+&PART ..., ORIENTATION(1:3,1)=0,0,1, ORIENTATION(1:3,2)=0,0,-1 /
 \end{lstlisting}
-
-\noindent
 specifies that half the particle is facing upwards and half is facing downwards.   Each orientation is modeled in practice by a separate particle that sees the radiation that is directed to a plane normal to the orientation. The particle mass and the surface area are scaled by the number of orientations. The splitting along the coordinate axis is demonstrated for all geometries in Fig.~\ref{cart_split} through Fig.~\ref{sphere_split}. The orientation direction does not have to align with the coordinate axes. For a Cartesian particle (i.e., a plate), only the orientations that are perpendicular to the plate make physical sense.
 
 \begin{figure}[ht]
@@ -6279,7 +6272,7 @@ A 2-D array of particles can be used to represent the drag exerted by a window s
 &INIT N_PARTICLES_PER_CELL=1, CELL_CENTERED=.TRUE., PART_ID='SCREEN',
       XB=1.01,1.02,0.0,1.0,0.0,1.0/
 &PART ID='SCREEN', DRAG_LAW='SCREEN', FREE_AREA_FRACTION=0.4, STATIC=.TRUE.,
-      SURF_ID='SCREEN', ORIENTATION(1,1:3)=1,0,0 /
+      SURF_ID='SCREEN', ORIENTATION(1:3,1)=1,0,0 /
 &SURF ID='SCREEN', THICKNESS=0.00015, GEOMETRY='CYLINDRICAL',
       MATL_ID='ALUMINUM' /
 &MATL ID='ALUMINUM', DENSITY=2700., CONDUCTIVITY=200., SPECIFIC_HEAT=0.9 /
@@ -6348,26 +6341,17 @@ centermost temperature, as that is where electrical shorts in a multi-conductor 
 likely to occur first.
 
 To use the THIEF model in FDS, add lines similar to the following to the input file:
-
 \begin{lstlisting}
 &MATL ID='plastic', DENSITY=2535., CONDUCTIVITY=0.2, SPECIFIC_HEAT=1.5 /
 &SURF ID='cylinder', THICKNESS=0.00815, LENGTH=0.1, MATL_ID='plastic',
       GEOMETRY='CYLINDRICAL' /
-&PART ID='Cable Segment', SURF_ID='cylinder', ORIENTATION(1,1:3)=0.,0.,1.,
+&PART ID='Cable Segment', SURF_ID='cylinder', ORIENTATION(1:3,1)=0.,0.,1.,
       STATIC=.TRUE. /
 &INIT ID='Cable', XB=0.01,0.01,0.,0.,0.,0., N_PARTICLES=1, PART_ID='Cable Segment' /
 &DEVC ID='Cable Temp', INIT_ID='Cable',
-      QUANTITY='INSIDE WALL TEMPERATURE', DEPTH=0.00152 /
+      QUANTITY='INSIDE WALL TEMPERATURE', DEPTH=0.0015 /
 \end{lstlisting}
-
-\noindent
-The THIEF model assumes that the cable plastic material has a thermal conductivity of 0.2~\si{W/(m.K)} and a specific heat of 1.5~\si{kJ/(kg.K)}. If you change these
-values, you are no longer using the THIEF model. The density is the mass per unit length of the cable divided by its cross sectional area.
-The {\ct THICKNESS} is the radius of the cylindrical cable in units of m. The {\ct LENGTH}, in m, is needed
-by FDS because it assumes that the cable is a cylindrical segment of a certain length. It has no impact on the simulation, and its value it typically the size of a grid cell.
-The {\ct ORIENTATION} tells FDS the direction of the prevailing radiative source. The first argument indicates that there can be more than one {\ct ORIENTATION}.
-The {\ct STATIC=.TRUE.} prevents the cable from moving. The {\ct INIT} line is used to position the cable within the computational domain.
-The {\ct DEVC} line records the cables inner temperature, in this case 1.52~mm below the surface. This is typically the jacket thickness.
+The THIEF model assumes that the cable plastic material has a thermal conductivity of 0.2~\si{W/(m.K)} and a specific heat of 1.5~\si{kJ/(kg.K)}. If you change these values, you are no longer using the THIEF model. The density is the mass per unit length of the cable divided by its cross sectional area. The {\ct THICKNESS} is the radius of the cylindrical cable in units of m. The {\ct LENGTH}, in m, is needed by FDS because it assumes that the cable is a cylindrical segment of a certain length. It has no impact on the simulation, and its value it typically the size of a grid cell. The {\ct ORIENTATION} tells FDS the direction of the prevailing radiative source. The second argument indicates that there can be more than one {\ct ORIENTATION}. {\ct STATIC=.TRUE.} prevents the cable from moving. The {\ct INIT} line is used to position the cable within the computational domain. The {\ct DEVC} line records the cables inner temperature, in this case 1.5~mm below the surface. This is typically the jacket thickness.
 
 
 
@@ -6602,50 +6586,23 @@ via additional namelist groups called {\ct CTRL} (Control) and
 
 Regardless of the specific properties, each device needs to be sited either at a point within the computational domain, or
 over a span of the domain, like a beam smoke detector. For example, a sprinkler is sited within the domain with a line like:
-
 \begin{lstlisting}
 &DEVC XYZ=3.0,5.6,2.3, PROP_ID='Acme Sprinkler 123', ID='Spk_39' /
 \end{lstlisting}
+The physical coordinates of the device are given by a triplet of real numbers, {\ct XYZ}.  FDS uses these coordinates to determine in which gas or wall cell the device is located. The properties of the device are contained on the {\ct PROP} line designated by {\ct PROP\_ID}, which will be explained below for each of the special devices included in FDS. The character string {\ct ID} is merely a descriptor to identify the device in the output files, and if any action is tied to its activation.
 
-\noindent
-The physical coordinates of the
-device are given by a triplet of real numbers, {\ct XYZ}.  FDS uses these coordinates to determine in which gas or wall cell the device is located.
-The properties of the device are contained on the {\ct PROP} line
-designated by {\ct PROP\_ID}, which will be explained below for each of the
-special devices included in FDS.
-The character string {\ct ID} is merely a descriptor to identify the
-device in the output files, and if any action is tied to its activation.
-
-Not all devices need to be associated with a particular set of properties via the {\ct PROP\_ID}. For example, pointwise
-output quantities are specified with a single {\ct DEVC} line, like
-
+Not all devices need to be associated with a particular set of properties via the {\ct PROP\_ID}. For example, pointwise output quantities are specified with a single {\ct DEVC} line, like
 \begin{lstlisting}
 &DEVC ID='TC-23', XYZ=3.0,5.6,2.3, QUANTITY='TEMPERATURE'  /
 \end{lstlisting}
+which tells FDS to record the temperature at the given point as a function of time. The {\ct ID} is a label in the output file whose name is {\ct CHID\_devc.csv}. Note that FDS outputs the data stored for that cell without performing any interpolation with surrounding cells.
 
-\noindent
-which tells FDS to record the temperature at the given point as a function of time. The {\ct ID} is a label in the output file whose name
-is {\ct CHID\_devc.csv}. Note that FDS outputs the data stored for that cell without performing any interpolation with surrounding cells.
-
-Some devices have a particular orientation.
-The parameter {\ct IOR} (Index of Orientation) is required for any device that is
-placed on the surface of a solid. The values $\pm$1 or $\pm$2 or $\pm$3 indicate the direction
-that the device ``points.'' For example, {\ct IOR=-1} means that the device is mounted on a wall that faces in the negative $x$ direction.
-
-{\ct ORIENTATION} is used for devices that are not on a surface
-and require a directional specification, like a sprinkler. {\ct ORIENTATION} is specified with a
-triplet of real number values that indicate the components of the direction vector.
-The default value of {\ct ORIENTATION} is (0,0,-1).
-For example, a default downward-directed sprinkler spray can be redirected in other direction.
+Some devices have a particular orientation. The parameter {\ct IOR} (Index of Orientation) is required for any device that is placed on the surface of a solid. The values $\pm$1 or $\pm$2 or $\pm$3 indicate the direction that the device ``points.'' For example, {\ct IOR=-1} means that the device is mounted on a wall that faces in the negative $x$ direction. {\ct ORIENTATION} is used for devices that are not on a surface and require a directional specification, like a sprinkler. {\ct ORIENTATION} is specified with a triplet of real number values that indicate the components of the direction vector. The default value of {\ct ORIENTATION} is (0,0,-1). For example, a default downward-directed sprinkler spray can be redirected in other direction.
 If you were to specify
-
 \begin{lstlisting}
 &DEVC XYZ=3.0,5.6,2.3, PROP_ID='...', ID='...', ORIENTATION=0.707,0.707,0.0 /
 \end{lstlisting}
-
-\noindent
-the sprinkler would point in the direction halfway between the positive $x$ and $y$ directions.
-For other devices, the {\ct ORIENTATION} would only change the way the device is drawn by Smokeview.
+the sprinkler would point in the direction halfway between the positive $x$ and $y$ directions. For other devices, the {\ct ORIENTATION} would only change the way the device is drawn by Smokeview.
 
 The delivered density to the floor from a sprinkler depends upon where the sprinkler arms are located.  Rather than redefining the spray pattern for every possible direction that the sprinkler can be attached to the pipe, the {\ct DEVC} can be given the parameter {\ct ROTATION}.  The default {\ct ROTATION} is 0 degrees, which for a downwards pointing sprinkler is the positive x-axis.  Positive {\ct ROTATION} will rotate the 0 degree point towards the positive y-axis.
 
@@ -6941,8 +6898,8 @@ for the single parameter Heskestad model. Note that a {\ct PROP} line is mandato
       ACTIVATION_OBSCURATION=3.24 /
 \end{lstlisting}
 where the two characteristic filling or ``lag'' times are of the form:
-\be 
-   \delta t_e = \alpha_e u^{\beta_e} \quad ; \quad \delta t_c = \alpha_c u^{\beta_c} 
+\be
+   \delta t_e = \alpha_e u^{\beta_e} \quad ; \quad \delta t_c = \alpha_c u^{\beta_c}
 \ee
 The default detector parameters are for the Heskestad model with a characteristic {\ct LENGTH} of
 1.8~m. For the Cleary model, the {\ct ALPHA}s and {\ct BETA}s must all be listed explicitly.
@@ -8191,21 +8148,12 @@ $h$ is the heat transfer coefficient to a small sphere, $h=k \, \NU / D_{\rm TC}
 \subsection{Heat Fluxes and Thermal Radiation}
 \label{info:heat_flux}
 
-There are various ways of recording the heat flux at a solid
-boundary. If you want to record the {\em net} heat flux to the
-surface, $\dq_{\rm c}'' + \dq_{\rm r}''$, use the {\ct QUANTITY} called {\ct 'NET HEAT FLUX'}. The individual components, the {\em net} convective and
-radiative fluxes, are {\ct 'CONVECTIVE HEAT FLUX'} and {\ct 'RADIATIVE HEAT FLUX'}, respectively. If you want to compare predicted heat
-flux with a measurement, you often need to use {\ct 'GAUGE HEAT FLUX'}.
-The difference between {\ct 'NET HEAT FLUX'} and {\ct 'GAUGE HEAT FLUX'} is that
-the former is the rate at which energy is absorbed by the solid surface;
-the latter is the amount of energy that would be absorbed if the surface were cold (or some specified temperature $T_{\rm G}$):
+There are various ways of recording the heat flux at a solid boundary. If you want to record the {\em net} heat flux to the surface, $\dq_{\rm c}'' + \dq_{\rm r}''$, use the {\ct QUANTITY} called {\ct 'NET HEAT FLUX'}. The individual components, the {\em net} convective and radiative fluxes, are {\ct 'CONVECTIVE HEAT FLUX'} and {\ct 'RADIATIVE HEAT FLUX'}, respectively. If you want to compare predicted heat flux with a measurement, you often need to use {\ct 'GAUGE HEAT FLUX'}. The difference between {\ct 'NET HEAT FLUX'} and {\ct 'GAUGE HEAT FLUX'} is that
+the former is the rate at which energy is absorbed by the solid surface; the latter is the amount of energy that would be absorbed if the surface were cold (or some specified temperature $T_{\rm G}$):
 \be
    \dq_{\rm gauge}'' = \dq_{\rm r}''/\epsilon + \dq_{\rm c}'' + h(T_{\rm w}-T_{\rm G}) + \sigma (T_{\rm w}^4-T_{\rm G}^4)
 \ee
-If the heat flux gauge used in an experiment has a temperature other
-than ambient, set {\ct GAUGE\_TEMPERATURE} ($T_{\rm G}$) on the {\ct PROP} line
-associated with the device.  When comparing against a radiometer
-measurement, use {\ct RADIOMETER}:
+If the heat flux gauge used in an experiment has a temperature other than ambient, set {\ct GAUGE\_TEMPERATURE} ($T_{\rm G}$) on the {\ct PROP} line associated with the device.  When comparing against a radiometer measurement, use {\ct RADIOMETER}:
 \be
    \dq_{\rm radiometer}'' = \dq_{\rm r}''/\epsilon + \sigma (T_{\rm w}^4-T_\infty^4)
 \ee
@@ -8215,11 +8163,15 @@ For diagnostic purposes it is sometimes convenient to output the {\ct 'INCIDENT 
 \ee
 Note that the sign of the output of heat flux is different than the sign of the input of a heat flux.  A positive output quantity for heat flux means heat is being transferred into the surface.
 
-All of the above heat flux output quantities are defined at a solid surface. To record the heat flux away from a solid surface, use a Lagrangian particle as a surrogate for a heat flux gauge, as in the following example:
+All of the above heat flux output quantities are defined at a solid surface. To record the radiative heat flux away from a solid surface, add a device with the following format:
+\begin{lstlisting}
+&DEVC ID='flux', QUANTITY='RADIATIVE HEAT FLUX GAS', XYZ=0.45,0.0,0.3, ORIENTATION=-1,0,0 /
+\end{lstlisting}
+This single line of input is a special shortcut\footnote{This feature maintains backward compatibility with FDS~5.} for the following lines of input that make use of a Lagrangian particle as a surrogate target:
 \begin{lstlisting}
 &DEVC ID='flux', INIT_ID='f1', QUANTITY='RADIATIVE HEAT FLUX' /
 &INIT ID='f1', XYZ=0.45,0.0,0.3, N_PARTICLES=1, PART_ID='rad gauge' /
-&PART ID='rad gauge', STATIC=.TRUE., ORIENTATION(1,1:3)=-1,0,0, SURF_ID='target' /
+&PART ID='rad gauge', STATIC=.TRUE., ORIENTATION(1:3,1)=-1,0,0, SURF_ID='target' /
 &SURF ID='target', RADIUS=0.001, GEOMETRY='SPHERICAL' /
 \end{lstlisting}
 Note that the {\ct DEVC} line does not contain device coordinates, but rather a reference to the {\ct INIT} line that positions the single surrogate particle at the point {\ct XYZ}. The {\ct INIT} line references the {\ct PART} line, which provides information about the particle, in particular the orientation of the heat flux gauge. The reference to the {\ct SURF} line is mainly for consistency -- FDS needs to know something about the particle's geometry even though it is really just a ``target.''
@@ -9102,6 +9054,7 @@ Here, the {\ct ID} is just a label in the output file. When an output quantity i
 {\ct PRESSURE COEFFICIENT}                      & Section~\ref{info:wind}                       &                & B,D          \\ \hline
 {\ct PRESSURE ZONE}                             & Section~\ref{info:ZONE}                       &                & D,S          \\ \hline
 {\ct RADIATIVE HEAT FLUX}                       & Section~\ref{info:heat_flux}                  & kW/m$^2$       & B,D          \\ \hline
+{\ct RADIATIVE HEAT FLUX GAS}                   & Section~\ref{info:heat_flux}                  & kW/m$^2$       & D            \\ \hline
 {\ct RADIOMETER}                                & Section~\ref{info:heat_flux}                  & kW/m$^2$       & B,D          \\ \hline
 {\ct RELATIVE HUMIDITY}                         & Section~\ref{info:simple_chemistry}           & \%             & D,I,P,S      \\ \hline
 {\ct SCALAR RESOLUTION}$^{*****}$               & Section~\ref{info:meshquality}                &                & S            \\ \hline
@@ -10051,7 +10004,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct MINIMUM\_DIAMETER}             & Real            & Section~\ref{info:particle_size}        & $\mu$m    & 20.           \\ \hline
 {\ct MONODISPERSE}                  & Logical         & Section~\ref{info:particle_size}        &           & {\ct .FALSE.} \\ \hline
 {\ct N\_STRATA}                     & Integer         & Section~\ref{info:particle_size}        &           & 7             \\ \hline
-{\ct ORIENTATION(:,1:3)}            & Real Array      & Section~\ref{info:PART_SURF}            &           &               \\ \hline
+{\ct ORIENTATION(1:3,:)}            & Real Array      & Section~\ref{info:PART_SURF}            &           &               \\ \hline
 {\ct PROP\_ID}                      & Character       & Section~\ref{info:PART_Basics}          &           &               \\ \hline
 {\ct QUANTITIES(10)}                & Character       & Section~\ref{info:particle_quantities}  &           &               \\ \hline
 {\ct QUANTITIES\_SPEC\_ID(10)}      & Character       & Section~\ref{info:particle_quantities}  &           &               \\ \hline

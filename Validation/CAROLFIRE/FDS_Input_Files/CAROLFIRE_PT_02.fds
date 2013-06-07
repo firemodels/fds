@@ -20,7 +20,7 @@
 
 &MATL ID='plastic', DENSITY=2535., CONDUCTIVITY=0.2, SPECIFIC_HEAT=1.5 /
 &SURF ID='Cable 14', THICKNESS=0.00815, LENGTH=0.1, MATL_ID='plastic', GEOMETRY='CYLINDRICAL' /
-&PART ID='Cable Segment', SURF_ID='Cable 14', ORIENTATION(1,3)=1., STATIC=.TRUE., PROP_ID='cable picture' /
+&PART ID='Cable Segment', SURF_ID='Cable 14', ORIENTATION=0,0,1, STATIC=.TRUE., PROP_ID='cable picture' /
 &PROP ID='cable picture', SMOKEVIEW_ID='TUBE', SMOKEVIEW_PARAMETERS='L=0.1','D=0.0163' /
 &INIT ID='cable position', XYZ=0.01,0.,0., NUMBER_INITIAL_PARTICLES=1, PART_ID='Cable Segment' /
 
