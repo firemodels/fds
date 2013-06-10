@@ -425,7 +425,6 @@ Namelist  & FDS 5 Parameter & Namelist  & FDS 6 Parameter & Notes \\ \hline \hli
 {\ct MISC}    & {\ct SUPPRESSION}                   &  {\ct REAC}  & {\ct SUPPRESSION}                           & Section~\ref{info:extinction}            \\ \hline
 {\ct MISC}    & {\ct VISCOSITY}                     &  {\ct SPEC}  &  {\ct VISCOSITY}                            & Section~\ref{info:SPEC}                  \\ \hline
 {\ct OBST}    & {\ct SAWTOOTH}                      &  {\ct SURF}  & {\ct FREE\_SLIP=.TRUE.}                     & Section~\ref{info:WALL_MODEL}            \\ \hline
-{\ct PART}    & {\ct EVAPORATE}                     &  {\ct PART}  & {\ct SPEC\_ID}                              & Section~\ref{info:PART_Basics}           \\ \hline
 {\ct PART}    & {\ct FUEL}                          &  {\ct PART}  & {\ct SPEC\_ID='[FUEL]'}                     & Section~\ref{info:fuel_droplets}         \\ \hline
 {\ct PART}    & {\ct HEAT\_OF\_VAPORIZATION}        &  {\ct SPEC}  &  {\ct HEAT\_OF\_VAPORIZATION}               & Section~\ref{thermal_part_props}         \\ \hline
 {\ct PART}    & {\ct H\_V\_REFERENCE\_TEMPERATURE}  &  {\ct SPEC}  &   {\ct H\_V\_REFERENCE\_TEMPERATURE}        & Section~\ref{thermal_part_props}         \\ \hline
@@ -6131,7 +6130,7 @@ output the surface temperature of a single particle.
 \subsection{Drag}
 \label{info:particle_drag}
 
-For massive particles the default drag law (i.e., the drag coefficient correlation as a function of the Reynolds number based on particle diameter) is that of a sphere. To invoke the cylinder drag law set {\ct DRAG\_LAW} to {\ct 'CYLINDER'} on the {\ct PART} line and to invoke the screen drag law (see Section~\ref{info:particle_screen}) set to {\ct 'SCREEN'}  If neither of these options is applicable, you may specify a constant value of the drag coefficient for a particle class (a specific {\ct PART\_ID}) by setting a {\ct DRAG\_COEFFICIENT} on {\ct PART}. The {\ct DRAG\_COEFFICIENT} over-rides the {\ct DRAG\_LAW}.
+For massive particles the default drag law (i.e., the drag coefficient correlation as a function of the Reynolds number based on particle diameter) is that of a sphere. To invoke the cylinder drag law set {\ct DRAG\_LAW} to {\ct 'CYLINDER'} on the {\ct PART} line and to invoke the screen drag law (see Section~\ref{info:particle_screen}) set to {\ct 'SCREEN'}  If neither of these options is applicable, you may specify a constant value of the drag coefficient for a particle class (a specific {\ct PART\_ID}) by setting a {\ct DRAG\_COEFFICIENT} on {\ct PART}. The {\ct DRAG\_COEFFICIENT} over-rides the {\ct DRAG\_LAW}. If local particle density is very high drag may be reduced by particle wake effects. The threshold volumefraction for considering three-way coupling effects is controlled by the {\ct DENSE\_VOLUME\_FRACTION} parameter. Setting this parameter to 1 will turn off the three-way coupling model.
 
 \subsection{Splitting particles}
 \label{info:particle_split}
@@ -6422,7 +6421,7 @@ droplets created per second than the number that can be simulated.
 \label{info:initial_droplets}
 
 Sometimes it is convenient to introduce Lagrangian particles within a particular region of the domain. To do this, use an {\ct INIT} line which contains the {\ct PART\_ID} for the type of particle to be inserted. Particles specified via an {\ct INIT} line can represent a number of different kinds of subgrid-scale objects. The particles can be massless tracers or they can be solid or liquid particles with mass. If not massless, specify {\ct MASS\_PER\_VOLUME} in units of kg/m$^3$. Do not confuse this parameter with {\ct DENSITY}, explained in the next section.
-For example, water has a {\ct DENSITY} of 1000~kg/m$^3$, whereas a liter of water broken up into droplets and spread over a cubic meter has a {\ct MASS\_PER\_VOLUME} of 1~kg/m$^3$.
+For example, water has a {\ct DENSITY} of 1000~kg/m$^3$, whereas a liter of water broken up into droplets and spread over a cubic meter has a {\ct MASS\_PER\_VOLUME} of 1~kg/m$^3$. The number of lagrangian particles inserted is controlled by the parameter {\ct N\_PARTICLES}. 
 
 \subsubsection{Randomly Distributed Particles within a Specified Volume}
 
@@ -9988,7 +9987,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct COLOR}                         & Character       & Section~\ref{info:particle_quantities}  &           & {\ct 'BLACK'} \\ \hline
 {\ct COMPLEX\_REFRACTIVE\_INDEX}    & Real            & Section~\ref{radiative_part_props}      &           & 0.01          \\ \hline
 {\ct CTRL\_ID}                      & Character       & Section~\ref{info:particle_flux}        &           &               \\ \hline
-%{\ct DENSE\_VOLUME\_FRACTION}       & Real            &                                         & m$^3$/m$^3$ & 1.E-5         \\ \hline
+{\ct DENSE\_VOLUME\_FRACTION}       & Real            & Section~\ref{info:particle_drag}        & m$^3$/m$^3$ & 1.E-5         \\ \hline
 {\ct DEVC\_ID}                      & Character       & Section~\ref{info:particle_flux}        &           &               \\ \hline
 {\ct DIAMETER}                      & Real            & Section~\ref{info:particle_size}        & $\mu$m    &               \\ \hline
 {\ct DISTRIBUTION}                  & Character       & Section~\ref{info:particle_size}        &           & {\ct 'ROSIN...'} \\ \hline
@@ -10135,6 +10134,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct PART\_ID}                          & Character     & Section~\ref{info:sprinklers}             &                       &           \\ \hline
 {\ct PDPA\_END}                         & Real          & Section~\ref{PDPA}                        & s                     & {\ct T\_END} \\ \hline
 {\ct PDPA\_HISTOGRAM}                   & Logical       & Section~\ref{PDPA}                        &                       & .FALSE.   \\ \hline
+{\ct PDPA\_HISTOGRAM\_CUMULATIVE}       & Logical       & Section~\ref{PDPA}                        &                       & .FALSE.   \\ \hline
 {\ct PDPA\_HISTOGRAM\_LIMITS}           & Real Array    & Section~\ref{PDPA}                        &                       &       \\ \hline
 {\ct PDPA\_HISTOGRAM\_NBINS}            & Integer       & Section~\ref{PDPA}                        &                       & 10        \\ \hline
 {\ct PDPA\_INTEGRATE}                   & Logical       & Section~\ref{PDPA}                        &                       & {\ct .TRUE.}         \\ \hline
