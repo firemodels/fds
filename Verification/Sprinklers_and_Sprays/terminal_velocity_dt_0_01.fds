@@ -15,7 +15,7 @@
 
 &PART ID='particles', SURF_ID='sphere', DRAG_COEFFICIENT=1, QUANTITIES(1)='W-VELOCITY' /
 
-&INIT XB=0.,0.,0.,0.,0.,0., UVW=0.,0.,0., NUMBER_INITIAL_PARTICLES=1, PART_ID='particles' /
+&INIT XB=0.,0.,0.,0.,0.,0., UVW=0.,0.,0., N_PARTICLES=1, PART_ID='particles' /
 
 &VENT MB='ZMIN', SURF_ID='OPEN' /
 &VENT MB='ZMAX', SURF_ID='OPEN' /
