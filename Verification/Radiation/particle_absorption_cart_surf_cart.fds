@@ -85,12 +85,12 @@ In total, 100 particles
       J_LOWER=0,J_UPPER=4,
       K_LOWER=0,K_UPPER=3 /
 
-&INIT NUMBER_INITIAL_PARTICLES = 1,
+&INIT N_PARTICLES = 1,
       XB = 1.5,1.5,1.5,1.5,1.5,1.5,
       ID = 'init_1',
       PART_ID = 'part_1'/, MULT_ID= 'part_mult' /
 
-&INIT NUMBER_INITIAL_PARTICLES = 1,
+&INIT N_PARTICLES = 1,
       XB = 5.5,5.5,1.5,1.5,1.5,1.5,
       ID = 'init_2',
       PART_ID = 'part_2'/, MULT_ID= 'part_mult' /

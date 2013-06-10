@@ -110,22 +110,22 @@ Particle volume is 4/3 x pi x 0.0288^3 m3 = 1E-4 m3.
       SPECIFIC_HEAT = 1.0
       EMISSIVITY = 1.0 /
 
-&INIT NUMBER_INITIAL_PARTICLES = 1,
+&INIT N_PARTICLES = 1,
       XB = 1.5,1.5,1.5,1.5,1.5,1.5,
       ID = 'init_1',
       PART_ID = 'part_1'/
 
-&INIT NUMBER_INITIAL_PARTICLES = 1,
+&INIT N_PARTICLES = 1,
       XB = 5.5,5.5,1.5,1.5,1.5,1.5,
       ID = 'init_2',
       PART_ID = 'part_2'/
 
-&INIT NUMBER_INITIAL_PARTICLES = 1,
+&INIT N_PARTICLES = 1,
       XB = 9.5,9.5,1.5,1.5,1.5,1.5,
       ID = 'init_3',
       PART_ID = 'part_3'/
 
-&INIT NUMBER_INITIAL_PARTICLES = 1,
+&INIT N_PARTICLES = 1,
       XB = 13.5,13.5,1.5,1.5,1.5,1.5,
       ID = 'init_4',
       PART_ID = 'part_4'/

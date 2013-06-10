@@ -15,7 +15,7 @@
 
 &PART ID='particles', SURF_ID='sphere', DRAG_COEFFICIENT=0.2, QUANTITIES(1:2)='U-VELOCITY','W-VELOCITY' /
 
-&INIT XB=0.,0.,0.,0.,8.,8., UVW=400.,0.,0., PART_ID='particles', NUMBER_INITIAL_PARTICLES=1 /
+&INIT XB=0.,0.,0.,0.,8.,8., UVW=400.,0.,0., PART_ID='particles', N_PARTICLES=1 /
 
 &SURF ID='slip walls', FREE_SLIP=.TRUE., DEFAULT=.TRUE./
 
