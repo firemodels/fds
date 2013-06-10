@@ -1775,3 +1775,74 @@ DATA ( (tetra_plane2edge(i,j), j=0,3),i=0,3) /&
   
 end subroutine getverts
 
+!  ------------------ u_cross_v ------------------------ 
+
+subroutine u_cross_v(u, v, uxy)
+real, dimension(3) :: u, v, uxy
+
+!  i   j  k
+!  u1 u2 u3
+!  v1 v2 v3
+
+!  (u2v3-u3v2) i + (u3v1-u1v3)j + (u1v2-u2v1)k
+
+uxy(1) = u(2)*v(3) - u(3)*v(2)
+uxy(2) = u(3)*v(1) - u(1)*v(3)
+uxy(3) = u(1)*v(2) - u(2)*v(1)
+return
+end subroutine u_cross_v
+
+!  ------------------ u_dot_v ------------------------ 
+
+real function u_dot_v(u, v)
+u_dot_v = u(1)*v(1) + u(2)*v(2) + u(3)*v(3)
+return
+end function u_dot_v
+
+!  ------------------ in_box ------------------------ 
+
+integer function in_box(boxbounds, xyz, ignore_plane)
+integer, dimension(6), intent(in) :: boxbounds
+real, dimension(3), intent(in) :: xyz
+integer, intent(in) :: ignore_plane
+
+in_box=0
+if((xyz(1)>=boxbounds(1).OR.ignore_plane.EQ.1) .AND. (xyz(1) <= boxbounds(2).OR.ignore_plane.eq.2) .AND. &
+   (xyz(2)>=boxbounds(3).OR.ignore_plane.EQ.3) .AND. (xyz(2) <= boxbounds(4).OR.ignore_plane.eq.4) .AND. &
+   (xyz(3)>=boxbounds(5).OR.ignore_plane.EQ.5) .AND. (xyz(3) <= boxbounds(6).OR.ignore_plane.eq.6) ) in_box = 1
+
+return
+end function in_box
+
+!  ------------------ in_tetra ------------------------ 
+
+integer function in_tetra(verts, planes, normals, xyz, ignore_plane)
+  real, dimension(0:11), intent(in) :: verts, normals
+  integer, dimension(0:3), intent(in) :: planes
+  real, intent(in), dimension(3) :: xyz
+  integer, intent(in) :: ignore_plane
+  
+INTEGER, DIMENSION(0:3,0:3) :: tetra_plane2vert
+
+DATA ( (tetra_plane2vert(i,j), j=0,3),i=0,3) /&
+  1,0,3,-1,&
+  2,1,3,-1,&
+  0,2,3,-1,&
+  0,2,1,-1&
+  /
+
+  integer i,j
+  real, dimension(3) :: diff, normal
+  
+  in_tetra=1
+  do i = 0, 3
+    if(i.eq.ignore_plane)cycle
+    j=3*tetra_plane2vert(i-1,0)
+    diff(1:3) = xyz(1:3) - verts(j:j+2)
+    normal(1:3) = normals(3*i:3*i+2)
+    if(u_dot_v(normal,diff)>0.0)then
+      in_tetra=0
+      return
+    endif
+  end do
+end function in_tetra
