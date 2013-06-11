@@ -418,10 +418,9 @@ void DrawGeomTest(int option){
   unsigned char tetracolor[4]={0,0,255,255};
   clipdata tetra_clipinfo, box_clipinfo;
   float *v1, *v2, *v3, *v4;
-  vert verts[100];
   int nverts;
   int facestart[100], facenum[100], nfaces;
-  float fverts[300]; 
+  float verts[300]; 
 
   v1 = tetra_vertices;
   v2 = v1 + 3;
@@ -490,26 +489,26 @@ void DrawGeomTest(int option){
   glPopMatrix();
   // tetrahedron
 
-// FORTgetverts(box_bounds, v1, v2, v3, v4, fverts, &nverts, facestart, facenum, &nfaces);
-//  if(option==1&&nverts>0){
-  if(option==1&&GetVerts(box_bounds,v1,v2,v3,v4,verts,&nverts)>0){
-    int i;
+  if(option==1){
+    FORTgetverts(box_bounds, v1, v2, v3, v4, verts, &nverts, facestart, facenum, &nfaces);
+    if(nverts>0){
+      int i;
 
-    glPushMatrix();
-    glScalef(1.0/xyzmaxdiff,1.0/xyzmaxdiff,1.0/xyzmaxdiff);
-    glTranslatef(-xbar0,-ybar0,-zbar0);
-    glPointSize(10.0);
-    glBegin(GL_POINTS);
-    glColor3fv(foregroundcolor);
-    for(i=0;i<nverts;i++){
-      glVertex3fv(verts[i].v);
-//        glVertex3fv(fverts+3*i);
+      glPushMatrix();
+      glScalef(1.0/xyzmaxdiff,1.0/xyzmaxdiff,1.0/xyzmaxdiff);
+      glTranslatef(-xbar0,-ybar0,-zbar0);
+      glPointSize(10.0);
+      glBegin(GL_POINTS);
+      glColor3fv(foregroundcolor);
+      for(i=0;i<nverts;i++){
+        glVertex3fv(verts+3*i);
+      }
+      glEnd();
+      glPopMatrix();
     }
-    glEnd();
-    glPopMatrix();
   }
-  if(option==0)setClipPlanes(NULL,CLIP_OFF);
   if(option==0){
+    setClipPlanes(NULL,CLIP_OFF);
     glDisable(GL_LIGHTING);
     glDisable(GL_COLOR_MATERIAL);
   }
