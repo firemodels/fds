@@ -6421,7 +6421,7 @@ droplets created per second than the number that can be simulated.
 \label{info:initial_droplets}
 
 Sometimes it is convenient to introduce Lagrangian particles within a particular region of the domain. To do this, use an {\ct INIT} line which contains the {\ct PART\_ID} for the type of particle to be inserted. Particles specified via an {\ct INIT} line can represent a number of different kinds of subgrid-scale objects. The particles can be massless tracers or they can be solid or liquid particles with mass. If not massless, specify {\ct MASS\_PER\_VOLUME} in units of kg/m$^3$. Do not confuse this parameter with {\ct DENSITY}, explained in the next section.
-For example, water has a {\ct DENSITY} of 1000~kg/m$^3$, whereas a liter of water broken up into droplets and spread over a cubic meter has a {\ct MASS\_PER\_VOLUME} of 1~kg/m$^3$. The number of lagrangian particles inserted is controlled by the parameter {\ct N\_PARTICLES}. 
+For example, water has a {\ct DENSITY} of 1000~kg/m$^3$, whereas a liter of water broken up into droplets and spread over a cubic meter has a {\ct MASS\_PER\_VOLUME} of 1~kg/m$^3$. The number of lagrangian particles inserted is controlled by the parameter {\ct N\_PARTICLES}.
 
 \subsubsection{Randomly Distributed Particles within a Specified Volume}
 
@@ -10759,61 +10759,27 @@ wall.f90   & Wall boundary conditions \\ \hline
 
 \chapter{Output File Formats}
 
-The output from the code consists of the file {\ct CHID.out}, plus various
-data files that are described below.
-Most of these output files are written out by the subroutines within {\ct dump.f90},
-and can easily be modified to accommodate various plotting packages.
+The output from the code consists of the file {\ct CHID.out}, plus various data files that are described below. Most of these output files are written out by the subroutines within {\ct dump.f90}, and can easily be modified to accommodate various plotting packages.
 
 \section{Diagnostic Output}
-
 \label{out:file}
 
-The file {\ct CHID.out} consists of a list of the input
-parameters, and an accounting of various important quantities, including
-CPU usage. Typically, diagnostic information is printed out every
-100 time steps
-
+The file {\ct CHID.out} contains diagnostic output, including an accounting of various important quantities, including CPU usage. Typically, diagnostic information is printed out every 100 time steps as follows:
 \begin{lstlisting}
-                            .
-                            .
-
-       Iteration   8300   May 16, 2003  08:37:53
-       ----------------------------------------------
-       Mesh  1, Cycle   3427
-       CPU/step:     2.272 s, Total CPU:      2.15 hr
-       Time step:  0.03373 s, Total time:   128.86 s
-       Max CFL number: 0.86E+00 at ( 21,  9, 80)
-       Max divergence: 0.24E+01 at ( 25, 30, 22)
-       Min divergence: -.39E+01 at ( 26, 18, 31)
-       Number of Sprinkler Droplets:          615
-       Total Heat Release Rate:          7560.777 kW
-       Radiation Loss to Boundaries:     6776.244 kW
-       Mesh  2, Cycle   2914
-       CPU/step:     1.887 s, Total CPU:      1.53 hr
-       Time step:  0.03045 s, Total time:   128.87 s
-       Max CFL number: 0.96E+00 at ( 21, 29, 42)
-       Max divergence: 0.20E+01 at ( 22, 20, 22)
-       Min divergence: -.60E+01 at (  7, 26, 48)
-       Number of Sprinkler Droplets:          301
-
-                            .
-                            .
+Time Step   74700   June 11, 2013  12:51:00
+Pressure Iterations:      2
+Maximum Velocity Error:  0.29E-01 on Mesh   1 at (  93  72  39)
+----------------------------------------------
+CPU/step:     3.550 s, Total CPU:     82.39 hr
+Time step:  0.01105 s, Total time:   845.26 s
+Max CFL number:  0.84E+00 at ( 93, 72, 33)
+Max divergence:  0.81E+01 at ( 94, 72,  4)
+Min divergence: -0.36E+01 at ( 94, 73, 26)
+No. of Lagrangian Particles:        110940
+Total Heat Release Rate:           4258.043 kW
+Radiation Loss to Boundaries:      -595.837 kW
 \end{lstlisting}
-The Iteration number indicates how many time steps the code has run, whereas the
-Cycle number for a given mesh indicates how many time steps have been taken on that
-mesh. The date and time (wall clock time) are on the line starting with the word
-Iteration. The quantity {\ct CPU/step} is the amount of CPU time required to complete
-a time step for that mesh; {\ct Total CPU} is the amount of CPU time elapsed since the
-start of the run; {\ct Time step} is the time step size for the given mesh;
-{\ct Total time} is the time of the simulation;
-{\ct Max/Min divergence} is the max/min value of the
-function $\nabla \cdot \bu$ and is used as a diagnostic when the flow
-is incompressible (i.e., no heating); and {\ct Max CFL number} is the
-maximum value of the CFL number. The {\ct Radiation Loss to Boundaries} is the
-amount of energy that is being radiated to the boundaries. As compartments
-heat up, the energy lost to the boundaries can grow to be an appreciable
-fraction of the {\ct Total Heat Release Rate}. Finally, {\ct Number of Tracer Particles} indicates
-how many passive particles are being tracked at that time.
+The {\ct Time Step} indicates the total number of iterations. The date and time indicate the current wall clock time. The {\ct Pressure Iterations} are the number of iterations of the pressure solver for the corrector (second) half of the time step. The pressure solver iterations are designed to minimize the error in the normal component of velocity at solid walls or the interface of two meshes. The {\ct Maximum Velocity Error} indicates this error and in which grid cell it occurs. The quantity {\ct CPU/step} is the amount of CPU time required to complete a time step for that mesh; {\ct Total CPU} is the amount of CPU time elapsed since the start of the run; {\ct Time step} is the time step size for the given mesh; {\ct Total time} is the time of the simulation; {\ct Max/Min divergence} is the max/min value of the function $\nabla \cdot \bu$ and is used as a diagnostic when the flow is incompressible (i.e., no heating); and {\ct Max CFL number} is the maximum value of the CFL number. The {\ct No. of Lagrangian Particles} refers to the number of particles in the current mesh. The {\ct Radiation Loss to Boundaries} is the amount of energy that is being radiated to the boundaries. As compartments heat up, the energy lost to the boundaries can grow to be an appreciable fraction of the {\ct Total Heat Release Rate}.
 
 Following the completion of a successful run, a summary of the CPU
 usage per subroutine is listed. This is useful in determining where
@@ -10824,222 +10790,119 @@ most of the computational effort is being placed.
 \label{out:hrr}
 The heat release rate of the fire, plus other global energy-related quantities, are automatically written into a text file
 called {\ct CHID\_hrr.csv}. The format of the file is as follows
-
 \begin{lstlisting}
-s,kW,kW,kW,kW,...,kg/s,Pa,Pa, ...
-Time,HRR,Q_RADI,Q_CONV,Q_COND,...,BURN_RATE,ZONE_01,ZONE_02, ...
- 0.0000000E+000, 0.0000000E+000, ...
- 3.5355338E-001, 0.0000000E+000, ...
- .
- .
- .
+s    , kW       , kW       , ... , kg/s      , Pa       , Pa        , ...
+Time , HRR      , Q_RADI   , ... , BURN_RATE , ZONE_01  , ZONE_02   , ...
+T(1) , VAL(1,1) , VAL(2,1) , ... , VAL(8,1)  , VAL(9,1) , VAL(10,1) , ... 
+T(2) , VAL(1,2) , VAL(2,2) , ... , VAL(8,2)  , VAL(9,2) , VAL(10,1) , ...  
+            .
+            .
  \end{lstlisting}
-
-\noindent
-Details of the integrated energy quantities can be found in Section~\ref{info:HRR}.
-{\ct BURN\_RATE} is the total mass loss rate of fuel, and {\ct ZONE\_01}, etc., are the background pressures of the various
-pressure {\ct ZONE}s. Note that the reported {\ct BURN\_RATE} is not adjusted to account for the possibility that each individual
-material might have a different heat of combustion. It is the actual burning rate of the fuel as predicted by FDS or specified by you.
-The background pressure is discussed in Section~\ref{info:ZONE}.
-
-
-
+Details of the integrated energy quantities can be found in Section~\ref{info:HRR}. {\ct BURN\_RATE} is the total mass loss rate of fuel, and {\ct ZONE\_01}, etc., are the background pressures of the various pressure {\ct ZONE}s. Note that the reported {\ct BURN\_RATE} is not adjusted to account for the possibility that each individual material might have a different heat of combustion. It is the actual burning rate of the fuel as predicted by FDS or specified by you. The background pressure is discussed in Section~\ref{info:ZONE}.
 
 
 \section{Device Output Data}
 \label{out:DEVC}
 
-Data associated with particular devices (link temperatures, smoke obscuration, thermocouples, etc.)
-specified in the input file under the namelist
-group {\ct DEVC} is output in comma delimited format in a file called
-{\ct CHID\_devc.csv}. The format of the file is as follows
-
+Data associated with particular devices (link temperatures, smoke obscuration, thermocouples, etc.) specified in the input file under the namelist group {\ct DEVC} is output in comma delimited format in a file called {\ct CHID\_devc.csv}. The format of the file is as follows:
 \begin{lstlisting}
-s        , UNITS(1) , UNITS(2) , ... , UNITS(N_DEVC)
-FDS Time , ID(1)    , ID(2)    , ... , ID(N_DEVC)
-T(1)     , VAL(1,1) , VAL(2,1) , ... , VAL(N_DEVC,1)
-T(2)     , VAL(1,2) , VAL(2,2) , ... , VAL(N_DEVC,2)
-                      .
+s    , UNITS(1) , UNITS(2) , ... , UNITS(N_DEVC)
+Time , ID(1)    , ID(2)    , ... , ID(N_DEVC)
+T(1) , VAL(1,1) , VAL(2,1) , ... , VAL(N_DEVC,1)
+T(2) , VAL(1,2) , VAL(2,2) , ... , VAL(N_DEVC,2)
                       .
                       .
 \end{lstlisting}
-where {\ct N\_DEVC} is the number of devices, {\ct ID(I)} is the user-defined
-ID of the {\ct I}th device,
-{\ct UNITS(I)} the units, {\ct T(J)} the time of the {\ct J}th dump, and
-{\ct VAL(I,J)} the value at the {\ct I}th device at the {\ct J}th time.
-The files can be imported into Microsoft Excel or almost any other
-spread sheet program. If the number of columns exceeds 256, the file will
-automatically be split into smaller files.
+where {\ct N\_DEVC} is the number of devices, {\ct ID(I)} is the user-defined ID of the {\ct I}th device, {\ct UNITS(I)} the units, {\ct T(J)} the time of the {\ct J}th dump, and
+{\ct VAL(I,J)} the value at the {\ct I}th device at the {\ct J}th time. The files can be imported into Microsoft Excel or almost any other spread sheet program. If the number of columns exceeds 256, the file will automatically be split into smaller files.
 
 \section{Control Output Data}
 \label{out:CTRL}
 
-Data associated with particular control functions specified in the input file under the
-namelist group {\ct CTRL} is output in comma delimited format in a file called
-{\ct CHID\_ctrl.csv}. The format of the file is as follows
-
+Data associated with particular control functions specified in the input file under the namelist group {\ct CTRL} is output in comma delimited format in a file called {\ct CHID\_ctrl.csv}. The format of the file is as follows:
 \begin{lstlisting}
-s,status,status,status,status
-FDS Time,ID(1),ID(2),...,ID(N_CTRL)
- 0.00000E+000,-001, 001, ...
- 1.11803E-001,-001,-001, ...
+s    , status , status , ... , status
+Time , ID(1)  , ID(2)  , ... , ID(N_CTRL)
+T(1) , -001   , 001    , ... , -001
             .
             .
-            .
-
 \end{lstlisting}
-
-\noindent
-where {\ct N\_CTRL} is the number of controllers, {\ct ID(I)} is the user-defined ID of the {\ct I}th control function, and plus or minus 1's represent the
-state {\ct -1 = .FALSE. and +1 = .TRUE.} of the {\ct I}th control function at the particular time.
-The files can be imported into Microsoft Excel or almost any other
-spread sheet program. If the number of columns exceeds 256, the file will automatically be split into smaller files.
+where {\ct N\_CTRL} is the number of controllers, {\ct ID(I)} is the user-defined ID of the {\ct I}th control function, and plus or minus 1's represent the state {\ct -1 = .FALSE. and +1 = .TRUE.} of the {\ct I}th control function at the particular time. The files can be imported into Microsoft Excel or almost any other spread sheet program. If the number of columns exceeds 256, the file will automatically be split into smaller files.
 
 
 \section{Gas Mass Data}
 
-The total mass of the various gas species at any instant in time
-is reported in the comma delimited
-file {\ct CHID\_mass.csv}. The file consists of several columns,
-the first column containing the time in seconds, the second contains the
-total mass of all the gas species in the computational domain in units of kg,
-the next lines contain the total mass of the individual species.
+The total mass of the various gas species at any instant in time is reported in the comma delimited file {\ct CHID\_mass.csv}. The file consists of several columns, the first column containing the time in seconds, the second contains the total mass of all the gas species in the computational domain in units of kg, the next lines contain the total mass of the individual species.
 
-You must specifically ask that this file be generated, as it can potentially cost a fair amount of CPU time to generate. Set
-{\ct MASS\_FILE=.TRUE.} on the {\ct DUMP} line to create this output file.
+You must specifically ask that this file be generated, as it can potentially cost a fair amount of CPU time to generate. Set {\ct MASS\_FILE=.TRUE.} on the {\ct DUMP} line to create this output file.
 
 
 \section{Slice Files}
 \label{out:SLCF}
-The slice files defined under the namelist group {\ct SLCF} are
-named {\ct CHID\_$n$.sf} ($n$=01,02...),
-and are written out unformatted, unless otherwise directed.
-These files are written out from {\ct dump.f90} with the following lines:
 
+The slice files defined under the namelist group {\ct SLCF} are named {\ct CHID\_$n$.sf} ($n$=01,02...), and are written out unformatted, unless otherwise directed. These files are written out from {\ct dump.f90} with the following lines:
 \begin{lstlisting}
-      WRITE(LUSF) QUANTITY
-      WRITE(LUSF) SHORT_NAME
-      WRITE(LUSF) UNITS
-      WRITE(LUSF) I1,I2,J1,J2,K1,K2
-      WRITE(LUSF) TIME
-      WRITE(LUSF) (((QQ(I,J,K),I=I1,I2),J=J1,J2),K=K1,K2)
-              .
-              .
-              .
-      WRITE(LUSF) TIME
-      WRITE(LUSF) (((QQ(I,J,K),I=I1,I2),J=J1,J2),K=K1,K2)
+WRITE(LUSF) QUANTITY
+WRITE(LUSF) SHORT_NAME
+WRITE(LUSF) UNITS
+WRITE(LUSF) I1,I2,J1,J2,K1,K2
+WRITE(LUSF) TIME
+WRITE(LUSF) (((QQ(I,J,K),I=I1,I2),J=J1,J2),K=K1,K2)
+        .
+        .
+WRITE(LUSF) TIME
+WRITE(LUSF) (((QQ(I,J,K),I=I1,I2),J=J1,J2),K=K1,K2)
 \end{lstlisting}
-{\ct QUANTITY}, {\ct SHORT\_NAME} and {\ct UNITS} are
-character strings of length 30.
-The sextuplet ({\ct I1,I2,J1,J2,K1,K2}) denotes the bounding mesh cell
-nodes. The sextuplet indices correspond to mesh cell
-nodes, or corners, thus the entire mesh would be represented by the
-sextuplet ({\ct 0,IBAR,0,JBAR,0,KBAR}).
+{\ct QUANTITY}, {\ct SHORT\_NAME} and {\ct UNITS} are character strings of length 30. The sextuplet ({\ct I1,I2,J1,J2,K1,K2}) denotes the bounding mesh cell nodes. The sextuplet indices correspond to mesh cell nodes, or corners, thus the entire mesh would be represented by the sextuplet ({\ct 0,IBAR,0,JBAR,0,KBAR}).
 
-There is a short Fortran 90 program provided, called
-{\ct fds2ascii.f90},
-that can convert slice files into text files that can be read
-into a variety of graphics packages. The program combines multiple
-slice files corresponding to the same ``slice'' of the computational
-domain, time-averages the data, and writes the values into one file,
-consisting of a line of numbers for each node. Each line contains the
-physical coordinates of the node, and the time-averaged quantities
-corresponding to that node. In particular, the graphics package
-Tecplot
-reads this file and produces contour, streamline and/or vector plots.
-See Section~\ref{info:fds2ascii} for more details about the program
-{\ct fds2ascii}.
+There is a short Fortran 90 program provided, called {\ct fds2ascii.f90}, that can convert slice files into text files that can be read into a variety of graphics packages. The program combines multiple slice files corresponding to the same ``slice'' of the computational domain, time-averages the data, and writes the values into one file, consisting of a line of numbers for each node. Each line contains the physical coordinates of the node, and the time-averaged quantities corresponding to that node. In particular, the graphics package Tecplot reads this file and produces contour, streamline and/or vector plots. See Section~\ref{info:fds2ascii} for more details about the program {\ct fds2ascii}.
 
 \section{Plot3D Data}
 \label{out:PL3D}
 
-Quantities over the entire mesh can be output in a format used by the graphics package Plot3D.
-The Plot3D data sets are single precision (32 bit reals), whole and
-unformatted. Note that there is blanking, that is,
-blocked out data points are not plotted.
-If the statement {\ct WRITE\_XYZ=.TRUE.} is included on the {\ct DUMP}
-line, then the mesh data is written out to a file called {\ct CHID.xyz}
-
+Quantities over the entire mesh can be output in a format used by the graphics package Plot3D. The Plot3D data sets are single precision (32 bit reals), whole and unformatted. Note that there is blanking, that is, blocked out data points are not plotted. If the statement {\ct WRITE\_XYZ=.TRUE.} is included on the {\ct DUMP} line, then the mesh data is written out to a file called {\ct CHID.xyz}
 \begin{lstlisting}
-      WRITE(LU13) IBAR+1,JBAR+1,KBAR+1
-      WRITE(LU13) (((X(I),I=0,IBAR),J=0,JBAR),K=0,KBAR),
-     .            (((Y(J),I=0,IBAR),J=0,JBAR),K=0,KBAR),
-     .            (((Z(K),I=0,IBAR),J=0,JBAR),K=0,KBAR),
-     .     (((IBLK(I,J,K),I=0,IBAR),J=0,JBAR),K=0,KBAR)
+WRITE(LU13) IBAR+1,JBAR+1,KBAR+1
+WRITE(LU13) (((X(I),I=0,IBAR),J=0,JBAR),K=0,KBAR), &
+            (((Y(J),I=0,IBAR),J=0,JBAR),K=0,KBAR), &
+            (((Z(K),I=0,IBAR),J=0,JBAR),K=0,KBAR), &
+     (((IBLK(I,J,K),I=0,IBAR),J=0,JBAR),K=0,KBAR)
 \end{lstlisting}
+where {\ct X, Y} and {\ct Z} are the coordinates of the cell corners, and {\ct IBLK} is an indicator of whether or not the cell is blocked. If the point ({\ct X,Y,Z}) is completely embedded within a solid region, then {\ct IBLK} is 0. Otherwise, {\ct IBLK} is 1. Normally, the mesh file is not dumped.
 
-\noindent
-where {\ct X, Y} and {\ct Z} are the coordinates of the cell corners,
-and {\ct IBLK} is an indicator of whether or not the cell is blocked.
-If the point ({\ct X,Y,Z}) is completely embedded within a solid region,
-then {\ct IBLK} is 0. Otherwise, {\ct IBLK} is 1. Normally, the mesh
-file is not dumped.
-
-The flow variables are written to a file called {\ct CHID\_****\_**.q},
-where the stars indicate a time at which the data is output.
-The file is written with the lines
-
+The flow variables are written to a file called {\ct CHID\_****\_**.q}, where the stars indicate a time at which the data is output. The file is written with the lines
 \begin{lstlisting}
-      WRITE(LU14) IBAR+1,JBAR+1,KBAR+1
-      WRITE(LU14) ZERO,ZERO,ZERO,ZERO
-      WRITE(LU14) ((((QQ(I,J,K,N),I=0,IBAR),J=0,JBAR),K=0,KBAR),N=1,5)
+WRITE(LU14) IBAR+1,JBAR+1,KBAR+1
+WRITE(LU14) ZERO,ZERO,ZERO,ZERO
+WRITE(LU14) ((((QQ(I,J,K,N),I=0,IBAR),J=0,JBAR),K=0,KBAR),N=1,5)
 \end{lstlisting}
-The five channels {\ct N=1,5} are by default the temperature
-($^\circ$C), the $u$, $v$ and
-$w$ components of the velocity (m/s), and the heat release rate
-per unit volume (kW/m$^3$). Alternate variables can be specified with
-the input parameter {\ct PLOT3D\_QUANTITY(1:5)} on the {\ct DUMP} line.
-Note that the data is interpolated at
-cell corners, thus the dimensions of the Plot3D data sets are
-one larger than the dimensions of the computational mesh.
+The five channels {\ct N=1,5} are by default the temperature ($^\circ$C), the $u$, $v$ and $w$ components of the velocity (m/s), and the heat release rate per unit volume (kW/m$^3$). Alternate variables can be specified with the input parameter {\ct PLOT3D\_QUANTITY(1:5)} on the {\ct DUMP} line. Note that the data is interpolated at cell corners, thus the dimensions of the Plot3D data sets are one larger than the dimensions of the computational mesh.
 
-Smokeview can display the Plot3D data. In
-addition, the Plot3D data sets can be read into some other graphics
-programs that accept the data format.
-This particular format is very convenient, and recognized by
-a number of graphics packages.
+Smokeview can display the Plot3D data. In addition, the Plot3D data sets can be read into some other graphics programs that accept the data format. This particular format is very convenient, and recognized by a number of graphics packages.
 
 
 \section{Boundary Files}
 \label{out:BNDF}
-The boundary files defined under the namelist group {\ct BNDF} are
-named {\ct CHID\_$n$.bf} ($n$=0001,0002...),
-and are written out unformatted.
-These files are written out from {\ct dump.f90} with the following lines:
 
+The boundary files defined under the namelist group {\ct BNDF} are named {\ct CHID\_$n$.bf} ($n$=0001,0002...), and are written out unformatted. These files are written out from {\ct dump.f90} with the following lines:
 \begin{lstlisting}
-      WRITE(LUBF) QUANTITY
-      WRITE(LUBF) SHORT_NAME
-      WRITE(LUBF) UNITS
-      WRITE(LUBF) NPATCH
-      WRITE(LUBF) I1,I2,J1,J2,K1,K2,IOR,NB,NM
-      WRITE(LUBF) I1,I2,J1,J2,K1,K2,IOR,NB,NM
-              .
-              .
-              .
-      WRITE(LUBF) TIME
-      WRITE(LUBF) (((QQ(I,J,K),I=11,I2),J=J1,J2),K=K1,K2)
-      WRITE(LUBF) (((QQ(I,J,K),I=11,I2),J=J1,J2),K=K1,K2)
-              .
-              .
-              .
-      WRITE(LUBF) TIME
-      WRITE(LUBF) (((QQ(I,J,K),I=11,I2),J=J1,J2),K=K1,K2)
-      WRITE(LUBF) (((QQ(I,J,K),I=11,I2),J=J1,J2),K=K1,K2)
-              .
-              .
-              .
+WRITE(LUBF) QUANTITY
+WRITE(LUBF) SHORT_NAME
+WRITE(LUBF) UNITS
+WRITE(LUBF) NPATCH
+WRITE(LUBF) I1,I2,J1,J2,K1,K2,IOR,NB,NM
+WRITE(LUBF) I1,I2,J1,J2,K1,K2,IOR,NB,NM
+        .
+        . WRITE(LUBF) TIME
+WRITE(LUBF) (((QQ(I,J,K),I=11,I2),J=J1,J2),K=K1,K2)
+WRITE(LUBF) (((QQ(I,J,K),I=11,I2),J=J1,J2),K=K1,K2)
+        .
+        . WRITE(LUBF) TIME
+WRITE(LUBF) (((QQ(I,J,K),I=11,I2),J=J1,J2),K=K1,K2)
+WRITE(LUBF) (((QQ(I,J,K),I=11,I2),J=J1,J2),K=K1,K2) .
+        .
 \end{lstlisting}
-{\ct QUANTITY}, {\ct SHORT\_NAME} and {\ct UNITS} are character
-strings of lengths 60, 30 and 30, respectively.
-{\ct NPATCH} is the number of planes (or ``patches'') that make up the
-solid boundaries plus the external walls.
-The sextuplet ({\ct I1,I2,J1,J2,K1,K2}) defines the cell nodes of each
-patch. {\ct IOR} is an integer indicating the orientation of the
-patch ($\pm 1,\pm 2,\pm 3$). You do not prescribe these.
-{\ct NB} is the number of the boundary (zero for external walls) and
-{\ct NM} is the number of the mesh.  Note that the data is planar,
-thus one pair of cell nodes is the same. Presently, Smokeview is the
+{\ct QUANTITY}, {\ct SHORT\_NAME} and {\ct UNITS} are character strings of lengths 60, 30 and 30, respectively. {\ct NPATCH} is the number of planes (or ``patches'') that make up the solid boundaries plus the external walls. The sextuplet ({\ct I1,I2,J1,J2,K1,K2}) defines the cell nodes of each patch. {\ct IOR} is an integer indicating the orientation of the patch ($\pm 1,\pm 2,\pm 3$). You do not prescribe these. {\ct NB} is the number of the boundary (zero for external walls) and {\ct NM} is the number of the mesh.  Note that the data is planar, thus one pair of cell nodes is the same. Presently, Smokeview is the
 only program available to view the boundary files.
 
 \section{Particle Data}
@@ -11090,144 +10953,78 @@ several different quantities.
 \section{Profile Files}
 \label{out:PROF}
 
-The profile files defined under the namelist group {\ct PROF} are
-named {\ct CHID\_prof\_$nn$.csv} ($nn$=01,02...),
-and are written out formatted. These files are written out from {\ct dump.f90} with the following line:
-
+The profile files defined under the namelist group {\ct PROF} are named {\ct CHID\_prof\_$nn$.csv} ($nn$=01,02...), and are written out formatted. These files are written out from {\ct dump.f90} with the following line:
 \begin{lstlisting}
 WRITE(LU_PROF) T,NWP+1,(X_S(I),I=0,NWP),(Q(I),I=0,NWP)
 \end{lstlisting}
-After the time {\ct T}, the number of node points is given and then
-the node coordinates. These are written out at every time step because
-the wall thickness and the local solid phase mesh may change over time
-due to the solid phase reactions. Array {\ct Q} contains the values of
-the output quantity, which may be wall temperature, density or
-component density.
+After the time {\ct T}, the number of node points is given and then the node coordinates. These are written out at every time step because the wall thickness and the local solid phase mesh may change over time due to the solid phase reactions. Array {\ct Q} contains the values of the output quantity, which may be wall temperature, density or component density.
 
 \section{3-D Smoke Files}
 \label{out:SMOKE3D}
 
-3-D smoke files contain alpha values used by Smokeview to draw
-semi-transparent planes representing smoke and fire.
-FDS outputs 3-D smoke data at fixed time
-intervals.  A {\em pseudo-code} representation of the 3-D
-smoke file is given by:
-
+3-D smoke files contain alpha values used by Smokeview to draw semi-transparent planes representing smoke and fire. FDS outputs 3-D smoke data at fixed time intervals.  A {\em pseudo-code} representation of the 3-D smoke file is given by:
 \begin{lstlisting}
-
-! header
-
-  WRITE(LU_SMOKE3D) ONE,VERSION,0,NX-1,0,NY-1,0,NZ-1
-
-! time dependent data
-
-  WRITE(LU_SMOKE3D_SIZE,*)TIME,NCHARS_IN,NCHARS_OUT
-  WRITE(LU_SMOKE3D)TIME
-  WRITE(LU_SMOKE3D)NCHARS_IN,NCHARS_OUT
-  IF (NCHARS_OUT > 0)WRITE(LU_SMOKE3D)(BUFFER_OUT(I),I=1,NCHARS_OUT)
-
+WRITE(LU_SMOKE3D) ONE,VERSION,0,NX-1,0,NY-1,0,NZ-1
+                .
+                .
+WRITE(LU_SMOKE3D_SIZE,*)TIME,NCHARS_IN,NCHARS_OUT
+WRITE(LU_SMOKE3D)TIME
+WRITE(LU_SMOKE3D)NCHARS_IN,NCHARS_OUT
+IF (NCHARS_OUT > 0)WRITE(LU_SMOKE3D)(BUFFER_OUT(I),I=1,NCHARS_OUT)
 \end{lstlisting}
-
-\noindent The first {\ct ONE}\ is an endian flag.  Smokeview uses
-this number to determine whether the computer creating the 3-D
-smoke file and the computer viewing the 3-D smoke file use the
-same or different byte swap (endian) conventions for storing
-floating point numbers.  The opacity data is converted from 4 byte
-float point numbers to one byte integers then compressed using
-run-length encoding (RLE). The compressed data is contained in
-{\ct BUFFER\_OUT}.  Run-length encoding is a compression scheme
-where repeated ``runs'' of data are replaced with a number (number
-of repeats), and the value repeated.  In more detail,
-
-
-\begin{enumerate}
-\item Represent four or more consecutive identical characters as
-$\# n c$ where $\#$ is a special character denoting the beginning
-of a repeated sequence, $n$ is the number of repeats and $c$ is
-the character repeated.  $n$ can be up to 254 (255 is used to
-represent the {\em special}\ character).
-\item Represent
-characters not repeated four or more times as is.
-\end{enumerate}
-
-The character string {\tt aaaaaabbbbbcc}\ would then be encoded as
-{\tt \#6a\#5bcc}.
+The first {\ct ONE}\ is an endian flag.  Smokeview uses this number to determine whether the computer creating the 3-D smoke file and the computer viewing the 3-D smoke file use the same or different byte swap (endian) conventions for storing floating point numbers.  The opacity data is converted from 4 byte floating point numbers to one byte integers then compressed using
+run-length encoding (RLE). The compressed data is contained in {\ct BUFFER\_OUT}.  Run-length encoding is a compression scheme where repeated ``runs'' of data are replaced with a number (number of repeats), and the value repeated. Four or more consecutive identical characters are represented by $\# n c$ where $\#$ is a special character denoting the beginning of a repeated sequence, $n$ is the number of repeats and $c$ is the character repeated.  $n$ can be up to 254 (255 is used to represent the {\em special}\ character). Characters not repeated four or more times are listed as is. For example, the character string {\tt aaaaaabbbbbcc} is encoded as {\tt \#6a\#5bcc}.
 
 
 
 \section{Geometry, Isosurface Files}
 \label{out:GEOMETRY}
 
-Both immersed geometric surfaces (generalized obstructions) and FDS generated isosurfaces are stored using a file format described in this section.
-Iso-surface files are used to store one or more surfaces where the specified {\ct QUANTITY} is a specified value.
-FDS outputs iso-surface data at fixed
-time intervals.  These surfaces are
-defined in terms of vertices and triangles.  A vertex consists of an $(x,y,z)$ coordinate.
-A triangle
-consists of 3 connected vertices.  The file format allows one to specify objects that change with time.
-Static geometry is defined once and displayed by Smokeview unchanged at each time step.
-Dynamic geometry is defined at each time step either in terms of nodes and faces
-or in terms of a translation and two rotations (azimuthal and elevation) of dynamic geometry defined
-in the first time step.
-These files are written out from {\ct dump.f90} using lines equivalent to the following:
-
+Both immersed geometric surfaces (generalized obstructions) and FDS generated isosurfaces are stored using a file format described in this section. Iso-surface files are used to store one or more surfaces where the specified {\ct QUANTITY} is a specified value. FDS outputs iso-surface data at fixed time intervals.  These surfaces are defined in terms of vertices and triangles.  A vertex consists of an $(x,y,z)$ coordinate. A triangle consists of 3 connected vertices.  The file format allows one to specify objects that change with time. Static geometry is defined once and displayed by Smokeview unchanged at each time step. Dynamic geometry is defined at each time step either in terms of nodes and faces or in terms of a translation and two rotations (azimuthal and elevation) of dynamic geometry defined in the first time step. These files are written out from {\ct dump.f90} using lines equivalent to the following:
 \begin{lstlisting}
 ! header
 
-  WRITE(LU_GEOM) ONE
-  WRITE(LU_GEOM) VERSION
-  WRITE(LU_GEOM) N_FLOATS
-  IF (N_FLOATS>0) WRITE(LU_GEOM) (FLOAT_HEADER(I),I=1,N_FLOATS)
-  WRITE(LU_GEOM) N_INTS
-  IF (N_INTS>0) WRITE(LU_GEOM) (INT_HEADER(I),I=1,N_INTS)
+WRITE(LU_GEOM) ONE
+WRITE(LU_GEOM) VERSION
+WRITE(LU_GEOM) N_FLOATS
+IF (N_FLOATS>0) WRITE(LU_GEOM) (FLOAT_HEADER(I),I=1,N_FLOATS)
+WRITE(LU_GEOM) N_INTS
+IF (N_INTS>0) WRITE(LU_GEOM) (INT_HEADER(I),I=1,N_INTS)
 
 ! static geometry - geometry specified once and appearing at all time steps
 
-  WRITE(LU_GEOM) N_VERT_S, N_FACE_S
-  IF (N_VERT_S>0)  WRITE(LU_GEOM) (Xvert_S(I),Yvert_S(I),Zvert_S(I),I=1,N_VERT_S)
-  IF (N_FACE_S>0)  WRITE(LU_GEOM) (FACE1_S(I),FACE2_S(I),FACE3_S(I),I=1,N_FACE_S)
-  IF (N_FACE_S>0)  WRITE(LU_GEOM) (SURF_S(I),I=1,N_FACE_S)
+WRITE(LU_GEOM) N_VERT_S, N_FACE_S
+IF (N_VERT_S>0)  WRITE(LU_GEOM) (Xvert_S(I),Yvert_S(I),Zvert_S(I),I=1,N_VERT_S)
+IF (N_FACE_S>0)  WRITE(LU_GEOM) (FACE1_S(I),FACE2_S(I),FACE3_S(I),I=1,N_FACE_S)
+IF (N_FACE_S>0)  WRITE(LU_GEOM) (SURF_S(I),I=1,N_FACE_S)
 
 ! dynamic geometry - geometry specified and appearing for each time step
 
-  WRITE(LU_GEOM) STIME, GEOM_TYPE
-  IF (GEOM_TYPE.EQ.0) THEN
-    WRITE(LU_GEOM) N_VERT_D, N_FACE_D
-    IF (N_VERT_D>0) WRITE(LU_GEOM) (Xvert_D(I),Yvert_D(I),Zvert_D(I),I=1,N_VERT_D)
-    IF (N_FACE_D>0) WRITE(LU_GEOM) (FACE1_D(I),FACE2_D(I),FACE3_D(I),I=1,N_FACE_D)
-    IF (N_FACE_D>0) WRITE(LU_GEOM) (SURF_D(I),I=1,N_FACE_D)
-  ELSE IF (GEOM_TYPE.EQ.1) THEN
-    ! rotation and translation parameters used to transform geometry from first
-    ! dynamic time step
-    WRITE(LU_GEOM) Xtran, Ytran, Ztran, Xrot0, Yrot0, Zrot0, rot_az, rot_elev
-  ENDIF
-              .
+WRITE(LU_GEOM) STIME, GEOM_TYPE
+IF (GEOM_TYPE.EQ.0) THEN
+  WRITE(LU_GEOM) N_VERT_D, N_FACE_D
+  IF (N_VERT_D>0) WRITE(LU_GEOM) (Xvert_D(I),Yvert_D(I),Zvert_D(I),I=1,N_VERT_D)
+  IF (N_FACE_D>0) WRITE(LU_GEOM) (FACE1_D(I),FACE2_D(I),FACE3_D(I),I=1,N_FACE_D)
+  IF (N_FACE_D>0) WRITE(LU_GEOM) (SURF_D(I),I=1,N_FACE_D)
+ELSE IF (GEOM_TYPE.EQ.1) THEN
+  ! rotation and translation parameters used to transform geometry from first
+  ! dynamic time step
+  WRITE(LU_GEOM) Xtran, Ytran, Ztran, Xrot0, Yrot0, Zrot0, rot_az, rot_elev
+ENDIF
               .
               .
 \end{lstlisting}
 \begin{itemize}
-\item {\ct ONE}\ has the value 1.
-Smokeview uses this number to
-determine whether the computer creating the geometry file and the
-computer viewing the geometry file use the same or different byte
-swap (endian) conventions for storing floating point numbers.
+\item {\ct ONE}\ has the value 1. Smokeview uses this number to determine whether the computer creating the geometry file and the computer viewing the geometry file use the same or different byte swap (endian) conventions for storing floating point numbers.
 \item {\ct VERSION}\ currently has value 0 and indicates the version number of this file format.
-\item {\ct N\_FLOATS, N\_INTS} The number of floating point and integer data items stored at
-the beginning of the file.
-\item {\ct FLOAT\_HEADER, INT\_HEADER} Floating point and integer data stored at
-the beginning of the file.
+\item {\ct N\_FLOATS, N\_INTS} The number of floating point and integer data items stored at the beginning of the file.
+\item {\ct FLOAT\_HEADER, INT\_HEADER} Floating point and integer data stored at the beginning of the file.
 \item {\ct STIME} is the FDS simulation time.
 \item {\ct N\_VERT\_S, N\_FACE\_S, N\_VERT\_D, N\_FACE\_D}\ are the number of static and dynamic vertices and faces.
 \item {\ct Xvert\_S, Yvert\_S, Zvert\_S, Xvert\_D, Yvert\_D, Zvert\_D}\ are the static and dynamic vertex coordinates.
-\item {\ct FACE1\_S, FACE2\_S, FACE3\_S,FACE1\_D, FACE2\_D, FACE3\_D}\ are the static and dynamic vertex
-indices for each face (triangle).  The indices are numbered relative to how vertices were written out earlier.
+\item {\ct FACE1\_S, FACE2\_S, FACE3\_S,FACE1\_D, FACE2\_D, FACE3\_D}\ are the static and dynamic vertex indices for each face (triangle).  The indices are numbered relative to how vertices were written out earlier.
 \item {\ct SURF\_S, SURF\_D}\ are the static and dynamic SURF indices for each face (triangle).
-\item {\ct GEOM\_TYPE}\ is flag indicating how dynamic geometry is represented.
-If {\ct GEOM\_TYPE}\ is 0 then time dependent geometry is written out in
-terms of nodes and faces using the same format as the static geometry.
-If {\ct GEOM\_TYPE}\ is 1 then time dependent geometry is written out in terms of a translation
-and two rotations.  These transformations are applied to the dynamic geometry defined
-at the first time step.
+\item {\ct GEOM\_TYPE}\ is flag indicating how dynamic geometry is represented. If {\ct GEOM\_TYPE}\ is 0 then time dependent geometry is written out in terms of nodes and faces using the same format as the static geometry. If {\ct GEOM\_TYPE}\ is 1 then time dependent geometry is written out in terms of a translation and two rotations.  These transformations are applied to the dynamic geometry defined at the first time step.
 \item {\ct Xtran, Ytran, Ztran}\ is the translation applied to the initial dynamic geometry (If {\ct GEOM\_TYPE}\ is 1)
 \item {\ct Xrot0, Yrot0, Zrot0}\ is the origin about which rotations occur.
 \item {\ct rot\_az, rot\_elev}\ are the azimuthal and elevation rotation angles (in degrees) applied to the initial dynamic geometry.
@@ -11241,7 +11038,6 @@ geometrical objects.  This file is analogous to the boundary file.
 The data written out to a geometry data file MUST correspond to the geometry written out
 in the corresponding geometry file.
 Geometry data files are written out from {\ct dump.f90} with the lines equivalent to the following:
-
 \begin{lstlisting}[basicstyle=\scriptsize\ttfamily]
   WRITE(LU_GEOM_DATA) ONE
   WRITE(LU_GEOM_DATA) VERSION
@@ -11253,23 +11049,16 @@ Geometry data files are written out from {\ct dump.f90} with the lines equivalen
   IF (N_FACE_D_VALS>0)  WRITE(LU_GEOM_DATA) (ValFaceDynamic(I),I=1,N_FACE_D_VALS)
               .
               .
-              .
 \end{lstlisting}
 The data values written out in this file correspond to the geometry written out in the geometry file.
 \begin{itemize}
-\item {\ct ONE}\ has the value 1.
-Smokeview uses this number to
-determine whether the computer creating the geometry file and the
-computer viewing the geometry file use the same or different byte
-swap (endian) conventions for storing floating point numbers.
+\item {\ct ONE}\ has the value 1. Smokeview uses this number to determine whether the computer creating the geometry file and the computer viewing the geometry file use the same or different byte swap (endian) conventions for storing floating point numbers.
 \item {\ct VERSION}\ currently has value 0 and indicates the version number of this file format.
 \item {\ct STIME} is the FDS simulation time.
 \item {\ct N\_VERT\_S\_VALS, N\_FACE\_S\_VALS}\ is the number of data values written out for static vertices and faces.  One can write out data values located at nodes, located at the center of faces or both.
-\item {\ct N\_VERT\_D\_VALS, N\_FACE\_D\_VALS}\ is the number of dynamic values written out for dynamic vertices and faces.  One can write out
-data values located at nodes, located at the center of faces, both or neither (if there is no dynamic geometry).
+\item {\ct N\_VERT\_D\_VALS, N\_FACE\_D\_VALS}\ is the number of dynamic values written out for dynamic vertices and faces.  One can write out data values located at nodes, located at the center of faces, both or neither (if there is no dynamic geometry).
 \item {\ct ValVertStatic, ValFaceStatic}\ static vertex and face data.
-\item {\ct ValVertDynamic, ValFaceDynamic}\ dynamic
- vertex and face data.
+\item {\ct ValVertDynamic, ValFaceDynamic}\ dynamic vertex and face data.
 \end{itemize}
 
 
