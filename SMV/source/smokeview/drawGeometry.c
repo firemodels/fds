@@ -420,6 +420,8 @@ void DrawGeomTest(int option){
   float *v1, *v2, *v3, *v4;
   vert verts[100];
   int nverts;
+  int facestart[100], facenum[100], nfaces;
+  float fverts[300]; 
 
   v1 = tetra_vertices;
   v2 = v1 + 3;
@@ -488,6 +490,8 @@ void DrawGeomTest(int option){
   glPopMatrix();
   // tetrahedron
 
+// FORTgetverts(box_bounds, v1, v2, v3, v4, fverts, &nverts, facestart, facenum, &nfaces);
+//  if(option==1&&nverts>0){
   if(option==1&&GetVerts(box_bounds,v1,v2,v3,v4,verts,&nverts)>0){
     int i;
 
@@ -499,6 +503,7 @@ void DrawGeomTest(int option){
     glColor3fv(foregroundcolor);
     for(i=0;i<nverts;i++){
       glVertex3fv(verts[i].v);
+//        glVertex3fv(fverts+3*i);
     }
     glEnd();
     glPopMatrix();

@@ -16,6 +16,7 @@
 #define _F(name) name ## _
 #endif
 
+#define FORTgetverts _F(getverts2)
 #define FORTgeomout _F(geomout)
 #define FORTgetembeddatasize _F(getembeddatasize)
 #define FORTgetembeddata _F(getembeddata)
@@ -43,7 +44,8 @@
 #define FORTgetboundaryheader1 _F(getboundaryheader1)
 #define FORTgetboundaryheader2 _F(getboundaryheader2)
 
-
+STDCALLF FORTgetverts(float *box_bounds, float *v0, float *v1, float *v2, float *v3, float *out_verts, 
+                      int *nverts, int *facestart, int *facenum, int *nfaces);
 STDCALLF FORTgeomout(float *verts, int *nverts, int *faces, int *nfaces);
 STDCALLF FORTgetembeddatasize(char *filename, int *endian, int *ntimes, int *nvars, int *error, FILE_SIZE lenfile);
 STDCALLF FORTgetembeddata(char *filename, int *endian, int *ntimes, int *nvals, float *times, int *nstatics, int *ndynamics,

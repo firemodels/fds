@@ -1714,6 +1714,7 @@ end do
 funit=-1
 return
 end subroutine get_file_unit
+
 ! VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
 ! compute volume of intersection of box and tetrahedron
 
@@ -1734,16 +1735,16 @@ IMPLICIT NONE
 PRIVATE
 
 INTEGER, DIMENSION(0:5,0:3) :: BOX_PLANE2VERT
-INTEGER, DIMENSION(0:5,0:3) :: BOX_PLANE2EDGE
-INTEGER, DIMENSION(0:11,0:1) :: BOX_EDGE2VERT
+INTEGER, DIMENSION(0:5,0:3), TARGET :: BOX_PLANE2EDGE
+INTEGER, DIMENSION(0:11,0:1), TARGET :: BOX_EDGE2VERT
 
 INTEGER, DIMENSION(0:3,0:3) :: TETRA_PLANE2VERT
 INTEGER, DIMENSION(0:3,0:3) :: TETRA_PLANE2EDGE
 INTEGER, DIMENSION(0:5,0:1) :: TETRA_EDGE2VERT
 
-REAL(EB), DIMENSION(0:5,0:2) :: BOX_NORMALS
-REAL(EB), DIMENSION(0:3,0:2) :: TETRA_NORMALS, TETRA_VERTS
-REAL(EB), DIMENSION(0:7,0:2) :: BOX_VERTS
+REAL(EB), DIMENSION(0:5,0:2), TARGET :: BOX_NORMALS
+REAL(EB), DIMENSION(0:3,0:2), TARGET :: TETRA_NORMALS, TETRA_VERTS
+REAL(EB), DIMENSION(0:7,0:2), TARGET :: BOX_VERTS
 
 INTEGER, PARAMETER :: MIN_X=0, MAX_X=1, MIN_Y=2, MAX_Y=3, MIN_Z=4, MAX_Z=5
 
@@ -1804,6 +1805,7 @@ DATA ( (TETRA_PLANE2EDGE(I,J), J=0,3),I=0,3) /&
 PUBLIC GETVERTS
 
 CONTAINS
+
 !  ------------------ GETVERTS ------------------------ 
 
 SUBROUTINE GETVERTS(BOX_BOUNDS,V0,V1,V2,V3,OUT_VERTS,NVERTS,FACESTART,FACENUM,NFACES)
@@ -1815,93 +1817,64 @@ REAL(EB), DIMENSION(0:99,0:2), INTENT(OUT) :: OUT_VERTS
 INTEGER, DIMENSION(0:99), INTENT(OUT) :: FACESTART, FACENUM
 INTEGER, INTENT(OUT) :: NVERTS,NFACES
 
-INTEGER :: I, J
+INTEGER :: I, J, K
 REAL(EB) :: T
 REAL(EB), DIMENSION(3) :: OUT_VERT
+REAL(EB), POINTER, DIMENSION(:) :: BOXVERT, BOXNORMAL,  BOXVERT0, BOXVERT1
+REAL(EB), POINTER, DIMENSION(:) :: TETRAVERT, TETRANORMAL, TETRAVERT0, TETRAVERT1
+INTEGER, POINTER, DIMENSION(:) :: BOXEDGES
+INTEGER :: EDGEK
 
 CALL SETUP_VERTS(BOX_BOUNDS,V0,V1,V2,V3)
 
 NVERTS=0
 NFACES=0
 DO J = 0, 5 ! box plane i
-  DO I = 0, 5 ! tetra edge j
-    IF( PLANE_EDGE_INTERSECTION( BOX_VERTS(BOX_PLANE2VERT(J,0),0:2),BOX_NORMALS(J,0:2), &
-                                 TETRA_VERTS(TETRA_EDGE2VERT(I,0),0:2),TETRA_VERTS(TETRA_EDGE2VERT(I,1),0:2),&
-                                 OUT_VERT).EQ.1)THEN
-      IF(IN_BOX(BOX_BOUNDS, OUT_VERT, J).EQ.1)THEN
-        OUT_VERTS(NVERTS,0:2)=OUT_VERT(0:2)
-        NVERTS=NVERTS+1
-      ENDIF                                  
-    ENDIF
-  END DO
-  
+   BOXVERT(0:2) => BOX_VERTS(BOX_PLANE2VERT(J,0),0:2)
+   BOXNORMAL(0:2) => BOX_NORMALS(BOX_PLANE2VERT(J,0),0:2)
+
+!  add intersection of tetrahedron edge 'i' and box plane 'j' (if on box)
+
+   DO I = 0, 5 ! tetra edge j
+      TETRAVERT0(0:2) => TETRA_VERTS(TETRA_EDGE2VERT(I,0),0:2)
+      TETRAVERT1(0:2) => TETRA_VERTS(TETRA_EDGE2VERT(I,1),0:2)
+      IF ( PLANE_EDGE_INTERSECTION( BOXVERT,BOXNORMAL,TETRAVERT0,TETRAVERT1,OUT_VERT).EQ.1) THEN
+         IF (IN_BOX(BOX_BOUNDS, OUT_VERT, J).EQ.1) THEN
+             NVERTS=NVERTS+1
+             OUT_VERTS(NVERTS,0:2)=OUT_VERT
+         ENDIF                                  
+      ENDIF
+   END DO
+
+!  add intersection of edge 'k' of box plane 'j' and tetrahedron plane 'i' (if on tetrahedron)
+
+   DO K = 0, 3 ! box plane edges
+      EDGEK = BOX_PLANE2EDGE(J,K)
+      BOXVERT0(0:2) => BOX_VERTS(BOX_EDGE2VERT(EDGEK,0),0:2)
+      BOXVERT1(0:2) => BOX_VERTS(BOX_EDGE2VERT(EDGEK,1),0:2)
+      DO I = 0, 3 ! tetra plane
+         TETRAVERT(0:2) => TETRA_VERTS(TETRA_PLANE2VERT(I,0),0:2)
+         TETRANORMAL(0:2) => TETRA_NORMALS(TETRA_PLANE2VERT(I,0),0:2)
+         IF ( PLANE_EDGE_INTERSECTION( TETRAVERT,TETRANORMAL,BOXVERT0,BOXVERT1,OUT_VERT).EQ.1) THEN
+            IF (IN_TETRA(OUT_VERT, I) .EQ. 1) THEN
+                NVERTS=NVERTS+1
+                OUT_VERTS(NVERTS,0:2)=OUT_VERT
+            ENDIF
+         ENDIF
+      END DO
+   END DO
+
+! add box plane 'j' vertices if inside tetrahedron
+
+   DO I = 0, 3
+      BOXVERT(0:2) => BOX_VERTS(BOX_PLANE2VERT(J,I),0:2)
+      IF (IN_TETRA(BOXVERT, -1) .EQ. 1) THEN
+         NVERTS=NVERTS+1
+         OUT_VERTS(NVERTS,0:2)=OUT_VERT
+      ENDIF
+   END DO
+
 END DO
-
-
-!    for(i=0;i<6;i++){
-!      edge *tetraedgei;
-!
-!      tetraedgei = tetra_edges + i;
-!
-!      // add intersection of tetrahedron edge and box plane (if on box)
-!
-!      xyzptr = get_edge_plane_intersection(tetraedgei,boxplanej,xyz);
-!      if(xyzptr!=NULL&&in_solid(box_planes,6,xyzptr,j)==1){
-!        v = verts[nv].v;
-!        v[0]=xyz[0];
-!        v[1]=xyz[1];
-!        v[2]=xyz[2];
-!        nnodes++;
-!        nv++;
-!      }
-!    }
-!
-!    // add intersection of box edge and tetrahedron plane (if on tetrahedron)
-!
-!    for(jj=0;jj<4;jj++){
-!      int kk;
-!      edge *edgejj;
-!
-!      edgejj = boxplanej->edges[jj];
-!
-!      for(kk=0;kk<4;kk++){
-!        plane *tetraplanekk;
-!
-!        tetraplanekk = tetra_planes + kk;
-!        xyzptr = get_edge_plane_intersection(edgejj,tetraplanekk,xyz);
-!        if(xyzptr!=NULL&&in_solid(tetra_planes,4,xyzptr,kk)==1){
-!          v = verts[nv].v;
-!          v[0]=xyz[0];
-!          v[1]=xyz[1];
-!          v[2]=xyz[2];
-!          nnodes++;
-!          nv++;
-!        }
-!      }
-!    }
-!
-!    // add box plane vertices if inside tetrahedron
-!
-!    for(i=0;i<4;i++){
-!      float *xyz;
-!      int jj;
-!
-!      xyz = boxplanej->verts[i]->v;
-!      if(in_solid(tetra_planes,4,xyz,-1)==1){
-!        v = verts[nv].v;
-!        v[0]=xyz[0];
-!        v[1]=xyz[1];
-!        v[2]=xyz[2];
-!        nnodes++;
-!        nv++;
-!      }
-!    }
-!    if(nnodes>0){
-!      facennodes[nfaces]=nnodes;
-!      nfaces++;
-!      faceptr[nfaces]=faceptr[nfaces-1]+nnodes;
-!    }
-!  }
 
 RETURN
 END SUBROUTINE GETVERTS
@@ -1944,10 +1917,10 @@ BOX_VERTS(7,0) = BOX_BOUNDS(MAX_X)
 BOX_VERTS(7,1) = BOX_BOUNDS(MAX_Y)
 BOX_VERTS(7,2) = BOX_BOUNDS(MAX_Z)
 
-TETRA_VERTS(0,0:2) = V0(0:2)
-TETRA_VERTS(1,0:2) = V1(0:2)
-TETRA_VERTS(2,0:2) = V2(0:2)
-TETRA_VERTS(3,0:2) = V3(0:2)
+TETRA_VERTS(0,0:2) = V0
+TETRA_VERTS(1,0:2) = V1
+TETRA_VERTS(2,0:2) = V2
+TETRA_VERTS(3,0:2) = V3
 
 CALL VEC_CROSS(V0,V3,V1,TETRA_NORMALS(0,0:2))
 CALL VEC_CROSS(V1,V3,V2,TETRA_NORMALS(1,0:2))
@@ -1971,20 +1944,19 @@ REAL(EB), DIMENSION(0:2), INTENT(OUT) :: OUT_VERT
 
 REAL(EB), DIMENSION(0:2) :: V0MX0, V1MV0
 REAL(EB) :: DENOM, NUM, T
-REAL(EB) U_DOT_V
 
 V0MX0 = V0 - X0
 V1MV0 = V1 - V0
 
-!DENOM = U_DOT_V(V1MV0,N0)
+DENOM = U_DOT_V(V1MV0,N0)
 
 PLANE_EDGE_INTERSECTION=0
-IF(DENOM.NE.0)THEN
-  !T = -U_DOT_V(V0MX0,N0)/DENOM
-  IF(T.GE.0.0.AND.T.LE.1.0)THEN
-    PLANE_EDGE_INTERSECTION=1
-    OUT_VERT = (1.0-T)*V0 + T*V1
-  ENDIF
+IF (DENOM.NE.0) THEN
+   T = -U_DOT_V(V0MX0,N0)/DENOM
+   IF (T.GE.0.0.AND.T.LE.1.0) THEN
+      PLANE_EDGE_INTERSECTION=1
+      OUT_VERT = (1.0-T)*V0 + T*V1
+   ENDIF
 ENDIF
 RETURN
 END FUNCTION PLANE_EDGE_INTERSECTION
@@ -1998,9 +1970,9 @@ REAL(EB), DIMENSION(0:2), INTENT(IN) :: XYZ
 INTEGER, INTENT(IN) :: IGNORE_PLANE
 
 IN_BOX=0
-IF((XYZ(0)>=BOX_BOUNDS(MIN_X).OR.IGNORE_PLANE.EQ.MIN_X) .AND. (XYZ(0) <= BOX_BOUNDS(MAX_X).OR.IGNORE_PLANE.EQ.MAX_X) .AND. &
-   (XYZ(1)>=BOX_BOUNDS(MIN_Y).OR.IGNORE_PLANE.EQ.MIN_Y) .AND. (XYZ(1) <= BOX_BOUNDS(MAX_Y).OR.IGNORE_PLANE.EQ.MAX_Y) .AND. &
-   (XYZ(2)>=BOX_BOUNDS(MIN_Z).OR.IGNORE_PLANE.EQ.MIN_Z) .AND. (XYZ(2) <= BOX_BOUNDS(MAX_Z).OR.IGNORE_PLANE.EQ.MAX_Z) ) IN_BOX = 1
+IF ((XYZ(0)>=BOX_BOUNDS(MIN_X).OR.IGNORE_PLANE.EQ.MIN_X) .AND. (XYZ(0) <= BOX_BOUNDS(MAX_X).OR.IGNORE_PLANE.EQ.MAX_X) .AND. &
+    (XYZ(1)>=BOX_BOUNDS(MIN_Y).OR.IGNORE_PLANE.EQ.MIN_Y) .AND. (XYZ(1) <= BOX_BOUNDS(MAX_Y).OR.IGNORE_PLANE.EQ.MAX_Y) .AND. &
+    (XYZ(2)>=BOX_BOUNDS(MIN_Z).OR.IGNORE_PLANE.EQ.MIN_Z) .AND. (XYZ(2) <= BOX_BOUNDS(MAX_Z).OR.IGNORE_PLANE.EQ.MAX_Z) ) IN_BOX = 1
 
 RETURN
 END FUNCTION IN_BOX
@@ -2008,25 +1980,24 @@ END FUNCTION IN_BOX
 !  ------------------ IN_TETRA ------------------------ 
 
 INTEGER FUNCTION IN_TETRA(XYZ, IGNORE_PLANE)
-  REAL(EB), INTENT(IN), DIMENSION(0:2) :: XYZ
-  INTEGER, INTENT(IN) :: IGNORE_PLANE
-  REAL(EB) :: U_DOT_V
-  INTEGER :: VERT
+REAL(EB), INTENT(IN), DIMENSION(0:2) :: XYZ
+INTEGER, INTENT(IN) :: IGNORE_PLANE
   
-
-  INTEGER I,J
-  REAL(EB), DIMENSION(0:2) :: VECDIFF, NORMAL
+INTEGER I,J
+REAL(EB), DIMENSION(0:2) :: VECDIFF, NORMAL
+REAL(EB), DIMENSION(:), POINTER :: TETRAVERT, TETRANORMAL
   
-  IN_TETRA=1
-  DO I = 0, 3
-    IF(I.EQ.IGNORE_PLANE)CYCLE
-    VERT=TETRA_PLANE2VERT(I,0)
-    VECDIFF(0:2) = XYZ(0:2) - TETRA_VERTS(VERT,0:2)
-    !IF(U_DOT_V(TETRA_NORMALS(I,0:2),VECDIFF)>0.0)THEN
-   !   IN_TETRA=0
-   !   RETURN
-  !  ENDIF
-  END DO
+IN_TETRA=1
+DO I = 0, 3
+   IF (I.EQ.IGNORE_PLANE) CYCLE
+   TETRAVERT(0:2) => TETRA_VERTS(TETRA_PLANE2VERT(I,0),0:2)
+   TETRANORMAL(0:2) => TETRA_NORMALS(I,0:2)
+   VECDIFF = XYZ - TETRAVERT
+   IF (U_DOT_V(TETRANORMAL,VECDIFF)>0.0) THEN
+      IN_TETRA=0
+      RETURN
+   ENDIF
+END DO
 END FUNCTION IN_TETRA
 
 
@@ -2080,16 +2051,32 @@ REAL(EB) :: SUM
 
 SUM = 0.0
 DO I = 0, 2
-  SUM = SUM + U(I)*U(I)
+   SUM = SUM + U(I)*U(I)
 END DO
 SUM = SQRT(SUM)
-IF (SUM .NE.0.0) THEN
-  DO I = 0, 2
-    U(I) = U(I)/SUM
-  END DO
-ENDIF
+IF (SUM .NE.0.0) U = U/SUM
 
 RETURN
 END SUBROUTINE VEC_NORMALIZE
 
 END MODULE BOXTETRA_ROUTINES
+
+SUBROUTINE GETVERTS2(BOX_BOUNDS,V0,V1,V2,V3,OUT_VERTS,NVERTS,FACESTART,FACENUM,NFACES)
+USE PRECISION_PARAMETERS
+USE BOXTETRA_ROUTINES
+IMPLICIT NONE
+#ifdef pp_cvf
+#ifndef X64
+!DEC$ ATTRIBUTES ALIAS:'_getverts2@40' :: getverts2
+#endif
+#endif
+
+REAL(EB), DIMENSION(0:5), INTENT(IN) :: BOX_BOUNDS
+REAL(EB), DIMENSION(0:2), INTENT(IN) :: V0, V1, V2, V3
+REAL(EB), DIMENSION(0:99,0:2), INTENT(OUT) :: OUT_VERTS
+INTEGER, DIMENSION(0:99), INTENT(OUT) :: FACESTART, FACENUM
+INTEGER, INTENT(OUT) :: NVERTS,NFACES
+
+CALL GETVERTS(BOX_BOUNDS,V0,V1,V2,V3,OUT_VERTS,NVERTS,FACESTART,FACENUM,NFACES)
+
+END SUBROUTINE GETVERTS2
