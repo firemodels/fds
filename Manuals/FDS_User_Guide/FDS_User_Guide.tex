@@ -9782,7 +9782,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 %{\ct AL2O3}                                     & Logical       &                                                       &               & {\ct .FALSE.}    \\ \hline
 {\ct \footnotesize ALLOW\_SURFACE\_PARTICLES}   & Logical       & Section~\ref{info:surface_droplets}                   &               & {\ct .TRUE.}    \\ \hline
 {\ct \footnotesize ALLOW\_UNDERSIDE\_PARTICLES} & Logical       & Section~\ref{info:surface_droplets}                   &               & {\ct .FALSE.}    \\ \hline
-{\ct \footnotesize ASSUMED\_GAS\_TEMPERATURE}   & Real          & Section~\ref{solid_phase_verification}                &               &                   \\ \hline
+{\ct \footnotesize ASSUMED\_GAS\_TEMPERATURE}   & Real          & Section~\ref{solid_phase_verification}                &   $^\circ$C &                   \\ \hline
 {\ct \footnotesize ASSUMED\_GAS\_TEMPERATURE\_RAMP}& Character  & Section~\ref{solid_phase_verification}                &               &                   \\ \hline
 {\ct BAROCLINIC}                                & Logical       & Section~\ref{baroclinic_torque}                       &               & {\ct .TRUE.}     \\ \hline
 {\ct BNDF\_DEFAULT}                             & Logical       & Section~\ref{info:BNDF}                               &               & {\ct .TRUE.}      \\ \hline
@@ -10017,7 +10017,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct SURFACE\_TENSION}              & Real            & Section~\ref{info:secondary_breakup}    &   N/m     & $72.8 \times 10^3$  \\ \hline
 {\ct SURF\_ID}                      & Character       & Section~\ref{info:PART_SURF}            &           &               \\ \hline
 %{\ct TURBULENT\_DISPERSION}         & Logical         &                                         &           & {\ct .FALSE.} \\ \hline
-{\ct DRAG\_COEFFICIENT(3)}          & Real Array      & Section~\ref{info:particle_drag}        &           & -1.           \\ \hline
+{\ct DRAG\_COEFFICIENT}             & Real            & Section~\ref{info:particle_drag}        &           & -1.           \\ \hline
 {\ct VERTICAL\_VELOCITY}            & Real            & Section~\ref{info:surface_droplets}     & m/s       &  0.5          \\ \hline
 \end{longtable}
 
