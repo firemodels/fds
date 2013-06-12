@@ -14,7 +14,7 @@
 #  ===================
 
 # Mailing list for status report
-mailTo="kevin.mcgrattan@nist.gov, mcgratta@gmail.com, randall.mcdermott@nist.gov, randy.mcdermott@gmail.com, glenn.forney@nist.gov, gforney@gmail.com, craig.weinschenk@nist.gov, CraigWeinschenk@gmail.com, jfloyd@haifire.com, koverholt@gmail.com, topi.sikanen@nist.gov, tmacksmyers@gmail.com, Simo.Hostikka@vtt.fi, christian@rogsch.de, ben.trettel@gmail.com, mrctkg@gmail.com, kiliansusan@gmail.com"
+mailTo="mcgratta@gmail.com, randy.mcdermott@gmail.com, gforney@gmail.com, CraigWeinschenk@gmail.com, drjfloyd@gmail.com, koverholt@gmail.com, Topi.Sikanen@gmail.com, shostikk@gmail.com, ben.trettel@gmail.com, mrctkg@gmail.com, kiliansusan@gmail.com"
 
 # Firebot's username
 FIREBOT_USERNAME="firebot"
