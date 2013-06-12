@@ -2748,10 +2748,10 @@ SELECT_VELOCITY_NORM: SELECT CASE (CFL_VELOCITY_NORM)
       ENDIF
       !$OMP END CRITICAL
       !$OMP END PARALLEL
-   CASE(3)
+   CASE(3) ! same as case 0 without divergence
       P_UVWMAX = UVWMAX
-      !$OMP PARALLEL DEFAULT(NONE) &
-      !$OMP SHARED(UVWMAX,ICFL,JCFL,KCFL,FVX,FVY,FVZ,RDXN,RDYN,RDZN,IBAR,JBAR,KBAR,DP) &
+      !$OMP PARALLEL DEFAULT(NONE) & 
+      !$OMP SHARED(UVWMAX,ICFL,JCFL,KCFL,UU,VV,WW,RDXN,RDYN,RDZN,IBAR,JBAR,KBAR,DP) &
       !$OMP PRIVATE(P_ICFL,P_JCFL,P_KCFL) &
       !$OMP FIRSTPRIVATE(P_UVWMAX) 
 
@@ -2759,14 +2759,10 @@ SELECT_VELOCITY_NORM: SELECT CASE (CFL_VELOCITY_NORM)
       DO K=0,KBAR
          DO J=0,JBAR
             DO I=0,IBAR
-               ! Experimental:
-               ! The idea here is that basing the time scale off the acceleration should also account for
-               ! VN (Von Neumann), GR (gravity), and BARO (baroclinic torque), or whatever other physics
-               ! you decide to include in F_i.
-               UODX = SQRT(ABS(FVX(I,J,K))*RDXN(I))
-               VODY = SQRT(ABS(FVY(I,J,K))*RDYN(J))
-               WODZ = SQRT(ABS(FVZ(I,J,K))*RDZN(K))
-               UVW  = MAX(UODX,VODY,WODZ) + ABS(DP(I,J,K))*DENSITY_FACTOR
+               UODX = ABS(UU(I,J,K))*RDXN(I)
+               VODY = ABS(VV(I,J,K))*RDYN(J)
+               WODZ = ABS(WW(I,J,K))*RDZN(K)
+               UVW  = MAX(UODX,VODY,WODZ)
                IF (UVW>=P_UVWMAX) THEN
                   P_UVWMAX = UVW
                   P_ICFL = I
