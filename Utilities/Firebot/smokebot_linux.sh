@@ -12,7 +12,7 @@
 #  ===================
 
 mailToSMV="gforney@gmail.com, koverholt@gmail.com"
-mailToFDS="kevin.mcgrattan@nist.gov, mcgratta@gmail.com, randall.mcdermott@nist.gov, randy.mcdermott@gmail.com, glenn.forney@nist.gov, gforney@gmail.com, craig.weinschenk@nist.gov, CraigWeinschenk@gmail.com, jfloyd@haifire.com, koverholt@gmail.com, topi.sikanen@nist.gov, tmacksmyers@gmail.com, Simo.Hostikka@vtt.fi, christian@rogsch.de, ben.trettel@gmail.com, mrctkg@gmail.com, kiliansusan@gmail.com"
+mailToFDS="mcgratta@gmail.com, randy.mcdermott@gmail.com, gforney@gmail.com, CraigWeinschenk@gmail.com, drjfloyd@gmail.com, koverholt@gmail.com, Topi.Sikanen@gmail.com, shostikk@gmail.com, ben.trettel@gmail.com, mrctkg@gmail.com, kiliansusan@gmail.com"
 
 
 FIREBOT_QUEUE=smokebot
@@ -94,7 +94,7 @@ get_fds_email2()
     THIS_FDSEMAIL=mcgratta@gmail.com
   fi
   if [[ $THIS_FDSAUTHOR == topisikanen ]] ; then
-    THIS_FDSEMAIL=topi.sikanen@nist.gov
+    THIS_FDSEMAIL=Topi.Sikanen@gmail.com
   fi
   if [[ $THIS_FDSAUTHOR == randy.mcdermott ]] ; then
     THIS_FDSEMAIL=randy.mcdermott@gmail.com
@@ -103,10 +103,10 @@ get_fds_email2()
     THIS_FDSEMAIL=CraigWeinschenk@gmail.com
   fi
   if [[ $THIS_FDSAUTHOR == drjfloyd ]] ; then
-    THIS_FDSEMAIL=jfloyd@haifire.com
+    THIS_FDSEMAIL=drjfloyd@gmail.com
   fi
   if [[ $THIS_FDSAUTHOR == shostikk ]] ; then
-    THIS_FDSEMAIL=Simo.Hostikka@vtt.fi
+    THIS_FDSEMAIL=shostikk@gmail.com
   fi
   if [[ $THIS_FDSAUTHOR == mrctkg@gmail.com ]] ; then
     THIS_FDSEMAIL=mrctkg@gmail.com
