@@ -490,7 +490,10 @@ void DrawGeomTest(int option){
   // tetrahedron
 
   if(option==1){
-    FORTgetverts(box_bounds, v1, v2, v3, v4, verts, &nverts, facestart, facenum, &nfaces);
+    float volume;
+
+    FORTgetverts(box_bounds, v1, v2, v3, v4, verts, &nverts, facestart, facenum, &nfaces, &volume);
+    printf("volume=%f\n",volume);
     if(nverts>0){
       int i;
 
