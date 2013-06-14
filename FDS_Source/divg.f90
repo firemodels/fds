@@ -40,7 +40,6 @@ TYPE(SPECIES_MIXTURE_TYPE), POINTER :: SM,SM0
 INTEGER :: IW,N,IOR,II,JJ,KK,IIG,JJG,KKG,ITMP,I,J,K,IPZ,IOPZ
 TYPE(VENTS_TYPE), POINTER :: VT=>NULL()
 TYPE(WALL_TYPE), POINTER :: WC=>NULL()
-REAL(EB), PARAMETER :: ADVECTION_EPS=1.E-6_EB
 !TYPE(FACET_TYPE), POINTER :: FC=>NULL()
 !TYPE(CUTCELL_LINKED_LIST_TYPE), POINTER :: CL=>NULL()
 !INTEGER :: NF,IC
@@ -828,18 +827,14 @@ LIMITER_SELECT: SELECT CASE (FLUX_LIMITER)
          DO J=1,JBAR
             DO I=1,IBM1
 
-               IF (ABS(DV(I,J,K))>ADVECTION_EPS) THEN
-                  IF (UU(I,J,K)>0._EB) THEN
-                     DR = DV(I-1,J,K)/DV(I,J,K)
-                     B = MAX(0._EB,MIN(2._EB*DR,1._EB),MIN(DR,2._EB))
-                     HX(I,J,K) = RHO_H_S_P(I,J,K)   + 0.5_EB*B*DV(I,J,K)
-                  ELSE
-                     DR = DV(I+1,J,K)/DV(I,J,K)
-                     B = MAX(0._EB,MIN(2._EB*DR,1._EB),MIN(DR,2._EB))
-                     HX(I,J,K) = RHO_H_S_P(I+1,J,K) - 0.5_EB*B*DV(I,J,K)
-                  ENDIF
+               IF (UU(I,J,K)>0._EB) THEN
+                  DR = DV(I-1,J,K)/DV(I,J,K)
+                  B = MAX(0._EB,MIN(2._EB*DR,1._EB),MIN(DR,2._EB))
+                  HX(I,J,K) = RHO_H_S_P(I,J,K)   + 0.5_EB*B*DV(I,J,K)
                ELSE
-                  HX(I,J,K) = 0.5_EB*(RHO_H_S_P(I,J,K) + RHO_H_S_P(I+1,J,K))
+                  DR = DV(I+1,J,K)/DV(I,J,K)
+                  B = MAX(0._EB,MIN(2._EB*DR,1._EB),MIN(DR,2._EB))
+                  HX(I,J,K) = RHO_H_S_P(I+1,J,K) - 0.5_EB*B*DV(I,J,K)
                ENDIF
 
             ENDDO
@@ -861,18 +856,14 @@ LIMITER_SELECT: SELECT CASE (FLUX_LIMITER)
          DO J=1,JBM1
             DO I=1,IBAR
 
-               IF (ABS(DV(I,J,K))>ADVECTION_EPS) THEN
-                  IF (VV(I,J,K)>0._EB) THEN
-                     DR = DV(I,J-1,K)/DV(I,J,K)
-                     B = MAX(0._EB,MIN(2._EB*DR,1._EB),MIN(DR,2._EB))
-                     HY(I,J,K) = RHO_H_S_P(I,J,K)   + 0.5_EB*B*DV(I,J,K)
-                  ELSE
-                     DR = DV(I,J+1,K)/DV(I,J,K)
-                     B = MAX(0._EB,MIN(2._EB*DR,1._EB),MIN(DR,2._EB))
-                     HY(I,J,K) = RHO_H_S_P(I,J+1,K) - 0.5_EB*B*DV(I,J,K)
-                  ENDIF
+               IF (VV(I,J,K)>0._EB) THEN
+                  DR = DV(I,J-1,K)/DV(I,J,K)
+                  B = MAX(0._EB,MIN(2._EB*DR,1._EB),MIN(DR,2._EB))
+                  HY(I,J,K) = RHO_H_S_P(I,J,K)   + 0.5_EB*B*DV(I,J,K)
                ELSE
-                  HY(I,J,K) = 0.5_EB*(RHO_H_S_P(I,J,K) + RHO_H_S_P(I,J+1,K))
+                  DR = DV(I,J+1,K)/DV(I,J,K)
+                  B = MAX(0._EB,MIN(2._EB*DR,1._EB),MIN(DR,2._EB))
+                  HY(I,J,K) = RHO_H_S_P(I,J+1,K) - 0.5_EB*B*DV(I,J,K)
                ENDIF
 
             ENDDO
@@ -894,18 +885,14 @@ LIMITER_SELECT: SELECT CASE (FLUX_LIMITER)
          DO J=1,JBAR
             DO I=1,IBAR
 
-               IF (ABS(DV(I,J,K))>ADVECTION_EPS) THEN
-                  IF (WW(I,J,K)>0._EB) THEN
-                     DR = DV(I,J,K-1)/DV(I,J,K)
-                     B = MAX(0._EB,MIN(2._EB*DR,1._EB),MIN(DR,2._EB))
-                     HZ(I,J,K) = RHO_H_S_P(I,J,K)   + 0.5_EB*B*DV(I,J,K)
-                  ELSE
-                     DR = DV(I,J,K+1)/DV(I,J,K)
-                     B = MAX(0._EB,MIN(2._EB*DR,1._EB),MIN(DR,2._EB))
-                     HZ(I,J,K) = RHO_H_S_P(I,J,K+1) - 0.5_EB*B*DV(I,J,K)
-                  ENDIF
+               IF (WW(I,J,K)>0._EB) THEN
+                  DR = DV(I,J,K-1)/DV(I,J,K)
+                  B = MAX(0._EB,MIN(2._EB*DR,1._EB),MIN(DR,2._EB))
+                  HZ(I,J,K) = RHO_H_S_P(I,J,K)   + 0.5_EB*B*DV(I,J,K)
                ELSE
-                  HZ(I,J,K) = 0.5_EB*(RHO_H_S_P(I,J,K) + RHO_H_S_P(I,J,K+1))
+                  DR = DV(I,J,K+1)/DV(I,J,K)
+                  B = MAX(0._EB,MIN(2._EB*DR,1._EB),MIN(DR,2._EB))
+                  HZ(I,J,K) = RHO_H_S_P(I,J,K+1) - 0.5_EB*B*DV(I,J,K)
                ENDIF
 
             ENDDO
@@ -1135,18 +1122,14 @@ LIMITER_SELECT: SELECT CASE (FLUX_LIMITER)
          DO J=1,JBAR
             DO I=1,IBM1
 
-               IF (ABS(DV(I,J,K))>ADVECTION_EPS) THEN
-                  IF (UU(I,J,K)>0._EB) THEN
-                     DR = DV(I-1,J,K)/DV(I,J,K)
-                     B = MAX(0._EB,MIN(2._EB*DR,1._EB),MIN(DR,2._EB))
-                     FX(I,J,K,0) = RHOP(I,J,K)   + 0.5_EB*B*DV(I,J,K)
-                  ELSE
-                     DR = DV(I+1,J,K)/DV(I,J,K)
-                     B = MAX(0._EB,MIN(2._EB*DR,1._EB),MIN(DR,2._EB))
-                     FX(I,J,K,0) = RHOP(I+1,J,K) - 0.5_EB*B*DV(I,J,K)
-                  ENDIF
+               IF (UU(I,J,K)>0._EB) THEN
+                  DR = DV(I-1,J,K)/DV(I,J,K)
+                  B = MAX(0._EB,MIN(2._EB*DR,1._EB),MIN(DR,2._EB))
+                  FX(I,J,K,0) = RHOP(I,J,K)   + 0.5_EB*B*DV(I,J,K)
                ELSE
-                  FX(I,J,K,0) = 0.5_EB*(RHOP(I,J,K) + RHOP(I+1,J,K))
+                  DR = DV(I+1,J,K)/DV(I,J,K)
+                  B = MAX(0._EB,MIN(2._EB*DR,1._EB),MIN(DR,2._EB))
+                  FX(I,J,K,0) = RHOP(I+1,J,K) - 0.5_EB*B*DV(I,J,K)
                ENDIF
 
             ENDDO
@@ -1168,18 +1151,14 @@ LIMITER_SELECT: SELECT CASE (FLUX_LIMITER)
          DO J=1,JBM1
             DO I=1,IBAR
 
-               IF (ABS(DV(I,J,K))>ADVECTION_EPS) THEN
-                  IF (VV(I,J,K)>0._EB) THEN
-                     DR = DV(I,J-1,K)/DV(I,J,K)
-                     B = MAX(0._EB,MIN(2._EB*DR,1._EB),MIN(DR,2._EB))
-                     FY(I,J,K,0) = RHOP(I,J,K)   + 0.5_EB*B*DV(I,J,K)
-                  ELSE
-                     DR = DV(I,J+1,K)/DV(I,J,K)
-                     B = MAX(0._EB,MIN(2._EB*DR,1._EB),MIN(DR,2._EB))
-                     FY(I,J,K,0) = RHOP(I,J+1,K) - 0.5_EB*B*DV(I,J,K)
-                  ENDIF
+               IF (VV(I,J,K)>0._EB) THEN
+                  DR = DV(I,J-1,K)/DV(I,J,K)
+                  B = MAX(0._EB,MIN(2._EB*DR,1._EB),MIN(DR,2._EB))
+                  FY(I,J,K,0) = RHOP(I,J,K)   + 0.5_EB*B*DV(I,J,K)
                ELSE
-                  FY(I,J,K,0) = 0.5_EB*(RHOP(I,J,K) + RHOP(I,J+1,K))
+                  DR = DV(I,J+1,K)/DV(I,J,K)
+                  B = MAX(0._EB,MIN(2._EB*DR,1._EB),MIN(DR,2._EB))
+                  FY(I,J,K,0) = RHOP(I,J+1,K) - 0.5_EB*B*DV(I,J,K)
                ENDIF
 
             ENDDO
@@ -1201,18 +1180,14 @@ LIMITER_SELECT: SELECT CASE (FLUX_LIMITER)
          DO J=1,JBAR
             DO I=1,IBAR
 
-               IF (ABS(DV(I,J,K))>ADVECTION_EPS) THEN
-                  IF (WW(I,J,K)>0._EB) THEN
-                     DR = DV(I,J,K-1)/DV(I,J,K)
-                     B = MAX(0._EB,MIN(2._EB*DR,1._EB),MIN(DR,2._EB))
-                     FZ(I,J,K,0) = RHOP(I,J,K)   + 0.5_EB*B*DV(I,J,K)
-                  ELSE
-                     DR = DV(I,J,K+1)/DV(I,J,K)
-                     B = MAX(0._EB,MIN(2._EB*DR,1._EB),MIN(DR,2._EB))
-                     FZ(I,J,K,0) = RHOP(I,J,K+1) - 0.5_EB*B*DV(I,J,K)
-                  ENDIF
+               IF (WW(I,J,K)>0._EB) THEN
+                  DR = DV(I,J,K-1)/DV(I,J,K)
+                  B = MAX(0._EB,MIN(2._EB*DR,1._EB),MIN(DR,2._EB))
+                  FZ(I,J,K,0) = RHOP(I,J,K)   + 0.5_EB*B*DV(I,J,K)
                ELSE
-                  FZ(I,J,K,0) = 0.5_EB*(RHOP(I,J,K) + RHOP(I,J,K+1))
+                  DR = DV(I,J,K+1)/DV(I,J,K)
+                  B = MAX(0._EB,MIN(2._EB*DR,1._EB),MIN(DR,2._EB))
+                  FZ(I,J,K,0) = RHOP(I,J,K+1) - 0.5_EB*B*DV(I,J,K)
                ENDIF
 
             ENDDO
@@ -1470,18 +1445,14 @@ LIMITER_SELECT: SELECT CASE (FLUX_LIMITER)
          DO J=1,JBAR
             DO I=1,IBM1
 
-               IF (ABS(DV(I,J,K))>ADVECTION_EPS) THEN
-                  IF (UU(I,J,K)>0._EB) THEN
-                     DR = DV(I-1,J,K)/DV(I,J,K)
-                     B = MAX(0._EB,MIN(2._EB*DR,1._EB),MIN(DR,2._EB))
-                     FX(I,J,K,N) = RHO_Z_P(I,J,K)   + 0.5_EB*B*DV(I,J,K)
-                  ELSE
-                     DR = DV(I+1,J,K)/DV(I,J,K)
-                     B = MAX(0._EB,MIN(2._EB*DR,1._EB),MIN(DR,2._EB))
-                     FX(I,J,K,N) = RHO_Z_P(I+1,J,K) - 0.5_EB*B*DV(I,J,K)
-                  ENDIF
+               IF (UU(I,J,K)>0._EB) THEN
+                  DR = DV(I-1,J,K)/DV(I,J,K)
+                  B = MAX(0._EB,MIN(2._EB*DR,1._EB),MIN(DR,2._EB))
+                  FX(I,J,K,N) = RHO_Z_P(I,J,K)   + 0.5_EB*B*DV(I,J,K)
                ELSE
-                  FX(I,J,K,N) = 0.5_EB*(RHO_Z_P(I,J,K) + RHO_Z_P(I+1,J,K))
+                  DR = DV(I+1,J,K)/DV(I,J,K)
+                  B = MAX(0._EB,MIN(2._EB*DR,1._EB),MIN(DR,2._EB))
+                  FX(I,J,K,N) = RHO_Z_P(I+1,J,K) - 0.5_EB*B*DV(I,J,K)
                ENDIF
 
             ENDDO
@@ -1503,18 +1474,14 @@ LIMITER_SELECT: SELECT CASE (FLUX_LIMITER)
          DO J=1,JBM1
             DO I=1,IBAR
 
-               IF (ABS(DV(I,J,K))>ADVECTION_EPS) THEN
-                  IF (VV(I,J,K)>0._EB) THEN
-                     DR = DV(I,J-1,K)/DV(I,J,K)
-                     B = MAX(0._EB,MIN(2._EB*DR,1._EB),MIN(DR,2._EB))
-                     FY(I,J,K,N) = RHO_Z_P(I,J,K)   + 0.5_EB*B*DV(I,J,K)
-                  ELSE
-                     DR = DV(I,J+1,K)/DV(I,J,K)
-                     B = MAX(0._EB,MIN(2._EB*DR,1._EB),MIN(DR,2._EB))
-                     FY(I,J,K,N) = RHO_Z_P(I,J+1,K) - 0.5_EB*B*DV(I,J,K)
-                  ENDIF
+               IF (VV(I,J,K)>0._EB) THEN
+                  DR = DV(I,J-1,K)/DV(I,J,K)
+                  B = MAX(0._EB,MIN(2._EB*DR,1._EB),MIN(DR,2._EB))
+                  FY(I,J,K,N) = RHO_Z_P(I,J,K)   + 0.5_EB*B*DV(I,J,K)
                ELSE
-                  FY(I,J,K,N) = 0.5_EB*(RHO_Z_P(I,J,K) + RHO_Z_P(I,J+1,K))
+                  DR = DV(I,J+1,K)/DV(I,J,K)
+                  B = MAX(0._EB,MIN(2._EB*DR,1._EB),MIN(DR,2._EB))
+                  FY(I,J,K,N) = RHO_Z_P(I,J+1,K) - 0.5_EB*B*DV(I,J,K)
                ENDIF
 
             ENDDO
@@ -1536,18 +1503,14 @@ LIMITER_SELECT: SELECT CASE (FLUX_LIMITER)
          DO J=1,JBAR
             DO I=1,IBAR
 
-               IF (ABS(DV(I,J,K))>ADVECTION_EPS) THEN
-                  IF (WW(I,J,K)>0._EB) THEN
-                     DR = DV(I,J,K-1)/DV(I,J,K)
-                     B = MAX(0._EB,MIN(2._EB*DR,1._EB),MIN(DR,2._EB))
-                     FZ(I,J,K,N) = RHO_Z_P(I,J,K)   + 0.5_EB*B*DV(I,J,K)
-                  ELSE
-                     DR = DV(I,J,K+1)/DV(I,J,K)
-                     B = MAX(0._EB,MIN(2._EB*DR,1._EB),MIN(DR,2._EB))
-                     FZ(I,J,K,N) = RHO_Z_P(I,J,K+1) - 0.5_EB*B*DV(I,J,K)
-                  ENDIF
+               IF (WW(I,J,K)>0._EB) THEN
+                  DR = DV(I,J,K-1)/DV(I,J,K)
+                  B = MAX(0._EB,MIN(2._EB*DR,1._EB),MIN(DR,2._EB))
+                  FZ(I,J,K,N) = RHO_Z_P(I,J,K)   + 0.5_EB*B*DV(I,J,K)
                ELSE
-                  FZ(I,J,K,N) = 0.5_EB*(RHO_Z_P(I,J,K) + RHO_Z_P(I,J,K+1))
+                  DR = DV(I,J,K+1)/DV(I,J,K)
+                  B = MAX(0._EB,MIN(2._EB*DR,1._EB),MIN(DR,2._EB))
+                  FZ(I,J,K,N) = RHO_Z_P(I,J,K+1) - 0.5_EB*B*DV(I,J,K)
                ENDIF
 
             ENDDO
