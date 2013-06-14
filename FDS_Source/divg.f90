@@ -1414,9 +1414,9 @@ DO K=0,KBP1
    ENDDO
 ENDDO
 
-FX(:,:,:,N)=1.E20_EB
-FY(:,:,:,N)=1.E20_EB
-FZ(:,:,:,N)=1.E20_EB
+! FX(:,:,:,N)=1.E20_EB
+! FY(:,:,:,N)=1.E20_EB
+! FZ(:,:,:,N)=1.E20_EB
 
 IF (.NOT.CONSTANT_SPECIFIC_HEAT) THEN
    U_DOT_DEL_RHO_Z=>WORK7 
@@ -1524,6 +1524,32 @@ LIMITER_SELECT: SELECT CASE (FLUX_LIMITER)
                   FZ(I,J,K,N) = 0.5_EB*(RHO_Z_P(I,J,K) + RHO_Z_P(I,J,K+1))
                ENDIF
 
+            ENDDO
+         ENDDO
+      ENDDO
+
+   CASE (CENTRAL_LIMITER) LIMITER_SELECT
+
+      DO K=1,KBAR
+         DO J=1,JBAR
+            DO I=1,IBM1
+               FX(I,J,K,N) = 0.5_EB*(RHO_Z_P(I,J,K) + RHO_Z_P(I+1,J,K))
+            ENDDO
+         ENDDO
+      ENDDO
+
+      DO K=1,KBAR
+         DO J=1,JBM1
+            DO I=1,IBAR
+               FY(I,J,K,N) = 0.5_EB*(RHO_Z_P(I,J,K) + RHO_Z_P(I,J+1,K))
+            ENDDO
+         ENDDO
+      ENDDO
+
+      DO K=1,KBM1
+         DO J=1,JBAR
+            DO I=1,IBAR
+               FZ(I,J,K,N) = 0.5_EB*(RHO_Z_P(I,J,K) + RHO_Z_P(I,J,K+1))
             ENDDO
          ENDDO
       ENDDO
