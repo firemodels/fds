@@ -211,10 +211,12 @@ ENDIF
 
 ! Stop all the processes if this is just a set-up run
  
-IF (SET_UP) THEN
-   CALL INITIALIZE_DIAGNOSTIC_FILE
-   CALL SHUTDOWN('Stop FDS, Set-up only')
+IF (SET_UP_ONLY) THEN
+   IF (MYID==0) CALL INITIALIZE_DIAGNOSTIC_FILE
+   PROCESS_STOP_STATUS = SETUP_ONLY_STOP
+   CALL END_FDS
 ENDIF
+
 ! Set up Time arrays (All Nodes)
  
 ALLOCATE(ACTIVE_MESH(NMESHES),STAT=IZERO)
@@ -1113,6 +1115,8 @@ IF (MYID==0) THEN
          WRITE(MESSAGE,'(A)') 'STOP: FDS stopped by user'
       CASE(SETUP_STOP) 
          WRITE(MESSAGE,'(A)') 'STOP: FDS was improperly set-up'
+      CASE(SETUP_ONLY_STOP) 
+         WRITE(MESSAGE,'(A)') 'STOP: Set-up only'
       CASE(CTRL_STOP) 
          WRITE(MESSAGE,'(A)') 'STOP: FDS was stopped by KILL control function'
    END SELECT
