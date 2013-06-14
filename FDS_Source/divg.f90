@@ -294,8 +294,8 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
          DO J=1,JBAR
             DO I=1,IBAR
                DEL_RHO_D_DEL_Z(I,J,K,N) = (RHO_D_DZDX(I,J,K)-RHO_D_DZDX(I-1,J,K))*RDX(I) + &
-                    (RHO_D_DZDY(I,J,K)-RHO_D_DZDY(I,J-1,K))*RDY(J) + &
-                    (RHO_D_DZDZ(I,J,K)-RHO_D_DZDZ(I,J,K-1))*RDZ(K)
+                                          (RHO_D_DZDY(I,J,K)-RHO_D_DZDY(I,J-1,K))*RDY(J) + &
+                                          (RHO_D_DZDZ(I,J,K)-RHO_D_DZDZ(I,J,K-1))*RDZ(K)
             ENDDO
          ENDDO
       ENDDO
@@ -561,7 +561,7 @@ IF (.NOT.CONSTANT_SPECIFIC_HEAT) THEN
             IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
             ZZ_GET = 0._EB
             CALL GET_SENSIBLE_ENTHALPY(ZZ_GET,H_S,TMP(I,J,K))
-            DP(I,J,K) = DP(I,J,K) - ( SM0%RCON/RSUM(I,J,K) - H_S*R_H_G(I,J,K))*( U_DOT_DEL_RHO(I,J,K) )/RHOP(I,J,K)
+            DP(I,J,K) = DP(I,J,K) - ( SM0%RCON/RSUM(I,J,K) - H_S*R_H_G(I,J,K) )*U_DOT_DEL_RHO(I,J,K)/RHOP(I,J,K)
          ENDDO
       ENDDO
    ENDDO
@@ -908,6 +908,32 @@ LIMITER_SELECT: SELECT CASE (FLUX_LIMITER)
                   HZ(I,J,K) = 0.5_EB*(RHO_H_S_P(I,J,K) + RHO_H_S_P(I,J,K+1))
                ENDIF
 
+            ENDDO
+         ENDDO
+      ENDDO
+
+   CASE (CENTRAL_LIMITER) LIMITER_SELECT
+
+      DO K=1,KBAR
+         DO J=1,JBAR
+            DO I=1,IBM1
+               HX(I,J,K) = 0.5_EB*(RHO_H_S_P(I,J,K) + RHO_H_S_P(I+1,J,K))
+            ENDDO
+         ENDDO
+      ENDDO
+
+      DO K=1,KBAR
+         DO J=1,JBM1
+            DO I=1,IBAR
+               HY(I,J,K) = 0.5_EB*(RHO_H_S_P(I,J,K) + RHO_H_S_P(I,J+1,K))
+            ENDDO
+         ENDDO
+      ENDDO
+
+      DO K=1,KBM1
+         DO J=1,JBAR
+            DO I=1,IBAR
+               HZ(I,J,K) = 0.5_EB*(RHO_H_S_P(I,J,K) + RHO_H_S_P(I,J,K+1))
             ENDDO
          ENDDO
       ENDDO
