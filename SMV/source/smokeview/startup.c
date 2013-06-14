@@ -1145,6 +1145,11 @@ void init_texturedir(void){
 void initvars(void){
   int i;
 
+#ifdef pp_GEOMTEST
+  for(i=0;i<10;i++){
+    tetrabox_vis[i]=1;
+  }
+#endif
 #ifdef pp_DEG
   degC[0]=176; // deg symbol (small superscript 0)
   degC[1]='C';

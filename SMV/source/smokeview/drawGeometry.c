@@ -495,7 +495,7 @@ void DrawGeomTest(int option){
     FORTgetverts(box_bounds, v1, v2, v3, v4, verts, &nverts, facestart, facenum, &nfaces, &volume);
     printf("volume=%f\n",volume);
     if(nverts>0){
-      int i;
+      int j;
 
       glPushMatrix();
       glScalef(1.0/xyzmaxdiff,1.0/xyzmaxdiff,1.0/xyzmaxdiff);
@@ -503,10 +503,28 @@ void DrawGeomTest(int option){
       glPointSize(10.0);
       glBegin(GL_POINTS);
       glColor3fv(foregroundcolor);
-      for(i=0;i<nverts;i++){
-        glVertex3fv(verts+3*i);
+      for(j=0;j<nfaces;j++){
+        int i;
+
+        if(tetrabox_vis[j]==0)continue;
+        for(i=facestart[j];i<facestart[j+1];i++){
+          glVertex3fv(verts+3*i);
+        }
       }
       glEnd();
+      if(option==1){
+        for(j=0;j<nfaces;j++){
+          int i;
+
+          if(tetrabox_vis[j]==0)continue;
+          for(i=facestart[j];i<facestart[j+1];i++){
+            char label[100];
+
+            sprintf(label,"%i",i-facestart[j]);
+            output3Text(foregroundcolor, verts[3*i]-3*EPS, verts[3*i+1]-3*EPS, verts[3*i+2]+3*EPS, label);
+          }
+        }
+      }
       glPopMatrix();
     }
   }

@@ -2003,7 +2003,7 @@ DO TP = 0, 3
 
 !  add intersection of box edge and tetrahedron plane (if on tetrahedron)
 
-   DO BE = 0, 3 ! box edge
+   DO BE = 0, 11 ! box edge
       BOXVERT0(0:2) => BOX_VERTS(0:2,BOX_EDGE2VERT(0,BE))
       BOXVERT1(0:2) => BOX_VERTS(0:2,BOX_EDGE2VERT(1,BE))
       IF ( PLANE_EDGE_INTERSECTION( TETRAVERT,TETRANORMAL,BOXVERT0,BOXVERT1,VERT).EQ.1) THEN
