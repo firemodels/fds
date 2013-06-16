@@ -21,35 +21,23 @@ char output_revision[]="$Revision$";
 
 void outputAxisLabels(){
   float x, y, z;
-  float xx0, yy0;
-  int ibar,jbar,kbar;
-  float *xplt,*yplt,*zplt;
-  int i;
-  mesh *meshi;
+  float x0, y0, z0;
 
-  glColor3fv(foregroundcolor);
   glPushMatrix();
   glScalef(1.0/xyzmaxdiff,1.0/xyzmaxdiff,1.0/xyzmaxdiff);
   glTranslatef(-xbar0,-ybar0,-zbar0);
-  for(i=0;i<nmeshes;i++){
-    meshi=meshinfo+i;
-    ibar=meshi->ibar;
-    jbar=meshi->jbar;
-    kbar=meshi->kbar;
-    xplt=meshi->xplt;
-    yplt=meshi->yplt;
-    zplt=meshi->zplt;
 
-    xx0 = xplt[0]-0.02;
-    yy0 = yplt[0]-0.02;
+  x = (xbar0+xbarORIG)/2.0;
+  y = (ybar0+ybarORIG)/2.0;
+  z = (zbar0+zbarORIG)/2.0;
+  x0 = xbar0 - xyzmaxdiff/50.0;
+  y0 = ybar0 - xyzmaxdiff/50.0;
+  z0 = zbar0 - xyzmaxdiff/50.0;
 
-    x = DENORMALIZE_X((xplt[0]+xplt[ibar])/2.0);
-    y = DENORMALIZE_Y((yplt[0]+yplt[jbar])/2.0);
-    z = DENORMALIZE_Z((zplt[0]+zplt[kbar])/2.0);
-    output3Text(foregroundcolor,   x,yy0, 0.0, "X");
-    output3Text(foregroundcolor, xx0,  y, 0.0, "Y");
-    output3Text(foregroundcolor, xx0,yy0,   z, "Z");
-  }
+  output3Text(foregroundcolor,   x,y0, z0, "X");
+  output3Text(foregroundcolor, x0,  y, z0, "Y");
+  output3Text(foregroundcolor, x0,y0,   z, "Z");
+  
   glPopMatrix();
 }
 
