@@ -264,7 +264,7 @@ labeldata *LABEL_Next(labeldata *label){
   return NULL;
 }
 
-/* ------------------ LABEL_Next ------------------------ */
+/* ------------------ LABEL_Previous ------------------------ */
 
 labeldata *LABEL_Previous(labeldata *label){
   labeldata *thislabel;
@@ -304,7 +304,7 @@ int LABEL_Get_Nuserlabels(void){
   return count;
 }
 
-/* ------------------ getnewlabel ------------------------ */
+/* ------------------ LABEL_get ------------------------ */
 
 labeldata *LABEL_get(char *name){
   labeldata *thislabel;
