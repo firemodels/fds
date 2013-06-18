@@ -9614,7 +9614,7 @@ PROC_DEVC_LOOP: DO N=1,N_DEVC
    IF (DV%UNITS=='null') DV%UNITS = OUTPUT_QUANTITY(DV%OUTPUT_INDEX)%UNITS
    DV%CTRL_INDEX       = 0
    DV%QUANTITY         = OUTPUT_QUANTITY(QUANTITY_INDEX)%NAME
-   DV%T                = 0._EB
+   DV%T                = T_BEGIN
    DV%TMP_L            = TMPA
    DV%TI_VALUE         = 0._EB
    DV%TI_T             = 0._EB
