@@ -390,13 +390,13 @@ work, but you are encouraged to gradually modify your input files to conform to 
 in FDS 6 are:
 \begin{itemize}
 \item If you want to model a fire, you {\em must} include a {\ct REAC} line with a specified {\ct FUEL}. See Chapter~\ref{info:REAC} for details.
-\item The output quantity {\ct 'MIXTURE\_FRACTION'} has been replaced with {\ct 'MIXTURE FRACTION'} and is only usable if there is a single {\ct REAC} input of the form $A \; + \; B \rightarrow C$.
+\item The output quantity {\ct 'MIXTURE\_FRACTION'} has been replaced with {\ct 'MIXTURE FRACTION'} and is only usable if there is a single {\ct REAC} input of the form ${\rm A} \; + \; {\rm B} \rightarrow {\rm C}$.
 \item The {\ct ISOTHERMAL} feature is no longer an option.
 \item There is no longer a {\ct STATE\_FILE} because there is no longer a simple mixture fraction model.
 \item {\ct PRESSURE\_CORRECTION} has been eliminated. See Section~\ref{info:PRES} for ways to improve the performance of the pressure solver.
 \item Species mass and volume fraction outputs are no longer invoked using {\ct QUANTITY='species name'}. Use {\ct QUANTITY='MASS FRACTION'} or {\ct QUANTITY='VOLUME FRACTION'} along with
-{\ct SPEC\_ID} instead.  Also note that all predefefined species (Table~\ref{tab:gasspecies}) are now referenced with all uppercase letters.
-\item The output quantity {\ct 'SOOT VOLUME FRACTION'} has been replaced with {\ct 'AEROSOL VOLUME FRACTION'} along with {\ct SPEC\_ID}.
+{\ct SPEC\_ID} instead.  Also note that all predefined species (Table~\ref{tab:gasspecies}) are now referenced with all uppercase letters.
+\item The output quantity {\ct 'SOOT VOLUME FRACTION'} is now {\ct 'AEROSOL VOLUME FRACTION'} along with {\ct SPEC\_ID} to identify the name of the species.
 \end{itemize}
 
 
@@ -475,6 +475,15 @@ Namelist      & FDS 5 Parameter                     & Namelist     & FDS 6 Param
 \end{sidewaystable}
 
 
+\section{A Note on Longer Run Times in FDS 6}
+
+A number of changes made in FDS 6 are aimed at improving the robustness and accuracy of the simulations. However, these improvements come at increased cost in both CPU time and memory usage. Some of this increased cost is offset by increasingly faster computers and improved parallel processing, but in most cases you will notice an increase in CPU time of approximately 50~\% over FDS~5. Listed below are suggested ways to decrease CPU time, but these options should be considered very carefully. The default parameter settings are designed to address a wide range of fire scenarios, but there are scenarios for which approximations used in past versions of FDS may still be appropriate. The best way to determine if one or more of these time-saving assumptions is appropriate, run identical simulations with and without the assumption to determine if the difference in results is acceptable.
+
+\begin{enumerate}
+\item The improved turbulence model in FDS 6 has been found to produce comparable results to older versions of FDS using slightly less refined numerical grids. Section~\ref{info:Mesh_Resolution} introduces a dimensionless parameter, $D^*/\dx$, that indicates the number of grid cells of dimension $\dx$ that span the characteristic width of the fire, $D^*$. A grid resolution study should be performed to determine the loss of accuracy caused by a reduced value of $D^*/\dx$. 
+\item One reason for the increased CPU cost of FDS~6 is the more precise treatment of gas species properties. Previous versions of FDS assumed that the specific heat of a gas species is solely dependent on its molecular weight, and that the ratio of specific heats, $c_p/c_v$, is equal to 1.4, a value appropriate for a diatomic gas like nitrogen, N$_2$. Section~\ref{info:Enthalpy} provides more details. FDS~6 now assumes that gas species are temperature-dependent, and this assumption increases the cost of the calculation in a number of different routines, in particular the calculation of the divergence. If you set {\ct CONSTANT\_SPECIFIC\_HEAT} to {\ct .TRUE.} on the {\ct MISC} line, you can once again assume that the gas species are all diatomic. For scenarios where the overall compartment temperature does not approach flashover conditions, this assumption might be appropriate. 
+\item In situations where you are simulating a relatively small fire in a relatively large space, it might be reasonable to turn off the radiation transport calculation by setting {\ct RADIATION} equal to {\ct .FALSE.} on the {\ct RADI} line. FDS will still assume that a fixed fraction of the fire's energy is radiated away, only now the energy is simply removed from the calculation. 
+\end{enumerate}
 
 
 
@@ -1640,6 +1649,7 @@ the mesh boundaries. This is done automatically by FDS.
 
 
 \subsection{Mesh Resolution}
+\label{info:Mesh_Resolution}
 
 A common question asked by new FDS users is, ``What should my grid spacing be?''
 The answer is not easy because it depends considerably on what you are trying
@@ -2120,7 +2130,6 @@ indicates that the region bounded by {\ct XB} shall generate 1000~kW/m$^3$. This
 
 
 
-\clearpage
 
 \section{The Pressure Solver: The \texorpdfstring{{\tt PRES}}{PRES} Namelist Group (Table \ref{tbl:PRES})}
 \label{info:PRES}
@@ -2369,9 +2378,6 @@ It is a good idea to inspect the geometry by running either a setup job
 
 
 
-
-\newpage
-
 \section{Applying Surface Properties: The \texorpdfstring{{\tt VENT}}{VENT} Namelist Group (Table \ref{tbl:VENT})}
 \label{info:VENT}
 
@@ -2526,7 +2532,7 @@ the problem, but it is more likely that if there is an error message about orien
 the {\ct VENT} is buried within a solid obstruction, in which case the program cannot determine
 the direction in which the {\ct VENT} is facing.
 
-\clearpage
+
 
 \section{Coloring Obstructions, Vents, Surfaces and Meshes}
 \label{info:colors}
@@ -2631,7 +2637,7 @@ should be applied. For example,
 applies paneling to an obstruction whose dimensions are 1~m by 1~m by 2~m, such that the image of the paneling is positioned at the point (1,3,5). The default value of {\ct TEXTURE\_ORIGIN} is (0,0,0), and the global default can be changed by added a {\ct TEXTURE\_ORIGIN} statement to the {\ct MISC} line.
 
 
-\clearpage
+
 
 \section{Repeated Objects: The \texorpdfstring{{\tt MULT}}{MULT} Namelist Group (Table \ref{tbl:MULT})}
 \label{info:MULT}
@@ -3108,7 +3114,7 @@ prescribed, the surface temperature is set to {\ct TMP\_BACK}, convective heat f
 See Section~\ref{solid_phase_verification} for ways to check and improve the accuracy of the solid phase calculation.
 
 
-\clearpage
+
 
 \section{Simple Pyrolysis Models}
 
@@ -3232,7 +3238,7 @@ the conditions of the surrounding environment.
 
 
 
-\clearpage
+
 
 \section{Complex Pyrolysis Models}
 \label{info:solid_pyrolysis}
@@ -3457,7 +3463,6 @@ fraction of the combustible load. A single couch can generate several
 megawatts of energy and sometimes lead to compartment flashover. Modeling
 a couch fire requires a simplification of its structure and materials.
 At the very least, we want the upholstery to be modeled as a layer of fabric covering polyurethane foam. We need the thermal properties of each, along with estimates of the ``reference'' temperatures as described above. The foam might be described as follows:
-
 \begin{lstlisting}
 &MATL ID                    = 'FOAM'
       SPECIFIC_HEAT         = 1.0
@@ -3470,8 +3475,6 @@ At the very least, we want the upholstery to be modeled as a layer of fabric cov
       HEAT_OF_REACTION      = 1500.
       HEAT_OF_COMBUSTION    = 30000. /
 \end{lstlisting}
-
-\noindent
 Note that these properties are completely made up.
 Both the fabric and the foam decompose into fuel gases via
 single-step reactions. The fuel gases from each have different
@@ -3484,7 +3487,7 @@ The same couch model is included in a room-scale fire simulation, known as the
 Only the reaction zone of the fire is shown; the smoke is hidden so that you can see the fire progressing
 along the couch.
 
-\begin{figure}[p]
+\begin{figure}[ht]
 \includegraphics[width=\textwidth]{SCRIPT_FIGURES/room_fire_300}
 \caption[Results of the {\ct room\_fire} test case]{Output of {\ct room\_fire} test case showing fire on the couch at
 5 min.}
@@ -4077,7 +4080,7 @@ In Chapter 7 of Jarrin's thesis \cite{Jarrin:2008}, he introduces the Modified S
 \end{lstlisting}
 
 
-\clearpage
+
 
 
 
@@ -4112,31 +4115,25 @@ A number of examples of simple HVAC systems are given in the HVAC folder of the 
 \label{info:HVACduct}
 
 A typical input line specifying a duct is as follows:
-
 \begin{lstlisting}
 &HVAC TYPE_ID='DUCT', ID='ductname', NODE_ID='node 1','node 2', AREA=3.14,
       LOSS=1.,1., ROUGHNESS=0.001, FAN_ID='fan 1', DEVC_ID='device 1' /
 \end{lstlisting}
-
-\noindent where:
-
+where:
 \begin{description}
 \item[{\ct AIRCOIL\_ID}] is the {\ct ID} of an aircoil located in the duct.  The operation of the aircoil can be controlled by either a device or a control function.
 \item[{\ct AREA}] is the cross sectional area of the duct in m$^2$.
 \item[{\ct DAMPER}] is a logical parameter indicating the presence of a damper in the duct. The state of the damper is controlled by either a device or a control function (see Section~\ref{info:HVACdamper}).
-\item[{\ct DIAMETER}] the diameter of the duct in m.  If only {\ct DIAMETER} is specified, the {\ct AREA} will be computed assuming a round duct.  Do not specify both {\ct DIAMETER} and {\ct PERIMETER}.
+\item[{\ct DIAMETER}] is the diameter of the duct in m.  If only {\ct DIAMETER} is specified, the {\ct AREA} will be computed assuming a round duct.  Do not specify both {\ct DIAMETER} and {\ct PERIMETER}.
 \item[{\ct DEVC\_ID}]  is the {\ct ID} of a {\ct DEVC} for a damper, fan, or aircoil in the duct. An alternative is {\ct CTRL\_ID}.
-\item[{\ct FAN\_ID}] is the {\ct ID} of a fan located in the duct. Instead of
-specifying a {\ct FAN\_ID}, you could specify the {\ct VOLUME\_FLOW} rate (m$^3$/s) through the duct. The operation of the fan can be controlled by either a device or a control function.
+\item[{\ct FAN\_ID}] is the {\ct ID} of a fan located in the duct. Instead of specifying a {\ct FAN\_ID}, you could specify the {\ct VOLUME\_FLOW} rate (m$^3$/s) through the duct. The operation of the fan can be controlled by either a device or a control function.
 \item[{\ct LOSS}] is a pair of real numbers giving the forward and reverse flow loss in the duct.  Forward is flow from the first node listed in {\ct NODE\_ID} to the second node listed in {\ct NODE\_ID}.
 \item[{\ct NODE\_ID}] gives the {\ct ID}s of the nodes on either end of the duct segment.  Positive velocity in a duct is defined as flow from the first node to second node.
 \item[{\ct PERIMETER}] is used along with {\ct AREA} to specify a duct with non-circular cross-section.  The {\ct DIAMETER} will be computed as the hydraulic diameter.
 \item[{\ct REVERSE}]  is a logical parameter that when {\ct .TRUE.} indicates that the specified {\ct FAN\_ID} or {\ct VOLUME\_FLOW} blows from the second node to the first.
 \item[{\ct ROUGHNESS}] is the absolute roughness in m of the duct that is used to compute the friction factor for the duct.
-\item[{\ct VOLUME\_FLOW}] This is a fixed flow rate (m$^3$/s) through the duct.  If you specify {\ct VOLUME\_FLOW}, you can change its value in time either using the characteristic time, {\ct TAU\_VF},  to define a tanh ({\ct TAU\_VF}>0) or t$^2$ ramp ({\ct TAU\_VF}<0); or you can specify a {\ct RAMP\_ID}.  This cannot be controlled by a device or control function; however, a constant volume flow {\ct FAN} can be.
+\item[{\ct VOLUME\_FLOW}] is a fixed flow rate (m$^3$/s) through the duct.  If you specify {\ct VOLUME\_FLOW}, you can change its value in time either using the characteristic time, {\ct TAU\_VF},  to define a tanh ({\ct TAU\_VF}>0) or t$^2$ ramp ({\ct TAU\_VF}<0); or you can specify a {\ct RAMP\_ID}.  This cannot be controlled by a device or control function; however, a constant volume flow {\ct FAN} can be.
 \end{description}
-
-\noindent
 Note that only one of {\ct AIRCOIL\_ID}, {\ct DAMPER}, or {\ct FAN\_ID} should be specified for a duct.
 
 To reduce the computational cost of the HVAC solver, a duct should be considered as any length of duct that connects two items that must be defined as nodes (i.e., a connection to the FDS domain, a filter, or a location where more than two ducts join).  That is, a duct should be considered as any portion of the HVAC system where flow can only be in one direction at given point in time (flow can reverse direction over time).  For example the top of Figure~\ref{fig:HVAC_Simplify} shows a segment of an HVAC system where flow from a tee goes through an expansion fitting, two elbows, an expansion fitting, and a straight length of duct before it terminates as a connection to the FDS domain.
@@ -4376,7 +4373,7 @@ The above input defines a vent lying in the $y$-$z$ plane facing in the $-x$ dir
 
 
 
-\clearpage
+
 
 \section{Pressure-Related Effects: The \texorpdfstring{{\tt ZONE}}{ZONE} Namelist Group (Table \ref{tbl:VENT})}
 \label{info:ZONE}
@@ -4564,7 +4561,6 @@ where $ \Delta z$ is the distance from the leak point to the neutral plane.  Usi
 
 
 
-\clearpage
 
 \section{Special Topic: Pressure Boundary Conditions}
 \label{info:pressure_boundary}
@@ -4815,7 +4811,7 @@ Here, {\ct A\_RAMP} and {\ct E\_RAMP} are the parameters on the {\ct REAC} line 
 
 
 
-\chapter{Chemical Species: The \texorpdfstring{{\tt SPEC}}{SPEC} Namelist Group}
+\chapter{Chemical Species}
 \label{info:SPEC}
 
 FDS was designed primarily to study fire phenomena, and much of the basic chemistry of combustion is handled with a minimum of user inputs. However, there are many applications in which you might want to simulate the movement of gases in the absence of fire, or additional chemical species might be added to a simulation that involves fire.  Gas species are defined with the input group
@@ -4958,6 +4954,7 @@ Conductivity can be specified in one of two ways.  First, it can be explicitly d
 Diffusivity, assumed to be the binary diffusion coefficient between the given species and the background species, can be specified in one of two ways.  First, it can be explicitly defined using {\ct DIFFUSIVITY} (m$^2$/s) with optional temperature dependence by using of {\ct RAMP\_D}.  Second, it can be computed by FDS using {\ct MW} and the Lennard-Jones potential parameters $\sigma$ ({\ct SIGMALJ}) and $\epsilon/k$ ({\ct EPSILONKLJ}).  If no inputs are specified, FDS will compute the diffusivity using {\ct MW} and the Lennard-Jones parameters for air.
 
 \subsubsection{Enthalpy}
+\label{info:Enthalpy}
 
 The enthalpy of the gas mixture is given by the following formula:
 \be
@@ -9808,7 +9805,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct C\_SMAGORINSKY}                            & Real          & Section~\ref{info:LES}                                &               & 0.20              \\ \hline
 {\ct C\_VREMAN}                                 & Real          & Section~\ref{info:LES}                                &               & 0.07              \\ \hline
 %{\ct COMPUTE_VISCOSITY_TWICE}                   & Logical       &                                                       &               & {\ct .TRUE.}     \\ \hline
-{\ct CONSTANT\_SPECIFIC\_HEAT}                  & Real          & Section~\ref{info:MISC_Basics}                        &               & {\ct .FALSE.}    \\ \hline
+{\ct CONSTANT\_SPECIFIC\_HEAT}                  & Real          & Section~\ref{info:Enthalpy}                           &               & {\ct .FALSE.}    \\ \hline
 {\ct DNS}                                       & Logical       & Section~\ref{info:MISC_Basics}                        &               & {\ct .FALSE.}     \\ \hline
 {\ct DRIFT\_FLUX}                               & Logical       & Section~\ref{info:deposition}                         &               & {\ct .TRUE.}     \\ \hline
 {\ct EVACUATION\_DRILL}                         & Logical       & Reference~\cite{FDS_Evac_Users_Guide}                 &               & {\ct .FALSE.}     \\ \hline
