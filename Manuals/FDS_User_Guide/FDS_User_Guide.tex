@@ -196,15 +196,21 @@ Giacomo Villi                           & Universit\`{a} di Padova, Italy       
 Andreas Vischer                         & Wijnveld//Ingenieure, Osnabr\"{u}ck, Germany                              \\ \hline
 \end{longtable}
 
-
 \cleardoublepage
+\phantomsection
+\addcontentsline{toc}{chapter}{Contents}
 \tableofcontents
 
 \cleardoublepage
+\phantomsection
+\addcontentsline{toc}{chapter}{List of Figures}
 \listoffigures
 
 \cleardoublepage
+\phantomsection
+\addcontentsline{toc}{chapter}{List of Tables}
 \listoftables
+
 
 \mainmatter
 
@@ -6427,14 +6433,11 @@ For example, water has a {\ct DENSITY} of 1000~kg/m$^3$, whereas a liter of wate
 
 The parameter {\ct N\_PARTICLES} on the {\ct INIT} line indicates the number of particles to insert within a specified region of the domain. This region can take on a number of shapes, depending on the parameter {\ct SHAPE}. By default, the region is a rectangular solid designated with the real sextuplet {\ct XB}.
 The format for {\ct XB} is the same as that used on the {\ct OBST} line. Alternatively, you can specify {\ct SHAPE='CONE'}, in which case the particles will be randomly distributed within a vertical cone. This is primarily used for representing trees. The dimensions of the cone are specified via the parameters {\ct RADIUS}, {\ct HEIGHT}, and base position {\ct XYZ}. The latter is a triplet of real numbers designating the point at the center of the base of the cone. Examples of typical {\ct INIT} lines are:
-
 \begin{lstlisting}
 &INIT PART_ID='droplets', XB=..., N_PARTICLES=..., MASS_PER_VOLUME=... /
 &INIT PART_ID='leaves', XYZ=..., RADIUS=..., HEIGHT=..., SHAPE='CONE',
       N_PARTICLES=..., MASS_PER_VOLUME=... /
 \end{lstlisting}
-
-\noindent
 Note that the volume of the specified region is calculated according to the {\ct SHAPE} dimensions, regardless of whether there are solid obstructions within this region. Note also that the number of particles, {\ct N\_PARTICLES}, is somewhat arbitrary but should be chosen to provide at least a few particles per grid cell. FDS will automatically assign a weighting factor to each particle to ensure that the {\ct MASS\_PER\_VOLUME} is achieved.
 
 \subsubsection{Specifying a Fixed Number of Particles per Grid Cell}
@@ -6445,14 +6448,10 @@ When using {\ct N\_PARTICLES\_PER\_CELL}, the particles will be randomly placed 
 
 \subsubsection{Single Particle Insertion}
 
-If you introduce
-only a single particle, which is often a handy way of creating a target, you may use the real triplet {\ct XYZ} rather than {\ct XB} to designate the particle's position.  You can give this single particle an initial velocity using the real triplet {\ct UVW}. You can also add {\ct DX}, {\ct DY}, and/or {\ct DZ} to create a line of particles that are offset from {\ct XYZ} by these increments in units of meters. For example,
-
+If you introduce only a single particle, which is often a handy way of creating a target, you may use the real triplet {\ct XYZ} rather than {\ct XB} to designate the particle's position.  You can give this single particle an initial velocity using the real triplet {\ct UVW}. You can also add {\ct DX}, {\ct DY}, and/or {\ct DZ} to create a line of particles that are offset from {\ct XYZ} by these increments in units of meters. For example,
 \begin{lstlisting}
 &INIT PART_ID='target', XYZ=1.2,3.4,5.6, N_PARTICLES=10, DX=0.1 /
 \end{lstlisting}
-
-\noindent
 creates a line of 10 particles starting at the point (1.2,3.4,5.6) separated by 0.1~m. This is handy for creating arrays of devices, like heat flux gauges. See Section~\ref{info:heat_flux} for more details.
 
 In special cases, you might want a single liquid droplet to be inserted at a particular point with a particular velocity every {\ct DT\_INSERT}~s following the activation of a particular device, as follows:
@@ -6460,7 +6459,14 @@ In special cases, you might want a single liquid droplet to be inserted at a par
 &INIT N_PARTICLES=1, XYZ=..., UVW=..., DIAMETER=200., DT_INSERT=0.05,
       PART_ID='drops', DEVC_ID='nozzle' /
 \end{lstlisting}
-Note that the {\ct DIAMETER} ($\mu$m) is only valid for liquid droplets. It over-rides the {\ct DIAMETER} on the {\ct PART} line labelled {\ct 'drops'}.
+Note that the {\ct DIAMETER} ($\mu$m) on the {\ct INIT} line is only valid for liquid droplets. It over-rides the {\ct DIAMETER} on the {\ct PART} line labelled {\ct 'drops'}. A simple test case that demonstrates this functionality is called {\ct bucket\_test\_3}, in which water droplets are launched in different directions from a common point. Their size, velocity, insertion frequency, and mass flux are varied, and a check is made that water mass is conserved (see Fig.~\ref{bucket_test_3_fig}).
+
+\begin{figure}[ht]
+\centering
+\includegraphics[scale=0.55]{SCRIPT_FIGURES/bucket_test_3}
+\caption[Results of the {\ct bucket\_test\_3} case]{Accumulated water collected at the floor in the {\ct bucket\_test\_3} case.}
+\label{bucket_test_3_fig}
+\end{figure}
 
 
 
@@ -6743,9 +6749,7 @@ where 0 (or 360) is aligned with the $-x$ axis and 90 is aligned with the $-y$ a
 point of insertion.
 {\ct FRAC} the fraction of the total flow rate of liquid that should emerge from that particular solid angle.
 
-In the test case called {\ct bucket\_test\_2}, the spray pattern is defined as two jets, each with a velocity of 5~m/s and a total flow rate
-of 60~L/min. The first jet contains 0.2 of the total flow, the second, 0.8 of the total.
-The jets are centered at points 30$^\circ$ below the ``equator,'' and are separated by 180$^\circ$.
+In the test case called {\ct bucket\_test\_2}, the spray pattern is defined as two jets, each with a velocity of 5~m/s and a total flow rate of 60~L/min. The sprinkler is set to operate for only 5~s. The first jet contains 0.2 of the total flow, the second, 0.8 of the total. The jets are centered at points 30$^\circ$ below the ``equator,'' and are separated by 180$^\circ$.
 \begin{lstlisting}
 &PROP ID='K-11', QUANTITY='SPRINKLER LINK TEMPERATURE', OFFSET=0.10,
       PART_ID='water_drops', FLOW_RATE=60., SPRAY_PATTERN_TABLE='TABLE1',
@@ -6753,7 +6757,14 @@ The jets are centered at points 30$^\circ$ below the ``equator,'' and are separa
 &TABL ID='TABLE1',TABLE_DATA=30,31,0,1,5,0.2/
 &TABL ID='TABLE1',TABLE_DATA=30,31,179,180,5,0.8/
 \end{lstlisting}
-Note that each set of {\ct TABL} lines must have a unique {\ct ID}.  Also note that the {\ct TABL} lines can be specified in any order.
+Note that each set of {\ct TABL} lines must have a unique {\ct ID}.  Also note that the {\ct TABL} lines can be specified in any order. Figure~\ref{bucket_test_2_fig} verifies that the sprinkler releases 5~kg of water (1~kg/s for 5~s).
+
+\begin{figure}[ht]
+\centering
+\includegraphics[scale=0.55]{SCRIPT_FIGURES/bucket_test_2}
+\caption[Results of the {\ct bucket\_test\_2} case]{Accumulated water collected at the floor in the {\ct bucket\_test\_2} case.}
+\label{bucket_test_2_fig}
+\end{figure}
 
 
 
@@ -10793,8 +10804,8 @@ called {\ct CHID\_hrr.csv}. The format of the file is as follows
 \begin{lstlisting}
 s    , kW       , kW       , ... , kg/s      , Pa       , Pa        , ...
 Time , HRR      , Q_RADI   , ... , BURN_RATE , ZONE_01  , ZONE_02   , ...
-T(1) , VAL(1,1) , VAL(2,1) , ... , VAL(8,1)  , VAL(9,1) , VAL(10,1) , ... 
-T(2) , VAL(1,2) , VAL(2,2) , ... , VAL(8,2)  , VAL(9,2) , VAL(10,1) , ...  
+T(1) , VAL(1,1) , VAL(2,1) , ... , VAL(8,1)  , VAL(9,1) , VAL(10,1) , ...
+T(2) , VAL(1,2) , VAL(2,2) , ... , VAL(8,2)  , VAL(9,2) , VAL(10,1) , ...
             .
             .
  \end{lstlisting}
