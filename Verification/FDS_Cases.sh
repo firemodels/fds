@@ -269,8 +269,9 @@ $RUNFDS Species pvc_combustion
 $RUNFDS Species soot_gravitational_settling
 
 $RUNFDS Sprinklers_and_Sprays activate_sprinklers
-$RUNFDS Sprinklers_and_Sprays bucket_test_2
 $RUNFDS Sprinklers_and_Sprays bucket_test
+$RUNFDS Sprinklers_and_Sprays bucket_test_2
+$RUNFDS Sprinklers_and_Sprays bucket_test_3
 $RUNFDS Sprinklers_and_Sprays cascade
 $RUNFDS Sprinklers_and_Sprays droplet_distributions
 $RUNFDS Sprinklers_and_Sprays flow_rate
