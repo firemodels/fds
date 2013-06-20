@@ -8211,27 +8211,7 @@ BANDLOOP: DO IBND = 1,NSB
          ASUM = 0._EB
          BSUM = 0._EB
 
-         !     Loop over PARTICLE size distribution
-
-!         DO I = 0,NRDINT
-!
-!            !     Integrate effective scattering cross section 
-!            !     = scattering cross section * (1-forward fraction)
-!
-!            CALL INTERPOLATE1D(RDMIE,QSCA(:,J),RDDIST(I),AVAL)
-!            CALL INTERPOLATE1D(RDMIE,CHI_F(:,J),RDDIST(I),BVAL)
-!            BVAL = (1._EB-BVAL)
-!            AVAL = AVAL*BVAL*PI*RDDIST(I)**2
-!            ASUM = ASUM + RDWGHT(I)*AVAL
-!
-!            !     Integrate absorption cross sections
-!
-!            CALL INTERPOLATE1D(RDMIE,QABS(:,J),RDDIST(I),BVAL)
-!            BVAL = BVAL*PI*RDDIST(I)**2
-!            BSUM = BSUM + RDWGHT(I)*BVAL
-!         ENDDO
-  
-         ! Properties simply at d32 - Elizabeth's idea
+         ! Properties at d32
 
          CALL INTERPOLATE1D(RDMIE,QSCA(:,J),LPC%R50(ND),AVAL)
          CALL INTERPOLATE1D(RDMIE,CHI_F(:,J),LPC%R50(ND),BVAL)
@@ -8239,7 +8219,6 @@ BANDLOOP: DO IBND = 1,NSB
          ASUM = AVAL*BVAL
          CALL INTERPOLATE1D(RDMIE,QABS(:,J),LPC%R50(ND),BVAL)
          BSUM = BVAL
-         ! End Elizabeth's 
 
          LPC%WQSCA(ND,IBND) = LPC%WQSCA(ND,IBND) + ASUM*LMBDWGHT(J)*IB
          LPC%WQABS(ND,IBND) = LPC%WQABS(ND,IBND) + BSUM*LMBDWGHT(J)*IB
@@ -8249,14 +8228,6 @@ BANDLOOP: DO IBND = 1,NSB
 
       LPC%WQSCA(ND,IBND)  = LPC%WQSCA(ND,IBND)/IBSUM
       LPC%WQABS(ND,IBND)  = LPC%WQABS(ND,IBND)/IBSUM
-
-      !     Transform cross sections back to efficiency factors
-
-!      LPC%WQSCA(ND,IBND)  = LPC%WQSCA(ND,IBND)/(PI*LPC%R50(ND)**2)
-!      LPC%WQABS(ND,IBND)  = LPC%WQABS(ND,IBND)/(PI*LPC%R50(ND)**2)
-!     For d32-based properties, no need to divide by drop area
-!      LPC%WQSCA(ND,IBND)  = LPC%WQSCA(ND,IBND)/(PI*(LPC%DMN(ND)/2._EB)**2)
-!      LPC%WQABS(ND,IBND)  = LPC%WQABS(ND,IBND)/(PI*(LPC%DMN(ND)/2._EB)**2)
 
 ENDDO DRGROUPLOOP
 ENDDO BANDLOOP
