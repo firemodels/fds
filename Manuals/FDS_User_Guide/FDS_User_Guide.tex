@@ -482,7 +482,8 @@ A number of changes made in FDS 6 are aimed at improving the robustness and accu
 \begin{enumerate}
 \item The improved turbulence model in FDS 6 has been found to produce comparable results to older versions of FDS using slightly less refined numerical grids. Section~\ref{info:Mesh_Resolution} introduces a dimensionless parameter, $D^*/\dx$, that indicates the number of grid cells of dimension $\dx$ that span the characteristic width of the fire, $D^*$. A grid resolution study should be performed to determine the loss of accuracy caused by a reduced value of $D^*/\dx$. 
 \item One reason for the increased CPU cost of FDS~6 is the more precise treatment of gas species properties. Previous versions of FDS assumed that the specific heat of a gas species is solely dependent on its molecular weight, and that the ratio of specific heats, $c_p/c_v$, is equal to 1.4, a value appropriate for a diatomic gas like nitrogen, N$_2$. Section~\ref{info:Enthalpy} provides more details. FDS~6 now assumes that gas species are temperature-dependent, and this assumption increases the cost of the calculation in a number of different routines, in particular the calculation of the divergence. If you set {\ct CONSTANT\_SPECIFIC\_HEAT} to {\ct .TRUE.} on the {\ct MISC} line, you can once again assume that the gas species are all diatomic. For scenarios where the overall compartment temperature does not approach flashover conditions, this assumption might be appropriate. 
-\item In situations where you are simulating a relatively small fire in a relatively large space, it might be reasonable to turn off the radiation transport calculation by setting {\ct RADIATION} equal to {\ct .FALSE.} on the {\ct RADI} line. FDS will still assume that a fixed fraction of the fire's energy is radiated away, only now the energy is simply removed from the calculation. 
+\item In situations where you are simulating a relatively small fire in a relatively large space and you are not interested in heat fluxes to surrounding structures, it might be reasonable to turn off the radiation transport calculation by setting {\ct RADIATION} equal to {\ct .FALSE.} on the {\ct RADI} line. FDS will still assume that a fixed fraction of the fire's energy is radiated away, only now the energy is simply removed from the calculation. 
+\item In situations where the heat transfer conditions are stationary or change only gradually, you can reduce the cost of the radiation solution by reducing the temporal resolution. More details in Section~\ref{info:RADI_Resolution}. A sensitivity study should be performed to determine the loss of accuracy.
 \end{enumerate}
 
 
@@ -3724,7 +3725,7 @@ the ratio of heats of combustion
 \be
 0.75 \times 1.28 \; \hbox{kg}\; = 0.96 \; \hbox{kg}
 \ee
-The same case is tested in 2D ({\ct box\_burn\_away\_2D} and {\ct box\_burn\_away\_2D\_residue}). In the latter only half of the mass is converted to fuel, yielding 50 \% residue. The box is made burn away by setting {\ct BULK\_DENSITY = 10}.
+The same case is tested in 2D ({\ct box\_burn\_away\_2D} and {\ct box\_burn\_away\_2D\_residue}). In the latter only half of the mass is converted to fuel, yielding 50 \% residue. The box is made burn away by setting {\ct BULK\_DENSITY = 10}. These two cases also plot the remaining mass of the solid box as a function of time, demonstrating the artificial increase of the solid mass when new, unburned surface is explosed to the surface. However, despite the instantaneous increases of the solid mass, both the final solid mass and the gaseous degradation products should match the expected values in the end of the simulation.
 \begin{figure}[ht]
 \begin{tabular*}{\textwidth}{lr}
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/box_burn_away1} &
