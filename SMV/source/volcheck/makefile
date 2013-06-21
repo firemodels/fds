@@ -1,67 +1,61 @@
-# Makefile for volcheck
+FILTERF =
 
-# The variable VPATH defines where the source code is relative to the current directory
+VPATH = .:../smokeview
+bin = .
 
-VPATH = .;../smokeview
+# Definition of the object variables
 
-obj_serial = getdata.o volcheck.o
+obj = getdata.o volcheck.o
+objwin = getdata.obj volcheck.obj
 
-objwin_serial = $(obj_serial:.o=.obj)
-
-# General Purpose Rules
+#*** General Purpose Rules ***
 
 no_target:
 	@echo \******** You did not specify a make target \********
-	@echo Please read the comments at the top of the makefile
+	@echo Use one of targets found in the Makefile
 
-setup:
-%.o : %.mod
+.SUFFIXES: .F90 .c .obj .o .f90 .cpp
 
-setup_win:
-%.obj : %.mod
-
-.SUFFIXES: .f90 .o .obj
-
-.f90.o:
-	$(FCOMPL) -c $(FFLAGS) $<
+.F90.o:
+	$(FC) -c $(FFLAGS) $(FILTERF) $<
 .f90.obj:
-	$(FCOMPL) -c $(FFLAGS) $<
+	$(FC) -c $(FFLAGS) $(FILTERF) $<
+.f90.o:
+	$(FC) -c $(FFLAGS) $(FILTERF) $<
 
 
-intel_win_64 : FFLAGS = /O3 /Qvec_report0 /Qipo -fpp
-intel_win_64 : FCOMPL = ifort
-intel_win_64 : obj = fds_win_64
-intel_win_64 : setup_win $(objwin_serial)
-	$(FCOMPL) -o $(obj) $(FFLAGS) /F1000000000 $(objwin_serial)
+# ------------- Win 64 ----------------
+#  64 bit windows
 
-intel_linux_64_profile : FFLAGS = -m64 -O2 -vec_report0 -p
-intel_linux_64_profile : LFLAGS = -static-intel
-intel_linux_64_profile : FCOMPL = ifort
-intel_linux_64_profile : obj = fds_intel_linux_64_profile
-intel_linux_64_profile : setup $(obj_serial)
-	$(FCOMPL) $(FFLAGS) $(LFLAGS) -o $(obj) $(obj_serial)
+intel_win_64 : FFLAGS    = -O2 /Qvec_report0 /nologo /fpp
+intel_win_64 : FC        = ifort
+intel_win_64 : exe       = volcheck.exe
 
-intel_linux_64 : FFLAGS = -m64 -O3 -vec_report0 -ipo
-intel_linux_64 : LFLAGS = -static-intel
-intel_linux_64 : FCOMPL = ifort
-intel_linux_64 : obj = fds_intel_linux_64
-intel_linux_64 : setup $(obj_serial)
-	$(FCOMPL) $(FFLAGS) $(LFLAGS) -o $(obj) $(obj_serial)
+intel_win_64 : $(objwin)
+	$(FC) -o $(bin)/$(exe) $(objwin)
 
+# ------------- Linux 64 ----------------
+#  64 bit linux
 
-intel_osx_64 : FFLAGS = -O3 -m64 -heap-arrays -ipo -mmacosx-version-min=10.4
-intel_osx_64 : LFLAGS = -static-intel
-intel_osx_64 : FCOMPL = ifort
-intel_osx_64 : obj = fds_intel_osx_64
-intel_osx_64 : setup $(obj_serial)
-	$(FCOMPL) $(FFLAGS) $(LFLAGS) -o $(obj) $(obj_serial)
+intel_linux_64 : FFLAGS    = -O2 -m64 -vec_report0 -fpp
+intel_linux_64 : FC        = ifort
+intel_linux_64 : exe       = volcheck_linux_64
 
-#*** Clean Target to remove Object and Module files ***
+intel_linux_64 : $(obj)
+	$(FC) -o $(bin)/$(exe) $(obj)
+
+# ------------- OSX 64 ----------------
+#  64 bit OSX
+
+intel_osx_64 : FFLAGS    = -O2 -m64 -vec_report0 -fpp
+intel_osx_64 : FC        = ifort
+intel_osx_64 : exe       = volcheck_osx_64
+
+intel_osx_64 : $(obj)
+	$(FC) -o $(bin)/$(exe)  -mmacosx-version-min=10.4 $(obj)
+
+#-------------- Clean Target to remove Object and Module files -----------
 
 .PHONY : clean
 clean:
-	-rm -f *.o *.mod *.obj 
-
-.PHONY : winclean
-winclean:
-	-erase *.mod *.obj 
+	rm *.o
