@@ -44,6 +44,23 @@ intel_linux_64 : exe       = volcheck_linux_64
 intel_linux_64 : $(obj)
 	$(FC) -o $(bin)/$(exe) $(obj)
 
+# ------------- Linux 64 profile ----------------
+#  64 bit linux profile
+
+# to profile:
+# 1.  build volcheck using intel_linux_64p target
+# 2.  run case as usual
+# 3.  type: gprof volcheck_linux_64p > results.out
+
+
+intel_linux_64p : FFLAGS    = -O2 -m64 -vec_report0 -fpp -p
+intel_linux_64p : FC        = ifort
+intel_linux_64p : exe       = volcheck_linux_64p
+
+intel_linux_64p : $(obj)
+	$(FC) -o $(bin)/$(exe) $(obj)
+
+
 # ------------- OSX 64 ----------------
 #  64 bit OSX
 
