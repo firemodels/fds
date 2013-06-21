@@ -1,3 +1,4 @@
 #!/bin/bash
-./make_linux_64p.sh
-./volcheckp
+./make_linuxp.sh
+./volcheck_linux_64p
+gprof ./volcheck_linux_64p > results.out

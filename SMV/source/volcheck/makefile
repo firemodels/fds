@@ -53,12 +53,12 @@ intel_linux_64 : $(obj)
 # 3.  type: gprof volcheck_linux_64p > results.out
 
 
-intel_linux_64p : FFLAGS    = -O2 -m64 -vec_report0 -fpp -p
+intel_linux_64p : FFLAGS    = -p -O2 -m64 -vec_report0 -fpp 
 intel_linux_64p : FC        = ifort
 intel_linux_64p : exe       = volcheck_linux_64p
 
 intel_linux_64p : $(obj)
-	$(FC) -o $(bin)/$(exe) $(obj)
+	$(FC) -o $(bin)/$(exe) -p $(obj)
 
 
 # ------------- OSX 64 ----------------
