@@ -292,7 +292,7 @@ ENDIF INIT_WIDE_BAND
 !
 !-------------------------------------------------------------------------
 
-MAKE_KAPPA_ARRAYS: IF (ANY(SPECIES%RADCAL_ID/='null')) THEN
+MAKE_KAPPA_ARRAYS: IF (.NOT.SOLID_PHASE_ONLY .AND. ANY(SPECIES%RADCAL_ID/='null')) THEN
    
    ! Check for valid RADCAL species and setup arrays from ZZ to RADCAL_YY
 
