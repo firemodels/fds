@@ -1,6 +1,6 @@
-! $Date: 2013-06-21 08:22:15 -0400 (Fri, 21 Jun 2013) $ 
-! $Revision: 16087 $
-! $Author: gforney $
+! $Date$ 
+! $Revision$
+! $Author$
 
 
 program volcheck
