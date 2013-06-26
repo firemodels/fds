@@ -491,9 +491,11 @@ void DrawGeomTest(int option){
 
   if(option==1){
     float volume;
+    int flag=0,error;
+    double err;
 
-    FORTgetverts(box_bounds, v1, v2, v3, v4, verts, &nverts, facestart, facenum, &nfaces, &volume);
-    printf("volume=%f\n",volume);
+    FORTgetverts(box_bounds, v1, v2, v3, v4, verts, &nverts, facestart, facenum, &nfaces, &volume, &flag, &error, &err);
+    printf("volume=%f\n\n",volume);
     if(nverts>0){
       int j;
 
