@@ -69,7 +69,7 @@ intel_osx_64 : FC        = ifort
 intel_osx_64 : exe       = volcheck_osx_64
 
 intel_osx_64 : $(obj)
-	$(FC) -o $(bin)/$(exe)  -mmacosx-version-min=10.4 $(obj)
+	$(FC) -o $(bin)/$(exe) $(obj)
 
 #-------------- Clean Target to remove Object and Module files -----------
 
