@@ -676,16 +676,15 @@ As with the slice rendering method, compression procedures are implemented using
 This \paper\ describes the algorithms Smokeview uses to display
 smoke and fire using physics based algorithms. These algorithms
 may be improved in several ways. Presently, only radiation from
-soot is used to visualize smoke. Radiation emissions from heated
-gas components such as carbon dioxide and water vapor are
-neglected. The gray gas assumption may be relaxed by solving the
-RTE for several wavelength bands (as may be done by FDS) and
-combining the results. The RTE line integration needs to terminate
-at the first solid object encountered (FDS OBST) rather than the
-far side of the data mesh. The computational efficiency may be
-improved by implementing algorithms to skip over regions with
-little or no smoke. Research on unstructured geometries for future
-incorporation into FDS may also lead to better visualization.
-Finally, flame color computations may be made more quantitative by
-using a transfer function relating temperature to color that is
-physics based rather than an assumed color map.
+soot is used to visualize smoke. The gray gas assumption may be
+relaxed by solving the RTE for several wavelength bands (as may be
+done by FDS) and combining the results. The RTE line integration
+needs to terminate at the first solid object encountered (FDS
+OBST) rather than the far side of the data mesh. The computational
+efficiency may be improved by implementing algorithms to skip over
+regions with little or no smoke. Research on unstructured
+geometries for future incorporation into FDS may also lead to
+better visualization. Finally, flame color computations may be
+made more quantitative by using a transfer function relating
+temperature to color that is physics based rather than an assumed
+color map.
