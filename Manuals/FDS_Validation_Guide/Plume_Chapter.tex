@@ -2,6 +2,8 @@
 
 \chapter{Fire Plumes}
 
+\section{Plume Temperatures}
+
 For fire plumes, a measure of how well the flow field is resolved is given by the non-dimensional expression $D^*/\dx$, where $D^*$ is a characteristic
 fire diameter
 \be
@@ -9,11 +11,11 @@ fire diameter
      \frac{\dQ}{\rho_\infty \, c_p \, T_\infty \, \sqrt{g} }
      \right)^\frac{2}{5}
 \ee
-and $\dx$ is the nominal size of a mesh cell\footnote{The characteristic fire diameter is related to the characteristic fire size via the relation $Q^* = (D^*/D)^{5/2}$, where $D$ is the physical diameter of the fire.}. The quantity $D^*/\dx$ can be thought of as the number of computational cells spanning the characteristic (not necessarily the physical) diameter of the fire. The more cells spanning the fire, the better the resolution of the calculation. It is better to assess the quality of the mesh in terms of this non-dimensional parameter, rather than an absolute mesh cell size. For example, a cell size of 10~cm may be ``adequate,'' in some sense, for evaluating the spread of smoke and heat through a building from a sizable fire, but may not be appropriate to study a very small, smoldering source.
+and $\dx$ is the nominal size of a mesh cell\footnote{The characteristic fire diameter is related to the characteristic fire size via the relation $Q^* = (D^*/D)^{5/2}$, where $D$ is the physical diameter of the fire.}. The quantity $D^*/\dx$ can be thought of as the number of computational cells spanning the characteristic (not necessarily the physical) diameter of the fire. The more cells spanning the fire, the better the resolution of the calculation. It is better to assess the quality of the mesh in terms of this non-dimensional parameter, rather than an absolute mesh cell size. For example, a cell size of 10~cm may be ``adequate,'' in some sense, for evaluating the spread of smoke and heat through a building from a sizable fire, but may not be appropriate to study a very small, smoldering source. The resolution of all the numerical simulations included in this chapter is given in Table~\ref{Numerical_Parameters}.
 
 \clearpage
 
-\section{FM/SNL Test Series}
+\subsection{FM/SNL Experiments}
 
 \label{FM/SNL_Plume}
 
@@ -61,8 +63,158 @@ The FM/SNL tests consisted of propylene gas burners, heptane pools, methanol poo
 
 \clearpage
 
-\section{Heskestad's Flame Height Correlation}
 
+
+\subsection{McCaffrey's Plume Correlation}
+
+The following plots show the results of simulations of McCaffrey's five fires at three grid resolutions, $D^*/\dx=[5,10,20]$ (note this resolution index is used to label the legend entries). The mesh cells are cubic and the spacing is uniform (no stretching).
+
+\begin{figure}[h!]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/McCaffrey_Plume/McCaffrey_Plume_Temperature_14_kW} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/McCaffrey_Plume/McCaffrey_Plume_Temperature_22_kW} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/McCaffrey_Plume/McCaffrey_Plume_Temperature_33_kW} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/McCaffrey_Plume/McCaffrey_Plume_Temperature_45_kW} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/McCaffrey_Plume/McCaffrey_Plume_Temperature_57_kW} &
+\end{tabular*}
+\label{McCaffrey_Plume_Temperature}
+\end{figure}
+
+\clearpage
+
+
+\subsection{SP Adiabatic Surface Temperature Experiments}
+
+Three experiments were conducted at SP, Sweden, in 2011, in which a 6~m long, 20~cm diameter vertical column was positioned in the middle of 1.1~m and 1.9~m diesel fuel and 1.1~m heptane
+pool fires~\cite{Sjostrom:AST}. Gas, plate, and steel surface temperature measurements were made at heights of 1~m, 2~m, 3~m, 4~m, and 5~m above the pool surface. Gas temperatures were measured with 0.25~mm and 0.50~mm bead thermocouples. The results are very similar and only the 0.25~mm values are used. In the experiments, the fire was reported to lean. The lean was significant for the 1.9~m diesel fuel fire. In that case, only data from 1~m and 2~m above the pool are used. The average temperature between 10~min and 15~min is the basic of comparison.
+
+
+\begin{figure}[h!]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/SP_AST/SP_AST_Diesel_1p1_Gas-1}   &  \includegraphics[height=2.2in]{SCRIPT_FIGURES/SP_AST/SP_AST_Diesel_1p1_Gas-2}    \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/SP_AST/SP_AST_Diesel_1p1_Gas-3}   &  \includegraphics[height=2.2in]{SCRIPT_FIGURES/SP_AST/SP_AST_Diesel_1p1_Gas-4}     \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/SP_AST/SP_AST_Diesel_1p1_Gas-5}   &
+\end{tabular*}
+\label{SP_Diesel_1p1_Gas}
+\end{figure}
+
+\newpage
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/SP_AST/SP_AST_Diesel_1p9_Gas-1}   &  \includegraphics[height=2.2in]{SCRIPT_FIGURES/SP_AST/SP_AST_Diesel_1p9_Gas-2}    \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/SP_AST/SP_AST_Heptane_1p1_Gas-1}  &  \includegraphics[height=2.2in]{SCRIPT_FIGURES/SP_AST/SP_AST_Heptane_1p1_Gas-2}    \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/SP_AST/SP_AST_Heptane_1p1_Gas-3}  &  \includegraphics[height=2.2in]{SCRIPT_FIGURES/SP_AST/SP_AST_Heptane_1p1_Gas-4}     \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/SP_AST/SP_AST_Heptane_1p1_Gas-5}  &
+\end{tabular*}
+\label{SP_Diesel_1p9_Gas}
+\end{figure}
+
+\clearpage
+
+\subsection{USN High Bay Hangar Experiments}
+
+\label{USN_Plume}
+
+A large number of plume temperature measurements are available from the US Navy experiments conducted at Keflavik, Iceland, and Barber's Point, Hawaii. The hangars were very large in size (22~m high in Iceland and 15~m high in Hawaii) and the heat release rates varied from 100~kW to 33~MW. All experiments made use of a fuel pan filled with either JP-5 or JP-8 jet fuel, positioned in the center of the hangar.
+
+
+\begin{figure}[h!]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USN_Hangars/USN_Iceland_Test_01_1} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USN_Hangars/USN_Iceland_Test_02_1} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USN_Hangars/USN_Iceland_Test_03_1} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USN_Hangars/USN_Iceland_Test_04_1} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USN_Hangars/USN_Iceland_Test_05_1} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USN_Hangars/USN_Iceland_Test_06_1} \\
+\end{tabular*}
+\label{USN_Plume_Iceland_1}
+\end{figure}
+
+\newpage
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USN_Hangars/USN_Iceland_Test_07_1} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USN_Hangars/USN_Iceland_Test_09_1} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USN_Hangars/USN_Iceland_Test_10_1} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USN_Hangars/USN_Iceland_Test_11_1} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USN_Hangars/USN_Iceland_Test_12_1} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USN_Hangars/USN_Iceland_Test_13_1} \\
+\end{tabular*}
+\label{USN_Plume_Iceland_2}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USN_Hangars/USN_Iceland_Test_14_1} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USN_Hangars/USN_Iceland_Test_15_1} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USN_Hangars/USN_Iceland_Test_17_1} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USN_Hangars/USN_Iceland_Test_18_1} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USN_Hangars/USN_Iceland_Test_19_1} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USN_Hangars/USN_Iceland_Test_20_1} \\
+\end{tabular*}
+\label{USN_Plume_Iceland_3}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USN_Hangars/USN_Hawaii_Test_01_1} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USN_Hangars/USN_Hawaii_Test_02_1} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USN_Hangars/USN_Hawaii_Test_03_1} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USN_Hangars/USN_Hawaii_Test_04_1} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USN_Hangars/USN_Hawaii_Test_05_1} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USN_Hangars/USN_Hawaii_Test_06_1} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USN_Hangars/USN_Hawaii_Test_07_1} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USN_Hangars/USN_Hawaii_Test_11_1}
+\end{tabular*}
+\label{USN_Plume_Hawaii}
+\end{figure}
+
+\clearpage
+
+\subsection{VTT Large Hall Experiments}
+
+\label{VTT_plume}
+
+The VTT experiments consisted of liquid fuel pan fires positioned in the middle of a large fire test hall. Plume temperatures were measured at two heights above the fire, 6~m (T G.1) and 12~m (T G.2). The flames were observed to extend to about 4~m above the fire pan.
+
+
+\begin{figure}[h]
+\begin{center}
+\begin{tabular}{c}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/VTT/VTT_01_Plume_Temperature} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/VTT/VTT_02_Plume_Temperature} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/VTT/VTT_03_Plume_Temperature}
+\end{tabular}
+\end{center}
+\label{VTT_Plume}
+\end{figure}
+
+
+\clearpage
+
+
+\subsection{Summary of Plume Temperature Predictions}
+
+
+
+\begin{figure}[h!]
+\begin{center}
+\begin{tabular}{c}
+\includegraphics[width=4.0in]{SCRIPT_FIGURES/ScatterPlots/Plume_Temperature} \\[-0.2in]
+\includegraphics[width=4.0in]{SCRIPT_FIGURES/ScatterPlots/Fire_Plume_Temperature}
+\end{tabular}
+\end{center}
+\caption[Summary of plume temperature predictions]
+{Summary of plume temperature predictions.}
+\label{Plume_Summary}
+\end{figure}
+
+\clearpage
+
+
+\section{Heskestad's Flame Height Correlation}
 
 Table~\ref{Flame_Height_Parameters} lists the parameters for FDS simulations of fires in a 1~m by 1~m square pan\footnote{The effective diameter, $D$, of a 1~m square pan is 1.13~m, obtained by equating the area of a square and circle.}. Figure~\ref{Flame_Height_check_hrr} shows a verification of the heat release rate for each case, and Fig.~\ref{Flame_Height} compares the FDS predictions with Heskestad's empirical correlation. Note that the flame height for the FDS simulations is defined as the distance above the pan, on average, at which 99~\% of the fuel has been consumed. Note also that the simulations were run at three different grid resolutions. A convenient length scale is given by
 \be
@@ -145,159 +297,10 @@ $Q^*$       & $\dot{Q}$~(kW) & $D^*$ (m)  & $\dx_5$ (m)  & $\dx_{10}$  & $\dx_{2
 \end{figure}
 
 
-\clearpage
-
-\section{McCaffrey's Plume Correlation}
-
-The following plots show the results of simulations of McCaffrey's five fires at three grid resolutions, $D^*/\dx=[5,10,20]$ (note this resolution index is used to label the legend entries). The mesh cells are cubic and the spacing is uniform (no stretching).
-
-\begin{figure}[h!]
-\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/McCaffrey_Plume/McCaffrey_Plume_Temperature_14_kW} &
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/McCaffrey_Plume/McCaffrey_Plume_Temperature_22_kW} \\
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/McCaffrey_Plume/McCaffrey_Plume_Temperature_33_kW} &
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/McCaffrey_Plume/McCaffrey_Plume_Temperature_45_kW} \\
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/McCaffrey_Plume/McCaffrey_Plume_Temperature_57_kW} &
-\end{tabular*}
-\label{McCaffrey_Plume_Temperature}
-\end{figure}
 
 \clearpage
 
-
-\section{SP Adiabatic Surface Temperature Experiments}
-
-Three experiments were conducted at SP, Sweden, in 2011, in which a 6~m long, 20~cm diameter vertical column was positioned in the middle of 1.1~m and 1.9~m diesel fuel and 1.1~m heptane
-pool fires~\cite{Sjostrom:AST}. Gas, plate, and steel surface temperature measurements were made at heights of 1~m, 2~m, 3~m, 4~m, and 5~m above the pool surface. Gas temperatures were measured with 0.25~mm and 0.50~mm bead thermocouples. The results are very similar and only the 0.25~mm values are used. In the experiments, the fire was reported to lean. The lean was significant for the 1.9~m diesel fuel fire. In that case, only data from 1~m and 2~m above the pool are used. The average temperature between 10~min and 15~min is the basic of comparison.
-
-
-\begin{figure}[h!]
-\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/SP_AST/SP_AST_Diesel_1p1_Gas-1}   &  \includegraphics[height=2.2in]{SCRIPT_FIGURES/SP_AST/SP_AST_Diesel_1p1_Gas-2}    \\
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/SP_AST/SP_AST_Diesel_1p1_Gas-3}   &  \includegraphics[height=2.2in]{SCRIPT_FIGURES/SP_AST/SP_AST_Diesel_1p1_Gas-4}     \\
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/SP_AST/SP_AST_Diesel_1p1_Gas-5}   &  
-\end{tabular*}
-\label{SP_Diesel_1p1_Gas}
-\end{figure}
-
-\newpage
-
-\begin{figure}[p]
-\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/SP_AST/SP_AST_Diesel_1p9_Gas-1}   &  \includegraphics[height=2.2in]{SCRIPT_FIGURES/SP_AST/SP_AST_Diesel_1p9_Gas-2}    \\
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/SP_AST/SP_AST_Heptane_1p1_Gas-1}  &  \includegraphics[height=2.2in]{SCRIPT_FIGURES/SP_AST/SP_AST_Heptane_1p1_Gas-2}    \\
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/SP_AST/SP_AST_Heptane_1p1_Gas-3}  &  \includegraphics[height=2.2in]{SCRIPT_FIGURES/SP_AST/SP_AST_Heptane_1p1_Gas-4}     \\
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/SP_AST/SP_AST_Heptane_1p1_Gas-5}  &
-\end{tabular*}
-\label{SP_Diesel_1p9_Gas}
-\end{figure}
-
-\clearpage
-
-\section{USN High Bay Hangar Experiments}
-
-\label{USN_Plume}
-
-A large number of plume temperature measurements are available from the US Navy experiments conducted at Keflavik, Iceland, and Barber's Point, Hawaii. The hangars were very large in size (22~m high in Iceland and 15~m high in Hawaii) and the heat release rates varied from 100~kW to 33~MW. All experiments made use of a fuel pan filled with either JP-5 or JP-8 jet fuel, positioned in the center of the hangar.
-
-
-\begin{figure}[h!]
-\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/USN_Hangars/USN_Iceland_Test_01_1} &
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/USN_Hangars/USN_Iceland_Test_02_1} \\
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/USN_Hangars/USN_Iceland_Test_03_1} &
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/USN_Hangars/USN_Iceland_Test_04_1} \\
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/USN_Hangars/USN_Iceland_Test_05_1} &
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/USN_Hangars/USN_Iceland_Test_06_1} \\
-\end{tabular*}
-\label{USN_Plume_Iceland_1}
-\end{figure}
-
-\newpage
-
-\begin{figure}[p]
-\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/USN_Hangars/USN_Iceland_Test_07_1} &
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/USN_Hangars/USN_Iceland_Test_09_1} \\
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/USN_Hangars/USN_Iceland_Test_10_1} &
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/USN_Hangars/USN_Iceland_Test_11_1} \\
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/USN_Hangars/USN_Iceland_Test_12_1} &
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/USN_Hangars/USN_Iceland_Test_13_1} \\
-\end{tabular*}
-\label{USN_Plume_Iceland_2}
-\end{figure}
-
-\begin{figure}[p]
-\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/USN_Hangars/USN_Iceland_Test_14_1} &
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/USN_Hangars/USN_Iceland_Test_15_1} \\
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/USN_Hangars/USN_Iceland_Test_17_1} &
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/USN_Hangars/USN_Iceland_Test_18_1} \\
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/USN_Hangars/USN_Iceland_Test_19_1} &
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/USN_Hangars/USN_Iceland_Test_20_1} \\
-\end{tabular*}
-\label{USN_Plume_Iceland_3}
-\end{figure}
-
-\begin{figure}[p]
-\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/USN_Hangars/USN_Hawaii_Test_01_1} &
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/USN_Hangars/USN_Hawaii_Test_02_1} \\
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/USN_Hangars/USN_Hawaii_Test_03_1} &
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/USN_Hangars/USN_Hawaii_Test_04_1} \\
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/USN_Hangars/USN_Hawaii_Test_05_1} &
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/USN_Hangars/USN_Hawaii_Test_06_1} \\
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/USN_Hangars/USN_Hawaii_Test_07_1} &
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/USN_Hangars/USN_Hawaii_Test_11_1}
-\end{tabular*}
-\label{USN_Plume_Hawaii}
-\end{figure}
-
-\clearpage
-
-\section{VTT Large Hall}
-
-\label{VTT_plume}
-
-The VTT experiments consisted of liquid fuel pan fires positioned in the middle of a large fire test hall. Plume temperatures were measured at two heights above the fire, 6~m (T G.1) and 12~m (T G.2). The flames were observed to extend to about 4~m above the fire pan.
-
-
-\begin{figure}[h]
-\begin{center}
-\begin{tabular}{c}
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/VTT/VTT_01_Plume_Temperature} \\
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/VTT/VTT_02_Plume_Temperature} \\
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/VTT/VTT_03_Plume_Temperature}
-\end{tabular}
-\end{center}
-\label{VTT_Plume}
-\end{figure}
-
-
-\clearpage
-
-
-\section{Summary of Plume Temperature Predictions}
-
-
-
-\begin{figure}[h!]
-\begin{center}
-\begin{tabular}{c}
-\includegraphics[width=4.0in]{SCRIPT_FIGURES/ScatterPlots/Plume_Temperature} \\
-\includegraphics[width=4.0in]{SCRIPT_FIGURES/ScatterPlots/Fire_Plume_Temperature}
-\end{tabular}
-\end{center}
-\caption[Summary of plume temperature predictions]
-{Summary of plume temperature predictions.}
-\label{Plume_Summary}
-\end{figure}
-
-
-
-\clearpage
-
-\section{Harrison Spill Plumes}
+\section{Harrison Spill Plumes/Entrainment Experiments}
 \label{Harrison_Spill_Plumes}
 
 In each of these reduced-scale spill plume experiments, the entrained mass flow rate into the plume was measured at a series of heights by varying the flow through an exhaust hood to maintain a constant smoke layer depth.  Figure~\ref{Entrainment} compares measured and predicted entrainment rates at five different elevations for the fire scenarios labelled SE4 through SE21 in Ref.~\cite{Harrison:2009}. Two general configurations are considered -- one that is intended to mimic a balcony spill plume and one in which the plume adheres to a vertical wall above the compartment opening.
