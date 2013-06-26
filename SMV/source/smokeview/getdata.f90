@@ -2606,7 +2606,7 @@ USE BOXTETRA_ROUTINES
 IMPLICIT NONE
 #ifdef pp_cvf
 #ifndef X64
-!DEC$ ATTRIBUTES ALIAS:'_getverts2@44' :: getverts2
+!DEC$ ATTRIBUTES ALIAS:'_getverts2@56' :: getverts2
 #endif
 #endif
 
