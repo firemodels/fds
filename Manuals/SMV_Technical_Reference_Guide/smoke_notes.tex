@@ -7,22 +7,108 @@
 % -------------------  Introduction ------------------------
 
 \section{Introduction}
-This \paper\ documents the physics and associated numerical algorithms used by Smokeview~\cite{Smokeview_Users_Guide} to visualize smoke and fire.  Smokeview is a companion to the Fire Dynamics Simulator (FDS)~\cite{FDS_Math_Guide} and CFAST~\cite{Jones:2009}, fire models which generate   simulation data that Smokeview uses to perform these visualizations. FDS is a computational fluid dynamics model of fire-driven fluid flow. FDS numerically solves a form of the Navier-Stokes equations appropriate for low-speed, thermally-driven flow with an emphasis on smoke and heat transport from fires.  CFAST is a zone fire model used to calculate the evolving distribution of smoke, fire gases and temperature throughout compartments of a constructed facility due to a fire.
+This \paper\ documents the physics and associated numerical
+algorithms used by Smokeview~\cite{Smokeview_Users_Guide} to
+visualize smoke and fire.  Smokeview is a companion to the Fire
+Dynamics Simulator (FDS)~\cite{FDS_Math_Guide} and
+CFAST~\cite{Jones:2009}, fire models which generate   simulation
+data that Smokeview uses to perform these visualizations. FDS is a
+computational fluid dynamics model of fire-driven fluid flow. FDS
+numerically solves a form of the Navier-Stokes equations
+appropriate for low-speed, thermally-driven flow with an emphasis
+on smoke and heat transport from fires.  CFAST is a zone fire
+model used to calculate the evolving distribution of smoke, fire
+gases and temperature throughout compartments of a constructed
+facility due to a fire.
 
-Realistic visualization of fire calculation methods are important for applications where one wishes to observe qualitative effects of fire and smoke rather than determine quantitative characteristics of data such as temperature or velocity.  This would be the case for a fire fighter using a computer based fire fighting simulator. Realistic visualization methods, however, complement but do not replace other more traditional visualization methods such as 2D contouring or 3D iso-surfacing which are better suited for quantitatively analyzing data.
+Realistic visualization of fire calculation methods are important
+for applications where one wishes to observe qualitative effects
+of fire and smoke rather than determine quantitative
+characteristics of data such as temperature or velocity.  This
+would be the case for a fire fighter using a computer based fire
+fighting simulator. Realistic visualization methods, however,
+complement but do not replace other more traditional visualization
+methods such as 2D contouring or 3D iso-surfacing which are better
+suited for quantitatively analyzing data.
 
-Complete methods for visualizing smoke and fire data taking into account interactions between light and smoke require the solution of the radiation transport equation (RTE)~\cite{Siegel:2001} also called the volume rendering equation in visualization literature.~\cite{levoy:1988} This equation models how light is affected after interacting with smoke, a participating medium. In particular, Smokeview uses the RTE to account for extinction (absorption plus out-scattering) by the smoke and emission from the fire.  The RTE used by Smokeview to model smoke and fire appearance is identical to that used by FDS to model radiative heat transfer.  Smokeview and FDS use this equation in different ways, however.  FDS solves it at infrared wavelengths of light. Generally, Smokeview solves the RTE for visible wavelengths of light.  With the proper extinction coefficient, however, Smokeview can also view smoke at other wavelengths, simulating a thermal imager, for example. Smokeview solves the RTE assuming a gray gas environment.  This is the default solution method for FDS.  One other important difference is that Smokeview requires a solution at only one point at a time (any arbitrary point though), the observer's viewpoint, while FDS requires a radiation field, a
-solution at all points within the solution domain.  Even so, the solution of this integro-differential equation for visualization requires significant computation and memory  resources. Approximations are required in order to display smoke and fire at interactive frame rates.  The primary approximation is to take advantage of the low albedo character of smoke allowing one to either simplify or eliminate scattering terms in the RTE.
+Complete methods for visualizing smoke and fire data taking into
+account interactions between light and smoke require the solution
+of the radiation transport equation (RTE)~\cite{Siegel:2001} also
+called the volume rendering equation in visualization
+literature.~\cite{levoy:1988} This equation models how light is
+affected after interacting with smoke, a participating medium. In
+particular, Smokeview uses the RTE to account for extinction
+(absorption plus out-scattering) by the smoke and emission from
+the fire.  The RTE used by Smokeview to model smoke and fire
+appearance is identical to that used by FDS to model radiative
+heat transfer.  Smokeview and FDS use this equation in different
+ways, however.  FDS solves it at infrared wavelengths of light.
+Generally, Smokeview solves the RTE for visible wavelengths of
+light.  With the proper extinction coefficient, however, Smokeview
+can also view smoke at other wavelengths, simulating a thermal
+imager, for example. Smokeview solves the RTE assuming a gray gas
+environment.  This is the default solution method for FDS.  One
+other important difference is that Smokeview requires a solution
+at only one point at a time (any arbitrary point though), the
+observer's viewpoint, while FDS requires a radiation field, a
+solution at all points within the solution domain.  Even so, the
+solution of this integro-differential equation for visualization
+requires significant computation and memory  resources.
+Approximations are required in order to display smoke and fire at
+interactive frame rates.  The primary approximation is to take
+advantage of the low albedo character of smoke allowing one to
+either simplify or eliminate scattering terms in the RTE.
 
-Two techniques discussed for visualizing smoke are slice rendered and volume rendered methods~\cite{levoy:1988,Engel:2006}.    These methods both solve a form of the RTE equation.  The integrated quantity in both cases is radiance, the intensity of light seen by the observer.  They differ in how the integration path is partitioned.
+Two techniques discussed for visualizing smoke are slice rendered
+and volume rendered methods~\cite{levoy:1988,Engel:2006}.    These
+methods both solve a form of the RTE equation.  The integrated
+quantity in both cases is radiance, the intensity of light seen by
+the observer.  They differ in how the integration path is
+partitioned.
 
-The first approach, a slice rendering method,  splits the integration path at grid planes within a 3D mesh. There is one partially transparent slice for each plane of simulated data. Planes are drawn through the data along the coordinate planes or diagonally to these  planes.   The particular plane drawn is chosen to be the one most perpendicular to the viewer's line of sight.  The resulting partially transparent slice planes are drawn individually and combined by the video hardware to form one image.
+The first approach, a slice rendering method,  splits the
+integration path at grid planes within a 3D mesh. There is one
+partially transparent slice for each plane of simulated data.
+Planes are drawn through the data along the coordinate planes or
+diagonally to these  planes.   The particular plane drawn is
+chosen to be the one most perpendicular to the viewer's line of
+sight.  The resulting partially transparent slice planes are drawn
+individually and combined by the video hardware to form one image.
 
-The separation distance between slice planes becomes smaller as more planes are used to simulate a case.  As a result, the computed opacity values are subject to increased round off error due to finite precision arithmetic.  In fact, if these planes are sufficiently close, the computed opacities truncate to zero.   In this situation, volume rendering methods are required.
+The separation distance between slice planes becomes smaller as
+more planes are used to simulate a case.  As a result, the
+computed opacity values are subject to increased round off error
+due to finite precision arithmetic.  In fact, if these planes are
+sufficiently close, the computed opacities truncate to zero.   In
+this situation, volume rendering methods are required.
 
-The second approach, a volume rendering method, also integrates a simplified form of the radiation transport equation, but over the entire data mesh.  The integration occurs from the front of the solution domain (relative to the observer) to the back, rather than across just one slice plane. By performing the entire integral at once instead of in pieces, the volume rendered method does not suffer from the round off errors of the slice rendered method.  The intermediate computational terms in the volume rendered method are stored using full precision arithmetic rather than 8 bits.  A volume rendered method then computes opacity across multiple grid planes.  As a result, there is only one plane of data displayed.  The video hardware is again exploited, but this time to compute a line integral for each pixel in the observer's view.  Opacities and color for both methods are computed using transfer functions using soot density and temperature data obtained from a fire simulation.
+The second approach, a volume rendering method, also integrates a
+simplified form of the radiation transport equation, but over the
+entire data mesh.  The integration occurs from the front of the
+solution domain (relative to the observer) to the back, rather
+than across just one slice plane. By performing the entire
+integral at once instead of in pieces, the volume rendered method
+does not suffer from the round off errors of the slice rendered
+method.  The intermediate computational terms in the volume
+rendered method are stored using full precision arithmetic rather
+than 8 bits.  A volume rendered method then computes opacity
+across multiple grid planes.  As a result, there is only one plane
+of data displayed.  The video hardware is again exploited, but
+this time to compute a line integral for each pixel in the
+observer's view.  Opacities and color for both methods are
+computed using transfer functions using soot density and
+temperature data obtained from a fire simulation.
 
-This \paper\ is organized as follows.  A model for visualizing smoke and fire is discussed.  This model, the radiative transport equation (RTE), is simplified in several ways, one of which gives the Beer-Lambert law.  Two methods are then discussed for visualizing smoke  both using a form of the RTE.  The first method, slice rendering,  uses a series of partially transparent slices to represent smoke and fire. The second method, volume rendering, solves the RTE over the entire domain. Finally, several areas for which the visualization methods may be improved are given.
+This \paper\ is organized as follows.  A model for visualizing
+smoke and fire is discussed.  This model, the radiative transport
+equation (RTE), is simplified in several ways, one of which gives
+the Beer-Lambert law.  Two methods are then discussed for
+visualizing smoke  both using a form of the RTE.  The first
+method, slice rendering,  uses a series of partially transparent
+slices to represent smoke and fire. The second method, volume
+rendering, solves the RTE over the entire domain. Finally, several
+areas for which the visualization methods may be improved are
+given.
 
 % -------------------  Radiation Transport Equation ------------------------
 
