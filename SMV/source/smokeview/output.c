@@ -30,9 +30,9 @@ void outputAxisLabels(){
   x = (xbar0+xbarORIG)/2.0;
   y = (ybar0+ybarORIG)/2.0;
   z = (zbar0+zbarORIG)/2.0;
-  x0 = xbar0 - xyzmaxdiff/50.0;
-  y0 = ybar0 - xyzmaxdiff/50.0;
-  z0 = zbar0 - xyzmaxdiff/50.0;
+  x0 = xbar0 - SCALE2FDS(0.02);
+  y0 = ybar0 - SCALE2FDS(0.02);
+  z0 = zbar0 - SCALE2FDS(0.02);
 
   output3Text(foregroundcolor,   x,y0, z0, "X");
   output3Text(foregroundcolor, x0,  y, z0, "Y");
@@ -52,8 +52,8 @@ void outputSText3(float x, float y, float z, char *string){
 
 
   if(string==NULL)return;
-  scale_x = xyzmaxdiff*(scaled_font3d_height2width*(float)scaled_font3d_height/(float)104.76)/(float)port_pixel_width;
-  scale_y = xyzmaxdiff*((float)scaled_font3d_height/(float)152.38)/(float)port_pixel_height;
+  scale_x = SCALE2FDS(scaled_font3d_height2width*(float)scaled_font3d_height/(float)104.76)/(float)port_pixel_width;
+  scale_y = SCALE2FDS((float)scaled_font3d_height/(float)152.38)/(float)port_pixel_height;
   glPushMatrix();
   glTranslatef(x,y,z);
   v[0]=world_eyepos[0]-x;

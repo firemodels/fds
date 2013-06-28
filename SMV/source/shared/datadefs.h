@@ -5,6 +5,23 @@
 #ifndef DATADEFS_H_DEFINED
 #define DATADEFS_H_DEFINED
 
+#define SCALE2FDS(x) ((x)*xyzmaxdiff)
+#define SCALE2SMV(x) ((x)/xyzmaxdiff)
+
+#define SCALE2FDSL(x) ((x)*xyzmaxdiff_local)
+
+#define NORMALIZE_X(x) (((x)-xbar0)/xyzmaxdiff)
+#define NORMALIZE_Y(y) (((y)-ybar0)/xyzmaxdiff)
+#define NORMALIZE_Z(z) (((z)-zbar0)/xyzmaxdiff)
+
+#define DENORMALIZE_X(x) (xbar0+(x)*xyzmaxdiff)
+#define DENORMALIZE_Y(y) (ybar0+(y)*xyzmaxdiff)
+#define DENORMALIZE_Z(z) (zbar0+(z)*xyzmaxdiff)
+
+#define DENORMALIZE_XX(x) (xbar0+(x)*(xbarORIG-xbar0))
+#define DENORMALIZE_YY(y) (ybar0+(y)*(ybarORIG-ybar0))
+#define DENORMALIZE_ZZ(z) (zbar0+(z)*(zbarORIG-zbar0))
+
 #ifndef DOT2
 #define DOT2(x,y) (x[0]*y[0]+x[1]*y[1])
 #endif

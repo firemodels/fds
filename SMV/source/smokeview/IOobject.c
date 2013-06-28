@@ -714,7 +714,7 @@ void draw_devices(void){
 
         for(j=0;j<3;j++){
           xxx1[j] = xyz[j];
-          xxx2[j] = xyz[j] + xyzmaxdiff*vel[j]/max_dev_vel;
+          xxx2[j] = xyz[j] + SCALE2FDS(vel[j])/max_dev_vel;
         }
         glBegin(GL_LINES);
         glVertex3fv(xxx1);

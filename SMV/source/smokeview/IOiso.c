@@ -1166,9 +1166,9 @@ void drawstaticiso(const isosurface *asurface,int surfacetype,
       v2=vertices_i+i2;
       v3=vertices_i+i3;
       for(k=0;k<3;k++){
-        vv1[k]=xyzmin[k]+xyzmaxdiff_local*v1[k]/65535.;
-        vv2[k]=xyzmin[k]+xyzmaxdiff_local*v2[k]/65535.;
-        vv3[k]=xyzmin[k]+xyzmaxdiff_local*v3[k]/65535.;
+        vv1[k]=xyzmin[k]+SCALE2FDSL(v1[k]/65535.);
+        vv2[k]=xyzmin[k]+SCALE2FDSL(v2[k]/65535.);
+        vv3[k]=xyzmin[k]+SCALE2FDSL(v3[k]/65535.);
       }
       if(smoothnorm==1){
         norm1 = vertexnorm+i1;
@@ -1216,9 +1216,9 @@ void drawstaticiso(const isosurface *asurface,int surfacetype,
       v2=vertices_i+i2;
       v3=vertices_i+i3;
       for(k=0;k<3;k++){
-        vv1[k]=xyzmin[k]+xyzmaxdiff_local*v1[k]/65535.;
-        vv2[k]=xyzmin[k]+xyzmaxdiff_local*v2[k]/65535.;
-        vv3[k]=xyzmin[k]+xyzmaxdiff_local*v3[k]/65535.;
+        vv1[k]=xyzmin[k]+SCALE2FDSL(v1[k]/65535.);
+        vv2[k]=xyzmin[k]+SCALE2FDSL(v2[k]/65535.);
+        vv3[k]=xyzmin[k]+SCALE2FDSL(v3[k]/65535.);
       }
       glVertex3fv(vv1);
       glVertex3fv(vv2);
@@ -1245,7 +1245,7 @@ void drawstaticiso(const isosurface *asurface,int surfacetype,
     for(j=0;j<nvertices;j++){
       v1=vertices_i+3*j;
       for(k=0;k<3;k++){
-        vv1[k]=xyzmin[k]+xyzmaxdiff_local*v1[k]/65535.;
+        vv1[k]=xyzmin[k]+SCALE2FDSL(v1[k]/65535.);
       }
 
       glVertex3fv(vv1);
@@ -1270,9 +1270,9 @@ void drawstaticiso(const isosurface *asurface,int surfacetype,
       v2=vertices_i+i2;
       v3=vertices_i+i3;
       for(k=0;k<3;k++){
-        vv1[k]=xyzmin[k]+xyzmaxdiff_local*v1[k]/65535.;
-        vv2[k]=xyzmin[k]+xyzmaxdiff_local*v2[k]/65535.;
-        vv3[k]=xyzmin[k]+xyzmaxdiff_local*v3[k]/65535.;
+        vv1[k]=xyzmin[k]+SCALE2FDSL(v1[k]/65535.);
+        vv2[k]=xyzmin[k]+SCALE2FDSL(v2[k]/65535.);
+        vv3[k]=xyzmin[k]+SCALE2FDSL(v3[k]/65535.);
       }
 
       if(smoothtrinormal==1){

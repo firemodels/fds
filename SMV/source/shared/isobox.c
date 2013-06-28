@@ -950,9 +950,9 @@ int CompressIsosurface(isosurface *surface, int reduce_triangles,
   }
 
   for(i=0;i<nvertices;i++){
-    vertices[3*i]=(unsigned short)(65535*(x[i]-xmin)/xyzmaxdiff);
-    vertices[3*i+1]=(unsigned short)(65535*(y[i]-ymin)/xyzmaxdiff);
-    vertices[3*i+2]=(unsigned short)(65535*(z[i]-zmin)/xyzmaxdiff);
+    vertices[3*i]=SCALE2SMV((unsigned short)(65535*(x[i]-xmin)));
+    vertices[3*i+1]=SCALE2SMV((unsigned short)(65535*(y[i]-ymin)));
+    vertices[3*i+2]=SCALE2SMV((unsigned short)(65535*(z[i]-zmin)));
     sortedlist[i]=i;
     map[i]=i;
   	rank[i]=i;

@@ -7220,8 +7220,8 @@ typedef struct {
     if(partclassi->device_name!=NULL){
         float length, azimuth, elevation;
        
-        partclassi->diameter/=xyzmaxdiff;
-        partclassi->length/=xyzmaxdiff;
+        partclassi->diameter=SCALE2SMV(partclassi->diameter);
+        partclassi->length=SCALE2SMV(partclassi->length);
         length=partclassi->length;
         azimuth = partclassi->azimuth*DEG2RAD;
         elevation = partclassi->elevation*DEG2RAD;
