@@ -488,8 +488,7 @@ void get_cum_smokecolor(float *cum_smokecolor, float *xyzvert, float dstep, mesh
   if(nsteps<1){
     nsteps=1;
   }
-  dstep=distseg/(float)nsteps;
-  dstep*=xyzmaxdiff;
+  dstep=SCALE2FDS(distseg/(float)nsteps);
   sootdensum=0.0;
   isteps=0;
   if(block_volsmoke==1){

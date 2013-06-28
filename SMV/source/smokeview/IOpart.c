@@ -1584,14 +1584,14 @@ void drawPart5(const partdata *parti){
               int save_use_displaylist;
 
               glPushMatrix();
-              glTranslatef(xplts[sx[j]],yplts[sy[j]],zplts[sz[j]]-parti->zoffset/xyzmaxdiff);
+              glTranslatef(xplts[sx[j]],yplts[sy[j]],zplts[sz[j]]-SCALE2SMV(parti->zoffset));
               if(select_avatar==1&&selected_avatar_tag>0&&selected_avatar_tag==datacopy->tags[j]){
                 selected_avatar_pos[0]=xplts[sx[j]];
                 selected_avatar_pos[1]=yplts[sy[j]];
                 selected_avatar_pos[2]=zplts[sz[j]];
                 selected_avatar_angle = datacopy->avatar_angle[j];
               }
-              glScalef(1.0/xyzmaxdiff,1.0/xyzmaxdiff,1.0/xyzmaxdiff);
+              glScalef(SCALE2SMV(1.0),SCALE2SMV(1.0),SCALE2SMV(1.0));
                  
               az_angle=angle[j];
               glRotatef(az_angle,0.0,0.0,1.0);
@@ -1743,11 +1743,11 @@ void drawPart5(const partdata *parti){
 
                 prop=datacopy->partclassbase->prop;
                 copy_dep_vals(partclassi,datacopy,colorptr,prop,j);
-                glScalef(1.0/xyzmaxdiff,1.0/xyzmaxdiff,1.0/xyzmaxdiff);
+                glScalef(SCALE2SMV(1.0),SCALE2SMV(1.0),SCALE2SMV(1.0));
 
-                partfacedir[0]=xbar0+world_eyepos[0]/xyzmaxdiff-xplts[sx[j]];
-                partfacedir[1]=ybar0+world_eyepos[1]/xyzmaxdiff-yplts[sy[j]];
-                partfacedir[2]=zbar0+world_eyepos[2]/xyzmaxdiff-zplts[sz[j]];
+                partfacedir[0]=xbar0+SCALE2SMV(world_eyepos[0])-xplts[sx[j]];
+                partfacedir[1]=ybar0+SCALE2SMV(world_eyepos[1])-yplts[sy[j]];
+                partfacedir[2]=zbar0+SCALE2SMV(world_eyepos[2])-zplts[sz[j]];
                 
                 draw_SVOBJECT(prop->smv_object,0,prop,0);
                 glPopMatrix();

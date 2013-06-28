@@ -2197,7 +2197,7 @@ void handle_move_keys(int  key){
 
   glui_move_mode=-1;
 
-  INC_XY=meshinfo->cellsize/xyzmaxdiff;
+  INC_XY=SCALE2SMV(meshinfo->cellsize);
   INC_Z=INC_XY;
   INC_ANGLE = 5*INC_ANGLE0;
 

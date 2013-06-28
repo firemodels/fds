@@ -359,7 +359,7 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
         case TERRAIN_2D_STEPPED:
           if(cullfaces==1)glDisable(GL_CULL_FACE);
           glPushMatrix();
-          glScalef(1.0/xyzmaxdiff,1.0/xyzmaxdiff,1.0/xyzmaxdiff);
+          glScalef(SCALE2SMV(1.0),SCALE2SMV(1.0),SCALE2SMV(1.0));
           glTranslatef(-xbar0,-ybar0,-zbar0);
           DrawContours(&meshinfo[i].terrain_contour);
           glPopMatrix();
@@ -367,7 +367,7 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
           break;
         case TERRAIN_2D_LINE:
           glPushMatrix();
-          glScalef(1.0/xyzmaxdiff,1.0/xyzmaxdiff,1.0/xyzmaxdiff);
+          glScalef(SCALE2SMV(1.0),SCALE2SMV(1.0),SCALE2SMV(1.0));
           glTranslatef(-xbar0,-ybar0,-zbar0);
           DrawLineContours(&meshinfo[i].terrain_contour,1.0);
           glPopMatrix();

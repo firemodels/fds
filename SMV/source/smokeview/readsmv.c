@@ -1827,7 +1827,7 @@ void update_mesh_coords(void){
     if(veclength>meshi->yplt[1]-meshi->yplt[0])veclength=meshi->yplt[1]-meshi->yplt[0];
     if(veclength>meshi->zplt[1]-meshi->zplt[0])veclength=meshi->zplt[1]-meshi->zplt[0];
   }
-  veclength = veclength/xyzmaxdiff;
+  veclength = SCALE2SMV(veclength);
   veclength = 0.01;
 
   for(igrid=0;igrid<nmeshes;igrid++){
@@ -2037,9 +2037,9 @@ void update_mesh_coords(void){
     roomi->x1=NORMALIZE_X(roomi->x1);
     roomi->y1=NORMALIZE_Y(roomi->y1);
     roomi->z1=NORMALIZE_Z(roomi->z1);
-    roomi->dx=roomi->dx/xyzmaxdiff;
-    roomi->dy=roomi->dy/xyzmaxdiff;
-    roomi->dz=roomi->dz/xyzmaxdiff;
+    roomi->dx=SCALE2SMV(roomi->dx);
+    roomi->dy=SCALE2SMV(roomi->dy);
+    roomi->dz=SCALE2SMV(roomi->dz);
   }
   for(n=0;n<nfires;n++){
     firedata *firen;
@@ -2048,7 +2048,7 @@ void update_mesh_coords(void){
     firen->absx=NORMALIZE_X(firen->absx);
     firen->absy=NORMALIZE_Y(firen->absy);
     firen->absz=NORMALIZE_Z(firen->absz);
-    firen->dz=firen->dz/xyzmaxdiff;
+    firen->dz=SCALE2SMV(firen->dz);
   }
   for(n=0;n<nzvents;n++){
     zvent *zvi;

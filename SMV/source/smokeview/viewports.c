@@ -885,9 +885,9 @@ void Scene_viewport(int quad, int view_mode, GLint screen_left, GLint screen_dow
     FrustumAsymmetry=0.0;
   }
   else if(showstereo!=0&&(view_mode==VIEW_LEFT||view_mode==VIEW_RIGHT)){
-    StereoCameraOffset = (fzero/xyzmaxdiff)/30.0;
+    StereoCameraOffset = SCALE2SMV(fzero)/30.0;
     if(view_mode==VIEW_LEFT)StereoCameraOffset = -StereoCameraOffset;
-    FrustumAsymmetry= -0.5*StereoCameraOffset*fnear/(fzero/xyzmaxdiff);
+    FrustumAsymmetry= -0.5*StereoCameraOffset*fnear/SCALE2SMV(fzero);
   }
 
   if(SUB_portfrustum(quad,&VP_scene,

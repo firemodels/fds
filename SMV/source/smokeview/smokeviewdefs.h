@@ -58,6 +58,9 @@ void _Sniff_Errors(char *whereat);
 #define KEY_SHIFT 3
 #define KEY_NONE 2
 
+#define SCALE2FDS(x) ((x)*xyzmaxdiff)
+#define SCALE2SMV(x) ((x)/xyzmaxdiff)
+
 #define NORMALIZE_X(x) (((x)-xbar0)/xyzmaxdiff)
 #define NORMALIZE_Y(y) (((y)-ybar0)/xyzmaxdiff)
 #define NORMALIZE_Z(z) (((z)-zbar0)/xyzmaxdiff)

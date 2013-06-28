@@ -61,7 +61,7 @@ void drawtrees(void){
  glEnable(GL_COLOR_MATERIAL);
 
   glPushMatrix();
-  glScalef(1.0/xyzmaxdiff,1.0/xyzmaxdiff,1.0/xyzmaxdiff);
+  glScalef(SCALE2SMV(1.0),SCALE2SMV(1.0),SCALE2SMV(1.0));
   glTranslatef(-xbar0,-ybar0,-zbar0);
   for(i=0;i<ntreeinfo;i++){
     treedata *treei;
@@ -220,7 +220,7 @@ float get_zcell_val_offset(mesh *meshi,float xval, float yval, int *loc){
 
     // convert zoffset back to smokeview/scaled units
 
-      zvaloffset /= xyzmaxdiff;
+      zvaloffset = SCALE2SMV(zvaloffset);
       return zvaloffset;
     }
   }
@@ -308,7 +308,7 @@ void initterrain_all(void){
         zval /= (float)count;
 
         znode[ijnode3(i,j)]=zval;
-        zval_offset = (val1_offset*loc1 + val2_offset*loc2 + val3_offset*loc3 + val4_offset*loc4)/xyzmaxdiff;
+        zval_offset = SCALE2SMV((val1_offset*loc1 + val2_offset*loc2 + val3_offset*loc3 + val4_offset*loc4));
         if(count==0)count=1;
         zval_offset /= (float)count;
 
@@ -577,7 +577,7 @@ void drawterrain(terraindata *terri, int only_geom){
   terrain_color[3]=1.0;
 
   glPushMatrix();
-  glScalef(1.0/xyzmaxdiff,1.0/xyzmaxdiff,1.0/xyzmaxdiff);
+  glScalef(SCALE2SMV(1.0),SCALE2SMV(1.0),SCALE2SMV(1.0));
   glTranslatef(-xbar0,-ybar0,-zbar0);
 
   glEnable(GL_LIGHTING);
@@ -665,7 +665,7 @@ void drawterrain_texture(terraindata *terri, int only_geom){
   terrain_color[3]=1.0;
 
   glPushMatrix();
-  glScalef(mscale[0]/xyzmaxdiff,mscale[1]/xyzmaxdiff,mscale[2]/xyzmaxdiff);
+  glScalef(SCALE2SMV(mscale[0]),SCALE2SMV(mscale[1]),SCALE2SMV(mscale[2]));
   glTranslatef(-xbar0,-ybar0,-zbar0);
 
   glEnable(GL_LIGHTING);

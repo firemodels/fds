@@ -97,7 +97,7 @@ extern "C" void glui_stereo_setup(int main_window){
   SPINNER_right_green2->set_float_limits(0.0,1.0,GLUI_LIMIT_CLAMP);
   SPINNER_right_blue2->set_float_limits(0.0,1.0,GLUI_LIMIT_CLAMP);
 
-  fzero*=xyzmaxdiff;
+  fzero=SCALE2FDS(fzero);
   SPINNER_zero_parallax=glui_stereo->add_spinner(_("Distance to zero parallax plane (m)"),GLUI_SPINNER_FLOAT,&fzero);
 #ifdef _DEBUG
   glui_stereo->add_checkbox("Show stereo parallax",&show_parallax);
@@ -161,7 +161,7 @@ void STEREO_CB(int var){
     }
     break;
   case STEREO_RESET:
-    SPINNER_zero_parallax->set_float_val(0.25*xyzmaxdiff);
+    SPINNER_zero_parallax->set_float_val(SCALE2FDS(0.25));
     break;
   case STEREO_CLOSE:
     hide_glui_stereo();

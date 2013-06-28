@@ -200,7 +200,7 @@ void draw_geom(int flag, int frameflag){
     glEnable(GL_COLOR_MATERIAL);
     
     glPushMatrix();
-    glScalef(1.0/xyzmaxdiff,1.0/xyzmaxdiff,1.0/xyzmaxdiff);
+    glScalef(SCALE2SMV(1.0),SCALE2SMV(1.0),SCALE2SMV(1.0));
     glTranslatef(-xbar0,-ybar0,-zbar0);
     glBegin(GL_TRIANGLES);
     for(i=0;i<ntris;i++){
@@ -285,7 +285,7 @@ void draw_geom(int flag, int frameflag){
     npoints = geomlisti->npoints;
     if(showtrioutline==1){
       glPushMatrix();
-      glScalef(1.0/xyzmaxdiff,1.0/xyzmaxdiff,1.0/xyzmaxdiff);
+      glScalef(SCALE2SMV(1.0),SCALE2SMV(1.0),SCALE2SMV(1.0));
       glTranslatef(-xbar0,-ybar0,-zbar0);
       glBegin(GL_LINES);
       for(j=0;j<ntris;j++){
@@ -321,7 +321,7 @@ void draw_geom(int flag, int frameflag){
     }
     if(showtripoints==1&&geomlisti->npoints>0){
       glPushMatrix();
-      glScalef(1.0/xyzmaxdiff,1.0/xyzmaxdiff,1.0/xyzmaxdiff);
+      glScalef(SCALE2SMV(1.0),SCALE2SMV(1.0),SCALE2SMV(1.0));
       glTranslatef(-xbar0,-ybar0,-zbar0);
       glPointSize(6.0);
       glBegin(GL_POINTS);
@@ -339,7 +339,7 @@ void draw_geom(int flag, int frameflag){
     if(showtrinormal==1){
       if(smoothtrinormal==0){
         glPushMatrix();
-        glScalef(1.0/xyzmaxdiff,1.0/xyzmaxdiff,1.0/xyzmaxdiff);
+        glScalef(SCALE2SMV(1.0),SCALE2SMV(1.0),SCALE2SMV(1.0));
         glTranslatef(-xbar0,-ybar0,-zbar0);
         glBegin(GL_LINES);
         for(j=0;j<ntris;j++){
@@ -359,9 +359,9 @@ void draw_geom(int flag, int frameflag){
           xyz1[0] = (p1[0] + p2[0] + p3[0])/3.0;
           xyz1[1] = (p1[1] + p2[1] + p3[1])/3.0;
           xyz1[2] = (p1[2] + p2[2] + p3[2])/3.0;
-          xyz2[0] = xyz1[0] + VECFACTOR*xyzmaxdiff*xyznorm[0];
-          xyz2[1] = xyz1[1] + VECFACTOR*xyzmaxdiff*xyznorm[1];
-          xyz2[2] = xyz1[2] + VECFACTOR*xyzmaxdiff*xyznorm[2];
+          xyz2[0] = xyz1[0] + SCALE2FDS(VECFACTOR)*xyznorm[0];
+          xyz2[1] = xyz1[1] + SCALE2FDS(VECFACTOR)*xyznorm[1];
+          xyz2[2] = xyz1[2] + SCALE2FDS(VECFACTOR)*xyznorm[2];
 
           glColor3fv(blue);
           glVertex3fv(xyz1);
@@ -388,9 +388,9 @@ void draw_geom(int flag, int frameflag){
           xyz1[0] = (p1[0] + p2[0] + p3[0])/3.0;
           xyz1[1] = (p1[1] + p2[1] + p3[1])/3.0;
           xyz1[2] = (p1[2] + p2[2] + p3[2])/3.0;
-          xyz2[0] = xyz1[0] + VECFACTOR*xyzmaxdiff*xyznorm[0];
-          xyz2[1] = xyz1[1] + VECFACTOR*xyzmaxdiff*xyznorm[1];
-          xyz2[2] = xyz1[2] + VECFACTOR*xyzmaxdiff*xyznorm[2];
+          xyz2[0] = xyz1[0] + SCALE2FDS(VECFACTOR)*xyznorm[0];
+          xyz2[1] = xyz1[1] + SCALE2FDS(VECFACTOR)*xyznorm[1];
+          xyz2[2] = xyz1[2] + SCALE2FDS(VECFACTOR)*xyznorm[2];
 
           glColor3fv(blue);
           glVertex3fv(xyz2);
@@ -400,7 +400,7 @@ void draw_geom(int flag, int frameflag){
       }
       if(smoothtrinormal==1){
         glPushMatrix();
-        glScalef(1.0/xyzmaxdiff,1.0/xyzmaxdiff,1.0/xyzmaxdiff);
+        glScalef(SCALE2SMV(1.0),SCALE2SMV(1.0),SCALE2SMV(1.0));
         glTranslatef(-xbar0,-ybar0,-zbar0);
         glBegin(GL_LINES);
         for(j=0;j<npoints;j++){
@@ -412,9 +412,9 @@ void draw_geom(int flag, int frameflag){
           xyznorm = pointi->point_norm;       
           xyz1 = pointi->xyz;
 
-          xyz2[0] = xyz1[0] + VECFACTOR*xyzmaxdiff*xyznorm[0];
-          xyz2[1] = xyz1[1] + VECFACTOR*xyzmaxdiff*xyznorm[1];
-          xyz2[2] = xyz1[2] + VECFACTOR*xyzmaxdiff*xyznorm[2];
+          xyz2[0] = xyz1[0] + SCALE2FDS(VECFACTOR)*xyznorm[0];
+          xyz2[1] = xyz1[1] + SCALE2FDS(VECFACTOR)*xyznorm[1];
+          xyz2[2] = xyz1[2] + SCALE2FDS(VECFACTOR)*xyznorm[2];
 
           color = black;
           glColor3fv(color);
@@ -434,9 +434,9 @@ void draw_geom(int flag, int frameflag){
           xyznorm = pointi->point_norm;       
           xyz1 = pointi->xyz;
 
-          xyz2[0] = xyz1[0] + VECFACTOR*xyzmaxdiff*xyznorm[0];
-          xyz2[1] = xyz1[1] + VECFACTOR*xyzmaxdiff*xyznorm[1];
-          xyz2[2] = xyz1[2] + VECFACTOR*xyzmaxdiff*xyznorm[2];
+          xyz2[0] = xyz1[0] + SCALE2FDS(VECFACTOR)*xyznorm[0];
+          xyz2[1] = xyz1[1] + SCALE2FDS(VECFACTOR)*xyznorm[1];
+          xyz2[2] = xyz1[2] + SCALE2FDS(VECFACTOR)*xyznorm[2];
 
           color = black;
           glColor3fv(color);
@@ -998,7 +998,7 @@ void draw_geomdata(patchdata *patchi, int frameflag){
     glEnable(GL_COLOR_MATERIAL);
 
     glPushMatrix();
-    glScalef(1.0/xyzmaxdiff,1.0/xyzmaxdiff,1.0/xyzmaxdiff);
+    glScalef(SCALE2SMV(1.0),SCALE2SMV(1.0),SCALE2SMV(1.0));
     glTranslatef(-xbar0,-ybar0,-zbar0);
     glBegin(GL_TRIANGLES);
     if(smoothtrinormal==0){

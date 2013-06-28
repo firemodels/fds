@@ -278,7 +278,7 @@ void getzonedatacsv(int nzone_times_local, int nrooms_local, int nfires_local,
       area=zonefarea_devs[j]->vals[i];
       diam=2.0*sqrt(area/PI);
       if(diam<0.0001){
-        diam=0.1/xyzmaxdiff;
+        diam=SCALE2SMV(0.1);
       }
       zonefdiam_local[iif]=diam;
       zonefbase_local[iif]=zonefbase_devs[j]->vals[i];
@@ -622,7 +622,7 @@ void readzone(int ifile, int flag, int *errorcode){
           }
         }
       }
-      zoneylay[ii]/=xyzmaxdiff;
+      zoneylay[ii]=SCALE2SMV(zoneylay[ii]);
       ii++;
     }
   }
@@ -727,11 +727,11 @@ float get_p(float y, float pfloor, float ylay, float rho_L, float rho_U){
   float p;
 
   if(y<ylay){
-    p = pfloor - rho_L*g*y*xyzmaxdiff;
+    p = pfloor - SCALE2FDS(rho_L*g*y);
   }
   else{
-    p = pfloor - rho_L*g*ylay*xyzmaxdiff;
-    p -= rho_U*g*(y-ylay)*xyzmaxdiff;
+    p = pfloor - SCALE2FDS(rho_L*g*ylay);
+    p -= SCALE2FDS(rho_U*g*(y-ylay));
   }
   return p;
 }
@@ -1229,7 +1229,7 @@ float getzonethick(int dir, roomdata *roomi, float xyz[3]){
     }
   }
 
-  factor = (factor_U+factor_L)*L*xyzmaxdiff;
+  factor = SCALE2FDS((factor_U+factor_L)*L);
   thick = 1.0-exp(-factor);
   return thick;
 }
@@ -1534,10 +1534,10 @@ void drawfiredata(void){
           // radius/plumeheight = .268 = atan(15 degrees)
           firei = fireinfo + i;
           roomi = roominfo + firei->roomnumber-1;
-          diameter = zonefdiambase[i]/xyzmaxdiff;
-          deltaz = zonefbasebase[i]/xyzmaxdiff;
+          diameter = SCALE2SMV(zonefdiambase[i]);
+          deltaz = SCALE2SMV(zonefbasebase[i]);
           maxheight=roomi->z1-roomi->z0-deltaz;
-          flameheight = zonefheightbase[i]/xyzmaxdiff;
+          flameheight = SCALE2SMV(zonefheightbase[i]);
           glPushMatrix();
           glTranslatef(firei->absx,firei->absy,roomi->z0+deltaz);
           DrawFirePlume(diameter,flameheight,maxheight);
@@ -1553,7 +1553,7 @@ void drawfiredata(void){
           firei = fireinfo + i;
           roomi = roominfo + firei->roomnumber-1;
           maxheight=roomi->z1-firei->absz;
-          flameheight = (0.23f*pow((double)qdot,(double)0.4)/(1.0f+2.0f*0.268f))/xyzmaxdiff;
+          flameheight = SCALE2SMV((0.23f*pow((double)qdot,(double)0.4)/(1.0f+2.0f*0.268f)));
           diameter = 2.0*flameheight*0.268f;
           glPushMatrix();
           glTranslatef(firei->absx,firei->absy,firei->absz);

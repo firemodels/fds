@@ -557,7 +557,7 @@ void getPart5Colors(partdata *parti, int nlevel){
 
           az= azimuth_data[m]*DEG2RAD;
           elev = elevation_data[m]*DEG2RAD;
-          length=length_data[m]/xyzmaxdiff;
+          length=SCALE2SMV(length_data[m]);
           dsx[m] = cos(az)*cos(elev)*length/2.0;
           dsy[m] = sin(az)*cos(elev)*length/2.0;
           dsz[m] =         sin(elev)*length/2.0;

@@ -205,7 +205,7 @@ void drawcolorbarpath(void){
     ydenorm = DENORMALIZE_Y(0.0);
     if(fontindex==SCALED_FONT)scale_3dfont();
     glPushMatrix();
-    glScalef(1.0/xyzmaxdiff,1.0/xyzmaxdiff,1.0/xyzmaxdiff);
+    glScalef(SCALE2SMV(1.0),SCALE2SMV(1.0),SCALE2SMV(1.0));
     glTranslatef(-xbar0,-ybar0,-zbar0);
     for(i=0;i<cbi->nnodes;i++){
       char cbuff[1024];

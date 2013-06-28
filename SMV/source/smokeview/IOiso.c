@@ -310,7 +310,7 @@ void readiso_orig(const char *file, int ifile, int flag, int *errorcode){
   meshi->isofilenum=ifile;
   highlight_mesh = blocknumber;
   
-  factor = (meshi->xyzmaxdiff/xyzmaxdiff)/65535.0;
+  factor = (SCALE2SMV(meshi->xyzmaxdiff))/65535.0;
   normalize_xyz(offset,meshi->xyz_bar0);
 
   if(iso_ambient_ini==NULL||n_iso_ambient_ini==0){

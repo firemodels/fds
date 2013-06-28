@@ -457,7 +457,7 @@ void draw_devices_val(void){
 
   if(fontindex==SCALED_FONT)scale_3dfont();
   glPushMatrix();
-  glScalef(1.0/xyzmaxdiff,1.0/xyzmaxdiff,1.0/xyzmaxdiff);
+  glScalef(SCALE2SMV(1.0),SCALE2SMV(1.0),SCALE2SMV(1.0));
   glTranslatef(-xbar0,-ybar0,-zbar0);
   if(active_smokesensors==1&&show_smokesensors!=0){
     getdevice_screencoords();
@@ -694,7 +694,7 @@ void draw_devices(void){
     glEnable(GL_COLOR_MATERIAL);
 
     glPushMatrix();
-    glScalef(1.0/xyzmaxdiff,1.0/xyzmaxdiff,1.0/xyzmaxdiff);
+    glScalef(SCALE2SMV(1.0),SCALE2SMV(1.0),SCALE2SMV(1.0));
     glTranslatef(-xbar0,-ybar0,-zbar0);
     glColor3fv(foregroundcolor);
     glPointSize(vectorpointsize);
@@ -728,8 +728,8 @@ void draw_devices(void){
         float dd,d1=0.0, d2, height, vv;
         float anglemin, anglemax, rmin, rmax;
 
-        vv=vel[0]*xyzmaxdiff/max_dev_vel;
-        height=2.0*dvel*xyzmaxdiff/max_dev_vel;
+        vv=SCALE2FDS(vel[0])/max_dev_vel;
+        height=SCALE2FDS(2.0*dvel)/max_dev_vel;
         dd=2.0*vv*tan(DEG2RAD*dangle);
         d1=dd*(vv+dvel)/vv;
         d2=dd*(MAX(vv-dvel,0.0))/vv;
@@ -757,7 +757,7 @@ void draw_devices(void){
 
   glPushMatrix();
   glPushAttrib(GL_POINT_BIT|GL_LINE_BIT);
-  glScalef(1.0/xyzmaxdiff,1.0/xyzmaxdiff,1.0/xyzmaxdiff);
+  glScalef(SCALE2SMV(1.0),SCALE2SMV(1.0),SCALE2SMV(1.0));
   glTranslatef(-xbar0,-ybar0,-zbar0);
   for(i=0;i<ndeviceinfo;i++){
     int tagval;
@@ -887,7 +887,7 @@ void drawTargetNorm(void){
 
   if(isZoneFireModel==1&&hasSensorNorm==1&&visSensor==1&&visSensorNorm==1){
     glPushMatrix();
-    glScalef(1.0/xyzmaxdiff,1.0/xyzmaxdiff,1.0/xyzmaxdiff);
+    glScalef(SCALE2SMV(1.0),SCALE2SMV(1.0),SCALE2SMV(1.0));
     glBegin(GL_LINES);
     glColor4fv(sensornormcolor);
 
@@ -1465,7 +1465,7 @@ void draw_SVOBJECT(sv_object *object_dev, int iframe_local, propdata *prop, int 
       glScalef(arg[0],arg[1],arg[2]);
       break;
     case SV_SCALEAUTO:
-      glScalef(arg[0]*xyzmaxdiff,arg[0]*xyzmaxdiff,arg[0]*xyzmaxdiff);
+      glScalef(SCALE2FDS(arg[0]),SCALE2FDS(arg[0]),SCALE2FDS(arg[0]));
       break;
     case SV_SCALEGRID:
       glScalef(arg[0]*min_gridcell_size,arg[0]*min_gridcell_size,arg[0]*min_gridcell_size);
@@ -1968,7 +1968,7 @@ void drawsphereseg(float anglemin, float anglemax, float rmin, float rmax){
   glEnd();
   }
 #ifdef xxx
-#define VECFACTOR (0.1*xyzmaxdiff)
+#define VECFACTOR (SCALE2FDS(0.1))
   glColor4fv(colorwhite);
   glBegin(GL_LINES);
   for(i=0;i<NLAT;i++){

@@ -448,7 +448,7 @@ void DrawGeomTest(int option){
   initBoxClipInfo(&box_clipinfo,*xmin,*xmax,*ymin,*ymax,*zmin,*zmax);
 
   glPushMatrix();
-  glScalef(1.0/xyzmaxdiff,1.0/xyzmaxdiff,1.0/xyzmaxdiff);
+  glScalef(SCALE2SMV(1.0),SCALE2SMV(1.0),SCALE2SMV(1.0));
   glTranslatef(-xbar0,-ybar0,-zbar0);
 
   if(option==0)setClipPlanes(&tetra_clipinfo,CLIP_ON_DENORMAL);
@@ -472,7 +472,7 @@ void DrawGeomTest(int option){
   // tetrahedron
 
   glPushMatrix();
-  glScalef(1.0/xyzmaxdiff,1.0/xyzmaxdiff,1.0/xyzmaxdiff);
+  glScalef(SCALE2SMV(1.0),SCALE2SMV(1.0),SCALE2SMV(1.0));
   glTranslatef(-xbar0,-ybar0,-zbar0);
   if(option==0){
     setClipPlanes(&box_clipinfo,CLIP_ON_DENORMAL);
@@ -500,7 +500,7 @@ void DrawGeomTest(int option){
       int j;
 
       glPushMatrix();
-      glScalef(1.0/xyzmaxdiff,1.0/xyzmaxdiff,1.0/xyzmaxdiff);
+      glScalef(SCALE2SMV(1.0),SCALE2SMV(1.0),SCALE2SMV(1.0));
       glTranslatef(-xbar0,-ybar0,-zbar0);
       glPointSize(10.0);
       glBegin(GL_POINTS);
@@ -850,13 +850,13 @@ void DrawCircVentsExactSolid(int option){
         z0 = cvi->zmin;
       }
 
-      delta=0.001*xyzmaxdiff;
+      delta=SCALE2FDS(0.001);
       color=cvi->color;
       vcolor[0]=color[0]*255;
       vcolor[1]=color[1]*255;
       vcolor[2]=color[2]*255;
       glPushMatrix();
-      glScalef(1.0/xyzmaxdiff,1.0/xyzmaxdiff,1.0/xyzmaxdiff);
+      glScalef(SCALE2SMV(1.0),SCALE2SMV(1.0),SCALE2SMV(1.0));
       glTranslatef(-xbar0,-ybar0,-zbar0);
       if(option==VENT_CIRCLE){
         clipdata circleclip;
@@ -956,13 +956,13 @@ void DrawCircVentsExactOutline(int option){
         z0 = cvi->zmin;
       }
 
-      delta=0.001*xyzmaxdiff;
+      delta=SCALE2FDS(0.001);
       color=cvi->color;
       vcolor[0]=color[0]*255;
       vcolor[1]=color[1]*255;
       vcolor[2]=color[2]*255;
       glPushMatrix();
-      glScalef(1.0/xyzmaxdiff,1.0/xyzmaxdiff,1.0/xyzmaxdiff);
+      glScalef(SCALE2SMV(1.0),SCALE2SMV(1.0),SCALE2SMV(1.0));
       glTranslatef(-xbar0,-ybar0,-zbar0);
       if(option==VENT_CIRCLE){
         clipdata circleclip;
@@ -1136,7 +1136,7 @@ void drawcbox(float x, float y, float z, float size){
   int ix[8]={0,1,1,0,0,1,1,0};
   int iy[8]={0,0,0,0,1,1,1,1};
   int iz[8]={0,0,1,1,0,0,1,1};
-  float dsize=size/xyzmaxdiff;
+  float dsize=SCALE2SMV(size);
 
   xbound[0]=x-dsize/2.0;
   ybound[0]=y-dsize/2.0;
@@ -1498,7 +1498,7 @@ void SetCVentDirs(void){
 
             dy = yplt[j]-NORMALIZE_Y(cvi->origin[1]);
             drad=sqrt(dy*dy+dz*dz);
-            if(drad>cvi->radius/xyzmaxdiff){
+            if(SCALE2SMV(drad>cvi->radius)){
               blank[IJCIRC(j-cvi->jmin,k-cvi->kmin)]=0;
             }
           }
@@ -1516,7 +1516,7 @@ void SetCVentDirs(void){
 
             dx = xplt[i]-NORMALIZE_X(cvi->origin[0]);
             drad=sqrt(dx*dx+dz*dz);
-            if(drad>cvi->radius/xyzmaxdiff){
+            if(SCALE2SMV(drad>cvi->radius)){
               blank[IJCIRC(i-cvi->imin,k-cvi->kmin)]=0;
             }
           }
@@ -1534,7 +1534,7 @@ void SetCVentDirs(void){
 
             dx = xplt[i]-NORMALIZE_X(cvi->origin[0]);
             drad=sqrt(dx*dx+dy*dy);
-            if(drad>cvi->radius/xyzmaxdiff){
+            if(SCALE2SMV(drad>cvi->radius)){
               blank[IJCIRC(i-cvi->imin,j-cvi->jmin)]=0;
             }
             else{
@@ -2862,11 +2862,11 @@ void obst_or_vent2faces(const mesh *meshi,blockagedata *bc,
       float xe_texture[4], ye_texture[4];
       float dx_e, dy_e, dx_a, dy_a;
 
-      xa_texture[0]=(*xstart+xyzmaxdiff*xtex[bfi[0]]);
-      ya_texture[0]=(*ystart+xyzmaxdiff*ytex[bfi[0]]);
+      xa_texture[0]=(*xstart+SCALE2FDS(xtex[bfi[0]]));
+      ya_texture[0]=(*ystart+SCALE2FDS(ytex[bfi[0]]));
 
-      xe_texture[0]=(*xstart+xyzmaxdiff*xtex2[bfi[0]]);
-      ye_texture[0]=(*ystart+xyzmaxdiff*ytex2[bfi[0]]);
+      xe_texture[0]=(*xstart+SCALE2FDS(xtex2[bfi[0]]));
+      ye_texture[0]=(*ystart+SCALE2FDS(ytex2[bfi[0]]));
 
       switch (faceptr->dir){
         case DOWN_X:
@@ -2895,10 +2895,10 @@ void obst_or_vent2faces(const mesh *meshi,blockagedata *bc,
           break;
       }
 
-      dx_a = xyzmaxdiff*(xtex[bfi[0]]-xtex[bfi[1]]);
-      dy_a = xyzmaxdiff*(ytex[bfi[0]]-ytex[bfi[2]]);
-      dx_e = xyzmaxdiff*(xtex2[bfi[0]]-xtex2[bfi[1]]);
-      dy_e = xyzmaxdiff*(ytex2[bfi[0]]-ytex2[bfi[2]]);
+      dx_a = SCALE2FDS(xtex[bfi[0]]-xtex[bfi[1]]);
+      dy_a = SCALE2FDS(ytex[bfi[0]]-ytex[bfi[2]]);
+      dx_e = SCALE2FDS(xtex2[bfi[0]]-xtex2[bfi[1]]);
+      dy_e = SCALE2FDS(ytex2[bfi[0]]-ytex2[bfi[2]]);
       if(dx_a<0.0)dx_a=-dx_a;
       if(dy_a<0.0)dy_a=-dy_a;
       if(dx_e<0.0)dx_e=-dx_e;
@@ -5239,7 +5239,7 @@ void draw_user_ticks(void){
     user_tick_option=-user_tick_option;
   }
   glPushMatrix();
-  glScalef(1.0/xyzmaxdiff,1.0/xyzmaxdiff,1.0/xyzmaxdiff);
+  glScalef(SCALE2SMV(1.0),SCALE2SMV(1.0),SCALE2SMV(1.0));
   glTranslatef(-xbar0,-ybar0,-zbar0);
 
  //*** x axis tick/labels
@@ -5259,13 +5259,13 @@ void draw_user_ticks(void){
       xyz[2]=tick_origin[2];
       if(user_tick_option==3){
         xyz2[0]=xyz[0];
-        xyz2[1]=xyz[1]-user_tick_length*xyzmaxdiff;
+        xyz2[1]=xyz[1]-SCALE2FDS(user_tick_length);
         xyz2[2]=xyz[2];
       }
       else{
         xyz2[0]=xyz[0];
         xyz2[1]=xyz[1];
-        xyz2[2]=xyz[2]-user_tick_length*xyzmaxdiff;
+        xyz2[2]=xyz[2]-SCALE2FDS(user_tick_length);
       }
       if(i==0){
         glVertex3fv(xyz);
@@ -5294,13 +5294,13 @@ void draw_user_ticks(void){
         xyz[2]=tick_origin[2];
         if(user_tick_option==3){
           xyz2[0]=xyz[0];
-          xyz2[1]=xyz[1]-user_tick_length*xyzmaxdiff/2.0;
+          xyz2[1]=xyz[1]-SCALE2FDS(user_tick_length)/2.0;
           xyz2[2]=xyz[2];
         }
         else{
           xyz2[0]=xyz[0];
           xyz2[1]=xyz[1];
-          xyz2[2]=xyz[2]-user_tick_length*xyzmaxdiff/2.0;
+          xyz2[2]=xyz[2]-SCALE2FDS(user_tick_length)/2.0;
         }
         glVertex3fv(xyz);
         glVertex3fv(xyz2);
@@ -5317,13 +5317,13 @@ void draw_user_ticks(void){
       xyz[2]=tick_origin[2];
       if(user_tick_option==3){
         xyz2[0]=xyz[0];
-        xyz2[1]=xyz[1]-TEXT_FACTOR*user_tick_length*xyzmaxdiff;
+        xyz2[1]=xyz[1]-TEXT_FACTOR*SCALE2FDS(user_tick_length);
         xyz2[2]=xyz[2];
       }
       else{
         xyz2[0]=xyz[0];
         xyz2[1]=xyz[1];
-        xyz2[2]=xyz[2]-TEXT_FACTOR*user_tick_length*xyzmaxdiff;
+        xyz2[2]=xyz[2]-TEXT_FACTOR*SCALE2FDS(user_tick_length);
       }
       sprintf(label,"%f",xyz[0]);
       trimzeros(label);
@@ -5348,14 +5348,14 @@ void draw_user_ticks(void){
         )continue;
       xyz[2]=tick_origin[2];
       if(user_tick_option==3){
-        xyz2[0]=xyz[0]-user_tick_length*xyzmaxdiff;
+        xyz2[0]=xyz[0]-SCALE2FDS(user_tick_length);
         xyz2[1]=xyz[1];
         xyz2[2]=xyz[2];
       }
       else{
         xyz2[0]=xyz[0];
         xyz2[1]=xyz[1];
-        xyz2[2]=xyz[2]-user_tick_length*xyzmaxdiff;
+        xyz2[2]=xyz[2]-SCALE2FDS(user_tick_length);
       }
       if(i==0){
         glVertex3fv(xyz);
@@ -5383,14 +5383,14 @@ void draw_user_ticks(void){
           )continue;
         xyz[2]=tick_origin[2];
         if(user_tick_option==3){
-          xyz2[0]=xyz[0]-user_tick_length*xyzmaxdiff/2.0;
+          xyz2[0]=xyz[0]-SCALE2FDS(user_tick_length)/2.0;
           xyz2[1]=xyz[1];
           xyz2[2]=xyz[2];
         }
         else{
           xyz2[0]=xyz[0];
           xyz2[1]=xyz[1];
-          xyz2[2]=xyz[2]-user_tick_length*xyzmaxdiff/2.0;
+          xyz2[2]=xyz[2]-SCALE2FDS(user_tick_length)/2.0;
         }
         glVertex3fv(xyz);
         glVertex3fv(xyz2);
@@ -5410,14 +5410,14 @@ void draw_user_ticks(void){
       xyz[2]=tick_origin[2];
       xyz2[0]=xyz[0];
       if(user_tick_option==3){
-        xyz2[0]=xyz[0]-TEXT_FACTOR*user_tick_length*xyzmaxdiff;
+        xyz2[0]=xyz[0]-TEXT_FACTOR*SCALE2FDS(user_tick_length);
         xyz2[1]=xyz[1];
         xyz2[2]=xyz[2];
       }
       else{
         xyz2[0]=xyz[0];
         xyz2[1]=xyz[1];
-        xyz2[2]=xyz[2]-TEXT_FACTOR*user_tick_length*xyzmaxdiff;
+        xyz2[2]=xyz[2]-TEXT_FACTOR*SCALE2FDS(user_tick_length);
       }
       sprintf(label,"%f",xyz[1]);
       trimzeros(label);
@@ -5442,10 +5442,10 @@ void draw_user_ticks(void){
         )continue;
       if(user_tick_option==2){
         xyz2[0]=xyz[0];
-        xyz2[1]=xyz[1]-user_tick_length*xyzmaxdiff;
+        xyz2[1]=xyz[1]-SCALE2FDS(user_tick_length);
       }
       else{
-        xyz2[0]=xyz[0]-user_tick_length*xyzmaxdiff;
+        xyz2[0]=xyz[0]-SCALE2FDS(user_tick_length);
         xyz2[1]=xyz[1];
       }
       xyz2[2]=xyz[2];
@@ -5476,10 +5476,10 @@ void draw_user_ticks(void){
           )continue;
         if(user_tick_option==2){
           xyz2[0]=xyz[0];
-          xyz2[1]=xyz[1]-user_tick_length*xyzmaxdiff/2.0;
+          xyz2[1]=xyz[1]-SCALE2FDS(user_tick_length)/2.0;
         }
         else{
-          xyz2[0]=xyz[0]-user_tick_length*xyzmaxdiff/2.0;
+          xyz2[0]=xyz[0]-SCALE2FDS(user_tick_length)/2.0;
           xyz2[1]=xyz[1];
         }
         xyz2[2]=xyz[2];
@@ -5501,10 +5501,10 @@ void draw_user_ticks(void){
         )continue;
       if(user_tick_option==2){
         xyz2[0]=xyz[0];
-        xyz2[1]=xyz[1]-TEXT_FACTOR*user_tick_length*xyzmaxdiff;
+        xyz2[1]=xyz[1]-TEXT_FACTOR*SCALE2FDS(user_tick_length);
       }
       else{
-        xyz2[0]=xyz[0]-TEXT_FACTOR*user_tick_length*xyzmaxdiff;
+        xyz2[0]=xyz[0]-TEXT_FACTOR*SCALE2FDS(user_tick_length);
         xyz2[1]=xyz[1];
       }
       xyz2[2]=xyz[2];

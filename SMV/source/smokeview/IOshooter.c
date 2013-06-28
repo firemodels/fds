@@ -214,7 +214,7 @@ void draw_shooter(void){
   glPointSize(shooterpointsize);
 
   glPushMatrix();
-  glScalef(1.0/xyzmaxdiff,1.0/xyzmaxdiff,1.0/xyzmaxdiff);
+  glScalef(SCALE2SMV(1.0),SCALE2SMV(1.0),SCALE2SMV(1.0));
   glTranslatef(-xbar0,-ybar0,-zbar0);
 
   //glColor4fv(static_color);

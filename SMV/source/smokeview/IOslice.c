@@ -1901,7 +1901,7 @@ int new_multi_slice(slicedata *sdold,slicedata *sd){
   // sd->xmin/xmax etc are in Smokeview scaled units
   // convert from physical to scaled units using xyzmaxdiff 
     delta_orig = MAX(sdold->delta_orig,sd->delta_orig);
-    delta_scaled = delta_orig/xyzmaxdiff;
+    delta_scaled = SCALE2SMV(delta_orig);
     if(ABS(sd->xmin-sdold->xmin)<delta_scaled&&ABS(sd->xmax-sdold->xmax)<delta_scaled // test whether two slices are identical
 	   &&ABS(sd->ymin-sdold->ymin)<delta_scaled&&ABS(sd->ymax-sdold->ymax)<delta_scaled
 	   &&ABS(sd->zmin-sdold->zmin)<delta_scaled&&ABS(sd->zmax-sdold->zmax)<delta_scaled
@@ -3422,7 +3422,7 @@ void drawgslice_outline(void){
   float zero[3]={0.0,0.0,0.0};
 
   glPushMatrix();
-  glScalef(1.0/xyzmaxdiff,1.0/xyzmaxdiff,1.0/xyzmaxdiff);
+  glScalef(SCALE2SMV(1.0),SCALE2SMV(1.0),SCALE2SMV(1.0));
   glTranslatef(-xbar0,-ybar0,-zbar0);
 
   glColor3fv(foregroundcolor);
@@ -3593,7 +3593,7 @@ void drawgslice_dataGPU(slicedata *slicei){
 
   update_slice3d_texture(meshi, slicei->qsliceframe);
   glPushMatrix();
-  glScalef(1.0/xyzmaxdiff,1.0/xyzmaxdiff,1.0/xyzmaxdiff);
+  glScalef(SCALE2SMV(1.0),SCALE2SMV(1.0),SCALE2SMV(1.0));
   glTranslatef(-xbar0,-ybar0,-zbar0);
 
   if(cullfaces==1)glDisable(GL_CULL_FACE);
@@ -3650,7 +3650,7 @@ void drawgslice_data(slicedata *slicei){
   del /= 4.0;
 
   glPushMatrix();
-  glScalef(1.0/xyzmaxdiff,1.0/xyzmaxdiff,1.0/xyzmaxdiff);
+  glScalef(SCALE2SMV(1.0),SCALE2SMV(1.0),SCALE2SMV(1.0));
   glTranslatef(-xbar0,-ybar0,-zbar0);
 
   if(cullfaces==1)glDisable(GL_CULL_FACE);
