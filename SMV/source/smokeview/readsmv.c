@@ -9871,7 +9871,7 @@ int readini2(char *inifile, int localfile){
     if(match(buffer,"SHOWOTHERVENTS")==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i",&visOtherVents);
-      if(visTerrainType!=TERRAIN_HIDDEN)visOtherVents=0;
+      if(visOtherVents!=1)visOtherVents=0;
       continue;
       }
     if(match(buffer,"SHOWCVENTS")==1){
