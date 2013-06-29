@@ -1737,9 +1737,7 @@ void update_mesh_coords(void){
 
   // compute scaling factor used in NORMALIXE_X, NORMALIZE_Y, NORMALIZE_Z macros
 
-  xyzmaxdiff=xbar-xbar0;
-  if(ybar-ybar0>xyzmaxdiff)xyzmaxdiff=ybar-ybar0;
-  if(zbar-zbar0>xyzmaxdiff)xyzmaxdiff=zbar-zbar0;
+  xyzmaxdiff=MAX(MAX(xbar-xbar0,ybar-ybar0),zbar-zbar0);
 
   // normalize various coordinates.
 
@@ -1769,9 +1767,7 @@ void update_mesh_coords(void){
 
     meshi=meshinfo+i;
     /* compute a local scaling factor for each block */
-    meshi->xyzmaxdiff=meshi->xyz_bar[XXX]-meshi->xyz_bar0[XXX];
-    if(meshi->xyz_bar[YYY]-meshi->xyz_bar0[YYY]>meshi->xyzmaxdiff)meshi->xyzmaxdiff=meshi->xyz_bar[YYY]-meshi->xyz_bar0[YYY];
-    if(meshi->xyz_bar[ZZZ]-meshi->xyz_bar0[ZZZ]>meshi->xyzmaxdiff)meshi->xyzmaxdiff=meshi->xyz_bar[ZZZ]-meshi->xyz_bar0[ZZZ];
+    meshi->xyzmaxdiff=MAX(MAX(meshi->xyz_bar[XXX]-meshi->xyz_bar0[XXX],meshi->xyz_bar[YYY]-meshi->xyz_bar0[YYY]),meshi->xyz_bar[ZZZ]-meshi->xyz_bar0[ZZZ]);
 
     normalize_xyz(meshi->xyz_bar,meshi->xyz_bar);
     meshi->xcen = NORMALIZE_X(meshi->xcen);

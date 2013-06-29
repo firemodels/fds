@@ -919,9 +919,7 @@ int CompressIsosurface(isosurface *surface, int reduce_triangles,
 
   surface->vertices=vertices;
   surface->rank=rank;
-  xyzmaxdiff = xmax - xmin;
-  if(ymax-ymin>xyzmaxdiff)xyzmaxdiff=ymax-ymin;
-  if(zmax-zmin>xyzmaxdiff)xyzmaxdiff=zmax-zmin;
+  xyzmaxdiff = MAX(MAX(xmax-xmin,ymax-ymin),zmax-zmin);
   surface->xmin=xmin;
   surface->ymin=ymin;
   surface->zmin=zmin;

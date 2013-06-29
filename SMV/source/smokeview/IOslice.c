@@ -449,7 +449,7 @@ void readfed(int file_index, int flag, int file_type, int *errorcode){
       strcat(fed_area_file_base,"_area.csv");
       fed_area_file=fed_area_file_base;
       AREA_STREAM=fopen(fed_area_file,"w");
-      area_factor=xyzmaxdiff*xyzmaxdiff;
+      area_factor=SCALE2FDS(xyzmaxdiff);
     }
     if(Creadslice_frame(0,fedi->o2_index,LOAD)<0||
        Creadslice_frame(0,fedi->co2_index,LOAD)<0||
