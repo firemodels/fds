@@ -929,8 +929,8 @@ int CompressIsosurface(isosurface *surface, int reduce_triangles,
     tmin=t[0];
     tmax=tmin;
     for(i=1;i<nvertices;i++){
-      if(t[i]<tmin)tmin=t[i];
-      if(t[i]>tmax)tmax=t[i];
+      tmin=MIN(t[i],tmin);
+      tmax=MAX(t[i],tmax);
     }
     surface->tmin=tmin;
     surface->tmax=tmax;

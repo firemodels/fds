@@ -34,13 +34,7 @@ void adjustdatabounds(const float *pdata, int local_skip, int ndata,
       }
       for (n=local_skip;n<ndata;n++){
         level=0;
-        if(dp!=0.0f)level = (int)((pdata[n] - *pmin)/dp);
-        if(level<0){
-          level=0;
-        }
-        if(level>NBUCKETS-1){
-          level=NBUCKETS-1;
-        }
+        if(dp!=0.0f)level = CLAMP((int)((pdata[n] - *pmin)/dp),0,NBUCKETS-1);
         buckets[level]++;
       }
       alpha05 = (int)(percentile_level*ndata);
@@ -87,14 +81,14 @@ void adjustpart5chops(partdata *parti){
       float dval;
 
       dval = propi->valmax-propi->valmin;
-      if(dval<=0.0)dval=1;
+      if(dval<=0.0)dval=1.0;
       propi->imin=CLAMP(255*(propi->chopmin-propi->valmin)/dval,0,255);
     }
     if(propi->setchopmax==1){
       float dval;
 
       dval = propi->valmax-propi->valmin;
-      if(dval<=0.0)dval=1;
+      if(dval<=0.0)dval=1.0;
       propi->imax=CLAMP(255*(propi->chopmax-propi->valmin)/dval,0,255);
     }
   }
@@ -152,8 +146,8 @@ void adjustpart5bounds(partdata *parti){
             float val;
 
             val=*rvals++;
-            if(valmin!=NULL&&val<*valmin)*valmin=val;
-            if(valmax!=NULL&&val>*valmax)*valmax=val;
+            if(valmin!=NULL)*valmin=MIN(*valmin,val);
+            if(valmax!=NULL)*valmax=MAX(*valmax,val);
           }
         }
       }
@@ -191,9 +185,7 @@ void adjustpart5bounds(partdata *parti){
           int ival;
 
           val=*rvals++;
-          ival = (val-*valmin)/dg;
-          if(ival<0)ival=0;
-          if(ival>NBUCKETS-1)ival=NBUCKETS-1;
+          ival = CLAMP((val-*valmin)/dg,0,NBUCKETS-1);
           buckets[ival]++;
         }
       }
@@ -265,7 +257,6 @@ void adjustpart5bounds(partdata *parti){
     switch (propi->setvalmin){
     case PERCENTILE_MIN:
       propi->valmin=propi->percentile_min;
-  //    propi->user_min=propi->valmin;
       break;
     case GLOBAL_MIN:
       propi->valmin=propi->global_min;
@@ -280,7 +271,6 @@ void adjustpart5bounds(partdata *parti){
     switch (propi->setvalmax){
     case PERCENTILE_MAX:
       propi->valmax=propi->percentile_max;
-//      propi->user_max=propi->valmax;
       break;
     case GLOBAL_MAX:
       propi->valmax=propi->global_max;
@@ -329,13 +319,7 @@ void adjustpartbounds(const float *pdata, int particle_type, int droplet_type, c
         else{
           if(particle_type==0)continue;
         }
-        if(dp!=0.0f)level = (int)((pdata[n] - *pmin)/dp);
-        if(level<0){
-          level=0;
-        }
-        if(level>NBUCKETS-1){
-          level=NBUCKETS-1;
-        }
+        if(dp!=0.0f)level = CLAMP((int)((pdata[n] - *pmin)/dp),0,NBUCKETS-1);
         ndata++;
         buckets[level]++;
       }
@@ -404,13 +388,7 @@ void adjustPlot3Dbounds(int plot3dvar, int setpmin, float *pmin, int setpmax, fl
         for(n=0;n<ntotal;n++){
           if(iblank==NULL||*iblank++==GAS){
             level=0;
-            if(dp!=0.0f)level = (int)((q[n] - *pmin)/dp);
-            if(level<0){
-              level=0;
-            }
-            if(level>NBUCKETS-1){
-              level=NBUCKETS-1;
-            }
+            if(dp!=0.0f)level = CLAMP((int)((q[n] - *pmin)/dp),0,NBUCKETS-1);
             buckets[level]++;
           }
         }
@@ -420,14 +398,16 @@ void adjustPlot3Dbounds(int plot3dvar, int setpmin, float *pmin, int setpmax, fl
       for (n=0;n<NBUCKETS;n++){
         total += buckets[n];
         if(total>alpha05){
-          nsmall=n;break;
+          nsmall=n;
+          break;
         }
       }
       total = 0;
       for (n=NBUCKETS;n>0;n--){
         total += buckets[n-1];
         if(total>alpha05){
-          nbig=n;break;
+          nbig=n;
+          break;
         }
       }
       pmin2 = *pmin + (nsmall-1)*dp;
@@ -455,8 +435,8 @@ void getzonebounds(const float *pdata, int ndata,
     pmax2 = pmin2;
     for (n=0;n<ndata;n++){
       val=*pdata++;
-      if(val<pmin2)pmin2=val;
-      if(val>pmax2)pmax2=val;
+      pmin2=MIN(val,pmin2);
+      pmax2=MAX(val,pmax2);
     }
     if(setpmin!=SET_MIN)*pmin = pmin2; 
     if(setpmax!=SET_MAX)*pmax = pmax2;
