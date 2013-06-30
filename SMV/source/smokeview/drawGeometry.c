@@ -5102,13 +5102,13 @@ void init_user_ticks(void){
     mesh *meshi;
 
     meshi = meshinfo + i;
-    if(meshi->boxmin[0]<user_tick_min[0])user_tick_min[0]=meshi->boxmin[0];
-    if(meshi->boxmin[1]<user_tick_min[1])user_tick_min[1]=meshi->boxmin[1];
-    if(meshi->boxmin[2]<user_tick_min[2])user_tick_min[2]=meshi->boxmin[2];
+    user_tick_min[0]=MIN(meshi->boxmin[0],user_tick_min[0]);
+    user_tick_min[1]=MIN(meshi->boxmin[1],user_tick_min[1]);
+    user_tick_min[2]=MIN(meshi->boxmin[2],user_tick_min[2]);
 
-    if(meshi->boxmax[0]>user_tick_max[0])user_tick_max[0]=meshi->boxmax[0];
-    if(meshi->boxmax[1]>user_tick_max[1])user_tick_max[1]=meshi->boxmax[1];
-    if(meshi->boxmax[2]>user_tick_max[2])user_tick_max[2]=meshi->boxmax[2];
+    user_tick_max[0]=MAX(meshi->boxmax[0],user_tick_max[0]);
+    user_tick_max[1]=MAX(meshi->boxmax[1],user_tick_max[1]);
+    user_tick_max[2]=MAX(meshi->boxmax[2],user_tick_max[2]);
   }
 
   user_tick_origin[0]=user_tick_min[0];
