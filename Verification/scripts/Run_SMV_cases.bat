@@ -24,6 +24,8 @@ set FDSEXE=%SVNROOT%\FDS_Compilation\intel_win_64\fds_win_64.exe
 Rem set FDSEXE=%SVNROOT%\FDS_Compilation\intel_win_64_db\fds_win_64_db.exe
 Rem set FDSEXE=fds
 
+set BACKGROUNDEXE=%SVNROOT%\Utilities\background\intel_win_32\background.exe
+
 Rem Choose CFAST version (repository or release)
 
 Rem set CFASTEXE=cfast6
@@ -31,8 +33,8 @@ set CFASTEXE=%CFAST%\CFAST\intel_win_64\cfast6_win_64.exe
 
 Rem Run jobs in background (or not)
 
-set "bg=background -u 85 -d 5 "
-Rem set background=
+set "bg=%BACKGROUNDEXE% -u 85 -d 5 "
+Rem set bg=
 
 Rem ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 

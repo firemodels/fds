@@ -8,14 +8,14 @@ set TIME_FILE="%BASEDIR%\fds_case_times.txt"
 Rem Choose one of the following four FDS "definitions" by commenting all lines but one.
 
 set FDSEXE=%SVNROOT%\FDS_Compilation\intel_win_64\fds_win_64
-
+set BACKGROUNDEXE=%SVNROOT%\Utilities\background\intel_win_32\background.exe
 
 Rem Choose one of the following run options by commenting the line you don't want to use.
 Rem Use the first "FDS" definition to run one case at a time in the forground.
 Rem Use the second "FDS" definition to execute more than one case at a time in the background
 
 Rem set FDS=%FDSEXE%
-set FDS=background -u 75 -d 10 %FDSEXE%
+set FDS=%BACKGROUNDEXE% -u 75 -d 10 %FDSEXE%
 
 set RUNFDS=call %SVNROOT%\Utilities\Scripts\runfds_win32.bat
 set RUNFDSMPI=call %SVNROOT%\Utilities\Scripts\runfdsmpi_win32.bat
