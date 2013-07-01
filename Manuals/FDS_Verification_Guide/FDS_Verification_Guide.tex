@@ -3880,4 +3880,56 @@ This appendix summarizes the accuracy of results from cases in the FDS verificat
 
 \IfFileExists{SCRIPT_FIGURES/verification_statistics.tex}{\input{SCRIPT_FIGURES/verification_statistics.tex}}{\typeout{Error: Missing file SCRIPT_FIGURES/verification_statistics.tex}}
 
+\newpage
+
+\appendix
+
+\chapter{Installation Testing}
+\label{info:installation_testing}
+
+The use of computer software for safety purposes is sometimes regulated under a software quality assurance (SQA) program by the Authority Having Jurisdiction.  For example, in the United States both the Department of Energy (DOE) via DOE G 414.1-4~\cite{DOE_G_414} and the Nuclear Regulatory Commission (NRC) via NUREG-1737~\cite{NUREG_1737} impose specific requirements on software used for certain safety purposes.  In addition to imposing general requirements on configuration management and verification and validation, SQA programs often impose an acceptance testing requirement.  For simulation software this involves test program in which the software is used to execute a number of sample cases with results compared to accepted values.  The purpose of this testing is to ensure that the software installation was successful and that no corruption of the software executable or libraries has occurred.  
+
+The acceptance test procedure is as follows:
+
+\begin{enumerate}
+\item Obtain and installed the version of FDS you will be running.  Note that this procedure will need to be repeated for each version of the FDS executable being used (i.e. if you will be running both serial and mpi versions, then the procedure will be done twice).
+\item Either checkout the entire FDS repository by following the link from the FDS-SMV webpage or go to the repository and download the files shown in Table~\ref{tbl:installation_test}.  The folder identified is a subfolder of the Verification folder.
+\item Execute each of the FDS input files listed in Table~\ref{tbl:installation_test}.
+\item Compare the results of each FDS output file shown in Table~\ref{tbl:installation_test} with the expected results in the corresponding expected results file.
+\item Verify that the expected results match the current results using the criteria shown in Appendix~\ref{info:verification_statistics}.
+\end{enumerate}
+
+\newpage
+\vspace{\baselineskip}
+\begin{sidewaystable}[p]
+\begin{center}
+\caption{FDS Installation Test Suite}
+\label{tbl:installation_test}
+\begin{tabular}{|l|l|l|l|}
+\hline
+Folder  & Input File & Output File & Expected Results File \\ \hline
+
+Controls         & activate\_vents.fds & activate\_vents\_ctrl.csv & activate\_vents.csv \\ \hline
+Pressure\_Effects & isentropic2.fds    & insentropic2\_devc.csv   & isentropic2.csv \\ \hline
+Energy\_Budget    & energy\_budget\_tmix.fds & energy\_budget\_tmix\_devc.csv & energy\_budget\_tmix.csv \\ \hline
+Energy\_Budget    & energy\_budget\_cold\_walls.fds & energy\_budget\_cold\_walls\_hrr.csv & energy\_budget\_cold\_walls.csv \\ \hline
+Fires            & spray\_burner.fds & spray\_burner\_devc.csv & spray\_burner.csv \\ \hline
+Heat\_Transfer    & heat\_conduction\_kc.fds & heat\_conduction\_kc\_devc.csv & heat\_conduction\_kc.csv \\ \hline
+HVAC             & ashrae7\_table.fds &ashrae7\_table\_devc.csv & ashrae7\_exp.csv \\ \hline
+Pressure\_Solver  & duct\_flow.fds & duct\_flow\_devc.csv & duct\_flow.csv \\ \hline
+Pyrolysis        & enthalpy.fds & enthalpy\_devc.csv & enthalpy.csv \\ \hline
+Pyrolysis        & shrink\_swell.fds & shrink\_swell.csv & shrink\_swell.csv \\ \hline
+Radiation        & radiation\_shield.fds & radiation\_shield\_devc.csv & radiation\_shield.csv \\ \hline
+Species          & \footnotesize reactionrate\_EDC\_1step\_CH4\_nonmix.csv & \footnotesize reactionrate\_EDC\_1step\_CH4\_nonmix\_devc.csv & \footnotesize reactionrate\_arrhenius\_2order\_1step.csv \\ \hline
+Species          & \footnotesize reactionrate\_arrhenius\_2order\_1step.csv & \footnotesize reactionrate\_arrhenius\_2order\_1step\_devc.csv & \footnotesize reactionrate\_arrhenius\_2order\_1step.csv \\ \hline
+Sprinklers\_and\_Sprays & water\_evaporation\_1.fds & water\_evaporation\_1\_devc.csv &  water\_evaporation\_1.csv \\ \hline
+Sprinklers\_and\_Sprays & particle\_drag\_U50\_N16.fds & particle\_drag\_U50\_N16.csv &  particle\_drag\_U50\_N16.csv \\ \hline
+
+\end{tabular}
+\end{center}
+\end{sidewaystable}
+
+
+\clearpage 
+
 \end{document}
