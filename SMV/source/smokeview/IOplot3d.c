@@ -857,10 +857,11 @@ void drawplot3d_texture(mesh *meshi){
 /* ------------------ drawplot3d_frame ------------------------ */
 
 void drawplot3d_frame(void){
-  mesh *meshi;
   int i;
 
   for(i=0;i<nmeshes;i++){
+    mesh *meshi;
+
     meshi=meshinfo+i;
     if(meshi->plot3dfilenum==-1)continue;
     if(plot3dinfo[meshi->plot3dfilenum].display==0)continue;
@@ -1293,13 +1294,13 @@ void updatesurface(void){
   isosurface *currentsurfptr,*currentsurf2ptr;
   float *qdata;
   char *iblank_cell;
-  mesh *meshi;
   int plot3dsize;
   int i;
 
   if(unload_qdata==1)return;
   for(i=0;i<nmeshes;i++){
     float dlevel=-1.0;
+    mesh *meshi;
     
     meshi = meshinfo+i;
     if(meshi->plot3dfilenum==-1)continue;

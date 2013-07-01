@@ -279,6 +279,7 @@ void update_unit_defs(void){
 
 void getunitinfo(const char *unitlabel, int *unitclass, int *unittype){
   int i;
+
   *unitclass=-1;
   *unittype=-1;
   for(i=0;i<nunitclasses;i++){

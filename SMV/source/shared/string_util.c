@@ -339,6 +339,7 @@ char *STRSTR(char *string, const char *key){
 
 void scalestring(const char *stringfrom, char *stringto, const float *scale, float range){
   float val;
+
   sscanf(stringfrom,"%f",&val);
   val = scale[0]*val+scale[1];
   num2string(stringto,val,scale[0]*range);
@@ -348,6 +349,7 @@ void scalestring(const char *stringfrom, char *stringto, const float *scale, flo
 
 void scalefloat2string(float floatfrom, char *stringto, const float *scale, float range){
   float val;
+
   val = scale[0]*floatfrom+scale[1];
   num2string(stringto,val,scale[0]*range);
 }
@@ -706,6 +708,7 @@ int match_wild(char *pTameText, char *pWildText){
 
 void remove_comment(char *buffer){
   char *comment;
+
   comment = strstr(buffer,"//");
   if(comment!=NULL)comment[0]=0;
   return;

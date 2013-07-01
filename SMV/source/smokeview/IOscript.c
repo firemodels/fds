@@ -803,8 +803,6 @@ void script_loadvolsmoke(scriptdata *scripti){
 
 void script_loadvolsmokeframe(scriptdata *scripti, int flag){
   int framenum,index;
-  volrenderdata *vr;
-  mesh *meshi;
   int first=1;
   int i;
 
@@ -813,6 +811,9 @@ void script_loadvolsmokeframe(scriptdata *scripti, int flag){
   if(index>nmeshes-1)index=-1;
   for(i=0;i<nmeshes;i++){
     if(index==i||index<0){
+      mesh *meshi;
+      volrenderdata *vr;
+
       meshi = meshinfo + i;
       vr = &meshi->volrenderinfo;
       read_volsmoke_frame(vr,framenum,&first);

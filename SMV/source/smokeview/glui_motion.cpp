@@ -641,7 +641,6 @@ extern "C" void update_translate(void){
 /* ------------------ update_rotation_index ------------------------ */
 
 void update_rotation_index(int val){
-  mesh *meshi;
   float *az_elev;
   int *rotation_index;
 
@@ -650,6 +649,8 @@ void update_rotation_index(int val){
   *rotation_index=val;
   if(*rotation_index==rotation_index_OLD)return;
   if(*rotation_index>=0&&*rotation_index<nmeshes){
+    mesh *meshi;
+
     meshi = meshinfo + *rotation_index;
     camera_current->xcen=meshi->xcen;
     camera_current->ycen=meshi->ycen;

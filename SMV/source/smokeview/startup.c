@@ -41,7 +41,6 @@ void glui_3dsmoke_setup(int main_window);
 /* ------------------ Init ------------------------ */
 
 void Init(void){
-
   int i;
 
   FREEMEMORY(plotiso);

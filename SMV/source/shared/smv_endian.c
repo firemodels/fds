@@ -13,12 +13,13 @@ char smv_endian_revision[]="$Revision$";
 int getendian(void){
   short val;
   char *cval;
+
   val=1;
   cval = (char *)&val+1;
   return (int)(*cval);
 }
 
-/* ------------------ endian_switch ------------------------ */
+/* ------------------ float_switch ------------------------ */
 
 float float_switch(float val){ 
   float *val2ptr;
@@ -37,6 +38,8 @@ float float_switch(float val){
 
 }
 
+/* ------------------ int_switch ------------------------ */
+
 int int_switch(int val){ 
   int *val2ptr;
   unsigned char *buffer;
@@ -54,13 +57,15 @@ int int_switch(int val){
 
 }
 
+/* ------------------ endian_switch ------------------------ */
+
 void endian_switch(void *val, int nval){
-  unsigned char *ca, *cb, *cc, *cd;
-  unsigned char c1, c2, c3, c4;
   int i;
 
   for(i=0;i<nval;i++){
     int ii;
+    unsigned char *ca, *cb, *cc, *cd;
+    unsigned char c1, c2, c3, c4;
 
     ii=4*i;
     ca=(unsigned char *)val+ii;

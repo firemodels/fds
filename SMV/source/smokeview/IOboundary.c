@@ -1252,10 +1252,12 @@ void nodein_extvent(int ipatch, int *patchblank, const mesh *meshi,
 /* ------------------ ispatchtype ------------------------ */
 
 int ispatchtype(int type){
-  int n,i;
-  mesh *meshi;
+  int i;
 
   for(i=0;i<nmeshes;i++){
+    mesh *meshi;
+    int n;
+
     meshi=meshinfo+i;
     for(n=0;n<meshi->npatches;n++){
       if(meshi->patchtype[n]==type)return 1;

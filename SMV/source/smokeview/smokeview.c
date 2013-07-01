@@ -28,8 +28,10 @@ char smokeview_revision[]="$Revision$";
 
 void _Sniff_Errors(char *whereat){
   int error;
-  char *glu_error;
+
   while((error=glGetError())!=GL_NO_ERROR){
+    char *glu_error;
+
     glu_error=(char *)gluErrorString((unsigned int)error);
     fprintf(stderr,"*** Error: OpenGL error:%s, where:%s %i\n",
       glu_error,whereat,snifferrornumber);
@@ -40,10 +42,11 @@ void _Sniff_Errors(char *whereat){
 /* ------------------ updateLights ------------------------ */
 
 void updateLights(int pos){
-  GLfloat ambientlight2[4], diffuselight2[4];
   int i;
 
   if(visLIGHT0==1&&visLIGHT1==1){
+    GLfloat ambientlight2[4], diffuselight2[4];
+
     for(i=0;i<3;i++){
       ambientlight2[i]=ambientlight[i]/2.0;
       diffuselight2[i]=diffuselight[i]/2.0;
@@ -163,11 +166,11 @@ void camera2quat(camera *ca, float *quat, float *rotation){
 /* ------------------ ResetView ------------------------ */
 
 void ResetView(int option){
-  int rotation_type_save;
-  int projection_type_save;
-
   in_external=0;
   switch (option){
+    int rotation_type_save;
+    int projection_type_save;
+
   case RESTORE_EXTERIOR_VIEW_ZOOM:
     break;
   case RESTORE_EXTERIOR_VIEW:
@@ -247,7 +250,6 @@ void parse_commandline(int argc, char **argv){
   zonescale=a_zonescale;
 
   if(argc==1){
-  //  usage(argv);
     exit(1);
   }
   if(strncmp(argv[1],"-ini",3)==0){

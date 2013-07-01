@@ -38,12 +38,8 @@ int parse_lang(char *file, trdata **trinfoptr, int *ntrinfoptr){
              the trinfo data structure
   */
   FILE *stream;
-  char buffer[1000];
-  char *buf;
-  char *key, *value;
   trdata *trinfo_local;
   int ntrinfo_local;
-  int doit;
 
   ntrinfo_local=*ntrinfoptr;
   trinfo_local=*trinfoptr;
@@ -66,6 +62,10 @@ int parse_lang(char *file, trdata **trinfoptr, int *ntrinfoptr){
   if(stream==NULL)return 0;
 
   while(!feof(stream)){
+    char buffer[1000];
+    char *buf;
+    char *key;
+
     if(fgets(buffer,1000,stream)==NULL)break;
     buf=trim_front(buffer);
     trim(buf);
@@ -82,8 +82,12 @@ int parse_lang(char *file, trdata **trinfoptr, int *ntrinfoptr){
   ntrinfo_local=0;
   rewind(stream);
   while(!feof(stream)){
+    char buffer[1000];
     trdata *tri;
     char *keybuf,*valbuf;
+    char *buf;
+    char *key, *value;
+    int doit;
 
     if(fgets(buffer,1000,stream)==NULL)break;
     buf=trim_front(buffer);
@@ -182,7 +186,6 @@ char *translate(char *string){
   /*! \fn char *translate(char *string)
       \brief return the translation of string, return string if translation not found
   */
-  char c;
   int i, len, nchars_before=0, nchars_after=0;
   unsigned int nchars_in=0;
   char *string_before, *string_in, *string_out, *string_after;
@@ -196,6 +199,7 @@ char *translate(char *string){
 
   for(i=0;i<len;i++){
     char C,D;
+    char c;
 
     c=string[i];
     C=toupper(c);
@@ -218,6 +222,8 @@ char *translate(char *string){
   // find trailing non-alpha characters
 
   for(i=len-1;i>=nchars_before;i--){
+    char c;
+
     c=string[i];
     if((c>='a'&&c<='z')||(c>='A'&&c<='Z')){
       nchars_after=len-1-i;

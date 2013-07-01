@@ -123,19 +123,15 @@ void drawtrees(void){
 /* ------------------ get_zcell ------------------------ */
 
 float get_zcell_val(mesh *meshi,float xval, float yval, float *zval_offset, int *loc){
-  terraindata *terri;
-  mesh *meshj;
-  int ival, jval;
-  float *xplt, *yplt;
-  int ibar, jbar;
-  float dx, dy;
-  int nxcell;
-  float *zcell,zval,zval_return;
   int imesh;
   int meshstart=-1;
 
   if(meshi==NULL)meshstart=0;
   for(imesh=meshstart;imesh<nmeshes;imesh++){
+    mesh *meshj;
+    float *xplt, *yplt;
+    int ibar, jbar;
+
     if(imesh==-1){
       meshj=meshi;
     }
@@ -148,6 +144,14 @@ float get_zcell_val(mesh *meshi,float xval, float yval, float *zval_offset, int 
     ibar = meshj->ibar;
     jbar = meshj->jbar;
     if(xplt[0]<=xval&&xval<=xplt[ibar]&&yplt[0]<=yval&&yval<=yplt[jbar]){
+      float dx, dy;
+      terraindata *terri;
+      int ival, jval;
+      int nxcell;
+      float zval;
+      float *zcell;
+      float zval_return;
+
       dx = xplt[1]-xplt[0];
       dy = yplt[1]-yplt[0];
       ival = (xval-xplt[0])/dx;
@@ -173,21 +177,16 @@ float get_zcell_val(mesh *meshi,float xval, float yval, float *zval_offset, int 
 /* ------------------ get_zcell_offset ------------------------ */
 
 float get_zcell_val_offset(mesh *meshi,float xval, float yval, int *loc){
-  terraindata *terri;
-  mesh *meshj;
-  int ival, jval;
-  float *xplt, *yplt;
-  int ibar, jbar;
-  float dx, dy;
-  int nxcell;
-  float *zcell,zval;
   int imesh;
-  float zvaloffset;
   int meshstart=-1;
 
   if(meshi==NULL)meshstart=0;
 
   for(imesh=meshstart;imesh<nmeshes;imesh++){
+    mesh *meshj;
+    float *xplt, *yplt;
+    int ibar, jbar;
+
     if(imesh==-1){
       meshj=meshi;
     }
@@ -205,6 +204,13 @@ float get_zcell_val_offset(mesh *meshi,float xval, float yval, int *loc){
     ibar = meshj->ibar;
     jbar = meshj->jbar;
     if(xplt[0]<=xval&&xval<=xplt[ibar]&&yplt[0]<=yval&&yval<=yplt[jbar]){
+      terraindata *terri;
+      int ival, jval;
+      float dx, dy;
+      int nxcell;
+      float *zcell,zval;
+      float zvaloffset;
+
       dx = xplt[1]-xplt[0];
       dy = yplt[1]-yplt[0];
       ival = (xval-xplt[0])/dx;
@@ -247,19 +253,17 @@ void update_terrain_colors(void){
 /* ------------------ initterrain_all ------------------------ */
 
 void initterrain_all(void){
-  float dx, dy;
-  float *znode, *znode_offset;
-  int nycell;
-  float znormal3[3];
   int imesh;
-  float denom;
-  unsigned char *uc_znormal;
   float zmin, zmax, dz;
 
   for(imesh=0;imesh<nmeshes;imesh++){
     mesh *meshi;
     terraindata *terri;
     int j;
+    float dx, dy;
+    float *znode, *znode_offset;
+    int nycell;
+    unsigned char *uc_znormal;
     
     meshi = meshinfo + imesh;
 
@@ -294,6 +298,8 @@ void initterrain_all(void){
         float dxa, dxb, dya, dyb;
         float dzdx, dzdy;
         float sum;
+        float znormal3[3];
+        float denom;
 
         xnode = terri->x[i];
 

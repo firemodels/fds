@@ -2711,14 +2711,8 @@ void updatevslicetypes(void){
 /* ------------------ update_slice_contours ------------------------ */
 
 void update_slice_contours(int slice_type_index, float line_min, float line_max, int nline_values){
-  int i,j;
-  int nx, ny, nz;
-  mesh *meshi;
-  int ibar, jbar, kbar;
-  float *xplt, *yplt, *zplt;
-  float constval;
+  int j;
   databounds *sb;
-  int slice_type_j;
   int contours_gen=0;
   float dval;
 
@@ -2730,6 +2724,13 @@ void update_slice_contours(int slice_type_index, float line_min, float line_max,
   sb = slicebounds + slice_type_index;
   for(j=0;j<nsliceinfo;j++){
     slicedata *sd;
+    mesh *meshi;
+    int nx, ny, nz;
+    int ibar, jbar, kbar;
+    float *xplt, *yplt, *zplt;
+    int slice_type_j;
+    float constval;
+    int i;
 
     sd = sliceinfo + j;
     if(sd->loaded==0)continue;

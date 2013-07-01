@@ -46,7 +46,6 @@ void drawtetra_outline(float *v1, float *v2, float *v3, float *v4, unsigned char
 void drawfilledtetra(float *v1, float *v2, float *v3, float *v4, unsigned char *rgbcolor){
   float diff1[3],diff2[3],cross[3];
 
-
   glBegin(GL_TRIANGLES);
   if(rgbcolor!=NULL)glColor3ubv(rgbcolor);
 
@@ -882,8 +881,6 @@ void getsmokedir(float *mm){
     meshj->dyz=meshj->dy*meshj->dy+meshj->dz*meshj->dz;
     meshj->dyz=sqrt(meshj->dyz)/2.0;
 
-
-
     meshj->dy/=meshj->dx;
     meshj->dz/=meshj->dx;
     meshj->dxy/=meshj->dx;
@@ -1408,19 +1405,19 @@ int makeiblank_carve(void){
 /* ------------------ makeiblank ------------------------ */
 
 int makeiblank(void){
-  blockagedata *bc;
-  int ijksize,i,j,k;
-  int ii,ig;
-  int test;
-  mesh *meshi;
-  int ibar,jbar,kbar;
-  int nx, ny, nxy;
-  float *fblank_cell=NULL;
-  char *iblank_node=NULL,*iblank_cell=NULL,*c_iblank_x=NULL,*c_iblank_y=NULL,*c_iblank_z=NULL;
+  int ig;
 
   PRINTF("  initializing blanking array\n");
   if(use_iblank==0)return 0;
   for(ig=0;ig<nmeshes;ig++){
+    mesh *meshi;
+    int nx, ny, nxy;
+    int ibar,jbar,kbar;
+    float *fblank_cell=NULL;
+    char *iblank_node=NULL,*iblank_cell=NULL,*c_iblank_x=NULL,*c_iblank_y=NULL,*c_iblank_z=NULL;
+    int ii,ijksize;
+    int i,j,k;
+
     meshi = meshinfo+ig;
 
     ibar = meshi->ibar;
@@ -1457,6 +1454,8 @@ int makeiblank(void){
     nxy = nx*ny;
 
     for(ii=0;ii<meshi->nbptrs;ii++){
+      blockagedata *bc;
+
       bc=meshi->blockageinfoptrs[ii];
       for(i=bc->ijk[IMIN];i<bc->ijk[IMAX];i++){
       for(j=bc->ijk[JMIN];j<bc->ijk[JMAX];j++){
@@ -1474,6 +1473,8 @@ int makeiblank(void){
     for(i=0;i<ibar+1;i++){
       for(j=0;j<jbar+1;j++){
         for(k=0;k<kbar+1;k++){
+          int test;
+
           test=0;
           if(i!=0&&j!=0&&k!=0)         test+=iblank_cell[IJKCELL(i-1,j-1,k-1)];
           if(i!=ibar&&j!=0&&k!=0)      test+=iblank_cell[IJKCELL(  i,j-1,k-1)];
