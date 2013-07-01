@@ -22,6 +22,17 @@
 #define DENORMALIZE_YY(y) (ybar0+(y)*(ybarORIG-ybar0))
 #define DENORMALIZE_ZZ(z) (zbar0+(z)*(zbarORIG-zbar0))
 
+#define DENORMALIZE_XYZ(XYZ_OUT,XYZ_IN)\
+(XYZ_OUT)[0] = DENORMALIZE_X((XYZ_IN)[0]);\
+(XYZ_OUT)[1] = DENORMALIZE_Y((XYZ_IN)[1]);\
+(XYZ_OUT)[2] = DENORMALIZE_Z((XYZ_IN)[2])
+
+#define NORMALIZE_XYZ(XYZ_OUT,XYZ_IN)\
+(XYZ_OUT)[0] = NORMALIZE_X((XYZ_IN)[0]);\
+(XYZ_OUT)[1] = NORMALIZE_Y((XYZ_IN)[1]);\
+(XYZ_OUT)[2] = NORMALIZE_Z((XYZ_IN)[2])
+
+
 #ifndef DOT2
 #define DOT2(x,y) (x[0]*y[0]+x[1]*y[1])
 #endif

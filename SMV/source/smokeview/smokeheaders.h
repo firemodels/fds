@@ -135,8 +135,6 @@ EXTERNCPP void init_device(devicedata *devicei, float *xyz, float *xyzn, int sta
 EXTERNCPP void init_device_plane(devicedata *devicei);
 EXTERNCPP void draw_devices_val(void);
 EXTERNCPP void getsmokesensors(void);
-EXTERNCPP void normalize_xyz(float *xyz_out, float *xyz_in);
-EXTERNCPP void denormalize_xyz(float *xyz_out, float *xyz_in);
 EXTERNCPP void add_new_tour(void);
 EXTERNCPP void cleanbuffer(char *buffer, char *buffer2);
 EXTERNCPP void start_script(void);

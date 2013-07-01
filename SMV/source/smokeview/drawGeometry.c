@@ -5632,8 +5632,8 @@ void drawticks(void){
       xyz2[0]=xyz[0]+dxyz[0];
       xyz2[1]=xyz[1]+dxyz[1];
       xyz2[2]=xyz[2]+dxyz[2];
-      normalize_xyz(xyz,xyz);
-      normalize_xyz(xyz2,xyz2);
+      NORMALIZE_XYZ(xyz,xyz);
+      NORMALIZE_XYZ(xyz2,xyz2);
       glVertex3fv(xyz);
       glVertex3fv(xyz2);
     }

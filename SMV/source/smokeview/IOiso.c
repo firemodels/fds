@@ -311,7 +311,7 @@ void readiso_orig(const char *file, int ifile, int flag, int *errorcode){
   highlight_mesh = blocknumber;
   
   factor = (SCALE2SMV(meshi->xyzmaxdiff))/65535.0;
-  normalize_xyz(offset,meshi->xyz_bar0);
+  NORMALIZE_XYZ(offset,meshi->xyz_bar0);
 
   if(iso_ambient_ini==NULL||n_iso_ambient_ini==0){
     iso_colors=iso_ambient;

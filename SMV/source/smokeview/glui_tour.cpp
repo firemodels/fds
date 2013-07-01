@@ -557,7 +557,7 @@ void TOUR_CB(int var){
       if(selected_tour-tourinfo==0)dirtycircletour=1;
       selected_tour->startup=0;
       aview = selected_frame->nodeval.aview;
-      normalize_xyz(aview,tour_view_xyz);
+      NORMALIZE_XYZ(aview,tour_view_xyz);
 
       adjustviewangle(selected_frame,&tour_az_path,&tour_elev_path);
       SPINNER_az_path->set_float_val(tour_az_path);
@@ -598,7 +598,7 @@ void TOUR_CB(int var){
         selected_frame->noncon_time=tour_ttt;
         selected_frame->disp_time=tour_ttt;
       }
-      normalize_xyz(eye,tour_xyz);
+      NORMALIZE_XYZ(eye,tour_xyz);
       if(viewtype==0){
         tour_az_path = SPINNER_az_path->get_float_val();
       }
@@ -610,7 +610,7 @@ void TOUR_CB(int var){
       selected_frame->continuity=tour_continuity;
       selected_frame->viewtype=viewtype;
       selected_frame->nodeval.zoom=tour_zoom;
-      normalize_xyz(aview,tour_view_xyz);
+      NORMALIZE_XYZ(aview,tour_view_xyz);
       createtourpaths();
       selected_frame->selected=1;
       if(viewtype==1){
@@ -722,11 +722,11 @@ void TOUR_CB(int var){
         else{
           viewtype=1;
           if(thiskey->viewtype==1){
-            denormalize_xyz(key_view,thiskey->nodeval.aview);
+            DENORMALIZE_XYZ(key_view,thiskey->nodeval.aview);
             key_elev_path = thiskey->nodeval.elev_path;
           }
           if(thiskey->viewtype==0&&nextkey->viewtype==1){
-            denormalize_xyz(key_view,nextkey->nodeval.aview);
+            DENORMALIZE_XYZ(key_view,nextkey->nodeval.aview);
             key_elev_path = nextkey->nodeval.elev_path;
           }
         }

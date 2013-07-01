@@ -956,9 +956,9 @@ keyframe *add_frame(keyframe *framei, float time_local, float *eye, float key_az
   frame->az_path=key_az_path;
   frame->nodeval.elev_path=elev_path;
   frame->bank=bank;
-  normalize_xyz(feye,eye);
+  NORMALIZE_XYZ(feye,eye);
   feye[3]=key_az_path;
-  normalize_xyz(faview,view);
+  NORMALIZE_XYZ(faview,view);
 
   frame->noncon_time=time_local;
   frame->disp_time=time_local;
