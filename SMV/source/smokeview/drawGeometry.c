@@ -1047,10 +1047,7 @@ void DrawCircVents(int option){
 void UpdateIndexColors(void){
   int i;
   int colorindex;
-  blockagedata *bc;
-  mesh *meshi;
   int j;
-  ventdata *vi;
   float s_color[4];
   surfdata *surfi;
 
@@ -1070,8 +1067,12 @@ void UpdateIndexColors(void){
   }
 
   for(i=0;i<nmeshes;i++){
+    mesh *meshi;
+
     meshi = meshinfo + i;
     for(j=0;j<meshi->nbptrs;j++){
+      blockagedata *bc;
+
       bc = meshi->blockageinfoptrs[j];
       if(bc->usecolorindex==1){
         colorindex=bc->colorindex;
@@ -1081,6 +1082,8 @@ void UpdateIndexColors(void){
       }
     }
     for(j=0;j<meshi->nvents;j++){
+      ventdata *vi;
+
       vi = meshi->ventinfo + j;
       if(vi->usecolorindex==1){
         colorindex=vi->colorindex;
@@ -2424,35 +2427,44 @@ void drawcad2ageom(const cadgeom *cd){
 /* ------------------ updatefaces ------------------------ */
 
 void update_faces(void){
-  int i,j;
-  mesh *meshi;
-  blockagedata *bc;
-  facedata *faceptr;
-  ventdata *vi;
+  int i;
+
   allocate_faces();
   updatefaces=0;
   have_vents_int=0;
   for(i=0;i<nmeshes;i++){
+    mesh *meshi;
+    facedata *faceptr;
+    int j;
+
     meshi = meshinfo + i;
     faceptr = meshi->faceinfo;
     for(j=0;j<meshi->nbptrs;j++){
+      blockagedata *bc;
+
       bc = meshi->blockageinfoptrs[j];
       if(visTerrainType!=TERRAIN_HIDDEN&&bc->is_wuiblock==1)continue;
       obst_or_vent2faces(meshi,bc,NULL,faceptr,BLOCK_face);
       faceptr += 6;
     }
     for(j=0;j<meshi->nvents;j++){
+      ventdata *vi;
+
       vi = meshi->ventinfo+j;
       obst_or_vent2faces(meshi,NULL,vi,faceptr,VENT_face);
       faceptr++;
     }
     for(j=meshi->nvents;j<meshi->nvents+6;j++){
+      ventdata *vi;
+
       vi = meshi->ventinfo+j;
       obst_or_vent2faces(meshi,NULL,vi,faceptr,OUTLINE_FRAME_face);
       ASSERT(faceptr->color!=NULL);
       faceptr++;
     }
     for(j=meshi->nvents+6;j<meshi->nvents+12;j++){
+      ventdata *vi;
+
       vi = meshi->ventinfo+j;
       obst_or_vent2faces(meshi,NULL,vi,faceptr,SHADED_FRAME_face);
       ASSERT(faceptr->color!=NULL);
@@ -3174,21 +3186,8 @@ int comparecolorfaces( const void *arg1, const void *arg2 ){
 void UpdateFacelists(void){
   int n_textures, n_outlines;
   int n_normals_single, n_normals_double, n_transparent_double;
-  int i,j,k;
-  mesh *meshi;
-  facedata *facej;
-  int local_showpatch, loadpatch;
-  patchdata *patchi;
-  int patchfilenum;
-  int patch_dir[6]={2,1,3,0,4,5};
-  int vent_offset, outline_offset, exteriorsurface_offset;
-  ventdata *vi;
-  int drawing_smooth;
-  int drawing_transparent, drawing_blockage_transparent, drawing_vent_transparent;
-
-//     visBlocks (visBLOCKNormal, visBLOCKAsInput )
-//     visSmoothAsNormal
-//     visTransparentBlockage
+  int i;
+  int drawing_smooth, drawing_transparent, drawing_blockage_transparent, drawing_vent_transparent;
 
   get_drawing_parms(&drawing_smooth, &drawing_transparent, &drawing_blockage_transparent, &drawing_vent_transparent);
 
@@ -3204,9 +3203,17 @@ void UpdateFacelists(void){
     glutPostRedisplay();
   }
   for(i=0;i<nmeshes;i++){
-    meshi = meshinfo + i;
+    mesh *meshi;
+    int patchfilenum;
+    int j;
+    patchdata *patchi;
+    int loadpatch, local_showpatch;
+    int vent_offset, outline_offset, exteriorsurface_offset;
 
+    meshi = meshinfo + i;
     for(j=0;j<meshi->nfaces;j++){
+      facedata *facej;
+
       facej = meshi->faceinfo + j;
       facej->patchpresent=0;
       facej->cullport=NULL;
@@ -3225,13 +3232,19 @@ void UpdateFacelists(void){
     }
 
     if(local_showpatch==1&&loadpatch==1){
+      int j;
+
       for(j=0;j<meshi->nbptrs;j++){
         blockagedata *bc;
+        facedata *facej;
+        int k;
 
         bc=meshi->blockageinfoptrs[j];
         if(bc->prop!=NULL&&bc->prop->blockvis==0)continue;
         facej = meshi->faceinfo + 6*j;
         for(k=0;k<6;k++){
+          int patch_dir[6]={2,1,3,0,4,5};
+
           facej->patchpresent=1-bc->patchvis[patch_dir[k]];
           facej++;
         }
@@ -3244,7 +3257,15 @@ void UpdateFacelists(void){
     n_textures=0;
     n_outlines=0;
 
+    vent_offset = 6*meshi->nbptrs;
+    outline_offset = vent_offset + meshi->nvents;
+    exteriorsurface_offset = outline_offset + 6;
+
     for(j=0;j<meshi->nfaces;j++){
+      facedata *facej;
+      ventdata *vi;
+
+      vi = meshi->ventinfo+j-vent_offset;
       facej = meshi->faceinfo + j;
 
       if(showonly_hiddenfaces==0&&facej->hidden==1)continue;
@@ -3253,9 +3274,6 @@ void UpdateFacelists(void){
       if(facej->bc!=NULL&&facej->bc->prop!=NULL&&facej->bc->prop->blockvis==0)continue;
       if(clip_face(&clipinfo,facej)==1)continue;
 
-      vent_offset = 6*meshi->nbptrs;
-      outline_offset = vent_offset + meshi->nvents;
-      exteriorsurface_offset = outline_offset + 6;
       if(showedit_dialog==1&&j<vent_offset){
         if(facej->show_bothsides==0)meshi->face_normals_single[n_normals_single++]=facej;
         if(facej->show_bothsides==1)meshi->face_normals_double[n_normals_double++]=facej;
@@ -3268,7 +3286,6 @@ void UpdateFacelists(void){
         continue;
       }
       if(j>=vent_offset&&j<vent_offset+meshi->nvents){
-        vi = meshi->ventinfo+j-vent_offset;
         if(visOpenVents==0&&vi->isOpenvent==1)continue;
         if(visDummyVents==0&&vi->dummy==1)continue;
         if(visOtherVents==0&&vi->isOpenvent==0&&vi->dummy==0)continue;
@@ -3513,20 +3530,25 @@ void UpdateFacelists(void){
 /* ------------------ drawselect_faces ------------------------ */
 
 void drawselect_faces(){
-  int i,j,k;
-  mesh *meshi;
-  float *vertices;
+  int i;
   int color_index=0;
-  unsigned char r, g, b;
-  int sides[]={DOWN_Y,UP_X,UP_Y,DOWN_X,DOWN_Z,UP_Z};
-  facedata *facek;
 
   glDisable(GL_LIGHTING);
   glBegin(GL_QUADS);
   for(i=0;i<nmeshes;i++){
+    int j;
+    mesh *meshi;
+
     meshi=meshinfo + i;
     for(j=0;j<meshi->nbptrs;j++){
+      int k;
+
       for(k=0;k<6;k++){
+        unsigned char r, g, b;
+        facedata *facek;
+        float *vertices;
+        int sides[]={DOWN_Y,UP_X,UP_Y,DOWN_X,DOWN_Z,UP_Z};
+
         facek = meshi->faceinfo + 6*j + sides[k];
 
         vertices = facek->approx_vertex_coords;
@@ -3554,6 +3576,8 @@ void drawselect_faces(){
 #define DRAWFACE(DEFfacetest,DEFeditcolor)    \
         float *facepos;\
         culldata *cullport;\
+        facedata *facei;\
+        float *vertices;\
         facei = face_START[i];\
         cullport=facei->cullport;\
         if(cullport!=NULL&&cullport->vis==0)continue;\
@@ -3595,11 +3619,6 @@ void drawselect_faces(){
 /* ------------------ drawfaces ------------------------ */
 
 void draw_faces(){
-  int i,j;
-  mesh *meshi;
-  facedata *facei;
-  float *vertices,*tvertices;
-  texture *texti;
   float *new_color,*old_color=NULL;
   int **showtimelist_handle, *showtimelist;
   float up_color[4]={0.9,0.9,0.9,1.0};
@@ -3611,6 +3630,8 @@ void draw_faces(){
 #endif
 
   if(nface_normals_single>0){
+    int j;
+
     glEnable(GL_LIGHTING);
     glMaterialfv(GL_FRONT_AND_BACK,GL_SHININESS,&block_shininess);
     glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,block_ambient2);
@@ -3618,6 +3639,9 @@ void draw_faces(){
     glBegin(GL_TRIANGLES);
     for(j=0;j<nmeshes;j++){
       facedata **face_START;
+      mesh *meshi;
+      int i;
+
       meshi=meshinfo + j;
       if(meshi->blockvis==0)continue;
 
@@ -3677,6 +3701,8 @@ void draw_faces(){
   PRINTF("faces=%i, faces drawn=%i, color switches=%i\n",nface_normals_single,faces_drawn,color_swaps);
 #endif  
   if(nface_normals_double>0){
+    int j;
+
     glEnable(GL_LIGHTING);
     glMaterialfv(GL_FRONT_AND_BACK,GL_SHININESS,&block_shininess);
     glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,block_ambient2);
@@ -3684,8 +3710,14 @@ void draw_faces(){
     if(cullfaces==1)glDisable(GL_CULL_FACE);
     glBegin(GL_QUADS);
     for(j=0;j<nmeshes;j++){
+      mesh *meshi;
+      int i;
+
       meshi=meshinfo + j;
       for(i=0;i<meshi->nface_normals_double;i++){
+        facedata *facei;
+        float *vertices;
+
         facei = meshi->face_normals_double[i];
         if(blocklocation==BLOCKlocation_grid){
           vertices = facei->approx_vertex_coords;
@@ -3740,14 +3772,22 @@ void draw_faces(){
     glDisable(GL_LIGHTING);
   }
   if(nface_outlines>0){
+    int j;
+
     glDisable(GL_LIGHTING);
     antialias(1);
     glLineWidth(linewidth);
     glBegin(GL_LINES);
     for(j=0;j<nmeshes;j++){
+      mesh *meshi;
+      int i;
+
       meshi = meshinfo + j;
       if(meshi->blockvis==0)continue;
       for(i=0;i<meshi->nface_outlines;i++){
+        facedata *facei;
+        float *vertices;
+
         facei = meshi->face_outlines[i];
         showtimelist_handle = facei->showtimelist_handle;
         showtimelist = *showtimelist_handle;
@@ -3790,13 +3830,23 @@ void draw_faces(){
     antialias(0);
   }
   if(nface_textures>0){
+    int j;
+
     glEnable(GL_LIGHTING);
     glTexEnvf(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_REPLACE);
     glEnable(GL_TEXTURE_2D);
     for(j=0;j<nmeshes;j++){
+      mesh *meshi;
+      int i;
+
       meshi = meshinfo + j;
       if(meshi->blockvis==0)continue;
       for(i=0;i<meshi->nface_textures;i++){
+        facedata *facei;
+        float *tvertices;
+        float *vertices;
+        texture *texti;
+
         facei=meshi->face_textures[i];
         showtimelist_handle = facei->showtimelist_handle;
         showtimelist = *showtimelist_handle;
@@ -3857,11 +3907,11 @@ int comparetransparentfaces( const void *arg1, const void *arg2 ){
 
 void Sort_Transparent_Faces(float *mm){
   int i;
-  float *xyzface;
-  float xyzeye[3];
 
   for(i=0;i<nface_transparent;i++){
     facedata *facei;
+    float *xyzface;
+    float xyzeye[3];
 
     facei = face_transparent[i];
     xyzface = facei->approx_center_coord;
@@ -3881,10 +3931,6 @@ void Sort_Transparent_Faces(float *mm){
 /* ------------------ draw_transparent_faces ------------------------ */
 
 void draw_transparent_faces(){
-  int i,j;
-  facedata *facei;
-  mesh *meshi;
-  float *vertices;
   float old_color[4]={(float)-1.0,(float)-1.0,(float)-1.0,(float)-1.0};
   float *new_color;
   int **showtimelist_handle, *showtimelist;
@@ -3902,12 +3948,17 @@ void draw_transparent_faces(){
   if(drawing_transparent==1)transparenton();
 
   if(nface_transparent>0){
+    int i;
+
     glEnable(GL_LIGHTING);
     glMaterialfv(GL_FRONT_AND_BACK,GL_SHININESS,&block_shininess);
     glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,block_ambient2);
     glEnable(GL_COLOR_MATERIAL);
     glBegin(GL_QUADS);
     for(i=0;i<nface_transparent;i++){
+      facedata *facei;
+      float *vertices;
+
       facei = face_transparent[i];
       if(blocklocation==BLOCKlocation_grid){
         vertices = facei->approx_vertex_coords;
@@ -3971,6 +4022,8 @@ void draw_transparent_faces(){
   }
 
   if(nface_transparent_double>0){
+    int j;
+
     glEnable(GL_LIGHTING);
     glMaterialfv(GL_FRONT_AND_BACK,GL_SHININESS,&block_shininess);
     glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,block_ambient2);
@@ -3978,8 +4031,14 @@ void draw_transparent_faces(){
     if(cullfaces==1)glDisable(GL_CULL_FACE);
     glBegin(GL_QUADS);
     for(j=0;j<nmeshes;j++){
+      mesh *meshi;
+      int i;
+
       meshi=meshinfo + j;
       for(i=0;i<meshi->nface_transparent_double;i++){
+        facedata *facei;
+        float *vertices;
+
         facei = meshi->face_transparent_double[i];
         if(blocklocation==BLOCKlocation_grid){
           vertices = facei->approx_vertex_coords;
@@ -4068,12 +4127,12 @@ void UpdateHiddenFaces(){
 
 void allocate_faces(){
   int i;
-  mesh *meshi;
   int ntotal2=0;
   int abortflag=0;
 
   FREEMEMORY(face_transparent);
   for(i=0;i<nmeshes;i++){
+    mesh *meshi;
     int ntotal;
 
     meshi = meshinfo + i;
@@ -4122,6 +4181,7 @@ void allocate_faces(){
     ntotal2=0;
     for(i=0;i<nmeshes;i++){
       int ntotal;
+      mesh *meshi;
 
       meshi = meshinfo + i;
  
@@ -4175,40 +4235,40 @@ int blockcompare( const void *arg1, const void *arg2 ){
 /* ------------------ update_selectblocks ------------------------ */
 
 void update_selectblocks(void){
-  mesh *meshi;
-  blockagedata *bc;
-  int i,j;
+  int i;
   int ntotal=0;
   int local_count=0;
 
   for(i=0;i<nmeshes;i++){
+    mesh *meshi;
+
     meshi = meshinfo + i;
     ntotal += meshi->nbptrs;
   }
   if(ntotal==0)return;
   FREEMEMORY(selectblockinfo);
   FREEMEMORY(sortedblocklist);
-//  FREEMEMORY(changed_idlist);
 
   NewMemory((void **)&selectblockinfo,sizeof(blockagedata *)*ntotal);
   NewMemory((void **)&sortedblocklist,sizeof(int)*ntotal);
- // NewMemory((void **)&changed_idlist,sizeof(int)*(ntotal+1));
 
   for(i=0;i<ntotal;i++){
     sortedblocklist[i]=i;
- //   changed_idlist[i]=0;
   }
   for(i=0;i<nmeshes;i++){
+    mesh *meshi;
+    int j;
+
     meshi = meshinfo + i;
     for(j=0;j<meshi->nbptrs;j++){
+      blockagedata *bc;
+
       bc = meshi->blockageinfoptrs[j];
       selectblockinfo[local_count++]=bc;
     }
   }
   qsort(sortedblocklist,(size_t)ntotal,sizeof(int),blockcompare);
   nselectblocks=ntotal;
- // nchanged_idlist=ntotal;
-
 }
 
 
@@ -4218,16 +4278,15 @@ void update_selectfaces(void){
 
   /* store info about faces that could be selected */
 
-  int i,j,k;
-  mesh *meshi;
-  facedata *facek;
+  int i;
   selectdata *sd;
-  int sides[]={DOWN_Y,UP_X,UP_Y,DOWN_X,DOWN_Z,UP_Z};
   
   FREEMEMORY(selectfaceinfo);
 
   ntotalfaces=0;
   for(i=0;i<nmeshes;i++){
+    mesh *meshi;
+
     meshi=meshinfo + i;
     ntotalfaces += 6*meshi->nbptrs;
   }
@@ -4244,9 +4303,17 @@ void update_selectfaces(void){
   ntotalfaces=0;
   sd = selectfaceinfo;
   for(i=0;i<nmeshes;i++){
+    mesh *meshi;
+    int j;
+
     meshi=meshinfo + i;
     for(j=0;j<meshi->nbptrs;j++){
+      int k;
+
       for(k=0;k<6;k++){
+        facedata *facek;
+        int sides[]={DOWN_Y,UP_X,UP_Y,DOWN_X,DOWN_Z,UP_Z};
+
         facek = meshi->faceinfo + 6*j + sides[k];
         facek->blockageindex=j;
         facek->meshindex=i;
@@ -4267,9 +4334,6 @@ void update_selectfaces(void){
 
 void update_smooth_blockages(void){
   int i, blocktotal;
-  mesh *meshi;
-  smoothblockage *sb;
-  int j;
 
   blocktotal=0;
 
@@ -4301,15 +4365,22 @@ void update_smooth_blockages(void){
   }
 
   for(i=0;i<nmeshes;i++){
+    mesh *meshi;
+
     meshi = meshinfo + i;
     blocktotal += meshi->nbptrs;
   }
   if(blocktotal>0){
     PRINTF("Initializing smooth blockage data - ");
     for(i=0;i<nmeshes;i++){
+      mesh *meshi;
+      int j;
+
       meshi=meshinfo+i;
 
       for(j=0;j<meshi->nsmoothblockages_list;j++){
+        smoothblockage *sb;
+
         if(read_smoothobst==1){
           PRINTF("Reading smooth blockages %i of %i in mesh %i\n",j+1,meshi->nsmoothblockages_list,i+1);
         }
@@ -4366,14 +4437,16 @@ int isblockagevisible(blockagedata *bc, float local_time){
 /* ------------------ getsmoothblockparams ------------------------ */
 
 void getsmoothblockparms(mesh *meshi, smoothblockage *sb){
-  int i,j;
-  blockagedata *bc,*bc2;
+  int i;
   int nsmoothcolors=0;
   int fail;
   
   /* number of unique smooth block colors */
 
   for(i=0;i<meshi->nbptrs;i++){
+    int j;
+    blockagedata *bc;
+
     bc = meshi->blockageinfoptrs[i];
     if(bc->type!=BLOCK_smooth||bc->del==1)continue;
     if(isblockagevisible(bc,sb->time)!=1){
@@ -4381,6 +4454,8 @@ void getsmoothblockparms(mesh *meshi, smoothblockage *sb){
     }
     fail=0;
     for(j=0;j<i;j++){
+      blockagedata *bc2;
+
       bc2=meshi->blockageinfoptrs[j];
       if(bc2->type!=BLOCK_smooth)continue;
       if(bc2->del==1)continue;
@@ -4403,8 +4478,6 @@ void getsmoothblockparms(mesh *meshi, smoothblockage *sb){
 
   FREEMEMORY(sb->smoothblockagecolors);
   FREEMEMORY(sb->smoothblockagesurfaces);
-//  FREEMEMORY(meshi->smoothblockagecolors);
-//  FREEMEMORY(meshi->blockagesurfaces);
   if(nsmoothcolors>0){
     NewMemory((void **)&meshi->smoothblockagecolors,4*nsmoothcolors*sizeof(float));
     NewMemory((void **)&meshi->blockagesurfaces,nsmoothcolors*sizeof(isosurface *));
@@ -4422,11 +4495,16 @@ void getsmoothblockparms(mesh *meshi, smoothblockage *sb){
   /* smooth block colors */
 
   for(i=0;i<meshi->nbptrs;i++){
+    blockagedata *bc;
+    int j;
+
     bc = meshi->blockageinfoptrs[i];
     if(bc->type!=BLOCK_smooth||bc->del==1)continue;
     if(isblockagevisible(bc,sb->time)!=1)continue;
     fail=0;
     for(j=0;j<i;j++){
+      blockagedata *bc2;
+
       bc2=meshi->blockageinfoptrs[j];
       if(bc2->type!=BLOCK_smooth)continue;
       if(bc2->del==1)continue;
@@ -4539,7 +4617,6 @@ void WriteSmoothIsoSurface(isosurface *asurface){
 /* ------------------ MakeIsoBlockages ------------------------ */
 
 void MakeIsoBlockages(mesh *meshi, smoothblockage *sb){
-  blockagedata *bc;
   float *cellcopy,*cell=NULL,*node=NULL,*nodecopy;
   int ib,i,j,k,iblockcolor;
   int imin, imax, jmin, jmax, kmin, kmax;
@@ -4603,6 +4680,8 @@ void MakeIsoBlockages(mesh *meshi, smoothblockage *sb){
         *cellcopy++=0.0;
       }
       for(ib=0;ib<meshi->nbptrs;ib++){
+        blockagedata *bc;
+
         bc=meshi->blockageinfoptrs[ib];
         if(bc->type!=BLOCK_smooth||bc->del==1)continue;
         if(isblockagevisible(bc,sb->time)!=1)continue;
@@ -4724,7 +4803,6 @@ void MakeIsoBlockages(mesh *meshi, smoothblockage *sb){
 
 void MakeIsoBlockages2(mesh *meshi, smoothblockage *sb){
 //xxx experimental smooth blockage generation routine
-  blockagedata *bc;
   float *cell=NULL;
   int ib,i,j,k,iblockcolor;
   int imin, imax, jmin, jmax, kmin, kmax;
@@ -4791,6 +4869,8 @@ void MakeIsoBlockages2(mesh *meshi, smoothblockage *sb){
         cell[i]=0.0;
       }
       for(ib=0;ib<meshi->nbptrs;ib++){
+        blockagedata *bc;
+
         bc=meshi->blockageinfoptrs[ib];
         if(bc->type!=BLOCK_smooth||bc->del==1)continue;
         if(isblockagevisible(bc,sb->time)!=1)continue;
@@ -5646,9 +5726,8 @@ void drawticks(void){
 
 void drawBlockages(int mode, int trans_flag){
 
-  mesh *meshi;
   int smoothnorms;
-  int i,j;
+  int i;
   cadgeom *cd;
   int drawing_smooth, drawing_transparent, drawing_blockage_transparent, drawing_vent_transparent;
 
@@ -5657,8 +5736,10 @@ void drawBlockages(int mode, int trans_flag){
   if(drawing_smooth==1&&showedit_dialog==0){
     if(clip_mode!=CLIP_OFF)glDisable(GL_CULL_FACE);
     for(i=0;i<nmeshes;i++){
-      meshi = meshinfo + i;
+      mesh *meshi;
+      int j;
 
+      meshi = meshinfo + i;
       for(j=0;j<meshi->nsmoothblockagecolors;j++){
         isosurface *bsurface;
         smoothnorms=1;
@@ -5815,11 +5896,6 @@ void get_drawing_parms(int *drawing_smooth, int *drawing_transparent, int *drawi
 /* ------------------ drawfacesBAK ------------------------ */
 
 void draw_facesOLD(){
-  int i,j;
-  mesh *meshi;
-  facedata *facei;
-  float *vertices,*tvertices;
-  texture *texti;
   float *new_color,*old_color=NULL;
   int **showtimelist_handle, *showtimelist;
   float up_color[4]={0.9,0.9,0.9,1.0};
@@ -5829,7 +5905,10 @@ void draw_facesOLD(){
   int color_swaps=0;
   int faces_drawn=0;
 #endif
+
   if(nface_normals_single>0){
+    int j;
+
     glEnable(GL_CULL_FACE);
     glEnable(GL_LIGHTING);
     glMaterialfv(GL_FRONT_AND_BACK,GL_SHININESS,&block_shininess);
@@ -5837,9 +5916,15 @@ void draw_facesOLD(){
     glEnable(GL_COLOR_MATERIAL);
     glBegin(GL_TRIANGLES);
     for(j=0;j<nmeshes;j++){
+      mesh *meshi;
+      int i;
+
       meshi=meshinfo + j;
       if(meshi->blockvis==0)continue;
       for(i=0;i<meshi->nface_normals_single;i++){
+        facedata *facei;
+        float *vertices;
+
         facei = meshi->face_normals_single[i];
         if(blocklocation==BLOCKlocation_grid){
           vertices = facei->approx_vertex_coords;
@@ -5904,6 +5989,8 @@ void draw_facesOLD(){
   PRINTF("faces=%i, faces drawn=%i, color switches=%i\n",nface_normals_single,faces_drawn,color_swaps);
 #endif
   if(nface_normals_double>0){
+    int j;
+
     glEnable(GL_LIGHTING);
     glMaterialfv(GL_FRONT_AND_BACK,GL_SHININESS,&block_shininess);
     glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,block_ambient2);
@@ -5911,8 +5998,14 @@ void draw_facesOLD(){
     if(cullfaces==1)glDisable(GL_CULL_FACE);
     glBegin(GL_QUADS);
     for(j=0;j<nmeshes;j++){
+      mesh *meshi;
+      int i;
+
       meshi=meshinfo + j;
       for(i=0;i<meshi->nface_normals_double;i++){
+        facedata *facei;
+        float *vertices;
+
         facei = meshi->face_normals_double[i];
         if(blocklocation==BLOCKlocation_grid){
           vertices = facei->approx_vertex_coords;
@@ -5967,14 +6060,22 @@ void draw_facesOLD(){
     glDisable(GL_LIGHTING);
   }
   if(nface_outlines>0){
+    int j;
+
     glDisable(GL_LIGHTING);
     antialias(1);
     glLineWidth(linewidth);
     glBegin(GL_LINES);
     for(j=0;j<nmeshes;j++){
+      mesh *meshi;
+      int i;
+
       meshi = meshinfo + j;
       if(meshi->blockvis==0)continue;
       for(i=0;i<meshi->nface_outlines;i++){
+        facedata *facei;
+        float *vertices;
+
         facei = meshi->face_outlines[i];
         showtimelist_handle = facei->showtimelist_handle;
         showtimelist = *showtimelist_handle;
@@ -6020,13 +6121,23 @@ void draw_facesOLD(){
     antialias(0);
   }
   if(nface_textures>0){
+    int j;
+
     glEnable(GL_LIGHTING);
     glTexEnvf(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_REPLACE);
     glEnable(GL_TEXTURE_2D);
     for(j=0;j<nmeshes;j++){
+      mesh *meshi;
+      int i;
+
       meshi = meshinfo + j;
       if(meshi->blockvis==0)continue;
       for(i=0;i<meshi->nface_textures;i++){
+        facedata *facei;
+        float *tvertices;
+        float *vertices;
+        texture *texti;
+
         facei=meshi->face_textures[i];
         showtimelist_handle = facei->showtimelist_handle;
         showtimelist = *showtimelist_handle;
@@ -6316,22 +6427,18 @@ void remove_dup_blockages(void){
 void getobstlabels(const char *filein){
 
   FILE *stream_in;
-  char buffer[1000];
   int fdsobstcount=0;
-  int i,j;
-  char *obstlabel;
-  mesh *meshi;
-  blockagedata *bc;
-  int id;
-  size_t lenlabel;
   char **obstlabels=NULL;
   int nobstlabels=0;
+  int i;
 
   if(filein==NULL)return;
   stream_in = fopen(filein,"r");
   if(stream_in==NULL)return;
 
   while(!feof(stream_in)){
+    char buffer[1000];
+
     if(fgets(buffer,1000,stream_in)==NULL)break;
 
     if(STRSTR(buffer,"&OBST")==NULL)continue;
@@ -6347,6 +6454,10 @@ void getobstlabels(const char *filein){
   rewind(stream_in);
   fdsobstcount=0;
   while(!feof(stream_in)){
+    char buffer[1000];
+    char *obstlabel;
+    size_t lenlabel;
+
     if(fgets(buffer,1000,stream_in)==NULL)break;
 
     if(STRSTR(buffer,"&OBST")==NULL)continue;
@@ -6367,12 +6478,20 @@ void getobstlabels(const char *filein){
   fclose(stream_in);
 
   for(i=0;i<nmeshes;i++){
+    mesh *meshi;
+    int j;
+
     meshi = meshinfo + i;
     for(j=0;j<meshi->nbptrs;j++){
+      blockagedata *bc;
+      int id;
+
       bc = meshi->blockageinfoptrs[j];
       id = bc->blockage_id-1;
       if(id>=0&&id<nobstlabels){
         if(obstlabels[id]!=NULL){
+          size_t lenlabel;
+
           lenlabel=strlen(obstlabels[id]);
           ResizeMemory((void **)&bc->label,(unsigned int)(lenlabel+1));
           strcpy(bc->label,obstlabels[id]);
