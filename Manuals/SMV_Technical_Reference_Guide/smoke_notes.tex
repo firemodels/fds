@@ -9,17 +9,12 @@
 \section{Introduction}
 This \paper\ documents the physics and associated numerical
 algorithms used by Smokeview~\cite{Smokeview_Users_Guide} to
-visualize smoke and fire.  Smokeview is a companion to the Fire
-Dynamics Simulator (FDS)~\cite{FDS_Math_Guide} and
-CFAST~\cite{Jones:2009}, fire models which generate   simulation
-data that Smokeview uses to perform these visualizations. FDS is a
-computational fluid dynamics model of fire-driven fluid flow. FDS
-numerically solves a form of the Navier-Stokes equations
-appropriate for low-speed, thermally-driven flow with an emphasis
-on smoke and heat transport from fires.  CFAST is a zone fire
-model used to calculate the evolving distribution of smoke, fire
-gases and temperature throughout compartments of a constructed
-facility due to a fire.
+visualize smoke and fire.  Smoke color and opacity are visualized
+using quantitative physics based methods.  Flame color at present
+is visualized using an arbitrary user specified color palette
+where color is mapped to gas temperature. Future work involves
+mapping color to a blackbody temperature curve enabling a more
+quantitative choice of color for this application.
 
 Realistic visualization of fire calculation methods are important
 for applications where one wishes to observe qualitative effects
@@ -39,25 +34,27 @@ literature.~\cite{levoy:1988} This equation models how light is
 affected after interacting with smoke, a participating medium. In
 particular, Smokeview uses the RTE to account for extinction
 (absorption plus out-scattering) by the smoke and emission from
-the fire.  The RTE used by Smokeview to model smoke and fire
+the fire.
+
+The form of the RTE used by Smokeview to model smoke and fire
 appearance is identical to that used by FDS to model radiative
-heat transfer.  Smokeview and FDS use this equation in different
-ways, however.  FDS solves it at infrared wavelengths of light.
-Generally, Smokeview solves the RTE for visible wavelengths of
-light.  With the proper extinction coefficient, however, Smokeview
-can also view smoke at other wavelengths, simulating a thermal
-imager, for example. Smokeview solves the RTE assuming a gray gas
-environment.  This is the default solution method for FDS.  One
-other important difference is that Smokeview requires a solution
-at only one point at a time (any arbitrary point though), the
-observer's viewpoint, while FDS requires a radiation field, a
-solution at all points within the solution domain.  Even so, the
-solution of this integro-differential equation for visualization
-requires significant computation and memory  resources.
-Approximations are required in order to display smoke and fire at
-interactive frame rates.  The primary approximation is to take
-advantage of the low albedo character of smoke allowing one to
-either simplify or eliminate scattering terms in the RTE.
+heat transfer. Smokeview uses an extinction coefficient
+appropriate for visible light while FDS use one appropriate for
+infrared wavelengths of light.  With the proper extinction
+coefficient, however, Smokeview can also view smoke at other
+wavelengths, simulating a thermal imager, for example. Smokeview
+solves the RTE assuming a gray gas environment. This is the
+default solution method for FDS. One other important difference is
+that Smokeview requires a solution at only one point at a time
+(any arbitrary point though), the observer's viewpoint, while FDS
+requires a radiation field, a solution at all points within the
+solution domain.  Even so, the solution of this
+integro-differential equation for visualization requires
+significant computation and memory  resources. Approximations are
+required in order to display smoke and fire at interactive frame
+rates.  The primary approximation is to take advantage of the low
+albedo character of smoke allowing one to either simplify or
+eliminate scattering terms in the RTE.
 
 Two techniques discussed for visualizing smoke are slice rendered
 and volume rendered methods~\cite{levoy:1988,Engel:2006}.    These
