@@ -480,9 +480,9 @@ Namelist      & FDS 5 Parameter                     & Namelist     & FDS 6 Param
 A number of changes made in FDS 6 are aimed at improving the robustness and accuracy of the simulations. However, these improvements come at increased cost in both CPU time and memory usage. Some of this increased cost is offset by increasingly faster computers and improved parallel processing, but in most cases you will notice an increase in CPU time of approximately 50~\% over FDS~5. Listed below are suggested ways to decrease CPU time, but these options should be considered very carefully. The default parameter settings are designed to address a wide range of fire scenarios, but there are scenarios for which approximations used in past versions of FDS may still be appropriate. The best way to determine if one or more of these time-saving assumptions is appropriate, run identical simulations with and without the assumption to determine if the difference in results is acceptable.
 
 \begin{enumerate}
-\item The improved turbulence model in FDS 6 has been found to produce comparable results to older versions of FDS using slightly less refined numerical grids. Section~\ref{info:Mesh_Resolution} introduces a dimensionless parameter, $D^*/\dx$, that indicates the number of grid cells of dimension $\dx$ that span the characteristic width of the fire, $D^*$. A grid resolution study should be performed to determine the loss of accuracy caused by a reduced value of $D^*/\dx$. 
-\item One reason for the increased CPU cost of FDS~6 is the more precise treatment of gas species properties. Previous versions of FDS assumed that the specific heat of a gas species is solely dependent on its molecular weight, and that the ratio of specific heats, $c_p/c_v$, is equal to 1.4, a value appropriate for a diatomic gas like nitrogen, N$_2$. Section~\ref{info:Enthalpy} provides more details. FDS~6 now assumes that gas species are temperature-dependent, and this assumption increases the cost of the calculation in a number of different routines, in particular the calculation of the divergence. If you set {\ct CONSTANT\_SPECIFIC\_HEAT} to {\ct .TRUE.} on the {\ct MISC} line, you can once again assume that the gas species are all diatomic. For scenarios where the overall compartment temperature does not approach flashover conditions, this assumption might be appropriate. 
-\item In situations where you are simulating a relatively small fire in a relatively large space and you are not interested in heat fluxes to surrounding structures, it might be reasonable to turn off the radiation transport calculation by setting {\ct RADIATION} equal to {\ct .FALSE.} on the {\ct RADI} line. FDS will still assume that a fixed fraction of the fire's energy is radiated away, only now the energy is simply removed from the calculation. 
+\item The improved turbulence model in FDS 6 has been found to produce comparable results to older versions of FDS using slightly less refined numerical grids. Section~\ref{info:Mesh_Resolution} introduces a dimensionless parameter, $D^*/\dx$, that indicates the number of grid cells of dimension $\dx$ that span the characteristic width of the fire, $D^*$. A grid resolution study should be performed to determine the loss of accuracy caused by a reduced value of $D^*/\dx$.
+\item One reason for the increased CPU cost of FDS~6 is the more precise treatment of gas species properties. Previous versions of FDS assumed that the specific heat of a gas species is solely dependent on its molecular weight, and that the ratio of specific heats, $c_p/c_v$, is equal to 1.4, a value appropriate for a diatomic gas like nitrogen, N$_2$. Section~\ref{info:Enthalpy} provides more details. FDS~6 now assumes that gas species are temperature-dependent, and this assumption increases the cost of the calculation in a number of different routines, in particular the calculation of the divergence. If you set {\ct CONSTANT\_SPECIFIC\_HEAT} to {\ct .TRUE.} on the {\ct MISC} line, you can once again assume that the gas species are all diatomic. For scenarios where the overall compartment temperature does not approach flashover conditions, this assumption might be appropriate.
+\item In situations where you are simulating a relatively small fire in a relatively large space and you are not interested in heat fluxes to surrounding structures, it might be reasonable to turn off the radiation transport calculation by setting {\ct RADIATION} equal to {\ct .FALSE.} on the {\ct RADI} line. FDS will still assume that a fixed fraction of the fire's energy is radiated away, only now the energy is simply removed from the calculation.
 \item In situations where the heat transfer conditions are stationary or change only gradually, you can reduce the cost of the radiation solution by reducing the temporal resolution. More details in Section~\ref{info:RADI_Resolution}. A sensitivity study should be performed to determine the loss of accuracy.
 \end{enumerate}
 
@@ -3677,57 +3677,27 @@ The burnout time of a liquid fuel is calculated automatically based on the liqui
 \subsubsection{Special topic: Making Fuels Disappear}
 \label{info:BURN_AWAY}
 
-If a burning object is to disappear from the calculation once it is consumed, set {\ct BURN\_AWAY=.TRUE.} on the corresponding
-{\ct SURF} line. The solid object disappears from the calculation cell by cell, as the mass contained by each mesh cells is consumed
-either by the pyrolysis reactions or by the prescribed HRR.  The mass of each mesh cell is the cell face area multiplied by the
-surface density of the {\ct SURF} type.
-The following issues should be kept in mind when using {\ct BURN\_AWAY}:
+If a burning object is to disappear from the simulation once it is consumed, set {\ct BURN\_AWAY=.TRUE.} on the corresponding {\ct SURF} line. The solid object disappears from the calculation cell by cell, as the mass contained within each solid cell is consumed either by the pyrolysis reactions or by the prescribed HRR. The following issues should be kept in mind when using {\ct BURN\_AWAY}:
 \begin{itemize}
-\item For surfaces with prescribed HRR ({\ct HRRPUA}) or prescribed mass loss rate ({\ct MLRPUA}) AND thermally thick heat conduction,
-the mass flux is affected by the heats of combustion defined for the gas phase reaction and the first listed material ({\ct MATL}) component.
-\item Use {\ct BURN\_AWAY} parameter cautiously. If an object has the potential of burning away, a significant
-amount of extra memory has to be set aside to store additional surface information as the rectangular block is
-eaten away.
-\item If {\ct BURN\_AWAY} is prescribed, the {\ct SURF} should be applied to the entire object, not just a face of the object
-because it is unclear how to handle edges of solid obstructions that have different {\ct SURF\_ID}s on different faces.
-\item If the volume of the obstruction changes because it has to conform to the uniform mesh,
-FDS does {\em not} adjust the burning rate to account for this as it does with various quantities associated with areas,
-like {\ct HRRPUA}.
-\item A parameter called {\ct BULK\_DENSITY} (kg/m$^3$) can be applied to the {\ct OBST} rather than the {\ct SURF} line. This parameter is used
-to determine the combustible mass of the solid object. The calculation uses the user-specified object dimensions, not those of the mesh-adjusted
-object. This parameter over-rides all other parameters from which a combustible mass would be calculated. Note that without a {\ct BULK\_DENSITY} specified, the total amount of mass burned will depend upon the grid resolution. The use of the {\ct BULK\_DENSITY} parameter ensures a specific fuel mass per unit volume that is independent of the grid resolution.
-\item The mass of the object is based on the densities of all material components ({\ct MATL}), but it is only consumed by mass fluxes of
-the {\em known} species. If the sum of the gaseous yields is less than one, it will take longer to consume the mass.
+\item For surfaces with prescribed HRR ({\ct HRRPUA}) or prescribed mass loss rate ({\ct MLRPUA}) AND thermally thick heat conduction, the mass flux is affected by the heats of combustion defined for the gas phase reaction and the first listed material ({\ct MATL}) component.
+\item Use {\ct BURN\_AWAY} parameter cautiously. If an object has the potential of burning away, a significant amount of extra memory has to be set aside to store additional surface information as the mesh cells disappear.
+\item If {\ct BURN\_AWAY} is prescribed, the {\ct SURF} should be applied to the entire object, not just a face of the object because it is unclear how to handle edges of solid obstructions that have different {\ct SURF\_ID}s on different faces.
+\item If the volume of the obstruction changes because it has to conform to the uniform mesh, FDS does {\em not} adjust the burning rate to account for this as it does with various quantities associated with areas, like {\ct HRRPUA}.
+\item A parameter called {\ct BULK\_DENSITY} (kg/m$^3$) can be applied to the {\ct OBST} rather than the {\ct SURF} line. This parameter is used to determine the combustible mass of the solid object. The calculation uses the user-specified object dimensions, not those of the mesh-adjusted object. This parameter over-rides all other parameters from which a combustible mass would be calculated. Note that without a {\ct BULK\_DENSITY} specified, the total amount of mass burned will depend upon the grid resolution. The use of the {\ct BULK\_DENSITY} parameter ensures a specific fuel mass per unit volume that is independent of the grid resolution.
+\item The mass of the object is based on the densities of all material components ({\ct MATL}), but it is only consumed by mass fluxes of the {\em known} species. If the sum of the gaseous yields is less than one, it will take longer to consume the mass.
 \end{itemize}
-Simple examples demonstrating how solid fuels can be forced to disappear from the domain are labeled \linebreak[4] {\ct Fires/box\_burn\_away}.
-These are examples of a solid block of ``foam'' that is pyrolyzed
-until it is completely consumed. The heat flux is generated by placing
-hot surfaces around the box. There is no combustion.  In the first
-example, {\ct box\_burn\_away1}, the released gas is ({\ct 'METHANE'}),
-and in the second example, {\ct box\_burn\_away2}, it is an additional
-species called {\ct 'GAS'}. In the third and fourth examples
-{\ct box\_burn\_away3} and {\ct box\_burn\_away4}, the
-released gas is fuel but the pyrolysis rate is specified.
-In the fourth case, the heat of combustion for the foam material is set
-different from that of the gas, with ratio 0.75.
-The properties of the block of foam were chosen
-simply to assure a quick calculation. The objective of the test is to
-check that the released mass and the integrated burning rate are
-consistent with the material properties of the block. The block is
-0.4~m on a side, with a density of 20~kg/m$^3$.  The integrated
-densities of the pyrolysis product gases (written to
-{\ct box\_burn\_away\#\_devc.csv}), as well as
-the integrated burning rate (written to {\ct box\_burn\_away\#\_hrr.csv}) at
+Simple examples demonstrating how solid fuels can be forced to disappear from the domain are labeled \linebreak[4] {\ct Fires/box\_burn\_away}. These are examples of a solid block of solid material that is pyrolyzed until it is completely consumed. The heat flux is generated by placing hot surfaces around the box. There is no combustion. In the first
+example, {\ct box\_burn\_away1}, the released gas is ({\ct 'METHANE'}), and in the second example, {\ct box\_burn\_away2}, it is an additional species called {\ct 'GAS'}. In the third and fourth examples {\ct box\_burn\_away3} and {\ct box\_burn\_away4}, the released gas is fuel but the pyrolysis rate is specified. In the fourth case, the heat of combustion for the foam material is set different from that of the gas, with a ratio of 0.75. The properties of the solid material were chosen simply to assure a quick calculation. The objective of the test is to
+check that the released mass and the integrated burning rate are consistent with the material properties of the block. The block is 0.4~m on a side, with a density of 20~kg/m$^3$.  The integrated densities of the pyrolysis product gases (written to {\ct box\_burn\_away\#\_devc.csv}), as well as the integrated burning rate (written to {\ct box\_burn\_away\#\_hrr.csv}) at
 the end of the 30~s calculation ought to be:
 \be
 (0.4)^3 \; \hbox{m}^3 \times 20 \; \hbox{kg/m}^3 = 1.28 \; \hbox{kg}
 \ee
-except for the fourth case, where the amount of released gas is affected by
-the ratio of heats of combustion
+except for the fourth case, where the amount of released gas is affected by the ratio of heats of combustion
 \be
 0.75 \times 1.28 \; \hbox{kg}\; = 0.96 \; \hbox{kg}
 \ee
-The same case is tested in 2D ({\ct box\_burn\_away\_2D} and {\ct box\_burn\_away\_2D\_residue}). In the latter only half of the mass is converted to fuel, yielding 50 \% residue. The box is made burn away by setting {\ct BULK\_DENSITY = 10}. These two cases also plot the remaining mass of the solid box as a function of time, demonstrating the artificial increase of the solid mass when new, unburned surface is explosed to the surface. However, despite the instantaneous increases of the solid mass, both the final solid mass and the gaseous degradation products should match the expected values in the end of the simulation.
+The same case is tested in two dimensions ({\ct box\_burn\_away\_2D} and {\ct box\_burn\_away\_2D\_residue}). In the latter case, only half of the mass is converted to fuel, leaving behind a residue that is 50~\% of the original mass. The box is forced to burn away by setting the {\ct BULK\_DENSITY} to 10~kg/m$^3$. These two cases exhibit a fictitious increase in solid mass when new unburned surfaces are exposed as entire mesh cells disappear. The increased mass is just an artifact of reporting the residual solid mass as the product of surface density and surface area. Both the final solid mass and the gaseous degradation products should match the expected values at the end of the simulation.
 \begin{figure}[ht]
 \begin{tabular*}{\textwidth}{lr}
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/box_burn_away1} &
