@@ -2829,6 +2829,26 @@ associated with particles in three variations.}
 
 \clearpage
 
+\subsection{Burning Rate of a Small Object (\texorpdfstring{{\bf cell\_burn\_away}}{cell\_burn\_away})}
+
+In FDS, it is assumed that heat conduction and pyrolysis within solids are functions of depth only. This can be problematic in cases where entire solid obstructions burn away. In this example, a single grid cell, 4~cm on a side, is made up of a material with density $\rho_{\rm s}=50$~kg/m$^3$ and constant reaction rate, $r_{\rm s}=0.05$~s$^{-1}$. The burning rate of the single grid cell, $\dm$, is given by:
+\be
+   \dm = \delta \, \rho_{\rm s} \, r_{\rm s} \, A  \label{br}
+\ee
+where $\delta$ is the thickness of the surface layer and $A$ is the area of the six faces of the single grid cell. If we set the layer thickness so that $\delta \, A=V$, where $V$ is the volume of the cell, and note that the mass of the cell is $m=\delta \, A \, \rho_{\rm s}$, Eq.~(\ref{br}) becomes:
+\be
+   \dm = m \, r_{\rm s} = m_0 \, r_{\rm s} \, {\rm e}^{-r_{\rm s} t}
+\ee
+Figure~\ref{cell_burn_away} displays the computed and analytical burning rate. Note that the burning rate is proportional to the mass and the mass decays exponentially to zero in this case because we have specified the {\ct THICKNESS} to be $V/A$ and set the {\ct BULK\_DENSITY} to be 50~kg/m$^3$ on the {\ct OBST} line defining the single solid grid cell.
+\begin{figure}[ht]
+\begin{center}
+\includegraphics[width=3.5in]{SCRIPT_FIGURES/cell_burn_away}
+\end{center}
+\caption[The {\ct cell\_burn\_away} test case.]{Burning rate of a single grid cell with fixed reaction rate.}
+\label{cell_burn_away}
+\end{figure}
+
+
 \subsection{Evaporation of a Liquid Surface}
 
 A liquid evaporation model was tested in a mass conservation test similar to the surf\_mass\_vent\_nonchar\_fuel test above. A 1 cm layer of heptane
@@ -3885,7 +3905,7 @@ This appendix summarizes the accuracy of results from cases in the FDS verificat
 \chapter{Installation Testing}
 \label{info:installation_testing}
 
-The use of computer software for safety purposes is sometimes regulated under a software quality assurance (SQA) program by the Authority Having Jurisdiction.  For example, in the United States both the Department of Energy (DOE) via DOE G 414.1-4~\cite{DOE_G_414} and the Nuclear Regulatory Commission (NRC) via NUREG-1737~\cite{NUREG_1737} impose specific requirements on software used for certain safety purposes.  In addition to imposing general requirements on configuration management and verification and validation, SQA programs often impose an acceptance testing requirement.  For simulation software this involves test program in which the software is used to execute a number of sample cases with results compared to accepted values.  The purpose of this testing is to ensure that the software installation was successful and that no corruption of the software executable or libraries has occurred.  
+The use of computer software for safety purposes is sometimes regulated under a software quality assurance (SQA) program by the Authority Having Jurisdiction.  For example, in the United States both the Department of Energy (DOE) via DOE G 414.1-4~\cite{DOE_G_414} and the Nuclear Regulatory Commission (NRC) via NUREG-1737~\cite{NUREG_1737} impose specific requirements on software used for certain safety purposes.  In addition to imposing general requirements on configuration management and verification and validation, SQA programs often impose an acceptance testing requirement.  For simulation software this involves test program in which the software is used to execute a number of sample cases with results compared to accepted values.  The purpose of this testing is to ensure that the software installation was successful and that no corruption of the software executable or libraries has occurred.
 
 The acceptance test procedure is as follows:
 
@@ -3928,6 +3948,6 @@ Sprinklers\_and\_Sprays & particle\_drag\_U50\_N16.fds & particle\_drag\_U50\_N1
 \end{sidewaystable}
 
 
-\clearpage 
+\clearpage
 
 \end{document}
