@@ -21,11 +21,12 @@ char colorbar_revision[]="$Revision$";
 
 void UpdateTimeLabels(void){
   float time0;
-  int hour, min, sec,sec10;
  
   time0 = timeoffset;
   if(global_times!=NULL)time0 = timeoffset + global_times[itimes];
   if(vishmsTimelabel==1){
+    int hour, min, sec,sec10;
+
     hour = time0/3600;
     min = (int)(time0/60.0 - 60.0*hour);
     sec10 = (int)(10*(time0 -  60.0*min - 3600.0*hour));
@@ -127,10 +128,7 @@ void addcolorbar(int icolorbar){
 
 void drawcolorbarpath(void){
   int i;
-  unsigned char *rrgb;
   colorbardata *cbi;
-  unsigned char *rgbleft;
-  float vval_min, vval_cutoff, vval_max;
   int ncolors;
 
   cbi = colorbarinfo + colorbartype;
@@ -148,6 +146,8 @@ void drawcolorbarpath(void){
   glPointSize(10.0);
   glBegin(GL_POINTS);
   for(i=0;i<cbi->nnodes;i++){
+    unsigned char *rrgb;
+
     rrgb=cbi->rgb_node+3*i;
     glColor3ubv(rrgb);
     glVertex3f(rrgb[0]/255.0,rrgb[1]/255.0,rrgb[2]/255.0);
@@ -176,6 +176,8 @@ void drawcolorbarpath(void){
   glEnd();
 
   if(colorbarpoint>=0&&colorbarpoint<cbi->nnodes){
+    unsigned char *rgbleft;
+
     rgbleft = cbi->rgb_node+3*colorbarpoint;
 
     glPointSize(20.0);
@@ -232,6 +234,7 @@ void drawcolorbarpath(void){
     }
     if(show_firecolormap==1){
       char vvlabel[255];
+      float vval_min, vval_cutoff, vval_max;
 
       if(smoke_render_option==RENDER_SLICE){
         vval_min=global_hrrpuv_min;
@@ -327,8 +330,8 @@ colorbardata *getcolorbar(char *label){
 /* ------------------ remapcolorbar ------------------------ */
 
 void remapcolorbar(colorbardata *cbi){
-  int i,j,i1,i2;
-  float factor,*colorbar;
+  int i;
+  float *colorbar;
   unsigned char *rgb_node;
   unsigned char *alpha;
 
@@ -351,11 +354,15 @@ void remapcolorbar(colorbardata *cbi){
     }
   }
   for(i=0;i<cbi->nnodes-1;i++){
+    int i1,i2,j;
+
     i1 = cbi->index_node[i];
     i2 = cbi->index_node[i+1];
     if(i2==i1)continue;
     rgb_node = cbi->rgb_node+3*i;
     for(j=i1;j<i2;j++){
+      float factor;
+
       factor = (float)(j-i1)/(float)(i2-i1);
       colorbar[3*j]=MIX(factor,rgb_node[3],rgb_node[0])/255.0;
       colorbar[1+3*j]=MIX(factor,rgb_node[4],rgb_node[1])/255.0;

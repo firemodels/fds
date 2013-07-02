@@ -310,9 +310,6 @@ void mouse_edit_blockage(int button, int state, int x, int y){
   int val, val1;
   int mouse_x, mouse_y;
   GLubyte r, g, b;
-  int i;
-  mesh *meshi;
-  selectdata *sd;
 
   mouse_x=x; mouse_y=screenHeight-y;
   glDisable(GL_BLEND);
@@ -337,7 +334,11 @@ void mouse_edit_blockage(int button, int state, int x, int y){
   val = val1;
   
   if(val>0&&val<=ntotalfaces){
-      /* need to start colors at 1 so that black (color 0,0,0) is not
+    mesh *meshi;
+    selectdata *sd;
+    int i;
+
+    /* need to start colors at 1 so that black (color 0,0,0) is not
                 interpreted as a blockage */
     val--;
     sd = selectfaceinfo + val;
@@ -479,11 +480,7 @@ void mouse_select_avatar(int button, int state, int x, int y){
 /* ------------------ checktimebound ------------------------ */
 
 void checktimebound(void){
-  int i,j;
-  slicedata *sd;
-  mesh *meshi;
-  blockagedata *bc;
-  partdata *parti;
+  int i;
 
   if(timebar_drag==0&&itimes>nglobal_times-1||timebar_drag==1&&itimes<0){
     izone=0;
@@ -495,14 +492,21 @@ void checktimebound(void){
     }
     frame_index=first_frame_index;
     for(i=0;i<nsliceinfo;i++){
+      slicedata *sd;
+
       sd=sliceinfo+i;
       sd->itime=0;
     }
     for(i=0;i<nmeshes;i++){
+      mesh *meshi;
+
       meshi=meshinfo+i;
+
       meshi->patch_itime=0;
     }
     for(i=0;i<nmeshes;i++){
+      mesh *meshi;
+
       meshi=meshinfo+i;
       if(meshi->iso_times==NULL)continue;
       meshi->iso_itime=0;
@@ -512,18 +516,26 @@ void checktimebound(void){
     izone=nzone_times-1;
     itimes=nglobal_times-1;
     for(i=0;i<npartinfo;i++){
+      partdata *parti;
+
       parti=partinfo+i;
       parti->itime=parti->ntimes-1;
     }
     for(i=0;i<nsliceinfo;i++){
+      slicedata *sd;
+
       sd=sliceinfo+i;
       sd->itime=sd->ntimes-1;
     }
     for(i=0;i<nmeshes;i++){
+      mesh *meshi;
+
       meshi=meshinfo+i;
       meshi->patch_itime=meshi->npatch_times-1;
     }
     for(i=0;i<nmeshes;i++){
+      mesh *meshi;
+
       meshi=meshinfo+i;
       if(meshi->iso_times==NULL)continue;
       meshi->iso_itime=meshi->niso_times-1;
@@ -532,8 +544,13 @@ void checktimebound(void){
   /* set blockage visibility */
 
   for(i=0;i<nmeshes;i++){
+    mesh *meshi;
+    int j;
+
     meshi=meshinfo+i;
     for(j=0;j<meshi->nbptrs;j++){
+      blockagedata *bc;
+
       bc=meshi->blockageinfoptrs[j];
       if(bc->showtimelist==NULL)continue;
       bc->show=bc->showtimelist[itimes];
