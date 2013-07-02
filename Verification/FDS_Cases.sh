@@ -130,6 +130,7 @@ $RUNFDS Pyrolysis cable_701_insulation_mcc
 $RUNFDS Pyrolysis cable_11_jacket_mcc
 $RUNFDS Pyrolysis cable_23_jacket_mcc
 $RUNFDS Pyrolysis cable_701_jacket_mcc
+$RUNFDS Pyrolysis cell_burn_away
 $RUNFDS Pyrolysis birch_tga_1step_2
 $RUNFDS Pyrolysis birch_tga_1step_20
 $RUNFDS Pyrolysis enthalpy
