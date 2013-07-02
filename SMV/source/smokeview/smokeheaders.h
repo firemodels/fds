@@ -5,6 +5,7 @@
 #ifndef SMOKEHEADERS_H_DEFINED
 #define SMOKEHEADERS_H_DEFINED
 
+void slerp(float *p0, float *p1, float t, float *pout);
 #ifdef pp_GEOMTEST
 EXTERNCPP void DrawGeomTest(int option);
 #endif
@@ -61,7 +62,6 @@ EXTERNCPP void camera2quat(camera *ca, float *quat, float *rotation);
 EXTERNCPP void angleaxis2quat(float angle, float *axis, float *quat);
 EXTERNCPP void quat2rot(float quat[4],float rot[16]);
 EXTERNCPP void mult_quat(float x[4], float y[4], float z[4]);
-EXTERNCPP void normalize_quat(float x[4]);
 
 EXTERNCPP void setScreenSize(int *width, int *height);
 EXTERNCPP void keyboard_CB(unsigned char key, int x, int y);
