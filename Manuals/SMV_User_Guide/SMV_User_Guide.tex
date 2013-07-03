@@ -844,17 +844,17 @@ viewpoint that should be set when Smokeview first starts up.
 
 \elist
 
-\section{Eye View}
+\section{First Person View}
 
-Radio buttons in the {\em Motion/View/Render}\ dialog box allow
-one to toggle between world, eye centered and world level rotation
-scene movement modes. These modes may also be changed by using the
-``e'' key. When in {\em eye center}\ mode, several key mappings
-have been added, inspired by popular computer games, to allow for
-easier movement within the scene. For example, the up and down
-cursor keys allow one to move forward or backwards.  The left and
-right cursor keys allow one to rotate left or right. Other
-keyboard mappings are described in Table \ref{tabKEYS}.
+First person view is entered by either pressing the appropriate
+radio buttons in the {\em Motion/View/Render}\ dialog box (button
+labeled eye centered) or by pressing the ``e'' key until first
+person view is obtained. When in {\em eye center}\ mode, several
+key mappings have been added, inspired by popular computer games,
+to allow for easier movement within the scene. For example, the up
+and down cursor keys allow one to move forward or backwards.  The
+left and right cursor keys allow one to rotate left or right.
+Other keyboard mappings are described in Table \ref{tabKEYS}.
 
 \begin{table}[\figoptions]
 \begin{center}
@@ -1897,7 +1897,7 @@ b) clip blockages and data\\
 \caption[Clipping a scene.]{Three views of a scene. The first view
 is drawn without clipping, the second view shows the scene
 clipping only the geometry (blockages), the third view shows the
-scene slipping both the geometry and the data.} \label{figCLIPPED}
+scene clipping both the geometry and the data.} \label{figCLIPPED}
 \end{figure}
 
 It is difficult to view the interior of a scene when modeling
@@ -1924,26 +1924,81 @@ the data.
 %---------------------------------------------------------------------------------
 
 \chapter{Creating Custom Objects}
-\label{chap:devices} Smokeview visualizes FDS devices such as heat and smoke detectors using instructions found in a file named {\tt objects.svo}. Smokeview also uses these instructions to represent people (avatars) in FDS-EVAC simulations and to represent trees and shrubs in FDS WUI simulations. The
-Smokeview implementation of FDS devices is referred to as objects in this chapter.
+\label{chap:devices} Smokeview visualizes FDS devices such as heat
+and smoke detectors using instructions found in a file named {\tt
+objects.svo}. Smokeview also uses these instructions to represent
+people (avatars) in FDS-EVAC simulations and to represent trees
+and shrubs in FDS WUI simulations. The Smokeview implementation of
+FDS devices is referred to as objects in this chapter.
 
-The instruction file is located in the Smokeview installation directory\footnote{The current objects.svo file containing documentation and a listing of object definitions is listed in Appendix \ref{section:objects}}. The instructions correspond to OpenGL library calls, the same type of calls Smokeview uses to visualize FDS cases. Smokeview then acts as an interpreter executing OpenGL commands as specified in the object definition file. Efficiency is attained by compiling these instructions into display lists, terminology for an OpenGL construct for storing and efficiently drawing collections of OpenGL commands.  New objects may be designed and drawn without requiring modifications to Smokeview and more importantly may be created by someone other than the Smokeview developer.
+The instruction file is located in the  Smokeview installation
+directory\footnote{The current objects.svo file containing
+documentation and a listing of object definitions is listed in
+Appendix \ref{section:objects}}. The instructions correspond to
+OpenGL library calls, the same type of calls Smokeview uses to
+visualize FDS cases. Smokeview then acts as an interpreter
+executing OpenGL commands as specified in the object definition
+file. Efficiency is attained by compiling these instructions into
+display lists, terminology for an OpenGL construct for storing and
+efficiently drawing collections of OpenGL commands.  New objects
+may be designed and drawn without requiring modifications to
+Smokeview and more importantly may be created by someone other
+than the Smokeview developer.
 
-An object's appearance may be fixed or it may be altered based upon data specified in an FDS input file.  The {\tt sensor}\ object is drawn as a small green sphere with a fixed diameter.  Its appearance is the same regardless of how an FDS input file is set up. The appearance of the {\tt tsphere}\ object (t for texture) depends on data specified in the FDS input file.  One may specify the diameter of the sphere and an image to cover it with ( the image is known as a texture map).
+An object's appearance may be fixed or it may be altered based
+upon data specified in an FDS input file.  The {\tt sensor}\
+object is drawn as a small green sphere with a fixed diameter.
+Its appearance is the same regardless of how an FDS input file is
+set up. The appearance of the {\tt tsphere}\ object (t for
+texture) depends on data specified in the FDS input file.  One may
+specify the diameter of the sphere and an image to cover it with (
+the image is known as a texture map).
 
-As with preference or {\tt .ini}\ files, Smokeview looks for object definition files in three locations: in a file named {\tt objects.svo}\ located in the Smokeview installation directory, in a file named {\tt objects.svo}\ located in the casename directory and in a file named {\tt casename.svo} also located in the casename directory where {\tt casename}\ is the name of the case being visualized.
+As with preference or {\tt .ini}\ files, Smokeview looks for
+object definition files in three locations: in a file named {\tt
+objects.svo}\ located in the Smokeview installation directory, in
+a file named {\tt objects.svo}\ located in the casename directory
+and in a file named {\tt casename.svo} also located in the
+casename directory where {\tt casename}\ is the name of the case
+being visualized.
 
-This chapter describes how to create new objects. Though all of the examples are given for drawing FDS devices, the intent of this procedure is to be more general allowing Smokeview to draw other types of objects such as people walking.
+This chapter describes how to create new objects. Though all of
+the examples are given for drawing FDS devices, the intent of this
+procedure is to be more general allowing Smokeview to draw other
+types of objects such as people walking.
 
 \section{Object File Format}
-The first statement in an object definition is the keyword {\tt OBJECTDEF} (or {\tt AVATARDEF}\ when defining a {\em person}). The next statement is the name or label for the object. Following this are the instructions used for creating the object. Each instruction consist of zero or more data values followed by a command. Comments may be placed anywhere in the object definition file by adding text after a double slash `//`.
+The first statement in an object definition is the keyword {\tt
+OBJECTDEF} (or {\tt AVATARDEF}\ when defining a {\em person}). The
+next statement is the name or label for the object. Following this
+are the instructions used for creating the object. Each
+instruction consist of zero or more data values followed by a
+command. Comments may be placed anywhere in the object definition
+file by adding text after a double slash `//`.
 
-Data from FDS may be optionally passed to the object definition by placing a series of labels, written as {\tt :var1 ... :varn}, at the beginning of the definition.  These data values may then be accessed later in the definition using {\tt \$var1 ... \$varn}\ respectively. The data placed in {\tt :vari}\ labels is specified in the FDS input  file using the {\tt SMOKEVIEW\_PARAMETERS}\ keyword on the {\tt \&PROP}\ input line.
+Data from FDS may be optionally passed to the object definition by
+placing a series of labels, written as {\tt :var1 ... :varn}, at
+the beginning of the definition.  These data values may then be
+accessed later in the definition using {\tt \$var1 ... \$varn}\
+respectively. The data placed in {\tt :vari}\ labels is specified
+in the FDS input  file using the {\tt SMOKEVIEW\_PARAMETERS}\
+keyword on the {\tt \&PROP}\ input line.
 
-There are two types of instructions for drawing basic geometric objects.  Instructions for drawing objects such as cubes, disks, spheres etc.  and instructions for manipulating these objects through transformations such as scaling, rotation and translation. Collectively these instructions specify the type, location and orientation of objects used to represent objects.  The important feature of this process is that new objects may be designed and drawn without the need to modify Smokeview.
+There are two types of instructions for drawing basic geometric
+objects.  Instructions for drawing objects such as cubes, disks,
+spheres etc.  and instructions for manipulating these objects
+through transformations such as scaling, rotation and translation.
+Collectively these instructions specify the type, location and
+orientation of objects used to represent objects.  The important
+feature of this process is that new objects may be designed and
+drawn without the need to modify Smokeview.
 
-Some examples of argument/instruction pairs are {\tt d drawsphere} for drawing a sphere of diameter {\tt d} or {\tt x y z translate} for
-translating an object by $(x,y,z)$. The symbols {\tt d}, {\tt x}, {\tt y} and {\tt z}\ are specified in the object file using a numerical constant such as 1.23 or using a reference such as \$var to data located elsewhere.
+Some examples of argument/instruction pairs are {\tt d drawsphere}
+for drawing a sphere of diameter {\tt d} or {\tt x y z translate}
+for translating an object by $(x,y,z)$. The symbols {\tt d}, {\tt
+x}, {\tt y} and {\tt z}\ are specified in the object file using a
+numerical constant such as 1.23 or using a reference such as \$var
+to data located elsewhere.
 
 Transformation commands are cumulative, each command builds on the effects of the previous one.  The commands {\tt push}\ and {\tt pop}\ isolate these effects by saving and restoring the geometric state.
 
@@ -1959,7 +2014,7 @@ framerule=1pt,framesep=1pc,fillcolor=\color{yellow}]
 //  2. any line not beginning with "//" is part of the definition.
 //  3. the first non-comment line after OBJECTDEF is the object name
 //  4. an object definition may contain, labels, numerical constants
-//     a number), string constants (enclosed in " ") and/or
+//     (a number), string constants (enclosed in " ") and/or
 //     commands (beginning with a-z)
 //  5. a label begins with ':' as in :dx
 //  6. the label :dx may be accessed afterward using $dx
