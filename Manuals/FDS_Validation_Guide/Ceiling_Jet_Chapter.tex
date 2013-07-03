@@ -2,7 +2,7 @@
 
 \chapter{Ceiling Jets and Device Activation}
 
-FDS is a computational fluid dynamics (CFD) model and has no specific ceiling jet algorithm. Rather, temperatures throughout the fire compartment are computed directly from the governing conservation equations. Nevertheless, temperature measurements near the ceiling can be used to evaluate the model's ability to predict the activation times of sprinklers, smoke detectors, and other fire protection devices.
+FDS is a computational fluid dynamics (CFD) model and has no specific ceiling jet algorithm. Rather, temperatures throughout the fire compartment are computed directly from the governing conservation equations. Nevertheless, temperature measurements near the ceiling are useful in evaluating the model's ability to predict the activation times of sprinklers, smoke detectors, and other fire protection devices. The term ``ceiling jet'' is used loosely here -- it distinguishes a point temperature measurement near the ceiling from an average ``hot gas layer'' (HGL) temperature.
 
 This chapter first presents comparisons of model predictions and temperature measurements near to the ceiling. Next, predicted sprinkler activation times and the total number of activations are compared with measurements. Finally, predicted smoke detector activation times are compared with measurements.
 
@@ -401,6 +401,38 @@ has been chosen to evaluate the ceiling jet temperature prediction.
 \label{NIST_NRC_Jet_Open}
 \end{figure}
 
+
+\clearpage
+
+\subsection{SP Adiabatic Surface Temperature Experiments}
+
+Three experiments were conducted in a standard compartment, 3.6~m long by 2.4~m wide by 2.4~m high, with a 0.8~m wide by 2.0~m high door centered on the narrow wall. A single beam was suspended 20~cm below the ceiling lengthwise along the centerline of the compartment. There were three measurement stations along the beam at distances of 0.9~m (Station~A), 1.8~m (Station~B), and 2.7~m (Station~C) from the far wall where the fire was either positioned in the corner (Tests~1 and 2), or the center (Test 3). The gas temperatures reported here were measured 10~cm away from all four sides of the beam at Station~A, and 10~cm away from the two lateral sides at Stations~B and C. In the figure legends, the measurement station is denoted A, B, or C, and the position is denoted 1, 2, 3, or 4. Position~1 is 10~cm above the beam. Position~2 is 10~cm from the side of the beam facing away from the fire, Position~3 is 10~cm below the beam, and Position~4 is 10~cm away from the side of the beam facing the fire.
+
+\begin{figure}[h!]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/SP_AST/SP_AST_Test_1_Sta_A_Pos_1_and_2_Gas} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/SP_AST/SP_AST_Test_1_Sta_A_Pos_3_and_4_Gas} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/SP_AST/SP_AST_Test_1_Sta_B_Pos_2_and_4_Gas} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/SP_AST/SP_AST_Test_1_Sta_C_Pos_2_and_4_Gas}
+\end{tabular*}
+\label{SP_Test_1_Gas}
+\end{figure}
+
+\newpage
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/SP_AST/SP_AST_Test_2_Sta_A_Pos_1_and_2_Gas} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/SP_AST/SP_AST_Test_2_Sta_A_Pos_3_and_4_Gas} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/SP_AST/SP_AST_Test_2_Sta_B_Pos_2_and_4_Gas} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/SP_AST/SP_AST_Test_2_Sta_C_Pos_2_and_4_Gas} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/SP_AST/SP_AST_Test_3_Sta_A_Pos_1_and_2_Gas} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/SP_AST/SP_AST_Test_3_Sta_A_Pos_3_and_4_Gas} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/SP_AST/SP_AST_Test_3_Sta_B_Pos_2_and_4_Gas} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/SP_AST/SP_AST_Test_3_Sta_C_Pos_2_and_4_Gas}
+\end{tabular*}
+\label{SP_Test_2_3_Gas}
+\end{figure}
 
 \clearpage
 
