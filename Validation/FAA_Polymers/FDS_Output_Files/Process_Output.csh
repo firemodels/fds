@@ -1,9 +1,9 @@
 #!/bin/csh -f
 setenv SVNROOT ~/FDS-SMV
-set WDIR=$SVNROOT/Validation/CHRISTIFIRE/FDS_Output_Files
-set DDIR=$SVNROOT/Validation/CHRISTIFIRE/Current_Results
+set WDIR=$SVNROOT/Validation/FAA_Polymers/FDS_Output_Files
+set DDIR=$SVNROOT/Validation/FAA_Polymers/Current_Results
 cd $DDIR
-cp CHRISTIFIRE*devc.csv $WDIR
+cp FAA*devc.csv $WDIR
 cp *svn.txt $WDIR
 cd $WDIR
 
