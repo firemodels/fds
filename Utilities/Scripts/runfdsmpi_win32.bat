@@ -19,10 +19,9 @@ Rem if STOPFDS=1 then create %fulldir%/%stopfile% and exit
 Rem erase %fulldir%\%stopfile%
 
 cd %fulldir%
-echo **********************
+
 echo %in% started
-echo **********************
+
 %FDS% %in%  > %out%
-echo **********************
-echo %in% completed
-echo **********************
+
+cd %BASEDIR%
