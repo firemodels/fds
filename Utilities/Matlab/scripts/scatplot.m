@@ -334,9 +334,17 @@ for j=2:length(Q);
                 ln_M_E = log(nonzeros(Predicted_Metric))-log(nonzeros(Measured_Metric));
                 % Normality test (requires at least 4 observations)
                 if length(ln_M_E) >= 4
-                    [normality,p] = lillietest(ln_M_E);
+%                     [normality,p] = lillietest(ln_M_E);
+%                     
+%                     if normality == 0
+%                         normality_test = 'Pass';
+%                     else
+%                         normality_test = 'Fail';
+%                     end
+
+                    pval = spiegel_test(ln_M_E);
                     
-                    if normality == 0
+                    if pval > 0.05
                         normality_test = 'Pass';
                     else
                         normality_test = 'Fail';
@@ -347,7 +355,7 @@ for j=2:length(Q);
                     box on
                     hold on
                     [n,xout] = hist(ln_M_E,10);
-                    bar(xout,n,'LineWidth',1,'FaceColor',[0.7,0.7,0.7])
+                    bar(xout,n,1,'LineWidth',1,'FaceColor',[0.7,0.7,0.7])
                     
                     % Plot normal distribution
                     x_lim = [xout(1)-(xout(2)-xout(1)),xout(end)+(xout(2)-xout(1))];
