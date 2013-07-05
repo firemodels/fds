@@ -24,15 +24,15 @@ echo You are about to run the Verification Test Suite.
 echo Press any key to begin.
 pause > Nul
 
-Rem -------------------------
-Rem run FDS veriication cases
-Rem -------------------------
-echo creating FDS case list from FDS_Cases.sh
+echo.
+echo Creating FDS case list from FDS_Cases.sh
 ..\Utilities\Data_processing\sh2bat FDS_Cases.sh FDS_Cases.bat
-echo creating FDS_MPI case list from FDS_MPI_Cases.sh
+echo Creating FDS_MPI case list from FDS_MPI_Cases.sh
 ..\Utilities\Data_processing\sh2bat FDS_MPI_Cases.sh FDS_MPI_Cases.bat
 
-echo running FDS cases
+echo.
+echo Running FDS cases
+echo.
 
 echo "FDS test cases begin" >> %TIME_FILE%
 date /t >> %TIME_FILE%
@@ -47,5 +47,6 @@ date /t >> %TIME_FILE%
 time /t >> %TIME_FILE%
 
 erase FDS_Cases.bat
+erase FDS_MPI_Cases.bat
 
 pause
