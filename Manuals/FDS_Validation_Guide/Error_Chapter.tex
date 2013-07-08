@@ -1,6 +1,7 @@
 % !TEX root = FDS_Validation_Guide.tex
 
 \chapter{Quantifying Model Uncertainty}
+\label{Error_Chapter}
 
 This chapter describes a method to estimate the model uncertainty using comparisons of model predictions with experimental measurements whose uncertainty has been quantified. The method is ideal for complex numerical models like FDS for which a systematic analysis of sub-components is impractical, but for which there exists a relatively large amount of experimental data with which to evaluate the accuracy of the model predictions. If the uncertainty in the experiments can be quantified, the uncertainty in the model can then be expressed in the form of a normal distribution whose mean and standard deviation are estimated from the relative difference between the predicted and measured values.
 
@@ -128,12 +129,12 @@ shielded, aspirated) with different size beads, metals, and so on. For each, one
 uncertainty in the reported measurement.
 
 Next, the uncertainty of the measurements of the reported test parameters was estimated, including the heat release rate, leakage area, ventilation rate, material properties, and so on. It was then necessary to calculate how the uncertainty in these parameters contributed to the uncertainty of the reported measurement. To do this, Hamins examined a number of empirical formulae that are widely used in fire protection engineering to determine the most important test parameters and their effect on the measured results. These formulae provided the means of propagating the parameter uncertainties through the experiment. For example, it has been shown~\cite{SFPE:Walton} that the hot gas layer temperature rise, $T-T_0$, due to a compartment fire is proportional to the heat release rate, $\dot{Q}$, raised to the two-thirds power:
-\be 
-   T-T_0 = C \, \dot{Q}^{\frac{2}{3}} 
+\be
+   T-T_0 = C \, \dot{Q}^{\frac{2}{3}}
 \ee
 The constant, $C$, involves a number of geometric and thermo-physical parameters that are unique to the given fire scenario. By way of differentials, this empirical relationship can be expressed in the form:
-\be 
-   \frac{\Delta T}{T-T_0} \approx \frac{2}{3} \, \frac{\Delta \dot{Q}}{\dot{Q}}  
+\be
+   \frac{\Delta T}{T-T_0} \approx \frac{2}{3} \, \frac{\Delta \dot{Q}}{\dot{Q}}
 \ee
 In words, the relative change in the temperature rise is approximately two-thirds the relative change in the heat release rate. Assuming that the numerical model exhibits the same functional relationship between the compartment temperature and the heat release rate, there is now a way to express the uncertainty of the model prediction as a function of the uncertainty of this most important input parameter. Often, the uncertainty of a measurement is expressed in the form of a 95~\% confidence interval, (two standard deviations or 2$\sigma$).
 Thus, if the heat release rate of a fire is assumed with 95~\% confidence to be within 15~\% of the reported measurement, then the temperature predicted by the model has an uncertainty\footnote{An uncertainty that is expressed in the form of a percentage typically means one or two {\em relative} standard deviations, often denoted with a tilde,
@@ -260,29 +261,7 @@ Combining Eq.~(\ref{eeq}) with Eq.~(\ref{meq}) yields:
    \ln M  - \ln E = \ln(M/E) \sim N \left( \ln \delta - \frac{\widetilde{\sigma}_M^2}{2}+\frac{\widetilde{\sigma}_E^2}{2} \; ,
    \; \widetilde{\sigma}_M^2+\widetilde{\sigma}_E^2 \right) \label{lnMeq}
 \ee
-Equation~(\ref{lnMeq}) is important because it does not involve the unknown $\theta$, but rather the known predicted and measured values of the quantity
-of interest plus an estimate of the experimental uncertainty. Until now, it has been assumed that all of the relevant uncertainties can be characterized
-by normal distributions. Equation~(\ref{lnMeq}) can be used to test this assumption, whereas Eqs.~(\ref{mdist}) and (\ref{expunc}) cannot.
-An examination of the results of the validation study discussed above~\cite{NUREG_1824}
-indicates that in cases where the number of pairs of $M$ and $E$ is greater than about 20, the values of $\ln (M/E)$ pass a test for
-normality\footnote{The Kolmogorov-Smirnov test for
-normality was used with a $p$-value of 0.05. The $p$-value determines the probability of being incorrect in concluding that the data is not normally distributed.}, whereas when
-there are less values, normality cannot be assumed. Figure~\ref{Normality} contains a set of data from the validation study.
-There were 124 point comparisons of measured and predicted Wall Temperatures, for which $\ln (M/E)$ conforms quite well to a normal distribution.
-If normality cannot be assumed, alternative techniques for assessing model uncertainty with limited
-experimental data have been proposed, for example, see Ref.~\cite{Siu:1992}.
-\begin{figure}[ht!]
-\begin{tabular}{ll}
-\includegraphics[width=3.2in]{FIGURES/Wall_Temperature_Scatter} &
-\includegraphics[width=3.2in]{FIGURES/Wall_Temperature_Normality}
-\end{tabular}
-\caption[Testing the normality of validation data.]{The results of normality testing for a set of data taken from Reference~\cite{NUREG_1824}. On the
-left is a comparison of measured vs predicted wall temperatures, and on the right is the distribution of $\ln(M/E)$. Note that the off-diagonal lines in the scatter plot
-indicate the $2 \widetilde{\sigma}$ bounds for the experiments (long dash) and the model (short dash).}
-\label{Normality}
-\end{figure}
-
-Returning to Eq.~(\ref{lnMeq}), what is now needed is a way to estimate the mean and standard deviation of the distribution. First, define:
+To estimate the mean and standard deviation of the distribution\footnote{The assumption that $\ln(M/E)$ is normally distributed has been tested for each quantity of interest discussed in the chapters ahead. The results are shown in Section~\ref{normality_tests}.}, first define:
 \be
    \overline{\ln (M/E)} = \frac{1}{n} \, \sum_{i=1}^n \, \ln (M_i/E_i)
 \ee
@@ -350,7 +329,6 @@ various parameters, like the thermal inertia of the object, the size of the fire
 experimental uncertainty from those who conducted the experiments or follow the procedure outlined by Hamins~\cite{NUREG_1824}. Express the
 experimental uncertainty in relative terms, $\widetilde{\sigma}_E$.
 \item Calculate the bias factor, $\delta$, and relative standard deviation, $\tilde{\sigma}_M$, from Eqs.~(\ref{delta}) and (\ref{stdev}), respectively.
-For the data shown in Fig.~\ref{Normality}, $\delta=1.13$ and that $\widetilde{\sigma}_M=0.20$.
 \end{enumerate}
 Consider the distribution, Eq.~(\ref{truth}), of the ``true'' temperature, $\theta$, shown graphically in Fig.~\ref{bell_curve}.
 The vertical lines indicate the ``critical'' temperature at which damage is assumed to occur ($T_c=200$~$^\circ$C), and the temperature predicted by the
