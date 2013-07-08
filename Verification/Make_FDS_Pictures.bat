@@ -15,3 +15,6 @@ set SMOKEVIEW=smokeview
 ..\Utilities\Data_Processing\sh2bat FDS_Pictures.sh FDS_Pictures.bat
 
 call FDS_Pictures.bat
+
+cd %BASEDIR%\Verification
+erase FDS_Pictures.bat
