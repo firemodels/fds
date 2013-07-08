@@ -103,4 +103,8 @@ copy %smvug%\SCRIPT_FIGURES\*.png %summary%\images
 copy %smvvg%\SCRIPT_FIGURES\*.png %summary%\images
 copy %smvvg%\FIGURES\graysquares.png %summary%\images
 
+
 cd %SCRIPT_DIR%
+
+erase SMV_Pictures_Cases.bat
+erase SMV_DIFF_Pictures_Cases.bat
