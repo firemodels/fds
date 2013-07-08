@@ -247,17 +247,20 @@ for j=2:length(Q);
         Sigma_M = sqrt( max(0,u*u - Sigma_E.^2) );
         delta = exp(M_bar-E_bar+0.5*Sigma_M.^2-0.5*Sigma_E.^2);
         
-        plot([Plot_Min,Plot_Max],[Plot_Min,Plot_Max],'k-')                    
-        plot([Plot_Min,Plot_Max],[Plot_Min,Plot_Max*(1+2*Sigma_E)],'k--') 
-        plot([Plot_Min,Plot_Max],[Plot_Min,Plot_Max*(1-2*Sigma_E)],'k--') 
+        % Plot diagonal lines
         
-        if strcmp(Model_Error,'yes') 
+        plot([Plot_Min,Plot_Max],[Plot_Min,Plot_Max],'k-')
+        if strcmp(Model_Error,'yes')
+            plot([Plot_Min,Plot_Max],[Plot_Min,Plot_Max],'k-')
+            plot([Plot_Min,Plot_Max],[Plot_Min,Plot_Max*(1+2*Sigma_E)],'k--')
+            plot([Plot_Min,Plot_Max],[Plot_Min,Plot_Max*(1-2*Sigma_E)],'k--')
             plot([Plot_Min,Plot_Max],[Plot_Min,delta*Plot_Max],'r-')
             plot([Plot_Min,Plot_Max],[Plot_Min,delta*Plot_Max*(1+2*Sigma_M)],'r--')
             plot([Plot_Min,Plot_Max],[Plot_Min,delta*Plot_Max*(1-2*Sigma_M)],'r--')
         end
         
         % format the legend and axis labels
+        
         xlabel(Ind_Title,'Interpreter',Font_Interpreter,'FontSize',Scat_Label_Font_Size,'FontName',Font_Name)
         ylabel(Dep_Title,'Interpreter',Font_Interpreter,'FontSize',Scat_Label_Font_Size,'FontName',Font_Name)
         axis([Plot_Min Plot_Max Plot_Min Plot_Max])
@@ -377,7 +380,8 @@ for j=2:length(Q);
                     set(gca,'XTick',xout,'XTickLabel',{'1','2','3','4','5','6','7','8','9','10'})
                     set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
                     text(0.03, 0.90,Scatter_Plot_Title,'FontSize',Title_Font_Size,'FontName','Times','Interpreter',Font_Interpreter,'Units','normalized')
-                    text(0.03, 0.82,['Normality Test: ',normality_test],'FontSize',Title_Font_Size,'FontName','Times','Interpreter',Font_Interpreter,'Units','normalized')
+                    text(0.03, 0.82,['Normality Test'],'FontSize',Title_Font_Size,'FontName','Times','Interpreter',Font_Interpreter,'Units','normalized')
+                    text(0.03, 0.74,['p-value = ',num2str(pval,'%4.2f')],'FontSize',Title_Font_Size,'FontName','Times','Interpreter',Font_Interpreter,'Units','normalized')
                     
                     PDF_Paper_Width = Paper_Width;
                     
@@ -502,6 +506,7 @@ if stats_output == 2
     % Generate table header information in .tex file
     fprintf(fid, '%s\n', '\begin{center}');
     fprintf(fid, '%s\n', '\begin{longtable}{|l|c|c|c|c|c|}');
+    fprintf(fid, '%s\n', '\caption[Summary statistics]{Summary statistics for all quantities of interest}');
     fprintf(fid, '%s\n', '\hline');
     fprintf(fid, '%s\n', 'Quantity & Datasets  & Points    & $\widetilde{\sigma}_E$ & $\widetilde{\sigma}_M$ & Bias \\ \hline \hline');
     fprintf(fid, '%s\n', '\endfirsthead');
@@ -527,6 +532,7 @@ if stats_output == 2
         fprintf(fid, '%s', num2str(sigma_m, '%0.2f'), ' & ');
         fprintf(fid, '%s%s\n', num2str(bias, '%0.2f'), ' \\ \hline');
     end
+    fprintf(fid,'%s\n','\label{summary_stats}');
     fprintf(fid,'%s\n','\end{longtable}');
     fprintf(fid,'%s\n','\end{center}');
 end

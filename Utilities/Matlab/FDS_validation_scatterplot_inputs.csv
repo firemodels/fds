@@ -29,7 +29,7 @@ Smoke Detector Activation Time,Measured Time to Activation (s),Predicted Time to
 Cable Failure Time,Measured Time to Threshold Temperature (s),Predicted Time to Threshold Temperature (s),0,1800,0.03 0.95,SouthEast,1,14,yes,linear,FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/Cable_Temperature
 Sprinkler Actuations,Measured Actuations,Predicted Actuations,0,40,0.03 0.95,SouthEast,1,-1,yes,linear,FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/UL_NFPRF_Actuations
 Aerosol Deposition Velocity,Measured Deposition Velocity (m/s),Predicted Deposition Velocity (m/s),1.00E-07,1.00E-01,0.03 0.95,SouthEast,1,-1,yes,loglog,FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/Aerosol_Deposition_Velocity
-Burning Rate,Measured Burning Rate (kg/m$^2$/s),Predicted Burning Rate (kg/m$^2$/s),0,0.1,0.03 0.95,SouthEast,1,-1,yes,linear,FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/Pool_Fires_Burning_Rates
+Burning Rate,Measured Burning Rate (kg/m$^2$/s),Predicted Burning Rate (kg/m$^2$/s),0,0.1,0.03 0.95,SouthEast,1,10,yes,linear,FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/Burning_Rates
 Carbon Monoxide Concentration,Measured Change in Volume Fraction,Predicted Change in Volume Fraction,0,0.001,0.03 0.95,SouthEast,1,9,yes,linear,FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/Carbon_Monoxide_Concentration
 Entrainment,Measured Mass Flow Rate (kg/s),Predicted Mass Flow Rate (kg/s),0,0.6,0.03 0.95,SouthEast,1,14,yes,linear,FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/Entrainment
 Extinction Time,Measured Time (s),Predicted Time (s),0,650,0.03 0.95,SouthEast,1,-1,yes,linear,FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/USCG_HAI_Extinction
