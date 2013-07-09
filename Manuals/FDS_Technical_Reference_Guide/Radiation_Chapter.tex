@@ -37,7 +37,7 @@ where $I_n$ is the intensity integrated over the band $n$, and $\kappa_n$ is the
 
 The emission source term for radiation band $n$ is
 \be
-B_n(\bx) = \kappa_n(\bx) \, I_{{\rm b},n}(\bx)
+   B_n(\bx) = \kappa_n(\bx) \, I_{{\rm b},n}(\bx)
 \ee
 where $I_{{\rm b},n}$ is the fraction of the blackbody radiation at temperature $T(\bx)$:
 \be
@@ -47,11 +47,9 @@ and $\sigma$ is the Stefan-Boltzmann constant. The calculation of factors $F_n$ 
 
 Even with a reasonably small number of bands, solving multiple RTEs is very time consuming. Fortunately, in most large-scale fire scenarios soot is the most important combustion product controlling the thermal radiation from the fire and hot smoke. As the radiation spectrum of soot is continuous, it is possible to assume that the gas behaves as a gray medium.  The spectral dependence is then lumped into one absorption coefficient ($N=1$) and the source term is given by the black body radiation intensity
 \be
-I_{\rm b}(\bx) = \frac{\sigma \, T(\bx)^4}{\pi} \label{emission_source_term}
+   I_{\rm b}(\bx) = \frac{\sigma \, T(\bx)^4}{\pi} \label{emission_source_term}
 \ee
-This is the default mode of FDS and appropriate for most problems of fire engineering.
-
-For optically thin flames, however, where the yield of soot is small compared to the yields of $\rm CO_2$ and water vapor, the gray gas assumption can lead to an over-prediction of the emitted radiation. From a series of numerical experiments using methane as the fuel, it has been found that six bands ($N=6$) provide an accurate representation of the most important radiation bands of the fuel, $\rm CO_2$, and water vapor. Table~\ref{banditos} through Table~\ref{band_MMA} list the band limits for various fuel species. The location of the bands have been adjusted to accommodate most of the features of the fuels spectra. If the absorption of the fuel is known to be important, separate bands can be reserved for fuel, increasing the total number of bands, $N$. The number of additional bands depends on the fuel, as discussed in Appendix~\ref{absorption_coefficients}.
+This is the default mode of FDS. For optically thin flames, however, where the yield of soot is small compared to the yields of $\rm CO_2$ and water vapor, the gray gas assumption can lead to an over-prediction of the emitted radiation. From a series of numerical experiments using methane as the fuel, it has been found that six bands ($N=6$) provide an accurate representation of the most important radiation bands of the fuel, $\rm CO_2$, and water vapor~\cite{Hostikka:3}. Table~\ref{banditos} through Table~\ref{band_MMA} list the band limits for various fuel species. The location of the bands have been adjusted to accommodate most of the features of the fuels spectra. If the absorption of the fuel is known to be important, separate bands can be reserved for fuel, increasing the total number of bands, $N$. The number of additional bands depends on the fuel, as discussed in Appendix~\ref{absorption_coefficients}.
 \begin{table}[p]
 \caption{Limits of the spectral bands for methane (CH$_4$).}
 \label{banditos}
@@ -338,29 +336,13 @@ difference between that which is absorbed and that which is emitted.
 
 \subsection{Correction of the Emission Source Term}
 
-In calculations of limited spatial resolution, the source term, $I_{\rm b}$,
-defined in Eq.~(\ref{emission_source_term}) requires special treatment in the flaming region of the fire. Typical FDS calculations
-use grid cells that are tens of centimeters in size, and consequently the computed temperatures constitute a bulk average for a given grid cell and are considerably lower than
-one would expect in a diffusion flame.
-Because of its fourth-power dependence on the temperature,
-the source term must be modeled in those grid cells where combustion occurs. Elsewhere, the computed temperature is used directly to compute the source term.
-It is assumed that this ``flaming region'' is where the local heat release rate is non-zero, $\dq'''>0$. In this region, the global radiative fraction model is used. The emission source term is 
-multiplied by a corrective factor, $C$:
+In calculations of limited spatial resolution, the source term, $I_{\rm b}$, defined in Eq.~(\ref{emission_source_term}) requires special treatment in the flaming region of the fire. Typical FDS calculations use grid cells that are tens of centimeters in size, and consequently the computed temperatures constitute a bulk average for a given grid cell and are considerably lower than the maximum temperature in a diffusion flame. Because of its fourth-power dependence on the temperature, the source term must be modeled in those grid cells where combustion occurs. Elsewhere, the computed temperature is used directly to compute the source term. It is assumed that this ``flaming region'' is where the local heat release rate is non-zero, $\dq'''>0$. In this region, the global radiative fraction model is used. The emission source term is multiplied by a corrective factor, $C$:
 \be I_{\rm b,f}(\bx) = C \, \frac{\sigma \, T(\bx)^4}{\pi}   \quad ; \quad
     C = \frac{\sum_{\dq'''_{ijk}>0} \left( \chi_{\rm r} \, \dq'''_{ijk} + \kappa_{ijk} \, U_{ijk} \right) \, \d V}{\sum_{\dq'''_{ijk}>0} \left( 4 \, \kappa_{ijk} \, \sigma \, T^4_{ijk} \right) \, \d V} \label{corrected_emission_source_term}
 \ee
-When the source term defined in Eq.~(\ref{corrected_emission_source_term}) is
-substituted into Eq.~(\ref{net_emission}), the net radiative emission from the flaming region becomes the desired fraction of the total heat release rate.
+When the source term defined in Eq.~(\ref{corrected_emission_source_term}) is substituted into Eq.~(\ref{net_emission}), the net radiative emission from the flaming region becomes the desired fraction of the total heat release rate.
 
-The radiative
-fraction, $\chi_{\rm r}$, is a useful quantity in fire science. It is the nominal fraction of the heat release rate is emitted as thermal radiation. For most combustibles, $\chi_{\rm r}$
-is between 0.3 and 0.4. However, in Eq.~(\ref{corrected_emission_source_term}), $\chi_{\rm r}$ is
-interpreted as the fraction of energy radiated from the flaming
-region.  For a small fire with a base diameter less than approximately 1~m, the local $\chi_{\rm r}$ is
-approximately equal to its global counterpart. However, as the fire
-increases in size, the global value will typically decrease due to a
-net re-absorption of the thermal radiation by the increasing smoke
-mantle.
+The radiative fraction, $\chi_{\rm r}$, is a useful quantity in fire science. It is the nominal fraction of the combustion energy that is emitted as thermal radiation. For most combustibles, $\chi_{\rm r}$ is between 0.3 and 0.4~\cite{Beyler2:SFPE}. However, in Eq.~(\ref{corrected_emission_source_term}), $\chi_{\rm r}$ is interpreted as the fraction of energy radiated from the flaming region.  For a small fire with a base diameter less than approximately 1~m, the local $\chi_{\rm r}$ is approximately equal to its global counterpart. However, as the fire increases in size, the global value will typically decrease due to a net re-absorption of the thermal radiation by the increasing smoke mantle~\cite{Takahashi:1}.
 
 
 
@@ -431,22 +413,21 @@ special treatment, developed by Murthy and Mathur~\cite{Murthy}, is
 applied. In these cases $N_{\phi}(\theta_i)$ is kept constant, and
 the total number of angles is $N_{\Omega} = N_{\theta} \times
 N_{\phi}$. In addition, the angle of the vertical slice of the cylinder is
-chosen to be same as $\delta\phi$.
+chosen to be the same as $\delta\phi$.
 
 
 
 \subsection{Spatial Discretization}
 
-\subsubsection{Derivation}
 
 The grid used for the RTE solver is the same as for the hydrodynamic solver. The radiative transport equation~(\ref{bandRTE}) is solved using
 techniques similar to those for convective transport in finite volume methods for fluid flow~\cite{Raithby}; thus, the name given to it is
-the Finite Volume Method (FVM). More details of the model implementation can be found from~\cite{Hostikka:2008}.
+the Finite Volume Method (FVM). More details of the model implementation are included in Ref.~\cite{Hostikka:2008}.
 
-The thermal radiation spectrum is first divided into bands, as described in section~\ref{RTEsection}.  The procedure outlined below is 
+The thermal radiation spectrum is first divided into bands, as described in section~\ref{RTEsection}.  The procedure outlined below is
 applied for each band of a wide band model, and thus the subscript $n$ has been removed for clarity.
-The unit sphere is then discretized, as described in section~\ref{radiation-discre}. 
-Finally, the computational domain is divided into numerical grid as described in section~\ref{govequations}. 
+The unit sphere is then discretized, as described in section~\ref{radiation-discre}.
+Finally, the computational domain is divided into numerical grid as described in section~\ref{govequations}.
 In each grid cell, a discretized equation is derived by integrating Eq.~(\ref{bandRTE}) over the volume of cell $ijk$ and the control
 angle $\delta \Omega^l$, to obtain
 \be
@@ -455,7 +436,7 @@ angle $\delta \Omega^l$, to obtain
    \int_{\delta \Omega^l} \int_{V_{ijk}} \kappa(\bx') \;
     \left[ I_{\rm b}(\bx') - I(\bx',\bs') \right] \d \bx' \d \bs'
 \ee
-The volume integral on the left hand side is replaced by a surface integral over the cell faces using the divergence theorem. 
+The volume integral on the left hand side is replaced by a surface integral over the cell faces using the divergence theorem.
 \be
   \int_{\delta \Omega^l} \int_{A_{ijk}}
    \left(\bs' \cdot \bn' \right) I(\bx',\bs') \d\bn' \d\bs' =
@@ -494,12 +475,12 @@ a little bit more complicated, as the cell face normal vectors $\bn_m$ are not a
 retained.},
 the normal vectors $\bn_m$ are the base vectors of the coordinate system and the integrals over the solid
 angle do not depend on the physical coordinate, but the direction only. These integrals are denoted as
-\be 
+\be
 D_m^l= \int_{\Omega^l}(\bs' \cdot \bn_m) \d \bs'
 \label{cellfaceintegral}
 \ee
 and the discrete equation becomes
-\be  \sum_{m=1}^6 A_m \; I_m^l \; D_m^l 
+\be  \sum_{m=1}^6 A_m \; I_m^l \; D_m^l
    = \kappa_{ijk} \,
      \left[ I_{{\rm b},ijk} - I_{ijk}^l \right] \; V_{ijk} \,
      \delta \Omega^l   \label{RTEdiscrete3}
@@ -507,13 +488,13 @@ and the discrete equation becomes
 The cell face intensities, $I_m^l$ appearing on the left hand side of (\ref{RTEdiscrete3}) are calculated using a first order
 upwind scheme. Consider, for example, a control angle having a direction vector $\bs$. If the radiation is traveling in the positive
 $x$-direction, i.e., $\bs\cdot {\bf i} \geq 0$, the intensity on the upwind side, $I_{xu}^l$ is assumed to be
-the intensity in the neighboring cell, $I_{i-1\,jk}^l$, and the intensity on the downwind side is the (unknown) intensity in the cell 
+the intensity in the neighboring cell, $I_{i-1\,jk}^l$, and the intensity on the downwind side is the (unknown) intensity in the cell
 itself $I_{ijk}^l$. The discrete RTE can now be written using the upwind intensities $I^l_{xu}$, $I^l_{yu}$ and $I^l_{zu}$ and $I_{ijk}^l$:
-\begin{align}  
+\begin{align}
    \notag A_x \; I_{xu}^l \; D_{xu}^l  & + A_x \; I_{ijk}^l \; D_{xd}^l +  \\
    \notag A_y \; I_{yu}^l \; D_{yu}^l  & + A_y \; I_{ijk}^l \; D_{yd}^l +  \\
    \notag A_z \; I_{zu}^l \; D_{zu}^l  & + A_z \; I_{ijk}^l \; D_{zd}^l  \\
-   & = \kappa_{ijk}\,I_{{\rm b},ijk} V_{ijk} \,\delta \Omega^l   
+   & = \kappa_{ijk}\,I_{{\rm b},ijk} V_{ijk} \,\delta \Omega^l
    - \kappa_{ijk}\,I_{ijk}^l       V_{ijk} \,\delta \Omega^l
 \label{RTEdiscrete4}
 \end{align}
@@ -529,9 +510,6 @@ $D_{xu}^l = -D_{xd}^l$ and the equation can be simplified further. In addition, 
 \\
    \delta \Omega^l & = \int_{\Omega^l} \d \Omega = \int_{\dph}\int_{\dth} \sin\theta \; \d\theta \d\phi
 \end{align}
-
-\subsubsection{Solution procedure}
-
 Equation (\ref{RTEdiscrete4}) for the unknown intensity $I_{ijk}^l$ is written in the form
 \be
   a_{ijk}^l I_{ijk}^l =
@@ -546,18 +524,16 @@ where
   a_{x}^l & = A_x |D_x^l| \\
   a_{y}^l & = A_y |D_y^l| \\
   a_{z}^l & = A_z |D_z^l| \\
-  b_{ijk}^l & = \kappa_{ijk} \; I_{{\rm b},ijk} \; V_{ijk} \; \delta\Omega^l 
+  b_{ijk}^l & = \kappa_{ijk} \; I_{{\rm b},ijk} \; V_{ijk} \; \delta\Omega^l
 \end{align}
-
-\noindent
 Here $\bf i$, $\bf j$ and $\bf k$ are the base vectors of the Cartesian coordinate system. $\theta^+$, $\theta^-$, $\phi^+$ and
 $\phi^-$ are the upper and lower boundaries of the control angle in the polar and azimuthal directions, respectively, and $\Delta\theta =
-\theta^+ - \theta^-$ and $\Delta\phi = \phi^+ - \phi^-$. 
+\theta^+ - \theta^-$ and $\Delta\phi = \phi^+ - \phi^-$.
 
 The solution method of (\ref{RTEdiscrete4}) is based on an explicit marching sequence~\cite{Kim}. The marching direction depends on the
 propagation direction of the radiation intensity. As the marching is done in the ``downwind'' direction, the ``upwind'' intensities in all
 three spatial directions are known, and the intensity $I_{ijk}^l$ can be solved directly from an algebraic equation. In the first cell to be solved,
-all the upwind intensities are determined from solid or gas phase boundaries. In theory, iterations are needed if the reflections 
+all the upwind intensities are determined from solid or gas phase boundaries. In theory, iterations are needed if the reflections
 or scattering are important, or if the scenario is optically very thick. Currently, no iterations are made.
 
 \subsection{Boundary Conditions}
@@ -694,7 +670,7 @@ becomes
 where the source function is based on the average particle temperature within a cell.
 
 
-\subsection{Forward fraction of scattering}
+\subsection{Forward Fraction of Scattering}
 \label{forward_fraction}
 
 The computation of $\chi_{\rm f}$ for a similar but simpler situation has been derived in Ref.~\cite{Yang:3}. It can be shown that here
@@ -725,27 +701,13 @@ The limits of the innermost integral are
 \ee
 
 
-\subsection{Solution procedure}
+\subsection{Solution Procedure}
 
-The absorption and scattering coefficients, $\kappa_{\rm p}$ and $\overline{\sigma}_{\rm p}$ are not calculated during the simulation again and again. Instead, they
-are tabulated in the beginning of the simulation for each band and a range of different mean particle radii $r_{32}$.
-The averaged quantities, now functions of $r_{32}$ only, are stored in one-dimensional arrays.
-During the simulation, the local properties are found by table look-up using the local Sauter mean droplet diameter, $r_{32}(\bx)$.
+The absorption and scattering coefficients, $\kappa_{\rm p}$ and $\overline{\sigma}_{\rm p}$ are not repeatedly calculated during the simulation. Instead, they are tabulated at the beginning of the simulation for each band and a range of different Sauter mean diameters, $r_{32}$. The averaged quantities, now functions $r_{32}$ only, are stored in one-dimensional arrays. During the simulation, the local properties are found by table look-up.
 
-In the band integration of $\kappa_{\rm p}$ and $\overline{\sigma}_{\rm p}$, a constant ``radiation'' temperature, $T_{\rm rad}$, is used
-to provide the wavelength weighting (Planck function).  $T_{\rm rad}$ should be selected to represent a typical radiating flame
-temperature. A value of 1173~K is used by default.
+In the band integration of $\kappa_{\rm p}$ and $\overline{\sigma}_{\rm p}$, a constant ``radiation'' temperature, $T_{\rm rad}$, is used to provide the wavelength weighting (Planck function).  $T_{\rm rad}$ should be selected to represent a typical radiating flame temperature. A value of 1173~K is used by default.
 
-The absorption and scattering efficiencies $Q_{\rm a}$ and $Q_{\rm s}$, and the scattering phase
-function $P_0(\theta_{\rm p},\la)$ are calculated using the MieV code developed by Wiscombe~\cite{Wiscombe}.
-The spectral properties of the particles can be specified in terms of wavelength dependent complex refractive index.
-Pre-compiled data are included for water and a generic hydrocarbon fuel based on diesel and heptane properties.
-In case of water, the values of the imaginary part of the complex refractive index (related to absorption coefficient) are taken from
-Ref.~\cite{Hale:1}, and value 1.33 is used for the real part.
-For fuel, the droplet spectral properties are taken from~\cite{Dombrovsky:1}, who measured the refractive index
-of a diesel fuel and compared the values with those of heptane. The diesel properties are used for the real part of the refractive index. For the complex
-part, the heptane properties are used to avoid the uncertainty associated with different types of diesel oils. Usually, the radiative properties
-of the particle cloud are much more sensitive to the particle size and concentration than to values of the refractive index.
+The absorption and scattering efficiencies, $Q_{\rm a}$ and $Q_{\rm s}$, and the scattering phase function $P_0(\theta_{\rm p},\la)$, are calculated using the MieV code developed by Wiscombe~\cite{Wiscombe}. The spectral properties of the particles can be specified in terms of a wavelength-dependent complex refractive index. Pre-compiled data are included for water and a generic hydrocarbon fuel based on diesel fuel and heptane. For water, the values of the imaginary part of the complex refractive index (related to the absorption coefficient) are taken from Ref.~\cite{Hale:1}, and a value of 1.33 is used for the real part. For fuel, the droplet spectral properties are taken from Ref.~\cite{Dombrovsky:1}, which includes measurements of the refractive index of a diesel fuel and a comparison of the values with those of heptane. The diesel properties are used for the real part of the refractive index. For the complex part, the heptane properties are used to avoid the uncertainty associated with different types of diesel fuels. Usually, the radiative properties of the particle cloud are more sensitive to the particle size and concentration than to values of the refractive index.
 
 
 
