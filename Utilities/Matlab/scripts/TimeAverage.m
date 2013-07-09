@@ -73,12 +73,6 @@ else
     end
 end
 
-
-for i = 2:u
-    figure;
-    plot(M(:,1),M(:,i),N(:,1),N(:,i))
-end
-
 %Re-reads the data file, this time to acquire the text data. 
 [A,B,J] = xlsread(in);
 
