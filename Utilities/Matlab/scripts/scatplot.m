@@ -507,7 +507,7 @@ if stats_output == 2
     fprintf(fid, '%s\n', '\begin{center}');
     fprintf(fid, '%s\n', '\begin{longtable}{|l|c|c|c|c|c|}');
     fprintf(fid, '%s\n', '\caption[Summary statistics]{Summary statistics for all quantities of interest}');
-    fprintf(fid, '%s\n', '\hline');
+    fprintf(fid, '%s\n', '\\ \hline');
     fprintf(fid, '%s\n', 'Quantity & Datasets  & Points    & $\widetilde{\sigma}_E$ & $\widetilde{\sigma}_M$ & Bias \\ \hline \hline');
     fprintf(fid, '%s\n', '\endfirsthead');
     fprintf(fid, '%s\n', '\hline');
@@ -532,8 +532,8 @@ if stats_output == 2
         fprintf(fid, '%s', num2str(sigma_m, '%0.2f'), ' & ');
         fprintf(fid, '%s%s\n', num2str(bias, '%0.2f'), ' \\ \hline');
     end
-    fprintf(fid,'%s\n','\label{summary_stats}');
     fprintf(fid,'%s\n','\end{longtable}');
+    fprintf(fid,'%s\n','\label{summary_stats}');
     fprintf(fid,'%s\n','\end{center}');
 end
 
