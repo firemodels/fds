@@ -39,12 +39,12 @@ In fire scenarios, $\eta$ is usually on the order of one millimeter.  DNS is the
 
 \subsection{The LES Momentum Equation}
 
-With engineering domains ranging in size from meters to kilometers, the affordable grid resolution for most LES fire calculations ranges from centimeters to meters.  The goal of the LES is to evolve the cell mean values of mass, momentum, and energy explicitly, while accounting for the effects that subgrid transport and chemistry have on the mean fields.  To this end, we apply the box filter to the DNS equations to obtain the filtered equations.  As an example, consider the momentum equation.  Applying Eq.~(\ref{eqn_box_filter}) to Eq.~(\ref{eqn_dns_conservative}) results in
+For length scales ranging in size from meters to kilometers, the affordable grid resolution for most LES fire calculations ranges from centimeters to meters.  The goal of the LES is to evolve the cell mean values of mass, momentum, and energy explicitly, while accounting for the effects that subgrid transport and chemistry have on the mean fields.  To this end, we apply the box filter to the DNS equations to obtain the filtered equations.  As an example, consider the momentum equation.  Applying Eq.~(\ref{eqn_box_filter}) to Eq.~(\ref{eqn_dns_conservative}) results in
 \begin{equation}
 \label{eqn_LES_1}
 \frac{\partial \overline{\rho u_i}}{\partial t} + \frac{\partial}{\partial x_j} (\overline{\rho u_i u_j}) = -\frac{\partial \overline{p}}{\partial x_i} - \frac{\partial \overline{\tau}_{ij}}{\partial x_j} + \overline{\rho} g_i + \bar{f}_{{\rm d},i} + \overline{\dot{m}_{\rm b}^\ppp u_{{\rm b},i}}
 \end{equation}
-Simple enough, we just put lines over everything.  The dilemma we now face is that the cell mean value $\overline{\rho u_i u_j}$ is not itself a primitive variable in the calculation---we have no way of computing the stuff under the bars to advance Eq.~(\ref{eqn_LES_1}) in time.  We must, therefore, decompose the terms, and this leads to closure problems.
+The cell mean value, $\overline{\rho u_i u_j}$, is not itself a primitive variable in the calculation---we have no way of computing the term under the bar to advance Eq.~(\ref{eqn_LES_1}) in time.  We must, therefore, decompose the terms, and this leads to closure problems.
 
 The next step is simply to apply the Favre filter,
 \begin{equation}
@@ -108,8 +108,7 @@ The transport equation for the resolved kinetic energy per unit mass, $K\equiv \
 \overline{\rho} \,\DoD{K}{t} &= -\widetilde{u}_i\frac{\partial \bar{p}}{\partial x_i} - \widetilde{u}_i\frac{\partial \tau_{ij}^{\rm dev}}{\partial x_j} + (\overline{\rho} g_i + \bar{f}_{b,i}) \widetilde{u}_i \notag \\
 \overline{\rho} \,\DoD{K}{t} + \frac{\partial}{\partial x_j} ([\bar{p}\delta_{ij} + \tau_{ij}^{\rm dev}]\widetilde{u}_i) &=  \bar{p} \frac{\partial \widetilde{u}_i}{\partial x_i} + \tau_{ij}^{\rm dev}\frac{\partial \widetilde{u}_i}{\partial x_j} + (\overline{\rho} g_i + \bar{f}_{{\rm b},i}) \widetilde{u}_i
 \end{align}
-The terms on the left hand side represent transport.  The terms on the right hand side are sources or sinks of kinetic energy.  Of particular interest in LES is the \emph{production of subgrid kinetic energy}, buried in the second RHS term.  The effect of this term is to transfer energy between the resolved and unresolved scales of motion.  In the classical picture of the ``energy cascade'', the net transfer of energy is from large to small scales, where ultimately the motions are dissipated as heat by viscosity.  In LES, however, this term may also be a source of energy, a phenomenon called \emph{backscatter}.  An issue that makes designing subgrid closures for LES challenging is that, far from being the exception, backscatter is ubiquitous and often critical to the formation of large-scale motions (think of subgrid buoyancy-generated turbulence, e.g., the Rayleigh-Taylor instability).
-
+The terms on the left hand side represent transport.  The terms on the right hand side are sources or sinks of kinetic energy.  Of particular interest in LES is the \emph{production of subgrid kinetic energy}, buried in the second RHS term.  The effect of this term is to transfer energy between the resolved and unresolved scales of motion.  In the classical picture of the ``energy cascade'', the net transfer of energy is from large to small scales, where ultimately the motions are dissipated as heat by viscosity.  In LES, however, this term may also be a source of energy, a phenomenon called \emph{backscatter}.  An issue that makes designing subgrid closures for LES challenging is that, far from being the exception, backscatter is ubiquitous and often critical to the formation of large-scale motions (think of subgrid buoyancy-generated turbulence, e.g., the Rayleigh-Taylor instability)~\cite{Piomelli:1991}. 
 Most simple LES subgrid closures take production of subgrid kinetic energy to be equal to the dissipation of total kinetic energy.  Using gradient diffusion for SGS closure, this assumption implies the following:
 \begin{align}
 \label{eqn_ke_dissipation}
@@ -119,19 +118,19 @@ Most simple LES subgrid closures take production of subgrid kinetic energy to be
 \end{align}
 Using a model kinetic energy spectrum (see \cite{Pope:2000}), Eq.~(\ref{eqn_ke_dissipation}) can be used to derive theoretical values for model constants, such as the Smagorinsky constant, discussed below.
 
-\newpage
+
 \section{Models for the Turbulent Viscosity}
 \label{section:turbulent_viscosity}
 
-In LES, the ``turbulence model'' refers to the closure for SGS flux terms.  In FDS, \emph{gradient diffusion} is the turbulence model used to close both the SGS momentum and scalar flux terms.  We then require a model for the turbulent transport coefficient: the turbulent (or eddy) viscosity or the turbulent (or eddy) diffusivity.  The turbulent diffusivity is obtained using a constant Schmidt number (for mass diffusivity) or Prandtl number (for thermal diffusivity), as discussed below, and so the most important transport coefficient is the turbulent viscosity, $\mu_t$. There are several different options available in FDS. Following is a description of each. The Deardorff model, Section \ref{sec:deardorff}, is the default.
+In LES, the ``turbulence model'' refers to the closure for SGS flux terms.  In FDS, \emph{gradient diffusion} is the turbulence model used to close both the SGS momentum and scalar flux terms.  We then require a model for the turbulent transport coefficient: the turbulent (or eddy) viscosity or the turbulent (or eddy) diffusivity.  The turbulent diffusivity is obtained using a constant Schmidt number (for mass diffusivity) or Prandtl number (for thermal diffusivity), as discussed below, and so the most important transport coefficient is the turbulent viscosity, $\mu_{\rm t}$. There are several different options available that are described in this section. The Deardorff model, Section~\ref{sec:deardorff}, is the default. Its selection as the default was based on comparisons with a wide variety of full-scale experiments.
 
 \subsection{Constant Coefficient Smagorinsky Model}
 
-Following the analysis of Smagorinsky~\cite{Smagorinsky:1}, the eddy viscosity is modeled by
+Following the analysis of Smagorinsky~\cite{Smagorinsky:1}, the eddy viscosity can be modeled as follows:
 \be
 \mu_t = \rho \, (C_{\rm s}\, \Delta)^2 \, |S| \label{constant_coef_LES} \quad ; \quad |S| = \left(2 S_{ij}S_{ij} - \frac{2}{3} (\nabla\!\cdot \bu)^2 \right)^\ha
 \ee
-where $C_{\rm s}=0.2$ is a constant and $\Delta = (\delta x \, \delta y \, \delta z)^{1/3}$ is the filter width.
+where $C_{\rm s}=0.2$ is a constant and $\Delta = (\delta x \, \delta y \, \delta z)^{1/3}$ is the filter width. This model was used in FDS versions 1 through 5. 
 
 \subsection{Dynamic Smagorinsky Model}
 
@@ -413,19 +412,18 @@ Generally, this requires an iterative procedure since $\tau_w$ is needed to defi
 
 The turbulent viscosity $\nu_{\rm t} = \mu_{\rm t}/\rho$ may be thought of as a ``mixing length'' squared divided by a time scale.  For example, in the Smagorinsky model the mixing length is $\ell_{\rm mix} = C_{\rm s} \,\Delta$ and the time scale is the inverse of the strain rate invariant $1/|S|$.  Thus, the turbulent kinematic viscosity has units of length$^2$/time.
 
-To achieve the correct decay of the Reynolds stresses near a wall, Van Driest (see \cite{Wilcox:1}) proposed the following modification:
+To achieve the correct decay of the Reynolds stresses near a wall, Van Driest~\cite{Wilcox:1} proposed the following modification:
 \begin{equation}
 \label{eqn_vdf}
 \ell_{\rm mix} = C_{\rm s} \Delta \left[ 1 - \mathrm{e}^{-y^+/A} \right]
 \end{equation}
-where $A=26$.  The additional factor (in brackets) we refer to as the Van Driest damping function.
-
-In FDS, due to difficulties defining a consistent test filter (for use with either Deardorff or the dynamic model) near the wall, at corners, and inside cavities, the turbulent viscosity of the first off-wall cell is obtained from the Smagroinsky model with Van Driest damping of the mixing length as shown in Eq.~(\ref{eqn_vdf}) with $y^+ = (\delta y/2)/\delta_\nu$ and $C_{\rm s} = 0.2$.  The viscosity is then given by\begin{equation}
-\label{eqn_nearwall_viscosity}
-\nu_{\rm t} = \ell_{\rm mix}^{\,2}\,|S|
+where $A$ is a dimensionless empirical constant equal to 26.  The term in brackets is referred to as the {\em Van Driest damping function}. In FDS, due to difficulties defining a consistent test filter for use with either the Deardorff or the dynamic Smagorinsky turbulence model near the wall, at corners, and inside cavities, the turbulent viscosity of the first off-wall cell is obtained from the Smagorinsky model with Van Driest damping applied to the mixing length as shown in Eq.~(\ref{eqn_vdf}) with $y^+ = (\delta y/2)/\delta_\nu$ and $C_{\rm s} = 0.2$.  See Section~\ref{smooth_wall_model} for an explanation of terms. The viscosity near the wall is then given by
+\begin{equation}
+   \nu_{\rm t} = \ell_{\rm mix}^{\,2}\,|S|  \label{eqn_nearwall_viscosity}
 \end{equation}
+where the strain rate, $|S|$, is defined in Eq.~(\ref{constant_coef_LES}).
 
-\newpage
+
 \section{Time Step and Stability Constraints}
 \label{stability}
 
@@ -437,7 +435,7 @@ The well-known CFL constraint given by
 \begin{equation}
 \mbox{CFL} = \delta t \frac{\|\mathbf{u}\|}{\delta x} \approx 1
 \end{equation}
-places a restriction on the time step due to the advection velocity. Physically, the constraint says that a fluid element should not traverse more than one cell within a time step. For LES, this constraint has the added advantage of keeping the implicit temporal and spatial filters consistent with each other.  In other words, in order to resolve an eddy of size $\delta x$, the time step needs to be in concert with the CFL.  If one were to employ an implicit scheme for purpose of taking time steps say 10 times larger than the CFL limit, the smallest resolvable turbulent motions would then be roughly 10 times the grid spacing, which would severely limit the benefit of the LES.  In most cases, if one wishes the simulation to run faster, a better strategy is to coarsen the grid resolution while keeping the CFL $\approx 1$.
+places a restriction on the time step due to the advection velocity. Physically, the constraint says that a fluid element should not traverse more than one cell within a time step. For LES, this constraint has the added advantage of keeping the implicit temporal and spatial filters consistent with each other.  In other words, in order to resolve an eddy of size $\delta x$, the time step needs to be in concert with the CFL.  If one were to employ an implicit scheme for the purpose of taking time steps say 10 times larger than the CFL limit, the smallest resolvable turbulent motions would then be roughly 10 times the grid spacing, which would severely limit the benefit of LES.  In most cases, if one wishes the simulation to run faster, a better strategy is to coarsen the grid resolution while keeping the CFL $\approx 1$.
 
 The exact CFL needed to maintain stability depends on the order (as well as other properties) of the time integration scheme and the choice of velocity norm. Three choices for velocity norm are available in FDS (set on \textct{MISC}):
 \vskip\baselineskip
@@ -510,7 +508,7 @@ Note that this is the analog of the positive mass density constraint when the di
 
 \subsection{Heat Transfer Constraint}
 
-Note that the heat transfer coefficient, $h$, has units of W/(m$^2$\,K).  Thus, a velocity scale may be formed from $h/(\rho\, c_p)$.  Anytime we have a velocity scale to resolve we have a CFL-type stability restriction.  Therefore, the heat transfer stability check loops over all wall cells to ensure $\delta t \le \delta x \,\rho \,c_p/h$.  This check is an option. It is not done by default.
+Note that the heat transfer coefficient, $h$, has units of W/(m$^2$\,K).  Thus, a velocity scale may be formed from $h/(\rho\, c_p)$.  Anytime we have a velocity scale to resolve, we have a CFL-type stability restriction.  Therefore, the heat transfer stability check loops over all wall cells to ensure $\delta t \le \delta x \,\rho \,c_p/h$.  This check is an option. It is not done by default.
 
 \subsection{Adjusting the Time Step}
 
@@ -520,7 +518,7 @@ In the default LES mode of operation, the CFL is increased or decreased to remai
 \end{equation}
 In DNS mode, the time step is also adjusted to maintain VN between 0.4 and 0.5. If either the CFL or VN is too large then the new time step is set to 90\% of the allowable value.  If both CFL and VN are below their minimum values then the current time step is increased by 10\%.  See the User's Guide~\cite{FDS_Users_Guide} for details.
 
-\newpage
+
 \section{The Equation for Pressure (Poisson Equation)}
 
 An elliptic partial differential equation (known as a Poisson equation) is obtained by
@@ -714,8 +712,7 @@ For the corrector step, the procedure is the same, except the boundary condition
 \be
    \cH_B = \frac{\cH_I^{\rm old} + \cH_1^{\rm old} }{2} + \frac{\dx}{2\, \dt} \left( u_I^{n+1,\,{\rm old}}-u_0^{n+1,\,{\rm old}} \right)
 \ee
-
-\paragraph{Velocity Tolerance} The default velocity tolerance is $\left| u_I^* - u_0^* \right| < 0.5 \, \delta x$ and the default maximum number of pressure iterations is 10.  Both of these parameters may be changed on the \textct{PRES} line.
+The default velocity tolerance is $\left| u_I^* - u_0^* \right| < 0.5 \, \delta x$ and the default maximum number of pressure iterations is 10.  Both of these parameters can be changed by the user. Details can be found in the FDS User's Guide~\cite{FDS_Users_Guide}.
 
 
 

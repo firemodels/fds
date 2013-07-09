@@ -26,24 +26,16 @@ into a ``background'' component and a perturbation. It is assumed that
 the background component of pressure can differ from compartment to compartment. If
 a volume within the computational domain is isolated from other volumes, except via leak paths or ventilation ducts, it is referred to as a ``pressure zone'' and assigned its own background pressure. The pressure field within the $m$th zone, for example, is a linear combination
 of its background component and the flow-induced perturbation:
-\be p(\bx,t) = \bp_m(z,t) + \tp(\bx,t) \ee
-Note that the background pressure is a function of $z$, the vertical spatial coordinate, and time. For most
-compartment fire applications, $\bp_m$ changes very little with height or time. However, for situations where the pressure
-increases due to a fire in a tightly sealed enclosure, or when the height of the domain is significant, $\bp_m$ takes these effects into
-account~\cite{Baum:5}. The ambient pressure field is denoted $\bp_0(z)$. Note that the subscript 0 denotes the exterior of the computational domain, not
-time 0. This is the assumed atmospheric pressure stratification that serves as both
-the initial and boundary condition for the governing equations.
+\be 
+   p(\bx,t) = \bp_m(z,t) + \tp(\bx,t) 
+\ee
+Note that the background pressure is a function of $z$, the vertical spatial coordinate, and the time, $t$. For most compartment fire applications, $\bp_m$ changes very little with height or time. However, for scenarios where a fire increases the pressure in a closed compartment, or where the HVAC system affects the pressure, or when the height of the domain is significant, $\bp_m$ takes these effects into account~\cite{Baum:5}. The ambient pressure field is denoted $\bp_0(z)$. Note that the subscript 0 denotes the exterior of the computational domain, not time 0. This is the assumed atmospheric pressure stratification that serves as both the initial and boundary condition for the governing equations.
 
-The purpose of decomposing the pressure is that for low Mach number flows, it can be assumed that the temperature and density are inversely
-proportional, and thus the equation of state (in the $m$th pressure zone) can be approximated
-\be \bp_m  =  \rho T \R \sum_\alpha \frac{Z_\alpha}{W_\alpha} = \frac{\rho T \R}{ \bW }  \label{state} \ee
-Recall from Section~\ref{sec_lumped_species} that $Z_\alpha$ is the mass fraction of lumped species $\alpha$.
-The pressure, $p$, in the state and energy equations is replaced by the background pressure $\bp_m$ to filter out sound waves
-that travel at speeds that are much faster
-than typical flow speeds expected in fire applications. The low Mach number assumption serves two purposes. First, the filtering of acoustic waves
-means that the time step in the numerical algorithm is bound only by the flow speed as opposed to the speed of sound, and second, the modified state
-equation leads to a reduction in the number of dependent variables in the system of equations by one. The energy equation (\ref{energy}) is not
-explicitly solved; rather, its source terms are included in the expression for the flow divergence, to be discussed later in the chapter.  When the velocity field satisfies the specified thermodynamic divergence, the conservative form of the sensible enthalpy equation is satisfied by construction.
+The purpose of decomposing the pressure is that for low Mach number flows, it can be assumed that the temperature and density are inversely proportional, and thus the equation of state (in the $m$th pressure zone) can be approximated as
+\be 
+   \bp_m  =  \rho T \R \sum_\alpha \frac{Z_\alpha}{W_\alpha} = \frac{\rho T \R}{ \bW }  \label{state} 
+\ee
+Recall from Section~\ref{sec_lumped_species} that $Z_\alpha$ is the mass fraction of lumped species $\alpha$. The pressure, $p$, in the state and energy equations is replaced by the background pressure $\bp_m$ to filter out sound waves that travel at speeds that are much faster than typical flow speeds expected in fire applications. The low Mach number assumption serves two purposes. First, the filtering of acoustic waves means that the time step in the numerical algorithm is bound only by the flow speed as opposed to the speed of sound, and second, the modified state equation leads to a reduction in the number of dependent variables in the system of equations by one. The energy equation (\ref{energy}) is not explicitly solved; rather, its source terms are included in the expression for the flow divergence, to be discussed later in the chapter.  When the velocity field satisfies the specified thermodynamic divergence, the conservative form of the sensible enthalpy equation is satisfied by construction.
 
 The stratification of the atmosphere is derived from the relation
 \be \frac{\d \bp_0}{\d z} = - \rho_0(z) \, g  \ee
@@ -62,16 +54,13 @@ It can then be shown that for $\Gamma \ne 0$ the pressure stratification becomes
 
 \section{Mass and Species Transport}
 
-The density and species transport equations are solved using the same basic predictor-corrector scheme.
-Advection terms are written in flux divergence (conservative) form. In the predictor step, the density in cell $ijk$ at time level $n+1$ is estimated based on information at the $n$th level
+The density and species transport equations are solved using the same basic predictor-corrector scheme. Advection terms are written in flux divergence (conservative) form. In the predictor step, the density in cell $ijk$ at time level $n+1$ is estimated based on information at the $n$th level
 \be
     \label{eqn_density_fl}
     \frac{\rho_{ijk}^{*}-\rho_{ijk}^n}{\dt}
     + \nabla\!\cdot(\overline{\rho}^{\rm FL} \mathbf{u})_{ijk}^n = 0
 \ee
-The quantity $\overline{\rho}^{\rm FL}$ indicates a \emph{flux limiter} applied to the cell face value, as discussed below in Section \ref{sec_flux_limiters}.
-
-Following the prediction of the velocity and background pressure at time level $n+1$, the density is corrected via
+The quantity $\overline{\rho}^{\rm FL}$ indicates a \emph{flux limiter} applied to the cell face value, as discussed below in Section \ref{sec_flux_limiters}. Following the prediction of the velocity and background pressure at time level $n+1$, the density is corrected via
 \be \frac{\rho_{ijk}^{n+1}-\ha\left(\rho_{ijk}^n
      +\rho_{ijk}^{*}\right)} {\ha \dt}
     + \nabla\!\cdot(\overline{\rho}^{\rm FL} \mathbf{u})_{ijk}^{*}
@@ -93,7 +82,7 @@ Mass source terms due to chemistry, evaporation, or pyrolysis are time split and
 \subsection{Flux Limiters}
 \label{sec_flux_limiters}
 
-A \emph{flux limiter} is a form of interpolation scheme which depends on the local state of the flow field and scalar data. Simple linear interpolation of the cell-centered scalar data to the cell face would result in a central difference scheme.  Such purely centered schemes are known to generate intolerable levels of dispersion error (spurious wiggles) leading to unphysical results such as negative densities or mass fractions outside the range of [0,1].  To address this issue, FDS relies on two schemes: a \emph{flux limiter} (discussed below), which handles the bulk of the problem, and a \emph{flux correction} (see Appendix~\ref{app_boundedness}) which adds the minimum amount of numerical diffusion to maintain boundedness.
+A \emph{flux limiter} is an interpolation scheme for defining mass fluxes at cell faces. Simple linear interpolation of the cell-centered scalar variables to the cell face would result in a central difference scheme.  Such purely centered schemes are known to generate intolerable levels of dispersion error (spurious wiggles) leading to unphysical results such as negative densities or mass fractions outside the range of [0,1].  To address this issue, FDS relies on two schemes: a \emph{flux limiter} (discussed below) that handles the bulk of the problem, and a \emph{flux correction} (see Appendix~\ref{app_boundedness}) that adds the minimum amount of numerical diffusion to maintain boundedness.
 
 For uniform flow velocity, a fundamental property of the exact solution to the equations governing scalar transport is that the total variation of the scalar field (the sum of the absolute values of the scalar differences between neighboring cells) is either preserved or diminished (never increased).  In other words, no new extrema are created.  Numerical schemes which preserve this property are referred to as total variation diminishing (TVD) schemes.  The practical importance of using a TVD scheme for fire modelling is that such a scheme is able to accurately track coherent vortex structure in turbulent flames and does not develop spurious reaction zones.
 
@@ -141,7 +130,7 @@ The MP5 scheme of Suresh and Huynh \cite{Suresh:1997} is based on the keen obser
 
 \subsubsection{Notes on Implementation}
 
-In practice, we set $r=0$ initially and only compute $r$ if the denominator is not zero.  Note that for $\delta \phi_{loc}=0$ it does not matter which limiter (0-3) is used: all the limiters yield the same scalar face value.  For CHARM, we set both $r=0$ and $B=0$ initially and only compute $B$ if $r>0$ (this requires data variations to have the same sign). Otherwise, CHARM reduces to Godunov's scheme.
+In practice, we set $r=0$ initially and only compute $r$ if the denominator is not zero.  Note that for $\delta \phi_{loc}=0$, it does not matter which limiter is used: all the limiters yield the same scalar face value.  For CHARM, we set both $r=0$ and $B=0$ initially and only compute $B$ if $r>0$ (this requires data variations to have the same sign). Otherwise, CHARM reduces to Godunov's scheme.
 
 The Central Difference, Godunov, and MINMOD limiters are included for completeness, debugging, and educational purposes.  These schemes have little utility for typical FDS applications.
 
@@ -171,7 +160,7 @@ At a solid boundary, the surface temperature, $T_{\rm w}$, is either specified o
 \be
    k \frac{T_{\rm g} - T_{\rm w}}{\dn/2} = h \; (T_{\rm g}-T_{\rm w})  \label{ebal}
 \ee
-where $\dn/2$ is the distance between the center of the gas cell and the surface. The convective heat transfer coefficient, $h$, is described in Section~\ref{conflux}. For a DNS calculation, the convective heat transfer is determined directly from the computed or specified surface temperature.
+where $\dn/2$ is the distance between the surface and the center of the adjacent gas phase cell. The convective heat transfer coefficient, $h$, is described in Section~\ref{conflux}. For a DNS calculation, the convective heat transfer is determined directly from the computed or specified surface temperature.
 
 There is no transfer of mass at a solid boundary; thus, the boundary value for the species mixture $\alpha$ is simply
 \be Z_{\rm \alpha,w} = Z_{\rm \alpha,g} \ee
@@ -244,7 +233,7 @@ D &= \frac{1}{\rho c_p T}\left[ \dot{q}^\ppp + \dot{q}_{\rm b}^\ppp + \dot{q}_{\
 \subsection{Mass and Energy Source Terms}
 \label{div_source_terms}
 
-The volumetric source terms in the divergence expression require extended discussion.  The heat of combustion, $\dq^\ppp$, and the mean chemical source term, $\dot{m}_\alpha^\ppp$, are detailed in Chapter~\ref{chapter:combustion}, Combustion.    The radiative source, $\dq_{\rm r}^\ppp$, is discussed in Chapter~\ref{chapter:radiation}, Thermal Radiation.  The bulk heat source from Lagrangian particles, $\dq_{\rm b}^\ppp$, which accounts for convective cooling and radiative absorption, is discussed in Chapter~\ref{chapter:lagrangian_particles}, Lagrangian Particles.  The bulk mass source from Lagrangian particles, $\dot{m}_{\rm b,\alpha}^\ppp$, is also found in Chapter~\ref{chapter:lagrangian_particles}.
+The volumetric source terms in the divergence expression require extended discussion.  The heat release rate per unit volume, $\dq'''$, and the mass generation rate of species $\alpha$ per unit volume, $\dot{m}_\alpha'''$, are detailed in Chapter~\ref{chapter:combustion}, Combustion. The radiative source, $\dq_{\rm r}'''$, is discussed in Chapter~\ref{chapter:radiation}, Thermal Radiation.  The bulk heat source from Lagrangian particles, $\dq_{\rm b}'''$, which accounts for convective heat transfer and radiative absorption, is discussed in Chapter~\ref{chapter:lagrangian_particles}, Lagrangian Particles.  The bulk mass source from Lagrangian particles, $\dot{m}_{\rm b,\alpha}'''$, is also found in Chapter~\ref{chapter:lagrangian_particles}.
 
 \subsection{Diffusion Terms}
 \label{div_discret}
@@ -270,11 +259,11 @@ The mean cell gas temperature, $T$, is derived from the density and species mass
 
 \subsection{Sensible Enthalpy}
 
-The sensible enthalpy is a function of the temperature:
+The sensible enthalpy of the gas is a mass-weighted average of the enthalpies of the lumped species (denoted by $\alpha$), which are in turn a mass-weighted average of the enthalpies of the individual gas species (denoted by $n$):
 \be
-  h_{\rm s} = \sum_\alpha Z_\alpha h_{\rm s,\alpha} \quad;\quad  h_{\rm s,\alpha}=\sum_n Y_n h_{{\rm s},n}  \quad; \quad h_{{\rm s},n}(T)=\int_{T_0}^T c_{p,n}(T') \,\mbox{d}T'
+  h_{\rm s} = \sum_\alpha Z_\alpha \, h_{\rm s,\alpha} \quad;\quad  h_{\rm s,\alpha}=\sum_n Y_n \, h_{{\rm s},n}  \quad; \quad h_{{\rm s},n}(T)=\int_{T_0}^T c_{p,n}(T') \, \mbox{d}T'
 \ee
-The values of $h_{{\rm s},n}$ and $c_{p,n}$ for the primitive gas species are obtained by table lookup from the NIST-JANAF tables~\cite{NIST_JANAF}. The values are taken to the nearest degree Kelvin.
+The values of $h_{{\rm s},n}$ and $c_{p,n}$ for the individual gas species are obtained by table lookup from the NIST-JANAF tables~\cite{NIST_JANAF}. The values are taken to the nearest degree Kelvin.
 
 \subsection{Computing the Background Pressure Rise}
 
