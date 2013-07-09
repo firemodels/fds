@@ -10,19 +10,15 @@ This chapter presents the governing equations of FDS and an outline of the gener
 \item Explicit, second-order, kinetic-energy-conserving numerics
 \item Structured, uniform, staggered grid
 \item Simple immersed boundary method for treatment of flow obstructions
-\item Generalized ``lumped species'' method (simplified reaction progress variable approach)
+\item Generalized ``lumped species'' method (simplified chemistry using a reaction progress variable)
 \item Deardorff eddy viscosity subgrid closure
 \item Constant turbulent Schmidt and Prandtl numbers
 \item Eddy dissipation concept (fast chemistry) for single-step reaction between fuel and oxidizer
 \item Gray gas radiation with finite volume solution to the radiation transport equation
 \end{itemize}
-The model, however, is not limited to these simple algorithms. For example, the user may specify multiple reactions, finite-rate chemistry, a wide-band radiation model, and a variety of other special features. The more detailed physics incur increased computational cost and it is incumbent on the user to justify the added expense in terms of improved accuracy.  The default model options have been selected based on results from a wide variety of full-scale validation experiments \cite{FDS_Validation_Guide}.
+The model, however, is not limited to these simple algorithms. For example, the user may specify multiple reactions, finite-rate chemistry, a wide-band radiation model, and a variety of other special features. The more detailed physics incur increased computational cost and it is incumbent on the user to justify the added expense in terms of improved accuracy for a particular application.  The default model options have been selected based on results from a wide variety of full-scale validation experiments \cite{FDS_Validation_Guide}.
 
-The algorithm outlined below has evolved over roughly three decades. Initially, it was designed to study buoyant plumes in the
-Boussinesq limit; that is, the fluid was assumed incompressible but included a source term for buoyancy. This approach was based
-on a long tradition in fire research of modeling smoke movement using dyed salt water introduced into a tank filled with fresh
-water. Eventually, this approach proved too limiting, but some of the major features of the algorithm, like the low
-Mach number approximation, were retained.
+The algorithm outlined below has evolved over roughly three decades. Initially, it was designed to study buoyant plumes in the Boussinesq limit; that is, the fluid was assumed incompressible but included a source term for buoyancy. This approach was based on a long tradition in fire research of modeling smoke movement using dyed salt water introduced into a tank filled with fresh water. Eventually, this approach proved too limiting, but some of the major features of the algorithm, like the low Mach number approximation, were retained.
 
 \section{LES Formalism}
 \label{filteredfields}
@@ -53,20 +49,7 @@ The governing equations are approximated using second-order accurate finite diff
 \section{Mass and Species Transport}
 \label{sec_lumped_species}
 
-The most basic description of the chemistry of fire is a reaction of a hydrocarbon fuel with oxygen that produces carbon dioxide and water vapor. Because fire is a relatively
-inefficient combustion process involving multiple fuel gases that contain more than just carbon and hydrogen atoms, the number of gas species to keep track of in the simulation
-is almost limitless. However, to make the simulations tractable, we limit the number of fuels to one, usually, and the number of reactions to just one or two. We also leave open
-the possibility that the reaction may not proceed for lack of sufficient oxygen in the incoming air stream, as when a fire in a closed compartment extinguishes itself. Even
-with this simplified approach to the chemistry, we still need to track at least six gas species (Fuel, O$_2$, CO$_2$, H$_2$O, CO, N$_2$) plus soot particulate. If we assume a single-step
-reaction, we do not need
-to solve explicitly seven transport equations. In fact, we only need to solve two -- one for the fuel and one for the products. The air is everything that is neither fuel nor
-products. Whereas the fuel is a single gas species, the air and products are what are often referred to as ``lumped species''.
-A lumped species represents a mixture of gas species that transport together (i.e., the lumped species has a single set of transport properties) and react together, and from the point of
-view of the numerical model it can be treated as a single species. In fact, the mass transport equations make no distinction between a single or lumped species. For example, air is a
-lumped species that consists of nitrogen, oxygen, and trace amounts of water vapor and carbon dioxide.
-We use the symbols $Z_A$, $Z_F$, and $Z_P$ to denote the mass fractions of air, fuel and products ($Z_A=1 - Z_F - Z_P$).  The lumped species mass fractions are linearly related
-to the primitive species mass fractions, $Y_\alpha$; thus, conversion from one to the other is a simple matter of performing a matrix multiplication.  For example, the complete
-combustion of methane:
+The most basic description of the chemistry of fire is a reaction of a hydrocarbon fuel with oxygen that produces carbon dioxide and water vapor. Because fire is a relatively inefficient combustion process involving multiple fuel gases that contain more than just carbon and hydrogen atoms, the number of gas species to keep track of in the simulation is almost limitless. However, to make the simulations tractable, we limit the number of fuels to one, usually, and the number of reactions to just one or two. We also leave open the possibility that the reaction may not proceed for lack of sufficient oxygen in the incoming air stream, as when a fire in a closed compartment extinguishes itself. Even with this simplified approach to the chemistry, we still need to track at least six gas species (Fuel, O$_2$, CO$_2$, H$_2$O, CO, N$_2$) plus soot particulate. If we assume a single-step reaction, we do not need to solve explicitly seven transport equations. In fact, we only need to solve two -- one for the fuel and one for the products. The air is everything that is neither fuel nor products. Whereas the fuel is a single gas species, the air and products are what are often referred to as ``lumped species''. A lumped species represents a mixture of gas species that transport together (i.e., the lumped species has a single set of transport properties) and react together, and from the point of view of the numerical model, a lumped species can be treated as a single species. In fact, the mass transport equations make no distinction between a single or lumped species. For example, air is a lumped species that consists of nitrogen, oxygen, and trace amounts of water vapor and carbon dioxide. We use the symbols $Z_A$, $Z_F$, and $Z_P$ to denote the mass fractions of air, fuel and products ($Z_A=1 - Z_F - Z_P$).  The lumped species mass fractions are linearly related to the primitive species mass fractions, $Y_\alpha$; thus, conversion from one to the other is a simple matter of performing a matrix multiplication.  For example, the complete combustion of methane:
 \be \mathrm{CH_4 + 2 \, \left( O_2 + 3.76 \, N_2 \right)  \rightarrow CO_2 +2 \, H_2O + 7.52 \, N_2} \ee
 is expressed as
 \be \hbox{Fuel} + 2 \, \hbox{Air} \rightarrow \hbox{Products} \ee
@@ -126,7 +109,7 @@ Eq.~(\ref{energy}) is not solved explicitly. Instead, the velocity divergence is
 \label{eqn_simplediv1}
 \Div\mathbf{u} = \frac{1}{\rho h_{\rm s}} \left[ \DoD{}{t} (\bp-\rho h_{\rm s}) + \dq''' + \dq_{\rm r}''' - \dq_{\rm b}^\ppp - \Div \dot{\mathbf{q}}^\pp \right]
 \ee
-The hydrodynamics solver guarantees Eq.~(\ref{eqn_simplediv1}) is satisfied.  It follows that Eq.~(\ref{energy}) is also satisfied (energy is conserved).
+The hydrodynamics solver guarantees that Eq.~(\ref{eqn_simplediv1}) is satisfied.  It follows that Eq.~(\ref{energy}) is also satisfied (energy is conserved).
 
 Expanding the material derivatives on the right hand side of Eq.~(\ref{eqn_simplediv1}) produces a fairly complicated expression for
 the divergence that includes the source and diffusion terms from the mass, species and energy conservation equations. Its importance to the overall algorithm is that it can be computed using only the thermodynamic variables $\rho$, $Z_\alpha$, and $\bp$. As will be shown below, the way to advance the flow velocity in time is to first estimate the thermodynamic variables at the next time step, compute the divergence, and then solve an equation for the pressure that will guarantee that the divergence of the updated velocity is identical to that computed solely from the thermodynamic variables.
@@ -135,16 +118,18 @@ the divergence that includes the source and diffusion terms from the mass, speci
 
 \section{Momentum Transport}
 
-Noting the vector identity $(\bu \cdot \nabla) \bu = \nabla|\bu|^2/2 - \bu\times\bo $ and defining the stagnation energy per unit mass $\cH \equiv |\bu|^2/2 + \tp/\rho$, the momentum equation can be written (see Chapter \ref{momentum_chapter} for a detailed derivation)
+Noting the vector identity $(\bu \cdot \nabla) \bu = \nabla|\bu|^2/2 - \bu\times\bo $ and defining the stagnation energy per unit mass, $\cH \equiv |\bu|^2/2 + \tp/\rho$, the momentum equation can be written (see Chapter \ref{momentum_chapter} for a detailed derivation)
 \be
-   \dod{\bu}{t} - \bu\times\bo + \nabla \cH - \tp \, \nabla \left( 1/\rho\right) = \frac{1}{\rho} \Big[ (\rho-\rho_0) \bg + \bof_{\rm b} + \nabla\!\cdot \btau \Big]
+   \dod{\bu}{t} - \bu\times\bo + \nabla \cH - \tp \, \nabla \left( 1/\rho\right) = \frac{1}{\rho} \Big[ (\rho-\rho_0) \bg + \bof_{\rm b} + \nabla\!\cdot \btau \Big] \label{momeqnoncon}
 \ee
-The term, $\bof_\text{b}$, represents the drag force exerted by the subgrid-scale particles and droplets. The viscous stress, $\btau$, is closed via gradient diffusion with the turbulent viscosity obtained from the Deardorff eddy viscosity model \cite{Deardorff:1980,Pope:2000}.
-
-It is convenient to write this equation in the form:
-\be \dod{\bu}{t} + \bF + \nabla \cH = 0  \ee
+The term, $\bof_\text{b}$, represents the drag force exerted by the subgrid-scale particles and droplets. The viscous stress, $\btau$, is closed via gradient diffusion with the turbulent viscosity obtained from the Deardorff eddy viscosity model \cite{Deardorff:1980,Pope:2000}. It is convenient to write Eq.~(\ref{momeqnoncon}) in the form:
+\be 
+   \dod{\bu}{t} + \bF + \nabla \cH = 0  
+\ee
 so that a Poisson equation for the pressure can be derived by taking its divergence:
-\be \nabla^2 \cH = - \left[ \dod{ }{t} (\nabla\!\cdot \bu) + \nabla\!\cdot \bF \right]   \label{simplephi2} \ee
+\be 
+   \nabla^2 \cH = - \left[ \dod{ }{t} (\nabla\!\cdot \bu) + \nabla\!\cdot \bF \right]   \label{simplephi2} 
+\ee
 Note the appearance of the time derivative of the divergence. This is an important feature of the time marching scheme. Note also that the right hand side of the Poisson equation retains a term that includes the perturbation pressure, $\tp \, \nabla (1/\rho)$. This term accounts for the baroclinic torque. It is included on the right hand side of the Poisson equation by using its value from the previous time step. This approximation allows us to solve a separable form of the Poisson equation, for which there are fast, direct solvers that are optimized for uniform grids~\cite{Sweet:1}.
 
 \section{Combustion and Radiation}
@@ -178,48 +163,27 @@ The net contribution from thermal radiation in the energy equation is defined by
 \be
     \dq_r^\ppp \equiv -\nabla\!\cdot \dbq_{\rm r}''(\bx) =
     \kappa(\bx) \, \left[ U(\bx) - 4 \pi \, I_{\rm b}(\bx) \right]  \quad ; \quad
-    U(\bx) = \int_{4\pi} \, I(\bx,\bs') \, d\bs'
+    U(\bx) = \int_{4\pi} \, I(\bx,\bs') \, d\bs'  \label{simple_rte}
 \ee
-where $\kappa(\bx)$ is the absorption coefficient,
-$I_b(\bx)$ is the source term, and $I(\bx,\bs)$ is the solution of the radiation transport equation (RTE) for
-a non-scattering gray gas:
-\be   \bs \cdot \nabla I(\bx,\bs) = \kappa(\bx) \; \left[ I_{\rm b}(\bx) - I(\bx,\bs) \right]
-\label{bandRTE1} \ee
-In practical simulations, the spectral dependence of $I$, $I_b$, and $\kappa$ cannot be resolved
-accurately, nor do we have reliable data for non-ideal fuels typical of real fires.
-While FDS does have an option to divide the radiation spectrum into
-a relatively small number of bands and solve a separate RTE for
-each band, it is usually not necessary because in real fires, soot is the dominant source and sink of
-thermal radiation and is not particulary sensitive to wavelength.
-The mean absorption coefficient, $\kappa$, is a function of species composition and temperature.
-Its values are obtained by table look-up using a narrow-band model, RadCal~\cite{RadCal}.
+where $\kappa(\bx)$ is the absorption coefficient, $I_b(\bx)$ is the source term, and $I(\bx,\bs)$ is the solution of the radiation transport equation (RTE) for a non-scattering gray gas:
+\be   
+   \bs \cdot \nabla I(\bx,\bs) = \kappa(\bx) \; \left[ I_{\rm b}(\bx) - I(\bx,\bs) \right] \label{bandRTE1} 
+\ee
+In practical simulations, the spectral dependence of $I$, $I_b$, and $\kappa$ cannot be resolved accurately, nor do we have reliable data for non-ideal fuels typical of real fires. While FDS does have an option to divide the radiation spectrum into a relatively small number of bands and solve a separate RTE for each band, it is usually not necessary because in real fires, soot is the dominant source and sink of thermal radiation and is not particulary sensitive to wavelength. The mean absorption coefficient, $\kappa$, is a function of species composition and temperature. Its values are obtained from a narrow-band model called RadCal~\cite{RadCal}.
 
-The source term, $I_{\rm b}$, requires special treatment because of the limited resolution of the underlying numerical
-grid in the vicinity of flames. In large scale fire simulations, grid cells are typically on the order of
-tens of centimeters. Relatively thin flame sheets cannot be resolved, in which case the resolved temperature field
-will not reflect the true temperatures one would expect to find in the reaction zone. Consequently, the
-source term is approximated in grid cells where fuel and oxygen react.
-Elsewhere, the subgrid temperature field is homogeneous
-and the source term can be computed directly:
+The source term, $I_{\rm b}$, requires special treatment because of the limited resolution of the underlying numerical grid in the vicinity of flames. In large scale fire simulations, grid cells are typically on the order of
+tens of centimeters. Flame sheets cannot be resolved, meaning that the computed cell-average temperature can be significantly lower than temperatures one would expect to find in the reacting flame. Consequently, the
+source term is approximated in grid cells where fuel and oxygen react. Elsewhere, the subgrid temperature field is homogeneous and the source term can be computed directly:
 \be \kappa \; I_{\rm b} = \left\{ \begin{array}{cll}
     \kappa \, \sigma \, T^4/\pi      & \hbox{Outside flame zone}, & \dot{q}'''=0  \\ [0.1in]
     C\, \kappa \, \sigma \, T^4/\pi  & \hbox{Inside flame zone}, & \dot{q}'''>0
     \end{array} \right.  \label{radapprox1}
 \ee
-The constant $C$ is adjusted dynamically such that the integrated quantity $\chi_{\rm r} \,\dot{q}'''$ is satisfied for each mesh. Here, $\chi_{\rm r}$ is an empirical estimate of the {\em global} fraction of that energy emitted as thermal radiation. Typically, a sooty fire radiates approximately one-third of the total combustion energy.
+The constant $C$ is computed at each time step so that the volume integral of Eq.~(\ref{simple_rte}) over the entire flaming region is approximately equal to the volume integral of $\chi_{\rm r} \,\dot{q}'''$ over that same region. Here, $\chi_{\rm r}$ is an empirical estimate of the {\em global} fraction of that energy emitted as thermal radiation. Typically, a sooty fire radiates approximately one-third of the total combustion energy.
 
-The radiation equation is solved using a technique similar to a finite
-volume method for convective transport, thus the name given to it is
-the Finite Volume Method (FVM). Using approximately 100 discrete
-angles which are updated over multiple time steps, the finite volume solver requires about 20\% of the total CPU
-time of a calculation, a modest cost given the complexity of radiation
-heat transfer.
+The radiation equation is solved using a technique similar to a finite volume method for convective transport, thus the name given to it is the Finite Volume Method (FVM). Using approximately 100 discrete angles which are updated over multiple time steps, the finite volume solver requires about 20\% of the total CPU time of a calculation, a modest cost given the complexity of radiation heat transfer.
 
-Water droplets can absorb and scatter thermal
-radiation. This is important in cases involving mist sprinklers, but
-also plays a role in all sprinkler cases. The absorption and
-scattering coefficients are based on Mie theory. The scattering from
-the gaseous species and soot is not included in the model.
+Water droplets can absorb and scatter thermal radiation. This is important in scenarios involving water mist suppression systems, but also plays a role in all sprinkler cases. The absorption and scattering coefficients are based on Mie theory. The scattering from the gaseous species and soot is considered negligible and is not included in the model.
 
 
 

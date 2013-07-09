@@ -19,13 +19,15 @@ In the typical FDS problem the primitive species are lumped into reacting groups
 \begin{equation}\label{eq:simple}
 \mathrm{Fuel + Air \rightarrow Products}
 \end{equation}
-We refer to the Fuel, Air, and Products in Eq.~(\ref{eq:simple}) as \emph{lumped species}.  The lumped species approach is a simplified reaction progress variable approach \cite{fox2003} in which all the progress variables are mass fractions. This avoids any complications related to boundedness and ill-defined initial and boundary conditions.
+We refer to the Fuel, Air, and Products in Eq.~(\ref{eq:simple}) as \emph{lumped species}.  The lumped species approach is a simplified reaction progress variable approach~\cite{fox2003} in which all the progress variables are mass fractions. This avoids any complications related to boundedness and ill-defined initial and boundary conditions.
+
+\subsection{Relationship between Lumped and Primitive Species}
 
 In a simple hydrocarbon reaction, the reactants are the fuel, oxygen, and nitrogen and the products are carbon dioxide, water vapor, and nitrogen. The primitive species mass fractions are given by the composition vector
 \begin{equation}\label{eq:prim_vector}
 \mathbf{Y} = [Y_{\mathrm{CH}_4}\, \, Y_{\mathrm{O}_2}\, \, Y_{\mathrm{N}_2}\, \, Y_{\mathrm{CO}_2}\, \, Y_{\mathrm{H}_2\mathrm{O}}]^T
 \end{equation}
-Lumped species are groups of primitive species which only exist in the flow in certain proportions. For example, Air can be assumed to be a lumped species composed of 21\% O$_2$ and 79\% N$_2$ by volume. The key assumption made in lumping primitive species is that the new species groups transport (implying equal diffusivities) and react together.
+Lumped species are groups of primitive species which only exist in the flow in certain proportions. For example, Air can be assumed to be a lumped species composed of 21~\% O$_2$, 79~\% N$_2$ by volume, plus trace amounts of water vapor and carbon dioxide. The key assumption made in lumping primitive species is that the new species groups transport (implying equal diffusivities) and react together.
 
 In terms of primitive species, a one-step methane reaction, Eq.~(\ref{eq:simple}) may be written as
 \begin{equation}\label{eq:lumped_methane}
@@ -33,15 +35,9 @@ In terms of primitive species, a one-step methane reaction, Eq.~(\ref{eq:simple}
 \end{equation}
 This is equivalent to
 \begin{equation}\label{eq:lumped_expand}
-\mathrm{9.52\underbrace{(0.21\,\mbox{O}_2+.79\,\mbox{N}_2)}_\text{Background,~$Z_0$}+\underbrace{\mbox{CH}_4}_\text{Fuel,~$Z_1$} \rightarrow 10.52\underbrace{(0.095\,\mbox{CO}_2+0.19\,\mbox{H}_2\mbox{O}+0.715\,\mbox{N}_2)}_\text{Products,~$Z_2$}}
+\mathrm{9.52\underbrace{(0.21\,\mbox{O}_2+.79\,\mbox{N}_2)}_\text{Air, $Z_0$}+\underbrace{\mbox{CH}_4}_\text{Fuel,~$Z_1$} \rightarrow 10.52\underbrace{(0.095\,\mbox{CO}_2+0.19\,\mbox{H}_2\mbox{O}+0.715\,\mbox{N}_2)}_\text{Products,~$Z_2$}}
 \end{equation}
-In Eq.~(\ref{eq:lumped_expand}), 9.52 moles of the lumped species Background react with 1 mole of lumped species Fuel, to produce 10.52 moles of lumped species Products.  Notice that the primitive species have been grouped by volume fraction into lumped species and the lumped species stoichiometric coefficients are the sum of the primitive species coefficients from Eq.~(\ref{eq:lumped_methane}).
-
-\paragraph{Remark}
-In Eq.~(\ref{eq:lumped_expand}), 9.52 $\times$ 0.21 is only approximately equal to 2. In practice the atom balance requires machine precision. To alleviate this issue, FDS internally normalizes the lumped species volume fractions and makes any necessary adjustments to the specified lumped stoichiometric coefficients.
-
-\vskip\baselineskip
-The species Background is not transported.  It is found from $\sum_i Z_i = 1$.  The lumped species vector $\textbf{Z}$ is indexed from $0$ to $N_z$. Thus, $N_z$ transport equations are solved. In the case of Eq.~(\ref{eq:lumped_expand}), two transport equations are solved (Fuel and Products), same number as in the mixture-fraction--progress-variable approach.
+where 9.52~moles of Air react with 1~mole of Fuel to produce 10.52~moles of Products. Notice that the primitive species have been grouped by volume fraction into lumped species and the lumped species stoichiometric coefficients are the sum of the primitive species coefficients from Eq.~(\ref{eq:lumped_methane}). Note that 9.52 $\times$ 0.21 is only approximately equal to 2. In practice the atom balance requires machine precision. To alleviate this issue, FDS internally normalizes the lumped species volume fractions and makes any necessary adjustments to the specified lumped stoichiometric coefficients. The lumped species mass fractions are denoted $Z_i$, where $Z_0$ is referred to as the Background, and an explicit transport equation is not solved for it since $Z_0=1-\sum_{i=1}^n Z_i$. In the case of Eq.~(\ref{eq:lumped_expand}), two transport equations are solved (Fuel and Products), the same number as in the mixture-fraction--progress-variable approach.
 
 The linear transformation from lumped species to primitive species is given by
 \begin{equation}\label{eq:transform}
@@ -51,9 +47,7 @@ where $A$ is the transformation matrix ($N_{y}$ rows $\times$ $(N_{z}+1)$ column
 \begin{equation}\label{eq:A_def}
 a_{\alpha\,i} = \frac{\upsilon_{\alpha\,i}W_{\alpha}}{\displaystyle \sum_{\alpha}\upsilon_{\alpha i}W_{\alpha}}
 \end{equation}
-where $\upsilon_{\alpha\,i}$ are the volume fractions of primitive species $\alpha$ in lumped species $i$.
-
-If we want the primitive species in Eq.~(\ref{eq:lumped_expand}) and, as an example, say we have $\mathbf{Z} = [0.3 \,\,\, 0.2 \,\,\, 0.5]^T$, we can transform from lumped species to primitive species via
+where $\upsilon_{\alpha\,i}$ are the volume fractions of primitive species $\alpha$ in lumped species $i$. If we want the primitive species in Eq.~(\ref{eq:lumped_expand}) and, as an example, say we have $\mathbf{Z} = [0.3 \,\,\, 0.2 \,\,\, 0.5]^T$, we can transform from lumped species to primitive species via
 
 \begin{equation}\label{eq:transform_to_primitive}
 \mathbf{Y}=\left[\begin{array}{c}
@@ -89,20 +83,17 @@ To transform back to lumped species from primitive species we can use:
 \end{equation}
 provided $A$ has full rank and $\mathbf{Y}$ is realizable (i.e., the forward transformation is also possible).
 
-\subsection{Simple Chemistry}
+\subsection{Default Hydrocarbon Combustion Chemistry}
 \label{sec:simplechemistry}
 
-The default reaction system in FDS is Fuel plus Background (oxidizer) goes to Products, where Products contains carbon dioxide, water vapor, nitrogen, carbon monoxide, and soot. For a typical hydrocarbon fuel, the chemical reaction is
+The default reaction equation in FDS, known as ``simple chemistry,'' is defined as follows:
 \begin{multline}\label{eq:full_lump}
-\nu_{0}\underbrace{(\upsilon_{\mathrm{O}_{2},0}\mathrm{O}_2 +\upsilon_{\mathrm{N}_{2},0}\mathrm{N}_2 + \upsilon_{\mathrm{H}_{2}\mathrm{O},0}\mathrm{H}_2\mathrm{O}+\upsilon_{\mathrm{CO}_{2},0}\mathrm{CO}_2)}_\text{Background,~$Z_0$} \,\,+ \,\, \nu_{1}\underbrace{\mbox{C}_m\mbox{H}_n\mbox{O}_a\mbox{N}_b}_\text{Fuel,~$Z_1$} \quad \longrightarrow \\
-\nu_{2}\underbrace{(\upsilon_{\mathrm{CO}_{2},2}\mathrm{CO}_2+\upsilon_{\mathrm{H}_{2}\mathrm{O},2}\mathrm{H}_2\mathrm{O}+\upsilon_{\mathrm{N}_{2},2}\mathrm{N}_2+\upsilon_{\mathrm{CO},2}\mathrm{CO}+\upsilon_{\mathrm{S},2}\mathrm{S})}_\text{Products,~$Z_2$}
+\nu_{0}\underbrace{(\upsilon_{\mathrm{O}_{2},0} \, \mathrm{O}_2 +\upsilon_{\mathrm{N}_{2},0} \, \mathrm{N}_2 + \upsilon_{\mathrm{H}_{2} \, \mathrm{O},0} \, \mathrm{H}_2 \, \mathrm{O}+\upsilon_{\mathrm{CO}_{2},0} \, \mathrm{CO}_2)}_\text{Background,~$Z_0$} \; + \; \nu_{1} \, \underbrace{\mbox{C}_m\mbox{H}_n\mbox{O}_a\mbox{N}_b}_\text{Fuel,~$Z_1$} \quad \longrightarrow \\
+\nu_{2}\underbrace{(\upsilon_{\mathrm{CO}_{2},2} \, \mathrm{CO}_2 + \upsilon_{\mathrm{H}_{2} \, \mathrm{O},2} \, \mathrm{H}_2 \, \mathrm{O} + \upsilon_{\mathrm{N}_{2},2} \, \mathrm{N}_2+\upsilon_{\mathrm{CO},2} \, \mathrm{CO} + \upsilon_{\mathrm{S},2} \, \mathrm{Soot})}_\text{Products,~$Z_2$}
 \end{multline}
-Here the volume fraction of primitive species $\alpha$ in lumped species $i$ is denoted by $\upsilon_{\alpha\,i}$ and the stoichiometric coefficients for the lumped species $i$ are denoted by $\nu_{i}$.
+Here, the volume fraction of primitive species $\alpha$ in lumped species $i$ is denoted by $\upsilon_{\alpha\,i}$ and the stoichiometric coefficients for the lumped species $i$ are denoted by $\nu_{i}$.
 
-\subsection{Specified CO and Soot Yield}
-\label{sec:yield}
-
-Carbon monoxide and soot yields are zero by default. The user can specify the CO and soot yields ($y_{\mathrm{CO}}$ and $y_{\mathrm{S}}$ respectively) on the \textct{REAC} line; this determines the composition of the products. The CO yield, and similarly for soot, is the mass of CO produced per mass of fuel reacted:
+Carbon monoxide and soot yields are zero by default. The user can specify the CO and soot yields ($y_{\mathrm{CO}}$ and $y_{\mathrm{S}}$ respectively). The CO yield, and similarly for soot, is the mass of CO produced per mass of fuel reacted:
 \begin{equation}\label{eq:y_co}
 y_\mathrm{CO} = \frac{\mbox{mass CO in Products}}{\mbox{mass of Fuel reacted}}
 \end{equation}
@@ -131,44 +122,14 @@ Consider a methane--air reaction where methane has a specified CO yield of $y_{\
 \noindent The preceding table shows that the addition of carbon monoxide and soot increases the number of primitive species in the reaction from five to seven. The number of lumped species, however, remains at three---the composition of Products has changed to include to the two additional species.
 
 
-\subsection{Primitive Species}
-
-\subsubsection{Tracking Select Species (Such as Evaporating Droplets)}
-
-There are cases, such as droplet evaporation or complex chemistry, where tracking a particular primitive species may be needed (formally, the primitive species becomes its own lumped species with volume fraction 1). In sprinkler nozzle cases, for example, water vapor produced by combustion lives in Products and water vapor produced from droplet evaporation is tracked separately. The evaporated water vapor cannot simply be added to Products because the composition of Products would then change and, by definition, the primitive species fraction within a given lumped species cannot change. If the primitive species concentration of water vapor is needed, it may be obtained from Eq.~(\ref{eq:transform_to_primitive}).
-
-\subsubsection{Tracking All Species}
-
-%If we revisit Eq.~(\ref{eq:full_lump}) but decompose the reaction into all primitive species, we get:
-%\begin{multline}\label{eq:prim}
-%\nu_{\mathrm{O}_{2},\mathrm{R}}\mathrm{O}_2+\nu_{\mathrm{N}_{2},\mathrm{R}}\mathrm{N}_2+\nu_{\mathrm{H}_{2}\mathrm{O},\mathrm{R}}\mathrm{H}_2\mathrm{O}+\nu_{\mathrm{CO}_{2},\mathrm{R}}\mathrm{CO}_2 + \nu_{\mathrm{Fuel},\mathrm{R}}(\mbox{C}_m\mbox{H}_n\mbox{O}_a\mbox{N}_b) \longrightarrow \\
-%\nu_{\mathrm{CO}_{2},\mathrm{P}}\mathrm{CO}_2+\nu_{\mathrm{H}_{2}\mathrm{O},\mathrm{P}}\mathrm{H}_2\mathrm{O}+\nu_{\mathrm{N}_{2},\mathrm{P}}\mathrm{N}_2+\nu_{\mathrm{CO},\mathrm{P}}\mathrm{CO}+\nu_{\mathrm{S},\mathrm{P}}\mathrm{S}
-%\end{multline}
-%Here, the subscript {\small R} indicates a ``reactant'' coefficient and the subscript {\small P} indicates a ``product''.  In this formulation, we would have to solve transport equations for six species, as compared to two when the species are lumped.
-
-In the case where all primitive species are treated as individual lumped species, $A$ becomes the identity matrix.  One of the species, usually nitrogen, must still be selected as Background.
-
-%\begin{center}
-%\begin{tabular}{|c|c|c|c|c|c|c|c|}
-%\hline  & {CH$_4$} & {N$_2$} & {O$_2$} & {CO$_2$} & {CO} & {H$_2$O} & {C} \\ \hline \hline
-%{CH$_4$}            & 1.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 \\
-%{N$_2$}             & 0.00 & 1.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 \\
-%{O$_2$}             & 0.00 & 0.00 & 1.00 & 0.00 & 0.00 & 0.00 & 0.00 \\
-%{CO$_2$}            & 0.00 & 0.00 & 0.00 & 1.00 & 0.00 & 0.00 & 0.00 \\
-%{CO}                & 0.00 & 0.00 & 0.00 & 0.00 & 1.00 & 0.00 & 0.00 \\
-%{H$_2$O}            & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 1.00 & 0.00 \\
-%{C}                 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 1.00 \\\hline
-%\end{tabular}
-%\end{center}
-Note that tracking all primitive species could be very expensive.  Chemical mechanisms in combustion may require 10 to 100 species or more and each transport equation adds roughly 5\% to the computational cost.
-
+\clearpage
 
 \section{Turbulent Combustion}
 
 \subsection{Mixing-Controlled Fast Chemistry (Default)}
 \label{sec:fastchemistry}
 
-For the vast majority of FDS applications, the ``mixed is burnt'' approximation is adequate to describe combustion chemistry and the chemical source term for Fuel may be modeled by the Eddy Dissipation Concept (EDC) of Magnussen and Hjertager \cite{Magnussen:1,Poinsot:TNC}:
+For the vast majority of FDS applications, the ``mixed is burnt'' assumption implies a mixing-controlled reaction whose rate is modeled using the Eddy Dissipation Concept (EDC) of Magnussen and Hjertager~\cite{Magnussen:1,Poinsot:TNC}:
 \begin{equation}
 \label{eq:edc}
 \dot{m}_{\si{F}}^{\prime\prime\prime} = -\rho \frac{\min(Z_{\si{F}}, Z_{\si{A}}/s)}{\tau_{\rm mix}}
@@ -179,43 +140,29 @@ Here, $Z_{\si{F}}$ and $Z_{\si{A}}$ are the lumped mass fractions of Fuel and Ai
 \subsection{Heat Release Rate}
 \label{sec:hrr}
 
-Each chemical reaction in FDS must be defined with a fuel and sufficient information such that a heat of formation is known for each participating species. The heat release per unit volume is found by summing the species mass production rates by the respective species heat of formation:
+The heat release per unit volume is found by summing the species mass production rates multiplied by the respective heats of formation:
 \begin{equation}\label{eq:vol_heat_gen}
-\dot{q}^{\prime\prime\prime} \equiv -\displaystyle \sum_{\alpha} \dot{m}^{\prime\prime\prime}_{\alpha} \Delta h_{f,\alpha}
+\dot{q}''' \equiv -\displaystyle \sum_{\alpha} \dot{m}_{\alpha}''' \, \Delta h_{{\rm f},\alpha}
 \end{equation}
-
-\subsubsection{Heat Release Rate Limiter}
-
-There is a need, in certain situations, to put an upper bound on the local heat release rate per unit volume. The reason for
-this is that FDS is applied over length scales ranging from millimeters to tens of meters, and the resolution of the numerical grid
-is sometimes too coarse to work effectively.
-A scaling analysis of pool fires by Orloff and de Ris~\cite{Orloff:19th_Symposium} suggests that the spatial average of the
-heat release rate of a fire is approximately \SI{1200}{kW/m^3}. FDS uses a less restrictive upper bound on the local heat release rate per unit volume:
-\begin{equation}\label{eq:q_bound}
-\dq_{\rm upper}''' = 200/\dx + 2500 \quad \si{kW/m^3}
+There is a need, in certain situations, to put an upper bound on the local heat release rate per unit volume. The reason for this is that on relatively coarse numerical grids, the mixing rate of fuel and air can be unphysically high due to numerical diffusion. A scaling analysis of pool fires by Orloff and de Ris~\cite{Orloff:19th_Symposium} suggests that the spatial average of the heat release rate of a fire is approximately \SI{1200}{kW/m^3}. FDS uses a less restrictive upper bound on the local heat release rate per unit volume:
+\begin{equation}
+   \dq_{\rm upper}''' = 200/\dx + 2500 \quad \si{kW/m^3}  \label{eq:q_bound}
 \end{equation}
-The value of \SI{200}{kW/m^2} is an empirically derived upper bound on the heat release rate per unit area of flame sheet and $\delta x$ is the characteristic cell size (m). 
-
-%Typically, this bound only affects fires whose value of $Q^*$ is less than one
-%
-%\footnote{The non-dimensional quantity, $Q^*$, is a measure of the fire's heat release rate divided by the area of its base. It is expressed as $Q^*=\dQ/(\rho_\infty c_p T_\infty \sqrt{g D} D^2)$.}.
-%
-%The upper limit on the heat release rate per unit volume inherently places a limiter on the time integration. If the local heat release rate per unit volume reaches or exceeds the limiting value in a time step, the heat release rate per unit volume is set to the limiting value. This freezes the chemical reactions. The change in species is then scaled based on the ratio of the limiting value to the calculated heat release rate per unit volume. The new values for heat release rate per unit volume and species concentrations are set at their respective limits for the remainder of the time step. 
+The value of \SI{200}{kW/m^2} is an empirically derived upper bound on the heat release rate per unit area of flame sheet and $\delta x$ is the characteristic cell size (m).
 
 
 \subsection{Extinction}
-
 \label{extinction}
 
 Subgrid-scale modeling of gas phase suppression and extinction is still an area of active research in the combustion community. The physical mechanisms underlying these phenomena are complex, and even simplified models still rely on an accurate prediction of the flame temperature and local strain rate, neither of which is readily available in an LES calculation.
 
-A limitation of the mixing-controlled reaction model described above is that it assumes fuel and oxygen always react regardless of the local conditions for temperature, dilution, or strain. For large-scale, well-ventilated fires, this approximation is usually sufficient. However, if a fire is in an under-ventilated compartment, or if a suppression agent like water mist or CO$_2$ is introduced, or if the strain between the fuel and oxidizing streams is high, burning may not occur. 
+A limitation of the mixing-controlled reaction model described above is that it assumes fuel and oxygen always react regardless of the local conditions for temperature, dilution, or strain. For large-scale, well-ventilated fires, this approximation is usually sufficient. However, if a fire is in an under-ventilated compartment, or if a suppression agent like water mist or CO$_2$ is introduced, or if the strain between the fuel and oxidizing streams is high, burning may not occur.
 
-FDS uses simple empirical rules---which ignore strain---to predict local extinction within a certain grid cell based on resolved species concentrations and the mean cell temperature.  The default FDS extinction model consists of two parts based on the concept of a \emph{critical flame temperature} \cite{SFPE:Beyler}. If either criterion fails, then there is no chemical reaction and $\dot{m}_\alpha^{\prime\prime\prime}=0$ and $\dot{q}^{\prime\prime\prime}=0$ for that time step.
+FDS uses simple empirical rules---which ignore strain---to predict local extinction within a certain grid cell based on resolved species concentrations and the mean cell temperature.  The default FDS extinction model consists of two parts based on the concept of a \emph{critical flame temperature} \cite{SFPE:Beyler}. If either criterion fails, then there is no chemical reaction and $\dot{m}_\alpha'''=0$ and $\dot{q}'''=0$ for that time step.
 
 \begin{enumerate}
-\item If the cell temperature is below the auto-ignition temperature for all fuels in the cell then combustion is suppressed. The auto-ignition temperature for each fuel is zero by default so that the typical user does not need to specify an ignition source.
-\item If the potential combustion heat release from a local pocket of stoichimetric fuel-air-product mixture cannot raise the temperature of that mixture above an empirically determined limiting flame temperature, $T_{\rm LFT}$, then combustion is suppressed.  Let $Z_{\rm F}$, $Z_{\rm A}$, and $Z_{\rm P}$ denote the resolved lumped species mass fractions of Fuel\footnote{If multiple fuels are present, all are temporarily grouped into one lumped species for the purposes of the extinction model.}, Air, and Products\footnote{Here Products accounts for product species from previous time steps and for all other diluents in the system.} at the beginning of the combustion time step.  The mass stoichiometric coefficients for Air is $s$.  Based on the limiting reactant, the masses in the local pocket of stoichiometric mixture are defined to be
+\item If the cell temperature is below the auto-ignition temperature for all fuels in the cell then combustion is suppressed. The auto-ignition temperature for each fuel is zero by default; thus, the user does not need to specify an ignition source.
+\item If the potential combustion heat release from a local pocket of stoichiometric fuel-air-product mixture cannot raise the temperature of that mixture above an empirically determined limiting flame temperature, $T_{\rm LFT}$, then combustion is suppressed.  Let $Z_{\rm F}$, $Z_{\rm A}$, and $Z_{\rm P}$ denote the resolved lumped species mass fractions of Fuel\footnote{If multiple fuels are present, all are temporarily grouped into one lumped species for the purposes of the extinction model.}, Air, and Products\footnote{Here Products accounts for product species from previous time steps and for all other diluents in the system.} at the beginning of the combustion time step.  The mass stoichiometric coefficients for Air is $s$.  Based on the limiting reactant, the masses in the local pocket of stoichiometric mixture are defined to be
 \begin{align}
 \label{eq:dzf}  \Delta Z_{\rm BF} &= \min(Z_{\rm F},Z_{\rm A}/s)\,\mbox{,} \quad \mbox{BF = ``Burning-Fuel''}
                  \\
@@ -257,11 +204,11 @@ In addition to the extinction model described above, there is the option in FDS 
 \subsection{Reaction Time Scale Model}
 \label{sec:reac_time_scale}
 
-In this section we provide an expression for the mixing time based on the local state of the flow field.  The basic idea behind the model we propose here is to consider the three physical processes of diffusion, subgrid-scale (SGS) advection, and buoyant acceleration and to take the fastest of these processes (locally) as the controlling flow time scale.
+In this section we provide an expression for the mixing time based on the local state of the flow field.  The basic idea behind the model we propose here is to consider the three physical processes of diffusion, subgrid-scale (SGS) advection, and buoyant acceleration and to take the fastest of these processes (locally) as the controlling flow time scale~\cite{McDermott:2011}.
 
-It is important to consider the behavior of a model as the LES filter width (cell size) varies. The mixing times for diffusion, SGS advection, and buoyant acceleration scale differently with filter width and if we look to the limits of the filter scales an interesting picture emerges.  Referring to Fig.~\ref{fig_reaction_time_scale}, let us move from left to right along the horizontal axis following the thick black line which represents our time scale model for a hypothetical flow condition.  First, notice that the reaction time scale must be greater than or equal to the chemical time scale, $\tau_{\rm chem}$, which, though usually small, is finite. At a slightly larger scale we expect the mixing time to vary as the square of the filter width because the mixing is controlled by molecular diffusion.  In this regime, denoted $\tau_{\rm d}$, the numerical solution is a DNS and this scaling law is valid while $\Delta$ is less than the Kolmogorov scale, $\eta$, the length scale of the smallest turbulent eddies (for this discussion we assume the Schmidt number (Sc) is of order unity). For a sufficiently high Reynolds number flow (such that an inertial subrange exists), as the filter width increases beyond the Kolmogorov scale we encounter a regime, marked $\tau_{\rm u}$, where turbulent advection controls the rate of mixing and the mixing time varies as the two thirds power of the filter width \cite{Pope:2000}.  This is the regime where most LES submodels are valid (It is important to appreciate that fire differs from turbulent combustion in that the assumption of locally high Re is frequently invalid).
+It is important to consider the behavior of a model as the LES filter width (cell size) varies. The mixing times for diffusion, SGS advection, and buoyant acceleration scale differently with filter width and if we look to the limits of the filter scales an interesting picture emerges.  Referring to Fig.~\ref{fig_reaction_time_scale}, let us move from left to right along the horizontal axis following the thick black line which represents our time scale model for a hypothetical flow condition.  First, notice that the reaction time scale must be greater than or equal to the chemical time scale, $\tau_{\rm chem}$, which, though usually small, is finite. At a slightly larger scale, we expect the mixing time to vary as the square of the filter width because the mixing is controlled by molecular diffusion.  In this regime, denoted $\tau_{\rm d}$, the numerical solution is a DNS and this scaling law is valid while $\Delta$ is less than the Kolmogorov scale, $\eta$, the length scale of the smallest turbulent eddies (for this discussion we assume the Schmidt number (Sc) is of order unity). For a sufficiently high Reynolds number flow (such that an inertial subrange exists), as the filter width increases beyond the Kolmogorov scale we encounter a regime, marked $\tau_{\rm u}$, where turbulent advection controls the rate of mixing and the mixing time varies as the two thirds power of the filter width \cite{Pope:2000}.  This is the regime where most LES submodels are valid (It is important to appreciate that fire differs from turbulent combustion in that the assumption of locally high Re is frequently invalid).
 
-Now let us imagine what should happen to the mixing time as the filter width increases beyond the inertial subrange to a length scale larger than the height of the flame itself (actually a possibility in wildfire modeling). We would \emph{not} expect the inertial range scaling to continue up through the so-called ``energy-containing'' range of turbulent length scales.  Rather, for fires--which are generally buoyancy-driven flows--we expect buoyant acceleration to control the mixing at these relatively coarse scales.  A time scale based on a constant acceleration goes as the square root of the filter width, as shown by the regime marked $\tau_{\rm g}$ in the diagram.  This shift in scaling may appear minor given the log-log nature of the plot, but the effect of the acceleration-based time scale is indeed significant for large cell sizes.  Finally, note that the flame height presents a limit to the reaction time scale, here denoted $\tau_{\rm flame}$, since all fuel must be consumed within a single cell.
+Now, let us imagine what should happen to the mixing time as the filter width increases beyond the inertial subrange to a length scale larger than the height of the flame itself (actually a possibility in wildfire modeling). We would \emph{not} expect the inertial range scaling to continue up through the so-called ``energy-containing'' range of turbulent length scales.  Rather, for fires we expect buoyant acceleration to control the mixing at these relatively coarse scales.  A time scale based on a constant acceleration goes as the square root of the filter width, as shown by the regime marked $\tau_{\rm g}$ in the diagram.  This shift in scaling may appear minor given the log-log nature of the plot, but the effect of the acceleration-based time scale is indeed significant for large cell sizes.  Finally, note that the flame height presents a limit to the reaction time scale, here denoted $\tau_{\rm flame}$, since all fuel must be consumed within a single cell.
 
 \begin{figure}
 \centering
@@ -271,7 +218,7 @@ Now let us imagine what should happen to the mixing time as the filter width inc
 \label{fig_reaction_time_scale}
 \end{figure}
 
-Of course, the relative importance of the physical processes will depend on the flow.  For example, if gravity is weak the $\tau_{\rm g}$ line shifts up and may not affect the reaction time before the flame time scale is reached.  If the flow is highly turbulent, the inertial range scaling may be more dominant, which would be indicated by a lowering of the $\tau_{\rm u}$ line.  Or, for highly turbulent jet flames $\tau_{\rm flame}$ may be reached before the acceleration time scale has any effect.  Perhaps more typical for low strain fires, if an inertial subrange does not exist (if the Reynolds number is too low relative to the Froude number), then the $\tau_{\rm u}$ line in Fig.~\ref{fig_reaction_time_scale} moves up out of the picture and we are left with diffusion and buoyancy to control the mixing.
+Of course, the relative importance of the physical processes will depend on the flow.  For example, if gravity is weak, the $\tau_{\rm g}$ line shifts up and may not affect the reaction time before the flame time scale is reached.  If the flow is highly turbulent, the inertial range scaling may be more dominant, which would be indicated by a lowering of the $\tau_{\rm u}$ line.  Or, for highly turbulent jet flames $\tau_{\rm flame}$ may be reached before the acceleration time scale has any effect.  Perhaps more typical for low strain fires, if an inertial subrange does not exist (if the Reynolds number is too low relative to the Froude number), then the $\tau_{\rm u}$ line in Fig.~\ref{fig_reaction_time_scale} moves up out of the picture and we are left with diffusion and buoyancy to control the mixing.
 
 The bold solid line in Fig.~\ref{fig_reaction_time_scale} is mathematically represented by
 \begin{equation}
@@ -290,7 +237,7 @@ where $D_F$ is the diffusivity of the fuel species. Note that $k_{\rm sgs}$ is t
 \subsection{Partially-Stirred Batch Reactor Model}
 \label{sec:batchreactormodel}
 
-Modeling chemical reactions in turbulent flow is mathematically challenging because the length and time scales associated with the reactions may be orders of magnitude below what can be spatially and temporally resolved by the simulation.  When the fuel and oxidizer are initially unmixed (diffusion flame) and the kinetics are fast compared with mixing, the simple Eddy Dissipation Concept (EDC) model \cite{Magnussen:1,Poinsot:TNC} is sufficient.  However, for more complex chemically reacting flows---such as carbon monoxide and soot formation---where reaction and mixing time scales may overlap, we require a more generalized approach.
+Modeling chemical reactions in turbulent flow is mathematically challenging because the length and time scales associated with the reactions may be orders of magnitude below what can be spatially and temporally resolved by the simulation.  When the fuel and oxidizer are initially unmixed (diffusion flame) and the kinetics are fast compared with mixing, the simple Eddy Dissipation Concept (EDC) model \cite{Magnussen:1,Poinsot:TNC} is sufficient.  However, for more complex reactions---such as carbon monoxide and soot formation---where reaction and mixing time scales may overlap, we require a more generalized approach.
 
 To this end, we have developed a simple mixing environment method to close the mean chemical source term, $\dot{m}^{\prime\prime\prime}_{\alpha}$, in Eq.~(\ref{species}).  For pure diffusion flames our method is similar to EDC, but the method is not limited to diffusion flames.  Each computational cell is thought of as a partially stirred batch reactor. At the start of a time step, each cell has an initial concentration of species (reactants, products, inerts) that exist with some degree of mixing. By default, each cell is completely unmixed at the start of a time step (corresponding to a diffusion flame). Generally, the rate of mixing is dominated by turbulence. The mixing time, $\tau_{\rm mix}$, was discussed in Section \ref{sec:reac_time_scale}. Once mixed, species can react based on specified kinetic parameters---reactions may be infinitely fast or governed by an Arrhenius rate law (Section \ref{Reaction_Rate_Model}).
 
@@ -300,7 +247,7 @@ At the start of the integration of the reactor model, the species transport equa
 
 In turbulent combustion, \emph{transport} and \emph{mixing} may be easily confused.  It is especially important to distinguish these phenomena when considering infinitely fast chemistry, because in that case it is mixing (not transport) that dictates the rate of reaction.
 
-FDS employs a \emph{time splitting} scheme (see Sections \ref{sec:solution_procedure} and \ref{sec_time_splitting}) to solve the species equations in which we first compute transport (both advective and diffusive) and then we compute mixing.  Note that transport due to turbulent diffusion (the residual advection of mass between cells due to unresolved fluid motions) does not mix chemical species at the molecular level---a requirement for chemical reaction to proceed. (Note that turbulent \emph{stirring} does increase the rate of mixing by increasing the contact area between unmixed regions of composition space.)  This is illustrated in Fig.~\ref{fig_transport_vs_mixing}.  On the far left, we show a hypothetical computational cell at the end of the transport step and the beginning of the mixing and reaction step in our algorithm.  Notice that there is a subgrid distribution of the species mass fraction.  Locally in space the mass fraction may be pure fuel or pure oxidizer.  In this image, where there are already various shades of gray, it may be noted that  the initial condition of the cell may not be purely unmixed.  As we proceed to the right in our image sequence, the local cell composition is relaxing toward the mean value of 0.5.
+FDS employs a \emph{time splitting} scheme (see Sections \ref{sec:solution_procedure} and \ref{sec_time_splitting}) to solve the species equations in which we first compute transport (both advective and diffusive) and then we compute mixing.  Note that transport due to turbulent diffusion (the residual advection of mass between cells due to unresolved fluid motions) does not mix chemical species at the molecular level---a requirement for chemical reaction to proceed. (Note that turbulent \emph{stirring} does increase the rate of mixing by increasing the contact area between unmixed regions of composition space.)  This is illustrated in Fig.~\ref{fig_transport_vs_mixing}.  On the far left, we show a hypothetical computational cell at the end of the transport step and the beginning of the mixing and reaction step in our algorithm.  Notice that there is a subgrid distribution of the species mass fraction.  Locally in space, the mass fraction may be pure fuel or pure oxidizer.  In this image, where there are already various shades of gray, it may be noted that  the initial condition of the cell may not be purely unmixed.  As we proceed to the right in our image sequence, the local cell composition is relaxing toward the mean value of 0.5.
 
 \begin{figure}
 \begin{center}
@@ -357,13 +304,12 @@ w_1 &= \zeta \, (1 - \overline{Y}_\alpha) \\
 w_2 &= \zeta \, \overline{Y}_\alpha \\
 w_3 &= 1-\zeta
 \end{align}
-
-As shown by Pope \cite{Pope:2000}, the PDF evolves by the Fokker-Planck equation
+As shown by Pope \cite{Pope:2000}, the PDF is the solution of the Fokker-Planck equation:
 \begin{equation}
 \label{eq:fokker-planck}
 \frac{\partial f}{\partial t} = -\frac{\partial}{\partial \psi_\alpha} \left(f \left\langle \left. \frac{\partial Y_\alpha}{\partial t} \right| \psi_\alpha \right\rangle \right)
 \end{equation}
-The term on the right in angled brackets is a conditional diffusion term which requires closure.  Using IEM, Eq.~(\ref{eq:iem}), as the model for this term, Eq.~(\ref{eq:fokker-planck}) implies that the unmixed fraction, $\zeta$, is governed by the following simple ODE\footnote{This is a good exercise for the reader.  Hint: Just consider the evolution of the second term in Eq.~(\ref{eq:pdf}) and utilize Appendix C in Pope \cite{Pope:2000}.}:
+The term on the right in angled brackets is a conditional diffusion term which requires closure.  Using IEM, Eq.~(\ref{eq:iem}), as the model for this term, Eq.~(\ref{eq:fokker-planck}) implies that the unmixed fraction, $\zeta$, is governed by the following simple ODE\footnote{The derivation of the ODE is based on the evolution of the second term in Eq.~(\ref{eq:pdf}) and Appendix C in Pope~\cite{Pope:2000}.}:
 \begin{equation}
 \label{eq:zeta}
 \frac{\d \zeta}{\d t}=-\frac{\zeta}{\tau_{\rm mix}}
@@ -371,9 +317,8 @@ The term on the right in angled brackets is a conditional diffusion term which r
 with the solution
 \begin{equation}
 \label{eq:zeta_soln}
-\zeta(t) = \zeta_0 \exp(-t/\tau_{\rm mix})
+\zeta(t) = \zeta_0 \, \exp(-t/\tau_{\rm mix})
 \end{equation}
-
 We may think of an initial unmixed fraction of $\zeta_0=1$ (default) as representing a diffusion flame and $\zeta_0=0$ as a premixed flame.
 
 
@@ -404,7 +349,7 @@ The first term on the RHS represents chemical kinetics.  The second term account
 -\overline{Y}_{\alpha,0} \frac{\d U}{\d t} &= \frac{\overline{Y}_{\alpha,0} \, U(t) }{\tau_{\rm mix}}
 \end{align}
 
-The rate of reaction, $\d \hat{Y}_\alpha/\d t$, is discussed in Section \ref{Reaction_Rate_Model}. The reaction rate may be ``fast'' (default) or based on an Arrhenius rate law.  The integration of Eq.~(\ref{eq:mixmass}) for these special cases is discussed in Section \ref{sec:reac_time_integration}. 
+The rate of reaction, $\d \hat{Y}_\alpha/\d t$, is discussed in Section \ref{Reaction_Rate_Model}. The reaction rate may be ``fast'' (default) or based on an Arrhenius rate law.  The integration of Eq.~(\ref{eq:mixmass}) for these special cases is discussed in Section \ref{sec:reac_time_integration}.
 
 Once the final mixed zone mass is known, the composition of the computational cell is found by recombining the unmixed and mixed portions:
 \begin{equation}
@@ -426,7 +371,7 @@ When the reactants are initially unmixed ($\zeta_0=1$) and the chemical kinetics
 \label{eq:edcproof1}
 \dot{m}^{\prime\prime\prime}_{\rm F} &= \rho \, \frac{\overline{Y}_{\rm F}(\Delta t) - \overline{Y}_{\rm F,0}}{\Delta t} \notag\\
 %&=\rho \, \frac{[\zeta(\Delta t) \, \overline{Y}_{\rm F,0} + (1-\zeta(\Delta t)) \, \hat{Y}_{\rm F}(\Delta t)] - \overline{Y}_{\rm F,0}}{\Delta t} \notag\\
-&=\rho \, \frac{1-\zeta(\Delta t)}{\Delta t} \, [\hat{Y}_{\rm F}(\Delta t) - \overline{Y}_{\rm F,0}] 
+&=\rho \, \frac{1-\zeta(\Delta t)}{\Delta t} \, [\hat{Y}_{\rm F}(\Delta t) - \overline{Y}_{\rm F,0}]
 \end{align}
 Next, note that in the case where the reactants are unmixed, the fuel mass fraction in the mixed reactor zone at $\Delta t$ is $\overline{Y}_{\rm F,0} + \Delta \hat{Y}_{\rm F}$.  Further, using Eq.~(\ref{eq:zeta_soln}), to leading order we obtain
 \begin{align}
@@ -441,6 +386,7 @@ which corresponds to Eq.~(\ref{eq:edc}) with the mass fractions written in terms
 
 \subsection{Finite-Rate Chemistry (Arrhenius Reaction)}
 \label{Reaction_Rate_Model}
+
 Consider a simple one-step forward reaction:
 \begin{equation}\label{eq:generic_1step}
 a\mathrm{A} + b\mathrm{B} \rightarrow c\mathrm{C} + d\mathrm{D}
@@ -449,7 +395,6 @@ The rate expression for species A with a mixed zone concentration of $C_{\mbox{\
 \begin{equation}\label{eq:generic_rate}
 \frac{\d C_{\mbox{\scriptsize A}}}{\d t}= -k\; C_{\mbox{\scriptsize A}}^{\,a}\; C_{\mbox{\scriptsize B}}^{\,b}
 \end{equation}
-
 Consider a set of $N_r$ reactions with fuel F. The reaction rate (\si{mol/(L.s)}) for F in the $i$th reaction is:
 \begin{equation}\label{eq:rate_f}
 r_{\si{F},i}= -k_{i}\; \prod C_{\alpha}^{\,a_{\alpha,i}}
@@ -500,7 +445,7 @@ Let $\Delta t^k$ represent the $k$th sub-time step in the integration (not neces
 \label{eq:dmdt_1} m_\alpha^* &= m_{\alpha}(t^k) + [ \zeta(t^k) - \zeta(t^k+\Delta t^k) ] \, \rho V \, \overline{Y}_{\alpha,0}  \\
 \label{eq:dmdt_2} m_\alpha(t^k + \Delta t^k) &= m_{\alpha}^* + M(t^k + \Delta t^k) \, \Delta \hat{Y}_\alpha^*
 \end{align}
-The superscript $^*$ indicates the post-mixing, pre-reaction value.  The first step, Eq.~(\ref{eq:dmdt_1}), is an analytical solution for the mixing step (second term in Eq.~(\ref{eq:mixmass})) over the subinterval, obtained using Eqs.~(\ref{eq:mixingstep}), (\ref{eq:mixunmix_2}), and (\ref{eq:zeta_soln}).  The unmixed fractions $\zeta(t^k)$ and $\zeta(t^k + \Delta t^k)$ are obtained from Eq.~(\ref{eq:zeta_soln}). The mixing time scale $\tau_{\rm mix}$ needed in Eq.~(\ref{eq:zeta_soln}) is computed once per FDS time step and held constant during the reactor integration. The mixed mass, $M(t^k + \Delta t^k)$, is evaluated at the end of the subinterval using Eq.~(\ref{eq:mixunmix_3}). For a single step, mixing-controlled reaction, we take only one sub-step and $\Delta t = \delta t$.  This is discussed in more detail below.  
+The superscript $^*$ indicates the post-mixing, pre-reaction value.  The first step, Eq.~(\ref{eq:dmdt_1}), is an analytical solution for the mixing step (second term in Eq.~(\ref{eq:mixmass})) over the subinterval, obtained using Eqs.~(\ref{eq:mixingstep}), (\ref{eq:mixunmix_2}), and (\ref{eq:zeta_soln}).  The unmixed fractions $\zeta(t^k)$ and $\zeta(t^k + \Delta t^k)$ are obtained from Eq.~(\ref{eq:zeta_soln}). The mixing time scale $\tau_{\rm mix}$ needed in Eq.~(\ref{eq:zeta_soln}) is computed once per FDS time step and held constant during the reactor integration. The mixed mass, $M(t^k + \Delta t^k)$, is evaluated at the end of the subinterval using Eq.~(\ref{eq:mixunmix_3}). For a single step, mixing-controlled reaction, we take only one sub-step and $\Delta t = \delta t$.  This is discussed in more detail below.
 
 The method to determine $\Delta \hat{Y}_\alpha^*$ (the change in mass fraction of $\alpha$ due to chemical reaction) in Eq.~(\ref{eq:dmdt_2}) depends on the complexity of the reaction system.  Below we first discuss the simplest (default) case of a single step, mixing-controlled (infinitely fast) reaction.  Then we discuss multiple fast reactions.  And finally, finite-rate chemistry.
 
@@ -512,15 +457,17 @@ Once the mixed zone mass has been updated, the mixed zone mass fractions are com
 At the end of the time integration, the mixed zone composition, $\hat{Y}_\alpha(\delta t)$, is combined with the unmixed mass in Eq.~(\ref{eq:final_comp}) to obtain the final cell composition.
 
 \subsubsection{Infinitely Fast Reaction (Default)}
+
 In practice, for fast chemistry $E$ and $n$ in Eq.~(\ref{eq:finite_rate_fin}) are set to zero, which removes the temperature dependence from the rate expression. The species exponents, $a_{\alpha}$, in Eqs.~(\ref{eq:aprime}) and (\ref{eq:finite_rate_fin}) are also set to zero to remove concentration dependence. Finally, the pre-exponential factor, $A^{\prime}$, is set to $1 \times 10^{16}$. As a result, $\mbox{d}\hat{Y}_{\rm F}/\mbox{d}t$ becomes sufficiently large such that the fuel in the mixed zone can be stoichiometrically consumed in a single time step, effectively making the rate infinite. The change in fuel is based on the limiting reactant:
 \begin{equation}\label{eq:stoich_fuel_single}
 \Delta \hat{Y}_{\rm F} = - \min \left( \hat{Y}_{\rm F}, \hat{Y}_{\alpha} \,\frac{\nu_{\rm F}\,W_{\rm F}}{\nu_{\alpha}\,W_{\alpha}}\right) \quad ; \quad \mbox{for all reactants, $\alpha$}
 \end{equation}
 
 \subsubsection{Multiple Infinitely Fast Reactions: Parallel Reactions}
-Special treatment is needed for multiple, infinitely fast, oxygen-limited reactions. In this situation no reaction takes precedent over another and each wants to consume all of the available oxidizer.  Thus, the oxygen must be apportioned in some reasonable way.
 
-The first step in our approach is to determine the amount of oxidizer present in the mixed zone of the reactor. Next, we calculate the amount of oxidizer needed to stoichiometrically consume all of the fuel in each reaction. If the required oxidizer is larger than what is available then the mixed zone of the reactor is globally fuel rich.
+Special treatment is needed for multiple, infinitely fast, oxygen-limited reactions. In this situation, no reaction takes precedent over another and each wants to consume all of the available oxidizer.  Thus, the oxygen must be apportioned in some reasonable way.
+
+The first step is to determine the amount of oxidizer present in the mixed zone of the reactor. Next, we calculate the amount of oxidizer needed to stoichiometrically consume all of the fuel in each reaction. If the required oxidizer is larger than what is available then the mixed zone of the reactor is globally fuel rich.
 
 If the cell is determined to be globally fuel rich, then for each reaction we determine the stoichiometric fuel concentration based on the limiting reactant:
 \begin{equation}\label{eq:stoich_fuel}
@@ -554,17 +501,17 @@ The initial composition of a premixed reactor is 30\% methane, 40\% propane, and
 \hat{Y}_{{\rm F,lim},1} = \min \left (0.3,\,0.3\,\frac{(-1) (16)}{(-2)(32)} \right) = 0.0752 \\
 \hat{Y}_{{\rm F,lim},2} = \min \left (0.4,\,0.3\,\frac{(-1) (44)}{(-5)(32)} \right) = 0.0827
 \end{align}
-Knowing $\hat{Y}_{\rm F,lim}$ for each reaction, Eq.~(\ref{eq:fuel_weight}) can be used to find the weighting factors:
+Knowing $\hat{Y}_{\rm F,lim}$ for each reaction, Eq.~(\ref{eq:fuel_weight}) can be used to estimate the weighting factors:
 \begin{align}
 w_1 =  \frac{0.0752}{0.1579} = 0.4763 \\
 w_2 =  \frac{0.0827}{0.1579} = 0.5237
 \end{align}
-Finally, using Eq.~(\ref{eq:fuel_rate}) the limiting change in fuel for the each reaction becomes:
+Finally, using Eq.~(\ref{eq:fuel_rate}) the limiting change in fuel for each reaction becomes:
 \begin{align}
 \Delta \hat{Y}_{{\rm F},1} = - (0.0752)(0.4763) = -0.0358 \\
 \Delta \hat{Y}_{{\rm F},2} = - (0.0827)(0.5237) = -0.0433
 \end{align}
-The oxygen consumption for each reaction can be found using the change in fuel, the stoichiometric coefficients, and the ratio of molecular weights of oxygen and the fuel. The generic form of this equation which is applied to each of the species in each reaction is given by Eq.~(\ref{eq:change_alpha}).
+The oxygen consumption for each reaction is estimated using the change in fuel, the stoichiometric coefficients, and the ratio of molecular weights of oxygen and the fuel. The generic form of this equation which is applied to each of the species in each reaction is given by Eq.~(\ref{eq:change_alpha}).
 \begin{align}
 \Delta \hat{Y}_{\si{O_2},1} = \frac{(-2)(32)}{(-1)(16)}(-0.0358) = -0.1429 \\
 \Delta \hat{Y}_{\si{O_2},2} = \frac{(-5)(32)}{(-1)(44)}(-0.0433) = -0.1571
@@ -572,15 +519,16 @@ The oxygen consumption for each reaction can be found using the change in fuel, 
 As should be the case, the total change in oxygen, $-0.3$, is equal to the amount of available oxygen.
 
 \subsubsection{Multiple Infinitely Fast Reactions: Series Reactions}
-A special iterative procedure is needed handle infinitely fast reactions in series to ensure that we correctly process intermediate species consumption. Consider the set of reactions where a product from one reaction is the fuel of a second reaction:
+
+A special iterative procedure is needed to handle infinitely fast reactions in series to ensure that we correctly process intermediate species consumption. Consider the set of reactions in which a product from one reaction is the fuel of a second reaction:
 \begin{align}
 &\mbox{Reaction 1}& \mathrm{CH_4 + 1.5 \, O_2} &\rightarrow  \mathrm{CO + 2 \, H_2O}       && && \label{eq:series_reac_1} \\
 &\mbox{Reaction 2}& \mathrm{CO + 0.5 \, O_2} &\rightarrow \mathrm{CO_2}                    && && \label{eq:series_reac_2}
 \end{align}
-If both Eqs.~(\ref{eq:series_reac_1}) and (\ref{eq:series_reac_2}) are infinitely fast and the mixed state is in stoichiometric proportions, then only H$_2$O and CO$_2$ should be present at the end of a time step. To properly process series reactions, FDS will identify the number of infinitely fast series reactions, $n$, that the user has specified. FDS will then update the species $n$ times before updating the time step. This ensures that the reactions proceed as far as the mixed state stoichiometry permits. 
-  
+If both Eqs.~(\ref{eq:series_reac_1}) and (\ref{eq:series_reac_2}) are infinitely fast and the mixed state is in stoichiometric proportions, then only H$_2$O and CO$_2$ should be present at the end of a time step. To properly process series reactions, FDS will identify the number of infinitely fast series reactions, $n$, that the user has specified. FDS will then update the species $n$ times before updating the time step. This ensures that the reactions proceed as far as the mixed state stoichiometry permits.
+
 \subsubsection{Time Integration for Finite-Rate Chemistry}
 
-For reactions other than single step, mixing controlled chemistry, a fourth-order explicit integrator with error control is used. The time integration follows the procedure outlined in Eqs.~(\ref{eq:dmdt_1}) and (\ref{eq:dmdt_2}), but multiple subiterations are generally needed and the change in composition over the subinterval in the mixed reactor zone, $\Delta \hat{Y}_\alpha^*$, is usually obtained by integrating an Arrhenius rate law (we say ``usually'' because a combination of fast and finite-rate chemistry is permissible). More detail on the numerical methods of the integrator---including a method to combat stiff chemistry---can be found in Appendix~\ref{chemistry_integration}.
+For reactions other than single step, mixing controlled chemistry, a fourth-order explicit integrator with error control is used. The time integration follows the procedure outlined in Eqs.~(\ref{eq:dmdt_1}) and (\ref{eq:dmdt_2}), but multiple subiterations are generally needed and the change in composition over the subinterval in the mixed reactor zone, $\Delta \hat{Y}_\alpha^*$, is usually obtained by integrating an Arrhenius rate law (we say ``usually'' because a combination of fast and finite-rate chemistry is permissible). More detail on the numerical methods of the integrator, including a method to combat stiff chemistry, can be found in Appendix~\ref{chemistry_integration}.
 
 
