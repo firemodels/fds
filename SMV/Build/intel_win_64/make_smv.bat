@@ -2,9 +2,9 @@
 
 Rem windows batch file to build smokeview from the command line
 
-IF "%SETUP_IFORT_COMPILER%"=="1" GOTO envexist
+IF "%SETUP_IFORT_COMPILER_64%"=="1" GOTO envexist
 
-set SETUP_IFORT_COMPILER=1
+set SETUP_IFORT_COMPILER_64=1
 
 echo Setting up compiler environment
 call "%IFORT_COMPILER13%\bin\compilervars" intel64
