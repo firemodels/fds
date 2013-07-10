@@ -1,4 +1,4 @@
-set intelbin="%IFORT_COMPILER12%\bin"
+set intelbin="%IFORT_COMPILER13%\bin"
 
 call %intelbin%\ifortvars ia32
 
