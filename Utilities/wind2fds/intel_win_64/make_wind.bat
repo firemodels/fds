@@ -2,13 +2,12 @@
 
 Rem windows batch file to build smokezip from the command line
 
-IF "%SETUP_IFORT_COMPILER12%"=="1" GOTO envexist
+IF "%SETUP_IFORT_COMPILER64%"=="1" GOTO envexist
 
-set SETUP_IFORT_COMPILER12=1
+set SETUP_IFORT_COMPILER64=1
 
 echo Setting up compiler environment
-call "%IFORT_COMPILER12%\bin\ifortvars" intel64
-call "%IFORT_COMPILER12%\bin\iclvars" intel64
+call "%IFORT_COMPILER13%\bin\compilervars" intel64
 :envexist
 erase *.obj
 erase *.mod
