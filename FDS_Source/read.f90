@@ -8022,7 +8022,7 @@ MESH_LOOP_1: DO NM=1,NMESHES
                ! Circular VENT
 
                IF (RADIUS>0._EB) THEN
-                  IF (ANY(XYZ<-1.E-5_EB)) THEN
+                  IF (ANY(XYZ<-1.E5_EB)) THEN
                      WRITE(MESSAGE,'(A,I4,A)') 'ERROR: VENT ',NN,' requires center point XYZ'
                      CALL SHUTDOWN(MESSAGE)
                   ENDIF
