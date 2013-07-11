@@ -50,6 +50,7 @@ Even with a reasonably small number of bands, solving multiple RTEs is very time
    I_{\rm b}(\bx) = \frac{\sigma \, T(\bx)^4}{\pi} \label{emission_source_term}
 \ee
 This is the default mode of FDS. For optically thin flames, however, where the yield of soot is small compared to the yields of $\rm CO_2$ and water vapor, the gray gas assumption can lead to an over-prediction of the emitted radiation. From a series of numerical experiments using methane as the fuel, it has been found that six bands ($N=6$) provide an accurate representation of the most important radiation bands of the fuel, $\rm CO_2$, and water vapor~\cite{Hostikka:3}. Table~\ref{banditos} through Table~\ref{band_MMA} list the band limits for various fuel species. The location of the bands have been adjusted to accommodate most of the features of the fuels spectra. If the absorption of the fuel is known to be important, separate bands can be reserved for fuel, increasing the total number of bands, $N$. The number of additional bands depends on the fuel, as discussed in Appendix~\ref{absorption_coefficients}.
+
 \begin{table}[p]
 \caption{Limits of the spectral bands for methane (CH$_4$).}
 \label{banditos}
@@ -355,7 +356,6 @@ the radiative heat flux $\dq_{\rm r}''$ is computed at solid boundaries.
 
 \subsection{Angular Discretization}
 \label{radiation-discre}
-
 
 To obtain the discretized form of the RTE, the unit sphere is divided into a finite number of solid angles.
 The coordinate system used to discretize the solid angle is
