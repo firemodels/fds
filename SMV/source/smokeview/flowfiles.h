@@ -716,8 +716,8 @@ typedef struct {
 /* --------------------------  pathdata ------------------------------------ */
 
 typedef struct _pathdata {
-  float time, eye[4], aview[3], oview[3];
-  float zoom,elev_path;
+  float time, eye[3], xyz_view[3], tour_view[3];
+  float az_path,zoom,elev_path;
   struct _pathdata *keysnap;
 } pathdata;
 
@@ -730,7 +730,7 @@ typedef struct _keyframe {
   float keyview_x, keyview_y;
   float cumdist, dist;
   float s_eye[6], d_eye[6];
-  float s_aview[3], d_aview[3];
+  float s_xyz_view[3], d_xyz_view[3];
   float bias, continuity, tension;
   float bank;
   float az_path;
