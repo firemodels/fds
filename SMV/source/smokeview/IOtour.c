@@ -509,8 +509,8 @@ void createtourpaths(void){
     }
     if(touri->nkeyframes<=1)continue;
     for(keyj=(touri->first_frame).next,j=0;keyj->next!=NULL;keyj=keyj->next,j++){
-      keyframe *key0, *key1, *key2;
-      float *eye0, *eye1, *eye2;
+      keyframe *lastkey, *thiskey, *nextkey;
+      float *lasteye, *thiseye, *nexteye;
       float *xyz_view0, *xyz_view1, *xyz_view2;
       float s1, s2, d1, d2;
       float a, b, c;
@@ -521,14 +521,14 @@ void createtourpaths(void){
       keyj->dist=0.0;
       keyj->npoints=0;
 
-      key0=keyj->prev;
-      key1=keyj;
-      key2=keyj->next;
+      lastkey=keyj->prev;
+      thiskey=keyj;
+      nextkey=keyj->next;
       if(j==0&&touri->periodic==1){
-        key0=touri->keyframe_list[touri->nkeyframes-2];
+        lastkey=touri->keyframe_list[touri->nkeyframes-2];
       }
       if(j==touri->nkeyframes-1&&touri->periodic==1){
-        key2=touri->keyframe_list[1];
+        nextkey=touri->keyframe_list[1];
       }
       if(touri->global_tension_flag==1){
         a=touri->global_tension;
@@ -544,12 +544,12 @@ void createtourpaths(void){
       d1=(1.0-a)*(1.0+b)*(1+c)/2.0;
       d2=(1.0-a)*(1.0-b)*(1-c)/2.0;
 
-      eye0 = key0->nodeval.eye;
-      eye1 = key1->nodeval.eye;
-      eye2 = key2->nodeval.eye;
-      xyz_view0 = key0->nodeval.xyz_view;
-      xyz_view1 = key1->nodeval.xyz_view;
-      xyz_view2 = key2->nodeval.xyz_view;
+      lasteye = lastkey->nodeval.eye;
+      thiseye = thiskey->nodeval.eye;
+      nexteye = nextkey->nodeval.eye;
+      xyz_view0 = lastkey->nodeval.xyz_view;
+      xyz_view1 = thiskey->nodeval.xyz_view;
+      xyz_view2 = nextkey->nodeval.xyz_view;
 
 
       if(touri->periodic==0&&j==0){
@@ -561,30 +561,24 @@ void createtourpaths(void){
         keyj->s_eye[4]=0.0;
         keyj->s_eye[5]=0.0;
 
-        keyj->d_eye[0]=eye2[0] - eye1[0];
-        keyj->d_eye[1]=eye2[1] - eye1[1];
-        keyj->d_eye[2]=eye2[2] - eye1[2];
+        VECDIFF3(thiseye,nexteye,keyj->d_eye);
 
-        keyj->d_eye[3]=key2->az_path - key1->az_path;
-        keyj->d_eye[4]=key2->nodeval.zoom - key1->nodeval.zoom;
-        keyj->d_eye[5]=key2->nodeval.elev_path - key1->nodeval.elev_path;
+        keyj->d_eye[3]=nextkey->az_path - thiskey->az_path;
+        keyj->d_eye[4]=nextkey->nodeval.zoom - thiskey->nodeval.zoom;
+        keyj->d_eye[5]=nextkey->nodeval.elev_path - thiskey->nodeval.elev_path;
 
         keyj->s_xyz_view[0]=0.0;
         keyj->s_xyz_view[1]=0.0;
         keyj->s_xyz_view[2]=0.0;
 
-        keyj->d_xyz_view[0]=xyz_view2[0] - xyz_view1[0];
-        keyj->d_xyz_view[1]=xyz_view2[1] - xyz_view1[1];
-        keyj->d_xyz_view[2]=xyz_view2[2] - xyz_view1[2];
+        VECDIFF3(xyz_view1,xyz_view2,keyj->d_xyz_view);
       }
       else if(touri->periodic==0&&j==touri->nkeyframes-1){
-        keyj->s_eye[0]=eye1[0] - eye0[0];
-        keyj->s_eye[1]=eye1[1] - eye0[1];
-        keyj->s_eye[2]=eye1[2] - eye0[2];
+        VECDIFF3(lasteye,thiseye,keyj->s_eye);
 
-        keyj->s_eye[3]=key1->az_path - key0->az_path;
-        keyj->s_eye[4]=key1->nodeval.zoom - key0->nodeval.zoom;
-        keyj->s_eye[5]=key1->nodeval.elev_path - key0->nodeval.elev_path;
+        keyj->s_eye[3]=thiskey->az_path - lastkey->az_path;
+        keyj->s_eye[4]=thiskey->nodeval.zoom - lastkey->nodeval.zoom;
+        keyj->s_eye[5]=thiskey->nodeval.elev_path - lastkey->nodeval.elev_path;
 
         keyj->d_eye[0]=0.0;
         keyj->d_eye[1]=0.0;
@@ -594,9 +588,7 @@ void createtourpaths(void){
         keyj->d_eye[4]=0.0;
         keyj->d_eye[5]=0.0;
 
-        keyj->s_xyz_view[0]=xyz_view1[0] - xyz_view0[0];
-        keyj->s_xyz_view[1]=xyz_view1[1] - xyz_view0[1];
-        keyj->s_xyz_view[2]=xyz_view1[2] - xyz_view0[2];
+        VECDIFF3(xyz_view0,xyz_view1,keyj->s_xyz_view);
 
         keyj->d_xyz_view[0]=0.0;
         keyj->d_xyz_view[1]=0.0;
@@ -606,37 +598,30 @@ void createtourpaths(void){
         float del1, del2;
         float sfactor, dfactor;
 
-        del1 = key1->nodeval.time - key0->nodeval.time;
-        del2 = key2->nodeval.time - key1->nodeval.time;
+        del1 = thiskey->nodeval.time - lastkey->nodeval.time;
+        del2 = nextkey->nodeval.time - thiskey->nodeval.time;
         sfactor = 2*del2/(del1 + del2);
         dfactor = 2*del1/(del1 + del2);
         //sfactor = 1.0;
         //dfactor = 1.0;
 
-        keyj->s_eye[0]=sfactor*(s1*(eye1[0] - eye0[0]) + s2*(eye2[0]-eye1[0]));
-        keyj->s_eye[1]=sfactor*(s1*(eye1[1] - eye0[1]) + s2*(eye2[1]-eye1[1]));
-        keyj->s_eye[2]=sfactor*(s1*(eye1[2] - eye0[2]) + s2*(eye2[2]-eye1[2]));
+#define HERM1(s1,s2,lastval,thisval,nextval,val)\
+        val[0]=sfactor*(s1*(thisval[0] - lastval[0]) + s2*(nextval[0]-thisval[0]));\
+        val[1]=sfactor*(s1*(thisval[1] - lastval[1]) + s2*(nextval[1]-thisval[1]));\
+        val[2]=sfactor*(s1*(thisval[2] - lastval[2]) + s2*(nextval[2]-thisval[2]))
 
-        keyj->s_eye[3]=sfactor*(s1*(key1->az_path -           key0->az_path) +           s2*(key2->az_path-          key1->az_path));
-        keyj->s_eye[4]=sfactor*(s1*(key1->nodeval.zoom -      key0->nodeval.zoom) +      s2*(key2->nodeval.zoom-     key1->nodeval.zoom));
-        keyj->s_eye[5]=sfactor*(s1*(key1->nodeval.elev_path - key0->nodeval.elev_path) + s2*(key2->nodeval.elev_path-key1->nodeval.elev_path));
+#define HERM2(s1,s2,lastkey,thiskey,nextkey,val)\
+        val[3]=sfactor*(s1*(thiskey->az_path -           lastkey->az_path) +           s2*(nextkey->az_path-          thiskey->az_path));\
+        val[4]=sfactor*(s1*(thiskey->nodeval.zoom -      lastkey->nodeval.zoom) +      s2*(nextkey->nodeval.zoom-     thiskey->nodeval.zoom));\
+        val[5]=sfactor*(s1*(thiskey->nodeval.elev_path - lastkey->nodeval.elev_path) + s2*(nextkey->nodeval.elev_path-thiskey->nodeval.elev_path))
 
-        keyj->s_xyz_view[0]=sfactor*(s1*(xyz_view1[0] - xyz_view0[0]) + s2*(xyz_view2[0]-xyz_view1[0]));
-        keyj->s_xyz_view[1]=sfactor*(s1*(xyz_view1[1] - xyz_view0[1]) + s2*(xyz_view2[1]-xyz_view1[1]));
-        keyj->s_xyz_view[2]=sfactor*(s1*(xyz_view1[2] - xyz_view0[2]) + s2*(xyz_view2[2]-xyz_view1[2]));
+        HERM1(s1,s2,lasteye,thiseye,nexteye,keyj->s_eye);
+        HERM2(s1,s2,lastkey,thiskey,nextkey,keyj->s_eye);
+        HERM1(s1,s2,xyz_view0,xyz_view1,xyz_view2,keyj->s_xyz_view);
 
-        keyj->d_eye[0]=dfactor*(d1*(eye1[0] - eye0[0]) + d2*(eye2[0]-eye1[0]));
-        keyj->d_eye[1]=dfactor*(d1*(eye1[1] - eye0[1]) + d2*(eye2[1]-eye1[1]));
-        keyj->d_eye[2]=dfactor*(d1*(eye1[2] - eye0[2]) + d2*(eye2[2]-eye1[2]));
-
-        keyj->d_eye[3]=dfactor*(d1*(key1->az_path -           key0->az_path) +           d2*(key2->az_path-          key1->az_path));
-        keyj->d_eye[4]=dfactor*(d1*(key1->nodeval.zoom -      key0->nodeval.zoom) +      d2*(key2->nodeval.zoom-     key1->nodeval.zoom));
-        keyj->d_eye[5]=dfactor*(d1*(key1->nodeval.elev_path - key0->nodeval.elev_path) + d2*(key2->nodeval.elev_path-key1->nodeval.elev_path));
-
-        keyj->d_xyz_view[0]=dfactor*(d1*(xyz_view1[0] - xyz_view0[0]) + d2*(xyz_view2[0]-xyz_view1[0]));
-        keyj->d_xyz_view[1]=dfactor*(d1*(xyz_view1[1] - xyz_view0[1]) + d2*(xyz_view2[1]-xyz_view1[1]));
-        keyj->d_xyz_view[2]=dfactor*(d1*(xyz_view1[2] - xyz_view0[2]) + d2*(xyz_view2[2]-xyz_view1[2]));
-
+        HERM1(d1,d2,lasteye,thiseye,nexteye,keyj->d_eye);
+        HERM2(d1,d2,lastkey,thiskey,nextkey,keyj->d_eye);
+        HERM1(d1,d2,xyz_view0,xyz_view1,xyz_view2,keyj->d_xyz_view);
       }
     }
 
@@ -712,7 +697,7 @@ void createtourpaths(void){
       }
     }
 
-    // constuct running "cumdist" info
+    // construct running "cumdist" info
 
     kf1 = touri->first_frame.next;
     kf1->cumdist=0.0;
