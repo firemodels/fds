@@ -27,7 +27,7 @@ where $u$ is the duct velocity, $A$ is the duct area, and $h$ is the enthalpy of
 The subscript $j$ indicates a duct segment, the subscripts $i$ and $k$ indicate nodes (where one or more ducts join or where a duct terminates in a compartment).
 $\Delta P$ is a fixed source of momentum (a fan or blower), $L$ is the length of the duct segment, and $K$ is the friction loss of the duct segment.
 
-Since nodes have no volume, the mass and energy conservation equations state that what flows into a node must also flow out. In the momentum equation the terms on the right hand side consist of the pressure gradient between the upstream and the downstream node, the buoyancy head, pressure rise due to an external source (e.g., a fan or blower), and the pressure losses due to wall friction or the presence of duct fittings.
+Since nodes have no volume, the mass and energy conservation equations require that what flows into a node must also flow out. In the momentum equation the terms on the right hand side consist of the pressure gradient between the upstream and the downstream node, the buoyancy head, pressure rise due to an external source (e.g., a fan or blower), and the pressure losses due to wall friction or the presence of duct fittings.
 
 \section{Solution Procedure}
 
@@ -81,17 +81,17 @@ The solution scheme is as follows:
 
 \subsection{Filtration}
 
-Filters have two effects on the flow in an HVAC network.  First, a filter causes a flow loss whose magnitude depends on the loading of the filter.  Second, a filter removes mass from flow going through the filter as function of the filter's efficiency. Filter losses are evaluated using the beginning of time step filter loading.  This loss is applied to the upstream duct.  The filter loss is computed as a function of the total filter loading using either a linear ramp or a user defined table.  The total loading of the filter is determined by summing the mass of each species trapped times a weighting factor for that species.
+Filters have two effects on the flow in an HVAC network.  First, a filter causes a flow loss whose magnitude depends on the loading of the filter.  Second, a filter removes mass from flow going through the filter as a function of the filter's efficiency. Filter losses are evaluated using the filter loading at the start of each time step.  This loss is applied to the upstream duct.  The filter loss is computed as a function of the total filter loading using either a linear ramp or a user defined table.  The total loading of the filter is determined by summing the mass of each species trapped times a weighting factor for that species.
 
 The filter is assumed to remove a fixed fraction (the filter's efficiency) of the species being trapped by the filter.  Each species can be given its own removal efficiency.   Eq.~(\ref{HVACmass}) for a filter is therefore given as:
 \be
-   u_\text{\tiny out} \, \rho_\text{\tiny out} \, A_\text{\tiny out} = u_\text{\tiny in} \, \rho_\text{\tiny in} \, A_\text{tiny in} - \sum_j u_\text{\tiny in} \, \rho_\text{\tiny in} \, A_\text{\tiny in} Y_{j,\text{\tiny in}} E_j = u_\text{\tiny in} \, \rho_\text{\tiny in} \, A_\text{\tiny in}  \left(1 - \sum_j Y_{j,\text{\tiny in}} E_j \right)
+   u_{\rm out} \, \rho_{\rm out} \, A_{\rm out} = u_{\rm in} \, \rho_{\rm in} \, A_{\rm in} - \sum_j u_{\rm in} \, \rho_{\rm in} \, A_{\rm in} Y_{j,{\rm in}} E_j = u_{\rm in} \, \rho_{\rm in} \, A_{\rm in}  \left(1 - \sum_j Y_{j,{\rm in}} E_j \right)
 \ee
 where $j$ is a species being filtered and $E_j$ is its removal efficiency.
 
 \subsection{Node Losses}
 
-Some nodes in the modeled HVAC system will represent items such as tees.  Flow through such a node will result in a flow loss.  However, as seen in Eq.~(\ref{HVACfullexpansion}), flow loss terms appear only in the equations for a duct.  This means that losses that are physically associated with a node must be expressed numerically as equivalent losses in the ducts attached to the node.  The losses also need to be applied in a manner that represents the flow conditions within the node.  For example if a tee has flow into one leg and out of two legs, it would not make sense to apply the loss to the upstream leg as there would be no way to distinguish losses due to any changes of the flow splitting in the downstream legs.  Loss terms are applied as follows:
+Some nodes in the modeled HVAC system will represent items such as tees.  Flow through such a node will result in a flow loss.  However, as seen in Eq.~(\ref{HVACfullexpansion}), flow loss terms appear only in the equations for a duct.  This means that losses that are physically associated with a node must be expressed numerically as equivalent losses in the ducts attached to the node.  The losses also need to be applied in a manner that represents the flow conditions within the node.  For example, if a tee has flow into one leg and out of two legs, it would not make sense to apply the loss to the upstream leg as there would be no way to distinguish losses due to any changes of the flow splitting in the downstream legs.  Loss terms are applied as follows:
 
 \begin{enumerate}
 \item If there is no flow at the node, then each duct connected to the node is assigned the average of all the losses for flows to the duct from all other ducts.
@@ -111,16 +111,16 @@ where $\epsilon$ is the absolute roughness of the duct.
 
 \subsection{Heating and Coiling Coils}
 
-A duct can contain a heating or cooling coil.  These either add or remove heat from the mass flowing in a duct.  This enthalpy change is then added to the duct enthalpy flow at the downstream node prior to computing the node temperature.  Two models are available.  The first model is a constant heat model that adds or removes heat at a fixed rate as long as the coil is operating.  The second model is an effectiveness type heat exchanger model where four parameters are specified: the enthalpy of the working fluid ($c_{p,\text{\tiny fl}}$), the temperature of the working fluid, ($T_\text{\tiny fl}$), the mass flow rate of the working fluid ($\dot{m}_\text{\tiny fl}$), and the effectiveness ($\eta$).  The rate of enthalpy change is then computed as follows:
+A duct can contain a heating or cooling coil.  These either add or remove heat from the mass flowing in a duct.  This enthalpy change is then added to the duct enthalpy flow at the downstream node prior to computing the node temperature.  Two models are available.  The first model is a constant heat model that adds or removes heat at a fixed rate as long as the coil is operating.  The second model is an effectiveness type heat exchanger model in which four parameters are specified: the enthalpy of the working fluid ($c_{p,\text{\tiny fl}}$), the temperature of the working fluid, ($T_\text{\tiny fl}$), the mass flow rate of the working fluid ($\dot{m}_\text{\tiny fl}$), and the effectiveness ($\eta$).  The rate of enthalpy change is then computed as follows:
 
-\be T_\text{\tiny out} = \frac{\dot{m}_\text{\tiny duct} \, c_{p,\text{\tiny duct,in}} \, T_\text{\tiny duct,in} + \dot{m}_\text{\tiny fl} \, c_{p,\text{\tiny fl}} \, T_\text{\tiny fl}}
-                             {\dot{m}_\text{\tiny duct} \, c_{p,\text{\tiny duct,in}} + \dot{m}_\text{\tiny fl} \, c_{p,\text{\tiny fl}} } \ee
+\be T_{\rm out} = \frac{\dot{m}_{\rm duct} \, c_{p,{\rm duct,in}} \, T_{\rm duct,in} + \dot{m}_{\rm fl} \, c_{p,{\rm fl}} \, T_{\rm fl}}
+                             {\dot{m}_{\rm duct} \, c_{p,{\rm duct,in}} + \dot{m}_{\rm fl} \, c_{p,{\rm fl}} } \ee
 
-\be \dot{q}_\text{\tiny coil}= \dot{m}_\text{\tiny fl} c_{p,\text{\tiny fl}} \left(T_\text{\tiny fl} -T_\text{\tiny out} \right) \eta \ee
+\be \dot{q}_{\rm coil}= \dot{m}_{\rm fl} c_{p,{\rm fl}} \left(T_{\rm fl} -T_{\rm out} \right) \eta \ee
 
 \section{Leakage}
 
-With rare exceptions, walls, floors, and ceilings are not air tight.  Gaps around windows and doors and openings for electrical, mechanical, and other systems provide for small flow paths through surfaces.  These flow paths can be modeled as an equivalent HVAC system where each leakage path is a single duct.  The area of the duct is total leakage area and the terminal nodes of the duct can be considered the entire area of the surfaces defined as participating in that flow path.
+With rare exceptions, walls, floors, and ceilings are not air tight.  Gaps around windows and doors and openings for electrical, mechanical, and other systems provide small flow paths through obstructions.  These flow paths can be modeled as an equivalent HVAC system where each leakage path is a single duct.  The area of the duct is total leakage area and the terminal nodes of the duct can be considered the entire area of the surfaces defined as participating in that flow path.
 
 \section{Coupling the HVAC solver to FDS}
 

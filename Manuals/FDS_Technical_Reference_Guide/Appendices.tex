@@ -102,6 +102,7 @@ $\nu_{{\rm g},\gamma}$    \> yield of gaseous species $\gamma$ in solid phase re
 $\rho$                    \> density \\
 $\bar{\tau}_{\om}$        \> mean spectral transmissivity of a narrow band centered in $\om$ \\
 $\btau_{ij}$              \> viscous stress tensor \\
+$\phi$                    \> porosity \\
 $\chi$                    \> shape factor \\
 $\chi_{\rm r}$            \> radiative loss fraction \\
 $\sigma$                  \> Stefan-Boltzmann constant; constant in droplet size distribution; surface tension \\
@@ -392,7 +393,7 @@ The source term $I_{\rm b,\la}(T)$ is the {\em Planck blackbody distribution law
 \be \label{eq:Planck_law}
 I_{\rm b,\la}(T)\d \la = \dfrac{2 \, h \, c^2 \, \la^{-5}}{\exp\left(\dfrac{h \, c}{k_{\rm B} \, \la \, T }\right)-1}\d \la
 \ee
-Here, $h$ is the Planck constant ($6.626 \times 10^{-34}$~J$\cdot$s), $c$ is the speed of light in vacuum ($2.998 \times 10^8$~m/s), and $k_{\rm B}$ is the Boltzmann constant ($1.381 \times 10^{-23}$~J/K). 
+Here, $h$ is the Planck constant ($6.626 \times 10^{-34}$~J$\cdot$s), $c$ is the speed of light in vacuum ($2.998 \times 10^8$~m/s), and $k_{\rm B}$ is the Boltzmann constant ($1.381 \times 10^{-23}$~J/K).
 $I_{\rm b,\la}(T)$ is in units of $\rm{W/m^{2}/str/m}$; the wavelengths are converted from $\rm{\mu m}$ to $\rm{m}$.
 
 The second coefficient is the so-called {\em path mean} or {\em effective} absorption coefficient, $\kappa_{{\rm e},n}(T)$ which is defined according to the following equation
@@ -409,24 +410,21 @@ In cases with only one band ($N$=1), the smaller of the two absorption coefficie
 If $N>1$ or $L=0$, $\kappa_n=\kappa_n(P,T)$. Note that the spectral data within RADCAL are used whenever the gas mixture contains water vapor, fuel or combustion products, regardless of the number of radiation bands $N$.
 
 \textbf{Note on wavenumber, wavelength, and frequency}: some confusion might arise when dealing with the various quantities describing the wave nature of radiation. These quantities are wavenumber $\om$, wavelength $\la$, and frequency denoted here $\nu$. Most users may be familiar with the frequency $\nu$, in units of \textit{hertz}, ${\rm Hz}$, representing the number of cycles per second. While this unit is preferred for radiation waves of low energy such as radio waves, wavelength and wavenumber are preferred for waves of higher energy. Wavenumber and wavelength are related to frequency through
-\be 
+\be
  \la = c/\nu \: \: \rm{and} \: \: \om = \nu /c
 \ee
-Wavelength $\la$ represents the distance traveled by the wave during one cycle, assuming it travels at the speed of light in vacuum. When dealing with infrared 
-radiation, its units are commonly expressed in ${\rm \mu m}$.
-Wavenumber $\om$ is the reciprocal of the wavelength. It represents the number of 
-cycles per unit length. In most infrared spectroscopic work, it is expressed in units of ${\rm cm^{-1}}$. This is the unit used in the sections below. One can  easily switch from wavenumber in units of ${\rm cm^{-1}}$ to wavelength in units of ${\rm \mu m}$ using the relation
+where $c$ is the speed of light in a vacuum. The wavelength, $\la$, represents the distance traveled by the wave during one cycle, assuming it travels at the speed of light in a vacuum. Its units are commonly expressed in ${\rm \mu m}$. Wavenumber, $\om$, is the reciprocal of the wavelength. It represents the number of cycles per unit length. In most infrared spectroscopic work, it is expressed in units of ${\rm cm^{-1}}$. This is the unit used in the sections below. One can  easily switch from wavenumber in units of ${\rm cm^{-1}}$ to wavelength in units of ${\rm \mu m}$ using the relation
 
 \be
   \la \; {\rm \mu m}  \; = 10000/\om \; \; {\rm cm^{-1}}
 \ee
 Finally, the user who wishes to express the Planck blackbody distribution law
-as a function of wavenumber should take caution when performing the change of variables. One should start by expressing that the radiant energy emitted 
+as a function of wavenumber should take caution when performing the change of variables. One should start by expressing that the radiant energy emitted
 at a wavelength $\la$ is the same as the radiant energy emitted at the corresponding wavenumber $\om$
 \be \label{eq:Planck_WN_WL}
 I_{\rm b,\la}(T) \d \la = -I_{\rm b,\om}(T)\d \om
 \ee
-the negative sign is introduced because $\om$ is the reciprocal of $\la$. 
+the negative sign is introduced because $\om$ is the reciprocal of $\la$.
 Since $\la$ = 1/$\om$, it comes
 
 \be
@@ -452,18 +450,20 @@ A combination of molecular models and data tables are used to compute the spectr
   \item Methanol:  $\rm CH_3OH$
   \item Methyl Methacrylate: $\rm C_5H_8O_2$
 \end{itemize}
-These new data have been obtained through FTIR measurements for wavenumbers between 700~cm$\rm ^{-1}$ and 4000~cm$\rm ^{-1}$. A useful quantity to compare the relative importance of the different IR bands is provided by the integrated band intensity, $\alpha_i$, defined for the $i$th participating species as:
+These new data have been obtained through FTIR measurements for wavenumbers between 700~cm$\rm ^{-1}$ and 4000~cm$\rm ^{-1}$~\cite{Wakatsuki:2005}. A useful quantity to compare the relative importance of the different IR bands is provided by the integrated band intensity, $\alpha_i$, defined for the $i$th participating species as:
 \be
   \alpha_i(T) = \displaystyle\int_{\om_{\min}}^{\om_{\max}} \bar{\kappa}_i(\om',T) \; \d \om'
 \ee
 whose units are $\rm {atm^{-1} cm^{-2}}$. The value of the spectral absorption coefficient, $\bar{\kappa}_i$, is averaged over a narrow band whose spectral width, $\Delta \om$, varies from 5~cm$^{-1}$ for $\om < $ 1100~cm$^{-1}$, to 25~cm$^{-1}$ for 1100~cm$^{-1} \leq \om < $ 5000~cm$^{\rm -1}$, and to 50~cm$^{\rm -1}$ for 5000~cm$^{\rm -1}\leq \om$.
 
-The subsections below briefly describe the molecular bands where the species are active for each of the gas-phase radiative species, and provide for most of them the integrated band intensity of their most important bands at the indicated temperature. Outside these bands, the species are transparent. At the start of a simulation, the absorption coefficient are calculated using RADCAL and then tabulated as a function of mixture fraction and temperature. During the simulation, the local absorption coefficient is interpolated from the table of values.
+The subsections below briefly describe the molecular bands where the species are active for each of the gas-phase radiative species, and provide for most of them the integrated band intensity of their most important bands at the indicated temperature. Outside these bands, the species are transparent. At the start of a simulation, the absorption coefficients are calculated using RADCAL and then tabulated as a function of mixture fraction and temperature. During the simulation, the local absorption coefficient is interpolated from the table of values.
+
+
 
 
 \subsubsection{Carbon Dioxide: $\rm CO_2$}
 
-Carbon dioxide is a linear molecule and has four vibrational modes, but only two fundamental IR vibration frequencies. It has five distinct bands that are included in RADCAL, see Table \ref{Table::CO2}.
+Carbon dioxide is a linear molecule and has four vibrational modes, but only two fundamental IR vibration frequencies. It has five distinct bands that are included in RADCAL, see Table~\ref{Table::CO2}.
 \begin{table}[h!]
     \centering
     \caption{Spectral bands of $\rm CO_2$ included in RADCAL.}
@@ -504,7 +504,7 @@ The statistical narrow band model associated with $\rm CO$ is the Goody model. R
 
 \subsubsection{Water Vapor: $\rm H_2O$}
 
-Due to the non-linearity of its molecular structure, the IR spectrum of water vapor is complex and broad. In RADCAL, water vapor spectrum from 50~cm$\rm ^{-1}$ to 9300~cm$\rm ^{-1}$ is considered. Data in RADCAL are tabulated and provide from Ludwig \textit{et al.}~\cite{Ludwig:NASA}. Experimental data have been fitted using the statistical Goody narrow band model. The strongest bands at standard temperature and pressure are located in the ranges $\left[50-2100\right]$~cm$\rm ^{-1}$: $\alpha = 300\;\rm {atm^{-1}cm^{-2}}$, and $\left[3000-4000\right]$~cm$\rm ^{-1}$: $\alpha = 220\;\rm {atm^{-1}cm^{-2}}$.
+Due to the non-linearity of its molecular structure, the IR spectrum of water vapor is complex and broad. In RADCAL, water vapor spectrum from 50~cm$\rm ^{-1}$ to 9300~cm$\rm ^{-1}$ is considered. Data in RADCAL are provided by Ludwig~\textit{et al.}~\cite{Ludwig:NASA}. Experimental data have been fitted using the statistical Goody narrow band model. The strongest bands at standard temperature and pressure are located in the ranges $\left[50-2100\right]$~cm$\rm ^{-1}$: $\alpha = 300\;\rm {atm^{-1}cm^{-2}}$, and $\left[3000-4000\right]$~cm$\rm ^{-1}$: $\alpha = 220\;\rm {atm^{-1}cm^{-2}}$.
 
 \subsubsection{Methane: $\rm CH_4$}
 
@@ -524,7 +524,7 @@ Methane is a spherical top molecule of tetrahedral shape with the carbon atom oc
     \hline
    \end{tabular}
 \end{table}
-The strongest bands are Bands~1 and 2 which at standard temperature and pressure have an integrated band intensity of $237\;\rm {atm^{-1}cm^{-2}}$ and $212\;\rm {atm^{-1}cm^{-2}}$, respectively. The tabulated data were obtained from high resolution FTIR experiments with temperatures varying from 300~K to 1400~K. The spectral absorption coefficients were obtained assuming the FTIR measurements to be in the weak line regime and applying the Beer-Lambert Law to the experimental spectral transmissivity.
+The strongest bands are Bands~1 and 2 which at standard temperature and pressure have an integrated band intensity of $237\;\rm {atm^{-1}cm^{-2}}$ and $212\;\rm {atm^{-1}cm^{-2}}$, respectively. The tabulated data were obtained from high resolution FTIR experiments with temperatures varying from 300~K to 1400~K~\cite{Wakatsuki:2005}. The spectral absorption coefficients were obtained assuming the FTIR measurements to be in the weak line regime and applying the Beer-Lambert Law to the experimental spectral transmissivity.
 
 
 
@@ -548,7 +548,7 @@ Ethylene is a molecule with a plane symmetrical form and belongs to the point gr
       \hline
     \end{tabular}
 \end{table}
-Band~1 is the strongest absorbing band. All the ethylene IR spectral absorption data were obtained from high resolution FTIR experiments with temperatures varying from 296~K to 801~K. The spectral absorption coefficients were obtained by fitting the experimental spectral transmissivity of a homogeneous column of isothermal ethylene with a total pressure of 1~atm using the Goody model.
+Band~1 is the strongest absorbing band. All the ethylene IR spectral absorption data were obtained from high resolution FTIR experiments with temperatures varying from 296~K to 801~K~\cite{Wakatsuki:2005}. The spectral absorption coefficients were obtained by fitting the experimental spectral transmissivity of a homogeneous column of isothermal ethylene with a total pressure of 1~atm using the Goody model.
 
 \subsubsection{Ethane: $\rm C_2H_6$}
 
@@ -569,7 +569,7 @@ Ethane has a three-fold axis of symmetry and belongs to the point group $D_{3d}$
     \end{tabular}
 \end{table}
 Band~3 corresponds to the stretching of $\rm CH$ and is the strongest absorbing band. At standard temperature and pressure, its integrated band intensity is more than 10 times the value of
-Band~2, and more than 20 times the value of Band~1. All the ethane IR spectral absorption data were obtained from high resolution FTIR experiments with temperatures varying from 296~K to 1000~K. The spectral absorption coefficients were obtained by fitting the experimental spectral transmissivity of a homogeneous column of isothermal ethane with a total pressure of 1~atm using the Elsasser model.
+Band~2, and more than 20 times the value of Band~1. All the ethane IR spectral absorption data were obtained from high resolution FTIR experiments with temperatures varying from 296~K to 1000~K~\cite{Wakatsuki:2005}. The spectral absorption coefficients were obtained by fitting the experimental spectral transmissivity of a homogeneous column of isothermal ethane with a total pressure of 1~atm using the Elsasser model.
 
 \subsubsection{Propylene: $\rm C_3H_6$}
 
@@ -589,7 +589,7 @@ Propylene has only one plane of symmetry and belongs to the point group $C_s$. T
     \hline
    \end{tabular}
 \end{table}
-Band~3 corresponds to the stretching of $\rm CH$ and is the strongest of all Propylene absorbing bands. All the propylene IR spectral absorption data were obtained from high resolution FTIR experiments with temperatures varying from 296~K to 1003~K. The spectral absorption coefficients were obtained by fitting the experimental spectral transmissivity of a homogeneous column of isothermal propylene with a total pressure of 1~atm using the Goody model.
+Band~3 corresponds to the stretching of $\rm CH$ and is the strongest of all Propylene absorbing bands. All the propylene IR spectral absorption data were obtained from high resolution FTIR experiments with temperatures varying from 296~K to 1003~K~\cite{Wakatsuki:2005}. The spectral absorption coefficients were obtained by fitting the experimental spectral transmissivity of a homogeneous column of isothermal propylene with a total pressure of 1~atm using the Goody model.
 
 \subsubsection{Propane: $\rm C_3H_8$}
 
@@ -608,7 +608,7 @@ Propane has two planes of symmetry and two axes of rotation. It belongs to the p
     \hline
    \end{tabular}
 \end{table}
-Band~2 corresponds to the stretching of $\rm CH_3$ and $\rm CH_2$ and is the strongest of all propane absorbing bands. For similar conditions, Band~1 has a much lower integrated band intensity. All the propane IR spectral absorption data were obtained from high resolution FTIR experiments with temperatures varying from 295~K to 1009~K. The spectral absorption coefficients were obtained by fitting the experimental spectral transmissivity of a homogeneous column of isothermal propane with a total pressure of 1~atm using the Goody model.
+Band~2 corresponds to the stretching of $\rm CH_3$ and $\rm CH_2$ and is the strongest of all propane absorbing bands. For similar conditions, Band~1 has a much lower integrated band intensity. All the propane IR spectral absorption data were obtained from high resolution FTIR experiments with temperatures varying from 295~K to 1009~K~\cite{Wakatsuki:2005}. The spectral absorption coefficients were obtained by fitting the experimental spectral transmissivity of a homogeneous column of isothermal propane with a total pressure of 1~atm using the Goody model.
 
 \subsubsection{Toluene: $\rm C_7H_8$}
 
@@ -630,7 +630,7 @@ Toluene has only one plane of symmetry. It belongs to the point group $C_{s}$. T
     \hline
    \end{tabular}
 \end{table}
-Band~5 corresponds to the stretching of $\rm CH_3$ and $\rm CH$, and it is the strongest absorbing band. All the toluene IR spectral absorption data were obtained from high resolution FTIR experiments with temperatures varying from 300~K to 795~K. The spectral absorption coefficients were obtained by fitting the experimental spectral transmissivity of a homogeneous column of isothermal toluene with a total pressure of 1~atm using the Goody model.
+Band~5 corresponds to the stretching of $\rm CH_3$ and $\rm CH$, and it is the strongest absorbing band. All the toluene IR spectral absorption data were obtained from high resolution FTIR experiments with temperatures varying from 300~K to 795~K~\cite{Wakatsuki:2005}. The spectral absorption coefficients were obtained by fitting the experimental spectral transmissivity of a homogeneous column of isothermal toluene with a total pressure of 1~atm using the Goody model.
 
 \subsubsection{\textit{n}-Heptane: $\rm C_7H_{16}$}
 
@@ -649,7 +649,7 @@ Band~5 corresponds to the stretching of $\rm CH_3$ and $\rm CH$, and it is the s
     \hline
    \end{tabular}
 \end{table}
-Band~2 corresponds to the stretching of $\rm CH_3$ and $\rm CH_2$ groups, and is the strongest absorbing band. All the \textit{n}-heptane IR spectral absorption data were obtained from high resolution FTIR experiments with temperatures varying from 293~K to 794~K. The spectral absorption coefficients were obtained by fitting the experimental spectral transmissivity of a homogeneous column of isothermal \textit{n}-heptane with a total pressure of 1~atm using the Goody model.
+Band~2 corresponds to the stretching of $\rm CH_3$ and $\rm CH_2$ groups, and is the strongest absorbing band. All the \textit{n}-heptane IR spectral absorption data were obtained from high resolution FTIR experiments with temperatures varying from 293~K to 794~K~\cite{Wakatsuki:2005}. The spectral absorption coefficients were obtained by fitting the experimental spectral transmissivity of a homogeneous column of isothermal \textit{n}-heptane with a total pressure of 1~atm using the Goody model.
 
 \subsubsection{Methanol: $\rm CH_3OH$}
 
@@ -670,7 +670,7 @@ Methanol has only one plane of symmetry. It belongs to the point group $C_{s}$. 
     \hline
    \end{tabular}
 \end{table}
-Band~3 corresponds to the stretching of the $\rm CH_3$ group and is the strongest absorbing band. All the methanol IR spectral absorption data were obtained from high resolution FTIR experiments with temperatures varying from 293~K to 804~K. The spectral absorption coefficients were obtained by fitting the experimental spectral transmissivity of a homogeneous column of isothermal methanol with a total pressure of 1~atm using the Goody model.
+Band~3 corresponds to the stretching of the $\rm CH_3$ group and is the strongest absorbing band. All the methanol IR spectral absorption data were obtained from high resolution FTIR experiments with temperatures varying from 293~K to 804~K~\cite{Wakatsuki:2005}. The spectral absorption coefficients were obtained by fitting the experimental spectral transmissivity of a homogeneous column of isothermal methanol with a total pressure of 1~atm using the Goody model.
 
 \subsubsection{Methyl Methacrylate: $\rm C_5H_8O_2$}
 
@@ -693,7 +693,7 @@ Methyl Methacrylate or MMA has the most complex IR spectrum of all the fuels pre
     \hline
    \end{tabular}
 \end{table}
-Band~3 corresponds to the stretching of the $\rm C-O$ group and has the highest integrated band intensity. All the MMA IR spectral absorption data were obtained from high resolution FTIR experiments with temperatures varying from 396~K to 803~K. The spectral absorption coefficients were obtained by fitting the experimental spectral transmissivity of a homogeneous column of isothermal MMA with a total pressure of 1~atm using the Goody model.
+Band~3 corresponds to the stretching of the $\rm C-O$ group and has the highest integrated band intensity. All the MMA IR spectral absorption data were obtained from high resolution FTIR experiments with temperatures varying from 396~K to 803~K~\cite{Wakatsuki:2005}. The spectral absorption coefficients were obtained by fitting the experimental spectral transmissivity of a homogeneous column of isothermal MMA with a total pressure of 1~atm using the Goody model.
 
 \subsubsection{Statistical Narrow Band Models}
 
@@ -777,25 +777,13 @@ temperature rise of the control volume is evaluated by equating Eqs.~(\ref{bbb})
 \ee
 If $\hat{Y}_{\OTWO} < \hat{Y}_{\OTWO,lim}$ then combustion is not allowed and  $\Delta \hat{Y}_{F}$ is set to 0.
 
-\paragraph{Remark}
-As an example, the critical adiabatic flame temperature can be assumed to have a constant value of approximately
-1700~K for hydrocarbon diffusion flames, as suggested by Beyler,\footnote{C. Beyler, ``Flammability Limits of Premixed and Diffusion Flames,''
-{\em SFPE Handbook of Fire Protection Engineering} (3rd Ed.), National Fire
-Protection Association, Quincy, MA, 2003.}. The combustion products can have an average specific heat of \SI{1.2}{kJ/(kg.K)} which is a value similar to that of nitrogen, the primary component of the products. Then, the relationship between the limiting oxygen mass fraction and the bulk temperature of a control volume is given by:
+As an example, the critical adiabatic flame temperature can be assumed to have a constant value of approximately 1700~K for hydrocarbon diffusion flames, as suggested by Beyler\footnote{C. Beyler, ``Flammability Limits of Premixed and Diffusion Flames,'' {\em SFPE Handbook of Fire Protection Engineering} (3rd Ed.), National Fire Protection Association, Quincy, MA, 2003.}. The combustion products can have an average specific heat of \SI{1.2}{kJ/(kg.K)} which is a value similar to that of nitrogen, the primary component of the products. Then, the relationship between the limiting oxygen mass fraction and the bulk temperature of a control volume is given by:
 \be
    \hat{Y}_{\OTWO,lim} = \frac{ \overline{c_p} (T_{f,lim}-T_m) }{\Delta H/r_\OTWO} \approx  \frac{ 1.2 \, (1700-T_m) }{ 13100}  \label{extinction_model}
 \ee
-For a control volume at a temperature of \SI{300}{K}, i.e., near room temperature, the limiting oxygen
-mass fraction would evaluate to $\hat{Y}_{\OTWO,lim}=0.128$.  This value is consistent with the measurements
-of Morehart, Zukoski and Kubota,\footnote{Morehart, J., Zukoski, E., and Kubota, T., ``Characteristics of Large Diffusion Flames
-Burning in a Vitiated Atmosphere,'' {\em Third International Symposium on Fire Safety
-Science}, Elsevier Science Publishers, pp.~575-583, 1991.} who measured the oxygen concentration at extinction of flames by dilution of air
-with combustion products. They found that flames self-extinguished at oxygen concentrations of 12.4~\% to 14.3~\%. Note that their results
-are expressed as volume, not mass, fractions. Beyler's chapter in the SFPE Handbook references other researchers who measured oxygen
-concentrations at extinction ranging from 12~\% to 15~\%.
+For a control volume at a temperature of \SI{300}{K}, i.e., near room temperature, the limiting oxygen mass fraction would evaluate to $\hat{Y}_{\OTWO,lim}=0.128$.  This value is consistent with the measurements of Morehart, Zukoski and Kubota\footnote{Morehart, J., Zukoski, E., and Kubota, T., ``Characteristics of Large Diffusion Flames Burning in a Vitiated Atmosphere,'' {\em Third International Symposium on Fire Safety Science}, Elsevier Science Publishers, pp.~575-583, 1991.} who measured the oxygen concentration at extinction of flames by dilution of air with combustion products. They found that flames self-extinguished at oxygen concentrations of 12.4~\% to 14.3~\%. Note that their results are expressed as volume, not mass, fractions. Beyler's chapter in the SFPE Handbook references other researchers who measured oxygen concentrations at extinction ranging from 12~\% to 15~\%.
 
 \chapter{Numerical Methods for Integration of Complex Chemistry}
-
 \label{chemistry_integration}
 
 To solve the system of ordinary differential equations used for complex chemistry (e.g., multi-step reactions, reversible reactions), FDS uses a second-order Runge-Kutta (RK2) scheme as the foundation for its numerical integrator.  As discussed below, the scheme is augmented with Richardson extrapolation, which increases the accuracy to fourth-order and provides a means of error control.
@@ -850,11 +838,11 @@ Eq.~(\ref{eq:dt_new}) indicates that if the error estimate is large relative to 
 
 The stiffness associated with a flame front is handled by the error controller and variable time stepping discussed above. The scheme discussed in this section automatically detects chemical equilibrium, the explicit integration of which is also a stiff problem.  Even with error control, the numerical solution may exhibit numerical fluctuations between the bounds of the error tolerance.  This is an undesirable condition which often occurs in cases with competing or reversible reactions.
 
-If the values are fluctuating around a fixed value bounded by the error tolerance, the integrator is doing extra work by continuing to calculate every fluctuation within a time step. To minimize the computational expense, a total variation (TV) scheme has been developed. This scheme examines the differences in species mass fractions at four consecutive sub-time steps. Within this four point stencil there are three differences for each species mass fraction. The TV scheme compares the absolute value of the sum of the differences to the sum of the absolute values of the differences.  For a monotonic function, the following condition must hold:
+If the values are fluctuating around a fixed value bounded by the error tolerance, the integrator is doing extra work by continuing to calculate every fluctuation within a time step. To minimize the computational expense, a total variation (TV) scheme has been developed. This scheme examines the differences in species mass fractions at four consecutive sub-time steps. Within this four point stencil, there are three differences for each species mass fraction. The TV scheme compares the absolute value of the sum of the differences to the sum of the absolute values of the differences.  For a monotonic function, the following condition must hold:
 \begin{equation}\label{eq:monotone}
 \sum_{i=1}^{4}|Y(i+1)-Y(i)| = |\sum_{i=1}^{4}(Y(i+1)-Y(i))|
 \end{equation}
-The reader unfamiliar with the concept of ``data variation'' should stop and think about this for a moment.  It says that, regardless of other complexities, the monotonicity constraint (no fluctuations) is sufficient guarantee the condition stated in Eq.~(\ref{eq:monotone}).  The corollary is that if Eq.~(\ref{eq:monotone}) does not hold then we are guaranteed to have some level of fluctuation.
+The reader unfamiliar with the concept of ``data variation'' should stop and think about this for a moment.  It says that, regardless of other complexities, the monotonicity constraint (no fluctuations) is sufficient to guarantee the condition stated in Eq.~(\ref{eq:monotone}).  The corollary is that if Eq.~(\ref{eq:monotone}) does not hold, then we are guaranteed to have some level of fluctuation.
 
 The condition which corresponds to the extreme case of repeating fluctuations between the error tolerance bounds for our four point stencil is
 \begin{equation}\label{eq:TV}

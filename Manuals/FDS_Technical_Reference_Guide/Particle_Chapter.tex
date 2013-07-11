@@ -61,11 +61,11 @@ This model assumes that the spheres are traveling directly in-line with each oth
 \be
   L/D = \bar{D} \left(\pi/6\alpha \right)^{\frac{1}{3}}
 \ee
-Here local quantities are taken as average over a single computational cell.
+Here, local quantities are averaged over a single computational cell.
 
 In reality, the spray is not monodisperse and the separation distance between the interacting particles varies. In the simulation, the drag reduction factor in Eq.~\ref{eq:dragred} is only used when the local droplet volume fraction exceeds \num{1e-5}. The drag reduction model is turned on by default.
 
-An alternative approach to drag reduction was provided by Prahl et al.~\cite{Prahl:1} who studied the interaction between two solid spheres in steady or pulsating flow by detailed numerical simulations. According to their study, the above correlation under-estimates the drag reduction significantly at small drop-to-drop distances. The inflow pulsations were found to reduce the effect of the drag reduction. At large distances the two results are similar, the Ram\'{\i}rez-Mu\~{n}oz correlation showing more drag reduction. This is not surprising since the velocity profile of a fully developed axi-symmetric wake behind an axi-symmetric body is used in developing the drag reduction correction in Eqs.~\ref{eq:dragredfact} and \ref{eq:Wake-Vel}. At short distances, the wake is not fully developed and the assumption does not hold.
+An alternative approach to drag reduction was provided by Prahl et al.~\cite{Prahl:1} who studied the interaction between two solid spheres in steady or pulsating flow by detailed numerical simulations. According to their study, the above correlation under-estimates the drag reduction significantly at small drop-to-drop distances. The inflow pulsations were found to reduce the effect of the drag reduction. At large distances, the two results are similar, the Ram\'{\i}rez-Mu\~{n}oz correlation showing more drag reduction. This is not surprising since the velocity profile of a fully developed axi-symmetric wake behind an axi-symmetric body is used in developing the drag reduction correction in Eqs.~\ref{eq:dragredfact} and \ref{eq:Wake-Vel}. At short distances, the wake is not fully developed and the assumption does not hold.
 
 
 
@@ -80,12 +80,12 @@ The cumulative volume distribution for a liquid spray is represented by a combin
 where $D_{\rm v,0.5}$ is the median volumetric droplet diameter (i.e., half the mass is carried by droplets with diameters of $D_{\rm v,0.5}$ or less), and $\gamma$ and $\sigma$ are empirical constants equal to approximately 2.4 and 0.6, respectively.\footnote{The Rosin-Rammler and lognormal distributions are smoothly joined if $\sigma=2/(\sqrt{2\pi} \, (\ln\,2) \; \gamma)=1.15/\gamma$ .} Alternatively, the user may specify any form of size distribution using the tabulated input data.
 
 The median droplet diameter is a function of the sprinkler orifice diameter, operating pressure, and geometry. Research at Factory Mutual has yielded a correlation for the median droplet diameter~\cite{Yu:2}
-\be 
-   \frac{D_{\rm v,0.5}}{d} \propto \WE^{-\ot}  \label{dropcor} 
+\be
+   \frac{D_{\rm v,0.5}}{d} \propto \WE^{-\ot}  \label{dropcor}
 \ee
 where $d$ is the orifice diameter of the nozzle. The orifice Weber number, the ratio of inertial forces to surface tension forces, is given by
-\be 
-   \WE = \frac{\rho_{\rm p} \, u_{\rm p}^2 \, d}{\sigma}  \label{Weber} 
+\be
+   \WE = \frac{\rho_{\rm p} \, u_{\rm p}^2 \, d}{\sigma}  \label{Weber}
 \ee
 where $\rho_{\rm p}$ is the liquid density, $u_{\rm p}$ is the discharge velocity, and $\sigma$ is the liquid surface tension (\SI{72.8e-3}{N/m} at \SI{20}{\degreeCelsius} for water).
 The discharge velocity can be computed from the mass flow rate, a function of the operating pressure and orifice coefficient known as the K-factor. FM reports that the constant of proportionality in Eq.~(\ref{dropcor}) appears to be independent of flow rate and operating pressure. Three different sprinklers were tested in their study with orifice diameters of \SI{16.3}{\milli m}, \SI{13.5}{\milli m}, and \SI{12.7}{\milli m}, and the constants were approximately 4.3, 2.9, and 2.3, respectively. The strike plates of the two smaller sprinklers were notched, while that of the largest sprinkler was not~\cite{Yu:2}.
@@ -96,9 +96,9 @@ decreases when more and more sprinkler heads are activated. The pipe pressure ha
     \dot{m}_{\rm p} \propto p^{1/2} \quad ; \quad u_{\rm p} \propto p^{1/2} \quad ; \quad D_{\rm v,0.5}  \propto  p^{-1/3}
 \ee
 The droplet diameters are randomly chosen from the given size distribution. The cumulative number fraction (CNF), $F_{\rm n}$, is determined from the cumulative volume fraction, $F_{\rm v}$, as follows
-\be 
+\be
    F_{\rm n}(D) = \int_0^D \frac{F'_{\rm v}(D')}{D'^3} \, \d D'  \left/ \int_0^\infty \, \frac{F'_{\rm v}(D')}{D'^3}
-     \, \d D' \right. \quad ; \quad F_{\rm v}' \equiv \frac{\d F_{\rm v}}{\d D}   
+     \, \d D' \right. \quad ; \quad F_{\rm v}' \equiv \frac{\d F_{\rm v}}{\d D}
 \ee
 Figure~\ref{rosin} displays the Rosin-Rammler/lognormal function and the resulting cumulative number fraction.
 \begin{figure}[t]
@@ -114,14 +114,14 @@ a typical industrial-scale sprinkler. The median volumetric diameter, $D_{\rm v,
 
 The selection of droplet diameters makes use of a stratified sampling technique to ensure that the droplets span the entire range of sizes, even with a relatively small number of droplets. Without the stratification, the tails of the distribution can be poorly represented. The procedure for selecting droplet sizes is as follows:
 \begin{enumerate}
-\item Suppose that the mass flow rate of the liquid is $\dm$, that the time interval for droplet insertion is $\dt$, and that the number of droplets inserted each time interval is $N$. 
-\item Divide the droplet diameter range into a number of bins of equal width (7 by default). 
+\item Suppose that the mass flow rate of the liquid is $\dm$, that the time interval for droplet insertion is $\dt$, and that the number of droplets inserted each time interval is $N$.
+\item Divide the droplet diameter range into a number of bins of equal width (7 by default).
 \item Randomly choose $N$ integers, $n_i$, ranging from 1 to the total number of bins.
 \item Choose $N$ uniformly distributed real numbers between 0 and 1 and calculate $N$ random droplet diameters:
 \be
    D_i = F^{-1}_{\rm n} \Big[ F_{\rm n}(D_{n_i,\min}) + {\cal U}(0,1)\left(F_{\rm n}(D_{n_i,\max})-F_{\rm n}(D_{n_i,\min}) \right) \Big] \label{Ud_strat}
 \ee
-where ${\cal U}(0,1)$ is a uniformly distributed real number between 0 and 1 and $D_{n_i,\min}$ and $D_{n_i,\max}$ are the minimum and maximum diameters of bin $n_i$. 
+where ${\cal U}(0,1)$ is a uniformly distributed real number between 0 and 1 and $D_{n_i,\min}$ and $D_{n_i,\max}$ are the minimum and maximum diameters of bin $n_i$.
 \item Compute weighting constants for each droplet $C_i = F_{\rm n}(D_{n_i,\max}) - F_{\rm n}(D_{n_i,\min})$.
 \item Compute a global weighting constant, C, to maintain the overall mass balance:
     \be \dm \; \dt = C \, \sum_{i=1}^N \; C_i \; \frac{4}{3} \pi \rho_{\rm p}
@@ -131,7 +131,7 @@ where ${\cal U}(0,1)$ is a uniformly distributed real number between 0 and 1 and
 \end{enumerate}
 
 
-\section{Spray Initialization} 
+\section{Spray Initialization}
 
 The droplets are introduced into the simulation along a spherical surface whose diameter is a specified stand-off distance from the nozzle orifice. It is assumed that the droplets have fully atomized by this stage. The longitude of the initial droplet position, $0\le \theta < 2 \pi$, is randomly chosen from a uniform distribution. The latitude, $0 \le \phi < \pi$, is randomly selected from the following distribution:
 \begin{equation}
@@ -163,7 +163,7 @@ Mass and heat transfer between liquid and gas are described with analogous empir
 \ee
 $\SH$ is the Sherwood number, $D_{\rm \ell g}$ is the binary diffusion coefficient between the liquid vapor and the surrounding gas (usually assumed air), $L$ is a length scale equal to either the droplet diameter or 1~m for a surface film, $\RE_D$ is the Reynolds number of the droplet (based on the diameter, $D$, and the relative air-droplet velocity), $\RE_L$ is the Reynolds number based on the length scale $L$, and $\SC$ is the Schmidt number ($\nu/D_{\rm \ell g}$, assumed 0.6 for all cases).
 
-An analogous relationship exists for the heat transfer coefficient:
+An analogous relationship exists for the heat transfer coefficient~\cite{Incropera:1}:
 \be
    h = \frac{\NU \; k}{L} \quad ; \quad \NU = \left\{ \begin{array}{ll} 2 + 0.6 \; \RE_D^\ha \; \PR^\ot           & \hbox{gas-droplet} \\ [0.1in]
                                                                          0.037 \;   \RE_L^{\frac{4}{5}} \; \PR^\ot & \hbox{gas-film}     \end{array} \right.
@@ -242,7 +242,7 @@ where $\dq_0''(t)$ is the burning rate per unit area of the fuel when no water i
 \be
    k(t) = a \; m_{\rm w}''(t) \quad   \hbox{s}^{-1}
 \ee
-Note that $a$ is an empirical constant.
+Note that $a$ is an empirical constant that is dependent on the material properties of the solid fuel and its geometrical configuration.
 
 
 
@@ -272,9 +272,9 @@ Catwalk grating, expanded metal mesh, window screens, and similar thin porous ma
 \be
    \frac {\Delta p}{l} =  \frac{\mu}{K} u + \rho \frac{Y}{\sqrt{K}} \, u^2
 \ee
-where $K$ is a permeability constant, $Y$ is an inertial constant, $u$ is the velocity normal to the screen, $\rho$ is the density, and $\mu$ is the viscosity of the gas.  $K$ and $Y$ are functions the screen porosity (free area/total area), $\varepsilon$:
+where $K$ is a permeability constant, $Y$ is an inertial constant, $u$ is the velocity normal to the screen, $\rho$ is the density, and $\mu$ is the viscosity of the gas.  $K$ and $Y$ are functions of the screen porosity (free area/total area), $\phi$:
 \be
-   K = 3.44 \times 10^{-9} \; \varepsilon^{1.6} \; \; \hbox{m}^2 \quad ; \quad Y = 0.043 \, \varepsilon^{2.13}
+   K = 3.44 \times 10^{-9} \; \phi^{1.6} \; \; \hbox{m}^2 \quad ; \quad Y = 0.043 \, \phi^{2.13}
 \ee
 The force vector $\bof_{\rm b}$ in Eq.~(\ref{momentum}) represents the momentum transferred from the screen to the gas:
 \be
@@ -291,6 +291,6 @@ The effect of subgrid-scale turbulent fluid motion on the velocity and position 
 \be
 \mbox{d}\mathbf{x}^* = \left[ \tilde{\mathbf{u}} + \frac{1}{\bar{\rho}}\nabla (\bar{\rho}\,D_t) \right] \,\mbox{d}t + \sqrt{2D_t} \,\mbox{d}\mbox{\textbf{W}}
 \ee
-where $\mathbf{x}^*$ denotes the particle position (an asterisk signifies a particle property), $\tilde{\mathbf{u}}$ is the resolved LES velocity, $D_t$ is the turbulent diffusivity (taken from an eddy viscosity model, for example), and $\mbox{\textbf{W}}$ is an independent Wiener process.  Notice that if no turbulent diffusion exists the particle follows the resolved flow.  The term added to the resolved velocity accounts for the deterministic mean drift and the random walk term (Wiener process) accounts for the reorientation effect of unresolved turbulent motion.
+where $\mathbf{x}^*$ denotes the particle position (an asterisk signifies a particle property), $\tilde{\mathbf{u}}$ is the resolved LES velocity, $D_t$ is the turbulent diffusivity (taken from an eddy viscosity model, for example), and $\mbox{\textbf{W}}$ is an independent Wiener process.  Notice that if no turbulent diffusion exists, the particle follows the resolved flow.  The term added to the resolved velocity accounts for the deterministic mean drift and the random walk term (Wiener process) accounts for the reorientation effect of unresolved turbulent motion.
 
 For those unfamiliar with stochastic differential equations, the Wiener process may be understood numerically as $\mbox{dW}(t) = (\delta t)^{1/2} \, \zeta(t)$ in the limit $\delta t \rightarrow 0$, where $\zeta(t)$ is an independent standardized Gaussian random variable \cite{Pope:2000}.  In FDS, $\zeta(t)$ are generated from a Box-Muller transform \cite{Box-Muller:1958}.
