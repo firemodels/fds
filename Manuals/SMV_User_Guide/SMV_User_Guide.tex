@@ -1193,8 +1193,8 @@ input file. The slice orientation is changed by double clicking and moving the m
 \end{figure}
 
 \subsection{Fractional effective dose (FED) slices}
-The fractional effective dose (FED), developed by Purser~\cite{SFPE:Purser}, is a measure of human incapacitation
-due to combustion gases.
+The fractional effective dose (FED), developed by Purser~\cite{SFPE:Purser}, is an estimate of human incapacitation
+due to a limited set of combustion gases.
 FED index data is computed by Smokeview using CO, $\mathrm{CO_2}$ and $\mathrm{O_2}$ gas
 concentration data computed by FDS.
 This data is made available to Smokeview in the form of slice files.
@@ -3913,9 +3913,9 @@ parameter study or running a long list of cases to verify the use of FDS. Typica
 would create a windows batch file (.bat) containing a list of commands like
 
 \begin{lstlisting}
-fds5 casename_1.fds
+fds casename_1.fds
 ....
-fds5 casename_n.fds
+fds casename_n.fds
 \end{lstlisting}
 
 On a Windows system, each entry in the above list will not start until the previous entry
@@ -3929,13 +3929,13 @@ more than one job simultaneously.
 Here is how one might use {\em background}\ with FDS
 
 \begin{lstlisting}
-background -d 1.0 -u 90 fds5 casename.fds
+background -d 1.0 -u 90 fds casename.fds
 \end{lstlisting}
 
-This command runs ``fds5 casename.fds'' after waiting 1~s and ensuring that the CPU usage is
+This command runs ``fds casename.fds'' after waiting 1~s and ensuring that the CPU usage is
 less than 90 \%. If the CPU usage happens to be more than 90 \%, the program {\em background}\
-waits to submit the fds5 command until the usage drops below 90 \% .  Once this occurs, it runs
-the command, {\tt fds5 casename.fds}.
+waits to submit the fds command until the usage drops below 90 \% .  Once this occurs, it runs
+the command, {\tt fds casename.fds}.
 
 The purpose of the delay before submitting a job is to give windows a chance to update the usage level from the
 previous invocations.  This feature is a fail safe to ensure that a large number of jobs are not
@@ -3946,21 +3946,21 @@ a list of 5 FDS jobs you want to run in a windows batch file. On a windows compu
 a batch file with the contents something like
 
 \begin{lstlisting}
-fds5 case1.fds
-fds5 case2.fds
-fds5 case3.fds
-fds5 case4.fds
-fds5 case5.fds
+fds case1.fds
+fds case2.fds
+fds case3.fds
+fds case4.fds
+fds case5.fds
 \end{lstlisting}
 
 Using background with a 2 second delay and 75 per cent maximum load level, you would change your script to something like
 
 \begin{lstlisting}
-background -d 2 -u 75 fds5 case1.fds
-background -d 2 -u 75 fds5 case2.fds
-background -d 2 -u 75 fds5 case3.fds
-background -d 2 -u 75 fds5 case4.fds
-background -d 2 -u 75 fds5 case5.fds
+background -d 2 -u 75 fds case1.fds
+background -d 2 -u 75 fds case2.fds
+background -d 2 -u 75 fds case3.fds
+background -d 2 -u 75 fds case4.fds
+background -d 2 -u 75 fds case5.fds
 \end{lstlisting}
 
 Help information for background may be obtained at the command line by typing {\tt background -h} which gives:
