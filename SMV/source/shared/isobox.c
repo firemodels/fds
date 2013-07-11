@@ -1782,7 +1782,6 @@ float get_tri_area(int *edgelist, float *xyz){
   float *v1, *v2, *v3;
   float v22[3], v33[3], vcross[3];
   int i;
-  float area;
 
   v1 = xyz + 3*edgelist[0];
   v2 = xyz + 3*edgelist[1];
@@ -1794,11 +1793,8 @@ float get_tri_area(int *edgelist, float *xyz){
 //  i    j    k
 //  v220 v221 v222
 //  v330 v331 v332
-  vcross[0]= v22[1]*v33[2]-v33[1]*v22[2];
-  vcross[1]=-v22[0]*v33[2]+v33[0]*v22[2];
-  vcross[2]= v22[0]*v33[1]-v33[0]*v22[1];
-  area = 0.5*sqrt(vcross[0]*vcross[0]+vcross[1]*vcross[1]+vcross[2]*vcross[2]);
-  return area;
+  CROSS(v22,v33,vcross);
+  return 0.5*NORM3(vcross);
 }
 
 /* ------------------ get_iso_level_area_tetra ------------------------ */
