@@ -951,9 +951,9 @@ void Scene_viewport(int quad, int view_mode, GLint screen_left, GLint screen_dow
             pj = touri->pathnodes + frame_index;
           }
 
-          viewx = pj->tour_view[0]+StereoCameraOffset*cos_dv_sum;
-          viewy = pj->tour_view[1]-StereoCameraOffset*sin_dv_sum;
-          viewz = pj->tour_view[2];
+          viewx = pj->oview[0]+StereoCameraOffset*cos_dv_sum;
+          viewy = pj->oview[1]-StereoCameraOffset*sin_dv_sum;
+          viewz = pj->oview[2];
           elevation=0.0;
           azimuth=0.0;
         }

@@ -19,7 +19,15 @@ char geometry_revision[]="$Revision$";
 void rotateu2v(float *u, float *v, float *axis, float *angle){
   float sum,cosangle,normu,normv;
 
-  CROSS(u,v,axis);
+  /*
+  i  j  k
+  ux uy uz
+  vx vy vz
+  */
+
+  axis[0] = u[1]*v[2] -v[1]*u[2];
+  axis[1] = -u[0]*v[2]+v[0]*u[2];
+  axis[2] = u[0]*v[1] -v[0]*u[1];
   sum = NORM3(axis);
   normu = NORM3(u);
   normv = NORM3(v);
@@ -38,7 +46,8 @@ void rotateu2v(float *u, float *v, float *axis, float *angle){
   }
 }
 
-/* ------------------ angleaxis2quat ------------------------ */
+
+/* ------------------ mult_quat ------------------------ */
 
 void angleaxis2quat(float angle, float *axis, float *quat){
   float sum;
@@ -111,6 +120,38 @@ void mult_quat(float x[4], float y[4], float z[4]){
   z[1]=z2[1];
   z[2]=z2[2];
   z[3]=z2[3];
+}
+
+/* ------------------ mult_quat ------------------------ */
+
+void normalize_quat(float x[4]){
+  float sum;
+
+  sum = sqrt(x[0]*x[0]+x[1]*x[1]+x[2]*x[2]+x[3]*x[3]);
+  if(sum>0.0){
+    x[0]/=sum;
+    x[1]/=sum;
+    x[2]/=sum;
+    x[3]/=sum;
+  }
+}
+
+/* ------------------ normalize_vec3 ------------------------ */
+
+void normalize_vec3(float *xyz){
+  float norm2;
+  int i;
+
+  norm2 = 0.0;
+
+  for(i=0;i<3;i++){
+    norm2 += xyz[i]*xyz[i];
+  }
+  norm2=sqrt(norm2);
+  if(norm2==0.0)norm2=1.0;
+  for(i=0;i<3;i++){
+    xyz[i]/=norm2;
+  }
 }
 
 /* ------------------ InsertEdge ------------------------ */
@@ -388,7 +429,7 @@ float VertOffset(vertdata *vert){
       best_xyz[i]/=sum;
     }
   }
-  NORMALIZE3(best_norm);
+  normalize_vec3(best_norm);
 
   // best plane: xyz pts satisfying (xyz-best_xyz).dot.best_norm = 0
   // find distance between plane and vertex coordinate

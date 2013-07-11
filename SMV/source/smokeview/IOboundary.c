@@ -322,22 +322,7 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
       bc->patchvis[j]=1;
     }
   }
-/*
-  for(n=0;n<meshi->npatches;n++){
-    float dxx, dyy, dzz, ig_factor;
-    float dx_factor, dy_factor, dz_factor;
-    int i1, i2, j1, j2, k1, k2;
 
-
-    i1=meshi->pi1[n]; 
-    i2=meshi->pi2[n];
-    j1=meshi->pj1[n]; 
-    j2=meshi->pj2[n];
-    k1=meshi->pk1[n]; 
-    k2=meshi->pk2[n];
-    printf("n:%i %i %i %i %i %i %i\n",n,i1,i2,j1,j2,k1,k2);
-  }
-  */
   for(n=0;n<meshi->npatches;n++){
     float dxx, dyy, dzz, ig_factor;
     float dx_factor, dy_factor, dz_factor;
@@ -1337,7 +1322,12 @@ void global2localpatchbounds(const char *key){
 /* ------------------ drawpatch_texture ------------------------ */
 
 void drawpatch_texture(const mesh *meshi){
+  float r11, r12, r21, r22;
   int n;
+  int nrow, ncol, irow, icol;
+  unsigned char *cpatchval_iframe_copy;
+  float *xyzpatchcopy;
+  int *patchblankcopy;
   float *patch_times;
   int *visPatches;
   float *xyzpatch;
@@ -1345,7 +1335,10 @@ void drawpatch_texture(const mesh *meshi){
   int *blockstart;
   int *patchblank;
   unsigned char *cpatchval_iframe;
+  int iblock;
+  blockagedata *bc;
   patchdata *patchi;
+  mesh *meshblock;
   float dboundx,dboundy,dboundz;
   float *xplt, *yplt, *zplt;
 
@@ -1396,26 +1389,16 @@ void drawpatch_texture(const mesh *meshi){
 
   glBegin(GL_TRIANGLES);
   for(n=0;n<meshi->npatches;n++){
-    int iblock;
-    mesh *meshblock;
-
     iblock = meshi->blockonpatch[n];
     meshblock = meshi->meshonpatch[n];
     ASSERT((iblock!=-1&&meshblock!=NULL)||(iblock==-1&&meshblock==NULL));
     if(iblock!=-1&&meshblock!=NULL){
-      blockagedata *bc;
-
       bc=meshblock->blockageinfoptrs[iblock];
       if(bc->showtimelist!=NULL&&bc->showtimelist[itimes]==0){
         continue;
       }
     }
     if(visPatches[n]==1&&patchdir[n]==0){
-      int nrow, ncol, irow, icol;
-      int *patchblankcopy;
-      float *xyzpatchcopy;
-      unsigned char *cpatchval_iframe_copy;
-
       nrow=patchrow[n];
       ncol=patchcol[n];
       xyzpatchcopy = xyzpatch + 3*blockstart[n];
@@ -1436,8 +1419,6 @@ void drawpatch_texture(const mesh *meshi){
 
         for(icol=0;icol<ncol-1;icol++){
           if(*patchblank1==GAS&&*patchblank2==GAS&&*(patchblank1+1)==GAS&&*(patchblank2+1)==GAS){
-            float r11, r12, r21, r22;
-
             r11 = (float)(*cpatchval1)/255.0;
             r12 = (float)(*(cpatchval1+1))/255.0;
             r21 = (float)(*cpatchval2)/255.0;
@@ -1476,25 +1457,15 @@ void drawpatch_texture(const mesh *meshi){
     glBegin(GL_TRIANGLES);
   }
   for(n=0;n<meshi->npatches;n++){
-    int iblock;
-    mesh *meshblock;
-
     iblock = meshi->blockonpatch[n];
     meshblock=meshi->meshonpatch[n];
     if(iblock!=-1){
-      blockagedata *bc;
-
       bc=meshblock->blockageinfoptrs[iblock];
       if(bc->showtimelist!=NULL&&bc->showtimelist[itimes]==0){
         continue;
       }
     }
     if(meshi->visPatches[n]==1&&meshi->patchdir[n]>0){
-      int nrow, ncol, irow, icol;
-      int *patchblankcopy;
-      float *xyzpatchcopy;
-      unsigned char *cpatchval_iframe_copy;
-
       nrow=patchrow[n];
       ncol=patchcol[n];
       xyzpatchcopy = xyzpatch + 3*blockstart[n];
@@ -1533,8 +1504,6 @@ void drawpatch_texture(const mesh *meshi){
 
         for(icol=0;icol<ncol-1;icol++){
           if(*patchblank1==GAS&&*patchblank2==GAS&&*(patchblank1+1)==GAS&&*(patchblank2+1)==GAS){
-            float r11, r12, r21, r22;
-
             r11 = (float)(*cpatchval1)/255.0;
             r12 = (float)(*(cpatchval1+1))/255.0;
             r21 = (float)(*cpatchval2)/255.0;
@@ -1570,26 +1539,16 @@ void drawpatch_texture(const mesh *meshi){
 
   /* if a contour boundary DOES match a blockage face then draw "one sides" of boundary */
   for(n=0;n<meshi->npatches;n++){
-    int iblock;
-    mesh *meshblock;
-
     iblock = meshi->blockonpatch[n];
     meshblock = meshi->meshonpatch[n];
     ASSERT((iblock!=-1&&meshblock!=NULL)||(iblock==-1&&meshblock==NULL));
     if(iblock!=-1&&meshblock!=NULL){
-      blockagedata *bc;
-
       bc=meshblock->blockageinfoptrs[iblock];
       if(bc->showtimelist!=NULL&&bc->showtimelist[itimes]==0){
         continue;
       }
     }
     if(visPatches[n]==1&&patchdir[n]<0){
-      int nrow, ncol, irow, icol;
-      int *patchblankcopy;
-      float *xyzpatchcopy;
-      unsigned char *cpatchval_iframe_copy;
-
       nrow=patchrow[n];
       ncol=patchcol[n];
       xyzpatchcopy = xyzpatch + 3*blockstart[n];
@@ -1627,8 +1586,6 @@ void drawpatch_texture(const mesh *meshi){
 
         for(icol=0;icol<ncol-1;icol++){
           if(*patchblank1==GAS&&*patchblank2==GAS&&*(patchblank1+1)==GAS&&*(patchblank2+1)==GAS){
-            float r11, r12, r21, r22;
-
             r11 = (float)(*cpatchval1)/255.0;
             r12 = (float)(*(cpatchval1+1))/255.0;
             r21 = (float)(*cpatchval2)/255.0;

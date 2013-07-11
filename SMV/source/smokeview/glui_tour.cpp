@@ -350,7 +350,7 @@ extern "C" void set_glui_keyframe(){
   TOUR_CB(TOUR_AVATAR);
   LISTBOX_avatar->set_int_val(glui_avatar_index);
   eye = selected_frame->nodeval.eye;
-  aview = selected_frame->nodeval.xyz_view;
+  aview = selected_frame->nodeval.aview;
 
   tour_ttt = selected_frame->disp_time;
   tour_xyz[0] = trim_val(DENORMALIZE_X(eye[0]));
@@ -449,6 +449,7 @@ void TOUR_CB(int var){
   keyframe *lastkey;
   float dummy;
   tourdata *thistour=NULL;
+  float *aview,*eye;
 
   float key_xyz[3];
   float key_params[3];
@@ -553,11 +554,9 @@ void TOUR_CB(int var){
     break;
   case KEYFRAME_viewXYZ:
     if(selected_frame!=NULL){
-      float *aview;
-
       if(selected_tour-tourinfo==0)dirtycircletour=1;
       selected_tour->startup=0;
-      aview = selected_frame->nodeval.xyz_view;
+      aview = selected_frame->nodeval.aview;
       NORMALIZE_XYZ(aview,tour_view_xyz);
 
       adjustviewangle(selected_frame,&tour_az_path,&tour_elev_path);
@@ -570,13 +569,31 @@ void TOUR_CB(int var){
     break;
   case KEYFRAME_tXYZ:
     if(selected_frame!=NULL){
-      float *aview;
-      float *eye;
-
       if(selected_tour-tourinfo==0)dirtycircletour=1;
       selected_tour->startup=0;
       eye = selected_frame->nodeval.eye;
-      aview = selected_frame->nodeval.xyz_view;
+      aview = selected_frame->nodeval.aview;
+
+      /*
+      {
+        int change_time;
+
+        change_time=0;
+        if(tour_ttt<selected_frame->prev->display_time){
+          change_time=1;
+          tour_ttt=selected_frame->prev->display_time;
+        }
+        if(tour_ttt>selected_frame->next->display_time){
+          change_time=1;
+          tour_ttt=selected_frame->next->display_time;
+        }
+        if(change_time==1){
+          SPINNER_t->set_float_val(tour_ttt);
+        }
+      }
+
+        */
+
       if(tour_constant_vel==0){
         selected_frame->noncon_time=tour_ttt;
         selected_frame->disp_time=tour_ttt;
@@ -677,9 +694,9 @@ void TOUR_CB(int var){
         key_params[0]=(2*thiskey->bias-lastkey->bias);
         key_params[1]=(2*thiskey->continuity-lastkey->continuity);
         key_params[2]=(2*thiskey->tension-lastkey->tension);
-        key_view[0]=DENORMALIZE_X(2*thiskey->nodeval.xyz_view[0]-lastkey->nodeval.xyz_view[0]);
-        key_view[1]=DENORMALIZE_Y(2*thiskey->nodeval.xyz_view[1]-lastkey->nodeval.xyz_view[1]);
-        key_view[2]=DENORMALIZE_Z(2*thiskey->nodeval.xyz_view[2]-lastkey->nodeval.xyz_view[2]);
+        key_view[0]=DENORMALIZE_X(2*thiskey->nodeval.aview[0]-lastkey->nodeval.aview[0]);
+        key_view[1]=DENORMALIZE_Y(2*thiskey->nodeval.aview[1]-lastkey->nodeval.aview[1]);
+        key_view[2]=DENORMALIZE_Z(2*thiskey->nodeval.aview[2]-lastkey->nodeval.aview[2]);
         key_zoom = (2*thiskey->nodeval.zoom - lastkey->nodeval.zoom);
         key_bank = (2*thiskey->bank - lastkey->bank);
         viewtype=thiskey->viewtype;
@@ -694,9 +711,9 @@ void TOUR_CB(int var){
         key_params[0]=(thiskey->bias+nextkey->bias)/2.0;
         key_params[1]=(thiskey->continuity+nextkey->continuity)/2.0;
         key_params[2]=(thiskey->tension+nextkey->tension)/2.0;
-        key_view[0]=DENORMALIZE_X((thiskey->nodeval.xyz_view[0]+nextkey->nodeval.xyz_view[0])/2.0);
-        key_view[1]=DENORMALIZE_Y((thiskey->nodeval.xyz_view[1]+nextkey->nodeval.xyz_view[1])/2.0);
-        key_view[2]=DENORMALIZE_Z((thiskey->nodeval.xyz_view[2]+nextkey->nodeval.xyz_view[2])/2.0);
+        key_view[0]=DENORMALIZE_X((thiskey->nodeval.aview[0]+nextkey->nodeval.aview[0])/2.0);
+        key_view[1]=DENORMALIZE_Y((thiskey->nodeval.aview[1]+nextkey->nodeval.aview[1])/2.0);
+        key_view[2]=DENORMALIZE_Z((thiskey->nodeval.aview[2]+nextkey->nodeval.aview[2])/2.0);
         key_zoom = (thiskey->nodeval.zoom + nextkey->nodeval.zoom)/2.0;
         key_bank = (thiskey->bank + nextkey->bank)/2.0;
         if(thiskey->viewtype==0&&nextkey->viewtype==0){
@@ -705,11 +722,11 @@ void TOUR_CB(int var){
         else{
           viewtype=1;
           if(thiskey->viewtype==1){
-            DENORMALIZE_XYZ(key_view,thiskey->nodeval.xyz_view);
+            DENORMALIZE_XYZ(key_view,thiskey->nodeval.aview);
             key_elev_path = thiskey->nodeval.elev_path;
           }
           if(thiskey->viewtype==0&&nextkey->viewtype==1){
-            DENORMALIZE_XYZ(key_view,nextkey->nodeval.xyz_view);
+            DENORMALIZE_XYZ(key_view,nextkey->nodeval.aview);
             key_elev_path = nextkey->nodeval.elev_path;
           }
         }
