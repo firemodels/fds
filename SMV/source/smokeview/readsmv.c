@@ -8382,10 +8382,10 @@ int readini2(char *inifile, int localfile){
       if(match(buffer,"GSLICEPARMS")==1){
         fgets(buffer,255,stream);
         sscanf(buffer,"%i %i %i %i",&vis_gslice_data, &show_gslice_triangles, &show_gslice_triangulation, &show_gslice_normal);
-        if(vis_gslice_data!=0)vis_gslice_data=1;
-        if(show_gslice_triangles!=0)show_gslice_triangles=1;
-        if(show_gslice_triangulation!=0)show_gslice_triangulation=1;
-        if(show_gslice_normal!=0)show_gslice_normal=1;
+        ONEORZERO(vis_gslice_data);
+        ONEORZERO(show_gslice_triangles);
+        ONEORZERO(show_gslice_triangulation);
+        ONEORZERO(show_gslice_normal);
         fgets(buffer,255,stream);
         sscanf(buffer,"%f %f %f",gslice_xyz,gslice_xyz+1,gslice_xyz+2);
         fgets(buffer,255,stream);
@@ -8407,7 +8407,7 @@ int readini2(char *inifile, int localfile){
    if(match(buffer,"GVERSION")==1){
      fgets(buffer,255,stream);
      sscanf(buffer,"%i",&gversion);
-     if(gversion!=0)gversion=1;
+     ONEORZERO(gversion);
    }
    if(match(buffer,"SCALEDFONT")==1){
      fgets(buffer,255,stream);
@@ -8426,13 +8426,13 @@ int readini2(char *inifile, int localfile){
    if(match(buffer,"FED")==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i",&regenerate_fed);
-      if(regenerate_fed!=0)regenerate_fed=1;
+      ONEORZERO(regenerate_fed);
       continue;
     }
    if(match(buffer,"SHOWFEDAREA")==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i",&show_fed_area);
-      if(show_fed_area!=0)show_fed_area=1;
+      ONEORZERO(show_fed_area);
       continue;
     }
    if(match(buffer,"SHOWDEVICEVALS")==1){
@@ -8443,7 +8443,7 @@ int readini2(char *inifile, int localfile){
     if(match(buffer,"USENEWDRAWFACE")==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i",&use_new_drawface);
-      if(use_new_drawface!=0)use_new_drawface=1;
+      ONEORZERO(use_new_drawface);
       continue;
     }
     if(match(buffer,"TLOAD")==1){
@@ -8458,9 +8458,9 @@ int readini2(char *inifile, int localfile){
       fgets(buffer,255,stream);
       sscanf(buffer,"%f %f %f %f %f %f %f",
         &temperature_min,&temperature_cutoff,&temperature_max,&fire_opacity_factor,&mass_extinct,&gpu_vol_factor,&nongpu_vol_factor);
-      if(glui_compress_volsmoke!=0)glui_compress_volsmoke=1;
-      if(use_multi_threading!=0)use_multi_threading=1;
-      if(load_at_rendertimes!=0)load_at_rendertimes=1;
+      ONEORZERO(glui_compress_volsmoke);
+      ONEORZERO(use_multi_threading);
+      ONEORZERO(load_at_rendertimes);
       fire_opacity_factor=CLAMP(fire_opacity_factor,1.0,10.0);
       mass_extinct=CLAMP(mass_extinct,100.0,100000.0);
       init_volrender_surface(0);
@@ -8512,7 +8512,7 @@ int readini2(char *inifile, int localfile){
         meshi = meshinfo + i;
         fgets(buffer,255,stream);
         sscanf(buffer,"%i",&meshi->blockvis);
-        if(meshi->blockvis!=0)meshi->blockvis=1;
+        ONEORZERO(meshi->blockvis);
       }
       continue;
     }
@@ -8527,10 +8527,10 @@ int readini2(char *inifile, int localfile){
     if(match(buffer,"SHOWEVACSLICES")==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i %i %i",&show_evac_slices,&constant_evac_coloring,&show_evac_colorbar);
-      if(show_evac_slices!=1)show_evac_slices=0;
+      ONEORZERO(show_evac_slices);
       if(constant_evac_coloring!=1)constant_evac_coloring=0;
       data_evac_coloring=1-constant_evac_coloring;
-      if(show_evac_colorbar!=1)show_evac_colorbar=0;
+      ONEORZERO(show_evac_colorbar);
       update_slice_menu_show();
       update_evac_parms();
       continue;
@@ -8538,7 +8538,7 @@ int readini2(char *inifile, int localfile){
     if(match(buffer,"DIRECTIONCOLOR")==1){
       float *dc;
 
-	  dc = direction_color;
+	    dc = direction_color;
       fgets(buffer,255,stream);
       sscanf(buffer,"%f %f %f",dc,dc+1,dc+2);
       dc[3]=1.0;
@@ -8550,7 +8550,7 @@ int readini2(char *inifile, int localfile){
     if(match(buffer,"OFFSETSLICE")==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i",&offset_slice);
-      if(offset_slice!=0)offset_slice=1;
+      ONEORZERO(offset_slice);
       continue;
     }
     if(match(buffer,"VECLENGTH")==1){
@@ -8571,14 +8571,14 @@ int readini2(char *inifile, int localfile){
     if(match(buffer,"SHOWTRIANGLES")==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i %i %i %i %i %i",&showtrisurface,&showtrioutline,&showtripoints,&showtrinormal,&showpointnormal,&smoothtrinormal);
-      if(showtrisurface!=0)showtrisurface=1;
-      if(showtrioutline!=0)showtrioutline=1;
-      if(showtripoints!=0)showtripoints=1;
-      if(showtrinormal!=0)showtrinormal=1;
-      if(showpointnormal!=0)showpointnormal=1;
-      if(smoothtrinormal!=0)smoothtrinormal=1;
+      ONEORZERO(showtrisurface);
+      ONEORZERO(showtrioutline);
+      ONEORZERO(showtripoints);
+      ONEORZERO(showtrinormal);
+      ONEORZERO(showpointnormal);
+      ONEORZERO(smoothtrinormal);
 #ifdef pp_BETA
-      if(showtrinormal!=0)showtrinormal=1;
+      ONEORZERO(showtrinormal);
 #else
       showtrinormal=0;
 #endif
@@ -8588,11 +8588,9 @@ int readini2(char *inifile, int localfile){
     if(match(buffer,"SHOWSTREAK")==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i %i %i %i",&streak5show,&streak5step,&showstreakhead,&streak_index);
-      if(streak5show!=1){
-        streak5show=0;
-        streak_index=-2;
-      }
-      if(showstreakhead!=1)showstreakhead=0;
+      ONEORZERO(streak5show);
+      if(streak5show==0)streak_index=-2;
+      ONEORZERO(showstreakhead);
       update_streaks=1;
       continue;
     }
@@ -8622,10 +8620,8 @@ int readini2(char *inifile, int localfile){
       sscanf(buffer,"%f",&vertical_factor);
 
       for(i=0;i<3;i++){
-        if(terrain_rgba_zmin[i]<0)terrain_rgba_zmin[i]=0;
-        if(terrain_rgba_zmin[i]>255)terrain_rgba_zmin[i]=255;
-        if(terrain_rgba_zmax[i]<0)terrain_rgba_zmax[i]=0;
-        if(terrain_rgba_zmax[i]>255)terrain_rgba_zmax[i]=255;
+        terrain_rgba_zmin[i]=CLAMP(terrain_rgba_zmin[i],0,2255);
+        terrain_rgba_zmax[i]=CLAMP(terrain_rgba_zmax[i],0,2255);
       }
       vertical_factor=CLAMP(vertical_factor,0.25,4.0);
       update_terrain(0,vertical_factor);
@@ -8640,14 +8636,14 @@ int readini2(char *inifile, int localfile){
     if(match(buffer,"SBATSTART")==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i",&sb_atstart);
-      if(sb_atstart!=0)sb_atstart=1;
+      ONEORZERO(sb_atstart);
       continue;
     }
 #ifdef pp_GPU
     if(gpuactive==1&&match(buffer,"USEGPU")==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i",&usegpu);
-      if(usegpu!=0)usegpu=1;
+      ONEORZERO(usegpu);
       continue;
     }
 #endif
@@ -8679,7 +8675,7 @@ int readini2(char *inifile, int localfile){
     if(match(buffer,"UNLOAD_QDATA")==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i",&unload_qdata);
-      if(unload_qdata!=1)unload_qdata=0;
+      ONEORZERO(unload_qdata);
       continue;
     }
     if(match(buffer,"TREECOLORS")==1){
@@ -8687,13 +8683,10 @@ int readini2(char *inifile, int localfile){
       sscanf(buffer,"%f %f %f",trunccolor,trunccolor+1,trunccolor+2);
       sscanf(buffer,"%f %f %f",treecolor,treecolor+1,treecolor+2);
       sscanf(buffer,"%f %f %f",treecharcolor,treecharcolor+1,treecharcolor+2);
-      for(i=0;i<4;i++){
-        if(treecolor[i]<0.0)treecolor[i]=0.0;
-        if(treecharcolor[i]<0.0)treecharcolor[i]=0.0;
-        if(trunccolor[i]<0.0)trunccolor[i]=0.0;
-        if(treecolor[i]>1.0)treecolor[i]=1.0;
-        if(treecharcolor[i]>1.0)treecharcolor[i]=1.0;
-        if(trunccolor[i]>1.0)trunccolor[i]=1.0;
+      for(i=0;i<3;i++){
+        treecolor[i]=CLAMP(treecolor[i],0.0,1.0);
+        treecharcolor[i]=CLAMP(treecharcolor[i],0.0,1.0);
+        trunccolor[i]=CLAMP(trunccolor[i],0.0,1.0);
       }
       treecolor[3]=1.0;
       treecharcolor[3]=1.0;
@@ -8709,13 +8702,13 @@ int readini2(char *inifile, int localfile){
     if(match(buffer,"SMOOTHBLOCKSOLID")==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i",&smooth_block_solid);
-      if(smooth_block_solid!=1)smooth_block_solid=0;
+      ONEORZERO(smooth_block_solid);
       continue;
     }
     if(match(buffer,"SHOWTRANSPARENTVENTS")==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i",&show_transparent_vents);
-      if(show_transparent_vents!=0)show_transparent_vents=1;
+      ONEORZERO(show_transparent_vents);
       continue;
     }
     if(match(buffer,"COLORBARTYPE")==1){
@@ -8784,7 +8777,7 @@ int readini2(char *inifile, int localfile){
     if(match(buffer,"SLICEAVERAGE")==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i %f %i",&slice_average_flag,&slice_average_interval,&vis_slice_average);
-      if(slice_average_flag!=1)slice_average_flag=0;
+      ONEORZERO(slice_average_flag);
       if(slice_average_interval<0.0)slice_average_interval=0.0;
       continue;
     }
@@ -8835,26 +8828,26 @@ int readini2(char *inifile, int localfile){
     if(match(buffer,"SHOWHRRCUTOFF")==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i",&show_hrrcutoff);
-      if(show_hrrcutoff!=1)show_hrrcutoff=0;
+      ONEORZERO(show_hrrcutoff);
       continue;
     }
     if(match(buffer,"TWOSIDEDVENTS")==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i %i",&show_bothsides_int,&show_bothsides_ext);
-      if(show_bothsides_int!=1)show_bothsides_int=0;
-      if(show_bothsides_ext!=1)show_bothsides_ext=0;
+      ONEORZERO(show_bothsides_int);
+      ONEORZERO(show_bothsides_ext);
       continue;
     }
     if(match(buffer,"SHOWSLICEINOBST")==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i",&show_slice_in_obst);
-      if(show_slice_in_obst!=1)show_slice_in_obst=0;
+      ONEORZERO(show_slice_in_obst);
       continue;
     }
     if(match(buffer,"SKIPEMBEDSLICE")==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i",&skip_slice_in_embedded_mesh);
-      if(skip_slice_in_embedded_mesh!=1)skip_slice_in_embedded_mesh=0;
+      ONEORZERO(skip_slice_in_embedded_mesh);
       continue;
     }
     if(match(buffer,"PERCENTILELEVEL")==1){
@@ -9295,7 +9288,9 @@ int readini2(char *inifile, int localfile){
     if(match(buffer,"OUTLINEMODE")==1){
 	    fgets(buffer,255,stream);
 	    sscanf(buffer,"%i %i",&highlight_flag,&outline_color_flag);
-      if(nmeshes<2&&highlight_flag!=0)highlight_flag=1;
+      if(nmeshes<2){
+        ONEORZERO(highlight_flag);
+      }
       continue;
     }
     if(match(buffer,"SLICEDATAOUT")==1){
@@ -9366,7 +9361,7 @@ int readini2(char *inifile, int localfile){
     if(match(buffer,"SHOWTRACERSALWAYS")==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i",&show_tracers_always);
-      if(show_tracers_always!=1)show_tracers_always=0;
+      ONEORZERO(show_tracers_always);
       continue;
     }
     if(localfile==1&&match(buffer,"PROPINDEX")==1){
@@ -9597,8 +9592,8 @@ int readini2(char *inifile, int localfile){
     if(match(buffer,"SHOWSENSORS")==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i %i ",&visSensor,&visSensorNorm);
-      if(visSensor!=0)visSensor=1;
-      if(visSensorNorm!=0)visSensorNorm=1;
+      ONEORZERO(visSensor);
+      ONEORZERO(visSensorNorm);
       continue;
     }
     if(match(buffer,"AVATAREVAC")==1){
@@ -9645,7 +9640,7 @@ int readini2(char *inifile, int localfile){
     if(match(buffer,"RENDERFILELABEL")==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i ",&renderfilelabel);
-      if(renderfilelabel!=0)renderfilelabel=1;
+      ONEORZERO(renderfilelabel);
       continue;
     }
     if(match(buffer,"CELLCENTERTEXT")==1){
@@ -9706,8 +9701,7 @@ int readini2(char *inifile, int localfile){
     if(match(buffer,"APERATURE")==1||match(buffer,"APERTURE")==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i ",&apertureindex);
-      if(apertureindex<0)apertureindex=0;
-      if(apertureindex>4)apertureindex=4;
+      apertureindex=CLAMP(apertureindex,0,4);
       ApertureMenu(apertureindex);
       continue;
     }
@@ -9868,7 +9862,7 @@ int readini2(char *inifile, int localfile){
     if(match(buffer,"SHOWOTHERVENTS")==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i",&visOtherVents);
-      if(visOtherVents!=1)visOtherVents=0;
+      ONEORZERO(visOtherVents);
       continue;
       }
     if(match(buffer,"SHOWCVENTS")==1){
@@ -9928,13 +9922,12 @@ int readini2(char *inifile, int localfile){
         fgets(buffer,255,stream);
         sscanf(buffer,"%i %i %i %i %i %i",
           &visx_all,&meshi->plotx,&visy_all,&meshi->ploty,&visz_all,&meshi->plotz);
-        if(visx_all!=0)visx_all=1;
-        if(visy_all!=0)visy_all=1;
-        if(visy_all!=0)visz_all=1;
-        if(meshi->plotx<0)meshi->plotx=0;
-        if(meshi->plotx>meshi->ibar)meshi->plotx=meshi->ibar;
-        if(meshi->ploty>meshi->jbar)meshi->ploty=meshi->jbar;
-        if(meshi->plotz>meshi->kbar)meshi->plotz=meshi->kbar;
+        ONEORZERO(visx_all);
+        ONEORZERO(visy_all);
+        ONEORZERO(visz_all);
+        meshi->plotx=CLAMP(meshi->plotx,0,meshi->ibar);
+        meshi->ploty=CLAMP(meshi->ploty,0,meshi->jbar);
+        meshi->plotz=CLAMP(meshi->plotz,0,meshi->kbar);
       }
       continue;
     }
@@ -9961,7 +9954,7 @@ int readini2(char *inifile, int localfile){
     if(match(buffer,"SHOWFRAME")==1&&match(buffer,"SHOWFRAMERATE")!=1&&match(buffer,"SHOWFRAMELABEL")!=1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i",&visFrame);
-      if(isZoneFireModel==1)visFrame=0;
+      ONEORZERO(visFrame);
       continue;
     }
     if(match(buffer,"FRAMERATEVALUE")==1){
@@ -10455,8 +10448,7 @@ int readini2(char *inifile, int localfile){
       if(match(buffer,"SMOKERTHICK")==1){
         if(fgets(buffer,255,stream)==NULL)break;
         sscanf(buffer,"%f",&smoke3d_rthick);
-        if(smoke3d_rthick<1.0)smoke3d_rthick=1.0;
-        if(smoke3d_rthick>255.0)smoke3d_rthick=255.0;
+        smoke3d_rthick=CLAMP(smoke3d_rthick,1.0,255.0);
         smoke3d_thick=log_base2(smoke3d_rthick);
         continue;
       }
@@ -10471,8 +10463,6 @@ int readini2(char *inifile, int localfile){
         sscanf(buffer,"%f",&fire_halfdepth);
         continue;
       }
-
-
       if(match(buffer,"VIEWTOURFROMPATH")==1){
         if(fgets(buffer,255,stream)==NULL)break;
         sscanf(buffer,"%i",&viewtourfrompath);

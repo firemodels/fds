@@ -5,6 +5,8 @@
 #ifndef DATADEFS_H_DEFINED
 #define DATADEFS_H_DEFINED
 
+#define ONEORZERO(val) if(val!=0)val=1
+
 #define SCALE2FDS(x) ((x)*xyzmaxdiff)
 #define SCALE2SMV(x) ((x)/xyzmaxdiff)
 
