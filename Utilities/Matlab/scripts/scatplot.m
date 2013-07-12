@@ -287,15 +287,15 @@ for j=2:length(Q);
   
         if Sigma_E > 0.0
             text(Plot_Min+(Title_Position(1)+0.05)*(Plot_Max-Plot_Min),Plot_Min+(Title_Position(2)-0.05)*(Plot_Max-Plot_Min),...
-                 ['$2 \, \tilde{\sigma}_E$=',num2str(2*Sigma_E,'%4.2f')],'FontSize',12,'FontName','Times','Interpreter',Font_Interpreter)
+                 ['Exp. Uncertainty: ',num2str(Sigma_E,'%4.2f')],'FontSize',12,'FontName','Times','Interpreter',Font_Interpreter)
         end
          
         if strcmp(Model_Error,'yes')
             text(Plot_Min+(Title_Position(1)+0.05)*(Plot_Max-Plot_Min),Plot_Min+(Title_Position(2)-0.10)*(Plot_Max-Plot_Min),...
-                ['$2 \, \tilde{\sigma}_M$=',num2str(2*Sigma_M,'%4.2f')],'FontSize',12,'FontName','Times','Interpreter',Font_Interpreter)
+                ['Model Uncertainty: ',num2str(Sigma_M,'%4.2f')],'FontSize',12,'FontName','Times','Interpreter',Font_Interpreter)
             
             text(Plot_Min+(Title_Position(1)+0.05)*(Plot_Max-Plot_Min),Plot_Min+(Title_Position(2)-0.15)*(Plot_Max-Plot_Min),...
-                ['Bias =',num2str(delta,'%4.2f')],'FontSize',12,'FontName','Times','Interpreter',Font_Interpreter)
+                ['Bias Factor: ',num2str(delta,'%4.2f')],'FontSize',12,'FontName','Times','Interpreter',Font_Interpreter)
         end
         
         C = stripcell(Group_Key_Label);
@@ -454,14 +454,14 @@ if stats_output == 1
     % Generate table header information in .tex file
     fprintf(fid, '%s\n', '\begin{center}');
     fprintf(fid, '%s\n', '\tiny');
-    fprintf(fid, '%s\n', '\begin{longtable}{|l|c|c|l|c|c|c|c|}');
+    fprintf(fid, '%s\n', '\begin{longtable}{|l|c|c|c|c|c|c|}');
     fprintf(fid, '%s\n', '\hline');
-    fprintf(fid, '%s\n', 'Case Name & Expected & Predicted & Dependent & Type of Error & Error & Error     & Within    \\');
-    fprintf(fid, '%s\n', '          & Metric   & Metric    & Variable  &               &       & Tolerance & Tolerance \\ \hline \hline');
+    fprintf(fid, '%s\n', 'Case Name & Expected & Predicted & Type of Error & Error & Error     & Within    \\');
+    fprintf(fid, '%s\n', '          & Metric   & Metric    &               &       & Tolerance & Tolerance \\ \hline \hline');
     fprintf(fid, '%s\n', '\endfirsthead');
     fprintf(fid, '%s\n', '\hline');
-    fprintf(fid, '%s\n', 'Case Name & Expected & Predicted & Dependent & Type of Error & Error & Error     & Within    \\');
-    fprintf(fid, '%s\n', '          & Metric   & Metric    & Variable  &               &       & Tolerance & Tolerance \\ \hline \hline');
+    fprintf(fid, '%s\n', 'Case Name & Expected & Predicted & Type of Error & Error & Error     & Within    \\');
+    fprintf(fid, '%s\n', '          & Metric   & Metric    &               &       & Tolerance & Tolerance \\ \hline \hline');
     fprintf(fid, '%s\n', '\endhead');
     fprintf(fid, '%s\n', '\hline');
     fprintf(fid, '%s\n', '\endfoot');
@@ -476,7 +476,6 @@ if stats_output == 1
         % Additional columns
         expected_value = m{i_row, 5};
         predicted_value = m{i_row, 6};
-        dependent_variable = m{i_row, 7};
         % Remove " Error" from string to save horizontal space
         error_type = strrep(m{i_row, 8}, ' Error', '');
         % Convert strings to numbers for later formatting
@@ -489,7 +488,6 @@ if stats_output == 1
         fprintf(fid, '%s', case_name, ' & ');
         fprintf(fid, '%s', num2str(expected_value, '%1.2e'), ' & ');
         fprintf(fid, '%s', num2str(predicted_value, '%1.2e'), ' & ');
-        fprintf(fid, '%s', dependent_variable, ' & ');
         fprintf(fid, '%s', error_type, ' & ');
         fprintf(fid, '%s', num2str(error_val, '%1.2e'), ' & ');
         fprintf(fid, '%s', num2str(tol, '%1.2e'), ' & ');
