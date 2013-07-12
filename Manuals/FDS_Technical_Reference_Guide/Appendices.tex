@@ -1301,6 +1301,68 @@ The following solutions are used to advance the particle positions forward in ti
 At first glance, the theoretical accuracy of the original equation for $\mathbf{x}^{n+1}$, Eq.~(\ref{mom_x_p_full}), appears to be $\mathcal{O}(\Delta t^3)$. But computation reveals it is actually $\mathcal{O}(\Delta t^2)$. This is due to the velocity error reducing the overall accuracy of the position solution. The $\Delta t^3$ term, therefore, may be dropped from Eq.~(\ref{mom_x_p_full}) without loss of accuracy. More details about this are available in the Lagrangian Particles chapter in the FDS Verification Guide~\cite{FDS_Verification_Guide}.
 
 
+\chapter{Simplifications of the Radiation Transport Equation}
+\label{radiation_derivations}
+
+\subsubsection*{Antti Paajanen, VTT, Finland}
+
+
+The Radiation Transport Equation (RTE) for particles is given by Eq.~(\ref{RTEspray}) and repeated here:
+\begin{equation}
+\mathbf{s} \cdot \nabla I_{\lambda}(\mathbf{x},\mathbf{s}) = -\Big[ \kappa_{\rm p}(\mathbf{x},\lambda) + \sigma_{\rm p}(\mathbf{x},\lambda) \Big]
+I_{\lambda}(\mathbf{x},\mathbf{s}) +\kappa_{\rm p}(\mathbf{x},\lambda) \; I_{{\rm b,p}}(\mathbf{x},\lambda) +
+\frac{\sigma_{\rm p}(\mathbf{x},\lambda)}{4\pi}
+\int_{4\pi}\Phi(\mathbf{s},\mathbf{s}') \, I_{\lambda}(\mathbf{x},\mathbf{s}') \, \rm d\mathbf{s}' \label{RTEspray2}
+\end{equation}
+An accurate computation of the in-scattering integral on the right hand side of Eq.~(\ref{RTEspray2}) would be extremely time consuming and require a prohibitive amount of memory because the individual intensities in each location would have to be stored. The in-scattering integral can be approximated by dividing the total $4\pi$ solid angle into a ``forward angle,'' $\delta\Omega^l$, and an ``ambient angle,'' $\delta\Omega^*=4\pi - \delta\Omega^l$.  For compatibility with the FVM solver, $\delta\Omega^l$ is set equal to the control angle given by the angular discretization.  However, it is assumed to be symmetric around the center of the control angle.  Within $\delta\Omega^l$ the intensity is $I_{\la}(\bx,\bs)$ and elsewhere it is approximated as
+\be
+\label{Ustar}
+U^*(\bx,\la) = \frac{U(\bx,\la) - \delta\Omega^l \, I_{\la}(\bx,\bs)}{\delta\Omega^*}
+\ee
+where $U(\bx)$ is the total intensity integrated over the unit sphere. The in-scattering integral in Eq.~(\ref{RTEspray2}) can now be approximated as
+\begin{align}
+\notag \frac{\sigma_{\rm p}(\bx,\la)}{4\pi}\int_{4\pi}\Phi(\bs,\bs') \; I_{\la}(\bx,\bs')
+  \; \d\bs'
+  &\approx
+\sigma_{\rm p}(\bx,\la) \, \left( \chi_{\rm f} \, I_{\la}(\bx,\bs) + \frac{1}{\delta\Omega^{*}} \left(1-\chi_{\rm f}\right)
+\int_{\delta\Omega^{*}} I_{\la}(\bx,\bs') \; \d \bs' \right)\\[0.1in]
+  &=
+\sigma_{\rm p}(\bx,\la) \, \Big( \chi_{\rm f} \; I_{\la}(\bx,\bs) +
+(1-\chi_{\rm f}) \, U^*(\bx,\la) \Big)
+\label{SprayRTE_RHS}
+\end{align}
+where $\chi_{\rm f} = \chi_{\rm f}(r,\la)=\chi_{\rm f}(\bx,\la)$ is a fraction of the total intensity originally within the solid angle $\delta\Omega^l$ that is scattered
+into the same angle, $\delta\Omega^l$. The calculation of $\chi_{\rm f}$ is discussed in section~\ref{forward_fraction}. Using the definition of $U^*$ in Eq.~(\ref{Ustar}), the RTE is now: 
+\begin{equation}
+\mathbf{s} \cdot \nabla I_{\lambda}(\mathbf{x},\mathbf{s}) = -\kappa_{\rm p}(\mathbf{x},\lambda) \,
+I_{\lambda}(\mathbf{x},\mathbf{s}) + \kappa_{\rm p}(\mathbf{x},\lambda) \, I_{{\rm b,p}}(\mathbf{x},\lambda) +
+\sigma_{\rm p}(\mathbf{x},\lambda) \left( 1-\chi_{\rm f} \right) \left( \frac{U(\mathbf{x},\lambda) - \delta\Omega^l \, I_{\lambda}(\mathbf{x},\mathbf{s})}{\delta\Omega^*} - I_{\lambda}(\mathbf{x},\mathbf{s}) \right)
+\end{equation}
+An effective scattering coefficient is next defined
+\be
+\label{effective_sigma_d}
+\overline{\sigma}_{\rm p}(\bx,\la) = \frac{4\pi}{4\pi-\delta\Omega^l} \Big(1-\chi_{\rm f}(\bx,\la)\Big) \; \sigma_{\rm p}(\bx,\la)
+\ee
+Using Eq.~(\ref{effective_sigma_d}) and $\delta\Omega^*=4\pi - \delta\Omega^l$, the scattering coefficient can be written as:
+\begin{equation}
+\sigma_{\rm p}(\mathbf{x},\lambda) = \frac{\overline{\sigma}_{\rm p}(\mathbf{x},\lambda)}{4\pi} \frac{\delta\Omega^*}{\left(1-\chi_{\rm f} \right)}
+\end{equation}
+Substituting this in the previous form of the RTE yields:
+\begin{equation}
+\mathbf{s} \cdot \nabla I_{\lambda}(\mathbf{x},\mathbf{s}) = -\kappa_{\rm p}(\mathbf{x},\lambda) \,
+I_{\lambda}(\mathbf{x},\mathbf{s}) +\kappa_{\rm p}(\mathbf{x},\lambda) \; I_{{\rm b,p}}(\mathbf{x},\lambda) +
+\frac{\overline{\sigma}_{\rm p}(\mathbf{x},\lambda)}{4\pi} \left( U(\mathbf{x},\lambda) - \left( \delta \Omega^l
++ \delta\Omega^* \right) I_{\lambda}(\mathbf{x},\mathbf{s}) \right)
+\end{equation}
+Using $\delta\Omega^l+ \delta\Omega^*=4\pi $, the RTE simplifies to:
+\begin{equation}
+\mathbf{s} \cdot \nabla I_{\lambda}(\mathbf{x},\mathbf{s}) = -\Big[\kappa_{\rm p}(\mathbf{x},\lambda) + \overline{\sigma}_{\rm p}(\mathbf{x},\lambda)\Big]
+I_{\lambda}(\mathbf{x},\mathbf{s}) +\kappa_{\rm p}(\mathbf{x},\lambda) \; I_{{\rm b,p}}(\mathbf{x},\lambda) +
+\frac{\overline{\sigma}_{\rm p}(\mathbf{x},\lambda)}{4\pi} U(\mathbf{x},\lambda)
+\end{equation}
+
+
+
 
 \chapter{Absorption Coefficients of Liquid Fuels}
 \label{app_abscoeff}
