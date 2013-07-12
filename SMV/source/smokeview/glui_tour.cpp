@@ -21,7 +21,8 @@ char glui_tour_revision[]="$Revision$";
 #include "update.h"
 #include "smokeviewvars.h"
 
-static int viewtype=0;
+static int viewtype1=0;
+static int viewtype2=0;
 static float tour_xyz[3]={0.0,0.0,0.0}, tour_ttt, tour_az_path=0.0, tour_tension=0.0;
 static float tour_view_xyz[3]={0.0,0.0,0.0}, tour_elev_path=0.0;
 static int tour_hide=0;
@@ -49,21 +50,32 @@ GLUI_Button *BUTTON_tour_a3;
 
 GLUI_Rollout *ROLLOUT_tour=NULL;
 
-GLUI_Panel *PANEL_path=NULL;
-GLUI_Panel *PANEL_advancedkeyframe=NULL;
+GLUI_Rollout *PANEL_path=NULL;
+GLUI_Rollout *PANEL_spline=NULL;
+
 GLUI_Panel *PANEL_keyframe=NULL;
-GLUI_Panel *PANEL_tour1=NULL;
-GLUI_Panel *PANEL_tour4=NULL;
+GLUI_Panel *PANEL_tour;
+GLUI_Panel *PANEL_tour2;
+GLUI_Panel *PANEL_tour3;
+GLUI_Panel *PANEL_tour4;
+GLUI_Panel *PANEL_close_tour=NULL;
 GLUI_Panel *PANEL_view=NULL;
-GLUI_Panel *PANEL_advanced=NULL;
-GLUI_Panel *PANEL_spline=NULL;
+GLUI_Panel *PANEL_view2=NULL;
+GLUI_Panel *PANEL_view3=NULL;
+GLUI_Panel *PANEL_pos=NULL;
+GLUI_Panel *PANEL_pos2=NULL;
+GLUI_Panel *PANEL_pos3=NULL;
+GLUI_Panel *PANEL_view_xyz=NULL;
+GLUI_Panel *PANEL_view_angle=NULL;
+
 GLUI_Panel *PANEL_settings=NULL;
-GLUI_Panel *PANEL_movedir=NULL;
+GLUI_Panel *PANEL_settings2=NULL;
 
 GLUI_Checkbox *CHECKBOX_snap=NULL,*CHECKBOX_view=NULL,*CHECKBOX_showtourroute=NULL,*CHECKBOX_constantvel=NULL;
 GLUI_Checkbox *CHECKBOX_showtourlocus=NULL,*CHECKBOX_showintermediate=NULL;
 GLUI_Checkbox *CHECKBOX_globaltension_flag=NULL, *CHECKBOX_tourhide=NULL;
 GLUI_Checkbox *CHECKBOX_view1=NULL;
+GLUI_Checkbox *CHECKBOX_view2=NULL;
 GLUI_Checkbox *CHECKBOX_usecurrent=NULL;
 
 GLUI_Spinner *SPINNER_globaltourtension=NULL;
@@ -73,7 +85,7 @@ GLUI_Spinner *SPINNER_tourcontinuity=NULL;
 GLUI_Spinner *SPINNER_tourzoom=NULL;
 GLUI_Spinner *SPINNER_elev_path=NULL;
 
-GLUI_Button *BUTTON_settings=NULL,*BUTTON_next_tour=NULL,*BUTTON_prev_tour=NULL;
+GLUI_Button *BUTTON_next_tour=NULL,*BUTTON_prev_tour=NULL;
 GLUI_Button *BUTTON_tour_1=NULL;
 GLUI_Button *BUTTON_tour_2=NULL;
 GLUI_Button *BUTTON_tour_3=NULL;
@@ -81,7 +93,6 @@ GLUI_Button *BUTTON_tour_4=NULL;
 GLUI_Button *BUTTON_tour_5=NULL;
 GLUI_Button *BUTTON_tour_6=NULL;
 GLUI_Button *BUTTON_tour_7=NULL;
-GLUI_Button *BUTTON_tour_8=NULL;
 
 GLUI_EditText *EDIT_label=NULL;
 
@@ -115,6 +126,7 @@ GLUI_StaticText *STATIC_tour_2=NULL;
 #define TOUR_LIST 24
 #define TOUR_AVATAR 31
 #define VIEW1 26
+#define VIEW2 30
 #define VIEW_times 27
 #define TOUR_UPDATELABEL 28
 #define TOUR_USECURRENT 29
@@ -143,24 +155,12 @@ extern "C" void glui_tour_setup(int main_window){
   if(showtour_dialog==0)glui_tour->hide();
 
 
-  PANEL_settings = glui_tour->add_panel(_("Tour settings"));
-  CHECKBOX_view=glui_tour->add_checkbox_to_panel(PANEL_settings,_("View from tour path"),&viewtourfrompath,VIEWTOURFROMPATH,TOUR_CB);
-  CHECKBOX_snap=glui_tour->add_checkbox_to_panel(PANEL_settings,_("View from selected keyframe"),&keyframe_snap,VIEWSNAP,TOUR_CB);
-  glui_tour->add_separator_to_panel(PANEL_settings);
-  CHECKBOX_constantvel=glui_tour->add_checkbox_to_panel(PANEL_settings,_("Constant speed"),&tour_constant_vel,CONSTANTTOURVEL,TOUR_CB);
-  CHECKBOX_showtourroute=glui_tour->add_checkbox_to_panel(PANEL_settings,_("Edit tour path"),&edittour,SHOWTOURROUTE,TOUR_CB);
-  CHECKBOX_showtourlocus=glui_tour->add_checkbox_to_panel(PANEL_settings,_("Show avatar"),&show_tourlocus);
-  CHECKBOX_showintermediate=glui_tour->add_checkbox_to_panel(PANEL_settings,_("Show intermediate path nodes"),&show_path_knots);
+  PANEL_tour = glui_tour->add_panel("",GLUI_PANEL_NONE);
 
-  glui_tour->add_separator_to_panel(PANEL_settings);
-
-  BUTTON_tour_1=glui_tour->add_button_to_panel(PANEL_settings,_("New tour"),TOUR_INSERT,TOUR_CB);
-  BUTTON_next_tour=glui_tour->add_button_to_panel(PANEL_settings,_("Next tour"),TOUR_NEXT,TOUR_CB);
-  BUTTON_prev_tour=glui_tour->add_button_to_panel(PANEL_settings,_("Previous tour"),TOUR_PREVIOUS,TOUR_CB);
   if(ntours>0){
     selectedtour_index=-1;
     selectedtour_index_old=-1;
-    LISTBOX_tour=glui_tour->add_listbox_to_panel(PANEL_settings,_("Select tour:"),&selectedtour_index,TOUR_LIST,TOUR_CB);
+    LISTBOX_tour=glui_tour->add_listbox_to_panel(PANEL_tour,_("Tour:"),&selectedtour_index,TOUR_LIST,TOUR_CB);
 
     LISTBOX_tour->add_item(-1,"Manual");
     LISTBOX_tour->add_item(-999,"-");
@@ -169,14 +169,23 @@ extern "C" void glui_tour_setup(int main_window){
       LISTBOX_tour->add_item(i,touri->label);
     }
     LISTBOX_tour->set_int_val(selectedtour_index);
+    glui_tour->add_column_to_panel(PANEL_tour,false);
   }
-  glui_tour->add_separator_to_panel(PANEL_settings);
+  BUTTON_next_tour=glui_tour->add_button_to_panel(PANEL_tour,_("Next tour"),TOUR_NEXT,TOUR_CB);
+  glui_tour->add_column_to_panel(PANEL_tour);
+  BUTTON_prev_tour=glui_tour->add_button_to_panel(PANEL_tour,_("Previous tour"),TOUR_PREVIOUS,TOUR_CB);
+  glui_tour->add_column_to_panel(PANEL_tour);
+  BUTTON_tour_1=glui_tour->add_button_to_panel(PANEL_tour,_("New tour"),TOUR_INSERT,TOUR_CB);
 
-  BUTTON_tour_2=glui_tour->add_button_to_panel(PANEL_settings,_("Update tour label"),TOUR_UPDATELABEL,TOUR_CB);
-  EDIT_label=glui_tour->add_edittext_to_panel(PANEL_settings,_("Tour label"),GLUI_EDITTEXT_TEXT,tour_label,TOUR_LABEL,TOUR_CB);
+  PANEL_tour3 = glui_tour->add_panel("",GLUI_PANEL_NONE);
+  EDIT_label=glui_tour->add_edittext_to_panel(PANEL_tour3,_("Tour label"),GLUI_EDITTEXT_TEXT,tour_label,TOUR_LABEL,TOUR_CB);
+  glui_tour->add_column_to_panel(PANEL_tour3,false);
+  BUTTON_tour_2=glui_tour->add_button_to_panel(PANEL_tour3,_("Update"),TOUR_UPDATELABEL,TOUR_CB);
   EDIT_label->set_w(240);
+
+  PANEL_tour2 = glui_tour->add_panel("",GLUI_PANEL_NONE);
   if(navatar_types>0){
-    LISTBOX_avatar=glui_tour->add_listbox_to_panel(PANEL_settings,_("Avatar:"),&glui_avatar_index,TOUR_AVATAR,TOUR_CB);
+    LISTBOX_avatar=glui_tour->add_listbox_to_panel(PANEL_tour2,_("Avatar:"),&glui_avatar_index,TOUR_AVATAR,TOUR_CB);
 
     for(i=0;i<navatar_types;i++){
       touri = tourinfo + i;
@@ -193,106 +202,92 @@ extern "C" void glui_tour_setup(int main_window){
     }
 
     LISTBOX_avatar->set_int_val(glui_avatar_index);
+    glui_tour->add_column_to_panel(PANEL_tour2,false);
+    CHECKBOX_showtourlocus=glui_tour->add_checkbox_to_panel(PANEL_tour2,_("Show avatar"),&show_tourlocus);
   }
 
-  PANEL_keyframe = glui_tour->add_panel("Keyframe");
-  
-  PANEL_tour1 = glui_tour->add_panel_to_panel(PANEL_keyframe,"",GLUI_PANEL_NONE);
-  BUTTON_tour_3=glui_tour->add_button_to_panel(PANEL_tour1,_("Next"),    KEYFRAME_NEXT,TOUR_CB);
-  BUTTON_tour_4=glui_tour->add_button_to_panel(PANEL_tour1,_("Previous"),KEYFRAME_PREVIOUS,TOUR_CB);
-  SPINNER_t=glui_tour->add_spinner_to_panel(PANEL_tour1,"t:",GLUI_SPINNER_FLOAT,&tour_ttt,KEYFRAME_tXYZ,TOUR_CB);
-  glui_tour->add_column_to_panel(PANEL_tour1,false);
-  BUTTON_tour_5=glui_tour->add_button_to_panel(PANEL_tour1,_("Add"),KEYFRAME_INSERT,TOUR_CB);
-  BUTTON_tour_6=glui_tour->add_button_to_panel(PANEL_tour1,_("Delete"),KEYFRAME_DELETE,TOUR_CB);
-  CHECKBOX_view1=glui_tour->add_checkbox_to_panel(PANEL_tour1,"X,Y,Z View",&viewtype,VIEW1,TOUR_CB);
+  PANEL_settings = glui_tour->add_panel(_("Settings"));
+  CHECKBOX_showtourroute=glui_tour->add_checkbox_to_panel(PANEL_settings,_("Edit tour path"),&edittour,SHOWTOURROUTE,TOUR_CB);
+  CHECKBOX_view=glui_tour->add_checkbox_to_panel(PANEL_settings,_("View from tour path"),&viewtourfrompath,VIEWTOURFROMPATH,TOUR_CB);
+  CHECKBOX_snap=glui_tour->add_checkbox_to_panel(PANEL_settings,_("View from selected keyframe"),&keyframe_snap,VIEWSNAP,TOUR_CB);
+  CHECKBOX_constantvel=glui_tour->add_checkbox_to_panel(PANEL_settings,_("Constant speed"),&tour_constant_vel,CONSTANTTOURVEL,TOUR_CB);
+  CHECKBOX_showintermediate=glui_tour->add_checkbox_to_panel(PANEL_settings,_("Show intermediate path nodes"),&show_path_knots);
 
-  PANEL_movedir = glui_tour->add_panel_to_panel(PANEL_keyframe,"",GLUI_PANEL_NONE);
-  STATIC_tour_1=glui_tour->add_statictext_to_panel(PANEL_movedir,_("Position"));
-  SPINNER_x=glui_tour->add_spinner_to_panel(PANEL_movedir,"X:",GLUI_SPINNER_FLOAT,tour_xyz,KEYFRAME_tXYZ,TOUR_CB);
-  SPINNER_y=glui_tour->add_spinner_to_panel(PANEL_movedir,"Y:",GLUI_SPINNER_FLOAT,tour_xyz+1,KEYFRAME_tXYZ,TOUR_CB);
-  SPINNER_z=glui_tour->add_spinner_to_panel(PANEL_movedir,"Z:",GLUI_SPINNER_FLOAT,tour_xyz+2,KEYFRAME_tXYZ,TOUR_CB);
+  PANEL_path = glui_tour->add_rollout_to_panel(PANEL_settings,_("Duration"),false);
 
-  glui_tour->add_column_to_panel(PANEL_movedir,false);
-  STATIC_tour_2=glui_tour->add_statictext_to_panel(PANEL_movedir,_("View Direction"));
-  SPINNER_viewx=glui_tour->add_spinner_to_panel(PANEL_movedir,"X",GLUI_SPINNER_FLOAT,tour_view_xyz,KEYFRAME_viewXYZ,TOUR_CB);
-  SPINNER_viewy=glui_tour->add_spinner_to_panel(PANEL_movedir,"Y",GLUI_SPINNER_FLOAT,tour_view_xyz+1,KEYFRAME_viewXYZ,TOUR_CB);
-  SPINNER_viewz=glui_tour->add_spinner_to_panel(PANEL_movedir,"Z",GLUI_SPINNER_FLOAT,tour_view_xyz+2,KEYFRAME_viewXYZ,TOUR_CB);
-  SPINNER_az_path=glui_tour->add_spinner_to_panel(PANEL_movedir,_("Azimuth:"),GLUI_SPINNER_FLOAT,&tour_az_path,KEYFRAME_tXYZ,TOUR_CB);
-  SPINNER_elev_path=glui_tour->add_spinner_to_panel(PANEL_movedir,_("Elevation:"),GLUI_SPINNER_FLOAT,&tour_elev_path,KEYFRAME_tXYZ,TOUR_CB);
-  SPINNER_elev_path->set_float_limits(-90.0,90.0);
-  SPINNER_tourzoom=glui_tour->add_spinner_to_panel(PANEL_movedir,_("Zoom:"),GLUI_SPINNER_FLOAT,&tour_zoom,KEYFRAME_tXYZ,TOUR_CB);
-  
- // if(tour_constant_vel==0){
- //   SPINNER_t->enable();
- // }
- // else{
- //   SPINNER_t->disable();
- // }
+  SPINNER_tour_a1=glui_tour->add_spinner_to_panel(PANEL_path,_("start time"),GLUI_SPINNER_FLOAT,&view_tstart,VIEW_times,TOUR_CB);
+  SPINNER_tour_a2=glui_tour->add_spinner_to_panel(PANEL_path,_("stop time:"),GLUI_SPINNER_FLOAT,&view_tstop, VIEW_times,TOUR_CB);
+  SPINNER_tour_a3=glui_tour->add_spinner_to_panel(PANEL_path,_("points"),    GLUI_SPINNER_INT,&view_ntimes,  VIEW_times,TOUR_CB);
 
- 
-  glui_tour->add_separator();
-
-  PANEL_tour4 = glui_tour->add_panel("",false);
-  BUTTON_tour_7=glui_tour->add_button_to_panel(PANEL_tour4,_("Advanced settings"),ADVANCEDTOUR_OPEN,TOUR_CB);
-  glui_tour->add_column_to_panel(PANEL_tour4,false);
-  BUTTON_settings=glui_tour->add_button_to_panel(PANEL_tour4,_("Save settings"),SAVE_SETTINGS,TOUR_CB);
-
-  BUTTON_tour_8=glui_tour->add_button("Close",TOUR_CLOSE,TOUR_CB);
-
-  glui_tour->set_main_gfx_window( main_window );
-  update_tourcontrols();
-}
-
-/* ------------------ glui_advancedtour_setup ------------------------ */
-
-extern "C" void glui_advancedtour_setup(int main_window){
-
-  if(glui_advancedtour!=NULL){
-    glui_advancedtour->close();
-    glui_advancedtour->close();
-  }
-  glui_advancedtour = GLUI_Master.create_glui("Advanced Settings",0,0,0);
-  glui_advancedtour->hide();
-
-  PANEL_advanced = glui_advancedtour->add_panel("Advanced Settings",false);
-
-  PANEL_path = glui_advancedtour->add_panel_to_panel(PANEL_advanced,_("Duration/Points (all tours)"),true);
-
-  SPINNER_tour_a1=glui_advancedtour->add_spinner_to_panel(PANEL_path,_("start time"),GLUI_SPINNER_FLOAT,&view_tstart,VIEW_times,TOUR_CB);
-  SPINNER_tour_a2=glui_advancedtour->add_spinner_to_panel(PANEL_path,_("stop time:"),GLUI_SPINNER_FLOAT,&view_tstop, VIEW_times,TOUR_CB);
-  SPINNER_tour_a3=glui_advancedtour->add_spinner_to_panel(PANEL_path,_("points"),    GLUI_SPINNER_INT,&view_ntimes,  VIEW_times,TOUR_CB);
-
-  PANEL_advancedkeyframe = glui_advancedtour->add_panel_to_panel(PANEL_advanced,_("Edit keyframe's view/tension"),true);
-
-  BUTTON_tour_a1=glui_advancedtour->add_button_to_panel(PANEL_advancedkeyframe,_("Next"),    KEYFRAME_NEXT,TOUR_CB);
-  BUTTON_tour_a2=glui_advancedtour->add_button_to_panel(PANEL_advancedkeyframe,_("Previous"),KEYFRAME_PREVIOUS,TOUR_CB);
-
-  PANEL_spline = glui_advancedtour->add_panel_to_panel(PANEL_advancedkeyframe,_("Tension"),true);
-  CHECKBOX_globaltension_flag=glui_advancedtour->add_checkbox_to_panel(PANEL_spline,_("Global"),&tour_global_tension_flag,GLOBAL_TENSIONFLAG,TOUR_CB);
-  SPINNER_globaltourtension=glui_advancedtour->add_spinner_to_panel(PANEL_spline,_("All keyframes"),GLUI_SPINNER_FLOAT,&tour_global_tension,GLOBAL_TENSION,TOUR_CB);
-  SPINNER_tourtension=glui_advancedtour->add_spinner_to_panel(PANEL_spline,_("Selected keyframe"),GLUI_SPINNER_FLOAT,&tour_tension,KEYFRAME_tXYZ,TOUR_CB);
+  PANEL_spline = glui_tour->add_rollout_to_panel(PANEL_settings,_("Tension"),false);
+  CHECKBOX_globaltension_flag=glui_tour->add_checkbox_to_panel(PANEL_spline,_("Global"),&tour_global_tension_flag,GLOBAL_TENSIONFLAG,TOUR_CB);
+  SPINNER_globaltourtension=glui_tour->add_spinner_to_panel(PANEL_spline,_("All keyframes"),GLUI_SPINNER_FLOAT,&tour_global_tension,GLOBAL_TENSION,TOUR_CB);
+  SPINNER_tourtension=glui_tour->add_spinner_to_panel(PANEL_spline,_("Selected keyframe"),GLUI_SPINNER_FLOAT,&tour_tension,KEYFRAME_tXYZ,TOUR_CB);
 
   SPINNER_globaltourtension->set_float_limits(-1.0,1.0,GLUI_LIMIT_CLAMP);
   SPINNER_tourtension->set_float_limits(-1.0,1.0,GLUI_LIMIT_CLAMP);
+
+  PANEL_keyframe = glui_tour->add_panel("Keyframe");
+  
+  PANEL_pos = glui_tour->add_panel_to_panel(PANEL_keyframe,"",GLUI_PANEL_NONE);
+
+  PANEL_pos3 = glui_tour->add_panel_to_panel(PANEL_pos,"",GLUI_PANEL_NONE);
+  BUTTON_tour_3=glui_tour->add_button_to_panel(PANEL_pos3,_("Next"),    KEYFRAME_NEXT,TOUR_CB);
+  BUTTON_tour_4=glui_tour->add_button_to_panel(PANEL_pos3,_("Previous"),KEYFRAME_PREVIOUS,TOUR_CB);
+  BUTTON_tour_5=glui_tour->add_button_to_panel(PANEL_pos3,_("Add"),KEYFRAME_INSERT,TOUR_CB);
+  BUTTON_tour_6=glui_tour->add_button_to_panel(PANEL_pos3,_("Delete"),KEYFRAME_DELETE,TOUR_CB);
+
+  glui_tour->add_column_to_panel(PANEL_pos,false);
+
+  PANEL_pos2 = glui_tour->add_panel_to_panel(PANEL_pos,"Position/time");
+  SPINNER_t=glui_tour->add_spinner_to_panel(PANEL_pos2,"t:",GLUI_SPINNER_FLOAT,&tour_ttt,KEYFRAME_tXYZ,TOUR_CB);
+  SPINNER_x=glui_tour->add_spinner_to_panel(PANEL_pos2,"X:",GLUI_SPINNER_FLOAT,tour_xyz,KEYFRAME_tXYZ,TOUR_CB);
+  SPINNER_y=glui_tour->add_spinner_to_panel(PANEL_pos2,"Y:",GLUI_SPINNER_FLOAT,tour_xyz+1,KEYFRAME_tXYZ,TOUR_CB);
+  SPINNER_z=glui_tour->add_spinner_to_panel(PANEL_pos2,"Z:",GLUI_SPINNER_FLOAT,tour_xyz+2,KEYFRAME_tXYZ,TOUR_CB);
+
+  PANEL_view = glui_tour->add_panel_to_panel(PANEL_keyframe,"View direction");
+  PANEL_view3 = glui_tour->add_panel_to_panel(PANEL_view,"",GLUI_PANEL_NONE);
+  CHECKBOX_view1=glui_tour->add_checkbox_to_panel(PANEL_view3,"X,Y,Z",&viewtype1,VIEW1,TOUR_CB);
+  glui_tour->add_column_to_panel(PANEL_view3,false);
+  CHECKBOX_view2=glui_tour->add_checkbox_to_panel(PANEL_view3,"Relative to path",&viewtype2,VIEW2,TOUR_CB);
+
+  PANEL_view2 = glui_tour->add_panel_to_panel(PANEL_view,"",GLUI_PANEL_NONE);
+  PANEL_view_xyz = glui_tour->add_panel_to_panel(PANEL_view2,"",GLUI_PANEL_NONE);
+  glui_tour->add_column_to_panel(PANEL_view2,false);
+  PANEL_view_angle = glui_tour->add_panel_to_panel(PANEL_view2,"",GLUI_PANEL_NONE);
+
+
+  SPINNER_viewx=glui_tour->add_spinner_to_panel(PANEL_view_xyz,"X",GLUI_SPINNER_FLOAT,tour_view_xyz,KEYFRAME_viewXYZ,TOUR_CB);
+  SPINNER_viewy=glui_tour->add_spinner_to_panel(PANEL_view_xyz,"Y",GLUI_SPINNER_FLOAT,tour_view_xyz+1,KEYFRAME_viewXYZ,TOUR_CB);
+  SPINNER_viewz=glui_tour->add_spinner_to_panel(PANEL_view_xyz,"Z",GLUI_SPINNER_FLOAT,tour_view_xyz+2,KEYFRAME_viewXYZ,TOUR_CB);
+  SPINNER_az_path=glui_tour->add_spinner_to_panel(PANEL_view_angle,_("Azimuth:"),GLUI_SPINNER_FLOAT,&tour_az_path,KEYFRAME_tXYZ,TOUR_CB);
+  SPINNER_elev_path=glui_tour->add_spinner_to_panel(PANEL_view_angle,_("Elevation:"),GLUI_SPINNER_FLOAT,&tour_elev_path,KEYFRAME_tXYZ,TOUR_CB);
+  SPINNER_elev_path->set_float_limits(-90.0,90.0);
+  SPINNER_tourzoom=glui_tour->add_spinner_to_panel(PANEL_view_angle,_("Zoom:"),GLUI_SPINNER_FLOAT,&tour_zoom,KEYFRAME_tXYZ,TOUR_CB);
+
+  PANEL_close_tour = glui_tour->add_panel("",false);
+  glui_tour->add_button_to_panel(PANEL_close_tour,_("Save settings"),SAVE_SETTINGS,TOUR_CB);
+  glui_tour->add_column_to_panel(PANEL_close_tour,false);
+  glui_tour->add_button_to_panel(PANEL_close_tour,"Close",TOUR_CLOSE,TOUR_CB);
+
+  glui_tour->set_main_gfx_window( main_window );
 
   TOUR_CB(VIEW1);
   TOUR_CB(GLOBAL_TENSIONFLAG);
 
   SPINNER_az_path->set_float_limits(-180.0,180.0);
-  
-  BUTTON_tour_a3=glui_advancedtour->add_button("Close",ADVANCEDTOUR_CLOSE,TOUR_CB);
-
-  glui_advancedtour->set_main_gfx_window( main_window );
   update_tourcontrols();
   update_tourlist=1;
- // TOUR_CB(TOUR_LIST);
 }
+
+/* ------------------ Update_Tourlist(void) ------------------------ */
 
 extern "C" void Update_Tourlist(void){
 
   update_tourlist=0;
   TOUR_CB(TOUR_LIST);
 }
+
 /* ------------------ hide_glui_advancedtour ------------------------ */
 
 extern "C" void hide_glui_advancedtour(void){
@@ -362,7 +357,8 @@ extern "C" void set_glui_keyframe(){
   tour_az_path = selected_frame->az_path;
   tour_continuity=selected_frame->continuity;
   tour_bias=selected_frame->bias;
-  viewtype=selected_frame->viewtype;
+  viewtype1=selected_frame->viewtype;
+  viewtype2=1-viewtype1;
   tour_tension=selected_frame->tension;
   tour_zoom=selected_frame->nodeval.zoom;
   tour_elev_path=selected_frame->nodeval.elev_path;
@@ -418,7 +414,7 @@ extern "C" void set_glui_keyframe(){
   EDIT_label->set_text(tour_label);
 
   if(edittour==1){
-    if(viewtype==1){
+    if(viewtype1==1){
       SPINNER_az_path->disable();
       SPINNER_elev_path->disable();
       SPINNER_viewx->enable();
@@ -433,7 +429,8 @@ extern "C" void set_glui_keyframe(){
       SPINNER_viewz->disable();
     }
   }
-  CHECKBOX_view1->set_int_val(viewtype);
+  CHECKBOX_view1->set_int_val(viewtype1);
+  CHECKBOX_view2->set_int_val(viewtype2);
 }
 
 extern "C" void update_tourindex(void){
@@ -522,8 +519,16 @@ void TOUR_CB(int var){
     viewtourfrompath = 1 - viewtourfrompath;
     TOURMENU(-5);
     break;
+  case VIEW2:
+    viewtype1=1-viewtype2;
+    viewtype2=1-viewtype1;
+    TOUR_CB(VIEW1);
+    CHECKBOX_view1->set_int_val(viewtype1);
+    break;
   case VIEW1:
-    if(viewtype==1){
+    viewtype2 = 1 - viewtype1;
+    CHECKBOX_view2->set_int_val(viewtype2);
+    if(viewtype1==1){
       SPINNER_az_path->disable();
       SPINNER_elev_path->disable();
       SPINNER_viewx->enable();
@@ -535,7 +540,7 @@ void TOUR_CB(int var){
         SPINNER_elev_path->set_float_val(tour_elev_path);
       }
     }
-    else if(viewtype==0){
+    else if(viewtype1==0){
       SPINNER_az_path->enable();
       SPINNER_elev_path->enable();
       SPINNER_viewx->disable();
@@ -543,7 +548,7 @@ void TOUR_CB(int var){
       SPINNER_viewz->disable();
     }
     if(selected_frame!=NULL){
-      selected_frame->viewtype=viewtype;
+      selected_frame->viewtype=viewtype1;
     }
     createtourpaths();
     break;
@@ -599,7 +604,7 @@ void TOUR_CB(int var){
         selected_frame->disp_time=tour_ttt;
       }
       NORMALIZE_XYZ(eye,tour_xyz);
-      if(viewtype==0){
+      if(viewtype1==0){
         tour_az_path = SPINNER_az_path->get_float_val();
       }
       selected_frame->az_path=tour_az_path;
@@ -608,12 +613,12 @@ void TOUR_CB(int var){
       selected_frame->tension=tour_tension;
       selected_frame->bias=tour_bias;
       selected_frame->continuity=tour_continuity;
-      selected_frame->viewtype=viewtype;
+      selected_frame->viewtype=viewtype1;
       selected_frame->nodeval.zoom=tour_zoom;
       NORMALIZE_XYZ(xyz_view,tour_view_xyz);
       createtourpaths();
       selected_frame->selected=1;
-      if(viewtype==1){
+      if(viewtype1==1){
         TOUR_CB(KEYFRAME_viewXYZ);
       }
     }
@@ -699,7 +704,8 @@ void TOUR_CB(int var){
         key_view[2]=DENORMALIZE_Z(2*thiskey->nodeval.xyz_view[2]-lastkey->nodeval.xyz_view[2]);
         key_zoom = (2*thiskey->nodeval.zoom - lastkey->nodeval.zoom);
         key_bank = (2*thiskey->bank - lastkey->bank);
-        viewtype=thiskey->viewtype;
+        viewtype1=thiskey->viewtype;
+        viewtype2=1-viewtype1;
       }
       else{
         key_xyz[0]=DENORMALIZE_X((thiskey->nodeval.eye[0]+nextkey->nodeval.eye[0])/2.0);
@@ -717,10 +723,10 @@ void TOUR_CB(int var){
         key_zoom = (thiskey->nodeval.zoom + nextkey->nodeval.zoom)/2.0;
         key_bank = (thiskey->bank + nextkey->bank)/2.0;
         if(thiskey->viewtype==0&&nextkey->viewtype==0){
-          viewtype=0;
+          viewtype1=0;
         }
         else{
-          viewtype=1;
+          viewtype1=1;
           if(thiskey->viewtype==1){
             DENORMALIZE_XYZ(key_view,thiskey->nodeval.xyz_view);
             key_elev_path = thiskey->nodeval.elev_path;
@@ -730,9 +736,9 @@ void TOUR_CB(int var){
             key_elev_path = nextkey->nodeval.elev_path;
           }
         }
+        viewtype2=1-viewtype1;
       }
-      newframe=add_frame(selected_frame,key_time_in,key_xyz,key_az_path,key_elev_path,key_bank,
-      key_params,viewtype,key_zoom,key_view);
+      newframe=add_frame(selected_frame,key_time_in,key_xyz,key_az_path,key_elev_path,key_bank,key_params,viewtype1,key_zoom,key_view);
       createtourpaths();
       new_select(newframe);
       set_glui_keyframe();
@@ -923,7 +929,6 @@ extern "C" void update_tourcontrols(void){
   if(BUTTON_next_tour==NULL)return;
   if(BUTTON_prev_tour==NULL)return;
   if(PANEL_keyframe==NULL)return;
-  if(PANEL_advanced==NULL)return;
   if(SPINNER_t==NULL)return;
   if(CHECKBOX_showtourroute!=NULL)CHECKBOX_showtourroute->set_int_val(edittour);
   if(CHECKBOX_view!=NULL)CHECKBOX_view->set_int_val(viewtourfrompath);
@@ -938,12 +943,10 @@ extern "C" void update_tourcontrols(void){
   if(ntours>0&&edittour==1){
     if(SPINNER_t!=NULL)SPINNER_t->enable();
     if(PANEL_keyframe!=NULL&&PANEL_keyframe->enabled==0)PANEL_keyframe->enable();
-    if(PANEL_advanced!=NULL&&PANEL_advanced->enabled==0)PANEL_advanced->enable();
   }
   else{
     if(SPINNER_t!=NULL)SPINNER_t->disable();
     if(PANEL_keyframe!=NULL&&PANEL_keyframe->enabled==1)PANEL_keyframe->disable();
-    if(PANEL_advanced!=NULL&&PANEL_advanced->enabled==1)PANEL_advanced->disable();
   }
 
   if(CHECKBOX_tourhide!=NULL){

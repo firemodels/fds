@@ -33,7 +33,6 @@ void glui_edit_setup(int main_window);
 void glui_clip_setup(int main_window);
 void glui_wui_setup(int main_window);
 void glui_tour_setup(int main_window);
-void glui_advancedtour_setup(int main_window);
 void glui_stereo_setup(int main_window);
 void glui_trainer_setup(int main_window);
 void glui_3dsmoke_setup(int main_window);
@@ -287,7 +286,6 @@ int setup_case(int argc, char **argv){
   glui_device_setup(mainwindow_id);
   glui_tour_setup(mainwindow_id);
   glui_alert_setup(mainwindow_id);
-  glui_advancedtour_setup(mainwindow_id);
   glui_stereo_setup(mainwindow_id);
   glui_3dsmoke_setup(mainwindow_id);
 

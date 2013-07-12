@@ -766,7 +766,7 @@ extern "C" void glui_labels_setup(int main_window){
   PANEL_label2 = glui_labels->add_panel("",false);
   glui_labels->add_column_to_panel(PANEL_label2,false);
 
-  BUTTON_label_3=glui_labels->add_button_to_panel(PANEL_label2,_("Save"),SAVE_SETTINGS,Labels_CB);
+  BUTTON_label_3=glui_labels->add_button_to_panel(PANEL_label2,_("Save settings"),SAVE_SETTINGS,Labels_CB);
   glui_labels->add_column_to_panel(PANEL_label2,false);
 
   BUTTON_label_4=glui_labels->add_button_to_panel(PANEL_label2,_("Close"),LABELS_close,Labels_CB);

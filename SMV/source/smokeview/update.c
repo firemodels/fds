@@ -1864,7 +1864,6 @@ void Update_Glui_Names(void){
   update_glui_wui=1;
 }
 
-void glui_advancedtour_setup(int main_window);
 void glui_tour_setup(int main_window);
 void glui_colorbar_setup(int main_window);
 void glui_bounds_setup(int main_window);
@@ -1897,7 +1896,6 @@ void Update_Glui_Dialogs(void){
 #endif
   if(update_glui_tour==1){
     glui_tour_setup(mainwindow_id);
-    glui_advancedtour_setup(mainwindow_id);
   }
   if(update_glui_trainer==1)glui_trainer_setup(mainwindow_id);
   if(update_glui_alert==1)glui_alert_setup(mainwindow_id);
