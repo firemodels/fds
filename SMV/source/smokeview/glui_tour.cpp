@@ -42,6 +42,7 @@ GLUI_Rollout *PANEL_spline=NULL;
 
 GLUI_Panel *PANEL_keyframe=NULL;
 GLUI_Panel *PANEL_tour;
+GLUI_Panel *PANEL_tour1;
 GLUI_Panel *PANEL_tour2;
 GLUI_Panel *PANEL_tour3;
 GLUI_Panel *PANEL_close_tour=NULL;
@@ -127,12 +128,13 @@ extern "C" void glui_tour_setup(int main_window){
   if(showtour_dialog==0)glui_tour->hide();
 
 
-  PANEL_tour = glui_tour->add_panel("",GLUI_PANEL_NONE);
+  PANEL_tour = glui_tour->add_panel("Tours");
+  PANEL_tour1 = glui_tour->add_panel_to_panel(PANEL_tour,"",GLUI_PANEL_NONE);
 
   if(ntours>0){
     selectedtour_index=-1;
     selectedtour_index_old=-1;
-    LISTBOX_tour=glui_tour->add_listbox_to_panel(PANEL_tour,_("Tour:"),&selectedtour_index,TOUR_LIST,TOUR_CB);
+    LISTBOX_tour=glui_tour->add_listbox_to_panel(PANEL_tour1,"",&selectedtour_index,TOUR_LIST,TOUR_CB);
 
     LISTBOX_tour->add_item(-1,"Manual");
     LISTBOX_tour->add_item(-999,"-");
@@ -141,19 +143,21 @@ extern "C" void glui_tour_setup(int main_window){
       LISTBOX_tour->add_item(i,touri->label);
     }
     LISTBOX_tour->set_int_val(selectedtour_index);
-    glui_tour->add_column_to_panel(PANEL_tour,false);
+    glui_tour->add_column_to_panel(PANEL_tour1,false);
   }
-  BUTTON_next_tour=glui_tour->add_button_to_panel(PANEL_tour,_("Next tour"),TOUR_NEXT,TOUR_CB);
-  glui_tour->add_column_to_panel(PANEL_tour);
-  BUTTON_prev_tour=glui_tour->add_button_to_panel(PANEL_tour,_("Previous tour"),TOUR_PREVIOUS,TOUR_CB);
+  BUTTON_next_tour=glui_tour->add_button_to_panel(PANEL_tour1,_("Next"),TOUR_NEXT,TOUR_CB);
+  glui_tour->add_column_to_panel(PANEL_tour1);
+  BUTTON_prev_tour=glui_tour->add_button_to_panel(PANEL_tour1,_("Previous"),TOUR_PREVIOUS,TOUR_CB);
 
-  PANEL_tour3 = glui_tour->add_panel("",GLUI_PANEL_NONE);
-  EDIT_label=glui_tour->add_edittext_to_panel(PANEL_tour3,_("Tour label"),GLUI_EDITTEXT_TEXT,tour_label,TOUR_LABEL,TOUR_CB);
+  glui_tour->add_button_to_panel(PANEL_tour,_("New"),TOUR_INSERT,TOUR_CB);
+
+  PANEL_tour3 = glui_tour->add_panel_to_panel(PANEL_tour,"",GLUI_PANEL_NONE);
+  EDIT_label=glui_tour->add_edittext_to_panel(PANEL_tour3,"Label:",GLUI_EDITTEXT_TEXT,tour_label,TOUR_LABEL,TOUR_CB);
   glui_tour->add_column_to_panel(PANEL_tour3,false);
   glui_tour->add_button_to_panel(PANEL_tour3,_("Update"),TOUR_UPDATELABEL,TOUR_CB);
   EDIT_label->set_w(240);
 
-  PANEL_tour2 = glui_tour->add_panel("",GLUI_PANEL_NONE);
+  PANEL_tour2 = glui_tour->add_panel_to_panel(PANEL_tour,"",GLUI_PANEL_NONE);
   if(navatar_types>0){
     LISTBOX_avatar=glui_tour->add_listbox_to_panel(PANEL_tour2,_("Avatar:"),&glui_avatar_index,TOUR_AVATAR,TOUR_CB);
 
@@ -177,7 +181,6 @@ extern "C" void glui_tour_setup(int main_window){
   }
 
   PANEL_settings = glui_tour->add_panel(_("Settings"));
-  glui_tour->add_button_to_panel(PANEL_settings,_("New tour"),TOUR_INSERT,TOUR_CB);
   CHECKBOX_showtourroute=glui_tour->add_checkbox_to_panel(PANEL_settings,_("Edit tour"),&edittour,SHOWTOURROUTE,TOUR_CB);
   CHECKBOX_view=glui_tour->add_checkbox_to_panel(PANEL_settings,_("View from tour path"),&viewtourfrompath,VIEWTOURFROMPATH,TOUR_CB);
   CHECKBOX_snap=glui_tour->add_checkbox_to_panel(PANEL_settings,_("View from selected keyframe"),&keyframe_snap,VIEWSNAP,TOUR_CB);
