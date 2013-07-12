@@ -1703,6 +1703,14 @@ void keyboard(unsigned char key, int flag){
             fprintf(scriptoutstream," %i %i %i %i %i\n",
               clip_rendered_scene,render_clip_left,render_clip_right,render_clip_bottom,render_clip_top);
           }
+          if(vis_gslice_data==1||show_gslice_triangles==1||show_gslice_triangulation==1||show_gslice_normal){
+            fprintf(scriptoutstream,"GSLICEVIEW\n");
+            fprintf(scriptoutstream," %i %i %i %i\n",vis_gslice_data,show_gslice_triangles,show_gslice_triangulation,show_gslice_normal);
+            fprintf(scriptoutstream,"GSLICEPOS\n");
+            fprintf(scriptoutstream," %f %f %f\n",gslice_xyz[0],gslice_xyz[1],gslice_xyz[2]);
+            fprintf(scriptoutstream,"GSLICEORIEN\n");
+            fprintf(scriptoutstream," %f %f\n",gslice_normal_azelev[0],gslice_normal_azelev[1]);
+          }
           if(rflag==0){
             fprintf(scriptoutstream,"RENDERONCE\n");
           }

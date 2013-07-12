@@ -369,6 +369,9 @@ int get_script_keyword_index(char *keyword){
   if(match_upper(keyword,"RENDERSTART") == 1)return SCRIPT_RENDERSTART;
   if(match_upper(keyword,"SCENECLIP") == 1)return SCRIPT_SCENECLIP;
   if(match_upper(keyword,"SETTIMEVAL") == 1)return SCRIPT_SETTIMEVAL;
+  if(match_upper(keyword,"GSLICEVIEW") == 1)return SCRIPT_GSLICEVIEW;
+  if(match_upper(keyword,"GSLICEPOS") == 1)return SCRIPT_GSLICEPOS;
+  if(match_upper(keyword,"GSLICEORIEN") == 1)return SCRIPT_GSLICEORIEN;
   if(match_upper(keyword,"SETVIEWPOINT") == 1)return SCRIPT_SETVIEWPOINT;
   if(match_upper(keyword,"SHOWPLOT3DDATA") == 1)return SCRIPT_SHOWPLOT3DDATA;
   if(match_upper(keyword,"UNLOADALL") == 1)return SCRIPT_UNLOADALL;
@@ -657,6 +660,27 @@ int compile_script(char *scriptfile){
         if(scripti->fval<0.0)scripti->fval=0.0;
         break;
 
+        //    sscanf(buffer,"%i %i %i %i",&vis_gslice_data, &show_gslice_triangles, &show_gslice_triangulation, &show_gslice_normal);
+        //    sscanf(buffer,"%f %f %f",gslice_xyz,gslice_xyz+1,gslice_xyz+2);
+        //    sscanf(buffer,"%f %f",gslice_normal_azelev,gslice_normal_azelev+1);
+
+      case SCRIPT_GSLICEVIEW:
+        SETcval;
+        cleanbuffer(buffer,buffer2);
+        sscanf(buffer2,"%i %i %i %i",&scripti->ival,&scripti->ival2,&scripti->ival3,&scripti->ival4);
+        break;
+
+      case SCRIPT_GSLICEPOS:
+        SETcval;
+        cleanbuffer(buffer,buffer2);
+        sscanf(buffer2,"%f %f %f",&scripti->fval,&scripti->fval2,&scripti->fval3);
+        break;
+
+      case SCRIPT_GSLICEORIEN:
+        SETcval;
+        cleanbuffer(buffer,buffer2);
+        sscanf(buffer2,"%f %f",&scripti->fval,&scripti->fval2);
+        break;
     }
     if(scriptEOF==1)break;
     if(keyword_index!=SCRIPT_UNKNOWN)nscriptinfo++;
@@ -1325,6 +1349,37 @@ void script_settimeval(scriptdata *scripti){
   }
 }
 
+//    sscanf(buffer,"%i %i %i %i",&vis_gslice_data, &show_gslice_triangles, &show_gslice_triangulation, &show_gslice_normal);
+//    sscanf(buffer,"%f %f %f",gslice_xyz,gslice_xyz+1,gslice_xyz+2);
+//    sscanf(buffer,"%f %f",gslice_normal_azelev,gslice_normal_azelev+1);
+
+/* ------------------ script_gsliceview ------------------------ */
+
+void script_gsliceview(scriptdata *scripti){
+  vis_gslice_data = scripti->ival;
+  show_gslice_triangles = scripti->ival2;
+  show_gslice_triangulation = scripti->ival3;
+  show_gslice_normal = scripti->ival4;
+  update_gslice=1;
+}
+
+/* ------------------ script_gslicepos ------------------------ */
+
+void script_gslicepos(scriptdata *scripti){
+  gslice_xyz[0]=scripti->fval;
+  gslice_xyz[1]=scripti->fval2;
+  gslice_xyz[2]=scripti->fval3;
+  update_gslice=1;
+}
+
+/* ------------------ script_gsliceorien ------------------------ */
+
+void script_gsliceorien(scriptdata *scripti){
+  gslice_normal_azelev[0]=scripti->fval;
+  gslice_normal_azelev[1]=scripti->fval2;
+  update_gslice=1;
+}
+
 /* ------------------ settimeval ------------------------ */
 
 void settimeval(float timeval){
@@ -1552,6 +1607,15 @@ int run_script(void){
       break;
     case SCRIPT_SETVIEWPOINT:
       script_setviewpoint(scripti);
+      break;
+    case SCRIPT_GSLICEVIEW:
+      script_gsliceview(scripti);
+      break;
+    case SCRIPT_GSLICEPOS:
+      script_gslicepos(scripti);
+      break;
+    case SCRIPT_GSLICEORIEN:
+      script_gsliceorien(scripti);
       break;
     case SCRIPT_CBARFLIP:
       colorbarflip=0;
