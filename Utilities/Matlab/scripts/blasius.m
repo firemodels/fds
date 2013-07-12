@@ -138,10 +138,10 @@ H(1)=loglog(dz, err,'b*-','LineWidth',Line_Width); hold on
 H(2)=loglog(dz, 10*dz,'k--','LineWidth',Line_Width);
 H(3)=loglog(dz, 100*dz.^2,'k-','LineWidth',Line_Width);
 
-xlabel('Grid Spacing, $\delta z$ (m)','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter)
+xlabel('Grid Spacing (m)','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter)
 ylabel('RMS Error (m/s)','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter)
 axis([1e-3 1e-1 1e-3 1e-0])
-legend_handle=legend(H,'FDS','${\cal O}(\delta z)$','${\cal O}(\delta z^2)$','Location','Northwest');
+legend_handle=legend(H,'FDS','O(\delta z)','O(\delta z^2)','Location','Northwest');
 set(legend_handle,'FontSize',Label_Font_Size,'Interpreter',Font_Interpreter)
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Title_Font_Size)

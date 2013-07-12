@@ -101,10 +101,10 @@ erro = errvec((length(errvec) - 1):length(errvec));
 set(gca, 'FontName', Font_Name)
 set(gca, 'FontSize', Key_Font_Size)
 
-xlabel('Time Step, $\delta t$ (s)', 'Interpreter', Font_Interpreter,'FontSize',Label_Font_Size)
+xlabel('Time Step (s)', 'Interpreter', Font_Interpreter,'FontSize',Label_Font_Size)
 ylabel('Terminal Velocity Error','FontSize',Label_Font_Size)
-h = legend(H, 'FDS', '$\mathcal{O}(\delta t)$',...
-    '$\mathcal{O}(\delta t^2)$', 'Location', 'Southeast');
+h = legend(H, 'FDS', 'O(\delta t)',...
+    'O(\delta t^2)', 'Location', 'Southeast');
 set(h,'Interpreter', Font_Interpreter)
 
 set(gcf, 'Visible', Figure_Visibility);
@@ -147,10 +147,10 @@ erro = Linf((length(Linf) - 1):length(Linf));
 set(gca, 'FontName', Font_Name)
 set(gca, 'FontSize', Key_Font_Size)
 
-xlabel('Time Step, $\delta t$ (s)', 'Interpreter', Font_Interpreter,'FontSize',Label_Font_Size)
+xlabel('Time Step (s)', 'Interpreter', Font_Interpreter,'FontSize',Label_Font_Size)
 ylabel('Position Error','FontSize',Label_Font_Size)
-h = legend(H, 'FDS', '$\mathcal{O}(\delta t)$',...
-    '$\mathcal{O}(\delta t^2)$', 'Location', 'Southeast');
+h = legend(H, 'FDS', 'O(\delta t)',...
+    'O(\delta t^2)', 'Location', 'Southeast');
 set(h,'Interpreter', Font_Interpreter)
 
 set(gcf, 'Visible', Figure_Visibility);
@@ -192,10 +192,10 @@ print(gcf, '-dpdf', '../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/positio
 % set(gca, 'FontName', Font_Name)
 % set(gca, 'FontSize', Key_Font_Size)
 % 
-% xlabel('Time Step, $\delta t$ (s)', 'Interpreter', Font_Interpreter)
+% xlabel('Time Step (s)', 'Interpreter', Font_Interpreter)
 % ylabel('Position Error')
-% h = legend(H, 'FDS', '$\mathcal{O}(\delta t)$',...
-%     '$\mathcal{O}(\delta t^2)$', 'Location', 'Southeast');
+% h = legend(H, 'FDS', 'O(\delta t)',...
+%     'O(\delta t^2)', 'Location', 'Southeast');
 % set(h,'Interpreter', Font_Interpreter)
 % 
 % set(gcf, 'Visible', Figure_Visibility);
