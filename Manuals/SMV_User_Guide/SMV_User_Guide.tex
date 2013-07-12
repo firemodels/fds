@@ -2513,11 +2513,7 @@ locations. Keyframes may be edited using the {\em Touring}\ or
 
 \begin{figure}[\figoptions]
 \begin{center}
-\begin{tabular}{cc}
-\includegraphics[width=2.472222in]{FIGURES/figTOUR}&
-\includegraphics[width=1.722222in]{FIGURES/figADVANCEDTOUR}\\
-a) basic options&b) advanced options\\
-\end{tabular}
+\includegraphics[width=3.4861111in]{FIGURES/figTOUR}
 \end{center}
 \caption[{\em Touring}\ dialog boxes.]{The {\em Touring}\ dialog
 boxes may be used to select tours or keyframes, change the
@@ -2531,10 +2527,7 @@ through or around a Smokeview scene.  One may then view the
 scenario from the vantage point of an observer moving along one of
 these paths.    A tour may also be used to observe time dependent
 portions of the scenario such as blockage/vent openings and
-closings.  The default view direction is towards the direction of
-motion.  The path tension and start and stop times may be changed
-with the {\em Advanced Settings}\ dialog box illustrated in Figure
-\ref{figTOUR}b.
+closings.
 
 When Smokeview starts up it creates a tour, called the {\em circle
 tour}\ which surrounds the scene.  The {\em circle}\ tour and a
@@ -2543,13 +2536,15 @@ The circle tour is similar to the {\em Tour}\ menu option found in
 earlier versions of Smokeview. The user may modify the {\em
 circle}\ tour or define their own tours by using the {\em Tour}\
 dialog box illustrated in Figure \ref{figTOUR}. The user places
-several points or keyframes in or around the scene. Smokeview
+several points or keyframes in or around the scene and may also set the view direction.
+The default view direction is towards the direction of
+motion.  Smokeview
 creates a smooth path going through these points.
 
 \section{Tour Settings}
 An existing tour may be modified by selecting it from the {\bf
-Select Tour:}\ listbox found in the {\em Edit Tour}\ dialog box
-illustrated in Figure \ref{figTOUR}a.  A new tour may be created
+Tour:}\ listbox found in the {\em Edit Tour}\ dialog box
+illustrated in Figure \ref{figTOUR}.  A new tour may also be created
 by clicking the \frameit{New Tour}\ button. A newly created tour
 goes through the middle of the Smokeview scene starting at the
 front left and finishing at the back right. A tour may also be
@@ -2561,8 +2556,7 @@ assigned to each keyframe.   If the {\bf Constant Speed}\ checkbox
 is checked then these times are determined given the distance
 between keyframes and the velocity required to traverse the entire
 path in the specified time as given by the {\em start time}\ and
-{\em stop time}\ entries found in the {\em Advanced Settings}\ dialog
-box illustrated in Figure \ref{figTOUR}b.
+{\em stop time}\ entries.
 
 
 Three different methods for viewing the scene may be selected.  To
@@ -2602,12 +2596,6 @@ button. There is no \frameit{Delete Tour}\ button. A tour may be
 deleted by either deleting all of its keyframes or by deleting its
 entry in the casename.ini file.
 
-\section{Advanced Settings}
-The {\em Advanced Settings}\ dialog box is only necessary if one
-wishes to override Smokeview's choice of tension settings.  This
-dialog box is opened by clicking the \frameit{Advanced Settings}\
-button contained in the {\em Edit Tours} dialog box.
-
 A view direction may be defined at each keyframe by either setting
 direction angles relative to the path (an azimuth and an elevation
 angle) or by setting a direction relative to the scene geometry (a
@@ -2627,8 +2615,7 @@ tour locator (vertical and horizontal red lines) near the
 keyframe.  The horizontal red line always points in the view
 direction.
 
-Spline tension settings may also be changed using the {\em
-Advanced Settings}\ dialog box, though normally this is not
+Spline tension settings may also be changed, though normally this is not
 necessary except when one wishes abrupt rather than smooth path
 changes. Kochanek-Bartels~\cite{Moller:02} splines (piecewise cubic
 Hermite polynomials) are used to represent the tour paths.
