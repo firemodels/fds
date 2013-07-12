@@ -238,8 +238,8 @@ Plot_X = 1.35*(Paper_Height-Plot_Height)/2;
 Plot_Y = 1.25*(Paper_Height-Plot_Height)/2;
 set(gca,'Position',[Plot_X,Plot_Y,Plot_Height,Plot_Height])
 set(hf(3),'DefaultLineLineWidth',Line_Width)
-xlabel('Exp. Attenuation (\%)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
-ylabel('FDS Attenuation (\%)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
+xlabel('Exp. Attenuation (%)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
+ylabel('FDS Attenuation (%)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
 hl(n) = legend(ha,'BRE (Nozzle A)','BRE (Nozzle B)','BRE (Nozzle D)','LEMTA','Location','SouthEast');
 
 % print to pdf

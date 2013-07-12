@@ -178,10 +178,10 @@ H(3)=loglog(h,e_FL4,'g^-','LineWidth',Line_Width); hold on
 H(4)=loglog(h,.1*h,'k--','LineWidth',Line_Width);
 H(5)=loglog(h,.1*h.^2,'k-','LineWidth',Line_Width);
 
-xlabel('Grid Spacing, $\delta x$ (m)','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter,'FontName',Font_Name)
-ylabel('L2 Error (kg/m$^3$)','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter,'FontName',Font_Name)
+xlabel('Grid Spacing (m)','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter,'FontName',Font_Name)
+ylabel('L2 Error (kg/m^3)','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter,'FontName',Font_Name)
 axis([1e-2 1e0 1e-6 1e-1])
-legend_handle=legend(H(1:5),'FDS Central','FDS Superbee','FDS CHARM','${\cal O}(\delta x)$','${\cal O}(\delta x^2)$','Location','NorthWest');
+legend_handle=legend(H(1:5),'FDS Central','FDS Superbee','FDS CHARM','O(\delta x)','O(\delta x^2)','Location','NorthWest');
 set(legend_handle,'FontSize',Title_Font_Size,'Interpreter',Font_Interpreter)
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Title_Font_Size)
