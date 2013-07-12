@@ -64,6 +64,9 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
   if(update_tourlist==1){
     Update_Tourlist();
   }
+  if(update_gslice==1){
+    update_gslice_parms();
+  }
   if(camera_current->dirty==1){
     update_camera(camera_current);
   }

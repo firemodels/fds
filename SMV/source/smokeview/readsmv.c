@@ -8390,6 +8390,7 @@ int readini2(char *inifile, int localfile){
         sscanf(buffer,"%f %f %f",gslice_xyz,gslice_xyz+1,gslice_xyz+2);
         fgets(buffer,255,stream);
         sscanf(buffer,"%f %f",gslice_normal_azelev,gslice_normal_azelev+1);
+        update_gslice=1;
         continue;
      }
      if(match(buffer,"GRIDPARMS")==1){
@@ -11292,9 +11293,6 @@ void writeini(int flag){
   if(flag==LOCAL_INI){
     fprintf(fileout,"AVATAREVAC\n");
     fprintf(fileout," %i\n",iavatar_evac);
-  }
-  
-  if(flag==LOCAL_INI){
     fprintf(fileout,"GRIDPARMS\n");
     fprintf(fileout," %i %i %i\n",visx_all, visy_all, visz_all);
     fprintf(fileout," %i %i %i\n",iplotx_all, iploty_all, iplotz_all);

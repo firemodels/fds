@@ -171,6 +171,7 @@ extern "C" void update_nrender_rows(void){
 /* ------------------ update_gslice_parms ------------------------ */
 
 extern "C" void update_gslice_parms(void){
+  update_gslice=0;
   Gslice_CB(GSLICE_NORMAL);
   Gslice_CB(GSLICE_TRANSLATE);
   SPINNER_gslice_center_x->set_float_val(gslice_xyz[0]);

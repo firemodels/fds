@@ -30,6 +30,7 @@ SVEXTERN int SVDECL(show_geomtest,0),SVDECL(show_intersection,1);
 #endif
 
 
+SVEXTERN int SVDECL(update_gslice,0);
 SVEXTERN int SVDECL(wc_flag,0);
 SVEXTERN circdata cvent_circ, object_circ;
 #ifdef pp_BETA
