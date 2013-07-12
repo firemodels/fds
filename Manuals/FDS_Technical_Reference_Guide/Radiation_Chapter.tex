@@ -571,101 +571,48 @@ The connection matrix associates one incoming direction $l'$ to each mirrored di
 \section{Absorption and Scattering of Thermal Radiation by Droplets/Particles}
 \label{droplet-radiation}
 
-The attenuation of thermal radiation by liquid droplets and particles is an important consideration, especially for water mist
-systems~\cite{Ravigururajan:1}.  Droplets and particles attenuate thermal radiation through a combination of scattering and
-absorption~\cite{Tuntomo:1}.  The radiation-spray interaction must therefore be solved for both the accurate prediction of the radiation
-field and for the particle energy balance.
-
-If the gas phase absorption and emission in Eq.~(\ref{RTEbasic}) are temporarily neglected for simplicity, the radiative transport
-equation becomes
+The attenuation of thermal radiation by liquid droplets and particles is an important consideration, especially for water mist systems~\cite{Ravigururajan:1}.  Droplets and particles attenuate thermal radiation through a combination of scattering and absorption~\cite{Tuntomo:1}.  The radiation-spray interaction must therefore be solved for both the accurate prediction of the radiation field and for the particle energy balance. If the gas phase absorption and emission in Eq.~(\ref{RTEbasic}) are temporarily neglected for simplicity, the radiative transport equation becomes
 \be
-\bs \cdot \nabla I_{\la}(\bx,\bs) = -\left[\kappa_{\rm p}(\bx,\la) + \sigma_{\rm p}(\bx,\la)\right]
+\bs \cdot \nabla I_{\la}(\bx,\bs) = -\Big[\kappa_{\rm p}(\bx,\la) + \sigma_{\rm p}(\bx,\la)\Big]
 I_{\la}(\bx,\bs) +\kappa_{\rm p}(\bx,\la) \; I_{{\rm b,p}}(\bx,\la) +
 \frac{\sigma_{\rm p}(\bx,\la)}{4\pi}
-\int_{4\pi}\Phi(\bs',\bs) \; I_{\la}(\bx,\bs') \; \d\bs'
+\int_{4\pi}\Phi(\bs,\bs') \; I_{\la}(\bx,\bs') \, \d\bs'
 \label{RTEspray}
 \ee
-where $\kappa_{\rm p}$ is the particle absorption coefficient, $\sigma_{\rm p}$ is the
-particle scattering coefficient and $I_{{\rm b,p}}$ is the emission
-term of the particles. $\Phi(\bs',\bs)$ is a scattering phase function
-that gives the scattered intensity fraction from direction $\bs'$ to $\bs$.\\
+where $\kappa_{\rm p}$ is the particle absorption coefficient, $\sigma_{\rm p}$ is the particle scattering coefficient and $I_{{\rm b,p}}$ is the emission term of the particles. $\Phi(\bs',\bs)$ is a scattering phase function that gives the scattered intensity fraction from direction $\bs'$ to $\bs$.
 
-\subsection{Absorption and scattering coefficients}
+\subsection{Absorption and Scattering Coefficients}
 
-The capability of an individual droplet or particle to absorb and scatter radiation depends on its cross sectional area and radiative material
-properties. For simplicity, we next assume that the particles are spherical in shape, in which case the cross sectional area of a particle
-is $\pi r^2$, where $r$ is the particle radius. If the local number density distribution of droplets or particles at location $\bx$ is
-denoted by $n(r(\bx))$, the local absorption and scattering coefficients within a spray/particle cloud can be calculated
-from
+Radiation absorption and scattering by particles depends on their cross sectional areas and radiative material properties. For simplicity, we assume that the particles are spherical in shape, in which case the cross sectional area of a particle is $\pi r^2$, where $r$ is the particle radius. If the local number density distribution of particles at location $\bx$ is denoted by $n(r(\bx))$, the local absorption and scattering coefficients within a spray/particle cloud can be calculated from:
 \begin{align}
-\kappa_{\rm p}(\bx,\la) &= \int_0^\infty n(r(\bx)) \; Q_{\rm a}(r,\la) \; \pi r^2 \; \d r \\ %N(\bx)\int_0^\infty f(r,d_m(\bx)) \; C_{\rm a}(r,\la) \; dr \\
-\sigma_{\rm p}(\bx,\la) &= \int_0^\infty n(r(\bx)) \; Q_{\rm s}(r,\la) \; \pi r^2 \; \d r    %N(\bx)\int_0^\infty f(r,d_m(\bx)) \; C_{\rm s}(r,\la) \; dr
+\kappa_{\rm p}(\bx,\la) &= \int_0^\infty n(r(\bx)) \; Q_{\rm a}(r,\la) \; \pi r^2 \; \d r \\[0.1in] %N(\bx)\int_0^\infty f(r,d_m(\bx)) \; C_{\rm a}(r,\la) \; dr \\
+\sigma_{\rm p}(\bx,\la) &= \int_0^\infty n(r(\bx)) \; Q_{\rm s}(r,\la) \; \pi r^2 \; \d r           %N(\bx)\int_0^\infty f(r,d_m(\bx)) \; C_{\rm s}(r,\la) \; dr
 \end{align}
-where $Q_{\rm a}$ and $Q_{\rm s}$ are the absorption and scattering efficiencies, respectively.
-For the computation of the spray/particle cloud radiative properties,
-spherical particles are assumed and the radiative properties of the individual particles
-are computed using Mie theory.
+where $Q_{\rm a}$ and $Q_{\rm s}$ are the absorption and scattering efficiencies, respectively. For the computation of the spray/particle cloud radiative properties, spherical particles are assumed and the radiative properties of the individual particles are computed using Mie theory.
 
-Based on \cite{Collin} and \cite{Maruyama}, the real particle size distribution inside a grid cell is modeled as a mono-disperse suspension
-whose diameter corresponds to the Sauter mean ($d_{32}$) diameter of the poly-disperse spray.
-This assumption leads to a simplified expression of the radiative coefficients
+Based on Refs.~\cite{Collin} and \cite{Maruyama}, the real particle size distribution inside a grid cell is modeled as a mono-disperse suspension whose diameter corresponds to the Sauter mean ($d_{32}$) diameter of the poly-disperse spray. This assumption leads to a simplified expression of the radiative coefficients
 \begin{align}
-\kappa_{\rm p}(\bx,\la) &= A_{\rm p}(\bx) \; Q_{\rm a}(r_{32},\la) \\
+\kappa_{\rm p}(\bx,\la) &= A_{\rm p}(\bx) \; Q_{\rm a}(r_{32},\la) \\[0.1in]
 \sigma_{\rm p}(\bx,\la) &= A_{\rm p}(\bx) \; Q_{\rm s}(r_{32},\la)
 \end{align}
-These expressions are functions of the total cross sectional area per unit volume of the droplets $A_{\rm p}$. $A_{\rm p}$ is computed simply by summing the cross sectional areas of all the droplets within a cell and divided by the cell volume. For practical reasons, a relaxation factor of 0.5 is
-used to smooth slightly the temporal variation of $A_{\rm p}$.
+These expressions are functions of the total cross sectional area per unit volume of the droplets, $A_{\rm p}$, which is computed simply by summing the cross sectional areas of all the droplets within a cell and dividing by the cell volume. For practical reasons, a relaxation factor of 0.5 is used to smooth slightly the temporal variation of $A_{\rm p}$.
 
-\subsection{Approximating the in-scattering integral}
+\subsection{Approximating the In-Scattering Integral}
 
-An accurate computation of the in-scattering integral on the right hand side of Eq.~(\ref{RTEspray}) would be extremely time
-consuming and require a lot of memory as the individual intensitities in each location would have to be maintained in the computer memory.
-The in-scattering interal is here approximated by dividing the total $4\pi$ solid angle to a ``forward angle'' $\delta\Omega^l$ and ``ambient angle''
-$\delta\Omega^*=4\pi - \delta\Omega^l$.  For compatibility with the FVM solver, $\delta\Omega^l$ is set equal to the control angle given
-by the angular discretization.  However, it is assumed to be symmetric around the center of the control angle.  Within $\delta\Omega^l$ the
-intensity is $I_{\la}(\bx,\bs)$ and elsewhere it is approximated as
-\be
-\label{Ustar}
-U^*(\bx,\la) = \frac{U(\bx,\la) - \delta\Omega^l \, I_{\la}(\bx,\bs)}{\delta\Omega^*}
-\ee
-where $U(\bx)$ is the total intensity integrated over the unit sphere. The in-scattering
-integral can now be approximated as
-\begin{align}
-\notag \frac{\sigma_{\rm p}(\bx,\la)}{4\pi}\int_{4\pi}\Phi(\bs,\bs') \; I_{\la}(\bx,\bs')
-  \; \d\Omega'
-  &\approx
-\sigma_{\rm p}(\bx,\la) \, \left( \chi_{\rm f} \, I_{\la}(\bx,\bs) ~+~\frac{1}{\delta\Omega^{*}}~\left(1-\chi_{\rm f}\right)~
-\int\limits_{\delta\Omega^{*}} I_{\la}(\bx,\bs') \; \textrm{d} \Omega' \right)\\
-  &=
-\sigma_{\rm p}(\bx,\la) \, \left( \chi_{\rm f} \; I_{\la}(\bx,\bs) ~+~
-(1-\chi_{\rm f}) \, U^*(\bx,\la) \right)
-\label{SprayRTE_RHS}
-\end{align}
-where $\chi_{\rm f} = \chi_{\rm f}(r,\la)=\chi_{\rm f}(\bx,\la)$ is a fraction of the total intensity originally within the solid angle $\delta\Omega^l$ that is scattered
-into the same angle $\delta\Omega^l$. The calculation of $\chi_{\rm f}$ is discussed in section~\ref{forward_fraction}.
-
-An effective scattering coefficient is next defined
-\be
-\label{effective_sigma_d}
-\overline{\sigma}_{\rm p}(\bx,\la) = \frac{4\pi}{4\pi-\delta\Omega^l} \left(1-\chi_{\rm f}(\bx,\la)\right) \; \sigma_{\rm p}(\bx,\la)
-\ee
-Substituting definitions \ref{Ustar} and \ref{effective_sigma_d} and approximation \ref{SprayRTE_RHS} to \ref{RTEspray} gives a simplified form of
-the RTE in droplet/particle ladden medium
+An accurate computation of the in-scattering integral on the right hand side of Eq.~(\ref{RTEspray}) would be extremely time consuming and require a prohibitive amount of memory because the individual intensities in each location would have to be stored. Instead, a simplified form of Eq.~(\ref{RTEspray}) can be derived:
 \be
 \bs \cdot \nabla I_{\la}(\bx,\bs) =
 -\left[\kappa_{\rm p}(\bx,\la) + \overline{\sigma}_{\rm p}(\bx,\la)\right]
 I_{\la}(\bx,\bs)
 +\kappa_{\rm p}(\bx,\la) \; I_{\rm b,p}(\bx,\la)
-+\frac{\overline{\sigma}_{\rm p}(\bx,\la)}{4\pi}U(\bx,\la)
++\frac{\overline{\sigma}_{\rm p}(\bx,\la)}{4\pi}U(\bx,\la) \label{simple_particle_RTE}
 \ee
-This equation can be integrated over the spectrum to get the band specific RTE's. The procedure is exactly the same as that used for the
-gas phase RTE. After the band integrations, the spray RTE for band $n$
-becomes
+where $U(\bx)$ is the total intensity integrated over the unit sphere and $\overline{\sigma}_{\rm p}$ is an effective scattering coefficient. The derivation of Eq.~(\ref{simple_particle_RTE}) is given in Appendix~\ref{radiation_derivations}. This simplified equation can be integrated over the spectrum to get the band specific RTE's. The procedure is exactly the same as that used for the gas phase RTE. After the band integrations, the spray RTE for band $n$ becomes:
 \be
 \bs \cdot \nabla I_{n}(\bx,\bs) =
 -\left[\kappa_{{\rm p},n}(\bx) + \overline{\sigma}_{{\rm p},n}(\bx)\right] I_n(\bx,\bs)
 +\kappa_{{\rm p},n}(\bx) \; I_{{\rm b,p},n}(\bx)
-+\frac{\overline{\sigma}_{\rm p}(\bx,\la)}{4\pi}U_n(\bx)
++\frac{\overline{\sigma}_{{\rm p},n}(\bx)}{4\pi}U_n(\bx)
 \ee
 where the source function is based on the average particle temperature within a cell.
 
@@ -673,8 +620,12 @@ where the source function is based on the average particle temperature within a 
 \subsection{Forward Fraction of Scattering}
 \label{forward_fraction}
 
-The computation of $\chi_{\rm f}$ for a similar but simpler situation has been derived in Ref.~\cite{Yang:3}. It can be shown that here
-$\chi_{\rm f}$ becomes
+The effective scattering coefficient in Eq.~(\ref{simple_particle_RTE}) is defined:
+\be
+\label{effective_sigma_d2}
+\overline{\sigma}_{\rm p}(\bx,\la) = \frac{4\pi}{4\pi-\delta\Omega^l} \Big(1-\chi_{\rm f}(\bx,\la)\Big) \; \sigma_{\rm p}(\bx,\la)
+\ee
+where $\chi_{\rm f}$ is the fraction of the total intensity originally within the solid angle $\delta\Omega^l$ that is scattered into the same angle, $\delta\Omega^l$. The computation of $\chi_{\rm f}$ has been derived in Ref.~\cite{Yang:3}. It can be shown that here $\chi_{\rm f}$ becomes:
 \be
 \chi_{\rm f}(r,\la) = \frac{1}{\delta\Omega^l}
 \int_{\mu^l}^1\int_{\mu^l}^1\int_{\mu_{\rm p,0}}^{\mu_{\rm p,\pi}}
@@ -682,15 +633,12 @@ $\chi_{\rm f}$ becomes
 {\left[(1-\mu^2)(1-\mu'^2)-(\mu_{\rm p}-\mu\mu')^2\right]^{1/2}}
 \; \d\mu_{\rm p} \, \d\mu \, \d\mu'
 \ee
-where $\mu_{\rm p}$ is a cosine of the scattering angle $\theta_{\rm p}$ and
-$P_0(\theta_{\rm p},\la)$ is a single droplet scattering phase function
+where $\mu_{\rm p}$ is a cosine of the scattering angle $\theta_{\rm p}$ and $P_0(\theta_{\rm p},\la)$ is a single droplet scattering phase function
 \be
 P_0(\theta_{\rm p},\la) =
 \frac{\la^2\left(|S_1(\theta_{\rm p})|^2+|S_2(\theta_{\rm p})|^2\right)}{2 \, Q_{\rm s}(r,\la) \pi r^2}
 \ee
-$S_1(\theta_{\rm p})$ and $S_2(\theta_{\rm p})$ are the scattering amplitudes, given by
-Mie-theory. The integration limit $\mu^l$ is a cosine of the polar angle
-defining the boundary of the symmetric control angle $\delta\Omega^l$
+$S_1(\theta_{\rm p})$ and $S_2(\theta_{\rm p})$ are the scattering amplitudes, given by Mie-theory. The integration limit, $\mu^l$, is a cosine of the polar angle defining the boundary of the symmetric control angle, $\delta\Omega^l$
 \be
 \mu^l = \cos(\theta^l) = 1 - \frac{2}{N_\Omega}
 \ee
