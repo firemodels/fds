@@ -43,11 +43,23 @@
 // x[0] x[1] x[2]
 // y[0] y[1] y[2]
 
+#ifndef ROTATE
+#define ROTATE(xfrom,xto,az)\
+  xto[0] = xfrom[0]*cos(az) - xfrom[1]*sin(az);\
+  xto[1] = xfrom[0]*sin(az) + xfrom[1]*cos(az)
+#endif
 #ifndef CROSS
 #define CROSS(x,y,xy) \
   (xy)[0] = x[1]*y[2] - y[1]*x[2];\
   (xy)[1] = x[2]*y[0] - y[2]*x[0];\
   (xy)[2] = x[0]*y[1] - y[0]*x[1]
+#endif
+
+#ifndef VECADD3
+#define VECADD3(x,y,ypx)\
+  (ypx)[0]=(y)[0]+(x)[0];\
+  (ypx)[1]=(y)[1]+(x)[1];\
+  (ypx)[2]=(y)[2]+(x)[2]
 #endif
 
 #ifndef VECDIFF3

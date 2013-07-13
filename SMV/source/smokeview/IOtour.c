@@ -823,36 +823,29 @@ void createtourpaths(void){
 
       if(kf1->viewtype==0||kf2->viewtype==0){
         float az;
-        float dx, dy, denom, dx2, dy2;
-        float dz, dist;
+        float dxyz[3], denom, dxyz2[3];
+        float dist;
 
-        dx = view_local[0];
-        dy = view_local[1];
-        denom = 10.0*sqrt(dx*dx+dy*dy);
+        dxyz[0] = view_local[0];
+        dxyz[1] = view_local[1];
+        denom = 10.0*NORM2(dxyz);
         if(denom==0.0)denom=1.0;
-        dx /= denom;
-        dy /= denom;
+        dxyz[0] /= denom;
+        dxyz[1] /= denom;
         az = pj->az_path*DEG2RAD;
-        dx2 = dx*cos(az) - dy*sin(az);
-        dy2 = dx*sin(az) + dy*cos(az);
-        dz = tan(pj->elev_path*DEG2RAD)/10.0;
-        tour_view[0]=eye[0]+dx2;
-        tour_view[1]=eye[1]+dy2;
-        tour_view[2]=eye[2]+dz;
-      }
+        ROTATE(dxyz,dxyz2,az);
+        dxyz2[2] = tan(pj->elev_path*DEG2RAD)/10.0;
+        VECADD3(eye,dxyz2,tour_view);
+      } 
       else{
-        float dx, dy, dz, denom;
+        float dxyz[3], denom;
 
-        dx = xyz_view[0]-eye[0];
-        dy = xyz_view[1]-eye[1];
-        dz = xyz_view[2]-eye[2];
-        denom = 10.0*sqrt(dx*dx+dy*dy+dz*dz);
-        dx /= denom;
-        dy /= denom;
-        dz /= denom;
-        tour_view[0]=eye[0]+dx;
-        tour_view[1]=eye[1]+dy;
-        tour_view[2]=eye[2]+dz;
+        VECDIFF3(eye,xyz_view,dxyz);
+        denom = 10.0*NORM3(dxyz);
+        dxyz[0] /= denom;
+        dxyz[1] /= denom;
+        dxyz[2] /= denom;
+        VECADD3(eye,dxyz,tour_view);
       }
       if(iframe_old!=iframe_new){
         iframe_old=iframe_new;
