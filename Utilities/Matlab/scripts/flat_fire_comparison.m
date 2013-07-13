@@ -49,8 +49,8 @@ set(gca, 'Position', [Plot_X, Plot_Y, Plot_Width, Plot_Height])
 set(gcf, 'DefaultLineLineWidth', Line_Width)
 set(gca, 'FontName', Font_Name)
 set(gca, 'FontSize', Label_Font_Size)
-xlabel('$x$-position (m)', 'Interpreter', Font_Interpreter,'FontSize',Label_Font_Size)
-ylabel('$z$-position (m)', 'Interpreter', Font_Interpreter,'FontSize',Label_Font_Size)
+xlabel('{\it x}-position (m)', 'Interpreter', Font_Interpreter,'FontSize',Label_Font_Size)
+ylabel('{\it z}-position (m)', 'Interpreter', Font_Interpreter,'FontSize',Label_Font_Size)
 h = legend(H, 'Flat fire', 'FDS', 'Location', 'Southwest');
 set(h,'Interpreter', Font_Interpreter)
 set(gcf, 'Visible', Figure_Visibility);
@@ -82,7 +82,7 @@ set(gcf, 'DefaultLineLineWidth', Line_Width)
 set(gca, 'FontName', Font_Name)
 set(gca, 'FontSize', Label_Font_Size)
 xlabel('Time (s)', 'Interpreter', Font_Interpreter,'FontSize',Label_Font_Size)
-ylabel('$x$-position (m)', 'Interpreter', Font_Interpreter,'FontSize',Label_Font_Size)
+ylabel('{\it x}-position (m)', 'Interpreter', Font_Interpreter,'FontSize',Label_Font_Size)
 h = legend(H, 'Flat fire', 'FDS', 'Location', 'Southeast');
 set(h,'Interpreter', Font_Interpreter)
 set(gcf, 'Visible', Figure_Visibility);
@@ -114,7 +114,7 @@ set(gcf, 'DefaultLineLineWidth', Line_Width)
 set(gca, 'FontName', Font_Name)
 set(gca, 'FontSize', Label_Font_Size)
 xlabel('Time (s)', 'Interpreter', Font_Interpreter,'FontSize',Label_Font_Size)
-ylabel('$z$-position (m)', 'Interpreter', Font_Interpreter,'FontSize',Label_Font_Size)
+ylabel('{\it z}-position (m)', 'Interpreter', Font_Interpreter,'FontSize',Label_Font_Size)
 h = legend(H, 'Flat fire', 'FDS', 'Location', 'Southwest');
 set(h,'Interpreter', Font_Interpreter)
 set(gcf, 'Visible', Figure_Visibility);
@@ -146,7 +146,7 @@ set(gcf, 'DefaultLineLineWidth', Line_Width)
 set(gca, 'FontName', Font_Name)
 set(gca, 'FontSize', Label_Font_Size)
 xlabel('Time (s)', 'Interpreter', Font_Interpreter,'FontSize',Label_Font_Size)
-ylabel('$u$-velocity (m/s)', 'Interpreter', Font_Interpreter,'FontSize',Label_Font_Size)
+ylabel('{\it u}-velocity (m/s)', 'Interpreter', Font_Interpreter,'FontSize',Label_Font_Size)
 h = legend(H, 'Flat fire', 'FDS', 'Location', 'Northeast');
 set(h,'Interpreter', Font_Interpreter)
 set(gcf, 'Visible', Figure_Visibility);
@@ -178,7 +178,7 @@ set(gcf, 'DefaultLineLineWidth', Line_Width)
 set(gca, 'FontName', Font_Name)
 set(gca, 'FontSize', Label_Font_Size)
 xlabel('Time (s)', 'Interpreter', Font_Interpreter,'FontSize',Label_Font_Size)
-ylabel('$w$-velocity (m/s)', 'Interpreter', Font_Interpreter,'FontSize',Label_Font_Size)
+ylabel('{\it w}-velocity (m/s)', 'Interpreter', Font_Interpreter,'FontSize',Label_Font_Size)
 h = legend(H, 'Flat fire', 'FDS', 'Location', 'Southwest');
 set(h,'Interpreter', Font_Interpreter)
 set(gcf, 'Visible', Figure_Visibility);

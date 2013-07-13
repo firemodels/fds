@@ -40,8 +40,8 @@ set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Title_Font_Size)
 set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
 
-xlabel('$y^+$','Interpreter',Font_Interpreter,'Fontname',Font_Name)
-ylabel('$u^+$','Interpreter',Font_Interpreter,'Fontname',Font_Name)
+xlabel('{\it y}^+','Interpreter',Font_Interpreter,'Fontname',Font_Name)
+ylabel('{\it u}^+','Interpreter',Font_Interpreter,'Fontname',Font_Name)
 
 
 figure(2)
@@ -57,8 +57,8 @@ set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Title_Font_Size)
 set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
 
-xlabel('$y^+$','Interpreter',Font_Interpreter,'Fontname',Font_Name)
-ylabel('$T^+$','Interpreter',Font_Interpreter,'Fontname',Font_Name)
+xlabel('{\it y}^+','Interpreter',Font_Interpreter,'Fontname',Font_Name)
+ylabel('{\it T}^+','Interpreter',Font_Interpreter,'Fontname',Font_Name)
 
 text(225,26,'Pr=2.0','Interpreter',Font_Interpreter,'Fontname',Font_Name,'FontSize',Label_Font_Size)
 text(225,15,'Pr=0.71','Interpreter',Font_Interpreter,'Fontname',Font_Name,'FontSize',Label_Font_Size)
@@ -129,7 +129,7 @@ end
 
 figure(1)
 
-h = legend(hfig1,'FDS','DNS Re$_\tau=180$','Location','Northwest');
+h = legend(hfig1,'FDS','DNS Re_\tau=180','Location','Northwest');
 set(h,'Interpreter',Font_Interpreter)
 
 % add SVN if file is available
@@ -154,7 +154,7 @@ print(gcf,'-dpdf','../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/heated_ch
 
 figure(2)
 
-h = legend(hfig2,'FDS','DNS Re$_\tau=180$','Location','Northwest');
+h = legend(hfig2,'FDS','DNS Re_\tau=180','Location','Northwest');
 set(h,'Interpreter',Font_Interpreter)
 
 % add SVN if file is available

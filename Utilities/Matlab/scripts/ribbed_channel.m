@@ -16,7 +16,7 @@ h = 0.1;
 C_nu = 0.1;
 dx = 1./nx;
 fds_marker = {'r+-' 'c^-' 'g>-' 'k-'};
-fds_key = {'FDS $h/\delta x = 2$' 'FDS $h/\delta x = 4$' 'FDS $h/\delta x = 8$' 'FDS $h/\delta x = 16$'};
+fds_key = {'FDS {\it h/\deltax=2}' 'FDS {\it h/\deltax=4}' 'FDS {\it h/\deltax=8}' 'FDS {\it h/\deltax=16}'};
 
 if ~exist([datadir,'ribbed_channel_data.csv'])
     display(['Error: File ' [datadir,'ribbed_channel_data.csv'] ' does not exist. Skipping case.'])
@@ -60,7 +60,7 @@ for i=1:lnx
     H(1+i)=plot(x/h,u_fds,fds_marker{i});
 end
 
-xlabel('$x/h$','Interpreter',Font_Interpreter,'Fontsize',Label_Font_Size,'FontName',Font_Name)
+xlabel('\it x/h','Interpreter',Font_Interpreter,'Fontsize',Label_Font_Size,'FontName',Font_Name)
 ylabel('Streamwise Velocity (m/s)','Interpreter',Font_Interpreter,'Fontsize',Label_Font_Size,'FontName',Font_Name)
 
 axis([0 10 -0.8 0.8])
@@ -120,7 +120,7 @@ for i=1:lnx
     H(1+i)=plot(x/h,urms_fds,fds_marker{i});
 end
 
-xlabel('$x/h$','Interpreter',Font_Interpreter,'Fontsize',Label_Font_Size,'FontName',Font_Name)
+xlabel('\it x/h','Interpreter',Font_Interpreter,'Fontsize',Label_Font_Size,'FontName',Font_Name)
 yh = ylabel('Streamwise RMS Velocity (m/s)','Interpreter',Font_Interpreter,'Fontsize',Label_Font_Size,'FontName',Font_Name);
 set(yh,'Position',[-0.8194-.2    0.2963-.025    1.0001])
 
@@ -175,7 +175,7 @@ for i=1:lnx
     H(1+i)=plot(u_fds,y/h,fds_marker{i});
 end
 
-ylabel('$z/h$','Interpreter',Font_Interpreter,'Fontsize',Label_Font_Size)
+ylabel('\it z/h','Interpreter',Font_Interpreter,'Fontsize',Label_Font_Size)
 xlabel('Streamwise Velocity (m/s)','Interpreter',Font_Interpreter,'Fontsize',Label_Font_Size)
 
 axis([0 2 1 3])
@@ -230,7 +230,7 @@ for i=1:lnx
     H(1+i)=plot(urms_fds,y/h,fds_marker{i});
 end
 
-ylabel('$z/h$','Interpreter',Font_Interpreter,'Fontsize',Label_Font_Size)
+ylabel('\it z/h','Interpreter',Font_Interpreter,'Fontsize',Label_Font_Size)
 xlabel('Streamwise RMS Velocity (m/s)','Interpreter',Font_Interpreter,'Fontsize',Label_Font_Size)
 
 axis([0 1 1 3])
