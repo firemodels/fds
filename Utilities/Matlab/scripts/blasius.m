@@ -69,10 +69,10 @@ set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Title_Font_Size)
 set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
 
-xlabel('$u$ (m/s)','Interpreter',Font_Interpreter,'FontName',Font_Name)
-ylabel('$z$ (m)','Interpreter',Font_Interpreter,'FontName',Font_Name)
+xlabel('{\it u} (m/s)','Interpreter',Font_Interpreter,'FontName',Font_Name)
+ylabel('{\it z} (m)','Interpreter',Font_Interpreter,'FontName',Font_Name)
 
-h = legend(H,'Blasius','$N_z=16$','$N_z=32$','$N_z=64$','Location','northwest');
+h = legend(H,'Blasius','{\it N_z}=16','{\it N_z}=32','{\it N_z}=64','Location','northwest');
 set(h,'FontSize',Title_Font_Size,'Interpreter',Font_Interpreter)
 
 % add SVN if file is available
@@ -138,10 +138,10 @@ H(1)=loglog(dz, err,'b*-','LineWidth',Line_Width); hold on
 H(2)=loglog(dz, 10*dz,'k--','LineWidth',Line_Width);
 H(3)=loglog(dz, 100*dz.^2,'k-','LineWidth',Line_Width);
 
-xlabel('Grid Spacing (m)','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter)
+xlabel('Grid Spacing, {\it \deltaz} (m)','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter)
 ylabel('RMS Error (m/s)','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter)
 axis([1e-3 1e-1 1e-3 1e-0])
-legend_handle=legend(H,'FDS','O(\delta z)','O(\delta z^2)','Location','Northwest');
+legend_handle=legend(H,'FDS','O({\it \deltaz})','O({\it \deltaz^2})','Location','Northwest');
 set(legend_handle,'FontSize',Label_Font_Size,'Interpreter',Font_Interpreter)
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Title_Font_Size)
