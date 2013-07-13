@@ -103,8 +103,8 @@ set(gca, 'FontSize', Key_Font_Size)
 
 xlabel('Time Step (s)', 'Interpreter', Font_Interpreter,'FontSize',Label_Font_Size)
 ylabel('Terminal Velocity Error','FontSize',Label_Font_Size)
-h = legend(H, 'FDS', 'O(\delta t)',...
-    'O(\delta t^2)', 'Location', 'Southeast');
+h = legend(H, 'FDS', 'O({\it \deltat})',...
+    'O({\it \deltat}^2)', 'Location', 'Southeast');
 set(h,'Interpreter', Font_Interpreter)
 
 set(gcf, 'Visible', Figure_Visibility);
@@ -149,8 +149,8 @@ set(gca, 'FontSize', Key_Font_Size)
 
 xlabel('Time Step (s)', 'Interpreter', Font_Interpreter,'FontSize',Label_Font_Size)
 ylabel('Position Error','FontSize',Label_Font_Size)
-h = legend(H, 'FDS', 'O(\delta t)',...
-    'O(\delta t^2)', 'Location', 'Southeast');
+h = legend(H, 'FDS', 'O({\it \deltat})',...
+    'O({\it \deltat}^2)', 'Location', 'Southeast');
 set(h,'Interpreter', Font_Interpreter)
 
 set(gcf, 'Visible', Figure_Visibility);

@@ -49,8 +49,8 @@ set(gca,'FontSize',Title_Font_Size)
 set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
 set(gcf,'DefaultLineLineWidth',Line_Width)
 
-xlabel('$y^+$ specified','Interpreter',Font_Interpreter,'Fontname',Font_Name),
-ylabel('$y^+$ predicted','Interpreter',Font_Interpreter,'Fontname',Font_Name),
+xlabel('{\it y}^+ specified','Interpreter',Font_Interpreter,'Fontname',Font_Name),
+ylabel('{\it y}^+ predicted','Interpreter',Font_Interpreter,'Fontname',Font_Name),
 leg = legend('exact','FDS');
 set(leg,'Location','SouthEast')
 set(leg,'Interpreter',Font_Interpreter)
