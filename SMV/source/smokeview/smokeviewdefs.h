@@ -11,6 +11,9 @@ void _Sniff_Errors(char *whereat);
 #define SNIFF_ERRORS(f)
 #endif
 
+#define IS_AVATAR 1
+#define IS_NOT_AVATAR 0
+
 #define C_GENERATED 0
 #define FORTRAN_GENERATED 1
 

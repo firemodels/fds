@@ -11942,9 +11942,9 @@ void writeini(int flag){
             }
             else{
               sprintf(buffer,"%f %f %f %f %f %f %f ",
-                DENORMALIZE_X(framei->nodeval.xyz_view[0]),
-                DENORMALIZE_Y(framei->nodeval.xyz_view[1]),
-                DENORMALIZE_Z(framei->nodeval.xyz_view[2]),
+                DENORMALIZE_X(framei->nodeval.xyz_view_abs[0]),
+                DENORMALIZE_Y(framei->nodeval.xyz_view_abs[1]),
+                DENORMALIZE_Z(framei->nodeval.xyz_view_abs[2]),
                 framei->tension, framei->bias, framei->continuity,
                 framei->nodeval.zoom);
             }

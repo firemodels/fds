@@ -5643,13 +5643,13 @@ int read_object_defs(char *file){
     if(match(buffer_ptr,"OBJECTDEF") == 1||
        match(buffer_ptr,"AVATARDEF") == 1
       ){
-        int is_avatar=0;
+        int object_type=IS_NOT_AVATAR;
       char *label;
 
       sv_object_frame *first_frame, *last_frame;
 
       if(match(buffer_ptr,"AVATARDEF") == 1){
-        is_avatar=1;
+        object_type=IS_AVATAR;
       }  
       ndevices++;
       if(fgets(buffer,255,stream)==NULL)break;
@@ -5680,7 +5680,7 @@ int read_object_defs(char *file){
 
       first_frame = &current_object->first_frame;
       last_frame = &current_object->last_frame;
-      current_object->type=is_avatar;
+      current_object->type=object_type;
 
       first_frame->next=last_frame;
       first_frame->prev=NULL;
@@ -6110,26 +6110,26 @@ void init_avatar(void){
   object_start = object_def_first.next;
   navatar_types=2;
   for(objecti = object_start;objecti->next!=NULL;objecti=objecti->next){
-    if(objecti->type==1)navatar_types++;
+    if(objecti->type==IS_AVATAR)navatar_types++;
   }
   NewMemory((void **)&avatar_types,navatar_types*sizeof(sv_object *));
 
   strcpy(com_buffer,labels);
   strcat(com_buffer,"0.0 0.0 1.0 translate 255 0 0 setrgb 0.03 0.1 drawdisk 0 0 255 setrgb 90.0 rotatey 0.03 0.2 drawdisk");
   avatar_defs_backup[0] = init_SVOBJECT1("Avatar_1", com_buffer,1);
-  avatar_defs_backup[0]->type=1;
+  avatar_defs_backup[0]->type=IS_AVATAR;
 
   strcpy(com_buffer,labels);
   strcat(com_buffer,"255 255 0 setrgb 0.02 0.05 drawdisk");
   avatar_defs_backup[1] = init_SVOBJECT1("Avatar_2", com_buffer,1);
-  avatar_defs_backup[1]->type=1;
+  avatar_defs_backup[1]->type=IS_AVATAR;
 
   avatar_types[0]=avatar_defs_backup[0];
   avatar_types[1]=avatar_defs_backup[1];
 
   iavatar_types_local=2;
   for(objecti = object_start;objecti->next!=NULL;objecti=objecti->next){
-    if(objecti->type==0)continue;
+    if(objecti->type==IS_NOT_AVATAR)continue;
     avatar_types[iavatar_types_local++]=objecti;
   }
   iavatar_types_local=0;
