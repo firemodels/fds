@@ -29,6 +29,7 @@ SVEXTERN int tetrabox_vis[10];
 SVEXTERN int SVDECL(show_geomtest,0),SVDECL(show_intersection,1);
 #endif
 
+SVEXTERN int SVDECL(tour_antialias,0);
 
 SVEXTERN int SVDECL(update_gslice,0);
 SVEXTERN int SVDECL(wc_flag,0);

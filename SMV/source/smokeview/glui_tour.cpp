@@ -191,6 +191,9 @@ extern "C" void glui_tour_setup(int main_window){
   CHECKBOX_snap=glui_tour->add_checkbox_to_panel(PANEL_settings,_("View from selected keyframe"),&keyframe_snap,VIEWSNAP,TOUR_CB);
   CHECKBOX_constantvel=glui_tour->add_checkbox_to_panel(PANEL_settings,_("Constant speed"),&tour_constant_vel,CONSTANTTOURVEL,TOUR_CB);
   CHECKBOX_showintermediate=glui_tour->add_checkbox_to_panel(PANEL_settings,_("Show intermediate path nodes"),&show_path_knots);
+#ifdef _DEBUG
+  glui_tour->add_checkbox_to_panel(PANEL_settings,_("Antialias tour path line"),&tour_antialias);
+#endif
 
   ROLLOUT_path = glui_tour->add_rollout_to_panel(PANEL_settings,_("Duration"),false);
 

@@ -166,7 +166,7 @@ void drawtours(void){
       tourdata *touri;
 
       glColor3fv(tourcol_selectedpathline);
-      antialias(1);
+      if(tour_antialias==1)antialias(1);
       glBegin(GL_LINES);
       touri = tourinfo + selectedtour_index;
 
@@ -180,7 +180,7 @@ void drawtours(void){
         glVertex3fv(pj->eye);
       }
       glEnd();
-      antialias(0);
+      if(tour_antialias==1)antialias(0);
 
     }
 
