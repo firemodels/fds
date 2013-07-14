@@ -106,8 +106,8 @@ plot_position = get(plot_handle,'Position');
 set(plot_handle,'FontName',Font_Name)
 set(plot_handle,'FontSize',Title_Font_Size)
 
-Dep_Title = '$Q^*$';
-Ind_Title = '$L_f/D$';
+Dep_Title = '{\itQ}*';
+Ind_Title = '{\itL}_f/{\itD}';
 Plot_Title = 'Flame Height Variation';
 Min_Ind = 0.05;
 Max_Ind = 2e4;
