@@ -83,9 +83,7 @@ void Init(void){
 
   /* initialize box sizes, lighting parameters */
 
-  xyzbox = xbar;
-  if(ybar>xyzbox){xyzbox=ybar;}
-  if(zbar>xyzbox){xyzbox=zbar;}
+  xyzbox = MAX(MAX(xbar,ybar),zbar);
 
   {
     char name_external[32];

@@ -23,7 +23,7 @@ char glui_tour_revision[]="$Revision$";
 
 static int viewtype1=REL_VIEW;
 static int viewtype2=REL_VIEW;
-static float tour_xyz[3]={0.0,0.0,0.0}, tour_ttt, tour_az_path=0.0, tour_tension=0.0;
+static float tour_ttt, tour_az_path=0.0, tour_tension=0.0;
 static float tour_view_xyz[3]={0.0,0.0,0.0}, tour_elev_path=0.0;
 static int tour_hide=0;
 static int tour_global_tension_flag=1;
@@ -107,6 +107,12 @@ GLUI_Listbox *LISTBOX_avatar=NULL;
 #define TOUR_USECURRENT 29
 
 #define TOURMENU(f) callfrom_tourglui=1;TourMenu(f);callfrom_tourglui=0;
+
+/* ------------------ add_new_tour ------------------------ */
+
+extern "C" void update_tour_parms(void){
+  TOUR_CB(KEYFRAME_tXYZ);
+}
 
 /* ------------------ add_new_tour ------------------------ */
 
@@ -297,9 +303,17 @@ extern "C" float trim_val(float val){
   }
 }
 
+/* ------------------ update_glui_keyframe ------------------------ */
+
+extern "C" void update_glui_keyframe(void){
+  SPINNER_x->set_float_val(tour_xyz[0]);
+  SPINNER_y->set_float_val(tour_xyz[1]);
+  SPINNER_z->set_float_val(tour_xyz[2]);
+}
+
 /* ------------------ set_glui_keyframe ------------------------ */
 
-extern "C" void set_glui_keyframe(){
+extern "C" void set_glui_keyframe(void){
   tourdata *ti;
   float *eye,*xyz_view;
 

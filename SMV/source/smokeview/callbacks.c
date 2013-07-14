@@ -282,6 +282,7 @@ void mouse_edit_tour(int button, int state, int x, int y){
   if(val!=0&&itourknots>=0&&itourknots<ntourknots&&tourknotskeylist!=NULL){
     tourknotskeylist[itourknots]->selected=0;
   }
+  tour_drag=0;
   if(val>0&&val<=ntourknots){
   
   /* need to start colors at 1 so that black (color 0,0,0) is not interpreted as a blockage */
@@ -298,6 +299,7 @@ void mouse_edit_tour(int button, int state, int x, int y){
     }
     set_glui_keyframe();
     update_tourcontrols();
+    tour_drag=1;
   }
   glShadeModel(GL_SMOOTH);
   glEnable(GL_BLEND);
@@ -811,6 +813,7 @@ void mouse_CB(int button, int state, int xm, int ym){
   glutPostRedisplay();
 
   if(state==GLUT_UP){
+    tour_drag=0;
     mouse_down=0;
     show_gslice_normal_keyboard=0;
     eye_xyz0[0]=eye_xyz[0];
@@ -962,6 +965,53 @@ void Timebar_Drag(int xm, int ym){
     timebar_drag=1;
   }
   Idle_CB();
+}
+
+/* ------------------ Move_Tour_Node ------------------------ */
+
+void Move_Tour_Node(int xm, int ym){
+  int dxm, dym;
+
+  dxm = xm - start_xyz0[0];
+  dym = ym - start_xyz0[1];
+  printf("%i %i\n",dxm,dym);
+  switch (key_state){
+    case KEY_NONE:
+    case KEY_CTRL:
+      {
+        float xx, yy;
+        float dx, dy;
+
+        xx = (float)(xm-mouse_down_xy0[0])/(float)screenWidth;
+        yy = (float)(ym-mouse_down_xy0[1])/(float)screenHeight;
+        dx =  (xbarORIG-xbar0ORIG)*xx;
+        dy =  (ybarORIG-ybar0ORIG)*yy;
+        tour_xyz[0] += dx;
+        tour_xyz[1] -= dy;
+        mouse_down_xy0[0]=xm;
+        mouse_down_xy0[1]=ym;
+        update_tour_parms();
+        update_glui_keyframe();
+      }
+      break;
+    case KEY_ALT:
+      {
+        float zz, dz;
+
+        zz = (float)(ym-mouse_down_xy0[1])/(float)screenHeight;
+        dz =  (zbarORIG-zbar0ORIG)*zz;
+        tour_xyz[2] -= dz;
+        mouse_down_xy0[1]=ym;
+        update_tour_parms();
+        update_glui_keyframe();
+      }
+      break;
+    case KEY_SHIFT:
+      break;
+    default:
+      ASSERT(0);
+      break;
+  }
 }
 
 /* ------------------ Move_Gen_Slice ------------------------ */
@@ -1170,6 +1220,10 @@ void motion_CB(int xm, int ym){
   }
   if(move_gslice==1){
     Move_Gen_Slice(xm,ym);
+    return;
+  }
+  if(tour_drag==1){
+    Move_Tour_Node(xm,ym);
     return;
   }
 

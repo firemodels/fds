@@ -30,6 +30,7 @@ SVEXTERN int SVDECL(show_geomtest,0),SVDECL(show_intersection,1);
 #endif
 
 SVEXTERN int SVDECL(tour_antialias,0);
+SVEXTERN int SVDECL(tour_drag,0);
 
 SVEXTERN int SVDECL(update_gslice,0);
 SVEXTERN int SVDECL(wc_flag,0);
@@ -767,10 +768,12 @@ SVEXTERN int SVDECL(visUsagememory,0);
 #endif
 SVEXTERN float gslice_norm[3];
 #ifdef INMAIN
+SVEXTERN float tour_xyz[3]={0.0,0.0,0.0};
 SVEXTERN float gslice_xyz[3]={-1000001.0,-1000001.0,-1000001.0};
 SVEXTERN float gslice_normal_xyz[3]={0.0,0.0,1.0};
 SVEXTERN float gslice_normal_azelev[2]={0.0,90.0};
 #else
+SVEXTERN float tour_xyz[3];
 SVEXTERN float gslice_xyz[3];
 SVEXTERN float gslice_normal_xyz[3];
 SVEXTERN float gslice_normal_azelev[3];
