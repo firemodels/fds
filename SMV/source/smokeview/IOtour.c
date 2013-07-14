@@ -524,11 +524,13 @@ void createtourpaths(void){
       lastkey=keyj->prev;
       thiskey=keyj;
       nextkey=keyj->next;
-      if(j==0&&touri->periodic==1){
-        lastkey=touri->keyframe_list[touri->nkeyframes-2];
-      }
-      if(j==touri->nkeyframes-1&&touri->periodic==1){
-        nextkey=touri->keyframe_list[1];
+      if(touri->periodic==1){
+        if(j==0){
+          lastkey=touri->keyframe_list[touri->nkeyframes-2];
+        }
+        if(j==touri->nkeyframes-1){
+          nextkey=touri->keyframe_list[1];
+        }
       }
       if(touri->global_tension_flag==1){
         a=touri->global_tension;
@@ -599,10 +601,10 @@ void createtourpaths(void){
 
         del1 = thiskey->nodeval.time - lastkey->nodeval.time;
         del2 = nextkey->nodeval.time - thiskey->nodeval.time;
-        sfactor = 2*del2/(del1 + del2);
-        dfactor = 2*del1/(del1 + del2);
-        //sfactor = 1.0;
-        //dfactor = 1.0;
+        //sfactor = 2*del2/(del1 + del2);
+        //dfactor = 2*del1/(del1 + del2);
+        sfactor = 1.0;
+        dfactor = 1.0;
 
 #define HERM1(sfactor,s1,s2,lastval,thisval,nextval,val)\
         val[0]=sfactor*(s1*(thisval[0] - lastval[0]) + s2*(nextval[0]-thisval[0]));\
