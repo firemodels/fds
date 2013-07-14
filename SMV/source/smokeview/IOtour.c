@@ -20,7 +20,6 @@ char IOtour_revision[]="$Revision$";
 #include "smokeviewvars.h"
 
 void drawcir(float *center, float rad, float *color);
-//void TourMenu(int val);
 void hermiteeye(float f1, keyframe *kf1, keyframe *kf2, float *eye, float *slope);
 void hermiteother(float f1, keyframe *kf1, keyframe *kf2, pathdata *pj);
 void hermiteview(float t, keyframe *kf1, keyframe *kf2, float *view);
@@ -256,7 +255,7 @@ void drawtours(void){
       glBegin(GL_POINTS);
       glColor3fv(tourcol_selectedknot);
       glVertex3fv(selected_frame->nodeval.eye);
-      if(selected_frame->viewtype==1){
+      if(selected_frame->viewtype==ABS_VIEW){
         glColor3fv(tourcol_selectedview);
         glVertex3fv(selected_frame->nodeval.xyz_view_abs);
       }
@@ -490,7 +489,7 @@ void createtourpaths(void){
     keyframe *kf1, *kf2;
     float *tour_dist3a;
     float factor,total_time;
-    float dist_total;
+    float total_distance;
     float vdist,vtime2,vdt;
     float tour_tstart, tour_tstop;
     int j,jj;
@@ -519,7 +518,7 @@ void createtourpaths(void){
       *tourknotskeylist_copy++ = keyj;
       *tourknotstourlist_copy++ = touri;
       keyj->selected=0;
-      keyj->dist=0.0;
+      keyj->distance=0.0;
       keyj->npoints=0;
 
       lastkey=keyj->prev;
@@ -576,8 +575,8 @@ void createtourpaths(void){
       else if(touri->periodic==0&&j==touri->nkeyframes-1){
         VECDIFF3(lasteye,thiseye,keyj->s_eye);
 
-        keyj->s_az=thiskey->az_path - lastkey->az_path;
-        keyj->s_zoom=thiskey->nodeval.zoom - lastkey->nodeval.zoom;
+        keyj->s_az  =thiskey->az_path           - lastkey->az_path;
+        keyj->s_zoom=thiskey->nodeval.zoom      - lastkey->nodeval.zoom;
         keyj->s_elev=thiskey->nodeval.elev_path - lastkey->nodeval.elev_path;
 
         keyj->d_eye[0]=0.0;
@@ -625,9 +624,18 @@ void createtourpaths(void){
     }
 
     for(keyj=(touri->first_frame).next;keyj->next!=NULL;keyj=keyj->next){
-      keyj->keyview_x=keyj->d_eye[0];
-      keyj->keyview_y=keyj->d_eye[1];
-      if(keyj->viewtype==1)adjustviewangle(keyj,NULL,NULL);
+      float denom;
+
+      keyj->keyview_xyz[0]=keyj->d_eye[0];
+      keyj->keyview_xyz[1]=keyj->d_eye[1];
+      keyj->keyview_xyz[2]=0.0;
+      if(keyj->viewtype==ABS_VIEW)xyzview2azelev(keyj,NULL,NULL);
+
+      ROTATE(keyj->keyview_xyz,keyj->keyview_xyz2,keyj->az_path*DEG2RAD);
+      keyj->keyview_xyz2[2]=0.0;
+      denom=NORM2(keyj->keyview_xyz2);
+      if(denom==0.0)continue;
+      VEC2MA(keyj->keyview_xyz2,10000.0/denom);
     }
 
     // evaluate quantities along path - determine distances
@@ -665,9 +673,11 @@ void createtourpaths(void){
          kf1->nodeval.eye[1]==kf2->nodeval.eye[1]&&
          kf1->nodeval.eye[2]==kf2->nodeval.eye[2]){
         hermiteeye(1.0,kf1->prev,kf1,eye,view_local);
+        slerp(kf1->prev->keyview_xyz2,kf1->keyview_xyz2,1.0,view_local);
       }
       else{
         hermiteeye(f1,kf1,kf2,eye,view_local);
+        slerp(kf1->keyview_xyz2,kf2->keyview_xyz2,f1,view_local);
       }
 
       hermiteview(f1,kf1,kf2, xyz_view);
@@ -679,26 +689,26 @@ void createtourpaths(void){
       tour_t[j]=vtime;
       if(j!=0){
         float dx, dy;
-        float dz, dist;
+        float dz, distance;
 
         pjm1 = pj - 1;
         dx = eye[0]-pjm1->eye[0];
         dy = eye[1]-pjm1->eye[1];
         dz = eye[2]-pjm1->eye[2];
-        dist = sqrt(dx*dx+dy*dy+dz*dz);
-        tour_dist[j]=tour_dist[j-1] + dist;
-        kf1->dist += dist;
+        distance = sqrt(dx*dx+dy*dy+dz*dz);
+        tour_dist[j]=tour_dist[j-1] + distance;
+        kf1->distance += distance;
       }
     }
 
-    // construct running "cumdist" info
+    // construct running "total_distance" info
 
     kf1 = touri->first_frame.next;
-    kf1->cumdist=0.0;
-    dist_total=0.0;
+    kf1->total_distance=0.0;
+    total_distance=0.0;
     for(keyj=kf1->next;keyj->next!=NULL;keyj=keyj->next){
-      keyj->cumdist = keyj->prev->cumdist + keyj->prev->dist;
-      dist_total += keyj->prev->dist;
+      keyj->total_distance = keyj->prev->total_distance + keyj->prev->distance;
+      total_distance += keyj->prev->distance;
     }
 
     // decide fraction of global path vs. local path
@@ -710,7 +720,7 @@ void createtourpaths(void){
     for(keyj=(touri->first_frame).next;keyj->next!=NULL;keyj=keyj->next){
       if(keyj->next->next!=NULL)total_time += keyj->next->noncon_time - keyj->noncon_time;
       if(tour_constant_vel==1){
-        touri->global_dist+=keyj->dist;
+        touri->global_dist+=keyj->distance;
       }
       else{
         if(keyj->next->next!=NULL)touri->local_dist+=keyj->next->noncon_time-keyj->noncon_time;
@@ -725,7 +735,7 @@ void createtourpaths(void){
     ntotal=0;
     for(keyj=(touri->first_frame).next;keyj->next!=NULL;keyj=keyj->next){
       if(tour_constant_vel==1){
-        keyj->npoints=view_ntimes*(1.0-factor)*keyj->dist/touri->global_dist;
+        keyj->npoints=view_ntimes*(1.0-factor)*keyj->distance/touri->global_dist;
       }
       else{
         keyj->npoints=0;
@@ -755,7 +765,7 @@ void createtourpaths(void){
     tour_dist3a = tour_dist3 + 5;
     for(keyj=(touri->first_frame).next;keyj->next!=NULL;keyj=keyj->next){
       for(j=0;j<keyj->npoints;j++){
-        tour_dist3a[jj] = keyj->cumdist + keyj->dist*(float)j/(float)keyj->npoints;
+        tour_dist3a[jj] = keyj->total_distance + keyj->distance*(float)j/(float)keyj->npoints;
         jj++;
       }
     }
@@ -821,7 +831,7 @@ void createtourpaths(void){
       hermiteother(f1,kf1,kf2,pj);
       hermiteview(f1,kf1,kf2,xyz_view);
 
-      if(kf1->viewtype==0||kf2->viewtype==0){
+      if(kf1->viewtype==REL_VIEW||kf2->viewtype==REL_VIEW){
         float az;
         float dxyz[3], denom, dxyz2[3];
         float dist;
@@ -855,7 +865,7 @@ void createtourpaths(void){
       }
     }
     for(keyj=kf1->next;keyj->next!=NULL;keyj=keyj->next){
-      keyj->nodeval.time = tour_tstart + (tour_tstop-tour_tstart)*keyj->cumdist/dist_total;
+      keyj->nodeval.time = tour_tstart + (tour_tstop-tour_tstart)*keyj->total_distance/total_distance;
     }
     if(selected_frame!=NULL)selected_frame->selected=1;
   }
@@ -995,8 +1005,9 @@ keyframe *add_frame(keyframe *framei, float time_local, float *eye, float key_az
   frame->tension=params[0];
   frame->viewtype=viewtype;
   frame->nodeval.zoom=zoom_local;
-  frame->keyview_x=0.0;
-  frame->keyview_y=0.0;
+  frame->keyview_xyz[0]=0.0;
+  frame->keyview_xyz[1]=0.0;
+  frame->keyview_xyz[2]=0.0;
 
   CheckMemory;
   return frame;
@@ -1279,48 +1290,42 @@ void setup_tour(void){
   }
 }
 
-/* ------------------ adjustviewangle ------------------------ */
-void adjustviewangle(keyframe *kf, float *az_path, float *elev_path){
-  float dx, dy, dz;
-  float dx2, dy2;
+/* ------------------ xyzview2azelev ------------------------ */
+
+void xyzview2azelev(keyframe *kf, float *az_path, float *elev_path){
+  float dxyz[3];
+  float dxy2[2];
   float distxy, distxy2;
   float angle_temp, angle_temp2;
   float az, elev;
 
   float *eye, *xyz_view;
 
-  dx2 = kf->keyview_x;
-  dy2 = kf->keyview_y;
-  distxy2 = sqrt(dx2*dx2+dy2*dy2);
+  dxy2[0] = kf->keyview_xyz[0];
+  dxy2[1] = kf->keyview_xyz[1];
+  distxy2 = NORM2(dxy2);
   if(distxy2<=0.0)return;
   
   eye = kf->nodeval.eye;
   xyz_view = kf->nodeval.xyz_view_abs;
 
-  dx = xyz_view[0] - eye[0];
-  dy = xyz_view[1] - eye[1];
-  dz = xyz_view[2] - eye[2];
+  VECDIFF3(eye,xyz_view,dxyz);
 
-  distxy = sqrt(dx*dx+dy*dy);
+  distxy = NORM2(dxyz);
   if(distxy<=0.0)return;
 
-  dx2 /= distxy2;
-  dy2 /= distxy2;
+  VEC2DA(dxy2,distxy2);
+  VEC3DA(dxyz,distxy);
 
-  dx /= distxy;
-  dy /= distxy;
-  dz /= distxy;
-
-  angle_temp = RAD2DEG*atan2(dy,dx);
-  angle_temp2 = RAD2DEG*atan2(dy2,dx2);
+  angle_temp = RAD2DEG*atan2(dxyz[1],dxyz[0]);
+  angle_temp2 = RAD2DEG*atan2(dxy2[1],dxy2[0]);
   az = angle_temp - angle_temp2;
   if(az>180.0)az = 360.0 - az;
   if(az<-180.0)az = az + 360.0;
-  elev=atan(dz)*RAD2DEG;
+  elev=atan(dxyz[2])*RAD2DEG;
 
+  kf->az_path=az;
   kf->nodeval.elev_path=elev;
-  kf->az_path=az;
-  kf->az_path=az;
   if(az_path!=NULL)*az_path=az;
   if(elev_path!=NULL)*elev_path = elev;
 }
@@ -1328,9 +1333,6 @@ void adjustviewangle(keyframe *kf, float *az_path, float *elev_path){
 /* ------------------ adjusttourtimes ------------------------ */
 
 void adjusttourtimes(tourdata *touri){
-  // view_ntimes
-  // view_tstart
-  // view_tstop
   float dt;
   keyframe *keyj;
   float tstart, tstop,dtmin;

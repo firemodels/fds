@@ -20,6 +20,27 @@ char smv_geometry_revision[]="$Revision$";
 
 #include "smokeviewvars.h"
 
+/* ------------------ slerp ------------------------ */
+
+void slerp(float *p0, float *p1, float t, float *pout){
+  float cosangle,sinangle,denom,angle,factor1,factor2;
+
+  denom = NORM3(p0)*NORM3(p1);
+  if(denom==0.0){
+    pout[0]=p0[0];
+    pout[1]=p0[1];
+    pout[2]=p0[2];
+    return;
+  }
+  cosangle = DOT3(p0,p1)/denom;
+  angle = acos(cosangle);
+  sinangle = sin(angle);
+  factor1 = sin((1.0-t)*angle)/sinangle;
+  factor2 = sin(t*angle)/sinangle;
+  pout[0]=factor1*p0[0]+factor2*p1[0];
+  pout[1]=factor1*p0[1]+factor2*p1[1];
+  pout[2]=factor1*p0[2]+factor2*p1[2];
+}
 
 /* ----------------------- drawtetra_outline ----------------------------- */
 

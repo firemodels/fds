@@ -727,8 +727,8 @@ typedef struct _keyframe {
   int selected,viewtype,npoints;
   float noncon_time, con_time, disp_time;
   pathdata nodeval;
-  float keyview_x, keyview_y;
-  float cumdist, dist;
+  float keyview_xyz[3],keyview_xyz2[3];
+  float total_distance, distance;
   float s_eye[3], s_az, s_elev, s_zoom, s_xyz_view[3];
   float d_eye[3], d_az, d_elev, d_zoom, d_xyz_view[3];
   float bias, continuity, tension;

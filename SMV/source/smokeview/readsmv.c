@@ -11934,7 +11934,7 @@ void writeini(int flag){
               DENORMALIZE_Z(framei->nodeval.eye[2]));
             trimmzeros(buffer);
             fprintf(fileout," %s %i ",buffer,framei->viewtype);
-            if(framei->viewtype==0){
+            if(framei->viewtype==REL_VIEW){
               sprintf(buffer,"%f %f %f %f %f %f %f ",
                 framei->az_path,framei->nodeval.elev_path,framei->bank,
                 framei->tension, framei->bias, framei->continuity,

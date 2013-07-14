@@ -34,20 +34,38 @@
 (XYZ_OUT)[1] = NORMALIZE_Y((XYZ_IN)[1]);\
 (XYZ_OUT)[2] = NORMALIZE_Z((XYZ_IN)[2])
 
+#define VEC2MA(vec,a)\
+      vec[0] *= (a);\
+      vec[1] *= (a)
+
+#define VEC3MA(vec,a)\
+  vec[0] *= (a);\
+  vec[1] *= (a);\
+  vec[2] *= (a)
+
+#define VEC2DA(vec,a)\
+  vec[0] /= (a);\
+  vec[1] /= (a)
+
+#define VEC3DA(vec,a)\
+  vec[0] /= (a);\
+  vec[1] /= (a);\
+  vec[2] /= (a)
 
 #ifndef DOT2
 #define DOT2(x,y) (x[0]*y[0]+x[1]*y[1])
 #endif
-
-//   i    j    k
-// x[0] x[1] x[2]
-// y[0] y[1] y[2]
 
 #ifndef ROTATE
 #define ROTATE(xfrom,xto,az)\
   xto[0] = xfrom[0]*cos(az) - xfrom[1]*sin(az);\
   xto[1] = xfrom[0]*sin(az) + xfrom[1]*cos(az)
 #endif
+
+//   i    j    k
+// x[0] x[1] x[2]
+// y[0] y[1] y[2]
+
 #ifndef CROSS
 #define CROSS(x,y,xy) \
   (xy)[0] = x[1]*y[2] - y[1]*x[2];\

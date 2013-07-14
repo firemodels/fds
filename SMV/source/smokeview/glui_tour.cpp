@@ -21,8 +21,8 @@ char glui_tour_revision[]="$Revision$";
 #include "update.h"
 #include "smokeviewvars.h"
 
-static int viewtype1=0;
-static int viewtype2=0;
+static int viewtype1=REL_VIEW;
+static int viewtype2=REL_VIEW;
 static float tour_xyz[3]={0.0,0.0,0.0}, tour_ttt, tour_az_path=0.0, tour_tension=0.0;
 static float tour_view_xyz[3]={0.0,0.0,0.0}, tour_elev_path=0.0;
 static int tour_hide=0;
@@ -378,7 +378,7 @@ extern "C" void set_glui_keyframe(){
   EDIT_label->set_text(tour_label);
 
   if(edittour==1){
-    if(viewtype1==1){
+    if(viewtype1==ABS_VIEW){
       SPINNER_az_path->disable();
       SPINNER_elev_path->disable();
       SPINNER_viewx->enable();
@@ -492,12 +492,12 @@ void TOUR_CB(int var){
       SPINNER_viewy->enable();
       SPINNER_viewz->enable();
       if(selected_frame!=NULL){
-        adjustviewangle(selected_frame,NULL,NULL);
+        xyzview2azelev(selected_frame,NULL,NULL);
         SPINNER_az_path->set_float_val(tour_az_path);
         SPINNER_elev_path->set_float_val(tour_elev_path);
       }
     }
-    else if(viewtype1==0){
+    else if(viewtype1==REL_VIEW){
       SPINNER_az_path->enable();
       SPINNER_elev_path->enable();
       SPINNER_viewx->disable();
@@ -521,7 +521,7 @@ void TOUR_CB(int var){
       xyz_view = selected_frame->nodeval.xyz_view_abs;
       NORMALIZE_XYZ(xyz_view,tour_view_xyz);
 
-      adjustviewangle(selected_frame,&tour_az_path,&tour_elev_path);
+      xyzview2azelev(selected_frame,&tour_az_path,&tour_elev_path);
       SPINNER_az_path->set_float_val(tour_az_path);
       SPINNER_elev_path->set_float_val(tour_elev_path);
 
@@ -561,7 +561,7 @@ void TOUR_CB(int var){
         selected_frame->disp_time=tour_ttt;
       }
       NORMALIZE_XYZ(eye,tour_xyz);
-      if(viewtype1==0){
+      if(viewtype1==REL_VIEW){
         tour_az_path = SPINNER_az_path->get_float_val();
       }
       selected_frame->az_path=tour_az_path;
@@ -575,7 +575,7 @@ void TOUR_CB(int var){
       NORMALIZE_XYZ(xyz_view,tour_view_xyz);
       createtourpaths();
       selected_frame->selected=1;
-      if(viewtype1==1){
+      if(viewtype1==ABS_VIEW){
         TOUR_CB(KEYFRAME_viewXYZ);
       }
     }
@@ -679,16 +679,16 @@ void TOUR_CB(int var){
         key_view[2]=DENORMALIZE_Z((thiskey->nodeval.xyz_view_abs[2]+nextkey->nodeval.xyz_view_abs[2])/2.0);
         key_zoom = (thiskey->nodeval.zoom + nextkey->nodeval.zoom)/2.0;
         key_bank = (thiskey->bank + nextkey->bank)/2.0;
-        if(thiskey->viewtype==0&&nextkey->viewtype==0){
-          viewtype1=0;
+        if(thiskey->viewtype==REL_VIEW&&nextkey->viewtype==REL_VIEW){
+          viewtype1=REL_VIEW;
         }
         else{
-          viewtype1=1;
-          if(thiskey->viewtype==1){
+          viewtype1=ABS_VIEW;
+          if(thiskey->viewtype==ABS_VIEW){
             DENORMALIZE_XYZ(key_view,thiskey->nodeval.xyz_view_abs);
             key_elev_path = thiskey->nodeval.elev_path;
           }
-          if(thiskey->viewtype==0&&nextkey->viewtype==1){
+          if(thiskey->viewtype==REL_VIEW&&nextkey->viewtype==ABS_VIEW){
             DENORMALIZE_XYZ(key_view,nextkey->nodeval.xyz_view_abs);
             key_elev_path = nextkey->nodeval.elev_path;
           }

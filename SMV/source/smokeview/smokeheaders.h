@@ -5,6 +5,7 @@
 #ifndef SMOKEHEADERS_H_DEFINED
 #define SMOKEHEADERS_H_DEFINED
 
+EXTERNCPP void slerp(float *p0, float *p1, float t, float *pout);
 #ifdef pp_GEOMTEST
 EXTERNCPP void DrawGeomTest(int option);
 #endif
@@ -524,7 +525,7 @@ EXTERNCPP void create_tourlist(void);
 EXTERNCPP void delete_tourlist(void);
 EXTERNCPP void updateviewtour(void);
 EXTERNCPP void update_tourcontrols(void);
-EXTERNCPP void adjustviewangle(keyframe *kf,float *azimuth, float *elevation);
+EXTERNCPP void xyzview2azelev(keyframe *kf,float *azimuth, float *elevation);
 EXTERNCPP void setup_tour(void);
 EXTERNCPP void createtourpaths(void);
 EXTERNCPP void drawtours(void);
