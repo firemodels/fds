@@ -100,9 +100,9 @@ void set_vert2(float x, float y, float z, vert *vi){
 float *set_normal(float *v1, float *v2, float *v3, float normal[3]){
   float v1d[3], v3d[3];
 
-  VECDIFF3(v2,v1,v1d);
-  VECDIFF3(v2,v3,v3d);
-  CROSS(v1d,v3d,normal);
+  VECDIFF3(v1d,v1,v2);
+  VECDIFF3(v3d,v3,v2);
+  CROSS(normal,v1d,v3d);
   NORMALIZE3(normal);
   return normal;
 }
@@ -118,7 +118,7 @@ int in_solid(plane *planes, int nplanes, float *xyz, int plane_index){
 
     if(i==plane_index)continue;
     pi = planes + i;
-    VECDIFF3(pi->x0,xyz,diff);
+    VECDIFF3(diff,xyz,pi->x0);
     if(DOT3(pi->n,diff)>0.0)return 0;
   }
   return 1;
@@ -130,8 +130,8 @@ float *get_edge_plane_intersection(edge *e, plane *p, float xyz[3]){
   float t, v1mx0[3], v2mv1[3];
   float denom;
 
-  VECDIFF3(p->x0,e->v1,v1mx0);
-  VECDIFF3(e->v1,e->v2,v2mv1);
+  VECDIFF3(v1mx0,e->v1,p->x0);
+  VECDIFF3(v2mv1,e->v2,e->v1);
   denom=DOT3(p->n,v2mv1);
   if(denom==0.0)return NULL;
   t = -DOT3(p->n,v1mx0)/denom;

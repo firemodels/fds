@@ -25,7 +25,7 @@ void rotateu2v(float *u, float *v, float *axis, float *angle){
   vx vy vz
   */
 
-  CROSS(u,v,axis);
+  CROSS(axis,u,v);
   sum = NORM3(axis);
   normu = NORM3(u);
   normv = NORM3(v);

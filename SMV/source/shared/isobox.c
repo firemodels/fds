@@ -38,7 +38,7 @@ float vol_tetra(float *a, float *b, float *c, float *d){
     crel[i] = c[i]-a[i];
     drel[i] = d[i]-a[i];
   }
-  CROSS(brel,crel,axb);
+  CROSS(axb,brel,crel);
   volume = DOT3(drel,axb);
   return ABS(volume);
 }
@@ -1793,7 +1793,7 @@ float get_tri_area(int *edgelist, float *xyz){
 //  i    j    k
 //  v220 v221 v222
 //  v330 v331 v332
-  CROSS(v22,v33,vcross);
+  CROSS(vcross,v22,v33);
   return 0.5*NORM3(vcross);
 }
 

@@ -560,7 +560,7 @@ void createtourpaths(void){
         keyj->s_elev=0.0;
         keyj->s_zoom=0.0;
 
-        VECDIFF3(thiseye,nexteye,keyj->d_eye);
+        VECDIFF3(keyj->d_eye,nexteye,thiseye);
 
         keyj->d_az=nextkey->az_path - thiskey->az_path;
         keyj->d_zoom=nextkey->nodeval.zoom - thiskey->nodeval.zoom;
@@ -570,10 +570,10 @@ void createtourpaths(void){
         keyj->s_xyz_view[1]=0.0;
         keyj->s_xyz_view[2]=0.0;
 
-        VECDIFF3(xyz_view1,xyz_view2,keyj->d_xyz_view);
+        VECDIFF3(keyj->d_xyz_view,xyz_view2,xyz_view1);
       }
       else if(touri->periodic==0&&j==touri->nkeyframes-1){
-        VECDIFF3(lasteye,thiseye,keyj->s_eye);
+        VECDIFF3(keyj->s_eye,thiseye,lasteye);
 
         keyj->s_az  =thiskey->az_path           - lastkey->az_path;
         keyj->s_zoom=thiskey->nodeval.zoom      - lastkey->nodeval.zoom;
@@ -587,7 +587,7 @@ void createtourpaths(void){
         keyj->d_zoom=0.0;
         keyj->d_elev=0.0;
 
-        VECDIFF3(xyz_view0,xyz_view1,keyj->s_xyz_view);
+        VECDIFF3(keyj->s_xyz_view,xyz_view1,xyz_view0);
 
         keyj->d_xyz_view[0]=0.0;
         keyj->d_xyz_view[1]=0.0;
@@ -631,7 +631,7 @@ void createtourpaths(void){
       keyj->keyview_xyz[2]=0.0;
       if(keyj->viewtype==ABS_VIEW)xyzview2azelev(keyj,NULL,NULL);
 
-      ROTATE(keyj->keyview_xyz,keyj->keyview_xyz2,keyj->az_path*DEG2RAD);
+      ROTATE(keyj->keyview_xyz2,keyj->keyview_xyz,keyj->az_path*DEG2RAD);
       keyj->keyview_xyz2[2]=0.0;
       denom=NORM2(keyj->keyview_xyz2);
       if(denom==0.0)continue;
@@ -843,19 +843,19 @@ void createtourpaths(void){
         dxyz[0] /= denom;
         dxyz[1] /= denom;
         az = pj->az_path*DEG2RAD;
-        ROTATE(dxyz,dxyz2,az);
+        ROTATE(dxyz2,dxyz,az);
         dxyz2[2] = tan(pj->elev_path*DEG2RAD)/10.0;
-        VECADD3(eye,dxyz2,tour_view);
+        VECADD3(tour_view,eye,dxyz2);
       } 
       else{
         float dxyz[3], denom;
 
-        VECDIFF3(eye,xyz_view,dxyz);
+        VECDIFF3(dxyz,xyz_view,eye);
         denom = 10.0*NORM3(dxyz);
         dxyz[0] /= denom;
         dxyz[1] /= denom;
         dxyz[2] /= denom;
-        VECADD3(eye,dxyz,tour_view);
+        VECADD3(tour_view,eye,dxyz);
       }
       if(iframe_old!=iframe_new){
         iframe_old=iframe_new;
@@ -1309,7 +1309,7 @@ void xyzview2azelev(keyframe *kf, float *az_path, float *elev_path){
   eye = kf->nodeval.eye;
   xyz_view = kf->nodeval.xyz_view_abs;
 
-  VECDIFF3(eye,xyz_view,dxyz);
+  VECDIFF3(dxyz,xyz_view,eye);
 
   distxy = NORM2(dxyz);
   if(distxy<=0.0)return;
