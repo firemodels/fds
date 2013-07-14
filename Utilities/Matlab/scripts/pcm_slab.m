@@ -94,7 +94,7 @@ for i_plot=1:2
     if i_plot==1
        h=plot(t,xf,'k-',t_fds,dmin,'k--',t_fds,dmax,'r--');
        xlabel('Time (s)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
-       ylabel('Phase interface $x_f$ (m)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
+       ylabel('Phase interface, {\itx}_f (m)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
        legend('Analytical','FDS min','FDS max','Location','SouthEast')
     else
        h=plot(t,T(:,1),'k-',t,T(:,2),'r-',t,T(:,3),'g-'); hold on
@@ -102,7 +102,7 @@ for i_plot=1:2
        h=plot(M_fds(1:5:nt_fds,1),M_fds(1:5:nt_fds,3),'ro');hold on
        h=plot(M_fds(1:5:nt_fds,1),M_fds(1:5:nt_fds,4),'gs');
        xlabel('Time (s)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
-       ylabel('Temperature ($^\circ$C)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)       
+       ylabel('Temperature (\circC)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)       
        legend('Analytical 1 cm','Analytical 5 cm','Analytical 10 cm','FDS 1 cm','FDS 5 cm','FDS 10 cm')
     end
     

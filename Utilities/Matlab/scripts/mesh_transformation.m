@@ -78,8 +78,8 @@ for i=1:length(XMinorTick)
 end
 set(gca,'XTick',[0:0.3:1.5])
 set(gca,'YTick',[0:0.3:1.5])
-xlabel('$\xi$','FontSize',Title_Font_Size,'FontName',Font_Name,'Interpreter',Font_Interpreter)
-ylabel('$x$','FontSize',Title_Font_Size,'FontName',Font_Name,'Interpreter',Font_Interpreter)
+xlabel('\xi','FontSize',Title_Font_Size,'FontName',Font_Name,'Interpreter',Font_Interpreter)
+ylabel('\itx','FontSize',Title_Font_Size,'FontName',Font_Name,'Interpreter',Font_Interpreter)
 
 set(gca,'FontSize',Label_Font_Size)
 set(gca,'FontName',Font_Name)
@@ -105,8 +105,8 @@ for i=1:length(XMinorTick)
 end
 set(gca,'XTick',[0:0.3:1.5])
 set(gca,'YTick',[0:0.3:1.5])
-xlabel('$\xi$','FontSize',Title_Font_Size,'FontName',Font_Name,'Interpreter',Font_Interpreter)
-ylabel('$x$','FontSize',Title_Font_Size,'FontName',Font_Name,'Interpreter',Font_Interpreter)
+xlabel('\xi','FontSize',Title_Font_Size,'FontName',Font_Name,'Interpreter',Font_Interpreter)
+ylabel('\itx','FontSize',Title_Font_Size,'FontName',Font_Name,'Interpreter',Font_Interpreter)
 
 set(gca,'FontSize',Label_Font_Size)
 set(gca,'FontName',Font_Name)
