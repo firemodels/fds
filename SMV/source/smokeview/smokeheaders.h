@@ -5,6 +5,7 @@
 #ifndef SMOKEHEADERS_H_DEFINED
 #define SMOKEHEADERS_H_DEFINED
 
+EXTERNCPP void add_delete_keyframe(int flag);
 EXTERNCPP void update_glui_keyframe(void);
 EXTERNCPP void update_tour_parms(void);
 EXTERNCPP void slerp(float *p0, float *p1, float t, float *pout);

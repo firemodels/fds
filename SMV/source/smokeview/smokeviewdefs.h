@@ -11,6 +11,9 @@ void _Sniff_Errors(char *whereat);
 #define SNIFF_ERRORS(f)
 #endif
 
+#define ADD_KEYFRAME 1
+#define DELETE_KEYFRAME -1
+
 #define REL_VIEW 0
 #define ABS_VIEW 1
 

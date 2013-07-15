@@ -1317,6 +1317,10 @@ void keyboard(unsigned char key, int flag){
 
   switch (key2){
     case 'a':
+      if(showtour_dialog==1&&edittour==1){
+        add_delete_keyframe(ADD_KEYFRAME);
+        break;
+      }
       switch (keystate){
         case GLUT_ACTIVE_ALT:
         case GLUT_ACTIVE_CTRL:
@@ -1429,6 +1433,10 @@ void keyboard(unsigned char key, int flag){
       break;
     case 'd':
     case 'D':
+      if(showtour_dialog==1&&edittour==1){
+        add_delete_keyframe(DELETE_KEYFRAME);
+        break;
+      }
       switch (keystate){
       case GLUT_ACTIVE_ALT:
         DialogMenu(22); // display dialog
