@@ -624,7 +624,110 @@ int compare_volfacelistdata( const void *arg1, const void *arg2 ){
   return 0;
 }
 
-/* ------------------ getvolsmokedir ------------------------ */
+/* ------------------ gettourdir ------------------------ */
+
+void gettourdir(void){
+  GLdouble xyz[3];
+  int viewport[4];
+  GLdouble screen0[3];
+  GLdouble screen[3],dscreenx[3],dscreeny[3],dscreenz[3];
+  GLdouble modelview[16];
+  GLdouble projection[16];
+  int set;
+  GLdouble maxvals[3];
+  int min_index;
+
+#define SETSCREEN(i1,i2,i3,dscreen)\
+  if(i1==0)set=0;\
+  if(set==0&&ABS(dscreen[i1])>MAX( ABS(dscreen[i2]) , ABS(dscreen[i3]) ) ){\
+    dscreen[i1]=SIGN(dscreen[i1]);\
+    dscreen[i2]=0.0;\
+    dscreen[i3]=0.0;\
+    set=1;\
+  }
+
+#define MAXABS3(x,y,z) (MAX(ABS((z)),MAX(ABS((x)),ABS((y)))))
+
+  glGetIntegerv(GL_VIEWPORT, viewport);
+  glGetDoublev(GL_MODELVIEW_MATRIX, modelview);
+  glGetDoublev(GL_PROJECTION_MATRIX, projection);
+
+  xyz[0]=0.0;
+  xyz[1]=0.0;
+  xyz[2]=0.0;
+  gluProject(xyz[0],xyz[1],xyz[2],modelview,projection,viewport,screen0,screen0+1,screen0+2);
+
+  xyz[0]=NORMALIZE_X(xbarORIG);
+  xyz[1]=0.0;
+  xyz[2]=0.0;
+  gluProject(xyz[0],xyz[1],xyz[2],modelview,projection,viewport,screen,screen+1,screen+2);
+  VECDIFF3(dscreenx,screen,screen0);
+  maxvals[0] = MAXABS3(dscreenx[0],dscreenx[1],dscreenx[2]);
+
+  xyz[0]=0.0;
+  xyz[1]=NORMALIZE_Y(ybarORIG);
+  xyz[2]=0.0;
+  gluProject(xyz[0],xyz[1],xyz[2],modelview,projection,viewport,screen,screen+1,screen+2);
+  VECDIFF3(dscreeny,screen,screen0);
+  maxvals[1] = MAXABS3(dscreeny[0],dscreeny[1],dscreeny[2]);
+
+  xyz[0]=0.0;
+  xyz[1]=0.0;
+  xyz[2]=NORMALIZE_Z(zbarORIG);
+  gluProject(xyz[0],xyz[1],xyz[2],modelview,projection,viewport,screen,screen+1,screen+2);
+  VECDIFF3(dscreenz,screen,screen0);
+  maxvals[2] = MAXABS3(dscreenz[0],dscreenz[1],dscreenz[2]);
+
+  if(maxvals[0]<MIN(maxvals[1],maxvals[2])){
+    min_index=0;
+  }
+  else if(maxvals[1]<MIN(maxvals[0],maxvals[2])){
+    min_index=1;
+  }
+  else{
+    min_index=2;
+  }
+
+  if(min_index==0){
+    dscreenx[0]=0.0;
+    dscreenx[1]=0.0;
+    dscreenx[2]=0.0;
+  }
+  else{
+    SETSCREEN(0,1,2,dscreenx);
+    SETSCREEN(1,0,2,dscreenx);
+    SETSCREEN(2,0,1,dscreenx);
+  }
+  printf("xx: %f %f %f \n",dscreenx[0],dscreenx[1],dscreenx[2]);
+
+  if(min_index==1){
+    dscreeny[0]=0.0;
+    dscreeny[1]=0.0;
+    dscreeny[2]=0.0;
+  }
+  else{
+    SETSCREEN(0,1,2,dscreeny);
+    SETSCREEN(1,0,2,dscreeny);
+    SETSCREEN(2,0,1,dscreeny);
+  }
+  printf("yy: %f %f %f \n",dscreeny[0],dscreeny[1],dscreeny[2]);
+
+  if(min_index==2){
+    dscreenz[0]=0.0;
+    dscreenz[1]=0.0;
+    dscreenz[2]=0.0;
+  }
+  else{
+    SETSCREEN(0,1,2,dscreenz);
+    SETSCREEN(1,0,2,dscreenz);
+    SETSCREEN(2,0,1,dscreenz);
+  }
+  printf("zz: %f %f %f \n",dscreenz[0],dscreenz[1],dscreenz[2]);
+
+  printf("\n");
+}
+
+  /* ------------------ getvolsmokedir ------------------------ */
 
 void getvolsmokedir(float *mm){
     /*
@@ -667,9 +770,9 @@ void getvolsmokedir(float *mm){
   if(freeze_volsmoke==1)return;
 #endif
 
-  xyzeyeorig[0] = -(mm[0]*mm[12]+mm[1]*mm[13]+ mm[2]*mm[14])/mscale[0];
-  xyzeyeorig[1] = -(mm[4]*mm[12]+mm[5]*mm[13]+ mm[6]*mm[14])/mscale[1];
-  xyzeyeorig[2] = -(mm[8]*mm[12]+mm[9]*mm[13]+mm[10]*mm[14])/mscale[2];
+  xyzeyeorig[0] = -DOT3(mm+0,mm+12)/mscale[0];
+  xyzeyeorig[1] = -DOT3(mm+4,mm+12)/mscale[1];
+  xyzeyeorig[2] = -DOT3(mm+8,mm+12)/mscale[2];
   
   for(j=0;j<nmeshes;j++){
     mesh *meshj;
@@ -755,13 +858,9 @@ void getvolsmokedir(float *mm){
         ASSERT(FFALSE);
         break;
       }
-      eyedir[0]=xyzeyeorig[0]-eyedir[0];
-      eyedir[1]=xyzeyeorig[1]-eyedir[1];
-      eyedir[2]=xyzeyeorig[2]-eyedir[2];
+      VECDIFF3(eyedir,xyzeyeorig,eyedir);
       normalize(eyedir,3);
-      cosdir = (eyedir[0]*norm[0]+eyedir[1]*norm[1]+eyedir[2]*norm[2]);
-      if(cosdir>1.0)cosdir=1.0;
-      if(cosdir<-1.0)cosdir=-1.0;
+      cosdir = CLAMP(DOT3(eyedir,norm),-1.0,1.0);
       cosdir=acos(cosdir)*RAD2DEG;
       if(cosdir<0.0)cosdir=-cosdir;
       angles[3+i]=cosdir;
@@ -883,9 +982,9 @@ void getsmokedir(float *mm){
   float dx, dy, dz;
   float factor;
 
-  xyzeyeorig[0] = -(mm[0]*mm[12]+mm[1]*mm[13]+ mm[2]*mm[14])/mscale[0];
-  xyzeyeorig[1] = -(mm[4]*mm[12]+mm[5]*mm[13]+ mm[6]*mm[14])/mscale[1];
-  xyzeyeorig[2] = -(mm[8]*mm[12]+mm[9]*mm[13]+mm[10]*mm[14])/mscale[2];
+  xyzeyeorig[0] = -DOT3(mm+0,mm+12)/mscale[0];
+  xyzeyeorig[1] = -DOT3(mm+4,mm+12)/mscale[1];
+  xyzeyeorig[2] = -DOT3(mm+8,mm+12)/mscale[2];
   
   for(j=0;j<nmeshes;j++){
     meshj = meshinfo + j;
@@ -1059,13 +1158,11 @@ void getsmokedir(float *mm){
       scalednorm[1]=norm[1]*mscale[1];
       scalednorm[2]=norm[2]*mscale[2];
 
-      normdir[0] = mm[0]*scalednorm[0] + mm[4]*scalednorm[1] + mm[8]*scalednorm[2];
-      normdir[1] = mm[1]*scalednorm[0] + mm[5]*scalednorm[1] + mm[9]*scalednorm[2];
-      normdir[2] = mm[2]*scalednorm[0] + mm[6]*scalednorm[1] + mm[10]*scalednorm[2];
+      normdir[0] = DOT3SKIP(mm,4,scalednorm,1);
+      normdir[1] = DOT3SKIP(mm+1,4,scalednorm,1);
+      normdir[2] = DOT3SKIP(mm+2,4,scalednorm,1);
 
-      cosangle = normdir[2]/sqrt(normdir[0]*normdir[0]+normdir[1]*normdir[1]+normdir[2]*normdir[2]);
-      if(cosangle>1.0)cosangle=1.0;
-      if(cosangle<-1.0)cosangle=-1.0;
+      cosangle = CLAMP(normdir[2]/NORM3(normdir),-1.0,1.0);
       absangle=acos(cosangle)*RAD2DEG;
       if(absangle<0.0)absangle=-absangle;
       if(absangle<minangle){

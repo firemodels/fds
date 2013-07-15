@@ -1433,7 +1433,7 @@ void keyboard(unsigned char key, int flag){
       break;
     case 'd':
     case 'D':
-      if(showtour_dialog==1&&edittour==1){
+      if(key2=='d'&&showtour_dialog==1&&edittour==1){
         add_delete_keyframe(DELETE_KEYFRAME);
         break;
       }

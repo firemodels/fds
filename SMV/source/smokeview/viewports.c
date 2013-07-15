@@ -996,18 +996,17 @@ void Scene_viewport(int quad, int view_mode, GLint screen_left, GLint screen_dow
     if(nrooms>0){
       getzonesmokedir(modelview_scratch);
     }
-    if(nvolrenderinfo>0&&showvolrender==1){
-      if(usevolrender==1){
-        getvolsmokedir(modelview_scratch);
-        SNIFF_ERRORS("after getvolsmokedir");
+    if(nvolrenderinfo>0&&showvolrender==1&&usevolrender==1){
+      getvolsmokedir(modelview_scratch);
+      SNIFF_ERRORS("after getvolsmokedir");
 #ifdef pp_GPU
-        if(usegpu==0){
-          compute_all_smokecolors();
-        }
+      if(usegpu==0)compute_all_smokecolors();
 #else
-        compute_all_smokecolors();
+      compute_all_smokecolors();
 #endif
-      }
+    }
+    if(1==0&&showtour_dialog==1&&edittour==1){
+      gettourdir();
     }
     if(nsmoke3dinfo>0&&show3dsmoke==1){
       sort_smoke3dinfo();

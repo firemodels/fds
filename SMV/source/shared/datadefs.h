@@ -91,6 +91,14 @@
 #define DOT3(x,y) ((x)[0]*(y)[0]+(x)[1]*(y)[1]+(x)[2]*(y)[2])
 #endif
 
+#ifndef DOT3SKIP
+#define DOT3SKIP(x,ix,y,iy) ((x)[0]*(y)[0]+(x)[ix]*(y)[iy]+(x)[2*ix]*(y)[2*iy])
+#endif
+
+#ifndef DOT4SKIP
+#define DOT4SKIP(x,ix,y,iy) ((x)[0]*(y)[0]+(x)[ix]*(y)[iy]+(x)[2*ix]*(y)[2*iy]+(x)[3*ix]*(y)[3*iy])
+#endif
+
 #ifndef NORM3
 #define NORM3(x) sqrt((x)[0]*(x)[0]+(x)[1]*(x)[1]+(x)[2]*(x)[2])
 #endif
