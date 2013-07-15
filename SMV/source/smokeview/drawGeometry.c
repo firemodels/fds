@@ -1610,8 +1610,8 @@ void SetVentDirs(void){
           orien=1;
           i=vi->imin;
           breakloop=0;
-          for(j=vi->jmin;j<=vi->jmax;j++){
-            for(k=vi->kmin;k<=vi->kmax;k++){
+          for(j=vi->jmin;j<=MIN(vi->jmax,jbar-1);j++){
+            for(k=vi->kmin;k<=MIN(vi->kmax,kbar-1);k++){
               int state1, state2;
 
               if(use_iblank==1){
@@ -1660,8 +1660,8 @@ void SetVentDirs(void){
           orien=1;
           j=vi->jmin;
           breakloop=0;
-          for(i=vi->imin;i<=vi->imax;i++){
-            for(k=vi->kmin;k<=vi->kmax;k++){
+          for(i=vi->imin;i<=MIN(vi->imax,ibar-1);i++){
+            for(k=vi->kmin;MIN(k<=vi->kmax,kbar-1);k++){
               int state1, state2;
 
               if(use_iblank==1){
@@ -1710,8 +1710,8 @@ void SetVentDirs(void){
           orien=1;
           k=vi->kmin;
           breakloop=0;
-          for(i=vi->imin;i<=vi->imax;i++){
-            for(j=vi->jmin;j<=vi->jmax;j++){
+          for(i=vi->imin;i<=MIN(vi->imax,ibar-1);i++){
+            for(j=vi->jmin;j<=MIN(vi->jmax,jbar-1);j++){
               int state1, state2;
 
               if(use_iblank==1){
