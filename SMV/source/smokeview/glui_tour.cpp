@@ -108,6 +108,14 @@ GLUI_Listbox *LISTBOX_avatar=NULL;
 
 #define TOURMENU(f) callfrom_tourglui=1;TourMenu(f);callfrom_tourglui=0;
 
+/* ------------------ update_tour_state ------------------------ */
+
+extern "C" void update_tour_state(void){
+  TOUR_CB(SHOWTOURROUTE);
+  TOUR_CB(VIEWTOURFROMPATH);
+  TOUR_CB(VIEWSNAP);
+}
+
 /* ------------------ add_delete_keyframe ------------------------ */
 
 void add_delete_keyframe(int flag){

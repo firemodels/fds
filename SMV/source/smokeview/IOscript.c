@@ -123,6 +123,12 @@ void update_menu(void);
 // LOADTOUR
 //  type (char)
 
+// SETTOURVIEW
+//   viewtype  showpath
+
+// SETTOURKEYFRAME
+//  time (float)
+
 // UNLOADTOUR
 
 // SETTIMEVAL
@@ -345,6 +351,9 @@ int get_script_keyword_index(char *keyword){
   if(match_upper(keyword,"CBARNORMAL") == 1)return SCRIPT_CBARNORMAL;
   if(match_upper(keyword,"EXIT") == 1)return SCRIPT_EXIT;
   if(match_upper(keyword,"KEYBOARD") == 1)return SCRIPT_KEYBOARD;
+  if(match_upper(keyword,"GSLICEORIEN") == 1)return SCRIPT_GSLICEORIEN;
+  if(match_upper(keyword,"GSLICEPOS") == 1)return SCRIPT_GSLICEPOS;
+  if(match_upper(keyword,"GSLICEVIEW") == 1)return SCRIPT_GSLICEVIEW;
   if(match_upper(keyword,"LOAD3DSMOKE") == 1)return SCRIPT_LOAD3DSMOKE;
   if(match_upper(keyword,"LOADBOUNDARY") == 1)return SCRIPT_LOADBOUNDARY;
   if(match_upper(keyword,"LOADFILE") == 1)return SCRIPT_LOADFILE;
@@ -368,10 +377,9 @@ int get_script_keyword_index(char *keyword){
   if(match_upper(keyword,"RENDERONCE") == 1)return SCRIPT_RENDERONCE;
   if(match_upper(keyword,"RENDERSTART") == 1)return SCRIPT_RENDERSTART;
   if(match_upper(keyword,"SCENECLIP") == 1)return SCRIPT_SCENECLIP;
+  if(match_upper(keyword,"SETTOURKEYFRAME") == 1)return SCRIPT_SETTOURKEYFRAME;
+  if(match_upper(keyword,"SETTOURVIEW") == 1)return SCRIPT_SETTOURVIEW;
   if(match_upper(keyword,"SETTIMEVAL") == 1)return SCRIPT_SETTIMEVAL;
-  if(match_upper(keyword,"GSLICEVIEW") == 1)return SCRIPT_GSLICEVIEW;
-  if(match_upper(keyword,"GSLICEPOS") == 1)return SCRIPT_GSLICEPOS;
-  if(match_upper(keyword,"GSLICEORIEN") == 1)return SCRIPT_GSLICEORIEN;
   if(match_upper(keyword,"SETVIEWPOINT") == 1)return SCRIPT_SETVIEWPOINT;
   if(match_upper(keyword,"SHOWPLOT3DDATA") == 1)return SCRIPT_SHOWPLOT3DDATA;
   if(match_upper(keyword,"UNLOADALL") == 1)return SCRIPT_UNLOADALL;
@@ -658,6 +666,16 @@ int compile_script(char *scriptfile){
         cleanbuffer(buffer,buffer2);
         sscanf(buffer,"%f",&scripti->fval);
         if(scripti->fval<0.0)scripti->fval=0.0;
+        break;
+      case SCRIPT_SETTOURVIEW:
+        SETcval;
+        cleanbuffer(buffer,buffer2);
+        scanf(buffer,"%i %i",scripti->ival,scripti->ival2);
+        break;
+      case SCRIPT_SETTOURKEYFRAME:
+        SETcval;
+        cleanbuffer(buffer,buffer2);
+        scanf(buffer,"%f",scripti->fval);
         break;
 
         //    sscanf(buffer,"%i %i %i %i",&vis_gslice_data, &show_gslice_triangles, &show_gslice_triangulation, &show_gslice_normal);
@@ -1312,6 +1330,36 @@ void script_loadvfile(scriptdata *scripti){
 
 }
 
+/* ------------------ script_settourkeyframe ------------------------ */
+
+void script_settourkeyframe(scriptdata *scripti){
+}
+
+/* ------------------ script_settourview ------------------------ */
+
+void script_settourview(scriptdata *scripti){
+  edittour=scripti->ival;
+  switch (scripti->ival2){
+    case 0:
+      viewtourfrompath=0;
+      keyframe_snap=0;
+      break;
+    case 1:
+      viewtourfrompath=1;
+      keyframe_snap=0;
+      break;
+    case 2:
+      viewtourfrompath=0;
+      keyframe_snap=1;
+      break;
+    default:
+      viewtourfrompath=0;
+      keyframe_snap=0;
+      break;
+  }
+  update_tour_state();
+}
+
 /* ------------------ script_settimeval ------------------------ */
 
 void script_settimeval(scriptdata *scripti){
@@ -1604,6 +1652,12 @@ int run_script(void){
     case SCRIPT_SETTIMEVAL:
       returnval=1;
       script_settimeval(scripti);
+      break;
+    case SCRIPT_SETTOURVIEW:
+      script_settourview(scripti);
+      break;
+    case SCRIPT_SETTOURKEYFRAME:
+      script_settourkeyframe(scripti);
       break;
     case SCRIPT_SETVIEWPOINT:
       script_setviewpoint(scripti);
