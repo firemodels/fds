@@ -115,7 +115,14 @@ void add_delete_keyframe(int flag){
   if(flag==DELETE_KEYFRAME)TOUR_CB(KEYFRAME_DELETE);
 }
 
-/* ------------------ add_new_tour ------------------------ */
+
+/* ------------------ update_edit_tour ------------------------ */
+
+extern "C" void update_edit_tour(void){
+  TOUR_CB(SHOWTOURROUTE);
+}
+
+/* ------------------ update_tour_parms ------------------------ */
 
 extern "C" void update_tour_parms(void){
   TOUR_CB(KEYFRAME_tXYZ);

@@ -1980,6 +1980,10 @@ void keyboard(unsigned char key, int flag){
     case '(':
       clip_rendered_scene=1-clip_rendered_scene;
       break;
+    case '[':
+      edittour=1-edittour;
+      update_edit_tour();
+      break;
   }
 
   skip2=key2-'1'+1;
