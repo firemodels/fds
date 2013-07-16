@@ -149,7 +149,7 @@ This chapter provides a brief overview of the Fire Dynamics Simulator (FDS) and 
 
 FDS is a Computational Fluid Dynamics (CFD) model of fire-driven fluid flow. The model numerically solves a form of the Navier-Stokes equations
 appropriate for low-speed, thermally-driven flow with an emphasis on smoke and heat transport from fires. The partial derivatives in the conservation
-equations for mass, momentum and energy are approximated by finite differences, and the solution is updated in time on a three-dimensional,
+equations for mass, momentum, and energy are approximated by finite differences, and the solution is updated in time on a three-dimensional,
 rectilinear grid. Thermal radiation is computed using a finite volume technique on the same grid as the flow solver. Lagrangian particles are used to
 simulate smoke movement, sprinkler discharge, and fuel sprays.
 
@@ -158,7 +158,7 @@ to Smokeview the ability to visualize fire and smoke in a fairly realistic way. 
 an integral part of the physical model, as it allows one to assess the visibility within a fire compartment in ways that ordinary scientific
 visualization software cannot.
 
-Although not part of the FDS/Smokeview suite maintained at NIST, there are several third-party and proprietary ``add-ons'' to FDS either available
+Although not part of the FDS/Smokeview suite maintained at NIST (and not subject to this Plan), there are several third-party and proprietary ``add-ons'' to FDS either available
 commercially or privately maintained by individual users. Most notably, there are several Graphical User Interfaces (GUIs) that can be used to create
 the input file containing all the necessary information needed to perform a simulation.
 
@@ -168,12 +168,12 @@ the input file containing all the necessary information needed to perform a simu
 
 Version 1 of FDS was publicly released in February 2000, version 2 in December 2001, version 3 in November 2002, version 4 in July 2004, version 5 in October 2007, and a beta test of version 6 in October 2012.
 
-Starting with FDS 5, a formal revision management system has been implemented to track changes to the FDS source code. The open-source program
-development tools are provided by an Internet-based organization known as Google Code (code.google.com).
+Starting with FDS 5, a formal revision management system was implemented to track changes to the FDS source code. The open-source program
+development tools are provided by an Internet-based organization known as Google Code (code.google.com).  
 
 The version number for FDS has three parts.  For example, FDS 5.2.12 indicates that this is FDS 5, the fifth major release. The 2 indicates a
 significant upgrade (a minor release), but still within the framework of FDS 5.  The 12 indicates the twelfth maintenance release of 5.2, mostly bug fixes and minor user
-requests.
+requests.  A Wiki file, located on the FDS/Smokeview web site, maintained by the developers describes the changes made for each release.
 
 
 \section{Model Developers}
@@ -238,15 +238,15 @@ sprinkler/detector activation studies. The other half consist of residential and
 \section{Input Parameters}
 
 All of the input parameters required by FDS to describe a particular scenario are conveyed via a single text file created by the user. The file
-contains information about the numerical grid, ambient environment, building geometry, material properties, combustion kinetics, and desired output
+contains information about the numerical grid, ambient environment, scenario geometry, material properties, combustion kinetics, and desired output
 quantities. The numerical grid consists of one or more rectilinear meshes with (usually) uniform cells. All geometric features of the scenario must
-conform to this numerical grid. Objects smaller than a single grid cell are either approximated as a single cell, or rejected. The building geometry
+conform to this numerical grid. Objects smaller than a single grid cell are either approximated as a single blocked cell or cell face, or are rejected. The scenario geometry
 is input as a series of rectangular blocks. Boundary conditions are applied to solid surfaces as rectangular patches. Materials are defined by their
 thermal conductivity, specific heat, density, thickness, and burning behavior. There are various ways that this information is conveyed, depending on
 the desired level of detail.
 
 Any simulation of a real fire scenario involves specifying material properties for the walls, floor, ceiling, and furnishings. FDS treats all of
-these objects as multi-layered solids, thus the physical parameters for many real objects can only be viewed as approximations to the actual
+these objects as multi-layered solids; thus, the physical parameters for many real objects can only be viewed as approximations to the actual
 properties. Describing these materials in the input file is the single most challenging task for the user. Thermal properties such as conductivity,
 specific heat, density, and thickness can be found in various handbooks, or in manufacturers literature, or from bench-scale measurements. The
 burning behavior of materials at different heat fluxes is more difficult to describe, and the properties more difficult to obtain. Even though entire
@@ -261,7 +261,7 @@ A complete description of the input parameters required by FDS can be found in t
 
 \section{Output Quantities}
 
-FDS computes the temperature, density, pressure, velocity and chemical composition within each numerical grid cell at each discrete time step. There
+FDS computes the temperature, density, pressure, velocity, chemical composition, and various other quantities within each numerical grid cell at each discrete time step. There
 are typically hundreds of thousands to millions of grid cells and thousands to hundreds of thousands of time steps. In addition, FDS computes at
 solid surfaces the temperature, heat flux, mass loss rate, and various other quantities. The user must carefully select what data to save, much like
 one would do in designing an actual experiment. Even though only a small fraction of the computed information can be saved, the output typically
@@ -274,7 +274,6 @@ consists of fairly large data files. Typical output quantities for the gas phase
 \item Smoke concentration and visibility estimates
 \item Pressure
 \item Heat release rate per unit volume
-\item Mixture fraction (or air/fuel ratio)
 \item Gas density
 \item Water droplet mass per unit volume
 \end{itemize}
@@ -432,7 +431,7 @@ Once a change request has be addressed by a developer and changes submitted to t
 
 \subsection{Committing Changes}
 
-Once a developer has addressed a change request, the modified files are committed to the SVN repository.  A description of the changes will be added to the SVN change log.  This description first identifies the primary component being changed (for example: FDS Source or FDS Documentation).  This component identification will be followed by a brief summary of the changes made.  The issue identifier will be included as part of that brief description.
+Once a developer has addressed a change request, the modified files are committed to the SVN repository.  A description of the changes will be added to the SVN change log.  This description first identifies the primary component being changed (for example: FDS Source or FDS Documentation).  This component identification will be followed by a brief summary of the changes made.
 
 Changes to the FDS source code and supporting documentation are reviewed by other members of the team. There is no formal system with which changes are reviewed because the frequency of changes makes it impractical. As a general rule, all team members watch for unintentional commits of copyrighted material or algorithms, and also proprietary data or case studies collected from an end user. FDS itself does not include copyrighted or proprietary data, but occasionally this kind of information is submitted by an end user who has submitted a bug report.
 
