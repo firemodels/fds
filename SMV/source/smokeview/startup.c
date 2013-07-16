@@ -1850,7 +1850,6 @@ void initvars(void){
   show_path_knots=0;
   keyframe_snap=0;
   tourviewtype=0;
-  show_tourlocus=1;
   tourlocus_type=0;
   tourrad_avatar=0.1;
   dirtycircletour=0;

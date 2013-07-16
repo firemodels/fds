@@ -124,7 +124,7 @@ void update_menu(void);
 //  type (char)
 
 // SETTOURVIEW
-//   viewtype  showpath
+//   viewtype  showpath showtour_locus
 
 // SETTOURKEYFRAME
 //  time (float)
@@ -670,12 +670,12 @@ int compile_script(char *scriptfile){
       case SCRIPT_SETTOURVIEW:
         SETcval;
         cleanbuffer(buffer,buffer2);
-        scanf(buffer,"%i %i",scripti->ival,scripti->ival2);
+        sscanf(buffer,"%i %i %i",&scripti->ival,&scripti->ival2,&scripti->ival3);
         break;
       case SCRIPT_SETTOURKEYFRAME:
         SETcval;
         cleanbuffer(buffer,buffer2);
-        scanf(buffer,"%f",scripti->fval);
+        sscanf(buffer,"%f",&scripti->fval);
         break;
 
         //    sscanf(buffer,"%i %i %i %i",&vis_gslice_data, &show_gslice_triangles, &show_gslice_triangulation, &show_gslice_normal);
@@ -1333,12 +1333,40 @@ void script_loadvfile(scriptdata *scripti){
 /* ------------------ script_settourkeyframe ------------------------ */
 
 void script_settourkeyframe(scriptdata *scripti){
+  float keyframe_time;
+  keyframe *keyj,*minkey=NULL;
+  tourdata *touri;
+  float minkeytime=1000000000.0;
+
+  if(selected_tour==NULL)return;
+  touri=selected_tour;
+  keyframe_time=scripti->fval;
+  for(keyj=(touri->first_frame).next;keyj->next!=NULL;keyj=keyj->next){
+    float difftime;
+
+    if(keyj==(touri->first_frame).next){
+      minkey=keyj;
+      minkeytime=ABS(keyframe_time-keyj->nodeval.time);
+      continue;
+    }
+    difftime=ABS(keyframe_time-keyj->nodeval.time);
+    if(difftime<minkeytime){
+      minkey=keyj;
+      minkeytime=difftime;
+    }
+  }
+  if(minkey!=NULL){
+    new_select(minkey);
+    set_glui_keyframe();
+    update_tourcontrols();
+  }
 }
 
 /* ------------------ script_settourview ------------------------ */
 
 void script_settourview(scriptdata *scripti){
   edittour=scripti->ival;
+  show_tourlocus=scripti->ival3;
   switch (scripti->ival2){
     case 0:
       viewtourfrompath=0;

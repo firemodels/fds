@@ -974,7 +974,6 @@ void Move_Tour_Node(int xm, int ym){
 
   dxm = xm - start_xyz0[0];
   dym = ym - start_xyz0[1];
-  printf("%i %i\n",dxm,dym);
   switch (key_state){
     case KEY_NONE:
     case KEY_ALT:
@@ -1981,7 +1980,11 @@ void keyboard(unsigned char key, int flag){
       clip_rendered_scene=1-clip_rendered_scene;
       break;
     case '[':
-      edittour=1-edittour;
+      edittour=1;
+      update_edit_tour();
+      break;
+    case ']':
+      edittour=0;
       update_edit_tour();
       break;
   }

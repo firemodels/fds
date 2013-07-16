@@ -59,7 +59,7 @@ GLUI_Panel *PANEL_view_angle=NULL;
 GLUI_Panel *PANEL_settings=NULL;
 
 GLUI_Checkbox *CHECKBOX_snap=NULL,*CHECKBOX_view=NULL,*CHECKBOX_showtourroute=NULL,*CHECKBOX_constantvel=NULL;
-GLUI_Checkbox *CHECKBOX_showtourlocus=NULL,*CHECKBOX_showintermediate=NULL;
+GLUI_Checkbox *CHECKBOX_showtour_locus=NULL,*CHECKBOX_showintermediate=NULL;
 GLUI_Checkbox *CHECKBOX_globaltension_flag=NULL, *CHECKBOX_tourhide=NULL;
 GLUI_Checkbox *CHECKBOX_view1=NULL;
 GLUI_Checkbox *CHECKBOX_view2=NULL;
@@ -210,7 +210,7 @@ extern "C" void glui_tour_setup(int main_window){
     }
     LISTBOX_avatar->set_int_val(glui_avatar_index);
     glui_tour->add_column_to_panel(PANEL_tour2,false);
-    CHECKBOX_showtourlocus=glui_tour->add_checkbox_to_panel(PANEL_tour2,_("Show avatar"),&show_tourlocus);
+    CHECKBOX_showtour_locus=glui_tour->add_checkbox_to_panel(PANEL_tour2,_("Show avatar"),&show_tourlocus);
   }
 
   PANEL_settings = glui_tour->add_panel(_("Settings"));
@@ -959,13 +959,13 @@ extern "C" void update_tourcontrols(void){
     selectedtour_index = selected_tour-tourinfo;
     LISTBOX_tour->set_int_val(selectedtour_index);
     LISTBOX_avatar->enable();
-    CHECKBOX_showtourlocus->enable();
+    CHECKBOX_showtour_locus->enable();
   }
   else{
     selectedtour_index = -1;
     LISTBOX_tour->set_int_val(selectedtour_index);
     LISTBOX_avatar->disable();
-    CHECKBOX_showtourlocus->disable();
+    CHECKBOX_showtour_locus->disable();
   }
   if(edittour==1){
     if(tour_constant_vel==0){
