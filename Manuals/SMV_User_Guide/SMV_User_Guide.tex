@@ -2520,7 +2520,7 @@ of the tour path. }
 \end{figure}
 
 The touring option allows one to specify paths or tours through a
-Smokeview scene.  One may then view a scene from the vantage point of an 
+Smokeview scene.  One may then view a scene from the vantage point of an
 observer moving along one of these paths. Smokeview creates a tour surrounding
 the scene by default.  An example for the townhouse case is illustrated
 in Figure \ref{figTOUREXAMPLE}.
@@ -2560,7 +2560,7 @@ The start and stop times of the tour may also be specified using the {\em start 
 \section{Key frame Settings}
 A tour is created from a series of key frames.  One may specify
  the time, position and view direction at each key frame.  Smokeview then
-obtains positions and view directions between key frames by interpolating 
+obtains positions and view directions between key frames by interpolating
 using cubic Hermite cubic splines.
 A tour is created by pressing the
 \frameit{Add Tour}\ button.  This tour has two key frames located
@@ -2577,20 +2577,22 @@ time 40 s. Key frame positions may then be modified by changing
 data in the t, X, Y or Z edit boxes. A different view direction
 may also be set.
 
-A key frame may be moved with the mouse.  Key frame movement with the mouse works the same way as 
-scene movement. Dragging the mouse left/right and up/down
-moves the key frame within a horizontal plane at a fixed elevation.  If the <CTRL> key is pressed while clicking and dragging the mouse, the key frame moves vertically within the scene.
+A key frame may also be moved with the mouse.  Clicking on a key frame node then dragging the mouse left/right and up/down
+moves the key frame horizontally and vertically.  Pressing the <CTRL> key while dragging the mouse
+restricts key frame movement to a horizontal direction (with respect to the mouse).  Pressing the <ALT> key while dragging the mouse
+restricts key frame movement to a vertical direction (again with respect to the mouse).
 
 A new key frame is created by clicking the \frameit{Add}\ button.
 It is formed by averaging the positions and view directions of the
 current and next key frames. If the selected key frame is the last
 one in the tour then a new key frame  is added beyond the last
-key frame.
+key frame.  A key frame may also be created by pressing the 'a' key.
 
 A key frame may be deleted by clicking the \frameit{Delete}\
-button. There is no \frameit{Delete Tour}\ button. A tour may be
+button. The currently selected key frame may also be deleted by pressing the 'd' key.
+There is no \frameit{Delete Tour}\ button. A tour may be
 deleted by either deleting all of its key frames or by deleting its
-entry in the casename.ini file.
+entry in the casename.ini file. 
 
 A view direction may be defined at each key frame by either setting
 direction angles relative to the path (an azimuthal and an elevation
