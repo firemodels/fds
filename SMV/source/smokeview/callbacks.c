@@ -977,36 +977,44 @@ void Move_Tour_Node(int xm, int ym){
   printf("%i %i\n",dxm,dym);
   switch (key_state){
     case KEY_NONE:
+    case KEY_ALT:
+    case KEY_SHIFT:
     case KEY_CTRL:
       {
-        float xx, yy;
-        float dx, dy;
+        float xy[2]={0.0,0.0},xyz[3];
+        float dx, dy, dz;
 
-        xx = (float)(xm-mouse_down_xy0[0])/(float)screenWidth;
-        yy = (float)(ym-mouse_down_xy0[1])/(float)screenHeight;
-        dx =  (xbarORIG-xbar0ORIG)*xx;
-        dy =  (ybarORIG-ybar0ORIG)*yy;
+// scale mouse coordinates
+
+        if(key_state!=KEY_ALT)xy[0] = (float)(xm-mouse_down_xy0[0])/(float)screenWidth;
+        if(key_state!=KEY_CTRL)xy[1] = -(float)(ym-mouse_down_xy0[1])/(float)screenHeight;
+
+// permute coordinates according to how screen is rotated
+
+        xyz[0]=DOT2(xy,screen_perm);
+        xyz[1]=DOT2(xy,screen_perm+3);
+        xyz[2]=DOT2(xy,screen_perm+6);
+
+// compute mouse movement in physical coordinates
+
+        dx =  (xbarORIG-xbar0ORIG)*xyz[0];
+        dy =  (ybarORIG-ybar0ORIG)*xyz[1];
+        dz =  (zbarORIG-zbar0ORIG)*xyz[2];
+
+// offset tour node location
+
         tour_xyz[0] += dx;
-        tour_xyz[1] -= dy;
+        tour_xyz[1] += dy;
+        tour_xyz[2] += dz;
+        
         mouse_down_xy0[0]=xm;
         mouse_down_xy0[1]=ym;
-        update_tour_parms();
-        update_glui_keyframe();
-      }
-      break;
-    case KEY_ALT:
-      {
-        float zz, dz;
 
-        zz = (float)(ym-mouse_down_xy0[1])/(float)screenHeight;
-        dz =  (zbarORIG-zbar0ORIG)*zz;
-        tour_xyz[2] -= dz;
-        mouse_down_xy0[1]=ym;
+// update tour data structures with new tour node location
+
         update_tour_parms();
         update_glui_keyframe();
       }
-      break;
-    case KEY_SHIFT:
       break;
     default:
       ASSERT(0);

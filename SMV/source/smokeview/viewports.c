@@ -1005,8 +1005,8 @@ void Scene_viewport(int quad, int view_mode, GLint screen_left, GLint screen_dow
       compute_all_smokecolors();
 #endif
     }
-    if(1==0&&showtour_dialog==1&&edittour==1){
-      gettourdir();
+    if(showtour_dialog==1&&edittour==1){
+      get_screen_mapping();
     }
     if(nsmoke3dinfo>0&&show3dsmoke==1){
       sort_smoke3dinfo();

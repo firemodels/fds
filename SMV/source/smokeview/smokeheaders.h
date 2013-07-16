@@ -390,7 +390,7 @@ EXTERNCPP void Sort_Transparent_Faces(float *mm);
 EXTERNCPP void getsmokedir(float *mm);
 EXTERNCPP void get_vdevice_vel(float time, vdevicedata *vdevicei, float *vel, float *angle, float *dvel, float *dangle, int *valid_vel);
 EXTERNCPP float get_device_val(float time, devicedata *devicei, int *valid);
-EXTERNCPP void gettourdir(void);
+EXTERNCPP void get_screen_mapping(void);
 EXTERNCPP void getvolsmokedir(float *mm);
 EXTERNCPP void getzonesmokedir(float *mm);
 EXTERNCPP void get_world_eyepos(float *mm, float user_eyepos[3], float scaled_eyepos[3]);

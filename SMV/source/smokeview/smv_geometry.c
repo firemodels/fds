@@ -624,9 +624,9 @@ int compare_volfacelistdata( const void *arg1, const void *arg2 ){
   return 0;
 }
 
-/* ------------------ gettourdir ------------------------ */
+/* ------------------ get_screen_mapping ------------------------ */
 
-void gettourdir(void){
+void get_screen_mapping(void){
   GLdouble xyz[3];
   int viewport[4];
   GLdouble screen0[3];
@@ -639,14 +639,14 @@ void gettourdir(void){
 
 #define SETSCREEN(i1,i2,i3,dscreen)\
   if(i1==0)set=0;\
-  if(set==0&&ABS(dscreen[i1])>MAX( ABS(dscreen[i2]) , ABS(dscreen[i3]) ) ){\
-    dscreen[i1]=SIGN(dscreen[i1]);\
-    dscreen[i2]=0.0;\
-    dscreen[i3]=0.0;\
+  if(set==0&&ABS((dscreen)[i1])>MAX( ABS((dscreen)[i2]) , ABS((dscreen)[i3]) ) ){\
+    (dscreen)[i1]=SIGN((dscreen)[i1]);\
+    (dscreen)[i2]=0.0;\
+    (dscreen)[i3]=0.0;\
     set=1;\
   }
 
-#define MAXABS3(x,y,z) (MAX(ABS((z)),MAX(ABS((x)),ABS((y)))))
+#define MAXABS3(x) (MAX(ABS((x)[0]),MAX(ABS((x)[1]),ABS((x)[2]))))
 
   glGetIntegerv(GL_VIEWPORT, viewport);
   glGetDoublev(GL_MODELVIEW_MATRIX, modelview);
@@ -661,22 +661,22 @@ void gettourdir(void){
   xyz[1]=0.0;
   xyz[2]=0.0;
   gluProject(xyz[0],xyz[1],xyz[2],modelview,projection,viewport,screen,screen+1,screen+2);
-  VECDIFF3(dscreenx,screen,screen0);
-  maxvals[0] = MAXABS3(dscreenx[0],dscreenx[1],dscreenx[2]);
+  VECDIFF3(screen_perm,screen,screen0);
+  maxvals[0] = MAXABS3(screen_perm);
 
   xyz[0]=0.0;
   xyz[1]=NORMALIZE_Y(ybarORIG);
   xyz[2]=0.0;
   gluProject(xyz[0],xyz[1],xyz[2],modelview,projection,viewport,screen,screen+1,screen+2);
-  VECDIFF3(dscreeny,screen,screen0);
-  maxvals[1] = MAXABS3(dscreeny[0],dscreeny[1],dscreeny[2]);
+  VECDIFF3(screen_perm+3,screen,screen0);
+  maxvals[1] = MAXABS3(screen_perm+3);
 
   xyz[0]=0.0;
   xyz[1]=0.0;
   xyz[2]=NORMALIZE_Z(zbarORIG);
   gluProject(xyz[0],xyz[1],xyz[2],modelview,projection,viewport,screen,screen+1,screen+2);
-  VECDIFF3(dscreenz,screen,screen0);
-  maxvals[2] = MAXABS3(dscreenz[0],dscreenz[1],dscreenz[2]);
+  VECDIFF3(screen_perm+6,screen,screen0);
+  maxvals[2] = MAXABS3(screen_perm+6);
 
   if(maxvals[0]<MIN(maxvals[1],maxvals[2])){
     min_index=0;
@@ -689,42 +689,37 @@ void gettourdir(void){
   }
 
   if(min_index==0){
-    dscreenx[0]=0.0;
-    dscreenx[1]=0.0;
-    dscreenx[2]=0.0;
+    screen_perm[0]=0.0;
+    screen_perm[1]=0.0;
+    screen_perm[2]=0.0;
   }
   else{
-    SETSCREEN(0,1,2,dscreenx);
-    SETSCREEN(1,0,2,dscreenx);
-    SETSCREEN(2,0,1,dscreenx);
+    SETSCREEN(0,1,2,screen_perm);
+    SETSCREEN(1,0,2,screen_perm);
+    SETSCREEN(2,0,1,screen_perm);
   }
-  printf("xx: %f %f %f \n",dscreenx[0],dscreenx[1],dscreenx[2]);
 
   if(min_index==1){
-    dscreeny[0]=0.0;
-    dscreeny[1]=0.0;
-    dscreeny[2]=0.0;
+    screen_perm[3]=0.0;
+    screen_perm[4]=0.0;
+    screen_perm[5]=0.0;
   }
   else{
-    SETSCREEN(0,1,2,dscreeny);
-    SETSCREEN(1,0,2,dscreeny);
-    SETSCREEN(2,0,1,dscreeny);
+    SETSCREEN(0,1,2,screen_perm+3);
+    SETSCREEN(1,0,2,screen_perm+3);
+    SETSCREEN(2,0,1,screen_perm+3);
   }
-  printf("yy: %f %f %f \n",dscreeny[0],dscreeny[1],dscreeny[2]);
 
   if(min_index==2){
-    dscreenz[0]=0.0;
-    dscreenz[1]=0.0;
-    dscreenz[2]=0.0;
+    screen_perm[6]=0.0;
+    screen_perm[7]=0.0;
+    screen_perm[8]=0.0;
   }
   else{
-    SETSCREEN(0,1,2,dscreenz);
-    SETSCREEN(1,0,2,dscreenz);
-    SETSCREEN(2,0,1,dscreenz);
+    SETSCREEN(0,1,2,screen_perm+6);
+    SETSCREEN(1,0,2,screen_perm+6);
+    SETSCREEN(2,0,1,screen_perm+6);
   }
-  printf("zz: %f %f %f \n",dscreenz[0],dscreenz[1],dscreenz[2]);
-
-  printf("\n");
 }
 
   /* ------------------ getvolsmokedir ------------------------ */
