@@ -4,6 +4,16 @@
 RENDERDIR
  ..\..\Manuals\SMV_User_Guide\SCRIPT_FIGURES
 
+// render tour
+SETVIEWPOINT
+ upz2
+KEYBOARD
+ [
+RENDERONCE
+ thouse5_tourexample
+KEYBOARD
+ [
+
 // render 3D smoke
 
 LOADINIFILE
