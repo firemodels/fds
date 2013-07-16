@@ -89,6 +89,8 @@ for m = 1:4
     % Calculate RMS Error Values
     %-----------------------------------------------------------------%
     
+    figure
+    
     % Define plot range
     Z0 = STEPSIZE(m)/2;
     Z  = -2*Rc+Z0:STEPSIZE(m):2*Rc-Z0;
