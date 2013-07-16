@@ -49,7 +49,7 @@ if length(varargin) >= 1
     % Check if FDS verification plot, set appropriate flag and tex output file
     if strfind(output_file, 'FDS_verification_scatterplot_output')
         stats_output = 1;
-        statistics_tex_output = '../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/verification_statistics.tex';
+        statistics_tex_output = '../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/Scatterplots/verification_statistics.tex';
     % Check if FDS validation plot, set appropriate flag and tex output file
     elseif strfind(output_file, 'FDS_validation_scatterplot_output')
         stats_output = 2;
@@ -447,8 +447,8 @@ if (stats_output ~= 0)
     fclose(fid);
 end
 
-% Write statistics information to a LaTeX table for inclusion in the
-% FDS Verification Guide (SCRIPT_FIGURES/verification_statistics.tex)
+% Write statistics information to a LaTeX table
+% for inclusion in the FDS Verification Guide
 if stats_output == 1
     fid = fopen(statistics_tex_output, 'wt');
     % Generate table header information in .tex file
