@@ -124,7 +124,7 @@ void update_menu(void);
 //  type (char)
 
 // SETTOURVIEW
-//   viewtype  showpath showtour_locus
+//   viewtype  showpath showtour_locus tension
 
 // SETTOURKEYFRAME
 //  time (float)
@@ -670,7 +670,7 @@ int compile_script(char *scriptfile){
       case SCRIPT_SETTOURVIEW:
         SETcval;
         cleanbuffer(buffer,buffer2);
-        sscanf(buffer,"%i %i %i",&scripti->ival,&scripti->ival2,&scripti->ival3);
+        sscanf(buffer,"%i %i %i %f",&scripti->ival,&scripti->ival2,&scripti->ival3,&scripti->fval);
         break;
       case SCRIPT_SETTOURKEYFRAME:
         SETcval;
@@ -1367,6 +1367,8 @@ void script_settourkeyframe(scriptdata *scripti){
 void script_settourview(scriptdata *scripti){
   edittour=scripti->ival;
   show_tourlocus=scripti->ival3;
+  tour_global_tension_flag=1;
+  tour_global_tension=scripti->fval;
   switch (scripti->ival2){
     case 0:
       viewtourfrompath=0;

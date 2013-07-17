@@ -10813,7 +10813,7 @@ typedef struct {
               inittour(touri);
               fgets(buffer,255,stream);
               trim(buffer);
-              strcpy(touri->label,buffer);
+              strcpy(touri->label,trim_front(buffer));
 
               t_globaltension=touri->global_tension;
               t_globaltension_flag=touri->global_tension_flag;

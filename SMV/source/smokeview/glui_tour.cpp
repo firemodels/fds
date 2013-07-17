@@ -26,8 +26,6 @@ static int viewtype2=REL_VIEW;
 static float tour_ttt, tour_az_path=0.0, tour_tension=0.0;
 static float tour_view_xyz[3]={0.0,0.0,0.0}, tour_elev_path=0.0;
 static int tour_hide=0;
-static int tour_global_tension_flag=1;
-static float tour_global_tension=0.0;
 static float tour_zoom=1.0;
 static char tour_label[sizeof(GLUI_String)];
 
@@ -114,6 +112,8 @@ extern "C" void update_tour_state(void){
   TOUR_CB(SHOWTOURROUTE);
   TOUR_CB(VIEWTOURFROMPATH);
   TOUR_CB(VIEWSNAP);
+  TOUR_CB(GLOBAL_TENSION);
+  TOUR_CB(GLOBAL_TENSIONFLAG);
 }
 
 /* ------------------ add_delete_keyframe ------------------------ */
@@ -242,10 +242,10 @@ extern "C" void glui_tour_setup(int main_window){
   PANEL_pos = glui_tour->add_panel_to_panel(PANEL_keyframe,"",GLUI_PANEL_NONE);
 
   PANEL_pos3 = glui_tour->add_panel_to_panel(PANEL_pos,"",GLUI_PANEL_NONE);
-  glui_tour->add_button_to_panel(PANEL_pos3,_("Add"),KEYFRAME_INSERT,TOUR_CB);
-  glui_tour->add_button_to_panel(PANEL_pos3,_("Delete"),KEYFRAME_DELETE,TOUR_CB);
   glui_tour->add_button_to_panel(PANEL_pos3,_("Next"),    KEYFRAME_NEXT,TOUR_CB);
   glui_tour->add_button_to_panel(PANEL_pos3,_("Previous"),KEYFRAME_PREVIOUS,TOUR_CB);
+  glui_tour->add_button_to_panel(PANEL_pos3,_("Add"),KEYFRAME_INSERT,TOUR_CB);
+  glui_tour->add_button_to_panel(PANEL_pos3,_("Delete"),KEYFRAME_DELETE,TOUR_CB);
 
   glui_tour->add_column_to_panel(PANEL_pos,false);
 

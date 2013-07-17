@@ -1133,7 +1133,7 @@ tourdata *add_tour(char *label){
     sprintf(touri->label,"Tour %i",ntours);
   }
   else{
-    strcpy(touri->label,label);
+    strcpy(touri->label,trim_front(label));
   }
   nkeyframes=2;
   NewMemory((void **)&touri->keyframe_times, nkeyframes*sizeof(float));
