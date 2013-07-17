@@ -779,7 +779,7 @@ check_smv_pictures()
 {
    # Scan and report any errors in make SMV pictures process
    cd $FIREBOT_DIR
-   if [[ `grep -B 50 -A 50 "Segmentation" -I $FIREBOT_DIR/output/stage6e` == "" && `grep "*** Error" -I $FIREBOT_DIR/output/stage6e` == "" ]]
+   if [[ `grep -I -E "Segmentation|Error" $FIREBOT_DIR/output/stage6c` == "" ]]
    then
       stage6e_success=true
    else
@@ -805,7 +805,7 @@ make_smv_movies()
 check_smv_movies()
 {
    cd $FIREBOT_DIR
-   if [[ `grep -B 50 -A 50 "Segmentation" -I $FIREBOT_DIR/output/stage6f` == "" && `grep "*** Error" -I $FIREBOT_DIR/output/stage6f` == "" ]]
+   if [[ `grep -I -E "Segmentation|Error" $FIREBOT_DIR/output/stage6c` == "" ]]
    then
       stage6f_success=true
    else
