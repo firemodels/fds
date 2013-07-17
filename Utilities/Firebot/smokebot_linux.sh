@@ -714,7 +714,7 @@ check_smv_pictures_db()
 {
    # Scan and report any errors in make SMV pictures process
    cd $FIREBOT_DIR
-   if [[ `grep -B 50 -A 50 "Segmentation" -I $FIREBOT_DIR/output/stage6c` == "" && `grep "*** Error" -I $FIREBOT_DIR/output/stage6c` == "" ]]
+   if [[ `grep -I -E "Segmentation|Error" $FIREBOT_DIR/output/stage6c` == "" ]]
    then
       stage6c_success=true
    else
