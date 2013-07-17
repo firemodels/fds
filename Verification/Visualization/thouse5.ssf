@@ -4,19 +4,60 @@
 RENDERDIR
  ..\..\Manuals\SMV_User_Guide\SCRIPT_FIGURES
 
-// render tour
+// render circular tour
 
 UNLOADTOUR
 LOADTOUR
  Circular
 SETTOURVIEW
-  1   0 0
+  1   0 0 0.0
 SETTOURKEYFRAME
   40.0
 SETVIEWPOINT
  upz2
 RENDERONCE
- thouse5_tourexample
+ thouse5_Circular_tour
+
+// render start tour
+
+UNLOADTOUR
+LOADTOUR
+ start_tour
+SETTOURVIEW
+  1   0 0 0.0
+SETVIEWPOINT
+ tour_view1
+RENDERONCE
+ thouse5_start_tour
+
+// render example tour 1
+
+UNLOADTOUR
+LOADTOUR
+ example_tour
+SETTOURVIEW
+  1   0 0 0.0
+SETVIEWPOINT
+ tour_view1
+RENDERONCE
+ thouse5_example_tour1
+
+
+// render example tour 2
+
+SETVIEWPOINT
+ tour_view2
+RENDERONCE
+ thouse5_example_tour2
+
+// render example tour 1
+
+SETTOURVIEW
+  1   0 0 0.75
+SETVIEWPOINT
+ tour_view2
+RENDERONCE
+ thouse5_example_tour3
 
 // render 3D smoke
 
