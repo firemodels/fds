@@ -226,7 +226,8 @@ void drawtours(void){
       glEnd();
     }
 
-    /* non-selcted path, keyframe knots */
+    /* non-selected path, keyframe knots */
+
     if(showtours_whenediting==1){
       glColor3fv(tmp_tourcol_pathknots);
       glPointSize(10.0f);
@@ -410,7 +411,7 @@ void drawselect_tours(void){
   int color_index=0;
   float *eye;
 
-  glPointSize(10.0f);
+  glPointSize(20.0f);
   glBegin(GL_POINTS);
   for(i=0;i<ntours;i++){
     touri = tourinfo + i;
