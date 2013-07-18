@@ -59,6 +59,8 @@ SETVIEWPOINT
 RENDERONCE
  thouse5_example_tour3
 
+UNLOADTOUR
+
 // render 3D smoke
 
 LOADINIFILE
