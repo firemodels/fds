@@ -248,6 +248,7 @@ USE GLOBAL_CONSTANTS, ONLY: N_TRACKED_SPECIES,TMPMAX,TMPMIN,EVACUATION_ONLY, &
                             PREDICTOR,CORRECTOR,CHANGE_TIME_STEP,TMPA,N_ZONE, &
                             GAS_SPECIES, R0,SOLID_PHASE_ONLY,TUSED, &
                             CLIP_MASS_FRACTION,N_REACTIONS
+USE MANUFACTURED_SOLUTIONS, ONLY: VD2D_MMS_Z_OF_RHO
 REAL(EB) :: DTRATIO,OMDTRATIO,TNOW,ZZ_GET(0:N_TRACKED_SPECIES)
 INTEGER  :: I,J,K,N
 INTEGER, INTENT(IN) :: NM
@@ -338,18 +339,28 @@ CASE(.TRUE.) PREDICTOR_STEP
 
    ! Extract mass fraction from RHO * ZZ
 
-   !$OMP DO COLLAPSE(4) SCHEDULE(DYNAMIC) PRIVATE(N,K,J,I)
-   DO N=1,N_TRACKED_SPECIES
+   IF (PERIODIC_TEST==7) THEN
       DO K=1,KBAR
          DO J=1,JBAR
             DO I=1,IBAR
-               IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-               ZZS(I,J,K,N) = ZZS(I,J,K,N)/RHOS(I,J,K)
+               ZZS(I,J,K,1) = VD2D_MMS_Z_OF_RHO(RHOS(I,J,K))
             ENDDO
          ENDDO
       ENDDO
-   ENDDO
-   !$OMP END DO
+   ELSE
+      !$OMP DO COLLAPSE(4) SCHEDULE(DYNAMIC) PRIVATE(N,K,J,I)
+      DO N=1,N_TRACKED_SPECIES
+         DO K=1,KBAR
+            DO J=1,JBAR
+               DO I=1,IBAR
+                  IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
+                  ZZS(I,J,K,N) = ZZS(I,J,K,N)/RHOS(I,J,K)
+               ENDDO
+            ENDDO
+         ENDDO
+      ENDDO
+      !$OMP END DO
+   ENDIF
 
    ! Correct mass fractions above or below clip limits
 
@@ -451,18 +462,29 @@ CASE(.FALSE.) PREDICTOR_STEP
 
    ! Extract Y_n from rho*Y_n
 
-   !$OMP DO COLLAPSE(4) SCHEDULE(DYNAMIC) PRIVATE(N,K,J,I)
-   DO N=1,N_TRACKED_SPECIES
+   IF (PERIODIC_TEST==7) THEN ! Manufactured solution
       DO K=1,KBAR
          DO J=1,JBAR
             DO I=1,IBAR
-               IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-               ZZ(I,J,K,N) = ZZ(I,J,K,N)/RHO(I,J,K)
+               ZZ(I,J,K,1) = VD2D_MMS_Z_OF_RHO(RHO(I,J,K))
             ENDDO
          ENDDO
       ENDDO
-   ENDDO
-   !$OMP END DO
+   ELSE
+      !$OMP DO COLLAPSE(4) SCHEDULE(DYNAMIC) PRIVATE(N,K,J,I)
+      DO N=1,N_TRACKED_SPECIES
+         DO K=1,KBAR
+            DO J=1,JBAR
+               DO I=1,IBAR
+                  IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
+                  ZZ(I,J,K,N) = ZZ(I,J,K,N)/RHO(I,J,K)
+               ENDDO
+            ENDDO
+         ENDDO
+      ENDDO
+      !$OMP END DO
+   ENDIF
+
 
    ! Correct mass fractions above or below clip limits
 
