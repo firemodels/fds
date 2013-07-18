@@ -626,7 +626,7 @@ int compare_volfacelistdata( const void *arg1, const void *arg2 ){
 
 /* ------------------ get_screen_mapping ------------------------ */
 
-void get_screen_mapping(void){
+void get_screen_mapping(float *xyz0, float *screen_perm){
   GLdouble xyz[3];
   int viewport[4];
   GLdouble screen0[3];
@@ -652,28 +652,23 @@ void get_screen_mapping(void){
   glGetDoublev(GL_MODELVIEW_MATRIX, modelview);
   glGetDoublev(GL_PROJECTION_MATRIX, projection);
 
-  xyz[0]=0.0;
-  xyz[1]=0.0;
-  xyz[2]=0.0;
+  VECEQ3(xyz,xyz0);
   gluProject(xyz[0],xyz[1],xyz[2],modelview,projection,viewport,screen0,screen0+1,screen0+2);
 
-  xyz[0]=NORMALIZE_X(xbarORIG);
-  xyz[1]=0.0;
-  xyz[2]=0.0;
+  VECEQ3(xyz,xyz0);
+  xyz[0]+=0.1;
   gluProject(xyz[0],xyz[1],xyz[2],modelview,projection,viewport,screen,screen+1,screen+2);
   VECDIFF3(screen_perm,screen,screen0);
   maxvals[0] = MAXABS3(screen_perm);
 
-  xyz[0]=0.0;
-  xyz[1]=NORMALIZE_Y(ybarORIG);
-  xyz[2]=0.0;
+  VECEQ3(xyz,xyz0);
+  xyz[1]+=0.1;
   gluProject(xyz[0],xyz[1],xyz[2],modelview,projection,viewport,screen,screen+1,screen+2);
   VECDIFF3(screen_perm+3,screen,screen0);
   maxvals[1] = MAXABS3(screen_perm+3);
 
-  xyz[0]=0.0;
-  xyz[1]=0.0;
-  xyz[2]=NORMALIZE_Z(zbarORIG);
+  VECEQ3(xyz,xyz0);
+  xyz[2]+=0.1;
   gluProject(xyz[0],xyz[1],xyz[2],modelview,projection,viewport,screen,screen+1,screen+2);
   VECDIFF3(screen_perm+6,screen,screen0);
   maxvals[2] = MAXABS3(screen_perm+6);

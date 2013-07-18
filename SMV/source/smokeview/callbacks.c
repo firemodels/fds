@@ -967,11 +967,18 @@ void Timebar_Drag(int xm, int ym){
   Idle_CB();
 }
 
-/* ------------------ Move_Tour_Node ------------------------ */
+/* ------------------ Drag_Tour_Node ------------------------ */
 
-void Move_Tour_Node(int xm, int ym){
+void Drag_Tour_Node(int xm, int ym){
   int dxm, dym;
+  float screen_perm[9];
 
+  if(showtour_dialog==1&&edittour==1&&selected_frame!=NULL){
+    get_screen_mapping(selected_frame->nodeval.eye,screen_perm);
+  }
+  else{
+    return;
+  }
   dxm = xm - start_xyz0[0];
   dym = ym - start_xyz0[1];
   switch (key_state){
@@ -1230,7 +1237,7 @@ void motion_CB(int xm, int ym){
     return;
   }
   if(tour_drag==1){
-    Move_Tour_Node(xm,ym);
+    Drag_Tour_Node(xm,ym);
     return;
   }
 

@@ -406,7 +406,6 @@ SVEXTERN float modelview_setup[16];
 SVEXTERN float modelview_rotate_last[16],modelview_rotate_save[16];
 SVEXTERN float modelview_current[16];
 SVEXTERN float modelview_scratch[16];
-SVEXTERN float screen_perm[9];
 
 SVEXTERN camera SVDECL(*camera_current,NULL), SVDECL(*camera_save,NULL), SVDECL(*camera_last,NULL);
 SVEXTERN camera SVDECL(*camera_external,NULL), SVDECL(*camera_internal,NULL);
