@@ -678,6 +678,13 @@ void get_screen_mapping(void){
   VECDIFF3(screen_perm+6,screen,screen0);
   maxvals[2] = MAXABS3(screen_perm+6);
 
+#ifdef _DEBUG
+  printf("%f %f %f\n",screen_perm[0],screen_perm[1],screen_perm[2]);
+  printf("%f %f %f\n",screen_perm[3],screen_perm[4],screen_perm[5]);
+  printf("%f %f %f\n",screen_perm[6],screen_perm[7],screen_perm[8]);
+  printf("\n");
+#endif
+ 
   if(maxvals[0]<MIN(maxvals[1],maxvals[2])){
     min_index=0;
   }
@@ -720,6 +727,12 @@ void get_screen_mapping(void){
     SETSCREEN(1,0,2,screen_perm+6);
     SETSCREEN(2,0,1,screen_perm+6);
   }
+#ifdef _DEBUG
+  printf("%f %f %f\n",screen_perm[0],screen_perm[1],screen_perm[2]);
+  printf("%f %f %f\n",screen_perm[3],screen_perm[4],screen_perm[5]);
+  printf("%f %f %f\n",screen_perm[6],screen_perm[7],screen_perm[8]);
+  printf("\n");
+#endif
 }
 
   /* ------------------ getvolsmokedir ------------------------ */
