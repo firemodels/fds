@@ -11,7 +11,7 @@ Gas phase thermal conduction and radiation are represented by the divergence of 
 \section{Radiation Transport Equation}
 \label{RTEsection}
 
-The Radiative Transport Equation (RTE) for an absorbing, emitting, and scattering medium is
+The Radiative Transport Equation (RTE) for an absorbing, emitting, and scattering medium is \cite{Viskanta:1987}
 \begin{align}
 \bs \cdot \nabla I_{\la}(\bx,\bs) &=
 \underbrace{ - \kappa(\bx,\la)   \; I_\la(\bx,\bs) }_{\textrm{Energy loss by absorption}} -
@@ -45,7 +45,7 @@ where $I_{{\rm b},n}$ is the fraction of the blackbody radiation at temperature 
 \ee
 and $\sigma$ is the Stefan-Boltzmann constant. The calculation of factors $F_n$ is explained in Ref.~\cite{Siegel:1}. The measurement of the absorption coefficients, $\kappa_n$, is discussed in Appendix~\ref{absorption_coefficients}.
 
-Even with a reasonably small number of bands, solving multiple RTEs is very time consuming. Fortunately, in most large-scale fire scenarios soot is the most important combustion product controlling the thermal radiation from the fire and hot smoke. As the radiation spectrum of soot is continuous, it is possible to assume that the gas behaves as a gray medium.  The spectral dependence is then lumped into one absorption coefficient ($N=1$) and the source term is given by the blackbody radiation intensity
+Even with a reasonably small number of bands, solving multiple RTEs is very time consuming. Fortunately, in most large-scale fire scenarios soot is the most important combustion product controlling the thermal radiation from the fire and hot smoke. As the radiation spectrum of soot is continuous, it is possible to assume that the gas behaves as a gray medium.  The spectral dependence is then lumped into one absorption coefficient ($N=1$) and the source term is given by the blackbody radiation intensity \cite{Ludwig:NASA}
 \be
    I_{\rm b}(\bx) = \frac{\sigma \, T(\bx)^4}{\pi} \label{emission_source_term}
 \ee
