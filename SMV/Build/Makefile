@@ -107,6 +107,19 @@ intel_win_32 : exe       = smokeview_win_$(SMV_TESTSTRING)32
 intel_win_32 : $(objwin)
 	$(CPP) -o $(bin)/$(exe) $(LFLAGS) $(objwin) $(WIN_LIBS) $(SMV_LIBS_32)
 
+# ------------- ms_win_64 ----------------
+
+ms_win_64 : INC = -I ../../source/include -I ../../source/shared -I ../../source/smokeview -I ../../source/glew
+ms_win_64 : FFLAGS    = -O2 -fpp -D pp_cvf -D X64 /iface:stdref
+ms_win_64 : CFLAGS    = -O2 -D WIN32 -D _CONSOLE -D X64 -D GLEW_STATIC -D PTW32_STATIC_LIB $(SMV_TESTFLAG)
+ms_win_64 : LFLAGS    = /F32768000 
+ms_win_64 : CC        = cl
+ms_win_64 : CPP       = cl
+ms_win_64 : FC        = ifort
+
+ms_win_64 : $(objwin)
+	$(CPP) -o $(bin)/$(exe) $(LFLAGS) $(objwin) $(WIN_LIBS) $(SMV_LIBS_64)
+
 # ------------- intel_win_64 ----------------
 
 intel_win_64 : INC = -I ../../source/include -I ../../source/shared -I ../../source/smokeview -I ../../source/glew
