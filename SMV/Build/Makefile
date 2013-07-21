@@ -73,12 +73,17 @@ no_target:
 
 WIN_LIBS = user32.lib gdi32.lib comdlg32.lib shell32.lib
 
-WIN_LIBDIR_32 = $(LIB_DIR)/lib_win_intel_32
-WIN_LIBDIR_64 = $(LIB_DIR)/lib_win_intel_64
 GCC_LIBDIR_32 = $(LIB_DIR)/lib_win_gcc_32
 
+WIN_LIBDIR_32 = $(LIB_DIR)/lib_win_intel_32
+WIN_LIBDIR_64 = $(LIB_DIR)/lib_win_intel_64
 SMV_LIBS_32 = $(WIN_LIBDIR_32)\glui.lib $(WIN_LIBDIR_32)\glut32.lib $(WIN_LIBDIR_32)\gd.lib $(WIN_LIBDIR_32)\jpeg.lib $(WIN_LIBDIR_32)\png.lib $(WIN_LIBDIR_32)\zlib.lib $(WIN_LIBDIR_32)\pthreads.lib 
 SMV_LIBS_64 = $(WIN_LIBDIR_64)\glui.lib $(WIN_LIBDIR_64)\glut32.lib $(WIN_LIBDIR_64)\gd.lib $(WIN_LIBDIR_64)\jpeg.lib $(WIN_LIBDIR_64)\png.lib $(WIN_LIBDIR_64)\zlib.lib $(WIN_LIBDIR_64)\pthreads.lib
+
+WIN_MSLIBDIR_32 = $(LIB_DIR)/lib_win_ms_32
+WIN_MSLIBDIR_64 = $(LIB_DIR)/lib_win_ms_64
+SMV_MSLIBS_32 = $(WIN_MSLIBDIR_32)\glui.lib $(WIN_MSLIBDIR_32)\glut32.lib $(WIN_MSLIBDIR_32)\gd.lib $(WIN_MSLIBDIR_32)\jpeg.lib $(WIN_MSLIBDIR_32)\png.lib $(WIN_MSLIBDIR_32)\zlib.lib $(WIN_MSLIBDIR_32)\pthreads.lib 
+SMV_MSLIBS_64 = $(WIN_MSLIBDIR_64)\glui.lib $(WIN_MSLIBDIR_64)\glut32.lib $(WIN_MSLIBDIR_64)\gd.lib $(WIN_MSLIBDIR_64)\jpeg.lib $(WIN_MSLIBDIR_64)\png.lib $(WIN_MSLIBDIR_64)\zlib.lib $(WIN_MSLIBDIR_64)\pthreads.lib
 
 # ------------- gcc_win_32 ----------------
 
@@ -119,7 +124,7 @@ ms_win_32 : FC        = ifort
 ms_win_32 : exe       = smokeview_win_$(SMV_TESTSTRING)32
 
 ms_win_32 : $(objwin)
-	$(CPP) /Fe:"$(exe)" $(LFLAGS) $(objwin) $(WIN_LIBS) $(SMV_LIBS_32)
+	$(CPP) /Fe:"$(exe)" $(LFLAGS) $(objwin) $(WIN_LIBS) $(SMV_MSLIBS_32)
 
 # ------------- ms_win_64 ----------------
 
@@ -133,7 +138,7 @@ ms_win_64 : FC        = ifort
 ms_win_64 : exe       = smokeview_win_$(SMV_TESTSTRING)64
 
 ms_win_64 : $(objwin)
-	$(CPP) /Fe:"$(exe)" $(LFLAGS) $(objwin) $(WIN_LIBS) $(SMV_LIBS_64)
+	$(CPP) /Fe:"$(exe)" $(LFLAGS) $(objwin) $(WIN_LIBS) $(SMV_MSLIBS_64)
 
 # ------------- intel_win_64 ----------------
 

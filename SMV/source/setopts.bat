@@ -26,7 +26,7 @@ IF "%COMPILER%" NEQ "cl" GOTO MSenvexist
 IF "%MSCOMPILERS_DEFINED%" EQU "1" GOTO MSenvexist
 echo Setting up MS compiler environment
 set MSCOMPILERS_DEFINED=1
-call "C:\Program Files (x86)\Microsoft Visual Studio 9.0\VC\vcvarsall" %MSCOMPILER3%
+call "C:\Program Files (x86)\Microsoft Visual Studio 9.0\VC\vcvarsall" %MSCOMPILER%
 GOTO Ienvexist
 :MSenvexist
 
