@@ -5,7 +5,7 @@ set SMV_TESTSTRING=
 
 IF "%COMPILERS_DEFINED%"=="1" GOTO envexist
 
-  set %COMPILERS_DEFINED%=1
+  set COMPILERS_DEFINED=1
 
   call "C:\Program Files (x86)\Microsoft Visual Studio 9.0\VC\vcvarsall" x86_amd64
   call "%IFORT_COMPILER13%\bin\compilervars" intel64
