@@ -380,7 +380,7 @@ The examples above are for illustration purposes only.  In general, we first com
 
 For the calculation of the gray or band-mean absorption coefficients, $\kappa_n$, a narrow-band model, RADCAL~\cite{RadCal}, has been
 implemented in FDS. RADCAL computes the spectral properties of the radiation participating species at discrete values of the spectrum (expressed either in wavenumber $\om$ or in wavelength $\la$) and temperature,
-and returns two alternative mean absorption coefficients for each spectral band, $n$. The first coefficient is the Planck mean coefficient
+and returns two alternative mean absorption coefficients for each spectral band, $n$. The first coefficient is the Planck mean coefficient \cite{Tien:1968}
 \begin{equation}
 \kappa_n(P,T) = \dfrac{\pi}{\sigma T^4}
 \displaystyle\int_{\la_{\min}}^{\la_{\max}}{I_{\rm b,\la}(T)
@@ -389,11 +389,11 @@ and returns two alternative mean absorption coefficients for each spectral band,
 where $\la$ is the wavelength, expressed in units of ${\rm \mu m}$, $P_i$ is the partial pressure of participating species $i$, in units of ${\rm atm}$, and $\bar{\kappa}_i$ is the spectral absorption coefficient of participating species $i$, in units of ${\rm atm^{-1}cm^{-1}}$. Note that the temperature used in the calculation of $\kappa_n$ is the local gas temperature; thus, $\kappa_n(P,T)$ is a function of the gas phase temperature and partial pressure and is independent of the pathlength. Its units are 1/m.
 The factor $100$ is introduced to convert $\bar{\kappa}_i$ from ${\rm atm^{-1}cm^{-1}}$ to ${\rm atm^{-1}m^{-1}}$
 
-The source term $I_{\rm b,\la}(T)$ is the {\em Planck blackbody distribution law} which expresses the equilibrium rate of radiant energy emitted from a blackbody at temperature, $T$, and as function of wavelength, $\la$. Formally, the monochromatic blackbody radiant energy emitted at a wavelength $\la$ is given by
+The source term $I_{\rm b,\la}(T)$ is the {\em Planck blackbody distribution law} which expresses the equilibrium rate of radiant energy emitted from a blackbody at temperature, $T$, and as function of wavelength, $\la$. Formally, the monochromatic blackbody radiant energy emitted at a wavelength $\la$ is given by \cite{Penner:1959}
 \be \label{eq:Planck_law}
 I_{\rm b,\la}(T)\d \la = \dfrac{2 \, h \, c^2 \, \la^{-5}}{\exp\left(\dfrac{h \, c}{k_{\rm B} \, \la \, T }\right)-1}\d \la
 \ee
-Here, $h$ is the Planck constant ($6.626 \times 10^{-34}$~J$\cdot$s), $c$ is the speed of light in vacuum ($2.998 \times 10^8$~m/s), and $k_{\rm B}$ is the Boltzmann constant ($1.381 \times 10^{-23}$~J/K).
+Here, $h$ is the Planck constant ($6.626 \times 10^{-34}$~J$\cdot$s), $c$ is the speed of light in vacuum ($2.998 \times 10^8$~m/s), and $k_{\rm B}$ is the Boltzmann constant ($1.381 \times 10^{-23}$~J/K) \cite{Mohr:2012}.
 $I_{\rm b,\la}(T)$ is in units of $\rm{W/m^{2}/str/m}$; the wavelengths are converted from $\rm{\mu m}$ to $\rm{m}$.
 
 The second coefficient is the so-called {\em path mean} or {\em effective} absorption coefficient, $\kappa_{{\rm e},n}(T)$ which is defined according to the following equation
@@ -409,7 +409,7 @@ In cases with only one band ($N$=1), the smaller of the two absorption coefficie
 \ee
 If $N>1$ or $L=0$, $\kappa_n=\kappa_n(P,T)$. Note that the spectral data within RADCAL are used whenever the gas mixture contains water vapor, fuel or combustion products, regardless of the number of radiation bands $N$.
 
-\textbf{Note on wavenumber, wavelength, and frequency}: some confusion might arise when dealing with the various quantities describing the wave nature of radiation. These quantities are wavenumber $\om$, wavelength $\la$, and frequency denoted here $\nu$. Most users may be familiar with the frequency $\nu$, in units of \textit{hertz}, ${\rm Hz}$, representing the number of cycles per second. While this unit is preferred for radiation waves of low energy such as radio waves, wavelength and wavenumber are preferred for waves of higher energy. Wavenumber and wavelength are related to frequency through
+\textbf{Note on wavenumber, wavelength, and frequency}: some confusion might arise when dealing with the various quantities describing the wave nature of radiation. These quantities are wavenumber $\om$, wavelength $\la$, and frequency denoted here $\nu$. Most users may be familiar with the frequency $\nu$, in units of \textit{hertz}, ${\rm Hz}$, representing the number of cycles per second. While this unit is preferred for radiation waves of low energy such as radio waves, wavelength and wavenumber are preferred for waves of higher energy. Wavenumber and wavelength are related to frequency through \cite{Penner:1959}
 \be
  \la = c/\nu \: \: \rm{and} \: \: \om = \nu /c
 \ee
@@ -420,7 +420,7 @@ where $c$ is the speed of light in a vacuum. The wavelength, $\la$, represents t
 \ee
 Finally, the user who wishes to express the Planck blackbody distribution law
 as a function of wavenumber should take caution when performing the change of variables. One should start by expressing that the radiant energy emitted
-at a wavelength $\la$ is the same as the radiant energy emitted at the corresponding wavenumber $\om$
+at a wavelength $\la$ is the same as the radiant energy emitted at the corresponding wavenumber $\om$ \cite{Tien:1968}
 \be \label{eq:Planck_WN_WL}
 I_{\rm b,\la}(T) \d \la = -I_{\rm b,\om}(T)\d \om
 \ee
@@ -439,7 +439,7 @@ $I_{\rm b,\om}(T)$ is in units of $\rm{W/m/str/m^{-1}}$; the wavenumbers are con
 The user who wishes to analyze the fuel bands presented below (given in wavenumber) with the Planck blackbody distribution law should use Eq.~\ref{eq:Planck_WN} but should NOT use Eq.~\ref{eq:Planck_law} with $\la$ = 1/$\om$.
 
 
-A combination of molecular models and data tables are used to compute the spectral radiative properties of the radiation participating species. The original version of RADCAL includes spectral properties of $\rm CO_2$, $\rm H_2O$, $\rm CO$, and $\rm CH_4$ that are either modeled through quantitative molecular spectroscopy derivations or tabulated from the fitting of experimental data into appropriate statistical narrow band models. The original RADCAL data have been supplemented with new tabulated experimental data for the following fuels:
+A combination of molecular models and data tables are used to compute the spectral radiative properties of the radiation participating species. The original version of RADCAL includes spectral properties of $\rm CO_2$, $\rm H_2O$, $\rm CO$, and $\rm CH_4$ that are either modeled through quantitative molecular spectroscopy derivations or tabulated from the fitting of experimental data into appropriate statistical narrow band models \cite{RadCal}. The original RADCAL data have been supplemented with new tabulated experimental data for the following fuels:
 \begin{itemize}
   \item Ethylene:  $\rm C_2H_4$
   \item Ethane:    $\rm C_2H_6$
@@ -450,7 +450,7 @@ A combination of molecular models and data tables are used to compute the spectr
   \item Methanol:  $\rm CH_3OH$
   \item Methyl Methacrylate: $\rm C_5H_8O_2$
 \end{itemize}
-These new data have been obtained through FTIR measurements for wavenumbers between 700~cm$\rm ^{-1}$ and 4000~cm$\rm ^{-1}$~\cite{Wakatsuki:2005}. A useful quantity to compare the relative importance of the different IR bands is provided by the integrated band intensity, $\alpha_i$, defined for the $i$th participating species as:
+These new data have been obtained through FTIR measurements for wavenumbers between 700~cm$\rm ^{-1}$ and 4000~cm$\rm ^{-1}$~\cite{Wakatsuki:2005}. A useful quantity to compare the relative importance of the different IR bands is provided by the integrated band intensity, $\alpha_i$, defined for the $i$th participating species as \cite{Matheson:1932}:
 \be
   \alpha_i(T) = \displaystyle\int_{\om_{\min}}^{\om_{\max}} \bar{\kappa}_i(\om',T) \; \d \om'
 \ee
@@ -463,7 +463,7 @@ The subsections below briefly describe the molecular bands where the species are
 
 \subsubsection{Carbon Dioxide: $\rm CO_2$}
 
-Carbon dioxide is a linear molecule and has four vibrational modes, but only two fundamental IR vibration frequencies. It has five distinct bands that are included in RADCAL, see Table~\ref{Table::CO2}.
+Carbon dioxide is a linear molecule and has four vibrational modes, but only two fundamental IR vibration frequencies \cite{Herzberg:1949}. It has five distinct bands that are included in RADCAL, see Table~\ref{Table::CO2}.
 \begin{table}[h!]
     \centering
     \caption{Spectral bands of $\rm CO_2$ included in RADCAL.}
@@ -485,7 +485,7 @@ The strongest band in the $\rm CO_2$ spectrum is Band~3. At 300~K, it has an int
 
 \subsubsection{Carbon Monoxide: $\rm CO$}
 
-Carbon Monoxide is a diatomic molecule and as such, it has only one vibrational mode. RADCAL includes one distinct band, see Table \ref{Table::CO}.
+Carbon Monoxide is a diatomic molecule and as such, it has only one vibrational mode \cite{Herzberg:1949}. RADCAL includes one distinct band, see Table \ref{Table::CO}.
 \begin{table}[h!]
     \centering
     \caption{Spectral bands of $\rm CO$ included in RADCAL.}
@@ -504,11 +504,11 @@ The statistical narrow band model associated with $\rm CO$ is the Goody model. R
 
 \subsubsection{Water Vapor: $\rm H_2O$}
 
-Due to the non-linearity of its molecular structure, the IR spectrum of water vapor is complex and broad. In RADCAL, water vapor spectrum from 50~cm$\rm ^{-1}$ to 9300~cm$\rm ^{-1}$ is considered. Data in RADCAL are provided by Ludwig~\textit{et al.}~\cite{Ludwig:NASA}. Experimental data have been fitted using the statistical Goody narrow band model. The strongest bands at standard temperature and pressure are located in the ranges $\left[50-2100\right]$~cm$\rm ^{-1}$: $\alpha = 300\;\rm {atm^{-1}cm^{-2}}$, and $\left[3000-4000\right]$~cm$\rm ^{-1}$: $\alpha = 220\;\rm {atm^{-1}cm^{-2}}$.
+Due to the non-linearity of its molecular structure, the IR spectrum of water vapor is complex and broad \cite{Herzberg:1949}. In RADCAL, water vapor spectrum from 50~cm$\rm ^{-1}$ to 9300~cm$\rm ^{-1}$ is considered. Data in RADCAL are provided by Ludwig~\textit{et al.}~\cite{Ludwig:NASA}. Experimental data have been fitted using the statistical Goody narrow band model. The strongest bands at standard temperature and pressure are located in the ranges $\left[50-2100\right]$~cm$\rm ^{-1}$: $\alpha = 300\;\rm {atm^{-1}cm^{-2}}$, and $\left[3000-4000\right]$~cm$\rm ^{-1}$: $\alpha = 220\;\rm {atm^{-1}cm^{-2}}$.
 
 \subsubsection{Methane: $\rm CH_4$}
 
-Methane is a spherical top molecule of tetrahedral shape with the carbon atom occupying the center of the tetrahedron. It belongs to the point group $T_d$. The methane IR spectrum is the result of the vibration-rotation modes of the $\rm C-H$ groups. It has nine vibrational modes, but due to its symmetry, this translates into only two distinct IR active fundamental vibration frequencies. In RADCAL, the methane IR spectrum is divided into three distinct bands (fundamentals + degenerates), see Table \ref{Table::CH4}.
+Methane is a spherical top molecule of tetrahedral shape with the carbon atom occupying the center of the tetrahedron \cite{Herzberg:1949}. It belongs to the point group $T_d$. The methane IR spectrum is the result of the vibration-rotation modes of the $\rm C-H$ groups. It has nine vibrational modes, but due to its symmetry, this translates into only two distinct IR active fundamental vibration frequencies. In RADCAL, the methane IR spectrum is divided into three distinct bands (fundamentals + degenerates), see Table \ref{Table::CH4}.
 \begin{table}[ht]
       \centering
       \caption{Spectral bands of $\rm CH_4$ included in RADCAL.}
@@ -531,7 +531,7 @@ The strongest bands are Bands~1 and 2 which at standard temperature and pressure
 
 \subsubsection{Ethylene: $\rm C_2H_4$}
 
-Ethylene is a molecule with a plane symmetrical form and belongs to the point group $D_{2h}$. The ethylene IR spectrum is the result of the vibration-rotation modes of the $\rm C=C$, $\rm CH$, and $\rm CH_2$ groups. It has 12 vibrational modes. In RADCAL, its IR spectrum is divided into four distinct bands, see Table \ref{Table::C2H4}.
+Ethylene is a molecule with a plane symmetrical form and belongs to the point group $D_{2h}$ \cite{Herzberg:1949}. The ethylene IR spectrum is the result of the vibration-rotation modes of the $\rm C=C$, $\rm CH$, and $\rm CH_2$ groups. It has 12 vibrational modes. In RADCAL, its IR spectrum is divided into four distinct bands, see Table \ref{Table::C2H4}.
 \begin{table}[ht]
     \centering
     \caption{Spectral bands of $\rm C_2H_4$ included in RADCAL.}
@@ -552,7 +552,7 @@ Band~1 is the strongest absorbing band. All the ethylene IR spectral absorption 
 
 \subsubsection{Ethane: $\rm C_2H_6$}
 
-Ethane has a three-fold axis of symmetry and belongs to the point group $D_{3d}$. The ethane IR spectrum is the result of the vibration-rotation modes of the $\rm C-C$, $\rm CH$, and $\rm CH_2$ groups. It has 18 vibrational modes; its IR spectrum is divided into three distinct bands, see Table~\ref{Table::C2H6}.
+Ethane has a three-fold axis of symmetry and belongs to the point group $D_{3d}$ \cite{Herzberg:1949}. The ethane IR spectrum is the result of the vibration-rotation modes of the $\rm C-C$, $\rm CH$, and $\rm CH_2$ groups. It has 18 vibrational modes; its IR spectrum is divided into three distinct bands, see Table~\ref{Table::C2H6}.
 \begin{table} [ht]
     \centering
     \caption{Spectral bands of $\rm C_2H_6$ included in RADCAL.}
@@ -573,7 +573,7 @@ Band~2, and more than 20 times the value of Band~1. All the ethane IR spectral a
 
 \subsubsection{Propylene: $\rm C_3H_6$}
 
-Propylene has only one plane of symmetry and belongs to the point group $C_s$. The propylene IR spectrum is the result of the vibration-rotation modes of the $\rm C-C$, $\rm C=C$, $\rm CH$, $\rm CH_2$, and $\rm CH_3$ groups. It has 21 vibrational modes; its IR spectrum is divided into three distinct bands, see Table \ref{Table::C3H6}.
+Propylene has only one plane of symmetry and belongs to the point group $C_s$ \cite{Herzberg:1949}. The propylene IR spectrum is the result of the vibration-rotation modes of the $\rm C-C$, $\rm C=C$, $\rm CH$, $\rm CH_2$, and $\rm CH_3$ groups. It has 21 vibrational modes; its IR spectrum is divided into three distinct bands, see Table \ref{Table::C3H6}.
 \begin{table}[ht]
    \centering
    \caption{Spectral bands of $\rm C_3H_6$ included in RADCAL.}
@@ -593,7 +593,7 @@ Band~3 corresponds to the stretching of $\rm CH$ and is the strongest of all Pro
 
 \subsubsection{Propane: $\rm C_3H_8$}
 
-Propane has two planes of symmetry and two axes of rotation. It belongs to the point group $C_{2v}$. The propane IR spectrum is the result of the vibration-rotation modes of the $\rm C-C$, $\rm CH_2$, $\rm CH_3$ groups. It has 27 vibrational modes; its IR spectrum is divided into two distinct bands, see Table \ref{Table::C3H8}.
+Propane has two planes of symmetry and two axes of rotation. It belongs to the point group $C_{2v}$ \cite{Herzberg:1949}. The propane IR spectrum is the result of the vibration-rotation modes of the $\rm C-C$, $\rm CH_2$, $\rm CH_3$ groups. It has 27 vibrational modes; its IR spectrum is divided into two distinct bands, see Table \ref{Table::C3H8}.
 \begin{table}[ht]
    \centering
    \caption{Spectral bands of $\rm C_3H_8$ included in RADCAL.}
@@ -612,7 +612,7 @@ Band~2 corresponds to the stretching of $\rm CH_3$ and $\rm CH_2$ and is the str
 
 \subsubsection{Toluene: $\rm C_7H_8$}
 
-Toluene has only one plane of symmetry. It belongs to the point group $C_{s}$. The toluene IR spectrum is the result of the vibration-rotation modes of the $\rm C=C$, $\rm CH$, and $\rm CH_3$ groups. It has 39 vibrational modes. For ease of modeling using statistical narrow band models, its IR spectrum has been divided into five distinct bands, see Table \ref{Table::C7H8}.
+Toluene has only one plane of symmetry. It belongs to the point group $C_{s}$ \cite{III2011}. The toluene IR spectrum is the result of the vibration-rotation modes of the $\rm C=C$, $\rm CH$, and $\rm CH_3$ groups. It has 39 vibrational modes. For ease of modeling using statistical narrow band models, its IR spectrum has been divided into five distinct bands, see Table \ref{Table::C7H8}.
 \begin{table}[ht]
    \centering
    \caption{Spectral bands of $\rm C_7H_8$ included in RADCAL.}
@@ -634,7 +634,7 @@ Band~5 corresponds to the stretching of $\rm CH_3$ and $\rm CH$, and it is the s
 
 \subsubsection{\textit{n}-Heptane: $\rm C_7H_{16}$}
 
-\textit{n}-heptane has two planes of symmetry and two axes of rotation. It belongs to the point group $C_{2v}$. The \textit{n}-heptane IR spectrum results from the vibration-rotation modes of the $\rm C-C$, $\rm CH_2$, and $\rm CH_3$ groups. It has 63 vibrational modes. For ease of modeling using statistical narrow band models, its IR spectrum has been divided into two distinct bands, see Table \ref{Table::C7H16}.
+\textit{n}-heptane has two planes of symmetry and two axes of rotation. It belongs to the point group $C_{2v}$ \cite{III2011}. The \textit{n}-heptane IR spectrum results from the vibration-rotation modes of the $\rm C-C$, $\rm CH_2$, and $\rm CH_3$ groups. It has 63 vibrational modes. For ease of modeling using statistical narrow band models, its IR spectrum has been divided into two distinct bands, see Table \ref{Table::C7H16}.
 \begin{table}[ht]
    \centering
    \caption{Spectral bands of $\rm C_7H_{16}$ included in RADCAL.}
@@ -653,7 +653,7 @@ Band~2 corresponds to the stretching of $\rm CH_3$ and $\rm CH_2$ groups, and is
 
 \subsubsection{Methanol: $\rm CH_3OH$}
 
-Methanol has only one plane of symmetry. It belongs to the point group $C_{s}$. The methanol IR spectrum results from the vibration-rotation modes of the $\rm C-O$, $\rm OH$, and $\rm CH_3$ groups. It has 12 vibrational modes. For ease of modeling using statistical narrow band models, its IR spectrum has been divided into four distinct bands, see Table \ref{Table::CH3OH}.
+Methanol has only one plane of symmetry. It belongs to the point group $C_{s}$ \cite{Herzberg:1949}. The methanol IR spectrum results from the vibration-rotation modes of the $\rm C-O$, $\rm OH$, and $\rm CH_3$ groups. It has 12 vibrational modes. For ease of modeling using statistical narrow band models, its IR spectrum has been divided into four distinct bands, see Table \ref{Table::CH3OH}.
 \begin{table}[ht]
    \centering
    \caption{Spectral bands of $\rm CH_3OH$ included in RADCAL.}
@@ -674,7 +674,7 @@ Band~3 corresponds to the stretching of the $\rm CH_3$ group and is the stronges
 
 \subsubsection{Methyl Methacrylate: $\rm C_5H_8O_2$}
 
-Methyl Methacrylate or MMA has the most complex IR spectrum of all the fuels presented above. With 15 atoms, it has 39 vibrational modes. The MMA IR spectrum results from the vibration-rotation modes of the $\rm C-O$, $\rm C=O$, $\rm C=C$, $\rm CH_2$, and $\rm CH_3$ groups. For ease of modeling using statistical narrow band models, its IR spectrum has been divided into six distinct bands, see Table \ref{Table::C5H8O2}.
+Methyl Methacrylate or MMA has the most complex IR spectrum of all the fuels presented above. With 15 atoms, it has 39 vibrational modes \cite{III2011}. The MMA IR spectrum results from the vibration-rotation modes of the $\rm C-O$, $\rm C=O$, $\rm C=C$, $\rm CH_2$, and $\rm CH_3$ groups. For ease of modeling using statistical narrow band models, its IR spectrum has been divided into six distinct bands, see Table \ref{Table::C5H8O2}.
 \begin{table}[ht]
    \centering
    \caption{Spectral bands of $\rm C_5H_8O_2$ included in RADCAL.}
@@ -712,7 +712,7 @@ transmissivity, $\bar{\tau}_{\om}$, of a homogeneous isothermal column filled
 with only some gas of species $i$,
 at a total pressure $P_T$ and with an optical pathlength $U = P_i L$ ($L$
 being the column physical length and $P_i$ the $i$th participating radiating
-species partial pressure), is given by the expression:
+species partial pressure), is given by the expression \cite{Modest:2003}:
 \be\label{eq::Elsasser}
     \bar{\tau}_{\om} = 1- \erf \left( \frac{\sqrt{\pi} \, \bar{\kappa}_i \, U }{\displaystyle \sqrt{1 + \frac{\pi \, \bar{\kappa}_i \, U}{4 \, \bar{\gamma}_i \, P_T}}}  \right)
 \ee
@@ -720,7 +720,7 @@ where $\bar{\gamma}_i$ is the spectral fine structure parameter of the narrow
 band. Its units are in $\rm atm^{-1}$. $\bar{\kappa}_i$ is the spectral absorption coefficient of the narrow
 band. Its units are in $\rm atm^{-1}cm^{-1}$. The Goody model assumes all the lines to have the same shape, but to be randomly
 spaced within the narrow band, and their line strength follows an exponential
-distribution. For this model, the spectral transmissivity is given by the expression:
+distribution. For this model, the spectral transmissivity is given by the expression \cite{Modest:2003}:
 \be\label{eq::Goody}
     \bar{\tau}_{\om} = \exp\left(-\frac{\bar{\kappa}_i \, U} {\displaystyle \sqrt{1+\frac{\bar{\kappa}_i \, U}{4 \, \bar{\gamma}_i \, P_T}}}\right)
 \ee
