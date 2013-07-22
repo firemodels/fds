@@ -3,35 +3,40 @@
 \chapter{HGL Temperature}
 \label{HGL_Chapter}
 
+\clearpage
+
 \section{Natural Ventilation}
 
-For a compartment with natural ventilation, the method of McCaffrey, Quintiere, and Harkleroad (MQH) can be used. In this method, the hot gas layer temperature increase, $\Delta T_g$, above ambient ($T_g$ - $T_\infty$) is given as follows
-
+For a compartment with natural ventilation, the correlation of McCaffrey, Quintiere, and Harkleroad (MQH) predicts that the HGL temperature rise, $\Delta T_g$, is given by:
 \be
-\Delta T_g = 6.85 \left( \frac{\dot Q^2}{A_v \sqrt{H_v} h_k A_T} \right)^{1/3}
+\Delta T_g = 6.85 \left( \frac{\dot Q^2}{A_0 \sqrt{H_0} h_k A_T} \right)^{1/3} \quad ^\circ{\rm C}
 \label{eq:MQH}
 \ee
-
-\noindent where
-
+where $\dot Q$ is the heat release rate (HRR) of the fire~(kW), $A_0$ is the area of the ventilation opening~(m$^2$), $H_0$ is the height of the ventilation opening~(m), and $A_T$ is the total area of the compartment enclosing surfaces~(m$^2$), excluding areas of vent openings. The heat transfer coefficient, $h_k$ (kW/m$^2$/K), is given by:
+\be
+h_k = \left\{ \begin{array}{cl}
+   \sqrt{k \rho c/t}  & t \le t_p \\[0.1in]
+   k/\delta           & t > t_p 
+   \end{array} \right.
+\label{eq:MQH_hk_lt}
+\ee
+where $k$ is the thermal conductivity of the interior lining~(kW/m/K), $\rho$ is its density~(kg/m$^3$), $c$ is its specific heat~(kJ/kg/K), and $\delta$ is its thickness~(m). The thermal penetration time, $t_p$ (s), is given by:
 \be
 t_p = \left( \frac{\rho c}{k} \right) \left( \frac{\delta}{2} \right)^2
 \label{eq:MQH_tp}
 \ee
 
-\be
-h_k = \frac{k}{\delta} \mathrm{\ for\ } t > t_p
-\label{eq:MQH_hk_gt}
-\ee
 
-\be
-h_k = \left( \frac{k \rho c}{t} \right)^{1/2} \mathrm{\ for\ } t \le t_p
-\label{eq:MQH_hk_lt}
-\ee
-
-In Eq.~\ref{eq:MQH}, $\Delta T_g$ is the upper gas temperature rise above ambient~($^\circ$C), $\dot Q$ is the heat release rate (HRR) of the fire~(kW), $A_v$ is the total area of the ventilation openings~(m$^2$), $H_v$ is the height of the ventilation opening~(m$^2$), $h_k$ is the heat transfer coefficient~(W/m$^2$/K), and $A_T$ is the total area of the compartment enclosing surfaces, excluding areas of vent openings~(m$^2$). 
-
-The parameter $t_p$ is the thermal penetration time of the wall lining material, which is given by Eq.~\ref{eq:MQH_tp}. If the burning time $t$ is greater than $t_p$, then the heat transfer coefficient $h_k$ is calculated using Eq.~\ref{eq:MQH_hk_gt}. In Eq.~\ref{eq:MQH_hk_gt}, $k$ is the thermal conductivity of the interior lining~(kW/m/K), and $\delta$ is the thickness of the interior lining. If the burning time $t$ is less than $t_p$, then the heat transfer coefficient $h_k$ is calculated using Eq.~\ref{eq:MQH_hk_lt}. In Eq.~\ref{eq:MQH_hk_lt}, $k$ is the thermal conductivity of the interior lining~(kW/m/K), $\rho$ is the density of the interior lining~(kg/m$^3$), and $c$ is the specific heat of the interior lining~(kJ/kg/K).
+\begin{figure}[ht]
+\begin{center}
+\begin{tabular}{l}
+\includegraphics[width=4.0in]{SCRIPT_FIGURES/Scatterplots/HGL_Temperature_MQH}
+\end{tabular}
+\end{center}
+\caption[Summary of HGL temperature predictions for natural ventilation tests]
+{Summary of HGL temperature predictions for natural ventilation tests using the MQH method.}
+\label{HGL_Summary_Natural_Ventilation}
+\end{figure}
 
 %The smoke layer height can be determined by
 %
@@ -46,7 +51,6 @@ The parameter $t_p$ is the thermal penetration time of the wall lining material,
 %\ee
 %
 %If the smoke layer height is below the door height, then the door height is used as the layer height.
-
 
 \clearpage
 
@@ -83,6 +87,14 @@ In Eq.~\ref{eq:FPA}, $\Delta T_g$ is the hot gas layer temperature rise above am
 
 The parameter $t_p$ is the thermal penetration time of the wall lining material, which is given by Eq.~\ref{eq:FPA_tp}. If the burning time $t$ is greater than $t_p$, then the heat transfer coefficient $h_k$ is calculated using Eq.~\ref{eq:FPA_hk_gt}. In Eq.~\ref{eq:FPA_hk_gt}, $k$ is the thermal conductivity of the interior lining~(kW/m/K), and $\delta$ is the thickness of the interior lining. If the burning time $t$ is less than $t_p$, then the heat transfer coefficient $h_k$ is calculated using Eq.~\ref{eq:FPA_hk_lt}. In Eq.~\ref{eq:FPA_hk_lt}, $k$ is the thermal conductivity of the interior lining~(kW/m/K), $\rho$ is the density of the interior lining~(kg/m$^3$), and $c$ is the specific heat of the interior lining~(kJ/kg/K).
 
+\begin{figure}[h]
+\begin{center}
+\includegraphics[width=4.0in]{SCRIPT_FIGURES/Scatterplots/HGL_Temperature_FPA}
+\end{center}
+\caption[Summary of HGL temperature predictions for forced ventilation tests]
+{Summary of HGL temperature predictions for forced ventilation tests using the FPA method (top) and DB method (bottom).}
+\label{HGL_Summary_Forced_Ventilation}
+\end{figure}
 
 \clearpage
 
@@ -107,7 +119,14 @@ In Eq.~\ref{eq:DB}, $\Delta T_g$ is the hot gas layer temperature rise above amb
 
 In Eq.~\ref{eq:DB_hk}, $k$ is the thermal conductivity of the interior lining~(kW/m/K), $\rho$ is the density of the interior lining~(kg/m$^3$), $c$ is the specific heat of the interior lining~(kJ/kg/K), $t$ is the exposure time~(s), and $\delta$ is the thickness of the interior lining~(m). This model is only valid for times up to 2000 seconds.
 
-
+\begin{figure}[ht]
+\begin{center}
+\includegraphics[width=4.0in]{SCRIPT_FIGURES/Scatterplots/HGL_Temperature_DB}
+\end{center}
+\caption[Summary of HGL temperature predictions for forced ventilation tests]
+{Summary of HGL temperature predictions for forced ventilation tests using the FPA method (top) and DB method (bottom).}
+\label{HGL_Summary_Forced_Ventilation}
+\end{figure}
 
 \clearpage
 
@@ -135,38 +154,7 @@ K_2 = \frac{\dot Q}{m c_p}
 
 In Eq.~\ref{eq:Beyler}, $\Delta T_g$ is the hot gas layer temperature rise above ambient~($^\circ$C), and $t$ is the exposure time~(s). In Eq.~\ref{eq:Beyler_K1}, $k$ is the thermal conductivity of the interior lining~(kW/m/K), $\rho$ is the density of the interior lining~(kg/m$^3$), $c$ is the specific heat of the interior lining~(kJ/kg/K), $A_T$ the total area of compartment enclosing surfaces~(m$^2$), $m$ is the mass of gas in the compartment~(kg), and $c_p$ is the specific heat of air~(kJ/kg/K). In Eq.~\ref{eq:Beyler_K2}, $\dot Q$ is the HRR of the fire~(kW).
 
-
-\clearpage
-
-
-\section{Summary of Hot Gas Layer Temperature Predictions}
-
-Summary scatter plots of the HGL temperature predictions are shown on the following pages.
-
 \begin{figure}[ht]
-\begin{center}
-\begin{tabular}{l}
-\includegraphics[width=4.0in]{SCRIPT_FIGURES/Scatterplots/HGL_Temperature_MQH}
-\end{tabular}
-\end{center}
-\caption[Summary of HGL temperature predictions for natural ventilation tests]
-{Summary of HGL temperature predictions for natural ventilation tests using the MQH method.}
-\label{HGL_Summary_Natural_Ventilation}
-\end{figure}
-
-\begin{figure}[p]
-\begin{center}
-\begin{tabular}{l}
-\includegraphics[width=4.0in]{SCRIPT_FIGURES/Scatterplots/HGL_Temperature_FPA} \\
-\includegraphics[width=4.0in]{SCRIPT_FIGURES/Scatterplots/HGL_Temperature_DB}
-\end{tabular}
-\end{center}
-\caption[Summary of HGL temperature predictions for forced ventilation tests]
-{Summary of HGL temperature predictions for forced ventilation tests using the FPA method (top) and DB method (bottom).}
-\label{HGL_Summary_Forced_Ventilation}
-\end{figure}
-
-\begin{figure}[p]
 \begin{center}
 \begin{tabular}{l}
 \includegraphics[width=4.0in]{SCRIPT_FIGURES/Scatterplots/HGL_Temperature_Beyler}
@@ -176,4 +164,3 @@ Summary scatter plots of the HGL temperature predictions are shown on the follow
 {Summary of HGL temperature predictions for no ventilation tests using the Beyler method.}
 \label{HGL_Summary_No_Ventilation}
 \end{figure}
-
