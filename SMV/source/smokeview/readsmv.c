@@ -8558,7 +8558,7 @@ int readini2(char *inifile, int localfile){
       int dummy;
 
       fgets(buffer,255,stream);
-      sscanf(buffer,"%i %f %f",&dummy,&vf);
+      sscanf(buffer,"%i %f",&dummy,&vf);
       vecfactor = vf;
       continue;
     }
