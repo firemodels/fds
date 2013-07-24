@@ -733,12 +733,10 @@ $\bar{\kappa}_i$ and $\bar{\gamma}_i$ in temperature and/or in wavenumber is
 performed by RADCAL when necessary. If the temperature sought is out of the
 tabulated data range, then the data at the nearest temperature are used.
 
-
 \chapter{A Simple Model of Flame Extinction}
 \label{o2_based_model}
 
 \subsubsection*{Frederick W. Mowrer, Department of Fire Protection Engineering, University of Maryland}
-
 
 A diffusion flame immersed in a vitiated atmosphere will extinguish before consuming all the
 available oxygen from the atmosphere.  The classic example of this behavior is a candle burning
@@ -864,6 +862,121 @@ to the absolute value of the sum of the differences,
 |\displaystyle \sum_{i=1}^{4}(Y(i+1)-Y(i))| = |(1-0)+(0-1)+(1-0)| = 1
 \end{equation}
 The ratio of Eq.~(\ref{eq:sum_abs_tv}) and Eq.~(\ref{eq:abs_sum_tv}) is 3, which indicates that this data is fluctuating. For the implementation of this scheme in FDS, instead of comparing directly to 3, we use 2.5 because floating point division might not return a value of exactly 3. If fluctuations have been identified, then the values at the fourth point in the stencil are frozen and become the final values at the end of an integration time step. This prevents unnecessary sub-time steps being taken by the integrator. Because the error controller is bounding the solution, any one of the values within the stencil is also within the error tolerance and is therefore acceptable.
+
+\chapter{The Unmixed Fraction}
+\label{app:unmixed_fraction}
+
+\subsection*{Moments of the PDF Transport Equation}
+\label{app:pdf_transport}
+
+As discussed by Pope \cite{Pope:2000}, the PDF (\ref{eq:pdf}) evolves by the Fokker-Planck equation:
+\begin{equation}
+\label{eq:fokker-planck}
+\frac{\partial f}{\partial t} = -\frac{\partial}{\partial \psi_\alpha} \left(f \left\langle \left. \frac{\partial Y_\alpha}{\partial t} \right| \psi_\alpha \right\rangle \right) \,\mbox{.}
+\end{equation}
+The term on the right in angled brackets is a conditional mean.  Here it is modeled using a variant of IEM \cite{Dopazo:1974} which we call `interaction by exchange with the mixed mean' or IEMM.  When including chemical reaction, the conditional mean is modeled by
+\begin{equation}
+\label{eq:iem2}
+\left\langle \left. \frac{\partial Y_\alpha}{\partial t} \right| \psi_\alpha \right\rangle = \frac{1}{\tau_{\si{mix}}}(\hat{Y}_\alpha - \psi_\alpha) + \frac{\d \hat{Y}_\alpha}{\d t} \,\mbox{.}
+\end{equation}
+Using (\ref{eq:iem2}), the zeroth moment of (\ref{eq:fokker-planck}) yields (\ref{eq:final_comp}).  The zeroth and first moments of (\ref{eq:fokker-planck}) combine to yield the model for the chemical source term (\ref{mass_prod_rate}), once multiplied by density.
+
+\subsection*{Derivation of First Moment Equation}
+
+\begin{align}
+\int \psi_\beta \left[ \frac{\partial f}{\partial t} = - \frac{\partial}{\partial \psi_\alpha} \left( f \left\langle \left. \frac{\partial Y_\alpha}{\partial t} \right| \psi_\alpha \right\rangle \right) \right] \d \psi_\beta
+\end{align}
+LHS:
+\begin{align}
+\int \bigg[ \frac{\partial f \psi_\beta}{\partial t} - f \underbrace{\frac{\partial \psi_\beta}{\partial t}}_{0} \bigg] \d \psi_\beta = \frac{\d \widetilde{Y}_\beta}{\d t}
+\end{align}
+RHS:
+\begin{multline}
+\int - \psi_\beta \frac{\partial}{\partial \psi_\alpha} \left( f \left\{ \frac{1}{\tau_{\si{mix}}}(\hat{Y}_\alpha - \psi_\alpha) + \frac{\d \hat{Y}_\alpha}{\d t} \right\} \right) \d \psi_\beta =\\ - \underbrace{\int \frac{\partial}{\partial \psi_\alpha}\left[ \psi_\beta f \{ \;\;\; \} \right] \d \psi_\beta}_{\mbox{0 by Pope Exercise 12.1 \cite{Pope:2000}}} + \int f \{\;\;\;\} \underbrace{\frac{\partial \psi_\beta}{\partial \psi_\alpha}}_{\delta_{\alpha \beta}} \d \psi_\beta
+\end{multline}
+\begin{align}
+&= \frac{1}{\tau_{\si{mix}}}(\hat{Y}_\beta - \widetilde{Y}_\beta) + (1-\zeta) \frac{\d \hat{Y}_\beta}{\d t} \notag\\
+&= \frac{1}{\tau_{\si{mix}}}(\hat{Y}_\beta - [\zeta \widetilde{Y}_\beta^0 + (1-\zeta)\hat{Y}_\beta]) + (1-\zeta) \frac{\d \hat{Y}_\beta}{\d t} \notag\\
+&= \frac{\zeta}{\tau_{\si{mix}}}(\hat{Y}_\beta - \widetilde{Y}_\beta^0) + (1-\zeta) \frac{\d \hat{Y}_\beta}{\d t} \label{eq:first_moment}
+\end{align}
+
+\subsection*{Evolution of the Unmixed Fraction}
+\label{app:evo_unmixed}
+
+Equation (\ref{eq:zeta}) may be derived as follows.  Differentiating (\ref{eq:final_comp}) in time we get
+\begin{align}
+\label{eq:diff_comp}
+\frac{\d \widetilde{Y}_\alpha}{\d t}
+&= \widetilde{Y}_\alpha^0 \frac{\d \zeta}{\d t} + (1-\zeta) \frac{\d \hat{Y}_\alpha}{\d t} - \hat{Y}_\alpha \frac{\d \zeta}{\d t} \notag\\
+&= - \frac{\d \zeta}{\d t} (\hat{Y}_\alpha-\widetilde{Y}_\alpha^0) + (1-\zeta) \frac{\d \hat{Y}_\alpha}{\d t}
+\end{align}
+Comparing (\ref{eq:diff_comp}) with (\ref{eq:first_moment}) we see that during the reactor step the unmixed fraction evolves by
+\begin{equation}
+\label{eq:zeta_ode}
+\frac{\d \zeta}{\d t} = - \frac{\zeta}{\tau_{\si{mix}}} \,\mbox{.}
+\end{equation}
+Note that while (\ref{mass_prod_rate}) invokes (\ref{eq:zeta_ode}) in its derivation, (\ref{eq:first_moment}) does not---it is an independent derivation that relies on the choice of mixing model, in this case a variant of IEM as shown in (\ref{eq:iem2}).
+
+\chapter{Limiting Behavior of the PaSR Model}
+\label{app:eddy_dissipation_concept}
+
+\section{Burke-Schumann Solution}
+
+When the reactants are initially completely mixed ($\zeta_0=0$) and the chemical kinetics are infinitely fast for a single step reaction, $\mbox{Fuel} + \mbox{Air} \rightarrow \mbox{Products}$, the present model reduces to the Burke-Schumann solution (see, e.g., \cite{Turns:1996}), where the cell mean mixture fraction is given by
+\begin{equation}
+\label{eq:mixture_fraction}
+\widetilde{Z} = \widetilde{Y}_{\si{F}} + \left(\frac{1}{1+s}\right) \widetilde{Y}_{\si{P}} \,\mbox{.}
+\end{equation}
+
+\section{Basic EDC}
+
+When the reactants are initially unmixed ($\zeta_0=1$) and the kinetics are infinitely fast, our model reduces to the Eddy Dissipation Concept (EDC) as described in \cite{Poinsot:TNC}.  First, write (\ref{mass_prod_rate}) for Fuel (F) with $\zeta = 1$:
+\begin{equation}
+\label{eq:edc} 
+\dot{m}^{\prime\prime\prime}_{\si{F}} = \rho \frac{1}{\tau_{\si{mix}}} (\hat{Y}_{\si{F}} - \widetilde{Y}_{\si{F}}^0) \,\mbox{.}
+\end{equation}
+For infinitely fast kinetics, the Fuel composition in the mixed zone is
+\begin{equation}
+\label{eq:mixed_fuel_comp}
+\hat{Y}_{\si{F}} = \left\{ \begin{array}{ll} 0 & \mbox{if} \quad \widetilde{Y}_{\si{F}}^0 \le \widetilde{Y}_{\si{A}}^0/s \quad \mbox{(excess Air)}  \,\mbox{,} \\
+\widetilde{Y}_{\si{F}}^0 - \widetilde{Y}_{\si{A}}^0/s & \mbox{if} \quad \widetilde{Y}_{\si{F}}^0 > \widetilde{Y}_{\si{A}}^0/s \quad \mbox{(excess Fuel)}  \,\mbox{.} \end{array} \right.
+\end{equation}
+Using (\ref{eq:mixed_fuel_comp}) in (\ref{eq:edc}) we recover the basic EDC model:
+\begin{equation}
+\label{eq:edc_basic} 
+\dot{m}^{\prime\prime\prime}_{\si{F}} = - \rho \frac{\min(\widetilde{Y}_{\si{F}}^0,\widetilde{Y}_{\si{A}}^0/s)}{\tau_{\si{mix}}} \,\mbox{.}
+\end{equation}
+
+\section{Extended EDC}
+
+When the unmixed fraction is held constant ($\zeta = \zeta_0$), our formulation may be cast as an extended EDC model with the mixed reactor zone treated as a perfectly stirred reactor (PSR).  Previous authors  \cite{Chen:1,Panjwani:2010,Lilleberg:2010} have referred to the mixed reactor zone as the ``fine structure region.'' In the notation of \cite{Panjwani:2010}, the extended EDC reaction rate model, comparable to (\ref{mass_prod_rate}) in this paper, is given by
+\begin{equation}
+\label{eq:panjwani_edc}
+\rho \, \frac{\d \widetilde{Y}_\alpha}{\d t} = \rho \, \frac{\gamma_\lambda^2 \chi}{\tau^\star} \left( Y_\alpha^0 - Y_\alpha^\star \right) \,\mbox{,}
+\end{equation}
+where $\gamma_\lambda$ is the ``ratio between the mass of the fine structure and the total mass of the subgrid structure'' and $\chi$ is the probability of fine structure burning \cite{Panjwani:2010}; in practice, both quantities are between 0 and 1.  The reactor residence time is denoted $\tau^\star$, clearly comparable to our mixing time scale, and the fine structure mass fraction is $Y_\alpha^\star$, clearly comparable to our mixed zone mass fraction $\hat{Y}_\alpha$.  Panjwani et al.~\cite{Panjwani:2010} refer to $Y_\alpha^0$ as the mass fraction of the ``surrounding state,'' thus equivalent to our initial cell mean $\widetilde{Y}_\alpha^0=\widetilde{Y}_\alpha(0)$.
+
+\paragraph{Remarks}
+\begin{enumerate}
+%\item It is not clear why $\gamma_\lambda$ should be squared in (\ref{eq:lilleberg_edc}).  In fact, \cite{Chen:1} does not square this quantity.
+%\item Given that $\gamma_\lambda$ and $\chi$ are in the range [0,1], the sign of the RHS of (\ref{eq:panjwani_edc}) is inconsistent since for fast chemistry $Y_{\si{F}}^\star$ may be 0 (this sign convention is used consistently by the aforementioned authors).
+\item A comparison between the models written down by \cite{Panjwani:2010} (see Eq.~(\ref{eq:panjwani_edc})) and \cite{Lilleberg:2010} makes it clear that the cell mean mass fraction may be written as $\widetilde{Y}_\alpha = (1-\gamma_\lambda^2 \chi) Y_\alpha^0 + \gamma_\lambda^2 \chi \, Y_\alpha^\star$, which is equivalent to our (\ref{eq:final_comp}) with $\zeta = 1-\gamma_\lambda^2 \chi$.  This definition of the cell mean is inconsistent with the stated definition of $\gamma_\lambda$ (quoted above) in \cite{Panjwani:2010}.
+\item Equation (\ref{eq:panjwani_edc}) may be rewritten as
+   \begin{align}
+      \label{eq:edc_compare}
+      \rho \, \frac{\d \widetilde{Y}_\alpha}{\d t} &= \rho \, \frac{(1-\zeta)}{\tau_{\si{mix}}} ( \widetilde{Y}_\alpha^0 - \hat{Y}_\alpha ) \,\mbox{,} \notag \\
+      &= \rho \, \frac{(\zeta-1)}{\tau_{\si{mix}}} ( \hat{Y}_\alpha - \widetilde{Y}_\alpha^0 ) \,\mbox{,} \notag \\
+      &= \rho \, \left[ \frac{\zeta}{\tau_{\si{mix}}}(\hat{Y}_\alpha - \widetilde{Y}_\alpha^0) + \frac{\widetilde{Y}_\alpha^0 - \hat{Y}_\alpha}{\tau_{\si{mix}}} \right] \,\mbox{.}
+   \end{align}
+   Compare (\ref{eq:edc_compare}) with (\ref{mass_prod_rate}).  Again, the first term on the RHS represents mixing, the second term reaction.  Evidently, the PSR model is
+   \begin{equation}
+      \label{eq:psr}
+      \frac{\d \hat{Y}_\alpha}{\d t} = \frac{\widetilde{Y}_\alpha^0 - \hat{Y}_\alpha}{\tau_{\si{mix}}(1-\zeta)} \,\mbox{,}
+   \end{equation}
+   where the residence time in the reactor is $\tau_{\si{mix}}(1-\zeta)$.
+   
+%   There is clearly a sign error in (\ref{eq:psr}), which may account for unsatisfactory results when implementing kinetics into the PSR models by previous authors \cite{Lilleberg:2010}. {\color{red}[I'm not sure I want to include all this in the paper.  But I cannot seem to reconcile the sign issue.  I would rather be able to simply say our approach compares with Panjwani et al. for constant $\zeta$.]}
+\end{enumerate}
 
 %\chapter{Derivation of the Werner Wengle Wall Model}
 %%\subsubsection{R. McDermott, BFRL}
