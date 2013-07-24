@@ -129,6 +129,7 @@ GLUI_Rollout *ROLLOUT_part_chop=NULL;
 #define COLORBAND 115
 
 #define UPDATE_VECTOR 101
+#define UPDATE_VECTOR_FROM_SMV 102
 
 #define TRUNCATE_BOUNDS 1
 #define DONT_TRUNCATE_BOUNDS 0
@@ -1129,12 +1130,15 @@ extern "C" void PLOT3D_CB(int var){
       if(enable_isosurface==0)PANEL_isosurface->disable();
     }
     break;
-  case UPDATE_VECTOR:
+  case UPDATE_VECTOR_FROM_SMV:
     if(SPINNER_vectorpointsize!=NULL&&SPINNER_vectorlinewidth!=NULL&&SPINNER_vectorlinelength!=NULL){
       SPINNER_vectorpointsize->set_float_val(vectorpointsize);
       SPINNER_vectorlinewidth->set_float_val(vectorlinewidth);
       SPINNER_vectorlinelength->set_float_val(vecfactor);
     }
+    PLOT3D_CB(UPDATE_VECTOR);
+    break;
+  case UPDATE_VECTOR:
     updateplotslice(1);
     updateplotslice(2);
     updateplotslice(3);
@@ -2263,12 +2267,15 @@ extern "C" void Slice_CB(int var){
       update_slice_contours(list_slice_index,slice_line_contour_min, slice_line_contour_max,slice_line_contour_num);
       break;
 #endif
-  case UPDATE_VECTOR:
+  case UPDATE_VECTOR_FROM_SMV:
     if(SPINNER_plot3d_vectorpointsize!=NULL&&SPINNER_plot3d_vectorlinewidth!=NULL&&SPINNER_plot3d_vectorlinelength!=NULL){
       SPINNER_plot3d_vectorpointsize->set_float_val(vectorpointsize);
       SPINNER_plot3d_vectorlinewidth->set_float_val(vectorlinewidth);
       SPINNER_plot3d_vectorlinelength->set_float_val(vecfactor);
     }
+    Slice_CB(UPDATE_VECTOR);
+    break;
+  case UPDATE_VECTOR:
     break;
   case FRAMELOADING:
     sliceframestep=sliceframeskip+1;
@@ -2608,8 +2615,8 @@ extern "C" void hide_glui_bounds(void){
 /* ------------------ update_vector_widgets ------------------------ */
 
 extern "C" void update_vector_widgets(void){
-  PLOT3D_CB(UPDATE_VECTOR);
-  Slice_CB(UPDATE_VECTOR);
+  PLOT3D_CB(UPDATE_VECTOR_FROM_SMV);
+  Slice_CB(UPDATE_VECTOR_FROM_SMV);
 }
 
 /* ------------------ update_plot3d_display ------------------------ */
