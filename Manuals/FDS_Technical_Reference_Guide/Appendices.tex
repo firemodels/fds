@@ -818,7 +818,7 @@ This same technique is applied to the second-order Runge-Kutta scheme with three
 \begin{equation}\label{eq:A4}
 A=\frac{4\,A_4-A_2}{3}  + \mathcal{O}(h^4)
 \end{equation}
-In Eq.~(\ref{eq:A4}), $A$ represents the time updated value of the species concentrations in the mixed reactor zone, $\hat{Y}_{\alpha}$, as found in Eq.~(\ref{eq:mixed_mass_fraction_sub}).
+In Eq.~(\ref{eq:A4}), $A$ represents the time updated value of the species concentrations in the mixed reactor zone, $\hat{Y}_{\alpha}$, as found in Eq.~(\ref{eq:dmdt_2}).
 
 \subsection*{Error Control}
 
@@ -932,7 +932,7 @@ When the reactants are initially completely mixed ($\zeta_0=0$) and the chemical
 
 When the reactants are initially unmixed ($\zeta_0=1$) and the kinetics are infinitely fast, our model reduces to the Eddy Dissipation Concept (EDC) as described in \cite{Poinsot:TNC}.  First, write (\ref{mass_prod_rate}) for Fuel (F) with $\zeta = 1$:
 \begin{equation}
-\label{eq:edc} 
+\label{eq:src_zeta_1} 
 \dot{m}^{\prime\prime\prime}_{\si{F}} = \rho \frac{1}{\tau_{\si{mix}}} (\hat{Y}_{\si{F}} - \widetilde{Y}_{\si{F}}^0) \,\mbox{.}
 \end{equation}
 For infinitely fast kinetics, the Fuel composition in the mixed zone is
