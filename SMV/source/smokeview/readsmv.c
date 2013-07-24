@@ -10357,12 +10357,12 @@ int readini2(char *inifile, int localfile){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i",&nuc);
       for(i=0;i<nuc;i++){
-        int active;
+        int unit_index;
 
         fgets(buffer,255,stream);
         if(i>nunitclasses-1)continue;
-        sscanf(buffer,"%i",&active);
-        unitclasses[i].active=active;
+        sscanf(buffer,"%i",&unit_index);
+        unitclasses[i].unit_index=unit_index;
       }
       continue;
     }
@@ -11619,7 +11619,7 @@ void writeini(int flag){
   fprintf(fileout,"UNITCLASSES\n");
   fprintf(fileout," %i\n",nunitclasses);
   for(i=0;i<nunitclasses;i++){
-    fprintf(fileout," %i\n",unitclasses[i].active);
+    fprintf(fileout," %i\n",unitclasses[i].unit_index);
   }
   if(flag==LOCAL_INI){
     fprintf(fileout,"MSCALE\n");

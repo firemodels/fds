@@ -474,6 +474,8 @@ EXTERNCPP int makeiblank(void);
 EXTERNCPP int makeiblank_carve(void);
 EXTERNCPP void makeiblank_smoke3d(void);
 EXTERNCPP void getunitinfo(const char *unitlabel, int *unitclass, int *unittype);
+EXTERNCPP float getunitval(const char *unitlabel, float oldval);
+
 EXTERNCPP void update_unit_defs(void);
 
 EXTERNCPP void SmoothIsoSurface(isosurface *surfacedata);

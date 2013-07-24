@@ -5405,7 +5405,7 @@ void draw_user_ticks(void){
         xyz2[1]=xyz[1];
         xyz2[2]=xyz[2]-TEXT_FACTOR*SCALE2FDS(user_tick_length);
       }
-      sprintf(label,"%f",xyz[0]);
+      sprintf(label,"%5.1f",getunitval("Distance",xyz[0]));
       trimzeros(label);
       output3Text(foregroundcolor,xyz2[0],xyz2[1],xyz2[2], label);
     }
@@ -5499,7 +5499,7 @@ void draw_user_ticks(void){
         xyz2[1]=xyz[1];
         xyz2[2]=xyz[2]-TEXT_FACTOR*SCALE2FDS(user_tick_length);
       }
-      sprintf(label,"%f",xyz[1]);
+      sprintf(label,"%5.1f",getunitval("Distance",xyz[1]));
       trimzeros(label);
       output3Text(foregroundcolor,xyz2[0],xyz2[1],xyz2[2], label);
     }
@@ -5588,7 +5588,7 @@ void draw_user_ticks(void){
         xyz2[1]=xyz[1];
       }
       xyz2[2]=xyz[2];
-      sprintf(label,"%f",xyz[2]);
+      sprintf(label,"%5.1f",getunitval("Distance",xyz[2]));
       trimzeros(label);
       output3Text(foregroundcolor,xyz2[0],xyz2[1],xyz2[2], label);
     }

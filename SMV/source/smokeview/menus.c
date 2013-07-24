@@ -1221,15 +1221,15 @@ void FontMenu(int value){
 /* ------------------ UnitsMenu ------------------------ */
 
 void UnitsMenu(int value){
-  int unitclass, unittype;
+  int unitclass, unit_index;
   int i;
 
   unitclass = value/1000;
-  unittype = value - unitclass*1000;
-  unitclasses[unitclass].active=unittype;
+  unit_index = value - unitclass*1000;
+  unitclasses[unitclass].unit_index=unit_index;
   if(value==-1){
     for(i=0;i<nunitclasses;i++){
-      unitclasses[i].active=0;
+      unitclasses[i].unit_index=0;
     }
   }
   else if(value==-2){
@@ -7236,7 +7236,7 @@ updatemenu=0;
       for(j=0;j<uci->nunits;j++){
         char menulabel[1024];
 
-        if(uci->active==j){
+        if(uci->unit_index==j){
           strcpy(menulabel,"*");
           strcat(menulabel,uci->units[j].unit);
         }

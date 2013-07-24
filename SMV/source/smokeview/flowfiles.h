@@ -1335,7 +1335,7 @@ typedef struct {
 
 typedef struct {
   int nunits;
-  int active,submenuid,visible;
+  int unit_index,submenuid,visible;
   char unitclass[30]; /* ie: velocity, temperature */
   int diff_index;
   f_unit *units;

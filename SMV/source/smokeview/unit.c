@@ -121,7 +121,7 @@ void add_unit_class(flowlabels *label){
 
   ut->diff_index=1;
   ut->nunits=2;
-  ut->active=0;
+  ut->unit_index=0;
   strcpy(ut->unitclass,label->shortlabel);
 
   NewMemory((void **)&(ut->units),ut->nunits*sizeof(f_unit));
@@ -275,6 +275,27 @@ void update_unit_defs(void){
 
 }
 
+/* ------------------ getunitval ------------------------ */
+
+float getunitval(const char *unittype, float oldval){
+  int i;
+
+  for(i=0;i<nunitclasses;i++){
+    if(STRCMP(unitclasses[i].unitclass,unittype)==0){
+      int unit_index;
+      float *scale;
+      float val;
+
+      unit_index = unitclasses[i].unit_index;
+      scale = unitclasses[i].units[unit_index].scale;
+      val =  scale[0]*oldval + scale[1];
+      val = (float)((int)(val*10.0 + 0.5))/10.0;
+      return val;
+    }
+  }
+  return oldval;
+}
+
 /* ------------------ getunitinfo ------------------------ */
 
 void getunitinfo(const char *unitlabel, int *unitclass, int *unittype){
@@ -286,7 +307,7 @@ void getunitinfo(const char *unitlabel, int *unitclass, int *unittype){
     if(strlen(unitclasses[i].units->unit)!=strlen(unitlabel))continue;
     if(STRCMP(unitclasses[i].units->unit,unitlabel)==0){
       *unitclass=i;
-      *unittype=unitclasses[i].active;
+      *unittype=unitclasses[i].unit_index;
       return;
     }
   }
@@ -322,7 +343,7 @@ void InitUnits(void){
   ut->diff_index=-1;
   ut->nunits=3;
 #endif
-  ut->active=0;
+  ut->unit_index=0;
   strcpy(ut->unitclass,"Temperature");
 
   NewMemory((void **)&(ut->units),ut->nunits*sizeof(f_unit));
@@ -365,7 +386,7 @@ void InitUnits(void){
   // velocity units
 
   ut = unitclasses_default+1;
-  ut->active=0;
+  ut->unit_index=0;
 #ifdef pp_SMOKEDIFF
   if(smokediff==1){
     ut->diff_index=3;
@@ -405,7 +426,7 @@ void InitUnits(void){
   // distance units
 
   ut = unitclasses_default + 2;
-  ut->active=0;
+  ut->unit_index=0;
 #ifdef pp_SMOKEDIFF
   if(smokediff==1){
     ut->diff_index=2;
@@ -442,7 +463,7 @@ void InitUnits(void){
   // volume flow units
 
   ut = unitclasses_default + 3;
-  ut->active=0;
+  ut->unit_index=0;
 #ifdef pp_SMOKDIFF
   if(smokediff==1){
     ut->diff_index=2;
@@ -479,7 +500,7 @@ void InitUnits(void){
   // Mass fraction units
 
   ut = unitclasses_default + 4;
-  ut->active=0;
+  ut->unit_index=0;
 #ifdef pp_SMOKEDIFF
   if(smokediff==1){
     ut->diff_index=2;
@@ -517,7 +538,7 @@ void InitUnits(void){
   // Concentration
 
   ut = unitclasses_default + 5;
-  ut->active=0;
+  ut->unit_index=0;
 #ifdef pp_SMOKDIFF
   if(smokediff==1){
     ut->diff_index=2;
