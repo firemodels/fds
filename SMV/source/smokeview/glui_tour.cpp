@@ -35,11 +35,10 @@ void TOUR_CB(int var);
 
 GLUI *glui_tour=NULL;
 
-GLUI_Rollout *ROLLOUT_path=NULL;
-GLUI_Rollout *ROLLOUT_spline=NULL;
 GLUI_Rollout *ROLLOUT_avatar=NULL;
-GLUI_Rollout *ROLLOUT_view=NULL;
 
+GLUI_Panel *PANEL_tension=NULL;
+GLUI_Panel *PANEL_path=NULL;
 GLUI_Panel *PANEL_keyframe=NULL;
 GLUI_Panel *PANEL_tour=NULL;
 GLUI_Panel *PANEL_tour1=NULL;
@@ -47,6 +46,7 @@ GLUI_Panel *PANEL_tour2=NULL;
 GLUI_Panel *PANEL_tour3=NULL;
 GLUI_Panel *PANEL_tour4=NULL;
 GLUI_Panel *PANEL_close_tour=NULL;
+GLUI_Panel *PANEL_view=NULL;
 GLUI_Panel *PANEL_view2=NULL;
 GLUI_Panel *PANEL_view3=NULL;
 GLUI_Panel *PANEL_pos=NULL;
@@ -223,16 +223,16 @@ extern "C" void glui_tour_setup(int main_window){
   glui_tour->add_checkbox_to_panel(PANEL_settings,_("Antialias tour path line"),&tour_antialias);
 #endif
 
-  ROLLOUT_path = glui_tour->add_rollout_to_panel(PANEL_settings,_("Duration"),false);
+  PANEL_path = glui_tour->add_panel_to_panel(PANEL_settings,_("Duration"),true);
 
-  glui_tour->add_spinner_to_panel(ROLLOUT_path,_("start time"),GLUI_SPINNER_FLOAT,&view_tstart,VIEW_times,TOUR_CB);
-  glui_tour->add_spinner_to_panel(ROLLOUT_path,_("stop time:"),GLUI_SPINNER_FLOAT,&view_tstop, VIEW_times,TOUR_CB);
-  glui_tour->add_spinner_to_panel(ROLLOUT_path,_("points"),    GLUI_SPINNER_INT,&view_ntimes,  VIEW_times,TOUR_CB);
+  glui_tour->add_spinner_to_panel(PANEL_path,_("start time"),GLUI_SPINNER_FLOAT,&view_tstart,VIEW_times,TOUR_CB);
+  glui_tour->add_spinner_to_panel(PANEL_path,_("stop time:"),GLUI_SPINNER_FLOAT,&view_tstop, VIEW_times,TOUR_CB);
+  glui_tour->add_spinner_to_panel(PANEL_path,_("points"),    GLUI_SPINNER_INT,&view_ntimes,  VIEW_times,TOUR_CB);
 
-  ROLLOUT_spline = glui_tour->add_rollout_to_panel(PANEL_settings,_("Tension"),false);
-  CHECKBOX_globaltension_flag=glui_tour->add_checkbox_to_panel(ROLLOUT_spline,_("Global"),&tour_global_tension_flag,GLOBAL_TENSIONFLAG,TOUR_CB);
-  SPINNER_globaltourtension=glui_tour->add_spinner_to_panel(ROLLOUT_spline,_("All keyframes"),GLUI_SPINNER_FLOAT,&tour_global_tension,GLOBAL_TENSION,TOUR_CB);
-  SPINNER_tourtension=glui_tour->add_spinner_to_panel(ROLLOUT_spline,_("Selected keyframe"),GLUI_SPINNER_FLOAT,&tour_tension,KEYFRAME_tXYZ,TOUR_CB);
+  PANEL_tension = glui_tour->add_panel_to_panel(PANEL_settings,_("Tension"),true);
+  CHECKBOX_globaltension_flag=glui_tour->add_checkbox_to_panel(PANEL_tension,_("Global"),&tour_global_tension_flag,GLOBAL_TENSIONFLAG,TOUR_CB);
+  SPINNER_globaltourtension=glui_tour->add_spinner_to_panel(PANEL_tension,_("All keyframes"),GLUI_SPINNER_FLOAT,&tour_global_tension,GLOBAL_TENSION,TOUR_CB);
+  SPINNER_tourtension=glui_tour->add_spinner_to_panel(PANEL_tension,_("Selected keyframe"),GLUI_SPINNER_FLOAT,&tour_tension,KEYFRAME_tXYZ,TOUR_CB);
 
   SPINNER_globaltourtension->set_float_limits(-1.0,1.0,GLUI_LIMIT_CLAMP);
   SPINNER_tourtension->set_float_limits(-1.0,1.0,GLUI_LIMIT_CLAMP);
@@ -255,13 +255,13 @@ extern "C" void glui_tour_setup(int main_window){
   SPINNER_y=glui_tour->add_spinner_to_panel(PANEL_pos2,"Y:",GLUI_SPINNER_FLOAT,tour_xyz+1,KEYFRAME_tXYZ,TOUR_CB);
   SPINNER_z=glui_tour->add_spinner_to_panel(PANEL_pos2,"Z:",GLUI_SPINNER_FLOAT,tour_xyz+2,KEYFRAME_tXYZ,TOUR_CB);
 
-  ROLLOUT_view = glui_tour->add_rollout_to_panel(PANEL_keyframe,"View direction",false);
-  PANEL_view3 = glui_tour->add_panel_to_panel(ROLLOUT_view,"",GLUI_PANEL_NONE);
+  PANEL_view = glui_tour->add_panel_to_panel(PANEL_keyframe,"View direction",true);
+  PANEL_view3 = glui_tour->add_panel_to_panel(PANEL_view,"",GLUI_PANEL_NONE);
   CHECKBOX_view1=glui_tour->add_checkbox_to_panel(PANEL_view3,"Absolute",&viewtype1,VIEW1,TOUR_CB);
   glui_tour->add_column_to_panel(PANEL_view3,false);
   CHECKBOX_view2=glui_tour->add_checkbox_to_panel(PANEL_view3,"Relative to path",&viewtype2,VIEW2,TOUR_CB);
 
-  PANEL_view2 = glui_tour->add_panel_to_panel(ROLLOUT_view,"",GLUI_PANEL_NONE);
+  PANEL_view2 = glui_tour->add_panel_to_panel(PANEL_view,"",GLUI_PANEL_NONE);
   PANEL_view_xyz = glui_tour->add_panel_to_panel(PANEL_view2,"",GLUI_PANEL_NONE);
   glui_tour->add_column_to_panel(PANEL_view2,false);
   PANEL_view_angle = glui_tour->add_panel_to_panel(PANEL_view2,"",GLUI_PANEL_NONE);
@@ -574,26 +574,6 @@ void TOUR_CB(int var){
       selected_tour->startup=0;
       eye = selected_frame->nodeval.eye;
       xyz_view = selected_frame->nodeval.xyz_view_abs;
-
-      /*
-      {
-        int change_time;
-
-        change_time=0;
-        if(tour_ttt<selected_frame->prev->display_time){
-          change_time=1;
-          tour_ttt=selected_frame->prev->display_time;
-        }
-        if(tour_ttt>selected_frame->next->display_time){
-          change_time=1;
-          tour_ttt=selected_frame->next->display_time;
-        }
-        if(change_time==1){
-          SPINNER_t->set_float_val(tour_ttt);
-        }
-      }
-
-        */
 
       if(tour_constant_vel==0){
         selected_frame->noncon_time=tour_ttt;
