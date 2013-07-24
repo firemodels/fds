@@ -102,7 +102,7 @@ int makeslicesizefile(char *file, char *sizefile, int compression_type);
              DU = U->qslice[(n)];               \
            }                                  \
          }                                   \
-         DU *= 0.05*vecfactor2*vecfactor/vrange
+         DU *= 0.05*vecfactor/vrange
 
 #define GET_VEC_DXYZ_TERRAIN(U,DU) \
          if(U==NULL){\
@@ -116,7 +116,7 @@ int makeslicesizefile(char *file, char *sizefile, int compression_type);
              DU=f1*U->qslice[n1]+f2*U->qslice[n2];               \
            }                                  \
          }                                   \
-         DU *= 0.05*vecfactor2*vecfactor/vrange
+         DU *= 0.05*vecfactor/vrange
 
 /* ------------------ out_slice ------------------------ */
 

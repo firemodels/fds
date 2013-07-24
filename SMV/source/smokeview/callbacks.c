@@ -1335,46 +1335,44 @@ void keyboard(unsigned char key, int flag){
         add_delete_keyframe(ADD_KEYFRAME);
         break;
       }
-      switch (keystate){
-        case GLUT_ACTIVE_ALT:
-        case GLUT_ACTIVE_CTRL:
-          if((visVector==1&&ReadPlot3dFile==1)||showvslice==1)vecfactor2/=1.5;
-          PRINTF("vector length multiplier: %f\n",vecfactor2);
-          break;
-        default:
-          if((rotation_type==EYE_CENTERED||(visVector==1&&ReadPlot3dFile==1)||showvslice==1||isZoneFireModel==1)){
-            if(rotation_type==EYE_CENTERED){
-              handle_move_keys(256+key2);
-            }
-            else{
-              vecfactor2*=1.5;
-              PRINTF("vector length multiplier: %f\n",vecfactor2);
-
-              if(isZoneFireModel==1){
-                if(FlowDir>0){
-                  zone_ventfactor*=1.5;
-                } 
-                else{
-                  zone_ventfactor/=1.5;
-                }
-                PRINTF("zone vent factor: %f\n",zone_ventfactor);
-              }
-              if(visVector==1&&ReadPlot3dFile==1){
-                gbsave=current_mesh;
-                for(i=0;i<nmeshes;i++){
-                  gbi = meshinfo + i;
-                  if(gbi->plot3dfilenum==-1)continue;
-                  update_current_mesh(gbi);
-                  updateplotslice(1);
-                  updateplotslice(2);
-                  updateplotslice(3);
-                }
-                update_current_mesh(gbsave);
-              }
-            }
-            return;
-          }
-          break;
+      if(rotation_type==EYE_CENTERED){
+        handle_move_keys(256+key2);
+        break;
+      }
+      if((visVector==1&&ReadPlot3dFile==1)||showvslice==1||isZoneFireModel==1){
+      }
+      else{
+        break;
+      }
+      if(isZoneFireModel==1){
+        if(FlowDir>0){
+          zone_ventfactor*=1.5;
+        } 
+        else{
+          zone_ventfactor/=1.5;
+        }
+        PRINTF("zone vent factor: %f\n",zone_ventfactor);
+      }
+      else{
+        if(keystate==GLUT_ACTIVE_ALT){
+          vecfactor/=1.5;
+        }
+        else{
+          vecfactor*=1.5;
+        }
+        PRINTF("vector length factor: %f\n",vecfactor);
+      }
+      if(visVector==1&&ReadPlot3dFile==1){
+        gbsave=current_mesh;
+        for(i=0;i<nmeshes;i++){
+          gbi = meshinfo + i;
+          if(gbi->plot3dfilenum==-1)continue;
+          update_current_mesh(gbi);
+          updateplotslice(1);
+          updateplotslice(2);
+          updateplotslice(3);
+        }
+        update_current_mesh(gbsave);
       }
       break;
     case 'A':

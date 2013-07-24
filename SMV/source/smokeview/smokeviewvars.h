@@ -463,7 +463,7 @@ SVEXTERN int which_face;
 SVEXTERN int showfontmenu;
 SVEXTERN int showlightmenu;
 
-SVEXTERN float SVDECL(vecfactor,1.0),SVDECL(veclength,0.0),SVDECL(vecfactor2,1.0);
+SVEXTERN float SVDECL(vecfactor,1.0),SVDECL(veclength,0.0);
 
 SVEXTERN int glui_active;
 
