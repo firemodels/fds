@@ -1,6 +1,6 @@
 &HEAD CHID='NIST_He_3600_UC_SSV',TITLE='Helium release experiment 3600 seconds, Upper Center Burner, Single Small Vent'/
 
-&MESH IJK=64,60,30, XB=-0.1, 1.50, 0.0, 1.50, 0.0, 0.75 /
+&MESH IJK=64,60,30, XB=0.0, 1.50, 0.0, 1.50, 0.0, 0.75 /
 
 &TIME DT=0.5, T_END=32460./ 3600 sec. release and an equilibrium phase
 &MISC TMPA=21. /
