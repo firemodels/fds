@@ -37,8 +37,7 @@ GLUI *glui_tour=NULL;
 
 GLUI_Rollout *ROLLOUT_avatar=NULL;
 
-GLUI_Panel *PANEL_COL1=NULL;
-GLUI_Panel *PANEL_COL2=NULL;
+GLUI_Panel *PANEL_settingskeyframe=NULL;
 GLUI_Panel *PANEL_tension=NULL;
 GLUI_Panel *PANEL_path=NULL;
 GLUI_Panel *PANEL_keyframe=NULL;
@@ -215,7 +214,9 @@ extern "C" void glui_tour_setup(int main_window){
     CHECKBOX_showtour_locus=glui_tour->add_checkbox_to_panel(PANEL_tour2,_("Show avatar"),&show_tourlocus);
   }
 
-  PANEL_settings = glui_tour->add_panel(_("Settings"));
+  PANEL_settingskeyframe=glui_tour->add_panel("",GLUI_PANEL_NONE);
+
+  PANEL_settings = glui_tour->add_panel_to_panel(PANEL_settingskeyframe,_("Settings"));
   CHECKBOX_showtourroute=glui_tour->add_checkbox_to_panel(PANEL_settings,_("Edit tour"),&edittour,SHOWTOURROUTE,TOUR_CB);
   CHECKBOX_view=glui_tour->add_checkbox_to_panel(PANEL_settings,_("View from tour path"),&viewtourfrompath,VIEWTOURFROMPATH,TOUR_CB);
   CHECKBOX_snap=glui_tour->add_checkbox_to_panel(PANEL_settings,_("View from selected keyframe"),&keyframe_snap,VIEWSNAP,TOUR_CB);
@@ -239,7 +240,8 @@ extern "C" void glui_tour_setup(int main_window){
   SPINNER_globaltourtension->set_float_limits(-1.0,1.0,GLUI_LIMIT_CLAMP);
   SPINNER_tourtension->set_float_limits(-1.0,1.0,GLUI_LIMIT_CLAMP);
 
-  PANEL_keyframe = glui_tour->add_panel("Keyframe");
+  glui_tour->add_column_to_panel(PANEL_settingskeyframe,false);
+  PANEL_keyframe = glui_tour->add_panel_to_panel(PANEL_settingskeyframe,"Keyframe");
   
   PANEL_pos = glui_tour->add_panel_to_panel(PANEL_keyframe,"",GLUI_PANEL_NONE);
 
