@@ -1361,6 +1361,7 @@ void keyboard(unsigned char key, int flag){
           vecfactor*=1.5;
         }
         PRINTF("vector length factor: %f\n",vecfactor);
+        update_glui_vecfactor();
       }
       if(visVector==1&&ReadPlot3dFile==1){
         gbsave=current_mesh;
