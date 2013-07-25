@@ -1,4 +1,4 @@
-&HEAD CHID='NIST_He_3600_LC_SLV_HVAC',TITLE='Helium release experiment 3600 seconds, Lower Center Burner, Single Large Vent'/
+&HEAD CHID='NIST_He_3600_LC_SLV',TITLE='Helium release experiment 3600 seconds, Lower Center Burner, Single Large Vent'/
 
 &MESH IJK=60,60,30, XB=0.0, 1.50, 0.0, 1.50, 0.0, 0.75 /
 
