@@ -37,6 +37,8 @@ GLUI *glui_tour=NULL;
 
 GLUI_Rollout *ROLLOUT_avatar=NULL;
 
+GLUI_Panel *PANEL_COL1=NULL;
+GLUI_Panel *PANEL_COL2=NULL;
 GLUI_Panel *PANEL_tension=NULL;
 GLUI_Panel *PANEL_path=NULL;
 GLUI_Panel *PANEL_keyframe=NULL;
@@ -432,6 +434,13 @@ extern "C" void set_glui_keyframe(void){
       SPINNER_viewz->disable();
     }
   }
+  else{
+    SPINNER_az_path->disable();
+    SPINNER_elev_path->disable();
+    SPINNER_viewx->disable();
+    SPINNER_viewy->disable();
+    SPINNER_viewz->disable();
+  }
   CHECKBOX_view1->set_int_val(viewtype1);
   CHECKBOX_view2->set_int_val(viewtype2);
 }
@@ -524,7 +533,7 @@ void TOUR_CB(int var){
   case VIEW1:
     viewtype2 = 1 - viewtype1;
     CHECKBOX_view2->set_int_val(viewtype2);
-    if(viewtype1==1){
+    if(viewtype1==1&&edittour==1){
       SPINNER_az_path->disable();
       SPINNER_elev_path->disable();
       SPINNER_viewx->enable();
@@ -536,9 +545,16 @@ void TOUR_CB(int var){
         SPINNER_elev_path->set_float_val(tour_elev_path);
       }
     }
-    else if(viewtype1==REL_VIEW){
+    else if(viewtype1==REL_VIEW&&edittour==1){
       SPINNER_az_path->enable();
       SPINNER_elev_path->enable();
+      SPINNER_viewx->disable();
+      SPINNER_viewy->disable();
+      SPINNER_viewz->disable();
+    }
+    else if(edittour==0){
+      SPINNER_az_path->disable();
+      SPINNER_elev_path->disable();
       SPINNER_viewx->disable();
       SPINNER_viewy->disable();
       SPINNER_viewz->disable();
@@ -921,10 +937,14 @@ extern "C" void update_tourcontrols(void){
   if(ntours>0&&edittour==1){
     if(SPINNER_t!=NULL)SPINNER_t->enable();
     if(PANEL_keyframe!=NULL&&PANEL_keyframe->enabled==0)PANEL_keyframe->enable();
+    if(SPINNER_az_path!=NULL)SPINNER_az_path->enable();
+    if(SPINNER_elev_path!=NULL)SPINNER_elev_path->enable();
   }
   else{
     if(SPINNER_t!=NULL)SPINNER_t->disable();
     if(PANEL_keyframe!=NULL&&PANEL_keyframe->enabled==1)PANEL_keyframe->disable();
+    if(SPINNER_az_path!=NULL)SPINNER_az_path->disable();
+    if(SPINNER_elev_path!=NULL)SPINNER_elev_path->disable();
   }
 
   if(CHECKBOX_tourhide!=NULL){
