@@ -58,7 +58,7 @@ intel_win_64 : FC        = ifort
 intel_win_64 : exe       = wind2fds_win_64.exe
 
 intel_win_64 : $(objwin)
-	$(CPP) -o $(bin)/$(exe) $(objwin) $(LIB_DIR)/lib_win_intel_64/pthreadVC2_x64.lib
+	$(CPP) -o $(bin)/$(exe) $(objwin) $(LIB_DIR)/lib_win_intel_64/pthreads.lib
 
 # ------------- Linux 64 ----------------
 #  64 bit linux
