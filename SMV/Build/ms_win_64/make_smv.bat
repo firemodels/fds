@@ -4,10 +4,8 @@ set SMV_TESTFLAG=
 set SMV_TESTSTRING=
 
 IF "%COMPILERS_DEFINED%"=="1" GOTO envexist
-
   set COMPILERS_DEFINED=1
-
-  call "C:\Program Files (x86)\Microsoft Visual Studio 9.0\VC\vcvarsall" x86_amd64
+  call "%VS_COMPILER%\..\vcvarsall" x86_amd64
   call "%IFORT_COMPILER13%\bin\compilervars" intel64
 :envexist
 

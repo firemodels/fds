@@ -23,10 +23,16 @@ IF "%COMPILER%" == "cl" SET SIZE=
 
 IF "%COMPILER%" NEQ "cl" GOTO MSenvexist
 
+IF "%VS_COMPILER% NEQ "" GOTO VS_COMPILER_DEFINED
+echo "*** Error: The environment variable, VS_COMPILER, pointing"
+echo "           to the Visual Studio C compiler, cl, is not defined"
+echo "*** compilation aborted
+exit
+:VS_COMPILER_DEFINED
 IF "%MSCOMPILERS_DEFINED%" EQU "1" GOTO MSenvexist
-echo Setting up MS compiler environment
+echo Setting up Visual Studio compiler environment
 set MSCOMPILERS_DEFINED=1
-call "C:\Program Files (x86)\Microsoft Visual Studio 9.0\VC\vcvarsall" %MSCOMPILER%
+call "%VS_COMPILER%\..\vcvarsall" %MSCOMPILER%
 GOTO Ienvexist
 :MSenvexist
 
