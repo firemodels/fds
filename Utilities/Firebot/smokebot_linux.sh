@@ -1072,16 +1072,16 @@ if [[ $stage2b_success ]] ; then
    check_compile_fds_mpi
 fi
 
+### Stage 6a ###
+# No stage dependencies
+compile_smv_utilities
+check_smv_utilities
+
 ### Stage 5 ###
 if [[ $stage4a_success && $stage4b_success ]] ; then
    run_verification_cases_release
    check_verification_cases_release
 fi
-
-### Stage 6a ###
-# No stage dependencies
-compile_smv_utilities
-check_smv_utilities
 
 ### Stage 6b ###
 # No stage dependencies
