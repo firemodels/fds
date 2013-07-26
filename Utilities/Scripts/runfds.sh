@@ -45,7 +45,7 @@ debug_flag=$3
 
 if [ "$debug_flag" == "1" ]; then
 echo debug_flag is set to 1
-if [ "$FDS_DEBUG" != "" ]; then
+if [ "$FDS_DEBUG" == "1" ]; then
 exit
 fi
 fi
