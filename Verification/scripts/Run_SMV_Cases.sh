@@ -121,6 +121,7 @@ cd $SVNROOT/Verification/WUI
 echo Converting wind data
 echo .
 
+if [[ ! stop_cases ]] ; then
 if [ -e $WIND2FDS ];  then
   cd %SVNROOT%\Verification\WUI
   $WIND2FDS -prefix sd11 -offset " 50.0  50.0 0.0" wind_test1a.csv
@@ -129,6 +130,7 @@ if [ -e $WIND2FDS ];  then
   $WIND2FDS -prefix sd22 -offset "150.0 150.0 0.0" wind_test1d.csv
 else
   echo "The file $WIND2FDS does not exist. Run aborted"
+fi
 fi
 
 cd $SVNROOT/Verification
