@@ -7,6 +7,7 @@ queue=
 size=64
 DEBUG=
 OPENMP=
+FDS_DEBUG=0
 
 function usage {
 echo "Run_SMV_Cases.sh [-d -h -o -p -q queue_name -s ]"
@@ -35,6 +36,7 @@ do
 case $OPTION in
   d)
    DEBUG=_db
+   FDS_DEBUG=1
    ;;
   h)
   usage;
@@ -56,6 +58,7 @@ case $OPTION in
 esac
 #shift
 done
+export FDS_DEBUG
 
 if [ "$size" != "32" ]; then
   size=64
