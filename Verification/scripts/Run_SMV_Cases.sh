@@ -97,7 +97,7 @@ fi
 export BASEDIR=`pwd`
 
 # Remove output files (unless stop option is used)
-if [[ ! stop_cases ]] ; then
+if [[ ! $stop_cases ]] ; then
   echo "Removing FDS/CFAST output files"
   export RUNCFAST="$SVNROOT/Verification/scripts/Remove_CFAST_Files.sh"
   export RUNFDS="$SVNROOT/Verification/scripts/Remove_FDS_Files.sh"
@@ -117,13 +117,10 @@ fi
 
 echo "" | $FDSEXE 2> $SVNROOT/Manuals/SMV_User_Guide/SCRIPT_FIGURES/fds.version
 
-cd $SVNROOT/Verification/WUI
-echo Converting wind data
-echo .
-
-if [[ ! stop_cases ]] ; then
+if [[ ! $stop_cases ]] ; then
 if [ -e $WIND2FDS ];  then
-  cd %SVNROOT%\Verification\WUI
+  cd $SVNROOT/Verification/WUI
+  echo Converting wind data
   $WIND2FDS -prefix sd11 -offset " 50.0  50.0 0.0" wind_test1a.csv
   $WIND2FDS -prefix sd12 -offset " 50.0 150.0 0.0" wind_test1b.csv
   $WIND2FDS -prefix sd21 -offset "150.0  50.0 0.0" wind_test1c.csv
@@ -132,7 +129,6 @@ else
   echo "The file $WIND2FDS does not exist. Run aborted"
 fi
 fi
-
 cd $SVNROOT/Verification
 scripts/SMV_Cases.sh
 scripts/SMV_MPI_Cases.sh
