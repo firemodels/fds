@@ -60,15 +60,23 @@ intel_win_64 : exe       = wind2fds_win_64.exe
 intel_win_64 : $(objwin)
 	$(CPP) -o $(bin)/$(exe) $(objwin) $(LIB_DIR)/lib_win_intel_64/pthreads.lib
 
+# ------------- Linux 32 ----------------
+#  32 bit linux
+
+intel_linux_32 : CFLAGS    = -O2 -m32 -vec_report0 -D pp_LINUX
+intel_linux_32 : CC        = icc
+intel_linux_32 : CPP       = icc
+intel_linux_32 : exe       = wind2fds_linux_64
+
+intel_linux_32 : $(obj)
+	$(CPP) -o $(bin)/$(exe) $(obj)
+
 # ------------- Linux 64 ----------------
 #  64 bit linux
 
-intel_linux_64 : FFLAGS    = -O2 -m64 -vec_report0 -fpp -D pp_noappend -D pp_LINUX64
 intel_linux_64 : CFLAGS    = -O2 -m64 -vec_report0 -D pp_LINUX64
-intel_linux_64 : FORTLIBDIR = $(LINUX64FORTLIBDIR)
 intel_linux_64 : CC        = icc
 intel_linux_64 : CPP       = icc
-intel_linux_64 : FC        = ifort
 intel_linux_64 : exe       = wind2fds_linux_64
 
 intel_linux_64 : $(obj)
