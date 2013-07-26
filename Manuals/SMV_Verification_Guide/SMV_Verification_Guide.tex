@@ -435,10 +435,11 @@ Figure \ref{figfedslicetest} presents slice file images verifying the computatio
 
 Figure \ref{figgslicetest} presents images of 3D slices oriented in two different ways. Images are drawn at \SI{0}{s}, \SI{10}{s} and \SI{30}{s}.
 
-Figure \ref{figlevelsettest} presents images of level set slices drawn on a slope. Images are drawn at \SI{30}{s}, \SI{60}{s}, \SI{90}{s} and \SI{120}{s}.  The test verifies that the level set slices follow the sloped terrain.
-Figure \ref{figterraintest} presents images of temperature slice drawn on a terrain geometry. Images are drawn at \SI{15}{s}, \SI{30}{s}, \SI{45}{s} and \SI{60}{s}.  The test verifies that slice contour follows the sloped terrain and that the red blockage (a non-terrain blockage) is drawn correctly with terrain.
-
-Figure \ref{figdiffslicetest} presents images from data differenced by Smokediff.  Smokediff computed the difference between two similar FDS cases and generated slice files. Difference contours from these slice files are displayed at \SI{0}{s}, \SI{10}{s} and \SI{15}{s}.
+Figure \ref{figdiffslicetest} presents images from data
+differenced by Smokediff.  Smokediff computed the difference
+between two similar FDS cases and generated slice files.
+Difference contours from these slice files are displayed at
+\SI{0}{s}, \SI{10}{s} and \SI{15}{s}.
 
 
 \begin{figure}[\figoptions]
@@ -555,35 +556,6 @@ SI{30}{s}, FED=0.29&\SI{60}{s}, FED=0.59\\
 \label{figgslicetest}%
 \end{figure}
 
-\begin{figure}[\figoptions]
-\begin{center}
-\begin{tabular}{cc}
- \includegraphics[height=\figheightE]{SCRIPT_FIGURES/levelset_30}&
- \includegraphics[height=\figheightE]{SCRIPT_FIGURES/levelset_60}\\
-
- \includegraphics[height=\figheightE]{SCRIPT_FIGURES/levelset_90}&
- \includegraphics[height=\figheightE]{SCRIPT_FIGURES/levelset_120}\\
-
- \end{tabular}
-\end{center}
- \caption[A test showing level set slices drawn along a sloped terrain]{A test showing level set slices drawn along a sloped terrain at \SI{30}{s}, \SI{60}{s}, \SI{90}{s} and \SI{120}{s}. The test verifies that the level set slices follow the sloped terrain.}
-\label{figlevelsettest}%
-\end{figure}
-
-\begin{figure}[\figoptions]
-\begin{center}
-\begin{tabular}{cc}
- \includegraphics[height=\figheightE]{SCRIPT_FIGURES/hill_structure_015}&
- \includegraphics[height=\figheightE]{SCRIPT_FIGURES/hill_structure_030}\\
-
- \includegraphics[height=\figheightE]{SCRIPT_FIGURES/hill_structure_045}&
- \includegraphics[height=\figheightE]{SCRIPT_FIGURES/hill_structure_060}\\
-
- \end{tabular}
-\end{center}
- \caption[A test showing level temperature slices drawn along a sloped terrain]{A test showing temperature slices drawn along a sloped terrain at \SI{15}{s}, \SI{30}{s}, \SI{45}{s} and \SI{60}{s}. The test verifies that the temperature slices follow the sloped terrain and that the non-terrain red blockage is drawn with the terrain.}
-\label{figterraintest}%
-\end{figure}
 
 \begin{figure}[\figoptions]
 \begin{center}
@@ -833,7 +805,81 @@ Path lengths (smoke sensor locations) are chosen to obtain grey levels, $\alpha$
 \end{figure}
 
 
+\chapter{WUI Test Cases}
+This chapter presents test cases
 
+Figure \ref{figlevelsettest} presents images of level set slices
+drawn on a slope. Images are drawn at \SI{30}{s}, \SI{60}{s},
+\SI{90}{s} and \SI{120}{s}.  The test verifies that the level set
+slices follow the sloped terrain. Figure \ref{figterraintest}
+presents images of temperature slice drawn on a terrain geometry.
+Images are drawn at \SI{15}{s}, \SI{30}{s}, \SI{45}{s} and
+\SI{60}{s}.  The test verifies that slice contour follows the
+sloped terrain and that the red blockage (a non-terrain blockage)
+is drawn correctly with terrain.
+
+\begin{figure}[\figoptions]
+\begin{center}
+\begin{tabular}{cc}
+ \includegraphics[height=\figheightE]{SCRIPT_FIGURES/levelset_30}&
+ \includegraphics[height=\figheightE]{SCRIPT_FIGURES/levelset_60}\\
+
+ \includegraphics[height=\figheightE]{SCRIPT_FIGURES/levelset_90}&
+ \includegraphics[height=\figheightE]{SCRIPT_FIGURES/levelset_120}\\
+
+ \end{tabular}
+\end{center}
+ \caption[A test showing level set slices drawn along a sloped terrain]{A test showing level set slices drawn along a sloped terrain at \SI{30}{s}, \SI{60}{s}, \SI{90}{s} and \SI{120}{s}. The test verifies that the level set slices follow the sloped terrain.}
+\label{figlevelsettest}%
+\end{figure}
+
+\begin{figure}[\figoptions]
+\begin{center}
+\begin{tabular}{cc}
+ \includegraphics[height=\figheightE]{SCRIPT_FIGURES/hill_structure_015}&
+ \includegraphics[height=\figheightE]{SCRIPT_FIGURES/hill_structure_030}\\
+
+ \includegraphics[height=\figheightE]{SCRIPT_FIGURES/hill_structure_045}&
+ \includegraphics[height=\figheightE]{SCRIPT_FIGURES/hill_structure_060}\\
+
+ \end{tabular}
+\end{center}
+ \caption[A test showing level temperature slices drawn along a sloped terrain]{A test showing temperature slices drawn along a sloped terrain at \SI{15}{s}, \SI{30}{s}, \SI{45}{s} and \SI{60}{s}. The test verifies that the temperature slices follow the sloped terrain and that the non-terrain red blockage is drawn with the terrain.}
+\label{figterraintest}%
+\end{figure}
+
+\begin{figure}[\figoptions]
+\begin{center}
+\begin{tabular}{cc}
+ \includegraphics[height=2.5in]{SCRIPT_FIGURES/fire_line2_0000}&
+ \includegraphics[height=2.5in]{SCRIPT_FIGURES/fire_line2_0250}\\
+ \SI{0}{s}&\SI{250}{s}\\
+
+ \includegraphics[height=2.5in]{SCRIPT_FIGURES/fire_line2_0500}&
+ \includegraphics[height=2.5in]{SCRIPT_FIGURES/fire_line2_0750}\\
+ \SI{500}{s}&\SI{750}{s}\\
+
+ \includegraphics[height=2.5in]{SCRIPT_FIGURES/fire_line2_1000}&
+ \includegraphics[height=2.5in]{SCRIPT_FIGURES/fire_line2_1250}\\
+ \SI{1000}{s}&\SI{1250}{s}\\
+
+
+ \end{tabular}
+\end{center}
+ \caption[A test showing a fire line slice drawn along a sloped and textured terrain]{A test showing a fire line slice drawn along a sloped and textured terrain at \SI{0}{s}, \SI{250}{s}, \SI{500}{s}, \SI{750}{s}, \SI{1000}{s} and \SI{1250}{s} of simulated time. The test verifies that the level set slices follow the sloped terrain.}
+\label{figterraintest}%
+\end{figure}
+
+\begin{figure}[\figoptions]
+\begin{center}
+\begin{tabular}{c}
+ \includegraphics[height=5.0in]{SCRIPT_FIGURES/fire_line2_2000}\\
+ \SI{2000}{s}
+ \end{tabular}
+\end{center}
+ \caption{A test showing a fire line slice drawn along a sloped and textured terrain at \SI{2000}{s} simulated time.}
+\label{figterraintest}%
+\end{figure}
 
 \chapter{Other Tests}
 
