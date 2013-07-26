@@ -1346,16 +1346,16 @@ check_compile_fds_mpi
 compile_fds_openmp
 check_compile_fds_openmp
 
+### Stage 6a ###
+compile_smv_utilities
+check_smv_utilities
+
 ### Stage 5 ###
 # Depends on successful FDS compile
 if [[ $stage4a_success && $stage4b_success ]] ; then
    run_verification_cases_release
    check_verification_cases_release
 fi
-
-### Stage 6a ###
-compile_smv_utilities
-check_smv_utilities
 
 ### Stage 6b ###
 compile_smv_db
