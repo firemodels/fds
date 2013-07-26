@@ -41,6 +41,14 @@ fi
 scratchdir=$SVNROOT/Utilities/Scripts/tmp
 dir=$1
 infile=$2
+debug_flag=$3
+
+if [ "$debug_flag" == "1" ]; then
+echo debug_flag is set to 1
+if [ "$FDS_DEBUG" != "" ]; then
+exit
+fi
+fi
 
 fulldir=$BASEDIR/$dir
 in=$infile.fds
