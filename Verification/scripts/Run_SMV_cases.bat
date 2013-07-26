@@ -31,6 +31,11 @@ Rem Choose CFAST version (repository or release)
 Rem set CFASTEXE=cfast6
 set CFASTEXE=%CFAST%\CFAST\intel_win_64\cfast6_win_64.exe
 
+
+Rem Define wind2fds
+
+set WIND2FDSEXE=%SVNROOT%\Utilities\wind2fds\intel_win_64\wind2fds_win_64.exe
+
 Rem Run jobs in background (or not)
 
 set "bg=%BACKGROUNDEXE% -u 85 -d 5 "
@@ -38,7 +43,17 @@ Rem set bg=
 
 Rem ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Rem Ensure that fds exists
+Rem ---------- Ensure that wind2fds_win_64 exists
+
+IF EXIST %WIND2FDSEXE% GOTO endif_wind2fdsexist
+echo ***Fatal error.  The file %WIND2FDSEXE% does not exist. 
+echo Aborting now...
+pause>NUL
+goto:eof
+
+:endif_wind2fdsexist
+
+Rem ---------- Ensure that fds exists
 
 IF EXIST %FDSEXE% GOTO endif_fdsexist
 echo ***Fatal error.  The file %FDSEXE% does not exist. 
@@ -48,7 +63,7 @@ goto:eof
 
 :endif_fdsexist
 
-Rem Ensure that CFAST exists
+Rem ---------- Ensure that CFAST exists
 
 IF EXIST %CFASTEXE% GOTO endif_cfastexist
 echo ***Fatal error.  The file %CFASTEXE% does not exist. 
@@ -69,6 +84,15 @@ echo CFAST=%CFAST%
 echo.
 echo Press any key to proceed, CTRL c to abort
 pause > Nul
+
+echo Converting wind data
+echo .
+cd %SVNROOT%\Verification\WUI
+%WIND2FDSEXE% -prefix sd11 -offset " 50.0  50.0 0.0" wind_test1a.csv
+%WIND2FDSEXE% -prefix sd12 -offset " 50.0 150.0 0.0" wind_test1b.csv
+%WIND2FDSEXE% -prefix sd21 -offset "150.0  50.0 0.0" wind_test1c.csv
+%WIND2FDSEXE% -prefix sd22 -offset "150.0 150.0 0.0" wind_test1d.csv
+pause
 
 cd %SCRIPT_DIR%
 echo creating FDS case list from SMV_Cases.sh
