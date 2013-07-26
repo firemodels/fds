@@ -642,6 +642,13 @@ compile_smv_utilities()
    rm -f *.o background
    echo 'Compiling background:' >> $FIREBOT_DIR/output/stage6a 2>&1
    ./make_background.sh >> $FIREBOT_DIR/output/stage6a 2>&1
+   
+  # wind2fds:
+   cd $FDS_SVNROOT/Utilities/wind2fds/intel_linux_64
+   rm -f *.o wind2fds_linux_64
+   echo 'Compiling wind2fds:' > $FIREBOT_DIR/output/stage6a 2>&1
+   ./make_wind.sh >> $FIREBOT_DIR/output/stage6a 2>&1
+   echo "" >> $FIREBOT_DIR/output/stage6a 2>&1
 }
 
 check_smv_utilities()
@@ -650,6 +657,7 @@ check_smv_utilities()
    cd $FDS_SVNROOT
    if [ -e "$FDS_SVNROOT/Utilities/smokezip/intel_linux_64/smokezip_linux_64" ]  && \
       [ -e "$FDS_SVNROOT/Utilities/smokediff/intel_linux_64/smokediff_linux_64" ]  && \
+      [ -e "$FDS_SVNROOT/Utilities/wind2fds/intel_linux_64/wind2fds_linux_64" ]  && \
       [ -e "$FDS_SVNROOT/Utilities/background/intel_linux_32/background" ]
    then
       stage6a_success=true
