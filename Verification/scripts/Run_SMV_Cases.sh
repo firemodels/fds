@@ -121,6 +121,7 @@ fi
 echo "" | $FDSEXE 2> $SVNROOT/Manuals/SMV_User_Guide/SCRIPT_FIGURES/fds.version
 
 if [[ ! $stop_cases ]] ; then
+if [ "$FDS_DEBUG" == "0" ] ; then
 if [ -e $WIND2FDS ];  then
   cd $SVNROOT/Verification/WUI
   echo Converting wind data
@@ -130,6 +131,7 @@ if [ -e $WIND2FDS ];  then
   $WIND2FDS -prefix sd22 -offset "150.0 150.0 0.0" wind_test1d.csv
 else
   echo "The file $WIND2FDS does not exist. Run aborted"
+fi
 fi
 fi
 cd $SVNROOT/Verification
