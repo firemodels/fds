@@ -75,6 +75,7 @@ if [ "$FDSNETWORK" == "infiniband" ] ; then
 IB=ib
 fi
 
+export WIND2FDS=$SVNROOT/Utilities/wind2fds/intel_$PLATFORM/wind2fds_$PLATFORM
 export BACKGROUND=$SVNROOT/Utilities/background/intel_$PLATFORM2/background
 export FDSEXE=$SVNROOT/FDS_Compilation/${OPENMP}intel_$PLATFORM$DEBUG/fds_${OPENMP}intel_$PLATFORM$DEBUG
 export FDS=$FDSEXE
@@ -116,6 +117,21 @@ fi
 
 echo "" | $FDSEXE 2> $SVNROOT/Manuals/SMV_User_Guide/SCRIPT_FIGURES/fds.version
 
+cd $SVNROOT/Verification/WUI
+echo Converting wind data
+echo .
+
+if [ -e $WIND2FDS ];  then
+  cd %SVNROOT%\Verification\WUI
+  $WIND2FDS -prefix sd11 -offset " 50.0  50.0 0.0" wind_test1a.csv
+  $WIND2FDS -prefix sd12 -offset " 50.0 150.0 0.0" wind_test1b.csv
+  $WIND2FDS -prefix sd21 -offset "150.0  50.0 0.0" wind_test1c.csv
+  $WIND2FDS -prefix sd22 -offset "150.0 150.0 0.0" wind_test1d.csv
+else
+  echo "The file $WIND2FDS does not exist. Run aborted"
+fi
+
+cd $SVNROOT/Verification
 scripts/SMV_Cases.sh
 scripts/SMV_MPI_Cases.sh
 
