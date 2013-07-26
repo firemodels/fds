@@ -46,13 +46,13 @@ The latest nightly versions of the documentation/manuals from Firebot [https://d
   * Stage 4a: Compile FDS release
   * Stage 4b: Compile FDS MPI release
   * Stage 4c: Compile FDS OpenMP release
+  * Stage 5pre: Compile SMV utilities
   * Stage 5:  Run verification cases (release mode)
-  * Stage 6a: Compile SMV utilities
-  * Stage 6b: Compile SMV debug
-  * Stage 6c: Make SMV pictures (debug mode)
-  * Stage 6d: Compile SMV release
-  * Stage 6e: Make SMV pictures (release mode)
-  * Stage 6f: Make FDS pictures
+  * Stage 6a: Compile SMV debug
+  * Stage 6b: Make SMV pictures (debug mode)
+  * Stage 6c: Compile SMV release
+  * Stage 6d: Make SMV pictures (release mode)
+  * Stage 6e: Make FDS pictures
   * Stage 7a: Matlab plotting and statistics (verification)
   * Stage 7b: Matlab plotting (validation)
   * Stage 7c: FDS run time statistics
