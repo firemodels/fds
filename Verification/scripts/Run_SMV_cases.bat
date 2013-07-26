@@ -92,7 +92,6 @@ cd %SVNROOT%\Verification\WUI
 %WIND2FDSEXE% -prefix sd12 -offset " 50.0 150.0 0.0" wind_test1b.csv
 %WIND2FDSEXE% -prefix sd21 -offset "150.0  50.0 0.0" wind_test1c.csv
 %WIND2FDSEXE% -prefix sd22 -offset "150.0 150.0 0.0" wind_test1d.csv
-pause
 
 cd %SCRIPT_DIR%
 echo creating FDS case list from SMV_Cases.sh
