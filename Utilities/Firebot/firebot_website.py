@@ -83,13 +83,13 @@ To view a detailed error log, mouse over a fail or warning status.<br>
 <b>Stage 4a:</b> Compile FDS release <br>
 <b>Stage 4b:</b> Compile FDS MPI release <br>
 <b>Stage 4c:</b> Compile FDS OpenMP release <br>
+<b>Stage 5pre:</b> Compile SMV utilities <br>
 <b>Stage 5:</b> Run verification cases (release mode) <br>
-<b>Stage 6a:</b> Compile SMV utilities <br>
-<b>Stage 6b:</b> Compile SMV debug <br>
-<b>Stage 6c:</b> Make SMV pictures (debug mode) <br>
-<b>Stage 6d:</b> Compile SMV release <br>
-<b>Stage 6e:</b> Make SMV pictures (release mode) <br>
-<b>Stage 6f:</b> Make FDS pictures <br>
+<b>Stage 6a:</b> Compile SMV debug <br>
+<b>Stage 6b:</b> Make SMV pictures (debug mode) <br>
+<b>Stage 6c:</b> Compile SMV release <br>
+<b>Stage 6d:</b> Make SMV pictures (release mode) <br>
+<b>Stage 6e:</b> Make FDS pictures <br>
 <b>Stage 7a:</b> Matlab plotting and statistics (verification) <br>
 <b>Stage 7b:</b> Matlab plotting (validation) <br>
 <b>Stage 7c:</b> FDS run time statistics <br>
