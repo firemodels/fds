@@ -14,7 +14,6 @@
 mailToSMV="gforney@gmail.com, koverholt@gmail.com"
 mailToFDS="mcgratta@gmail.com, randy.mcdermott@gmail.com, gforney@gmail.com, CraigWeinschenk@gmail.com, drjfloyd@gmail.com, koverholt@gmail.com, Topi.Sikanen@gmail.com, shostikk@gmail.com, ben.trettel@gmail.com, mrctkg@gmail.com, kiliansusan@gmail.com"
 
-
 FIREBOT_QUEUE=smokebot
 MAKEMOVIES=
 RUNAUTO=
@@ -559,6 +558,63 @@ check_compile_fds_mpi()
       echo "" >> $WARNING_LOG
    fi
 }
+
+#  ======================================
+#  = Stage 5pre - Compile SMV utilities =
+#  ======================================
+
+compile_smv_utilities()
+{  
+   # smokeview libraries
+   cd $FDS_SVNROOT/SMV/Build/LIBS/lib_linux_intel_64
+   echo 'Building Smokeview libraries:' > $FIREBOT_DIR/output/stage5pre 2>&1
+   ./makelibs.sh >> $FIREBOT_DIR/output/stage5pre 2>&1
+
+   # smokezip:
+   cd $FDS_SVNROOT/Utilities/smokezip/intel_linux_64
+   rm -f *.o smokezip_linux_64
+   echo 'Compiling smokezip:' > $FIREBOT_DIR/output/stage5pre 2>&1
+   ./make_zip.sh >> $FIREBOT_DIR/output/stage5pre 2>&1
+   echo "" >> $FIREBOT_DIR/output/stage5pre 2>&1
+   
+   # smokediff:
+   cd $FDS_SVNROOT/Utilities/smokediff/intel_linux_64
+   rm -f *.o smokediff_linux_64
+   echo 'Compiling smokediff:' >> $FIREBOT_DIR/output/stage5pre 2>&1
+   ./make_diff.sh >> $FIREBOT_DIR/output/stage5pre 2>&1
+   echo "" >> $FIREBOT_DIR/output/stage5pre 2>&1
+   
+   # background:
+   cd $FDS_SVNROOT/Utilities/background/intel_linux_32
+   rm -f *.o background
+   echo 'Compiling background:' >> $FIREBOT_DIR/output/stage5pre 2>&1
+   ./make_background.sh >> $FIREBOT_DIR/output/stage5pre 2>&1
+   
+  # wind2fds:
+   cd $FDS_SVNROOT/Utilities/wind2fds/intel_linux_64
+   rm -f *.o wind2fds_linux_64
+   echo 'Compiling wind2fds:' > $FIREBOT_DIR/output/stage5pre 2>&1
+   ./make_wind.sh >> $FIREBOT_DIR/output/stage5pre 2>&1
+   echo "" >> $FIREBOT_DIR/output/stage5pre 2>&1
+}
+
+check_smv_utilities()
+{
+   # Check for errors in SMV utilities compilation
+   cd $FDS_SVNROOT
+   if [ -e "$FDS_SVNROOT/Utilities/smokezip/intel_linux_64/smokezip_linux_64" ]  && \
+      [ -e "$FDS_SVNROOT/Utilities/smokediff/intel_linux_64/smokediff_linux_64" ]  && \
+      [ -e "$FDS_SVNROOT/Utilities/wind2fds/intel_linux_64/wind2fds_linux_64" ]  && \
+      [ -e "$FDS_SVNROOT/Utilities/background/intel_linux_32/background" ]
+   then
+      stage5pre_success=true
+   else
+      echo "Errors from Stage 5pre - Compile SMV utilities:" >> $ERROR_LOG
+      cat $FIREBOT_DIR/output/stage5pre >> $ERROR_LOG
+      echo "" >> $ERROR_LOG
+   fi
+}
+
 #  ===================================================
 #  = Stage 5 - Run verification cases (release mode) =
 #  ===================================================
@@ -612,64 +668,8 @@ check_verification_cases_release()
    fi
 }
 
-#  ====================================
-#  = Stage 6a - Compile SMV utilities =
-#  ====================================
-
-compile_smv_utilities()
-{  
-   # smokeview libraries
-   cd $FDS_SVNROOT/SMV/Build/LIBS/lib_linux_intel_64
-   echo 'Building Smokeview libraries:' > $FIREBOT_DIR/output/stage6a 2>&1
-   ./makelibs.sh >> $FIREBOT_DIR/output/stage6a 2>&1
-
-   # smokezip:
-   cd $FDS_SVNROOT/Utilities/smokezip/intel_linux_64
-   rm -f *.o smokezip_linux_64
-   echo 'Compiling smokezip:' > $FIREBOT_DIR/output/stage6a 2>&1
-   ./make_zip.sh >> $FIREBOT_DIR/output/stage6a 2>&1
-   echo "" >> $FIREBOT_DIR/output/stage6a 2>&1
-   
-   # smokediff:
-   cd $FDS_SVNROOT/Utilities/smokediff/intel_linux_64
-   rm -f *.o smokediff_linux_64
-   echo 'Compiling smokediff:' >> $FIREBOT_DIR/output/stage6a 2>&1
-   ./make_diff.sh >> $FIREBOT_DIR/output/stage6a 2>&1
-   echo "" >> $FIREBOT_DIR/output/stage6a 2>&1
-   
-   # background:
-   cd $FDS_SVNROOT/Utilities/background/intel_linux_32
-   rm -f *.o background
-   echo 'Compiling background:' >> $FIREBOT_DIR/output/stage6a 2>&1
-   ./make_background.sh >> $FIREBOT_DIR/output/stage6a 2>&1
-   
-  # wind2fds:
-   cd $FDS_SVNROOT/Utilities/wind2fds/intel_linux_64
-   rm -f *.o wind2fds_linux_64
-   echo 'Compiling wind2fds:' > $FIREBOT_DIR/output/stage6a 2>&1
-   ./make_wind.sh >> $FIREBOT_DIR/output/stage6a 2>&1
-   echo "" >> $FIREBOT_DIR/output/stage6a 2>&1
-}
-
-check_smv_utilities()
-{
-   # Check for errors in SMV utilities compilation
-   cd $FDS_SVNROOT
-   if [ -e "$FDS_SVNROOT/Utilities/smokezip/intel_linux_64/smokezip_linux_64" ]  && \
-      [ -e "$FDS_SVNROOT/Utilities/smokediff/intel_linux_64/smokediff_linux_64" ]  && \
-      [ -e "$FDS_SVNROOT/Utilities/wind2fds/intel_linux_64/wind2fds_linux_64" ]  && \
-      [ -e "$FDS_SVNROOT/Utilities/background/intel_linux_32/background" ]
-   then
-      stage6a_success=true
-   else
-      echo "Errors from Stage 6a - Compile SMV utilities:" >> $ERROR_LOG
-      cat $FIREBOT_DIR/output/stage6a >> $ERROR_LOG
-      echo "" >> $ERROR_LOG
-   fi
-}
-
 #  ================================
-#  = Stage 6b - Compile SMV debug =
+#  = Stage 6a - Compile SMV debug =
 #  ================================
 
 compile_smv_db()
@@ -677,7 +677,7 @@ compile_smv_db()
    # Clean and compile SMV debug
    cd $FDS_SVNROOT/SMV/Build/intel_linux_64_db
    rm -f smokeview_linux_64_db
-   ./make_smv.sh &> $FIREBOT_DIR/output/stage6b
+   ./make_smv.sh &> $FIREBOT_DIR/output/stage6a
 }
 
 check_compile_smv_db()
@@ -686,56 +686,55 @@ check_compile_smv_db()
    cd $FDS_SVNROOT/SMV/Build/intel_linux_64_db
    if [ -e "smokeview_linux_64_db" ]
    then
-      stage6b_success=true
+      stage6a_success=true
    else
-      echo "Errors from Stage 6b - Compile SMV debug:" >> $ERROR_LOG
-      cat $FIREBOT_DIR/output/stage6b >> $ERROR_LOG
+      echo "Errors from Stage 6a - Compile SMV debug:" >> $ERROR_LOG
+      cat $FIREBOT_DIR/output/stage6a >> $ERROR_LOG
       echo "" >> $ERROR_LOG
    fi
 
    # Check for compiler warnings/remarks
    # grep -v 'feupdateenv ...' ignores a known FDS MPI compiler warning (http://software.intel.com/en-us/forums/showthread.php?t=62806)
-   if [[ `grep -A 5 -E 'warning|remark' ${FIREBOT_DIR}/output/stage6b | grep -v 'feupdateenv is not implemented' | grep -v 'lcilkrts linked'` == "" ]]
+   if [[ `grep -A 5 -E 'warning|remark' ${FIREBOT_DIR}/output/stage6a | grep -v 'feupdateenv is not implemented' | grep -v 'lcilkrts linked'` == "" ]]
    then
       # Continue along
       :
    else
-      echo "Stage 6b warnings:" >> $WARNING_LOG
-      grep -A 5 -E 'warning|remark' ${FIREBOT_DIR}/output/stage6b | grep -v 'feupdateenv is not implemented' | grep -v 'lcilkrts linked' >> $WARNING_LOG
+      echo "Stage 6a warnings:" >> $WARNING_LOG
+      grep -A 5 -E 'warning|remark' ${FIREBOT_DIR}/output/stage6a | grep -v 'feupdateenv is not implemented' | grep -v 'lcilkrts linked' >> $WARNING_LOG
       echo "" >> $WARNING_LOG
    fi
 }
 
 #  =============================================
-#  = Stage 6c - Make SMV pictures (debug mode) =
+#  = Stage 6b - Make SMV pictures (debug mode) =
 #  =============================================
 
 make_smv_pictures_db()
 {
    # Run Make SMV Pictures script (debug mode)
    cd $FDS_SVNROOT/Verification/scripts
-   ./Make_SMV_Pictures.sh -d 2>&1 | grep -v FreeFontPath &> $FIREBOT_DIR/output/stage6c
-
+   ./Make_SMV_Pictures.sh -d 2>&1 | grep -v FreeFontPath &> $FIREBOT_DIR/output/stage6b
 }
 
 check_smv_pictures_db()
 {
    # Scan and report any errors in make SMV pictures process
    cd $FIREBOT_DIR
-   if [[ `grep -I -E "Segmentation|Error" $FIREBOT_DIR/output/stage6c` == "" ]]
+   if [[ `grep -I -E "Segmentation|Error" $FIREBOT_DIR/output/stage6b` == "" ]]
    then
-      stage6c_success=true
+      stage6b_success=true
    else
-      cp $FIREBOT_DIR/output/stage6c $FIREBOT_DIR/output/stage6c_errors
+      cp $FIREBOT_DIR/output/stage6b $FIREBOT_DIR/output/stage6b_errors
 
-      echo "Errors from Stage 6c - Make SMV pictures (debug mode):" >> $ERROR_LOG
-      cat $FIREBOT_DIR/output/stage6c_errors >> $ERROR_LOG
+      echo "Errors from Stage 6b - Make SMV pictures (debug mode):" >> $ERROR_LOG
+      cat $FIREBOT_DIR/output/stage6b_errors >> $ERROR_LOG
       echo "" >> $ERROR_LOG
    fi
 }
 
 #  ==================================
-#  = Stage 6d - Compile SMV release =
+#  = Stage 6c - Compile SMV release =
 #  ==================================
 
 compile_smv()
@@ -743,7 +742,7 @@ compile_smv()
    # Clean and compile SMV
    cd $FDS_SVNROOT/SMV/Build/intel_linux_64
    rm -f smokeview_linux_64
-   ./make_smv.sh &> $FIREBOT_DIR/output/stage6d
+   ./make_smv.sh &> $FIREBOT_DIR/output/stage6c
 }
 
 check_compile_smv()
@@ -752,75 +751,75 @@ check_compile_smv()
    cd $FDS_SVNROOT/SMV/Build/intel_linux_64
    if [ -e "smokeview_linux_64" ]
    then
-      stage6d_success=true
+      stage6c_success=true
    else
-      echo "Errors from Stage 6d - Compile SMV release:" >> $ERROR_LOG
-      cat $FIREBOT_DIR/output/stage6d >> $ERROR_LOG
+      echo "Errors from Stage 6c - Compile SMV release:" >> $ERROR_LOG
+      cat $FIREBOT_DIR/output/stage6c >> $ERROR_LOG
       echo "" >> $ERROR_LOG
    fi
 
    # Check for compiler warnings/remarks
    # grep -v 'feupdateenv ...' ignores a known FDS MPI compiler warning (http://software.intel.com/en-us/forums/showthread.php?t=62806)
-   if [[ `grep -A 5 -E 'warning|remark' ${FIREBOT_DIR}/output/stage6d | grep -v 'feupdateenv is not implemented' | grep -v 'lcilkrts linked'` == "" ]]
+   if [[ `grep -A 5 -E 'warning|remark' ${FIREBOT_DIR}/output/stage6c | grep -v 'feupdateenv is not implemented' | grep -v 'lcilkrts linked'` == "" ]]
    then
       # Continue along
       :
    else
-      echo "Stage 6d warnings:" >> $WARNING_LOG
-      grep -A 5 -E 'warning|remark' ${FIREBOT_DIR}/output/stage6d | grep -v 'feupdateenv is not implemented' | grep -v 'lcilkrts linked' >> $WARNING_LOG
+      echo "Stage 6c warnings:" >> $WARNING_LOG
+      grep -A 5 -E 'warning|remark' ${FIREBOT_DIR}/output/stage6c | grep -v 'feupdateenv is not implemented' | grep -v 'lcilkrts linked' >> $WARNING_LOG
       echo "" >> $WARNING_LOG
    fi
 }
 
 #  ===============================================
-#  = Stage 6e - Make SMV pictures (release mode) =
+#  = Stage 6d - Make SMV pictures (release mode) =
 #  ===============================================
 
 make_smv_pictures()
 {
    # Run Make SMV Pictures script (release mode)
    cd $FDS_SVNROOT/Verification/scripts
-   ./Make_SMV_Pictures.sh 2>&1 | grep -v FreeFontPath &> $FIREBOT_DIR/output/stage6e
+   ./Make_SMV_Pictures.sh 2>&1 | grep -v FreeFontPath &> $FIREBOT_DIR/output/stage6d
 }
 
 check_smv_pictures()
 {
    # Scan and report any errors in make SMV pictures process
    cd $FIREBOT_DIR
-   if [[ `grep -I -E "Segmentation|Error" $FIREBOT_DIR/output/stage6c` == "" ]]
+   if [[ `grep -I -E "Segmentation|Error" $FIREBOT_DIR/output/stage6d` == "" ]]
    then
-      stage6e_success=true
+      stage6d_success=true
    else
-      cp $FIREBOT_DIR/output/stage6e  $FIREBOT_DIR/output/stage6e_errors
+      cp $FIREBOT_DIR/output/stage6d  $FIREBOT_DIR/output/stage6d_errors
 
-      echo "Errors from Stage 6e - Make SMV pictures (release mode):" >> $ERROR_LOG
-      cat $FIREBOT_DIR/output/stage6e >> $ERROR_LOG
+      echo "Errors from Stage 6d - Make SMV pictures (release mode):" >> $ERROR_LOG
+      cat $FIREBOT_DIR/output/stage6d >> $ERROR_LOG
       echo "" >> $ERROR_LOG
    fi
 }
 
 #  ===============================================
-#  = Stage 6f - Make SMV movies (release mode) =
+#  = Stage 6e - Make SMV movies (release mode) =
 #  ===============================================
 
 make_smv_movies()
 {
    cd $FDS_SVNROOT/Verification
-   scripts/Make_SMV_Movies.sh 2>&1  &> $FIREBOT_DIR/output/stage6f
+   scripts/Make_SMV_Movies.sh 2>&1  &> $FIREBOT_DIR/output/stage6e
    rsync -avzu --exclude .svn ~/FDS-SMV/Manuals/SMV_Animations/ /var/www/html/smokebot/summary/movies
 }
 
 check_smv_movies()
 {
    cd $FIREBOT_DIR
-   if [[ `grep -I -E "Segmentation|Error" $FIREBOT_DIR/output/stage6c` == "" ]]
+   if [[ `grep -I -E "Segmentation|Error" $FIREBOT_DIR/output/stage6e` == "" ]]
    then
-      stage6f_success=true
+      stage6e_success=true
    else
-      cp $FIREBOT_DIR/output/stage6f  $FIREBOT_DIR/output/stage6f_errors
+      cp $FIREBOT_DIR/output/stage6e  $FIREBOT_DIR/output/stage6e_errors
 
-      echo "Errors from Stage 6f - Make SMV movies " >> $ERROR_LOG
-      cat $FIREBOT_DIR/output/stage6f >> $ERROR_LOG
+      echo "Errors from Stage 6e - Make SMV movies " >> $ERROR_LOG
+      cat $FIREBOT_DIR/output/stage6e >> $ERROR_LOG
       echo "" >> $ERROR_LOG
    fi
 }
@@ -1072,7 +1071,7 @@ if [[ $stage2b_success ]] ; then
    check_compile_fds_mpi
 fi
 
-### Stage 6a ###
+### Stage 5pre ###
 # No stage dependencies
 compile_smv_utilities
 check_smv_utilities
@@ -1083,28 +1082,28 @@ if [[ $stage4a_success && $stage4b_success ]] ; then
    check_verification_cases_release
 fi
 
-### Stage 6b ###
+### Stage 6a ###
 # No stage dependencies
 compile_smv_db
 check_compile_smv_db
 
-### Stage 6c ###
-if [[ $stage4a_success && $stage4b_sucessess && $stage6b_success ]] ; then
+### Stage 6b ###
+if [[ $stage4a_success && $stage4b_sucessess && $stage6a_success ]] ; then
   make_smv_pictures_db
   check_smv_pictures_db
 fi
 
-### Stage 6d ###
+### Stage 6c ###
 compile_smv
 check_compile_smv
 
-### Stage 6e ###
-if [[ $stage4a_success && $stage4b_success && $stage6d_success ]] ; then
+### Stage 6d ###
+if [[ $stage4a_success && $stage4b_success && $stage6c_success ]] ; then
   make_smv_pictures
   check_smv_pictures
 fi
 
-### Stage 6f ###
+### Stage 6e ###
 if [ "$MAKEMOVIES" == "1" ]
 then
   make_smv_movies

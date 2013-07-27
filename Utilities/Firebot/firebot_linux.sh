@@ -806,7 +806,7 @@ check_compile_smv_db()
    then
       stage6a_success=true
    else
-      echo "Errors from Stage 6b - Compile SMV debug:" >> $ERROR_LOG
+      echo "Errors from Stage 6a - Compile SMV debug:" >> $ERROR_LOG
       cat $FIREBOT_DIR/output/stage6a >> $ERROR_LOG
       echo "" >> $ERROR_LOG
    fi
@@ -818,7 +818,7 @@ check_compile_smv_db()
       # Continue along
       :
    else
-      echo "Warnings from Stage 6b - Compile SMV debug:" >> $WARNING_LOG
+      echo "Warnings from Stage 6a - Compile SMV debug:" >> $WARNING_LOG
       grep -A 5 -E 'warning|remark' ${FIREBOT_DIR}/output/stage6a | grep -v 'feupdateenv is not implemented' | grep -v 'lcilkrts linked' >> $WARNING_LOG
       echo "" >> $WARNING_LOG
    fi
@@ -845,7 +845,7 @@ check_smv_pictures_db()
    else
        cp $FIREBOT_DIR/output/stage6b $FIREBOT_DIR/output/stage6b_errors
 
-      echo "Errors from Stage 6c - Make SMV pictures (debug mode):" >> $ERROR_LOG
+      echo "Errors from Stage 6b - Make SMV pictures (debug mode):" >> $ERROR_LOG
       cat $FIREBOT_DIR/output/stage6b_errors >> $ERROR_LOG
       echo "" >> $ERROR_LOG
    fi
@@ -870,7 +870,7 @@ check_compile_smv()
    then
       stage6c_success=true
    else
-      echo "Errors from Stage 6d - Compile SMV release:" >> $ERROR_LOG
+      echo "Errors from Stage 6c - Compile SMV release:" >> $ERROR_LOG
       cat $FIREBOT_DIR/output/stage6c >> $ERROR_LOG
       echo "" >> $ERROR_LOG
    fi
@@ -882,7 +882,7 @@ check_compile_smv()
       # Continue along
       :
    else
-      echo "Warnings from Stage 6d - Compile SMV release:" >> $WARNING_LOG
+      echo "Warnings from Stage 6c - Compile SMV release:" >> $WARNING_LOG
       grep -A 5 -E 'warning|remark' ${FIREBOT_DIR}/output/stage6c | grep -v 'feupdateenv is not implemented' | grep -v 'lcilkrts linked' >> $WARNING_LOG
       echo "" >> $WARNING_LOG
    fi
@@ -909,7 +909,7 @@ check_smv_pictures()
    else
       cp $FIREBOT_DIR/output/stage6d $FIREBOT_DIR/output/stage6d_errors
 
-      echo "Errors from Stage 6e - Make SMV pictures (release mode):" >> $ERROR_LOG
+      echo "Errors from Stage 6d - Make SMV pictures (release mode):" >> $ERROR_LOG
       cat $FIREBOT_DIR/output/stage6d >> $ERROR_LOG
       echo "" >> $ERROR_LOG
    fi
@@ -936,7 +936,7 @@ check_fds_pictures()
    else
       cp $FIREBOT_DIR/output/stage6e $FIREBOT_DIR/output/stage6e_errors
       
-      echo "Errors from Stage 6f - Make FDS pictures:" >> $ERROR_LOG
+      echo "Errors from Stage 6e - Make FDS pictures:" >> $ERROR_LOG
       cat $FIREBOT_DIR/output/stage6e_errors >> $ERROR_LOG
       echo "" >> $ERROR_LOG
    fi
