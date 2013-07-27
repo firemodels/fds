@@ -7257,7 +7257,7 @@ updatemenu=0;
       f_units *uci;
 
       uci = unitclasses + i;
-      if(uci->visible==1||show_all_units==1){
+      if(uci->visible==1||show_all_units==1||strcmp(uci->unitclass,"Distance")==0){
         glutAddSubMenu(uci->unitclass,uci->submenuid);
       }
     }
