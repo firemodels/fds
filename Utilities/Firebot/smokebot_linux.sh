@@ -1086,7 +1086,7 @@ compile_smv_db
 check_compile_smv_db
 
 ### Stage 6b ###
-if [[ $stage4a_success && $stage4b_sucessess && $stage6a_success ]] ; then
+if [[ $stage4a_success && $stage4b_success && $stage6a_success ]] ; then
   make_smv_pictures_db
   check_smv_pictures_db
 fi
