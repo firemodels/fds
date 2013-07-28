@@ -1044,12 +1044,10 @@ do_svn_checkout
 check_svn_checkout
 
 ### Stage 2a ###
-# No stage dependencies
 compile_fds_db
 check_compile_fds_db
 
 ### Stage 2b ###
-# No stage dependencies
 compile_fds_mpi_db
 check_compile_fds_mpi_db
 
@@ -1072,7 +1070,6 @@ if [[ $stage2b_success ]] ; then
 fi
 
 ### Stage 5pre ###
-# No stage dependencies
 compile_smv_utilities
 check_smv_utilities
 
@@ -1083,7 +1080,6 @@ if [[ $stage4a_success && $stage4b_success ]] ; then
 fi
 
 ### Stage 6a ###
-# No stage dependencies
 compile_smv_db
 check_compile_smv_db
 
@@ -1122,7 +1118,6 @@ if [[ $stage4a_success && $stage4b_success && $stage6d_success ]] ; then
   make_smv_technical_guide
   make_smv_verification_guide
 fi
-# No stage dependencies
 
 ### Report results ###
 set_files_world_readable
