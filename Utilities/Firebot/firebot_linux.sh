@@ -843,7 +843,7 @@ check_smv_pictures_db()
    then
       stage6b_success=true
    else
-       cp $FIREBOT_DIR/output/stage6b $FIREBOT_DIR/output/stage6b_errors
+      cp $FIREBOT_DIR/output/stage6b $FIREBOT_DIR/output/stage6b_errors
 
       echo "Errors from Stage 6b - Make SMV pictures (debug mode):" >> $ERROR_LOG
       cat $FIREBOT_DIR/output/stage6b_errors >> $ERROR_LOG
