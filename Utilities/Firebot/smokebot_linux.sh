@@ -645,7 +645,7 @@ run_verification_cases_release()
 check_verification_cases_release()
 {
    # Scan and report any errors in FDS verification cases
-   cd $FDS_SVNROOT/Verification/Visualization
+   cd $FDS_SVNROOT/Verification
 
    if [[ `grep 'Run aborted' -rI ${FIREBOT_DIR}/output/stage5` == "" ]] && \
       [[ `grep Segmentation -rI *` == "" ]] && \
