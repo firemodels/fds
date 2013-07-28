@@ -314,9 +314,9 @@ check_svn_checkout()
    fi
 }
 
-#  ================================
-#  = Stage 2a - Compile FDS debug =
-#  ================================
+#  ==================================
+#  = Stage 2a/b - Compile FDS debug =
+#  ==================================
 
 compile_fds_db()
 {
@@ -396,7 +396,9 @@ check_compile_fds_mpi_db()
    fi
 }
 
-#  ================================================
+#  =================================================
+#  = Stage 3 - Run verification cases (debug mode) =
+#  =================================================
 
 wait_verification_cases_debug_start()
 {
@@ -485,9 +487,9 @@ check_verification_cases_debug()
    fi
 }
 
-#  ==================================
-#  = Stage 4a - Compile FDS release =
-#  ==================================
+#  ====================================
+#  = Stage 4a/b - Compile FDS release =
+#  ====================================
 
 compile_fds()
 {
@@ -1063,7 +1065,7 @@ if [[ $stage2a_success ]] ; then
    check_compile_fds
 fi
 
-### Stage 4a ###
+### Stage 4b ###
 if [[ $stage2b_success ]] ; then
    compile_fds_mpi
    check_compile_fds_mpi
