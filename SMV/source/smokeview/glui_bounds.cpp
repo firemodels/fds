@@ -308,8 +308,8 @@ GLUI_StaticText *STATIC_plot3d_cmax_unit=NULL;
 /* ------------------ update_glui_vecfactor ------------------------ */
 
 extern "C" void update_glui_vecfactor(void){
-  SPINNER_plot3d_vectorlinelength->set_float_val(vecfactor);
-  SPINNER_vectorlinelength->set_float_val(vecfactor);
+  if(SPINNER_plot3d_vectorlinelength!=NULL)SPINNER_plot3d_vectorlinelength->set_float_val(vecfactor);
+  if(SPINNER_vectorlinelength!=NULL)SPINNER_vectorlinelength->set_float_val(vecfactor);
 }
 
 /* ------------------ update_glui_part_units ------------------------ */
