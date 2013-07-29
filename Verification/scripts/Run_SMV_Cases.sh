@@ -129,6 +129,7 @@ if [ -e $WIND2FDS ];  then
   $WIND2FDS -prefix sd12 -offset " 50.0 150.0 0.0" wind_test1b.csv
   $WIND2FDS -prefix sd21 -offset "150.0  50.0 0.0" wind_test1c.csv
   $WIND2FDS -prefix sd22 -offset "150.0 150.0 0.0" wind_test1d.csv
+  $WIND2FDS -prefix sd22 -offset "575.0 375.0 60.0" wind_test3a.csv
 else
   echo "The file $WIND2FDS does not exist. Run aborted"
 fi
