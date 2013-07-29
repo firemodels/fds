@@ -449,7 +449,7 @@ topics such as image rendering and data compression are detailed.
 
 \chapter{Preliminaries}
 \label{visoverview}
-\section{Defining Objects} Smokeview defines object locations in terms of a right handed coordinate system with the $x$~axis pointing to the right, the $y$~axis pointing to the back and the $z$~axis pointing up (see Figure \ref{figrighthand}).  Coordinate values as defined in an FDS input file for objects such as blockages, vents, etc. are transformed internally within Smokeview to lie between 0.0 and 1.0. All Smokeview objects are drawn by grouping appropriately {\em OpenGL} vertices.
+\section{Defining Objects} Smokeview defines object locations in terms of a right handed coordinate system with the $x$~axis pointing to the right, the $y$~axis pointing to the back and the $z$~axis pointing up (see Fig. \ref{figrighthand}).  Coordinate values as defined in an FDS input file for objects such as blockages, vents, etc. are transformed internally within Smokeview to lie between 0.0 and 1.0. All Smokeview objects are drawn by grouping appropriately {\em OpenGL} vertices.
 \begin{figure}[\figoptions]
 \begin{center}
 \includegraphics[width=3.0in]{FIGURES/righthandrule}
@@ -476,7 +476,7 @@ glVertex3f(xyz[0],xyz[1],xyz[2]);
 to represent the vertex location.
 
 Groups of vertices may be {\em built up}\ to form more complex
-geometric objects. Several objects are illustrated in Figure
+geometric objects. Several objects are illustrated in Fig.
 \ref{figshapes}.  They are formed by grouping vertices together
 and surrounding them with calls to {\tt glBegin()}\ and {\tt
 glEnd()}. The argument passed to {\tt glBegin()}\ determines which
@@ -490,7 +490,7 @@ glVertex3f(1.0,0.0,0.0);
 glEnd();
 \end{lstlisting}
 Similarly, to draw points or to connect the vertices with lines
-(also shown in Figure \ref{figshapes}) one would replace {\tt
+(also shown in Fig. \ref{figshapes}) one would replace {\tt
 GL\_TRIANGLE}\ above with {\tt GL\_POINTS}\ or {\tt GL\_LINES}\
 respectively.
 \begin{figure}[\figoptions]
@@ -736,7 +736,7 @@ glBlendFunc(GL_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 Choosing an alpha less than one allows one to {\em see through}\
 objects. Smokeview uses this feature to implement partially
 transparent blockages and 2D animated slices. Slice files
-illustrated in Figure \ref{figtransparent} are drawn using
+illustrated in Fig. \ref{figtransparent} are drawn using
 transparency. Smokeview also implements data chopping or hiding
 using blending or transparency.  Data to be hidden is assigned an
 alpha value of 0.0 causing it to be completely transparent.
@@ -876,11 +876,14 @@ R=\left(%
 \end{eqnarray}
 and applies it to the modelview matrix.
 
-It is of interest to rotate a scene between vectors $u$ and $v$ about an axis perpendicular to both vectors
-as illustrated in Figure \ref{figrotateuv}.
-The rotation axis is formed by generating the cross-product of u and v, namely $u\times v$.  The
-rotation amount $\theta$ is found using $cos(\theta)=u\cdot v/(||u||\cdot ||v||)$ .  For the special case that $u$ and $v$ are unit vectors
-and $u=(0,0,1)$, a vector along the $z$~axis, then $\theta$ and the rotation axis are given by
+It is of interest to rotate a scene between vectors $u$ and $v$
+about an axis perpendicular to both vectors as illustrated in Fig.
+\ref{figrotateuv}. The rotation axis is formed by generating the
+cross-product of u and v, namely $u\times v$.  The rotation amount
+$\theta$ is found using $cos(\theta)=u\cdot v/(||u||\cdot ||v||)$
+.  For the special case that $u$ and $v$ are unit vectors and
+$u=(0,0,1)$, a vector along the $z$~axis, then $\theta$ and the
+rotation axis are given by
 \begin{eqnarray}
 \theta&=&\cos^{-1}(v_z)\\
 u\times v&=&(-v_y,v_x,0)
@@ -1063,7 +1066,13 @@ An index into a color table of size 256 is computed using
 \right.
 \end{eqnarray}
 
-\noindent where $v_{min}$ and $v_{max}$ are specified data bounds.  Each table entry contains 4 components (red, green, blue and opacity).  Each component is scaled from 0.0 to 1.0.  The data in the colorbar data structure then defines colors (by default) as illustrated by the {\bf bold path}\ in Figure \ref{colorbarinfo}.  Other colorbars may be used, for example a color bar containing shades of gray from white to black.
+\noindent where $v_{min}$ and $v_{max}$ are specified data bounds.
+Each table entry contains 4 components (red, green, blue and
+opacity).  Each component is scaled from 0.0 to 1.0.  The data in
+the colorbar data structure then defines colors (by default) as
+illustrated by the {\bf bold path}\ in Fig. \ref{colorbarinfo}.
+Other colorbars may be used, for example a color bar containing
+shades of gray from white to black.
 
 
 \begin{figure}[\figoptions]
@@ -1099,7 +1108,7 @@ glEnd();
 \end{lstlisting}
 
 OpenGL interpolates colors between the vertices and interior to
-the triangle using the color cube as in Figure \ref{colorbarinfo}.
+the triangle using the color cube as in Fig. \ref{colorbarinfo}.
 For example, if two vertices A and B are colored $(0.0,1.0,0.5)$
 and $(1.0,0.5,0.0)$, then a point half way in between would be
 colored $(0.5,0.75,0.25)$, the average of the two colors.  This
@@ -1175,10 +1184,10 @@ The following code segments (simplified) shows an example of drawing a slice in 
 
 Figure \ref{fignewslice} shows the old and new method for
 coloring.  Note that the new method results in crisper, clearer
-colors. Figure \ref{colorinterp} illustrates two methods for
-interpolating color.  Colors are interpolated in Figure
+colors. Fig. \ref{colorinterp} illustrates two methods for
+interpolating color.  Colors are interpolated in Fig.
 \ref{colorinterp}a within the color cube where the colors within
-the cube have value (r,g,b).  Colors are interpolated in Figure
+the cube have value (r,g,b).  Colors are interpolated in Fig.
 \ref{colorinterp}b with the colorbar.
 
 \begin{figure}[\figoptions]
@@ -1257,7 +1266,7 @@ each square aligned with the underlying FDS grid.
 
 \item For  each square:
 \begin{enumerate}
-\item Number the square corners as illustrated in Figure
+\item Number the square corners as illustrated in Fig.
 \ref{fig2dline}.
 
 \item For each cell corner beginning with corner 0: assign 1 if
@@ -1300,7 +1309,7 @@ each square aligned with the underlying FDS grid.
 
 \item For  each square:
 \begin{enumerate}
-\item Number square corners as illustrated in Figure
+\item Number square corners as illustrated in Fig.
 \ref{fig2dband}.
 
 \item For each cell corner beginning with corner 0: assign 0 if
@@ -1354,14 +1363,20 @@ in $T_1$ and $T_2$ at $x_1$ and $x_2$ respectively.
 \item Split region to be contoured into a number of cubes, each cube aligned with the underlying FDS grid.
 \item For  each cube:
 \begin{enumerate}
-\item Number cube corners from 0 to 7 as illustrated in Figure \ref{figisosetup}.
-\item For each cube corner beginning with corner 0: assign 1 if value exceeds $L$, 0 otherwise.
-\item Use resulting 8 digit binary number $(0\rightarrow 255)$ to determine the case number to be plotted.
-\item Triangulate cube surface, storing vertex locations and edge numbers according to case
+\item Number cube corners from 0 to 7 as illustrated in Fig.
+\ref{figisosetup}. \item For each cube corner beginning with
+corner 0: assign 1 if value exceeds $L$, 0 otherwise. \item Use
+resulting 8 digit binary number $(0\rightarrow 255)$ to determine
+the case number to be plotted. \item Triangulate cube surface,
+storing vertex locations and edge numbers according to case
 \end{enumerate}
-\item Triangle decimation.  Eliminate small triangles (any triangle with two or more vertices {\em closest}\ to the same node).
-Replace removed triangle vertices with a vertex with coordinates that are the average of the three removed vertices coordinates.  Re-triangulate using this new vertex.  This process is illustrated in Figure \ref{figdecimate}.
-\item Estimate normal directions (to be associated with a vertex).  For each vertex:
+\item Triangle decimation.  Eliminate small triangles (any
+triangle with two or more vertices {\em closest}\ to the same
+node). Replace removed triangle vertices with a vertex with
+coordinates that are the average of the three removed vertices
+coordinates.  Re-triangulate using this new vertex.  This process
+is illustrated in Fig. \ref{figdecimate}. \item Estimate normal
+directions (to be associated with a vertex).  For each vertex:
 \begin{enumerate}
 \item determine triangles sharing the vertex
 \item determine the normal vector (normalized with length 1.0) of each triangle using the vertex
@@ -1442,7 +1457,7 @@ after decimation
 \label{figlinesmooth}%
 \end{figure}
 
-\paragraph{Vertex normals in 2D} The use of inverse area weights or harmonic averages to construct average normal vectors at isosurface vertices is justified by the following two dimensional example.  As illustrated in Figure \ref{figlinesmooth}, consider the quadratic $y(x)=A+Bx+Cx^2$ with $y(-\Delta x_2)=0$, $y(0)=1$ and $y(\Delta x_1)=0$ .  The slope at $x=0$ is given by $y'(0)=B$.  Likewise, the slope of the vector perpendicular to this curve at $x=0$ is $-1/B$.  The coefficient $B$ may be determined from the two simultaneous equations $y(\Delta x_1)=0$ and  $(y(-\Delta x_2)=0$ (note that $A=1$ since $y(0)=1$) or
+\paragraph{Vertex normals in 2D} The use of inverse area weights or harmonic averages to construct average normal vectors at isosurface vertices is justified by the following two dimensional example.  As illustrated in Fig. \ref{figlinesmooth}, consider the quadratic $y(x)=A+Bx+Cx^2$ with $y(-\Delta x_2)=0$, $y(0)=1$ and $y(\Delta x_1)=0$ .  The slope at $x=0$ is given by $y'(0)=B$.  Likewise, the slope of the vector perpendicular to this curve at $x=0$ is $-1/B$.  The coefficient $B$ may be determined from the two simultaneous equations $y(\Delta x_1)=0$ and  $(y(-\Delta x_2)=0$ (note that $A=1$ since $y(0)=1$) or
 \begin{eqnarray}
 1+B\Delta x_1 + C \Delta x_1^2 &= &0\\
 1-B\Delta x_2 + C \Delta x_2^2 &= &0
@@ -1485,8 +1500,8 @@ Figure \ref{figpart} shows particles represented as particles and
 as streaks. A particle streak visualizes where a particle is
 located over a period of time.  The streak length is specified as
 time. Static particle images are not effective at displaying
-motion.  For example, the particle image in Figure \ref{figpart}a
-does not show particle motion.  Streak lines, however, in Figure
+motion.  For example, the particle image in Fig. \ref{figpart}a
+does not show particle motion.  Streak lines, however, in Fig.
 \ref{figpart}b shows curved motion due to interior obstructions.
 Particle size is specified using
 \begin{lstlisting}
