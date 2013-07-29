@@ -28,6 +28,7 @@ $RUNFDS Visualization version
 $RUNFDS WUI levelset1
 #$RUNFDS WUI fire_line
 #$RUNFDS WUI fire_line2 1
+$RUNFDS WUI wind_test3
 $RUNFDS WUI hill_structure
 #$RUNFDS WUI pine_tree
 
