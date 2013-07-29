@@ -2088,39 +2088,49 @@ $\alpha$ is defined as [$\mathrm{C_3H_8}$ $\mathrm{O_2}$ $\mathrm{CO_2}$ $\mathr
 \label{fig:Arrhenius_2Order_1step}
 \end{figure}
 Multi-step Arrhenius finite rate reactions are also examined. First, we consider a two-step forward propane reaction:
-\begin{align}\label{eq:2step_propane}
+\begin{subequations}
+\begin{align}
+\label{eq:2step_propane_a}
 \mathrm{C_3H_8+3.5 \, O_2} &\rightarrow  \mathrm{3 \, CO + 4 \, H_2O} \\
-\nonumber \mathrm{CO+0.5 \, O_2} &\rightarrow \mathrm{CO_2}
+\label{eq:2step_propane_b}
+\mathrm{CO+0.5 \, O_2} &\rightarrow \mathrm{CO_2}
 \end{align}
+\end{subequations}
 with the following reaction input parameters:
 
 \begin{center}
 \begin{tabular}{|l|l|l|l|l|l|l|l|l|}
 \hline Reaction & $\nu_{\alpha}$ & E (kJ/kmol) & A (cm$^3$/mole/s) & $a_{\alpha}$ & $n_{\alpha}$  \\ \hline \hline
-\ref{eq:2step_propane} a & [-1 -3.5 3 4 0] & 0 & 5e2 & [0.1 1.65 0 0 0] & [0 0 0 0 0] \\ \hline
-\ref{eq:2step_propane} b & [0 -0.5 -1 0 1] & 0 & 8e3 & [0 0.25 1 0.5 0] & [0 0 0 0 0] \\ \hline
+\ref{eq:2step_propane_a} & [-1 -3.5 3 4 0] & 0 & 5e2 & [0.1 1.65 0 0 0] & [0 0 0 0 0] \\ \hline
+\ref{eq:2step_propane_b} & [0 -0.5 -1 0 1] & 0 & 8e3 & [0 0.25 1 0.5 0] & [0 0 0 0 0] \\ \hline
 \end{tabular}
 \vskip8pt
 $\alpha$ is defined as [$\mathrm{C_3H_8}$ $\mathrm{O_2}$ $\mathrm{CO}$ $\mathrm{H_2O}$ $\mathrm{CO_2}$].
 \end{center}
 The species evolutions for the two-step 1.75 order reaction mechanism are shown in Fig.~\ref{fig:Arrhenius_175Order_2step}. We also consider a two-step reversible propane reaction:
-\begin{align}\label{eq:2step_propane_rev}
+\begin{subequations}
+\begin{align}
+\label{eq:2step_propane_rev_a}
 \mathrm{C_3H_8+3.5 \, O_2} &\rightarrow \mathrm{3 \, CO+4 \, H_2O} \\
-\nonumber \mathrm{CO + 0.5 \, O_2} &\leftrightharpoons \mathrm{CO_2}
+\label{eq:2step_propane_rev_b}
+\mathrm{CO + 0.5 \, O_2} &\rightarrow \mathrm{CO_2} \\
+\label{eq:2step_propane_rev_c}
+\mathrm{CO_2} &\rightarrow \mathrm{CO + 0.5 \, O_2}
 \end{align}
+\end{subequations}
 with the following reaction input parameters:
 
 \begin{center}
 \begin{tabular}{|l|l|l|l|l|l|l|l|l|}
 \hline Reaction & $\nu_{\alpha}$ & E (kJ/kmol) & A (cm$^3$/mole/s) & $a_{\alpha}$ & $n_{\alpha}$  \\ \hline \hline
-\ref{eq:2step_propane_rev} a & [-1 -3.5 3 4 0] & 0 & 5e2  & [0.1 1.65 0 0 0] & [0 0 0 0 0] \\ \hline
-\ref{eq:2step_propane_rev} b & [0 -0.5 -1 0 1] & 0 & 8e3  & [0 0.25 1 0.5 0] & [0 0 0 0 0] \\ \hline
-\ref{eq:2step_propane_rev} c & [0 0.5 1 0 -1]  & 0 & 4e-4 & [0 0 0 0 0 1]    & [0 0 0 0 0] \\ \hline
+\ref{eq:2step_propane_rev_a} & [-1 -3.5 3 4 0] & 0 & 5e2  & [0.1 1.65 0 0 0] & [0 0 0 0 0] \\ \hline
+\ref{eq:2step_propane_rev_b} & [0 -0.5 -1 0 1] & 0 & 8e3  & [0 0.25 1 0.5 0] & [0 0 0 0 0] \\ \hline
+\ref{eq:2step_propane_rev_c} & [0 0.5 1 0 -1]  & 0 & 4e-4 & [0 0 0 0 0 1]    & [0 0 0 0 0] \\ \hline
 \end{tabular}
 \vskip8pt
 $\alpha$ is defined as [$\mathrm{C_3H_8}$ $\mathrm{O_2}$ $\mathrm{CO}$ $\mathrm{H_2O}$ $\mathrm{CO_2}$].
 \end{center}
-Equation (\ref{eq:2step_propane_rev}) includes the decomposition of $\mathrm{CO_2}$ into $\mathrm{CO}$ and $\mathrm{O_2}$ whereas the forward-only two-step mechanism, Equation (\ref{eq:2step_propane}), does not. This reverse reaction mechanism is represented by three separate reactions on the \textct{REAC} line in an FDS input file as indicated by rows $\mathrm{a}$, $\mathrm{b}$ and $\mathrm{c}$ in the preceding table. Species evolutions for the 2 step reverse reaction are shown in Fig.~\ref{fig:Arrhenius_175Order_2stepR}. In the forward CO step, (row $\mathrm{b}$ in the two prior tables), we see that water vapor contributes to the reaction rate based on its local concentration despite not being a participant in the reaction.
+Equation (\ref{eq:2step_propane_rev}) includes the decomposition of $\mathrm{CO_2}$ into $\mathrm{CO}$ and $\mathrm{O_2}$ whereas the forward-only two-step mechanism, Eq.~(\ref{eq:2step_propane}), does not. This reverse reaction mechanism is represented by three separate reactions on the \textct{REAC} line in an FDS input file as indicated by rows $\mathrm{a}$, $\mathrm{b}$ and $\mathrm{c}$ in the preceding table. Species evolutions for the 2 step reverse reaction are shown in Fig.~\ref{fig:Arrhenius_175Order_2stepR}. In the forward CO step, (row $\mathrm{b}$ in the two prior tables), we see that water vapor contributes to the reaction rate based on its local concentration despite not being a participant in the reaction.
 \vskip8pt
 Note: the values of $E$ and $A$ used in these examples are not necessarily representative of the chemical reactions presented. When using finite rate chemistry consult experimental data or literature for appropriate reaction parameters.
 
@@ -2140,18 +2150,18 @@ Note: the values of $E$ and $A$ used in these examples are not necessarily repre
 \label{fig:Arrhenius_175Order_2stepR}
 \end{figure}
 
-To couple verification of species mass fraction, compartment temperature, and compartment pressure, an equilibrium example problem was setup. In this case, we examine a sealed box filled with a stoichiometric mixture of fuel, oxygen, and nitrogen. The two-step reversible reaction mechanism, Equation (\ref{eq:2step_propane_rev}), is used to drive the FDS simulation. The initial temperature is set to 350 $^\circ$C to ensure the reaction occurs in a timely manner. The reaction rate parameters in the table below are based off values in literature from Westbrook and Dryer \cite{Westbrook:1}.
+To couple verification of species mass fraction, compartment temperature, and compartment pressure, an equilibrium example problem was setup. In this case, we examine a sealed box filled with a stoichiometric mixture of fuel, oxygen, and nitrogen. The two-step reversible reaction mechanism, Eqs.~(\ref{eq:2step_propane_rev_a})-(\ref{eq:2step_propane_rev_c}), is used to drive the FDS simulation. The initial temperature is set to 350 \si{\degree C} to ensure the reaction occurs in a timely manner. The reaction rate parameters in the table below are based off values in literature from Westbrook and Dryer \cite{Westbrook:1}.
 \begin{center}
 \begin{tabular}{|l|l|l|l|l|l|l|l|l|}
 \hline Reaction & $\nu_{\alpha}$ & E (kJ/kmol) & A (cm$^3$/mole/s) & $a_{\alpha}$ & $n_{\alpha}$  \\ \hline \hline
-\ref{eq:2step_propane_rev} a & [-1 -3.5 3 4 0] & 125520 & 1.5e12 & [0.1 1.65 0 0 0] & [0 0 0 0 0] \\ \hline
-\ref{eq:2step_propane_rev} b & [0 -0.5 -1 0 1] & 167360 & 3.4e13 & [0 0.25 1 0.5 0] & [0 0 0 0 0] \\ \hline
-\ref{eq:2step_propane_rev} c & [0 0.5 1 0 -1]  & 167360 & 8e8    & [0 0 0 0 0 1]    & [0 0 0 0 0] \\ \hline
+\ref{eq:2step_propane_rev_a} & [-1 -3.5 3 4 0] & 125520 & 1.5e12 & [0.1 1.65 0 0 0] & [0 0 0 0 0] \\ \hline
+\ref{eq:2step_propane_rev_b} & [0 -0.5 -1 0 1] & 167360 & 3.4e13 & [0 0.25 1 0.5 0] & [0 0 0 0 0] \\ \hline
+\ref{eq:2step_propane_rev_c} & [0 0.5 1 0 -1]  & 167360 & 8e8    & [0 0 0 0 0 1]    & [0 0 0 0 0] \\ \hline
 \end{tabular}
 \vskip8pt
 $\alpha$ is defined as [$\mathrm{C_3H_8}$ $\mathrm{O_2}$ $\mathrm{CO}$ $\mathrm{H_2O}$ $\mathrm{CO_2}$].
 \end{center}
-Equilibrium values were determined using the NASA code Chemical Equilibrium with Applications (CEA)~\cite{Gordon:1994}. A constant volume, constant internal energy equilibrium calculation was performed where the equilibrium values were found by minimizing Helmholtz Energy. The equilibrium species were limited to $\mathrm{C_3H_8}$, $\mathrm{O_2}$, $\mathrm{CO}$, $\mathrm{H_2O}$, and $\mathrm{CO_2}$; the same species tracked in the FDS simulation.
+Equilibrium values were determined using the NASA code Chemical Equilibrium with Applications (CEA)~\cite{Gordon:1994}. A constant volume, constant internal energy equilibrium calculation was performed where the equilibrium values were found by minimizing Helmholtz Energy. The equilibrium species were limited to $\mathrm{C_3H_8}$, $\mathrm{O_2}$, $\mathrm{CO}$, $\mathrm{H_2O}$, and $\mathrm{CO_2}$; the same species tracked in the FDS simulation.  The results are shown in Figs.~\ref{fig:Arrhenius_2Order_1stepb} and \ref{fig:Arrhenius_175Order_23stepb}.
 
 \begin{figure}[h!]
 \begin{center}
@@ -2201,14 +2211,14 @@ Fig.~\ref{fig:burke_schumann_spec} demonstrates that the predicted final fuel, o
 \end{figure}
 The state relation for temperature is given by:
 \begin{equation}\label{eq:mix_relate_temp}
-T = T_{{\rm O,I}} +  (T_{{\rm F,I}}-T_{{\rm O,I}}) \,f + (f-Y_{\rm F}(f)) \, \frac{\Delta h_{\rm c}}{c_{v}}
+T = T_0 +  (f-Y_{\rm F}(f)) \, \frac{\Delta h_{\rm c}}{c_{v}}
 \end{equation}
 where the subscript I refers to the inlet condition. The specific heat, $c_p$, for each species is set to 1~kJ/(kg$\cdot$K) as in the analysis by Turns~\cite{Turns:1996}. The enthalpy of formation of each of the species except for the fuel is set to zero, such that the heat of combustion of the reaction equals the heat of formation of the fuel. To obtain true adiabatic conditions in FDS, these cases were conducted inside a constant-volume reactor, so Eq.~(\ref{eq:mix_relate_temp}) is based on $c_v$ rather than $c_p$. We use the  following relationship $c_v = c_p - R/W$ to determine $c_v$. The molecular weight of the species were not assumed to be uniform; thus, the average molecular weight and $c_v$ vary with the mixture fraction. As a result, the traditional linear temperature profile is not expected.
 \begin{figure}[h!]
 \begin{center}
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/burke_schumann_temp}
 \end{center}
-\caption[Mixture fraction state relation for temperature ({\bf burke\_schumann})]{Non-dimensional temperature as a function of the mixture fraction.}
+\caption[Mixture fraction state relation for temperature ({\bf burke\_schumann})]{Non-dimensional temperature, $(T-T_0)/(T_{\rm stoich} - T_0)$, as a function of the mixture fraction.}
 \label{fig:burke_schumann_temp}
 \end{figure}
 
@@ -2264,11 +2274,11 @@ The fraction of an incapacitating dose of CO is calculated as
 \be
 \mathrm{FED}_\mathrm{CO} = \int_0^t 2.764 \times 10^{-5} \, (C_\mathrm{CO}(t))^{1.036} \, \d t
 \ee
-where $t$ is time (minutes), and $C_\mathrm{CO}$ is the CO concentration (ppm). The fraction of an incapacitating dose of CN is calculated as
+where $t$ is time (min), and $C_\mathrm{CO}$ is the CO concentration (ppm). The fraction of an incapacitating dose of CN is calculated as
 \be
 \mathrm{FED}_\mathrm{CN} = \int_0^t \left( \frac{\exp\left( \frac{C_\mathrm{CN}(t)}{43} \right)}{220} - 0.0045 \right) \, \d t
 \ee
-where $t$ is time (minutes), and $C_\mathrm{CN}$ is the concentration (ppm) of HCN corrected for the protective effect of NO$_\mathrm{2}$. $C_\mathrm{CN}$ is calculated as
+where $t$ is time (min), and $C_\mathrm{CN}$ is the concentration (ppm) of HCN corrected for the protective effect of NO$_\mathrm{2}$. $C_\mathrm{CN}$ is calculated as
 \be
 C_\mathrm{CN} = C_\mathrm{HCN} - C_\mathrm{NO_2}
 \ee
@@ -2276,7 +2286,7 @@ The fraction of an incapacitating dose of NO$_x$ is calculated as
 \be
 \mathrm{FED}_\mathrm{NO_x} = \int_0^t \frac{C_\mathrm{NO_x}(t)}{1500} \, \d t
 \ee
-where $t$ is time (minutes), and $C_\mathrm{NO_x}$ is the sum of NO and NO$_\mathrm{2}$ concentrations (ppm).
+where $t$ is time (min), and $C_\mathrm{NO_x}$ is the sum of NO and NO$_\mathrm{2}$ concentrations (ppm).
 The Fractional Lethal Dose (FLD) of irritants is calculated as
 \be
 \mathrm{FLD}_\mathrm{irr} = \int_0^t \left(
@@ -2289,7 +2299,7 @@ The Fractional Lethal Dose (FLD) of irritants is calculated as
     \frac{C_\mathrm{CH_2O}(t)}  {F_\mathrm{FLD,CH_2O}}
     \right) \, \d t
 \ee
-where $t$ is time (minutes), the numerators are the instantaneous concentrations (ppm) of each irritant, and
+where $t$ is time (min), the numerators are the instantaneous concentrations (ppm) of each irritant, and
 the denominators are the exposure doses of respective irritants predicted to be lethal to half the population.
 The lethal exposure doses~\cite{SFPE:Purser} are given in the table below.
 \begin{center}
@@ -2303,12 +2313,12 @@ The fraction of an incapacitating dose of low O${}_2$ hypoxia is calculated as
 \be
 \mathrm{FED}_\mathrm{O_2} =  \int_0^t \frac{\d t}{\exp \left [ 8.13 - 0.54 \, (20.9 - C_\mathrm{O_2}(t)) \right ] }
 \ee
-where $t$ is time (minutes), and $C_\mathrm{O_2}$ is the O${}_2$ concentration (volume percent).
+where $t$ is time (min), and $C_\mathrm{O_2}$ is the O${}_2$ concentration (volume percent).
 The hyperventilation factor induced by carbon dioxide is calculated as
 \be
 \mathrm{HV}_\mathrm{CO_2} = \frac{ \exp( 0.1930 \, C_\mathrm{CO_2}(t) +  2.0004 ) }{7.1} \label{co2hyp}
 \ee
-where $t$ is time (minutes), and $C_\mathrm{CO_2}$ is the CO${}_2$ concentration (percent).
+where $t$ is time (min), and $C_\mathrm{CO_2}$ is the CO${}_2$ concentration (volume percent).
 
 The Fractional Irritant Concentration (FIC), also developed by Purser~\cite{SFPE:Purser}, represents the toxic effect which
 depends upon the immediate concentrations of irritants. The overall irritant concentration FIC is calculated as
@@ -2348,7 +2358,7 @@ $\mathrm{CH_2O}$ & 0 & 0 & 13.49 & 6.743  \\ \hline
 Two versions of the simulations are performed. In the first simulation, the species were defined as individual tracked species.
 The FDS predictions and the expected FED and FIC values are compared in the figures below. In the second simulation, each species was defined as
 a lumped species, being part of the mixture using \textct{SMIX}. Four different mixtures were defined. The results of this test are shown in
-Fig.~\ref{FED_FIC_SMIX_plot}.
+Figs.~\ref{FED_FIC_plot} and \ref{FED_FIC_SMIX_plot}.
 
 \begin{figure}[ht]
 \noindent
@@ -2547,8 +2557,8 @@ model~\cite{Childs}. The cylindrical and spherical solutions were computed using
 The sample of homogeneous material is initially at 0~$^\circ$C and at $t>0$ exposed to a gas at 700~$^\circ$C. A fixed heat transfer coefficient of
 10~W/m$^2$/K is assumed. The density of the material is 10,000~kg/m$^3$. The conductivity and specific heat are functions of temperature with the
 following values: $k(0)=0.10$~W/m/K, $k(200)=0.20$~W/m/K, $c(0)=1.0$~kJ/kg/K, $c(100)=1.2$~kJ/kg/K, $c(200)=1.0$~kJ/kg/K. The thickness (radius) of
-the sample is 0.01~m. In the Cartesian case, the back surface of the material is exposed to a gas at 0~$^\circ$C. In the figure below, the light colored solid
-lines are FDS results and the dark lines are the HEATING results. An example input with cylindrical geometry looks like:
+the sample is 0.01~m. In the Cartesian case, the back surface of the material is exposed to a gas at 0~$^\circ$C. In the figure below, the solid
+lines are FDS results and the circles are the HEATING results. An example input with cylindrical geometry looks like:
 
 \begin{lstlisting}
 &MATL ID='MAT_1'
@@ -2602,7 +2612,7 @@ This example tests the convective cooling algorithm. A 1~m thick solid slab that
 \section{Simple Thermocouple Model (\texorpdfstring{{\bf thermocouples}}{thermocouples})}
 
 This example tests the simple thermocouple model in FDS. It consists of a box whose walls and gas temperatures are fixed at 500~$^\circ$C. Inside the box are three
-thermocouples with bead diameters of 1, 2, and 3~mm. Also included in the box are three ``targets'' -- small solid objects whose surfaces are assumed to be composed of
+thermocouples with bead diameters of 1~mm, 2~mm, and 3~mm. Also included in the box are three ``targets'' -- small solid objects whose surfaces are assumed to be composed of
 small spheres of the same diameter as the thermocouples. Figure~\ref{thermocouples} compares the temperature rise of the objects. The thermocouple model is not compared
 with an analytical solutions. This is
 simply a comparison of the thermally thin thermocouple calculation with the thermally thick ``target'' calculation. Small differences in temperature are due to slightly different
@@ -2741,8 +2751,8 @@ $360(1-0.5) \times \pi r^2 L=0.00565$~kg for charring, and 0.0113~kg for non-cha
 For spherical particles, the expected mass is $360(1-0.5) \times 4\pi r^3/3=7.54\times 10^{-4}$~kg for charring, and $1.51\times 10^{-3}$~kg for
 non-charring materials.
 
-The analytical and computed results for charring material are compared in~\ref{surf_mass_part_char}.
-The analytical and computed results for non-charring material are compared in~\ref{surf_mass_part_nonchar}.
+The analytical and computed results for charring material are compared in Fig.~\ref{surf_mass_part_char}.
+The analytical and computed results for non-charring material are compared in Fig.~\ref{surf_mass_part_nonchar}.
 \begin{figure}[ht]
 \noindent
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
@@ -2783,7 +2793,7 @@ Because the length of the cylindrical particles is four times 0.1~m, the cylinde
 \textct{NUMBER\_RADIATIVE\_ANGLES} feature of the \textct{PART} class.
 \end{description}
 The analytical and computed results are compared in Fig.~\ref{surf_mass_part_char_advanced}.
-The readability of the figure is improved by setting the external heat fluxes for Meshes 1, 2, and 3 to 50, 45 and 40 kW/m$^2$, respectively.
+The readability of the figure is improved by setting the external heat fluxes for Meshes 1, 2, and 3 to 50 \si{kW/m^2}, 45 \si{kW/m^2}, and 40 \si{kW/m^2}, respectively.
 \begin{figure}[ht]
 \begin{center}
 \includegraphics[width=4.5in]{SCRIPT_FIGURES/surf_mass_part_char_cyl_gas_advanced}
@@ -2850,8 +2860,7 @@ Figure~\ref{cell_burn_away} displays the computed and analytical burning rate. N
 \subsection{Evaporation of a Liquid Surface}
 
 A liquid evaporation model was tested in a mass conservation test similar to the surf\_mass\_vent\_nonchar\_fuel test above. A 1 cm layer of heptane
-fuel was exposed to a 50 kW/m$^2$ heat flux and the evolution of gas phase fuel mass and surface density were tracked. Results are shown in the
-figure below.
+fuel was exposed to a 50 kW/m$^2$ heat flux and the evolution of gas phase fuel mass and surface density were tracked. Results are shown in Fig.~\ref{surf_mass_vent_liquid}.
 \begin{figure}[ht]
 \begin{center}
 \includegraphics[width=3.5in]{SCRIPT_FIGURES/surf_mass_vent_liquid_fuel}
@@ -2867,7 +2876,7 @@ mass-weighted sum of the individual values of the emissivity
 in the first condensed phase grid cell. In this verification test, the
 initial material, having emissivity of 1.0, is converted to another
 material, having emissivity of 0.0, at a constant rate of 0.1~s$^{-1}$. As a
-result, the surface emissivity should change linearly from 1.0 to 0.0 in 10~s.
+result, the surface emissivity should change linearly from 1.0 to 0.0 in 10~s (Fig.~\ref{emissivity}).
 
 \begin{figure}[ht]
 \begin{center}
@@ -2886,7 +2895,7 @@ If the product material (3) of the reaction is of higher density than the
 reactant ($\rho_3 > \rho_1$), the layer thickness $\Delta$ should shrink.
 If the product density is lower than the reactant's density ($\rho_3 < \rho_1$) the layer should swell (increase) in thickness. If the inert material has
 a static matrix structure (\textct{ALLOW\_SHRINKING=.FALSE.} or \textct{ALLOW\_SWELLING=.FALSE.}) the layer thickness should not change. The parameters of the
-six test cases are shown in the following table. The figures below show the surface densities, which obviously should not change, and the surface
+six test cases are shown in the following table. Figure \ref{shrink_swell2} shows the surface densities, which obviously should not change, and the surface
 thicknesses over the time of the simulation.
 
 \begin{table}[ht]
