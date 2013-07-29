@@ -158,8 +158,8 @@ and wavelength may be expressed using
 \end{eqnarray}
 
 \noindent where  $\Lxo$ represents the  radiance at $x$ along a
-direction $\omega$. As illustrated in Figure \ref{figRadiance},
-the right hand side of (\ref{eq:fullrte}) is split into four
+direction $\omega$. As illustrated in Fig. \ref{figRadiance}, the
+right hand side of (\ref{eq:fullrte}) is split into four
 components accounting for absorption, in and out scattering and
 emission where $\siga$ is the absorption coefficient, $\sigs$ is
 the scattering coefficient, $\Lexo$ is the radiance emitted at $x$
@@ -169,8 +169,9 @@ direction $\omega$. Absorption and out-scattering cause radiance
 to decrease while emission and in-scattering cause radiance to
 increase. The radiance terms $C$, $C_e$ and $C_i$ have units of
 \si{W/(m^2.sr)}. The coefficients $\sigma_a$ and $\sigma_s$ have
-units of \si{1/m} and specify the time and location dependent change
-per unit length to the radiance term to which they are applied.
+units of \si{1/m} and specify the time and location dependent
+change per unit length to the radiance term to which they are
+applied.
 
 \begin{figure}[\figoptions]
 \begin{center}
@@ -402,11 +403,11 @@ radiance and smoke opacity require  properties for the entire line
 of sight which may encompass more than one data mesh.  This
 section discusses how  radiance and opacity may be computed by
 combining solutions from each individual mesh along the line of
-sight.  For example, as illustrated in Figure
-\ref{figsmokesetup3}, consider an interval $[x_0,x_N]$ that is
-split at $D$ into two sub-intervals $[x_0,D]$ and $[D,x_N]$.  The
-goal then is to compute a radiance and opacity for $[x_0,x_N]$
-using radiances and opacities computed on  the two sub-intervals.
+sight.  For example, as illustrated in Fig. \ref{figsmokesetup3},
+consider an interval $[x_0,x_N]$ that is split at $D$ into two
+sub-intervals $[x_0,D]$ and $[D,x_N]$.  The goal then is to
+compute a radiance and opacity for $[x_0,x_N]$ using radiances and
+opacities computed on  the two sub-intervals.
 
 \begin{figure}[\figoptions]
 \begin{center}
@@ -501,7 +502,7 @@ displayed.
 % -------------------  Computing Opacity ------------------------
 
 \subsection{Computing Opacity}
-Computing opacity at slice plane nodes is illustrated in Figure
+Computing opacity at slice plane nodes is illustrated in Fig.
 \ref{figsmokesetup}. A ray travels from the background to the
 observer through intervening smoke. Light is absorbed or scattered
 by the smoke as the ray passes each slice plane. Emission effects
@@ -547,7 +548,7 @@ opaque.
 
 The absorption parameter, $\alpha$, needs to be adjusted for view
 directions not aligned with the axis orthogonal to the viewing
-planes (see Figure \ref{figray}).  The absorption coefficient also
+planes (see Fig. \ref{figray}).  The absorption coefficient also
 needs to be adjusted when the distance between adjacent smoke
 planes changes, or viewing planes are skipped.
 
@@ -616,7 +617,7 @@ x=||x_p-x_e||/n\cdot(x_p-x_e)$, $n$ is the unit vector normal to
 the current plane being drawn, $\theta$ is the angle between the
 view direction and $n$, $x_e$ is the observers position and $x_p$
 is the vertex being drawn (along the view direction).  These terms
-are illustrated in Figure \ref{figray}.
+are illustrated in Fig. \ref{figray}.
 
 When planes are skipped, (\ref{eq:alphahat}) may be simplified.
 In particular, when every 2nd plane is skipped,
@@ -666,7 +667,7 @@ form the image. } \label{figplume}
 Figure \ref{figsmoke3d} illustrates this process showing smoke and
 fire in a townhouse kitchen fire. The visualization is performed
 by displaying a series of partially transparent planes. For
-illustration, these planes are made more conspicuous (in Figure
+illustration, these planes are made more conspicuous (in Fig.
 \ref{figsmoke3d}a) by skipping smoke planes (displaying every
 third plane) and orienting them along the $x$~axis. Figure
 \ref{figsmoke3d}b shows the visualization as it normally appears
@@ -709,7 +710,7 @@ directions and the corresponding smoke plane orientations that
 would be used. Off-axis viewing is minimized by selecting the view
 planes orientation that minimizes the angle between the planes
 normal direction and the view direction. This angle, $\theta$, is
-illustrated in Figure \ref{figDIRB}, and is given by
+illustrated in Fig. \ref{figDIRB}, and is given by
 
 \begin{eqnarray}
 \cos(\theta)=\frac{n\cdot v_e}{||n||~||v_e||}
@@ -899,19 +900,19 @@ images, b) and c), are rotated versions of the image as in a). }
 \label{fig:volplume_example}
 \end{figure}
 
-Three example colormaps  are illustrated in Figure
-\ref{fig:colormaps}. The black/orange colormap in Figure
+Three example colormaps  are illustrated in Fig.
+\ref{fig:colormaps}. The black/orange colormap in Fig.
 \ref{fig:colormaps}a is used to produce an image.  If the
 temperature is below a user specified value, the color is black,
 representing soot (where emission is not significant).  If the
 temperature is above this value then it is a shade of orange,
 representing emission from a fire.  The particular shade chosen is
 based on the color emitted by a blackbody source. The black to
-white colormap in Figure \ref{fig:colormaps}b along with an
+white colormap in Fig. \ref{fig:colormaps}b along with an
 extinction coefficient appropriate for infrared wavelengths could
 be used to simulate the effect of a thermal imager by using black
 for cool temperatures and white for warm temperatures. The rainbow
-colormap in Figure \ref{fig:colormaps}c produces non-realistic
+colormap in Fig. \ref{fig:colormaps}c produces non-realistic
 images which can still be of value for highlighting data of
 interest.
 
