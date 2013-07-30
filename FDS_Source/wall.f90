@@ -404,7 +404,8 @@ METHOD_OF_HEAT_TRANSFER: SELECT CASE(SF%THERMAL_BC_INDEX)
 
       RHO_G = RHOP(IIG,JJG,KKG)
       RHO_G_2 = RHO_G
-      RHO_OTHER_2 = RHO_OTHER ! first order extrapolation of scalar data
+      RHO_OTHER_2 = RHO_OTHER ! first-order extrapolation of scalar data
+      !RHO_OTHER_2 = 2._EB*RHO_OTHER-RHO_G ! second-order extrapolation of scalar data
       RHOP(II,JJ,KK) = RHO_OTHER
       SELECT CASE(IOR)
          CASE( 1)
@@ -438,7 +439,8 @@ METHOD_OF_HEAT_TRANSFER: SELECT CASE(SF%THERMAL_BC_INDEX)
 
             RHO_ZZ_G = RHO_G*ZZP(IIG,JJG,KKG,N)
             RHO_ZZ_G_2 = RHO_ZZ_G
-            RHO_ZZ_OTHER_2 = RHO_ZZ_OTHER(N)
+            RHO_ZZ_OTHER_2 = RHO_ZZ_OTHER(N) ! first-order
+            !RHO_ZZ_OTHER_2 = 2._EB*RHO_ZZ_OTHER(N) - RHO_ZZ_G ! second-order
             SELECT CASE(IOR)
                CASE( 1)
                   ZZZ(1:4) = (/RHO_ZZ_OTHER_2,RHO_ZZ_OTHER(N),RHO_ZZ_G,RHO_ZZ_G_2/)
