@@ -369,7 +369,7 @@ check_compile_fds_db()
 check_compile_fds_mpi_db()
 {
    # Check for errors in FDS debug compilation
-   cd $FDS_SVNROOT/FDS_Compilation/intel_mpi_linux_64$IB$DB
+   cd $FDS_SVNROOT/FDS_Compilation/mpi_intel_linux_64$IB$DB
    if [ -e "fds_mpi_intel_linux_64$IB$DB" ]
    then
       stage2b_success=true
