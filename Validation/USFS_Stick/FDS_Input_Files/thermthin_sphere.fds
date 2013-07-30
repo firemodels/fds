@@ -1,0 +1,156 @@
+&HEAD CHID='thermthin_sphere', TITLE='Thermally thick stick' /
+
+Experiment is reported in "An examination of fuel heating during fire spread," 
+Cohen and Finney, VI International Conference on Forest Fire Research
+Coimbra, Portugal 2010
+Measurement data is at the end of this file.
+
+In this input file the 1 mm thick (square cross-section), 120mm long
+stick is approximated by a 6 mm radius sphere. 
+
+&TIME T_END=75,WALL_INCREMENT=1. /
+&MISC TMPA=25 / 
+
+&MESH IJK=48,16,48, XB=-0.24,0.24,-0.24,-0.08,0,0.48 /
+&MESH IJK=48,16,48, XB=-0.24,0.24,-0.08, 0.08,0,0.48 /
+&MESH IJK=48,16,48, XB=-0.24,0.24, 0.08, 0.24,0,0.48 /
+
+- Radiant panel (using temp from Cohen & Finney ICFFR paper
+&SURF ID='radiant panel',TMP_FRONT=725,TMP_BACK=20,RAMP_T='panelramp' /
+&RAMP ID='panelramp',T=0, F=0 /
+&RAMP ID='panelramp',T=0.5, F=1 /
+&OBST XB=0,0.005,-0.24,0.24,0,0.375,SURF_ID='radiant panel' /
+
+- Place obstacle between smaple location and radiant panel for 0 s to 15 s and then remove 
+&OBST XB=-0.08,-0.07,-0.10,0.10,0.05,0.25,COLOR='BLACK' /
+&DEVC XYZ=0,0,0,ID='block_off',SETPOINT=15,QUANTITY='TIME',INITIAL_STATE=.FALSE./
+&HOLE XB=-0.08,-0.07,-0.10,0.10,0.05,0.25,COLOR='BLACK',DEVC_ID='block_off' /
+
+&REAC ID='WOOD'
+      FUEL='WOOD'
+      FYI='Ritchie, et al., 5th IAFSS, C_3.4 H_6.2 O_2.5, dHc = 15MW/kg'
+      SOOT_YIELD = 0.02
+      O          = 2.5
+      C          = 3.4
+      H          = 6.2
+      HEAT_OF_COMBUSTION = 17936. /
+
+&SURF ID = '1mm stick'
+     MATL_ID(1,1:2)             = 'Yellow Poplar','WATER'
+     MATL_MASS_FRACTION(1,1:2)	= 0.99,0.01
+     RADIUS                     = 0.0005
+     GEOMETRY                 	= 'SPHERICAL' 
+     STRETCH_FACTOR             = 1
+     CELL_SIZE_FACTOR           = 1
+     BACKING                    = 'INSULATED' /
+     CONVECTION_LENGTH_SCALE    = 0.012
+
+- Wood properites from Glass et al.Glass, Samuel, and Samuel Zalinka. 
+  The Wood Handbook: Wood as an Engineering Materia, 
+  chapter 4: Moisture Relations and Physical Properties of Wood: 
+  2010 http://www.fpl.fs.fed.us/documnts/fplgtr/fplgtr190/chapter_04.pdf 
+  Density (kg/m^3) Yellow poplar
+  Conductivity (W/m/K) yellow poplar
+  heat capacity (kJ/kg/K) wood
+&MATL ID                        = 'Yellow Poplar'
+	CONDUCTIVITY_RAMP      	= 'k_wood'
+     	SPECIFIC_HEAT_RAMP    	= 'c_wood'
+     	DENSITY               	= 460
+	EMISSIVITY              = 0.90
+     	N_REACTIONS           	= 1
+     	REFERENCE_TEMPERATURE 	= 300
+     	SPEC_ID               	= 'WOOD'
+     	NU_SPEC               	= 0.80 
+     	MATL_ID               	= 'CHAR'
+     	NU_MATL               	= 0.20 
+	HEAT_OF_REACTION        = 418 /
+&RAMP ID='k_wood', T= 0.,    F=0.11 /
+&RAMP ID='k_wood', T= 1000., F=0.11 /
+&RAMP ID='c_wood', T= 0.,    F=1.16 /
+&RAMP ID='c_wood', T= 1000., F=5.03 /
+
+&MATL ID                        = 'WATER'
+     	CONDUCTIVITY_RAMP       = 'k_water'
+     	SPECIFIC_HEAT_RAMP      = 'c_water'
+     	DENSITY               	= 997
+     	N_REACTIONS           	= 1
+     	REFERENCE_TEMPERATURE 	= 100
+     	SPEC_ID               	= 'WATER VAPOR'
+     	NU_SPEC               	= 1 
+	HEAT_OF_REACTION        = 2257 /
+&SPEC ID='WATER VAPOR' /
+&RAMP ID='k_water', T= 0.,    F=0.569 /
+&RAMP ID='k_water', T= 26.85, F=0.613 /
+&RAMP ID='k_water', T= 51.85, F=0.645 /
+&RAMP ID='k_water', T= 76.85, F=0.668 /
+&RAMP ID='k_water', T= 100.,  F=0.680 /
+&RAMP ID='c_water', T= 0.,    F=4.217 /
+&RAMP ID='c_water', T= 6.85,  F=4.198 /
+&RAMP ID='c_water', T= 16.85, F=4.184 /
+&RAMP ID='c_water', T= 26.85, F=4.179 /
+&RAMP ID='c_water', T= 36.85, F=4.178 /
+&RAMP ID='c_water', T= 46.85, F=4.180 /
+&RAMP ID='c_water', T= 56.85, F=4.184 /
+&RAMP ID='c_water', T= 66.85, F=4.188 /
+&RAMP ID='c_water', T= 76.85, F=4.195 /
+&RAMP ID='c_water', T= 86.85, F=4.203 /
+&RAMP ID='c_water', T= 100.,  F=4.217 /
+
+-Char propeties 
+ Char fraction from rough average of Sussot wood measurements
+ Conducitiviy (W/m/K) Ragland
+ Density from Shi
+ heat capacity (kJ/kg/K) of graphite from Ragland
+ emissivity Ragland,
+ density (kg/m^3)=0.63*dry wood from Shi
+&MATL ID                        = 'CHAR'
+     	CONDUCTIVITY            = 0.052
+     	SPECIFIC_HEAT_RAMP      = 'c_char'
+     	DENSITY               	= 290 
+	EMISSIVITY              = 0.80 /
+&RAMP ID='c_char', T=    0, F=1.40 /
+&RAMP ID='c_char', T= 1000, F=1.85 /
+
+- Stick particles
+&PROP ID='rod shape', 
+      SMOKEVIEW_ID='TUBE', 
+      SMOKEVIEW_PARAMETERS(1:2)='D=0.012','L=0.12' /
+
+&PART ID='1mm stick',
+      DRAG_LAW='SPHERE',
+      INITIAL_TEMPERATURE = 25,
+      SURF_ID='1mm stick',
+      QUANTITIES(1:2)='PARTICLE TEMPERATURE','PARTICLE MASS',
+      ORIENTATION(1,1:3)= 1, 0, 0,
+      SAMPLING_FACTOR=1, 
+      PROP_ID='rod shape',
+      STATIC=.TRUE. /
+
+&INIT ID='1mm stick',PART_ID='1mm stick', XYZ=-0.10,0.0,0.15, N_PARTICLES=1 /
+
+- Boundary conditions
+&VENT MB=XMIN,SURF_ID=OPEN /
+&VENT MB=XMAX,SURF_ID=OPEN /
+&VENT MB=YMIN,SURF_ID=OPEN /
+&VENT MB=YMAX,SURF_ID=OPEN /
+&VENT MB=ZMAX,SURF_ID=OPEN /
+
+- Output
+&DUMP DT_DEVC=0.1,DT_PART=0.1,DT_SLCF=0.1 /
+-- wood stick
+&DEVC ID='T_surf',INIT_ID='1mm stick', QUANTITY='WALL TEMPERATURE'/ 
+&DEVC ID='T_ctr',INIT_ID='1mm stick',QUANTITY='INSIDE WALL TEMPERATURE', DEPTH=0.006 /
+&DEVC ID='Net q', INIT_ID='1mm stick',QUANTITY='NET HEAT FLUX' /
+&DEVC ID='qc', INIT_ID='1mm stick',QUANTITY='CONVECTIVE HEAT FLUX' /
+&DEVC ID='qr', INIT_ID='1mm stick',QUANTITY='RADIATIVE HEAT FLUX' /
+&DEVC ID='qgr', INIT_ID='1mm stick',QUANTITY='GAUGE HEAT FLUX' /
+
+&SLCF PBY=0,VECTOR=.TRUE.,QUANTITY='TEMPERATURE' /
+
+-- surrogate particle
+cDEVC ID='flux', INIT_ID='f1', QUANTITY='RADIATIVE HEAT FLUX' /
+cINIT ID='f1', XYZ=-0.15,0.0,0.26, N_PARTICLES=1, PART_ID='rad gauge' /
+cPART ID='rad gauge', STATIC=.TRUE., ORIENTATION(1,1:3)=1,0,0, SURF_ID='target' /
+cSURF ID='target', RADIUS=0.001, GEOMETRY='SPHERICAL' /
+
+&TAIL /
