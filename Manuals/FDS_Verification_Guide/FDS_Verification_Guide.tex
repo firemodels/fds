@@ -595,7 +595,7 @@ of velocity, $(x_{N/2},\bar{z}_{N/2})$, which is different in each case, $N =\{8
    \caption[Velocity time history, qualitative convergence]{Time history of the $u$-component of velocity half a grid cell below the center of the domain for a range of grid resolutions.
    The domain is a square of side $L = 2\pi$ m.  The $N \times N$ grid is uniform.  Progressing from left to right and top to bottom we have resolutions $N =\{8,16,32,64\}$
    clearly showing convergence of the FDS numerical solution (open circles) to the analytical solution (solid line).
-   The case is run with constant properties, $\rho=1$ kg/m$^3$ and $\mu = 0.1$ kg/m/s, and a Courant-Friedrichs-Lewy (CFL) of 0.25.}
+   The case is run with constant properties, $\rho=1$ \si{kg/m^3} and $\mu = 0.1$ kg/m/s, and a Courant-Friedrichs-Lewy (CFL) of 0.25.}
    \label{fig_ns2d_timehistory}
 \end{figure}
 
@@ -990,7 +990,7 @@ w&=&\frac{1}{2}\sqrt{\frac{\nu \,u_0}{x}}(\eta f^{'}-f)
 \end{eqnarray}
 The solution of Eq.~(\ref{BL_ODE}) is the Blasius solution (see \cite{Panton:1}).
 
-The physical domain of the present verification case is a rectangle with length $L=0.15$ m in the streamwise direction and $H=0.3$ m in the wall-normal direction. The grid spacing is uniform $\delta x = L/N_x$, $\delta z =H/N_z$ in each direction, and $N_x = 1.5 N_z$ with $N_z = \{16, 32, 64\}$ for each test series. The Boundary conditions for the inlet and outlet boundaries are \textct{OPEN} with the dynamic pressure set to zero at the inlet boundary. On the top boundary, the gradient of $w$ in the $z$ direction is zero combined with a free-slip condition that combines to yield an irrotational field. The boundary condition along the bottom of the domain is free-slip upstream of the plate ($x<0.5$ m) and no-slip on the plate. The initial velocity is $1$ m/s and $u_0$ is taken as the value of $u$ at the top boundary since boundary conditions at $z=\infty$ cannot be directly applied. The case is run with constant properties: $\rho=1.2$ kg/m$^3$, $\mu = 0.001$ kg/m/s.
+The physical domain of the present verification case is a rectangle with length $L=0.15$ m in the streamwise direction and $H=0.3$ m in the wall-normal direction. The grid spacing is uniform $\delta x = L/N_x$, $\delta z =H/N_z$ in each direction, and $N_x = 1.5 N_z$ with $N_z = \{16, 32, 64\}$ for each test series. The Boundary conditions for the inlet and outlet boundaries are \textct{OPEN} with the dynamic pressure set to zero at the inlet boundary. On the top boundary, the gradient of $w$ in the $z$ direction is zero combined with a free-slip condition that combines to yield an irrotational field. The boundary condition along the bottom of the domain is free-slip upstream of the plate ($x<0.5$ m) and no-slip on the plate. The initial velocity is $1$ m/s and $u_0$ is taken as the value of $u$ at the top boundary since boundary conditions at $z=\infty$ cannot be directly applied. The case is run with constant properties: $\rho=1.2$ \si{kg/m^3}, $\mu = 0.001$ kg/m/s.
 
 Figure \ref{blasius} (left) shows a comparison of the streamwise velocity from FDS with the Blasius solution. It is seen that the FDS solution (lines) converges to Blasius (open circles) as the mesh resolution is increased. Figure \ref{blasius} (right) shows root mean square (RMS) error, $\varepsilon$, in $u$ (streamwise component) at $x=0.1$ m ($0.05$ m from the leading edge of the plate) for the dimensional Blasius solution. The error is defined by
 \begin{equation}
@@ -1048,7 +1048,7 @@ In FDS, $\tau_w$ is obtained only from the wall model. The resolution of the wal
 
 \noindent The simulation of turbulent channel flow (Re$_{\tau}=180$) with a heat source was performed to verify the log law near-wall model for heat transfer \cite{FDS_Tech_Guide}. The model was developed based on the law of wall for temperature and empirical equations \cite{Kader:1981}. These cases are located in the Verification/Turbulence subdirectory.
 
-The height of the channel is $H=2$ m, the width is $W=6$ m, and the length is $L=12$ m. There are 64 cells in the streamwise direction ($\delta x = 0.1875$ m) and 32 cells in the spanwise ($\delta y=0.1875$ m) and wall-normal directions ($\delta z=0.0625$ m).  The midpoint of the first cell in viscous units is $z^+ = 5$, which is a very highly resolved LES. For this reason, the dynamic Smagorinsky SGS model is used for the residual stress. Additionally, these cases were run in ``research mode'' (\textct{RESEARCH\_MODE=.TRUE.} on \textct{MISC}), which accounts for both molecular the turbulent transport coefficients, a must for distinguishing between fluids with different molecular Prandtl or Schmidt numbers (here the Re is so low that molecular effects may dominate locally).  The flow is maintained by a mean pressure gradient ($8.748 \times 10^{-6}$ Pa/m) in the streamwise direction. A constant volumetric heat source (0.5 W/m$^3$) is imposed on the fluid. The boundary conditions for momentum equations are no-slip at top and bottom walls and periodic for the streamwise and spanwise directions. The boundary condition for the energy equation is constant temperature ($T_w = 20 \,\mbox{$^\circ$C} $) at the wall. To evaluate the effects of Prandtl number (Pr) and compare the DNS study \cite{Kim:1987} with FDS, the specific heat ($c_p = 1$ \si{kJ/(kg.K)}) and viscosity ($\mu = 1.8216 \times 10^{-5}$ \si{kg/(m.s)}) are fixed and the conductivity, $k$, of the fluid (air) is adjusted to:
+The height of the channel is $H=2$ m, the width is $W=6$ m, and the length is $L=12$ m. There are 64 cells in the streamwise direction ($\delta x = 0.1875$ m) and 32 cells in the spanwise ($\delta y=0.1875$ m) and wall-normal directions ($\delta z=0.0625$ m).  The midpoint of the first cell in viscous units is $z^+ = 5$, which is a very highly resolved LES. For this reason, the dynamic Smagorinsky SGS model is used for the residual stress. Additionally, these cases were run in ``research mode'' (\textct{RESEARCH\_MODE=.TRUE.} on \textct{MISC}), which accounts for both molecular the turbulent transport coefficients, a must for distinguishing between fluids with different molecular Prandtl or Schmidt numbers (here the Re is so low that molecular effects may dominate locally).  The flow is maintained by a mean pressure gradient ($8.748 \times 10^{-6}$ Pa/m) in the streamwise direction. A constant volumetric heat source (0.5 W/m$^3$) is imposed on the fluid. The boundary conditions for momentum equations are no-slip at top and bottom walls and periodic for the streamwise and spanwise directions. The boundary condition for the energy equation is constant temperature ($T_w = 20 \,\mbox{\si{\degree C}} $) at the wall. To evaluate the effects of Prandtl number (Pr) and compare the DNS study \cite{Kim:1987} with FDS, the specific heat ($c_p = 1$ \si{kJ/(kg.K)}) and viscosity ($\mu = 1.8216 \times 10^{-5}$ \si{kg/(m.s)}) are fixed and the conductivity, $k$, of the fluid (air) is adjusted to:
 \begin{center}
 \begin{tabular}{ll}
 Pr & $k$ (\si{W/(m.K)}) \\
@@ -1366,7 +1366,7 @@ u_n = \frac{\sum_\alpha \dot{m}_{\alpha}^{\prime\prime}}{\rho(\mathbf{Y},T)}
 \end{equation}
 The density is computed using old values of the face mass fractions and the face temperature which may be specified or computed depending on choices made by the user.  The new face mass fraction is then set to satisfy (\ref{eqn_total_flux}).  The test case below is designed to exercise contributions from both the advective and diffusive terms in this boundary condition.
 
-In the test case, we inject propane into a cube with 1 m$^2$ vents on all six faces.  We specify the \textct{MASS\_FLUX} of propane to be 0.0001 kg/(m$^2$-s) and the temperature of the face of the \textct{VENT} (\textct{TMP\_FRONT}) is specified to be 500 $^\circ$C.  The box is initially filled with air at standard conditions.  We \textct{DUMP} a \textct{MASS\_FILE} and compare the accumulation of propane with the specified rate.  The results are shown in Fig.~\ref{fig_low_flux_hot_gas_filling}.
+In the test case, we inject propane into a cube with 1 m$^2$ vents on all six faces.  We specify the \textct{MASS\_FLUX} of propane to be 0.0001 kg/(m$^2$-s) and the temperature of the face of the \textct{VENT} (\textct{TMP\_FRONT}) is specified to be 500 \si{\degree C}.  The box is initially filled with air at standard conditions.  We \textct{DUMP} a \textct{MASS\_FILE} and compare the accumulation of propane with the specified rate.  The results are shown in Fig.~\ref{fig_low_flux_hot_gas_filling}.
 
 \begin{figure}[h]
 \begin{tabular*}{\textwidth}{lr}
@@ -1394,7 +1394,7 @@ Here $\rho$ is the mass density, $h_{\rm s}$ is the sensible enthalpy, $\bar{p}$
 For the purpose of verifying that the basic FDS algorithm is energy conserving, it is useful to think of a single compartment as a control volume into which energy is generated by a fire and out of which energy either flows via openings or is conducted through the walls. If the fire's heat release rate (HRR) is steady, eventually the system will reach a quasi-steady state (in an LES calculation, there is never a true ``steady state''). Two simple cases, called {\bf energy\_budget\_adiabatic\_walls} and {\bf energy\_budget\_cold\_walls}, illustrate that in the quasi-steady state, the energy generated by the fire is conserved. For the case with adiabatic walls, a 1200~kW fire is simulated within a compartment that is 10~m by 10~m by 5~m tall. There is a single door and a single horizontal vent in the ceiling. The walls are assumed to be adiabatic; that is, there is no net heat flux through them. Another way to look at it is that the walls are perfect insulators. To simplify the case even further, the radiation transport algorithm is turned off. It is expected that in this case 1200~kW ought to flow out of the compartment either via the
 door or ceiling vent. The plot in Fig.~\ref{energy_budget_adiabatic_walls} shows both the HRR and enthalpy flow out of the compartment converging to 1200~kW. During the warm up phase, the enthalpy flow is less than the HRR because energy is consumed heating up the air within the room.
 
-Next, the same compartment with the same fire is now assumed to have cold (20~$^\circ$C) walls, and the radiation is switched back on. After a few minutes of simulation, the net enthalpy outflow is approximately 470~kW and the heat losses to the wall (both radiative and convective) are approximately 730~kW. The plot is shown in Fig.~\ref{energy_budget_cold_walls}.
+Next, the same compartment with the same fire is now assumed to have cold (20~\si{\degree C}) walls, and the radiation is switched back on. After a few minutes of simulation, the net enthalpy outflow is approximately 470~kW and the heat losses to the wall (both radiative and convective) are approximately 730~kW. The plot is shown in Fig.~\ref{energy_budget_cold_walls}.
 
 \begin{figure}[ht]
 \centering
@@ -1438,16 +1438,16 @@ inject the nitrogen at a specified rate into the particular grid cell that each 
 This example checks that if nitrogen is added via an external vent to a sealed compartment with adiabatic (i.e., no heat loss) walls, that the
 density, pressure and temperature ought to rise to the same values regardless of the time of injection.  The results are plotted in Fig.~\ref{isentropic2}.
 In the two cases, 0.2~kg of N$_2$ are added to a compartment that is 1~m$^3$ in volume. In the first case, the injection occurs in 10~s, in the
-second case in 50~s. The temperature of the gas in both cases is 500~$^\circ$C. It is expected that the pressure, $p$, should rise at the rate:
+second case in 50~s. The temperature of the gas in both cases is 500~\si{\degree C}. It is expected that the pressure, $p$, should rise at the rate:
 \be \frac{\d p}{\d t} = \frac{\gamma \, p \, u \, A}{V} \ee
 where $u$ is the injection velocity and $A$ is the area of the vent. The vent area is 0.04~m$^2$. The density of the incoming N$_2$ is found from the equation of state:
 \be \rho = \frac{ \overline{W} \, p }{ \R T} \ee
 The injection velocity is the mass flux divided by the density, $u=\dot{m}''/\rho$, in which case, the pressure rise can be written
 \be \frac{\d p}{\d t} = \frac{\gamma \, \dot{m}'' \, \R T \, A}{\overline{W} \, V} \ee
 Note that the pressure rise is constant. In both the fast and slow injection cases, the pressure is expected to rise 64,282~Pa above ambient. The density
-and temperature rise are also linear. The density increases from 1.164~kg/m$^3$ to 1.364~kg/m$^3$. The temperature increases from 20~$^\circ$C to 135.7~$^\circ$C.
+and temperature rise are also linear. The density increases from 1.164~\si{kg/m^3} to 1.364~\si{kg/m^3}. The temperature increases from 20~\si{\degree C} to 135.7~\si{\degree C}.
 The change in the internal energy of the system, based on the mass and temperature of the added N$_2$, is:
-\be \Delta E = (0.2 \; \hbox{kg}) \times (1.039 \; \hbox{kJ/kg/K}) \times (773.15 \; \hbox{K} ) = 160.7 \; \hbox{kJ} \ee
+\be \Delta E = (0.2 \; \hbox{kg}) \times (1.039 \; \hbox{\si{kJ/(kg.K)}}) \times (773.15 \; \hbox{K} ) = 160.7 \; \hbox{kJ} \ee
 Adding in the work due to the pressure yields the change in total enthalpy:
 \be \Delta H = \Delta E + V \, \Delta P = 160.7 \; \hbox{kJ} + (1 \; \hbox{m}^3) \times ( \; 64.3 \; \hbox{kJ/m}^3) = 225 \; \hbox{kJ} \ee
 
@@ -1468,7 +1468,7 @@ Adding in the work due to the pressure yields the change in total enthalpy:
 
 \subsection{Mixing Gases (\texorpdfstring{{\bf energy\_budget\_dns}}{energy\_budget\_dns})}
 
-In this example, two fictitious gases are forced through tiny ducts (1~mm by 1~mm) that meet at a T-joint. The cross sectional areas of all the ducts are the same. Gas~1 has an initial temperature of 606.3~$^\circ$C and a constant specific heat of 1~\si{kJ/(kg.K)}. Gas~2 has an initial temperature of 20~$^\circ$C and a constant specific heat of 10~\si{kJ/(kg.K)}. Both gases have a molecular weight of 29~g/mol and a mass flow of $1 \times 10^{-8}$~kg/s. Typically gases of the same molecular weight have comparable, but not necessarily the same, specific heats. This is an extreme case. In steady state, it is expected that the convection and diffusion of enthalpy at the boundaries will be equal:
+In this example, two fictitious gases are forced through tiny ducts (1~mm by 1~mm) that meet at a T-joint. The cross sectional areas of all the ducts are the same. Gas~1 has an initial temperature of 606.3~\si{\degree C} and a constant specific heat of 1~\si{kJ/(kg.K)}. Gas~2 has an initial temperature of 20~\si{\degree C} and a constant specific heat of 10~\si{kJ/(kg.K)}. Both gases have a molecular weight of 29~g/mol and a mass flow of $1 \times 10^{-8}$~kg/s. Typically gases of the same molecular weight have comparable, but not necessarily the same, specific heats. This is an extreme case. In steady state, it is expected that the convection and diffusion of enthalpy at the boundaries will be equal:
 \be \int h_{\rm s} \, \rho \bu \cdot \d\bS = \sum_\alpha \int h_{s,\alpha} \, \rho D_\alpha \nabla Z_\alpha \cdot \d\bS \ee
 where $Z_\alpha$ is the mass fraction of species $\alpha$.  The plot at left in Fig.~\ref{energy_budget_dns} shows the convective and diffusive enthalpy fluxes at steady state. The quantities are of opposite sign because both quantities are evaluated as source terms in the energy budget.
 
@@ -1724,14 +1724,14 @@ integral function (order 3) of optical depth, $\tau$. The exact solutions and FD
 \label{hot_spheres}
 
 This case tests the calculation of the radiation heat flux from a collection of hot objects. Within two
-completely open volumes that are 1~m on a side, hot spheres with a diameter of 1~cm and temperature of 500~$^\circ$C are
+completely open volumes that are 1~m on a side, hot spheres with a diameter of 1~cm and temperature of 500~\si{\degree C} are
 situated within a smaller volume that is 0.5~m on a side. One of the open volumes contains 10 spheres, the other contains
 50,000. The simulation lasts for
 10~s. In the first volume, the heat loss is just the sum
 of the areas of the spheres multiplied by $\sigma T^4$ (emissivity is specified as unity in this case). See
 the upper left plot in Fig.~\ref{hot_spheres_plot}. In the second
 volume, the region is densely packed and it is expected that the collection of spheres will radiate like a solid cube  that is
-0.5~m on a side and whose temperature is 500~$^\circ$C. This is just under 30~kW, as
+0.5~m on a side and whose temperature is 500~\si{\degree C}. This is just under 30~kW, as
 shown in the upper right of Fig.~\ref{hot_spheres_plot}. The plot in the lower left of Fig.~\ref{hot_spheres_plot}
 shows the incident heat flux to a gauge positioned at the center of the densely packed volume.
 It is expected that this gauge would register a heat flux of
@@ -1764,7 +1764,7 @@ where $m$ and $c_p$ are the total mass and specific heat of the droplets, respec
 \be
 \overline{T}_{\rm p} = T_0 + \frac{\Delta t \, \dot{Q}_{\rm r} }{m \, c_p}
 \ee
-By setting $T_0=0$~$^\circ$C, $\Delta t =0.01$~s, $m =0.01$~kg, and $c_p =1.0$~kJ/(kg$\cdot$K), the final value of $\overline{T}_{\rm p}$ should equal $\dot{Q}_{\rm r}$. Figure~\ref{droplet_absorption_figures} shows comparisons of the predicted average droplet temperature and the expected value in Cartesian and cylindrical coordinate systems.
+By setting $T_0=0$~\si{\degree C}, $\Delta t =0.01$~s, $m =0.01$~kg, and $c_p =1.0$~kJ/(kg$\cdot$K), the final value of $\overline{T}_{\rm p}$ should equal $\dot{Q}_{\rm r}$. Figure~\ref{droplet_absorption_figures} shows comparisons of the predicted average droplet temperature and the expected value in Cartesian and cylindrical coordinate systems.
 
 \begin{figure}[h]
 \noindent
@@ -1800,7 +1800,7 @@ Tests similar to those in Section~\ref{droplet_absorption} are performed for sol
 \section{Radiation Attenuation by Particles (\texorpdfstring{{\bf part\_attenuation}}{part\_attenuation}) }
 \label{part_attenuation}
 
-This case is a qualitative assessment of the attenuation of thermal radiation by four different types of particles. In each case, the radiation is computed inside a one meter cube with one hot and five cold walls. The radiative heat flux is monitored on the wall that is opposite the hot wall. In each case, 10~g of non-evaporating, monodisperse, 100~$\mu$m particles with a density of 1,000~kg/m$^3$ are placed inside the cube. Five different cases are computed. The reference case contains no particles. The four other cases contain transparent particles, water droplets, fuel droplets, and opaque particles. Different methods to specify the refractive index are tested. For water and fuel droplets, the FDS internal tables are used. For transparent particles, the refractive index is $\hbox{m} = 1.0+0\,i$. For opaque particles, the refractive index is $\hbox{m} = 1.5+0.5 \,i$. The resulting heat fluxes are plotted in Fig.~\ref{part_attenuation_figure}. The transparent particles do not attenuate the radiation, and the relatively opaque particles give the highest attenuation. The heat fluxes through water and fuel droplets fall between the two extremes.
+This case is a qualitative assessment of the attenuation of thermal radiation by four different types of particles. In each case, the radiation is computed inside a one meter cube with one hot and five cold walls. The radiative heat flux is monitored on the wall that is opposite the hot wall. In each case, 10~g of non-evaporating, monodisperse, 100~$\mu$m particles with a density of 1,000~\si{kg/m^3} are placed inside the cube. Five different cases are computed. The reference case contains no particles. The four other cases contain transparent particles, water droplets, fuel droplets, and opaque particles. Different methods to specify the refractive index are tested. For water and fuel droplets, the FDS internal tables are used. For transparent particles, the refractive index is $\hbox{m} = 1.0+0\,i$. For opaque particles, the refractive index is $\hbox{m} = 1.5+0.5 \,i$. The resulting heat fluxes are plotted in Fig.~\ref{part_attenuation_figure}. The transparent particles do not attenuate the radiation, and the relatively opaque particles give the highest attenuation. The heat fluxes through water and fuel droplets fall between the two extremes.
 
 This case also demonstrates the finite convergence rate of the radiation calculations with scattering media. As can be seen, the radiation field is not converged to its final value instantaneously because there are no internal iterations in the radiation solver. As a result, a slight increase of the heat flux is observed after 0.5 s, which is the third time step, i.e. the second call of the radiation solver. Further, smaller increase can be seen three steps later. In real applications with small time steps, the time lag of the radiation field is small.
 
@@ -1818,7 +1818,7 @@ This case also demonstrates the finite convergence rate of the radiation calcula
 \section{Transient Thermocouple Response (\texorpdfstring{{\bf TC\_heating}}{TC\_heating}) }
 \label{TC_heating}
 
-A thermocouple is placed in the center of a 1~m cube with walls set to 600~$^\circ$C and gas temperature set to 20~$^\circ$C.
+A thermocouple is placed in the center of a 1~m cube with walls set to 600~\si{\degree C} and gas temperature set to 20~\si{\degree C}.
 The heat transfer coefficient is set to zero to eliminate convective heating. The gas temperature remains at 20~$^{\circ}$C because there is no convective heat transfer from the walls.
 The thermocouple heats up according to the equation:
 \be
@@ -1839,7 +1839,7 @@ Figure~\ref{TC_heating_plot} displays the thermocouple response compared to the 
 \begin{center}
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/TC_heating}
 \end{center}
-\caption[Transient thermocouple heating]{Increasing temperature of a thermocouple surrounded by walls at 600~$^\circ$C.}
+\caption[Transient thermocouple heating]{Increasing temperature of a thermocouple surrounded by walls at 600~\si{\degree C}.}
 \label{TC_heating_plot}
 \end{figure}
 
@@ -1853,7 +1853,7 @@ Figure~\ref{TC_heating_plot} displays the thermocouple response compared to the 
 
 This case tests the radiation solver using the simple thermocouple model in FDS.
 Suppose that a small, thermally thin metal bead is at the center of a 1~m cube. The left half of the cube boundary surface is
-at 20~$^\circ$C, the right half at 500~$^\circ$C. Assume that there is no convective heat transfer to the bead; only radiation. Assume everything has an emissivity of 1. The
+at 20~\si{\degree C}, the right half at 500~\si{\degree C}. Assume that there is no convective heat transfer to the bead; only radiation. Assume everything has an emissivity of 1. The
 bead temperature ought to rise to a steady value of
 \be
    T_{\hbox{\tiny TC}} = \left( \frac{T_1^4 + T_2^4}{2} \right)^\frac{1}{4} -273.15 = \left( \frac{293.15^4 + 773.15^4}{2} \right)^\frac{1}{4} -273.15 = 380.3 \quad ^\circ \hbox{C}
@@ -1869,7 +1869,7 @@ This is essentially what is plotted in Fig.~\ref{TC_view_factor_plot}, compared 
 \begin{center}
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/TC_view_factor}
 \end{center}
-\caption[Radiation/thermocouple test case]{Temperature of a thermocouple equidistant from walls at temperatures of 20~$^\circ$C and 500~$^\circ$C.}
+\caption[Radiation/thermocouple test case]{Temperature of a thermocouple equidistant from walls at temperatures of 20~\si{\degree C} and 500~\si{\degree C}.}
 \label{TC_view_factor_plot}
 \end{figure}
 
@@ -1878,7 +1878,7 @@ This is essentially what is plotted in Fig.~\ref{TC_view_factor_plot}, compared 
 \section{Radiation Shield (\texorpdfstring{{\bf radiation\_shield}}{radiation\_shield}) }
 \label{radiation_shield}
 
-A lead radiation shield with a thickness of 0.1~mm is placed between two infinitely wide parallel plates at 500~$^\circ$C and 20~$^\circ$C.
+A lead radiation shield with a thickness of 0.1~mm is placed between two infinitely wide parallel plates at 500~\si{\degree C} and 20~\si{\degree C}.
 The computational domain has dimensions of 10~m by 0.1~m by 1~m. The sides of the domain are assumed to be symmetry planes.
 The emissivity, $\varepsilon_{3}$, of the lead shield is 0.48 on both sides.  At 400~s, the shield is removed.
 Assuming that there is no convective heat transfer and that the emissivity of the hot and cold plates is 1,
@@ -2130,7 +2130,7 @@ with the following reaction input parameters:
 \vskip8pt
 $\alpha$ is defined as [$\mathrm{C_3H_8}$ $\mathrm{O_2}$ $\mathrm{CO}$ $\mathrm{H_2O}$ $\mathrm{CO_2}$].
 \end{center}
-Equation (\ref{eq:2step_propane_rev}) includes the decomposition of $\mathrm{CO_2}$ into $\mathrm{CO}$ and $\mathrm{O_2}$ whereas the forward-only two-step mechanism, Eq.~(\ref{eq:2step_propane}), does not. This reverse reaction mechanism is represented by three separate reactions on the \textct{REAC} line in an FDS input file as indicated by rows $\mathrm{a}$, $\mathrm{b}$ and $\mathrm{c}$ in the preceding table. Species evolutions for the 2 step reverse reaction are shown in Fig.~\ref{fig:Arrhenius_175Order_2stepR}. In the forward CO step, (row $\mathrm{b}$ in the two prior tables), we see that water vapor contributes to the reaction rate based on its local concentration despite not being a participant in the reaction.
+Equations (\ref{eq:2step_propane_rev_a})-(\ref{eq:2step_propane_rev_c}) includes the decomposition of $\mathrm{CO_2}$ into $\mathrm{CO}$ and $\mathrm{O_2}$ whereas the forward-only two-step mechanism, Eqs.~(\ref{eq:2step_propane_a})-(\ref{eq:2step_propane_b}), does not. This reverse reaction mechanism is represented by three separate reactions on the \textct{REAC} line in an FDS input file as indicated by rows $\mathrm{a}$, $\mathrm{b}$ and $\mathrm{c}$ in the preceding table. Species evolutions for the 2 step reverse reaction are shown in Fig.~\ref{fig:Arrhenius_175Order_2stepR}. In the forward CO step, (row $\mathrm{b}$ in the two prior tables), we see that water vapor contributes to the reaction rate based on its local concentration despite not being a participant in the reaction.
 \vskip8pt
 Note: the values of $E$ and $A$ used in these examples are not necessarily representative of the chemical reactions presented. When using finite rate chemistry consult experimental data or literature for appropriate reaction parameters.
 
@@ -2202,7 +2202,7 @@ Y_{\rm O} &= 1- \frac{f}{f_{\rm stoich}} \\
 Y_{\rm P} &= \frac{f}{f_{\rm stoich}}
 \end{align}
 Fig.~\ref{fig:burke_schumann_spec} demonstrates that the predicted final fuel, oxidizer, and product mass fractions obey the ideal state relations.
-\begin{figure}[h!]
+\begin{figure}
 \begin{center}
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/burke_schumann_spec}
 \end{center}
@@ -2213,8 +2213,8 @@ The state relation for temperature is given by:
 \begin{equation}\label{eq:mix_relate_temp}
 T = T_0 +  (f-Y_{\rm F}(f)) \, \frac{\Delta h_{\rm c}}{c_{v}}
 \end{equation}
-where the subscript I refers to the inlet condition. The specific heat, $c_p$, for each species is set to 1~kJ/(kg$\cdot$K) as in the analysis by Turns~\cite{Turns:1996}. The enthalpy of formation of each of the species except for the fuel is set to zero, such that the heat of combustion of the reaction equals the heat of formation of the fuel. To obtain true adiabatic conditions in FDS, these cases were conducted inside a constant-volume reactor, so Eq.~(\ref{eq:mix_relate_temp}) is based on $c_v$ rather than $c_p$. We use the  following relationship $c_v = c_p - R/W$ to determine $c_v$. The molecular weight of the species were not assumed to be uniform; thus, the average molecular weight and $c_v$ vary with the mixture fraction. As a result, the traditional linear temperature profile is not expected.
-\begin{figure}[h!]
+The specific heat, $c_p$, for each species is set to 1~\si{kJ/(kg.K)} as in the analysis by Turns~\cite{Turns:1996}. The enthalpy of formation of each of the species except for the fuel is set to zero, such that the heat of combustion of the reaction equals the heat of formation of the fuel. To obtain true adiabatic conditions in FDS, these cases were conducted inside a constant-volume reactor, so Eq.~(\ref{eq:mix_relate_temp}) is based on $c_v$ rather than $c_p$. We use the  following relationship $c_v = c_p - R/W$ to determine $c_v$. The molecular weight of the species were not assumed to be uniform; thus, the average molecular weight and $c_v$ vary with the mixture fraction. As a result, the traditional linear temperature profile is not expected.  The FDS result is shown in Fig.~\ref{fig:burke_schumann_temp}.
+\begin{figure}
 \begin{center}
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/burke_schumann_temp}
 \end{center}
@@ -2249,7 +2249,7 @@ For the same initial conditions, FDS predictions for burning or extinction (clos
 \section{Ideal and Non-Ideal Heat of Combustion ({\bf extinction})}
 \label{HoC}
 
-When using a non-predefined fuel, one may have heat of combustion data representing complete combustion but species yield data representing typical large scale conditions.  When using simple chemistry, the input keyword \textct{IDEAL=.TRUE.} on the \textct{REAC} line will have FDS reduce the heat of combustion to account for any minor products of combustion (e.g. CO and H$_2$O).  This is done by removing energy from the heat of combustion to account for carbon that goes to CO and soot rather than CO$_2$ and for hydrogen that goes to soot rather than H$_2$O.  A custom fuel (methane) is defined with CO and soot yields of 0.1, a heat of combustion of 50000 kJ/kg, and a 40 kW fire.  Two input files are created, one with the \textct{HEAT\_OF\_COMBUSTION} defined with \textct{IDEAL=.TRUE.} and the second with \textct{IDEAL=.FALSE.}.  In the \textct{IDEAL=.FALSE.} case where the heat of combustion is not adjusted we expect a fuel mass flow rate of 0.0008 \si{kg/(m$^2$.s)}.  With the heat of combustion adjusted we expect a higher fuel mass flow rate of 0.000877 \si{kg/(m$^2$.s)}, as shown in Fig.~\ref{fig:HoC}.
+When using a non-predefined fuel, one may have heat of combustion data representing complete combustion but species yield data representing typical large scale conditions.  When using simple chemistry, the input keyword \textct{IDEAL=.TRUE.} on the \textct{REAC} line will have FDS reduce the heat of combustion to account for any minor products of combustion (e.g. CO and H$_2$O).  This is done by removing energy from the heat of combustion to account for carbon that goes to CO and soot rather than CO$_2$ and for hydrogen that goes to soot rather than H$_2$O.  A custom fuel (methane) is defined with CO and soot yields of 0.1, a heat of combustion of 50000 kJ/kg, and a 40 kW fire.  Two input files are created, one with the \textct{HEAT\_OF\_COMBUSTION} defined with \textct{IDEAL=.TRUE.} and the second with \textct{IDEAL=.FALSE.}.  In the \textct{IDEAL=.FALSE.} case where the heat of combustion is not adjusted we expect a fuel mass flow rate of 0.0008 \si{kg/(m^2.s)}.  With the heat of combustion adjusted we expect a higher fuel mass flow rate of 0.000877 \si{kg/(m^2.s)}, as shown in Fig.~\ref{fig:HoC}.
 \begin{figure}[h!]
 \begin{tabular*}{\textwidth}{lr}
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/HoC_Ideal} &
@@ -2518,14 +2518,14 @@ devices.
 \section{Heat Conduction Through a Solid Slab (\texorpdfstring{{\bf heat\_conduction}}{heat\_conduction})}
 
 Analytical solutions of transient, one-dimensional heat conduction through a slab can be found in Refs.~\cite{Drysdale:1} and \cite{Carslaw:1}. Four
-cases are examined here. In each, a slab of thickness $L=0.1$~m is exposed on one face to an air temperature of $T_g=120$~$^\circ$C. The other face
+cases are examined here. In each, a slab of thickness $L=0.1$~m is exposed on one face to an air temperature of $T_g=120$~\si{\degree C}. The other face
 is insulated (adiabatic). The convective heat transfer from the gas to the slab is $\dq_c'' = h \, (T_g - T_{\rm s})$, where $h$ is constant, and $T_{\rm s}$ is
 the slab face temperature. No thermal radiation is included.
 \begin{center}
 \begin{tabular}{|c|c|c|c|c|c|}
 \hline
 Case  &  $k$      & $\rho$       &  $c$          &   $h$         &  Bi     \\
-      & (W/m/K)   & (kg/m$^3$)   &  (kJ/kg/K)    &  (W/m$^2$/K)  &  $hL/k$ \\ \hline \hline
+      & (\si{W/(m.K)})  & (\si{kg/m^3})   &  (\si{kJ/(kg.K)})    &  (\si{W/(m^2.K)})  &  $hL/k$ \\ \hline \hline
 A     &   0.1     & 100          &  1            &  100          &  100    \\ \hline
 B     &   0.1     & 100          &  1            &  10           &  10     \\ \hline
 C     &   1.0     & 1000         &  1            &  10           &  1      \\ \hline
@@ -2554,10 +2554,10 @@ This example demonstrates the 1D heat conduction in Cartesian, cylindrical, and 
 The Cartesian solution was computed using HEATING (version~7.3), a multi-dimensional, finite-difference, general purpose heat transfer
 model~\cite{Childs}. The cylindrical and spherical solutions were computed using a commercial finite-element solver, ABAQUS.
 
-The sample of homogeneous material is initially at 0~$^\circ$C and at $t>0$ exposed to a gas at 700~$^\circ$C. A fixed heat transfer coefficient of
-10~W/m$^2$/K is assumed. The density of the material is 10,000~kg/m$^3$. The conductivity and specific heat are functions of temperature with the
-following values: $k(0)=0.10$~W/m/K, $k(200)=0.20$~W/m/K, $c(0)=1.0$~kJ/kg/K, $c(100)=1.2$~kJ/kg/K, $c(200)=1.0$~kJ/kg/K. The thickness (radius) of
-the sample is 0.01~m. In the Cartesian case, the back surface of the material is exposed to a gas at 0~$^\circ$C. In the figure below, the solid
+The sample of homogeneous material is initially at 0~\si{\degree C} and at $t>0$ exposed to a gas at 700~\si{\degree C}. A fixed heat transfer coefficient of
+10~\si{W/(m^2.K)} is assumed. The density of the material is 10,000~\si{kg/m^3}. The conductivity and specific heat are functions of temperature with the
+following values: $k(0)=0.10$~\si{W/(m.K)}, $k(200)=0.20$~\si{W/(m.K)}, $c(0)=1.0$~\si{kJ/(kg.K)}, $c(100)=1.2$~\si{kJ/(kg.K)}, $c(200)=1.0$~\si{kJ/(kg.K)}. The thickness (radius) of
+the sample is 0.01~m. In the Cartesian case, the back surface of the material is exposed to a gas at 0~\si{\degree C}. In the figure below, the solid
 lines are FDS results and the circles are the HEATING results. An example input with cylindrical geometry looks like:
 
 \begin{lstlisting}
@@ -2595,7 +2595,7 @@ lines are FDS results and the circles are the HEATING results. An example input 
 
 \section{Convective Cooling (\texorpdfstring{{\bf convective\_cooling}}{convective\_cooling})}
 
-This example tests the convective cooling algorithm. A 1~m thick solid slab that is initially at 1000~$^\circ$C is suddenly exposed to air at 0~$^\circ$C. The back of the slab is insulated. Its density is 1000~kg/m$^3$, its specific heat is 0.001~kJ/(kg$\cdot$K), its conductivity is 1~W/(m$\cdot$K), and its emissivity is zero, meaning there is no radiative loss from the surface. The convective heat transfer coefficient is 1~W/(m$^2\cdot$K). The predicted and exact temperature at the back side of the slab are displayed in Fig.~\ref{convective_cooling}.
+This example tests the convective cooling algorithm. A 1~m thick solid slab that is initially at 1000~\si{\degree C} is suddenly exposed to air at 0~\si{\degree C}. The back of the slab is insulated. Its density is 1000~\si{kg/m^3}, its specific heat is 0.001~kJ/(kg$\cdot$K), its conductivity is 1~W/(m$\cdot$K), and its emissivity is zero, meaning there is no radiative loss from the surface. The convective heat transfer coefficient is 1~W/(m$^2\cdot$K). The predicted and exact temperature at the back side of the slab are displayed in Fig.~\ref{convective_cooling}.
 
 \begin{figure}[ht]
 \noindent
@@ -2611,7 +2611,7 @@ This example tests the convective cooling algorithm. A 1~m thick solid slab that
 
 \section{Simple Thermocouple Model (\texorpdfstring{{\bf thermocouples}}{thermocouples})}
 
-This example tests the simple thermocouple model in FDS. It consists of a box whose walls and gas temperatures are fixed at 500~$^\circ$C. Inside the box are three
+This example tests the simple thermocouple model in FDS. It consists of a box whose walls and gas temperatures are fixed at 500~\si{\degree C}. Inside the box are three
 thermocouples with bead diameters of 1~mm, 2~mm, and 3~mm. Also included in the box are three ``targets'' -- small solid objects whose surfaces are assumed to be composed of
 small spheres of the same diameter as the thermocouples. Figure~\ref{thermocouples} compares the temperature rise of the objects. The thermocouple model is not compared
 with an analytical solutions. This is
@@ -2632,7 +2632,7 @@ flow conditions in different regions of the box and numerical error due to node 
 
 \section{Heat Conduction through Insulated Steel (\texorpdfstring{{\bf insulated\_steel\_x}}{insulated\_steel\_x})}
 
-In these examples, a 1~cm thick steel plate and pipe are coated on each side with 2~cm thick insulation material. The conductivity, specific heat, and density of the steel are 50~W/m/K, 0.5~kJ/kg/K, and 7500~kg/m$^3$, respectively. The corresponding values for the insulation material are 0.2~W/m/K, 1~kJ/kg/K, and 200~kg/m$^3$, respectively. The heat transfer coefficient is 10~W/m$^2$/K. The outer surface of the composite is exposed to air at 480~$^\circ$C while the inner surface is exposed to air at 20~$^\circ$C. The assemblies are heated for 10~h and the steady-state temperature profiles are shown in Fig.~\ref{insulated_steel_plate}. Neglecting thermal radiation, the heat flux through the plate is given by~\cite{Incropera:1}:
+In these examples, a 1~cm thick steel plate and pipe are coated on each side with 2~cm thick insulation material. The conductivity, specific heat, and density of the steel are 50~\si{W/(m.K)}, 0.5~\si{kJ/(kg.K)}, and 7500~\si{kg/m^3}, respectively. The corresponding values for the insulation material are 0.2~\si{W/(m.K)}, 1~\si{kJ/(kg.K)}, and 200~\si{kg/m^3}, respectively. The heat transfer coefficient is 10~\si{W/(m^2.K)}. The outer surface of the composite is exposed to air at 480~\si{\degree C} while the inner surface is exposed to air at 20~\si{\degree C}. The assemblies are heated for 10~h and the steady-state temperature profiles are shown in Fig.~\ref{insulated_steel_plate}. Neglecting thermal radiation, the heat flux through the plate is given by~\cite{Incropera:1}:
 \be
    \dot{q}'' = \frac{ T_{\hbox{\tiny hot}} - T_{\hbox{\tiny cold}} }{ \frac{1}{h} + \frac{L_{\hbox{\tiny ins}}}{k_{\hbox{\tiny ins}}} + \frac{L_{\hbox{\tiny steel}}}{k_{\hbox{\tiny steel}}} + \frac{L_{\hbox{\tiny ins}}}{k_{\hbox{\tiny ins}}} +\frac{1}{h}}
 \ee
@@ -2683,13 +2683,13 @@ described by a \textct{PART} line.
 \item The pyrolysis product can be either the fuel gas defined by the
 mixture fraction model, or an additional gas species, defined by a \textct{SPEC} line.
 \end{enumerate}
-In all cases, the wall thickness (or radius for cylindrical and spherical geometries) is 0.01~m. The material density is 360~kg/m$^3$ and the yield of gaseous
+In all cases, the wall thickness (or radius for cylindrical and spherical geometries) is 0.01~m. The material density is 360~\si{kg/m^3} and the yield of gaseous
 products for the charring cases is 0.5, i.e., half of the original mass. For Cartesian surfaces, the mass loss per unit area is
-1.8~kg/m$^2$ for charring, and 3.6~kg/m$^2$ for non-charring materials.
+1.8~\si{kg/m^2} for charring, and 3.6~\si{kg/m^2} for non-charring materials.
 For cylindrical surfaces, the volume per unit surface area is $r/2$, and thus the mass loss per unit area
-is $360(1-0.5) \times r/2$=0.9~kg/m$^2$ for charring, and 1.8~kg/m$^2$ for non-charring materials.
+is $360(1-0.5) \times r/2$=0.9~\si{kg/m^2} for charring, and 1.8~\si{kg/m^2} for non-charring materials.
 For spherical surfaces, the volume per unit surface area is $r/3$, and thus the mass loss per unit area is
-$360(1-0.5) \times r/3$=0.6~kg/m$^2$ for charring, and 1.2~kg/m$^2$ for non-charring materials.
+$360(1-0.5) \times r/3$=0.6~\si{kg/m^2} for charring, and 1.2~\si{kg/m^2} for non-charring materials.
 On the figures found on the following pages, the computed results are labeled as follows:
 \begin{description}
 \item[Expected] indicates the total mass that has pyrolyzed by the end of the simulation.
@@ -2839,7 +2839,7 @@ associated with particles in three variations.}
 
 \subsection{Burning Rate of a Small Object (\texorpdfstring{{\bf cell\_burn\_away}}{cell\_burn\_away})}
 
-In FDS, it is assumed that heat conduction and pyrolysis within solids are functions of depth only. This can be problematic in cases where entire solid obstructions burn away. In this example, a single grid cell, 4~cm on a side, is made up of a material with density $\rho_{\rm s}=50$~kg/m$^3$ and constant reaction rate, $r_{\rm s}=0.05$~s$^{-1}$. The burning rate of the single grid cell, $\dm$, is given by:
+In FDS, it is assumed that heat conduction and pyrolysis within solids are functions of depth only. This can be problematic in cases where entire solid obstructions burn away. In this example, a single grid cell, 4~cm on a side, is made up of a material with density $\rho_{\rm s}=50$~\si{kg/m^3} and constant reaction rate, $r_{\rm s}=0.05$~s$^{-1}$. The burning rate of the single grid cell, $\dm$, is given by:
 \be
    \dm = \delta \, \rho_{\rm s} \, r_{\rm s} \, A  \label{br}
 \ee
@@ -2847,7 +2847,7 @@ where $\delta$ is the thickness of the surface layer and $A$ is the area of the 
 \be
    \dm = m \, r_{\rm s} = m_0 \, r_{\rm s} \, {\rm e}^{-r_{\rm s} t}
 \ee
-Figure~\ref{cell_burn_away} displays the computed and analytical burning rate. Note that the burning rate is proportional to the mass and the mass decays exponentially to zero in this case because we have specified the {\ct THICKNESS} to be $V/A$ and set the {\ct BULK\_DENSITY} to be 50~kg/m$^3$ on the {\ct OBST} line defining the single solid grid cell.
+Figure~\ref{cell_burn_away} displays the computed and analytical burning rate. Note that the burning rate is proportional to the mass and the mass decays exponentially to zero in this case because we have specified the {\ct THICKNESS} to be $V/A$ and set the {\ct BULK\_DENSITY} to be 50~\si{kg/m^3} on the {\ct OBST} line defining the single solid grid cell.
 \begin{figure}[ht]
 \begin{center}
 \includegraphics[width=3.5in]{SCRIPT_FIGURES/cell_burn_away}
@@ -2906,7 +2906,7 @@ thicknesses over the time of the simulation.
 \hline
 Case     & \multicolumn{2}{|c|}{Reactant}  &  \multicolumn{3}{|c|}{Inert} & Product & \multicolumn{4}{|c|}{Layer} \\ \hline
          & $\rho_1$  & $Y_1$ & $\rho_2$  & $Y_2$ & Allow        & $\rho_3$  & $\rho_{\rm s}$(0) & $\rho_{\rm s}$(end) & $\Delta$(0) & $\Delta$(end) \\
-         & (kg/m$^3$)&       & (kg/m$^3$)&       & shrink/swell & (kg/m$^3$)& (kg/m$^3$)  & (kg/m$^3$)    & (m)         & (m) \\ \hline
+         & (\si{kg/m^3})&       & (\si{kg/m^3})&       & shrink/swell & (\si{kg/m^3})& (\si{kg/m^3})  & (\si{kg/m^3})    & (m)         & (m) \\ \hline
 
 Shrink 1 & 500 & 1   & 0   & 0   & T   & 1000   & 500 & 1000   & 0.001  & 0.0005 \\
 Shrink 2 & 500 &0.9  &500  &0.1  &T &1125 &500  &1000 &0.001   &0.0005 \\
@@ -2947,20 +2947,20 @@ case means that material A disappears in exactly 5~s. This is achieved by settin
     A \; \exp \left(-\frac{E}{RT_{\rm s}}\right)
 \ee
 The density and conductivity of both materials are
-30~kg/m$^3$ and 10~W/m/K, respectively. The emissivity of the front and back is 1.  The specific heat of material A changes from
-1.0~kJ/kg/K to 0.1~kJ/kg/K above 80~$^\circ$C, while the specific heat of material B is constant at 1.0~kJ/kg/K. The slab is 1~mm thick.
+30~\si{kg/m^3} and 10~\si{W/(m.K)}, respectively. The emissivity of the front and back is 1.  The specific heat of material A changes from
+1.0~\si{kJ/(kg.K)} to 0.1~\si{kJ/(kg.K)} above 80~\si{\degree C}, while the specific heat of material B is constant at 1.0~\si{kJ/(kg.K)}. The slab is 1~mm thick.
 
 \begin{figure}[ht]
 \begin{center}
 \includegraphics[width=3.5in]{SCRIPT_FIGURES/enthalpy}
 \end{center}
 \caption[The {\bf enthalpy} test case]{Testing the enthalpy of solid materials.}
-\label{enthalpy}
+\label{fig:solid_phase_enthalpy}
 \end{figure}
 
 \noindent
 Note that the ``analytical'' solution is actually a simple numerical integration of the equations above with a small time step to ensure accuracy.
-This example tests a number of features, including the reaction rate, mass weighted specific heats, and radiation boundary conditions. Note that the
+This example (Fig.~\ref{fig:solid_phase_enthalpy}) tests a number of features, including the reaction rate, mass weighted specific heats, and radiation boundary conditions. Note that the
 convective heat transfer has been turned off, and the correct steady-state temperature is calculated by FDS.
 
 \clearpage
@@ -2996,9 +2996,9 @@ transcendental equation, given in \cite{Carslaw:1}.
 In the test case, the thickness of the liquid layer cannot be infinite. For practical purposes, a 50 cm thick layer was found to be sufficient.
 The fixed-temperature boundary condition, which is formally not available for the condensed-phase heat transfer solver in FDS,
 is implemented by assuming that the gas temperature is $T_0$ with a very high heat convection coefficient.
-For material properties, we choose $\rho_{\rm s} = \rho_l =1,000$~kg/m$^3$,
-$k_{\rm s} = k_l = 2$~W/m/K, $c_{\rm s} = c_l = 2$~kJ/kg/K, $H_{r,\alpha\beta}=300$~kJ/kg, $T_f = 0$~$^\circ$C, $T_i = +15$~$^\circ$C,
-and $T_0 = -15$~$^\circ$C, which leads to a {\em Stefan number}
+For material properties, we choose $\rho_{\rm s} = \rho_l =1,000$~\si{kg/m^3},
+$k_{\rm s} = k_l = 2$~\si{W/(m.K)}, $c_{\rm s} = c_l = 2$~\si{kJ/(kg.K)}, $H_{r,\alpha\beta}=300$~kJ/kg, $T_f = 0$~\si{\degree C}, $T_i = +15$~\si{\degree C},
+and $T_0 = -15$~\si{\degree C}, which leads to a {\em Stefan number}
 \be
 \hbox{St}=\frac{c_{\rm s}\left(T_i - T_0\right)}{H_{r,\alpha\beta}} = 0.1
 \ee
@@ -3006,7 +3006,7 @@ and $\lambda = 0.189$.
 
 Analytical and simulated results are compared in Fig.~\ref{pcm_slab}. The plot on the left shows the position of the phase boundary.
 From the FDS results, two estimates of $x_f$ are determined because in the numerical solution, the boundary of the two phases is not perfectly sharp.
-``FDS min'' is the largest value of $x$ for which $\rho_{\rm s} > 990$~kg/m$^3$ and ``FDS max'' is the largest $x$ for which $\rho_{\rm s} > 0$~kg/m$^3$. The plot on the right
+``FDS min'' is the largest value of $x$ for which $\rho_{\rm s} > 990$~\si{kg/m^3} and ``FDS max'' is the largest $x$ for which $\rho_{\rm s} > 0$~\si{kg/m^3}. The plot on the right
 shows temperatures at three depths from the surface: 1~cm, 5~cm, and 10~cm.
 \begin{figure}[ht!]
 \noindent
@@ -3025,10 +3025,8 @@ shows temperatures at three depths from the surface: 1~cm, 5~cm, and 10~cm.
 \section{A Simple Two-Step Pyrolysis Example (\texorpdfstring{{\bf two\_step\_solid\_reaction}}{two\_step\_solid\_reaction})}
 
 Before considering actual experimental measurements, it is necessary to check the accuracy of the ordinary differential
-equation solver within FDS.
-Consider  the simplified set  of ordinary  differential equations  describing the mass
-fraction of  three  components of  a  solid material  undergoing thermal
-degradation:
+equation solver within FDS. Consider a simplified set  of ordinary  differential equations  describing the mass
+fraction of three components of a solid material  undergoing thermal degradation:
 \begin{eqnarray}
     \frac{\d Y_a}{\d t} &=&  -K_{ab} Y_a \nonumber  \\
     \frac{\d Y_b}{\d t} &=&   K_{ab} Y_a  -  K_{bc}  Y_b  \\
@@ -3042,14 +3040,14 @@ analytical solution is:
     Y_b(t)    &=&    \frac{K_{ab}}{K_{bc}-K_{ab}} \exp(-K_{ab} t)  - \exp(-K_{bc} t) \\
     Y_c(t)    &=&    \left[   K_{ab}    (1-\exp(-K_{bc} t) )    +  K_{bc}*(\exp(-K_{ab} t) -1) \right] / (K_{ab}-K_{bc})
 \end{eqnarray}
-The analytical and  numerical solution for the parameters $K_{ab} = 0.389$ and $K_{bc} = 0.262$ are shown here:
+The analytical and  numerical solution for the parameters $K_{ab} = 0.389$ and $K_{bc} = 0.262$ are shown in Fig.~\ref{fig:two_step_solid_reaction}:
 
 \begin{figure}[ht]
 \begin{center}
 \includegraphics[width=3.5in]{SCRIPT_FIGURES/two_step_solid_reaction}
 \end{center}
 \caption[The {\bf two\_step\_solid\_reaction} test case]{Comparison of a two-step solid pyrolysis calculation with an analytical solution.}
-\label{two_step_solid_reaction}
+\label{fig:two_step_solid_reaction}
 \end{figure}
 
 
@@ -3127,7 +3125,7 @@ The results of PCFC measurements for several multi-conductor control cables are 
 For each cable, the insulation and jacket material were tested separately, and at least three replicates were performed for each
 (only one replicate is shown for each sample). The samples, weighing approximately 5~mg, were cut from the cable jackets and conductor
 insulation material of each of the cables. These samples were pyrolyzed in the PCFC at a rate of 1~K/s
-from 100~$^\circ$C to 600~$^\circ$C in a nitrogen atmosphere and the effluent combusted at 900~$^\circ$C in a mixture consisting of 20~\% O$_2$
+from 100~\si{\degree C} to 600~\si{\degree C} in a nitrogen atmosphere and the effluent combusted at 900~\si{\degree C} in a mixture consisting of 20~\% O$_2$
 and 80~\% N$_2$. The resulting curve shows the heat release rate of the sample as it was heated, normalized by the mass of the original sample.
 There are usually one, two or three noticeable peaks in the curve, corresponding to temperatures where a significant decomposition reaction occurs.
 Each peak can be characterized by the maximum value of the heat release rate~($\dot{q}_{p,i}$), the temperature ($T_{p,i}$), and the relative fraction of the original sample mass that undergoes this particular reaction ($Y_{0,i}$). The area under the curve
@@ -3191,7 +3189,7 @@ reaction is given by:
 \end{lstlisting}
 
 \noindent Only the relevant parameters are shown. The other parameters are not relevant in this
-exercise. Note that \textct{REFERENCE\_TEMPERATURE} is $T_{p,i}$, but in units of $^\circ$C. \textct{REFERENCE\_RATE} is actually
+exercise. Note that \textct{REFERENCE\_TEMPERATURE} is $T_{p,i}$, but in units of \si{\degree C}. \textct{REFERENCE\_RATE} is actually
 $r_{p,i}/Y_{0,i}$, in units of s$^{-1}$. \textct{HEATING\_RATE} is $\beta$ in units of K/min.
 \textct{NU\_RESIDUE} is $\nu_r$ and \textct{NU\_FUEL} is ($1-\nu_r$).
 Table~\ref{cable_parameters} lists all of the kinetic parameters for the cable insulation and jacket
@@ -3204,13 +3202,13 @@ meaning in their own.
 \begin{table}[ht]
 \begin{center}
 \caption[Parameters for kinetic constants for cable materials]{Parameters used to derive the kinetic constants for cable materials. The heating rate for both is
-60~$^\circ$C/min.}
+60~\si{\degree C}/min.}
 \label{cable_parameters}
 \begin{tabular}{|l||c|c||c|c|c|}
 \hline
 Parameter                       & \multicolumn{2}{|c|}{Insulation, $\nu_r$=0.06 }  &  \multicolumn{3}{|c|}{Jacket, $\nu_r$=0.49} \\ \cline{2-6}
                                 & 1             & 2                 &  1        & 2         & 3              \\ \hline \hline
-$T_{p,i}$ ($^\circ$C)           & 355           & 485               &  300      & 345       & 450            \\ \hline
+$T_{p,i}$ (\si{\degree C})           & 355           & 485               &  300      & 345       & 450            \\ \hline
 $r_{p,i}/Y_{0,i}$ (s$^{-1}$)    & 0.0384        & 0.2426            &  0.0064   & 0.3500    & 0.0156         \\ \hline
 \end{tabular}
 \end{center}
@@ -3222,9 +3220,9 @@ $r_{p,i}/Y_{0,i}$ (s$^{-1}$)    & 0.0384        & 0.2426            &  0.0064   
 
 This is an example of a comparison of a candidate solid phase model with thermogravimetric analysis (TGA) data. The sample cases
 called {\bf birch\_tga\_1step\_2} and {\bf birch\_tga\_1step\_20} simulate two standard TGA experiments in which small samples of birch wood are heated up slowly at constant
-rates of 2~$^\circ$C/min and 20~$^\circ$C/min, respectively. The model of the wood only involves one reaction that converts virgin wood to char and fuel gases. There is
+rates of 2~\si{\degree C}/min and 20~\si{\degree C}/min, respectively. The model of the wood only involves one reaction that converts virgin wood to char and fuel gases. There is
 also a reaction in the simulation that does nothing more than evaporate the small amount of moisture in the wood. This evaporation is evident in
-Fig.~\ref{fig_birch_tga} near the temperature of 100~$^\circ$C.
+Fig.~\ref{fig_birch_tga} near the temperature of 100~\si{\degree C}.
 
 \begin{figure}[ht]
    \begin{center}
@@ -3248,7 +3246,7 @@ The {\bf fluid\_part\_mom} cases test accuracy, stability, and momentum conserva
 
 We set up three separate tests, one for each coordinate direction.  These are labeled \_x, \_y, and \_z in the verification directory.  We consider a duct 1 m $\times$ 1 m in the vertical and spanwise directions and 10 m in the streamwise direction.  The boundary conditions are periodic in the streamwise direction and free slip walls along the inside of the duct. The fluid grid is 40 $\times$ 4 $\times$ 4 for the x case; the y and z cases use analogous grids.  The fluid velocity is initialized to be 10 m/s in the streamwise direction.  A monodisperse distribution of 1,000 particles is initialized with zero velocity and random positions in the first cubic meter of the duct.  Gravity is set to zero.
 
-As the case proceeds momentum is exchanged between the fluid and the particles.  The momenta relax toward equilibrium.  The results for all three tests are shown in Fig.~\ref{fig_fluid_part_mom}.  On the left, the green symbols represent the total momentum of the system, which, as can be seen, is conserved.  The fluid (blue) and the particle (red) momenta are closely following the analytical solution (solid lines) which is the basis of the scheme.  The plot on the right shows the fluid (blue) and particle (red) velocities compared to the system equilibrium velocity (green dashed line).  By construction of the method, both the fluid and the particle velocities are approaching the equilibrium velocity at long times.
+As the case proceeds momentum is exchanged between the fluid and the particles.  The momenta relax toward equilibrium.  The results for all three tests are shown in Fig.~\ref{fig_fluid_part_mom}.  On the top, the green symbols represent the total momentum of the system, which, as can be seen, is conserved.  The fluid (blue) and the particle (red) momenta are closely following the analytical solution (solid lines) which is the basis of the scheme.  The plot on the bottom shows the fluid (blue) and particle (red) velocities compared to the system equilibrium velocity (green dashed line).  By construction of the method, both the fluid and the particle velocities are approaching the equilibrium velocity at long times.
 
 \begin{figure}[h]
 \begin{center}
@@ -3331,7 +3329,7 @@ F & 150 & 1600 \tabularnewline
 
 The pressure drop test cases consider a 1 m wide by 1 m tall by 2 m long channel with a 2 m/s fixed velocity boundary condition on one end, an \textct{OPEN} boundary condition on the other end, and \textct{FREE\_SLIP} on the y- and z-faces.  Three channels are stacked vertically (each with its own \textct{MESH}, and a plane of particles is placed across each channel at 1 m.  The particles are 0.01 m in diameter and 10 particles are placed per cell.  A \textct{USER\_DRAG\_COEFFICIENT} of 5, 10, and 20 is set for the particles in the channels.  According to
 \be \Delta P=\frac{1}{2} \rho \frac{\sum \, C_{D} \, \pi \, r_{d}^{2}} {A} \ee
-where A$_{cx}$ is the 1 m$^2$ cross-sectional area, the pressure drops in each sub channel are 3.77, 7.54, and 15.1~Pa.  Comparisons of computed and analytical results are shown in Fig.~\ref{particle_drag_plots}. The pressure drop converges to the analytical solution as the time step decreases.
+where A$_{cx}$ is the 1 m$^2$ cross-sectional area, the pressure drops in each sub channel are 3.77~Pa, 7.54~Pa, and 15.1~Pa.  Comparisons of computed and analytical results are shown in Fig.~\ref{pressure_drop_plots}. The pressure drop converges to the analytical solution as the time step decreases.
 
 \begin{figure}[ht]
 \noindent
@@ -3382,14 +3380,14 @@ the solution below and equivalent definition of $K$ for a droplet is found.
     K \equiv \frac{3 \rho_a C_d}{4 \rho_d D_d}
 \ee
 The terminal velocity case is run over several time steps. The precise configuration of the scenario is detailed in the table below.
-The $L_\infty$ error of the terminal velocity and position are computed and plotted for each time step.
+The $L_\infty$ (maximum) error of the terminal velocity and position are computed and plotted for each time step.
 \begin{center}
 \begin{tabular}{|r|c|l|}
 \hline
 Drag coefficient of droplet & $C_d$ & 1 \\
 Diameter of droplet & $D_d$ & 10~mm \\
 Gravitational acceleration & $g$ & 9.8~m/s$^2$ \\
-Droplet fluid density & $\rho_d$ & 1,000~kg/m$^3$ \\
+Droplet fluid density & $\rho_d$ & 1000~\si{kg/m^3} \\
 \hline
 \end{tabular}
 \end{center}
@@ -3453,7 +3451,7 @@ There are no known solutions of the drag equations in multiple dimensions. Howev
 %   &\Downarrow \\
 %   \ddot{x} = -K \dot{x}^2 \quad &; \quad \ddot{y} = -K \dot{y} \dot{x} - g
 %\end{align*}
-To ensure that the flat fire assumption is valid, the following ICs are used: $x(0) = 0$, $\dot{x}(0) = u(0) = V_0$, $z(0) = h$, $\dot{z}(0) = w(0) = 0$. The exact solution to this system is below.
+To ensure that the flat fire assumption is valid, the following ICs are used: $x(0) = 0$, $\dot{x}(0) = u(0) = V_0$, $z(0) = h$, $\dot{z}(0) = w(0) = 0$. The exact solution to this system is given below.
 \be
     x = \frac{\text{log}(V_0 K t + 1)}{K} \quad ; \quad
     z = h + \frac{g \text{log}(V_0 K t + 1)}{2 (V_0 K)^2} - \frac{g t^2}{4} - \frac{g t}{2 V_0 K} \quad ; \quad
@@ -3469,7 +3467,7 @@ The following case was run in FDS and compared against the approximate solution:
 Drag coefficient of droplet & $C_d$ & 0.2 \\
 Diameter of droplet & $D_d$ & 5~mm \\
 Gravitational acceleration & $g$ & 9.8~m/s$^2$ \\
-Droplet fluid density & $\rho_d$ & 1,000~kg/m$^3$ \\
+Droplet fluid density & $\rho_d$ & 1000~\si{kg/m^3} \\
 Starting $x$-velocity & $V_0$ & 400~m/s \\
 \hline
 \end{tabular}
@@ -3517,7 +3515,7 @@ units of kPa and m$^3$, respectively.
 \subsection{Case 1}
 
 In the first case, the dimensions of the box are 1~m on a side, the initial
-air temperature is 200~$^\circ$C, the median volumetric diameter of the droplets is 200~$\mu$m, the water temperature is 20~$^\circ$C, and the total
+air temperature is 200~\si{\degree C}, the median volumetric diameter of the droplets is 200~$\mu$m, the water temperature is 20~\si{\degree C}, and the total
 mass of water droplets is 0.01~kg. The initial mass fraction of water vapor is 0.
 It is expected that the droplets will all evaporate within about 10~s.
 Figure~\ref{water_evaporation_1_plots} displays
@@ -3541,9 +3539,8 @@ The solid horizontal lines denote the expected steady-state values.
 \subsection{Case 2}
 
 In the second case, the dimensions of the box are 40~cm on a side, and the initial
-air temperature is 500~$^\circ$C. There is only one fictitiously large water droplet in the box whose diameter is 10~cm and whose temperature is 20~$^\circ$C.
-The initial mass fraction of water vapor is 0. It is expected that the water will evaporate until the air in the box is saturated. The analytical solution for the stationary state is derived
-from the first law of thermodynamics and the Clausius-Clapeyron equation by assuming that the liquid water temperature is equal to air temperature at the steady state.
+air temperature is 500~\si{\degree C}. There is only one fictitiously large water droplet in the box whose diameter is 10~cm and whose temperature is 20~\si{\degree C}.
+The initial mass fraction of water vapor is 0. It is expected that the water will evaporate until the air in the box is saturated. The analytical solution for the stationary state is derived from the first law of thermodynamics and the Clausius-Clapeyron equation by assuming that the liquid water temperature is equal to air temperature at the steady state. Results are shown in Fig.~\ref{water_evaporation_2_plots}.
 
 \begin{figure}[p]
 \noindent
@@ -3562,10 +3559,10 @@ from the first law of thermodynamics and the Clausius-Clapeyron equation by assu
 \subsection{Case 3}
 
 In the third case, the dimensions of the box are 1~m on a side, the initial
-air temperature is 500~$^\circ$C, the  initial diameter of all the droplets is 200~$\mu$m, the water temperature is 20~$^\circ$C,
+air temperature is 500~\si{\degree C}, the  initial diameter of all the droplets is 200~$\mu$m, the water temperature is 20~\si{\degree C},
 and the total mass of water droplets is 0.1~kg. The initial mass fraction of water vapor is 0. It is expected to reach the saturation state.
 As in the second case, the analytical solution for the stationary state derives from the first principle of thermodynamics and the Clausius-Clapeyron equation
-by assuming that the liquid water temperature is equal to air temperature at the stationary state.
+by assuming that the liquid water temperature is equal to air temperature at the stationary state.  Results are shown in Fig.~\ref{water_evaporation_3_plots}.
 
 \begin{figure}[p]
 \noindent
@@ -3585,13 +3582,13 @@ by assuming that the liquid water temperature is equal to air temperature at the
 
 \subsection{Case 4}
 
-In the fourth case, air at 500~$^\circ$C is forced through a 3~m long, 1~m wide, 1~m tall tunnel at 1~m/s. Water droplets with a median volumetric diameter of 20~$\mu$m are
-introduced in the middle of the tunnel at a rate of 0.05~kg/s, starting at 10~s. The water temperature is 20~$^\circ$C.
+In the fourth case, air at 500~\si{\degree C} is forced through a 3~m long, 1~m wide, 1~m tall tunnel at 1~m/s. Water droplets with a median volumetric diameter of 20~$\mu$m are
+introduced in the middle of the tunnel at a rate of 0.05~kg/s, starting at 10~s. The water temperature is 20~\si{\degree C}.
 The mass fraction of water vapor in the hot air flowing into the tunnel is 0.
 The water evaporates at approximately the same rate at which it is introduced.
 Figure~\ref{water_evaporation_4_plots}, left, displays the time history of the enthalpy flow out of the tunnel. The enthalpy flow rate of the dry hot air is 228~kW above its ambient value, and this
 value drops to approximately 100~kW after about 20~s. The evaporation of the water droplets is extracting energy from the hot gas at a rate of
-\be \left( 4.184 \; \hbox{kJ/kg/K} \times 80 \; \hbox{K} + 2260 \; \hbox{kJ/kg} \right) \times 0.05 \; \hbox{kg/s} = 130 \; \hbox{kW} \ee
+\be \left( 4.184 \; \hbox{\si{kJ/(kg.K)}} \times 80 \; \hbox{K} + 2260 \; \hbox{kJ/kg} \right) \times 0.05 \; \hbox{kg/s} = 130 \; \hbox{kW} \ee
 
 \subsection{Case 5}
 
@@ -3611,7 +3608,7 @@ As opposed to the other cases above, this case tests the predicted rate of evapo
 
 \subsection{Case 6}
 
-This case tests the conservation of energy between drops, surfaces, and  the gas.  A 1 m$^3$ box is filled with 1 kg of gas ($c_p$ = 1~kJ/(kg-K) and W = 28~g/mol) at an initial temperature of 100~$^\circ$C.  The box is filled with 0.1~kg of droplets ($c_p$ = 2~kJ/(kg-K)) that evaporate to the gas.  The droplets have an initial temperature of 20~$^\circ$C, a freezing point of 0~$^\circ$C, a boiling point of 100~$^\circ$C,  and a median diameter of 0.2~mm. All walls except the floor are adiabatic.  The floor is thermally thin (e.g., high conductivity compared to its thickness) has a total mass of 1 kg, a specific heat of 1~kJ/(kg-K), and an initial temperature of 250~$^\circ$C.  At steady-state all the drops will have evaporated, the wall and the gas will be at 172.0~$^\circ$C and the pressure rise will be 34,600 Pa (see Fig.~\ref{water_evaporation_6_plots}).
+This case tests the conservation of energy between drops, surfaces, and  the gas.  A 1 m$^3$ box is filled with 1 kg of gas ($c_p$ = 1~\si{kJ/(kg.K)} and W = 28~g/mol) at an initial temperature of 100~\si{\degree C}.  The box is filled with 0.1~kg of droplets ($c_p$ = 2~\si{kJ/(kg.K)}) that evaporate to the gas.  The droplets have an initial temperature of 20~\si{\degree C}, a freezing point of 0~\si{\degree C}, a boiling point of 100~\si{\degree C},  and a median diameter of 0.2~mm. All walls except the floor are adiabatic.  The floor is thermally thin (e.g., high conductivity compared to its thickness) has a total mass of 1 kg, a specific heat of 1~\si{kJ/(kg.K)}, and an initial temperature of 250~\si{\degree C}.  At steady-state all the drops will have evaporated, the wall and the gas will be at 172.0~\si{\degree C} and the pressure rise will be 34,600 Pa (see Fig.~\ref{water_evaporation_6_plots}).
 
 \begin{figure}[h!]
 \noindent
@@ -3626,10 +3623,10 @@ This case tests the conservation of energy between drops, surfaces, and  the gas
 \subsection{Case 7}
 
 In this case, a gas burner lies near the bottom of a 1~m by 1~m by 5~m high vertical channel whose walls are made of a thin sheet of insulated steel. Air at ambient temperature is forced into the bottom of the channel at 1~m/s. Monodisperse water droplets with a diameter of 2,000~$\mu$m are
-introduced via a nozzle in the middle of the channel at a rate of 1~L/min, starting at 60~s. The water temperature is 20~$^\circ$C, and the spray is directed at the walls with an initial velocity of 5~m/s.
+introduced via a nozzle in the middle of the channel at a rate of 1~L/min, starting at 60~s. The water temperature is 20~\si{\degree C}, and the spray is directed at the walls with an initial velocity of 5~m/s.
 The water completely evaporates before it drips down to the bottom of the channel.
 Figure~\ref{water_evaporation_7_plot} displays the energy balance for this case. The heat release rate, \textct{HRR}, of the fire is expected to be 320~kW. The rate at which the water droplets extract energy from the system, \textct{Q\_PART}, is expected to be
-\be - \left( 4.184 \; \hbox{kJ/kg/K} \times 80 \; \hbox{K} + 2260 \; \hbox{kJ/kg} \right) \times 1/60 \; \hbox{kg/s} = -43.2 \; \hbox{kW} \ee
+\be - \left( 4.184 \; \hbox{\si{kJ/(kg.K)}} \times 80 \; \hbox{K} + 2260 \; \hbox{kJ/kg} \right) \times 1/60 \; \hbox{kg/s} = -43.2 \; \hbox{kW} \ee
 The sum of all the terms, \textct{Q\_TOTAL}, is expected to be zero. The three other quantities, \textct{Q\_COND}, \textct{Q\_RADI}, \textct{Q\_CONV}, all have plausible values, but there is no way to determine the exact values.
 
 \begin{figure}[h!]
@@ -3646,8 +3643,7 @@ The sum of all the terms, \textct{Q\_TOTAL}, is expected to be zero. The three o
 
 \section{Flow Rate and Pipe Networks (\texorpdfstring{{\textbf{flow\_rate\_2}}}{flow\_rate\_2}) }
 
-In this test case four sprinklers are placed in a room.  The first three sprinklers are on one pipe network (\textct{PIPE\_INDEX = 1}) and the fourth sprinkler is on a second pipe network (\textct{PIPE\_INDEX = 2}).  The sprinklers are defined with a pressure ramp such that all of the sprinklers within a pipe network flow at a combined rate of 10~L/min regardless of the number of open heads.  The sprinklers are set to open every 15~s and to close at 60~s.  After 45~s, the first three sprinklers have opened for a combined flow rate of 10~L/min and an accumulated water mass of 7.5~kg.  At 60~s, the fourth sprinkler flowing at 10 L/min plus the first three sprinklers flowing at 10~L/min have produced 12.5~kg of water.
-
+In this test case four sprinklers are placed in a room.  The first three sprinklers are on one pipe network (\textct{PIPE\_INDEX = 1}) and the fourth sprinkler is on a second pipe network (\textct{PIPE\_INDEX = 2}).  The sprinklers are defined with a pressure ramp such that all of the sprinklers within a pipe network flow at a combined rate of 10~L/min regardless of the number of open heads.  The sprinklers are set to open every 15~s and to close at 60~s.  After 45~s, the first three sprinklers (black line) have opened for a combined flow rate of 10~L/min and an accumulated water mass of 7.5~kg.  At 60~s, the fourth sprinkler (red line) flowing at 10 L/min plus the first three sprinklers flowing at 10~L/min have produced 12.5~kg of water. The results are shown in Fig.~\ref{flow_rate_2_figure}.
 
 \begin{figure}[ht]
 \begin{tabular*}{\textwidth}{lr}
@@ -3664,12 +3660,12 @@ In this test case four sprinklers are placed in a room.  The first three sprinkl
 \section{Turbulent Dispersion (\texorpdfstring{{\textbf{random\_walk}}}{random\_walk}) }
 \label{turbulent_dispersion}
 
-Two cases are set up to test the turbulent dispersion of tracer particles.  Tracer particles are injected into a channel with a steady laminar flow with mean velocity 1 m/s.  In the first case ({\bf random\_walk\_1}), the diffusivity is set to $D=0.0834$~m$^2$/s (this value results from setting the dynamic viscosity to $\mu = 0.1$~kg/(m$\cdot$s) with an ambient density of $\rho=1.199$~kg/m$^3$ and a Schmidt number of unity).  In the second case ({\bf random\_walk\_2}), the diffusivity is set to $D=0.00834$ m$^2$/s.  The results are compared with Einstein's classic result for Brownian motion \cite{Gardiner:2004}:
+Two cases are set up to test the turbulent dispersion of tracer particles.  Tracer particles are injected into a channel with a steady laminar flow with mean velocity 1 m/s.  In the first case ({\bf random\_walk\_1}), the diffusivity is set to $D=0.0834$~m$^2$/s (this value results from setting the dynamic viscosity to $\mu = 0.1$~kg/(m$\cdot$s) with an ambient density of $\rho=1.199$~\si{kg/m^3} and a Schmidt number of unity).  In the second case ({\bf random\_walk\_2}), the diffusivity is set to $D=0.00834$ m$^2$/s.  The results are compared with Einstein's classic result for Brownian motion \cite{Gardiner:2004}:
 \begin{equation}
 \label{eqn_number_density}
 f(z,t) = \frac{n}{4\pi D} \frac{\exp \left( -z^2/4Dt \right)}{\sqrt{t}}
 \end{equation}
-where $f(z,t)$ is the particle number density at lateral distance $z$ from the source at time $t$, $n$ is the total number of particles in the system.  A phase doppler particle analyzer (PDPA) is set up to measure the number concentration at the outlet of the channel as a function of height, $z$.  The outlet is 15 m downstream of the point source of tracer particles.  With a mean velocity of 1 m/s, the time is taken as $t = 15$ s.  The FDS results are compared with Eq.~(\ref{eqn_number_density}) in Fig.~\ref{random_walk}.
+where $f(z,t)$ is the particle number density at lateral distance $z$ from the source at time $t$, $n$ is the total number of particles in the system.  A virtual phase doppler particle analyzer (PDPA) is set up to measure the FDS number concentration at the outlet of the channel as a function of height, $z$.  The outlet is 15 m downstream of the point source of tracer particles.  With a mean velocity of 1 m/s, the time is taken as $t = 15$ s.  The FDS results are compared with Eq.~(\ref{eqn_number_density}) in Fig.~\ref{random_walk}.
 
 \begin{figure}[ht]
 \begin{tabular*}{\textwidth}{lr}
@@ -3693,7 +3689,7 @@ where $f(z,t)$ is the particle number density at lateral distance $z$ from the s
 
 The pressure drop due to steady flow in a duct is given by
 \be \Delta p = \frac{K \rho \, u^2}{2}  \label {HVAC_steady_state}\ee
-where $K$ is the loss coefficient for the duct, $\rho$ is the gas density, and $u$ is the mean velocity. In this example, a duct is split at a tee joint into two ducts. All ducts have the same cross sectional area.  The primary duct is assigned a constant flow rate of 0.3~m$^3$/s.  The other two ducts are assigned loss coefficients of 4 and 16 and outlets at the same elevation.  From Eq.~(\ref{HVAC_steady_state}), it can be shown that since the two branch ducts have the same pressure at their outlets, the steady-state velocities in the three ducts should be 3~m/s, 2~m/s, and 1~m/s.
+where $K$ is the loss coefficient for the duct, $\rho$ is the gas density, and $u$ is the mean velocity. In this example, a duct is split at a tee joint into two ducts. All ducts have the same cross sectional area.  The primary duct is assigned a constant flow rate of 0.3~\si{m^3/s}.  The other two ducts are assigned loss coefficients of 4 and 16 and outlets at the same elevation.  From Eq.~(\ref{HVAC_steady_state}), it can be shown that since the two branch ducts have the same pressure at their outlets, the steady-state velocities in the three ducts should be 3~m/s, 2~m/s, and 1~m/s.  FDS results are shown in Fig.~\ref{fig_HVAC_loss}.
 
 \begin{figure}[ht]
    \begin{center}
@@ -3706,7 +3702,7 @@ where $K$ is the loss coefficient for the duct, $\rho$ is the gas density, and $
 
 \section{Node Flow Losses (\texorpdfstring{\bf HVAC\_tee\_loss\_1}{HVAC\_tee\_loss\_1} and \texorpdfstring{\bf HVAC\_tee\_loss\_2}{HVAC\_tee\_loss\_2})}
 
-These two cases use the same geometry as in Section~\ref{HVAC_flow_loss}. However, instead of losses assigned to the ducts, the losses are assigned to the duct nodes.  In the first case, {\bf HVAC\_tee\_loss\_1}, the flow goes into the primary leg of the tee. The secondary branches are assigned loss coefficients of 15 and 3 and the discharge nodes are assigned losses of 1.  This gives total losses of 16 and 4. In the second case, {\bf HVAC\_tee\_loss\_2}, the flow goes out the primary leg of the tee. Duct directions are reversed so the sign on velocity remains the same as in the first case.  The same flow losses are assigned.  It is expected that the duct velocities in both cases should be 3~m/s, 2~m/s, and 1~m/s.
+These two cases use the same geometry as in Section~\ref{HVAC_flow_loss}. However, instead of losses assigned to the ducts, the losses are assigned to the duct nodes.  In the first case, {\bf HVAC\_tee\_loss\_1}, the flow goes into the primary leg of the tee. The secondary branches are assigned loss coefficients of 15 and 3 and the discharge nodes are assigned losses of 1.  This gives total losses of 16 and 4. In the second case, {\bf HVAC\_tee\_loss\_2}, the flow goes out the primary leg of the tee. Duct directions are reversed so the sign on velocity remains the same as in the first case.  The same flow losses are assigned.  It is expected that the duct velocities in both cases should be 3~m/s, 2~m/s, and 1~m/s.  FDS results are shown in Fig.~\ref{fig_HVAC_node}.
 
 \begin{figure}[ht]
    \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
@@ -3739,10 +3735,10 @@ A 1~m by 1~m by 1~m compartment is initialized with the lower half of the compar
 \section{HVAC Energy Conservation and Pressure (\texorpdfstring{\bf HVAC\_energy\_pressure}{HVAC\_energy\_pressure})}
 
 A 1~m by 1~m by 1~m box is divided into two equal compartments by a vertical wall, see Fig.~\ref{fig_HVAC_e_p}.
-The ambient species is defined with a molecular weight of 28 g/mol, a specific heat of 1 kJ/kg/K and a specific enthalpy of 298.15 kJ/kg at the reference temperature of 298.15~K.
+The ambient species is defined with a molecular weight of 28 g/mol, a specific heat of 1 \si{kJ/(kg.K)} and a specific enthalpy of 298.15 kJ/kg at the reference temperature of 298.15~K.
 The left side of the compartment is initialized to twice the ambient temperature.  A simple HVAC system of ducts is created.
-The first duct takes suction from the lower left half and discharges into the lower right half and is given an area of 0.1 m$^2$ and fixed volume flow rate 0.1 m$^3$/s.
-The second duct is placed in the upper half of the compartment and is assigned a flow loss of 1 and an area of 0.01 m$^2$.  It is expected that the top and bottom duct velocities will be 10 m/s and 1 m/s respectively, the total energy will be conserved, that at the start of the computation hot gas will be seen entering the lower right and cold gas entering the upper left, and that at the end of the computation the pressure difference between the two sides will be 43.6 Pa based on Eq.~\ref{HVAC_steady_state}
+The first duct takes suction from the lower left half and discharges into the lower right half and is given an area of 0.1 m$^2$ and fixed volume flow rate 0.1 \si{m^3/s}.
+The second duct is placed in the upper half of the compartment and is assigned a flow loss of 1 and an area of 0.01 m$^2$.  It is expected that the top and bottom duct velocities will be 10 m/s and 1 m/s respectively, the total energy will be conserved, that at the start of the computation hot gas will be seen entering the lower right and cold gas entering the upper left, and that at the end of the computation the pressure difference between the two sides will be 43.6 Pa based on Eq.~(\ref{HVAC_steady_state})
 
 \begin{figure}[ht]
 \noindent
@@ -3760,7 +3756,7 @@ The second duct is placed in the upper half of the compartment and is assigned a
 
 \section{HVAC Dampers (\texorpdfstring{\bf HVAC\_damper}{HVAC\_damper})}
 
-The \textct{HVAC\_damper} example case is a simple duct network of three ducts connected by a tee.  A damper is present in one of the ducts and linked to a \textct{DEVC} that will change state at 10~s.  With the damper open, the respective duct flow speeds should be 3~m/s, 1~m/s and 2~m/s.  When the damper closes, the respective duct flow speeds should be 3~m/s, 3~m/s and~0 m/s.  Results of this are shown in Fig.~\ref{fig:HVAC_damper}.
+The \textct{HVAC\_damper} example case is a simple duct network of three ducts connected by a tee.  A damper is present in one of the ducts and linked to a \textct{DEVC} that will change state at 10~s.  With the damper open, the respective duct flow speeds should be 3~m/s, 1~m/s, and 2~m/s.  When the damper closes, the respective duct flow speeds should be 3~m/s, 3~m/s, and~0 m/s.  Results of this are shown in Fig.~\ref{fig:HVAC_damper}.
 
 \begin{figure}[h!]
 \begin{center}
@@ -3775,7 +3771,7 @@ The \textct{HVAC\_damper} example case is a simple duct network of three ducts c
 
 \section{HVAC Dampers (\texorpdfstring{\bf HVAC\_filter}{HVAC\_filter})}
 
-The sample case \textct{HVAC\_filter} demonstrates the use of the filter input.  A 1~m$^3$ compartment is initialized with a particulate species with a mass fraction of 0.001.  A 100 \% efficient filter with a clean loss of 1 and a loading loss of 7732.446~kg$^{-1}$ (gives a total loss of 10 when all the soot in the compartment is filtered).  A quadratic fan in a 0.01 m$^2$ duct with a maximum pressure of 20~Pa and a maximum flow of 0.2~m$^3$/s takes suction from one side of the compartment and discharges into the other.  Over time, the filter removes the particulate from the compartment.  However, since the filter loss increases with the mass of particulate filtered, the rate of removal will decrease over time.  Applying the conservation of energy to the compartment and the steady state duct momentum equation to the duct, we can solve for the compartment temperature and pressure and the duct velocity.  These results along with the loading of the filter and the mass of particulate in the compartment are shown in Fig.~\ref{fig_filter}.
+The sample case \textct{HVAC\_filter} demonstrates the use of the filter input.  A 1~m$^3$ compartment is initialized with a particulate species with a mass fraction of 0.001.  A 100 \% efficient filter with a clean loss of 1 and a loading loss of 7732.446~kg$^{-1}$ (gives a total loss of 10 when all the soot in the compartment is filtered).  A quadratic fan in a 0.01 m$^2$ duct with a maximum pressure of 20~Pa and a maximum flow of 0.2~\si{m^3/s} takes suction from one side of the compartment and discharges into the other.  Over time, the filter removes the particulate from the compartment.  However, since the filter loss increases with the mass of particulate filtered, the rate of removal will decrease over time.  Applying the conservation of energy to the compartment and the steady state duct momentum equation to the duct, we can solve for the compartment temperature and pressure and the duct velocity.  These results along with the loading of the filter and the mass of particulate in the compartment are shown in Fig.~\ref{fig_filter}.
 
 \begin{figure}[h!]
    \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
@@ -3793,18 +3789,18 @@ The sample case \textct{HVAC\_filter} demonstrates the use of the filter input. 
 \section{HVAC Fans (\texorpdfstring{\bf fan\_test}{fan\_test})}
 
 Two compartments share a common wall. Both compartments are considered as
-separate ``pressure zones.'' Two, 0.04~m$^2$ HVAC ducts are defined.  One has a quadratic fan with a maximum volumetric flow of 0.16~m$^3$/s and a stall pressure of 10~Pa.
+separate ``pressure zones.'' Two, 0.04~m$^2$ HVAC ducts are defined.  One has a quadratic fan with a maximum volumetric flow of 0.16~\si{m^3/s} and a stall pressure of 10~Pa.
 The second is an open duct with a flow loss of 10. The volume flow through the fans is obtained from the equation below:
 \be \dot{V}_{\hbox{\footnotesize fan}} = \dot{V}_{\hbox{\footnotesize max}} \;
    \hbox{sign} (\Delta p_{\hbox{\footnotesize max}}-\Delta p)
    \sqrt{ \frac{ |\Delta p - \Delta p_{\hbox{\footnotesize max}}|}{\Delta p_{\hbox{\footnotesize max}} } }  \label{fan_curve} \ee
-$\dot{V}_{\hbox{\footnotesize max}}=0.16$~m$^3$/s is the maximum output of the fan from
+$\dot{V}_{\hbox{\footnotesize max}}=0.16$~\si{m^3/s} is the maximum output of the fan from
 Zone~1 to Zone~2 and 0.2~m/s is the flow speed from Zone~2 to Zone~1. $\Delta p_{\hbox{\footnotesize max}}=10$~Pa is the maximum pressure difference at which the fan can operate. In steady state, the volume flow from compartment to compartment should be equal and opposite in sign.
 This occurs when the positive pressure added by the fan equals the pressure drop due to the flow loss, $K$, through the return duct.  The volume flow through the duct for a given pressure drop can be found from the duct momentum equation ignoring all terms but the flow loss:
 \be  \dot{V}_{\hbox{\footnotesize fan}}=A_{\hbox{\footnotesize duct}} \sqrt{\frac{2 \Delta p}{\rho K}} \ee
 Setting the above equation equal to Eq.~(\ref{fan_curve}), the pressure drop can be determined:
-\be  \sqrt{\frac {2 |p_2-p_1|}{ (1.2 \; \hbox{kg/m$^3$}) 10}} (0.04 \; \hbox{m}^2) =
-   (0.16 \; \hbox{m$^3$/s})  \;
+\be  \sqrt{\frac {2 |p_2-p_1|}{ (1.2 \; \hbox{\si{kg/m^3}}) 10}} (0.04 \; \hbox{m}^2) =
+   (0.16 \; \hbox{\si{m^3/s}})  \;
    \sqrt{ \frac{ |p_1-p_2-10 \; \hbox{Pa}|}{10 \; \hbox{Pa}}  } \ee
 The solution is $p_2=4.5$~Pa and $p_1=-4.5$~Pa (see Fig.~\ref{fan_test}). Note that the sign of the volume flow in the duct indicates whether the flow is moving from the first node to the second (positive) or the second node to the first (negative).
 This convention can make these types of calculations a bit tricky.
@@ -3849,7 +3845,7 @@ where $A_{\hbox{\scriptsize leak}}=0.0001$~m$^2$ and $\rho$ is the density at th
 
 \subsection{Multiple zone leakage (\texorpdfstring{\bf leak\_test\_2}{leak\_test\_2})}
 
-This case starts with the same input as {\bf leak\_test}.  A second leakage vent is added to the floor of the discharge side of the fan.  This vent leaks to the ambient.  When the simulation starts the fan pushes air from one compartment to the other. As the pressure rises, the leakage increases until the leakage flow rate is equal to the fan flow rate. Since some air from the interior compartment is being discharged to the ambient, the average pressure of the two compartments decreases until the pressure of the interior compartment is equal to that of the ambient. At this point in time, there is no more leakage to the outside and the fan flow rate equals the leakage flow rate between the two compartments.  Given the leakage area and the fan curve, this occurs when the pressure difference between the two compartments is the same as the pressure difference from leak\_test, only now the discharge side should be at 0~Pa.
+This case starts with the same input as {\bf leak\_test}.  A second leakage vent is added to the floor of the discharge side of the fan.  This vent leaks to the ambient.  When the simulation starts the fan pushes air from one compartment to the other. As the pressure rises, the leakage increases until the leakage flow rate is equal to the fan flow rate. Since some air from the interior compartment is being discharged to the ambient, the average pressure of the two compartments decreases until the pressure of the interior compartment is equal to that of the ambient. At this point in time, there is no more leakage to the outside and the fan flow rate equals the leakage flow rate between the two compartments.  Given the leakage area and the fan curve, this occurs when the pressure difference between the two compartments is the same as the pressure difference from {\bf leak\_test}, only now the discharge side should be at 0~Pa.
 
 \begin{figure}[ht]
    \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
@@ -3866,7 +3862,7 @@ This case starts with the same input as {\bf leak\_test}.  A second leakage vent
 
 \section{ASHRAE Sample Problem 7\\(\texorpdfstring{{\bf ashrae\_7\_fixed\_flow}}{ashrae\_7\_fixed\_flow}, \texorpdfstring{{\bf ashrae\_7\_quadratic}}{ashrae\_7\_quadratic}, and \texorpdfstring{{\bf ashrae\_7\_table}}{ashrae\_7\_table})}
 
-ASHRAE Sample Problem 7~\cite{ASHRAE} is a simple HVAC system that represents a metal working exhaust system for a machine shop where particulates from three pieces of equipment are removed by a dust collector.  The network, shown in Fig.~\ref{ASHRAE7}, consists of three inlets, two tees, the dust collector, and a fan.  The lengths, diameters, and friction losses for all the components are specified, as well as the fan flow rate. The pressure drops and flow rates can be computed by hand.  Also listed in Fig.~\ref{ASHRAE7} are the predicted pressure drops for a fan with a fixed flow rate, a fan with a quadratic fan curve (\textct{MAX\_FLOW=2.4094, MAX\_PRESSURE=3000.}) that includes the fixed flow state (i.e., the flow rate of 1.45~m$^3$/s and pressure drop of 1913.5~Pa from the fixed flow simulation sits on the quadratic curve), and a fan with a \textct{RAMP} to define the same quadratic fan curve at 500~Pa intervals. The hand calculations assume a constant density, whereas the FDS computation will have a slightly non-uniform density in the network due to pressure drops. It is expected that there will be small differences that will be more noticeable at higher pressure changes.  Additionally since specifying a fan curve via a table results in a piecewise linear approximation, it is expected that the user-defined fan curve results will vary slightly from the quadratic and fixed flow results.
+ASHRAE Sample Problem 7~\cite{ASHRAE} is a simple HVAC system that represents a metal working exhaust system for a machine shop where particulates from three pieces of equipment are removed by a dust collector.  The network, shown in Fig.~\ref{ASHRAE7}, consists of three inlets, two tees, the dust collector, and a fan.  The lengths, diameters, and friction losses for all the components are specified, as well as the fan flow rate. The pressure drops and flow rates can be computed by hand.  Also listed in Fig.~\ref{ASHRAE7} are the predicted pressure drops for a fan with a fixed flow rate, a fan with a quadratic fan curve (\textct{MAX\_FLOW=2.4094, MAX\_PRESSURE=3000.}) that includes the fixed flow state (i.e., the flow rate of 1.45~\si{m^3/s} and pressure drop of 1913.5~Pa from the fixed flow simulation sits on the quadratic curve), and a fan with a \textct{RAMP} to define the same quadratic fan curve at 500~Pa intervals. The hand calculations assume a constant density, whereas the FDS computation will have a slightly non-uniform density in the network due to pressure drops. It is expected that there will be small differences that will be more noticeable at higher pressure changes.  Additionally since specifying a fan curve via a table results in a piecewise linear approximation, it is expected that the user-defined fan curve results will vary slightly from the quadratic and fixed flow results.
 
 
 \begin{figure}[ht]
@@ -3874,7 +3870,7 @@ ASHRAE Sample Problem 7~\cite{ASHRAE} is a simple HVAC system that represents a 
 \includegraphics[width=4.in]{FIGURES/ashrae_7}
 \end{center}
 \IfFileExists{SCRIPT_FIGURES/ashrae_7.tex}{\input{SCRIPT_FIGURES/ashrae_7.tex}}{\typeout{Error: Missing file SCRIPT_FIGURES/ashrae_7.tex}}
-\caption[Results of {\bf ashrae\_7} test cases]{Schematic of ASHRAE Sample Problem 7, and tabulated pressure drops for a fixed flow fan curve, quadratic fan curve, and a table defined fan curve.}
+\caption[Results of {\bf ashrae\_7} test cases]{Schematic of ASHRAE Sample Problem 7, and tabulated pressure drops (Pa) for a fixed flow fan curve, quadratic fan curve, and a table defined fan curve.}
 \label{ASHRAE7}
 \end{figure}
 
@@ -3890,7 +3886,7 @@ A cut-cell algorithm is developed for calculating the intersection area between 
 
 \IfFileExists{SCRIPT_FIGURES/cutcell_area.tex}{\input{SCRIPT_FIGURES/cutcell_area.tex}}{\typeout{Error: Missing file SCRIPT_FIGURES/cutcell_area.tex}}
 
- Twelve examples in which different triangles intersect with a bounding box are summarized in the table below.  NXP represents the vertices of the intersection polygon, whose area is calculated as shown. Examples (1) through (4) and (6) through (8) have a regular triangle intersection. Examples (5) and (9) have a point and line intersection, both with zero area. Examples (10), (11), and (12) are more complicated cases. The intersection polygon has six (6), seven (7), and nine (9) vertices, respectively.
+ Twelve examples in which different triangles intersect with a bounding box are summarized in Table \ref{tab_cutcell_areas}.  NXP represents the vertices of the intersection polygon, whose area is calculated as shown. Examples (1) through (4) and (6) through (8) have a regular triangle intersection. Examples (5) and (9) have a point and line intersection, both with zero area. Examples (10), (11), and (12) are more complicated cases. The intersection polygon has six (6), seven (7), and nine (9) vertices, respectively.
 
 \newpage
 
