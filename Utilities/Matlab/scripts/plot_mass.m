@@ -9,4 +9,4 @@ t = M(:,1);
 m = M(:,col);
 
 H(1)=plot(t,flux*area*t,'k-'); hold on
-H(2)=plot(t,m,'bo-');
+H(2)=plot(t,m,'bo');
