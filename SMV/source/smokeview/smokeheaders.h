@@ -6,6 +6,7 @@
 #ifndef SMOKEHEADERS_H_DEFINED
 #define SMOKEHEADERS_H_DEFINED
 
+EXTERNCPP void DefineAllFEDs(void);
 EXTERNCPP void update_glui_vecfactor(void);
 EXTERNCPP void update_tour_state(void);
 EXTERNCPP void update_edit_tour(void);

@@ -3592,6 +3592,18 @@ void UnloadTerrainMenu(int value){
 
 }
 
+/* ------------------ DefineAllFEDs ------------------------ */
+
+void DefineAllFEDs(void){
+  int i;
+
+  compute_fed=0;
+  for(i=nsliceinfo-nfedinfo;i<nsliceinfo;i++){
+    LoadSliceMenu(i);
+    UnloadSliceMenu(i);
+  }
+}
+
 /* ------------------ LoadSliceMenu ------------------------ */
 
 void LoadSliceMenu(int value){

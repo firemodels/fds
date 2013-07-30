@@ -483,6 +483,9 @@ void parse_commandline(int argc, char **argv){
       arg_iblank=1;
       use_iblank=0;
     }
+    else if(strncmp(argv[i],"-fed",4)==0){
+      compute_fed=1;
+    }
     else if(strncmp(argv[i],"-blank",6)==0){
       arg_iblank=1;
       use_iblank=1;
@@ -665,6 +668,7 @@ void usage(char **argv){
   PRINTF("%s\n",_(" -bindir dir    - specify location of smokeview bin directory"));
   PRINTF("%s\n",_(" -build         - show directives used in this build of Smokeview"));
   PRINTF("%s\n",_(" -demo          - use demonstrator mode of Smokeview"));
+  PRINTF("%s\n",_(" -fed            - pre-calculate all FED slice files"));
   PRINTF("%s\n",_(" -help          - display this message"));
   PRINTF("%s\n",_(" -ini           - output default smokeview parameters to smokeview.ini"));
   PRINTF("%s\n",_(" -ng_ini        - No graphics version of -ini."));
