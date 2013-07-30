@@ -89,7 +89,7 @@ FDS Version 6.0 \\
 
 \chapter{Preface}
 
-This is Volume 2 of the FDS Technical Reference Guide. Volume 1 describes the mathematical model and
+This is Volume 2 of the FDS Technical Reference Guide~\cite{FDS_Tech_Guide}. Volume 1 describes the mathematical model and
 numerical method. Volume 3 documents past and present experimental validation work. Instructions for
 using FDS are contained in a separate User's Guide~\cite{FDS_Users_Guide}.
 
@@ -1431,24 +1431,24 @@ inject the nitrogen at a specified rate into the particular grid cell that each 
 \subsection{Gas Injection via a Non-Isentropic Process (\texorpdfstring{{\bf isentropic2}}{isentropic2})}
 
 This example checks that if a given mass of nitrogen is added via an external vent to a sealed compartment with adiabatic (i.e., no heat loss) walls, that the density, pressure and temperature ought to rise to the same values regardless of the duration of the injection time.  The results are plotted in Fig.~\ref{isentropic2}. In the two cases, 0.2~kg of N$_2$ are added to a compartment that is 1~m$^3$ in volume. In the first case, the injection occurs in 10~s, in the second case in 50~s. The temperature of the gas in both cases is 500~\si{\degree C}. It is expected that the pressure, $p$, should rise at the rate:
-\be 
-   \frac{\d p}{\d t} = \frac{\gamma \, p \, u \, A}{V} 
+\be
+   \frac{\d p}{\d t} = \frac{\gamma \, p \, u \, A}{V}
 \ee
 where $u$ is the injection velocity and $A$ is the area of the vent, 0.04~m$^2$. The density of the incoming N$_2$ is found from the equation of state:
-\be 
-   \rho = \frac{ \overline{W} \, p }{ \R T} 
+\be
+   \rho = \frac{ \overline{W} \, p }{ \R T}
 \ee
 The injection velocity is the mass flux divided by the density, $u=\dot{m}''/\rho$, in which case, the pressure rise can be written
-\be 
-   \frac{\d p}{\d t} = \frac{\gamma \, \dot{m}'' \, \R T \, A}{\overline{W} \, V} 
+\be
+   \frac{\d p}{\d t} = \frac{\gamma \, \dot{m}'' \, \R T \, A}{\overline{W} \, V}
 \ee
 Note that the rate of pressure rise is constant. In both the fast and slow injection cases, the pressure is expected to rise 64,282~Pa above ambient. The density and temperature rise are also linear. The density increases from 1.164~\si{kg/m^3} to 1.364~\si{kg/m^3}. The temperature increases from 20~\si{\degree C} to 135.7~\si{\degree C}. The change in the internal energy of the system, based on the mass and temperature of the added N$_2$, is:
-\be 
-   \Delta E = (0.2 \; \hbox{kg}) \times (1.039 \; \hbox{\si{kJ/(kg.K)}}) \times (773.15 \; \hbox{K} ) = 160.7 \; \hbox{kJ} 
+\be
+   \Delta E = (0.2 \; \hbox{kg}) \times (1.039 \; \hbox{\si{kJ/(kg.K)}}) \times (773.15 \; \hbox{K} ) = 160.7 \; \hbox{kJ}
 \ee
 Adding in the work due to the pressure yields the change in total enthalpy:
-\be 
-   \Delta H = \Delta E + V \, \Delta P = 160.7 \; \hbox{kJ} + (1 \; \hbox{m}^3) \times ( \; 64.3 \; \hbox{kJ/m}^3) = 225 \; \hbox{kJ} 
+\be
+   \Delta H = \Delta E + V \, \Delta P = 160.7 \; \hbox{kJ} + (1 \; \hbox{m}^3) \times ( \; 64.3 \; \hbox{kJ/m}^3) = 225 \; \hbox{kJ}
 \ee
 
 
