@@ -1,4 +1,4 @@
-&HEAD CHID='wind_test2',TITLE='test experimental wind data display in smokeview SVN $Revision: 16382 $' /
+&HEAD CHID='wind_test2',TITLE='test experimental wind data display in smokeview SVN $Revision$' /
 
 &MESH IJK=16,16,32, XB=0.0,200.0,0.0,200.0,0.0,200.0 /
 
