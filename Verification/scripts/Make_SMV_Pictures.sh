@@ -126,6 +126,17 @@ cd $SVNROOT/Verification/Visualization
 echo Converting particles to isosurfaces in case plumeiso
 $SMOKEZIP -r -part2iso plumeiso
 
+# precompute FED slices
+
+source $STARTX
+$RUNFDS -f Visualization plume5c
+$RUNFDS -f Visualization plume5cdelta
+$RUNFDS -f Visualization thouse5
+$RUNFDS -f Visualization thouse5delta
+source $STOPX
+
+# difference plume5c and thouse5
+
 cd $SVNROOT/Verification/Visualization
 echo Differencing cases plume5c and plume5cdelta
 $SMOKEDIFF -r plume5c plume5cdelta
