@@ -4974,10 +4974,24 @@ READ_SURF_LOOP: DO N=0,N_SURF
    SF%VOLUME_FLUX          = VOLUME_FLUX
    SF%WIDTH                = WIDTH
    SF%Z0                   = Z0
-   SF%MASS_FLUX_TOTAL      = MASS_FLUX_TOTAL
    SF%H_FIXED              = HEAT_TRANSFER_COEFFICIENT
    SF%HM_FIXED             = MASS_TRANSFER_COEFFICIENT
    SF%XYZ                  = XYZ
+
+   ! Convert inflowing MASS_FLUX_TOTAL to MASS_FLUX
+   
+   IF (MASS_FLUX_TOTAL >= 0._EB) THEN
+      SF%MASS_FLUX_TOTAL      = MASS_FLUX_TOTAL
+   ELSE
+      IF (TRIM(SPEC_ID(1))=='null') THEN
+         SPEC_ID(1) = SPECIES_MIXTURE(0)%ID
+         MASS_FLUX(1) = MASS_FLUX_TOTAL
+      ELSE
+         MASS_FLUX = -MASS_FLUX_TOTAL*MASS_FRACTION
+      ENDIF
+      MASS_FLUX_TOTAL = 0._EB
+      MASS_FRACTION = 0._EB
+   ENDIF
 
    ! Error checking
 
