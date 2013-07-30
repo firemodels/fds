@@ -131,7 +131,6 @@ else
 fi
 fi
 fi
-exit
 cd $SVNROOT/Verification
 scripts/SMV_Cases.sh
 scripts/SMV_MPI_Cases.sh
