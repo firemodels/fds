@@ -1,10 +1,16 @@
-#!/bin/bash -f
+#!/bin/bash
 
+FED=
 MOVIE=
+RUNSCRIPT=
+ssffile=
 
-while getopts 'm' OPTION
+while getopts 'fm' OPTION
 do
 case $OPTION in
+  f)
+   FED="-fed"
+   ;;
   m)
    MOVIE="y"
    ;;
@@ -15,6 +21,7 @@ shift $(($OPTIND-1))
 dir=$1
 in=$2
 
+if [ "$FED" == "" ]; then
 if [ "$MOVIE" == "" ]; then
   RUNSCRIPT=-runscript
   ssffile=$in.ssf
@@ -22,6 +29,7 @@ else
   MOVIE=_movies
   RUNSCRIPT="-script $in$MOVIE.ssf"
   ssffile=$in$MOVIE.ssf
+fi
 fi
 
 fulldir=$BASEDIR/$dir
@@ -48,5 +56,5 @@ fi
 
 source ~/.bashrc_fds intel64
 cd $fulldir
-echo $SMV $SMVBINDIR $RUNSCRIPT $in
-$SMV $SMVBINDIR -redirect $RUNSCRIPT $in
+echo $SMV $FED $SMVBINDIR $RUNSCRIPT $in
+$SMV $FED $SMVBINDIR -redirect $RUNSCRIPT $in
