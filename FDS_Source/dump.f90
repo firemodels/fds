@@ -227,9 +227,10 @@ ELSE
       IF (NM==NMESHES) IUVW = IUVW + 1
    ENDIF
    IF (PERIODIC_TEST==7) THEN
-      IF (T>=MMS_CLOCK) THEN
+      IF (T>=MMS_TIMER) THEN
          WRITE(FN_MMS,'(A,A)') TRIM(CHID),'_mms.csv'
          CALL DUMP_MMS(NM,FN_MMS,T)
+         MMS_TIMER=1.E10_EB
       ENDIF
    ENDIF
 

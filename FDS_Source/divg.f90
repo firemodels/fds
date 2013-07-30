@@ -36,7 +36,7 @@ REAL(EB), POINTER, DIMENSION(:,:) :: PBAR_P
 REAL(EB) :: DELKDELT,VC,VC1,DTDX,DTDY,DTDZ,TNOW,ZZ_GET(0:N_TRACKED_SPECIES), &
             HDIFF,DZDX,DZDY,DZDZ,T,RDT,RHO_D_DZDN,TSI,TIME_RAMP_FACTOR,ZONE_VOLUME,DELTA_P,PRES_RAMP_FACTOR,&
             TMP_G,TMP_WGT,DIV_DIFF_HEAT_FLUX,H_S,ZZZ(1:4),DU_P,DU_M,UN,RCON_DIFF,PROFILE_FACTOR, &
-            XHAT,ZHAT
+            XHAT,ZHAT,TT
 TYPE(SURFACE_TYPE), POINTER :: SF
 TYPE(SPECIES_MIXTURE_TYPE), POINTER :: SM,SM0
 INTEGER :: IW,N,IOR,II,JJ,KK,IIG,JJG,KKG,ITMP,I,J,K,IPZ,IOPZ
@@ -630,13 +630,15 @@ ENDIF
 ! Test manufactured solution
 
 IF (PERIODIC_TEST==7) THEN
+   IF (PREDICTOR) TT=T+DT
+   IF (CORRECTOR) TT=T
    DO K=1,KBAR
       DO J=1,JBAR
          DO I=1,IBAR
             ! divergence from EOS
-            XHAT = XC(I) - UF_MMS*T
-            ZHAT = ZC(K) - WF_MMS*T
-            DP(I,J,K) = (1._EB/RHO_1_MMS - 1._EB/RHO_0_MMS) * ( DEL_RHO_D_DEL_Z(I,J,K,1) + VD2D_MMS_Z_SRC(XHAT,ZHAT,T) )
+            XHAT = XC(I) - UF_MMS*TT
+            ZHAT = ZC(K) - WF_MMS*TT
+            DP(I,J,K) = (1._EB/RHO_1_MMS - 1._EB/RHO_0_MMS) * ( DEL_RHO_D_DEL_Z(I,J,K,1) + VD2D_MMS_Z_SRC(XHAT,ZHAT,TT) )
          ENDDO
       ENDDO
    ENDDO
@@ -1125,6 +1127,8 @@ END SUBROUTINE ENTHALPY_ADVECTION
 
 SUBROUTINE DENSITY_ADVECTION
 
+USE MANUFACTURED_SOLUTIONS, ONLY: VD2D_MMS_RHO
+
 REAL(EB), POINTER, DIMENSION(:,:,:) :: DV=>NULL()
 REAL(EB) :: DR,B
 
@@ -1451,6 +1455,33 @@ IF (.NOT.CONSTANT_SPECIFIC_HEAT) THEN
 
 ENDIF
 
+IF (.false.) THEN
+
+   IF (PREDICTOR) TT=T+DT
+   IF (CORRECTOR) TT=T
+
+   DO K=1,KBAR
+      DO J=1,JBAR
+         DO I=0,IBAR
+            XHAT =  X(I) - UF_MMS*TT
+            ZHAT = ZC(K) - WF_MMS*TT
+            FX(I,J,K,0) = VD2D_MMS_RHO(XHAT,ZHAT,TT)
+         ENDDO
+      ENDDO
+   ENDDO
+
+   DO K=0,KBAR
+      DO J=1,JBAR
+         DO I=1,IBAR
+            XHAT = XC(I) - UF_MMS*TT
+            ZHAT =  Z(K) - WF_MMS*TT
+            FZ(I,J,K,0) = VD2D_MMS_RHO(XHAT,ZHAT,TT)
+         ENDDO
+      ENDDO
+   ENDDO
+
+ENDIF
+
 END SUBROUTINE DENSITY_ADVECTION
 
 
@@ -1520,7 +1551,7 @@ LIMITER_SELECT: SELECT CASE (FLUX_LIMITER)
 
       ! compute data variation and face value y
 
-     ! DV = 1.E20_EB
+      ! DV = 1.E20_EB
       DO K=1,KBAR
          DO J=0,JBAR
             DO I=1,IBAR
