@@ -125,16 +125,13 @@ if [ "$FDS_DEBUG" == "0" ] ; then
 if [ -e $WIND2FDS ];  then
   cd $SVNROOT/Verification/WUI
   echo Converting wind data
-  $WIND2FDS -prefix sd11 -offset " 50.0  50.0 0.0" wind_test1a.csv
-  $WIND2FDS -prefix sd12 -offset " 50.0 150.0 0.0" wind_test1b.csv
-  $WIND2FDS -prefix sd21 -offset "150.0  50.0 0.0" wind_test1c.csv
-  $WIND2FDS -prefix sd22 -offset "150.0 150.0 0.0" wind_test1d.csv
-  $WIND2FDS -prefix sd22 -offset "575.0 375.0 60.0" wind_test3a.csv
+  $WIND2FDS -prefix sd11 -offset " 100.0  100.0 0.0" wind_data1a.csv
 else
   echo "The file $WIND2FDS does not exist. Run aborted"
 fi
 fi
 fi
+exit
 cd $SVNROOT/Verification
 scripts/SMV_Cases.sh
 scripts/SMV_MPI_Cases.sh
