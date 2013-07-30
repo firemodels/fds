@@ -135,6 +135,7 @@ H(10)=plot(t_soln,MX(1)*U_soln,'b-');
 H(11)=plot(t_soln,n*pwt*m_p*u_soln,'r-');
 
 axis([min(tx) max(tx) 0 150])
+set(gca,'Position',[Plot_X,Plot_Y,1.5*Plot_Width,Plot_Height])
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Label_Font_Size)
 xlabel('Time (s)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
@@ -194,6 +195,7 @@ H(7)=plot(ty,V_eq,'g--');
 H(7)=plot(tz,W_eq,'g--');
 
 axis([min(tx) max(tx) 0 10])
+set(gca,'Position',[Plot_X,Plot_Y,1.5*Plot_Width,Plot_Height])
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Label_Font_Size)
 xlabel('Time (s)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
