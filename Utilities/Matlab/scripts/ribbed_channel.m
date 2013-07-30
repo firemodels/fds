@@ -16,7 +16,7 @@ h = 0.1;
 C_nu = 0.1;
 dx = 1./nx;
 fds_marker = {'r+-' 'c^-' 'g>-' 'k-'};
-fds_key = {'FDS {\it h/\deltax=2}' 'FDS {\it h/\deltax=4}' 'FDS {\it h/\deltax=8}' 'FDS {\it h/\deltax=16}'};
+fds_key = {'FDS {\it h/\deltax}=2' 'FDS {\it h/\deltax}=4' 'FDS {\it h/\deltax}=8' 'FDS {\it h/\deltax}=16'};
 
 if ~exist([datadir,'ribbed_channel_data.csv'])
     display(['Error: File ' [datadir,'ribbed_channel_data.csv'] ' does not exist. Skipping case.'])
