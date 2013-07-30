@@ -213,7 +213,7 @@ H(6)=loglog(h,.1*h.^2,'k-','LineWidth',Line_Width);
 xlabel('Grid Spacing (m)','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter,'FontName',Font_Name)
 ylabel('L2 Error (kg/m^3)','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter,'FontName',Font_Name)
 axis([1e-2 1e0 1e-4 1e-1])
-legend_handle=legend(H(1:6),'Central','Superbee','CHARM','MP5','O(\delta x)','O(\delta x^2)','Location','NorthWest');
+legend_handle=legend(H(1:6),'Central','Superbee','CHARM','MP5','{\it O}({\it\deltax})','{\it O}({\it\deltax^2})','Location','NorthWest');
 set(legend_handle,'FontSize',Title_Font_Size,'Interpreter',Font_Interpreter)
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Title_Font_Size)
