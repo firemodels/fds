@@ -64,8 +64,7 @@ filename = '../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/cutcell_area.tex
 fid = fopen(filename,'wt');
 fprintf(fid,'%s\n','\begin{table}[ht]');
 fprintf(fid,'%s\n','\begin{center}');
-fprintf(fid,'%s\n','\label{tab_cutcell_areas}');
-fprintf(fid,'%s\n','\caption[Summary of examples for the cut cell algorithm]{Summary of examples for the cut cell algorithm.}');
+fprintf(fid,'%s\n','\caption[Summary of examples for the cut cell algorithm]{\label{tab_cutcell_areas} Summary of examples for the cut cell algorithm.}');
 fprintf(fid,'%s\n','\begin{tabular}{|c|c|c|c|c|c|}\hline');
 fprintf(fid,'%s\n','Case number  &  Illustration  &  Triangle Area  &  NXP  &  Cutcell Area  & Total Cutcell Area \\ \hline');
 fprintf(fid,'%s %s %6.4f %s %6.4f %s %6.4f %s\n', '1    &',  '\includegraphics[totalheight=2.in]{SCRIPT_FIGURES/tri_cube_cut_cell_test_01_image}   &',   tri_area(1), '&  3     &', cut_area(1), '&    ', total_area(1), '\\ \noalign{\smallskip}\hline\noalign{\smallskip}');
