@@ -402,11 +402,11 @@ for i=2:n_plots
                 legend_handle = legend(K,[parse(d1_Key),parse(d2_Key)],'Location',Key_Position);
                 if isequal(Key_Position,'EastOutside')
                    pos = get(legend_handle,'position');
-                   set(legend_handle,'position',[Paper_Width pos(2:4)])
+                   set(legend_handle,'position',[Paper_Width (Plot_Y+(Plot_Height-pos(4))/2) pos(3:4)])
                 end
                 if isequal(Key_Position,'SouthEastOutside')
                    pos = get(legend_handle,'position');
-                   set(legend_handle,'position',[Paper_Width 0.5 pos(3:4)])
+                   set(legend_handle,'position',[Paper_Width Plot_Y pos(3:4)])
                 end
                 set(legend_handle,'Interpreter',Font_Interpreter);
                 set(legend_handle,'Fontsize',Key_Font_Size);
