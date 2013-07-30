@@ -1370,7 +1370,7 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
 #endif
     }
 
-  glutPostRedisplay();
+  if(use_graphics==1)glutPostRedisplay();
 }
 /* ------------------ outputslicebounds ------------------------ */
 /*

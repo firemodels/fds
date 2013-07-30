@@ -2556,7 +2556,7 @@ void Idle_CB(void){
     UpdateTimeLabels();
   }
   Update_Framenumber(changetime);
-  if(redisplay==1){
+  if(redisplay==1&&use_graphics==1){
     glutPostRedisplay();
   }
 }

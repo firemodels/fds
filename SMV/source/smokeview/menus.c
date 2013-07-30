@@ -3130,7 +3130,7 @@ void UnloadSliceMenu(int value){
   int errorcode,i;
 
   updatemenu=1;  
-  glutPostRedisplay();
+  if(use_graphics==1)glutPostRedisplay();
   if(value>=0){
     readslice("",value,UNLOAD,&errorcode);
   }
@@ -3611,7 +3611,7 @@ void LoadSliceMenu(int value){
   int errorcode,i;
 
   if(value==-999)return;
-  glutSetCursor(GLUT_CURSOR_WAIT);
+  if(use_graphics==1)glutSetCursor(GLUT_CURSOR_WAIT);
   if(value>=0){
     char *file;
 
@@ -3658,9 +3658,11 @@ void LoadSliceMenu(int value){
       }
     }
   }
-  updatemenu=1;  
-  glutPostRedisplay();
-  glutSetCursor(GLUT_CURSOR_LEFT_ARROW);
+  updatemenu=1;
+  if(use_graphics==1){
+    glutPostRedisplay();
+    glutSetCursor(GLUT_CURSOR_LEFT_ARROW);
+  }
 }
 
 /* ------------------ LoadVMultiSliceMenu ------------------------ */

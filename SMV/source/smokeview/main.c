@@ -49,6 +49,7 @@ int main(int argc, char **argv){
   return_code=setup_case(argc,argv_sv);
   if(return_code==0&&update_bounds==1)return_code=Update_Bounds();
   if(return_code!=0)return 1;
+  if(compute_fed==1)DefineAllFEDs();
 
   glutMainLoop();
   return 0;

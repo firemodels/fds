@@ -2159,7 +2159,7 @@ extern "C" void Slice_CB(int var){
     update_extreme();
     return;
   }
-  if(var==COLORBAR_LIST2){
+  if(var==COLORBAR_LIST2&&use_graphics==1){
       selectedcolorbar_index=get_colorbar_list_index();
       update_colorbar_list();
       ColorBarMenu(selectedcolorbar_index);
@@ -2499,7 +2499,7 @@ void SETslicemax(int setslicemax_local, float slicemax_local,int setslicechopmax
 /* ------------------ updateslicelist ------------------------ */
 
 extern "C" void updateslicelist(int index){
-  RADIO_slice->set_int_val(index);
+  if(RADIO_slice!=NULL)RADIO_slice->set_int_val(index);
 }
 
 /* ------------------ updateslicelistindex ------------------------ */

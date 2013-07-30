@@ -485,6 +485,7 @@ void parse_commandline(int argc, char **argv){
     }
     else if(strncmp(argv[i],"-fed",4)==0){
       compute_fed=1;
+      use_graphics=0;
     }
     else if(strncmp(argv[i],"-blank",6)==0){
       arg_iblank=1;
