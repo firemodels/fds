@@ -3602,6 +3602,7 @@ void DefineAllFEDs(void){
     LoadSliceMenu(i);
     UnloadSliceMenu(i);
   }
+  exit(0);
 }
 
 /* ------------------ LoadSliceMenu ------------------------ */
