@@ -538,7 +538,6 @@ ENDDO WALL_LOOP
 END SUBROUTINE VISCOSITY_BC
 
 
-
 SUBROUTINE VELOCITY_FLUX(T,NM)
 
 ! Compute convective and diffusive terms of the momentum equations
@@ -913,7 +912,6 @@ MEAN_FORCING_Z: IF (MEAN_FORCING(3)) THEN
    !$OMP END WORKSHARE NOWAIT
 ENDIF MEAN_FORCING_Z
 !$OMP END PARALLEL
-
 
 ! Surface vegetation drag 
 
@@ -1439,10 +1437,11 @@ END SUBROUTINE NO_FLUX
 SUBROUTINE VELOCITY_PREDICTOR(T,NM,STOP_STATUS)
 
 USE TURBULENCE, ONLY: COMPRESSION_WAVE
+USE MANUFACTURED_SOLUTIONS, ONLY: UF_MMS,WF_MMS,VD2D_MMS_U,VD2D_MMS_V
 
 ! Estimates the velocity components at the next time step
 
-REAL(EB) :: TNOW
+REAL(EB) :: TNOW,XHAT,ZHAT
 INTEGER  :: STOP_STATUS,I,J,K
 INTEGER, INTENT(IN) :: NM
 REAL(EB), INTENT(IN) :: T
@@ -1500,6 +1499,29 @@ ENDDO
 
 ENDIF FREEZE_VELOCITY_IF
 
+! Manufactured solution (debug)
+
+IF (PERIODIC_TEST==7) THEN
+   DO K=1,KBAR
+      DO J=1,JBAR
+         DO I=0,IBAR
+            XHAT =  X(I) - UF_MMS*(T+DT)
+            ZHAT = ZC(K) - WF_MMS*(T+DT)
+            US(I,J,K) = VD2D_MMS_U(XHAT,ZHAT,T+DT)
+         ENDDO
+      ENDDO
+   ENDDO
+   DO K=0,KBAR
+      DO J=1,JBAR
+         DO I=1,IBAR
+            XHAT = XC(I) - UF_MMS*(T+DT)
+            ZHAT =  Z(K) - WF_MMS*(T+DT)
+            WS(I,J,K) = VD2D_MMS_V(XHAT,ZHAT,T+DT)
+         ENDDO
+      ENDDO
+   ENDDO
+ENDIF
+
 ! No vertical velocity in Evacuation meshes
 
 IF (EVACUATION_ONLY(NM)) WS = 0._EB
@@ -1518,10 +1540,11 @@ END SUBROUTINE VELOCITY_PREDICTOR
 SUBROUTINE VELOCITY_CORRECTOR(T,NM)
 
 USE TURBULENCE, ONLY: COMPRESSION_WAVE
+USE MANUFACTURED_SOLUTIONS, ONLY: UF_MMS,WF_MMS,VD2D_MMS_U,VD2D_MMS_V
 
 ! Correct the velocity components
 
-REAL(EB) :: TNOW
+REAL(EB) :: TNOW,XHAT,ZHAT
 INTEGER  :: I,J,K
 INTEGER, INTENT(IN) :: NM
 REAL(EB), INTENT(IN) :: T
@@ -1577,6 +1600,29 @@ ENDDO
 !$OMP END PARALLEL
 
 ENDIF FREEZE_VELOCITY_IF
+
+! Manufactured solution (debug)
+
+IF (PERIODIC_TEST==7) THEN
+   DO K=1,KBAR
+      DO J=1,JBAR
+         DO I=0,IBAR
+            XHAT =  X(I) - UF_MMS*T
+            ZHAT = ZC(K) - WF_MMS*T
+            U(I,J,K) = VD2D_MMS_U(XHAT,ZHAT,T)
+         ENDDO
+      ENDDO
+   ENDDO
+   DO K=0,KBAR
+      DO J=1,JBAR
+         DO I=1,IBAR
+            XHAT = XC(I) - UF_MMS*T
+            ZHAT =  Z(K) - WF_MMS*T
+            W(I,J,K) = VD2D_MMS_V(XHAT,ZHAT,T)
+         ENDDO
+      ENDDO
+   ENDDO
+ENDIF
 
 ! No vertical velocity in Evacuation meshes
 

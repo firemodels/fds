@@ -53,6 +53,9 @@ ELSE
 ENDIF
 
 WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
+
+   !IF (PERIODIC_TEST==7) CYCLE WALL_LOOP
+
    WC=>WALL(IW)
    IF (WC%BOUNDARY_TYPE==NULL_BOUNDARY) CYCLE WALL_LOOP
 
@@ -339,28 +342,18 @@ CASE(.TRUE.) PREDICTOR_STEP
 
    ! Extract mass fraction from RHO * ZZ
 
-   IF (PERIODIC_TEST==7) THEN
+   !$OMP DO COLLAPSE(4) SCHEDULE(DYNAMIC) PRIVATE(N,K,J,I)
+   DO N=1,N_TRACKED_SPECIES
       DO K=1,KBAR
          DO J=1,JBAR
             DO I=1,IBAR
-               ZZS(I,J,K,1) = VD2D_MMS_Z_OF_RHO(RHOS(I,J,K))
+               IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
+               ZZS(I,J,K,N) = ZZS(I,J,K,N)/RHOS(I,J,K)
             ENDDO
          ENDDO
       ENDDO
-   ELSE
-      !$OMP DO COLLAPSE(4) SCHEDULE(DYNAMIC) PRIVATE(N,K,J,I)
-      DO N=1,N_TRACKED_SPECIES
-         DO K=1,KBAR
-            DO J=1,JBAR
-               DO I=1,IBAR
-                  IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-                  ZZS(I,J,K,N) = ZZS(I,J,K,N)/RHOS(I,J,K)
-               ENDDO
-            ENDDO
-         ENDDO
-      ENDDO
-      !$OMP END DO
-   ENDIF
+   ENDDO
+   !$OMP END DO
 
    ! Correct mass fractions above or below clip limits
 
@@ -372,6 +365,18 @@ CASE(.TRUE.) PREDICTOR_STEP
       !$OMP SINGLE
       CALL CHECK_MASS_FRACTION
       !$OMP END SINGLE
+   ENDIF
+
+   ! Manufactured solution
+
+   IF (PERIODIC_TEST==7) THEN
+      DO K=1,KBAR
+         DO J=1,JBAR
+            DO I=1,IBAR
+               ZZS(I,J,K,1) = VD2D_MMS_Z_OF_RHO(RHOS(I,J,K))
+            ENDDO
+         ENDDO
+      ENDDO
    ENDIF
 
    ! Predict background pressure at next time step
@@ -462,29 +467,18 @@ CASE(.FALSE.) PREDICTOR_STEP
 
    ! Extract Y_n from rho*Y_n
 
-   IF (PERIODIC_TEST==7) THEN ! Manufactured solution
+   !$OMP DO COLLAPSE(4) SCHEDULE(DYNAMIC) PRIVATE(N,K,J,I)
+   DO N=1,N_TRACKED_SPECIES
       DO K=1,KBAR
          DO J=1,JBAR
             DO I=1,IBAR
-               ZZ(I,J,K,1) = VD2D_MMS_Z_OF_RHO(RHO(I,J,K))
+               IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
+               ZZ(I,J,K,N) = ZZ(I,J,K,N)/RHO(I,J,K)
             ENDDO
          ENDDO
       ENDDO
-   ELSE
-      !$OMP DO COLLAPSE(4) SCHEDULE(DYNAMIC) PRIVATE(N,K,J,I)
-      DO N=1,N_TRACKED_SPECIES
-         DO K=1,KBAR
-            DO J=1,JBAR
-               DO I=1,IBAR
-                  IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-                  ZZ(I,J,K,N) = ZZ(I,J,K,N)/RHO(I,J,K)
-               ENDDO
-            ENDDO
-         ENDDO
-      ENDDO
-      !$OMP END DO
-   ENDIF
-
+   ENDDO
+   !$OMP END DO
 
    ! Correct mass fractions above or below clip limits
 
@@ -496,6 +490,18 @@ CASE(.FALSE.) PREDICTOR_STEP
       !$OMP SINGLE
       CALL CHECK_MASS_FRACTION
       !$OMP END SINGLE
+   ENDIF
+
+   ! Manufactured solution
+
+   IF (PERIODIC_TEST==7) THEN
+      DO K=1,KBAR
+         DO J=1,JBAR
+            DO I=1,IBAR
+               ZZ(I,J,K,1) = VD2D_MMS_Z_OF_RHO(RHO(I,J,K))
+            ENDDO
+         ENDDO
+      ENDDO
    ENDIF
 
    ! Correct background pressure
