@@ -5,45 +5,45 @@
 
 \section{Point Source Radiation Heat Flux}
 
-The point source model assumes that radiative energy is concentrated at a point located within the flame.
-Here the point source is located at a point one-third the height of the flame.
-The radiative heat flux at any distance $R$ from this point is given by
-
+The point source model assumes that radiative energy is concentrated at a point located within a flame.
+Here, the point source is located at a point one-third the height of the flame.
+The radiative heat flux, $\dot q_r''$ (\si{kW/m^2}), at any distance $R$ (\si{m}) from this point can be predicted using
 \be
 \dot q_r'' = \cos\theta \left( \frac{\chi_r \dot Q}{4 \pi R^2} \right)
 \label{eq:point_source}
 \ee
-
-\noindent where
-
+where the $\cos\theta$ term (equal to $x/R$ for targets facing sideways, or $z/R$ for gauges facing upward or downward) accounts for a target that is at an angle $\theta$ from the source. The IOR orientation parameter is used to specify which direction the target or gauge is facing: 1 or -1 for the positive or negative $x$ direction, 2 or -2 for the positive or negative $y$ direction, and 3 or -3 for the positive or negative $z$ direction. $\chi_r$ is the radiative fraction~(-), $\dot Q$ is the HRR of the fire~(\si{kW}), and $R$ is the radial distance from the point source to the edge of the target~(\si{m}) and is given by
 \be
 R = \sqrt{x^2 + \left(z - \frac{L_f}{3} \right)^2}
 \label{eq:point_source_R}
 \ee
-
+where $x$ is the horizontal distance from the point source to the edge of the target~(\si{m}), $z$ is the height of the heat flux target~(\si{m}). The flame height, $L_f$ (\si{m}), is given by
 \be
 L_f = D (3.7 Q^{*^{2/5}} - 1.02)
 \label{eq:point_source_Lf}
 \ee
-
-\be
-Q^* = \frac{\dot Q}{\rho_\infty c_p T_\infty \sqrt{g} D^{5/2}}
-\label{eq:point_source_Qstar}
-\ee
-
+where $D$ is the diameter of the fire source~(\si{m}) and is given by
 \be
 D = \sqrt{\frac{4 A}{\pi}}
 \label{eq:point_source_D}
 \ee
+where $A$ is the area of the fire source~(m$^2$). The nondimensional HRR, $Q^*$, is given by
+\be
+Q^* = \frac{\dot Q}{\rho_\infty c_p T_\infty \sqrt{g} D^{5/2}}
+\label{eq:point_source_Qstar}
+\ee
+where $\rho_\infty$ is the ambient air density~(\si{kg/m^3}), $c_p$ is the specific heat of air~(\si{kJ/(kg.K)}), $T_\infty$ is the ambient air temperature~(\si{K}), and $g$ is the acceleration of gravity~(\si{m/s^2}).
 
-In Eq.~\ref{eq:point_source}, $\dot q_r''$ is the radiative heat flux~(kW/m$^2$), the $\cos\theta$ term (equal to $x/R$ for targets pointing sideways, or $z/R$ for gauges pointing upward or downward) accounts for a target that is at an angle $\theta$ from the source. The IOR orientation parameter is used to specify which direction the target or gauge is facing: 1 or -1 for the positive or negative x direction, 2 or -2 for the positive or negative y direction, and 3 or -3 for the positive or negative z-direction. $\chi_r$ is the radiative fraction~(-), $\dot Q$ is the HRR of the fire~(kW), and $R$ is the radial distance from the point source to the edge of the target~(m).
-
-In Eq.~\ref{eq:point_source_R}, $x$ is the horizontal distance from the point source to the edge of the target~(m), $z$ is the height of the heat flux target~(m), and $L_f$ is the flame height given by Eq.~\ref{eq:point_source_Lf}~(m).
-In Eq.~\ref{eq:point_source_Lf}, $D$ is the diameter of the fire source~(m), and $Q^*$ is the nondimensional HRR given by Eq.~\ref{eq:point_source_Qstar}. In Eq.~\ref{eq:point_source_Qstar}, $\rho_\infty$ is the ambient air density~(kg/m$^3$), $c_p$ is the specific heat of air~(kJ/kg/K), $T_\infty$ is the ambient air temperature~(K), and $g$ is the acceleration of gravity~(m/s$^2$). In Eq.~\ref{eq:point_source_D}, $A$ is the area of the fire source~(m$^2$).
-
-
-\clearpage
-
+\begin{figure}[!ht]
+\begin{center}
+\begin{tabular}{l}
+\includegraphics[width=4.0in]{SCRIPT_FIGURES/Scatterplots/Point_Source_Radiation_Heat_Flux}
+\end{tabular}
+\end{center}
+\caption[Summary of point source radiation heat flux predictions]
+{Summary of point source radiation heat flux temperature predictions.}
+\label{Heat_Flux_Point_Source_Summary}
+\end{figure}
 
 % \section{Immersed HGL Radiation Heat Flux}
 
@@ -72,22 +72,7 @@ In Eq.~\ref{eq:point_source_Lf}, $D$ is the diameter of the fire source~(m), and
 
 % \clearpage
 
-\section{Summary of Heat Flux Predictions}
-
-Summary scatter plots of the heat flux predictions are shown on the following pages.
-
-\begin{figure}[ht]
-\begin{center}
-\begin{tabular}{l}
-\includegraphics[width=4.0in]{SCRIPT_FIGURES/Scatterplots/Point_Source_Radiation_Heat_Flux}
-\end{tabular}
-\end{center}
-\caption[Summary of point source radiation heat flux predictions]
-{Summary of point source radiation heat flux temperature predictions.}
-\label{Heat_Flux_Point_Source_Summary}
-\end{figure}
-
-% \begin{figure}[p]
+% \begin{figure}[!ht]
 % \begin{center}
 % \begin{tabular}{l}
 % \includegraphics[width=4.0in]{SCRIPT_FIGURES/Scatterplots/Immersed_HGL_Radiation_Heat_Flux}
@@ -98,7 +83,7 @@ Summary scatter plots of the heat flux predictions are shown on the following pa
 % \label{Heat_Flux_Immersed_HGL_Summary}
 % \end{figure}
 
-% \begin{figure}[p]
+% \begin{figure}[!ht]
 % \begin{center}
 % \begin{tabular}{l}
 % \includegraphics[width=4.0in]{SCRIPT_FIGURES/Scatterplots/Immersed_Plume_Radiation_Heat_Flux}
