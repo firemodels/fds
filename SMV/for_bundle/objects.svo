@@ -537,7 +537,7 @@ OBJECTDEF // object for tree trunk
  
 OBJECTDEF // object for tree canopy
  CANOPY
-:R=25 :G=128 :B=0 :CANOPY_BASE_H :CANOPY_D :CANOPY_H 
+:CANOPY_BASE_H :CANOPY_D :CANOPY_H :R=25 :G=128 :B=0 
 $R $G $B setrgb
  0.0 0.0 $CANOPY_BASE_H translate $CANOPY_D $CANOPY_H drawcone
 
