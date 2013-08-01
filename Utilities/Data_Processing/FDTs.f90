@@ -6,7 +6,7 @@ CHARACTER(60) :: INPUT_FILE,OUTPUT_FILE
 REAL :: ACTIVATION_TEMPERATURE,A_C,ALPHA,AREA,A_T,A_V,C_I,CONDUIT_DIAMETER,CONDUIT_THICKNESS,CUTOFF_TIME,C_PL,C_CJ, &
         C_S,C_STEEL,D,DELTA,DELTA_T_C,DT,EPSILON,F_V,H,H_C,H_I,H_K,H_V,JACKET_THICKNESS,K_I,K_S,L,LOCATION_FACTOR,L_F, &
         LEAK_AREA,MASS_PER_LENGTH,M_DOT,P,Q,Q_STAR,Q_STEP,R,RADIATIVE_FRACTION,RHO_AIR,RHO_I,RHO_S,RHO_STEEL,RTI,T, &
-        t_activation,T_END,T_P,TMP_A,TMP_G,T_CLOCK,U_JET,V,V_DOT,W,W_D,W_V
+        t_activation,T_END,T_P,TMP_A,TMP_G,T_CLOCK,U_JET,V,V_ENT,V_EXP,V_UL,V_DOT,W,W_D,W_V,Z_YT,Z_ASET
 REAL, DIMENSION(20) :: X,Z,T_PLUME,R_VALUES,H_VALUES
 REAL, DIMENSION(9999) :: TIME_RAMP,Q_RAMP
 REAL, DIMENSION(0:5) :: TMP_RAMP,T_RAMP
@@ -352,8 +352,9 @@ OPEN(11,FILE=TRIM(OUTPUT_FILE),FORM='FORMATTED',STATUS='REPLACE')
 A_T = 2.*L*W + 2.*L*H + 2.*W*H - A_V
 TMP_A = TMP_A + 273.
 M = L*W*H*RHO_A
+Z_ASET = H
 
-WRITE(11,'(A)') 'Time,Temp,HGL Depth (m),Immersed HGL Radiation Heat Flux (kW/m2)'
+WRITE(11,'(A)') 'Time,Temp,HGL Depth Yamana Tanaka (m),HGL Depth ASET (m),Immersed HGL Radiation Heat Flux (kW/m2)'
 
 DO I=0,50
 
@@ -366,11 +367,17 @@ DO I=0,50
 
    Q_RAD = SIGMA*(TMP_G**4-TMP_A**4)
 
+   ! Calculate HGL height using ASET correlation
+   V_EXP = Q / 353
+   V_ENT = ((1 / 1) * 0.071 / 1.18) * (1 * Q)**(1./3.) * (Z_ASET - 0)**(5./3.)
+   V_UL = V_EXP + V_ENT
+   Z_ASET = Z_ASET - V_UL / (L * W)
+
    ! Calculate HGL height using Yamana and Tanaka correlation (1985)
    K = 0.076/(353/TMP_G)
-   Z = (2*K*Q**(1./3.)*T/(3*L*W) + (1/H**(2./3.)))**(-3./2.)
+   Z_YT = (2*K*Q**(1./3.)*T/(3*L*W) + (1/H**(2./3.)))**(-3./2.)
 
-   WRITE(11,'(F6.1,A1,F6.1,A1,F6.2,A1,F6.2)') T,',',TMP_G-273.,',',Z,',',Q_RAD
+   WRITE(11,'(F6.1,A1,F6.1,A1,F6.2,A1,F6.2,A1,F6.2)') T,',',TMP_G-273.,',',Z_YT,',',Z_ASET,',',Q_RAD
 
 ENDDO
 
