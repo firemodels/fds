@@ -9,6 +9,7 @@ $VDIR/Beyler_Hood/FDS_Output_Files/Process_Output.csh
 $VDIR/BRE_Spray/FDS_Output_Files/Process_Output.csh
 $VDIR/Bryant_Doorway/FDS_Output_Files/Process_Output.csh
 $VDIR/CAROLFIRE/FDS_Output_Files/Process_Output.csh
+$VDIR/CHRISTIFIRE/FDS_Output_Files/Process_Output.csh
 $VDIR/CSTB_Tunnel/FDS_Output_Files/Process_Output.csh
 $VDIR/Cup_Burner/FDS_Output_Files/Process_Output.csh
 $VDIR/FAA_Cargo_Compartments/FDS_Output_Files/Process_Output.csh
