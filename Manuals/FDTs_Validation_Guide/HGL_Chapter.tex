@@ -9,10 +9,10 @@
 
 For a compartment with natural ventilation, the correlation of McCaffrey, Quintiere, and Harkleroad (MQH) predicts that the HGL temperature rise, $\Delta T_g$, is given by
 \be
-\Delta T_g = 6.85 \left( \frac{\dot Q^2}{A_0 \sqrt{H_0} h_k A_T} \right)^{1/3} \quad ^\circ{\rm C}
+\Delta T_g = 6.85 \left( \frac{\dot Q^2}{A_o \sqrt{H_o} h_k A_T} \right)^{1/3} \quad ^\circ{\rm C}
 \label{eq:MQH}
 \ee
-where $\dot Q$ is the heat release rate (HRR) of the fire~(\si{kW}), $A_0$ is the area of the ventilation opening~(\si{m^2}), $H_0$ is the height of the ventilation opening~(\si{m}), and $A_T$ is the total area of the compartment enclosing surfaces~(\si{m^2}), excluding areas of vent openings. The heat transfer coefficient, $h_k$ (\si{kW/(m^2.K})), is given by
+where $\dot Q$ is the heat release rate (HRR) of the fire~(\si{kW}), $A_o$ is the area of the ventilation opening~(\si{m^2}), $H_o$ is the height of the ventilation opening~(\si{m}), and $A_T$ is the total area of the compartment enclosing surfaces~(\si{m^2}), excluding areas of vent openings. The heat transfer coefficient, $h_k$ (\si{kW/(m^2.K})), is given by
 \be
 h_k = \left\{ \begin{array}{cl}
    \sqrt{k \rho c/t}  & t \le t_p \\[0.1in]
@@ -48,10 +48,10 @@ t_p = \left( \frac{\rho c}{k} \right) \left( \frac{\delta}{2} \right)^2
 
 For a compartment with forced ventilation, the correlation of Foote, Pagni, and Alvares (FPA) predicts that the HGL temperature rise, $\Delta T_g$, is given by
 \be
-\Delta T_g = \left[ 0.63 \left( \frac{\dot Q}{\dot m c_p T_\infty} \right)^{0.72} \left( \frac{h_k A_T}{\dot m c_p} \right)^{-0.36} \right] T_\infty
+\Delta T_g = \left[ 0.63 \left( \frac{\dot Q}{\dot m_g c_p T_\infty} \right)^{0.72} \left( \frac{h_k A_T}{\dot m_g c_p} \right)^{-0.36} \right] T_\infty \quad ^\circ{\rm C}
 \label{eq:FPA}
 \ee
-where $\dot Q$ is the HRR of the fire~(\si{kW}), $\dot m$ is the compartment ventilation mass flow rate~(\si{kg/s}), $c_p$ is the specific heat of air (\si{kJ/(kg.K)}), $T_\infty$ is the ambient air temperature~(\si{\celsius}), $h_k$ is the heat transfer coefficient~(\si{kW/(m^2.K)}), and $A_T$ is the total area of the compartment enclosing surfaces~(\si{m^2}), excluding areas of vent openings. The heat transfer coefficient, $h_k$ (\si{kW/(m^2.K)}), is given by
+where $\dot Q$ is the HRR of the fire~(\si{kW}), $\dot m_g$ is the compartment ventilation mass flow rate~(\si{kg/s}), $c_p$ is the specific heat of air (\si{kJ/(kg.K)}), $T_\infty$ is the ambient air temperature~(\si{\celsius}), $h_k$ is the heat transfer coefficient~(\si{kW/(m^2.K)}), and $A_T$ is the total area of the compartment enclosing surfaces~(\si{m^2}), excluding areas of vent openings. The heat transfer coefficient, $h_k$ (\si{kW/(m^2.K)}), is given by
 \be
 h_k = \left\{ \begin{array}{cl}
    \sqrt{k \rho c/t}  & t \le t_p \\[0.1in]
@@ -81,10 +81,10 @@ t_p = \left( \frac{\rho c}{k} \right) \left( \frac{\delta}{2} \right)^2
 
 For a compartment with forced ventilation, the correlation of Deal and Beyler (DB) predicts that the HGL temperature rise, $\Delta T_g$, is given by
 \be
-\Delta T_g = \left( \frac{\dot Q}{\dot m c_p + h_k A_T} \right)
+\Delta T_g = \left( \frac{\dot Q}{\dot m_g c_p + h_k A_T} \right) \quad ^\circ{\rm C}
 \label{eq:DB}
 \ee
-where $\dot Q$ is the HRR of the fire~(\si{kW}), $\dot m$ is the compartment ventilation mass flow rate~(\si{kg/s}), $c_p$ is the specific heat of air (\si{kJ/(kg.K)}), $T_\infty$ is the ambient air temperature~(\si{\celsius}), $h_k$ is the heat transfer coefficient~(\si{kW/(m^2.K)}), and $A_T$ is the total area of compartment enclosing surfaces~(\si{m^2}), excluding areas of vent openings. The heat transfer coefficient, $h_k$ (\si{kW/(m^2.K)}), is given by 
+where $\dot Q$ is the HRR of the fire~(\si{kW}), $\dot m_g$ is the compartment ventilation mass flow rate~(\si{kg/s}), $c_p$ is the specific heat of air (\si{kJ/(kg.K)}), $T_\infty$ is the ambient air temperature~(\si{\celsius}), $h_k$ is the heat transfer coefficient~(\si{kW/(m^2.K)}), and $A_T$ is the total area of compartment enclosing surfaces~(\si{m^2}), excluding areas of vent openings. The heat transfer coefficient, $h_k$ (\si{kW/(m^2.K)}), is given by 
 \be
 h_k = 0.4\ \mathrm{max} \left( \sqrt{\frac{k \rho c}{t}} , \frac{k}{\delta} \right)
 \label{eq:DB_hk}
@@ -108,7 +108,7 @@ where $k$ is the thermal conductivity of the interior lining~(\si{kW/(m.K)}), $\
 
 For a compartment with no ventilation (closed doors) and constant HRR, the correlation of Belyer predicts that the HGL temperature rise, $\Delta T_g$, is given by
 \be
-\Delta T_g = \frac{2 K_2}{K_1^2} (K_1 \sqrt{t} - 1 + e^{-K_1 \sqrt{t}})
+\Delta T_g = \frac{2 K_2}{K_1^2} (K_1 \sqrt{t} - 1 + e^{-K_1 \sqrt{t}}) \quad ^\circ{\rm C}
 \label{eq:Beyler}
 \ee
 where $t$ is the exposure time~(\si{\second}). $K_1$ is given by
