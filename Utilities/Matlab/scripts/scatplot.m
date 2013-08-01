@@ -365,9 +365,10 @@ for j=2:length(Q);
                     ix = x_lim(1):1e-3:x_lim(2);
                     mu = mean(ln_M_E);
                     sd = std(ln_M_E);
-                    iy = pdf('normal',ix,mu,sd);
+                    % Generate PDF of normal distribution (overlaid on results)
+                    iy = 1/(sd*sqrt(2*pi))*exp(-(ix-mu).^2/(2*sd^2));
                     plot(ix,iy*trapz(xout,n),'k','LineWidth',2);
-                    
+
                     % Additional plot content
                     set(gca,'XLim',[x_lim(1),x_lim(2)]);
                     y_lim = get(gca,'YLim') * 1.25;
