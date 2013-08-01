@@ -486,33 +486,32 @@ void readiso_orig(const char *file, int ifile, int flag, int *errorcode){
 
         if(ib->dataflag==1){
           unsigned short *tvertices_i;
-          float tcolor0, tcolorfactor, tcolor;
+          float tcolor0, tcolorfactor, tcolorfactor2;
           
           EGZ_FREAD(&asurface->tmin,4,1,isostream);
           EGZ_FREAD(&asurface->tmax,4,1,isostream);
+          //printf("amin=%f amax=%f imin=%f imax=%f\n",asurface->tmin,asurface->tmax,ib->tmin,ib->tmax);;
           if(NewMemory((void **)&tvertices_i,nvertices_i*sizeof(unsigned short))==0){
             break_frame=1;
             break;
           }
           EGZ_FREAD(tvertices_i,2,(unsigned int)nvertices_i,isostream);
+          tcolorfactor = (asurface->tmax-asurface->tmin)/65535.;
           if(ib->tmax>ib->tmin){
-            tcolor0 = (asurface->tmin-ib->tmin)/(ib->tmax-ib->tmin);
-            tcolorfactor = (asurface->tmax-asurface->tmin)/65535.;
-            tcolorfactor /= (ib->tmax-ib->tmin);
+            tcolorfactor2 = 255.0/(ib->tmax-ib->tmin);
           }
           else{
-            tcolor0=0.5;
-            tcolorfactor=0.0;
+            tcolorfactor2 = 1.0;
           }
           for(ivert=0;ivert<nvertices_i;ivert++){
             isovert *isoverti;
             unsigned char colorindex;
+            float tcolor;
                           
             isoverti = asurface->iso_vertices+ivert;
-            tcolor = tcolor0 + tvertices_i[ivert]*tcolorfactor;
-            if(tcolor<0.0)tcolor=0.0;
-            if(tcolor>1.0)tcolor=1.0;
-            colorindex = (unsigned char)(tcolor*255);
+            tcolor = asurface->tmin + tvertices_i[ivert]*tcolorfactor;
+            colorindex = (unsigned char)CLAMP((tcolor-ib->tmin)*tcolorfactor2,0,255);
+           // printf("color= %f %i %i\n",tcolor,(int)colorindex,(int)tvertices_i[ivert]);
             isoverti->color = rgb_iso+4*colorindex;
             isoverti->ctexturecolor=colorindex;
           }
