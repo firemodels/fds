@@ -1,6 +1,6 @@
 % !TEX root = FDTs_Validation_Guide.tex
 
-\chapter{HGL Temperature}
+\chapter{HGL Temperature and Depth}
 \label{HGL_Chapter}
 
 \clearpage
@@ -133,3 +133,70 @@ where $\dot Q$ is the HRR of the fire~(\si{kW}).
 {Summary of HGL temperature predictions for no ventilation tests using the Beyler method.}
 \label{HGL_Summary_No_Ventilation}
 \end{figure}
+
+\section{HGL Depth}
+
+\subsection{ASET}
+
+For a compartment with no ventilation (closed doors) and constant HRR, the available safe egress time (ASET) correlation predicts that the HGL height, $z$, is calculated iteratively using
+\be
+z = z - \frac{\dot V_{ul}}{L W}
+\label{eq:ASET_1}
+\ee
+where $L$ and $W$ are the length and height of the compartment, respectively.
+The change in volume of the upper layer, $\dot V_{ul}$, is given by
+\be
+\dot V_{ul} = \dot V_{exp} + \dot V_{ent}
+\label{eq:ASET_2}
+\ee
+The volumetric expansion rate, $\dot V_{exp}$, is given by
+\be
+\dot V_{exp} = \frac{\dot Q}{353}
+\label{eq:ASET_3}
+\ee
+The volume entrainment rate, $\dot V_{ent}$, is given by
+\be
+\dot V_{ent} = \left( \frac{1}{K_f} \frac{0.071}{1.18} \right) (K_f \dot Q)^{1/3} (z - z_0)^{5/3}
+\label{eq:ASET_4}
+\ee
+where $K_f$ is the location factor, and $z_0$ is the fuel height. The location factor has a value of 1, 2, or 4, which corresponds to a fire away from walls or corners, a fire adjacent to a wall, or a fire located in a corner, respectively.
+
+\begin{figure}[!ht]
+\begin{center}
+\begin{tabular}{l}
+\includegraphics[width=4.0in]{SCRIPT_FIGURES/Scatterplots/HGL_Depth_ASET}
+\end{tabular}
+\end{center}
+\caption[Summary of HGL depth predictions using ASET]
+{Summary of HGL depth predictions using ASET.}
+\label{HGL_Depth_ASET}
+\end{figure}
+
+
+\clearpage
+
+
+\subsection{Yamana and Tanaka}
+
+For a compartment with no ventilation (closed doors) and constant HRR, the correlation of Yamana and Tanaka predicts that the HGL height, $z$, is given by
+\be
+z = \left( \frac{2 k \dot Q^{1/3} t}{3 A_c} + \frac{1}{h_c^{2/3}} \right)^{-3/2}
+\label{eq:Yamana_Tanaka}
+\ee
+where $\dot Q$ is the HRR~(\si{kW}), $t$ is the time after ignition~(\si{s}), $A_c$ is the compartment floor area~(\si{m^2}), and $h_c$ is the compartment height~(\si{m}). The constant $k$ is given by
+\be
+k = \frac{0.076}{(353/T_g)}
+\ee
+where $T_g$ is the HGL temperature~(\si{K}).
+
+\begin{figure}[!ht]
+\begin{center}
+\begin{tabular}{l}
+\includegraphics[width=4.0in]{SCRIPT_FIGURES/Scatterplots/HGL_Depth_Yamana_Tanaka}
+\end{tabular}
+\end{center}
+\caption[Summary of HGL depth predictions using Yamana and Tanaka]
+{Summary of HGL depth predictions using Yamana and Tanaka method.}
+\label{HGL_Depth_YT}
+\end{figure}
+
