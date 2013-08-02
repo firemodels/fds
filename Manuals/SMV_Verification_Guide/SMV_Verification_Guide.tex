@@ -880,6 +880,21 @@ measure of the uncertainty of the wind direction measurement.
 Likewise the depth (from front to back) of these shells give a
 measure of the uncertainty of the wind velocity measurement
 
+Figure \ref{figWUItrees} shows an example of trees drawn as
+Smokeview objects.  The tree is drawn as a cylinder colored brown
+and a cone colored green.  Tree objects may change appearance as a
+simulation progresses as illustrated in Fig. \ref{figWUItreesB}.
+Typical views are a normal view, partially burned and completely
+burned.
+
+Figure \ref{figWUIparts} shows an example of trees drawn as
+particles. Particle represent small units of fuel. Particle color
+represents temperature.  As particles use up fuel they disappear.
+When many trees are simulated, it is difficult to discern
+individual trees when drawn as particles.  Fig. \ref{figWUIiso}
+shows an equivalent view using isosurface. The isosurface location
+is determined from the boundary of the  particle cloud shown in
+Fig. \ref{figWUIparts}.
 
 
 \begin{figure}[\figoptions]
@@ -958,6 +973,45 @@ occurred occurred respectively.}
 \end{center}
  \caption[A test showing wind vectors]{A test showing wind vectors.}
 \label{figwind}%
+\end{figure}
+
+\begin{figure}[\figoptions]
+\begin{center}
+\begin{tabular}{c}
+ \includegraphics[width=5.5in]{FIGURES/tree_line_objects}\\
+ \end{tabular}
+\end{center}
+ \caption[A test showing trees drawn as Smokeview objects.]{A test showing trees drawn as Smokeview objects.  The tree canopy is colored green drawn as a cone,
+ the tree trun is colored brown drawn as a cylinder.}
+\label{figWUItrees}%
+\end{figure}
+
+\begin{figure}[\figoptions]
+\begin{center}
+\begin{tabular}{c}
+ \includegraphics[width=5.5in]{FIGURES/tree_line_part_000}\\
+ \includegraphics[width=5.5in]{FIGURES/tree_line_part_020}\\
+ \includegraphics[width=5.5in]{FIGURES/tree_line_part_040}\\
+ \includegraphics[width=5.5in]{FIGURES/tree_line_part_060}
+ \end{tabular}
+\end{center}
+ \caption[A test showing trees drawn as particles.]{A test showing trees drawn as particles.  Particle represent small units of fuel.
+ Particle color represents temperature.  As particles use up fuel they disappear.}
+\label{figWUIparts}%
+\end{figure}
+
+\begin{figure}[\figoptions]
+\begin{center}
+\begin{tabular}{c}
+ \includegraphics[width=5.5in]{FIGURES/tree_line_iso_000}\\
+ \includegraphics[width=5.5in]{FIGURES/tree_line_iso_020}\\
+ \includegraphics[width=5.5in]{FIGURES/tree_line_iso_040}\\
+ \includegraphics[width=5.5in]{FIGURES/tree_line_iso_060}
+ \end{tabular}
+\end{center}
+ \caption[A test showing trees drawn as isosurfaces.]{A test showing trees drawn as isosurface.  The surface location
+ is determined from the boundary of the  particle cloud shown in Fig. \ref{figWUIparts}.}
+\label{figWUIiso}%
 \end{figure}
 
 \chapter{Other Tests}
