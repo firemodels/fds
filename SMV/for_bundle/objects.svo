@@ -534,12 +534,27 @@ OBJECTDEF // object for tree trunk
  :TRUNK_BASE_H :TRUNK_D :TRUNK_H :R=138 :G=69 :B=18
  $R $G $B setrgb
  0.0 0.0 $TRUNK_BASE_H translate $TRUNK_D $TRUNK_H drawdisk
+NEWFRAME
+ :TRUNK_BASE_H :TRUNK_D :TRUNK_H 
+ 0.0 0.0 0.0 setrgb
+ 0.0 0.0 $TRUNK_BASE_H translate $TRUNK_D $TRUNK_H drawdisk
+NEWFRAME
+ :TRUNK_BASE_H :TRUNK_D :TRUNK_H 
+ 0.0 0.0 0.0 setrgb
+ 0.0 0.0 $TRUNK_BASE_H translate $TRUNK_D $TRUNK_H drawdisk
  
 OBJECTDEF // object for tree canopy
  CANOPY
 :CANOPY_BASE_H :CANOPY_D :CANOPY_H :R=25 :G=128 :B=0 
 $R $G $B setrgb
  0.0 0.0 $CANOPY_BASE_H translate $CANOPY_D $CANOPY_H drawcone
+NEWFRAME
+:CANOPY_BASE_H :CANOPY_D :CANOPY_H 
+0.0 0.0 0.0 setrgb
+ 0.0 0.0 $CANOPY_BASE_H translate $CANOPY_D $CANOPY_H drawcone
+NEWFRAME
+ 0.0 0.0 0.0 translate
+ 
 
 OBJECTDEF // object for house
  HOUSE
