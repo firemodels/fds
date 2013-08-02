@@ -797,20 +797,16 @@ void script_loadparticles(scriptdata *scripti){
 
 void script_loadiso(scriptdata *scripti){
   int i;
-  int errorcode;
   int count=0;
 
   PRINTF("script: loading isosurface files of type: %s\n\n",scripti->cval);
 
   for(i=0;i<nisoinfo;i++){
+    int errorcode;
     isodata *isoi;
-    int len;
-    int imatch;
 
     isoi = isoinfo + i;
-    len = strlen(scripti->cval);
-    imatch = match_upper(isoi->surface_label.longlabel,scripti->cval);
-    if(imatch==1||imatch==2){
+    if(STRCMP(isoi->surface_label.longlabel,scripti->cval)==0){
       readiso(isoi->file,i,LOAD,&errorcode);
       count++;
     }
@@ -818,7 +814,6 @@ void script_loadiso(scriptdata *scripti){
   if(count==0)fprintf(stderr,"*** Error: Isosurface files of type %s failed to load\n",scripti->cval);
   force_redisplay=1;
   updatemenu=1;
-
 }
 
 /* ------------------ script_loadvolsmoke ------------------------ */

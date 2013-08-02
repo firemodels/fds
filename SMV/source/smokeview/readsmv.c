@@ -6925,6 +6925,7 @@ typedef struct {
             strcat(long_label,isoi->color_label.longlabel);
             strcat(long_label,")");
           }
+          trim(long_label);
         }
       }
       continue;
