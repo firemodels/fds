@@ -180,8 +180,8 @@ RENDERONCE
 // render iso-surface
 
 UNLOADALL
-LOADISO
- TEMPERATURE
+LOADFILE
+ thouse5_01.iso
 SETTIMEVAL
  5.000000
 RENDERONCE
@@ -411,8 +411,8 @@ thouse5_plot3d_iso2
 // render two left/right stereo images
 
 UNLOADALL
-LOADISO
- TEMPERATURE
+LOADFILE
+ thouse5_01.iso
 LOADINIFILE
  thouse5_lr_stereo.ini 
 SETTIMEVAL
