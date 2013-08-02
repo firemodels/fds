@@ -837,7 +837,6 @@ void createtourpaths(void){
       if(kf1->viewtype==REL_VIEW||kf2->viewtype==REL_VIEW){
         float az;
         float dxyz[3], denom, dxyz2[3];
-        float dist;
 
         dxyz[0] = view_local[0];
         dxyz[1] = view_local[1];
@@ -887,7 +886,7 @@ void hermiteeye(float t, keyframe *kf1, keyframe *kf2, float *eye, float *slope)
   t3 = t2*t;
 
   for(i=0;i<3;i++){
-    float p0, p1, m0, m1, val;
+    float p0, p1, m0, m1;
 
     p0 = kf1->nodeval.eye[i];
     p1 = kf2->nodeval.eye[i];
@@ -903,7 +902,7 @@ void hermiteeye(float t, keyframe *kf1, keyframe *kf2, float *eye, float *slope)
 /* ------------------ hermiteother ------------------------ */
 
 void hermiteother(float t, keyframe *kf1, keyframe *kf2, pathdata *pj){
-  float p0, p1, m0, m1, val;
+  float p0, p1, m0, m1;
   float t3, t2;
 
   t2 = t*t;
@@ -995,7 +994,6 @@ keyframe *add_frame(keyframe *framei, float time_local, float *eye, float key_az
   frame->nodeval.elev_path=elev_path;
   frame->bank=bank;
   NORMALIZE_XYZ(feye,eye);
-  feye[3]=key_az_path;
   NORMALIZE_XYZ(fxyz_view,view);
 
   frame->noncon_time=time_local;

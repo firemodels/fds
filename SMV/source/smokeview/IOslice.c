@@ -917,7 +917,7 @@ void readvslice(int ivslice, int flag, int *errorcode){
   push_vslice_loadstack(ivslice);
   
 #ifdef _DEBUG
-  PRINTF("After vslice load: ");
+  PRINTF("After vslice load: \n");
   PrintMemoryInfo;
 #endif
   Idle_CB();
@@ -1060,7 +1060,7 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
       update_unit_defs();
       Update_Times();
 #ifdef pp_MEMDEBUG
-      PRINTF("After slice unload: ");
+      PRINTF("After slice unload: \n");
       PrintMemoryInfo;
       CountMemoryBlocks(num_memblocks_unload,num_memblocks_load);
 #endif
@@ -1316,7 +1316,7 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
     ASSERT(ValidPointer(sd->qslicedata,sizeof(float)*sd->nslicei*sd->nslicej*sd->nslicek*sd->ntimes));
   }
   CheckMemory;
-  PRINTF("After slice file load: ");
+  PRINTF("After slice file load: \n");
   CountMemoryBlocks(sd->num_memblocks,num_memblocks_load);
   PrintMemoryInfo;
 #endif

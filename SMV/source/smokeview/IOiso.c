@@ -239,7 +239,7 @@ void readiso_geom(const char *file, int ifile, int flag, int *errorcode){
   Update_Times();
   get_faceinfo();
 #ifdef _DEBUG
-  PRINTF("After iso load: ");
+  PRINTF("After iso load: \n");
   PrintMemoryInfo;
 #endif
   Idle_CB();
@@ -296,7 +296,7 @@ void readiso_orig(const char *file, int ifile, int flag, int *errorcode){
 
 #ifdef _DEBUG
   if(flag==UNLOAD){
-    PRINTF("After iso unload: ");
+    PRINTF("After iso unload: \n");
     PrintAllMemoryInfo;
   }
 #endif
@@ -486,7 +486,7 @@ void readiso_orig(const char *file, int ifile, int flag, int *errorcode){
 
         if(ib->dataflag==1){
           unsigned short *tvertices_i;
-          float tcolor0, tcolorfactor, tcolorfactor2;
+          float tcolorfactor, tcolorfactor2;
           
           EGZ_FREAD(&asurface->tmin,4,1,isostream);
           EGZ_FREAD(&asurface->tmax,4,1,isostream);
@@ -674,6 +674,7 @@ void readiso_orig(const char *file, int ifile, int flag, int *errorcode){
   updatemenu=1;
   iisotype=getisotype(ib);
 
+  CheckMemory;
   if(ib->dataflag==1){
     iisottype = getisottype(ib);
     sync_isobounds(iisottype);
@@ -683,7 +684,7 @@ void readiso_orig(const char *file, int ifile, int flag, int *errorcode){
 
   Update_Times();
 #ifdef _DEBUG
-  PRINTF("After iso load: ");
+  PRINTF("After iso load: \n");
   PrintMemoryInfo;
 #endif
   Idle_CB();
@@ -1498,8 +1499,7 @@ void setisolabels(float smin, float smax,
 /* ------------------ sync_isobounds ------------------------ */
 
 void sync_isobounds(int isottype){
-  int i,j,ii,kk,ncount;
-  isosurface *asurface;
+  int i,ncount;
   int firsttime=1;
   float tmin_local, tmax_local;
 
@@ -1552,6 +1552,8 @@ void sync_isobounds(int isottype){
   for(i=0;i<nisoinfo;i++){
     isodata *isoi;
     mesh *meshi;
+    int ii;
+    isosurface *asurface;
 
     isoi = isoinfo + i;
     if(isoi->loaded==0||isoi->type!=iisotype||isoi->dataflag==0)continue;
@@ -1561,8 +1563,11 @@ void sync_isobounds(int isottype){
     asurface=meshi->animatedsurfaces;
 
     for(ii=0;ii<meshi->niso_times;ii++){
+      int j;
+
       for(j=0;j<meshi->nisolevels;j++){
         float tcolor, tcolor0, tcolorfactor;
+        int kk;
 
         if(isoi->tmax>isoi->tmin){
           tcolor0 = (asurface->tmin-isoi->tmin)/(isoi->tmax-isoi->tmin);
@@ -1575,9 +1580,7 @@ void sync_isobounds(int isottype){
         }
         for(kk=0;kk<asurface->nvertices;kk++){
           tcolor = tcolor0 + asurface->tvertices[kk]*tcolorfactor;
-          if(tcolor<0.0)tcolor=0.0;
-          if(tcolor>1.0)tcolor=1.0;
-          asurface->color8[kk] = (unsigned char)(tcolor*255);
+          asurface->color8[kk] = (unsigned char)(CLAMP(tcolor,0.0,1.0)*255);
         }
         asurface++;
       }

@@ -13,8 +13,6 @@ char translate_revision[]="$Revision$";
 #include <ctype.h>
 #include "MALLOC.h"
 #include "translate.h"
-#include "string_util.h"
-#include "file_util.h"
 
 /* ------------------ compare_trdata ------------------------ */
 

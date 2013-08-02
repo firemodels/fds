@@ -702,15 +702,12 @@ void Synch_Times(void){
 
   /* synchronize tour times */
 
-    {
+    for(j=0;j<ntours;j++){
       tourdata *tourj; 
-      int j;
 
-      for(j=0;j<ntours;j++){
-        tourj = tourinfo + j;
-        if(tourj->display==0)continue;
-        tourj->timeslist[n]=get_itime(n,tourj->timeslist,tourj->path_times,tourj->ntimes);
-      }
+      tourj = tourinfo + j;
+      if(tourj->display==0)continue;
+      tourj->timeslist[n]=get_itime(n,tourj->timeslist,tourj->path_times,tourj->ntimes);
     }
 
     /* synchronize terrain times */

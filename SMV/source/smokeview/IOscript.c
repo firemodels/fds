@@ -1337,17 +1337,17 @@ void script_settourkeyframe(scriptdata *scripti){
   touri=selected_tour;
   keyframe_time=scripti->fval;
   for(keyj=(touri->first_frame).next;keyj->next!=NULL;keyj=keyj->next){
-    float difftime;
+    float diff_time;
 
     if(keyj==(touri->first_frame).next){
       minkey=keyj;
       minkeytime=ABS(keyframe_time-keyj->nodeval.time);
       continue;
     }
-    difftime=ABS(keyframe_time-keyj->nodeval.time);
-    if(difftime<minkeytime){
+    diff_time=ABS(keyframe_time-keyj->nodeval.time);
+    if(diff_time<minkeytime){
       minkey=keyj;
-      minkeytime=difftime;
+      minkeytime=diff_time;
     }
   }
   if(minkey!=NULL){

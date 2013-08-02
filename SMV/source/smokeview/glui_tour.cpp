@@ -458,7 +458,6 @@ extern "C" void update_tourindex(void){
 void TOUR_CB(int var){
   keyframe *thiskey,*nextkey,*newframe;
   keyframe *lastkey;
-  float dummy;
   tourdata *thistour=NULL;
   float *xyz_view,*eye;
 

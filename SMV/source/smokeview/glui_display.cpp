@@ -391,7 +391,6 @@ extern "C" void glui_labels_rename(void){
 extern "C" void glui_labels_setup(int main_window){
   labeldata *gl;
   int init_status=0;
-  int i;
 
   update_glui_labels=0;
   if(glui_labels!=NULL){
@@ -752,11 +751,15 @@ extern "C" void glui_labels_setup(int main_window){
   SPINNER_tetra_vertices[11]=glui_labels->add_spinner_to_panel(PANEL_geom2c,"z:",GLUI_SPINNER_FLOAT,tetra_vertices+11);
 
   glui_labels->add_checkbox_to_panel(ROLLOUT_geomtest,"show intersection",&show_intersection);
-  for(i=0;i<10;i++){
-    char label[100];
+  {
+    int i;
+    
+    for(i=0;i<10;i++){
+      char label[100];
 
-    sprintf(label,"face %i",i);
-    glui_labels->add_checkbox_to_panel(ROLLOUT_geomtest,label,tetrabox_vis+i);
+      sprintf(label,"face %i",i);
+      glui_labels->add_checkbox_to_panel(ROLLOUT_geomtest,label,tetrabox_vis+i);
+    }
   }
 
 #endif

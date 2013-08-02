@@ -630,7 +630,7 @@ void get_screen_mapping(float *xyz0, float *screen_perm){
   GLdouble xyz[3];
   int viewport[4];
   GLdouble screen0[3];
-  GLdouble screen[3],dscreenx[3],dscreeny[3],dscreenz[3];
+  GLdouble screen[3];
   GLdouble modelview[16];
   GLdouble projection[16];
   int set;

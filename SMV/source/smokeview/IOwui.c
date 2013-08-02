@@ -851,7 +851,7 @@ void readterrain(char *file, int ifile, int flag, int *errorcode){
   plotstate=getplotstate(DYNAMIC_PLOTS);
   Update_Times();
 #ifdef _DEBUG
-  PRINTF("After terrain file load: ");
+  PRINTF("After terrain file load: \n");
   PrintMemoryInfo;
 #endif
   Idle_CB();

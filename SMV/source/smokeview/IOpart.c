@@ -999,7 +999,7 @@ void readpart5(char *file, int ifile, int flag, int *errorcode){
     updatemenu=1;
     updatePart5extremes();
 #ifdef _DEBUG
-    PRINTF("After particle file unload: ");
+    PRINTF("After particle file unload: \n");
     PrintMemoryInfo;
 #endif
     return;
@@ -1020,7 +1020,7 @@ void readpart5(char *file, int ifile, int flag, int *errorcode){
   updateglui();
 
 #ifdef _DEBUG
-  PRINTF("After particle file load: ");
+  PRINTF("After particle file load: \n");
   PrintMemoryInfo;
 #endif
   if(parti->evac==0){
@@ -1054,7 +1054,7 @@ void readpart5(char *file, int ifile, int flag, int *errorcode){
   getPart5Colors(parti,nrgb);
   updateglui();
 #ifdef _DEBUG
-  PRINTF("After particle file load: ");
+  PRINTF("After particle file load: \n");
   PrintMemoryInfo;
 #endif
   if(parti->evac==0){
@@ -1178,7 +1178,7 @@ void readpart(char *file, int ifile, int flag, int *errorcode){
     Update_Times();
     updatemenu=1;
 #ifdef _DEBUG
-    PRINTF("After particle file unload: ");
+    PRINTF("After particle file unload: \n");
     PrintMemoryInfo;
 #endif
     return;
@@ -1425,7 +1425,7 @@ void readpart(char *file, int ifile, int flag, int *errorcode){
   updateglui();
 
 #ifdef _DEBUG
-  PRINTF("After particle file load: ");
+  PRINTF("After particle file load: \n");
   PrintMemoryInfo;
 #endif
   if(partinfo[ifile].evac==0){

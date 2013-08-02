@@ -149,7 +149,7 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
     if(enableflag==1)enable_boundary_glui();
     updatemenu=1;
 #ifdef _DEBUG
-    PRINTF("After boundary file unload: ");
+    PRINTF("After boundary file unload: \n");
     PrintMemoryInfo;
 #endif
     return;
@@ -958,7 +958,7 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
   update_unit_defs();
   updatechopcolors();
 #ifdef _DEBUG
-  PRINTF("After boundary file load: ");
+  PRINTF("After boundary file load: \n");
   PrintMemoryInfo;
 #endif
   Idle_CB();
