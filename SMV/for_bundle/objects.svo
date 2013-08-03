@@ -543,6 +543,8 @@ NEWFRAME
  0.0 0.0 0.0 setrgb
  push 0.0 0.0 $TRUNK_BASE_H translate $TRUNK_D $TRUNK_H drawdisk pop
  0.0 0.0 $TRUNK_BASE_H translate 0.0 0.0 $TRUNK_H translate $TRUNK_D $CANOPY_H drawcone 
+NEWFRAME
+ 0.0 0.0 0.0 translate
  
 OBJECTDEF // object for tree canopy
  CANOPY
@@ -553,6 +555,8 @@ NEWFRAME
 :CANOPY_BASE_H :CANOPY_D :CANOPY_H 
 0.0 0.0 0.0 setrgb
  0.0 0.0 $CANOPY_BASE_H translate $CANOPY_D $CANOPY_H drawcone
+NEWFRAME
+ 0.0 0.0 0.0 translate
 NEWFRAME
  0.0 0.0 0.0 translate
  
