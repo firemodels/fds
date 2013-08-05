@@ -102,11 +102,7 @@ Smokeview Version 6 \\
 \begin{minipage}[t][9in][s]{6.5in}
 
 
-\flushright{Certain commercial entities, equipment, or materials may be identified in this \\
-document in order to describe an experimental procedure or concept adequately. Such \\
-identification is not intended to imply recommendation or endorsement by the \\
-National Institute of Standards and Technology, nor is it intended to imply that the \\
-entities, materials, or equipment are necessarily the best available for the purpose.
+\flushright{Certain commercial entities, equipment, or materials may be identified in this document in order to describe an experimental procedure or concept adequately. Such identification is not intended to imply recommendation or endorsement by the National Institute of Standards and Technology, nor is it intended to imply that the entities, materials, or equipment are necessarily the best available for the purpose.
 }
 
 \vspace{3in}
@@ -306,19 +302,7 @@ color near the chop boundary should match the color near
 \clearpage
 
 \section{Iso-surfaces}
-An isosurface is a three-dimensional surface that defines constant
-values of a dependent variable. Figures \ref{figisotest} and
-\ref{figisotest2} present images verifying the display of
-isosurfaces. A series of temperature isosurfaces are drawn at
-\SI{0}{s}, \SI{10}{s} and \SI{30}{s}.  A portion of the interior
-gas temperature is initialized to \SI{600}{\degreeCelsius}, hence.
-This is the reason that the rectangular block appears in the first
-row of images. The first column in Fig. \ref{figisotest}\ presents
-the iso-surface using points. The second column presents the
-iso-surface using triangulated outlines. The third column presents
-the iso-surface using a solid surface. Figure \ref{figisotest2}
-demonstrates color customization using the {\tt ISOCOLORS}\ .ini
-keyword.
+An isosurface is a three-dimensional surface that defines constant values of a dependent variable. Figures \ref{figisotest} and \ref{figisotest2} present images verifying the display of isosurfaces. A series of temperature isosurfaces are drawn at \SI{0}{s}, \SI{10}{s} and \SI{30}{s}.  A portion of the interior gas temperature is initialized to \SI{600}{\degreeCelsius}, hence. This is the reason that the rectangular block appears in the first row of images. The first column in Fig. \ref{figisotest}\ presents the iso-surface using points. The second column presents the iso-surface using triangulated outlines. The third column presents the iso-surface using a solid surface. Figure \ref{figisotest2} demonstrates color customization using the {\tt ISOCOLORS}\ .ini keyword.
 
 \begin{figure}[\figoptions]
 \begin{center}
@@ -335,9 +319,7 @@ keyword.
  point view&outline view&solid view
   \end{tabular}
 \end{center}
- \caption[A test showing an isosurface enclosing a region initialized to \SI{600}{\degreeCelsius}]{A test showing an isosurface enclosing a region initialized to \SI{600}{\degreeCelsius} at \SI{0}{s}, \SI{10}{s} and \SI{30}{s}.
-The isosurface should surround this region for the $t=\SI{0}{s}$
-images.}
+ \caption[A test showing an isosurface enclosing a region initialized to \SI{600}{\degreeCelsius}]{A test showing an isosurface enclosing a region initialized to \SI{600}{\degreeCelsius} at \SI{0}{s}, \SI{10}{s} and \SI{30}{s}. The isosurface should surround this region for the $t=\SI{0}{s}$ images.}
 \label{figisotest}%
 \end{figure}
 
@@ -376,12 +358,8 @@ Given that data used to generate an isosurface has uncertainty, an important que
 \label{figisointerp}%
 \end{figure}
 
-Suppose, as illustrated in Fig. \ref{figisointerp}, that
-$(x_1,y,z)$, $T_1$ and $(x_2,y,z)$, $T_2$ represent two known data
-location, data value pairs and that $T_m$ is also known satisfying
-$T_1\le T_m \le T_2$.  The inverse interpolation problem then is
-to find the location $(x_m,y,z)$ that takes on the data value
-$T_m$.  The location $x_m$ is given by
+Suppose, as illustrated in Fig. \ref{figisointerp}, that $(x_1,y,z)$, $T_1$ and $(x_2,y,z)$, $T_2$ represent two known data location, data value pairs and that $T_m$ is also known satisfying $T_1\le T_m \le T_2$.  The inverse interpolation problem then is to find the location $(x_m,y,z)$ that takes on the data value $T_m$.  The location $x_m$ is given by
+
 \begin{eqnarray}
 x_m=(1-\alpha)x_1+\alpha x_2
 \end{eqnarray}
@@ -418,10 +396,12 @@ Equation (\ref{eq:sensitivity}) may be re-written using terms in equations (\ref
 \end{eqnarray}
 
 \noindent Equation (\ref{eq:sensfinal}) relates the relative error of $x_m$ to the relative errors of $T_1$ and $T_2$ in terms of the interpolation parameter $\alpha$. The error $\Delta x_m$ may then be bounded to obtain
+
 \begin{eqnarray}
 |\Delta x_m|\le
 |x_2-x_1|\frac{\max(|\Delta T_1|,|\Delta T_2|)}{|T_2-T_1|}
 \end{eqnarray}
+
 \noindent Uncertainty in isosurface location is then proportional to the magnitude of data uncertainty, $\max(|\Delta T_1|,|\Delta T_2|)$, and inversely proportional to the data variation, $|T_2-T_1|$.
 
 
@@ -457,11 +437,7 @@ ions]
 \section{Slices}
 Figure \ref{fignodeslicetest} presents images verifying the display of node centered data slices. Images are drawn at \SI{0}{s}, \SI{10}{s} and \SI{30}{s}. A portion of the interior gas temperature is initialized to \SI{600}{\degreeCelsius} corresponding to the red rectangular block appearing in the first row. The first column visualizes all of the data in the slice.  The second column discards or chops data below \SI{140}{\degreeCelsius}. Note that the color near the chopped boundary should match the color in the color bar near \SI{140}{\degreeCelsius}.
 
-Figures \ref{figcellaslicetest} and \ref{figcellbslicetest}
-present images verifying the display of cell centered data. Images
-in Fig. \ref{figcellaslicetest} are drawn at \SI{0}{s}, \SI{10}{s}
-and \SI{30}{s}. Images in Fig. \ref{figcellbslicetest} tests the
-transfer of data from FDS to Smokeview.
+Figures \ref{figcellaslicetest} and \ref{figcellbslicetest} present images verifying the display of cell centered data. Images in Fig. \ref{figcellaslicetest} are drawn at \SI{0}{s}, \SI{10}{s} and \SI{30}{s}. Images in Fig. \ref{figcellbslicetest} tests the transfer of data from FDS to Smokeview.
 
 Figure \ref{figvslicetest} present images verifying the display of vector slices. Again, vector slice file images are drawn at \SI{0}{s}, \SI{10}{s} and \SI{30}{s}. The first column draws all vectors while the second column discards or chops vectors below \SI{140}{\degreeCelsius}.
 
@@ -469,12 +445,7 @@ Figure \ref{figfedslicetest} presents slice file images verifying the computatio
 
 Figure \ref{figgslicetest} presents images of 3D slices oriented in two different ways. Images are drawn at \SI{0}{s}, \SI{10}{s} and \SI{30}{s}.
 
-Figure \ref{figdiffslicetest} presents images from data
-differenced by Smokediff.  Smokediff computed the difference
-between two similar FDS cases and generated slice files.
-Difference contours from these slice files are displayed at
-\SI{0}{s}, \SI{10}{s} and \SI{15}{s}.
-
+Figure \ref{figdiffslicetest} presents images from data differenced by Smokediff.  Smokediff computed the difference between two similar FDS cases and generated slice files. Difference contours from these slice files are displayed at \SI{0}{s}, \SI{10}{s} and \SI{15}{s}.
 
 \begin{figure}[\figoptions]
 \begin{center}
@@ -806,12 +777,7 @@ Figure \ref{figsmoketestgeom} shows a side view of the numerical smoke box used 
 
 Figure \ref{figsmoketest2} shows quantitative tests of the smoke opacity calculation performed in Smokeview for two different FDS grid resolutions and three different skip levels\footnote{Smokeview allows one to skip grid planes when visualizing smoke.  The smoke opacity is adjusted by Smokeview to account for the skips.}. This figure also gives the predicted shades of grey based upon the specified soot densities, mass extinction coefficient and path lengths.  The smoke visualization algorithm is verified then if the shades of grey in the Smokeview visualizations match the corresponding predicted shades of grey.  Each shaded rectangle is accompanied by a numerical value that can also be used to judge whether the visualization is verified.
 
-The numbers displayed in this Fig. \ref{figsmoketest2} represent
-the shade of the underlying rectangle.  These numbers may be
-verified by using a program such as Adobe Photoshop to examine the
-pixel values of this rectangular region.  The numbers are verified
-when they match the pixel values as reported by Photoshop or any
-other program that can report image values.
+The numbers displayed in this Fig. \ref{figsmoketest2} represent the shade of the underlying rectangle.  These numbers may be verified by using a program such as Adobe Photoshop to examine the pixel values of this rectangular region.  The numbers are verified when they match the pixel values as reported by Photoshop or any other program that can report image values.
 
 When soot densities are constant, smoke grey level or opacity, $\alpha$ may be computed by using Eq.~(\ref{eq:Beers}).  Solving Eq.~(\ref{eq:Beers}) for $\Delta x$ gives
 \begin{eqnarray}
@@ -890,13 +856,7 @@ Figures \ref{figobsttest} and \ref{figtransparency} test different methods for d
 
 \section{Devices}
 
-The case illustrated in Fig. \ref{figsprinkmany} tests how well
-Smokeview can display many devices. This figure shows a series of
-sprinklers with three different levels of detail.  Smokeview
-should be able to smoothly rotate this scene on computers with
-good video cards. The images for this test were created
-automatically by running the Smokeview script, {\tt
-sprinkler\_many.ssf}\ (see Appendix \ref{SSFspinklermany}).
+The case illustrated in Fig. \ref{figsprinkmany} tests how well Smokeview can display many devices. This figure shows a series of sprinklers with three different levels of detail.  Smokeview should be able to smoothly rotate this scene on computers with good video cards. The images for this test were created automatically by running the Smokeview script, {\tt sprinkler\_many.ssf}\ (see Appendix \ref{SSFspinklermany}).
 
 \begin{figure}[\figoptions]
 \begin{center}
@@ -915,9 +875,7 @@ sprinkler\_many.ssf}\ (see Appendix \ref{SSFspinklermany}).
 \clearpage
 
 \section{Vents}
-Figure \ref{figventtest} tests vent display.  This figure shows three different levels of vent visibility: all vents displayed, only non-open vents displayed and all vents hidden. The images for this test were created automatically by running the Smokeview script,
-{\tt plume5c.ssf}\ (see Appendix \ref{SSFplume5c}).  Figure \ref{figcircventtest} shows circular vents drawn on the sides of a blockage. The circular vents
-are drawn as as requested by the user (a circle) and as implemented within FDS.
+Figure \ref{figventtest} tests vent display.  This figure shows three different levels of vent visibility: all vents displayed, only non-open vents displayed and all vents hidden. The images for this test were created automatically by running the Smokeview script, {\tt plume5c.ssf}\ (see Appendix \ref{SSFplume5c}).  Figure \ref{figcircventtest} shows circular vents drawn on the sides of a blockage. The circular vents are drawn as as requested by the user (a circle) and as implemented within FDS.
 
 \begin{figure}[\figoptions]
 \begin{center}
@@ -946,8 +904,7 @@ are drawn as as requested by the user (a circle) and as implemented within FDS.
  FDS implementation
 \end{tabular}
 \end{center}
- \caption{A test showing circular vents drawn as specified in the input file and
- as implemented within FDS}
+ \caption{A test showing circular vents drawn as specified in the input file and  as implemented within FDS}
 \label{figcircventtest}%
 \end{figure}
 
@@ -956,9 +913,11 @@ are drawn as as requested by the user (a circle) and as implemented within FDS.
 \section{Conversion to Color}
 
 Smokeview converts data values obtained from an FDS calculation to color using a linear scaling of the form
+
 \begin{equation}
 C_i=255 \; \frac{V_i-V_{\min}}{V_{\max}-V_{\min}}
 \end{equation}
+
 where $C_i$ is an index into a color table between 0 and 255, $V_{\min}$ and $V_{\max}$  are data bounds, and $V_i$ is a data value to be converted. Figure \ref{figcolorconv} presents images verifying the conversion of data to colors. The input file, {\tt colorconv.fds}\ (see Appendix \ref{FDScolorconv}), was set up so that initially the left half of the domain (it is a 2D case) is \SI{20}{\degreeCelsius} and the right half is \SI{100}{\degreeCelsius}. The images for this test were created automatically by running the Smokeview script, {\tt colorconv.ssf}\ (see Appendix \ref{SSFcolorconv}).
 
 A second color conversion test involves the use of the colorbar to highlight portions of the data.  The case was set up so that the vertical slice aligns with the colorbar.  The gas temperatures were defined to increase from \SI{20}{\degreeCelsius} to \SI{100}{\degreeCelsius} from the floor to the ceiling.  As a result, when one selects the colorbar, the selected region in the colorbar should match the selected region in the vertical slice. The images for this test were created automatically by running the Smokeview script, {\tt colorbar.ssf}\ (see Appendix \ref{SSFcolorbar}).
@@ -984,8 +943,7 @@ A second color conversion test involves the use of the colorbar to highlight por
 &&&\raisebox{0.0in}[0pt]{\includegraphics[height=8.0in]{FIGURES/colorbar_20_100}}\\
 \end{tabular}
 \end{center}
- \caption[A test showing that data is converted to color properly]{A test showing that data is converted to color properly.  Temperature between \SI{20}{\degreeCelsius} and \SI{100}{\degreeCelsius} are
- converted to colors between blue and red.}
+ \caption[A test showing that data is converted to color properly]{A test showing that data is converted to color properly.  Temperature between \SI{20}{\degreeCelsius} and \SI{100}{\degreeCelsius} are  converted to colors between blue and red.}
 \label{figcolorconv}%
 \end{figure}
 
