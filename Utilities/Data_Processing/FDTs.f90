@@ -371,12 +371,14 @@ DO I=0,50
    Q_RAD = SIGMA*(TMP_G**4-TMP_A**4)
 
    ! Calculate HGL height using ASET correlation
-   V_EXP = Q / 353.
-   V_ENT = ((1 / LOCATION_FACTOR) * 0.071 / 1.18) * (LOCATION_FACTOR * Q)**(1./3.) * (Z_ASET - FUEL_HEIGHT)**(5./3.)
-   V_UL = V_EXP + V_ENT
-   Z_ASET = Z_ASET - (V_UL * DT) / (L * W)
-   IF (Z_ASET < FUEL_HEIGHT) THEN
-      Z_ASET = FUEL_HEIGHT
+   IF (I>0) THEN
+      V_EXP = Q / 353.
+      V_ENT = ((1 / LOCATION_FACTOR) * 0.071 / 1.18) * (LOCATION_FACTOR * Q)**(1./3.) * (Z_ASET - FUEL_HEIGHT)**(5./3.)
+      V_UL = V_EXP + V_ENT
+      Z_ASET = Z_ASET - (V_UL * DT) / (L * W)
+      IF (Z_ASET < FUEL_HEIGHT) THEN
+         Z_ASET = FUEL_HEIGHT
+      ENDIF
    ENDIF
 
    ! Calculate HGL height using Yamana and Tanaka correlation (1985)
