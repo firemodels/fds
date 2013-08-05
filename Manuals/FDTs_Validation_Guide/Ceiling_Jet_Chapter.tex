@@ -5,7 +5,7 @@
 
 \section{Ceiling Jet Temperature}
 
-For a steady-state fire, the correlation of Alpert (1972) predicts that the ceiling jet temperature rise, $\Delta T_{jet}$, from a fire plume is given by
+For a steady-state fire, the correlation of Alpert~\cite{SFPE:Alpert} predicts that the ceiling jet temperature rise, $\Delta T_{jet}$, from a fire plume is given by
 \be
 \Delta T_{jet} = \left\{ \begin{array}{cl}
    \frac{16.9 \dot Q^{2/3}}{H^{5/3}}  &  r/H <= 0.18 \\[0.1in]
@@ -17,7 +17,7 @@ where $\dot Q$ is the total HRR~(\si{kW}), $H$ is the height of the ceiling abov
 
 Note that some of these cases use a t-squared fire source as a quasi-steady approach.
 
-For cases in which the fire was located against a wall or corner, these correlations are adjusted based on the method of reflection. For a fire adjacent to a flat wall, 2$\dot Q$ is substituted for $\dot Q$; and for a fire in a 90-degree corner, 4$\dot Q$ is substituted for $\dot Q$~\cite{SFPE:Alpert}. This adjustment is denoted in the input parameters as the location factor. For a given case, the location factor has a value of 1, 2, or 4, which corresponds to a fire away from walls or corners, a fire adjacent to a wall, or a fire located in a corner, respectively.
+For cases in which the fire was located against a wall or corner, these correlations are adjusted based on the method of reflection. For a fire adjacent to a flat wall, 2$\dot Q$ is substituted for $\dot Q$; and for a fire in a 90-degree corner, 4$\dot Q$ is substituted for $\dot Q$. This adjustment is denoted in the input parameters as the location factor. For a given case, the location factor has a value of 1, 2, or 4, which corresponds to a fire away from walls or corners, a fire adjacent to a wall, or a fire located in a corner, respectively.
 
 It is important to note that this ceiling jet temperature correlation was developed using data from tests that were conducted in a large facility in which the distant walls and large compartment size did not allow for the development of a significant hot gas layer (HGL). In a more typical fire scenario (i.e., a smaller compartment), the HGL develops relatively quickly, and temperatures at the ceiling are affected by the ceiling jet as well as the accumulating HGL. Thus, when compared to experimentally measured ceiling temperatures in a compartment fire, this correlation tends to underpredict the temperatures because it is not accounting for the development of the HGL. This is an important consideration when using this correlation to predict detector or sprinkler activations.
 
@@ -41,7 +41,7 @@ For the reasons stated above, two scatter plot comparisons are shown in Fig.~\re
 \section{Sprinkler Activation Time}
 \label{sec:sprinkler_alpert}
 
-For a steady-state fire, the correlation of Alpert (1972) predicts that the activation time of a sprinkler, $t_{activation}$, is given by (Budnick, Evans, and Nelson, 1997)
+For a steady-state fire, the correlation of Alpert~\cite{SFPE:Alpert} predicts that the activation time of a sprinkler, $t_{activation}$, is given by (Budnick, Evans, and Nelson, 1997)
 \be
 t_{activation} =  \frac{RTI}{\sqrt{u_{jet}}} \ln \left( \frac{T_{jet} - T_\infty}{T_{jet} - T_{activation}} \right)\label{eq:Alpert}
 \ee
@@ -86,7 +86,7 @@ For cases in which the fire was located against a wall or corner, these correlat
 
 \subsection{Method of Alpert}
 
-In this method, the prediction of smoke detector activation time is identical to that for a sprinkler (as described in Section~\ref{sec:sprinkler_alpert}). Heskestad and Delichatsios (1977) correlated smoke detector activation to a smoke temperature change of 10~$^\circ$C (18~$^\circ$F) from typical fuels. It is assumed that the smoke detectors are low-RTI devices ($\textrm{RTI}=5$).
+In this method, the prediction of smoke detector activation time is identical to that for a sprinkler (as described in Section~\ref{sec:sprinkler_alpert}). Heskestad and Delichatsios~\cite{Heskestad:4} correlated smoke detector activation to a smoke temperature change of 10~$^\circ$C (18~$^\circ$F) from typical fuels. It is assumed that the smoke detectors are low-RTI devices ($\textrm{RTI}=5$).
 
 \begin{figure}[!ht]
 \begin{center}
@@ -105,7 +105,7 @@ In this method, the prediction of smoke detector activation time is identical to
 
 \subsection{Method of Milke}
 
-The correlation of Milke predicts that the time of smoke detector activation, $t_{activation}$, is given by
+The correlation of Milke~\cite{Milke:1} predicts that the time of smoke detector activation, $t_{activation}$, is given by
 \be
 t_{activation} = \frac{X H^{4/3}}{\dot Q^{1/3}}
 \label{eq:Milke}
@@ -141,7 +141,7 @@ Note that some of these cases use a t-squared fire source as a quasi-steady appr
 
 \subsection{Method of Mowrer}
 
-The correlation of Mowrer predicts that the time of smoke detector activation, $t_{activation}$, is given by
+The correlation of Mowrer~\cite{Mowrer:1} predicts that the time of smoke detector activation, $t_{activation}$, is given by
 \be
 t_{activation} = t_{pl} + t_{cj}
 \label{eq:Mowrer}
