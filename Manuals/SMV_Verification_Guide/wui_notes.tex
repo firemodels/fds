@@ -1,19 +1,24 @@
-This \chap\ presents visualization techniques added to Smokeview that are applicable to WUI
-(wildland urban interface) and wild fire test cases.  
-Some of these techniques involve 1) visualizing changing terrain using satellite images with modeling results overlayed, 2) visualizing wind sensors using flow vectors 
-and 3) making use of Smokeview objects for representing modeling elements such as trees or structures.
-Several Smokeview images are displayed in the following figures to illustrate these techniques.
+This \chap\ presents visualization techniques added to Smokeview
+applicable to WUI (wildland urban interface) and wild fire test
+cases. Some of these techniques involve 1) visualizing changing
+terrain using satellite images with modeling results overlayed, 2)
+visualizing wind sensor data using flow vectors and error
+indicators and 3) making use of Smokeview objects for representing
+modeling elements such as trees or structures. Smokeview images
+are displayed in the following figures to illustrate these
+techniques.
 
 Figure \ref{figlevelset} presents images of level set contour
 slices drawn on a slope. The thin red line represents where
 burning is currently taking place.  The grey region represents
 where burning has occurred and the green region represents where
-burning has not occurred. Level sets are used here to quickly
-(relative to a complete computational fluid dynamic simulation ) model fire spread and
-fire line locations. In this particular case, images are drawn at
-\SI{30}{s}, \SI{60}{s}, \SI{90}{s} and \SI{120}{s}. The test
-verifies that the level set slices follow the sloped terrain.
-Figure \ref{figterrain2} and \ref{figterrain3} also present images of let set contours.  These contour slices are 
+burning has not occurred. Level sets are used to quickly (relative
+to a complete computational fluid dynamic calculation ) model fire
+spread and fire line locations. In this particular case, images
+are drawn at \SI{30}{s}, \SI{60}{s}, \SI{90}{s} and \SI{120}{s}.
+The test verifies that the level set slices follow the sloped
+terrain. Figure \ref{figterrain2} and \ref{figterrain3} also
+present images of level set contours.  These contour slices are
 drawn along with a satellite image of the region being modeled.
 
 \begin{figure}[\figoptions]
@@ -21,9 +26,11 @@ drawn along with a satellite image of the region being modeled.
 \begin{tabular}{cc}
  \includegraphics[height=\figheightE]{SCRIPT_FIGURES/levelset_30}&
  \includegraphics[height=\figheightE]{SCRIPT_FIGURES/levelset_60}\\
+ \SI{30}{s}&\SI{60}{s}\\
 
  \includegraphics[height=\figheightE]{SCRIPT_FIGURES/levelset_90}&
  \includegraphics[height=\figheightE]{SCRIPT_FIGURES/levelset_120}\\
+ \SI{90}{s}&\SI{120}{s}
 
  \end{tabular}
 \end{center}
@@ -42,15 +49,15 @@ occurred occurred respectively.}
 \begin{tabular}{cc}
  \includegraphics[height=2.5in]{SCRIPT_FIGURES/BT10m_2x2km_LS_0000}&
  \includegraphics[height=2.5in]{SCRIPT_FIGURES/BT10m_2x2km_LS_0300}\\
- \SI{0}{s}&\SI{250}{s}\\
+ \SI{0}{s}&\SI{300}{s}\\
 
  \includegraphics[height=2.5in]{SCRIPT_FIGURES/BT10m_2x2km_LS_0600}&
  \includegraphics[height=2.5in]{SCRIPT_FIGURES/BT10m_2x2km_LS_0900}\\
- \SI{500}{s}&\SI{750}{s}\\
+ \SI{600}{s}&\SI{900}{s}\\
 
  \includegraphics[height=2.5in]{SCRIPT_FIGURES/BT10m_2x2km_LS_1200}&
  \includegraphics[height=2.5in]{SCRIPT_FIGURES/BT10m_2x2km_LS_1500}\\
- \SI{1000}{s}&\SI{1250}{s}\\
+ \SI{1200}{s}&\SI{1500}{s}\\
  \end{tabular}
 \end{center}
  \caption[A test showing a fire line slice drawn along a sloped and textured terrain]
@@ -75,7 +82,7 @@ drawn on a terrain geometry. The scenario has a small hill
 parallel to the vertical axis of the scene. Images are drawn at
 \SI{15}{s}, \SI{30}{s}, \SI{45}{s} and \SI{60}{s}. The test
 verifies that temperature contours follow the sloped terrain and
-that the red blockage (a non-terrain blockage representing a structure) is drawn correctly along 
+that the red blockage (a non-terrain blockage representing a structure) is drawn correctly along
 with the terrain.
 
 \begin{figure}[\figoptions]
@@ -83,9 +90,11 @@ with the terrain.
 \begin{tabular}{cc}
  \includegraphics[height=\figheightE]{SCRIPT_FIGURES/hill_structure_015}&
  \includegraphics[height=\figheightE]{SCRIPT_FIGURES/hill_structure_030}\\
+ \SI{15}{s}&\SI{30}{s}\\
 
  \includegraphics[height=\figheightE]{SCRIPT_FIGURES/hill_structure_045}&
  \includegraphics[height=\figheightE]{SCRIPT_FIGURES/hill_structure_060}\\
+ \SI{45}{s}&\SI{60}{s}
 
  \end{tabular}
 \end{center}
@@ -122,7 +131,7 @@ Smokeview objects.  The tree is drawn as a cylinder colored brown
 and a cone colored green.  Tree objects may change appearance as a
 simulation progresses as illustrated in Fig. \ref{figWUIstates}.
 Tree states are a normal view, partially burned, partially burned (canopy burned away) and completely
-burned.  
+burned.
 \begin{figure}[\figoptions]
 \begin{center}
 \begin{tabular}{c}
@@ -140,7 +149,8 @@ burned.
  \includegraphics[width=1.5in]{FIGURES/tree_test_state1}&
  \includegraphics[width=1.5in]{FIGURES/tree_test_state2}&
  \includegraphics[width=1.5in]{FIGURES/tree_test_state3}&
- \includegraphics[width=1.5in]{FIGURES/tree_test_state4}
+ \includegraphics[width=1.5in]{FIGURES/tree_test_state4}\\
+ state 1&state 2&state 3&state 4
  \end{tabular}
 \end{center}
  \caption[A test showing four states of smokeview tree objects.]{A test showing four states of the smokeview trunk and canopy objects.  The
@@ -160,28 +170,28 @@ Fig. \ref{figWUIparts}.
 
 \begin{figure}[\figoptions]
 \begin{center}
-\begin{tabular}{c}
- \includegraphics[width=5.5in]{FIGURES/tree_line_part_000}\\
- \includegraphics[width=5.5in]{FIGURES/tree_line_part_020}\\
- \includegraphics[width=5.5in]{FIGURES/tree_line_part_040}\\
- \includegraphics[width=5.5in]{FIGURES/tree_line_part_060}
+\begin{tabular}{rc}
+ \SI{0}{s}&\includegraphics[width=5.5in]{FIGURES/tree_line_part_000}\\
+ \SI{20}{s}&\includegraphics[width=5.5in]{FIGURES/tree_line_part_020}\\
+ \SI{40}{s}&\includegraphics[width=5.5in]{FIGURES/tree_line_part_040}\\
+ \SI{60}{s}&\includegraphics[width=5.5in]{FIGURES/tree_line_part_060}
  \end{tabular}
 \end{center}
- \caption[A test showing trees drawn as particles.]{A test showing trees drawn as particles.  Particle represent small units of fuel.
+ \caption[A test showing trees drawn as particles.]{A test showing trees drawn as particles at \SI{0}{s}, \SI{20}{s}, \SI{40}{s} and \SI{60}{s}.  Particle represent small units of fuel.
  Particle color represents temperature.  As particles use up fuel they disappear.}
 \label{figWUIparts}%
 \end{figure}
 
 \begin{figure}[\figoptions]
 \begin{center}
-\begin{tabular}{c}
- \includegraphics[width=5.5in]{FIGURES/tree_line_iso_000}\\
- \includegraphics[width=5.5in]{FIGURES/tree_line_iso_020}\\
- \includegraphics[width=5.5in]{FIGURES/tree_line_iso_040}\\
- \includegraphics[width=5.5in]{FIGURES/tree_line_iso_060}
+\begin{tabular}{rc}
+ \SI{0}{s}&\includegraphics[width=5.5in]{FIGURES/tree_line_iso_000}\\
+ \SI{20}{s}&\includegraphics[width=5.5in]{FIGURES/tree_line_iso_020}\\
+ \SI{40}{s}&\includegraphics[width=5.5in]{FIGURES/tree_line_iso_040}\\
+ \SI{60}{s}&\includegraphics[width=5.5in]{FIGURES/tree_line_iso_060}
  \end{tabular}
 \end{center}
- \caption[A test showing trees drawn as isosurfaces.]{A test showing trees drawn as isosurface.  The surface location
+ \caption[A test showing trees drawn as isosurfaces.]{A test showing trees drawn as isosurface  at \SI{0}{s}, \SI{20}{s}, \SI{40}{s} and \SI{60}{s}.  The surface location
  is determined from the boundary of the  particle cloud shown in Fig. \ref{figWUIparts}.}
 \label{figWUIiso}%
 \end{figure}
