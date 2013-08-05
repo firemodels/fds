@@ -9,7 +9,7 @@
 
 The thermally-induced electrical failure (THIEF) of a cable can be predicted via a simple
 one-dimensional heat transfer calculation, under the assumption that the cable can be
-treated as a homogeneous cylinder. The governing equation for the cable temperature,
+treated as a homogeneous cylinder~\cite{CAROLFIRE}. The governing equation for the cable temperature,
 $T(r,t)$, is given by
 \be
 \rho c \left( \frac{\partial T}{\partial t} \right) = \frac{1}{r} \frac{\partial}{\partial r} k r \left( \frac{\partial T}{\partial r} \right)
@@ -44,7 +44,7 @@ where the time step $\delta t$ is given by
 
 \section{Unprotected Steel Temperature}
 
-The temperature rise, $\Delta T_s$, of an unprotected steel member exposed to fire can be predicted using
+The temperature rise, $\Delta T_s$, of an unprotected steel member exposed to fire can be predicted using~\cite{Buchanan:1}
 \be
 \Delta T_s = \frac{F}{V} \frac{1}{\rho_s c_s} \left[ h_c (T_f - T_s) + \sigma \epsilon (T_f^4 - T_s^4) \right] \Delta t
 \label{eq:unprotected_steel}
@@ -61,14 +61,14 @@ c_s \frac{W}{D} > 2 c_i \rho_i h
 \ee
 where $c_s$ is the specific heat of steel~(\si{J/(kg.K)}), $W/D$ is the ratio of the weight of steel section per unit length to the heated perimeter~(\si{kg/m^2}), $c_i$ is the specific heat of the insulation material~(\si{J/(kg.K)}), $\rho_i$ is the density of the insulating material~(\si{kg/m^3}), and $h$ is the thickness of the insulation~(\si{m}).
 
-If the thermal capacity of the insulation layer can be neglected, then the temperature rise, $\Delta T_s$, of a structural steel element exposed to fire can be predicted using
+If the thermal capacity of the insulation layer can be neglected, then the temperature rise, $\Delta T_s$, of a structural steel element exposed to fire can be predicted using~\cite{Buchanan:1}
 \be
 \Delta T_s = k_i \left( \frac{T_f - T_s}{c_s h \frac{W}{D} + \frac{1}{2} c_i \rho_i h^2} \right) \Delta t
 \label{eq:protected_steel_neglect_c}
 \ee
 where $k_i$ is the thermal conductivity of the insulation material~(\si{W/(m.K)}), $T_f$ is the exposing fire temperature~(\si{K}), $T_s$ is the steel temperature~(\si{K}), and $\Delta t$ is the time step~(\si{s}). Note that the exposing fire temperature, $T_f$, can be replaced by the hot gas layer temperature, plume temperature, or other exposing temperature.
 
-If the thermal capacity of the insulation layer must be accounted for, then the temperature rise, $\Delta T_s$, of a structural steel element exposed to fire can be predicted using
+If the thermal capacity of the insulation layer must be accounted for, then the temperature rise, $\Delta T_s$, of a structural steel element exposed to fire can be predicted using~\cite{Buchanan:1}
 \be
 \Delta T_s = \frac{k_i}{h} \left( \frac{T_f - T_s}{c_s \frac{W}{D} + \frac{1}{2} c_i \rho_i h} \right) \Delta t
 \label{eq:protected_steel_account_c}

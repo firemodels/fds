@@ -7,7 +7,7 @@
 
 \section{Natural Ventilation}
 
-For a compartment with natural ventilation, the correlation of McCaffrey, Quintiere, and Harkleroad (MQH) predicts that the HGL temperature rise, $\Delta T_g$, is given by
+For a compartment with natural ventilation, the correlation of McCaffrey, Quintiere, and Harkleroad (MQH)~\cite{SFPE:Walton} predicts that the HGL temperature rise, $\Delta T_g$, is given by
 \be
 \Delta T_g = 6.85 \left( \frac{\dot Q^2}{A_o \sqrt{H_o} h_k A_T} \right)^{1/3} \quad ^\circ{\rm C}
 \label{eq:MQH}
@@ -46,7 +46,7 @@ t_p = \left( \frac{\rho c}{k} \right) \left( \frac{\delta}{2} \right)^2
 
 \subsection{FPA Method}
 
-For a compartment with forced ventilation, the correlation of Foote, Pagni, and Alvares (FPA) predicts that the HGL temperature rise, $\Delta T_g$, is given by
+For a compartment with forced ventilation, the correlation of Foote, Pagni, and Alvares (FPA)~\cite{SFPE:Walton} predicts that the HGL temperature rise, $\Delta T_g$, is given by
 \be
 \Delta T_g = \left[ 0.63 \left( \frac{\dot Q}{\dot m_g c_p T_\infty} \right)^{0.72} \left( \frac{h_k A_T}{\dot m_g c_p} \right)^{-0.36} \right] T_\infty \quad ^\circ{\rm C}
 \label{eq:FPA}
@@ -79,7 +79,7 @@ t_p = \left( \frac{\rho c}{k} \right) \left( \frac{\delta}{2} \right)^2
 
 \subsection{Deal and Beyler Method}
 
-For a compartment with forced ventilation, the correlation of Deal and Beyler (DB) predicts that the HGL temperature rise, $\Delta T_g$, is given by
+For a compartment with forced ventilation, the correlation of Deal and Beyler (DB)~\cite{SFPE:Walton} predicts that the HGL temperature rise, $\Delta T_g$, is given by
 \be
 \Delta T_g = \left( \frac{\dot Q}{\dot m_g c_p + h_k A_T} \right) \quad ^\circ{\rm C}
 \label{eq:DB}
@@ -106,7 +106,7 @@ where $k$ is the thermal conductivity of the interior lining~(\si{kW/(m.K)}), $\
 
 \section{No Ventilation}
 
-For a compartment with no ventilation (closed doors) and constant HRR, the correlation of Belyer predicts that the HGL temperature rise, $\Delta T_g$, is given by
+For a compartment with no ventilation (closed doors) and constant HRR, the correlation of Belyer~\cite{SFPE:Walton} predicts that the HGL temperature rise, $\Delta T_g$, is given by
 \be
 \Delta T_g = \frac{2 K_2}{K_1^2} (K_1 \sqrt{t} - 1 + e^{-K_1 \sqrt{t}}) \quad ^\circ{\rm C}
 \label{eq:Beyler}
@@ -138,7 +138,7 @@ where $\dot Q$ is the HRR of the fire~(\si{kW}).
 
 \subsection{ASET}
 
-For a compartment with no ventilation (closed doors) and constant HRR, the available safe egress time (ASET) correlation predicts that the HGL height, $z$, is calculated iteratively using
+For a compartment with no ventilation (closed doors) and constant HRR, the available safe egress time (ASET)~\cite{Walton:1} correlation predicts that the HGL height, $z$, is calculated iteratively using
 \be
 z = z - \frac{\dot V_{ul}}{L W}
 \label{eq:ASET_1}
@@ -178,7 +178,7 @@ where $K_f$ is the location factor, and $z_0$ is the fuel height. The location f
 
 \subsection{Yamana and Tanaka}
 
-For a compartment with no ventilation (closed doors) and constant HRR, the correlation of Yamana and Tanaka predicts that the HGL height, $z$, is given by
+For a compartment with no ventilation (closed doors) and constant HRR, the correlation of Yamana and Tanaka~\cite{Tanaka:1} predicts that the HGL height, $z$, is given by
 \be
 z = \left( \frac{2 k \dot Q^{1/3} t}{3 A_c} + \frac{1}{h_c^{2/3}} \right)^{-3/2}
 \label{eq:Yamana_Tanaka}
