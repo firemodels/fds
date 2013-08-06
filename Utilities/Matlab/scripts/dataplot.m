@@ -2,7 +2,7 @@
 % 6-06-2012
 % dataplot.m
 %
-% [saved_data,drange] = dataplot(cfil,vdir,plotdir,[drange])
+% [saved_data, drange] = dataplot(Dataplot_Inputs_File, Working_Dir, Manuals_Dir, [drange])
 %
 % Output:
 %    saved_data - cell array containing data needed in scatplot.m
@@ -12,11 +12,11 @@
 %
 % Input:
 %
-%    cfil - base configuration file (set in master script)
+%    Dataplot_Inputs_File - base configuration file
 %
-%    vfil - base input file directory (set in master)
+%    Working_Dir - base input file directory
 %
-%    plotdir - base plot directory (set in master)
+%    Manuals_Dir - base plot directory
 %
 %    [optional] drange - a vector for the 'd' lines you want to read from the
 %    config file.  For example, [2:5,7:8,10,12].
@@ -35,9 +35,9 @@
 % Example: From the command line within the Matlab/functions/ directory,
 %    type
 %
-%    >> [saved_data,drange] = dataplot(cfil,vdir,plotdir,[2:4,6:8]);
+%    >> [saved_data,drange] = dataplot(Dataplot_Inputs_File, Working_Dir, Manuals_Dir, [2:4,6:8]);
 %
-%    >> [saved_data,drange] = dataplot(cfil,vdir,plotdir,'WTC');
+%    >> [saved_data,drange] = dataplot(Dataplot_Inputs_File, Working_Dir, Manuals_Dir, 'WTC');
 
 function [saved_data,drange] = dataplot(varargin)
 
@@ -45,9 +45,9 @@ if nargin<3||nargin>4;
     display('Error in argument list')
 end
 if nargin>=3
-    cfil = varargin{1};
-    vdir = varargin{2};
-    plotdir = varargin{3};
+    Dataplot_Inputs_File = varargin{1};
+    Working_Dir = varargin{2};
+    Manuals_Dir = varargin{3};
 end
 
 % set the plot style parameters
@@ -63,7 +63,7 @@ set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
 
 % read the configuration file
 
-A = importdata(cfil);
+A = importdata(Dataplot_Inputs_File);
 H = textscan(A{1},'%q','delimiter',',');
 headers = H{:}'; clear H
 
@@ -459,7 +459,7 @@ for i=2:n_plots
             set(gcf,'PaperSize',[PDF_Paper_Width Paper_Height]);
             set(gcf,'PaperPosition',[0 0 PDF_Paper_Width Paper_Height]); 
             display(['Printing plot ',num2str(i),'...'])
-            print(gcf,'-dpdf',[plotdir,Plot_Filename])
+            print(gcf,Image_File_Type,[Manuals_Dir,Plot_Filename])
         catch
             display(['Error: Problem with dataplot row ', num2str(i), ' (', Dataname, '); check syntax of plot/save settings. Skipping case.'])
             continue

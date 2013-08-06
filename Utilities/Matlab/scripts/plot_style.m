@@ -4,8 +4,8 @@
 %
 % Preferred style for FDS and Smokeview plots 
 
-% font properties
-Font_Name       = 'Times';
+% Font properties
+Font_Name = 'Times';
 Font_Interpreter = 'TeX';
 Key_Font_Size   = 12;
 Title_Font_Size = 16;
@@ -13,10 +13,10 @@ Label_Font_Size = 16;
 Scat_Title_Font_Size = 14;
 Scat_Label_Font_Size = 14;
 
-% line properties
+% Line properties
 Line_Width      = 1.0;
 
-% plot properties
+% Plot properties
 Plot_Units      = 'inches';
 Plot_Width      = 5.0;
 Plot_Height     = 3.4;
@@ -27,22 +27,24 @@ Scat_Plot_Width      = 4.75;
 Scat_Plot_Height     = 4.75;
 Scat_Plot_X          = 0.75;
 Scat_Plot_Y          = 0.75;
+Subtitle_Text_Offset = 0.05;
 
-% paper properties
+% Paper properties
 Paper_Units     = 'inches';
 Paper_Width     = 6.5;
 Paper_Height    = 4.5;
 Scat_Paper_Height = 6.0;
 Scat_Paper_Width  = 6.0;
 
-% print properties
+% Print properties
 Figure_Visibility = 'on';
+Image_File_Type = '-dpdf';
 
-% svn text position
+% SVN text position
 SVN_Scale_X = 0.80;
 SVN_Scale_Y = 1.05;
 
-% set default figure properties
+% Set default figure properties
 set(0,'DefaultAxesUnits',Plot_Units)
 set(0,'DefaultAxesPosition',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
 set(0,'DefaultTextInterpreter',Font_Interpreter)

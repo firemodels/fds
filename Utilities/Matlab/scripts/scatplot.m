@@ -5,7 +5,7 @@
 % Generate scatter plots.  Must first run dataplot.m to generate
 % saved_data and drange.
 %
-% [] = scatplot(saved_data,drange,qfil,plotfil)
+% [] = scatplot(saved_data, drange, Scatterplot_Inputs_File, Manuals_Dir)
 %
 % Arguments:
 %    saved_data - cell array of packed data, may be obtained by running
@@ -22,7 +22,28 @@
 %    ../scripts/define_qrow_variables.m
 %
 
-function [] = scatplot(saved_data,drange,qfil,plotdir,varargin)
+function [] = scatplot(saved_data,drange,varargin)
+
+for k=1:2:length(varargin);
+    switch (varargin{k})
+    case {'Append_To_Scatterplot_Title'}
+        Append_To_Scatterplot_Title = varargin{k+1};
+    case {'Scatterplot_Inputs_File'}
+        Scatterplot_Inputs_File = varargin{k+1};
+    case {'Manuals_Dir'}
+        Manuals_Dir = varargin{k+1};
+    case {'Output_File'}
+        Output_File = varargin{k+1};
+    case {'Stats_Output'}
+        Stats_Output = varargin{k+1};
+    case {'Statistics_Tex_Output'}
+        Statistics_Tex_Output = varargin{k+1};
+    case {'Histogram_Tex_Output'}
+        Histogram_Tex_Output = varargin{k+1};
+    case {'NRC_Options'}
+        NRC_Options = varargin{k+1};
+    end
+end
 
 % unpack data
 Save_Quantity         = saved_data{:,1};
@@ -44,37 +65,27 @@ Size_Save_Quantity = size(Save_Quantity);
 % stats_outputs = 0: No output statistics
 % stats_outputs = 1: FDS verification statistics
 % stats_outputs = 2: FDS or FDTs validation statistics
-if length(varargin) >= 1
-    output_file = varargin{1};
-    % Check if FDS verification plot, set appropriate flag and tex output file
-    if strfind(output_file, 'FDS_verification_scatterplot_output')
-        stats_output = 1;
-        statistics_tex_output = '../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/Scatterplots/verification_statistics.tex';
-    % Check if FDS validation plot, set appropriate flag and tex output file
-    elseif strfind(output_file, 'FDS_validation_scatterplot_output')
-        stats_output = 2;
-        statistics_tex_output = '../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/validation_statistics.tex';
-        histogram_tex_output = '../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/validation_histograms.tex';
-    % Check if FDTs validation plot, set appropriate flag and tex output file
-    elseif strfind(output_file, 'FDTs_validation_scatterplot_output')
-        stats_output = 2;
-        statistics_tex_output = '../../Manuals/FDTs_Validation_Guide/SCRIPT_FIGURES/Scatterplots/validation_statistics.tex';
-        histogram_tex_output = '../../Manuals/FDTs_Validation_Guide/SCRIPT_FIGURES/Scatterplots/validation_histograms.tex';
-    end
-else
-    stats_output = 0;
+if exist('stats_output', 'var') == 0
+    Stats_Output = 0;
 end
 
 qrange = [2:100];
 
 plot_style
 
-Q = importdata(qfil);
+% Override the plot style options with NRC 1824 plot options
+if NRC_Options == true
+    Font_Name = 'Arial';
+    Subtitle_Text_Offset = 0;
+    Image_File_Type = '-dpdf';
+end
+
+Q = importdata(Scatterplot_Inputs_File);
 H = textscan(Q{1},'%q','delimiter',',');
 headers = H{:}'; clear H
 
 % Generate header information for verification output_stats
-if stats_output == 1
+if Stats_Output == 1
     output_stats = {};
     output_stats{1,1} = 'Dataplot Line Number';
     output_stats{1,2} = 'Verification Group';
@@ -92,7 +103,7 @@ if stats_output == 1
 end
 
 % Generate header information for validation output_stats
-if stats_output == 2
+if Stats_Output == 2
     output_stats = {};
     output_stats{1,1} = 'Quantity';
     output_stats{1,2} = 'Number of Datasets';
@@ -152,7 +163,7 @@ for j=2:length(Q);
             end
             
             % Perform this code block for FDS verification scatterplot output
-            if stats_output == 1
+            if Stats_Output == 1
                 single_measured_metric = nonzeros(Measured_Metric(k,:,:));
                 single_predicted_metric = nonzeros(Predicted_Metric(k,:,:));
                 % Loop over multiple line comparisons and build output_stats cell
@@ -266,36 +277,36 @@ for j=2:length(Q);
         axis([Plot_Min Plot_Max Plot_Min Plot_Max])
         
         set(gca,'Units','inches')
-        set(gca,'FontName','Times')
+        set(gca,'FontName',Font_Name)
         set(gca,'FontSize',12)
         set(gca,'YTick',get(gca,'XTick'))
         set(gca,'Position',[Scat_Plot_X,Scat_Plot_Y,Scat_Plot_Width,Scat_Plot_Height])
         
         if strcmp(Plot_Type,'linear')
             text(Plot_Min+Title_Position(1)*(Plot_Max-Plot_Min),Plot_Min+Title_Position(2)*(Plot_Max-Plot_Min),...
-            Scatter_Plot_Title,'FontSize',Scat_Title_Font_Size,'FontName','Times','Interpreter',Font_Interpreter)
+            [Scatter_Plot_Title, Append_To_Scatterplot_Title],'FontSize',Scat_Title_Font_Size,'FontName',Font_Name,'Interpreter',Font_Interpreter)
         elseif strcmp(Plot_Type,'loglog')
             text(10^(log10(Plot_Min)+Title_Position(1)*(log10(Plot_Max)-log10(Plot_Min))),10^(log10(Plot_Min)+Title_Position(2)*(log10(Plot_Max)-log10(Plot_Min))),...
-            Scatter_Plot_Title,'FontSize',Scat_Title_Font_Size,'FontName','Times','Interpreter',Font_Interpreter)
+            [Scatter_Plot_Title, Append_To_Scatterplot_Title],'FontSize',Scat_Title_Font_Size,'FontName',Font_Name,'Interpreter',Font_Interpreter)
         elseif strcmp(Plot_Type,'semilogx')
             text(10^(log10(Plot_Min)+Title_Position(1)*(log10(Plot_Max)-log10(Plot_Min))),Plot_Min+Title_Position(2)*(Plot_Max-Plot_Min),...
-            Scatter_Plot_Title,'FontSize',Scat_Title_Font_Size,'FontName','Times','Interpreter',Font_Interpreter)
+            [Scatter_Plot_Title, Append_To_Scatterplot_Title],'FontSize',Scat_Title_Font_Size,'FontName',Font_Name,'Interpreter',Font_Interpreter)
         elseif strcmp(Plot_Type,'semilogy')
             text(Plot_Min+Title_Position(1)*(Plot_Max-Plot_Min),10^(log10(Plot_Min)+Title_Position(2)*(log10(Plot_Max)-log10(Plot_Min))),...
-            Scatter_Plot_Title,'FontSize',Scat_Title_Font_Size,'FontName','Times','Interpreter',Font_Interpreter)
+            [Scatter_Plot_Title, Append_To_Scatterplot_Title],'FontSize',Scat_Title_Font_Size,'FontName',Font_Name,'Interpreter',Font_Interpreter)
         end
   
         if Sigma_E > 0.0
-            text(Plot_Min+(Title_Position(1)+0.05)*(Plot_Max-Plot_Min),Plot_Min+(Title_Position(2)-0.05)*(Plot_Max-Plot_Min),...
-                 ['Exp. Uncertainty: ',num2str(Sigma_E,'%4.2f')],'FontSize',12,'FontName','Times','Interpreter',Font_Interpreter)
+            text(Plot_Min+(Title_Position(1)+Subtitle_Text_Offset)*(Plot_Max-Plot_Min),Plot_Min+(Title_Position(2)-0.05)*(Plot_Max-Plot_Min),...
+                 ['Exp. Uncertainty: ',num2str(Sigma_E,'%4.2f')],'FontSize',12,'FontName',Font_Name,'Interpreter',Font_Interpreter)
         end
          
         if strcmp(Model_Error,'yes')
-            text(Plot_Min+(Title_Position(1)+0.05)*(Plot_Max-Plot_Min),Plot_Min+(Title_Position(2)-0.10)*(Plot_Max-Plot_Min),...
-                ['Model Uncertainty: ',num2str(Sigma_M,'%4.2f')],'FontSize',12,'FontName','Times','Interpreter',Font_Interpreter)
+            text(Plot_Min+(Title_Position(1)+Subtitle_Text_Offset)*(Plot_Max-Plot_Min),Plot_Min+(Title_Position(2)-0.10)*(Plot_Max-Plot_Min),...
+                ['Model Uncertainty: ',num2str(Sigma_M,'%4.2f')],'FontSize',12,'FontName',Font_Name,'Interpreter',Font_Interpreter)
             
-            text(Plot_Min+(Title_Position(1)+0.05)*(Plot_Max-Plot_Min),Plot_Min+(Title_Position(2)-0.15)*(Plot_Max-Plot_Min),...
-                ['Bias Factor: ',num2str(delta,'%4.2f')],'FontSize',12,'FontName','Times','Interpreter',Font_Interpreter)
+            text(Plot_Min+(Title_Position(1)+Subtitle_Text_Offset)*(Plot_Max-Plot_Min),Plot_Min+(Title_Position(2)-0.15)*(Plot_Max-Plot_Min),...
+                ['Bias Factor: ',num2str(delta,'%4.2f')],'FontSize',12,'FontName',Font_Name,'Interpreter',Font_Interpreter)
         end
         
         C = stripcell(Group_Key_Label);
@@ -321,16 +332,16 @@ for j=2:length(Q);
         % print to pdf
         
         PDF_Paper_Width = Paper_Width_Factor * Scat_Paper_Width;
-
+        
         set(gcf,'Visible','on');
         set(gcf,'PaperUnits','inches');
         set(gcf,'PaperSize',[PDF_Paper_Width Scat_Paper_Height]);
         set(gcf,'PaperPosition',[0 0 PDF_Paper_Width Scat_Paper_Height]);
         display(['Printing scatter plot ',num2str(j),'...'])
-        print(gcf,'-dpdf',[plotdir,Plot_Filename])
+        print(gcf,Image_File_Type,[Manuals_Dir,Plot_Filename])
 
         %%% Print histogram of ln(M/E) and normal distribution
-        if stats_output == 2 % (Validation runs only)
+        if Stats_Output == 2 % (Validation runs only)
             % Wrap histogram routine in try loop
             % Skips case upon any Matlab error
             try
@@ -376,13 +387,13 @@ for j=2:length(Q);
                     xlabel('Interval Number','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size,'FontName',Font_Name)
                     ylabel('Number of Data Points','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size,'FontName',Font_Name)
                     set(gca,'Units','inches')
-                    set(gca,'FontName','Times')
+                    set(gca,'FontName',Font_Name)
                     set(gca,'FontSize',12)
                     set(gca,'XTick',xout,'XTickLabel',{'1','2','3','4','5','6','7','8','9','10'})
                     set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
-                    text(0.03, 0.90,Scatter_Plot_Title,'FontSize',Title_Font_Size,'FontName','Times','Interpreter',Font_Interpreter,'Units','normalized')
-                    text(0.03, 0.82,['Normality Test'],'FontSize',Title_Font_Size,'FontName','Times','Interpreter',Font_Interpreter,'Units','normalized')
-                    text(0.03, 0.74,['p-value = ',num2str(pval,'%4.2f')],'FontSize',Title_Font_Size,'FontName','Times','Interpreter',Font_Interpreter,'Units','normalized')
+                    text(0.03, 0.90,Scatter_Plot_Title,'FontSize',Title_Font_Size,'FontName',Font_Name,'Interpreter',Font_Interpreter,'Units','normalized')
+                    text(0.03, 0.82,['Normality Test'],'FontSize',Title_Font_Size,'FontName',Font_Name,'Interpreter',Font_Interpreter,'Units','normalized')
+                    text(0.03, 0.74,['p-value = ',num2str(pval,'%4.2f')],'FontSize',Title_Font_Size,'FontName',Font_Name,'Interpreter',Font_Interpreter,'Units','normalized')
                     
                     PDF_Paper_Width = Paper_Width;
                     
@@ -390,7 +401,7 @@ for j=2:length(Q);
                     set(gcf,'PaperUnits','inches');
                     set(gcf,'PaperSize',[PDF_Paper_Width Paper_Height]);
                     set(gcf,'PaperPosition',[0 0 PDF_Paper_Width Paper_Height]);
-                    print(gcf,'-dpdf',[plotdir,[Plot_Filename, '_Histogram']])
+                    print(gcf,Image_File_Type,[Manuals_Dir,[Plot_Filename, '_Histogram']])
                     hold off
                     % Add histogram name to array for LaTeX output later
                     [~, filename, ~] = fileparts(Plot_Filename);
@@ -403,7 +414,7 @@ for j=2:length(Q);
         end
         
         % Perform this code block for FDS validation scatterplot output
-        if stats_output == 2
+        if Stats_Output == 2
             % Write descriptive statistics to output_stats cell
             output_stats{stat_line,1} = Scatter_Plot_Title; % Quantity
             output_stats{stat_line,2} = size(B, 2); % Number of data sets
@@ -423,9 +434,9 @@ for j=2:length(Q);
 end
 
 % Write all verification or validation statistics from output_stats to csv output_file
-if (stats_output ~= 0)
+if (Stats_Output ~= 0)
     [rows, cols] = size(output_stats);
-    fid = fopen(output_file, 'w');
+    fid = fopen(Output_File, 'w');
     for i_row = 1:rows
         file_line = '';
         for i_col = 1:cols
@@ -450,8 +461,8 @@ end
 
 % Write statistics information to a LaTeX table
 % for inclusion in the FDS Verification Guide
-if stats_output == 1
-    fid = fopen(statistics_tex_output, 'wt');
+if Stats_Output == 1
+    fid = fopen(Statistics_Tex_Output, 'wt');
     % Generate table header information in .tex file
     fprintf(fid, '%s\n', '\begin{center}');
     fprintf(fid, '%s\n', '\tiny');
@@ -500,8 +511,8 @@ end
 
 % Write statistics information to a LaTeX table for inclusion
 % in the FDS Validation Guide or FDTs Validation Guide
-if stats_output == 2
-    fid = fopen(statistics_tex_output, 'wt');
+if Stats_Output == 2
+    fid = fopen(Statistics_Tex_Output, 'wt');
     % Generate table header information in .tex file
     fprintf(fid, '%s\n', '\begin{center}');
     fprintf(fid, '%s\n', '\begin{longtable}{|l|c|c|c|c|c|}');
@@ -538,8 +549,8 @@ end
 
 % Write histogram information to a LaTeX file for inclusion
 % in the FDS Validation Guide or FDTs Validation Guide
-if (stats_output == 2) && (exist('output_histograms','var') == 1) && (isempty(output_histograms) == 0)
-    fid = fopen(histogram_tex_output, 'wt');
+if (Stats_Output == 2) && (exist('output_histograms','var') == 1) && (isempty(output_histograms) == 0)
+    fid = fopen(Histogram_Tex_Output, 'wt');
     % Write plots to LaTeX figures, eight per page
     num_histograms = length(output_histograms);
     page_count = ceil(num_histograms/8);
