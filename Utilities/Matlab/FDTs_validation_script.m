@@ -32,9 +32,6 @@ vdir = [pwd,'/../../Validation/'];
 plotdir = [pwd,'/../../Manuals/'];
 qfil = [pwd,'/FDTs_validation_scatterplot_inputs.csv'];
 output_file = [pwd,'/FDTs_validation_scatterplot_output.csv'];
-stats_output = 2;
-statistics_tex_output = [pwd,'../../Manuals/FDTs_Validation_Guide/SCRIPT_FIGURES/Scatterplots/validation_statistics.tex'];
-histogram_tex_output = [pwd,'../../Manuals/FDTs_Validation_Guide/SCRIPT_FIGURES/Scatterplots/validation_histograms.tex'];
 
 [saved_data,drange] = dataplot(cfil,vdir,plotdir);
 scatplot(saved_data,drange,qfil,plotdir,output_file)
