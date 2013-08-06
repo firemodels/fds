@@ -16,7 +16,7 @@ agenda for FDS  is greatly influenced  by   the  feedback   provided  by  users,
 It is useful to divide the various validation exercises described in this chapter into two classes -- those for which the
 heat release rate (HRR) of the fire is {\em specified} as an input to the model and those for which the HRR
 is {\em predicted} by the model. The former is often the case for a
-design application, the latter for a forensic reconstruction. Consider each in turn.
+design application, the latter for a forensic reconstruction. 
 
 Design  applications  typically  involve  an existing  building  or  a building  under  design. A  so-called  ``design  fire'' is  specified either
 by  a regulatory authority  or by the engineers  performing the analysis. Because the  fire's heat release rate is  specified, the role of the model
@@ -48,33 +48,14 @@ validation  efforts are moving  in the direction of these more difficult issues.
 
 \section{Validation Work with Pre-Release Versions of FDS}
 
-FDS was officially released in  2000. However, for two decades various CFD codes using the basic FDS hydrodynamic framework were developed at NIST
-for  different applications and  for research. In the  mid 1990s, many of  these different codes were consolidated  into what eventually became FDS.
-Before FDS, the various  models were referred  to as LES, NIST-LES, LES3D,  IFS (Industrial Fire Simulator), and  ALOFT (A Large Outdoor Fire Plume
-Trajectory).
+FDS was officially released in  2000. However, for two decades various CFD codes using the basic FDS hydrodynamic framework were developed at NIST for  different applications and  for research. In the  mid 1990s, many of  these different codes were consolidated  into what eventually became FDS. Before FDS, the various  models were referred  to as LES, NIST-LES, LES3D,  IFS (Industrial Fire Simulator), and  ALOFT (A Large Outdoor Fire Plume Trajectory).
 
-The  NIST LES model  describes the  transport of  smoke and  hot gases during  a fire  in an  enclosure using  the  Boussinesq approximation, where
-it is assumed that the density and temperature variations in the flow                           are                          relatively
-small~\cite{Rehm:1,Rehm:SIAM83,Rehm:ANM85,Rehm:IAFSS3}.     Such    an approximation  can be  applied  to a  fire  plume away  from the  fire itself.
-Much of  the early  work  with this  form of  the model  was devoted  to  the  formulation of  the  low  Mach  number form  of  the Navier-Stokes
-equations and  the development  of the  basic numerical algorithm.   Early validation  efforts  compared the  model with  salt water
-experiments~\cite{Baum:1,McGrattan:1,Rehm:IAFSS5},   and  fire plumes~\cite{Baum:IAFSS5,Baum:2,Baum:3,Baum:4}.  Clement validated the hydrodynamic
-model  in FDS by  measuring salt water flows  using Laser Induced   dye   Fluorescence~(LIF)~\cite{Clement:1}.  An   interesting finding  of this
-work was  that the  transition from  a laminar  to a turbulent plume is very difficult  to predict with any technique other than DNS.
+The  NIST LES model  describes the  transport of  smoke and  hot gases during  a fire  in an  enclosure using  the  Boussinesq approximation, where it is assumed that the density and temperature variations in the flow are relatively small~\cite{Rehm:1,Rehm:SIAM83,Rehm:ANM85,Rehm:IAFSS3}. Such an approximation  can be  applied  to a  fire  plume away  from the  fire itself. Much of  the early  work  with this  form of  the model  was devoted  to  the  formulation of  the  low  Mach  number form  of  the Navier-Stokes equations and  the development  of the  basic numerical algorithm.   Early validation  efforts  compared the  model with  salt water experiments~\cite{Baum:1,McGrattan:1,Rehm:IAFSS5},   and  fire plumes~\cite{Baum:IAFSS5,Baum:2,Baum:3,Baum:4}.  Clement validated the hydrodynamic model  in FDS by  measuring salt water flows  using Laser Induced dye   Fluorescence~(LIF)~\cite{Clement:1}.  An   interesting finding  of this work was  that the  transition from  a laminar  to a turbulent plume is very difficult  to predict with any technique other than DNS.
 
-Eventually, the  Boussinesq approximation was  dropped and simulations began  to   include  more  fire-specific   phenomena.  Simulations  of
-enclosure   fires   were   compared   to  experiments   performed   by Steckler~\cite{McGrattan:4}.  Mell~{\em  et al.}~\cite{Mell:1} studied small
-helium  plumes, with particular attention to  the relative roles of  baroclinic torque and  buoyancy as  sources of  vorticity.  Cleary {\em  et
-al.}~\cite{LES:6}  used   the  LES  model  to  simulate  the environment  seen by  multi-sensor fire  detectors and  performed some simple validation
-work to check the model before using it.  Large fire experiments were performed by NIST  at the FRI test facility in Japan, and at US Naval aircraft
-hangars in Hawaii and Iceland~\cite{Davis:1}. Room   airflow   applications   were   considered  by   Emmerich   and
-McGrattan~\cite{Emmerich:1,Emmerich:2}.
+Eventually, the  Boussinesq approximation was  dropped and simulations began  to   include  more  fire-specific   phenomena.  Simulations  of enclosure   fires   were   compared   to  experiments   performed   by Steckler~\cite{McGrattan:4}.  Mell~{\em  et al.}~\cite{Mell:1} studied small helium  plumes, with particular attention to  the relative roles of  baroclinic torque and  buoyancy as  sources of  vorticity.  Cleary~{\em  et
+al.}~\cite{LES:6}  used   the  LES  model  to  simulate  the environment  seen by  multi-sensor fire  detectors and  performed some simple validation work to check the model before using it.  Large fire experiments were performed by NIST  at the FRI test facility in Japan, and at US Naval aircraft hangars in Hawaii and Iceland~\cite{Davis:1}. Room   airflow   applications   were   considered  by   Emmerich   and McGrattan~\cite{Emmerich:1,Emmerich:2}.
 
-These early validation efforts were encouraging, but still pointed out the  need  to  improve  the  hydrodynamic  model  by  introducing  the
-Smagorinsky form of large eddy simulation.  This addition improved the stability  of the  model  because of  the  relatively simple  relation between
-the  local strain rate  and the turbulent viscosity.  There is both   a   physical  and   numerical   benefit   to  the   Smagorinsky model.
-Physically,  the viscous term used  in the model  has the right functional  form to describe  sub-grid mixing  processes. Numerically, local
-oscillations in the computed  flow quantities are damped if they become  large   enough  to  threaten  the  stability   of  the  entire calculation.
+These early validation efforts were encouraging, but highlighted the  need  to  improve  the  hydrodynamic  model  by  introducing  the Smagorinsky form of large eddy simulation.  This addition improved the stability  of the  model  because of  the  relatively simple  relation between the  local strain rate  and the turbulent viscosity.  There is both   a   physical  and   numerical   benefit   to  the   Smagorinsky model. Physically,  the viscous term used  in the model  has the right functional  form to describe  sub-grid mixing  processes. Numerically, local oscillations in the computed  flow quantities are damped if they become  large   enough  to  threaten  the  stability   of  the  entire calculation.
 
 
 
@@ -100,94 +81,40 @@ assessment of the model.
 
 \subsection{Fire Plumes}
 
-There are  several examples of  fire flows that have  been extensively studied, so much  so that a set of  engineering correlations combining the
-results  of   many  experiments   have  been   developed.  These correlations are  useful to modelers because of  their simplicity. The most studied
-phenomena include fire  plumes, ceiling jets,  and flame heights.
+There are  several examples of  fire flows that have  been extensively studied, so much  so that a set of  engineering correlations combining the results  of   many  experiments   have  been   developed.  These correlations are  useful to modelers because of  their simplicity. The most studied phenomena include fire  plumes, ceiling jets,  and flame heights.
 
-Although much  of the  early validation work  before FDS  was released involved fire plumes, it remains an active area of interest. One study by
-Chow  and Yin~\cite{Chow:1}  surveys  the  performance of  various models in predicting plume temperatures and entrainment for a 470~kW fire with a
-diameter of  1~m and an  unbounded ceiling.  They compare the FDS results with various
-correlations and a  RANS (Reynolds-Averaged Navier-Stokes) model.
+Although much  of the  early validation work  before FDS  was released involved fire plumes, it remains an active area of interest. One study by Chow  and Yin~\cite{Chow:1}  surveys  the  performance of  various models in predicting plume temperatures and entrainment for a 470~kW fire with a diameter of  1~m and an  unbounded ceiling.  They compare the FDS results with various correlations and a  RANS (Reynolds-Averaged Navier-Stokes) model.
 
-Battaglia~{\em  et al.}~\cite{Battaglia:1} used  FDS to  simulate fire whirls.   First,  the  model  was  shown to  reproduce  the  McCaffrey
-correlation  of  a  fire  plume,   then  it  was  shown  to  reproduce qualitatively certain features  of fire whirls. At the  time, FDS used
-Lagrangian elements to introduce heat  from the fire (no longer used), and this  combustion model could not replicate  the extreme stretching of the
-core of the flame zone.
+Battaglia~{\em  et al.}~\cite{Battaglia:1} used  FDS to  simulate fire whirls.   First,  the  model  was  shown to  reproduce  the  McCaffrey correlation  of  a  fire  plume,   then  it  was  shown  to  reproduce qualitatively certain features  of fire whirls. At the  time, FDS used Lagrangian elements to introduce heat  from the fire (no longer used), and this  combustion model could not replicate  the extreme stretching of the core of the flame zone.
 
-Quintiere and Ma~\cite{Ma:2,Ma:3} compared predicted flame heights and plume  centerline temperatures to  empirical correlations.   For plume
-temperature,   the  Heskestad   correlation~\cite{SFPE:Heskestad}  was chosen.  Favorable  agreement was found  in the plume region,  but the results
-near  the  flame  region  were found  to  be  grid-dependent, especially for  low $Q^*$  fires.  At this  same time,  researchers at NIST were
-reaching similar  conclusions, and it  was noticed  by both teams  that a  critical parameter  for the  model is  $D^*/\dx$, where $D^*$ is the
-characteristic fire diameter and $\dx$  is the grid cell size.  If  this parameter  is  sufficiently  large,  the fire  can  be considered
-well-resolved  and  agreement  with various  flame  height correlations was found. If the parameter is not large enough, the fire is not
-well-resolved and adjustments  must be made to  the combustion routine to account for it.
+Quintiere and Ma~\cite{Ma:2,Ma:3} compared predicted flame heights and plume  centerline temperatures to  empirical correlations.   For plume temperature,   the  Heskestad   correlation~\cite{SFPE:Heskestad}  was chosen.  Favorable  agreement was found  in the plume region,  but the results near  the  flame  region  were found  to  be  grid-dependent, especially for  low $Q^*$  fires.  At this  same time,  researchers at NIST were reaching similar  conclusions, and it  was noticed  by both teams  that a  critical parameter  for the  model is  $D^*/\dx$, where $D^*$ is the characteristic fire diameter and $\dx$  is the grid cell size.  If  this parameter  is  sufficiently  large,  the fire  can  be considered well-resolved  and  agreement  with various  flame  height correlations was found. If the parameter is not large enough, the fire is not well-resolved and adjustments  must be made to  the combustion routine to account for it.
 
-Guti\'{e}rrez-Montes {\em et al.}~\cite{Gutierrez:Building_and_Environment} simulated 1.3~MW and 2.3~MW fires in a 20~m cubic atrium using FDS version 4.
-The authors conclude that FDS ``significantly
-over-predicts by 40~\% to 80~\% the plume temperature near the flame (below 9~m) but only slightly over-predicts by 10~\% to 25~\% the
-plume temperature above 9~m.'' Similar results were found for experiments conducted at VTT, Finland, in a 19~m tall test hall with similar sized fires. These results
-are included in Section~\ref{VTT_plume}. Both of these studies point out the sensitivity of the centerline plume temperature close to the flame tip to the prediction of the
-flame height. FDS does not use a flame height correlation, but rather predicts the flame height based on the fuel stoichiometry and fluid dynamics of the turbulent plume.
+Guti\'{e}rrez-Montes {\em et al.}~\cite{Gutierrez:Building_and_Environment} simulated 1.3~MW and 2.3~MW fires in a 20~m cubic atrium using FDS version 4. Similar experiments were conducted at VTT, Finland, in a 19~m tall test hall with similar sized fires. These results are included in Section~\ref{VTT_plume}. 
 
-Hurley and Munguia~\cite{Hurley:GCR09-921,Hurley:JFPE2009} compared FDS (version 4) simulations with plume and ceiling
-jet measurements from a series of full-scale tests
-conducted by Underwriters Laboratories. The tests were conducted in a 36.6~m by 36.6~m
-compartment with ceiling heights ranging from 3~m to 12.2~m. Heat release rates
-followed a modified t-squared growth profile. Thermocouples attached to brass disks were used to
-simulate thermal detectors.
-The FDS simulations were conducted with a grid spacing of 10~cm. A convergence study found
-that grid-size convergence was achieved outside of the plume region. However, grid
-convergence was not achieved in the plume region at this grid spacing. Outside of the plume
-region, FDS predictions were within a factor of 1.9 of the test data.
+Hurley and Munguia~\cite{Hurley:GCR09-921,Hurley:JFPE2009} compared FDS (version 4) simulations with plume and ceiling jet measurements from a series of full-scale tests conducted by Underwriters Laboratories. The tests were conducted in a 36.6~m by 36.6~m compartment with ceiling heights ranging from 3~m to 12.2~m. Heat release rates followed a modified t-squared growth profile. Thermocouples attached to brass disks were used to simulate thermal detectors.
+
 
 
 
 \subsection{Pool Fires}
 
 
-Xin~{\em et  al.}~\cite{Xin:JSS2005} used FDS to model  a 1~m diameter methane pool  fire.  The  computational domain was  2~m by 2~m  by 4~m with  a
-uniform  grid  size of  2.5  cm.  The  predicted results  were compared  to   experimental  data  and  found   to  qualitatively  and quantitatively
-reproduce   the  velocity  field.   The  same  authors performed a similar study of a 7.1~cm methane burner~\cite{Xin:CF2005} and a helium
-plume~\cite{Xin:CS2002}.
+Xin~{\em et  al.}~\cite{Xin:JSS2005} used FDS to model  a 1~m diameter methane pool  fire.  The  computational domain was  2~m by 2~m  by 4~m with  a uniform  grid  size of  2.5  cm.  The  predicted results  were compared  to   experimental  data  and  found   to  qualitatively  and quantitatively reproduce   the  velocity  field.   The  same  authors performed a similar study of a 7.1~cm methane burner~\cite{Xin:CF2005} and a helium plume~\cite{Xin:CS2002}.
 
-Hostikka~{\em et al.}~\cite{Hostikka:3} modeled small pool fires of
-methane, natural gas and methanol  to test the FDS radiation solver for low-sooting
-fires.  They conclude that the predicted radiative fluxes are higher than measured values, especially at small heat
-release rates, due to an over-prediction of the gas temperature. These
-tests are also included in the Heat Flux section of this report.
+Hostikka~{\em et al.}~\cite{Hostikka:3} modeled small pool fires of methane, natural gas and methanol  to test the FDS radiation solver for low-sooting fires.  They conclude that the predicted radiative fluxes are higher than measured values, especially at small heat release rates, due to an over-prediction of the gas temperature. These tests are also included in the Heat Flux section of this report.
 
-Hietaniemi,  Hostikka and  Vaari~\cite{Hietaniemi:1}  consider heptane pool fires of various diameters.  Predictions of the burning rate as a
-function  of  diameter  follow  the  trend observed  in  a  number  of experimental studies.  Their results show an improvement  in the model over
-the earlier work with  methanol fires, due to improvements in the radiation  routine  and the  fact  that  heptane  is more  sooty  than methanol,
-simplifying  the treatment of radiation.   The authors point out  that reliable  predictions of  the burning  rate of  liquid fuels require roughly
-twice as fine a grid spanning the burner than would be necessary to predict plume velocities and temperatures. The reason for this is  the prediction
-of the heat  feedback to the  burning surface necessary to {\em predict} rather  than to {\em specify} the burning rate.
+Hietaniemi,  Hostikka and  Vaari~\cite{Hietaniemi:1}  considered heptane pool fires of various diameters.  Predictions of the burning rate as a function  of  diameter  follow  the  trend observed  in  a  number  of experimental studies.  Their results show an improvement  in the model over the earlier work with  methanol fires, due to improvements in the radiation  routine  and the  fact  that  heptane  is more  sooty  than methanol, simplifying  the treatment of radiation.   The authors point out  that reliable  predictions of  the burning  rate of  liquid fuels require roughly twice as fine a grid spanning the burner than would be necessary to predict plume velocities and temperatures. The reason for this is  the prediction of the heat  feedback to the  burning surface necessary to {\em predict} rather  than to {\em specify} the burning rate.
 
 
 \subsection{Air and Gas Movement in the Absence of Fire}
 
-The low Mach number assumption in FDS is appropriate not only to fire, but to  most building  ventilation scenarios.  An  example of  how the model
-can  be used  to  assess indoor  air  quality  is presented  by Musser~{\em  et  al.}~\cite{Musser:1}.   The  test compartment  was  a displacement
-ventilation  test   room   that  contained   computers, furniture, and  lighting fixtures as well as  heated rectangular boxes intended to  represent
-occupants.  A detailed description  of the test configuration is  given by Yuan~{\em et  al.}~\cite{Yuan:1}.  The room is ventilated with  cool
-supply air introduced via  a diffuser that is mounted on a side  wall near the floor. The air rises  as it is warmed by heat sources  and exits
-through a return duct  located in the upper portion  of  the  room.  The   flow  pattern  is  intended  to  remove contaminants by sweeping  them
-upward at the source  and removing them from the room.  Sulphur  hexafluoride, SF$_6$, was introduced into the compartment during the  experiment as
-a tracer gas  near the breathing zone  of  the   occupants.   Temperature,  tracer  concentration,  and velocity were  measured during the
-experiments.   For temperature, the two finest grids (50 by 36 by  24 and 64 by 45 by 30) produced results in  which the  agreement between  the
-measurement  and  prediction was considered  ``acceptable.''  The agreement  for the  tracer concentrations were  not as  good.  It  was suggested  that
-the  difference  could be related to  the way  the source  of the tracer  gas was  modeled.  The comparison  of   velocity  data  was  deemed
-``reasonable,''  given  the limitations of the velocity probes at low velocities.
+The low Mach number assumption in FDS is appropriate not only to fire, but to  most building  ventilation scenarios.  An  example of  how the model can  be used  to  assess indoor  air  quality  is presented  by Musser~{\em  et  al.}~\cite{Musser:1}.   The  test compartment  was  a displacement ventilation  test   room   that  contained   computers, furniture, and  lighting fixtures as well as  heated rectangular boxes intended to  represent occupants.  A detailed description  of the test configuration is  given by Yuan~{\em et  al.}~\cite{Yuan:1}.  The room is ventilated with  cool supply air introduced via  a diffuser that is mounted on a side  wall near the floor. The air rises  as it is warmed by heat sources  and exits through a return duct  located in the upper portion  of  the  room.  The   flow  pattern  is  intended  to  remove contaminants by sweeping  them upward at the source  and removing them from the room.  Sulphur  hexafluoride, SF$_6$, was introduced into the compartment during the  experiment as a tracer gas  near the breathing zone  of  the   occupants.   Temperature,  tracer  concentration,  and velocity were  measured during the experiments.   
 
-In another  study, Musser and  Tan~\cite{Musser:2} used FDS  to assess the  design  of ventilation  systems  for  facilities  in which  train
-locomotives  operate.  Although there  is  only  a  limited amount  of validation, the  study is useful  in demonstrating a practical  use of FDS for
-a non-fire scenario.
+In another  study, Musser and  Tan~\cite{Musser:2} used FDS  to assess the  design  of ventilation  systems  for  facilities  in which  train locomotives  operate.  Although there  is  only  a  limited amount  of validation, the  study is useful  in demonstrating a practical  use of FDS for a non-fire scenario.
 
-Mniszewski~\cite{Mniszewski:1}  used  FDS  to  model  the  release  of flammable gases in simple enclosures and open areas. In this work, the gases
-were not ignited.
+Mniszewski~\cite{Mniszewski:1}  used  FDS  to  model  the  release  of flammable gases in simple enclosures and open areas. In this work, the gases were not ignited.
 
-Kerber  and Walton  provided a  comparison between  FDS version  1 and experiments on positive pressure ventilation in a full-scale enclosure without
-a fire.   The model predictions of velocity  were within 10~\% to 20~\% of the experimental values~\cite{Kerber:1}.
+Kerber  and Walton~\cite{Kerber:1}  provided a  comparison between  FDS version  1 and experiments on positive pressure ventilation in a full-scale enclosure without a fire.   
 
 
 \subsection{Wind Engineering}
@@ -226,29 +153,14 @@ Mouilleau and Champassith~\cite{JLP:2009} performed a validation study to assess
 model atmospheric dispersion. They concluded that the best results were obtained for
 simulations done with explicitly-modeled wind fluctuations.
 Specific atmospheric flow characteristics were evaluated for passive releases in open
-and flat fields. The authors concluded that maximum downwind concentration were well-predicted, except
-for the case of unstable conditions where the model over-predicted
-the concentration, and that time-averaged ``cloud shape'' was well-predicted for stable
-atmospheric conditions, but less so for neutral and unstable conditions.
+and flat fields. 
 
 
 
 \subsection{Growing Fires}
 \label{growingfires}
 
-Vettori~\cite{Vettori:1} modeled two different fire growth rates in an obstructed ceiling geometry.  The rectangular compartment was 9.2~m by 5.6~m
-by 2.4~m  with a hollow steel door to  the outside that remained closed during the tests. An open wooden stairway led to an upper floor with the same
-dimensions as the fire compartment below.  Wooden joists measuring 0.038~m by 0.24~m were spaced at 0.41~m intervals across the ceiling and  were
-supported  by a single  steel beam that  spanned the width of the  room.  A rectangular methane gas  burner measuring 0.7~m by 1.0~m by 0.31~m was
-placed  in the corner of the chamber.  Slow and fast  burning  fires  that  reached  1055~kW  in  600~s  and  150~s, respectively,  were
-monitored.   Four   vertical  arrays  of  Type~K thermocouples were used to measure temperatures during the tests.  The FDS model used four grid
-refinements and piecewise-linear grid spacing for each fire growth rate (slow  and fast). For the fast growing fire, the predicted  temperatures were
-within  20~\% of the  measured values and within  10~\% for the slow  growing fire. In  general, finer grids produced better agreement.
 
-In a follow-up report,  Vettori~\cite{Vettori:2} extended his study to include sloped ceilings, with  and without obstructions. He found that the
-difference between  predicted and  measured  sprinkler activation times varied  between 4~\%  and 26~\% for  all cases studied.  He also noted that
-FDS was able to predict the first activation of a sprinkler twice  as far  from  the fire  as  another; caused  presumably by  the re-direction of
-smoke and heat by the beams on the ceiling.
 
 Floyd~\cite{Floyd:5,Floyd:6} validated  FDS by comparing  the modeling results with  measurements from fire tests at  the Heiss-Dampf Reaktor (HDR)
 facility.  The structure was originally the containment building for a nuclear power reactor  in Germany. The cylindrical structure was 20~m in
@@ -357,87 +269,41 @@ The simulations were found to provide satisfying results in CFAST, as an alterna
 
 \subsection{Sprinklers, Mist System, and Suppression by Water}
 
-A   significant  validation  effort   for  sprinkler   activation  and suppression was  a project entitled the  International Fire Sprinkler, Smoke
-and Heat Vent, Draft  Curtain Fire Test Project organized by the National   Fire  Protection   Research  Foundation~\cite{McGrattan:5}. Thirty-nine
-large scale  fire  tests were  conducted at  Underwriters Laboratories in  Northbrook, IL.  The  tests were aimed  at evaluating the performance of
-various  fire protection systems in large buildings with  flat ceilings, like  warehouses and  ``big box''  retail stores. All the  tests were
-conducted  under a 30~m by  30~m adjustable-height platform in a 37~m by 37~m by 15~m high test bay. At the time, FDS had not been publicly released
-and  was referred to as the Industrial Fire Simulator (IFS), but it was essentially the same as FDS version 1. The first series of heptane spray burner
-fires have been simulated with the latest version of FDS and are included in this Guide under the heading ``UL/NFPRF Test Series.''
-Most of the full-scale experiments performed during the project used a heptane  spray  burner  to   generate  controlled  fires  of  1~MW  to 10~MW.
-However, five  experiments  were performed  with  6~m high  racks containing the  Factory Mutual Standard Plastic Commodity,  or Group A Plastic. To
-model these  fires, bench scale experiments were performed to characterize the burning behavior of the commodity, and larger test fires  provided
-validation  data  with  which  to   test  the  model predictions    of    the     burning    rate    and    flame    spread
-behavior~\cite{Hamins:1,Hamins:IAFSS2002}.     Two   to    four   tier configurations  were  evaluated.  For  the  period  of  time prior  to
-application of water, the simulated heat release rate was within 20~\% of the experimental  heat release rates.  It should  be noted that the model
-was very  sensitive to the thermal parameters  and the numerical grid when used to model the fire growth in the piled commodity tests.
+Vettori~\cite{Vettori:1} modeled sprinkler activation patterns in a room with an obstructed ceiling. In a follow-up report, Vettori~\cite{Vettori:2} extended his study to include sloped ceilings, with and without obstructions. Both of these experimental series are included within the current validation guide and are referred to the Vettori Flat and Sloped Ceiling Experiments.
 
+A   significant  validation  effort   for  sprinkler   activation  and suppression was  a project entitled the  International Fire Sprinkler, Smoke and Heat Vent, Draft  Curtain Fire Test Project organized by the National Fire  Protection   Research  Foundation~\cite{McGrattan:5}. Thirty-nine large scale  fire  tests were  conducted at  Underwriters Laboratories in  Northbrook, IL.  The  tests were aimed  at evaluating the performance of various  fire protection systems in large buildings with  flat ceilings, like  warehouses and  ``big box''  retail stores. All the  tests were conducted  under a 30~m by  30~m adjustable-height platform in a 37~m by 37~m by 15~m high test bay. At the time, FDS had not been publicly released and  was referred to as the Industrial Fire Simulator (IFS), but it was essentially the same as FDS version 1. The first and second series of heptane spray burner fires are included in this guide under the heading ``UL/NFPRF Sprinkler, Vent, and Draft Curtain Study.'' Most of the full-scale experiments performed during the project used a heptane  spray  burner  to   generate  controlled  fires  of  1~MW  to 10~MW. However, five  experiments  were performed  with  6~m high  racks containing the  Factory Mutual Standard Plastic Commodity,  or Group A Plastic. To model these  fires, bench scale experiments were performed to characterize the burning behavior of the commodity, and larger test fires  provided validation  data  with  which to test the  model predictions of the burning rate and flame spread behavior~\cite{Hamins:1,Hamins:IAFSS2002}. Two to four tier configurations  were  evaluated.  
 
-High rack storage fires of pool chemicals were modeled by Olenick~{\em et  al.}~\cite{Olenick:1}  to  determine  the  validity  of  sprinkler
-activation predictions  of FDS.  The model was  compared to full-scale fires conducted  in January, 2000  at Southwest Research  Institute in San
-Antonio,  Texas.
+High rack storage fires of pool chemicals were modeled by Olenick~{\em et  al.}~\cite{Olenick:1}  to  determine  the  validity  of  sprinkler activation predictions  of FDS.  The model was  compared to full-scale fires conducted  in January, 2000  at Southwest Research  Institute in San Antonio,  Texas.
 
-FDS  has  been  used  to  study  the behavior  of  a  fire  undergoing suppression     by     a    water     mist     system.     Kim     and
-Ryou~\cite{Kim:BE2003,Kim:IJACR2004}   compared  FDS   predictions  to results of compartment fire tests  with and without the application of a water
-mist. The cooling and oxygen dilution were predicted to within about 10~\% of the measurements, but the simulations failed to predict the complete
-extinguishment of a hexane pool fire. The authors suggest that this is a result of the combustion model rather than the spray or droplet model.
+FDS  has  been  used  to  study  the behavior  of  a  fire  undergoing suppression     by     a    water     mist     system.     Kim     and Ryou~\cite{Kim:BE2003,Kim:IJACR2004}   compared  FDS   predictions  to results of compartment fire tests  with and without the application of a water mist. The cooling and oxygen dilution were predicted to within about 10~\% of the measurements, but the simulations failed to predict the complete extinguishment of a hexane pool fire. The authors suggest that this is a result of the combustion model rather than the spray or droplet model.
 
-Another study  of water  mist suppression using  FDS was  conducted by Hume   at   the    University   of   Canterbury,   Christchurch,   New
-Zealand~\cite{Hume:Masters}. Full-scale  experiments were performed in which a fine  water mist was combined with  a displacement ventilation system
-to protect occupants and electrical equipment in the event of a fire.  Simulations of  these experiments  with FDS  showed qualitative agreement, but
-the version of the  model used in the study (version 3) was not able  to predict accurately the decrease  in heat release rate of the fire.
+Another study  of water  mist suppression using  FDS was  conducted by Hume   at   the    University   of   Canterbury,   Christchurch,   New Zealand~\cite{Hume:Masters}. Full-scale  experiments were performed in which a fine  water mist was combined with  a displacement ventilation system to protect occupants and electrical equipment in the event of a fire.  Simulations of  these experiments  with FDS  showed qualitative agreement, but the version of the  model used in the study (version 3) was not able  to predict accurately the decrease  in heat release rate of the fire.
 
-Hostikka    and   McGrattan~\cite{Hostikka:FSJ2006}    evaluated   the absorption of  thermal radiation by water sprays.  They considered two sets of
-experimental data and concluded  that FDS has  the ability to predict the  attenuation of thermal radiation  ``when the hydrodynamic interaction
-between   the  droplets  is   weak.''  However,  modeling interacting sprays would require a more costly coalescence model. They also note that  the
-results of the model were  sensitive to grid size, angular discretization, and droplet sampling.
+Hostikka    and   McGrattan~\cite{Hostikka:FSJ2006}    evaluated   the absorption of  thermal radiation by water sprays.  They considered two sets of experimental data and concluded  that FDS has  the ability to predict the  attenuation of thermal radiation  ``when the hydrodynamic interaction between   the  droplets  is   weak.''  However,  modeling interacting sprays would require a more costly coalescence model. They also note that  the results of the model were  sensitive to grid size, angular discretization, and droplet sampling.
 
-O'Grady and Novozhilov~\cite{OGrady:CST} compared the predictions of FDS version 4
-against full-scale fire tests performed at SP Sweden involving a 1.5~MW steady-state fire with two different
-sprinkler flow rates~\cite{Ingason:1}.
-The authors reported results for gas temperatures and the tangential flow velocity in the
-ceiling jet. With the sprinkler off, the average relative prediction error away from the fire
-was of the order of 12~\% for the temperature (with respect to excess temperature in the
-ceiling jet) and 6~\% for velocity. For the two different sprinkler operating conditions,
-the relative errors were 7~\% to 8~\% for velocity and 10~\% to 15~\% for the temperature.
-Sensitivity of the model to a range of input parameters was investigated.
-The model demonstrated moderate sensitivity to the spray parameters,
-such as spray cone configuration, initial droplet velocities, and droplet sizes.
-On the other hand, the sensitivity to other parameters such as
-sprinkler atomization length and rms of droplet size distribution was low.
+O'Grady and Novozhilov~\cite{OGrady:CST} compared the predictions of FDS version 4 against full-scale fire tests performed at SP Sweden involving a 1.5~MW steady-state fire with two different sprinkler flow rates~\cite{Ingason:1}. The authors reported results for gas temperatures and the tangential flow velocity in the ceiling jet. Sensitivity of the model to a range of input parameters was investigated. The model demonstrated moderate sensitivity to the spray parameters, such as spray cone configuration, initial droplet velocities, and droplet sizes. On the other hand, the sensitivity to other parameters such as sprinkler atomization length and rms of droplet size distribution was low.
 
-Xiao~\cite{Xiao:FT2012} compared FDS simulations with real scale compartment measurements for unsprinklered and sprinklered experiments. Numerical results for doorway mass flow rate and
-temperature are compared with the experimental data for three fire sizes. 
+Xiao~\cite{Xiao:FT2012} compared FDS simulations with real scale compartment measurements for unsprinklered and sprinklered experiments. Numerical results for doorway mass flow rate and temperature are compared with the experimental data for three fire sizes.
 
 
 
 \subsection{Airflows in Fire Compartments}
 
-Friday studied the  use of FDS in large  scale mechanically ventilated spaces.   The ventilated  enclosure  was provided  with air  injection rates
-of  1 to 12 air  changes per hour  and a fire with  heat release rates ranging  from 0.5~MW to  2~MW.  The test measurements  and model output were
-compared to assess the accuracy of FDS~\cite{Friday:1}. These simulations have been repeated with the latest version of FDS and reported in this Guide under
+Friday studied the  use of FDS in large  scale mechanically ventilated spaces.   The ventilated  enclosure  was provided  with air  injection rates of  1 to 12 air  changes per hour  and a fire with  heat release rates ranging  from 0.5~MW to  2~MW.  The test measurements  and model output were compared to assess the accuracy of FDS~\cite{Friday:1}. These simulations have been repeated with the latest version of FDS and reported in this guide under
 the heading ``FM/SNL Test Series.''
 
-Zhang {\em  et al.}~\cite{Zhang:2} utilized  the FDS model  to predict turbulence characteristics  of the flow and temperature  fields due to fire
-in a compartment.   The experimental  data was  acquired through tests that replicated a half-scale ISO Room Fire Test.  Two cases were explored --
-the heat  source in  the center  of the  room and  the heat source adjacent to a wall.  In both cases, the heat source was a heating element with an output of
-12~kW/m$^2$.   The predicted  intensity
-of  the temperature  fluctuation  ``agree[d] very well'' at  all points  except those directly  adjacent to  the burner. The turbulent heat flux was
-found to be larger in the region above the heat source.
+Zhang {\em  et al.}~\cite{Zhang:2} utilized  the FDS model  to predict turbulence characteristics  of the flow and temperature  fields due to fire in a compartment.   The experimental  data was  acquired through tests that replicated a half-scale ISO Room Fire Test.  Two cases were explored -- the heat  source in  the center  of the  room and  the heat source adjacent to a wall.  In both cases, the heat source was a heating element with an output of 12~kW/m$^2$.   
 
 
 \subsection{Tunnel Fires}
 
 Cochard~\cite{Cochard:1} used  FDS to  study the ventilation  within a tunnel. He  compared the model  results with a full-scale  tunnel fire
 experiment conducted  as part of the  Massachusetts Highway Department Memorial Tunnel Fire Ventilation  Test Program.  The test consisted of a
-single  point supply of  fresh air through  a 28~m$^2$ opening  in a 135~m tunnel.  The ventilation was started 2 min after the ignition of a  40~MW
-fire.  Fifteen  temperature  measurement  trees were  placed within  the  tunnel and  replicated  within  the  model. Depending  on location,  the
-difference between  predicted and  measured temperature rise ranged from 10~\% to 20~\%.
+single  point supply of  fresh air through  a 28~m$^2$ opening  in a 135~m tunnel.  
 
 McGrattan and Hamins~\cite{McGrattan:HST} also applied FDS to simulate two of the Memorial Tunnel Fire Tests as validation for the use of the model
 in  studying  an  actual  fire in  the  Howard  Street  Tunnel, Baltimore,  Maryland,  July  2001.  The  experiments  chosen  for  the comparison
-were unventilated. One  experiment was  a 20~MW  fire; the other a 50~MW fire.  FDS predictions of peak near-ceiling temperatures were within
-50~$^\circ$C of the measured peak temperatures, which were 600~$^\circ$C and 800~$^\circ$C, respectively.
+were unventilated. One  experiment was  a 20~MW  fire; the other a 50~MW fire.  
 
 Piergoirgio~{\em  et al.}~\cite{Piergiorgio:1} provided  a qualitative analysis of FDS applied to a  truck fire within a tunnel.  The goal of their
 analysis  was to describe the  spread of the  toxic gases within the tunnels, to determine the  places not involved in the spreading of combustion
@@ -448,8 +314,7 @@ function of  the fire intensity, and his  results compared favorably with   expe
 Hwang~\cite{Edwards:SME2006}  applied FDS to  study fire  spread along combustibles in  a ventilated mine  entry. Analyses such as  these are
 intended for planning and implementation of ventilation changes during mine fire fighting and rescue operations.
 
-Bilson~{\em et al.}~\cite{Bilson:2008} used FDS to evaluate the interaction of a deluge system with a tunnel
-ventilation and smoke exhaust system.
+Bilson~{\em et al.}~\cite{Bilson:2008} used FDS to evaluate the interaction of a deluge system with a tunnel ventilation and smoke exhaust system.
 
 Harris~\cite{Harris:ISTSS2010} used FDS to determine the heat flux from a tunnel fire under varying water application rates.
 These results were qualitatively consistent with experimental results of Arvidson~\cite{Arvidson:ISTSS2010}, who conducted burn tests for shielded and unshielded
@@ -479,8 +344,7 @@ temperature and  smoke concentration. It was remarked that simulating  the  earl
 
 Cleary~\cite{Cleary:1} also provided a comparison between FDS computed gas  velocity,  temperature  and  concentrations at  various  detector
 locations.   The research concluded  that multi-room  fire simulations with the FDS model can accurately predict the conditions that a sensor might
-experience during a real fire  event.  The FDS model was able to predict the smoke and gas concentrations, heat, and flow velocities at various
-detector locations to within 15~\% of measurements.
+experience during a real fire  event. 
 
 
 
@@ -498,19 +362,13 @@ Bundy,  Dillon and  Hamins~\cite{Dillon:1,Hamins:FPE2005}  studied the use of FD
 support their investigations.   A paraffin  wax candle  was placed within  a  0.61~m by  0.61~m  by  0.76~m  plexi-glass enclosure.   The chamber was
 raised 20~mm off the surface to reveal 44 uniformly spaced 6~mm diameter holes.   The holes provided oxygen to  the flame without subjecting the
 flame to a draft.   A 150~mm hole was  provided at the top of the enclosure to allow  for the heat and combustion products to exit the space.  The
-heat flux  from the candle flame was modeled with FDS.  The model  provides a prediction of the heat  flux of the candle at a height of  56~mm above
-the base of the flame  with an accuracy of 5~\%. The flux is under predicted  by 16~\% at 76~mm above the base of the  flame. The remainder  of the
-predictions show  flux measurements were under-predicted by 15~\% to 40~\% of the measured values.
+heat flux  from the candle flame was modeled with FDS. 
 
 Floyd~{\em et al.}~\cite{Floyd:1,Floyd:6} compared the radiation model of  FDS version 2  with full-scale  data from  the Virginia  Tech Fire
 Research Laboratory (VTFRL).  The  test compartment was outfitted with equipment   capable   of  taking   temperature,   air  velocity,   gas
 concentrations, unburned hydrocarbon  and heat flux measurements.  The test facility consisted of  a single compartment geometrically similar to the
 ISO 9705 standard compartment with dimensions of 1.2~m by 1.8~m by  1.2~m  in height.   The  ceiling  and  walls were  constructed  of fiberboard
 over  a steel  shell  with  a  floor of  concrete.   Three baseline experiments  were completed with  fires ranging in  size from 90~kW  to 440~kW.
-Overall,  FDS  predicted  the  temperatures  to within  15~\%  of  the measured  temperatures.  The  FDS velocity  measurements  followed the trend
-of  the test  data  but did  not  replicate  it.  The  outgoing velocities  were under-predicted by  30~\% to  40~\% and  the incoming velocities
-were  over-predicted by 40~\%. FDS predicted  the heat flux gauge response to within 10~\%  of the measured values.  The radiation model  in FDS
-predicted the  measured  fluxes to  within 15~\%.
 
 Xin   and  Gore~\cite{Xin:JSS2003}   compared   FDS  predictions   and measurements  of the  spectral radiation  intensities of  small fires. The
 fuel flow rates for  methane and ethylene burners were selected so that the  Froude numbers  matched that of  liquid toluene  pool fires. The heat
