@@ -44,7 +44,24 @@ Size_Save_Quantity = size(Save_Quantity);
 % stats_outputs = 0: No output statistics
 % stats_outputs = 1: FDS verification statistics
 % stats_outputs = 2: FDS or FDTs validation statistics
-if exist('stats_output', 'var') == 0
+if length(varargin) >= 1
+    output_file = varargin{1};
+    % Check if FDS verification plot, set appropriate flag and tex output file
+    if strfind(output_file, 'FDS_verification_scatterplot_output')
+        stats_output = 1;
+        statistics_tex_output = '../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/Scatterplots/verification_statistics.tex';
+    % Check if FDS validation plot, set appropriate flag and tex output file
+    elseif strfind(output_file, 'FDS_validation_scatterplot_output')
+        stats_output = 2;
+        statistics_tex_output = '../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/validation_statistics.tex';
+        histogram_tex_output = '../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/validation_histograms.tex';
+    % Check if FDTs validation plot, set appropriate flag and tex output file
+    elseif strfind(output_file, 'FDTs_validation_scatterplot_output')
+        stats_output = 2;
+        statistics_tex_output = '../../Manuals/FDTs_Validation_Guide/SCRIPT_FIGURES/Scatterplots/validation_statistics.tex';
+        histogram_tex_output = '../../Manuals/FDTs_Validation_Guide/SCRIPT_FIGURES/Scatterplots/validation_histograms.tex';
+    end
+else
     stats_output = 0;
 end
 
