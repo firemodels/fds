@@ -39,9 +39,13 @@ vdir = [pwd,'/../../Validation/'];
 plotdir = [pwd,'/../../Manuals/'];
 qfil = [pwd,'/FDS_validation_scatterplot_inputs.csv'];
 output_file = [pwd,'/FDS_validation_scatterplot_output.csv'];
+stats_output = 2;
+statistics_tex_output = '../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/validation_statistics.tex';
+histogram_tex_output = '../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/validation_histograms.tex';
+NRC_options = true;
 
-[saved_data,drange] = dataplot(cfil,vdir,plotdir);
-scatplot(saved_data,drange,qfil,plotdir,output_file)
+[saved_data,drange] = dataplot(cfil,vdir,plotdir,5:20);
+scatplot(saved_data,drange,qfil,plotdir,output_file,NRC_options)
 
 % Miscellaneous other scripts for special cases
 
