@@ -43,8 +43,6 @@ vdir = [pwd,'/../../Verification/'];
 plotdir = [pwd,'/../../Manuals/'];
 qfil = [pwd,'/FDS_verification_scatterplot_inputs.csv'];
 output_file = [pwd,'/FDS_verification_scatterplot_output.csv'];
-stats_output = 1;
-statistics_tex_output = '../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/Scatterplots/verification_statistics.tex';
 
 [saved_data,drange] = dataplot(cfil,vdir,plotdir);
 scatplot(saved_data,drange,qfil,plotdir,output_file)
