@@ -36,7 +36,7 @@ Stats_Output = 2;
 Statistics_Tex_Output = [pwd, '../../Manuals/FDTs_Validation_Guide/SCRIPT_FIGURES/Scatterplots/validation_statistics.tex'];
 Histogram_Tex_Output = [pwd, '../../Manuals/FDTs_Validation_Guide/SCRIPT_FIGURES/Scatterplots/validation_histograms.tex'];
 
-NRC_Options = true;
+NRC_Options = false;
 Append_To_Scatterplot_Title = '';
 
 [saved_data,drange] = dataplot(Dataplot_Inputs_File, Working_Dir, Manuals_Dir);
