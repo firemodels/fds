@@ -7,15 +7,15 @@
 % keep 'read_dline.m' as clean as possible.  Note that the cell arrays
 % 'parameters' and 'headers' are defined in 'read_dline.m'.
 %
-% vdir = '../../../Verification/'; for example, is also set in read_dline.
+% Working_Dir = '../../../Verification/'; for example, is also set in read_dline.
 
 Quantity          = char(parameters(find(strcmp(headers,'Quantity'))));
 Group_Key_Label   = parameters(find(strcmp(headers,'Group_Key_Label')));
 Group_Style       = parameters(find(strcmp(headers,'Group_Style')));
 Fill_Color        = parameters(find(strcmp(headers,'Fill_Color')));
 Dataname          = char(parameters(find(strcmp(headers,'Dataname'))));
-SVN_Filename      = [vdir,char(parameters(find(strcmp(headers,'SVN_Filename'))))];
-d1_Filename       = [vdir,char(parameters(find(strcmp(headers,'d1_Filename'))))];
+SVN_Filename      = [Working_Dir,char(parameters(find(strcmp(headers,'SVN_Filename'))))];
+d1_Filename       = [Working_Dir,char(parameters(find(strcmp(headers,'d1_Filename'))))];
 d1_Col_Name_Row   = str2num(char(parameters(find(strcmp(headers,'d1_Col_Name_Row')))));
 d1_Ind_Col_Name   = char(parameters(find(strcmp(headers,'d1_Ind_Col_Name'))));
 d1_Dep_Col_Name   = char(parameters(find(strcmp(headers,'d1_Dep_Col_Name'))));
@@ -28,7 +28,7 @@ d1_Tick           = str2num(char(parameters(find(strcmp(headers,'d1_Tick')))));
 d1_Comp_Start     = str2num(char(parameters(find(strcmp(headers,'d1_Comp_Start')))));
 d1_Comp_End       = str2num(char(parameters(find(strcmp(headers,'d1_Comp_End')))));
 d1_Initial_Value  = str2num(char(parameters(find(strcmp(headers,'d1_Initial_Value')))));
-d2_Filename       = [vdir,char(parameters(find(strcmp(headers,'d2_Filename'))))];
+d2_Filename       = [Working_Dir,char(parameters(find(strcmp(headers,'d2_Filename'))))];
 d2_Col_Name_Row   = str2num(char(parameters(find(strcmp(headers,'d2_Col_Name_Row')))));
 d2_Ind_Col_Name   = char(parameters(find(strcmp(headers,'d2_Ind_Col_Name'))));
 d2_Dep_Col_Name   = char(parameters(find(strcmp(headers,'d2_Dep_Col_Name'))));

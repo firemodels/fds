@@ -38,14 +38,26 @@ burke_schumann
 
 % The main plotting routine is dataplot
 
-cfil = [pwd,'/FDS_verification_dataplot_inputs.csv'];
-vdir = [pwd,'/../../Verification/'];
-plotdir = [pwd,'/../../Manuals/'];
-qfil = [pwd,'/FDS_verification_scatterplot_inputs.csv'];
-output_file = [pwd,'/FDS_verification_scatterplot_output.csv'];
+Dataplot_Inputs_File = [pwd, '/FDS_verification_dataplot_inputs.csv'];
+Working_Dir = [pwd, '/../../Verification/'];
+Manuals_Dir = [pwd, '/../../Manuals/'];
+Scatterplot_Inputs_File = [pwd, '/FDS_verification_scatterplot_inputs.csv'];
+Output_File = [pwd, '/FDS_verification_scatterplot_output.csv'];
+Stats_Output = 1;
+Statistics_Tex_Output = [pwd, '../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/Scatterplots/verification_statistics.tex'];
 
-[saved_data,drange] = dataplot(cfil,vdir,plotdir);
-scatplot(saved_data,drange,qfil,plotdir,output_file)
+NRC_Options = false;
+Append_To_Scatterplot_Title = '';
+
+[saved_data,drange] = dataplot(Dataplot_Inputs_File, Working_Dir, Manuals_Dir);
+scatplot(saved_data, drange, ...
+         'Scatterplot_Inputs_File', Scatterplot_Inputs_File, ...
+         'Manuals_Dir', Manuals_Dir, ...
+         'Output_File', Output_File, ...
+         'Stats_Output', Stats_Output, ...
+         'Statistics_Tex_Output', Statistics_Tex_Output, ...
+         'NRC_Options', NRC_Options, ...
+         'Append_To_Scatterplot_Title', Append_To_Scatterplot_Title)
 
 % Special cases
  
