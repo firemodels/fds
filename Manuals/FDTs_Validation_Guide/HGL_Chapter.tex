@@ -138,28 +138,37 @@ where $\dot Q$ is the HRR of the fire~(\si{kW}).
 
 \subsection{ASET}
 
-For a compartment with no ventilation (closed doors) and constant HRR, the available safe egress time (ASET)~\cite{Walton:1} correlation predicts that the HGL height, $z$, is calculated iteratively using
+For a compartment with no ventilation (closed doors) and constant HRR, the available safe egress time (ASET)~\cite{Walton:1}
+correlation predicts that the change in HGL height, $z$~(\si{m}), is given by
 \be
-z = z - \frac{\dot V_{ul}}{L W}
+A_s \frac{dz}{dt} = \frac{dV_{ul}}{dt} = \dot V_{ul}
 \label{eq:ASET_1}
 \ee
-where $L$ and $W$ are the length and height of the compartment, respectively.
-The change in volume of the upper layer, $\dot V_{ul}$, is given by
+where $A_s$ is the area of the boundary surfaces~(\si{m^2}), and $V_{ul}$ is the volume of the HGL~(\si{m^3}).
+The change in volume of the upper layer, $\dot V_{ul}$~(\si{m^3/s}), is given by
 \be
 \dot V_{ul} = \dot V_{exp} + \dot V_{ent}
 \label{eq:ASET_2}
 \ee
-The volumetric expansion rate, $\dot V_{exp}$, is given by
+The volumetric expansion rate, $\dot V_{exp}$~(\si{m^3/s}), is given by
 \be
-\dot V_{exp} = \frac{\dot Q}{353}
+\dot V_{exp} = \frac{\dot Q_{net}}{\rho_g c_p T_g} \approx \frac{(1 - \chi_l) \dot Q_f}{353}
 \label{eq:ASET_3}
 \ee
-The volume entrainment rate, $\dot V_{ent}$, is given by
+where $\dot Q_{net}$ and $\dot Q_f$ are the net and actual HRRs~(\si{kW}), respectively, $\rho_g$, $c_p$ and $T_g$ are the density~(\si{kg/m^3}), specific heat~(\si{kJ/(kg.K)}), and temperature~(\si{K}) of air in the HGL, respectively, and $\chi_l$ is the heat loss fraction to the enclosure boundaries~(-).
+The volumetric entrainment rate, $\dot V_{ent}$~(\si{m^3/s}), is given by
 \be
-\dot V_{ent} = \left( \frac{1}{K_f} \frac{0.071}{1.18} \right) (K_f \dot Q)^{1/3} (z - z_0)^{5/3}
+\dot V_{ent} = k_v \dot Q^{1/3} z^{5/3} = \frac{0.21}{K_f} \left( \frac{g}{\rho_\infty T_\infty} \right)^{1/3} (K_f \dot Q)^{1/3} (z - z_f)^{5/3}
 \label{eq:ASET_4}
 \ee
-where $K_f$ is the location factor, and $z_0$ is the fuel height. The location factor has a value of 1, 2, or 4, which corresponds to a fire away from walls or corners, a fire adjacent to a wall, or a fire located in a corner, respectively.
+where $k_v$ is the volumetric entrainment coefficient, $g$ is the acceleration due to gravity~(\si{m/s^2}), $\rho_\infty$ and $T_\infty$ are the density~(\si{kg/m^3}) and temperature~(\si{K}) of ambient air, respectively, $K_f$ is the location factor~(-), and $z_f$ is the fuel height~(\si{m}). The location factor has a value of 1, 2, or 4, which corresponds to a fire away from walls or corners, a fire adjacent to a wall, or a fire located in a corner, respectively.
+
+The HGL height, $z$, in Eq.~\ref{eq:ASET_1} can be calculated iteratively using
+\be
+z|_{t+1} = z|_t - \frac{\dot V_{ul}}{L W} \Delta t
+\label{eq:ASET_5}
+\ee
+where $L$ and $W$ are the length and width of the compartment~(\si{m}), respectively, and $\Delta t$ is the time step size~(\si{s}).
 
 \begin{figure}[!ht]
 \begin{center}
