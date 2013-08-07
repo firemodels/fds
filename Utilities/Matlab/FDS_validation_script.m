@@ -43,6 +43,7 @@ Stats_Output = 2;
 Statistics_Tex_Output = [pwd, '/../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/validation_statistics.tex'];
 Histogram_Tex_Output = [pwd, '/../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/validation_histograms.tex'];
 
+% Override the plot style options with NRC 1824 plot options
 NRC_Options = false;
 Append_To_Scatterplot_Title = '';
 
