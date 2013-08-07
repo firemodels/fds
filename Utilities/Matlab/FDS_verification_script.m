@@ -46,6 +46,7 @@ Output_File = [pwd, '/FDS_verification_scatterplot_output.csv'];
 Stats_Output = 1;
 Statistics_Tex_Output = [pwd, '/../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/Scatterplots/verification_statistics.tex'];
 
+% Override the plot style options with NRC 1824 plot options
 NRC_Options = false;
 Append_To_Scatterplot_Title = '';
 
