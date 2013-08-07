@@ -26,8 +26,6 @@ function [] = scatplot(saved_data,drange,varargin)
 
 for k=1:2:length(varargin);
     switch (varargin{k})
-    case {'Append_To_Scatterplot_Title'}
-        Append_To_Scatterplot_Title = varargin{k+1};
     case {'Scatterplot_Inputs_File'}
         Scatterplot_Inputs_File = varargin{k+1};
     case {'Manuals_Dir'}
@@ -42,6 +40,8 @@ for k=1:2:length(varargin);
         Histogram_Tex_Output = varargin{k+1};
     case {'NRC_Options'}
         NRC_Options = varargin{k+1};
+    case {'Append_To_Scatterplot_Title'}
+        Append_To_Scatterplot_Title = varargin{k+1};
     end
 end
 
@@ -65,7 +65,7 @@ Size_Save_Quantity = size(Save_Quantity);
 % stats_outputs = 0: No output statistics
 % stats_outputs = 1: FDS verification statistics
 % stats_outputs = 2: FDS or FDTs validation statistics
-if exist('stats_output', 'var') == 0
+if exist('Stats_Output', 'var') == 0
     Stats_Output = 0;
 end
 
@@ -112,7 +112,7 @@ if Stats_Output == 2
     output_stats{1,5} = 'Sigma_Model';
     output_stats{1,6} = 'Bias';
     stat_line = 2;
-    output_histograms = {};
+    Output_Histograms = {};
 end
 
 for j=2:length(Q);
@@ -405,7 +405,7 @@ for j=2:length(Q);
                     hold off
                     % Add histogram name to array for LaTeX output later
                     [~, filename, ~] = fileparts(Plot_Filename);
-                    output_histograms{end+1} = [filename, '_Histogram'];
+                    Output_Histograms{end+1} = [filename, '_Histogram'];
                 end
             catch
                 display(['Error: Problem with histogram routine for scatter plot ', Scatter_Plot_Title, '; Skipping histogram.'])
@@ -549,10 +549,10 @@ end
 
 % Write histogram information to a LaTeX file for inclusion
 % in the FDS Validation Guide or FDTs Validation Guide
-if (Stats_Output == 2) && (exist('output_histograms','var') == 1) && (isempty(output_histograms) == 0)
+if (Stats_Output == 2) && (exist('Output_Histograms','var') == 1) && (isempty(Output_Histograms) == 0)
     fid = fopen(Histogram_Tex_Output, 'wt');
     % Write plots to LaTeX figures, eight per page
-    num_histograms = length(output_histograms);
+    num_histograms = length(Output_Histograms);
     page_count = ceil(num_histograms/8);
     for i = 1:page_count
         fprintf(fid, '%s\n', '\begin{figure}[p]');
@@ -566,7 +566,7 @@ if (Stats_Output == 2) && (exist('output_histograms','var') == 1) && (isempty(ou
             else
                 line_ending = '\\';
             end
-            fprintf(fid, '%s\n', ['\includegraphics[height=2.2in]{SCRIPT_FIGURES/ScatterPlots/',output_histograms{j},'} ',line_ending]);
+            fprintf(fid, '%s\n', ['\includegraphics[height=2.2in]{SCRIPT_FIGURES/ScatterPlots/',Output_Histograms{j},'} ',line_ending]);
         end
         fprintf(fid, '%s\n', '\end{tabular*}');
         fprintf(fid, '%s\n', ['\label{Histogram_',num2str(i),'}']);

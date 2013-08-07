@@ -40,8 +40,8 @@ Manuals_Dir = [pwd, '/../../Manuals/'];
 Scatterplot_Inputs_File = [pwd, '/FDS_validation_scatterplot_inputs.csv'];
 Output_File = [pwd, '/FDS_validation_scatterplot_output.csv'];
 Stats_Output = 2;
-Statistics_Tex_Output = [pwd, '../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/validation_statistics.tex'];
-Histogram_Tex_Output = [pwd, '../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/validation_histograms.tex'];
+Statistics_Tex_Output = [pwd, '/../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/validation_statistics.tex'];
+Histogram_Tex_Output = [pwd, '/../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/validation_histograms.tex'];
 
 NRC_Options = false;
 Append_To_Scatterplot_Title = '';
