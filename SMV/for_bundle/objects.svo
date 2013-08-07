@@ -539,10 +539,9 @@ NEWFRAME
  0.0 0.0 0.0 setrgb
  0.0 0.0 $TRUNK_BASE_H translate $TRUNK_D $TRUNK_H drawdisk
 NEWFRAME
- :TRUNK_BASE_H :TRUNK_D :TRUNK_H :CANOPY_H=0.0
+ :TRUNK_BASE_H :TRUNK_D :TRUNK_H 
  0.0 0.0 0.0 setrgb
- push 0.0 0.0 $TRUNK_BASE_H translate $TRUNK_D $TRUNK_H drawdisk pop
- 0.0 0.0 $TRUNK_BASE_H translate 0.0 0.0 $TRUNK_H translate $TRUNK_D $CANOPY_H drawcone 
+ 0.0 0.0 $TRUNK_BASE_H translate $TRUNK_D $TRUNK_H drawdisk
 NEWFRAME
  0.0 0.0 0.0 translate
  
