@@ -26,7 +26,6 @@ t_p = \left( \frac{\rho c}{k} \right) \left( \frac{\delta}{2} \right)^2
 \label{eq:MQH_tp}
 \ee
 
-
 \begin{figure}[!ht]
 \begin{center}
 \begin{tabular}{l}
@@ -139,7 +138,7 @@ where $\dot Q$ is the HRR of the fire~(\si{kW}).
 \subsection{ASET}
 
 For a compartment with no ventilation (closed doors) and constant HRR, the available safe egress time (ASET)~\cite{Walton:1}
-correlation predicts that the change in HGL height, $z$~(\si{m}), is given by
+correlation predicts that the change in HGL height, $z$~(\si{m}), is given by~\cite{SFPE:Milke}
 \be
 A_s \frac{dz}{dt} = \frac{dV_{ul}}{dt} = \dot V_{ul}
 \label{eq:ASET_1}
@@ -150,13 +149,13 @@ The change in volume of the upper layer, $\dot V_{ul}$~(\si{m^3/s}), is given by
 \dot V_{ul} = \dot V_{exp} + \dot V_{ent}
 \label{eq:ASET_2}
 \ee
-The volumetric expansion rate, $\dot V_{exp}$~(\si{m^3/s}), is given by
+The volumetric expansion rate, $\dot V_{exp}$~(\si{m^3/s}), is given by~\cite{SFPE:Mowrer}
 \be
 \dot V_{exp} = \frac{\dot Q_{net}}{\rho_g c_p T_g} \approx \frac{(1 - \chi_l) \dot Q_f}{353}
 \label{eq:ASET_3}
 \ee
 where $\dot Q_{net}$ and $\dot Q_f$ are the net and actual HRRs~(\si{kW}), respectively, $\rho_g$, $c_p$ and $T_g$ are the density~(\si{kg/m^3}), specific heat~(\si{kJ/(kg.K)}), and temperature~(\si{K}) of air in the HGL, respectively, and $\chi_l$ is the heat loss fraction to the enclosure boundaries~(-).
-The volumetric entrainment rate, $\dot V_{ent}$~(\si{m^3/s}), is given by
+The volumetric entrainment rate, $\dot V_{ent}$~(\si{m^3/s}), is given by~\cite{Zukoski:1981}
 \be
 \dot V_{ent} = k_v \dot Q^{1/3} z^{5/3} = \frac{0.21}{K_f} \left( \frac{g}{\rho_\infty T_\infty} \right)^{1/3} (K_f \dot Q)^{1/3} (z - z_f)^{5/3}
 \label{eq:ASET_4}
