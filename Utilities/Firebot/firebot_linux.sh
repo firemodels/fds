@@ -13,8 +13,8 @@
 #  = Input variables =
 #  ===================
 
-# Mailing list for status report
-mailTo="mcgratta@gmail.com, randy.mcdermott@gmail.com, gforney@gmail.com, CraigWeinschenk@gmail.com, drjfloyd@gmail.com, koverholt@gmail.com, Topi.Sikanen@gmail.com, shostikk@gmail.com, ben.trettel@gmail.com, mrctkg@gmail.com, kiliansusan@gmail.com"
+# Load mailing list for status report
+source ./firebot_emails.sh
 
 # Firebot's username
 FIREBOT_USERNAME="firebot"
@@ -132,7 +132,7 @@ check_time_limit()
 
       if [ $ELAPSED_TIME -gt $TIME_LIMIT ]
       then
-         echo -e "Firebot has been running for more than 12 hours in Stage ${TIME_LIMIT_STAGE}. \n\nPlease ensure that there are no problems. \n\nThis is a notification only and does not terminate Firebot." | mail -s "[Firebot@$hostname] Notice: Firebot has been running for more than 12 hours." $mailTo > /dev/null
+         echo -e "Firebot has been running for more than 12 hours in Stage ${TIME_LIMIT_STAGE}. \n\nPlease ensure that there are no problems. \n\nThis is a notification only and does not terminate Firebot." | mail -s "[Firebot@$hostname] Notice: Firebot has been running for more than 12 hours." $mailToFDS > /dev/null
          TIME_LIMIT_EMAIL_NOTIFICATION="sent"
       fi
    fi
@@ -1258,19 +1258,19 @@ email_build_status()
    if [[ -e $WARNING_LOG && -e $ERROR_LOG ]]
    then
      # Send email with failure message and warnings, body of email contains appropriate log file
-     mail -s "[Firebot@$hostname] Build failure and warnings for Revision ${SVN_REVISION}." $mailTo < $ERROR_LOG > /dev/null
+     mail -s "[Firebot@$hostname] Build failure and warnings for Revision ${SVN_REVISION}." $mailToFDS < $ERROR_LOG > /dev/null
 
    # Check for errors only
    elif [ -e $ERROR_LOG ]
    then
       # Send email with failure message, body of email contains error log file
-      mail -s "[Firebot@$hostname] Build failure for Revision ${SVN_REVISION}." $mailTo < $ERROR_LOG > /dev/null
+      mail -s "[Firebot@$hostname] Build failure for Revision ${SVN_REVISION}." $mailToFDS < $ERROR_LOG > /dev/null
 
    # Check for warnings only
    elif [ -e $WARNING_LOG ]
    then
       # Send email with success message, include warnings
-      mail -s "[Firebot@$hostname] Build success, with warnings. Revision ${SVN_REVISION} passed all build tests." $mailTo < $WARNING_LOG > /dev/null
+      mail -s "[Firebot@$hostname] Build success, with warnings. Revision ${SVN_REVISION} passed all build tests." $mailToFDS < $WARNING_LOG > /dev/null
 
    # No errors or warnings
    else
@@ -1284,7 +1284,7 @@ email_build_status()
       echo "Nightly Manuals (private): http://blaze.nist.gov/firebot" >> $TIME_LOG
       echo "Nightly Manuals (public):  https://docs.google.com/folder/d/0B_wB1pJL2bFQaDJaOFNnUDR4LXM/edit" >> $TIME_LOG
       echo "-------------------------------" >> $TIME_LOG
-      mail -s "[Firebot@$hostname] Build success! Revision ${SVN_REVISION} passed all build tests." $mailTo < $TIME_LOG > /dev/null
+      mail -s "[Firebot@$hostname] Build success! Revision ${SVN_REVISION} passed all build tests." $mailToFDS < $TIME_LOG > /dev/null
    fi
 }
 

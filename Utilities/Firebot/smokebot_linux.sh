@@ -11,8 +11,8 @@
 #  = Input variables =
 #  ===================
 
-mailToSMV="gforney@gmail.com, koverholt@gmail.com"
-mailToFDS="mcgratta@gmail.com, randy.mcdermott@gmail.com, gforney@gmail.com, CraigWeinschenk@gmail.com, drjfloyd@gmail.com, koverholt@gmail.com, Topi.Sikanen@gmail.com, shostikk@gmail.com, ben.trettel@gmail.com, mrctkg@gmail.com, kiliansusan@gmail.com"
+# Load mailing list for status report
+source ./firebot_emails.sh
 
 FIREBOT_QUEUE=smokebot
 MAKEMOVIES=
