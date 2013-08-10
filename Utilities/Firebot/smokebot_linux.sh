@@ -12,7 +12,7 @@
 #  ===================
 
 # Load mailing list for status report
-source ./firebot_emails.sh
+source ./firebot_email_list.sh
 
 FIREBOT_QUEUE=smokebot
 MAKEMOVIES=
