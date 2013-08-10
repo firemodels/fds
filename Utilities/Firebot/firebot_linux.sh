@@ -14,7 +14,7 @@
 #  ===================
 
 # Load mailing list for status report
-source ./firebot_emails.sh
+source ./firebot_email_list.sh
 
 # Firebot's username
 FIREBOT_USERNAME="firebot"
