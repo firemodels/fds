@@ -11,9 +11,6 @@
 #  = Input variables =
 #  ===================
 
-# Load mailing list for status report
-source ./firebot_email_list.sh
-
 FIREBOT_QUEUE=smokebot
 MAKEMOVIES=
 RUNAUTO=
@@ -58,6 +55,9 @@ LAST_FDS_FAILED=0
 if [ -e $FDS_STATUS_FILE ] ; then
   LAST_FDS_FAILED=`cat $FDS_STATUS_FILE`
 fi
+
+# Load mailing list for status report
+source $FIREBOT_DIR/firebot_email_list.sh
 
 mailTo=$mailToSMV
 if [[ "$LAST_FDS_FAILED" == "1" ]] ; then

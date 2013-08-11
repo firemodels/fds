@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Firebot
-# FDS automatIc veRification and validation tEst bot
+# FDS Automatic Verification and Validation Test Bot
 # Kristopher Overholt
 # 6/22/2012
 
@@ -12,9 +12,6 @@
 #  ===================
 #  = Input variables =
 #  ===================
-
-# Load mailing list for status report
-source ./firebot_email_list.sh
 
 # Firebot's username
 FIREBOT_USERNAME="firebot"
@@ -35,6 +32,9 @@ IB=
 if [ "$FDSNETWORK" == "infiniband" ] ; then
 IB=ib
 fi
+
+# Load mailing list for status report
+source $FIREBOT_DIR/firebot_email_list.sh
 
 function usage {
 echo "firebot.sh [ -q queue_name -r revision_number -s -u svn_username -y ]"
