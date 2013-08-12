@@ -18,7 +18,10 @@
 %
 % [saved_data,drange] = dataplot(Dataplot_Inputs_File,Validation_Dir,Manuals_Dir,'WTC');
 %
-% In this case, all the WTC results will be plotted. 
+% In this case, all the WTC results will be plotted.
+%
+% Dataplot creates most of the plots for the Validation Guide.
+% It must be run before scatplot, which makes the scatter plots.
 
 close all
 clear all
@@ -32,14 +35,15 @@ cat_mccaffrey
 NIST_RSE
 sippola_aerosol_deposition
 
-% dataplot creates most of the plots for the Validation Guide. It must be run before scatplot, which makes the scatter plots.
-
+% Dataplot and scatplot options
 Dataplot_Inputs_File = [pwd,'/FDS_validation_dataplot_inputs.csv'];
 Working_Dir = [pwd, '/../../Validation/'];
 Manuals_Dir = [pwd, '/../../Manuals/'];
 Scatterplot_Inputs_File = [pwd, '/FDS_validation_scatterplot_inputs.csv'];
-Output_File = [pwd, '/FDS_validation_scatterplot_output.csv'];
+
+% Statistics output options
 Stats_Output = 2;
+Output_File = [pwd, '/FDS_validation_scatterplot_output.csv'];
 Statistics_Tex_Output = [pwd, '/../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/validation_statistics.tex'];
 Histogram_Tex_Output = [pwd, '/../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/validation_histograms.tex'];
 
