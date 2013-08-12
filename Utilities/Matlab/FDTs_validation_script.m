@@ -18,21 +18,25 @@
 %
 % [saved_data,drange] = dataplot(Dataplot_Inputs_File,Validation_Dir,Manuals_Dir,'WTC');
 %
-% In this case, all the WTC results will be plotted. 
+% In this case, all the WTC results will be plotted.
+%
+% Dataplot creates most of the plots for the Validation Guide.
+% It must be run before scatplot, which makes the scatter plots.
 
 close all
 clear all
 
 addpath 'scripts'
 
-% dataplot creates most of the plots for the Validation Guide. It must be run before scatplot, which makes the scatter plots.
-
+% Dataplot and scatplot options
 Dataplot_Inputs_File = [pwd, '/FDTs_validation_dataplot_inputs.csv'];
 Working_Dir = [pwd, '/../../Validation/'];
 Manuals_Dir = [pwd, '/../../Manuals/'];
 Scatterplot_Inputs_File = [pwd, '/FDTs_validation_scatterplot_inputs.csv'];
-Output_File = [pwd, '/FDTs_validation_scatterplot_output.csv'];
+
+% Statistics output options
 Stats_Output = 2;
+Output_File = [pwd, '/FDTs_validation_scatterplot_output.csv'];
 Statistics_Tex_Output = [pwd, '/../../Manuals/FDTs_Validation_Guide/SCRIPT_FIGURES/Scatterplots/validation_statistics.tex'];
 Histogram_Tex_Output = [pwd, '/../../Manuals/FDTs_Validation_Guide/SCRIPT_FIGURES/Scatterplots/validation_histograms.tex'];
 
