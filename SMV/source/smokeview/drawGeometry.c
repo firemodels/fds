@@ -552,7 +552,6 @@ void DrawGeomTest(int option){
 
 void DrawCircVentsApproxSolid(int option){
   int i;
-  int in_circle;
 
   if(option==VENT_HIDE)return;
   ASSERT(option==VENT_CIRCLE||option==VENT_RECTANGLE);
@@ -595,6 +594,8 @@ void DrawCircVentsApproxSolid(int option){
             zz = zplt[kk];
             zz2 = zplt[kk+1];
             for(jj=cvi->jmin;jj<cvi->jmax;jj++){
+              int in_circle;
+
               yy = yplt[jj];
               yy2 = yplt[jj+1];
 
@@ -627,6 +628,8 @@ void DrawCircVentsApproxSolid(int option){
             zz = zplt[kk];
             zz2 = zplt[kk+1];
             for(ii=cvi->imin;ii<cvi->imax;ii++){
+              int in_circle;
+
               xx = xplt[ii];
               xx2 = xplt[ii+1];
 
@@ -659,6 +662,8 @@ void DrawCircVentsApproxSolid(int option){
             yy = yplt[jj];
             yy2 = yplt[jj+1];
             for(ii=cvi->imin;ii<cvi->imax;ii++){
+              int in_circle;
+
               xx = xplt[ii];
               xx2 = xplt[ii+1];
 
