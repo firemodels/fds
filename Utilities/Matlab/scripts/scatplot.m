@@ -132,33 +132,37 @@ for j=2:length(Q);
         if i > Size_Save_Quantity(2); break; end
         if strcmp(Save_Quantity(1,i),Scatter_Plot_Title) || strcmp(Save_Quantity(Size_Save_Quantity(1),i),Scatter_Plot_Title)
             k = k+1;
-            Measured_Metric(k,:,:)  = nonzeros(Save_Measured_Metric(i,:,:));
-            Predicted_Metric(k,:,:) = nonzeros(Save_Predicted_Metric(i,:,:));
-            Group_Key_Label(k)  = Save_Group_Key_Label(i);
-            size_measured = size(Measured_Metric(k,:,:));
-            size_predicted = size(Predicted_Metric(k,:,:));
+            
+            Measured_Metric(k,:,:)  = Save_Measured_Metric(i,:,:);
+            Predicted_Metric(k,:,:) = Save_Predicted_Metric(i,:,:);
+            Nonzeros_Measured_Metric = nonzeros(Measured_Metric(k,:,:));
+            Nonzeros_Predicted_Metric = nonzeros(Predicted_Metric(k,:,:));
+            Size_Measured = size(Nonzeros_Measured_Metric);
+            Size_Predicted = size(Nonzeros_Predicted_Metric);
+            Group_Key_Label(k) = Save_Group_Key_Label(i);
+            
             % Skip case if predicted metric is zero
-            if size_predicted(1) == 0
+            if Size_Predicted(1) == 0
                 display(['Error: Size of predicted metric is zero for scatterplot ', Scatter_Plot_Title, '. Skipping scatterplot.'])
                 continue
             end
             % Check to see if measured and predicted arrays are the same size
-            if size_measured(1) ~= size_predicted(1)
+            if Size_Measured(1) ~= Size_Predicted(1)
                 display(['Error: Mismatched measured and predicted arrays in scatter plot for scatterplot ', Scatter_Plot_Title, '. Verify that the statistical metrics are being used properly for all cases. Skipping scatterplot.'])
                 continue
             end
             
             if strcmp(Plot_Type,'linear')
-                K(k) = plot(Measured_Metric(k,:,:),Predicted_Metric(k,:,:),...
+                K(k) = plot(Nonzeros_Measured_Metric,Nonzeros_Predicted_Metric,...
                 char(Save_Group_Style(i)),'MarkerFaceColor',char(Save_Fill_Color(i))); hold on
             elseif strcmp(Plot_Type,'loglog')
-                K(k) = loglog(Measured_Metric(k,:,:),Predicted_Metric(k,:,:),...
+                K(k) = loglog(Nonzeros_Measured_Metric,Nonzeros_Predicted_Metric,...
                 char(Save_Group_Style(i)),'MarkerFaceColor',char(Save_Fill_Color(i))); hold on
             elseif strcmp(Plot_Type,'semilogx')
-                K(k) = semilogx(Measured_Metric(k,:,:),Predicted_Metric(k,:,:),...
+                K(k) = semilogx(Nonzeros_Measured_Metric,Nonzeros_Predicted_Metric,...
                 char(Save_Group_Style(i)),'MarkerFaceColor',char(Save_Fill_Color(i))); hold on
             elseif strcmp(Plot_Type,'semilogy')
-                K(k) = semilogy(Measured_Metric(k,:,:),Predicted_Metric(k,:,:),...
+                K(k) = semilogy(Nonzeros_Measured_Metric,Nonzeros_Predicted_Metric,...
                 char(Save_Group_Style(i)),'MarkerFaceColor',char(Save_Fill_Color(i))); hold on
             end
             
@@ -210,7 +214,7 @@ for j=2:length(Q);
     
     if k > 0
         
-        Measured_Values  = nonzeros(Measured_Metric);
+        Measured_Values = nonzeros(Measured_Metric);
         Predicted_Values = nonzeros(Predicted_Metric);
         n_pts = length(Measured_Values);
         
@@ -241,10 +245,10 @@ for j=2:length(Q);
         % Calculate statistics
         E_bar = sum(log(Measured_Values).*weight)/sum(weight);
         M_bar = sum(log(Predicted_Values).*weight)/sum(weight);
-        size_measured = size(Measured_Values);
-        size_predicted = size(Predicted_Values);
+        Size_Measured = size(Measured_Values);
+        Size_Predicted = size(Predicted_Values);
         
-        if size_measured(1) ~= size_predicted(1)
+        if Size_Measured(1) ~= Size_Predicted(1)
             display(['Error: Mismatched measured and predicted arrays for scatterplot ', Scatter_Plot_Title, '. Skipping scatterplot.'])
             continue
         end
@@ -354,7 +358,7 @@ for j=2:length(Q);
         display(['No data for scatter plot ',Scatter_Plot_Title])
     end
     
-    clear Measured_Metric Predicted_Metric Group_Key_Label K
+    clear Measured_Metric Measured_Values Predicted_Metric Predicted_Values Group_Key_Label K
     close all
 end
 

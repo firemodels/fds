@@ -10,7 +10,7 @@ if Stats_Output == 2 % (Validation runs only)
     % Wrap histogram routine in try loop
     % Skips case upon any Matlab error
     try
-        ln_M_E = log(Predicted_Metric)-log(Measured_Metric);
+        ln_M_E = log(Predicted_Values)-log(Measured_Values);
         % Normality test (requires at least 4 observations)
         if length(ln_M_E) >= 4
 
