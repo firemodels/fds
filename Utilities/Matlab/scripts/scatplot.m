@@ -45,7 +45,7 @@ for k=1:2:length(varargin);
     end
 end
 
-% unpack data
+% Unpack data
 Save_Quantity         = saved_data{:,1};
 Save_Group_Style      = saved_data{:,2};
 Save_Fill_Color       = saved_data{:,3};
@@ -62,15 +62,14 @@ Size_Save_Quantity = size(Save_Quantity);
 
 % If a statistics output file is specified, then enable statistics throughout.
 % This is also used to enable histogram plotting for validation cases.
-% stats_outputs = 0: No output statistics
-% stats_outputs = 1: FDS verification statistics
-% stats_outputs = 2: FDS or FDTs validation statistics
+% Stats_Output = 0: No output statistics
+% Stats_Output = 1: FDS verification statistics
+% Stats_Output = 2: FDS or FDTs validation statistics
 if exist('Stats_Output', 'var') == 0
     Stats_Output = 0;
 end
 
-qrange = [2:100];
-
+% Read in global plot options
 plot_style
 
 % Override the plot style options with NRC 1824 plot options
@@ -120,7 +119,7 @@ for j=2:length(Q);
     define_qrow_variables
     
     Model_Error = 'yes';
-    if Sigma_2_E<0 ; Model_Error = 'no'; end
+    if Sigma_2_E < 0 ; Model_Error = 'no'; end
     
     clear Measured_Metric
     clear Predicted_Metric
@@ -129,16 +128,16 @@ for j=2:length(Q);
     
     k = 0;
     for i=drange
-        if i>Size_Save_Quantity(2); break; end
-        if strcmp(Save_Quantity(1,i),Scatter_Plot_Title) | strcmp(Save_Quantity(Size_Save_Quantity(1),i),Scatter_Plot_Title)
+        if i > Size_Save_Quantity(2); break; end
+        if strcmp(Save_Quantity(1,i),Scatter_Plot_Title) || strcmp(Save_Quantity(Size_Save_Quantity(1),i),Scatter_Plot_Title)
             k = k+1;
-            Measured_Metric(k,:,:)  = Save_Measured_Metric(i,:,:);
-            Predicted_Metric(k,:,:) = Save_Predicted_Metric(i,:,:);
+            Measured_Metric(k,:,:)  = nonzeros(Save_Measured_Metric(i,:,:));
+            Predicted_Metric(k,:,:) = nonzeros(Save_Predicted_Metric(i,:,:));
             Group_Key_Label(k)  = Save_Group_Key_Label(i);
-            size_measured = size(nonzeros(Measured_Metric(k,:,:)));
-            size_predicted = size(nonzeros(Predicted_Metric(k,:,:)));
+            size_measured = size(Measured_Metric(k,:,:));
+            size_predicted = size(Predicted_Metric(k,:,:));
             % Skip case if predicted metric is zero
-            if size_predicted(1)==0
+            if size_predicted(1) == 0
                 display(['Error: Size of predicted metric is zero for scatterplot ', Scatter_Plot_Title, '. Skipping scatterplot.'])
                 continue
             end
@@ -149,23 +148,23 @@ for j=2:length(Q);
             end
             
             if strcmp(Plot_Type,'linear')
-                K(k) = plot(nonzeros(Measured_Metric(k,:,:)),nonzeros(Predicted_Metric(k,:,:)),...
+                K(k) = plot(Measured_Metric(k,:,:),Predicted_Metric(k,:,:),...
                 char(Save_Group_Style(i)),'MarkerFaceColor',char(Save_Fill_Color(i))); hold on
             elseif strcmp(Plot_Type,'loglog')
-                K(k) = loglog(nonzeros(Measured_Metric(k,:,:)),nonzeros(Predicted_Metric(k,:,:)),...
+                K(k) = loglog(Measured_Metric(k,:,:),Predicted_Metric(k,:,:),...
                 char(Save_Group_Style(i)),'MarkerFaceColor',char(Save_Fill_Color(i))); hold on
             elseif strcmp(Plot_Type,'semilogx')
-                K(k) = semilogx(nonzeros(Measured_Metric(k,:,:)),nonzeros(Predicted_Metric(k,:,:)),...
+                K(k) = semilogx(Measured_Metric(k,:,:),Predicted_Metric(k,:,:),...
                 char(Save_Group_Style(i)),'MarkerFaceColor',char(Save_Fill_Color(i))); hold on
             elseif strcmp(Plot_Type,'semilogy')
-                K(k) = semilogy(nonzeros(Measured_Metric(k,:,:)),nonzeros(Predicted_Metric(k,:,:)),...
+                K(k) = semilogy(Measured_Metric(k,:,:),Predicted_Metric(k,:,:),...
                 char(Save_Group_Style(i)),'MarkerFaceColor',char(Save_Fill_Color(i))); hold on
             end
             
             % Perform this code block for FDS verification scatterplot output
             if Stats_Output == 1
-                single_measured_metric = nonzeros(Measured_Metric(k,:,:));
-                single_predicted_metric = nonzeros(Predicted_Metric(k,:,:));
+                single_measured_metric = Measured_Metric(k,:,:);
+                single_predicted_metric = Predicted_Metric(k,:,:);
                 % Loop over multiple line comparisons and build output_stats cell
                 for m=1:length(single_measured_metric)
                     
@@ -208,7 +207,7 @@ for j=2:length(Q);
         end
     end
     
-    if k>0
+    if k > 0
         
         Measured_Values  = nonzeros(Measured_Metric);
         Predicted_Values = nonzeros(Predicted_Metric);
@@ -217,7 +216,6 @@ for j=2:length(Q);
         % Weight the data -- for each point on the scatterplot compute a
         % "weight" to provide sparse data with greater importance in the
         % calculation of the accuracy statistics
-        
         weight = zeros(size(Measured_Values));
         
         if strcmp(Weight_Data,'yes')
@@ -230,7 +228,7 @@ for j=2:length(Q);
             end
             for iv=1:n_pts
                 for ib=1:10
-                    if Measured_Values(iv)>=(ib-1)*Bin_Size & Measured_Values(iv)<ib*Bin_Size; weight(iv) = bin_weight(ib); end
+                    if Measured_Values(iv)>=(ib-1)*Bin_Size && Measured_Values(iv)<ib*Bin_Size; weight(iv) = bin_weight(ib); end
                 end
             end
         else
@@ -240,7 +238,6 @@ for j=2:length(Q);
         end
         
         % Calculate statistics
-            
         E_bar = sum(log(Measured_Values).*weight)/sum(weight);
         M_bar = sum(log(Predicted_Values).*weight)/sum(weight);
         size_measured = size(Measured_Values);
@@ -259,7 +256,6 @@ for j=2:length(Q);
         delta = exp(M_bar-E_bar+0.5*Sigma_M.^2-0.5*Sigma_E.^2);
         
         % Plot diagonal lines
-        
         plot([Plot_Min,Plot_Max],[Plot_Min,Plot_Max],'k-')
         if strcmp(Model_Error,'yes')
             plot([Plot_Min,Plot_Max],[Plot_Min,Plot_Max],'k-')
@@ -270,8 +266,7 @@ for j=2:length(Q);
             plot([Plot_Min,Plot_Max],[Plot_Min,delta*Plot_Max*(1-2*Sigma_M)],'r--')
         end
         
-        % format the legend and axis labels
-        
+        % Format the legend and axis labels
         xlabel(Ind_Title,'Interpreter',Font_Interpreter,'FontSize',Scat_Label_Font_Size,'FontName',Font_Name)
         ylabel(Dep_Title,'Interpreter',Font_Interpreter,'FontSize',Scat_Label_Font_Size,'FontName',Font_Name)
         axis([Plot_Min Plot_Max Plot_Min Plot_Max])
@@ -312,13 +307,13 @@ for j=2:length(Q);
         C = stripcell(Group_Key_Label);
         [B I] = unique(C);
         
-        if size(Key_Position)>0
+        if size(Key_Position) > 0
             legend_handle = legend(K(I),C(I),'Location',Key_Position,'FontSize',12','Interpreter',Font_Interpreter);
-            if isequal(Key_Position,'EastOutside')
+            if strcmp(Key_Position,'EastOutside')
                pos = get(legend_handle,'position');
                set(legend_handle,'position',[Scat_Paper_Width pos(2:4)])
             end
-            if isequal(Key_Position,'SouthEastOutside')
+            if strcmp(Key_Position,'SouthEastOutside')
                pos = get(legend_handle,'position');
                set(legend_handle,'position',[Scat_Paper_Width 0.5 pos(3:4)])
             end
@@ -329,8 +324,7 @@ for j=2:length(Q);
         
         hold off
         
-        % print to pdf
-        
+        % Print to pdf
         PDF_Paper_Width = Paper_Width_Factor * Scat_Paper_Width;
         
         set(gcf,'Visible','on');
@@ -340,22 +334,16 @@ for j=2:length(Q);
         display(['Printing scatter plot ',num2str(j),'...'])
         print(gcf,Image_File_Type,[Manuals_Dir,Plot_Filename])
 
-        %%% Print histogram of ln(M/E) and normal distribution
+        % Print histogram of ln(M/E) and normal distribution
         if Stats_Output == 2 % (Validation runs only)
             % Wrap histogram routine in try loop
             % Skips case upon any Matlab error
             try
-                ln_M_E = log(nonzeros(Predicted_Metric))-log(nonzeros(Measured_Metric));
+                ln_M_E = log(Predicted_Metric)-log(Measured_Metric);
                 % Normality test (requires at least 4 observations)
                 if length(ln_M_E) >= 4
 
                     pval = spiegel_test(ln_M_E);
-                    
-                    if pval > 0.05
-                        normality_test = 'Pass';
-                    else
-                        normality_test = 'Fail';
-                    end
                     
                     % Plot histogram
                     figure
@@ -385,7 +373,7 @@ for j=2:length(Q);
                     set(gca,'XTick',xout,'XTickLabel',{'1','2','3','4','5','6','7','8','9','10'})
                     set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
                     text(0.03, 0.90,Scatter_Plot_Title,'FontSize',Title_Font_Size,'FontName',Font_Name,'Interpreter',Font_Interpreter,'Units','normalized')
-                    text(0.03, 0.82,['Normality Test'],'FontSize',Title_Font_Size,'FontName',Font_Name,'Interpreter',Font_Interpreter,'Units','normalized')
+                    text(0.03, 0.82,'Normality Test','FontSize',Title_Font_Size,'FontName',Font_Name,'Interpreter',Font_Interpreter,'Units','normalized')
                     text(0.03, 0.74,['p-value = ',num2str(pval,'%4.2f')],'FontSize',Title_Font_Size,'FontName',Font_Name,'Interpreter',Font_Interpreter,'Units','normalized')
                     
                     PDF_Paper_Width = Paper_Width;

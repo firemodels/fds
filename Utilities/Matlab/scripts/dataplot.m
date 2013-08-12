@@ -50,8 +50,7 @@ if nargin>=3
     Manuals_Dir = varargin{3};
 end
 
-% set the plot style parameters
-
+% Read in global plot options
 plot_style
 
 set(gcf,'DefaultLineLineWidth',Line_Width)
@@ -61,8 +60,7 @@ set(gca,'FontName',Font_Name)
 set(gca,'Units',Plot_Units)
 set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
 
-% read the configuration file
-
+% Read configuration file
 A = importdata(Dataplot_Inputs_File);
 H = textscan(A{1},'%q','delimiter',',');
 headers = H{:}'; clear H
@@ -76,7 +74,7 @@ else
 end
 
 if ~isnumeric(drange)
-    dataname_col = find(strcmp(headers,'Dataname'));
+    dataname_col = strcmp(headers,'Dataname');
     dstring = drange;
     drange_index = 0;
     clear drange
@@ -84,13 +82,11 @@ else
     dstring = 'null';
 end
 
-% allocate the arrays to hold the data for scatterplots
-
+% Allocate arrays to hold the data for scatterplots
 Save_Measured_Metric = zeros(n_plots,10,10);
 Save_Predicted_Metric = zeros(n_plots,10,10);
 
-% search for "o" lines, to process Only those lines.
-
+% Search for "o" lines, to process (o)nly those lines.
 otest_true = false;
 for i=2:n_plots
 
@@ -98,7 +94,7 @@ for i=2:n_plots
     P = textscan(A{i},'%q','delimiter',',');
     parameters = P{:}';
    
-    otest = strcmp(parameters(find(strcmp(headers,'switch_id'))),'o');
+    otest = strcmp(parameters(strcmp(headers,'switch_id')),'o');
 
     if otest
        if ~otest_true
@@ -110,8 +106,7 @@ for i=2:n_plots
     end
 end
    
-% process the "d" or "o" lines one by one
-
+% Process the "d" or "o" lines one by one
 for i=2:n_plots
     
     if i>length(A); break; end
@@ -119,8 +114,7 @@ for i=2:n_plots
     P = textscan(A{i},'%q','delimiter',',');
     parameters = P{:}';
     
-    % check for shortname specification instead of numeric drange
-    
+    % Check for shortname specification instead of numeric drange
     if strcmp(dstring,'null')
         itest = ismember(i,drange);
     else
@@ -131,22 +125,19 @@ for i=2:n_plots
         end
     end
     
-    % check to see if d line has been activated in configuration file
-    
-    dtest = strcmp(parameters(find(strcmp(headers,'switch_id'))),'d');
+    % Check to see if d line has been activated in configuration file
+    dtest = strcmp(parameters(strcmp(headers,'switch_id')),'d');
 
-    % check to see if o line has been activated in configuration file
-
-    otest = strcmp(parameters(find(strcmp(headers,'switch_id'))),'o');
+    % Check to see if o line has been activated in configuration file
+    otest = strcmp(parameters(strcmp(headers,'switch_id')),'o');
     
-    if itest & (dtest | otest)
+    if itest && (dtest || otest)
 
         figure
         
         define_drow_variables
         
-        % save for scatter plots
-        
+        % Save for scatter plots
         Q1                      = parse(Quantity);
         Save_Quantity(i,1:length(Q1))        = Q1;
         Save_Group_Style(i)     = Group_Style;
@@ -158,8 +149,7 @@ for i=2:n_plots
         Save_Error_Tolerance(i) = Error_Tolerance;
         Save_Metric_Type(i)     = {Metric};
                 
-        % plot the experimental data or analytical solution (d1)
-        
+        % Plot the experimental data or analytical solution (d1)
         if ~exist(d1_Filename,'file')
            display(['Error: File ', d1_Filename ', does not exist. Skipping case.'])
            continue
@@ -255,8 +245,7 @@ for i=2:n_plots
             continue
         end
         
-        % plot the FDS or model data (d2)
-       
+        % Plot the FDS or model data (d2)
         if ~exist(d2_Filename,'file')
            display(['Error: File ', d2_Filename, ' does not exist. Skipping case.'])
            continue
@@ -400,11 +389,11 @@ for i=2:n_plots
             end
             if size(Key_Position)>0
                 legend_handle = legend(K,[parse(d1_Key),parse(d2_Key)],'Location',Key_Position);
-                if isequal(Key_Position,'EastOutside')
+                if strcmp(Key_Position,'EastOutside')
                    pos = get(legend_handle,'position');
                    set(legend_handle,'position',[Paper_Width (Plot_Y+(Plot_Height-pos(4))/2) pos(3:4)])
                 end
-                if isequal(Key_Position,'SouthEastOutside')
+                if strcmp(Key_Position,'SouthEastOutside')
                    pos = get(legend_handle,'position');
                    set(legend_handle,'position',[Paper_Width Plot_Y pos(3:4)])
                 end
@@ -427,8 +416,7 @@ for i=2:n_plots
                 end
             end
 
-            % add SVN if file is available
-
+            % Add SVN if file is available
             if exist(SVN_Filename,'file')
                 SVN = importdata(SVN_Filename);
                 x_lim = get(gca,'XLim');
@@ -450,8 +438,7 @@ for i=2:n_plots
                     'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
             end
 
-            % print to pdf
-
+            % Save plot file
             PDF_Paper_Width = Paper_Width_Factor*Paper_Width;
 
             set(gcf,'Visible',Figure_Visibility);
@@ -472,8 +459,7 @@ end
 
 clear A
 
-% pack data for use in scatter plot
-
+% Pack data for use in scatplot
 saved_data = [{Save_Quantity'},...
               {Save_Group_Style'},...
               {Save_Fill_Color'},...
