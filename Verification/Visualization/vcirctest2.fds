@@ -1,6 +1,6 @@
-&HEAD CHID='circle_test', TITLE='SMV-Test for RADIUS-Vent' /    
+&HEAD CHID='vcirctest2', TITLE='SMV-Test for RADIUS-Vent' /    
 
-&MESH IJK=80,80,80, XB= 0.0,1.0,0.0,1.0,0.0,1.0/
+&MESH IJK=20,20,20, XB= 0.0,1.0,0.0,1.0,0.0,1.0/
 
 &TIME T_END=0.0/
 
