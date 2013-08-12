@@ -539,10 +539,20 @@ void DrawGeomTest(int option){
 
 #endif
 
+#define INCIRCLE(x,y,z,incirc) \
+{\
+  float ddx, ddy, ddz;\
+  ddx = DENORMALIZE_X(x)-cvi->origin[0];\
+  ddy = DENORMALIZE_Y(y)-cvi->origin[1];\
+  ddz = DENORMALIZE_Z(z)-cvi->origin[2];\
+  incirc=( ddx*ddx + ddy*ddy + ddz*ddz <= cvi->radius*cvi->radius ? 1 : 0 );\
+}\
+
   /* ------------------ DrawCircVentsApproxSolid ------------------------ */
 
 void DrawCircVentsApproxSolid(int option){
   int i;
+  int in_circle;
 
   if(option==VENT_HIDE)return;
   ASSERT(option==VENT_CIRCLE||option==VENT_RECTANGLE);
@@ -587,7 +597,10 @@ void DrawCircVentsApproxSolid(int option){
             for(jj=cvi->jmin;jj<cvi->jmax;jj++){
               yy = yplt[jj];
               yy2 = yplt[jj+1];
-              if(blank[IJCIRC(jj-cvi->jmin,kk-cvi->kmin)]==0)continue;
+
+              INCIRCLE(xx,(yy+yy2)/2.0,(zz+zz2)/2.0,in_circle);
+              if(in_circle==0)continue;
+              
               glVertex3f(xx, yy,zz);
               glVertex3f(xx,yy2,zz);
               glVertex3f(xx,yy2,zz2);
@@ -616,7 +629,10 @@ void DrawCircVentsApproxSolid(int option){
             for(ii=cvi->imin;ii<cvi->imax;ii++){
               xx = xplt[ii];
               xx2 = xplt[ii+1];
-              if(blank[IJCIRC(ii-cvi->imin,kk-cvi->kmin)]==0)continue;
+
+              INCIRCLE((xx+xx2)/2.0,yy,(zz+zz2)/2.0,in_circle);
+              if(in_circle==0)continue;
+
               glVertex3f( xx,yy,zz);
               glVertex3f(xx2,yy,zz);
               glVertex3f(xx2,yy,zz2);
@@ -645,7 +661,10 @@ void DrawCircVentsApproxSolid(int option){
             for(ii=cvi->imin;ii<cvi->imax;ii++){
               xx = xplt[ii];
               xx2 = xplt[ii+1];
-              if(blank[IJCIRC(ii-cvi->imin,jj-cvi->jmin)]==0)continue;
+
+              INCIRCLE((xx+xx2)/2.0,(yy+yy2)/2.0,zz,in_circle);
+              if(in_circle==0)continue;
+              
               glVertex3f( xx, yy,zz);
               glVertex3f(xx2, yy,zz);
               glVertex3f(xx2,yy2,zz);
@@ -698,9 +717,12 @@ void DrawCircVentsApproxOutline(int option){
       int ii, jj, kk;
       int iii, jjj, kkk;
       int nx;
+      float xx0, yy0, zz0;
       float xx, yy, zz;
       float xx2, yy2, zz2;
+      float xx3, yy3, zz3;
       float dx;
+      int in_circle;
 
       cvi = meshi->cventinfo + j;
       blank = cvi->blank;
@@ -718,26 +740,37 @@ void DrawCircVentsApproxOutline(int option){
           nx = cvi->jmax-cvi->jmin+2;
           for(kk=cvi->kmin;kk<cvi->kmax;kk++){
             kkk = kk-cvi->kmin;
+            zz0 = zplt[MAX(kk-1,cvi->kmin)];
             zz = zplt[kk];
             zz2 = zplt[kk+1];
+            zz3 = zplt[MIN(kk+2,cvi->kmax)];
             for(jj=cvi->jmin;jj<cvi->jmax;jj++){
               jjj=jj-cvi->jmin;
+              yy0 = yplt[MAX(jj-1,cvi->jmin)];
               yy = yplt[jj];
               yy2 = yplt[jj+1];
-              if(blank[IJCIRC(jjj,kkk)]==0)continue;
-              if(blank[IJCIRC(jjj+1,kkk)]==0){
+              yy3 = yplt[MIN(jj+2,cvi->jmax)];
+
+              INCIRCLE(xx,(yy+yy2)/2.0,(zz+zz2)/2.0,in_circle);
+              if(in_circle==0)continue;
+
+              INCIRCLE(xx,(yy2+yy3)/2.0,(zz+zz2)/2.0,in_circle);
+              if(in_circle==0){
                 glVertex3f(xx,yy2,zz);
                 glVertex3f(xx,yy2,zz2);
               }
-              if(blank[IJCIRC(jjj-1,kkk)]==0){
+              INCIRCLE(xx,(yy0+yy)/2.0,(zz+zz2)/2.0,in_circle);
+              if(in_circle==0){
                 glVertex3f(xx,yy,zz);
                 glVertex3f(xx,yy,zz2);
               }
-              if(blank[IJCIRC(jjj,kkk+1)]==0){
+              INCIRCLE(xx,(yy+yy2)/2.0,(zz2+zz3)/2.0,in_circle);
+              if(in_circle==0){
                 glVertex3f(xx,yy,zz2);
                 glVertex3f(xx,yy2,zz2);
               }
-              if(blank[IJCIRC(jjj,kkk-1)]==0){
+              INCIRCLE(xx,(yy+yy2)/2.0,(zz0+zz)/2.0,in_circle);
+              if(in_circle==0){
                 glVertex3f(xx,yy,zz);
                 glVertex3f(xx,yy2,zz);
               }
@@ -749,27 +782,41 @@ void DrawCircVentsApproxOutline(int option){
           yy=yplt[cvi->jmin]+dx;;
           nx = cvi->imax-cvi->imin+2;
           for(kk=cvi->kmin;kk<cvi->kmax;kk++){
+            zz0 = zplt[MAX(kk-1,cvi->kmin)];
             zz = zplt[kk];
             zz2 = zplt[kk+1];
+            zz3 = zplt[MIN(kk+2,cvi->kmax)];
             kkk=kk-cvi->kmin;
             for(ii=cvi->imin;ii<cvi->imax;ii++){
+              xx0 = xplt[MAX(ii-1,cvi->imin)];
               xx = xplt[ii];
               xx2 = xplt[ii+1];
+              xx3 = xplt[MIN(ii+2,cvi->imax)];
               iii=ii-cvi->imin;
-              if(blank[IJCIRC(iii,kkk)]==0)continue;
-              if(blank[IJCIRC(iii+1,kkk)]==0){
+
+              INCIRCLE((xx+xx2)/2.0,yy,(zz+zz2)/2.0,in_circle);
+              if(in_circle==0)continue;
+
+              INCIRCLE((xx2+xx3)/2.0,yy,(zz+zz2)/2.0,in_circle);
+              if(in_circle==0){
                 glVertex3f(xx2,yy,zz);
                 glVertex3f(xx2,yy,zz2);
               }
-              if(blank[IJCIRC(iii-1,kkk)]==0){
+
+              INCIRCLE((xx0+xx)/2.0,yy,(zz+zz2)/2.0,in_circle);
+              if(in_circle==0){
                 glVertex3f(xx,yy,zz);
                 glVertex3f(xx,yy,zz2);
               }
-              if(blank[IJCIRC(iii,kkk+1)]==0){
+
+              INCIRCLE((xx+xx2)/2.0,yy,(zz2+zz3)/2.0,in_circle);
+              if(in_circle==0){
                 glVertex3f(xx,yy,zz2);
                 glVertex3f(xx2,yy,zz2);
               }
-              if(blank[IJCIRC(iii,kkk-1)]==0){
+
+              INCIRCLE((xx+xx2)/2.0,yy,(zz0+zz)/2.0,in_circle);
+              if(in_circle==0){
                 glVertex3f(xx,yy,zz);
                 glVertex3f(xx2,yy,zz);
               }
@@ -781,27 +828,41 @@ void DrawCircVentsApproxOutline(int option){
           zz=zplt[cvi->kmin]+dx;;
           nx = cvi->imax-cvi->imin+2;
           for(jj=cvi->jmin;jj<cvi->jmax;jj++){
+            yy0 = yplt[MAX(jj-1,cvi->jmin)];
             yy = yplt[jj];
             yy2 = yplt[jj+1];
+            yy3 = yplt[MIN(jj+2,cvi->jmax)];
             jjj = jj-cvi->jmin;
             for(ii=cvi->imin;ii<cvi->imax;ii++){
+              xx0 = xplt[MAX(ii-1,cvi->imin)];
               xx = xplt[ii];
               xx2 = xplt[ii+1];
+              xx3 = xplt[MIN(ii+2,cvi->imax)];
               iii=ii-cvi->imin;
-              if(blank[IJCIRC(iii,jjj)]==0)continue;
-              if(blank[IJCIRC(iii+1,jjj)]==0){
+
+              INCIRCLE((xx+xx2)/2.0,(yy+yy2)/2.0,zz,in_circle);
+              if(in_circle==0)continue;
+
+              INCIRCLE((xx2+xx3)/2.0,(yy+yy2)/2.0,zz,in_circle);
+              if(in_circle==0){
                 glVertex3f(xx2,yy,zz);
                 glVertex3f(xx2,yy2,zz);
               }
-              if(blank[IJCIRC(iii-1,jjj)]==0){
+
+              INCIRCLE((xx0+xx)/2.0,(yy+yy2)/2.0,zz,in_circle);
+              if(in_circle==0){
                 glVertex3f(xx,yy,zz);
                 glVertex3f(xx,yy2,zz);
               }
-              if(blank[IJCIRC(iii,jjj+1)]==0){
+
+              INCIRCLE((xx+xx2)/2.0,(yy2+yy3)/2.0,zz,in_circle);
+              if(in_circle==0){
                 glVertex3f(xx,yy2,zz);
                 glVertex3f(xx2,yy2,zz);
               }
-              if(blank[IJCIRC(iii,jjj-1)]==0){
+
+              INCIRCLE((xx+xx2)/2.0,(yy0+yy)/2.0,zz,in_circle);
+              if(in_circle==0){
                 glVertex3f(xx,yy,zz);
                 glVertex3f(xx2,yy,zz);
               }
