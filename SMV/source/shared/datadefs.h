@@ -12,6 +12,9 @@
 
 #define SCALE2FDSL(x) ((x)*xyzmaxdiff_local)
 
+#define YES 1
+#define NO 0
+
 #define NORMALIZE_X(x) (((x)-xbar0)/xyzmaxdiff)
 #define NORMALIZE_Y(y) (((y)-ybar0)/xyzmaxdiff)
 #define NORMALIZE_Z(z) (((z)-zbar0)/xyzmaxdiff)
@@ -33,6 +36,15 @@
 (XYZ_OUT)[0] = NORMALIZE_X((XYZ_IN)[0]);\
 (XYZ_OUT)[1] = NORMALIZE_Y((XYZ_IN)[1]);\
 (XYZ_OUT)[2] = NORMALIZE_Z((XYZ_IN)[2])
+
+#define INCIRCLE(x,y,z,incirc) \
+{\
+  float ddx, ddy, ddz;\
+  ddx = DENORMALIZE_X(x)-cvi->origin[0];\
+  ddy = DENORMALIZE_Y(y)-cvi->origin[1];\
+  ddz = DENORMALIZE_Z(z)-cvi->origin[2];\
+  incirc=( ddx*ddx + ddy*ddy + ddz*ddz <= cvi->radius*cvi->radius ? 1 : 0 );\
+}
 
 #define VEC2MA(vec,a)\
       (vec)[0] *= (a);\
