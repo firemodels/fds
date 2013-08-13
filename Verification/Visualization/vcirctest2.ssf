@@ -21,8 +21,6 @@ RENDERONCE
  vcirctest2_fds
 LOADINIFILE
  vcirctest2_outline.ini
-KEYBOARD
- q
 RENDERCLIP
  1 217 187 81 71
 RENDERONCE
