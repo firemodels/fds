@@ -79,5 +79,5 @@ source $SVNROOT/Utilities/Scripts/startXserver.sh
 ./FDS_Pictures.sh
 source $SVNROOT/Utilities/Scripts/stopXserver.sh
 
-echo FDS cases submitted
+echo FDS pictures created.
 
