@@ -360,7 +360,8 @@ $\hat{C}_N=\htau{0}C_0+\Chatjj{0}$ . Then
 \Chatjj{j+1}     &= &\sum_{i=j+1}^{N-1}  \htau{i}\,\Leii{i}
 \end{eqnarray}
 
-Subtracting (\ref{eq:recurse2}) from (\ref{eq:recurse1}) and solving for $\Chatjj{j}$ results in
+Subtracting (\ref{eq:recurse2}) from (\ref{eq:recurse1}) and solving
+for $\Chatjj{j}$ results in
 \begin{eqnarray}
 \label{eq:color}
 \Chatjj{j}&=&\Chatjj{j+1}+\htau{j}\,\Leii{j}
@@ -373,7 +374,7 @@ in the 2D projected image to
 \item convert the emitted radiances along the integration path to
 colors and
 
-\item form a weighted average of these these colors using either
+\item form a weighted average of these colors using either
 equation (\ref{eq:discrete_rte2}) or (\ref{eq:color}) where the
 weights are optical depths obtained using (\ref{eq:alpha2}) .
 
@@ -388,7 +389,7 @@ performing volume rendering.
 % -------------------  Splitting the Radiation Transport Equation ------------------------
 
 \subsection{Splitting the Radiation Transport Equation}
-This section discusses splitting the the Radiation Transport
+This section discusses splitting the Radiation Transport
 Equation (RTE), so that it may be solved separately on multiple
 meshes or multiple slice planes.  The final solution is then
 obtained by  appropriately combining solutions obtained on each
@@ -889,7 +890,8 @@ a) normal view as seen by the observer
 \begin{tabular}{cc}
 \includegraphics[width=3.5in]{FIGURES/vis_test2_freezeC}&
 \includegraphics[width=3.5in]{FIGURES/vis_test2_freezeA}\\
-b) same image as in a) but viewed from the left&c) same image as in a) but viewed from the right\\
+b) same image as in a) but viewed from the left&c) same image
+as in a) but viewed from the right\\
 \end{tabular}
 \end{center}
 \caption[Volume rendered smoke plume shown from several points of

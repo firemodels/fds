@@ -301,7 +301,7 @@ scientific visualization tool whose drawing algorithms are based
 on physics, not just a tool for drawing pretty pictures. Version 1
 of Smokeview was publicly released in February 2000, version 2 in
 December 2001, version 3 in November 2002, version 4 in July
-2004 and version 5 in September 2007.  
+2004 and version 5 in September 2007.
 The present version of Smokeview is 6, officially released
 in June 2012.
 
@@ -450,7 +450,12 @@ topics such as image rendering and data compression are detailed.
 
 \chapter{Preliminaries}
 \label{visoverview}
-\section{Defining Objects} Smokeview defines object locations in terms of a right handed coordinate system with the $x$~axis pointing to the right, the $y$~axis pointing to the back and the $z$~axis pointing up (see Fig. \ref{figrighthand}).  Coordinate values as defined in an FDS input file for objects such as blockages, vents, etc. are transformed internally within Smokeview to lie between 0.0 and 1.0. All Smokeview objects are drawn by grouping appropriately {\em OpenGL} vertices.
+\section{Defining Objects} Smokeview defines object locations in terms of a right
+handed coordinate system with the $x$~axis pointing to the right, the $y$~axis
+pointing to the back and the $z$~axis pointing up (see Fig. \ref{figrighthand}).
+Coordinate values as defined in an FDS input file for objects such as blockages,
+vents, etc. are transformed internally within Smokeview to lie between 0.0 and 1.0.
+All Smokeview objects are drawn by grouping appropriately {\em OpenGL} vertices.
 \begin{figure}[\figoptions]
 \begin{center}
 \includegraphics[width=3.0in]{FIGURES/righthandrule}
@@ -553,7 +558,14 @@ and {\tt glOrtho}\ to perform orthographic projections
         (double)fnear,(double)ffar);
 \end{lstlisting}
 
-\noindent where {\tt fleft}, {\tt fright}, {\tt fdown}, {\tt fup}, {\tt fnear}, {\tt ffar} are six clipping planes bounding the view frustum (truncated pyramid) for the perspective projection or the box in the orthographic projection.  Drawing does not occur outside of the 3D region defined by these 6 clipping planes. An additional six clipping planes parallel to the x, y and z axes may be activated in Smokeview (using the clipping dialog box) to hide geometry making it easier to see interior objects or visualizations (hence the term clipping plane).  OpenGL allows one to define clipping planes along arbitrarily oriented planes.
+\noindent where {\tt fleft}, {\tt fright}, {\tt fdown}, {\tt fup}, {\tt fnear},
+{\tt ffar} are six clipping planes bounding the view frustum (truncated pyramid)
+for the perspective projection or the box in the orthographic projection.
+Drawing does not occur outside of the 3D region defined by these 6 clipping planes.
+An additional six clipping planes parallel to the x, y and z axes may be activated
+in Smokeview (using the clipping dialog box) to hide geometry making it easier to
+see interior objects or visualizations (hence the term clipping plane).  OpenGL
+allows one to define clipping planes along arbitrarily oriented planes.
 \begin{figure}[\figoptions]
 \begin{center}
 \includegraphics[width=4.0in]{FIGURES/figviewport}
@@ -565,7 +577,13 @@ screen viewport.}
 
 \subsection{Stereo Projections}
 
-A stereo projection is simply a perspective applied twice making adjustments to simulate the viewpoint as seen for an observer's left and right eye.  The two resulting versions of the scene can then be drawn in succession using shuttered glasses synced with the monitor to render the stereo effect.  Alternatively, left and right versions of the scene may be drawn at the same time using stereo viewers to reveal the stereo effect.  Figure \ref{figstereo} illustrates the two view frustums used for a stereo projection.
+A stereo projection is simply a perspective applied twice making adjustments
+to simulate the viewpoint as seen for an observer's left and right eye.
+The two resulting versions of the scene can then be drawn in succession
+using shuttered glasses synced with the monitor to render the stereo effect.
+Alternatively, left and right versions of the scene may be drawn at the same
+time using stereo viewers to reveal the stereo effect.  Figure \ref{figstereo}
+illustrates the two view frustums used for a stereo projection.
 
 \begin{figure}[\figoptions]
 \begin{center}
@@ -788,7 +806,8 @@ by
 \begin{eqnarray}
 \hat{b}_1=(1-\alpha_2)b_0 + \alpha_2c_2
 \end{eqnarray}
-Blending $c_1$ to the interim background color $\hat{b}_1$ results in a new background color, $\hat{b}_2$, given by
+Blending $c_1$ to the interim background color $\hat{b}_1$ results in a new background color,
+$\hat{b}_2$, given by
 \begin{eqnarray}
 \hat{b_2}&=&(1-\alpha_1)\hat{b}_0+\alpha_1c_1\\
 \hat{b_2}&=&(1-\alpha_1)((1-\alpha_2)b_0 + \alpha_2c_2)+\alpha_1c_1\\
@@ -889,7 +908,8 @@ rotation axis are given by
 \theta&=&\cos^{-1}(v_z)\\
 u\times v&=&(-v_y,v_x,0)
 \end{eqnarray}
-so that the OpenGL call to perform the desired rotation would be {\tt glRotatef}$(180\cos^{-1}(v_z)/\pi,-v_y,v_x,0)$.
+so that the OpenGL call to perform the desired rotation would be
+{\tt glRotatef}$(180\cos^{-1}(v_z)/\pi,-v_y,v_x,0)$.
 
 \begin{figure}[\figoptions]
 \begin{center}
@@ -1017,9 +1037,9 @@ inspired by the software tool named Frames written by James Sims.
 
 The second method for visualizing smoke flow involves a method
 known as volumetric rendering.  Smoke transparency is visualized
-using the optical properties of soot noting that that the amount
-of light obscured by smoke and hence its shade of gray depends on
-the amount of smoke between the observer and the background.
+using the optical properties of soot noting that the amount
+of light obscured by smoke and hence its shade depends on
+the quantity of smoke between the observer and the background.
 Smokeview then integrates the smoke opacity one grid plane at a
 time using a simple implementation of Beer's law in the video
 hardware.
@@ -1052,7 +1072,15 @@ enables more detail to be obtained from the visualization due to
 the way that color interpolations between grid points are
 performed.
 
-\subsection{Determining Data Bounds}Smokeview uses three methods for setting data bounds.  First, the bounds may be set by the user.  This would be useful to ensure consistent coloring when several file types are displayed simultaneously (say slice and boundary files).  A second method is to use {\em percentile}\ bounds (1st and 99th by default) which are useful when data outliers are present.  To find percentile bounds, Smokeview scans the data computing a histogram.  It then picks data bounds at a specified percentile levels, 1st and 99th by default.  The third method for setting data bounds is to simply pick the global bounds for the data.
+\subsection{Determining Data Bounds}Smokeview uses three methods for
+setting data bounds.  First, the bounds may be set by the user.
+This would be useful to ensure consistent coloring when several
+file types are displayed simultaneously (say slice and boundary files).
+A second method is to use {\em percentile}\ bounds (1st and 99th by default)
+which are useful when data outliers are present.  To find percentile bounds,
+Smokeview scans the data computing a histogram.  It then picks data bounds at
+a specified percentile levels, 1st and 99th by default.  The third method for
+setting data bounds is to simply pick the global bounds for the data.
 
 \subsection{Converting data to a color}
 An index into a color table of size 256 is computed using
@@ -1079,7 +1107,8 @@ shades of gray from white to black.
 \begin{figure}[\figoptions]
 \begin{center}
 \begin{tabular}{cc}
-\includegraphics[height=4.0in]{FIGURES/rainbowcolor}&\includegraphics[height=4.0in]{FIGURES/3dcolorcube}\\
+\includegraphics[height=4.0in]
+{FIGURES/rainbowcolor}&\includegraphics[height=4.0in]{FIGURES/3dcolorcube}\\
 a) colorbar&b) 3D color cube\\
 \end{tabular}
 \end{center}
@@ -1124,7 +1153,7 @@ region occurs near a blue (0,0,1) region, the interpolated color
 halfway in between would be (0.5,0.0,0.5), a shade of purple, not
 in the colorbar.  In general, suppose that $ci_j$ is an integer
 index between 0 and 255 and that $f(ci_j)$ is the $ci_j$'th color
-in the colorbar.  Then the interpolated color between between the
+in the colorbar.  Then the interpolated color between the
 two colors $f(c_1)$ and $f(c_2)$ would be
 \begin{eqnarray}
 \mbox{interpolated color}=(f(c_1)+f(c_2))/2
@@ -1194,7 +1223,8 @@ the cube have value (r,g,b).  Colors are interpolated in Fig.
 \begin{figure}[\figoptions]
 \begin{center}
 \begin{tabular}{cc}
-\includegraphics[width=3.0in]{FIGURES/plume_bad}&\includegraphics[width=3.0in]{FIGURES/plume_good}\\
+\includegraphics[width=3.0in]
+{FIGURES/plume_bad}&\includegraphics[width=3.0in]{FIGURES/plume_good}\\
 interpolate colors within a 3D color cube&interpolate colors within 1D texture color bar\\
 \end{tabular}
 \caption [Slice file snapshots illustrating old and new method for
@@ -1347,9 +1377,14 @@ better and also reduces storage requirements. Figures
 for visualizing the stoichiometric mixture fraction. These figures
 show different ways of drawing isosurfaces.
 
-\paragraph{Isosurface uncertainty} Data used to generate isosurfaces has uncertainty, therefore the location of the isosurface
-also has uncertainty.  Bounds for this uncertainty may be expressed in terms of data uncertainty and data variation (the smaller the variation the larger the uncertainty).
-The Smokeview verification guide~\cite{Smokeview_Verification_Guide} shows that the uncertainty in isosurface location, $\Delta x$, between two node, data value pairs $(x_1,T_1)$ and $(x_2,T_2)$  may be bounded using
+\paragraph{Isosurface uncertainty} Data used to generate isosurfaces
+has uncertainty, therefore the location of the isosurface
+also has uncertainty.  Bounds for this uncertainty may be expressed
+in terms of data uncertainty and data variation (the smaller the
+variation the larger the uncertainty).
+The Smokeview verification guide~\cite{Smokeview_Verification_Guide}
+shows that the uncertainty in isosurface location, $\Delta x$,
+between two node, data value pairs $(x_1,T_1)$ and $(x_2,T_2)$  may be bounded using
 
 \begin{eqnarray}
 \left|\frac{\Delta x}{x_2-x_1}\right|\le \frac{\max(|\Delta
@@ -1359,9 +1394,11 @@ T_1|,|\Delta T_2|)}{|T_2-T_1|}
 \noindent where $\Delta T_1$ and $\Delta T_2$ are the uncertainty
 in $T_1$ and $T_2$ at $x_1$ and $x_2$ respectively.
 
-\paragraph{Algorithm for generating an Isosurface} The algorithm for generating an isosurface may be summarized as follows:
+\paragraph{Algorithm for generating an Isosurface} The algorithm for
+generating an isosurface may be summarized as follows:
 \begin{enumerate}
-\item Split region to be contoured into a number of cubes, each cube aligned with the underlying FDS grid.
+\item Split region to be contoured into a number of cubes, each cube
+aligned with the underlying FDS grid.
 \item For  each cube:
 \begin{enumerate}
 \item Number cube corners from 0 to 7 as illustrated in Fig.
@@ -1380,19 +1417,26 @@ is illustrated in Fig. \ref{figdecimate}. \item Estimate normal
 directions (to be associated with a vertex).  For each vertex:
 \begin{enumerate}
 \item determine triangles sharing the vertex
-\item determine the normal vector (normalized with length 1.0) of each triangle using the vertex
-\item construct a harmonic weighted average of triangle normal vectors where all weights sum to 1.0 and each weight is inversely proportional to the corresponding triangle area
+\item determine the normal vector (normalized with length 1.0) of each
+triangle using the vertex
+\item construct a harmonic weighted average of triangle normal vectors
+where all weights sum to 1.0 and each weight is inversely proportional
+to the corresponding triangle area
 \item store the resulting average along with vertex data
 \end{enumerate}
 \end{enumerate}
 
-\paragraph{Vertex normals in 3D} An averaged normal vector, $V_i$, for vertex $i$ may then be determined by summing over all triangles $n$ connected to a vertex $i$ as in
+\paragraph{Vertex normals in 3D} An averaged normal vector, $V_i$, for
+vertex $i$ may then be determined by summing over all triangles $n$
+connected to a vertex $i$ as in
 \begin{eqnarray}
 V_{i}&=&\sum_n\frac{U_n}{A_n}/\sum_n\frac{1}{A_n}
 =\sum_n\frac{u_n\times v_n}{||u_n\times
 v_n||^2}/\sum_n\frac{1}{||u_n\times v_n||}
 \end{eqnarray}
-where for the $n$'th triangle, $u_n$ and $v_n$ are two sides, $A_n=||u_n\times v_n||$ is the triangle area and $U_n=u_n\times v_n/A_n$ is a unit vector normal to the triangle.
+where for the $n$'th triangle, $u_n$ and $v_n$ are two sides,
+$A_n=||u_n\times v_n||$ is the triangle area and $U_n=u_n\times v_n/A_n$
+is a unit vector normal to the triangle.
 
 
 \begin{figure}[\figoptions]
@@ -1442,7 +1486,9 @@ before decimation\\
 after decimation
 \end{tabular}
 \end{center}
-\caption[Example of triangle decimation.]{Example of triangle decimation.  Triangle with red dots is removed.  Region is re-triangulated by replacing any edges connected to a red dot with the blue dot (average position of removed red dot).}
+\caption[Example of triangle decimation.]{Example of triangle decimation.
+Triangle with red dots is removed.  Region is re-triangulated by replacing
+any edges connected to a red dot with the blue dot (average position of removed red dot).}
 \label{figdecimate}%
 \end{figure}
 
@@ -1458,7 +1504,15 @@ after decimation
 \label{figlinesmooth}%
 \end{figure}
 
-\paragraph{Vertex normals in 2D} The use of inverse area weights or harmonic averages to construct average normal vectors at isosurface vertices is justified by the following two dimensional example.  As illustrated in Fig. \ref{figlinesmooth}, consider the quadratic $y(x)=A+Bx+Cx^2$ with $y(-\Delta x_2)=0$, $y(0)=1$ and $y(\Delta x_1)=0$ .  The slope at $x=0$ is given by $y'(0)=B$.  Likewise, the slope of the vector perpendicular to this curve at $x=0$ is $-1/B$.  The coefficient $B$ may be determined from the two simultaneous equations $y(\Delta x_1)=0$ and  $(y(-\Delta x_2)=0$ (note that $A=1$ since $y(0)=1$) or
+\paragraph{Vertex normals in 2D} The use of inverse area weights or
+harmonic averages to construct average normal vectors at isosurface
+vertices is justified by the following two dimensional example.
+As illustrated in Fig. \ref{figlinesmooth}, consider the
+quadratic $y(x)=A+Bx+Cx^2$ with $y(-\Delta x_2)=0$,
+$y(0)=1$ and $y(\Delta x_1)=0$ .  The slope at $x=0$ is given by $y'(0)=B$.
+Likewise, the slope of the vector perpendicular to this curve at $x=0$ is $-1/B$.
+The coefficient $B$ may be determined from the two simultaneous equations
+$y(\Delta x_1)=0$ and  $(y(-\Delta x_2)=0$ (note that $A=1$ since $y(0)=1$) or
 \begin{eqnarray}
 1+B\Delta x_1 + C \Delta x_1^2 &= &0\\
 1-B\Delta x_2 + C \Delta x_2^2 &= &0
@@ -1472,9 +1526,12 @@ The slope $N$ of the normal at $x=0$ is then given by
 \begin{eqnarray}
 N=-\frac{1}{B}&=&\frac{1}{1/\Delta x_1-1/\Delta x_2}
 \end{eqnarray}
-The slope $N_1$ of the normal to the line segment between $(0,1)$ and $(\Delta x_1,0)$ is $N_1=\Delta x_1$.
-The slope $N_2$ of the normal to the line segment between $(-\Delta x_2,0)$ and (0,1) is $N_2=-\Delta x_2$.
-Therefore the average slope $N$ may be expressed in terms of $N_1$ and $N_2$ as
+The slope $N_1$ of the normal to the line segment between
+$(0,1)$ and $(\Delta x_1,0)$ is $N_1=\Delta x_1$.
+The slope $N_2$ of the normal to the line segment between
+$(-\Delta x_2,0)$ and (0,1) is $N_2=-\Delta x_2$.
+Therefore the average slope $N$ may be expressed in terms of
+$N_1$ and $N_2$ as
 \begin{eqnarray}
 N=\frac{1}{1/N_1+1/N_2}
 \end{eqnarray}
@@ -1494,7 +1551,7 @@ where $x_p$ represents particle position and $V$ represents the
 velocity field.
 
 The assumption this model uses to compute particle flow is that
-the the drag force on the particle is large compared to $mg$, the
+the drag force on the particle is large compared to $mg$, the
 force due to gravity.
 
 Figure \ref{figpart} shows particles represented as particles and
@@ -1590,14 +1647,20 @@ $C_\mathrm{O_2}(t)=\mathrm{O_2}$ are constant, equations
 so that the total FED is given by
 
 \begin{eqnarray}
-\mathrm{FED}_\mathrm{tot} &= &\mathrm{FED}_\mathrm{CO}(t)\times\mathrm{HV}_\mathrm{CO_2}(t)+\mathrm{FED}_\mathrm{O_2}(t)\\
+\mathrm{FED}_\mathrm{tot}
+&= &\mathrm{FED}_\mathrm{CO}(t)\times\mathrm{HV}_\mathrm{CO_2}(t)+\mathrm{FED}_\mathrm{O_2}(t)\\
 \nonumber
  &= &\left(2.764 \times 10^{-5} \, \mathrm{CO}^{1.036}\times
 \frac{ \exp( 0.1903 \, \mathrm{CO_2} +  2.0004 ) }{7.1}\exp( -8.13
 + 0.54 \, (20.9 - \mathrm{O_2}) )\right) t\\
 \end{eqnarray}
 
-Figure \ref{fig:fedplot} presents two FED computations where CO, $\mathrm{CO_2}$ and $\mathrm{O_2}$ are constant.  The first for a smoke filled room with CO=\SI{10000}{ppm}, $\mathrm{CO_2}=5 \%$ and $\mathrm{O_2}=10 \%$ and the second for a room with ambient conditions with CO=\SI{9}{ppm}, $\mathrm{CO_2}=0 \%$ and $\mathrm{O_2}=21 \%$
+Figure \ref{fig:fedplot} presents two FED computations where CO,
+$\mathrm{CO_2}$ and $\mathrm{O_2}$ are constant.
+The first for a smoke filled room with CO=\SI{10000}{ppm},
+$\mathrm{CO_2}=5 \%$ and $\mathrm{O_2}=10 \%$ and the second for a
+room with ambient conditions with CO=\SI{9}{ppm},
+$\mathrm{CO_2}=0 \%$ and $\mathrm{O_2}=21 \%$
 
 \begin{figure}[\figoptions]
 \begin{center}
@@ -1814,7 +1877,7 @@ libpng~\cite{PNGLIB}, and libjpeg~\cite{JPEGLIB} are used for
 converting Smokeview scenes/results into images files. The library
 libzip~\cite{ZLIB} is used for compression. Smokeview uses this
 compression library when generating PNG files and when reading in
-3D smoke files compressed by smokezip.
+3D smoke files compressed by Smokezip.
 
 A small portion of Smokeview is written in Fortran 90 to input
 data generated by FDS.  The use of portable libraries allows
@@ -1848,7 +1911,7 @@ words, the user initiates events not the program. The Smokeview
 response then depends on which {\em event}\ has occurred.
 
 The program structure may then be described as follows. Smokeview
-starts out by by performing initializations and setting up the
+starts out by performing initializations and setting up the
 OpenGL environment. This is followed by a call to a GLUT routine
 that implements the {\em event loop}. The {\em event loop}\ is
 literally a program loop without an exit which detects when the
@@ -1881,7 +1944,7 @@ will use most of the callbacks named in this figure.
 \end{figure}
 
 %
-% -------------------  Interfacing OpenGL with teh Host Operating System ----------
+% -------------------  Interfacing OpenGL with the Host Operating System ----------
 %
 
 \chapter{Interfacing OpenGL with the Host Operating System}
@@ -2027,14 +2090,5 @@ A summary of the steps in more detail are:
 \end{lstlisting}
 
 \end{enumerate}
-
-
-
-
-
-
-
-
-
 
 \end{document}
