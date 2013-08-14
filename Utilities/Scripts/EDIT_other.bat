@@ -17,4 +17,4 @@ call %envfile%
 
 %svn_drive%
 cd %svn_root%\Utilities\
-start wordpad build_other.html
+start notepad build_other.html
