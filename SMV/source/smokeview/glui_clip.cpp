@@ -36,6 +36,7 @@ GLUI_Panel *PANEL_clip_lower=NULL, *PANEL_clip_upper=NULL, *PANEL_clip=NULL,*pan
 GLUI_Panel *PANEL_clipx=NULL, *PANEL_clipX=NULL;
 GLUI_Panel *PANEL_clipy=NULL, *PANEL_clipY=NULL;
 GLUI_Panel *PANEL_clipz=NULL, *PANEL_clipZ=NULL;
+GLUI_Panel *PANEL_blockageview=NULL;
 
 GLUI_Listbox *LIST_mesh=NULL;
 
@@ -77,6 +78,7 @@ void set_clip_controls(int val);
 /* ------------------ glui_clip_setup ------------------------ */
 
 extern "C" void glui_clip_setup(int main_window){
+  int i;
 
   update_glui_clip=0;
   if(glui_clip!=NULL){
@@ -132,6 +134,14 @@ extern "C" void glui_clip_setup(int main_window){
   SPINNER_clip_zmax->set_float_limits(zclip_min,zclip_max,GLUI_LIMIT_CLAMP);
   glui_clip->add_column_to_panel(PANEL_clipZ,false);
   CHECKBOX_clip_zmax=glui_clip->add_checkbox_to_panel(PANEL_clipZ,"",&clipinfo.clip_zmax,CLIP_zupper,CLIP_CB);
+
+  PANEL_blockageview = glui_clip->add_rollout_to_panel(PANEL_clip,"Hide blockages",false);
+  for(i=0;i<nmeshes;i++){
+    mesh *meshi;
+
+    meshi = meshinfo + i;
+    glui_clip->add_checkbox_to_panel(PANEL_blockageview,meshi->label,&meshi->blockvis);
+  }
 
   panel_wrapup = glui_clip->add_panel_to_panel(PANEL_clip,"",GLUI_PANEL_NONE);
 

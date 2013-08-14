@@ -35,7 +35,6 @@ GLUI_StaticText *STATIC_blockage_index=NULL;
 GLUI_StaticText *STATIC_mesh_index=NULL;
 GLUI_StaticText *STATIC_label=NULL;
 
-GLUI_Panel *PANEL_blockageview=NULL;
 GLUI_Panel *PANEL_obj_select=NULL,*PANEL_surface=NULL;
 GLUI_Panel *PANEL_obj_stretch2=NULL,*PANEL_obj_stretch3=NULL, *PANEL_obj_stretch4=NULL;
 
@@ -227,13 +226,6 @@ extern "C" void glui_edit_setup(int main_window){
   EDIT_zmin->set_float_limits(zplt_orig[0],zplt_orig[kbar],GLUI_LIMIT_CLAMP);
   EDIT_zmax->set_float_limits(zplt_orig[0],zplt_orig[kbar],GLUI_LIMIT_CLAMP);
 
-  PANEL_blockageview = glui_edit->add_rollout("Hide blockages by mesh",false);
-  for(i=0;i<nmeshes;i++){
-    mesh *meshi;
-
-    meshi = meshinfo + i;
-    glui_edit->add_checkbox_to_panel(PANEL_blockageview,meshi->label,&meshi->blockvis);
-  }
   glui_edit->add_separator();
   BUTTON_blockage_1=glui_edit->add_button(_("Close"),CLOSE_WINDOW,Blockedit_DLG_CB);
 
