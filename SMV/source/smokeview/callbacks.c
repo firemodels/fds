@@ -1654,10 +1654,41 @@ void keyboard(unsigned char key, int flag){
       }
       break;
     case 'o':
-      highlight_flag++;
-      if(highlight_flag>2&&noutlineinfo>0)highlight_flag=0;
-      if(highlight_flag>1&&noutlineinfo==0)highlight_flag=0;
-      PRINTF("outline mode=%i\n",highlight_flag);
+      if(keystate==GLUT_ACTIVE_ALT){
+        switch (visBlocks){
+          case visBLOCKAsInput:
+            BlockageMenu(visBLOCKHide);
+            BlockageMenu(visBLOCKAsInput);
+            BlockageMenu(visBLOCKAddOutline);
+            break;
+          case visBLOCKAsInputOutline:
+            BlockageMenu(visBLOCKHide);
+            BlockageMenu(visBLOCKNormal);
+            break;
+          case visBLOCKNormal:
+            BlockageMenu(visBLOCKHide);
+            BlockageMenu(visBLOCKOnlyOutline);
+            break;
+          case visBLOCKOutline:
+          case visBLOCKOnlyOutline:
+            BlockageMenu(visBLOCKHide);
+            break;
+          case visBLOCKHide:
+            BlockageMenu(visBLOCKHide);
+            BlockageMenu(visBLOCKAsInput);
+            break;
+          default:
+            BlockageMenu(visBLOCKHide);
+            BlockageMenu(visBLOCKAsInput);
+            break;
+        }
+      }
+      else{
+        highlight_flag++;
+        if(highlight_flag>2&&noutlineinfo>0)highlight_flag=0;
+        if(highlight_flag>1&&noutlineinfo==0)highlight_flag=0;
+        PRINTF("outline mode=%i\n",highlight_flag);
+      }
       break;
     case 'p':
       plotn += FlowDir;
