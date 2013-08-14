@@ -1643,8 +1643,17 @@ void keyboard(unsigned char key, int flag){
       }
       break;
 #endif
-    case 'o':
     case 'O':
+      if(visBlocks!=visBLOCKAsInput&&visBlocks!=visBLOCKAsInputOutline){
+        BlockageMenu(visBLOCKHide);
+        BlockageMenu(visBLOCKAsInput);
+      }
+      else{
+        BlockageMenu(visBLOCKHide);
+        BlockageMenu(visBLOCKOnlyOutline);
+      }
+      break;
+    case 'o':
       highlight_flag++;
       if(highlight_flag>2&&noutlineinfo>0)highlight_flag=0;
       if(highlight_flag>1&&noutlineinfo==0)highlight_flag=0;
