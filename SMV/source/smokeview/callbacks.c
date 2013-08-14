@@ -1644,13 +1644,16 @@ void keyboard(unsigned char key, int flag){
       break;
 #endif
     case 'O':
-      if(visBlocks!=visBLOCKAsInput&&visBlocks!=visBLOCKAsInputOutline){
-        BlockageMenu(visBLOCKHide);
-        BlockageMenu(visBLOCKAsInput);
-      }
-      else{
-        BlockageMenu(visBLOCKHide);
-        BlockageMenu(visBLOCKOnlyOutline);
+      switch (visBlocks){
+        case visBLOCKAsInput:
+        case visBLOCKAsInputOutline:
+          BlockageMenu(visBLOCKHide);
+          BlockageMenu(visBLOCKOnlyOutline);
+          break;
+        default:
+          BlockageMenu(visBLOCKHide);
+          BlockageMenu(visBLOCKAsInput);
+          break;
       }
       break;
     case 'o':

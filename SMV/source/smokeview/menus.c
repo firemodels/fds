@@ -7516,6 +7516,10 @@ updatemenu=0;
   }
   glutAddMenuEntry(_("  e: toggle between view rotation types: scene centered 2 axis, 1 axis, 3 axis and eye centered"),7);
   glutAddMenuEntry(_("  q: display blockages as specified by user or as used by FDS"),7);
+  if(ntotal_blockages>0){
+    glutAddMenuEntry(_("  O: toggle blockage view (normal <--> outline)"),7);
+    glutAddMenuEntry(_("  ALT+o: cycle between all blockage view types"),7);
+  }
   glutAddMenuEntry(_("  W: toggle clipping - use Options/Clip menu to specify clipping planes"),7);
   glutAddMenuEntry(_("  -: decrement time step, 2D contour planes, 3D contour levels"),2);
   glutAddMenuEntry(_("  space bar: increment time step, 2D contour planes, 3D contour levels"),2);
