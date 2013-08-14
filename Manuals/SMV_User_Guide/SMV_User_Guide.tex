@@ -1944,15 +1944,17 @@ scene clipping both the geometry and the data.} \label{figCLIPPED}
 \end{figure}
 
 It is difficult to view the interior of a scene when modeling
-complicated geometries.  To alleviate this problem, portions of
+complicated geometries.  To alleviate this problem, one may change the blockage view
+to {\em outline}\ with the Show/Hide>Blockages menu or one may clip the scene.
+Portions of
 the scene may be hidden or clipped by setting up to six clipping
-planes. OpenGL draws the scene on one side of a clipping plane but
+planes. The scene is then drawn on one side of a clipping plane but
 not the other. In general, a clipping plane may have any
-orientation. Smokeview defines two clipping planes for each of the
+orientation. Smokeview defines six clipping planes, two clipping planes for each of the
 three coordinate axes.   The two x axis clipping planes clip
-regions with $x$ coordinates smaller than an `$x_{min}$' clipping
-value and larger than an `$x_{max}$' value. The y axis and z axis
-clipping planes behave similarly.  Clipping plane values are
+regions with $x$ coordinates smaller than `$x_{min}$' (in FDS coordinates) and larger than `$x_{max}$' .
+Clipping planes for the y and z axis behave similarly.  
+Clipping plane values are
 specified using the {\em Clipping}\ dialog box which is opened by
 selecting the {\em Dialogs$>$Clip Geometry}\ menu item. Figure
 \ref{figCLIP} shows this dialog box with the $y_{max}$ plane
@@ -1961,6 +1963,9 @@ Figure \ref{figCLIPPED}a is drawn with no clipping. Figure
 \ref{figCLIPPED}b is drawn clipping just the geometry (blockages).
 Figure \ref{figCLIPPED}c is drawn clipping both the geometry and
 the data.
+
+The clipping dialog box also allows one to hide blockages.  Blockages for any given mesh may be hidden
+by selecting the appropriate checkbox in the {\em Hide blockages}\ rollout panel.
 
 %---------------------------------------------------------------------------------
 %--------------- Creating Custom Objects -----------------------------------------
