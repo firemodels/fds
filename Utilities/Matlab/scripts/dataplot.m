@@ -183,31 +183,31 @@ for i=2:n_plots
                         using_stat_x_y_check_zero = 1;
                     end
                 elseif strcmp(Metric,'mean')
-                    Save_Measured_Metric(i,j,1) = mean(M(indices,d1_Dep_Col));
+                    Save_Measured_Metric(i,j,1) = abs(mean(M(indices,d1_Dep_Col))-d1_Initial_Value);
                 % If mean_x_y is specified for a plot with multiple curves,
                 % then get the results from curve x only
                 elseif strfind(Metric,'mean_')
                     using_stat_x_y = 1;
                     compare_indices = sscanf(Metric, ['mean_' '%f' '_' '%f']);
                     if compare_indices(1) == j
-                        Save_Measured_Metric(i,1,1) = mean(M(indices,d1_Dep_Col));
+                        Save_Measured_Metric(i,1,1) = abs(mean(M(indices,d1_Dep_Col))-d1_Initial_Value);
                         using_stat_x_y_check_zero = 1;
                     end
                 elseif strcmp(Metric,'all')
-                    Save_Measured_Metric(i,j,1:length(indices)) = M(indices,d1_Dep_Col);
+                    Save_Measured_Metric(i,j,1:length(indices)) = M(indices,d1_Dep_Col)-d1_Initial_Value;
                 elseif strcmp(Metric,'threshold')
                     Save_Measured_Metric(i,j,1) = min(M(indices,d1_Dep_Col));
                 elseif strcmp(Metric,'area')
-                    Save_Measured_Metric(i,j,1) = trapz(M(indices,d1_Ind_Col), M(indices,d1_Dep_Col));
+                    Save_Measured_Metric(i,j,1) = trapz(M(indices,d1_Ind_Col), M(indices,d1_Dep_Col))-d1_Initial_Value;
                 elseif strcmp(Metric,'end')
-                    Save_Measured_Metric(i,j,1) = M(indices(end),d1_Dep_Col);
+                    Save_Measured_Metric(i,j,1) = M(indices(end),d1_Dep_Col)-d1_Initial_Value;
                 % If end_x_y is specified for a plot with multiple curves,
                 % then get the results from curve x only
                 elseif strfind(Metric,'end_')
                     using_stat_x_y = 1;
                     compare_indices = sscanf(Metric, ['end_' '%f' '_' '%f']);
                     if compare_indices(1) == j
-                        Save_Measured_Metric(i,1,1) = M(indices(end),d1_Dep_Col);
+                        Save_Measured_Metric(i,1,1) = M(indices(end),d1_Dep_Col)-d1_Initial_Value;
                         using_stat_x_y_check_zero = 1;
                     end
                 else
@@ -279,31 +279,31 @@ for i=2:n_plots
                         using_stat_x_y_check_zero = 1;
                     end
                 elseif strcmp(Metric,'mean')
-                    Save_Predicted_Metric(i,j,1) = mean(M(indices,d2_Dep_Col));
+                    Save_Predicted_Metric(i,j,1) = abs(mean(M(indices,d2_Dep_Col))-d2_Initial_Value);
                 % If mean_x_y is specified for a plot with multiple curves,
                 % then get the results from curve y only
                 elseif strfind(Metric,'mean_')
                     using_stat_x_y = 1;
                     compare_indices = sscanf(Metric, ['mean_' '%f' '_' '%f']);
                     if compare_indices(2) == j
-                        Save_Predicted_Metric(i,1,1) = mean(M(indices,d2_Dep_Col));
+                        Save_Predicted_Metric(i,1,1) = abs(mean(M(indices,d2_Dep_Col))-d2_Initial_Value);
                         using_stat_x_y_check_zero = 1;
                     end
                 elseif strcmp(Metric,'all')
-                    Save_Predicted_Metric(i,j,1:length(indices)) = M(indices,d2_Dep_Col);
+                    Save_Predicted_Metric(i,j,1:length(indices)) = M(indices,d2_Dep_Col)-d2_Initial_Value;
                 elseif strcmp(Metric,'threshold')
-                    Save_Predicted_Metric(i,j,1) = min(M(indices,d2_Dep_Col));
+                    Save_Predicted_Metric(i,j,1) = min(M(indices,d2_Dep_Col))-d2_Initial_Value;
                 elseif strcmp(Metric,'area')
-                    Save_Predicted_Metric(i,j,1) = trapz(M(indices,d2_Ind_Col), M(indices,d2_Dep_Col));
+                    Save_Predicted_Metric(i,j,1) = trapz(M(indices,d2_Ind_Col), M(indices,d2_Dep_Col))-d2_Initial_Value;
                 elseif strcmp(Metric,'end')
-                    Save_Predicted_Metric(i,j,1) = M(indices(end),d2_Dep_Col);
+                    Save_Predicted_Metric(i,j,1) = M(indices(end),d2_Dep_Col)-d2_Initial_Value;
                 % If end_x_y is specified for a plot with multiple curves,
                 % then get the results from curve y only
                 elseif strfind(Metric,'end_')
                     using_stat_x_y = 1;
                     compare_indices = sscanf(Metric, ['end_' '%f' '_' '%f']);
                     if compare_indices(2) == j
-                        Save_Predicted_Metric(i,1,1) = M(indices(end),d2_Dep_Col);
+                        Save_Predicted_Metric(i,1,1) = M(indices(end),d2_Dep_Col)-d2_Initial_Value;
                         using_stat_x_y_check_zero = 1;
                     end
                 else
