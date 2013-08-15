@@ -1870,7 +1870,7 @@ lines with a {\ct T}.
 The pressure term in the momentum transport equation solved by FDS is decomposed as follows:
 \be \frac{1}{\rho} \nabla \tp = \nabla \left( \frac{\tp}{\rho}\right) - \tp \, \nabla \left(\frac{1}{\rho} \right)  \ee
 The pressure term is written like this so that a separable elliptic partial differential equation can be solved for the
-``total'' pressure, $\calH \equiv |\bu|^2/2 + \tp/\rho$, using a direct solver. The second term is calculated based on
+``total'' pressure, $\cH \equiv |\bu|^2/2 + \tp/\rho$, using a direct solver. The second term is calculated based on
 the pressure field from the previous time step, a slight approximation necessary to render the pressure equation separable.
 This term is sometimes referred to as the baroclinic torque, and it is responsible for
 generating vorticity due to the non-alignment of pressure and density gradients.
@@ -2450,7 +2450,7 @@ The first special {\ct VENT} is invoked by the parameter {\ct SURF\_ID='OPEN'}. 
 
 By default, it is assumed that ambient conditions exist beyond the {\ct 'OPEN'} vent. However, in some cases, you may want to alter this assumption, for example, the temperature. If you assume a temperature other than ambient, specify {\ct TMP\_EXTERIOR} along with {\ct SURF\_ID='OPEN'}. You can modify the time history of this parameter using a ramp function, {\ct TMP\_EXTERIOR\_RAMP}. Use this option cautiously -- in many situations if you want to describe the exterior of a building, it is better to include the exterior explicitly in your calculation because the flow in and out of the doors and windows will be more naturally captured. See Section~\ref{info:stackeffect} for more details. If you want to specify a non-ambient pressure at the {\ct OPEN} boundary, see Section~\ref{info:pressure_boundary}.
 
-The {\ct OPEN} pressure boundary condition is most stable for flows that are predominantly normal  to the vent, either mostly in or mostly out.  This is because the prescribed pressure at an {\ct OPEN} boundary is ill-conditioned (a small perturbation to the input may lead to large change in the output) if the flow is parallel to the vent.  Suppose, for example, that an outdoor flow is 10 m/s in the $x$ direction and $\pm 0.001$ m/s in the $z$ direction with an {\ct OPEN} top boundary.  The kinetic energy of this flow is roughly $k=50$ m$^2$/s$^2$.  When the vertical velocity is positive (+0.001 m/s) then the prescribed boundary condition for the stagnation pressure is set to $\calH = k = 50$ m$^2$/s$^2$.  But when the vertical velocity is negative (-0.001 m/s) then $\calH = 0$ (see \cite{FDS_Tech_Guide}).  For this reason, {\ct OPEN} vents should be used with care in outdoor applications.  See Section \ref{info:mean_forcing} for an alternative approach.
+The {\ct OPEN} pressure boundary condition is most stable for flows that are predominantly normal  to the vent, either mostly in or mostly out.  This is because the prescribed pressure at an {\ct OPEN} boundary is ill-conditioned (a small perturbation to the input may lead to large change in the output) if the flow is parallel to the vent.  Suppose, for example, that an outdoor flow is 10 m/s in the $x$ direction and $\pm 0.001$ m/s in the $z$ direction with an {\ct OPEN} top boundary.  The kinetic energy of this flow is roughly $k=50$ m$^2$/s$^2$.  When the vertical velocity is positive (+0.001 m/s) then the prescribed boundary condition for the stagnation pressure is set to $\cH = k = 50$ m$^2$/s$^2$.  But when the vertical velocity is negative (-0.001 m/s) then $\cH = 0$ (see \cite{FDS_Tech_Guide}).  For this reason, {\ct OPEN} vents should be used with care in outdoor applications.  See Section \ref{info:mean_forcing} for an alternative approach.
 
 
 Vents to the outside of the computational domain ({\ct OPEN} vents)
@@ -3991,7 +3991,7 @@ Note that specifying a combination of {\ct VEL} and {\ct MASS\_FRACTION} can lea
 
 
 
-\subsection{Special Topic: Tangential Velocity Boundary Conditions at Solid Surfaces}
+\subsection{Tangential Velocity Boundary Conditions at Solid Surfaces}
 \label{info:WALL_MODEL}
 
 The no-slip condition implies that the continuum tangential gas velocity at a surface is zero.
@@ -4541,10 +4541,10 @@ interior of a tunnel, and a wind is blowing at one of the portals that affects t
             .
             .
 \end{lstlisting}
-The use of a {\em dynamic pressure} boundary affects the FDS algorithm as follows.  At {\ct OPEN} boundaries, the hydrodynamic pressure (head) $\calH$ is specified as
+The use of a {\em dynamic pressure} boundary affects the FDS algorithm as follows.  At {\ct OPEN} boundaries, the hydrodynamic pressure (head) $\cH$ is specified as
 \begin{eqnarray}
-\calH &=& \mbox{\ct DYNAMIC\_PRESSURE}/\rho_\infty + {|\mathbf{u}|^2}/2 \quad  \mbox{(outgoing)}  \nonumber \\
-\calH &=& \mbox{\ct DYNAMIC\_PRESSURE}/\rho_\infty \quad                       \mbox{(incoming)}
+\cH &=& \mbox{\ct DYNAMIC\_PRESSURE}/\rho_\infty + {|\mathbf{u}|^2}/2 \quad  \mbox{(outgoing)}  \nonumber \\
+\cH &=& \mbox{\ct DYNAMIC\_PRESSURE}/\rho_\infty \quad                       \mbox{(incoming)}
 \end{eqnarray}
 where $\rho_\infty$ is the ambient density and $\mathbf{u}$ is the most recent value of the velocity on the boundary.
 The {\ct PRESSURE\_RAMP} allows you to alter the pressure as a function of time. Note that you do not
@@ -9111,7 +9111,7 @@ be found in Volume~1 of the FDS Technical Reference Guide~\cite{FDS_Math_Guide}.
 \\ \hline
 {\ct F\_X, F\_Y, F\_Z}                          & Momentum terms, $F_x$, $F_y$, $F_z$               & m/s$^2$        & D,I,P,S      \\ \hline
 {\ct GAS TEMPERATURE}                           & Gas Temperature near wall                         & $^\circ$C      & B,D          \\ \hline
-{\ct H}                                         & $\calH=|\bu|^2/2 + \tp/\rho_0$                    & (m/s)$^2$      & D,I,P,S      \\ \hline
+{\ct H}                                         & $\cH=|\bu|^2/2 + \tp/\rho_0$                    & (m/s)$^2$      & D,I,P,S      \\ \hline
 {\ct HEAT TRANSFER COEFFICIENT}                 & Convective heat transfer                          & \si{W/(m$^2$.K)} & B,D          \\ \hline
 {\ct HRRPUL}                                    & $\int \dq''' \, \d x \, \d y$                     & kW/m           & D            \\ \hline
 {\ct INTEGRATED INTENSITY}                      & $U=\int I \, \d \bs$                              & kW/m$^2$       & D,I,P,S      \\ \hline
