@@ -22,6 +22,7 @@ CONTAINS
 SUBROUTINE INIT_RADIATION
 
 USE MEMORY_FUNCTIONS, ONLY : CHKMEMERR
+USE COMP_FUNCTIONS, ONLY: SHUTDOWN
 USE MIEV
 USE RADCALV
 REAL(EB) :: THETAUP,THETALOW,PHIUP,PHILOW,F_THETA,PLANCK_C2,KSI,LT,RCRHO,YY,YY2,BBF,AP0,AMEAN
@@ -483,7 +484,7 @@ MAKE_KAPPA_ARRAYS: IF (.NOT.SOLID_PHASE_ONLY .AND. ANY(SPECIES%RADCAL_ID/='null'
                         SPECIE(1) = YY
                         P(1)      = YY
                         P(6)      = (1._EB-YY)
-                     CASE(4) !SOOT
+                     CASE(4) ! SOOT
                         YY2 = YY * 0.2_EB
                         SPECIE = 0._EB
                         P      = 0._EB
@@ -514,6 +515,10 @@ MAKE_KAPPA_ARRAYS: IF (.NOT.SOLID_PHASE_ONLY .AND. ANY(SPECIES%RADCAL_ID/='null'
    ENDIF BUILD_KAPPA_ARRAY
 
 ENDIF MAKE_KAPPA_ARRAYS
+
+! Trap any errors
+
+IF (ANY(RADCAL_SPECIES2KAPPA<0._EB)) CALL SHUTDOWN('ERROR: KAPPA < 0 in RADCAL')
  
 ! Tables for PARTICLE absorption coefficients
 
@@ -724,6 +729,7 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
          ENDDO
       ENDIF
    ENDIF
+
    ! Compute source term KAPPA*4*SIGMA*TMP**4
 
    RAD_Q_SUM = 0._EB
