@@ -21,31 +21,45 @@
 \newcommand{\palphattwo}{ \frac{\partial \alpha}{\partial T_2} }
 \newcommand{\figoptions}{hbp}
 
+\newcommand{\headerA}[1]{
+\flushright{
+\fontsize{20}{24}\selectfont
+\bf{NIST Special Publication #1}}
+}
+
+\newcommand{\headerB}[1]{
+\flushright{
+\fontsize{28}{33.6}\selectfont
+\bf{#1}
+}
+}
+
+\newcommand{\headerC}[1]{
+\vspace{.5in}
+\flushright{\fontsize{14}{16.8}\selectfont
+#1}
+}
+
 %
 % ----------------------  first cover/title page --------------------------
 %
 \begin{minipage}[t][9in][s]{6.5in}
 
-\flushright{
-    \fontsize{20}{24}\selectfont
-    \bf{NIST Special Publication 1017-3}}
+\headerA{1017-3}
 
 
-\vspace{1in}
+%\vspace{1in}
 
-\flushright{\fontsize{28}{33.6}\selectfont
-\bf{
+\headerB{
 Smokeview (Version 6)\\
 A Tool for Visualizing\\
 Fire Dynamics Simulation Data\\
-Volume III: Verification Guide\\}
+Volume III: Verification Guide\\
 }
 
 
 
-\vspace{.5in}
-\flushright{\fontsize{14}{16.8}\selectfont
-Glenn P. Forney}
+\headerC{Glenn P. Forney}
 
 \vspace{0.5in}
 \flushright{http://dx.doi.org/10.6028/NIST.SP.1017-3}
@@ -67,24 +81,20 @@ Glenn P. Forney}
 %
 \begin{minipage}[t][9in][s]{6.5in}
 
-\flushright{
-    \fontsize{20}{24}\selectfont
-    \bf{ NIST Special Publication 1017-3}}
+\headerA{1017-3}
 
 \vspace{1.in}
 
-\flushright{\fontsize{28}{33.6}\selectfont
-\bf{
+\headerB{
 Smokeview (Version 6)\\
 A Tool for Visualizing\\
 Fire Dynamics Simulation Data\\
-Volume III: Verification Guide\\}
+Volume III: Verification Guide\\
 }
 
 \vspace{.5in}
 
-\normalsize
-\flushright{Glenn P. Forney\\
+\headerC{Glenn P. Forney\\
 {\em Fire Research Division}\\
 {\em Engineering Laboratory}\\
 }
@@ -94,7 +104,8 @@ http://dx.doi.org/10.6028/NIST.SP.1017-3
 
 \vspace{.25in}
 \flushright{
-\today\\
+%\today\\
+August 2013\\
 Smokeview Version 6 \\
 \emph{SVN Repository}~$Revision$}
 %
