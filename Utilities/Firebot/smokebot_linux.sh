@@ -980,7 +980,7 @@ email_build_status()
    echo " stop time: $stop_time " >> $TIME_LOG
    echo "   results (private): http://blaze.nist.gov/smokebot" >> $TIME_LOG
    echo "   results (private: web summary): http://blaze.nist.gov/VV/SMV2" >> $TIME_LOG
-   echo "   results (public): https://docs.google.com/folder/d/0B_wB1pJL2bFQaDJaOFNnUDR4LXM/edit" >> $TIME_LOG
+   echo "   results (public): https://drive.google.com/folderview?id=0B_wB1pJL2bFQaDJaOFNnUDR4LXM#list" >> $TIME_LOG
    if [ "$MAKEMOVIES" == "1" ]
    then
      echo "animations: http://blaze.nist.gov/smokebot/movies" >> $TIME_LOG

@@ -20,7 +20,7 @@
 
 <table cellpadding="5">
 <tr><td align="center">
-[https://docs.google.com/folder/d/0B-EZ4HlrI6VDUWtRN1N0MmM5c1U/edit http://fds-smv.googlecode.com/svn/trunk/FDS/trunk/FDS-SMV_website/images/button_manuals.png]
+[https://drive.google.com/folderview?id=0B-EZ4HlrI6VDUWtRN1N0MmM5c1U#list http://fds-smv.googlecode.com/svn/trunk/FDS/trunk/FDS-SMV_website/images/button_manuals.png]
 </td><td>
 <font face="calibri,helvetica,arial,sans-serif" size="3">
 FDS and Smokeview User, Technical, Verification, and Validation Guides.
@@ -37,7 +37,7 @@ Mailing list for general discussion, questions, and feedback.
 [http://code.google.com/p/fds-smv/issues/list http://fds-smv.googlecode.com/svn/trunk/FDS/trunk/FDS-SMV_website/images/button_issue.png]
 </td><td>
 <font face="calibri,helvetica,arial,sans-serif" size="3">
-Submit cases to the Issue Tracker to report specific bugs or problems.
+Submit cases to the Issue Tracker to report specific bugs, problems, or enhancement requests.
 </font>
 </td></tr>
 <tr><td align="center">
@@ -70,7 +70,7 @@ Information on FDS-SMV development, third-party tools, and other resources.
 == FDS Validation Test Reports ==
 
 <font face="calibri,helvetica,arial,sans-serif" size="3">
-  View the [https://docs.google.com/folder/d/0B-EZ4HlrI6VDT2R5SjNFOGtIdTg/edit collection of publicly available reports] for experimental data sets referenced in the FDS Validation Guide.
+  View the [https://drive.google.com/folderview?id=0B-EZ4HlrI6VDT2R5SjNFOGtIdTg&usp=sharing#list collection of publicly available reports] for experimental data sets referenced in the FDS Validation Guide.
 </font>
 
 <br>
@@ -97,7 +97,7 @@ Information on FDS-SMV development, third-party tools, and other resources.
 
  FDS 6 is ready for beta testing. You can access the FDS-SMV release candidate [http://code.google.com/p/fds-smv/downloads/list here]. Note that the installation of FDS 6 is in a parallel folder to FDS 5. FDS 6 can be accessed by typing `fds` at the command prompt, whereas the currently installed version of FDS 5 can still be invoked with `fds5`.
 
- As part of the FDS 6 beta release, you can access [https://docs.google.com/folder/d/0B_wB1pJL2bFQaDJaOFNnUDR4LXM/edit nightly versions of the FDS-SMV documentation/manuals].
+ As part of the FDS 6 beta release, you can access [https://drive.google.com/folderview?id=0B_wB1pJL2bFQaDJaOFNnUDR4LXM#list nightly versions of the FDS-SMV documentation/manuals].
 
  These manuals are generated automatically each night by the continuous integration testing process (Firebot), which is described in detail in the FDS Configuration Management Plan. You can view the status of recent nightly builds on the [http://code.google.com/p/fds-smv/wiki/Firebot_Build_Status Firebot Build Status] Wiki Page.
 
