@@ -26,7 +26,7 @@ char IOpart_revision[]="$Revision$";
 int tagscompare( const void *arg1, const void *arg2 );
 void copy_dep_vals(part5class *partclassi, part5data *datacopy, float *colorptr, propdata *prop, int j);
 
-void draw_SVOBJECT(sv_object *object, int frame_index_local, propdata *prop, int recurse_level);
+void draw_SVOBJECT(sv_object *object, int frame_index_local, propdata *prop, int recurse_level,float *valrgb);
 void update_all_partvis(partdata *parti);
 void update_partvis(int first_frame,partdata *parti, part5data *datacopy, int nclasses);
 int get_tagindex(const partdata *parti, part5data **data, int tagval);
@@ -1678,7 +1678,7 @@ void drawPart5(const partdata *parti){
                 }
               }
               copy_dep_vals(partclassi,datacopy,colorptr,prop,j);
-              draw_SVOBJECT(avatar_types[avatar_type],0,prop,0);
+              draw_SVOBJECT(avatar_types[avatar_type],0,prop,0,NULL);
               select_device_color_ptr=NULL;
               avatar_types[avatar_type]->use_displaylist=save_use_displaylist;
               glPopMatrix();
@@ -1749,7 +1749,7 @@ void drawPart5(const partdata *parti){
                 partfacedir[1]=ybar0+SCALE2SMV(world_eyepos[1])-yplts[sy[j]];
                 partfacedir[2]=zbar0+SCALE2SMV(world_eyepos[2])-zplts[sz[j]];
                 
-                draw_SVOBJECT(prop->smv_object,0,prop,0);
+                draw_SVOBJECT(prop->smv_object,0,prop,0,NULL);
                 glPopMatrix();
               }
             }

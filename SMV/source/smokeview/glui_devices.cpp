@@ -22,7 +22,8 @@ char glui_device_revision[]="$Revision$";
 
 #define DEVICE_sensorsize 20
 #define SHOWDEVICEVALS 26
-#define DEVICE_devicetypes 27
+#define COLORDEVICEVALS 27
+#define DEVICE_devicetypes 28
 #define SAVE_SETTINGS 99
 #define DEVICE_close 3
 
@@ -61,6 +62,7 @@ GLUI_Panel *PANEL_open1=NULL;
 GLUI_Panel *PANEL_open2=NULL;
 GLUI_Panel *PANEL_open3=NULL;
 GLUI_Panel *PANEL_objects=NULL;
+GLUI_Panel *PANEL_objectvalues=NULL;
 GLUI_Panel *PANEL_devicevis=NULL;
 GLUI_Panel *PANEL_label3=NULL;
 
@@ -75,8 +77,7 @@ GLUI_RadioGroup *RADIO_devicetypes=NULL;
 GLUI_Checkbox *CHECKBOX_device_1=NULL;
 GLUI_Checkbox *CHECKBOX_device_2=NULL;
 GLUI_Checkbox *CHECKBOX_device_3=NULL;
-
-
+GLUI_Checkbox *CHECKBOX_device_4=NULL;
 
 void Device_CB(int var);
 
@@ -89,9 +90,8 @@ extern "C" void glui_device_setup(int main_window){
     glui_device->close();
     glui_device=NULL;
   }
-  glui_device = GLUI_Master.create_glui("Device/Ojbects",0,0,0);
+  glui_device = GLUI_Master.create_glui("Device/Objects",0,0,0);
   if(showdevice_dialog==0)glui_device->hide();
-
 
   if(ndeviceinfo>0){
     int i;
@@ -99,15 +99,23 @@ extern "C" void glui_device_setup(int main_window){
     PANEL_objects = glui_device->add_panel("Devices/Objects",false);
     SPINNER_sensorrelsize=glui_device->add_spinner_to_panel(PANEL_objects,_("Scaling"),GLUI_SPINNER_FLOAT,&sensorrelsize,DEVICE_sensorsize,Device_CB);
     if(ndevicetypes>0){
-      CHECKBOX_device_1=glui_device->add_checkbox_to_panel(PANEL_objects,_("Show velocity vectors"),&showvdeviceval);
-      CHECKBOX_device_2=glui_device->add_checkbox_to_panel(PANEL_objects,_("Show values"),&showdeviceval,SHOWDEVICEVALS,Device_CB);
       CHECKBOX_device_3=glui_device->add_checkbox_to_panel(PANEL_objects,_("Outline"),&object_outlines);
-      PANEL_devicevis=glui_device->add_panel_to_panel(PANEL_objects,"",false);
+
+      PANEL_objectvalues = glui_device->add_panel_to_panel(PANEL_objects,"Device values",true);
+      CHECKBOX_device_1=glui_device->add_checkbox_to_panel(PANEL_objectvalues,_("Velocity vectors"),&showvdeviceval);
+      CHECKBOX_device_2=glui_device->add_checkbox_to_panel(PANEL_objectvalues,_("Show values"),&showdeviceval,SHOWDEVICEVALS,Device_CB);
+      CHECKBOX_device_4=glui_device->add_checkbox_to_panel(PANEL_objectvalues,_("Color values"),&colordeviceval,COLORDEVICEVALS,Device_CB);
+      glui_device->add_spinner_to_panel(PANEL_objectvalues,"min",GLUI_SPINNER_FLOAT,&device_valmin);
+      glui_device->add_spinner_to_panel(PANEL_objectvalues,"max",GLUI_SPINNER_FLOAT,&device_valmax);
+
+      PANEL_devicevis=glui_device->add_panel_to_panel(PANEL_objectvalues,"",false);
       RADIO_devicetypes=glui_device->add_radiogroup_to_panel(PANEL_devicevis,&devicetypes_index,DEVICE_devicetypes,Device_CB);
       for(i=0;i<ndevicetypes;i++){
         glui_device->add_radiobutton_to_group(RADIO_devicetypes,devicetypes[i]->quantity);
       }
+
       Device_CB(SHOWDEVICEVALS);
+      Device_CB(COLORDEVICEVALS);
       Device_CB(DEVICE_devicetypes);
     }
   }
@@ -274,8 +282,9 @@ void Device_CB(int var){
     devicetypes[devicetypes_index]->type2vis=1;
     break;
   case SHOWDEVICEVALS:
+  case COLORDEVICEVALS:
     if(PANEL_devicevis!=NULL){
-      if(showdeviceval==1){
+      if(colordeviceval==1||showdeviceval==1){
         PANEL_devicevis->enable();
       }
       else{

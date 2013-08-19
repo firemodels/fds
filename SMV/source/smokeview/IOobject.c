@@ -235,17 +235,19 @@ char IOobject_revision[]="$Revision$";
 #define SV_PUSH       300
 #define SV_POP        301
 #define SV_SETRGB   302
-#define SV_SETBW      303
-#define SV_SETLINEWIDTH 304
-#define SV_SETPOINTSIZE 305
-#define SV_SETCOLOR   306
-#define SV_GETTEXTUREINDEX 307
+#define SV_SETRGBVAL   303
+#define SV_SETBW      304
+#define SV_SETLINEWIDTH 305
+#define SV_SETPOINTSIZE 306
+#define SV_SETCOLOR   307
+#define SV_GETTEXTUREINDEX 308
 
 #define SV_NO_OP      999
 
 #define SV_PUSH_NUMARGS       0
 #define SV_POP_NUMARGS        0
 #define SV_SETRGB_NUMARGS   3
+#define SV_SETRGBVAL_NUMARGS   3
 #define SV_SETBW_NUMARGS      1
 #define SV_SETLINEWIDTH_NUMARGS 1
 #define SV_SETPOINTSIZE_NUMARGS 1
@@ -256,6 +258,7 @@ char IOobject_revision[]="$Revision$";
 #define SV_PUSH_NUMOUTARGS       0
 #define SV_POP_NUMOUTARGS        0
 #define SV_SETRGB_NUMOUTARGS   0
+#define SV_SETRGBVAL_NUMOUTARGS   0
 #define SV_SETBW_NUMOUTARGS      0
 #define SV_SETLINEWIDTH_NUMOUTARGS 0
 #define SV_SETPOINTSIZE_NUMOUTARGS 0
@@ -305,7 +308,7 @@ void drawhexdisk(float diameter, float height, unsigned char *rgbcolor);
 void drawpolydisk(int nsides, float diameter, float height, unsigned char *rgbcolor);
 void drawring(float d_inner, float d_outer, float height, unsigned char *rgbcolor);
 void drawnotchplate(float diameter, float height, float notchheight, float direction, unsigned char *rgbcolor);
-void draw_SVOBJECT(sv_object *object, int frame_index_local, propdata *prop, int recurse_level);
+void draw_SVOBJECT(sv_object *object, int frame_index_local, propdata *prop, int recurse_level,float *valrgb);
 void free_object(sv_object *object);
 void freecircle(circdata *circinfo);
 
@@ -644,7 +647,26 @@ float get_device_val(float time_local, devicedata *devicei, int *valid){
   return devicei->val;
 }
 
-  /* ----------------------- output_device_val ----------------------------- */
+/* ----------------------- get_device_color ----------------------------- */
+
+float *get_device_color(devicedata *devicei, float *rgbval,float valmin, float valmax){
+  float val;
+  int valid,colorindex;
+  float *rgb;
+
+  if(valmax<=valmin)return NULL;
+  val=get_device_val(global_times[itimes],devicei,&valid);
+  if(valid!=1)return NULL;
+  val = (val-valmin)/(valmax-valmin);
+  colorindex=CLAMP(255*val,1,254);
+  rgb=current_colorbar->colorbar+3*colorindex;
+  rgbval[0]=255*rgb[0];
+  rgbval[1]=255*rgb[1];
+  rgbval[2]=255*rgb[2];
+  return rgbval;
+}
+
+/* ----------------------- output_device_val ----------------------------- */
 
 void output_device_val(devicedata *devicei){
   char label[1000];
@@ -859,12 +881,25 @@ void draw_devices(void){
     }
     if(showtime==1&&itimes>=0&&itimes<nglobal_times&&devicei->showstatelist!=NULL){
       int state;
+      float valcolor[3],*valcolorptr=NULL;
 
       state=devicei->showstatelist[itimes];
-      draw_SVOBJECT(devicei->object,state,prop,0);
+      if(colordeviceval==1){
+        int type,vistype;
+
+        type=devicei->type2;
+        if(type>=0&&type<ndevicetypes)vistype=devicetypes[type]->type2vis;
+        if(vistype==1){
+          valcolorptr=get_device_color(devicei,valcolor,device_valmin,device_valmax);
+          draw_SVOBJECT(devicei->object,state,prop,0,valcolorptr);
+        }
+      }
+      else{
+        draw_SVOBJECT(devicei->object,state,prop,0,NULL);
+      }
     }
     else{
-      draw_SVOBJECT(devicei->object,devicei->state0,prop,0);
+      draw_SVOBJECT(devicei->object,devicei->state0,prop,0,NULL);
     }
     if(devicei->nparams>0&&prop!=NULL){
       prop->nvars_indep=0;
@@ -914,7 +949,7 @@ void drawTargetNorm(void){
 
 /* ----------------------- draw_SVOBJECT ----------------------------- */
 
-void draw_SVOBJECT(sv_object *object_dev, int iframe_local, propdata *prop, int recurse_level){
+void draw_SVOBJECT(sv_object *object_dev, int iframe_local, propdata *prop, int recurse_level,float *valrgb){
   sv_object_frame *framei,*frame0;
   tokendata *toknext;
   unsigned char *rgbptr_local;
@@ -1170,7 +1205,7 @@ void draw_SVOBJECT(sv_object *object_dev, int iframe_local, propdata *prop, int 
           iframe_local2=toki->included_frame;
           included_object = toki->included_object;
         }
-        draw_SVOBJECT(included_object, iframe_local2, NULL, recurse_level+1);
+        draw_SVOBJECT(included_object, iframe_local2, NULL, recurse_level+1,NULL);
       }
       break;
     case SV_ABS:
@@ -1586,6 +1621,7 @@ void draw_SVOBJECT(sv_object *object_dev, int iframe_local, propdata *prop, int 
       break;
     case SV_SETCOLOR:
     case SV_SETRGB:
+    case SV_SETRGBVAL:
       if(toki->command==SV_SETCOLOR){
         FILE_SIZE lenstring;
         int iarg[3];
@@ -1598,6 +1634,11 @@ void draw_SVOBJECT(sv_object *object_dev, int iframe_local, propdata *prop, int 
         arg[0]=iarg[0];
         arg[1]=iarg[1];
         arg[2]=iarg[2];
+      }
+      if(valrgb!=NULL&&toki->command==SV_SETRGBVAL){
+        arg[0]=valrgb[0];
+        arg[1]=valrgb[1];
+        arg[2]=valrgb[2];
       }
       if(setbw==1){
         float grey;
@@ -4468,6 +4509,11 @@ int get_token_id(char *token, int *opptr, int *num_opptr, int *num_outopptr, int
     op=SV_SETRGB;
     num_op=SV_SETRGB_NUMARGS;
     num_outop=SV_SETRGB_NUMOUTARGS;
+  }
+  else if(STRCMP(token,"setrgbval")==0){
+    op=SV_SETRGBVAL;
+    num_op=SV_SETRGBVAL_NUMARGS;
+    num_outop=SV_SETRGBVAL_NUMOUTARGS;
   }
   else if(STRCMP(token,"setlinewidth")==0){
     op=SV_SETLINEWIDTH;
