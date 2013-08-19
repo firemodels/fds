@@ -1,2 +1,0 @@
-&ALPERT Q=5344., LOCATION_FACTOR=1, T_END=500., R_VALUES=2,4,6,8, H_VALUES=6.1,6.1,6.1,6.1, LABEL='2 m','4 m','6 m','8 m', TMP_A=20., OUTPUT_FILE='Arup_Tunnel_ALPERT.csv' /
-
