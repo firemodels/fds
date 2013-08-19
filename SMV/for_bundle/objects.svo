@@ -548,11 +548,11 @@ NEWFRAME
 OBJECTDEF // object for tree canopy
  CANOPY
 :CANOPY_BASE_H :CANOPY_D :CANOPY_H :R=25 :G=128 :B=0 
-$R $G $B setrgb
+$R $G $B setrgbval
  0.0 0.0 $CANOPY_BASE_H translate $CANOPY_D $CANOPY_H drawcone
 NEWFRAME
 :CANOPY_BASE_H :CANOPY_D :CANOPY_H 
-0.0 0.0 0.0 setrgb
+0.0 0.0 0.0 setrgbval
  0.0 0.0 $CANOPY_BASE_H translate $CANOPY_D $CANOPY_H drawcone
 NEWFRAME
  0.0 0.0 0.0 translate
