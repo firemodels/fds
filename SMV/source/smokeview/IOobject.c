@@ -606,6 +606,10 @@ float get_device_val(float time_local, devicedata *devicei, int *valid){
   ival = devicei->ival;
 
   times_local = devicei->times;
+  if(times_local==NULL){
+    *valid=0;
+    return 0.0;
+  }
   IN_INTERVAL(ival);
   if(ival<nvals-1){
     IN_INTERVAL(ival+1);
