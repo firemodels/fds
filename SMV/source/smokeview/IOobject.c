@@ -604,9 +604,9 @@ float get_device_val(float time_local, devicedata *devicei, int *valid){
 
   nvals = devicei->nvals;
   ival = devicei->ival;
-
   times_local = devicei->times;
-  if(times_local==NULL){
+
+  if(nvals==0||times_local==NULL){
     *valid=0;
     return 0.0;
   }
@@ -883,11 +883,16 @@ void draw_devices(void){
         output_device_val(devicei);
       }
     }
-    if(showtime==1&&itimes>=0&&itimes<nglobal_times&&devicei->showstatelist!=NULL){
+    if(showtime==1&&itimes>=0&&itimes<nglobal_times){
       int state;
       float valcolor[3],*valcolorptr=NULL;
 
-      state=devicei->showstatelist[itimes];
+      if(devicei->showstatelist==NULL){
+        state=devicei->state0;
+      }
+      else{
+        state=devicei->showstatelist[itimes];
+      }
       if(colordeviceval==1){
         int type,vistype;
 
@@ -6433,6 +6438,7 @@ void init_device(devicedata *devicei, float *xyz, float *xyzn, int state0, int n
   float norm;
   int i;
 
+  devicei->nvals=0;
   devicei->filetype=-1;
   devicei->in_zone_csv=0;
   devicei->labelptr=devicei->label;
