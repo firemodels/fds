@@ -90,16 +90,16 @@ OBJECTDEF  // draw a plane intersecting through FDS meshes
 
 OBJECTDEF
  sensor
- "GREEN" setcolor
+0 255 0 setrgbval
 0.25 SCALEGRID 1.0 drawsphere
  NEWFRAME
- "RED" setcolor
+ 255 0 0 setrgbval
 0.25 SCALEGRID 1.0 drawsphere
  NEWFRAME
- "BLUE" setcolor
+ 0 0 255 setrgbval
 0.25 SCALEGRID 1.0 drawsphere
  NEWFRAME
- "WHITE" setcolor
+ 255 255 255 setrgbval
 0.25 SCALEGRID 1.0 drawsphere
 
 OBJECTDEF
