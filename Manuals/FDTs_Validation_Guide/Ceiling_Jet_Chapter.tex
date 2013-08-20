@@ -15,7 +15,12 @@ For a steady-state fire, the correlation of Alpert~\cite{SFPE:Alpert} predicts t
 \ee
 where $\dot Q$ is the total HRR~(\si{kW}), $H$ is the height of the ceiling above the fuel~(\si{m}), and $r$~is the radial distance to the detector~(\si{m}).
 
-Note that some of these cases use a t-squared fire source as a quasi-steady approach.
+Note that some of these cases assume a quasi-steady approach for a fire source $\dot Q$ that follows a specified t-squared growth, which is given by
+\be
+\dot Q = \alpha t^2
+\label{eq:t_squared}
+\ee
+where $\alpha$ is the t-squared growth parameter~(\si{kW/s^2}), and $t$ is time~(\si{s}).
 
 For cases in which the fire was located against a wall or corner, these correlations are adjusted based on the method of reflection. For a fire adjacent to a flat wall, 2$\dot Q$ is substituted for $\dot Q$; and for a fire in a 90-degree corner, 4$\dot Q$ is substituted for $\dot Q$. This adjustment is denoted in the input parameters as the location factor. For a given case, the location factor has a value of 1, 2, or 4, which corresponds to a fire away from walls or corners, a fire adjacent to a wall, or a fire located in a corner, respectively.
 
@@ -63,7 +68,7 @@ u_{jet} = \left\{ \begin{array}{cl}
 \label{eq:sprinkler_ujet}
 \ee
 
-Note that some of these cases use a t-squared fire source as a quasi-steady approach.
+Note that some of these cases assume a quasi-steady approach for a fire source $\dot Q$ that follows a specified t-squared growth, which is given by Eq.~\ref{eq:t_squared}.
 
 For cases in which the fire was located against a wall or corner, these correlations are adjusted based on the method of reflection. For a fire adjacent to a flat wall, 2$\dot Q$ is substituted for $\dot Q$; and for a fire in a 90-degree corner, 4$\dot Q$ is substituted for $\dot Q$~\cite{SFPE:Alpert}. This adjustment is denoted in the input parameters as the location factor. For a given case, the location factor has a value of 1, 2, or 4, which corresponds to a fire away from walls or corners, a fire adjacent to a wall, or a fire located in a corner, respectively.
 
@@ -87,6 +92,8 @@ For cases in which the fire was located against a wall or corner, these correlat
 \subsection{Method of Alpert}
 
 In this method, the prediction of smoke detector activation time is identical to that for a sprinkler (as described in Section~\ref{sec:sprinkler_alpert}). Heskestad and Delichatsios~\cite{Heskestad:4} correlated smoke detector activation to a smoke temperature change of 10~$^\circ$C (18~$^\circ$F) from typical fuels. It is assumed that the smoke detectors are low-RTI devices ($\textrm{RTI}=5$).
+
+Note that some of these cases assume a quasi-steady approach for a fire source $\dot Q$ that follows a specified t-squared growth, which is given by Eq.~\ref{eq:t_squared}.
 
 \begin{figure}[!ht]
 \begin{center}
@@ -122,7 +129,7 @@ Y = \frac{\Delta T_c H^{5/3}}{\dot Q^{2/3}}
 \ee
 where $\Delta T_c$ is the temperature rise of gases under the ceiling required for the smoke detector to activate~($^\circ$F).
 
-Note that some of these cases use a t-squared fire source as a quasi-steady approach.
+Note that some of these cases assume a quasi-steady approach for a fire source $\dot Q$ that follows a specified t-squared growth, which is given by Eq.~\ref{eq:t_squared}.
 
 \begin{figure}[!ht]
 \begin{center}
@@ -159,7 +166,7 @@ t_{cj} = \frac{1}{C_{cj}} \frac{r^{11/6}}{\dot Q^{1/3} H^{1/2}}
 \ee
 where $C_{cj}$ is the ceiling jet time lag time constant~(1.2), and $r$ is the radial distance to the detector~(\si{m}).
 
-Note that some of these cases use a t-squared fire source as a quasi-steady approach.
+Note that some of these cases assume a quasi-steady approach for a fire source $\dot Q$ that follows a specified t-squared growth, which is given by Eq.~\ref{eq:t_squared}.
 
 \begin{figure}[!ht]
 \begin{center}

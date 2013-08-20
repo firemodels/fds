@@ -1,2 +1,12 @@
-&ALPERT Q=410., LOCATION_FACTOR=1, T_END=1350., R_VALUES=5.9, H_VALUES=3.72, LABEL='Tr 7-10', TMP_A=22., OUTPUT_FILE='NIST_NRC_ALPERT_Test_1.csv' /
+# HGL Temperature, Natural Ventilation (MQH)
+# LLNL Test 51
+&MQH Q=200., TMP_A=33., L=6., W=4., H=3.0, C_S=1., K_S=0.000463, RHO_S=1607., DELTA=0.1, T_END=3000., OUTPUT_FILE='HGL_Temperature_Natural.csv', H_V=2.06, W_V=0.76 /
+
+# Ceiling Jet Temperature (Alpert)
+# NIST/NRC, Test 1
+&ALPERT Q=410., LOCATION_FACTOR=1, T_END=1350., R_VALUES=5.9, H_VALUES=3.72, LABEL='Tr 7-10', TMP_A=22., OUTPUT_FILE='Ceiling_Jet_Temperature.csv' /
+
+# Sprinkler Activation Time (Alpert)
+# Vettori Flat Ceiling, Test 1
+&SPRINKLER ALPHA=0.105, CUTOFF_TIME=99999, RTI=55, ACTIVATION_TEMPERATURE=68, H=2.09, R=2.2, TMP_A=16.6, LOCATION_FACTOR=1, OUTPUT_FILE='Sprinkler_Activation_Time.csv' /
 
