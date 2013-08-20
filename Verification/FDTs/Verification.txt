@@ -1,6 +1,6 @@
 # HGL Temperature, Natural Ventilation (MQH)
 # LLNL Test 51
-&MQH Q=200., TMP_A=33., L=6., W=4., H=3.0, C_S=1., K_S=0.000463, RHO_S=1607., DELTA=0.1, T_END=3000., OUTPUT_FILE='HGL_Temperature_Natural.csv', H_V=2.06, W_V=0.76 /
+&MQH Q=200., TMP_A=33., L=6., W=4., H=3.0, C_S=1., K_S=0.000463, RHO_S=1607., DELTA=0.1, T_END=3000., OUTPUT_FILE='HGL_Temperature_Natural_Ventilation.csv', H_V=2.06, W_V=0.76 /
 
 # Ceiling Jet Temperature (Alpert)
 # NIST/NRC, Test 1
