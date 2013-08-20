@@ -8394,52 +8394,57 @@ int readini2(char *inifile, int localfile){
         sscanf(buffer,"%f %f",gslice_normal_azelev,gslice_normal_azelev+1);
         update_gslice=1;
         continue;
-     }
-     if(match(buffer,"GRIDPARMS")==1){
-       fgets(buffer,255,stream);
-       sscanf(buffer,"%i %i %i",&visx_all, &visy_all, &visz_all);
-       fgets(buffer,255,stream);
-       sscanf(buffer,"%i %i %i",&iplotx_all, &iploty_all, &iplotz_all);
-       if(iplotx_all>nplotx_all-1)iplotx_all=0;
-       if(iploty_all>nploty_all-1)iploty_all=0;
-       if(iplotz_all>nplotz_all-1)iplotz_all=0;
-       continue;
-     }
-   }
-   if(match(buffer,"GVERSION")==1){
-     fgets(buffer,255,stream);
-     sscanf(buffer,"%i",&gversion);
-     ONEORZERO(gversion);
-   }
-   if(match(buffer,"SCALEDFONT")==1){
-     fgets(buffer,255,stream);
-     sscanf(buffer,"%i %f %i",&scaled_font2d_height,&scaled_font2d_height2width,&scaled_font2d_thickness);
-     fgets(buffer,255,stream);
-     sscanf(buffer,"%i %f %i",&scaled_font3d_height,&scaled_font3d_height2width,&scaled_font3d_thickness);
-   }
-   if(match(buffer,"FEDCOLORBAR")==1){
-     char *fbuff;
+      }
+      if(match(buffer,"GRIDPARMS")==1){
+        fgets(buffer,255,stream);
+        sscanf(buffer,"%i %i %i",&visx_all, &visy_all, &visz_all);
+        fgets(buffer,255,stream);
+        sscanf(buffer,"%i %i %i",&iplotx_all, &iploty_all, &iplotz_all);
+        if(iplotx_all>nplotx_all-1)iplotx_all=0;
+        if(iploty_all>nploty_all-1)iploty_all=0;
+        if(iplotz_all>nplotz_all-1)iplotz_all=0;
+        continue;
+      }
+    }
+    if(match(buffer,"GVERSION")==1){
+      fgets(buffer,255,stream);
+      sscanf(buffer,"%i",&gversion);
+      ONEORZERO(gversion);
+    }
+    if(match(buffer,"SCALEDFONT")==1){
+      fgets(buffer,255,stream);
+      sscanf(buffer,"%i %f %i",&scaled_font2d_height,&scaled_font2d_height2width,&scaled_font2d_thickness);
+      fgets(buffer,255,stream);
+      sscanf(buffer,"%i %f %i",&scaled_font3d_height,&scaled_font3d_height2width,&scaled_font3d_thickness);
+    }
+    if(match(buffer,"FEDCOLORBAR")==1){
+      char *fbuff;
 
-     fgets(buffer,255,stream);
-     trim(buffer);
-     fbuff=trim_front(buffer);
-     if(strlen(fbuff)>0)strcpy(default_fed_colorbar,fbuff);
-   }
-   if(match(buffer,"FED")==1){
+      fgets(buffer,255,stream);
+      trim(buffer);
+      fbuff=trim_front(buffer);
+      if(strlen(fbuff)>0)strcpy(default_fed_colorbar,fbuff);
+    }
+    if(match(buffer,"FED")==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i",&regenerate_fed);
       ONEORZERO(regenerate_fed);
       continue;
     }
-   if(match(buffer,"SHOWFEDAREA")==1){
+    if(match(buffer,"SHOWFEDAREA")==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i",&show_fed_area);
       ONEORZERO(show_fed_area);
       continue;
     }
-   if(match(buffer,"SHOWDEVICEVALS")==1){
+    if(match(buffer,"DEVICEBOUNDS")==1){
       fgets(buffer,255,stream);
-      sscanf(buffer,"%i %i %i",&showdeviceval,&showvdeviceval,&devicetypes_index);
+      sscanf(buffer,"%f %f",&device_valmin,&device_valmax);
+      continue;
+    }
+    if(match(buffer,"SHOWDEVICEVALS")==1){
+      fgets(buffer,255,stream);
+      sscanf(buffer,"%i %i %i %i",&showdeviceval,&showvdeviceval,&devicetypes_index,&colordeviceval);
       continue;
     }
     if(match(buffer,"USENEWDRAWFACE")==1){
@@ -11315,7 +11320,9 @@ void writeini(int flag){
     }
 
     fprintf(fileout,"SHOWDEVICEVALS\n");
-    fprintf(fileout," %i %i %i\n",showdeviceval,showvdeviceval,devicetypes_index);
+    fprintf(fileout," %i %i %i %i\n",showdeviceval,showvdeviceval,devicetypes_index,colordeviceval);
+    fprintf(fileout,"DEVICEBOUNDS\n");
+    fprintf(fileout," %f %f\n",device_valmin,device_valmax);
     put_startup_smoke3d(fileout);
     fprintf(fileout,"LOADFILESATSTARTUP\n");
     fprintf(fileout," %i\n",loadfiles_at_startup);
