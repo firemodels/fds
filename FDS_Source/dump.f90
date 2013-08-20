@@ -2624,16 +2624,20 @@ REACTION_LOOP: DO N=1,N_REACTIONS
         IF (RN%N_S(NN) <=-998._EB) CYCLE
         WRITE(LU_OUTPUT,'(3X,A,1X,F11.5)') SPECIES(NN)%ID,RN%N_S(NN) 
       ENDDO
+      WRITE(LU_OUTPUT,'(/3X,A)')  'Reaction Kinetics'
       IF (RN%FAST_CHEMISTRY) THEN
-         WRITE(LU_OUTPUT,'(/3X,A)')  'Fast Chemistry Reaction'
+         WRITE(LU_OUTPUT,'(A)')            '   Arrhenius Constants'
+         WRITE(LU_OUTPUT,'(A)')            '   Pre-exponential:    Infinite'
+         WRITE(LU_OUTPUT,'(A)')            '   Activation Energy:  N/A'        
       ELSEIF (RN%A_RAMP_INDEX /= 0 .OR. RN%E_RAMP_INDEX /= 0) THEN
-         WRITE(LU_OUTPUT,'(/3X,A)')  'Mixed Fast/Finite Rate Chemistry Reaction'
+         WRITE(LU_OUTPUT,'(A)') '   Arrhenius Constants'
+         WRITE(LU_OUTPUT,'(A,1X,ES13.6)')  '   Pre-exponential:  ',RN%A_IN
+         WRITE(LU_OUTPUT,'(A,1X,ES13.6)')  '   Activation Energy:',RN%E_IN      
       ELSE
-         WRITE(LU_OUTPUT,'(/3X,A)')  'Finite Rate Chemistry Reaction'
+         WRITE(LU_OUTPUT,'(A)') '   Arrhenius Constants'
+         WRITE(LU_OUTPUT,'(A,1X,ES13.6)')  '   Pre-exponential:  ',RN%A_IN
+         WRITE(LU_OUTPUT,'(A,1X,ES13.6)')  '   Activation Energy:',RN%E_IN
       ENDIF
-      WRITE(LU_OUTPUT,'(A)') '   Arrhenius Constants'
-      WRITE(LU_OUTPUT,'(A,1X,ES13.6)')  '   Pre-exponential:  ',RN%A_IN
-      WRITE(LU_OUTPUT,'(A,1X,ES13.6)')  '   Activation Energy:',RN%E_IN
    ENDIF
    WRITE(LU_OUTPUT,'(/A)') '   Fuel                           Heat of Combustion (kJ/kg)'            
    WRITE(LU_OUTPUT,'(3X,A,1X,F12.5)') RN%FUEL,RN%HEAT_OF_COMBUSTION/1000._EB
