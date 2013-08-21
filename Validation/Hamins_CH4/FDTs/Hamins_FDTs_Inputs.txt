@@ -1,7 +1,0 @@
-&RAD AREA=0.008, Q=0.42, RADIATIVE_FRACTION=0.35, X=0.82,  Z=0.002,0.088,0.203,0.393,                                        IOR=-1,-1,-1,-1,                OUTPUT_FILE='Hamins_RAD_Test_01.csv', FLIP_AXIS=.TRUE. /
-&RAD AREA=0.008, Q=1.90, RADIATIVE_FRACTION=0.35, X=0.82,  Z=0.002,0.088,0.203,0.393,                                        IOR=-1,-1,-1,-1,                OUTPUT_FILE='Hamins_RAD_Test_05.csv', FLIP_AXIS=.TRUE. /
-&RAD AREA=0.785, Q=49.0, RADIATIVE_FRACTION=0.35, X=1.00,  Z=0.0000,0.1216,0.4678,0.7682,1.0894,1.4565,1.7986,2.5077,        IOR=-1,-1,-1,-1,-1,-1,-1,-1,    OUTPUT_FILE='Hamins_RAD_Test_07.csv', FLIP_AXIS=.TRUE. /
-&RAD AREA=0.785, Q=162., RADIATIVE_FRACTION=0.35, X=0.80,  Z=0.0000,0.1289,0.3544,0.6190,0.9312,1.3172,1.7986,2.2150,2.5099, IOR=-1,-1,-1,-1,-1,-1,-1,-1,-1, OUTPUT_FILE='Hamins_RAD_Test_19.csv', FLIP_AXIS=.TRUE. /
-&RAD AREA=0.113, Q=33.0, RADIATIVE_FRACTION=0.35, X=0.732, Z=0.0266,0.2706,0.4968,0.6698,1.1445,1.8853,                      IOR=-1,-1,-1,-1,-1,-1,          OUTPUT_FILE='Hamins_RAD_Test_21.csv', FLIP_AXIS=.TRUE. /
-&RAD AREA=0.113, Q=176., RADIATIVE_FRACTION=0.35, X=0.732, Z=0.2092,0.2835,0.5066,0.6833,1.1388,1.8825,                      IOR=-1,-1,-1,-1,-1,-1,          OUTPUT_FILE='Hamins_RAD_Test_23.csv', FLIP_AXIS=.TRUE. /
-

@@ -31,9 +31,6 @@ $FDTs Fleury_Heat_Flux_FDTs_Inputs.txt
 cd $VALIDATION_DIR/FM_SNL/FDTs
 $FDTs FM_SNL_FDTs_Inputs.txt
 
-cd $VALIDATION_DIR/Hamins_CH4/FDTs
-$FDTs Hamins_FDTs_Inputs.txt
-
 cd $VALIDATION_DIR/LLNL_Enclosure/FDTs
 $FDTs LLNL_FDTs_Inputs.txt
 
@@ -46,9 +43,6 @@ $FDTs NIST_NRC_FDTs_Inputs.txt
 cd $VALIDATION_DIR/NIST_Dunes_2000/FDTs
 $FDTs NIST_Dunes_2000_FDTs_Inputs.txt
 
-cd $VALIDATION_DIR/NRL_HAI/FDTs
-$FDTs NRL_HAI_FDTs_Inputs.txt
-
 cd $VALIDATION_DIR/SP_AST/FDTs
 $FDTs SP_AST_FDTs_Inputs.txt
 
@@ -57,9 +51,6 @@ $FDTs Steckler_FDTs_Inputs.txt
 
 cd $VALIDATION_DIR/UL_NFPRF/FDTs
 $FDTs UL_NFPRF_FDTs_Inputs.txt
-
-cd $VALIDATION_DIR/Ulster_SBI/FDTs
-$FDTs Ulster_SBI_FDTs_Inputs.txt
 
 cd $VALIDATION_DIR/USN_Hangars/FDTs
 $FDTs USN_Hangars_FDTs_Inputs.txt
