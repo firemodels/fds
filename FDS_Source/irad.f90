@@ -291,10 +291,7 @@ END SUBROUTINE GET_REV_irad
 SUBROUTINE INIT_RADCAL
 !==============================================================================
 ! 
- USE RADCONS, ONLY: RADTMP
 !------------------------------------------------------------------------------
-
- TWALL = RADTMP
 
  IF(OMMAX<1100._EB) THEN 
     NOM=INT((OMMAX-OMMIN)/5._EB)
@@ -355,7 +352,7 @@ SUBROUTINE RADCAL(AMEAN,AP0,RADCAL_ID)
 !          MMA:
 !          CH3OH:
 !------------------------------------------------------------------------------
-USE RADCONS, ONLY:RPI_SIGMA
+USE RADCONS, ONLY:RPI_SIGMA,RADTMP
 
 ! VARIABLES PASSED IN
 CHARACTER(30),INTENT(IN):: RADCAL_ID
@@ -387,6 +384,8 @@ REAL(EB) :: DOM, ABGAS, RSL, RSS,                  &
 
 AZORCT = 273._EB/RCT
 RCT4   = RCT**4
+
+TWALL = RADTMP
 
 ! COMPUTE TOTAL PRESSURE
 PTOT   = SUM(P(1:6))
@@ -577,15 +576,11 @@ ENDIF
 Q = Q + RSS + RSL
 
 ! COMPUTE AMEAN
-
-! The first version is for TWALL = 0 K.
-! Also, if TWALL = RCT, Q becomes indepenndent of AMEAN, and we assume TWALL = 0 K to get a value.
-IF (ABS(TWALL-RCT)<=SPACING(TWALL) .OR. TWALL<=TWO_EPSILON_EB) THEN
-   LTERM  = MIN(1._EB,MAX(TWO_EPSILON_EB,(Q/RPI_SIGMA-RCT4)/(-RCT4)))
+IF (ABS(TWALL-RCT)<=SPACING(TWALL)) THEN
+   LTERM = 1._EB
 ELSE
    LTERM  = MIN(1._EB,MAX(TWO_EPSILON_EB,(Q/RPI_SIGMA-RCT4)/(TWALL**4-RCT4)))
 ENDIF
-
 AMEAN  = -1._EB/DD*DLOG(LTERM)
 
 ! THE FOLLOWING SECTION COMPUTES THE MEAN ABSORPTION COEFFICIENTS IF THE SYSTEM IS HOMOGENEOUS (IE., NPT=1).
