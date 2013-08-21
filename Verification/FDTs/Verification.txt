@@ -1,12 +1,32 @@
 # HGL Temperature, Natural Ventilation (MQH)
 # LLNL Test 51
-&MQH Q=200., TMP_A=33., L=6., W=4., H=3.0, C_S=1., K_S=0.000463, RHO_S=1607., DELTA=0.1, T_END=3000., OUTPUT_FILE='HGL_Temperature_Natural_Ventilation.csv', H_V=2.06, W_V=0.76 /
+&MQH Q=200., TMP_A=33., L=6., W=4., H=3.0, C_S=1., K_S=0.000463, RHO_S=1607., DELTA=0.1, T_END=3000., OUTPUT_FILE='HGL_Temperature_Natural_Ventilation_MQH.csv', H_V=2.06, W_V=0.76 /
+
+# HGL Temperature, Forced Ventilation (FPA)
+# FM/SNL Test 1
+&FPA Q=516., M_DOT=4.5, TMP_A=15., L=18.3, W=12.2, H=6.1, C_S=1.16, K_S=0.00023, RHO_S=1000., DELTA=0.025, T_END=600., OUTPUT_FILE='HGL_Temperature_Forced_Ventilation_FPA.csv' /
+
+# HGL Temperature, Forced Ventilation (DB)
+# FM/SNL Test 1
+&DB Q=516., M_DOT=4.5, TMP_A=15., L=18.3, W=12.2, H=6.1, C_S=1.16, K_S=0.00023, RHO_S=1000., DELTA=0.025, T_END= 600., OUTPUT_FILE='HGL_Temperature_Forced_Ventilation_DB.csv' /
+
+# HGL Temperature, No Ventilation (Beyler)
+# LLNL Test 1
+&BEYLER Q=200., TMP_A=23., L=6., W=4., H=4.5, C_S=1., K_S=0.000463, RHO_S=1607., DELTA=0.1, T_END=500., OUTPUT_FILE='HGL_Temperature_No_Ventilation_Beyler.csv' /
+
+# Plume Temperature (Heskestad)
+# VTT Test 1
+&HESKESTAD TIME_RAMP=13,90,288,327,409, Q_RAMP=1245,1309,1858,1783,1356, Z=6,12, A_C=1.075, TMP_A=22, RADIATIVE_FRACTION=0.40, OUTPUT_FILE='Plume_Temperature_HESKESTAD.csv', Z_LABEL='6 m' /
+
+# Plume Temperature (McCaffrey)
+# VTT Test 1
+&MCCAFFREY TIME_RAMP=13,90,288,327,409, Q_RAMP=1245,1309,1858,1783,1356, Z=6,12, TMP_A=22, OUTPUT_FILE='Plume_Temperature_MCCAFFREY.csv', Z_LABEL='6 m' /
 
 # Ceiling Jet Temperature (Alpert)
 # NIST/NRC, Test 1
-&ALPERT Q=410., LOCATION_FACTOR=1, T_END=1350., R_VALUES=5.9, H_VALUES=3.72, LABEL='Tr 7-10', TMP_A=22., OUTPUT_FILE='Ceiling_Jet_Temperature.csv' /
+&ALPERT Q=410., LOCATION_FACTOR=1, T_END=1350., R_VALUES=5.9, H_VALUES=3.72, LABEL='Tr 7-10', TMP_A=22., OUTPUT_FILE='Ceiling_Jet_Temperature_ALPERT.csv' /
 
 # Sprinkler Activation Time (Alpert)
 # Vettori Flat Ceiling, Test 1
-&SPRINKLER ALPHA=0.105, CUTOFF_TIME=99999, RTI=55, ACTIVATION_TEMPERATURE=68, H=2.09, R=2.2, TMP_A=16.6, LOCATION_FACTOR=1, OUTPUT_FILE='Sprinkler_Activation_Time.csv' /
+&SPRINKLER ALPHA=0.105, CUTOFF_TIME=99999, RTI=55, ACTIVATION_TEMPERATURE=68, H=2.09, R=2.2, TMP_A=16.6, LOCATION_FACTOR=1, OUTPUT_FILE='Sprinkler_Activation_Time_ALPERT.csv' /
 

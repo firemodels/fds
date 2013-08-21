@@ -5,7 +5,7 @@ IMPLICIT NONE
 CHARACTER(60) :: INPUT_FILE,OUTPUT_FILE
 REAL :: ACTIVATION_TEMPERATURE,A_C,ALPHA,AREA,A_T,A_V,C_I,CONDUIT_DIAMETER,CONDUIT_THICKNESS,CUTOFF_TIME,C_PL,C_CJ, &
         C_S,C_STEEL,D,DELTA,DELTA_T_C,DT,EPSILON,FUEL_HEIGHT,F_V,H,HEAT_LOSS_FRACTION,H_C,H_I,H_K,H_V,JACKET_THICKNESS, &
-        K_I,K_S,L,LOCATION_FACTOR,L_F,LEAK_AREA,MASS_PER_LENGTH,M_DOT,P,Q,Q_STAR,Q_STEP,R,RADIATIVE_FRACTION,RHO_A, &
+        K_I,K_S,L,LOCATION_FACTOR,L_F,MASS_PER_LENGTH,M_DOT,P,Q,Q_STAR,Q_STEP,R,RADIATIVE_FRACTION,RHO_A, &
         RHO_I,RHO_S,RHO_STEEL,RTI,T,t_activation,T_END,T_P,TMP_A,TMP_G,T_CLOCK,U_JET,V,V_ENT,V_EXP,V_UL,V_DOT,W,W_D,W_V,Z_YT,Z_ASET
 REAL, DIMENSION(20) :: X,Z,T_PLUME,R_VALUES,H_VALUES
 REAL, DIMENSION(9999) :: TIME_RAMP,Q_RAMP
@@ -18,12 +18,11 @@ INTEGER, DIMENSION(20) :: IOR
 REAL, PARAMETER :: C_P=1.,G=9.81,GAMMA=1.4,PI=3.141592654,P_0=101325.
 
 NAMELIST /FPA/ C_S,DELTA,H,K_S,L,M_DOT,OUTPUT_FILE,Q,RHO_S,T_END,TMP_A,W
-NAMELIST /DB/  C_S,DELTA,H,K_S,L,LEAK_AREA,M_DOT,OUTPUT_FILE,Q,RHO_S,T_END,TMP_A,W
+NAMELIST /DB/  C_S,DELTA,H,K_S,L,M_DOT,OUTPUT_FILE,Q,RHO_S,T_END,TMP_A,W
 NAMELIST /MQH/ C_S,DELTA,H,H_V,K_S,L,M_DOT,OUTPUT_FILE,PROFILE,Q,RHO_S,T_END,TMP_A,W,W_V, &
                STEEL_UNPROTECTED,STEEL_PROTECTED,F_V,RHO_STEEL,C_STEEL,H_C,EPSILON,W_D,K_I,RHO_I,C_I,H_I
 NAMELIST /BEYLER/ C_S,DELTA,FUEL_HEIGHT,H,HEAT_LOSS_FRACTION,K_S,L,LOCATION_FACTOR,OUTPUT_FILE,Q,RHO_S,T_END,TMP_A,W
 NAMELIST /RAD/ AREA,RADIATIVE_FRACTION,OUTPUT_FILE,Q,X,Z,IOR,Z_LABEL,TIME_OUTPUT,FLIP_AXIS
-NAMELIST /PRESSURE/ H,L,LEAK_AREA,M_DOT,OUTPUT_FILE,Q,T_END,W
 NAMELIST /THIEF/ CONDUIT_DIAMETER,CONDUIT_THICKNESS,D,JACKET_THICKNESS,MASS_PER_LENGTH,OUTPUT_FILE,T_END,TMP_A,TMP_RAMP,T_RAMP
 NAMELIST /ALPERT/ Q,LOCATION_FACTOR,T_END,R_VALUES,H_VALUES,LABEL,TMP_A,OUTPUT_FILE,T_SQUARED,ALPHA
 NAMELIST /SPRINKLER/ ALPHA,CUTOFF_TIME,RTI,ACTIVATION_TEMPERATURE,H,R,TMP_A,LOCATION_FACTOR,OUTPUT_FILE
@@ -162,17 +161,13 @@ CONTAINS
 
 SUBROUTINE COMPUTE_FPA
 
-REAL :: SIGMA,Q_RAD
-
-SIGMA = 5.67e-11
-
 OPEN(11,FILE=TRIM(OUTPUT_FILE),FORM='FORMATTED',STATUS='REPLACE')
 
 T_P = (RHO_S*C_S/K_S) * (DELTA/2.)**2
 A_T = 2.*L*W + 2.*L*H + 2.*W*H
 TMP_A = TMP_A + 273.
 
-WRITE(11,'(A)') 'Time,Temp,Immersed HGL Radiation Heat Flux (kW/m2)'
+WRITE(11,'(A)') 'Time,Temp'
 
 DO I=0,50
 
@@ -186,9 +181,7 @@ DO I=0,50
 
    TMP_G = TMP_A*(1. + 0.63*(Q/(M_DOT*C_P*TMP_A))**0.72 * (H_K*A_T/(M_DOT*C_P))**-0.36)
 
-   Q_RAD = SIGMA*(TMP_G**4-TMP_A**4)
-
-   WRITE(11,'(F6.1,A1,F6.1,A1,F6.2)') T,',',TMP_G-273.,',',Q_RAD
+   WRITE(11,'(F6.1,A1,F6.1)') T,',',TMP_G-273.
 
 ENDDO
 
@@ -199,9 +192,7 @@ END SUBROUTINE COMPUTE_FPA
 
 SUBROUTINE COMPUTE_DB
 
-REAL :: HRR,SIGMA,Q_RAD
-
-SIGMA = 5.67e-11
+REAL :: HRR
 
 OPEN(11,FILE=TRIM(OUTPUT_FILE),FORM='FORMATTED',STATUS='REPLACE')
 
@@ -210,7 +201,7 @@ V = L*W*H
 TMP_A = TMP_A + 273.
 RHO_A = 353./(TMP_A)
 
-WRITE(11,'(A)') 'Time,Temp,Pres,Immersed HGL Radiation Heat Flux (kW/m2)'
+WRITE(11,'(A)') 'Time,Temp'
 
 DT = 0.05
 P  = P_0
@@ -229,18 +220,8 @@ DO
       TMP_G = TMP_A
    ENDIF
 
-   V_DOT = SIGN(1.,P-P_0)*LEAK_AREA*SQRT(2.*ABS(P-P_0)/RHO_A) + M_DOT/RHO_A
-   IF (T<=0.) THEN
-      HRR = 0.
-   ELSE
-      HRR = Q
-   ENDIF
-   P = P + DT*( (GAMMA-1)/V*1000.*(HRR-H_K*A_T*(TMP_G-TMP_A)) - GAMMA*P*V_DOT/V )
-
-   Q_RAD = SIGMA*(TMP_G**4-TMP_A**4)
-
    IF (T>T_CLOCK) THEN
-      WRITE(11,'(F6.1,A1,F6.1,A1,F8.1,A1,F6.2)') T,',',TMP_G-273.,',',P-P_0,',',Q_RAD
+      WRITE(11,'(F6.1,A1,F6.1)') T,',',TMP_G-273.
       T_CLOCK = T_CLOCK + T_END/500.
    ENDIF
 
@@ -255,7 +236,7 @@ END SUBROUTINE COMPUTE_DB
 
 SUBROUTINE COMPUTE_MQH
 
-REAL :: RHO_G,Z,SIGMA,Q_RAD
+REAL :: RHO_G,Z,SIGMA
 REAL :: T_STEEL(9999),DELTA_T
 INTEGER :: J
 
@@ -269,11 +250,11 @@ A_T = 2.*L*W + 2.*L*H + 2.*W*H - A_V
 TMP_A = TMP_A + 273.
 
 IF (PROFILE) THEN
-   WRITE(11,'(A)') 'Height,Temp,Immersed HGL Radiation Heat Flux (kW/m2)'
+   WRITE(11,'(A)') 'Height,Temp'
 ELSEIF ((STEEL_UNPROTECTED == .TRUE.) .OR. (STEEL_PROTECTED == .TRUE.)) THEN
-   WRITE(11,'(A)') 'Time,Temp,Height,Immersed HGL Radiation Heat Flux (kW/m2),Steel Temperature (C)'
+   WRITE(11,'(A)') 'Time,Temp,Height,Steel Temperature (C)'
 ELSE
-   WRITE(11,'(A)') 'Time,Temp,Height,Immersed HGL Radiation Heat Flux (kW/m2)'
+   WRITE(11,'(A)') 'Time,Temp,Height'
 ENDIF
 
 DO I=0,50
@@ -290,8 +271,6 @@ DO I=0,50
 
    RHO_G = 353./TMP_G
    Z = MAX( H_V , H*(1. + 2.*(0.05/RHO_G)*Q**0.333*T*H**0.667/(3.*L*W) )**-1.5 )
-
-   Q_RAD = SIGMA*(TMP_G**4-TMP_A**4)
 
    ! Compute steel temperatures
 
@@ -318,20 +297,20 @@ DO I=0,50
    ENDIF
 
    IF ((STEEL_UNPROTECTED == .TRUE.) .OR. (STEEL_PROTECTED == .TRUE.)) THEN
-      IF ((.NOT.PROFILE) .AND. (I==0)) WRITE(11,'(F6.1,A1,F6.1,A1,F6.2,A1,F6.2,A1,F7.2)') T,',',TMP_G-273.,',',Z,',',Q_RAD,',',T_STEEL(1)-273
-      IF ((.NOT.PROFILE) .AND. (I/=0)) WRITE(11,'(F6.1,A1,F6.1,A1,F6.2,A1,F6.2,A1,F7.2)') T,',',TMP_G-273.,',',Z,',',Q_RAD,',',T_STEEL(T)-273
+      IF ((.NOT.PROFILE) .AND. (I==0)) WRITE(11,'(F6.1,A1,F6.1,A1,F6.2,A1,F7.2)') T,',',TMP_G-273.,',',Z,',',T_STEEL(1)-273
+      IF ((.NOT.PROFILE) .AND. (I/=0)) WRITE(11,'(F6.1,A1,F6.1,A1,F6.2,A1,F7.2)') T,',',TMP_G-273.,',',Z,',',T_STEEL(T)-273
    ELSE
-      IF ((.NOT.PROFILE) .AND. (I==0)) WRITE(11,'(F6.1,A1,F6.1,A1,F6.2,A1,F6.2)') T,',',TMP_G-273.,',',Z,',',Q_RAD
-      IF ((.NOT.PROFILE) .AND. (I/=0)) WRITE(11,'(F6.1,A1,F6.1,A1,F6.2,A1,F6.2)') T,',',TMP_G-273.,',',Z,',',Q_RAD
+      IF ((.NOT.PROFILE) .AND. (I==0)) WRITE(11,'(F6.1,A1,F6.1,A1,F6.2)') T,',',TMP_G-273.,',',Z
+      IF ((.NOT.PROFILE) .AND. (I/=0)) WRITE(11,'(F6.1,A1,F6.1,A1,F6.2)') T,',',TMP_G-273.,',',Z
    ENDIF
 
 ENDDO
 
 IF (PROFILE) THEN
-   WRITE(11,'(F6.1,A1,F6.1,A1,F6.2,A1,F6.2)') 0.,',',TMP_A-273.,',',Q_RAD
-   WRITE(11,'(F6.1,A1,F6.1,A1,F6.2,A1,F6.2)') Z ,',',TMP_A-273.,',',Q_RAD
-   WRITE(11,'(F6.1,A1,F6.1,A1,F6.2,A1,F6.2)') Z ,',',TMP_G-273.,',',Q_RAD
-   WRITE(11,'(F6.1,A1,F6.1,A1,F6.2,A1,F6.2)') H ,',',TMP_G-273.,',',Q_RAD
+   WRITE(11,'(F6.1,A1,F6.1,A1,F6.2)') 0.,',',TMP_A-273.
+   WRITE(11,'(F6.1,A1,F6.1,A1,F6.2)') Z ,',',TMP_A-273.
+   WRITE(11,'(F6.1,A1,F6.1,A1,F6.2)') Z ,',',TMP_G-273.
+   WRITE(11,'(F6.1,A1,F6.1,A1,F6.2)') H ,',',TMP_G-273.
 ENDIF
 
 CLOSE(11)
@@ -344,9 +323,7 @@ END SUBROUTINE COMPUTE_MQH
 
 SUBROUTINE COMPUTE_BEYLER
 
-REAL :: K1,K2,M,SIGMA,Q_RAD,K,Z
-
-SIGMA = 5.67e-11
+REAL :: K1,K2,M,K,Z
 
 OPEN(11,FILE=TRIM(OUTPUT_FILE),FORM='FORMATTED',STATUS='REPLACE')
 
@@ -357,7 +334,7 @@ M = L*W*H*RHO_A
 Z_ASET = H
 DT = T_END/50.
 
-WRITE(11,'(A)') 'Time,Temp,HGL Depth Yamana Tanaka (m),HGL Depth ASET (m),Immersed HGL Radiation Heat Flux (kW/m2)'
+WRITE(11,'(A)') 'Time,Temp,HGL Depth Yamana Tanaka (m),HGL Depth ASET (m)'
 
 DO I=0,50
 
@@ -367,8 +344,6 @@ DO I=0,50
    K2 = Q/(M*C_P)
 
    TMP_G = TMP_A + (2.*K2/K1**2)*(K1*SQRT(T) - 1. + EXP(-K1*SQRT(T)))
-
-   Q_RAD = SIGMA*(TMP_G**4-TMP_A**4)
 
    ! Calculate HGL height using ASET correlation
    IF (I>0) THEN
@@ -385,7 +360,7 @@ DO I=0,50
    K = 0.076/(353/TMP_G)
    Z_YT = (2*K*Q**(1./3.)*T/(3*L*W) + (1/H**(2./3.)))**(-3./2.)
 
-   WRITE(11,'(F6.1,A1,F6.1,A1,F6.2,A1,F6.2,A1,F6.2)') T,',',TMP_G-273.,',',Z_YT,',',Z_ASET,',',Q_RAD
+   WRITE(11,'(F6.1,A1,F6.1,A1,F6.2,A1,F6.2)') T,',',TMP_G-273.,',',Z_YT,',',Z_ASET
 
 ENDDO
 
@@ -770,7 +745,7 @@ END SUBROUTINE COMPUTE_HESKESTAD
 SUBROUTINE COMPUTE_MCCAFFREY
 
 INTEGER :: I,J,K,M,N_T,N_Z,REGION
-REAL :: Q,Z_Q_2_5,KAPPA,ETA,T_P,SIGMA,Q_RAD(20),MAX_STEEL_TEMP(20)
+REAL :: Q,Z_Q_2_5,KAPPA,ETA,T_P,SIGMA,MAX_STEEL_TEMP(20)
 REAL :: T_STEEL(9999),DELTA_T
 CHARACTER(30) :: FMT
 
@@ -812,10 +787,6 @@ DO I=1,9999
 
       T_PLUME(J) = (((KAPPA)/(0.9*SQRT(2*G)))**(2.) * (Z_Q_2_5)**(2*ETA-1) * (TMP_A+273)) + (TMP_A+273)
 
-      ! Compute immersed plume radiation heat flux
-
-      Q_RAD(J) = SIGMA*(T_PLUME(J)**4)
-
       ! Compute steel temperatures
 
       IF (STEEL_UNPROTECTED) THEN
@@ -842,34 +813,27 @@ DO I=1,9999
          MAX_STEEL_TEMP(J) = MAXVAL(T_STEEL)
       ENDIF
 
-      IF ((I==1) .AND. (J==1) .AND. (PROFILE)) THEN
-         WRITE(11,'(A)') 'Height,Flux,Region (1=cont.;2=inter.;3=plume)'
-         WRITE(11,'(A5,A1,F6.2,A1,I1,A1,F7.2)') Z_LABEL(J), ',', Q_RAD(J), ',', REGION
-      ELSEIF ((I==1) .AND. (PROFILE)) THEN
-         WRITE(11,'(A5,A1,F6.2,A1,I1,A1,F7.2)') Z_LABEL(J), ',', Q_RAD(J), ',', REGION
-      ENDIF
-
    ENDDO
 
    IF ((STEEL_UNPROTECTED == .TRUE.) .OR. (STEEL_PROTECTED == .TRUE.)) THEN
       IF ((I==1) .AND. (.NOT. PROFILE)) THEN
-         WRITE(FMT,'(A,I2.1,5A)') "(",N_Z*3,"(","A",",','),","A",")"
-         WRITE(11,FMT) 'Time', (TRIM(Z_LABEL(K)),K=1,N_Z), (TRIM('Radiation '//Z_LABEL(K)),K=1,N_Z), (TRIM('Steel Temperature '//Z_LABEL(K)),K=1,N_Z)
-         WRITE(FMT,'(A,I2.1,5A)') "(",N_Z*3,"(","F7.2",",','),","F7.2",")"
-         WRITE(11,FMT) TIME_RAMP(I), (T_PLUME(K)-273,K=1,N_Z), (Q_RAD(K),K=1,N_Z), (MAX_STEEL_TEMP(K)-273,K=1,N_Z)
+         WRITE(FMT,'(A,I2.1,5A)') "(",N_Z*2,"(","A",",','),","A",")"
+         WRITE(11,FMT) 'Time', (TRIM(Z_LABEL(K)),K=1,N_Z), (TRIM('Steel Temperature '//Z_LABEL(K)),K=1,N_Z)
+         WRITE(FMT,'(A,I2.1,5A)') "(",N_Z*2,"(","F7.2",",','),","F7.2",")"
+         WRITE(11,FMT) TIME_RAMP(I), (T_PLUME(K)-273,K=1,N_Z), (MAX_STEEL_TEMP(K)-273,K=1,N_Z)
       ELSEIF (.NOT. PROFILE) THEN
-         WRITE(FMT,'(A,I2.1,5A)') "(",N_Z*3,"(","F8.2",",','),","F8.2",")"
-         WRITE(11,FMT) TIME_RAMP(I), (T_PLUME(K)-273,K=1,N_Z), (Q_RAD(K),K=1,N_Z), (MAX_STEEL_TEMP(K)-273,K=1,N_Z)
+         WRITE(FMT,'(A,I2.1,5A)') "(",N_Z*2,"(","F8.2",",','),","F8.2",")"
+         WRITE(11,FMT) TIME_RAMP(I), (T_PLUME(K)-273,K=1,N_Z), (MAX_STEEL_TEMP(K)-273,K=1,N_Z)
       ENDIF
    ELSE
       IF ((I==1) .AND. (.NOT. PROFILE)) THEN
-         WRITE(FMT,'(A,I2.1,5A)') "(",N_Z*2,"(","A",",','),","A",")"
-         WRITE(11,FMT) 'Time', (TRIM(Z_LABEL(K)),K=1,N_Z), (TRIM('Radiation '//Z_LABEL(K)),K=1,N_Z)
-         WRITE(FMT,'(A,I2.1,5A)') "(",N_Z*2,"(","F7.2",",','),","F7.2",")"
-         WRITE(11,FMT) TIME_RAMP(I), (T_PLUME(K)-273,K=1,N_Z), (Q_RAD(K),K=1,N_Z)
+         WRITE(FMT,'(A,I2.1,5A)') "(",N_Z,"(","A",",','),","A",")"
+         WRITE(11,FMT) 'Time', (TRIM(Z_LABEL(K)),K=1,N_Z)
+         WRITE(FMT,'(A,I2.1,5A)') "(",N_Z,"(","F7.2",",','),","F7.2",")"
+         WRITE(11,FMT) TIME_RAMP(I), (T_PLUME(K)-273,K=1,N_Z)
       ELSEIF (.NOT. PROFILE) THEN
-         WRITE(FMT,'(A,I2.1,5A)') "(",N_Z*2,"(","F7.2",",','),","F7.2",")"
-         WRITE(11,FMT) TIME_RAMP(I), (T_PLUME(K)-273,K=1,N_Z), (Q_RAD(K),K=1,N_Z)
+         WRITE(FMT,'(A,I2.1,5A)') "(",N_Z,"(","F7.2",",','),","F7.2",")"
+         WRITE(11,FMT) TIME_RAMP(I), (T_PLUME(K)-273,K=1,N_Z)
       ENDIF
    ENDIF
 ENDDO

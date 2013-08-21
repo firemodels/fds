@@ -7,8 +7,6 @@
 
 \subsection{HGL Temperature, Natural Ventilation}
 
-% &MQH Q=200., TMP_A=33., L=6., W=4., H=3.0, C_S=1., K_S=0.000463, RHO_S=1607., DELTA=0.1, T_END=3000., OUTPUT_FILE='HGL_Temperature_Natural.csv', H_V=2.06, W_V=0.76 /
-
 Test: LLNL Test 51
 
 \begin{table}[!ht]
@@ -33,10 +31,100 @@ $T_\infty$ ($^\circ$C)  &  33          \\ \hline
 \end{tabular}
 \end{center}
 \end{table}
-Expected output: At 60~s, the HGL temperature $T_g$ is 111.45~$^\circ$C; at 120~s, $T_g$ is 121.05~$^\circ$C; at 180~s, $T_g$ is 127.21~$^\circ$C.
+
+\noindent Expected output: At 60~s, the HGL temperature $T_g$ is 111.45~$^\circ$C; at 120~s, $T_g$ is 121.05~$^\circ$C; at 180~s, $T_g$ is 127.21~$^\circ$C.
 
 
 \clearpage
+
+
+\subsection{HGL Temperature, Forced Ventilation (FPA)}
+
+Test: FM/SNL Test 1
+
+\begin{table}[!ht]
+\caption[Input parameters, HGL temperature, forced ventilation]
+{Input parameters, HGL temperature, forced ventilation.}
+\begin{center}
+\begin{tabular}{|l|c|}
+\hline
+                        &              \\
+\rb{Input Parameter}    &  \rb{Value}  \\ \hline \hline
+$\dot Q$ (kW)           &  516         \\ \hline
+$\dot m$ (kg/s)         &  4.5         \\ \hline
+$L$ (m)                 &  18.3        \\ \hline
+$W$ (m)                 &  12.2        \\ \hline
+$H$ (m)                 &  6.1         \\ \hline
+$k$ (kW/m/K)            &  0.00023     \\ \hline
+$\rho$ (kg/m$^3$)       &  1000        \\ \hline
+$c$ (kJ/kg/K)           &  1.16        \\ \hline
+$\delta$ (m)            &  0.025       \\ \hline
+$T_\infty$ ($^\circ$C)  &  15          \\ \hline
+\end{tabular}
+\end{center}
+\end{table}
+
+\noindent Expected output: At 60~s, the HGL temperature $T_g$ is 53.07~$^\circ$C; at 120~s, $T_g$ is 58.13~$^\circ$C; at 180~s, $T_g$ is 61.39~$^\circ$C.
+
+
+\subsection{HGL Temperature, Forced Ventilation (DB)}
+
+Test: FM/SNL Test 1
+
+\begin{table}[!ht]
+\caption[Input parameters, HGL temperature, forced ventilation]
+{Input parameters, HGL temperature, forced ventilation.}
+\begin{center}
+\begin{tabular}{|l|c|}
+\hline
+                        &              \\
+\rb{Input Parameter}    &  \rb{Value}  \\ \hline \hline
+$\dot Q$ (kW)           &  516         \\ \hline
+$\dot m$ (kg/s)         &  4.5         \\ \hline
+$L$ (m)                 &  18.3        \\ \hline
+$W$ (m)                 &  12.2        \\ \hline
+$H$ (m)                 &  6.1         \\ \hline
+$k$ (kW/m/K)            &  0.00023     \\ \hline
+$\rho$ (kg/m$^3$)       &  1000        \\ \hline
+$c$ (kJ/kg/K)           &  1.16        \\ \hline
+$\delta$ (m)            &  0.025       \\ \hline
+$T_\infty$ ($^\circ$C)  &  15          \\ \hline
+\end{tabular}
+\end{center}
+\end{table}
+
+\noindent Expected output: At 60~s, the HGL temperature $T_g$ is 34.60~$^\circ$C; at 120~s, $T_g$ is 40.88~$^\circ$C; at 180~s, $T_g$ is 45.16~$^\circ$C.
+
+
+\clearpage
+
+
+\subsection{HGL Temperature, Forced Ventilation (Beyler)}
+
+Test: LLNL Test 1
+
+\begin{table}[!ht]
+\caption[Input parameters, HGL temperature, no ventilation]
+{Input parameters, HGL temperature, no ventilation.}
+\begin{center}
+\begin{tabular}{|l|c|}
+\hline
+                        &              \\
+\rb{Input Parameter}    &  \rb{Value}  \\ \hline \hline
+$\dot Q$ (kW)           &  200         \\ \hline
+$L$ (m)                 &  6.0         \\ \hline
+$W$ (m)                 &  14.0        \\ \hline
+$H$ (m)                 &  4.5         \\ \hline
+$k$ (kW/m/K)            &  0.000463    \\ \hline
+$\rho$ (kg/m$^3$)       &  1607        \\ \hline
+$c$ (kJ/kg/K)           &  1.0         \\ \hline
+$\delta$ (m)            &  0.1         \\ \hline
+$T_\infty$ ($^\circ$C)  &  23          \\ \hline
+\end{tabular}
+\end{center}
+\end{table}
+
+\noindent Expected output: At 60~s, the HGL temperature $T_g$ is 49.87~$^\circ$C; at 120~s, $T_g$ is 63.33~$^\circ$C; at 180~s, $T_g$ is 73.67~$^\circ$C.
 
 
 \section{Ceiling Jets and Device Activation}
@@ -61,7 +149,8 @@ $T_{\infty}$ ($^\circ$C)  &  22          \\ \hline
 \end{tabular}
 \end{center}
 \end{table}
-Expected output: The ceiling jet temperature $T_{jet}$ is 46.45~$^\circ$C
+
+\noindent Expected output: The ceiling jet temperature $T_{jet}$ is 46.45~$^\circ$C
 
 
 \subsection{Sprinkler Activation Time}
@@ -86,5 +175,6 @@ $T_\infty$ ($^\circ$C)        &  16.6        \\ \hline
 \end{tabular}
 \end{center}
 \end{table}
-Expected output: At 50~s, the HRR $\dot Q$ is 262.5~kW, and the activation time $t_{activation}$ is 98.74~s
+
+\noindent Expected output: At 50~s, the HRR $\dot Q$ is 262.5~kW, and the activation time $t_{activation}$ is 98.74~s
 
