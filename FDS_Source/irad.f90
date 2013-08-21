@@ -578,7 +578,8 @@ Q = Q + RSS + RSL
 
 ! COMPUTE AMEAN
 
-! If TWALL = RCT  or TWALL = 0 K.
+! The first version is for TWALL = 0 K.
+! Also, if TWALL = RCT, Q becomes indepenndent of AMEAN, and we assume TWALL = 0 K to get a value.
 IF (ABS(TWALL-RCT)<=SPACING(TWALL) .OR. TWALL<=TWO_EPSILON_EB) THEN
    LTERM  = MIN(1._EB,MAX(TWO_EPSILON_EB,(Q/RPI_SIGMA-RCT4)/(-RCT4)))
 ELSE
