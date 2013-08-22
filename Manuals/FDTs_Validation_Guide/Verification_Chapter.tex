@@ -99,7 +99,7 @@ $T_\infty$ ($^\circ$C)  &  15          \\ \hline
 \clearpage
 
 
-\subsection{HGL Temperature, Forced Ventilation (Beyler)}
+\subsection{HGL Temperature, No Ventilation (Beyler)}
 
 Test: LLNL Test 1
 
@@ -127,6 +127,56 @@ $T_\infty$ ($^\circ$C)  &  23          \\ \hline
 \noindent Expected output: At 60~s, the HGL temperature $T_g$ is 49.87~$^\circ$C; at 120~s, $T_g$ is 63.33~$^\circ$C; at 180~s, $T_g$ is 73.67~$^\circ$C.
 
 
+\clearpage
+
+
+\section{Fire Plumes}
+
+\subsection{Plume Temperature (Heskestad)}
+
+\begin{table}[!ht]
+\caption[Input parameters, plume temperature (Heskestad)]
+{Input parameters, plume temperature (Heskestad).}
+\begin{center}
+\begin{tabular}{|l|c|}
+\hline
+                        &              \\
+\rb{Input Parameter}    &  \rb{Value}  \\ \hline \hline
+$\dot Q$ (m)            &  1245        \\ \hline
+$z$ (m)                 &  6           \\ \hline
+$A$ (m$^2$)             &  1.075       \\ \hline
+$\chi_r$ (-)            &  0.40        \\ \hline
+$T_\infty$ ($^\circ$C)  &  22          \\ \hline
+\end{tabular}
+\end{center}
+\end{table}
+
+\noindent Expected output: The plume temperature $T_{0}$ is 133.76~$^\circ$C.
+
+
+\subsection{Plume Temperature (McCaffrey)}
+
+\begin{table}[!ht]
+\caption[Input parameters, plume temperature (McCaffrey)]
+{Input parameters, plume temperature (McCaffrey).}
+\begin{center}
+\begin{tabular}{|l|c|}
+\hline
+                        &              \\
+\rb{Input Parameter}    &  \rb{Value}  \\ \hline \hline
+$\dot Q$ (m)            &  1245        \\ \hline
+$z$ (m)                 &  6           \\ \hline
+$T_\infty$ ($^\circ$C)  &  22          \\ \hline
+\end{tabular}
+\end{center}
+\end{table}
+
+\noindent Expected output: The plume temperature $T_{0}$ is 153.21~$^\circ$C.
+
+
+\clearpage
+
+
 \section{Ceiling Jets and Device Activation}
 
 \subsection{Ceiling Jet Temperature (Alpert)}
@@ -150,7 +200,7 @@ $T_{\infty}$ ($^\circ$C)  &  22          \\ \hline
 \end{center}
 \end{table}
 
-\noindent Expected output: The ceiling jet temperature $T_{jet}$ is 46.45~$^\circ$C
+\noindent Expected output: The ceiling jet temperature $T_{jet}$ is 46.45~$^\circ$C.
 
 
 \subsection{Sprinkler Activation Time}
@@ -176,5 +226,75 @@ $T_\infty$ ($^\circ$C)        &  16.6        \\ \hline
 \end{center}
 \end{table}
 
-\noindent Expected output: At 50~s, the HRR $\dot Q$ is 262.5~kW, and the activation time $t_{activation}$ is 98.74~s
+\noindent Expected output: At 50~s, the HRR $\dot Q$ is 262.5~kW, and the activation time $t_{activation}$ is 98.74~s.
+
+
+\subsection{Smoke Detector Activation Time (Alpert)}
+
+\begin{table}[!ht]
+\caption[Input parameters, smoke detector activation time (Alpert)]
+{Input parameters, smoke detector activation time (Alpert).}
+\begin{center}
+\begin{tabular}{|l|c|}
+\hline
+                          &              \\
+\rb{Input Parameter}      &  \rb{Value}  \\ \hline \hline
+Location factor (-)       &  1           \\ \hline
+$\alpha$ (kW/s$^2$)       &  0.00463     \\ \hline
+$t_{fire}$ (s)            &  300         \\ \hline
+$r$ (m)                   &  1.3         \\ \hline
+$H$ (m)                   &  2.1         \\ \hline
+$\Delta T_c$ ($^\circ$C)  &  10          \\ \hline
+RTI (m-s)$^{1/2}$         &  5           \\ \hline
+$T_\infty$ ($^\circ$C)    &  21          \\ \hline
+\end{tabular}
+\end{center}
+\end{table}
+
+\noindent Expected output: At 47~s, the HRR $\dot Q$ is 10.23~kW, and the activation time $t_{activation}$ is 30.8~s.
+
+
+\subsection{Smoke Detector Activation Time (Milke)}
+
+
+\begin{table}[!ht]
+\caption[Input parameters, smoke detector activation time (Milke)]
+{Input parameters, smoke detector activation time (Milke).}
+\begin{center}
+\begin{tabular}{|l|c|}
+\hline
+                          &              \\
+\rb{Input Parameter}      &  \rb{Value}  \\ \hline \hline
+$\alpha$ (kW/s$^2$)       &  0.00463     \\ \hline
+$t_{fire}$ (s)            &  300         \\ \hline
+$H$ (m)                   &  2.1         \\ \hline
+$\Delta T_c$ ($^\circ$C)  &  10          \\ \hline
+\end{tabular}
+\end{center}
+\end{table}
+
+\noindent Expected output: At 40~s, the HRR $\dot Q$ is 7.41~kW, and the activation time $t_{activation}$ is 39.5~s.
+
+
+\subsection{Smoke Detector Activation Time (Mowrer)}
+
+\begin{table}[!ht]
+\caption[Input parameters, smoke detector activation time (Mowrer)]
+{Input parameters, smoke detector activation time (Mowrer).}
+\begin{center}
+\begin{tabular}{|l|c|}
+\hline
+                      &              \\
+\rb{Input Parameter}  &  \rb{Value}  \\ \hline \hline
+$\alpha$ (kW/s$^2$)   &  0.00463     \\ \hline
+$t_{fire}$ (s)        &  300         \\ \hline
+$C_{pl}$ (-)          &  0.67        \\ \hline
+$C_{cj}$ (-)          &  1.2         \\ \hline
+$r$ (m)               &  1.3         \\ \hline
+$H$ (m)               &  2.1         \\ \hline
+\end{tabular}
+\end{center}
+\end{table}
+
+\noindent Expected output: At 5~s, the HRR $\dot Q$ is 0.116~kW, and the activation time $t_{activation}$ is 5.6~s.
 
