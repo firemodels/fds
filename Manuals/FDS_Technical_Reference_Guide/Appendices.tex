@@ -401,7 +401,7 @@ The second coefficient is the so-called {\em path mean} or {\em effective} absor
    \int_{\la_{\rm min}}^{\la_{\rm max}}I(\la,L,T,T_{\rm rad}) \; \d \la = \frac{\sigma}{\pi}
        \left[\left(1-{\rm e}^{-\kappa_{{\rm e},n}(T)\, L}\right) \, T^4 + {\rm e}^{-\kappa_{{\rm e},n}(T) \, L} \, T_{\rm rad}^4\right]
 \ee
-where $L$ is the path length and $T_{\rm rad}$ is the effective temperature of flame radiation. RADCAL calculates the left hand integral by calculating the intensity leaving a uniform gas layer of equivalent thickness $L$, bounded by a black wall at temperature $T_{\rm rad}$, for a large number of narrow spectral bands.  By default in FDS, the pathlength, $L$, is five times the characteristic cell size of the simulation, limited by a maximum value of 10~m. It can also be specified by the user.
+where $L$ is the path length and $T_{\rm rad}$ is the effective temperature of flame radiation. RADCAL calculates the left hand integral by calculating the intensity leaving a uniform gas layer of equivalent thickness $L$, bounded by a black wall at temperature $T_{\rm rad}$, for a large number of narrow spectral bands.  By default in FDS, the pathlength, $L$, is five times the characteristic cell size of the simulation, limited by a maximum value of 10~m. It can also be specified by the user. If $T=T_{\rm rad}$ the intensity does not depend on $\kappa_{{\rm e},n}$. The value $\kappa_{{\rm e},n}(T_{\rm rad})$ is therefore interpolated from the neighbouring temperatures.
 
 In cases with only one band ($N$=1), the smaller of the two absorption coefficients is used:
 \be
@@ -456,8 +456,7 @@ These new data have been obtained through FTIR measurements for wavenumbers betw
 \ee
 whose units are $\rm {atm^{-1} cm^{-2}}$. The value of the spectral absorption coefficient, $\bar{\kappa}_i$, is averaged over a narrow band whose spectral width, $\Delta \om$, varies from 5~cm$^{-1}$ for $\om < $ 1100~cm$^{-1}$, to 25~cm$^{-1}$ for 1100~cm$^{-1} \leq \om < $ 5000~cm$^{\rm -1}$, and to 50~cm$^{\rm -1}$ for 5000~cm$^{\rm -1}\leq \om$.
 
-The subsections below briefly describe the molecular bands where the species are active for each of the gas-phase radiative species, and provide for most of them the integrated band intensity of their most important bands at the indicated temperature. Outside these bands, the species are transparent. At the start of a simulation, the absorption coefficients are calculated using RADCAL and then tabulated as a function of mixture fraction and temperature. During the simulation, the local absorption coefficient is interpolated from the table of values.
-
+The subsections below briefly describe the molecular bands where the species are active for each of the gas-phase radiative species, and provide for most of them the integrated band intensity of their most important bands at the indicated temperature. Outside these bands, the species are transparent. At the start of a simulation, the absorption coefficients are calculated using RADCAL and then tabulated as a function of species concentration and temperature. During the simulation, the local absorption coefficient is interpolated from the table of values. The contributions of individual species are summed to the the total absorption coefficient.
 
 
 
