@@ -410,27 +410,32 @@ METHOD_OF_HEAT_TRANSFER: SELECT CASE(SF%THERMAL_BC_INDEX)
       ! Density
 
       RHO_G = RHOP(IIG,JJG,KKG)
-      RHO_G_2 = RHO_G
       !RHO_OTHER_2 = RHO_OTHER ! first-order extrapolation of scalar data
       RHO_OTHER_2 = 2._EB*RHO_OTHER-RHO_G ! second-order extrapolation of scalar data
       RHOP(II,JJ,KK) = RHO_OTHER
       SELECT CASE(IOR)
          CASE( 1)
+            RHO_G_2 = RHOP(IIG+1,JJG,KKG)
             ZZZ(1:4) = (/RHO_OTHER_2,RHO_OTHER,RHO_G,RHO_G_2/)
             WC%RHO_F = SCALAR_FACE_VALUE(UU(II,JJ,KK),ZZZ,FLUX_LIMITER)
          CASE(-1)
+            RHO_G_2 = RHOP(IIG-1,JJG,KKG)
             ZZZ(1:4) = (/RHO_G_2,RHO_G,RHO_OTHER,RHO_OTHER_2/)
             WC%RHO_F = SCALAR_FACE_VALUE(UU(II-1,JJ,KK),ZZZ,FLUX_LIMITER)
          CASE( 2)
+            RHO_G_2 = RHOP(IIG,JJG+1,KKG)
             ZZZ(1:4) = (/RHO_OTHER_2,RHO_OTHER,RHO_G,RHO_G_2/)
             WC%RHO_F = SCALAR_FACE_VALUE(VV(II,JJ,KK),ZZZ,FLUX_LIMITER)
          CASE(-2)
+            RHO_G_2 = RHOP(IIG,JJG-1,KKG)
             ZZZ(1:4) = (/RHO_G_2,RHO_G,RHO_OTHER,RHO_OTHER_2/)
             WC%RHO_F = SCALAR_FACE_VALUE(VV(II,JJ-1,KK),ZZZ,FLUX_LIMITER)
          CASE( 3)
+            RHO_G_2 = RHOP(IIG,JJG,KKG+1)
             ZZZ(1:4) = (/RHO_OTHER_2,RHO_OTHER,RHO_G,RHO_G_2/)
             WC%RHO_F = SCALAR_FACE_VALUE(WW(II,JJ,KK),ZZZ,FLUX_LIMITER)
          CASE(-3)
+            RHO_G_2 = RHOP(IIG,JJG,KKG-1)
             ZZZ(1:4) = (/RHO_G_2,RHO_G,RHO_OTHER,RHO_OTHER_2/)
             WC%RHO_F = SCALAR_FACE_VALUE(WW(II,JJ,KK-1),ZZZ,FLUX_LIMITER)
       END SELECT
@@ -445,26 +450,31 @@ METHOD_OF_HEAT_TRANSFER: SELECT CASE(SF%THERMAL_BC_INDEX)
          SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
 
             RHO_ZZ_G = RHO_G*ZZP(IIG,JJG,KKG,N)
-            RHO_ZZ_G_2 = RHO_ZZ_G
             !RHO_ZZ_OTHER_2 = RHO_ZZ_OTHER(N) ! first-order
             RHO_ZZ_OTHER_2 = 2._EB*RHO_ZZ_OTHER(N) - RHO_ZZ_G ! second-order
             SELECT CASE(IOR)
                CASE( 1)
+                  RHO_ZZ_G_2 = RHOP(IIG+1,JJG,KKG)*ZZP(IIG+1,JJG,KKG,N)
                   ZZZ(1:4) = (/RHO_ZZ_OTHER_2,RHO_ZZ_OTHER(N),RHO_ZZ_G,RHO_ZZ_G_2/)
                   RHO_ZZ_F(N) = SCALAR_FACE_VALUE(UU(II,JJ,KK),ZZZ,FLUX_LIMITER)
                CASE(-1)
+                  RHO_ZZ_G_2 = RHOP(IIG-1,JJG,KKG)*ZZP(IIG-1,JJG,KKG,N)
                   ZZZ(1:4) = (/RHO_ZZ_G_2,RHO_ZZ_G,RHO_ZZ_OTHER(N),RHO_ZZ_OTHER_2/)
                   RHO_ZZ_F(N) = SCALAR_FACE_VALUE(UU(II-1,JJ,KK),ZZZ,FLUX_LIMITER)
                CASE( 2)
+                  RHO_ZZ_G_2 = RHOP(IIG,JJG+1,KKG)*ZZP(IIG,JJG+1,KKG,N)
                   ZZZ(1:4) = (/RHO_ZZ_OTHER_2,RHO_ZZ_OTHER(N),RHO_ZZ_G,RHO_ZZ_G_2/)
                   RHO_ZZ_F(N) = SCALAR_FACE_VALUE(VV(II,JJ,KK),ZZZ,FLUX_LIMITER)
                CASE(-2)
+                  RHO_ZZ_G_2 = RHOP(IIG,JJG-1,KKG)*ZZP(IIG,JJG-1,KKG,N)
                   ZZZ(1:4) = (/RHO_ZZ_G_2,RHO_ZZ_G,RHO_ZZ_OTHER(N),RHO_ZZ_OTHER_2/)
                   RHO_ZZ_F(N) = SCALAR_FACE_VALUE(VV(II,JJ-1,KK),ZZZ,FLUX_LIMITER)
                CASE( 3)
+                  RHO_ZZ_G_2 = RHOP(IIG,JJG,KKG+1)*ZZP(IIG,JJG,KKG+1,N)
                   ZZZ(1:4) = (/RHO_ZZ_OTHER_2,RHO_ZZ_OTHER(N),RHO_ZZ_G,RHO_ZZ_G_2/)
                   RHO_ZZ_F(N) = SCALAR_FACE_VALUE(WW(II,JJ,KK),ZZZ,FLUX_LIMITER)
                CASE(-3)
+                  RHO_ZZ_G_2 = RHOP(IIG,JJG,KKG-1)*ZZP(IIG,JJG,KKG-1,N)
                   ZZZ(1:4) = (/RHO_ZZ_G_2,RHO_ZZ_G,RHO_ZZ_OTHER(N),RHO_ZZ_OTHER_2/)
                   RHO_ZZ_F(N) = SCALAR_FACE_VALUE(WW(II,JJ,KK-1),ZZZ,FLUX_LIMITER)
             END SELECT
