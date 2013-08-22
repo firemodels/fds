@@ -664,9 +664,9 @@ DO WHILE (ITER)
    ! Compute ceiling jet velocity
 
    IF (R/H<=0.15) THEN
-           U_JET = 0.96 * (Q/H)**(1./3.)
+       U_JET = 0.96 * (Q/H)**(1./3.)
    ELSEIF (R/H>0.15) THEN
-           U_JET = 0.195 * Q**(1./3.) * H**(1./2.) / R**(5./6.)
+       U_JET = 0.195 * Q**(1./3.) * H**(1./2.) / R**(5./6.)
    ENDIF
 
    ! Compute sprinkler or detector activation time
@@ -701,17 +701,18 @@ CHARACTER(30) :: FMT
 
 OPEN(11,FILE=TRIM(OUTPUT_FILE),FORM='FORMATTED',STATUS='REPLACE')
 
+TMP_A = TMP_A + 273
 RHO_A = 353./(TMP_A)
 
 DO I=1,30
    IF (TIME_RAMP(I)<0.) EXIT
    N_T = N_T + 1
-   
+
    N_Z = 0
    DO J=1,9999
    IF (Z(J)<0) EXIT
       N_Z = N_Z + 1
-      
+
       ! Compute convective HRR
 
       Q_C = Q_RAMP(I) * (1 - RADIATIVE_FRACTION)
@@ -726,9 +727,9 @@ DO I=1,30
 
       ! Compute plume centerline temperature
 
-      T_PLUME(J) = 9.1 * ((TMP_A+273)/(G*(C_P**2.)*(RHO_A)**2.))**(1./3.) * (Q_C)**(2./3.) * (Z(J)-Z_0)**(-5./3.) + (TMP_A+273)
+      T_PLUME(J) = 9.1 * ((TMP_A)/(G*(C_P**2.)*(RHO_A)**2.))**(1./3.) * (Q_C)**(2./3.) * (Z(J)-Z_0)**(-5./3.) + (TMP_A)
    ENDDO
-   
+
    IF (I==1) THEN
       WRITE(FMT,'(A,I1.1,5A)') "(",N_Z,"(","A",",','),","A",")"
       WRITE(11,FMT) 'Time',(TRIM(Z_LABEL(K)),K=1,N_Z)
@@ -906,11 +907,11 @@ DO WHILE (ITER)
    ! Note, these equations contain conversion factors from m to ft
    ! and C to F to match the units of the original correlation.
    
-   Y = (DELTA_T_C*1.8)*(H*(1./0.3048))**(5./3.)/(Q*(1./1.05505585))**(2./3.)
+   Y = (DELTA_T_C*1.8) * (H/0.3048)**(5./3.) / (Q/0.94781712)**(2./3.)
 
    X = 4.6*1E-4*Y**2 + 2.7*1E-15*Y**6
 
-   t_activation = X*(H*(1./0.3048))**(4./3.)/(Q*(1./1.05505585))**(1./3.)
+   t_activation = X * (H/0.3048)**(4./3.) / (Q/0.94781712)**(1./3.)
 
    IF (t_activation>9999) THEN
       WRITE(11,'(F6.1,A1,I2,A5,F6.1)') T,',',-1,',NaN,',Q
