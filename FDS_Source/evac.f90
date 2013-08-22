@@ -69,7 +69,7 @@ MODULE EVAC
      INTEGER :: N_INITIAL=0,SAMPLING=0, IPC=0, IMESH=0, AVATAR_TYPE_INDEX=0
      INTEGER :: I_PRE_DIST=0, I_DET_DIST=0, GUARD_MEN=0
      INTEGER :: GN_MIN=0, GN_MAX=0
-     INTEGER :: N_VENT_FFIELDS=0, Avatar_Color_Index=0, I_AGENT_TYPE=2
+     INTEGER :: N_VENT_FFIELDS=0, Avatar_Color_Index=0, I_AGENT_TYPE=2, I_EVAC_THIS_MESH=1
      INTEGER, DIMENSION(3) :: RGB=-1, AVATAR_RGB=-1
      INTEGER, POINTER, DIMENSION(:) :: I_DOOR_NODES =>NULL()
      INTEGER, POINTER, DIMENSION(:) :: I_VENT_FFIELDS =>NULL()
@@ -85,7 +85,7 @@ MODULE EVAC
      CHARACTER(30) :: GRID_NAME='null'
      INTEGER, DIMENSION(3) :: RGB=-1
      LOGICAL :: SHOW=.TRUE.
-     INTEGER :: IMESH=0
+     INTEGER :: IMESH=0, I_EVHO_THIS_MESH=1
   END TYPE EVAC_HOLE_TYPE
   !
   ! A spectator stand. IOR: which x,y line is the bottom line of the stand.
@@ -1305,17 +1305,19 @@ CONTAINS
             END IF
          END  DO
 
-         ! Allocate quantities for EVAC, PERS, EXIT types
+         ! Allocate quantities for EVAC, PERS, EXIT types and initialize some variables
          !
          EVAC_PROC_IF: IF (MYID==MAX(0,EVAC_PROCESS)) THEN
             IF (NPC_EVAC > 0 ) THEN
                ALLOCATE(EVAC_EVACS(NPC_EVAC),STAT=IZERO)
                CALL ChkMemErr('READ','EVAC_EVACS',IZERO)
+               EVAC_EVACS(:)%I_EVAC_THIS_MESH = 1
             END IF
 
             IF (N_HOLES > 0 ) THEN
                ALLOCATE(EVAC_HOLES(N_HOLES),STAT=IZERO)
                CALL ChkMemErr('READ','EVAC_HOLES',IZERO)
+               EVAC_HOLES(:)%I_EVHO_THIS_MESH = 1
             END IF
 
             IF (N_SSTANDS > 0 ) THEN
@@ -3798,11 +3800,11 @@ CONTAINS
          END IF
          PNX%N_VENT_FFIELDS = i
          ALLOCATE(PNX%I_DOOR_NODES(0:i),STAT=IZERO)
-         CALL ChkMemErr('Read_Evac','PNX%I_DOOR_NODES',IZERO) 
+         CALL ChkMemErr('Read_Entries','PNX%I_DOOR_NODES',IZERO) 
          ALLOCATE(PNX%I_VENT_FFIELDS(0:i),STAT=IZERO)
-         CALL ChkMemErr('Read_Evac','PNX%I_VENT_FFIELDS',IZERO) 
+         CALL ChkMemErr('Read_Entries','PNX%I_VENT_FFIELDS',IZERO) 
          ALLOCATE(PNX%P_VENT_FFIELDS(0:i),STAT=IZERO)
-         CALL ChkMemErr('Read_Evac','PNX%P_VENT_FFIELDS',IZERO) 
+         CALL ChkMemErr('Read_Entries','PNX%P_VENT_FFIELDS',IZERO) 
          !
 
          PNX%TO_NODE    = TO_NODE
@@ -4889,6 +4891,7 @@ CONTAINS
       ! Local variables
       REAL(EB) xtol,ytol
       LOGICAL :: L_TMP
+      INTEGER, DIMENSION(:), ALLOCATABLE :: N_MESH_TMP
       TYPE (EVAC_ENTR_TYPE), POINTER :: PNX=>NULL()
       TYPE (EVAC_DOOR_TYPE), POINTER :: PDX=>NULL()
       TYPE (EVAC_STRS_TYPE), POINTER :: STRP=>NULL()
@@ -4918,6 +4921,21 @@ CONTAINS
          END IF
       END DO
 
+      ! Set the z offset counters for the EVHO and EVAC rectangles shown in SMV
+      ALLOCATE(N_MESH_TMP(NMESHES))
+      CALL ChkMemErr('CHECK_EVAC_NODES','N_MESH_TMP',IZERO)
+      N_MESH_TMP = 0 ! Counter array for the EVAC and EVHO lines on the meshes
+      DO N = 1, NPC_EVAC
+         IF (.NOT.EVAC_EVACS(N)%SHOW) CYCLE
+         ! IMESH: The mesh index, including fire meshes also, [1,NMESHES]
+         N_MESH_TMP(EVAC_EVACS(N)%IMESH) = N_MESH_TMP(EVAC_EVACS(N)%IMESH) + 1
+         EVAC_EVACS(N)%I_EVAC_THIS_MESH  = N_MESH_TMP(EVAC_EVACS(N)%IMESH)
+      END DO
+      DO N = 1, N_HOLES
+         IF (.NOT.EVAC_HOLES(N)%SHOW) CYCLE
+         N_MESH_TMP(EVAC_HOLES(N)%IMESH) = N_MESH_TMP(EVAC_HOLES(N)%IMESH) + 1
+         EVAC_HOLES(N)%I_EVHO_THIS_MESH  = N_MESH_TMP(EVAC_HOLES(N)%IMESH)
+      END DO
       !
       DO n = 1, N_DOORS
          NodeLoop: DO i = 1, n_nodes
