@@ -106,6 +106,11 @@ if Stats_Output == 2
         sigma_m = m{i_row, 5};
         bias = m{i_row, 6};
         
+        % Do not print rows with no exp. error (specified as "-1" in scatplot_inputs)
+        if str2num(sigma_e) < 0
+            continue
+        end
+        
         % Write out all columns to .tex file
         fprintf(fid, '%s', quantity, ' & ');
         fprintf(fid, '%s', num2str(number_datasets), ' & ');
