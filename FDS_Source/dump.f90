@@ -1985,7 +1985,8 @@ EVAC_ONLY5: IF (ANY(EVACUATION_GRID).AND.MYID==MAX(0,EVAC_PROCESS)) THEN
    NN = 0
    DO N=1,NPC_EVAC
       IF (.NOT.EVAC_EVACS(N)%SHOW) CYCLE
-      NN = NN + 1
+      ! NN = NN + 1  ! I_EVAC_THIS_MESH is under construction
+      NN = EVAC_EVACS(N)%I_EVAC_THIS_MESH
       XX = EVAC_EVACS(N)%X1
       YY = EVAC_EVACS(N)%Y1
       ZZ = 0.5_EB*(EVAC_EVACS(N)%Z1+EVAC_EVACS(N)%Z2)+0.05_EB*(NN-1)
@@ -1999,7 +2000,8 @@ EVAC_ONLY5: IF (ANY(EVACUATION_GRID).AND.MYID==MAX(0,EVAC_PROCESS)) THEN
    NN = 0
    DO N=1,N_HOLES
       IF (.NOT.EVAC_HOLES(N)%SHOW) CYCLE
-      NN = NN + 1
+      ! NN = NN + 1  ! I_EVHO_THIS_MESH is under construction
+      NN = EVAC_HOLES(N)%I_EVHO_THIS_MESH
       XX = EVAC_HOLES(N)%X1
       YY = EVAC_HOLES(N)%Y1
       ZZ = 0.5_EB*(EVAC_HOLES(N)%Z1+EVAC_HOLES(N)%Z2)+0.05_EB*(NN-1)
@@ -5232,6 +5234,13 @@ SELECT CASE(IND)
          ENDDO DLOOP
          IF (DV%PDPA_DENUM > 0._EB) GAS_PHASE_OUTPUT_RES = (DV%PDPA_NUMER/DV%PDPA_DENUM)**EXPON
       ENDIF
+   CASE(251)  ! WIND CHILL INDEX
+      ! Wind speed at head height m/s, temperature Celsius
+      ! WCT = 13.12 + 0.6215*TMP_G - 13.956*VEL_10m**(0.16) + 0.4867*TMP_G*VEL_10m**(0.16)
+      ! Canada: Speed at head height = 2/3 * speed at 10 m height, v_10m = 1.5*v_head
+      TMP_G = TMP(II,JJ,KK) - TMPM ! Temperature as Celsius
+      VEL = 1.5_EB*SQRT(2._EB*KRES(II,JJ,KK)) ! Flow (wind) speed as m/s at 10 m height
+      GAS_PHASE_OUTPUT_RES = MIN(13.12_EB+0.6215_EB*TMP_G-13.956_EB*VEL**(0.16_EB)+0.4867_EB*TMP_G*VEL**(0.16_EB),TMP_G)
    END SELECT
 END FUNCTION GAS_PHASE_OUTPUT
 
