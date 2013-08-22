@@ -966,19 +966,25 @@ SUBROUTINE MMS_VELOCITY_FLUX(NM,T)
 
 ! Shunn et al., JCP (2012) prob 3
 
-USE MANUFACTURED_SOLUTIONS, ONLY: UF_MMS,WF_MMS,VD2D_MMS_U_SRC,VD2D_MMS_V_SRC
+USE MANUFACTURED_SOLUTIONS, ONLY: UF_MMS,WF_MMS,VD2D_MMS_U_SRC,VD2D_MMS_V_SRC,VD2D_MMS_RHO_SRC
 INTEGER, INTENT(IN) :: NM
 REAL(EB), INTENT(IN) :: T
 INTEGER :: I,J,K
 REAL(EB) :: XHAT,ZHAT,RRHO
-REAL(EB), POINTER, DIMENSION(:,:,:) :: RHOP=>NULL()
+REAL(EB), POINTER, DIMENSION(:,:,:) :: RHOP=>NULL(),UU=>NULL(),WW=>NULL()
 
 CALL POINT_TO_MESH(NM)
 IF (PREDICTOR) THEN
    RHOP=>RHO
+   UU=>U
+   WW=>W
 ELSE
    RHOP=>RHOS
+   UU=>US
+   WW=>WS
 ENDIF
+
+! Since we do not solve the momentum equations in conservative form, we must also subtract u_i/rho*Q_rho from the RHS.
 
 DO K=1,KBAR
    DO J=1,JBAR
@@ -986,7 +992,7 @@ DO K=1,KBAR
          RRHO  = 2._EB/(RHOP(I,J,K)+RHOP(I+1,J,K))
          XHAT =  X(I) - UF_MMS*T
          ZHAT = ZC(K) - WF_MMS*T
-         FVX(I,J,K) = FVX(I,J,K) - RRHO*VD2D_MMS_U_SRC(XHAT,ZHAT,T)
+         FVX(I,J,K) = FVX(I,J,K) - RRHO*( VD2D_MMS_U_SRC(XHAT,ZHAT,T) - UU(I,J,K)*VD2D_MMS_RHO_SRC(X(I),ZC(K),T) )
       ENDDO 
    ENDDO   
 ENDDO
@@ -997,7 +1003,7 @@ DO K=0,KBAR
          RRHO  = 2._EB/(RHOP(I,J,K)+RHOP(I,J,K+1))
          XHAT = XC(I) - UF_MMS*T
          ZHAT =  Z(K) - WF_MMS*T
-         FVZ(I,J,K) = FVZ(I,J,K) - RRHO*VD2D_MMS_V_SRC(XHAT,ZHAT,T)
+         FVZ(I,J,K) = FVZ(I,J,K) - RRHO*( VD2D_MMS_V_SRC(XHAT,ZHAT,T) - WW(I,J,K)*VD2D_MMS_RHO_SRC(XC(I),Z(K),T) )
       ENDDO 
    ENDDO   
 ENDDO
@@ -1501,7 +1507,7 @@ ENDIF FREEZE_VELOCITY_IF
 
 ! Manufactured solution (debug)
 
-IF (PERIODIC_TEST==7) THEN
+IF (PERIODIC_TEST==7 .and. .true.) THEN
    DO K=1,KBAR
       DO J=1,JBAR
          DO I=0,IBAR
@@ -1603,7 +1609,7 @@ ENDIF FREEZE_VELOCITY_IF
 
 ! Manufactured solution (debug)
 
-IF (PERIODIC_TEST==7) THEN
+IF (PERIODIC_TEST==7 .and. .true.) THEN
    DO K=1,KBAR
       DO J=1,JBAR
          DO I=0,IBAR
