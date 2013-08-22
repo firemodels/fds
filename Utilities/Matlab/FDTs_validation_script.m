@@ -44,6 +44,7 @@ Histogram_Tex_Output = [pwd, '/../../Manuals/FDTs_Validation_Guide/SCRIPT_FIGURE
 NRC_Options = false;
 Append_To_Scatterplot_Title = '';
 
+% Run dataplot and scatplot scripts
 [saved_data,drange] = dataplot(Dataplot_Inputs_File, Working_Dir, Manuals_Dir);
 scatplot(saved_data, drange, ...
          'Scatterplot_Inputs_File', Scatterplot_Inputs_File, ...

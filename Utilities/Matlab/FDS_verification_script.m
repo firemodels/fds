@@ -51,6 +51,7 @@ Statistics_Tex_Output = [pwd, '/../../Manuals/FDS_Verification_Guide/SCRIPT_FIGU
 NRC_Options = false;
 Append_To_Scatterplot_Title = '';
 
+% Run dataplot and scatplot scripts
 [saved_data,drange] = dataplot(Dataplot_Inputs_File, Working_Dir, Manuals_Dir);
 scatplot(saved_data, drange, ...
          'Scatterplot_Inputs_File', Scatterplot_Inputs_File, ...
