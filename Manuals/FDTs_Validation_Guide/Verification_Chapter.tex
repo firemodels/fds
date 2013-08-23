@@ -127,6 +127,67 @@ $T_\infty$ ($^\circ$C)  &  23          \\ \hline
 \noindent Expected output: At 60~s, the HGL temperature $T_g$ is 49.87~$^\circ$C; at 120~s, $T_g$ is 63.33~$^\circ$C; at 180~s, $T_g$ is 73.67~$^\circ$C.
 
 
+\subsection{HGL Depth (ASET)}
+
+Test: NIST/NRC Test 1
+
+\begin{table}[!ht]
+\caption[Input parameters, HGL depth]
+{Input parameters, HGL depth.}
+\begin{center}
+\begin{tabular}{|l|c|}
+\hline
+                        &              \\
+\rb{Input Parameter}    &  \rb{Value}  \\ \hline \hline
+$\dot Q$ (kW)           &  410         \\ \hline
+$L$ (m)                 &  21.66       \\ \hline
+$W$ (m)                 &  7.04        \\ \hline
+$H$ (m)                 &  3.82        \\ \hline
+$k$ (kW/m/K)            &  0.00012     \\ \hline
+$\rho$ (kg/m$^3$)       &  737         \\ \hline
+$c$ (kJ/kg/K)           &  0.9         \\ \hline
+$\delta$ (m)            &  0.0254      \\ \hline
+$T_\infty$ ($^\circ$C)  &  22          \\ \hline
+Location Factor (-)     &  1           \\ \hline
+$\chi_l$ (-)            &  0           \\ \hline
+$z_f$ (-)               &  0           \\ \hline
+\end{tabular}
+\end{center}
+\end{table}
+
+\noindent Expected output: At 10~s, the HGL depth $z$ is 3.47~m; at 20~s, $z$ is 3.17~m, at 30~s, $z$ is 2.89~m.
+
+
+\subsection{HGL Depth (Yamana and Tanaka)}
+
+Test: NIST/NRC Test 1
+
+\noindent Note: The method of Beyler is used to calculate the HGL temperature, $T_g$.
+
+\begin{table}[!ht]
+\caption[Input parameters, HGL depth]
+{Input parameters, HGL depth.}
+\begin{center}
+\begin{tabular}{|l|c|}
+\hline
+                        &              \\
+\rb{Input Parameter}    &  \rb{Value}  \\ \hline \hline
+$\dot Q$ (kW)           &  410         \\ \hline
+$L$ (m)                 &  21.66       \\ \hline
+$W$ (m)                 &  7.04        \\ \hline
+$H$ (m)                 &  3.82        \\ \hline
+$k$ (kW/m/K)            &  0.00012     \\ \hline
+$\rho$ (kg/m$^3$)       &  737         \\ \hline
+$c$ (kJ/kg/K)           &  0.9         \\ \hline
+$\delta$ (m)            &  0.0254      \\ \hline
+$T_\infty$ ($^\circ$C)  &  22          \\ \hline
+\end{tabular}
+\end{center}
+\end{table}
+
+\noindent Expected output: At 10~s, the HGL depth $z$ is 3.54~m; at 20~s, $z$ is 3.29~m, at 30~s, $z$ is 3.07~m.
+
+
 \clearpage
 
 
