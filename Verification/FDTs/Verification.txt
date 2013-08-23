@@ -8,11 +8,16 @@
 
 # HGL Temperature, Forced Ventilation (DB)
 # FM/SNL Test 1
-&DB Q=516., M_DOT=4.5, TMP_A=15., L=18.3, W=12.2, H=6.1, C_S=1.16, K_S=0.00023, RHO_S=1000., DELTA=0.025, T_END= 600., OUTPUT_FILE='HGL_Temperature_Forced_Ventilation_DB.csv' /
+&DB Q=516., M_DOT=4.5, TMP_A=15., L=18.3, W=12.2, H=6.1, C_S=1.16, K_S=0.00023, RHO_S=1000., DELTA=0.025, T_END=600., OUTPUT_FILE='HGL_Temperature_Forced_Ventilation_DB.csv' /
 
 # HGL Temperature, No Ventilation (Beyler)
 # LLNL Test 1
 &BEYLER Q=200., TMP_A=23., L=6., W=4., H=4.5, C_S=1., K_S=0.000463, RHO_S=1607., DELTA=0.1, T_END=500., OUTPUT_FILE='HGL_Temperature_No_Ventilation_Beyler.csv' /
+
+# HGL Depth (ASET)
+# HGL Depth (YT)
+# NIST/NRC Test 1
+&BEYLER Q=410., TMP_A=22., L=21.66, W=7.04, H=3.82, C_S=0.9, K_S=0.00012, RHO_S=737., DELTA=0.0254, T_END=1350., OUTPUT_FILE='HGL_Depth.csv', LOCATION_FACTOR=1, HEAT_LOSS_FRACTION=0, FUEL_HEIGHT=0 /
 
 # Plume Temperature (Heskestad)
 # VTT Test 1
