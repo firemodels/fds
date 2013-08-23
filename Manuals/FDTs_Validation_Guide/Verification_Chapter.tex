@@ -32,7 +32,7 @@ $T_\infty$ ($^\circ$C)  &  33          \\ \hline
 \end{center}
 \end{table}
 
-\noindent Expected output: At 60~s, the HGL temperature $T_g$ is 111.45~$^\circ$C; at 120~s, $T_g$ is 121.05~$^\circ$C; at 180~s, $T_g$ is 127.21~$^\circ$C.
+\noindent Expected result: At 60~s, the HGL temperature $T_g$ is 111.45~$^\circ$C; at 120~s, $T_g$ is 121.05~$^\circ$C; at 180~s, $T_g$ is 127.21~$^\circ$C.
 
 
 \clearpage
@@ -64,7 +64,7 @@ $T_\infty$ ($^\circ$C)  &  15          \\ \hline
 \end{center}
 \end{table}
 
-\noindent Expected output: At 60~s, the HGL temperature $T_g$ is 53.07~$^\circ$C; at 120~s, $T_g$ is 58.13~$^\circ$C; at 180~s, $T_g$ is 61.39~$^\circ$C.
+\noindent Expected result: At 60~s, the HGL temperature $T_g$ is 53.07~$^\circ$C; at 120~s, $T_g$ is 58.13~$^\circ$C; at 180~s, $T_g$ is 61.39~$^\circ$C.
 
 
 \subsection{HGL Temperature, Forced Ventilation (DB)}
@@ -93,7 +93,7 @@ $T_\infty$ ($^\circ$C)  &  15          \\ \hline
 \end{center}
 \end{table}
 
-\noindent Expected output: At 60~s, the HGL temperature $T_g$ is 34.60~$^\circ$C; at 120~s, $T_g$ is 40.88~$^\circ$C; at 180~s, $T_g$ is 45.16~$^\circ$C.
+\noindent Expected result: At 60~s, the HGL temperature $T_g$ is 34.60~$^\circ$C; at 120~s, $T_g$ is 40.88~$^\circ$C; at 180~s, $T_g$ is 45.16~$^\circ$C.
 
 
 \clearpage
@@ -124,7 +124,7 @@ $T_\infty$ ($^\circ$C)  &  23          \\ \hline
 \end{center}
 \end{table}
 
-\noindent Expected output: At 60~s, the HGL temperature $T_g$ is 49.87~$^\circ$C; at 120~s, $T_g$ is 63.33~$^\circ$C; at 180~s, $T_g$ is 73.67~$^\circ$C.
+\noindent Expected result: At 60~s, the HGL temperature $T_g$ is 49.87~$^\circ$C; at 120~s, $T_g$ is 63.33~$^\circ$C; at 180~s, $T_g$ is 73.67~$^\circ$C.
 
 
 \subsection{HGL Depth (ASET)}
@@ -155,7 +155,7 @@ $z_f$ (-)               &  0           \\ \hline
 \end{center}
 \end{table}
 
-\noindent Expected output: At 10~s, the HGL depth $z$ is 3.47~m; at 20~s, $z$ is 3.17~m, at 30~s, $z$ is 2.89~m.
+\noindent Expected result: At 10~s, the HGL depth $z$ is 3.47~m; at 20~s, $z$ is 3.17~m; at 30~s, $z$ is 2.89~m.
 
 
 \subsection{HGL Depth (Yamana and Tanaka)}
@@ -163,6 +163,8 @@ $z_f$ (-)               &  0           \\ \hline
 Test: NIST/NRC Test 1
 
 \noindent Note: The method of Beyler is used to calculate the HGL temperature, $T_g$.
+
+\noindent In the FDTs spreadsheets, this HGL depth calculation method is used with natual ventilation and the MQH correlation.
 
 \begin{table}[!ht]
 \caption[Input parameters, HGL depth]
@@ -185,7 +187,7 @@ $T_\infty$ ($^\circ$C)  &  22          \\ \hline
 \end{center}
 \end{table}
 
-\noindent Expected output: At 10~s, the HGL depth $z$ is 3.54~m; at 20~s, $z$ is 3.29~m, at 30~s, $z$ is 3.07~m.
+\noindent Expected result: At 10~s, the HGL depth $z$ is 3.54~m; at 20~s, $z$ is 3.29~m; at 30~s, $z$ is 3.07~m.
 
 
 \clearpage
@@ -212,7 +214,7 @@ $T_\infty$ ($^\circ$C)  &  22          \\ \hline
 \end{center}
 \end{table}
 
-\noindent Expected output: The plume temperature $T_{0}$ is 133.76~$^\circ$C.
+\noindent Expected result: The plume temperature $T_{0}$ is 133.76~$^\circ$C.
 
 
 \subsection{Plume Temperature (McCaffrey)}
@@ -232,7 +234,46 @@ $T_\infty$ ($^\circ$C)  &  22          \\ \hline
 \end{center}
 \end{table}
 
-\noindent Expected output: The plume temperature $T_{0}$ is 153.21~$^\circ$C.
+\noindent Expected result: The plume temperature $T_{0}$ is 153.21~$^\circ$C.
+
+
+\clearpage
+
+
+% \section{Target Temperature}
+
+
+\section{Target Heat Flux}
+
+\subsection{Point Source Radiation Heat Flux}
+
+Test: Fleury 100 kW, 1:1 Burner
+\\ \\
+\noindent In the FDTs spreadsheets, the point source radiation heat flux is calculated without accounting for the elevation
+of the target with respect to the fire, and the flame height is not considered. The FDTs.f90 program considers both of these.
+
+\begin{table}[!ht]
+\caption[Input parameters, point source radiation heat flux]
+{Input parameters, point source radiation heat flux.}
+
+\begin{center}
+\begin{tabular}{|l|l|}
+\hline
+                      &                   \\
+\rb{Input Parameter}  &  \rb{Value}       \\ \hline \hline
+$\dot Q$ (kW)         &  100              \\ \hline
+$\chi_r$ (-)          &  0.35             \\ \hline
+$A$ (m$^2$)           &  0.09             \\ \hline
+$x$ (m)               &  0.50, 0.75, 1.0  \\ \hline
+$z$ (m)               &  0.0              \\ \hline
+IOR (-)               &  2                \\ \hline
+\end{tabular}
+\end{center}
+\end{table}
+
+\noindent Expected result (FDTs spreadsheets): At a radius $R$ of 0.67~m, the radiative heat flux $q''_{r}$ is 6.22~kW/m$^2$; at an $R$ of 0.92~m, $q''_{r}$ is 3.30~kW/m$^2$; at an $R$ of 1.17~m, $q''_{r}$ is 2.04~kW/m$^2$.
+\\ \\
+\noindent Expected result (FDTs.f90): At a radius $R$ of 0.50~m, the radiative heat flux $q''_{r}$ is 6.01~kW/m$^2$; at an $R$ of 0.75~m, $q''_{r}$ is 3.65~kW/m$^2$; at an $R$ of 1.0~m, $q''_{r}$ is 2.33~kW/m$^2$.
 
 
 \clearpage
@@ -261,7 +302,7 @@ $T_{\infty}$ ($^\circ$C)  &  22          \\ \hline
 \end{center}
 \end{table}
 
-\noindent Expected output: The ceiling jet temperature $T_{jet}$ is 46.45~$^\circ$C.
+\noindent Expected result: The ceiling jet temperature $T_{jet}$ is 46.45~$^\circ$C.
 
 
 \subsection{Sprinkler Activation Time}
@@ -287,7 +328,10 @@ $T_\infty$ ($^\circ$C)        &  16.6        \\ \hline
 \end{center}
 \end{table}
 
-\noindent Expected output: At 50~s, the HRR $\dot Q$ is 262.5~kW, and the activation time $t_{activation}$ is 98.74~s.
+\noindent Expected result: At 50~s, the HRR $\dot Q$ is 262.5~kW, and the activation time $t_{activation}$ is 98.74~s.
+
+
+\clearpage
 
 
 \subsection{Smoke Detector Activation Time (Alpert)}
@@ -312,7 +356,7 @@ $T_\infty$ ($^\circ$C)    &  21          \\ \hline
 \end{center}
 \end{table}
 
-\noindent Expected output: At 47~s, the HRR $\dot Q$ is 10.23~kW, and the activation time $t_{activation}$ is 30.8~s.
+\noindent Expected result: At 47~s, the HRR $\dot Q$ is 10.23~kW, and the activation time $t_{activation}$ is 30.8~s.
 
 
 \subsection{Smoke Detector Activation Time (Milke)}
@@ -334,8 +378,12 @@ $\Delta T_c$ ($^\circ$C)  &  10          \\ \hline
 \end{center}
 \end{table}
 
-\noindent Expected output: At 40~s, the HRR $\dot Q$ is 7.41~kW, and the activation time $t_{activation}$ is 47.3~s.
+\noindent Expected result: At 40~s, the HRR $\dot Q$ is 7.41~kW, and the activation time $t_{activation}$ is 47.3~s.
+\\ \\
 Note: The FDTs spreadsheets use an incorrect unit conversion factor from kW to Btu/s, which gives an activation time of 39.5~s.
+
+
+\clearpage
 
 
 \subsection{Smoke Detector Activation Time (Mowrer)}
@@ -358,5 +406,5 @@ $H$ (m)               &  2.1         \\ \hline
 \end{center}
 \end{table}
 
-\noindent Expected output: At 5~s, the HRR $\dot Q$ is 0.116~kW, and the activation time $t_{activation}$ is 5.6~s.
+\noindent Expected result: At 5~s, the HRR $\dot Q$ is 0.116~kW, and the activation time $t_{activation}$ is 5.6~s.
 
