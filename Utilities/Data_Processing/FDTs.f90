@@ -332,11 +332,11 @@ TMP_A = TMP_A + 273.
 RHO_A = 353./(TMP_A)
 M = L*W*H*RHO_A
 Z_ASET = H
-DT = T_END/50.
+DT = 1.
 
 WRITE(11,'(A)') 'Time,Temp,HGL Depth Yamana Tanaka (m),HGL Depth ASET (m)'
 
-DO I=0,50
+DO I=1,T_END
 
    T = I*DT
 
@@ -357,7 +357,7 @@ DO I=0,50
    ENDIF
 
    ! Calculate HGL height using Yamana and Tanaka correlation (1985)
-   K = 0.076/(353/TMP_G)
+   K = 0.076/(353./TMP_G)
    Z_YT = (2*K*Q**(1./3.)*T/(3*L*W) + (1/H**(2./3.)))**(-3./2.)
 
    WRITE(11,'(F6.1,A1,F6.1,A1,F6.2,A1,F6.2)') T,',',TMP_G-273.,',',Z_YT,',',Z_ASET
