@@ -8333,7 +8333,7 @@ updatemenu=0;
               break;
             }
           }
-          if(nsootloaded>1) glutAddMenuEntry(_("soot density - all meshes"),-1);
+          if(nsootloaded>1) glutAddMenuEntry(_("SOOT MASS FRACTION - all meshes"),-1);
           if(nhrrloaded>1)  glutAddMenuEntry(_("HRRPUV - all meshes"),-2);
           if(nwaterloaded>1)glutAddMenuEntry(_("water - all meshes"),-3);
           if(nsootloaded>1||nhrrloaded>1||nwaterloaded>1)glutAddMenuEntry("-",999);
@@ -8427,7 +8427,7 @@ updatemenu=0;
             glutAddMenuEntry("-",-2);
           }
           if(nmeshes>1){
-            if(n_soot_menu>0)glutAddSubMenu(_("soot Mass Fraction - single mesh"),loadsmoke3dsootmenu);
+            if(n_soot_menu>0)glutAddSubMenu(_("SOOT MASS FRACTION - single mesh"),loadsmoke3dsootmenu);
             if(n_hrr_menu>0)glutAddSubMenu(_("HRRPUV - single mesh"),loadsmoke3dhrrmenu);
             if(n_water_menu>0)glutAddSubMenu(_("Water - single mesh"),loadsmoke3dwatermenu);
           }
