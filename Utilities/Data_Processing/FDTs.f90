@@ -904,14 +904,16 @@ DO WHILE (ITER)
       Q = ALPHA * CUTOFF_TIME**2
    ENDIF
 
-   ! Note, these equations contain conversion factors from m to ft
-   ! and C to F to match the units of the original correlation.
+   ! Note, these equations contain conversion factors (NIST SP 811) from m to ft,
+   ! C to F, and kW to Btu/s to match the units of the original correlation.
    
-   Y = (DELTA_T_C*1.8) * (H/0.3048)**(5./3.) / (Q/0.94781712)**(2./3.)
+   Y = (DELTA_T_C*1.8) * (H/0.3048)**(5./3.) / (Q/1.055056)**(2./3.)
 
    X = 4.6*1E-4*Y**2 + 2.7*1E-15*Y**6
 
-   t_activation = X * (H/0.3048)**(4./3.) / (Q/0.94781712)**(1./3.)
+   t_activation = X * (H/0.3048)**(4./3.) / (Q/1.055056)**(1./3.)
+
+   WRITE(*,*) T, Q, t_activation
 
    IF (t_activation>9999) THEN
       WRITE(11,'(F6.1,A1,I2,A5,F6.1)') T,',',-1,',NaN,',Q
