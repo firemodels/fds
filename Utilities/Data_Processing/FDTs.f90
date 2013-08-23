@@ -913,8 +913,6 @@ DO WHILE (ITER)
 
    t_activation = X * (H/0.3048)**(4./3.) / (Q/1.055056)**(1./3.)
 
-   WRITE(*,*) T, Q, t_activation
-
    IF (t_activation>9999) THEN
       WRITE(11,'(F6.1,A1,I2,A5,F6.1)') T,',',-1,',NaN,',Q
    ELSEIF (t_activation>T) THEN
