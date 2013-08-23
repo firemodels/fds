@@ -27,6 +27,10 @@
 # VTT Test 1
 &MCCAFFREY TIME_RAMP=13, Q_RAMP=1245, Z=6, TMP_A=22, OUTPUT_FILE='Plume_Temperature_MCCAFFREY.csv', Z_LABEL='6 m' /
 
+# Target Heat Flux (McCaffrey)
+# Fleury 100 kW, 1:1 Burner
+&RAD AREA=0.09, Q=100., RADIATIVE_FRACTION=0.35, X=0.5,0.75,1.0, Z=0.0, IOR=2, Z_LABEL='f000', OUTPUT_FILE='Target_Heat_Flux_PSR.csv' /
+
 # Ceiling Jet Temperature (Alpert)
 # NIST/NRC, Test 1
 &ALPERT Q=410., LOCATION_FACTOR=1, T_END=1350., R_VALUES=5.9, H_VALUES=3.72, LABEL='Tr 7-10', TMP_A=22., OUTPUT_FILE='Ceiling_Jet_Temperature_ALPERT.csv' /
