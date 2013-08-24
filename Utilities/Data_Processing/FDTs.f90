@@ -277,8 +277,8 @@ DO I=0,50
    IF (STEEL_UNPROTECTED) THEN
       DELTA_T = 1
       T_STEEL = TMP_A
-      DO J=2,T_END
-         T_STEEL(J) = (F_V * (1/(RHO_STEEL*C_STEEL)) * ((H_C * ((TMP_G)-(T_STEEL(J-1)))) + ((SIGMA*1000) * EPSILON * ((TMP_G)**4 - (T_STEEL(J-1))**4))) * DELTA_T) + (T_STEEL(J-1))
+      DO J=1,T_END-1
+         T_STEEL(J+1) = (F_V * (1/(RHO_STEEL*C_STEEL)) * ((H_C * ((TMP_G)-(T_STEEL(J)))) + ((SIGMA*1000) * EPSILON * ((TMP_G)**4 - (T_STEEL(J))**4))) * DELTA_T) + (T_STEEL(J))
       ENDDO
    ENDIF
 
@@ -286,19 +286,19 @@ DO I=0,50
       DELTA_T = 1
       T_STEEL = TMP_A
       IF (C_STEEL * W_D > 2 * C_I * RHO_I * H_I) THEN
-         DO J=2,T_END
-            T_STEEL(J) = (((K_I/(C_STEEL*H_I*W_D + 0.5*C_I*RHO_I*H_I**2)) * ((TMP_G)-(T_STEEL(J-1)))) * DELTA_T) + (T_STEEL(J-1))
+         DO J=1,T_END-1
+            T_STEEL(J+1) = (((K_I/(C_STEEL*H_I*W_D + 0.5*C_I*RHO_I*H_I**2)) * ((TMP_G)-(T_STEEL(J)))) * DELTA_T) + (T_STEEL(J))
          ENDDO
       ELSE
-         DO J=2,T_END
-            T_STEEL(J) = ((((K_I/H_I)/(C_STEEL*W_D + 0.5*C_I*RHO_I*H_I)) * ((TMP_G)-(T_STEEL(J-1)))) * DELTA_T) + (T_STEEL(J-1))
+         DO J=1,T_END-1
+            T_STEEL(J+1) = ((((K_I/H_I)/(C_STEEL*W_D + 0.5*C_I*RHO_I*H_I)) * ((TMP_G)-(T_STEEL(J)))) * DELTA_T) + (T_STEEL(J))
          ENDDO
       ENDIF
    ENDIF
 
    IF ((STEEL_UNPROTECTED == .TRUE.) .OR. (STEEL_PROTECTED == .TRUE.)) THEN
       IF ((.NOT.PROFILE) .AND. (I==0)) WRITE(11,'(F6.1,A1,F6.1,A1,F6.2,A1,F7.2)') T,',',TMP_G-273.,',',Z,',',T_STEEL(1)-273
-      IF ((.NOT.PROFILE) .AND. (I/=0)) WRITE(11,'(F6.1,A1,F6.1,A1,F6.2,A1,F7.2)') T,',',TMP_G-273.,',',Z,',',T_STEEL(T)-273
+      IF ((.NOT.PROFILE) .AND. (I/=0)) WRITE(11,'(F6.1,A1,F6.1,A1,F6.2,A1,F7.2)') T,',',TMP_G-273.,',',Z,',',T_STEEL(T+1)-273
    ELSE
       IF ((.NOT.PROFILE) .AND. (I==0)) WRITE(11,'(F6.1,A1,F6.1,A1,F6.2)') T,',',TMP_G-273.,',',Z
       IF ((.NOT.PROFILE) .AND. (I/=0)) WRITE(11,'(F6.1,A1,F6.1,A1,F6.2)') T,',',TMP_G-273.,',',Z
@@ -323,7 +323,8 @@ END SUBROUTINE COMPUTE_MQH
 
 SUBROUTINE COMPUTE_BEYLER
 
-REAL :: K1,K2,M,K,Z
+REAL :: K1,K2,M,K,Z,DELTA_T,Z_ASET(9999)
+INTEGER :: J
 
 OPEN(11,FILE=TRIM(OUTPUT_FILE),FORM='FORMATTED',STATUS='REPLACE')
 
@@ -331,14 +332,12 @@ A_T = 2.*L*W + 2.*L*H + 2.*W*H
 TMP_A = TMP_A + 273.
 RHO_A = 353./(TMP_A)
 M = L*W*H*RHO_A
-Z_ASET = H
-DT = 1.
 
 WRITE(11,'(A)') 'Time,Temp,HGL Depth Yamana Tanaka (m),HGL Depth ASET (m)'
 
-DO I=1,T_END
+DO I=0,50
 
-   T = I*DT
+   T = I*T_END/50.
 
    K1 = 2*(0.4*SQRT(K_S*RHO_S*C_S))*A_T/(M*C_P)
    K2 = Q/(M*C_P)
@@ -346,21 +345,28 @@ DO I=1,T_END
    TMP_G = TMP_A + (2.*K2/K1**2)*(K1*SQRT(T) - 1. + EXP(-K1*SQRT(T)))
 
    ! Calculate HGL height using ASET correlation
-   IF (I>0) THEN
+   Z_ASET = H
+   DELTA_T = 1.
+
+   DO J=1,T_END-1
       V_EXP = (1 - HEAT_LOSS_FRACTION) * Q / 353.
-      V_ENT = ((1 / LOCATION_FACTOR) * 0.21 * (G / (RHO_A * TMP_A))**(1./3.)) * (LOCATION_FACTOR * Q)**(1./3.) * (Z_ASET - FUEL_HEIGHT)**(5./3.)
+      V_ENT = ((1 / LOCATION_FACTOR) * 0.21 * (G / (RHO_A * TMP_A))**(1./3.)) * (LOCATION_FACTOR * Q)**(1./3.) * (Z_ASET(J) - FUEL_HEIGHT)**(5./3.)
       V_UL = V_EXP + V_ENT
-      Z_ASET = Z_ASET - (V_UL * DT) / (L * W)
-      IF (Z_ASET < FUEL_HEIGHT) THEN
-         Z_ASET = FUEL_HEIGHT
+      Z_ASET(J+1) = Z_ASET(J) - ( (V_UL) / (L * W) ) * DELTA_T
+      IF (Z_ASET(J+1) < FUEL_HEIGHT) THEN
+         Z_ASET(J+1) = FUEL_HEIGHT
       ENDIF
-   ENDIF
+   ENDDO
 
    ! Calculate HGL height using Yamana and Tanaka correlation (1985)
    K = 0.076/(353./TMP_G)
    Z_YT = (2*K*Q**(1./3.)*T/(3*L*W) + (1/H**(2./3.)))**(-3./2.)
 
-   WRITE(11,'(F6.1,A1,F6.1,A1,F6.2,A1,F6.2)') T,',',TMP_G-273.,',',Z_YT,',',Z_ASET
+   IF (I==0) THEN
+      WRITE(11,'(F6.1,A1,F6.1,A1,F6.2,A1,F6.2)') T,',',TMP_G-273.,',',Z_YT,',',Z_ASET(1)
+   ELSE
+      WRITE(11,'(F6.1,A1,F6.1,A1,F6.2,A1,F6.2)') T,',',TMP_G-273.,',',Z_YT,',',Z_ASET(T+1)
+   ENDIF
 
 ENDDO
 
@@ -751,6 +757,7 @@ REAL :: T_STEEL(9999),DELTA_T
 CHARACTER(30) :: FMT
 
 SIGMA = 5.67e-11
+TMP_A = TMP_A + 273.
 
 OPEN(11,FILE=TRIM(OUTPUT_FILE),FORM='FORMATTED',STATUS='REPLACE')
 
@@ -786,15 +793,15 @@ DO I=1,9999
 
       ! Compute plume centerline temperature
 
-      T_PLUME(J) = (((KAPPA)/(0.9*SQRT(2*G)))**(2.) * (Z_Q_2_5)**(2*ETA-1) * (TMP_A+273)) + (TMP_A+273)
+      T_PLUME(J) = (((KAPPA)/(0.9*SQRT(2*G)))**(2.) * (Z_Q_2_5)**(2*ETA-1) * (TMP_A)) + (TMP_A)
 
       ! Compute steel temperatures
 
       IF (STEEL_UNPROTECTED) THEN
          DELTA_T = 1
          T_STEEL = TMP_A
-         DO M=2,TIME_RAMP(I)
-            T_STEEL(M) = (F_V * (1/(RHO_STEEL*C_STEEL)) * ((H_C * ((T_PLUME(J))-(T_STEEL(M-1)))) + ((SIGMA*1000) * EPSILON * ((T_PLUME(J))**4 - (T_STEEL(M-1))**4))) * DELTA_T) + (T_STEEL(M-1))
+         DO M=1,TIME_RAMP(I)-1
+            T_STEEL(M+1) = (F_V * (1/(RHO_STEEL*C_STEEL)) * ((H_C * ((T_PLUME(J))-(T_STEEL(M)))) + ((SIGMA*1000) * EPSILON * ((T_PLUME(J))**4 - (T_STEEL(M))**4))) * DELTA_T) + (T_STEEL(M))
          ENDDO
          MAX_STEEL_TEMP(J) = MAXVAL(T_STEEL)
       ENDIF
@@ -803,12 +810,12 @@ DO I=1,9999
          DELTA_T = 1
          T_STEEL = TMP_A
          IF (C_STEEL * W_D > 2 * C_I * RHO_I * H_I) THEN
-            DO M=2,TIME_RAMP(I)
-               T_STEEL(M) = (((K_I/(C_STEEL*H_I*W_D + 0.5*C_I*RHO_I*H_I**2)) * ((T_PLUME(J))-(T_STEEL(M-1)))) * DELTA_T) + (T_STEEL(M-1))
+            DO M=1,TIME_RAMP(I)-1
+               T_STEEL(M+1) = (((K_I/(C_STEEL*H_I*W_D + 0.5*C_I*RHO_I*H_I**2)) * ((T_PLUME(J))-(T_STEEL(M)))) * DELTA_T) + (T_STEEL(M))
             ENDDO
          ELSE
-            DO M=2,TIME_RAMP(I)
-               T_STEEL(M) = ((((K_I/H_I)/(C_STEEL*W_D + 0.5*C_I*RHO_I*H_I)) * ((T_PLUME(J))-(T_STEEL(M-1)))) * DELTA_T) + (T_STEEL(M-1))
+            DO M=1,TIME_RAMP(I)-1
+               T_STEEL(M+1) = ((((K_I/H_I)/(C_STEEL*W_D + 0.5*C_I*RHO_I*H_I)) * ((T_PLUME(J))-(T_STEEL(M)))) * DELTA_T) + (T_STEEL(M))
             ENDDO
          ENDIF
          MAX_STEEL_TEMP(J) = MAXVAL(T_STEEL)
