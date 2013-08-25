@@ -44,7 +44,7 @@ DO
    READ(10,NML=FPA,END=100,ERR=99,IOSTAT=IOS)
    CALL COMPUTE_FPA
 ENDDO
-100 WRITE(0,*) 'Done FPA'
+100 WRITE(0,*) 'Completed FPA.'
 REWIND(10)
 
 ! Process DB (Deal and Beyler)
@@ -52,7 +52,7 @@ DO
    READ(10,NML=DB,END=101,ERR=99,IOSTAT=IOS)
    CALL COMPUTE_DB
 ENDDO
-101 WRITE(0,*) 'Done Deal and Beyler'
+101 WRITE(0,*) 'Completed Deal and Beyler.'
 REWIND(10)
 
 ! Process MQH lines
@@ -61,7 +61,7 @@ DO
    READ(10,NML=MQH,END=102,ERR=99,IOSTAT=IOS)
    CALL COMPUTE_MQH
 ENDDO
-102 WRITE(0,*) 'Done MQH'
+102 WRITE(0,*) 'Completed MQH.'
 REWIND(10)
 
 ! Process Beyler lines
@@ -70,7 +70,7 @@ DO
    READ(10,NML=BEYLER,END=103,ERR=99,IOSTAT=IOS)
    CALL COMPUTE_BEYLER
 ENDDO
-103 WRITE(0,*) 'Done Beyler'
+103 WRITE(0,*) 'Completed Beyler.'
 REWIND(10)
 
 ! Process Point Source Radiation lines
@@ -80,7 +80,7 @@ DO
    READ(10,NML=RAD,END=104,ERR=99,IOSTAT=IOS)
    CALL COMPUTE_POINT_SOURCE_RADIATION
 ENDDO
-104 WRITE(0,*) 'Done Point Source Radiation'
+104 WRITE(0,*) 'Completed Point Source Radiation.'
 REWIND(10)
 
 ! Process THIEF lines
@@ -90,7 +90,7 @@ DO
    READ(10,NML=THIEF,END=105,ERR=99,IOSTAT=IOS)
    CALL COMPUTE_THIEF
 ENDDO
-105 WRITE(0,*) 'Done THIEF'
+105 WRITE(0,*) 'Completed THIEF.'
 REWIND(10)
 
 ! Process ALPERT (Ceiling Jet Temperature) lines
@@ -100,7 +100,7 @@ DO
    READ(10,NML=ALPERT,END=106,ERR=99,IOSTAT=IOS)
    CALL COMPUTE_ALPERT
 ENDDO
-106 WRITE(0,*) 'Done Ceiling Jet Temperatures (Alpert)'
+106 WRITE(0,*) 'Completed Ceiling Jet Temperatures (Alpert).'
 REWIND(10)
 
 ! Process SPRINKLER (Sprinkler Activation) lines
@@ -109,7 +109,7 @@ DO
    READ(10,NML=SPRINKLER,END=107,ERR=99,IOSTAT=IOS)
    CALL COMPUTE_SPRINKLER
 ENDDO
-107 WRITE(0,*) 'Done Sprinkler Activation (Alpert)'
+107 WRITE(0,*) 'Completed Sprinkler Activation (Alpert).'
 REWIND(10)
 
 ! Process HESKESTAD (Plume Centerline Temperature) lines
@@ -119,7 +119,7 @@ DO
    READ(10,NML=HESKESTAD,END=108,ERR=99,IOSTAT=IOS)
    CALL COMPUTE_HESKESTAD
 ENDDO
-108 WRITE(0,*) 'Done Heskestad Plume'
+108 WRITE(0,*) 'Completed Heskestad Plume.'
 REWIND(10)
 
 ! Process MCCAFFREY (Plume Centerline Temperature) lines
@@ -129,7 +129,7 @@ DO
    READ(10,NML=MCCAFFREY,END=109,ERR=99,IOSTAT=IOS)
    CALL COMPUTE_MCCAFFREY
 ENDDO
-109 WRITE(0,*) 'Done McCaffrey Plume'
+109 WRITE(0,*) 'Completed McCaffrey Plume.'
 REWIND(10)
 
 ! Process MOWRER (Smoke Detector Activation) lines
@@ -138,7 +138,7 @@ DO
    READ(10,NML=MOWRER,END=110,ERR=99,IOSTAT=IOS)
    CALL COMPUTE_MOWRER
 ENDDO
-110 WRITE(0,*) 'Done Smoke Detector Activation (Mowrer)'
+110 WRITE(0,*) 'Completed Smoke Detector Activation (Mowrer).'
 REWIND(10)
 
 ! Process MILKE (Smoke Detector Activation) lines
@@ -147,13 +147,13 @@ DO
    READ(10,NML=MILKE,END=111,ERR=99,IOSTAT=IOS)
    CALL COMPUTE_MILKE
 ENDDO
-111 WRITE(0,*) 'Done Smoke Detector Activation (Milke)'
+111 WRITE(0,*) 'Completed Smoke Detector Activation (Milke).'
 REWIND(10)
 
 ! Error message
 
 99 IF (IOS>0) THEN
-      WRITE(0,*) 'ERROR: Problem input line.'
+      WRITE(0,*) 'ERROR: Problem with input line.'
       STOP
    ENDIF
 
@@ -585,6 +585,8 @@ CHARACTER(30) :: FMT
 
 OPEN(11,FILE=TRIM(OUTPUT_FILE),FORM='FORMATTED',STATUS='REPLACE')
 
+TMP_A = TMP_A + 273.
+
 ! Scaling factor for Q, 2Q, or 4Q (open, wall, or corner fire placement)
 Q = Q * LOCATION_FACTOR
 
@@ -610,15 +612,15 @@ DO I=0,50
       IF (R/H<=0.15) THEN
          U_JET(J) = 0.947 * (Q/H)**(1./3.)
       ELSEIF (R/H>0.15) THEN
-         U_JET(J) = 0.197 * ((Q/H)**(1./3.)/(R/H)**(5./6.))
+         U_JET(J) = 0.197 * ( (Q/H)**(1./3.) / (R/H)**(5./6.) )
       ENDIF
 
       ! Compute ceiling jet temperature
 
       IF (R/H<=0.18) THEN
-         T_JET(J) = (16.9 * Q**(2./3.) / H**(5./3.)) + (TMP_A+273)
+         T_JET(J) = (16.9 * Q**(2./3.) / H**(5./3.)) + (TMP_A)
       ELSEIF (R/H>0.18) THEN
-         T_JET(J) = (5.38 * (Q/R)**(2./3.) / H) + (TMP_A+273)
+         T_JET(J) = (5.38 * (Q/R)**(2./3.) / H) + (TMP_A)
       ENDIF
    ENDDO
 
@@ -647,6 +649,8 @@ OPEN(11,FILE=TRIM(OUTPUT_FILE),FORM='FORMATTED',STATUS='REPLACE')
 
 WRITE(11,'(A)') 'Time,Activation,Ceiling jet temperature,Activation time,Total HRR'
 
+TMP_A = TMP_A + 273
+ACTIVATION_TEMPERATURE = ACTIVATION_TEMPERATURE + 273
 ITER = .TRUE.
 T = 0
 
@@ -662,9 +666,9 @@ DO WHILE (ITER)
    ! Compute ceiling jet temperature
 
    IF (R/H<=0.18) THEN
-      T_JET = (16.9 * Q**(2./3.) / H**(5./3.)) + (TMP_A+273)
+      T_JET = (16.9 * Q**(2./3.) / H**(5./3.)) + (TMP_A)
    ELSEIF (R/H>0.18) THEN
-      T_JET = (5.38 * (Q/R)**(2./3.) / H) + (TMP_A+273)
+      T_JET = (5.38 * (Q/R)**(2./3.) / H) + (TMP_A)
    ENDIF
 
    ! Compute ceiling jet velocity
@@ -677,9 +681,9 @@ DO WHILE (ITER)
 
    ! Compute sprinkler or detector activation time
 
-   t_activation = (RTI / SQRT(U_JET)) * LOG((T_JET-273 - TMP_A)/(T_JET-273 - ACTIVATION_TEMPERATURE))
+   t_activation = (RTI / SQRT(U_JET)) * LOG((T_JET - TMP_A)/(T_JET - ACTIVATION_TEMPERATURE))
 
-   IF ((((T_JET-273 - TMP_A)/(T_JET-273 - ACTIVATION_TEMPERATURE))<=0) .OR. (t_activation<=0)) THEN
+   IF ((((T_JET - TMP_A)/(T_JET - ACTIVATION_TEMPERATURE))<=0) .OR. (t_activation<=0)) THEN
       WRITE(11,'(F6.1,A1,I2,A1,F6.1,A5,F6.1)') T,',',-1,',',T_JET-273.,',NaN,',Q
    ELSEIF (t_activation>T) THEN
       WRITE(11,'(F6.1,A1,I2,A1,F6.1,A1,F6.1,A1,F6.1)') T,',',-1,',',T_JET-273.,',',t_activation,',',Q
