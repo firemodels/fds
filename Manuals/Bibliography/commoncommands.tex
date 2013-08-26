@@ -153,7 +153,7 @@ Kristopher Overholt}
 
 \includegraphics[width=2.in]{../Bibliography/nistident_flright_vec} \\[.3in]
 \includegraphics[width=1.3in]{../Bibliography/VTT_BLACK_L} \\
-VTT Technical Research Centre of Finland 
+VTT Technical Research Centre of Finland
 }
 }
 
@@ -206,6 +206,27 @@ verifying the various visualization capabilities of Smokeview in Volume III, the
 respectively.
 }
 
+% commands to use for "official" cover and title pages
+% see smokeview verification guide to see how they are used
+
+\newcommand{\headerA}[1]{
+\flushright{
+\fontsize{20}{24}\selectfont
+\bf{NIST Special Publication #1}}
+}
+
+\newcommand{\headerB}[1]{
+\flushright{
+\fontsize{28}{33.6}\selectfont
+\bf{#1}
+}
+}
+
+\newcommand{\headerC}[1]{
+\vspace{.5in}
+\flushright{\fontsize{14}{16.8}\selectfont
+#1}
+}
 
 \newcommand{\dod}[2]{\frac{\partial #1}{\partial #2}}
 \newcommand{\DoD}[2]{\frac{\mathrm{D} #1}{\mathrm{D} #2}}
