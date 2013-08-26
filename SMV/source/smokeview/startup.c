@@ -194,6 +194,9 @@ void init_lang(void){
     else if(strcmp(lang_code,"de")==0){
       strcpy(langi->lang_name,_("German"));
     }
+    else if(strcmp(lang_code,"pl")==0){
+      strcpy(langi->lang_name,_("Polish"));
+    }
     else if(strcmp(lang_code,"es")==0){
       strcpy(langi->lang_name,_("Spanish"));
     }
