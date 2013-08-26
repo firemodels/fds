@@ -650,6 +650,15 @@ SDC39     &  Mattress     &  Bedroom        &  200              &  180         &
 \label{tab:NIST_Dunes_2000_Summary}
 \end{table}
 
+\clearpage
+
+\section{NIST Helium Release in a Reduced Scale Garage Geometry Experiments}
+
+The NIST Helium Release in a Reduced Scale Garage Geometry Experiments were a set of 18 experiments in which helium was released over a lengthy time period inside of a 1.5 m x 1.5 m x 0.75 m plexiglass box~\cite{NIST_He} with one or two small leakage holes.  The tests were intended to represent the release of hydrogen from passenger vehicle fuel cell inside of a residential garage.  Tests varied the release rate and length, the location of the release, and the size and location of the leakage.  Measurements were made of the helium concentration in a rake at seven locations over the height of the compartment during the release and for a period of up to 11 hours post-release.
+
+Test variables included all permutations of the leak rate and time (14.8 L/min over 3600 s or 3.71 L/min over 14400 s), leak location (on the floor at the center of the compartment, on the floor at the center of the rear wall, and 2.5 cm below the ceiling at the center of the compartment), and the leak area (2.4 cm x 2.4 cm at the center of the front wall, 3.05 cm x 3.05 cm at the center of the front wall, and a pair of 2.15 cm x 2.15 cm centered on the front wall 2.5 cm from the floor and ceiling).  
+
+Leakage areas were square holes under 10 cm$^2$ in area.  Attempting to resolve flows through these holes would have required very small grid cells in the vicinity of the holes.  Instead, the FDS HVAC model was used.  For each leakage hole a pair of HVAC ducts was defined over a height of two grid cells (one grid cell height for each vent).  Each duct was assigned one-half the leakage area and the experimentally determined orifice flow coefficient.  This approach enabled bi-directional flow to occur at the leakage vent as occurred during each test following the termination of the helium release.
 
 \clearpage
 
