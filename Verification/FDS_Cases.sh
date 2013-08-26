@@ -56,6 +56,13 @@ $RUNFDS Flowfields sealed_box
 
 $RUNFDS Heat_Transfer adiabatic_net_flux
 $RUNFDS Heat_Transfer convective_cooling
+$RUNFDS Heat_Transfer convective_cooling_p1
+$RUNFDS Heat_Transfer convective_cooling_p05
+$RUNFDS Heat_Transfer convective_cooling_p025
+$RUNFDS Heat_Transfer convective_cooling_p01
+$RUNFDS Heat_Transfer convective_cooling_p005
+$RUNFDS Heat_Transfer convective_cooling_p0025
+$RUNFDS Heat_Transfer convective_cooling_p00125
 $RUNFDS Heat_Transfer heat_conduction_a
 $RUNFDS Heat_Transfer heat_conduction_b
 $RUNFDS Heat_Transfer heat_conduction_c
