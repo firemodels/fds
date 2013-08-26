@@ -2595,8 +2595,7 @@ lines are FDS results and the circles are the HEATING results. An example input 
 
 \section{Convective Cooling (\texorpdfstring{{\bf convective\_cooling}}{convective\_cooling})}
 
-This example tests the convective cooling algorithm. A 1~m thick solid slab that is initially at 1000~\si{\degree C} is suddenly exposed to air at 0~\si{\degree C}. The back of the slab is insulated. Its density is 1000~\si{kg/m^3}, its specific heat is 0.001~kJ/(kg$\cdot$K), its conductivity is 1~W/(m$\cdot$K), and its emissivity is zero, meaning there is no radiative loss from the surface. The convective heat transfer coefficient is 1~W/(m$^2\cdot$K). The predicted and exact temperature at the back side of the slab are displayed in Fig.~\ref{convective_cooling}.
-
+This example tests the convective cooling algorithm. A 1~m thick solid slab that is initially at 1000~\si{\degree C} is suddenly exposed to air at 0~\si{\degree C}. The back of the slab is insulated. Its density is 1000~\si{kg/m^3}, its specific heat is 0.001~kJ/(kg$\cdot$K), its conductivity is 1~W/(m$\cdot$K), and its emissivity is zero, meaning there is no radiative loss from the surface. The convective heat transfer coefficient is 1~W/(m$^2\cdot$K). The predicted and exact temperature values at the back side of the slab are displayed in Fig.~\ref{convective_cooling}.
 \begin{figure}[ht]
 \noindent
 \begin{center}
@@ -2604,6 +2603,15 @@ This example tests the convective cooling algorithm. A 1~m thick solid slab that
 \end{center}
 \caption[The {\bf convective\_cooling} test case]{Predicted vs.~exact back side temperatures of a thick slab cooled by convection alone.}
 \label{convective_cooling}
+\end{figure}
+To test the second-order accuracy of the solid phase conduction algorithm, this case was run with increasingly finer spatial and temporal resolution. The resulting convergence study is displayed in Fig.~\ref{convective_cooling_convergence}. The plot shows the relative difference between the computed and exact solution at 1800~s as a function of grid size.
+\begin{figure}[ht]
+\noindent
+\begin{center}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/convective_cooling_error}
+\end{center}
+\caption[Convergence study for the {\bf convective\_cooling} test case]{Convergence study for the {\bf convective\_cooling} test case.}
+\label{convective_cooling_convergence}
 \end{figure}
 
 
