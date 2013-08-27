@@ -29,22 +29,26 @@ clear all
 addpath 'scripts'
 
 % Dataplot and scatplot options
+
 Dataplot_Inputs_File = [pwd, '/FDTs_validation_dataplot_inputs.csv'];
 Working_Dir = [pwd, '/../../Validation/'];
 Manuals_Dir = [pwd, '/../../Manuals/'];
 Scatterplot_Inputs_File = [pwd, '/FDTs_validation_scatterplot_inputs.csv'];
 
 % Statistics output options
+
 Stats_Output = 2;
 Output_File = [pwd, '/FDTs_validation_scatterplot_output.csv'];
 Statistics_Tex_Output = [pwd, '/../../Manuals/FDTs_Validation_Guide/SCRIPT_FIGURES/Scatterplots/validation_statistics.tex'];
 Histogram_Tex_Output = [pwd, '/../../Manuals/FDTs_Validation_Guide/SCRIPT_FIGURES/Scatterplots/validation_histograms.tex'];
 
 % Override the plot style options with NRC 1824 plot options
+
 NRC_Options = false;
 Append_To_Scatterplot_Title = '';
 
 % Run dataplot and scatplot scripts
+
 [saved_data,drange] = dataplot(Dataplot_Inputs_File, Working_Dir, Manuals_Dir);
 scatplot(saved_data, drange, ...
          'Scatterplot_Inputs_File', Scatterplot_Inputs_File, ...
