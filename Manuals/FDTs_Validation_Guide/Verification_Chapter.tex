@@ -127,6 +127,9 @@ $T_\infty$ ($^\circ$C)  &  23          \\ \hline
 \noindent Expected result: At 60~s, the HGL temperature $T_g$ is 49.87~$^\circ$C; at 120~s, $T_g$ is 63.33~$^\circ$C; at 180~s, $T_g$ is 73.67~$^\circ$C.
 
 
+\clearpage
+
+
 \subsection{HGL Depth (ASET)}
 
 Test: NIST/NRC Test 1
@@ -162,9 +165,7 @@ $z_f$ (-)               &  0           \\ \hline
 
 Test: NIST/NRC Test 1
 
-\noindent Note: The method of Beyler is used to calculate the HGL temperature, $T_g$.
-
-\noindent In the FDTs spreadsheets, this HGL depth calculation method is used with natual ventilation and the MQH correlation.
+\noindent Note: In the FDTs spreadsheets, this HGL depth correlation is used with the MQH correlation (natual ventilation). In this verification case, the method of Beyler is used to calculate the HGL temperature,~$T_g$.
 
 \begin{table}[!ht]
 \caption[Input parameters, HGL depth]
@@ -240,7 +241,100 @@ $T_\infty$ ($^\circ$C)  &  22          \\ \hline
 \clearpage
 
 
-% \section{Target Temperature}
+\section{Target Temperature}
+
+\subsection{Cable Failure Time (THIEF)}
+
+Test: Penlight Test 1
+
+\begin{table}[!ht]
+\caption[Input parameters, cable failure time]
+{Input parameters, cable failure time.}
+\begin{center}
+\begin{tabular}{|l|l|}
+\hline
+                             &                                \\
+\rb{Input Parameter}         &  \rb{Value}                    \\ \hline \hline
+Time Ramp                    &  0, 70, 820, 1240, 1600, 1800  \\ \hline
+Temperature Ramp             &  24, 480, 480, 290, 190, 0     \\ \hline
+Cable Diameter (mm)          &  16.3                          \\ \hline
+Mass per Unit Length (kg/m)  &  0.529                         \\ \hline
+Jacket Thickness (mm)        &  1.5                           \\ \hline
+Conduit Diameter (mm)        &  -                             \\ \hline
+Conduit Thickness (mm)       &  -                             \\ \hline
+$T_\infty$ ($^\circ$C)       &  24                            \\ \hline
+\end{tabular}
+\end{center}
+\end{table}
+
+\noindent Expected result: At 50~s, the exposing temperature is 349.5~$^\circ$C, and the cable temperature is 35.2~$^\circ$C; at 80~s, the exposing temperature is 480.0~$^\circ$C, and the cable temperature is 69.7~$^\circ$C. At 592.8~s, the cable reaches a failure temperature of 400~$^\circ$C.
+
+
+\subsection{Unprotected Steel Temperature}
+
+Test: SP AST Column, 1.1 m Diesel Fire
+
+\begin{table}[!ht]
+\caption[Input parameters, unprotected steel temperature]
+{Input parameters, unprotected steel temperature.}
+\begin{center}
+\begin{tabular}{|l|l|}
+\hline
+                           &              \\
+\rb{Input Parameter}       &  \rb{Value}  \\ \hline \hline
+$F/V$ (1/m)                &  205         \\ \hline
+$\rho_{s}$ (kg/m$^3$)      &  7850        \\ \hline
+$c_{s}$ (kJ/kg/K)          &  0.6         \\ \hline
+$\epsilon$ (-)             &  0.7         \\ \hline
+$h_c$ (W/m$^2$/K)          &  25          \\ \hline
+Correlation for $T_f$ (-)  &  McCaffrey   \\ \hline
+$\dot Q$ (kW)              &  1434        \\ \hline
+Height (m)                 &  1           \\ \hline
+\end{tabular}
+\end{center}
+\end{table}
+
+\noindent Expected result: The fire temperature (plume temperature at a height of 1~m from McCaffrey) is 872.51~$^\circ$C. At 15~s, the steel temperature is 74.0~$^\circ$C; at 30~s, the steel temperature is 130.7~$^\circ$C; at 45~s, the steel temperature is 186.1~$^\circ$C.
+
+
+\subsection{Protected Steel Temperature}
+
+Test: WTC Test 4, Bar Structural Element
+
+\begin{table}[!ht]
+\caption[Input parameters, protected steel temperature]
+{Input parameters, protected steel temperature.}
+\begin{center}
+\begin{tabular}{|l|l|}
+\hline
+                           &              \\
+\rb{Input Parameter}       &  \rb{Value}  \\ \hline \hline
+$c_{s}$ (kJ/kg/K)          &  0.450       \\ \hline
+$W/D$ (kg/m$2$)            &  51.1        \\ \hline
+$k_{i}$ (W/m/K)            &  0.10        \\ \hline
+$\rho_{i}$ (kg/m$^3$)      &  208         \\ \hline
+$c_{i}$ (kJ/kg/K)          &  2.0         \\ \hline
+$h_{i}$ (m)                &  0.0191      \\ \hline
+Correlation for $T_f$ (-)  &  MQH         \\ \hline
+$\dot Q$ (kW)              &  3200        \\ \hline
+$L$ (m)                    &  7.04        \\ \hline
+$W$ (m)                    &  3.60        \\ \hline
+$H$ (m)                    &  3.82        \\ \hline
+$H_v$ (m)                  &  2.82        \\ \hline
+$W_v$ (m)                  &  2.4         \\ \hline
+$k$ (kW/m/K)               &  0.00012     \\ \hline
+$\rho$ (kg/m$^3$)          &  737         \\ \hline
+$c$ (kJ/kg/K)              &  0.9         \\ \hline
+$\delta$ (m)               &  0.0254      \\ \hline
+$T_\infty$ ($^\circ$C)     &  20          \\ \hline
+\end{tabular}
+\end{center}
+\end{table}
+
+\noindent Expected result: At 15~s, the HGL temperature (from MQH) is 336.7~$^\circ$C and the steel temperature is 20.94~$^\circ$C; At 30~s, the HGL temperature (from MQH) is 375.4~$^\circ$C and the steel temperature is 22.1~$^\circ$C; at 45~s, the HGL temperature (from MQH) is 400.3~$^\circ$C and the steel temperature is 23.36~$^\circ$C.
+
+
+\clearpage
 
 
 \section{Target Heat Flux}
@@ -249,13 +343,13 @@ $T_\infty$ ($^\circ$C)  &  22          \\ \hline
 
 Test: Fleury 100 kW, 1:1 Burner
 \\ \\
-\noindent In the FDTs spreadsheets, the point source radiation heat flux is calculated without accounting for the elevation
-of the target with respect to the fire, and the flame height is not considered. The FDTs.f90 program considers both of these.
+\noindent In the FDTs spreadsheets, the point source radiation heat flux is calculated without accounting for the angle/elevation
+of the target with respect to the fire, and the flame height is not considered. The FDTs.f90 program considers both of these and
+assumes that the point source is located one-third of the height of the flame ($L_f/3$).
 
 \begin{table}[!ht]
 \caption[Input parameters, point source radiation heat flux]
 {Input parameters, point source radiation heat flux.}
-
 \begin{center}
 \begin{tabular}{|l|l|}
 \hline
@@ -318,7 +412,7 @@ Test: Vettori Flat Ceiling Test 1
                               &              \\
 \rb{Input Parameter}          &  \rb{Value}  \\ \hline \hline
 $\alpha$ (kW/s$^2$)           &  0.105       \\ \hline
-Location factor (-)           &  1           \\ \hline
+Location Factor (-)           &  1           \\ \hline
 RTI (m-s)$^{1/2}$             &  55          \\ \hline
 $T_{activation}$ ($^\circ$C)  &  68          \\ \hline
 $r$ (m)                       &  2.20        \\ \hline
@@ -344,7 +438,7 @@ $T_\infty$ ($^\circ$C)        &  16.6        \\ \hline
 \hline
                           &              \\
 \rb{Input Parameter}      &  \rb{Value}  \\ \hline \hline
-Location factor (-)       &  1           \\ \hline
+Location Factor (-)       &  1           \\ \hline
 $\alpha$ (kW/s$^2$)       &  0.00463     \\ \hline
 $t_{fire}$ (s)            &  300         \\ \hline
 $r$ (m)                   &  1.3         \\ \hline
