@@ -14,6 +14,51 @@ char geometry_revision[]="$Revision$";
 #include "geometry.h"
 #include "datadefs.h"
 
+/* ------------------ in_sphere ------------------------ */
+
+int in_sphere(float *pt, float *center, float radius){
+  float dist2=0.0,dval;
+  int i;
+
+  for(i=0;i<3;i++){
+    dval = pt[i]-center[i];
+    dist2 += dval*dval;
+  }
+  if(dist2<=radius*radius)return 1;
+  return 0;
+}
+
+/* ------------------ in_cylinder ------------------------ */
+
+int in_cylinder(float *pt, float *base, float h, float radius){
+  float dval,dist2=0.0;
+
+  if(pt[2]<base[2]||pt[2]>base[2]+h)return 0;
+  dval = pt[0]-base[0];
+  dist2 =dval*dval;
+  dval = pt[1]-base[1];
+  dist2 += dval*dval;
+  if(dist2>radius*radius)return 0;
+  return 1;
+}
+
+
+/* ------------------ in_cone ------------------------ */
+
+int in_cone(float *pt, float *base, float h, float radius){
+  float dval,dist2=0.0,rz;
+
+  if(pt[2]<base[2]||pt[2]>base[2]+h)return 0;
+  rz = radius*(1.0-(pt[2]-base[2])/h);
+  dval = pt[0]-base[0];
+  dist2 =dval*dval;
+  dval = pt[1]-base[1];
+  dist2 += dval*dval;
+  if(dist2>rz*rz)return 0;
+  return 1;
+
+}
+
 /* ------------------ rotateu2v ------------------------ */
 
 void rotateu2v(float *u, float *v, float *axis, float *angle){

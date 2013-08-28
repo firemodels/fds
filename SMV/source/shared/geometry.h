@@ -44,3 +44,8 @@ typedef struct _geomdata {
   int nverts, ntris, nedges;
 } geomdata;
 
+int in_sphere(float *pt, float *center, float radius);
+int in_cylinder(float *pt, float *base, float h, float radius);
+int in_cone(float *pt, float *base, float h, float radius);
+
+
