@@ -6,7 +6,7 @@
 % histogram plots to be used in various guides.
 
 % Print histogram of ln(M/E) and normal distribution
-if Stats_Output == 2 % (Validation runs only)
+if (Stats_Output == 2) && (exist('Histogram_Tex_Output','var') == 1)
     % Wrap histogram routine in try loop
     % Skips case upon any Matlab error
     try
