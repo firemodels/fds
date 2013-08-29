@@ -1024,4 +1024,365 @@ void part2iso(part *parti, int *thread_index){
   }
 }
 
+/* ------------------ part2object ------------------------ */
+
+void part2object(part *parti, int *thread_index){
+  float *pdata;
+  int *tagdata;
+  int fdsversion;
+
+  int endiandata;
+
+  int blocknumber;
+  FILE_SIZE len_partfile;
+  int unit;
+  int error1;
+  int nclasses;
+  int *nquantities, *npoints, *partindex;
+  float time_local;
+  int error, size;
+  int j;
+  int npartcount, i;
+  mesh *partmesh;
+  int nx, ny, nz;
+  char *isofile, tisofile[1024];
+  char isolonglabel[32], isoshortlabel[32], isounits[32];
+  int nlevels;
+  float levels[1];
+  int reduce_triangles=1;
+  float *xpltcell, *ypltcell, *zpltcell;
+  int data2flag=1;
+  float *partcount;
+  FILE *SMVISOFILE=NULL;
+  int nx2, ny2, nz2;
+  float xmin, ymin, zmin;
+  part5prop *part5propinfo_copy;
+  int percent_done;
+  float file_size;
+  int percent_next=10;
+
+  parti->compressed2=0;
+#ifdef pp_THREAD
+  if(GLOBcleanfiles==0){
+    int fileindex;
+
+    fileindex = parti + 1 - partinfo;
+    sprintf(threadinfo[*thread_index].label,"prt2iso %i",fileindex);
+  }
+#else
+  PRINTF("Converting %s to\n",parti->file);
+#endif
+
+  endiandata=getendian();
+  if(endianswitch==1)endiandata=1-endiandata;
+
+  NewMemory((void **)&pdata,1000000*sizeof(float));
+  NewMemory((void **)&tagdata,1000000*sizeof(int));
+  NewMemory((void **)&partindex,1000000*sizeof(int));
+
+  len_partfile=strlen(parti->file);
+  LOCK_COMPRESS;
+  FORTget_file_unit(&unit,&parti->unit_start);
+  FORTopenpart(parti->file,&unit,&endiandata,&error1,len_partfile);
+  UNLOCK_COMPRESS;
+
+  FORTgetpartheader1(&unit,&nclasses,&fdsversion,&size);
+  NewMemory((void **)&nquantities,nclasses*sizeof(int));
+  NewMemory((void **)&npoints,nclasses*sizeof(int));
+
+  FORTgetpartheader2(&unit,&nclasses,nquantities,&size);
+
+  partmesh = parti->partmesh;
+
+  blocknumber = partmesh-meshinfo + 1;
+
+  nx = partmesh->ibar;
+  ny = partmesh->jbar;
+  nz = partmesh->kbar;
+
+  nx2 = nx+2;
+  ny2 = ny+2;
+  nz2 = nz+2;
+
+  npartcount = nx2*ny2*nz2;
+
+  xmin = partmesh->xbar0-partmesh->dx;
+  ymin = partmesh->ybar0-partmesh->dy;
+  zmin = partmesh->zbar0-partmesh->dz;
+
+  xpltcell = partmesh->xpltcell;
+  ypltcell = partmesh->ypltcell;
+  zpltcell = partmesh->zpltcell;
+
+  NewMemory((void **)&isofile,strlen(parti->file)+5);
+  strcpy(isofile,parti->file);
+  strcat(isofile,".iso");
+
+  NewMemory((void **)&tisofile,strlen(parti->file)+6);
+  strcpy(tisofile,parti->file);
+  strcat(tisofile,".tiso");
+
+  strcpy(isolonglabel,"particle boundary");
+  strcpy(isoshortlabel,"pbound");
+  strcpy(isounits,"");
+
+  nlevels=1;
+  levels[0]=0.5;
+
+  if(npart5propinfo>0)NewMemory((void **)&part5propinfo_copy,npart5propinfo*sizeof(part5prop));
+
+  for(i=0;i<npart5propinfo;i++){
+    part5prop *propi;
+
+    propi = part5propinfo_copy + i;
+    propi->used=0;
+  }
+  for(j=0;j<nclasses;j++){
+    int k;
+
+    for(k=0;k<nquantities[j];k++){
+      part5class *classj;
+      part5prop *propi;
+
+      classj=parti->classptr[j];
+      propi=part5propinfo_copy+getpartprop_index(classj->labels[k].shortlabel);
+      propi->used=1;
+    }
+  }
+
+  NewMemory((void **)&partcount,npartcount*sizeof(float));
+
+  for(i=0;i<npart5propinfo;i++){
+    part5prop *propi;
+
+    propi = part5propinfo_copy + i;
+    if(propi->used==0)continue;
+
+    NewMemory((void **)&propi->partvals,npartcount*sizeof(float));
+  }
+
+  CCisoheader(isofile,isolonglabel,isoshortlabel,isounits,levels,&nlevels,&error);
+
+  LOCK_PART2ISO;
+  if(GLOBfirst_part2iso_smvopen==1){
+    GLOBfirst_part2iso_smvopen=0;
+    SMVISOFILE=fopen(GLOBsmvisofile,"w");
+  }
+  else{
+    SMVISOFILE=fopen(GLOBsmvisofile,"a");
+  }
+
+  fprintf(SMVISOFILE,"ISOF %i\n",blocknumber);
+  fprintf(SMVISOFILE," %s\n",isofile);
+  fprintf(SMVISOFILE," %s\n",isolonglabel);
+
+  fprintf(SMVISOFILE," %s\n",isoshortlabel);
+  fprintf(SMVISOFILE," %s\n",isounits);
+  fprintf(SMVISOFILE,"\n");
+
+#ifndef pp_THREAD
+  PRINTF("  %s\n",isofile);
+#endif
+
+  for(i=0;i<npart5propinfo;i++){
+    part5prop *propi,*propi_ro;
+    flowlabels *labels;
+
+    propi_ro = part5propinfo + i;
+    propi = part5propinfo_copy + i;
+    if(propi->used==0)continue;
+
+    labels = &propi_ro->label;
+    strcpy(propi->isofilename,parti->file);
+    strcat(propi->isofilename,"_");
+    strcat(propi->isofilename,labels->shortlabel);
+    strcat(propi->isofilename,".tiso");
+    CCtisoheader(propi->isofilename, labels->longlabel, labels->shortlabel, labels->unit, levels, &nlevels, &error);
+#ifndef pp_THREAD
+    PRINTF("  %s\n",propi->isofilename);
+#endif
+
+    fprintf(SMVISOFILE,"TISOF %i\n",blocknumber);
+    fprintf(SMVISOFILE," %s\n",propi->isofilename);
+    fprintf(SMVISOFILE," %s\n",isolonglabel);
+    fprintf(SMVISOFILE," %s\n",isoshortlabel);
+    fprintf(SMVISOFILE," %s\n",isounits);
+    fprintf(SMVISOFILE," %s\n",labels->longlabel);
+    fprintf(SMVISOFILE," %s\n",labels->shortlabel);
+    fprintf(SMVISOFILE," %s\n",labels->unit);
+    fprintf(SMVISOFILE," \n");
+  }
+  fclose(SMVISOFILE);
+  UNLOCK_PART2ISO;
+
+#ifndef pp_THREAD
+  PRINTF(" ");
+#endif
+  error=0;
+  file_size=0.0;
+  for(;;){
+    float *x, *y, *z, *vals;
+    int k;
+
+    FORTgetpartdataframe(&unit,&nclasses,nquantities,npoints,&time_local,tagdata,pdata,&size,&error);
+
+    file_size+=size;
+
+    percent_done=100.0*(float)file_size/(float)parti->filesize;
+#ifdef pp_THREAD
+    threadinfo[*thread_index].stat=percent_done;
+    if(percent_done>percent_next){
+      LOCK_PRINT;
+      print_thread_stats();
+      UNLOCK_PRINT;
+      percent_next+=10;
+    }
+#else
+    if(percent_done>percent_next){
+      PRINTF(" %i%s",percent_next,GLOBpp);
+      FFLUSH();
+      percent_next+=10;
+    }
+#endif
+    if(error!=0)break;
+
+    for(j=0;j<npartcount;j++){
+      partcount[j]=0.0;
+    }
+    for(i=0;i<npart5propinfo;i++){
+      part5prop *propi;
+
+      propi = part5propinfo_copy + i;
+      if(propi->used==0)continue;
+
+      for(j=0;j<npartcount;j++){
+        propi->partvals[j]=0.0;
+      }
+    }
+
+    vals=pdata;
+    for(j=0;j<nclasses;j++){
+      part5class *classj;
+
+      if(npoints[j]==0)continue;
+      classj=parti->classptr[j];
+      x = vals;
+      y = x + npoints[j];
+      z = y + npoints[j];
+      vals = z + npoints[j];
+
+      // construct 3D particle density array
+
+      for(i=0;i<npoints[j];i++){
+        int ix, iy, iz;
+        int ijkval;
+
+        GETINDEX(ix,x[i],xmin,partmesh->dx,nx2);
+        GETINDEX(iy,y[i],ymin,partmesh->dy,ny2);
+        GETINDEX(iz,z[i],zmin,partmesh->dz,nz2);
+        ijkval = IJKVAL(ix,iy,iz);
+        partindex[i]=ijkval;
+        partcount[ijkval]++;
+      }
+      for(k=0;k<nquantities[j];k++){
+        part5prop *propi;
+
+        propi=part5propinfo_copy+getpartprop_index(classj->labels[k].shortlabel);
+
+        for(i=0;i<npoints[j];i++){
+          int ijkval;
+
+          ijkval = partindex[i];
+          propi->partvals[ijkval]+=vals[i];
+        }
+        for(i=0;i<npartcount;i++){
+          if(partcount[i]>0){
+            propi->partvals[i]/=partcount[i];
+          }
+        }
+        vals += npoints[j];
+      }
+    }
+    CCisosurface2file(isofile, &time_local, partcount, NULL, levels, &nlevels,
+      xpltcell, &nx2, ypltcell, &ny2, zpltcell, &nz2,
+      &reduce_triangles, &error);
+
+    for(i=0;i<npart5propinfo;i++){
+      part5prop *propi;
+
+      propi = part5propinfo_copy + i;
+      if(propi->used==0)continue;
+
+      CCisosurfacet2file(propi->isofilename, &time_local, partcount, &data2flag, propi->partvals, NULL, levels, &nlevels,
+        xpltcell, &nx2, ypltcell, &ny2, zpltcell, &nz2,
+        &reduce_triangles, &error);
+    }
+  }
+
+#ifdef pp_THREAD
+  {
+    int nconv=1;
+    int lenfile;
+    char **summaries;
+
+    for(i=0;i<npart5propinfo;i++){
+      part5prop *propi;
+
+      propi = part5propinfo_copy + i;
+      if(propi->used==1)nconv++;
+    }
+
+    NewMemory((void **)&summaries,nconv*sizeof(char *));
+
+    lenfile=strlen(isofile);
+    NewMemory((void **)&summaries[0],lenfile+1);
+    strcpy(summaries[0],isofile);
+
+    parti->summaries=summaries;
+    parti->nsummaries=nconv;
+
+    nconv=1;
+    for(i=0;i<npart5propinfo;i++){
+      part5prop *propi;
+
+      propi = part5propinfo_copy + i;
+      if(propi->used==0)continue;
+      lenfile=strlen(propi->isofilename);
+      NewMemory((void **)&summaries[nconv],lenfile+1);
+      strcpy(summaries[nconv],propi->isofilename);
+      nconv++;
+    }
+    parti->compressed2=1;
+    threadinfo[*thread_index].stat=-1;
+  }
+#else
+  PRINTF(" 100%s completed\n",GLOBpp);
+#endif
+
+  FREEMEMORY(nquantities);
+  FREEMEMORY(npoints);
+  FREEMEMORY(partcount);
+  FREEMEMORY(isofile);
+  LOCK_COMPRESS;
+  FORTclosefortranfile(&unit);
+  UNLOCK_COMPRESS;
+
+  FREEMEMORY(pdata);
+  FREEMEMORY(tagdata);
+  FREEMEMORY(partindex);
+
+  for(i=0;i<npart5propinfo;i++){
+    part5prop *propi;
+
+    propi = part5propinfo_copy + i;
+    if(propi->used==0)continue;
+
+    FREEMEMORY(propi->partvals);
+    FREEMEMORY(propi->partvals);
+  }
+  if(npart5propinfo>0){
+    FREEMEMORY(part5propinfo_copy);
+  }
+}
+
 #endif

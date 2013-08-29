@@ -14,6 +14,86 @@ char geometry_revision[]="$Revision$";
 #include "geometry.h"
 #include "datadefs.h"
 
+/* ------------------ parse_device_keyword ------------------------ */
+
+int get_canopy_info(FILE *stream, float **center, float **radh){
+  int ndevices=0,ncanopies=0, count=0;
+  float *centerptr, *radhptr;
+
+  rewind(stream);
+  *center=NULL;
+  *radh=NULL;
+  while(1){
+    char buffer[255],buffer2[255];
+
+    if(fgets(buffer,255,stream)==NULL)break;
+    if(match(buffer,"DEVICE")==0){
+      char *front,*percen;
+
+      ndevices++;
+      fgets(buffer,255,stream);
+      trim(buffer);
+      front = trim_front(buffer);
+      percen = strchr(front,'%');
+      if(percen!=NULL){
+        *percen=0;
+        trim(front);
+      }
+      if(STRCMP(front,"CANOPY")==0)ncanopies++;
+    }
+  }
+  if(ncanopies==0)return 0;
+
+  NewMemory((void **)&centerptr,3*ndevices*sizeof(float));
+  NewMemory((void **)&radhptr,2*ndevices*sizeof(float));
+  *center=centerptr;
+  *radh=radhptr;
+
+  count=0;
+  rewind(stream);
+  while(1){
+    char buffer[255],buffer2[255];
+
+    if(match(buffer,"DEVICE")==0){
+      char *front,*percen;
+
+      count++;
+      fgets(buffer,255,stream);
+      trim(buffer);
+      front = trim_front(buffer);
+      percen = strchr(front,'%');
+      if(percen!=NULL){
+        *percen=0;
+        trim(front);
+      }
+      centerptr[0]=0.0;
+      centerptr[1]=0.0;
+      centerptr[2]=0.0;
+      radhptr[0]=-1.0;
+      radhptr[1]=0.0;
+      if(strcmp(front,"CANOPY")==0){
+        float dummy[3],vals[3];
+        int idummy, nparams;
+
+        fgets(buffer,255,stream);
+        sscanf(buffer,"%f %f %f %f %f %f %i %i",
+          centerptr,centerptr+1,centerptr+2,dummy,dummy+1,dummy+2,&idummy,&nparams);
+        if(nparams>=3){
+          fgets(buffer,255,stream);
+          sscanf(buffer,"%f %f %f",vals,vals+1,vals+2);
+          radhptr[0]=vals[1]/2.0;
+          radhptr[1]=vals[2];
+          centerptr[2]+=vals[0];
+        }
+      }
+      centerptr+=3;
+      radhptr+=2;
+      if(count>=ndevices)break;
+    }
+  }
+  return ncanopies;
+}
+
 /* ------------------ in_sphere ------------------------ */
 
 int in_sphere(float *pt, float *center, float radius){
