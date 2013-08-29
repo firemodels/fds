@@ -126,7 +126,7 @@ end
 
 % Write histogram information to a LaTeX file for inclusion
 % in the FDS Validation Guide or FDTs Validation Guide
-if (Stats_Output == 2) && (exist('Output_Histograms','var') == 1) && (isempty(Output_Histograms) == 0)
+if (Stats_Output == 2) && (exist('Histogram_Tex_Output','var') == 1) && (exist('Output_Histograms','var') == 1) && (isempty(Output_Histograms) == 0)
     fid = fopen(Histogram_Tex_Output, 'wt');
     % Write plots to LaTeX figures, eight per page
     num_histograms = length(Output_Histograms);
