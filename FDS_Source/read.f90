@@ -1467,7 +1467,6 @@ NAMELIST /MISC/ AL2O3,ALLOW_SURFACE_PARTICLES,ALLOW_UNDERSIDE_PARTICLES,ASSUMED_
 TMPA         = 20._EB                                              ! Ambient temperature (C)
 GAMMA        = 1.4_EB                                              ! Heat capacity ratio for air
 P_INF        = 101325._EB                                          ! Ambient pressure (Pa)
-SIGMA        = 5.67E-8_EB                                          ! Stefan-Boltzmann constant (W/m**2/K**4)
 MU_AIR_0     = 1.8E-5_EB                                           ! Dynamic Viscosity of Air at 20 C (kg/m/s)
 CP_AIR_0     = 1012._EB                                            ! Specific Heat of Air at 20 C (J/kg/K)
 PR_AIR       = 0.7_EB
