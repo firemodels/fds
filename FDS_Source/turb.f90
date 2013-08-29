@@ -1706,8 +1706,7 @@ REAL(EB), PUBLIC, PARAMETER :: UF_MMS=0.5_EB,WF_MMS=0.5_EB,VISC_MMS=0.001_EB,DIF
 
 PRIVATE
 PUBLIC :: SHUNN_MMS_3,VD2D_MMS_Z,VD2D_MMS_RHO,VD2D_MMS_RHO_OF_Z,VD2D_MMS_U,VD2D_MMS_V, &
-          VD2D_MMS_Z_SRC,VD2D_MMS_U_SRC,VD2D_MMS_V_SRC,VD2D_MMS_Z_OF_RHO,VD2D_MMS_DIV,VD2D_MMS_RHO_SRC,&
-          VD2D_MMS_Z_SRC_2,VD2D_MMS_U_SRC_2,VD2D_MMS_V_SRC_2
+          VD2D_MMS_Z_SRC,VD2D_MMS_U_SRC,VD2D_MMS_V_SRC,VD2D_MMS_Z_OF_RHO,VD2D_MMS_DIV
 
 CONTAINS
 
@@ -1733,9 +1732,9 @@ CALL VD2D_MMS_INIT
 ! initialize flow fields
 
 CALL POINT_TO_MESH(NM)
-U = 0._EB
+U = UF_MMS
 V = 0._EB
-W = 0._EB
+W = WF_MMS
 DO K=0,KBP1
    DO J=0,JBP1
       DO I=0,IBP1
@@ -1917,204 +1916,6 @@ DVDY = S6 * S8 * S3 * S1 * (S4 * S14 - PI * K * S5 / S7)
 VD2D_MMS_DIV = DUDX + DVDY
 
 END FUNCTION VD2D_MMS_DIV
-
-REAL(EB) FUNCTION VD2D_MMS_RHO_SRC(X,Y,T)
-IMPLICIT NONE
-REAL(EB),INTENT (IN) :: X,Y,T
-VD2D_MMS_RHO_SRC = &
-   PI*K*(-R0*UF*SIN(PI*K*(T*VF - Y))*COS(PI*K*(T*UF - X)) - R0*VF*SIN(PI*K*(T*UF - X))*COS(PI*K*(T*VF - Y)) + &
-   R1*UF*SIN(PI*K*(T*VF - Y))*COS(PI*K*(T*UF - X)) + R1*VF*SIN(PI*K*(T*UF - X))*COS(PI*K*(T*VF - Y)))*COS(PI*T*W)/2._EB
-END FUNCTION VD2D_MMS_RHO_SRC
-
-REAL(EB) FUNCTION VD2D_MMS_Z_SRC_2(X,Y,T)
-IMPLICIT NONE
-REAL(EB),INTENT (IN) :: X,Y,T
-
-VD2D_MMS_Z_SRC_2 = &
-   -D*(2._EB*PI**2*K**2*(-R0/R1 + 1._EB)**2*(SIN(PI*K*(-T*UF + X))*SIN(PI*K*(-T*VF + Y))*COS(PI*T*W) +&
-   1._EB)*SIN(PI*K*(-T*UF + X))**2*COS(PI*K*(-T*VF + Y))**2*COS(PI*T*W)**2/(R0/R1 + (-R0/R1 + 1._EB)*SIN(PI*K*(-T*UF +&
-   X))*SIN(PI*K*(-T*VF + Y))*COS(PI*T*W) + 1._EB)**3 + 2._EB*PI**2*K**2*(-R0/R1 + 1._EB)**2*(SIN(PI*K*(-T*UF +&
-   X))*SIN(PI*K*(-T*VF + Y))*COS(PI*T*W) + 1._EB)*SIN(PI*K*(-T*VF + Y))**2*COS(PI*K*(-T*UF + X))**2*COS(PI*T*W)**2/(R0/R1 +&
-   (-R0/R1 + 1._EB)*SIN(PI*K*(-T*UF + X))*SIN(PI*K*(-T*VF + Y))*COS(PI*T*W) + 1._EB)**3 + 2._EB*PI**2*K**2*(-R0/R1 +&
-   1._EB)*(SIN(PI*K*(-T*UF + X))*SIN(PI*K*(-T*VF + Y))*COS(PI*T*W) + 1._EB)*SIN(PI*K*(-T*UF + X))*SIN(PI*K*(-T*VF +&
-   Y))*COS(PI*T*W)/(R0/R1 + (-R0/R1 + 1._EB)*SIN(PI*K*(-T*UF + X))*SIN(PI*K*(-T*VF + Y))*COS(PI*T*W) + 1._EB)**2 -&
-   2._EB*PI**2*K**2*(-R0/R1 + 1._EB)*SIN(PI*K*(-T*UF + X))**2*COS(PI*K*(-T*VF + Y))**2*COS(PI*T*W)**2/(R0/R1 + (-R0/R1 +&
-   1._EB)*SIN(PI*K*(-T*UF + X))*SIN(PI*K*(-T*VF + Y))*COS(PI*T*W) + 1._EB)**2 - 2._EB*PI**2*K**2*(-R0/R1 +&
-   1._EB)*SIN(PI*K*(-T*VF + Y))**2*COS(PI*K*(-T*UF + X))**2*COS(PI*T*W)**2/(R0/R1 + (-R0/R1 + 1._EB)*SIN(PI*K*(-T*UF +&
-   X))*SIN(PI*K*(-T*VF + Y))*COS(PI*T*W) + 1._EB)**2 - 2._EB*PI**2*K**2*SIN(PI*K*(-T*UF + X))*SIN(PI*K*(-T*VF +&
-   Y))*COS(PI*T*W)/(R0/R1 + (-R0/R1 + 1._EB)*SIN(PI*K*(-T*UF + X))*SIN(PI*K*(-T*VF + Y))*COS(PI*T*W) + 1._EB)) + PI*W*(-R0&
-   + R1)*(-R0/R1 + 1._EB)*(SIN(PI*K*(-T*UF + X))*SIN(PI*K*(-T*VF + Y))*COS(PI*T*W) + 1._EB)*SIN(PI*K*(-T*UF +&
-   X))**2*SIN(PI*T*W)*COS(PI*K*(-T*VF + Y))**2*COS(PI*T*W)/(4._EB*(R0/R1 + (-R0/R1 + 1._EB)*SIN(PI*K*(-T*UF +&
-   X))*SIN(PI*K*(-T*VF + Y))*COS(PI*T*W) + 1._EB)**2) + PI*W*(-R0 + R1)*(-R0/R1 + 1._EB)*(SIN(PI*K*(-T*UF +&
-   X))*SIN(PI*K*(-T*VF + Y))*COS(PI*T*W) + 1._EB)*SIN(PI*K*(-T*VF + Y))**2*SIN(PI*T*W)*COS(PI*K*(-T*UF +&
-   X))**2*COS(PI*T*W)/(4._EB*(R0/R1 + (-R0/R1 + 1._EB)*SIN(PI*K*(-T*UF + X))*SIN(PI*K*(-T*VF + Y))*COS(PI*T*W) + 1._EB)**2)&
-   + PI*W*(-R0 + R1)*(SIN(PI*K*(-T*UF + X))*SIN(PI*K*(-T*VF + Y))*COS(PI*T*W) + 1._EB)*SIN(PI*K*(-T*UF +&
-   X))*SIN(PI*K*(-T*VF + Y))*SIN(PI*T*W)/(2._EB*(R0/R1 + (-R0/R1 + 1._EB)*SIN(PI*K*(-T*UF + X))*SIN(PI*K*(-T*VF +&
-   Y))*COS(PI*T*W) + 1._EB)) - PI*W*(-R0 + R1)*SIN(PI*K*(-T*UF + X))**2*SIN(PI*T*W)*COS(PI*K*(-T*VF +&
-   Y))**2*COS(PI*T*W)/(4._EB*(R0/R1 + (-R0/R1 + 1._EB)*SIN(PI*K*(-T*UF + X))*SIN(PI*K*(-T*VF + Y))*COS(PI*T*W) + 1._EB)) -&
-   PI*W*(-R0 + R1)*SIN(PI*K*(-T*VF + Y))**2*SIN(PI*T*W)*COS(PI*K*(-T*UF + X))**2*COS(PI*T*W)/(4._EB*(R0/R1 + (-R0/R1 +&
-   1._EB)*SIN(PI*K*(-T*UF + X))*SIN(PI*K*(-T*VF + Y))*COS(PI*T*W) + 1._EB)) + (SIN(PI*K*(-T*UF + X))*SIN(PI*K*(-T*VF +&
-   Y))*COS(PI*T*W) + 1._EB)*(PI*K*UF*(-R0/R1 + 1._EB)*SIN(PI*K*(-T*VF + Y))*COS(PI*K*(-T*UF + X))*COS(PI*T*W) +&
-   PI*K*VF*(-R0/R1 + 1._EB)*SIN(PI*K*(-T*UF + X))*COS(PI*K*(-T*VF + Y))*COS(PI*T*W) + PI*W*(-R0/R1 + 1._EB)*SIN(PI*K*(-T*UF&
-   + X))*SIN(PI*K*(-T*VF + Y))*SIN(PI*T*W))/(((SIN(PI*K*(-T*UF + X))*SIN(PI*K*(-T*VF + Y))*COS(PI*T*W) + 1._EB)/(R1*(R0/R1&
-   + (-R0/R1 + 1._EB)*SIN(PI*K*(-T*UF + X))*SIN(PI*K*(-T*VF + Y))*COS(PI*T*W) + 1._EB)) + (-(SIN(PI*K*(-T*UF +&
-   X))*SIN(PI*K*(-T*VF + Y))*COS(PI*T*W) + 1._EB)/(R0/R1 + (-R0/R1 + 1._EB)*SIN(PI*K*(-T*UF + X))*SIN(PI*K*(-T*VF +&
-   Y))*COS(PI*T*W) + 1._EB) + 1._EB)/R0)*(R0/R1 + (-R0/R1 + 1._EB)*SIN(PI*K*(-T*UF + X))*SIN(PI*K*(-T*VF + Y))*COS(PI*T*W)&
-   + 1._EB)**2) + (-PI*K*UF*SIN(PI*K*(-T*VF + Y))*COS(PI*K*(-T*UF + X))*COS(PI*T*W) - PI*K*VF*SIN(PI*K*(-T*UF +&
-   X))*COS(PI*K*(-T*VF + Y))*COS(PI*T*W) - PI*W*SIN(PI*K*(-T*UF + X))*SIN(PI*K*(-T*VF + Y))*SIN(PI*T*W))/(((SIN(PI*K*(-T*UF&
-   + X))*SIN(PI*K*(-T*VF + Y))*COS(PI*T*W) + 1._EB)/(R1*(R0/R1 + (-R0/R1 + 1._EB)*SIN(PI*K*(-T*UF + X))*SIN(PI*K*(-T*VF +&
-   Y))*COS(PI*T*W) + 1._EB)) + (-(SIN(PI*K*(-T*UF + X))*SIN(PI*K*(-T*VF + Y))*COS(PI*T*W) + 1._EB)/(R0/R1 + (-R0/R1 +&
-   1._EB)*SIN(PI*K*(-T*UF + X))*SIN(PI*K*(-T*VF + Y))*COS(PI*T*W) + 1._EB) + 1._EB)/R0)*(R0/R1 + (-R0/R1 +&
-   1._EB)*SIN(PI*K*(-T*UF + X))*SIN(PI*K*(-T*VF + Y))*COS(PI*T*W) + 1._EB)) + (SIN(PI*K*(-T*UF + X))*SIN(PI*K*(-T*VF +&
-   Y))*COS(PI*T*W) + 1._EB)*(-(SIN(PI*K*(-T*UF + X))*SIN(PI*K*(-T*VF + Y))*COS(PI*T*W) + 1._EB)*(PI*K*UF*(-R0/R1 +&
-   1._EB)*SIN(PI*K*(-T*VF + Y))*COS(PI*K*(-T*UF + X))*COS(PI*T*W) + PI*K*VF*(-R0/R1 + 1._EB)*SIN(PI*K*(-T*UF +&
-   X))*COS(PI*K*(-T*VF + Y))*COS(PI*T*W) + PI*W*(-R0/R1 + 1._EB)*SIN(PI*K*(-T*UF + X))*SIN(PI*K*(-T*VF +&
-   Y))*SIN(PI*T*W))/(R1*(R0/R1 + (-R0/R1 + 1._EB)*SIN(PI*K*(-T*UF + X))*SIN(PI*K*(-T*VF + Y))*COS(PI*T*W) + 1._EB)**2) -&
-   (-PI*K*UF*SIN(PI*K*(-T*VF + Y))*COS(PI*K*(-T*UF + X))*COS(PI*T*W) - PI*K*VF*SIN(PI*K*(-T*UF + X))*COS(PI*K*(-T*VF +&
-   Y))*COS(PI*T*W) - PI*W*SIN(PI*K*(-T*UF + X))*SIN(PI*K*(-T*VF + Y))*SIN(PI*T*W))/(R1*(R0/R1 + (-R0/R1 +&
-   1._EB)*SIN(PI*K*(-T*UF + X))*SIN(PI*K*(-T*VF + Y))*COS(PI*T*W) + 1._EB)) - (-(SIN(PI*K*(-T*UF + X))*SIN(PI*K*(-T*VF +&
-   Y))*COS(PI*T*W) + 1._EB)*(PI*K*UF*(-R0/R1 + 1._EB)*SIN(PI*K*(-T*VF + Y))*COS(PI*K*(-T*UF + X))*COS(PI*T*W) +&
-   PI*K*VF*(-R0/R1 + 1._EB)*SIN(PI*K*(-T*UF + X))*COS(PI*K*(-T*VF + Y))*COS(PI*T*W) + PI*W*(-R0/R1 + 1._EB)*SIN(PI*K*(-T*UF&
-   + X))*SIN(PI*K*(-T*VF + Y))*SIN(PI*T*W))/(R0/R1 + (-R0/R1 + 1._EB)*SIN(PI*K*(-T*UF + X))*SIN(PI*K*(-T*VF +&
-   Y))*COS(PI*T*W) + 1._EB)**2 - (-PI*K*UF*SIN(PI*K*(-T*VF + Y))*COS(PI*K*(-T*UF + X))*COS(PI*T*W) -&
-   PI*K*VF*SIN(PI*K*(-T*UF + X))*COS(PI*K*(-T*VF + Y))*COS(PI*T*W) - PI*W*SIN(PI*K*(-T*UF + X))*SIN(PI*K*(-T*VF +&
-   Y))*SIN(PI*T*W))/(R0/R1 + (-R0/R1 + 1._EB)*SIN(PI*K*(-T*UF + X))*SIN(PI*K*(-T*VF + Y))*COS(PI*T*W) +&
-   1._EB))/R0)/(((SIN(PI*K*(-T*UF + X))*SIN(PI*K*(-T*VF + Y))*COS(PI*T*W) + 1._EB)/(R1*(R0/R1 + (-R0/R1 +&
-   1._EB)*SIN(PI*K*(-T*UF + X))*SIN(PI*K*(-T*VF + Y))*COS(PI*T*W) + 1._EB)) + (-(SIN(PI*K*(-T*UF + X))*SIN(PI*K*(-T*VF +&
-   Y))*COS(PI*T*W) + 1._EB)/(R0/R1 + (-R0/R1 + 1._EB)*SIN(PI*K*(-T*UF + X))*SIN(PI*K*(-T*VF + Y))*COS(PI*T*W) + 1._EB) +&
-   1._EB)/R0)**2*(R0/R1 + (-R0/R1 + 1._EB)*SIN(PI*K*(-T*UF + X))*SIN(PI*K*(-T*VF + Y))*COS(PI*T*W) + 1._EB))
-
-END FUNCTION VD2D_MMS_Z_SRC_2
-
-REAL(EB) FUNCTION VD2D_MMS_U_SRC_2(X,Y,T)
-IMPLICIT NONE
-REAL(EB),INTENT (IN) :: X,Y,T
-
-VD2D_MMS_U_SRC_2 = &
-   -2._EB*MU*(PI**2*K*W*(-R0 + R1)*(R0 - R1)*(-(-R0 + R1)*(COS(2._EB*PI*K*(-T*UF + T*VF + X - Y)) +&
-   COS(2._EB*PI*K*(T*UF + T*VF - X - Y)) - 2._EB)*COS(PI*T*W) + 12._EB*(R0 - R1)*SIN(PI*K*(T*VF - Y))**2*COS(PI*K*(T*UF -&
-   X))**2*COS(PI*T*W) - 4._EB*(R0 + R1 + (-R0 + R1)*SIN(PI*K*(T*UF - X))*SIN(PI*K*(T*VF - Y))*COS(PI*T*W))*SIN(PI*K*(T*UF -&
-   X))*SIN(PI*K*(T*VF - Y)))*SIN(PI*K*(T*VF - Y))*SIN(PI*T*W)*COS(PI*K*(T*UF - X))*COS(PI*T*W)/(12._EB*(R0 + R1 + (-R0 +&
-   R1)*SIN(PI*K*(T*UF - X))*SIN(PI*K*(T*VF - Y))*COS(PI*T*W))**3) + PI**2*K*W*(R0**2 - R1**2)*SIN(PI*K*(T*VF -&
-   Y))*SIN(PI*T*W)*COS(PI*K*(T*UF - X))/(2._EB*(R0*SIN(PI*K*(T*UF - X))*SIN(PI*K*(T*VF - Y))*COS(PI*T*W) - R0 -&
-   R1*SIN(PI*K*(T*UF - X))*SIN(PI*K*(T*VF - Y))*COS(PI*T*W) - R1)**2) + PI*W*(R0 - R1)*(4._EB*PI*K*(-R0 +&
-   R1)*SIN(PI*K*(T*UF - X))*SIN(PI*K*(T*VF - Y))**2*COS(PI*K*(T*UF - X))*COS(PI*T*W) + 24._EB*PI*K*(R0 - R1)*SIN(PI*K*(T*UF&
-   - X))*SIN(PI*K*(T*VF - Y))**2*COS(PI*K*(T*UF - X))*COS(PI*T*W) + 4._EB*PI*K*(R0 + R1 + (-R0 + R1)*SIN(PI*K*(T*UF -&
-   X))*SIN(PI*K*(T*VF - Y))*COS(PI*T*W))*SIN(PI*K*(T*VF - Y))*COS(PI*K*(T*UF - X)) - (-R0 +&
-   R1)*(-2._EB*PI*K*SIN(2._EB*PI*K*(-T*UF + T*VF + X - Y)) + 2._EB*PI*K*SIN(2._EB*PI*K*(T*UF + T*VF - X -&
-   Y)))*COS(PI*T*W))*SIN(PI*T*W)/(24._EB*(R0 + R1 + (-R0 + R1)*SIN(PI*K*(T*UF - X))*SIN(PI*K*(T*VF - Y))*COS(PI*T*W))**2) +&
-   PI*W*(R0**2 - R1**2)*(2._EB*PI*K*R0*SIN(PI*K*(T*UF - X))*COS(PI*K*(T*VF - Y))*COS(PI*T*W) - 2._EB*PI*K*R1*SIN(PI*K*(T*UF&
-   - X))*COS(PI*K*(T*VF - Y))*COS(PI*T*W))*SIN(PI*T*W)*COS(PI*K*(T*UF - X))*COS(PI*K*(T*VF - Y))/(2._EB*(R0*SIN(PI*K*(T*UF&
-   - X))*SIN(PI*K*(T*VF - Y))*COS(PI*T*W) - R0 - R1*SIN(PI*K*(T*UF - X))*SIN(PI*K*(T*VF - Y))*COS(PI*T*W) - R1)**3)) -&
-   PI*UF*W*(-R0 + R1)*SIN(PI*K*(-T*UF + X))*SIN(PI*K*(-T*VF + Y))*SIN(PI*T*W)/4._EB + PI*VF*W*(-R0 +&
-   R1)*SIN(PI*T*W)*COS(PI*K*(-T*UF + X))*COS(PI*K*(-T*VF + Y))/4._EB - PI*W**2*(-R0 + R1)**2*((SIN(PI*K*(-T*UF +&
-   X))*SIN(PI*K*(-T*VF + Y))*COS(PI*T*W) + 1)/(R1*(R0/R1 + (-R0/R1 + 1)*SIN(PI*K*(-T*UF + X))*SIN(PI*K*(-T*VF +&
-   Y))*COS(PI*T*W) + 1)) + (-(SIN(PI*K*(-T*UF + X))*SIN(PI*K*(-T*VF + Y))*COS(PI*T*W) + 1)/(R0/R1 + (-R0/R1 +&
-   1)*SIN(PI*K*(-T*UF + X))*SIN(PI*K*(-T*VF + Y))*COS(PI*T*W) + 1) + 1)/R0)*SIN(PI*K*(-T*UF + X))**2*SIN(PI*K*(-T*VF +&
-   Y))*SIN(PI*T*W)**2*COS(PI*K*(-T*VF + Y))/(32._EB*K) - 3*PI*W**2*(-R0 + R1)**2*((SIN(PI*K*(-T*UF + X))*SIN(PI*K*(-T*VF +&
-   Y))*COS(PI*T*W) + 1)/(R1*(R0/R1 + (-R0/R1 + 1)*SIN(PI*K*(-T*UF + X))*SIN(PI*K*(-T*VF + Y))*COS(PI*T*W) + 1)) +&
-   (-(SIN(PI*K*(-T*UF + X))*SIN(PI*K*(-T*VF + Y))*COS(PI*T*W) + 1)/(R0/R1 + (-R0/R1 + 1)*SIN(PI*K*(-T*UF +&
-   X))*SIN(PI*K*(-T*VF + Y))*COS(PI*T*W) + 1) + 1)/R0)*SIN(PI*K*(-T*UF + X))*SIN(PI*K*(-T*VF +&
-   Y))**2*SIN(PI*T*W)**2*COS(PI*K*(-T*UF + X))/(16._EB*K) + PI*W**2*(-R0 + R1)**2*((SIN(PI*K*(-T*UF + X))*SIN(PI*K*(-T*VF +&
-   Y))*COS(PI*T*W) + 1)/(R1*(R0/R1 + (-R0/R1 + 1)*SIN(PI*K*(-T*UF + X))*SIN(PI*K*(-T*VF + Y))*COS(PI*T*W) + 1)) +&
-   (-(SIN(PI*K*(-T*UF + X))*SIN(PI*K*(-T*VF + Y))*COS(PI*T*W) + 1)/(R0/R1 + (-R0/R1 + 1)*SIN(PI*K*(-T*UF +&
-   X))*SIN(PI*K*(-T*VF + Y))*COS(PI*T*W) + 1) + 1)/R0)*SIN(PI*K*(-T*UF + X))*SIN(PI*T*W)**2*COS(PI*K*(-T*UF +&
-   X))*COS(PI*K*(-T*VF + Y))**2/(16._EB*K) + PI*W**2*(-R0 + R1)**2*((SIN(PI*K*(-T*UF + X))*SIN(PI*K*(-T*VF +&
-   Y))*COS(PI*T*W) + 1)/(R1*(R0/R1 + (-R0/R1 + 1)*SIN(PI*K*(-T*UF + X))*SIN(PI*K*(-T*VF + Y))*COS(PI*T*W) + 1)) +&
-   (-(SIN(PI*K*(-T*UF + X))*SIN(PI*K*(-T*VF + Y))*COS(PI*T*W) + 1)/(R0/R1 + (-R0/R1 + 1)*SIN(PI*K*(-T*UF +&
-   X))*SIN(PI*K*(-T*VF + Y))*COS(PI*T*W) + 1) + 1)/R0)*SIN(PI*K*(-T*VF + Y))*SIN(PI*T*W)**2*COS(PI*K*(-T*UF +&
-   X))**2*COS(PI*K*(-T*VF + Y))/(32._EB*K) - PI*W**2*(-R0 + R1)*SIN(PI*K*(-T*VF + Y))*COS(PI*K*(-T*UF +&
-   X))*COS(PI*T*W)/(4._EB*K) + W**2*(-R0 + R1)**2*(-PI*K*(-R0/R1 + 1)*(SIN(PI*K*(-T*UF + X))*SIN(PI*K*(-T*VF +&
-   Y))*COS(PI*T*W) + 1)*SIN(PI*K*(-T*UF + X))*COS(PI*K*(-T*VF + Y))*COS(PI*T*W)/(R1*(R0/R1 + (-R0/R1 + 1)*SIN(PI*K*(-T*UF +&
-   X))*SIN(PI*K*(-T*VF + Y))*COS(PI*T*W) + 1)**2) + PI*K*SIN(PI*K*(-T*UF + X))*COS(PI*K*(-T*VF + Y))*COS(PI*T*W)/(R1*(R0/R1&
-   + (-R0/R1 + 1)*SIN(PI*K*(-T*UF + X))*SIN(PI*K*(-T*VF + Y))*COS(PI*T*W) + 1)) + (PI*K*(-R0/R1 + 1)*(SIN(PI*K*(-T*UF +&
-   X))*SIN(PI*K*(-T*VF + Y))*COS(PI*T*W) + 1)*SIN(PI*K*(-T*UF + X))*COS(PI*K*(-T*VF + Y))*COS(PI*T*W)/(R0/R1 + (-R0/R1 +&
-   1)*SIN(PI*K*(-T*UF + X))*SIN(PI*K*(-T*VF + Y))*COS(PI*T*W) + 1)**2 - PI*K*SIN(PI*K*(-T*UF + X))*COS(PI*K*(-T*VF +&
-   Y))*COS(PI*T*W)/(R0/R1 + (-R0/R1 + 1)*SIN(PI*K*(-T*UF + X))*SIN(PI*K*(-T*VF + Y))*COS(PI*T*W) + 1))/R0)*SIN(PI*K*(-T*UF&
-   + X))*SIN(PI*K*(-T*VF + Y))*SIN(PI*T*W)**2*COS(PI*K*(-T*UF + X))*COS(PI*K*(-T*VF + Y))/(16._EB*K**2) + W**2*(-R0 +&
-   R1)**2*(-PI*K*(-R0/R1 + 1)*(SIN(PI*K*(-T*UF + X))*SIN(PI*K*(-T*VF + Y))*COS(PI*T*W) + 1)*SIN(PI*K*(-T*VF +&
-   Y))*COS(PI*K*(-T*UF + X))*COS(PI*T*W)/(R1*(R0/R1 + (-R0/R1 + 1)*SIN(PI*K*(-T*UF + X))*SIN(PI*K*(-T*VF + Y))*COS(PI*T*W)&
-   + 1)**2) + PI*K*SIN(PI*K*(-T*VF + Y))*COS(PI*K*(-T*UF + X))*COS(PI*T*W)/(R1*(R0/R1 + (-R0/R1 + 1)*SIN(PI*K*(-T*UF +&
-   X))*SIN(PI*K*(-T*VF + Y))*COS(PI*T*W) + 1)) + (PI*K*(-R0/R1 + 1)*(SIN(PI*K*(-T*UF + X))*SIN(PI*K*(-T*VF +&
-   Y))*COS(PI*T*W) + 1)*SIN(PI*K*(-T*VF + Y))*COS(PI*K*(-T*UF + X))*COS(PI*T*W)/(R0/R1 + (-R0/R1 + 1)*SIN(PI*K*(-T*UF +&
-   X))*SIN(PI*K*(-T*VF + Y))*COS(PI*T*W) + 1)**2 - PI*K*SIN(PI*K*(-T*VF + Y))*COS(PI*K*(-T*UF + X))*COS(PI*T*W)/(R0/R1 +&
-   (-R0/R1 + 1)*SIN(PI*K*(-T*UF + X))*SIN(PI*K*(-T*VF + Y))*COS(PI*T*W) + 1))/R0)*SIN(PI*K*(-T*UF + X))*SIN(PI*K*(-T*VF +&
-   Y))*SIN(PI*T*W)**2*COS(PI*K*(-T*UF + X))*COS(PI*K*(-T*VF + Y))/(32._EB*K**2) + W**2*(-R0 + R1)**2*(-PI*K*(-R0/R1 +&
-   1)*(SIN(PI*K*(-T*UF + X))*SIN(PI*K*(-T*VF + Y))*COS(PI*T*W) + 1)*SIN(PI*K*(-T*VF + Y))*COS(PI*K*(-T*UF +&
-   X))*COS(PI*T*W)/(R1*(R0/R1 + (-R0/R1 + 1)*SIN(PI*K*(-T*UF + X))*SIN(PI*K*(-T*VF + Y))*COS(PI*T*W) + 1)**2) +&
-   PI*K*SIN(PI*K*(-T*VF + Y))*COS(PI*K*(-T*UF + X))*COS(PI*T*W)/(R1*(R0/R1 + (-R0/R1 + 1)*SIN(PI*K*(-T*UF +&
-   X))*SIN(PI*K*(-T*VF + Y))*COS(PI*T*W) + 1)) + (PI*K*(-R0/R1 + 1)*(SIN(PI*K*(-T*UF + X))*SIN(PI*K*(-T*VF +&
-   Y))*COS(PI*T*W) + 1)*SIN(PI*K*(-T*VF + Y))*COS(PI*K*(-T*UF + X))*COS(PI*T*W)/(R0/R1 + (-R0/R1 + 1)*SIN(PI*K*(-T*UF +&
-   X))*SIN(PI*K*(-T*VF + Y))*COS(PI*T*W) + 1)**2 - PI*K*SIN(PI*K*(-T*VF + Y))*COS(PI*K*(-T*UF + X))*COS(PI*T*W)/(R0/R1 +&
-   (-R0/R1 + 1)*SIN(PI*K*(-T*UF + X))*SIN(PI*K*(-T*VF + Y))*COS(PI*T*W) + 1))/R0)*SIN(PI*K*(-T*VF +&
-   Y))**2*SIN(PI*T*W)**2*COS(PI*K*(-T*UF + X))**2/(16._EB*K**2)
-
-END FUNCTION VD2D_MMS_U_SRC_2
-
-REAL(EB) FUNCTION VD2D_MMS_V_SRC_2(X,Y,T)
-IMPLICIT NONE
-REAL(EB),INTENT (IN) :: X,Y,T
-
-VD2D_MMS_V_SRC_2 = &
-   -2._EB*MU*(PI**2*K*W*(-R0 + R1)*(R0 - R1)*(-(-R0 + R1)*(COS(2._EB*PI*K*(-T*UF + T*VF + X - Y)) +&
-   COS(2._EB*PI*K*(T*UF + T*VF - X - Y)) - 2._EB)*COS(PI*T*W) + 12._EB*(R0 - R1)*SIN(PI*K*(T*UF - X))**2*COS(PI*K*(T*VF -&
-   Y))**2*COS(PI*T*W) - 4._EB*(R0 + R1 + (-R0 + R1)*SIN(PI*K*(T*UF - X))*SIN(PI*K*(T*VF - Y))*COS(PI*T*W))*SIN(PI*K*(T*UF -&
-   X))*SIN(PI*K*(T*VF - Y)))*SIN(PI*K*(T*UF - X))*SIN(PI*T*W)*COS(PI*K*(T*VF - Y))*COS(PI*T*W)/(12._EB*(R0 + R1 + (-R0 +&
-   R1)*SIN(PI*K*(T*UF - X))*SIN(PI*K*(T*VF - Y))*COS(PI*T*W))**3) + PI**2*K*W*(R0**2 - R1**2)*SIN(PI*K*(T*UF -&
-   X))*SIN(PI*T*W)*COS(PI*K*(T*VF - Y))/(2._EB*(R0*SIN(PI*K*(T*UF - X))*SIN(PI*K*(T*VF - Y))*COS(PI*T*W) - R0 -&
-   R1*SIN(PI*K*(T*UF - X))*SIN(PI*K*(T*VF - Y))*COS(PI*T*W) - R1)**2) + PI*W*(R0 - R1)*(4._EB*PI*K*(-R0 +&
-   R1)*SIN(PI*K*(T*UF - X))**2*SIN(PI*K*(T*VF - Y))*COS(PI*K*(T*VF - Y))*COS(PI*T*W) + 24._EB*PI*K*(R0 - R1)*SIN(PI*K*(T*UF&
-   - X))**2*SIN(PI*K*(T*VF - Y))*COS(PI*K*(T*VF - Y))*COS(PI*T*W) + 4._EB*PI*K*(R0 + R1 + (-R0 + R1)*SIN(PI*K*(T*UF -&
-   X))*SIN(PI*K*(T*VF - Y))*COS(PI*T*W))*SIN(PI*K*(T*UF - X))*COS(PI*K*(T*VF - Y)) - (-R0 +&
-   R1)*(2._EB*PI*K*SIN(2*PI*K*(-T*UF + T*VF + X - Y)) + 2*PI*K*SIN(2*PI*K*(T*UF + T*VF - X -&
-   Y)))*COS(PI*T*W))*SIN(PI*T*W)/(24._EB*(R0 + R1 + (-R0 + R1)*SIN(PI*K*(T*UF - X))*SIN(PI*K*(T*VF - Y))*COS(PI*T*W))**2) +&
-   PI*W*(R0**2 - R1**2)*(2._EB*PI*K*R0*SIN(PI*K*(T*VF - Y))*COS(PI*K*(T*UF - X))*COS(PI*T*W) - 2._EB*PI*K*R1*SIN(PI*K*(T*VF&
-   - Y))*COS(PI*K*(T*UF - X))*COS(PI*T*W))*SIN(PI*T*W)*COS(PI*K*(T*UF - X))*COS(PI*K*(T*VF - Y))/(2._EB*(R0*SIN(PI*K*(T*UF&
-   - X))*SIN(PI*K*(T*VF - Y))*COS(PI*T*W) - R0 - R1*SIN(PI*K*(T*UF - X))*SIN(PI*K*(T*VF - Y))*COS(PI*T*W) - R1)**3)) +&
-   PI*UF*W*(-R0 + R1)*SIN(PI*T*W)*COS(PI*K*(-T*UF + X))*COS(PI*K*(-T*VF + Y))/4._EB - PI*VF*W*(-R0 + R1)*SIN(PI*K*(-T*UF +&
-   X))*SIN(PI*K*(-T*VF + Y))*SIN(PI*T*W)/4._EB - 3*PI*W**2*(-R0 + R1)**2*((SIN(PI*K*(-T*UF + X))*SIN(PI*K*(-T*VF +&
-   Y))*COS(PI*T*W) + 1)/(R1*(R0/R1 + (-R0/R1 + 1)*SIN(PI*K*(-T*UF + X))*SIN(PI*K*(-T*VF + Y))*COS(PI*T*W) + 1)) +&
-   (-(SIN(PI*K*(-T*UF + X))*SIN(PI*K*(-T*VF + Y))*COS(PI*T*W) + 1)/(R0/R1 + (-R0/R1 + 1)*SIN(PI*K*(-T*UF +&
-   X))*SIN(PI*K*(-T*VF + Y))*COS(PI*T*W) + 1) + 1)/R0)*SIN(PI*K*(-T*UF + X))**2*SIN(PI*K*(-T*VF +&
-   Y))*SIN(PI*T*W)**2*COS(PI*K*(-T*VF + Y))/(16._EB*K) - PI*W**2*(-R0 + R1)**2*((SIN(PI*K*(-T*UF + X))*SIN(PI*K*(-T*VF +&
-   Y))*COS(PI*T*W) + 1)/(R1*(R0/R1 + (-R0/R1 + 1)*SIN(PI*K*(-T*UF + X))*SIN(PI*K*(-T*VF + Y))*COS(PI*T*W) + 1)) +&
-   (-(SIN(PI*K*(-T*UF + X))*SIN(PI*K*(-T*VF + Y))*COS(PI*T*W) + 1)/(R0/R1 + (-R0/R1 + 1)*SIN(PI*K*(-T*UF +&
-   X))*SIN(PI*K*(-T*VF + Y))*COS(PI*T*W) + 1) + 1)/R0)*SIN(PI*K*(-T*UF + X))*SIN(PI*K*(-T*VF +&
-   Y))**2*SIN(PI*T*W)**2*COS(PI*K*(-T*UF + X))/(32._EB*K) + PI*W**2*(-R0 + R1)**2*((SIN(PI*K*(-T*UF + X))*SIN(PI*K*(-T*VF +&
-   Y))*COS(PI*T*W) + 1)/(R1*(R0/R1 + (-R0/R1 + 1)*SIN(PI*K*(-T*UF + X))*SIN(PI*K*(-T*VF + Y))*COS(PI*T*W) + 1)) +&
-   (-(SIN(PI*K*(-T*UF + X))*SIN(PI*K*(-T*VF + Y))*COS(PI*T*W) + 1)/(R0/R1 + (-R0/R1 + 1)*SIN(PI*K*(-T*UF +&
-   X))*SIN(PI*K*(-T*VF + Y))*COS(PI*T*W) + 1) + 1)/R0)*SIN(PI*K*(-T*UF + X))*SIN(PI*T*W)**2*COS(PI*K*(-T*UF +&
-   X))*COS(PI*K*(-T*VF + Y))**2/(32._EB*K) + PI*W**2*(-R0 + R1)**2*((SIN(PI*K*(-T*UF + X))*SIN(PI*K*(-T*VF +&
-   Y))*COS(PI*T*W) + 1)/(R1*(R0/R1 + (-R0/R1 + 1)*SIN(PI*K*(-T*UF + X))*SIN(PI*K*(-T*VF + Y))*COS(PI*T*W) + 1)) +&
-   (-(SIN(PI*K*(-T*UF + X))*SIN(PI*K*(-T*VF + Y))*COS(PI*T*W) + 1)/(R0/R1 + (-R0/R1 + 1)*SIN(PI*K*(-T*UF +&
-   X))*SIN(PI*K*(-T*VF + Y))*COS(PI*T*W) + 1) + 1)/R0)*SIN(PI*K*(-T*VF + Y))*SIN(PI*T*W)**2*COS(PI*K*(-T*UF +&
-   X))**2*COS(PI*K*(-T*VF + Y))/(16._EB*K) - PI*W**2*(-R0 + R1)*SIN(PI*K*(-T*UF + X))*COS(PI*K*(-T*VF +&
-   Y))*COS(PI*T*W)/(4._EB*K) + W**2*(-R0 + R1)**2*(-PI*K*(-R0/R1 + 1)*(SIN(PI*K*(-T*UF + X))*SIN(PI*K*(-T*VF +&
-   Y))*COS(PI*T*W) + 1)*SIN(PI*K*(-T*UF + X))*COS(PI*K*(-T*VF + Y))*COS(PI*T*W)/(R1*(R0/R1 + (-R0/R1 + 1)*SIN(PI*K*(-T*UF +&
-   X))*SIN(PI*K*(-T*VF + Y))*COS(PI*T*W) + 1)**2) + PI*K*SIN(PI*K*(-T*UF + X))*COS(PI*K*(-T*VF + Y))*COS(PI*T*W)/(R1*(R0/R1&
-   + (-R0/R1 + 1)*SIN(PI*K*(-T*UF + X))*SIN(PI*K*(-T*VF + Y))*COS(PI*T*W) + 1)) + (PI*K*(-R0/R1 + 1)*(SIN(PI*K*(-T*UF +&
-   X))*SIN(PI*K*(-T*VF + Y))*COS(PI*T*W) + 1)*SIN(PI*K*(-T*UF + X))*COS(PI*K*(-T*VF + Y))*COS(PI*T*W)/(R0/R1 + (-R0/R1 +&
-   1)*SIN(PI*K*(-T*UF + X))*SIN(PI*K*(-T*VF + Y))*COS(PI*T*W) + 1)**2 - PI*K*SIN(PI*K*(-T*UF + X))*COS(PI*K*(-T*VF +&
-   Y))*COS(PI*T*W)/(R0/R1 + (-R0/R1 + 1)*SIN(PI*K*(-T*UF + X))*SIN(PI*K*(-T*VF + Y))*COS(PI*T*W) + 1))/R0)*SIN(PI*K*(-T*UF&
-   + X))**2*SIN(PI*T*W)**2*COS(PI*K*(-T*VF + Y))**2/(16._EB*K**2) + W**2*(-R0 + R1)**2*(-PI*K*(-R0/R1 + 1)*(SIN(PI*K*(-T*UF&
-   + X))*SIN(PI*K*(-T*VF + Y))*COS(PI*T*W) + 1)*SIN(PI*K*(-T*UF + X))*COS(PI*K*(-T*VF + Y))*COS(PI*T*W)/(R1*(R0/R1 +&
-   (-R0/R1 + 1)*SIN(PI*K*(-T*UF + X))*SIN(PI*K*(-T*VF + Y))*COS(PI*T*W) + 1)**2) + PI*K*SIN(PI*K*(-T*UF +&
-   X))*COS(PI*K*(-T*VF + Y))*COS(PI*T*W)/(R1*(R0/R1 + (-R0/R1 + 1)*SIN(PI*K*(-T*UF + X))*SIN(PI*K*(-T*VF + Y))*COS(PI*T*W)&
-   + 1)) + (PI*K*(-R0/R1 + 1)*(SIN(PI*K*(-T*UF + X))*SIN(PI*K*(-T*VF + Y))*COS(PI*T*W) + 1)*SIN(PI*K*(-T*UF +&
-   X))*COS(PI*K*(-T*VF + Y))*COS(PI*T*W)/(R0/R1 + (-R0/R1 + 1)*SIN(PI*K*(-T*UF + X))*SIN(PI*K*(-T*VF + Y))*COS(PI*T*W) +&
-   1)**2 - PI*K*SIN(PI*K*(-T*UF + X))*COS(PI*K*(-T*VF + Y))*COS(PI*T*W)/(R0/R1 + (-R0/R1 + 1)*SIN(PI*K*(-T*UF +&
-   X))*SIN(PI*K*(-T*VF + Y))*COS(PI*T*W) + 1))/R0)*SIN(PI*K*(-T*UF + X))*SIN(PI*K*(-T*VF +&
-   Y))*SIN(PI*T*W)**2*COS(PI*K*(-T*UF + X))*COS(PI*K*(-T*VF + Y))/(32._EB*K**2) + W**2*(-R0 + R1)**2*(-PI*K*(-R0/R1 +&
-   1)*(SIN(PI*K*(-T*UF + X))*SIN(PI*K*(-T*VF + Y))*COS(PI*T*W) + 1)*SIN(PI*K*(-T*VF + Y))*COS(PI*K*(-T*UF +&
-   X))*COS(PI*T*W)/(R1*(R0/R1 + (-R0/R1 + 1)*SIN(PI*K*(-T*UF + X))*SIN(PI*K*(-T*VF + Y))*COS(PI*T*W) + 1)**2) +&
-   PI*K*SIN(PI*K*(-T*VF + Y))*COS(PI*K*(-T*UF + X))*COS(PI*T*W)/(R1*(R0/R1 + (-R0/R1 + 1)*SIN(PI*K*(-T*UF +&
-   X))*SIN(PI*K*(-T*VF + Y))*COS(PI*T*W) + 1)) + (PI*K*(-R0/R1 + 1)*(SIN(PI*K*(-T*UF + X))*SIN(PI*K*(-T*VF +&
-   Y))*COS(PI*T*W) + 1)*SIN(PI*K*(-T*VF + Y))*COS(PI*K*(-T*UF + X))*COS(PI*T*W)/(R0/R1 + (-R0/R1 + 1)*SIN(PI*K*(-T*UF +&
-   X))*SIN(PI*K*(-T*VF + Y))*COS(PI*T*W) + 1)**2 - PI*K*SIN(PI*K*(-T*VF + Y))*COS(PI*K*(-T*UF + X))*COS(PI*T*W)/(R0/R1 +&
-   (-R0/R1 + 1)*SIN(PI*K*(-T*UF + X))*SIN(PI*K*(-T*VF + Y))*COS(PI*T*W) + 1))/R0)*SIN(PI*K*(-T*UF + X))*SIN(PI*K*(-T*VF +&
-   Y))*SIN(PI*T*W)**2*COS(PI*K*(-T*UF + X))*COS(PI*K*(-T*VF + Y))/(16._EB*K**2)
-
-END FUNCTION VD2D_MMS_V_SRC_2
 
 END MODULE MANUFACTURED_SOLUTIONS
 
