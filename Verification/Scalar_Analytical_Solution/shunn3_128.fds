@@ -10,6 +10,7 @@
       GVEC(3)=0.
       NOISE=.FALSE.
       DNS=.TRUE.
+      CFL_MAX=0.5
       PERIODIC_TEST=7
       P_INF=243738.74668/
 
