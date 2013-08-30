@@ -213,7 +213,6 @@ update_and_compile_cfast()
       cat $FIREBOT_DIR/output/stage0_cfast >> $ERROR_LOG
       echo "" >> $ERROR_LOG
    fi
-
 }
 
 #  ============================
@@ -984,20 +983,8 @@ check_matlab_license_server()
 run_matlab_verification()
 {
    # Run Matlab plotting script
-   cd $FDS_SVNROOT/Utilities/Matlab/scripts
-
-   # Replace LaTeX with TeX for Interpreter in plot_style.m
-   # This allows displayless automatic Matlab plotting
-   # Otherwise Matlab crashes due to a known bug
-   # sed -i 's/LaTeX/TeX/g' plot_style.m 
-
    cd $FDS_SVNROOT/Utilities/Matlab
    matlab -r "try, disp('Running Matlab Verification script'), FDS_verification_script, catch, disp('Error'), err = lasterror, err.message, err.stack, end, exit" &> $FIREBOT_DIR/output/stage7a_verification
-
-   # Restore LaTeX as plot_style interpreter
-   # cd scripts
-   # sed -i 's/TeX/LaTeX/g' plot_style.m
-   # cd ..
 }
 
 check_matlab_verification()
@@ -1062,20 +1049,8 @@ check_verification_stats()
 run_matlab_validation()
 {
    # Run Matlab plotting script
-   cd $FDS_SVNROOT/Utilities/Matlab/scripts
-
-   # Replace LaTeX with TeX for Interpreter in plot_style.m
-   # This allows displayless automatic Matlab plotting
-   # Otherwise Matlab crashes due to a known bug
-   # sed -i 's/LaTeX/TeX/g' plot_style.m 
-
    cd $FDS_SVNROOT/Utilities/Matlab
    matlab -r "try, disp('Running Matlab Validation script'), FDS_validation_script, catch, disp('Error'), err = lasterror, err.message, err.stack, end, exit" &> $FIREBOT_DIR/output/stage7b_validation
-
-   # Restore LaTeX as plot_style interpreter
-   # cd scripts
-   # sed -i 's/TeX/LaTeX/g' plot_style.m
-   # cd ..
 }
 
 check_matlab_validation()
@@ -1216,6 +1191,89 @@ make_smv_verification_guide()
 
    # Check guide for completion and copy to website if successful
    check_guide $FIREBOT_DIR/output/stage8_smv_verification_guide $FDS_SVNROOT/Manuals/SMV_Verification_Guide/SMV_Verification_Guide.pdf 'SMV Verification Guide'
+}
+
+#  =====================================
+#  = Stage 9a - Run correlations cases =
+#  =====================================
+
+run_correlations()
+{
+   # Compile FDTs.f90 and run correlations cases
+   cd $FDS_SVNROOT/Validation
+   ./Run_FDTs_Cases.sh &> $FIREBOT_DIR/output/stage9a_correlations
+}
+
+check_correlations()
+{
+   # Scan and report any errors in correlation cases
+   cd $FIREBOT_DIR
+   if [[ `grep -A 20 -B 20 "Problem" $FIREBOT_DIR/output/stage9a_correlations` == "" ]]
+   then
+      stage9a_success=true
+   else
+      echo "Warnings from Stage 9a - Run correlations:" >> $WARNING_LOG
+      grep -A 20 -B 20 "Problem" $FIREBOT_DIR/output/stage9a_correlations >> $WARNING_LOG
+      echo "" >> $WARNING_LOG
+   fi
+}
+
+#  =============================================
+#  = Stage 9b - Matlab plotting (correlations) =
+#  =============================================
+
+run_matlab_correlations()
+{
+   # Run Matlab plotting script
+   cd $FDS_SVNROOT/Utilities/Matlab
+   matlab -r "try, disp('Running Matlab FDTs Validation script'), FDTs_validation_script, catch, disp('Error'), err = lasterror, err.message, err.stack, end, exit" &> $FIREBOT_DIR/output/stage9b_correlations
+}
+
+check_matlab_correlations()
+{
+   # Scan and report any errors in Matlab scripts
+   cd $FIREBOT_DIR
+   if [[ `grep -A 50 "Error" $FIREBOT_DIR/output/stage9b_correlations` == "" ]]
+   then
+      stage9b_success=true
+   else
+      echo "Warnings from Stage 9b - Matlab plotting (correlations):" >> $WARNING_LOG
+      grep -A 50 "Error" $FIREBOT_DIR/output/stage9b_correlations >> $WARNING_LOG
+      echo "" >> $WARNING_LOG
+   fi
+}
+
+#  =======================================
+#  = Stage 9c - Build correlations guide =
+#  =======================================
+
+check_correlations_guide()
+{
+   # Scan and report any errors or warnings in build process for guide
+   cd $FIREBOT_DIR
+   if [[ `grep -I "successfully" $1` == "" ]]
+   then
+      # There were errors/warnings in the guide build process
+      echo "Warnings from Stage 9c - Build Correlations Guide:" >> $WARNING_LOG
+      echo $3 >> $WARNING_LOG # Name of guide
+      cat $1 >> $WARNING_LOG # Contents of log file
+      echo "" >> $WARNING_LOG
+   else
+      # Guide built successfully; there were no errors/warnings
+      # Copy guide to Firebot's local website
+      cp $2 /var/www/html/firebot/fdts_manuals/
+   fi
+}
+
+make_correlations_guide()
+{
+   cd $FDS_SVNROOT/Manuals/FDTs_Validation_Guide
+
+   # Build FDS User Guide
+   ./make_guide.sh &> $FIREBOT_DIR/output/stage9c_correlations_guide
+
+   # Check guide for completion and copy to website if successful
+   check_correlations_guide $FIREBOT_DIR/output/stage9c_correlations_guide $FDS_SVNROOT/Manuals/FDTs_Validation_Guide/FDTs_Validation_Guide.pdf 'Correlations Guide'
 }
 
 #  =====================================================
@@ -1410,6 +1468,18 @@ make_smv_user_guide
 make_smv_technical_guide
 make_smv_verification_guide
 make_fds_configuration_management_plan
+
+### Stage 9a ###
+run_correlations
+check_correlations
+
+### Stage 9b ###
+check_matlab_license_server
+run_matlab_correlations
+check_matlab_correlations
+
+### Stage 9c ###
+make_correlations_guide
 
 ### Wrap up and report results ###
 set_files_world_readable
