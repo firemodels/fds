@@ -173,7 +173,7 @@ update_and_compile_cfast()
    if [ -e "$CFAST_SVNROOT" ]
    # If yes, then update the CFAST repository and compile CFAST
    then
-      echo "Updating and compiling CFAST:" > $FIREBOT_DIR/output/stage0_cfast
+      echo "Updating and compiling CFAST:" >> $FIREBOT_DIR/output/stage0_cfast
       cd $CFAST_SVNROOT/CFAST
       
       # Clean unversioned and modified files
@@ -189,7 +189,7 @@ update_and_compile_cfast()
       ./make_cfast.sh >> $FIREBOT_DIR/output/stage0_cfast 2>&1
    # If no, then checkout the CFAST repository and compile CFAST
    else
-      echo "Downloading and compiling CFAST:" > $FIREBOT_DIR/output/stage0_cfast
+      echo "Downloading and compiling CFAST:" >> $FIREBOT_DIR/output/stage0_cfast
       mkdir -p $CFAST_SVNROOT
       cd $CFAST_SVNROOT
 
@@ -420,7 +420,7 @@ check_inspect_fds_openmp_db()
       :
    else
       echo "Errors from Stage 2c - Compile and inspect FDS OpenMP debug:" >> $ERROR_LOG
-      cat ${FIREBOT_DIR}/output/stage2c_inspect > $ERROR_LOG
+      cat ${FIREBOT_DIR}/output/stage2c_inspect >> $ERROR_LOG
       echo "" >> $ERROR_LOG
       echo "For more details, view the inspector log in the FDS-SMV/Utilities/Scripts folder" >> $ERROR_LOG
       echo "by using the FDS-SMV/Utilities/Scripts/inspect_report.sh script." >> $ERROR_LOG
@@ -466,7 +466,7 @@ run_verification_cases_debug()
    cd $FDS_SVNROOT/Verification
 
    # Submit FDS verification cases and wait for them to start (run serial cases in debug mode on firebot queue)
-   echo 'Running FDS verification cases (serial):' > $FIREBOT_DIR/output/stage3
+   echo 'Running FDS verification cases (serial):' >> $FIREBOT_DIR/output/stage3
    ./Run_FDS_Cases.sh -c serial -d -q $QUEUE >> $FIREBOT_DIR/output/stage3 2>&1
    wait_verification_cases_debug_start
 
@@ -544,7 +544,7 @@ check_verification_cases_debug()
    then
       stage3_success=true
    else
-      grep -rI 'Run aborted' $FIREBOT_DIR/output/stage3 > $FIREBOT_DIR/output/stage3_errors
+      grep -rI 'Run aborted' $FIREBOT_DIR/output/stage3 >> $FIREBOT_DIR/output/stage3_errors
       grep -rI Segmentation * >> $FIREBOT_DIR/output/stage3_errors
       grep -rI ERROR: * >> $FIREBOT_DIR/output/stage3_errors
       grep -rI 'STOP: Numerical' * >> $FIREBOT_DIR/output/stage3_errors
@@ -683,7 +683,7 @@ compile_smv_utilities()
 {  
    # smokeview libraries
    cd $FDS_SVNROOT/SMV/Build/LIBS/lib_linux_intel_64
-   echo 'Building Smokeview libraries:' > $FIREBOT_DIR/output/stage5pre 2>&1
+   echo 'Building Smokeview libraries:' >> $FIREBOT_DIR/output/stage5pre 2>&1
    ./makelibs.sh >> $FIREBOT_DIR/output/stage5pre 2>&1
 
    # smokezip:
@@ -706,7 +706,7 @@ compile_smv_utilities()
   # wind2fds:
    cd $FDS_SVNROOT/Utilities/wind2fds/intel_linux_64
    rm -f *.o wind2fds_linux_64
-   echo 'Compiling wind2fds:' > $FIREBOT_DIR/output/stage5pre 2>&1
+   echo 'Compiling wind2fds:' >> $FIREBOT_DIR/output/stage5pre 2>&1
    ./make_wind.sh >> $FIREBOT_DIR/output/stage5pre 2>&1
    echo "" >> $FIREBOT_DIR/output/stage5pre 2>&1
 
@@ -749,7 +749,7 @@ run_verification_cases_release()
 {
    # Start running all FDS verification cases (run all cases on firebot queue)
    cd $FDS_SVNROOT/Verification
-   echo 'Running FDS verification cases:' > $FIREBOT_DIR/output/stage5
+   echo 'Running FDS verification cases:' >> $FIREBOT_DIR/output/stage5
    ./Run_FDS_Cases.sh -q $QUEUE >> $FIREBOT_DIR/output/stage5 2>&1
    echo "" >> $FIREBOT_DIR/output/stage5 2>&1
 
@@ -775,7 +775,7 @@ check_verification_cases_release()
    then
       stage5_success=true
    else
-      grep -rI 'Run aborted' $FIREBOT_DIR/output/stage5 > $FIREBOT_DIR/output/stage5_errors
+      grep -rI 'Run aborted' $FIREBOT_DIR/output/stage5 >> $FIREBOT_DIR/output/stage5_errors
       grep -rI Segmentation * >> $FIREBOT_DIR/output/stage5_errors
       grep -rI ERROR: * >> $FIREBOT_DIR/output/stage5_errors
       grep -rI 'STOP: Numerical' * >> $FIREBOT_DIR/output/stage5_errors
@@ -1276,7 +1276,7 @@ email_build_status()
    else
       # Send success message with links to nightly manuals
       stop_time=`date`
-      echo "-------------------------------" > $TIME_LOG
+      echo "-------------------------------" >> $TIME_LOG
       echo "Host: $hostname " >> $TIME_LOG
       echo "Start Time: $start_time " >> $TIME_LOG
       echo "Stop Time: $stop_time " >> $TIME_LOG
