@@ -9,6 +9,10 @@ set fds_revision=13139
 
 set fdssmv_major_version=6
 
+Rem ---------- App names ------------
+
+set wzzip=wzzip
+
 Rem ---------- FDS-Smokeview repository settings ------------
 
 set fds_edition=FDS6

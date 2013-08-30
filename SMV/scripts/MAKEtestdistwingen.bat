@@ -82,7 +82,7 @@ copy textures\*.png %smvdir%\textures
 echo
 echo winzipping distribution directory
 cd %smvdir%
-wzzip -a -r -p %zipbase%.zip *
+%wzzip% -a -r -p %zipbase%.zip *
 
 echo
 echo creating self-extracting archive

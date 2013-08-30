@@ -88,7 +88,7 @@ copy wrapup_smv_install_%platform%.bat "%smvdir%\wrapup_smv_install.bat
 echo
 echo winzipping distribution directory
 cd %smvdir%
-wzzip -a -r -P %zipbase%.zip *
+%wzzip% -a -r -P %zipbase%.zip *
 
 echo
 echo creating self-extracting archive
