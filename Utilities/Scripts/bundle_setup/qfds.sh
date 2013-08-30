@@ -179,9 +179,9 @@ TITLE="$infile"
 if [ $nprocesses -gt 1 ] ; then
   MPIRUN="$MPIDIST/bin/mpirun -np $nprocesses"
   TITLE="$infile(MPI)"
-  if [ $FDSNETWORK == "infiniband" ] ; then
-    TITLE="$infile(MPI_IB)"
-  fi
+  case $FDSNETWORK in
+    "infiniband") TITLE="$infile(MPI_IB)"
+  esac
 fi
 if [ "$USE_SMOKEVIEW" == "y" ] ; then
   TITLE="$infile(SMV)"
