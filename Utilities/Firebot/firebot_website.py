@@ -94,6 +94,9 @@ To view a detailed error log, mouse over a fail or warning status.<br>
 <b>Stage 7b:</b> Matlab plotting (validation) <br>
 <b>Stage 7c:</b> FDS run time statistics <br>
 <b>Stage 8:</b> Build FDS-SMV guides <br>
+<b>Stage 9a:</b> Run correlations cases
+<b>Stage 9b:</b> Matlab plotting (correlations)
+<b>Stage 9c:</b> Build correlations guide
 </span></span>"""
 
 print "<br><hr align='left'><br>"
