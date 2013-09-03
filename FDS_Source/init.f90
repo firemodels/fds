@@ -543,7 +543,7 @@ IF (PARTICLE_FILE .AND. .NOT.EVACUATION_ONLY(NM)) THEN
    ENDDO
 ENDIF
 
-! Allocate wall cell arrays. This array will grow as need be.
+! Allocate wall cell arrays. This array will grow as needed.
 
 M%N_WALL_CELLS_DIM = 1000
 
@@ -667,7 +667,7 @@ DO IOR=1,-1,-2
       ENDDO
    ENDDO
 ENDDO
- 
+
 DO IOR=2,-2,-4
    IF (IOR== 2) J = 0
    IF (IOR==-2) J = JBP1
@@ -678,7 +678,7 @@ DO IOR=2,-2,-4
       ENDDO
    ENDDO
 ENDDO
- 
+
 NOT_EVAC_IF_2: IF (.NOT.EVACUATION_ONLY(NM)) THEN
 DO IOR=3,-3,-6
    IF (IOR== 3) K = 0
@@ -1860,7 +1860,7 @@ IF (M%SOLID(ICG)) BOUNDARY_TYPE = NULL_BOUNDARY
 NOM_FOUND = 0
 NOM_IB = 0
  
-CHECK_MESHES: IF (IW<=M%N_EXTERNAL_WALL_CELLS .AND.  .NOT.EVACUATION_ONLY(NM)) THEN
+CHECK_MESHES: IF (IW<=M%N_EXTERNAL_WALL_CELLS .AND. .NOT.EVACUATION_ONLY(NM)) THEN
  
    IIO_MIN =  1000000
    IIO_MAX = -1000000
