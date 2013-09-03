@@ -374,6 +374,7 @@ DO K=0,KBP1
 ENDDO
 
 ! Initialize integration iteration array
+
 IF (OUTPUT_CHEM_IT) THEN
    M%CHEM_SUBIT = 0._EB
 ENDIF
@@ -432,7 +433,6 @@ EVACUATION_ZONE_LOOP: DO N=1,N_ZONE
       ENDDO
    ENDDO
 ENDDO EVACUATION_ZONE_LOOP
-
 
 ! Over-ride default ambient conditions with user-prescribed INITializations
  

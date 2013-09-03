@@ -1646,9 +1646,16 @@ SELECT CASE (TRIM(TURBULENCE_MODEL))
       CALL SHUTDOWN(MESSAGE)
 END SELECT
 
+! Check compatibility of constant_specific_heat and stratification
+
+IF (CONSTANT_SPECIFIC_HEAT .AND. STRATIFICATION) THEN
+   WRITE(MESSAGE,'(A,A,A)')  'ERROR: CONSTANT_SPECIFIC_HEAT option is incompatible with STRATIFICATION.'
+   CALL SHUTDOWN(MESSAGE)
+ENDIF
+
 ! Level set based model of firespread in vegetation
 
-IF(VEG_LEVEL_SET) WIND_ONLY = .TRUE.
+IF (VEG_LEVEL_SET) WIND_ONLY = .TRUE.
 
 IF (HRRPUV_MAX_SMV<0.0) THEN
    HRRPUV_MAX_SMV=1200.0
