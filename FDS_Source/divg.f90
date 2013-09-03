@@ -798,7 +798,7 @@ PRESSURE_ZONE_LOOP: DO IPZ=1,N_ZONE
          DO I=1,IBAR
             IF (PRESSURE_ZONE(I,J,K) /= IPZ) CYCLE
             IF (SOLID(CELL_INDEX(I,J,K)))    CYCLE
-            VC   = DX(I)*RC(I)*VC1
+            VC = DX(I)*RC(I)*VC1
             ZONE_VOLUME = ZONE_VOLUME + VC
             DSUM(IPZ,NM) = DSUM(IPZ,NM) + VC*DP(I,J,K)
             PSUM(IPZ,NM) = PSUM(IPZ,NM) + VC*(R_PBAR(K,IPZ)-RTRM(I,J,K))
