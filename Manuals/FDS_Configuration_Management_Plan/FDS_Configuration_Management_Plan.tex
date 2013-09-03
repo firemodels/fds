@@ -21,15 +21,17 @@
 
 \begin{minipage}[t][9in][s]{6.5in}
 
-\huge \flushright{\bf NIST Special Publication 1018 \\ \Large Sixth Edition}
+\headerA{1018\\Sixth Edition\\}
 
-\vspace{1in}
+\headerB{
+Fire Dynamics Simulator\\
+Technical Reference Guide\\
+Volume 4: Configuration Management\\
+}
 
-\Huge \flushright{\bf Fire Dynamics Simulator \\ Technical Reference Guide \\ \Large Volume 4: Software Configuration Management Plan}
-
-\normalsize
-
+\headerC{
 \authortitlesigs
+}
 
 \end{minipage}
 
@@ -41,33 +43,29 @@
 
 \begin{minipage}[t][9in][s]{6.5in}
 
-\huge \flushright{\bf NIST Special Publication 1018 \\ \Large Sixth Edition}
+\headerA{1018\\Sixth Edition\\}
 
-\vspace{.75in}
+\headerB{
+Fire Dynamics Simulator\\
+Technical Reference Guide\\
+Volume 4: Configuration Management\\
+}
 
-\Huge \flushright{\bf Fire Dynamics Simulator (Version 6) \\ Technical Reference Guide \\ \Large Volume 4: Configuration Management Plan}
-
-\vspace{.25in}
-
-\normalsize
-
+\headerC{
 \authorsigs
-
-\vspace{.25in}
+}
 
 \flushright{\today \\
-FDS Version 6.0 \\
+FDS Version \fdsversion \\
 \emph{SVN Repository}~$Revision$}
 
 \vfill
 
-\flushright{\includegraphics[width=1in]{../Bibliography/doc} }
+\flushright{\includegraphics[width=1.2in]{../Bibliography/doc} }
 
 \titlesigs
 
 \end{minipage}
-
-
 
 \newpage
 
@@ -77,26 +75,6 @@ FDS Version 6.0 \\
 
 \input{../Bibliography/authors}
 
-\chapter{Disclaimer}
-
-The US Department of Commerce makes no warranty, expressed or implied,
-to users of the Fire Dynamics Simulator (FDS), and accepts no responsibility for its use.
-Users of FDS assume sole responsibility under Federal law for determining
-the appropriateness of its use in any particular application;
-for any conclusions drawn from the results of its use; and for any
-actions taken or not taken as a result of analysis performed using these tools.
-
-Users are warned that FDS is intended for use only by those competent
-in the fields of fluid dynamics, thermodynamics, heat transfer, combustion, and fire science,
-and is intended only to supplement the informed judgment of the qualified user.
-The software package is a computer model that may or may not have predictive
-capability when applied to a specific set of factual circumstances.
-Lack of accurate predictions by the model could lead to erroneous
-conclusions with regard to fire safety. All results should be evaluated by an informed user.
-
-Throughout this document, the mention of computer hardware or commercial
-software does not constitute endorsement by NIST, nor does it indicate that
-the products are necessarily those best suited for the intended purpose.
 
 \chapter{Preface}
 
@@ -115,6 +93,9 @@ This document applies only to the program FDS, its companion visualization progr
 sites, and the various utility programs that support FDS and Smokeview. This document does not apply to third-party software developed by others
 not affiliated with NIST, VTT, or its software development collaborators.
 
+
+% \chapter{Disclaimer}
+\input{../Bibliography/disclaimer}
 
 
 \chapter{Acknowledgments}
