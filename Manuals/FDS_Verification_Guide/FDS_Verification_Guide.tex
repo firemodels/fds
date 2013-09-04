@@ -1327,14 +1327,14 @@ this test case confirms that relatively low levels of diffusion are incurred at 
 
 \clearpage
 
-\section{Variable-Density Manufactured Solution}
+\section{Variable-Density Manufactured Solution (\texorpdfstring{\bf shunn3}{shunn3})}
 
 To demonstrate second-order accuracy of the FDS time-marching algorithm, here we present numerical results for the manufactured solution proposed by Shunn et al.~\cite{Shunn:2012}. The parameters for this problem are given in Table \ref{tab_shunn_params}.  In the 2D sinusoidal solution given below, $Z$ is the mixture fraction, $\rho$ is the density, $u$ and $v$ are velocity components, and $\tilde{p}$ is the hydrodynamic pressure.  The solution translates diagonally across the domain with velocity $[u_f, v_f]$.  The translated positions are define by $\hat{x} \equiv x- u_f t$ and $\hat{y} \equiv y - v_f t$. The solution is spatially periodic on a square domain extending from $-1$ m to 1 m ($L=2$ m) on each side and has a time period of 1 s.
 %
 \begin{table}
 \small
 \centering
-\caption{\label{tab_shunn_params} Parameters for Shunn et al.~\cite{Shunn:2012} manufactured solution.}
+\caption[Parameters for manufactured solution]{\label{tab_shunn_params} Parameters for Shunn et al.~\cite{Shunn:2012} manufactured solution.}
 \begin{tabular*}{.5\textwidth}{l@{\extracolsep{1.5cm}}ll}
 %\hline
 Parameter & Value & Units\\
@@ -1499,15 +1499,15 @@ Simulations were performed for $N = \{32, 64, 128, 256, 512\}$, where $N$ is the
 \end{tikzpicture}
 
 \end{center}
-\caption{Evolution of the manufactured solution.  From top to bottom, the images show density, $\rho$, mixture fraction, $Z$, and the $u$-velocity component from the $256^2$ simulation at the times shown at the top of the columns.  These results may be compared to \cite{Shunn:2012} to confirm the validity of the numerical solution.}
+\caption[Evolution of the variable-density manufactured solution]{Evolution of the variable-density manufactured solution.  From top to bottom, the images show density, $\rho$, mixture fraction, $Z$, and the $u$-velocity component from the $256^2$ simulation at the times shown at the top of the columns.  These results may be compared to \cite{Shunn:2012} to confirm the validity of the numerical solution.}
 \label{fig_mms_evo}
 \end{figure}
 
-%\begin{figure}
-%\centering
-%\includegraphics[width=.8\textwidth]{shunn_mms_convergence.pdf}
-%\caption{\label{fig_mms_convergence} Convergence for the manufactured solution.  The L2 error at time $t = 1$ s is plotted as a function of grid spacing for $N=\{32,64,128,256,512\}$ points in each direction.  The grid spacing is $\Delta x = L/N$, where $L=2$ m.  Calculations were performed with an adaptive time step satisfying both convective and diffusive CFL (Von Neumann) limits of 0.5. These results confirm second-order accuracy of the flow solver for density, mixture fraction, and velocity. As is known for projection schemes like ours, the pressure solution (represented by $H$) is first-order accurate \cite{Armfield:2002}.}
-%\end{figure}
+\begin{figure}
+\centering
+\includegraphics[width=.8\textwidth]{SCRIPT_FIGURES/shunn_mms_convergence.pdf}
+\caption{\label{fig_mms_convergence} Convergence for the manufactured solution.  The L2 error at time $t = 1$ s is plotted as a function of grid spacing for $N=\{32,64,128,256,512\}$ points in each direction.  The grid spacing is $\Delta x = L/N$, where $L=2$ m.  Calculations were performed with an adaptive time step satisfying both convective and diffusive CFL (Von Neumann) limits of 0.5. These results confirm second-order accuracy of the flow solver for density, mixture fraction, and velocity. As is known for projection schemes like ours, the pressure solution (represented by $H$) is first-order accurate \cite{Armfield:2002}.}
+\end{figure}
 
 
 \clearpage
