@@ -20,6 +20,9 @@ FIREBOT_USERNAME="firebot"
 cd
 FIREBOT_HOME_DIR="`pwd`"
 
+# Set unlimited stack size
+ulimit -s unlimited
+
 # Additional definitions
 FIREBOT_DIR="$FIREBOT_HOME_DIR/firebot"
 FDS_SVNROOT="$FIREBOT_HOME_DIR/FDS-SMV"
