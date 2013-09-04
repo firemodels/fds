@@ -120,7 +120,7 @@ for j=2:length(Q);
     define_qrow_variables
     
     Model_Error = 'yes';
-    if Sigma_2_E < 0 ; Model_Error = 'no'; end
+    if Sigma_E < 0 ; Model_Error = 'no'; end
     
     clear Measured_Metric
     clear Predicted_Metric
@@ -255,7 +255,7 @@ for j=2:length(Q);
         
         u2 = sum(    (((log(Predicted_Values)-log(Measured_Values)) - (M_bar-E_bar)).^2).*weight   )/(sum(weight)-1);
         u  = sqrt(u2);
-        Sigma_E = Sigma_2_E/200;
+        Sigma_E = Sigma_E/100;
         Sigma_E = min(u/sqrt(2),Sigma_E);
         Sigma_M = sqrt( max(0,u*u - Sigma_E.^2) );
         delta = exp(M_bar-E_bar+0.5*Sigma_M.^2-0.5*Sigma_E.^2);
