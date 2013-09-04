@@ -1325,6 +1325,190 @@ this test case confirms that relatively low levels of diffusion are incurred at 
    \label{fig_move_slug}
 \end{figure}
 
+\clearpage
+
+\section{Variable-Density Manufactured Solution}
+
+To demonstrate second-order accuracy of the FDS time-marching algorithm, here we present numerical results for the manufactured solution proposed by Shunn et al.~\cite{Shunn:2012}. The parameters for this problem are given in Table \ref{tab_shunn_params}.  In the 2D sinusoidal solution given below, $Z$ is the mixture fraction, $\rho$ is the density, $u$ and $v$ are velocity components, and $\tilde{p}$ is the hydrodynamic pressure.  The solution translates diagonally across the domain with velocity $[u_f, v_f]$.  The translated positions are define by $\hat{x} \equiv x- u_f t$ and $\hat{y} \equiv y - v_f t$. The solution is spatially periodic on a square domain extending from $-1$ m to 1 m ($L=2$ m) on each side and has a time period of 1 s.
+%
+\begin{table}
+\small
+\centering
+\caption{\label{tab_shunn_params} Parameters for Shunn et al.~\cite{Shunn:2012} manufactured solution.}
+\begin{tabular*}{.5\textwidth}{l@{\extracolsep{1.5cm}}ll}
+%\hline
+Parameter & Value & Units\\
+\hline
+$\rho_0$  & 5 & \si{kg/m^3} \\
+$\rho_1$  & 1 & \si{kg/m^3}\\
+$k=\omega$ & 2 & \si{1/m}, \si{1/s}\\
+$u_f = v_f$ & 0.5 & \si{m/s} \\
+$\rho D = \mu$ & 0.001 & \si{kg/(m.s)}\\
+%\hline
+\end{tabular*}
+\end{table}
+%
+\begin{align}
+\label{eqn_mms_z} Z(x,y,t) &= \frac{1 + \sin(\pi k \hat{x}) \sin(\pi k \hat{y}) \cos(\pi \omega t)}{(1 + \frac{\rho_0}{\rho_1}) + (1 - \frac{\rho_0}{\rho_1}) \sin(\pi k \hat{x}) \sin(\pi k \hat{y}) \cos(\pi \omega t)} \\
+\label{eqn_mms_rho} \rho(x,y,t) &= \left( \frac{Z(x,y,t)}{\rho_1} + \frac{1-Z(x,y,t)}{\rho_0} \right)^{-1} \\
+\label{eqn_mms_u} u(x,y,t) &= u_f + \frac{\rho_1 - \rho_0}{\rho(x,y,t)} \left(\frac{-\omega}{4 k}\right) \cos(\pi k \hat{x}) \sin(\pi k \hat{y}) \sin(\pi \omega t) \\
+\label{eqn_mms_v} v(x,y,t) &= v_f + \frac{\rho_1 - \rho_0}{\rho(x,y,t)} \left(\frac{-\omega}{4 k}\right) \sin(\pi k \hat{x}) \cos(\pi k \hat{y}) \sin(\pi \omega t) \\
+\label{eqn_mms_p} \tilde{p}(x,y,t) &= \frac{1}{2} \rho(x,y,t) u(x,y,t) v(x,y,t)
+\end{align}
+
+Note that (\ref{eqn_mms_rho}) is the equation of state (EOS) and may be rearranged for this simple problem to give $Z$ in terms of $\rho$,
+\begin{equation}
+\label{eqn_mms_eos}
+Z = \frac{(\rho_0 - \rho) \rho_1}{(\rho_0 - \rho_1) \rho} \,\mbox{.}
+\end{equation}
+
+The source terms for the manufactured solution, $\dot{Q}_\rho$, etc., are defined as the residuals of the conservative form of the transport equations:
+\begin{align}
+\label{eqn_mms_continuity} \frac{\partial \rho}{\partial t} + \Div(\rho {\bf u}) &= \dot{Q}_\rho \,\mbox{,}\\
+\frac{\partial (\rho Z)}{\partial t} + \Div(\rho Z {\bf u}) - \Div\left(\rho D \nabla Z\right) &= \dot{Q}_Z \,\mbox{,}\\
+\frac{\partial (\rho {\bf u})}{\partial t} + \Div(\rho {\bf u u}) + \nabla \tilde{p} - \Div{\sf T} &= \dot{Q}_{\bf u} \,\mbox{,}
+\end{align}
+where the components of the deviatoric stress tensor, ${\sf T}$, are given by
+\begin{equation}
+T_{ij} = 2\mu \left( S_{ij} -  \frac{1}{3} S_{kk} \delta_{ij} \right) \quad\mbox{;}\quad S_{ij} \equiv \frac{1}{2}\left( \frac{\partial u_i}{\partial x_j} + \frac{\partial u_j}{\partial x_i} \right) \,\mbox{.}
+\end{equation}
+The source terms (which are complex sinusoidal functions) may be obtained from \cite{Shunn:2012}, by looking at the source code in the FDS repository \cite{FDS-SMV_repository} (see module {\ct MANUFACTURED\_SOLUTIONS} in {\ct turb.f90}), or by running the sympy (Symbolic Python) script provided under {\ct FDS-SMV/Utilities/Python/shunn\_mms\_sym.py}.  A feature of this particular solution is that the mass source is zero, $\dot{Q}_\rho = 0$, which provides a more realistic test case and simplifies the MMS implementation.
+
+The divergence expression is obtained by differentiating the EOS:
+\begin{equation}
+\label{eqn_mms_div}
+\Div\mathbf{u} = \left[ \frac{1}{\rho_1} - \frac{1}{\rho_0} \right] \bigg( \Div(\rho D \nabla Z) + \dot{Q}_Z \bigg) \,\mbox{.}
+\end{equation}
+For this isothermal flow there is no alternative divergence formulation to consider. The RHS of the momentum equation is augmented as follows:
+\begin{equation}
+\label{eqn_mms_u_eqn}
+\frac{\partial {\bf u}}{\partial t} = - ( {\bf F} + \nabla H ) + \dot{Q}_{\bf u}/\rho \,\mbox{.}
+\end{equation}
+And the Poisson equation for $H$ becomes
+\begin{align}
+\label{eqn_poisson_mms}
+\nabla^2 H = - \left[ \Div \left( \mathbf{F} - \dot{Q}_{\bf u}/\rho \right) + \frac{\partial}{\partial t} (\Div\mathbf{u}) \right] \,\mbox{.}
+\end{align}
+
+\subsubsection*{Manufactured Solution Procedure}
+
+For the flow to remain isothermal the ideal gas law must be obeyed identically. Since a transport equation is solved for density, the mixture fraction must be obtained from the EOS.  Hence, in this problem $Z$ plays the role usually played by temperature in a typical fire problem.  For the manufactured solution, the basic FDS algorithm is modified as follows.  Given $u_i^n$, $\rho^n$, $Z^n$, and $H^n$ at time $t^n$:
+\begin{enumerate}
+\item \label{item_rho_mms} Update the density equation (\ref{eqn_mms_continuity}) to obtain $\rho^{n+1}$.
+\item \label{item_Z_mms}   Obtain $Z^{n+1}$ from the equation of state (\ref{eqn_mms_eos}).
+\item \label{item_div_mms} Compute $(\Div \mathbf{u})^{n+1}$ from (\ref{eqn_mms_div}).
+\item \label{item_pois_mms} Solve the Poisson equation (\ref{eqn_poisson_mms}) for $H^{n+1}$.
+\item \label{item_mom_mms} Update momentum (\ref{eqn_mms_u_eqn}) using the pressure field from Step \ref{item_pois_mms} to obtain $u_i^{n+1}$.
+\end{enumerate}
+This procedure represents a single stage in the RK2 time integration scheme.
+
+Simulations were performed for $N = \{32, 64, 128, 256, 512\}$, where $N$ is the number of cells in each direction, using an adaptive time step satisfying both convective and diffusive CFL numbers of 0.5.  The time step criterion and the simulation parameters in Table \ref{tab_shunn_params} were chosen to match Shunn et al.~\cite{Shunn:2012}. The density equation (\ref{eqn_mms_continuity}) is solved using the CHARM flux limiter. Qualitative results for the $256^2$ case are shown in Fig.~\ref{fig_mms_evo}.  These images may be compared to the images presented in \cite{Shunn:2012}.  In Fig.~\ref{fig_mms_convergence}, we plot the L2 error at time $t = 1$ s as a function of grid spacing, $\Delta x = L/N$, confirming second-order accuracy of the solutions for density, mixture fraction, and velocity.  As shown in Fig.~\ref{fig_mms_convergence}, schemes such as ours, where the pressure is set to zero at the beginning of each stage of the integration (in other words, no pressure gradient term shows up in the force on the RHS of the Poisson equation), are known to be first-order accurate for pressure \cite{Armfield:2002}. This is not a severe limitation of the algorithm since the hyrdrodynamic pressure does not factor into the equation of state for low-Mach flows.
+
+\begin{figure}
+\begin{center}
+
+% density
+\begin{tikzpicture}[scale=1]
+\footnotesize
+\begin{axis}[
+    width=0.95\linewidth,
+    axis equal image,
+    enlargelimits=false,
+    axis x line=none,
+    axis y line=none,
+    colorbar,
+    point meta min=1, point meta max=5,
+    colormap={whiteblack}{gray(0cm)=(0); gray(1cm)=(1)},
+    colorbar style={
+        title={$\rho$, \si{kg/m^3}},
+        at={(1.02,0.0)}, % Coordinate system relative to the main axis. (1,1) is upper right corner of main axis.
+        anchor=south west,
+        height=\pgfkeysvalueof{/pgfplots/parent axis height}, % Scale the colorbar relative to the main axis
+        /pgf/number format/.cd, % Change the key directory to /pgf/number format
+        fixed, fixed zerofill, precision=1,
+        /tikz/.cd  % Change back to the normal key directory
+    }
+    	]
+	\addplot graphics [xmin=0.00, xmax=1.00, ymin=0, ymax=1] {SCRIPT_FIGURES/shunn3_256_density_p000.png};
+	\addplot graphics [xmin=1.10, xmax=2.10, ymin=0, ymax=1] {SCRIPT_FIGURES/shunn3_256_density_p125.png};
+	\addplot graphics [xmin=2.20, xmax=3.20, ymin=0, ymax=1] {SCRIPT_FIGURES/shunn3_256_density_p250.png};
+	\addplot graphics [xmin=3.30, xmax=4.30, ymin=0, ymax=1] {SCRIPT_FIGURES/shunn3_256_density_p375.png};
+\end{axis}
+\draw (1.75,3.78) node {$t=0$ s};
+\draw (5.25,3.78) node {$t=0.125$ s};
+\draw (8.8,3.78) node {$t=0.250$ s};
+\draw (12.5,3.78) node {$t=0.375$ s};
+\end{tikzpicture}
+
+% mixture fraction
+\begin{tikzpicture}[scale=1]
+\footnotesize
+\begin{axis}[
+    width=0.95\linewidth,
+    axis equal image,
+    enlargelimits=false,
+    axis x line=none,
+    axis y line=none,
+    colorbar,
+    point meta min=0, point meta max=1,
+    colormap={whiteblack}{gray(0cm)=(0); gray(1cm)=(1)},
+    colorbar style={
+        title={$Z$},
+        at={(1.02,0.0)}, % Coordinate system relative to the main axis. (1,1) is upper right corner of main axis.
+        anchor=south west,
+        height=\pgfkeysvalueof{/pgfplots/parent axis height}, % Scale the colorbar relative to the main axis
+        /pgf/number format/.cd, % Change the key directory to /pgf/number format
+        fixed, fixed zerofill, precision=1,
+        /tikz/.cd  % Change back to the normal key directory
+    }
+    	]
+	\addplot graphics [xmin=0.00, xmax=1.00, ymin=0, ymax=1] {SCRIPT_FIGURES/shunn3_256_scalar_p000.png};
+	\addplot graphics [xmin=1.10, xmax=2.10, ymin=0, ymax=1] {SCRIPT_FIGURES/shunn3_256_scalar_p125.png};
+	\addplot graphics [xmin=2.20, xmax=3.20, ymin=0, ymax=1] {SCRIPT_FIGURES/shunn3_256_scalar_p250.png};
+	\addplot graphics [xmin=3.30, xmax=4.30, ymin=0, ymax=1] {SCRIPT_FIGURES/shunn3_256_scalar_p375.png};
+\end{axis}
+\end{tikzpicture}
+
+% uvelocity
+\begin{tikzpicture}[scale=1]
+\footnotesize
+\begin{axis}[
+    width=0.95\linewidth,
+    axis equal image,
+    enlargelimits=false,
+    axis x line=none,
+    axis y line=none,
+    colorbar,
+    point meta min=0.2, point meta max=0.8,
+    colormap={whiteblack}{gray(0cm)=(0); gray(1cm)=(1)},
+    colorbar style={
+        title={$u$, m/s},
+        at={(1.02,0.0)}, % Coordinate system relative to the main axis. (1,1) is upper right corner of main axis.
+        anchor=south west,
+        height=\pgfkeysvalueof{/pgfplots/parent axis height}, % Scale the colorbar relative to the main axis
+        /pgf/number format/.cd, % Change the key directory to /pgf/number format
+        fixed, fixed zerofill, precision=1,
+        /tikz/.cd  % Change back to the normal key directory
+    }
+    	]
+	\addplot graphics [xmin=0.00, xmax=1.00, ymin=0, ymax=1] {SCRIPT_FIGURES/shunn3_256_uvelocity_p000.png};
+	\addplot graphics [xmin=1.10, xmax=2.10, ymin=0, ymax=1] {SCRIPT_FIGURES/shunn3_256_uvelocity_p125.png};
+	\addplot graphics [xmin=2.20, xmax=3.20, ymin=0, ymax=1] {SCRIPT_FIGURES/shunn3_256_uvelocity_p250.png};
+	\addplot graphics [xmin=3.30, xmax=4.30, ymin=0, ymax=1] {SCRIPT_FIGURES/shunn3_256_uvelocity_p375.png};
+\end{axis}
+\end{tikzpicture}
+
+\end{center}
+\caption{Evolution of the manufactured solution.  From top to bottom, the images show density, $\rho$, mixture fraction, $Z$, and the $u$-velocity component from the $256^2$ simulation at the times shown at the top of the columns.  These results may be compared to \cite{Shunn:2012} to confirm the validity of the numerical solution.}
+\label{fig_mms_evo}
+\end{figure}
+
+%\begin{figure}
+%\centering
+%\includegraphics[width=.8\textwidth]{shunn_mms_convergence.pdf}
+%\caption{\label{fig_mms_convergence} Convergence for the manufactured solution.  The L2 error at time $t = 1$ s is plotted as a function of grid spacing for $N=\{32,64,128,256,512\}$ points in each direction.  The grid spacing is $\Delta x = L/N$, where $L=2$ m.  Calculations were performed with an adaptive time step satisfying both convective and diffusive CFL (Von Neumann) limits of 0.5. These results confirm second-order accuracy of the flow solver for density, mixture fraction, and velocity. As is known for projection schemes like ours, the pressure solution (represented by $H$) is first-order accurate \cite{Armfield:2002}.}
+%\end{figure}
+
 
 \clearpage
 
@@ -1343,7 +1527,6 @@ through multiple meshes and its mass is conserved. An obstruction is created tha
 \caption[The {\bf simple\_duct} test case]{The mass of CO$_2$ contained in a simple room connected with a recirculating duct.}
 \label{simple_duct}
 \end{figure}
-
 
 \clearpage
 
