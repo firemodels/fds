@@ -1,15 +1,16 @@
-&HEAD CHID='cylinder_n128', TITLE='simple test of immersed boundary method' /
+&HEAD CHID='cylinder_n32', TITLE='simple test of immersed boundary method' /
 
-&MESH IJK=128,1,128, XB=-1,1,-.50,.50,-1,1/
+&MESH IJK=32,1,32, XB=-1,1,-.50,.50,-1,1/
   
 &TIME T_END=20.0/
   
 &MISC NOISE=.FALSE.
       STRATIFICATION=.FALSE.,GVEC(3)=0.
       DNS=.TRUE.
-      IMMERSED_BOUNDARY_METHOD=2
-      PERIODIC_TEST=123
-      CONSTANT_PROPERTIES=.TRUE./
+      IMMERSED_BOUNDARY_METHOD=1
+      CONSTANT_SPECIFIC_HEAT=.TRUE./
+
+&SURF ID='wall', FREE_SLIP=.TRUE., DEFAULT=.TRUE./
 
 &SPEC ID='AIR',VISCOSITY=0.025,BACKGROUND=.TRUE./
 
