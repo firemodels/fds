@@ -2602,7 +2602,7 @@ REACTION_LOOP: DO N=1,N_REACTIONS
    IF (RN%ID/='null')  WRITE(LU_OUTPUT,'(/3X,A,A)')   'Reaction ID:  ', RN%ID   
       
    WRITE(LU_OUTPUT,'(3X,A,A)')  'ODE Solver:  ', ODE_SOLVER
-   IF (SUPPRESSION) THEN
+   IF (SUPPRESSION .AND. RN%FAST_CHEMISTRY) THEN
       WRITE(LU_OUTPUT,'(3X,A,A)')  'Extinction Model:  ', EXTINCTION_MODEL
       WRITE(LU_OUTPUT,'(3X,A,F8.1)')  'Critical Flame Temperature (K):  ', RN%CRIT_FLAME_TMP
    ENDIF
@@ -2630,11 +2630,7 @@ REACTION_LOOP: DO N=1,N_REACTIONS
       IF (RN%FAST_CHEMISTRY) THEN
          WRITE(LU_OUTPUT,'(A)')            '   Arrhenius Constants'
          WRITE(LU_OUTPUT,'(A)')            '   Pre-exponential:    Infinite'
-         WRITE(LU_OUTPUT,'(A)')            '   Activation Energy:  N/A'        
-      ELSEIF (RN%A_RAMP_INDEX /= 0 .OR. RN%E_RAMP_INDEX /= 0) THEN
-         WRITE(LU_OUTPUT,'(A)') '   Arrhenius Constants'
-         WRITE(LU_OUTPUT,'(A,1X,ES13.6)')  '   Pre-exponential:  ',RN%A_IN
-         WRITE(LU_OUTPUT,'(A,1X,ES13.6)')  '   Activation Energy:',RN%E_IN      
+         WRITE(LU_OUTPUT,'(A)')            '   Activation Energy:  N/A'         
       ELSE
          WRITE(LU_OUTPUT,'(A)') '   Arrhenius Constants'
          WRITE(LU_OUTPUT,'(A,1X,ES13.6)')  '   Pre-exponential:  ',RN%A_IN
@@ -4950,6 +4946,8 @@ SELECT CASE(IND)
    CASE(132) ! CHEMISTRY SUBITERATIONS
       GAS_PHASE_OUTPUT_RES = CHEM_SUBIT(II,JJ,KK)
    
+   CASE(133) ! REACTION SOURCE TERM
+      GAS_PHASE_OUTPUT_RES = REAC_SOURCE_TERM(II,JJ,KK,Z_INDEX)
    
    CASE(154:155) ! TRANSMISSION, PATH OBSCURATION
       EXT_COEF   = 0._EB
