@@ -352,6 +352,12 @@ $RUNFDS Scalar_Analytical_Solution compression_wave_FL5_128
 $RUNFDS Scalar_Analytical_Solution move_slug
 $RUNFDS Scalar_Analytical_Solution move_slug_fl1
 
+$RUNFDS Scalar_Analytical_Solution shunn3_32
+$RUNFDS Scalar_Analytical_Solution shunn3_64
+$RUNFDS Scalar_Analytical_Solution shunn3_128
+$RUNFDS Scalar_Analytical_Solution shunn3_256
+$RUNFDS Scalar_Analytical_Solution shunn3_512
+
 $RUNFDS Turbulence csmag0_32
 $RUNFDS Turbulence csmag_32
 $RUNFDS Turbulence csmag_64
