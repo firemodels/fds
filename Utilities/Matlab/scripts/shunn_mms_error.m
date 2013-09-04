@@ -42,6 +42,33 @@ dx = L./nx;
 datadir = '../../Verification/Scalar_Analytical_Solution/';
 filename = {'shunn3_32_mms.csv','shunn3_64_mms.csv','shunn3_128_mms.csv','shunn3_256_mms.csv','shunn3_512_mms.csv'};
 
+skip_case = 0;
+
+if ~exist([datadir,'shunn3_32_mms.csv'])
+    display(['Error: File ' [datadir,'shunn3_32_mms.csv'] ' does not exist. Skipping case.'])
+    skip_case = 1;
+end
+if ~exist([datadir,'shunn3_64_mms.csv'])
+    display(['Error: File ' [datadir,'shunn3_64_mms.csv'] ' does not exist. Skipping case.'])
+    skip_case = 1;
+end
+if ~exist([datadir,'shunn3_128_mms.csv'])
+    display(['Error: File ' [datadir,'shunn3_128_mms.csv'] ' does not exist. Skipping case.'])
+    skip_case = 1;
+end
+if ~exist([datadir,'shunn3_256_mms.csv'])
+    display(['Error: File ' [datadir,'shunn3_256_mms.csv'] ' does not exist. Skipping case.'])
+    skip_case = 1;
+end
+if ~exist([datadir,'shunn3_512_mms.csv'])
+    display(['Error: File ' [datadir,'shunn3_512_mms.csv'] ' does not exist. Skipping case.'])
+    skip_case = 1;
+end
+
+if skip_case
+    return
+end
+
 e_r = zeros(length(filename),1);
 e_z = zeros(length(filename),1);
 e_u = zeros(length(filename),1);
