@@ -26,6 +26,7 @@ $RUNSMV Pressure_Effects pressure_boundary
 $RUNSMV Pressure_Solver dancing_eddies_tight
 $RUNSMV Scalar_Analytical_Solution move_slug
 $RUNSMV Scalar_Analytical_Solution move_slug_fl1
+$RUNSMV Scalar_Analytical_Solution shunn3_256
 $RUNSMV Species propane_flame_deposition
 $RUNSMV Sprinklers_and_Sprays cascade
 $RUNSMV Turbulence csmag_64
