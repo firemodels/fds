@@ -311,6 +311,8 @@ and variance of this normal distribution are based solely on comparisons of mode
 scenario being analyzed. The performance of the model is quantified by the estimators of the parameters, $\delta$ and $\widetilde{\sigma}_M$, which
 have been corrected to account for uncertainties associated with the experimental measurements.
 
+When computing the relative error between measured and predicted values, an additional step is performed to ensure that the bias factor, $\delta$, is not skewed by a large number of data points at any particular region in the scatter plot. The approach used for this procedure is called a regressogram, i.e., a bin-smoothed estimator function~\cite{Tukey:1}. This approach accounts for cases in which small measured values are compared to small predicted values, which can result in a large relative error. In these cases, the calculated bias factor might not be representative of the overall model bias, especially for larger measured and predicted values. Alternatively, a regressogram treats the average values throughout the scatter plot equally by subdividing the scatter plot into bins and normalizing each bin by the number of local data points. The regressogram estimator function is implemented as follows. For each scatter plot, the $x$-axis is subdivided into 10 equally spaced bins. Each bin is assigned a weight that is inversely proportional to the number of points in the bin; a bin with more points is assigned a smaller weight, and a bin with fewer points is assigned a larger weight. Finally, when the relative error is calculated, each bin is multiplied by its respective bin weight.
+
 
 
 \section{Example}
