@@ -86,5 +86,6 @@ extinction
 fan_curve
 mesh_transformation
 synthetic_eddy_method
+shunn_mms_error
 
 display('verification scripts completed successfully!')
