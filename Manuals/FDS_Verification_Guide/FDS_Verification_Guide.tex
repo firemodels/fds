@@ -1671,9 +1671,9 @@ The plot at right in Fig.~\ref{energy_budget_dns} shows the resulting and integr
 
 \subsection{Mixing with Variable Specific Heats (\texorpdfstring{{\bf energy\_budget\_tmix}}{energy\_budget\_tmix})}
 
-This case tests the ability of FDS to properly account for temperature dependent specific heats.  A coarse 2D channel mixing case is presented where hot gas at 900 \si{\degree C} with a constant specific heat of $c_p=1$ \si{kJ/(kg.K)} enters from the bottom left vent with a flux of 2 \si{kg/(m^2.s)} and cold gas at 20 \si{\degree C} with a constant specific heat of $c_p=10$ \si{kJ/(kg.K)} enters from a top left vent with the same mass flux.  The gases mix in a center channel and exit the domain flowing to the right.
+This case tests the ability of FDS to properly account for temperature dependent specific heats.  A coarse 2D channel mixing case is presented where hot gas at 900 \si{\degree C} with a constant specific heat of $c_p=1$ \si{kJ/(kg.K)} enters from the bottom left vent with a flux of 1 \si{kg/(m^2.s)} and cold gas at 20 \si{\degree C} with a constant specific heat of $c_p=10$ \si{kJ/(kg.K)} enters from a top left vent with the same mass flux.  The gases mix in a center channel and exit the domain flowing to the right.
 
-The enthalpy of the mixture at the outlet is $2 \times 1 \times (900+273.15) + 2 \times 10 \times (20+273.15) = 8209.3$ \si{kJ/(m^2.s)}.  The mixture heat capacity at the outlet is 5.5 \si{kJ/(kg.K)} and the flux is 4 \si{kg/(m^2.s)}.  Therefore the outlet temperature is $8209.3/4/5.5 - 273.15 = 100$ \si{\degree C}.
+The enthalpy of the mixture at the outlet is $1 \times 1 \times (900+273.15) + 1 \times 10 \times (20+273.15) = 4104.65$ \si{kJ/(m^2.s)}.  The mixture heat capacity at the outlet is 5.5 \si{kJ/(kg.K)} and the flux is 2 \si{kg/(m^2.s)}.  Therefore the outlet temperature is $4104.65/2/5.5 - 273.15 = 100$ \si{\degree C}.
 \begin{figure}[ht]
 \centering
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/energy_budget_tmix}
