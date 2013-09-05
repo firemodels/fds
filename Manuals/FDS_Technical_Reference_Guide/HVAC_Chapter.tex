@@ -51,20 +51,20 @@ Since the two models are not fully coupled, the extrapolated pressure is an esti
 \begin{figure}[ht!]
    \begin{center}
       \scalebox{0.8}{\includegraphics{FIGURES/hvacpressure.png}}
-      \caption{\label{hvacpressure} Illustration of interdependent pressure solutions.  All unshaded compartments have pressures that are dependent upon each other.}
+      \caption[Illustration of interdependent pressure solutions]{\label{hvacpressure} Illustration of interdependent pressure solutions.  All unshaded compartments have pressures that are dependent upon each other.}
    \end{center}
 \end{figure}
 
 The extrapolated pressure for a compartment can be determined by using Eq.~(\ref{concon2}) and correcting the integral over velocity for the current solution of
 all interdependent HVAC flows into or out of an FDS pressure zone:
-\be \tilde{p}^n_i  = p^{n-1}_i+\left(\frac{\d p^{n-1}_i}{\d t} + \frac{{\sum_j u^{n-1}_j A^{n-1}_j} - {\sum_j u^n_j A^n_j}}{\int_{\Omega_m} P \, \d V}\right)\Delta t^n = \tilde{p^*}^n_i - \frac{\sum_j u^n_j A^n_j}{\int_{\Omega_m} P \, \d V})\Delta t^n
+\be \tilde{p}^n_i  = p^{n-1}_i+\left(\frac{\d p^{n-1}_i}{\d t} + \frac{{\sum_j u^{n-1}_j A^{n-1}_j} - {\sum_j u^n_j A^n_j}}{\int_{\Omega_m} P \, \d V}\right)\Delta t^n = \tilde{p}^{*\,n}_i - \frac{\sum_j u^n_j A^n_j}{\int_{\Omega_m} P \, \d V})\Delta t^n
    \label{HVACextrapolatedpressure} \ee
 If the summation term for the velocities being predicted in this timestep is removed from Eq.~(\ref{HVACextrapolatedpressure}) and placed on the left hand side of Eq.~(\ref{HVACdiscretemomentum}) and the remaining terms of Eq.~(\ref{HVACextrapolatedpressure}) are placed on the right hand side we obtain the following:
 \begin{align}
    u^n_j \left( 1+\frac{K_j}{2 L_j} \left| u^{n-}_j+u^{n+}_j \right| \right) &-
     \frac{\Delta {t^n}^2}{\rho_j L_j} \frac{{\sum_{j\in i} u^n_j A^n_j}-{\sum_{j\in k} u^n_j A^n_j}}{{\int_{\Omega_m} P \, \d V}}= \nonumber \\
   & u^{n-1}_j+ \frac{\Delta {t^n}^2}{\rho_j L_j}
-  \left(\tilde{p^*}^n_i-\tilde{p^*}^n_k +  (\rho g \Delta z)_j + \Delta p_j \right) +
+  \left(\tilde{p}^{*\,n}_i-\tilde{p}^{*\,n}_k +  (\rho g \Delta z)_j + \Delta p_j \right) +
   \frac{K_j}{2 L_j}\left|u^{n+}_j\right| \left|u^{n-}_j\right| \label{HVACfullexpansion}
 \end{align}
 If node $i$ or node $k$ for duct $j$ in Eq.~(\ref{HVACfullexpansion}) is an internal duct node, then extrapolated pressures are not computed and the actual node pressure is solved for.
