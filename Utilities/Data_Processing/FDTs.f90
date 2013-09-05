@@ -287,7 +287,7 @@ DO I=0,50
       T_STEEL = TMP_A
       IF (C_STEEL * W_D > 2 * C_I * RHO_I * H_I) THEN
          DO J=1,T_END-1
-            T_STEEL(J+1) = (((K_I/(C_STEEL*H_I*W_D + 0.5*C_I*RHO_I*H_I**2)) * ((TMP_G)-(T_STEEL(J)))) * DELTA_T) + (T_STEEL(J))
+            T_STEEL(J+1) = (((K_I/(C_STEEL*H_I*W_D)) * ((TMP_G)-(T_STEEL(J)))) * DELTA_T) + (T_STEEL(J))
          ENDDO
       ELSE
          DO J=1,T_END-1
@@ -815,7 +815,7 @@ DO I=1,9999
          T_STEEL = TMP_A
          IF (C_STEEL * W_D > 2 * C_I * RHO_I * H_I) THEN
             DO M=1,TIME_RAMP(I)-1
-               T_STEEL(M+1) = (((K_I/(C_STEEL*H_I*W_D + 0.5*C_I*RHO_I*H_I**2)) * ((T_PLUME(J))-(T_STEEL(M)))) * DELTA_T) + (T_STEEL(M))
+               T_STEEL(M+1) = (((K_I/(C_STEEL*H_I*W_D)) * ((T_PLUME(J))-(T_STEEL(M)))) * DELTA_T) + (T_STEEL(M))
             ENDDO
          ELSE
             DO M=1,TIME_RAMP(I)-1
