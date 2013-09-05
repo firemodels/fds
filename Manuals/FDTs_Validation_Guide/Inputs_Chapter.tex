@@ -1,7 +1,7 @@
 % !TEX root = FDTs_Validation_Guide.tex
 
 \chapter{Summary of Correlation Input Parameters}
-\label{Correlation_Chapter}
+\label{Inputs_Chapter}
 
 \section{ATF Corridors}
 
@@ -44,6 +44,8 @@ ATF Corridors 500 kW  &  500            \\ \hline
 \section{CAROLFIRE}
 
 \subsection*{Cable Failure Time}
+
+The cable and conduit targets were not completely surrounded by the Penlight apparatus, which had openings at its ends. Threfore, the exposing temperature $T_{ramp}$ was calculated using a view factor of 0.90 and the experimentally measured shroud temperature.
 
 \begin{table}[!ht]
 \caption[Input parameters for CAROLFIRE cases, cable failure time]
@@ -108,41 +110,41 @@ Penlight Test 65  &   7.0      &  0.076        &  1.0        &  -         &  -  
                   &                                &                             \\
 \rb{Test}         &  \rb{$t_{ramp}$}               &  \rb{$T_{ramp}$}            \\
                   &  \rb{(s)}                      &  \rb{($^\circ$C)}           \\ \hline \hline
-Penlight Test 1   &  0, 70, 820, 1240, 1600, 1800  &  24, 480, 480, 290, 190, 0  \\ \hline
-Penlight Test 2   &  0, 80, 800, 1220, 1600, 1800  &  24, 480, 480, 290, 190, 0  \\ \hline
-Penlight Test 3   &  0, 80, 700,  950, 1600, 1800  &  24, 480, 480, 350, 190, 0  \\ \hline
-Penlight Test 4   &  0, 60, 820, 1470, 1800, 1900  &  24, 305, 305, 305, 200, 0  \\ \hline
-Penlight Test 5   &  0, 60, 820, 1080, 1600, 1800  &  24, 305, 305, 305, 150, 0  \\ \hline
-Penlight Test 6   &  0, 60, 820, 1080, 1600, 1800  &  24, 305, 305, 305, 150, 0  \\ \hline
-Penlight Test 7   &  0, 80, 820, 1240, 1800, 1900  &  24, 480, 480, 480, 480, 0  \\ \hline
-Penlight Test 8   &  0, 55, 820, 1080, 1800, 1900  &  24, 305, 305, 305, 305, 0  \\ \hline
-Penlight Test 9   &  0, 80, 820, 1240, 1800, 1900  &  24, 470, 470, 470, 470, 0  \\ \hline
-Penlight Test 10  &  0, 60, 820, 1500, 1800, 1900  &  24, 300, 300, 300, 200, 0  \\ \hline
-Penlight Test 11  &  0, 80, 820, 1320, 1800, 1900  &  24, 475, 475, 475, 280, 0  \\ \hline
-Penlight Test 12  &  0, 80, 820, 1320, 1800, 1900  &  24, 480, 480, 480, 280, 0  \\ \hline
-Penlight Test 13  &  0, 80, 820, 1320, 1800, 1900  &  24, 480, 480, 480, 280, 0  \\ \hline
-Penlight Test 14  &  0, 60, 820, 1470, 1800, 1900  &  24, 305, 305, 305, 305, 0  \\ \hline
-Penlight Test 15  &  0, 60, 820, 1470, 1800, 1900  &  24, 330, 330, 330, 200, 0  \\ \hline
-Penlight Test 16  &  0, 60, 820, 1470, 1800, 1900  &  24, 330, 330, 330, 330, 0  \\ \hline
-Penlight Test 17  &  0, 80, 660, 1240, 1600, 1800  &  24, 480, 480, 290, 190, 0  \\ \hline
-Penlight Test 18  &  0, 70, 820, 1240, 1600, 1800  &  24, 700, 700, 700, 700, 0  \\ \hline
-Penlight Test 19  &  0, 80, 820, 1050, 1500, 1800  &  24, 480, 480, 480, 250, 0  \\ \hline
-Penlight Test 20  &  0, 70, 600, 1240, 1600, 1800  &  24, 480, 480, 290, 190, 0  \\ \hline
-Penlight Test 21  &  0, 60, 930, 1200              &  24, 305, 305, 210          \\ \hline
-Penlight Test 22  &  0, 80, 1440, 1650             &  24, 480, 480, 310          \\ \hline
-Penlight Test 23  &  0, 80, 1801                   &  24, 475, 475               \\ \hline
-Penlight Test 24  &  0, 80, 1801                   &  24, 475, 475               \\ \hline
-Penlight Test 25  &  0, 50, 1801                   &  24, 325, 325               \\ \hline
-Penlight Test 26  &  0, 60, 1801                   &  24, 325, 325               \\ \hline
-Penlight Test 27  &  0, 80, 1500, 1801             &  24, 475, 475, 320          \\ \hline
-Penlight Test 28  &  0, 80, 1801                   &  24, 470, 470               \\ \hline
-Penlight Test 29  &  0, 60, 1260, 1650             &  24, 325, 325, 200          \\ \hline
-Penlight Test 30  &  0, 50, 1350, 1800             &  24, 325, 325, 200          \\ \hline
-Penlight Test 31  &  0, 70, 820, 1240, 1600, 1801  &  24, 700, 700, 700, 700, 0  \\ \hline
-Penlight Test 62  &  0, 80, 300, 480, 1200         &  24, 470, 470, 350, 220     \\ \hline
-Penlight Test 63  &  0, 70, 720                    &  24, 325, 325               \\ \hline
-Penlight Test 64  &  0, 80, 240, 900               &  24, 470, 470, 220          \\ \hline
-Penlight Test 65  &  0, 65, 540, 780               &  24, 325, 325, 230          \\ \hline
+Penlight Test 1   &  0, 70, 820, 1240, 1600, 1800  &  24, 460, 460, 275, 178, 0  \\ \hline
+Penlight Test 2   &  0, 80, 800, 1220, 1600, 1800  &  24, 460, 460, 275, 178, 0  \\ \hline
+Penlight Test 3   &  0, 80, 700,  950, 1600, 1800  &  24, 460, 460, 334, 178, 0  \\ \hline
+Penlight Test 4   &  0, 60, 820, 1470, 1800, 1900  &  24, 290, 290, 290, 188, 0  \\ \hline
+Penlight Test 5   &  0, 60, 820, 1080, 1600, 1800  &  24, 290, 290, 290, 139, 0  \\ \hline
+Penlight Test 6   &  0, 60, 820, 1080, 1600, 1800  &  24, 290, 290, 290, 139, 0  \\ \hline
+Penlight Test 7   &  0, 80, 820, 1240, 1800, 1900  &  24, 460, 460, 460, 460, 0  \\ \hline
+Penlight Test 8   &  0, 55, 820, 1080, 1800, 1900  &  24, 290, 290, 290, 290, 0  \\ \hline
+Penlight Test 9   &  0, 80, 820, 1240, 1800, 1900  &  24, 451, 451, 451, 451, 0  \\ \hline
+Penlight Test 10  &  0, 60, 820, 1500, 1800, 1900  &  24, 285, 285, 285, 188, 0  \\ \hline
+Penlight Test 11  &  0, 80, 820, 1320, 1800, 1900  &  24, 456, 456, 456, 266, 0  \\ \hline
+Penlight Test 12  &  0, 80, 820, 1320, 1800, 1900  &  24, 460, 460, 460, 266, 0  \\ \hline
+Penlight Test 13  &  0, 80, 820, 1320, 1800, 1900  &  24, 460, 460, 460, 266, 0  \\ \hline
+Penlight Test 14  &  0, 60, 820, 1470, 1800, 1900  &  24, 290, 290, 290, 290, 0  \\ \hline
+Penlight Test 15  &  0, 60, 820, 1470, 1800, 1900  &  24, 314, 314, 314, 188, 0  \\ \hline
+Penlight Test 16  &  0, 60, 820, 1470, 1800, 1900  &  24, 314, 314, 314, 314, 0  \\ \hline
+Penlight Test 17  &  0, 80, 660, 1240, 1600, 1800  &  24, 460, 460, 275, 178, 0  \\ \hline
+Penlight Test 18  &  0, 70, 820, 1240, 1600, 1800  &  24, 675, 675, 675, 675, 0  \\ \hline
+Penlight Test 19  &  0, 80, 820, 1050, 1500, 1800  &  24, 460, 460, 460, 236, 0  \\ \hline
+Penlight Test 20  &  0, 70, 600, 1240, 1600, 1800  &  24, 460, 460, 275, 178, 0  \\ \hline
+Penlight Test 21  &  0, 60, 930, 1200              &  24, 290, 290, 197          \\ \hline
+Penlight Test 22  &  0, 80, 1440, 1650             &  24, 460, 460, 295          \\ \hline
+Penlight Test 23  &  0, 80, 1801                   &  24, 456, 456               \\ \hline
+Penlight Test 24  &  0, 80, 1801                   &  24, 456, 456               \\ \hline
+Penlight Test 25  &  0, 50, 1801                   &  24, 309, 309               \\ \hline
+Penlight Test 26  &  0, 60, 1801                   &  24, 309, 309               \\ \hline
+Penlight Test 27  &  0, 80, 1500, 1801             &  24, 456, 456, 305          \\ \hline
+Penlight Test 28  &  0, 80, 1801                   &  24, 451, 451               \\ \hline
+Penlight Test 29  &  0, 60, 1260, 1650             &  24, 309, 309, 188          \\ \hline
+Penlight Test 30  &  0, 50, 1350, 1800             &  24, 309, 309, 188          \\ \hline
+Penlight Test 31  &  0, 70, 820, 1240, 1600, 1801  &  24, 675, 675, 675, 675, 0  \\ \hline
+Penlight Test 62  &  0, 80, 300, 480, 1200         &  24, 451, 451, 334, 207     \\ \hline
+Penlight Test 63  &  0, 70, 720                    &  24, 309, 309               \\ \hline
+Penlight Test 64  &  0, 80, 240, 900               &  24, 451, 451, 207          \\ \hline
+Penlight Test 65  &  0, 65, 540, 780               &  24, 309, 309, 217          \\ \hline
 \end{tabular}
 \end{center}
 \end{table}
