@@ -160,7 +160,7 @@ A limitation of the mixing-controlled reaction model described above is that it 
 
 FDS uses simple empirical rules---which ignore strain---to predict local extinction within a certain grid cell based on resolved species concentrations and the mean cell temperature.  The default FDS extinction model consists of two parts (shown below) based on the concept of a \emph{critical flame temperature} \cite{SFPE:Beyler}. If either criterion fails, then there is no chemical reaction and $\dot{m}_\alpha'''=0$ and $\dot{q}'''=0$ for that time step.
 
-\paragraph{Extinction Model}
+\paragraph{Basic Extinction Model}
 \begin{enumerate}
 \item If the cell temperature is below the auto-ignition temperature for all fuels in the cell then combustion is suppressed. The auto-ignition temperature for each fuel is zero by default; thus, the user does not need to specify an ignition source.
 \item If the potential combustion heat release from a local pocket of stoichiometric fuel-air mixture cannot raise the temperature of that mixture above an empirically determined limiting flame temperature, $T_{\rm LFT}$, then combustion is suppressed.  Let $Z_{\rm XF}$ and $Z_{\rm XA}$ denote mass fractions of temporary lumped species ``Extinction Fuel'' (XF) and ``Extinction Air'' (XA) at the beginning of the combustion time step.  Here the definitions for XF and XA can be somewhat confusing.  XF is composed of all fuels involved in ``fast chemistry'' reactions in proportion to their local cell concentrations. XA accounts for all remaining lumped species (including oxidizers, products, diluents, and fuels not involved in fast chemistry) combined in proportion to their local cell concentrations. The mass stoichiometric coefficient for a chemical reaction between XF and XA is $s$.  Based on the limiting reactant, the masses in the local pocket of stoichiometric mixture are defined to be
@@ -211,7 +211,7 @@ Now, let us imagine what should happen to the mixing time as the filter width in
 
 \begin{figure}
 \centering
-\includegraphics[width=4.5in]{FIGURES/reaction_time_scale.pdf}
+\includegraphics[width=4.in]{FIGURES/reaction_time_scale.pdf}
 \vskip-.2cm
 \caption{Reaction time scale model.}
 \label{fig_reaction_time_scale}
@@ -457,6 +457,10 @@ A special iterative procedure is needed to handle infinitely fast reactions in s
 &\mbox{Reaction 2}& \mathrm{CO + 0.5 \, O_2} &\rightarrow \mathrm{CO_2}                    && && \label{eq:series_reac_2}
 \end{align}
 If both Eqs.~(\ref{eq:series_reac_1}) and (\ref{eq:series_reac_2}) are infinitely fast and the mixed state is in stoichiometric proportions, then only H$_2$O and CO$_2$ should be present at the end of a time step. To properly process series reactions, FDS will identify the number of infinitely fast series reactions, $n$, that the user has specified. FDS will then update the species $n$ times before updating the time step. This ensures that the reactions proceed as far as the mixed state stoichiometry permits.
+
+\subsubsection{Multiple Infinitely Fast Reactions: Extinction}
+
+Details for the general case with simple example.
 
 \subsection{Finite-Rate Chemistry (Arrhenius Reaction)}
 \label{Reaction_Rate_Model}
