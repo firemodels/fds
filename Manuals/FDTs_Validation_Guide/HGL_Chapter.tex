@@ -7,6 +7,8 @@
 
 \section{Natural Ventilation}
 
+\subsubsection*{Description}
+
 For a compartment with natural ventilation, the correlation of McCaffrey, Quintiere, and Harkleroad (MQH)~\cite{SFPE:Walton} predicts that the HGL temperature rise, $\Delta T_g$, is given by
 \be
 \Delta T_g = 6.85 \left( \frac{\dot Q^2}{A_o \sqrt{H_o} h_k A_T} \right)^{1/3} \quad ^\circ{\rm C}
@@ -25,6 +27,41 @@ where $k$ is the thermal conductivity of the interior lining~(\si{kW/(m. K)}), $
 t_p = \left( \frac{\rho c}{k} \right) \left( \frac{\delta}{2} \right)^2
 \label{eq:MQH_tp}
 \ee
+
+\subsubsection*{Verification}
+
+Test: LLNL Test 51
+
+\begin{table}[!ht]
+\caption[Input parameters, HGL temperature, natural ventilation]
+{Input parameters, HGL temperature, natural ventilation.}
+\begin{center}
+\begin{tabular}{|l|c|}
+\hline
+                        &              \\
+\rb{Input Parameter}    &  \rb{Value}  \\ \hline \hline
+$\dot Q$ (kW)           &  200         \\ \hline
+$L$ (m)                 &  6.0         \\ \hline
+$W$ (m)                 &  4.0         \\ \hline
+$H$ (m)                 &  3.0         \\ \hline
+$H_v$ (m)               &  2.06        \\ \hline
+$W_v$ (m)               &  0.76        \\ \hline
+$k$ (kW/m/K)            &  0.000463    \\ \hline
+$\rho$ (kg/m$^3$)       &  1607        \\ \hline
+$c$ (kJ/kg/K)           &  1.0         \\ \hline
+$\delta$ (m)            &  0.10        \\ \hline
+$T_\infty$ ($^\circ$C)  &  33          \\ \hline
+\end{tabular}
+\end{center}
+\end{table}
+
+\noindent Expected result: At 60~s, the HGL temperature $T_g$ is 111.45~$^\circ$C; at 120~s, $T_g$ is 121.05~$^\circ$C; at 180~s, $T_g$ is 127.21~$^\circ$C.
+
+
+\clearpage
+
+
+\subsubsection*{Validation}
 
 \begin{figure}[!ht]
 \begin{center}
@@ -45,6 +82,8 @@ t_p = \left( \frac{\rho c}{k} \right) \left( \frac{\delta}{2} \right)^2
 
 \subsection{FPA Method}
 
+\subsubsection*{Description}
+
 For a compartment with forced ventilation, the correlation of Foote, Pagni, and Alvares (FPA)~\cite{SFPE:Walton} predicts that the HGL temperature rise, $\Delta T_g$, is given by
 \be
 \Delta T_g = \left[ 0.63 \left( \frac{\dot Q}{\dot m_g c_p T_\infty} \right)^{0.72} \left( \frac{h_k A_T}{\dot m_g c_p} \right)^{-0.36} \right] T_\infty \quad ^\circ{\rm C}
@@ -64,6 +103,40 @@ t_p = \left( \frac{\rho c}{k} \right) \left( \frac{\delta}{2} \right)^2
 \label{eq:FPA_tp}
 \ee
 
+\subsubsection*{Verification}
+
+Test: FM/SNL Test 1
+
+\begin{table}[!ht]
+\caption[Input parameters, HGL temperature, forced ventilation]
+{Input parameters, HGL temperature, forced ventilation.}
+\begin{center}
+\begin{tabular}{|l|c|}
+\hline
+                        &              \\
+\rb{Input Parameter}    &  \rb{Value}  \\ \hline \hline
+$\dot Q$ (kW)           &  516         \\ \hline
+$\dot m$ (kg/s)         &  4.5         \\ \hline
+$L$ (m)                 &  18.3        \\ \hline
+$W$ (m)                 &  12.2        \\ \hline
+$H$ (m)                 &  6.1         \\ \hline
+$k$ (kW/m/K)            &  0.00023     \\ \hline
+$\rho$ (kg/m$^3$)       &  1000        \\ \hline
+$c$ (kJ/kg/K)           &  1.16        \\ \hline
+$\delta$ (m)            &  0.025       \\ \hline
+$T_\infty$ ($^\circ$C)  &  15          \\ \hline
+\end{tabular}
+\end{center}
+\end{table}
+
+\noindent Expected result: At 60~s, the HGL temperature $T_g$ is 53.07~$^\circ$C; at 120~s, $T_g$ is 58.13~$^\circ$C; at 180~s, $T_g$ is 61.39~$^\circ$C.
+
+
+\clearpage
+
+
+\subsubsection*{Validation}
+
 \begin{figure}[!ht]
 \begin{center}
 \includegraphics[width=4.0in]{SCRIPT_FIGURES/Scatterplots/HGL_Temperature_FPA}
@@ -78,6 +151,8 @@ t_p = \left( \frac{\rho c}{k} \right) \left( \frac{\delta}{2} \right)^2
 
 \subsection{Deal and Beyler Method}
 
+\subsubsection*{Description}
+
 For a compartment with forced ventilation, the correlation of Deal and Beyler (DB)~\cite{SFPE:Walton} predicts that the HGL temperature rise, $\Delta T_g$, is given by
 \be
 \Delta T_g = \left( \frac{\dot Q}{\dot m_g c_p + h_k A_T} \right) \quad ^\circ{\rm C}
@@ -89,6 +164,40 @@ h_k = 0.4\ \mathrm{max} \left( \sqrt{\frac{k \rho c}{t}} , \frac{k}{\delta} \rig
 \label{eq:DB_hk}
 \ee
 where $k$ is the thermal conductivity of the interior lining~(\si{kW/(m.K)}), $\rho$ is the density of the interior lining~(\si{kg/m^3}), $c$ is the specific heat of the interior lining~(\si{kJ/(kg.K)}), $t$ is the exposure time~(\si{\second}), and $\delta$ is the thickness of the interior lining~(\si{m}). This model is only valid for times up to 2000 seconds.
+
+\subsubsection*{Verification}
+
+Test: FM/SNL Test 1
+
+\begin{table}[!ht]
+\caption[Input parameters, HGL temperature, forced ventilation]
+{Input parameters, HGL temperature, forced ventilation.}
+\begin{center}
+\begin{tabular}{|l|c|}
+\hline
+                        &              \\
+\rb{Input Parameter}    &  \rb{Value}  \\ \hline \hline
+$\dot Q$ (kW)           &  516         \\ \hline
+$\dot m$ (kg/s)         &  4.5         \\ \hline
+$L$ (m)                 &  18.3        \\ \hline
+$W$ (m)                 &  12.2        \\ \hline
+$H$ (m)                 &  6.1         \\ \hline
+$k$ (kW/m/K)            &  0.00023     \\ \hline
+$\rho$ (kg/m$^3$)       &  1000        \\ \hline
+$c$ (kJ/kg/K)           &  1.16        \\ \hline
+$\delta$ (m)            &  0.025       \\ \hline
+$T_\infty$ ($^\circ$C)  &  15          \\ \hline
+\end{tabular}
+\end{center}
+\end{table}
+
+\noindent Expected result: At 60~s, the HGL temperature $T_g$ is 34.60~$^\circ$C; at 120~s, $T_g$ is 40.88~$^\circ$C; at 180~s, $T_g$ is 45.16~$^\circ$C.
+
+
+\clearpage
+
+
+\subsubsection*{Validation}
 
 \begin{figure}[!ht]
 \begin{center}
@@ -104,6 +213,8 @@ where $k$ is the thermal conductivity of the interior lining~(\si{kW/(m.K)}), $\
 
 
 \section{No Ventilation}
+
+\subsubsection*{Description}
 
 For a compartment with no ventilation (closed doors) and constant HRR, the correlation of Belyer~\cite{SFPE:Walton} predicts that the HGL temperature rise, $\Delta T_g$, is given by
 \be
@@ -122,6 +233,38 @@ K_2 = \frac{\dot Q}{m c_p}
 \ee
 where $\dot Q$ is the HRR of the fire~(\si{kW}).
 
+\subsubsection*{Verification}
+
+Test: LLNL Test 1
+
+\begin{table}[!ht]
+\caption[Input parameters, HGL temperature, no ventilation]
+{Input parameters, HGL temperature, no ventilation.}
+\begin{center}
+\begin{tabular}{|l|c|}
+\hline
+                        &              \\
+\rb{Input Parameter}    &  \rb{Value}  \\ \hline \hline
+$\dot Q$ (kW)           &  200         \\ \hline
+$L$ (m)                 &  6.0         \\ \hline
+$W$ (m)                 &  4.0         \\ \hline
+$H$ (m)                 &  4.5         \\ \hline
+$k$ (kW/m/K)            &  0.000463    \\ \hline
+$\rho$ (kg/m$^3$)       &  1607        \\ \hline
+$c$ (kJ/kg/K)           &  1.0         \\ \hline
+$T_\infty$ ($^\circ$C)  &  23          \\ \hline
+\end{tabular}
+\end{center}
+\end{table}
+
+\noindent Expected result: At 60~s, the HGL temperature $T_g$ is 49.87~$^\circ$C; at 120~s, $T_g$ is 63.33~$^\circ$C; at 180~s, $T_g$ is 73.67~$^\circ$C.
+
+
+\clearpage
+
+
+\subsubsection*{Validation}
+
 \begin{figure}[!ht]
 \begin{center}
 \begin{tabular}{l}
@@ -133,9 +276,15 @@ where $\dot Q$ is the HRR of the fire~(\si{kW}).
 \label{HGL_Summary_No_Ventilation}
 \end{figure}
 
+
+\clearpage
+
+
 \section{HGL Depth}
 
 \subsection{ASET}
+
+\subsubsection*{Description}
 
 For a compartment with no ventilation (closed doors) and constant HRR, the available safe egress time (ASET)~\cite{Walton:1}
 correlation predicts that the HGL height, $z$~(\si{m}), is given by~\cite{SFPE:Milke}
@@ -169,6 +318,46 @@ z|_{t+1} = z|_t - \frac{\dot V_{ul}}{L W} \Delta t
 \ee
 where $L$ and $W$ are the length and width of the compartment~(\si{m}), respectively, and $\Delta t$ is the time step size~(\si{s}).
 
+
+\clearpage
+
+
+\subsubsection*{Verification}
+
+Test: NIST/NRC Test 1
+
+\begin{table}[!ht]
+\caption[Input parameters, HGL depth]
+{Input parameters, HGL depth.}
+\begin{center}
+\begin{tabular}{|l|c|}
+\hline
+                        &              \\
+\rb{Input Parameter}    &  \rb{Value}  \\ \hline \hline
+$\dot Q$ (kW)           &  410         \\ \hline
+$L$ (m)                 &  21.66       \\ \hline
+$W$ (m)                 &  7.04        \\ \hline
+$H$ (m)                 &  3.82        \\ \hline
+$k$ (kW/m/K)            &  0.00012     \\ \hline
+$\rho$ (kg/m$^3$)       &  737         \\ \hline
+$c$ (kJ/kg/K)           &  0.9         \\ \hline
+$\delta$ (m)            &  0.0254      \\ \hline
+$T_\infty$ ($^\circ$C)  &  22          \\ \hline
+Location Factor (-)     &  1           \\ \hline
+$\chi_l$ (-)            &  0           \\ \hline
+$z_f$ (-)               &  0           \\ \hline
+\end{tabular}
+\end{center}
+\end{table}
+
+\noindent Expected result: At 10~s, the HGL depth $z$ is 3.47~m; at 20~s, $z$ is 3.17~m; at 30~s, $z$ is 2.89~m.
+
+
+\clearpage
+
+
+\subsubsection*{Validation}
+
 \begin{figure}[!ht]
 \begin{center}
 \begin{tabular}{l}
@@ -186,6 +375,8 @@ where $L$ and $W$ are the length and width of the compartment~(\si{m}), respecti
 
 \subsection{Yamana and Tanaka}
 
+\subsubsection*{Description}
+
 For a compartment with no ventilation (closed doors) and constant HRR, the correlation of Yamana and Tanaka~\cite{Tanaka:1} predicts that the HGL height, $z$, is given by
 \be
 z = \left( \frac{2 k \dot Q^{1/3} t}{3 A_c} + \frac{1}{h_c^{2/3}} \right)^{-3/2}
@@ -196,6 +387,41 @@ where $\dot Q$ is the HRR~(\si{kW}), $t$ is the time after ignition~(\si{s}), $A
 k = \frac{0.076}{(353/T_g)}
 \ee
 where $T_g$ is the HGL temperature~(\si{K}).
+
+\subsubsection*{Verification}
+
+Test: NIST/NRC Test 1
+
+\noindent Note: In the FDTs spreadsheets, this HGL depth correlation is used with the MQH correlation (natual ventilation). In this verification case, the method of Beyler is used to calculate the HGL temperature,~$T_g$.
+
+\begin{table}[!ht]
+\caption[Input parameters, HGL depth]
+{Input parameters, HGL depth.}
+\begin{center}
+\begin{tabular}{|l|c|}
+\hline
+                        &              \\
+\rb{Input Parameter}    &  \rb{Value}  \\ \hline \hline
+$\dot Q$ (kW)           &  410         \\ \hline
+$L$ (m)                 &  21.66       \\ \hline
+$W$ (m)                 &  7.04        \\ \hline
+$H$ (m)                 &  3.82        \\ \hline
+$k$ (kW/m/K)            &  0.00012     \\ \hline
+$\rho$ (kg/m$^3$)       &  737         \\ \hline
+$c$ (kJ/kg/K)           &  0.9         \\ \hline
+$\delta$ (m)            &  0.0254      \\ \hline
+$T_\infty$ ($^\circ$C)  &  22          \\ \hline
+\end{tabular}
+\end{center}
+\end{table}
+
+\noindent Expected result: At 10~s, the HGL depth $z$ is 3.54~m; at 20~s, $z$ is 3.29~m; at 30~s, $z$ is 3.07~m.
+
+
+\clearpage
+
+
+\subsubsection*{Validation}
 
 \begin{figure}[!ht]
 \begin{center}

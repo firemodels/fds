@@ -5,6 +5,8 @@
 
 \section{Point Source Radiation Heat Flux}
 
+\subsubsection*{Description}
+
 The point source model assumes that radiative energy is concentrated at a point located within a flame~\cite{Beyler2:SFPE}.
 Here, the point source is located at a point one-third the height of the flame.
 The radiative heat flux, $\dot q_r''$, at any distance $R$ (\si{m}) from this point can be predicted using
@@ -33,6 +35,42 @@ Q^* = \frac{\dot Q}{\rho_\infty c_p T_\infty \sqrt{g} D^{5/2}}
 \label{eq:point_source_Qstar}
 \ee
 where $\rho_\infty$ is the ambient air density~(\si{kg/m^3}), $c_p$ is the specific heat of air~(\si{kJ/(kg.K)}), $T_\infty$ is the ambient air temperature~(\si{K}), and $g$ is the acceleration of gravity~(\si{m/s^2}).
+
+\subsubsection*{Verification}
+
+Test: Fleury 100 kW, 1:1 Burner
+\\ \\
+\noindent In the FDTs spreadsheets, the point source radiation heat flux is calculated without accounting for the angle/elevation
+of the target with respect to the fire, and the flame height is not considered. The FDTs.f90 program considers both of these and
+assumes that the point source is located one-third of the height of the flame ($L_f/3$).
+
+\begin{table}[!ht]
+\caption[Input parameters, point source radiation heat flux]
+{Input parameters, point source radiation heat flux.}
+\begin{center}
+\begin{tabular}{|l|l|}
+\hline
+                      &                   \\
+\rb{Input Parameter}  &  \rb{Value}       \\ \hline \hline
+$\dot Q$ (kW)         &  100              \\ \hline
+$\chi_r$ (-)          &  0.35             \\ \hline
+$A$ (m$^2$)           &  0.09             \\ \hline
+$x$ (m)               &  0.50, 0.75, 1.0  \\ \hline
+$z$ (m)               &  0.0              \\ \hline
+IOR (-)               &  2                \\ \hline
+\end{tabular}
+\end{center}
+\end{table}
+
+\noindent Expected result (FDTs spreadsheets): At a radius $R$ of 0.67~m, the radiative heat flux $q''_{r}$ is 6.22~kW/m$^2$; at an $R$ of 0.92~m, $q''_{r}$ is 3.30~kW/m$^2$; at an $R$ of 1.17~m, $q''_{r}$ is 2.04~kW/m$^2$.
+\\ \\
+\noindent Expected result (FDTs.f90): At a radius $R$ of 0.50~m, the radiative heat flux $q''_{r}$ is 6.01~kW/m$^2$; at an $R$ of 0.75~m, $q''_{r}$ is 3.65~kW/m$^2$; at an $R$ of 1.0~m, $q''_{r}$ is 2.33~kW/m$^2$.
+
+
+\clearpage
+
+
+\subsubsection*{Validation}
 
 \begin{figure}[!ht]
 \begin{center}
