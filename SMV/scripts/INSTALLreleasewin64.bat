@@ -1,7 +1,7 @@
 @echo off
 
 Rem Windows batch file to upload Smokeview test files to
-Rem the google download site.  This script assume that the Windows
+Rem the download site.  This script assume that the Windows
 Rem batch file, MAKEtest.bat, has already been run.
 
 set envfile="%userprofile%"\fds_smv_env.bat
@@ -19,7 +19,7 @@ goto:eof
 call %envfile%
 
 %svn_drive%
-cd %svn_root%\SMV\for_bundle\to_google
+cd %svn_root%\SMV\for_bundle\uploads
 
 Rem ----------------------------------------------------------
 Rem should not need to edit any lines below

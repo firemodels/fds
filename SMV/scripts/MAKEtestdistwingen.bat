@@ -24,7 +24,7 @@ set platform=%1
 
 set version=test_%smv_revision%
 set zipbase=smv_%version%_win%platform%
-set smvdir=to_google\%zipbase%
+set smvdir=uploads\%zipbase%
 set sh2bat=%svn_root%\Utilities\Data_Processing
 
 cd %svn_root%\SMV\for_bundle

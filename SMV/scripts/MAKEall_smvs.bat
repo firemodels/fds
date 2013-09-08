@@ -43,11 +43,11 @@ plink %svn_logon% %scriptdir%/make_smvs.csh %osx_hostname%
 plink %svn_logon% %scriptdir%/make_dists.csh %version%
 
 echo downloading Linux Smokeview files
-pscp %svn_logon%:%bundledir%/smv_%version%_linux.tar.gz ..\for_bundle\to_google\.
-pscp %svn_logon%:%bundledir%/smv_%version%_linux64.tar.gz ..\for_bundle\to_google\.
+pscp %svn_logon%:%bundledir%/smv_%version%_linux.tar.gz ..\for_bundle\uploads\.
+pscp %svn_logon%:%bundledir%/smv_%version%_linux64.tar.gz ..\for_bundle\uploads\.
 
 echo downloading MAC OSX Smokeview files
-pscp %svn_logon%:%bundledir%/smv_%version%_osx.tar.gz ..\for_bundle\to_google\.
+pscp %svn_logon%:%bundledir%/smv_%version%_osx.tar.gz ..\for_bundle\uploads\.
 
 call make_smv_release_win32.bat %version%
 

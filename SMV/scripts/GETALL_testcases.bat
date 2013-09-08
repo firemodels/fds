@@ -25,7 +25,7 @@ set testdir=verification_%verification_revision%
 Rem get test cases for Linux/OSX systems
 
 plink %svn_logon% %LREPOS%/Utilities/Scripts/get_testcases.csh %verification_revision% %LREPOS%
-pscp  %svn_logon%:%LREPOS%/Utilities/to_google/%testdir%.tar.gz %svn_root%\Utilities\to_google\.
+pscp  %svn_logon%:%LREPOS%/Utilities/uploads/%testdir%.tar.gz %svn_root%\Utilities\uploads\.
 
 Rem get test cases for Windows systems
 

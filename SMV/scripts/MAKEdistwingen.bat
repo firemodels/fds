@@ -35,7 +35,7 @@ set sh2bat=%svn_root%\Utilities\Data_Processing
 set bundleinfo=%svn_root%\Utilities\Scripts\bundle_setup
 
 set zipbase=smv_%version%_win%platform%
-set smvdir=to_google\%zipbase%
+set smvdir=uploads\%zipbase%
 
 cd %bundledir%
 echo

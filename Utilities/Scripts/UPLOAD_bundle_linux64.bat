@@ -1,7 +1,8 @@
 @echo off
-Title Uploading FDS-SMV bundle for 64 bit OSX
+Title Uploading FDS-SMV bundle for 64 bit Linux
 
-Rem Windows batch file to upload 64 bit OSX bundle to the google download site
+
+Rem Windows batch file to upload 64 bit windows bundle to the google download site
 
 set envfile="%userprofile%\fds_smv_env.bat"
 IF EXIST %envfile% GOTO endif_envexist
@@ -18,12 +19,12 @@ goto:eof
 call %envfile%
 
 %svn_drive%
-cd %svn_root%\Utilities\to_google
+cd %svn_root%\Utilities\uploads
 
-set glabels=Type-Installer,Opsys-OSX_64,%fds_google_level%
-set dplatform=64 bit OSX
+set glabels=Type-Installer,Opsys-Linux_64,%fds_google_level%
+set dplatform=64 bit Linux
 set summary=Bundled FDS and Smokeview for %dplatform% (SVN r%fds_revision%,%smv_revision%)
-set exe=FDS_%fds_version%-SMV_%smv_version%_osx64.sh
+set exe=FDS_%fds_version%-SMV_%smv_version%_linux64.sh
 
 
 echo Uploading %exe%

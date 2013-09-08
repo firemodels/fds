@@ -1,8 +1,9 @@
 @echo off
+Title Uploading FDS-SMV bundle for 64 bit OSX
 
-Rem Windows batch file to upload FDS release to the google download site.
+Rem Windows batch file to upload 64 bit OSX bundle to the google download site
 
-set envfile=%userprofile%\fds_smv_env.bat
+set envfile="%userprofile%\fds_smv_env.bat"
 IF EXIST %envfile% GOTO endif_envexist
 echo ***Fatal error.  The environment setup file %envfile% does not exist. 
 echo Create a file named %envfile% and use SMV/scripts/fds_smv_env_template.bat
@@ -17,17 +18,15 @@ goto:eof
 call %envfile%
 
 %svn_drive%
-set scriptdir=%svn_root%\Scripts
-cd %scriptdir%\to_google
+cd %svn_root%\Utilities\uploads
 
-set glabels=Type-Installer,Opsys-Windows,%fds_google_level%
-set dplatform=64 bit Windows
-set platform=win64
-set summary=FDS %fds_version% for %dplatform% (SVN r%fds_revision%)
-set exe=fds_%fds_version%_%fds_revision%_%platform%.exe
+set glabels=Type-Installer,Opsys-OSX_64,%fds_google_level%
+set dplatform=64 bit OSX
+set summary=Bundled FDS and Smokeview for %dplatform% (SVN r%fds_revision%,%smv_revision%)
+set exe=FDS_%fds_version%-SMV_%smv_version%_osx64.sh
+
 
 echo Uploading %exe%
-echo FDS %fds_google_level% version=%fds_version% revision=%fds_revision%
 echo.
 echo press any key to proceed with upload, CTRL c to abort
 pause>NUL
@@ -36,7 +35,7 @@ pause>NUL
   echo.
   echo Uploading %summary% - %exe%
   echo googlecode_upload.py --passwd-file-dir %google_password_dir% --config-dir none -s "%summary%" -p fds-smv -u %google_username% -l %glabels% %exe%
-       %scriptdir%\googlecode_upload.py --passwd-file-dir %google_password_dir% --config-dir none -s "%summary%" -p fds-smv -u %google_username% -l %glabels% %exe%
+       %upload% --passwd-file-dir %google_password_dir% --config-dir none -s "%summary%" -p fds-smv -u %google_username% -l %glabels% %exe%
 
 echo.
 echo Uploads complete

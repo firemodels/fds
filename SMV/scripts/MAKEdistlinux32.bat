@@ -22,12 +22,12 @@ cd %svn_root%\smv\scripts
 set version=%smv_version%
 
 set scriptdir=FDS-SMV/SMV/scripts
-set bundledir=FDS-SMV/SMV/for_bundle/to_google
+set bundledir=FDS-SMV/SMV/for_bundle/uploads
 
 echo making Linux archives
 plink %svn_logon% %scriptdir%/MAKEdistgen.csh %version% linux 32 %linux_hostname%
 
 echo downloading Linux Smokeview files
-pscp %svn_logon%:%bundledir%/smv_%version%_linux32.tar.gz ..\for_bundle\to_google\.
+pscp %svn_logon%:%bundledir%/smv_%version%_linux32.tar.gz ..\for_bundle\uploads\.
 
 pause

@@ -23,11 +23,11 @@ call %envfile%
 cd %svn_root%\smv\scripts
 
 set scriptdir=FDS-SMV/SMV/scripts
-set bundledir=FDS-SMV/SMV/for_bundle/to_google
+set bundledir=FDS-SMV/SMV/for_bundle/uploads
 
 echo making 64 bit Linux test distribution archive
 plink %svn_logon% %scriptdir%/MAKEtestdistlinux64.csh %smv_revision%
 
 echo downloading Linux Smokeview files
-pscp %svn_logon%:%bundledir%/smv_test_%smv_revision%_linux64.tar.gz ..\for_bundle\to_google\.
+pscp %svn_logon%:%bundledir%/smv_test_%smv_revision%_linux64.tar.gz ..\for_bundle\uploads\.
 pause

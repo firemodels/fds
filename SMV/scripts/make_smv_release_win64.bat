@@ -10,7 +10,7 @@ REM    where version is of the from X.Y_svn#
 
 cd ..\for_bundle
 set zipbase=smv_%version%_win64
-set smvdir=to_google\%zipbase%
+set smvdir=uploads\%zipbase%
 
 echo
 echo filling distribution directory

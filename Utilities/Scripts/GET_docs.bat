@@ -21,7 +21,7 @@ echo.
 
 set mandir=%svn_root%\Manuals\All_PDF_Files
 set zipbase=docs_fds_smv_%docs_revision%
-set togoogle=%svn_root%\Utilities\to_google
+set togoogle=%svn_root%\Utilities\uploads
 set docbasedir=%togoogle%\%zipbase%\
 
 mkdir %docbasedir%
@@ -52,7 +52,7 @@ set LREPOS=FDS-SMV
 Rem get Documentation for Linux/OSX systems
 
 plink %svn_logon% %LREPOS%/Utilities/Scripts/get_docs.csh %docs_revision%
-pscp %svn_logon%:%LREPOS%/Utilities/Scripts/to_google/%zipbase%.tar.gz %togoogle%\.
+pscp %svn_logon%:%LREPOS%/Utilities/Scripts/uploads/%zipbase%.tar.gz %togoogle%\.
 
 cd %svn_root%\Utilities\Scripts
 pause

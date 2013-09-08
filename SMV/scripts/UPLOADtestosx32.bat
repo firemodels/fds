@@ -18,7 +18,7 @@ goto:eof
 call %envfile%
 
 %svn_drive%
-cd %svn_root%\SMV\for_bundle\to_google
+cd %svn_root%\SMV\for_bundle\uploads
 
 Rem ----------------------------------------------------------
 Rem should not need to edit any lines below

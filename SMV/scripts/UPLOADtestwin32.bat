@@ -21,7 +21,7 @@ set level=Release-4_Test
 call %envfile%
 
 %svn_drive%
-cd %svn_root%\smv\for_bundle\to_google
+cd %svn_root%\smv\for_bundle\uploads
 
 Rem --------------- 32 bit Windows ----------------
 

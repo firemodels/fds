@@ -11,7 +11,7 @@ set SMDDIR=$REMOTESVNROOT/Utilities/smokediff/intel_osx_32
 set FORBUNDLE=$SVNROOT/SMV/for_bundle
 set OSXDIR=smv_test\_$revision\_osx32
 
-cd $FORBUNDLE/to_google
+cd $FORBUNDLE/uploads
 
 rm -rf $OSXDIR
 mkdir -p $OSXDIR

@@ -9,7 +9,7 @@ set SMDDIR=$SVNROOT/Utilities/smokediff/intel_linux_32
 set FORBUNDLE=$SVNROOT/SMV/for_bundle
 set LINUXDIR=smv_test\_$revision\_linux32
 
-cd $FORBUNDLE/to_google
+cd $FORBUNDLE/uploads
 
 rm -rf $LINUXDIR
 mkdir -p $LINUXDIR

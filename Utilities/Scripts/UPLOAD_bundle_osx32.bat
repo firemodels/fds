@@ -1,8 +1,10 @@
 @echo off
+Title Uploading FDS-SMV bundle for 32 bit OSX
 
-Rem Windows batch file to upload FDS release to the google download site.
 
-set envfile=%userprofile%\fds_smv_env.bat
+Rem Windows batch file to upload 32 bit windows bundle to the google download site
+
+set envfile="%userprofile%\fds_smv_env.bat"
 IF EXIST %envfile% GOTO endif_envexist
 echo ***Fatal error.  The environment setup file %envfile% does not exist. 
 echo Create a file named %envfile% and use SMV/scripts/fds_smv_env_template.bat
@@ -17,16 +19,15 @@ goto:eof
 call %envfile%
 
 %svn_drive%
-cd %svn_root%\Utilities\to_google
+cd %svn_root%\Utilities\uploads
 
-set glabels=Type-Installer,Opsys-Linux,%fds_google_level%
-set dplatform=64 bit Linux
-set platform=linux64
-set summary=FDS %fds_version% for %dplatform% (SVN r%fds_revision%)
-set exe=fds_%fds_version%_%fds_revision%_%platform%.zip
+set glabels=Type-Installer,Opsys-OSX,%fds_google_level%
+set dplatform=32 bit OSX
+set summary=Bundled FDS and Smokeview for %dplatform% (SVN r%fds_revision%,%smv_revision%)
+set exe=FDS_%fds_version%-SMV_%smv_version%_osx32.sh
+
 
 echo Uploading %exe%
-echo FDS %fds_google_level% version=%fds_version% revision=%fds_revision%
 echo.
 echo press any key to proceed with upload, CTRL c to abort
 pause>NUL

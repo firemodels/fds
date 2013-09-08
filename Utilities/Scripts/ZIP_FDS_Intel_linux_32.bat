@@ -20,7 +20,7 @@ call %envfile%
 cd %svn_root%\Utilities\Makefile
 
 set fdsroot=fds_%fds_version%_%fds_revision%_linux32
-set togoogle=%svn_root%\Utilities\to_google
+set togoogle=%svn_root%\Utilities\uploads
 set fdsrootdir=%togoogle%\%fdsroot%
 set scriptdir=%linux_svn_root%/Utilities/Scripts
 mkdir %fdsrootdir%
@@ -31,8 +31,8 @@ plink %svn_logon% %scriptdir%/bundle_linux_32.csh %scriptdir%
 
 echo.
 echo downloading 32 bit linux fds files
-pscp %svn_logon%:%scriptdir%/to_google/fds_intel_linux_32 %fdsrootdir%\fds_intel_linux_32
-pscp %svn_logon%:%scriptdir%/to_google/fds_mpi_intel_linux_32 %fdsrootdir%\fds_mpi_intel_linux_32
+pscp %svn_logon%:%scriptdir%/uploads/fds_intel_linux_32 %fdsrootdir%\fds_intel_linux_32
+pscp %svn_logon%:%scriptdir%/uploads/fds_mpi_intel_linux_32 %fdsrootdir%\fds_mpi_intel_linux_32
 
 echo.
 echo winzipping distribution directory

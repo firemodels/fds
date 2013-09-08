@@ -18,12 +18,12 @@ call %envfile%
 %svn_drive%
 
 set in_pdf=%svn_root%\Manuals\All_PDF_Files
-set in_fds=%svn_root%\Utilities\to_google\fds_%fds_version%_%fds_revision%_win32
-set in_smv=%svn_root%\SMV\for_bundle\to_google\smv_%smv_version%_%smv_revision%_win32
+set in_fds=%svn_root%\Utilities\uploads\fds_%fds_version%_%fds_revision%_win32
+set in_smv=%svn_root%\SMV\for_bundle\uploads\smv_%smv_version%_%smv_revision%_win32
 
-set to_google=%svn_root%\Utilities\to_google
+set uploads=%svn_root%\Utilities\uploads
 set basename=FDS_%fds_version%-SMV_%smv_version%_Windows
-set out_bundle=%to_google%\%basename%
+set out_bundle=%uploads%\%basename%
 set out_bin=%out_bundle%\%fds_edition%\bin
 set out_doc=%out_bundle%\%fds_edition%\Documentation
 set out_examples=%out_bundle%\%fds_edition%\Examples
@@ -66,7 +66,7 @@ echo Compressing %out_bundle%
 
 copy %bundleinfo%\setup.bat %out_bundle%\%fds_edition%\setup.bat
 
-cd %to_google%
+cd %uploads%
 if exist %basename%.zip erase %basename%.zip
 cd %basename%
 wzzip -a -r -P ..\%basename%.zip *
