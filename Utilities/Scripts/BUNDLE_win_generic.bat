@@ -15,8 +15,8 @@ set in_smv=%svn_root%\SMV\Build\intel_win_%platform%
 set in_for_bundle=%svn_root%\SMV\for_bundle
 set in_sh2bat=%svn_root%\Utilities\Data_Processing
 
-set to_google=%svn_root%\Utilities\to_google
-set basedir=%to_google%\%basename%
+set uploads=%svn_root%\Utilities\uploads
+set basedir=%uploads%\%basename%
 set out_bundle=%basedir%\FDS
 set out_bin=%out_bundle%\%fdsversion%\bin
 set out_textures=%out_bin%\textures
@@ -251,7 +251,7 @@ copy "%bundleinfo%\set_path.exe" "%out_bundle%\%fdsversion%\set_path.exe"
 echo.
 echo Compressing FDS/Smokeview distribution
 
-cd %to_google%
+cd %uploads%
 if exist %basename%.zip erase %basename%.zip
 cd %out_bundle%\%fdsversion%\
 %wzzip% -a -r -xExamples\*.csv -P ..\..\..\%basename%.zip * > winzip.out
@@ -260,7 +260,7 @@ Rem create an installation file from the zipped bundle directory
 
 echo.
 echo Creating installer
-cd %to_google%
+cd %uploads%
 echo Setup is about to install FDS %fds_version% and Smokeview %smv_version% > %bundleinfo%\message.txt
 echo Press Setup to begin installation. > %bundleinfo%\main.txt
 if exist %basename%.exe erase %basename%.exe

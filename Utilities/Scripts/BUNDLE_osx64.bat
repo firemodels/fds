@@ -1,4 +1,4 @@
-@echo off
+echo off
 Title Bundle FDS and Smokeview for 64 bit OSX
 Rem Batch file used to bundle a 64 bit OSX of FDS/Smokeview
 
@@ -21,14 +21,14 @@ call %envfile%
 set bundledir=FDS_%fds_version%-SMV_%smv_version%_osx64
 plink %svn_logon% %linux_svn_root%/Utilities/Scripts/BUNDLE_osx64.csh %linux_svn_root% %bundledir% %osx_hostname% %fds_edition%  %fds_version% %smv_version% %fdssmv_major_version%
 
-set manifest=%svn_root%\Utilities\to_google\manifest_osx_64.html
+set manifest=%svn_root%\Utilities\uploads\manifest_osx_64.html
 echo Downloading manifest
 erase %manifest%
 pscp %svn_logon%:manifest_osx_64.html %manifest%
 start explorer %manifest%
 
 echo Downloading compressed archive to:
-echo   %svn_root%\Utilities\to_google\%bundledir%.sh
-pscp %svn_logon%:%linux_svn_root%/Utilities/to_google/%bundledir%.sh %svn_root%/Utilities/to_google/.
+echo   %svn_root%\Utilities\uploads\%bundledir%.sh
+pscp %svn_logon%:%linux_svn_root%/Utilities/uploads/%bundledir%.sh %svn_root%/Utilities/uploads/.
 
 pause
