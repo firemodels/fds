@@ -21,14 +21,14 @@ call %envfile%
 set bundledir=FDS_%fds_version%-SMV_%smv_version%_osx32
 plink %svn_logon% %linux_svn_root%/Utilities/Scripts/BUNDLE_osx32.csh %linux_svn_root% %bundledir% %osx_hostname% %fds_edition%  %fds_version% %smv_version% %fdssmv_major_version%
 
-set manifest=%svn_root%\Utilities\to_google\manifest_osx_32.html
+set manifest=%svn_root%\Utilities\uploads\manifest_osx_32.html
 echo Downloading manifest
 erase %manifest%
 pscp %svn_logon%:manifest_osx_32.html %manifest%
 start explorer %manifest%
 
 echo Downloading compressed archive to:
-echo   %svn_root%\Utilities\to_google\%bundledir%.sh
-pscp %svn_logon%:%linux_svn_root%/Utilities/to_google/%bundledir%.sh %svn_root%/Utilities/to_google/.
+echo   %svn_root%\Utilities\uploads\%bundledir%.sh
+pscp %svn_logon%:%linux_svn_root%/Utilities/uploads/%bundledir%.sh %svn_root%/Utilities/uploads/.
 
 pause

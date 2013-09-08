@@ -1,4 +1,4 @@
-@echo off
+
 Title Bundle FDS and Smokeview for 64 bit Windows
 
 Rem Windows batch file to upload 64 bit windows bundle to the google download site
@@ -18,7 +18,7 @@ goto:eof
 call %envfile%
 
 %svn_drive%
-cd %svn_root%\Utilities\to_google
+cd %svn_root%\Utilities\uploads
 
 set platform=win_64
 set exe=FDS_%fds_version%_SMV_%smv_version%_%platform%.exe

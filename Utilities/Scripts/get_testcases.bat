@@ -18,7 +18,7 @@ Rem --------- should not need to edit below ----------
 
 call %envfile%
 %svn_drive%
-cd %svn_root%\Utilities\to_google\
+cd %svn_root%\Utilities\uploads\
 set excludefile=%svn_root%\Utilities\Scripts\examples_win.exclude
 set testdir=verification_%verification_revision%
 

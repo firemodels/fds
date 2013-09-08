@@ -5,7 +5,7 @@
 set revision=$1
 set REPOS=$2
 
-cd $REPOS/Utilities/to_google/
+cd $REPOS/Utilities/uploads/
 
 set testdir=verification_$revision
 
