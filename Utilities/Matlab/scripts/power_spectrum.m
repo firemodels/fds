@@ -58,16 +58,16 @@ axis([xmin xmax ymin ymax])
 
 xt = 1.5e-1;
 yt = 3.5e0;
-text(xt,yt,title1,'FontSize',Label_Font_Size,'Interpreter',Font_Interpreter)
+text(xt,yt,title1,'FontSize',Label_Font_Size,'Interpreter',Font_Interpreter,'FontName',Font_Name)
 xt = 1.5e-1;
 yt = .9e0;
-text(xt,yt,title2,'FontSize',Label_Font_Size,'Interpreter',Font_Interpreter)
+text(xt,yt,title2,'FontSize',Label_Font_Size,'Interpreter',Font_Interpreter,'FontName',Font_Name)
 
 text(1.5e-1,3.5e-4,'measured','FontSize',Label_Font_Size,'FontName',Font_Name,'Interpreter',Font_Interpreter);
 text(1.5e-1,1.2e-4,'puffing','FontSize',Label_Font_Size,'FontName',Font_Name,'Interpreter',Font_Interpreter);
 text(1.5e-1,.4e-4,'frequency','FontSize',Label_Font_Size,'FontName',Font_Name,'Interpreter',Font_Interpreter);
 annotation('arrow',[.3 .4],[.3 .3]);
-text(1e1,4e-2,'-5/3','FontSize',Label_Font_Size,'Interpreter',Font_Interpreter)
+text(1e1,4e-2,'-5/3','FontSize',Label_Font_Size,'Interpreter',Font_Interpreter,'FontName',Font_Name)
 %text(1e2,1.1e-3,'Nyquist','FontSize',Label_Font_Size,'Interpreter',Font_Interpreter)
 %text(1.4e2,.4e-3,'limit','FontSize',Label_Font_Size,'Interpreter',Font_Interpreter)
 
