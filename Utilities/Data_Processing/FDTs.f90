@@ -607,20 +607,20 @@ DO I=0,50
       R = R_VALUES(J)
       H = H_VALUES(J)
 
-      ! Compute ceiling jet velocity
-
-      IF (R/H<=0.15) THEN
-         U_JET(J) = 0.947 * (Q/H)**(1./3.)
-      ELSEIF (R/H>0.15) THEN
-         U_JET(J) = 0.197 * ( (Q/H)**(1./3.) / (R/H)**(5./6.) )
-      ENDIF
-
       ! Compute ceiling jet temperature
 
       IF (R/H<=0.18) THEN
          T_JET(J) = (16.9 * Q**(2./3.) / H**(5./3.)) + (TMP_A)
       ELSEIF (R/H>0.18) THEN
          T_JET(J) = (5.38 * (Q/R)**(2./3.) / H) + (TMP_A)
+      ENDIF
+
+      ! Compute ceiling jet velocity
+
+      IF (R/H<=0.15) THEN
+          U_JET = 0.947 * (Q/H)**(1./3.)
+      ELSEIF (R/H>0.15) THEN
+          U_JET = 0.197 * Q**(1./3.) * H**(1./2.) / R**(5./6.)
       ENDIF
    ENDDO
 
@@ -674,9 +674,9 @@ DO WHILE (ITER)
    ! Compute ceiling jet velocity
 
    IF (R/H<=0.15) THEN
-       U_JET = 0.96 * (Q/H)**(1./3.)
+       U_JET = 0.947 * (Q/H)**(1./3.)
    ELSEIF (R/H>0.15) THEN
-       U_JET = 0.195 * Q**(1./3.) * H**(1./2.) / R**(5./6.)
+       U_JET = 0.197 * Q**(1./3.) * H**(1./2.) / R**(5./6.)
    ENDIF
 
    ! Compute sprinkler or detector activation time
