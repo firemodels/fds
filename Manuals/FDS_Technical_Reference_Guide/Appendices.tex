@@ -802,20 +802,20 @@ Here $k$ is the iteration index.  The number of sub-time intervals is determined
 To overcome this issue, we use Richardson extrapolation. Richardson extrapolation increases the order of accuracy and provides a means of error control. Suppose you have an exact solution $A$ represented by a numerical approximation using the interval $h$ such that the error, $A-A(h)$, can be represented by a polynomial expansion of $h$. For
 two different intervals $h$ and $h/2$ we may write
 \begin{equation}\label{eq:h1}
-A_1={A(h)} + \underbrace{a_{1}(h) + a_{2}(h)^2 + \mathcal{O}(h^3)}_{\mathcal{O}(h)}
+A_1={A(h)} + \underbrace{a_{1}(h) + a_{2}(h)^2 + \mathit{O}(h^3)}_{\mathit{O}(h)}
 \end{equation}
 \begin{equation}\label{eq:h2}
-A_2=A\left(\frac{h}{2}\right) + \underbrace{a_{1}\left(\frac{h}{2}\right) + a_{2}\left(\frac{h}{2}\right)^2 + \mathcal{O}(h^3)}_{\mathcal{O}(h)}
+A_2=A\left(\frac{h}{2}\right) + \underbrace{a_{1}\left(\frac{h}{2}\right) + a_{2}\left(\frac{h}{2}\right)^2 + \mathit{O}(h^3)}_{\mathit{O}(h)}
 \end{equation}
 Here the subscript on $A$ represents subdivisions of the time step $h$, where $A_1$ takes $h/1$ steps, $A_2$ takes $h/2$ steps, and so on. The $a_{1}$ terms can be eliminated by subtracting Eq.~(\ref{eq:h1}) from two times Eq.~(\ref{eq:h2}):
 \begin{equation}\label{eq:A2}
-A=2\,A_2-A_1 = 2\,A\left(\frac{h}{2}\right) - A(h) + \underbrace{a_{2}\left(\frac{h}{2}\right)^2 + \mathcal{O}(h^3)}_{\mathcal{O}(h^2)}
+A=2\,A_2-A_1 = 2\,A\left(\frac{h}{2}\right) - A(h) + \underbrace{a_{2}\left(\frac{h}{2}\right)^2 + \mathit{O}(h^3)}_{\mathit{O}(h^2)}
 \end{equation}
 which results in a solution with a higher order of error.
 
 This same technique is applied to the second-order Runge-Kutta scheme with three sub-intervals: $h$, $h/2$, and $h/4$. Because the RK2 scheme was initially second-order, the three-step Richardson extrapolation gives a fourth-order solution \cite{Moin:2001}:
 \begin{equation}\label{eq:A4}
-A=\frac{4\,A_4-A_2}{3}  + \mathcal{O}(h^4)
+A=\frac{4\,A_4-A_2}{3}  + \mathit{O}(h^4)
 \end{equation}
 In Eq.~(\ref{eq:A4}), $A$ represents the time updated value of the species concentrations in the mixed reactor zone, $\hat{Y}_{\alpha}$, as found in Eq.~(\ref{eq:dmdt_2}).
 
@@ -953,29 +953,29 @@ When the unmixed fraction is held constant ($\zeta = \zeta_0$), our formulation 
 \label{eq:panjwani_edc}
 \rho \, \frac{\d \widetilde{Y}_\alpha}{\d t} = \rho \, \frac{\gamma_\lambda^2 \chi}{\tau^\star} \left( Y_\alpha^0 - Y_\alpha^\star \right) \,\mbox{,}
 \end{equation}
-where $\gamma_\lambda$ is the ``ratio between the mass of the fine structure and the total mass of the subgrid structure'' and $\chi$ is the probability of fine structure burning \cite{Panjwani:2010}; in practice, both quantities are between 0 and 1.  The reactor residence time is denoted $\tau^\star$, clearly comparable to our mixing time scale, and the fine structure mass fraction is $Y_\alpha^\star$, clearly comparable to our mixed zone mass fraction $\hat{Y}_\alpha$.  Panjwani et al.~\cite{Panjwani:2010} refer to $Y_\alpha^0$ as the mass fraction of the ``surrounding state,'' thus equivalent to our initial cell mean $\widetilde{Y}_\alpha^0=\widetilde{Y}_\alpha(0)$.
+where $\gamma_\lambda$ is the ``ratio between the mass of the fine structure and the total mass of the subgrid structure'' and $\chi$ is the probability of fine structure burning \cite{Panjwani:2010}; in practice, both quantities are between 0 and 1.  The reactor residence time is denoted $\tau^\star$, clearly comparable to our mixing time scale, and the fine structure mass fraction is $Y_\alpha^\star$, clearly comparable to our mixed zone mass fraction $\hat{Y}_\alpha$.  Panjwani et al.~\cite{Panjwani:2010} refer to $Y_\alpha^0$ as the mass fraction of the ``surrounding state,'' thus equivalent to our initial cell mean $\widetilde{Y}_\alpha^0$.
 
-\paragraph{Remarks}
-\begin{enumerate}
-%\item It is not clear why $\gamma_\lambda$ should be squared in (\ref{eq:lilleberg_edc}).  In fact, \cite{Chen:1} does not square this quantity.
-%\item Given that $\gamma_\lambda$ and $\chi$ are in the range [0,1], the sign of the RHS of (\ref{eq:panjwani_edc}) is inconsistent since for fast chemistry $Y_{\si{F}}^\star$ may be 0 (this sign convention is used consistently by the aforementioned authors).
-\item A comparison between the models written down by \cite{Panjwani:2010} (see Eq.~(\ref{eq:panjwani_edc})) and \cite{Lilleberg:2010} makes it clear that the cell mean mass fraction may be written as $\widetilde{Y}_\alpha = (1-\gamma_\lambda^2 \chi) Y_\alpha^0 + \gamma_\lambda^2 \chi \, Y_\alpha^\star$, which is equivalent to our (\ref{eq:final_comp}) with $\zeta = 1-\gamma_\lambda^2 \chi$.  This definition of the cell mean is inconsistent with the stated definition of $\gamma_\lambda$ (quoted above) in \cite{Panjwani:2010}.
-\item Equation (\ref{eq:panjwani_edc}) may be rewritten as
-   \begin{align}
-      \label{eq:edc_compare}
-      \rho \, \frac{\d \widetilde{Y}_\alpha}{\d t} &= \rho \, \frac{(1-\zeta)}{\tau_{\si{mix}}} ( \widetilde{Y}_\alpha^0 - \hat{Y}_\alpha ) \,\mbox{,} \notag \\
-      &= \rho \, \frac{(\zeta-1)}{\tau_{\si{mix}}} ( \hat{Y}_\alpha - \widetilde{Y}_\alpha^0 ) \,\mbox{,} \notag \\
-      &= \rho \, \left[ \frac{\zeta}{\tau_{\si{mix}}}(\hat{Y}_\alpha - \widetilde{Y}_\alpha^0) + \frac{\widetilde{Y}_\alpha^0 - \hat{Y}_\alpha}{\tau_{\si{mix}}} \right] \,\mbox{.}
-   \end{align}
-   Compare (\ref{eq:edc_compare}) with (\ref{mass_prod_rate}).  Again, the first term on the RHS represents mixing, the second term reaction.  Evidently, the PSR model is
-   \begin{equation}
-      \label{eq:psr}
-      \frac{\d \hat{Y}_\alpha}{\d t} = \frac{\widetilde{Y}_\alpha^0 - \hat{Y}_\alpha}{\tau_{\si{mix}}(1-\zeta)} \,\mbox{,}
-   \end{equation}
-   where the residence time in the reactor is $\tau_{\si{mix}}(1-\zeta)$.
-   
-%   There is clearly a sign error in (\ref{eq:psr}), which may account for unsatisfactory results when implementing kinetics into the PSR models by previous authors \cite{Lilleberg:2010}. {\color{red}[I'm not sure I want to include all this in the paper.  But I cannot seem to reconcile the sign issue.  I would rather be able to simply say our approach compares with Panjwani et al. for constant $\zeta$.]}
-\end{enumerate}
+%\paragraph{Remarks}
+%\begin{enumerate}
+%%\item It is not clear why $\gamma_\lambda$ should be squared in (\ref{eq:lilleberg_edc}).  In fact, \cite{Chen:1} does not square this quantity.
+%%\item Given that $\gamma_\lambda$ and $\chi$ are in the range [0,1], the sign of the RHS of (\ref{eq:panjwani_edc}) is inconsistent since for fast chemistry $Y_{\si{F}}^\star$ may be 0 (this sign convention is used consistently by the aforementioned authors).
+%\item A comparison between the models written down by \cite{Panjwani:2010} (see Eq.~(\ref{eq:panjwani_edc})) and \cite{Lilleberg:2010} makes it clear that the cell mean mass fraction may be written as $\widetilde{Y}_\alpha = (1-\gamma_\lambda^2 \chi) Y_\alpha^0 + \gamma_\lambda^2 \chi \, Y_\alpha^\star$, which is equivalent to our (\ref{eq:final_comp}) with $\zeta = 1-\gamma_\lambda^2 \chi$.  This definition of the cell mean is inconsistent with the stated definition of $\gamma_\lambda$ (quoted above) in \cite{Panjwani:2010}.
+%\item Equation (\ref{eq:panjwani_edc}) may be rewritten as
+%   \begin{align}
+%      \label{eq:edc_compare}
+%      \rho \, \frac{\d \widetilde{Y}_\alpha}{\d t} &= \rho \, \frac{(1-\zeta)}{\tau_{\si{mix}}} ( \widetilde{Y}_\alpha^0 - \hat{Y}_\alpha ) \,\mbox{,} \notag \\
+%      &= \rho \, \frac{(\zeta-1)}{\tau_{\si{mix}}} ( \hat{Y}_\alpha - \widetilde{Y}_\alpha^0 ) \,\mbox{,} \notag \\
+%      &= \rho \, \left[ \frac{\zeta}{\tau_{\si{mix}}}(\hat{Y}_\alpha - \widetilde{Y}_\alpha^0) + \frac{\widetilde{Y}_\alpha^0 - \hat{Y}_\alpha}{\tau_{\si{mix}}} \right] \,\mbox{.}
+%   \end{align}
+%   Compare (\ref{eq:edc_compare}) with (\ref{mass_prod_rate}).  Again, the first term on the RHS represents mixing, the second term reaction.  Evidently, the PSR model is
+%   \begin{equation}
+%      \label{eq:psr}
+%      \frac{\d \hat{Y}_\alpha}{\d t} = \frac{\widetilde{Y}_\alpha^0 - \hat{Y}_\alpha}{\tau_{\si{mix}}(1-\zeta)} \,\mbox{,}
+%   \end{equation}
+%   where the residence time in the reactor is $\tau_{\si{mix}}(1-\zeta)$.
+%   
+%%   There is clearly a sign error in (\ref{eq:psr}), which may account for unsatisfactory results when implementing kinetics into the PSR models by previous authors \cite{Lilleberg:2010}. {\color{red}[I'm not sure I want to include all this in the paper.  But I cannot seem to reconcile the sign issue.  I would rather be able to simply say our approach compares with Panjwani et al. for constant $\zeta$.]}
+%\end{enumerate}
 
 %\chapter{Derivation of the Werner Wengle Wall Model}
 %%\subsubsection{R. McDermott, BFRL}
@@ -1354,14 +1354,14 @@ This has a term parallel to the initial relative velocity and a term parallel to
 Assembling all these terms, $\mathbf{u}_\text{g}$ can be found to be
 \begin{align}
     \label{ug_second_order}
-    \mathbf{u}_\text{g} = \mathbf{g} t - \frac{\beta_{\rm p} t^2}{2} \left[\mathbf{u}_{\text{r}}(0) \left(\frac{\mathbf{u}_{\text{r}}(0) \cdot \mathbf{g}}{|\mathbf{u}_{\text{r}}(0)|^2}\right) + \mathbf{g}\right] + \mathcal{O}(t^3) \,.
+    \mathbf{u}_\text{g} = \mathbf{g} t - \frac{\beta_{\rm p} t^2}{2} \left[\mathbf{u}_{\text{r}}(0) \left(\frac{\mathbf{u}_{\text{r}}(0) \cdot \mathbf{g}}{|\mathbf{u}_{\text{r}}(0)|^2}\right) + \mathbf{g}\right] + \mathit{O}(t^3) \,.
 \end{align}
 Assembling Eqs. (\ref{ud_exact}) and (\ref{ug_second_order}), the solution for $\mathbf{u}_\text{r}$ is
 \begin{align}
     \label{ur_short}
-    \mathbf{u}_\text{r} &= \frac{\mathbf{u}_{\text{r}}(0)}{1 + \beta_{\rm p} t} + \mathbf{g} t - \frac{\beta_{\rm p} t^2}{2} \left[\mathbf{u}_{\text{r}}(0) \left(\frac{\mathbf{u}_{\text{r}}(0) \cdot \mathbf{g}}{|\mathbf{u}_{\text{r}}(0)|^2}\right) + \mathbf{g}\right] + \mathcal{O}(t^3) \quad ; \quad \beta_{\rm p} \equiv K_{\rm p} |\mathbf{u}_{\text{r}}(0)| \,. %\\
+    \mathbf{u}_\text{r} &= \frac{\mathbf{u}_{\text{r}}(0)}{1 + \beta_{\rm p} t} + \mathbf{g} t - \frac{\beta_{\rm p} t^2}{2} \left[\mathbf{u}_{\text{r}}(0) \left(\frac{\mathbf{u}_{\text{r}}(0) \cdot \mathbf{g}}{|\mathbf{u}_{\text{r}}(0)|^2}\right) + \mathbf{g}\right] + \mathit{O}(t^3) \quad ; \quad \beta_{\rm p} \equiv K_{\rm p} |\mathbf{u}_{\text{r}}(0)| \,. %\\
     %\label{ur_expanded}
-    %\mathbf{u} - \mathbf{U} &= \frac{\mathbf{u}(0) - \mathbf{U}(0)}{1 + \beta_{\rm p} t} + \mathbf{g} t - \frac{\beta_{\rm p} t^2}{2} \left[(\mathbf{u}(0) - \mathbf{U}(0)) \left(\frac{(\mathbf{u}(0) - \mathbf{U}(0)) \cdot \mathbf{g}}{|\mathbf{u}(0) - \mathbf{U}(0)|^2}\right) + \mathbf{g}\right] + \mathcal{O}(t^3) \quad ; \quad \beta_{\rm p} \equiv K_{\rm p} |\mathbf{u}(0) - \mathbf{U}(0)|
+    %\mathbf{u} - \mathbf{U} &= \frac{\mathbf{u}(0) - \mathbf{U}(0)}{1 + \beta_{\rm p} t} + \mathbf{g} t - \frac{\beta_{\rm p} t^2}{2} \left[(\mathbf{u}(0) - \mathbf{U}(0)) \left(\frac{(\mathbf{u}(0) - \mathbf{U}(0)) \cdot \mathbf{g}}{|\mathbf{u}(0) - \mathbf{U}(0)|^2}\right) + \mathbf{g}\right] + \mathit{O}(t^3) \quad ; \quad \beta_{\rm p} \equiv K_{\rm p} |\mathbf{u}(0) - \mathbf{U}(0)|
 \end{align}
 
 \subsubsection*{Particle velocities and positions}
@@ -1391,12 +1391,12 @@ Eq. (\ref{mom_U_p}) can be substituted into Eq. (\ref{ur_short}) to get the solu
 \end{align*}
 \begin{align}
     \label{mom_u_p_full}
-    \mathbf{u} = \frac{\mathbf{u}(0)}{1 + \beta_{\rm p} t} + \frac{(\mathbf{u}(0) + \alpha_{\rm p} \mathbf{U}(0))\beta_{\rm p} t}{(1 + \beta_{\rm p} t)(1 + \alpha_{\rm p})} + \mathbf{g} t - \frac{\alpha_{\rm p} \beta_{\rm p} t^2}{2 (1 + \alpha_{\rm p})} \left[\mathbf{u}_{\text{r}}(0) \left(\frac{\mathbf{u}_{\text{r}}(0) \cdot \mathbf{g}}{|\mathbf{u}_{\text{r}}(0)|^2}\right) + \mathbf{g}\right] + \mathcal{O}(t^3)
+    \mathbf{u} = \frac{\mathbf{u}(0)}{1 + \beta_{\rm p} t} + \frac{(\mathbf{u}(0) + \alpha_{\rm p} \mathbf{U}(0))\beta_{\rm p} t}{(1 + \beta_{\rm p} t)(1 + \alpha_{\rm p})} + \mathbf{g} t - \frac{\alpha_{\rm p} \beta_{\rm p} t^2}{2 (1 + \alpha_{\rm p})} \left[\mathbf{u}_{\text{r}}(0) \left(\frac{\mathbf{u}_{\text{r}}(0) \cdot \mathbf{g}}{|\mathbf{u}_{\text{r}}(0)|^2}\right) + \mathbf{g}\right] + \mathit{O}(t^3)
 \end{align}
 Integrating Eq. (\ref{mom_u_p_full}) leads to an equation for the particle positions,
 \begin{align}
     \label{mom_x_p_full}
-    \mathbf{x} = \mathbf{x}_{p}(0) + \left(\frac{\mathbf{u}(0) + \alpha_{\rm p} \mathbf{U}(0)}{1 + \alpha_{\rm p}}\right) t - \frac{\alpha_{\rm p} (\mathbf{u}(0) - \mathbf{U}(0))}{\beta_{\rm p} (1 + \alpha_{\rm p})} \text{ln}(\beta_{\rm p} t + 1) + \frac{\mathbf{g} t^2}{2} - \frac{\alpha_{\rm p} \beta_{\rm p} t^3}{6 (1 + \alpha_{\rm p})} \left[\mathbf{u}_{\text{r}}(0) \left(\frac{\mathbf{u}_{\text{r}}(0) \cdot \mathbf{g}}{|\mathbf{u}_{\text{r}}(0)|^2}\right) + \mathbf{g}\right] + \mathcal{O}(t^4) \,.
+    \mathbf{x} = \mathbf{x}_{p}(0) + \left(\frac{\mathbf{u}(0) + \alpha_{\rm p} \mathbf{U}(0)}{1 + \alpha_{\rm p}}\right) t - \frac{\alpha_{\rm p} (\mathbf{u}(0) - \mathbf{U}(0))}{\beta_{\rm p} (1 + \alpha_{\rm p})} \text{ln}(\beta_{\rm p} t + 1) + \frac{\mathbf{g} t^2}{2} - \frac{\alpha_{\rm p} \beta_{\rm p} t^3}{6 (1 + \alpha_{\rm p})} \left[\mathbf{u}_{\text{r}}(0) \left(\frac{\mathbf{u}_{\text{r}}(0) \cdot \mathbf{g}}{|\mathbf{u}_{\text{r}}(0)|^2}\right) + \mathbf{g}\right] + \mathit{O}(t^4) \,.
 \end{align}
 
 \subsubsection*{Implementation in FDS}
@@ -1410,7 +1410,7 @@ The following solutions are used to advance the particle positions forward in ti
     \alpha_{\rm p} &\equiv \frac{\rho V_{\rm g}}{m_{\rm p} n_{\rm p}} \notag \\
     \beta_{\rm p} &\equiv \frac{1}{2} \rho C_\text{d} A_{\rm p} \left(\frac{1}{m_{\rm p}} + \frac{1}{M_{\rm p}} \right) |\mathbf{u}_{\text{r}}(0)| \notag
 \end{align}
-At first glance, the theoretical accuracy of the original equation for $\mathbf{x}^{n+1}$, Eq.~(\ref{mom_x_p_full}), appears to be $\mathcal{O}(\Delta t^3)$. But computation reveals it is actually $\mathcal{O}(\Delta t^2)$. This is due to the velocity error reducing the overall accuracy of the position solution. The $\Delta t^3$ term, therefore, may be dropped from Eq.~(\ref{mom_x_p_full}) without loss of accuracy. More details about this are available in the Lagrangian Particles chapter in the FDS Verification Guide~\cite{FDS_Verification_Guide}.
+At first glance, the theoretical accuracy of the original equation for $\mathbf{x}^{n+1}$, Eq.~(\ref{mom_x_p_full}), appears to be $\mathit{O}(\Delta t^3)$. But computation reveals it is actually $\mathit{O}(\Delta t^2)$. This is due to the velocity error reducing the overall accuracy of the position solution. The $\Delta t^3$ term, therefore, may be dropped from Eq.~(\ref{mom_x_p_full}) without loss of accuracy. More details about this are available in the Lagrangian Particles chapter in the FDS Verification Guide~\cite{FDS_Verification_Guide}.
 
 
 \chapter{Simplifications of the Radiation Transport Equation}
