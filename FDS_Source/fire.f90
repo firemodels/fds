@@ -151,12 +151,10 @@ REAL(EB) :: ZZ_0(0:N_TRACKED_SPECIES),DZZDT1_1(0:N_TRACKED_SPECIES),DZZDT1_2(0:N
             DZZDT(0:N_TRACKED_SPECIES),SMIX_MIX_MASS_0(0:N_TRACKED_SPECIES),SMIX_MIX_MASS(0:N_TRACKED_SPECIES),TOTAL_MIX_MASS,&
             TAU_D,TAU_G,TAU_U,DELTA,CP_BAR_0,CP_BAR_U,CP_BAR_M,TMP_MIXED_ZONE,ZZ_CHECK(0:N_TRACKED_SPECIES)
 REAL(EB), PARAMETER :: DT_SUB_MIN=1.E-10_EB,ZZ_MIN=1.E-10_EB
-INTEGER :: NR,NS,NSS,ITER,TVI,RICH_ITER,TIME_ITER,TIME_ITER_MAX,SR
-INTEGER, PARAMETER :: SUB_DT1=1,SUB_DT2=2,SUB_DT4=4,TV_ITER_MIN=5,RICH_ITER_MAX=5
+INTEGER :: NR,NS,NSS,ITER,TVI,RICH_ITER,TIME_ITER,SR
+INTEGER, PARAMETER :: SUB_DT1=1,SUB_DT2=2,SUB_DT4=4,TV_ITER_MIN=5,RICH_ITER_MAX=5,TIME_ITER_MAX=1000
 LOGICAL :: EXTINCT(1:N_REACTIONS),TV_FLUCT(0:N_TRACKED_SPECIES)
 TYPE(REACTION_TYPE),POINTER :: RN=>NULL()
-
-TIME_ITER_MAX= HUGE(0)
 
 IF (FIXED_MIX_TIME>0._EB) THEN
    MIX_TIME(I,J,K)=FIXED_MIX_TIME
@@ -217,242 +215,242 @@ INTEGRATION_LOOP: DO TIME_ITER = 1,TIME_ITER_MAX
          /(TOTAL_MIX_MASS*CP_BAR_M)
    ENDIF
    IF (SUPPRESSION .AND. TIME_ITER == 1) CALL EXTINCTION(ZZ_MIXED,TMP_MIXED_ZONE,EXTINCT) 
-      RK2_IF: IF (COMBUSTION_ODE /= RK2_RICHARDSON) THEN ! Explicit Euler 
-         DO SR=0,SERIES_REAC
-            DZZDT1_1 = 0._EB
-            ZZ_0 = ZZ_MIXED
-            RATE_CONSTANT = 0._EB
-            CALL COMPUTE_RATE_CONSTANT(RATE_CONSTANT,ZZ_0,I,J,K,DT_SUB,TMP_MIXED_ZONE,EXTINCT)
-            REACTION_LOOP1: DO NR = 1, N_REACTIONS
-               RN => REACTION(NR)
+   RK2_IF: IF (COMBUSTION_ODE /= RK2_RICHARDSON) THEN ! Explicit Euler 
+      DO SR=0,SERIES_REAC
+         DZZDT1_1 = 0._EB
+         ZZ_0 = ZZ_MIXED
+         RATE_CONSTANT = 0._EB
+         CALL COMPUTE_RATE_CONSTANT(RATE_CONSTANT,ZZ_0,I,J,K,DT_SUB,TMP_MIXED_ZONE,EXTINCT)
+         REACTION_LOOP1: DO NR = 1,N_REACTIONS
+            RN => REACTION(NR)
+            DZZDT = RN%NU_MW_O_MW_F*RATE_CONSTANT(NR)
+            ZZ_CHECK = ZZ_0 + (DZZDT1_1+DZZDT)*DT_SUB
+            IF (ANY(ZZ_CHECK < 0._EB)) THEN
+               DO NSS=0,N_TRACKED_SPECIES
+                  IF (ZZ_CHECK(NSS) < 0._EB .AND. ABS(DZZDT(NSS))>TWO_EPSILON_EB) THEN
+                     RATE_CONSTANT(NR) = MIN(RATE_CONSTANT(NR),ZZ_0(NSS)/(ABS(RN%NU_MW_O_MW_F(NSS))*DT_SUB))
+                  ENDIF
+               ENDDO
                DZZDT = RN%NU_MW_O_MW_F*RATE_CONSTANT(NR)
-               ZZ_CHECK = ZZ_0 + (DZZDT1_1+DZZDT)*DT_SUB
-               IF (ANY(ZZ_CHECK < 0._EB)) THEN
-                  DO NSS=0,N_TRACKED_SPECIES
-                     IF (ZZ_CHECK(NSS) < 0._EB .AND. ABS(DZZDT(NSS))>TWO_EPSILON_EB) THEN
-                        RATE_CONSTANT(NR) = MIN(RATE_CONSTANT(NR),ZZ_0(NSS)/(ABS(RN%NU_MW_O_MW_F(NSS))*DT_SUB))
-                     ENDIF
-                  ENDDO
-                  DZZDT = RN%NU_MW_O_MW_F*RATE_CONSTANT(NR)
-               ENDIF
-               DZZDT1_1 = DZZDT1_1+DZZDT
-            ENDDO REACTION_LOOP1
-            A1 = ZZ_0 + DZZDT1_1*DT_SUB
-            ZZ_MIXED = A1
-         ENDDO 
-         IF (TIME_ITER > 1) CALL SHUTDOWN('ERROR: Error in Simple Chemistry')
-         IF (ALL(DZZDT1_1 < 0._EB)) EXIT INTEGRATION_LOOP
-      ELSE RK2_IF ! RK2 w/ Richardson
-         ERR_EST = MAX(10._EB,10._EB*ERR_TOL)
-         RICH_EX_LOOP: DO RICH_ITER =1,RICH_ITER_MAX
-            DT_SUB = DT_SUB_NEW
-            IF (DT_ITER + DT_SUB > DT) THEN
-               DT_SUB = DT - DT_ITER
             ENDIF
-            !--------------------
-            ! Calculate A1 term
-            ! Time step = DT_SUB
-            !--------------------
-            ZZ_0 = ZZ_MIXED
-            TMP_0 = TMP_MIXED_ZONE
-            TMP_1 = TMP_MIXED_ZONE
-            ODE_LOOP1: DO NS = 1,SUB_DT1
-               DO SR=0,SERIES_REAC
-                  DZZDT1_1 = 0._EB
-                  RATE_CONSTANT = 0._EB
-                  CALL COMPUTE_RATE_CONSTANT(RATE_CONSTANT,ZZ_0,I,J,K,DT_SUB,TMP_0,EXTINCT)
-                  REACTION_LOOP1_1: DO NR = 1,N_REACTIONS
-                     RN => REACTION(NR)
-                     IF (.NOT. RN%FAST_CHEMISTRY .AND. SR < SERIES_REAC) RATE_CONSTANT(NR) = 0._EB
+            DZZDT1_1 = DZZDT1_1+DZZDT
+         ENDDO REACTION_LOOP1
+         A1 = ZZ_0 + DZZDT1_1*DT_SUB
+         ZZ_MIXED = A1
+      ENDDO 
+      IF (TIME_ITER > 1) CALL SHUTDOWN('ERROR: Error in Simple Chemistry')
+      IF (ALL(DZZDT1_1 < 0._EB)) EXIT INTEGRATION_LOOP
+   ELSE RK2_IF ! RK2 w/ Richardson
+      ERR_EST = MAX(10._EB,10._EB*ERR_TOL)
+      RICH_EX_LOOP: DO RICH_ITER =1,RICH_ITER_MAX
+         DT_SUB = DT_SUB_NEW
+         IF (DT_ITER + DT_SUB > DT) THEN
+            DT_SUB = DT - DT_ITER
+         ENDIF
+         !--------------------
+         ! Calculate A1 term
+         ! Time step = DT_SUB
+         !--------------------
+         ZZ_0 = ZZ_MIXED
+         TMP_0 = TMP_MIXED_ZONE
+         TMP_1 = TMP_MIXED_ZONE
+         ODE_LOOP1: DO NS = 1,SUB_DT1
+            DO SR=0,SERIES_REAC
+               DZZDT1_1 = 0._EB
+               RATE_CONSTANT = 0._EB
+               CALL COMPUTE_RATE_CONSTANT(RATE_CONSTANT,ZZ_0,I,J,K,DT_SUB,TMP_0,EXTINCT)
+               REACTION_LOOP1_1: DO NR = 1,N_REACTIONS
+                  RN => REACTION(NR)
+                  IF (.NOT. RN%FAST_CHEMISTRY .AND. SR < SERIES_REAC) RATE_CONSTANT(NR) = 0._EB
+                  DZZDT = RN%NU_MW_O_MW_F*RATE_CONSTANT(NR)
+                  ZZ_CHECK = ZZ_0 + (DZZDT1_1+DZZDT)*DT_SUB
+                  IF (ANY( ZZ_CHECK < 0._EB)) THEN
+                     DO NSS=0,N_TRACKED_SPECIES
+                        IF (ZZ_CHECK(NSS) < 0._EB .AND. ABS(DZZDT(NSS))>TWO_EPSILON_EB) THEN
+                           RATE_CONSTANT(NR) = MIN(RATE_CONSTANT(NR),ZZ_0(NSS)/(ABS(RN%NU_MW_O_MW_F(NSS))*DT_SUB))
+                        ENDIF
+                     ENDDO
                      DZZDT = RN%NU_MW_O_MW_F*RATE_CONSTANT(NR)
-                     ZZ_CHECK = ZZ_0 + (DZZDT1_1+DZZDT)*DT_SUB
-                     IF (ANY( ZZ_CHECK < 0._EB)) THEN
-                        DO NSS=0,N_TRACKED_SPECIES
-                           IF (ZZ_CHECK(NSS) < 0._EB .AND. ABS(DZZDT(NSS))>TWO_EPSILON_EB) THEN
-                              RATE_CONSTANT(NR) = MIN(RATE_CONSTANT(NR),ZZ_0(NSS)/(ABS(RN%NU_MW_O_MW_F(NSS))*DT_SUB))
-                           ENDIF
-                        ENDDO
-                        DZZDT = RN%NU_MW_O_MW_F*RATE_CONSTANT(NR)
-                     ENDIF
-                     DZZDT1_1 = DZZDT1_1+DZZDT
-                  ENDDO REACTION_LOOP1_1
-                  IF (TEMPERATURE_DEPENDENT_REACTION) THEN
-                     CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_0,CP_BAR_0,TMP_0)
-                     TMP_1 = TMP_0 + (1._EB-RADIATIVE_FRACTION)*SUM(-SPECIES_MIXTURE%H_F*DZZDT1_1*DT_SUB)/CP_BAR_0
                   ENDIF
-                  A1 = ZZ_0 + DZZDT1_1*DT_SUB
-                  IF (ALL(REACTION(:)%FAST_CHEMISTRY) .AND. SR == SERIES_REAC) THEN ! All fast reactions solve explicit Euler
-                     A4 = A1
-                     A2 = A1
-                     TMP_4 = TMP_1
-                     TMP_2 = TMP_1
-                     DT_SUB = DT - DT_ITER 
-                     EXIT RICH_EX_LOOP
-                  ENDIF
-                  DZZDT1_2 = 0._EB
-                  RATE_CONSTANT2 = 0._EB
-                  CALL COMPUTE_RATE_CONSTANT(RATE_CONSTANT2,A1,I,J,K,DT_SUB,TMP_1,EXTINCT)
-                  REACTION_LOOP1_2: DO NR = 1, N_REACTIONS
-                     RN => REACTION(NR)
-                     IF (.NOT.RN%FAST_CHEMISTRY .AND. SR < SERIES_REAC) RATE_CONSTANT(NR) = 0._EB
+                  DZZDT1_1 = DZZDT1_1+DZZDT
+               ENDDO REACTION_LOOP1_1
+               IF (TEMPERATURE_DEPENDENT_REACTION) THEN
+                  CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_0,CP_BAR_0,TMP_0)
+                  TMP_1 = TMP_0 + (1._EB-RADIATIVE_FRACTION)*SUM(-SPECIES_MIXTURE%H_F*DZZDT1_1*DT_SUB)/CP_BAR_0
+               ENDIF
+               A1 = ZZ_0 + DZZDT1_1*DT_SUB
+               IF (ALL(REACTION(:)%FAST_CHEMISTRY) .AND. SR == SERIES_REAC) THEN ! All fast reactions solve explicit Euler
+                  A4 = A1
+                  A2 = A1
+                  TMP_4 = TMP_1
+                  TMP_2 = TMP_1
+                  DT_SUB = DT - DT_ITER 
+                  EXIT RICH_EX_LOOP
+               ENDIF
+               DZZDT1_2 = 0._EB
+               RATE_CONSTANT2 = 0._EB
+               CALL COMPUTE_RATE_CONSTANT(RATE_CONSTANT2,A1,I,J,K,DT_SUB,TMP_1,EXTINCT)
+               REACTION_LOOP1_2: DO NR = 1, N_REACTIONS
+                  RN => REACTION(NR)
+                  IF (.NOT.RN%FAST_CHEMISTRY .AND. SR < SERIES_REAC) RATE_CONSTANT(NR) = 0._EB
+                  DZZDT = RN%NU_MW_O_MW_F*RATE_CONSTANT2(NR)
+                  ZZ_CHECK = A1 + (DZZDT1_2+DZZDT)*DT_SUB
+                  IF (ANY( ZZ_CHECK < 0._EB)) THEN
+                     DO NSS=0,N_TRACKED_SPECIES
+                        IF (ZZ_CHECK(NSS) < 0._EB .AND. ABS(DZZDT(NSS))>TWO_EPSILON_EB) THEN
+                           RATE_CONSTANT2(NR) = MIN(RATE_CONSTANT2(NR),A1(NSS)/(ABS(RN%NU_MW_O_MW_F(NSS))*DT_SUB))
+                        ENDIF
+                     ENDDO
                      DZZDT = RN%NU_MW_O_MW_F*RATE_CONSTANT2(NR)
-                     ZZ_CHECK = A1 + (DZZDT1_2+DZZDT)*DT_SUB
-                     IF (ANY( ZZ_CHECK < 0._EB)) THEN
-                        DO NSS=0,N_TRACKED_SPECIES
-                           IF (ZZ_CHECK(NSS) < 0._EB .AND. ABS(DZZDT(NSS))>TWO_EPSILON_EB) THEN
-                              RATE_CONSTANT2(NR) = MIN(RATE_CONSTANT2(NR),A1(NSS)/(ABS(RN%NU_MW_O_MW_F(NSS))*DT_SUB))
-                           ENDIF
-                        ENDDO
-                        DZZDT = RN%NU_MW_O_MW_F*RATE_CONSTANT2(NR)
-                     ENDIF
-                     DZZDT1_2 = DZZDT1_2+DZZDT
-                  ENDDO REACTION_LOOP1_2
-                  IF (TEMPERATURE_DEPENDENT_REACTION) THEN
-                     CALL GET_AVERAGE_SPECIFIC_HEAT(A1,CP_BAR_0,TMP_1)
-                     TMP_1 = TMP_1 + (1._EB-RADIATIVE_FRACTION)*SUM(-SPECIES_MIXTURE%H_F*DZZDT1_2*DT_SUB)/CP_BAR_0
-                     TMP_1 = 0.5_EB*(TMP_1 + TMP_0)
-                     TMP_0 = TMP_1
                   ENDIF
-                  A1 = A1 + DZZDT1_2*DT_SUB
-                  A1 = 0.5_EB*(ZZ_0 + A1)
-                  ZZ_0 = A1
-               ENDDO
-            ENDDO ODE_LOOP1
-            !--------------------
-            ! Calculate A2 term
-            ! Time step = DT_SUB/2
-            !--------------------
-            ZZ_0 = ZZ_MIXED
-            TMP_0 = TMP_MIXED_ZONE
-            TMP_2 = TMP_MIXED_ZONE
-            ODE_LOOP2: DO NS = 1,SUB_DT2
-               DO SR=0,SERIES_REAC
-                  DZZDT2_1 = 0._EB
-                  RATE_CONSTANT = 0._EB
-                  CALL COMPUTE_RATE_CONSTANT(RATE_CONSTANT,ZZ_0,I,J,K,DT_SUB,TMP_0,EXTINCT)
-                  REACTION_LOOP2_1: DO NR = 1,N_REACTIONS
-                     RN => REACTION(NR)
-                     IF (.NOT.RN%FAST_CHEMISTRY .AND. SR < SERIES_REAC) RATE_CONSTANT(NR) = 0._EB
+                  DZZDT1_2 = DZZDT1_2+DZZDT
+               ENDDO REACTION_LOOP1_2
+               IF (TEMPERATURE_DEPENDENT_REACTION) THEN
+                  CALL GET_AVERAGE_SPECIFIC_HEAT(A1,CP_BAR_0,TMP_1)
+                  TMP_1 = TMP_1 + (1._EB-RADIATIVE_FRACTION)*SUM(-SPECIES_MIXTURE%H_F*DZZDT1_2*DT_SUB)/CP_BAR_0
+                  TMP_1 = 0.5_EB*(TMP_1 + TMP_0)
+                  TMP_0 = TMP_1
+               ENDIF
+               A1 = A1 + DZZDT1_2*DT_SUB
+               A1 = 0.5_EB*(ZZ_0 + A1)
+               ZZ_0 = A1
+            ENDDO
+         ENDDO ODE_LOOP1
+         !--------------------
+         ! Calculate A2 term
+         ! Time step = DT_SUB/2
+         !--------------------
+         ZZ_0 = ZZ_MIXED
+         TMP_0 = TMP_MIXED_ZONE
+         TMP_2 = TMP_MIXED_ZONE
+         ODE_LOOP2: DO NS = 1,SUB_DT2
+            DO SR=0,SERIES_REAC
+               DZZDT2_1 = 0._EB
+               RATE_CONSTANT = 0._EB
+               CALL COMPUTE_RATE_CONSTANT(RATE_CONSTANT,ZZ_0,I,J,K,DT_SUB,TMP_0,EXTINCT)
+               REACTION_LOOP2_1: DO NR = 1,N_REACTIONS
+                  RN => REACTION(NR)
+                  IF (.NOT.RN%FAST_CHEMISTRY .AND. SR < SERIES_REAC) RATE_CONSTANT(NR) = 0._EB
+                  DZZDT = RN%NU_MW_O_MW_F*RATE_CONSTANT(NR)
+                  ZZ_CHECK = ZZ_0 + (DZZDT2_1+DZZDT)*(DT_SUB*0.5_EB)
+                  IF (ANY( ZZ_CHECK < 0._EB)) THEN
+                     DO NSS=0,N_TRACKED_SPECIES
+                        IF (ZZ_CHECK(NSS) < 0._EB .AND. ABS(DZZDT(NSS))>TWO_EPSILON_EB) THEN
+                           RATE_CONSTANT(NR) = MIN(RATE_CONSTANT(NR),ZZ_0(NSS)/(ABS(RN%NU_MW_O_MW_F(NSS))*DT_SUB*0.5_EB))
+                        ENDIF
+                     ENDDO
                      DZZDT = RN%NU_MW_O_MW_F*RATE_CONSTANT(NR)
-                     ZZ_CHECK = ZZ_0 + (DZZDT2_1+DZZDT)*(DT_SUB*0.5_EB)
-                     IF (ANY( ZZ_CHECK < 0._EB)) THEN
-                        DO NSS=0,N_TRACKED_SPECIES
-                           IF (ZZ_CHECK(NSS) < 0._EB .AND. ABS(DZZDT(NSS))>TWO_EPSILON_EB) THEN
-                              RATE_CONSTANT(NR) = MIN(RATE_CONSTANT(NR),ZZ_0(NSS)/(ABS(RN%NU_MW_O_MW_F(NSS))*DT_SUB*0.5_EB))
-                           ENDIF
-                        ENDDO
-                        DZZDT = RN%NU_MW_O_MW_F*RATE_CONSTANT(NR)
-                     ENDIF
-                     DZZDT2_1 = DZZDT2_1+DZZDT
-                  ENDDO REACTION_LOOP2_1
-                  IF (TEMPERATURE_DEPENDENT_REACTION) THEN
-                     CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_0,CP_BAR_0,TMP_0)
-                     TMP_2 = TMP_0 + (1._EB-RADIATIVE_FRACTION)*SUM(-SPECIES_MIXTURE%H_F*DZZDT2_1*DT_SUB*0.5_EB)/CP_BAR_0
                   ENDIF
-                  A2 = ZZ_0 + DZZDT2_1*(DT_SUB*0.5_EB)
-                  DZZDT2_2 = 0._EB
-                  RATE_CONSTANT2 = 0._EB
-                  CALL COMPUTE_RATE_CONSTANT(RATE_CONSTANT2,A2,I,J,K,DT_SUB,TMP_2,EXTINCT)
-                  REACTION_LOOP2_2: DO NR = 1,N_REACTIONS
-                     RN => REACTION(NR)
-                     IF (.NOT. RN%FAST_CHEMISTRY .AND. SR < SERIES_REAC) RATE_CONSTANT(NR) = 0._EB
+                  DZZDT2_1 = DZZDT2_1+DZZDT
+               ENDDO REACTION_LOOP2_1
+               IF (TEMPERATURE_DEPENDENT_REACTION) THEN
+                  CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_0,CP_BAR_0,TMP_0)
+                  TMP_2 = TMP_0 + (1._EB-RADIATIVE_FRACTION)*SUM(-SPECIES_MIXTURE%H_F*DZZDT2_1*DT_SUB*0.5_EB)/CP_BAR_0
+               ENDIF
+               A2 = ZZ_0 + DZZDT2_1*(DT_SUB*0.5_EB)
+               DZZDT2_2 = 0._EB
+               RATE_CONSTANT2 = 0._EB
+               CALL COMPUTE_RATE_CONSTANT(RATE_CONSTANT2,A2,I,J,K,DT_SUB,TMP_2,EXTINCT)
+               REACTION_LOOP2_2: DO NR = 1,N_REACTIONS
+                  RN => REACTION(NR)
+                  IF (.NOT. RN%FAST_CHEMISTRY .AND. SR < SERIES_REAC) RATE_CONSTANT(NR) = 0._EB
+                  DZZDT = RN%NU_MW_O_MW_F*RATE_CONSTANT2(NR)
+                  ZZ_CHECK = A2 + (DZZDT2_2+DZZDT)*(DT_SUB*0.5_EB)
+                  IF (ANY(ZZ_CHECK < 0._EB)) THEN
+                     DO NSS=0,N_TRACKED_SPECIES
+                        IF (ZZ_CHECK(NSS) < 0._EB .AND. ABS(DZZDT(NSS))>TWO_EPSILON_EB) THEN
+                           RATE_CONSTANT2(NR) = MIN(RATE_CONSTANT2(NR),A2(NSS)/(ABS(RN%NU_MW_O_MW_F(NSS))*DT_SUB*0.5_EB))
+                        ENDIF
+                     ENDDO
                      DZZDT = RN%NU_MW_O_MW_F*RATE_CONSTANT2(NR)
-                     ZZ_CHECK = A2 + (DZZDT2_2+DZZDT)*(DT_SUB*0.5_EB)
-                     IF (ANY(ZZ_CHECK < 0._EB)) THEN
-                        DO NSS=0,N_TRACKED_SPECIES
-                           IF (ZZ_CHECK(NSS) < 0._EB .AND. ABS(DZZDT(NSS))>TWO_EPSILON_EB) THEN
-                              RATE_CONSTANT2(NR) = MIN(RATE_CONSTANT2(NR),A2(NSS)/(ABS(RN%NU_MW_O_MW_F(NSS))*DT_SUB*0.5_EB))
-                           ENDIF
-                        ENDDO
-                        DZZDT = RN%NU_MW_O_MW_F*RATE_CONSTANT2(NR)
-                     ENDIF
-                     DZZDT2_2 = DZZDT2_2+DZZDT
-                  ENDDO REACTION_LOOP2_2
-                  IF (TEMPERATURE_DEPENDENT_REACTION) THEN
-                     CALL GET_AVERAGE_SPECIFIC_HEAT(A2,CP_BAR_0,TMP_2)
-                     TMP_2 = TMP_2 + (1._EB-RADIATIVE_FRACTION)*SUM(-SPECIES_MIXTURE%H_F*DZZDT2_2*DT_SUB*0.5_EB)/CP_BAR_0
-                     TMP_2 = 0.5_EB*(TMP_2 + TMP_0)
-                     TMP_0 = TMP_2
                   ENDIF
-                  A2 = A2 + DZZDT2_2*(DT_SUB*0.5_EB)
-                  A2 = 0.5_EB*(ZZ_0 + A2)
-                  ZZ_0 = A2
-               ENDDO
-            ENDDO ODE_LOOP2
-            !--------------------
-            ! Calculate A4 term  
-            ! Time step = DT_SUB/4
-            !-------------------- 
-            ZZ_0 = ZZ_MIXED
-            TMP_0 = TMP_MIXED_ZONE
-            TMP_4 = TMP_MIXED_ZONE
-            ODE_LOOP4: DO NS = 1,SUB_DT4
-               DO SR=0,SERIES_REAC
-                  DZZDT4_1 = 0._EB
-                  RATE_CONSTANT = 0._EB
-                  CALL COMPUTE_RATE_CONSTANT(RATE_CONSTANT,ZZ_0,I,J,K,DT_SUB,TMP_0,EXTINCT)
-                  REACTION_LOOP4_1: DO NR = 1,N_REACTIONS
-                     RN => REACTION(NR)
-                     IF (.NOT.RN%FAST_CHEMISTRY .AND. SR < SERIES_REAC) RATE_CONSTANT(NR) = 0._EB
+                  DZZDT2_2 = DZZDT2_2+DZZDT
+               ENDDO REACTION_LOOP2_2
+               IF (TEMPERATURE_DEPENDENT_REACTION) THEN
+                  CALL GET_AVERAGE_SPECIFIC_HEAT(A2,CP_BAR_0,TMP_2)
+                  TMP_2 = TMP_2 + (1._EB-RADIATIVE_FRACTION)*SUM(-SPECIES_MIXTURE%H_F*DZZDT2_2*DT_SUB*0.5_EB)/CP_BAR_0
+                  TMP_2 = 0.5_EB*(TMP_2 + TMP_0)
+                  TMP_0 = TMP_2
+               ENDIF
+               A2 = A2 + DZZDT2_2*(DT_SUB*0.5_EB)
+               A2 = 0.5_EB*(ZZ_0 + A2)
+               ZZ_0 = A2
+            ENDDO
+         ENDDO ODE_LOOP2
+         !--------------------
+         ! Calculate A4 term  
+         ! Time step = DT_SUB/4
+         !-------------------- 
+         ZZ_0 = ZZ_MIXED
+         TMP_0 = TMP_MIXED_ZONE
+         TMP_4 = TMP_MIXED_ZONE
+         ODE_LOOP4: DO NS = 1,SUB_DT4
+            DO SR=0,SERIES_REAC
+               DZZDT4_1 = 0._EB
+               RATE_CONSTANT = 0._EB
+               CALL COMPUTE_RATE_CONSTANT(RATE_CONSTANT,ZZ_0,I,J,K,DT_SUB,TMP_0,EXTINCT)
+               REACTION_LOOP4_1: DO NR = 1,N_REACTIONS
+                  RN => REACTION(NR)
+                  IF (.NOT.RN%FAST_CHEMISTRY .AND. SR < SERIES_REAC) RATE_CONSTANT(NR) = 0._EB
+                  DZZDT = RN%NU_MW_O_MW_F*RATE_CONSTANT(NR)
+                  ZZ_CHECK = ZZ_0 + (DZZDT4_1+DZZDT)*(DT_SUB*0.25_EB)
+                  IF (ANY(ZZ_CHECK < 0._EB)) THEN
+                     DO NSS=0,N_TRACKED_SPECIES
+                        IF (ZZ_CHECK(NSS) < 0._EB .AND. ABS(DZZDT(NSS))>TWO_EPSILON_EB) THEN
+                           RATE_CONSTANT(NR) = MIN(RATE_CONSTANT(NR),ZZ_0(NSS)/(ABS(RN%NU_MW_O_MW_F(NSS))*DT_SUB*0.25_EB))
+                        ENDIF
+                     ENDDO
                      DZZDT = RN%NU_MW_O_MW_F*RATE_CONSTANT(NR)
-                     ZZ_CHECK = ZZ_0 + (DZZDT4_1+DZZDT)*(DT_SUB*0.25_EB)
-                     IF (ANY(ZZ_CHECK < 0._EB)) THEN
-                        DO NSS=0,N_TRACKED_SPECIES
-                           IF (ZZ_CHECK(NSS) < 0._EB .AND. ABS(DZZDT(NSS))>TWO_EPSILON_EB) THEN
-                              RATE_CONSTANT(NR) = MIN(RATE_CONSTANT(NR),ZZ_0(NSS)/(ABS(RN%NU_MW_O_MW_F(NSS))*DT_SUB*0.25_EB))
-                           ENDIF
-                        ENDDO
-                        DZZDT = RN%NU_MW_O_MW_F*RATE_CONSTANT(NR)
-                     ENDIF
-                     DZZDT4_1 = DZZDT4_1+DZZDT
-                  END DO REACTION_LOOP4_1
-                  IF (TEMPERATURE_DEPENDENT_REACTION) THEN
-                     CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_0,CP_BAR_0,TMP_0)
-                     TMP_4 = TMP_0 + (1._EB-RADIATIVE_FRACTION)*SUM(-SPECIES_MIXTURE%H_F*DZZDT4_1*DT_SUB*0.25_EB)/CP_BAR_0
                   ENDIF
-                  A4 = ZZ_0 + DZZDT4_1*(DT_SUB*0.25_EB)
-                  DZZDT4_2 = 0._EB
-                  RATE_CONSTANT2 = 0._EB
-                  CALL COMPUTE_RATE_CONSTANT(RATE_CONSTANT2,A4,I,J,K,DT_SUB,TMP_4,EXTINCT)
-                  REACTION_LOOP4_2: DO NR = 1,N_REACTIONS
-                     RN => REACTION(NR)
-                     IF (.NOT.RN%FAST_CHEMISTRY .AND. SR < SERIES_REAC) RATE_CONSTANT(NR) = 0._EB
+                  DZZDT4_1 = DZZDT4_1+DZZDT
+               END DO REACTION_LOOP4_1
+               IF (TEMPERATURE_DEPENDENT_REACTION) THEN
+                  CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_0,CP_BAR_0,TMP_0)
+                  TMP_4 = TMP_0 + (1._EB-RADIATIVE_FRACTION)*SUM(-SPECIES_MIXTURE%H_F*DZZDT4_1*DT_SUB*0.25_EB)/CP_BAR_0
+               ENDIF
+               A4 = ZZ_0 + DZZDT4_1*(DT_SUB*0.25_EB)
+               DZZDT4_2 = 0._EB
+               RATE_CONSTANT2 = 0._EB
+               CALL COMPUTE_RATE_CONSTANT(RATE_CONSTANT2,A4,I,J,K,DT_SUB,TMP_4,EXTINCT)
+               REACTION_LOOP4_2: DO NR = 1,N_REACTIONS
+                  RN => REACTION(NR)
+                  IF (.NOT.RN%FAST_CHEMISTRY .AND. SR < SERIES_REAC) RATE_CONSTANT(NR) = 0._EB
+                  DZZDT = RN%NU_MW_O_MW_F*RATE_CONSTANT2(NR)
+                  ZZ_CHECK = A4 + (DZZDT4_2+DZZDT)*(DT_SUB*0.25_EB)
+                  IF (ANY(ZZ_CHECK < 0._EB)) THEN
+                     DO NSS=0,N_TRACKED_SPECIES
+                        IF (ZZ_CHECK(NSS) < 0._EB .AND. ABS(DZZDT(NSS))>TWO_EPSILON_EB) THEN
+                           RATE_CONSTANT2(NR) = MIN(RATE_CONSTANT2(NR),A4(NSS)/(ABS(RN%NU_MW_O_MW_F(NSS))*DT_SUB*0.25_EB))
+                        ENDIF
+                     ENDDO
                      DZZDT = RN%NU_MW_O_MW_F*RATE_CONSTANT2(NR)
-                     ZZ_CHECK = A4 + (DZZDT4_2+DZZDT)*(DT_SUB*0.25_EB)
-                     IF (ANY(ZZ_CHECK < 0._EB)) THEN
-                        DO NSS=0,N_TRACKED_SPECIES
-                           IF (ZZ_CHECK(NSS) < 0._EB .AND. ABS(DZZDT(NSS))>TWO_EPSILON_EB) THEN
-                              RATE_CONSTANT2(NR) = MIN(RATE_CONSTANT2(NR),A4(NSS)/(ABS(RN%NU_MW_O_MW_F(NSS))*DT_SUB*0.25_EB))
-                           ENDIF
-                        ENDDO
-                        DZZDT = RN%NU_MW_O_MW_F*RATE_CONSTANT2(NR)
-                     ENDIF
-                     DZZDT4_2 = DZZDT4_2+DZZDT
-                  ENDDO REACTION_LOOP4_2
-                  IF (TEMPERATURE_DEPENDENT_REACTION) THEN
-                     CALL GET_AVERAGE_SPECIFIC_HEAT(A4,CP_BAR_0,TMP_4)
-                     TMP_4 = TMP_4 + (1._EB-RADIATIVE_FRACTION)*SUM(-SPECIES_MIXTURE%H_F*DZZDT4_2*DT_SUB*0.25_EB)/CP_BAR_0
-                     TMP_4 = 0.5_EB*(TMP_4 + TMP_0)
-                     TMP_0 = TMP_4
                   ENDIF
-                  A4 = A4 + DZZDT4_2*(DT_SUB*0.25_EB)
-                  A4 = 0.5_EB*(ZZ_0 + A4)
-                  ZZ_0 = A4
-               ENDDO
-            ENDDO ODE_LOOP4
-            ! Species Error Analysis
-            ERR_EST = MAXVAL(ABS((4._EB*A4-5._EB*A2+A1)))/45._EB  ! Estimate Error
-            DT_SUB_NEW = MIN(MAX(DT_SUB*(ERR_TOL/(ERR_EST+TWO_EPSILON_EB))**(0.25_EB),DT_SUB_MIN),DT-DT_ITER) ! New Time Step
-            IF (RICH_ITER == RICH_ITER_MAX) EXIT RICH_EX_LOOP
-            IF (ERR_EST <= ERR_TOL) EXIT RICH_EX_LOOP
-            ZETA1 = ZETA0*EXP(-(DT_ITER+DT_SUB_NEW)/MIX_TIME(I,J,K))
-            SMIX_MIX_MASS =  MAX(0._EB,SMIX_MIX_MASS_0 + (ZETA-ZETA1)*CELL_MASS*ZZ_GET_0)
-            TOTAL_MIX_MASS = SUM(SMIX_MIX_MASS)
-            ZZ_MIXED = SMIX_MIX_MASS/(TOTAL_MIX_MASS)
-         ENDDO RICH_EX_LOOP
-         ZZ_MIXED = (4._EB*A4-A2)*ONTH
-         IF (TEMPERATURE_DEPENDENT_REACTION) TMP_MIXED_ZONE = (4._EB*TMP_4-TMP_2)*ONTH
-      ENDIF RK2_IF 
+                  DZZDT4_2 = DZZDT4_2+DZZDT
+               ENDDO REACTION_LOOP4_2
+               IF (TEMPERATURE_DEPENDENT_REACTION) THEN
+                  CALL GET_AVERAGE_SPECIFIC_HEAT(A4,CP_BAR_0,TMP_4)
+                  TMP_4 = TMP_4 + (1._EB-RADIATIVE_FRACTION)*SUM(-SPECIES_MIXTURE%H_F*DZZDT4_2*DT_SUB*0.25_EB)/CP_BAR_0
+                  TMP_4 = 0.5_EB*(TMP_4 + TMP_0)
+                  TMP_0 = TMP_4
+               ENDIF
+               A4 = A4 + DZZDT4_2*(DT_SUB*0.25_EB)
+               A4 = 0.5_EB*(ZZ_0 + A4)
+               ZZ_0 = A4
+            ENDDO
+         ENDDO ODE_LOOP4
+         ! Species Error Analysis
+         ERR_EST = MAXVAL(ABS((4._EB*A4-5._EB*A2+A1)))/45._EB  ! Estimate Error
+         DT_SUB_NEW = MIN(MAX(DT_SUB*(ERR_TOL/(ERR_EST+TWO_EPSILON_EB))**(0.25_EB),DT_SUB_MIN),DT-DT_ITER) ! New Time Step
+         IF (RICH_ITER == RICH_ITER_MAX) EXIT RICH_EX_LOOP
+         IF (ERR_EST <= ERR_TOL) EXIT RICH_EX_LOOP
+         ZETA1 = ZETA0*EXP(-(DT_ITER+DT_SUB_NEW)/MIX_TIME(I,J,K))
+         SMIX_MIX_MASS =  MAX(0._EB,SMIX_MIX_MASS_0 + (ZETA-ZETA1)*CELL_MASS*ZZ_GET_0)
+         TOTAL_MIX_MASS = SUM(SMIX_MIX_MASS)
+         ZZ_MIXED = SMIX_MIX_MASS/(TOTAL_MIX_MASS)
+      ENDDO RICH_EX_LOOP
+      ZZ_MIXED = (4._EB*A4-A2)*ONTH
+      IF (TEMPERATURE_DEPENDENT_REACTION) TMP_MIXED_ZONE = (4._EB*TMP_4-TMP_2)*ONTH
+   ENDIF RK2_IF 
    DT_ITER = DT_ITER + DT_SUB
    ITER = ITER + 1
    IF (OUTPUT_CHEM_IT) THEN
