@@ -160,7 +160,7 @@ A limitation of the mixing-controlled reaction model described above is that it 
 
 FDS uses simple empirical rules---which ignore strain---to predict local extinction within a certain grid cell based on resolved species concentrations and the mean cell temperature.  The default FDS extinction model consists of two parts (shown below) based on the concept of a \emph{critical flame temperature} \cite{SFPE:Beyler}. If either criterion fails, then there is no chemical reaction and $\dot{m}_\alpha'''=0$ and $\dot{q}'''=0$ for that time step.
 
-In this section we discuss the basic extinction model for simple chemistry without additional diluents.  Details of the general case considering multiple, infinitely fast reactions with added diluents is discussed in Sec.~\ref{General_Extinction}.
+In this section we discuss the basic extinction model for simple chemistry without additional diluents.  Details of the general case considering multiple, infinitely fast reactions with added diluents are discussed in Sec.~\ref{General_Extinction}.
 
 \paragraph{Basic Extinction Model}
 \begin{enumerate}
@@ -249,7 +249,7 @@ At the start of the integration of the reactor model, the species transport equa
 
 \subsection{A Simple Subgrid Environment}
 
-The cell mean mass fraction of $\alpha$, a function of time, is denoted $\widetilde{Y}_\alpha(t)$. The local concentration at any point within the cell exists in one of two states: completely unmixed or completely mixed.  Let $\hat{Y}_\alpha(t)$ denote the mass fraction of $\alpha$ in the mixed reactor zone, initially equal to the cell mean, $\hat{Y}_\alpha(0) = \widetilde{Y}_{\alpha}(0)$ (later we will denote the initial cell mean as $\widetilde{Y}_{\alpha}^0$).  With $\psi_\alpha \in [0,1]$ representing the sample space for the composition, the subgrid probability density function (PDF) may be written as
+The cell mean mass fraction of $\alpha$, a function of time, is denoted $\widetilde{Y}_\alpha(t)$. The local concentration at any point within the cell exists in one of two states: completely unmixed or completely mixed.  Let $\hat{Y}_\alpha(t)$ denote the mass fraction of $\alpha$ in the mixed reactor zone, initially equal to the cell mean, $\hat{Y}_\alpha(0) = \widetilde{Y}_{\alpha}^0 \equiv \widetilde{Y}_{\alpha}(0)$.  With $\psi_\alpha \in [0,1]$ representing the sample space for the composition, the subgrid probability density function (PDF) may be written as
 \begin{equation}
 \label{eq:pdf}
 f(\psi_\alpha;t) = w_1 \delta(0-\psi_\alpha) + w_2 \delta(1-\psi_\alpha) + w_3 \delta(\hat{Y}_\alpha[t] - \psi_\alpha)
@@ -461,7 +461,7 @@ A special iterative procedure is needed to handle infinitely fast reactions in s
 &\mbox{Reaction 1}& \mathrm{CH_4 + 1.5 \, O_2} &\rightarrow  \mathrm{CO + 2 \, H_2O}       && && \label{eq:series_reac_1} \\
 &\mbox{Reaction 2}& \mathrm{CO + 0.5 \, O_2} &\rightarrow \mathrm{CO_2}                    && && \label{eq:series_reac_2}
 \end{align}
-If both Eqs.~(\ref{eq:series_reac_1}) and (\ref{eq:series_reac_2}) are infinitely fast and the mixed state is in stoichiometric proportions, then only H$_2$O and CO$_2$ should be present at the end of a time step. To properly process series reactions, FDS will identify the number of infinitely fast series reactions, $n$, that the user has specified. FDS will then update the species $n$ times before updating the time step. This ensures that the reactions proceed as far as the mixed state stoichiometry permits.
+If both Eqs.~(\ref{eq:series_reac_1}) and (\ref{eq:series_reac_2}) are infinitely fast and the mixed state is a stoichiometric mixture of methane and oxygen (for \emph{complete} combustion) then only H$_2$O and CO$_2$ should be present at the end of a time step. Note that if these reactions are processed in parallel in a single step then we are guaranteed to have CO remaining, which of course should not happen if sufficient O$_2$ is present. To properly process series reactions, FDS will identify the number of infinitely fast series reactions, $n$, that the user has specified. FDS will then update the species $n$ times before updating the time step. This ensures that the reactions proceed as far as the mixed state stoichiometry permits.
 
 \subsubsection{Multiple Infinitely Fast Reactions: Extinction}
 \label{General_Extinction}
