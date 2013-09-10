@@ -437,6 +437,7 @@ Namelist      & FDS 5 Parameter                     & Namelist     & FDS 6 Param
 {\ct REAC}    & {\ct MASS\_EXTINCTION\_COEFFICIENT} &  {\ct SPEC}  &  {\ct MASS\_EXTINCTION\_COEFFICIENT}        & Section~\ref{info:visibility}       \\ \hline
 {\ct REAC}    & {\ct MAXIMUM\_VISIBILITY}           &  {\ct MISC}  &  {\ct MAXIMUM\_VISIBILITY}                  & Section~\ref{info:visibility}       \\ \hline
 {\ct REAC}    & {\ct OXIDIZER}                      &              & New procedure                               & Section~\ref{info:REAC_Diagnostics}          \\ \hline
+{\ct REAC}    & {\ct SUPPRESSION}                   &  {\ct MISC}  &  {\ct SUPPRESSION}                          & Section~\ref{info:extinction}       \\ \hline
 {\ct REAC}    & {\ct VISIBILITY\_FACTOR}            &  {\ct MISC}  &  {\ct VISIBILITY\_FACTOR}                   & Section~\ref{info:visibility}       \\ \hline
 {\ct SPEC}    & {\ct ABSORBING}                     &  {\ct SPEC}  &  {\ct RADCAL\_ID }                          & Section~\ref{info:radiative_spec_props}  \\ \hline
 {\ct SURF}    & {\ct H\_FIXED}                      &  {\ct SURF}  & {\ct HEAT\_TRANSFER\_COEFFICIENT}           & Section~\ref{info:convection}                   \\ \hline
@@ -4720,36 +4721,6 @@ a fraction of some other quantity. Thus, if {\ct CONDUCTIVITY\_RAMP} is used, th
 value of {\ct CONDUCTIVITY} given. Note also that for values of temperature, {\ct T}, below and above the
 given range, FDS will assume a constant value equal to the first or last {\ct F} specified. Note also that the {\ct DENSITY} of a material cannot be controlled with a {\ct RAMP} function.
 
-\section{Arrhenius Parameter Functions}
-\label{info:RAMP_Arrhenius}
-
-Arrhenius reaction parameters are typically found for a particular range of equivalence ratios; however, equivalence ratios within a simulation may exist in multiple ranges. For these cases, a piecewise definition of Arrhenius parameters based on equivalence ratio can be used to define the pre-exponential {\ct A} and activation energy {\ct E} using the {\ct RAMP} function with a defined chemical reaction as follows:
-
-\begin{lstlisting}
-&REAC ID = 'CARBON MONOXIDE'
-      FUEL = 'CARBON MONOXIDE'
-      A = 4e14
-      A_RAMP = 'rampa'
-      E = 167360
-      E_RAMP = 'rampe'
-      SPEC_ID_NU = 'CARBON MONOXIDE','OXYGEN','CARBON DIOXIDE'
-      SPEC_ID_N_S = 'OXYGEN','CARBON MONOXIDE','WATER VAPOR'
-      NU= -1,-0.5,1
-      N_S = 0.25,1,0.5
-      CRITICAL_FLAME_TEMPERATURE=1418. /
-
-&RAMP ID='rampa', T = 0,       F = 1e7 /
-&RAMP ID='rampa', T = 1.00,    F = 1e7 /
-&RAMP ID='rampa', T = 1.00001, F = 1 /
-&RAMP ID='rampa', T = 100,     F = 1 /
-
-&RAMP ID='rampe', T = 0.,      F = 0 /
-&RAMP ID='rampe', T = 1.00,    F = 0 /
-&RAMP ID='rampe', T = 1.00001, F = 1 /
-&RAMP ID='rampe', T = 100.,    F = 1 /
-\end{lstlisting}
-Here, {\ct A\_RAMP} and {\ct E\_RAMP} are the parameters on the {\ct REAC} line to indicate that a {\ct RAMP} is being used. Unlike other {\ct RAMP} functions, {\ct T} is the equivalence ratio, {\em not} time or temperature. For Arrhenius ramps, {\ct F} is a fraction of the the quantity {\ct A} or {\ct E}. In this example, for equivalence ratios less than or equal to 1 the pre-exponential is large and the activation energy is 0. These parameters indicate that the reaction is fast. For equivalence ratios greater than 1, the reaction parameters are equal to those defined on the {\ct REAC} line.
-
 
 
 
@@ -5534,7 +5505,6 @@ k = A \; T^{N_{T}} \; e^{-E/RT}
 \item[{\ct N\_S}] is an array containing the concentration exponents (default 1),
 \item[{\ct N\_T}] is the temperature exponent (default is 0, meaning no temperature dependence).
 \end{description}
-Note that {\ct A} and {\ct E} can be defined using a {\ct RAMP} as a function of equivalence ratio as explained in Section~\ref{info:RAMP_Arrhenius}.
 
 If we use Arrhenius parameters found from experiments or the literature (for this case Westbrook and Dryer~\cite{Westbrook:1}), the rate expression for the single-step propane reaction defined by Eq.~(\ref{eq:propane_1step}) becomes:
 \begin{equation}\label{eq:reac_rate2}
@@ -9781,6 +9751,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 %{\ct KINETIC\_ENERGY\_SOURCE}                   & Logical       &                                                       &               & {\ct .FALSE.}     \\ \hline
 {\ct LAPSE\_RATE}                               & Real          & Section~\ref{info:stratification}                     &  $^\circ$C/m  & 0                 \\ \hline
 {\ct LES\_FILTER\_WIDTH}                        & Character     & Section~\ref{info:LES}                                &               & {\ct 'MEAN'}      \\ \hline
+{\ct MAX\_CHEMISTRY\_ITERATIONS}                & Integer       & Section~\ref{info:finite}                             &              &  1000             \\ \hline
 {\ct MAXIMUM\_VISIBILITY}                       & Real          & Section~\ref{info:visibility}                         &  m            &  30               \\ \hline
 {\ct MEAN\_FORCING(3)}                          & Logical       & Section~\ref{info:mean_forcing}                       &               & {\ct .FALSE.}     \\ \hline
 {\ct NOISE}                                     & Logical       & Section~\ref{info:MISC_Basics}                        &               & {\ct .TRUE.}      \\ \hline
@@ -9808,6 +9779,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct SMOKE\_ALBEDO}                             & Real          & Reference~\cite{Smokeview_Users_Guide}                &               & 0.3               \\ \hline
 {\ct SOLID\_PHASE\_ONLY}                        & Logical       & Section~\ref{solid_phase_verification}                &               & {\ct .FALSE.}     \\ \hline
 {\ct STRATIFICATION}                            & Logical       & Section~\ref{info:stratification}                     &               & {\ct .TRUE.}      \\ \hline
+{\ct SUPPRESSION}                               & Logical       & Section~\ref{info:extinction}                         &                   & {\ct .TRUE.}      \\ \hline
 %{\ct TENSOR\_DIFFUSIVITY}                       & Logical       &                                                       &               & {\ct .FALSE.}     \\ \hline
 %{\ct TERRAIN\_CASE}                             & Logical       & See Wildland Fire User's Guide                        &               & {\ct .FALSE.}     \\ \hline
 %{\ct TERRAIN\_IMAGE}                            & Character     & See Wildland Fire User's Guide                        &               &                   \\ \hline
@@ -10204,14 +10176,12 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \hline \hline
 \endhead
 {\ct A}                                   & Real        & Section~\ref{info:finite}                 &                   &     \\ \hline
-{\ct A\_RAMP}                             & Character   & Section~\ref{info:RAMP_Arrhenius}         &                   &     \\ \hline
 {\ct AUTO\_IGNITION\_TEMPERATURE}         & Real        & Section~\ref{info:extinction}             & $^\circ$C         &     \\ \hline
 {\ct C}                                   & Real        & Section~\ref{info:simple_chemistry}       &                   & 0    \\ \hline
 {\ct CHECK\_ATOM\_BALANCE}                & Logical     & Section~\ref{info:REAC_Diagnostics}       &                   & {\ct .TRUE.}    \\ \hline
 {\ct CO\_YIELD}                           & Real        & Section~\ref{info:simple_chemistry}       & kg/kg             & 0        \\ \hline
 {\ct CRITICAL\_FLAME\_TEMPERATURE}        & Real        & Section~\ref{info:extinction}             &   $^\circ$C       & 1327    \\ \hline
 {\ct E}                                   & Real        & Section~\ref{info:finite}                 &   kJ/kmol         &     \\ \hline
-{\ct E\_RAMP}                             & Character   & Section~\ref{info:RAMP_Arrhenius}         &                   &         \\ \hline
 {\ct EPUMO2}                              & Real        & Section~\ref{info:heat_of_combustion}     &   kJ/kg           & 13100    \\ \hline
 {\ct EQUATION}                            & Character   & Section~\ref{info:EQUATION}               &                   &          \\ \hline
 %{\ct FIXED\_MIX\_TIME}                    & Real        & Section~\ref{??}                          &  s                &      \\ \hline
@@ -10236,7 +10206,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct SOOT\_YIELD}                         & Real        & Section~\ref{info:simple_chemistry}       & kg/kg             & 0.0    \\ \hline
 {\ct SPEC\_ID\_N\_S(:)}                   & Char.~Array & Section~\ref{info:finite}                   &                   &     \\ \hline
 {\ct SPEC\_ID\_NU(:)}                     & Char.~Array & Section~\ref{info:finite}                   &                   &     \\ \hline
-{\ct SUPPRESSION}                         & Logical     & Section~\ref{info:extinction}             &                   & {\ct .TRUE.}      \\ \hline
 %{\ct TAU\_CHEM}                           & Real        & Section~\ref{??}                          &                   & 1.E-10   \\ \hline
 %{\ct TAU\_FLAME}                          & Real        & Section~\ref{??}                          &                   & 1.E-10   \\ \hline
 \end{longtable}
