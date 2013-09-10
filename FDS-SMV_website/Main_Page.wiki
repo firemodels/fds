@@ -95,13 +95,11 @@ Information on FDS-SMV development, third-party tools, and other resources.
 
 <font face="calibri,helvetica,arial,sans-serif" size="3">
 
- FDS 6 is ready for beta testing. You can access the FDS-SMV release candidate [http://code.google.com/p/fds-smv/downloads/list here]. Note that the installation of FDS 6 is in a parallel folder to FDS 5. FDS 6 can be accessed by typing `fds` at the command prompt, whereas the currently installed version of FDS 5 can still be invoked with `fds5`.
+ FDS 6 is ready for beta testing: [https://bintray.com/nist-fire-research/releases/FDS-SMV/6RC3/files download the latest FDS-SMV release candidate]. Note that the installation of FDS 6 is in a parallel folder to FDS 5. FDS 6 can be accessed by typing `fds` at the command prompt, whereas the currently installed version of FDS 5 can still be invoked with `fds5`.
 
  As part of the FDS 6 beta release, you can access [https://drive.google.com/folderview?id=0B_wB1pJL2bFQaDJaOFNnUDR4LXM#list nightly versions of the FDS-SMV documentation/manuals].
 
  These manuals are generated automatically each night by the continuous integration testing process (Firebot), which is described in detail in the FDS Configuration Management Plan. You can view the status of recent nightly builds on the [http://code.google.com/p/fds-smv/wiki/Firebot_Build_Status Firebot Build Status] Wiki Page.
-
- <b>Important</b>: _The guides linked above are unofficial documentation and are subject to change during the FDS 6 beta testing period. Please include the *SVN repository revision number and date* of the guide when referring to the nightly manuals in posts to the Issue Tracker or Discussion Group._
 </font>
 
 <br>
