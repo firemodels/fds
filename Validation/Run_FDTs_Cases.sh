@@ -31,6 +31,9 @@ $FDTs Fleury_Heat_Flux_FDTs_Inputs.txt
 cd $VALIDATION_DIR/FM_SNL/FDTs
 $FDTs FM_SNL_FDTs_Inputs.txt
 
+cd $VALIDATION_DIR/iBMB/FDTs
+$FDTs iBMB_FDTs_Inputs.txt
+
 cd $VALIDATION_DIR/LLNL_Enclosure/FDTs
 $FDTs LLNL_FDTs_Inputs.txt
 
