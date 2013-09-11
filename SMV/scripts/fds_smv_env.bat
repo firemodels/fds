@@ -28,10 +28,7 @@ set osx_hostname=bluesky
 set linux_username=%username%
 set svn_logon=%linux_username%@%linux_hostname%
 
-Rem ----------- for uploading to Google Code -----------------
+Rem ----------- for uploading to Bintray -----------------
 
-set google_username=%username%
-set google_password_dir=%userprofile%\
-set upload=%svn_root%\smv\scripts\googlecode_upload.py
-set fds_google_level=Release-3_Maintenance
-set smv_google_level=Release-3_Maintenance
+set bintray_api_key=%userprofile%\bintray_api_key.txt
+set upload=%svn_root%\Utilities\Scripts\curl
