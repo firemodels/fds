@@ -5,7 +5,7 @@ REM Windows batch file to upload 32 bit Linux bundle to the downloads site
 
 set platform=linux32
 
-set envfile="%userprofile%\fds_smv_env.bat"
+set envfile=%userprofile%\fds_smv_env.bat
 IF EXIST %envfile% GOTO endif_envexist
 echo ***Fatal error.  The environment setup file %envfile% does not exist. 
 echo Create a file named %envfile% and use SMV/scripts/fds_smv_env_template.bat
@@ -42,10 +42,9 @@ pause>NUL
   set org_name=nist-fire-research
   set repo_name=releases
   set package_name=FDS-SMV
-  set version_name=%fds_version%
 
   REM Upload and publish file
-  %upload% -k -ufds-smv:%api_key% -T %exe% https://api.bintray.com/content/%org_name%/%repo_name%/%package_name%/%version_name%/%exe%;publish=1
+  %upload% -k -ufds-smv:%api_key% -T %exe% https://api.bintray.com/content/%org_name%/%repo_name%/%package_name%/%fds_version%/%exe%;publish=1
 
 echo.
 echo Uploads complete
