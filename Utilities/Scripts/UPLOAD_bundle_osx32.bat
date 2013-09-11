@@ -1,8 +1,9 @@
 @echo off
-Title Uploading FDS-SMV bundle for 32 bit OSX
+Title Uploading FDS-SMV bundle for 32 bit OS X
 
+REM Windows batch file to upload 32 bit OS X bundle to the downloads site
 
-Rem Windows batch file to upload 32 bit windows bundle to the google download site
+set platform=osx32
 
 set envfile="%userprofile%\fds_smv_env.bat"
 IF EXIST %envfile% GOTO endif_envexist
@@ -21,22 +22,30 @@ call %envfile%
 %svn_drive%
 cd %svn_root%\Utilities\uploads
 
-set glabels=Type-Installer,Opsys-OSX,%fds_google_level%
-set dplatform=32 bit OSX
-set summary=Bundled FDS and Smokeview for %dplatform% (SVN r%fds_revision%,%smv_revision%)
-set exe=FDS_%fds_version%-SMV_%smv_version%_osx32.sh
-
+set summary=Bundled FDS and Smokeview for %platform% (SVN r%fds_revision%,%smv_revision%)
+set exe=FDS_%fds_version%-SMV_%smv_version%_%platform%.sh
 
 echo Uploading %exe%
 echo.
-echo press any key to proceed with upload, CTRL c to abort
+echo Press any key to proceed with upload, CTRL c to abort
 pause>NUL
 
   if not exist %exe% goto abort_upload
   echo.
   echo Uploading %summary% - %exe%
-  echo googlecode_upload.py --passwd-file-dir %google_password_dir% --config-dir none -s "%summary%" -p fds-smv -u %google_username% -l %glabels% %exe%
-       %upload% --passwd-file-dir %google_password_dir% --config-dir none -s "%summary%" -p fds-smv -u %google_username% -l %glabels% %exe%
+
+  if not exist %bintray_api_key% goto no_key_file
+  echo.
+  set /p api_key=<%bintray_api_key%
+
+  REM Repository information
+  set org_name=nist-fire-research
+  set repo_name=releases
+  set package_name=FDS-SMV
+  set version_name=%fds_version%
+
+  REM Upload and publish file
+  curl -k -ufds-smv:%api_key% -T %exe% https://api.bintray.com/content/%org_name%/%repo_name%/%package_name%/%version_name%/%exe%;publish=1
 
 echo.
 echo Uploads complete
@@ -44,5 +53,9 @@ pause
 goto:eof
 
 :abort_upload
-echo %exe% does not exist - upload to google failed
+echo Error: %exe% does not exist - upload failed.
+pause
+
+:no_key_file
+echo Error: Bintray API key does not exist in %bintray_api_key% - upload failed.
 pause
