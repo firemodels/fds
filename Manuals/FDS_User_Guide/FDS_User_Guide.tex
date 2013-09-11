@@ -5415,19 +5415,19 @@ The {\ct VENT} points to the {\ct SURF\_ID='FIRE1'} which we can define using bo
 
 \begin{lstlisting}
 &SURF ID='FIRE1', SPEC_ID(1)='POLYURETHANE', MASS_FLUX(1)=0.022901, RAMP_MF(1)='poly'
-                  SPEC_ID(2)='WOOD',         MASS_FLUX(2)=0.036585, RAMP_MF(2)='wood' /
+                  SPEC_ID(2)='WOOD',         MASS_FLUX(2)=0.036585, RAMP_MF(2)='wood'/
 \end{lstlisting}
 Note that the {\ct SPEC\_ID}, {\ct MASS\_FLUX}, and {\ct RAMP\_MF} correspond to one another for each fuel. It does not matter which fuel is {\ct (1)}, just that the numbering is consistent. We also want each fuel to follow a ramp such that fire starts at 0~kW at the initial time, reaches 1200~kW at 100~s, and remains at 1200~kW for the remainder of a 600~s simulation.
 \begin{lstlisting}
-&RAMP ID='poly'    T = 0  , F = 0.0  /
-&RAMP ID='poly'    T = 50 , F = 0.5  /
-&RAMP ID='poly'    T = 100, F = 1.0  /
-&RAMP ID='poly'    T = 600, F = 1.0  /
+&RAMP ID='poly', T = 0,   F = 0.0 /
+&RAMP ID='poly', T = 50 , F = 0.5 /
+&RAMP ID='poly', T = 100, F = 1.0 /
+&RAMP ID='poly', T = 600, F = 1.0 /
 
-&RAMP ID='wood'    T = 0  , F = 0.0  /
-&RAMP ID='wood'    T = 50 , F = 0.5  /
-&RAMP ID='wood'    T = 100, F = 1.0  /
-&RAMP ID='wood'    T = 600, F = 1.0  /
+&RAMP ID='wood', T = 0  , F = 0.0 /
+&RAMP ID='wood', T = 50 , F = 0.5 /
+&RAMP ID='wood', T = 100, F = 1.0 /
+&RAMP ID='wood', T = 600, F = 1.0 /
 \end{lstlisting}
 Here, {\ct T} corresponds to the time and {\ct F} is the fraction of the mass flux specified on the {\ct SURF} line. Fig.~\ref{fig:hrr_two_fuels} compares the resulting FDS heat release rate (HRR) to the expected HRR from the defined ramp. Note that in this simulation, there is 10~s averaging on the FDS output HRR ({\ct \&DUMP DT\_HRR=10}) and the expected results account for this averaging.
 
@@ -5491,16 +5491,16 @@ In this case we explicitly define all primitive species:
 &SPEC ID='WATER VAPOR' /
 &SPEC ID='CARBON DIOXIDE' /
 \end{lstlisting}
-If $\hat{C}_{\alpha}$ represents the concentration of species $\alpha$ that can react with a rate constant, $k$, then the rate expression for the fuel, $\mathrm{C_3H_8}$, is:
+If $C_{\alpha}$ represents the concentration of species $\alpha$ that can react with a rate constant $k$, then the rate expression for the fuel, $\mathrm{C_3H_8}$, is
 \begin{equation}\label{eq:finite_rate}
-\frac{\d \hat{C}_{\mathrm{C_3H_8}}}{\d t}= -k\; \prod \hat{C}_{\alpha}\,^{N_S}
+\frac{\d C_{\mathrm{C_3H_8}}}{\d t}= -k \, \prod C_{\alpha}\,^{N_S}
 \end{equation}
-where the rate constant is defined as:
+where the rate constant is defined as
 \begin{equation}\label{eq:reac_rate}
-k = A \; T^{N_{T}} \; e^{-E/RT}
+k = A \, T^{N_{T}} \, {\rm e}^{-E/RT}
 \end{equation}
 \begin{description}
-\item[{\ct A}] is the pre-exponential factor in units of \si{mol/(cm$^3$.s)},
+\item[{\ct A}] is the pre-exponential factor (in appropriate units),
 \item[{\ct E}] is the activation energy in units of J/mol,
 \item[{\ct N\_S}] is an array containing the concentration exponents (default 1),
 \item[{\ct N\_T}] is the temperature exponent (default is 0, meaning no temperature dependence).
@@ -5508,7 +5508,7 @@ k = A \; T^{N_{T}} \; e^{-E/RT}
 
 If we use Arrhenius parameters found from experiments or the literature (for this case Westbrook and Dryer~\cite{Westbrook:1}), the rate expression for the single-step propane reaction defined by Eq.~(\ref{eq:propane_1step}) becomes:
 \begin{equation}\label{eq:reac_rate2}
-\frac{\d \hat{C}_{\mathrm{C_3H_8}}}{\d t} = -8.6 \times 10^{11} \; T^{0} \; e^{-125520/RT} \; \hat{C}_{\mathrm{C_3H_8}}\,^{0.1} \; \hat{C}_{\mathrm{O_2}}\,^{1.65}
+\frac{\d C_{\mathrm{C_3H_8}}}{\d t} = -8.6 \times 10^{11} \; T^{0} \; {\rm e}^{-125520/RT} \; C_{\mathrm{C_3H_8}}\,^{0.1} \; C_{\mathrm{O_2}}\,^{1.65}
 \end{equation}
 and the resulting {\ct REAC} line is:
 
@@ -5566,7 +5566,7 @@ As before, we use primitive species rather than mixtures. A {\ct REAC} line is n
 \mathrm{a \, X + b \, Y + M \rightarrow X_aY_b + M }
 \end{equation}
 
-However, for the purposes of inputting into FDS, since M is neither a product nor a species it would not be specified in the chemical reaction using either {\ct REACTION} or {\ct NU}.  It would be given a rate exponent using {\ct N\_S} to indicate that its presence is required.
+However, for the purposes of inputting into FDS, since M is neither a product nor a species it would not be specified in the chemical reaction using either {\ct REACTION} or {\ct NU}.  It would instead be given a rate exponent using {\ct N\_S} to indicate that its presence is required.
 
 As discussed previously (Section~\ref{info:heat_of_combustion}), energy release is calculated using the net change of species in a time step along with the enthalpy of formation of each species. This approach makes specifying an endothermic reaction, such as the reversible CO$_2$ reaction (R3), no different than typical FDS exothermic combustion reactions.
 
