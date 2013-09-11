@@ -44,7 +44,7 @@ Histogram_Tex_Output = [pwd, '/../../Manuals/FDTs_Validation_Guide/SCRIPT_FIGURE
 
 % Override the plot style options with NRC 1824 plot options
 
-NRC_Options = false;
+NRC_Options = true;
 Append_To_Scatterplot_Title = '';
 
 % Run dataplot and scatplot scripts
