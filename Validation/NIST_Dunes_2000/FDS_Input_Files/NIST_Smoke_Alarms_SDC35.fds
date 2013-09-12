@@ -1,10 +1,10 @@
-&HEAD CHID='NIST_Dunes_2000_SDC02', TITLE='NIST Dunes 2000 Test SDC02 (Chair Specimen 108858)' /
+&HEAD CHID='NIST_Smoke_Alarms_SDC35', TITLE='NIST Dunes 2000 Test SDC35 (Chair Specimen 108858)' /
 
 &MESH IJK=220,60,28, XB=-1,21,-1,5,0,2.8 /
 
 &TIME T_END=180.0 /
 
-&MISC TMPA=21. /
+&MISC TMPA=26. /
 
 &DUMP DT_CTRL=0.5, DT_HRR=1., DT_DEVC=1., SIG_FIGS=4, SIG_FIGS_EXP=2 /
 
@@ -32,69 +32,69 @@
 
 &OBST XB=12.6,13.2,2.9,3.5,0.0,0.3 / Chair
 &VENT XB=12.6,13.2,2.9,3.5,0.3,0.3, SURF_ID='fire' /
-&SURF ID='fire', HRRPUA=436, RAMP_Q='fireramp', COLOR='RED' /
+&SURF ID='fire', HRRPUA=286, RAMP_Q='fireramp', COLOR='RED' /
 
 &RAMP ID='fireramp', T=0.0, F=0.000 /
-&RAMP ID='fireramp', T=3.0, F=0.000 /
-&RAMP ID='fireramp', T=6.0, F=0.045 /
-&RAMP ID='fireramp', T=9.0, F=0.045 /
-&RAMP ID='fireramp', T=12.0, F=0.045 /
-&RAMP ID='fireramp', T=15.0, F=0.045 /
-&RAMP ID='fireramp', T=18.0, F=0.045 /
-&RAMP ID='fireramp', T=21.0, F=0.045 /
-&RAMP ID='fireramp', T=24.0, F=0.045 /
-&RAMP ID='fireramp', T=27.0, F=0.046 /
-&RAMP ID='fireramp', T=30.0, F=0.048 /
-&RAMP ID='fireramp', T=33.0, F=0.050 /
-&RAMP ID='fireramp', T=36.0, F=0.052 /
-&RAMP ID='fireramp', T=39.0, F=0.056 /
-&RAMP ID='fireramp', T=42.0, F=0.060 /
-&RAMP ID='fireramp', T=45.0, F=0.064 /
-&RAMP ID='fireramp', T=48.0, F=0.069 /
-&RAMP ID='fireramp', T=51.0, F=0.074 /
-&RAMP ID='fireramp', T=54.0, F=0.080 /
-&RAMP ID='fireramp', T=57.0, F=0.087 /
-&RAMP ID='fireramp', T=60.0, F=0.094 /
-&RAMP ID='fireramp', T=63.0, F=0.102 /
-&RAMP ID='fireramp', T=66.0, F=0.110 /
-&RAMP ID='fireramp', T=69.0, F=0.119 /
-&RAMP ID='fireramp', T=72.0, F=0.128 /
-&RAMP ID='fireramp', T=75.0, F=0.138 /
-&RAMP ID='fireramp', T=78.0, F=0.148 /
-&RAMP ID='fireramp', T=81.0, F=0.159 /
-&RAMP ID='fireramp', T=84.0, F=0.171 /
-&RAMP ID='fireramp', T=87.0, F=0.183 /
-&RAMP ID='fireramp', T=90.0, F=0.196 /
-&RAMP ID='fireramp', T=93.0, F=0.209 /
-&RAMP ID='fireramp', T=96.0, F=0.223 /
-&RAMP ID='fireramp', T=99.0, F=0.237 /
-&RAMP ID='fireramp', T=102.0, F=0.252 /
-&RAMP ID='fireramp', T=105.0, F=0.268 /
-&RAMP ID='fireramp', T=108.0, F=0.284 /
-&RAMP ID='fireramp', T=111.0, F=0.300 /
-&RAMP ID='fireramp', T=114.0, F=0.317 /
-&RAMP ID='fireramp', T=117.0, F=0.335 /
-&RAMP ID='fireramp', T=120.0, F=0.353 /
-&RAMP ID='fireramp', T=123.0, F=0.372 /
-&RAMP ID='fireramp', T=126.0, F=0.391 /
-&RAMP ID='fireramp', T=129.0, F=0.411 /
-&RAMP ID='fireramp', T=132.0, F=0.432 /
-&RAMP ID='fireramp', T=135.0, F=0.453 /
-&RAMP ID='fireramp', T=138.0, F=0.474 /
-&RAMP ID='fireramp', T=141.0, F=0.496 /
-&RAMP ID='fireramp', T=144.0, F=0.519 /
-&RAMP ID='fireramp', T=147.0, F=0.542 /
-&RAMP ID='fireramp', T=150.0, F=0.566 /
-&RAMP ID='fireramp', T=153.0, F=0.591 /
-&RAMP ID='fireramp', T=156.0, F=0.615 /
-&RAMP ID='fireramp', T=159.0, F=0.641 /
-&RAMP ID='fireramp', T=162.0, F=0.667 /
-&RAMP ID='fireramp', T=165.0, F=0.694 /
-&RAMP ID='fireramp', T=168.0, F=0.721 /
-&RAMP ID='fireramp', T=171.0, F=0.748 /
-&RAMP ID='fireramp', T=174.0, F=0.777 /
-&RAMP ID='fireramp', T=177.0, F=0.805 /
-&RAMP ID='fireramp', T=180.0, F=0.835 /
+&RAMP ID='fireramp', T=3.0, F=0.029 /
+&RAMP ID='fireramp', T=6.0, F=0.029 /
+&RAMP ID='fireramp', T=9.0, F=0.029 /
+&RAMP ID='fireramp', T=12.0, F=0.029 /
+&RAMP ID='fireramp', T=15.0, F=0.030 /
+&RAMP ID='fireramp', T=18.0, F=0.031 /
+&RAMP ID='fireramp', T=21.0, F=0.033 /
+&RAMP ID='fireramp', T=24.0, F=0.035 /
+&RAMP ID='fireramp', T=27.0, F=0.038 /
+&RAMP ID='fireramp', T=30.0, F=0.041 /
+&RAMP ID='fireramp', T=33.0, F=0.045 /
+&RAMP ID='fireramp', T=36.0, F=0.050 /
+&RAMP ID='fireramp', T=39.0, F=0.055 /
+&RAMP ID='fireramp', T=42.0, F=0.061 /
+&RAMP ID='fireramp', T=45.0, F=0.067 /
+&RAMP ID='fireramp', T=48.0, F=0.074 /
+&RAMP ID='fireramp', T=51.0, F=0.081 /
+&RAMP ID='fireramp', T=54.0, F=0.089 /
+&RAMP ID='fireramp', T=57.0, F=0.097 /
+&RAMP ID='fireramp', T=60.0, F=0.106 /
+&RAMP ID='fireramp', T=63.0, F=0.116 /
+&RAMP ID='fireramp', T=66.0, F=0.126 /
+&RAMP ID='fireramp', T=69.0, F=0.137 /
+&RAMP ID='fireramp', T=72.0, F=0.148 /
+&RAMP ID='fireramp', T=75.0, F=0.160 /
+&RAMP ID='fireramp', T=78.0, F=0.172 /
+&RAMP ID='fireramp', T=81.0, F=0.185 /
+&RAMP ID='fireramp', T=84.0, F=0.198 /
+&RAMP ID='fireramp', T=87.0, F=0.212 /
+&RAMP ID='fireramp', T=90.0, F=0.227 /
+&RAMP ID='fireramp', T=93.0, F=0.242 /
+&RAMP ID='fireramp', T=96.0, F=0.257 /
+&RAMP ID='fireramp', T=99.0, F=0.274 /
+&RAMP ID='fireramp', T=102.0, F=0.290 /
+&RAMP ID='fireramp', T=105.0, F=0.308 /
+&RAMP ID='fireramp', T=108.0, F=0.326 /
+&RAMP ID='fireramp', T=111.0, F=0.344 /
+&RAMP ID='fireramp', T=114.0, F=0.363 /
+&RAMP ID='fireramp', T=117.0, F=0.382 /
+&RAMP ID='fireramp', T=120.0, F=0.403 /
+&RAMP ID='fireramp', T=123.0, F=0.423 /
+&RAMP ID='fireramp', T=126.0, F=0.444 /
+&RAMP ID='fireramp', T=129.0, F=0.466 /
+&RAMP ID='fireramp', T=132.0, F=0.489 /
+&RAMP ID='fireramp', T=135.0, F=0.511 /
+&RAMP ID='fireramp', T=138.0, F=0.535 /
+&RAMP ID='fireramp', T=141.0, F=0.559 /
+&RAMP ID='fireramp', T=144.0, F=0.583 /
+&RAMP ID='fireramp', T=147.0, F=0.608 /
+&RAMP ID='fireramp', T=150.0, F=0.634 /
+&RAMP ID='fireramp', T=153.0, F=0.660 /
+&RAMP ID='fireramp', T=156.0, F=0.687 /
+&RAMP ID='fireramp', T=159.0, F=0.714 /
+&RAMP ID='fireramp', T=162.0, F=0.742 /
+&RAMP ID='fireramp', T=165.0, F=0.771 /
+&RAMP ID='fireramp', T=168.0, F=0.800 /
+&RAMP ID='fireramp', T=171.0, F=0.829 /
+&RAMP ID='fireramp', T=174.0, F=0.859 /
+&RAMP ID='fireramp', T=177.0, F=0.890 /
+&RAMP ID='fireramp', T=180.0, F=0.921 /
 
 &VENT MB='XMIN', SURF_ID='OPEN' /
 &VENT MB='XMAX', SURF_ID='OPEN' /
@@ -203,7 +203,7 @@
 &PROP ID='P2', QUANTITY='CHAMBER OBSCURATION', ALPHA_E=0.015, BETA_E=-1.9, ALPHA_C=0.15, BETA_C=-1.4, ACTIVATION_OBSCURATION=6.6 /
 &PROP ID='P3', QUANTITY='CHAMBER OBSCURATION', ALPHA_E=0.015, BETA_E=-1.9, ALPHA_C=0.15, BETA_C=-1.4, ACTIVATION_OBSCURATION=6.6 /
 
-&PROP ID='HEAT', QUANTITY='LINK TEMPERATURE', RTI=5, ACTIVATION_TEMPERATURE=31 /
+&PROP ID='HEAT', QUANTITY='LINK TEMPERATURE', RTI=5, ACTIVATION_TEMPERATURE=31. /
 
 =============
 = Station A =
