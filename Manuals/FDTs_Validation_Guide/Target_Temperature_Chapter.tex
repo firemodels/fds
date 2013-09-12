@@ -32,7 +32,7 @@ where the time step $\delta t$ is given by
 
 \subsubsection*{Verification}
 
-Test: CAROLFIRE Penlight Test 1
+Test: CAROLFIRE Penlight Test 7
 
 \begin{table}[!ht]
 \caption[Input parameters, cable failure time]
@@ -42,19 +42,19 @@ Test: CAROLFIRE Penlight Test 1
 \hline
                              &                                \\
 \rb{Input Parameter}         &  \rb{Value}                    \\ \hline \hline
-Time Ramp                    &  0, 70, 820, 1240, 1600, 1800  \\ \hline
-Temperature Ramp             &  24, 480, 480, 290, 190, 0     \\ \hline
+Time Ramp                    &  0, 80, 820, 1240, 1800, 1900  \\ \hline
+Temperature Ramp             &  24, 460, 460, 460, 460, 0     \\ \hline
 Cable Diameter (mm)          &  16.3                          \\ \hline
 Mass per Unit Length (kg/m)  &  0.529                         \\ \hline
 Jacket Thickness (mm)        &  1.5                           \\ \hline
-Conduit Diameter (mm)        &  -                             \\ \hline
-Conduit Thickness (mm)       &  -                             \\ \hline
+Conduit Diameter (mm)        &  50                            \\ \hline
+Conduit Thickness (mm)       &  4.9                           \\ \hline
 $T_\infty$ ($^\circ$C)       &  24                            \\ \hline
 \end{tabular}
 \end{center}
 \end{table}
 
-\noindent Expected result: At 50~s, the exposing temperature is 349.5~$^\circ$C, and the cable temperature is 35.2~$^\circ$C; at 80~s, the exposing temperature is 480.0~$^\circ$C, and the cable temperature is 69.7~$^\circ$C. At 592.8~s, the cable reaches a failure temperature of 400~$^\circ$C.
+\noindent Expected result: At 50.0~s, the exposing temperature is 296.3~$^\circ$C, the cable temperature is 24.1~$^\circ$C, and the conduit temperature is 32.4~$^\circ$C; at 80~s, the exposing temperature is 460.0~$^\circ$C, the cable temperature is 24.6~$^\circ$C, and the conduit temperature is 52.3~$^\circ$C. At 1473~s, the cable reaches a failure temperature of 400~$^\circ$C.
 
 
 \clearpage
