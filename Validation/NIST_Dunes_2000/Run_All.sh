@@ -12,13 +12,13 @@ qq=
 
 /bin/sh -c "cp $BASEDIR/FDS_Input_Files/*.fds $BASEDIR/$INDIR"
 
-$QFDS -r $qq -d $INDIR NIST_Dunes_2000_SDC02.fds
-$QFDS -r $qq -d $INDIR NIST_Dunes_2000_SDC05.fds
-$QFDS -r $qq -d $INDIR NIST_Dunes_2000_SDC07.fds
-$QFDS -r $qq -d $INDIR NIST_Dunes_2000_SDC10.fds
-$QFDS -r $qq -d $INDIR NIST_Dunes_2000_SDC33.fds
-$QFDS -r $qq -d $INDIR NIST_Dunes_2000_SDC35.fds
-$QFDS -r $qq -d $INDIR NIST_Dunes_2000_SDC38.fds
-$QFDS -r $qq -d $INDIR NIST_Dunes_2000_SDC39.fds
+$QFDS -r $qq -d $INDIR NIST_Smoke_Alarms_SDC02.fds
+$QFDS -r $qq -d $INDIR NIST_Smoke_Alarms_SDC05.fds
+$QFDS -r $qq -d $INDIR NIST_Smoke_Alarms_SDC07.fds
+$QFDS -r $qq -d $INDIR NIST_Smoke_Alarms_SDC10.fds
+$QFDS -r $qq -d $INDIR NIST_Smoke_Alarms_SDC33.fds
+$QFDS -r $qq -d $INDIR NIST_Smoke_Alarms_SDC35.fds
+$QFDS -r $qq -d $INDIR NIST_Smoke_Alarms_SDC38.fds
+$QFDS -r $qq -d $INDIR NIST_Smoke_Alarms_SDC39.fds
 
 echo FDS cases submitted
