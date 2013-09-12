@@ -344,22 +344,22 @@ The near-ceiling thermocouples in Sectors 1 and 3 have been chosen to evaluate t
 
 \clearpage
 
-\subsection{NIST Dunes 2000 Experiments}
+\subsection{NIST Smoke Alarm Experiments}
 
-The primary purpose of the NIST Dunes 2000 experiments was to measure smoke detector activation times in residential settings. In the single-story manufactured home tests that were selected for validation, five smoke detector measurement stations (Station A through Station E) were located in different areas of the manufactured home. Thermocouple trees were also located at each measurement station. The highest thermocouple in the tree can be compared to ceiling jet temperature predictions. The plots on the following page show the measured and predicted ceiling jet temperatures for the five measurement stations in each test.
+The primary purpose of the NIST Smoke Alarm Experiments was to measure smoke detector activation times in residential settings. In the single-story manufactured home tests that were selected for validation, five smoke detector measurement stations (Station A through Station E) were located in different areas of the manufactured home. Thermocouple trees were also located at each measurement station. The highest thermocouple in the tree can be compared to ceiling jet temperature predictions. The plots on the following page show the measured and predicted ceiling jet temperatures for the five measurement stations in each test.
 
 \begin{figure}[h!]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/NIST_Dunes_2000/NIST_Dunes_2000_SDC02_Ceiling_Jet} &
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/NIST_Dunes_2000/NIST_Dunes_2000_SDC05_Ceiling_Jet} \\
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/NIST_Dunes_2000/NIST_Dunes_2000_SDC07_Ceiling_Jet} &
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/NIST_Dunes_2000/NIST_Dunes_2000_SDC10_Ceiling_Jet} \\
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/NIST_Dunes_2000/NIST_Dunes_2000_SDC33_Ceiling_Jet} &
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/NIST_Dunes_2000/NIST_Dunes_2000_SDC35_Ceiling_Jet} \\
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/NIST_Dunes_2000/NIST_Dunes_2000_SDC38_Ceiling_Jet} &
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/NIST_Dunes_2000/NIST_Dunes_2000_SDC39_Ceiling_Jet}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/NIST_Smoke_Alarms/NIST_Smoke_Alarms_SDC02_Ceiling_Jet} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/NIST_Smoke_Alarms/NIST_Smoke_Alarms_SDC05_Ceiling_Jet} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/NIST_Smoke_Alarms/NIST_Smoke_Alarms_SDC07_Ceiling_Jet} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/NIST_Smoke_Alarms/NIST_Smoke_Alarms_SDC10_Ceiling_Jet} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/NIST_Smoke_Alarms/NIST_Smoke_Alarms_SDC33_Ceiling_Jet} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/NIST_Smoke_Alarms/NIST_Smoke_Alarms_SDC35_Ceiling_Jet} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/NIST_Smoke_Alarms/NIST_Smoke_Alarms_SDC38_Ceiling_Jet} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/NIST_Smoke_Alarms/NIST_Smoke_Alarms_SDC39_Ceiling_Jet}
 \end{tabular*}
-\label{NIST_Dunes_2000_Ceiling_Jet}
+\label{NIST_Smoke_Alarms_Ceiling_Jet}
 \end{figure}
 
 
@@ -899,7 +899,7 @@ The figures on the following pages display the number of sprinklers actuated as 
 
 \section{Smoke Detector Activation Times}
 
-There are two methods of modeling smoke detector activation. The first method is based on the assumption that activation occurs when the gas temperature near the detector rises above a given threshold. Essentially this method treats the smoke detector exactly like a heat detector with a relatively low RTI value. Figure~\ref{NIST_Dunes_2000_Scatterplot_Temp_Rise} compares the measured versus predicted smoke detector activation times using a heat detector/temperature rise approach. The heat detectors were set with an RTI of 5~$\sqrt{\hbox{m}\cdot \hbox{s}}$ and an activation temperature of \SI{10}{\celsius} above ambient temperature.
+There are two methods of modeling smoke detector activation. The first method is based on the assumption that activation occurs when the gas temperature near the detector rises above a given threshold. Essentially this method treats the smoke detector exactly like a heat detector with a relatively low RTI value. Figure~\ref{NIST_Smoke_Alarms_Scatterplot_Temp_Rise} compares the measured versus predicted smoke detector activation times using a heat detector/temperature rise approach. The heat detectors were set with an RTI of 5~$\sqrt{\hbox{m}\cdot \hbox{s}}$ and an activation temperature of \SI{10}{\celsius} above ambient temperature.
 
 \begin{figure}[h!]
 \begin{center}
@@ -907,12 +907,12 @@ There are two methods of modeling smoke detector activation. The first method is
 \includegraphics[width=4.0in]{SCRIPT_FIGURES/ScatterPlots/FDS_Smoke_Detector_Activation_Time_Temp_Rise}
 \end{tabular}
 \end{center}
-\caption[Summary of smoke detector activation times (temperature rise), NIST Dunes 2000.]
-{Summary of smoke detector activation times (using temperature rise), NIST Dunes 2000.}
-\label{NIST_Dunes_2000_Scatterplot_Temp_Rise}
+\caption[Summary of smoke detector activation times (temperature rise), NIST Smoke Alarms.]
+{Summary of smoke detector activation times (using temperature rise), NIST Smoke Alarms.}
+\label{NIST_Smoke_Alarms_Scatterplot_Temp_Rise}
 \end{figure}
 
-The second method of predicting smoke detector activation is to use an empirical model of the smoke transit time within the device to estimate when the smoke concentration will rise above a particular threshold value set by the manufacturer. Figure~\ref{NIST_Dunes_2000_Scatterplot} compares the measured versus predicted smoke detector activation times using the smoke detector model.
+The second method of predicting smoke detector activation is to use an empirical model of the smoke transit time within the device to estimate when the smoke concentration will rise above a particular threshold value set by the manufacturer. Figure~\ref{NIST_Smoke_Alarms_Scatterplot} compares the measured versus predicted smoke detector activation times using the smoke detector model.
 
 
 \begin{figure}[h!]
@@ -921,9 +921,9 @@ The second method of predicting smoke detector activation is to use an empirical
 \includegraphics[width=4.0in]{SCRIPT_FIGURES/ScatterPlots/FDS_Smoke_Detector_Activation_Time}
 \end{tabular}
 \end{center}
-\caption[Summary of smoke detector activation times (smoke detector model), NIST Dunes 2000.]
-{Summary of smoke detector activation times (using smoke detector model), NIST Dunes 2000.}
-\label{NIST_Dunes_2000_Scatterplot}
+\caption[Summary of smoke detector activation times (smoke detector model), NIST Smoke Alarms.]
+{Summary of smoke detector activation times (using smoke detector model), NIST Smoke Alarms.}
+\label{NIST_Smoke_Alarms_Scatterplot}
 \end{figure}
 
 
