@@ -41,7 +41,7 @@ The burner was located near the end of the first floor away from the stairs. A d
 
 \begin{sidewaysfigure}[h]
 \begin{center}
-\includegraphics[height=6.5in]{FIGURES/ATF_Corridors/ATF}
+\includegraphics[height=6.in]{FIGURES/ATF_Corridors/ATF}
 \end{center}
 \caption{Geometry of the ATF Corridors Experiments.}
 \label{ATF Drawing}
@@ -293,7 +293,7 @@ No.     &  Type             & HRR (kW)      & Position      & Rate (ach)        
 
 \begin{sidewaysfigure}[p]
 \begin{center}
-\includegraphics[height=6.5in]{FIGURES/FM_SNL/FM_SNL_Drawing}
+\includegraphics[height=6.in]{FIGURES/FM_SNL/FM_SNL_Drawing}
 \end{center}
 \caption[Geometry of the FM/SNL Experiments]{Geometry of the FM/SNL Experiments.}
 \label{FM_SNL_Drawing}
@@ -365,13 +365,13 @@ Two different test configurations were used to model both detached and adhered s
 
 \begin{figure}[ht]
 \begin{center}
+\vspace{-2in}
 \includegraphics[height=8.8in]{FIGURES/Harrison_Spill_Plumes/Harrison_Spill_Plumes_Assembly_Drawing}
 \end{center}
+\vspace{-1.5in}
 \caption{Geometry of the Harrison Spill Plumes Experiments.}
 \label{Harrison_Drawing}
 \end{figure}
-
-\clearpage
 
 
 
@@ -458,13 +458,13 @@ No.  & Config. & m     &  kW        & g/s       & $^\circ$C   &   No.  & Config.
 
 \begin{sidewaysfigure}[p]
 \begin{center}
-\includegraphics[height=6.5in]{FIGURES/LLNL_Enclosure/LLNL_Enclosure_Drawing}
+\includegraphics[height=6.in]{FIGURES/LLNL_Enclosure/LLNL_Enclosure_Drawing}
 \end{center}
 \caption[Geometry of the LLNL Enclosure Experiments]{Geometry of the LLNL Enclosure Experiments.}
 \label{LLNL_Enclosure_Drawing}
 \end{sidewaysfigure}
 
-
+\clearpage
 
 \section{McCaffrey Plume Experiments}
 
@@ -513,7 +513,7 @@ ratio was less than that assumed by the various ceiling jet correlations.
 
 \begin{sidewaysfigure}[p]
 \begin{center}
-\includegraphics[height=6.5in]{FIGURES/NBS/NBS_Drawing}
+\includegraphics[height=6.in]{FIGURES/NBS/NBS_Drawing}
 \end{center}
 \caption[Geometry of the NBS Multi-Room Experiments]{Geometry of the NBS Multi-Room Experiments.}
 \label{NBS_Drawing}
@@ -524,6 +524,16 @@ ratio was less than that assumed by the various ceiling jet correlations.
 
 
 \clearpage
+
+\section{NIST Helium Experiments}
+
+Eighteen experiments were conducted at NIST in which helium was released over a lengthy time period inside of a 1.5~m by 1.5~m by 0.75~m plexiglass box with one or two small leakage holes~\cite{Pitts:2011}. The experiments were intended to represent the release of hydrogen from passenger vehicle fuel cell inside of a residential garage. Test parameters included the release rate and length, the location of the release, and the size and location of the leakage. Measurements were made of the helium concentration in a rake at seven locations over the height of the compartment during the release and for a period of up to 11 hours post-release.
+
+Test variables included all permutations of the leak rate and time (14.8~L/min over 3600~s or 3.71~L/min over 14400~s), leak location (on the floor at the center of the compartment, on the floor at the center of the rear wall, and 2.5~cm below the ceiling at the center of the compartment), and the leak area (2.4~cm by 2.4~cm at the center of the front wall, 3.05~cm by 3.05~cm at the center of the front wall, and a pair of 2.15~cm by 2.15~cm centered on the front wall 2.5~cm from the floor and ceiling).
+
+Leakage areas were square holes under 10~cm$^2$ in area.  Attempting to resolve flows through these holes would have required very small grid cells in the vicinity of the holes.  Instead, the FDS HVAC model was used.  For each leakage hole a pair of HVAC ducts was defined over a height of two grid cells (one grid cell height for each vent).  Each duct was assigned one-half the leakage area and the experimentally determined orifice flow coefficient. This approach enabled bi-directional flow to occur at the leakage vent as occurred during each test following the termination of the helium release.
+
+
 
 \section{NIST/NRC Test Series}
 
@@ -567,25 +577,42 @@ A diagram of the test structure is displayed in Figure~\ref{NIST_NRC_Drawing}.
 
 \begin{sidewaysfigure}[p]
 \begin{center}
-\includegraphics[height=6.5in]{FIGURES/NIST_NRC/NIST_NRC_Drawing}
+\includegraphics[height=6.in]{FIGURES/NIST_NRC/NIST_NRC_Drawing}
 \end{center}
 \caption[Geometry of the NIST/NRC Experiments]{Geometry of the NIST/NRC Experiments.}
 \label{NIST_NRC_Drawing}
 \end{sidewaysfigure}
 
 
+
+
 \clearpage
 
-\section{NIST Dunes 2000 Experiments}
+
+
+\section{NIST Reduced Scale Enclosure Experiments}
+
+The NIST Reduced Scale Enclosure (RSE) is a 40~\% scale version of the ISO~9705 compartment~\cite{Bryner:1}.
+It measures 0.98 m wide by 1.46 m deep by 0.98 m tall.  The compartment contains a door centered on the smaller
+wall that measures 0.48~m wide by 0.81 m tall.  A 15~cm diameter natural gas burner was positioned in the
+center of the compartment.  The burner was on a stand so that its top was 15~cm above the floor.
+The fires ranged from 50~kW to 600~kW.
+Species measurements, including CO concentration, were made near the ceiling in the front and back of the compartment.
+
+\section{NIST Smoke Alarm Experiments}
 
 A series of experiments was conducted by NIST to measure the activation time of ionization and photoelectric
 smoke alarms in a residential setting~\cite{Bukowski:1}. Tests were conducted in actual homes with
 representative sizes and floor plans, utilized actual furnishings and household items for fire sources,
 and tested actual smoke alarms sold in retail stores at that time. Thirty-six tests were conducted in two
 homes; 27 in a single-story manufactured home, and 8 in a two-story home.
+Eight experiments that were conducted in the single-story manufactured home were selected for model validation.
+Only tests that used a flaming ignition source with a couch or mattress fuel package were considered;
+the cooking oil fires and tests that used a smoldering ignition source were not considered.
+The flaming ignition tests used a moderate flame source to quickly ignite the fuel package.
+Note that Test SDC15 was excluded due to a failed ignition event.
 
-Figure~\ref{NIST_Dunes_2000_Drawing} shows a diagram of the layout and instrumentation in the
-single-story manufactured home. The primary partitioning of the 84.7~m$^2$ floor plan consisted
+The primary partitioning of the single-story floor plan consisted
 of three bedrooms, one full bathroom, one kitchen/dining area, one living room, and two hallways.
 For testing, the doors to bedroom 3 and the bathroom were always closed. The ceiling was peaked
 on the long axis, reaching a height of 2.4~m. The outside walls were approximately 2.1~m in height.
@@ -594,18 +621,6 @@ room of fire origin, at least one bedroom, and in a central location. Five stati
 through Station E) containing smoke alarm arrays were mounted parallel to the ceiling. Note that,
 in the FDS Guides, smoke detectors and smoke alarms are collectively referred to as smoke detectors
 because the same smoke detection algorithm is used to predict activation of either type of device.
-
-Eight experiments that were conducted in the single-story manufactured home were selected for model validation.
-Only tests that used a flaming ignition source with a couch or mattress fuel package were considered;
-the cooking oil fires and tests that used a smoldering ignition source were not considered.
-The flaming ignition tests used a moderate flame source to quickly ignite the fuel package.
-Note that Test SDC15 was excluded due to a failed ignition event.
-
-% The mass loss rates of the upholstered chair and mattress were measured at Omega Point
-% Laboratories\footnote{Project Nos.~15638-108858 (upholstered chair) and 15638-108856 (mattress).}.
-% The upholstered chair was tested in accordance with California Bureau of Home Furnishings Technical
-% Bulletin 133~\cite{CALTB133} (with a modified ignition source). The mattress was tested in accordance
-% with California Bureau of Home Furnishings Technical Bulletin 129~\cite{CALTB129} (with a modified ignition source).
 
 Although a load cell was used in the experiments to measure the mass loss rate of the fuel package, the mass loss data
 were not reliable enough to reconstruct the HRR curves for each test. Instead, the HRR curves were determined by approximating
@@ -617,22 +632,14 @@ by using the temperature measured at the highest thermocouple in the tree (2~cm 
 \ee
 A time offset was used to align the predicted ceiling thermocouple temperatures with the measured temperatures.
 This offset is reported as the time at which the $t^2$ ramp begins.
-The t-squared calibration parameters and time offsets for the HRR ramps are shown in Table~\ref{tab:NIST_Dunes_2000_Summary}.
+The t-squared calibration parameters and time offsets for the HRR ramps are shown in Table~\ref{tab:NIST_Smoke_Alarms_Summary}.
 Additionally, the ignition source had a small effect on the measured ceiling thermocouple temperatures. Therefore,
 the size of the ignition source was approximated as either 3~kW or 7~kW, and the time offset of the ignition source was
 also calibrated by using the measured ceiling thermocouple temperatures. The resulting HRR curve was input into FDS as a fire ramp.
-A summary of the eight tests selected for model validation is shown in Table~\ref{tab:NIST_Dunes_2000_Summary}.
-
-\begin{figure}[ht]
-\begin{center}
-\includegraphics[height=2.5in]{FIGURES/NIST_Dunes_2000/NIST_Dunes_2000_Drawing}
-\end{center}
-\caption[Geometry of the NIST Dunes 2000 Experiments]{Geometry of the NIST Dunes 2000 Experiments.}
-\label{NIST_Dunes_2000_Drawing}
-\end{figure}
+A summary of the eight tests selected for model validation is shown in Table~\ref{tab:NIST_Smoke_Alarms_Summary}.
 
 \begin{table}[h!]
-\caption{Summary of NIST Dunes 2000 experiments selected for model validation.}
+\caption{Summary of NIST Smoke Alarm Experiments selected for model validation.}
 \begin{center}
 \begin{tabular}{|c|c|c|c|c|c|}
 \hline
@@ -647,28 +654,8 @@ SDC38     &  Mattress     &  Bedroom        &  120              &  180         &
 SDC39     &  Mattress     &  Bedroom        &  200              &  180         &  25               \\ \hline
 \end{tabular}
 \end{center}
-\label{tab:NIST_Dunes_2000_Summary}
+\label{tab:NIST_Smoke_Alarms_Summary}
 \end{table}
-
-\clearpage
-
-\section{NIST Helium Experiments}
-
-Eighteen experiments were conducted at NIST in which helium was released over a lengthy time period inside of a 1.5~m by 1.5~m by 0.75~m plexiglass box with one or two small leakage holes~\cite{Pitts:2011}. The experiments were intended to represent the release of hydrogen from passenger vehicle fuel cell inside of a residential garage. Test parameters included the release rate and length, the location of the release, and the size and location of the leakage. Measurements were made of the helium concentration in a rake at seven locations over the height of the compartment during the release and for a period of up to 11 hours post-release.
-
-Test variables included all permutations of the leak rate and time (14.8~L/min over 3600~s or 3.71~L/min over 14400~s), leak location (on the floor at the center of the compartment, on the floor at the center of the rear wall, and 2.5~cm below the ceiling at the center of the compartment), and the leak area (2.4~cm by 2.4~cm at the center of the front wall, 3.05~cm by 3.05~cm at the center of the front wall, and a pair of 2.15~cm by 2.15~cm centered on the front wall 2.5~cm from the floor and ceiling).
-
-Leakage areas were square holes under 10~cm$^2$ in area.  Attempting to resolve flows through these holes would have required very small grid cells in the vicinity of the holes.  Instead, the FDS HVAC model was used.  For each leakage hole a pair of HVAC ducts was defined over a height of two grid cells (one grid cell height for each vent).  Each duct was assigned one-half the leakage area and the experimentally determined orifice flow coefficient. This approach enabled bi-directional flow to occur at the leakage vent as occurred during each test following the termination of the helium release.
-
-
-\section{NIST Reduced Scale Enclosure Experiments}
-
-The NIST Reduced Scale Enclosure (RSE) is a 40~\% scale version of the ISO~9705 compartment~\cite{Bryner:1}.
-It measures 0.98 m wide by 1.46 m deep by 0.98 m tall.  The compartment contains a door centered on the smaller
-wall that measures 0.48~m wide by 0.81 m tall.  A 15~cm diameter natural gas burner was positioned in the
-center of the compartment.  The burner was on a stand so that its top was 15~cm above the floor.
-The fires ranged from 50~kW to 600~kW.
-Species measurements, including CO concentration, were made near the ceiling in the front and back of the compartment.
 
 
 \section{NRCC Facade Heat Flux Measurements}
@@ -690,7 +677,7 @@ experiment, heat flux measurements were made 0.5~m, 1.5~m, 2.5~m, and 3.5~m abov
 
 \begin{sidewaysfigure}[p]
 \begin{center}
-\includegraphics[height=6.5in]{FIGURES/NRCC_Facade/NRCC_Facade-1}
+\includegraphics[height=6.in]{FIGURES/NRCC_Facade/NRCC_Facade-1}
 \end{center}
 \caption[Geometry of the NRCC Facade Experiments]{Geometry of the NRCC Facade Experiments.}
 \label{NRCC_Facade_Drawing}
@@ -799,25 +786,23 @@ The heat source was a gas burner run at a constant power of 450~kW. The top of t
 A single steel beam was suspended 20~cm below the ceiling
 along the centerline of the compartment. There were three measurement stations along the beam at lengths of 0.9~m (Position A), 1.8~m (Position B), and
 2.7~m (Position C) from the far wall where the fire was either positioned in the corner (Tests 1 and 2), or the center (Test 3). The beam in Test 1 was
-a rectangular steel tube filled with an insulation material. A diagram of the room used in Test 1 is displayed in Figure~\ref{Hollowbar_Drawing}.  The beam in Tests 2 and 3 was an I-beam. A diagram of the room used in Tests 2 and 3 is displayed in Figure~\ref{Room_Drawing}.
+a rectangular steel tube filled with an insulation material. The beam in Tests 2 and 3 was an I-beam. A diagram of the room used in Tests 2 and 3 is displayed in Figure~\ref{Room_Drawing}.
 
-\begin{sidewaysfigure}[ht]
-\begin{center}
-\includegraphics[width=8.8in]{FIGURES/SP_AST/Full_Room_hollowbar}
-\end{center}
-\caption{Geometry of the SP/AST compartment for Test 1}
-\label{Hollowbar_Drawing}
-\end{sidewaysfigure}
+%\begin{sidewaysfigure}[ht]
+%\begin{center}
+%\includegraphics[width=6.in]{FIGURES/SP_AST/Full_Room_hollowbar}
+%\end{center}
+%\caption{Geometry of the SP/AST compartment for Test 1}
+%\label{Hollowbar_Drawing}
+%\end{sidewaysfigure}
 
-\begin{sidewaysfigure}[h]
+\begin{figure}[ht]
 \begin{center}
-\includegraphics[width=8.8in]{FIGURES/SP_AST/Fullroom_Drawing}
+\includegraphics[width=6.5in]{FIGURES/SP_AST/Fullroom_Drawing}
 \end{center}
 \caption{Geometry of the  SP/AST compartment for Tests 2 and 3}
 \label{Room_Drawing}
-\end{sidewaysfigure}
-
-\clearpage
+\end{figure}
 
 A second series of experiments involving plate thermometers was carried out in 2011~\cite{Sjostrom:AST}.
 A 6~m long, 20~cm diameter vertical steel column was positioned in the center of 1.1~m and 1.9~m diesel fuel and 1.1~m heptane
@@ -884,13 +869,13 @@ Test    & Width     & Height        & $\dot{Q}$  & Location     & Test  & Width 
 
 \begin{figure}[ht]
 \begin{center}
-\includegraphics[width=7in]{FIGURES/Steckler_Compartment/Room_Drawing.pdf}
+\includegraphics[width=6in]{FIGURES/Steckler_Compartment/Room_Drawing.pdf}
 \end{center}
 \caption{Geometry of the Steckler Compartment Experiments.}
 \label{Steckler_ Drawing}
 \end{figure}
 
-\clearpage
+
 \section{UL/NIST Vent Experiments}
 \label{UL_NIST_Vents_Description}
 
@@ -1151,8 +1136,6 @@ temperatures near the ceiling, (ii) temperatures of the ceiling jet, and (iii) t
 \end{description}
 
 
-\clearpage
-
 
 \section{Ulster SBI Corner Heat Flux Measurements}
 
@@ -1191,7 +1174,7 @@ Vettori~\cite{Vettori:1} analyzed a series of 45 experiments conducted at NIST t
 
 \begin{sidewaysfigure}[p]
 \begin{center}
-\includegraphics[height=6.5in]{FIGURES/Vettori_Flat_Ceiling/Vettori_Flat_Ceiling}
+\includegraphics[height=6.in]{FIGURES/Vettori_Flat_Ceiling/Vettori_Flat_Ceiling}
 \end{center}
 \caption[Geometry of the Vettori Flat Ceiling compartment]{Geometry of the Vettori Flat Ceiling compartment.}
 \label{Vettori_Drawing}
@@ -1253,7 +1236,7 @@ scale fire experiments used.
 A diagram of the test structure is displayed in Figure~\ref{VTT_Drawing}.
 \begin{sidewaysfigure}[p]
 \begin{center}
-\includegraphics[height=6.5in]{FIGURES/VTT/VTT_Drawing}
+\includegraphics[height=6.in]{FIGURES/VTT/VTT_Drawing}
 \end{center}
 \caption[Geometry of the VTT Large Fire Test Hall]{Geometry of the VTT Large Fire Test Hall.}
 \label{VTT_Drawing}
@@ -1285,7 +1268,7 @@ liquid fuel droplets.
 
 \begin{sidewaysfigure}[p]
 \begin{center}
-\includegraphics[height=6.5in]{FIGURES/WTC/WTC}
+\includegraphics[height=6.in]{FIGURES/WTC/WTC}
 \end{center}
 \caption[Geometry of the WTC Experiments]{Geometry of the WTC Experiments.}
 \label{WTC_Drawing}
@@ -1310,25 +1293,15 @@ outlines the range of applicability of the validation studies performed to date.
 \item[Heat Release Rate, $\dQ$,] is the range of peak heat release rates of the fires in the test series.
 \item[Fire Diameter, $D$,] is the equivalent diameter of the base of the fire, calculated $D=\sqrt{4A/\pi}$, where $A$ is the area of the base.
 \item[Ceiling Height, $H$,] is the distance from floor to ceiling.
-\item[Fire Froude Number, $Q^*$,] is a useful non-dimensional quantity for plume correlations and flame height estimates.
-\be Q^* = \frac{\dot{Q}}{\rho_\infty c_p T_\infty \sqrt{gD} D^2} \ee
-It is essentially the ratio of the fuel gas exit velocity and the buoyancy-induced plume velocity. Jet fires are characterized by large Froude numbers. Typical accidental fires
-have a Froude number near unity.
-\item[Flame Height relative to Ceiling Height, $L_f/H$,] is a convenient way to express the physical size of the fire relative to the size of the room.
-The height of the visible flame, based on Heskestad's correlation, is estimated by:
-\be L_f = D \, \left( 3.7 \, (Q^*)^{2/5} - 1.02 \right) \ee
-\item[Global Equivalence Ratio, $\phi$,] is the ratio of the mass flux of fuel to the mass flux of oxygen into the compartment, divided by the stoichiometric ratio.
-\be \phi = \frac{\dm_f}{r\, \dm{\hbox{\tiny O$_2$}}} \equiv  \frac{\dQ \, \hbox{(kW)}}{13,100 \, \hbox{(kJ/kg)} \; \dm_{\hbox{\tiny O$_2$}} } \quad ; \quad  \dm_{\hbox{\tiny O$_2$}} = \left\{
-   \begin{array}{r@{\quad:\quad}l}
+\item[Fire Froude Number, $\dot{Q}^*$,] is a useful non-dimensional quantity for plume correlations and flame height estimates. \be \dot{Q}^* = \frac{\dot{Q}}{\rho_\infty c_p T_\infty \sqrt{gD} D^2} \ee It is essentially the ratio of the fuel gas exit velocity and the buoyancy-induced plume velocity. Jet fires are characterized by large Froude numbers. Typical accidental fires have a Froude number near unity.
+\item[Flame Height relative to Ceiling Height, $L_{\rm f}/H$,] is a convenient way to express the physical size of the fire relative to the size of the room. The height of the visible flame, based on Heskestad's correlation, is estimated by: \be L_{\rm f} = D \, \left( 3.7 \, (\dot{Q}^*)^{2/5} - 1.02 \right) \ee
+\item[Global Equivalence Ratio, $\phi$,] is the ratio of the mass flux of fuel to the mass flux of oxygen into the compartment, divided by the stoichiometric ratio. \be \phi = \frac{\dm_{\rm f}}{r\, \dm_{\hbox{\tiny O$_2$}}} \equiv  \frac{\dQ \; \hbox{(kW)}}{13,100 \; \hbox{(kJ/kg)} \; \dm_{\hbox{\tiny O$_2$}} } \quad ; \quad  \dm_{\hbox{\tiny O$_2$}} = \left\{
+     \begin{array}{r@{\quad:\quad}l}
       \ha \, 0.23 \, A_0 \sqrt{H_0} & \hbox{Natural Ventilation} \\
-      0.23 \, \rho \, \dot{V}       & \hbox{Mechanical Ventilation} \end{array} \right.
-\ee
-Here, $r$ is the stoichiometric ratio, $A_0$ is the area of the compartment opening, $H_0$ is the height of the opening, $\rho$ is the density of air, and $\dot{V}$ is the
-volume flow of air into the compartment. If $\phi<1$, the compartment is considered ``well-ventilated'' and if $\phi>1$, the compartment is considered ``under-ventilated.''
+      0.23 \, \rho \, \dot{V}       & \hbox{Mechanical Ventilation} \end{array} \right. \ee Here, $r$ is the stoichiometric ratio, $A_0$ is the area of the compartment opening, $H_0$ is the height of the opening, $\rho$ is the density of air, and $\dot{V}$ is the volume flow of air into the compartment. If $\phi<1$, the compartment is considered ``well-ventilated'' and if $\phi>1$, the compartment is considered ``under-ventilated.''
 \item[Compartment Aspect Ratios, $W/H$ and $L/H$,] indicate if the compartment is shaped like a hallway, typical room, or vertical shaft.
-\item[Relative Distance along the Ceiling, $r_{cj}/H$,] indicates the distance from the fire plume of a sprinkler, smoke detector, etc., relative to the
-compartment height, $H$.
-\item[Relative Distance from the Fire, $r_{rad}/D$,] indicates whether a ``target'' is near or far from the fire.
+\item[Relative Distance along the Ceiling, $r_{\rm cj}/H$,] indicates the distance from the fire plume of a sprinkler, smoke detector, etc., relative to the compartment height, $H$.
+\item[Relative Distance from the Fire, $r_{\rm rad}/D$,] indicates whether a ``target'' is near or far from the fire.
 \end{description}
 
 \newpage \thispagestyle{empty}
@@ -1337,41 +1310,41 @@ compartment height, $H$.
 \begin{center}
 \begin{tabular}{|l|c|c|c|c|c|c|c|c|c|c|c|c|}
 \hline
-                    & $\dot{Q}$     & $D$           & $H$   &                   &               &               &           &           &                   &                   \\
-\rb{Test Series}    & (kW)          & (m)           & (m)   & \rb{$\dot{Q}^*$}  & \rb{$L_f/H$}  & \rb{$\phi$}   & \rb{$W/H$}& \rb{$L/H$}& \rb{$r_{cj}/H$}   & \rb{$r_{rad}/D$}  \\ \hline \hline
-Arup Tunnel         & 5344          & 1.6           & 7     & 1.4               & 0.8           & 0.03          & 1.1       & 43        & 0 -- 1.1          & N/A               \\ \hline
-ATF Corridors       & 50 -- 500     & 0.5           & 2.4   & 0.3 -- 3.1        & 0.3 -- 1      & 0.01 -- 0.07  & 0.8       & 7.1       & 0.8 -- 6          & N/A               \\ \hline
-Beyler Hood         & 8 -- 30       & 0.2           & 0.5   & 0.4 -- 1.0        & 0.7 -- 1.4    & 0.2 -- 1.7    & 2.0       & 2.0       & N/A               & N/A               \\ \hline
-Bryant Doorway      & 34 -- 511     & 0.3           & 2.4   & 0.4 -- 6.4        & 0.3 -- 1      & 0.01 -- 0.16  & 1.0       & 2.1       & 0.6 -- 0.8        & N/A               \\ \hline
-CSTB Tunnel         & 1965 -- 2484  & 0.8           & 1.9   & 2.9 -- 3.7        & 2.1 -- 2.4    & 0.04 -- 0.05  & 1.3       & 28        & 1.6 -- 12.6       & N/A               \\ \hline
-Cup Burner          & 0.3           & 0.028         & Open  & 1.9               & Open          & Varying       & Open      & Open      & Open              & N/A               \\ \hline
-FAA Cargo           & 5             & 0.1           & 1.4   & 1.3               & 0.2           & 0             & 2.3       & 4.8       & 0.1 -- 4.8        & N/A               \\ \hline
-Fleury Heat Flux    & 100 -- 300    & 0.3 -- 0.6    & Open  &  0.3 -- 4.3       & Open          & Open          & Open      & Open      & Open              & 0.8 -- 6.7        \\ \hline
-FM Panels           & 30 -- 100     & 0.5           & Open  &  0.15 -- 0.5      & Open          & Open          & Open      & Open      & Open              & 0  -- 0.3         \\ \hline
-FM/SNL              & 470 -- 516    & 0.9           & 6.1   & 0.5 -- 0.6        & 0.3           & 0.2           & 2.0       & 3.0       & 0.2 -- 0.3        & N/A               \\ \hline
-Hamins CH$_4$       & 0.4 -- 162    & 0.1 -- 1.0    & Open  & 0.1               & Open          & Open          & Open      & Open      & N/A               & 0.1 -- 12         \\ \hline
-Harrison Plumes     & 5 -- 15       & 0.16          & 0.5   & 0.4 -- 1.3        & 0.6 -- 1.1    & 0.1           & 2         & 2         & N/A               & N/A               \\ \hline
-Heskestad           & $10^2-10^7$   & 1.1           & Open  & $10^{-1}-10^4$    & Open          & Open          & Open      & Open      & N/A               & N/A               \\ \hline
-LLNL Enclosure      & 50 -- 400     & 0.6           & 4.5   & 0.2 -- 1.4        & 0.1 -- 0.4    & 0.03 -- 0.22  & 0.9       & 1.3       & 0.3 -- 1.0        & N/A               \\ \hline
-McCaffrey Plume     & 14 -- 57      & 0.3           & Open  & 0.2 -- 0.7        & Open          & Open          & Open      & Open      & N/A               & N/A               \\ \hline
-NBS Multi-Room      & 110           & 0.3           & 2.4   & 1.4               & 0.4           & 0.12          & 1.0       & 5.1       & 0.5 -- 0.7        & 0.9 -- 2.4        \\ \hline
-NIST RSE            & 50 -- 600     & 0.15          & 1.0   & 4.9 -- 58.4       & 1 -- 2.9      & 0.1 -- 1.15   & 1.0       & 1.5       & N/A               & N/A               \\ \hline
-NIST/NRC            & 350 -- 2200   & 1.0           & 3.8   & 0.3 -- 1.9        & 0.4 -- 1.1    & 0.04 -- 0.7   & 1.9       & 5.7       & 0.3 -- 2.1        & 2 -- 4            \\ \hline
-NRCC Facade         & 5000 -- 10300 & 4.3           & 2.8   & 0.1 -- 0.2        & 1 -- 1.8      & 2.5 -- 5.2    & 1.6       & 2.2       & N/A               & 0                 \\ \hline
-NRL/HAI             & 50 -- 520     & 0.3 -- 0.7    & Open  & 1 -- 1.1          & Open          & Open          & Open      & Open      & N/A               & 0.3 -- 8          \\ \hline
-Sandia Plume        & 2025 -- 5450  & 1.0           & Open  & 1.7 -- 4.6        & Open          & Open          & Open      & Open      & N/A               & N/A               \\ \hline
-SP AST              & 450           & 0.3           & 2.4   & 5.7               & 1             & 0.1           & 1.0       & 1.5       & N/A               & N/A               \\ \hline
-Steckler            & 31.6 -- 158   & 0.3           & 2.1   & 0.7 -- 3.5        & 0.3 -- 0.7    & 0.01 -- 0.6   & 1.3       & 1.3       & N/A               & N/A               \\ \hline
-UL/NFPRF            & 4400 -- 10000 & 1.0           & 7.6   & 3.7 -- 8.5        & 0.8 -- 1.1    & 0             & 4.9       & 4.9       & 0.1 -- 2.0        & N/A               \\ \hline
-UL/NIST Vents       & 500 -- 2000   & 0.9           & 2.4   & 0.6 -- 2.5        & 0.8 -- 1.7    & 0.1 -- 0.5    & 1.8       & 2.5       & 1.0 -- 2.3        & N/A               \\ \hline
-Ulster SBI          & 30 -- 60      & 0.2           & Open  & 1.4 -- 2.8        & Open          & Open          & Open      & Open      & N/A               & 1 -- 7.5          \\ \hline
-USCG/HAI            & 250 -- 1000   & 0.3           & 3.0   & 5.6 -- 22.4       & 0.6 -- 1.1    & 0.3 -- 1.0    & 1.7       & 2.3       & 0 -- 0.8          & 6 -- 15           \\ \hline
-USN Hawaii          & 100 -- 7700   & 0.3 -- 2.5    & 15    & 1.3 -- 0.7        & 0.1 -- 0.4    & 0             & 4.9       & 6.5       & 0 -- 1.2          & N/A               \\ \hline
-USN Iceland         & 100 -- 15700  & 0.3 -- 3.4    & 22    & 1.3 -- 0.6        & 0.1 -- 0.4    & 0             & 2.1       & 3.4       & 0 -- 1.0          & N/A               \\ \hline
-Vettori Flat        & 1055          & 0.7           & 2.6   & 2.3               & 1.2           & Closed        & 2.1       & 3.5       & 0.8 -- 2.9        & N/A               \\ \hline
-Vettori Sloped      & 1055          & 0.7           & 2.5   & 2.3               & 1.2           & 0.23          & 2.2       & 2.9       & N/A               & N/A               \\ \hline
-VTT Large Hall      & 1860 -- 3640  & 1.4 -- 1.8    & 19    & 0.7               & 0.2           & 0             & 1.0       & 1.4       & 0 -- 0.6          & N/A               \\ \hline
-WTC                 & 965 -- 1460   & 1.0           & 3.8   & 0.8 -- 1.2        & 0.7 -- 0.9    & 0.5 -- 0.7    & 0.9       & 1.8       & 0.1               & 0.5 -- 2          \\ \hline
+                    & $\dot{Q}$     & $D$           & $H$   &                   &                     &               &             &             &                       &                       \\
+\rb{Test Series}    & (kW)          & (m)           & (m)   & \rb{$\dot{Q}^*$}  & \rb{$L_{\rm f}/H$}  & \rb{$\phi$}   & \rb{$W/H$}  & \rb{$L/H$}  & \rb{$r_{\rm cj}/H$}   & \rb{$r_{\rm rad}/D$}  \\ \hline \hline
+Arup Tunnel         & 5344          & 1.6           & 7     & 1.5               & 0.8                 & 0.0           & 1.1         & 43          & 0.0 -- 1.1            & N/A                   \\ \hline
+ATF Corridors       & 50 -- 500     & 0.5           & 2.4   & 0.3 -- 3.3        & 0.3 -- 0.9          & 0.0 -- 0.1    & 0.8         & 7.1         & 0.8 -- 6.0            & N/A                   \\ \hline
+Beyler Hood         & 8 -- 30       & 0.2           & 0.5   & 0.5 -- 1.1        & 0.7 -- 1.3          & 0.2 -- 1.7    & 2.0         & 2.0         & N/A                   & N/A                   \\ \hline
+Bryant Doorway      & 34 -- 511     & 0.3           & 2.4   & 0.5 -- 6.9        & 0.2 -- 1.0          & 0.0 -- 0.2    & 1.0         & 2.1         & 0.6 -- 0.8            & N/A                   \\ \hline
+CSTB Tunnel         & 1965 -- 2484  & 0.8           & 1.9   & 3.1 -- 3.9        & 2.0 -- 2.3          & 0.0 -- 0.1    & 1.3         & 28          & 1.6 -- 12.6           & N/A                   \\ \hline
+Cup Burner          & 0.3           & 0.028         & Open  & 2.1               & Open                & Varying       & Open        & Open        & Open                  & N/A                   \\ \hline
+FAA Cargo           & 5             & 0.1           & 1.4   & 1.4               & 0.2                 & 0.2           & 2.3         & 4.8         & 0.1 -- 4.8            & N/A                   \\ \hline
+Fleury Heat Flux    & 100 -- 300    & 0.3 -- 0.6    & Open  & 0.3 -- 5.5        & Open                & Open          & Open        & Open        & Open                  & 1.7 -- 3.3            \\ \hline
+FM Panels           & 30 -- 100     & 0.5           & Open  & 0.2 -- 0.5        & Open                & Open          & Open        & Open        & Open                  & 0                     \\ \hline
+FM/SNL              & 470 -- 516    & 0.9           & 6.1   & 0.6 -- 2.4        & 0.3 -- 0.6          & 0.0 -- 0.2    & 2.0         & 3.0         & 0.2 -- 0.3            & N/A                   \\ \hline
+Hamins CH$_4$       & 0.4 -- 162    & 0.1 -- 1.0    & Open  & 0.1               & Open                & Open          & Open        & Open        & N/A                   & 0.1 -- 12             \\ \hline
+Harrison Plumes     & 5 -- 15       & 0.16          & 0.5   & 0.5 -- 1.4        & 0.5 -- 1.0          & Open          & Open        & Open        & N/A                   & N/A                   \\ \hline
+Heskestad           & $10^2-10^7$   & 1.1           & Open  & $10^{-1}-10^4$    & Open                & Open          & Open        & Open        & N/A                   & N/A                   \\ \hline
+LLNL Enclosure      & 50 -- 400     & 0.6           & 4.5   & 0.2 -- 1.5        & 0.1 -- 0.4          & 0.1 -- 0.4    & 0.9         & 1.3         & 0.3 -- 1.0            & N/A                   \\ \hline
+McCaffrey Plume     & 14 -- 57      & 0.3           & Open  & 0.2 -- 0.8        & Open                & Open          & Open        & Open        & N/A                   & N/A                   \\ \hline
+NBS Multi-Room      & 110           & 0.3           & 2.4   & 1.5               & 0.5                 & 0.0           & 1.0         & 5.1         & N/A                   & N/A                   \\ \hline
+NIST RSE            & 50 -- 600     & 0.15          & 1.0   & 5.2 -- 63         & 0.9 -- 2.8          & 0.1 -- 1.1    & 1.0         & 1.5         & N/A                   & N/A                   \\ \hline
+NIST/NRC            & 350 -- 2200   & 1.0           & 3.8   & 0.3 -- 2.0        & 0.3 -- 1.0          & 0.0 -- 0.3    & 1.9         & 5.7         & 0.3 -- 2.1            & 2.0 -- 4.0            \\ \hline
+NRCC Facade         & 5000 -- 10300 & 4.3           & 2.8   & 0.1 -- 0.2        & 0.9 -- 1.7          & 0.6 -- 1.2    & 1.6         & 2.2         & N/A                   & 0                     \\ \hline
+NRL/HAI             & 50 -- 520     & 0.3 -- 0.7    & Open  & 1.1 -- 1.2        & Open                & Open          & Open        & Open        & N/A                   & 0                     \\ \hline
+Sandia Plume        & 2025 -- 5450  & 1.0           & Open  & 1.8 -- 5.0        & Open                & Open          & Open        & Open        & N/A                   & N/A                   \\ \hline
+SP AST              & 450           & 0.3           & 2.4   & 6.1               & 1.1                 & 0.1           & 1.0         & 1.5         & N/A                   & N/A                   \\ \hline
+Steckler            & 31.6 -- 158   & 0.3           & 2.1   & 0.8 -- 3.8        & 0.3 -- 0.7          & 0.0 -- 0.6    & 1.3         & 1.3         & N/A                   & N/A                   \\ \hline
+UL/NFPRF            & 4400 -- 10000 & 1.0           & 7.6   & 4.0 -- 9.1        & 0.7 -- 1.0          & Open          & 4.9         & 4.9         & 0.6 -- 3.9            & N/A                   \\ \hline
+UL/NIST Vents       & 500 -- 2000   & 0.9           & 2.4   & 0.7 -- 2.6        & 0.8 -- 1.6          & 0.2 -- 0.6    & 1.8         & 2.5         & 1.0 -- 2.3            & N/A                   \\ \hline
+Ulster SBI          & 30 -- 60      & 0.2           & Open  & 1.5 -- 3.0        & Open                & Open          & Open        & Open        & N/A                   & 0                     \\ \hline
+USCG/HAI            & 250 -- 1000   & 0.3           & 3.0   & 6.0 -- 24         & 0.6 -- 1.1          & 0.3 -- 1.0    & 1.7         & 2.3         & N/A                   & N/A                   \\ \hline
+USN Hawaii          & 100 -- 7700   & 0.3 -- 2.5    & 15    & 0.7 -- 1.3        & 0.1 -- 0.4          & Open          & 4.9         & 6.5         & 0 -- 1.2              & N/A                   \\ \hline
+USN Iceland         & 100 -- 15700  & 0.3 -- 3.4    & 22    & 0.7 -- 1.3        & 0.0 -- 0.3          & Open          & 2.1         & 3.4         & 0 -- 1.0              & N/A                   \\ \hline
+Vettori Flat        & 1055          & 0.7           & 2.6   & 2.5               & 1.1                 & 0.3           & 2.1         & 3.5         & 0.8 -- 2.9            & N/A                   \\ \hline
+Vettori Sloped      & 1055          & 0.7           & 2.5   & 2.5               & 1.2                 & 0.3           & 2.2         & 2.9         & N/A                   & N/A                   \\ \hline
+VTT Large Hall      & 1860 -- 3640  & 1.4 -- 1.8    & 19    & 0.7               & 0.2                 & 0             & 1.0         & 1.4         & 0 -- 0.6              & N/A                   \\ \hline
+WTC                 & 1970 -- 3240  & 1.6           & 3.8   & 0.6 -- 0.9        & 0.8 -- 1.1          & 0.3 -- 0.5    & 0.9         & 1.8         & 0.0 -- 0.8            & 0.3 -- 1.3              \\ \hline
 \end{tabular}
 \end{center}
 \label{Test_Parameters}
