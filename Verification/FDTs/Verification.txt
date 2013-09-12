@@ -41,9 +41,9 @@ Z=1, TMP_A=20, OUTPUT_FILE='Unprotected_Steel_Temperature.csv', Z_LABEL='1', STE
 # WTC Test 4, Bar Structural Element
 &MQH Q=3200., TMP_A=20., L=7.04, W=3.60, H=3.82, C_S=0.9, K_S=0.00012, RHO_S=737., DELTA=0.0254, T_END=840., OUTPUT_FILE='Protected_Steel_Temperature.csv', H_V=2.82, W_V=2.4, STEEL_PROTECTED=.TRUE., C_STEEL=450, W_D=50.1, K_I=0.10, RHO_I=208, C_I=2000, H_I=0.0191 /
 
-# Target Heat Flux (McCaffrey)
+# Target Heat Flux (Radiation)
 # Fleury 100 kW, 1:1 Burner
-&RAD AREA=0.09, Q=100., RADIATIVE_FRACTION=0.35, X=0.5,0.75,1.0, Z=0.0, IOR=2, Z_LABEL='f000', OUTPUT_FILE='Target_Heat_Flux_PSR.csv' /
+&RAD AREA=0.09, Q=100., RADIATIVE_FRACTION=0.35, X=0.5,0.75,1.0, Z=0.0, IOR=2, Z_LABEL='f000', OUTPUT_FILE='Target_Heat_Flux_RAD.csv' /
 
 # Ceiling Jet Temperature (Alpert)
 # NIST/NRC, Test 1
@@ -54,14 +54,14 @@ Z=1, TMP_A=20, OUTPUT_FILE='Unprotected_Steel_Temperature.csv', Z_LABEL='1', STE
 &SPRINKLER T_SQUARED=.TRUE., ALPHA=0.105, CUTOFF_TIME=99999, RTI=55, ACTIVATION_TEMPERATURE=68, H=2.09, R=2.2, TMP_A=16.6, LOCATION_FACTOR=1, OUTPUT_FILE='Sprinkler_Activation_Time_ALPERT.csv' /
 
 # Smoke Detector Activation Time (Alpert)
-# NIST Dunes 2000, Test SDC02
+# NIST Smoke Alarms, Test SDC02
 &SPRINKLER T_SQUARED=.TRUE., ALPHA=0.00463, CUTOFF_TIME=300, RTI=5, ACTIVATION_TEMPERATURE=31, H=2.1, R=1.3, TMP_A=21, LOCATION_FACTOR=1, OUTPUT_FILE='Smoke_Detector_Activation_Time_ALPERT.csv' /
 
 # Smoke Detector Activation Time (Milke)
-# NIST Dunes 2000, Test SDC02
+# NIST Smoke Alarms, Test SDC02
 &MILKE T_SQUARED=.TRUE., ALPHA=0.00463, CUTOFF_TIME=300, DELTA_T_C=10, H=2.1, OUTPUT_FILE='Smoke_Detector_Activation_Time_MILKE.csv' /
 
 # Smoke Detector Activation Time (Mowrer)
-# NIST Dunes 2000, Test SDC02
+# NIST Smoke Alarms, Test SDC02
 &MOWRER T_SQUARED=.TRUE., ALPHA=0.00463, CUTOFF_TIME=300, C_PL=0.67, C_CJ=1.2, H=2.1, R=1.3, OUTPUT_FILE='Smoke_Detector_Activation_Time_MOWRER.csv' /
 
