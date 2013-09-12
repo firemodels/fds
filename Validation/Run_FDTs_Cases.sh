@@ -43,8 +43,8 @@ $FDTs NBS_Multi-Room_FDTs_Inputs.txt
 cd $VALIDATION_DIR/NIST_NRC/FDTs
 $FDTs NIST_NRC_FDTs_Inputs.txt
 
-cd $VALIDATION_DIR/NIST_Dunes_2000/FDTs
-$FDTs NIST_Dunes_2000_FDTs_Inputs.txt
+cd $VALIDATION_DIR/NIST_Smoke_Alarms/FDTs
+$FDTs NIST_Smoke_Alarms_FDTs_Inputs.txt
 
 cd $VALIDATION_DIR/SP_AST/FDTs
 $FDTs SP_AST_FDTs_Inputs.txt
