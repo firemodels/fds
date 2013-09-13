@@ -596,14 +596,14 @@ because the same smoke detection algorithm is used to predict activation of eith
 
 Although a load cell was used in the experiments to measure the mass loss rate of the fuel package, the mass loss data
 were not reliable enough to reconstruct the HRR curves for each test. Instead, the HRR curves were determined by approximating
-the fire growth using a $t^2$ ramp, as in Eq.~(\ref{eq:t_squared}). The parameters for the $t^2$ ramp were calibrated in FDS
+the fire growth using a $t$-squared ramp, as in Eq.~(\ref{eq:t_squared}). The parameters for the $t$-squared ramp were calibrated in FDS
 by using the temperature measured at the highest thermocouple in the tree (2~cm below the ceiling) in the fire room.
 \be
 \dot Q = \dot Q_0 \left( \frac{t}{\tau} \right)^2
 \label{eq:t_squared}
 \ee
 A time offset was used to align the predicted ceiling thermocouple temperatures with the measured temperatures.
-This offset is reported as the time at which the $t^2$ ramp begins.
+This offset is reported as the time at which the $t$-squared ramp begins.
 The t-squared calibration parameters and time offsets for the HRR ramps are shown in Table~\ref{tab:NIST_Smoke_Alarms_Summary}.
 Additionally, the ignition source had a small effect on the measured ceiling thermocouple temperatures. Therefore,
 the size of the ignition source was approximated as either 3~kW or 7~kW, and the time offset of the ignition source was
