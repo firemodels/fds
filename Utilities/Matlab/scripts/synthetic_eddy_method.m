@@ -30,8 +30,8 @@ plot(0.9*uprof,z,'k--')
 
 H(3)=plot(umean,z,'b>-');
 axis([.4 1.2 0 1])
-xlabel('$u$ (m/s)')
-ylabel('$z$ (m)')
+xlabel('\it{u} (m/s)')
+ylabel('\it{z} (m)')
 
 k = find(strcmp(M.colheaders,'urms'));
 z = M.data(:,k-1);
@@ -91,8 +91,8 @@ plot(0.9*uprof,z,'k--')
 
 H(3)=plot(umean,z,'b>-');
 axis([0 1.2 0 1])
-xlabel('$u$ (m/s)')
-ylabel('$z$ (m)')
+xlabel('\it{u} (m/s)')
+ylabel('\it{z} (m)')
 
 k = find(strcmp(M.colheaders,'urms'));
 z = M.data(:,k-1);
@@ -151,8 +151,8 @@ plot(0.9*uprof,z,'k--')
 
 H(3)=plot(umean,z,'b>-');
 axis([0 1.4 0 1])
-xlabel('$u$ (m/s)')
-ylabel('$z$ (m)')
+xlabel('\it{u} (m/s)')
+ylabel('\it{z} (m)')
 
 k = find(strcmp(M.colheaders,'urms'));
 z = M.data(:,k-1);
