@@ -1202,7 +1202,7 @@ make_smv_verification_guide()
 
 run_correlations()
 {
-   # Compile Correlations.f90 and run correlations cases
+   # Compile correlations.f90 and run correlations cases
    cd $FDS_SVNROOT/Validation
    ./Run_Correlation_Cases.sh &> $FIREBOT_DIR/output/stage9a_correlations
 }
