@@ -167,15 +167,15 @@ In this section we discuss the basic extinction model for simple chemistry witho
 \item If the cell temperature is below the auto-ignition temperature for all fuels in the cell then combustion is suppressed. The auto-ignition temperature for each fuel is zero by default; thus, the user does not need to specify an ignition source.
 \item If the potential combustion heat release from a \emph{local pocket of stoichiometric fuel-air-product mixture} cannot raise the temperature of that mixture above an empirically determined limiting flame temperature, $T_{\rm LFT}$, then combustion is suppressed.  Consider the simple reaction $\mbox{Fuel} + \mbox{Air} \rightarrow \mbox{Products}$. The local mass fractions of lumped species Fuel, Air, and Products in the cell at the beginning of the combustion time step are $[Z_{\rm F}, Z_{\rm A}, Z_{\rm P}]$ and $s$ is the mass stoichiometric coefficient for Air (mass of Air required per mass of Fuel consumed). Based on the limiting reactant, the masses in the local pocket of stoichiometric mixture are defined to be
 \begin{align}
-\label{eq:dzf}  \Delta Z_{\rm F} &= \min(Z_{\rm F},Z_{\rm A}/s) \\
-\label{eq:dza}  \Delta Z_{\rm A} &= s \,\Delta Z_{\rm F} \\
-\label{eq:dzp}  \Delta Z_{\rm P} &= \min(\Delta Z_{\rm F}/Z_{\rm F},\Delta Z_{\rm A}/Z_{\rm A}) \, Z_{\rm P}
+\label{eq:dzf} m_{\rm F,st} &= \rho V_{\rm c} \min(Z_{\rm F},Z_{\rm A}/s) \\
+\label{eq:dza} m_{\rm A,st} &= s \, m_{\rm F,st}                          \\
+\label{eq:dzp} m_{\rm P,st} &= m_{\rm A,st} Z_{\rm P}/Z_{\rm A}           
 \end{align}
 The extinction criterion is then given by
 \begin{multline}
 \label{eq:extinction}
-\Delta Z_{\rm F} \, \left( h_{\rm F}(T)+\Delta h_{\rm c,F} \right) + \Delta Z_{\rm A} \, h_{\rm A}(T) + \Delta Z_{\rm P} \, h_{\rm P}(T)  < \\
-\Delta Z_{\rm F} \, h_{\rm F}(T_{\rm LFT}) + \Delta Z_{\rm A} \, h_{\rm A}(T_{\rm LFT}) + \Delta Z_{\rm P} \, h_{\rm P}(T_{\rm LFT}) 
+m_{\rm F,st} \, \left( h_{\rm F}(T)+\Delta h_{\rm c,F} \right) + m_{\rm A,st} \, h_{\rm A}(T) + m_{\rm P,st} \, h_{\rm P}(T)  < \\
+m_{\rm F,st} \, h_{\rm F}(T_{\rm LFT}) + m_{\rm A,st} \, h_{\rm A}(T_{\rm LFT}) + m_{\rm P,st} \, h_{\rm P}(T_{\rm LFT}) 
 \end{multline}
 where $T$ is the initial mean cell temperature and $\Delta h_{\rm c,F}$ is the heat of combustion of Fuel.
 \end{enumerate}
