@@ -1,7 +1,7 @@
 Scatter_Plot_Title,Ind_Title,Dep_Title,Plot_Min,Plot_Max,Title_Position,Key_Position,Paper_Width_Factor,Sigma_E,Weight_Data,Plot_Type,Plot_Filename
+"HGL Temperature, Natural Ventilation (MQH)",Measured Temperature Rise (\circC),Predicted Temperature Rise (\circC),0,1000,0.03 0.95,SouthEast,1,7,yes,linear,Correlation_Guide/SCRIPT_FIGURES/Scatterplots/HGL_Temperature_MQH
 "HGL Temperature, Forced Ventilation (FPA)",Measured Temperature Rise (\circC),Predicted Temperature Rise (\circC),0,500,0.03 0.95,SouthEast,1,7,yes,linear,Correlation_Guide/SCRIPT_FIGURES/Scatterplots/HGL_Temperature_FPA
 "HGL Temperature, Forced Ventilation (DB)",Measured Temperature Rise (\circC),Predicted Temperature Rise (\circC),0,500,0.03 0.95,SouthEast,1,7,yes,linear,Correlation_Guide/SCRIPT_FIGURES/Scatterplots/HGL_Temperature_DB
-"HGL Temperature, Natural Ventilation (MQH)",Measured Temperature Rise (\circC),Predicted Temperature Rise (\circC),0,1000,0.03 0.95,SouthEast,1,7,yes,linear,Correlation_Guide/SCRIPT_FIGURES/Scatterplots/HGL_Temperature_MQH
 "HGL Temperature, No Ventilation (Beyler)",Measured Temperature Rise (\circC),Predicted Temperature Rise (\circC),0,500,0.03 0.95,SouthEast,1,7,yes,linear,Correlation_Guide/SCRIPT_FIGURES/Scatterplots/HGL_Temperature_Beyler
 HGL Depth (ASET),Measured Layer Depth (m),Predicted Layer Depth (m),0,20,0.03 0.95,SouthEast,1,-1,yes,linear,Correlation_Guide/SCRIPT_FIGURES/Scatterplots/HGL_Depth_ASET
 HGL Depth (Yamana and Tanaka),Measured Layer Depth (m),Predicted Layer Depth (m),0,20,0.03 0.95,SouthEast,1,-1,yes,linear,Correlation_Guide/SCRIPT_FIGURES/Scatterplots/HGL_Depth_Yamana_Tanaka
