@@ -481,24 +481,24 @@ Given the cell composition vector $\mathbf{Z}$, the mass fractions of Fuel, Air,
 
 The stoichiometric masses of Fuel, Air, and Products depend on the limiting reactants computed in Sec.~\ref{fast_parallel_reactions}, which discusses fast parallel reactions:
 \begin{align}
-m_{\rm F,st} &= \sum_i |\Delta \hat{Y}_{{\rm F},i}| \\
-m_{\rm A,st} &= \sum_i \left|\left(\frac{\nu_{{\rm A},i} \,W_{{\rm A},i}}{\nu_{{\rm F},i} \,W_{{\rm F},i}}\right)\Delta \hat{Y}_{{\rm F},i} \right| \\
+m_{\rm F,st} &= \sum_i |\Delta \hat{Y}_{{\rm F},i}| \quad \mbox{for fast reactions $i$}\\
+m_{\rm A,st} &= \sum_i \left|\left(\frac{\nu_{{\rm A},i} \,W_{{\rm A},i}}{\nu_{{\rm F},i} \,W_{{\rm F},i}}\right)\Delta \hat{Y}_{{\rm F},i} \right| \quad \mbox{for fast reactions $i$} \\
 m_{\rm P,st} &= m_{\rm A,st} \, Z_{\rm P}/Z_{\rm A}
 \end{align}
 
 The components of the mixture composition vectors are given by
 \begin{align}
-\overline{Z}_{{\rm F,st},\alpha} &= \frac{\sum_i |\Delta \hat{Y}_{\alpha,i}| \quad \mbox{for $\alpha$=Fuel in $i$}}{m_{\rm F,st}} \\
-\overline{Z}_{{\rm A,st},\alpha} &= \frac{\sum_i \left|\left(\frac{\nu_{\alpha,i} \,W_\alpha}{\nu_{{\rm F},i} \,W_{{\rm F},i}}\right)\Delta \hat{Y}_{{\rm F},i} \right| \quad \mbox{for $\alpha$=Air in $i$}}{m_{\rm A,st}} \\
-\overline{Z}_{{\rm P,st},\alpha} &= \frac{good question}{m_{\rm P,st}} \\
-\overline{Z}_{{\rm PFP,st},\alpha} &= \frac{\sum_i \left|\left(\frac{\nu_{\alpha,i} \,W_\alpha}{\nu_{{\rm F},i} \,W_{{\rm F},i}}\right)\Delta \hat{Y}_{{\rm F},i} \right| + GQ}{m_{\rm F,st} + m_{\rm A,st} + m_{\rm P,st}} 
+\overline{Z}_{{\rm F,st},\alpha} &= \frac{\sum_i |\Delta \hat{Y}_{\alpha,i}| \quad (\mbox{for $\alpha$=Fuel in fast reaction $i$}) }{m_{\rm F,st}} \\
+\overline{Z}_{{\rm A,st},\alpha} &= \frac{\sum_i \left|\left(\frac{\nu_{\alpha,i} \,W_\alpha}{\nu_{{\rm F},i} \,W_{{\rm F},i}}\right)\Delta \hat{Y}_{{\rm F},i} \right| \quad (\mbox{for $\alpha$=Air in fast reaction $i$}) }{m_{\rm A,st}} \\
+\overline{Z}_{{\rm P,st},\alpha} &= \frac{GQ}{m_{\rm P,st}} \\
+\overline{Z}_{{\rm PFP,st},\alpha} &= \frac{\sum_i \left|\left(\frac{\nu_{\alpha,i} \,W_\alpha}{\nu_{{\rm F},i} \,W_{{\rm F},i}}\right)\Delta \hat{Y}_{{\rm F},i} \right| \quad \mbox{(for $\nu_{\alpha,i}>0$)} \quad + \quad GQ}{m_{\rm F,st} + m_{\rm A,st} + m_{\rm P,st}} 
 \end{align}
 
 The limiting flame temperature is taken as a mass-weighted average based on the stoichiometric fuel mixture composition:
 \begin{equation}
-T_{\rm LFT} = \sum_\alpha \overline{Z}_{{\rm F,st},\alpha} \, T_{{\rm LFT},\alpha}
+T_{\rm LFT} = \frac{\sum_i |\Delta \hat{Y}_{\alpha,i}| \, T_{{\rm LFT},i} \quad (\mbox{for $\alpha$=Fuel in fast reaction $i$}) }{m_{\rm F,st}} 
 \end{equation}
-where $T_{{\rm LFT},\alpha}$ is the pure component LFT of species $\alpha$.
+where $T_{{\rm LFT},i}$ is the LFT of reaction $i$.
 
 \subsection{Finite-Rate Chemistry (Arrhenius Reaction)}
 \label{Reaction_Rate_Model}
