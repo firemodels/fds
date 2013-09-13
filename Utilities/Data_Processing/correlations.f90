@@ -1,4 +1,4 @@
-PROGRAM Correlations
+PROGRAM correlations
 
 IMPLICIT NONE
 
