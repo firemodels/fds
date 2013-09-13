@@ -1202,9 +1202,9 @@ make_smv_verification_guide()
 
 run_correlations()
 {
-   # Compile FDTs.f90 and run correlations cases
+   # Compile Correlations.f90 and run correlations cases
    cd $FDS_SVNROOT/Validation
-   ./Run_FDTs_Cases.sh &> $FIREBOT_DIR/output/stage9a_correlations
+   ./Run_Correlation_Cases.sh &> $FIREBOT_DIR/output/stage9a_correlations
 }
 
 check_correlations()
@@ -1229,7 +1229,7 @@ run_matlab_correlations()
 {
    # Run Matlab plotting script
    cd $FDS_SVNROOT/Utilities/Matlab
-   matlab -r "try, disp('Running Matlab FDTs Validation script'), FDTs_validation_script, catch, disp('Error'), err = lasterror, err.message, err.stack, end, exit" &> $FIREBOT_DIR/output/stage9b_correlations
+   matlab -r "try, disp('Running Matlab Correlation Validation script'), Correlation_validation_script, catch, disp('Error'), err = lasterror, err.message, err.stack, end, exit" &> $FIREBOT_DIR/output/stage9b_correlations
 }
 
 check_matlab_correlations()
@@ -1247,36 +1247,36 @@ check_matlab_correlations()
 }
 
 #  =======================================
-#  = Stage 9c - Build correlations guide =
+#  = Stage 9c - Build Correlation Guide =
 #  =======================================
 
-check_correlations_guide()
+check_correlation_guide()
 {
    # Scan and report any errors or warnings in build process for guide
    cd $FIREBOT_DIR
    if [[ `grep -I "successfully" $1` == "" ]]
    then
       # There were errors/warnings in the guide build process
-      echo "Warnings from Stage 9c - Build Correlations Guide:" >> $WARNING_LOG
+      echo "Warnings from Stage 9c - Build Correlation Guide:" >> $WARNING_LOG
       echo $3 >> $WARNING_LOG # Name of guide
       cat $1 >> $WARNING_LOG # Contents of log file
       echo "" >> $WARNING_LOG
    else
       # Guide built successfully; there were no errors/warnings
       # Copy guide to Firebot's local website
-      cp $2 /var/www/html/firebot/fdts_manuals/
+      cp $2 /var/www/html/firebot/correlation_guide/
    fi
 }
 
-make_correlations_guide()
+make_correlation_guide()
 {
-   cd $FDS_SVNROOT/Manuals/FDTs_Validation_Guide
+   cd $FDS_SVNROOT/Manuals/Correlation_Guide
 
    # Build FDS User Guide
-   ./make_guide.sh &> $FIREBOT_DIR/output/stage9c_correlations_guide
+   ./make_guide.sh &> $FIREBOT_DIR/output/stage9c_correlation_guide
 
    # Check guide for completion and copy to website if successful
-   check_correlations_guide $FIREBOT_DIR/output/stage9c_correlations_guide $FDS_SVNROOT/Manuals/FDTs_Validation_Guide/FDTs_Validation_Guide.pdf 'Correlations Guide'
+   check_correlation_guide $FIREBOT_DIR/output/stage9c_correlation_guide $FDS_SVNROOT/Manuals/Correlation_Guide/Correlation_Guide.pdf 'Correlation Guide'
 }
 
 #  =====================================================
@@ -1483,7 +1483,7 @@ run_matlab_correlations
 check_matlab_correlations
 
 ### Stage 9c ###
-make_correlations_guide
+make_correlation_guide
 
 ### Wrap up and report results ###
 set_files_world_readable
