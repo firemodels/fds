@@ -171,13 +171,15 @@ In this section we discuss the basic extinction model for simple chemistry witho
 \label{eq:dza} m_{\rm A,st} &= s \, m_{\rm F,st}                          \\
 \label{eq:dzp} m_{\rm P,st} &= m_{\rm A,st} Z_{\rm P}/Z_{\rm A}           
 \end{align}
-The extinction criterion is then given by
+The extinction criterion is then given by ({\ct EXTINCTION=True} if the following inequality is true)
 \begin{multline}
 \label{eq:extinction}
-m_{\rm F,st} \, \left( h_{\rm F}(T)+\Delta h_{\rm c,F} \right) + m_{\rm A,st} \, h_{\rm A}(T) + m_{\rm P,st} \, h_{\rm P}(T)  < \\
-m_{\rm F,st} \, h_{\rm F}(T_{\rm LFT}) + m_{\rm A,st} \, h_{\rm A}(T_{\rm LFT}) + m_{\rm P,st} \, h_{\rm P}(T_{\rm LFT}) 
+m_{\rm F,st} \, \left( h[\overline{\mathbf{Z}}_{\rm F,st},T]+\Delta h_{\rm c}[\overline{\mathbf{Z}}_{\rm F,st}] \right) + m_{\rm A,st} \, h(\overline{\mathbf{Z}}_{\rm A,st},T) + m_{\rm P,st} \, h(\overline{\mathbf{Z}}_{\rm P,st},T)  < \\
+(m_{\rm F,st} + m_{\rm A,st} + m_{\rm P,st}) \, h(\overline{\mathbf{Z}}_{\rm PFP},T_{\rm LFT}) 
 \end{multline}
-where $T$ is the initial mean cell temperature and $\Delta h_{\rm c,F}$ is the heat of combustion of Fuel.
+where $T$ is the initial mean cell temperature.  The respective mixture composition vectors are denoted by an overline.  For example, $\overline{\mathbf{Z}}_{\rm F,st}$ is the composition of the stoichiometric fuel mixture; $\Delta h_{\rm c}(\overline{\mathbf{Z}}_{\rm F,st})$ is the heat of combustion of the stoichiometric fuel mixture.  The composition vector for the Post-Flame Products is $\overline{\mathbf{Z}}_{\rm PFP}$.
+
+For the simple chemistry case, the Fuel, Air, and Product mixtures are ``pure''.  But Eq.~(\ref{eq:extinction}) is general enough to account for multiple fuels and multiple fast reactions.  In that case, the mixture compositions and the limiting flame temperature are adjusted as discussed in Sec.~\ref{General_Extinction}.
 \end{enumerate}
 
 %The limiting flame temperature extinction algorithm is outlined below.
