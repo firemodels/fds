@@ -3,7 +3,7 @@
 # validation_uncertainty.py
 
 # This script generates input files for the quantification of uncertainty of
-# the THIEF model (CAROLFIRE cases) using the FDTs program
+# the THIEF model (CAROLFIRE cases) using the correlations program
 
 from __future__ import division
 import numpy as np
@@ -39,7 +39,7 @@ if mode == 'write':
     TMP_RAMP = TMP_A + np.random.normal(450-TMP_A, 0.025*(450-TMP_A), n_samples)
     T_END = 1800
 
-    # Generate FDTs input file
+    # Generate correlation input file
     f = open(input_file, 'w')
     for i in range(len(TMP_RAMP)):
         output_string = "{} D={:.2f}, MASS_PER_LENGTH={:.3f}, JACKET_THICKNESS={:.2f}, TMP_A={:.0f}, T_RAMP(0:5)=0,70,120,180,240,300, TMP_RAMP(0:5)={:.1f},{:.1f},{:.1f},{:.1f},{:.1f},{:.1f}, T_END={:.0f}, OUTPUT_FILE='{}' /\n".format('&THIEF', D[i], MASS_PER_LENGTH, JACKET_THICKNESS[i], TMP_A, TMP_A, TMP_RAMP[i], TMP_RAMP[i], TMP_RAMP[i], TMP_RAMP[i],TMP_RAMP[i], T_END, output_file + '_' + str(i) + '.csv')

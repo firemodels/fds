@@ -82,7 +82,7 @@ if Stats_Output == 1
 end
 
 % Write statistics information to a LaTeX table for inclusion
-% in the FDS Validation Guide or FDTs Validation Guide
+% in the FDS Validation Guide or Correlation Guide
 if Stats_Output == 2
     fid = fopen(Statistics_Tex_Output, 'wt');
     % Generate table header information in .tex file
@@ -125,7 +125,7 @@ if Stats_Output == 2
 end
 
 % Write histogram information to a LaTeX file for inclusion
-% in the FDS Validation Guide or FDTs Validation Guide
+% in the FDS Validation Guide or Correlation Guide
 if (Stats_Output == 2) && (exist('Output_Histograms','var') == 1) && (isempty(Output_Histograms) == 0)
     fid = fopen(Histogram_Tex_Output, 'wt');
     % Write plots to LaTeX figures, eight per page
