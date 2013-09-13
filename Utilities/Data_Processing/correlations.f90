@@ -1,4 +1,4 @@
-PROGRAM FDTs
+PROGRAM Correlations
 
 IMPLICIT NONE
 

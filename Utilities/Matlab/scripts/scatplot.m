@@ -65,7 +65,7 @@ Size_Save_Quantity = size(Save_Quantity);
 % This is also used to enable histogram plotting for validation cases.
 % Stats_Output = 0: No output statistics
 % Stats_Output = 1: FDS verification statistics
-% Stats_Output = 2: FDS or FDTs validation statistics
+% Stats_Output = 2: FDS or Correlation validation statistics
 if exist('Stats_Output', 'var') == 0
     Stats_Output = 0;
 end
