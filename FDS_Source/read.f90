@@ -2727,10 +2727,9 @@ ALLOCATE(REACTION(N_REACTIONS),STAT=IZERO)
 ! Check appropriate extinction model
 
 IF (N_REACTIONS > 1 .AND. EXTINCT_MOD == 2 .AND. SUPPRESSION) THEN
-	WRITE(MESSAGE,'(A)') 'ERROR: The default EXTINCTION MODEL is designed for 1 reaction. Multi-reaction extinction is developing.'
-	CALL SHUTDOWN(MESSAGE)  
+   WRITE(MESSAGE,'(A)') 'ERROR: The default EXTINCTION MODEL is designed for 1 reaction. Multi-reaction extinction is developing.'
+   CALL SHUTDOWN(MESSAGE)
 ENDIF
-
 
 ! Read and store the reaction parameters
 
