@@ -160,8 +160,6 @@ A limitation of the mixing-controlled reaction model described above is that it 
 
 FDS uses simple empirical rules---which ignore strain---to predict local extinction within a certain grid cell based on resolved species concentrations and the mean cell temperature.  The default FDS extinction model consists of two parts (shown below) based on the concept of a \emph{critical flame temperature} \cite{SFPE:Beyler}. If either criterion fails, then there is no chemical reaction and $\dot{m}_\alpha'''=0$ and $\dot{q}'''=0$ for that time step.
 
-In this section we discuss the basic extinction model for simple chemistry without additional diluents.  Details of the general case considering multiple, infinitely fast reactions with added diluents are discussed in Sec.~\ref{General_Extinction}.
-
 \paragraph{Basic Extinction Model}
 \begin{enumerate}
 \item If the cell temperature is below the auto-ignition temperature (AIT) for all fuels in the cell then combustion is suppressed. The auto-ignition temperature for each fuel is zero by default; thus, the user does not need to specify an ignition source.
