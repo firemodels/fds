@@ -899,7 +899,7 @@ The figures on the following pages display the number of sprinklers actuated as 
 
 \section{Smoke Detector Activation Times}
 
-There are two methods of modeling smoke detector activation. The first method is based on the assumption that activation occurs when the gas temperature near the detector rises above a given threshold. Essentially this method treats the smoke detector exactly like a heat detector with a relatively low RTI value. Figure~\ref{NIST_Smoke_Alarms_Scatterplot_Temp_Rise} compares the measured versus predicted smoke detector activation times using a heat detector/temperature rise approach. The heat detectors were set with an RTI of 5~$\sqrt{\hbox{m}\cdot \hbox{s}}$ and an activation temperature of \SI{10}{\celsius} above ambient temperature.
+FDS can model smoke detector activation in two ways. The first method is based on the assumption that activation occurs when the gas temperature near the detector rises above a given threshold. Essentially this method treats the smoke detector exactly like a heat detector with a relatively low RTI value. Figure~\ref{NIST_Smoke_Alarms_Scatterplot_Temp_Rise} compares the measured versus predicted smoke detector activation times using a heat detector/temperature rise approach. The heat detectors were set with an RTI of 5~$\sqrt{\hbox{m}\cdot \hbox{s}}$ and an activation temperature of \SI{5}{\celsius} above ambient, based on the suggestion of Bukowski and Averill~\cite{Bukowski:2}.
 
 \begin{figure}[h!]
 \begin{center}
@@ -912,7 +912,7 @@ There are two methods of modeling smoke detector activation. The first method is
 \label{NIST_Smoke_Alarms_Scatterplot_Temp_Rise}
 \end{figure}
 
-The second method of predicting smoke detector activation is to use an empirical model of the smoke transit time within the device to estimate when the smoke concentration will rise above a particular threshold value set by the manufacturer. Figure~\ref{NIST_Smoke_Alarms_Scatterplot} compares the measured versus predicted smoke detector activation times using the smoke detector model.
+The second method of predicting smoke detector activation is to use an empirical model of the smoke transit time within the device to estimate when the smoke concentration will rise above a particular threshold value set by the manufacturer. Figure~\ref{NIST_Smoke_Alarms_Scatterplot} compares the measured versus predicted smoke detector activation times using the smoke detector model. Note that the test report~\cite{Bukowski:1} does not provide the parameters that characterize the smoke transit time within the detector. Instead, generic values are used.
 
 
 \begin{figure}[h!]
