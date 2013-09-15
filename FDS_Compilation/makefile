@@ -469,6 +469,7 @@ openmp_intel_osx_64 : setup $(obj_serial)
 	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_serial)
 
 intel_osx_64_db : FFLAGS = -m64 -check -warn unused -O0 -auto -WB -traceback -g -fpe0 -fltconsistency -vec_report0 -stand:f03 -mmacosx-version-min=10.4
+intel_osx_64_db : LFLAGS = -static-intel
 intel_osx_64_db : FCOMPL = ifort
 intel_osx_64_db : obj = fds_intel_osx_64_db
 intel_osx_64_db : setup $(obj_serial)
@@ -489,7 +490,7 @@ openmp_intel_osx_64_db : obj = fds_openmp_intel_osx_64_db
 openmp_intel_osx_64_db : setup $(obj_serial)
 	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_serial)
 
-intel_osx_64_dv : FFLAGS = -m64 -O2 -vec_report0 -traceback -mmacosx-version-min=10.4
+intel_osx_64_dv : FFLAGS = -m64 -O2 -vec_report0 -traceback -stand:f03 -mmacosx-version-min=10.4
 intel_osx_64_dv : LFLAGS = -static-intel
 intel_osx_64_dv : FCOMPL = ifort
 intel_osx_64_dv : obj = fds_intel_osx_64_dv
