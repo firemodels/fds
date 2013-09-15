@@ -2684,7 +2684,7 @@ CHARACTER(100) :: FORMULA
 CHARACTER(30), TARGET  :: SPEC_ID_NU(MAX_SPECIES),SPEC_ID_N_S(MAX_SPECIES)
 CHARACTER(255) :: EQUATION
 CHARACTER(100) :: FWD_ID
-INTEGER :: NR,NS,NS2
+INTEGER :: NR,NS,NS2,NFR
 REAL(EB) :: SOOT_YIELD,CO_YIELD,EPUMO2,A, &
             CRITICAL_FLAME_TEMPERATURE,HEAT_OF_COMBUSTION,NU(MAX_SPECIES),E,N_S(MAX_SPECIES),C,H,N,O, &
             AUTO_IGNITION_TEMPERATURE,SOOT_H_FRACTION,N_T,EQBM_CONS
@@ -2724,14 +2724,9 @@ ENDDO COUNT_REAC_LOOP
 
 ALLOCATE(REACTION(N_REACTIONS),STAT=IZERO)
 
-! Check appropriate extinction model
-
-IF (N_REACTIONS > 1 .AND. EXTINCT_MOD == 2 .AND. SUPPRESSION) THEN
-   WRITE(MESSAGE,'(A)') 'ERROR: The default EXTINCTION MODEL is designed for 1 reaction. Multi-reaction extinction is developing.'
-   CALL SHUTDOWN(MESSAGE)
-ENDIF
 
 ! Read and store the reaction parameters
+NFR = 0 ! Number of fast reactions
 
 REAC_READ_LOOP: DO NR=1,N_REACTIONS
 
@@ -2817,8 +2812,15 @@ REAC_READ_LOOP: DO NR=1,N_REACTIONS
       IF (RN%E == -1000._EB) THEN
          IF (.NOT. RN%REVERSE) THEN
             RN%FAST_CHEMISTRY=.TRUE.
+            NFR = NFR + 1
          ENDIF
       ENDIF
+   ENDIF
+
+   ! Check appropriate extinction model
+   IF (NFR > 1 .AND. EXTINCT_MOD == 2 .AND. SUPPRESSION) THEN      
+      WRITE(MESSAGE,'(A)') 'ERROR: The default EXTINCTION MODEL is designed for 1 reaction. See Tech Guide'
+      CALL SHUTDOWN(MESSAGE)
    ENDIF
 
    ! Determine the number of stoichiometric coefficients for this reaction
