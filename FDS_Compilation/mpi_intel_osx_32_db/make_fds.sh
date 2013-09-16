@@ -3,7 +3,7 @@ platform=ia32
 dir=`pwd`
 target=${dir##*/}
 
-source $IFORT_COMPILER/bin/ifortvars.sh $platform
+source $IFORT_COMPILER/bin/compilervars.sh $platform
 source ~/.bashrc_fds $platform
 
 echo Building $target
