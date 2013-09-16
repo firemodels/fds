@@ -221,19 +221,20 @@ for j=2:length(Q);
         % Weight the data -- for each point on the scatterplot compute a
         % "weight" to provide sparse data with greater importance in the
         % calculation of the accuracy statistics
+        
         weight = zeros(size(Measured_Values));
         
         if strcmp(Weight_Data,'yes')
             Max_Measured_Value = max(Measured_Values);
             Bin_Size = Max_Measured_Value/10;
             for ib=1:10
-                bin_indices = find(Measured_Values>=(ib-1)*Bin_Size & Measured_Values<ib*Bin_Size);
+                bin_indices = find(Measured_Values>(ib-1)*Bin_Size & Measured_Values<=ib*Bin_Size);
                 bin_weight(ib) = n_pts/length(bin_indices);
                 clear bin_indices
             end
             for iv=1:n_pts
                 for ib=1:10
-                    if Measured_Values(iv)>=(ib-1)*Bin_Size && Measured_Values(iv)<ib*Bin_Size; weight(iv) = bin_weight(ib); end
+                    if Measured_Values(iv)>(ib-1)*Bin_Size && Measured_Values(iv)<=ib*Bin_Size; weight(iv) = bin_weight(ib); end
                 end
             end
         else
@@ -243,6 +244,7 @@ for j=2:length(Q);
         end
         
         % Calculate statistics
+        
         E_bar = sum(log(Measured_Values).*weight)/sum(weight);
         M_bar = sum(log(Predicted_Values).*weight)/sum(weight);
         Size_Measured = size(Measured_Values);
