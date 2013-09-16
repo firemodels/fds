@@ -3023,6 +3023,14 @@ REAC_LOOP: DO NR=1,N_REACTIONS
          ENDIF
       ENDDO
    ENDDO
+   
+   ! Find AIR index
+   GET_AIR_INDEX_LOOP: DO NS = 0,N_TRACKED_SPECIES      
+      IF (RN%NU(NS) < 0._EB .AND. NS /= RN%FUEL_SMIX_INDEX) THEN
+         RN%AIR_SMIX_INDEX = NS
+         EXIT GET_AIR_INDEX_LOOP
+      ENDIF
+   ENDDO GET_AIR_INDEX_LOOP
 
    ! Adjust mol/cm^3/s based rate to kg/m^3/s rate
    RN%RHO_EXPONENT = 0._EB
