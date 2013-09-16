@@ -146,7 +146,11 @@ where $L$ is the path length, $I$ and $I_0$ are the laser signal and reference s
 
 \subsubsection{Pressure Gauges}
 
-The uncertainty in pressure measurements is typically small, but depends on the sensor type and calibration. In the NIST/NRC experiments, the differential pressure gauge used was temperature compensated, highly linear, and very stable. A conservative estimate of the systematic relative standard uncertainty is 0.5~\%. However, the average difference between the repeat measurements in the NIST/NRC experiments was about 14~\%. Changes in compartment leakage due to the effects of the fire are a likely explanation for this large difference between replicate tests. A combined relative standard uncertainty of 14~\% is suggested for the measurement of pressure.
+The uncertainty in pressure measurements is typically small, but depends on the sensor type and calibration. In the NIST/NRC experiments, the differential pressure gauge used was temperature compensated, highly linear, and very stable. The estimated relative standard uncertainty is 0.5~\%. 
+
+\subsubsection{Bi-Directional Probes}
+
+Gas velocity is typically measured in fire experiments using bi-directional probes. These devices work like pitot tubes but have much larger openings. Bryant~\cite{Bryant:FSJ2009} estimates that the standard relative uncertainty of this measurement, assuming that the probe is aligned well with the flow, is approximately 7~\%.
 
 \subsubsection{Oxygen Consumption Calorimeters}
 
@@ -196,7 +200,13 @@ The maximum compartment pressure is achieved when the pressure rise term in Eq.~
 \be
    (p-p_\infty)_{\max} \approx \frac{\rho_\infty}{2} \left( \frac{ (\gamma-1)  \left( \dot{Q} - \dot{Q}_{\rm loss} \right) + \gamma p_\infty \dot{V} }{\gamma p_\infty A_{\rm leak} } \right)^2 \label{pmax}
 \ee
-The test report for the NIST/NRC experiments contains estimates of the uncertainty in the HRR, ventilation rate and leakage area. To calculate the uncertainty in the maximum pressure rise resulting from the uncertainty in these three parameters, the pressure rise estimate in Eq.~(\ref{pmax}) was calculated using 1000 randomly selected sets of values of the HRR, ventilation rate, and leakage area. These parameters were assumed to be randomly distributed with mean values of 1000~kW, 1~m$^3$/s, and 0.06~m$^2$ and relative standard uncertainties of 75~kW, 0.1~m$^3$/s, and 0.0021~m$^2$. The mean values of these parameters were typical of the NIST/NRC experiments, and the uncertainties were reported in the test report. The resulting relative standard uncertainty in the pressure is 21~\%.
+The test report for the NIST/NRC experiments contains estimates of the uncertainty in the HRR, ventilation rate and leakage area. To calculate the uncertainty in the maximum pressure rise resulting from the uncertainty in these three parameters, the pressure rise estimate in Eq.~(\ref{pmax}) was calculated using 1000 randomly selected sets of values of the HRR, ventilation rate, and leakage area. These parameters were assumed to be randomly distributed with mean values of 1000~kW, 1~m$^3$/s, and 0.06~m$^2$ and relative standard uncertainties of 75~kW, 0.1~m$^3$/s, and 0.0021~m$^2$. The mean values of these parameters were typical of the NIST/NRC experiments, and the uncertainties were reported in the test report. The resulting relative standard uncertainty in the pressure of a closed compartment due to the uncertainty in the HRR, ventilation rate, and leakage area is 21~\%.
+
+For an open compartment, in which the ventilation rate and leakage area have much less influence, the relative standard uncertainty in the pressure is twice that of the HRR, 15~\%. 
+
+\subsubsection{Velocity}
+
+Fire-induced velocities, as in a plume or ceiling jet, are roughtly proportional to the HRR to the 1/3 power~\cite{SFPE:Alpert}. Given that the relative standard uncertainty in the HRR is 7.5~\%, the uncertainty in gas velocity due to the propagated effect of the uncertainty in the HRR is 2.5~\%.
 
 \subsubsection{Heat Flux}
 
@@ -230,6 +240,15 @@ To determine how the uncertainties in the measured parameters affect the sprinkl
 
 The activation times recorded by Vettori include two or three replicates for each configuration. The standard deviation of the 45 measured activation times, normalized by the mean of each set of replicates, was 6~\%, consistent with the result obtained above.
 
+\subsubsection{Number of Activated Sprinklers}
+
+Alpert's ceiling jet correlation~\cite{SFPE:Alpert} predicts the temperature rise, $T-T_\infty$ ($^\circ$C), as a function of the HRR, $\dot{Q}$ (kW), and radial distance, $r$ (m), from the plume centerline:
+\be
+   T-T_\infty = 5.38 \; \frac{ \dot{Q}^{2/3} / H^{5/3} }{ (r/H)^{2/3} } \quad ; \quad r/H > 0.18
+\ee
+For a given ceiling height, $H$, the radial extent of the sprinkler activation temperature is directly proportional to $\dot{Q}$. The number of activated sprinklers is roughly proportional to the square of this radial distance, assuming the sprinklers are uniformly spaced on a rectangular grid. Thus, the uncertainty in the number of activated sprinklers due to the uncertainty in the HRR is 15~\%. 
+
+
 \subsubsection{Electrical Cable Failure Time}
 
 The uncertainty in the reported cable failure times is due mainly to uncertainties in the measured exposing temperature, cable diameter, and jacket thickness. The uncertainty in the measured mass per unit length of the cable is assumed to be negligible. To determine the uncertainty in the cable failure time, the heat conduction equation in the THIEF model was solved numerically using 10,000 random selections of the exposing temperature, cable diameter, and jacket thickness. The cable diameter was varied from 16.25~mm to 16.35~mm, and the jacket thickness was varied from 1.45~mm to 1.55~mm. The uncertainty in the exposing temperature of the cylindrical heater was assumed to be 2.5~\%, the lower bound of the range of uncertainty estimates for thermocouple measurements. The mass per unit length of the cable was assumed to be 0.529~kg/m, and the ambient temperature was assumed to be 20~$^\circ$C. This procedure yielded an estimated relative standard uncertainty in the cable failure time of 12~\%.
@@ -253,8 +272,11 @@ Gas and Solid Temperatures    & 0.05            & 0.05              & 0.07      
 HGL Depth                     & 0.05            & 0.00              & 0.05                                      \\ \hline
 Gas Concentrations            & 0.02            & 0.08              & 0.08                                      \\ \hline
 Smoke Concentration           & 0.14            & 0.13              & 0.19                                      \\ \hline
-Pressure                      & 0.14            & 0.21              & 0.25                                      \\ \hline
+Pressure, Closed Compartment  & 0.01            & 0.21              & 0.21                                      \\ \hline
+Pressure, Open Compartment    & 0.01            & 0.15              & 0.15                                      \\ \hline
+Velocity                      & 0.07            & 0.03              & 0.08                                      \\ \hline
 Heat Flux                     & 0.05            & 0.10              & 0.11                                      \\ \hline
+No.~Activated Sprinklers      & 0.00            & 0.15              & 0.15                                      \\ \hline
 Sprinkler Activation Time     & 0.00            & 0.06              & 0.06                                      \\ \hline
 Cable Failure Time            & 0.00            & 0.12              & 0.12                                      \\ \hline
 Smoke Alarm Activation Time   & 0.00            & 0.34              & 0.34                                      \\ \hline

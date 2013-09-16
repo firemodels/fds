@@ -8,24 +8,24 @@ Sloped Ceiling Jet Temperature,Measured Temperature Rise (\circC),Predicted Temp
 Plume Temperature,Measured Temperature Rise (\circC),Predicted Temperature Rise (\circC),0,1000,0.03 0.95,SouthEast,1,7,yes,linear,FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/FDS_Plume_Temperature
 Oxygen Concentration,Measured Drop in Volume Fraction,Predicted Drop in Volume Fraction,0,0.15,0.03 0.95,SouthEast,1,8,yes,linear,FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/FDS_Oxygen_Concentration
 Carbon Dioxide Concentration,Measured Rise in Volume Fraction,Predicted Rise in Volume Fraction,0,0.15,0.03 0.95,SouthEast,1,8,yes,linear,FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/FDS_Carbon_Dioxide_Concentration
-Smoke Concentration,Measured Density (mg/m^3),Predicted Density (mg/m^3),0,300,0.03 0.95,SouthEast,1,20,yes,linear,FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/FDS_Smoke_Concentration
-Compartment Pressure,Measured Pressure Rise (Pa),Predicted Pressure Rise (Pa),0,400,0.03 0.95,SouthEast,1,25,yes,linear,FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/FDS_Compartment_Pressure
-Open Compartment Pressure,Measured Pressure Drop (Pa),Predicted Pressure Drop (Pa),0,30,0.03 0.95,SouthEast,1,25,yes,linear,FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/FDS_Open_Compartment_Pressure
+Smoke Concentration,Measured Density (mg/m^3),Predicted Density (mg/m^3),0,300,0.03 0.95,SouthEast,1,19,yes,linear,FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/FDS_Smoke_Concentration
+Compartment Pressure,Measured Pressure Rise (Pa),Predicted Pressure Rise (Pa),0,400,0.03 0.95,SouthEast,1,21,yes,linear,FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/FDS_Compartment_Pressure
+Open Compartment Pressure,Measured Pressure Drop (Pa),Predicted Pressure Drop (Pa),0,30,0.03 0.95,SouthEast,1,15,yes,linear,FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/FDS_Open_Compartment_Pressure
 Target Temperature,Measured Temperature Rise (\circC),Predicted Temperature Rise (\circC),0,1000,0.03 0.95,SouthEast,1,7,yes,linear,FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/FDS_Target_Temperature
 THIEF Temperature,Measured Temperature Rise (\circC),Predicted Temperature Rise (\circC),0,800,0.03 0.95,SouthEast,1,7,yes,linear,FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/FDS_THIEF_Temperature
 Surface Temperature,Measured Temperature Rise (\circC),Predicted Temperature Rise (\circC),0,1000,0.03 0.95,SouthEast,1,7,yes,linear,FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/FDS_Surface_Temperature
 Target Heat Flux,Measured Heat Flux (kW/m^2),Predicted Heat Flux (kW/m^2),0,120,0.03 0.95,SouthEast,1,11,yes,linear,FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/FDS_Target_Heat_Flux
 Flame Impinging Heat Flux,Measured Heat Flux (kW/m^2),Predicted Heat Flux (kW/m^2),0,120,0.03 0.95,SouthEast,1,11,yes,linear,FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/FDS_Flame_Impinging_Heat_Flux
 Surface Heat Flux,Measured Heat Flux (kW/m^2),Predicted Heat Flux (kW/m^2),0,120,0.03 0.95,SouthEast,1,11,yes,linear,FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/FDS_Surface_Heat_Flux
-Velocity,Measured Velocity (m/s),Predicted Velocity (m/s),0,10,0.03 0.95,SouthEast,1,10,yes,linear,FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/FDS_Velocity
+Velocity,Measured Velocity (m/s),Predicted Velocity (m/s),0,10,0.03 0.95,SouthEast,1,8,yes,linear,FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/FDS_Velocity
 Sprinkler Actuation Time,Measured Time to Actuation (s),Predicted Time to Actuation (s),0,300,0.03 0.95,SouthEast,1,6,yes,linear,FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/FDS_Sprinkler_Actuation_Time
 Smoke Detector Activation Time,Measured Time to Activation (s),Predicted Time to Activation (s),0,300,0.03 0.95,SouthEast,1,34,yes,linear,FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/FDS_Smoke_Detector_Activation_Time
 "Smoke Detector Activation Time, Temperature Rise",Measured Time to Activation (s),Predicted Time to Activation (s),0,300,0.03 0.95,SouthEast,1,34,yes,linear,FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/FDS_Smoke_Detector_Activation_Time_Temp_Rise
 Cable Failure Time,Measured Time to Threshold Temperature (s),Predicted Time to Threshold Temperature (s),0,1800,0.03 0.95,SouthEast,1,12,yes,linear,FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/FDS_Cable_Failure_Time
-Sprinkler Actuations,Measured Actuations,Predicted Actuations,0,40,0.03 0.95,SouthEast,1,-1,yes,linear,FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/FDS_Sprinkler_Actuations
+Sprinkler Actuations,Measured Actuations,Predicted Actuations,0,40,0.03 0.95,SouthEast,1,15,yes,linear,FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/FDS_Sprinkler_Actuations
 Aerosol Deposition Velocity,Measured Deposition Velocity (m/s),Predicted Deposition Velocity (m/s),1.00E-07,1.00E-01,0.03 0.95,SouthEast,1,-1,yes,loglog,FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/FDS_Aerosol_Deposition_Velocity
-Burning Rate,Measured Burning Rate (kg/m^2/s),Predicted Burning Rate (kg/m^2/s),0,0.1,0.03 0.95,SouthEast,1,10,yes,linear,FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/FDS_Burning_Rates
-Carbon Monoxide Concentration,Measured Change in Volume Fraction,Predicted Change in Volume Fraction,0,0.001,0.03 0.95,SouthEast,1,8,yes,linear,FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/FDS_Carbon_Monoxide_Concentration
+Burning Rate,Measured Burning Rate (kg/m^2/s),Predicted Burning Rate (kg/m^2/s),0,0.1,0.03 0.95,SouthEast,1,-1,yes,linear,FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/FDS_Burning_Rates
+Carbon Monoxide Concentration,Measured Change in Volume Fraction,Predicted Change in Volume Fraction,0,0.001,0.03 0.95,SouthEast,1,19,yes,linear,FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/FDS_Carbon_Monoxide_Concentration
 Entrainment,Measured Mass Flow Rate (kg/s),Predicted Mass Flow Rate (kg/s),0,0.6,0.03 0.95,SouthEast,1,10,yes,linear,FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/FDS_Entrainment
 Extinction Time,Measured Time (s),Predicted Time (s),0,650,0.03 0.95,SouthEast,1,-1,yes,linear,FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/FDS_Extinction_Time
 Species Concentration,Measured Change in Volume Fraction (%),Predicted Change in Volume Fraction (%),0,100,0.03 0.95,SouthEast,1,8,yes,linear,FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/FDS_Species_Concentration
