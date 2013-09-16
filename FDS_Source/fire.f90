@@ -213,7 +213,7 @@ INTEGRATION_LOOP: DO TIME_ITER = 1,MAX_CHEMISTRY_ITERATIONS
 
          DO SR=0,N_SERIES_REACTIONS
             ZZ_MIXED = FUNC_FE(ZZ_MIXED,DT_SUB,TMP_MIXED_ZONE,EXTINCT,RHO_HAT,SR)
-         ENDDO 
+         ENDDO         
          IF (TIME_ITER > 1) CALL SHUTDOWN('ERROR: Error in Simple Chemistry')
 
       CASE (RK2_RICHARDSON) ! Finite-rate (or mixed finite-rate/fast) chemistry
@@ -246,6 +246,7 @@ INTEGRATION_LOOP: DO TIME_ITER = 1,MAX_CHEMISTRY_ITERATIONS
       CHEM_SUBIT(I,J,K) = ITER
    ENDIF
    ZZ_GET =  ZETA1*ZZ_GET_0 + (1._EB-ZETA1)*ZZ_MIXED ! FDS Tech Guide (5.30)
+
 
    ! Compute heat release rate
    
@@ -327,7 +328,7 @@ REACTION_LOOP: DO NR = 1,N_REACTIONS
 
    DZZDT_TEMP = RN%NU_MW_O_MW_F*RATE_CONSTANT(NR)
    ZZ_NEW = ZZ_0 + DT_LOC*DZZDT_TEMP ! test Forward Euler step for each reaction
-   
+      
    ! Realizable individual reaction rates
    DO NS=0,N_TRACKED_SPECIES
 
@@ -349,7 +350,10 @@ ZZ_NEW = ZZ_0 + DT_LOC*DZZDT ! corrected FE step for all species
 ! Note: The correction below may provide inaccurate results if the above realizability correction
 ! is not implemented on the individual reaction rates.
 
-ZZ_NEW = ZZ_NEW - MIN(0._EB,MINVAL(ZZ_NEW)) ! shift ZZ_NEW such that min is >= 0
+DO NS=0,N_TRACKED_SPECIES
+   IF (ZZ_NEW(NS) == 0._EB) CYCLE ! if species NS not present, do not apply shift
+   ZZ_NEW(NS) = ZZ_NEW(NS) - MIN(0._EB,MINVAL(ZZ_NEW)) ! shift ZZ_NEW such that min is >= 0
+ENDDO
 ZZ_NEW = ZZ_NEW / MAX(1._EB,SUM(ZZ_NEW))    ! now compress such that max is <= 1
 
 ZZ_NEW(0) = 1._EB - MIN(1._EB,SUM(ZZ_NEW(1:N_TRACKED_SPECIES)))
