@@ -557,11 +557,7 @@ IF (TMP_MIXED_ZONE < RN%AUTO_IGNITION_TEMPERATURE) THEN
    EXTINCT_1 = .TRUE.
 ELSE
    CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_IN,CPBAR,TMP_MIXED_ZONE)
-   DO NS = 0,N_TRACKED_SPECIES
-      IF (RN%NU(NS)<-TWO_EPSILON_EB .AND. NS/=RN%FUEL_SMIX_INDEX) THEN
-         Y_O2 = ZZ_IN(NS)
-      ENDIF
-   ENDDO
+   Y_O2 = ZZ_IN(RN%AIR_SMIX_INDEX)
    Y_O2_CRIT = CPBAR*(RN%CRIT_FLAME_TMP-TMP_MIXED_ZONE)/RN%EPUMO2
    IF (Y_O2 < Y_O2_CRIT) EXTINCT_1 = .TRUE.
 ENDIF
@@ -575,7 +571,7 @@ REAL(EB),INTENT(IN)::ZZ_MIXED_IN(0:N_TRACKED_SPECIES),TMP_MIXED_ZONE
 REAL(EB):: ZZ_F,ZZ_HAT_F,ZZ_GET_F(0:N_TRACKED_SPECIES),ZZ_A,ZZ_HAT_A,ZZ_GET_A(0:N_TRACKED_SPECIES),ZZ_P,ZZ_HAT_P,&
            ZZ_GET_P(0:N_TRACKED_SPECIES),ZZ_GET_PFP(0:N_TRACKED_SPECIES),H_F_0,H_A_0,H_P_0,H_PFP_CFT
 INTEGER, INTENT(IN) :: NR
-INTEGER :: NS,AIR_SMIX_INDEX
+INTEGER :: NS
 TYPE(REACTION_TYPE),POINTER :: RN=>NULL()
 RN => REACTION(NR)
 
@@ -583,20 +579,11 @@ EXTINCT_2 = .FALSE.
 AIT_IF: IF (TMP_MIXED_ZONE < RN%AUTO_IGNITION_TEMPERATURE) THEN
    EXTINCT_2 = .TRUE.
 ELSE AIT_IF
-
-   ! Find AIR index
-   GET_AIR_INDEX_LOOP: DO NS = 0,N_TRACKED_SPECIES      
-      IF (RN%NU(NS) < 0._EB .AND. NS /= RN%FUEL_SMIX_INDEX) THEN
-         AIR_SMIX_INDEX = NS
-         EXIT GET_AIR_INDEX_LOOP
-      ENDIF
-   ENDDO GET_AIR_INDEX_LOOP
-
    ZZ_F = ZZ_MIXED_IN(RN%FUEL_SMIX_INDEX)
-   ZZ_A = ZZ_MIXED_IN(AIR_SMIX_INDEX)
+   ZZ_A = ZZ_MIXED_IN(RN%AIR_SMIX_INDEX)
    ZZ_P = 1._EB - ZZ_F - ZZ_A
 
-   ZZ_HAT_F = MIN(ZZ_F,ZZ_MIXED_IN(NS)/RN%S) ! burned fuel, FDS Tech Guide (5.16)
+   ZZ_HAT_F = MIN(ZZ_F,ZZ_MIXED_IN(RN%AIR_SMIX_INDEX)/RN%S) ! burned fuel, FDS Tech Guide (5.16)
    ZZ_HAT_A = ZZ_HAT_F*RN%S ! FDS Tech Guide (5.17)
    ZZ_HAT_P = (ZZ_HAT_A/(ZZ_A+TWO_EPSILON_EB))*(ZZ_F - ZZ_HAT_F + ZZ_P) ! reactant diluent concentration, FDS Tech Guide (5.18)
 
@@ -609,10 +596,10 @@ ELSE AIT_IF
    ZZ_GET_PFP = 0._EB
 
    ZZ_GET_F(RN%FUEL_SMIX_INDEX) = ZZ_HAT_F ! fuel in reactant mixture composition
-   ZZ_GET_A(AIR_SMIX_INDEX)     = ZZ_HAT_A ! air  in reactant mixture composition
+   ZZ_GET_A(RN%AIR_SMIX_INDEX)  = ZZ_HAT_A ! air  in reactant mixture composition
    
    ZZ_GET_P(RN%FUEL_SMIX_INDEX) = MAX(ZZ_GET_P(RN%FUEL_SMIX_INDEX)-ZZ_HAT_F,0._EB) ! remove burned fuel from product composition
-   ZZ_GET_P(AIR_SMIX_INDEX)     = MAX(ZZ_GET_P(AIR_SMIX_INDEX)    -ZZ_A,0._EB) ! remove all air from product composition
+   ZZ_GET_P(RN%AIR_SMIX_INDEX)  = MAX(ZZ_GET_P(RN%AIR_SMIX_INDEX) -ZZ_A,0._EB) ! remove all air from product composition
  
    ! Note: The post-flame composition (PFP) is for the reactant mixture only.  We only consider excess fuel as a diluent
    ! in the reactant mixture; excess air is not considered a diluent.  This has the effect of allowing combustion in cells
