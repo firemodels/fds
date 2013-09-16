@@ -163,7 +163,7 @@ FDS uses simple empirical rules---which ignore strain---to predict local extinct
 \paragraph{Basic Extinction Model}
 \begin{enumerate}
 \item If the cell temperature is below the auto-ignition temperature (AIT) for all fuels in the cell then combustion is suppressed. The auto-ignition temperature for each fuel is zero by default; thus, the user does not need to specify an ignition source.
-\item If the potential combustion heat release from a \emph{local pocket of stoichiometric fuel-air-product (hereafter ``reactant'') mixture} cannot raise the temperature of that mixture above an empirically determined limiting flame temperature, $T_{\rm LFT}$, then combustion is suppressed.  Consider the simple reaction $\mbox{Fuel} + \mbox{Air} \rightarrow \mbox{Products}$. The local mass fractions of lumped species Fuel, Air, and Products in the cell at the beginning of the combustion time step are $[Z_{\rm F}, Z_{\rm A}, Z_{\rm P}]$ and $s$ is the mass stoichiometric coefficient for Air (mass of Air required per mass of Fuel consumed). Based on the limiting reactant, the masses in the local reactant mixture are defined as follows (take 1 kg as a basis; the hat $\hat{\;}$ indicates a reactant mixture value):
+\item If the potential combustion heat release from a \emph{local pocket of stoichiometric fuel-air-product (hereafter ``reactant'') mixture} cannot raise the temperature of that mixture above an empirically determined critical flame temperature, $T_{\rm CFT}$, then combustion is suppressed.  Consider the simple reaction $\mbox{Fuel} + \mbox{Air} \rightarrow \mbox{Products}$. The local mass fractions of lumped species Fuel, Air, and Products in the cell at the beginning of the combustion time step are $[Z_{\rm F}, Z_{\rm A}, Z_{\rm P}]$ and $s$ is the mass stoichiometric coefficient for Air (mass of Air required per mass of Fuel consumed). Based on the limiting reactant, the masses in the local reactant mixture are defined as follows (take 1 kg as a basis; the hat $\hat{\;}$ indicates a reactant mixture value):
 \begin{align}
 \label{eq:dzf} \hat{Z}_{\rm F} &= \min(Z_{\rm F},Z_{\rm A}/s) \\
 \label{eq:dza} \hat{Z}_{\rm A} &= s \, \hat{Z}_{\rm F}         
@@ -180,7 +180,7 @@ Once the local reactant mixture has been determined, the extinction criterion is
 \begin{align}
 \label{eq:extinction}
 \hat{Z}_{\rm F} \, (h_{\rm F}(T) + \Delta h_{\rm c,F}) + \hat{Z}_{\rm A} \, h_{\rm A}(T) + \hat{Z}_{\rm P} \, h_{\rm P}(T) < 
-(\hat{Z}_{\rm F} + \hat{Z}_{\rm A} + \hat{Z}_{\rm P}) \, h_{\rm PFP}(T_{\rm LFT}) 
+(\hat{Z}_{\rm F} + \hat{Z}_{\rm A} + \hat{Z}_{\rm P}) \, h_{\rm PFP}(T_{\rm CFT}) 
 \end{align}
 where $T$ is the initial mean cell temperature and PFP denotes a ``post-flame product'' mixture.  If the inequality Eq.~(\ref{eq:extinction}) is true, then combustion is suppressed---the heat of combustion is not sufficient to raise the product mixture above its critical flame temperature.
 
