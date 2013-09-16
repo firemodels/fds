@@ -6,7 +6,6 @@ HGL Depth,Measured Layer Depth (m),Predicted Layer Depth (m),0,20,0.03 0.95,Sout
 Ceiling Jet Temperature,Measured Temperature Rise (\circC),Predicted Temperature Rise (\circC),0,1000,0.03 0.95,SouthEast,1,7,yes,linear,FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/FDS_Flat_Ceiling_Jet_Temperature
 Sloped Ceiling Jet Temperature,Measured Temperature Rise (\circC),Predicted Temperature Rise (\circC),0,500,0.03 0.95,SouthEast,1,7,yes,linear,FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/FDS_Sloped_Ceiling_Jet_Temperature
 Plume Temperature,Measured Temperature Rise (\circC),Predicted Temperature Rise (\circC),0,1000,0.03 0.95,SouthEast,1,7,yes,linear,FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/FDS_Plume_Temperature
-Fire Plume Temperature,Measured Temperature Rise (\circC),Predicted Temperature Rise (\circC),0,1200,0.03 0.95,SouthEast,1,7,yes,linear,FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/FDS_Fire_Plume_Temperature
 Oxygen Concentration,Measured Drop in Volume Fraction,Predicted Drop in Volume Fraction,0,0.15,0.03 0.95,SouthEast,1,8,yes,linear,FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/FDS_Oxygen_Concentration
 Carbon Dioxide Concentration,Measured Rise in Volume Fraction,Predicted Rise in Volume Fraction,0,0.15,0.03 0.95,SouthEast,1,8,yes,linear,FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/FDS_Carbon_Dioxide_Concentration
 Smoke Concentration,Measured Density (mg/m^3),Predicted Density (mg/m^3),0,300,0.03 0.95,SouthEast,1,20,yes,linear,FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/FDS_Smoke_Concentration
