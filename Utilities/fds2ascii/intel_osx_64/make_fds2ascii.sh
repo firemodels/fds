@@ -1,5 +1,5 @@
 #!/bin/bash
 
-source ~/.bashrc_setfort intel64
+source $IFORT_COMPILER/bin/compilervars.sh intel64
 rm *.o
 make -f ../Makefile intel_osx_64
