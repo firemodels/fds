@@ -428,7 +428,7 @@ ELSE
          IF (RN%FAST_CHEMISTRY .AND. RN%HEAT_OF_COMBUSTION > 0._EB .AND. .NOT. EXTINCT(NR)) THEN
             DO NS = 0,N_TRACKED_SPECIES
                IF (RN%NU(NS) < 0._EB) ZZ_MIXED_FR(NS) = ZZ_MIXED_FR(NS) - ABS(ZZ_MIXED_IN(NS)/RN%NU_MW_O_MW_F(NS))
-               ZZ_MIXED_FR(NS) = MAX(0._EB,ZZ_MIXED_FR(NS))
+               ZZ_MIXED_FR(NS) = MAX(0._EB,ZZ_MIXED_FR(NS)) ! remove stoich fast chemistry reactants
             ENDDO
          ENDIF
       ENDDO
@@ -563,7 +563,7 @@ LOGICAL FUNCTION EXTINCT_2(ZZ_MIXED_IN,TMP_MIXED_ZONE,NR)
 USE PHYSICAL_FUNCTIONS,ONLY:GET_SENSIBLE_ENTHALPY
 REAL(EB),INTENT(IN)::ZZ_MIXED_IN(0:N_TRACKED_SPECIES),TMP_MIXED_ZONE
 REAL(EB):: ZZ_F,ZZ_HAT_F,ZZ_GET_F(0:N_TRACKED_SPECIES),ZZ_A,ZZ_HAT_A,ZZ_GET_A(0:N_TRACKED_SPECIES),ZZ_P,ZZ_HAT_P,&
-           ZZ_GET_P(0:N_TRACKED_SPECIES),ZZ_GET_PFP(0:N_TRACKED_SPECIES),H_F_0,H_A_0,H_P_0,H_PFP_CFT
+           ZZ_GET_P(0:N_TRACKED_SPECIES),H_F_0,H_A_0,H_P_0,H_F_N,H_A_N,H_P_N
 INTEGER, INTENT(IN) :: NR
 INTEGER :: NS
 TYPE(REACTION_TYPE),POINTER :: RN=>NULL()
@@ -594,35 +594,23 @@ ELSE AIT_IF
    
    ZZ_GET_P(RN%FUEL_SMIX_INDEX) = MAX(ZZ_GET_P(RN%FUEL_SMIX_INDEX)-ZZ_HAT_F,0._EB) ! remove burned fuel from product composition
    ZZ_GET_P(RN%AIR_SMIX_INDEX)  = MAX(ZZ_GET_P(RN%AIR_SMIX_INDEX) -ZZ_A,0._EB) ! remove all air from product composition
- 
-   ! Note: The post-flame composition (PFP) is for the reactant mixture only.  We only consider excess fuel as a diluent
-   ! in the reactant mixture; excess air is not considered a diluent.  This has the effect of allowing combustion in cells
-   ! with large amounts of air, but suppressing combustion in cells with large amounts of fuel.
-   
-   ZZ_GET_PFP(RN%FUEL_SMIX_INDEX) = MAX(ZZ_F-ZZ_HAT_F,0._EB) ! add unburned fuel to PFP
-   
-   DO NS = 0,N_TRACKED_SPECIES
-      IF (RN%NU(NS) >= 0._EB) THEN
-         ZZ_GET_PFP(NS) = ZZ_GET_P(NS) + ZZ_GET_F(RN%FUEL_SMIX_INDEX)*RN%NU_MW_O_MW_F(NS) ! add products to PFP
-      ENDIF
-   ENDDO
    
    ! Normalize concentrations
    ZZ_GET_F = ZZ_GET_F/(SUM(ZZ_GET_F)+TWO_EPSILON_EB)
    ZZ_GET_A = ZZ_GET_A/(SUM(ZZ_GET_A)+TWO_EPSILON_EB)
    ZZ_GET_P = ZZ_GET_P/(SUM(ZZ_GET_P)+TWO_EPSILON_EB)
-   ZZ_GET_PFP = ZZ_GET_PFP/(SUM(ZZ_GET_PFP)+TWO_EPSILON_EB)
 
    ! Get the specific heat for the fuel and diluent at the current and critical flame temperatures
    CALL GET_SENSIBLE_ENTHALPY(ZZ_GET_F,H_F_0,TMP_MIXED_ZONE)
    CALL GET_SENSIBLE_ENTHALPY(ZZ_GET_A,H_A_0,TMP_MIXED_ZONE)
-   CALL GET_SENSIBLE_ENTHALPY(ZZ_GET_P,H_P_0,TMP_MIXED_ZONE)  
-   CALL GET_SENSIBLE_ENTHALPY(ZZ_GET_PFP,H_PFP_CFT,RN%CRIT_FLAME_TMP)
+   CALL GET_SENSIBLE_ENTHALPY(ZZ_GET_P,H_P_0,TMP_MIXED_ZONE) 
+   CALL GET_SENSIBLE_ENTHALPY(ZZ_GET_F,H_F_N,RN%CRIT_FLAME_TMP)
+   CALL GET_SENSIBLE_ENTHALPY(ZZ_GET_A,H_A_N,RN%CRIT_FLAME_TMP)
+   CALL GET_SENSIBLE_ENTHALPY(ZZ_GET_P,H_P_N,RN%CRIT_FLAME_TMP)  
    
    ! See if enough energy is released to raise the fuel and required "air" temperatures above the critical flame temp. 
-   IF ( ZZ_HAT_F*(H_F_0 + RN%HEAT_OF_COMBUSTION) + ZZ_HAT_A*H_A_0 + ZZ_HAT_P*H_P_0 < (ZZ_HAT_F+ZZ_HAT_A+ZZ_HAT_P)*H_PFP_CFT ) THEN
-      EXTINCT_2 = .TRUE. ! FDS Tech Guide (5.19)
-   ENDIF
+   IF ( ZZ_HAT_F*(H_F_0 + RN%HEAT_OF_COMBUSTION) + ZZ_HAT_A*H_A_0 + ZZ_HAT_P*H_P_0 < &
+      ZZ_HAT_F*H_F_N  + ZZ_HAT_A*H_A_N + ZZ_HAT_P*H_P_N ) EXTINCT_2 = .TRUE. ! FDS Tech Guide (5.19)
 ENDIF AIT_IF
 
 END FUNCTION EXTINCT_2
