@@ -254,7 +254,7 @@ echo Compressing FDS/Smokeview distribution
 cd %uploads%
 if exist %basename%.zip erase %basename%.zip
 cd %out_bundle%\%fdsversion%\
-%wzzip% -a -r -xExamples\*.csv -P ..\..\..\%basename%.zip * > winzip.out
+wzzip -a -r -xExamples\*.csv -P ..\..\..\%basename%.zip * > winzip.out
 
 Rem create an installation file from the zipped bundle directory
 
