@@ -18,10 +18,17 @@ Rem location of batch files used to set up Intel compilation environment
 
 call %envfile%
 
-set bundleinfo=%svn_root%\Utilities\Scripts\bundle_setup
-set wikify=%svn_root%\Utilities\Scripts\wikify.py
+%svn_drive%
+cd %svn_root%\Utilities\Scripts\bundle_setup
+
+set scriptdir=FDS-SMV/Utilities/Scripts
+set bundlesetup=%scriptdir%/bundle_setup
 
 
 echo.
 echo Converting the FDS release notes from wiki to html format
-"%wikify%" -r "%bundleinfo%\FDS_Release_Notes.wiki" > "%bundleinfo%\FDS_Release_Notes.htm"
+
+plink %svn_logon%  %scriptdir%/ssh_command2.csh blaze %scriptdir% CONV_fds_release.sh
+
+pscp %svn_logon%:%bundlesetup%/release_notes.htm FDS_Release_Notes.htm
+pause
