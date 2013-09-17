@@ -6864,15 +6864,9 @@ Heskestad Ionization          & ---         & ---          &  1.8               
 \subsubsection{Defining Smoke}
 \label{info:alternative_smoke}
 
-By default, FDS assumes that the smoke from a fire is generated in direct proportion to the heat release rate. A value
-of {\ct SOOT\_YIELD=0.01} on the {\ct REAC} line means that the smoke generation rate is 0.01 of the fuel burning rate. The
-``smoke'' in this case is not explicitly tracked by FDS, but rather is assumed to be a function of the combustion products lumped species.
+By default, FDS assumes that the smoke from a fire is generated in direct proportion to the heat release rate. A value of {\ct SOOT\_YIELD=0.01} on the {\ct REAC} line means that the smoke generation rate is 0.01 of the fuel burning rate. The ``smoke'' in this case is not explicitly tracked by FDS, but rather is assumed to be a function of the combustion products lumped species.
 
-Suppose, however, that you want to define your own ``smoke'' and that you want to specify its production rate independently of
-the HRR (or even in lieu of an actual fire, like a smoldering source). You might also want to define a mass extinction coefficient for the
-smoke and an assumed molecular weight (as it will be tracked like a gas species). Finally, you also want to visualize the smoke using
-the {\ct SMOKE3D} feature in Smokeview. Use the following lines:
-
+Suppose, however, that you want to define your own ``smoke'' and that you want to specify its production rate independently of the HRR (or even in lieu of an actual fire, like a smoldering source). You might also want to define a mass extinction coefficient for the smoke and an assumed molecular weight (as it will be tracked like a gas species). Finally, you also want to visualize the smoke using the {\ct SMOKE3D} feature in Smokeview. Use the following lines:
 \begin{lstlisting}
 &SPEC ID='MY SMOKE', MW=29., MASS_EXTINCTION_COEFFICIENT=8700. /
 &SURF ID='SMOLDER', TMP_FRONT=1000., MASS_FLUX(1)=0.0001, SPEC_ID='MY SMOKE', COLOR='RED' /
@@ -6881,14 +6875,9 @@ the {\ct SMOKE3D} feature in Smokeview. Use the following lines:
 &PROP ID='Acme Smoke', QUANTITY='CHAMBER OBSCURATION', SPEC_ID='MY SMOKE' /
 &DEVC XYZ=1.00,0.50,0.95, PROP_ID='Acme Smoke', ID='smoke_1' /
 
-&DUMP SMOKE3D_QUANTITY='MY SMOKE' /
+&DUMP SMOKE3D_QUANTITY='MASS FRACTION', SMOKE3D_SPEC_ID='MY SMOKE' /
 \end{lstlisting}
-
-\noindent
-The same smoke detector model is used that was described above. Only now, the mass fraction of your species {\ct 'MY SMOKE'} is used in the
-algorithm, rather than that associated with the lumped species. Note that your species will not participate in the radiation calculation. It
-will merely serve as a surrogate for smoke. Note also that if you specify explicitly a smoke surrogate, you should set {\ct SOOT\_YIELD=0} on the
-{\ct REAC} line to prevent FDS from including smoke as a component of the combustion product lumped species.
+The same smoke detector model is used that was described above. Only now, the mass fraction of your species {\ct 'MY SMOKE'} is used in the algorithm, rather than that associated with the lumped species. Note that your species will not participate in the radiation calculation. It will merely serve as a surrogate for smoke. Note also that if you specify explicitly a smoke surrogate, you should set {\ct SOOT\_YIELD=0} on the {\ct REAC} line to prevent FDS from including smoke as a component of the combustion product lumped species.
 
 
 
@@ -7557,34 +7546,13 @@ parameters associated with particles.
 
 The namelist group {\ct DUMP} contains parameters (Table \ref{tbl:DUMP}) that control the rate at which output files
 are written, and various other global parameters associated with output files. Its parameters include:
-
 \begin{description}
-\item[{\ct NFRAMES}] Number of output dumps per calculation. The default is 1000.
-Device data, slice data, particle data, isosurface data, 3D smoke data, boundary data, solid phase profile data, and
-control function data are saved every {\ct (T\_END-T\_BEGIN)/NFRAMES} seconds unless otherwise specified
-using {\ct DT\_DEVC}, {\ct DT\_SLCF}, {\ct DT\_PART}, {\ct DT\_ISOF}, {\ct DT\_BNDF}, {\ct DT\_PROF},
-or {\ct DT\_CTRL}. Note that {\ct DT\_SLCF} controls Smoke3D output. {\ct DT\_HRR} controls the
-output of heat release rate and associated quantities.
-\item[{\ct MASS\_FILE}] If {\ct .TRUE.}, produce an output file listing the total masses of all gas species as a function of time.
-It is {\ct .FALSE.} by default because the calculation
-of all gas species in all mesh cells is time-consuming. The parameter {\ct DT\_MASS} controls the frequency of output.
-\item[{\ct MAXIMUM\_PARTICLES}] Maximum number of Lagrangian particles that can be included on any
-mesh at any given time. (Default 500000)
+\item[{\ct NFRAMES}] Number of output dumps per calculation. The default is 1000. Device data, slice data, particle data, isosurface data, 3D smoke data, boundary data, solid phase profile data, and control function data are saved every {\ct (T\_END-T\_BEGIN)/NFRAMES} seconds unless otherwise specified using {\ct DT\_DEVC}, {\ct DT\_SLCF}, {\ct DT\_PART}, {\ct DT\_ISOF}, {\ct DT\_BNDF}, {\ct DT\_PROF}, or {\ct DT\_CTRL}. Note that {\ct DT\_SLCF} controls Smoke3D output. {\ct DT\_HRR} controls the output of heat release rate and associated quantities.
+\item[{\ct MASS\_FILE}] If {\ct .TRUE.}, produce an output file listing the total masses of all gas species as a function of time. It is {\ct .FALSE.} by default because the calculation of all gas species in all mesh cells is time-consuming. The parameter {\ct DT\_MASS} controls the frequency of output.
+\item[{\ct MAXIMUM\_PARTICLES}] Maximum number of Lagrangian particles that can be included on any mesh at any given time. (Default 500000)
 \item[{\ct SMOKE3D}] If {\ct .FALSE.}, do not produce an animation of the smoke and fire. It is {\ct .TRUE.} by default.
-\item[{\ct FLUSH\_FILE\_BUFFERS}] FDS
-purges the output file buffers periodically and forces the data to be written out
-into the respective output files. It does this to make it easier to view the case in Smokeview while it is running.
-It has been noticed on Windows
-machines that occasionally a runtime error occurs because of file
-access problems related to the buffer flushing. If this happens, set
-this parameter to {\ct .FALSE.}, but be aware that it may not be
-possible to look at output in Smokeview until after the calculation is
-finished. You may also set {\ct DT\_FLUSH} to control the frequency of the file flushing. Its default value is the duration of
-the simulation divided by {\ct NFRAMES}.
-\item[{\ct STATUS\_FILES}] If {\ct .TRUE.}, produces an output file
-{\ct CHID.notready} which is deleted, if the simulation is completed
-successfully. This file can be used as an error indicator. It is {\ct
-.FALSE.} by default.
+\item[{\ct FLUSH\_FILE\_BUFFERS}] FDS purges the output file buffers periodically and forces the data to be written out into the respective output files. It does this to make it easier to view the case in Smokeview while it is running. It has been noticed on Windows machines that occasionally a runtime error occurs because of file access problems related to the buffer flushing. If this happens, set this parameter to {\ct .FALSE.}, but be aware that it may not be possible to look at output in Smokeview until after the calculation is finished. You may also set {\ct DT\_FLUSH} to control the frequency of the file flushing. Its default value is the duration of the simulation divided by {\ct NFRAMES}.
+\item[{\ct STATUS\_FILES}] If {\ct .TRUE.}, produces an output file {\ct CHID.notready} which is deleted, if the simulation is completed successfully. This file can be used as an error indicator. It is {\ct .FALSE.} by default.
 \end{description}
 
 
@@ -7868,23 +7836,13 @@ Any gas phase quantity can be animated via iso-surfaces, but use caution. To ren
 \section{Plot3D Static Data Dumps}
 \label{info:PL3D}
 
-Data stored in Plot3D~\cite{PLOT3D} files (See Section~\ref{out:PL3D}) use a format developed by
-NASA that is used by many CFD programs for representing simulation results.
-Plot3D data is visualized in three ways: as 2-D contours, vector plots and iso-surfaces.
-Vector plots may be viewed if one or more of the $u$, $v$ and $w$
-velocity components are stored in the Plot3D file. The vector
-length and direction show the direction and relative speed of the
-fluid flow. The vector colors show a scalar fluid quantity such as
-temperature.
+Data stored in Plot3D~\cite{PLOT3D} files (See Section~\ref{out:PL3D}) use a format developed by NASA that is used by many CFD programs for representing simulation results. Plot3D data is visualized in three ways: as 2-D contours, vector plots and iso-surfaces. Vector plots may be viewed if one or more of the $u$, $v$ and $w$ velocity components are stored in the Plot3D file. The vector length and direction show the direction and relative speed of the fluid flow. The vector colors show a scalar fluid quantity such as temperature.
 
 Five quantities are written out to a file at one instant in time. The default specification is:
-
 \begin{lstlisting}
 &DUMP ..., PLOT3D_QUANTITY(1:5)='TEMPERATURE',
       'U-VELOCITY','V-VELOCITY','W-VELOCITY','HRRPUV' /
 \end{lstlisting}
-
-\noindent
 It's best to leave the velocity components as is, because Smokeview
 uses them to draw velocity vectors. If any of the specified quantities require the additional specification of a particular species,
 use {\ct PLOT3D\_SPEC\_ID(n)} to provide the {\ct SPEC\_ID} for {\ct PLOT3D\_QUANTITY(n)}.
@@ -7900,38 +7858,22 @@ obtained elsewhere.
 
 
 \section{SMOKE3D: Realistic Smoke and Fire}
-
 \label{info:SMOKE3D}
 
-When you do a fire simulation, FDS automatically creates two output files that are rendered by
-Smokeview as realistic looking smoke and fire. By default, the output quantities are the {\ct 'MASS FRACTION'} of {\ct 'SOOT'} and {\ct 'HRRPUV'} (Heat Release Rate Per Unit Volume). You have the option of rendering any other species mass fraction instead of {\ct 'SOOT'}, so long as the
-{\ct MASS\_EXTINCTION\_COEFFICIENT} on the {\ct SPEC} line is appropriate in
+When you do a fire simulation, FDS automatically creates two output files that are rendered by Smokeview as realistic looking smoke and fire. By default, the output quantities are the {\ct 'MASS FRACTION'} of {\ct 'SOOT'} and {\ct 'HRRPUV'} (Heat Release Rate Per Unit Volume). You have the option of rendering any other species mass fraction instead of {\ct 'SOOT'}, so long as the {\ct MASS\_EXTINCTION\_COEFFICIENT} on the {\ct SPEC} line is appropriate in
 describing the attenuation of visible light by the specified gas species.
 
-An alternative to {\ct SOOT} mass fraction can be specified via {\ct SMOKE3D\_QUANTITY} on the {\ct DUMP} line.
-If the specified quantity requires the additional specification of a particular species,
-use {\ct SMOKE3D\_SPEC\_ID} to provide the {\ct SPEC\_ID}.
-Here is an example of how to change the smoke species. Normally, you do not need to do this as the ``smoke'' is an assumed part of the default combustion model when a non-zero {\ct SOOT\_YIELD} is defined on the {\ct REAC} line.
-
+An alternative to {\ct SOOT} mass fraction can be specified via {\ct SMOKE3D\_QUANTITY} on the {\ct DUMP} line. If the specified quantity requires the additional specification of a particular species, use {\ct SMOKE3D\_SPEC\_ID} to provide the {\ct SPEC\_ID}. Here is an example of how to change the smoke species. Normally, you do not need to do this as the ``smoke'' is an assumed part of the default combustion model when a non-zero {\ct SOOT\_YIELD} is defined on the {\ct REAC} line.
 \begin{lstlisting}
 &SPEC ID='MY SMOKE', MW=29., MASS_EXTINCTION_COEFFICIENT=8700. /
 &DUMP SMOKE3D_QUANTITY='MASS FRACTION', SMOKE3D_SPEC_ID='MY SMOKE' /
 \end{lstlisting}
-
-\noindent
 The {\ct MASS\_EXTINCTION\_COEFFICIENT} is passed to Smokeview to be used for visualization.
-
-
-
-
-
-
 
 
 \section{Special Output Quantities}
 
-This section lists a variety of output quantities that are useful for studying thermally-driven flows, combustion, pyrolysis, and so forth. Note that some
-of the output quantities can be produced in a variety of ways.
+This section lists a variety of output quantities that are useful for studying thermally-driven flows, combustion, pyrolysis, and so forth. Note that some of the output quantities can be produced in a variety of ways.
 
 
 \subsection{Heat Release Rate}
