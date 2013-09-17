@@ -39,10 +39,10 @@ axis([.05 10^4 10^2 10^8])
 
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Label_Font_Size)
-xlabel('Q*','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
+xlabel('{\it Q*}','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
 ylabel('Heat Release Rate (kW)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
 text(.1,2e7,'Flame Height Heat Release Verification','FontSize',Title_Font_Size,'FontName',Font_Name,'Interpreter',Font_Interpreter)
-hh=legend(K,'D*/\delta x=5','D*/\delta x=10','D*/\delta x=20','correct','Location','Southeast');
+hh=legend(K,'{\itD}*/{\it\deltax}=5','{\itD}*/{\it\deltax}=10','{\itD}*/{\it\deltax}=20','correct','Location','Southeast');
 set(hh,'Interpreter',Font_Interpreter,'FontSize',Key_Font_Size)
 
 % add SVN if file is available
