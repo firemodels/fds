@@ -37,13 +37,9 @@ plink -V
 echo.
 echo Press any key to test Compiler installation
 pause>NUL
-IF DEFINED IFORT_COMPILER12 echo IFORT_COMPILER12 variable is defined.
-IF DEFINED IFORT_COMPILER12 echo Fortran compiler located at %IFORT_COMPILER12%
-IF NOT DEFINED IFORT_COMPILER12 echo IFORT_COMPILER12 variable not defined
-echo.
-IF DEFINED IFORT_COMPILER11 echo IFORT_COMPILER11 variable is defined.
-IF DEFINED IFORT_COMPILER11 echo Fortran compiler located at %IFORT_COMPILER11%
-IF NOT DEFINED IFORT_COMPILER11 echo IFORT_COMPILER11 variable not defined
+IF DEFINED IFORT_COMPILER14 echo IFORT_COMPILER14 variable is defined.
+IF DEFINED IFORT_COMPILER14 echo Fortran compiler located at %IFORT_COMPILER14%
+IF NOT DEFINED IFORT_COMPILER14 echo IFORT_COMPILER14 variable not defined
 
 echo.
 echo Winzip test
