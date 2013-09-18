@@ -2687,11 +2687,11 @@ CHARACTER(100) :: FWD_ID
 INTEGER :: NR,NS,NS2,NFR
 REAL(EB) :: SOOT_YIELD,CO_YIELD,EPUMO2,A, &
             CRITICAL_FLAME_TEMPERATURE,HEAT_OF_COMBUSTION,NU(MAX_SPECIES),E,N_S(MAX_SPECIES),C,H,N,O, &
-            AUTO_IGNITION_TEMPERATURE,SOOT_H_FRACTION,N_T,EQBM_CONS
+            AUTO_IGNITION_TEMPERATURE,SOOT_H_FRACTION,N_T,K
 REAL(EB) :: E_TMP=0._EB,S_TMP=0._EB,ATOM_COUNTS(118),MW_FUEL=0._EB,H_F
 LOGICAL :: L_TMP,CHECK_ATOM_BALANCE,FAST_CHEMISTRY,SERIES_REACTION,REVERSE
 NAMELIST /REAC/ A,AUTO_IGNITION_TEMPERATURE,C,CHECK_ATOM_BALANCE,CO_YIELD,CRITICAL_FLAME_TEMPERATURE,&
-                E,EPUMO2,EQBM_CONS,EQUATION,FIXED_MIX_TIME,FORMULA,FUEL,FUEL_RADCAL_ID, &
+                E,EPUMO2,K,EQUATION,FIXED_MIX_TIME,FORMULA,FUEL,FUEL_RADCAL_ID, &
                 FWD_ID,FYI,H,HEAT_OF_COMBUSTION,&
                 HRRPUA_SHEET,HRRPUV_AVERAGE,ID,IDEAL,N,NU,N_S,N_T,O,ODE_SOLVER,REAC_ATOM_ERROR,&
                 REAC_MASS_ERROR,REVERSE,SOOT_H_FRACTION,SOOT_YIELD,SPEC_ID_N_S,SPEC_ID_NU,TAU_CHEM,TAU_FLAME,&
@@ -2779,8 +2779,8 @@ REAC_READ_LOOP: DO NR=1,N_REACTIONS
          MW_FUEL = ELEMENT(6)%MASS*C+ELEMENT(1)%MASS*H+ELEMENT(8)%MASS*O+ELEMENT(7)%MASS*N
       ENDIF
    ENDIF
-   RN%A                         = A
    RN%A_IN                      = A
+   RN%A_PRIME                   = A
    RN%AUTO_IGNITION_TEMPERATURE = AUTO_IGNITION_TEMPERATURE + TMPM
    RN%C                         = C
    RN%CHECK_ATOM_BALANCE        = CHECK_ATOM_BALANCE
@@ -2788,7 +2788,7 @@ REAC_READ_LOOP: DO NR=1,N_REACTIONS
    RN%CRIT_FLAME_TMP            = CRITICAL_FLAME_TEMPERATURE + TMPM
    RN%E                         = E*1000._EB
    RN%E_IN                      = E
-   RN%EQBM_CONS                 = EQBM_CONS
+   RN%K                         = K
    RN%EQUATION                  = EQUATION
    RN%EPUMO2                    = EPUMO2*1000._EB
    RN%FAST_CHEMISTRY            = FAST_CHEMISTRY
@@ -2808,7 +2808,7 @@ REAC_READ_LOOP: DO NR=1,N_REACTIONS
    RN%SOOT_H_FRACTION           = SOOT_H_FRACTION
    RN%SOOT_YIELD                = SOOT_YIELD
 
-   IF (RN%A == -1._EB) THEN
+   IF (RN%A_PRIME == -1._EB) THEN
       IF (RN%E == -1000._EB) THEN
          IF (.NOT. RN%REVERSE) THEN
             RN%FAST_CHEMISTRY=.TRUE.
@@ -2874,14 +2874,14 @@ CONTAINS
 SUBROUTINE SET_REAC_DEFAULTS
 
 AUTO_IGNITION_TEMPERATURE   = -TMPM
-A                           = -1._EB     ! cm**3/mol-s
+A                           = -1._EB
 C                           = 0._EB
 CHECK_ATOM_BALANCE          = .TRUE.
 CO_YIELD                    = 0._EB
 CRITICAL_FLAME_TEMPERATURE  = 1327._EB   ! C
 E                           = -1._EB     ! kJ/kmol
 EPUMO2                      = 13100._EB  ! kJ/kg
-EQBM_CONS                   = 1._EB
+K                           = 1._EB
 EQUATION                    = 'null'
 FAST_CHEMISTRY              = .FALSE.
 FORMULA                     = 'null'
@@ -2947,7 +2947,7 @@ REAC_LOOP: DO NR=1,N_REACTIONS
 
    RN => REACTION(NR)
 
-   IF ((RN%A > 0._EB .OR. RN%E > 0._EB) .AND. (RN%C>TWO_EPSILON_EB .OR. RN%H>TWO_EPSILON_EB)) THEN
+   IF ((RN%A_PRIME > 0._EB .OR. RN%E > 0._EB) .AND. (RN%C>TWO_EPSILON_EB .OR. RN%H>TWO_EPSILON_EB)) THEN
       WRITE(MESSAGE,'(A)') 'ERROR: cannot use both finite rate REAC and simple chemistry'
       CALL SHUTDOWN(MESSAGE)
    ENDIF
@@ -3032,17 +3032,22 @@ REAC_LOOP: DO NR=1,N_REACTIONS
       ENDIF
    ENDDO GET_AIR_INDEX_LOOP
 
+   IF (RN%AIR_SMIX_INDEX == -1 .AND. RN%FAST_CHEMISTRY) THEN
+      WRITE(MESSAGE,'(A)') 'ERROR: Dissociation reactions must use finite rate chemistry.'
+      CALL SHUTDOWN(MESSAGE)
+   ENDIF
+
    ! Adjust mol/cm^3/s based rate to kg/m^3/s rate
    RN%RHO_EXPONENT = 0._EB
    DO NS=1,RN%N_SPEC
       IF (TRIM(RN%SPEC_ID_N_S_READ(NS))=='null') CYCLE
-      IF (RN%A < 0.0_EB) CYCLE
+      IF (RN%A_PRIME < 0.0_EB) CYCLE
       NAME_FOUND = .FALSE.
       DO NS2=1,N_SPECIES
          IF (TRIM(RN%SPEC_ID_N_S_READ(NS))==TRIM(SPECIES(NS2)%ID)) THEN
             RN%SPEC_ID_N_S(NS2) = RN%SPEC_ID_N_S_READ(NS)
             RN%N_S(NS2)       = RN%N_S_READ(NS)
-            RN%A              = RN%A * (1000._EB*SPECIES(NS2)%MW)**(-RN%N_S(NS2))
+            RN%A_PRIME        = RN%A_PRIME * (1000._EB*SPECIES(NS2)%MW)**(-RN%N_S(NS2))
             RN%RHO_EXPONENT   = RN%RHO_EXPONENT + RN%N_S(NS2)
             NAME_FOUND = .TRUE.
             EXIT
@@ -3056,7 +3061,7 @@ REAC_LOOP: DO NR=1,N_REACTIONS
    ENDDO
 
    RN%RHO_EXPONENT = RN%RHO_EXPONENT - 1._EB
-   RN%A = RN%A *1000._EB*SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%MW
+   RN%A_PRIME = RN%A_PRIME * 1000._EB*SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%MW
    IF (RN%FUEL/='null' .AND. RN%FUEL_SMIX_INDEX<1) THEN
       WRITE(MESSAGE,'(A,I3,A,A,A)') 'ERROR: Problem with REAC ',NR,'. Fuel ',TRIM(RN%FUEL),' not found.'
       CALL SHUTDOWN(MESSAGE)
@@ -3193,7 +3198,7 @@ REAC_LOOP: DO NR=1,N_REACTIONS
    ENDDO
 
    IF (NR==1) REACTION%HOC_COMPLETE = RN%HEAT_OF_COMBUSTION
-
+      
 ENDDO REAC_LOOP
 
 ! Calculates rate parameters for reverse reactions
@@ -3207,7 +3212,7 @@ REVERSE_LOOP: DO NRR=1,N_REACTIONS
       FR => REACTION(NFR)     
       IF(.NOT. FR%ID == RR%FWD_ID) CYCLE FORWARD_LOOP
       F_COUNT = 1
-      RR%A=FR%A
+      RR%A_PRIME=FR%A_PRIME
       RR%E=FR%E
       RR%RHO_EXPONENT = FR%RHO_EXPONENT
       RR%N_T = FR%N_T
