@@ -190,7 +190,7 @@ for j=2:length(Q);
                     if error_val <= error_tolerance
                         within_tolerance = 'Yes';
                     else
-                        within_tolerance = 'Out_Of_Tol';
+                        within_tolerance = 'Out of Tolerance';
                     end
                     
                     % Write descriptive statistics to output_stats cell
