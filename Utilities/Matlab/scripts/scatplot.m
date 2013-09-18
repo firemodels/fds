@@ -168,8 +168,8 @@ for j=2:length(Q);
             
             % Perform this code block for FDS verification scatterplot output
             if Stats_Output == 1
-                single_measured_metric = Measured_Metric(k,:,:);
-                single_predicted_metric = Predicted_Metric(k,:,:);
+                single_measured_metric = Nonzeros_Measured_Metric;
+                single_predicted_metric = Nonzeros_Predicted_Metric;
                 % Loop over multiple line comparisons and build output_stats cell
                 for m=1:length(single_measured_metric)
                     
@@ -190,7 +190,7 @@ for j=2:length(Q);
                     if error_val <= error_tolerance
                         within_tolerance = 'Yes';
                     else
-                        within_tolerance = 'No';
+                        within_tolerance = 'Out_Of_Tol';
                     end
                     
                     % Write descriptive statistics to output_stats cell

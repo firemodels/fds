@@ -1021,7 +1021,7 @@ check_verification_stats()
 
    # Scan and report warnings for any verification cases that are outside of their specified error tolerance
    cd $FDS_SVNROOT/Utilities/Matlab
-   if [[ `grep ",No," FDS_verification_scatterplot_output.csv` == "" ]]
+   if [[ `grep Out_Of_Tol FDS_verification_scatterplot_output.csv` == "" ]]
    then
       # Continue along
       :
