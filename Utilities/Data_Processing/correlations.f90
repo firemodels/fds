@@ -73,14 +73,14 @@ ENDDO
 103 WRITE(0,*) 'Completed Beyler.'
 REWIND(10)
 
-! Process Point Source Radiation lines
+! Process Radiation lines
 
 DO
    X=-1. ; Z=-1.
    READ(10,NML=RAD,END=104,ERR=99,IOSTAT=IOS)
-   CALL COMPUTE_POINT_SOURCE_RADIATION
+   CALL COMPUTE_RADIATION
 ENDDO
-104 WRITE(0,*) 'Completed Point Source Radiation.'
+104 WRITE(0,*) 'Completed Radiation.'
 REWIND(10)
 
 ! Process THIEF lines
@@ -375,9 +375,10 @@ CLOSE(11)
 END SUBROUTINE COMPUTE_BEYLER
 
 
-SUBROUTINE COMPUTE_POINT_SOURCE_RADIATION
+! Combined point source radiation model and solid flame model
+SUBROUTINE COMPUTE_RADIATION
 
-REAL :: R,Q_RAD(20)
+REAL :: R,Q_RAD(20),Q_RAD_SOLID(20),E,S(20),H1(20),H2(20),A1(20),A2(20),F_12_V1(20),F_12_V2(20),F_12_V(20)
 INTEGER :: I,K,N_X,N_Z
 CHARACTER(30) :: FMT
 
@@ -387,10 +388,14 @@ IF (FLIP_AXIS) THEN
    WRITE(11,'(A)') 'Height (cm),Vertical Flux'
 ENDIF
 
+! Flame height calculation
 RHO_A = 353./(273.+20.)
 D = SQRT(4.*AREA/PI)
 Q_STAR = Q/(RHO_A*C_P*293.*SQRT(G)*D**2.5)
 L_F = D*(3.7*Q_STAR**0.4 - 1.02)
+
+! Emissive power calculation
+E = 50*(10**(-0.00823*D))
 
 N_X = 0
 DO I=1,20
@@ -400,6 +405,8 @@ DO I=1,20
    DO K=1,20
       IF (Z(K)<0) EXIT
       N_Z = N_Z + 1
+
+      ! Point source radiation model
       R = SQRT(X(I)**2+(Z(K)-L_F/3.)**2)
       SELECT CASE(ABS(IOR(K)))
       ! Select cos term based on orientation of heat flux gauge
@@ -410,6 +417,19 @@ DO I=1,20
          CASE(3)
             Q_RAD(K) = (Z(K)/R)*RADIATIVE_FRACTION*Q/(4.*PI*R**2)
       END SELECT
+      
+      ! Solid flame radiation model
+      S = 2*X/D
+      H1 = 2*X/D
+      H2 = 2*(L-X)/D
+      A1 = (H1**2 + S**2 +1 ) / (2 * S)
+      A2 = (H1**2 + S**2 +1 ) / (2 * S)
+      F_12_V1 = (1/(PI*S)) * ATAN(H1/SQRT(S**2-1)) - (H1/(PI*S))*ATAN((S-1)/(S+1))**(1./2.) + (A1*H1/(PI*S*SQRT(A1**2-1))) * ATAN((A1+1)*(S-1)/((A1-1)*(S+1)))**(1./2.)
+      F_12_V2 = (1/(PI*S)) * ATAN(H2/SQRT(S**2-1)) - (H2/(PI*S))*ATAN((S-1)/(S+1))**(1./2.) + (A2*H2/(PI*S*SQRT(A2**2-1))) * ATAN((A2+1)*(S-1)/((A2-1)*(S+1)))**(1./2.)
+      F_12_V = F_12_V1 + F_12_V2
+      Q_RAD_SOLID = E * F_12_V
+      ! WRITE(*,*) Q_RAD_SOLID
+
       IF (FLIP_AXIS) THEN
          WRITE(11,'(F6.2,A1,F6.2)') Z(K)*100,',',Q_RAD(K)
       ENDIF
@@ -436,7 +456,7 @@ ENDDO
 
 CLOSE(11)
 
-END SUBROUTINE COMPUTE_POINT_SOURCE_RADIATION
+END SUBROUTINE COMPUTE_RADIATION
 
 
 SUBROUTINE COMPUTE_THIEF
