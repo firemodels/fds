@@ -11,7 +11,7 @@ REAL, DIMENSION(20) :: X,Z,T_PLUME,R_VALUES,H_VALUES
 REAL, DIMENSION(9999) :: TIME_RAMP,Q_RAMP
 REAL, DIMENSION(0:5) :: TMP_RAMP,T_RAMP
 CHARACTER(20), DIMENSION(20) :: Z_LABEL,LABEL
-LOGICAL :: FLIP_AXIS=.FALSE.,ITER=.TRUE.,PROFILE=.FALSE.,STEEL_PROTECTED=.FALSE., &
+LOGICAL :: ITER=.TRUE.,PROFILE=.FALSE.,STEEL_PROTECTED=.FALSE., &
            STEEL_UNPROTECTED=.FALSE.,TIME_OUTPUT=.FALSE.,T_SQUARED=.FALSE.
 INTEGER :: I,IOS
 INTEGER, DIMENSION(20) :: IOR
@@ -22,7 +22,7 @@ NAMELIST /DB/  C_S,DELTA,H,K_S,L,M_DOT,OUTPUT_FILE,Q,RHO_S,T_END,TMP_A,W
 NAMELIST /MQH/ C_S,DELTA,H,H_V,K_S,L,M_DOT,OUTPUT_FILE,PROFILE,Q,RHO_S,T_END,TMP_A,W,W_V, &
                STEEL_UNPROTECTED,STEEL_PROTECTED,F_V,RHO_STEEL,C_STEEL,H_C,EPSILON,W_D,K_I,RHO_I,C_I,H_I
 NAMELIST /BEYLER/ C_S,DELTA,FUEL_HEIGHT,H,HEAT_LOSS_FRACTION,K_S,L,LOCATION_FACTOR,OUTPUT_FILE,Q,RHO_S,T_END,TMP_A,W
-NAMELIST /RAD/ AREA,RADIATIVE_FRACTION,OUTPUT_FILE,Q,X,Z,IOR,Z_LABEL,TIME_OUTPUT,FLIP_AXIS
+NAMELIST /RAD/ AREA,RADIATIVE_FRACTION,OUTPUT_FILE,Q,X,Z,IOR,Z_LABEL,TIME_OUTPUT
 NAMELIST /THIEF/ CONDUIT_DIAMETER,CONDUIT_THICKNESS,D,JACKET_THICKNESS,MASS_PER_LENGTH,OUTPUT_FILE,T_END,TMP_A,TMP_RAMP,T_RAMP
 NAMELIST /ALPERT/ Q,LOCATION_FACTOR,T_END,R_VALUES,H_VALUES,LABEL,TMP_A,OUTPUT_FILE,T_SQUARED,ALPHA
 NAMELIST /SPRINKLER/ T_SQUARED,ALPHA,CUTOFF_TIME,RTI,ACTIVATION_TEMPERATURE,H,R,TMP_A,LOCATION_FACTOR,OUTPUT_FILE
@@ -378,15 +378,11 @@ END SUBROUTINE COMPUTE_BEYLER
 ! Combined point source radiation model and solid flame model
 SUBROUTINE COMPUTE_RADIATION
 
-REAL :: R,Q_RAD(20),Q_RAD_SOLID(20),E,S(20),H1(20),H2(20),A1(20),A2(20),F_12_V1(20),F_12_V2(20),F_12_V(20)
+REAL :: R,Q_RAD(20),Q_RAD_SOLID(20),E,S,H1,H2,A1,A2,F_12_V1,F_12_V2,F_12_H,F_12_V,F_12,A,B
 INTEGER :: I,K,N_X,N_Z
 CHARACTER(30) :: FMT
 
 OPEN(11,FILE=TRIM(OUTPUT_FILE),FORM='FORMATTED',STATUS='REPLACE')
-
-IF (FLIP_AXIS) THEN
-   WRITE(11,'(A)') 'Height (cm),Vertical Flux'
-ENDIF
 
 ! Flame height calculation
 RHO_A = 353./(273.+20.)
@@ -395,7 +391,7 @@ Q_STAR = Q/(RHO_A*C_P*293.*SQRT(G)*D**2.5)
 L_F = D*(3.7*Q_STAR**0.4 - 1.02)
 
 ! Emissive power calculation
-E = 50*(10**(-0.00823*D))
+E = 58*(10**(-0.00823*D))
 
 N_X = 0
 DO I=1,20
@@ -417,25 +413,29 @@ DO I=1,20
          CASE(3)
             Q_RAD(K) = (Z(K)/R)*RADIATIVE_FRACTION*Q/(4.*PI*R**2)
       END SELECT
-      
-      ! Solid flame radiation model
-      S = 2*X/D
-      H1 = 2*X/D
-      H2 = 2*(L-X)/D
-      A1 = (H1**2 + S**2 +1 ) / (2 * S)
-      A2 = (H1**2 + S**2 +1 ) / (2 * S)
-      F_12_V1 = (1/(PI*S)) * ATAN(H1/SQRT(S**2-1)) - (H1/(PI*S))*ATAN((S-1)/(S+1))**(1./2.) + (A1*H1/(PI*S*SQRT(A1**2-1))) * ATAN((A1+1)*(S-1)/((A1-1)*(S+1)))**(1./2.)
-      F_12_V2 = (1/(PI*S)) * ATAN(H2/SQRT(S**2-1)) - (H2/(PI*S))*ATAN((S-1)/(S+1))**(1./2.) + (A2*H2/(PI*S*SQRT(A2**2-1))) * ATAN((A2+1)*(S-1)/((A2-1)*(S+1)))**(1./2.)
-      F_12_V = F_12_V1 + F_12_V2
-      Q_RAD_SOLID = E * F_12_V
-      ! WRITE(*,*) Q_RAD_SOLID
 
-      IF (FLIP_AXIS) THEN
-         WRITE(11,'(F6.2,A1,F6.2)') Z(K)*100,',',Q_RAD(K)
+      ! Solid flame radiation model
+      S = 2*X(I)/D
+      IF (Z(I)>0) THEN
+         H1 = 2*Z(K)/D
+         H2 = 2*(L_F-Z(K))/D
+         A1 = (H1**2 + S**2 +1 ) / (2 * S)
+         A2 = (H1**2 + S**2 +1 ) / (2 * S)
+         F_12_V1 = (1/(PI*S)) * ATAN(H1/SQRT(S**2-1)) - (H1/(PI*S))*ATAN(SQRT((S-1)/(S+1))) + (A1*H1/(PI*S*SQRT(A1**2-1))) * ATAN(SQRT((A1+1)*(S-1)/((A1-1)*(S+1))))
+         F_12_V2 = (1/(PI*S)) * ATAN(H2/SQRT(S**2-1)) - (H2/(PI*S))*ATAN(SQRT((S-1)/(S+1))) + (A2*H2/(PI*S*SQRT(A2**2-1))) * ATAN(SQRT((A2+1)*(S-1)/((A2-1)*(S+1))))
+         F_12 = F_12_V1 + F_12_V2
+      ELSE
+         H = 2*L_F/D
+         A = (H**2 + S**2 +1 ) / (2 * S)
+         B = (1+S**2) / (2*S)
+         F_12_H = (1/(PI*S)) * ATAN(H/SQRT(S**2-1)) - (H/(PI*S))*ATAN(SQRT((S-1)/(S+1))) + (A*H/(PI*S*SQRT(A**2-1))) * ATAN(SQRT((A+1)*(S-1)/((A-1)*(S+1))))
+         F_12_V = ((B-(1/S))/(PI*SQRT(B**2-1))) * ATAN(SQRT((B+1)*(S-1)/((B-1)*(S+1)))) - ((A-(1/S))/(PI*SQRT(A**2-1))) * ATAN(SQRT((A+1)*(S-1)/((A-1)*(S+1))))
+         F_12 = SQRT(F_12_H**2 + F_12_V**2)
       ENDIF
+      Q_RAD_SOLID(K) = E * F_12
    ENDDO
 
-   IF ((I==1) .AND. (.NOT. FLIP_AXIS)) THEN
+   IF (I==1) THEN
       IF (TIME_OUTPUT) THEN
          WRITE(FMT,'(A,I2.1,5A)') "(",N_Z,"(","A",",','),","A",")"
          WRITE(11,FMT) 'Time',(TRIM(Z_LABEL(K)),K=1,N_Z)
@@ -448,7 +448,7 @@ DO I=1,20
       ENDIF
    ENDIF
    
-   IF ((.NOT. TIME_OUTPUT) .AND. (.NOT. FLIP_AXIS)) THEN
+   IF (.NOT. TIME_OUTPUT) THEN
       WRITE(FMT,'(A,I2.1,5A)') "(",N_Z,"(","F7.2",",','),","F7.2",")"
       WRITE(11,FMT) X(I),(Q_RAD(K),K=1,N_Z)
    ENDIF
