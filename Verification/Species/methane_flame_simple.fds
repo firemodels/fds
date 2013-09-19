@@ -26,7 +26,8 @@ Yields       kg/kg fuel	  kg
 
 Species and reactions
 
-&REAC FUEL='METHANE', C=1, H=4, HEAT_OF_COMBUSTION=50000. CO_YIELD = 0.1/
+&REAC FUEL='METHANE', C=1, H=4, HEAT_OF_COMBUSTION=50000. CO_YIELD = 0.1
+      HRRPUV_AVERAGE = 1e8 /
 
 Measurements
 
