@@ -3139,7 +3139,7 @@ Sometimes it is desired that a fire spread radially at some specified rate. Rath
 &RAMP ID='fireramp', T=31.0, F=0.0 /
 &VENT XB=0.0,5.0,1.5,9.5,0.0,0.0, SURF_ID='FIRE', XYZ=1.5,4.0,0.0, SPREAD_RATE=0.03 /
 \end{lstlisting}
-create a rectangular area via the {\ct VENT} line on which the fire starts at the point (1.5,4.0,0.0) and spreads outwards at a rate of 0.03~m/s. Each surface cell burns for 30~s as the fire spreads outward, creating a widening ring of fire. Note that the {\ct RAMP\_Q} is used to turn the burning on and off to simulate the consumption of fuel as the fire spreads radially. It should not be used to mimic the ``$t$-squared'' curve -- the whole point of the exercise is to mimic this curve in a more natural way. Eventually, the fire goes out as the ring grows past the boundary of the rectangle. Some trial and error is probably required to find the {\ct SPREAD\_RATE} that leads to a desired time history of the heat release rate.
+create a rectangular area via the {\ct VENT} line on which the fire starts at the point (1.5,4.0,0.0) and spreads outwards at a rate of 0.03~m/s. Each surface cell burns for 30~s as the fire spreads outward, creating a widening ring of fire. Note that the {\ct RAMP\_Q} is used to turn the burning on and off to simulate the consumption of fuel as the fire spreads radially. It should not be used to mimic a $t$-squared fire growth rate -- the whole point of the exercise is to mimic this curve in a more natural way. Eventually, the fire goes out as the ring grows past the boundary of the rectangle. Some trial and error is probably required to find the {\ct SPREAD\_RATE} that leads to a desired time history of the heat release rate.
 
 If you desire that the fire spread over an area that is not confined to a flat plane, specify {\ct XYZ} and {\ct SPREAD\_RATE} on the {\ct SURF} line directly and then apply that {\ct SURF} line to the obstructions or particles over which you want the fire to spread. This technique can be useful for simulating the spread of fire through a cluttered space when the detailed properties of the materials are unknown, or when the uncertainties associated with modeling the pyrolysis of the solid fuels directly are too great.
 
@@ -4621,13 +4621,19 @@ TAU\_Q}, {\ct TAU\_T}, and {\ct TAU\_V} indicate that the heat release
 rate ({\ct HRRPUA}); surface temperature ({\ct TMP\_FRONT}); and/or
 normal velocity ({\ct VEL}, {\ct VOLUME\_FLUX}), or {\ct
 MASS\_FLUX\_TOTAL} are to ramp up to their prescribed values in {\ct
-TAU} seconds and remain there.  If {\ct TAU\_Q} is positive, then the
-heat release rate ramps up like tanh$(t/\tau)$. If negative, then the
-HRR ramps up like $(t/\tau)^2$. If the fire ramps up following a $t^2$
-curve, it remains constant after {\ct TAU\_Q} seconds.  These rules
-apply to {\ct TAU\_T} and {\ct TAU\_V} as well.  The default value for
-all {\ct TAU}s is 1~s.  If something other than a tanh or $t^2$ ramp
-up is desired, then a user-defined function must be input. To
+TAU} seconds and remain there. To prescribe different heat release rate ramps, the
+{\ct TAU\_Q} parameter can be defined as a negative value ($t$-squared growth rate) or
+a positive value ($\tanh$ growth rate), which results in a time-dependent
+heat release rate as
+\begin{equation}
+\dot Q(t) = \left\{ \begin{array}{ll} \dot Q_0 \left( \frac{t}{\tau} \right)^2            &  \mbox{if {\ct TAU\_Q} is negative} \\
+                                      \dot Q_0 \cdot \tanh \left( \frac{t}{\tau} \right)  &  \mbox{if {\ct TAU\_Q} is positive}  \end{array} \right.
+\end{equation}
+where $\dot Q_0$ is the user-specified heat release rate. If the
+fire ramps up following a $t$-squared curve, then it remains constant after
+{\ct TAU\_Q} seconds.  These rules apply to {\ct TAU\_T} and {\ct TAU\_V} as well.
+The default value for all {\ct TAU}s is 1~s.  If something other than a tanh or
+$t$-squared ramp up is desired, then a user-defined function must be input. To
 do this, set {\ct RAMP\_Q}, {\ct RAMP\_T} or {\ct RAMP\_V} equal to a
 character string designating the ramp function to use for that
 particular surface type, then somewhere in the input file generate
