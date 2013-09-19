@@ -12,13 +12,13 @@ qq=
 
 /bin/sh -c "cp $BASEDIR/FDS_Input_Files/*.fds $BASEDIR/$INDIR"
 
-$QFDS -r $qq -d $INDIR Cup_C7H16_Ar.fds
-$QFDS -r $qq -d $INDIR Cup_C7H16_CO2.fds
-$QFDS -r $qq -d $INDIR Cup_C7H16_He.fds
-$QFDS -r $qq -d $INDIR Cup_C7H16_N2.fds
-$QFDS -r $qq -d $INDIR Cup_CH4_Ar.fds
-$QFDS -r $qq -d $INDIR Cup_CH4_CO2.fds
-$QFDS -r $qq -d $INDIR Cup_CH4_He.fds
-$QFDS -r $qq -d $INDIR Cup_CH4_N2.fds
+$QFDS -r -p 4 $qq -d $INDIR Cup_C7H16_Ar.fds
+$QFDS -r -p 4 $qq -d $INDIR Cup_C7H16_CO2.fds
+$QFDS -r -p 4 $qq -d $INDIR Cup_C7H16_He.fds
+$QFDS -r -p 4 $qq -d $INDIR Cup_C7H16_N2.fds
+$QFDS -r -p 4 $qq -d $INDIR Cup_CH4_Ar.fds
+$QFDS -r -p 4 $qq -d $INDIR Cup_CH4_CO2.fds
+$QFDS -r -p 4 $qq -d $INDIR Cup_CH4_He.fds
+$QFDS -r -p 4 $qq -d $INDIR Cup_CH4_N2.fds
 
 echo FDS cases submitted
