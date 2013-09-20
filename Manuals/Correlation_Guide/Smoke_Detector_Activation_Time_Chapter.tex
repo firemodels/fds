@@ -1,0 +1,192 @@
+% !TEX root = Correlation_Guide.tex
+
+\chapter{Smoke Detector Activation Time}
+\label{Smoke_Detector_Activation_Time_Chapter}
+
+\section{Temperature Rise Method}
+
+\subsection*{Description}
+
+In this method, the prediction of smoke detector activation time is identical to that for a sprinkler (as described in Chapter~\ref{Sprinkler_Activation_Time_Chapter}). Heskestad and Delichatsios~\cite{Heskestad:4} correlated smoke detector activation to a smoke temperature change of 10~$^\circ$C (18~$^\circ$F) from typical fuels. It is assumed that the smoke detectors are low-RTI devices ($\textrm{RTI}=5$).
+
+Note that some of these cases assume a quasi-steady approach for a fire source $\dot Q$ that follows a specified t-squared growth, which is given by Eq.~\ref{eq:t_squared}.
+
+\subsection*{Verification}
+
+Test: NIST Smoke Alarms, Test SDC02
+
+\begin{table}[!ht]
+\caption[Verification input parameters, smoke detector activation time]
+{Verification input parameters, smoke detector activation time.}
+\begin{center}
+\begin{tabular}{|l|c|}
+\hline
+                          &              \\
+\rb{Input Parameter}      &  \rb{Value}  \\ \hline \hline
+Location Factor (-)       &  1           \\ \hline
+$\alpha$ (kW/s$^2$)       &  0.00463     \\ \hline
+$t_{fire}$ (s)            &  300         \\ \hline
+$r$ (m)                   &  1.3         \\ \hline
+$H$ (m)                   &  2.1         \\ \hline
+$\Delta T_c$ ($^\circ$C)  &  10          \\ \hline
+RTI (m-s)$^{1/2}$         &  5           \\ \hline
+$T_\infty$ ($^\circ$C)    &  21          \\ \hline
+\end{tabular}
+\end{center}
+\end{table}
+
+\noindent Expected result: At 47~s, the HRR $\dot Q$ is 10.23~kW, and the activation time $t_{activation}$ is 30.8~s.
+
+
+\clearpage
+
+
+\subsection*{Validation}
+
+\begin{figure}[!ht]
+\begin{center}
+\begin{tabular}{l}
+\includegraphics[width=4.0in]{SCRIPT_FIGURES/Scatterplots/Smoke_Detector_Activation_Time_Temperature_Rise}
+\end{tabular}
+\end{center}
+\caption[Summary of smoke detector activation time predictions]
+{Summary of smoke detector activation time predictions using the Temperature Rise method.}
+\label{Smoke_Detector_Activation_Summary_Temperature_Rise}
+\end{figure}
+
+
+\clearpage
+
+
+\section{Milke Method}
+
+\subsection*{Description}
+
+The correlation of Milke~\cite{Milke:1} predicts that the time of smoke detector activation, $t_{activation}$, is given by
+\be
+t_{activation} = \frac{X H^{4/3}}{\dot Q^{1/3}}
+\label{eq:Milke}
+\ee
+where $H$ is the height of the ceiling above the top of the fuel~(\si{ft}), and $\dot Q$ is the HRR~(\si{kW}). The constant $X$ is given by
+\be
+X = 4.6 \times 10^{-4} (Y^2) + 2.7 \times 10^{-15} (Y^6)
+\label{eq:Milke_X}
+\ee
+and the constant $Y$ is given by
+\be
+Y = \frac{\Delta T_c H^{5/3}}{\dot Q^{2/3}}
+\label{eq:Milke_Y}
+\ee
+where $\Delta T_c$ is the temperature rise of gases under the ceiling required for the smoke detector to activate~($^\circ$F).
+
+Note that some of these cases assume a quasi-steady approach for a fire source $\dot Q$ that follows a specified t-squared growth, which is given by Eq.~\ref{eq:t_squared}.
+
+\subsection*{Verification}
+
+Test: NIST Smoke Alarms, Test SDC02
+
+\begin{table}[!ht]
+\caption[Verification input parameters, smoke detector activation time]
+{Verification input parameters, smoke detector activation time.}
+\begin{center}
+\begin{tabular}{|l|c|}
+\hline
+                          &              \\
+\rb{Input Parameter}      &  \rb{Value}  \\ \hline \hline
+$\alpha$ (kW/s$^2$)       &  0.00463     \\ \hline
+$t_{fire}$ (s)            &  300         \\ \hline
+$H$ (m)                   &  2.1         \\ \hline
+$\Delta T_c$ ($^\circ$C)  &  10          \\ \hline
+\end{tabular}
+\end{center}
+\end{table}
+
+\noindent Expected result: At 40~s, the HRR $\dot Q$ is 7.41~kW, and the activation time $t_{activation}$ is 47.3~s.
+\\ \\
+Note: The FDTs spreadsheets use an incorrect unit conversion factor from kW to Btu/s, which gives an activation time of 39.5~s.
+
+
+\clearpage
+
+
+\subsection*{Validation}
+
+\begin{figure}[!ht]
+\begin{center}
+\begin{tabular}{l}
+\includegraphics[width=4.0in]{SCRIPT_FIGURES/Scatterplots/Smoke_Detector_Activation_Time_Milke}
+\end{tabular}
+\end{center}
+\caption[Summary of smoke detector activation time predictions]
+{Summary of smoke detector activation time predictions using the method of Milke.}
+\label{Smoke_Detector_Activation_Summary_Milke}
+\end{figure}
+
+
+\clearpage
+
+
+\section{Mowrer Method}
+
+\subsection*{Description}
+
+The correlation of Mowrer~\cite{Mowrer:1} predicts that the time of smoke detector activation, $t_{activation}$, is given by
+\be
+t_{activation} = t_{pl} + t_{cj}
+\label{eq:Mowrer}
+\ee
+where the transport lag time of the plume, $t_{pl}$, is given by
+\be
+t_{pl} = C_{pl} \frac{H^{4/3}}{\dot Q^{1/3}}
+\label{eq:Mowrer_tpl}
+\ee
+where $C_{pl}$ is the plume lag time constant~(0.67), $H$ is the height of the ceiling above the fuel~(\si{m}), and $\dot Q$ is the HRR~(\si{kW}).
+The transport lag time of the ceiling jet, $t_{cj}$, is given by
+\be
+t_{cj} = \frac{1}{C_{cj}} \frac{r^{11/6}}{\dot Q^{1/3} H^{1/2}}
+\label{eq:Mowrer_tcj}
+\ee
+where $C_{cj}$ is the ceiling jet time lag time constant~(1.2), and $r$ is the radial distance to the detector~(\si{m}).
+
+Note that some of these cases assume a quasi-steady approach for a fire source $\dot Q$ that follows a specified t-squared growth, which is given by Eq.~\ref{eq:t_squared}.
+
+\subsection*{Verification}
+
+Test: NIST Smoke Alarms, Test SDC02
+
+\begin{table}[!ht]
+\caption[Verification input parameters, smoke detector activation time]
+{Verification input parameters, smoke detector activation time.}
+\begin{center}
+\begin{tabular}{|l|c|}
+\hline
+                      &              \\
+\rb{Input Parameter}  &  \rb{Value}  \\ \hline \hline
+$\alpha$ (kW/s$^2$)   &  0.00463     \\ \hline
+$t_{fire}$ (s)        &  300         \\ \hline
+$C_{pl}$ (-)          &  0.67        \\ \hline
+$C_{cj}$ (-)          &  1.2         \\ \hline
+$r$ (m)               &  1.3         \\ \hline
+$H$ (m)               &  2.1         \\ \hline
+\end{tabular}
+\end{center}
+\end{table}
+
+\noindent Expected result: At 5~s, the HRR $\dot Q$ is 0.116~kW, and the activation time $t_{activation}$ is 5.6~s.
+
+
+\clearpage
+
+
+\subsection*{Validation}
+
+\begin{figure}[!ht]
+\begin{center}
+\begin{tabular}{l}
+\includegraphics[width=4.0in]{SCRIPT_FIGURES/Scatterplots/Smoke_Detector_Activation_Time_Mowrer}
+\end{tabular}
+\end{center}
+\caption[Summary of smoke detector activation time predictions]
+{Summary of smoke detector activation time predictions using the method of Mowrer (bottom).}
+\label{Smoke_Detector_Activation_Summary_Mowrer}
+\end{figure}

@@ -1,15 +1,11 @@
 % !TEX root = Correlation_Guide.tex
 
-\chapter{Fire Plumes}
+\chapter{Plume Temperature}
 \label{Plume_Chapter}
 
-\clearpage
+\section{Heskestad Method}
 
-\section{Plume Temperature}
-
-\subsection{Heskestad Method}
-
-\subsubsection*{Description}
+\subsection*{Description}
 
 For a fire plume, the correlation by Heskestad~\cite{SFPE:Heskestad} predicts that the increase in centerline temperature, $\Delta T_0$, is given by
 \be
@@ -34,13 +30,17 @@ D = \sqrt{\frac{4 A}{\pi}}
 where $A$ is the area of the fire source~(\si{m^2}).
 Note that this plume temperature correlation is only valid above the mean flame height.
 
-\subsubsection*{Verification}
+
+\clearpage
+
+
+\subsection*{Verification}
 
 Test: VTT Test 1
 
 \begin{table}[!ht]
-\caption[Input parameters, plume temperature (Heskestad)]
-{Input parameters, plume temperature (Heskestad).}
+\caption[Verification input parameters, plume temperature]
+{Verification input parameters, plume temperature.}
 \begin{center}
 \begin{tabular}{|l|c|}
 \hline
@@ -61,7 +61,7 @@ $T_\infty$ ($^\circ$C)  &  22          \\ \hline
 \clearpage
 
 
-\subsubsection*{Validation}
+\subsection*{Validation}
 
 \begin{figure}[!ht]
 \begin{center}
@@ -78,9 +78,9 @@ $T_\infty$ ($^\circ$C)  &  22          \\ \hline
 \clearpage
 
 
-\subsection{McCaffrey Method}
+\section{McCaffrey Method}
 
-\subsubsection*{Description}
+\subsection*{Description}
 
 For a fire plume, the correlation by McCaffrey~\cite{McCaffrey:NBSIR_79-1910} predicts that the increase in centerline temperature, $\Delta T_0$, is given by
 \be
@@ -92,8 +92,8 @@ where $g$ is the acceleration of gravity~(\si{m/s^2}), $z$ is the elevation abov
 \vspace{\baselineskip}
 \begin{table}[!ht]
 \begin{center}
-\caption[Constants used in McCaffrey plume correlation]
-{Constants used in McCaffrey plume correlation.}
+\caption[Constants used in McCaffrey plume temperature correlation]
+{Constants used in McCaffrey plume temperature correlation.}
 \label{tbl:McCaffrey_constants}
 \begin{tabular}{|c|c|c|c|}
 \hline
@@ -107,13 +107,13 @@ Plume         &  > 0.2            & -1/3    & 1.1      \\
 \end{center}
 \end{table}
 
-\subsubsection*{Verification}
+\subsection*{Verification}
 
 Test: VTT Test 1
 
 \begin{table}[!ht]
-\caption[Input parameters, plume temperature (McCaffrey)]
-{Input parameters, plume temperature (McCaffrey).}
+\caption[Verification input parameters, plume temperature]
+{Verification input parameters, plume temperature.}
 \begin{center}
 \begin{tabular}{|l|c|}
 \hline
@@ -132,7 +132,7 @@ $T_\infty$ ($^\circ$C)  &  22          \\ \hline
 \clearpage
 
 
-\subsubsection*{Validation}
+\subsection*{Validation}
 
 \begin{figure}[!ht]
 \begin{center}

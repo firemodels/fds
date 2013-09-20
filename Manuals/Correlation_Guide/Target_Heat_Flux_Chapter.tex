@@ -5,7 +5,7 @@
 
 \section{Point Source Radiation Heat Flux}
 
-\subsubsection*{Description}
+\subsection*{Description}
 
 The point source model assumes that radiative energy is concentrated at a point located within a flame~\cite{Beyler2:SFPE}.
 Here, the point source is located at a point one-third the height of the flame.
@@ -36,7 +36,7 @@ Q^* = \frac{\dot Q}{\rho_\infty c_p T_\infty \sqrt{g} D^{5/2}}
 \ee
 where $\rho_\infty$ is the ambient air density~(\si{kg/m^3}), $c_p$ is the specific heat of air~(\si{kJ/(kg.K)}), $T_\infty$ is the ambient air temperature~(\si{K}), and $g$ is the acceleration of gravity~(\si{m/s^2}).
 
-\subsubsection*{Verification}
+\subsection*{Verification}
 
 Test: Fleury 100 kW, 1:1 Burner
 \\ \\
@@ -45,8 +45,8 @@ of the target with respect to the fire, and the flame height is not considered. 
 assumes that the point source is located one-third of the height of the flame ($L_f/3$).
 
 \begin{table}[!ht]
-\caption[Input parameters, point source radiation heat flux]
-{Input parameters, point source radiation heat flux.}
+\caption[Verification input parameters, point source radiation heat flux]
+{Verification input parameters, point source radiation heat flux.}
 \begin{center}
 \begin{tabular}{|l|l|}
 \hline
@@ -70,7 +70,7 @@ IOR (-)               &  2                \\ \hline
 \clearpage
 
 
-\subsubsection*{Validation}
+\subsection*{Validation}
 
 \begin{figure}[!ht]
 \begin{center}
@@ -89,7 +89,7 @@ IOR (-)               &  2                \\ \hline
 
 \section{Solid Flame Radiation Heat Flux}
 
-\subsubsection*{Description}
+\subsection*{Description}
 
 The solid flame model predicts the heat flux to a target based on an effective emissive power from a flame and a view factor calculation~\cite{Beyler2:SFPE}.
 The radiative heat flux, $\dot q_r''$, at any distance $R$ (\si{m}) from the center of the flame can be predicted using
@@ -105,7 +105,7 @@ E = 58 (10^{-0.0823 D})
 \ee
 where $D$ is the effective fire diameter~(\si{m}).
 
-\subsubsection*{Ground-Level Target}
+\subsection*{Ground-Level Target}
 
 \noindent For a heat flux target that is at the same level as the base of the flame, the view factor between the target and the flame, $F_{12}$, is given by
 \be
@@ -135,7 +135,7 @@ flux target~(\si{m}), and $L_f$ is the flame height given in Eq.~\ref{eq:point_s
 \clearpage
 
 
-\subsubsection*{Elevated Target}
+\subsection*{Elevated Target}
 
 \noindent For a heat flux target that is elevated from the base of the flame, the view factor between the target and the flame, $F_{12}$, is given by
 \be
@@ -167,13 +167,13 @@ and $L_f$ is the flame height given in Eq.~\ref{eq:point_source_Lf}~(\si{m}).
 \clearpage
 
 
-\subsubsection*{Verification}
+\subsection*{Verification}
 
 Test: Fleury 100 kW, 1:1 Burner
 
 \begin{table}[!ht]
-\caption[Input parameters, solid flame radiation heat flux]
-{Input parameters, solid flame radiation heat flux.}
+\caption[Verification input parameters, solid flame radiation heat flux]
+{Verification input parameters, solid flame radiation heat flux.}
 \begin{center}
 \begin{tabular}{|l|l|}
 \hline
@@ -190,7 +190,7 @@ $z$ (m)               &  0.0              \\ \hline
 
 \noindent Expected result: At a radius $R$ of 0.50~m, the radiative heat flux $q''_{r}$ is 11.18~kW/m$^2$; at an $R$ of 0.75~m, $q''_{r}$ is 6.9~kW/m$^2$; at an $R$ of 1.0~m, $q''_{r}$ is 4.69~kW/m$^2$.
 
-\subsubsection*{Validation}
+\subsection*{Validation}
 
 \begin{figure}[!ht]
 \begin{center}
