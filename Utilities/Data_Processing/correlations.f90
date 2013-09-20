@@ -205,7 +205,6 @@ RHO_A = 353./(TMP_A)
 WRITE(11,'(A)') 'Time,Temp'
 
 DT = 0.05
-P  = P_0
 T  = -60.
 T_CLOCK = T 
 
