@@ -97,6 +97,9 @@ void    GLUI_Main::create_standalone_window( char *name, int x, int y )
   if ( x >= 0 OR y >= 0 )
     glutInitWindowPosition( x, y );
   glutInitDisplayMode( GLUT_RGB | GLUT_SINGLE ); /* | GLUT_DOUBLE );          */
+#if pp_OSX
+#undef pp_NOCLOSE
+#endif
 #ifdef pp_NOCLOSE
   glut_window_id = glutCreateNoCloseWindow( name );
 #else
