@@ -48,6 +48,7 @@ ENDDO
 REWIND(10)
 
 ! Process DB (Deal and Beyler)
+
 DO
    READ(10,NML=DB,END=101,ERR=99,IOSTAT=IOS)
    CALL COMPUTE_DB
@@ -419,14 +420,14 @@ DO I=1,20
       IF (Z(I)>0) THEN
          H1 = 2*Z(K)/D
          H2 = 2*(L_F-Z(K))/D
-         A1 = (H1**2 + S**2 +1 ) / (2 * S)
-         A2 = (H1**2 + S**2 +1 ) / (2 * S)
+         A1 = (H1**2 + S**2 + 1 ) / (2 * S)
+         A2 = (H2**2 + S**2 + 1 ) / (2 * S)
          F_12_V1 = (1/(PI*S)) * ATAN(H1/SQRT(S**2-1)) - (H1/(PI*S))*ATAN(SQRT((S-1)/(S+1))) + (A1*H1/(PI*S*SQRT(A1**2-1))) * ATAN(SQRT((A1+1)*(S-1)/((A1-1)*(S+1))))
          F_12_V2 = (1/(PI*S)) * ATAN(H2/SQRT(S**2-1)) - (H2/(PI*S))*ATAN(SQRT((S-1)/(S+1))) + (A2*H2/(PI*S*SQRT(A2**2-1))) * ATAN(SQRT((A2+1)*(S-1)/((A2-1)*(S+1))))
          F_12 = F_12_V1 + F_12_V2
       ELSE
          H = 2*L_F/D
-         A = (H**2 + S**2 +1 ) / (2 * S)
+         A = (H**2 + S**2 + 1 ) / (2 * S)
          B = (1+S**2) / (2*S)
          F_12_H = (1/(PI*S)) * ATAN(H/SQRT(S**2-1)) - (H/(PI*S))*ATAN(SQRT((S-1)/(S+1))) + (A*H/(PI*S*SQRT(A**2-1))) * ATAN(SQRT((A+1)*(S-1)/((A-1)*(S+1))))
          F_12_V = ((B-(1/S))/(PI*SQRT(B**2-1))) * ATAN(SQRT((B+1)*(S-1)/((B-1)*(S+1)))) - ((A-(1/S))/(PI*SQRT(A**2-1))) * ATAN(SQRT((A+1)*(S-1)/((A-1)*(S+1))))
@@ -437,20 +438,20 @@ DO I=1,20
 
    IF (I==1) THEN
       IF (TIME_OUTPUT) THEN
-         WRITE(FMT,'(A,I2.1,5A)') "(",N_Z,"(","A",",','),","A",")"
-         WRITE(11,FMT) 'Time',(TRIM(Z_LABEL(K)),K=1,N_Z)
-         WRITE(FMT,'(A,I2.1,5A)') "(",N_Z,"(","F7.2",",','),","F7.2",")"
-         WRITE(11,FMT) 0.,(Q_RAD(K),K=1,N_Z)
-         WRITE(11,FMT) 9999.,(Q_RAD(K),K=1,N_Z)
+         WRITE(FMT,'(A,I2.1,5A)') "(",2*N_Z,"(","A",",','),","A",")"
+         WRITE(11,FMT) 'Time',(TRIM(Z_LABEL(K))//'_PS_RAD',K=1,N_Z),(TRIM(Z_LABEL(K))//'_SF_RAD',K=1,N_Z)
+         WRITE(FMT,'(A,I2.1,5A)') "(",2*N_Z,"(","F7.2",",','),","F7.2",")"
+         WRITE(11,FMT) 0.,(Q_RAD(K),K=1,N_Z),(Q_RAD_SOLID(K),K=1,N_Z)
+         WRITE(11,FMT) 9999.,(Q_RAD(K),K=1,N_Z),(Q_RAD_SOLID(K),K=1,N_Z)
       ELSE
-         WRITE(FMT,'(A,I2.1,5A)') "(",N_Z,"(","A",",','),","A",")"
-         WRITE(11,FMT) 'x',(TRIM(Z_LABEL(K)),K=1,N_Z)
+         WRITE(FMT,'(A,I2.1,5A)') "(",2*N_Z,"(","A",",','),","A",")"
+         WRITE(11,FMT) 'x',(TRIM(Z_LABEL(K))//'_PS_RAD',K=1,N_Z),(TRIM(Z_LABEL(K))//'_SF_RAD',K=1,N_Z)
       ENDIF
    ENDIF
    
    IF (.NOT. TIME_OUTPUT) THEN
-      WRITE(FMT,'(A,I2.1,5A)') "(",N_Z,"(","F7.2",",','),","F7.2",")"
-      WRITE(11,FMT) X(I),(Q_RAD(K),K=1,N_Z)
+      WRITE(FMT,'(A,I2.1,5A)') "(",2*N_Z,"(","F7.2",",','),","F7.2",")"
+      WRITE(11,FMT) X(I),(Q_RAD(K),K=1,N_Z),(Q_RAD_SOLID(K),K=1,N_Z)
    ENDIF
 ENDDO
 
