@@ -1,5 +1,16 @@
 \documentclass[11pt]{book}
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                                                                                                 %
+% The mathematical style of these documents follows                                               %
+%                                                                                                 %
+% A. Thompson and B.N. Taylor. The NIST Guide for the Use of the International System of Units.   %
+%    NIST Special Publication 881, 2008.                                                          %
+%                                                                                                 %
+% http://www.nist.gov/pml/pubs/sp811/index.cfm                                                    %
+%                                                                                                 %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 \input{../Bibliography/commoncommands}
 
 
@@ -8,30 +19,104 @@
 \bibliographystyle{unsrt}
 \pagestyle{empty}
 
-\begin{minipage}[t][9in][s]{6.5in}
 
-\Huge
-\flushright{Verification and Validation \\ of Commonly Used \\ Empirical Correlations \\ for Fire Scenarios}
+\begin{minipage}[t][9in][s]{6.25in}
+
+\headerA{
+XXXX\\
+}
+
+\headerB{
+Verification and Validation\\
+of Commonly Used\\
+Empirical Correlations\\
+for Fire Scenarios\\
+}
 
 \normalsize
-\flushright{\today \\
-\emph{SVN Repository}~$Revision$}
+
+\headerC{
+{
+\flushright{
+Kristopher Overholt}
 
 \vfill
 
 \flushright{
-\includegraphics[width=2.in]{../Bibliography/nistident_flright_vec}
+
+\includegraphics[width=2.in]{../Bibliography/nistident_flright_vec} \\[.3in]
+}
+}
 }
 
 \end{minipage}
 
 \newpage
-
 \hspace{5in}
+\newpage
+
+\begin{minipage}[t][9in][s]{6.25in}
+
+\headerA{
+XXXX\\}
+
+\headerB{
+Verification and Validation\\
+of Commonly Used\\
+Empirical Correlations\\
+for Fire Scenarios\\
+}
+
+\headerC{
+\flushright{
+Kristopher Overholt \\
+{\em Fire Research Division \\
+Engineering Laboratory \\
+Gaithersburg, Maryland, USA} \\ }
+}
+
+\flushright{\today \\
+\emph{SVN Repository}~$Revision$}
+
+\vfill
+
+\flushright{\includegraphics[width=1in]{../Bibliography/doc} }
+
+\titlesigs
+
+\end{minipage}
+
+\newpage
+
+\begin{minipage}[t][9in][s]{6.25in}
+
+\flushright{Certain commercial entities, equipment, or materials may be identified in this \\
+document in order to describe an experimental procedure or concept adequately. \\
+Such identification is not intended to imply recommendation or endorsement by the \\
+National Institute of Standards and Technology, nor is it intended to imply that the \\
+entities, materials, or equipment are necessarily the best available for the purpose.\\
+}
+
+\vspace{3in}
+
+\large
+\flushright{\bf National Institute of Standards and Technology Special Publication XXXX \\
+Natl.~Inst.~Stand.~Technol.~Spec.~Publ.~XXXX, \pageref{LastPage} pages (XXXX 2013) \\
+%http://dx.doi.org/XX.XXXX/NIST.SP.XXXX \\
+CODEN: NSPUE2 }
+
+\vfill
+
+\hspace{1in}
+
+\end{minipage}
+
+\clearpage
 
 \frontmatter
 
 \pagestyle{plain}
+\pagenumbering{roman}
 
 
 \cleardoublepage
@@ -62,6 +147,8 @@
 \include{Smoke_Detector_Activation_Time_Chapter}
 
 \bibliography{../Bibliography/FDS_refs,../Bibliography/FDS_general,../Bibliography/FDS_mathcomp}
+
+\addtocontents{toc}{\protect\newpage}
 
 \appendix
 
