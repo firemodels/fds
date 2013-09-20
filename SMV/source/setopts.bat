@@ -40,5 +40,5 @@ IF "%COMPILER%" NEQ "icl" GOTO Ienvexist
 IF "%ICOMPILERS_DEFINED%" EQU "1" GOTO Ienvexist
 echo Setting up Intel compiler environment
 set ICOMPILERS_DEFINED=1
-call "%IFORT_COMPILER13%\bin\compilervars" %SIZE2%
+call "%IFORT_COMPILER14%\bin\compilervars" %SIZE2%
 :Ienvexist
