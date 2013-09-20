@@ -6,7 +6,7 @@ PLATFORM=
 
 GLUT_INC_LOCATION=../include2
 
-CFLAGS = 
+CFLAGS = -D pp_NOCLOSE
 
 RM=/bin/rm
 COMPILER=icc

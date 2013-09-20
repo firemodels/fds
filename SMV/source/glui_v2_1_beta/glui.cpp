@@ -24,6 +24,11 @@
 #include <GL/glut.h>
 #endif
 
+#ifdef pp_NOCLOSE
+extern "C" int glutCreateNoCloseWindow(const char *title);
+extern "C" int glutCreateNoCloseSubWindow(int win, int x, int y, int width, int height);
+#endif
+
 
 /*** This object must be used to create a GLUI ***/
 
