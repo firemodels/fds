@@ -1,7 +1,7 @@
 &HEAD CHID='simple_duct', TITLE='Test of mass conservation in a simple duct, SVN $Revision$' /
 
 &TIME T_END=30.0 /
-&MISC  Y_CO2_INFTY=0.,HUMIDITY=0./ 
+&MISC Y_CO2_INFTY=0.,HUMIDITY=0./ 
 
 &MESH IJK=50,36,50, XB=0.00,2.50,-0.90,0.90,0.00,2.50 /
 &MESH IJK=20, 8, 6, XB=2.50,3.50,-0.20,0.20,0.50,0.80 /
@@ -23,10 +23,10 @@
       SPEC_ID(1)='CARBON DIOXIDE'
       MASS_FLUX(1)=5.
       RAMP_MF(1)='leak_ramp' /
-&RAMP ID='leak_ramp', T=  0.0,     F=0.0 /
-&RAMP ID='leak_ramp', T=  1.0,     F=1.0 /
-&RAMP ID='leak_ramp', T= 10.0,     F=1.0 /
-&RAMP ID='leak_ramp', T= 11.0,     F=0.0 /
+&RAMP ID='leak_ramp', T=  0.0, F=0.0 /
+&RAMP ID='leak_ramp', T=  1.0, F=1.0 /
+&RAMP ID='leak_ramp', T= 10.0, F=1.0 /
+&RAMP ID='leak_ramp', T= 11.0, F=0.0 /
 
 &OBST XB=3.20,3.30,-0.05,0.05,1.50,1.55, COLOR='BLUE' /
 &VENT XB=3.20,3.30,-0.05,0.05,1.55,1.55, SURF_ID='LEAK' /
