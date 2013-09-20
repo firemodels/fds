@@ -52,9 +52,9 @@
 &VENT XB= 3.60,3.60,-0.40, 0.40,0.00,2.00, SURF_ID='OPEN'/
 
 &MATL ID            = 'STEEL'
-      SPECIFIC_HEAT = 0.5      
-      CONDUCTIVITY  = 48.      
-      DENSITY       = 7800. /
+      SPECIFIC_HEAT = 0.465      
+      CONDUCTIVITY  = 54.      
+      DENSITY       = 7833. /
 
 &MATL ID            = 'INSULATION' 
       DENSITY       = 200.
