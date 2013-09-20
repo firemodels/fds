@@ -3223,50 +3223,56 @@ REVERSE_LOOP: DO NRR=1,N_REACTIONS
       CALL SHUTDOWN(MESSAGE)
 ENDDO REVERSE_LOOP 
 
-
 ! Determine number of fast/potentially fast series reactions
 N_SERIES_REACTIONS = 0
-DO NR = 1,N_REACTIONS
+SERIES_REACTION_LOOP: DO NR = 1,N_REACTIONS
    RN => REACTION(NR)
-   IF (RN%FAST_CHEMISTRY) THEN
-      DO NS = 0,N_TRACKED_SPECIES
-         IF (RN%NU(NS) > 0._EB) THEN
-            DO NRR = 1,N_REACTIONS
+   RN%SERIES_REACTION = .FALSE.
+   ! Special treatment of series reactions is only needed for fast chemistry
+   FAST_CHEM_IF: IF (RN%FAST_CHEMISTRY) THEN
+
+      ! Determine whether a product of reaction RN is fuel of a different reaction RNN
+      SERIES_SPECIES_LOOP: DO NS = 0,N_TRACKED_SPECIES
+         PRODUCTS_IF: IF (RN%NU(NS) > 0._EB) THEN
+            
+            RNN_LOOP: DO NRR = 1,N_REACTIONS
                RNN => REACTION(NRR)
                IF (RNN%FAST_CHEMISTRY) THEN
-                  IF (NRR == NR) CYCLE
+                  IF (NRR == NR) CYCLE RNN_LOOP
                   IF (NS == RNN%FUEL_SMIX_INDEX) THEN
                      N_SERIES_REACTIONS = N_SERIES_REACTIONS + 1
                      RN%SERIES_REACTION = .TRUE.
                   ENDIF
                ENDIF
-            ENDDO
-         ENDIF
-      ENDDO
-   ENDIF
-ENDDO
+            ENDDO RNN_LOOP
+
+         ENDIF PRODUCTS_IF
+      ENDDO SERIES_SPECIES_LOOP
+
+   ENDIF FAST_CHEM_IF
+ENDDO SERIES_REACTION_LOOP
 
 ! Select integrator
 IF (TRIM(ODE_SOLVER)/='null') THEN
    SELECT CASE (TRIM(ODE_SOLVER))
       CASE ('EXPLICIT EULER')
-         COMBUSTION_ODE = EXPLICIT_EULER
+         COMBUSTION_ODE_SOLVER = EXPLICIT_EULER
       CASE ('RK2 RICHARDSON')
-         COMBUSTION_ODE = RK2_RICHARDSON
+         COMBUSTION_ODE_SOLVER = RK2_RICHARDSON
       CASE DEFAULT
          WRITE(MESSAGE,'(A)') 'ERROR: Problem with REAC. Name of ODE_SOLVER is not recognized.'
          CALL SHUTDOWN(MESSAGE)
-      END SELECT
+   END SELECT
 ELSE
-   FAST_CHEM: DO NR =1,N_REACTIONS
+   FAST_CHEM_LOOP: DO NR =1,N_REACTIONS
       RN => REACTION(NR)
       IF (.NOT. RN%FAST_CHEMISTRY) THEN
-         COMBUSTION_ODE = RK2_RICHARDSON
-         EXIT FAST_CHEM
+         COMBUSTION_ODE_SOLVER = RK2_RICHARDSON
+         EXIT FAST_CHEM_LOOP
       ELSE
-         COMBUSTION_ODE = EXPLICIT_EULER
+         COMBUSTION_ODE_SOLVER = EXPLICIT_EULER
       ENDIF
-   ENDDO FAST_CHEM
+   ENDDO FAST_CHEM_LOOP
 ENDIF
 
 ! Change units of combustion quantities
