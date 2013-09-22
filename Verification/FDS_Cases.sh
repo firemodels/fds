@@ -274,6 +274,7 @@ $RUNFDS Species reactionrate_EDC_flim_1step_CH4
 $RUNFDS Species reactionrate_EDC_flim_2step
 $RUNFDS Species reactionrate_EDC_O2lim_1step
 $RUNFDS Species reactionrate_EDC_O2lim_2step
+$RUNFDS Species reactionrate_EDC_O2lim_2fuel_lump
 $RUNFDS Species reactionrate_lumped_two_air
 $RUNFDS Species reactionrate_series_reaction
 $RUNFDS Species pvc_combustion
