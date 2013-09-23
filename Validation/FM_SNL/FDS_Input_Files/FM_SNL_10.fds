@@ -38,7 +38,7 @@
       COLOR      = 'WHEAT 4'  
       THICKNESS  = 0.025 /
 
-&SURF ID='duct',VOLUME_FLUX=-0.48,COLOR='GREEN' / 
+&SURF ID='duct',VOLUME_FLUX=-0.275,COLOR='GREEN' / 
 
 &OBST XB=8.75,9.55,11.4,12.2,0.0,0.2,SURF_IDS='burner','WALL BOARD','WALL BOARD' /sand burner 
 
