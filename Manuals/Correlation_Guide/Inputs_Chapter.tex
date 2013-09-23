@@ -29,10 +29,11 @@ $T_{\infty}$ ($^\circ$C)  &  20          \\ \hline
                       &                 \\
 \rb{Test}             &  \rb{$\dot Q$}  \\
                       &  \rb{(kW)}      \\ \hline \hline
-ATF Corridors 50 kW   &  50             \\ \hline
-ATF Corridors 100 kW  &  100            \\ \hline
+ATF Corridors 50 kW   &  48             \\ \hline
+ATF Corridors 100 kW  &  97             \\ \hline
+ATF Corridors 240 kW  &  242            \\ \hline
 ATF Corridors 250 kW  &  250            \\ \hline
-ATF Corridors 500 kW  &  500            \\ \hline
+ATF Corridors 500 kW  &  485            \\ \hline
 \end{tabular}
 \end{center}
 \end{table}
@@ -372,7 +373,6 @@ Test 22    &  1000           &  1              &  14                \\ \hline
 \rb{Input Parameter}  &  \rb{Value}  \\ \hline \hline
 $L$ (m)               &  3.6         \\ \hline
 $W$ (m)               &  3.6         \\ \hline
-$H$ (m)               &  2.16        \\ \hline
 $k$ (kW/m/K)          &  0.0021      \\ \hline
 $\rho$ (kg/m$^3$)     &  2400        \\ \hline
 $c$ (kJ/kg/K)         &  0.88        \\ \hline
@@ -412,10 +412,10 @@ For the cases with natural ventilation (MQH), the door size was 2.06 m high by 0
 \hline
                         &              \\
 \rb{Input Parameter}    &  \rb{Value}  \\ \hline \hline
-$k$ (kW/m/K)            &  0.00012     \\ \hline
-$\rho$ (kg/m$^3$)       &  737         \\ \hline
-$c$ (kJ/kg/K)           &  0.9         \\ \hline
-$\delta$ (m)            &  0.0254      \\ \hline
+$k$ (kW/m/K)            &  0.000463    \\ \hline
+$\rho$ (kg/m$^3$)       &  1607        \\ \hline
+$c$ (kJ/kg/K)           &  1.0         \\ \hline
+$\delta$ (m)            &  0.1         \\ \hline
 Location Factor (-)     &  1           \\ \hline
 Heat Loss Fraction (-)  &  0           \\ \hline
 Fuel Height (-)         &  0           \\ \hline
@@ -425,34 +425,34 @@ Fuel Height (-)         &  0           \\ \hline
 \begin{center}
 \begin{tabular}{|l|l|c|c|c|c|c|c|c|}
 \hline
-           &                    &            &            &            &                 &                 &                    &                  \\
-\rb{Test}  &  \rb{Correlation}  &  \rb{$L$}  &  \rb{$W$}  &  \rb{$H$}  &  \rb{$\dot Q$}  &  \rb{$\dot m$}  &  \rb{$T_\infty$}   &  \rb{$t_{end}$}  \\
-           &                    &  \rb{(m)}  &  \rb{(m)}  &  \rb{(m)}  &  \rb{(kW)}      &  \rb{(kg/s)}    &  \rb{($^\circ$C)}  &  \rb{(s)}        \\ \hline \hline
-Test 1     &  Beyler            &  6.0       &  4.0       &  4.5       &  200            &  -              &  23                &  500             \\ \hline
-Test 2     &  Beyler            &  6.0       &  4.0       &  4.5       &  200            &  -              &  27                &  500             \\ \hline
-Test 3     &  Beyler            &  6.0       &  4.0       &  4.5       &  400            &  -              &  27                &  200             \\ \hline
-Test 4     &  Beyler            &  6.0       &  4.0       &  4.5       &  300            &  -              &  24                &  300             \\ \hline
-Test 5     &  Beyler            &  6.0       &  4.0       &  4.5       &  50             &  -              &  28                &  2500            \\ \hline
-Test 6     &  Beyler            &  6.0       &  4.0       &  4.5       &  100            &  -              &  29                &  1000            \\ \hline
-Test 7     &  Beyler            &  6.0       &  4.0       &  4.5       &  100            &  -              &  35                &  1000            \\ \hline
-Test 8     &  Beyler            &  6.0       &  4.0       &  4.5       &  200            &  -              &  35                &  500             \\ \hline
-Test 9     &  FPA, DB           &  6.0       &  4.0       &  4.5       &  200            &  0.565          &  33                &  4000            \\ \hline
-Test 10    &  FPA, DB           &  6.0       &  4.0       &  4.5       &  200            &  0.118          &  28                &  6000            \\ \hline
-Test 11    &  FPA, DB           &  6.0       &  4.0       &  4.5       &  200            &  0.240          &  18                &  4000            \\ \hline
-Test 12    &  FPA, DB           &  6.0       &  4.0       &  4.5       &  200            &  0.366          &  21                &  5000            \\ \hline
-Test 13    &  FPA, DB           &  6.0       &  4.0       &  4.5       &  200            &  0.474          &  28                &  5000            \\ \hline
-Test 14    &  FPA, DB           &  6.0       &  4.0       &  4.5       &  200            &  0.472          &  28                &  5000            \\ \hline
-Test 15    &  FPA, DB           &  6.0       &  4.0       &  4.5       &  100            &  0.352          &  24                &  4000            \\ \hline
-Test 16    &  FPA, DB           &  6.0       &  4.0       &  4.5       &  200            &  0.356          &  21                &  6000            \\ \hline
-Test 17    &  FPA, DB           &  6.0       &  4.0       &  3.0       &  200            &  0.587          &  26                &  3000            \\ \hline
-Test 18    &  FPA, DB           &  6.0       &  4.0       &  3.0       &  200            &  0.463          &  21                &  4000            \\ \hline
-Test 19    &  FPA, DB           &  6.0       &  4.0       &  3.0       &  200            &  0.351          &  18                &  5000            \\ \hline
-Test 20    &  FPA, DB           &  6.0       &  4.0       &  3.0       &  200            &  0.240          &  16                &  6000            \\ \hline
-Test 21    &  FPA, DB           &  6.0       &  4.0       &  3.0       &  200            &  0.116          &  23                &  6000            \\ \hline
-Test 22    &  FPA, DB           &  6.0       &  4.0       &  3.0       &  200            &  0.225          &  30                &  500             \\ \hline
-Test 23    &  FPA, DB           &  6.0       &  4.0       &  3.0       &  200            &  0.249          &  28                &  4000            \\ \hline
-Test 24    &  FPA, DB           &  6.0       &  4.0       &  3.0       &  200            &  0.235          &  26                &  1000            \\ \hline
-Test 25    &  FPA, DB           &  6.0       &  4.0       &  3.0       &  200            &  0.233          &  25                &  2000            \\ \hline
+           &                    &                 &            &            &            &                 &                    &                  \\
+\rb{Test}  &  \rb{Correlation}  &  \rb{$\dot Q$}  &  \rb{$L$}  &  \rb{$W$}  &  \rb{$H$}  &  \rb{$\dot m$}  &  \rb{$T_\infty$}   &  \rb{$t_{end}$}  \\
+           &                    &  \rb{(kW)}      &  \rb{(m)}  &  \rb{(m)}  &  \rb{(m)}  &  \rb{(kg/s)}    &  \rb{($^\circ$C)}  &  \rb{(s)}        \\ \hline \hline
+Test 1     &  Beyler            &  200            &  6.0       &  4.0       &  4.5       &  -              &  23                &  500             \\ \hline
+Test 2     &  Beyler            &  200            &  6.0       &  4.0       &  4.5       &  -              &  27                &  500             \\ \hline
+Test 3     &  Beyler            &  400            &  6.0       &  4.0       &  4.5       &  -              &  27                &  200             \\ \hline
+Test 4     &  Beyler            &  300            &  6.0       &  4.0       &  4.5       &  -              &  24                &  300             \\ \hline
+Test 5     &  Beyler            &  50             &  6.0       &  4.0       &  4.5       &  -              &  28                &  2500            \\ \hline
+Test 6     &  Beyler            &  100            &  6.0       &  4.0       &  4.5       &  -              &  29                &  1000            \\ \hline
+Test 7     &  Beyler            &  100            &  6.0       &  4.0       &  4.5       &  -              &  35                &  1000            \\ \hline
+Test 8     &  Beyler            &  200            &  6.0       &  4.0       &  4.5       &  -              &  35                &  500             \\ \hline
+Test 9     &  FPA, DB           &  200            &  6.0       &  4.0       &  4.5       &  0.565          &  33                &  4000            \\ \hline
+Test 10    &  FPA, DB           &  200            &  6.0       &  4.0       &  4.5       &  0.118          &  28                &  6000            \\ \hline
+Test 11    &  FPA, DB           &  200            &  6.0       &  4.0       &  4.5       &  0.240          &  18                &  4000            \\ \hline
+Test 12    &  FPA, DB           &  200            &  6.0       &  4.0       &  4.5       &  0.366          &  21                &  5000            \\ \hline
+Test 13    &  FPA, DB           &  200            &  6.0       &  4.0       &  4.5       &  0.474          &  28                &  5000            \\ \hline
+Test 14    &  FPA, DB           &  200            &  6.0       &  4.0       &  4.5       &  0.472          &  28                &  5000            \\ \hline
+Test 15    &  FPA, DB           &  100            &  6.0       &  4.0       &  4.5       &  0.352          &  24                &  4000            \\ \hline
+Test 16    &  FPA, DB           &  200            &  6.0       &  4.0       &  4.5       &  0.356          &  21                &  6000            \\ \hline
+Test 17    &  FPA, DB           &  200            &  6.0       &  4.0       &  3.0       &  0.587          &  26                &  3000            \\ \hline
+Test 18    &  FPA, DB           &  200            &  6.0       &  4.0       &  3.0       &  0.463          &  21                &  4000            \\ \hline
+Test 19    &  FPA, DB           &  200            &  6.0       &  4.0       &  3.0       &  0.351          &  18                &  5000            \\ \hline
+Test 20    &  FPA, DB           &  200            &  6.0       &  4.0       &  3.0       &  0.240          &  16                &  6000            \\ \hline
+Test 21    &  FPA, DB           &  200            &  6.0       &  4.0       &  3.0       &  0.116          &  23                &  6000            \\ \hline
+Test 22    &  FPA, DB           &  200            &  6.0       &  4.0       &  3.0       &  0.225          &  30                &  500             \\ \hline
+Test 23    &  FPA, DB           &  200            &  6.0       &  4.0       &  3.0       &  0.249          &  28                &  4000            \\ \hline
+Test 24    &  FPA, DB           &  200            &  6.0       &  4.0       &  3.0       &  0.235          &  26                &  1000            \\ \hline
+Test 25    &  FPA, DB           &  200            &  6.0       &  4.0       &  3.0       &  0.233          &  25                &  2000            \\ \hline
 \end{tabular}
 \end{center}
 \end{table}
@@ -461,48 +461,48 @@ Test 25    &  FPA, DB           &  6.0       &  4.0       &  3.0       &  200   
 \begin{center}
 \begin{tabular}{|l|l|c|c|c|c|c|c|c|}
 \hline
-           &                    &            &            &            &                 &                 &                    &                  \\
-\rb{Test}  &  \rb{Correlation}  &  \rb{$L$}  &  \rb{$W$}  &  \rb{$H$}  &  \rb{$\dot Q$}  &  \rb{$\dot m$}  &  \rb{$T_\infty$}   &  \rb{$t_{end}$}  \\
-           &                    &  \rb{(m)}  &  \rb{(m)}  &  \rb{(m)}  &  \rb{(kW)}      &  \rb{(kg/s)}    &  \rb{($^\circ$C)}  &  \rb{(s)}        \\ \hline \hline
-Test 26    &  FPA, DB           &  6.0       &  4.0       &  3.0       &  200            &  0.586          &  24                &  4000            \\ \hline
-Test 27    &  FPA, DB           &  6.0       &  4.0       &  3.0       &  200            &  0.116          &  23                &  500             \\ \hline
-Test 28    &  FPA, DB           &  6.0       &  4.0       &  3.0       &  150            &  0.174          &  31                &  1000            \\ \hline
-Test 29    &  FPA, DB           &  6.0       &  4.0       &  3.0       &  250            &  0.298          &  28                &  1000            \\ \hline
-Test 30    &  FPA, DB           &  6.0       &  4.0       &  3.0       &  250            &  0.349          &  34                &  4000            \\ \hline
-Test 31    &  FPA, DB           &  6.0       &  4.0       &  3.0       &  250            &  0.576          &  36                &  4000            \\ \hline
-Test 32    &  FPA, DB           &  6.0       &  4.0       &  3.0       &  100            &  0.110          &  33                &  4000            \\ \hline
-Test 33    &  FPA, DB           &  6.0       &  4.0       &  3.0       &  100            &  0.230          &  23                &  5000            \\ \hline
-Test 34    &  FPA, DB           &  6.0       &  4.0       &  3.0       &  100            &  0.342          &  34                &  4000            \\ \hline
-Test 35    &  FPA, DB           &  6.0       &  4.0       &  3.0       &  100            &  0.455          &  22                &  4000            \\ \hline
-Test 36    &  FPA, DB           &  6.0       &  4.0       &  3.0       &  100            &  0.582          &  29                &  4000            \\ \hline
-Test 37    &  FPA, DB           &  6.0       &  4.0       &  3.0       &  170            &  0.111          &  20                &  500             \\ \hline
-Test 38    &  FPA, DB           &  6.0       &  4.0       &  3.0       &  200            &  0.346          &  29                &  4000            \\ \hline
-Test 39    &  FPA, DB           &  6.0       &  4.0       &  3.0       &  250            &  0.107          &  18                &  500             \\ \hline
-Test 40    &  FPA, DB           &  6.0       &  4.0       &  3.0       &  200            &  0.467          &  28                &  4000            \\ \hline
-Test 41    &  FPA, DB           &  6.0       &  4.0       &  3.0       &  150            &  0.126          &  20                &  500             \\ \hline
-Test 42    &  FPA, DB           &  6.0       &  4.0       &  3.0       &  200            &  0.206          &  30                &  5000            \\ \hline
-Test 43    &  Beyler            &  6.0       &  4.0       &  3.0       &  200            &  -              &  32                &  500             \\ \hline
-Test 44    &  FPA, DB           &  6.0       &  4.0       &  3.0       &  200            &  0.213          &  19                &  2000            \\ \hline
-Test 45    &  Beyler            &  6.0       &  4.0       &  3.0       &  200            &  -              &  30                &  500             \\ \hline
-Test 46    &  FPA, DB           &  6.0       &  4.0       &  3.0       &  200            &  0.201          &  19                &  500             \\ \hline
-Test 47    &  Beyler            &  6.0       &  4.0       &  3.0       &  200            &  -              &  19                &  500             \\ \hline
-Test 48    &  Beyler            &  6.0       &  4.0       &  3.0       &  165            &  -              &  21                &  500             \\ \hline
-Test 49    &  FPA, DB           &  6.0       &  4.0       &  3.0       &  200            &  0.208          &  26                &  500             \\ \hline
-Test 50    &  FPA, DB           &  6.0       &  4.0       &  3.0       &  200            &  0.222          &  21                &  4000            \\ \hline
-Test 51    &  MQH               &  6.0       &  4.0       &  3.0       &  200            &  -              &  33                &  3000            \\ \hline
-Test 52    &  MQH               &  6.0       &  4.0       &  3.0       &  200            &  -              &  23                &  4000            \\ \hline
-Test 53    &  FPA, DB           &  6.0       &  4.0       &  3.0       &  200            &  0.214          &  33                &  1000            \\ \hline
-Test 54    &  FPA, DB           &  6.0       &  4.0       &  3.0       &  200            &  0.248          &  21                &  4000            \\ \hline
-Test 55    &  MQH               &  6.0       &  4.0       &  3.0       &  100            &  -              &  31                &  4000            \\ \hline
-Test 56    &  FPA, DB           &  6.0       &  4.0       &  3.0       &  200            &  0.221          &  20                &  1000            \\ \hline
-Test 57    &  FPA, DB           &  6.0       &  4.0       &  3.0       &  200            &  0.247          &  29                &  5000            \\ \hline
-Test 58    &  FPA, DB           &  6.0       &  4.0       &  3.0       &  200            &  0.220          &  18                &  4000            \\ \hline
-Test 59    &  FPA, DB           &  6.0       &  4.0       &  3.0       &  200            &  0.214          &  24                &  4000            \\ \hline
-Test 60    &  MQH               &  6.0       &  4.0       &  3.0       &  400            &  -              &  22                &  2000            \\ \hline
-Test 61    &  MQH               &  6.0       &  4.0       &  4.5       &  200            &  -              &  31                &  2000            \\ \hline
-Test 62    &  MQH               &  6.0       &  4.0       &  4.5       &  400            &  -              &  22                &  2000            \\ \hline
-Test 63    &  MQH               &  6.0       &  4.0       &  4.5       &  50             &  -              &  28                &  3000            \\ \hline
-Test 64    &  MQH               &  6.0       &  4.0       &  4.5       &  100            &  -              &  17                &  3000            \\ \hline
+           &                    &                 &            &            &            &                 &                    &                  \\
+\rb{Test}  &  \rb{Correlation}  &  \rb{$\dot Q$}  &  \rb{$L$}  &  \rb{$W$}  &  \rb{$H$}  &  \rb{$\dot m$}  &  \rb{$T_\infty$}   &  \rb{$t_{end}$}  \\
+           &                    &  \rb{(kW)}      &  \rb{(m)}  &  \rb{(m)}  &  \rb{(m)}  &  \rb{(kg/s)}    &  \rb{($^\circ$C)}  &  \rb{(s)}        \\ \hline \hline
+Test 26    &  FPA, DB           &  200            &  6.0       &  4.0       &  3.0       &  0.586          &  24                &  4000            \\ \hline
+Test 27    &  FPA, DB           &  200            &  6.0       &  4.0       &  3.0       &  0.116          &  23                &  500             \\ \hline
+Test 28    &  FPA, DB           &  150            &  6.0       &  4.0       &  3.0       &  0.174          &  31                &  1000            \\ \hline
+Test 29    &  FPA, DB           &  250            &  6.0       &  4.0       &  3.0       &  0.298          &  28                &  1000            \\ \hline
+Test 30    &  FPA, DB           &  250            &  6.0       &  4.0       &  3.0       &  0.349          &  34                &  4000            \\ \hline
+Test 31    &  FPA, DB           &  250            &  6.0       &  4.0       &  3.0       &  0.576          &  36                &  4000            \\ \hline
+Test 32    &  FPA, DB           &  100            &  6.0       &  4.0       &  3.0       &  0.110          &  33                &  4000            \\ \hline
+Test 33    &  FPA, DB           &  100            &  6.0       &  4.0       &  3.0       &  0.230          &  23                &  5000            \\ \hline
+Test 34    &  FPA, DB           &  100            &  6.0       &  4.0       &  3.0       &  0.342          &  34                &  4000            \\ \hline
+Test 35    &  FPA, DB           &  100            &  6.0       &  4.0       &  3.0       &  0.455          &  22                &  4000            \\ \hline
+Test 36    &  FPA, DB           &  100            &  6.0       &  4.0       &  3.0       &  0.582          &  29                &  4000            \\ \hline
+Test 37    &  FPA, DB           &  170            &  6.0       &  4.0       &  3.0       &  0.111          &  20                &  500             \\ \hline
+Test 38    &  FPA, DB           &  200            &  6.0       &  4.0       &  3.0       &  0.346          &  29                &  4000            \\ \hline
+Test 39    &  FPA, DB           &  250            &  6.0       &  4.0       &  3.0       &  0.107          &  18                &  500             \\ \hline
+Test 40    &  FPA, DB           &  200            &  6.0       &  4.0       &  3.0       &  0.467          &  28                &  4000            \\ \hline
+Test 41    &  FPA, DB           &  150            &  6.0       &  4.0       &  3.0       &  0.126          &  20                &  500             \\ \hline
+Test 42    &  FPA, DB           &  200            &  6.0       &  4.0       &  3.0       &  0.206          &  30                &  5000            \\ \hline
+Test 43    &  Beyler            &  200            &  6.0       &  4.0       &  3.0       &  -              &  32                &  500             \\ \hline
+Test 44    &  FPA, DB           &  200            &  6.0       &  4.0       &  3.0       &  0.213          &  19                &  2000            \\ \hline
+Test 45    &  Beyler            &  200            &  6.0       &  4.0       &  3.0       &  -              &  30                &  500             \\ \hline
+Test 46    &  FPA, DB           &  200            &  6.0       &  4.0       &  3.0       &  0.201          &  19                &  500             \\ \hline
+Test 47    &  Beyler            &  200            &  6.0       &  4.0       &  3.0       &  -              &  19                &  500             \\ \hline
+Test 48    &  Beyler            &  165            &  6.0       &  4.0       &  3.0       &  -              &  21                &  500             \\ \hline
+Test 49    &  FPA, DB           &  200            &  6.0       &  4.0       &  3.0       &  0.208          &  26                &  500             \\ \hline
+Test 50    &  FPA, DB           &  200            &  6.0       &  4.0       &  3.0       &  0.222          &  21                &  4000            \\ \hline
+Test 51    &  MQH               &  200            &  6.0       &  4.0       &  3.0       &  -              &  33                &  3000            \\ \hline
+Test 52    &  MQH               &  200            &  6.0       &  4.0       &  3.0       &  -              &  23                &  4000            \\ \hline
+Test 53    &  FPA, DB           &  200            &  6.0       &  4.0       &  3.0       &  0.214          &  33                &  1000            \\ \hline
+Test 54    &  FPA, DB           &  200            &  6.0       &  4.0       &  3.0       &  0.248          &  21                &  4000            \\ \hline
+Test 55    &  MQH               &  100            &  6.0       &  4.0       &  3.0       &  -              &  31                &  4000            \\ \hline
+Test 56    &  FPA, DB           &  200            &  6.0       &  4.0       &  3.0       &  0.221          &  20                &  1000            \\ \hline
+Test 57    &  FPA, DB           &  200            &  6.0       &  4.0       &  3.0       &  0.247          &  29                &  5000            \\ \hline
+Test 58    &  FPA, DB           &  200            &  6.0       &  4.0       &  3.0       &  0.220          &  18                &  4000            \\ \hline
+Test 59    &  FPA, DB           &  200            &  6.0       &  4.0       &  3.0       &  0.214          &  24                &  4000            \\ \hline
+Test 60    &  MQH               &  400            &  6.0       &  4.0       &  3.0       &  -              &  22                &  2000            \\ \hline
+Test 61    &  MQH               &  200            &  6.0       &  4.0       &  4.5       &  -              &  31                &  2000            \\ \hline
+Test 62    &  MQH               &  400            &  6.0       &  4.0       &  4.5       &  -              &  22                &  2000            \\ \hline
+Test 63    &  MQH               &  50             &  6.0       &  4.0       &  4.5       &  -              &  28                &  3000            \\ \hline
+Test 64    &  MQH               &  100            &  6.0       &  4.0       &  4.5       &  -              &  17                &  3000            \\ \hline
 \end{tabular}
 \end{center}
 \end{table}
@@ -575,7 +575,7 @@ $W$ (m)                 &  7.04        \\ \hline
 $H$ (m)                 &  3.82        \\ \hline
 $k$ (kW/m/K)            &  0.00012     \\ \hline
 $\rho$ (kg/m$^3$)       &  737         \\ \hline
-$c$ (kJ/kg/K)           &  0.9         \\ \hline
+$c$ (kJ/kg/K)           &  1.42        \\ \hline
 $\delta$ (m)            &  0.0254      \\ \hline
 Location Factor (-)     &  1           \\ \hline
 Heat Loss Fraction (-)  &  0           \\ \hline
@@ -584,26 +584,26 @@ Fuel Height (-)         &  0           \\ \hline
 \end{center}
 
 \begin{center}
-\begin{tabular}{|l|l|c|c|c|c|}
+\begin{tabular}{|l|l|c|c|c|c|c|c|}
 \hline
-           &                    &                 &                 &                    &                  \\
-\rb{Test}  &  \rb{Correlation}  &  \rb{$\dot Q$}  &  \rb{$\dot m$}  &  \rb{$T_\infty$}   &  \rb{$t_{end}$}  \\
-           &                    &  \rb{(kW)}      &  \rb{(kg/s)}    &  \rb{($^\circ$C)}  &  \rb{(s)}        \\ \hline \hline
-Test 1     &  Beyler            &  410            &  -              &  22                &  1350            \\ \hline
-Test 2     &  Beyler            &  1190           &  -              &  26                &  625             \\ \hline
-Test 3     &  MQH               &  1190           &  -              &  30                &  1380            \\ \hline
-Test 4     &  FPA, DB           &  1200           &  1.1            &  27                &  816             \\ \hline
-Test 5     &  MQH               &  1190           &  -              &  28                &  1380            \\ \hline
-Test 7     &  Beyler            &  400            &  -              &  24                &  1330            \\ \hline
-Test 8     &  Beyler            &  1190           &  -              &  25                &  610             \\ \hline
-Test 9     &  MQH               &  1170           &  -              &  27                &  1380            \\ \hline
-Test 10    &  FPA, DB           &  1190           &  1.1            &  27                &  826             \\ \hline
-Test 13    &  Beyler            &  2330           &  -              &  31                &  265             \\ \hline
-Test 14    &  MQH               &  1180           &  -              &  28                &  1380            \\ \hline
-Test 15    &  MQH               &  1180           &  -              &  18                &  1380            \\ \hline
-Test 16    &  FPA, DB           &  2300           &  1.1            &  26                &  380             \\ \hline
-Test 17    &  Beyler            &  1160           &  -              &  29                &  272             \\ \hline
-Test 18    &  MQH               &  1180           &  -              &  27                &  1380            \\ \hline
+           &                    &                 &                 &              &              &                    &                  \\
+\rb{Test}  &  \rb{Correlation}  &  \rb{$\dot Q$}  &  \rb{$\dot m$}  &  \rb{$H_v$}  &  \rb{$W_v$}  &  \rb{$T_\infty$}   &  \rb{$t_{end}$}  \\
+           &                    &  \rb{(kW)}      &  \rb{(kg/s)}    &  \rb{(m)}    &  \rb{(m)}    &  \rb{($^\circ$C)}  &  \rb{(s)}        \\ \hline \hline
+Test 1     &  Beyler            &  410            &  -              &  -           &  -           &  22                &  1350            \\ \hline
+Test 2     &  Beyler            &  1190           &  -              &  -           &  -           &  26                &  625             \\ \hline
+Test 3     &  MQH               &  1190           &  -              &  2.0         &  2.0         &  30                &  1380            \\ \hline
+Test 4     &  FPA, DB           &  1200           &  1.3            &  -           &  -           &  27                &  816             \\ \hline
+Test 5     &  MQH               &  1190           &  -              &  2.0         &  2.0         &  28                &  1380            \\ \hline
+Test 7     &  Beyler            &  400            &  -              &  -           &  -           &  24                &  1330            \\ \hline
+Test 8     &  Beyler            &  1190           &  -              &  -           &  -           &  25                &  610             \\ \hline
+Test 9     &  MQH               &  1170           &  -              &  2.0         &  2.0         &  27                &  1380            \\ \hline
+Test 10    &  FPA, DB           &  1190           &  1.3            &  -           &  -           &  27                &  826             \\ \hline
+Test 13    &  Beyler            &  2330           &  -              &  -           &  -           &  31                &  265             \\ \hline
+Test 14    &  MQH               &  1180           &  -              &  2.0         &  2.0         &  28                &  1380            \\ \hline
+Test 15    &  MQH               &  1180           &  -              &  2.0         &  2.0         &  18                &  1380            \\ \hline
+Test 16    &  FPA, DB           &  2300           &  1.3            &  -           &  -           &  26                &  380             \\ \hline
+Test 17    &  Beyler            &  1160           &  -              &  -           &  -           &  29                &  272             \\ \hline
+Test 18    &  MQH               &  1180           &  -              &  2.0         &  2.0         &  27                &  1380            \\ \hline
 \end{tabular}
 \end{center}
 \end{table}
@@ -891,10 +891,10 @@ $W$ (m)                 &  3.6         \\ \hline
 $H$ (m)                 &  2.4         \\ \hline
 $H_v$ (m)               &  2.0         \\ \hline
 $W_v$ (m)               &  0.8         \\ \hline
-$k$ (kW/m/K)            &  0.00012     \\ \hline
-$\rho$ (kg/m$^3$)       &  737         \\ \hline
-$c$ (kJ/kg/K)           &  0.9         \\ \hline
-$\delta$ (m)            &  0.0254      \\ \hline
+$k$ (kW/m/K)            &  0.0001      \\ \hline
+$\rho$ (kg/m$^3$)       &  600         \\ \hline
+$c$ (kJ/kg/K)           &  0.8         \\ \hline
+$\delta$ (m)            &  0.2         \\ \hline
 $T_\infty$ ($^\circ$C)  &  20          \\ \hline
 \end{tabular}
 \end{center}
@@ -929,8 +929,8 @@ The HGL temperatures from the MQH HGL temperature correlation were used as the i
 \hline
                        &              \\
 \rb{Input Parameter}   &  \rb{Value}  \\ \hline \hline
-$\rho_{s}$ (kg/m$^3$)  &  7850        \\ \hline
-$c_{s}$ (kJ/kg/K)      &  1.0         \\ \hline
+$\rho_{s}$ (kg/m$^3$)  &  7833        \\ \hline
+$c_{s}$ (kJ/kg/K)      &  0.465       \\ \hline
 $\epsilon$ (-)         &  0.7         \\ \hline
 $h_c$ (W/m$^2$/K)      &  25          \\ \hline
 \end{tabular}
@@ -1040,8 +1040,8 @@ The HGL temperatures from the McCaffrey plume temperature correlation were used 
                        &              \\
 \rb{Input Parameter}   &  \rb{Value}  \\ \hline \hline
 $F/V$ (1/m)            &  205         \\ \hline
-$\rho_{s}$ (kg/m$^3$)  &  7850        \\ \hline
-$c_{s}$ (kJ/kg/K)      &  0.6         \\ \hline
+$\rho_{s}$ (kg/m$^3$)  &  7833        \\ \hline
+$c_{s}$ (kJ/kg/K)      &  0.465       \\ \hline
 $\epsilon$ (-)         &  0.7         \\ \hline
 $h_c$ (W/m$^2$/K)      &  25          \\ \hline
 \end{tabular}
@@ -1084,39 +1084,38 @@ $k$ (kW/m/K)              &  0.0001      \\ \hline
 $\rho$ (kg/m$^3$)         &  200         \\ \hline
 $c$ (kJ/kg/K)             &  1.0         \\ \hline
 $\delta$ (m)              &  0.013       \\ \hline
-$T_{\infty}$ ($^\circ$C)  &  22          \\ \hline
 \end{tabular}
 \end{center}
 
 \begin{center}
-\begin{tabular}{|l|l|c|c|c|}
+\begin{tabular}{|l|l|c|c|c|c|}
 \hline
-           &                    &                 &              &              \\
-\rb{Test}  &  \rb{Correlation}  &  \rb{$\dot Q$}  &  \rb{$H_v$}  &  \rb{$W_v$}  \\
-           &                    &  \rb{(kW)}      &  \rb{(m)}    &  \rb{(m)}    \\ \hline \hline
-Test 10    &  MQH               &  62.9           &  1.83        &  0.24        \\ \hline
-Test 11    &  MQH               &  62.9           &  1.83        &  0.36        \\ \hline
-Test 12    &  MQH               &  62.9           &  1.83        &  0.49        \\ \hline
-Test 612   &  MQH               &  62.9           &  1.83        &  0.49        \\ \hline
-Test 13    &  MQH               &  62.9           &  1.83        &  0.62        \\ \hline
-Test 14    &  MQH               &  62.9           &  1.83        &  0.74        \\ \hline
-Test 18    &  MQH               &  62.9           &  1.83        &  0.74        \\ \hline
-Test 710   &  MQH               &  62.9           &  1.83        &  0.74        \\ \hline
-Test 810   &  MQH               &  62.9           &  1.83        &  0.74        \\ \hline
-Test 16    &  MQH               &  62.9           &  1.83        &  0.86        \\ \hline
-Test 17    &  MQH               &  62.9           &  1.83        &  0.99        \\ \hline
-Test 22    &  MQH               &  62.9           &  1.38        &  0.74        \\ \hline
-Test 23    &  MQH               &  62.9           &  0.92        &  0.74        \\ \hline
-Test 30    &  MQH               &  62.9           &  0.92        &  0.74        \\ \hline
-Test 41    &  MQH               &  62.9           &  0.46        &  0.74        \\ \hline
-Test 19    &  MQH               &  31.6           &  1.83        &  0.74        \\ \hline
-Test 20    &  MQH               &  105.3          &  1.83        &  0.74        \\ \hline
-Test 21    &  MQH               &  158.           &  1.83        &  0.74        \\ \hline
-Test 114   &  MQH               &  62.9           &  1.83        &  0.24        \\ \hline
-Test 144   &  MQH               &  62.9           &  1.83        &  0.36        \\ \hline
-Test 212   &  MQH               &  62.9           &  1.83        &  0.49        \\ \hline
-Test 242   &  MQH               &  62.9           &  1.83        &  0.62        \\ \hline
-Test 410   &  MQH               &  62.9           &  1.83        &  0.74        \\ \hline
+           &                    &                 &              &              &                    \\
+\rb{Test}  &  \rb{Correlation}  &  \rb{$\dot Q$}  &  \rb{$H_v$}  &  \rb{$W_v$}  &  \rb{$T_infty$}    \\
+           &                    &  \rb{(kW)}      &  \rb{(m)}    &  \rb{(m)}    &  \rb{($^\circ$C)}  \\ \hline \hline
+Test 10    &  MQH               &  62.9           &  1.83        &  0.24        &  22                \\ \hline
+Test 11    &  MQH               &  62.9           &  1.83        &  0.36        &  25                \\ \hline
+Test 12    &  MQH               &  62.9           &  1.83        &  0.49        &  19                \\ \hline
+Test 612   &  MQH               &  62.9           &  1.83        &  0.49        &  19                \\ \hline
+Test 13    &  MQH               &  62.9           &  1.83        &  0.62        &  20                \\ \hline
+Test 14    &  MQH               &  62.9           &  1.83        &  0.74        &  28                \\ \hline
+Test 18    &  MQH               &  62.9           &  1.83        &  0.74        &  29                \\ \hline
+Test 710   &  MQH               &  62.9           &  1.83        &  0.74        &  13                \\ \hline
+Test 810   &  MQH               &  62.9           &  1.83        &  0.74        &  15                \\ \hline
+Test 16    &  MQH               &  62.9           &  1.83        &  0.86        &  23                \\ \hline
+Test 17    &  MQH               &  62.9           &  1.83        &  0.99        &  19                \\ \hline
+Test 22    &  MQH               &  62.9           &  1.38        &  0.74        &  26                \\ \hline
+Test 23    &  MQH               &  62.9           &  0.92        &  0.74        &  23                \\ \hline
+Test 30    &  MQH               &  62.9           &  0.92        &  0.74        &  23                \\ \hline
+Test 41    &  MQH               &  62.9           &  0.46        &  0.74        &  14                \\ \hline
+Test 19    &  MQH               &  31.6           &  1.83        &  0.74        &  29                \\ \hline
+Test 20    &  MQH               &  105.3          &  1.83        &  0.74        &  29                \\ \hline
+Test 21    &  MQH               &  158.           &  1.83        &  0.74        &  29                \\ \hline
+Test 114   &  MQH               &  62.9           &  1.83        &  0.24        &  31                \\ \hline
+Test 144   &  MQH               &  62.9           &  1.83        &  0.36        &  30                \\ \hline
+Test 212   &  MQH               &  62.9           &  1.83        &  0.49        &  25                \\ \hline
+Test 242   &  MQH               &  62.9           &  1.83        &  0.62        &  29                \\ \hline
+Test 410   &  MQH               &  62.9           &  1.83        &  0.74        &  21                \\ \hline
 \end{tabular}
 \end{center}
 \end{table}
@@ -1125,41 +1124,41 @@ Test 410   &  MQH               &  62.9           &  1.83        &  0.74        
 \begin{center}
 \begin{tabular}{|l|l|c|c|c|}
 \hline
-           &                    &                 &              &              \\
-\rb{Test}  &  \rb{Correlation}  &  \rb{$\dot Q$}  &  \rb{$H_v$}  &  \rb{$W_v$}  \\
-           &                    &  \rb{(kW)}      &  \rb{(m)}    &  \rb{(m)}    \\ \hline \hline
-Test 210   &  MQH               &  62.9           &  1.83        &  0.74        \\ \hline
-Test 310   &  MQH               &  62.9           &  1.83        &  0.74        \\ \hline
-Test 240   &  MQH               &  62.9           &  1.83        &  0.86        \\ \hline
-Test 116   &  MQH               &  62.9           &  1.83        &  0.99        \\ \hline
-Test 122   &  MQH               &  62.9           &  1.38        &  0.74        \\ \hline
-Test 224   &  MQH               &  62.9           &  0.92        &  0.74        \\ \hline
-Test 324   &  MQH               &  62.9           &  0.92        &  0.74        \\ \hline
-Test 220   &  MQH               &  31.6           &  1.83        &  0.74        \\ \hline
-Test 221   &  MQH               &  105.3          &  1.83        &  0.74        \\ \hline
-Test 514   &  MQH               &  62.9           &  1.83        &  0.24        \\ \hline
-Test 544   &  MQH               &  62.9           &  1.83        &  0.36        \\ \hline
-Test 512   &  MQH               &  62.9           &  1.83        &  0.49        \\ \hline
-Test 542   &  MQH               &  62.9           &  1.83        &  0.62        \\ \hline
-Test 610   &  MQH               &  62.9           &  1.83        &  0.74        \\ \hline
-Test 510   &  MQH               &  62.9           &  1.83        &  0.74        \\ \hline
-Test 540   &  MQH               &  62.9           &  1.83        &  0.86        \\ \hline
-Test 517   &  MQH               &  62.9           &  1.83        &  0.99        \\ \hline
-Test 622   &  MQH               &  62.9           &  1.38        &  0.74        \\ \hline
-Test 522   &  MQH               &  62.9           &  1.38        &  0.74        \\ \hline
-Test 524   &  MQH               &  62.9           &  0.92        &  0.74        \\ \hline
-Test 541   &  MQH               &  62.9           &  0.46        &  0.74        \\ \hline
-Test 520   &  MQH               &  31.6           &  1.83        &  0.74        \\ \hline
-Test 521   &  MQH               &  105.3          &  1.83        &  0.74        \\ \hline
-Test 513   &  MQH               &  158.           &  1.83        &  0.74        \\ \hline
-Test 160   &  MQH               &  62.9           &  1.83        &  0.74        \\ \hline
-Test 163   &  MQH               &  62.9           &  1.83        &  0.74        \\ \hline
-Test 164   &  MQH               &  62.9           &  1.83        &  0.74        \\ \hline
-Test 165   &  MQH               &  62.9           &  1.83        &  0.74        \\ \hline
-Test 162   &  MQH               &  62.9           &  1.83        &  0.74        \\ \hline
-Test 167   &  MQH               &  62.9           &  1.83        &  0.74        \\ \hline
-Test 161   &  MQH               &  62.9           &  1.83        &  0.74        \\ \hline
-Test 166   &  MQH               &  62.9           &  1.83        &  0.74        \\ \hline
+           &                    &                 &              &              &      \\
+\rb{Test}  &  \rb{Correlation}  &  \rb{$\dot Q$}  &  \rb{$H_v$}  &  \rb{$W_v$}  &      \\
+           &                    &  \rb{(kW)}      &  \rb{(m)}    &  \rb{(m)}    &      \\ \hline \hline
+Test 210   &  MQH               &  62.9           &  1.83        &  0.74        &  30  \\ \hline
+Test 310   &  MQH               &  62.9           &  1.83        &  0.74        &  20  \\ \hline
+Test 240   &  MQH               &  62.9           &  1.83        &  0.86        &  28  \\ \hline
+Test 116   &  MQH               &  62.9           &  1.83        &  0.99        &  29  \\ \hline
+Test 122   &  MQH               &  62.9           &  1.38        &  0.74        &  27  \\ \hline
+Test 224   &  MQH               &  62.9           &  0.92        &  0.74        &  26  \\ \hline
+Test 324   &  MQH               &  62.9           &  0.92        &  0.74        &  22  \\ \hline
+Test 220   &  MQH               &  31.6           &  1.83        &  0.74        &  25  \\ \hline
+Test 221   &  MQH               &  105.3          &  1.83        &  0.74        &  25  \\ \hline
+Test 514   &  MQH               &  62.9           &  1.83        &  0.24        &  8   \\ \hline
+Test 544   &  MQH               &  62.9           &  1.83        &  0.36        &  8   \\ \hline
+Test 512   &  MQH               &  62.9           &  1.83        &  0.49        &  20  \\ \hline
+Test 542   &  MQH               &  62.9           &  1.83        &  0.62        &  20  \\ \hline
+Test 610   &  MQH               &  62.9           &  1.83        &  0.74        &  18  \\ \hline
+Test 510   &  MQH               &  62.9           &  1.83        &  0.74        &  22  \\ \hline
+Test 540   &  MQH               &  62.9           &  1.83        &  0.86        &  13  \\ \hline
+Test 517   &  MQH               &  62.9           &  1.83        &  0.99        &  14  \\ \hline
+Test 622   &  MQH               &  62.9           &  1.38        &  0.74        &  9   \\ \hline
+Test 522   &  MQH               &  62.9           &  1.38        &  0.74        &  13  \\ \hline
+Test 524   &  MQH               &  62.9           &  0.92        &  0.74        &  8   \\ \hline
+Test 541   &  MQH               &  62.9           &  0.46        &  0.74        &  7   \\ \hline
+Test 520   &  MQH               &  31.6           &  1.83        &  0.74        &  17  \\ \hline
+Test 521   &  MQH               &  105.3          &  1.83        &  0.74        &  13  \\ \hline
+Test 513   &  MQH               &  158.           &  1.83        &  0.74        &  14  \\ \hline
+Test 160   &  MQH               &  62.9           &  1.83        &  0.74        &  6   \\ \hline
+Test 163   &  MQH               &  62.9           &  1.83        &  0.74        &  6   \\ \hline
+Test 164   &  MQH               &  62.9           &  1.83        &  0.74        &  6   \\ \hline
+Test 165   &  MQH               &  62.9           &  1.83        &  0.74        &  6   \\ \hline
+Test 162   &  MQH               &  62.9           &  1.83        &  0.74        &  6   \\ \hline
+Test 167   &  MQH               &  62.9           &  1.83        &  0.74        &  6   \\ \hline
+Test 161   &  MQH               &  62.9           &  1.83        &  0.74        &  6   \\ \hline
+Test 166   &  MQH               &  62.9           &  1.83        &  0.74        &  6   \\ \hline
 \end{tabular}
 \end{center}
 \end{table}
