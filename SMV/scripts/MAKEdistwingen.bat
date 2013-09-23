@@ -37,6 +37,9 @@ set bundleinfo=%svn_root%\Utilities\Scripts\bundle_setup
 set zipbase=smv_%version%_win%platform%
 set smvdir=uploads\%zipbase%
 
+cd "%svn_root%\..\Google Drive\uploads"
+set gupload=%CD%
+
 cd %bundledir%
 echo
 echo filling distribution directory
@@ -94,5 +97,8 @@ echo
 echo creating self-extracting archive
 wzipse32 %zipbase%.zip -runasadmin -d "C:\Program Files\FDS\%fds_edition%\bin" -c wrapup_smv_install.bat
 copy %zipbase%.exe ..\.
+
+IF EXIST "%gupload%" echo copying %zipbase%.exe to %gupload%
+IF EXIST "%gupload%" copy %zipbase%.exe "%gupload%"
 
 echo win%platform% Smokeview bundle built

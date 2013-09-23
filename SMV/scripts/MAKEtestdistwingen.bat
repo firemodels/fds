@@ -27,6 +27,9 @@ set zipbase=smv_%version%_win%platform%
 set smvdir=uploads\%zipbase%
 set sh2bat=%svn_root%\Utilities\Data_Processing
 
+cd "%svn_root%\..\Google Drive\uploads"
+set gupload=%CD%
+
 cd %svn_root%\SMV\for_bundle
 
 echo
@@ -87,4 +90,7 @@ wzzip -a -r -p %zipbase%.zip *
 echo
 echo creating self-extracting archive
 wzipse32 %zipbase%.zip -runasadmin -d "c:\Program Files\FDS\%fds_edition%\bin" -c wrapup_smv_install.bat
+
 copy %zipbase%.exe ..\.
+IF EXIST "%gupload%" echo copying %zipbase%.exe to %gupload%
+IF EXIST "%gupload%" copy %zipbase%.exe "%gupload%"
