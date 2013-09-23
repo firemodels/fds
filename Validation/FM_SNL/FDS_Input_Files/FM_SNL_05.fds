@@ -38,7 +38,7 @@
       COLOR      = 'WHEAT 4'
       THICKNESS  = 0.025 /
 
-&SURF ID='duct', VOLUME_FLUX=-0.76, COLOR='GREEN', RAMP_V='ductramp' / 
+&SURF ID='duct', VOLUME_FLUX=-0.63, COLOR='GREEN', RAMP_V='ductramp' / 
 &RAMP ID='ductramp',T=  0.,F=0. /
 &RAMP ID='ductramp',T=  1.,F=1. /
 &RAMP ID='ductramp',T=540.,F=1. /
