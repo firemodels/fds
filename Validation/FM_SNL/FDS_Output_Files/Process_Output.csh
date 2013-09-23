@@ -4,25 +4,25 @@ set PDIR=$SVNROOT/Utilities/Data_Processing
 set WDIR=$SVNROOT/Validation/FM_SNL/FDS_Output_Files
 set DDIR=$SVNROOT/Validation/FM_SNL/Current_Results
 cd $DDIR
-$PDIR/layer_height < $WDIR/FM_SNL_01.input
-$PDIR/layer_height < $WDIR/FM_SNL_02.input
-$PDIR/layer_height < $WDIR/FM_SNL_03.input
-$PDIR/layer_height < $WDIR/FM_SNL_04.input
-$PDIR/layer_height < $WDIR/FM_SNL_05.input
-$PDIR/layer_height < $WDIR/FM_SNL_06.input
-$PDIR/layer_height < $WDIR/FM_SNL_07.input
-$PDIR/layer_height < $WDIR/FM_SNL_08.input
-$PDIR/layer_height < $WDIR/FM_SNL_09.input
-$PDIR/layer_height < $WDIR/FM_SNL_10.input
-$PDIR/layer_height < $WDIR/FM_SNL_11.input
-$PDIR/layer_height < $WDIR/FM_SNL_12.input
-$PDIR/layer_height < $WDIR/FM_SNL_13.input
-$PDIR/layer_height < $WDIR/FM_SNL_14.input
-$PDIR/layer_height < $WDIR/FM_SNL_15.input
-$PDIR/layer_height < $WDIR/FM_SNL_16.input
-$PDIR/layer_height < $WDIR/FM_SNL_17.input
-$PDIR/layer_height < $WDIR/FM_SNL_21.input
-$PDIR/layer_height < $WDIR/FM_SNL_22.input
+$PDIR/layer_height < $WDIR/FM_SNL_01_HGL.input
+$PDIR/layer_height < $WDIR/FM_SNL_02_HGL.input
+$PDIR/layer_height < $WDIR/FM_SNL_03_HGL.input
+$PDIR/layer_height < $WDIR/FM_SNL_04_HGL.input
+$PDIR/layer_height < $WDIR/FM_SNL_05_HGL.input
+$PDIR/layer_height < $WDIR/FM_SNL_06_HGL.input
+$PDIR/layer_height < $WDIR/FM_SNL_07_HGL.input
+$PDIR/layer_height < $WDIR/FM_SNL_08_HGL.input
+$PDIR/layer_height < $WDIR/FM_SNL_09_HGL.input
+$PDIR/layer_height < $WDIR/FM_SNL_10_HGL.input
+$PDIR/layer_height < $WDIR/FM_SNL_11_HGL.input
+$PDIR/layer_height < $WDIR/FM_SNL_12_HGL.input
+$PDIR/layer_height < $WDIR/FM_SNL_13_HGL.input
+$PDIR/layer_height < $WDIR/FM_SNL_14_HGL.input
+$PDIR/layer_height < $WDIR/FM_SNL_15_HGL.input
+$PDIR/layer_height < $WDIR/FM_SNL_16_HGL.input
+$PDIR/layer_height < $WDIR/FM_SNL_17_HGL.input
+$PDIR/layer_height < $WDIR/FM_SNL_21_HGL.input
+$PDIR/layer_height < $WDIR/FM_SNL_22_HGL.input
 cp FM_SNL*HGL.csv $WDIR
 cp FM_SNL*devc.csv $WDIR
 cp *svn.txt $WDIR
