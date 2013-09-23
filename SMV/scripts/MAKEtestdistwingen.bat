@@ -27,7 +27,7 @@ set zipbase=smv_%version%_win%platform%
 set smvdir=uploads\%zipbase%
 set sh2bat=%svn_root%\Utilities\Data_Processing
 
-cd "%svn_root%\..\Google Drive\fds_smv_downloads"
+cd "%svn_root%\..\Google Drive\SMV_Test_Versions
 set gupload=%CD%
 
 cd %svn_root%\SMV\for_bundle

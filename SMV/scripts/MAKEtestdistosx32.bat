@@ -21,7 +21,7 @@ call %envfile%
 
 %svn_drive%
 
-cd "%svn_root%\..\Google Drive\fds_smv_downloads"
+cd "%svn_root%\..\Google Drive\SMV_Test_Versions
 set gupload=%CD%
 
 cd %svn_root%\smv\scripts

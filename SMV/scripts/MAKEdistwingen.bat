@@ -37,7 +37,7 @@ set bundleinfo=%svn_root%\Utilities\Scripts\bundle_setup
 set zipbase=smv_%version%_win%platform%
 set smvdir=uploads\%zipbase%
 
-cd "%svn_root%\..\Google Drive\fds_smv_downloads"
+cd "%svn_root%\..\Google Drive\SMV_Test_Versions
 set gupload=%CD%
 
 cd %bundledir%
