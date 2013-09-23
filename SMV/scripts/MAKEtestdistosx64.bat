@@ -29,7 +29,7 @@ echo making OSX test distribution archive
 plink %svn_logon% %scriptdir%/MAKEtestdistosx64.csh %smv_revision% %osx_hostname%
 
 echo downloading OSX test distribution archive
-pscp %svn_logon%:%bundledir%/smv_test_%smv_revision%_osx64.tar.gz ..\for_bundle\uploadds\.
+pscp %svn_logon%:%bundledir%/smv_test_%smv_revision%_osx64.tar.gz ..\for_bundle\uploads\.
 
 
 pause
