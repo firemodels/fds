@@ -269,8 +269,8 @@ echo Press Setup to begin installation. > %bundleinfo%\main.txt
 if exist %basename%.exe erase %basename%.exe
 wzipse32 %basename%.zip -runasadmin -a %bundleinfo%\about.txt -st"FDS %fds_version% Smokeview %smv_version% Setup" -d "c:\Program Files\FDS\%fdsversion%" -c wrapup_fds_install.bat
 
-if exist %gupload% echo copying %basename%.exe to %gupload%
-if exist %gupload% copy %basename%.exe "%gupload%"
+IF EXIST "%gupload%" echo copying %basename%.exe to %gupload%
+IF EXIST "%gupload%" copy %basename%.exe "%gupload%"
 
 rmdir %out_examples2%
 
