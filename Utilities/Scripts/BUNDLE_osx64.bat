@@ -34,7 +34,7 @@ pscp %svn_logon%:%linux_svn_root%/Utilities/uploads/%bundledir%.sh %svn_root%/Ut
 cd "%svn_root%\..\Google Drive\Bundle_Versions"
 set gupload=%CD%
 
-if exist %gupload% echo copying %svn_root%\Utilities\uploads\%bundledir%.sh to %gupload%
-if exist %gupload% copy %svn_root%\Utilities\uploads\%bundledir%.sh "%gupload%"
+IF EXIST "%gupload%" echo copying %svn_root%\Utilities\uploads\%bundledir%.sh to %gupload%
+IF EXIST "%gupload%" copy %svn_root%\Utilities\uploads\%bundledir%.sh "%gupload%"
 
 pause
