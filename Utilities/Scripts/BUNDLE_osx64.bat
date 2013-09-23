@@ -31,4 +31,10 @@ echo Downloading compressed archive to:
 echo   %svn_root%\Utilities\uploads\%bundledir%.sh
 pscp %svn_logon%:%linux_svn_root%/Utilities/uploads/%bundledir%.sh %svn_root%/Utilities/uploads/.
 
+cd "%svn_root%\..\Google Drive\fds_smv_downloads"
+set gupload=%CD%
+
+echo copying %svn_root%\Utilities\uploads\%bundledir%.sh to %gupload%
+copy %svn_root%\Utilities\uploads\%bundledir%.sh "%gupload%"
+
 pause
