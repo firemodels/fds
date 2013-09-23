@@ -97,46 +97,46 @@ filename{2} = '../../Validation/Heskestad_Flame_Height/FDS_Output_Files/FDS_Tama
 filename{3} = '../../Validation/Heskestad_Flame_Height/FDS_Output_Files/FDS_Tamanini_RI=20.csv';
 
 fds_line_file = {'Qs=2000_RI=05_line.csv', 'Qs=p5_RI=05_line.csv', 'Qs=p2_RI=05_line.csv'; ...
-	             'Qs=2000_RI=10_line.csv', 'Qs=p5_RI=10_line.csv', 'Qs=p2_RI=10_line.csv'; ...
-				 'Qs=2000_RI=20_line.csv', 'Qs=p5_RI=20_line.csv', 'Qs=p2_RI=20_line.csv'};
-			 
+                 'Qs=2000_RI=10_line.csv', 'Qs=p5_RI=10_line.csv', 'Qs=p2_RI=10_line.csv'; ...
+                 'Qs=2000_RI=20_line.csv', 'Qs=p5_RI=20_line.csv', 'Qs=p2_RI=20_line.csv'};
+
 Qstar = [2000 .5 .2];
 header = {'z/L jet','Q jet','z/L 62','Q 62','z/L 31','Q 31'};
 
 for j=1:3 % resolution loop
-	
-	clear z hrr
-	
-	fid = fopen(filename{j},'wt');
-	
-	fprintf(fid,'%s, %s, %s, %s, %s, %s\n',header{:});
-	A = [];
-	
-	for k=1:3 % hrr loop
-		
-		M = importdata(fds_line_file{j,k},',',2);
-		z = M.data(:,1);
-		dz = z(2)-z(1);
-		hrrpul = M.data(:,2);
-		Qdot_line = sum(hrrpul)*dz;
+
+    clear z hrr
+
+    fid = fopen(filename{j},'wt');
+
+    fprintf(fid,'%s, %s, %s, %s, %s, %s\n',header{:});
+    A = [];
+
+    for k=1:3 % hrr loop
+
+        M = importdata(fds_line_file{j,k},',',2);
+        z = M.data(:,1);
+        dz = z(2)-z(1);
+        hrrpul = M.data(:,2);
+        Qdot_line = sum(hrrpul)*dz;
         f = 0.99;
-		
-		% determine flame height
-		for n=1:length(z)
-			hrr(n) = sum(hrrpul(1:n))*dz/Qdot_line; % cummulative heat release
+
+        % determine flame height
+        for n=1:length(z)
+            hrr(n) = sum(hrrpul(1:n))*dz/Qdot_line; % cummulative heat release
         end
-		kk = find(hrr>f,1);
+        kk = find(hrr>f,1);
         L(k) = z(kk-1)+dz*(f-hrr(kk-1))/(hrr(kk)-hrr(kk-1));
-        
-		A=[A,(z+dz/2)/L(k),hrr'];
-		
-	end % hrr loop
-	
-	for i=1:length(z)
-		fprintf(fid,'%f, %f, %f, %f, %f, %f\n',A(i,:));
-	end
-	fclose(fid);
-	
+
+        A=[A,(z+dz/2)/L(k),hrr'];
+
+    end % hrr loop
+
+    for i=1:length(z)
+        fprintf(fid,'%f, %f, %f, %f, %f, %f\n',A(i,:));
+    end
+    fclose(fid);
+    
 end % resolution loop
 
 
