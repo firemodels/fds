@@ -21,6 +21,10 @@ goto:eof
 call %envfile%
 
 %svn_drive%
+
+cd "%svn_root%\..\Google Drive\fds_smv_downloads"
+set gupload=%CD%
+
 cd %svn_root%\smv\scripts
 
 set scriptdir=FDS-SMV/SMV/scripts
@@ -31,5 +35,8 @@ plink %svn_logon% %scriptdir%/MAKEtestdistlinux32.csh %smv_revision%
 
 echo downloading Linux Smokeview files
 pscp %svn_logon%:%bundledir%/smv_test_%smv_revision%_linux32.tar.gz ..\for_bundle\uploads\.
+
+echo copying ..\for_bundle\uploads\smv_test_%smv_revision%_linux32.tar.gz to %gupload%
+copy ..\for_bundle\uploads\smv_test_%smv_revision%_linux32.tar.gz "%gupload%"
 
 pause

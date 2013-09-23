@@ -251,6 +251,9 @@ copy "%bundleinfo%\set_path.exe" "%out_bundle%\%fdsversion%\set_path.exe"
 echo.
 echo Compressing FDS/Smokeview distribution
 
+cd "%svn_root%\..\Google Drive\fds_smv_downloads"
+set gupload=%CD%
+
 cd %uploads%
 if exist %basename%.zip erase %basename%.zip
 cd %out_bundle%\%fdsversion%\
@@ -265,6 +268,9 @@ echo Setup is about to install FDS %fds_version% and Smokeview %smv_version% > %
 echo Press Setup to begin installation. > %bundleinfo%\main.txt
 if exist %basename%.exe erase %basename%.exe
 wzipse32 %basename%.zip -runasadmin -a %bundleinfo%\about.txt -st"FDS %fds_version% Smokeview %smv_version% Setup" -d "c:\Program Files\FDS\%fdsversion%" -c wrapup_fds_install.bat
+
+echo copying %basename%.exe to %gupload%
+copy %basename%.exe "%gupload%"
 
 rmdir %out_examples2%
 

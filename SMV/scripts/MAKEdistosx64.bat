@@ -19,6 +19,10 @@ goto:eof
 call %envfile%
 
 %svn_drive%
+
+cd "%svn_root%\..\Google Drive\fds_smv_downloads"
+set gupload=%CD%
+
 cd %svn_root%\smv\scripts
 set version=%smv_version%
 
@@ -31,5 +35,7 @@ plink %svn_logon% %scriptdir%/MAKEdistgen.csh %version% osx 64 %osx_hostname%
 echo downloading 64 bit Smokeview OSX distribution archive
 pscp %svn_logon%:%bundledir%/smv_%version%_osx64.tar.gz ..\for_bundle\uploads\.
 
+echo copying ..\for_bundle\uploads\smv_%version%_osx64.tar.gz to %gupload%
+copy ..\for_bundle\uploads\smv_%version%_osx64.tar.gz "%gupload%"
 
 pause

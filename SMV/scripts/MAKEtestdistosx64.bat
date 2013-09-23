@@ -20,6 +20,10 @@ goto:eof
 call %envfile%
 
 %svn_drive%
+
+cd "%svn_root%\..\Google Drive\fds_smv_downloads"
+set gupload=%CD%
+
 cd %svn_root%\smv\scripts
 
 set scriptdir=FDS-SMV/SMV/scripts
@@ -31,5 +35,7 @@ plink %svn_logon% %scriptdir%/MAKEtestdistosx64.csh %smv_revision% %osx_hostname
 echo downloading OSX test distribution archive
 pscp %svn_logon%:%bundledir%/smv_test_%smv_revision%_osx64.tar.gz ..\for_bundle\uploads\.
 
+echo copying ..\for_bundle\uploads\smv_test_%smv_revision%_osx64.tar.gz to %gupload%
+copy ..\for_bundle\uploads\smv_test_%smv_revision%_osx64.tar.gz "%gupload%"
 
 pause
