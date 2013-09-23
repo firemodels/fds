@@ -298,19 +298,19 @@ where $\delta(x)$ is the Dirac delta function.  In other words, if we look at a 
 
 For convenience, we define the \emph{unmixed fraction}, $\zeta(t)$, as the fraction of mass within the cell existing as either 0 or 1.  To satisfy the integral constraints, the PDF weights are set to
 \begin{align}
-w_1 &= \zeta \, (1 - \widetilde{Y}_\alpha^0) \,\mbox{,} \\
-w_2 &= \zeta \, \widetilde{Y}_\alpha^0 \,\mbox{,} \\
-w_3 &= 1-\zeta \,\mbox{.}
+w_1 &= \zeta \, (1 - \widetilde{Y}_\alpha^0) \\
+w_2 &= \zeta \, \widetilde{Y}_\alpha^0 \\
+w_3 &= 1-\zeta 
 \end{align}
-As shown in Appendix~\ref{app:unmixed_fraction}, the unmixed fraction evolves by the following simple ODE:
+As shown in Appendix~\ref{app:unmixed_fraction}, the unmixed fraction evolves by the following simple ODE
 \begin{equation}
 \label{eq:zeta}
-\frac{\d \zeta}{\d t}=-\frac{\zeta}{\tau_{\rm mix}} \,\mbox{,}
+\frac{\d \zeta}{\d t}=-\frac{\zeta}{\tau_{\rm mix}}
 \end{equation}
 with the solution
 \begin{equation}
 \label{eq:zeta_soln}
-\zeta(t) = \zeta_0 \,{\rm e}^{-t/\tau_{\rm mix}} \,\mbox{.}
+\zeta(t) = \zeta_0 \,{\rm e}^{-t/\tau_{\rm mix}}
 \end{equation}
 The initial condition $\zeta_0$ may be specified, modeled algebraically, or taken from the update of a passive scalar transport equation.  Currently, FDS takes $\zeta_0=1$ as default for LES mode (diffusion flame) and $\zeta_0=0$ as default for DNS (it is assumed that the mixing time scale is well-resolved).
 
@@ -321,13 +321,13 @@ The initial condition $\zeta_0$ may be specified, modeled algebraically, or take
 At any point in time, the composition of the computational cell may be determined by combining the unmixed and mixed portions:
 \begin{equation}
 \label{eq:final_comp}
-\widetilde{Y}_{\alpha}(t)= \zeta(t) \, \widetilde{Y}_{\alpha}^0 + (1-\zeta(t)) \, \hat{Y}_{\alpha}(t) \,\mbox{.}
+\widetilde{Y}_{\alpha}(t)= \zeta(t) \, \widetilde{Y}_{\alpha}^0 + (1-\zeta(t)) \, \hat{Y}_{\alpha}(t)
 \end{equation}
 Differentiating (\ref{eq:final_comp}) in time and using (\ref{eq:zeta}) we see that our model for the chemical source term needed in (\ref{species}) is given by
 \begin{equation}
 \label{mass_prod_rate} 
 \dot{m}^{\prime\prime\prime}_{\alpha} = \rho \frac{\mbox{d}\widetilde{Y}_{\alpha}}{\mbox{d}t} 
-= \rho \left[ \frac{\zeta}{\tau_{\rm{mix}}} (\hat{Y}_\alpha - \widetilde{Y}_{\alpha}^0)  + (1-\zeta) \frac{\mbox{d}\hat{Y}_\alpha}{\mbox{d}t} \right] \,\mbox{.}
+= \rho \left[ \frac{\zeta}{\tau_{\rm{mix}}} (\hat{Y}_\alpha - \widetilde{Y}_{\alpha}^0)  + (1-\zeta) \frac{\mbox{d}\hat{Y}_\alpha}{\mbox{d}t} \right]
 \end{equation}
 Note that the unmixed fraction is comparable to the \emph{complement} of the fraction of ``reacting fine structures'' in other EDC formulations \cite{Chen:1,Panjwani:2010}, but in our model this fraction evolves in time.  A comparison between our model and that of Panjwani et al.~\cite{Panjwani:2010} is developed further in Appendix~\ref{app:eddy_dissipation_concept}.
 
@@ -339,24 +339,24 @@ Since (\ref{mass_prod_rate}) was obtained by differentiating (\ref{eq:final_comp
 
 The composition in the mixed reactor zone changes by two processes: mixing (mass is transferred from the unmixed zone to the mixed zone) and chemical reaction. As a consequence of the time splitting scheme, the total mass within the reactor (computational cell) is constant over a time step.  We denote this mass by $\rho V_{\rm c}$, where $\rho$ is the initial cell mass density and $V_{\rm c}$ is the cell volume.  The unmixed mass is denoted $U(t)$ and the mixed mass is denoted $M(t)$.  Given (\ref{eq:zeta_soln}), the following equations describe the cell mass evolution:
 \begin{align}
-\label{eq:mixunmix_1} \rho V_{\rm c} &= U(t) + M(t) \,\mbox{,}\\
-\label{eq:mixunmix_2} U(t) &= \zeta(t)\,\rho V_{\rm c} \,\mbox{,}\\
-\label{eq:mixunmix_3} M(t) &= (1-\zeta(t))\,\rho V_{\rm c} \,\mbox{.}
+\label{eq:mixunmix_1} \rho V_{\rm c} &= U(t) + M(t) \\
+\label{eq:mixunmix_2} U(t) &= \zeta(t)\,\rho V_{\rm c} \\
+\label{eq:mixunmix_3} M(t) &= (1-\zeta(t))\,\rho V_{\rm c}
 \end{align}
 
 Within the mixed reactor zone, let $m_\alpha(t)$ denote the mass of species $\alpha$.  The mass fraction of $\alpha$ in the mixed zone may then be written as
 \begin{equation}
 \label{eq:mass_fraction_mixed}
-\hat{Y}_{\alpha}(t)\equiv\frac{m_{\alpha}(t)}{M(t)} \,\mbox{.}
+\hat{Y}_{\alpha}(t)\equiv\frac{m_{\alpha}(t)}{M(t)}
 \end{equation}
 This concentration is important because Arrhenius rate laws are based on the mixed composition only.
 
 The ODE governing the mixed species mass is
 \begin{align}
 \label{eq:mixmass}
-\frac{\d m_{\alpha}}{\d t} &= \hat{Y}_\alpha \frac{\d M}{\d t} + M \frac{\d \hat{Y}_\alpha}{\d t} \,\mbox{,} \notag\\
-&= - \widetilde{Y}_{\alpha}^0 \frac{\d U}{\d t} + M \frac{\d \hat{Y}_\alpha}{\d t} \,\mbox{,} \notag\\
-&= \rho V_{\rm c} \left[ \frac{\zeta \, \widetilde{Y}_{\alpha}^0 }{\tau_{\rm mix}} + (1-\zeta) \frac{\d \hat{Y}_\alpha}{\d t} \right]\,\mbox{.} 
+\frac{\d m_{\alpha}}{\d t} &= \hat{Y}_\alpha \frac{\d M}{\d t} + M \frac{\d \hat{Y}_\alpha}{\d t} \notag\\
+&= - \widetilde{Y}_{\alpha}^0 \frac{\d U}{\d t} + M \frac{\d \hat{Y}_\alpha}{\d t} \notag\\
+&= \rho V_{\rm c} \left[ \frac{\zeta \, \widetilde{Y}_{\alpha}^0 }{\tau_{\rm mix}} + (1-\zeta) \frac{\d \hat{Y}_\alpha}{\d t} \right] 
 \end{align}
 The first term  on the RHS accounts for mixing.  The second term represents chemical kinetics. Note that in the second step we have utilized the fact that the unmixed composition remains constant (at the initial cell mean) throughout the time step. The third step follows from (\ref{eq:zeta}), (\ref{eq:mixunmix_2}), and (\ref{eq:mixunmix_3}).
 
@@ -365,9 +365,9 @@ The first term  on the RHS accounts for mixing.  The second term represents chem
 
 In this section, we discuss the numerical solution of (\ref{eq:mixmass}). Let $\Delta t^k$ represent the $k$th sub-time step in the integration (less than or equal to the LES time step $\delta t$); $t^k=0$ at the start of the reactor integration.  The integration is time split such that \emph{mixing is done first, followed by reaction}. A simple explicit update of (\ref{eq:mixmass}) over the sub-time interval $t^k$ to $t^k + \Delta t^k$ is given by
 \begin{align}
-\label{eq:dmdt_1} m_\alpha^* &= m_{\alpha}(t^k) - [ \zeta(t^k+\Delta t^k) - \zeta(t^k) ] \, \widetilde{Y}_{\alpha}^0 \, \rho V_{\rm c} \,\mbox{,} \\
-\label{eq:ystar}  \hat{Y}_\alpha^* &= m_\alpha^*/M^* \,\mbox{,} \\
-\label{eq:dmdt_2} \hat{Y}_\alpha(t^k + \Delta t^k) &= \hat{Y}_\alpha^* + \Delta \hat{Y}_\alpha^* \,\mbox{.}
+\label{eq:dmdt_1} m_\alpha^* &= m_{\alpha}(t^k) - [ \zeta(t^k+\Delta t^k) - \zeta(t^k) ] \, \widetilde{Y}_{\alpha}^0 \, \rho V_{\rm c} \\
+\label{eq:ystar}  \hat{Y}_\alpha^* &= m_\alpha^*/M^* \\
+\label{eq:dmdt_2} \hat{Y}_\alpha(t^k + \Delta t^k) &= \hat{Y}_\alpha^* + \Delta \hat{Y}_\alpha^* 
 \end{align}
 The superscript $^*$ indicates a post-mixing value.  The first step, (\ref{eq:dmdt_1}), is an analytical solution for the mixing step (first term in (\ref{eq:mixmass})), obtained using (\ref{eq:zeta_soln}).  The mixing time scale $\tau_{\rm mix}$, needed in (\ref{eq:zeta_soln}), is computed once per LES time step using (\ref{eqn_tau_mix}) and held constant during the reactor integration. The mixed mass, $M^* = M(t^k + \Delta t^k)$, is evaluated at the end of the subinterval using (\ref{eq:mixunmix_3}). For fast chemistry, we take only one sub-step ($\Delta t^{k=1} = \delta t$).
 
@@ -396,70 +396,89 @@ At the end of the time integration, the mixed zone composition, $\hat{Y}_\alpha(
 %\end{equation}
 %At the end of the time integration, the mixed zone composition, $\hat{Y}_\alpha(\delta t)$, is combined with the unmixed mass in Eq.~(\ref{eq:final_comp}) to obtain the final cell composition.
 
-\subsubsection{Infinitely Fast Reaction (Default)}
+\subsection{Infinitely Fast Chemistry (Default)}
 
 %In practice, for fast chemistry $E$ and $n$ in Eq.~(\ref{eq:finite_rate_fin}) are set to zero, which removes the temperature dependence from the rate expression. The species exponents, $a_{\alpha}$, in Eqs.~(\ref{eq:aprime}) and (\ref{eq:finite_rate_fin}) are also set to zero to remove concentration dependence. Finally, the pre-exponential factor, $A^{\prime}$, is set to $1 \times 10^{16}$. As a result, $\mbox{d}\hat{Y}_{\rm F}/\mbox{d}t$ becomes sufficiently large such that the fuel in the mixed zone can be stoichiometrically consumed in a single time step, effectively making the rate infinite.
 
 The change in fuel is based on the limiting reactant:
 \begin{equation}\label{eq:stoich_fuel_single}
-\Delta \hat{Y}_{\rm F} = - \min \left( \hat{Y}_{\rm F}, \hat{Y}_{\alpha} \,\frac{\nu_{\rm F}\,W_{\rm F}}{\nu_{\alpha}\,W_{\alpha}}\right) \quad ; \quad \mbox{for all reactants, $\alpha$}
-\end{equation}
-
-\subsubsection{Multiple Infinitely Fast Reactions: Parallel Reactions}
-\label{fast_parallel_reactions}
-
-Special treatment is needed for multiple, infinitely fast, oxygen-limited reactions. In this situation, no reaction takes precedent over another and each wants to consume all of the available oxidizer.  Thus, the oxygen must be apportioned in some reasonable way.
-
-The first step is to determine the amount of oxidizer present in the mixed zone of the reactor. Next, we calculate the amount of oxidizer needed to stoichiometrically consume all of the fuel in each reaction. If the required oxidizer is larger than what is available then the mixed zone of the reactor is globally fuel rich.
-
-If the cell is determined to be globally fuel rich, then for each reaction we determine the stoichiometric fuel concentration based on the limiting reactant:
-\begin{equation}\label{eq:stoich_fuel}
-\hat{Y}_{{\rm F,lim},i} = \min \left( \hat{Y}_{\rm F}, \hat{Y}_{\alpha} \,\frac{\nu_{\rm F}\,W_{\rm F}}{\nu_{\alpha}\,W_{\alpha}} \right) \quad ; \quad \mbox{for all reactants, $\alpha$, in reaction $i$}
-\end{equation}
-To prevent more than the available amount of oxidizer from being consumed, a weight factor, $w_i$, for the $i$th reaction is calculated based on the limiting amount of fuel:
-\begin{equation}\label{eq:fuel_weight}
-w_i = \frac{\hat{Y}_{{\rm F,lim},i}}{\sum_i \, \hat{Y}_{{\rm F,lim},i}}
-\end{equation}
-The limiting change in fuel for the $i$th reaction becomes
-\begin{equation}\label{eq:fuel_rate}
-\Delta \hat{Y}_{{\rm F},i} = -\hat{Y}_{{\rm F,lim},i}\,w_i
+\Delta \hat{Y}_{\rm F} = -\min \left( \hat{Y}_{\rm F}, \hat{Y}_{\alpha} \,\frac{\nu_{\rm F}\,W_{\rm F}}{\nu_{\alpha}\,W_{\alpha}}\right) \quad ; \quad \mbox{for all reactants, $\alpha$}
 \end{equation}
 
 \subsubsection{Change in Species Compositions}
 
-Using the stoichiometric change in fuel concentration, the change in each species $\alpha$ is given by
+Using the stoichiometric change in fuel concentration for each of the $i$ reactions, the change in each species $\alpha$ is given by
 \begin{equation}\label{eq:change_alpha}
 \Delta \hat{Y}_{\alpha} = \sum_i \,\left(\frac{\nu_{\alpha,i} \,W_{\alpha}}{\nu_{{\rm F},i} \,W_{{\rm F},i}}\right)\Delta \hat{Y}_{{\rm F},i}
 \end{equation}
 
-\subsubsection{Example: Oxygen-limited, Premixed Methane-Propane Combustion}
 
-Consider the case where there are two, single step hydrocarbon oxidization reactions:
+\subsubsection{Maintaining Species Boundedness}
+
+To maintain realizable species mass fractions ($ 0 \leq \hat{Y}_{\alpha} \leq 1$), a predictor-corrector scheme is applied to a modified version of Eq.~(\ref{eq:stoich_fuel_single}). Instead of finding the stoichiometric change in fuel based on the limiting reactant, the change in fuel is simply the amount of the fuel present, $\Delta \hat{Y}_{\rm F} = \hat{Y}_{\rm F}$. The change in each species is found from Eq.~(\ref{eq:change_alpha}). Each species concentration is updated following Eq.~(\ref{eq:dmdt_2}) (predictor) and checked to ensure the species is in bounds. If any species is found to be out of bounds, a boundedness multiplier (corrector) is applied to the change in species vector, $\hat{Y}_{\alpha}$, and Eq.~(\ref{eq:dmdt_2}) is recalculated. If reactant $\alpha$ is found to be out of bounds, the boundedness multiplier, $\beta$, is defined to be
+\begin{equation}\label{eq:bound_correct_reac}
+\beta = \frac{\hat{Y}_{\alpha}(t^k)}{\lvert \hat{Y}_{\alpha}(t^k + \Delta t^k)\rvert + \hat{Y}_{\alpha}(t^k)}
+\end{equation}
+Based on this formulation, for a fuel limited reaction $\beta$ is 1 and for an oxygen limited reaction $ 0 < \beta \leq 1$. If a product $\alpha$ were found to be out of bounds, then $\beta$ is found by
+\begin{equation}\label{eq:bound_correct_prod}
+\beta = \frac{1-\hat{Y}_{\alpha}(t^k)}{\hat{Y}_{\alpha}(t^k + \Delta t^k) - \hat{Y}_{\alpha}(t^k)}
+\end{equation}
+
+\subsubsection{Example: Oxygen-limited, Methane Combustion}
+Consider a single step methane oxidation reaction
+\begin{equation}\label{eq:bc_methane}
+\mathrm{CH_4 + 2 \, O_2} \rightarrow  \mathrm{CO_2 + 2 \, H_2O}
+\end{equation}
+where the initial mass fractions of species are 0.4 N$_{2}$, 0.3 O$_2$, and 0.3 CH$_4$. Following the predictor-corrector scheme, the change in methane concentration, $\Delta \hat{Y}_{\rm F}$, is $-$0.3. The corresponding change is oxygen is
+\begin{equation}\label{eq:bc_o2_single}
+\Delta \hat{Y}_{\rm O_2} = -0.3 \left( \frac{(-2)(32)}{(-1)(16)} \right) = -1.2
+\end{equation}
+The updated reaction concentrations are $\hat{Y}_{\rm F}$ = 0 and $\hat{Y}_{\rm O_2}$ = $-$0.9. Since oxygen is out of bounds, $\beta$ is calculated by Eq.~(\ref{eq:bound_correct_reac})
+\begin{equation}\label{eq:calc_beta_single}
+\beta = \frac{0.3}{0.9 + 0.3} = 0.25
+\end{equation}
+Multiplying $\beta$ by the change in species results in an updated $\Delta \hat{Y}_{\rm F}$ of $-$0.075 and $\Delta \hat{Y}_{\rm O_2}$ of $-$0.3. This is the same result as solving Eq.~(\ref{eq:stoich_fuel_single}) directly
+\begin{equation}\label{eq:edc_meth_single}
+\Delta \hat{Y}_{\rm F} = -\min \left( 0.3, 0.3 \frac{(-1)(16)}{(-2)(32)}\right) = -0.075
+\end{equation}
+The advantage of this implementation is for cases where there are multiple oxidation reactions as the following example illustrates.
+
+\subsubsection{Example: Oxygen-limited, Methane-Propane Combustion}
+Consider the case where there are two, single step hydrocarbon oxidization reactions
 \begin{align}
 &\mbox{Reaction 1}& \mathrm{CH_4 + 2 \, O_2} &\rightarrow  \mathrm{CO_2 + 2 \, H_2O}       && && \label{eq:two_fuel_ox_limit1} \\
 &\mbox{Reaction 2}& \mathrm{C_3H_8 + 5 \, O_2} &\rightarrow \mathrm{3 \,CO_2 + 4 \, H_2O}  && && \label{eq:two_fuel_ox_limit2}
 \end{align}
-The initial composition of a premixed reactor is 30\% methane, 40\% propane, and 30\% oxygen by mass. Based on the stoichiometry of the reactions, Eqs.~(\ref{eq:two_fuel_ox_limit1}) and (\ref{eq:two_fuel_ox_limit2}), and the composition of the reactor, the reactor is oxygen-limited. This means that the amount of fuel present requires more than the available oxygen to completely combust. To prevent the fuel from driving the oxygen concentration to a non-physical negative quantity, the first step is use Eq.~(\ref{eq:stoich_fuel}) to find the stoichiometric fuel concentration based on the limiting reactant:
-\begin{align}
-\hat{Y}_{{\rm F,lim},1} = \min \left (0.3,\,0.3\,\frac{(-1) (16)}{(-2)(32)} \right) = 0.0752 \\
-\hat{Y}_{{\rm F,lim},2} = \min \left (0.4,\,0.3\,\frac{(-1) (44)}{(-5)(32)} \right) = 0.0827
-\end{align}
-Knowing $\hat{Y}_{\rm F,lim}$ for each reaction, Eq.~(\ref{eq:fuel_weight}) can be used to estimate the weighting factors:
-\begin{align}
-w_1 =  \frac{0.0752}{0.1579} = 0.4763 \\
-w_2 =  \frac{0.0827}{0.1579} = 0.5237
-\end{align}
-Finally, using Eq.~(\ref{eq:fuel_rate}) the limiting change in fuel for each reaction becomes:
-\begin{align}
-\Delta \hat{Y}_{{\rm F},1} = - (0.0752)(0.4763) = -0.0358 \\
-\Delta \hat{Y}_{{\rm F},2} = - (0.0827)(0.5237) = -0.0433
-\end{align}
-The oxygen consumption for each reaction is estimated using the change in fuel, the stoichiometric coefficients, and the ratio of molecular weights of oxygen and the fuel. The generic form of this equation which is applied to each of the species in each reaction is given by Eq.~(\ref{eq:change_alpha}).
-\begin{align}
-\Delta \hat{Y}_{\si{O_2},1} = \frac{(-2)(32)}{(-1)(16)}(-0.0358) = -0.1429 \\
-\Delta \hat{Y}_{\si{O_2},2} = \frac{(-5)(32)}{(-1)(44)}(-0.0433) = -0.1571
-\end{align}
-As should be the case, the total change in oxygen, $-0.3$, is equal to the amount of available oxygen.
+The initial composition of a premixed reactor is 30\% methane, 40\% propane, and 30\% oxygen by mass. Based on the stoichiometry of the reactions, Eqs.~(\ref{eq:two_fuel_ox_limit1}) and (\ref{eq:two_fuel_ox_limit2}), and the composition of the reactor, the reactor is oxygen-limited. This means that the amount of fuel present requires more than the available oxygen to completely combust. 
+
+%\subsubsection{Example: Oxygen-limited, Premixed Methane-Propane Combustion}
+%
+%Consider the case where there are two, single step hydrocarbon oxidization reactions:
+%\begin{align}
+%&\mbox{Reaction 1}& \mathrm{CH_4 + 2 \, O_2} &\rightarrow  \mathrm{CO_2 + 2 \, H_2O}       && && \label{eq:two_fuel_ox_limit1} \\
+%&\mbox{Reaction 2}& \mathrm{C_3H_8 + 5 \, O_2} &\rightarrow \mathrm{3 \,CO_2 + 4 \, H_2O}  && && \label{eq:two_fuel_ox_limit2}
+%\end{align}
+%The initial composition of a premixed reactor is 30\% methane, 40\% propane, and 30\% oxygen by mass. Based on the stoichiometry of the reactions, Eqs.~(\ref{eq:two_fuel_ox_limit1}) and (\ref{eq:two_fuel_ox_limit2}), and the composition of the reactor, the reactor is oxygen-limited. This means that the amount of fuel present requires more than the available oxygen to completely combust. To prevent the fuel from driving the oxygen concentration to a non-physical negative quantity, the first step is use Eq.~(\ref{eq:stoich_fuel}) to find the stoichiometric fuel concentration based on the limiting reactant:
+%\begin{align}
+%\hat{Y}_{{\rm F,lim},1} = \min \left (0.3,\,0.3\,\frac{(-1) (16)}{(-2)(32)} \right) = 0.0752 \\
+%\hat{Y}_{{\rm F,lim},2} = \min \left (0.4,\,0.3\,\frac{(-1) (44)}{(-5)(32)} \right) = 0.0827
+%\end{align}
+%Knowing $\hat{Y}_{\rm F,lim}$ for each reaction, Eq.~(\ref{eq:fuel_weight}) can be used to estimate the weighting factors:
+%\begin{align}
+%w_1 =  \frac{0.0752}{0.1579} = 0.4763 \\
+%w_2 =  \frac{0.0827}{0.1579} = 0.5237
+%\end{align}
+%Finally, using Eq.~(\ref{eq:fuel_rate}) the limiting change in fuel for each reaction becomes:
+%\begin{align}
+%\Delta \hat{Y}_{{\rm F},1} = - (0.0752)(0.4763) = -0.0358 \\
+%\Delta \hat{Y}_{{\rm F},2} = - (0.0827)(0.5237) = -0.0433
+%\end{align}
+%The oxygen consumption for each reaction is estimated using the change in fuel, the stoichiometric coefficients, and the ratio of molecular weights of oxygen and the fuel. The generic form of this equation which is applied to each of the species in each reaction is given by Eq.~(\ref{eq:change_alpha}).
+%\begin{align}
+%\Delta \hat{Y}_{\si{O_2},1} = \frac{(-2)(32)}{(-1)(16)}(-0.0358) = -0.1429 \\
+%\Delta \hat{Y}_{\si{O_2},2} = \frac{(-5)(32)}{(-1)(44)}(-0.0433) = -0.1571
+%\end{align}
+%As should be the case, the total change in oxygen, $-0.3$, is equal to the amount of available oxygen.
 
 
 \subsection{Finite-Rate Chemistry (Arrhenius Reaction)}
@@ -469,11 +488,11 @@ Consider a simple one-step forward reaction:
 \begin{equation}\label{eq:generic_1step}
 a\mathrm{A} + b\mathrm{B} \rightarrow c\mathrm{C} + d\mathrm{D}
 \end{equation}
-The rate expression for species A with a mixed zone concentration of $C_{\mbox{\scriptsize A}}$ in mol/L and rate constant $k$ is:
+The rate expression for species A with a mixed zone concentration of $C_{\mbox{\scriptsize A}}$ in mol/L and rate constant $k$ is
 \begin{equation}\label{eq:generic_rate}
 \frac{\d C_{\mbox{\scriptsize A}}}{\d t}= -k\; C_{\mbox{\scriptsize A}}^{\,a}\; C_{\mbox{\scriptsize B}}^{\,b}
 \end{equation}
-Consider a set of $N_r$ reactions with fuel F. The reaction rate (\si{mol/(L.s)}) for F in the $i$th reaction is:
+Consider a set of $N_r$ reactions with fuel F. The reaction rate (\si{mol/(L.s)}) for F in the $i$th reaction is
 \begin{equation}\label{eq:rate_f}
 r_{\si{F},i}= -k_{i}\; \prod C_{\alpha}^{\,a_{\alpha,i}}
 \end{equation}
@@ -498,15 +517,15 @@ To simplify the calculations within FDS, density and molecular weight are pulled
 \begin{equation}\label{eq:aprime}
 A^{\prime}_{i} = A_{i}\;\rho^{\sum a_{\alpha}}\prod W_{\alpha}^{\,-a_{\alpha,i}}
 \end{equation}
-Using $A_i^{\prime}$, the rate becomes:
+Using $A_i^{\prime}$, the rate becomes
 \begin{equation}\label{eq:finite_rate_fin}
 r^{\prime}_{F,i} = -A_i^{\prime}\;T^{n_i}\;\mathrm{e}^{-E_i/RT}\;\prod Y_{\alpha}^{\,a_{\alpha,i}}
 \end{equation}
-The reaction rate on a mass basis for species $\alpha$ in the $i$th reaction is:
+The reaction rate on a mass basis for species $\alpha$ in the $i$th reaction is
 \begin{equation}\label{eq:rate_a_y}
 r^{\prime}_{\alpha,i}= \left(\frac{\nu_{\alpha,i}\,W_{\alpha}}{\nu_{F,i}\,W_{F}}\right)\,r^{\prime}_{F,i}
 \end{equation}
-Last, the rate of change in composition for species $\alpha$ (\si{kg $\alpha$/(m^3.s)}) in the mixed reactor zone becomes:
+Last, the rate of change in composition for species $\alpha$ (\si{kg $\alpha$/(m^3.s)}) in the mixed reactor zone becomes
 \begin{equation}\label{rate_expression_y}
 \frac{\d \hat{Y}_{\alpha}}{\d t} = \frac{1}{\rho}\sum_{i} r^{\prime}_{\alpha,i}
 \end{equation}
