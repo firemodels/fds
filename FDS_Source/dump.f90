@@ -2759,9 +2759,9 @@ SURFLOOP: DO N=0,N_SURF
  
    IF (SF%THERMAL_BC_INDEX==SPECIFIED_TEMPERATURE .AND. SF%TMP_FRONT>0._EB) &
                                   WRITE(LU_OUTPUT,'(A,F8.1)') '     Wall or Vent Temperature (C)', SF%TMP_FRONT - TMPM
-   IF (ABS(SF%VEL)>TWO_EPSILON_EB)             WRITE(LU_OUTPUT,'(A,F8.3)') '     Normal Velocity (m/s)       ', SF%VEL
-   IF (ABS(SF%MASS_FLUX_TOTAL)>TWO_EPSILON_EB) WRITE(LU_OUTPUT,'(A,F8.3)') '     Total Mass Flux (kg/m^2/s)  ', SF%MASS_FLUX_TOTAL
-   IF (ABS(SF%VOLUME_FLUX)>TWO_EPSILON_EB)     WRITE(LU_OUTPUT,'(A,F8.3)') '     Volume Flux (m**3/s)        ', SF%VOLUME_FLUX
+   IF (ABS(SF%VEL)>TWO_EPSILON_EB)             WRITE(LU_OUTPUT,'(A,F8.3)')  '     Normal Velocity (m/s)       ', SF%VEL
+   IF (ABS(SF%MASS_FLUX_TOTAL)>TWO_EPSILON_EB) WRITE(LU_OUTPUT,'(A,ES9.2)') '     Total Mass Flux (kg/m^2/s) ', SF%MASS_FLUX_TOTAL
+   IF (ABS(SF%VOLUME_FLUX)>TWO_EPSILON_EB)     WRITE(LU_OUTPUT,'(A,ES9.2)') '     Volume Flux (m**3/s)       ', SF%VOLUME_FLUX
  
    IF (SF%HRRPUA > 0._EB) WRITE(LU_OUTPUT,'(A,F12.1)') '     HRR Per Unit Area (kW/m2) ', SF%HRRPUA/1000._EB
    DO NN=0,N_TRACKED_SPECIES
