@@ -2,40 +2,36 @@
 % 9-23-13
 % layer_height.m
 %
-% replaces old layer_height.f (by Kevin McGrattan) used to post-process NIST_NRC cases
+% replaces old layer_height.f (by Kevin McGrattan) used to post-process HGL cases
 
 close all
 clear all
 
-dir = '../../Validation/NIST_NRC/FDS_Output_Files/';
+% this is horrendous, but the ls command was giving file permission problems with Samba
+list_dir = dir('../../Validation/*');
+k = 0;
+for i=1:length(list_dir)
+    list_files = dir(['../../Validation/',list_dir(i).name,'/FDS_Output_Files/*HGL.input']);
+    if size(list_files)>0
+        for j=1:length(list_files)
+            k=k+1;
+            output_dir{k} = ['../../Validation/',list_dir(i).name,'/FDS_Output_Files/'];
+            input_file{k} = list_files(j).name;
+        end
+    end
+end
 
-% list of input files
-chid = {'NIST_NRC_01', ...
-        'NIST_NRC_02', ...
-        'NIST_NRC_03', ...
-        'NIST_NRC_04', ...
-        'NIST_NRC_05', ...
-        'NIST_NRC_07', ...
-        'NIST_NRC_08', ...
-        'NIST_NRC_09', ...
-        'NIST_NRC_10', ...
-        'NIST_NRC_13', ...
-        'NIST_NRC_14', ...
-        'NIST_NRC_15', ...
-        'NIST_NRC_16', ...
-        'NIST_NRC_17', ...
-        'NIST_NRC_18'};
+%return % uncomment to just list the files for testing purposes
 
 ntd=20000;
 ncd=500;
 
-for i=1:length(chid) % chid loop
+for i=1:length(input_file) % input_file loop
 
     clear M
     tmp=zeros(ntd,ncd);
 
-    filename=[dir,chid{i},'_HGL.input'];
-    fid = fopen(filename,'r');
+    fid = fopen([output_dir{i},input_file{i}],'r');
 
     % read number of trees
     ntrees = str2num(fgetl(fid));
@@ -80,7 +76,7 @@ for i=1:length(chid) % chid loop
     fclose(fid);
 
     % read data from file
-    M = importdata(infile,',',nr-1);
+    M = importdata([output_dir{i},infile],',',nr-1);
     t = M.data(:,1);
     d = M.data(:,2:nc);
 
@@ -90,7 +86,7 @@ for i=1:length(chid) % chid loop
     end
     z(ntc) = z_h;
 
-    fout = fopen([dir,outfile],'w');
+    fout = fopen([output_dir{i},outfile],'w');
 
     fprintf(fout,'%s, %s, %s, %s\n','Time','Height','T_lower','T_upper');
 
@@ -119,12 +115,23 @@ for i=1:length(chid) % chid loop
         tmpl(i)=tmp(i,1);
         i1 = 0;
         for n=1:ntc
-            if z(n)>zint(i)
-                if z(n-1)>=zint(i)
-                    i1 = i1 + tmp(i,n)*(z(n)-z(n-1));
+            if n==1
+                if z(n)>zint(i)
+                    if z_0>=zint(i)
+                        i1 = i1 + tmp(i,n)*(z(n)-z_0);
+                    end
+                    if z_0<zint(i)
+                        i1 = i1 + tmp(i,n)*(z(n)-zint(i));
+                    end
                 end
-                if z(n-1)<zint(i)
-                    i1 = i1 + tmp(i,n)*(z(n)-zint(i));
+            else
+                if z(n)>zint(i)
+                    if z(n-1)>=zint(i)
+                        i1 = i1 + tmp(i,n)*(z(n)-z(n-1));
+                    end
+                    if z(n-1)<zint(i)
+                        i1 = i1 + tmp(i,n)*(z(n)-zint(i));
+                    end
                 end
             end
         end
@@ -136,7 +143,7 @@ for i=1:length(chid) % chid loop
 
     fclose(fout);
 
-end % chid loop
+end % input_file loop
 
 
 
