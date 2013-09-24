@@ -467,18 +467,22 @@ LOGICAL FUNCTION EXTINCT_1(ZZ_IN,TMP_MIXED_ZONE)
 USE PHYSICAL_FUNCTIONS,ONLY:GET_AVERAGE_SPECIFIC_HEAT
 REAL(EB),INTENT(IN)::ZZ_IN(0:N_TRACKED_SPECIES),TMP_MIXED_ZONE
 REAL(EB):: Y_O2,Y_O2_CRIT,CPBAR
+INTEGER :: NR
 TYPE(REACTION_TYPE),POINTER :: RN=>NULL()
-RN => REACTION(1)
 
 EXTINCT_1 = .FALSE.
-IF (TMP_MIXED_ZONE < RN%AUTO_IGNITION_TEMPERATURE) THEN
-   EXTINCT_1 = .TRUE.
-ELSE
-   CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_IN,CPBAR,TMP_MIXED_ZONE)
-   Y_O2 = ZZ_IN(RN%AIR_SMIX_INDEX)
-   Y_O2_CRIT = CPBAR*(RN%CRIT_FLAME_TMP-TMP_MIXED_ZONE)/RN%EPUMO2
-   IF (Y_O2 < Y_O2_CRIT) EXTINCT_1 = .TRUE.
-ENDIF
+REACTION_LOOP: DO NR=1,N_REACTIONS
+   RN => REACTION(NR)
+   IF (.NOT.RN%FAST_CHEMISTRY) CYCLE REACTION_LOOP
+   AIT_IF: IF (TMP_MIXED_ZONE < RN%AUTO_IGNITION_TEMPERATURE) THEN
+      EXTINCT_1 = .TRUE.
+   ELSE AIT_IF
+      CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_IN,CPBAR,TMP_MIXED_ZONE)
+      Y_O2 = ZZ_IN(RN%AIR_SMIX_INDEX)
+      Y_O2_CRIT = CPBAR*(RN%CRIT_FLAME_TMP-TMP_MIXED_ZONE)/RN%EPUMO2
+      IF (Y_O2 < Y_O2_CRIT) EXTINCT_1 = .TRUE.
+   ENDIF AIT_IF
+ENDDO REACTION_LOOP
 
 END FUNCTION EXTINCT_1
 
@@ -488,51 +492,55 @@ USE PHYSICAL_FUNCTIONS,ONLY:GET_SENSIBLE_ENTHALPY
 REAL(EB),INTENT(IN)::ZZ_MIXED_IN(0:N_TRACKED_SPECIES),TMP_MIXED_ZONE
 REAL(EB):: ZZ_F,ZZ_HAT_F,ZZ_GET_F(0:N_TRACKED_SPECIES),ZZ_A,ZZ_HAT_A,ZZ_GET_A(0:N_TRACKED_SPECIES),ZZ_P,ZZ_HAT_P,&
            ZZ_GET_P(0:N_TRACKED_SPECIES),H_F_0,H_A_0,H_P_0,H_F_N,H_A_N,H_P_N
+INTEGER :: NR
 TYPE(REACTION_TYPE),POINTER :: RN=>NULL()
-RN => REACTION(1)
 
 EXTINCT_2 = .FALSE.
-AIT_IF: IF (TMP_MIXED_ZONE < RN%AUTO_IGNITION_TEMPERATURE) THEN
-   EXTINCT_2 = .TRUE.
-ELSE AIT_IF
-   ZZ_F = ZZ_MIXED_IN(RN%FUEL_SMIX_INDEX)
-   ZZ_A = ZZ_MIXED_IN(RN%AIR_SMIX_INDEX)
-   ZZ_P = 1._EB - ZZ_F - ZZ_A
+REACTION_LOOP: DO NR=1,N_REACTIONS
+   RN => REACTION(NR)
+   IF (.NOT.RN%FAST_CHEMISTRY) CYCLE REACTION_LOOP
+   AIT_IF: IF (TMP_MIXED_ZONE < RN%AUTO_IGNITION_TEMPERATURE) THEN
+      EXTINCT_2 = .TRUE.
+   ELSE AIT_IF
+      ZZ_F = ZZ_MIXED_IN(RN%FUEL_SMIX_INDEX)
+      ZZ_A = ZZ_MIXED_IN(RN%AIR_SMIX_INDEX)
+      ZZ_P = 1._EB - ZZ_F - ZZ_A
 
-   ZZ_HAT_F = MIN(ZZ_F,ZZ_MIXED_IN(RN%AIR_SMIX_INDEX)/RN%S) ! burned fuel, FDS Tech Guide (5.16)
-   ZZ_HAT_A = ZZ_HAT_F*RN%S ! FDS Tech Guide (5.17)
-   ZZ_HAT_P = (ZZ_HAT_A/(ZZ_A+TWO_EPSILON_EB))*(ZZ_F - ZZ_HAT_F + ZZ_P) ! reactant diluent concentration, FDS Tech Guide (5.18)
+      ZZ_HAT_F = MIN(ZZ_F,ZZ_MIXED_IN(RN%AIR_SMIX_INDEX)/RN%S) ! burned fuel, FDS Tech Guide (5.16)
+      ZZ_HAT_A = ZZ_HAT_F*RN%S ! FDS Tech Guide (5.17)
+      ZZ_HAT_P = (ZZ_HAT_A/(ZZ_A+TWO_EPSILON_EB))*(ZZ_F - ZZ_HAT_F + ZZ_P) ! reactant diluent concentration, FDS Tech Guide (5.18)
 
-   ! "GET" indicates a composition vector.  Below we are building up the masses of the constituents in the various
-   ! mixtures.  At this point these composition vectors are not normalized.
+      ! "GET" indicates a composition vector.  Below we are building up the masses of the constituents in the various
+      ! mixtures.  At this point these composition vectors are not normalized.
 
-   ZZ_GET_F = 0._EB
-   ZZ_GET_A = 0._EB
-   ZZ_GET_P = ZZ_MIXED_IN
+      ZZ_GET_F = 0._EB
+      ZZ_GET_A = 0._EB
+      ZZ_GET_P = ZZ_MIXED_IN
 
-   ZZ_GET_F(RN%FUEL_SMIX_INDEX) = ZZ_HAT_F ! fuel in reactant mixture composition
-   ZZ_GET_A(RN%AIR_SMIX_INDEX)  = ZZ_HAT_A ! air  in reactant mixture composition
+      ZZ_GET_F(RN%FUEL_SMIX_INDEX) = ZZ_HAT_F ! fuel in reactant mixture composition
+      ZZ_GET_A(RN%AIR_SMIX_INDEX)  = ZZ_HAT_A ! air  in reactant mixture composition
    
-   ZZ_GET_P(RN%FUEL_SMIX_INDEX) = MAX(ZZ_GET_P(RN%FUEL_SMIX_INDEX)-ZZ_HAT_F,0._EB) ! remove burned fuel from product composition
-   ZZ_GET_P(RN%AIR_SMIX_INDEX)  = MAX(ZZ_GET_P(RN%AIR_SMIX_INDEX) -ZZ_A,0._EB) ! remove all air from product composition
+      ZZ_GET_P(RN%FUEL_SMIX_INDEX) = MAX(ZZ_GET_P(RN%FUEL_SMIX_INDEX)-ZZ_HAT_F,0._EB) ! remove burned fuel from product composition
+      ZZ_GET_P(RN%AIR_SMIX_INDEX)  = MAX(ZZ_GET_P(RN%AIR_SMIX_INDEX) -ZZ_A,0._EB) ! remove all air from product composition
    
-   ! Normalize concentrations
-   ZZ_GET_F = ZZ_GET_F/(SUM(ZZ_GET_F)+TWO_EPSILON_EB)
-   ZZ_GET_A = ZZ_GET_A/(SUM(ZZ_GET_A)+TWO_EPSILON_EB)
-   ZZ_GET_P = ZZ_GET_P/(SUM(ZZ_GET_P)+TWO_EPSILON_EB)
+      ! Normalize concentrations
+      ZZ_GET_F = ZZ_GET_F/(SUM(ZZ_GET_F)+TWO_EPSILON_EB)
+      ZZ_GET_A = ZZ_GET_A/(SUM(ZZ_GET_A)+TWO_EPSILON_EB)
+      ZZ_GET_P = ZZ_GET_P/(SUM(ZZ_GET_P)+TWO_EPSILON_EB)
 
-   ! Get the specific heat for the fuel and diluent at the current and critical flame temperatures
-   CALL GET_SENSIBLE_ENTHALPY(ZZ_GET_F,H_F_0,TMP_MIXED_ZONE)
-   CALL GET_SENSIBLE_ENTHALPY(ZZ_GET_A,H_A_0,TMP_MIXED_ZONE)
-   CALL GET_SENSIBLE_ENTHALPY(ZZ_GET_P,H_P_0,TMP_MIXED_ZONE) 
-   CALL GET_SENSIBLE_ENTHALPY(ZZ_GET_F,H_F_N,RN%CRIT_FLAME_TMP)
-   CALL GET_SENSIBLE_ENTHALPY(ZZ_GET_A,H_A_N,RN%CRIT_FLAME_TMP)
-   CALL GET_SENSIBLE_ENTHALPY(ZZ_GET_P,H_P_N,RN%CRIT_FLAME_TMP)  
+      ! Get the specific heat for the fuel and diluent at the current and critical flame temperatures
+      CALL GET_SENSIBLE_ENTHALPY(ZZ_GET_F,H_F_0,TMP_MIXED_ZONE)
+      CALL GET_SENSIBLE_ENTHALPY(ZZ_GET_A,H_A_0,TMP_MIXED_ZONE)
+      CALL GET_SENSIBLE_ENTHALPY(ZZ_GET_P,H_P_0,TMP_MIXED_ZONE) 
+      CALL GET_SENSIBLE_ENTHALPY(ZZ_GET_F,H_F_N,RN%CRIT_FLAME_TMP)
+      CALL GET_SENSIBLE_ENTHALPY(ZZ_GET_A,H_A_N,RN%CRIT_FLAME_TMP)
+      CALL GET_SENSIBLE_ENTHALPY(ZZ_GET_P,H_P_N,RN%CRIT_FLAME_TMP)  
    
-   ! See if enough energy is released to raise the fuel and required "air" temperatures above the critical flame temp. 
-   IF ( ZZ_HAT_F*(H_F_0 + RN%HEAT_OF_COMBUSTION) + ZZ_HAT_A*H_A_0 + ZZ_HAT_P*H_P_0 < &
-      ZZ_HAT_F*H_F_N  + ZZ_HAT_A*H_A_N + ZZ_HAT_P*H_P_N ) EXTINCT_2 = .TRUE. ! FDS Tech Guide (5.19)
-ENDIF AIT_IF
+      ! See if enough energy is released to raise the fuel and required "air" temperatures above the critical flame temp. 
+      IF ( ZZ_HAT_F*(H_F_0 + RN%HEAT_OF_COMBUSTION) + ZZ_HAT_A*H_A_0 + ZZ_HAT_P*H_P_0 < &
+         ZZ_HAT_F*H_F_N  + ZZ_HAT_A*H_A_N + ZZ_HAT_P*H_P_N ) EXTINCT_2 = .TRUE. ! FDS Tech Guide (5.19)
+   ENDIF AIT_IF
+ENDDO REACTION_LOOP
 
 END FUNCTION EXTINCT_2
 
