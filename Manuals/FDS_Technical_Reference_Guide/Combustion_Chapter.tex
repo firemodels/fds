@@ -414,6 +414,7 @@ Using the stoichiometric change in fuel concentration for each of the $i$ reacti
 
 
 \subsubsection{Maintaining Species Boundedness}
+\label{boundedness}
 
 To maintain realizable species mass fractions ($ 0 \leq \hat{Y}_{\alpha} \leq 1$), a predictor-corrector scheme is applied to a modified version of Eq.~(\ref{eq:stoich_fuel_single}). Instead of finding the stoichiometric change in fuel based on the limiting reactant, the change in fuel is simply the amount of the fuel present, $\Delta \hat{Y}_{\rm F} = \hat{Y}_{\rm F}$. The change in each species is found from Eq.~(\ref{eq:change_alpha}). Each species concentration is updated following Eq.~(\ref{eq:dmdt_2}) (predictor) and checked to ensure the species is in bounds. If any species is found to be out of bounds, a boundedness multiplier (corrector) is applied to the change in species vector, $\hat{Y}_{\alpha}$, and Eq.~(\ref{eq:dmdt_2}) is recalculated. If reactant $\alpha$ is found to be out of bounds, the boundedness multiplier, $\beta$, is defined to be
 \begin{equation}\label{eq:bound_correct_reac}
@@ -429,7 +430,7 @@ Consider a single step methane oxidation reaction
 \begin{equation}\label{eq:bc_methane}
 \mathrm{CH_4 + 2 \, O_2} \rightarrow  \mathrm{CO_2 + 2 \, H_2O}
 \end{equation}
-where the initial mass fractions of species are 0.4 N$_{2}$, 0.3 O$_2$, and 0.3 CH$_4$. Following the predictor-corrector scheme, the change in methane concentration, $\Delta \hat{Y}_{\rm F}$, is $-$0.3. The corresponding change is oxygen is
+where the initial mass fractions of species are 30\% methane, 30\% oxygen, and 40\% nitrogen by mass. Following the predictor-corrector scheme, the change in methane concentration, $\Delta \hat{Y}_{\rm F}$, is $-$0.3. The corresponding change is oxygen is
 \begin{equation}\label{eq:bc_o2_single}
 \Delta \hat{Y}_{\rm O_2} = -0.3 \left( \frac{(-2)(32)}{(-1)(16)} \right) = -1.2
 \end{equation}
@@ -449,37 +450,52 @@ Consider the case where there are two, single step hydrocarbon oxidization react
 &\mbox{Reaction 1}& \mathrm{CH_4 + 2 \, O_2} &\rightarrow  \mathrm{CO_2 + 2 \, H_2O}       && && \label{eq:two_fuel_ox_limit1} \\
 &\mbox{Reaction 2}& \mathrm{C_3H_8 + 5 \, O_2} &\rightarrow \mathrm{3 \,CO_2 + 4 \, H_2O}  && && \label{eq:two_fuel_ox_limit2}
 \end{align}
-The initial composition of a premixed reactor is 30\% methane, 40\% propane, and 30\% oxygen by mass. Based on the stoichiometry of the reactions, Eqs.~(\ref{eq:two_fuel_ox_limit1}) and (\ref{eq:two_fuel_ox_limit2}), and the composition of the reactor, the reactor is oxygen-limited. This means that the amount of fuel present requires more than the available oxygen to completely combust. 
-
-%\subsubsection{Example: Oxygen-limited, Premixed Methane-Propane Combustion}
-%
-%Consider the case where there are two, single step hydrocarbon oxidization reactions:
-%\begin{align}
-%&\mbox{Reaction 1}& \mathrm{CH_4 + 2 \, O_2} &\rightarrow  \mathrm{CO_2 + 2 \, H_2O}       && && \label{eq:two_fuel_ox_limit1} \\
-%&\mbox{Reaction 2}& \mathrm{C_3H_8 + 5 \, O_2} &\rightarrow \mathrm{3 \,CO_2 + 4 \, H_2O}  && && \label{eq:two_fuel_ox_limit2}
-%\end{align}
-%The initial composition of a premixed reactor is 30\% methane, 40\% propane, and 30\% oxygen by mass. Based on the stoichiometry of the reactions, Eqs.~(\ref{eq:two_fuel_ox_limit1}) and (\ref{eq:two_fuel_ox_limit2}), and the composition of the reactor, the reactor is oxygen-limited. This means that the amount of fuel present requires more than the available oxygen to completely combust. To prevent the fuel from driving the oxygen concentration to a non-physical negative quantity, the first step is use Eq.~(\ref{eq:stoich_fuel}) to find the stoichiometric fuel concentration based on the limiting reactant:
-%\begin{align}
-%\hat{Y}_{{\rm F,lim},1} = \min \left (0.3,\,0.3\,\frac{(-1) (16)}{(-2)(32)} \right) = 0.0752 \\
-%\hat{Y}_{{\rm F,lim},2} = \min \left (0.4,\,0.3\,\frac{(-1) (44)}{(-5)(32)} \right) = 0.0827
-%\end{align}
-%Knowing $\hat{Y}_{\rm F,lim}$ for each reaction, Eq.~(\ref{eq:fuel_weight}) can be used to estimate the weighting factors:
-%\begin{align}
-%w_1 =  \frac{0.0752}{0.1579} = 0.4763 \\
-%w_2 =  \frac{0.0827}{0.1579} = 0.5237
-%\end{align}
-%Finally, using Eq.~(\ref{eq:fuel_rate}) the limiting change in fuel for each reaction becomes:
-%\begin{align}
-%\Delta \hat{Y}_{{\rm F},1} = - (0.0752)(0.4763) = -0.0358 \\
-%\Delta \hat{Y}_{{\rm F},2} = - (0.0827)(0.5237) = -0.0433
-%\end{align}
-%The oxygen consumption for each reaction is estimated using the change in fuel, the stoichiometric coefficients, and the ratio of molecular weights of oxygen and the fuel. The generic form of this equation which is applied to each of the species in each reaction is given by Eq.~(\ref{eq:change_alpha}).
-%\begin{align}
-%\Delta \hat{Y}_{\si{O_2},1} = \frac{(-2)(32)}{(-1)(16)}(-0.0358) = -0.1429 \\
-%\Delta \hat{Y}_{\si{O_2},2} = \frac{(-5)(32)}{(-1)(44)}(-0.0433) = -0.1571
-%\end{align}
-%As should be the case, the total change in oxygen, $-0.3$, is equal to the amount of available oxygen.
-
+The initial composition of a premixed reactor is 30\% methane, 40\% propane, and 30\% oxygen by mass. Based on the stoichiometry of the reactions, Eqs.~(\ref{eq:two_fuel_ox_limit1}) and (\ref{eq:two_fuel_ox_limit2}), and the composition of the reactor, the reactor is oxygen-limited. This means that the amount of fuel present requires more than the available oxygen to completely combust. Following Eq.~(\ref{eq:stoich_fuel_single}) directly would result in a negative mass fraction of oxygen, which is not physical. Instead, the boundedness predictor-corrector is applied. The first step is to compute the change in fuel for each reaction
+\begin{align}\label{eq:change_fuel_2reac}
+\Delta \hat{Y}_{\rm F,1} &= -0.3\\
+\Delta \hat{Y}_{\rm F,2} &= -0.4
+\end{align}
+and the equivalent change in oxygen
+\begin{align}\label{eq:change_o2_2reac}
+\Delta \hat{Y}_{\rm O_2,1} &= -0.3 \left( \frac{(-2)(32)}{(-1)(16)} \right) = -1.2 \\
+\Delta \hat{Y}_{\rm O_2,2} &= -0.4 \left( \frac{(-5)(32)}{(-1)(44)} \right) = -1.45
+\end{align}
+The updated reaction concentrations are then
+\begin{align}\label{eq:uncorrect_spec}
+\hat{Y}_{{\rm F},1} &= 0.3 - 0.3 = 0 \\
+\hat{Y}_{{\rm F},2} &= 0.4 - 0.4 = 0 \\
+\hat{Y}_{{\rm O_2,lim},2} &= 0.3 - 1.2 - 1.45 = -2.35
+\end{align}
+Since the oxygen concentration is out of bounds, the reactant $\beta$ is applied, Eq.~(\ref{eq:bound_correct_reac})
+\begin{equation}\label{eq:calc_beta_two}
+\beta = \frac{0.3}{2.35 + 0.3} = 0.113
+\end{equation}
+Applying the $\beta$ correction to the change in reactants results in the updated change in species of
+\begin{align}\label{eq:change_reac_2}
+\Delta \hat{Y}_{\rm F,1} &= (-0.3)(0.113) = -0.0339 \\
+\Delta \hat{Y}_{\rm F,2} &= (-0.4)(0.113) = -0.0452 \\
+\Delta \hat{Y}_{\rm O_2} &= (-2.65)(0.113) = -0.3
+\end{align}
+and final species concentrations of
+\begin{align}\label{eq:mass_fina;}
+\hat{Y}_{\rm F,1} &= 0.3 -0.0339 = 0.2661 \\
+\hat{Y}_{\rm F,2} &= 0.4 -0.0452 = 0.3548 \\
+\hat{Y}_{\rm O_2} &= 0.3 - 0.3 = 0
+\end{align}
+Based on the same initial conditions, treating each of the reactions independently with the boundedness corrector provides the same results compared to the two fuels being lumped into one reaction
+\begin{equation}\label{eq:lumped_reac}
+\mathrm{C_{1.65}H_{5.31} + 2.98 \, O_2} \rightarrow  \mathrm{1.65 \, CO_2 + 2.66 \, H_2O}
+\end{equation}
+The lumped fuel reaction is determined from the initial concentration of 70\% fuel by mass with 43 \% of that mass methane and 57 \% propane. The molecular weight of this lumped fuel is 25.21 g/mol. Following Eq.~(\ref{eq:stoich_fuel_single}) directly yields a change in fuel of
+\begin{equation}\label{eq:edc_meth_single}
+\Delta \hat{Y}_{\rm F} = -\min \left( 0.7, 0.3 \frac{(-1)(25.21)}{(-2.98)(32)}\right) = -0.0793
+\end{equation}
+The change in fuel for each species is based on each fuel's mass fraction in the lumped fuel
+\begin{align}\label{eq:change_reac_lump}
+\Delta \hat{Y}_{\rm F,1} &= (-0.0793)(0.43) = -0.0339 \\
+\Delta \hat{Y}_{\rm F,2} &= (-0.0793)(0.57) = -0.0452
+\end{align}
+These results are the same as using the predictor-corrector scheme.
 
 \subsection{Finite-Rate Chemistry (Arrhenius Reaction)}
 \label{Reaction_Rate_Model}
@@ -529,6 +545,7 @@ Last, the rate of change in composition for species $\alpha$ (\si{kg $\alpha$/(m
 \begin{equation}\label{rate_expression_y}
 \frac{\d \hat{Y}_{\alpha}}{\d t} = \frac{1}{\rho}\sum_{i} r^{\prime}_{\alpha,i}
 \end{equation}
+To maintain realizable mass fractions in finite-rate chemistry, the same boundedness predictor-corrector procedure discussed with respect to infinitely-fast chemistry is applied (Section \ref{boundedness}).
 
 \subsubsection{Time Integration for Finite-Rate Chemistry}
 
