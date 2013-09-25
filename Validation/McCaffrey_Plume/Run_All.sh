@@ -6,7 +6,6 @@ export BASEDIR=`pwd`
 export INDIR=Current_Results
 # qq="-q fire80s"
 qq=
-:q
 
 # uncomment following line to stop all cases
 #export STOPFDS=1
