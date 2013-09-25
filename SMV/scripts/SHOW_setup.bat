@@ -55,14 +55,11 @@ echo Press any key to continue
 pause>NUL
 
 echo.
-echo *** Google Code upload settings
+echo *** Bintray upload settings
 
 echo.
-echo google_username=%google_username%
-echo google_password_dir=%google_password_dir%
+echo bintray_api_key=%bintray_api_key%
 echo upload=%upload%
-echo fds_google_level=%fds_google_level%
-echo smv_google_level=%smv_google_level%
 
 echo.
 echo variable display complete.
