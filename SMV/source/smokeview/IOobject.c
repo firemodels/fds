@@ -695,7 +695,7 @@ void draw_devices(void){
   devicedata *devicei;
   int i;
 
-  if(select_device==0||show_mode!=SELECT){
+  if(select_device==0||show_mode!=SELECTOBJECT){
     for(i=0;i<ndeviceinfo;i++){
       devicei = deviceinfo + i;
       if(devicei->object->visible==0)continue;
@@ -805,7 +805,7 @@ void draw_devices(void){
     if(isZoneFireModel==1&&STRCMP(devicei->label,"TIME")==0)continue;
     save_use_displaylist=devicei->object->use_displaylist;
     tagval=i+1;
-    if(select_device==1&&show_mode==SELECT){
+    if(select_device==1&&show_mode==SELECTOBJECT){
 
       select_device_color[0]=tagval>>(ngreenbits+nbluebits);
       select_device_color[1]=tagval>>nbluebits;

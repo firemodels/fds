@@ -41,7 +41,7 @@ void Render(int view_mode){
       current_script_command->remove_frame=itimes;
     }
   }
-  if(RenderOnceNow==0&&render_state==1&&render_multi==0){
+  if(RenderOnceNow==0&&RenderOnceNowR==0&&RenderOnceNowL==0&&render_state==1&&render_multi==0){
     if(plotstate==DYNAMIC_PLOTS && nglobal_times>0){
      if(itimes>=0&&itimes<nglobal_times&&
        ((render_frame[itimes] == 0&&showstereo==STEREO_NONE)||(render_frame[itimes]<2&&showstereo!=STEREO_NONE))
@@ -77,11 +77,9 @@ void Render(int view_mode){
     RenderOnceNow=0;
     if(view_mode==VIEW_LEFT)RenderOnceNowL=0;
     if(view_mode==VIEW_RIGHT)RenderOnceNowR=0;
-    if(RenderOnceNowR==0&&RenderOnceNowL==0){
-      if(render_multi==0){
-        RenderState(RENDER_OFF);
-        RenderSkip=1;
-      }
+    if(RenderOnceNowR==0&&RenderOnceNowL==0&&render_multi==0){
+      RenderState(RENDER_OFF);
+      RenderSkip=1;
     }
   }
   if(script_render==1){

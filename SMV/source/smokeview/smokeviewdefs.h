@@ -333,8 +333,8 @@ void _Sniff_Errors(char *whereat);
 #define SCRIPT_CONTINUE -7
 #define SCRIPT_CANCEL -8
 
-#define RENDER 1
-#define SELECT 2
+#define DRAWSCENE 1
+#define SELECTOBJECT 2
 
 #define CORRECT 1
 #define VIEW_LEFT 0

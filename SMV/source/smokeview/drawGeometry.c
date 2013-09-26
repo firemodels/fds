@@ -5812,7 +5812,7 @@ void drawBlockages(int mode, int trans_flag){
     if(clip_mode!=CLIP_OFF)glEnable(GL_CULL_FACE);
   }
   if(trans_flag!=DRAW_TRANSPARENT&&blocklocation!=BLOCKlocation_cad){
-    if(mode==SELECT){
+    if(mode==SELECTOBJECT){
       if(blockageSelect==1){
         drawselect_faces();
         return;

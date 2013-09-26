@@ -99,7 +99,7 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
 
 /* ++++++++++++++++++++++++ setup viewports +++++++++++++++++++++++++ */
 
-  if(mode==RENDER){
+  if(mode==DRAWSCENE){
     Get_VP_info();
 
     if(clip_rendered_scene==1){
@@ -146,7 +146,7 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
 
   if(UpdateLIGHTS==1)updateLights(0);
 
-  if(mode!=RENDER||viscolorbarpath!=1){
+  if(mode!=DRAWSCENE||viscolorbarpath!=1){
     if(clip_mode==CLIP_BLOCKAGES_DATA)setClipPlanes(&clipinfo,CLIP_ON);
   }
   else{
@@ -158,7 +158,7 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
     }
     SNIFF_ERRORS("after setColorbarClipPlanes 2");
   }
-  if(mode==RENDER){
+  if(mode==DRAWSCENE){
     glPointSize((float)1.0);
 
 
@@ -219,7 +219,7 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
       antialias(1);
       setClipPlanes(NULL,CLIP_OFF);
       draw_user_ticks();
-      if(mode!=RENDER||viscolorbarpath!=1){
+      if(mode!=DRAWSCENE||viscolorbarpath!=1){
         if(clip_mode==CLIP_BLOCKAGES_DATA)setClipPlanes(&clipinfo,CLIP_ON);
       }
       antialias(0);
@@ -258,12 +258,12 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
         }
       }
     }
-  } /* end of if(mode==RENDER) code segment */
+  } /* end of if(mode==DRAWSCENE) code segment */
 
 
 /* ++++++++++++++++++++++++ draw selected devices +++++++++++++++++++++++++ */
 
-  if(mode==SELECT){
+  if(mode==SELECTOBJECT){
     if(select_device==1){
      draw_devices();
       SNIFF_ERRORS("after drawselect_devices");
@@ -273,7 +273,7 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
 
 /* ++++++++++++++++++++++++ draw selected avatars +++++++++++++++++++++++++ */
 
-  if(mode==SELECT){
+  if(mode==SELECTOBJECT){
     if(select_avatar==1){
       drawselect_avatars();
       SNIFF_ERRORS("after drawselect_avatars");
@@ -283,7 +283,7 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
 
 /* ++++++++++++++++++++++++ draw selected tours +++++++++++++++++++++++++ */
 
-  if(mode==SELECT){
+  if(mode==SELECTOBJECT){
     if(edittour==1&&ntours>0){
       drawselect_tours();
       SNIFF_ERRORS("after drawselect_tours");

@@ -1653,7 +1653,7 @@ void drawPart5(const partdata *parti){
               }
 
               save_use_displaylist=avatar_types[avatar_type]->use_displaylist;
-              if(select_avatar==1&&show_mode==SELECT){
+              if(select_avatar==1&&show_mode==SELECTOBJECT){
                 int tagval;
 
                 avatar_types[avatar_type]->select_mode=1;
