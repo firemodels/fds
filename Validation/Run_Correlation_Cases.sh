@@ -31,9 +31,6 @@ $correlations Fleury_Heat_Flux_Correlation_Inputs.txt
 cd $VALIDATION_DIR/FM_SNL/Correlations
 $correlations FM_SNL_Correlation_Inputs.txt
 
-cd $VALIDATION_DIR/iBMB/Correlations
-$correlations iBMB_Correlation_Inputs.txt
-
 cd $VALIDATION_DIR/LLNL_Enclosure/Correlations
 $correlations LLNL_Correlation_Inputs.txt
 
