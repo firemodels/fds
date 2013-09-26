@@ -5587,13 +5587,13 @@ It is possible within FDS to model the deposition of smoke and aerosols onto sol
 
 \subsection{Example Case: Soot Deposition from a Propane Flame}
 
-The {\ct propane\_flame\_deposition} example shows how to define a reaction that invokes the aerosol deposition model in FDS. The fuel is propane with a specified soot yield of 0.05. The reaction is given by:
+The {\ct propane\_flame\_deposition} example shows how to define a reaction that invokes the aerosol deposition model in FDS. The fuel is propane with a specified soot yield of 0.05. Note that this is a fabricated soot yield that is used only for demonstration and verification purposes. The reaction is given by:
 \begin{multline}\label{eq:PROPANE_depo}
 1\,\underbrace{\mathrm{(C_3H_8)}}_\text{Fuel} \,+\, 4.8164 \; \underbrace{\mathrm{(O_2\,+\, 3.7619 \; N_2})}_\text{Air} \, \longrightarrow \\
 1 \; \underbrace{\mathrm{(18.1182 \; N_2 \, + \, 2.8164 \; CO_2 \,+ \, 4\; H_2O)}}_\text{Products} \,+\,
 \,0.1836 \; \underbrace{\mathrm{C}}_\text{Soot}
 \end{multline}
-Note that the stoichiometric coefficient for Soot ensures that the mass of soot produced is 0.05 times the mass of fuel consumed. This example uses the lumped species formulation to minimize the number of scalar transport equations that need to be solved. Note that for soot to deposit it must be explicitly tracked by defining {\ct AEROSOL=.TRUE.} on the {\ct SPEC} line.
+Note that the stoichiometric coefficient for soot ensures that the mass of soot produced is 0.05 times the mass of fuel consumed. This example uses the lumped species formulation to minimize the number of scalar transport equations that need to be solved. Note that for soot to deposit it must be explicitly tracked by defining {\ct AEROSOL=.TRUE.} on the {\ct SPEC} line.
 \begin{lstlisting}
 &SPEC ID = 'PROPANE' /
 &SPEC ID = 'OXYGEN',            LUMPED_COMPONENT_ONLY = .TRUE. /
