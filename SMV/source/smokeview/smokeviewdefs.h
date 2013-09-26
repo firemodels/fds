@@ -340,6 +340,12 @@ void _Sniff_Errors(char *whereat);
 #define VIEW_LEFT 0
 #define VIEW_RIGHT 1
 #define VIEW_CENTER 2
+#define STEREO_NONE 0
+#define STEREO_TIME 1
+#define STEREO_LR 2
+#define STEREO_RB 3
+#define STEREO_RC 4
+#define STEREO_CUSTOM 5
 #define IINT int
 #define UIINT unsigned int
 #define FFLOAT float

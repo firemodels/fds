@@ -399,7 +399,7 @@ void drawsmoke_frame(void){
   }
 #endif
 #ifdef pp_CULL
-  if(cullsmoke==1&&showstereo==0&&nsmoke3dinfo>0&&show3dsmoke==1){
+  if(cullsmoke==1&&showstereo==STEREO_NONE&&nsmoke3dinfo>0&&show3dsmoke==1){
     setPixelCount();
   }
 #endif

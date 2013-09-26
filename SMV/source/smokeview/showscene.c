@@ -95,7 +95,7 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
   if(global_times!=NULL&&updateUpdateFrameRateMenu==1)FrameRateMenu(frameratevalue);
   if(updatefaces==1)update_faces();
   if(updatefacelists==1)UpdateFacelists();
-  if(showstereo==0||showstereo==1)ClearBuffers(mode);
+  if(showstereo==STEREO_NONE||showstereo==STEREO_TIME)ClearBuffers(mode);
 
 /* ++++++++++++++++++++++++ setup viewports +++++++++++++++++++++++++ */
 

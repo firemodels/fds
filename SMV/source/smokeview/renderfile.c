@@ -28,7 +28,7 @@ char renderfile_revision[]="$Revision$";
 
 void Render(int view_mode){
   if(current_script_command!=NULL&&current_script_command->command==SCRIPT_VOLSMOKERENDERALL){
-    if( (render_frame[itimes]>0&&showstereo==0)||(render_frame[itimes]>1&&showstereo!=0) ){
+    if( (render_frame[itimes]>0&&showstereo==STEREO_NONE)||(render_frame[itimes]>1&&showstereo!=STEREO_NONE) ){
       if(itimes==0){
         current_script_command->remove_frame=itimes;
         current_script_command->exit=1;
@@ -37,14 +37,14 @@ void Render(int view_mode){
       }
     }
   //  render_frame[itimes]++; //xxx check whether this is needed
-    if( (render_frame[itimes]>0&&showstereo==0)||(render_frame[itimes]>1&&showstereo!=0) ){
+    if( (render_frame[itimes]>0&&showstereo==STEREO_NONE)||(render_frame[itimes]>1&&showstereo!=STEREO_NONE) ){
       current_script_command->remove_frame=itimes;
     }
   }
   if(RenderOnceNow==0&&render_state==1&&render_multi==0){
     if(plotstate==DYNAMIC_PLOTS && nglobal_times>0){
      if(itimes>=0&&itimes<nglobal_times&&
-       ((render_frame[itimes] == 0&&showstereo==0)||(render_frame[itimes]<2&&showstereo!=0))
+       ((render_frame[itimes] == 0&&showstereo==STEREO_NONE)||(render_frame[itimes]<2&&showstereo!=STEREO_NONE))
        ){
        render_frame[itimes]++;
        RenderFrame(view_mode);
@@ -97,7 +97,7 @@ void RenderFrame(int view_mode){
   char *renderfile_dir_ptr=NULL;
   int use_scriptfile;
 
-  if(view_mode==VIEW_LEFT&&(showstereo==2||showstereo==3))return;
+  if(view_mode==VIEW_LEFT&&showstereo==STEREO_RB)return;
 
 // construct filename for image to be rendered
 
@@ -111,6 +111,8 @@ void RenderFrame(int view_mode){
     strcpy(renderfile_name,fdsprefix);
   }
   else{
+    char suffix[20];
+
     if(
       (current_script_command->command==SCRIPT_RENDERONCE||
        current_script_command->command==SCRIPT_RENDERALL||
@@ -132,6 +134,23 @@ void RenderFrame(int view_mode){
         renderfile_dir_ptr=renderfile_dir;
       }
     }
+    strcpy(suffix,"");
+    switch (view_mode){
+    case VIEW_LEFT:
+      if(showstereo==STEREO_LR){
+        strcat(suffix,"_L");
+      }
+      break;
+    case VIEW_RIGHT:
+      if(showstereo==STEREO_LR){
+        strcat(suffix,"_R");
+      }
+      break;
+    default:
+      ASSERT(FFALSE);
+      break;
+    }
+    strcat(renderfile_suffix,suffix);
   }
   
   // directory
@@ -204,10 +223,12 @@ void RenderFrame(int view_mode){
       if(RenderTime==0)seqnum++;
       break;
     case VIEW_LEFT:
-      strcat(suffix,"_L");
+        if(showstereo==STEREO_LR){
+          strcat(suffix,"_L");
+        }
       break;
     case VIEW_RIGHT:
-      if(showstereo==0||showstereo==1){
+      if(showstereo==STEREO_NONE||showstereo==STEREO_TIME||showstereo==STEREO_LR){
         strcat(suffix,"_R");
       }
       if(RenderTime==0)seqnum++;

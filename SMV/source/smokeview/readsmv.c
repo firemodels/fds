@@ -8611,7 +8611,7 @@ int readini2(char *inifile, int localfile){
       showstereoOLD=showstereo;
       sscanf(buffer,"%i",&showstereo);
       showstereo=CLAMP(showstereo,0,5);
-      if(showstereo==1&&videoSTEREO!=1)showstereo=0;
+      if(showstereo==STEREO_TIME&&videoSTEREO!=1)showstereo=STEREO_NONE;
       Update_Glui_Stereo();
       continue;
     }

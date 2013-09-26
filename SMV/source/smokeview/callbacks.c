@@ -1838,7 +1838,7 @@ void keyboard(unsigned char key, int flag){
           fprintf(scriptoutstream," %s\n",script_renderfile);
         }
         RenderOnceNow=1;
-        if(showstereo!=0){
+        if(showstereo!=STEREO_NONE){
           RenderOnceNowL=1;
           RenderOnceNowR=1;
         }
@@ -1868,7 +1868,7 @@ void keyboard(unsigned char key, int flag){
       showstereoOLD=showstereo;
       showstereo++;
       if(showstereo>5)showstereo=0;
-      if(showstereo==1&&videoSTEREO!=1)showstereo=2;
+      if(showstereo==STEREO_TIME&&videoSTEREO!=1)showstereo=STEREO_LR;
       Update_Glui_Stereo();
       break;
     case 't':
@@ -2678,7 +2678,7 @@ void ClearBuffers(int mode){
 int DoStereo(void){
   int return_code=0;
   
-  if(showstereo==1&&videoSTEREO==1){  // temporal stereo (shuttered glasses)
+  if(showstereo==STEREO_TIME&&videoSTEREO==1){  // temporal stereo (shuttered glasses)
     glDrawBuffer(GL_BACK_LEFT);
     if(showstereo_frame==0||showstereo_frame==2){
       ShowScene(RENDER,VIEW_LEFT,0,0,0);
@@ -2690,7 +2690,7 @@ int DoStereo(void){
     if(buffertype==DOUBLE_BUFFER)glutSwapBuffers();
     return_code=1;
   }
-  else if(showstereo==2){             // left/right stereo
+  else if(showstereo==STEREO_LR){             // left/right stereo
     glDrawBuffer(GL_BACK);
     ClearBuffers(RENDER);
     if(showstereo_frame==0||showstereo_frame==2){
@@ -2712,7 +2712,7 @@ int DoStereo(void){
     if(buffertype==DOUBLE_BUFFER)glutSwapBuffers();
     return_code=2;
   }
-  else if(showstereo==3){             // red/blue stereo
+  else if(showstereo==STEREO_RB){             // red/blue stereo
     glDrawBuffer(GL_BACK);
     glColorMask(GL_TRUE,GL_TRUE,GL_TRUE,GL_TRUE);
     glClearColor(1.0, 0.0, 0.0, 1.0); 
@@ -2735,7 +2735,7 @@ int DoStereo(void){
     if(buffertype==DOUBLE_BUFFER)glutSwapBuffers();
     return_code=3;
   }
-  else if(showstereo==4){             // red/cyan stereo
+  else if(showstereo==STEREO_RC){             // red/cyan stereo
     glDrawBuffer(GL_BACK);
     glColorMask(GL_TRUE,GL_TRUE,GL_TRUE,GL_TRUE);
     glClearColor(1.0, 0.0, 0.0, 1.0); 
@@ -2758,7 +2758,7 @@ int DoStereo(void){
     if(buffertype==DOUBLE_BUFFER)glutSwapBuffers();
     return_code=4;
   }
-  else if(showstereo==5){             // custom red/blue stereo
+  else if(showstereo==STEREO_CUSTOM){             // custom red/blue stereo
     glDrawBuffer(GL_BACK);
     glColorMask(GL_TRUE,GL_TRUE,GL_TRUE,GL_TRUE);
     glClearColor(1.0, 1.0, 1.0, 1.0); 
@@ -2977,7 +2977,7 @@ void Display_CB(void){
     UpdateRGBColors(colorbar_select_index);
   }
   glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
-  if(showstereo==0){
+  if(showstereo==STEREO_NONE){
     dostereo=0;
   }
   else{
@@ -2996,7 +2996,7 @@ void Display_CB(void){
     
       if(plotstate==DYNAMIC_PLOTS && nglobal_times>0){
         if(itimes>=0&&itimes<nglobal_times&&
-          ((render_frame[itimes] == 0&&showstereo==0)||(render_frame[itimes]<2&&showstereo!=0))
+          ((render_frame[itimes] == 0&&showstereo==STEREO_NONE)||(render_frame[itimes]<2&&showstereo!=STEREO_NONE))
           ){
           render_frame[itimes]++;
           renderdoublenow=1;

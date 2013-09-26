@@ -99,13 +99,11 @@ extern "C" void glui_stereo_setup(int main_window){
 
   fzero=SCALE2FDS(fzero);
   SPINNER_zero_parallax=glui_stereo->add_spinner(_("Distance to zero parallax plane (m)"),GLUI_SPINNER_FLOAT,&fzero);
-#ifdef _DEBUG
   glui_stereo->add_checkbox("Show stereo parallax",&show_parallax);
   RADIO_showstereo_frame = glui_stereo->add_radiogroup(&showstereo_frame);
   glui_stereo->add_radiobutton_to_group(RADIO_showstereo_frame,_("Left eye"));
   glui_stereo->add_radiobutton_to_group(RADIO_showstereo_frame,_("Right eye"));
   glui_stereo->add_radiobutton_to_group(RADIO_showstereo_frame,_("Both eyes"));
-#endif
   //SPINNER_zero_parallax->set_float_limits(0.1*xyzmaxdiff,2.0*xyzmaxdiff,GLUI_LIMIT_CLAMP);
   STEREO_CB(STEREO_SHOW);
   Update_Glui_Stereo();
@@ -151,7 +149,7 @@ void STEREO_CB(int var){
       Update_Glui_Stereo();
       showstereoOLD=showstereo;
     }
-    if(showstereo==5){
+    if(showstereo==STEREO_CUSTOM){
       SPINNER_right_blue2->enable();
       SPINNER_right_green2->enable();
     }
