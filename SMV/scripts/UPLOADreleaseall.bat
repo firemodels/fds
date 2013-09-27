@@ -19,77 +19,15 @@ goto:eof
 call %envfile%
 
 %svn_drive%
-cd %svn_root%\SMV\for_bundle\uploads
+set scriptdir=%svn_root%\SMV\scripts
 
-REM --------------- 32 bit Linux ----------------
-
-  set platform=linux32
-  set summary=Smokeview %smv_version% for %platform% (SVN r%smv_revision%)
-  set exe=smv_%smv_version%_%platform%.tar.gz
-  echo.
-  echo Uploading %exe% 
-       %upload% -k -ufds-smv:%api_key% -T %exe% https://api.bintray.com/content/%org_name%/%repo_name%/%package_name%/%smv_version%/%exe%;publish=1
+call %scriptdir%\UPLOADreleaselinux32.bat
+call %scriptdir%\UPLOADreleaselinux64.bat
+call %scriptdir%\UPLOADreleaseosx32.bat
+call %scriptdir%\UPLOADreleaseosx64.bat
+call %scriptdir%\UPLOADreleasewin32.bat
+call %scriptdir%\UPLOADreleasewin64.bat
 
 echo.
-echo Upload complete
-
-REM --------------- 64 bit Linux ----------------
-
-  set platform=linux64
-  set summary=Smokeview %smv_version% for %platform% (SVN r%smv_revision%)
-  set exe=smv_%smv_version%_%platform%.tar.gz
-  echo.
-  echo Uploading %exe% 
-       %upload% -k -ufds-smv:%api_key% -T %exe% https://api.bintray.com/content/%org_name%/%repo_name%/%package_name%/%smv_version%/%exe%;publish=1
-
-echo.
-echo Upload complete
-
-REM --------------- 32 bit OS X ----------------
-
-  set platform=osx32
-  set summary=Smokeview %smv_version% for %platform% (SVN r%smv_revision%)
-  set exe=smv_%smv_version%_%platform%.tar.gz
-  echo.
-  echo Uploading %exe% 
-       %upload% -k -ufds-smv:%api_key% -T %exe% https://api.bintray.com/content/%org_name%/%repo_name%/%package_name%/%smv_version%/%exe%;publish=1
-
-echo.
-echo Upload complete
-
-REM --------------- 64 bit OS X ----------------
-
-  set platform=osx64
-  set summary=Smokeview %smv_version% for %platform% (SVN r%smv_revision%)
-  set exe=smv_%smv_version%_%platform%.tar.gz
-  echo.
-  echo Uploading %exe% 
-       %upload% -k -ufds-smv:%api_key% -T %exe% https://api.bintray.com/content/%org_name%/%repo_name%/%package_name%/%smv_version%/%exe%;publish=1
-
-echo.
-echo Upload complete
-
-REM --------------- 32 bit Windows ----------------
-
-set platform=win32
-set summary=Smokeview %smv_version% for %platform% (SVN r%smv_revision%)
-set exe=smv_%smv_version%_%platform%.exe
-echo.
-  echo Uploading %exe% 
-     %upload% -k -ufds-smv:%api_key% -T %exe% https://api.bintray.com/content/%org_name%/%repo_name%/%package_name%/%smv_version%/%exe%;publish=1
-
-echo.
-echo Upload complete
-
-REM --------------- 64 bit Windows ----------------
-
-set platform=win64
-set summary=Smokeview %smv_version% for %platform% (SVN r%smv_revision%)
-set exe=smv_%smv_version%_%platform%.exe
-echo.
-  echo Uploading %exe% 
-     %upload% -k -ufds-smv:%api_key% -T %exe% https://api.bintray.com/content/%org_name%/%repo_name%/%package_name%/%smv_version%/%exe%;publish=1
-
-echo.
-echo Upload complete
+echo Uploads complete
 pause

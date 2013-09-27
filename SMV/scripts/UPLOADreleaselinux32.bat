@@ -48,7 +48,7 @@ pause>NUL
   %upload% -k -ufds-smv:%api_key% -T %exe% https://api.bintray.com/content/%org_name%/%repo_name%/%package_name%/%smv_version%/%exe%;publish=1
 
 echo.
-echo Uploads complete
+echo Upload complete
 pause
 goto:eof
 
