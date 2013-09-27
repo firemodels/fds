@@ -94,7 +94,7 @@ void RenderFrame(int view_mode){
   char renderfile_name[1024], renderfile_dir[1024], renderfile_full[1024], renderfile_suffix[1024], *renderfile_ext;
   char *renderfile_dir_ptr=NULL;
   int use_scriptfile;
-  int woffset;
+  int woffset=0;
 
   if(view_mode==VIEW_LEFT&&showstereo==STEREO_RB)return;
 
@@ -217,7 +217,6 @@ void RenderFrame(int view_mode){
       strcpy(suffix,timelabelptr);
       strcat(suffix,"s");
     }
-    woffset=0;
     switch (view_mode){
     case VIEW_CENTER:
       if(RenderTime==0)seqnum++;
