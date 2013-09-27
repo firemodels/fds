@@ -523,6 +523,8 @@ A turbulent buoyant diffusion flame is established on a diffuser burner with an 
 
 A computational parametric study is performed to determine the effects of the simulation inputs and model choices on the simulation results. The simulation results were compared with measured radial profiles of vertical velocities, horizontal velocities and temperature \cite{Xin:CF2005}. The method in which the parametric study is conducted is to fix all the simulation inputs and model choices barring one which is varied to ascertain its effect on simulation results and their agreement with the aforementioned experimental results.
 
+Discrepancies between the measured and computed values of the mean mixture fraction are attributable to asymmetries in the flow field at the burner exit during the experiment.  As shown in Fig.~\ref{Purdue_7p1_CH4_vel_rms}, the differences in the experimental and modeled results for the centerline rms velocity indicate that the model boundary condition is not properly capturing the varying inlet conditions.
+
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/Purdue_Flames/7p1_cm_CH4_f_zd_1p41} &
@@ -562,5 +564,14 @@ A computational parametric study is performed to determine the effects of the si
 \label{Purdue_7p1_CH4_vertical_velocity}
 \end{figure}
 
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/Purdue_Flames/7p1_cm_CH4_RMS_w_zd_p50} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/Purdue_Flames/7p1_cm_CH4_RMS_u_zd_p50}
+\end{tabular*}
+\caption[Purdue 7.1 cm methane flame rms velocity profiles]
+{Measured and computed profiles of rms vertical (left) and radial (right) velocity profiles at $z/D = 0.5$.}
+\label{Purdue_7p1_CH4_vel_rms}
+\end{figure}
 
 
