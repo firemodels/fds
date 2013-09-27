@@ -7519,8 +7519,7 @@ There are occasions where you may want the value of a {\ct RAMP} to stop updatin
 \label{freeze_hrr}
 \end{figure}
 
-
-
+It should be noted that devices are updated sequentially in the order that they are listed in the input file and that devices in different meshes do not share values until the end of a timestep.  This means that if the device being frozen is on a different mesh or is listed before the device that freezes it, it will not be frozen until the next timestep.  
 
 \clearpage
 
