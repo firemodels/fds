@@ -337,15 +337,22 @@ void _Sniff_Errors(char *whereat);
 #define SELECTOBJECT 2
 
 #define CORRECT 1
+
 #define VIEW_LEFT 0
 #define VIEW_RIGHT 1
 #define VIEW_CENTER 2
+
 #define STEREO_NONE 0
 #define STEREO_TIME 1
 #define STEREO_LR 2
 #define STEREO_RB 3
 #define STEREO_RC 4
 #define STEREO_CUSTOM 5
+
+#define LEFT_EYE 0
+#define RIGHT_EYE 1
+#define BOTH_EYES 2
+
 #define IINT int
 #define UIINT unsigned int
 #define FFLOAT float

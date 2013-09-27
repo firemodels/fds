@@ -94,6 +94,7 @@ void RenderFrame(int view_mode){
   char renderfile_name[1024], renderfile_dir[1024], renderfile_full[1024], renderfile_suffix[1024], *renderfile_ext;
   char *renderfile_dir_ptr=NULL;
   int use_scriptfile;
+  int woffset;
 
   if(view_mode==VIEW_LEFT&&showstereo==STEREO_RB)return;
 
@@ -216,6 +217,7 @@ void RenderFrame(int view_mode){
       strcpy(suffix,timelabelptr);
       strcat(suffix,"s");
     }
+    woffset=0;
     switch (view_mode){
     case VIEW_CENTER:
       if(RenderTime==0)seqnum++;
@@ -229,6 +231,7 @@ void RenderFrame(int view_mode){
       if(showstereo==STEREO_NONE||showstereo==STEREO_TIME||showstereo==STEREO_LR){
         strcat(suffix,"_R");
       }
+      if(showstereo==STEREO_LR)woffset=screenWidth;
       if(RenderTime==0)seqnum++;
       break;
     default:
@@ -261,7 +264,7 @@ void RenderFrame(int view_mode){
 
   // render image
 
-  SVimage2file(renderfile_dir_ptr,renderfile_full,renderfiletype,screenWidth,screenHeight);
+  SVimage2file(renderfile_dir_ptr,renderfile_full,renderfiletype,woffset,screenWidth,screenHeight);
   if(RenderTime==1&&output_slicedata==1){
     output_Slicedata();
   }
@@ -389,7 +392,7 @@ int mergescreenbuffers(int nscreen_rows, GLubyte **screenbuffers){
 
 /* ------------------ SVimage2file ------------------------ */
 
-int SVimage2file(char *directory, char *RENDERfilename, int rendertype, int width, int height){
+int SVimage2file(char *directory, char *RENDERfilename, int rendertype, int woffset, int width, int height){
 
   FILE *RENDERfile;
   char *renderfile=NULL;
@@ -400,8 +403,8 @@ int SVimage2file(char *directory, char *RENDERfilename, int rendertype, int widt
   int width_beg, width_end, height_beg, height_end;
   int width2, height2;
 
-  width_beg=0;
-  width_end=width;
+  width_beg=woffset;
+  width_end=width+woffset;
   height_beg=0;
   height_end=height;
   if(clip_rendered_scene==1){
