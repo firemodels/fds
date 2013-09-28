@@ -3255,10 +3255,10 @@ ENDDO
 WRITE(LU_OUTPUT,*)
 
 100 FORMAT(/' Run Time Diagnostics'/)
-110 FORMAT(6X,' CPU/step:  ',F8.3,' s, Total CPU:  ',F8.2,' s')
-112 FORMAT(6X,' CPU/step:  ',F8.3,' s, Total CPU:  ',F8.2,' min')
-113 FORMAT(6X,' CPU/step:  ',F8.3,' s, Total CPU:  ',F8.2,' hr')
-111 FORMAT(6X,' Time step: ',F8.5,' s, Total time: ',F8.2,' s'/ &
+110 FORMAT(6X,' CPU/step:  ',F8.3,' s, Total CPU:  ',F10.2,' s')
+112 FORMAT(6X,' CPU/step:  ',F8.3,' s, Total CPU:  ',F10.2,' min')
+113 FORMAT(6X,' CPU/step:  ',F8.3,' s, Total CPU:  ',F10.2,' hr')
+111 FORMAT(6X,' Time step: ',F8.5,' s, Total time: ',F10.2,' s'/ &
         6X,' Max CFL number: ',E9.2,' at (',I3,',',I3,',',I3,')'/ &
         6X,' Max divergence: ',E9.2,' at (',I3,',',I3,',',I3,')'/ &
         6X,' Min divergence: ',E9.2,' at (',I3,',',I3,',',I3,')')
