@@ -939,7 +939,7 @@ void getzoneventbounds(void){
       float yelev[20];
 
       zvi = zventinfo + i;
-      if(zvi->vent_orien==1)continue;
+      if(zvi->vent_orien==VFLOW_VENT||zvi->vent_orien==HVAC_VENT)continue;
       for(j=0;j<20;j++){
         yelev[j]=(zvi->z1*(19-j)+zvi->z2*j)/19.0;
       }
@@ -953,7 +953,7 @@ void getzoneventbounds(void){
     zvent *zvi;
 
     zvi = zventinfo + i;
-    if(zvi->vent_orien==1)continue;
+    if(zvi->vent_orien==VFLOW_VENT||zvi->vent_orien==HVAC_VENT)continue;
     if(ABS(zvi->g_dpmin)>zone_maxventflow)zone_maxventflow=ABS(zvi->g_dpmin);
     if(ABS(zvi->g_dpmax)>zone_maxventflow)zone_maxventflow=ABS(zvi->g_dpmax);
   }
@@ -978,7 +978,7 @@ void drawventdata(void){
     float yelev[20];
 
     zvi = zventinfo + i;
-    if(zvi->vent_orien==1)continue;
+    if(zvi->vent_orien==VFLOW_VENT||zvi->vent_orien==HVAC_VENT)continue;
     for(j=0;j<20;j++){
       yelev[j]=(zvi->z1*(19-j)+zvi->z2*j)/19.0;
     }
@@ -993,7 +993,7 @@ void drawventdata(void){
 
     zvi = zventinfo + i;
 
-    if(zvi->vent_orien==1)continue;
+    if(zvi->vent_orien==VFLOW_VENT||zvi->vent_orien==HVAC_VENT)continue;
     for(j=0;j<20;j++){
       yelev[j]=(zvi->z1*(19-j)+zvi->z2*j)/19.0;
     }

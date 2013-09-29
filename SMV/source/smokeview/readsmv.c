@@ -2998,7 +2998,7 @@ int readsmv(char *file, char *file2){
       ntarginfo++;
       continue;
     }
-    if(match(buffer,"VENTGEOM") == 1||match(buffer,"VFLOWGEOM")==1){
+    if(match(buffer,"VENTGEOM") == 1||match(buffer,"VFLOWGEOM")==1||match(buffer,"HVACGEOM")==1){
       nzvents++;
       continue;
     }
@@ -5065,8 +5065,8 @@ int readsmv(char *file, char *file2){
     ++++++++++++++++++++++ VENTGEOM ++++++++++++++++++++++++++++++
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
-    if(match(buffer,"VENTGEOM")==1||match(buffer,"VFLOWGEOM")==1){
-      int zonevent_orien=0;
+    if(match(buffer,"VENTGEOM")==1||match(buffer,"VFLOWGEOM")==1||match(buffer,"HVACGEOM")==1){
+      int zonevent_orien=HFLOW_VENT;
       int hvent_type=0;
       zvent *zvi;
       float vent_area;
@@ -5077,7 +5077,8 @@ int readsmv(char *file, char *file2){
 
       nzvents++;
       zvi = zventinfo + nzvents - 1;
-      if(match(buffer,"VFLOWGEOM")==1)zonevent_orien=1;
+      if(match(buffer,"VFLOWGEOM")==1)zonevent_orien=VFLOW_VENT;
+      if(match(buffer,"HVACGEOM")==1)zonevent_orien=HVAC_VENT;
       zvi->vent_orien=zonevent_orien;
       if(fgets(buffer,255,stream)==NULL){
         BREAK;
@@ -5086,7 +5087,7 @@ int readsmv(char *file, char *file2){
       color[1]=0.0;
       color[2]=1.0;
       color[3]=1.0;
-      if(zonevent_orien==0){
+      if(zonevent_orien==HFLOW_VENT||zonevent_orien==HVAC_VENT){
         nzhvents++;
         sscanf(buffer,"%i %i %i %f %f %f %f %f %f %f",
           &roomfrom,&roomto, &face,&width,&ventoffset,&bottom,&top,
@@ -5131,7 +5132,7 @@ int readsmv(char *file, char *file2){
           ASSERT(FFALSE);
         }
       }
-      else{
+      else if(zonevent_orien==VFLOW_VENT){
         float ventside;
         float xcen, ycen;
         int r_from, r_to;

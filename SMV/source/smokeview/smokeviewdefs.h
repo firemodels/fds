@@ -30,6 +30,10 @@ void _Sniff_Errors(char *whereat);
 #define VENT_OUTLINE 2
 #define VENT_HIDDEN -2
 
+#define HFLOW_VENT 0
+#define VFLOW_VENT 1
+#define HVAC_VENT 2
+
 #define CLIP_ON_DENORMAL 2
 #define CLIP_ON 1
 #define CLIP_OFF 0
