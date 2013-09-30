@@ -59,7 +59,7 @@ cd VTT
 mkdir Current_Results
 ./Run_All.sh
 cd ..
-#cd Wind
+#cd Wind_Engineering
 #mkdir Current_Results
 #./Run_All.sh
 #cd ..
