@@ -2,6 +2,7 @@
 &MESH XB=-0.54,0.54,-0.54,0.54,-0.24,0.48,IJK=36,36,24/
 &TIME T_END=200./
 &DUMP NFRAMES=200/
+&MISC RICHARDSON_ERROR_TOLERANCE = 1e-6 /
 
 &VENT MB='ZMIN',SURF_ID='OPEN'/
 &VENT MB='XMIN',SURF_ID='OPEN'/
@@ -25,38 +26,26 @@
       FUEL = 'METHANOL'
       SPEC_ID_NU='METHANOL','OXYGEN','CARBON MONOXIDE','WATER VAPOR','SOOT',
       NU= -1,-0.977,0.954,2.,0.046
-      CRITICAL_FLAME_TEMPERATURE=1117./
+      CRITICAL_FLAME_TEMPERATURE=1170./
 
 &REAC ID = 'R2'
       FUEL = 'CARBON MONOXIDE'
-      A = 4e14
-      E = 167360
+      A = 3.98e8
+      E = 41840
       SPEC_ID_NU='CARBON MONOXIDE','OXYGEN','CARBON DIOXIDE'
-      SPEC_ID_N_S='OXYGEN','CARBON MONOXIDE','WATER VAPOR'
       NU= -1,-0.5,1
-      N_S = 0.25,1,0.5
-      A_RAMP = 'rampa'
-      E_RAMP = 'rampe'
-      CRITICAL_FLAME_TEMPERATURE=1418./
- 
-&RAMP ID='rampa',T = 0,       F = 1e6 /
-&RAMP ID='rampa',T = 1.00,    F = 1e6 /
-&RAMP ID='rampa',T = 1.00001, F = 1 /
-&RAMP ID='rampa',T = 100,     F = 1 /
- 
-&RAMP ID='rampe',T = 0.,      F = 0 /
-&RAMP ID='rampe',T = 1.00,    F = 0 /
-&RAMP ID='rampe',T = 1.00001, F = 1 /
-&RAMP ID='rampe',T = 100.,    F = 1 /
+      SPEC_ID_N_S='OXYGEN','CARBON MONOXIDE','WATER VAPOR'
+      N_S = 0.25,1,0.5/
  
 &REAC ID = 'R3'
       FUEL = 'CARBON DIOXIDE'
-      A = 5e8
-      E = 167360
+      A = 6.16e13
+      E = 328026
       SPEC_ID_NU= 'CARBON DIOXIDE','OXYGEN','CARBON MONOXIDE'
-      SPEC_ID_N_S='CARBON DIOXIDE'
       NU= -1,0.5,1
-      N_S = 1.0/
+      SPEC_ID_N_S='OXYGEN','CARBON DIOXIDE','WATER VAPOR'
+      N_S = -0.25,1,0.5
+      N_T = -0.97/
 
 &SLCF PBY=0.0,QUANTITY='TEMPERATURE',VECTOR=.TRUE. /
 &SLCF PBY=0.0,QUANTITY='HRRPUV' /
