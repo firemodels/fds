@@ -6069,11 +6069,11 @@ For massive particles the default drag law (i.e., the drag coefficient correlati
 \subsection{Splitting particles}
 \label{info:particle_split}
 
-If the radiation around the particle is not uniform, it may be useful to split the particle by orientations. This can be done by using the parameter {\ct ORIENTATION(1:3,1:N)} to specify {\ct N} unique directions for the particle. For example,
+If the radiation heat flux is not uniformly distributed about the particle, it may be useful to split the particle into pieces, each with its own orientation. This can be done by using the parameter {\ct ORIENTATION(1:3,1:N)} to specify {\ct N} unique outward facing directions for the particle. For example,
 \begin{lstlisting}
-&PART ..., ORIENTATION(1:3,1)=0,0,1, ORIENTATION(1:3,2)=0,0,-1 /
+&PART ..., ORIENTATION(1:3,1)=0,0,-1, ORIENTATION(1:3,2)=0,0,1 /
 \end{lstlisting}
-specifies that half the particle is facing upwards and half is facing downwards.   Each orientation is modeled in practice by a separate particle that sees the radiation that is directed to a plane normal to the orientation. The particle mass and the surface area are scaled by the number of orientations. The splitting along the coordinate axis is demonstrated for all geometries in Fig.~\ref{cart_split} through Fig.~\ref{sphere_split}. The orientation direction does not have to align with the coordinate axes. For a Cartesian particle (i.e., a plate), only the orientations that are perpendicular to the plate make physical sense.
+specifies that half the particle is facing downwards and half is facing upwards.  Each orientation is modeled in practice by a separate particle that ``sees'' the radiation that is directed to a plane normal to the orientation. The particle mass and the surface area are scaled by the number of orientations. The splitting along the coordinate axis is demonstrated for all geometries in Fig.~\ref{cart_split} through Fig.~\ref{sphere_split}. The orientation direction does not have to align with the coordinate axes. For a Cartesian particle (i.e., a plate), only the orientations that are perpendicular to the plate make physical sense. Keep in mind that the heat conducted within the different facets does not transfer through to the other facets. The heat conduction is still only one dimensional, in the direction normal to the face and towards the center.
 
 \begin{figure}[ht]
 \begin{center}
@@ -7519,7 +7519,7 @@ There are occasions where you may want the value of a {\ct RAMP} to stop updatin
 \label{freeze_hrr}
 \end{figure}
 
-It should be noted that devices are updated sequentially in the order that they are listed in the input file and that devices in different meshes do not share values until the end of a timestep.  This means that if the device being frozen is on a different mesh or is listed before the device that freezes it, it will not be frozen until the next timestep.  
+It should be noted that devices are updated sequentially in the order that they are listed in the input file and that devices in different meshes do not share values until the end of a timestep.  This means that if the device being frozen is on a different mesh or is listed before the device that freezes it, it will not be frozen until the next timestep.
 
 \clearpage
 
