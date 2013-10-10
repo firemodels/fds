@@ -485,7 +485,7 @@ END SELECT CYLINDER3
 
 ! Compute and store rho*h_s
 
-IF (.NOT.CONSTANT_SPECIFIC_HEAT) THEN
+IF (.NOT.CONSTANT_SPECIFIC_HEAT_RATIO) THEN
 
    RHO_H_S_P=>WORK1
    IF (N_TRACKED_SPECIES > 0) THEN
@@ -526,7 +526,7 @@ ENDIF
 
 ! Compute U_DOT_DEL_RHO_H_S and add to other enthalpy equation source terms
 
-IF (.NOT.CONSTANT_SPECIFIC_HEAT) THEN
+IF (.NOT.CONSTANT_SPECIFIC_HEAT_RATIO) THEN
 
    CALL ENTHALPY_ADVECTION 
 
@@ -559,7 +559,7 @@ CALL DENSITY_ADVECTION
 
 ! Compute (1/rho) * Sum( (Wbar/W_alpha-h_s,alpha/cp*T) (del dot rho*D del Z_n - u dot del rho*Z_n)
 
-IF (.NOT.CONSTANT_SPECIFIC_HEAT) THEN
+IF (.NOT.CONSTANT_SPECIFIC_HEAT_RATIO) THEN
    SM0 => SPECIES_MIXTURE(0)
    DO K=1,KBAR
       DO J=1,JBAR
@@ -575,7 +575,7 @@ ENDIF
 
 DO N=1,N_TRACKED_SPECIES
    CALL SPECIES_ADVECTION ! compute mass flux for species transport equation
-   IF (CONSTANT_SPECIFIC_HEAT) CYCLE
+   IF (CONSTANT_SPECIFIC_HEAT_RATIO) CYCLE
    SM  => SPECIES_MIXTURE(N)
    RCON_DIFF = SM%RCON-SM0%RCON
    DO K=1,KBAR
@@ -592,7 +592,7 @@ ENDDO
 
 ! Add contribution of reactions
 
-IF (N_REACTIONS > 0 .AND. .NOT.CONSTANT_SPECIFIC_HEAT) THEN
+IF (N_REACTIONS > 0 .AND. .NOT.CONSTANT_SPECIFIC_HEAT_RATIO) THEN
    DO K=1,KBAR
       DO J=1,JBAR
          DO I=1,IBAR
@@ -1137,7 +1137,7 @@ REAL(EB) :: DR,B
 !FY(:,:,:,0)=1.E20_EB
 !FZ(:,:,:,0)=1.E20_EB
 
-IF (.NOT.CONSTANT_SPECIFIC_HEAT) THEN
+IF (.NOT.CONSTANT_SPECIFIC_HEAT_RATIO) THEN
    U_DOT_DEL_RHO=>WORK8 
    U_DOT_DEL_RHO=0._EB
 ENDIF
@@ -1378,7 +1378,7 @@ WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
 
    ! Correct U_DOT_DEL_RHO at the boundaries
 
-   IF (.NOT.CONSTANT_SPECIFIC_HEAT) THEN
+   IF (.NOT.CONSTANT_SPECIFIC_HEAT_RATIO) THEN
 
       SELECT CASE(IOR)
          CASE( 1)
@@ -1426,7 +1426,7 @@ ENDDO WALL_LOOP
 
 ! Compute U_DOT_DEL_RHO at internal cells
 
-IF (.NOT.CONSTANT_SPECIFIC_HEAT) THEN
+IF (.NOT.CONSTANT_SPECIFIC_HEAT_RATIO) THEN
 
    IF (.NOT.ENTHALPY_TRANSPORT) THEN
       U_DOT_DEL_RHO = 0._EB
@@ -1479,7 +1479,7 @@ ENDDO
 ! FY(:,:,:,N)=1.E20_EB
 ! FZ(:,:,:,N)=1.E20_EB
 
-IF (.NOT.CONSTANT_SPECIFIC_HEAT) THEN
+IF (.NOT.CONSTANT_SPECIFIC_HEAT_RATIO) THEN
    U_DOT_DEL_RHO_Z=>WORK7 
    U_DOT_DEL_RHO_Z=0._EB
 ENDIF
@@ -1720,26 +1720,25 @@ WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
 
    ! Correct U_DOT_DEL_RHO_Z at the boundary
 
-   IF (.NOT.CONSTANT_SPECIFIC_HEAT) THEN
+   IF (.NOT.CONSTANT_SPECIFIC_HEAT_RATIO) THEN
 
-      SELECT CASE(IOR)
-         CASE( 1)
-            UN = UU(II,JJ,KK)
-         CASE(-1)
-            UN = UU(II-1,JJ,KK)
-         CASE( 2)
-            UN = VV(II,JJ,KK)
-         CASE(-2)
-            UN = VV(II,JJ-1,KK)
-         CASE( 3)
-            UN = WW(II,JJ,KK)
-         CASE(-3)
-            UN = WW(II,JJ,KK-1)
-      END SELECT
-   
-      ! In case of interpolated boundary, use the original velocity, not the averaged value
-   
-      IF (WC%BOUNDARY_TYPE==INTERPOLATED_BOUNDARY) UN = UVW_SAVE(IW)
+      BOUNDARY_SELECT: SELECT CASE(WC%BOUNDARY_TYPE)
+         CASE DEFAULT
+            IOR_SELECT: SELECT CASE(IOR)
+               CASE( 1); UN = UU(II,JJ,KK)
+               CASE(-1); UN = UU(II-1,JJ,KK)
+               CASE( 2); UN = VV(II,JJ,KK)
+               CASE(-2); UN = VV(II,JJ-1,KK)
+               CASE( 3); UN = WW(II,JJ,KK)
+               CASE(-3); UN = WW(II,JJ,KK-1)
+            END SELECT IOR_SELECT
+         CASE(SOLID_BOUNDARY,HVAC_BOUNDARY)
+            IF (PREDICTOR) UN = -SIGN(1._EB,REAL(IOR,EB))*WC%ONE_D%UW
+            IF (CORRECTOR) UN = -SIGN(1._EB,REAL(IOR,EB))*WC%ONE_D%UWS
+         CASE(INTERPOLATED_BOUNDARY)
+            ! In case of interpolated boundary, use the original velocity, not the averaged value
+            IF (WC%BOUNDARY_TYPE==INTERPOLATED_BOUNDARY) UN = UVW_SAVE(IW)
+      END SELECT BOUNDARY_SELECT
    
       SELECT CASE(IOR)
          CASE( 1)
@@ -1766,7 +1765,7 @@ WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
       
 ENDDO WALL_LOOP
 
-IF (.NOT.CONSTANT_SPECIFIC_HEAT) THEN
+IF (.NOT.CONSTANT_SPECIFIC_HEAT_RATIO) THEN
 
    IF (.NOT.ENTHALPY_TRANSPORT) THEN
       U_DOT_DEL_RHO_Z = 0._EB
