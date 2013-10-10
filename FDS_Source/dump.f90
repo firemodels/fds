@@ -211,20 +211,20 @@ ELSE
       CORE_CLOCK(NM) = CORE_CLOCK(NM) + DT_RESTART
    ENDIF
    IF (PERIODIC_TEST==2) THEN
-      IF (T>=UVW_CLOCK_CBC(IUVW)) THEN
-         WRITE(FN_UVW,'(A,A,I3.3,A)') TRIM(CHID),'_uvw_',IUVW,'.csv'
+      IF (T>=UVW_CLOCK_CBC(MESHES(NM)%IUVW)) THEN
+         WRITE(FN_UVW,'(A,A,I3.3,A)') TRIM(CHID),'_uvw_',MESHES(NM)%IUVW,'.csv'
          CALL DUMP_UVW(NM,FN_UVW)
-         IUVW = IUVW + 1
+         MESHES(NM)%IUVW = MESHES(NM)%IUVW + 1
       ENDIF
    ENDIF
-   IF (T>=UVW_TIMER(IUVW)) THEN
+   IF (T>=UVW_TIMER(MESHES(NM)%IUVW)) THEN
       IF (NMESHES>1) THEN
-         WRITE(FN_UVW,'(A,A,I3.3,A,I3.3,A)') TRIM(CHID),'_uvw_t',IUVW,'_m',NM,'.csv'
+         WRITE(FN_UVW,'(A,A,I3.3,A,I3.3,A)') TRIM(CHID),'_uvw_t',MESHES(NM)%IUVW,'_m',NM,'.csv'
       ELSE
-         WRITE(FN_UVW,'(A,A,I3.3,A)') TRIM(CHID),'_uvw_',IUVW,'.csv'
+         WRITE(FN_UVW,'(A,A,I3.3,A)') TRIM(CHID),'_uvw_',MESHES(NM)%IUVW,'.csv'
       ENDIF
       CALL DUMP_UVW(NM,FN_UVW)
-      IF (NM==NMESHES) IUVW = IUVW + 1
+      MESHES(NM)%IUVW = MESHES(NM)%IUVW + 1
    ENDIF
    IF (PERIODIC_TEST==7) THEN
       IF (T>=MMS_TIMER) THEN
