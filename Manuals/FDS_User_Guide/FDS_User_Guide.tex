@@ -484,99 +484,58 @@ A separate document~\cite{Smokeview_Users_Guide} describes how to use Smokeview.
 \section{How to Acquire FDS and Smokeview}
 \label{info:acquire}
 
-Detailed instructions on how to download executables, manuals, source-code and related utilities,
-can be found on the FDS-SMV Website
-\href{http://fire.nist.gov/fds}{{\ct http://fire.nist.gov/fds}}.
-The typical FDS/Smokeview distribution consists of an installation package or compressed archive,
-which is available for MS Windows, Mac~OS~X, and Linux.
+Detailed instructions on how to download executables, manuals, source-code and related utilities, can be found at the project home page: \href{http://code.google.com/p/fds-smv/}{{\ct http://code.google.com/p/fds-smv/}}. The typical FDS/Smokeview distribution consists of an installation package or compressed archive, which is available for MS Windows, Mac~OS~X, and Linux.
 
-If you ever want to keep an older version of FDS and Smokeview, copy the installation directory to some other
-place so that it is not overwritten during the updated installation.
+If you ever want to keep an older version of FDS and Smokeview, copy the installation directory to some other place so that it is not overwritten during the updated installation.
 
 
 \section{Computer Hardware Requirements}
 
-FDS requires a fast CPU\footnote{Central Processing Unit} and a substantial amount of random-access memory (RAM) to run efficiently.
-For minimum specifications, the system should have a 1~GHz CPU, and at least 512~MB RAM.
-The CPU speed will determine how long the computation will take to finish, while the amount
-of RAM will determine how many mesh cells can be held in memory.
-A large hard drive is required to store the output of the calculations. It is not unusual for
-the output of a single calculation to consume more than 1~GB of storage space.
+FDS requires a fast CPU\footnote{Central Processing Unit} and a substantial amount of random-access memory (RAM) to run efficiently. For minimum specifications, the system should have a 1~GHz CPU, and at least 512~MB RAM. The CPU speed will determine how long the computation will take to finish, while the amount of RAM will determine how many mesh cells can be held in memory. A large hard drive is required to store the output of the calculations. It is not unusual for the output of a single calculation to consume more than 1~GB of storage space.
 
-Most computers purchased within the past few years are adequate for running Smokeview
-with the caveat that additional memory (RAM) should be purchased to bring the
-memory size up to at least 512~MB. This is so the computer can display results without
-``swapping'' to disk. For Smokeview it is also important to obtain a fast graphics card
-for the PC used to display the results of the FDS computations.
+Most computers purchased within the past few years are adequate for running Smokeview with the caveat that additional memory (RAM) should be purchased to bring the memory size up to at least 512~MB. This is so the computer can display results without ``swapping'' to disk. For Smokeview it is also important to obtain a fast graphics card for the PC used to display the results of the FDS computations.
 
-For Multi-Mesh calculations, the MPI version of FDS will operate over standard 100 Mbps networks.
-A Gigabit or 1000 Mbps network will further reduce latency and improve data transfer rates between nodes.
+For Multi-Mesh calculations, the MPI version of FDS will operate over standard 100~Mb/s networks. A gigabit (1000~Mb/s) network will further reduce latency and improve data transfer rates between nodes.
 
 
 \section{Computer Operating System (OS) and Software Requirements}
 
-The goal of making FDS and Smokeview publicly available has been to enable
-practicing fire protection engineers to perform fairly sophisticated
-fire simulations at a reasonable cost. Thus, FDS and Smokeview have been
-designed for computers running Microsoft Windows, Mac OS~X, and various
-implementations of Unix/Linux.
+The goal of making FDS and Smokeview publicly available has been to enable practicing engineers to perform fairly sophisticated simulations at a reasonable cost. Thus, FDS and Smokeview have been
+designed for computers running Microsoft Windows, Mac OS~X, and various implementations of Unix/Linux.
 \begin{description}
 \item[{\bf MS Windows}] An installation package is available for Windows operating system. It is not recommended to run FDS/Smokeview under any version of MS Windows released prior to Windows 2000.
 \item[{\bf Mac OS X}] An installation script is available for Intel architectures. Mac OS~X 10.4.x or better is recommended, versions of OS~X prior to 10.4.x are not officially supported. You can always download the latest version of FDS source and compile FDS for other versions of OS~X (See Appendix~\ref{info:compilation} for details).
 \item[{\bf Linux}] Pre-compiled executables are installed in an appropriate directory via an installation script. If the pre-compiled FDS executable does not work (usually because of library incompatibilities), the FDS Fortran source code can be downloaded and compiled (See Appendix~\ref{info:compilation} for details). If Smokeview does not work on the Linux workstation, you can use the Windows version to view FDS output.
 \item[{\bf Unix}] There are no pre-compiled versions of FDS for the various flavors of Unix. However, the advice for Linux applies equally as well to Unix.
- \item[{\bf FDS in Parallel}] For those wishing to use multiple computers to run a single FDS calculation, MPI (Message Passing Interface) must be installed on each of the computers within the network that will be used for FDS computations.
+\item[{\bf FDS in Parallel}] For those wishing to use multiple computers to run a single FDS calculation, MPI (Message Passing Interface) must be installed on each of the computers within the network that will be used for FDS computations.
 \end{description}
 
 \section{Installation Testing}
 
 If you are running FDS under a quality assurance plan that requires installation testing, a test procedure is provided in Appendix B of the FDS Verification Guide~\cite{FDS_Verification_Guide}.  This guide can be obtained from the FDS-SMV website.
 
+
+
 \chapter{Running FDS}
 \label{info:runningFDS}
 
-This chapter describes the procedure to run an FDS calculation.
-The primary requirement for any calculation is an FDS input file. The creation of an
-input file is covered in detail in Part~\ref{info:inputfilecreation}.
-If you are new to FDS and Smokeview, it is strongly suggested that you start with an existing data file, run it as is,
-and then make the appropriate changes to the input file for the
-desired scenario. Sample input files are included as part of the standard installation.
-By running a sample case, you become familiar with the procedure, learn how to use Smokeview, and
-ensure that your computer is up to the task before embarking on
-learning how to create new input files.
+This chapter describes the procedure to run an FDS calculation. The primary requirement for any calculation is an FDS input file. The creation of an input file is covered in detail in Part~\ref{info:inputfilecreation}. If you are new to FDS and Smokeview, it is strongly suggested that you start with an existing data file, run it as is, and then make the appropriate changes to the input file for the desired scenario. Sample input files are included as part of the standard installation. By running a sample case, you become familiar with the procedure, learn how to use Smokeview, and ensure that your computer is up to the task before embarking on learning how to create new input files.
 
 
 
 \section{Starting an FDS Calculation}
 
-FDS can be run from the command prompt, or with a third-party
-Graphical User Interface (GUI). In the discussion to follow, it is
-assumed that FDS is being run from the command prompt. FDS can be
-run on a single computer, using only one CPU, or it can be run on
-multiple computers and use multiple CPUs. The executable names are
-the same across all platform types (Windows, Linux, and OS~X) and
-sizes (32~and~64~bits). The single CPU executable is called {\ct
-fds}\ (with an {\ct .exe}\ file extension on Windows).  The
-parallel executable is called {\ct fds\_mpi} (again with an {\ct
-.exe}\ file extension for Windows). The letters {\ct mpi} in the
-filename denote Message Passing Interface, which will be discussed
-below.  Batch files (Windows) or aliases (Linux or OS~X) may be
-defined to distinguish executables if you wish to install multiple
-versions of FDS.
+FDS can be run from the command prompt, or with a third-party Graphical User Interface (GUI). In the discussion to follow, it is assumed that FDS is being run from the command prompt. FDS can be
+run on a single computer, using only one CPU, or it can be run on multiple computers and use multiple CPUs. The executable names are the same across all platform types (Windows, Linux, and OS~X) and
+sizes (32~and~64~bits). The single CPU executable is called {\ct fds}\ (with an {\ct .exe}\ file extension on Windows).  The parallel executable is called {\ct fds\_mpi} (again with an {\ct .exe}\ file extension for Windows). The letters {\ct mpi} in the filename denote Message Passing Interface, which will be discussed below.  Batch files (Windows) or aliases (Linux or OS~X) may be defined to distinguish executables if you wish to install multiple versions of FDS.
 
-Note that the input file is the same for both single and parallel versions of FDS.
-In fact, it is recommended that before embarking on parallel processing, you should run your input
-file in serial mode to ensure that it is properly set up.
+Note that the input file is the same for both single and parallel versions of FDS. In fact, it is recommended that before embarking on parallel processing, you should run your input file in serial mode to ensure that it is properly set up.
 
 
 
 \subsection{Starting an FDS Calculation (Single Processor Version)}
 
-Sample input files are provided with the program for new users who
-are encouraged to first run a sample calculation before attempting to
-write an input file. Input files are typically given names that help identify the particular case, followed by the
-suffix {\ct .fds}. Suppose you want to run an input file called {\ct job\_name.fds}.
-You can start FDS from a DOS or Linux/Unix command prompt as follows:
+Sample input files are provided with the program for new users who are encouraged to first run a sample calculation before attempting to write an input file. Input files are typically given names that help identify the particular case, followed by the suffix {\ct .fds}. Suppose you want to run an input file called {\ct job\_name.fds}. You can start FDS from a DOS or Linux/Unix command prompt as follows:
 
 
 \subsubsection{MS Windows}
@@ -4483,9 +4442,9 @@ The interior air temperature, $T_{\rm b}$, is initially 20~$^\circ$C (293~K), an
 
 The initial density stratification inside and outside the building can be calculated using the relation:
 \be
-   \frac{\rho_0(z)}{\rho_\infty} = \exp \left(- \frac{g \overline{W}}{\calR T_0} z \right)
+   \frac{\rho_0(z)}{\rho_\infty} = \exp \left(- \frac{g \overline{W}}{\R T_0} z \right)
 \ee
-where $\calR$ is the universal gas constant, $g$ is the acceleration of gravity, and $\overline{W}$ is the average molecular weight of the air, $z$ is the height above the {\ct GROUND\_LEVEL}, and $T_0$ is the ambient temperature. Applying this formula to the external and internal locations at the lower and upper vents results in densities of 1.2412, 1.1989, 1.2272, and 1.1858~kg/m$^3$, respectively.
+where $\R$ is the universal gas constant, $g$ is the acceleration of gravity, and $\overline{W}$ is the average molecular weight of the air, $z$ is the height above the {\ct GROUND\_LEVEL}, and $T_0$ is the ambient temperature. Applying this formula to the external and internal locations at the lower and upper vents results in densities of 1.2412, 1.1989, 1.2272, and 1.1858~kg/m$^3$, respectively.
 
 Since the openings in the building are equally spaced over its height, the neutral plane should be close to its midpoint. This can be computed from:
 \be
@@ -4493,7 +4452,7 @@ Since the openings in the building are equally spaced over its height, the neutr
 \ee
 where $H_{\rm n}$ is the neutral plane height above the bottom vent and $\Delta H=95$~m is the distance between the leak points.  This gives a neutral plane of 46.68~m above the lower vent or 49.18~m above the bottom of the building.  Note that this is close to the midpoint value of 50~m above the bottom of the building. The pressure difference across the building's wall is computed from
 \be
-   \Delta p = \frac{\overline{W} \, p_0(z) \, g \, \Delta z} \calR \left( \frac{1}{T_\infty} - \frac{1}{T_{\rm b}} \right)
+   \Delta p = \frac{\overline{W} \, p_0(z) \, g \, \Delta z} \R \left( \frac{1}{T_\infty} - \frac{1}{T_{\rm b}} \right)
 \ee
 where $ \Delta z$ is the distance from the leak point to the neutral plane.  Using the neutral plane location, the $ \Delta z$ values are -46.68~m for the lower vent and +48.32~m for the upper vent which respectively result in lower and upper vent pressure differences of -19.4~Pa and +20.4~Pa.  Using the loss of 2 and the pressure difference in the HVAC momentum equation results in a steady-state inflow velocity at the bottom of 3.95~m/s and an outflow velocity at the top of 4.15~m/s. Results for velocity and density are shown in Fig.~\ref{fig_stack_effect}.
 
@@ -4626,7 +4585,7 @@ TAU} seconds and remain there. To prescribe different heat release rate ramps, t
 a positive value ($\tanh$ growth rate), which results in a time-dependent
 heat release rate as
 \begin{equation}
-\dot Q(t) = \left\{ \begin{array}{ll} \dot Q_0 \left( \frac{t}{\tau} \right)^2            &  \mbox{if {\ct TAU\_Q} is negative} \\
+\dot Q(t) = \left\{ \begin{array}{ll} \dot Q_0 \left( \frac{t}{\tau} \right)^2            &  \mbox{if {\ct TAU\_Q} is negative} \\[.1in]
                                       \dot Q_0 \cdot \tanh \left( \frac{t}{\tau} \right)  &  \mbox{if {\ct TAU\_Q} is positive}  \end{array} \right.
 \end{equation}
 where $\dot Q_0$ is the user-specified heat release rate. If the
@@ -4887,7 +4846,7 @@ where $c_p$ is the {\ct SPECIFIC\_HEAT} (\si{kJ/(kg.K)}) with optional temperatu
 
 If no inputs for enthalpy are provided, then the specific heat of the gas will be calculated from its molecular weight using the relation:
 \be
-   c_{p,\alpha} = \frac{\gamma}{\gamma-1} \frac\calR{W_\alpha}
+   c_{p,\alpha} = \frac{\gamma}{\gamma-1} \frac{\R}{W_\alpha}
 \ee
 The ratio of specific heats, {\ct GAMMA}, is 1.4 by default and can be changed on the {\ct MISC} line. If you want all the gas specific heats to follow this relation, set {\ct CONSTANT\_SPECIFIC\_HEAT\_RATIO=.TRUE.} on the {\ct MISC} line (note: this option also requires {\ct STRATIFICATION=.FALSE.}).  In this case the {\ct REFERENCE\_ENTHALPY} will be assumed to be 0 kJ/kg at a {\ct REFERENCE\_TEMPERATURE} of 0 K.
 
@@ -9012,8 +8971,7 @@ be found in Volume~1 of the FDS Technical Reference Guide~\cite{FDS_Math_Guide}.
 {\ct CELL W}                                    & $(w_{i,j,k}+w_{i,j,k-1})/2$                       & m/s            & D,I,S        \\ \hline
 {\ct EMISSIVITY}                                & Surface emissivity (usually constant)             &                & B,D          \\ \hline
 {\ct EXTINCTION}                                & Section \ref{info:extinct_out}                    &                & D,S          \\ \hline
-%{\ct FLAME TEMPERATURE}                         & Section \ref{info:finite}                         & $^\circ$C      & D,I,P,S
-\\ \hline
+%{\ct FLAME TEMPERATURE}                         & Section \ref{info:finite}                         & $^\circ$C      & D,I,P,S      \\ \hline
 {\ct F\_X, F\_Y, F\_Z}                          & Momentum terms, $F_x$, $F_y$, $F_z$               & m/s$^2$        & D,I,P,S      \\ \hline
 {\ct GAS TEMPERATURE}                           & Gas Temperature near wall                         & $^\circ$C      & B,D          \\ \hline
 {\ct H}                                         & $\cH=|\bu|^2/2 + \tp/\rho_0$                    & (m/s)$^2$      & D,I,P,S      \\ \hline
