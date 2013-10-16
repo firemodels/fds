@@ -702,7 +702,7 @@ SUBROUTINE VOLUME_PARTICLE_INSERT
 
 ! Loop over all INIT lines and look for particles inserted within a specified volume
 
-INTEGER :: I,ND,N_INSERT,I1,J1,K1,I2,J2,K2,MOD_N_INSERT
+INTEGER :: I,ND,N_INSERT,I1,J1,K1,I2,J2,K2,MOD_N_INSERT,N
 REAL(EB) :: XC1,XC2,YC1,YC2,ZC1,ZC2,X0,Y0,Z0,RR,HH
 
 VOLUME_INSERT_LOOP: DO IB=1,N_INIT
@@ -788,7 +788,9 @@ VOLUME_INSERT_LOOP: DO IB=1,N_INIT
 
          ! Get particle coordinates by randomly choosing within the designated volume
 
+         N = 0
          CHOOSE_XYZ_LOOP:  DO
+            N = N + 1
             SELECT CASE(IN%SHAPE)
                CASE('BLOCK') 
                   CALL RANDOM_RECTANGLE(LP%X,LP%Y,LP%Z,X1,X2,Y1,Y2,Z1,Z2)
@@ -805,6 +807,8 @@ VOLUME_INSERT_LOOP: DO IB=1,N_INIT
             LP%Y = LP%Y + (I-1)*IN%DY
             LP%Z = LP%Z + (I-1)*IN%DZ
             IF (.NOT.SOLID(CELL_INDEX(II,JJ,KK))) EXIT CHOOSE_XYZ_LOOP
+            ! If cannot find non-solid grid cell, stop searching
+            IF (N>10000) EXIT CHOOSE_XYZ_LOOP
          ENDDO CHOOSE_XYZ_LOOP
 
          CALL VOLUME_INIT_PARTICLE(I)
@@ -892,7 +896,7 @@ VOLUME_INSERT_LOOP: DO IB=1,N_INIT
    ELSEIF (IN%MASS_PER_VOLUME>0._EB) THEN
       PWT0 = IN%MASS_PER_VOLUME*INIT_VOLUME/MASS_SUM
    ELSE
-      PWT0 = 1._EB
+      PWT0 = REAL(IN%N_VIRTUAL_PARTICLES,EB)
    ENDIF
    
    DO I=1,MIN(MAXIMUM_PARTICLES,N_INSERT)
