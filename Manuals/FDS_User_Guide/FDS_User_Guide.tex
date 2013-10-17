@@ -6325,12 +6325,16 @@ The format for {\ct XB} is the same as that used on the {\ct OBST} line. Alterna
 &INIT PART_ID='leaves', XYZ=..., RADIUS=..., HEIGHT=..., SHAPE='CONE',
       N_PARTICLES=..., MASS_PER_VOLUME=... /
 \end{lstlisting}
-Note that the volume of the specified region is calculated according to the {\ct SHAPE} dimensions, regardless of whether there are solid obstructions within this region. Note also that the number of particles, {\ct N\_PARTICLES}, is somewhat arbitrary but should be chosen to provide at least a few particles per grid cell. FDS will automatically assign a weighting factor to each particle to ensure that the {\ct MASS\_PER\_VOLUME} is achieved.
+Note that the volume of the specified region is calculated according to the {\ct SHAPE} dimensions, regardless of whether there are solid obstructions within this region. Note also that in most applications, the number of particles, {\ct N\_PARTICLES}, is somewhat arbitrary but should be chosen to provide at least a few particles per grid cell. FDS will then automatically assign a weighting factor to each particle to ensure that the {\ct MASS\_PER\_VOLUME} is achieved. In some applications, on the other hand, it may be important to specify the number of particles. For example, if using particles to model the burning of electrical cables, you may want to specify how many cables are actually burning.
 
 \subsubsection{Specifying a Fixed Number of Particles per Grid Cell}
 
 There are special applications where you might want to specify {\ct N\_PARTICLES\_PER\_CELL} to indicate the number of particles within each grid cell of a specified region.
 When using {\ct N\_PARTICLES\_PER\_CELL}, the particles will be randomly placed within each cell.  If you set {\ct CELL\_CENTERED=.TRUE.}, the particles will be placed at the center of each cell.
+
+\subsubsection{Specifying a Weight Factor for Particles}
+
+Use {\ct PARTICLE\_WEIGHT\_FACTOR} to specify how many actual particles each of the computational particles represent. This can be used in conjunction with {\ct N\_PARTICLES\_PER\_CELL} to reduce the computational cost when a large number of identical particles would be placed in the same grid cell. 
 
 
 \subsubsection{Single Particle Insertion}
@@ -6354,8 +6358,6 @@ Note that the {\ct DIAMETER} ($\mu$m) on the {\ct INIT} line is only valid for l
 \caption[Results of the {\ct bucket\_test\_3} case]{Accumulated water collected at the floor in the {\ct bucket\_test\_3} case.}
 \label{bucket_test_3_fig}
 \end{figure}
-
-
 
 \subsubsection{Periodic Insertion of Particles within a Specified Volume}
 
@@ -9466,6 +9468,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct N\_PARTICLES}              & Integer           & Section~\ref{info:initial_droplets}           &               & 0             \\ \hline
 {\ct N\_PARTICLES\_PER\_CELL}   & Integer           & Section~\ref{info:initial_droplets}           &               & 0             \\ \hline
 {\ct PART\_ID}                  & Character         & Section~\ref{info:initial_droplets}           &               &               \\ \hline
+{\ct PARTICLE\_WEIGHT\_FACTOR}  & Real              & Section~\ref{info:initial_droplets}           &               & 1.            \\ \hline
 {\ct RADIUS}                    & Real              & Section~\ref{info:initial_droplets}           & m             &               \\ \hline
 {\ct SHAPE}                     & Character         & Section~\ref{info:initial_droplets}           &               & {\ct 'BLOCK'} \\ \hline
 {\ct SPEC\_ID(N)}               & Character Array   & Section~\ref{info:INIT}                       &               &               \\ \hline
