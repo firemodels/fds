@@ -627,6 +627,23 @@ IF (STRATIFICATION) THEN
    ENDDO
 ENDIF
 
+! Special treatment for strictly isothermal cases (constant pressure, no stratification, no reaction)
+
+IF (ISOTHERMAL) THEN
+   DO N=1,N_TRACKED_SPECIES
+      SM  => SPECIES_MIXTURE(N)
+      RCON_DIFF = SM%RCON-SM0%RCON
+      DO K=1,KBAR
+         DO J=1,JBAR
+            DO I=1,IBAR
+               IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
+               DP(I,J,K) = RCON_DIFF/RSUM(I,J,K) * DEL_RHO_D_DEL_Z(I,J,K,N) / RHOP(I,J,K)
+            ENDDO
+         ENDDO
+      ENDDO
+   ENDDO
+ENDIF
+
 ! Test manufactured solution
 
 IF (PERIODIC_TEST==7) THEN
