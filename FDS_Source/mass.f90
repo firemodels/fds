@@ -252,7 +252,7 @@ USE GLOBAL_CONSTANTS, ONLY: N_TRACKED_SPECIES,TMPMAX,TMPMIN,EVACUATION_ONLY, &
                             CLIP_MASS_FRACTION,N_REACTIONS
 USE MANUFACTURED_SOLUTIONS, ONLY: VD2D_MMS_Z_OF_RHO
 REAL(EB) :: DTRATIO,OMDTRATIO,TNOW,ZZ_GET(0:N_TRACKED_SPECIES),RCON_DIFF,RCON_DIFF_ZZ
-INTEGER  :: I,J,K,N,IPZ
+INTEGER  :: I,J,K,N
 INTEGER, INTENT(IN) :: NM
 TYPE(SPECIES_MIXTURE_TYPE), POINTER :: SM,SM0,SM1
 
@@ -290,6 +290,7 @@ CASE(.TRUE.) PREDICTOR_STEP
 
       !$OMP DO COLLAPSE(4) SCHEDULE(DYNAMIC) PRIVATE(N,K,J,I)
       DO N=1,N_TRACKED_SPECIES
+         IF (ISOTHERMAL .AND. N==1) CYCLE
          DO K=1,KBAR
             DO J=1,JBAR
                DO I=1,IBAR
@@ -309,6 +310,7 @@ CASE(.TRUE.) PREDICTOR_STEP
       !$OMP END SINGLE
       !$OMP DO COLLAPSE(4) SCHEDULE(DYNAMIC) PRIVATE(N,K,J,I)
       DO N=1,N_TRACKED_SPECIES
+         IF (ISOTHERMAL .AND. N==1) CYCLE
          DO K=1,KBAR
             DO J=1,JBAR
                DO I=1,IBAR
@@ -345,6 +347,7 @@ CASE(.TRUE.) PREDICTOR_STEP
 
    !$OMP DO COLLAPSE(4) SCHEDULE(DYNAMIC) PRIVATE(N,K,J,I)
    DO N=1,N_TRACKED_SPECIES
+      IF (ISOTHERMAL .AND. N==1) CYCLE
       DO K=1,KBAR
          DO J=1,JBAR
             DO I=1,IBAR
@@ -355,30 +358,6 @@ CASE(.TRUE.) PREDICTOR_STEP
       ENDDO
    ENDDO
    !$OMP END DO
-
-   ! Correct mass fractions above or below clip limits
-
-   IF (CLIP_MASS_FRACTION .AND. N_TRACKED_SPECIES>0) THEN
-      !$OMP WORKSHARE
-      ZZS(1:IBAR,1:JBAR,1:KBAR,1:N_TRACKED_SPECIES) = MAX(0._EB,MIN(1._EB,ZZS(1:IBAR,1:JBAR,1:KBAR,1:N_TRACKED_SPECIES)))
-      !$OMP END WORKSHARE
-   ELSEIF (N_TRACKED_SPECIES>0) THEN
-      !$OMP SINGLE
-      CALL CHECK_MASS_FRACTION
-      !$OMP END SINGLE
-   ENDIF
-
-   ! Manufactured solution
-
-   IF (PERIODIC_TEST==7) THEN
-      DO K=1,KBAR
-         DO J=1,JBAR
-            DO I=1,IBAR
-               ZZS(I,J,K,1) = VD2D_MMS_Z_OF_RHO(RHOS(I,J,K))
-            ENDDO
-         ENDDO
-      ENDDO
-   ENDIF
 
    ! Predict background pressure at next time step
 
@@ -403,11 +382,34 @@ CASE(.TRUE.) PREDICTOR_STEP
          DO J=1,JBAR
             DO I=1,IBAR
                IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-               IPZ = PRESSURE_ZONE(I,J,K)
-               ZZS(I,J,K,1) = ( RHOS(I,J,K)*PBAR_S(K,IPZ)/TMP(I,J,K) - RCON_DIFF_ZZ ) / RCON_DIFF
+               ZZS(I,J,K,1) = ( PBAR_S(K,PRESSURE_ZONE(I,J,K))/(RHOS(I,J,K)*TMP(I,J,K)) - RCON_DIFF_ZZ ) / RCON_DIFF
             ENDDO
          ENDDO
       ENDDO
+   ENDIF
+
+   ! Manufactured solution
+
+   IF (PERIODIC_TEST==7) THEN
+      DO K=1,KBAR
+         DO J=1,JBAR
+            DO I=1,IBAR
+               ZZS(I,J,K,1) = VD2D_MMS_Z_OF_RHO(RHOS(I,J,K))
+            ENDDO
+         ENDDO
+      ENDDO
+   ENDIF
+
+   ! Correct mass fractions above or below clip limits
+
+   IF (CLIP_MASS_FRACTION .AND. N_TRACKED_SPECIES>0) THEN
+      !$OMP WORKSHARE
+      ZZS(1:IBAR,1:JBAR,1:KBAR,1:N_TRACKED_SPECIES) = MAX(0._EB,MIN(1._EB,ZZS(1:IBAR,1:JBAR,1:KBAR,1:N_TRACKED_SPECIES)))
+      !$OMP END WORKSHARE
+   ELSEIF (N_TRACKED_SPECIES>0) THEN
+      !$OMP SINGLE
+      CALL CHECK_MASS_FRACTION
+      !$OMP END SINGLE
    ENDIF
 
    ! Compute molecular weight term RSUM=R0*SUM(Y_i/W_i)
@@ -458,6 +460,7 @@ CASE(.FALSE.) PREDICTOR_STEP
 
    !$OMP DO COLLAPSE(4) SCHEDULE(DYNAMIC) PRIVATE(N,K,J,I)
    DO N=1,N_TRACKED_SPECIES
+      IF (ISOTHERMAL .AND. N==1) CYCLE
       DO K=1,KBAR
          DO J=1,JBAR
             DO I=1,IBAR
@@ -492,6 +495,7 @@ CASE(.FALSE.) PREDICTOR_STEP
 
    !$OMP DO COLLAPSE(4) SCHEDULE(DYNAMIC) PRIVATE(N,K,J,I)
    DO N=1,N_TRACKED_SPECIES
+      IF (ISOTHERMAL .AND. N==1) CYCLE
       DO K=1,KBAR
          DO J=1,JBAR
             DO I=1,IBAR
@@ -502,30 +506,6 @@ CASE(.FALSE.) PREDICTOR_STEP
       ENDDO
    ENDDO
    !$OMP END DO
-
-   ! Correct mass fractions above or below clip limits
-
-   IF (CLIP_MASS_FRACTION .AND. N_TRACKED_SPECIES>0) THEN
-      !$OMP WORKSHARE
-      ZZ(1:IBAR,1:JBAR,1:KBAR,1:N_TRACKED_SPECIES) = MAX(0._EB,MIN(1._EB,ZZ(1:IBAR,1:JBAR,1:KBAR,1:N_TRACKED_SPECIES)))
-      !$OMP END WORKSHARE NOWAIT
-   ELSEIF (N_TRACKED_SPECIES>0) THEN
-      !$OMP SINGLE
-      CALL CHECK_MASS_FRACTION
-      !$OMP END SINGLE
-   ENDIF
-
-   ! Manufactured solution
-
-   IF (PERIODIC_TEST==7) THEN
-      DO K=1,KBAR
-         DO J=1,JBAR
-            DO I=1,IBAR
-               ZZ(I,J,K,1) = VD2D_MMS_Z_OF_RHO(RHO(I,J,K))
-            ENDDO
-         ENDDO
-      ENDDO
-   ENDIF
 
    ! Correct background pressure
 
@@ -550,11 +530,34 @@ CASE(.FALSE.) PREDICTOR_STEP
          DO J=1,JBAR
             DO I=1,IBAR
                IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-               IPZ = PRESSURE_ZONE(I,J,K)
-               ZZ(I,J,K,1) = ( RHO(I,J,K)*PBAR(K,IPZ)/TMP(I,J,K) - RCON_DIFF_ZZ ) / RCON_DIFF
+               ZZ(I,J,K,1) = ( PBAR(K,PRESSURE_ZONE(I,J,K))/(RHO(I,J,K)*TMP(I,J,K)) - RCON_DIFF_ZZ ) / RCON_DIFF
             ENDDO
          ENDDO
       ENDDO
+   ENDIF
+
+   ! Manufactured solution
+
+   IF (PERIODIC_TEST==7) THEN
+      DO K=1,KBAR
+         DO J=1,JBAR
+            DO I=1,IBAR
+               ZZ(I,J,K,1) = VD2D_MMS_Z_OF_RHO(RHO(I,J,K))
+            ENDDO
+         ENDDO
+      ENDDO
+   ENDIF
+
+   ! Correct mass fractions above or below clip limits
+
+   IF (CLIP_MASS_FRACTION .AND. N_TRACKED_SPECIES>0) THEN
+      !$OMP WORKSHARE
+      ZZ(1:IBAR,1:JBAR,1:KBAR,1:N_TRACKED_SPECIES) = MAX(0._EB,MIN(1._EB,ZZ(1:IBAR,1:JBAR,1:KBAR,1:N_TRACKED_SPECIES)))
+      !$OMP END WORKSHARE NOWAIT
+   ELSEIF (N_TRACKED_SPECIES>0) THEN
+      !$OMP SINGLE
+      CALL CHECK_MASS_FRACTION
+      !$OMP END SINGLE
    ENDIF
 
    ! Compute molecular weight term RSUM=R0*SUM(Y_i/W_i)
