@@ -89,7 +89,7 @@ CONNECTED_ZONES(:,:,NM) = .FALSE.
 DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
    WC=>WALL(IW)
    IF (WC%BOUNDARY_TYPE/=NULL_BOUNDARY .AND. WC%BOUNDARY_TYPE/=OPEN_BOUNDARY .AND. &
-        WC%BOUNDARY_TYPE/=INTERPOLATED_BOUNDARY) CYCLE   
+      WC%BOUNDARY_TYPE/=INTERPOLATED_BOUNDARY) CYCLE   
    II  = WC%ONE_D%II
    JJ  = WC%ONE_D%JJ
    KK  = WC%ONE_D%KK
@@ -622,23 +622,6 @@ IF (STRATIFICATION) THEN
          DO I=1,IBAR
             IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
             DP(I,J,K) = DP(I,J,K) + RTRM(I,J,K)*0.5_EB*(W(I,J,K)+W(I,J,K-1))*RHO_0(K)*GVEC(3)
-         ENDDO
-      ENDDO
-   ENDDO
-ENDIF
-
-! Special treatment for strictly isothermal cases (constant pressure, no stratification, no reaction)
-
-IF (ISOTHERMAL) THEN
-   DO N=1,N_TRACKED_SPECIES
-      SM  => SPECIES_MIXTURE(N)
-      RCON_DIFF = SM%RCON-SM0%RCON
-      DO K=1,KBAR
-         DO J=1,JBAR
-            DO I=1,IBAR
-               IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-               DP(I,J,K) = RCON_DIFF/RSUM(I,J,K) * DEL_RHO_D_DEL_Z(I,J,K,N) / RHOP(I,J,K)
-            ENDDO
          ENDDO
       ENDDO
    ENDDO
