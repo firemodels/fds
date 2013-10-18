@@ -95,6 +95,12 @@ intel_win_32 : obj = fds_win_32
 intel_win_32 : setup_win $(objwin_serial)
 	$(FCOMPL) -o $(obj) $(FFLAGS) /F100000000 $(objwin_serial)
 
+intel_win_32_ps : FFLAGS = /O3 /Qipo  /Qvec_report0 
+intel_win_32_ps : FCOMPL = ifort
+intel_win_32_ps : obj = fds_win_32_ps
+intel_win_32_ps : setup_win $(objwin_serial)
+	$(FCOMPL) -o $(obj) $(FFLAGS)  /F100000000 $(objwin_serial) /link /SUBSYSTEM:CONSOLE,5.01
+
 openmp_intel_win_32 : FFLAGS = /O2 /Qvec_report0 /Qipo
 openmp_intel_win_32 : FCOMPL = ifort
 openmp_intel_win_32 : FOPENMPFLAGS = /Qopenmp
@@ -109,6 +115,14 @@ mpi_intel_win_32 : FCOMPL = ifort
 mpi_intel_win_32 : obj = fds_mpi_win_32
 mpi_intel_win_32 : setup_win $(objwin_mpi)
 	$(FCOMPL) -o $(obj) $(FFLAGS) /F100000000 $(objwin_mpi) $(MPILIB)
+
+mpi_intel_win_32_ps : MPILIB = "c:\program files\mpich2\lib\fmpich2.lib"
+mpi_intel_win_32_ps : MPIINCLUDE = "c:\program files\mpich2\include"
+mpi_intel_win_32_ps : FFLAGS = /O2 /Qipo /Qvec_report0  /QxHost  /I $(MPIINCLUDE)
+mpi_intel_win_32_ps : FCOMPL = ifort
+mpi_intel_win_32_ps : obj = fds_mpi_win_32_ps
+mpi_intel_win_32_ps : setup_win $(objwin_mpi)
+	$(FCOMPL) -o $(obj) $(FFLAGS)  /F100000000 $(objwin_mpi) $(MPILIB) /link /SUBSYSTEM:CONSOLE,5.01
 
 openmp_mpi_intel_win_32 : MPILIB = "c:\program files\mpich2\lib\fmpich2.lib"
 openmp_mpi_intel_win_32 : MPIINCLUDE = "c:\program files\mpich2\include"
@@ -144,6 +158,12 @@ intel_win_64 : FCOMPL = ifort
 intel_win_64 : obj = fds_win_64
 intel_win_64 : setup_win $(objwin_serial)
 	$(FCOMPL) -o $(obj) $(FFLAGS) /F1000000000 $(objwin_serial)
+
+intel_win_64_ps : FFLAGS = -O2 /Qipo /Qvec_report0  
+intel_win_64_ps : FCOMPL = ifort
+intel_win_64_ps : obj = fds_win_64_ps
+intel_win_64_ps : setup_win $(objwin_serial)
+	$(FCOMPL) -o $(obj) $(FFLAGS) /F1000000000 $(objwin_serial) /link /SUBSYSTEM:CONSOLE,5.02
 
 openmp_intel_win_64 : FFLAGS = /O2 /Qvec_report0 /Qipo
 openmp_intel_win_64 : FCOMPL = ifort
@@ -186,6 +206,14 @@ mpi_intel_win_64 : FCOMPL = ifort
 mpi_intel_win_64 : obj = fds_mpi_win_64
 mpi_intel_win_64 : setup_win $(objwin_mpi)
 	$(FCOMPL) -o $(obj) $(FFLAGS)  /F1000000000 $(objwin_mpi) $(MPILIB)
+
+mpi_intel_win_64_ps : MPILIB = "c:\program files\mpich2\lib\fmpich2.lib"
+mpi_intel_win_64_ps : MPIINCLUDE = "c:\program files\mpich2\include"
+mpi_intel_win_64_ps : FFLAGS = -O2 /Qipo /Qvec_report0  /QxHost  /I $(MPIINCLUDE)
+mpi_intel_win_64_ps : FCOMPL = ifort
+mpi_intel_win_64_ps : obj = fds_mpi_win_64_ps
+mpi_intel_win_64_ps : setup_win $(objwin_mpi)
+	$(FCOMPL) -o $(obj) $(FFLAGS)  /F1000000000 $(objwin_mpi) $(MPILIB) /link /SUBSYSTEM:CONSOLE,5.02
 
 openmp_mpi_intel_win_64 : MPILIB = "c:\program files\mpich2\lib\fmpich2.lib"
 openmp_mpi_intel_win_64 : MPIINCLUDE = "c:\program files\mpich2\include"
