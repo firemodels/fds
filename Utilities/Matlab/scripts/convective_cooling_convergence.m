@@ -23,7 +23,7 @@ dx(7) = 0.00125;
 
 for k=1:7
      if ~exist(infile{k})
-         display(['Error: File ',infile{j,k},' does not exist. Skipping case.'])
+         display(['Error: File ',infile{k},' does not exist. Skipping case.'])
          return
      end
      M_10 = csvread(infile{k}, 2, 0);

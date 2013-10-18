@@ -91,7 +91,7 @@ skip_case = 0;
 for i = [1,2,3,4]
     
     if ~exist([datadir,devcfile{i}])
-        display(['Error: Files ' [datadir,devcfile{i}] ' does not exist. Skipping case.'])
+        display(['Error: File ' [datadir,devcfile{i}] ' does not exist. Skipping case.'])
         skip_case = 1;
         continue
     end
@@ -101,7 +101,7 @@ for i = [1,2,3,4]
     T_tau = q_w/(rho*u_tau*cp);
     
     if ~exist([datadir,linefile{i}])
-        display(['Error: Files ' [datadir,linefile{i}] ' does not exist. Skipping case.'])
+        display(['Error: File ' [datadir,linefile{i}] ' does not exist. Skipping case.'])
         skip_case = 1;
         continue
     end
