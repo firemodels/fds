@@ -10,6 +10,12 @@ clear all
 % Read SMV file and store transformations
 
 datadir = '../../Verification/Miscellaneous/';
+
+if ~exist([datadir,'mesh_transformation.smv'])
+   display(['Error: File ', [datadir,'mesh_transformation.smv'],' does not exist. Skipping case.'])
+   return
+end
+
 fid  = fopen([datadir,'mesh_transformation.smv'],'r');
 
 I = 50;
