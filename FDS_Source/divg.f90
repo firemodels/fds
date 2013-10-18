@@ -242,77 +242,77 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
       CALL GET_SENSIBLE_ENTHALPY_DIFF(N,WC%ONE_D%TMP_F,HDIFF)
       RHO_D_DZDN = 2._EB*WC%RHODW(N)*(ZZP(IIG,JJG,KKG,N)-WC%ZZ_F(N))*WC%RDN
       SELECT CASE(IOR)
-      CASE( 1) 
-         RHO_D_DZDX(IIG-1,JJG,KKG)   =  RHO_D_DZDN
-         H_RHO_D_DZDX(IIG-1,JJG,KKG) =  HDIFF*RHO_D_DZDN
-      CASE(-1) 
-         RHO_D_DZDX(IIG,JJG,KKG)     = -RHO_D_DZDN
-         H_RHO_D_DZDX(IIG,JJG,KKG)   = -HDIFF*RHO_D_DZDN
-      CASE( 2) 
-         RHO_D_DZDY(IIG,JJG-1,KKG)   =  RHO_D_DZDN
-         H_RHO_D_DZDY(IIG,JJG-1,KKG) =  HDIFF*RHO_D_DZDN
-      CASE(-2) 
-         RHO_D_DZDY(IIG,JJG,KKG)     = -RHO_D_DZDN
-         H_RHO_D_DZDY(IIG,JJG,KKG)   = -HDIFF*RHO_D_DZDN
-      CASE( 3) 
-         RHO_D_DZDZ(IIG,JJG,KKG-1)   =  RHO_D_DZDN
-         H_RHO_D_DZDZ(IIG,JJG,KKG-1) =  HDIFF*RHO_D_DZDN
-      CASE(-3) 
-         RHO_D_DZDZ(IIG,JJG,KKG)     = -RHO_D_DZDN
-         H_RHO_D_DZDZ(IIG,JJG,KKG)   = -HDIFF*RHO_D_DZDN
+         CASE( 1) 
+            RHO_D_DZDX(IIG-1,JJG,KKG)   =  RHO_D_DZDN
+            H_RHO_D_DZDX(IIG-1,JJG,KKG) =  HDIFF*RHO_D_DZDN
+         CASE(-1) 
+            RHO_D_DZDX(IIG,JJG,KKG)     = -RHO_D_DZDN
+            H_RHO_D_DZDX(IIG,JJG,KKG)   = -HDIFF*RHO_D_DZDN
+         CASE( 2) 
+            RHO_D_DZDY(IIG,JJG-1,KKG)   =  RHO_D_DZDN
+            H_RHO_D_DZDY(IIG,JJG-1,KKG) =  HDIFF*RHO_D_DZDN
+         CASE(-2) 
+            RHO_D_DZDY(IIG,JJG,KKG)     = -RHO_D_DZDN
+            H_RHO_D_DZDY(IIG,JJG,KKG)   = -HDIFF*RHO_D_DZDN
+         CASE( 3) 
+            RHO_D_DZDZ(IIG,JJG,KKG-1)   =  RHO_D_DZDN
+            H_RHO_D_DZDZ(IIG,JJG,KKG-1) =  HDIFF*RHO_D_DZDN
+         CASE(-3) 
+            RHO_D_DZDZ(IIG,JJG,KKG)     = -RHO_D_DZDN
+            H_RHO_D_DZDZ(IIG,JJG,KKG)   = -HDIFF*RHO_D_DZDN
       END SELECT
    ENDDO WALL_LOOP2
 
    CYLINDER: SELECT CASE(CYLINDRICAL)
-   CASE(.FALSE.) CYLINDER  ! 3D or 2D Cartesian Coords
-      DO K=1,KBAR
-         DO J=1,JBAR
+      CASE(.FALSE.) CYLINDER  ! 3D or 2D Cartesian Coords
+         DO K=1,KBAR
+            DO J=1,JBAR
+               DO I=1,IBAR
+
+                  DIV_DIFF_HEAT_FLUX = (H_RHO_D_DZDX(I,J,K)-H_RHO_D_DZDX(I-1,J,K))*RDX(I) + &
+                                       (H_RHO_D_DZDY(I,J,K)-H_RHO_D_DZDY(I,J-1,K))*RDY(J) + &
+                                       (H_RHO_D_DZDZ(I,J,K)-H_RHO_D_DZDZ(I,J,K-1))*RDZ(K)
+
+                  DP(I,J,K) = DP(I,J,K) + DIV_DIFF_HEAT_FLUX
+
+               ENDDO
+            ENDDO
+         ENDDO
+      CASE(.TRUE.) CYLINDER  ! 2D Cylindrical Coords
+         J = 1
+         DO K=1,KBAR
             DO I=1,IBAR
 
-               DIV_DIFF_HEAT_FLUX = (H_RHO_D_DZDX(I,J,K)-H_RHO_D_DZDX(I-1,J,K))*RDX(I) + &
-                                    (H_RHO_D_DZDY(I,J,K)-H_RHO_D_DZDY(I,J-1,K))*RDY(J) + &
-                                    (H_RHO_D_DZDZ(I,J,K)-H_RHO_D_DZDZ(I,J,K-1))*RDZ(K)
+               DIV_DIFF_HEAT_FLUX = (R(I)*H_RHO_D_DZDX(I,J,K)-R(I-1)*H_RHO_D_DZDX(I-1,J,K))*RDX(I)*RRN(I) + &
+                                    (     H_RHO_D_DZDZ(I,J,K)-       H_RHO_D_DZDZ(I,J,K-1))*RDZ(K)
 
                DP(I,J,K) = DP(I,J,K) + DIV_DIFF_HEAT_FLUX
 
             ENDDO
          ENDDO
-      ENDDO
-   CASE(.TRUE.) CYLINDER  ! 2D Cylindrical Coords
-      J = 1
-      DO K=1,KBAR
-         DO I=1,IBAR
-
-            DIV_DIFF_HEAT_FLUX = (R(I)*H_RHO_D_DZDX(I,J,K)-R(I-1)*H_RHO_D_DZDX(I-1,J,K))*RDX(I)*RRN(I) + &
-                                 (     H_RHO_D_DZDZ(I,J,K)-       H_RHO_D_DZDZ(I,J,K-1))*RDZ(K)
-
-            DP(I,J,K) = DP(I,J,K) + DIV_DIFF_HEAT_FLUX
-
-         ENDDO
-      ENDDO
    END SELECT CYLINDER
 
    ! Compute del dot rho*D del Z_n
 
    CYLINDER2: SELECT CASE(CYLINDRICAL)
-   CASE(.FALSE.) CYLINDER2  ! 3D or 2D Cartesian Coords
-      DO K=1,KBAR
-         DO J=1,JBAR
-            DO I=1,IBAR
-               DEL_RHO_D_DEL_Z(I,J,K,N) = (RHO_D_DZDX(I,J,K)-RHO_D_DZDX(I-1,J,K))*RDX(I) + &
-                                          (RHO_D_DZDY(I,J,K)-RHO_D_DZDY(I,J-1,K))*RDY(J) + &
-                                          (RHO_D_DZDZ(I,J,K)-RHO_D_DZDZ(I,J,K-1))*RDZ(K)
+      CASE(.FALSE.) CYLINDER2  ! 3D or 2D Cartesian Coords
+         DO K=1,KBAR
+            DO J=1,JBAR
+               DO I=1,IBAR
+                  DEL_RHO_D_DEL_Z(I,J,K,N) = (RHO_D_DZDX(I,J,K)-RHO_D_DZDX(I-1,J,K))*RDX(I) + &
+                                             (RHO_D_DZDY(I,J,K)-RHO_D_DZDY(I,J-1,K))*RDY(J) + &
+                                             (RHO_D_DZDZ(I,J,K)-RHO_D_DZDZ(I,J,K-1))*RDZ(K)
+               ENDDO
             ENDDO
          ENDDO
-      ENDDO
-   CASE(.TRUE.) CYLINDER2  ! 2D Cylindrical Coords
-      J=1
-      DO K=1,KBAR
-         DO I=1,IBAR
-            DEL_RHO_D_DEL_Z(I,J,K,N) = (R(I)*RHO_D_DZDX(I,J,K)-R(I-1)*RHO_D_DZDX(I-1,J,K))*RDX(I)*RRN(I) + &
-                                       (     RHO_D_DZDZ(I,J,K)-       RHO_D_DZDZ(I,J,K-1))*RDZ(K)
+      CASE(.TRUE.) CYLINDER2  ! 2D Cylindrical Coords
+         J=1
+         DO K=1,KBAR
+            DO I=1,IBAR
+               DEL_RHO_D_DEL_Z(I,J,K,N) = (R(I)*RHO_D_DZDX(I,J,K)-R(I-1)*RHO_D_DZDX(I-1,J,K))*RDX(I)*RRN(I) + &
+                                          (     RHO_D_DZDZ(I,J,K)-       RHO_D_DZDZ(I,J,K-1))*RDZ(K)
+            ENDDO
          ENDDO
-      ENDDO
    END SELECT CYLINDER2
 
 ENDDO SPECIES_LOOP
@@ -423,18 +423,18 @@ CORRECTION_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
    ENDIF
    IOR = WC%ONE_D%IOR
    SELECT CASE(IOR)
-   CASE( 1)
-      KDTDX(II,JJ,KK)   = 0._EB
-   CASE(-1)
-      KDTDX(II-1,JJ,KK) = 0._EB
-   CASE( 2)
-      KDTDY(II,JJ,KK)   = 0._EB
-   CASE(-2)
-      KDTDY(II,JJ-1,KK) = 0._EB
-   CASE( 3)
-      KDTDZ(II,JJ,KK)   = 0._EB
-   CASE(-3)
-      KDTDZ(II,JJ,KK-1) = 0._EB
+      CASE( 1)
+         KDTDX(II,JJ,KK)   = 0._EB
+      CASE(-1)
+         KDTDX(II-1,JJ,KK) = 0._EB
+      CASE( 2)
+         KDTDY(II,JJ,KK)   = 0._EB
+      CASE(-2)
+         KDTDY(II,JJ-1,KK) = 0._EB
+      CASE( 3)
+         KDTDZ(II,JJ,KK)   = 0._EB
+      CASE(-3)
+         KDTDZ(II,JJ,KK-1) = 0._EB
    END SELECT
    DP(IIG,JJG,KKG) = DP(IIG,JJG,KKG) - WC%ONE_D%QCONF*WC%RDN
 ENDDO CORRECTION_LOOP
