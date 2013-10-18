@@ -9,15 +9,15 @@ dir = '../../Verification/Turbulence/';
 
 skip_case = 0;
 if ~exist([dir,'yplus_8_devc.csv'])
-    display(['Error: Files ' [dir,'yplus_8_devc.csv'] ' does not exist. Skipping case.'])
+    display(['Error: File ' [dir,'yplus_8_devc.csv'] ' does not exist. Skipping case.'])
     skip_case = 1;
 end
 if ~exist([dir,'yplus_16_devc.csv'])
-    display(['Error: Files ' [dir,'yplus_16_devc.csv'] ' does not exist. Skipping case.'])
+    display(['Error: File ' [dir,'yplus_16_devc.csv'] ' does not exist. Skipping case.'])
     skip_case = 1;
 end
 if ~exist([dir,'yplus_32_devc.csv'])
-    display(['Error: Files ' [dir,'yplus_32_devc.csv'] ' does not exist. Skipping case.'])
+    display(['Error: File ' [dir,'yplus_32_devc.csv'] ' does not exist. Skipping case.'])
     skip_case = 1;
 end
 if skip_case

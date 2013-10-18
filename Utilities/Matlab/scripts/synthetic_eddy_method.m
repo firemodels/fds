@@ -16,6 +16,11 @@ error_tolerance = 0.01;
 % ------------
 figure
 
+if ~exist([datadir,'sem_flat_leddy_p2_line.csv'])
+   display(['Error: File ', [datadir,'sem_flat_leddy_p2_line.csv'],' does not exist. Skipping case.'])
+   return
+end
+
 M = importdata([datadir,'sem_flat_leddy_p2_line.csv'],',',2);
 
 k = find(strcmp(M.colheaders,'umean'));
@@ -74,6 +79,11 @@ end
 % Parabolic profile
 % -----------------
 figure
+
+if ~exist([datadir,'sem_par_leddy_p2_line.csv'])
+   display(['Error: File ', [datadir,'sem_par_leddy_p2_line.csv'],' does not exist. Skipping case.'])
+   return
+end
 
 M = importdata([datadir,'sem_par_leddy_p2_line.csv'],',',2);
 
@@ -134,6 +144,11 @@ end
 % Atmospheric profile
 % -------------------
 figure
+
+if ~exist([datadir,'sem_atm_leddy_p2_line.csv'])
+   display(['Error: File ', [datadir,'sem_atm_leddy_p2_line.csv'],' does not exist. Skipping case.'])
+   return
+end
 
 M = importdata([datadir,'sem_atm_leddy_p2_line.csv'],',',2);
 
