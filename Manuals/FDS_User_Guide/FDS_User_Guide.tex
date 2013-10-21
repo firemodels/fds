@@ -1648,6 +1648,13 @@ and initial conditions are perfectly symmetric. To turn this off, set {\ct NOISE
 convenient to start the flow immediately, like in an outdoor simulation involving wind.
 \end{description}
 
+\subsection{Special Topic: Isothermal Flows}
+\label{info:isothermal}
+
+If you know ahead of time that the flow is isothermal, it is recommended that you set {\ct ISOTHERMAL=.TRUE.} on {\ct MISC}.  In this case the density is computed from the ideal gas law and the temperature is held constant at {\ct TMPA}.  If {\ct ISOTHERMAL=.TRUE.} is set, then FDS automatically turns off stratification, radiation, and convective heat transfer ({\ct STRATIFICATION=.FALSE.}, {\ct RADIATION=.FALSE.}, {\ct HEAT\_TRANSFER\_COEFFICIENT=0}).  Additionally, chemical reactions are not allowed.
+
+If the flow is nearly (but not perfectly) isothermal, do not set {\ct ISOTHERMAL=.TRUE.}.  Instead, it is recommended that you set {\ct CFL\_VELOCITY\_NORM=1} on {\ct MISC}.  This helps prevent spurious errors in the density and composition fields.
+
 \subsection{Special Topic: Mean Forcing and Data Assimilation}
 \label{info:mean_forcing}
 
@@ -1733,7 +1740,7 @@ restart.
 \label{info:velo_restart}
 \label{info:CSVF}
 
-It may be useful to start a calculation from an established flow field.  Usually this can be accomplished with the normal restart functionality.  But in some circumstances restart may be fragile, or you may want to specify a profile throughout the entire domain.  For such situations we have added the ability to read the velocity field information from a comma-delimited (.csv) file.  You have the option of creating the velocity file using FDS or creating their own.  To generate the velocity initialization file with FDS, in the input file add a {\ct DUMP} line with a {\ct UVW\_TIMER} (time in seconds).  The timer will accept up to 10 values, and will write velocity files for each mesh and each timer index to the working directory.  For example, if you want to write the simulation velocity field at 10 minutes into the run, add the following:
+It may be useful to start a calculation from an established flow field.  Usually this can be accomplished with the normal restart functionality.  But in some circumstances restart may be fragile, or you may want to specify a profile throughout the entire domain.  For such situations we have added the ability to read the velocity field information from a comma-delimited (.csv) file.  You have the option of creating the velocity file using FDS or creating your own.  To generate the velocity initialization file with FDS, in the input file add a {\ct DUMP} line with a {\ct UVW\_TIMER} (time in seconds).  The timer will accept up to 10 values, and will write velocity files for each mesh and each timer index to the working directory.  For example, if you want to write the simulation velocity field at 10 minutes into the run, add the following:
 \begin{lstlisting}
 &DUMP UVW_TIMER(1)=600 /
 \end{lstlisting}
@@ -9658,6 +9665,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct HUMIDITY}                                  & Real           & Section~\ref{info:humidity}                          & \%                & 40.           \\ \hline
 %{\ct IMMERSED\_BOUNDARY\_METHOD}                & Logical       &                                                       &               & {\ct .FALSE.}     \\ \hline
 {\ct INITIAL\_UNMIXED\_FRACTION}                & Real          & Section~\ref{info:turbulent_combustion}               &               & 1.0                  \\ \hline
+{\ct ISOTHERMAL}                                & Logical       & Section~\ref{info:isothermal}                         &               & {\ct .FALSE.}        \\ \hline
 %{\ct KINETIC\_ENERGY\_SOURCE}                   & Logical       &                                                       &               & {\ct .FALSE.}     \\ \hline
 {\ct LAPSE\_RATE}                               & Real          & Section~\ref{info:stratification}                     &  $^\circ$C/m  & 0                 \\ \hline
 {\ct LES\_FILTER\_WIDTH}                        & Character     & Section~\ref{info:LES}                                &               & {\ct 'MEAN'}      \\ \hline
