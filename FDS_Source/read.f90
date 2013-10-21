@@ -2737,7 +2737,6 @@ IF (ISOTHERMAL .AND. N_REACTIONS>0) THEN
    CALL SHUTDOWN(MESSAGE)
 ENDIF
 
-
 ! Read and store the reaction parameters
 
 NFR = 0 ! Number of fast reactions
