@@ -52,12 +52,15 @@ cd $VDIR
 echo Starting background X server
 source $STARTX
 
-# This script assume that a smokeview scriptfile 
+# The -m option assumes that a script
 # named casename_movies.ssf exists for each 
+
+# generate movie frames
 $RUNSMV -m Visualization plume5c
 
 cd $INDIR
 
+# make movies out of frames generated above
 echo making plume5c_tslice movie
 $MAKEMOVIE -o $OUTDIR plume5c_tslice  > /dev/null
 echo making plume5c_3dsmoke movie
@@ -73,10 +76,12 @@ $MAKEMOVIE -o $OUTDIR plume5c_part  > /dev/null
 
 cd $VDIR
 
+# generate movie frames
 $RUNSMV -m Visualization thouse5
 
 cd $INDIR
 
+# make movies out of frames generated above
 echo making thouse5_tslice movie
 $MAKEMOVIE -o $OUTDIR thouse5_tslice  > /dev/null
 echo making thouse5_smoke3d movie
