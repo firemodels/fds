@@ -53,6 +53,8 @@ $RUNFDS Flowfields blasius_16
 $RUNFDS Flowfields blasius_32
 $RUNFDS Flowfields blasius_64
 $RUNFDS Flowfields sealed_box
+$RUNFDS Flowfields mwtest_isothermal
+$RUNFDS Flowfields mwtest_cfl
 
 $RUNFDS Heat_Transfer adiabatic_net_flux
 $RUNFDS Heat_Transfer convective_cooling
