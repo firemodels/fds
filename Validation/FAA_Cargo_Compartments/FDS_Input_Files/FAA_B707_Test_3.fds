@@ -8,6 +8,8 @@
 
 &TIME T_END=180. /
 
+&MISC SUPPRESSION=.FALSE. /
+
 &DUMP DT_DEVC=5., DT_HRR=5, SIG_FIGS=5, SIG_FIGS_EXP=2 /
 
 &SURF ID         = 'INSIDE WALL'
@@ -40,7 +42,7 @@
 
 &RADI RADIATIVE_FRACTION=0.55 /
 
-&REAC FUEL ='Mixed Polymers', SUPPRESSION=.FALSE.    
+&REAC FUEL ='Mixed Polymers',
       C = 1.           
       H = 12.2           
       HEAT_OF_COMBUSTION = 21000.

@@ -8,6 +8,8 @@
 
 &TIME T_END=180. /
 
+&MISC SUPPRESSION = .FALSE. /
+
 &DUMP DT_DEVC=5., DT_HRR=5,  SIG_FIGS=5, SIG_FIGS_EXP=2 /
 
 &ZONE XB= -1.18, 1.18, 0.0, 14.0, 0.0, 1.6, LEAK_AREA(0)=0.04 /
@@ -48,10 +50,9 @@
 &RADI RADIATIVE_FRACTION=0.55 /
 
 &REAC FUEL ='ESONE'
-      SUPPRESSION = .FALSE.
-      C = 1             
+      C = 1
       H = 12.2
-      HEAT_OF_COMBUSTION = 21000. 
+      HEAT_OF_COMBUSTION = 21000.
       CO_YIELD   = 0.065
       SOOT_YIELD = 0.125 /
 
