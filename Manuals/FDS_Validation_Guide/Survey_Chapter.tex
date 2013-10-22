@@ -41,7 +41,6 @@ There is an on-going effort at NIST and elsewhere to evaluate FDS as new capabil
 The validation work discussed below can be organized into several categories: Comparisons with full-scale tests conducted especially for the chosen evaluation,  comparisons  with previously  published full-scale test data, comparisons with standard tests, comparisons with documented fire experience, and comparisons with engineering correlations. There is no single method by which the predictions and measurements are compared.  Formal, rigorous validation exercises are time-consuming and expensive. Most validation exercises are done simply to assess if the model can be used for a very specific purpose. While not comprehensive on their own, these studies collectively constitute a valuable assessment of the model.
 
 
-
 \subsection{Fire Plumes}
 
 There are several examples of fire flows that have been extensively studied, so much so that a set of engineering correlations combining the results of  many experiments  have been  developed. These correlations are useful to modelers because of their simplicity. The most studied phenomena include fire plumes, ceiling jets, and flame heights.
@@ -57,12 +56,11 @@ Guti\'{e}rrez-Montes {\em et al.}~\cite{Gutierrez:Building_and_Environment} simu
 Hurley and Munguia~\cite{Hurley:GCR09-921,Hurley:JFPE2009} compared FDS (version 4) simulations with plume and ceiling jet measurements from a series of full-scale tests conducted by Underwriters Laboratories. The tests were conducted in a 36.6~m by 36.6~m compartment with ceiling heights ranging from 3~m to 12.2~m. Heat release rates followed a modified t-squared growth profile. Thermocouples attached to brass disks were used to simulate thermal detectors.
 
 
-
-
 \subsection{Pool Fires}
 
-
 Xin~{\em et al.}~\cite{Xin:JSS2005} used FDS to model a 1~m diameter methane pool fire. The computational domain was 2~m by 2~m by 4~m with a uniform grid size of 2.5 cm. The predicted results were compared to  experimental data and found  to qualitatively and quantitatively reproduce  the velocity field.  The same authors performed a similar study of a 7.1~cm methane burner~\cite{Xin:CF2005} and a helium plume~\cite{Xin:CS2002}.
+
+The 7.1 cm diameter buoyant diffusion flame has been extensively studied both experimentally and computationally. Zhou and Gore \cite{Zhou:CS1998} reported radial profiles of mixture fraction and vertical velocity for estimation of thermal expansion for natural gas buoyant difusion flames stabilized on a 7.1 cm diameter diffuser burner. Xin {\em et al.}~\cite{Xin:CSS2002} used a Lagrangian thermal element based combustion model to simulate this flame. The authors noted that the simulations were sensitive to the burnout time utilized by the combustion model. To gain further insight into the species distribution inside the fire, Xin {\em et al.}~\cite{Xin:CF2005} performed fire dynamics simulations using a mixture fraction based combustion model. Xin and Gore \cite{Xin:CS2005} used laser-induced incandescence to determine soot distributions in vertical and horizontal planes for methane and ethane turbulent buoyant flames. Biswas {\em et al.}~\cite{Biswas:CS2007} utilized a novel time series model to simulate the scalar concentrations and temperature fields for these flames.
 
 Hostikka~{\em et al.}~\cite{Hostikka:3} modeled small pool fires of methane, natural gas and methanol to test the FDS radiation solver for low-sooting fires. They conclude that the predicted radiative fluxes are higher than measured values, especially at small heat release rates, due to an over-prediction of the gas temperature. These tests are also included in the Heat Flux section of this report.
 
