@@ -517,13 +517,7 @@ By examining movies of the simulation results we can see a qualitative differenc
 \section{Purdue 7.1 cm Methane Flame}
 \label{Purdue_Flames}
 
-The 7.1 cm diameter buoyant diffusion flame has been extensively studied both experimentally and computa- tionally. Zhou and Gore \cite{Zhou:CS1998} reported radial profiles of mixture fraction and vertical velocity for estimation of thermal expansion for natural gas buoyant difusion flames stabilized on a 7.1 cm diameter diffuser burner. Xin et al.~\cite{Xin:CSS2002} used a Lagrangian thermal element based combustion model to simulate this flame. The authors noted that the simulations were sensitive to the burnout time utilized by the combustion model. To gain further insight into the species distribution inside the fire, Xin et al.~\cite{Xin:CF2005} performed fire dynamics simulations using a mixture fraction based combustion model. Xin and Gore \cite{Xin:CS2005} used laser-induced incandescence to determine soot distributions in vertical and horizontal planes for methane and ethane turbulent buoyant flames. Biswas et al.~\cite{Biswas:CS2007} utilized a novel time series model to simulate the scalar concentrations and temperaure fields for these flames.
-
-A turbulent buoyant diffusion flame is established on a diffuser burner with an exit diameter of 7.1 cm. The diverging angle of the burner is 7$^\circ$ such that the gaseous fuel (methane) is decelerated and forms a uniform velocity distribution at the burner exit \cite{Xin:CF2005}. The methane (CH4) mass flow rate (84.3 mg/s) The buoyant diffusion flame burns in a quiescent atmospheric pressure environment. The flame is surrounded by a screened enclosure to minimize flame disturbance. The Froude number of the flame is 0.109 and matches that of a 7.1 cm diameter liquid toluene pool fire \cite{Xin:CF2005,Zhou:CS1998}. The total heat release rate of the methane flame is 4.2 kW under the assumption of complete combustion, and the visible flame height is approximately 36 cm \cite{Xin:CF2005}. Measured and computed vertical and horizontal velocity, mixture fraction, and temperature values for this flame have been reported by Xin et al.~\cite{Xin:CF2005,Xin:PhD2002} and Zhou et al.~\cite{Zhou:CS1998,Zhou:PurduePhD1999}. The mean temperatures have been inferred from the measured species concentrations \cite{Xin:CF2005} by assuming an adiabatic flame. The interdependencies between species concentrations, temperature and specific heat have been ignored for determining the mean temperature.
-
-A computational parametric study is performed to determine the effects of the simulation inputs and model choices on the simulation results. The simulation results were compared with measured radial profiles of vertical velocities, horizontal velocities and temperature \cite{Xin:CF2005}. The method in which the parametric study is conducted is to fix all the simulation inputs and model choices barring one which is varied to ascertain its effect on simulation results and their agreement with the aforementioned experimental results.
-
-Discrepancies between the measured and computed values of the mean mixture fraction are attributable to asymmetries in the flow field at the burner exit during the experiment.  As shown in Fig.~\ref{Purdue_7p1_CH4_vel_rms}, the differences in the experimental and modeled results for the centerline rms velocity indicate that the model boundary condition is not properly capturing the varying inlet conditions.
+Figures \ref{Purdue_7p1_CH4_mixture_fraction}-\ref{Purdue_7p1_CH4_vel_rms} show results for the Purdue 7.1 cm methane flame \cite{Xin:CF2005} at two grid resolutions.
 
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
@@ -548,7 +542,6 @@ Discrepancies between the measured and computed values of the mean mixture fract
 {Inferred \cite{Xin:CF2005} and computed radial profiles of the mean temperature at select heights above the burner exit simulated using grids with different spatial resolutions.}
 \label{Purdue_7p1_CH4_temperature}
 \end{figure}
-
 
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
