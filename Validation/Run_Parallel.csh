@@ -11,6 +11,10 @@ cd ATF_Corridors
 mkdir Current_Results
 ./Run_All.sh
 cd ..
+cd FAA_Cargo_Compartments
+mkdir Current_Results
+./Run_All.sh
+cd ..
 cd FM_SNL
 mkdir Current_Results
 ./Run_All.sh
