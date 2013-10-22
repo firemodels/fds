@@ -46,7 +46,9 @@ WUIINDIR=$SVNROOT/Verification/WUI/frames
 export OUTDIR=$SVNROOT/Manuals/SMV_Animations
 
 rm -f $INDIR/*.png
+rm -f $WUIINDIR/*.png
 rm -f $OUTDIR/*.m1v
+rm -f $OUTDIR/*.png
 
 # make a movie
 MKMOVIE()
