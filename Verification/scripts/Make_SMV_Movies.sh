@@ -27,6 +27,7 @@ fi
 export SVNROOT=`pwd`/..
 export SMV=$SVNROOT/SMV/Build/intel_$PLATFORM/smokeview_$PLATFORM
 export RUNSMV="$SVNROOT/Utilities/Scripts/runsmv.sh"
+export SMVBINDIR="-bindir $SVNROOT/SMV/for_bundle"
 export MAKEMOVIE=$SVNROOT/Utilities/Scripts/make_movie.sh
 export STARTX=$SVNROOT/Utilities/Scripts/startXserver.sh
 export STOPX=$SVNROOT/Utilities/Scripts/stopXserver.sh
@@ -129,5 +130,9 @@ MKMOVIE WUI levelset1 $WUIINDIR
 # -------- wind_test1 movie -------------------
 
 MKMOVIE WUI wind_test1 $WUIINDIR
+
+# -------- tree_test2 movie -------------------
+
+MKMOVIE WUI tree_test2 $WUIINDIR
 
 source $STOPX
