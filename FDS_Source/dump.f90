@@ -1591,8 +1591,8 @@ XLOOP2: DO NX=1,2*NMESHES
          DO I=1,N
             SEG=>SEGMENT(I)
             IF (ABS(XX-SEG%X1)<=SPACING(SEG%X1) .AND. ABS(XX-SEG%X2)<=SPACING(SEG%X2) .AND. &
-                ABS(YY-SEG%Y1)<=SPACING(SEG%Y1) .AND. ABS(YY-SEG%Y2)<=SPACING(SEG%Y2) .AND. &
-                ABS(Z1-SEG%Z1)<=SPACING(SEG%Z1) .AND. ABS(ZZ-SEG%Z2)<=SPACING(SEG%Z2)) THEN
+                ABS(Y1-SEG%Y1)<=SPACING(SEG%Y1) .AND. ABS(YY-SEG%Y2)<=SPACING(SEG%Y2) .AND. &
+                ABS(ZZ-SEG%Z1)<=SPACING(SEG%Z1) .AND. ABS(ZZ-SEG%Z2)<=SPACING(SEG%Z2)) THEN
                Y1 = YY
                CYCLE YLOOP2
             ENDIF
@@ -1638,9 +1638,9 @@ ZLOOP3: DO NZ=1,2*NMESHES
             ENDIF
          DO I=1,N
             SEG=>SEGMENT(I)
-            IF (ABS(XX-SEG%X1)<=SPACING(SEG%X1) .AND. ABS(XX-SEG%X2)<=SPACING(SEG%X2) .AND. &
+            IF (ABS(X1-SEG%X1)<=SPACING(SEG%X1) .AND. ABS(XX-SEG%X2)<=SPACING(SEG%X2) .AND. &
                 ABS(YY-SEG%Y1)<=SPACING(SEG%Y1) .AND. ABS(YY-SEG%Y2)<=SPACING(SEG%Y2) .AND. &
-                ABS(Z1-SEG%Z1)<=SPACING(SEG%Z1) .AND. ABS(ZZ-SEG%Z2)<=SPACING(SEG%Z2)) THEN
+                ABS(ZZ-SEG%Z1)<=SPACING(SEG%Z1) .AND. ABS(ZZ-SEG%Z2)<=SPACING(SEG%Z2)) THEN
                X1 = XX
                CYCLE XLOOP3
             ENDIF
