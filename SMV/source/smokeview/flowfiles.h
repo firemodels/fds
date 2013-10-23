@@ -1098,7 +1098,9 @@ typedef struct _slicedata {
   float above_ground_level;
   int volslice;
   int is1, is2, js1, js2, ks1, ks2;
+  int ijk_min[3], ijk_max[3];
   float xmin,xmax,ymin,ymax,zmin,zmax;
+  float xyz_min[3], xyz_max[3];
   int nsliceii;
   int *timeslist;
   int idir;
