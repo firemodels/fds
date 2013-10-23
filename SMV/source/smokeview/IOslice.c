@@ -1362,12 +1362,29 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
       mesh *meshj;
 
       meshj = meshinfo + sd->blocknumber;
+      meshj->slice_min[0]=DENORMALIZE_X(sd->xmin);
+      meshj->slice_min[1]=DENORMALIZE_Y(sd->ymin);
+      meshj->slice_min[2]=DENORMALIZE_Z(sd->zmin);
+      meshj->slice_max[0]=DENORMALIZE_X(sd->xmax);
+      meshj->slice_max[1]=DENORMALIZE_Y(sd->ymax);
+      meshj->slice_max[2]=DENORMALIZE_Z(sd->zmax);
       vis_gslice_data=1;
 #ifdef pp_GPU
       if(gpuactive==1){
         init_slice3d_texture(meshj);
       }
 #endif
+    }
+    else{
+      mesh *meshj;
+
+      meshj = meshinfo + sd->blocknumber;
+      meshj->slice_min[0]=1.0;
+      meshj->slice_min[1]=0.0;
+      meshj->slice_min[2]=1.0;
+      meshj->slice_max[0]=0.0;
+      meshj->slice_max[1]=1.0;
+      meshj->slice_max[2]=0.0;
     }
 
   glutPostRedisplay();
@@ -3393,8 +3410,11 @@ void update_gslice_planes(void){
 
     meshi = meshinfo + i;
 
+//    xyzmin = meshi->slice_min;
+//    xyzmax = meshi->slice_max;
     xyzmin = meshi->boxmin;
     xyzmax = meshi->boxmax;
+    if(xyzmin[0]>xyzmax[0])continue;
     xx[0]=xyzmin[0];
     yy[0]=xyzmin[1];
     zz[0]=xyzmin[2];

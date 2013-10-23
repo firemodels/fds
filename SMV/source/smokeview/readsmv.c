@@ -7908,7 +7908,12 @@ void initobst(blockagedata *bc, surfdata *surf,int index,int meshindex){
 /* ------------------ initmesh ------------------------ */
 
 void initmesh(mesh *meshi){
-
+  meshi->slice_min[0]=1.0;
+  meshi->slice_min[1]=1.0;
+  meshi->slice_min[2]=1.0;
+  meshi->slice_max[0]=0.0;
+  meshi->slice_max[1]=0.0;
+  meshi->slice_max[2]=0.0;
   meshi->s_offset[0]=-1;
   meshi->s_offset[1]=-1;
   meshi->s_offset[2]=-1;
