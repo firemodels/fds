@@ -401,7 +401,7 @@ Namelist  & FDS 5 Parameter & Namelist  & FDS 6 Parameter & Notes \\ \hline \hli
 {\ct MISC}    & {\ct RADIATION}                     &  {\ct RADI}  & {\ct RADIATION}                             & Section~\ref{info:RADI}                  \\ \hline
 {\ct MISC}    & {\ct EVAC\_SURF\_DEFAULT}           &  {\ct SURF}  & {\ct EVAC\_DEFAULT}                         & Section~\ref{info:SURF}                  \\ \hline
 {\ct MISC}    & {\ct SURF\_DEFAULT}                 &  {\ct SURF}  & {\ct DEFAULT}                               & Section~\ref{info:SURF}                  \\ \hline
-{\ct MISC}    & {\ct SUPPRESSION}                   &  {\ct REAC}  & {\ct SUPPRESSION}                           & Section~\ref{info:extinction}            \\ \hline
+\\ \hline
 {\ct MISC}    & {\ct VISCOSITY}                     &  {\ct SPEC}  &  {\ct VISCOSITY}                            & Section~\ref{info:SPEC}                  \\ \hline
 {\ct OBST}    & {\ct SAWTOOTH}                      &  {\ct SURF}  & {\ct FREE\_SLIP=.TRUE.}                     & Section~\ref{info:WALL_MODEL}            \\ \hline
 {\ct PART}    & {\ct FUEL}                          &  {\ct PART}  & {\ct SPEC\_ID='[FUEL]'}                     & Section~\ref{info:fuel_droplets}         \\ \hline
@@ -438,7 +438,6 @@ Namelist      & FDS 5 Parameter                     & Namelist     & FDS 6 Param
 {\ct REAC}    & {\ct MASS\_EXTINCTION\_COEFFICIENT} &  {\ct SPEC}  &  {\ct MASS\_EXTINCTION\_COEFFICIENT}        & Section~\ref{info:visibility}       \\ \hline
 {\ct REAC}    & {\ct MAXIMUM\_VISIBILITY}           &  {\ct MISC}  &  {\ct MAXIMUM\_VISIBILITY}                  & Section~\ref{info:visibility}       \\ \hline
 {\ct REAC}    & {\ct OXIDIZER}                      &              & New procedure                               & Section~\ref{info:REAC_Diagnostics}          \\ \hline
-{\ct REAC}    & {\ct SUPPRESSION}                   &  {\ct MISC}  &  {\ct SUPPRESSION}                          & Section~\ref{info:extinction}       \\ \hline
 {\ct REAC}    & {\ct VISIBILITY\_FACTOR}            &  {\ct MISC}  &  {\ct VISIBILITY\_FACTOR}                   & Section~\ref{info:visibility}       \\ \hline
 {\ct SPEC}    & {\ct ABSORBING}                     &  {\ct SPEC}  &  {\ct RADCAL\_ID }                          & Section~\ref{info:radiative_spec_props}  \\ \hline
 {\ct SURF}    & {\ct H\_FIXED}                      &  {\ct SURF}  & {\ct HEAT\_TRANSFER\_COEFFICIENT}           & Section~\ref{info:convection}                   \\ \hline
@@ -5169,7 +5168,7 @@ contains more details about how the mechanism works. The only
 parameter you can control is the {\ct CRITICAL\_FLAME\_TEMPERATURE} set on the {\ct REAC} line.
 The default value is 1327~$^\circ$C. This value represents combustion of typical hydrocarbon fuels. Note that if you are using an effective heat of combustion or other types of fuels, the {\ct CRITICAL\_FLAME\_TEMPERATURE} should be calculated to reflect your reaction(s).
 To eliminate any gas phase suppression, set  {\ct CRITICAL\_FLAME\_TEMPERATURE} to -273.15 ~$^\circ$C, or turn off suppression completely
-by setting {\ct SUPPRESSION=.FALSE.} on the {\ct REAC} line. This latter approach saves on computing time because it
+by setting {\ct SUPPRESSION=.FALSE.} on the {\ct MISC} line. This latter approach saves on computing time because it
 prevents FDS from entering the suppression algorithm altogether.
 
 If the mixing-controlled combustion model is used and flame extinction occurs, the unburned fuel gas can re-ignite if it mixes with sufficient oxygen somewhere
