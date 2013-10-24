@@ -43,6 +43,9 @@ float get_texture_index(float *xyz);
 void draw_triangle(float *v1, float *v2, float *v3, 
                    float t1, float t2, float t3,
                    float del, int level);
+void draw_triangle_vector(float *v1, float *v2, float *v3, 
+                   float t1, float t2, float t3,
+                   float del, int level);
 void draw_triangle_outline(float *v1, float *v2, float *v3, 
                    float del, int level);
 int getslicezlibdata(char *file,
@@ -6353,6 +6356,11 @@ void update_slicedir_count(void){
   vavg[1]=(v1[1]+v2[1])/2.0;\
   vavg[2]=(v1[2]+v2[2])/2.0
 
+#define VERT_AVG3(v1,v2,v3,vavg) \
+  vavg[0]=(v1[0]+v2[0]+v3[0])/3.0;\
+  vavg[1]=(v1[1]+v2[1]+v3[1])/3.0;\
+  vavg[2]=(v1[2]+v2[2]+v3[2])/3.0
+
 #define DIST3(v1,v2,dist2) \
   dx=v1[0]-v2[0];\
   dy=v1[1]-v2[1];\
@@ -6448,9 +6456,7 @@ float get_texture_index(float *xyz){
   
 /* ------------------ draw_quad ------------------------ */
 
-void draw_quad(float *v1, float *v2, float *v3, float *v4,
-               float t1, float t2, float t3, float t4,
-               float del, int level){
+void draw_quad(float *v1, float *v2, float *v3, float *v4, float t1, float t2, float t3, float t4, float del, int level){
   float d13,d24;
   float dx, dy, dz;
 
@@ -6538,7 +6544,87 @@ void draw_triangle(float *v1, float *v2, float *v3, float t1, float t2, float t3
     glDisable(GL_TEXTURE_1D);
   }
 }
-  
+
+/* ------------------ draw_quad_vector ------------------------ */
+
+void draw_quad_vector(float *v1, float *v2, float *v3, float *v4, float t1, float t2, float t3, float t4, float del, int level){
+  float d13,d24;
+  float dx, dy, dz;
+
+  if(level==0){
+    glBegin(GL_LINE);
+  }
+  DIST3(v1,v3,d13);
+  DIST3(v2,v4,d24);
+  if(d13<d24){
+    draw_triangle_vector(v1,v2,v3,t1,t2,t3,del,level+1);
+    draw_triangle_vector(v1,v3,v4,t1,t3,t4,del,level+1);
+  }
+  else{
+    draw_triangle_vector(v1,v2,v4,t1,t2,t4,del,level+1);
+    draw_triangle_vector(v2,v3,v4,t2,t3,t4,del,level+1);
+  }
+  if(level==0){
+    glEnd();
+  }
+}
+
+/* ------------------ draw_triangle_vector ------------------------ */
+
+void draw_triangle_vector(float *v1, float *v2, float *v3, float t1, float t2, float t3, float del, int level){
+
+  float d12, d13 ,d23;
+  float v12[3],v13[3],v23[3],vavg[3];
+  float dx, dy, dz;
+  float t12,t13,t23,tavg;
+
+  if(level==0){
+    glBegin(GL_LINE);
+  }
+  DIST3(v1,v2,d12);
+  DIST3(v1,v3,d13);
+  DIST3(v2,v3,d23);
+  if(d12<=del&&d13<=del&&d23<del){
+    VERT_AVG3(v1,v2,v3,vavg);
+    tavg=get_texture_index(vavg);
+    glTexCoord1f(tavg);
+    glVertex3fv(vavg);
+    glVertex3fv(vavg);
+  }
+  else{
+    if(d12<=MIN(d13,d23)){
+      VERT_AVG(v1,v3,v13);
+      t13=get_texture_index(v13);
+      VERT_AVG(v2,v3,v23);
+      t23=get_texture_index(v23);
+
+      draw_triangle_vector(v3,v13,v23,t3,t13,t23,del,level+1);
+      draw_quad_vector(v13,v1,v2,v23,t13,t1,t2,t23,del,level+1);
+    }
+    else if(d13<=MIN(d12,d23)){
+      VERT_AVG(v1,v2,v12);
+      t12=get_texture_index(v12);
+      VERT_AVG(v2,v3,v23);
+      t23=get_texture_index(v23);
+
+      draw_triangle_vector(v12,v2,v23,t12,t2,t23,del,level+1);
+      draw_quad_vector(v1,v12,v23,v3,t1,t12,t23,t3,del,level+1);
+    }
+    else{ // d23<=MIN(d12,d13)
+      VERT_AVG(v1,v2,v12);
+      t12=get_texture_index(v12);
+      VERT_AVG(v1,v3,v13);
+      t13=get_texture_index(v13);
+
+      draw_triangle_vector(v1,v12,v13,t1,t12,t13,del,level+1);
+      draw_quad_vector(v12,v2,v3,v13,t12,t2,t3,t13,del,level+1);
+    }
+  }
+  if(level==0){
+    glEnd();
+  }
+}
+
 /* ------------------ draw_quad_outline ------------------------ */
 
 void draw_quad_outline(float *v1, float *v2, float *v3, float *v4,
