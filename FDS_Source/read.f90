@@ -8127,6 +8127,14 @@ MESH_LOOP_1: DO NM=1,NMESHES
                   VT%R_IJ = REYNOLDS_STRESS
                ENDIF
 
+               ! Check SEM parameters
+
+               IF (N_EDDY>0) THEN
+                  IF (ANY(VT%SIGMA_IJ<TWO_EPSILON_EB)) CALL SHUTDOWN('ERROR: L_EDDY = 0 in Synthetic Eddy Method')
+                  IF (ALL(ABS(VT%R_IJ)<TWO_EPSILON_EB)) &
+                     CALL SHUTDOWN('ERROR: VEL_RMS (or Reynolds Stress) = 0 in Synthetic Eddy Method')
+               ENDIF
+
                ! Miscellaneous
 
                VT%TMP_EXTERIOR = TMP_EXTERIOR + TMPM
