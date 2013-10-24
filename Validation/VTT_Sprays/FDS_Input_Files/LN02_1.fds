@@ -1,4 +1,4 @@
-&HEAD CHID =  'LN02_2' TITLE =  'Scale 3 PDPA experiments' /
+&HEAD CHID =  'LN02_1' TITLE =  'Scale 3 PDPA experiments' /
 
 &MESH IJK= 100 100 150 XB=-0.5 0.5 -0.5 0.5 -0.5 1 /
 
