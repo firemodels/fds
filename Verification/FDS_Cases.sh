@@ -2,6 +2,7 @@
 
 $RUNFDS Atmospheric_Effects lee_waves
 $RUNFDS Atmospheric_Effects stack_effect
+$RUNFDS Atmospheric_Effects lapse_rate
 
 $RUNFDS Controls activate_vents
 $RUNFDS Controls control_test

@@ -1748,6 +1748,18 @@ Because of the low Mach number approximation, an initially divergence free flow 
 \label{divergence_test}
 \end{figure}
 
+\subsection{Multi-mesh Pressure and Temperature Lapse (\texorpdfstring{{\bf lapse\_rate}}{lapse\_rate})}
+
+A 10 m x 10 m x 40 m volume is initialized with {\ct LAPSE\_RATE=-0.01}.  The volume is divided vertically into four equal meshes with each mesh having a 10 cm grid resolution.  There should be a smooth drop in both temperature and pressure that matches the analytic values.
+
+\begin{figure}[ht]
+\begin{tabular*}{\textwidth}{lr}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/lapse_rate_T} &
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/lapse_rate_P}
+\end{tabular*}
+\caption[The {\bf lapse\_rate} case]{Centerline temperature (left) and pressure (right) profiles for the {\bf lapse\_rate} case.}
+\label{lapse_rate}
+\end{figure}
 
 
 \chapter{Thermal Radiation}
