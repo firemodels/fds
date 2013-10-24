@@ -4,7 +4,7 @@ set fdsversion=%fds_edition%
 
 set fdsdir=%svn_root%\FDS_Compilation\intel_win_%platform%
 set fdsmpidir=%svn_root%\FDS_Compilation\mpi_intel_win_%platform%
-set basename=FDS_%fds_version%_SMV_%smv_version%_win_%platform%
+set basename=FDS_%fds_version%-SMV_%smv_version%_win%platform%
 
 set in_pdf=%svn_root%\..\FIRE-LOCAL\reports\fds_manuals\
 set in_fds2ascii=%svn_root%\Utilities\fds2ascii

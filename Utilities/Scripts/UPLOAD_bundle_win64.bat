@@ -23,7 +23,7 @@ call %envfile%
 cd %svn_root%\Utilities\uploads
 
 set summary=Bundled FDS and Smokeview for %platform% (SVN r%fds_revision%,%smv_revision%)
-set exe=FDS_%fds_version%-SMV_%smv_version%_%platform%.sh
+set exe=FDS_%fds_version%-SMV_%smv_version%_%platform%.exe
 
 echo Uploading %exe%
 echo.
