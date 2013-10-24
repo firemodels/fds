@@ -2154,6 +2154,7 @@ void getsliceparams(void){
     {
       float *xplt, *yplt, *zplt;
       mesh *meshi;
+      float *xyz_min, *xyz_max;
 
       meshi = meshinfo + sd->blocknumber;
       sd->mesh_type=meshi->mesh_type;
@@ -2166,12 +2167,28 @@ void getsliceparams(void){
       sd->ymax = yplt[sd->js2];
       sd->zmin = zplt[sd->ks1];
       sd->zmax = zplt[sd->ks2];
-      sd->xyz_min[0] = xplt[sd->ijk_min[0]];
-      sd->xyz_max[0] = xplt[sd->ijk_max[0]];
-      sd->xyz_min[1] = yplt[sd->ijk_min[1]];
-      sd->xyz_max[1] = yplt[sd->ijk_max[1]];
-      sd->xyz_min[2] = zplt[sd->ijk_min[2]];
-      sd->xyz_max[2] = zplt[sd->ijk_max[2]];
+      xyz_min = sd->xyz_min;
+      xyz_max = sd->xyz_max;
+      if(sd->is_fed==0){
+        xyz_min[0] = xplt[sd->ijk_min[0]];
+        xyz_max[0] = xplt[sd->ijk_max[0]];
+        xyz_min[1] = yplt[sd->ijk_min[1]];
+        xyz_max[1] = yplt[sd->ijk_max[1]];
+        xyz_min[2] = zplt[sd->ijk_min[2]];
+        xyz_max[2] = zplt[sd->ijk_max[2]];
+      }
+      else{
+        float *xyz_min2, *xyz_max2;
+
+        xyz_min2 = sd->fedptr->co2->xyz_min;
+        xyz_max2 = sd->fedptr->co2->xyz_max;
+        xyz_min[0] = xyz_min2[0];
+        xyz_max[0] = xyz_max2[0];
+        xyz_min[1] = xyz_min2[1];
+        xyz_max[1] = xyz_max2[1];
+        xyz_min[2] = xyz_min2[2];
+        xyz_max[2] = xyz_max2[2];
+      }
     }
   }
   if(stream!=NULL)fclose(stream);
@@ -6461,9 +6478,8 @@ void draw_quad(float *v1, float *v2, float *v3, float *v4,
   
 /* ------------------ draw_triangle ------------------------ */
 
-void draw_triangle(float *v1, float *v2, float *v3, 
-                   float t1, float t2, float t3,
-                   float del, int level){
+void draw_triangle(float *v1, float *v2, float *v3, float t1, float t2, float t3, float del, int level){
+
   float d12, d13 ,d23;
   float v12[3],v13[3],v23[3];
   float dx, dy, dz;
