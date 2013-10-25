@@ -24,8 +24,8 @@ L4=importdata([repository,'FDS_Output_Files/LN02_4_line.csv']);
 
 fds40diamx =strcmp('d10_40-x',L1.colheaders);
 fds62diamx =strcmp('d10_60-x',L1.colheaders);
-fds40diam  =strcmp('d10_40',L1.colheaders);
-fds62diam  =strcmp('d10_60',L1.colheaders);
+fds40diam  =strcmp('d32_40',L1.colheaders);
+fds62diam  =strcmp('d32_60',L1.colheaders);
 fds40velox =strcmp('w00_40-x',L1.colheaders);
 fds62velox =strcmp('w00_60-x',L1.colheaders);
 fds40velo  =strcmp('w00_40',L1.colheaders);
@@ -62,7 +62,7 @@ set(gca, 'FontSize', Key_Font_Size)
 
 xlabel('Radial position (m)', 'Interpreter', Font_Interpreter,'FontSize',Label_Font_Size)
 ylabel('Droplet velocity (m/s)','FontSize',Label_Font_Size)
-h = legend({'Experiment','FDS 1cm','FDS 2cm','FDS 4cm'}, 'Location', 'Northeast');
+h = legend({'Experiment','FDS 1cm','FDS 2cm','FDS 4cm'}, 'Location', 'Northwest');
 
 set(h,'Interpreter', Font_Interpreter)
 
@@ -101,8 +101,8 @@ set(gca, 'FontName', Font_Name)
 set(gca, 'FontSize', Key_Font_Size)
 
 xlabel('Radial position (m)', 'Interpreter', Font_Interpreter,'FontSize',Label_Font_Size)
-ylabel('Diameter ({\mu}m)','FontSize',Label_Font_Size)
-h = legend({'Experiment','FDS 1cm','FDS 2cm','FDS 4cm'}, 'Location', 'Southeast');
+ylabel('Sauter mean diameter d_{32} ({\mu}m)','FontSize',Label_Font_Size)
+h = legend({'Experiment','FDS 1cm','FDS 2cm','FDS 4cm'}, 'Location', 'Southwest');
 
 set(h,'Interpreter', Font_Interpreter)
 
@@ -142,7 +142,7 @@ set(gca, 'FontSize', Key_Font_Size)
 
 xlabel('Radial position (m)', 'Interpreter', Font_Interpreter,'FontSize',Label_Font_Size)
 ylabel('Droplet Flux (kg/m^2s)','FontSize',Label_Font_Size)
-h = legend({'Experiment','FDS 1cm','FDS 2cm','FDS 4cm'}, 'Location', 'Northeast');
+h = legend({'Experiment','FDS 1cm','FDS 2cm','FDS 4cm'}, 'Location', 'Northwest');
 
 set(h,'Interpreter', Font_Interpreter)
 
@@ -183,7 +183,7 @@ set(gca, 'FontSize', Key_Font_Size)
 
 xlabel('Radial position (m)', 'Interpreter', Font_Interpreter,'FontSize',Label_Font_Size)
 ylabel('Droplet velocity (m/s)','FontSize',Label_Font_Size)
-h = legend({'Experiment','FDS 1cm','FDS 2cm','FDS 4cm'}, 'Location', 'Northeast');
+h = legend({'Experiment','FDS 1cm','FDS 2cm','FDS 4cm'}, 'Location', 'Northwest');
 
 set(h,'Interpreter', Font_Interpreter)
 
@@ -222,8 +222,8 @@ set(gca, 'FontName', Font_Name)
 set(gca, 'FontSize', Key_Font_Size)
 
 xlabel('Radial position (m)', 'Interpreter', Font_Interpreter,'FontSize',Label_Font_Size)
-ylabel('Diameter ({\mu}m)','FontSize',Label_Font_Size)
-h = legend({'Experiment','FDS 1cm','FDS 2cm','FDS 4cm'}, 'Location', 'Southeast');
+ylabel('Sauter mean diameter d_{32} ({\mu}m)','FontSize',Label_Font_Size)
+h = legend({'Experiment','FDS 1cm','FDS 2cm','FDS 4cm'}, 'Location', 'Southwest');
 
 set(h,'Interpreter', Font_Interpreter)
 
@@ -263,7 +263,7 @@ set(gca, 'FontSize', Key_Font_Size)
 
 xlabel('Radial position (m)', 'Interpreter', Font_Interpreter,'FontSize',Label_Font_Size)
 ylabel('Droplet Flux (kg/m^2s)','FontSize',Label_Font_Size)
-h = legend({'Experiment','FDS 1cm','FDS 2cm','FDS 4cm'}, 'Location', 'Northeast');
+h = legend({'Experiment','FDS 1cm','FDS 2cm','FDS 4cm'}, 'Location', 'Northwest');
 
 set(h,'Interpreter', Font_Interpreter)
 
