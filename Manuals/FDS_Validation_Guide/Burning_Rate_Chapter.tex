@@ -451,6 +451,66 @@ Combustion Efficiency   &               &          1                        & As
 \end{figure}
 
 
+\clearpage
+
+\section{Corrugated Cardboard}
+\label{Cardboard}
+
+Table~\ref{Properties_Cardboard} lists the measured properties of a double-wall corrugated cardboard with the standard U.S.~designation 69-23B-69-23C-69. Corrugated cardboard is characterized by alternating layers of homogeneous, planar liner boards and corrugated sections made up of periodic flutes. The numbers in the specification indicate the areal density in lb/(1000~ft$^2$) and the letters indicate the flute designation (B indicates a range of 45 to 52 flutes per foot and C indicates a range of 39 to 43 flutes per foot). Each layer is consists of the same lingo-cellulosic, charring material. It is assumed that each layer consists of the same homogeneous material with the density defined as the mass of the solid material divided by the volume of the layer. This representation requires slightly different definitions for the properties of each unique layer (liner board, C-flute layer, and B-flute layer).
+
+The reaction mechanism for the cardboard material includes one reaction to describe the release of residual moisture and three sequential reactions to describe thermal degradation of the virgin material to a final residual char. Each of the initial solid components (LB, CFL, and BFL) degrades according to the same three-reaction mechanism.
+\begin{eqnarray}
+   \hbox{Moisture} &\to& \hbox{Water Vapor}  \\
+   \hbox{Virgin Cardboard}  &\to& \hbox{Intermediary Solid} + \hbox{Fuel Gas}  \\
+   \hbox{Intermediary Solid}  &\to& \hbox{Char 1} + \hbox{Fuel Gas}  \\
+   \hbox{Char 1}  &\to& \hbox{Char 2} + \hbox{Fuel Gas}
+\end{eqnarray}
+
+\begin{table}[h!]
+\caption[Properties of corrugated cardboard.]{Properties of corrugated cardboard. Courtesy M. McKinnon, University of Maryland. See Section~\ref{glossary} for an explanation of terms.}
+\begin{center}
+\begin{tabular}{|l|c|c|l|l|}
+\hline
+Property                &      Units    &      Value                        & Method                                    & Reference                     \\ \hline \hline
+Moisture Density        &     kg/m$^3$  & 1000                              & Direct                                    & \cite{Kempel:1}               \\ \hline
+& & & & \\ \hline
+& & & & \\ \hline
+& & & & \\ \hline
+& & & & \\ \hline
+\end{tabular}
+\end{center}
+\label{Properties_Cardboard}
+\end{table}
+Table~\ref{Dimensions_Cardboard} lists the composition and thickness of each of the layers. The sample is insulated with 28~mm of Kaowool PM board, manufactured by ThermalCeramics (www.thermalceramics.com).
+\begin{table}[h!]
+\caption[Cardboard composition and dimensions]{Cardboard composition and dimensions.}
+\begin{center}
+\begin{tabular}{|c|l|c|l|l|}
+\hline
+Layer	  & Composition   & Thickness (mm) \\ \hline \hline
+1	      & Liner Board	  & 0.64       \\ \hline
+2	      & C Flute Layer & 3.2        \\ \hline
+3	      & Liner Board	  & 0.64       \\ \hline
+4	      & B Flute Layer & 2.1        \\ \hline
+5	      & Liner Board	  & 0.64       \\ \hline
+6	      & Kaowool	      & 28         \\ \hline
+\end{tabular}
+\end{center}
+\label{Dimensions_Cardboard}
+\end{table}
+The gasification experiments were conducted in a modified cone calorimeter referred to as the controlled atmosphere pyrolysis apparatus (CAPA)~\cite{Semmes:IAFSS11}, in which the sample is surrounded by nitrogen to prevent ignition. Measured and predicted mass loss rates at imposed heat fluxes of 20~kW/m$^2$, 40~kW/m$^2$, and 60~kW/m$^2$ are shown in Fig.~\ref{MLR_Cardboard}.
+
+\begin{figure}[h!]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/FAA_Polymers/Cardboard_DW_20} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/FAA_Polymers/Cardboard_DW_40} \\
+ & \includegraphics[height=2.2in]{SCRIPT_FIGURES/FAA_Polymers/Cardboard_DW_60}
+\end{tabular*}
+\caption[Mass loss rate of corrugated cardboard]{Mass loss rate of corrugated cardboard.}
+\label{MLR_Cardboard}
+\end{figure}
+
+
 
 
 
@@ -558,8 +618,8 @@ The experimental and FDS results are shown in Fig.~\ref{christifire_small_scale_
 \subsection{Estimation of thermal parameters and validation}
 
 The remaining pyrolysis model parameters were estimated by fitting the calculated cone calorimeter results to the experimental ones at 50~kW/m$^2$ heat flux.
-The cone calorimeter sample consisting of seven cables is modeled as a rectangular solid. The layer structure of the cable sample is assumed to be 
-symmetrical: 
+The cone calorimeter sample consisting of seven cables is modeled as a rectangular solid. The layer structure of the cable sample is assumed to be
+symmetrical:
 \begin{enumerate}
 \item sheath (2.1 mm)
 \item insulation (2.1 mm)
@@ -568,12 +628,12 @@ symmetrical:
 \item sheath (2.1 mm)
 \item insulating calcium silicate backing board (20 mm)
 \end{enumerate}
-The layer thicknesses are calculated using the component mass fractions and densities. 
-For fitting the thermal parameters, the experimental heat release rate and mass loss rate curves were used. The results of the fitted models are shown in 
+The layer thicknesses are calculated using the component mass fractions and densities.
+For fitting the thermal parameters, the experimental heat release rate and mass loss rate curves were used. The results of the fitted models are shown in
 Fig.~\ref{christifire_cone_results_50}. The remaining parameters for v1 and v2 are listed in the following tables.
 
 Next, the model parameters were fixed and the model is validated by comparing the FDS and eperimental results at 25~kW/m$^2$ and 75~kW/m$^2$ heat fluxes.
-The results are shown in Fig.~\ref{christifire_cone_results_other_fluxes}. 
+The results are shown in Fig.~\ref{christifire_cone_results_other_fluxes}.
 
 \begin{table}
 \begin{center}
@@ -649,7 +709,7 @@ The results are shown in Fig.~\ref{christifire_cone_results_other_fluxes}.
 \begin{tabular}{c c}
  \includegraphics[height=3in]{SCRIPT_FIGURES/CHRISTIFIRE/CHRISTIFIRE_C701_hrr_50} &
 \includegraphics[height=3in]{SCRIPT_FIGURES/CHRISTIFIRE/CHRISTIFIRE_C701_mlr_50} \\
- \includegraphics[height=3in]{SCRIPT_FIGURES/CHRISTIFIRE/CHRISTIFIRE_C701_ehc_50} &  
+ \includegraphics[height=3in]{SCRIPT_FIGURES/CHRISTIFIRE/CHRISTIFIRE_C701_ehc_50} &
 \end{tabular}
 \caption{Cone calorimeter fitting of CHRISTIFIRE cable 701 at 50~kW/m$^2$ heat flux.}
 \label{christifire_cone_results_50}
@@ -661,7 +721,7 @@ The results are shown in Fig.~\ref{christifire_cone_results_other_fluxes}.
 \includegraphics[height=2.8in]{SCRIPT_FIGURES/CHRISTIFIRE/CHRISTIFIRE_C701_hrr_75} \\
  \includegraphics[height=2.8in]{SCRIPT_FIGURES/CHRISTIFIRE/CHRISTIFIRE_C701_mlr_25} &
 \includegraphics[height=2.8in]{SCRIPT_FIGURES/CHRISTIFIRE/CHRISTIFIRE_C701_mlr_75} \\
- \includegraphics[height=2.8in]{SCRIPT_FIGURES/CHRISTIFIRE/CHRISTIFIRE_C701_ehc_75} &  
+ \includegraphics[height=2.8in]{SCRIPT_FIGURES/CHRISTIFIRE/CHRISTIFIRE_C701_ehc_75} &
  \includegraphics[height=2.8in]{SCRIPT_FIGURES/CHRISTIFIRE/CHRISTIFIRE_C701_ehc_25}
 \end{tabular}
 \caption{Cone calorimeter validation of CHRISTIFIRE cable 701 at 25 and 75~kW/m$^2$ heat fluxes.}
