@@ -18,7 +18,7 @@ then
   echo "Usage: $progname [-p nprocesses] casename "
   echo ""
   echo " -d directory - directory containing case"
-  echo " -q queue - queue used to run cases (only fire60s, fire70s or vis)"
+  echo " -q queue - queue used to run cases (only fire70s or vis)"
   echo " -p nprocesses - number of processes used to run a case [default: 1] "
   echo "input_file - input file"
   echo ""

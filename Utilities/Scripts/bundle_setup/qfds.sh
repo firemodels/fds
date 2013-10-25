@@ -21,16 +21,15 @@ then
   echo "This script runs 64 bit serial or parallel versions of FDS using an executable"
   echo "specified on the command line or FDS from the respository if -r is specified."
   echo "The parallel FDS is invoked by using -p to specifying multiple processes."
-  echo "Alternate queues (vis, fire60s or fire70s) are set using the -q option."
+  echo "Alternate queues (vis, fire70s) are set using the -q option."
   echo ""
   echo " -b use debug version"
   echo " -d directory [default: .]"
   echo " -n processes per node - maximum number of processes per node [default: "
-  echo "    (serial: 1, parallel: 8 for new cluster and fire70s, 4 for the fire60s" 
-  echo "                          and vis queues)]"
+  echo "    (serial: 1, parallel: 8 for new cluster and fire70s, 4 for the vis queues)" 
   echo " -p nprocesses - number of processes used to run a case [default: 1] "
   echo " -q queue - name of the queue. choices: [default: $queue (other choices:"  
-  echo "    vis, fire60s and fire70s)"
+  echo "    vis and fire70s)"
   echo " -r - use FDS (or Smokeview if -s is specified) located in repository"
   echo " -f repository root - name and location of repository where FDS is located"
   echo "    [default: ~/FDS-SMV]"
@@ -119,17 +118,6 @@ if [ "$USE_SMOKEVIEW" == "y" ] ; then
 fi
 if [ "$use_debug" == "1" ] ; then
 DB=_db
-fi
-
-# set number of processes per node  to 4 if the fire60s queue is being used
-# (the fire60s only have 4 cores)
-
-if [ "$queue" == "fire60s" ]
-then
-if test $nprocesses_per_node_defined -eq 0 
-then
-  nprocesses_per_node=4
-fi
 fi
 
 if [ $use_repository -eq 0 ]
