@@ -434,28 +434,6 @@ Three experiments were conducted in a standard compartment, 3.6~m long by 2.4~m 
 \label{SP_Test_2_3_Gas}
 \end{figure}
 
-\clearpage
-
-\subsection{UL/NIST Vent Experiments}
-
-The ceiling jet temperatures were measured at two locations, 90~cm from the short ends of the 2.4~m by 1.2~m double vent.
-
-\newpage
-
-\begin{figure}[p]
-\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/UL_NIST_Vents/UL_NIST_Vents_Test_1_Jet_Tree_1} &
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/UL_NIST_Vents/UL_NIST_Vents_Test_1_Jet_Tree_2} \\
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/UL_NIST_Vents/UL_NIST_Vents_Test_2_Jet_Tree_1} &
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/UL_NIST_Vents/UL_NIST_Vents_Test_2_Jet_Tree_2} \\
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/UL_NIST_Vents/UL_NIST_Vents_Test_3_Jet_Tree_1} &
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/UL_NIST_Vents/UL_NIST_Vents_Test_3_Jet_Tree_2} \\
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/UL_NIST_Vents/UL_NIST_Vents_Test_4_Jet_Tree_1} &
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/UL_NIST_Vents/UL_NIST_Vents_Test_4_Jet_Tree_2}
-\end{tabular*}
-\label{UL_NIST_Ceiling_Jet}
-\end{figure}
-
 
 \clearpage
 
@@ -504,6 +482,29 @@ The primary purpose of the UL/NFPRF experiments was to measure sprinkler activat
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/UL_NFPRF/UL_NFPRF_1_22_jet}
 \end{tabular*}
 \label{UL_NFPRF_jet_3}
+\end{figure}
+
+
+\clearpage
+
+\subsection{UL/NIST Vent Experiments}
+
+The ceiling jet temperatures were measured at two locations, 90~cm from the short ends of the 2.4~m by 1.2~m double vent.
+
+\newpage
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/UL_NIST_Vents/UL_NIST_Vents_Test_1_Jet_Tree_1} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/UL_NIST_Vents/UL_NIST_Vents_Test_1_Jet_Tree_2} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/UL_NIST_Vents/UL_NIST_Vents_Test_2_Jet_Tree_1} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/UL_NIST_Vents/UL_NIST_Vents_Test_2_Jet_Tree_2} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/UL_NIST_Vents/UL_NIST_Vents_Test_3_Jet_Tree_1} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/UL_NIST_Vents/UL_NIST_Vents_Test_3_Jet_Tree_2} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/UL_NIST_Vents/UL_NIST_Vents_Test_4_Jet_Tree_1} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/UL_NIST_Vents/UL_NIST_Vents_Test_4_Jet_Tree_2}
+\end{tabular*}
+\label{UL_NIST_Ceiling_Jet}
 \end{figure}
 
 
@@ -770,16 +771,38 @@ In the WTC experiments, the compartment was 7~m long, 3.6~m wide and 3.8~m high.
 
 \subsection{Summary of Ceiling Jet Temperature Predictions}
 
+The scatter plots below summarize the comparisons of predicted and measured ceiling jet temperatures. Figure~\ref{Flat_Ceiling_Jet_Summary} includes the majority of the experimental data where the ceiling was relatively flat and smooth. This data has been used in the most recent NRC/EPRI fire model validation study~\cite{NUREG_1824}. Figure~\ref{Sloped_Ceiling_Jet_Summary} includes data from experiments in which the ceiling was sloped or arched. Empirical correlations and zone models do not typically address this situation; thus, these results are compiled separately. Similarly, Fig.~\ref{Low_Ceiling_Jet_Summary} includes results of experiments in which the fire was very small (less than 5~kW) and the ceiling jet temperatures were close to ambient.
+
 \begin{figure}[h!]
 \begin{center}
 \begin{tabular}{c}
-\includegraphics[width=3.8in]{SCRIPT_FIGURES/ScatterPlots/FDS_Flat_Ceiling_Jet_Temperature} \\
+\includegraphics[width=3.8in]{SCRIPT_FIGURES/ScatterPlots/FDS_Flat_Ceiling_Jet_Temperature} 
+\end{tabular}
+\end{center}
+\caption[Summary of flat ceiling jet temperature predictions]{Summary of flat ceiling jet temperature predictions.}
+\label{Flat_Ceiling_Jet_Summary}
+\end{figure}
+
+\begin{figure}[h!]
+\begin{center}
+\begin{tabular}{c}
 \includegraphics[width=3.8in]{SCRIPT_FIGURES/ScatterPlots/FDS_Sloped_Ceiling_Jet_Temperature}
 \end{tabular}
 \end{center}
-\caption[Summary of ceiling jet temperature predictions.]
-{Summary of ceiling jet temperature predictions.}
+\caption[Summary of sloped ceiling jet temperature predictions]{Summary of sloped ceiling jet temperature predictions.}
+\label{Sloped_Ceiling_Jet_Summary}
 \end{figure}
+
+\begin{figure}[h!]
+\begin{center}
+\begin{tabular}{c}
+\includegraphics[width=3.8in]{SCRIPT_FIGURES/ScatterPlots/FDS_Low_Ceiling_Jet_Temperature} 
+\end{tabular}
+\end{center}
+\caption[Summary of ceiling jet temperature predictions for very small fires]{Summary of ceiling jet temperature predictions for very small fires.}
+\label{Low_Ceiling_Jet_Summary}
+\end{figure}
+
 
 
 
