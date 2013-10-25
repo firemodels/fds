@@ -5,6 +5,8 @@
 close all
 clear all
 
+plot_style
+
 res_dir = '../../Validation/Wind_Engineering/FDS_Output_Files/';
 exp_dir = '../../Validation/Wind_Engineering/Experimental_Data/';
 plt_dir = '../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/Wind_Engineering/';
@@ -65,11 +67,24 @@ for ind1 = 1:length(str_mesh) % cycles through meshes
                 hold off
                 axis([0,x_max_plot,-1.7,1.5])
                 xlabel('Position along line (m)')
-                ylabel('C_p','Rotation',0)
-                title(['Mean C_p for an angle of ',angle,...
-                    ' at y = ',line_plot,' m'])
-                legend('FDS (Mean C_p Windward Wall)','FDS (Mean C_p Roof)',...
-                    'FDS (Mean C_p Leeward Wall)', 'Exp (Mean C_p)','Location', 'NorthEast')
+                ylabel('Mean C_p')
+                Plot_Title=['{\it y} = ',line_plot,' m'];
+                text(.01,1.2,Plot_Title,'FontSize',Title_Font_Size,'FontName',Font_Name,'Interpreter',Font_Interpreter)
+
+                % Add SVN if file is available
+                SVN_Filename = [res_dir,'UWO_test7_case1_',angle,'_',mesh,'_svn.txt'];
+                if exist(SVN_Filename,'file')
+                    SVN = importdata(SVN_Filename);
+                    x_lim = get(gca,'XLim');
+                    y_lim = get(gca,'YLim');
+                    X_SVN_Position = x_lim(1)+SVN_Scale_X*(x_lim(2)-x_lim(1));
+                    Y_SVN_Position = y_lim(1)+SVN_Scale_Y*(y_lim(2)-y_lim(1));
+                    text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
+                        'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
+                end
+
+                legend('FDS (Windward Wall)','FDS (Roof)','FDS (Leeward Wall)', 'Exp','Location', 'NorthEast')
+                legend boxoff
                                                
                 print('-dpdf',[plt_dir,'cp_mean_',angle,'_',mesh,'_',line_file])
                 
@@ -86,10 +101,27 @@ for ind1 = 1:length(str_mesh) % cycles through meshes
                 hold off
                 axis([0,x_max_plot,-1.7,1.5])
                 xlabel('Position along line (m)')
-                ylabel('C_p','Rotation',0)
-                title(['Mean C_p for an angle of ',angle,...
-                    ' on side wall at z = ',line_plot,' m'])
-                legend('FDS (Mean C_p)','Exp (Mean C_p)','Location', 'NorthEast')               
+                ylabel('Mean C_p')
+                % title(['Mean C_p for an angle of ',angle,...
+                %     ' on side wall at z = ',line_plot,' m'])
+
+                Plot_Title=['Side wall, {\it z} = ',line_plot,' m'];
+                text(.005,1.2,Plot_Title,'FontSize',Title_Font_Size,'FontName',Font_Name,'Interpreter',Font_Interpreter)
+
+                % Add SVN if file is available
+                SVN_Filename = [res_dir,'UWO_test7_case1_',angle,'_',mesh,'_svn.txt'];
+                if exist(SVN_Filename,'file')
+                    SVN = importdata(SVN_Filename);
+                    x_lim = get(gca,'XLim');
+                    y_lim = get(gca,'YLim');
+                    X_SVN_Position = x_lim(1)+SVN_Scale_X*(x_lim(2)-x_lim(1));
+                    Y_SVN_Position = y_lim(1)+SVN_Scale_Y*(y_lim(2)-y_lim(1));
+                    text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
+                        'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
+                end
+
+                legend('FDS','Exp','Location', 'NorthEast')
+                legend boxoff
                                
                 print('-dpdf',[plt_dir,'cp_mean_',angle,'_',mesh,'_',line_file])
                 
