@@ -49,5 +49,8 @@ $QFDS -r $qq -d $INDIR FAA_Polymers_PP.fds
 $QFDS -r $qq -d $INDIR FAA_Polymers_PA66.fds
 $QFDS -r $qq -d $INDIR FAA_Polymers_POM.fds
 $QFDS -r $qq -d $INDIR FAA_Polymers_PET.fds
+$QFDS -r $qq -d $INDIR Cardboard_DW_20.fds
+$QFDS -r $qq -d $INDIR Cardboard_DW_40.fds
+$QFDS -r $qq -d $INDIR Cardboard_DW_60.fds
 
 echo FDS cases submitted
