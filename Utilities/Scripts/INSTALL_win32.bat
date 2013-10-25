@@ -20,7 +20,7 @@ call %envfile%
 %svn_drive%
 cd %svn_root%\Utilities\uploads
 
-set platform=win_32
-set exe=FDS_%fds_version%_SMV_%smv_version%_%platform%.exe
+set platform=win32
+set exe=FDS_%fds_version%-SMV_%smv_version%_%platform%.exe
 call %exe%
 pause
