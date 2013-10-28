@@ -143,26 +143,26 @@ DO NN=1,N_HVAC_READ
          DU=> DUCT(I_DUCT)
          DU%ID   = ID
          IF (DIAMETER <= 0._EB .AND. AREA <= 0._EB .AND. PERIMETER <= 0._EB) THEN
-            WRITE(MESSAGE,'(A,I2)') 'ERROR: Duct has no AREA, DIAMETER, or PERIMTER, HVAC line number ',NN
+            WRITE(MESSAGE,'(A,I5)') 'ERROR: Duct has no AREA, DIAMETER, or PERIMTER, HVAC line number ',NN
             CALL SHUTDOWN(MESSAGE)
          ENDIF
          IF (DIAMETER > 0._EB) THEN
             IF (PERIMETER > 0._EB) THEN
-              WRITE(MESSAGE,'(A,I2)') 'ERROR: Duct cannot input both PERIMETER and DIAMETER, HVAC line number ',NN
+              WRITE(MESSAGE,'(A,I5)') 'ERROR: Duct cannot input both PERIMETER and DIAMETER, HVAC line number ',NN
               CALL SHUTDOWN(MESSAGE)
             ENDIF
             AREA = 0.5_EB*PIO2*DIAMETER**2
          ENDIF
          IF (AREA > 0._EB) THEN
             IF (DIAMETER >  0._EB .AND. PERIMETER >  0._EB) THEN               
-              WRITE(MESSAGE,'(A,I2)') 'ERROR: Duct cannot input both PERIMETER and DIAMETER with AREA, HVAC line number ',NN
+              WRITE(MESSAGE,'(A,I5)') 'ERROR: Duct cannot input both PERIMETER and DIAMETER with AREA, HVAC line number ',NN
               CALL SHUTDOWN(MESSAGE)
             ENDIF
             IF (PERIMETER <= 0._EB) DIAMETER = SQRT(2._EB*AREA/PIO2)
             IF (PERIMETER >  0._EB) DIAMETER = 4._EB*AREA/PERIMETER
          ENDIF  
          IF (PERIMETER > 0._EB .AND. AREA <= 0._EB) THEN
-            WRITE(MESSAGE,'(A,I2)') 'ERROR: Duct cannot have PERIMETER without AREA, HVAC line number ',NN
+            WRITE(MESSAGE,'(A,I5)') 'ERROR: Duct cannot have PERIMETER without AREA, HVAC line number ',NN
             CALL SHUTDOWN(MESSAGE)
          ENDIF
          DU%AREA_INITIAL = AREA
@@ -176,17 +176,17 @@ DO NN=1,N_HVAC_READ
          ENDIF
          DU%LOSS(1:2) = MAX(0._EB,LOSS(1:2,1))
          IF (CTRL_ID /='null' .AND. DEVC_ID /='null') THEN
-            WRITE(MESSAGE,'(A,I2)') 'ERROR: Can only specify one of CTRL_ID or DEVC_ID, HVAC line number ',NN
+            WRITE(MESSAGE,'(A,I5)') 'ERROR: Can only specify one of CTRL_ID or DEVC_ID, HVAC line number ',NN
             CALL SHUTDOWN(MESSAGE)
          ENDIF
          IF (DAMPER .AND. (FAN_ID /='null' .OR. AIRCOIL_ID /='null') .OR. &
              FAN_ID/='null' .AND. (DAMPER .OR. AIRCOIL_ID /='null') .OR. &
              AIRCOIL_ID/='null' .AND. (DAMPER .OR. FAN_ID /='null')) THEN
-            WRITE(MESSAGE,'(A,I2)') 'ERROR: Duct can only have one of damper, fan or aircoil, HVAC line number ',NN
+            WRITE(MESSAGE,'(A,I5)') 'ERROR: Duct can only have one of damper, fan or aircoil, HVAC line number ',NN
             CALL SHUTDOWN(MESSAGE)
          ENDIF
          IF (FAN_ID/='null' .AND. N_FANS<=0) THEN
-            WRITE(MESSAGE,'(A,I2)') 'ERROR: Duct has fan specied but no fans have been defined, HVAC line number ',NN
+            WRITE(MESSAGE,'(A,I5)') 'ERROR: Duct has fan specied but no fans have been defined, HVAC line number ',NN
             CALL SHUTDOWN(MESSAGE)
          ENDIF
          DU%DAMPER = DAMPER
@@ -287,11 +287,11 @@ DO NN=1,N_HVAC_READ
          IF (TAU_FAN < 0._EB) FAN(I_FAN)%SPIN_INDEX = TSQR_RAMP
          IF (RAMP_ID /= 'null') CALL GET_RAMP_INDEX(RAMP_ID,'FAN',FAN(I_FAN)%RAMP_INDEX)
          IF(( (MAX_FLOW<1.E6_EB .OR. MAX_PRESSURE<1.E6_EB) .AND. (VOLUME_FLOW<1.E6_EB .OR. RAMP_ID/='null')))THEN !.OR. &
-            WRITE(MESSAGE,'(A,I2)') 'ERROR: FAN can only be one of constant volume, quadratic or ramp, HVAC line number ',NN
+            WRITE(MESSAGE,'(A,I5)') 'ERROR: FAN can only be one of constant volume, quadratic or ramp, HVAC line number ',NN
             CALL SHUTDOWN(MESSAGE)
          ENDIF
          IF ((MAX_PRESSURE<1.E6_EB .AND. MAX_FLOW>1.E6_EB) .OR. (MAX_PRESSURE>1.E6_EB .AND. MAX_FLOW<1.E6_EB)) THEN
-            WRITE(MESSAGE,'(A,I2)') 'ERROR: IF one of MAX_PRESSURE or MAX_FLOW given, both must be specified, HVAC line number '&
+            WRITE(MESSAGE,'(A,I5)') 'ERROR: IF one of MAX_PRESSURE or MAX_FLOW given, both must be specified, HVAC line number '&
                                     ,NN
             CALL SHUTDOWN(MESSAGE)
          ENDIF
@@ -546,17 +546,17 @@ NODE_LOOP: DO NN = 1, N_DUCTNODES
       ENDDO MESH_LOOP
    ENDIF
    IF (DN%VENT_INDEX > 0 .AND. DN%AMBIENT) THEN
-      WRITE(MESSAGE,'(A,I2,A,A)') 'ERROR: DUCTNODE cannot be AMBIENT and have an assigned VENT_ID, DUCTNODE ',NN,&
+      WRITE(MESSAGE,'(A,I5,A,A)') 'ERROR: DUCTNODE cannot be AMBIENT and have an assigned VENT_ID, DUCTNODE ',NN,&
                                   ', DUCTNODE ID:',TRIM(DN%ID)
       CALL SHUTDOWN(MESSAGE)
    ENDIF
    IF (DN%N_DUCTS == 1 .AND. DN%VENT_INDEX < 0 .AND. .NOT. DN%AMBIENT) THEN
-      WRITE(MESSAGE,'(A,I2,A,A)') 'ERROR: Internal DUCTNODE must have at least two attached ducts, DUCTNODE ',NN,&
+      WRITE(MESSAGE,'(A,I5,A,A)') 'ERROR: Internal DUCTNODE must have at least two attached ducts, DUCTNODE ',NN,&
                                   ', DUCTNODE ID:',TRIM(DN%ID)
       CALL SHUTDOWN(MESSAGE)
    ENDIF  
    IF (DN%N_DUCTS> 1 .AND. (DN%AMBIENT .OR. DN%VENT_INDEX > 0) ) THEN
-      WRITE(MESSAGE,'(A,I2,A,A)') 'ERROR: External DUCTNODE can only have one attached duct, DUCTNODE ',NN,&
+      WRITE(MESSAGE,'(A,I5,A,A)') 'ERROR: External DUCTNODE can only have one attached duct, DUCTNODE ',NN,&
                                   ', DUCTNODE ID:',TRIM(DN%ID)
       CALL SHUTDOWN(MESSAGE)
    ENDIF  
@@ -576,7 +576,7 @@ NODE_LOOP: DO NN = 1, N_DUCTNODES
          ENDIF
       ENDDO
       IF (DN%DUCT_INDEX(ND)==-1) THEN
-         WRITE(MESSAGE,'(A,I2,A,I2,A,A)') 'ERROR: DUCT ',ND,' not found for DUCTNODE ',NN,&
+         WRITE(MESSAGE,'(A,I5,A,I5,A,A)') 'ERROR: DUCT ',ND,' not found for DUCTNODE ',NN,&
                                   ', DUCTNODE ID:',TRIM(DN%ID)
          CALL SHUTDOWN(MESSAGE)
       ENDIF  
@@ -1237,7 +1237,7 @@ NODE_LOOP: DO NN = 1, N_DUCTNODES
                IF (NODE_ZONE == -1) THEN
                   NODE_ZONE = WC%PRESSURE_ZONE
                ELSE
-                  WRITE(MESSAGE,'(A,I2)') 'ERROR: VENT for a NODE must lie with a single pressure zone. Node: ',NN
+                  WRITE(MESSAGE,'(A,I5)') 'ERROR: VENT for a NODE must lie with a single pressure zone. Node: ',NN
                   CALL SHUTDOWN(MESSAGE)
                ENDIF
             ENDIF
