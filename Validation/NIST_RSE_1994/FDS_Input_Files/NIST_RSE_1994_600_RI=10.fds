@@ -24,7 +24,7 @@
 
 &REAC ID = 'R2'
       FUEL = 'CARBON MONOXIDE'
-      A = 3.98e8
+      A = 1.5e9
       E = 41840
       SPEC_ID_NU='CARBON MONOXIDE','OXYGEN','CARBON DIOXIDE'
       NU= -1,-0.5,1
