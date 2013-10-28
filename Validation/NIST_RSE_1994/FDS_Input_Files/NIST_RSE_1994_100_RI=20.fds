@@ -28,7 +28,7 @@
 
 &REAC ID = 'R2'
       FUEL = 'CARBON MONOXIDE'
-      A = 3.98e8
+      A = 1.5e9
       E = 41840
       SPEC_ID_NU='CARBON MONOXIDE','OXYGEN','CARBON DIOXIDE'
       NU= -1,-0.5,1
@@ -43,7 +43,7 @@
       NU= -1,0.5,1
       SPEC_ID_N_S='OXYGEN','CARBON DIOXIDE','WATER VAPOR'
       N_S = -0.25,1,0.5
-      N_T = -0.97/ 
+      N_T = -0.97/
 
 &SURF ID                   = 'LINER', DEFAULT=.TRUE.
       MATL_ID              = 'MARINITE'
