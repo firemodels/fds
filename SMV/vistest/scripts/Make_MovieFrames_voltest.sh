@@ -17,5 +17,5 @@ rm -f Voltest/frames/voltest2*.png
 
 #$QSMV -d Voltest -p 20 mplume8n
 #$QSMV -d Voltest -p 30 -q fire70s  mplumeB8n
-$QSMV -d Voltest -p 30 voltest2
+$QSMV -d Voltest -p 30 -q vis voltest2
 #$QSMV -d Voltest -p 30 voltest3

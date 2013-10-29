@@ -6,7 +6,6 @@ set SMV_TESTSTRING=
 IF "%COMPILERS_DEFINED%"=="1" GOTO envexist
   set COMPILERS_DEFINED=1
   call "%VS_COMPILER%\..\vcvarsall" x86_amd64
-  call "%IFORT_COMPILER13%\bin\compilervars" intel64
 :envexist
 
 if "%1" NEQ "-t" goto endif

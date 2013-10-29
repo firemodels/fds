@@ -7,7 +7,7 @@ IF "%SETUP_IFORT_COMPILER_64%"=="1" GOTO envexist
 set SETUP_IFORT_COMPILER_64=1
 
 echo Setting up compiler environment
-call "%IFORT_COMPILER13%\bin\compilervars" intel64
+call "%IFORT_COMPILER14%\bin\compilervars" intel64
 :envexist
 
 set SMV_TESTFLAG=
