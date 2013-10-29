@@ -44,7 +44,6 @@ void draw_triangle(float *v1, float *v2, float *v3,
                    float t1, float t2, float t3,
                    float del, int level);
 void draw_triangle_vector(float *v1, float *v2, float *v3, 
-                   float t1, float t2, float t3,
                    float del, int level);
 void draw_triangle_outline(float *v1, float *v2, float *v3, 
                    float del, int level);
@@ -6547,7 +6546,7 @@ void draw_triangle(float *v1, float *v2, float *v3, float t1, float t2, float t3
 
 /* ------------------ draw_quad_vector ------------------------ */
 
-void draw_quad_vector(float *v1, float *v2, float *v3, float *v4, float t1, float t2, float t3, float t4, float del, int level){
+void draw_quad_vector(float *v1, float *v2, float *v3, float *v4, float del, int level){
   float d13,d24;
   float dx, dy, dz;
 
@@ -6557,12 +6556,12 @@ void draw_quad_vector(float *v1, float *v2, float *v3, float *v4, float t1, floa
   DIST3(v1,v3,d13);
   DIST3(v2,v4,d24);
   if(d13<d24){
-    draw_triangle_vector(v1,v2,v3,t1,t2,t3,del,level+1);
-    draw_triangle_vector(v1,v3,v4,t1,t3,t4,del,level+1);
+    draw_triangle_vector(v1,v2,v3,del,level+1);
+    draw_triangle_vector(v1,v3,v4,del,level+1);
   }
   else{
-    draw_triangle_vector(v1,v2,v4,t1,t2,t4,del,level+1);
-    draw_triangle_vector(v2,v3,v4,t2,t3,t4,del,level+1);
+    draw_triangle_vector(v1,v2,v4,del,level+1);
+    draw_triangle_vector(v2,v3,v4,del,level+1);
   }
   if(level==0){
     glEnd();
@@ -6571,12 +6570,12 @@ void draw_quad_vector(float *v1, float *v2, float *v3, float *v4, float t1, floa
 
 /* ------------------ draw_triangle_vector ------------------------ */
 
-void draw_triangle_vector(float *v1, float *v2, float *v3, float t1, float t2, float t3, float del, int level){
+void draw_triangle_vector(float *v1, float *v2, float *v3, float del, int level){
 
   float d12, d13 ,d23;
   float v12[3],v13[3],v23[3],vavg[3];
   float dx, dy, dz;
-  float t12,t13,t23,tavg;
+  float tavg;
 
   if(level==0){
     glBegin(GL_LINE);
@@ -6594,30 +6593,24 @@ void draw_triangle_vector(float *v1, float *v2, float *v3, float t1, float t2, f
   else{
     if(d12<=MIN(d13,d23)){
       VERT_AVG(v1,v3,v13);
-      t13=get_texture_index(v13);
       VERT_AVG(v2,v3,v23);
-      t23=get_texture_index(v23);
 
-      draw_triangle_vector(v3,v13,v23,t3,t13,t23,del,level+1);
-      draw_quad_vector(v13,v1,v2,v23,t13,t1,t2,t23,del,level+1);
+      draw_triangle_vector(v3,v13,v23,del,level+1);
+      draw_quad_vector(v13,v1,v2,v23,del,level+1);
     }
     else if(d13<=MIN(d12,d23)){
       VERT_AVG(v1,v2,v12);
-      t12=get_texture_index(v12);
       VERT_AVG(v2,v3,v23);
-      t23=get_texture_index(v23);
 
-      draw_triangle_vector(v12,v2,v23,t12,t2,t23,del,level+1);
-      draw_quad_vector(v1,v12,v23,v3,t1,t12,t23,t3,del,level+1);
+      draw_triangle_vector(v12,v2,v23,del,level+1);
+      draw_quad_vector(v1,v12,v23,v3,del,level+1);
     }
     else{ // d23<=MIN(d12,d13)
       VERT_AVG(v1,v2,v12);
-      t12=get_texture_index(v12);
       VERT_AVG(v1,v3,v13);
-      t13=get_texture_index(v13);
 
-      draw_triangle_vector(v1,v12,v13,t1,t12,t13,del,level+1);
-      draw_quad_vector(v12,v2,v3,v13,t12,t2,t3,t13,del,level+1);
+      draw_triangle_vector(v1,v12,v13,del,level+1);
+      draw_quad_vector(v12,v2,v3,v13,del,level+1);
     }
   }
   if(level==0){
