@@ -1848,8 +1848,7 @@ ELSE PARTICLE_NON_STATIC_IF ! Drag calculation for stationary, airborne particle
          LP%ACCEL_Y = VBAR*(1._EB/OBDT-1._EB)*RDT
          LP%ACCEL_Z = WBAR*(1._EB/OBDT-1._EB)*RDT
       CASE (SCREEN_DRAG)
-         IF (QREL > TWO_EPSILON_EB .AND. LPC%FREE_AREA_FRACTION < 1.0_EB ) THEN
-            TMP_G  = MAX(TMPMIN,TMP(IIG,JJG,KKG))
+         IF (QREL > 0.015_EB .AND. LPC%FREE_AREA_FRACTION < 1.0_EB ) THEN !0.015 from test.  Below this drag can result in instability            TMP_G  = MAX(TMPMIN,TMP(IIG,JJG,KKG))
             IF (N_TRACKED_SPECIES>0) ZZ_GET(1:N_TRACKED_SPECIES) = ZZ(IIG,JJG,KKG,1:N_TRACKED_SPECIES)
             CALL GET_VISCOSITY(ZZ_GET,MU_AIR,TMP_G)
             K_SCREEN = 3.44E-9_EB*LPC%FREE_AREA_FRACTION**1.6_EB
