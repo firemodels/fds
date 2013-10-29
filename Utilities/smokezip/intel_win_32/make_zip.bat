@@ -7,7 +7,7 @@ IF "%SETUP_IFORT_COMPILER_IA32%"=="1" GOTO envexist
 set SETUP_IFORT_COMPILER_IA32=1
 
 echo Setting up compiler environment
-call "%IFORT_COMPILER13%\bin\compilervars" ia32
+call "%IFORT_COMPILER14%\bin\compilervars" ia32
 if exist "%VS_COMPILER%\vcvars32x86_amd64.bat" call "%VS_COMPILER%\vcvars32x86_amd64"
 :envexist
 erase *.obj
