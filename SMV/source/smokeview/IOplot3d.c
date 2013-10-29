@@ -319,7 +319,7 @@ void readplot3d(char *file, int ifile, int flag, int *errorcode){
       
       sprintf(numstring,"%i",nn);
       strcpy(shortp3label[nn],numstring);
-      unitp3label[nn] = blank;
+      unitp3label[nn] = blank_global;
     }
 
     for(n=0;n<MAXRGB;n++){

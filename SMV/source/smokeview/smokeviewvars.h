@@ -349,7 +349,7 @@ SVEXTERN float tmin_global, tmax_global;
 SVEXTERN int videoSTEREO;
 SVEXTERN float fzero;
 
-SVEXTERN char blank[2];
+SVEXTERN char blank_global[2];
 
 SVEXTERN float SVDECL(*sphere_xyz,NULL);
 SVEXTERN int demo_mode;

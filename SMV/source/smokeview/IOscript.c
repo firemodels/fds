@@ -454,6 +454,7 @@ int compile_script(char *scriptfile){
   }
 
   if(nscriptinfo==0){
+    fclose(stream);
     fprintf(stderr,"*** Error: scriptfile has no usable commands\n");
     return 1;
   }

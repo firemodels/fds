@@ -96,4 +96,5 @@ void readhrr(int flag, int *errorcode){
     ntimeshrr++;
   }
   hrrinfo->ntimes_csv=ntimeshrr-nfirst;
+  fclose(HRRFILE);
 }

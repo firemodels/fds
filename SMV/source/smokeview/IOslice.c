@@ -459,6 +459,7 @@ void readfed(int file_index, int flag, int file_type, int *errorcode){
        Creadslice_frame(0,fedi->co_index,LOAD)<0){
 
        readfed(file_index,UNLOAD, file_type, errorcode);
+       if(AREA_STREAM!=NULL)fclose(AREA_STREAM);
        return;
     }
 

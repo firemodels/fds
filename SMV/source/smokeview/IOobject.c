@@ -656,17 +656,17 @@ float get_device_val(float time_local, devicedata *devicei, int *valid){
 float *get_device_color(devicedata *devicei, float *rgbval,float valmin, float valmax){
   float val;
   int valid,colorindex;
-  float *rgb;
+  float *rgb_local;
 
   if(valmax<=valmin)return NULL;
   val=get_device_val(global_times[itimes],devicei,&valid);
   if(valid!=1)return NULL;
   val = (val-valmin)/(valmax-valmin);
   colorindex=CLAMP(255*val,1,254);
-  rgb=current_colorbar->colorbar+3*colorindex;
-  rgbval[0]=255*rgb[0];
-  rgbval[1]=255*rgb[1];
-  rgbval[2]=255*rgb[2];
+  rgb_local=current_colorbar->colorbar+3*colorindex;
+  rgbval[0]=255*rgb_local[0];
+  rgbval[1]=255*rgb_local[1];
+  rgbval[2]=255*rgb_local[2];
   return rgbval;
 }
 
@@ -894,7 +894,7 @@ void draw_devices(void){
         state=devicei->showstatelist[itimes];
       }
       if(colordeviceval==1){
-        int type,vistype;
+        int type,vistype=0;
 
         type=devicei->type2;
         if(type>=0&&type<ndevicetypes)vistype=devicetypes[type]->type2vis;

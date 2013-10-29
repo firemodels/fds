@@ -71,7 +71,10 @@ int parse_lang(char *file, trdata **trinfoptr, int *ntrinfoptr){
     key = strstr(buf,"msgid");
     if(key!=NULL&&key==buf)ntrinfo_local++;
   }
-  if(ntrinfo_local==0)return 0;
+  if(ntrinfo_local==0){
+    fclose(stream);
+    return 0;
+  }
 
   NewMemory((void **)&trinfo_local,sizeof(trdata)*ntrinfo_local);
   *trinfoptr=trinfo_local;

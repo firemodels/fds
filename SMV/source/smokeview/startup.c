@@ -2069,7 +2069,7 @@ void initvars(void){
   fzero=0.25;
  
 
-  strcpy(blank,"");
+  strcpy(blank_global,"");
 
   demo_mode=0;
   update_demo=1;

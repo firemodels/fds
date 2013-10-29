@@ -852,6 +852,7 @@ void Scene_viewport(int quad, int view_mode, GLint screen_left, GLint screen_dow
   if(fnear<nearclip)fnear=nearclip;
   ffar = fnear + farclip;
   
+  FrustumAsymmetry=0.0;
   StereoCameraOffset=0.0;
   aperture_temp=aperture;
   aperture_temp = zoom2aperture(zoom);

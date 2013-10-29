@@ -1108,7 +1108,6 @@ void UpdateIndexColors(void){
   int colorindex;
   int j;
   float s_color[4];
-  surfdata *surfi;
 
   updateindexcolors=0;
 
@@ -1116,6 +1115,8 @@ void UpdateIndexColors(void){
     surfacedefault->color=block_ambient2;
   }
   for(i=0;i<nsurfinfo;i++){
+    surfdata *surfi;
+    
     surfi = surfinfo + i;
     if(strcmp(surfi->surfacelabel,"INERT")==0){
       surfi->color=block_ambient2;
@@ -1498,7 +1499,6 @@ void SetCVentDirs(void){
     int iv,i,j,k;
     unsigned char *blank;
     float *xplt, *yplt, *zplt;
-    float xx, yy, zz;
 
     meshi=meshinfo+ii;
 
@@ -1913,10 +1913,13 @@ void readcadgeom(cadgeom *cd){
   int nquads=0;
   int colorindex;
 
-  if( (stream=fopen(cd->file,"r"))==NULL){
+  stream=fopen(cd->file,"r");
+  if(stream==NULL)return;
+
+  if(fgets(buffer,255,stream)==NULL){
+    fclose(stream);
     return;
   }
-  if(fgets(buffer,255,stream)==NULL)return;
   trim(buffer);
   if(strncmp(buffer,"[APPEARANCE]",12)==0){
     cd->version=2;
@@ -1937,6 +1940,7 @@ void readcadgeom(cadgeom *cd){
   rewind(stream);
   if(NewMemory((void **)&cd->quad,nquads*sizeof(cadquad))==0){
     freecadinfo();
+    fclose(stream);
     return;
   }
   nquads=0;
@@ -2038,11 +2042,18 @@ void readcad2geom(cadgeom *cd){
 
   /* read in [APPEARANCE] info */
 
-  if(fgets(buffer,255,stream)==NULL)return;
-  if(fgets(buffer,255,stream)==NULL)return;
+  if(fgets(buffer,255,stream)==NULL){
+    fclose(stream);
+    return;
+  }
+  if(fgets(buffer,255,stream)==NULL){
+    fclose(stream);
+    return;
+  }
   sscanf(buffer,"%i",&cd->ncadlookinfo);
   if(cd->ncadlookinfo<=0){
     cd->ncadlookinfo=0;
+    fclose(stream);
     return;
   }
 

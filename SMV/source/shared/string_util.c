@@ -986,7 +986,7 @@ unsigned int date2day(char *tokenorig){
   // (/yyyy optional, if absent assume current year)
   char token[256];
   char *slash1=NULL, *slash2=NULL;
-  char *month, *day, *year;
+  char *month, *day, *year=NULL;
   int imonth, iday, iyear;
   int month2days[]={0,31,59,90,120,151,181,212,243,273,304,334};
   int days_local;
@@ -1002,6 +1002,7 @@ unsigned int date2day(char *tokenorig){
   else if(slash1!=NULL&&slash2==NULL){
     char *dayend;
 
+    year=NULL;
     month=token;
     day=slash1+1;
     dayend=strchr(day,' ');

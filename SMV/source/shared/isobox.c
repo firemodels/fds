@@ -72,7 +72,7 @@ float GetTetraVol(float *verts[4], float vals[4], float level){
 */
 
   int state[4]={0,0,0,0},i,index=0,p2=1;
-  float volfactors[6],volverts[18],*volargs[6];
+  float volfactors[6],volverts[33],*volargs[6];
   float full_volume;
   float vol_above_level;
   int ncase;

@@ -433,6 +433,7 @@ int SVimage2file(char *directory, char *RENDERfilename, int rendertype, int woff
   NewMemory((void **)&OpenGLimage,width2 * height2 * sizeof(GLubyte) * 3);
   if(OpenGLimage == NULL){
     fprintf(stderr,"*** Error allocating memory buffer for render file:%s\n",renderfile);
+    fclose(RENDERfile);
     return 1;
   }
   PRINTF("Rendering to: %s .",renderfile);
