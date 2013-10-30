@@ -4,8 +4,8 @@ export SVNROOT=`pwd`/../..
 export QFDS=/usr/local/bin/qfds.sh
 export BASEDIR=`pwd`
 export INDIR=Current_Results
-#qq="-q fire80s"
-qq=
+qq="-q fire80s"
+#qq=
 source ~/.bashrc_fds intel64
 
 # uncomment following line to stop all cases
@@ -34,6 +34,7 @@ $QFDS -r $qq -d $INDIR ISONG3.fds
 $QFDS -r $qq -d $INDIR ISONylon10.fds
 $QFDS -r $qq -d $INDIR ISOPP11.fds
 $QFDS -r $qq -d $INDIR ISOPP18.fds
+$QFDS -r $qq -d $INDIR ISOProp15.fds
 $QFDS -r $qq -d $INDIR ISOPropanol30.fds
 $QFDS -r $qq -d $INDIR ISOPropD14.fds
 $QFDS -r $qq -d $INDIR ISOStyrene16.fds
