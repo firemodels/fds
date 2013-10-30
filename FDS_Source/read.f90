@@ -2619,7 +2619,9 @@ DO N=1,N_SPECIES
     LISTED=.TRUE.
     SS => SPECIES(N)
     CALL CALC_GAS_PROPS(1,N,D_TMP(N),MU_TMP(N),K_TMP(N),CP_TMP(N),H_TMP(N),SS%ISFUEL,G_F_TMP(N),LISTED)
-    IF(.NOT.LISTED .AND. .NOT. CONSTANT_SPECIFIC_HEAT_RATIO) WRITE(LU_ERR,*) "WARNING: Gas phase species ",TRIM(SS%ID)," not found."
+    IF(.NOT.LISTED .AND. .NOT. CONSTANT_SPECIFIC_HEAT_RATIO) THEN
+       WRITE(LU_ERR,*) "WARNING: Gas phase species ",TRIM(SS%ID)," not found."
+    ENDIF
 ENDDO
 
 ! Adjust reference enthalpy to 0 K if a RAMP_CP is given
