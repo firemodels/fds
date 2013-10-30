@@ -14,6 +14,6 @@ qq=
 
 $QFDS -r       $qq -d $INDIR backward_facing_step_5.fds
 $QFDS -r -p 12 $qq -d $INDIR backward_facing_step_10.fds
-#$QFDS -r -p 12 $qq -d $INDIR backward_facing_step_20.fds
+#$QFDS -r -p 72 $qq -d $INDIR backward_facing_step_20.fds
 
 echo FDS cases submitted
