@@ -322,10 +322,9 @@ squared.  The  compartment  was   a  3~m  by  3~m  by  6.1~m space. Temperatures
 chosen  for   the   analysis:   30~cm,  15~cm,   10~cm, 7.5~cm. Temperature  estimates were  not found to  change dramatically with different grid
 dimensions.
 
-Using FDS  version 1, Bounagui {\em  et al.}~\cite{Bounagui:1} studied the effect of grid size on simulation results to determine the nominal grid
+Using FDS  version 1, Bounagui et al.~\cite{Bounagui:1} studied the effect of grid size on simulation results to determine the nominal grid
 size for future work. A propane burner 0.1~m by 0.1~m was modeled with  a heat  release rate  of  1,500~kW.   A similar analysis was performed using
-Alpert's ceiling  jet correlation~\cite{SFPE:Alpert}  that also showed better  predictions   with smaller grid sizes.  In a  related study,  Bounagui
-{\em  et al.}~\cite{Bounagui:2} used  FDS to  evaluate  the emergency  ventilation  strategies in  the Louis-Hippolyte-La Fontaine Tunnel in
+Alpert's ceiling  jet correlation~\cite{SFPE:Alpert}  that also showed better  predictions   with smaller grid sizes.  In a  related study,  Bounagui et al.~\cite{Bounagui:2} used  FDS to  evaluate  the emergency  ventilation  strategies in  the Louis-Hippolyte-La Fontaine Tunnel in
 Montreal, Canada.
 
 
@@ -355,7 +354,7 @@ this study indicate that  FDS simulations with grids of 0.15~m had temperature p
 of these grid  sizes produced results within   15~\%   of   the   University   of   Canterbury   temperature measurements. The 0.30~m grid  produced
 less accurate results. For the comparison of the Navy Hangar tests, grid sizes ranging from 0.60~m to 1.80~m yielded results of comparable accuracy.
 
-Musser~{\em et  al.}~\cite{Musser:1} investigated  the use of  FDS for course grid  modeling of non-fire and fire  scenarios. Determining the
+Musser et  al.~\cite{Musser:1} investigated  the use of  FDS for course grid  modeling of non-fire and fire  scenarios. Determining the
 appropriate  grid  size was  found  to  be  especially important  with respect  to heat  transfer  at heated  surfaces.  The convective  heat
 transfer  from the  heated surfaces  was most  accurate when  the near surface grid cells were smaller than the depth of the thermal boundary layer.
 However, a  finer grid  size  produced better  results at  the expense of computational time. Accurate contaminant dispersal modeling required a
@@ -377,7 +376,7 @@ expressions  for  the thermal conductivity  and  material diffusivity:  \be  k_{
 Thus, $C_{\rm s}$, $\PR_t$  and $\SC_t$ are  a set  of  empirical constants.  Most  FDS users
 simply use  the default values  of (0.2,0.5,0.5), but some have  explored their effect on the solution of the equations.
 
-In an effort  to validate FDS with some  simple room temperature data, Zhang~{\em et al.}~\cite{Zhang:2}  tried different combinations of the
+In an effort  to validate FDS with some  simple room temperature data, Zhang et al.~\cite{Zhang:2}  tried different combinations of the
 Smagorinsky parameters,  and suggested the current  default values. Of the  three parameters,  the  Smagorinsky constant  $C_{\rm s}$  is the  most
 sensitive.   Smagorinsky~\cite{Smagorinsky:1}  originally  proposed  a value of 0.23,  but researchers over the past  three decades have used values
 ranging  from 0.1  to 0.23. There  are also refinements  of the original  Smagorinsky  model~\cite{Deardorff:1,Germano:1,Lilly:1} that do  not
@@ -414,7 +413,7 @@ simulations  such as a  low-sooting methane burner.
 
 \subsection{Sensitivity of Thermophysical Properties of Solid Fuels}
 
-An  extensive amount  of  verification and  validation  work with  FDS version 4  has been  performed by Hietaniemi {\em et al.}~\cite{Hietaniemi:1} at VTT,
+An  extensive amount  of  verification and  validation  work with  FDS version 4  has been  performed by Hietaniemi et al.~\cite{Hietaniemi:1} at VTT,
 Finland. The case  studies are  comprised of fire  experiments   ranging  in   scale  from  the   cone  calorimeter (ISO~5660-1)
 to  full-scale fire  tests such as  the room  corner test (ISO~9705).  Comparisons are also  made between  FDS results  and data obtained  in the
 SBI (Single  Burning Item)  Euro-classification test apparatus (EN  13823) as  well as  data obtained in  two {\em  ad hoc} experimental
@@ -439,7 +438,7 @@ There is  little quantification of  the observed sensitivities  in the study. Fi
 changes in  fuel  properties  can lead  to  order of  magnitude changes  in heat  release rate  for unconfined  fires. The  subject is
 discussed  in the  FDS  Validation Guide \cite{FDS_Validation_Guide} where it is  noted in many of the studies  that predicting fire growth is difficult.
 
-Recently, Lautenberger {\em et al.}~\cite{Lautenberger:FSJ} developed a method to automate the
+Recently, Lautenberger et al.~\cite{Lautenberger:FSJ} developed a method to automate the
 process of  estimating material properties to input  into FDS. The methodology involves simulating a  bench-scale test with the model and iterating
 via a ``genetic'' algorithm  to obtain  an  optimal set  of material  properties for  that  particular item.  Such techniques  are necessary because
 most bench-scale apparatus do not provide a complete set of thermal properties.
@@ -1068,7 +1067,7 @@ As seen in the left side of Fig.~\ref{fig_heated_channel}, the velocity profile 
       \includegraphics[width=3.2in]{SCRIPT_FIGURES/heated_channel_uplus} &
       \includegraphics[width=3.2in]{SCRIPT_FIGURES/heated_channel_Tplus}
    \end{tabular*}
-   \caption[Mean velocity and temperature profiles for heated channel flow]{\label{fig_heated_channel} Comparison of FDS (lines with squares) with DNS (circles) for heated channel flow. (Left) Wall-normal velocity profile compared to DNS of Moser \emph{et al.} \cite{Moser:1999}. (Right) Wall-normal mean profiles of temperature for molecular Prandtl numbers (Pr) = 0.10, 0.71, and 2.0, compared to DNS of Kim and Moin~\cite{Kim:1987}.}
+   \caption[Mean velocity and temperature profiles for heated channel flow]{\label{fig_heated_channel} Comparison of FDS (lines with squares) with DNS (circles) for heated channel flow. (Left) Wall-normal velocity profile compared to DNS of Moser et al.~\cite{Moser:1999}. (Right) Wall-normal mean profiles of temperature for molecular Prandtl numbers (Pr) = 0.10, 0.71, and 2.0, compared to DNS of Kim and Moin~\cite{Kim:1987}.}
 \end{figure}
 
 \clearpage
@@ -2444,7 +2443,7 @@ For the same initial conditions, FDS predictions for burning or extinction (clos
 \section{Ideal and Non-Ideal Heat of Combustion ({\bf extinction})}
 \label{HoC}
 
-When using a non-predefined fuel, one may have heat of combustion data representing complete combustion but species yield data representing typical large scale conditions.  When using simple chemistry, the input keyword \textct{IDEAL=.TRUE.} on the \textct{REAC} line will have FDS reduce the heat of combustion to account for any minor products of combustion (e.g. CO and H$_2$O).  This is done by removing energy from the heat of combustion to account for carbon that goes to CO and soot rather than CO$_2$ and for hydrogen that goes to soot rather than H$_2$O.  A custom fuel (methane) is defined with CO and soot yields of 0.1, a heat of combustion of 50000 kJ/kg, and a 40 kW fire.  Two input files are created, one with the \textct{HEAT\_OF\_COMBUSTION} defined with \textct{IDEAL=.TRUE.} and the second with \textct{IDEAL=.FALSE.}.  In the \textct{IDEAL=.FALSE.} case where the heat of combustion is not adjusted we expect a fuel mass flow rate of 0.0008 \si{kg/(m^2.s)}.  With the heat of combustion adjusted we expect a higher fuel mass flow rate of 0.000877 \si{kg/(m^2.s)}, as shown in Fig.~\ref{fig:HoC}.
+When using a non-predefined fuel, one may have heat of combustion data representing complete combustion but species yield data representing typical large scale conditions.  When using simple chemistry, the input keyword \textct{IDEAL=.TRUE.} on the \textct{REAC} line will have FDS reduce the heat of combustion to account for any minor products of combustion (e.g., CO and H$_2$O).  This is done by removing energy from the heat of combustion to account for carbon that goes to CO and soot rather than CO$_2$ and for hydrogen that goes to soot rather than H$_2$O.  A custom fuel (methane) is defined with CO and soot yields of 0.1, a heat of combustion of 50000 kJ/kg, and a 40 kW fire.  Two input files are created, one with the \textct{HEAT\_OF\_COMBUSTION} defined with \textct{IDEAL=.TRUE.} and the second with \textct{IDEAL=.FALSE.}.  In the \textct{IDEAL=.FALSE.} case where the heat of combustion is not adjusted we expect a fuel mass flow rate of 0.0008 \si{kg/(m^2.s)}.  With the heat of combustion adjusted we expect a higher fuel mass flow rate of 0.000877 \si{kg/(m^2.s)}, as shown in Fig.~\ref{fig:HoC}.
 \begin{figure}[h!]
 \begin{tabular*}{\textwidth}{lr}
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/HoC_Ideal} &
