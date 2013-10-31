@@ -15,19 +15,19 @@ In the gas phase momentum equation, Eq.~(\ref{momentum}), the force term $\bof_{
 It is obtained by summing the force transferred from each particle
 in a grid cell and dividing by the cell volume, $V$:
 \be
-    {\bof_{\rm b}} = \frac{1}{V} \sum \left[ \ha \rho C_{\rm d} \, \pi \, r_{\rm p}^2 \, (\bu_{\rm p}-\bu) |\bu_{\rm p}-\bu| - \frac{\d m_{\rm p}}{\d t}(\bu_{\rm p}-\bu) \right]
+    {\bof_{\rm b}} = \frac{1}{V} \sum \left[ \ha \rho C_{\rm d} \, A_{\rm p} \, (\bu_{\rm p}-\bu) |\bu_{\rm p}-\bu| - \frac{\d m_{\rm p}}{\d t}(\bu_{\rm p}-\bu) \right]
 \ee
-where $C_{\rm d}$ is the drag coefficient, $r_{\rm p}$ is the particle radius, $\bu_{\rm p}$ is the particle velocity, $m_{\rm p}$ is the particle mass, $\bu$ is the
+where $C_{\rm d}$ is the drag coefficient, $A_{\rm p}$ is the particle cross-sectional area, $r_{\rm p}$ is the particle radius, $\bu_{\rm p}$ is the particle velocity, $m_{\rm p}$ is the particle mass, $\bu$ is the
 gas velocity, and $\rho$ is the gas density. The particle acceleration is given by
 \be
-    \frac{\d \bu_{\rm p}}{\d t} = \bg - \ha \frac{\rho\,C_{\rm d} \, \pi  r_{\rm p}^2}{m_{\rm p}} \,
+    \frac{\d \bu_{\rm p}}{\d t} = \bg - \ha \frac{\rho\,C_{\rm d} \, A_{\rm p}}{m_{\rm p}} \,
     (\bu_{\rm p}-\bu) |\bu_{\rm p}-\bu|
 \ee
 The particle position, $\bx_{\rm p}$, is determined from the equation
 \be
     \frac{\d \bx_{\rm p}}{\d t} = \bu_{\rm p}
 \ee
-The drag coefficient (default based on a sphere) is a function of the local Reynolds number that is based on the particle diameter, $D$
+The exact solution procedure of the above model is presented in Appendix~\ref{particle_momentum_transfer}. The drag coefficient (default based on a sphere) is a function of the local Reynolds number that is based on the particle diameter, $D$
 \begin{align}
  C_{\rm d} &= \left\{ \begin{array}{ll}
      24/\RE_D                                          & \RE_D < 1    \\[0.1in]
@@ -35,7 +35,15 @@ The drag coefficient (default based on a sphere) is a function of the local Reyn
      0.44                                              & 1000 < \RE_D
      \end{array} \right.  \\[0.2in]
 \RE_D &= \frac{\rho \, |\bu_{\rm p}-\bu| \, 2 r_{\rm p}}{\mu(T)} \end{align}
-where $\mu(T)$ is the dynamic viscosity of air at temperature $T$. Additional corrections are made to account for drag reduction due to the wake effect~\cite{Ramirez:1} and deformation of the droplet~\cite{Loth:1}.
+where $\mu(T)$ is the dynamic viscosity of air at temperature $T$. For cylindrical particles, 
+\begin{align}
+ C_{\rm d} &= \left\{ \begin{array}{ll}
+     10/\RE_D^{0.8}                                & \RE_D < 1    \\[0.1in]
+     10\left(0.6+0.4 \, \RE_D^{0.8} \right)/\RE_D  & 1 < \RE_D < 1000 \\[0.1in]
+     1                                             & 1000 < \RE_D
+     \end{array} \right. 
+\end{align}
+Additional corrections are made to account for drag reduction due to the wake effect~\cite{Ramirez:1} and deformation of the droplet~\cite{Loth:1}.
 
 \subsection{Drag Reduction}
 \label{sec:threeway}
