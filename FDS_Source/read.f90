@@ -282,15 +282,21 @@ COUNT_MESH_LOOP: DO
    IF (EVACUATION) NEVAC_MESHES = NEVAC_MESHES + 1
    IF (IMODE==1 .AND. EVAC_HUMANS) NO_EVAC_MESHES = .FALSE.
    IF (IMODE==1 .AND. EVAC_HUMANS) INPUT_EVAC_GRIDS = INPUT_EVAC_GRIDS + 1
-   N_MESH_NEW = 1
-   IF (MULT_ID/='null') THEN
+   N_MESH_NEW = 0
+   IF (MULT_ID=='null') THEN
+      N_MESH_NEW = 1
+   ELSE
       DO N=1,N_MULT
          MR => MULTIPLIER(N)
          IF (MULT_ID==MR%ID) N_MESH_NEW = MR%N_COPIES
       ENDDO
+      IF (N_MESH_NEW==0) THEN
+         WRITE(MESSAGE,'(A,A,A,I3)') 'ERROR: MULT line ', TRIM(MULT_ID),' not found on MESH line', &
+            NMESHES_READ
+         CALL SHUTDOWN(MESSAGE)
+      ENDIF
    ENDIF
    NMESHES      = NMESHES + N_MESH_NEW
-!   NMESHES_READ = NMESHES_READ + 1
    16 IF (IOS>0) CALL SHUTDOWN('ERROR: Problem with MESH line.')
 ENDDO COUNT_MESH_LOOP
 15 CONTINUE
@@ -6491,12 +6497,18 @@ MESH_LOOP: DO NM=1,NMESHES
       IF (IOS==1) EXIT COUNT_OBST_LOOP
       MULT_ID = 'null'
       READ(LU_INPUT,NML=OBST,END=1,ERR=2,IOSTAT=IOS)
-      N_OBST_NEW = 1
-      IF (MULT_ID/='null') THEN
+      N_OBST_NEW = 0
+      IF (MULT_ID=='null') THEN
+         N_OBST_NEW = 1
+      ELSE
          DO N=1,N_MULT
             MR => MULTIPLIER(N)
             IF (MULT_ID==MR%ID) N_OBST_NEW = MR%N_COPIES
          ENDDO
+         IF (N_OBST_NEW==0) THEN
+            WRITE(MESSAGE,'(A,A,A,I3)') 'ERROR: MULT line ', TRIM(MULT_ID),' not found on OBST ', N_OBST+1
+            CALL SHUTDOWN(MESSAGE)
+         ENDIF
       ENDIF
       N_OBST = N_OBST + N_OBST_NEW
       2 IF (IOS>0) THEN
@@ -7307,14 +7319,20 @@ COUNT_LOOP: DO
    IF (IOS==1) EXIT COUNT_LOOP
    MULT_ID = 'null'
    READ(LU_INPUT,NML=HOLE,END=1,ERR=2,IOSTAT=IOS)
-   N_HOLE_NEW = 1
-   IF (MULT_ID/='null') THEN
+   N_HOLE_O = N_HOLE_O + 1
+   N_HOLE_NEW = 0
+   IF (MULT_ID=='null') THEN
+      N_HOLE_NEW = 1
+   ELSE
       DO N=1,N_MULT
          MR => MULTIPLIER(N)
          IF (MULT_ID==MR%ID) N_HOLE_NEW = MR%N_COPIES
       ENDDO
+      IF (N_HOLE_NEW==0) THEN
+         WRITE(MESSAGE,'(A,A,A,I3)') 'ERROR: MULT line ', TRIM(MULT_ID),' not found on HOLE line', N_HOLE_O
+         CALL SHUTDOWN(MESSAGE)
+      ENDIF
    ENDIF
-   N_HOLE_O = N_HOLE_O + 1
    N_HOLE   = N_HOLE   + N_HOLE_NEW
    2 IF (IOS>0) THEN
       WRITE(MESSAGE,'(A,I5)')  'ERROR: Problem with HOLE number',N_HOLE_O+1
@@ -7755,12 +7773,18 @@ MESH_LOOP_1: DO NM=1,NMESHES
       IF (IOS==1) EXIT COUNT_VENT_LOOP
       MULT_ID = 'null'
       READ(LU_INPUT,NML=VENT,END=3,ERR=4,IOSTAT=IOS)
-      N_VENT_NEW = 1
-      IF (MULT_ID/='null') THEN
+      N_VENT_NEW = 0
+      IF (MULT_ID=='null') THEN
+         N_VENT_NEW = 1
+      ELSE
          DO N=1,N_MULT
             MR => MULTIPLIER(N)
             IF (MULT_ID==MR%ID) N_VENT_NEW = MR%N_COPIES
          ENDDO
+         IF (N_VENT_NEW==0) THEN
+            WRITE(MESSAGE,'(A,A,A,I3)') 'ERROR: MULT line ', TRIM(MULT_ID),' not found on VENT ', N_VENT+1
+            CALL SHUTDOWN(MESSAGE)
+         ENDIF
       ENDIF
       N_VENT = N_VENT + N_VENT_NEW
       4 IF (IOS>0) THEN
@@ -8425,12 +8449,18 @@ COUNT_LOOP: DO
       WRITE(MESSAGE,'(A,I3)') 'ERROR: Problem with INIT number ',N_INIT_READ+1
       CALL SHUTDOWN(MESSAGE)
       ENDIF
-   N_INIT_NEW = 1
-   IF (MULT_ID/='null') THEN
+   N_INIT_NEW = 0
+   IF (MULT_ID=='null') THEN
+      N_INIT_NEW = 1
+   ELSE
       DO N=1,N_MULT
          MR => MULTIPLIER(N)
          IF (MULT_ID==MR%ID) N_INIT_NEW = MR%N_COPIES
       ENDDO
+      IF (N_INIT_NEW==0) THEN
+         WRITE(MESSAGE,'(A,A,A,I3)') 'ERROR: MULT line ',TRIM(MULT_ID),' not found on INIT line', N_INIT_READ
+         CALL SHUTDOWN(MESSAGE)
+      ENDIF
    ENDIF
    N_INIT = N_INIT + N_INIT_NEW
 ENDDO COUNT_LOOP
