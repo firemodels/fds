@@ -47,7 +47,7 @@ where $A$ is the transformation matrix ($N_{y}$ rows $\times$ $(N_{z}+1)$ column
 \begin{equation}\label{eq:A_def}
 a_{\alpha\,i} = \frac{\upsilon_{\alpha\,i}W_{\alpha}}{\displaystyle \sum_{\beta}\upsilon_{\beta i}W_{\beta}}
 \end{equation}
-where $\upsilon_{\alpha\,i}$ are the volume fractions of primitive species $\alpha$ in lumped species $i$. If we want the primitive species in Eq.~(\ref{eq:lumped_expand}) and, as an example, say we have $\mathbf{Z} = [0.3 \,\,\, 0.2 \,\,\, 0.5]^T$, we can transform from lumped species to primitive species via
+where $\upsilon_{\alpha\,i}$ are the volume fractions of primitive species $\alpha$ in lumped species $i$ and $W_\alpha$ are the molecular weights. If we want the primitive species in Eq.~(\ref{eq:lumped_expand}) and, as an example, say we have $\mathbf{Z} = [0.3 \,\,\, 0.2 \,\,\, 0.5]^T$, we can transform from lumped species to primitive species via
 
 \begin{equation}\label{eq:transform_to_primitive}
 \mathbf{Y}=\left[\begin{array}{c}
@@ -180,9 +180,9 @@ Once the local reactant mixture has been determined, the extinction criterion is
 \begin{align}
 \label{eq:extinction}
 \hat{Z}_{\rm F} \, (h_{\rm F}(T) + \Delta h_{\rm c,F}) + \hat{Z}_{\rm A} \, h_{\rm A}(T) + \hat{Z}_{\rm P} \, h_{\rm P}(T) < 
-\hat{Z}_{\rm F} \, h_{\rm F}(T_{CFT}) + \hat{Z}_{\rm A} \, h_{\rm A}(T_{CFT}) + \hat{Z}_{\rm P} \, h_{\rm P}(T_{CFT})
+\hat{Z}_{\rm F} \, h_{\rm F}(T_{\rm CFT}) + \hat{Z}_{\rm A} \, h_{\rm A}(T_{\rm CFT}) + \hat{Z}_{\rm P} \, h_{\rm P}(T_{\rm CFT})
 \end{align}
-where $T$ is the initial mean cell temperature and $T_{CFT}$ is the critical flame temperature. If the inequality Eq.~(\ref{eq:extinction}) is true, then combustion is suppressed---the heat of combustion is not sufficient to raise the product mixture above its critical flame temperature.
+where $T$ is the initial mean cell temperature and $T_{\rm CFT}$ is the critical flame temperature. If the inequality Eq.~(\ref{eq:extinction}) is true, then combustion is suppressed---the heat of combustion is not sufficient to raise the product mixture above its critical flame temperature.
 
 \end{enumerate}
 

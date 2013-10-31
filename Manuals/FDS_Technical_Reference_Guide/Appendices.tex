@@ -1280,12 +1280,12 @@ The correction terms that guarantee mass conservation ($V_c \, \rho_c \, \delta 
 
 \chapter{Fluid-Particle Momentum Transfer}
 
-The trajectories of Lagrangian particles in FDS could be calculated with forward-Euler integration. However, forward-Euler integration extracts momentum from the cell each particle started in. This can cause large changes in the flow field unless the time step is extremely small. An extremely small time step would be necessary for stability. This time step would greatly slow down the calculation. Consequently, a stable, single-step approximate solution is developed and is implemented in FDS.
+The trajectories of Lagrangian particles in FDS could be calculated with Forward Euler (FE) time integration. However, Forward Euler extracts momentum from the cell corresponding to each particle's initial position and this may cause large changes in the flow field and ultimately instability unless the time step is extremely small. Consequently, a stable, single-step approximate solution is developed and is implemented in FDS.
 
-Two effects are neglected in this formulation. The first is the effect of the change in droplet mass between  time steps. The droplet's evaporation is not coupled to this model. This is justified because the change in droplet mass per time step is small. The second neglected effect is the change in drag coefficient between time steps. This is justified because of the large uncertainties in the drag coefficients. Modeling the time derivative of the drag coefficient will not improve accuracy beyond these uncertainties, but it will slow down the simulation.
+Two effects are neglected in this formulation. The first is the effect of the change in droplet mass between  time steps. The droplet's evaporation is not coupled to this model. This is justified because the change in droplet mass per time step is small. The second neglected effect is the change in drag coefficient between time steps. This is justified because of the large uncertainties in the drag coefficients. Modeling the time derivative of the drag coefficient would not improve accuracy beyond these uncertainties, but it would slow down the code.
 
 \subsubsection*{Relative velocities}
-Let $m_{\rm p}$ denote the particle mass, $\mathbf{u}$ the particle velocity, $A_{\rm p}$ the particle cross-sectional area, $C_\text{d}$ the particle drag coefficient, $\rho$ the fluid mass density, $\mathbf{U}$ the fluid velocity around the particle, $V_\text{g}$ is the volume occupied by the fluid in a cell, and $M \equiv \rho V_\text{g}$ the fluid mass of a cell, $n_\text{p}$ is the number of particles in a cell, $M_\text{p} \equiv M/n_\text{p}$ is the average fluid mass per particle in a cell, and $\mathbf{g}$ is the gravitational acceleration vector.
+Let $m_{\rm p}$ denote the particle mass, $\mathbf{u}$ the particle velocity, $A_{\rm p}$ the particle cross-sectional area, $C_\text{d}$ the particle drag coefficient, $\rho$ the fluid mass density, $\mathbf{U}$ the fluid velocity around the particle, $V_\text{g}$ the volume occupied by the fluid in a cell, $M \equiv \rho V_\text{g}$ the fluid mass of a cell, $n_\text{p}$ the number of particles in a cell, $M_\text{p} \equiv M/n_\text{p}$ the average fluid mass per particle in a cell, and $\mathbf{g}$ the gravitational acceleration vector.
 
 The equations of motion of the particles and fluid are formulated as follows from Newton's second law,
 \begin{align}
@@ -1306,7 +1306,7 @@ The equation above can be written in short as
 \end{align}
 Note that the $p$ subscripts have been dropped in $\mathbf{u}_\text{r}$ terms for convenience. The $p$ subscript also will be dropped from some other variables later as convenient.
 
-This is the drag equation, which has no solution in terms of elementary functions. Our solution approach first finds a solution neglecting gravity and then adds in a series for the gravity terms. $\mathbf{u}_\text{r} \equiv \mathbf{u}_\text{d} + \mathbf{u}_\text{g}$ is the decomposition of $\mathbf{u}_\text{r}$. $\mathbf{u}_\text{r}$ and $\mathbf{u}_\text{d}$ both have the same initial condition, $\mathbf{u}_\text{r}(0) \equiv \mathbf{u}_{\rm p}(0) - \mathbf{U}_{\rm p}(0)$. $\mathbf{u}_\text{d}$ satisfies the drag equation without gravity, specifically
+This is the drag equation, which has no solution in terms of elementary functions. Our solution approach first finds a solution neglecting gravity and then adds in a series for the gravity terms. $\mathbf{u}_\text{r} \equiv \mathbf{u}_\text{d} + \mathbf{u}_\text{g}$ is the decomposition of $\mathbf{u}_\text{r}$. The velocities $\mathbf{u}_\text{r}$ and $\mathbf{u}_\text{d}$ both have the same initial condition, $\mathbf{u}_\text{r}(0) \equiv \mathbf{u}_{\rm p}(0) - \mathbf{U}_{\rm p}(0)$. And $\mathbf{u}_\text{d}$ satisfies the drag equation without gravity, specifically
 \begin{align}
     \frac{\d \mathbf{u}_\text{d}}{\d t} = -K_{\rm p} \mathbf{u}_\text{d} |\mathbf{u}_\text{d}| \,.
 \end{align}
@@ -1315,7 +1315,7 @@ The solution subject to these initial conditions is
     \label{ud_exact}
     \mathbf{u}_\text{d} = \frac{\mathbf{u}(0) - \mathbf{U}(0)}{1 + \beta_{\rm p} t} \quad ; \quad \beta_{\rm p} \equiv K_{\rm p} |\mathbf{u}_{\text{r}}(0)| \,.
 \end{align}
-We decompose can $u_\text{r}$ to find a series solution for $\mathbf{u}_\text{g}$ with Taylor series. The function $\mathbf{u}_\text{g}$ can be written $\mathbf{u_g} = \mathbf{u}_\text{r} - \mathbf{u}_\text{d}$ so the differential equation for $\mathbf{u}_\text{g}$ is
+We can decompose $\mathbf{u}_\text{r}$ to find a series solution for $\mathbf{u}_\text{g}$. The function $\mathbf{u}_\text{g}$ can be written $\mathbf{u_g} = \mathbf{u}_\text{r} - \mathbf{u}_\text{d}$.  So the differential equation for $\mathbf{u}_\text{g}$ is
 \begin{align}
     \frac{\d \mathbf{u}_\text{g}}{\d t} = -K_{\rm p} (\mathbf{u}_\text{r} |\mathbf{u}_\text{r}| - \mathbf{u}_\text{d} |\mathbf{u}_\text{d}|) + \mathbf{g} \quad ; \quad \mathbf{u}_\text{g}(0) = \mathbf{u}_\text{r}(0) - \mathbf{u}_\text{d}(0) = 0 \,.
 \end{align}
@@ -1336,7 +1336,7 @@ The values of $\d \mathbf{u}_\text{r} / \d t(0)$ and $\d \mathbf{u}_\text{d} / \
     \frac{\d \mathbf{u}_\text{d}}{\d t}(0) &= -K_{\rm p} \mathbf{u}_{\text{r}}(0) |\mathbf{u}_{\text{r}}(0)| \,.
 \end{align*}
 % = -K_{\rm p} \left(\frac{\d \mathbf{u} |\mathbf{u}|}{\d t} - \frac{\d \mathbf{u}_\text{d} |\mathbf{u}_\text{d}|}{\d t} \right)
-The derivative of the L$_2$ norm must now be found. It can be shown that for an arbitrary vector $\mathbf{a}$,
+The derivative of the $L_2$ norm must now be found. It can be shown that for an arbitrary vector $\mathbf{a}$,
 \begin{align*}
     \frac{\d |\mathbf{a}|}{\d t} = \left(\frac{\mathbf{a}}{|\mathbf{a}|}\right) \cdot \frac{\d \mathbf{a}}{\d t} \,.
 \end{align*}
