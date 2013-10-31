@@ -5495,40 +5495,38 @@ and the resulting {\ct REAC} line is:
 \end{lstlisting}
 
 \noindent
-The array {\ct SPEC\_ID\_NU} contains the list of tracked species participating in the reaction as a product or reactant.  Note that a primitive species with {\ct LUMPED\_COMPONENT\_ONLY=.TRUE.} cannot be used in a reaction since it is not tracked separately.  The array {\ct SPEC\_ID\_N\_S} contains the list of species with the exponents, {\ct N\_S}, in Eq.~(\ref{eq:finite_rate}).  This array must contain only primitive species, i.e., no species mixtures. The array of stoichiometric coefficients, {\ct NU}, can be taken directly from Eq.~(\ref{eq:propane_1step}). If we extend Eq.~(\ref{eq:propane_1step}) to include reactions that account for carbon monoxide production, we obtain:
+The array {\ct SPEC\_ID\_NU} contains the list of tracked species participating in the reaction as a product or reactant.  Note that a primitive species with {\ct LUMPED\_COMPONENT\_ONLY=.TRUE.} cannot be used in a reaction since it is not tracked separately.  The array {\ct SPEC\_ID\_N\_S} contains the list of species with the exponents, {\ct N\_S}, in Eq.~(\ref{eq:finite_rate}).  This array must contain only primitive species, i.e., no species mixtures. The array of stoichiometric coefficients, {\ct NU}, can be taken directly from Eq.~(\ref{eq:propane_1step}). If we extend Eq.~(\ref{eq:propane_1step}) to include reactions from Westbrook and Dryer~\cite{Westbrook:1} that account for carbon monoxide production, we obtain:
 \begin{align}\label{eq:propane_2step}
 \mathrm{C_3H_8+3.5 \, O_2}&\rightarrow  \mathrm{3\,CO+4 \, H_2O} \\
 \nonumber \mathrm{CO + 0.5 \, O_2} &\leftrightharpoons \mathrm{CO_2}
 \end{align}
-As before, we use primitive species rather than mixtures. A {\ct REAC} line is needed for each reaction including the reverse reaction. The Arrhenius parameters are again found from Westbrook and Dryer~\cite{Westbrook:1}:
+In this case we will combine fast chemistry with finite-rate chemistry to create a mixed reaction mechanism. As before, we use primitive species rather than mixtures. A {\ct REAC} line is needed for each reaction including the reverse reaction. The propane oxidation reaction is a fast chemistry while the reversible carbon monoxide reaction is finite-rate. The Arrhenius parameters are modified from Andersen et al.~\cite{AndersenJ:1}:
 
 \begin{lstlisting}
 &REAC ID = 'R1'
       FUEL = 'PROPANE'
-      A = 1.0e12
-      E = 125520
       SPEC_ID_NU = 'PROPANE','OXYGEN','CARBON MONOXIDE','WATER VAPOR'
-      NU= -1,-3.5,3,4
-      SPEC_ID_N_S = 'PROPANE','OXYGEN'
-      N_S = 0.1,1.65 /
+      NU = -1,-3.5,3,4
+      CRITICAL_FLAME_TEMPERATURE = 730./
 
 &REAC ID = 'R2'
       FUEL = 'CARBON MONOXIDE'
-      A = 4e14
-      E = 167360
+      A = 1.5e9
+      E = 41840
       SPEC_ID_NU = 'CARBON MONOXIDE','OXYGEN','CARBON DIOXIDE'
-      NU= -1,-0.5,1
+      NU = -1,-0.5,1
       SPEC_ID_N_S = 'OXYGEN','CARBON MONOXIDE','WATER VAPOR'
-      N_S = 0.25,1,0.5 /
-
+      N_S = 0.25,1,0.5/
+ 
 &REAC ID = 'R3'
       FUEL = 'CARBON DIOXIDE'
-      A = 5e8
-      E = 167360
+      A = 6.16e13
+      E = 328026
       SPEC_ID_NU = 'CARBON DIOXIDE','OXYGEN','CARBON MONOXIDE'
-      NU= -1,0.5,1
-      SPEC_ID_N_S = 'CARBON DIOXIDE'
-      N_S = 1.0 /
+      NU = -1,0.5,1
+      SPEC_ID_N_S = 'OXYGEN','CARBON DIOXIDE','WATER VAPOR'
+      N_S = -0.25,1,0.5
+      N_T = -0.97/
 \end{lstlisting}
 
 \noindent For {\ct REAC ID='R2'}, the reaction rate depends on the water vapor concentration, as indicated by its assignment of a value of {\ct N\_S}. However, it does not explicitly participate in the reaction because it is not assigned a stoichiometric coefficient, {\ct NU}.  Reactions of this sort are often written in textbooks as
