@@ -1705,16 +1705,16 @@ DRAG_LAW_SELECT: SELECT CASE (LPC%DRAG_LAW)
    CASE (USER_DRAG)
       C_DRAG = LPC%DRAG_COEFFICIENT
       IF (LPC%LIQUID_DROPLET) THEN
-         A_DRAG = LP%PWT*PI*RDS
+         A_DRAG = PI*RDS
       ELSE
          IW = LP%WALL_INDEX
          SELECT CASE(SF%GEOMETRY)
             CASE(SURF_CARTESIAN)
-               A_DRAG = LP%PWT*SF%LENGTH*SF%WIDTH
+               A_DRAG = SF%LENGTH*SF%WIDTH
             CASE(SURF_CYLINDRICAL)
-               A_DRAG = LP%PWT*2._EB*RD*SF%LENGTH
+               A_DRAG = 2._EB*RD*SF%LENGTH
             CASE(SURF_SPHERICAL)                  
-               A_DRAG = LP%PWT*PI*RDS
+               A_DRAG = PI*RDS
          END SELECT
       ENDIF
    CASE (SCREEN_DRAG)
@@ -1726,16 +1726,16 @@ DRAG_LAW_SELECT: SELECT CASE (LPC%DRAG_LAW)
       LP%RE  = RHO_G*QREL*2._EB*RD/MU_AIR
       C_DRAG = DRAG(LP%RE,LPC%DRAG_LAW)
       IF (LPC%LIQUID_DROPLET) THEN
-         A_DRAG = LP%PWT*PI*RDS
+         A_DRAG = PI*RDS
       ELSE
          IW = LP%WALL_INDEX
          SELECT CASE(SF%GEOMETRY)
             CASE(SURF_CARTESIAN)
-               A_DRAG = LP%PWT*SF%LENGTH*SF%WIDTH
+               A_DRAG = SF%LENGTH*SF%WIDTH
             CASE(SURF_CYLINDRICAL)
-               A_DRAG = LP%PWT*2._EB*RD*SF%LENGTH
+               A_DRAG = 2._EB*RD*SF%LENGTH
             CASE(SURF_SPHERICAL)                  
-               A_DRAG = LP%PWT*PI*RDS
+               A_DRAG = PI*RDS
          END SELECT
       ENDIF
 
@@ -1780,7 +1780,7 @@ DRAG_LAW_SELECT: SELECT CASE (LPC%DRAG_LAW)
             LP%ONE_D%X(1) = RD
             RDS      = RD*RD
             RDC      = RD*RDS
-            A_DRAG = LP%PWT*PI*RDS
+            A_DRAG = PI*RDS
             ! Redo wake reduction and shape deformation for the new drop
             ! Drag reduction, except for particles associated with a SURF line
             WAKE_VEL = 1.0_EB
@@ -1868,9 +1868,9 @@ ELSE PARTICLE_NON_STATIC_IF ! Drag calculation for stationary, airborne particle
       CASE DEFAULT
          BETA = 0.5_EB*RVC*C_DRAG*A_DRAG*QREL
          OBDT = 1._EB+BETA*DT
-         LP%ACCEL_X = UBAR*(1._EB/OBDT-1._EB)*RDT 
-         LP%ACCEL_Y = VBAR*(1._EB/OBDT-1._EB)*RDT
-         LP%ACCEL_Z = WBAR*(1._EB/OBDT-1._EB)*RDT
+         LP%ACCEL_X = LP%PWT*UBAR*(1._EB/OBDT-1._EB)*RDT 
+         LP%ACCEL_Y = LP%PWT*VBAR*(1._EB/OBDT-1._EB)*RDT
+         LP%ACCEL_Z = LP%PWT*WBAR*(1._EB/OBDT-1._EB)*RDT
       CASE (SCREEN_DRAG)
          IF (QREL > 0.015_EB .AND. LPC%FREE_AREA_FRACTION < 1.0_EB ) THEN !Testing shows below this can have instability  
             TMP_G  = MAX(TMPMIN,TMP(IIG,JJG,KKG))
