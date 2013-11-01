@@ -1077,27 +1077,27 @@ WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
       CASE( 1)
          HX(II,JJ,KK)   = RHO_H_S_P(IIG,JJG,KKG) ! zero out DU at wall
          DU_M = (WC%RHO_F*H_S - RHO_H_S_P(IIG,JJG,KKG))*UN
-         U_DOT_DEL_RHO_H_S(IIG,JJG,KKG) = U_DOT_DEL_RHO_H_S(IIG,JJG,KKG) - DU_M*2._EB*WC%RDN
+         U_DOT_DEL_RHO_H_S(IIG,JJG,KKG) = U_DOT_DEL_RHO_H_S(IIG,JJG,KKG) - DU_M*WC%RDN
       CASE(-1)
          HX(II-1,JJ,KK) = RHO_H_S_P(IIG,JJG,KKG)
          DU_P = (WC%RHO_F*H_S - RHO_H_S_P(IIG,JJG,KKG))*UN
-         U_DOT_DEL_RHO_H_S(IIG,JJG,KKG) = U_DOT_DEL_RHO_H_S(IIG,JJG,KKG) + DU_P*2._EB*WC%RDN
+         U_DOT_DEL_RHO_H_S(IIG,JJG,KKG) = U_DOT_DEL_RHO_H_S(IIG,JJG,KKG) + DU_P*WC%RDN
       CASE( 2)
          HY(II,JJ,KK)   = RHO_H_S_P(IIG,JJG,KKG)
          DU_M = (WC%RHO_F*H_S - RHO_H_S_P(IIG,JJG,KKG))*UN
-         U_DOT_DEL_RHO_H_S(IIG,JJG,KKG) = U_DOT_DEL_RHO_H_S(IIG,JJG,KKG) - DU_M*2._EB*WC%RDN
+         U_DOT_DEL_RHO_H_S(IIG,JJG,KKG) = U_DOT_DEL_RHO_H_S(IIG,JJG,KKG) - DU_M*WC%RDN
       CASE(-2)
          HY(II,JJ-1,KK) = RHO_H_S_P(IIG,JJG,KKG)
          DU_P = (WC%RHO_F*H_S - RHO_H_S_P(IIG,JJG,KKG))*UN
-         U_DOT_DEL_RHO_H_S(IIG,JJG,KKG) = U_DOT_DEL_RHO_H_S(IIG,JJG,KKG) + DU_P*2._EB*WC%RDN
+         U_DOT_DEL_RHO_H_S(IIG,JJG,KKG) = U_DOT_DEL_RHO_H_S(IIG,JJG,KKG) + DU_P*WC%RDN
       CASE( 3)
          HZ(II,JJ,KK)   = RHO_H_S_P(IIG,JJG,KKG)
          DU_M = (WC%RHO_F*H_S - RHO_H_S_P(IIG,JJG,KKG))*UN
-         U_DOT_DEL_RHO_H_S(IIG,JJG,KKG) = U_DOT_DEL_RHO_H_S(IIG,JJG,KKG) - DU_M*2._EB*WC%RDN
+         U_DOT_DEL_RHO_H_S(IIG,JJG,KKG) = U_DOT_DEL_RHO_H_S(IIG,JJG,KKG) - DU_M*WC%RDN
       CASE(-3)
          HZ(II,JJ,KK-1) = RHO_H_S_P(IIG,JJG,KKG)
          DU_P = (WC%RHO_F*H_S - RHO_H_S_P(IIG,JJG,KKG))*UN
-         U_DOT_DEL_RHO_H_S(IIG,JJG,KKG) = U_DOT_DEL_RHO_H_S(IIG,JJG,KKG) + DU_P*2._EB*WC%RDN
+         U_DOT_DEL_RHO_H_S(IIG,JJG,KKG) = U_DOT_DEL_RHO_H_S(IIG,JJG,KKG) + DU_P*WC%RDN
    END SELECT
 
 ENDDO WALL_LOOP
@@ -1107,9 +1107,9 @@ DO K=1,KBAR
       DO I=1,IBAR
          IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
 
-         DU_P = (HX(I,J,K)   - RHO_H_S_P(I,J,K))*UU(I,J,K)
-         DU_M = (HX(I-1,J,K) - RHO_H_S_P(I,J,K))*UU(I-1,J,K)
-         U_DOT_DEL_RHO_H_S(I,J,K) = U_DOT_DEL_RHO_H_S(I,J,K) + (DU_P-DU_M)*RDX(I)
+         DU_P = (HX(I,J,K)   - RHO_H_S_P(I,J,K))*UU(I,J,K)                        ! FDS Tech Guide (B.13)
+         DU_M = (HX(I-1,J,K) - RHO_H_S_P(I,J,K))*UU(I-1,J,K)                      ! FDS Tech Guide (B.14)
+         U_DOT_DEL_RHO_H_S(I,J,K) = U_DOT_DEL_RHO_H_S(I,J,K) + (DU_P-DU_M)*RDX(I) ! FDS Tech Guide (B.12)
 
          DU_P = (HY(I,J,K)   - RHO_H_S_P(I,J,K))*VV(I,J,K)
          DU_M = (HY(I,J-1,K) - RHO_H_S_P(I,J,K))*VV(I,J-1,K)
@@ -1402,22 +1402,22 @@ WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
       SELECT CASE(IOR)
          CASE( 1)
             DU_M = (WC%RHO_F - RHOP(IIG,JJG,KKG))*UN
-            U_DOT_DEL_RHO(IIG,JJG,KKG) = U_DOT_DEL_RHO(IIG,JJG,KKG) - DU_M*2._EB*WC%RDN
+            U_DOT_DEL_RHO(IIG,JJG,KKG) = U_DOT_DEL_RHO(IIG,JJG,KKG) - DU_M*WC%RDN
          CASE(-1)
             DU_P = (WC%RHO_F - RHOP(IIG,JJG,KKG))*UN
-            U_DOT_DEL_RHO(IIG,JJG,KKG) = U_DOT_DEL_RHO(IIG,JJG,KKG) + DU_P*2._EB*WC%RDN
+            U_DOT_DEL_RHO(IIG,JJG,KKG) = U_DOT_DEL_RHO(IIG,JJG,KKG) + DU_P*WC%RDN
          CASE( 2)
             DU_M = (WC%RHO_F - RHOP(IIG,JJG,KKG))*UN
-            U_DOT_DEL_RHO(IIG,JJG,KKG) = U_DOT_DEL_RHO(IIG,JJG,KKG) - DU_M*2._EB*WC%RDN
+            U_DOT_DEL_RHO(IIG,JJG,KKG) = U_DOT_DEL_RHO(IIG,JJG,KKG) - DU_M*WC%RDN
          CASE(-2)
             DU_P = (WC%RHO_F - RHOP(IIG,JJG,KKG))*UN
-            U_DOT_DEL_RHO(IIG,JJG,KKG) = U_DOT_DEL_RHO(IIG,JJG,KKG) + DU_P*2._EB*WC%RDN
+            U_DOT_DEL_RHO(IIG,JJG,KKG) = U_DOT_DEL_RHO(IIG,JJG,KKG) + DU_P*WC%RDN
          CASE( 3)
             DU_M = (WC%RHO_F - RHOP(IIG,JJG,KKG))*UN
-            U_DOT_DEL_RHO(IIG,JJG,KKG) = U_DOT_DEL_RHO(IIG,JJG,KKG) - DU_M*2._EB*WC%RDN
+            U_DOT_DEL_RHO(IIG,JJG,KKG) = U_DOT_DEL_RHO(IIG,JJG,KKG) - DU_M*WC%RDN
          CASE(-3)
             DU_P = (WC%RHO_F - RHOP(IIG,JJG,KKG))*UN
-            U_DOT_DEL_RHO(IIG,JJG,KKG) = U_DOT_DEL_RHO(IIG,JJG,KKG) + DU_P*2._EB*WC%RDN
+            U_DOT_DEL_RHO(IIG,JJG,KKG) = U_DOT_DEL_RHO(IIG,JJG,KKG) + DU_P*WC%RDN
       END SELECT
 
    ENDIF
@@ -1475,9 +1475,9 @@ DO K=0,KBP1
    ENDDO
 ENDDO
 
-! FX(:,:,:,N)=1.E20_EB
-! FY(:,:,:,N)=1.E20_EB
-! FZ(:,:,:,N)=1.E20_EB
+!FX(:,:,:,N)=1.E20_EB
+!FY(:,:,:,N)=1.E20_EB
+!FZ(:,:,:,N)=1.E20_EB
 
 IF (.NOT.CONSTANT_SPECIFIC_HEAT_RATIO) THEN
    U_DOT_DEL_RHO_Z=>WORK7 
@@ -1525,7 +1525,7 @@ LIMITER_SELECT: SELECT CASE (FLUX_LIMITER)
 
       ! compute data variation and face value y
 
-      ! DV = 1.E20_EB
+      !DV = 1.E20_EB
       DO K=1,KBAR
          DO J=0,JBAR
             DO I=1,IBAR
@@ -1743,22 +1743,22 @@ WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
       SELECT CASE(IOR)
          CASE( 1)
             DU_M = (WC%RHO_F*WC%ZZ_F(N) - RHO_Z_P(IIG,JJG,KKG))*UN
-            U_DOT_DEL_RHO_Z(IIG,JJG,KKG) = U_DOT_DEL_RHO_Z(IIG,JJG,KKG) - DU_M*2._EB*WC%RDN
+            U_DOT_DEL_RHO_Z(IIG,JJG,KKG) = U_DOT_DEL_RHO_Z(IIG,JJG,KKG) - DU_M*WC%RDN
          CASE(-1)
             DU_P = (WC%RHO_F*WC%ZZ_F(N) - RHO_Z_P(IIG,JJG,KKG))*UN
-            U_DOT_DEL_RHO_Z(IIG,JJG,KKG) = U_DOT_DEL_RHO_Z(IIG,JJG,KKG) + DU_P*2._EB*WC%RDN
+            U_DOT_DEL_RHO_Z(IIG,JJG,KKG) = U_DOT_DEL_RHO_Z(IIG,JJG,KKG) + DU_P*WC%RDN
          CASE( 2)
             DU_M = (WC%RHO_F*WC%ZZ_F(N) - RHO_Z_P(IIG,JJG,KKG))*UN
-            U_DOT_DEL_RHO_Z(IIG,JJG,KKG) = U_DOT_DEL_RHO_Z(IIG,JJG,KKG) - DU_M*2._EB*WC%RDN
+            U_DOT_DEL_RHO_Z(IIG,JJG,KKG) = U_DOT_DEL_RHO_Z(IIG,JJG,KKG) - DU_M*WC%RDN
          CASE(-2)
             DU_P = (WC%RHO_F*WC%ZZ_F(N) - RHO_Z_P(IIG,JJG,KKG))*UN
-            U_DOT_DEL_RHO_Z(IIG,JJG,KKG) = U_DOT_DEL_RHO_Z(IIG,JJG,KKG) + DU_P*2._EB*WC%RDN
+            U_DOT_DEL_RHO_Z(IIG,JJG,KKG) = U_DOT_DEL_RHO_Z(IIG,JJG,KKG) + DU_P*WC%RDN
          CASE( 3)
             DU_M = (WC%RHO_F*WC%ZZ_F(N) - RHO_Z_P(IIG,JJG,KKG))*UN
-            U_DOT_DEL_RHO_Z(IIG,JJG,KKG) = U_DOT_DEL_RHO_Z(IIG,JJG,KKG) - DU_M*2._EB*WC%RDN
+            U_DOT_DEL_RHO_Z(IIG,JJG,KKG) = U_DOT_DEL_RHO_Z(IIG,JJG,KKG) - DU_M*WC%RDN
          CASE(-3)
             DU_P = (WC%RHO_F*WC%ZZ_F(N) - RHO_Z_P(IIG,JJG,KKG))*UN
-            U_DOT_DEL_RHO_Z(IIG,JJG,KKG) = U_DOT_DEL_RHO_Z(IIG,JJG,KKG) + DU_P*2._EB*WC%RDN
+            U_DOT_DEL_RHO_Z(IIG,JJG,KKG) = U_DOT_DEL_RHO_Z(IIG,JJG,KKG) + DU_P*WC%RDN
       END SELECT
 
    ENDIF
