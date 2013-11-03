@@ -1969,7 +1969,9 @@ as the basis for the time step restriction. To be clear, the CFL constraint is n
 \subsubsection{Stability of particle transport}
 \label{info:PART_Stability}
 
-The movement of Lagrangian particles within a time step is calculated using an analytical solution and remains stable regardless of the time step. In some cases with extremely fast particles, however, the stability of the overall flow behavior may require setting an additional parameter that limits the time step according to the speed of the fastest particle in the simulation.  The actual value of of the constraint is set using {\ct PARTICLE\_CFL\_MAX} on the {\ct MISC} line. A value of 1 (default) means that the fastest moving particle can move a distance of one grid cell during the time step. Setting {\ct PARTICLE\_CFL} to {\ct .FALSE.} on the {\ct MISC} line deactivates this constraint.
+The movement of Lagrangian particles within a time step is calculated using an analytical solution and remains stable regardless of the time step. In some cases with extremely fast particles, however, the stability of the overall flow behavior may require setting an additional parameter that limits the time step according to the speed of the fastest particle in the simulation.  The actual value of of the constraint is set using {\ct PARTICLE\_CFL\_MAX} on the {\ct MISC} line. A value of 1 (default) means that the fastest moving particle can move a distance of one grid cell during the time step.
+
+Because very fast nozzle velocities can cause extremely small time steps and hence very long run times, the {\ct PARTICLE\_CFL} constraint is set to {\ct .FALSE.} by default.  Setting {\ct PARTICLE\_CFL} to {\ct .TRUE.} on the {\ct MISC} line activates this constraint.
 
 \subsubsection{Heat Transfer Constraint}
 
