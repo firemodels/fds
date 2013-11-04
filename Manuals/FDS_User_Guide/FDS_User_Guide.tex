@@ -6316,6 +6316,8 @@ point of causing a numerical instability. If you encounter a numerical instabili
 {\ct PARTICLES\_PER\_SECOND} to produce a smoother evaporation pattern that is more realistic. Keep in mind that for a real sprinkler or nozzle, there are many more
 droplets created per second than the number that can be simulated.
 
+Note that by default the parameter {\ct PARTICLE\_CFL} is set to {\ct .FALSE.} (see Section \ref{info:PART_Stability}).  Thus, particles inserted with a velocity faster than the local fluid entrainment velocity may traverse more than one cell.  If the particles represent a fuel spray or sprinkler droplets that are to be collected in a pan, it may be necessary to set {\ct PARTICLE\_CFL=.TRUE.} on {\ct MISC} to precisely account for particle mass.  For example, the particles may represent liquid fuel being sprayed into a pan burner made from a zero thickness obstruction.  In this case, if the particle position overshoots the cell face representing the boundary of the pan then either spurious burning of the particle will occur underneath the pan or, if the particle does not burn, the heat release rate will be diminished.
+
 
 \subsection{Particles or Droplets Introduced within a Volume}
 \label{info:initial_droplets}
