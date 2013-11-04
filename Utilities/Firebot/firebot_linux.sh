@@ -251,6 +251,21 @@ do_svn_checkout()
    else
       echo "Checking out latest revision." >> $FIREBOT_DIR/output/stage1 2>&1
       svn update >> $FIREBOT_DIR/output/stage1 2>&1
+
+      # Bump SVN revision number for all guides (so that the SVN revision keyword gets updated)
+      echo "Bump SVN revision number for all guides." >> $FIREBOT_DIR/output/stage1 2>&1
+      CURRENT_TIMESTAMP=`date`
+      sed -i "s/.*% dummy comment to force svn change.*/% dummy comment to force svn change - ${CURRENT_TIMESTAMP}/" $FDS_SVNROOT/Manuals/FDS_User_Guide/FDS_User_Guide.tex
+      sed -i "s/.*% dummy comment to force svn change.*/% dummy comment to force svn change - ${CURRENT_TIMESTAMP}/" $FDS_SVNROOT/Manuals/FDS_Technical_Reference_Guide/FDS_Technical_Reference_Guide.tex
+      sed -i "s/.*% dummy comment to force svn change.*/% dummy comment to force svn change - ${CURRENT_TIMESTAMP}/" $FDS_SVNROOT/Manuals/FDS_Verification_Guide/FDS_Verification_Guide.tex
+      sed -i "s/.*% dummy comment to force svn change.*/% dummy comment to force svn change - ${CURRENT_TIMESTAMP}/" $FDS_SVNROOT/Manuals/FDS_Validation_Guide/FDS_Validation_Guide.tex
+      sed -i "s/.*% dummy comment to force svn change.*/% dummy comment to force svn change - ${CURRENT_TIMESTAMP}/" $FDS_SVNROOT/Manuals/FDS_Configuration_Management_Plan/FDS_Configuration_Management_Plan.tex
+
+      # Commit back results
+      svn commit -m 'Firebot: Bump SVN revision number for all guides' &> /dev/null
+
+      echo "Re-checking out latest revision." >> $FIREBOT_DIR/output/stage1 2>&1
+      svn update >> $FIREBOT_DIR/output/stage1 2>&1
       SVN_REVISION=`tail -n 1 $FIREBOT_DIR/output/stage1 | sed "s/[^0-9]//g"`
    fi
 }
