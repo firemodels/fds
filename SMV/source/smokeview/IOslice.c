@@ -36,8 +36,8 @@ char IOslice_revision[]="$Revision$";
 int endianswitch;
 float gslice_valmin, gslice_valmax, *gslicedata;
 mesh *gslice_valmesh;
+slicedata *gslice_u, *gslice_v, *gslice_w;
 slicedata *gslice;
-
 
 float get_texture_index(float *xyz);
 void draw_triangle(float *v1, float *v2, float *v3, 
@@ -92,6 +92,8 @@ int makeslicesizefile(char *file, char *sizefile, int compression_type);
              VAL = U->qslice[(n)];               \
            }                                  \
          }
+
+#define GET_VAL_N(U,n)  ( (U)==NULL ? 0.0 : ( (U)->compression_type==1 ? (U)->qval256[(U)->iqsliceframe[(n)]] : (U)->qslice[(n)] )  )
 
 #define GET_VEC_DXYZ(U,DU,n) \
          if(U==NULL){       \
@@ -3327,6 +3329,9 @@ void drawvslice_frame(void){
     else{
       if(VAL!=NULL)VAL->iqsliceframe = VAL->slicelevel + VAL->itime*VAL->nsliceii;
     }
+#ifdef pp_VECTORGEN    
+    if(VAL->qslicedata!=NULL)VAL->qsliceframe = VAL->qslicedata + VAL->itime*VAL->nsliceii;
+#endif    
 #undef VAL
 #define VAL u
     if(VAL!=NULL){
@@ -3381,6 +3386,12 @@ void drawvslice_frame(void){
     else if(vd->slicetype==SLICE_CENTER){
         drawvvolslice_cellcenter(vd);
     }
+#ifdef pp_VECTORGEN    
+    else if(vd->volslice==1&&vis_gslice_data==1){
+      drawvgslice_data(vd);
+      SNIFF_ERRORS("after drawvgslice_data");
+    }
+#endif    
     else{
       drawvvolslice(vd);
     }
@@ -3737,6 +3748,63 @@ void drawgslice_data(slicedata *slicei){
     t3 = get_texture_index(xyz3);
   
     draw_triangle(xyz1,xyz2,xyz3,t1,t2,t3,del,0);
+  }
+  if(use_transparency_data==1)transparentoff();
+  if(cullfaces==1)glEnable(GL_CULL_FACE);
+  glPopMatrix();
+}
+
+/* ------------------ drawvgslice_data ------------------------ */
+
+void drawvgslice_data(vslicedata *vslicei){
+  mesh *meshi;
+  int j;
+  databounds *sb;
+  float valmin, valmax;
+  float del;
+  float dval;
+  slicedata *slicei;
+
+  slicei = sliceinfo + vslicei->ival;
+
+  if(slicei->loaded==0/*||slicei->display==0*/||slicei->volslice==0)return;
+
+  meshi = meshinfo + slicei->blocknumber;
+  if(meshi->gslice_nverts==0||meshi->gslice_ntriangles==0)return;
+  del = meshi->cellsize;
+  del *= del;
+  del /= 4.0;
+
+  glPushMatrix();
+  glScalef(SCALE2SMV(1.0),SCALE2SMV(1.0),SCALE2SMV(1.0));
+  glTranslatef(-xbar0,-ybar0,-zbar0);
+
+  if(cullfaces==1)glDisable(GL_CULL_FACE);
+  if(use_transparency_data==1)transparenton();
+
+  sb=slicebounds+islicetype;
+  valmin = sb->levels256[0];
+  valmax = sb->levels256[255];
+  dval = (valmax-valmin)/255.0;
+
+  gslicedata=slicei->qsliceframe;
+  gslice_valmin=valmin;
+  gslice_valmax=valmax;
+  gslice_valmesh=meshi;
+  gslice=slicei;
+
+  gslice_u=vslicei->u;
+  gslice_v=vslicei->v;
+  gslice_w=vslicei->w;
+
+  for(j=0;j<meshi->gslice_ntriangles;j++){
+    float *xyz1, *xyz2, *xyz3;
+
+    xyz1 = meshi->gslice_verts + 3*meshi->gslice_triangles[3*j];
+    xyz2 = meshi->gslice_verts + 3*meshi->gslice_triangles[3*j+1];
+    xyz3 = meshi->gslice_verts + 3*meshi->gslice_triangles[3*j+2];
+
+    draw_triangle_vector(xyz1,xyz2,xyz3,del,0);
   }
   if(use_transparency_data==1)transparentoff();
   if(cullfaces==1)glEnable(GL_CULL_FACE);
@@ -4772,7 +4840,6 @@ void drawvvolslice(const vslicedata *vd){
   nx = meshi->ibar+1;
   ny = meshi->jbar+1;
   nxy = nx*ny;
-
 
   vrange = velocity_range;
   if(vrange<=0.0)vrange=1.0;
@@ -6453,6 +6520,86 @@ float get_texture_index(float *xyz){
   val_fraction = CLAMP(val_fraction,0.0,1.0);
   return val_fraction;
 }
+
+/* ------------------ get_3dslice_val ------------------------ */
+
+float get_3dslice_val(slicedata *sd, float *xyz){
+  int i, j, k;
+  float *vv;
+  float *xplt, *yplt, *zplt;
+  float dxbar, dybar, dzbar;
+  int ibar, jbar, kbar;
+  int nx, ny, nz;
+  int slice_nx, slice_ny, slice_nz;
+  float dx, dy, dz;
+  float val000,val100,val010,val110;
+  float val001,val101,val011,val111;
+  float val00,val10,val01,val11;
+  float val0, val1;
+  float val, val_fraction;
+  int ijk;
+
+  mesh *valmesh;
+
+  valmesh = meshinfo + sd->blocknumber;
+
+  xplt = valmesh->xplt_orig;
+  yplt = valmesh->yplt_orig;
+  zplt = valmesh->zplt_orig;
+  ibar = valmesh->ibar;
+  jbar = valmesh->jbar;
+  kbar = valmesh->kbar;
+  dxbar = xplt[1]-xplt[0];
+  dybar = yplt[1]-yplt[0];
+  dzbar = zplt[1]-zplt[0];
+
+  nx = ibar + 1;
+  ny = jbar + 1;
+  nz = kbar + 1;
+  slice_nx = sd->ijk_max[0] - sd->ijk_min[0] + 1;
+  slice_ny = sd->ijk_max[1] - sd->ijk_min[1] + 1;
+  slice_nz = sd->ijk_max[2] - sd->ijk_min[2] + 1;
+
+  GETINDEX(i,xyz[0],xplt[0],dxbar,nx);
+  GETINDEX(j,xyz[1],yplt[0],dybar,ny);
+  GETINDEX(k,xyz[2],zplt[0],dzbar,nz);
+
+  // val(i,j,k) = di*nj*nk + dj*nk + dk
+  ijk = (i-sd->ijk_min[0])*slice_nz*slice_ny + (j-sd->ijk_min[1])*slice_nz + (k-sd->ijk_min[2]);
+
+  dx = (xyz[0] - xplt[i])/dxbar;
+  dx = CLAMP(dx,0.0,1.0);
+  dy = (xyz[1] - yplt[j])/dybar;
+  dy = CLAMP(dy,0.0,1.0);
+  dz = (xyz[2] - zplt[k])/dzbar;
+  dz = CLAMP(dz,0.0,1.0);
+
+  // ijk
+  val000 = (float)GET_VAL_N(sd,ijk);     // i,j,k
+  val001 = (float)GET_VAL_N(sd,ijk + 1); // i,j,k+1
+
+  // ijk + slice_nz
+  val010 = (float)GET_VAL_N(sd,ijk+slice_nz);     // i,j+1,k
+  val011 = (float)GET_VAL_N(sd,ijk+slice_nz + 1); // i,j+1,k+1
+
+  // ijk + slice_nz*slice_ny 
+  val100 = (float)GET_VAL_N(sd,ijk + slice_nz*slice_ny);     // i+1,j,k
+  val101 = (float)GET_VAL_N(sd,ijk + slice_nz*slice_ny + 1); // i+1,j,k+1
+
+  // ijk + slice_nz + slice_nz*slice_ny
+  val110 = (float)GET_VAL_N(sd,ijk + slice_nz + slice_nz*slice_ny);   // i+1,j+1,k
+  val111 = (float)GET_VAL_N(sd,ijk + slice_nz + slice_nz*slice_ny + 1); // i+1,j+1,k+1
+
+  val00 = MIX(dx,val100,val000);
+  val10 = MIX(dx,val110,val010);
+  val01 = MIX(dx,val101,val001);
+  val11 = MIX(dx,val111,val011);
+  val0 = MIX(dy, val10, val00);
+  val1 = MIX(dy, val11, val01);
+
+  val = MIX(dz,val1,val0);
+  return val;
+}
   
 /* ------------------ draw_quad ------------------------ */
 
@@ -6577,19 +6724,36 @@ void draw_triangle_vector(float *v1, float *v2, float *v3, float del, int level)
   float v12[3],v13[3],v23[3],vavg[3];
   float dx, dy, dz;
   float tavg;
+  int tavg_index;
+  float vrange;
+  float *rgb_ptr;
+
+  vrange = velocity_range;
+  if(vrange<=0.0)vrange=1.0;
 
   if(level==0){
-    glBegin(GL_LINE);
+    glLineWidth(vectorlinewidth);
+    glBegin(GL_LINES);
   }
   DIST3(v1,v2,d12);
   DIST3(v1,v3,d13);
   DIST3(v2,v3,d23);
   if(d12<=del&&d13<=del&&d23<del){
     VERT_AVG3(v1,v2,v3,vavg);
-    tavg=get_texture_index(vavg);
-    glTexCoord1f(tavg);
-    glVertex3fv(vavg);
-    glVertex3fv(vavg);
+    dx = get_3dslice_val(gslice_u, vavg)*0.05*vecfactor/vrange*xyzmaxdiff;
+    dy = get_3dslice_val(gslice_v, vavg)*0.05*vecfactor/vrange*xyzmaxdiff;
+    dz = get_3dslice_val(gslice_w, vavg)*0.05*vecfactor/vrange*xyzmaxdiff;
+    if(gslice->constant_color!=NULL){
+      rgb_ptr = gslice->constant_color;
+    }
+    else{
+      tavg=get_texture_index(vavg);
+      tavg_index=CLAMP(tavg*255,0,255);
+      rgb_ptr = rgb_slice + 4*tavg_index;
+    }
+    glColor4fv(rgb_ptr);
+    glVertex3f(vavg[0]-dx,vavg[1]-dy,vavg[2]-dz);
+    glVertex3f(vavg[0]+dx,vavg[1]+dy,vavg[2]+dz);
   }
   else{
     if(d12<=MIN(d13,d23)){
@@ -6614,9 +6778,7 @@ void draw_triangle_vector(float *v1, float *v2, float *v3, float del, int level)
       draw_quad_vector(v12,v2,v3,v13,del,level+1);
     }
   }
-  if(level==0){
-    glEnd();
-  }
+  if(level==0)glEnd();
 }
 
 /* ------------------ draw_quad_outline ------------------------ */

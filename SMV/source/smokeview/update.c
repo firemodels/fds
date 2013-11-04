@@ -440,10 +440,16 @@ void Update_Show(void){
   if(visTimeSlice==1){
     for(i=0;i<nvsliceinfo;i++){
       vslicedata *vd;
+      slicedata *sd;
 
       vd = vsliceinfo+i;
       if(vd->loaded==0||vd->display==0)continue;
-      if(sliceinfo[vd->ival].type!=islicetype)continue;
+      sd = sliceinfo + vd->ival;
+      
+      if(sd->type!=islicetype)continue;
+#ifdef pp_VECTORGEN      
+      if(sd->volslice==1&&sd->slicetype==SLICE_NODE&&vis_gslice_data==1)SHOW_gslice_data=1;
+#endif      
       vsliceflag=1;
       break;
     }

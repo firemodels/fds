@@ -19,7 +19,7 @@
 #endif
 
 // comment the following line when building an unofficial release
-#define pp_OFFICIAL_RELEASE
+//#define pp_OFFICIAL_RELEASE
 
 #ifdef pp_release
 #ifdef pp_OFFICIAL_RELEASE
@@ -61,6 +61,7 @@
 //VVVVVVVVVVVVVVVVVVVVVVVVVVVVV  turn on options that are being tested VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
 
 #ifdef pp_BETA
+#define pp_VECTORGEN
 #define pp_GEOMTEST
 //#define pp_GPUDEPTH
 #ifdef _DEBUG

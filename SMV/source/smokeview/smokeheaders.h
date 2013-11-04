@@ -414,6 +414,7 @@ EXTERNCPP void drawplot3d_frame(void);
 EXTERNCPP void drawvslice_frame(void);
 EXTERNCPP void drawslice_frame(void);
 EXTERNCPP void drawgslice_dataGPU(slicedata *slicei);
+EXTERNCPP void drawvgslice_data(vslicedata *vslicei);
 EXTERNCPP void drawgslice_data(slicedata *slicei);
 EXTERNCPP void drawgslice_outline(void);
 EXTERNCPP void drawpatch_frame(void);
