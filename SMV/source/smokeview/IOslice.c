@@ -6725,11 +6725,7 @@ void draw_triangle_vector(float *v1, float *v2, float *v3, float del, int level)
   float dx, dy, dz;
   float tavg;
   int tavg_index;
-  float vrange;
   float *rgb_ptr;
-
-  vrange = velocity_range;
-  if(vrange<=0.0)vrange=1.0;
 
   if(level==0){
     glLineWidth(vectorlinewidth);
@@ -6739,10 +6735,16 @@ void draw_triangle_vector(float *v1, float *v2, float *v3, float del, int level)
   DIST3(v1,v3,d13);
   DIST3(v2,v3,d23);
   if(d12<=del&&d13<=del&&d23<del){
+    float vecfactor2, vrange;
+
+    vrange = velocity_range;
+    if(vrange<=0.0)vrange=1.0;
+    vecfactor2 = 0.05*vecfactor/vrange*xyzmaxdiff;
+
     VERT_AVG3(v1,v2,v3,vavg);
-    dx = get_3dslice_val(gslice_u, vavg)*0.05*vecfactor/vrange*xyzmaxdiff;
-    dy = get_3dslice_val(gslice_v, vavg)*0.05*vecfactor/vrange*xyzmaxdiff;
-    dz = get_3dslice_val(gslice_w, vavg)*0.05*vecfactor/vrange*xyzmaxdiff;
+    dx = get_3dslice_val(gslice_u, vavg)*vecfactor2;
+    dy = get_3dslice_val(gslice_v, vavg)*vecfactor2;
+    dz = get_3dslice_val(gslice_w, vavg)*vecfactor2;
     if(gslice->constant_color!=NULL){
       rgb_ptr = gslice->constant_color;
     }
