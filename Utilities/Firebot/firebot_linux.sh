@@ -274,7 +274,7 @@ check_svn_checkout()
 {
    cd $FDS_SVNROOT
    # Check for SVN errors
-   if [[ `grep -E 'Updated|At revision' $FIREBOT_DIR/output/stage1 | wc -l` -ne 1 ]];
+   if [[ `grep -E 'Updated|At revision' $FIREBOT_DIR/output/stage1 | wc -l` -ne 2 ]];
    then
       echo "Errors from Stage 1 - SVN operations:" >> $ERROR_LOG
       cat $FIREBOT_DIR/output/stage1 >> $ERROR_LOG
