@@ -8761,6 +8761,7 @@ int readini2(char *inifile, int localfile){
     if(match(buffer,"FIRECOLORMAP")==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i %i",&firecolormap_type,&fire_colorbar_index_ini);
+      firecolormap_type_save=firecolormap_type;
       update_fire_colorbar_index=1;
       continue;
     }
