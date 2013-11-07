@@ -1,0 +1,39 @@
+&HEAD CHID='ramp_prof_u_z', TITLE='Test of interpolated ramp profile' /
+
+&MESH IJK = 40,20,30, XB=-0.0392,0.0392,-0.0196,0.0196,0,0.0588 / dx = h/5 = 0.00196 m (single mesh)
+
+&TIME T_END=5./
+
+&SURF ID='inlet', VEL=-7.72, COLOR='BLUE', PROFILE='RAMP', RAMP_V_Z='u_prof' /
+&SURF ID='top', FREE_SLIP=.TRUE., COLOR='INVISIBLE' /
+
+&OBST XB=-0.0392,0,-0.0196,0.0196,0,0.0098 /
+
+&VENT MB='XMIN', SURF_ID='inlet'/
+&VENT MB='XMAX', SURF_ID='OPEN'/
+&VENT MB='YMIN', SURF_ID='MIRROR'/
+&VENT MB='YMAX', SURF_ID='MIRROR'/
+&VENT MB='ZMAX', SURF_ID='top'/
+
+&RAMP ID='u_prof', T=0.,      F=0.   /
+&RAMP ID='u_prof', T=0.0098,  F=0.   /
+&RAMP ID='u_prof', T=0.01005, F=0.2474 /
+&RAMP ID='u_prof', T=0.01029, F=0.4521 /
+&RAMP ID='u_prof', T=0.01077, F=0.6256 /
+&RAMP ID='u_prof', T=0.01174, F=0.7267 /
+&RAMP ID='u_prof', T=0.01368, F=0.8238 /
+&RAMP ID='u_prof', T=0.01562, F=0.8795 /
+&RAMP ID='u_prof', T=0.01756, F=0.9378 /
+&RAMP ID='u_prof', T=0.0195,  F=0.9663 /
+&RAMP ID='u_prof', T=0.02144, F=0.9922 /
+&RAMP ID='u_prof', T=0.02338, F=0.9987 /
+&RAMP ID='u_prof', T=0.02532, F=1 /
+&RAMP ID='u_prof', T=0.0588,  F=1 /
+
+&SLCF PBY=0, QUANTITY='VELOCITY', VECTOR=.TRUE. /
+
+&DEVC XB=-0.0294,-0.0294,0,0,0.00098,0.05782, QUANTITY='U-VELOCITY', POINTS=30, ID='umean'/
+
+&TAIL /
+
+
