@@ -12,8 +12,8 @@ qq=
 
 /bin/sh -c "cp $BASEDIR/FDS_Input_Files/*.fds $BASEDIR/$INDIR"
 
-$QFDS -r       $qq -d $INDIR backward_facing_step_5.fds
-$QFDS -r -p 12 $qq -d $INDIR backward_facing_step_10.fds
-#$QFDS -r -p 72 $qq -d $INDIR backward_facing_step_20.fds
+$QFDS -r            $qq -d $INDIR backward_facing_step_5.fds
+$QFDS -r -n 4 -p 12 $qq -d $INDIR backward_facing_step_10.fds
+$QFDS -r -n 8 -p 72 $qq -d $INDIR backward_facing_step_20.fds
 
 echo FDS cases submitted
