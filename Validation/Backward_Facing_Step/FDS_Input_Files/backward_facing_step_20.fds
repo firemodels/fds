@@ -21,12 +21,27 @@ MESH IJK = 480,80,120, XB=-0.0392,0.196,-0.0196,0.0196,0,0.0588 / dx = h/10 = 0.
 
 &SPEC ID='AIR', VISCOSITY=1.8216E-5, BACKGROUND=.TRUE./
 
-&SURF ID='inlet', VEL=-7.72, COLOR='BLUE' /
+&SURF ID='inlet', VEL=-7.72, COLOR='BLUE', PROFILE='RAMP', RAMP_V_Z='u_prof' /
 &VENT PBX=-0.0392, SURF_ID='inlet', N_EDDY=100, L_EDDY=.0098, VEL_RMS=0.03 /
 &VENT PBX= 0.1960, SURF_ID='OPEN' /
 &VENT PBY=-0.0196, SURF_ID='MIRROR' /
 &VENT PBY= 0.0196, SURF_ID='MIRROR' /
 &VENT PBZ= 0.0588, SURF_ID='MIRROR' /
+
+&RAMP ID='u_prof', T=0.,      F=0.   /
+&RAMP ID='u_prof', T=0.0098,  F=0.   /
+&RAMP ID='u_prof', T=0.01005, F=0.2474 /
+&RAMP ID='u_prof', T=0.01029, F=0.4521 /
+&RAMP ID='u_prof', T=0.01077, F=0.6256 /
+&RAMP ID='u_prof', T=0.01174, F=0.7267 /
+&RAMP ID='u_prof', T=0.01368, F=0.8238 /
+&RAMP ID='u_prof', T=0.01562, F=0.8795 /
+&RAMP ID='u_prof', T=0.01756, F=0.9378 /
+&RAMP ID='u_prof', T=0.0195,  F=0.9663 /
+&RAMP ID='u_prof', T=0.02144, F=0.9922 /
+&RAMP ID='u_prof', T=0.02338, F=0.9987 /
+&RAMP ID='u_prof', T=0.02532, F=1 /
+&RAMP ID='u_prof', T=0.0588,  F=1 /
 
 &OBST XB=-0.0392,0,-0.0196,0.0196,0,0.0098 /
 
