@@ -574,6 +574,8 @@ hazard due to combustion gases\cite{SFPE:Purser}. Images are drawn at \SI{30}{s}
 
 Figure \ref{figgslicetest} presents images of 3D slices oriented in two different
 ways. Images are drawn at \SI{0}{s}, \SI{10}{s} and \SI{30}{s}.
+Figure \ref{figvgslicetest} presents images of 3D vector slices oriented in two different
+ways. Images are drawn at \SI{0}{s}, \SI{10}{s} and \SI{30}{s}.
 
 Figure \ref{figdiffslicetest} presents images from data differenced by Smokediff.
 Smokediff computed the difference between two similar FDS cases and generated slice
@@ -719,6 +721,29 @@ SI{30}{s}, FED=0.29&\SI{60}{s}, FED=0.59\\
 \label{figgslicetest}%
 \end{figure}
 
+
+\begin{figure}[\figoptions]
+\begin{center}
+\begin{tabular}{cccp{1.0in}}
+ \includegraphics[height=\figheightE]{SCRIPT_FIGURES/plume5c_vgslice_00}&
+ \includegraphics[height=\figheightE]{SCRIPT_FIGURES/plume5c_vgslice2_00}\\
+
+ \includegraphics[height=\figheightE]{SCRIPT_FIGURES/plume5c_vgslice_10}&
+ \includegraphics[height=\figheightE]{SCRIPT_FIGURES/plume5c_vgslice2_10}\\
+
+ \includegraphics[height=\figheightE]{SCRIPT_FIGURES/plume5c_vgslice_30}&
+ \includegraphics[height=\figheightE]{SCRIPT_FIGURES/plume5c_vgslice2_30}\\
+
+ general orientation&second orientation\\
+ &&\raisebox{0.5in}[0pt]{\includegraphics[height=7.5in]{FIGURES/colorbar_20_620}}\\
+ \end{tabular}
+\end{center}
+ \caption[A test showing arbitrarily oriented vector slice file planes generated from
+ 3D slice files]{A test showing arbitrarily oriented vector slice file planes generated
+ from 3D slice files at \SI{0}{s}, \SI{10}{s} and \SI{30}{s}.  Two orientations are
+ shown at three time steps. }
+\label{figvgslicetest}%
+\end{figure}
 
 \begin{figure}[\figoptions]
 \begin{center}
