@@ -40,6 +40,8 @@ SETTIMEVAL
 RENDERONCE
  plume5c_slice_30
 
+// render general slice 1
+
 UNLOADALL
 LOADINIFILE
  plume5c_gslice.ini
@@ -62,6 +64,8 @@ SETTIMEVAL
 RENDERONCE
  plume5c_gslice_30
 
+// render general slice 2
+
 UNLOADALL
 LOADINIFILE
  plume5c_gslice2.ini
@@ -83,6 +87,54 @@ SETTIMEVAL
  30.05
 RENDERONCE
  plume5c_gslice2_30
+
+// render general vector slice 1
+
+UNLOADALL
+LOADINIFILE
+ plume5c_gslice.ini
+LOADVFILE
+ plume5c_30.sf
+KEYBOARD
+ *
+KEYBOARD
+ w
+SETTIMEVAL
+ 0.0
+RENDERONCE
+ plume5c_vgslice_00
+SETTIMEVAL
+ 10.05
+RENDERONCE
+ plume5c_vgslice_10
+SETTIMEVAL
+ 30.05
+RENDERONCE
+ plume5c_vgslice_30
+
+// render general vector slice 2
+
+UNLOADALL
+LOADINIFILE
+ plume5c_gslice2.ini
+LOADVFILE
+ plume5c_30.sf
+KEYBOARD
+ *
+KEYBOARD
+ w
+SETTIMEVAL
+ 0.0
+RENDERONCE
+ plume5c_vgslice2_00
+SETTIMEVAL
+ 10.05
+RENDERONCE
+ plume5c_vgslice2_10
+SETTIMEVAL
+ 30.05
+RENDERONCE
+ plume5c_vgslice2_30
 
 // render cell centered slice files
 
