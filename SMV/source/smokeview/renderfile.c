@@ -145,6 +145,8 @@ void RenderFrame(int view_mode){
         strcat(suffix,"_R");
       }
       break;
+    case VIEW_CENTER:
+      break;
     default:
       ASSERT(FFALSE);
       break;

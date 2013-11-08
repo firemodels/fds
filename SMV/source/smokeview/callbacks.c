@@ -1939,7 +1939,7 @@ void keyboard(unsigned char key, int flag){
           if(rotation_type==EYE_CENTERED){
             handle_move_keys(GLUT_KEY_UP);
           }
-          else if(SHOW_gslice_data==1){
+          else{
             vis_gslice_data = 1 - vis_gslice_data;
             update_gslice_parms();
           }
