@@ -1270,7 +1270,7 @@ void readpart(char *file, int ifile, int flag, int *errorcode){
     *errorcode=1;
     FORTclosefortranfile(&file_unit);
     fprintf(stderr,"*** Error: memory allocation failed while attempting .\n");
-    fprintf(stderr,"          to load %s.\n",parti->file);
+    fprintf(stderr,"          to load %s\n",parti->file);
     readpart("",ifile,UNLOAD,&error);
     return;
   }
@@ -1284,7 +1284,7 @@ void readpart(char *file, int ifile, int flag, int *errorcode){
      NewMemory((void **)&parti->sprframe,npartframes*sizeof(int))==0){
       *errorcode=1;
     fprintf(stderr,"*** Error: memory allocation failed while attempting .\n");
-    fprintf(stderr,"          to load %s.\n",parti->file);
+    fprintf(stderr,"          to load %s\n",parti->file);
       FORTclosefortranfile(&file_unit);
       readpart("",ifile,UNLOAD,&error);
       return;
