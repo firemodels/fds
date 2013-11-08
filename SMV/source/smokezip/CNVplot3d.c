@@ -90,7 +90,7 @@ int convert_plot3d(plot3d *plot3di){
     plot3dstream=fopen(plot3dfile_svz,"rb");
     if(plot3dstream!=NULL){
       fclose(plot3dstream);
-      PRINTF("  Removing %s.\n",plot3dfile_svz);
+      PRINTF("  Removing %s\n",plot3dfile_svz);
       UNLINK(plot3dfile_svz);
       LOCK_COMPRESS;
       GLOBfilesremoved++;

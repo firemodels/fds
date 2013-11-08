@@ -89,7 +89,7 @@ int convert_volslice(slice *slicei, int *thread_index){
     slicestream=fopen(slicefile_svz,"rb");
     if(slicestream!=NULL){
       fclose(slicestream);
-      PRINTF("  Removing %s.\n",slicefile_svz);
+      PRINTF("  Removing %s\n",slicefile_svz);
       UNLINK(slicefile_svz);
       LOCK_COMPRESS;
       GLOBfilesremoved++;
@@ -385,7 +385,7 @@ int convert_slice(slice *slicei, int *thread_index){
     slicestream=fopen(slicefile_svz,"rb");
     if(slicestream!=NULL){
       fclose(slicestream);
-      PRINTF("  Removing %s.\n",slicefile_svz);
+      PRINTF("  Removing %s\n",slicefile_svz);
       UNLINK(slicefile_svz);
       LOCK_COMPRESS;
       GLOBfilesremoved++;
@@ -394,7 +394,7 @@ int convert_slice(slice *slicei, int *thread_index){
     slicesizestream=fopen(slicesizefile_svz,"rb");
     if(slicesizestream!=NULL){
       fclose(slicesizestream);
-      PRINTF("  Removing %s.\n",slicesizefile_svz);
+      PRINTF("  Removing %s\n",slicesizefile_svz);
       UNLINK(slicesizefile_svz);
       LOCK_COMPRESS;
       GLOBfilesremoved++;

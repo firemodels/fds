@@ -109,7 +109,7 @@ void *convert_parts2iso(void *arg){
       stream=fopen(GLOBsmvisofile,"rb");
       if(stream!=NULL){
         fclose(stream);
-        PRINTF("  Removing %s.\n",GLOBsmvisofile);
+        PRINTF("  Removing %s\n",GLOBsmvisofile);
         UNLINK(GLOBsmvisofile);
         LOCK_COMPRESS;
         GLOBfilesremoved++;
@@ -135,7 +135,7 @@ void *convert_parts2iso(void *arg){
           stream=fopen(isofilename,"rb");
           if(stream!=NULL){
             fclose(stream);
-            PRINTF("  Removing %s.\n",isofilename);
+            PRINTF("  Removing %s\n",isofilename);
             UNLINK(isofilename);
             LOCK_COMPRESS;
             GLOBfilesremoved++;
@@ -327,7 +327,7 @@ void convert_part(part *parti, int *thread_index){
     partstream=fopen(partfile_svz,"rb");
     if(partstream!=NULL){
       fclose(partstream);
-      PRINTF("  Removing %s.\n",partfile_svz);
+      PRINTF("  Removing %s\n",partfile_svz);
       UNLINK(partfile_svz);
       LOCK_COMPRESS;
       GLOBfilesremoved++;
@@ -336,7 +336,7 @@ void convert_part(part *parti, int *thread_index){
     partsizestream=fopen(partsizefile_svz,"rb");
     if(partsizestream!=NULL){
       fclose(partsizestream);
-      PRINTF("  Removing %s.\n",partsizefile_svz);
+      PRINTF("  Removing %s\n",partsizefile_svz);
       UNLINK(partsizefile_svz);
       LOCK_COMPRESS;
       GLOBfilesremoved++;

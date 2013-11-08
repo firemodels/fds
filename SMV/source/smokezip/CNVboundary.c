@@ -71,7 +71,7 @@ int clean_boundary(patch *patchi){
   boundarystream=fopen(boundaryfile_svz,"rb");
   if(boundarystream!=NULL){
     fclose(boundarystream);
-    PRINTF("  Removing %s.\n",boundaryfile_svz);
+    PRINTF("  Removing %s\n",boundaryfile_svz);
     UNLINK(boundaryfile_svz);
     LOCK_COMPRESS;
     GLOBfilesremoved++;
@@ -80,7 +80,7 @@ int clean_boundary(patch *patchi){
   boundarysizestream=fopen(boundarysizefile_svz,"rb");
   if(boundarysizestream!=NULL){
     fclose(boundarysizestream);
-    PRINTF("  Removing %s.\n",boundarysizefile_svz);
+    PRINTF("  Removing %s\n",boundarysizefile_svz);
     UNLINK(boundarysizefile_svz);
     LOCK_COMPRESS;
     GLOBfilesremoved++;
