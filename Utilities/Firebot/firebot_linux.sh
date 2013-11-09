@@ -1211,89 +1211,6 @@ make_smv_verification_guide()
    check_guide $FIREBOT_DIR/output/stage8_smv_verification_guide $FDS_SVNROOT/Manuals/SMV_Verification_Guide/SMV_Verification_Guide.pdf 'SMV Verification Guide'
 }
 
-#  =====================================
-#  = Stage 9a - Run correlations cases =
-#  =====================================
-
-run_correlations()
-{
-   # Compile correlations.f90 and run correlations cases
-   cd $FDS_SVNROOT/Validation
-   ./Run_Correlation_Cases.sh &> $FIREBOT_DIR/output/stage9a_correlations
-}
-
-check_correlations()
-{
-   # Scan and report any errors in correlation cases
-   cd $FIREBOT_DIR
-   if [[ `grep -A 20 -B 20 "Problem" $FIREBOT_DIR/output/stage9a_correlations` == "" ]]
-   then
-      stage9a_success=true
-   else
-      echo "Warnings from Stage 9a - Run correlations:" >> $WARNING_LOG
-      grep -A 20 -B 20 "Problem" $FIREBOT_DIR/output/stage9a_correlations >> $WARNING_LOG
-      echo "" >> $WARNING_LOG
-   fi
-}
-
-#  =============================================
-#  = Stage 9b - Matlab plotting (correlations) =
-#  =============================================
-
-run_matlab_correlations()
-{
-   # Run Matlab plotting script
-   cd $FDS_SVNROOT/Utilities/Matlab
-   matlab -r "try, disp('Running Matlab Correlation Validation script'), Correlation_validation_script, catch, disp('Error'), err = lasterror, err.message, err.stack, end, exit" &> $FIREBOT_DIR/output/stage9b_correlations
-}
-
-check_matlab_correlations()
-{
-   # Scan and report any errors in Matlab scripts
-   cd $FIREBOT_DIR
-   if [[ `grep -A 50 "Error" $FIREBOT_DIR/output/stage9b_correlations` == "" ]]
-   then
-      stage9b_success=true
-   else
-      echo "Warnings from Stage 9b - Matlab plotting (correlations):" >> $WARNING_LOG
-      grep -A 50 "Error" $FIREBOT_DIR/output/stage9b_correlations >> $WARNING_LOG
-      echo "" >> $WARNING_LOG
-   fi
-}
-
-#  =======================================
-#  = Stage 9c - Build Correlation Guide =
-#  =======================================
-
-check_correlation_guide()
-{
-   # Scan and report any errors or warnings in build process for guide
-   cd $FIREBOT_DIR
-   if [[ `grep -I "successfully" $1` == "" ]]
-   then
-      # There were errors/warnings in the guide build process
-      echo "Warnings from Stage 9c - Build Correlation Guide:" >> $WARNING_LOG
-      echo $3 >> $WARNING_LOG # Name of guide
-      cat $1 >> $WARNING_LOG # Contents of log file
-      echo "" >> $WARNING_LOG
-   else
-      # Guide built successfully; there were no errors/warnings
-      # Copy guide to Firebot's local website
-      cp $2 /var/www/html/firebot/correlation_guide/
-   fi
-}
-
-make_correlation_guide()
-{
-   cd $FDS_SVNROOT/Manuals/Correlation_Guide
-
-   # Build FDS User Guide
-   ./make_guide.sh &> $FIREBOT_DIR/output/stage9c_correlation_guide
-
-   # Check guide for completion and copy to website if successful
-   check_correlation_guide $FIREBOT_DIR/output/stage9c_correlation_guide $FDS_SVNROOT/Manuals/Correlation_Guide/Correlation_Guide.pdf 'Correlation Guide'
-}
-
 #  =====================================================
 #  = Build status reporting - email and save functions =
 #  =====================================================
@@ -1359,7 +1276,6 @@ email_build_status()
       echo "-------------------------------" >> $TIME_LOG
       echo "Nightly Manuals (private):  http://blaze.nist.gov/firebot" >> $TIME_LOG
       echo "Nightly Manuals (public):   https://drive.google.com/folderview?id=0B_wB1pJL2bFQaDJaOFNnUDR4LXM#list" >> $TIME_LOG
-      echo "Correlation Guide (public): https://drive.google.com/folderview?id=0B_wB1pJL2bFQb1ZWSVB1cHA4TU0#list" >> $TIME_LOG
       echo "-------------------------------" >> $TIME_LOG
       mail -s "[Firebot@$hostname] Build success! Revision ${SVN_REVISION} passed all build tests." $mailToFDS < $TIME_LOG > /dev/null
    fi
@@ -1487,18 +1403,6 @@ make_smv_user_guide
 make_smv_technical_guide
 make_smv_verification_guide
 make_fds_configuration_management_plan
-
-### Stage 9a ###
-run_correlations
-check_correlations
-
-### Stage 9b ###
-check_matlab_license_server
-run_matlab_correlations
-check_matlab_correlations
-
-### Stage 9c ###
-make_correlation_guide
 
 ### Wrap up and report results ###
 set_files_world_readable
