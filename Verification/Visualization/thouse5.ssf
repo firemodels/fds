@@ -154,6 +154,48 @@ GSLICEORIEN
 RENDERONCE
  thouse5_gslice4
 
+
+// render general vector slices
+
+UNLOADALL
+LOADINIFILE
+ thouse5_gslice.ini
+LOADVFILE
+ thouse5_24.sf
+SETTIMEVAL
+ 60.000000
+
+GSSLICEVIEW
+ 1 0 0 0
+
+GSLICEPOS
+ 3.0 4.0 3.0
+GSLICEORIEN
+ 90.0 120.0
+RENDERONCE
+ thouse5_vgslice1
+
+GSLICEPOS
+ 3.0 4.0 3.0
+GSLICEORIEN
+ 50.0 145.0
+RENDERONCE
+ thouse5_vgslice2
+
+GSLICEPOS
+ 3.0 3.0 0.0
+GSLICEORIEN
+ 90.0 45.0
+RENDERONCE
+ thouse5_vgslice3
+
+GSLICEPOS
+ 0.0 2.0 0.0
+GSLICEORIEN
+ 128.0 42.0
+RENDERONCE
+ thouse5_vgslice4
+
 // render vector slice file
 
 UNLOADALL
