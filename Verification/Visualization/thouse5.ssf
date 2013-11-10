@@ -488,7 +488,7 @@ UNLOADALL
 SETVIEWPOINT
  external
 LOADFILE
- thouse5_29_fed.iso
+ thouse5_32_fed.iso
 SETTIMEVAL
  5.000000
 RENDERONCE
