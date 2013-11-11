@@ -27,16 +27,16 @@ more complicated behavior, like intumescence, need to be considered.
 \label{glossary}
 
 \begin{description}
-\item[Assumed Constant Volume:] The sample was assumed to have a constant volume. With volume known and mass determined density can be found.
-\item[Assumed Same as Polymer:] The material properties of the product were assumed to be the same as the known properties of the polymer.
 \item[Assumption:]  Characteristics were assumed from known properties in similar materials.
 \item[Cone Calorimeter] (ASTM E 1354 \cite{conecal}) The Cone Calorimeter exposes a small sample to a constant external radiant heat flux simulating exposure of the sample to a large scale fire. The device records mass loss data along with heat release data through oxygen consumption calorimetry. From this a variety of heat release related properties can be found including heat of combustion.
+\item[Constant Volume:] The material is assumed to maintain a constant volume during the solid phase reactions.
 \item[Direct:]  Direct measurement of densities is performed by measuring the dimensions and mass of the sample.
 \item[DSC:] (ASTM E 2070 \cite{diffscancal}) A Differential Scanning Calorimeter precisely raises the temperature of a small sample of material at a constant rate. This coupled with knowledge of heat absorbed by the sample allows for the calculation of the specific heat function of a material as well as heats of reaction and phase change.
 \item[Estimated:] Characteristics were approximated based on known properties in similar materials.
-\item[Fit to Cone Data:] Property was established by fitting a model to experimental values obtained in the Cone Calorimeter.
 \item[FTIR:] Fourier Transform Infrared Spectroscopy uses a spectrometer to simultaneously characterize the absorption of all frequencies of infrared light. In testing a sample is exposed to infrared light and a detector records light that has passed through the sample. A Fourier transform of detector measurement is then translated into absorption information.
 \item[Gasification Apparatus:] Similar to the Cone Calorimeter however flaming is prevented. This is done typically through the introduction of inert purge gases.
+\item[Inherited:] The properties of the product or component are assumed to be the same as the original material.
+\item[Inverse Analysis:] Property was established by fitting a model to measured temperatures from the Cone Calorimeter or Gasification Apparatus.
 \item[IS:] (ASTM E 1175 \cite{intgsphere}) An Integrating Sphere, or an Ulbricht Sphere, is a hollow cavity whose interior has a high diffuse reflectivity. A sample placed inside the sphere is exposed to incident radiation and reflectivity measured. Emissivity can be determined from this information. The standard above is for measurement of Solar reflectivity, and was not necessarily precisely followed.
 \item[Laser Flash:] (ASTM E1461 \cite{laserflash}) In the Laser Flash Method one surface of a sample is rapidly heated using a single pulse from a laser. Heat sensors on the opposite side of the sample record the arrival of the resulting temperature disturbance. From this thermal diffusivity/thermal conductivity can be calculated.
 \item[Literature:] Results were found within previously published literature.
@@ -216,13 +216,13 @@ Polymer Conductivity        & W/m/K         & 0.17 $\pm$ 0.01                   
 Polymer Specific Heat       & kJ/kg/K       & 1.55 $\pm$ 0.25                   & DSC                       &  \cite{Stoliarov:PDS2008}                 \\ \hline
 Polymer Emissivity          &               & 0.90 $\pm$ 0.05                   & IS                        &  \cite{Hallman:PES1974}                   \\ \hline
 Polymer Absorption Coef.    & m$^{-1}$      & 2145 $\pm$ 715                    & FTIR                      &  \cite{Tsilingiris:ECM2003}               \\ \hline
-Char 1 Density              & kg/m$^3$      & 629                               & Assumed Constant Volume   &  \cite{Stoliarov:CF2010}                  \\ \hline
-Char 1 Conductivity         & W/m/K         & 0.17                              & Assumed Same as Polymer   &  \cite{Stoliarov:CF2010}                  \\ \hline
-Char 1 Specific Heat        & kJ/kg/K       & 1.55 $\pm$ 0.25                   & Assumed Same as Polymer   &  \cite{Stoliarov:CF2010}                  \\ \hline
-Char 1 Emissivity           &               & 0.90 $\pm$ 0.05                   & Assumed Same as Polymer   &  \cite{Stoliarov:CF2010}                  \\ \hline
-Char 1 Absorption Coef.     & m$^{-1}$      & 2453                              & Fit to Cone Data          &  \cite{Stoliarov:CF2010}                  \\ \hline
-Char 2 Density              & kg/m$^3$      & 296                               & Assumed Constant Volume   &  \cite{Stoliarov:CF2010}                  \\ \hline
-Char 2 Conductivity         & W/m/K         & 0.26                              & Fit to Cone Data          &  \cite{Stoliarov:CF2010}                  \\ \hline
+Char 1 Density              & kg/m$^3$      & 629                               & Constant Volume           &  \cite{Stoliarov:CF2010}                  \\ \hline
+Char 1 Conductivity         & W/m/K         & 0.17                              & Inherited                 &  \cite{Stoliarov:CF2010}                  \\ \hline
+Char 1 Specific Heat        & kJ/kg/K       & 1.55 $\pm$ 0.25                   & Inherited                 &  \cite{Stoliarov:CF2010}                  \\ \hline
+Char 1 Emissivity           &               & 0.90 $\pm$ 0.05                   & Inherited                 &  \cite{Stoliarov:CF2010}                  \\ \hline
+Char 1 Absorption Coef.     & m$^{-1}$      & 2453                              & Inverse Analysis          &  \cite{Stoliarov:CF2010}                  \\ \hline
+Char 2 Density              & kg/m$^3$      & 296                               & Constant Volume           &  \cite{Stoliarov:CF2010}                  \\ \hline
+Char 2 Conductivity         & W/m/K         & 0.26                              & Inverse Analysis          &  \cite{Stoliarov:CF2010}                  \\ \hline
 Char 2 Specific Heat        & kJ/kg/K       & 1.72 $\pm$ 0.17                   & Pulsed Current            &  \cite{Stoliarov:CF2010,Matsumoto:1996}   \\ \hline
 Char 2 Emissivity           &               & 0.85 $\pm$ 0.05                   & Pulsed Current            &  \cite{Stoliarov:CF2010,Matsumoto:1996}   \\ \hline
 Char 2 Absorption Coef.     & m$^{-1}$      & Opaque                            & Assumption                &  \cite{Stoliarov:CF2010}                  \\ \hline
@@ -285,24 +285,24 @@ University of Maryland. See Section~\ref{glossary} for an explanation of terms.}
 \hline
 Property                    & Units         & Value                             & Method                    &  Reference                              \\ \hline \hline
 Polymer Density             & kg/m$^3$      & 1300                              & Direct                    &  \cite{Oztekin:CF2012}                  \\ \hline
-Polymer Conductivity        & W/m/K         & 0.28                              & Fit to cone data          &  \cite{Oztekin:CF2012}                  \\ \hline
-Polymer Specific Heat       & kJ/kg/K       & 2.05                              & Fit to cone data          &  \cite{Oztekin:CF2012}                  \\ \hline
-Polymer Emissivity          &               & 0.90                              & Fit to cone data          &  \cite{Oztekin:CF2012}                  \\ \hline
-Polymer Absorption Coef.    & m$^{-1}$      & 1690                              & Fit to cone data          &  \cite{Oztekin:CF2012}                  \\ \hline
-Char 1 Density              & kg/m$^3$      & 810                               & Assumed constant volume   &  \cite{Oztekin:CF2012}                  \\ \hline
-Char 1 Conductivity         & W/m/K         & 0.37                              & Fit to cone data          &  \cite{Oztekin:CF2012}                  \\ \hline
+Polymer Conductivity        & W/m/K         & 0.28                              & Inverse Analysis          &  \cite{Oztekin:CF2012}                  \\ \hline
+Polymer Specific Heat       & kJ/kg/K       & 2.05                              & Inverse Analysis          &  \cite{Oztekin:CF2012}                  \\ \hline
+Polymer Emissivity          &               & 0.90                              & Inverse Analysis          &  \cite{Oztekin:CF2012}                  \\ \hline
+Polymer Absorption Coef.    & m$^{-1}$      & 1690                              & Inverse Analysis          &  \cite{Oztekin:CF2012}                  \\ \hline
+Char 1 Density              & kg/m$^3$      & 810                               & Constant Volume           &  \cite{Oztekin:CF2012}                  \\ \hline
+Char 1 Conductivity         & W/m/K         & 0.37                              & Inverse Analysis          &  \cite{Oztekin:CF2012}                  \\ \hline
 Char 1 Specific Heat        & kJ/kg/K       & 0.24                              & Assumed                   &  \cite{Oztekin:CF2012}                  \\ \hline
 Char 1 Emissivity           &               & 1                                 & Assumed                   &  \cite{Oztekin:CF2012}                  \\ \hline
 Char 1 Absorption Coef.     & m$^{-1}$      & 81000                             & Assumed opaque            &  \cite{Oztekin:CF2012}                  \\ \hline
-Char 2 Density              & kg/m$^3$      & 710                               & Assumed constant volume   &  \cite{Oztekin:CF2012}                  \\ \hline
-Char 2 Conductivity         & W/m/K         & 0.37                              & Fit to cone data          &  \cite{Oztekin:CF2012}                  \\ \hline
+Char 2 Density              & kg/m$^3$      & 710                               & Constant Volume           &  \cite{Oztekin:CF2012}                  \\ \hline
+Char 2 Conductivity         & W/m/K         & 0.37                              & Inverse Analysis          &  \cite{Oztekin:CF2012}                  \\ \hline
 Char 2 Specific Heat        & kJ/kg/K       & 0.27                              & Assumed                   &  \cite{Oztekin:CF2012}                  \\ \hline
 Char 2 Emissivity           &               & 1                                 & Assumed                   &  \cite{Oztekin:CF2012}                  \\ \hline
 Char 2 Absorption Coef.     & m$^{-1}$      & 71000                             & Assumed opaque            &  \cite{Oztekin:CF2012}                  \\ \hline
 Reac 1 Pre-Exp.~Factor      & s$^{-1}$      & $1.0 \times 10^{32}$              & TGA                       &  \cite{Oztekin:CF2012}                  \\ \hline
 Reac 1 Activation Energy    & kJ/kmol       & $5.57 \times 10^5$                & TGA                       &  \cite{Oztekin:CF2012}                  \\ \hline
 Reac 1 Char Yield           &               & 0.62                              & TGA                       &  \cite{Oztekin:CF2012}                  \\ \hline
-Reac 1 Heat of Reaction     & kJ/kg         & 350                               & Fit to cone data          &  \cite{Oztekin:CF2012}                  \\ \hline
+Reac 1 Heat of Reaction     & kJ/kg         & 350                               & Inverse Analysis          &  \cite{Oztekin:CF2012}                  \\ \hline
 Gas 1 Heat of Combustion    & kJ/kg         & 16000                             & Cone calorimetry          &  \cite{Oztekin:CF2012}                  \\ \hline
 Gas 1 Combustion Efficiency &               & 1                                 & Assumed                   &  \cite{Oztekin:CF2012}                  \\ \hline
 Reac 2 Pre-Exp.~Factor      & s$^{-1}$      & $1.0 \times 10^3$                 & TGA                       &  \cite{Oztekin:CF2012}                  \\ \hline
@@ -420,7 +420,7 @@ Polymer Specific Heat   &    kJ/kg/K    & 1.68 $\pm$ 0.26                   & DS
 Polymer Conductivity    &      W/m/K    & 0.36 $\pm$ 0.06                   & TLS                                       & \cite{Kempel:1}               \\ \hline
 Polymer Emissivity      &               & 0.87 $\pm$ 0.05                   & FTIR                                      & \cite{Linteris:2}             \\ \hline
 Polymer Absorption Coef.&  m$^{-1}$     & 2860 $\pm$ 150                    & FTIR                                      & \cite{Linteris:2}             \\ \hline
-Char Density            &     kg/m$^3$  &        482                        & Assumed Constant Volume                   & \cite{Kempel:1}               \\ \hline
+Char Density            &     kg/m$^3$  &        482                        & Constant Volume                           & \cite{Kempel:1}               \\ \hline
 Char Specific Heat      &    kJ/kg/K    &        0.85                       & Literature                                & \cite{SCHOTT}                 \\ \hline
 Char Conductivity       &      W/m/K    & 0.07 $\pm$ 0.02                   & Laser Flash                               & \cite{Kempel:1}               \\ \hline
 Char Emissivity         &               &       0.85                        & Literature                                & \cite{Braeuer:1}              \\ \hline
@@ -456,32 +456,102 @@ Combustion Efficiency   &               &          1                        & As
 \section{Corrugated Cardboard}
 \label{Cardboard}
 
-Table~\ref{Properties_Cardboard} lists the measured properties of a double-wall corrugated cardboard with the standard U.S.~designation 69-23B-69-23C-69. Corrugated cardboard is characterized by alternating layers of homogeneous, planar liner boards and corrugated sections made up of periodic flutes. The numbers in the specification indicate the areal density in lb/(1000~ft$^2$) and the letters indicate the flute designation (B indicates a range of 45 to 52 flutes per foot and C indicates a range of 39 to 43 flutes per foot). Each layer is consists of the same lingo-cellulosic, charring material. It is assumed that each layer consists of the same homogeneous material with the density defined as the mass of the solid material divided by the volume of the layer. This representation requires slightly different definitions for the properties of each unique layer (liner board, C-flute layer, and B-flute layer).
+Table~\ref{Properties_Cardboard} lists the measured properties of a double-wall corrugated cardboard with the conventional U.S.~designation 69-23B-69-23C-69. Corrugated cardboard is characterized by alternating layers of homogeneous, planar liner boards and corrugated sections made up of periodic flutes. The numbers in the specification indicate the areal density in lb/(1000~ft$^2$) and the letters indicate the flute designation (B indicates a range of 45 to 52 flutes per foot and C indicates a range of 39 to 43 flutes per foot). It is assumed that each layer consists of the same lingo-cellulosic, charring material with the density defined as the mass of the solid material divided by the volume of the layer. This representation requires slightly different definitions for the properties of each unique layer -- liner board (LB), C-flute layer (CFL), and B-flute layer (BFL).
 
-The reaction mechanism for the cardboard material includes one reaction to describe the release of residual moisture and three sequential reactions to describe thermal degradation of the virgin material to a final residual char. Each of the initial solid components (LB, CFL, and BFL) degrades according to the same three-reaction mechanism.
+The reaction mechanism for the cardboard material includes one reaction to describe the release of residual moisture and three sequential reactions to describe the thermal degradation of the virgin material to a final residual char. Each of the initial solid components (LB, CFL, and BFL) undergoes the same four-step mechanism.
 \begin{eqnarray}
    \hbox{Moisture} &\to& \hbox{Water Vapor}  \\
-   \hbox{Virgin Cardboard}  &\to& \hbox{Intermediary Solid} + \hbox{Fuel Gas}  \\
-   \hbox{Intermediary Solid}  &\to& \hbox{Char 1} + \hbox{Fuel Gas}  \\
-   \hbox{Char 1}  &\to& \hbox{Char 2} + \hbox{Fuel Gas}
+   \hbox{Virgin Cardboard}  &\to& \hbox{Intermediary Solid} + \hbox{Fuel Gas 2}  \\
+   \hbox{Intermediary Solid}  &\to& \hbox{Char 1} + \hbox{Fuel Gas 3}  \\
+   \hbox{Char 1}  &\to& \hbox{Char 2} + \hbox{Fuel Gas 4}
 \end{eqnarray}
 
-\begin{table}[h!]
+
+\setlength\LTleft{0pt}
+\setlength\LTright{0pt}
+\begin{longtable}{@{\extracolsep{\fill}}|l|c|c|l|l|}
 \caption[Properties of corrugated cardboard.]{Properties of corrugated cardboard. Courtesy M. McKinnon, University of Maryland. See Section~\ref{glossary} for an explanation of terms.}
-\begin{center}
-\begin{tabular}{|l|c|c|l|l|}
+\label{Properties_Cardboard} \\
 \hline
-Property                &      Units    &      Value                        & Method                                    & Reference                     \\ \hline \hline
-Moisture Density        &     kg/m$^3$  & 1000                              & Direct                                    & \cite{Kempel:1}               \\ \hline
-& & & & \\ \hline
-& & & & \\ \hline
-& & & & \\ \hline
-& & & & \\ \hline
-\end{tabular}
-\end{center}
-\label{Properties_Cardboard}
-\end{table}
-Table~\ref{Dimensions_Cardboard} lists the composition and thickness of each of the layers. The sample is insulated with 28~mm of Kaowool PM board, manufactured by ThermalCeramics (www.thermalceramics.com).
+\endfirsthead
+\caption[]{Continued} \\
+\hline
+\endhead
+Property                          & Units         & Value                                   & Method                                    & Reference                             \\ \hline \hline
+Moisture Density                  & kg/m$^3$      & 1000                                    & Direct                                    & \cite{McKinnon:CF2013}                \\ \hline
+Moisture Conductivity	          & W/m/K	      & 0.1	                                    & Inherited             	                & \cite{McKinnon:CF2013}                \\ \hline
+Moisture Specific Heat	          & kJ/kg/K	      & 4.19	                                & Literature	                            & \cite{Coblentz:1}                     \\ \hline
+Moisture Emissivity	 	          &               & 0.7	                                    & Inherited             	                & \cite{McKinnon:CF2013}                \\ \hline
+LB Density	                      & kg/m$^3$      &	520	                                    & Direct	                                & \cite{McKinnon:CF2013}                \\ \hline
+LB Conductivity	                  & W/m/K	      & 0.1	                                    & Inverse Analysis                          & \cite{McKinnon:CF2013}                \\ \hline
+LB Specific Heat	              & kJ/kg/K	      & 1.8	                                    & DSC	                                    & \cite{McKinnon:CF2013}                \\ \hline  
+LB Emissivity	 	              &               & 0.7	                                    & Inverse Analysis                          & \cite{McKinnon:CF2013}                \\ \hline
+LB Intermediary Density	          & kg/m$^3$	  & 468	                                    & Constant Volume                           & \cite{McKinnon:CF2013}                \\ \hline
+LB Intermediary Conductivity	  & W/m/K	      & $0.05 + 7.5\times 10^{-11}\times T^3$   & Inverse Analysis                          & \cite{McKinnon:CF2013}                \\ \hline   
+LB Intermediary Specific Heat	  & kJ/kg/K	      & 1.55	                                & DSC	                                    & \cite{McKinnon:CF2013}                \\ \hline 
+LB Intermediary Emissivity	 	  &               & 0.775	                                & Inverse Analysis                          & \cite{McKinnon:CF2013}                \\ \hline 
+LB Char 1 Density	              & kg/m$^3$	  & 173	                                    & Constant Volume                           & \cite{McKinnon:CF2013}                \\ \hline  
+LB Char 1 Conductivity	          & W/m/K	      & $1.5\times 10^{-10}\times T^3$          & Inverse Analysis                          & \cite{McKinnon:CF2013}                \\ \hline   
+LB Char 1 Specific Heat	          & kJ/kg/K	      & 1.3	                                    & DSC                                       & \cite{McKinnon:CF2013}                \\ \hline  
+LB Char 1 Emissivity	 	      &               & 0.85	                                & Literature	                            & \cite{Matsumoto:IJT1995}              \\ \hline
+LB Char 2 Density	              & kg/m$^3$	  & 102	                                    & Constant Volume                           & \cite{McKinnon:CF2013}                \\ \hline  
+LB Char 2 Conductivity	          & W/m/K	      & $1.5\times 10^{-10}\times T^3$          & Inverse Analysis                          & \cite{McKinnon:CF2013}                \\ \hline   
+LB Char 2 Specific Heat	          & kJ/kg/K	      & 1.3	                                    & DSC                                       & \cite{McKinnon:CF2013}                \\ \hline  
+LB Char 2 Emissivity	 	      &               & 0.85	                                & Literature	                            & \cite{Matsumoto:IJT1995}              \\ \hline
+CFL Density	                      & kg/m$^3$	  & 49	                                    & Constant Volume                           & \cite{McKinnon:CF2013}                \\ \hline  
+CFL Conductivity	              & W/m/K	      & 0.1                                     & Inverse Analysis                          & \cite{McKinnon:CF2013}                \\ \hline   
+CFL Specific Heat	              & kJ/kg/K	      & 1.8	                                    & DSC                                       & \cite{McKinnon:CF2013}                \\ \hline  
+CFL Emissivity	 	              &               & 0.7 	                                & Inverse Analysis                          & \cite{McKinnon:CF2013}                \\ \hline
+CFL Intermediary Density	      & kg/m$^3$	  & 44	                                    & Constant Volume                           & \cite{McKinnon:CF2013}                \\ \hline
+CFL Intermediary Conductivity	  & W/m/K	      & $0.05 + 7.5\times 10^{-10}\times T^3$   & Inverse Analysis                          & \cite{McKinnon:CF2013}                \\ \hline
+CFL Intermediary Specific Heat	  & kJ/kg/K	      & 1.55	                                & DSC                                       & \cite{McKinnon:CF2013}                \\ \hline  
+CFL Intermediary Emissivity	 	  &               & 0.775 	                                & Inverse Analysis                          & \cite{McKinnon:CF2013}                \\ \hline
+CFL Char 1 Density	              & kg/m$^3$	  & 16	                                    & Constant Volume                           & \cite{McKinnon:CF2013}                \\ \hline  
+CFL Char 1 Conductivity	          & W/m/K	      & $1.5\times 10^{-9}\times T^3$           & Inverse Analysis                          & \cite{McKinnon:CF2013}                \\ \hline   
+CFL Char 1 Specific Heat	      & kJ/kg/K	      & 1.3	                                    & DSC                                       & \cite{McKinnon:CF2013}                \\ \hline  
+CFL Char 1 Emissivity	 	      &               & 0.85	                                & Literature	                            & \cite{Matsumoto:IJT1995}              \\ \hline
+CFL Char 2 Density	              & kg/m$^3$	  & 9.4	                                    & Constant Volume                           & \cite{McKinnon:CF2013}                \\ \hline  
+CFL Char 2 Conductivity	          & W/m/K	      & $1.5\times 10^{-9}\times T^3$           & Inverse Analysis                          & \cite{McKinnon:CF2013}                \\ \hline   
+CFL Char 2 Specific Heat	      & kJ/kg/K	      & 1.3	                                    & DSC                                       & \cite{McKinnon:CF2013}                \\ \hline  
+CFL Char 2 Emissivity	 	      &               & 0.85	                                & Literature	                            & \cite{Matsumoto:IJT1995}              \\ \hline
+BFL Density	                      & kg/m$^3$	  & 74	                                    & Constant Volume                           & \cite{McKinnon:CF2013}                \\ \hline  
+BFL Conductivity	              & W/m/K	      & 0.1                                     & Inverse Analysis                          & \cite{McKinnon:CF2013}                \\ \hline   
+BFL Specific Heat	              & kJ/kg/K	      & 1.8	                                    & DSC                                       & \cite{McKinnon:CF2013}                \\ \hline  
+BFL Emissivity	 	              &               & 0.7 	                                & Inverse Analysis                          & \cite{McKinnon:CF2013}                \\ \hline
+BFL Intermediary Density	      & kg/m$^3$	  & 67	                                    & Constant Volume                           & \cite{McKinnon:CF2013}                \\ \hline
+BFL Intermediary Conductivity	  & W/m/K	      & $0.05 + 7.5\times 10^{-10}\times T^3$   & Inverse Analysis                          & \cite{McKinnon:CF2013}                \\ \hline
+BFL Intermediary Specific Heat	  & kJ/kg/K	      & 1.55	                                & DSC                                       & \cite{McKinnon:CF2013}                \\ \hline  
+BFL Intermediary Emissivity       &               & 0.775 	                                & Inverse Analysis                          & \cite{McKinnon:CF2013}                \\ \hline
+BFL Char 1 Density	              & kg/m$^3$	  & 25	                                    & Constant Volume                           & \cite{McKinnon:CF2013}                \\ \hline  
+BFL Char 1 Conductivity	          & W/m/K	      & $1.5\times 10^{-9}\times T^3$           & Inverse Analysis                          & \cite{McKinnon:CF2013}                \\ \hline   
+BFL Char 1 Specific Heat	      & kJ/kg/K	      & 1.3	                                    & DSC                                       & \cite{McKinnon:CF2013}                \\ \hline  
+BFL Char 1 Emissivity	 	      &               & 0.85	                                & Literature	                            & \cite{Matsumoto:IJT1995}              \\ \hline
+BFL Char 2 Density	              & kg/m$^3$	  & 15	                                    & Constant Volume                           & \cite{McKinnon:CF2013}                \\ \hline  
+BFL Char 2 Conductivity	          & W/m/K	      & $1.5\times 10^{-9}\times T^3$           & Inverse Analysis                          & \cite{McKinnon:CF2013}                \\ \hline   
+BFL Char 2 Specific Heat	      & kJ/kg/K	      & 1.3	                                    & DSC                                       & \cite{McKinnon:CF2013}                \\ \hline  
+BFL Char 2 Emissivity	 	      &               & 0.85	                                & Literature	                            & \cite{Matsumoto:IJT1995}              \\ \hline
+Reaction 1 Pre-Exp.~Factor        & s$^{-1}$	  & 6.14	                                & TGA                                       & \cite{McKinnon:CF2013}                \\ \hline    
+Reaction 1 Activation Energy	  & kJ/mol	      & 23500                                   & TGA                                       & \cite{McKinnon:CF2013}                \\ \hline 
+Reaction 1 Heat of Reaction       &	kJ/kg	      & 2445	                                & Literature                                & \cite{Coblentz:1}                     \\ \hline
+Reaction 1 Char Yield	 	      &               & 0	                                    & TGA	                                    & \cite{McKinnon:CF2013}                \\ \hline    
+Reaction 2 Pre-Exp.~Factor        & s$^{-1}$      & $7.95\times 10^9$                       & TGA	                                    & \cite{McKinnon:CF2013}                \\ \hline 
+Reaction 2 Activation Energy	  & kJ/mol	      & $1.30\times 10^5$                       & TGA	                                    & \cite{McKinnon:CF2013}                \\ \hline  
+Reaction 2 Char Yield	 	      &               & 0.9	                                    & TGA	                                    & \cite{McKinnon:CF2013}                \\ \hline    
+Reaction 2 Heat of Reaction       & kJ/kg	      & 0                                       & DSC	                                    & \cite{McKinnon:CF2013}                \\ \hline 
+Fuel Gas 2 Heat of Combustion     & kJ/kg	      & 18500	                                & MCC	                                    & \cite{McKinnon:CF2013}                \\ \hline   
+Reaction 3 Pre-Exp.~Factor        & s$^{-1}$	  & $2\times 10^{11}$                   	& TGA                                       & \cite{McKinnon:CF2013}                \\ \hline
+Reaction 3 Activation Energy	  & kJ/mol	      & $1.60\times 10^5$	                    & TGA	                                    & \cite{McKinnon:CF2013}                \\ \hline
+Reaction 3 Char Yield	 	      &               & 0.37	                                & TGA	                                    & \cite{McKinnon:CF2013}                \\ \hline
+Reaction 3 Heat of Reaction	      & kJ/kg	      & 126                                 	& DSC                                       & \cite{McKinnon:CF2013}                \\ \hline
+Fuel Gas 3 Heat of Combustion     & kJ/kg	      & 13600	                                & MCC	                                    & \cite{McKinnon:CF2013}                \\ \hline  
+Reaction 4 Pre-Exp.~Factor        & s$^{-1}$	  & 0.0261	                                & TGA	                                    & \cite{McKinnon:CF2013}                \\ \hline
+Reaction 4 Activation Energy	  & kJ/mol	      & 17000	                                & TGA                                       & \cite{McKinnon:CF2013}                \\ \hline
+Reaction 4 Char Yield	 	      &               & 0.59	                                & TGA                                       & \cite{McKinnon:CF2013}                \\ \hline
+Reaction 4 Heat of Reaction	      & kJ/kg	      & 0                                       & DSC	                                    & \cite{McKinnon:CF2013}                \\ \hline
+Fuel Gas 4 Heat of Combustion     & kJ/kg	      & 14000                               	& MCC                                       & \cite{McKinnon:CF2013}                \\ \hline
+\end{longtable}
+
+\noindent Table~\ref{Dimensions_Cardboard} lists the composition and thickness of each of the layers. The sample is insulated with 28~mm of Kaowool PM board, manufactured by ThermalCeramics (www.thermalceramics.com).
 \begin{table}[h!]
 \caption[Cardboard composition and dimensions]{Cardboard composition and dimensions.}
 \begin{center}
