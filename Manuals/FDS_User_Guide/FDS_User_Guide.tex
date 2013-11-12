@@ -2634,7 +2634,10 @@ The end result of this input file is to create a pyramid by repeating long, rect
 Note that the {\ct MULT}iplication functionality works for {\ct MESH}, {\ct OBST}, {\ct HOLE}, {\ct VENT}, and {\ct INIT} lines. For a {\ct MESH}, it only applies to the bounds ({\ct XB}) of the mesh, not the number of cells.
 
 
+\section{Unstructured Geometry: The \texorpdfstring{{\tt GEOM}}{GEOM} Namelist Group (Table \ref{tbl:GEOM})}
+\label{info:GEOM}
 
+Placeholder for development of unstructured geometry input format.
 
 
 \chapter{Fire and Thermal Boundary Conditions}
@@ -9322,6 +9325,37 @@ properties be specified as well. Simply prescribing as many properties as possib
 
 \noindent
 $\Delta t$={\ct T\_END-T\_BEGIN}
+
+\vspace{\baselineskip}
+
+
+% This section is under construction!
+
+\section{\texorpdfstring{{\tt GEOM}}{GEOM} (Unstructured Geometry Parameters)}
+
+
+\setlength\LTleft{0pt}
+\setlength\LTright{0pt}
+\begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
+\caption[Unstructured geometry parameters ({\ct GEOM} namelist group)]{For more information see Section~\ref{info:GEOM}.}
+\label{tbl:GEOM} \\
+\hline
+\multicolumn{5}{|c|}{{\ct GEOM} (Unstructured Geometry Parameters)} \\
+\hline \hline
+\endfirsthead
+\caption[]{Continued} \\
+\hline
+\multicolumn{5}{|c|}{{\ct GEOM} (Unstructured Geometry Parameters)} \\
+\hline \hline
+\endhead
+{\ct F(3)}                & Integer Triplet     & Section~\ref{info:GEOM}            &           &                          \\ \hline
+{\ct GEOM\_ID}            & Character           & Section~\ref{info:GEOM}            &           &                          \\ \hline
+{\ct ID}                  & Character           & Section~\ref{info:GEOM}            &           &                          \\ \hline
+{\ct N\_VERT}             & Integer             & Section~\ref{info:GEOM}            &           &                          \\ \hline
+{\ct SURF\_ID}            & Character           & Section~\ref{info:GEOM}            &           &  {\ct 'INERT'}           \\ \hline
+{\ct X(3)}                & Real Triplet        & Section~\ref{info:GEOM}            &           &                          \\ \hline
+\end{longtable}
+
 
 \vspace{\baselineskip}
 
