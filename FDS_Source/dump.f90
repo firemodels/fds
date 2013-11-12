@@ -1257,8 +1257,6 @@ CHARACTER(80) PROCESS_FN_SMV
 LOGICAL :: EX
 CHARACTER(100) :: MESSAGE
 CHARACTER(33) :: TEMPCHAR
-TYPE (GEOMETRY_TYPE), POINTER :: G=>NULL()
-REAL(EB) :: THETA,UU(3)=0._EB,EYE(3,3)=0._EB,PP(3,3)=0._EB,QQ(3,3)=0._EB,RR(3,3)=0._EB,VOR(3),VOR_DEFAULT(3)
 INTEGER :: TYPE_INDICATOR
 
 ! If this is an MPI job and this is not the master node, open the .smv file only if this is not a RESTART case
@@ -1745,105 +1743,6 @@ IF (VEG_LEVEL_SET) THEN
    WRITE(LU_SMV,'(A)') 'phifield'
    WRITE(LU_SMV,'(A)') '-'
 ENDIF 
-
-! Write out GEOMETRY info (experimental)
-
-DO N=1,N_GEOM
-   G => GEOMETRY(N)
-   IF (G%ISHAPE == ICOMPLEX) CYCLE
-   
-   WRITE(LU_SMV,'(/A)') 'PROP'
-   WRITE(LU_SMV,'(1X,A)') G%ID
-   WRITE(LU_SMV,'(1X,I3)') 1
-   WRITE(LU_SMV,'(1X,A)') G%SMVOBJECT
-   WRITE(LU_SMV,'(1X,I3)') 12
-   WRITE(LU_SMV,'(1X,A,I3)') 'R=',G%RGB(1)
-   WRITE(LU_SMV,'(1X,A,I3)') 'G=',G%RGB(2)
-   WRITE(LU_SMV,'(1X,A,I3)') 'B=',G%RGB(3)
-   
-   ! find rotation matrix
-   VOR = (/G%XOR,G%YOR,G%ZOR/)
-   VOR_DEFAULT = (/0._EB,0._EB,1._EB/)
-   THETA = ACOS(DOT_PRODUCT(VOR_DEFAULT,VOR))
-   
-   IF (ABS(THETA)>1.E-6_EB) THEN
-      CALL CROSS_PRODUCT(UU,VOR_DEFAULT,VOR)
-      UU = UU/NORM2(UU)
-         
-      ! projection onto axis of rotation
-      PP(1,1) = UU(1)**2
-      PP(1,2) = UU(1)*UU(2)
-      PP(1,3) = UU(1)*UU(3)
-   
-      PP(2,1) = UU(1)*UU(2)
-      PP(2,2) = UU(2)**2
-      PP(2,3) = UU(2)*UU(3)
-   
-      PP(3,1) = UU(1)*UU(3)
-      PP(3,2) = UU(2)*UU(3)
-      PP(3,3) = UU(3)**2
-   
-      ! identity matrix
-      EYE(1,1) = 1._EB
-      EYE(2,2) = 1._EB
-      EYE(3,3) = 1._EB
-   
-      ! skew-symmetric representation
-      QQ(1,2) = -UU(3)
-      QQ(1,3) = UU(2)
-      QQ(2,1) = UU(3)
-      QQ(2,3) = -UU(1)
-      QQ(3,1) = -UU(2)
-      QQ(3,2) = UU(1)
-   
-      RR = PP + (EYE-PP)*COS(THETA) + QQ*SIN(THETA)
-   ELSE
-      ! identity matrix
-      RR(1,1) = 1._EB
-      RR(2,2) = 1._EB
-      RR(3,3) = 1._EB
-   ENDIF
-   
-   WRITE(LU_SMV,'(1X,A,1F12.5)') 'VX=', RR(1,1)*G%U0 + RR(2,1)*G%V0 + RR(3,1)*G%W0
-   WRITE(LU_SMV,'(1X,A,1F12.5)') 'VY=', RR(1,2)*G%U0 + RR(2,2)*G%V0 + RR(3,2)*G%W0
-   WRITE(LU_SMV,'(1X,A,1F12.5)') 'VZ=', RR(1,3)*G%U0 + RR(2,3)*G%V0 + RR(3,3)*G%W0
-   WRITE(LU_SMV,'(1X,A,1F12.5)') 'ROTATE_RATE=',G%OMEGA*180._EB/PI
-   WRITE(LU_SMV,'(1X,A,1F12.5)') 'D=',2._EB*G%RADIUS
-   IF (G%ISHAPE==ICYLINDER) THEN
-      ! for now, cylinder aligned with coordinate axis
-      IF (ABS(G%XOR-1._EB) <TWO_EPSILON_EB) WRITE(LU_SMV,'(1X,A,1F12.5)') 'L=',G%X2-G%X1
-      IF (ABS(G%YOR-1._EB) <TWO_EPSILON_EB) WRITE(LU_SMV,'(1X,A,1F12.5)') 'L=',G%Y2-G%Y1
-      IF (ABS(G%ZOR-1._EB) <TWO_EPSILON_EB) WRITE(LU_SMV,'(1X,A,1F12.5)') 'L=',G%Z2-G%Z1
-   ENDIF
-   WRITE(LU_SMV,'(1X,A,1F12.5)') 'XMAX=',G%X+G%RADIUS
-   WRITE(LU_SMV,'(1X,A,1F12.5)') 'YMAX=',G%Y+G%RADIUS
-   WRITE(LU_SMV,'(1X,A,1F12.5)') 'ZMAX=',G%Z+G%RADIUS
-   WRITE(LU_SMV,'(1X,3A)') 'tfile="t%',TRIM(G%TFILE),'"'
-   
-   WRITE(LU_SMV,'(/A)') 'DEVICE'
-   SELECT CASE(G%ISHAPE)
-      CASE(ISPHERE)
-         WRITE(LU_SMV,'(1X,A)') 'geom'
-         WRITE(LU_SMV,'(6F12.5,2I3,2A)') G%X,G%Y,G%Z,G%XOR,G%YOR,G%ZOR,0,0,' % ',G%ID
-      CASE(ICYLINDER)
-         WRITE(LU_SMV,'(1X,A)') 'geom'
-         WRITE(LU_SMV,'(6F12.5,2I3,2A)') G%X,G%Y,G%Z,G%XOR,G%YOR,G%ZOR,0,0,' % ',G%ID
-      !   WRITE(LU_SMV,'(A)') 'geom'
-      !   WRITE(LU_SMV,'(6F12.5,2I5)') G%X,G%Y,G%Z,0._EB,0._EB,1._EB,0,7
-      !   WRITE(LU_SMV,'(5F12.5,I5)') REAL(G%RGB,EB)/255._EB,2._EB*G%RADIUS,2._EB*G%HL(2),-90
-      !   WRITE(LU_SMV,'(F12.5)') 0._EB
-      CASE(IPLANE)
-         WRITE(LU_SMV,'(A)') 'plane'
-         WRITE(LU_SMV,'(6F12.5,2I5)') G%X,G%Y,G%Z,(/G%XOR-G%X,G%YOR-G%Y,G%ZOR-G%Z/),0,4
-         WRITE(LU_SMV,'(4F12.5)') REAL(G%RGB,EB)/255._EB,G%PIXELS
-      !CASE DEFAULT
-      !   WRITE(LU_SMV,'(A)') G%SHAPE
-      !   WRITE(LU_SMV,'(6F12.5,2I5)') G%X,G%Y,G%Z,(/G%XOR-G%X,G%YOR-G%Y,G%ZOR-G%Z/),0,4
-      !   WRITE(LU_SMV,'(4F12.5)') REAL(G%RGB,EB)/255._EB,2._EB*G%RADIUS
-   
-   END SELECT
-ENDDO
-
 
 ! Write BDNE info
 
