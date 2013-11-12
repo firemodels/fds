@@ -90,10 +90,10 @@ if Stats_Output == 2
     fprintf(fid, '%s\n', '\begin{longtable}{|l|c|c|c|c|c|}');
     fprintf(fid, '%s\n', '\caption[Summary statistics]{Summary statistics for all quantities of interest}');
     fprintf(fid, '%s\n', '\\ \hline');
-    fprintf(fid, '%s\n', 'Quantity & Datasets  & Points    & $\widetilde{\sigma}_E$ & $\widetilde{\sigma}_M$ & Bias \\ \hline \hline');
+    fprintf(fid, '%s\n', 'Quantity & Datasets  & Points    & $\widetilde{\sigma}_{\rm E}$ & $\widetilde{\sigma}_{\rm M}$ & Bias \\ \hline \hline');
     fprintf(fid, '%s\n', '\endfirsthead');
     fprintf(fid, '%s\n', '\hline');
-    fprintf(fid, '%s\n', 'Quantity & Datasets  & Points    & $\widetilde{\sigma}_E$ & $\widetilde{\sigma}_M$ & Bias \\ \hline \hline');
+    fprintf(fid, '%s\n', 'Quantity & Datasets  & Points    & $\widetilde{\sigma}_{\rm E}$ & $\widetilde{\sigma}_{\rm M}$ & Bias \\ \hline \hline');
     fprintf(fid, '%s\n', '\endhead');
     [rows, cols] = size(output_stats);
     for i_row = 2:rows
