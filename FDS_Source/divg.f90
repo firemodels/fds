@@ -439,23 +439,6 @@ CORRECTION_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
    DP(IIG,JJG,KKG) = DP(IIG,JJG,KKG) - WC%ONE_D%QCONF*WC%RDN
 ENDDO CORRECTION_LOOP
 
-! ! Correction for unstructured geometry
-
-! CORRECTION_LOOP_FACE: IF (N_FACE>0) THEN
-!    DO NF=1,N_FACE
-!       FC=>FACET(NF)
-!       CL=>FC%CUTCELL_LIST
-!       CUTCELL_LOOP_2: DO
-!          IF ( .NOT. ASSOCIATED(CL) ) EXIT CUTCELL_LOOP_2 ! if the next index does not exist, exit the loop
-!          IC = CL%INDEX
-!          IIG = I_CUTCELL(IC)
-!          JJG = J_CUTCELL(IC)
-!          KKG = K_CUTCELL(IC)
-!          CL=>CL%NEXT ! point to the next index in the linked list
-!        ENDDO CUTCELL_LOOP_2
-!    ENDDO
-! ENDIF CORRECTION_LOOP_FACE
-
 ! Compute (q + del dot k del T) and add to the divergence
 
 CYLINDER3: SELECT CASE(CYLINDRICAL)
