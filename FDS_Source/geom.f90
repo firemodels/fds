@@ -16,7 +16,7 @@ CHARACTER(255), PARAMETER :: geomrev='$Revision$'
 CHARACTER(255), PARAMETER :: geomdate='$Date$'
 
 PRIVATE
-PUBLIC :: INIT_IBM,TRILINEAR,GETX,GETU,GETGRAD,INIT_FACE,GET_REV_geom, &
+PUBLIC :: INIT_IBM,TRILINEAR,GETU,GETGRAD,INIT_FACE,GET_REV_geom, &
           READ_GEOM,READ_VERT,READ_FACE,READ_VOLU,GET_VELO_IBM,LINKED_LIST_INSERT
  
 CONTAINS
@@ -120,21 +120,6 @@ READ_GEOM_LOOP: DO N=1,N_GEOM
    IF (ABS(G%OMEGA)>0._EB) G%ROTATE = .TRUE.
    
    SELECT CASE(G%SHAPE)
-      CASE('BOX')
-         G%ISHAPE = IBOX
-         G%X0 = 0.5_EB*(G%X1+G%X2)
-         G%Y0 = 0.5_EB*(G%Y1+G%Y2)
-         G%Z0 = 0.5_EB*(G%Z1+G%Z2)
-         G%SMVOBJECT = 'movingbox'
-      CASE('SPHERE')
-         G%ISHAPE = ISPHERE
-         G%SMVOBJECT = 'movingsphere'
-      CASE('CYLINDER')
-         G%ISHAPE = ICYLINDER
-         G%SMVOBJECT = 'tube'
-      CASE('PLANE')
-         G%ISHAPE = IPLANE
-         G%SMVOBJECT = 'plane'
       CASE('COMPLEX')
          G%ISHAPE = ICOMPLEX
       CASE DEFAULT
@@ -413,7 +398,7 @@ INTEGER :: I,J,K,N,IERR,IERR1,IERR2,I_MIN,I_MAX,J_MIN,J_MAX,K_MIN,K_MAX,IC,IOR,I
 INTEGER :: NP,NXP,IZERO,LU,CUTCELL_COUNT,GEOM_TYPE,OWNER_INDEX,VERSION,NV,NF,DUMMY_INTEGER
 TYPE (MESH_TYPE), POINTER :: M
 REAL(EB) :: BB(6),V1(3),V2(3),V3(3),AREA,PC(18),XPC(60),V_POLYGON_CENTROID(3),VC,AREA_CHECK,&
-            X_MIN,X_MAX,Y_MIN,Y_MAX,Z_MIN,Z_MAX,PP(3),RP,XU(3),DP
+            X_MIN,X_MAX,Y_MIN,Y_MAX,Z_MIN,Z_MAX
 LOGICAL :: EX,OP
 CHARACTER(60) :: FN
 CHARACTER(100) :: MESSAGE
@@ -459,77 +444,8 @@ GEOM_LOOP: DO N=1,N_GEOM
    G%Z = G%Z0 + G%W*T
         
    DELTA_IBM = LES_FILTER_WIDTH_FUNCTION(M%DX(1),M%DY(1),M%DZ(1))
-   
-   IBM_UVWMAX = MAXVAL((/ABS(G%U),ABS(G%V),ABS(G%W)/))/DELTA_IBM
 
    ! find bounding box
-
-   SELECT_SHAPE: SELECT CASE(G%ISHAPE)
-      CASE(IBOX)
-         G%X1 = G%X1 + G%U*DT
-         G%X2 = G%X2 + G%U*DT
-         G%Y1 = G%Y1 + G%V*DT
-         G%Y2 = G%Y2 + G%V*DT
-         G%Z1 = G%Z1 + G%W*DT
-         G%Z2 = G%Z2 + G%W*DT
-         X_MIN = G%X1
-         X_MAX = G%X2
-         Y_MIN = G%Y1
-         Y_MAX = G%Y2
-         Z_MIN = G%Z1
-         Z_MAX = G%Z2
-         G%HL(1) = 0.5_EB*(X_MAX-X_MIN) + TOL
-         G%HL(2) = 0.5_EB*(X_MAX-X_MIN) + TOL
-         G%HL(3) = 0.5_EB*(X_MAX-X_MIN) + TOL
-      CASE(ISPHERE)
-         X_MIN = G%X-G%RADIUS
-         Y_MIN = G%Y-G%RADIUS
-         Z_MIN = G%Z-G%RADIUS
-         X_MAX = G%X+G%RADIUS
-         Y_MAX = G%Y+G%RADIUS
-         Z_MAX = G%Z+G%RADIUS
-         IBM_UVWMAX = IBM_UVWMAX + G%RADIUS*MAXVAL((/ABS(G%OMEGA_X),ABS(G%OMEGA_Y),ABS(G%OMEGA_Z)/))*RDX(1)
-      CASE(ICYLINDER)
-         G%HL(1) = 0.5_EB*(G%X2-G%X1)
-         G%HL(2) = 0.5_EB*(G%Y2-G%Y1)
-         G%HL(3) = 0.5_EB*(G%Z2-G%Z1)
-         IF (ABS(G%XOR-1._EB)<EPSILON_EB) THEN ! cylinder aligned with x axis
-            X_MIN = G%X-G%HL(1)
-            Y_MIN = G%Y-G%RADIUS
-            Z_MIN = G%Z-G%RADIUS
-            X_MAX = G%X+G%HL(1)
-            Y_MAX = G%Y+G%RADIUS
-            Z_MAX = G%Z+G%RADIUS
-         ENDIF
-         IF (ABS(G%YOR-1._EB)<EPSILON_EB) THEN ! cylinder aligned with y axis
-            X_MIN = G%X-G%RADIUS
-            Y_MIN = G%Y-G%HL(2)
-            Z_MIN = G%Z-G%RADIUS
-            X_MAX = G%X+G%RADIUS
-            Y_MAX = G%Y+G%HL(2)
-            Z_MAX = G%Z+G%RADIUS
-         ENDIF
-         IF (ABS(G%ZOR-1._EB)<EPSILON_EB) THEN ! cylinder aligned with z axis
-            X_MIN = G%X-G%RADIUS
-            Y_MIN = G%Y-G%RADIUS
-            Z_MIN = G%Z-G%HL(3)
-            X_MAX = G%X+G%RADIUS
-            Y_MAX = G%Y+G%RADIUS
-            Z_MAX = G%Z+G%HL(3)
-         ENDIF
-      CASE(IPLANE)
-         X_MIN = M%XS
-         Y_MIN = M%YS
-         Z_MIN = M%ZS
-         X_MAX = M%XF
-         Y_MAX = M%YF
-         Z_MAX = M%ZF
-         PP   = (/G%X,G%Y,G%Z/)
-         G%NN = (/G%XOR,G%YOR,G%ZOR/) - PP          ! normal vector to plane
-         G%NN = G%NN/SQRT(DOT_PRODUCT(G%NN,G%NN))   ! unit normal
-      CASE(ICOMPLEX)
-         CYCLE GEOM_LOOP
-   END SELECT SELECT_SHAPE
 
    G%MIN_I(NM) = M%IBAR
    G%MIN_J(NM) = M%JBAR
@@ -546,163 +462,12 @@ GEOM_LOOP: DO N=1,N_GEOM
    IF (X_MAX>=M%XS .AND. X_MAX<=M%XF) G%MAX_I(NM) = MIN(M%IBAR,CEILING((X_MAX+DELTA_IBM-M%XS)/M%DX(1))+1)
    IF (Y_MAX>=M%YS .AND. Y_MAX<=M%YF) G%MAX_J(NM) = MIN(M%JBAR,CEILING((Y_MAX+DELTA_IBM-M%YS)/M%DY(1))+1)
    IF (Z_MAX>=M%ZS .AND. Z_MAX<=M%ZF) G%MAX_K(NM) = MIN(M%KBAR,CEILING((Z_MAX+DELTA_IBM-M%ZS)/M%DZ(1))+1)
-   
-   IF (TWO_D) THEN
-      G%MIN_J(NM)=1
-      G%MAX_J(NM)=1
-   ENDIF
+  
    
    IF ( G%MAX_I(NM)<G%MIN_I(NM) .OR. &
         G%MAX_J(NM)<G%MIN_J(NM) .OR. &
         G%MAX_K(NM)<G%MIN_K(NM) ) CYCLE GEOM_LOOP
    
-   ! mask cells
-
-   DO K=G%MIN_K(NM),G%MAX_K(NM)
-      DO J=G%MIN_J(NM),G%MAX_J(NM)
-         DO I=G%MIN_I(NM),G%MAX_I(NM)
-         
-            MASK_SHAPE: SELECT CASE(G%ISHAPE)
-            
-               CASE(IBOX) MASK_SHAPE
-               
-                  ! this will not work for overlapping geometry, but use for now
-                  !M%U_MASK(I,J,K)=1
-                  !M%V_MASK(I,J,K)=1
-                  !M%W_MASK(I,J,K)=1
-                  !M%P_MASK(I,J,K)=1
-                  
-                  ! see if the point is inside geometry
-                  IF (ABS( M%X(I)-G%X)<G%HL(1) .AND. &
-                      ABS(M%YC(J)-G%Y)<G%HL(2) .AND. &
-                      ABS(M%ZC(K)-G%Z)<G%HL(3)) M%U_MASK(I,J,K) = -1
-                  
-                  IF (ABS(M%XC(I)-G%X)<G%HL(1) .AND. &
-                      ABS( M%Y(J)-G%Y)<G%HL(2) .AND. &
-                      ABS(M%ZC(K)-G%Z)<G%HL(3)) M%V_MASK(I,J,K) = -1
-                  
-                  IF (ABS(M%XC(I)-G%X)<G%HL(1) .AND. &
-                      ABS(M%YC(J)-G%Y)<G%HL(2) .AND. &
-                      ABS( M%Z(K)-G%Z)<G%HL(3)) M%W_MASK(I,J,K) = -1
-                  
-                  ! see if the point is in surface layer
-                  IF (X_MAX<M%X(I) .AND. M%X(I)<X_MAX+DELTA_IBM) M%U_MASK(I,J,K) = 0
-                  IF (Y_MAX<M%Y(J) .AND. M%Y(J)<Y_MAX+DELTA_IBM) M%V_MASK(I,J,K) = 0
-                  IF (Z_MAX<M%Z(K) .AND. M%Z(K)<Z_MAX+DELTA_IBM) M%W_MASK(I,J,K) = 0
-                  
-                  IF (X_MIN-DELTA_IBM<M%X(I) .AND. M%X(I)<X_MIN) M%U_MASK(I,J,K) = 0
-                  IF (Y_MIN-DELTA_IBM<M%Y(J) .AND. M%Y(J)<Y_MIN) M%V_MASK(I,J,K) = 0
-                  IF (Z_MIN-DELTA_IBM<M%Z(K) .AND. M%Z(K)<Z_MIN) M%W_MASK(I,J,K) = 0
-                  
-               CASE(ISPHERE) MASK_SHAPE
-               
-                  !M%U_MASK(I,J,K)=1
-                  !M%V_MASK(I,J,K)=1
-                  !M%W_MASK(I,J,K)=1
-                  !M%P_MASK(I,J,K)=1
-               
-                  RP = SQRT( (M%X(I)-G%X)**2+(M%YC(J)-G%Y)**2+(M%ZC(K)-G%Z)**2 )
-                  IF (RP-G%RADIUS < DELTA_IBM) M%U_MASK(I,J,K) = 0
-                  IF (RP-G%RADIUS < 0._EB) M%U_MASK(I,J,K) = -1
-                  
-                  RP = SQRT( (M%XC(I)-G%X)**2+(M%Y(J)-G%Y)**2+(M%ZC(K)-G%Z)**2 )
-                  IF (RP-G%RADIUS < DELTA_IBM) M%V_MASK(I,J,K) = 0
-                  IF (RP-G%RADIUS < 0._EB) M%V_MASK(I,J,K) = -1
-                  
-                  RP = SQRT( (M%XC(I)-G%X)**2+(M%YC(J)-G%Y)**2+(M%Z(K)-G%Z)**2 )
-                  IF (RP-G%RADIUS < DELTA_IBM) M%W_MASK(I,J,K) = 0
-                  IF (RP-G%RADIUS < 0._EB) M%W_MASK(I,J,K) = -1
-                  
-                  RP = SQRT( (M%XC(I)-G%X)**2+(M%YC(J)-G%Y)**2+(M%ZC(K)-G%Z)**2 )
-                  IF (RP-G%RADIUS < DELTA_IBM) M%P_MASK(I,J,K) = 0
-                  IF (RP-G%RADIUS < 0._EB) M%P_MASK(I,J,K) = -1
-                  
-               CASE(ICYLINDER) MASK_SHAPE
-               
-                  !M%U_MASK(I,J,K)=1
-                  !M%V_MASK(I,J,K)=1
-                  !M%W_MASK(I,J,K)=1
-                  !M%P_MASK(I,J,K)=1
-               
-                  CYLINDER_Y: IF (ABS(G%YOR-1._EB)<EPSILON_EB) THEN
-                     RP = SQRT( (M%X(I)-G%X)**2+(M%ZC(K)-G%Z)**2 )
-                     IF (RP-G%RADIUS < DELTA_IBM) M%U_MASK(I,J,K) = 0
-                     IF (RP-G%RADIUS < 0._EB) M%U_MASK(I,J,K) = -1
-                  
-                     RP = SQRT( (M%XC(I)-G%X)**2+(M%ZC(K)-G%Z)**2 )
-                     IF (RP-G%RADIUS < DELTA_IBM) M%V_MASK(I,J,K) = 0
-                     IF (RP-G%RADIUS < 0._EB) M%V_MASK(I,J,K) = -1
-                  
-                     RP = SQRT( (M%XC(I)-G%X)**2+(M%Z(K)-G%Z)**2 )
-                     IF (RP-G%RADIUS < DELTA_IBM) M%W_MASK(I,J,K) = 0
-                     IF (RP-G%RADIUS < 0._EB) M%W_MASK(I,J,K) = -1
-                  
-                     RP = SQRT( (M%XC(I)-G%X)**2+(M%ZC(K)-G%Z)**2 )
-                     IF (RP-G%RADIUS < DELTA_IBM) M%P_MASK(I,J,K) = 0
-                     IF (RP-G%RADIUS < 0._EB) M%P_MASK(I,J,K) = -1
-                  ENDIF CYLINDER_Y
-                  
-                  CYLINDER_Z: IF (ABS(G%ZOR-1._EB)<EPSILON_EB) THEN
-                     RP = SQRT( (M%X(I)-G%X)**2+(M%YC(J)-G%Y)**2 )
-                     IF (RP-G%RADIUS < DELTA_IBM) M%U_MASK(I,J,K) = 0
-                     IF (RP-G%RADIUS < 0._EB) M%U_MASK(I,J,K) = -1
-                  
-                     RP = SQRT( (M%XC(I)-G%X)**2+(M%Y(J)-G%Y)**2 )
-                     IF (RP-G%RADIUS < DELTA_IBM) M%V_MASK(I,J,K) = 0
-                     IF (RP-G%RADIUS < 0._EB) M%V_MASK(I,J,K) = -1
-                  
-                     RP = SQRT( (M%XC(I)-G%X)**2+(M%YC(J)-G%Y)**2 )
-                     IF (RP-G%RADIUS < DELTA_IBM) M%W_MASK(I,J,K) = 0
-                     IF (RP-G%RADIUS < 0._EB) M%W_MASK(I,J,K) = -1
-                  
-                     RP = SQRT( (M%XC(I)-G%X)**2+(M%YC(J)-G%Y)**2 )
-                     IF (RP-G%RADIUS < DELTA_IBM) M%P_MASK(I,J,K) = 0
-                     IF (RP-G%RADIUS < 0._EB) M%P_MASK(I,J,K) = -1
-                     
-                  ENDIF CYLINDER_Z
-
-               CASE(IPLANE) MASK_SHAPE
-               
-                  !M%U_MASK(I,J,K)=1
-                  !M%V_MASK(I,J,K)=1
-                  !M%W_MASK(I,J,K)=1
-                  !M%P_MASK(I,J,K)=1
-               
-                  ! see Section 10.3 Schneider and Eberly
-                  
-                  XU = (/M%X(I),M%YC(J),M%ZC(K)/)        ! point of interest
-                  IF (G%TWO_SIDED) THEN
-                     DP = ABS(DOT_PRODUCT(G%NN,XU-PP))   ! distance to plane
-                  ELSE
-                     DP = DOT_PRODUCT(G%NN,XU-PP)        ! signed distance to plane
-                  ENDIF
-                  IF (DP<DELTA_IBM) M%U_MASK(I,J,K) = 0
-                  IF (DP<0._EB) M%U_MASK(I,J,K) = -1
-                  
-                  XU = (/M%XC(I),M%Y(J),M%ZC(K)/)
-                  IF (G%TWO_SIDED) THEN
-                     DP = ABS(DOT_PRODUCT(G%NN,XU-PP))
-                  ELSE
-                     DP = DOT_PRODUCT(G%NN,XU-PP)
-                  ENDIF
-                  IF (DP<DELTA_IBM) M%V_MASK(I,J,K) = 0
-                  IF (DP<0._EB) M%V_MASK(I,J,K) = -1
-                  
-                  XU = (/M%XC(I),M%YC(J),M%Z(K)/)
-                  IF (G%TWO_SIDED) THEN
-                     DP = ABS(DOT_PRODUCT(G%NN,XU-PP))
-                  ELSE
-                     DP = DOT_PRODUCT(G%NN,XU-PP)
-                  ENDIF
-                  IF (DP<DELTA_IBM) M%W_MASK(I,J,K) = 0
-                  IF (DP<0._EB) M%W_MASK(I,J,K) = -1
-                  
-            END SELECT MASK_SHAPE
-      
-         ENDDO
-      ENDDO
-   ENDDO
-
 ENDDO GEOM_LOOP
 
 ! reinitialize complex geometry from geometry coordinate (.gc) file based on DT_GEOC frequency
@@ -1631,49 +1396,6 @@ TRILINEAR = UU(0,0,0)*(1._EB-XX)*(1._EB-YY)*(1._EB-ZZ) + &
             UU(1,1,1)*XX*YY*ZZ
 
 END FUNCTION TRILINEAR
-
-
-SUBROUTINE GETX(XI,XS,XU,N)
-IMPLICIT NONE
-
-REAL(EB), INTENT(OUT) :: XI(3),XS(3)
-REAL(EB), INTENT(IN) :: XU(3)
-INTEGER, INTENT(IN) :: N
-TYPE(GEOMETRY_TYPE), POINTER :: G
-REAL(EB) :: PP(3),RU(3),RUMAG,DR,DP
-
-XS=0._EB
-G => GEOMETRY(N)
-SELECT CASE(G%ISHAPE)
-   CASE(IBOX)
-      XI = XU
-      IF (XU(1)<G%X1) XI(1) = XU(1) + (XU(1)-G%X1)
-      IF (XU(1)>G%X2) XI(1) = XU(1) + (XU(1)-G%X2)
-      IF (XU(2)<G%Y1) XI(2) = XU(2) + (XU(2)-G%Y1)
-      IF (XU(2)>G%Y2) XI(2) = XU(2) + (XU(2)-G%Y2)
-      IF (XU(3)<G%Z1) XI(3) = XU(3) + (XU(3)-G%Z1)
-      IF (XU(3)>G%Z2) XI(3) = XU(3) + (XU(3)-G%Z2)
-   CASE(ISPHERE)
-      RU     = XU-(/G%X,G%Y,G%Z/)
-      RUMAG  = SQRT(DOT_PRODUCT(RU,RU))
-      DR     = RUMAG-G%RADIUS
-      XS     = XU - DR*RU/RUMAG
-      XI     = XU + DELTA_IBM*RU/RUMAG
-   CASE(ICYLINDER)
-      ! at the moment, cylinder must be aligned with an axis
-      IF (ABS(G%XOR-1._EB)<EPSILON_EB) RU = (/0._EB,XU(2),XU(3)/)-(/0._EB,G%Y,G%Z/)
-      IF (ABS(G%YOR-1._EB)<EPSILON_EB) RU = (/XU(1),0._EB,XU(3)/)-(/G%X,0._EB,G%Z/)
-      IF (ABS(G%ZOR-1._EB)<EPSILON_EB) RU = (/XU(1),XU(2),0._EB/)-(/G%X,G%Y,0._EB/)
-      RUMAG  = SQRT(DOT_PRODUCT(RU,RU))
-      DR     = RUMAG-G%RADIUS
-      XI     = XU + DR*RU/RUMAG
-   CASE(IPLANE)
-      PP = (/G%X,G%Y,G%Z/)           ! point in the plane
-      DP = DOT_PRODUCT(G%NN,XU-PP)   ! signed distance to plane
-      XI = XU + DP*G%NN
-END SELECT
-
-END SUBROUTINE GETX
 
 
 SUBROUTINE GETU(U_DATA,DXI,XI_IN,I_VEL,NM)
