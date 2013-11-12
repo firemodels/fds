@@ -9,15 +9,15 @@
 
 For a fire plume, the correlation by Heskestad~\cite{SFPE:Heskestad} predicts that the increase in centerline temperature, $\Delta T_0$, is given by
 \be
-\Delta T_0 = \frac{9.1 \left( \frac{T_\infty}{g c_p^2 \rho_{\infty}^2} \right)^{1/3} \dot Q_c^{2/3}}{(z-z_0)^{5/3}} \quad ^\circ{\rm C}
+\Delta T_0 = \frac{9.1 \left( \frac{T_\infty}{g c\sb{p}^2 \rho_{\infty}^2} \right)^{1/3} \dot Q\sb{c}^{2/3}}{(z-z_0)^{5/3}} \quad ^\circ{\rm C}
 \label{eq:Heskestad}
 \ee
-where $T_\infty$ is the ambient air temperature~($^\circ$C), $g$ is the acceleration of gravity~(m/s$^2$), $c_p$ is the specific heat of air~(kJ/kg/K), $\rho_{\infty}$ is the ambient air density~(\si{kg/m^3}), and $z$ is the elevation above the fire source~(\si{m}). The convective HRR, $\dot Q_c$ (\si{kW}), is given by
+where $T_\infty$ is the ambient air temperature~($^\circ$C), $g$ is the acceleration of gravity~(m/s$^2$), $c\sb{p}$ is the specific heat of air~(\si{kJ/(kg.K)}), $\rho_{\infty}$ is the ambient air density~(\si{kg/m^3}), and $z$ is the elevation above the fire source~(\si{m}). The convective HRR, $\dot Q\sb{c}$ (\si{kW}), is given by
 \be
-\dot Q_c = \dot Q (1 - \chi_r)
+\dot Q\sb{c} = \dot Q (1 - \chi\sb{r})
 \label{eq:Heskestad_Qc}
 \ee
-where $\dot Q$ is the total HRR~(\si{kW}), and $\chi_r$ is the radiative fraction~(-). The hypothetical virtual origin of the fire, $z_0$ (\si{m}), is given by
+where $\dot Q$ is the total HRR~(\si{kW}), and $\chi\sb{r}$ is the radiative fraction~(-). The hypothetical virtual origin of the fire, $z_0$ (\si{m}), is given by
 \be
 z_0 = -1.02 D + 0.083 \dot Q^{2/5}
 \label{eq:Heskestad_z0}
@@ -44,13 +44,14 @@ Test: VTT Test 1
 \begin{center}
 \begin{tabular}{|l|c|}
 \hline
-                        &              \\
-\rb{Input Parameter}    &  \rb{Value}  \\ \hline \hline
-$\dot Q$ (m)            &  1245        \\ \hline
-$z$ (m)                 &  6           \\ \hline
-$A$ (m$^2$)             &  1.075       \\ \hline
-$\chi_r$ (-)            &  0.40        \\ \hline
-$T_\infty$ ($^\circ$C)  &  22          \\ \hline
+                            &              \\
+\rb{Input Parameter}        &  \rb{Value}  \\ \hline \hline
+$\dot Q$ (m)                &  1245        \\ \hline
+$c\sb{p}$ (\si{kJ/(kg.K)})  &  1.0         \\ \hline
+$z$ (m)                     &  6           \\ \hline
+$A$ (m$^2$)                 &  1.075       \\ \hline
+$\chi\sb{r}$ (-)            &  0.40        \\ \hline
+$T_\infty$ ($^\circ$C)      &  22          \\ \hline
 \end{tabular}
 \end{center}
 \end{table}
@@ -97,10 +98,9 @@ where $g$ is the acceleration of gravity~(\si{m/s^2}), $z$ is the elevation abov
 \label{tbl:McCaffrey_constants}
 \begin{tabular}{|c|c|c|c|}
 \hline
-Region        &  $z/\dot Q^{2/5}$ &  $\eta$ & $\kappa$ \\
-\hline
-Continuous    &  < 0.08           & 1/2     & 6.8      \\
-Intermittent  &  < 0.08 -- 0.2    & 0       & 1.9      \\
+Region        &  $z/\dot Q^{2/5}$ &  $\eta$ & $\kappa$ \\ \hline \hline
+Continuous    &  < 0.08           & 1/2     & 6.8      \\ \hline
+Intermittent  &  < 0.08 -- 0.2    & 0       & 1.9      \\ \hline
 Plume         &  > 0.2            & -1/3    & 1.1      \\
 \hline
 \end{tabular}

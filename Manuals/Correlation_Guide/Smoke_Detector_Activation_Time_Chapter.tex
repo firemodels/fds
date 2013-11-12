@@ -7,9 +7,9 @@
 
 \subsection*{Description}
 
-In this method, the prediction of smoke detector activation time is identical to that for a sprinkler (as described in Chapter~\ref{Sprinkler_Activation_Time_Chapter}). Heskestad and Delichatsios~\cite{Heskestad:4} correlated smoke detector activation to a smoke temperature change of 10~$^\circ$C (18~$^\circ$F) from typical fuels. It is assumed that the smoke detectors are low-RTI devices ($\textrm{RTI}=5$).
+In this method, the prediction of smoke detector activation time is identical to that for a sprinkler (as described in Chapter~\ref{Sprinkler_Activation_Time_Chapter}). Bukowski and Averill~\cite{Bukowski:2} suggest an activation temperature of 5~$^\circ$C to be typical of many residential smoke alarms. It is assumed that the smoke detectors are low-RTI devices ($\textrm{RTI}=5~\si{(m.s)^{1/2}}$).
 
-Note that some of these cases assume a quasi-steady approach for a fire source $\dot Q$ that follows a specified t-squared growth, which is given by Eq.~\ref{eq:t_squared}.
+Note that some of these cases assume a quasi-steady approach for a fire source $\dot Q$ that follows a specified t-squared growth, which was specified as $\dot Q = \alpha t^2$ up to a cutoff time of $t\sb{fire}$. After the time $t\sb{fire}$, the fire HRR was steady.
 
 \subsection*{Verification}
 
@@ -21,21 +21,21 @@ Test: NIST Smoke Alarms, Test SDC02
 \begin{center}
 \begin{tabular}{|l|c|}
 \hline
-                          &              \\
-\rb{Input Parameter}      &  \rb{Value}  \\ \hline \hline
-Location Factor (-)       &  1           \\ \hline
-$\alpha$ (kW/s$^2$)       &  0.00463     \\ \hline
-$t_{fire}$ (s)            &  300         \\ \hline
-$r$ (m)                   &  1.3         \\ \hline
-$H$ (m)                   &  2.1         \\ \hline
-$\Delta T_c$ ($^\circ$C)  &  5           \\ \hline
-RTI (m-s)$^{1/2}$         &  5           \\ \hline
-$T_\infty$ ($^\circ$C)    &  21          \\ \hline
+                              &              \\
+\rb{Input Parameter}          &  \rb{Value}  \\ \hline \hline
+Location Factor (-)           &  1           \\ \hline
+$\alpha$ (kW/s$^2$)           &  0.00463     \\ \hline
+$t\sb{fire}$ (s)              &  300         \\ \hline
+$r$ (m)                       &  1.3         \\ \hline
+$H$ (m)                       &  2.1         \\ \hline
+$\Delta T\sb{c}$ ($^\circ$C)  &  5           \\ \hline
+RTI (\si{(m.s)^{1/2}})        &  5           \\ \hline
+$T_\infty$ ($^\circ$C)        &  21          \\ \hline
 \end{tabular}
 \end{center}
 \end{table}
 
-\noindent Expected result: At 28~s, the HRR $\dot Q$ is 3.63~kW, and the activation time $t_{activation}$ is 35.0~s.
+\noindent Expected result: At 28~s, the HRR $\dot Q$ is 3.63~kW, and the activation time $t\sb{act}$ is 35.0~s.
 
 
 \clearpage
@@ -62,9 +62,9 @@ $T_\infty$ ($^\circ$C)    &  21          \\ \hline
 
 \subsection*{Description}
 
-The correlation of Milke~\cite{Milke:1} predicts that the time of smoke detector activation, $t_{activation}$, is given by
+The correlation of Milke~\cite{Milke:1} predicts that the time of smoke detector activation, $t\sb{act}$, is given by
 \be
-t_{activation} = \frac{X H^{4/3}}{\dot Q^{1/3}}
+t\sb{act} = \frac{X H^{4/3}}{\dot Q^{1/3}}
 \label{eq:Milke}
 \ee
 where $H$ is the height of the ceiling above the top of the fuel~(\si{ft}), and $\dot Q$ is the HRR~(\si{kW}). The constant $X$ is given by
@@ -74,12 +74,12 @@ X = 4.6 \times 10^{-4} (Y^2) + 2.7 \times 10^{-15} (Y^6)
 \ee
 and the constant $Y$ is given by
 \be
-Y = \frac{\Delta T_c H^{5/3}}{\dot Q^{2/3}}
+Y = \frac{\Delta T\sb{c} H^{5/3}}{\dot Q^{2/3}}
 \label{eq:Milke_Y}
 \ee
-where $\Delta T_c$ is the temperature rise of gases under the ceiling required for the smoke detector to activate~($^\circ$F).
+where $\Delta T\sb{c}$ is the temperature rise of gases under the ceiling required for the smoke detector to activate~($^\circ$F).
 
-Note that some of these cases assume a quasi-steady approach for a fire source $\dot Q$ that follows a specified t-squared growth, which is given by Eq.~\ref{eq:t_squared}.
+Note that some of these cases assume a quasi-steady approach for a fire source $\dot Q$ that follows a specified t-squared growth, which was specified as $\dot Q = \alpha t^2$ up to a cutoff time of $t\sb{fire}$. After the time $t\sb{fire}$, the fire HRR was steady.
 
 \subsection*{Verification}
 
@@ -91,19 +91,19 @@ Test: NIST Smoke Alarms, Test SDC02
 \begin{center}
 \begin{tabular}{|l|c|}
 \hline
-                          &              \\
-\rb{Input Parameter}      &  \rb{Value}  \\ \hline \hline
-$\alpha$ (kW/s$^2$)       &  0.00463     \\ \hline
-$t_{fire}$ (s)            &  300         \\ \hline
-$H$ (m)                   &  2.1         \\ \hline
-$\Delta T_c$ ($^\circ$C)  &  5           \\ \hline
+                              &              \\
+\rb{Input Parameter}          &  \rb{Value}  \\ \hline \hline
+$\alpha$ (kW/s$^2$)           &  0.00463     \\ \hline
+$t\sb{fire}$ (s)              &  300         \\ \hline
+$H$ (m)                       &  2.1         \\ \hline
+$\Delta T\sb{c}$ ($^\circ$C)  &  5           \\ \hline
 \end{tabular}
 \end{center}
 \end{table}
 
-\noindent Expected result: At 30~s, the HRR $\dot Q$ is 4.2~kW, and the activation time $t_{activation}$ is 30.8~s.
-\\ \\
-Note: The FDTs spreadsheets use an incorrect unit conversion factor from kW to Btu/s, which gives an activation time of 25.4~s.
+\noindent Expected result: At 30~s, the HRR $\dot Q$ is 4.2~kW, and the activation time $t\sb{act}$ is 30.8~s.
+
+% Note: The FDTs spreadsheets use an incorrect unit conversion factor from kW to Btu/s, which gives an activation time of 25.4~s.
 
 
 \clearpage
@@ -130,25 +130,25 @@ Note: The FDTs spreadsheets use an incorrect unit conversion factor from kW to B
 
 \subsection*{Description}
 
-The correlation of Mowrer~\cite{Mowrer:1} predicts that the time of smoke detector activation, $t_{activation}$, is given by
+The correlation of Mowrer~\cite{Mowrer:1} predicts that the time of smoke detector activation, $t\sb{act}$, is given by
 \be
-t_{activation} = t_{pl} + t_{cj}
+t\sb{act} = t\sb{pl} + t\sb{cj}
 \label{eq:Mowrer}
 \ee
-where the transport lag time of the plume, $t_{pl}$, is given by
+where the transport lag time of the plume, $t\sb{pl}$, is given by
 \be
-t_{pl} = C_{pl} \frac{H^{4/3}}{\dot Q^{1/3}}
+t\sb{pl} = C\sb{pl} \frac{H^{4/3}}{\dot Q^{1/3}}
 \label{eq:Mowrer_tpl}
 \ee
-where $C_{pl}$ is the plume lag time constant~(0.67), $H$ is the height of the ceiling above the fuel~(\si{m}), and $\dot Q$ is the HRR~(\si{kW}).
-The transport lag time of the ceiling jet, $t_{cj}$, is given by
+where $C\sb{pl}$ is the plume lag time constant~(0.67), $H$ is the height of the ceiling above the fuel~(\si{m}), and $\dot Q$ is the HRR~(\si{kW}).
+The transport lag time of the ceiling jet, $t\sb{cj}$, is given by
 \be
-t_{cj} = \frac{1}{C_{cj}} \frac{r^{11/6}}{\dot Q^{1/3} H^{1/2}}
+t\sb{cj} = \frac{1}{C\sb{cj}} \frac{r^{11/6}}{\dot Q^{1/3} H^{1/2}}
 \label{eq:Mowrer_tcj}
 \ee
-where $C_{cj}$ is the ceiling jet time lag time constant~(1.2), and $r$ is the radial distance to the detector~(\si{m}).
+where $C\sb{cj}$ is the ceiling jet time lag time constant~(1.2), and $r$ is the radial distance to the detector~(\si{m}).
 
-Note that some of these cases assume a quasi-steady approach for a fire source $\dot Q$ that follows a specified t-squared growth, which is given by Eq.~\ref{eq:t_squared}.
+Note that some of these cases assume a quasi-steady approach for a fire source $\dot Q$ that follows a specified t-squared growth, which was specified as $\dot Q = \alpha t^2$ up to a cutoff time of $t\sb{fire}$. After the time $t\sb{fire}$, the fire HRR was steady.
 
 \subsection*{Verification}
 
@@ -163,16 +163,16 @@ Test: NIST Smoke Alarms, Test SDC02
                       &              \\
 \rb{Input Parameter}  &  \rb{Value}  \\ \hline \hline
 $\alpha$ (kW/s$^2$)   &  0.00463     \\ \hline
-$t_{fire}$ (s)        &  300         \\ \hline
-$C_{pl}$ (-)          &  0.67        \\ \hline
-$C_{cj}$ (-)          &  1.2         \\ \hline
+$t\sb{fire}$ (s)      &  300         \\ \hline
+$C\sb{pl}$ (-)        &  0.67        \\ \hline
+$C\sb{cj}$ (-)        &  1.2         \\ \hline
 $r$ (m)               &  1.3         \\ \hline
 $H$ (m)               &  2.1         \\ \hline
 \end{tabular}
 \end{center}
 \end{table}
 
-\noindent Expected result: At 5~s, the HRR $\dot Q$ is 0.116~kW, and the activation time $t_{activation}$ is 5.6~s.
+\noindent Expected result: At 5~s, the HRR $\dot Q$ is 0.116~kW, and the activation time $t\sb{act}$ is 5.6~s.
 
 
 \clearpage

@@ -9,19 +9,19 @@
 
 The point source model assumes that radiative energy is concentrated at a point located within a flame~\cite{Beyler2:SFPE}.
 Here, the point source is located at a point one-third the height of the flame.
-The radiative heat flux, $\dot q_r''$, at any distance $R$ (\si{m}) from this point can be predicted using
+The radiative heat flux, $\dot q''\sb{r}$, at any distance $R$ (\si{m}) from this point can be predicted using
 \be
-\dot q_r'' = \cos\theta \left( \frac{\chi_r \dot Q}{4 \pi R^2} \right) \quad \si{kW/m^2}
+\dot q''\sb{r} = \cos\theta \left( \frac{\chi\sb{r} \dot Q}{4 \pi R^2} \right) \quad \si{kW/m^2}
 \label{eq:point_source}
 \ee
-where the $\cos\theta$ term (equal to $x/R$ for targets facing sideways, or $z/R$ for gauges facing upward or downward) accounts for a target that is at an angle $\theta$ from the source. The IOR orientation parameter is used to specify which direction the target or gauge is facing: 1 or -1 for the positive or negative $x$ direction, 2 or -2 for the positive or negative $y$ direction, and 3 or -3 for the positive or negative $z$ direction. $\chi_r$ is the radiative fraction~(-), $\dot Q$ is the HRR of the fire~(\si{kW}), and $R$ is the radial distance from the point source to the edge of the target~(\si{m}) and is given by
+where the $\cos\theta$ term (equal to $x/R$ for targets facing sideways, or $z/R$ for gauges facing upward or downward) accounts for a target that is at an angle $\theta$ from the source. The IOR orientation parameter is used to specify which direction the target or gauge is facing: 1 or -1 for the positive or negative $x$ direction, 2 or -2 for the positive or negative $y$ direction, and 3 or -3 for the positive or negative $z$ direction. $\chi\sb{r}$ is the radiative fraction~(-), $\dot Q$ is the HRR of the fire~(\si{kW}), and $R$ is the radial distance from the point source to the edge of the target~(\si{m}) and is given by
 \be
-R = \sqrt{x^2 + \left(z - \frac{L_f}{3} \right)^2}
+R = \sqrt{x^2 + \left(z - \frac{L\sb{f}}{3} \right)^2}
 \label{eq:point_source_R}
 \ee
-where $x$ is the horizontal distance from the point source to the edge of the target~(\si{m}), and $z$ is the height of the heat flux target~(\si{m}). The flame height, $L_f$ (\si{m}), is given by
+where $x$ is the horizontal distance from the point source to the edge of the target~(\si{m}), and $z$ is the height of the heat flux target~(\si{m}). The flame height, $L\sb{f}$ (\si{m}), is given by
 \be
-L_f = D (3.7 Q^{*^{2/5}} - 1.02)
+L\sb{f} = D (3.7 Q^{*^{2/5}} - 1.02)
 \label{eq:point_source_Lf}
 \ee
 where $D$ is the diameter of the fire source~(\si{m}) and is given by
@@ -31,18 +31,16 @@ D = \sqrt{\frac{4 A}{\pi}}
 \ee
 where $A$ is the area of the fire source~(m$^2$). The nondimensional HRR, $Q^*$, is given by
 \be
-Q^* = \frac{\dot Q}{\rho_\infty c_p T_\infty \sqrt{g} D^{5/2}}
+Q^* = \frac{\dot Q}{\rho_\infty c\sb{p} T_\infty \sqrt{g} D^{5/2}}
 \label{eq:point_source_Qstar}
 \ee
-where $\rho_\infty$ is the ambient air density~(\si{kg/m^3}), $c_p$ is the specific heat of air~(\si{kJ/(kg.K)}), $T_\infty$ is the ambient air temperature~(\si{K}), and $g$ is the acceleration of gravity~(\si{m/s^2}).
+where $\rho_\infty$ is the ambient air density~(\si{kg/m^3}), $c\sb{p}$ is the specific heat of air~(\si{kJ/(kg.K)}), $T_\infty$ is the ambient air temperature~(\si{K}), and $g$ is the acceleration of gravity~(\si{m/s^2}).
 
 \subsection*{Verification}
 
 Test: Fleury 100 kW, 1:1 Burner
-\\ \\
-\noindent In the FDTs spreadsheets, the point source radiation heat flux is calculated without accounting for the angle/elevation
-of the target with respect to the fire, and the flame height is not considered. The correlations.f90 program considers both of these and
-assumes that the point source is located one-third of the height of the flame ($L_f/3$).
+
+% In the FDTs spreadsheets, the point source radiation heat flux is calculated without accounting for the angle/elevation of the target with respect to the fire, and the flame height is not considered. The correlations.f90 program considers both of these and assumes that the point source is located one-third of the height of the flame ($L\sb{f}/3$).
 
 \begin{table}[!ht]
 \caption[Verification input parameters, point source radiation heat flux]
@@ -53,7 +51,7 @@ assumes that the point source is located one-third of the height of the flame ($
                       &                   \\
 \rb{Input Parameter}  &  \rb{Value}       \\ \hline \hline
 $\dot Q$ (kW)         &  100              \\ \hline
-$\chi_r$ (-)          &  0.35             \\ \hline
+$\chi\sb{r}$ (-)      &  0.35             \\ \hline
 $A$ (m$^2$)           &  0.09             \\ \hline
 $x$ (m)               &  0.50, 0.75, 1.0  \\ \hline
 $z$ (m)               &  0.0              \\ \hline
@@ -62,9 +60,9 @@ IOR (-)               &  2                \\ \hline
 \end{center}
 \end{table}
 
-\noindent Expected result (FDTs spreadsheets): At a radius $R$ of 0.67~m, the radiative heat flux $q''_{r}$ is 6.22~kW/m$^2$; at an $R$ of 0.92~m, $q''_{r}$ is 3.30~kW/m$^2$; at an $R$ of 1.17~m, $q''_{r}$ is 2.04~kW/m$^2$.
-\\ \\
-\noindent Expected result (correlations.f90): At a radius $R$ of 0.50~m, the radiative heat flux $q''_{r}$ is 6.01~kW/m$^2$; at an $R$ of 0.75~m, $q''_{r}$ is 3.65~kW/m$^2$; at an $R$ of 1.0~m, $q''_{r}$ is 2.33~kW/m$^2$.
+% \noindent Expected result (FDTs spreadsheets): At a radius $R$ of 0.67~m, the radiative heat flux $\dot q''\sb{r}$ is 6.22~kW/m$^2$; at an $R$ of 0.92~m, $\dot q''\sb{r}$ is 3.30~kW/m$^2$; at an $R$ of 1.17~m, $\dot q''\sb{r}$ is 2.04~kW/m$^2$.
+
+\noindent Expected result: At a radius $R$ of 0.50~m, the radiative heat flux $\dot q''\sb{r}$ is 6.01~kW/m$^2$; at an $R$ of 0.75~m, $\dot q''\sb{r}$ is 3.65~kW/m$^2$; at an $R$ of 1.0~m, $\dot q''\sb{r}$ is 2.33~kW/m$^2$.
 
 
 \clearpage
@@ -92,9 +90,9 @@ IOR (-)               &  2                \\ \hline
 \subsection*{Description}
 
 The solid flame model predicts the heat flux to a target based on the effective emissive power from a flame and a view factor calculation~\cite{Beyler2:SFPE}.
-The radiative heat flux, $\dot q_r''$, at any distance $R$ (\si{m}) from the center of the flame can be predicted using
+The radiative heat flux, $\dot q''\sb{r}$, at any distance $R$ (\si{m}) from the center of the flame can be predicted using
 \be
-\dot q_r'' = E F_{12} \quad \si{kW/m^2}
+\dot q''\sb{r} = E F_{12} \quad \si{kW/m^2}
 \label{eq:solid_flame}
 \ee
 where $E$ is the effective emissive power of the flame~(\si{kW/m^2}), and $F_{12}$ is the view factor between the target and the flame~(-).
@@ -109,27 +107,27 @@ where $D$ is the effective fire diameter~(\si{m}).
 
 \noindent For a heat flux target that is at the same level as the base of the flame, the view factor between the target and the flame, $F_{12}$, is given by
 \be
-F_{12} = \sqrt{F_{12, H}^2 + F_{12, V}^2}
+F_{12} = \sqrt{F\sb{12, H}^2 + F\sb{12, V}^2}
 \label{eq:solid_flame_F12_HV}
 \ee
-where $F_{12, H}$ and $F_{12, V}$ are given by
+where $F\sb{12, H}$ and $F\sb{12, V}$ are given by
 \begin{align}
-F_{12, H} &= \frac{\left( B - \frac{1}{S} \right)}{\pi \sqrt{B^2 - 1}} \tan^{-1} \sqrt{ \frac{(B+1)(S-1)}{(B-1)(S+1)} } -
+F\sb{12, H} &= \frac{\left( B - \frac{1}{S} \right)}{\pi \sqrt{B^2 - 1}} \tan^{-1} \sqrt{ \frac{(B+1)(S-1)}{(B-1)(S+1)} } -
 \frac{\left( A - \frac{1}{S} \right)}{\pi \sqrt{A^2 - 1}} \tan^{-1} \sqrt{ \frac{(A+1)(S-1)}{(A-1)(S+1)} } \\
-F_{12, V} &= \frac{1}{\pi S} \tan^{-1} \left( \frac{H}{\sqrt{S^2-1}} \right) - \frac{H}{\pi S} \tan^{-1} \sqrt{\frac{S-1}{S+1}} +
+F\sb{12, V} &= \frac{1}{\pi S} \tan^{-1} \left( \frac{H}{\sqrt{S^2-1}} \right) - \frac{H}{\pi S} \tan^{-1} \sqrt{\frac{S-1}{S+1}} +
 \frac{A H}{\pi S \sqrt{A^2-1}} \tan^{-1} \sqrt{\frac{(A+1)(S-1)}{(A-1)(S+1)}}
 \label{eq:solid_flame_F12_H_V}
 \end{align}
 where $H$, $S$, $A$, and $B$ are given by
 \begin{align}
-H &= \frac{2 L_f}{D}            \\
+H &= \frac{2 L\sb{f}}{D}        \\
 S &= \frac{2 x}{D}              \\
 A &= \frac{H^2 + S^2 + 1}{2 S}  \\
 B &= \frac{1+S^2}{2 S}
 \label{eq:solid_flame_H_S_A_B}
 \end{align}
 where $x$ is the horizontal distance from the center of the flame to the edge of the heat
-flux target~(\si{m}), and $L_f$ is the flame height given in Eq.~\ref{eq:point_source_Lf}~(\si{m}).
+flux target~(\si{m}), and $L\sb{f}$ is the flame height given in Eq.~\ref{eq:point_source_Lf}~(\si{m}).
 
 
 \clearpage
@@ -139,21 +137,21 @@ flux target~(\si{m}), and $L_f$ is the flame height given in Eq.~\ref{eq:point_s
 
 \noindent For a heat flux target that is elevated from the base of the flame, the view factor between the target and the flame, $F_{12}$, is given by
 \be
-F_{12} = F_{12, V1} + F_{12, V2}
+F_{12} = F\sb{12, V1} + F\sb{12, V2}
 \label{eq:solid_flame_F12_V1V2}
 \ee
-where $F_{12, V1}$ and $F_{12, V2}$ are given by
+where $F\sb{12, V1}$ and $F\sb{12, V2}$ are given by
 \begin{align}
-F_{12, V1} &= \frac{1}{\pi S} \tan^{-1} \left( \frac{H_1}{\sqrt{S^2-1}} \right) - \frac{H_1}{\pi S} \tan^{-1} \sqrt{\frac{S-1}{S+1}} +
+F\sb{12, V1} &= \frac{1}{\pi S} \tan^{-1} \left( \frac{H_1}{\sqrt{S^2-1}} \right) - \frac{H_1}{\pi S} \tan^{-1} \sqrt{\frac{S-1}{S+1}} +
 \frac{A_1 H_1}{\pi S \sqrt{A_1^2-1}} \tan^{-1} \sqrt{\frac{(A_1+1)(S-1)}{(A_1-1)(S+1)}} \\
-F_{12, V2} &= \frac{1}{\pi S} \tan^{-1} \left( \frac{H_2}{\sqrt{S^2-1}} \right) - \frac{H_2}{\pi S} \tan^{-1} \sqrt{\frac{S-1}{S+1}} +
+F\sb{12, V2} &= \frac{1}{\pi S} \tan^{-1} \left( \frac{H_2}{\sqrt{S^2-1}} \right) - \frac{H_2}{\pi S} \tan^{-1} \sqrt{\frac{S-1}{S+1}} +
 \frac{A_2 H_2}{\pi S \sqrt{A_2^2-1}} \tan^{-1} \sqrt{\frac{(A_2+1)(S-1)}{(A_2-1)(S+1)}}
 \label{eq:solid_flame_F12_V1_V2}
 \end{align}
 where $H_1$, $H_2$, $S$, $A_1$, and $A_2$ are given by
 \begin{align}
 H_1 &= \frac{2 z}{D}                \\
-H_2 &= \frac{2 (L_f-z)}{D}          \\
+H_2 &= \frac{2 (L\sb{f}-z)}{D}      \\
 S   &= \frac{2 x}{D}                \\
 A_1 &= \frac{H_1^2 + S^2 + 1}{2 S}  \\
 A_2 &= \frac{H_2^2 + S^2 + 1}{2 S}
@@ -161,7 +159,7 @@ A_2 &= \frac{H_2^2 + S^2 + 1}{2 S}
 \end{align}
 where $x$ is the horizontal distance from the center of the flame to the edge of the heat
 flux target~(\si{m}), $z$ is the height of the target from the base of the flame~(\si{m}),
-and $L_f$ is the flame height given in Eq.~\ref{eq:point_source_Lf}~(\si{m}).
+and $L\sb{f}$ is the flame height given in Eq.~\ref{eq:point_source_Lf}~(\si{m}).
 
 
 \clearpage
@@ -187,7 +185,7 @@ $z$ (m)               &  0.0              \\ \hline
 \end{center}
 \end{table}
 
-\noindent Expected result: At a radius $R$ of 0.50~m, the radiative heat flux $q''_{r}$ is 11.18~kW/m$^2$; at an $R$ of 0.75~m, $q''_{r}$ is 6.9~kW/m$^2$; at an $R$ of 1.0~m, $q''_{r}$ is 4.69~kW/m$^2$.
+\noindent Expected result: At a radius $R$ of 0.50~m, the radiative heat flux $\dot q''\sb{r}$ is 11.18~kW/m$^2$; at an $R$ of 0.75~m, $\dot q''\sb{r}$ is 6.9~kW/m$^2$; at an $R$ of 1.0~m, $\dot q''\sb{r}$ is 4.69~kW/m$^2$.
 
 \subsection*{Validation}
 

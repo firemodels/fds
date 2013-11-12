@@ -82,12 +82,12 @@ $T_\infty$ ($^\circ$C)       &  24                            \\ \hline
 
 \subsection*{Description}
 
-The temperature rise, $\Delta T_s$, of an unprotected steel member exposed to fire can be predicted using~\cite{SFPE:Milke2}
+The temperature rise, $\Delta T\sb{s}$, of an unprotected steel member exposed to fire can be predicted using~\cite{SFPE:Milke2}
 \be
-\Delta T_s = \frac{F}{V} \frac{1}{\rho_s c_s} \left[ h_c (T_f - T_s) + \sigma \epsilon (T_f^4 - T_s^4) \right] \Delta t
+\Delta T\sb{s} = \frac{F}{V} \frac{1}{\rho\sb{s} c\sb{s}} \left[ h\sb{c} (T\sb{f} - T\sb{s}) + \sigma \epsilon (T\sb{f}^4 - T\sb{s}^4) \right] \Delta t
 \label{eq:unprotected_steel}
 \ee
-where $F/V$ is the ratio of heated surface area to volume~(\si{m^{-1}}), $\rho_s$ is the density of steel~(\si{kg/m^3}), $c_s$ is the specific heat of steel~(\si{J/(kg.K)}), $h_c$ is the convective heat transfer coefficient~(\si{W/(m^2.K)}), $T_f$ is the exposing fire temperature~(\si{K}), $T_s$ is the steel temperature~(\si{K}), $\sigma$ is the Stefan-Boltzmann constant (\si{W/(m^2.K^4)}), $\epsilon$ is the flame emissivity~(-), and $\Delta t$ is the time step~(\si{s}). Note that the HGL temperature, plume temperature, or other exposing temperature can be used as the fire temperature, $T_f$.
+where $F/V$ is the ratio of heated surface area to volume~(\si{m^{-1}}), $\rho\sb{s}$ is the density of steel~(\si{kg/m^3}), $c\sb{s}$ is the specific heat of steel~(\si{J/(kg.K)}), $h\sb{c}$ is the convective heat transfer coefficient~(\si{W/(m^2.K)}), $T\sb{f}$ is the exposing fire temperature~(\si{K}), $T\sb{s}$ is the steel temperature~(\si{K}), $\sigma$ is the Stefan-Boltzmann constant (\si{W/(m^2.K^4)}), $\epsilon$ is the flame emissivity~(-), and $\Delta t$ is the time step~(\si{s}). Note that the HGL temperature, plume temperature, or other exposing temperature can be used as the fire temperature, $T\sb{f}$.
 
 \subsection*{Verification}
 
@@ -99,16 +99,16 @@ Test: SP AST Column, 1.1 m Diesel Fire
 \begin{center}
 \begin{tabular}{|l|l|}
 \hline
-                           &              \\
-\rb{Input Parameter}       &  \rb{Value}  \\ \hline \hline
-$F/V$ (1/m)                &  205         \\ \hline
-$\rho_{s}$ (kg/m$^3$)      &  7850        \\ \hline
-$c_{s}$ (kJ/kg/K)          &  0.6         \\ \hline
-$\epsilon$ (-)             &  0.7         \\ \hline
-$h_c$ (W/m$^2$/K)          &  25          \\ \hline
-Correlation for $T_f$ (-)  &  McCaffrey   \\ \hline
-$\dot Q$ (kW)              &  1434        \\ \hline
-Height (m)                 &  1           \\ \hline
+                               &              \\
+\rb{Input Parameter}           &  \rb{Value}  \\ \hline \hline
+$F/V$ (1/m)                    &  205         \\ \hline
+$\rho\sb{s}$ (kg/m$^3$)        &  7850        \\ \hline
+$c\sb{s}$ (\si{kJ/(kg.K)})     &  0.6         \\ \hline
+$\epsilon$ (-)                 &  0.7         \\ \hline
+$h\sb{c}$ (\si{W/(m^2.K)})     &  25          \\ \hline \hline
+Correlation for $T\sb{f}$ (-)  &  McCaffrey   \\ \hline \hline
+$\dot Q$ (kW)                  &  1434        \\ \hline
+Height (m)                     &  1           \\ \hline
 \end{tabular}
 \end{center}
 \end{table}
@@ -124,15 +124,15 @@ Height (m)                 &  1           \\ \hline
 
 \subsection*{Description}
 
-The temperature rise, $\Delta T_s$, of a protected steel member exposed to fire can be predicted, but we must first determine if the thermal capacity of the insulation layer should be accounted for or if it can be neglected.
+The temperature rise, $\Delta T\sb{s}$, of a protected steel member exposed to fire can be predicted, but we must first determine if the thermal capacity of the insulation layer should be accounted for or if it can be neglected.
 \be
-\Delta T_s = \left\{ \begin{array}{cl}
-   k_i \left( \frac{T_f - T_s}{c_s h \frac{W}{D}} \right) \Delta t        &  c_s \frac{W}{D} > 2 c_i \rho_i h \\[0.1in]
-   \frac{k_i}{h} \left( \frac{T_f - T_s}{c_s \frac{W}{D} + \frac{1}{2} c_i \rho_i h} \right) \Delta t  &  c_s \frac{W}{D} < 2 c_i \rho_i h
+\Delta T\sb{s} = \left\{ \begin{array}{cl}
+   k\sb{i} \left( \frac{T\sb{f} - T\sb{s}}{c\sb{s} h \frac{W}{D}} \right) \Delta t        &  c\sb{s} \frac{W}{D} > 2 c\sb{i} \rho\sb{i} h \\[0.1in]
+   \frac{k\sb{i}}{h} \left( \frac{T\sb{f} - T\sb{s}}{c\sb{s} \frac{W}{D} + \frac{1}{2} c\sb{i} \rho\sb{i} h} \right) \Delta t  &  c\sb{s} \frac{W}{D} < 2 c\sb{i} \rho\sb{i} h
    \end{array} \right.
 \label{eq:protected_steel}
 \ee
-where $k_i$ is the thermal conductivity of the insulation material~(\si{W/(m.K)}), $T_f$ is the exposing fire temperature~(\si{K}), $T_s$ is the steel temperature~(\si{K}), $c_s$ is the specific heat of steel~(\si{J/(kg.K)}), $c_i$ is the specific heat of the insulation material~(\si{J/(kg.K)}), $h$ is the thickness of the insulation~(\si{m}), $W/D$ is the ratio of the weight of steel section per unit length to the heated perimeter~(\si{kg/m^2}), $\rho_i$ is the density of the insulating material~(\si{kg/m^3}), and $\Delta t$ is the time step~(\si{s}). Note that the HGL temperature, plume temperature, or other exposing temperature can be used as the fire temperature, $T_f$.
+where $k\sb{i}$ is the thermal conductivity of the insulation material~(\si{W/(m.K)}), $T\sb{f}$ is the exposing fire temperature~(\si{K}), $T\sb{s}$ is the steel temperature~(\si{K}), $c\sb{s}$ is the specific heat of steel~(\si{J/(kg.K)}), $c\sb{i}$ is the specific heat of the insulation material~(\si{J/(kg.K)}), $h$ is the thickness of the insulation~(\si{m}), $W/D$ is the ratio of the weight of steel section per unit length to the heated perimeter~(\si{kg/m^2}), $\rho\sb{i}$ is the density of the insulating material~(\si{kg/m^3}), and $\Delta t$ is the time step~(\si{s}). Note that the HGL temperature, plume temperature, or other exposing temperature can be used as the fire temperature, $T\sb{f}$.
 
 
 \clearpage
@@ -148,26 +148,26 @@ Test: WTC Test 4, Bar Structural Element
 \begin{center}
 \begin{tabular}{|l|l|}
 \hline
-                           &              \\
-\rb{Input Parameter}       &  \rb{Value}  \\ \hline \hline
-$c_{s}$ (kJ/kg/K)          &  0.450       \\ \hline
-$W/D$ (kg/m$2$)            &  51.1        \\ \hline
-$k_{i}$ (W/m/K)            &  0.10        \\ \hline
-$\rho_{i}$ (kg/m$^3$)      &  208         \\ \hline
-$c_{i}$ (kJ/kg/K)          &  2.0         \\ \hline
-$h_{i}$ (m)                &  0.0191      \\ \hline
-Correlation for $T_f$ (-)  &  MQH         \\ \hline
-$\dot Q$ (kW)              &  3200        \\ \hline
-$L$ (m)                    &  7.04        \\ \hline
-$W$ (m)                    &  3.60        \\ \hline
-$H$ (m)                    &  3.82        \\ \hline
-$H_v$ (m)                  &  2.82        \\ \hline
-$W_v$ (m)                  &  2.4         \\ \hline
-$k$ (kW/m/K)               &  0.00012     \\ \hline
-$\rho$ (kg/m$^3$)          &  737         \\ \hline
-$c$ (kJ/kg/K)              &  0.9         \\ \hline
-$\delta$ (m)               &  0.0254      \\ \hline
-$T_\infty$ ($^\circ$C)     &  20          \\ \hline
+                               &              \\
+\rb{Input Parameter}           &  \rb{Value}  \\ \hline \hline
+$c\sb{s}$ (\si{kJ/(kg.K)})     &  0.450       \\ \hline
+$W/D$ (kg/m$^2$)               &  51.1        \\ \hline
+$k\sb{i}$ (\si{W/(m.K)})       &  0.10        \\ \hline
+$\rho\sb{i}$ (kg/m$^3$)        &  208         \\ \hline
+$c\sb{i}$ (\si{kJ/(kg.K)})     &  2.0         \\ \hline
+$h\sb{i}$ (m)                  &  0.0191      \\ \hline \hline
+Correlation for $T\sb{f}$ (-)  &  MQH         \\ \hline \hline
+$\dot Q$ (kW)                  &  3200        \\ \hline
+$L$ (m)                        &  7.04        \\ \hline
+$W$ (m)                        &  3.60        \\ \hline
+$H$ (m)                        &  3.82        \\ \hline
+$H\sb{o}$ (m)                  &  2.82        \\ \hline
+$W\sb{o}$ (m)                  &  2.4         \\ \hline
+$k$ (\si{kW/(m.K)})            &  0.00012     \\ \hline
+$\rho$ (kg/m$^3$)              &  737         \\ \hline
+$c$ (\si{kJ/(kg.K)})           &  0.9         \\ \hline
+$\delta$ (m)                   &  0.0254      \\ \hline
+$T_\infty$ ($^\circ$C)         &  20          \\ \hline
 \end{tabular}
 \end{center}
 \end{table}

@@ -44,7 +44,7 @@ Histogram_Tex_Output = [pwd, '/../../Manuals/Correlation_Guide/SCRIPT_FIGURES/Sc
 
 % Override the plot style options with NRC 1824 plot options
 
-NRC_Options = true;
+NRC_Options = false;
 Append_To_Scatterplot_Title = '';
 
 % Run dataplot and scatplot scripts
