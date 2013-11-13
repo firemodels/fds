@@ -13,6 +13,10 @@
 
 \input{../Bibliography/commoncommands}
 
+% Rename chapter headings
+\renewcommand{\chaptername}{Section}
+\renewcommand{\bibname}{References}
+
 % Math shortcuts
 \renewcommand{\sb}[1]{_\mathrm{#1}}
 
@@ -102,8 +106,8 @@ entities, materials, or equipment are necessarily the best available for the pur
 
 \large
 \flushright{\bf National Institute of Standards and Technology Special Publication XXXX \\
-Natl.~Inst.~Stand.~Technol.~Spec.~Publ.~XXXX, \pageref{LastPage} pages (XXXX 2013) \\
-%http://dx.doi.org/XX.XXXX/NIST.SP.XXXX \\
+Natl.~Inst.~Stand.~Technol.~Spec.~Publ.~XXXX, \pageref{LastPage} pages (November 2013) \\
+% http://dx.doi.org/XX.XXXX/NIST.SP.XXXX \\
 CODEN: NSPUE2 }
 
 \vfill
@@ -119,12 +123,47 @@ CODEN: NSPUE2 }
 \pagestyle{plain}
 \pagenumbering{roman}
 
+\chapter{Preface}
+
+\subsection*{Background}
+
+This document was created as part of a fire model verification and validation study conducted by the U.S. Nuclear Regulatory Commission (NRC), the Electric Power Research Institute (EPRI), and the National Institute of Standards and Technology (NIST). The results of this verification and validation study are summarized in NUREG-1824 Supplement 1, the Verification and Validation of Selected Fire Models for Nuclear Power Plant Applications~\cite{NUREG_1824}.
+
+The model evaluation process consists of two main components: verification and validation. Verification is a process to check the correctness of the solution of the governing equations. Verification does not imply that the governing equations are appropriate; only that the equations are being solved correctly.
+
+Validation is a process to determine the appropriateness of the governing equations as a mathematical model of the physical phenomena of interest. Typically, validation involves comparing model results with experimental measurement. Differences that cannot be explained in terms of numerical errors in the model or uncertainty in the measurements are attributed to the assumptions and simplifications of the physical model.
+
+\subsection*{Scope of this Document}
+
+The focus of this document is to compare model predictions of empirical correlations that are commonly used in fire scenarios to various experimentally measured quantities (e.g., hot gas layer temperature, heat flux, plume temperature). A Fortran program was developed along with this document that automates the calculations of the empirical correlations and the verification and validation process. This automated verification and validation process is a method for maintaining the empirical correlations in the long term in a centralized location and enables model verification and validation to be performed on the empirical correlations in a systematic manner.
+
+This document is complementary to the verification and validation guides for the Consolidated Model of Fire and Smoke Transport (CFAST)~\cite{CFAST_Tech_Guide_6} and Fire Dynamics Simulator (FDS)~\cite{FDS_Verification_Guide, FDS_Validation_Guide} fire models, which are maintained by NIST. The experimental data sets referred to in this study are described in more detail in the FDS Validation Guide~\cite{FDS_Validation_Guide} (Volume 3 of the FDS Technical Reference Guide) and their respective test reports.
+
+
+\clearpage
+
+
+\subsection*{Organization of this Document}
+
+For each quantity and empirical correlation, Sections~\ref{HGL_Temperature_Chapter} through \ref{Smoke_Detector_Activation_Time_Chapter} provide a short description of the governing equations, a verification example, and a validation scatter plot that shows model predictions compared to measured values. For each empirical correlation, the corresponding validation scatter plot lists the experimental uncertainty, calculated model uncertainty, and bias factor.
+
+The experimental uncertainty was determined by considering the systematic and random uncertainty values for each measurement quantity. The model uncertainty is reported as one standard deviation of the predicted quantity. The bias factor is reported as an average underprediction or overprediction of a measured quantity, where a bias factor of 1 indicates perfect agreement, on average, between the measured and predicted quantities. More detailed discussion of the calculation of experimental and model uncertainty is provided in the FDS Validation Guide~\cite{FDS_Validation_Guide} and in McGrattan and Toman~\cite{McGrattan:Metrologia}.
+
+Section~\ref{Summary_Chapter} includes a table of summary statistics for each quantity and empirical correlation. Appendix~\ref{Inputs_Chapter} shows the input parameters for the empirical correlations that were used for each test in each data set.
 
 \cleardoublepage
+\phantomsection
+\addcontentsline{toc}{chapter}{Contents}
 \tableofcontents
+
 \cleardoublepage
+\phantomsection
+\addcontentsline{toc}{chapter}{List of Figures}
 \listoffigures
+
 \cleardoublepage
+\phantomsection
+\addcontentsline{toc}{chapter}{List of Tables}
 \listoftables
 
 \mainmatter
@@ -148,8 +187,6 @@ CODEN: NSPUE2 }
 \include{Summary_Chapter}
 
 \bibliography{../Bibliography/FDS_refs,../Bibliography/FDS_general,../Bibliography/FDS_mathcomp}
-
-\addtocontents{toc}{\protect\newpage}
 
 \appendix
 
