@@ -6310,7 +6310,7 @@ SUBROUTINE DUMP_BNDC(T)
 REAL(EB), INTENT(IN) :: T
 REAL(FB) :: STIME
 CHARACTER(50) :: FN
-INTEGER :: N,I
+INTEGER :: N
  
 STIME = T_BEGIN + (T-T_BEGIN)*TIME_SHRINK_FACTOR
  
@@ -6336,11 +6336,11 @@ BNDC_LOOP: DO N=1,1 ! placeholder for multiple boundary files
       !WRITE(LU_BNDC) (REAL(GEOM_OUTPUT(4,I),FB),I=1,N_FACE) ! index 4 is gas temperature
       !the following only works for a single mesh NM=1 and a single particle per facet
       ! 4 is gas temperature
-      WRITE(LU_BNDC) (REAL(SOLID_PHASE_OUTPUT(1, 4,0,0,FACET(I)%PART_INDEX,OPT_LP_INDEX=FACET(I)%PARTICLE_LIST%INDEX),FB), &
-         I=1,N_FACE)
+      !WRITE(LU_BNDC) (REAL(SOLID_PHASE_OUTPUT(1, 4,0,0,FACET(I)%PART_INDEX,OPT_LP_INDEX=FACET(I)%PARTICLE_LIST%INDEX),FB), &
+      !   I=1,N_FACE)
       ! 21 is heat transfer coefficient
-      WRITE(LU_BNDC) (REAL(SOLID_PHASE_OUTPUT(1,21,0,0,FACET(I)%PART_INDEX,OPT_LP_INDEX=FACET(I)%PARTICLE_LIST%INDEX),FB), &
-         I=1,N_FACE)
+      !WRITE(LU_BNDC) (REAL(SOLID_PHASE_OUTPUT(1,21,0,0,FACET(I)%PART_INDEX,OPT_LP_INDEX=FACET(I)%PARTICLE_LIST%INDEX),FB), &
+      !   I=1,N_FACE)
    ENDIF
    CLOSE(LU_BNDC)
 
