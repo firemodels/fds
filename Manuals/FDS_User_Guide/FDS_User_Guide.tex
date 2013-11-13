@@ -1829,8 +1829,7 @@ For further discussion of its effect, see Ref.~\cite{Xin:JSS2005}.
 
 
 
-
-\subsubsection{Example Case: Flowfields/helium\_2d}
+\subsubsection{Example Case: Flowfields/helium\_2d\_isothermal}
 
 This case demonstrates the use of baroclinic correction for an axially-symmetric helium plume.
 Note that the governing equations solved in FDS are written in terms of a
@@ -1843,15 +1842,16 @@ An example of an axially-symmetric helium plume is shown in Fig.~\ref{helium_plu
 \begin{figure}[ht]
 \noindent
 \begin{minipage}{1.1in}
-\includegraphics[height=2in]{SCRIPT_FIGURES/helium_2d}
+\includegraphics[height=2in]{SCRIPT_FIGURES/helium_2d_isothermal}
 \end{minipage}
 \hfill
 \begin{minipage}{5.5in}
 \begin{lstlisting}[basicstyle=\scriptsize\ttfamily]
-&HEAD CHID='helium_2d',TITLE='Axisymmetric Helium Plume' /
+&HEAD CHID='helium_2d_isothermal',TITLE='Axisymmetric Helium Plume' /
 &MESH IJK=72,1,144 XB=0.00,0.08,-0.001,0.001,0.00,0.16, CYLINDRICAL=.TRUE. /
 &TIME T_END=5.0 /
-&MISC DNS=.TRUE. /
+&MISC DNS=.TRUE., ISOTHERMAL=.TRUE. /
+&RADI RADIATION=.FALSE. /
 &SPEC ID='HELIUM'  /
 &SURF ID='HELIUM', VEL=-0.673, MASS_FRACTION(1)=1.0, TAU_MF(1)=0.3 /
 &VENT MB='XMAX' ,SURF_ID='OPEN' /
@@ -1863,7 +1863,7 @@ An example of an axially-symmetric helium plume is shown in Fig.~\ref{helium_plu
 &TAIL /
 \end{lstlisting}
 \end{minipage}
-\caption[Snapshot of the {\ct helium\_2d} test case]{Simulation of a helium plume.}
+\caption[Snapshot of the {\ct helium\_2d\_isothermal} test case]{Simulation of a helium plume.}
 \label{helium_plume}
 \end{figure}
 
