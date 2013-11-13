@@ -1,7 +1,7 @@
 $RUNSMV Controls activate_vents
 $RUNSMV Detectors beam_detector
 $RUNSMV Fires room_fire
-$RUNSMV Flowfields helium_2d
+$RUNSMV Flowfields helium_2d_isothermal
 $RUNSMV Flowfields symmetry_test
 $RUNSMV Flowfields jet_fan
 $RUNSMV Flowfields velocity_bc_test
