@@ -1422,9 +1422,9 @@ PARTICLE_LOOP: DO I=1,NLP
          
          ! Move particle to where it almost hits solid
 
-         LP%X = X_OLD + MINVAL(STEP_FRACTION)*DT*LP%U
-         LP%Y = Y_OLD + MINVAL(STEP_FRACTION)*DT*LP%V
-         LP%Z = Z_OLD + MINVAL(STEP_FRACTION)*DT*LP%W
+         LP%X = X_OLD + MINVAL(STEP_FRACTION)*(LP%X-X_OLD)
+         LP%Y = Y_OLD + MINVAL(STEP_FRACTION)*(LP%Y-Y_OLD)
+         LP%Z = Z_OLD + MINVAL(STEP_FRACTION)*(LP%Z-Z_OLD)
          
          CALL GET_IJK(LP%X,LP%Y,LP%Z,NM,XI,YJ,ZK,LP%ONE_D%IIG,LP%ONE_D%JJG,LP%ONE_D%KKG)
 
