@@ -8161,10 +8161,11 @@ MESH_LOOP_1: DO NM=1,NMESHES
                ! Synthetic Eddy Method
 
                VT%N_EDDY = N_EDDY
-               IF (L_EDDY>0._EB) THEN
+               IF (L_EDDY>TWO_EPSILON_EB) THEN
                   VT%SIGMA_IJ = L_EDDY
                ELSE
                   VT%SIGMA_IJ = L_EDDY_IJ ! Modified SEM (Jarrin, Ch. 7)
+                  VT%SIGMA_IJ = MAX(VT%SIGMA_IJ,1.E-10_EB)
                ENDIF
                IF (VEL_RMS>0._EB) THEN
                   VT%R_IJ=0._EB
@@ -8173,6 +8174,7 @@ MESH_LOOP_1: DO NM=1,NMESHES
                   VT%R_IJ(3,3)=VEL_RMS**2
                ELSE
                   VT%R_IJ = REYNOLDS_STRESS
+                  VT%R_IJ = MAX(VT%R_IJ,1.E-10_EB)
                ENDIF
 
                ! Check SEM parameters
