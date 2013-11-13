@@ -3,6 +3,6 @@ RENDERDIR
 LOADFILE
  helium_2d_isothermal_04.sf
 SETTIMEVAL
- 0.835005
+ 1.955 
 RENDERONCE
  helium_2d_isothermal
