@@ -4,9 +4,9 @@ MODULE PRECISION_PARAMETERS
  
 IMPLICIT NONE
  
-CHARACTER(255), PARAMETER :: precid='$Id: prec.f90 13213 2012-10-09 15:11:25Z drjfloyd $'
-CHARACTER(255), PARAMETER :: precrev='$Revision: 13213 $'
-CHARACTER(255), PARAMETER :: precdate='$Date: 2012-10-09 11:11:25 -0400 (Tue, 09 Oct 2012) $'
+CHARACTER(255), PARAMETER :: precid='$Id$'
+CHARACTER(255), PARAMETER :: precrev='$Revision$'
+CHARACTER(255), PARAMETER :: precdate='$Date$'
 
 ! Precision of "Four Byte" and "Eight Byte" reals
 
