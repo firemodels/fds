@@ -300,15 +300,15 @@ for j=2:length(Q);
   
         if Sigma_E > 0.0
             text(Plot_Min+(Title_Position(1))*(Plot_Max-Plot_Min),Plot_Min+(Title_Position(2)-0.05)*(Plot_Max-Plot_Min),...
-                 ['Exp. Uncertainty: ',num2str(Sigma_E,'%4.2f')],'FontSize',12,'FontName',Font_Name,'Interpreter',Font_Interpreter)
+                 ['Exp. Rel. Std. Dev.: ',num2str(Sigma_E,'%4.2f')],'FontSize',12,'FontName',Font_Name,'Interpreter',Font_Interpreter)
         end
          
         if strcmp(Model_Error,'yes')
             text(Plot_Min+(Title_Position(1))*(Plot_Max-Plot_Min),Plot_Min+(Title_Position(2)-0.10)*(Plot_Max-Plot_Min),...
-                ['Model Uncertainty: ',num2str(Sigma_M,'%4.2f')],'FontSize',12,'FontName',Font_Name,'Interpreter',Font_Interpreter)
+                ['Model Rel. Std. Dev.: ',num2str(Sigma_M,'%4.2f')],'FontSize',12,'FontName',Font_Name,'Interpreter',Font_Interpreter)
             
             text(Plot_Min+(Title_Position(1))*(Plot_Max-Plot_Min),Plot_Min+(Title_Position(2)-0.15)*(Plot_Max-Plot_Min),...
-                ['Bias Factor: ',num2str(delta,'%4.2f')],'FontSize',12,'FontName',Font_Name,'Interpreter',Font_Interpreter)
+                ['Model Bias Factor: ',num2str(delta,'%4.2f')],'FontSize',12,'FontName',Font_Name,'Interpreter',Font_Interpreter)
         end
         
         C = stripcell(Group_Key_Label);
