@@ -2634,12 +2634,6 @@ The end result of this input file is to create a pyramid by repeating long, rect
 Note that the {\ct MULT}iplication functionality works for {\ct MESH}, {\ct OBST}, {\ct HOLE}, {\ct VENT}, and {\ct INIT} lines. For a {\ct MESH}, it only applies to the bounds ({\ct XB}) of the mesh, not the number of cells.
 
 
-\section{Unstructured Geometry: The \texorpdfstring{{\tt GEOM}}{GEOM} Namelist Group (Table \ref{tbl:GEOM})}
-\label{info:GEOM}
-
-Placeholder for development of unstructured geometry input format.
-
-
 \chapter{Fire and Thermal Boundary Conditions}
 
 This chapter describes how to specify the thermal properties of solid objects. This is
@@ -5525,7 +5519,7 @@ In this case we will combine fast chemistry with finite-rate chemistry to create
       NU = -1,-0.5,1
       SPEC_ID_N_S = 'OXYGEN','CARBON MONOXIDE','WATER VAPOR'
       N_S = 0.25,1,0.5/
- 
+
 &REAC ID = 'R3'
       FUEL = 'CARBON DIOXIDE'
       A = 6.16e13
@@ -6348,7 +6342,7 @@ When using {\ct N\_PARTICLES\_PER\_CELL}, the particles will be randomly placed 
 
 \subsubsection{Specifying a Weight Factor for Particles}
 
-Use {\ct PARTICLE\_WEIGHT\_FACTOR} to specify how many actual particles each of the computational particles represent. This can be used in conjunction with {\ct N\_PARTICLES\_PER\_CELL} to reduce the computational cost when a large number of identical particles would be placed in the same grid cell. 
+Use {\ct PARTICLE\_WEIGHT\_FACTOR} to specify how many actual particles each of the computational particles represent. This can be used in conjunction with {\ct N\_PARTICLES\_PER\_CELL} to reduce the computational cost when a large number of identical particles would be placed in the same grid cell.
 
 
 \subsubsection{Single Particle Insertion}
@@ -9327,39 +9321,6 @@ properties be specified as well. Simply prescribing as many properties as possib
 $\Delta t$={\ct T\_END-T\_BEGIN}
 
 \vspace{\baselineskip}
-
-
-% This section is under construction!
-
-\section{\texorpdfstring{{\tt GEOM}}{GEOM} (Unstructured Geometry Parameters)}
-
-
-\setlength\LTleft{0pt}
-\setlength\LTright{0pt}
-\begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
-\caption[Unstructured geometry parameters ({\ct GEOM} namelist group)]{For more information see Section~\ref{info:GEOM}.}
-\label{tbl:GEOM} \\
-\hline
-\multicolumn{5}{|c|}{{\ct GEOM} (Unstructured Geometry Parameters)} \\
-\hline \hline
-\endfirsthead
-\caption[]{Continued} \\
-\hline
-\multicolumn{5}{|c|}{{\ct GEOM} (Unstructured Geometry Parameters)} \\
-\hline \hline
-\endhead
-{\ct F(3)}                & Integer Triplet     & Section~\ref{info:GEOM}            &           &                          \\ \hline
-{\ct GEOM\_ID}            & Character           & Section~\ref{info:GEOM}            &           &                          \\ \hline
-{\ct ID}                  & Character           & Section~\ref{info:GEOM}            &           &                          \\ \hline
-{\ct N\_VERT}             & Integer             & Section~\ref{info:GEOM}            &           &                          \\ \hline
-{\ct SURF\_ID}            & Character           & Section~\ref{info:GEOM}            &           &  {\ct 'INERT'}           \\ \hline
-{\ct X(3)}                & Real Triplet        & Section~\ref{info:GEOM}            &           &                          \\ \hline
-\end{longtable}
-
-
-\vspace{\baselineskip}
-
-
 
 \section{\texorpdfstring{{\tt HEAD}}{HEAD} (Header Parameters)}
 
