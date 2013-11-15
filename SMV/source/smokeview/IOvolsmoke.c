@@ -2591,7 +2591,7 @@ void init_supermesh(void){
     // sort meshes in supermesh from lower front left to upper back right
 
     if(nvolrenderinfo>1){
-      qsort((mesh **)smesh->meshes,sizeof(mesh *),smesh->nmeshes,compare_smeshes);
+      qsort((mesh **)smesh->meshes,smesh->nmeshes,sizeof(mesh *),compare_smeshes);
     }
 
     // count meshes in supermesh in each direction
