@@ -8,7 +8,7 @@ VPATH = .
 .f90.obj:
 	$(FCOMPL) -c $(FFLAGS) $<
 
-obj_serial = prec.o geom.f90 main.o
+obj_serial = geom.o main.o
 objwin_serial = $(obj_serial:.o=.obj)
 
 intel_win_64 : FFLAGS = /O2 /Qvec_report0 /Qipo

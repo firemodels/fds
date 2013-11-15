@@ -1,5 +1,17 @@
 ! Routines related to unstructured geometry and immersed boundary methods
 
+MODULE PRECISION_PARAMETERS
+ 
+! Set important parameters having to do with variable precision and array allocations
+ 
+IMPLICIT NONE
+ 
+! Precision of "Four Byte" and "Eight Byte" reals
+
+INTEGER, PARAMETER :: FB = SELECTED_REAL_KIND(6)
+INTEGER, PARAMETER :: EB = SELECTED_REAL_KIND(12)
+END MODULE PRECISION_PARAMETERS
+
 MODULE TYPES
 USE PRECISION_PARAMETERS
 
