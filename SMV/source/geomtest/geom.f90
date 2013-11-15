@@ -1,4 +1,4 @@
-! Routines related to unstructured geometry and immersed boundary methods
+! VVVVV placeholder routines VVVVV
 
 MODULE PRECISION_PARAMETERS
  
@@ -31,13 +31,12 @@ USE PRECISION_PARAMETERS
 USE TYPES
 
 IMPLICIT NONE
+INTEGER :: N_GEOM
 
 PRIVATE
-PUBLIC :: READ_GEOM
+PUBLIC :: READ_GEOM,WRITE_GEOM
  
 CONTAINS
-
-! VVVVV placeholder routines VVVVV
 
 SUBROUTINE ChkMemErr(CodeSect,VarName,IZERO)
  
@@ -97,9 +96,8 @@ END SUBROUTINE CHECKREAD
 
 SUBROUTINE READ_GEOM
 
-INTEGER, PARAMETER :: MAX_VERTS=10000000
+INTEGER, PARAMETER :: MAX_VERTS=10000000 ! at some point we may decide to use dynmaic memory allocation
 INTEGER, PARAMETER :: MAX_FACES=MAX_VERTS
-INTEGER :: N_GEOM
 CHARACTER(30) :: ID,SURF_ID
 REAL(EB) :: VERTS(3*MAX_VERTS)
 INTEGER :: FACES(3*MAX_FACES)
@@ -169,6 +167,17 @@ ENDDO READ_GEOM_LOOP
 35 REWIND(LU_INPUT)
 
 END SUBROUTINE READ_GEOM
+
+subroutine write_geom
+integer :: i
+TYPE(GEOMETRY_TYPE), POINTER :: G=>NULL()
+
+write(6,*)"NGEOM=",N_GEOM
+do i = 1, N_GEOM
+   G=>GEOMETRY(i)
+   write(6,*)"geom=",i,"nverts=",g%N_VERTS,"nfaces=",g%N_FACES
+end do
+end subroutine write_geom
 
 
 
