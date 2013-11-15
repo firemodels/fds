@@ -5030,7 +5030,7 @@ the post-flame yields for CO, soot and any other species listed below.
 cause FDS to use the built-in thermophysical properties for that species when computing quantities such as specific heat or viscosity.
 Table~\ref{tab:gasspecies} provides a listing of the available species.
 If the {\ct FUEL} is in the table, then FDS will use the built-in formula to obtain the values of C, H, O, and N.
-If not listed in Table~\ref{tab:gasspecies}, FDS uses the gas thermophysical properties of {\ct ETHYLENE}.
+If not listed in Table~\ref{tab:gasspecies}, FDS uses the gas thermophysical properties of {\ct ETHYLENE} along with the molecular weight given by the {\ct FORLMULA} or the values of C, H, O, and N.  Either way, FDS will implicitly create a {\ct SPEC} input for {\ct FUEL}.  This allows {\ct FUEL} to be used as a {\ct SPEC\_ID} input elsewhere (for example as an initial condition or an output quantity).  If you define {\ct FUEL} yourself as a {\ct SPEC}, any properties you specify will override the default values.
 \item[{\ct FORMULA}] A character string that identities the chemical formula of the fuel species for the reaction.
 This input only has meaning when simple chemistry is being used and the formula can only contain C, H, O, or N.
 Specifying a formula means the individual inputs of C, H, O, and N do not need to be specified. See ~\ref{gas_species_props} for a description on how to input a {\ct FORMULA}.
