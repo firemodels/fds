@@ -1,4 +1,4 @@
-\documentclass[12pt]{book}
+\documentclass[12pt, titlepage]{article}
 \usepackage{mathptm,times,color}
 \usepackage[pdftex]{graphicx}
 \usepackage{hyperref}
@@ -6,11 +6,6 @@
 \usepackage{rotating}
 \usepackage{longtable}
 \usepackage{amsmath}
-
-\usepackage{datetime}
-\newdateformat{mydate}{\monthname[\THEMONTH] \THEYEAR}
-
-\renewcommand{\bibname}{References}
 
 \setlength{\textwidth}{6.5in}
 \setlength{\textheight}{9.0in}
@@ -23,14 +18,20 @@
 
 \begin{document}
 
-\bibliographystyle{unsrt}
+\title{Model and Experiment Comparison Graphs\\ for the Empirical Correlations}
+\date{December 2013}
 
-\pagestyle{empty}
+\maketitle
 
-\mainmatter
+\section*{Preface}
 
-\appendix
+For the empirical correlations, this document contains individual comparisons of measured vs. predicted quantities that are contained in NUREG 1824 Supplement 1. The results are contained in the following sections and are organized by experiment, then by output quantity.
+
+\cleardoublepage
+\phantomsection
+\addcontentsline{toc}{section}{List of Experimental Data Sets}
+\tableofcontents
+
 \include{Appendix_Graphs}
-
 
 \end{document}
