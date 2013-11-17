@@ -8,10 +8,7 @@
 <p><hr size="1">
 <p><a href="http://fds-smv.googlecode.com/svn/trunk/FDS/trunk/Utilities/Scripts/bundle_setup/README_LINUX.html">Latest version of these notes</a>
 
-<p>These are preliminary notes for an upcoming release of the Linux version of FDS and Smokeview.
-
-<p>Future releases will use an installer.  In addtion to copying files to user specified locations
-the installer will add the following lines
+<p>In addtion to copying files to user specified locations, the installer adds the following lines
 <ul>
 <li><tt>source .cshrc_fds</tt>
 <li><tt>source .bashrc_fds</tt>
@@ -23,16 +20,13 @@ allowing one to run FDS and Smokeview from the command line.
 
 <P>To use the parallel version of FDS (fds_mpi_linux_64 or fds_mpi_linux_32), OpenMPI libaries must be installed.
 To install:
-<ul>
-<li>Download the 32 or 64 bit (or both) Openmpi libraries using the following links.
-<ul>
-<li><a href="http://code.google.com/p/fds-smv/downloads/detail?name=openmpi32_linux_1.4.3.tar.gz&can=4&q=1.4.3">OpenMPI 1.4.3 32 bit Linux</a>
-<li><a href="http://code.google.com/p/fds-smv/downloads/detail?name=openmpi64_linux_1.4.3.tar.gz&can=4&q=1.4.3">OpenMPI 1.4.3 64 bit Linux</a>
-</ul>
-<li>Uncompress and untar the downloaded  library archive placing the library contents /shared/openmpi_32 or /shared/openmpi_64<br>
-(as root cd to /shared and type tar xvf openmpi32_linux_1.4.3.tar.gz or tar xvf openmpi64_linux_1.4.3.tar.gz )
-</ul>
 
+<h2><a name="Installing_Open_MPI_using_a_package_manager"></a>Installing Open MPI using a package manager<a href="#Installing_Open_MPI_using_a_package_manager"></a></h2><p>Initially, you can try to install Open MPI using the native package manager for your distribution of Linux. For example, Ubuntu and Debian Linux use the aptitude package management system (apt-get), CentOS uses yum, Redhat uses rpm, and so on. You can find instructions on using the package manager for your system in the respective documentation for your Linux distribution. </p><ul><li>For example, on Ubuntu Linux, you can install the newest available version of Open MPI with the command </li><pre>sudo apt-get install openmpi-bin</pre></ul><ul><li>Test the MPI version of FDS by typing </li><pre>fds_mpi</pre></ul><blockquote>and you should see the version number of FDS print with no errors. 
+</blockquote><p>You can then run FDS MPI cases using the command: </p><pre>mpirun -np X fds_mpi fds_case.fds</pre><p>where <strong>X</strong> is the number of processors to use, <strong>fds_mpi</strong> is the FDS MPI executable, and <strong>fds_case.fds</strong> is the FDS case that you want to run. </p><h2><a name="(Alternative_1)_Installing_Open_MPI_from_precompiled_binaries"></a>(Alternative 1) Installing Open MPI from precompiled binaries<a href="#(Alternative_1)_Installing_Open_MPI_from_precompiled_binaries"></a></h2><p>If your Linux distribution does not have a package manager, or you want to install precompiled binaries, you can follow the steps below. These are the steps to set up and run the MPI version of FDS on Linux (tested on Ubuntu 13.04). </p><ul><li>Download the latest 32- or 64-bit compiled version of the Open MPI libraries for Linux from <a href="https://bintray.com/nist-fire-research/releases/Open_MPI" rel="nofollow">https://bintray.com/nist-fire-research/releases/Open_MPI</a> </li><li>Copy the openmpi<tt>_</tt><tt>*</tt>.<tt>*</tt>.<tt>*</tt><tt>_</tt>linux<tt>_</tt><tt>*</tt>.tar.gz file to the /shared directory  (you will need to create this directory if it doesn&#x27;t currently exist). </li><li>cd to the /shared directory and run </li><pre>sudo tar xvzf openmpi_*.*.*_linux_*.tar.gz</pre></ul><blockquote>which will extract the Open MPI libraries to /shared/openmpi<tt>_</tt><tt>*</tt>. 
+</blockquote><ul><li>Test the MPI version of FDS by typing </li><pre>fds_mpi</pre></ul><blockquote>and you should see the version number of FDS print with no errors. 
+</blockquote><p>You can then run FDS MPI cases using the command: </p><pre>mpirun -np X fds_mpi fds_case.fds</pre><p>where <strong>X</strong> is the number of processors to use, <strong>fds_mpi</strong> is the FDS MPI executable, and <strong>fds_case.fds</strong> is the FDS case that you want to run. Note that you might need to add the location of mpirun (/shared/openmpi<tt>_</tt><tt>*</tt>) to your PATH to use the mpirun command. </p><h2><a name="(Alternative_2)_Compiling_Open_MPI_and_FDS_from_source"></a>(Alternative 2) Compiling Open MPI and FDS from source<a href="#(Alternative_2)_Compiling_Open_MPI_and_FDS_from_source"></a></h2><p>The above steps involve using a precompiled version of Open MPI. If you want to build Open MPI and FDS yourself, you can follow the steps below. </p><ul><li>Install the Linux Intel C, C++, and Fortran compilers. Other compiler suites might work, but the official FDS builds use the Intel compiler suite. </li><li>Download and extract the latest 32- or 64-bit version of Open MPI from <a href="http://www.open-mpi.org/" rel="nofollow">http://www.open-mpi.org/</a> </li><li>cd to the directory that you extracted Open MPI to. </li><li>Install Open MPI using the Intel compiler suite; configure and install using: </li><pre>./configure --prefix /shared/openmpi_64 CC=icc CXX=icpc F77=ifort FC=ifort CFLAGS=-m64 CXXFLAGS=-m64 FFLAGS=-m64 FCFLAGS=-m64</pre></ul><blockquote>then type 
+<pre>  make all install</pre></blockquote><ul><li>Build FDS MPI Linux version from the repository: </li><pre>  cd FDS_Compilation/mpi_intel_linux_64</pre></ul><blockquote>then 
+<pre>  ./make_fds.sh</pre></blockquote><p>You can then run FDS MPI cases using the command: </p><pre>mpirun -np X fds_mpi_executable fds_case.fds</pre><p>where <strong>X</strong> is the number of processors to use, <strong>fds_mpi_execuatable</strong> is the FDS MPI executable that was built in the above steps, and <strong>fds_case.fds</strong> is the FDS case that you want to run. Note that you might need to add the location of mpirun (/shared/openmpi<tt>_</tt><tt>*</tt>) to your PATH to use the mpirun command. </p>
 
 
 
