@@ -16,19 +16,23 @@
 #  = Input variables =
 #  ===================
 
-# Mailing list for status report
-mailTo="mcgratta@gmail.com, randy.mcdermott@gmail.com, gforney@gmail.com, CraigWeinschenk@gmail.com, koverholt@gmail.com"
+# Load mailing list for status report
+source $FIREBOT_DIR/firebot_email_list.sh
+
 FIREBOT_USERNAME="firebot"
 
-# Hostname of machine
-hostname=`hostname`
+# Change to home directory
+cd
+FIREBOT_HOME_DIR="`pwd`"
 
 # Additional definitions
-FIREBOT_HOME_DIR="/Users/$FIREBOT_USERNAME"
+SVN_REVISION=$1
 FIREBOT_DIR="/Users/$FIREBOT_USERNAME/firebot"
 FDS_SVNROOT="/Users/$FIREBOT_USERNAME/FDS-SMV"
 CFAST_SVNROOT="/Users/$FIREBOT_USERNAME/cfast"
-SVN_REVISION=$1
+TIME_LOG=$FIREBOT_DIR/output/timings
+ERROR_LOG=$FIREBOT_DIR/output/errors
+WARNING_LOG=$FIREBOT_DIR/output/warnings
 
 #  ====================
 #  = End user warning =
@@ -92,22 +96,22 @@ set_files_world_readable()
    chmod -R go+r *
 }
 
-#  ========================
-#  ========================
-#  = Firebot Build Stages =
-#  ========================
-#  ========================
-
-#  ============================
-#  = Stage 1 - SVN operations =
-#  ============================
-
 clean_firebot_history()
 {
    # Clean Firebot metafiles
    cd $FIREBOT_DIR
    rm output/* > /dev/null
 }
+
+#  ========================
+#  ========================
+#  = Firebot Build Stages =
+#  ========================
+#  ========================
+
+#  ===================================
+#  = Stage 0 - External dependencies =
+#  ===================================
 
 update_and_compile_cfast()
 {
@@ -129,7 +133,7 @@ update_and_compile_cfast()
       
       # Build CFAST
       cd $CFAST_SVNROOT/CFAST/intel_osx_64
-      make --makefile ../makefile clean &> /dev/null
+      make -f ../makefile clean &> /dev/null
       ./make_cfast.sh >> $FIREBOT_DIR/output/stage1_cfast 2>&1
    # If no, then checkout the CFAST repository and compile CFAST
    else
@@ -142,7 +146,7 @@ update_and_compile_cfast()
       
       # Build CFAST
       cd $CFAST_SVNROOT/CFAST/intel_osx_64
-      make --makefile ../makefile clean &> /dev/null
+      make -f ../makefile clean &> /dev/null
       ./make_cfast.sh >> $FIREBOT_DIR/output/stage1_cfast 2>&1
    fi
 
@@ -150,17 +154,19 @@ update_and_compile_cfast()
    cd $CFAST_SVNROOT/CFAST/intel_osx_64
    if [ -e "cfast6_osx_64" ]
    then
-      # Continue along
-      :
+      stage0_success=true
    else
-      echo "CFAST failed to compile" >> $FIREBOT_DIR/output/stage1_cfast 2>&1
-      BUILD_STAGE_FAILURE="Stage 1: SVN Operations"
-      ERROR_LOG=$FIREBOT_DIR/output/stage1_cfast
-      set_files_world_readable
-      email_error_message
+      echo "Errors from Stage 0 - CFAST:" >> $ERROR_LOG
+      echo "CFAST failed to compile" >> $ERROR_LOG
+      cat $FIREBOT_DIR/output/stage0_cfast >> $ERROR_LOG
+      echo "" >> $ERROR_LOG
    fi
 
 }
+
+#  ============================
+#  = Stage 1 - SVN operations =
+#  ============================
 
 clean_svn_repo()
 {
@@ -202,14 +208,13 @@ check_svn_checkout()
    # Check for SVN errors
    if [[ `grep -E 'Updated|At revision' $FIREBOT_DIR/output/stage1 | wc -l` -ne 1 ]];
    then
-      BUILD_STAGE_FAILURE="Stage 1: SVN Operations"
-      ERROR_LOG=$FIREBOT_DIR/output/stage1
-      set_files_world_readable
-      save_build_status
-      email_error_message
+      echo "Errors from Stage 1 - SVN operations:" >> $ERROR_LOG
+      cat $FIREBOT_DIR/output/stage1 >> $ERROR_LOG
+      echo "" >> $ERROR_LOG
+      email_build_status
+      exit
    else
-      # Continue along
-      :
+      stage1_success=true
    fi
 }
 
@@ -220,6 +225,81 @@ compile_background()
    ./make_background.sh >> $FIREBOT_DIR/output/stage1_background 2>&1
 }
 
+#  ================================
+#  = Stage 2a - Compile FDS debug =
+#  ================================
+
+compile_fds_db()
+{
+   # Clean and compile FDS debug
+   cd $FDS_SVNROOT/FDS_Compilation/intel_osx_64_db
+   make -f ../makefile clean &> /dev/null
+   ./make_fds.sh &> $FIREBOT_DIR/output/stage2a
+}
+
+check_compile_fds_db()
+{
+   # Check for errors in FDS debug compilation
+   cd $FDS_SVNROOT/FDS_Compilation/intel_osx_64_db
+   if [ -e "fds_intel_osx_64_db" ]
+   then
+      stage2a_success=true
+   else
+      echo "Errors from Stage 2a - Compile FDS debug:" >> $ERROR_LOG
+      cat $FIREBOT_DIR/output/stage2a >> $ERROR_LOG
+      echo "" >> $ERROR_LOG
+   fi
+
+   # Check for compiler warnings/remarks
+   if [[ `grep -A 5 -E 'warning|remark' ${FIREBOT_DIR}/output/stage2a` == "" ]]
+   then
+      # Continue along
+      :
+   else
+      echo "Warnings from Stage 2a - Compile FDS debug:" >> $WARNING_LOG
+      grep -A 5 -E 'warning|remark' ${FIREBOT_DIR}/output/stage2a >> $WARNING_LOG
+      echo "" >> $WARNING_LOG
+   fi
+}
+
+#  ====================================
+#  = Stage 2b - Compile FDS MPI debug =
+#  ====================================
+
+compile_fds_mpi_db()
+{
+   # Clean and compile FDS MPI debug
+   cd $FDS_SVNROOT/FDS_Compilation/mpi_intel_osx_64_db
+   make -f ../makefile clean &> /dev/null
+   ./make_fds.sh &> $FIREBOT_DIR/output/stage2b
+}
+
+check_compile_fds_mpi_db()
+{
+   # Check for errors in FDS MPI debug compilation
+   cd $FDS_SVNROOT/FDS_Compilation/mpi_intel_osx_64_db
+   if [ -e "fds_mpi_intel_osx_64_db" ]
+   then
+      stage2b_success=true
+   else
+      echo "Errors from Stage 2b - Compile FDS MPI debug:" >> $ERROR_LOG
+      cat $FIREBOT_DIR/output/stage2b >> $ERROR_LOG
+      echo "" >> $ERROR_LOG
+   fi
+
+   # Check for compiler warnings/remarks
+   # grep -v 'feupdateenv ...' ignores a known FDS MPI compiler warning (http://software.intel.com/en-us/forums/showthread.php?t=62806)
+   if [[ `grep -A 5 -E 'warning|remark' ${FIREBOT_DIR}/output/stage2b | grep -v 'feupdateenv is not implemented'` == "" ]]
+   then
+      # Continue along
+      :
+   else
+      echo "Warnings from Stage 2b - Compile FDS MPI debug:" >> $WARNING_LOG
+      grep -A 5 -E 'warning|remark' ${FIREBOT_DIR}/output/stage2b | grep -v 'feupdateenv is not implemented' >> $WARNING_LOG
+      echo "" >> $WARNING_LOG
+   fi
+}
+
 #  ==================================
 #  = Stage 4a - Compile FDS release =
 #  ==================================
@@ -228,7 +308,7 @@ compile_fds()
 {
    # Clean and compile FDS
    cd $FDS_SVNROOT/FDS_Compilation/intel_osx_64
-   make --makefile ../makefile clean &> /dev/null
+   make -f ../makefile clean &> /dev/null
    ./make_fds.sh &> $FIREBOT_DIR/output/stage4a
 }
 
@@ -238,14 +318,11 @@ check_compile_fds()
    cd $FDS_SVNROOT/FDS_Compilation/intel_osx_64
    if [ -e "fds_intel_osx_64" ]
    then
-      # Continue along
-      :
+      stage4a_success=true
    else
-      BUILD_STAGE_FAILURE="Stage 4a: FDS Release Compilation"
-      ERROR_LOG=$FIREBOT_DIR/output/stage4a
-      set_files_world_readable
-      save_build_status
-      email_error_message
+      echo "Errors from Stage 4a - Compile FDS release:" >> $ERROR_LOG
+      cat $FIREBOT_DIR/output/stage4a >> $ERROR_LOG
+      echo "" >> $ERROR_LOG
    fi
 
    # Check for compiler warnings/remarks
@@ -255,9 +332,9 @@ check_compile_fds()
       # Continue along
       :
    else
-      echo "Stage 4a warnings:" >> $FIREBOT_DIR/output/warnings
-      grep -A 5 -E 'warning|remark' ${FIREBOT_DIR}/output/stage4a | grep -v 'performing multi-file optimizations' | grep -v 'generating object file' >> $FIREBOT_DIR/output/warnings
-      echo "" >> $FIREBOT_DIR/output/warnings
+      echo "Warnings from Stage 4a - Compile FDS release:" >> $WARNING_LOG
+      grep -A 5 -E 'warning|remark' ${FIREBOT_DIR}/output/stage4a | grep -v 'performing multi-file optimizations' | grep -v 'generating object file' >> $WARNING_LOG
+      echo "" >> $WARNING_LOG
    fi
 }
 
@@ -269,7 +346,7 @@ compile_fds_mpi()
 {
    # Clean and compile FDS MPI
    cd $FDS_SVNROOT/FDS_Compilation/mpi_intel_osx_64
-   make --makefile ../makefile clean &> /dev/null
+   make -f ../makefile clean &> /dev/null
    ./make_fds.sh &> $FIREBOT_DIR/output/stage4b
 }
 
@@ -279,14 +356,11 @@ check_compile_fds_mpi()
    cd $FDS_SVNROOT/FDS_Compilation/mpi_intel_osx_64
    if [ -e "fds_mpi_intel_osx_64" ]
    then
-      # Continue along
-      :
+      stage4b_success=true
    else
-      BUILD_STAGE_FAILURE="Stage 4b: FDS MPI Release Compilation"
-      ERROR_LOG=$FIREBOT_DIR/output/stage4b
-      set_files_world_readable
-      save_build_status
-      email_error_message
+      echo "Errors from Stage 4b - Compile FDS MPI release:" >> $ERROR_LOG
+      cat $FIREBOT_DIR/output/stage4b >> $ERROR_LOG
+      echo "" >> $ERROR_LOG
    fi
 
    # Check for compiler warnings/remarks
@@ -297,9 +371,9 @@ check_compile_fds_mpi()
       # Continue along
       :
    else
-      echo "Stage 4b warnings:" >> $FIREBOT_DIR/output/warnings
-      grep -A 5 -E 'warning|remark' ${FIREBOT_DIR}/output/stage4b | grep -v 'feupdateenv is not implemented' | grep -v 'performing multi-file optimizations' | grep -v 'generating object file' >> $FIREBOT_DIR/output/warnings
-      echo "" >> $FIREBOT_DIR/output/warnings
+      echo "Warnings from Stage 4b - Compile FDS MPI release:" >> $WARNING_LOG
+      grep -A 5 -E 'warning|remark' ${FIREBOT_DIR}/output/stage4b | grep -v 'feupdateenv is not implemented' | grep -v 'performing multi-file optimizations' | grep -v 'generating object file' >> $WARNING_LOG
+      echo "" >> $WARNING_LOG
    fi
 }
 
@@ -401,21 +475,17 @@ check_verification_cases_release()
       [[ `grep 'STOP: Numerical' -rI *` == "" ]] && \
       [[ `grep -A 20 forrtl -rI *` == "" ]]
    then
-      # Continue along
-      :
+      stage5_success=true
    else
-      BUILD_STAGE_FAILURE="Stage 5: FDS-SMV Verification Cases"
-      
       grep 'Run aborted' -rI $FIREBOT_DIR/output/stage5 > $FIREBOT_DIR/output/stage5_errors
       grep Segmentation -rI * >> $FIREBOT_DIR/output/stage5_errors
       grep ERROR: -rI * >> $FIREBOT_DIR/output/stage5_errors
       grep 'STOP: Numerical' -rI * >> $FIREBOT_DIR/output/stage5_errors
       grep -A 20 forrtl -rI * >> $FIREBOT_DIR/output/stage5_errors
       
-      ERROR_LOG=$FIREBOT_DIR/output/stage5_errors
-      set_files_world_readable
-      save_build_status
-      email_error_message
+      echo "Errors from Stage 5 - Run verification cases (release mode):" >> $ERROR_LOG
+      cat $FIREBOT_DIR/output/stage5_errors >> $ERROR_LOG
+      echo "" >> $ERROR_LOG
    fi
 }
 
@@ -423,54 +493,66 @@ check_verification_cases_release()
 #  = Build status report - email and save functions =
 #  ==================================================
 
-email_success_message()
-{
-   cd $FIREBOT_DIR
-   # Check for warnings
-   if [ -e "output/warnings" ]
-   then
-      # Send email with success message, include warnings
-      mail -s "[Firebot@$hostname] Build success, with warnings. Revision ${SVN_REVISION} passed all build tests." $mailTo < ${FIREBOT_DIR}/output/warnings > /dev/null
-   else
-      # Send empty email with success message
-      echo -e "Build tests on $hostname include:\n\n Stage 1: SVN operations\n Stage 4a and 4b: FDS release compilation\n Stage 5: Run verification cases (release mode)" | mail -s "[Firebot@$hostname] Build success! Revision ${SVN_REVISION} passed all build tests." $mailTo > /dev/null
-   fi
-}
-
-email_error_message()
-{
-   cd $FIREBOT_DIR
-   # Check for warnings
-   if [ -e "output/warnings" ]
-   then
-      cat "" >> $ERROR_LOG
-      cat output/warnings >> $ERROR_LOG
-
-      # Send email with failure message and warnings, body of email contains appropriate log file
-      mail -s "[Firebot@$hostname] Build failure, with warnings! Revision ${SVN_REVISION} build failure at ${BUILD_STAGE_FAILURE}." $mailTo < ${ERROR_LOG} > /dev/null
-   else
-      # Send email with failure message, body of email contains appropriate log file
-      mail -s "[Firebot@$hostname] Build failure! Revision ${SVN_REVISION} build failure at ${BUILD_STAGE_FAILURE}." $mailTo < ${ERROR_LOG} > /dev/null
-   fi
-   exit
-}
-
 save_build_status()
 {
    cd $FIREBOT_DIR
    # Save status outcome of build to a text file
-   if [[ $BUILD_STAGE_FAILURE != "" ]]
+   if [[ -e $WARNING_LOG && -e $ERROR_LOG ]]
    then
-      echo "Revision ${SVN_REVISION} build failure at ${BUILD_STAGE_FAILURE}." > "$FIREBOT_DIR/history/${SVN_REVISION}.txt"
+     cat "" >> $ERROR_LOG
+     cat $WARNING_LOG >> $ERROR_LOG
+     echo "Build failure and warnings for Revision ${SVN_REVISION}." > "$FIREBOT_DIR/history/${SVN_REVISION}.txt"
+     cat $ERROR_LOG > "$FIREBOT_DIR/history/${SVN_REVISION}_errors.txt"
+
+   # Check for errors only
+   elif [ -e $ERROR_LOG ]
+   then
+      echo "Build failure for Revision ${SVN_REVISION}." > "$FIREBOT_DIR/history/${SVN_REVISION}.txt"
       cat $ERROR_LOG > "$FIREBOT_DIR/history/${SVN_REVISION}_errors.txt"
+
+   # Check for warnings only
+   elif [ -e $WARNING_LOG ]
+   then
+      echo "Revision ${SVN_REVISION} has warnings." > "$FIREBOT_DIR/history/${SVN_REVISION}.txt"
+      cat $WARNING_LOG > "$FIREBOT_DIR/history/${SVN_REVISION}_warnings.txt"
+
+   # No errors or warnings
    else
-      if [ -e "output/warnings" ]
-         then 
-         echo "Revision ${SVN_REVISION} has warnings." > "$FIREBOT_DIR/history/${SVN_REVISION}.txt"
-         cat $FIREBOT_DIR/output/warnings > "$FIREBOT_DIR/history/${SVN_REVISION}_warnings.txt"
-      else
-         echo "Build success! Revision ${SVN_REVISION} passed all build tests." > "$FIREBOT_DIR/history/${SVN_REVISION}.txt"
-      fi
+      echo "Build success! Revision ${SVN_REVISION} passed all build tests." > "$FIREBOT_DIR/history/${SVN_REVISION}.txt"
+   fi
+}
+
+email_build_status()
+{
+   cd $FIREBOT_DIR
+   # Check for warnings and errors
+   if [[ -e $WARNING_LOG && -e $ERROR_LOG ]]
+   then
+     # Send email with failure message and warnings, body of email contains appropriate log file
+     mail -s "[Firebot@$hostname] Build failure and warnings for Revision ${SVN_REVISION}." $mailToFDS < $ERROR_LOG > /dev/null
+
+   # Check for errors only
+   elif [ -e $ERROR_LOG ]
+   then
+      # Send email with failure message, body of email contains error log file
+      mail -s "[Firebot@$hostname] Build failure for Revision ${SVN_REVISION}." $mailToFDS < $ERROR_LOG > /dev/null
+
+   # Check for warnings only
+   elif [ -e $WARNING_LOG ]
+   then
+      # Send email with success message, include warnings
+      mail -s "[Firebot@$hostname] Build success, with warnings. Revision ${SVN_REVISION} passed all build tests." $mailToFDS < $WARNING_LOG > /dev/null
+
+   # No errors or warnings
+   else
+      # Send success message with links to nightly manuals
+      stop_time=`date`
+      echo "-------------------------------" >> $TIME_LOG
+      echo "Host: $hostname " >> $TIME_LOG
+      echo "Start Time: $start_time " >> $TIME_LOG
+      echo "Stop Time: $stop_time " >> $TIME_LOG
+      echo "-------------------------------" >> $TIME_LOG
+      mail -s "[Firebot@$hostname] Build success! Revision ${SVN_REVISION} passed all build tests." $mailToFDS < $TIME_LOG > /dev/null
    fi
 }
 
@@ -478,13 +560,28 @@ save_build_status()
 #  = Primary script execution =
 #  ============================
 
-### Stage 1 ###
+hostname=`hostname`
+start_time=`date`
+
+### Clean up on start ###
 clean_firebot_history
+
+### Stage 0 ###
 update_and_compile_cfast
+
+### Stage 1 ###
 clean_svn_repo
 do_svn_checkout
 check_svn_checkout
 compile_background
+
+### Stage 2a ###
+compile_fds_db
+check_compile_fds_db
+
+### Stage 2b ###
+compile_fds_mpi_db
+check_compile_fds_mpi_db
 
 ### Stage 4a ###
 compile_fds
@@ -499,11 +596,13 @@ compile_smv_utilities
 check_smv_utilities
 
 ### Stage 5 ###
-run_verification_cases_release
-check_verification_cases_release
+if [[ $stage4a_success && $stage4b_success ]] ; then
+   run_verification_cases_release
+   check_verification_cases_release
+fi
 
-### Success! ###
+### Wrap up and report results ###
 set_files_world_readable
-email_success_message
 save_build_status
+email_build_status
 
