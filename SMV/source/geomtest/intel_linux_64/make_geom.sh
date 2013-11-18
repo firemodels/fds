@@ -7,4 +7,4 @@ source $IFORT_COMPILER/bin/compilervars.sh $platform
 
 echo Building $target
 rm *.o *.mod
-make -j4 VPATH=".." -f ../Makefile $target
+make VPATH=".." -f ../Makefile $target
