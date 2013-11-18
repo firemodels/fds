@@ -4178,6 +4178,10 @@ void BlockageMenu(int value){
       solid_state=visBLOCKHide;
       change_state=1;
       break;
+    case BLOCKlocation_grid:
+    case BLOCKlocation_exact:
+    case BLOCKlocation_cad:
+      break;
     default:
       ASSERT(0);
       break;
