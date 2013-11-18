@@ -36,9 +36,8 @@ end
 if Stats_Output == 1
     fid = fopen(Statistics_Tex_Output, 'wt');
     % Generate table header information in .tex file
-    fprintf(fid, '%s\n', '\begin{center}');
     fprintf(fid, '%s\n', '\tiny');
-    fprintf(fid, '%s\n', '\begin{longtable}{|l|c|c|c|c|c|c|}');
+    fprintf(fid, '%s\n', '\begin{longtable}[c]{|l|c|c|c|c|c|c|}');
     fprintf(fid, '%s\n', '\hline');
     fprintf(fid, '%s\n', 'Case Name & Expected & Predicted & Type of Error & Error & Error     & Within    \\');
     fprintf(fid, '%s\n', '          & Metric   & Metric    &               &       & Tolerance & Tolerance \\ \hline \hline');
@@ -78,7 +77,6 @@ if Stats_Output == 1
         fprintf(fid, '%s%s\n', within_tolerance, ' \\');
     end
     fprintf(fid,'%s\n','\end{longtable}');
-    fprintf(fid,'%s\n','\end{center}');
 end
 
 % Write statistics information to a LaTeX table for inclusion
@@ -86,8 +84,7 @@ end
 if Stats_Output == 2
     fid = fopen(Statistics_Tex_Output, 'wt');
     % Generate table header information in .tex file
-    fprintf(fid, '%s\n', '\begin{center}');
-    fprintf(fid, '%s\n', '\begin{longtable}{|l|c|c|c|c|c|}');
+    fprintf(fid, '%s\n', '\begin{longtable}[c]{|l|c|c|c|c|c|}');
     fprintf(fid, '%s\n', '\caption[Summary statistics]{Summary statistics for all quantities of interest}');
     fprintf(fid, '%s\n', '\\ \hline');
     fprintf(fid, '%s\n', 'Quantity & Datasets  & Points    & $\widetilde{\sigma}_{\rm E}$ & $\widetilde{\sigma}_{\rm M}$ & Bias \\ \hline \hline');
@@ -121,7 +118,6 @@ if Stats_Output == 2
     end
     fprintf(fid,'%s\n','\end{longtable}');
     fprintf(fid,'%s\n','\label{summary_stats}');
-    fprintf(fid,'%s\n','\end{center}');
 end
 
 % Write histogram information to a LaTeX file for inclusion
