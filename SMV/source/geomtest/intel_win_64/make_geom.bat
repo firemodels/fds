@@ -9,6 +9,7 @@ echo Setting up compiler environment
 call %intelbin%\ifortvars intel64
 
 :envexist
-erase *.obj *.mod
+
+erase *.obj *.mod *.exe
 make VPATH=".." -f ..\makefile intel_win_64
 pause
