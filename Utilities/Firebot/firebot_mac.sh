@@ -387,6 +387,7 @@ compile_smv_utilities()
    cd $FDS_SVNROOT/SMV/Build/LIBS/lib_osx_intel_64
    echo 'Building Smokeview libraries:' > $FIREBOT_DIR/output/stage5pre 2>&1
    ./makelibs.sh >> $FIREBOT_DIR/output/stage5pre 2>&1
+   echo "" >> $FIREBOT_DIR/output/stage5pre 2>&1
 
    # smokezip:
    cd $FDS_SVNROOT/Utilities/smokezip/intel_osx_64
@@ -404,14 +405,13 @@ compile_smv_utilities()
    cd $FDS_SVNROOT/Utilities/background/intel_osx_32
    echo 'Compiling background:' >> $FIREBOT_DIR/output/stage5pre 2>&1
    ./make_background.sh >> $FIREBOT_DIR/output/stage5pre 2>&1
-
-  # wind2fds:
-   cd $FDS_SVNROOT/Utilities/wind2fds/intel_osx_64
-   rm -f *.o wind2fds_osx_64
-   echo 'Compiling wind2fds:' > $FIREBOT_DIR/output/stage5pre 2>&1
-   ./make_wind.sh >> $FIREBOT_DIR/output/stage5pre 2>&1
    echo "" >> $FIREBOT_DIR/output/stage5pre 2>&1
 
+   # wind2fds:
+   cd $FDS_SVNROOT/Utilities/wind2fds/intel_osx_64
+   echo 'Compiling wind2fds:' >> $FIREBOT_DIR/output/stage5pre 2>&1
+   ./make_wind.sh >> $FIREBOT_DIR/output/stage5pre 2>&1
+   echo "" >> $FIREBOT_DIR/output/stage5pre 2>&1
 }
 
 check_smv_utilities()
