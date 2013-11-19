@@ -499,7 +499,7 @@ save_build_status()
    # Save status outcome of build to a text file
    if [[ -e $WARNING_LOG && -e $ERROR_LOG ]]
    then
-     cat "" >> $ERROR_LOG
+     echo "" >> $ERROR_LOG
      cat $WARNING_LOG >> $ERROR_LOG
      echo "Build failure and warnings for Revision ${SVN_REVISION}." > "$FIREBOT_DIR/history/${SVN_REVISION}.txt"
      cat $ERROR_LOG > "$FIREBOT_DIR/history/${SVN_REVISION}_errors.txt"
