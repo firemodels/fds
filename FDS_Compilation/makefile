@@ -445,27 +445,27 @@ openmp_mpi_intel_linux_64_db : setup $(obj_mpi)
 
 # 32 bit
 
-intel_osx_32 : FFLAGS = -O2  -m32 -heap-arrays -vec_report0
+intel_osx_32 : FFLAGS = -O2  -m32 -heap-arrays -vec_report0 -ipo -mmacosx-version-min=10.4
 intel_osx_32 : LFLAGS = -static-intel
 intel_osx_32 : FCOMPL = ifort
 intel_osx_32 : obj = fds_intel_osx_32
 intel_osx_32 : setup $(obj_serial)
 	$(FCOMPL) $(FFLAGS) $(LFLAGS) -o $(obj) $(obj_serial)
 
-mpi_intel_osx_32 : FFLAGS  = -O2 -m32 -heap-arrays -vec_report0
+mpi_intel_osx_32 : FFLAGS  = -O2 -m32 -heap-arrays -vec_report0 -ipo -mmacosx-version-min=10.4
 mpi_intel_osx_32 : LFLAGS  = -L$(MPIDIST)/lib -static-intel
 mpi_intel_osx_32 : FCOMPL  = mpif77
 mpi_intel_osx_32 : obj = fds_mpi_intel_osx_32
 mpi_intel_osx_32 : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) $(LFLAGS) -o $(obj) $(obj_mpi)
 
-intel_osx_32_db : FFLAGS = -m32 -check -warn unused -O0 -auto -WB -traceback -g -fpe0 -vec_report0 -stand:f03
+intel_osx_32_db : FFLAGS = -m32 -check -warn unused -O0 -auto -WB -traceback -g -fpe0 -vec_report0 -stand:f03 -mmacosx-version-min=10.4
 intel_osx_32_db : FCOMPL = ifort
 intel_osx_32_db : obj = fds_intel_osx_32_db
 intel_osx_32_db : setup $(obj_serial)
 	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_serial)
 
-mpi_intel_osx_32_db : FFLAGS  = -check -warn unused -O0 -m32 -g -traceback -fpe:0 -vec_report0
+mpi_intel_osx_32_db : FFLAGS  = -check -warn unused -O0 -m32 -g -traceback -fpe:0 -vec_report0 -mmacosx-version-min=10.4
 mpi_intel_osx_32_db : LFLAGS  = -L$(MPIDIST)/lib -static-intel
 mpi_intel_osx_32_db : FCOMPL  = mpif77
 mpi_intel_osx_32_db : obj = fds_mpi_intel_osx_32_db
@@ -474,21 +474,21 @@ mpi_intel_osx_32_db : setup $(obj_mpi)
 
 # 64 bit
 
-intel_osx_64 : FFLAGS = -O2 -m64 -heap-arrays
+intel_osx_64 : FFLAGS = -O2 -m64 -heap-arrays -ipo -mmacosx-version-min=10.4
 intel_osx_64 : LFLAGS = -static-intel
 intel_osx_64 : FCOMPL = ifort
 intel_osx_64 : obj = fds_intel_osx_64
 intel_osx_64 : setup $(obj_serial)
 	$(FCOMPL) $(FFLAGS) $(LFLAGS) -o $(obj) $(obj_serial)
 
-mpi_intel_osx_64 : FFLAGS  = -O2 -m64 -heap-arrays -vec_report0
+mpi_intel_osx_64 : FFLAGS  = -O2 -m64 -heap-arrays -vec_report0 -ipo -mmacosx-version-min=10.4
 mpi_intel_osx_64 : LFLAGS  = -L$(MPIDIST)/lib -static-intel
 mpi_intel_osx_64 : FCOMPL  = mpif77
 mpi_intel_osx_64 : obj = fds_mpi_intel_osx_64
 mpi_intel_osx_64 : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) $(LFLAGS) -o $(obj) $(obj_mpi)
 
-openmp_intel_osx_64 : FFLAGS = -m64 -O2 -vec_report0
+openmp_intel_osx_64 : FFLAGS = -m64 -O2 -vec_report0 -ipo
 openmp_intel_osx_64 : LFLAGS = -static-intel
 openmp_intel_osx_64 : FCOMPL = ifort
 openmp_intel_osx_64 : FOPENMPFLAGS = -openmp -openmp-link static
@@ -496,14 +496,14 @@ openmp_intel_osx_64 : obj = fds_openmp_intel_osx_64
 openmp_intel_osx_64 : setup $(obj_serial)
 	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_serial)
 
-intel_osx_64_db : FFLAGS = -m64 -check -warn unused -O0 -auto -WB -traceback -g -fpe0 -vec_report0 -stand:f03
+intel_osx_64_db : FFLAGS = -m64 -check -warn unused -O0 -auto -WB -traceback -g -fpe0 -vec_report0 -stand:f03 -mmacosx-version-min=10.4
 intel_osx_64_db : LFLAGS = -static-intel
 intel_osx_64_db : FCOMPL = ifort
 intel_osx_64_db : obj = fds_intel_osx_64_db
 intel_osx_64_db : setup $(obj_serial)
 	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_serial)
 
-mpi_intel_osx_64_db : FFLAGS = -m64 -check -warn unused -O0 -auto -WB -traceback -g -fpe0 -vec_report0 -stand:f03
+mpi_intel_osx_64_db : FFLAGS = -m64 -check -warn unused -O0 -auto -WB -traceback -g -fpe0 -vec_report0 -stand:f03 -mmacosx-version-min=10.4
 mpi_intel_osx_64_db : LFLAGS = -L$(MPIDIST)/lib -static-intel
 mpi_intel_osx_64_db : FCOMPL = mpif77
 mpi_intel_osx_64_db : obj = fds_mpi_intel_osx_64_db
@@ -518,7 +518,7 @@ openmp_intel_osx_64_db : obj = fds_openmp_intel_osx_64_db
 openmp_intel_osx_64_db : setup $(obj_serial)
 	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_serial)
 
-intel_osx_64_dv : FFLAGS = -m64 -O2 -vec_report0 -traceback -stand:f03
+intel_osx_64_dv : FFLAGS = -m64 -O2 -vec_report0 -traceback -stand:f03 -mmacosx-version-min=10.4
 intel_osx_64_dv : LFLAGS = -static-intel
 intel_osx_64_dv : FCOMPL = ifort
 intel_osx_64_dv : obj = fds_intel_osx_64_dv
