@@ -4158,17 +4158,17 @@ If the pressure difference increases beyond this, air will be forced backwards t
 &HVAC TYPE\_ID='FAN', ID='quadratic', MAX_FLOW=10., MAX_PRESSURE=500./
 
 &HVAC TYPE\_ID='FAN', ID='user fan curve', RAMP_ID='fan curve'/
-&RAMP ID='fan curve',F=-1000,T= 17.32/
-&RAMP ID='fan curve',F= -800,T= 16.12/
-&RAMP ID='fan curve',F= -600,T= 14.83/
-&RAMP ID='fan curve',F= -400,T= 13.42/
-&RAMP ID='fan curve',F= -200,T= 11.83/
-&RAMP ID='fan curve',F=    0,T= 10.00/
-&RAMP ID='fan curve',F=  200,T=  7.75/
-&RAMP ID='fan curve',F=  400,T=  4.47/
-&RAMP ID='fan curve',F=  600,T= -4.47/
-&RAMP ID='fan curve',F=  800,T= -7.75/
-&RAMP ID='fan curve',F= 1000,T=-10.00/
+&RAMP ID='fan curve',T=-10.00,F= 1000/
+&RAMP ID='fan curve',T= -7.75,F=  800/
+&RAMP ID='fan curve',T= -4.47,F=  600/
+&RAMP ID='fan curve',T=  4.47,F=  400/
+&RAMP ID='fan curve',T=  7.75,F=  200/
+&RAMP ID='fan curve',T= 10.00,F=    0/
+&RAMP ID='fan curve',T= 11.83,F= -200/
+&RAMP ID='fan curve',T= 13.42,F= -400/
+&RAMP ID='fan curve',T= 14.83,F= -600/
+&RAMP ID='fan curve',T= 16.12,F= -800/
+&RAMP ID='fan curve',T= 17.32,F=-1000/
 \end{lstlisting}
 
 Figure~\ref{fig:Fan_Curve} displays the fan curves for the inputs shown above.  Additional examples can be found in the {\ct ashrae7} and {\ct fan\_test} example cases, which are documented in the Verification Guide.
