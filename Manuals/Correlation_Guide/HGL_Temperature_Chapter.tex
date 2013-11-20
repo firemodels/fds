@@ -16,7 +16,7 @@ where $\dot Q$ is the heat release rate (HRR) of the fire~(\si{kW}), $A\sb{o}$ i
 \be
 h\sb{k} = \left\{ \begin{array}{cl}
    \sqrt{k \rho c/t}  & t \le t\sb{p} \\[0.1in]
-   k/\delta           & t > t\sb{p} 
+   k/\delta           & t > t\sb{p}
    \end{array} \right.
 \label{eq:MQH_hk_lt}
 \ee
@@ -32,16 +32,18 @@ t\sb{p} = \left( \frac{\rho c}{k} \right) \left( \frac{\delta}{2} \right)^2
 
 \subsection*{Verification}
 
-Test: LLNL Test 51
+This sample case is Test 51 from the LLNL (Lawrence-Livermore National Laboratory) series. The test facility included a simple compartment with an open door, a natural gas burner, and no forced ventilation.
+
 
 \begin{table}[!ht]
-\caption[Verification input parameters, HGL temperature, natural ventilation]
-{Verification input parameters, HGL temperature, natural ventilation.}
+\caption[Verification case, HGL temperature, natural ventilation]
+{Verification case, HGL temperature, natural ventilation.}
 \begin{center}
 \begin{tabular}{|l|c|}
 \hline
+\multicolumn{2}{|c|}{User-Specified Input} \\ \hline
                         &              \\
-\rb{Input Parameter}    &  \rb{Value}  \\ \hline \hline
+\rb{Parameter}          &  \rb{Value}  \\ \hline \hline
 $\dot Q$ (kW)           &  200         \\ \hline
 $L$ (m)                 &  6.0         \\ \hline
 $W$ (m)                 &  4.0         \\ \hline
@@ -53,17 +55,22 @@ $\rho$ (kg/m$^3$)       &  1607        \\ \hline
 $c$ (\si{kJ/(kg.K)})    &  1.0         \\ \hline
 $\delta$ (m)            &  0.10        \\ \hline
 $T_\infty$ ($^\circ$C)  &  33          \\ \hline
+\hline
+\multicolumn{2}{|c|}{Expected Output}       \\ \hline
+                 &                          \\
+\rb{Time (s)}    &  \rb{Value ($^\circ$C)}  \\ \hline \hline
+60               &  111.45                  \\ \hline
+120              &  121.05                  \\ \hline
+180              &  127.21                  \\ \hline
 \end{tabular}
 \end{center}
 \end{table}
 
-\noindent Expected result: At 60~s, the HGL temperature $T\sb{g}$ is 111.45~$^\circ$C; at 120~s, $T\sb{g}$ is 121.05~$^\circ$C; at 180~s, $T\sb{g}$ is 127.21~$^\circ$C.
-
-
-\clearpage
 
 
 \subsection*{Validation}
+
+A summary of the comparisons between peak predicted and measured compartment temperatures is shown in Fig.~\ref{HGL_Summary_Natural_Ventilation}.
 
 \begin{figure}[!ht]
 \begin{center}
@@ -93,7 +100,7 @@ where $\dot Q$ is the HRR of the fire~(\si{kW}), $\dot m\sb{g}$ is the compartme
 \be
 h\sb{k} = \left\{ \begin{array}{cl}
    \sqrt{k \rho c/t}  & t \le t\sb{p} \\[0.1in]
-   k/\delta           & t > t\sb{p} 
+   k/\delta           & t > t\sb{p}
    \end{array} \right.
 \label{eq:FPA_hk_lt}
 \ee
@@ -159,7 +166,7 @@ For a compartment with forced ventilation, the correlation of Deal and Beyler (D
 \Delta T\sb{g} = \left( \frac{\dot Q}{\dot m\sb{g} c\sb{p} + h\sb{k} A\sb{T}} \right) \quad ^\circ{\rm C}
 \label{eq:DB}
 \ee
-where $\dot Q$ is the HRR of the fire~(\si{kW}), $\dot m\sb{g}$ is the compartment ventilation mass flow rate~(\si{kg/s}), $c\sb{p}$ is the specific heat of air (\si{kJ/(kg.K)}), $T_\infty$ is the ambient air temperature~(\si{\celsius}), $h\sb{k}$ is the heat transfer coefficient~(\si{kW/(m^2.K)}), and $A\sb{T}$ is the total area of compartment enclosing surfaces~(\si{m^2}), excluding areas of vent openings. The heat transfer coefficient, $h\sb{k}$ (\si{kW/(m^2.K)}), is given by 
+where $\dot Q$ is the HRR of the fire~(\si{kW}), $\dot m\sb{g}$ is the compartment ventilation mass flow rate~(\si{kg/s}), $c\sb{p}$ is the specific heat of air (\si{kJ/(kg.K)}), $T_\infty$ is the ambient air temperature~(\si{\celsius}), $h\sb{k}$ is the heat transfer coefficient~(\si{kW/(m^2.K)}), and $A\sb{T}$ is the total area of compartment enclosing surfaces~(\si{m^2}), excluding areas of vent openings. The heat transfer coefficient, $h\sb{k}$ (\si{kW/(m^2.K)}), is given by
 \be
 h\sb{k} = 0.4\ \mathrm{max} \left( \sqrt{\frac{k \rho c}{t}} , \frac{k}{\delta} \right)
 \label{eq:DB_hk}
