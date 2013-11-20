@@ -4109,10 +4109,10 @@ A duct node must either have two or more ducts attached to it or it must have ei
 Below are given sample inputs for the three types of fans supported by FDS.
 
 \begin{lstlisting}
-&HVAC TYPE='FAN', ID='constant volume', DEVC_ID='device 1', VOLUME_FLOW=1.0, LOSS=2./
-&HVAC TYPE='FAN', ID='quadratic', DEVC_ID='device 1',
+&HVAC TYPE\_ID='FAN', ID='constant volume', DEVC_ID='device 1', VOLUME_FLOW=1.0, LOSS=2./
+&HVAC TYPE\_ID='FAN', ID='quadratic', DEVC_ID='device 1',
       MAX_FLOW=1., MAX_PRESSURE=1000., LOSS=2. /
-&HVAC TYPE='FAN', ID='user fan curve', RAMP_ID='fan curve',  DEVC_ID='device 1', LOSS=2. /
+&HVAC TYPE\_ID='FAN', ID='user fan curve', RAMP_ID='fan curve',  DEVC_ID='device 1', LOSS=2. /
 \end{lstlisting}
 
 \noindent where:
@@ -4153,11 +4153,11 @@ The flow through a fan will decrease from $\dot{V}_{\hbox{\footnotesize max}}$ a
 If the pressure difference increases beyond this, air will be forced backwards through the fan.   If the downstream pressure becomes negative, then the volume flow through the fan will increase beyond {\ct MAX\_FLOW}. More complicated fan curves can be specified by defining a {\ct RAMP}.  In the example inputs below, one fan of each type is specified.  A constant volume flow fan with a {\ct VOLUME\_FLOW} of 10~m$^3$/s, a quadratic fan with {\ct MAX\_FLUX=10} and {\ct MAX\_PRESSURE=500}, and a user-defined fan with the {\ct RAMP} set to the values of the quadratic fan in 200~Pa increments,
 
 \begin{lstlisting}
-&HVAC TYPE='FAN', ID='constant volume', VOLUME_FLOW=10.0/
+&HVAC TYPE\_ID='FAN', ID='constant volume', VOLUME_FLOW=10.0/
 
-&HVAC TYPE='FAN', ID='quadratic', MAX_FLOW=10., MAX_PRESSURE=500./
+&HVAC TYPE\_ID='FAN', ID='quadratic', MAX_FLOW=10., MAX_PRESSURE=500./
 
-&HVAC TYPE='FAN', ID='user fan curve', RAMP_ID='fan curve'/
+&HVAC TYPE\_ID='FAN', ID='user fan curve', RAMP_ID='fan curve'/
 &RAMP ID='fan curve',F=-1000,T= 17.32/
 &RAMP ID='fan curve',F= -800,T= 16.12/
 &RAMP ID='fan curve',F= -600,T= 14.83/
@@ -4207,7 +4207,7 @@ a short passageway that draws gases in one side and expels them out the other. T
 
 A sample input for a filter is given by:
 \begin{lstlisting}
-&HVAC TYPE='FILTER', ID='filter 1', LOADING=0., SPEC_ID='SOOT',
+&HVAC TYPE\_ID='FILTER', ID='filter 1', LOADING=0., SPEC_ID='SOOT',
       EFFICIENCY=0.99, LOADING_MULTIPLIER=1, CLEAN_LOSS=2., LOSS=100./
 \end{lstlisting}
 where:
