@@ -16,9 +16,6 @@
 #  = Input variables =
 #  ===================
 
-# Load mailing list for status report
-source $FIREBOT_DIR/firebot_email_list.sh
-
 FIREBOT_USERNAME="firebot"
 
 # Change to home directory
@@ -33,6 +30,9 @@ CFAST_SVNROOT="/Users/$FIREBOT_USERNAME/cfast"
 TIME_LOG=$FIREBOT_DIR/output/timings
 ERROR_LOG=$FIREBOT_DIR/output/errors
 WARNING_LOG=$FIREBOT_DIR/output/warnings
+
+# Load mailing list for status report
+source $FIREBOT_DIR/firebot_email_list.sh
 
 #  ====================
 #  = End user warning =
