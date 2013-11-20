@@ -7,7 +7,25 @@
 \section{Unstructured Geometry: The \texorpdfstring{{\tt GEOM}}{GEOM} Namelist Group (Table \ref{tbl:GEOM})}
 \label{info:GEOM}
 
-Placeholder for development of unstructured geometry input format.
+Unstructured geometric solids are defined using the \&GEOM keyword.
+A simple form is given by
+
+\begin{verbatim}
+&GEOM ID=..., VERTS=...., FACES=..../
+\end{verbatim}
+
+where ID is the name of the object which may be referenced in subsequent \&GEOM lines, VERTS is a list of vertex coordinates and FACES is a list of vertex indices.  Each vertex location is a triplet of physical coordinates and each face is a triplet of vertex indices where the indices range from 1 to the number of vertices found on this \&GEOM line.
+
+Keywords also exist that allow one to create objects in terms of previously defined objects and to rotate and translate objects.  An example is given by
+
+\begin{verbatim}
+&GEOM ID=... GEOM_IDS='geom1','geom2',..., XYZ0=, XYZ=, AZ=, ELEV= /
+\end{verbatim}
+
+where GEOM\_IDS is a list of previously defined geometries, XYZ0 defines an origin about which the object may be rotated as specified with AZ (azmuthal angle) and ELEV (elevation angle) keywords. The parameter, XYZ specifies a translation amount.
+
+The keyword, COMPONENT\_ONLY, if .TRUE., indicates that the geometry only occurs in other geometry definitions and is not itself a part of the FDS model.
+
 
 \vspace{\baselineskip}
 
