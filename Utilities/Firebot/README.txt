@@ -7,7 +7,7 @@
 # Kristopher Overholt
 # 7/2/2012
 
-RUNNING FIREBOT: To run Firebot manually, use the run_firebot_linux.sh script.
+RUNNING FIREBOT: To run Firebot manually on Blaze at NIST, use the run_firebot_linux.sh script.
 
 =========
 = About =
@@ -15,6 +15,29 @@ RUNNING FIREBOT: To run Firebot manually, use the run_firebot_linux.sh script.
 
 Firebot is an automatic verification and validation test bot that is run at a regular interval (nightly).
 More details on the Firebot build stages can be found in the FDS Configuration Management Plan.
+
+======================
+= Installing Firebot =
+======================
+
+1. Create an account for Firebot on your machine. This account should be named "firebot" if possible.
+   The use of a separate account is recommended so that Firebot has a clean and undisturbed copy of
+   the repositories to work with.
+
+2. In Firebot's newly created home directory, perform an SVN checkout on the Firebot portion of the
+   FDS-SMV repository using:
+
+      svn checkout https://fds-smv.googlecode.com/svn/trunk/FDS/trunk/Utilities/Firebot firebot
+
+3. cd to the newly created ~/firebot directory
+
+4. Run the ./firebot_linux.sh or ./firebot_mac.sh command, then the automated Firebot build process
+   will begin and will create directories and check out repositories as needed.
+
+(Optional) When running Firebot automatically using the cron system, the use of the run-one script is recommended,
+which is available from https://launchpad.net/ubuntu/+source/run-one. This script ensures that one instance of
+Firebot will not run over another instance of Firebot, which would cause file conflicts. The run-one script
+can be installed and used locally, and you can see examples of its usage in the crontab information below.
 
 =========================
 = Firebot files/scripts =
@@ -69,7 +92,7 @@ More details on the Firebot build stages can be found in the FDS Configuration M
 
 ------------------------------------------------------------------------------------
 
-#### The following information is in the Linux (Blaze) firebot user's crontab: ####
+#### The following information is in the Linux firebot user's crontab: ####
 
 ------------------------------------------------------------------------------------
 
@@ -122,7 +145,7 @@ MAILTO=""
 
 ------------------------------------------------------------------------------------
 
-#### The following information is in the Mac (Bluesky) firebot user's crontab: ####
+#### The following information is in the Mac firebot user's crontab: ####
 
 ------------------------------------------------------------------------------------
 
