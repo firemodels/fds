@@ -37,16 +37,16 @@ For cases in which the fire was located against a wall or corner, these correlat
 
 \subsection*{Verification}
 
-Test: Vettori Flat Ceiling Test 1
+This example case is based on Test 1 from the Vettori Flat Ceiling series. This test involved residential quick response sprinklers located on a flat ceiling in a compartment with a closed door, a methane burner, and no ventilation.
 
 \begin{table}[!ht]
-\caption[Verification input parameters, sprinkler activation time]
-{Verification input parameters, sprinkler activation time.}
+\caption[Verification case, sprinkler activation time]
+{Verification case, sprinkler activation time.}
 \begin{center}
 \begin{tabular}{|l|c|}
 \hline
                           &              \\
-\rb{Input Parameter}      &  \rb{Value}  \\ \hline \hline
+\rb{Parameter}            &  \rb{Value}  \\ \hline \hline
 $\alpha$ (kW/s$^2$)       &  0.105       \\ \hline
 Location Factor (-)       &  1           \\ \hline
 RTI (\si{(m.s)^{1/2}})    &  55          \\ \hline
@@ -61,6 +61,10 @@ $T_\infty$ ($^\circ$C)    &  16.6        \\ \hline
 \noindent Expected result: At 50~s, the HRR $\dot Q$ is 262.5~kW, and the activation time $t\sb{act}$ is 98.2~s.
 
 % Note that the FDTs spreadsheet uses incorrect coefficients in Alpert's ceiling jet correlation, which gives an activation time of 98.74 s.
+
+
+\clearpage
+
 
 \subsection*{Validation}
 

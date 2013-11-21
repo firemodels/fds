@@ -38,24 +38,24 @@ where $\rho_\infty$ is the ambient air density~(\si{kg/m^3}), $c\sb{p}$ is the s
 
 \subsection*{Verification}
 
-Test: Fleury 100 kW, 1:1 Burner
+This example case is based on a 100 kW test from the Fleury Heat Flux series. This test involved a propane burner with dimensions of 0.3~m by 0.3~m and heat flux measurements at various distances from the burner.
 
 % In the FDTs spreadsheets, the point source radiation heat flux is calculated without accounting for the angle/elevation of the target with respect to the fire, and the flame height is not considered. The correlations.f90 program considers both of these and assumes that the point source is located one-third of the height of the flame ($L\sb{f}/3$).
 
 \begin{table}[!ht]
-\caption[Verification input parameters, point source radiation heat flux]
-{Verification input parameters, point source radiation heat flux.}
+\caption[Verification case, point source radiation heat flux]
+{Verification case, point source radiation heat flux.}
 \begin{center}
 \begin{tabular}{|l|l|}
 \hline
-                      &                   \\
-\rb{Input Parameter}  &  \rb{Value}       \\ \hline \hline
-$\dot Q$ (kW)         &  100              \\ \hline
-$\chi\sb{r}$ (-)      &  0.35             \\ \hline
-$A$ (m$^2$)           &  0.09             \\ \hline
-$x$ (m)               &  0.50, 0.75, 1.0  \\ \hline
-$z$ (m)               &  0.0              \\ \hline
-IOR (-)               &  2                \\ \hline
+                  &                   \\
+\rb{Parameter}    &  \rb{Value}       \\ \hline \hline
+$\dot Q$ (kW)     &  100              \\ \hline
+$\chi\sb{r}$ (-)  &  0.35             \\ \hline
+$A$ (m$^2$)       &  0.09             \\ \hline
+$x$ (m)           &  0.50, 0.75, 1.0  \\ \hline
+$z$ (m)           &  0.0              \\ \hline
+IOR (-)           &  2                \\ \hline
 \end{tabular}
 \end{center}
 \end{table}
@@ -167,20 +167,20 @@ and $L\sb{f}$ is the flame height given in Eq.~\ref{eq:point_source_Lf}~(\si{m})
 
 \subsection*{Verification}
 
-Test: Fleury 100 kW, 1:1 Burner
+This example case is based on a 100 kW test from the Fleury Heat Flux series. This test involved a propane burner with dimensions of 0.3~m by 0.3~m and heat flux measurements at various distances from the burner.
 
 \begin{table}[!ht]
-\caption[Verification input parameters, solid flame radiation heat flux]
-{Verification input parameters, solid flame radiation heat flux.}
+\caption[Verification case, solid flame radiation heat flux]
+{Verification case, solid flame radiation heat flux.}
 \begin{center}
 \begin{tabular}{|l|l|}
 \hline
-                      &                   \\
-\rb{Input Parameter}  &  \rb{Value}       \\ \hline \hline
-$\dot Q$ (kW)         &  100              \\ \hline
-$A$ (m$^2$)           &  0.09             \\ \hline
-$x$ (m)               &  0.50, 0.75, 1.0  \\ \hline
-$z$ (m)               &  0.0              \\ \hline
+                &                   \\
+\rb{Parameter}  &  \rb{Value}       \\ \hline \hline
+$\dot Q$ (kW)   &  100              \\ \hline
+$A$ (m$^2$)     &  0.09             \\ \hline
+$x$ (m)         &  0.50, 0.75, 1.0  \\ \hline
+$z$ (m)         &  0.0              \\ \hline
 \end{tabular}
 \end{center}
 \end{table}
