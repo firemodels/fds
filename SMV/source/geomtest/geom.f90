@@ -10,9 +10,10 @@ USE GLOBAL_CONSTANTS
 USE TYPES
 
 IMPLICIT NONE
+REAL(EB), PARAMETER :: DEG2RAD=4.0_EB*ATAN(1.0_EB)/180.0_EB
 
 PRIVATE
-PUBLIC :: READ_GEOM,WRITE_GEOM
+PUBLIC :: READ_GEOM,WRITE_GEOM,ROTATE_VEC, SETUP_AZ_ELEV
  
 CONTAINS
 
@@ -177,7 +178,75 @@ ENDDO READ_GEOM_LOOP
 
 END SUBROUTINE READ_GEOM
 
-! ------------ SUBROUTINE MREGE_GEOMS
+! ------------ SUBROUTINE ROTATE_VEC
+
+SUBROUTINE ROTATE_VEC(M,N,XIN,XOUT)
+INTEGER, INTENT(IN) :: N
+REAL(EB), INTENT(IN) :: M(3,3), XIN(3*N)
+REAL(EB), INTENT(OUT) :: XOUT(3*N)
+
+INTEGER :: I
+
+DO I = 1, N
+   XOUT(3*I-2:3*I) = MATMUL(M,XIN(3*I-2:3*I))
+END DO
+END SUBROUTINE ROTATE_VEC
+
+! ------------ SUBROUTINE SETUP_AZ_ELEV
+
+SUBROUTINE SETUP_AZ_ELEV(AZ,ELEV,M)
+! construct a rotation matrix M that rotates a vector by
+! AZ degrees around the Z axis then ELEV degrees around
+! the (cos AZ, sin AZ, 0) axis
+REAL(EB), INTENT(IN) :: AZ, ELEV
+REAL(EB), INTENT(OUT) :: M(3,3)
+
+REAL(EB) :: U1(3), U2(3)
+REAL(EB) :: COS_AZ, SIN_AZ
+REAL(EB) :: M1(3,3), M2(3,3)
+
+U1 = (/0.0_EB, 0.0_EB, 1.0_EB/)
+CALL SETUP_ROTATE(AZ,U1,M1)
+
+COS_AZ = COS(DEG2RAD*AZ)
+SIN_AZ = SIN(DEG2RAD*AZ)
+U2 = (/COS_AZ, SIN_AZ, 0.0_EB/)
+CALL SETUP_ROTATE(ELEV,U2,M2)
+
+M = MATMUL(M2,M1)
+END SUBROUTINE SETUP_AZ_ELEV
+
+! ------------ SUBROUTINE SETUP_ROTATE
+
+SUBROUTINE SETUP_ROTATE(ALPHA,U,M)
+! construct a rotation matrix M that rotates a vector by
+! ALPHA degrees around an axis U
+
+! calling routine needs to make sure NORM2(U) != 0.0
+
+REAL(EB), INTENT(IN) :: ALPHA, U(3)
+REAL(EB), INTENT(OUT) :: M(3,3)
+REAL(EB) :: UP(3,1), S(3,3), UUT(3,3), IDENTITY(3,3)
+REAL(EB) :: COS_ALPHA, SIN_ALPHA
+
+UP = RESHAPE(U/NORM2(U),(/3,1/))
+COS_ALPHA = COS(ALPHA*DEG2RAD)
+SIN_ALPHA = SIN(ALPHA*DEG2RAD)
+S =   RESHAPE( (/&
+                   0.0_EB, -UP(3,1),  UP(2,1),&
+                  UP(3,1),   0.0_EB, -UP(1,1),&
+                 -UP(2,1),  UP(1,1),  0.0_EB  &
+                 /),(/3,3/))
+UUT = MATMUL(UP,TRANSPOSE(UP))
+IDENTITY = RESHAPE ((/&
+               1.0_EB,0.0_EB,0.0_EB,&
+               0.0_EB,1.0_EB,0.0_EB,&
+               0.0_EB,0.0_EB,1.0_EB &
+               /),(/3,3/))
+M = UUT + COS_ALPHA*(IDENTITY - UUT) + SIN_ALPHA*S
+END SUBROUTINE SETUP_ROTATE
+
+! ------------ SUBROUTINE MERGE_GEOMS
 
 SUBROUTINE MERGE_GEOMS(VERTS,N_VERTS,FACES,N_FACES)
    INTEGER N_VERTS, N_FACES, I, J
