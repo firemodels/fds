@@ -1270,7 +1270,7 @@ email_build_status()
       # Send success message with links to nightly manuals
       stop_time=`date`
       echo "-------------------------------" >> $TIME_LOG
-      echo "Host: $hostname " >> $TIME_LOG
+      echo "Linux Host: $hostname " >> $TIME_LOG
       echo "Start Time: $start_time " >> $TIME_LOG
       echo "Stop Time: $stop_time " >> $TIME_LOG
       echo "-------------------------------" >> $TIME_LOG
