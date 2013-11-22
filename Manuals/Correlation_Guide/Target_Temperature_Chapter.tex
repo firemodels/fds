@@ -40,29 +40,43 @@ This example case is based on Penlight Test 7 from the Cable Response to Live Fi
 \caption[Verification case, cable failure time]
 {Verification case, cable failure time.}
 \begin{center}
-\begin{tabular}{|l|l|}
+\begin{tabular}{|l|c|c|c|}
 \hline
-                             &                                \\
-\rb{Parameter}               &  \rb{Value}                    \\ \hline \hline
-Time Ramp                    &  0, 80, 820, 1240, 1800, 1900  \\ \hline
-Temperature Ramp             &  24, 460, 460, 460, 460, 0     \\ \hline
-Cable Diameter (mm)          &  16.3                          \\ \hline
-Mass per Unit Length (kg/m)  &  0.529                         \\ \hline
-Jacket Thickness (mm)        &  1.5                           \\ \hline
-Conduit Diameter (mm)        &  50                            \\ \hline
-Conduit Thickness (mm)       &  4.9                           \\ \hline
-$T_\infty$ ($^\circ$C)       &  24                            \\ \hline
+\multicolumn{4}{|c|}{}                                                                                   \\
+\multicolumn{4}{|c|}{User-Specified Input}                                                               \\
+\multicolumn{4}{|c|}{}                                                                                   \\ \hline
+\multicolumn{2}{|c|}{}                             &  \multicolumn{2}{c|}{}                              \\
+\multicolumn{2}{|c|}{\rb{Parameter}}               &  \multicolumn{2}{c|}{\rb{Value}}                    \\ \hline \hline
+\multicolumn{2}{|l|}{Time Ramp}                    &  \multicolumn{2}{l|}{0, 80, 820, 1240, 1800, 1900}  \\ \hline
+\multicolumn{2}{|l|}{Temperature Ramp}             &  \multicolumn{2}{l|}{24, 460, 460, 460, 460, 0}     \\ \hline
+\multicolumn{2}{|l|}{Cable Diameter (mm)}          &  \multicolumn{2}{l|}{16.3}                          \\ \hline
+\multicolumn{2}{|l|}{Mass per Unit Length (kg/m)}  &  \multicolumn{2}{l|}{0.529}                         \\ \hline
+\multicolumn{2}{|l|}{Jacket Thickness (mm)}        &  \multicolumn{2}{l|}{1.5}                           \\ \hline
+\multicolumn{2}{|l|}{Conduit Diameter (mm)}        &  \multicolumn{2}{l|}{50}                            \\ \hline
+\multicolumn{2}{|l|}{Conduit Thickness (mm)}       &  \multicolumn{2}{l|}{4.9}                           \\ \hline
+\multicolumn{2}{|l|}{$T_\infty$ ($^\circ$C)}       &  \multicolumn{2}{l|}{24}                            \\ \hline
+\multicolumn{2}{c}{}                                                                                     \\ \hline
+\multicolumn{4}{|c|}{}                                                                                   \\
+\multicolumn{4}{|c|}{Expected Output}                                                                    \\
+\multicolumn{4}{|c|}{}                                                                                   \\ \hline
+           &                    &                    &                                                   \\
+\rb{Time}  &  \rb{Exposing}     &  \rb{Cable}        &  \rb{Conduit}                                     \\
+\rb{(s)}   &  \rb{Temperature}  &  \rb{Temperature}  &  \rb{Temperature}                                 \\
+           &  \rb{($^\circ$C)}  &  \rb{($^\circ$C)}  &  \rb{($^\circ$C)}                                 \\ \hline \hline
+50         &  296.3             &  24.1              &  32.4                                             \\ \hline
+80         &  460.0             &  24.6              &  52.3                                             \\ \hline
+1473       &  460.0             &  400               &  440.3                                            \\ \hline
 \end{tabular}
 \end{center}
 \end{table}
-
-\noindent Expected result: At 50.0~s, the exposing temperature is 296.3~$^\circ$C, the cable temperature is 24.1~$^\circ$C, and the conduit temperature is 32.4~$^\circ$C; at 80~s, the exposing temperature is 460.0~$^\circ$C, the cable temperature is 24.6~$^\circ$C, and the conduit temperature is 52.3~$^\circ$C. At 1473~s, the cable reaches a failure temperature of 400~$^\circ$C.
 
 
 \clearpage
 
 
 \subsection*{Validation}
+
+A summary of the comparisons between predicted and measured cable failure times (the time at which the cable reaches its threshold failure temperature) is shown in Fig.~\ref{Surface_Temperature_THIEF_Summary}.
 
 \begin{figure}[!ht]
 \begin{center}
@@ -89,6 +103,10 @@ The temperature rise, $\Delta T\sb{s}$, of an unprotected steel member exposed t
 \ee
 where $F/V$ is the ratio of heated surface area to volume~(\si{m^{-1}}), $\rho\sb{s}$ is the density of steel~(\si{kg/m^3}), $c\sb{s}$ is the specific heat of steel~(\si{J/(kg.K)}), $h\sb{c}$ is the convective heat transfer coefficient~(\si{W/(m^2.K)}), $T\sb{f}$ is the exposing fire temperature~(\si{K}), $T\sb{s}$ is the steel temperature~(\si{K}), $\sigma$ is the Stefan-Boltzmann constant (\si{W/(m^2.K^4)}), $\epsilon$ is the flame emissivity~(-), and $\Delta t$ is the time step~(\si{s}). Note that the HGL temperature, plume temperature, or other exposing temperature can be used as the fire temperature, $T\sb{f}$.
 
+
+\clearpage
+
+
 \subsection*{Verification}
 
 This example case is based on the 1.1 m Diesel Fire Test from the SP AST Column series. This test involved a large test hall with a steel column located in the middle of a diesel pool fire.
@@ -97,24 +115,36 @@ This example case is based on the 1.1 m Diesel Fire Test from the SP AST Column 
 \caption[Verification case, unprotected steel temperature]
 {Verification case, unprotected steel temperature.}
 \begin{center}
-\begin{tabular}{|l|l|}
+\begin{tabular}{|l|c|c|}
 \hline
-                               &              \\
-\rb{Parameter}                 &  \rb{Value}  \\ \hline \hline
-$F/V$ (1/m)                    &  205         \\ \hline
-$\rho\sb{s}$ (kg/m$^3$)        &  7833        \\ \hline
-$c\sb{s}$ (\si{kJ/(kg.K)})     &  0.465       \\ \hline
-$\epsilon$ (-)                 &  0.7         \\ \hline
-$h\sb{c}$ (\si{W/(m^2.K)})     &  25          \\ \hline \hline
-Correlation for $T\sb{f}$ (-)  &  McCaffrey   \\ \hline \hline
-$\dot Q$ (kW)                  &  1434        \\ \hline
-Height (m)                     &  1           \\ \hline
-$T_\infty$ ($^\circ$C)         &  20          \\ \hline
+\multicolumn{3}{|c|}{}                                                                   \\
+\multicolumn{3}{|c|}{User-Specified Input}                                               \\
+\multicolumn{3}{|c|}{}                                                                   \\ \hline
+\multicolumn{2}{|c|}{}                               &  \multicolumn{1}{c|}{}            \\
+\multicolumn{2}{|c|}{\rb{Parameter}}                 &  \multicolumn{1}{c|}{\rb{Value}}  \\ \hline \hline
+\multicolumn{2}{|l|}{$F/V$ (1/m)}                    &  \multicolumn{1}{l|}{205}         \\ \hline
+\multicolumn{2}{|l|}{$\rho\sb{s}$ (kg/m$^3$)}        &  \multicolumn{1}{l|}{7833}        \\ \hline
+\multicolumn{2}{|l|}{$c\sb{s}$ (\si{kJ/(kg.K)})}     &  \multicolumn{1}{l|}{0}           \\ \hline
+\multicolumn{2}{|l|}{$\epsilon$ (-)}                 &  \multicolumn{1}{l|}{0}           \\ \hline
+\multicolumn{2}{|l|}{$h\sb{c}$ (\si{W/(m^2.K)})}     &  \multicolumn{1}{l|}{25}          \\ \hline \hline
+\multicolumn{2}{|l|}{Correlation for $T\sb{f}$ (-)}  &  \multicolumn{1}{l|}{McCaffrey}   \\ \hline \hline
+\multicolumn{2}{|l|}{$\dot Q$ (kW)}                  &  \multicolumn{1}{l|}{1434}        \\ \hline
+\multicolumn{2}{|l|}{Height (m)}                     &  \multicolumn{1}{l|}{1}           \\ \hline
+\multicolumn{2}{|l|}{$T_\infty$ ($^\circ$C)}         &  \multicolumn{1}{l|}{20}          \\ \hline
+\multicolumn{2}{c}{}                                                                     \\ \hline
+\multicolumn{3}{|c|}{}                                                                   \\
+\multicolumn{3}{|c|}{Expected Output}                                                    \\
+\multicolumn{3}{|c|}{}                                                                   \\ \hline
+           &                    &                                                        \\
+\rb{Time}  &  \rb{Fire}         &  \rb{Steel}                                            \\
+\rb{(s)}   &  \rb{Temperature}  &  \rb{Temperature}                                      \\
+           &  \rb{($^\circ$C)}  &  \rb{($^\circ$C)}                                      \\ \hline \hline
+15         &  872.81            &  89.7                                                  \\ \hline
+30         &  872.81            &  162.4                                                 \\ \hline
+45         &  872.81            &  232.8                                                 \\ \hline
 \end{tabular}
 \end{center}
 \end{table}
-
-\noindent Expected result: The fire temperature (plume temperature at a height of 1~m from McCaffrey) is 872.81~$^\circ$C. At 15~s, the steel temperature is 89.7~$^\circ$C; at 30~s, the steel temperature is 162.4~$^\circ$C; at 45~s, the steel temperature is 232.8~$^\circ$C.
 
 
 \clearpage
@@ -147,39 +177,53 @@ This example case examines the temperature of a bar structural element in Test 4
 \caption[Verification case, protected steel temperature]
 {Verification case, protected steel temperature.}
 \begin{center}
-\begin{tabular}{|l|l|}
+\begin{tabular}{|c|c|c|}
 \hline
-                               &              \\
-\rb{Parameter}                 &  \rb{Value}  \\ \hline \hline
-$c\sb{s}$ (\si{kJ/(kg.K)})     &  0.450       \\ \hline
-$W/D$ (kg/m$^2$)               &  50.1        \\ \hline
-$k\sb{i}$ (\si{W/(m.K)})       &  0.10        \\ \hline
-$\rho\sb{i}$ (kg/m$^3$)        &  208         \\ \hline
-$c\sb{i}$ (\si{kJ/(kg.K)})     &  2.0         \\ \hline
-$h\sb{i}$ (m)                  &  0.0191      \\ \hline \hline
-Correlation for $T\sb{f}$ (-)  &  MQH         \\ \hline \hline
-$\dot Q$ (kW)                  &  3200        \\ \hline
-$L$ (m)                        &  7.04        \\ \hline
-$W$ (m)                        &  3.60        \\ \hline
-$H$ (m)                        &  3.82        \\ \hline
-$H\sb{o}$ (m)                  &  2.82        \\ \hline
-$W\sb{o}$ (m)                  &  2.4         \\ \hline
-$k$ (\si{kW/(m.K)})            &  0.00012     \\ \hline
-$\rho$ (kg/m$^3$)              &  737         \\ \hline
-$c$ (\si{kJ/(kg.K)})           &  1.42        \\ \hline
-$\delta$ (m)                   &  0.0254      \\ \hline
-$T_\infty$ ($^\circ$C)         &  20          \\ \hline
+\multicolumn{3}{|c|}{}                                                                   \\
+\multicolumn{3}{|c|}{User-Specified Input}                                               \\
+\multicolumn{3}{|c|}{}                                                                   \\ \hline
+\multicolumn{2}{|c|}{}                               &  \multicolumn{1}{c|}{}            \\
+\multicolumn{2}{|c|}{\rb{Parameter}}                 &  \multicolumn{1}{c|}{\rb{Value}}  \\ \hline \hline
+\multicolumn{2}{|l|}{$c\sb{s}$ (\si{kJ/(kg.K)})}     &  \multicolumn{1}{l|}{0.450}       \\ \hline
+\multicolumn{2}{|l|}{$W/D$ (kg/m$^2$)}               &  \multicolumn{1}{l|}{50.1}        \\ \hline
+\multicolumn{2}{|l|}{$k\sb{i}$ (\si{W/(m.K)})}       &  \multicolumn{1}{l|}{0.10}        \\ \hline
+\multicolumn{2}{|l|}{$\rho\sb{i}$ (kg/m$^3$)}        &  \multicolumn{1}{l|}{208}         \\ \hline
+\multicolumn{2}{|l|}{$c\sb{i}$ (\si{kJ/(kg.K)})}     &  \multicolumn{1}{l|}{2.0}         \\ \hline
+\multicolumn{2}{|l|}{$h\sb{i}$ (m)}                  &  \multicolumn{1}{l|}{0.0191}      \\ \hline \hline
+\multicolumn{2}{|l|}{Correlation for $T\sb{f}$ (-)}  &  \multicolumn{1}{l|}{MQH}         \\ \hline \hline
+\multicolumn{2}{|l|}{$\dot Q$ (kW)}                  &  \multicolumn{1}{l|}{3200}        \\ \hline
+\multicolumn{2}{|l|}{$L$ (m)}                        &  \multicolumn{1}{l|}{7.04}        \\ \hline
+\multicolumn{2}{|l|}{$W$ (m)}                        &  \multicolumn{1}{l|}{3.60}        \\ \hline
+\multicolumn{2}{|l|}{$H$ (m)}                        &  \multicolumn{1}{l|}{3.82}        \\ \hline
+\multicolumn{2}{|l|}{$H\sb{o}$ (m)}                  &  \multicolumn{1}{l|}{2.82}        \\ \hline
+\multicolumn{2}{|l|}{$W\sb{o}$ (m)}                  &  \multicolumn{1}{l|}{2.4}         \\ \hline
+\multicolumn{2}{|l|}{$k$ (\si{kW/(m.K)})}            &  \multicolumn{1}{l|}{0.00012}     \\ \hline
+\multicolumn{2}{|l|}{$\rho$ (kg/m$^3$)}              &  \multicolumn{1}{l|}{737}         \\ \hline
+\multicolumn{2}{|l|}{$c$ (\si{kJ/(kg.K)})}           &  \multicolumn{1}{l|}{1.42}        \\ \hline
+\multicolumn{2}{|l|}{$\delta$ (m)}                   &  \multicolumn{1}{l|}{0.0254}      \\ \hline
+\multicolumn{2}{|l|}{$T_\infty$ ($^\circ$C)}         &  \multicolumn{1}{l|}{20}          \\ \hline
+\multicolumn{2}{c}{}                                                                     \\ \hline
+\multicolumn{3}{|c|}{}                                                                   \\
+\multicolumn{3}{|c|}{Expected Output}                                                    \\
+\multicolumn{3}{|c|}{}                                                                   \\ \hline
+           &                    &                                                        \\
+\rb{Time}  &  \rb{Fire}         &  \rb{Steel}                                            \\
+\rb{(s)}   &  \rb{Temperature}  &  \rb{Temperature}                                      \\
+           &  \rb{($^\circ$C)}  &  \rb{($^\circ$C)}                                      \\ \hline \hline
+15         &  313.5             &  21.0                                                  \\ \hline
+30         &  349.4             &  22.3                                                  \\ \hline
+45         &  372.4             &  23.66                                                 \\ \hline
 \end{tabular}
 \end{center}
 \end{table}
-
-\noindent Expected result: At 15~s, the HGL temperature (from MQH) is 313.5~$^\circ$C and the steel temperature is 21.0~$^\circ$C; At 30~s, the HGL temperature (from MQH) is 349.4~$^\circ$C and the steel temperature is 22.3~$^\circ$C; at 45~s, the HGL temperature (from MQH) is 372.4~$^\circ$C and the steel temperature is 23.66~$^\circ$C.
 
 
 \clearpage
 
 
 \subsection*{Validation}
+
+For both the unprotected and protected steel cases, a summary of the comparisons between peak predicted and measured target temperatures is shown in Fig.~\ref{Surface_Temperature_Steel_Summary}.
 
 \begin{figure}[!ht]
 \begin{center}

@@ -55,30 +55,42 @@ This example case is based on Test 1 from the NIST and Nuclear Regulatory Commis
 \begin{center}
 \begin{tabular}{|l|c|}
 \hline
-                        &              \\
-\rb{Parameter}          &  \rb{Value}  \\ \hline \hline
-$\dot Q$ (kW)           &  410         \\ \hline
-$L$ (m)                 &  21.66       \\ \hline
-$W$ (m)                 &  7.04        \\ \hline
-$H$ (m)                 &  3.82        \\ \hline
-$k$ (\si{kW/(m.K)})     &  0.00012     \\ \hline
-$\rho$ (kg/m$^3$)       &  737         \\ \hline
-$c$ (\si{kJ/(kg.K)})    &  1.42        \\ \hline
-$T_\infty$ ($^\circ$C)  &  22          \\ \hline
-Location Factor (-)     &  1           \\ \hline
-$\chi\sb{l}$ (-)        &  0           \\ \hline
-$z\sb{f}$ (-)           &  0           \\ \hline
+\multicolumn{2}{|c|}{}                           \\
+\multicolumn{2}{|c|}{User-Specified Input}       \\
+\multicolumn{2}{|c|}{}                           \\ \hline
+                        &                        \\
+\rb{Parameter}          &  \rb{Value}            \\ \hline \hline
+$\dot Q$ (kW)           &  410                   \\ \hline
+$L$ (m)                 &  21.66                 \\ \hline
+$W$ (m)                 &  7.04                  \\ \hline
+$H$ (m)                 &  3.82                  \\ \hline
+$k$ (\si{kW/(m.K)})     &  0.00012               \\ \hline
+$\rho$ (kg/m$^3$)       &  737                   \\ \hline
+$c$ (\si{kJ/(kg.K)})    &  1.42                  \\ \hline
+$T_\infty$ ($^\circ$C)  &  22                    \\ \hline
+Location Factor (-)     &  1                     \\ \hline
+$\chi\sb{l}$ (-)        &  0                     \\ \hline
+$z\sb{f}$ (-)           &  0                     \\ \hline
+\multicolumn{2}{c}{}                             \\ \hline
+\multicolumn{2}{|c|}{}                           \\
+\multicolumn{2}{|c|}{Expected Output}            \\
+\multicolumn{2}{|c|}{}                           \\ \hline
+                          &                      \\
+\rb{Time (s)}             &  \rb{HGL Depth (m)}  \\ \hline \hline
+10                        &  0.35                \\ \hline
+20                        &  0.65                \\ \hline
+30                        &  0.93                \\ \hline
 \end{tabular}
 \end{center}
 \end{table}
-
-\noindent Expected result: At 10~s, the HGL depth $z$ is 0.35~m; at 20~s, $z$ is 0.65~m; at 30~s, $z$ is 0.93~m.
 
 
 \clearpage
 
 
 \subsection*{Validation}
+
+A summary of the comparisons between peak predicted and measured HGL depths is shown in Fig.~\ref{HGL_Depth_ASET}.
 
 \begin{figure}[!ht]
 \begin{center}
@@ -110,6 +122,10 @@ k = \frac{0.076}{(353/T\sb{g})}
 \ee
 where $T\sb{g}$ is the HGL temperature~(\si{K}).
 
+
+\clearpage
+
+
 \subsection*{Verification}
 
 This example case is based on Test 1 from the NIST and Nuclear Regulatory Commission (NIST/NRC) series. This test involved a compartment with a closed door, a heptane spray burner, and no ventilation.
@@ -124,27 +140,39 @@ This example case is based on Test 1 from the NIST and Nuclear Regulatory Commis
 \begin{center}
 \begin{tabular}{|l|c|}
 \hline
-                        &              \\
-\rb{Parameter}          &  \rb{Value}  \\ \hline \hline
-$\dot Q$ (kW)           &  410         \\ \hline
-$L$ (m)                 &  21.66       \\ \hline
-$W$ (m)                 &  7.04        \\ \hline
-$H$ (m)                 &  3.82        \\ \hline
-$k$ (\si{kW/(m.K)})     &  0.00012     \\ \hline
-$\rho$ (kg/m$^3$)       &  737         \\ \hline
-$c$ (\si{kJ/(kg.K)})    &  1.42        \\ \hline
-$T_\infty$ ($^\circ$C)  &  22          \\ \hline
+\multicolumn{2}{|c|}{}                              \\
+\multicolumn{2}{|c|}{User-Specified Input}          \\
+\multicolumn{2}{|c|}{}                              \\ \hline
+                        &                           \\
+\rb{Parameter}          &  \rb{Value}               \\ \hline \hline
+$\dot Q$ (kW)           &  410                      \\ \hline
+$L$ (m)                 &  21.66                    \\ \hline
+$W$ (m)                 &  7.04                     \\ \hline
+$H$ (m)                 &  3.82                     \\ \hline
+$k$ (\si{kW/(m.K)})     &  0.00012                  \\ \hline
+$\rho$ (kg/m$^3$)       &  737                      \\ \hline
+$c$ (\si{kJ/(kg.K)})    &  1.42                     \\ \hline
+$T_\infty$ ($^\circ$C)  &  22                       \\ \hline
+\multicolumn{2}{c}{}                                \\ \hline
+\multicolumn{2}{|c|}{}                              \\
+\multicolumn{2}{|c|}{Expected Output}               \\
+\multicolumn{2}{|c|}{}                              \\ \hline
+                          &                         \\
+\rb{Time (s)}             &  \rb{HGL Depth (m)}     \\ \hline \hline
+10                        &  0.28                   \\ \hline
+20                        &  0.53                   \\ \hline
+30                        &  0.75                   \\ \hline
 \end{tabular}
 \end{center}
 \end{table}
-
-\noindent Expected result: At 10~s, the HGL depth $z$ is 0.28~m; at 20~s, $z$ is 0.53~m; at 30~s, $z$ is 0.75~m.
 
 
 \clearpage
 
 
 \subsection*{Validation}
+
+A summary of the comparisons between peak predicted and measured HGL depths is shown in Fig.~\ref{HGL_Depth_YT}.
 
 \begin{figure}[!ht]
 \begin{center}
