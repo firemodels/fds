@@ -8,24 +8,42 @@
 \label{info:GEOM}
 
 Unstructured geometric solids are defined using the \&GEOM keyword.
-A simple form is given by
+A simple form is given by 
 
 \begin{verbatim}
-&GEOM ID=..., VERTS=...., FACES=..../
+&GEOM ID='chair'
+
+      VERTS=X1,Y1,Z1,...,XM,YM,ZM,
+
+      FACES=F1_1,F1_2,F1_3,...,FN_1,FN_2,FN_3,
+
+      SCALE=[1],
+      AZIM=[0],
+      ELEV=[0],
+
+      XYZ0=[0,0,0],
+      XYZ=[0,0,0],
+/      
 \end{verbatim}
 
-where ID is the name of the object which may be referenced in subsequent \&GEOM lines, VERTS is a list of vertex coordinates and FACES is a list of vertex indices.  Each vertex location is a triplet of physical coordinates and each face is a triplet of vertex indices where the indices range from 1 to the number of vertices found on this \&GEOM line.
+\noindent where ID is the name of the object which may be referenced in subsequent \&GEOM lines, VERTS is a list of vertex coordinates and FACES is a list of vertex indices\footnote{Parameters within [] indicate default values}.  Each vertex location is a triplet of physical coordinates.  Each triangular face is defined by a triplet of vertex indices where the indices range from 1 to the number of vertices found on this \&GEOM line. The parameter SCALE may be used to change the size of the object. AZIM and ELEV parameters may be used to rotate the object about an origin defined by XYZ0 and the parameter XYZ may be used to translate the object.
 
-Keywords also exist that allow one to create objects in terms of previously defined objects and to rotate and translate objects.  An example is given by
+One may also create objects in terms of previously defined objects.  An example is given by
 
 \begin{verbatim}
-&GEOM ID=... GEOM_IDS='geom1','geom2',..., XYZ0=, XYZ=, AZ=, ELEV= /
-\end{verbatim}
+&GEOM ID='group 1'
 
-where GEOM\_IDS is a list of previously defined geometries, XYZ0 defines an origin about which the object may be rotated as specified with AZ (azmuthal angle) and ELEV (elevation angle) keywords. The parameter, XYZ specifies a translation amount.
+      XYZ=[0,0,0], 
+      AZIM=[0],
+      ELEV=[0],
 
+      GEOM_IDS(1)='chair',  DSCALE(1)=..., DAZIM(1)=..., DELEV(1)... DXYZ(1)=...,
+      GEOM_IDS(2)='couch',  DSCALE(2)=..., DAZIM(2)=..., DELEV(2)... DXYZ(2)=...,
+/      
+\end{verbatim}      
+
+\noindent where GEOM\_IDS is a list of previously defined geometries.   One may scale, rotate and translate objects as they are placed in a group using DSCALE, DAZIM, DELEV and DXYZ.  As with a primitive object, a group may be scaled, rotated and translated using XYZ, AZIM and ELEV keywords.
 The keyword, COMPONENT\_ONLY, if .TRUE., indicates that the geometry only occurs in other geometry definitions and is not itself a part of the FDS model.
-
 
 \vspace{\baselineskip}
 
@@ -47,12 +65,19 @@ The keyword, COMPONENT\_ONLY, if .TRUE., indicates that the geometry only occurs
 \multicolumn{5}{|c|}{{\ct GEOM} (Unstructured Geometry Parameters)} \\
 \hline \hline
 \endhead
-{\ct AZ}           & array of Reals                & Section~\ref{info:GEOM}            &  deg      &    0.0                   \\ \hline
+{\ct AZIM}         & array of Reals                & Section~\ref{info:GEOM}            &  deg      &    0.0                   \\ \hline
 {\ct COMPONENT\_ONLY}     & LOGICAL                & Section~\ref{info:GEOM}            &           &  {\ct .FALSE.}           \\ \hline
+{\ct ELEV}         & array of Reals                & Section~\ref{info:GEOM}            &  deg      &    0.0                   \\ \hline
+{\ct DAZIM}        & array of Reals                & Section~\ref{info:GEOM}            &  deg      &    0.0                   \\ \hline
+{\ct DELEV}        & array of Reals                & Section~\ref{info:GEOM}            &  deg      &    0.0                   \\ \hline
+{\ct DSCALE}       & Real                          & Section~\ref{info:GEOM}            &           &   1.0                    \\ \hline
+{\ct DXYZ}         & array of Real Triplets        & Section~\ref{info:GEOM}            &   m       &   0.0                    \\ \hline
 {\ct ELEV}         & array of Reals                & Section~\ref{info:GEOM}            &  deg      &    0.0                   \\ \hline
 {\ct FACES}        & array of Integer Triplets     & Section~\ref{info:GEOM}            &           &    0                     \\ \hline
 {\ct GEOMS}        & array of Character            & Section~\ref{info:GEOM}            &           &   {\ct ''}               \\ \hline
 {\ct ID}           & Character                     & Section~\ref{info:GEOM}            &           &   {\ct 'geom'}           \\ \hline
+{\ct SCALE}        & Real                          & Section~\ref{info:GEOM}            &           &   1.0                    \\ \hline
+{\ct SCALE3}       & Real triplet                  & Section~\ref{info:GEOM}            &           &   1.0,1.0,1.0            \\ \hline
 {\ct SURF\_ID}     & Character                     & Section~\ref{info:GEOM}            &           &  {\ct 'INERT'}           \\ \hline
 {\ct VERTS}        & array of Real Triplets        & Section~\ref{info:GEOM}            &   m       &   0.0                    \\ \hline
 {\ct XYZ0}         & array of Real Triplets        & Section~\ref{info:GEOM}            &   m       &   0.0                    \\ \hline
