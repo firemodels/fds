@@ -8169,48 +8169,47 @@ Contains
     !
     Implicit None
 
-    Real ( kind = 8 ) a
-    Real ( kind = 8 ) abstol
-    Real ( kind = 8 ) b
-    Real ( kind = 8 ) c
-    Real ( kind = 8 ) d
-    Integer ext
-    Real ( kind = 8 ) fa
-    Real ( kind = 8 ) fb
-    Real ( kind = 8 ) fc
-    Real ( kind = 8 ) fd
+    Real ( kind = 8 ), Save :: a
+    Real ( kind = 8 ), Save :: abstol
+    Real ( kind = 8 ), Save :: b ! save?
+    Real ( kind = 8 ), Save :: c ! save?
+    Real ( kind = 8 ), Save :: d ! save?
+    Integer, Save :: ext
+    Real ( kind = 8 ), Save :: fa
+    Real ( kind = 8 ), Save :: fb
+    Real ( kind = 8 ), Save :: fc ! save?
+    Real ( kind = 8 ), Save :: fd ! save?
     Real ( kind = 8 ) fda
     Real ( kind = 8 ) fdb
-    Logical first
+    Logical, Save :: first
     !Timo: Real ( kind = 8 ) ftol
     Real ( kind = 8 ) fx
-    Integer i99999
-    Real ( kind = 8 ) m
-    Real ( kind = 8 ) mb
-    Real ( kind = 8 ) p
-    Real ( kind = 8 ) q
+    Integer, Save :: i99999
+    Real ( kind = 8 ), Save :: m ! save?
+    Real ( kind = 8 ), Save :: mb ! save?
+    Real ( kind = 8 ), Save :: p ! save?
+    Real ( kind = 8 ), Save :: q ! save?
     Logical qhi
     Logical qleft
     Logical qrzero
-    Real ( kind = 8 ) reltol
+    Real ( kind = 8 ), Save :: reltol
     Integer status
-    Real ( kind = 8 ) tol
-    Real ( kind = 8 ) w
+    Real ( kind = 8 ), Save :: tol ! save?
+    Real ( kind = 8 ), Save :: w ! save?
     Real ( kind = 8 ) x
     Real ( kind = 8 ) xhi
     Real ( kind = 8 ) xlo
-    Real ( kind = 8 ) :: xxhi = 0.0D+00
-    Real ( kind = 8 ) :: xxlo = 0.0D+00
+    Real ( kind = 8 ), Save :: xxhi = 0.0D+00
+    Real ( kind = 8 ), Save :: xxlo = 0.0D+00
     Real ( kind = 8 ) zabstl
     Real ( kind = 8 ) zreltl
     Real ( kind = 8 ) zxhi
     Real ( kind = 8 ) zxlo
 
- !  Save ! Gnu compiler says that this Save is redundant
+    ! Save ! Gnu compiler says that this Save is redundant
     !Timo: Statement function ftol converted to an internal function
     !Timo: ftol(zx) = 0.5D+00 * Max ( abstol, reltol * Abs ( zx ) )
 
-    ! write(0,*) 'Subroutine dzror'
     If ( 0 < status ) Then
        go to 280
     End If
@@ -8428,7 +8427,6 @@ Contains
     Return
 
     Entry dstzr ( zxlo, zxhi, zabstl, zreltl )
-    ! write(0,*) 'Entry dstzr'
     !*****************************************************************************80
     !
     !! DSTZR - SeT ZeRo finder - Reverse communication version

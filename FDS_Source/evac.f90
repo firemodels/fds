@@ -1,4 +1,23 @@
 !
+! Timo Korhonen, VTT Technical Research Centre of Finland
+! File modifications started: September 2013
+! Base FDS source code version: SVN 16844
+! This evac.f90 version is for the CROWBAR project
+!
+! Time stamp line, time [s]:
+!   0; t; n_agents; ID_camera;
+! Agent line, length [mm], veloccty [mm/s]:
+!   1;i_agent;x_i;y_i;z_i;h_i;vx_i;vy_i;vz_i;
+!
+! Now: Some preprocessor to change the CSV format so that csv column separators
+!      ("," or ";") are replaced by spaces and the decimal separator is full 
+!      stop "." (not a comma "," as, for example, in Finnish language.
+!
+! READ (LU_EVAC_CB,IOSTAT=IOS) CB_LINE_TYPE, CB_TIME, CB_N_AGENTS, CB_ID_CAMERA
+! READ (LU_EVAC_CB,*) CB_LINE_TYPE, CB_I_AGENT(I),&
+!       CB_XYZ_AGENT(I,1),CB_XYZ_AGENT(I,2),CB_XYZ_AGENT(I,3),CB_H_AGENT(I),&
+!       CB_V_AGENT(I,1),CB_V_AGENT(I,2),CB_V_AGENT(I,3)
+!
 ! This module contains the FDS+Evac human movement algorithm and
 ! related subprograms.  Some of the types are defined in the
 ! type.f90 module file.  The statistic (cumulative distributions) are in
@@ -64,7 +83,7 @@ MODULE EVAC
      REAL(EB) :: TIME_FALL_DOWN=0._EB, TARGET_X=0._EB, TARGET_Y=0._EB, DELTA_X=0._EB, DELTA_Y=0._EB
      REAL(EB) :: T_START_FED=0._EB
      CHARACTER(60) :: CLASS_NAME='null', ID='null', AVATAR_TYPE_NAME='null'
-     CHARACTER(30) :: GRID_NAME='null', PROP_ID='null'
+     CHARACTER(30) :: GRID_NAME='null', PROP_ID='null', CROWBAR_INPUT_FILE='null'
      LOGICAL :: EVACFILE=.FALSE., After_Tpre=.FALSE., No_Persons=.FALSE., SHOW=.TRUE.
      INTEGER :: N_INITIAL=0,SAMPLING=0, IPC=0, IMESH=0, AVATAR_TYPE_INDEX=0
      INTEGER :: I_PRE_DIST=0, I_DET_DIST=0, GUARD_MEN=0
@@ -154,7 +173,7 @@ MODULE EVAC
      INTEGER, DIMENSION(50) :: NTARGET=0
      REAL(EB) :: FED_CO_CO2_O2=0._EB, SOOT_DENS=0._EB, TMP_G=0._EB, RADFLUX=0._EB
      INTEGER :: II=0, JJ=0, KK=0, FED_MESH=0
-     LOGICAL :: CHECK_FLOW=.FALSE., COUNT_ONLY=.FALSE., SHOW=.TRUE., COUNT_DENSITY=.FALSE.
+     LOGICAL :: CHECK_FLOW=.FALSE., COUNT_ONLY=.FALSE., SHOW=.TRUE., COUNT_DENSITY=.FALSE., KNOWN_DOOR=.FALSE.
      LOGICAL :: LOCKED_WHEN_CLOSED=.FALSE., TARGET_WHEN_CLOSED=.FALSE., WAIT_AT_XYZ=.TRUE.
      INTEGER :: STR_INDX=0, STR_SUB_INDX=0
      CHARACTER(60) :: ID='null', PERS_ID='null', EVAC_ID='null'
@@ -179,7 +198,7 @@ MODULE EVAC
      INTEGER :: STR_INDX=0, STR_SUB_INDX=0
      REAL(EB) :: FED_CO_CO2_O2=0._EB, SOOT_DENS=0._EB, TMP_G=0._EB, RADFLUX=0._EB
      INTEGER :: II=0, JJ=0, KK=0, FED_MESH=0
-     LOGICAL :: CHECK_FLOW=.FALSE., EXIT_SIGN=.FALSE., KEEP_XY=.FALSE., SHOW=.TRUE.
+     LOGICAL :: CHECK_FLOW=.FALSE., EXIT_SIGN=.FALSE., KEEP_XY=.FALSE., SHOW=.TRUE., KNOWN_DOOR=.FALSE.
      LOGICAL :: LOCKED_WHEN_CLOSED=.FALSE., TARGET_WHEN_CLOSED=.FALSE., WAIT_AT_XYZ=.TRUE.
      CHARACTER(60) :: ID='null'
      CHARACTER(60) :: TO_NODE='null'
@@ -234,13 +253,13 @@ MODULE EVAC
   TYPE EVAC_ENTR_TYPE
      REAL(EB) :: T_first=0._EB, T_last=0._EB, Flow=0._EB, Width=0._EB, T_Start=0._EB, T_Stop=0._EB
      REAL(EB) :: X1=0._EB,X2=0._EB,Y1=0._EB,Y2=0._EB,Z1=0._EB,Z2=0._EB, Height=2.0_EB, Z=0.0_EB
-     INTEGER :: IOR=0, ICOUNT=0, IPC=0, IMESH=0, INODE=0, IMODE=-1, &
-          TO_INODE=0, N_Initial=0, Max_Humans=-1, &
-          STR_INDX=0, STR_SUB_INDX=0, AVATAR_TYPE_INDEX=0
+     REAL(EB) :: CB_TimeLastRead=0._EB, CB_TimeNextRead=0._EB, Area=0._EB
+     INTEGER :: IOR=0, ICOUNT=0, IPC=0, IMESH=0, INODE=0, IMODE=-1, TO_INODE=0, N_Initial=0, Max_Humans=-1, &
+          STR_INDX=0, STR_SUB_INDX=0, AVATAR_TYPE_INDEX=0, CB_N_Agents, CB_N_CrowbarAgents
      CHARACTER(60) :: CLASS_NAME='null', ID='null', AVATAR_TYPE_NAME='null'
      CHARACTER(60) :: TO_NODE='null'
-     CHARACTER(30) :: GRID_NAME='null', Max_Humans_Ramp, PROP_ID='null'
-     LOGICAL :: After_Tpre=.FALSE., No_Persons=.FALSE., SHOW=.TRUE.
+     CHARACTER(30) :: GRID_NAME='null', Max_Humans_Ramp, PROP_ID='null', CROWBAR_INPUT_FILE='null'
+     LOGICAL :: After_Tpre=.FALSE., No_Persons=.FALSE., SHOW=.TRUE., CROWBAR_READ_IN=.FALSE.
      INTEGER :: N_VENT_FFIELDS=0, Avatar_Color_Index=0, I_AGENT_TYPE=2
      INTEGER, POINTER, DIMENSION(:) :: I_DOOR_NODES =>NULL()
      INTEGER, POINTER, DIMENSION(:) :: I_VENT_FFIELDS =>NULL()
@@ -404,7 +423,7 @@ MODULE EVAC
        ALPHA_HAWK, DELTA_HAWK, EPSILON_HAWK, THETA_HAWK, A_HAWK_T_START, T_STOP_HD_GAME, &
        F_MIN_FALL, F_MAX_FALL, D_OVERLAP_FALL, TAU_FALL_DOWN, A_FAC_FALLEN, TIME_FALL_DOWN, PROB_FALL_DOWN, &
        T_ASET_HAWK, T_0_HAWK, T_ASET_TFAC_HAWK, MAX_INITIAL_OVERLAP, TIME_INIT_NERVOUSNESS, &
-       SMOKE_SPEED_ALPHA, SMOKE_SPEED_BETA
+       SMOKE_SPEED_ALPHA, SMOKE_SPEED_BETA, CROWBAR_DT_READ
   INTEGER, DIMENSION(3) :: DEAD_RGB
   !
   REAL(EB), DIMENSION(:), ALLOCATABLE :: Tsteps
@@ -488,11 +507,11 @@ CONTAINS
     LOGICAL :: CHECK_FLOW, COUNT_ONLY, AFTER_REACTION_TIME, EXIT_SIGN, KEEP_XY, USE_V0, SHOW, COUNT_DENSITY, GLOBAL
     LOGICAL :: OUTPUT_SPEED, OUTPUT_MOTIVE_FORCE, OUTPUT_FED, OUTPUT_OMEGA, OUTPUT_DENSITY, OUTPUT_ANGLE, &
          OUTPUT_CONTACT_FORCE, OUTPUT_TOTAL_FORCE, OUTPUT_MOTIVE_ANGLE, OUTPUT_ACCELERATION, OUTPUT_NERVOUSNESS, &
-         LOCKED_WHEN_CLOSED, TARGET_WHEN_CLOSED, WAIT_AT_XYZ, ELEVATOR, EVAC_FDS6
+         LOCKED_WHEN_CLOSED, TARGET_WHEN_CLOSED, WAIT_AT_XYZ, ELEVATOR, EVAC_FDS6, KNOWN_DOOR
     !Issue1547: Added new output keyword for the PERS namelist, here is the definition
     !Issue1547: of the variable (OUTPUT_NERVOUSNES) that is needed by Fortran.
     INTEGER, DIMENSION(3) :: RGB, AVATAR_RGB
-    CHARACTER(30) :: VENT_FFIELD, MESH_ID, EVAC_MESH, PROP_ID
+    CHARACTER(30) :: VENT_FFIELD, MESH_ID, EVAC_MESH, PROP_ID, CROWBAR_INPUT_FILE
     REAL(EB) :: FAC_V0_UP, FAC_V0_DOWN, FAC_V0_HORI, HEIGHT, HEIGHT0, ESC_SPEED, PROB
     CHARACTER(25) :: COLOR, DEAD_COLOR, AVATAR_COLOR
 
@@ -514,13 +533,14 @@ CONTAINS
     REAL(EB) :: EVAC_Z_OFFSET
     INTEGER :: N_CORES
     INTEGER :: N_AVATAR_TYPE
+    LOGICAL :: CROWBAR_DUMP
 
     NAMELIST /EXIT/ ID, XB, IOR, FLOW_FIELD_ID, CHECK_FLOW, &
          MAX_FLOW, FYI, COUNT_ONLY, WIDTH, XYZ, VENT_FFIELD, COUNT_DENSITY, &
-         MESH_ID, COLOR_INDEX, XYZ_SMOKE, EVAC_ID, PERS_ID, &
+         MESH_ID, COLOR_INDEX, XYZ_SMOKE, EVAC_ID, PERS_ID, KNOWN_DOOR, &
          TIME_OPEN, TIME_CLOSE, EVAC_MESH, RGB, COLOR, SHOW, HEIGHT, LOCKED_WHEN_CLOSED, TARGET_WHEN_CLOSED, WAIT_AT_XYZ
     NAMELIST /DOOR/ ID, XB, IOR, FLOW_FIELD_ID, CHECK_FLOW, &
-         MAX_FLOW, TO_NODE, FYI, WIDTH, XYZ, VENT_FFIELD, &
+         MAX_FLOW, TO_NODE, FYI, WIDTH, XYZ, VENT_FFIELD, KNOWN_DOOR, &
          EXIT_SIGN, MESH_ID, COLOR_INDEX, XYZ_SMOKE, KEEP_XY, &
          TIME_OPEN, TIME_CLOSE, EVAC_MESH, RGB, COLOR, SHOW, HEIGHT, LOCKED_WHEN_CLOSED, TARGET_WHEN_CLOSED, WAIT_AT_XYZ
     NAMELIST /ENTR/ ID, XB, IOR, FLOW_FIELD_ID, MAX_FLOW, &
@@ -528,7 +548,8 @@ CONTAINS
          TIME_STOP, AFTER_REACTION_TIME, &
          KNOWN_DOOR_NAMES, KNOWN_DOOR_PROBS, &
          MESH_ID, COLOR_INDEX, EVAC_MESH, RGB, COLOR, &
-         AVATAR_COLOR, AVATAR_RGB, MAX_HUMANS, MAX_HUMANS_RAMP, SHOW, HEIGHT, AGENT_TYPE, AVATAR_TYPE, PROP_ID
+         AVATAR_COLOR, AVATAR_RGB, MAX_HUMANS, MAX_HUMANS_RAMP, SHOW, HEIGHT, AGENT_TYPE, AVATAR_TYPE, PROP_ID, &
+         CROWBAR_INPUT_FILE
     NAMELIST /CORR/ ID, XB, IOR, FLOW_FIELD_ID, CHECK_FLOW, &
          MAX_FLOW, TO_NODE, FYI, WIDTH, WIDTH1, WIDTH2, &
          EFF_WIDTH, EFF_LENGTH, MAX_HUMANS_INSIDE, FAC_SPEED, &
@@ -545,7 +566,7 @@ CONTAINS
          AVATAR_COLOR, AVATAR_RGB, SHOW, PRE_EVAC_DIST, DET_EVAC_DIST, &
          PRE_MEAN,PRE_PARA,PRE_PARA2,PRE_LOW,PRE_HIGH, &
          DET_MEAN,DET_PARA,DET_PARA2,DET_LOW,DET_HIGH, AGENT_TYPE, AVATAR_TYPE, PROP_ID, TIME_FALL_DOWN, &
-         GUARD_MEN_IN, TARGET_X, TARGET_Y, DELTA_X, DELTA_Y, TIME_START_FED
+         GUARD_MEN_IN, TARGET_X, TARGET_Y, DELTA_X, DELTA_Y, TIME_START_FED, CROWBAR_INPUT_FILE
     NAMELIST /EVHO/ FYI, ID, XB, EVAC_ID, PERS_ID, MESH_ID, EVAC_MESH, RGB, COLOR, SHOW, TIME_FALL_DOWN
 
     NAMELIST /EVSS/ FYI, ID, XB, MESH_ID, HEIGHT, HEIGHT0, IOR, &
@@ -583,7 +604,8 @@ CONTAINS
          F_MIN_FALL, F_MAX_FALL, D_OVERLAP_FALL, TAU_FALL_DOWN, A_FAC_FALLEN, PROB_FALL_DOWN, &
          T_ASET_HAWK, T_0_HAWK, T_ASET_TFAC_HAWK, &
          MAXIMUM_V0_FACTOR, MAX_INITIAL_OVERLAP, TIME_INIT_NERVOUSNESS, &
-         SMOKE_SPEED_ALPHA, SMOKE_SPEED_BETA, SMOKE_KS_SPEED_FUNCTION, FED_ACTIVITY
+         SMOKE_SPEED_ALPHA, SMOKE_SPEED_BETA, SMOKE_KS_SPEED_FUNCTION, FED_ACTIVITY, &
+         CROWBAR_DT_READ
     !Issue1547: Added new output keyword for the PERS namelist, here the new output
     !Issue1547: keyword OUTPUT_NERVOUSNES is added to the namelist. Also the user input
     !Issue1547: for the social force MAXIMUM_V0_FACTOR is added to the namelist.
@@ -1466,6 +1488,8 @@ CONTAINS
       !Issue1547: acceleration time is not counted. Time units are seconds, so 60 seconds.
       TIME_INIT_NERVOUSNESS    = 60.0_EB
 
+      CROWBAR_DT_READ = 1.0_EB
+
       ! Linear speed vs smoke density function, default is the Lund fit.
       ! c(Ks) = ( 1 + (BETA*Ks)/ALPHA )  [0,1] interval, c(Ks=0)=1, c(Ks=inf)=0
       SMOKE_SPEED_ALPHA = 0.706_EB   ! Lund 2003, report 3126 (Frantzich & Nilsson)
@@ -2212,6 +2236,7 @@ CONTAINS
          LOCKED_WHEN_CLOSED = .FALSE.
          TARGET_WHEN_CLOSED = .FALSE.
          WAIT_AT_XYZ        = .FALSE.
+         KNOWN_DOOR         = .FALSE.
          !
          CALL CHECKREAD('EXIT',LU_INPUT,IOS)
          IF (IOS == 1) THEN
@@ -2410,6 +2435,7 @@ CONTAINS
          IF (COUNT_ONLY  ) SHOW = .FALSE.
          PEX%SHOW    = SHOW
          PEX%HEIGHT = HEIGHT
+         PEX%KNOWN_DOOR = KNOWN_DOOR
 
 
          SELECT CASE (IOR)
@@ -2653,6 +2679,7 @@ CONTAINS
          LOCKED_WHEN_CLOSED = .FALSE.
          TARGET_WHEN_CLOSED = .FALSE.
          WAIT_AT_XYZ        = .FALSE.
+         KNOWN_DOOR         = .FALSE.
          !
          CALL CHECKREAD('DOOR',LU_INPUT,IOS)
          IF (IOS == 1) THEN
@@ -2864,6 +2891,7 @@ CONTAINS
          PDX%WAIT_AT_XYZ        = WAIT_AT_XYZ
          PDX%ICORR_TO   = 0  ! The corr index if target is an elevator corr, otherwise zero
          PDX%IMODE      = -1 ! Door is open by default
+         PDX%KNOWN_DOOR = KNOWN_DOOR
          IF (TIME_OPEN > TIME_CLOSE) THEN
             PDX%IMODE = -1
          ELSE
@@ -3666,6 +3694,7 @@ CONTAINS
       TYPE (EVAC_STRS_TYPE), POINTER :: STRP=>NULL()
       TYPE (MESH_TYPE), POINTER :: M=>NULL()
       !
+      CROWBAR_DUMP = .FALSE.
       READ_ENTR_LOOP: DO N = 1, N_ENTRYS
          !
          ID            = 'null'
@@ -3695,6 +3724,7 @@ CONTAINS
          KNOWN_DOOR_NAMES         = 'null'
          KNOWN_DOOR_PROBS         = 1.0_EB
          AGENT_TYPE               = 2  ! Default is "known door" agent
+         CROWBAR_INPUT_FILE = 'null'
          !
          !
          CALL CHECKREAD('ENTR',LU_INPUT,IOS)
@@ -3714,20 +3744,33 @@ CONTAINS
          IF (QUANTITY == 'MAGENTA') AVATAR_COLOR = 'MAGENTA'
          IF (QUANTITY == 'CYAN')    AVATAR_COLOR = 'CYAN'   
          !
+         IF (MYID==MAX(0,EVAC_PROCESS)) THEN
+            IF(TRIM(CROWBAR_INPUT_FILE)/='null' .AND. &
+                 (MAX_FLOW > TWO_EPSILON_EB) .OR. TRIM(MAX_HUMANS_RAMP)/='null') THEN
+               WRITE(MESSAGE,'(A,A,A)') 'ERROR: ENTR line ',TRIM(ID),&
+                    ' problem with CROWBAR_INPUT_FILE and MAX_FLOW or MAX_HUMANS_RAMP'
+               CALL SHUTDOWN(MESSAGE)
+            END IF
+         END IF
+         !
          ! Colors, integer RGB(3), e.g., (23,255,0)
          IF (ANY(RGB < 0) .AND. COLOR=='null') COLOR = 'SKY BLUE'
          IF (COLOR /= 'null') CALL COLOR2RGB(RGB,COLOR)
          IF (ANY(AVATAR_RGB < 0) .AND. AVATAR_COLOR=='null') AVATAR_COLOR = 'ROYAL BLUE 4'
          IF (AVATAR_COLOR /= 'null') CALL COLOR2RGB(AVATAR_RGB,AVATAR_COLOR)
-         IF (COLOR_METHOD == 0 .AND. (MAX_FLOW >= TWO_EPSILON_EB .OR. Trim(MAX_HUMANS_RAMP)/='null')) THEN
+         IF (COLOR_METHOD == 0 .AND. (MAX_FLOW >= TWO_EPSILON_EB .OR. &
+              Trim(MAX_HUMANS_RAMP)/='null') .OR. TRIM(CROWBAR_INPUT_FILE)/='null') THEN
             i_avatar_color = i_avatar_color + 1
             EVAC_AVATAR_RGB(1:3,i_avatar_color) = AVATAR_RGB
          END IF
 
+         IF (TRIM(CROWBAR_INPUT_FILE)/='null') CROWBAR_DUMP=.TRUE.
+
          TMP_AVATAR_TYPE_INDEX(N) = 0       ! Defaults for entries that do not generate new agents
          TMP_AVATAR_TYPE_NAME(N)  = 'null'
          TMP_AVATAR_TYPE_PROP(N)  = TRIM(PROP_ID)
-         IF (MAX_FLOW >= TWO_EPSILON_EB .OR. TRIM(MAX_HUMANS_RAMP)/='null') THEN
+         IF (MAX_FLOW >= TWO_EPSILON_EB .OR. TRIM(MAX_HUMANS_RAMP)/='null' &
+              .OR. TRIM(CROWBAR_INPUT_FILE)/='null') THEN
             IF (TRIM(AVATAR_TYPE) == 'null' .OR. TRIM(AVATAR_TYPE) == 'Human') THEN
                TMP_AVATAR_TYPE_INDEX(N) = 1
                TMP_AVATAR_TYPE_NAME(N) = TRIM('Human')
@@ -3749,14 +3792,18 @@ CONTAINS
 
          IF (MYID /= MAX(0,EVAC_PROCESS)) CYCLE READ_ENTR_LOOP
 
+         ! Restart is not working for evacuation part, but fire+evacuation calculation could
+         ! be restarted to produce a good CHID_evac.fed file for later evacuation simulations.
+         ! So, the restarted fire+evacuation calculation does not have any agents in it.
          IF (RESTART) THEN
             MAX_HUMANS = 0
             MAX_FLOW   = 0.0_EB
             MAX_HUMANS_RAMP = 'null'
+            CROWBAR_INPUT_FILE = 'null'
          END IF
 
          IF (MAX_HUMANS < 0) MAX_HUMANS = HUGE(MAX_HUMANS)
-         IF (MAX_FLOW <= 0.0_EB) MAX_HUMANS = 0
+         IF (MAX_FLOW <= 0.0_EB .AND. TRIM(CROWBAR_INPUT_FILE)=='null') MAX_HUMANS = 0
          IF (Trim(MAX_HUMANS_RAMP)/='null') THEN
             CALL GET_RAMP_INDEX(Trim(MAX_HUMANS_RAMP),'TIME',NR)
             MAX_HUMANS = -NR
@@ -3777,7 +3824,8 @@ CONTAINS
                END IF
             END DO
          END IF
-         IF (COLOR_METHOD == 0 .AND. (MAX_FLOW >= TWO_EPSILON_EB .OR. Trim(MAX_HUMANS_RAMP)/='null')) &
+         IF (COLOR_METHOD == 0 .AND. (MAX_FLOW >= TWO_EPSILON_EB .OR. &
+              TRIM(MAX_HUMANS_RAMP)/='null' .OR. TRIM(CROWBAR_INPUT_FILE)/='null')) &
               PNX%Avatar_Color_Index = i_avatar_color
 
          IF (EVAC_MESH /= 'null') THEN
@@ -3819,6 +3867,8 @@ CONTAINS
          PNX%HEIGHT = HEIGHT
          PNX%SHOW   = SHOW
          PNX%I_AGENT_TYPE = AGENT_TYPE
+         PNX%CB_N_Agents = 0 ! Agents in the XB area
+         PNX%CB_N_CrowbarAgents = 0 ! Crowbar read in agents in the XB area
 
          ! Check that the entry is properly specified
 
@@ -3872,8 +3922,12 @@ CONTAINS
          nm = PNX%IMESH
          M => MESHES(PNX%IMESH)
 
-         IF (XB(1)/=XB(2) .AND. XB(3)/=XB(4)) THEN
+         IF (ABS(IOR)<3 .AND. XB(1)/=XB(2) .AND. XB(3)/=XB(4)) THEN
             WRITE(MESSAGE,'(A,A,A)') 'ERROR: ENTR ',TRIM(ID),' must be a plane'
+            CALL SHUTDOWN(MESSAGE)
+         ENDIF
+         IF (ABS(IOR)==3 .AND. ABS(XB(1)-XB(2))*ABS(XB(3)-XB(4)) < TWO_EPSILON_EB) THEN
+            WRITE(MESSAGE,'(A,A,A)') 'ERROR: ENTR ',TRIM(ID),' must have a positive area'
             CALL SHUTDOWN(MESSAGE)
          ENDIF
 
@@ -3893,47 +3947,58 @@ CONTAINS
          XB(5) = MAX(XB(5),M%ZS)
          XB(6) = MIN(XB(6),M%ZF)
 
-         I1 = NINT( GINV(XB(1)-M%XS,1,nm)*M%RDXI ) 
-         I2 = NINT( GINV(XB(2)-M%XS,1,nm)*M%RDXI )
-         J1 = NINT( GINV(XB(3)-M%YS,2,nm)*M%RDETA) 
-         J2 = NINT( GINV(XB(4)-M%YS,2,nm)*M%RDETA)
+         IF (ABS(IOR)<3) THEN
 
-         XB(1) = M%X(I1)
-         XB(2) = M%X(I2)
-         XB(3) = M%Y(J1)
-         XB(4) = M%Y(J2)
+            I1 = NINT( GINV(XB(1)-M%XS,1,nm)*M%RDXI ) 
+            I2 = NINT( GINV(XB(2)-M%XS,1,nm)*M%RDXI )
+            J1 = NINT( GINV(XB(3)-M%YS,2,nm)*M%RDETA) 
+            J2 = NINT( GINV(XB(4)-M%YS,2,nm)*M%RDETA)
 
-         IF ( ABS(XB(1)-PNX%X1)>1.E-4_EB .OR. ABS(XB(2)-PNX%X2)>1.E-4_EB .OR. &
-              ABS(XB(3)-PNX%Y1)>1.E-4_EB .OR. ABS(XB(4)-PNX%Y2)>1.E-4_EB ) THEN
-            WRITE(LU_ERR,fmt='(a,a,a,a)') ' WARNING: Entr ',TRIM(ID),' XB adjusted to mesh ',TRIM(MESH_NAME(nm))
-            WRITE(LU_ERR,fmt='(a,6f12.4)') ' Old XB:', PNX%X1,PNX%X2,PNX%Y1,PNX%Y2,PNX%Z1,PNX%Z2
-            WRITE(LU_ERR,fmt='(a,6f12.4)') ' New XB:', XB(1:6)
+            XB(1) = M%X(I1)
+            XB(2) = M%X(I2)
+            XB(3) = M%Y(J1)
+            XB(4) = M%Y(J2)
+            
+            IF ( ABS(XB(1)-PNX%X1)>1.E-4_EB .OR. ABS(XB(2)-PNX%X2)>1.E-4_EB .OR. &
+                 ABS(XB(3)-PNX%Y1)>1.E-4_EB .OR. ABS(XB(4)-PNX%Y2)>1.E-4_EB ) THEN
+               WRITE(LU_ERR,fmt='(a,a,a,a)') ' WARNING: Entr ',TRIM(ID),' XB adjusted to mesh ',TRIM(MESH_NAME(nm))
+               WRITE(LU_ERR,fmt='(a,6f12.4)') ' Old XB:', PNX%X1,PNX%X2,PNX%Y1,PNX%Y2,PNX%Z1,PNX%Z2
+               WRITE(LU_ERR,fmt='(a,6f12.4)') ' New XB:', XB(1:6)
+            END IF
+            II = (I1+I2)/2
+            JJ = (J1+J2)/2
+            SELECT CASE (IOR)
+            CASE (+1)
+               II = II + 1
+            CASE (+2)
+               JJ = JJ + 1
+            END SELECT
+            IF (M%SOLID(M%CELL_INDEX(II,JJ,1)) .AND. ABS(IOR)<3) THEN
+               WRITE(LU_ERR,fmt='(a,a,a)') ' WARNING: Entr ',TRIM(ID),' problem with XB, mid point facing solid'
+            END IF
+
+            ! Coordinates are lined up with the mesh.
+            PNX%X1 = XB(1)
+            PNX%X2 = XB(2)
+            PNX%Y1 = XB(3)
+            PNX%Y2 = XB(4)
+            PNX%Z1 = XB(5)
+            PNX%Z2 = XB(6)
          END IF
-
-         II = (I1+I2)/2
-         JJ = (J1+J2)/2
-         SELECT CASE (IOR)
-         CASE (+1)
-            II = II + 1
-         CASE (+2)
-            JJ = JJ + 1
-         END SELECT
-         IF (M%SOLID(M%CELL_INDEX(II,JJ,1))) THEN
-            WRITE(LU_ERR,fmt='(a,a,a)') ' WARNING: Entr ',TRIM(ID),' problem with XB, mid point facing solid'
-         END IF
-
-         ! Coordinates are lined up with the mesh.
-         PNX%X1 = XB(1)
-         PNX%X2 = XB(2)
-         PNX%Y1 = XB(3)
-         PNX%Y2 = XB(4)
-         PNX%Z1 = XB(5)
-         PNX%Z2 = XB(6)
          ! 
          PNX%IOR        = IOR
          PNX%ID         = ID
          PNX%CLASS_NAME = PERS_ID
          PNX%PROP_ID    = TRIM(PROP_ID)
+         PNX%CROWBAR_INPUT_FILE = TRIM(CROWBAR_INPUT_FILE)
+         PNX%CROWBAR_READ_IN = .FALSE.
+         
+         ! Be sure that the crowbar entry is checked at the first initialization time step
+!         PNX%CB_TimeLastRead = - EVAC_DT_FLOWFIELD*EVAC_TIME_ITERATIONS + T_BEGIN - 2.0_EB
+         PNX%CB_TimeNextRead = - EVAC_DT_FLOWFIELD*EVAC_TIME_ITERATIONS + T_BEGIN - 1.0_EB
+         PNX%CB_TimeLastRead = HUGE(PNX%CB_TimeLastRead)
+!         PNX%CB_TimeNextRead = HUGE(PNX%CB_TimeNextRead)
+         IF(TRIM(CROWBAR_INPUT_FILE)/='null') PNX%CROWBAR_READ_IN = .TRUE.
 
          ! PNX%Z is used to plot the door on the correct height in Smokeview.
          PNX%Z = 0.5_EB*(PNX%Z1+PNX%Z2) + 0.5_EB*PNX%Height - EVACUATION_Z_OFFSET(PNX%IMESH)
@@ -3960,11 +4025,12 @@ CONTAINS
             END IF
             PNX%ORIENTATION(2)=-REAL(SIGN(1,IOR),EB)
          CASE (3)
-            IF ( (XB(4)-XB(3)) <= 0.0_EB .OR. (XB(2)-XB(1)) <= 0.0_EB) THEN
+            IF ( (XB(4)-XB(3)) <= TWO_EPSILON_EB .OR. (XB(2)-XB(1)) <= TWO_EPSILON_EB) THEN
                WRITE(MESSAGE,'(A,A,A)') 'ERROR: ENTR',TRIM(ID),' IOR=3 but not 3-dim object'
                CALL SHUTDOWN(MESSAGE)
             END IF
             PNX%ORIENTATION(3)=-REAL(SIGN(1,IOR),EB)
+            PNX%AREA = ABS(XB(4)-XB(3))*ABS(XB(2)-XB(1))  ! XB area used for Crowbar project
          CASE (0)
             IF ( (XB(4)-XB(3)) <= 0.0_EB .OR. (XB(2)-XB(1)) <= 0.0_EB) THEN
                WRITE(MESSAGE,'(A,A,A)') 'ERROR: ENTR',TRIM(ID),' no IOR but not 3-dim object'
@@ -4047,6 +4113,7 @@ CONTAINS
          END IF
          ! 
       END DO READ_ENTR_LOOP
+
 28    REWIND(LU_INPUT)
 
     END SUBROUTINE READ_ENTRIES
@@ -4109,6 +4176,7 @@ CONTAINS
          KNOWN_DOOR_PROBS         = 1.0_EB
          AGENT_TYPE               = 2  ! Default is "known door" agent
          PROP_ID                  = 'null'
+         CROWBAR_INPUT_FILE = 'null'
          !
          CALL CHECKREAD('EVAC',LU_INPUT,IOS)
          IF (IOS == 1) THEN
@@ -4119,6 +4187,11 @@ CONTAINS
          ! Old input used QUANTITY, next lines are needed for that
          IF (MYID==MAX(0,EVAC_PROCESS) .AND. QUANTITY /= 'null') WRITE (LU_ERR,'(A,A)') &
               ' WARNING: keyword QUANTITY is replaced by AVATAR_COLOR at EVAC line ',TRIM(ID)
+         IF (MYID==MAX(0,EVAC_PROCESS) .AND. TRIM(CROWBAR_INPUT_FILE)/='null' .AND. NUMBER_INITIAL_PERSONS < 1) THEN
+            WRITE(MESSAGE,'(A,A,A)') 'ERROR: EVAC line ',TRIM(ID),&
+                 ' problem with CROWBAR_INPUT_FILE and NUMBER_INITIAL_PERSONS'
+            CALL SHUTDOWN(MESSAGE)
+         END IF
          IF (QUANTITY == 'BLACK')   AVATAR_COLOR = 'BLACK'  
          IF (QUANTITY == 'YELLOW')  AVATAR_COLOR = 'YELLOW' 
          IF (QUANTITY == 'BLUE')    AVATAR_COLOR = 'BLUE'   
@@ -4137,9 +4210,12 @@ CONTAINS
             EVAC_AVATAR_RGB(1:3,I_AVATAR_COLOR) = AVATAR_RGB
          END IF
 
+         ! Restart is not working for evacuation part, but fire+evacuation calculation could
+         ! be restarted to produce a good CHID_evac.fed file for later evacuation simulations.
+         ! So, the restarted fire+evacuation calculation does not have any agents in it.
          IF (RESTART) THEN
             NUMBER_INITIAL_PERSONS = 0
-            MAX_FLOW = 0.0_EB
+            CROWBAR_INPUT_FILE = 'null'
          END IF
 
          TMP_AVATAR_TYPE_PROP(N+N_ENTRYS) = TRIM(PROP_ID)
@@ -4298,6 +4374,7 @@ CONTAINS
          HPT%GUARD_MEN   = GUARD_MEN_IN
          HPT%TARGET_X    = TARGET_X
          HPT%TARGET_Y    = TARGET_Y
+         HPT%CROWBAR_INPUT_FILE = TRIM(CROWBAR_INPUT_FILE)
          IF (DELTA_X>0.0_EB .AND. DELTA_Y>0.0_EB) THEN
             HPT%DELTA_X = DELTA_X ; HPT%DELTA_Y = DELTA_Y
          ELSE
@@ -4389,6 +4466,12 @@ CONTAINS
       END DO READ_EVAC_LOOP
 25    REWIND(LU_INPUT)
 
+
+      IF (CROWBAR_DUMP) THEN
+         ! Dump also the read in positions
+         N_AVATAR_TYPE = N_AVATAR_TYPE + 1
+      END IF
+      
       N_EVAC = MAX(1,N_AVATAR_TYPE)
       ALLOCATE(EVAC_CLASS_NAME(N_EVAC),STAT=IZERO)
       CALL ChkMemErr('READ_EVAC','EVAC_CLASS_NAME',IZERO)
@@ -4405,9 +4488,16 @@ CONTAINS
             IF (TRIM(TMP_AVATAR_TYPE_PROP(N)) /= 'null') EVAC_CLASS_PROP(I) = TRIM(TMP_AVATAR_TYPE_PROP(N))
          END IF
       END DO
+      
       DO N = 1, N_EVAC
          EVAC_CLASS_RGB(1:3,N) = (/ 39, 64,139/)  ! ROYAL BLUE 4
       END DO
+      IF (CROWBAR_DUMP) THEN
+         ! Dump also the read in positions
+         EVAC_CLASS_NAME(N_EVAC) = TRIM('Crowbar')
+         EVAC_CLASS_PROP(N_EVAC) = TRIM('Crowbar_props')
+         EVAC_CLASS_RGB(1:3,N_EVAC) = (/ 0, 0, 0/)  ! Crowbar is BLACK
+      END IF
 
     END SUBROUTINE READ_EVAC_LINES
 
@@ -5133,6 +5223,7 @@ CONTAINS
     FN_EVACFED = TRIM(CHID)//'_evac.fed'
     LU_EVACOUT = GET_FILE_NUMBER()
     FN_EVACOUT = TRIM(CHID)//'_evac.out'
+    LU_EVAC_CB = GET_FILE_NUMBER()
 
     L_fed_read = BTEST(I_EVAC,3)
     L_fed_save = BTEST(I_EVAC,1)
@@ -5867,17 +5958,21 @@ CONTAINS
     ! Local variables
     REAL :: RN_REAL
     REAL(EB) RN, simoDX, simoDY, TNOW
-    REAL(EB) VOL1, VOL2, X1, X2, Y1, Y2, Z1, Z2, &
-         dist, d_max, G_mean, G_sd, G_high, G_low, x1_old, y1_old
+    REAL(EB) VOL1, VOL2, X1, X2, Y1, Y2, Z1, Z2, dist, d_max, G_mean, G_sd, G_high, G_low, &
+         x1_old, y1_old, CB_TIME, ANGLE, EVEL
     INTEGER i,j,k,ii,jj,kk,ipc, izero, n_tmp, ie, nom, I_OBST, NM_SEE
     INTEGER i11, i22, group_size
-    LOGICAL pp_see_group, is_solid, HPT_ORDERED
-    INTEGER jjj, iii, i44
+    LOGICAL pp_see_group, is_solid, HPT_ORDERED, CROWBAR_READ_IN
+    INTEGER jjj, iii, i44, CB_LINE_TYPE, CB_N_AGENTS, CB_ID_CAMERA
+    INTEGER(4) IOS
     REAL(EB) x11, y11, group_x_sum, group_y_sum, group_x_center, group_y_center, dens_fac
     INTEGER :: i_endless_loop, istat, I_DX, J_DY
     REAL(EB), DIMENSION(6) :: y_tmp, x_tmp, r_tmp
     REAL(EB), DIMENSION(4) :: d_xy
     LOGICAL, DIMENSION(4) :: FoundWall_xy
+    INTEGER, DIMENSION(:), ALLOCATABLE :: CB_I_AGENT
+    REAL(EB), DIMENSION(:), ALLOCATABLE :: CB_H_AGENT
+    REAL(EB), DIMENSION(:,:), ALLOCATABLE :: CB_XYZ_AGENT,CB_V_AGENT
     ! 
     TYPE (MESH_TYPE), POINTER :: M =>NULL()
     TYPE (EVAC_SSTAND_TYPE),POINTER :: ESS=>NULL()
@@ -6023,6 +6118,65 @@ CONTAINS
           VOL1 = (X2 - X1) * (Y2 - Y1) * (Z2 - Z1)
        END IF
        
+       !CROWBAR project: read in positions and velocities of the agents
+       IF (TRIM(HPT%CROWBAR_INPUT_FILE)/=TRIM('null')) THEN
+          CROWBAR_READ_IN = .TRUE. ! Read the initial position and vels from a file
+       ELSE
+          CROWBAR_READ_IN = .FALSE.
+       END IF
+       IF (CROWBAR_READ_IN) THEN
+          HPT%GN_MIN = 1; HPT%GN_MAX = 1 ! 
+          IOS=0
+          CB_TIME=0.0_EB
+          CB_ID_CAMERA=0
+          OPEN (LU_EVAC_CB,file=TRIM(HPT%CROWBAR_INPUT_FILE),form='formatted', status='old')
+          READ (LU_EVAC_CB,*) CB_LINE_TYPE, CB_TIME, CB_N_AGENTS, CB_ID_CAMERA
+          IF (CB_LINE_TYPE/=0 .OR. CB_N_AGENTS<0) THEN
+             WRITE(MESSAGE,'(A)') 'ERROR: Initialize Evacuation:: CROWBAR INPUT FILE READ ERROR 1'
+             CLOSE (LU_EVAC_CB)
+             CALL SHUTDOWN(MESSAGE)
+          END IF
+          WRITE(LU_EVACOUT,'(A,A)') 'EVAC: Crowbar input file is: ',TRIM(HPT%CROWBAR_INPUT_FILE)
+          WRITE(LU_EVACOUT,'(I2,F8.2,I6,I16)') CB_LINE_TYPE, CB_TIME, CB_N_AGENTS, CB_ID_CAMERA
+          IF (CB_N_AGENTS>HPT%N_INITIAL) THEN
+             WRITE(MESSAGE,'(A)') 'ERROR: Initialize Evacuation:: CROWBAR N_AGENTS'
+             CLOSE (LU_EVAC_CB)
+             CALL SHUTDOWN(MESSAGE)
+          END IF
+          HPT%N_INITIAL = CB_N_AGENTS ! Use the number that is going to be read in
+          ALLOCATE(CB_I_AGENT(CB_N_AGENTS),STAT=IZERO)
+          CALL ChkMemErr('INIT_EVACUATION','CB_I_AGENT',IZERO)
+          ALLOCATE(CB_XYZ_AGENT(CB_N_AGENTS,3),STAT=IZERO)
+          CALL ChkMemErr('INIT_EVACUATION','CB_XYZ_AGENT',IZERO)
+          ALLOCATE(CB_V_AGENT(CB_N_AGENTS,3),STAT=IZERO)
+          CALL ChkMemErr('INIT_EVACUATION','CB_V_AGENT',IZERO)
+          ALLOCATE(CB_H_AGENT(CB_N_AGENTS),STAT=IZERO)
+          CALL ChkMemErr('INIT_EVACUATION','CB_H_AGENT',IZERO)
+          CB_I_AGENT = 0
+          CB_XYZ_AGENT = 0.0_EB; CB_H_AGENT = 0.0_EB; CB_V_AGENT = 0.0_EB
+          DO I = 1, CB_N_AGENTS
+             CB_LINE_TYPE = -1
+             READ (LU_EVAC_CB,*) CB_LINE_TYPE, CB_I_AGENT(I),&
+                  CB_XYZ_AGENT(I,1),CB_XYZ_AGENT(I,2),CB_XYZ_AGENT(I,3),CB_H_AGENT(I),&
+                  CB_V_AGENT(I,1),CB_V_AGENT(I,2),CB_V_AGENT(I,3)
+             IF (CB_LINE_TYPE/=1) THEN
+                WRITE(MESSAGE,'(A)') 'ERROR: Initialize Evacuation:: CROWBAR INPUT FILE READ ERROR 2'
+                CLOSE (LU_EVAC_CB)
+                CALL SHUTDOWN(MESSAGE)
+             END IF
+          END DO
+          CB_XYZ_AGENT = CB_XYZ_AGENT/1000.0_EB ! mm to m transformation
+          CB_H_AGENT   = CB_H_AGENT  /1000.0_EB ! mm to m transformation
+          CB_V_AGENT   = CB_V_AGENT  /1000.0_EB ! mm/s to m/s transformation
+          WRITE(LU_EVACOUT,'(A)') 'i_agent x_i     y_i     z_i   h_i     vx_i    vy_i    vz_i'
+          DO I = 1, CB_N_AGENTS
+             WRITE(LU_EVACOUT,'(I4,3F8.2,F6.2,3F8.2)')CB_I_AGENT(I),&
+                  CB_XYZ_AGENT(I,1),CB_XYZ_AGENT(I,2),CB_XYZ_AGENT(I,3),CB_H_AGENT(I),&
+                  CB_V_AGENT(I,1),CB_V_AGENT(I,2),CB_V_AGENT(I,3)
+          END DO
+          CLOSE(LU_EVAC_CB)
+       END IF
+
        IF (HPT%DELTA_X>0.0_EB .AND. HPT%DELTA_Y>0.0_EB) THEN
           HPT_ORDERED=.TRUE. ! Ordered input, delta_x, delta_y, XB-midpoint used
        ELSE
@@ -6133,6 +6287,17 @@ CONTAINS
                          I_DX = I_DX + SIGN(1,I_DX)
                       END IF
                       IF (I_DX >  FLOOR(0.5_EB*(X2-X1)/HPT%DELTA_X)) I_DX = -1
+                   ELSEIF (CROWBAR_READ_IN) THEN
+                      HR%X = CB_XYZ_AGENT(i11,1) ! x_i
+                      HR%Y = CB_XYZ_AGENT(i11,2) ! y_i
+                      ! These are overwritten at the initial phase (time < t_det+t_pre)
+                      ! so set these once again (evac-line should have t_pre=t_det=0.0
+                      ! for the initial agents that are read in. (Or some other specific time)
+                      HR%U_CB = CB_V_AGENT(i11,1) ! vx_i, x component of the velocity
+                      HR%V_CB = CB_V_AGENT(i11,2) ! vy_i, x component of the velocity
+                      HR%CROWBAR_READ_IN = .TRUE.
+                      x1_old = HR%X
+                      y1_old = HR%Y
                    ELSE
                       CALL RANDOM_NUMBER(RN_REAL)
                       RN = REAL(RN_REAL,EB)
@@ -6165,14 +6330,31 @@ CONTAINS
                    HR%X = MIN(X2,MAX(X1, x1_old + simoDX))
                    HR%Y = MIN(Y2,MAX(Y1, y1_old + simoDY))
                 END IF
-                HR%Z = Z1 + 0.5_EB*(Z2-Z1)
-                IF (HPT%Angle > -999.9_EB) THEN
+                HR%Z = Z1 + 0.5_EB*(Z2-Z1) ! The mid level of the evacuation mesh
+                IF (CROWBAR_READ_IN) THEN
+                   ! Set the body angle according to the velocity that is read in.
+                   ! If velocity close to zero => use random angle
+                   EVEL = SQRT(HR%U_CB**2 + HR%V_CB**2)
+                   IF (EVEL > 0.1_EB) THEN
+                      IF (HR%V_CB >= 0.0_EB) THEN
+                         ANGLE = ACOS(HR%U_CB/EVEL)
+                      ELSE
+                         ANGLE = 2.0_EB*PI - ACOS(HR%U_CB/EVEL)
+                      END IF
+                      HR%Angle = ANGLE
+                   ELSE
+                      CALL RANDOM_NUMBER(RN_REAL)
+                      RN = REAL(RN_REAL,EB)
+                      HR%Angle = 2.0_EB*Pi*rn
+                   END IF
+                ELSEIF (HPT%Angle > -999.9_EB) THEN
                    HR%Angle = HPT%Angle
                 ELSE
                    CALL RANDOM_NUMBER(RN_REAL)
                    RN = REAL(RN_REAL,EB)
                    HR%Angle = 2.0_EB*Pi*rn
                 END IF
+
                 DO WHILE (HR%Angle >= 2.0_EB*Pi)
                    HR%Angle = HR%Angle - 2.0_EB*Pi
                 END DO
@@ -6352,8 +6534,10 @@ CONTAINS
              HR%NODE_NAME   = TRIM(EVAC_Node_List(n_tmp)%ID)
              HR%I_FFIELD  = 0
              HR%IOR       = HUMAN_NO_TARGET
-             HR%U         = 0.0_EB
-             HR%V         = 0.0_EB
+             IF (.NOT.CROWBAR_READ_IN) THEN
+                HR%U         = 0.0_EB
+                HR%V         = 0.0_EB
+             END IF
              HR%W         = 0.0_EB
              HR%F_Y       = 0.0_EB
              HR%F_X       = 0.0_EB
@@ -6407,6 +6591,12 @@ CONTAINS
           !
        END DO INITIALIZATION_LOOP  ! i, # persons in a evac-line
        ! 
+       IF (CROWBAR_READ_IN) THEN
+          DEALLOCATE(CB_H_AGENT)
+          DEALLOCATE(CB_V_AGENT)
+          DEALLOCATE(CB_XYZ_AGENT)
+          DEALLOCATE(CB_I_AGENT)
+       END IF
     END DO EVAC_CLASS_LOOP ! ipc, number of evac-lines
 
     WRITE (LU_EVACOUT,fmt='(a,f8.2,a,i0,a,i0/)') ' EVAC: Time ', 0.0_EB,' mesh ',nm,' number of humans ',n_humans
@@ -7307,6 +7497,12 @@ CONTAINS
              EVAC_EXITS(I)%NTARGET(1:50) = 0
           END IF
        END DO
+       DO I = 1, N_ENTRYS
+          IF (EVAC_ENTRYS(I)%IMESH == NM .AND. EVAC_ENTRYS(I)%CROWBAR_READ_IN) THEN
+             EVAC_ENTRYS(I)%CB_N_Agents = 0
+             EVAC_ENTRYS(I)%CB_N_CrowbarAgents = 0
+          END IF
+       END DO
 
        ! ================================================
        ! Initialize group arrays for this main evac mesh.
@@ -7838,24 +8034,9 @@ CONTAINS
           A_WALL  = FAC_A_WALL*HR%A
           B_WALL  = FAC_B_WALL*HR%B
 
-          !Issue1547: Nervousness related parameter is taken from the agent's person type.
-          !Issue1547: Later just the MAX_V0_FAC can be used inside this EVAC_MOVE_LOOP.
-          HR_Speed = HR%SPEED
-          MAX_V0_FAC = EVAC_PERSON_CLASSES(HR%IPC)%MAXIMUM_V0_FACTOR
-          IF (MAX_V0_FAC>0.0_EB .AND. T > TPRE) THEN
-             !Issue1547: Nervousness related parameter is taken from the agent's person type.
-             !Issue1547: Later just the MAX_V0_FAC can be used inside this EVAC_FORCE_LOOP.
-             !Issue1547: Nervousness related calculation: average speed is saved as HR%Speed_ave= vi_ave/vi_0
-             !Issue1547: HR%Speed_ave is almost the nervousness parameter (1 - vi_ave/vi_0)
-             Eta_Nervous = MIN(MAX(1.0_EB -  HR%Speed_ave, 0.0_EB),1.0_EB) ! To be sure that 0 <= Eta <= 1
-             Speed_Nervous = (1.0_EB-Eta_Nervous)*HR%Speed + Eta_Nervous*MAX_V0_FAC
-             HR_Speed = Speed_Nervous
-          END IF
-
           GAME    = NOISEME
           GATH    = NOISETH
           GACM    = NOISECM
-          EVEL = SQRT(HR%U**2 + HR%V**2)
 
           L_FALLEN_DOWN = .FALSE.
           IF (HR%T_FallenDown < T) THEN
@@ -7911,10 +8092,26 @@ CONTAINS
           ELSE
              TPRE = HR%TDET ! Member of a group
           END IF
+
+          !Issue1547: Nervousness related parameter is taken from the agent's person type.
+          !Issue1547: Later just the MAX_V0_FAC can be used inside this EVAC_MOVE_LOOP.
+          HR_Speed = HR%SPEED
+          MAX_V0_FAC = EVAC_PERSON_CLASSES(HR%IPC)%MAXIMUM_V0_FACTOR
+          IF (MAX_V0_FAC>0.0_EB .AND. T > TPRE) THEN
+             !Issue1547: Nervousness related parameter is taken from the agent's person type.
+             !Issue1547: Later just the MAX_V0_FAC can be used inside this EVAC_FORCE_LOOP.
+             !Issue1547: Nervousness related calculation: average speed is saved as HR%Speed_ave= vi_ave/vi_0
+             !Issue1547: HR%Speed_ave is almost the nervousness parameter (1 - vi_ave/vi_0)
+             Eta_Nervous = MIN(MAX(1.0_EB -  HR%Speed_ave, 0.0_EB),1.0_EB) ! To be sure that 0 <= Eta <= 1
+             Speed_Nervous = (1.0_EB-Eta_Nervous)*HR%Speed + Eta_Nervous*MAX_V0_FAC
+             HR_Speed = Speed_Nervous
+          END IF
+
           IF (T < T_BEGIN .OR. T < TPRE) THEN
              HR_TAU = MAX(CF_MIN_TAU, 0.1_EB*HR%TAU)
              HR_TAU_INER = MAX(CF_MIN_TAU_INER, 0.1_EB*HR%TAU_INER)
           END IF
+
           ! Counterflow: Increase motivation to go ahead
           IF (HR%COMMITMENT > 0.01_EB .AND. T > T_BEGIN) THEN
              HR_TAU      = MAX(CF_MIN_TAU, HR%COMMITMENT*CF_FAC_TAUS*HR_TAU + (1.0_EB-HR%COMMITMENT)*HR_TAU)
@@ -7957,7 +8154,7 @@ CONTAINS
              ! FED_DOSE = FED_LCO*FED_VCO2 + FED_LO
              IF (HR%IEL > 0) THEN  ! From an evac line
                 IF (T >= EVAC_EVACS(HR%IEL)%T_START_FED) THEN
-                   HR%INTDOSE = DTSP*HUMAN_GRID(II,JJ)%FED_CO_CO2_O2 + HR%INTDOSE
+                   HR%INTDOSE =DTSP*HUMAN_GRID(II,JJ)%FED_CO_CO2_O2 + HR%INTDOSE
                 END IF
              ELSE ! From an entr line
                 HR%INTDOSE = DTSP*HUMAN_GRID(II,JJ)%FED_CO_CO2_O2 + HR%INTDOSE
@@ -8039,8 +8236,10 @@ CONTAINS
           IF (TAU_CHANGE_V0 > 1.0E-12_EB) THEN
              ! Stairs mesh: next subroutine call is needed to set up the targets etc correctly,
              ! but UBAR,VBAR are not needed.
-             IF (NM_STRS_MESH) CALL FIND_PREFERRED_DIRECTION(I, N, T,T_BEGIN, L_DEAD, NM_STRS_MESH, &
-                  II, JJ, IIX, JJY, XI, YJ, ZK, UBAR, VBAR, HR_TAU, TPRE, NM, I_STRS_DOOR)
+             IF (NM_STRS_MESH .OR. HR%CROWBAR_UPDATE_V0 .OR. HR%CROWBAR_READ_IN) &
+                  CALL FIND_PREFERRED_DIRECTION(I, N, T,T_BEGIN, L_DEAD, NM_STRS_MESH, &
+                  II, JJ, IIX, JJY, XI, YJ, ZK, UBAR, VBAR, HR_TAU, TPRE, NM, I_STRS_DOOR, HR_SPEED)
+             ! Crowbar (read in camera data) needs tau and speed updates
              ! Collision avoidance (incl. counterflow), do not update v0 on every time step.
              UBAR = HR%UBAR; VBAR = HR%VBAR
           ELSE
@@ -8053,7 +8252,7 @@ CONTAINS
                 UBAR = UBAR/EVEL ; VBAR = VBAR/EVEL
              ELSE
                 CALL FIND_PREFERRED_DIRECTION(I, N, T, T_BEGIN, L_DEAD, NM_STRS_MESH, &
-                     II, JJ, IIX, JJY, XI, YJ, ZK, UBAR, VBAR, HR_TAU, TPRE, NM, I_STRS_DOOR)
+                     II, JJ, IIX, JJY, XI, YJ, ZK, UBAR, VBAR, HR_TAU, TPRE, NM, I_STRS_DOOR, HR_SPEED)
              END IF
           END IF
           ! ========================================================
@@ -8290,6 +8489,7 @@ CONTAINS
           Y1 = HR%Y + V_NEW*DTSP
           HR%U = U_NEW
           HR%V = V_NEW
+
           ! The new body angle, should be on the interval [0,2pi)
           A1 = HR%ANGLE + OMEGA_NEW*DTSP
           DO WHILE (A1 >= 2.0_EB*PI)
@@ -8395,6 +8595,16 @@ CONTAINS
           HR%Y = Y1
           HR%ANGLE = A1
           !
+          IF (HR%IEL < 0) THEN ! From an entry line
+             PNX => EVAC_ENTRYS(ABS(HR%IEL))
+             IF (PNX%CROWBAR_READ_IN .AND. PNX%IMESH == NM) THEN
+                IF (Is_XY_Within_Bounds(HR%X,HR%Y,PNX%X1,PNX%X2,PNX%Y1,PNX%Y2,0._EB,0._EB)) THEN
+                   PNX%CB_N_Agents = PNX%CB_N_Agents + 1
+                   IF (HR%CROWBAR_READ_IN) PNX%CB_N_CrowbarAgents = PNX%CB_N_CrowbarAgents + 1
+                END IF
+             END IF
+          END IF
+
        END DO EVAC_MOVE_LOOP
        ! ========================================================
        ! Move loop ends here
@@ -8414,11 +8624,10 @@ CONTAINS
        ! ========================================================
        ! Add persons from entrys (specified flow rates)
        ! ========================================================
-       IF (T > T_BEGIN ) THEN
-          DO I = 1, N_ENTRYS
-             CALL ENTRY_HUMAN(I,T,NM,ISTAT)
-          END DO
-       END IF
+       DO I = 1, N_ENTRYS
+          IF (T > T_BEGIN ) CALL ENTRY_HUMAN(I,T,NM,ISTAT)
+          CALL ENTRY_CROWBAR_HUMAN(I,T,NM,ISTAT)
+       END DO
 
        ! ========================================================
        ! Remove out-of-bounds persons (outside the grid)
@@ -8430,6 +8639,9 @@ CONTAINS
        ELSE
           DTSP_NEW = EVAC_DT_FLOWFIELD  ! Initialization phase
        END IF
+       DTSP_NEW = MAX(DTSP_NEW, EVAC_DT_MIN)
+       DTSP_NEW = MIN(DTSP_NEW, EVAC_DT_MAX)
+
        SPEED_MAX  = 0.0_EB
        TUSED(15,NM)=TUSED(15,NM)+SECOND()-TNOW15  ! CPU timing
 
@@ -8548,6 +8760,17 @@ CONTAINS
              TARGET_X = 0.5_EB*(XS+XF)
              TARGET_Y = 0.5_EB*(YS+YF)
           END IF
+          IF (MAX(0,HR%GROUP_ID)==0) THEN
+             TPRE = HR%TPRE + HR%TDET ! Lonely agent
+          ELSE
+             TPRE = HR%TDET ! Member of a group
+          END IF
+          IF (HR%CROWBAR_READ_IN .AND. T <= TPRE+0.01*EVAC_DT_MIN .AND. ((T+DTSP) > TPRE)) THEN
+             HR%U = HR%U_CB; HR%V = HR%V_CB
+             EVEL = MAX(0.01_EB,SQRT(HR%U_CB**2+HR%V_CB**2))
+             HR%UBAR = HR%U_CB/EVEL ; HR%VBAR = HR%V_CB/EVEL
+             UBAR = HR%UBAR ; VBAR = HR%VBAR
+          END IF
           J  =  MAX(0,HR%GROUP_ID)   ! Group index
           J1 = -MIN(0,HR%GROUP_ID)   ! Lonely agent index
           ! HR%Z is the real z-coordinate of the agent (inclines, stairs,etc),
@@ -8571,6 +8794,18 @@ CONTAINS
           V_TMP(3) = HR%V - SIN(HR%ANGLE)*HR%OMEGA*HR%D_SHOULDER ! LEFT
           HR_A = HR%A
           HR_B = HR%B
+          HR_KAPPA = HR%KAPPA 
+          HR_GAMMA = HR%GAMMA
+          IF (T <= T_BEGIN) THEN
+             HR_KAPPA = 0.0_EB ; HR_GAMMA = 0.0_EB
+          END IF
+          IF (HR%CROWBAR_READ_IN) THEN
+             ! Crowbar project: Use camera data to steer the agents
+             HR_A = 0.5_EB*HR_A
+             HR_B = 0.5_EB*HR_B
+             HR_KAPPA = HR%KAPPA 
+             HR_GAMMA = HR%GAMMA
+          END IF
 
           CONTACT_F  = 0.0_EB
           CONTACT_FX = 0.0_EB
@@ -8709,13 +8944,11 @@ CONTAINS
              VBAR = WSPB
              EVEL = SQRT(UBAR**2 + VBAR**2)
              UBAR = UBAR/EVEL ; VBAR = VBAR/EVEL
-             !write(lu_err,*)'*** force t, v0 ',T,UBAR,VBAR
           ELSE
              CALL FIND_PREFERRED_DIRECTION(I, N, T+DTSP_NEW, T_BEGIN, L_DEAD, NM_STRS_MESH, &
-                  IIN, JJN, IIX, JJY, XI, YJ, ZK, UBAR, VBAR, HR_TAU, TPRE, NM, I_STRS_DOOR)
+                  IIN, JJN, IIX, JJY, XI, YJ, ZK, UBAR, VBAR, HR_TAU, TPRE, NM, I_STRS_DOOR, HR_SPEED)
           END IF
           EVEL = UBAR**2 + VBAR**2
-
 
           ! (UBAR,VBAR) is now the direction of the flow field of the evacuation mesh
           ! leading towards the chosen door (or the main evacuation field).  It has
@@ -9201,11 +9434,6 @@ CONTAINS
              ! Add contact force terms
              ! ========================================================
              ! No contact forces for fallen down agent due to other agents (wall contact forces are calculated)
-             HR_KAPPA = HR%KAPPA
-             HR_GAMMA = HR%GAMMA
-             IF (T <= T_BEGIN) THEN
-                HR_KAPPA = 0.0_EB ; HR_GAMMA = 0.0_EB
-             END IF
              IF ( (P2P_DIST <= (HR%RADIUS+HRE%RADIUS)) .AND. .NOT.L_FALLEN_DOWN) THEN
                 ! Calculate the velocities of the shoulder cirles
                 V_TMP(4) = HRE%V + SIN(HRE%ANGLE)*HRE%OMEGA*HRE%D_SHOULDER
@@ -9789,8 +10017,10 @@ CONTAINS
                    P2P_V = P2P_V + (HR%MASS/HR_TAU)*SPEED*(VBAR/EVEL)
                 END IF
              END IF
-             UBAR = 0.0_EB
-             VBAR = 0.0_EB
+             IF (.NOT. HR%CROWBAR_READ_IN) THEN
+                UBAR = 0.0_EB
+                VBAR = 0.0_EB
+             END IF
           END IF
 
           EVEL = SQRT(UBAR**2 + VBAR**2)
@@ -9860,7 +10090,6 @@ CONTAINS
              ! Slow rotation down if no direction available, i.e., target omega_0 is zero.
              OMEGA_NEW = OMEGA_NEW + 0.5_EB*(DTSP/HR_TAU_INER)*(-HR%OMEGA)
           END IF
-
           ! Check that velocities are not too large, i.e., less than 10 m/s for humans
           EVEL = SQRT(U_NEW**2 + V_NEW**2)
           IF ( EVEL > VMAX_TIMO ) THEN
@@ -10376,7 +10605,7 @@ CONTAINS
     END SUBROUTINE GUARD
 
     SUBROUTINE FIND_PREFERRED_DIRECTION(I, NOUT, T, T_BEGIN, L_DEAD, NM_STRS_MESH, &
-         II, JJ, IIX, JJY, XI, YJ, ZK, UBAR, VBAR, HR_TAU, TPRE, NM, I_STRS_DOOR)
+         II, JJ, IIX, JJY, XI, YJ, ZK, UBAR, VBAR, HR_TAU, TPRE, NM, I_STRS_DOOR, HR_SPEED)
       IMPLICIT NONE
       !
       ! Calculate the prefered walking direction
@@ -10406,13 +10635,14 @@ CONTAINS
       LOGICAL, INTENT(IN) :: L_DEAD, NM_STRS_MESH
       INTEGER, INTENT(OUT) :: I_STRS_DOOR
       REAL(EB), INTENT(INOUT) :: HR_TAU
-      REAL(EB), INTENT(OUT) :: UBAR, VBAR, TPRE
+      REAL(EB), INTENT(OUT) :: UBAR, VBAR, TPRE, HR_SPEED
       !
       ! Local variables
       INTEGER :: N,NM_NOW, STRS_INDX, DOOR_IOR, KKZ, J, I1, J1
       REAL(EB) :: X_TARGET, Y_TARGET, DOOR_WIDTH, DOOR_DIST, EVEL, X1, X2, Y1, Y2, D_TMP, X_XYZ, Y_XYZ, D_X, D_Y
+      REAL(EB) :: alpha, Dv0, Dv0_x, Dv0_y, D_DrV0, Dr_length, Dr_x, Dr_y
       LOGICAL :: NM_STRS_MESHS, STRAIGHT_LINE_TO_TARGET, Is_Known_Door_tmp, Is_XB_Visible, Is_XYZ_Visible, Is_InFront
-      LOGICAL :: V0_IS_SET_ZERO
+      LOGICAL :: V0_IS_SET_ZERO, CROWBAR_LOST_AGENT
       TYPE (MESH_TYPE), POINTER :: MFF=>NULL()
       TYPE (HUMAN_TYPE), POINTER :: HR=>NULL()
       TYPE (EVAC_STRS_TYPE), POINTER :: STRP=>NULL()
@@ -10488,6 +10718,8 @@ CONTAINS
                   ! J  =  MAX(0,HR%GROUP_ID)   ! Group index
                   ! J1 = -MIN(0,HR%GROUP_ID)   ! Lonely agent index
                   Is_Known_Door_tmp = .FALSE.
+                  IF (EVAC_DOORS(EVAC_NODE_LIST(INODE)%NODE_INDEX)%KNOWN_DOOR .AND. .NOT.HR%I_DoorAlgo==3) &
+                       Is_Known_Door_tmp = .TRUE.
                   IF ( HR%GROUP_ID /= 0 ) THEN
                      IF ( HR%GROUP_ID < 0 ) THEN
                         ! A lonely soul
@@ -10533,6 +10765,8 @@ CONTAINS
                   ! J  =  MAX(0,HR%GROUP_ID)   ! Group index
                   ! J1 = -MIN(0,HR%GROUP_ID)   ! Lonely agent index
                   Is_Known_Door_tmp = .FALSE.
+                  IF (EVAC_EXITS(EVAC_NODE_LIST(INODE)%NODE_INDEX)%KNOWN_DOOR .AND. .NOT.HR%I_DoorAlgo==3) &
+                       Is_Known_Door_tmp = .TRUE.
                   IF ( HR%GROUP_ID /= 0 ) THEN
                      IF ( HR%GROUP_ID < 0 ) THEN
                         ! A lonely soul
@@ -10702,6 +10936,77 @@ CONTAINS
       ELSE IF (NM_STRS_MESH) THEN ! If_Strs_Mesh2: In stairs but not straight line to target
          CALL STRS_U_AND_V(STRP,HR%STR_SUB_INDX,HR%X,HR%Y,HR%STRS_DIRECTION,UBAR,VBAR)
       ELSE ! If_Strs_Mesh2: Is not a Strs Mesh
+
+         IF (HR%CROWBAR_READ_IN .AND. HR%T_LastRead_CB < T-5.0_EB*CROWBAR_DT_READ) THEN 
+            HR%CROWBAR_READ_IN = .FALSE. ! No more camera information available for this agent
+         END IF
+         IF (HR%CROWBAR_READ_IN .AND. .NOT. HR%CROWBAR_UPDATE_V0) RETURN
+         IF (.NOT.HR%CROWBAR_READ_IN .AND. HR%CROWBAR_UPDATE_V0) THEN
+            ! Read in agents that have lately "disappered" from the camera data at or close to the entr XB boundary
+            ! Continue with the current UBAR,VBAR and use the Crowbar modified tau and speed
+            UBAR = HR%UBAR; VBAR = HR%VBAR
+            ! Update target velocity using camera information
+            EVEL = MAX(0.01_EB,SQRT(HR%U_CB**2+HR%V_CB**2))
+            HR_SPEED = MAX(0.05_EB*HR_SPEED,MIN(HR_SPEED,1.0_EB*EVEL))
+            ! Slow speed => tau should be scaled also (motive force strenght scales as v0/tau)
+            HR_TAU = MAX(0.1_EB,MIN(1.0_EB,HR_SPEED/HR%SPEED))*HR%TAU
+            IF (HR%T_LastRead_CB < T-15.0_EB*CROWBAR_DT_READ) HR%CROWBAR_UPDATE_V0 = .FALSE.
+            RETURN
+         END IF
+         ! IF (HR%CROWBAR_READ_IN .AND. HR%CROWBAR_UPDATE_V0 .AND. HR%T_LastRead_CB >= T-5.0_EB*CROWBAR_DT_READ) THEN
+         IF (HR%CROWBAR_READ_IN .AND. HR%CROWBAR_UPDATE_V0) THEN
+            ! Crowbar project: Use the read in camera information
+            IF (T >= TPRE) THEN
+               ! Update target velocity using camera information
+               EVEL = MAX(0.01_EB,SQRT(HR%U_CB**2+HR%V_CB**2))
+               HR_SPEED = MIN(HR_SPEED,1.0_EB*EVEL)
+               UBAR = HR%U_CB/EVEL ; VBAR = HR%V_CB/EVEL
+               ! Slow speed => tau should be scaled also (motive force strenght scales as v0/tau)
+               HR_TAU = MAX(0.1_EB,MIN(1.0_EB,HR_SPEED/HR%SPEED))*HR%TAU
+               ! Force strong motive force so that the agents follow the read in trajectories
+               HR_TAU = MAX(0.05_EB,0.25*HR_TAU)
+               ! X2_CB,Y2_CB: Agent's real (HR%X,HR%Y) postition at the time of last read in
+               Dr_x = (HR%X2_CB-HR%X_CB) ; Dr_y = (HR%Y2_CB-HR%Y_CB)
+               Dr_length = SQRT(Dr_x**2 + Dr_y**2)
+               IF (EVEL > 0.1_EB .AND. Dr_length > 0.01_EB) THEN
+                  ! Read in velocity is not too close to zero
+                  D_DrV0 = (Dr_x*UBAR + Dr_y*VBAR) ! distance along the v0 direction
+                  ! Agent should be slowed down to get it closer to camera position
+                  ! If more than 1.0 m => max slow down that is now half speed
+                  ! Agent should be accelerated to get it closer to camera position
+                  ! If more than 1.0 m => max acc that is now 1.8*speed
+                  ! y(x) = 1 - 2.0*x, where x is d_drv0
+                  HR_SPEED = HR_SPEED*MIN(1.8_EB,MAX(0.2_EB,1.0_EB-5.0_EB*D_DrV0))
+                  
+                  Dv0_x = D_DrV0*UBAR - Dr_x  ! Dv0 is a vector pointing normally towards the v0 direction
+                  Dv0_y = D_DrV0*VBAR - Dr_y
+                  Dv0 = SQRT(Dv0_x**2 + Dv0_y**2)
+                  IF (Dv0 > 0.01_EB) THEN
+                     Dv0_x = Dv0_x/Dv0 ; Dv0_y = Dv0_y/Dv0
+                  ELSE
+                     Dv0_x = 0.0_EB ; Dv0_y = 0.0_EB
+                  END IF
+                  alpha = Dv0/HR_SPEED ! normal distance in seconds
+                  alpha = alpha/(2.0_EB*CROWBAR_DT_READ) ! maximum change in direction, if more than dt_read time difference
+                  alpha = MIN(0.5_EB,alpha) ! no more than 45 deg change in the v0 direction
+                  UBAR = (1.0_EB-alpha)*UBAR + alpha*Dv0_x ; VBAR = (1.0_EB-alpha)*VBAR + alpha*Dv0_y
+                  EVEL = MAX(0.01_EB,SQRT(HR%U_CB**2+HR%V_CB**2))
+                  UBAR = UBAR/EVEL ; VBAR = VBAR/EVEL  ! Should be a unit vector
+               ELSEIF (EVEL <= 0.1_EB .AND. Dr_length > 1.0_EB*CROWBAR_DT_READ) THEN
+                  ! Agent in the camera is not moving much and xy_camera differs xy_i more than
+                  ! 1.0 m/s * dt_read metres then go towards the read in xy position.
+                  Dr_x = (HR%X_CB-HR%X2_CB) ; Dr_y = (HR%Y_CB-HR%Y2_CB) ! Points towards the read in xy
+                  Dr_length = SQRT(Dr_x**2 + Dr_y**2)
+                  UBAR = Dr_x/MAX(0.01_EB,Dr_length); VBAR = Dr_y/MAX(0.01_EB,Dr_length)
+                  HR_SPEED = HR_SPEED*MIN(1.8_EB,MAX(0.01_EB,1.0_EB-0.5_EB*Dr_length))
+               END IF
+            ELSE
+               ! Initialization phase, i.e., initial positions from the camera data
+               UBAR = 0.0_EB ; VBAR = 0.0_EB
+            END IF
+            RETURN
+         END IF
+
          If_BeeLine: IF (HR%I_Door_Mode >= 2 .AND. HR%I_TARGET /= 0) THEN
             ! Use the flow field by default
             N = ABS(HR%I_TARGET)
@@ -11142,24 +11447,39 @@ CONTAINS
       TYPE (HUMAN_TYPE), POINTER :: HP
       !
       ! Local variables
-      LOGICAL ISKNOWNDOOR, FINALTARGETFOUND
+      LOGICAL ISKNOWNDOOR, FINALTARGETFOUND, SOMEKNOWNDOORS
       INTEGER :: I_TARGET = 0, I, ID, FINAL_NODE, IG, IN, INODE, STR_SUB_INDX
       REAL(EB) :: Z_NODE, Z_FINAL, DZ_NODE, DZ_FINAL, Z_FINAL_UNKNOWN,DZ_TMP1, DZ_TMP2, DZ_NODE_ACTUAL
       REAL(EB) :: DIST_TO_DOOR, X_NODE, Y_NODE, DIST_TO_DOOR_TMP
       TYPE (EVAC_ENTR_TYPE), POINTER :: PNX =>NULL()
 
       FINALTARGETFOUND = .FALSE.
+      SOMEKNOWNDOORS = .FALSE.
       IG = ABS(HP%GROUP_ID)
 
       Z_FINAL_UNKNOWN = 0._EB
       DZ_NODE_ACTUAL = 0._EB
 
       DO I = 1, N_NODES
+         IF (EVAC_NODE_LIST(I)%NODE_TYPE=='Door') THEN
+            IF (EVAC_DOORS(EVAC_NODE_LIST(I)%NODE_INDEX)%KNOWN_DOOR) SOMEKNOWNDOORS=.TRUE.
+         END IF
+         IF (EVAC_NODE_LIST(I)%NODE_TYPE=='Exit') THEN
+            IF (EVAC_EXITS(EVAC_NODE_LIST(I)%NODE_INDEX)%KNOWN_DOOR) SOMEKNOWNDOORS=.TRUE.
+         END IF
+      END DO
+      DO I = 1, N_NODES
          ISKNOWNDOOR = .FALSE.
+         IF (EVAC_NODE_LIST(I)%NODE_TYPE=='Door') THEN
+            IF (EVAC_DOORS(EVAC_NODE_LIST(I)%NODE_INDEX)%KNOWN_DOOR) ISKNOWNDOOR=.TRUE.
+         END IF
+         IF (EVAC_NODE_LIST(I)%NODE_TYPE=='Exit') THEN
+            IF (EVAC_EXITS(EVAC_NODE_LIST(I)%NODE_INDEX)%KNOWN_DOOR) ISKNOWNDOOR=.TRUE.
+         END IF
          IF (IG == 0 ) THEN
             ! Human came from entry
             PNX => EVAC_ENTRYS(ABS(HR%IEL))
-            IF (PNX%N_VENT_FFIELDS == 0) THEN
+            IF (PNX%N_VENT_FFIELDS == 0 .AND. .NOT.SOMEKNOWNDOORS) THEN
                ISKNOWNDOOR = .TRUE.
             ELSE
                DO ID = 1, PNX%N_VENT_FFIELDS
@@ -11171,7 +11491,7 @@ CONTAINS
             ENDIF
          ELSE            
             ! Check the group know doors
-            IF (HUMAN_KNOWN_DOORS(IG)%N_NODES == 0) THEN
+            IF (HUMAN_KNOWN_DOORS(IG)%N_NODES == 0 .AND. .NOT.SOMEKNOWNDOORS) THEN
                ISKNOWNDOOR = .TRUE.
             ELSE
                IN = EVAC_NODE_LIST(I)%NODE_INDEX
@@ -12487,6 +12807,7 @@ CONTAINS
       !
       ! Local variables
       INTEGER :: IKILL, I
+      REAL(EB) :: X1, X2, Y1, Y2, DIST_CB
       !
       IKILL = 0
       DROP_LOOP: DO I=1,N_HUMANS
@@ -12500,7 +12821,49 @@ CONTAINS
          IKILL = IKILL + 1
       END DO DROP_LOOP
       N_HUMANS = N_HUMANS - IKILL
-      !
+
+!!$      IKILL = 0
+!!$      CROWBAR_DROP_LOOP: DO I=1,N_HUMANS
+!!$         HR=>HUMAN(I)
+!!$         IF (.NOT.HR%CROWBAR_READ_IN) CYCLE CROWBAR_DROP_LOOP
+!!$         IF (I > N_HUMANS-IKILL) EXIT CROWBAR_DROP_LOOP
+!!$         IF (HR%IEL>=0) CYCLE CROWBAR_DROP_LOOP ! not from an entry
+!!$         IF (HR%CROWBAR_READ_IN .AND. HR%T_LastRead_CB > T-1.5_EB*CROWBAR_DT_READ) CYCLE CROWBAR_DROP_LOOP
+!!$         ! IF (HR%CROWBAR_READ_IN .AND. HR%T_LastRead_CB > T-2.5_EB*CROWBAR_DT_READ) CYCLE CROWBAR_DROP_LOOP
+!!$         ! Now just those crowbar agents that have not lately been read in (updated)
+!!$
+!!$         ! Is the agent (x,y) outside or close to the ENTR bounds?
+!!$         DIST_CB = HUGE(DIST_CB)
+!!$         X1 = EVAC_ENTRYS(ABS(HR%IEL))%X1; X2 = EVAC_ENTRYS(ABS(HR%IEL))%X2; 
+!!$         Y1 = EVAC_ENTRYS(ABS(HR%IEL))%Y1; Y2 = EVAC_ENTRYS(ABS(HR%IEL))%Y2; 
+!!$         DIST_CB = MIN(DIST_CB,HR%X-X1) ! The -x face, how much inside of XB
+!!$         DIST_CB = MIN(DIST_CB,X2-HR%X) ! The +x face, how much inside of XB
+!!$         DIST_CB = MIN(DIST_CB,HR%Y-Y1) ! The -y face, how much inside of XB
+!!$         DIST_CB = MIN(DIST_CB,Y2-HR%Y) ! The +y face, how much inside of XB
+!!$         ! Agent speed = 1.0 m/s, dt=0.2s => more than 0.1 m out of XB => do not "remove"
+!!$         IF (DIST_CB < 0.5_EB*CROWBAR_DT_READ) THEN
+!!$            HR%CROWBAR_READ_IN = .FALSE.  ! Out of the camera area
+!!$            HR%CROWBAR_UPDATE_V0 = .TRUE. ! Use still the last camera information for speed for a while
+!!$            CYCLE CROWBAR_DROP_LOOP ! Is not in the XB area anymore
+!!$         END IF
+!!$
+!!$         ! Is the agent (x,y)_readin outside or close to the ENTR bounds?
+!!$         DIST_CB = HUGE(DIST_CB)
+!!$         X1 = EVAC_ENTRYS(ABS(HR%IEL))%X1; X2 = EVAC_ENTRYS(ABS(HR%IEL))%X2; 
+!!$         Y1 = EVAC_ENTRYS(ABS(HR%IEL))%Y1; Y2 = EVAC_ENTRYS(ABS(HR%IEL))%Y2; 
+!!$         DIST_CB = MIN(DIST_CB,HR%X_CB-X1) ! The -x face, how much inside of XB
+!!$         DIST_CB = MIN(DIST_CB,X2-HR%X_CB) ! The +x face, how much inside of XB
+!!$         DIST_CB = MIN(DIST_CB,HR%Y_CB-Y1) ! The -y face, how much inside of XB
+!!$         DIST_CB = MIN(DIST_CB,Y2-HR%Y_CB) ! The +y face, how much inside of XB
+!!$         ! Agent speed = 1.0 m/s, dt=0.2s => more than 0.1 m out of XB => do not remove
+!!$         IF (DIST_CB < 0.5_EB*CROWBAR_DT_READ) THEN
+!!$            HR%CROWBAR_READ_IN = .FALSE.  ! Out of the camera area
+!!$            HR%CROWBAR_UPDATE_V0 = .TRUE. ! Use still the last camera information for speed for a while
+!!$            CYCLE CROWBAR_DROP_LOOP ! Is not in the XB area anymore
+!!$         END IF
+!!$      END DO CROWBAR_DROP_LOOP
+!!$      N_HUMANS = N_HUMANS - IKILL
+
     END SUBROUTINE REMOVE_OUT_OF_GRIDS
     !
     SUBROUTINE ENTRY_HUMAN(I_entry, Tin, NM, istat)
@@ -12516,7 +12879,7 @@ CONTAINS
       ! Local variables
       REAL :: RN_REAL
       REAL(EB) RN, x1, x2, y1, y2, z1, z2, d_max, dist, xx, yy, zz, xx1, yy1
-      INTEGER  II, JJ, KK, ior, irnmax, irn, ie, NR
+      INTEGER  I,II, JJ, KK, ior, irnmax, irn, ie, NR
       REAL(EB), DIMENSION(6) ::y_tmp, x_tmp, r_tmp
 
       TYPE (EVAC_ENTR_TYPE), POINTER :: PNX =>NULL()
@@ -12526,6 +12889,7 @@ CONTAINS
       !
       istat = 1
       PNX => EVAC_ENTRYS(I_entry)
+      IF (PNX%CROWBAR_READ_IN) RETURN
       IF (PNX%IMESH /= NM ) RETURN
       IF (PNX%T_Start > Tin) RETURN
       IF (PNX%T_Stop < Tin) RETURN
@@ -12740,6 +13104,502 @@ CONTAINS
       END IF
       ! 
     END SUBROUTINE ENTRY_HUMAN
+
+    SUBROUTINE ENTRY_CROWBAR_HUMAN(I_entry, Tin, NM, istat)
+      IMPLICIT NONE
+      !
+      ! Insert humans into the domain if needed.
+      ! Crowbar project: use camera information
+      !
+      ! Now the camera file for the entry is reread every time.
+      ! The file information is not read in and saved for later use.
+      ! To minimize the file reads, also the next time stamp is read
+      ! and saved for later use. Also the last read time stamp is
+      ! saved, so one can figure out, when one should read once again.
+      ! I.e., It Tin >= next_time_stamp
+      ! Entry type variables: CB_TimeLastRead, CB_TimeNextRead
+      !
+      ! This routine is also called for times T < T_BEGIN, so the initialization
+      ! could be done.
+      !
+      ! Passed variables
+      REAL(EB), INTENT(IN) :: Tin  ! Current time in the internal evacuation clock
+      INTEGER,  INTENT(IN) :: I_entry, NM ! Index of the ENTR, Index of the mesh
+      INTEGER, INTENT(OUT) :: istat ! 0: Agents are generated, 1: No new agents
+      !
+      ! Local variables
+      REAL :: RN_REAL
+      REAL(EB) :: RN, x1, x2, y1, y2, z1, z2, d_max, dist, xx, yy, zz, xx1, yy1
+      REAL(EB) :: CB_TIME, ANGLE, EVEL, CB_TIME_OLD, CB_TIME_NOW
+      INTEGER :: I, J, II, JJ, KK, ior, irnmax, irn, ie, NR, CB_LINE_TYPE, CB_N_AGENTS, CB_ID_CAMERA, &
+           N_A_old, N_CBA_old, CB_N_AGENTS_PREV_DT
+      LOGICAL :: FIRST_PASS, TITLE_WROTED, SOLID_OBSERVATION, CROWBAR_READ_IN_TMP
+      REAL(EB), DIMENSION(6) :: y_tmp, x_tmp, r_tmp
+      INTEGER, DIMENSION(:), ALLOCATABLE :: CB_I_AGENT, CB_I_AGENT_PREV_DT
+      REAL(EB), DIMENSION(:), ALLOCATABLE :: CB_H_AGENT
+      REAL(EB), DIMENSION(:,:), ALLOCATABLE :: CB_XYZ_AGENT,CB_V_AGENT, CB_XYZ_AGENT_PREV_DT
+
+      TYPE (EVAC_ENTR_TYPE), POINTER :: PNX =>NULL()
+      TYPE (MESH_TYPE), POINTER :: MFF =>NULL()
+      TYPE (EVAC_PERS_TYPE), POINTER :: PCP =>NULL()
+      TYPE (HUMAN_TYPE), POINTER :: HR=>NULL(), HRE =>NULL()
+
+      PNX => EVAC_ENTRYS(I_entry)
+
+      IF (.NOT.PNX%CROWBAR_READ_IN) RETURN
+      IF (PNX%IMESH /= NM ) RETURN
+      IF (PNX%ICOUNT >= PNX%Max_Humans) RETURN ! This is not needed for Crowbar entries
+      IF (Tin < PNX%CB_TimeNextRead-TWO_EPSILON_EB) RETURN ! Check the time for Crowbar entries
+
+      MFF => MESHES(NM)
+      FIRST_PASS = .FALSE.
+      CB_TIME = 0.0_EB
+      CB_ID_CAMERA = 0
+
+      OPEN (LU_EVAC_CB,file=TRIM(PNX%CROWBAR_INPUT_FILE),form='formatted', status='old')
+      CB_N_AGENTS = 0
+      READ (LU_EVAC_CB,*) CB_LINE_TYPE, CB_TIME, CB_N_AGENTS, CB_ID_CAMERA
+      IF (CB_LINE_TYPE/=0 .OR. CB_N_AGENTS<0) THEN
+         WRITE(MESSAGE,'(A)') 'ERROR, Entry_Crowbar_Human: CROWBAR INPUT FILE READ ERROR 1'
+         CLOSE (LU_EVAC_CB)
+         CALL SHUTDOWN(MESSAGE)
+      END IF
+      IF (PNX%CB_TimeLastRead > Tin) THEN
+         ! This is the first call to this cb_entry
+         FIRST_PASS = .TRUE.
+         PNX%CB_TimeLastRead = Tin
+         WRITE(LU_EVACOUT,'(A,A)')   ' FDS+Evac: Crowbar input entry file is: ',TRIM(PNX%CROWBAR_INPUT_FILE)
+         WRITE(LU_EVACOUT,'(A,I16)') '                          camera ID is: ',CB_ID_CAMERA
+      END IF
+      CB_N_AGENTS_PREV_DT = CB_N_AGENTS
+
+      ! DO WHILE (PNX%CB_TimeLastRead >= CB_TIME-TWO_EPSILON_EB)
+      DO WHILE (PNX%CB_TimeLastRead >= CB_TIME+0.5_EB*CROWBAR_DT_READ)
+         ! Skip the times that are already read in (and used), but not the last read
+         DO I = 1, CB_N_AGENTS_PREV_DT
+            CB_LINE_TYPE = -1
+            READ (LU_EVAC_CB,*) CB_LINE_TYPE
+            IF (CB_LINE_TYPE/=1) THEN
+               WRITE(MESSAGE,'(A)') 'ERROR, Entry_Crowbar_Human: CROWBAR INPUT FILE READ ERROR 2'
+               CLOSE (LU_EVAC_CB)
+               CALL SHUTDOWN(MESSAGE)
+            END IF
+         END DO
+         CB_N_AGENTS_PREV_DT = 0
+         READ (LU_EVAC_CB,*) CB_LINE_TYPE, CB_TIME, CB_N_AGENTS_PREV_DT, CB_ID_CAMERA
+         IF (CB_LINE_TYPE/=0 .OR. CB_N_AGENTS_PREV_DT<0) THEN
+            WRITE(MESSAGE,'(A)') 'ERROR, Entry_Crowbar_Human: CROWBAR INPUT FILE READ ERROR 1'
+            CLOSE (LU_EVAC_CB)
+            CALL SHUTDOWN(MESSAGE)
+         END IF
+         CB_TIME_OLD = CB_TIME
+      END DO
+
+      IfFirstPass: IF (.NOT.FIRST_PASS) THEN
+         ! Read the previous time information for a camera
+         ALLOCATE(CB_I_AGENT_PREV_DT(CB_N_AGENTS_PREV_DT),STAT=IZERO)
+         CALL ChkMemErr('INIT_EVACUATION','CB_I_AGENT_PREV_DT',IZERO)
+         ALLOCATE(CB_XYZ_AGENT_PREV_DT(CB_N_AGENTS_PREV_DT,3),STAT=IZERO)
+         CALL ChkMemErr('INIT_EVACUATION','CB_XYZ_AGENT_PREV_DT',IZERO)
+         CB_I_AGENT_PREV_DT = 0
+         CB_XYZ_AGENT_PREV_DT = 0.0_EB
+         DO I = 1, CB_N_AGENTS_PREV_DT
+            CB_LINE_TYPE = -1
+            READ (LU_EVAC_CB,*) CB_LINE_TYPE, CB_I_AGENT_PREV_DT(I),&
+                 CB_XYZ_AGENT_PREV_DT(I,1),CB_XYZ_AGENT_PREV_DT(I,2),CB_XYZ_AGENT_PREV_DT(I,3)
+            IF (CB_LINE_TYPE/=1) THEN
+               WRITE(MESSAGE,'(A)') 'ERROR, Entry_Crowbar_Human: CROWBAR INPUT FILE READ ERROR 2A'
+               CLOSE (LU_EVAC_CB)
+               CALL SHUTDOWN(MESSAGE)
+            END IF
+         END DO
+         CB_XYZ_AGENT_PREV_DT = CB_XYZ_AGENT_PREV_DT/1000.0_EB ! mm to m transformation
+
+         CB_N_AGENTS = 0
+         READ (LU_EVAC_CB,*) CB_LINE_TYPE, CB_TIME, CB_N_AGENTS, CB_ID_CAMERA
+         IF (CB_LINE_TYPE/=0 .OR. CB_N_AGENTS<0) THEN
+            WRITE(MESSAGE,'(A)') 'ERROR, Entry_Crowbar_Human: CROWBAR INPUT FILE READ ERROR 1B'
+            CLOSE (LU_EVAC_CB)
+            CALL SHUTDOWN(MESSAGE)
+         END IF
+      END IF IfFirstPass
+      
+      ! Read the current time information for a camera
+      ALLOCATE(CB_I_AGENT(CB_N_AGENTS),STAT=IZERO)
+      CALL ChkMemErr('INIT_EVACUATION','CB_I_AGENT',IZERO)
+      ALLOCATE(CB_XYZ_AGENT(CB_N_AGENTS,3),STAT=IZERO)
+      CALL ChkMemErr('INIT_EVACUATION','CB_XYZ_AGENT',IZERO)
+      ALLOCATE(CB_V_AGENT(CB_N_AGENTS,3),STAT=IZERO)
+      CALL ChkMemErr('INIT_EVACUATION','CB_V_AGENT',IZERO)
+      ALLOCATE(CB_H_AGENT(CB_N_AGENTS),STAT=IZERO)
+      CALL ChkMemErr('INIT_EVACUATION','CB_H_AGENT',IZERO)
+      CB_I_AGENT = 0
+      CB_XYZ_AGENT = 0.0_EB; CB_H_AGENT = 0.0_EB; CB_V_AGENT = 0.0_EB
+      DO I = 1, CB_N_AGENTS
+         CB_LINE_TYPE = -1
+         READ (LU_EVAC_CB,*) CB_LINE_TYPE, CB_I_AGENT(I),&
+              CB_XYZ_AGENT(I,1),CB_XYZ_AGENT(I,2),CB_XYZ_AGENT(I,3),CB_H_AGENT(I),&
+              CB_V_AGENT(I,1),CB_V_AGENT(I,2),CB_V_AGENT(I,3)
+         IF (CB_LINE_TYPE/=1) THEN
+            WRITE(MESSAGE,'(A)') 'ERROR, Entry_Crowbar_Human: CROWBAR INPUT FILE READ ERROR 2'
+            CLOSE (LU_EVAC_CB)
+            CALL SHUTDOWN(MESSAGE)
+         END IF
+      END DO
+      CB_XYZ_AGENT = CB_XYZ_AGENT/1000.0_EB ! mm to m transformation
+      CB_H_AGENT   = CB_H_AGENT  /1000.0_EB ! mm to m transformation
+      CB_V_AGENT   = CB_V_AGENT  /1000.0_EB ! mm/s to m/s transformation
+      CB_V_AGENT   = MIN(CB_V_AGENT,5.0_EB) ! speed componets [-5 m/s, 5 m/s] interval
+      CB_V_AGENT   = MAX(CB_V_AGENT,-5.0_EB)
+
+      ! Check and read the next time stamp on the input file
+      PNX%CB_TimeNextRead = HUGE(PNX%CB_TimeNextRead) ! If the file ends, do not read anymore
+      PNX%CB_TimeLastRead = CB_TIME
+      CB_TIME_NOW = CB_TIME
+      READ (LU_EVAC_CB,*,END=100) CB_LINE_TYPE, CB_TIME
+      IF (CB_LINE_TYPE/=0) THEN
+         WRITE(MESSAGE,'(A)') 'ERROR, Entry_Crowbar_Human: CROWBAR INPUT FILE READ ERROR 3'
+         CLOSE (LU_EVAC_CB)
+         CALL SHUTDOWN(MESSAGE)
+      END IF
+      PNX%CB_TimeNextRead = CB_TIME ! Next time stamp in the camera file
+100   CONTINUE
+      CLOSE(LU_EVAC_CB)
+
+      ! The XB of the ENTR namelist:
+      X1  = PNX%X1
+      X2  = PNX%X2
+      Y1  = PNX%Y1
+      Y2  = PNX%Y2
+      Z1  = PNX%Z1
+      Z2  = PNX%Z2
+      ior = PNX%IOR
+
+      PCP => EVAC_PERSON_CLASSES(PNX%IPC)
+
+      TITLE_WROTED = .FALSE.
+      N_A_old   = PNX%CB_N_Agents  ! CB_N_(Crowbar)Agents is updated in the EVAC_MOVE_LOOP for this time step
+      N_CBA_old = PNX%CB_N_CrowbarAgents
+
+      CB_Agents: DO J = 1, CB_N_AGENTS
+         istat = 1 ! Default is "no space found", i.e., do not place this agent
+         SOLID_OBSERVATION = .TRUE.
+         IF (.NOT.FIRST_PASS) THEN
+            SOLID_OBSERVATION = .FALSE.
+            OldTimeAgents: DO I = 1, CB_N_AGENTS_PREV_DT
+               ! Check if the new agent ID in the camera is a solid observation, i.e.,
+               ! it exists at two consecutive time steps (the current and the previous one)
+               IF (CB_I_AGENT(J)==CB_I_AGENT_PREV_DT(I)) THEN
+                  SOLID_OBSERVATION = .TRUE.
+                  CB_V_AGENT(J,1) = (CB_XYZ_AGENT(J,1)-CB_XYZ_AGENT_PREV_DT(I,1)) / MAX(EVAC_DT_MIN,(CB_TIME_NOW-CB_TIME_OLD))
+                  CB_V_AGENT(J,2) = (CB_XYZ_AGENT(J,2)-CB_XYZ_AGENT_PREV_DT(I,2)) / MAX(EVAC_DT_MIN,(CB_TIME_NOW-CB_TIME_OLD))
+                  CB_V_AGENT(J,:)   = MIN(CB_V_AGENT(J,:),5.0_EB) ! speed componets [-5 m/s, 5 m/s] interval
+                  CB_V_AGENT(J,:)   = MAX(CB_V_AGENT(J,:),-5.0_EB)
+                  EXIT OldTimeAgents
+               END IF
+            END DO OldTimeAgents
+         END IF
+
+         P2PLoop2: DO I = 1, N_HUMANS
+            HRE=>HUMAN(I)
+            ! HR%IEL: Which camera, i.e, ENTR line, (iel<0 for entries, >0 for evac namelists)
+            IF (HRE%CROWBAR_READ_IN .AND. HRE%ID_CB==CB_I_AGENT(J) .AND. HRE%IEL==-I_entry) THEN
+               ! The current agent read in at this time step exists already for this camera.
+               ! Update the current location and velocity information: (x,y), v0
+               HRE%X_CB = CB_XYZ_AGENT(J,1)
+               HRE%Y_CB = CB_XYZ_AGENT(J,2)
+               HRE%X2_CB = HRE%X
+               HRE%Y2_CB = HRE%Y
+               HRE%U_CB = CB_V_AGENT(J,1)
+               HRE%V_CB = CB_V_AGENT(J,2)
+               HRE%CROWBAR_READ_IN   = .TRUE.
+               HRE%CROWBAR_UPDATE_V0 = .TRUE.
+               HRE%T_LastRead_CB = Tin
+               CYCLE CB_Agents ! The read in agent is already present in the calculation
+            END IF
+
+            ! Check the actual and the last read in positions, close to either one is enough
+            ! The last read in position should be a relatively recent one, dt is about 0.1 s
+            dist = SQRT((HRE%X-CB_XYZ_AGENT(J,1))**2 + (HRE%Y-CB_XYZ_AGENT(J,2))**2)
+            IF (HRE%T_LastRead_CB > T-MIN(1.0_EB,5.0_EB*CROWBAR_DT_READ)) THEN
+               ! Just for agents that are read in (camera information), not for ordinaty agents.
+               ! Ordinary agents have T_LastRead_CB < t_begin.
+               dist = MIN(dist,SQRT((HRE%X_CB-CB_XYZ_AGENT(J,1))**2 + (HRE%Y_CB-CB_XYZ_AGENT(J,2))**2))
+            END IF
+            ! If read at this or previous time step then this other agent is not considered for this "new"
+            ! read in agent position. I.e., this HRE agent has already its own read in information.
+            CROWBAR_READ_IN_TMP = .FALSE.
+            IF (HRE%CROWBAR_READ_IN .AND. HRE%T_LastRead_CB > T-1.8_EB*CROWBAR_DT_READ) CROWBAR_READ_IN_TMP = .TRUE.
+            IF (dist < 1.5_EB*HRE%Radius .AND. .NOT.CROWBAR_READ_IN_TMP) THEN
+               ! There is a "normal" agent close at the read in position => change this to a Crowbar agent.
+               write(lu_err,*)'*** Crowbar time,old ID, new ID ',Tin,HRE%ID_CB,CB_I_AGENT(J)
+               HRE%ID_CB = CB_I_AGENT(J)
+               HRE%X_CB  = CB_XYZ_AGENT(J,1)
+               HRE%Y_CB  = CB_XYZ_AGENT(J,2)
+               HRE%X2_CB = HRE%X
+               HRE%Y2_CB = HRE%Y
+               HRE%U_CB  = CB_V_AGENT(J,1)
+               HRE%V_CB  = CB_V_AGENT(J,2)
+               HRE%CROWBAR_READ_IN   = .TRUE.
+               HRE%CROWBAR_UPDATE_V0 = .TRUE.
+               HRE%T_LastRead_CB     = Tin
+               CYCLE CB_Agents ! The read in agent is allocated to an existing non-cb agent
+            END IF
+
+         END DO P2PLoop2
+         IF (.NOT.SOLID_OBSERVATION) CYCLE CB_Agents ! Not yet a solid observation
+
+         IF (N_HUMANS+1 > N_HUMANS_DIM) THEN
+            ! Re-allocation is not yet checked.
+            CALL SHUTDOWN('ERROR: Insert CB Humans: no re-allocation yet')
+            CALL RE_ALLOCATE_HUMANS(1,NM)
+            HUMAN=>MESHES(NM)%HUMAN
+         END IF
+         HR  => MESHES(NM)%HUMAN(N_HUMANS+1)
+         CALL CLASS_PROPERTIES(HR,PCP,-I_entry)
+         HR%Tpre = 0.0_EB   ! Start to move directly, ENTR-agents
+         HR%Tdet = T_BEGIN
+         HR%IPC  = PNX%IPC  ! Index of PERS namelist
+         HR%IEL  = -I_entry ! Evac lines > 0, Entr lines < 0
+         HR%GROUP_ID = 0
+         HR%I_Target = 0    ! Default, no target door yet
+         HR%I_Door_Mode = 0 ! Default, no target door yet
+         HR%I_DoorAlgo = PNX%I_AGENT_TYPE
+
+         ! Hawk-Dove game parameters (ongoing research/develepment work)
+         CALL RANDOM_NUMBER(RN_REAL)
+         RN = REAL(RN_REAL,EB)
+         HR%F_FallDown = F_MIN_FALL + RN*(F_MAX_FALL - F_MIN_FALL) 
+         HR%T_FallenDown = HUGE(HR%T_FallenDown)
+         HR%Angle_FallenDown = 0.0_EB
+         HR%SizeFac_FallenDown = 0.0_EB
+         HR%T_CheckFallDown = Tin
+
+         ! Agent positions and velocities are read from camera file
+         HR%X    = CB_XYZ_AGENT(J,1)
+         HR%Y    = CB_XYZ_AGENT(J,2)
+         HR%X_CB = CB_XYZ_AGENT(J,1)
+         HR%Y_CB = CB_XYZ_AGENT(J,2)
+         HR%X2_CB = HR%X
+         HR%Y2_CB = HR%Y
+         HR%U    = CB_V_AGENT(J,1)
+         HR%V    = CB_V_AGENT(J,2)
+         HR%U_CB = CB_V_AGENT(J,1)
+         HR%V_CB = CB_V_AGENT(J,2)
+         HR%ID_CB = CB_I_AGENT(J)
+         HR%CROWBAR_READ_IN = .TRUE.
+         HR%CROWBAR_UPDATE_V0 = .FALSE.
+         xx = CB_XYZ_AGENT(J,1)
+         yy = CB_XYZ_AGENT(J,2)
+
+         ! Set the body angle according to the velocity that is read in.
+         ! If velocity close to zero => use random angle
+         EVEL = SQRT(HR%U_CB**2 + HR%V_CB**2)
+         IF (EVEL > 0.1_EB) THEN
+            IF (HR%V_CB >= 0.0_EB) THEN
+               HR%ANGLE = ACOS(HR%U_CB/EVEL)
+            ELSE
+               HR%ANGLE = 2.0_EB*PI - ACOS(HR%U_CB/EVEL)
+            END IF
+         ELSE
+            CALL RANDOM_NUMBER(RN_REAL)
+            RN = REAL(RN_REAL,EB)
+            HR%Angle = 2.0_EB*Pi*rn
+         END IF
+
+         DO WHILE (HR%Angle >= 2.0_EB*Pi)
+            HR%Angle = HR%Angle - 2.0_EB*Pi
+         END DO
+         DO WHILE (HR%Angle < 0.0_EB)
+            HR%Angle = HR%Angle + 2.0_EB*Pi
+         END DO
+         !
+         IF (ABS(ior) == 1) irnmax = INT(PNX%Width*4.0_EB)
+         IF (ABS(ior) == 2) irnmax = INT(PNX%Width*4.0_EB)
+         IF (ABS(ior) == 3 .OR. ior == 0) irnmax = INT((x2-x1)*4.0_EB)*INT((y2-y1)*4.0_EB)
+         irnmax = MAX(irnmax,5)
+         !
+         irn = 0
+         CheckPPForce: DO WHILE (irn < irnmax)
+
+            zz  = 0.5_EB*(z1+z2)
+            II = FLOOR( CELLSI(FLOOR((xx-XS)*RDXINT)) + 1.0_EB )
+            JJ = FLOOR( CELLSJ(FLOOR((yy-YS)*RDYINT)) + 1.0_EB )
+            KK = 1
+
+            irn = irn + 1 ! Add counter of placement trials for this agent
+
+            I_OBST = OBST_INDEX_C(CELL_INDEX(II,JJ,KK))
+            IF (SOLID(CELL_INDEX(II,JJ,KK)) .AND. .NOT.OBSTRUCTION(I_OBST)%HIDDEN) CYCLE CheckPPForce
+            IF ( ABS(ior) == 2 ) THEN
+               xx1 = xx - HR%Radius - 1.0_EB*HR%B
+               II = FLOOR(CELLSI(FLOOR((xx1-XS)*RDXINT))+1.0_EB)
+               I_OBST = OBST_INDEX_C(CELL_INDEX(II,JJ,KK))
+               IF (SOLID(CELL_INDEX(II,JJ,KK)) .AND. .NOT.OBSTRUCTION(I_OBST)%HIDDEN) CYCLE CheckPPForce
+               xx1 = xx + HR%Radius + 1.0_EB*HR%B
+               II = FLOOR(CELLSI(FLOOR((xx1-XS)*RDXINT))+1.0_EB)
+               I_OBST = OBST_INDEX_C(CELL_INDEX(II,JJ,KK))
+               IF (SOLID(CELL_INDEX(II,JJ,KK)) .AND. .NOT.OBSTRUCTION(I_OBST)%HIDDEN) CYCLE CheckPPForce
+            END IF
+            IF ( ABS(ior) == 1 ) THEN
+               yy1 = yy - HR%Radius - 1.0_EB*HR%B
+               JJ = FLOOR(CELLSJ(FLOOR((yy1-YS)*RDYINT))+1.0_EB)
+               I_OBST = OBST_INDEX_C(CELL_INDEX(II,JJ,KK))
+               IF (SOLID(CELL_INDEX(II,JJ,KK)) .AND. .NOT.OBSTRUCTION(I_OBST)%HIDDEN) CYCLE CheckPPForce
+               yy1 = yy + HR%Radius + 1.0_EB*HR%B
+               JJ = FLOOR(CELLSJ(FLOOR((yy1-YS)*RDYINT))+1.0_EB)
+               I_OBST = OBST_INDEX_C(CELL_INDEX(II,JJ,KK))
+               IF (SOLID(CELL_INDEX(II,JJ,KK)) .AND. .NOT.OBSTRUCTION(I_OBST)%HIDDEN) CYCLE CheckPPForce
+            END IF
+            !
+            d_max = 1.0_EB*HR%B
+            r_tmp(1) = HR%r_shoulder ! right circle
+            r_tmp(2) = HR%r_torso     ! center circle
+            r_tmp(3) = HR%r_shoulder ! left circle
+            y_tmp(1) = yy - COS(HR%angle)*HR%d_shoulder ! right
+            x_tmp(1) = xx + SIN(HR%angle)*HR%d_shoulder
+            y_tmp(2) = yy ! torso
+            x_tmp(2) = xx
+            y_tmp(3) = yy + COS(HR%angle)*HR%d_shoulder ! left
+            x_tmp(3) = xx - SIN(HR%angle)*HR%d_shoulder
+            P2PLoop: DO ie = 1, n_humans
+               HRE=>HUMAN(IE)
+               ! HR%IEL: Which camera, i.e, ENTR line, (iel<0 for entries, >0 for evac namelists)
+!!$               IF (HRE%CROWBAR_READ_IN .AND. HRE%ID_CB==HR%ID_CB .AND. HRE%IEL==HR%IEL) THEN
+!!$                  ! The current agent read in at this time step exists already for this camera.
+!!$                  ! Update the current location and velocity information: (x,y), v0
+!!$                  HRE%U_CB = (CB_XYZ_AGENT(J,1)-HRE%X_CB)/MAX(EVAC_DT_MIN,Tin-HRE%T_LastRead_CB)
+!!$                  HRE%V_CB = (CB_XYZ_AGENT(J,2)-HRE%Y_CB)/MAX(EVAC_DT_MIN,Tin-HRE%T_LastRead_CB)
+!!$
+!!$                  HRE%X_CB = CB_XYZ_AGENT(J,1)
+!!$                  HRE%Y_CB = CB_XYZ_AGENT(J,2)
+!!$                  HRE%X2_CB = HRE%X
+!!$                  HRE%Y2_CB = HRE%Y
+!!$                  HRE%U_CB = CB_V_AGENT(J,1)
+!!$                  HRE%V_CB = CB_V_AGENT(J,2)
+!!$                  HRE%CROWBAR_UPDATE_V0 = .TRUE.
+!!$                  HRE%T_LastRead_CB = Tin
+!!$                  EXIT CheckPPForce
+!!$               END IF
+               r_tmp(4) = HRE%r_shoulder ! right circle
+               r_tmp(5) = HRE%r_torso     ! center circle
+               r_tmp(6) = HRE%r_shoulder ! left circle
+               y_tmp(4) = HRE%Y - COS(HRE%angle)*HRE%d_shoulder ! right circle
+               x_tmp(4) = HRE%X + SIN(HRE%angle)*HRE%d_shoulder
+               y_tmp(5) = HRE%Y ! center circle
+               x_tmp(5) = HRE%X
+               y_tmp(6) = HRE%Y + COS(HRE%angle)*HRE%d_shoulder ! left circle
+               x_tmp(6) = HRE%X - SIN(HRE%angle)*HRE%d_shoulder
+               DO iii = 1, 3
+                  DO jjj = 4, 6
+                     DIST = SQRT((x_tmp(jjj)-x_tmp(iii))**2 + (y_tmp(jjj)-y_tmp(iii))**2) - (r_tmp(jjj)+r_tmp(iii))
+                     IF (DIST < d_max) CYCLE CheckPPForce
+                  END DO
+               END DO
+            END DO P2PLoop
+            istat = 0
+            EXIT CheckPPForce
+         END DO CheckPPForce
+
+         IF (istat == 0 ) THEN ! An empty space for the agent is found
+            N_HUMANS = N_HUMANS + 1
+            PNX%T_last = Tin
+            PNX%ICOUNT = PNX%ICOUNT + 1
+            IF (PNX%T_first <= T_BEGIN) PNX%T_first = Tin
+            HR%X = xx
+            HR%Y = yy
+            HR%Z = zz
+            ! 
+            ILABEL_last = ILABEL_last + 1
+            HR%ILABEL = ILABEL_last
+            HR%SHOW = .TRUE.    
+            HR%COLOR_INDEX = 1
+            SELECT CASE (COLOR_METHOD)
+            CASE (-1)
+               HR%COLOR_INDEX = 1
+            CASE (0)
+               HR%COLOR_INDEX = PNX%Avatar_Color_Index
+            CASE (1,2)
+               HR%COLOR_INDEX = 1    ! lonely human
+            CASE (3)
+               HR%COLOR_INDEX = evac_person_classes(PNX%IPC)%Avatar_Color_Index
+            CASE (4)
+               HR%COLOR_INDEX = 1
+            CASE (5)
+               ! Correct color is put, where the flow fields are chosen.
+               HR%COLOR_INDEX = 1
+            CASE Default
+               WRITE(MESSAGE,'(A,I3,A)') 'ERROR: ENTRY_HUMAN COLOR METHOD',COLOR_METHOD, ' is not defined'
+               CALL SHUTDOWN(MESSAGE)
+            END SELECT
+            HR%FFIELD_NAME = TRIM(PNX%GRID_NAME)
+            HR%I_FFIELD    = 0
+            Mesh2Loop: DO i = 1, NMESHES
+               IF ( EVACUATION_ONLY(I) .AND. TRIM(HR%FFIELD_NAME) == TRIM(MESH_NAME(i)) ) THEN
+                  HR%I_FFIELD = i
+                  EXIT Mesh2Loop
+               END IF
+            END DO Mesh2Loop
+            IF ( HR%I_FFIELD == 0 ) THEN
+               WRITE(MESSAGE,'(A,A,A,A)') 'ERROR: ENTR line ',TRIM(PNX%ID), ' problem with flow field name, ', &
+                    TRIM(PNX%GRID_NAME),' not found'
+               CALL SHUTDOWN(MESSAGE)
+            END IF
+            HR%IMESH       = PNX%IMESH
+            HR%INODE       = PNX%TO_INODE
+            HR%NODE_NAME   = TRIM(PNX%TO_NODE)
+            HR%UBAR = HR%U_CB ; HR%VBAR= HR%V_CB
+            HR%U = 0.0_EB ; HR%V= 0.0_EB
+            HR%Tdet = MAX(EVAC_DT_MIN,Tin,PNX%CB_TimeLastRead)   ! Start to move directly, ENTR-agents
+            !HR%Tdet = MAX(EVAC_DT_MIN,PNX%CB_TimeLastRead)   ! Start to move directly, ENTR-agents
+            HR%Tpre = 0.0_EB
+            HR%T_LastRead_CB = PNX%CB_TimeLastRead
+            HR%CROWBAR_UPDATE_V0 = .TRUE.
+            HR%W          = 0.0_EB
+            HR%IOR        = 0  
+            HR%F_Y        = 0.0_EB
+            HR%F_X        = 0.0_EB
+            HR%v0_fac     = 1.0_EB
+            HR%SumForces  = 0.0_EB
+            HR%SumForces2 = 0.0_EB
+            HR%IntDose    = 0.0_EB
+            HR%Eta        = 0.0_EB
+            HR%Ksi        = 0.0_EB
+            HR%NewRnd     = .TRUE.
+            HR%STR_SUB_INDX = PNX%STR_SUB_INDX
+            HR%SKIP_WALL_FORCE_IOR = 0
+            IF (.NOT.TITLE_WROTED) WRITE(LU_EVACOUT,'(A)') &
+                 'i_agent x_i     y_i     z_i   h_i     vx_i    vy_i    vz_i  dia    v0   tau '
+            TITLE_WROTED = .TRUE.
+            WRITE(LU_EVACOUT,'(I4,3F8.2,F6.2,3F8.2,3F6.2)')CB_I_AGENT(J),&
+                 HR%X,HR%Y,HR%Z,CB_H_AGENT(J),&
+                 HR%U_CB,HR%V_CB,0.0_EB, 2.0_EB*HR%Radius, HR%Speed, HR%Tau
+         END IF
+      END DO CB_Agents
+
+
+      DEALLOCATE(CB_H_AGENT)
+      DEALLOCATE(CB_V_AGENT)
+      DEALLOCATE(CB_XYZ_AGENT)
+      DEALLOCATE(CB_I_AGENT)
+      IF (.NOT.FIRST_PASS) THEN
+         DEALLOCATE(CB_XYZ_AGENT_PREV_DT)
+         DEALLOCATE(CB_I_AGENT_PREV_DT)
+      END IF
+      ! 
+    END SUBROUTINE ENTRY_CROWBAR_HUMAN
+
+    LOGICAL FUNCTION Is_XY_Within_Bounds(P1x,P1y,P2x1,P2x2,P2y1,P2y2,xtol,ytol)
+      IMPLICIT NONE
+      !
+      REAL(EB), INTENT(IN) :: P1x,P1y
+      REAL(EB), INTENT(IN) :: P2x1,P2x2,P2y1,P2y2,xtol,ytol
+      !Returns .TRUE. if P2 is within the bounds of P1 with tolerances.
+      Is_XY_Within_Bounds = .FALSE.
+      IF (P1x >= P2x1-xtol .AND. P1x <= P2x2+xtol .AND. P1y >= P2y1-ytol .AND. P1y <= P2y2+ytol) &
+           Is_XY_Within_Bounds = .TRUE.
+      RETURN
+    END FUNCTION Is_XY_Within_Bounds
 
     SUBROUTINE Corner_Forces(x1, y1, x11, y11, p2p_dist_max, P2P_U, P2P_V, Social_F, &
          Contact_F, P2P_Torque, d_walls, x_tmp, y_tmp, r_tmp, u_tmp, v_tmp, istat, CONTACT_FX, CONTACT_FY)
@@ -13751,6 +14611,7 @@ CONTAINS
     HR%Speed_ave = 1.0_EB
     ! HR%T_Speed_ave = 60.0_EB
     HR%T_Speed_ave = TIME_INIT_NERVOUSNESS
+    HR%ID_CB = -1 ! Crowbar project, ids start at zero
     !
   END SUBROUTINE CLASS_PROPERTIES
 
@@ -13913,6 +14774,7 @@ CONTAINS
     !
     ! Local variables
     INTEGER :: NPP,NPLIM,i,izero,nn,n
+    LOGICAL :: CROWBAR_DUMP
     REAL(EB) :: TNOW, EVEL, angle_hr
     REAL(FB), ALLOCATABLE, DIMENSION(:) :: XP,YP,ZP
     REAL(FB), ALLOCATABLE, DIMENSION(:,:) :: QP, AP
@@ -13930,23 +14792,32 @@ CONTAINS
 
     HUMAN_CLASS_LOOP: DO N = 1, N_EVAC
        ! Count the number of humans to dump out
-       !
+
+       CROWBAR_DUMP = .FALSE.
+       IF (N==N_EVAC .AND. TRIM(EVAC_CLASS_NAME(N_EVAC))=='Crowbar') CROWBAR_DUMP = .TRUE.
+
        NPLIM = 0
-       DO I = 1, N_HUMANS
+       HUMLOOP: DO I = 1, N_HUMANS
           HR => HUMAN(I)
+          ! Crowbar: Dump the read in positions
+          IF (CROWBAR_DUMP .AND. N<N_EVAC) CYCLE HUMLOOP  ! The last avatar type is Crowbar
+          IF (CROWBAR_DUMP .AND. .NOT.HR%CROWBAR_READ_IN) CYCLE HUMLOOP ! Just the read in positions are dumped
           IF (HR%COLOR_INDEX < 1) HR%COLOR_INDEX = 1
           IF (HR%COLOR_INDEX > EVAC_AVATAR_NCOLOR) HR%COLOR_INDEX = EVAC_AVATAR_NCOLOR
-          ! IF (HR%SHOW .AND. N_EVAC == 1) NPLIM = NPLIM + 1
           IF (HR%SHOW) THEN
-             IF (HR%IEL > 0) THEN
-                IF (EVAC_EVACS(HR%IEL)%AVATAR_TYPE_INDEX == N) NPLIM = NPLIM + 1
+             IF (CROWBAR_DUMP) THEN
+                IF (HR%CROWBAR_READ_IN) NPLIM = NPLIM + 1
              ELSE
-                IF (EVAC_ENTRYS(ABS(HR%IEL))%AVATAR_TYPE_INDEX == N) NPLIM = NPLIM + 1
+                IF (HR%IEL > 0) THEN
+                   IF (EVAC_EVACS(HR%IEL)%AVATAR_TYPE_INDEX == N) NPLIM = NPLIM + 1
+                ELSE
+                   IF (EVAC_ENTRYS(ABS(HR%IEL))%AVATAR_TYPE_INDEX == N) NPLIM = NPLIM + 1
+                END IF
              END IF
           END IF
-       END DO
+       END DO HUMLOOP
        NPLIM = MIN(NPPS,NPLIM)
-       !
+
        ALLOCATE(TA(NPLIM),STAT=IZERO)
        CALL ChkMemErr('DUMP_EVAC','TA',IZERO)
        ALLOCATE(XP(NPLIM),STAT=IZERO)
@@ -13962,30 +14833,57 @@ CONTAINS
           ALLOCATE(QP(NPLIM,EVAC_N_QUANTITIES),STAT=IZERO)
           CALL ChkMemErr('DUMP_EVAC','QP',IZERO)
        END IF
-       !
+
        ! Load human coordinates into single precision array
-       !
+
        NPP = 0
        PLOOP: DO I = 1, N_HUMANS
           HR => HUMAN(I)
           IF (.NOT. HR%SHOW ) CYCLE PLOOP
-          ! IF (.NOT. (HR%SHOW .AND. EVAC_EVACS(HR%IEL)%AVATAR_TYPE_INDEX == N)) CYCLE PLOOP
-          IF (HR%IEL > 0) THEN
-             IF (.NOT.(EVAC_EVACS(HR%IEL)%AVATAR_TYPE_INDEX == N)) CYCLE PLOOP
-          ELSE
-             IF (.NOT.(EVAC_ENTRYS(ABS(HR%IEL))%AVATAR_TYPE_INDEX == N)) CYCLE PLOOP
+          IF (CROWBAR_DUMP .AND. N<N_EVAC) CYCLE PLOOP  ! The last avatar type is Crowbar
+          IF (CROWBAR_DUMP .AND. .NOT.HR%CROWBAR_READ_IN) CYCLE PLOOP ! Just the read in positions are dumped
+          IF (.NOT.CROWBAR_DUMP) THEN
+             IF (HR%IEL > 0) THEN
+                IF (.NOT.(EVAC_EVACS(HR%IEL)%AVATAR_TYPE_INDEX == N)) CYCLE PLOOP
+             ELSE
+                IF (.NOT.(EVAC_ENTRYS(ABS(HR%IEL))%AVATAR_TYPE_INDEX == N)) CYCLE PLOOP
+             END IF
           END IF
+
           NPP = NPP + 1
           TA(NPP) = HR%ILABEL
           XP(NPP) = REAL(HR%X,FB)
           YP(NPP) = REAL(HR%Y,FB)
+
           ZP(NPP) = MIN( MAX(REAL(HR%Z,FB), EVAC_Z_MIN), EVAC_Z_MAX)
 
           AP(NPP,1) = 180.0_FB*REAL(HR%Angle/Pi,FB)
-          AP(NPP,2) =   2.0_FB*REAL(HR%Radius,FB)
-          AP(NPP,3) =   2.0_FB*REAL(HR%r_torso,FB)
+          AP(NPP,2) =   2.0_FB*REAL(HR%Radius,FB) ! diameter
+          AP(NPP,3) =   2.0_FB*REAL(HR%r_torso,FB) ! diameter
           ! Height of a human scaled by radius, default male 1.80 m
           AP(NPP,4) =  1.80_FB*REAL(HR%Radius/0.27_EB,FB)
+
+          IF (CROWBAR_DUMP) THEN
+             EVEL = SQRT(HR%U_CB**2 + HR%V_CB**2)
+             IF (EVEL >= TWO_EPSILON_EB) THEN
+                IF (HR%V_CB >= 0.0_EB) THEN
+                   angle_hr = ACOS(HR%U_CB/EVEL)
+                ELSE
+                   angle_hr = 2.0_EB*Pi - ACOS(HR%U_CB/EVEL)
+                END IF
+                IF (angle_hr == 2.0_EB*Pi) angle_hr = 0.0_EB  ! agent HR angle is [0,2Pi)
+             ELSE
+                angle_hr = HR%ANGLE
+             END IF
+             XP(NPP) = REAL(HR%X_CB,FB)
+             YP(NPP) = REAL(HR%Y_CB,FB)
+             ! Shift the crowbar avatars a little bit upwards
+             ZP(NPP) = MIN(MAX(REAL(HR%Z+0.1_EB,FB), EVAC_Z_MIN), EVAC_Z_MAX)
+             AP(NPP,1) = REAL(180.0_EB*angle_hr/Pi,FB) ! read in velocity direction
+             AP(NPP,2) =   0.1_FB ! diameter
+             AP(NPP,3) =   0.05_FB ! torso diameter
+             AP(NPP,4) =  1.00_FB ! height
+          END IF
 
           DO NN=1,EVAC_N_QUANTITIES
              SELECT CASE(EVAC_QUANTITIES_INDEX(NN))
@@ -13998,6 +14896,7 @@ CONTAINS
                 END IF
              CASE(241)  ! FED_DOSE, Fractional Effective Dose
                 QP(NPP,NN) = REAL(HR%IntDose,FB)
+                IF (CROWBAR_DUMP .AND. HR%CROWBAR_READ_IN) QP(NPP,NN) = REAL(HR%ID_CB,FB)
              CASE(242)  ! SPEED, Human speed
                 QP(NPP,NN) = REAL(SQRT(HR%U**2 + HR%V**2),FB)
              CASE(243)  ! ANGULAR_SPEED, Human Angular Velocity
@@ -14918,6 +15817,7 @@ CONTAINS
           DO i = 1, N_DOORS
              IF ( EVAC_DOORS(i)%IMESH == nm_tmp) THEN
                 Is_Visible_Door(i) = .TRUE.
+                IF (EVAC_DOORS(i)%KNOWN_DOOR) Is_Known_Door(i) = .TRUE.
                 IF (imode == 0) CYCLE   ! Initialization call
                 DO i_tmp = 1, Human_Known_Doors(j1)%N_nodes
                    IF (EVAC_DOORS(i)%INODE == Human_Known_Doors(j1)%I_nodes(i_tmp)) Is_Known_Door(i) = .TRUE.
@@ -14927,6 +15827,7 @@ CONTAINS
           DO i = 1, N_EXITS
              IF ( EVAC_EXITS(i)%IMESH == nm_tmp .AND. .NOT. EVAC_EXITS(i)%COUNT_ONLY ) THEN
                 Is_Visible_Door(N_DOORS+i) = .TRUE.
+                IF (EVAC_EXITS(i)%KNOWN_DOOR) Is_Known_Door(N_DOORS+i) = .TRUE.
                 IF (imode == 0) CYCLE   ! Initialization call
                 DO i_tmp = 1, Human_Known_Doors(j1)%N_nodes
                    IF (EVAC_EXITS(i)%INODE == Human_Known_Doors(j1)%I_nodes(i_tmp)) Is_Known_Door(N_DOORS+i) = .TRUE.
@@ -14942,6 +15843,7 @@ CONTAINS
           DO i = 1, N_DOORS
              IF ( EVAC_DOORS(i)%IMESH == nm_tmp) THEN
                 Is_Visible_Door(i) = .TRUE.
+                IF (EVAC_DOORS(i)%KNOWN_DOOR) Is_Known_Door(i) = .TRUE.
                 IF (imode == 0) CYCLE   ! Initialization call
                 DO i_tmp = 1, Group_Known_Doors(j)%N_nodes
                    IF (EVAC_DOORS(i)%INODE == Group_Known_Doors(j)%I_nodes(i_tmp)) Is_Known_Door(i) = .TRUE.
@@ -14951,6 +15853,7 @@ CONTAINS
           DO i = 1, N_EXITS
              IF ( EVAC_EXITS(i)%IMESH == nm_tmp .AND. .NOT. EVAC_EXITS(i)%COUNT_ONLY ) THEN
                 Is_Visible_Door(N_DOORS+i) = .TRUE.
+                IF (EVAC_EXITS(i)%KNOWN_DOOR) Is_Known_Door(N_DOORS+i) = .TRUE.
                 IF (imode == 0) CYCLE   ! Initialization call
                 DO i_tmp = 1, Group_Known_Doors(j)%N_nodes
                    IF (EVAC_EXITS(i)%INODE == Group_Known_Doors(j)%I_nodes(i_tmp)) Is_Known_Door(N_DOORS+i) = .TRUE.
@@ -15081,6 +15984,13 @@ CONTAINS
              END IF
           END IF
        END DO Known_Doors_Loop2
+       DO i = 1, N_DOORS
+          IF (Is_Visible_Door(i) .AND. EVAC_DOORS(i)%KNOWN_DOOR) Is_Known_Door(i) = .TRUE.
+       END DO
+       DO i = 1, N_EXITS
+          IF (Is_Visible_Door(N_DOORS+i) .AND. EVAC_EXITS(i)%KNOWN_DOOR)&
+               Is_Known_Door(N_DOORS+i) = .TRUE.
+       END DO
     END IF   ! Is the agent from an entr or from an evac line
     ! Now Is_Visible_Door means that on the same floor.
     ! Now Is_Know_Door means: known + correct floor
