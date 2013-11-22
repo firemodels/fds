@@ -19,11 +19,11 @@
 #endif
 
 // comment the following line when building an unofficial release
-//#define pp_OFFICIAL_RELEASE
+#define pp_OFFICIAL_RELEASE
 
 #ifdef pp_release
 #ifdef pp_OFFICIAL_RELEASE
-#define PROGVERSION "6.1.4"
+#define PROGVERSION "6.1.5"
 #else
 #define PROGVERSION "Unofficial release"
 #endif
