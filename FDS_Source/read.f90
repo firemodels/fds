@@ -760,13 +760,18 @@ CONTAINS
              EMESH_EXITS(N)%I_DOORS_EMESH = J
              EMESH_NFIELDS(NN) = J
           END DO LOOP_EXITS_0
-          WRITE(LU_ERR,FMT='(A,I5,3A,I5,A)') ' EVAC: Emesh ',NN,' ',TRIM(EMESH_ID(NN)),' has ',&
-               EMESH_NFIELDS(NN),' door flow fields'
+          IF (EMESH_NFIELDS(NN)==0) THEN
+             WRITE(MESSAGE,'(A,I5,3A)') 'ERROR: EVAC: Emesh ',NN,' ',TRIM(EMESH_ID(NN)),' needs at least one DOOR/EXIT.'
+             CALL SHUTDOWN(MESSAGE)
+          ELSE
+             WRITE(LU_ERR,FMT='(A,I5,3A,I5,A)') ' EVAC: Emesh ',NN,' ',TRIM(EMESH_ID(NN)),' has ',&
+                  EMESH_NFIELDS(NN),' door flow fields'
+          END IF
        END IF
     END DO
 
     ! Next line should be executed only once during a FDS+Evac run
-    JMAX = MAXVAL(EMESH_NFIELDS)
+    JMAX = MAXVAL(EMESH_NFIELDS,1)
     EVAC_TIME_ITERATIONS = EVAC_TIME_ITERATIONS*JMAX
 
     LOOP_STAIRS: DO N = 1, N_STRS
