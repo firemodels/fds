@@ -40,27 +40,32 @@ This example case is based on Test 51 from the Lawrence-Livermore National Labor
 \begin{center}
 \begin{tabular}{|l|c|}
 \hline
-\multicolumn{2}{|c|}{User-Specified Input} \\ \hline
-                        &              \\
-\rb{Parameter}          &  \rb{Value}  \\ \hline \hline
-$\dot Q$ (kW)           &  200         \\ \hline
-$L$ (m)                 &  6.0         \\ \hline
-$W$ (m)                 &  4.0         \\ \hline
-$H$ (m)                 &  3.0         \\ \hline
-$H\sb{o}$ (m)           &  2.06        \\ \hline
-$W\sb{o}$ (m)           &  0.76        \\ \hline
-$k$ (\si{kW/(m.K)})     &  0.000463    \\ \hline
-$\rho$ (kg/m$^3$)       &  1607        \\ \hline
-$c$ (\si{kJ/(kg.K)})    &  1.0         \\ \hline
-$\delta$ (m)            &  0.10        \\ \hline
-$T_\infty$ ($^\circ$C)  &  33          \\ \hline
+\multicolumn{2}{|c|}{}                              \\
+\multicolumn{2}{|c|}{User-Specified Input}          \\
+\multicolumn{2}{|c|}{}                              \\ \hline
+                        &                           \\
+\rb{Parameter}          &  \rb{Value}               \\ \hline \hline
+$\dot Q$ (kW)           &  200                      \\ \hline
+$L$ (m)                 &  6.0                      \\ \hline
+$W$ (m)                 &  4.0                      \\ \hline
+$H$ (m)                 &  3.0                      \\ \hline
+$H\sb{o}$ (m)           &  2.06                     \\ \hline
+$W\sb{o}$ (m)           &  0.76                     \\ \hline
+$k$ (\si{kW/(m.K)})     &  0.000463                 \\ \hline
+$\rho$ (kg/m$^3$)       &  1607                     \\ \hline
+$c$ (\si{kJ/(kg.K)})    &  1.0                      \\ \hline
+$\delta$ (m)            &  0.10                     \\ \hline
+$T_\infty$ ($^\circ$C)  &  33                       \\ \hline
+\multicolumn{2}{c}{}                                \\
 \hline
-\multicolumn{2}{|c|}{Expected Output}     \\ \hline
-               &                          \\
-\rb{Time (s)}  &  \rb{Value ($^\circ$C)}  \\ \hline \hline
-60             &  111.45                  \\ \hline
-120            &  121.05                  \\ \hline
-180            &  127.21                  \\ \hline
+\multicolumn{2}{|c|}{}                              \\
+\multicolumn{2}{|c|}{Expected Output}               \\
+\multicolumn{2}{|c|}{}                              \\ \hline
+               &                                    \\
+\rb{Time (s)}  &  \rb{HGL Temperature ($^\circ$C)}  \\ \hline \hline
+60             &  111.45                            \\ \hline
+120            &  121.05                            \\ \hline
+180            &  127.21                            \\ \hline
 \end{tabular}
 \end{center}
 \end{table}
@@ -111,6 +116,10 @@ t\sb{p} = \left( \frac{\rho c}{k} \right) \left( \frac{\delta}{2} \right)^2
 \label{eq:FPA_tp}
 \ee
 
+
+\clearpage
+
+
 \subsection*{Verification}
 
 This example case is based on Test 1 from the Factory Mutual and Sandia National Laboratories (FM/SNL) series. This test involved a compartment with an open door, a propylene burner, and forced ventilation.
@@ -121,24 +130,35 @@ This example case is based on Test 1 from the Factory Mutual and Sandia National
 \begin{center}
 \begin{tabular}{|l|c|}
 \hline
-                            &              \\
-\rb{Parameter}              &  \rb{Value}  \\ \hline \hline
-$\dot Q$ (kW)               &  516         \\ \hline
-$\dot m$ (kg/s)             &  4.5         \\ \hline
-$c\sb{p}$ (\si{kJ/(kg.K)})  &  1.0         \\ \hline
-$L$ (m)                     &  18.3        \\ \hline
-$W$ (m)                     &  12.2        \\ \hline
-$H$ (m)                     &  6.1         \\ \hline
-$k$ (\si{kW/(m.K)})         &  0.00023     \\ \hline
-$\rho$ (kg/m$^3$)           &  1000        \\ \hline
-$c$ (\si{kJ/(kg.K)})        &  1.16        \\ \hline
-$\delta$ (m)                &  0.025       \\ \hline
-$T_\infty$ ($^\circ$C)      &  15          \\ \hline
+\multicolumn{2}{|c|}{}                              \\
+\multicolumn{2}{|c|}{User-Specified Input}          \\
+\multicolumn{2}{|c|}{}                              \\ \hline
+                            &                       \\
+\rb{Parameter}              &  \rb{Value}           \\ \hline \hline
+$\dot Q$ (kW)               &  516                  \\ \hline
+$\dot m$ (kg/s)             &  4.5                  \\ \hline
+$c\sb{p}$ (\si{kJ/(kg.K)})  &  1.0                  \\ \hline
+$L$ (m)                     &  18.3                 \\ \hline
+$W$ (m)                     &  12.2                 \\ \hline
+$H$ (m)                     &  6.1                  \\ \hline
+$k$ (\si{kW/(m.K)})         &  0.00023              \\ \hline
+$\rho$ (kg/m$^3$)           &  1000                 \\ \hline
+$c$ (\si{kJ/(kg.K)})        &  1.16                 \\ \hline
+$\delta$ (m)                &  0.025                \\ \hline
+$T_\infty$ ($^\circ$C)      &  15                   \\ \hline
+\multicolumn{2}{c}{}                                \\
+\hline
+\multicolumn{2}{|c|}{}                              \\
+\multicolumn{2}{|c|}{Expected Output}               \\ 
+\multicolumn{2}{|c|}{}                              \\ \hline
+               &                                    \\
+\rb{Time (s)}  &  \rb{HGL Temperature ($^\circ$C)}  \\ \hline \hline
+60             &  53.07                             \\ \hline
+120            &  58.13                             \\ \hline
+180            &  61.39                             \\ \hline
 \end{tabular}
 \end{center}
 \end{table}
-
-\noindent Expected result: At 60~s, the HGL temperature $T\sb{g}$ is 53.07~$^\circ$C; at 120~s, $T\sb{g}$ is 58.13~$^\circ$C; at 180~s, $T\sb{g}$ is 61.39~$^\circ$C.
 
 
 \clearpage
@@ -174,6 +194,10 @@ h\sb{k} = 0.4\ \mathrm{max} \left( \sqrt{\frac{k \rho c}{t}} , \frac{k}{\delta} 
 \ee
 where $k$ is the thermal conductivity of the interior lining~(\si{kW/(m.K)}), $\rho$ is the density of the interior lining~(\si{kg/m^3}), $c$ is the specific heat of the interior lining~(\si{kJ/(kg.K)}), $t$ is the exposure time~(\si{\second}), and $\delta$ is the thickness of the interior lining~(\si{m}). This model is only valid for times up to 2000 seconds.
 
+
+\clearpage
+
+
 \subsection*{Verification}
 
 This example case is based on Test 1 from the Factory Mutual and Sandia National Laboratories (FM/SNL) series. This test involved a compartment with an open door, a propylene burner, and forced ventilation.
@@ -184,24 +208,35 @@ This example case is based on Test 1 from the Factory Mutual and Sandia National
 \begin{center}
 \begin{tabular}{|l|c|}
 \hline
-                            &              \\
-\rb{Parameter}              &  \rb{Value}  \\ \hline \hline
-$\dot Q$ (kW)               &  516         \\ \hline
-$\dot m$ (kg/s)             &  4.5         \\ \hline
-$c\sb{p}$ (\si{kJ/(kg.K)})  &  1.0         \\ \hline
-$L$ (m)                     &  18.3        \\ \hline
-$W$ (m)                     &  12.2        \\ \hline
-$H$ (m)                     &  6.1         \\ \hline
-$k$ (\si{kW/(m.K)})         &  0.00023     \\ \hline
-$\rho$ (kg/m$^3$)           &  1000        \\ \hline
-$c$ (\si{kJ/(kg.K)})        &  1.16        \\ \hline
-$\delta$ (m)                &  0.025       \\ \hline
-$T_\infty$ ($^\circ$C)      &  15          \\ \hline
+\multicolumn{2}{|c|}{}                              \\
+\multicolumn{2}{|c|}{User-Specified Input}          \\
+\multicolumn{2}{|c|}{}                              \\ \hline
+                            &                       \\
+\rb{Parameter}              &  \rb{Value}           \\ \hline \hline
+$\dot Q$ (kW)               &  516                  \\ \hline
+$\dot m$ (kg/s)             &  4.5                  \\ \hline
+$c\sb{p}$ (\si{kJ/(kg.K)})  &  1.0                  \\ \hline
+$L$ (m)                     &  18.3                 \\ \hline
+$W$ (m)                     &  12.2                 \\ \hline
+$H$ (m)                     &  6.1                  \\ \hline
+$k$ (\si{kW/(m.K)})         &  0.00023              \\ \hline
+$\rho$ (kg/m$^3$)           &  1000                 \\ \hline
+$c$ (\si{kJ/(kg.K)})        &  1.16                 \\ \hline
+$\delta$ (m)                &  0.025                \\ \hline
+$T_\infty$ ($^\circ$C)      &  15                   \\ \hline
+\multicolumn{2}{c}{}                                \\
+\hline
+\multicolumn{2}{|c|}{}                              \\
+\multicolumn{2}{|c|}{Expected Output}               \\
+\multicolumn{2}{|c|}{}                              \\ \hline
+               &                                    \\
+\rb{Time (s)}  &  \rb{HGL Temperature ($^\circ$C)}  \\ \hline \hline
+60             &  34.60                             \\ \hline
+120            &  40.88                             \\ \hline
+180            &  45.16                             \\ \hline
 \end{tabular}
 \end{center}
 \end{table}
-
-\noindent Expected result: At 60~s, the HGL temperature $T\sb{g}$ is 34.60~$^\circ$C; at 120~s, $T\sb{g}$ is 40.88~$^\circ$C; at 180~s, $T\sb{g}$ is 45.16~$^\circ$C.
 
 
 \clearpage
@@ -243,6 +278,10 @@ K_2 = \frac{\dot Q}{m c\sb{p}}
 \ee
 where $\dot Q$ is the HRR of the fire~(\si{kW}).
 
+
+\clearpage
+
+
 \subsection*{Verification}
 
 This example case is based on Test 5 from the Lawrence-Livermore National Laboratory (LLNL) series. This test involved a compartment with an open door, a methane burner, and no ventilation.
@@ -253,22 +292,32 @@ This example case is based on Test 5 from the Lawrence-Livermore National Labora
 \begin{center}
 \begin{tabular}{|l|c|}
 \hline
-                            &              \\
-\rb{Parameter}              &  \rb{Value}  \\ \hline \hline
-$\dot Q$ (kW)               &  200         \\ \hline
-$L$ (m)                     &  6.0         \\ \hline
-$W$ (m)                     &  4.0         \\ \hline
-$H$ (m)                     &  4.5         \\ \hline
-$c\sb{p}$ (\si{kJ/(kg.K)})  &  1.0         \\ \hline
-$k$ (\si{kW/(m.K)})         &  0.000463    \\ \hline
-$\rho$ (kg/m$^3$)           &  1607        \\ \hline
-$c$ (\si{kJ/(kg.K)})        &  1.0         \\ \hline
-$T_\infty$ ($^\circ$C)      &  23          \\ \hline
+\multicolumn{2}{|c|}{}                              \\
+\multicolumn{2}{|c|}{User-Specified Input}          \\
+\multicolumn{2}{|c|}{}                              \\ \hline
+                            &                       \\
+$\dot Q$ (kW)               &  200                  \\ \hline
+$L$ (m)                     &  6.0                  \\ \hline
+$W$ (m)                     &  4.0                  \\ \hline
+$H$ (m)                     &  4.5                  \\ \hline
+$c\sb{p}$ (\si{kJ/(kg.K)})  &  1.0                  \\ \hline
+$k$ (\si{kW/(m.K)})         &  0.000463             \\ \hline
+$\rho$ (kg/m$^3$)           &  1607                 \\ \hline
+$c$ (\si{kJ/(kg.K)})        &  1.0                  \\ \hline
+$T_\infty$ ($^\circ$C)      &  23                   \\ \hline
+\multicolumn{2}{c}{}                                \\
+\hline
+\multicolumn{2}{|c|}{}                              \\
+\multicolumn{2}{|c|}{Expected Output}               \\
+\multicolumn{2}{|c|}{}                              \\ \hline
+               &                                    \\
+\rb{Time (s)}  &  \rb{HGL Temperature ($^\circ$C)}  \\ \hline \hline
+60             &  49.87                             \\ \hline
+120            &  63.33                             \\ \hline
+180            &  73.67                             \\ \hline
 \end{tabular}
 \end{center}
 \end{table}
-
-\noindent Expected result: At 60~s, the HGL temperature $T\sb{g}$ is 49.87~$^\circ$C; at 120~s, $T\sb{g}$ is 63.33~$^\circ$C; at 180~s, $T\sb{g}$ is 73.67~$^\circ$C.
 
 
 \clearpage
