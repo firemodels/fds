@@ -447,9 +447,7 @@ void Update_Show(void){
       sd = sliceinfo + vd->ival;
       
       if(sd->type!=islicetype)continue;
-#ifdef pp_VECTORGEN      
       if(sd->volslice==1&&sd->slicetype==SLICE_NODE&&vis_gslice_data==1)SHOW_gslice_data=1;
-#endif      
       vsliceflag=1;
       break;
     }

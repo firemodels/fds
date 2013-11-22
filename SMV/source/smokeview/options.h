@@ -61,7 +61,6 @@
 //VVVVVVVVVVVVVVVVVVVVVVVVVVVVV  turn on options that are being tested VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
 
 #ifdef pp_BETA
-#define pp_VECTORGEN
 #define pp_GEOMTEST
 //#define pp_GPUDEPTH
 #ifdef _DEBUG

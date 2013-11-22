@@ -3329,9 +3329,7 @@ void drawvslice_frame(void){
     else{
       if(VAL!=NULL)VAL->iqsliceframe = VAL->slicelevel + VAL->itime*VAL->nsliceii;
     }
-#ifdef pp_VECTORGEN    
     if(VAL->qslicedata!=NULL)VAL->qsliceframe = VAL->qslicedata + VAL->itime*VAL->nsliceii;
-#endif    
 #undef VAL
 #define VAL u
     if(VAL!=NULL){
@@ -3386,12 +3384,10 @@ void drawvslice_frame(void){
     else if(vd->slicetype==SLICE_CENTER){
         drawvvolslice_cellcenter(vd);
     }
-#ifdef pp_VECTORGEN    
     else if(vd->volslice==1&&vis_gslice_data==1){
       drawvgslice_data(vd);
       SNIFF_ERRORS("after drawvgslice_data");
     }
-#endif    
     else{
       drawvvolslice(vd);
     }
