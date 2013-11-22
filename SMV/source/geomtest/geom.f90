@@ -216,8 +216,6 @@ SUBROUTINE SETUP_ROTATE(ALPHA,U,M)
 ! construct a rotation matrix M that rotates a vector by
 ! ALPHA degrees around an axis U
 
-! calling routine needs to make sure NORM2(U) != 0.0
-
 REAL(EB), INTENT(IN) :: ALPHA, U(3)
 REAL(EB), INTENT(OUT) :: M(3,3)
 REAL(EB) :: UP(3,1), S(3,3), UUT(3,3), IDENTITY(3,3)
