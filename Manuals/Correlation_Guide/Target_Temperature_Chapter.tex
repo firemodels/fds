@@ -40,13 +40,13 @@ This example case is based on Penlight Test 7 from the Cable Response to Live Fi
 \caption[Verification case, cable failure time]
 {Verification case, cable failure time.}
 \begin{center}
-\begin{tabular}{|l|c|c|c|}
+\begin{tabular}{|c|c|c|c|}
 \hline
 \multicolumn{4}{|c|}{}                                                                                   \\
 \multicolumn{4}{|c|}{User-Specified Input}                                                               \\
 \multicolumn{4}{|c|}{}                                                                                   \\ \hline
 \multicolumn{2}{|c|}{}                             &  \multicolumn{2}{c|}{}                              \\
-\multicolumn{2}{|c|}{\rb{Parameter}}               &  \multicolumn{2}{c|}{\rb{Value}}                    \\ \hline \hline
+\multicolumn{2}{|l|}{\rb{Parameter}}               &  \multicolumn{2}{l|}{\rb{Value}}                    \\ \hline \hline
 \multicolumn{2}{|l|}{Time Ramp}                    &  \multicolumn{2}{l|}{0, 80, 820, 1240, 1800, 1900}  \\ \hline
 \multicolumn{2}{|l|}{Temperature Ramp}             &  \multicolumn{2}{l|}{24, 460, 460, 460, 460, 0}     \\ \hline
 \multicolumn{2}{|l|}{Cable Diameter (mm)}          &  \multicolumn{2}{l|}{16.3}                          \\ \hline
@@ -60,9 +60,9 @@ This example case is based on Penlight Test 7 from the Cable Response to Live Fi
 \multicolumn{4}{|c|}{Expected Output}                                                                    \\
 \multicolumn{4}{|c|}{}                                                                                   \\ \hline
            &                    &                    &                                                   \\
-\rb{Time}  &  \rb{Exposing}     &  \rb{Cable}        &  \rb{Conduit}                                     \\
-\rb{(s)}   &  \rb{Temperature}  &  \rb{Temperature}  &  \rb{Temperature}                                 \\
-           &  \rb{($^\circ$C)}  &  \rb{($^\circ$C)}  &  \rb{($^\circ$C)}                                 \\ \hline \hline
+           &  \rb{Exposing}     &  \rb{Cable}        &  \rb{Conduit}                                     \\
+\rb{Time}  &  \rb{Temperature}  &  \rb{Temperature}  &  \rb{Temperature}                                 \\
+\rb{(s)}   &  \rb{($^\circ$C)}  &  \rb{($^\circ$C)}  &  \rb{($^\circ$C)}                                 \\ \hline \hline
 50         &  296.3             &  24.1              &  32.4                                             \\ \hline
 80         &  460.0             &  24.6              &  52.3                                             \\ \hline
 1473       &  460.0             &  400               &  440.3                                            \\ \hline
@@ -115,30 +115,30 @@ This example case is based on the 1.1 m Diesel Fire Test from the SP AST Column 
 \caption[Verification case, unprotected steel temperature]
 {Verification case, unprotected steel temperature.}
 \begin{center}
-\begin{tabular}{|l|c|c|}
+\begin{tabular}{|c|c|c|}
 \hline
 \multicolumn{3}{|c|}{}                                                                   \\
 \multicolumn{3}{|c|}{User-Specified Input}                                               \\
 \multicolumn{3}{|c|}{}                                                                   \\ \hline
 \multicolumn{2}{|c|}{}                               &  \multicolumn{1}{c|}{}            \\
-\multicolumn{2}{|c|}{\rb{Parameter}}                 &  \multicolumn{1}{c|}{\rb{Value}}  \\ \hline \hline
-\multicolumn{2}{|l|}{$F/V$ (1/m)}                    &  \multicolumn{1}{l|}{205}         \\ \hline
-\multicolumn{2}{|l|}{$\rho\sb{s}$ (kg/m$^3$)}        &  \multicolumn{1}{l|}{7833}        \\ \hline
-\multicolumn{2}{|l|}{$c\sb{s}$ (\si{kJ/(kg.K)})}     &  \multicolumn{1}{l|}{0}           \\ \hline
-\multicolumn{2}{|l|}{$\epsilon$ (-)}                 &  \multicolumn{1}{l|}{0}           \\ \hline
-\multicolumn{2}{|l|}{$h\sb{c}$ (\si{W/(m^2.K)})}     &  \multicolumn{1}{l|}{25}          \\ \hline \hline
-\multicolumn{2}{|l|}{Correlation for $T\sb{f}$ (-)}  &  \multicolumn{1}{l|}{McCaffrey}   \\ \hline \hline
-\multicolumn{2}{|l|}{$\dot Q$ (kW)}                  &  \multicolumn{1}{l|}{1434}        \\ \hline
-\multicolumn{2}{|l|}{Height (m)}                     &  \multicolumn{1}{l|}{1}           \\ \hline
-\multicolumn{2}{|l|}{$T_\infty$ ($^\circ$C)}         &  \multicolumn{1}{l|}{20}          \\ \hline
+\multicolumn{2}{|l|}{\rb{Parameter}}                 &  \multicolumn{1}{c|}{\rb{Value}}  \\ \hline \hline
+\multicolumn{2}{|l|}{$F/V$ (1/m)}                    &  \multicolumn{1}{c|}{205}         \\ \hline
+\multicolumn{2}{|l|}{$\rho\sb{s}$ (kg/m$^3$)}        &  \multicolumn{1}{c|}{7833}        \\ \hline
+\multicolumn{2}{|l|}{$c\sb{s}$ (\si{kJ/(kg.K)})}     &  \multicolumn{1}{c|}{0}           \\ \hline
+\multicolumn{2}{|l|}{$\epsilon$ (-)}                 &  \multicolumn{1}{c|}{0}           \\ \hline
+\multicolumn{2}{|l|}{$h\sb{c}$ (\si{W/(m^2.K)})}     &  \multicolumn{1}{c|}{25}          \\ \hline \hline
+\multicolumn{2}{|l|}{Correlation for $T\sb{f}$ (-)}  &  \multicolumn{1}{c|}{McCaffrey}   \\ \hline \hline
+\multicolumn{2}{|l|}{$\dot Q$ (kW)}                  &  \multicolumn{1}{c|}{1434}        \\ \hline
+\multicolumn{2}{|l|}{Height (m)}                     &  \multicolumn{1}{c|}{1}           \\ \hline
+\multicolumn{2}{|l|}{$T_\infty$ ($^\circ$C)}         &  \multicolumn{1}{c|}{20}          \\ \hline
 \multicolumn{2}{c}{}                                                                     \\ \hline
 \multicolumn{3}{|c|}{}                                                                   \\
 \multicolumn{3}{|c|}{Expected Output}                                                    \\
 \multicolumn{3}{|c|}{}                                                                   \\ \hline
            &                    &                                                        \\
-\rb{Time}  &  \rb{Fire}         &  \rb{Steel}                                            \\
-\rb{(s)}   &  \rb{Temperature}  &  \rb{Temperature}                                      \\
-           &  \rb{($^\circ$C)}  &  \rb{($^\circ$C)}                                      \\ \hline \hline
+           &  \rb{Fire}         &  \rb{Steel}                                            \\
+\rb{Time}  &  \rb{Temperature}  &  \rb{Temperature}                                      \\
+\rb{(s)}   &  \rb{($^\circ$C)}  &  \rb{($^\circ$C)}                                      \\ \hline \hline
 15         &  872.81            &  89.7                                                  \\ \hline
 30         &  872.81            &  162.4                                                 \\ \hline
 45         &  872.81            &  232.8                                                 \\ \hline
@@ -183,33 +183,33 @@ This example case examines the temperature of a bar structural element in Test 4
 \multicolumn{3}{|c|}{User-Specified Input}                                               \\
 \multicolumn{3}{|c|}{}                                                                   \\ \hline
 \multicolumn{2}{|c|}{}                               &  \multicolumn{1}{c|}{}            \\
-\multicolumn{2}{|c|}{\rb{Parameter}}                 &  \multicolumn{1}{c|}{\rb{Value}}  \\ \hline \hline
-\multicolumn{2}{|l|}{$c\sb{s}$ (\si{kJ/(kg.K)})}     &  \multicolumn{1}{l|}{0.450}       \\ \hline
-\multicolumn{2}{|l|}{$W/D$ (kg/m$^2$)}               &  \multicolumn{1}{l|}{50.1}        \\ \hline
-\multicolumn{2}{|l|}{$k\sb{i}$ (\si{W/(m.K)})}       &  \multicolumn{1}{l|}{0.10}        \\ \hline
-\multicolumn{2}{|l|}{$\rho\sb{i}$ (kg/m$^3$)}        &  \multicolumn{1}{l|}{208}         \\ \hline
-\multicolumn{2}{|l|}{$c\sb{i}$ (\si{kJ/(kg.K)})}     &  \multicolumn{1}{l|}{2.0}         \\ \hline
-\multicolumn{2}{|l|}{$h\sb{i}$ (m)}                  &  \multicolumn{1}{l|}{0.0191}      \\ \hline \hline
-\multicolumn{2}{|l|}{Correlation for $T\sb{f}$ (-)}  &  \multicolumn{1}{l|}{MQH}         \\ \hline \hline
-\multicolumn{2}{|l|}{$\dot Q$ (kW)}                  &  \multicolumn{1}{l|}{3200}        \\ \hline
-\multicolumn{2}{|l|}{$L$ (m)}                        &  \multicolumn{1}{l|}{7.04}        \\ \hline
-\multicolumn{2}{|l|}{$W$ (m)}                        &  \multicolumn{1}{l|}{3.60}        \\ \hline
-\multicolumn{2}{|l|}{$H$ (m)}                        &  \multicolumn{1}{l|}{3.82}        \\ \hline
-\multicolumn{2}{|l|}{$H\sb{o}$ (m)}                  &  \multicolumn{1}{l|}{2.82}        \\ \hline
-\multicolumn{2}{|l|}{$W\sb{o}$ (m)}                  &  \multicolumn{1}{l|}{2.4}         \\ \hline
-\multicolumn{2}{|l|}{$k$ (\si{kW/(m.K)})}            &  \multicolumn{1}{l|}{0.00012}     \\ \hline
-\multicolumn{2}{|l|}{$\rho$ (kg/m$^3$)}              &  \multicolumn{1}{l|}{737}         \\ \hline
-\multicolumn{2}{|l|}{$c$ (\si{kJ/(kg.K)})}           &  \multicolumn{1}{l|}{1.42}        \\ \hline
-\multicolumn{2}{|l|}{$\delta$ (m)}                   &  \multicolumn{1}{l|}{0.0254}      \\ \hline
-\multicolumn{2}{|l|}{$T_\infty$ ($^\circ$C)}         &  \multicolumn{1}{l|}{20}          \\ \hline
+\multicolumn{2}{|l|}{\rb{Parameter}}                 &  \multicolumn{1}{c|}{\rb{Value}}  \\ \hline \hline
+\multicolumn{2}{|l|}{$c\sb{s}$ (\si{kJ/(kg.K)})}     &  \multicolumn{1}{c|}{0.450}       \\ \hline
+\multicolumn{2}{|l|}{$W/D$ (kg/m$^2$)}               &  \multicolumn{1}{c|}{50.1}        \\ \hline
+\multicolumn{2}{|l|}{$k\sb{i}$ (\si{W/(m.K)})}       &  \multicolumn{1}{c|}{0.10}        \\ \hline
+\multicolumn{2}{|l|}{$\rho\sb{i}$ (kg/m$^3$)}        &  \multicolumn{1}{c|}{208}         \\ \hline
+\multicolumn{2}{|l|}{$c\sb{i}$ (\si{kJ/(kg.K)})}     &  \multicolumn{1}{c|}{2.0}         \\ \hline
+\multicolumn{2}{|l|}{$h\sb{i}$ (m)}                  &  \multicolumn{1}{c|}{0.0191}      \\ \hline \hline
+\multicolumn{2}{|l|}{Correlation for $T\sb{f}$ (-)}  &  \multicolumn{1}{c|}{MQH}         \\ \hline \hline
+\multicolumn{2}{|l|}{$\dot Q$ (kW)}                  &  \multicolumn{1}{c|}{3200}        \\ \hline
+\multicolumn{2}{|l|}{$L$ (m)}                        &  \multicolumn{1}{c|}{7.04}        \\ \hline
+\multicolumn{2}{|l|}{$W$ (m)}                        &  \multicolumn{1}{c|}{3.60}        \\ \hline
+\multicolumn{2}{|l|}{$H$ (m)}                        &  \multicolumn{1}{c|}{3.82}        \\ \hline
+\multicolumn{2}{|l|}{$H\sb{o}$ (m)}                  &  \multicolumn{1}{c|}{2.82}        \\ \hline
+\multicolumn{2}{|l|}{$W\sb{o}$ (m)}                  &  \multicolumn{1}{c|}{2.4}         \\ \hline
+\multicolumn{2}{|l|}{$k$ (\si{kW/(m.K)})}            &  \multicolumn{1}{c|}{0.00012}     \\ \hline
+\multicolumn{2}{|l|}{$\rho$ (kg/m$^3$)}              &  \multicolumn{1}{c|}{737}         \\ \hline
+\multicolumn{2}{|l|}{$c$ (\si{kJ/(kg.K)})}           &  \multicolumn{1}{c|}{1.42}        \\ \hline
+\multicolumn{2}{|l|}{$\delta$ (m)}                   &  \multicolumn{1}{c|}{0.0254}      \\ \hline
+\multicolumn{2}{|l|}{$T_\infty$ ($^\circ$C)}         &  \multicolumn{1}{c|}{20}          \\ \hline
 \multicolumn{2}{c}{}                                                                     \\ \hline
 \multicolumn{3}{|c|}{}                                                                   \\
 \multicolumn{3}{|c|}{Expected Output}                                                    \\
 \multicolumn{3}{|c|}{}                                                                   \\ \hline
            &                    &                                                        \\
-\rb{Time}  &  \rb{Fire}         &  \rb{Steel}                                            \\
-\rb{(s)}   &  \rb{Temperature}  &  \rb{Temperature}                                      \\
-           &  \rb{($^\circ$C)}  &  \rb{($^\circ$C)}                                      \\ \hline \hline
+           &  \rb{Fire}         &  \rb{Steel}                                            \\
+\rb{Time}  &  \rb{Temperature}  &  \rb{Temperature}                                      \\
+\rb{(s)}   &  \rb{($^\circ$C)}  &  \rb{($^\circ$C)}                                      \\ \hline \hline
 15         &  313.5             &  21.0                                                  \\ \hline
 30         &  349.4             &  22.3                                                  \\ \hline
 45         &  372.4             &  23.66                                                 \\ \hline
@@ -223,7 +223,7 @@ This example case examines the temperature of a bar structural element in Test 4
 
 \subsection*{Validation}
 
-For both the unprotected and protected steel cases, a summary of the comparisons between peak predicted and measured target temperatures is shown in Fig.~\ref{Surface_Temperature_Steel_Summary}.
+For the unprotected and protected steel cases, a summary of the comparisons between peak predicted and measured target temperatures is shown in Fig.~\ref{Surface_Temperature_Steel_Summary}.
 
 \begin{figure}[!ht]
 \begin{center}
