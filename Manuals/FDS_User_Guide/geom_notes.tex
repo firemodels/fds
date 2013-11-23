@@ -30,6 +30,7 @@ A simple form is given by
 
 One may also create objects in terms of previously defined objects.  An example is given by
 
+{%\footnotesize
 \begin{verbatim}
 &GEOM ID='group 1'
 
@@ -37,13 +38,15 @@ One may also create objects in terms of previously defined objects.  An example 
       AZIM=[0],
       ELEV=[0],
 
-      GEOM_IDS(1)='chair',  DSCALE(1)=..., DAZIM(1)=..., DELEV(1)... DXYZ(1)=...,
-      GEOM_IDS(2)='couch',  DSCALE(2)=..., DAZIM(2)=..., DELEV(2)... DXYZ(2)=...,
+      GEOM_IDS(1)='chair',  DSCALE(1)=..., DAZIM(1)=..., DELEV(1)... 
+                            DXYZ0(1,1)=..., DXYZ(1,1)=...,
+      GEOM_IDS(2)='couch',  DSCALE(2)=..., DAZIM(2)=..., DELEV(2)... 
+                            DXYZ0(1,2)=..., DXYZ(1,2)=...,
 /
 \end{verbatim}
+}
 
-\noindent where GEOM\_IDS is a list of previously defined geometries.   One may scale, rotate and translate objects as they are placed in a group using DSCALE, DAZIM, DELEV and DXYZ.  As with a primitive object (an object without any GEOM\_IDS defined), A group may be scaled, rotated and translated using DXYZ, DAZIM and DELEV keywords just like an object.
-The keyword, COMPONENT\_ONLY, if .TRUE., indicates that the geometry only occurs in other geometry definitions and is not itself a part of the FDS model.
+\noindent where GEOM\_IDS is a list of object names define in previous \&GEOM lines (forward references are not allowed).   One may scale, rotate and translate objects as they are placed in a group using DSCALE, DAZIM, DELEV, DXYZ0 and DXYZ.  As with a primitive object (an object without any GEOM\_IDS defined), A group may be scaled, rotated and translated. The DXYZ0 and DXYZ keywords are two dimensional.  The first coordinate always 1.  The second coordinate is the index of the object in the GEOM\_IDS array. The keyword, COMPONENT\_ONLY, if .TRUE., indicates that the geometry only occurs in other geometry definitions and is not itself a part of the FDS model.
 
 \vspace{\baselineskip}
 
