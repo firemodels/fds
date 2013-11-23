@@ -7,8 +7,8 @@
 \section{Unstructured Geometry: The \texorpdfstring{{\tt GEOM}}{GEOM} Namelist Group (Table \ref{tbl:GEOM})}
 \label{info:GEOM}
 
-Unstructured geometric solids are defined using the \&GEOM keyword.
-A simple form is given by 
+Unstructured geometric solids are defined using the \&GEOM namelist.
+A simple form is given by
 
 \begin{verbatim}
 &GEOM ID='chair'
@@ -23,26 +23,26 @@ A simple form is given by
 
       XYZ0=[0,0,0],
       XYZ=[0,0,0],
-/      
+/
 \end{verbatim}
 
-\noindent where ID is the name of the object which may be referenced in subsequent \&GEOM lines, VERTS is a list of vertex coordinates and FACES is a list of vertex indices\footnote{Parameters within [] indicate default values}.  Each vertex location is a triplet of physical coordinates.  Each triangular face is defined by a triplet of vertex indices where the indices range from 1 to the number of vertices found on this \&GEOM line. The parameter SCALE may be used to change the size of the object. AZIM and ELEV parameters may be used to rotate the object about an origin defined by XYZ0 and the parameter XYZ may be used to translate the object.
+\noindent where ID is the name of the object which may be referenced in subsequent \&GEOM lines, VERTS is a list of M vertex coordinates and FACES is a list of 3*N vertex indices, 3 indices for each triangular face\footnote{Parameters within [] indicate default values}.  Each vertex location is a triplet of physical coordinates.  Each triangular face is defined by a triplet of vertex indices where the indices range from 1 to the number of vertices found on this \&GEOM line. The parameter SCALE may be used to change the size of the object. An object may be flipped by using a negative SCALE factor.  AZIM and ELEV parameters may be used to rotate the object about an origin defined by XYZ0 and the parameter XYZ may be used to translate the object.
 
 One may also create objects in terms of previously defined objects.  An example is given by
 
 \begin{verbatim}
 &GEOM ID='group 1'
 
-      XYZ=[0,0,0], 
+      XYZ=[0,0,0],
       AZIM=[0],
       ELEV=[0],
 
       GEOM_IDS(1)='chair',  DSCALE(1)=..., DAZIM(1)=..., DELEV(1)... DXYZ(1)=...,
       GEOM_IDS(2)='couch',  DSCALE(2)=..., DAZIM(2)=..., DELEV(2)... DXYZ(2)=...,
-/      
-\end{verbatim}      
+/
+\end{verbatim}
 
-\noindent where GEOM\_IDS is a list of previously defined geometries.   One may scale, rotate and translate objects as they are placed in a group using DSCALE, DAZIM, DELEV and DXYZ.  As with a primitive object, a group may be scaled, rotated and translated using XYZ, AZIM and ELEV keywords.
+\noindent where GEOM\_IDS is a list of previously defined geometries.   One may scale, rotate and translate objects as they are placed in a group using DSCALE, DAZIM, DELEV and DXYZ.  As with a primitive object (an object without any GEOM\_IDS defined), A group may be scaled, rotated and translated using DXYZ, DAZIM and DELEV keywords just like an object.
 The keyword, COMPONENT\_ONLY, if .TRUE., indicates that the geometry only occurs in other geometry definitions and is not itself a part of the FDS model.
 
 \vspace{\baselineskip}
