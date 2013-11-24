@@ -2,6 +2,9 @@
 
 &MESH XB=-1.0,1.0,-1.0,1.0,-1.0,1.0 /
 &GRID IBAR=10,JBAR=10,KBAR=10 /
+
+***ELEVATION TEST
+
 &GEOM ID='geom1',
         VERTS=0.0,0.0,0.0,
               1.0,0.0,0.0,
@@ -10,6 +13,9 @@
         VERTS=0.0,0.0,0.0,
               1.0,0.0,0.0,
               1.0,1.0,0.0,FACES=1,2,3,AZIM=0.0,ELEV=45/
+
+***AZIMUTHAL TEST
+
 &GEOM ID='geom3',
         VERTS=0.0,0.0,0.0,
               0.0,1.0,0.0,
@@ -18,6 +24,9 @@
         VERTS=0.0,0.0,0.0,
               0.0,1.0,0.0,
               0.0,1.0,1.0,FACES=1,2,3,AZIM=45.0,ELEV=0/
+
+***TRANSLATION TESET
+
 &GEOM ID='geom5',
         VERTS=1.0,0.0,0.0,
               1.0,1.0,0.0,
