@@ -2,7 +2,27 @@
 
 &MESH XB=-1.0,1.0,-1.0,1.0,-1.0,1.0 /
 &GRID IBAR=10,JBAR=10,KBAR=10 /
-&GEOM ID='geom1',VERTS=0.3,0.0,0.0,1.0,0.2,0.0,1.0,1.0,0.1,FACES=1,2,3,AZIM=10.0,ELEV=10.0/
-&GEOM ID='geom2',VERTS=0.6,0.0,0.0,1.0,0.4,0.0,1.0,1.0,0.2,FACES=1,2,3,AZIM=10.0,ELEV=10.0/
-&GEOM ID='geom3',VERTS=0.9,0.0,0.0,1.0,0.6,0.0,1.0,1.0,0.3,FACES=1,2,3,AZIM=10.0,ELEV=10.0/
-&GEOM ID='geom4',GEOM_IDS='geom1','geom2','geom3',DELEV(1)=10.0,DELEV(3)=30.0,DXYZ(1,2)=2.0,2.0,2.0/
+&GEOM ID='geom1',
+        VERTS=0.0,0.0,0.0,
+              1.0,0.0,0.0,
+              1.0,1.0,0.0,FACES=1,2,3,AZIM=0.0,ELEV=0/
+&GEOM ID='geom2',
+        VERTS=0.0,0.0,0.0,
+              1.0,0.0,0.0,
+              1.0,1.0,0.0,FACES=1,2,3,AZIM=0.0,ELEV=45/
+&GEOM ID='geom3',
+        VERTS=0.0,0.0,0.0,
+              0.0,1.0,0.0,
+              0.0,1.0,1.0,FACES=1,2,3,AZIM=0.0,ELEV=0/
+&GEOM ID='geom4',
+        VERTS=0.0,0.0,0.0,
+              0.0,1.0,0.0,
+              0.0,1.0,1.0,FACES=1,2,3,AZIM=45.0,ELEV=0/
+&GEOM ID='geom5',
+        VERTS=1.0,0.0,0.0,
+              1.0,1.0,0.0,
+              1.0,1.0,1.0,FACES=1,2,3,XYZ=0.0,0.0,0.0/
+&GEOM ID='geom6',
+        VERTS=1.0,0.0,0.0,
+              1.0,1.0,0.0,
+              1.0,1.0,1.0,FACES=1,2,3,XYZ=0.0,0.0,-1.0/
