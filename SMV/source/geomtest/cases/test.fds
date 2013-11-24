@@ -9,6 +9,8 @@
 &SURF ID='surf2a',RGB=0,128,0 /
 &SURF ID='surf3',RGB=0,0,255 /
 &SURF ID='surf3a',RGB=0,0,128 /
+&SURF ID='surf4',RGB=255,0,255 /
+&SURF ID='surf4a',RGB=128,0,128 /
 
 ***ELEVATION TEST
 
@@ -42,3 +44,14 @@
         VERTS=2.0,0.0,0.0,
               2.0,1.0,0.0,
               2.0,1.0,1.0,FACES=1,2,3,XYZ=0.0,0.0,-1.0,SURF_ID='surf3a'/
+
+***TRANSLATION TESET
+
+&GEOM ID='geom7',
+        VERTS=0.0,0.0,2.0,
+              0.0,1.0,2.0,
+              1.0,1.0,2.0,FACES=1,2,3,SURF_ID='surf4'/
+&GEOM ID='geom8',
+        VERTS=0.0,0.0,3.0,
+              0.0,1.0,3.0,
+              1.0,1.0,3.0,FACES=1,2,3,SCALE=2.0,2.0,1.0,SURF_ID='surf4a'/
