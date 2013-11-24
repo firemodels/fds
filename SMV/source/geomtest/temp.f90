@@ -1,6 +1,6 @@
 ! VVVVV placeholder modules - will not be moved to FDS VVVVV
 
-! ------------ module PRECISION_PARAMETERS
+! ------------ MODULE PRECISION_PARAMETERS ---------------------------------
 
 MODULE PRECISION_PARAMETERS
  
@@ -14,14 +14,14 @@ INTEGER, PARAMETER :: FB = SELECTED_REAL_KIND(6)
 INTEGER, PARAMETER :: EB = SELECTED_REAL_KIND(12)
 END MODULE PRECISION_PARAMETERS
 
-! ------------ module COMP_FUNCTIONS
+! ------------ MODULE COMP_FUNCTIONS ---------------------------------
 
 MODULE COMP_FUNCTIONS
 IMPLICIT NONE
 
 CONTAINS
 
-! ------------ SUBROUTINE SHUTDOWN
+! ------------ SUBROUTINE SHUTDOWN ---------------------------------
 
 SUBROUTINE SHUTDOWN(MESSAGE)  
 CHARACTER(*), INTENT(IN) :: MESSAGE
@@ -32,7 +32,7 @@ STOP
 
 END SUBROUTINE SHUTDOWN
 
-! ------------ SUBROUTINE CHECKREAD
+! ------------ SUBROUTINE CHECKREAD ---------------------------------
 
 SUBROUTINE CHECKREAD(NAME,LU,IOS)
 
@@ -66,7 +66,7 @@ END SUBROUTINE CHECKREAD
 
 END MODULE COMP_FUNCTIONS
 
-! ------------ MODULE MEMORY_FUNCTIONS
+! ------------ SUBROUTINE MEMORY_FUNCTIONS ---------------------------------
 
 MODULE MEMORY_FUNCTIONS
 
@@ -75,7 +75,7 @@ IMPLICIT NONE
 
 CONTAINS
 
-! ------------ SUBROUTINE ChkMemErr
+! ------------ SUBROUTINE ChkMemErr ---------------------------------
 
 SUBROUTINE ChkMemErr(CodeSect,VarName,IZERO)
  
@@ -95,7 +95,7 @@ END MODULE MEMORY_FUNCTIONS
 
 ! ^^^^ placeholder routines and modules ^^^^^^^
 
-! ------------ module TYPES
+! ------------ MODULE TYPES ---------------------------------
 
 MODULE TYPES
 USE PRECISION_PARAMETERS
@@ -123,7 +123,7 @@ TYPE (MESH_TYPE), SAVE, DIMENSION(:), ALLOCATABLE, TARGET :: MESHES
 
 END MODULE TYPES
 
-! ------------ module GLOBAL_CONSTANTS
+! ------------ MODULE GLOBAL_CONSTANTS ---------------------------------
 
 MODULE GLOBAL_CONSTANTS
 USE PRECISION_PARAMETERS
@@ -135,7 +135,7 @@ CHARACTER(250)                             :: FN_INPUT='null'
 CHARACTER(80) :: FN_SMV,FN_GEOM(1)
 END MODULE GLOBAL_CONSTANTS
 
-! ------------ MODULE READ_INPUT
+! ------------ SUBROUTINE READ_INPUT ---------------------------------
 
 MODULE READ_INPUT
 
@@ -152,7 +152,7 @@ PUBLIC :: READ_HEAD,READ_MESH,NMESHES
 
 CONTAINS
 
-! ------------ SUBROUTINE READ_HEAD
+! ------------ SUBROUTINE READ_HEAD ---------------------------------
 
 SUBROUTINE READ_HEAD
 INTEGER :: NAMELENGTH
@@ -191,7 +191,7 @@ FN_GEOM(1)=TRIM(CHID)//'.ge'
 
 END SUBROUTINE READ_HEAD
 
-! ------------ SUBROUTINE CHECK_XB
+! ------------ SUBROUTINE CHECK_XB ---------------------------------
 
 SUBROUTINE CHECK_XB(XB)
 ! Reorder an input sextuple XB if needed
@@ -206,7 +206,7 @@ DO I=1,5,2
 ENDDO
 END SUBROUTINE CHECK_XB
 
-! ------------ SUBROUTINE READ_MESH
+! ------------ SUBROUTINE READ_MESH ---------------------------------
 
 SUBROUTINE READ_MESH
 INTEGER :: IBAR,JBAR,KBAR,J
@@ -276,8 +276,7 @@ END SUBROUTINE READ_MESH
 
 END MODULE READ_INPUT
 
-
-! ------------ SUBROUTINE WRITE_SMV
+! ------------ SUBROUTINE WRITE_SMV ---------------------------------
 
 SUBROUTINE WRITE_SMV
 USE GLOBAL_CONSTANTS

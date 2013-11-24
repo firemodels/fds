@@ -1,5 +1,5 @@
 
-! ------------ module COMPLEX_GEOMETRY
+! ------------ module COMPLEX_GEOMETRY ---------------------------------
 
 MODULE COMPLEX_GEOMETRY ! this module will be moved to FDS
 
@@ -17,7 +17,7 @@ PUBLIC :: READ_GEOM,WRITE_GEOM,ROTATE_VEC, SETUP_AZ_ELEV
  
 CONTAINS
 
-! ------------ SUBROUTINE GET_GEOM_ID
+! ------------ SUBROUTINE GET_GEOM_ID ---------------------------------
 
 SUBROUTINE GET_GEOM_ID(ID,GEOM_INDEX, N_LAST)
    CHARACTER(30), INTENT(IN) :: ID
@@ -36,7 +36,7 @@ SUBROUTINE GET_GEOM_ID(ID,GEOM_INDEX, N_LAST)
    END DO
 END SUBROUTINE GET_GEOM_ID
 
-! ------------ SUBROUTINE READ_GEOM
+! ------------ SUBROUTINE READ_GEOM ---------------------------------
 
 SUBROUTINE READ_GEOM
 
@@ -193,7 +193,7 @@ ENDDO READ_GEOM_LOOP
 
 END SUBROUTINE READ_GEOM
 
-! ------------ SUBROUTINE ROTATE_VEC
+! ------------ SUBROUTINE ROTATE_VEC ---------------------------------
 
 SUBROUTINE ROTATE_VEC(M,N,XIN,XOUT)
 INTEGER, INTENT(IN) :: N
@@ -207,7 +207,7 @@ DO I = 1, N
 END DO
 END SUBROUTINE ROTATE_VEC
 
-! ------------ SUBROUTINE SETUP_AZ_ELEV
+! ------------ SUBROUTINE SETUP_AZ_ELEV ---------------------------------
 
 SUBROUTINE SETUP_AZ_ELEV(SCALE,AZ,ELEV,M)
 ! construct a rotation matrix M that rotates a vector by
@@ -238,7 +238,7 @@ MTEMP = MATMUL(M1,M0)
 M = MATMUL(M2,MTEMP)
 END SUBROUTINE SETUP_AZ_ELEV
 
-! ------------ SUBROUTINE SETUP_ROTATE
+! ------------ SUBROUTINE SETUP_ROTATE ---------------------------------
 
 SUBROUTINE SETUP_ROTATE(ALPHA,U,M)
 ! construct a rotation matrix M that rotates a vector by
@@ -266,7 +266,7 @@ IDENTITY = RESHAPE ((/&
 M = UUT + COS_ALPHA*(IDENTITY - UUT) + SIN_ALPHA*S
 END SUBROUTINE SETUP_ROTATE
 
-! ------------ SUBROUTINE MERGE_GEOMS
+! ------------ SUBROUTINE MERGE_GEOMS ---------------------------------
 
 SUBROUTINE MERGE_GEOMS(VERTS,N_VERTS,FACES,N_FACES)
    INTEGER N_VERTS, N_FACES, I, J
@@ -301,7 +301,7 @@ SUBROUTINE MERGE_GEOMS(VERTS,N_VERTS,FACES,N_FACES)
    END DO
 END SUBROUTINE MERGE_GEOMS
 
-! ------------ SUBROUTINE WRITE_GEOM
+! ------------ SUBROUTINE WRITE_GEOM ---------------------------------
 
 SUBROUTINE WRITE_GEOM
 INTEGER :: I
@@ -358,6 +358,8 @@ WRITE(LU_GEOM(1)) ZERO,ZERO
 CALL WRITE_GEOM_SUMMARY
 
 END SUBROUTINE WRITE_GEOM
+
+! ------------ SUBROUTINE WRITE_GEOM_SUMMARY ---------------------------------
 
 SUBROUTINE WRITE_GEOM_SUMMARY
 
