@@ -4,3 +4,4 @@ $GEOMTEST test.fds
 $GEOMTEST test_azim.fds
 $GEOMTEST test_elev.fds
 $GEOMTEST test_scale.fds
+$GEOMTEST test_group.fds
