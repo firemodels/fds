@@ -166,10 +166,25 @@ echo copying FDS_Release_Notes.htm
 copy "%bundleinfo%\FDS_Release_Notes.htm" "%out_guides%\FDS_Release_Notes.htm"
 
 echo.
-echo copying Documentation to the Documentation directory
+echo copying FDS Documentation to the Documentation directory
+
+echo copying FDS_Configuration_Management_Plan.pdf
+copy %in_pdf%\FDS_Configuration_Management_Plan.pdf %out_guides%\.
 
 echo copying FDS_User_Guide.pdf
 copy %in_pdf%\FDS_User_Guide.pdf %out_guides%\.
+
+echo copying FDS_Technical_Reference_Guide.pdf
+copy %in_pdf%\FDS_Technical_Reference_Guide.pdf %out_guides%\.
+
+echo copying FDS_Validation_Guide.pdf
+copy %in_pdf%\FDS_Validation_Guide.pdf %out_guides%\.
+
+echo copying FDS_Verification_Guide.pdf
+copy %in_pdf%\FDS_Verification_Guide.pdf %out_guides%\.
+
+echo.
+echo copying Smokeview Documentation to the Documentation directory
 
 echo copying SMV_User_Guide.pdf
 copy %in_pdf%\SMV_User_Guide.pdf %out_guides%\.
@@ -177,8 +192,8 @@ copy %in_pdf%\SMV_User_Guide.pdf %out_guides%\.
 echo copying SMV_Technical_Reference_Guide.pdf
 copy %in_pdf%\SMV_Technical_Reference_Guide.pdf %out_guides%\.
 
-echo copying FDS_Technical_Reference_Guide.pdf
-copy %in_pdf%\FDS_Technical_Reference_Guide.pdf %out_guides%\.
+echo copying SMV_Verification_Guide.pdf
+copy %in_pdf%\SMV_Verification_Guide.pdf %out_guides%\.
 
 echo copying readme.html
 copy "%in_for_bundle%\readme.html" "%out_guides%\Smokeview_release_notes.html"
