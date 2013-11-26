@@ -132,17 +132,20 @@ READ_GEOM_LOOP: DO N=1,N_GEOM
       ALLOCATE(G%GEOM_INDICES(N_GEOMS),STAT=IZERO)
       CALL ChkMemErr('READ_GEOM','GEOM_INDICES',IZERO)
       
+      ALLOCATE(G%DSCALE(3,N_GEOMS),STAT=IZERO)
+      CALL ChkMemErr('READ_GEOM','DSCALE',IZERO)
+      
       ALLOCATE(G%DAZIM(N_GEOMS),STAT=IZERO)
-      CALL ChkMemErr('READ_GEOM','AZ',IZERO)
+      CALL ChkMemErr('READ_GEOM','DAZIM',IZERO)
       
       ALLOCATE(G%DELEV(N_GEOMS),STAT=IZERO)
-      CALL ChkMemErr('READ_GEOM','ELEV',IZERO)
+      CALL ChkMemErr('READ_GEOM','DELEV',IZERO)
       
       ALLOCATE(G%DXYZ0(3,N_GEOMS),STAT=IZERO)
-      CALL ChkMemErr('READ_GEOM','XYZ0',IZERO)
+      CALL ChkMemErr('READ_GEOM','DXYZ0',IZERO)
       
       ALLOCATE(G%DXYZ(3,N_GEOMS),STAT=IZERO)
-      CALL ChkMemErr('READ_GEOM','XYZ',IZERO)
+      CALL ChkMemErr('READ_GEOM','DXYZ',IZERO)
 
       N_FACES=0 ! ignore vertex and face entries if there are any GEOM_IDS
       N_VERTS=0
@@ -193,6 +196,7 @@ READ_GEOM_LOOP: DO N=1,N_GEOM
    G%XYZ(1:3) = XYZ(1:3)
 
    IF(N_GEOMS.GT.0)THEN   
+      G%DSCALE(1:3,1:N_GEOMS) = DSCALE(1:3,1:N_GEOMS)
       G%DAZIM(1:N_GEOMS) = DAZIM(1:N_GEOMS)
       G%DELEV(1:N_GEOMS) = DELEV(1:N_GEOMS)
       G%DXYZ0(1:3,1:N_GEOMS) = DXYZ0(1:3,1:N_GEOMS)
@@ -213,8 +217,8 @@ REAL(EB), INTENT(OUT) :: XOUT(3*N)
 REAL(EB) :: VEC(3)
 INTEGER :: I
 
-DO I = 1, N
-   VEC(1:3) = XYZ(1:3) + XIN(3*I-2:3*I)
+DO I = 1, N 
+   VEC(1:3) = XYZ(1:3) + XIN(3*I-2:3*I) ! copy into a temp array so XIN and XOUT can point to same space
    XOUT(3*I-2:3*I) = VEC(1:3)
 END DO
 END SUBROUTINE TRANSLATE_VEC
@@ -229,7 +233,7 @@ REAL(EB) :: VEC(3)
 INTEGER :: I
 
 DO I = 1, N
-   VEC(1:3) = MATMUL(M,XIN(3*I-2:3*I)-XYZ0(1:3))
+   VEC(1:3) = MATMUL(M,XIN(3*I-2:3*I)-XYZ0(1:3))  ! copy into a temp array so XIN and XOUT can point to same space
    XOUT(3*I-2:3*I) = VEC(1:3) + XYZ0(1:3)
 END DO
 END SUBROUTINE ROTATE_VEC
@@ -360,9 +364,9 @@ SUBROUTINE EXPAND_GROUPS
    INTEGER :: N_VERTS, N_FACES
    INTEGER :: IZERO
    REAL(EB) :: M(3,3)
-   INTEGER :: IVERT, IFACE
+   INTEGER :: IVERT, IFACE, ISURF
    REAL(EB), POINTER, DIMENSION(:) :: XIN, XOUT
-   INTEGER, POINTER, DIMENSION(:) :: FIN,FOUT
+   INTEGER, POINTER, DIMENSION(:) :: FIN,FOUT, SURFIN, SURFOUT
    
    DO I = 2, N_GEOM ! first geometry will not have any sub-geometries
       G=>GEOMETRY(I)
@@ -384,33 +388,47 @@ SUBROUTINE EXPAND_GROUPS
          CYCLE
       ENDIF
       
+      G%N_VERTS=N_VERTS
+      G%N_FACES=N_FACES
+      
       ALLOCATE(G%FACES(3*N_FACES),STAT=IZERO)
       CALL ChkMemErr('READ_GEOM','FACES',IZERO)
 
       ALLOCATE(G%VERTS(3*N_VERTS),STAT=IZERO)
       CALL ChkMemErr('READ_GEOM','VERTS',IZERO)
       
-      IVERT = 1
-      IFACE = 1
-      DO J = 1, G%N_GEOMS
-        G2=>GEOMETRY(G%GEOM_INDICES(J))
-        
-        IF(G2%N_VERTS.EQ.0.OR.G2%N_FACES.EQ.0)CYCLE
+      ALLOCATE(G%SURF_INDICES(N_FACES),STAT=IZERO)
+      CALL ChkMemErr('READ_GEOM','SURF_INDICES',IZERO)
 
-        CALL SETUP_AZ_ELEV(G2%DSCALE(1,J),G2%DAZIM(J),G2%DELEV(J),M)
+      IVERT = 0
+      IFACE = 0
+      DO J = 1, G%N_GEOMS
+         G2=>GEOMETRY(G%GEOM_INDICES(J))
         
-         XIN(1:G2%N_VERTS) => G2%VERTS(1:G2%N_VERTS)
-        XOUT(1:G2%N_VERTS) => G%VERTS(IVERT:IVERT+G2%N_VERTS-1)
+         IF(G2%N_VERTS.EQ.0.OR.G2%N_FACES.EQ.0)CYCLE
+
+         CALL SETUP_AZ_ELEV(G%DSCALE(1,J),G%DAZIM(J),G%DELEV(J),M)
         
-        CALL ROTATE_VEC(M,G2%N_VERTS,G%DXYZ0,G%VERTS,XIN)
-        CALL TRANSLATE_VEC(G2%XYZ,G2%N_VERTS,XIN,XOUT)
-        IVERT=IVERT+G2%N_VERTS
+          XIN(1:3*G2%N_VERTS) => G2%VERTS(1:3*G2%N_VERTS)
+         XOUT(1:3*G2%N_VERTS) => G%VERTS(1+3*IVERT:3*(IVERT+G2%N_VERTS))
         
-        ! offset face indices
-        FIN(1:G2%N_FACES) => G2%FACES(1:G2%N_FACES)
-        FOUT(1:G2%N_FACES) => G%FACES(IFACE:IFACE+G2%N_FACES-1)
+         CALL ROTATE_VEC(M,G2%N_VERTS,G%DXYZ0(1,J),XIN,XOUT)
+         CALL TRANSLATE_VEC(G%DXYZ(1,J),G2%N_VERTS,XOUT,XOUT)
         
-        IFACE = IFACE + G2%N_FACES
+        ! copy and offset face indices
+         FIN(1:3*G2%N_FACES) => G2%FACES(1:3*G2%N_FACES)
+         FOUT(1:3*G2%N_FACES) => G%FACES(1+3*IFACE:3*(IFACE+G2%N_FACES))
+        
+         FOUT = FIN + IVERT
+
+        ! copy surface indices
+         SURFIN(1:G2%N_FACES) => G2%SURF_INDICES(1:G2%N_FACES)
+         SURFOUT(1:G2%N_FACES) => G%SURF_INDICES(1+IFACE:IFACE+G2%N_FACES)
+         
+         SURFOUT = SURFIN
+        
+         IVERT = IVERT + G2%N_VERTS
+         IFACE = IFACE + G2%N_FACES
       END DO
       
    END DO
@@ -433,7 +451,7 @@ INTEGER :: N_FACE_S_VALS, N_FACE_D_VALS
 IF (N_GEOM.LE.0) RETURN
 
 CALL PROCESS_GEOM  ! scale, rotate, translate GEOM vertices 
-!CALL EXPAND_GROUPS ! create vertex and face list from geometries specified in GEOM_IDS list
+CALL EXPAND_GROUPS ! create vertex and face list from geometries specified in GEOM_IDS list
 
 N_VERTS=0
 N_FACES=0
@@ -444,7 +462,7 @@ DO I = 1, N_GEOM ! count vertices and faces
    N_VERTS = N_VERTS + G%N_VERTS
    N_FACES = N_FACES + G%N_FACES
 END DO
-IF(N_VERTS.LE.0.OR.N_VERTS.LE.0)RETURN
+IF(N_VERTS.LE.0.OR.N_FACES.LE.0)RETURN
 
 ALLOCATE(VERTS(3*N_VERTS),STAT=IZERO)   ! create arrays to contain all vertices and faces
 CALL ChkMemErr('WRITE_GEOM_TO_SMV','VERTS',IZERO)
@@ -511,6 +529,8 @@ DO I = 1, N_GEOM
          60 FORMAT("      DXYZ0=",3E11.4)
          WRITE(6,70)G%DXYZ(1:3,J)
          70 FORMAT("      DXYZ=",3E11.4)
+         WRITE(6,80)G%DSCALE(1:3,J)
+         80 FORMAT("    DSCALE=",3E11.4)
          
       END DO
    ENDIF
