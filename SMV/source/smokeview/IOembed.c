@@ -806,9 +806,7 @@ void read_geom(geomdata *geomi, int flag, int type, int *errorcode){
         NewMemory((void **)&points,nverts*sizeof(point));
         geomlisti->points=points;
         geomlisti->npoints=nverts;
-        if(nverts>0){
-          FORTREADBR(xyz,3*nverts,stream);
-        }
+        FORTREADBR(xyz,3*nverts,stream);
         for(ii=0;ii<nverts;ii++){
           points[ii].xyz[0]=xyz[3*ii];
           points[ii].xyz[1]=xyz[3*ii+1];
@@ -826,12 +824,8 @@ void read_geom(geomdata *geomi, int flag, int type, int *errorcode){
         NewMemory((void **)&surf_ind,ntris*sizeof(int));
         geomlisti->triangles=triangles;
         geomlisti->ntriangles=ntris;
-        if(ntris>0){
-          FORTREADBR(ijk,3*ntris,stream);
-        }
-        if(ntris>0){
-          FORTREADBR(surf_ind,ntris,stream);
-        }
+        FORTREADBR(ijk,3*ntris,stream);
+        FORTREADBR(surf_ind,ntris,stream);
         if(type==GEOM_ISO)offset=nsurfinfo;
         for(ii=0;ii<ntris;ii++){
           triangles[ii].points[0]=points+ijk[3*ii]-1;
