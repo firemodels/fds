@@ -21,25 +21,30 @@ CONTAINS
 ! ------------ SUBROUTINE GET_GEOM_ID ---------------------------------
 
 SUBROUTINE GET_GEOM_ID(ID,GEOM_INDEX, N_LAST)
-   CHARACTER(30), INTENT(IN) :: ID
-   INTEGER, INTENT(IN) :: N_LAST
-   INTEGER, INTENT(OUT) :: GEOM_INDEX
-   INTEGER :: N
-   TYPE(GEOMETRY_TYPE), POINTER :: G=>NULL()
+
+! return the index of the geometry array with label ID
+
+CHARACTER(30), INTENT(IN) :: ID
+INTEGER, INTENT(IN) :: N_LAST
+INTEGER, INTENT(OUT) :: GEOM_INDEX
+INTEGER :: N
+TYPE(GEOMETRY_TYPE), POINTER :: G=>NULL()
    
-   GEOM_INDEX=0
-   DO N=1,N_LAST
-      G=>GEOMETRY(N)
-      IF(TRIM(G%ID)==TRIM(ID))THEN
-         GEOM_INDEX=N
-         RETURN
-      ENDIF
-   END DO
+GEOM_INDEX=0
+DO N=1,N_LAST
+   G=>GEOMETRY(N)
+   IF(TRIM(G%ID)==TRIM(ID))THEN
+      GEOM_INDEX=N
+      RETURN
+   ENDIF
+END DO
 END SUBROUTINE GET_GEOM_ID
 
 ! ------------ SUBROUTINE READ_GEOM ---------------------------------
 
 SUBROUTINE READ_GEOM
+
+! input &GEOM lines
 
 INTEGER, PARAMETER :: MAX_VERTS=10000000 ! at some point we may decide to use dynmaic memory allocation
 INTEGER, PARAMETER :: MAX_FACES=MAX_VERTS
@@ -58,27 +63,27 @@ TYPE(GEOMETRY_TYPE), POINTER :: G=>NULL()
 NAMELIST /GEOM/ AZIM, COMPONENT_ONLY, DAZIM, DELEV, DSCALE, DXYZ0, DXYZ, &
                 ELEV, FACES, GEOM_IDS, ID, SCALE, SURF_ID, VERTS, XYZ0, XYZ
 
-N_GEOM=0
+N_GEOMETRY=0
 REWIND(LU_INPUT)
 COUNT_GEOM_LOOP: DO
    CALL CHECKREAD('GEOM',LU_INPUT,IOS)
    IF (IOS==1) EXIT COUNT_GEOM_LOOP
    READ(LU_INPUT,NML=GEOM,END=11,ERR=12,IOSTAT=IOS)
-   N_GEOM=N_GEOM+1
+   N_GEOMETRY=N_GEOMETRY+1
    12 IF (IOS>0) CALL SHUTDOWN('ERROR: problem with GEOM line')
 ENDDO COUNT_GEOM_LOOP
 11 REWIND(LU_INPUT)
 
-IF (N_GEOM==0) RETURN
+IF (N_GEOMETRY==0) RETURN
 
 ! Allocate GEOMETRY array
 
-ALLOCATE(GEOMETRY(N_GEOM),STAT=IZERO)
+ALLOCATE(GEOMETRY(N_GEOMETRY),STAT=IZERO)
 CALL ChkMemErr('READ','GEOMETRY',IZERO)
 
 ! read GEOM data
 
-READ_GEOM_LOOP: DO N=1,N_GEOM
+READ_GEOM_LOOP: DO N=1,N_GEOMETRY
    G=>GEOMETRY(N)
    
    CALL CHECKREAD('GEOM',LU_INPUT,IOS)
@@ -211,6 +216,9 @@ END SUBROUTINE READ_GEOM
 ! ------------ SUBROUTINE TRANSLATE_VEC ---------------------------------
 
 SUBROUTINE TRANSLATE_VEC(XYZ,N,XIN,XOUT)
+
+! translate a geometry by the vector XYZ
+
 INTEGER, INTENT(IN) :: N
 REAL(EB), INTENT(IN) :: XYZ(3), XIN(3*N)
 REAL(EB), INTENT(OUT) :: XOUT(3*N)
@@ -226,6 +234,9 @@ END SUBROUTINE TRANSLATE_VEC
 ! ------------ SUBROUTINE ROTATE_VEC ---------------------------------
 
 SUBROUTINE ROTATE_VEC(M,N,XYZ0,XIN,XOUT)
+
+! rotate the vector XIN about the origin XYZ0
+
 INTEGER, INTENT(IN) :: N
 REAL(EB), INTENT(IN) :: M(3,3), XIN(3*N), XYZ0(3)
 REAL(EB), INTENT(OUT) :: XOUT(3*N)
@@ -241,9 +252,11 @@ END SUBROUTINE ROTATE_VEC
 ! ------------ SUBROUTINE SETUP_AZ_ELEV ---------------------------------
 
 SUBROUTINE SETUP_AZ_ELEV(SCALE,AZ,ELEV,M)
+
 ! construct a rotation matrix M that rotates a vector by
 ! AZ degrees around the Z axis then ELEV degrees around
 ! the (cos AZ, sin AZ, 0) axis
+
 REAL(EB), INTENT(IN) :: SCALE(3), AZ, ELEV
 REAL(EB), DIMENSION(3,3), INTENT(OUT) :: M
 
@@ -272,8 +285,9 @@ END SUBROUTINE SETUP_AZ_ELEV
 ! ------------ SUBROUTINE SETUP_ROTATE ---------------------------------
 
 SUBROUTINE SETUP_ROTATE(ALPHA,U,M)
+
 ! construct a rotation matrix M that rotates a vector by
-! ALPHA degrees around an axis U
+! ALPHA degrees about an axis U
 
 REAL(EB), INTENT(IN) :: ALPHA, U(3)
 REAL(EB), INTENT(OUT) :: M(3,3)
@@ -300,11 +314,14 @@ END SUBROUTINE SETUP_ROTATE
 ! ------------ SUBROUTINE PROCESS_GEOMS ---------------------------------
 
 SUBROUTINE PROCESS_GEOM
+
+! transform (scale, rotate and translate) vectors found on each &GEOM line
+
    INTEGER :: I
    TYPE(GEOMETRY_TYPE), POINTER :: G=>NULL()
    REAL(EB) :: M(3,3), VEC(3)
 
-   DO I = 1, N_GEOM
+   DO I = 1, N_GEOMETRY
       G=>GEOMETRY(I)
 
       IF(G%N_VERTS.EQ.0)CYCLE
@@ -317,132 +334,135 @@ END SUBROUTINE PROCESS_GEOM
 ! ------------ SUBROUTINE MERGE_GEOMS ---------------------------------
 
 SUBROUTINE MERGE_GEOMS(VERTS,N_VERTS,FACES,SURF_IDS,N_FACES)
-   INTEGER N_VERTS, N_FACES, I, J
-   INTEGER, DIMENSION(:) :: FACES(3*N_FACES)
-   INTEGER, DIMENSION(:) :: SURF_IDS(N_FACES)
-   INTEGER, DIMENSION(:) :: OFFSETS(0:N_GEOM)
-   REAL(EB), DIMENSION(:) :: VERTS(3*N_VERTS)
-   TYPE(GEOMETRY_TYPE), POINTER :: G=>NULL()
-   INTEGER :: IZERO
-   INTEGER :: IVERT, IFACE, ISURF
+
+! combine vectors and faces found on all &GEOM lines into one set of VECTOR and FACE arrays
+
+INTEGER N_VERTS, N_FACES, II, J
+INTEGER, DIMENSION(:) :: FACES(3*N_FACES)
+INTEGER, DIMENSION(:) :: SURF_IDS(N_FACES)
+INTEGER :: OFFSET
+REAL(EB), DIMENSION(:) :: VERTS(3*N_VERTS)
+TYPE(GEOMETRY_TYPE), POINTER :: G=>NULL()
+INTEGER :: IZERO
+INTEGER :: IVERT, IFACE, ISURF
    
-   OFFSETS(0)=0
-   DO I = 1, N_GEOM
-      G=>GEOMETRY(I)
-
-      IF(G%COMPONENT_ONLY)CYCLE
-      OFFSETS(I) = OFFSETS(I-1) + G%N_VERTS
-   END DO
-   IVERT = 1
-   IFACE = 1
-   ISURF = 1
-   DO I = 0, N_GEOM-1
-      G=>GEOMETRY(I+1)
-      IF(G%COMPONENT_ONLY)CYCLE
-
-      IF(G%N_VERTS>0)THEN
-         VERTS(IVERT:IVERT + 3*G%N_VERTS - 1) = G%VERTS(1:3*G%N_VERTS)
-         IVERT = IVERT + 3*G%N_VERTS
-      ENDIF
-      
-      IF(G%N_FACES>0)THEN
-         FACES(IFACE:IFACE + 3*G%N_FACES - 1) = G%FACES(1:3*G%N_FACES)+OFFSETS(I)
-         SURF_IDS(ISURF:ISURF + G%N_FACES - 1) = G%SURFS(1:G%N_FACES)
-         IFACE = IFACE + 3*G%N_FACES
-         ISURF = ISURF +   G%N_FACES
-      ENDIF
-   END DO
+IVERT = 0
+IFACE = 0
+ISURF = 0
+OFFSET = 0
+DO II = 1, N_GEOMETRY
+   G=>GEOMETRY(II)
+   IF(G%COMPONENT_ONLY)CYCLE
+    IF(G%N_VERTS>0)THEN
+      VERTS(1+IVERT:IVERT + 3*G%N_VERTS) = G%VERTS(1:3*G%N_VERTS)
+      IVERT = IVERT + 3*G%N_VERTS
+   ENDIF
+   
+   IF(G%N_FACES>0)THEN
+      FACES(1+IFACE:3*G%N_FACES + IFACE) = G%FACES(1:3*G%N_FACES)+OFFSET
+      SURF_IDS(1+ISURF:ISURF + G%N_FACES) = G%SURFS(1:G%N_FACES)
+      IFACE = IFACE + 3*G%N_FACES
+      ISURF = ISURF +   G%N_FACES
+   ENDIF
+   OFFSET = OFFSET + G%N_VERTS
+END DO
 END SUBROUTINE MERGE_GEOMS
 
 ! ------------ SUBROUTINE EXPAND_GROUPS ---------------------------------
 
 SUBROUTINE EXPAND_GROUPS
-! for each geometry specifed by &GEOM, merge geometries referened by GEOM_IDS after scaling, rotating and translating 
-   INTEGER I, J
-   TYPE(GEOMETRY_TYPE), POINTER :: G=>NULL(), GSUB=>NULL()
-   REAL(EB), ALLOCATABLE, DIMENSION(:) :: VERTS
-   INTEGER, ALLOCATABLE, DIMENSION(:) :: FACES, SURF_IDS
-   INTEGER :: N_VERTS, N_FACES
-   INTEGER :: IZERO
-   REAL(EB) :: M(3,3)
-   INTEGER :: IVERT, IFACE, ISURF
-   REAL(EB), POINTER, DIMENSION(:) :: XIN, XOUT
-   INTEGER, POINTER, DIMENSION(:) :: FIN,FOUT, SURFIN, SURFOUT
-   INTEGER :: NSUB_VERTS ,NSUB_FACES
+
+! for each geometry specifed by &GEOM, merge geometries referened
+! by GEOM_IDS after scaling, rotating and translating
+
+INTEGER I, J
+TYPE(GEOMETRY_TYPE), POINTER :: G=>NULL(), GSUB=>NULL()
+REAL(EB), ALLOCATABLE, DIMENSION(:) :: VERTS
+INTEGER, ALLOCATABLE, DIMENSION(:) :: FACES, SURF_IDS
+INTEGER :: N_VERTS, N_FACES
+INTEGER :: IZERO
+REAL(EB) :: M(3,3)
+INTEGER :: IVERT, IFACE, ISURF
+REAL(EB), POINTER, DIMENSION(:) :: XIN, XOUT
+INTEGER, POINTER, DIMENSION(:) :: FIN,FOUT, SURFIN, SURFOUT
+INTEGER :: NSUB_VERTS ,NSUB_FACES
    
-   DO I = 2, N_GEOM ! first geometry will not have any sub-geometries (since all sub-geometries must have 
-                    ! been defined in a previous &GEOM line)
-      G=>GEOMETRY(I)
+DO I = 2, N_GEOMETRY ! first geometry will not have any sub-geometries (since all sub-geometries must have 
+                     ! been defined in a previous &GEOM line)
+   G=>GEOMETRY(I)
+     
+   IF(G%NSUB_GEOMS.EQ.0)CYCLE
       
-      IF(G%NSUB_GEOMS.EQ.0)CYCLE
-      
-      N_VERTS=0  ! add number of vertices and faces in geometries referenced in GEOM_IDS
-      N_FACES=0
-      DO J = 1, G%NSUB_GEOMS
-        GSUB=>GEOMETRY(G%SUB_GEOMS(J))
+   N_VERTS=0  ! add number of vertices and faces in geometries referenced in GEOM_IDS
+   N_FACES=0
+   DO J = 1, G%NSUB_GEOMS
+      GSUB=>GEOMETRY(G%SUB_GEOMS(J))
         
-        IF(GSUB%N_VERTS.EQ.0.OR.GSUB%N_FACES.EQ.0)CYCLE
-        N_VERTS = N_VERTS + GSUB%N_VERTS
-        N_FACES = N_FACES + GSUB%N_FACES
-      END DO
-      
-      IF(N_VERTS.EQ.0.OR.N_FACES.EQ.0)THEN ! nothing to do if GEOM_IDS geometries are empty
-         G%N_VERTS=0
-         G%N_FACES=0
-         CYCLE
-      ENDIF
-      
-      G%N_VERTS=N_VERTS
-      G%N_FACES=N_FACES
-      
-      ALLOCATE(G%FACES(3*N_FACES),STAT=IZERO)
-      CALL ChkMemErr('READ_GEOM','FACES',IZERO)
-
-      ALLOCATE(G%VERTS(3*N_VERTS),STAT=IZERO)
-      CALL ChkMemErr('READ_GEOM','VERTS',IZERO)
-      
-      ALLOCATE(G%SURFS(N_FACES),STAT=IZERO)
-      CALL ChkMemErr('READ_GEOM','SURFS',IZERO)
-
-      IVERT = 0
-      IFACE = 0
-      DO J = 1, G%NSUB_GEOMS
-         GSUB=>GEOMETRY(G%SUB_GEOMS(J))
-         NSUB_VERTS = GSUB%N_VERTS
-         NSUB_FACES = GSUB%N_FACES
-        
-         IF(NSUB_VERTS.EQ.0.OR.NSUB_FACES.EQ.0)CYCLE
-
-         CALL SETUP_AZ_ELEV(G%DSCALE(1,J),G%DAZIM(J),G%DELEV(J),M)
-        
-          XIN(1:3*NSUB_VERTS) => GSUB%VERTS(1:3*NSUB_VERTS)
-         XOUT(1:3*NSUB_VERTS) => G%VERTS(1+3*IVERT:3*(IVERT+NSUB_VERTS))
-        
-         CALL ROTATE_VEC(M,NSUB_VERTS,G%DXYZ0(1,J),XIN,XOUT)
-         CALL TRANSLATE_VEC(G%DXYZ(1,J),NSUB_VERTS,XOUT,XOUT)
-        
-        ! copy and offset face indices
-        
-         FIN(1:3*NSUB_FACES) => GSUB%FACES(1:3*NSUB_FACES)
-         FOUT(1:3*NSUB_FACES) => G%FACES(1+3*IFACE:3*(IFACE+NSUB_FACES))
-         FOUT = FIN + IVERT
-
-        ! copy surface indices
-        
-         SURFIN(1:NSUB_FACES) => GSUB%SURFS(1:NSUB_FACES)
-         SURFOUT(1:NSUB_FACES) => G%SURFS(1+IFACE:IFACE+NSUB_FACES)
-         SURFOUT = SURFIN
-        
-         IVERT = IVERT + NSUB_VERTS
-         IFACE = IFACE + NSUB_FACES
-      END DO
-      
+      IF(GSUB%N_VERTS.EQ.0.OR.GSUB%N_FACES.EQ.0)CYCLE
+      N_VERTS = N_VERTS + GSUB%N_VERTS
+      N_FACES = N_FACES + GSUB%N_FACES
    END DO
+      
+   IF(N_VERTS.EQ.0.OR.N_FACES.EQ.0)THEN ! nothing to do if GEOM_IDS geometries are empty
+      G%N_VERTS=0
+      G%N_FACES=0
+      CYCLE
+   ENDIF
+      
+   G%N_VERTS=N_VERTS
+   G%N_FACES=N_FACES
+      
+   ALLOCATE(G%FACES(3*N_FACES),STAT=IZERO)
+   CALL ChkMemErr('READ_GEOM','FACES',IZERO)
+
+   ALLOCATE(G%VERTS(3*N_VERTS),STAT=IZERO)
+   CALL ChkMemErr('READ_GEOM','VERTS',IZERO)
+      
+   ALLOCATE(G%SURFS(N_FACES),STAT=IZERO)
+   CALL ChkMemErr('READ_GEOM','SURFS',IZERO)
+
+   IVERT = 0
+   IFACE = 0
+   DO J = 1, G%NSUB_GEOMS
+      GSUB=>GEOMETRY(G%SUB_GEOMS(J))
+      NSUB_VERTS = GSUB%N_VERTS
+      NSUB_FACES = GSUB%N_FACES
+        
+      IF(NSUB_VERTS.EQ.0.OR.NSUB_FACES.EQ.0)CYCLE
+
+      CALL SETUP_AZ_ELEV(G%DSCALE(1,J),G%DAZIM(J),G%DELEV(J),M)
+        
+      XIN(1:3*NSUB_VERTS) => GSUB%VERTS(1:3*NSUB_VERTS)
+      XOUT(1:3*NSUB_VERTS) => G%VERTS(1+3*IVERT:3*(IVERT+NSUB_VERTS))
+        
+      CALL ROTATE_VEC(M,NSUB_VERTS,G%DXYZ0(1,J),XIN,XOUT)
+      CALL TRANSLATE_VEC(G%DXYZ(1,J),NSUB_VERTS,XOUT,XOUT)
+        
+      ! copy and offset face indices
+        
+      FIN(1:3*NSUB_FACES) => GSUB%FACES(1:3*NSUB_FACES)
+      FOUT(1:3*NSUB_FACES) => G%FACES(1+3*IFACE:3*(IFACE+NSUB_FACES))
+      FOUT = FIN + IVERT
+
+      ! copy surface indices
+        
+      SURFIN(1:NSUB_FACES) => GSUB%SURFS(1:NSUB_FACES)
+      SURFOUT(1:NSUB_FACES) => G%SURFS(1+IFACE:IFACE+NSUB_FACES)
+      SURFOUT = SURFIN
+        
+      IVERT = IVERT + NSUB_VERTS
+      IFACE = IFACE + NSUB_FACES
+   END DO
+      
+END DO
 END SUBROUTINE EXPAND_GROUPS
 
 ! ------------ SUBROUTINE WRITE_GEOM ---------------------------------
 
 SUBROUTINE WRITE_GEOM
+
+! output geometries to a .ge file
+
 INTEGER :: I
 TYPE(GEOMETRY_TYPE), POINTER :: G=>NULL()
 INTEGER :: N_VERTS, N_FACES
@@ -454,14 +474,14 @@ REAL(FB) :: STIME=0.0
 INTEGER :: N_VERT_S_VALS, N_VERT_D_VALS
 INTEGER :: N_FACE_S_VALS, N_FACE_D_VALS
 
-IF (N_GEOM.LE.0) RETURN
+IF (N_GEOMETRY.LE.0) RETURN
 
 CALL PROCESS_GEOM  ! scale, rotate, translate GEOM vertices 
 CALL EXPAND_GROUPS ! create vertex and face list from geometries specified in GEOM_IDS list
 
 N_VERTS=0
 N_FACES=0
-DO I = 1, N_GEOM ! count vertices and faces
+DO I = 1, N_GEOMETRY ! count vertices and faces
    G=>GEOMETRY(I)
       
    IF(G%COMPONENT_ONLY)CYCLE   
@@ -509,10 +529,13 @@ END SUBROUTINE WRITE_GEOM
 
 SUBROUTINE WRITE_GEOM_SUMMARY
 
+! debug output routine (not intended for FDS)
+
 INTEGER :: I,J
 
 TYPE(GEOMETRY_TYPE), POINTER :: G=>NULL()
-DO I = 1, N_GEOM
+
+DO I = 1, N_GEOMETRY
    G=>GEOMETRY(I)
    
    WRITE(6,*)" GEOM:",I,TRIM(G%ID)
