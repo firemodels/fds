@@ -13,6 +13,9 @@
 #  = Input variables =
 #  ===================
 
+# Firebot mode (verification or validation); default mode: verification
+FIREBOT_MODE="verification"
+
 # Firebot's username
 FIREBOT_USERNAME="firebot"
 
@@ -44,14 +47,21 @@ echo "firebot.sh [ -q queue_name -r revision_number -s -u svn_username -y ]"
 echo "Runs Firebot V&V testing script"
 echo ""
 echo "Options"
-echo "-q queue_name - run cases using the queue queue_name"
+echo "-q - queue_name - run cases using the queue queue_name"
 echo "     default: firebot"
-echo "-r revision_number - run cases using a specific SVN revision number"
+echo ""
+echo "-r - revision_number - run cases using a specific SVN revision number"
 echo "     default: (none, latest SVN HEAD)"
+echo ""
 echo "-s - skip fixing SVN properties"
 echo "     default: SKIP_SVN_PROPS is undefined (false)"
+echo ""
 echo "-u - specify SVN username to use"
 echo "     default: fds.firebot"
+echo ""
+echo "-v - run Firebot in validation mode"
+echo "     default: (none, Firebot runs in verification mode)"
+echo ""
 echo "-y - run Firebot as any user (warning!)"
 echo "     default: (none)"
 exit
@@ -77,6 +87,11 @@ case $OPTION in
    ;;
   u)
    SVN_USERNAME="$OPTARG"
+   ;;
+  v)
+   FIREBOT_MODE="validation"
+   # Disable time limit email
+   TIME_LIMIT_EMAIL_NOTIFICATION="sent"
    ;;
   y)
    RUN_AS_ANOTHER_USER=true
@@ -279,7 +294,11 @@ check_svn_checkout()
       echo "Errors from Stage 1 - SVN operations:" >> $ERROR_LOG
       cat $FIREBOT_DIR/output/stage1 >> $ERROR_LOG
       echo "" >> $ERROR_LOG
-      email_build_status
+      if [ $FIREBOT_MODE == "verification" ] ; then
+         email_build_status 'Firebot' 'Build'
+      elif [ $FIREBOT_MODE == "validation" ] ; then
+         email_build_status 'Validationbot' 'Validation'
+      fi
       exit
    else
       stage1_success=true
@@ -449,24 +468,24 @@ check_inspect_fds_openmp_db()
 #  = Stage 3 - Run verification cases (debug mode) =
 #  =================================================
 
-wait_verification_cases_debug_start()
+wait_cases_debug_start()
 {
    # Scans qstat and waits for verification cases to start
    while [[ `qstat | grep $(whoami) | awk '{print $5}' | grep Q` != '' ]]; do
       JOBS_REMAINING=`qstat | grep $(whoami) | awk '{print $5}' | grep Q | wc -l`
-      echo "Waiting for ${JOBS_REMAINING} verification cases to start." >> $FIREBOT_DIR/output/stage3
+      echo "Waiting for ${JOBS_REMAINING} ${1} cases to start." >> $FIREBOT_DIR/output/stage3
       TIME_LIMIT_STAGE="3"
       check_time_limit
       sleep 30
    done
 }
 
-wait_verification_cases_debug_end()
+wait_cases_debug_end()
 {
    # Scans qstat and waits for verification cases to end
    while [[ `qstat | grep $(whoami)` != '' ]]; do
       JOBS_REMAINING=`qstat | grep $(whoami) | wc -l`
-      echo "Waiting for ${JOBS_REMAINING} verification cases to complete." >> $FIREBOT_DIR/output/stage3
+      echo "Waiting for ${JOBS_REMAINING} ${1} cases to complete." >> $FIREBOT_DIR/output/stage3
       TIME_LIMIT_STAGE="3"
       check_time_limit
       sleep 30
@@ -475,7 +494,6 @@ wait_verification_cases_debug_end()
 
 run_verification_cases_debug()
 {
-
    #  ============================
    #  = Run all FDS serial cases =
    #  ============================
@@ -485,7 +503,7 @@ run_verification_cases_debug()
    # Submit FDS verification cases and wait for them to start (run serial cases in debug mode on firebot queue)
    echo 'Running FDS verification cases (serial):' >> $FIREBOT_DIR/output/stage3
    ./Run_FDS_Cases.sh -c serial -d -q $QUEUE >> $FIREBOT_DIR/output/stage3 2>&1
-   wait_verification_cases_debug_start
+   wait_cases_debug_start 'verification'
 
    # Wait some additional time for all cases to start
    sleep 30
@@ -495,7 +513,7 @@ run_verification_cases_debug()
    echo "" >> $FIREBOT_DIR/output/stage3 2>&1
 
    # Wait for serial verification cases to end
-   wait_verification_cases_debug_end
+   wait_cases_debug_end 'verification'
 
    #  =========================
    #  = Run all FDS MPI cases =
@@ -506,7 +524,7 @@ run_verification_cases_debug()
    # Submit FDS verification cases and wait for them to start (run MPI cases in debug mode on firebot queue)
    echo 'Running FDS verification cases (MPI):' >> $FIREBOT_DIR/output/stage3 2>&1
    ./Run_FDS_Cases.sh -c mpi -d -q $QUEUE >> $FIREBOT_DIR/output/stage3 2>&1
-   wait_verification_cases_debug_start
+   wait_cases_debug_start 'verification'
 
    # Wait some additional time for all cases to start
    sleep 30
@@ -516,7 +534,7 @@ run_verification_cases_debug()
    echo "" >> $FIREBOT_DIR/output/stage3 2>&1
 
    # Wait for MPI verification cases to end
-   wait_verification_cases_debug_end
+   wait_cases_debug_end 'verification'
 
    #  =====================
    #  = Run all SMV cases =
@@ -527,7 +545,7 @@ run_verification_cases_debug()
    # Submit SMV verification cases and wait for them to start (run SMV cases in debug mode on firebot queue)
    echo 'Running SMV verification cases:' >> $FIREBOT_DIR/output/stage3 2>&1
    ./Run_SMV_Cases.sh -d -q $QUEUE >> $FIREBOT_DIR/output/stage3 2>&1
-   wait_verification_cases_debug_start
+   wait_cases_debug_start 'verification'
 
    # Wait some additional time for all cases to start
    sleep 30
@@ -537,7 +555,7 @@ run_verification_cases_debug()
    echo "" >> $FIREBOT_DIR/output/stage3 2>&1
 
    # Wait for SMV verification cases to end
-   wait_verification_cases_debug_end
+   wait_cases_debug_end 'verification'
 
    #  ======================
    #  = Remove .stop files =
@@ -548,10 +566,16 @@ run_verification_cases_debug()
    find . -name '*.stop' -exec rm -f {} \;
 }
 
-check_verification_cases_debug()
+run_validation_cases_debug()
 {
-   # Scan and report any errors in FDS verification cases
-   cd $FDS_SVNROOT/Verification
+   # Placeholder
+   sleep 30
+}
+
+check_cases_debug()
+{
+   # Scan and report any errors in FDS cases
+   cd $1
 
    if [[ `grep -rI 'Run aborted' ${FIREBOT_DIR}/output/stage3` == "" ]] && \
       [[ `grep -rI Segmentation *` == "" ]] && \
@@ -567,13 +591,13 @@ check_verification_cases_debug()
       grep -rI 'STOP: Numerical' * >> $FIREBOT_DIR/output/stage3_errors
       grep -rI -A 20 forrtl * >> $FIREBOT_DIR/output/stage3_errors
       
-      echo "Errors from Stage 3 - Run verification cases (debug mode):" >> $ERROR_LOG
+      echo "Errors from Stage 3 - Run ${2} cases (debug mode):" >> $ERROR_LOG
       cat $FIREBOT_DIR/output/stage3_errors >> $ERROR_LOG
       echo "" >> $ERROR_LOG
    fi
 
    # After Stage 3, delete all unversioned FDS output files before continuing
-   cd $FDS_SVNROOT/Verification
+   cd $1
    svn status --no-ignore | grep '^[I?]' | cut -c 9- | while IFS= read -r f; do rm -rf "$f"; done
 }
 
@@ -750,12 +774,12 @@ check_smv_utilities()
 #  = Stage 5 - Run verification cases (release mode) =
 #  ===================================================
 
-wait_verification_cases_release_end()
+wait_cases_release_end()
 {
    # Scans qstat and waits for verification cases to end
    while [[ `qstat | grep $(whoami)` != '' ]]; do
       JOBS_REMAINING=`qstat | grep $(whoami) | wc -l`
-      echo "Waiting for ${JOBS_REMAINING} verification cases to complete." >> $FIREBOT_DIR/output/stage5
+      echo "Waiting for ${JOBS_REMAINING} ${1} cases to complete." >> $FIREBOT_DIR/output/stage5
       TIME_LIMIT_STAGE="5"
       check_time_limit
       sleep 60
@@ -776,13 +800,19 @@ run_verification_cases_release()
    ./Run_SMV_Cases.sh -q $QUEUE >> $FIREBOT_DIR/output/stage5 2>&1
 
    # Wait for all verification cases to end
-   wait_verification_cases_release_end
+   wait_cases_release_end 'verification'
 }
 
-check_verification_cases_release()
+run_validation_cases_release()
 {
-   # Scan and report any errors in FDS verification cases
-   cd $FDS_SVNROOT/Verification
+   # Placeholder
+   sleep 30
+}
+
+check_cases_release()
+{
+   # Scan and report any errors in FDS cases
+   cd $1
 
    if [[ `grep -rI 'Run aborted' ${FIREBOT_DIR}/output/stage5` == "" ]] && \
       [[ `grep -rI Segmentation *` == "" ]] && \
@@ -798,10 +828,19 @@ check_verification_cases_release()
       grep -rI 'STOP: Numerical' * >> $FIREBOT_DIR/output/stage5_errors
       grep -rI -A 20 forrtl * >> $FIREBOT_DIR/output/stage5_errors
       
-      echo "Errors from Stage 5 - Run verification cases (release mode):" >> $ERROR_LOG
+      echo "Errors from Stage 5 - Run ${2} cases (release mode):" >> $ERROR_LOG
       cat $FIREBOT_DIR/output/stage5_errors >> $ERROR_LOG
       echo "" >> $ERROR_LOG
    fi
+}
+
+commit_validation_results()
+{
+   # cd to SVN root
+   cd $FDS_SVNROOT
+
+   # Commit new validation results
+   svn commit -m 'Validationbot: Updated validation results' &> /dev/null
 }
 
 #  ================================
@@ -1251,19 +1290,19 @@ email_build_status()
    if [[ -e $WARNING_LOG && -e $ERROR_LOG ]]
    then
      # Send email with failure message and warnings, body of email contains appropriate log file
-     mail -s "[Firebot@$hostname] Build failure and warnings for Revision ${SVN_REVISION}." $mailToFDS < $ERROR_LOG > /dev/null
+     mail -s "[${1}@$hostname] ${2} failure and warnings for Revision ${SVN_REVISION}." $mailToFDS < $ERROR_LOG > /dev/null
 
    # Check for errors only
    elif [ -e $ERROR_LOG ]
    then
       # Send email with failure message, body of email contains error log file
-      mail -s "[Firebot@$hostname] Build failure for Revision ${SVN_REVISION}." $mailToFDS < $ERROR_LOG > /dev/null
+      mail -s "[${1}@$hostname] ${2} failure for Revision ${SVN_REVISION}." $mailToFDS < $ERROR_LOG > /dev/null
 
    # Check for warnings only
    elif [ -e $WARNING_LOG ]
    then
       # Send email with success message, include warnings
-      mail -s "[Firebot@$hostname] Build success, with warnings. Revision ${SVN_REVISION} passed all build tests." $mailToFDS < $WARNING_LOG > /dev/null
+      mail -s "[${1}@$hostname] ${2} success, with warnings. Revision ${SVN_REVISION} passed all build tests." $mailToFDS < $WARNING_LOG > /dev/null
 
    # No errors or warnings
    else
@@ -1277,7 +1316,7 @@ email_build_status()
       echo "Nightly Manuals (private):  http://blaze.nist.gov/firebot" >> $TIME_LOG
       echo "Nightly Manuals (public):   https://drive.google.com/folderview?id=0B_wB1pJL2bFQaDJaOFNnUDR4LXM#list" >> $TIME_LOG
       echo "-------------------------------" >> $TIME_LOG
-      mail -s "[Firebot@$hostname] Build success! Revision ${SVN_REVISION} passed all build tests." $mailToFDS < $TIME_LOG > /dev/null
+      mail -s "[${1}@$hostname] ${2} success! Revision ${SVN_REVISION} passed all build tests." $mailToFDS < $TIME_LOG > /dev/null
    fi
 }
 
@@ -1298,6 +1337,7 @@ update_and_compile_cfast
 clean_svn_repo
 do_svn_checkout
 check_svn_checkout
+# Only run if -s option (skip SVN properties) is not used
 if [[ ! $SKIP_SVN_PROPS ]] ; then
    fix_svn_properties
 fi
@@ -1322,9 +1362,12 @@ check_compile_fds_openmp_db
 
 ### Stage 3 ###
 # Depends on successful FDS debug compile
-if [[ $stage2a_success && $stage2b_success ]] ; then
+if [[ $stage2a_success && $stage2b_success && $FIREBOT_MODE == "verification" ]] ; then
    run_verification_cases_debug
-   check_verification_cases_debug
+   check_cases_debug $FDS_SVNROOT/Verification 'verification'
+elif [[ $stage2a_success && $stage2b_success && $FIREBOT_MODE == "validation" ]] ; then
+   run_validation_cases_debug
+   check_cases_debug $FDS_SVNROOT/Validation 'validation'
 fi
 
 ### Stage 4a ###
@@ -1340,71 +1383,93 @@ compile_fds_openmp
 check_compile_fds_openmp
 
 ### Stage 5pre ###
-compile_smv_utilities
-check_smv_utilities
+# Only run if firebot is in "verification" mode
+if [ $FIREBOT_MODE == "verification" ] ; then
+   compile_smv_utilities
+   check_smv_utilities
+fi
 
 ### Stage 5 ###
 # Depends on successful FDS compile
-if [[ $stage4a_success && $stage4b_success ]] ; then
+if [[ $stage4a_success && $stage4b_success && $FIREBOT_MODE == "verification" ]] ; then
    run_verification_cases_release
-   check_verification_cases_release
+   check_cases_release $FDS_SVNROOT/Verification 'verification'
+elif [[ $stage4a_success && $stage4b_success && $FIREBOT_MODE == "validation" ]] ; then
+   run_validation_cases_release
+   check_cases_release $FDS_SVNROOT/Validation 'validation'
 fi
 
-### Stage 6a ###
-compile_smv_db
-check_compile_smv_db
-
-### Stage 6b ###
-# Depends on successful SMV debug compile
-if [[ $stage6a_success ]] ; then
-   make_smv_pictures_db
-   check_smv_pictures_db
+# Depends on successful run of validation cases
+if [[ $stage5_success && $FIREBOT_MODE == "validation" ]] ; then
+   commit_validation_results
 fi
 
-### Stage 6c ###
-compile_smv
-check_compile_smv
+#  ======================================================================
+#  = Only run the following stages if firebot is in "verification" mode =
+#  ======================================================================
 
-### Stage 6d ###
-# Depends on successful SMV compile
-if [[ $stage6c_success ]] ; then
-   make_smv_pictures
-   check_smv_pictures
+if [ $FIREBOT_MODE == "verification" ] ; then
+   ### Stage 6a ###
+   compile_smv_db
+   check_compile_smv_db
+
+   ### Stage 6b ###
+   # Depends on successful SMV debug compile
+   if [[ $stage6a_success ]] ; then
+      make_smv_pictures_db
+      check_smv_pictures_db
+   fi
+
+   ### Stage 6c ###
+   compile_smv
+   check_compile_smv
+
+   ### Stage 6d ###
+   # Depends on successful SMV compile
+   if [[ $stage6c_success ]] ; then
+      make_smv_pictures
+      check_smv_pictures
+   fi
+
+   ### Stage 6e ###
+   # Depends on successful SMV compile
+   if [[ $stage6c_success ]] ; then
+      make_fds_pictures
+      check_fds_pictures
+   fi
+
+   ### Stage 7a ###
+   check_matlab_license_server
+   run_matlab_verification
+   check_matlab_verification
+   check_verification_stats
+
+   ### Stage 7b ###
+   check_matlab_license_server
+   run_matlab_validation
+   check_matlab_validation
+
+   ### Stage 7c ###
+   generate_timing_stats
+   archive_timing_stats
+
+   ### Stage 8 ###
+   make_fds_user_guide
+   make_fds_verification_guide
+   make_fds_technical_guide
+   make_fds_validation_guide
+   make_smv_user_guide
+   make_smv_technical_guide
+   make_smv_verification_guide
+   make_fds_configuration_management_plan
 fi
-
-### Stage 6e ###
-# Depends on successful SMV compile
-if [[ $stage6c_success ]] ; then
-   make_fds_pictures
-   check_fds_pictures
-fi
-
-### Stage 7a ###
-check_matlab_license_server
-run_matlab_verification
-check_matlab_verification
-check_verification_stats
-
-### Stage 7b ###
-check_matlab_license_server
-run_matlab_validation
-check_matlab_validation
-
-### Stage 7c ###
-generate_timing_stats
-archive_timing_stats
-
-### Stage 8 ###
-make_fds_user_guide
-make_fds_verification_guide
-make_fds_technical_guide
-make_fds_validation_guide
-make_smv_user_guide
-make_smv_technical_guide
-make_smv_verification_guide
-make_fds_configuration_management_plan
 
 ### Wrap up and report results ###
 set_files_world_readable
-save_build_status
-email_build_status
+if [ $FIREBOT_MODE == "verification" ] ; then
+   save_build_status
+   email_build_status 'Firebot' 'Build'
+elif [ $FIREBOT_MODE == "validation" ] ; then
+   email_build_status 'Validationbot' 'Validation'
+fi
+
