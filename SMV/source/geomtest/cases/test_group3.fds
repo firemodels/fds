@@ -16,18 +16,19 @@
               -1.0,0.0,0.0,
               -1.0,0.0,1.0,
               -2.0,0.0,1.0,
-              FACES=1,2,3,1,3,4
+              FACES=1,2,3,1,3,4,
               AZIM=0.0,ELEV=0,SURF_ID='surf1',
               COMPONENT_ONLY=.TRUE.
 /
 
 &GEOM ID='group1',
-    GEOM_IDS(1)='geom1',DXYZ(1,1)=0.0,0.0,0.0 
-    GEOM_IDS(2)='geom1',DXYZ(1,2)=0.0,0.0,1.2 
+    GEOM_IDS(1)='geom1',DXYZ(1,1)=0.0,0.0,0.0, 
+    GEOM_IDS(2)='geom1',DXYZ(1,2)=0.0,0.0,1.2, 
     COMPONENT_ONLY=.TRUE.
 /
 
 &GEOM ID='group2',
-    GEOM_IDS(1)='group1',DXYZ(1,1)=0.0,0.0,0.0 
-    GEOM_IDS(2)='group1',DXYZ(1,2)=2.0,0.0,0.0 
+    GEOM_IDS(1)='group1',DXYZ(1,1)=0.0,0.0,0.0, 
+    GEOM_IDS(2)='group1',DXYZ(1,2)=2.0,0.0,0.0, 
+    SURF_ID='surf3'
 /
