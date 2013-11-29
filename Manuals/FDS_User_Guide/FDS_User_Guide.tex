@@ -366,7 +366,6 @@ in FDS 6 are:
 \begin{itemize}
 \item If you want to model a fire, you {\em must} include a {\ct REAC} line with a specified {\ct FUEL}. See Chapter~\ref{info:REAC} for details.
 \item The output quantity {\ct 'MIXTURE\_FRACTION'} has been replaced with {\ct 'MIXTURE FRACTION'} and is only usable if there is a single {\ct REAC} input of the form ${\rm A} \; + \; {\rm B} \rightarrow {\rm C}$.
-\item The {\ct ISOTHERMAL} feature is no longer an option.
 \item There is no longer a {\ct STATE\_FILE} because there is no longer a simple mixture fraction model.
 \item {\ct PRESSURE\_CORRECTION} has been eliminated. See Section~\ref{info:PRES} for ways to improve the performance of the pressure solver.
 \item Species mass and volume fraction outputs are no longer invoked using {\ct QUANTITY='species name'}. Use {\ct QUANTITY='MASS FRACTION'} or {\ct QUANTITY='VOLUME FRACTION'} along with
@@ -397,7 +396,6 @@ Namelist  & FDS 5 Parameter & Namelist  & FDS 6 Parameter & Notes \\ \hline \hli
 {\ct MISC}    & {\ct CONDUCTIVITY}                  &  {\ct SPEC}  & {\ct CONDUCTIVITY}                          & Section~\ref{info:SPEC}                  \\ \hline
 {\ct MISC}    & {\ct CO\_PRODUCTION}                &              & New procedure                               & Section~\ref{info:finite}                \\ \hline
 {\ct MISC}    & {\ct CSMAG}                         &  {\ct MISC}  & {\ct C\_SMAGORINSKY}                        & Section~\ref{info:LES}                   \\ \hline
-{\ct MISC}    & {\ct ISOTHERMAL}                    &              & Eliminated                                  &                                          \\ \hline
 {\ct MISC}    & {\ct MW}                            &  {\ct SPEC}  & {\ct MW}                                    & Section~\ref{info:SPEC}                  \\ \hline
 {\ct MISC}    & {\ct PRESSURE\_CORRECTION}          &  {\ct PRES}  & {\ct VELOCITY\_TOLERANCE}                   & Section~\ref{info:PRES}                  \\ \hline
 {\ct MISC}    & {\ct RADIATION}                     &  {\ct RADI}  & {\ct RADIATION}                             & Section~\ref{info:RADI}                  \\ \hline
