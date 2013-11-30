@@ -13,7 +13,7 @@
 &GEOM ID='blade',AZIM=0.0,AZIM_DOT=0.72
         VERTS=0.0,0.0,0.0,
               1.0,0.0,0.0,
-              1.0,1.0,0.0,
+              1.0,0.0,1.0,
         FACES=1,2,3/
 
 &GEOM ID='prop' GEOM_IDS(1)='blade',DAZIM(1)=0.0,
