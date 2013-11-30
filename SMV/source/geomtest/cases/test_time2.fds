@@ -1,0 +1,25 @@
+&HEAD CHID='test_time2' /
+
+&TIME T_END=1000.0 /
+&MESH XB=-1.0,1.0,-1.0,1.0,-1.0,1.0 /
+&GRID IBAR=10,JBAR=10,KBAR=10 /
+
+&SURF ID='surf1',RGB=255,0,0 /
+&SURF ID='surf2',RGB=0,255,0 /
+&SURF ID='surf3',RGB=0,0,255 /
+
+***AZIMUTHAL TEST
+
+&GEOM ID='blade',AZIM=0.0,AZIM_DOT=0.72
+        VERTS=0.0,0.0,0.0,
+              1.0,0.0,0.0,
+              1.0,1.0,0.0,
+        FACES=1,2,3/
+
+&GEOM ID='prop' GEOM_IDS(1)='blade',DAZIM(1)=0.0,
+                GEOM_IDS(2)='blade',DAZIM(2)=90.0,
+                GEOM_IDS(3)='blade',DAZIM(3)=180.0,
+                GEOM_IDS(4)='blade',DAZIM(4)=270.0,
+                SURF_ID='surf1',ELEV=45/
+
+
