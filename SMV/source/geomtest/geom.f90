@@ -212,12 +212,9 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
    G%SURF_ID = SURF_ID
 
    IF (N_FACES.GT.0) THEN
-      ALLOCATE(G%FACES_BASE(3*N_FACES),STAT=IZERO)
-      CALL ChkMemErr('READ_GEOM','FACES_BASE',IZERO)
-      G%FACES_BASE(1:3*N_FACES) = FACES(1:3*N_FACES)
-   
       ALLOCATE(G%FACES(3*N_FACES),STAT=IZERO)
       CALL ChkMemErr('READ_GEOM','FACES',IZERO)
+      G%FACES(1:3*N_FACES) = FACES(1:3*N_FACES)
       
       DO I = 1, 3*N_FACES
          IF (FACES(I).LT.1.OR.FACES(I).GT.N_VERTS) THEN
@@ -225,13 +222,10 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
          ENDIF
       END DO
 
-      ALLOCATE(G%SURFS_BASE(N_FACES),STAT=IZERO)
-      CALL ChkMemErr('READ_GEOM','SURFS',IZERO)
-      SURF_INDEX = GET_SURF_INDEX(SURF_ID)
-      G%SURFS_BASE(1:N_FACES) = SURF_INDEX
-      
       ALLOCATE(G%SURFS(N_FACES),STAT=IZERO)
       CALL ChkMemErr('READ_GEOM','SURFS',IZERO)
+      SURF_INDEX = GET_SURF_INDEX(SURF_ID)
+      G%SURFS(1:N_FACES) = SURF_INDEX
    ENDIF
 
    IF (N_VERTS.GT.0) THEN
@@ -524,7 +518,7 @@ DO I = 2, N_GEOMETRY ! first geometry will not have any sub-geometries (since al
       DSCALEPTR(1:3) => G%DSCALE(1:3,J)
       CALL SETUP_TRANSFORM(DSCALEPTR,G%DAZIM(J),G%DELEV(J),M)
         
-      XIN(1:3*NSUB_VERTS) => GSUB%VERTS_BASE(1:3*NSUB_VERTS)
+      XIN(1:3*NSUB_VERTS) => GSUB%VERTS(1:3*NSUB_VERTS)
       XOUT(1:3*NSUB_VERTS) => G%VERTS(1+3*IVERT:3*(IVERT+NSUB_VERTS))
         
       DXYZ0PTR(1:3) => G%DXYZ0(1:3,J)
@@ -534,13 +528,13 @@ DO I = 2, N_GEOMETRY ! first geometry will not have any sub-geometries (since al
         
       ! copy and offset face indices
         
-      FIN(1:3*NSUB_FACES) => GSUB%FACES_BASE(1:3*NSUB_FACES)
+      FIN(1:3*NSUB_FACES) => GSUB%FACES(1:3*NSUB_FACES)
       FOUT(1:3*NSUB_FACES) => G%FACES(1+3*IFACE:3*(IFACE+NSUB_FACES))
       FOUT = FIN + IVERT
 
       ! copy surface indices
         
-      SURFIN(1:NSUB_FACES) => GSUB%SURFS_BASE(1:NSUB_FACES)
+      SURFIN(1:NSUB_FACES) => GSUB%SURFS(1:NSUB_FACES)
       SURFOUT(1:NSUB_FACES) => G%SURFS(1+IFACE:IFACE+NSUB_FACES)
       SURFOUT = SURFIN
         
@@ -570,8 +564,7 @@ SUBROUTINE OUTGEOM(LUNIT,IS_DYNAMIC,TIME)
    INTEGER :: IZERO
 
    CALL PROCESS_GEOM(IS_DYNAMIC,TIME)  ! scale, rotate, translate GEOM vertices 
-   CALL EXPAND_GROUPS 
-                    ! create vertex and face list from geometries specified in GEOM_IDS list
+   CALL EXPAND_GROUPS ! create vertex and face list from geometries specified in GEOM_IDS list
 
    N_VERTS=0
    N_FACES=0
