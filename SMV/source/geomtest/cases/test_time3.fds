@@ -1,4 +1,4 @@
-&HEAD CHID='test_time2' /
+&HEAD CHID='test_time3' /
 
 &TIME T_END=1000.0 /
 &MESH XB=-1.0,1.0,-1.0,1.0,-1.0,1.0 /
@@ -24,7 +24,7 @@
                 GEOM_IDS(2)='blade2',DAZIM(2)=90.0,
                 GEOM_IDS(3)='blade1',DAZIM(3)=180.0,
                 GEOM_IDS(4)='blade3',DAZIM(4)=270.0,
-
+ELEV=45.0,AZIM=45.0
                 /
 
 

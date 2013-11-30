@@ -7,3 +7,7 @@ $GEOMTEST test_group.fds
 $GEOMTEST test_group2.fds
 $GEOMTEST test_group3.fds
 $GEOMTEST test_scale.fds
+$GEOMTEST test_time.fds
+$GEOMTEST test_time2.fds
+$GEOMTEST test_time3.fds
+

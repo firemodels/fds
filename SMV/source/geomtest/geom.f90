@@ -46,7 +46,7 @@ SUBROUTINE READ_GEOM
 
 ! input &GEOM lines
 
-INTEGER, PARAMETER :: MAX_VERTS=10000000 ! at some point we may decide to use dynmaic memory allocation
+INTEGER, PARAMETER :: MAX_VERTS=100000 ! at some point we may decide to use dynmaic memory allocation
 INTEGER, PARAMETER :: MAX_FACES=MAX_VERTS
 INTEGER, PARAMETER :: MAX_IDS=100000
 CHARACTER(30) :: ID,SURF_ID, GEOM_IDS(MAX_IDS)
@@ -90,7 +90,7 @@ ALLOCATE(DEFAULT_COMPONENT_ONLY(N_GEOMETRY),STAT=IZERO)
 CALL ChkMemErr('READ','DEFAULT_COMPONENT_ONLY',IZERO)
 
 ! set default for COMPONENT_ONLY
-!   if an object is in a GEOM_IDS then COMPONENT_ONLY is initially set to .TRUE. (is only drawn as part of a larger group)
+!   if an object is in a GEOM_IDS list then COMPONENT_ONLY is initially set to .TRUE. (is only drawn as part of a larger group)
 !   if an object is not in any GEOM_IDS list then COMPONENT_ONLY is initially set to .FALSE. (is drawn by default)
 READ_GEOM_LOOP0: DO N=1,N_GEOMETRY
    G=>GEOMETRY(N)
@@ -407,6 +407,7 @@ SUBROUTINE PROCESS_GEOM(IS_DYNAMIC,TIME)
    DO I = 1, N_GEOMETRY
       G=>GEOMETRY(I)
 
+      CALL EXPAND_GROUPS(I) ! create vertex and face list from geometries specified in GEOM_IDS list
       IF (G%N_VERTS.EQ.0) CYCLE
       CALL SETUP_TRANSFORM(G%SCALE,G%AZIM,G%ELEV,M)
       CALL ROTATE_VEC(M,G%N_VERTS,G%XYZ0,G%VERTS_BASE,G%VERTS)
@@ -452,12 +453,13 @@ END SUBROUTINE MERGE_GEOMS
 
 ! ------------ SUBROUTINE EXPAND_GROUPS ---------------------------------
 
-SUBROUTINE EXPAND_GROUPS
+SUBROUTINE EXPAND_GROUPS(IGEOM)
 
 ! for each geometry specifed in a &GEOM line, merge geometries referened
 ! by GEOM_IDS after scaling, rotating and translating
 
-INTEGER I, J
+INTEGER, INTENT(IN) :: IGEOM
+INTEGER :: J
 TYPE(GEOMETRY_TYPE), POINTER :: G=>NULL(), GSUB=>NULL()
 INTEGER :: N_VERTS, N_FACES
 INTEGER :: IZERO
@@ -467,95 +469,99 @@ REAL(EB), POINTER, DIMENSION(:) :: XIN, XOUT
 INTEGER, POINTER, DIMENSION(:) :: FIN,FOUT, SURFIN, SURFOUT
 INTEGER :: NSUB_VERTS ,NSUB_FACES, SURF_INDEX
 REAL(EB), DIMENSION(:), POINTER :: DSCALEPTR, DXYZ0PTR, DXYZPTR
-   
-DO I = 2, N_GEOMETRY ! first geometry will not have any sub-geometries (since all sub-geometries must have 
-                     ! been defined in a previous &GEOM line)
-   G=>GEOMETRY(I)
+
+IF(IGEOM.LE.1)RETURN   
+G=>GEOMETRY(IGEOM)
      
-   IF (G%NSUB_GEOMS.EQ.0) CYCLE
+IF (G%NSUB_GEOMS.EQ.0) RETURN
       
-   N_VERTS=0  ! add number of vertices and faces in geometries referenced in GEOM_IDS
-   N_FACES=0
-   DO J = 1, G%NSUB_GEOMS
-      GSUB=>GEOMETRY(G%SUB_GEOMS(J))
+N_VERTS=0  ! add number of vertices and faces in geometries referenced in GEOM_IDS
+N_FACES=0
+DO J = 1, G%NSUB_GEOMS
+   GSUB=>GEOMETRY(G%SUB_GEOMS(J))
         
-      IF (GSUB%N_VERTS.EQ.0.OR.GSUB%N_FACES.EQ.0) CYCLE
-      N_VERTS = N_VERTS + GSUB%N_VERTS
-      N_FACES = N_FACES + GSUB%N_FACES
-   END DO
-      
-   IF (N_VERTS.EQ.0.OR.N_FACES.EQ.0) THEN ! nothing to do if GEOM_IDS geometries are empty
-      G%N_VERTS=0
-      G%N_FACES=0
-      CYCLE
-   ENDIF
-      
-   G%N_VERTS=N_VERTS
-   G%N_FACES=N_FACES
-
-   IF(G%N_FACES>G%N_FACES_OLD)THEN
-      IF (G%N_FACES_OLD.NE.0) THEN
-         DEALLOCATE(G%FACES)
-         DEALLOCATE(G%SURFS)
-      ENDIF
-   
-      ALLOCATE(G%FACES(3*N_FACES),STAT=IZERO)
-      CALL ChkMemErr('READ_GEOM','FACES',IZERO)
-
-      ALLOCATE(G%SURFS(N_FACES),STAT=IZERO)
-      CALL ChkMemErr('READ_GEOM','SURFS',IZERO)
-      G%N_FACES_OLD=G%N_FACES
-   ENDIF
-
-   IF(G%N_VERTS>G%N_VERTS_OLD)THEN
-      IF (G%N_VERTS_OLD.NE.0) THEN
-         DEALLOCATE(G%VERTS)
-      ENDIF
-      ALLOCATE(G%VERTS(3*N_VERTS),STAT=IZERO)
-      CALL ChkMemErr('READ_GEOM','VERTS',IZERO)
-      G%N_VERTS_OLD=G%N_VERTS
-   ENDIF
-
-   IVERT = 0
-   IFACE = 0
-   DO J = 1, G%NSUB_GEOMS
-      GSUB=>GEOMETRY(G%SUB_GEOMS(J))
-      NSUB_VERTS = GSUB%N_VERTS
-      NSUB_FACES = GSUB%N_FACES
-        
-      IF (NSUB_VERTS.EQ.0.OR.NSUB_FACES.EQ.0) CYCLE
-
-      DSCALEPTR(1:3) => G%DSCALE(1:3,J)
-      CALL SETUP_TRANSFORM(DSCALEPTR,G%DAZIM(J),G%DELEV(J),M)
-        
-      XIN(1:3*NSUB_VERTS) => GSUB%VERTS(1:3*NSUB_VERTS)
-      XOUT(1:3*NSUB_VERTS) => G%VERTS(1+3*IVERT:3*(IVERT+NSUB_VERTS))
-        
-      DXYZ0PTR(1:3) => G%DXYZ0(1:3,J)
-      DXYZPTR(1:3) => G%DXYZ(1:3,J)
-      CALL ROTATE_VEC(M,NSUB_VERTS,DXYZ0PTR,XIN,XOUT)
-      CALL TRANSLATE_VEC(DXYZPTR,NSUB_VERTS,XOUT,XOUT)
-        
-      ! copy and offset face indices
-        
-      FIN(1:3*NSUB_FACES) => GSUB%FACES(1:3*NSUB_FACES)
-      FOUT(1:3*NSUB_FACES) => G%FACES(1+3*IFACE:3*(IFACE+NSUB_FACES))
-      FOUT = FIN + IVERT
-
-      ! copy surface indices
-        
-      SURFIN(1:NSUB_FACES) => GSUB%SURFS(1:NSUB_FACES)
-      SURFOUT(1:NSUB_FACES) => G%SURFS(1+IFACE:IFACE+NSUB_FACES)
-      SURFOUT = SURFIN
-        
-      IVERT = IVERT + NSUB_VERTS
-      IFACE = IFACE + NSUB_FACES
-   END DO
-   IF (G%HAS_SURF) THEN
-      SURF_INDEX = GET_SURF_INDEX(G%SURF_ID)
-      G%SURFS(1:N_FACES) = SURF_INDEX
-   ENDIF
+   IF (GSUB%N_VERTS.EQ.0.OR.GSUB%N_FACES.EQ.0) CYCLE
+   N_VERTS = N_VERTS + GSUB%N_VERTS
+   N_FACES = N_FACES + GSUB%N_FACES
 END DO
+      
+IF (N_VERTS.EQ.0.OR.N_FACES.EQ.0) THEN ! nothing to do if GEOM_IDS geometries are empty
+   G%N_VERTS=0
+   G%N_FACES=0
+   RETURN
+ENDIF
+      
+G%N_VERTS=N_VERTS
+G%N_FACES=N_FACES
+
+IF(G%N_FACES>G%N_FACES_OLD)THEN
+   IF (G%N_FACES_OLD.NE.0) THEN
+      DEALLOCATE(G%FACES)
+      DEALLOCATE(G%SURFS)
+   ENDIF
+   
+   ALLOCATE(G%FACES(3*N_FACES),STAT=IZERO)
+   CALL ChkMemErr('READ_GEOM','FACES',IZERO)
+
+   ALLOCATE(G%SURFS(N_FACES),STAT=IZERO)
+   CALL ChkMemErr('READ_GEOM','SURFS',IZERO)
+   G%N_FACES_OLD=G%N_FACES
+ENDIF
+
+IF(G%N_VERTS>G%N_VERTS_OLD)THEN
+   IF (G%N_VERTS_OLD.NE.0) THEN
+      DEALLOCATE(G%VERTS)
+      IF(G%NSUB_GEOMS>0) DEALLOCATE(G%VERTS_BASE)
+   ENDIF
+   ALLOCATE(G%VERTS(3*N_VERTS),STAT=IZERO)
+   CALL ChkMemErr('READ_GEOM','VERTS',IZERO)
+   IF(G%NSUB_GEOMS>0)THEN
+      ALLOCATE(G%VERTS_BASE(3*N_VERTS),STAT=IZERO)
+      CALL ChkMemErr('READ_GEOM','VERTS_BASE',IZERO)
+   ENDIF
+   G%N_VERTS_OLD=G%N_VERTS
+ENDIF
+
+IVERT = 0
+IFACE = 0
+DO J = 1, G%NSUB_GEOMS
+   GSUB=>GEOMETRY(G%SUB_GEOMS(J))
+   NSUB_VERTS = GSUB%N_VERTS
+   NSUB_FACES = GSUB%N_FACES
+        
+   IF (NSUB_VERTS.EQ.0.OR.NSUB_FACES.EQ.0) CYCLE
+
+   DSCALEPTR(1:3) => G%DSCALE(1:3,J)
+   CALL SETUP_TRANSFORM(DSCALEPTR,G%DAZIM(J),G%DELEV(J),M)
+     
+   XIN(1:3*NSUB_VERTS) => GSUB%VERTS(1:3*NSUB_VERTS)
+   XOUT(1:3*NSUB_VERTS) => G%VERTS(1+3*IVERT:3*(IVERT+NSUB_VERTS))
+        
+   DXYZ0PTR(1:3) => G%DXYZ0(1:3,J)
+   DXYZPTR(1:3) => G%DXYZ(1:3,J)
+   CALL ROTATE_VEC(M,NSUB_VERTS,DXYZ0PTR,XIN,XOUT)
+   CALL TRANSLATE_VEC(DXYZPTR,NSUB_VERTS,XOUT,XOUT)
+        
+   ! copy and offset face indices
+        
+   FIN(1:3*NSUB_FACES) => GSUB%FACES(1:3*NSUB_FACES)
+   FOUT(1:3*NSUB_FACES) => G%FACES(1+3*IFACE:3*(IFACE+NSUB_FACES))
+   FOUT = FIN + IVERT
+
+   ! copy surface indices
+        
+   SURFIN(1:NSUB_FACES) => GSUB%SURFS(1:NSUB_FACES)
+   SURFOUT(1:NSUB_FACES) => G%SURFS(1+IFACE:IFACE+NSUB_FACES)
+   SURFOUT = SURFIN
+        
+   IVERT = IVERT + NSUB_VERTS
+   IFACE = IFACE + NSUB_FACES
+END DO
+IF (G%HAS_SURF) THEN
+   SURF_INDEX = GET_SURF_INDEX(G%SURF_ID)
+   G%SURFS(1:N_FACES) = SURF_INDEX
+ENDIF
+G%VERTS_BASE(1:3*N_VERTS)=G%VERTS(1:3*N_VERTS)
 END SUBROUTINE EXPAND_GROUPS
 
 ! ------------ SUBROUTINE OUTGEOM ---------------------------------
@@ -574,7 +580,6 @@ SUBROUTINE OUTGEOM(LUNIT,IS_DYNAMIC,TIME)
    INTEGER :: IZERO
 
    CALL PROCESS_GEOM(IS_DYNAMIC,TIME)  ! scale, rotate, translate GEOM vertices 
-   CALL EXPAND_GROUPS ! create vertex and face list from geometries specified in GEOM_IDS list
 
    N_VERTS=0
    N_FACES=0
