@@ -25,6 +25,7 @@ call write_geom(T_BEGIN)
 if(is_geometry_dynamic)then
    do i = 1, nsteps-1
       time = (real(nsteps-1-i,eb)*t_begin + real(i,eb)*t_end)/real(nsteps-1,eb)
+      write(6,*)"i=",i," time=",time
       call write_geom(time)
    end do
 endif
