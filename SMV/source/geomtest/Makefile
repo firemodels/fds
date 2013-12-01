@@ -25,6 +25,13 @@ intel_linux_64 : obj = geomtest
 intel_linux_64 : $(obj_serial)
 	$(FCOMPL) -o $(obj) $(FFLAGS) $(LFLAGS) $(obj_serial)
 
+intel_linux_64p : FFLAGS = -m64 -O2 -vec_report0 -p
+intel_linux_64p : LFLAGS = -static-intel
+intel_linux_64p : FCOMPL = ifort
+intel_linux_64p : obj = geomtestp
+intel_linux_64p : $(obj_serial)
+	$(FCOMPL) -o $(obj) $(FFLAGS) $(LFLAGS) $(obj_serial)
+
 intel_osx_64 : FFLAGS = -m64 -O2 -vec_report0 
 intel_osx_64 : LFLAGS = -static-intel
 intel_osx_64 : FCOMPL = ifort
