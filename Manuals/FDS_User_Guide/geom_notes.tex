@@ -26,9 +26,9 @@ A simple form is given by
 /
 \end{verbatim}
 
-\noindent where ID is the name of the object which may be referenced in subsequent \&GEOM lines, VERTS is a list of M vertex coordinates and FACES is a list of 3*N vertex indices, 3 indices for each triangular face\footnote{Parameters within [] indicate default values}.  Each vertex location is a triplet of physical coordinates.  Each triangular face is defined by a triplet of vertex indices where the indices range from 1 to the number of vertices found on this \&GEOM line. The parameter SCALE may be used to change the size of the object. An object may be flipped by using a negative SCALE factor.  AZIM and ELEV parameters may be used to rotate the object about an origin defined by XYZ0 and the parameter XYZ may be used to translate the object.
+\noindent where ID is the name of the object which may be referenced in subsequent \&GEOM lines using the GEOM\_IDS keyword, VERTS is a list of M vertex (x,y,z) coordinates and FACES is a list of 3*N vertex indices, 3 indices for each triangular face\footnote{Parameters within [] indicate default values}.  Each vertex location is a triplet of physical coordinates.  Each triangular face is defined by a triplet of vertex indices where the indices range from 1 to the number of vertices found on this \&GEOM line. The parameter SCALE may be used to change the size of the object. An object may be flipped by using a negative SCALE factor.  AZIM and ELEV parameters may be used to rotate the object about an origin defined by XYZ0 and the parameter XYZ may be used to translate the object.
 
-One may also create objects in terms of previously defined objects.  An example is given by
+One may also create objects in terms of previously defined objects.  Previusly defined objects are specified after the GEOM\_IDS keyword.  An example is given by
 
 {%\footnotesize
 \begin{verbatim}
@@ -46,7 +46,7 @@ One may also create objects in terms of previously defined objects.  An example 
 \end{verbatim}
 }
 
-\noindent where GEOM\_IDS is a list of object names define in previous \&GEOM lines (forward references are not allowed).   One may scale, rotate and translate objects as they are placed in a group using DSCALE, DAZIM, DELEV, DXYZ0 and DXYZ.  As with a primitive object (an object without any GEOM\_IDS defined), A group may be scaled, rotated and translated. The DXYZ0 and DXYZ keywords are two dimensional.  The first coordinate always 1.  The second coordinate is the index of the object in the GEOM\_IDS array. The keyword, COMPONENT\_ONLY, if .TRUE., indicates that the geometry only occurs in other geometry definitions and is not itself a part of the FDS model.
+\noindent where GEOM\_IDS is a list of object names defined in previous \&GEOM lines (forward references are not allowed).   One may scale, rotate and translate objects as they are placed using DSCALE, DAZIM, DELEV, and DXYZ.  As with a primitive object (an object without any GEOM\_IDS defined), a group may be scaled, rotated and translated. The DXYZ0 and DXYZ keywords are two dimensional.  The first coordinate always 1.  The second coordinate is the index of the object in the GEOM\_IDS array. The keyword, COMPONENT\_ONLY, if .TRUE., indicates that the geometry only occurs in other geometry definitions and is not itself a part of the FDS model.
 
 Geometries that change with time may be created using the keywords, AZIM\_DOT, ELEV\_DOT, XYZ\_DOT and SCALE\_DOT which alter AZIM, ELEV, XYZ and SCALE respectively. For example,
 \begin{verbatim}
@@ -55,8 +55,6 @@ Geometries that change with time may be created using the keywords, AZIM\_DOT, E
 creates an object that rotates about the Z axis (an azimuthal angle) at a rate 1 deg/s.
 
 \vspace{\baselineskip}
-
-
 
 % This section is under construction!
 
@@ -88,8 +86,8 @@ creates an object that rotates about the Z axis (an azimuthal angle) at a rate 1
 {\ct FACES}        & array of Integer Triplets     & Section~\ref{info:GEOM}     &           &    0                     \\ \hline
 {\ct GEOM\_IDS}    & array of Character & Section~\ref{info:GEOM}                &           &   {\ct ''}               \\ \hline
 {\ct ID}           & Character              & Section~\ref{info:GEOM}            &           &   {\ct 'geom'}           \\ \hline
-{\ct SCALE}        & array of Real Triplets & Section~\ref{info:GEOM}            &           &   1.0                    \\ \hline
-{\ct SCALE\_DOT}   & array of Real Triplets & Section~\ref{info:GEOM}            &  1/s      &   1.0                    \\ \hline
+{\ct SCALE}        & Real Triplet           & Section~\ref{info:GEOM}            &           &   1.0                    \\ \hline
+{\ct SCALE\_DOT}   & Real Triplet           & Section~\ref{info:GEOM}            &  1/s      &   1.0                    \\ \hline
 {\ct SURF\_ID}     & Character              & Section~\ref{info:GEOM}            &           &  {\ct 'INERT'}           \\ \hline
 {\ct VERTS}        & array of Real Triplets & Section~\ref{info:GEOM}            &   m       &   0.0                    \\ \hline
 {\ct XYZ0}         & Real Triplet           & Section~\ref{info:GEOM}            &   m       &   0.0                    \\ \hline
