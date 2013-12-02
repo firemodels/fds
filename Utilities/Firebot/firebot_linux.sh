@@ -281,11 +281,11 @@ do_svn_checkout()
 
          # Commit back results
          svn commit -m 'Firebot: Bump SVN revision number for all guides' &> /dev/null
-
-         echo "Re-checking out latest revision." >> $FIREBOT_DIR/output/stage1 2>&1
-         svn update >> $FIREBOT_DIR/output/stage1 2>&1
-         SVN_REVISION=`tail -n 1 $FIREBOT_DIR/output/stage1 | sed "s/[^0-9]//g"`
       fi
+      
+      echo "Re-checking out latest revision." >> $FIREBOT_DIR/output/stage1 2>&1
+      svn update >> $FIREBOT_DIR/output/stage1 2>&1
+      SVN_REVISION=`tail -n 1 $FIREBOT_DIR/output/stage1 | sed "s/[^0-9]//g"`
    fi
 }
 
