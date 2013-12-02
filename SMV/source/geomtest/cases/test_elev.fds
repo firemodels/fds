@@ -9,18 +9,18 @@
 
 ***AZIMUTHAL TEST
 
-&GEOM ID='geom4',
+&GEOM ID='geom1',
         VERTS=-2.0,0.0,0.0,
               -1.0,0.0,0.0,
-              -1.0,1.0,0.0,FACES=1,2,3,XYZ0=-2.0,0.0,0.0,ELEV=45,SURF_ID='surf1'/
+              -1.0,1.0,0.0,FACES=1,2,3,XYZ0=-2.0,0.0,0.0,ELEV=0,SURF_ID='surf1'/
 
 
-&GEOM ID='geom4',
+&GEOM ID='geom2',
         VERTS= 0.0,0.0,0.0,
                1.0,0.0,0.0,
                1.0,1.0,0.0,FACES=1,2,3,XYZ0=0.0,0.0,0.0,ELEV=45,SURF_ID='surf2'/
 
-&GEOM ID='geom4',
+&GEOM ID='geom3',
         VERTS=2.0,0.0,0.0,
               3.0,0.0,0.0,
-              3.0,1.0,0.0,FACES=1,2,3,XYZ0=2.0,0.0,0.0,ELEV=45,SURF_ID='surf3'/
+              3.0,1.0,0.0,FACES=1,2,3,XYZ0=2.0,0.0,0.0,ELEV=90,SURF_ID='surf3'/
