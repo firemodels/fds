@@ -70,7 +70,7 @@ exit
 QUEUE=firebot
 SVN_REVISION=
 SVN_USERNAME=fds.firebot
-while getopts 'hq:r:su:y' OPTION
+while getopts 'hq:r:su:vy' OPTION
 do
 case $OPTION in
   h)
