@@ -468,6 +468,20 @@ check_inspect_fds_openmp_db()
 #  = Stage 3 - Run verification cases (debug mode) =
 #  =================================================
 
+select_validation_set()
+{
+   cd $FDS_SVNROOT/Validation
+
+   # List five oldest validation sets in the $FDS_SVNROOT/Validation/Process_All_Output.sh script
+   # based on the modification date of $VDIR/FDS_Output_Files
+   # The result is an array of five validation sets from 0 to 4
+   VALIDATION_SETS=(`grep '$VDIR' Process_All_Output.sh | grep -v "#" | xargs -n 1 dirname | xargs -n 1 dirname | xargs -n 1 basename | xargs -i ls --time-style full-iso -tl -d -1 {}"/FDS_Output_Files" | sort -k 6 | cut -d ' ' -f9 | head -n 5 | xargs -n 1 dirname`)
+
+   # Select a random validation set number from 0 to 4
+   RANDOM_VALIDATION_SET=$(($RANDOM % 5))
+   CURRENT_VALIDATION_SET=${VALIDATION_SETS[RANDOM_VALIDATION_SET]}
+}
+
 wait_cases_debug_start()
 {
    # Scans qstat and waits for verification cases to start
@@ -805,8 +819,23 @@ run_verification_cases_release()
 
 run_validation_cases_release()
 {
-   # Placeholder
-   sleep 30
+   #  ===================================
+   #  = Run selected FDS validation set =
+   #  ===================================
+
+   cd $FDS_SVNROOT/Validation/"$CURRENT_VALIDATION_SET"
+
+   mkdir Current_Results
+
+   # Start running FDS verification cases
+   echo "Running FDS validation cases:" >> $FIREBOT_DIR/output/stage5
+   echo "Validation Set: ${CURRENT_VALIDATION_SET}" >> $FIREBOT_DIR/output/stage5
+   echo "" >> $FIREBOT_DIR/output/stage5 2>&1
+   ./Run_All.sh >> $FIREBOT_DIR/output/stage5 2>&1
+   echo "" >> $FIREBOT_DIR/output/stage5 2>&1
+
+   # Wait for validation cases to end
+   wait_cases_debug_end 'validation'
 }
 
 check_cases_release()
@@ -1362,6 +1391,11 @@ check_compile_fds_openmp_db
 # fi
 
 ### Stage 3 ###
+# Only run if firebot is in "validation" mode
+if [[ $stage5_success && $FIREBOT_MODE == "validation" ]] ; then
+   select_validation_set
+fi
+
 # Depends on successful FDS debug compile
 if [[ $stage2a_success && $stage2b_success && $FIREBOT_MODE == "verification" ]] ; then
    run_verification_cases_debug
