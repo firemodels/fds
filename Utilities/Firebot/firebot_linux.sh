@@ -1348,6 +1348,9 @@ email_build_status()
       echo "-------------------------------" >> $TIME_LOG
       echo "Host OS: Linux " >> $TIME_LOG
       echo "Host Name: $hostname " >> $TIME_LOG
+      if [ $FIREBOT_MODE == "validation" ] ; then
+         echo "Validation Set: ${CURRENT_VALIDATION_SET} " >> $TIME_LOG
+      fi
       echo "Start Time: $start_time " >> $TIME_LOG
       echo "Stop Time: $stop_time " >> $TIME_LOG
       echo "-------------------------------" >> $TIME_LOG
@@ -1400,7 +1403,7 @@ check_compile_fds_openmp_db
 
 ### Stage 3 ###
 # Only run if firebot is in "validation" mode
-if [[ $stage5_success && $FIREBOT_MODE == "validation" ]] ; then
+if [ $FIREBOT_MODE == "validation" ] ; then
    select_validation_set
 fi
 
