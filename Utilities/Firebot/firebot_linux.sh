@@ -484,6 +484,9 @@ select_validation_set()
    # Select a random validation set number from 0 to 4
    RANDOM_VALIDATION_SET=$(($RANDOM % 5))
    CURRENT_VALIDATION_SET=${VALIDATION_SETS[RANDOM_VALIDATION_SET]}
+
+   echo "Current Validation Set: ${CURRENT_VALIDATION_SET}" >> $FIREBOT_DIR/output/stage3
+   echo "" >> $FIREBOT_DIR/output/stage3 2>&1
 }
 
 wait_cases_debug_start()
