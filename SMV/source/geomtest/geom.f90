@@ -18,27 +18,6 @@ PUBLIC :: READ_GEOM,WRITE_GEOM,ROTATE_VEC, SETUP_TRANSFORM
  
 CONTAINS
 
-! ------------ INTEGER FUNCTION GET_GEOM_ID ---------------------------------
-
-INTEGER FUNCTION GET_GEOM_ID(ID,N_LAST)
-
-! return the index of the geometry array with label ID
-
-CHARACTER(30), INTENT(IN) :: ID
-INTEGER, INTENT(IN) :: N_LAST
-INTEGER :: N
-TYPE(GEOMETRY_TYPE), POINTER :: G=>NULL()
-   
-GET_GEOM_ID=0
-DO N=1,N_LAST
-   G=>GEOMETRY(N)
-   IF (TRIM(G%ID)==TRIM(ID)) THEN
-      GET_GEOM_ID=N
-      RETURN
-   ENDIF
-END DO
-END FUNCTION GET_GEOM_ID
-
 ! ------------ SUBROUTINE READ_GEOM ---------------------------------
 
 SUBROUTINE READ_GEOM
@@ -318,42 +297,26 @@ ENDDO READ_GEOM_LOOP
 DEALLOCATE(DEFAULT_COMPONENT_ONLY)
 END SUBROUTINE READ_GEOM
 
+! ------------ INTEGER FUNCTION GET_GEOM_ID ---------------------------------
 
-! ------------ SUBROUTINE TRANSLATE_VEC ---------------------------------
+INTEGER FUNCTION GET_GEOM_ID(ID,N_LAST)
 
-SUBROUTINE TRANSLATE_VEC(XYZ,N,XIN,XOUT)
+! return the index of the geometry array with label ID
 
-! translate a geometry by the vector XYZ
-
-INTEGER, INTENT(IN) :: N
-REAL(EB), INTENT(IN) :: XYZ(3), XIN(3*N)
-REAL(EB), INTENT(OUT) :: XOUT(3*N)
-REAL(EB) :: VEC(3)
-INTEGER :: I
-
-DO I = 1, N 
-   VEC(1:3) = XYZ(1:3) + XIN(3*I-2:3*I) ! copy into a temp array so XIN and XOUT can point to same space
-   XOUT(3*I-2:3*I) = VEC(1:3)
+CHARACTER(30), INTENT(IN) :: ID
+INTEGER, INTENT(IN) :: N_LAST
+INTEGER :: N
+TYPE(GEOMETRY_TYPE), POINTER :: G=>NULL()
+   
+GET_GEOM_ID=0
+DO N=1,N_LAST
+   G=>GEOMETRY(N)
+   IF (TRIM(G%ID)==TRIM(ID)) THEN
+      GET_GEOM_ID=N
+      RETURN
+   ENDIF
 END DO
-END SUBROUTINE TRANSLATE_VEC
-
-! ------------ SUBROUTINE ROTATE_VEC ---------------------------------
-
-SUBROUTINE ROTATE_VEC(M,N,XYZ0,XIN,XOUT)
-
-! rotate the vector XIN about the origin XYZ0
-
-INTEGER, INTENT(IN) :: N
-REAL(EB), INTENT(IN) :: M(3,3), XIN(3*N), XYZ0(3)
-REAL(EB), INTENT(OUT) :: XOUT(3*N)
-REAL(EB) :: VEC(3)
-INTEGER :: I
-
-DO I = 1, N
-   VEC(1:3) = MATMUL(M,XIN(3*I-2:3*I)-XYZ0(1:3))  ! copy into a temp array so XIN and XOUT can point to same space
-   XOUT(3*I-2:3*I) = VEC(1:3) + XYZ0(1:3)
-END DO
-END SUBROUTINE ROTATE_VEC
+END FUNCTION GET_GEOM_ID
 
 ! ------------ SUBROUTINE SETUP_TRANSFORM ---------------------------------
 
@@ -409,6 +372,42 @@ IDENTITY = RESHAPE ((/&
                /),(/3,3/))
 M = UUT + COS(ALPHA*DEG2RAD)*(IDENTITY - UUT) + SIN(ALPHA*DEG2RAD)*S
 END SUBROUTINE SETUP_ROTATE
+
+! ------------ SUBROUTINE TRANSLATE_VEC ---------------------------------
+
+SUBROUTINE TRANSLATE_VEC(XYZ,N,XIN,XOUT)
+
+! translate a geometry by the vector XYZ
+
+INTEGER, INTENT(IN) :: N
+REAL(EB), INTENT(IN) :: XYZ(3), XIN(3*N)
+REAL(EB), INTENT(OUT) :: XOUT(3*N)
+REAL(EB) :: VEC(3)
+INTEGER :: I
+
+DO I = 1, N 
+   VEC(1:3) = XYZ(1:3) + XIN(3*I-2:3*I) ! copy into a temp array so XIN and XOUT can point to same space
+   XOUT(3*I-2:3*I) = VEC(1:3)
+END DO
+END SUBROUTINE TRANSLATE_VEC
+
+! ------------ SUBROUTINE ROTATE_VEC ---------------------------------
+
+SUBROUTINE ROTATE_VEC(M,N,XYZ0,XIN,XOUT)
+
+! rotate the vector XIN about the origin XYZ0
+
+INTEGER, INTENT(IN) :: N
+REAL(EB), INTENT(IN) :: M(3,3), XIN(3*N), XYZ0(3)
+REAL(EB), INTENT(OUT) :: XOUT(3*N)
+REAL(EB) :: VEC(3)
+INTEGER :: I
+
+DO I = 1, N
+   VEC(1:3) = MATMUL(M,XIN(3*I-2:3*I)-XYZ0(1:3))  ! copy into a temp array so XIN and XOUT can point to same space
+   XOUT(3*I-2:3*I) = VEC(1:3) + XYZ0(1:3)
+END DO
+END SUBROUTINE ROTATE_VEC
 
 ! ------------ SUBROUTINE PROCESS_GEOMS ---------------------------------
 
@@ -651,49 +650,5 @@ SUBROUTINE WRITE_GEOM(TIME)
    CLOSE(LU_GEOM(1))
 
 END SUBROUTINE WRITE_GEOM
-
-! ------------ SUBROUTINE WRITE_GEOM_SUMMARY ---------------------------------
-
-SUBROUTINE WRITE_GEOM_SUMMARY
-
-! debug output routine (not intended for FDS)
-
-INTEGER :: I,J
-
-TYPE(GEOMETRY_TYPE), POINTER :: G=>NULL()
-
-DO I = 1, N_GEOMETRY
-   G=>GEOMETRY(I)
-   
-   WRITE(6,*)" GEOM:",I,TRIM(G%ID)
-   WRITE(6,10)G%N_VERTS_BASE,G%N_FACES_BASE,G%NSUB_GEOMS
-   10 FORMAT("   NVERTS=",I3,' NFACES=',I3,' NGEOMS=',I3)
-   WRITE(6,20)G%SCALE_BASE
-   20 FORMAT('   SCALE=',3(E11.4,1X))
-   WRITE(6,25)G%AZIM_BASE,G%ELEV_BASE
-   25 FORMAT(' AZIM=',E11.4,' ELEV=',E11.4)
-   WRITE(6,30)G%XYZ0
-   30 FORMAT('   XYZ0=',3(E11.4,1X))
-   WRITE(6,40)G%XYZ_BASE
-   40 FORMAT(' XYZ=',3(E11.4,1X))
-   IF (G%NSUB_GEOMS.GT.0) THEN
-      DO J=1,G%NSUB_GEOMS
-         WRITE(6,*)"   GEOMS:",J
-         WRITE(6,50)G%DAZIM(J),G%DELEV(J)
-         50 FORMAT("      DAZIM=",E11.4," DELEV=",E11.4)
-         WRITE(6,60)G%DXYZ0(1:3,J)
-         60 FORMAT("      DXYZ0=",3E11.4)
-         WRITE(6,70)G%DXYZ(1:3,J)
-         70 FORMAT("      DXYZ=",3E11.4)
-         WRITE(6,80)G%DSCALE(1:3,J)
-         80 FORMAT("    DSCALE=",3E11.4)
-         
-      END DO
-   ENDIF
-      
-END DO
-
-END SUBROUTINE WRITE_GEOM_SUMMARY
-
 
 END MODULE COMPLEX_GEOMETRY
