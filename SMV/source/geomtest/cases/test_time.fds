@@ -11,8 +11,8 @@
 ***AZIMUTHAL TEST
 
 &GEOM ID='geom4',
-        VERTS=-2.0,0.0,0.0,
-              -2.0,1.0,0.0,
-              -2.0,1.0,1.0,FACES=1,2,3,XYZ0=-2.0,0.0,0.0,AZIM=0.0,AZIM_RATE=0.1,SURF_ID='surf1'/
+        VERTS=0.0,0.0,0.0,
+              0.0,1.0,0.0,
+              0.0,1.0,1.0,FACES=1,2,3,AZIM=0.0,AZIM_RATE=0.36,SURF_ID='surf1'/
 
 

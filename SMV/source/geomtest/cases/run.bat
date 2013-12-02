@@ -9,3 +9,5 @@
 ..\intel_win_64\geomtest test_time.fds
 ..\intel_win_64\geomtest test_time2.fds
 ..\intel_win_64\geomtest test_time3.fds
+..\intel_win_64\geomtest test_time4.fds
+..\intel_win_64\geomtest test_time5.fds
