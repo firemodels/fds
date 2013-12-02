@@ -869,11 +869,15 @@ check_cases_release()
 
 commit_validation_results()
 {
+   # Copy new FDS files from Current_Results to FDS_Output_Files using Process_Output.csh script for the validation set
+   cd $FDS_SVNROOT/Validation/"$CURRENT_VALIDATION_SET"/FDS_Output_Files
+   ./Process_Output.csh
+
    # cd to SVN root
    cd $FDS_SVNROOT
 
    # Commit new validation results
-   svn commit -m 'Validationbot: Updated validation results' &> /dev/null
+   svn commit -m "Validationbot: Updated validation results for ${CURRENT_VALIDATION_SET}" &> /dev/null
 }
 
 #  ================================
