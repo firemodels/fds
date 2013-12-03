@@ -427,7 +427,7 @@ SUBROUTINE PROCESS_GEOM(IS_DYNAMIC,TIME)
       DELTA_T = 0.0_EB
    ENDIF
    
-   DO I = 1, N_GEOMETRY
+   DO I = 0, N_GEOMETRY
       G=>GEOMETRY(I)
 
       G%SCALE = G%SCALE_BASE + DELTA_T*G%SCALE_RATE
@@ -444,7 +444,7 @@ SUBROUTINE PROCESS_GEOM(IS_DYNAMIC,TIME)
       ENDIF
    END DO
    
-   DO I = 1, N_GEOMETRY
+   DO I = 0, N_GEOMETRY
       G=>GEOMETRY(I)
 
       IF (G%NSUB_GEOMS>0) CALL EXPAND_GROUPS(I) ! create vertex and face list from geometries specified in GEOM_IDS list
@@ -473,7 +473,7 @@ IVERT = 0
 IFACE = 0
 ISURF = 0
 OFFSET = 0
-DO I = 1, N_GEOMETRY
+DO I = 0, N_GEOMETRY
    G=>GEOMETRY(I)
    IF (G%COMPONENT_ONLY) CYCLE
    IF (G%IS_DYNAMIC.AND..NOT.IS_DYNAMIC) CYCLE
@@ -581,8 +581,8 @@ SUBROUTINE OBST2GEOM
       1,3,2,  1,4,3,  5,6,7,  5,7,8/
 
    DATA ((VERT_LIST(I,J),J=1,3),I=1,8) /&
-   1,3,5,  2,3,5,  2,4,5,  1,4,5, &
-   1,3,6,  2,3,6,  2,4,6,  1,4,6 /
+      1,3,5,  2,3,5,  2,4,5,  1,4,5, &
+      1,3,6,  2,3,6,  2,4,6,  1,4,6 /
       
      
      
@@ -591,18 +591,27 @@ SUBROUTINE OBST2GEOM
    N_VERTS = 8*N_OBST
    G%N_FACES = N_FACES
    G%N_VERTS = N_VERTS
+   G%N_FACES_BASE = N_FACES
+   G%N_VERTS_BASE = N_VERTS
    G%NSUB_GEOMS = 0
    
    G%COMPONENT_ONLY=.FALSE.
+   G%IS_DYNAMIC = .FALSE.
    G%ID = 'obst'
    G%SURF_ID = 'null'
    
    G%AZIM = 0.0_EB
    G%ELEV = 0.0_EB
    G%SCALE = 1.0_EB
-   G%XYZ0 = 0.0_EB
    G%XYZ = 0.0_EB
    
+   G%XYZ0 = 0.0_EB
+
+   G%SCALE_BASE = G%SCALE
+   G%AZIM_BASE = G%AZIM
+   G%ELEV_BASE = G%ELEV
+   G%XYZ_BASE = G%XYZ
+      
    G%AZIM_RATE = 0.0_EB
    G%ELEV_RATE = 0.0_EB
    G%SCALE_RATE = 0.0_EB
@@ -610,21 +619,17 @@ SUBROUTINE OBST2GEOM
    
    IF (N_OBST.EQ.0) RETURN
 
-   IF (N_FACES.GT.0) THEN
-      ALLOCATE(G%FACES(3*N_FACES),STAT=IZERO)
-      CALL ChkMemErr('READ_GEOM','FACES',IZERO)
+   ALLOCATE(G%FACES(3*N_FACES),STAT=IZERO)
+   CALL ChkMemErr('READ_GEOM','FACES',IZERO)
 
-      ALLOCATE(G%SURFS(N_FACES),STAT=IZERO)
-      CALL ChkMemErr('READ_GEOM','SURFS',IZERO)
-   ENDIF
+   ALLOCATE(G%SURFS(N_FACES),STAT=IZERO)
+   CALL ChkMemErr('READ_GEOM','SURFS',IZERO)
 
-   IF (N_VERTS.GT.0) THEN
-      ALLOCATE(G%VERTS_BASE(3*N_VERTS),STAT=IZERO)
-      CALL ChkMemErr('READ_GEOM','VERTS',IZERO)
+   ALLOCATE(G%VERTS_BASE(3*N_VERTS),STAT=IZERO)
+   CALL ChkMemErr('READ_GEOM','VERTS',IZERO)
 
-      ALLOCATE(G%VERTS(3*N_VERTS),STAT=IZERO)
-      CALL ChkMemErr('READ_GEOM','VERTS',IZERO)
-   ENDIF
+   ALLOCATE(G%VERTS(3*N_VERTS),STAT=IZERO)
+   CALL ChkMemErr('READ_GEOM','VERTS',IZERO)
    
    DO IOB = 1, N_OBST
       OB=>OBSTRUCTIONS(IOB)
@@ -634,11 +639,12 @@ SUBROUTINE OBST2GEOM
          G%VERTS(3*I-1) = OB%XB(VERT_LIST(I,2))
          G%VERTS(3*I)   = OB%XB(VERT_LIST(I,3))
       END DO
+      G%VERTS_BASE = G%VERTS
       
       DO I = 1, 12      
-         G%FACES(3*I-2) = FACE_LIST(I,1) + 12*IOB
-         G%FACES(3*I-1) = FACE_LIST(I,2) + 12*IOB
-         G%FACES(3*I)   = FACE_LIST(I,3) + 12*IOB
+         G%FACES(3*I-2) = FACE_LIST(I,1) + 12*(IOB-1)
+         G%FACES(3*I-1) = FACE_LIST(I,2) + 12*(IOB-1)
+         G%FACES(3*I)   = FACE_LIST(I,3) + 12*(IOB-1)
       END DO
 
       DO I = 1, 6      
@@ -668,7 +674,7 @@ SUBROUTINE OUTGEOM(LUNIT,IS_DYNAMIC,TIME)
 
    N_VERTS=0
    N_FACES=0
-   DO I = 1, N_GEOMETRY ! count vertices and faces
+   DO I = 0, N_GEOMETRY ! count vertices and faces
       G=>GEOMETRY(I)
       
       IF (G%COMPONENT_ONLY) CYCLE

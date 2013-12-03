@@ -18,9 +18,9 @@ call read_head
 call read_time
 call read_surf
 call read_mesh
-!call read_obst
+call read_obst
 call read_geom
-!call obst2geom
+call obst2geom
 
 call write_geom(T_BEGIN)
 
