@@ -90,9 +90,12 @@ case $OPTION in
    ;;
   v)
    FIREBOT_MODE="validation"
+
+   # Set Validationbot email list
+   mailToFDS=$mailtoFDS_validationbot
+
    # Disable time limit email
    TIME_LIMIT_EMAIL_NOTIFICATION="sent"
-   mailToFDS="koverholt@gmail.com" # For validationbot testing
    ;;
   y)
    RUN_AS_ANOTHER_USER=true
