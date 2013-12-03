@@ -835,9 +835,10 @@ run_validation_cases_release()
 
    cd $FDS_SVNROOT/Validation/"$CURRENT_VALIDATION_SET"
 
+   # Create directory for FDS validation case files
    mkdir Current_Results
 
-   # Start running FDS verification cases
+   # Start running FDS validation cases
    echo "Running FDS validation cases:" >> $FIREBOT_DIR/output/stage5
    echo "Validation Set: ${CURRENT_VALIDATION_SET}" >> $FIREBOT_DIR/output/stage5
    echo "" >> $FIREBOT_DIR/output/stage5 2>&1
@@ -845,7 +846,7 @@ run_validation_cases_release()
    echo "" >> $FIREBOT_DIR/output/stage5 2>&1
 
    # Wait for validation cases to end
-   wait_cases_debug_end 'validation'
+   wait_cases_release_end 'validation'
 }
 
 check_cases_release()
