@@ -8,7 +8,7 @@ use READ_INPUT
 use TYPES
 implicit none
 integer i
-real(eb) :: time
+real(eb) :: time_local
 
 CALL GET_COMMAND_ARGUMENT(1,FN_INPUT)
 open(5,FILE=FN_INPUT)
@@ -26,9 +26,9 @@ call write_geom(T_BEGIN)
 
 if(is_geometry_dynamic)then
    do i = 1, nsteps-1
-      time = (real(nsteps-1-i,eb)*t_begin + real(i,eb)*t_end)/real(nsteps-1,eb)
-      write(6,*)"i=",i," time=",time
-      call write_geom(time)
+      time_local = (real(nsteps-1-i,eb)*t_begin + real(i,eb)*t_end)/real(nsteps-1,eb)
+      write(6,*)"i=",i," time=",time_local
+      call write_geom(time_local)
    end do
 endif
 
