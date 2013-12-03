@@ -4,15 +4,18 @@
 &GRID IBAR=10,JBAR=10,KBAR=10 /
 
 &SURF ID='surf1',RGB=255,0,0 /
-&SURF ID='surf2',RGB=0,255,0 /
-&SURF ID='surf3',RGB=0,0,255 /
+&SURF ID='surf2',RGB=128,32,0 /
+&SURF ID='surf3',RGB=0,255,0 /
+&SURF ID='surf4',RGB=0,128,32 /
+&SURF ID='surf5',RGB=0,0,255 /
+&SURF ID='surf6',RGB=32,0,128 /
 
-***AZIMUTHAL TEST
+***OBSTL TEST
 
 &GEOM ID='geom1',
-        VERTS=-2.0,0.0,0.0,
-              -2.0,1.0,0.0,
-              -2.0,1.0,1.0,FACES=1,2,3,XYZ0=-2.0,0.0,0.0,AZIM=0.0,ELEV=0,SURF_ID='surf1'/
+        VERTS=-0.5,0.0,0.0,
+              -0.5,1.0,0.0,
+              -0.5,1.0,1.0,FACES=1,2,3,SURF_ID='surf1'/
 
 
-&OBST XB=0.2,0.5,0.2,0.5,0.2,0.5, SURF_ID='surf2' /
+&OBST XB=0.0,0.5,0.0,0.5,0.0,0.5, SURF_ID6='surf1','surf2','surf3','surf4','surf5','surf6' /
