@@ -480,11 +480,11 @@ select_validation_set()
    cd $FDS_SVNROOT/Validation
 
    # List five oldest validation sets in the $FDS_SVNROOT/Validation/Process_All_Output.sh script
-   # based on the modification date of $VDIR/FDS_Output_Files
-   # The result is an array of five validation sets from 0 to 4
-   VALIDATION_SETS=(`grep '$VDIR' Process_All_Output.sh | grep -v "#" | xargs -n 1 dirname | xargs -n 1 dirname | xargs -n 1 basename | xargs -i ls --time-style full-iso -tl -d -1 {}"/FDS_Output_Files" | sort -k 6 | cut -d ' ' -f9 | head -n 5 | xargs -n 1 dirname`)
+   # based on the modification date of $VDIR/FDS_Output_Files.
+   # The result is an array of five validation sets from 0 to 4.
+   VALIDATION_SETS=(`grep '$VDIR' Process_All_Output.sh | grep -v "#" | xargs -n 1 dirname | xargs -n 1 dirname | xargs -n 1 basename | xargs -i svn info {}/FDS_Output_Files | awk '{if($0 != ""){ if(s){s=s"*"$0}else{s=$0}}else{ print s"*";s=""}}END{print s"*"}' | sort -t* -k9 | cut -d '*' -f1 | cut -d ' ' -f2 | xargs -n 1 dirname`)
 
-   # Select a random validation set number from 0 to 4
+   # Select a random validation set using a random number between 0 and 4.
    RANDOM_VALIDATION_SET=$(($RANDOM % 5))
    CURRENT_VALIDATION_SET=${VALIDATION_SETS[RANDOM_VALIDATION_SET]}
 
