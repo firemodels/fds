@@ -1395,14 +1395,17 @@ compile_fds_mpi_db
 check_compile_fds_mpi_db
 
 ### Stage 2c ###
-compile_fds_openmp_db
-check_compile_fds_openmp_db
+# Only run if firebot is in "verification" mode
+if [ $FIREBOT_MODE == "verification" ] ; then
+   compile_fds_openmp_db
+   check_compile_fds_openmp_db
 
-# Depends on successful FDS OpenMP debug compile
-# if [[ $stage2c_success ]] ; then
-   # inspect_fds_openmp_db
-   # check_inspect_fds_openmp_db
-# fi
+   # Depends on successful FDS OpenMP debug compile
+   # if [[ $stage2c_success ]] ; then
+      # inspect_fds_openmp_db
+      # check_inspect_fds_openmp_db
+   # fi
+fi
 
 ### Stage 3 ###
 # Only run if firebot is in "validation" mode
@@ -1428,8 +1431,11 @@ compile_fds_mpi
 check_compile_fds_mpi
 
 ### Stage 4c ###
-compile_fds_openmp
-check_compile_fds_openmp
+# Only run if firebot is in "verification" mode
+if [ $FIREBOT_MODE == "verification" ] ; then
+   compile_fds_openmp
+   check_compile_fds_openmp
+fi
 
 ### Stage 5pre ###
 # Only run if firebot is in "verification" mode
@@ -1448,8 +1454,8 @@ elif [[ $stage4a_success && $stage4b_success && $FIREBOT_MODE == "validation" ]]
    check_cases_release $FDS_SVNROOT/Validation 'validation'
 fi
 
-# Depends on successful run of validation cases
-if [[ $stage5_success && $FIREBOT_MODE == "validation" ]] ; then
+# Depends on successful run of validation cases in debug and release mode
+if [[ $stage3_success && $stage5_success && $FIREBOT_MODE == "validation" ]] ; then
    commit_validation_results
 fi
 
