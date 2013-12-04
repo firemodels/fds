@@ -1,18 +1,17 @@
 @echo  off
-set GEOMTEST=..\intel_win_64\geomtest
-%GEOMTEST% test_arch.fds
-%GEOMTEST% test_azim.fds
-%GEOMTEST% test_component.fds
-%GEOMTEST% test_elev.fds
-%GEOMTEST% test_group.fds
-%GEOMTEST% test_group2.fds
-%GEOMTEST% test_group3.fds
-%GEOMTEST% test_obst.fds
-%GEOMTEST% test_scale.fds
-%GEOMTEST% test_sphere.fds
-%GEOMTEST% test_sphere2.fds
-%GEOMTEST% test_time.fds
-%GEOMTEST% test_time2.fds
-%GEOMTEST% test_time3.fds
-%GEOMTEST% test_time4.fds
-%GEOMTEST% test_time5.fds
+set BASEDIR=%CD%
+
+cd %BASEDIR%\..\..\..\..
+set SVNROOT=%CD%
+
+set GEOMTEST=%SVNROOT%\SMV\source\geomtest\intel_win_64\geomtest
+set CASEDIR=%SVNROOT%\SMV\source\geomtest\cases
+set SH2BAT=%SVNROOT%\Utilities\Data_Processing\sh2bat
+
+cd %CASEDIR%
+
+%SH2BAT% geom_cases.sh geom_cases.bat
+
+
+call geom_cases.bat
+
