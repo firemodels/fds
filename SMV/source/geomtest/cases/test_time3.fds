@@ -9,7 +9,7 @@
 &SURF ID='surf3',RGB=0,0,255 /
 &SURF ID='surf4',RGB=0,0,0 /
 
-&GEOM ID='blade',AZIM=0.0,AZIM_RATE=0.72
+&GEOM ID='blade',AZIM=0.0,AZIM_DOT=0.72
         VERTS=0.0,0.0,0.0,
               1.0,0.0,0.0,
               1.0,0.0,1.0,
