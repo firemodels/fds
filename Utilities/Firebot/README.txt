@@ -52,6 +52,7 @@ can be installed and used locally, and you can see examples of its usage in the 
 
     This is the primary Firebot automated test script used on Linux with a queueing system (e.g., TORQUE).
     This script is invoked via crontab (details below).
+    By default, Firebot is run in verification mode, but the -v option can be used to run Firebot in validation mode.
 
 # firebot_mac.sh
 
@@ -142,6 +143,26 @@ MAILTO=""
 # Sends email alert if any "post job processing errors"
 # are found in the daily torque log.
 55 23 * * * chktorque.sh
+
+------------------------------------------------------------------------------------
+
+#### The following information is in the Linux validationbot user's crontab: ####
+
+------------------------------------------------------------------------------------
+
+PATH=/bin:/usr/bin:/usr/local/bin:/home2/smokevis2/validationbot/firebot:$PATH
+MAILTO=""
+
+#  ========================
+#  = Validationbot script =
+#  ========================
+
+# Run svn update every hour at XX:25 to get latest verison of Firebot
+25 * * * * cd ~/firebot ; svn revert * ; svn up
+
+# Run Validationbot every hour at xx:30
+# The run-once script maintains a lock to prevent the script from running twice
+30 * * * * run-one bash -lc "firebot_linux.sh -s -v -y"
 
 ------------------------------------------------------------------------------------
 
