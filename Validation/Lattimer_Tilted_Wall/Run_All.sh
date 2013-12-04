@@ -1,23 +1,16 @@
 #!/bin/bash
 
+# This script runs a set of Validation Cases on a Linux machine with a batch queuing system.
+# See the file Validation/Common_Run_All.sh for more information.
 export SVNROOT=`pwd`/../..
-export QFDS=/usr/local/bin/qfds.sh
-export BASEDIR=`pwd`
-export INDIR=Current_Results
-# qq="-q fire80s"
-qq=
+source $SVNROOT/Validation/Common_Run_All.sh
 
-# uncomment following line to stop all cases
-# export STOPFDS=1
+$QFDS $DEBUG -r $QUEUE -d $INDIR Lattimer_20_kW_0_degree_coarse.fds
+$QFDS $DEBUG -r $QUEUE -d $INDIR Lattimer_20_kW_0_degree.fds
+$QFDS $DEBUG -r -p 27 $QUEUE -d $INDIR Lattimer_20_kW_0_degree_fine.fds
 
-/bin/sh -c "cp $BASEDIR/FDS_Input_Files/*.fds $BASEDIR/$INDIR"
-
-$QFDS -r $qq -d $INDIR Lattimer_20_kW_0_degree_coarse.fds
-$QFDS -r $qq -d $INDIR Lattimer_20_kW_0_degree.fds
-$QFDS -r -p 27 $qq -d $INDIR Lattimer_20_kW_0_degree_fine.fds
-
-#$QFDS -r $qq -d $INDIR Lattimer_20_kW_0_degree_ibm.fds
-#$QFDS -r $qq -d $INDIR Lattimer_20_kW_10_degree_ibm.fds
-#$QFDS -r $qq -d $INDIR Lattimer_20_kW_20_degree_ibm.fds
+#$QFDS $DEBUG -r $QUEUE -d $INDIR Lattimer_20_kW_0_degree_ibm.fds
+#$QFDS $DEBUG -r $QUEUE -d $INDIR Lattimer_20_kW_10_degree_ibm.fds
+#$QFDS $DEBUG -r $QUEUE -d $INDIR Lattimer_20_kW_20_degree_ibm.fds
 
 echo FDS cases submitted

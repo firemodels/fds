@@ -1,34 +1,27 @@
 #!/bin/bash
 
+# This script runs a set of Validation Cases on a Linux machine with a batch queuing system.
+# See the file Validation/Common_Run_All.sh for more information.
 export SVNROOT=`pwd`/../..
-export QFDS=/usr/local/bin/qfds.sh
-export BASEDIR=`pwd`
-export INDIR=Current_Results
-# qq="-q fire80s"
-qq=
+source $SVNROOT/Validation/Common_Run_All.sh
 
-# uncomment following line to stop all cases
-#export STOPFDS=1
-
-/bin/sh -c "cp $BASEDIR/FDS_Input_Files/*.fds $BASEDIR/$INDIR"
-
-$QFDS -r $qq -d $INDIR NIST_He_14400_LC_SLV.fds
-$QFDS -r $qq -d $INDIR NIST_He_14400_LC_SSV.fds
-$QFDS -r $qq -d $INDIR NIST_He_14400_LC_ULV.fds
-$QFDS -r $qq -d $INDIR NIST_He_14400_LR_SLV.fds
-$QFDS -r $qq -d $INDIR NIST_He_14400_LR_SSV.fds
-$QFDS -r $qq -d $INDIR NIST_He_14400_LR_ULV.fds
-$QFDS -r $qq -d $INDIR NIST_He_14400_UC_SLV.fds
-$QFDS -r $qq -d $INDIR NIST_He_14400_UC_SSV.fds
-$QFDS -r $qq -d $INDIR NIST_He_14400_UC_ULV.fds
-$QFDS -r $qq -d $INDIR NIST_He_3600_LC_SLV.fds
-$QFDS -r $qq -d $INDIR NIST_He_3600_LC_SSV.fds
-$QFDS -r $qq -d $INDIR NIST_He_3600_LC_ULV.fds
-$QFDS -r $qq -d $INDIR NIST_He_3600_LR_SLV.fds
-$QFDS -r $qq -d $INDIR NIST_He_3600_LR_SSV.fds
-$QFDS -r $qq -d $INDIR NIST_He_3600_LR_ULV.fds
-$QFDS -r $qq -d $INDIR NIST_He_3600_UC_SLV.fds
-$QFDS -r $qq -d $INDIR NIST_He_3600_UC_SSV.fds
-$QFDS -r $qq -d $INDIR NIST_He_3600_UC_ULV.fds
+$QFDS $DEBUG -r $QUEUE -d $INDIR NIST_He_14400_LC_SLV.fds
+$QFDS $DEBUG -r $QUEUE -d $INDIR NIST_He_14400_LC_SSV.fds
+$QFDS $DEBUG -r $QUEUE -d $INDIR NIST_He_14400_LC_ULV.fds
+$QFDS $DEBUG -r $QUEUE -d $INDIR NIST_He_14400_LR_SLV.fds
+$QFDS $DEBUG -r $QUEUE -d $INDIR NIST_He_14400_LR_SSV.fds
+$QFDS $DEBUG -r $QUEUE -d $INDIR NIST_He_14400_LR_ULV.fds
+$QFDS $DEBUG -r $QUEUE -d $INDIR NIST_He_14400_UC_SLV.fds
+$QFDS $DEBUG -r $QUEUE -d $INDIR NIST_He_14400_UC_SSV.fds
+$QFDS $DEBUG -r $QUEUE -d $INDIR NIST_He_14400_UC_ULV.fds
+$QFDS $DEBUG -r $QUEUE -d $INDIR NIST_He_3600_LC_SLV.fds
+$QFDS $DEBUG -r $QUEUE -d $INDIR NIST_He_3600_LC_SSV.fds
+$QFDS $DEBUG -r $QUEUE -d $INDIR NIST_He_3600_LC_ULV.fds
+$QFDS $DEBUG -r $QUEUE -d $INDIR NIST_He_3600_LR_SLV.fds
+$QFDS $DEBUG -r $QUEUE -d $INDIR NIST_He_3600_LR_SSV.fds
+$QFDS $DEBUG -r $QUEUE -d $INDIR NIST_He_3600_LR_ULV.fds
+$QFDS $DEBUG -r $QUEUE -d $INDIR NIST_He_3600_UC_SLV.fds
+$QFDS $DEBUG -r $QUEUE -d $INDIR NIST_He_3600_UC_SSV.fds
+$QFDS $DEBUG -r $QUEUE -d $INDIR NIST_He_3600_UC_ULV.fds
 
 echo FDS cases submitted
