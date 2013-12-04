@@ -6981,7 +6981,7 @@ MESH_LOOP: DO NM=1,NMESHES
                          ABS(SURFACE(OB%SURF_INDEX(NNN))%VOLUME_FLUX)    >TWO_EPSILON_EB .OR. &
                          ABS(SURFACE(OB%SURF_INDEX(NNN))%MASS_FLUX_TOTAL)>TWO_EPSILON_EB) THEN
                         WRITE(MESSAGE,'(A,A,A)') 'ERROR: SURF_ID ',TRIM(SURFACE(OB%SURF_INDEX(NNN))%ID), &
-                           ' cannot attach velocity boundary to thin obstruction'
+                           ' cannot attach velocity boundary to thin obstruction; consider adding THICKEN=.TRUE.'
                         CALL SHUTDOWN(MESSAGE)
                      ENDIF
                   ENDDO FACE_LOOP_2
