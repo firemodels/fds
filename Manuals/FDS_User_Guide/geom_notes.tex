@@ -7,7 +7,7 @@
 \section{Unstructured Geometry: The \texorpdfstring{{\tt GEOM}}{GEOM} Namelist Group (Table \ref{tbl:GEOM})}
 \label{info:GEOM}
 
-Unstructured geometric solids are defined using the \&GEOM namelist.
+Unstructured geometric solids are defined using the {\tt \&GEOM}\ namelist. These solids consist of vertices and triangular faces.
 A simple form is given by
 
 \begin{verbatim}
@@ -26,9 +26,11 @@ A simple form is given by
 /
 \end{verbatim}
 
-\noindent where ID is the name of the object which may be referenced in subsequent \&GEOM lines using the GEOM\_IDS keyword, VERTS is a list of M vertex (x,y,z) coordinates and FACES is a list of 3*N vertex indices, 3 indices for each triangular face\footnote{Parameters within [] indicate default values}.  Each vertex location is a triplet of physical coordinates.  Each triangular face is defined by a triplet of vertex indices where the indices range from 1 to the number of vertices found on this \&GEOM line. The parameter SCALE may be used to change the size of the object. An object may be flipped by using a negative SCALE factor.  AZIM and ELEV parameters may be used to rotate the object about an origin defined by XYZ0 and the parameter XYZ may be used to translate the object.
+\noindent The keyword {\tt ID}\ specifies the name of the object.  The object's vertices and triangular faces are specified using the {\tt VERTS}\ and {\tt FACES}\ keywords.  {\tt VERTS}\ is a list of $(x,y,z)$ coordinates and {\tt FACES}\ is a list of vertex indices, 3 indices for each triangular face\footnote{Parameters within [] indicate default values}.  Each vertex index ranges from 1 to the number of vertices found on this {\tt \&GEOM}\ line. 
 
-One may also create objects in terms of previously defined objects.  Previusly defined objects are specified after the GEOM\_IDS keyword.  An example is given by
+An object may be translated, scaled and rotated.  An object is translated using the {\tt XYZ}\ keyword.  An object is scaled or magnified along each of 3 dimensions independently using {\tt SCALE}\ keyword followed by 3 scale factors. An object may be flipped by using a negative scale factor.  The object may be rotated using {\tt AZIM}\ and {\tt ELEV}.  AZIM is used to specify an azimuthal rotation about the Z axis.  ELEV specifies an elevation angle.  An object may also be rotated about an arbitrary axis.  {\tt GAXIS} is used to specify the axis of rotation and GROTATE specifies the rotation amount.  All rotations are in degrees.
+
+One may create an object using previously defined objects. These objects are specified using the {\tt GEOM\_IDS}\ keyword.  An example is given by
 
 {%\footnotesize
 \begin{verbatim}
@@ -46,13 +48,12 @@ One may also create objects in terms of previously defined objects.  Previusly d
 \end{verbatim}
 }
 
-\noindent where GEOM\_IDS is a list of object names defined in previous \&GEOM lines (forward references are not allowed).   One may scale, rotate and translate objects as they are placed using DSCALE, DAZIM, DELEV, and DXYZ.  As with a primitive object (an object without any GEOM\_IDS defined), a group may be scaled, rotated and translated. The DXYZ0 and DXYZ keywords are two dimensional.  The first coordinate always 1.  The second coordinate is the index of the object in the GEOM\_IDS array. The keyword, COMPONENT\_ONLY, if .TRUE., indicates that the geometry only occurs in other geometry definitions and is not itself a part of the FDS model.
+\noindent where {\tt GEOM\_IDS}\ is used incorporate a chair and couch into the group.  These two objects must be defined in previous {\&GEOM}\ lines (forward references are not allowed).   One may scale, rotate and translate objects as they are placed in the group using {\tt DSCALE}\, for scaling, {\tt DAZIM} and {\tt DELEV} for rotation and {\tt DXYZ} for translation. The {\tt DXYZ0}\ and {\tt DXYZ}\ keywords are two dimensional.  The first coordinate specifies the spatial component (1 for x, 2 for y, 3 for z or 1:3 for all three components).  The second coordinate specifies the object in the {\tt GEOM\_IDS}\ array. The keyword, {\tt COMPONENT\_ONLY}\, if .TRUE., indicates that the geometry only occurs in other geometry definitions and is not itself a part of the FDS model.
 
-Geometries that change with time may be created using the keywords, AZIM\_DOT, ELEV\_DOT, XYZ\_DOT and SCALE\_DOT which alter AZIM, ELEV, XYZ and SCALE respectively. For example,
+Geometries that change with time may be created using various keywords that end with {tt \_DOT}.  See Table \ref{tbl:geom} for a complete list of these keywords. In the following example, {\tt AZIM\_DOT} is used to vary the azimuthal rotation angle by 1 deg/s.
 \begin{verbatim}
 &GEOM VERTS=...,FACES=....,AZIM=0.0,AZIM_DOT=1.0 /
 \end{verbatim}
-creates an object that rotates about the Z axis (an azimuthal angle) at a rate 1 deg/s.
 
 \vspace{\baselineskip}
 
@@ -84,7 +85,9 @@ creates an object that rotates about the Z axis (an azimuthal angle) at a rate 1
 {\ct ELEV}         & Real                   & Section~\ref{info:GEOM}            &  deg      &    0.0                   \\ \hline
 {\ct ELEV\_DOT}    & Real                   & Section~\ref{info:GEOM}            &  deg/s    &    0.0                   \\ \hline
 {\ct FACES}        & array of Integer Triplets     & Section~\ref{info:GEOM}     &           &    0                     \\ \hline
-{\ct GEOM\_IDS}    & array of Character & Section~\ref{info:GEOM}                &           &   {\ct ''}               \\ \hline
+{\ct GAXIS}        & Real Triplet           & Section~\ref{info:GEOM}            &           &                          \\ \hline
+{\ct GROTATE}      & Real Triplet           & Section~\ref{info:GEOM}            &           &                          \\ \hline
+{\ct GEOM\_IDS}    & Real                   & Section~\ref{info:GEOM}            &           &                          \\ \hline
 {\ct ID}           & Character              & Section~\ref{info:GEOM}            &           &   {\ct 'geom'}           \\ \hline
 {\ct SCALE}        & Real Triplet           & Section~\ref{info:GEOM}            &           &   1.0                    \\ \hline
 {\ct SCALE\_DOT}   & Real Triplet           & Section~\ref{info:GEOM}            &  1/s      &   1.0                    \\ \hline
