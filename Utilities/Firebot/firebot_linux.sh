@@ -574,7 +574,10 @@ run_verification_cases_debug()
    # Wait some additional time for all cases to start
    sleep 30
 
-   # Stop all cases
+   #  ==================
+   #  = Stop all cases =
+   #  ==================
+
    ./Run_SMV_Cases.sh -d -s >> $FIREBOT_DIR/output/stage3 2>&1
    echo "" >> $FIREBOT_DIR/output/stage3 2>&1
 
@@ -592,8 +595,40 @@ run_verification_cases_debug()
 
 run_validation_cases_debug()
 {
-   # Placeholder
-   sleep 30
+
+   #  ============================================
+   #  = Run FDS validation cases for current set =
+   #  ============================================
+
+   cd $FDS_SVNROOT/Validation/"$CURRENT_VALIDATION_SET"
+
+   # Submit FDS validation cases and wait for them to start
+   echo 'Running FDS validation cases:' >> $FIREBOT_DIR/output/stage3
+   ./Run_All.sh -d >> $FIREBOT_DIR/output/stage3 2>&1
+   wait_cases_debug_start 'validation'
+
+   # Wait some additional time for all cases to start
+   sleep 60
+
+   #  ==================
+   #  = Stop all cases =
+   #  ==================
+
+   cd $FDS_SVNROOT/Validation/"$CURRENT_VALIDATION_SET"
+   
+   ./Run_all.sh -d -s >> $FIREBOT_DIR/output/stage3 2>&1
+   echo "" >> $FIREBOT_DIR/output/stage3 2>&1
+
+   # Wait for validation cases to end
+   wait_cases_debug_end 'validation'
+
+   #  ======================
+   #  = Remove .stop files =
+   #  ======================
+
+   # Remove all .stop files from Validation directories (recursively)
+   cd $FDS_SVNROOT/Validation
+   find . -name '*.stop' -exec rm -f {} \;
 }
 
 check_cases_debug()
@@ -834,9 +869,6 @@ run_validation_cases_release()
    #  ===================================
 
    cd $FDS_SVNROOT/Validation/"$CURRENT_VALIDATION_SET"
-
-   # Create directory for FDS validation case files
-   mkdir Current_Results
 
    # Start running FDS validation cases
    echo "Running FDS validation cases:" >> $FIREBOT_DIR/output/stage5
