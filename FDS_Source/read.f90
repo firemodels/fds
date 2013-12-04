@@ -6972,6 +6972,21 @@ MESH_LOOP: DO NM=1,NMESHES
                   IF (SURFACE(OB%SURF_INDEX(NNN))%BURN_AWAY) OB%CONSUMABLE = .TRUE.
                ENDDO FACE_LOOP
 
+               ! If OBST is THIN disallow velocity bc
+
+               IF (OB%THIN) THEN
+                  FACE_LOOP_2: DO NNN=-3,3
+                     IF (NNN==0) CYCLE FACE_LOOP_2
+                     IF (ABS(SURFACE(OB%SURF_INDEX(NNN))%VEL)            >TWO_EPSILON_EB .OR. &
+                         ABS(SURFACE(OB%SURF_INDEX(NNN))%VOLUME_FLUX)    >TWO_EPSILON_EB .OR. &
+                         ABS(SURFACE(OB%SURF_INDEX(NNN))%MASS_FLUX_TOTAL)>TWO_EPSILON_EB) THEN
+                        WRITE(MESSAGE,'(A,A,A)') 'ERROR: SURF_ID ',TRIM(SURFACE(OB%SURF_INDEX(NNN))%ID), &
+                           ' cannot attach velocity boundary to thin obstruction'
+                        CALL SHUTDOWN(MESSAGE)
+                     ENDIF
+                  ENDDO FACE_LOOP_2
+               ENDIF
+
                ! Calculate the increase or decrease in the obstruction volume over the user-specified
 
                VOL_SPECIFIED = (OB%X2-OB%X1)*(OB%Y2-OB%Y1)*(OB%Z2-OB%Z1)
