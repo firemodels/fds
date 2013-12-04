@@ -616,7 +616,7 @@ run_validation_cases_debug()
 
    cd $FDS_SVNROOT/Validation/"$CURRENT_VALIDATION_SET"
    
-   ./Run_all.sh -d -s >> $FIREBOT_DIR/output/stage3 2>&1
+   ./Run_All.sh -d -s >> $FIREBOT_DIR/output/stage3 2>&1
    echo "" >> $FIREBOT_DIR/output/stage3 2>&1
 
    # Wait for validation cases to end
