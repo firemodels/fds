@@ -395,7 +395,9 @@ Once a change has been committed and the issue tracker updated to reflect that t
 
 \section{Firebot: Automated Error Checking and Regression Testing}
 
-The FDS and Smokeview source codes undergo an automated build, verification, validation, and regression testing process, which is similar to a continuous integration system that automates the build/testing cycle for a project. This automated process is referred to as Firebot. The Firebot build/test process helps the FDS-SMV development team by performing automatic error checking and collecting performance and accuracy statistics between FDS revisions. This automated built/test process runs on a regular schedule (nightly) to ensure that FDS and Smokeview are free of compiler errors, verification errors, or any other errors that would result in a failure during the build/test cycle. For future reference, the results of a build/test process are archived and tagged with the SVN revision number that was used.
+The FDS and Smokeview source codes undergo an automated build, verification, validation, and regression testing process, which is similar to a continuous integration system that automates the build/testing cycle for a project. This automated process is referred to as Firebot. The Firebot build/test process helps the FDS-SMV development team by performing automatic error checking and collecting performance and accuracy statistics between FDS revisions.
+
+The automated built/test verification process runs on a regular schedule (nightly) to ensure that FDS and Smokeview are free of compiler errors, verification errors, or any other errors that would result in a failure during the build/test cycle. The automated build/test validation process runs continuously through the validation suite set-by-set. For future reference, the results of a build/test process are archived and tagged with the SVN revision number that was used.
 
 Upon completion of the automated build/test process, the results of the build/test process are dispatched to the development team. In the event of a failure, the build/test process continues when possible, and the appropriate error logs are dispatched to the development team. The automated build/test process consists of eight build stages, which are described in the following sections.
 
@@ -407,17 +409,17 @@ In the first stage, the newest version of the FDS-SMV source code is retrieved f
 
 The serial and parallel versions of FDS are compiled with debugging flags enabled. This stage allows for errors in the source code to be identified and traced early in the build/test process. Any compiler warnings are logged at this time, and the build/test process continues after no major compilation errors are found.
 
-\subsection*{Stage 3: Run verification suite in debug mode}
+\subsection*{Stage 3: Run verification suite (or validation set) in debug mode}
 
-All of the cases in the verification suite are invoked using the FDS debug versions that were compiled in Stage~2. The verification cases are run for at least one time step to ensure that the cases start without errors. After all of the verification cases run for at least one time step, the cases are stopped using an FDS stop file. Then the FDS output logs are checked for Fortran errors, numerical instabilities, missing verification case files, or other FDS errors.
+All of the cases in the verification suite (or validation set) are invoked using the FDS debug versions that were compiled in Stage~2. The verification (or validation) cases are run for at least one time step to ensure that the cases start without errors. After all of the cases run for at least one time step, the cases are stopped using an FDS stop file. Then the FDS output logs are checked for Fortran errors, numerical instabilities, missing verification case files, or other FDS errors.
 
 \subsection*{Stage 4: Compilation of FDS release versions}
 
 The serial, MPI, and OpenMP release versions of FDS are compiled. Any compiler warnings are logged at this time, and the build/test process continues after no major compilation errors are found.
 
-\subsection*{Stage 5: Run verification suite in release mode}
+\subsection*{Stage 5: Run verification suite (or validation set) in release mode}
 
-All of the cases in the verification suite are invoked using the FDS release versions that were compiled in Stage~4. After all of the verification cases run to completion, the FDS output logs are checked for Fortran errors, numerical instabilities, missing verification case files, or other FDS errors.
+All of the cases in the verification suite (or validation set) are invoked using the FDS release versions that were compiled in Stage~4. After all of the cases run to completion, the FDS output logs are checked for Fortran errors, numerical instabilities, missing verification case files, or other FDS errors. If validation mode is active and the simulations are free of errors, then the updated results are committed back to the repository.
 
 \subsection*{Stage 6: Compilation of Smokeview and scripted generation of figures}
 
