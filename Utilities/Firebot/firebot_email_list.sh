@@ -7,6 +7,5 @@ mailToSMV="gforney@gmail.com, koverholt@gmail.com"
 mailToFDS="mcgratta@gmail.com, randy.mcdermott@gmail.com, gforney@gmail.com, CraigWeinschenk@gmail.com, drjfloyd@gmail.com, koverholt@gmail.com, Topi.Sikanen@gmail.com, shostikk@gmail.com, ben.trettel@gmail.com, mrctkg@gmail.com, kiliansusan@gmail.com"
 
 # Mailing list for Validationbot
-# mailtoFDS_validationbot="mcgratta@gmail.com, randy.mcdermott@gmail.com, gforney@gmail.com, koverholt@gmail.com"
-mailtoFDS_validationbot="koverholt@gmail.com"
+mailtoFDS_validationbot="mcgratta@gmail.com, randy.mcdermott@gmail.com, gforney@gmail.com, koverholt@gmail.com"
 
