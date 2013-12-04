@@ -4223,7 +4223,7 @@ DEVICE_LOOP: DO N=1,N_DEVC
       WRITE(M%STRING(M%N_STRINGS),'(I6,F10.2,I6)') N,T_BEGIN+(T_TMP-T_BEGIN)*TIME_SHRINK_FACTOR,I_STATE
    ENDIF
 
-!Write initial state of DEViCes to the Smokeview file
+   ! Write initial state of DEViCes to the Smokeview file
 
    IF (ABS(T-T_BEGIN)<SPACING(T) .AND. .NOT. DV%CURRENT_STATE) THEN
       M=>MESHES(NM)
