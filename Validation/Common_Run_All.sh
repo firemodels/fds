@@ -53,9 +53,9 @@ fi
 ##############################################################
 
 # Skip if STOPFDS (-s option) is specified
-if [[ ! $STOPFDS ]] ; then
+if [ ! $STOPFDS ] ; then
   # Check for existence of $INDIR (Current_Results) directory
-  if [[ -d "$INDIR" ]]; then
+  if [ -d "$INDIR" ]; then
       # Check for files in $INDIR (Current_Results) directory
       if [ "$(ls -A $INDIR)" ]; then
           while true; do
