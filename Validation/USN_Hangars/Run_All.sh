@@ -1,45 +1,35 @@
 #!/bin/bash
 
-# This script runs the a set of Validation Cases on a linux machine with
-# a batch queuing system
-
+# This script runs a set of Validation Cases on a Linux machine with a batch queuing system.
+# See the file Validation/Common_Run_All.sh for more information.
 export SVNROOT=`pwd`/../..
-export QFDS=/usr/local/bin/qfds.sh
-export BASEDIR=`pwd`
-export INDIR=Current_Results
-# qq="-q fire80s"
-qq=
+source $SVNROOT/Validation/Common_Run_All.sh
 
-# uncomment following line to stop all cases
-# export STOPFDS=1
+$QFDS $DEBUG -p 5 -r $QUEUE -d $INDIR USN_Hawaii_Test_01.fds
+$QFDS $DEBUG -p 5 -r $QUEUE -d $INDIR USN_Hawaii_Test_02.fds
+$QFDS $DEBUG -p 5 -r $QUEUE -d $INDIR USN_Hawaii_Test_03.fds
+$QFDS $DEBUG -p 5 -r $QUEUE -d $INDIR USN_Hawaii_Test_04.fds
+$QFDS $DEBUG -p 5 -r $QUEUE -d $INDIR USN_Hawaii_Test_05.fds
+$QFDS $DEBUG -p 5 -r $QUEUE -d $INDIR USN_Hawaii_Test_06.fds
+$QFDS $DEBUG -p 5 -r $QUEUE -d $INDIR USN_Hawaii_Test_07.fds
+$QFDS $DEBUG -p 5 -r $QUEUE -d $INDIR USN_Hawaii_Test_11.fds
 
-/bin/sh -c "cp $BASEDIR/FDS_Input_Files/*.fds $BASEDIR/$INDIR"
-
-$QFDS -p 5 -r $qq -d $INDIR USN_Hawaii_Test_01.fds
-$QFDS -p 5 -r $qq -d $INDIR USN_Hawaii_Test_02.fds
-$QFDS -p 5 -r $qq -d $INDIR USN_Hawaii_Test_03.fds
-$QFDS -p 5 -r $qq -d $INDIR USN_Hawaii_Test_04.fds
-$QFDS -p 5 -r $qq -d $INDIR USN_Hawaii_Test_05.fds
-$QFDS -p 5 -r $qq -d $INDIR USN_Hawaii_Test_06.fds
-$QFDS -p 5 -r $qq -d $INDIR USN_Hawaii_Test_07.fds
-$QFDS -p 5 -r $qq -d $INDIR USN_Hawaii_Test_11.fds
-
-$QFDS -p 5 -r $qq -d $INDIR USN_Iceland_Test_01.fds
-$QFDS -p 5 -r $qq -d $INDIR USN_Iceland_Test_02.fds
-$QFDS -p 5 -r $qq -d $INDIR USN_Iceland_Test_03.fds
-$QFDS -p 5 -r $qq -d $INDIR USN_Iceland_Test_04.fds
-$QFDS -p 5 -r $qq -d $INDIR USN_Iceland_Test_05.fds
-$QFDS -p 5 -r $qq -d $INDIR USN_Iceland_Test_06.fds
-$QFDS -p 5 -r $qq -d $INDIR USN_Iceland_Test_07.fds
-$QFDS -p 5 -r $qq -d $INDIR USN_Iceland_Test_09.fds
-$QFDS -p 5 -r $qq -d $INDIR USN_Iceland_Test_10.fds
-$QFDS -p 5 -r $qq -d $INDIR USN_Iceland_Test_11.fds
-$QFDS -p 5 -r $qq -d $INDIR USN_Iceland_Test_12.fds
-$QFDS -p 5 -r $qq -d $INDIR USN_Iceland_Test_13.fds
-$QFDS -p 5 -r $qq -d $INDIR USN_Iceland_Test_14.fds
-$QFDS -p 5 -r $qq -d $INDIR USN_Iceland_Test_15.fds
-$QFDS -p 5 -r $qq -d $INDIR USN_Iceland_Test_17.fds
-$QFDS -p 5 -r $qq -d $INDIR USN_Iceland_Test_18.fds
-$QFDS -p 5 -r $qq -d $INDIR USN_Iceland_Test_19.fds
-$QFDS -p 5 -r $qq -d $INDIR USN_Iceland_Test_20.fds
+$QFDS $DEBUG -p 5 -r $QUEUE -d $INDIR USN_Iceland_Test_01.fds
+$QFDS $DEBUG -p 5 -r $QUEUE -d $INDIR USN_Iceland_Test_02.fds
+$QFDS $DEBUG -p 5 -r $QUEUE -d $INDIR USN_Iceland_Test_03.fds
+$QFDS $DEBUG -p 5 -r $QUEUE -d $INDIR USN_Iceland_Test_04.fds
+$QFDS $DEBUG -p 5 -r $QUEUE -d $INDIR USN_Iceland_Test_05.fds
+$QFDS $DEBUG -p 5 -r $QUEUE -d $INDIR USN_Iceland_Test_06.fds
+$QFDS $DEBUG -p 5 -r $QUEUE -d $INDIR USN_Iceland_Test_07.fds
+$QFDS $DEBUG -p 5 -r $QUEUE -d $INDIR USN_Iceland_Test_09.fds
+$QFDS $DEBUG -p 5 -r $QUEUE -d $INDIR USN_Iceland_Test_10.fds
+$QFDS $DEBUG -p 5 -r $QUEUE -d $INDIR USN_Iceland_Test_11.fds
+$QFDS $DEBUG -p 5 -r $QUEUE -d $INDIR USN_Iceland_Test_12.fds
+$QFDS $DEBUG -p 5 -r $QUEUE -d $INDIR USN_Iceland_Test_13.fds
+$QFDS $DEBUG -p 5 -r $QUEUE -d $INDIR USN_Iceland_Test_14.fds
+$QFDS $DEBUG -p 5 -r $QUEUE -d $INDIR USN_Iceland_Test_15.fds
+$QFDS $DEBUG -p 5 -r $QUEUE -d $INDIR USN_Iceland_Test_17.fds
+$QFDS $DEBUG -p 5 -r $QUEUE -d $INDIR USN_Iceland_Test_18.fds
+$QFDS $DEBUG -p 5 -r $QUEUE -d $INDIR USN_Iceland_Test_19.fds
+$QFDS $DEBUG -p 5 -r $QUEUE -d $INDIR USN_Iceland_Test_20.fds
 
