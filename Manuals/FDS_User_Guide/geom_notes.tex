@@ -26,9 +26,9 @@ A simple form is given by
 /
 \end{verbatim}
 
-\noindent The keyword {\tt ID}\ specifies the name of the object.  The object's vertices and triangular faces are specified using the {\tt VERTS}\ and {\tt FACES}\ keywords.  {\tt VERTS}\ is a list of $(x,y,z)$ coordinates and {\tt FACES}\ is a list of vertex indices, 3 indices for each triangular face\footnote{Parameters within [] indicate default values}.  Each vertex index ranges from 1 to the number of vertices found on this {\tt \&GEOM}\ line. 
+\noindent The keyword {\tt ID}\ specifies the name of the object.  The object's vertices and triangular faces are specified using the {\tt VERTS}\ and {\tt FACES}\ keywords.  {\tt VERTS}\ is a list of $(x,y,z)$ coordinates and {\tt FACES}\ is a list of vertex indices, 3 indices for each triangular face\footnote{Parameters within [] indicate default values}.  Each index ranges from 1 to the number of vertices found on this {\tt \&GEOM}\ line.
 
-An object may be translated, scaled and rotated.  An object is translated using the {\tt XYZ}\ keyword.  An object is scaled or magnified along each of 3 dimensions independently using {\tt SCALE}\ keyword followed by 3 scale factors. An object may be flipped by using a negative scale factor.  The object may be rotated using {\tt AZIM}\ and {\tt ELEV}.  AZIM is used to specify an azimuthal rotation about the Z axis.  ELEV specifies an elevation angle.  An object may also be rotated about an arbitrary axis.  {\tt GAXIS} is used to specify the axis of rotation and GROTATE specifies the rotation amount.  All rotations are in degrees.
+An object may be translated, scaled and rotated.  An object may be translated by $(x,y,z)$ using {\tt XYZ=x,y,z}.  An object may be scaled or magnified by $sx$, $sy$, $sz$ along each of 3 dimensions independently using {\tt SCALE=sx,sy,sz}. An object may be flipped by using a negative scale factor.  An object may be rotated by using {\tt AZIM}\ and {\tt ELEV}.  AZIM is used to specify an azimuthal rotation angle about a vertical axis centered at an origin defined by {\tt XYZ0}.  ELEV specifies an elevation angle.  An object may also be rotated about an arbitrary axis.  {\tt GAXIS} is used to specify this axis.  GROTATE is used to specify the amount of rotation about this axis.  All rotation angles are in degrees.
 
 One may create an object using previously defined objects. These objects are specified using the {\tt GEOM\_IDS}\ keyword.  An example is given by
 
@@ -41,16 +41,16 @@ One may create an object using previously defined objects. These objects are spe
       ELEV=[0],
 
       GEOM_IDS(1)='chair',  DSCALE(1)=..., DAZIM(1)=..., DELEV(1)...
-                            DXYZ0(1,1)=..., DXYZ(1,1)=...,
+                            DXYZ0(1:3,1)=..., DXYZ(1:3,1)=...,
       GEOM_IDS(2)='couch',  DSCALE(2)=..., DAZIM(2)=..., DELEV(2)...
-                            DXYZ0(1,2)=..., DXYZ(1,2)=...,
+                            DXYZ0(1:3,2)=..., DXYZ(1:3,2)=...,
 /
 \end{verbatim}
 }
 
-\noindent where {\tt GEOM\_IDS}\ is used incorporate a chair and couch into the group.  These two objects must be defined in previous {\&GEOM}\ lines (forward references are not allowed).   One may scale, rotate and translate objects as they are placed in the group using {\tt DSCALE}\, for scaling, {\tt DAZIM} and {\tt DELEV} for rotation and {\tt DXYZ} for translation. The {\tt DXYZ0}\ and {\tt DXYZ}\ keywords are two dimensional.  The first coordinate specifies the spatial component (1 for x, 2 for y, 3 for z or 1:3 for all three components).  The second coordinate specifies the object in the {\tt GEOM\_IDS}\ array. The keyword, {\tt COMPONENT\_ONLY}\, if .TRUE., indicates that the geometry only occurs in other geometry definitions and is not itself a part of the FDS model.
+\noindent where {\tt GEOM\_IDS}\ is used incorporate a chair and couch into the group.  These two objects must be defined in previous {\&GEOM}\ lines (forward references are not allowed).   One may scale, rotate and translate objects as they are placed in the group using {\tt DSCALE}\, for scaling, {\tt DAZIM} and {\tt DELEV} for rotation and {\tt DXYZ} for translation. The {\tt DXYZ0}\ and {\tt DXYZ}\ keywords are two dimensional.  The first coordinate specifies the spatial component (1 for x, 2 for y, 3 for z or 1:3 for x, y, z).  The second coordinate specifies the object number in the {\tt GEOM\_IDS}\ array. The keyword, {\tt COMPONENT\_ONLY}\, if .TRUE., indicates that the geometry only occurs in other geometry definitions and is not itself a part of the FDS model.
 
-Geometries that change with time may be created using various keywords that end with {tt \_DOT}.  See Table \ref{tbl:geom} for a complete list of these keywords. In the following example, {\tt AZIM\_DOT} is used to vary the azimuthal rotation angle by 1 deg/s.
+An object's position and orientation my change with time.  These changes are specified using various keywords that end with {\tt \_DOT}.  See Table \ref{tbl:GEOM} for a complete list of these keywords. In the following example, {\tt AZIM\_DOT} is used to vary the azimuthal rotation angle by 1 deg/s.  Similarly, the position may be changed by using {\tt XYZ\_DOT}.  For example, {\tt XYZ\_DOT=0.0,0.0,1.0}\ would cause an object to move 1~m/s in a vertical direction.
 \begin{verbatim}
 &GEOM VERTS=...,FACES=....,AZIM=0.0,AZIM_DOT=1.0 /
 \end{verbatim}
