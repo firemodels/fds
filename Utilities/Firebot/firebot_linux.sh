@@ -218,7 +218,7 @@ update_and_compile_cfast()
       cd $CFAST_SVNROOT
 
       # Checkout latest CFAST SVN revision
-      svn co https://cfast.googlecode.com/svn/trunk/cfast/trunk/CFAST CFAST >> $FIREBOT_DIR/output/stage0_cfast 2>&1
+      svn co http://cfast.googlecode.com/svn/trunk/cfast/trunk/CFAST CFAST >> $FIREBOT_DIR/output/stage0_cfast 2>&1
       
       # Build CFAST
       cd $CFAST_SVNROOT/CFAST/intel_linux_64
