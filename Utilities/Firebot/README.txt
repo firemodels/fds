@@ -27,7 +27,7 @@ More details on the Firebot build stages can be found in the FDS Configuration M
 2. In Firebot's newly created home directory, perform an SVN checkout on the Firebot portion of the
    FDS-SMV repository using:
 
-      svn checkout https://fds-smv.googlecode.com/svn/trunk/FDS/trunk/Utilities/Firebot firebot
+      svn checkout http://fds-smv.googlecode.com/svn/trunk/FDS/trunk/Utilities/Firebot firebot
 
 3. cd to the newly created ~/firebot directory
 
