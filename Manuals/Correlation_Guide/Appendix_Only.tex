@@ -15,6 +15,7 @@
 
 % Fancy headings
 \usepackage{fancyhdr}
+\setlength{\headheight}{15.2pt}
 \pagestyle{fancy}
 \renewcommand\thesection{\Alph{section}}
 \renewcommand{\subsectionmark}[1]{\markright{#1}{}}
@@ -35,6 +36,9 @@
 \thispagestyle{empty}
 
 \huge
+%  =========================================
+%  = Change this to Appendix A, B, C, or D =
+%  =========================================
 \noindent \textbf{Appendix A}
 
 \vspace{0.5em}
@@ -56,6 +60,11 @@ For the empirical correlations, this document contains individual comparisons of
 \tableofcontents
 
 \appendix
+
+%  =============================================================================================
+%  = Change this to 0 for Appendix A, 1 for Appendix B, 2 for Appendix C, and 3 for Appendix D =
+%  =============================================================================================
+\setcounter{section}{0}
 
 \include{Appendix_Graphs}
 
