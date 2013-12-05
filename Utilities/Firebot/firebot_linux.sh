@@ -90,12 +90,8 @@ case $OPTION in
    ;;
   v)
    FIREBOT_MODE="validation"
-
    # Set Validationbot email list
-   mailToFDS=$mailtoFDS_validationbot
-
-   # Disable time limit email
-   TIME_LIMIT_EMAIL_NOTIFICATION="sent"
+   mailToFDS=$mailtoFDS_nist
    ;;
   y)
    RUN_AS_ANOTHER_USER=true
@@ -140,7 +136,13 @@ START_TIME=$(date +%s)
 
 # Set time limit (43,200 seconds = 12 hours)
 TIME_LIMIT=43200
-TIME_LIMIT_EMAIL_NOTIFICATION="unsent"
+
+if [ $FIREBOT_MODE == "verification" ] ; then
+   TIME_LIMIT_EMAIL_NOTIFICATION="unsent"
+elif [ $FIREBOT_MODE == "validation" ] ; then
+   # Disable time limit email
+   TIME_LIMIT_EMAIL_NOTIFICATION="sent"
+fi
 
 check_time_limit()
 {
