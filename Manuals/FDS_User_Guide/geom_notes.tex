@@ -73,6 +73,10 @@ An object's position and orientation my change with time.  These changes are spe
 \multicolumn{5}{|c|}{{\ct GEOM} (Unstructured Geometry Parameters)} \\
 \hline \hline
 \endhead
+   G%TEXTURE_MAP = TEXTURE_MAP
+   G%TEXTURE_HEIGHT = TEXTURE_HEIGHT
+   G%TEXTURE_WIDTH = TEXTURE_WIDTH
+   G%GEOM_TYPE = 'XY'
 {\ct AZIM}         & Real                   & Section~\ref{info:GEOM}            &  deg      &    0.0                   \\ \hline
 {\ct AZIM\_DOT}    & Real                   & Section~\ref{info:GEOM}            &  deg/s    &    0.0                   \\ \hline
 {\ct COMPONENT\_ONLY} & LOGICAL             & Section~\ref{info:GEOM}            &           &  {\ct .FALSE.}           \\ \hline
@@ -86,12 +90,16 @@ An object's position and orientation my change with time.  These changes are spe
 {\ct ELEV\_DOT}    & Real                   & Section~\ref{info:GEOM}            &  deg/s    &    0.0                   \\ \hline
 {\ct FACES}        & array of Integer Triplets     & Section~\ref{info:GEOM}     &           &    0                     \\ \hline
 {\ct GAXIS}        & Real Triplet           & Section~\ref{info:GEOM}            &           &                          \\ \hline
+{\ct GEOM\_TYPE}   & Character              & Section~\ref{info:GEOM}            &           & {\ct 'XY'}               \\ \hline
 {\ct GROTATE}      & Real Triplet           & Section~\ref{info:GEOM}            &           &                          \\ \hline
 {\ct GEOM\_IDS}    & Real                   & Section~\ref{info:GEOM}            &           &                          \\ \hline
 {\ct ID}           & Character              & Section~\ref{info:GEOM}            &           &   {\ct 'geom'}           \\ \hline
 {\ct SCALE}        & Real Triplet           & Section~\ref{info:GEOM}            &           &   1.0                    \\ \hline
 {\ct SCALE\_DOT}   & Real Triplet           & Section~\ref{info:GEOM}            &  1/s      &   1.0                    \\ \hline
 {\ct SURF\_ID}     & Character              & Section~\ref{info:GEOM}            &           &  {\ct 'INERT'}           \\ \hline
+{\ct TEXTURE\_MAP} & Character              & Section~\ref{info:GEOM}            &           &  {\ct 'null'}            \\ \hline
+{\ct TEXTURE\_HEIGHT} & Character              & Section~\ref{info:GEOM}            &           & 1.0                   \\ \hline
+{\ct TEXTURE\_WIDTH} & Character              & Section~\ref{info:GEOM}            &           & 1.0                    \\ \hline
 {\ct VERTS}        & array of Real Triplets & Section~\ref{info:GEOM}            &   m       &   0.0                    \\ \hline
 {\ct XYZ0}         & Real Triplet           & Section~\ref{info:GEOM}            &   m       &   0.0                    \\ \hline
 {\ct XYZ}          & Real Triplet           & Section~\ref{info:GEOM}            &   m       &   0.0                    \\ \hline
