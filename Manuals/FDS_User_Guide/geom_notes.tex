@@ -101,5 +101,39 @@ An object's position and orientation my change with time.  These changes are spe
 
 
 \vspace{\baselineskip}
+
+\section{Geometry Data Files}
+\label{out:GEOMETRY_DATA}
+
+(add to FDS user's guide 20.13 when ready)
+
+The geometry data file contains a description of data values computed by FDS on an immersed
+geometrical objects.  This file is analogous to the boundary file.
+The data written out to a geometry data file MUST correspond to the geometry written out
+in the corresponding geometry file.
+Geometry data files are written out from {\ct dump.f90} with the lines equivalent to the following:
+\begin{lstlisting}[basicstyle=\scriptsize\ttfamily]
+  WRITE(LU_GEOM_DATA) ONE
+  WRITE(LU_GEOM_DATA) VERSION
+  WRITE(LU_GEOM_DATA) STIME
+  WRITE(LU_GEOM_DATA) N_VERT_S_VALS,N_VERT_D_VALS,N_FACE_S_VALS,N_FACE_D_VALS
+  IF (N_VERT_S_VALS>0)  WRITE(LU_GEOM_DATA) (ValVertStatic(I), I=1,N_VERT_S_VALS)
+  IF (N_VERT_D_VALS>0)  WRITE(LU_GEOM_DATA) (ValVertDynamic(I),I=1,N_VERT_D_VALS)
+  IF (N_FACE_S_VALS>0)  WRITE(LU_GEOM_DATA) (ValFaceStatic(I), I=1,N_FACE_S_VALS)
+  IF (N_FACE_D_VALS>0)  WRITE(LU_GEOM_DATA) (ValFaceDynamic(I),I=1,N_FACE_D_VALS)
+              .
+              .
+\end{lstlisting}
+The data values written out in this file correspond to the geometry written out in the geometry file.
+\begin{itemize}
+\item {\ct ONE}\ has the value 1. Smokeview uses this number to determine whether the computer creating the geometry file and the computer viewing the geometry file use the same or different byte swap (endian) conventions for storing floating point numbers.
+\item {\ct VERSION}\ currently has value 0 and indicates the version number of this file format.
+\item {\ct STIME} is the FDS simulation time.
+\item {\ct N\_VERT\_S\_VALS, N\_FACE\_S\_VALS}\ is the number of data values written out for static vertices and faces.  One can write out data values located at nodes, located at the center of faces or both.
+\item {\ct N\_VERT\_D\_VALS, N\_FACE\_D\_VALS}\ is the number of dynamic values written out for dynamic vertices and faces.  One can write out data values located at nodes, located at the center of faces, both or neither (if there is no dynamic geometry).
+\item {\ct ValVertStatic, ValFaceStatic}\ static vertex and face data.
+\item {\ct ValVertDynamic, ValFaceDynamic}\ dynamic vertex and face data.
+\end{itemize}
+
 \end{document}
 
