@@ -102,7 +102,7 @@ CAROLFIRE was a project sponsored by the U.S.~Nuclear Regulatory Commission to s
 
 Petra Andersson and Patrick Van Hees of the Swedish National Testing and Research Institute (SP) proposed that a cable's thermally-induced electrical failure can be predicted via a one-dimensional heat transfer calculation, under the assumption that the cable can be treated as a homogenous cylinder~\cite{Andersson:2005}. Their results for PVC cables were encouraging and suggested that the simplification of the analysis is reasonable and that it should extend to other types of cables. The assumptions underlying the THIEF model are as follows:
 \begin{enumerate}
-\item The heat penetration into a cable of circular cross section is primarily in the radial direction. 
+\item The heat penetration into a cable of circular cross section is primarily in the radial direction.
 \item The cable is homogenous in composition. In reality, a cable is constructed of several different types of polymeric materials, cellulosic fillers, and a conducting metal, most often copper.
 \item The thermal conductivity, specific heat, and density of the assumed homogenous cable are independent of temperature. In reality, both the thermal conductivity and specific heat of polymers are temperature-dependent, but this information is not easily obtained from manufacturers.
 \item It is assumed that no decomposition reactions occur within the cable during its heating, and ignition and burning are not considered in the model. In fact, thermoplastic cables melt, thermosets form a char layer, and both release volatile gases up to and beyond the point of electrical failure.
@@ -849,12 +849,9 @@ No.     & (s)       & (kW)          & Vents     & No.     & (s)       & (kW)    
 \section{UL/NFPRF Sprinkler, Vent, and Draft Curtain Study}
 \label{UL_NFPRF_Description}
 
-In 1997, a series of 34 heptane spray burner experiments was conducted at the Large Scale Fire Test Facility at Underwriters Laboratories
-(UL) in Northbrook, Illinois~\cite{Sheppard:1,McGrattan:5}. The experiments were divided into two test series. Series I consisted of 22 4.4~MW experiments. Series~II consisted
-of 12 10~MW experiments. The objective of the experiments was to characterize the temperature and flow field for fire
-scenarios with a controlled heat release rate in the presence of sprinklers, draft curtains, and smoke \& heat vents.
-The Large Scale Fire Test Facility at UL contains a 37~m by 37~m (120~ft by 120~ft) main fire test cell, equipped with a 30.5~m by 30.5~m (100~ft by
-100~ft) adjustable height ceiling. The UL/NFPRF test results (Series I) are summarized in Table~\ref{ULmatrix}. The UL/NFPRF test results (Series II) are summarized in Table~\ref{ULburnermatrixII}. The layout of the experiments is shown in Figs.~\ref{layout} and \ref{burnerlayoutA}.
+In 1997, thirty-four heptane spray burner and five racked commodity experiments were conducted at the Large Scale Fire Test Facility at Underwriters Laboratories (UL) in Northbrook, Illinois~\cite{Sheppard:1,McGrattan:5}. The spray burner experiments were divided into two test series. Series I consisted of 22 4.4~MW experiments. Series~II consisted of 12 10~MW experiments. The objective of the spray burner experiments was to characterize the temperature and flow field for fire scenarios with a controlled heat release rate in the presence of sprinklers, draft curtains, and smoke \& heat vents.
+
+The Large Scale Fire Test Facility at UL contains a 37~m by 37~m (120~ft by 120~ft) main fire test cell, equipped with a 30.5~m by 30.5~m (100~ft by 100~ft) adjustable height ceiling. The UL/NFPRF test results (Series I) are summarized in Table~\ref{ULmatrix}. The UL/NFPRF test results (Series II) are summarized in Table~\ref{ULburnermatrixII}. The layout of the experiments is shown in Figs.~\ref{layout}, \ref{burnerlayoutA}, and \ref{layout3}.
 
 \begin{table}[h!]
 \begin{center}
@@ -1058,14 +1055,85 @@ north to south. The vents are 4~ft by 8~ft. }
 \label{burnerlayoutA}
 \end{figure}
 
+\setlength{\unitlength}{.054166in}
+\newsavebox{\eightbox}
+\savebox{\eightbox}(3.5,3.5){%
+\put(0,0){\framebox(3.5,3.5){ }}
+\put(1.75,0){\line(0,1){3.5}}
+\put(0,1.75){\line(1,0){3.5}}}
 
+\newsavebox{\onebox}
+\savebox{\onebox}(3.5,3.5){%
+\put(0,0){\framebox(3.5,3.5){ }}}
+
+\thinlines
+\newsavebox{\fuel}
+\savebox{\fuel}(31.5,30.5){%
+\multiput( 0.000, 0.0)(4.000,0){ 2}{\usebox{\onebox}}
+\multiput( 8.000, 0.0)(4.000,0){ 4}{\usebox{\eightbox}}
+\multiput(24.000, 0.0)(4.000,0){ 2}{\usebox{\onebox}}
+\multiput( 0.000,11.5)(4.000,0){8}{\usebox{\eightbox}}
+\multiput( 0.000,15.5)(4.000,0){8}{\usebox{\eightbox}}
+\multiput( 0.000,27.0)(4.000,0){ 2}{\usebox{\onebox}}
+\multiput( 8.000,27.0)(4.000,0){ 4}{\usebox{\eightbox}}
+\multiput(24.000,27.0)(4.000,0){ 2}{\usebox{\onebox}}
+\put(15.000,13.25){\framebox(.5,.5){ }}
+\put(16.000,12.75){\framebox(.5,.5){ }}
+\put(16.000,13.25){\framebox(.5,.5){ }}
+\put(15.000,12.75){\framebox(.5,.5){ }}
+}
+
+\begin{figure}[p]
+\begin{center}
+\setlength{\unitlength}{.054166in}
+\begin{picture}(120,120)
+
+\linethickness{1mm}
+\put(0,0){\framebox(120,120)[tc]{ }}
+\put(60,118){\makebox(0,0){North Wall}}
+\put(60,  2){\makebox(0,0){South Wall}}
+
+\linethickness{.5mm}
+\put(10,10){\framebox(100,100)[tl]{ }}
+
+\thinlines
+\put(10.0,86.0){\dashbox{1}(30.0,24.0)[tl]{ }}
+\put(40.,10.5){\dashbox{1}(69.5,75.5)[tl]{              }}
+
+\thicklines
+\put(48.,16.){\framebox(4,8){ }}
+\put(48.,67.){\framebox(4,8){ }}
+\put(28.,67.){\framebox(4,8){ }}
+\put(98.,67.){\framebox(4,8){ }}
+\put(98.,16.){\framebox(4,8){ }}
+
+\put(34.25,67.75){\usebox{\fuel}}
+
+\multiput(15,11)(0,10){10}{\circle*{.8}}
+\multiput(25,11)(0,10){10}{\circle*{.8}}
+\multiput(35,11)(0,10){10}{\circle*{.8}}
+\multiput(45,11)(0,10){10}{\circle*{.8}}
+\multiput(55,11)(0,10){10}{\circle*{.8}}
+\multiput(65,11)(0,10){10}{\circle*{.8}}
+\multiput(75,11)(0,10){10}{\circle*{.8}}
+\multiput(85,11)(0,10){10}{\circle*{.8}}
+\multiput(95,11)(0,10){10}{\circle*{.8}}
+\multiput(105,11)(0,10){10}{\circle*{.8}}
+
+\end{picture}
+\end{center}
+\caption[Test layout for Plastic Commodity Test P-3.]
+{Plan view of the UL Large Scale Fire Test Facility with the layout of Plastic Commodity Test P-3. Tests P-1 and P-2 did not include the draft curtains (dashed lines). The sprinklers (dots) were separated by exactly 10~ft in each direction. The racks were located 30~ft south and 20~ft east of the position shown in Tests~P-1, P-4, and P-5. The racks were located 10~ft south of the position shown in Test~P-2. Each pallet load of boxed plastic commodity is represented by a square subdivided into four smaller squares to depict the individual boxes. Pallets containing empty boxes are represented by empty squares. Roof vents are represented by rectangles.}
+\label{layout3}
+\end{figure}
 
 \begin{description}
 \item[Ceiling:] The ceiling was raised to a height of 7.6~m and instrumented with thermocouples and other measurement devices. The ceiling was constructed of 0.6~m by 1.2~m by 1.6~cm UL fire-rated Armstrong Ceramaguard (Item 602B) ceiling tiles. The manufacturer reported the thermal properties of the material to be: specific heat 753 J/(kg$\cdot$K), thermal conductivity 0.0611~W/(m$\cdot$K), and density 313~kg/m$^3$.
 \item[Draft Curtains:] Sheet metal, 1.2~mm thick and 1.8~m deep, was suspended from the ceiling for 16 of the 22 Series~I tests, enclosing an area of about 450~m$^2$ and 49 sprinklers. The curtains were in place for all of the Series~II tests.
 \item[Sprinklers:] Central ELO-231 (Extra Large Orifice) uprights were used for all the tests. The orifice diameter of this sprinkler is reported by the manufacturer to be nominally 1.6~cm (0.64~in), the reference actuation temperature is reported by the manufacturer to be 74$^\circ$C (165$^\circ$F). The RTI (Response Time Index) and C-factor (Conductivity factor) were reported by UL to be 148~(m$\cdot$s)$^\ha$ and 0.7~(m/s)$^\ha$, respectively~\cite{Sheppard:1}. When installed, the sprinkler deflector was located 8~cm below the ceiling. The thermal element of the sprinkler was located 11~cm below the ceiling. The sprinklers were installed with nominal 3~m by 3~m (exact 10~ft by 10~ft) spacing in a system designed to deliver a constant 0.34~L/(s$\cdot$m$^2$) (0.50 gpm/ft$^2$) discharge density when supplied by a 131~kPa (19~psi) discharge pressure
 \item[Vent:] UL-listed double leaf fire vents with steel covers and steel curb were installed in the adjustable height ceiling in the position shown in Figs.~\ref{layout} and \ref{burnerlayoutA}. The vent is designed to open manually or automatically. The vent doors were recessed into the ceiling about 0.3~m (1~ft).
-\item[Heat Release Rate:] The heptane spray burner consisted of a 1~m by 1~m square of 1.3~cm pipe supported by four cement blocks 0.6~m off the floor. Four atomizing spray nozzles were used to provide a free spray of heptane that was then ignited. For all but one of the Series~I tests, the total heat release rate from the fire was manually ramped up following a ``t-squared'' curve to a steady-state in 75~s (150~s was used in Test I-16). The fire was ramped to 10~MW in 75~s for the Series~II tests. The fire growth curve was followed until a specified fire size was reached or the first sprinkler activated. After either of these events, the fire size was maintained at that level until conditions reached roughly a steady state, i.e., the temperatures recorded near the ceilings remained steady and no more sprinkler activations occurred. The heat release rate from the burner was confirmed by placing it under the large product calorimeter at UL, ramping up the flow of heptane in the same manner as in the tests, and measuring the total and convective heat release rates. It was found that the convective heat release rate was 0.65~$\pm$~0.02 of the total.
+\item[Heptane Spray Burner:] The heptane spray burner consisted of a 1~m by 1~m square of 1.3~cm pipe supported by four cement blocks 0.6~m off the floor. Four atomizing spray nozzles were used to provide a free spray of heptane that was then ignited. For all but one of the Series~I tests, the total heat release rate from the fire was manually ramped up following a ``t-squared'' curve to a steady-state in 75~s (150~s was used in Test I-16). The fire was ramped to 10~MW in 75~s for the Series~II tests. The fire growth curve was followed until a specified fire size was reached or the first sprinkler activated. After either of these events, the fire size was maintained at that level until conditions reached roughly a steady state, i.e., the temperatures recorded near the ceilings remained steady and no more sprinkler activations occurred. The heat release rate from the burner was confirmed by placing it under the large product calorimeter at UL, ramping up the flow of heptane in the same manner as in the tests, and measuring the total and convective heat release rates. It was found that the convective heat release rate was 0.65~$\pm$~0.02 of the total.
+\item[Plastic Commodity:] The Factory Mutual Research Corporation (FMRC) standard ``Group A Plastic'' test commodity served as the fuel for the rack storage experiments~\cite{Troup:1}. The cartoned plastic commodity consists of rigid crystalline polystyrene cups packaged in compartmented, single-wall, corrugated paper cartons. Each carton is a cube 0.53~m (21~in) on a side. Eight boxes comprise a pallet load. Two-way, slatted deck hardwood pallets support the loads.  A pallet load weighs approximately 80~kg (170~lb), of which about 36~\% is plastic, 35~\% is wood, and 29~\% is corrugated paper~\cite{Troup:1}. Each storage array consisted of a main (ignition) double-row rack at the center, flanked on two sides by single row target racks. The rows were separated by 8~ft wide aisles.  Each of the two rows of the main array consisted of four 2.4~m (8~ft) long bays; a 0.15~m (6~in) flue separated the rows. Longitudinal flues of 0.2~m (7.5~in) were used to separate the pallets within a row. The overall loaded area of the double-row rack measured approximately 2.3~m (7.5~ft) wide by 10~m (33~ft) long.  The racks were divided vertically into 4 tiers; the overall loaded height was 5.8~m (19~ft). The fire was ignited with 2 standard igniters which consisted of 8~cm (3~in) long by 8~cm diameter cylinders of rolled cotton material, each soaked in 120~mL (4~oz) of gasoline and enclosed in a polyethylene bag.  The rolls were placed against the carton surfaces in the first tier, just above the pallet. The igniters were lit with a flaming propane torch at the start of each test.
 \item[Instrumentation:] The instrumentation for the tests consisted of thermocouples, gas analysis equipment, and pressure transducers. The locations of the instrumentation are referenced in the plan view of the facility (Fig.~\ref{layout}). Temperature measurements were recorded at 104 locations. Type K 0.0625~in diameter Inconel sheathed thermocouples were positioned to measure (i) temperatures near the ceiling, (ii) temperatures of the ceiling jet, and (iii) temperatures near the vent.
 \end{description}
 
@@ -1163,7 +1231,7 @@ A diagram of the test structure is displayed in Figure~\ref{VTT_Drawing}.
 
 \section{Water mist characterization tests}
 
- A single water mist nozzle was characterized for validation purposes. The experiment was conducted at Tampere University of technology using Direct Imaging technique. The experiments are described in more detail in \cite{vaari:2012}. The characterized  nozzle  was the LN-2 nozzle by Spraying Systems Co.. It belongs to the fine spray hydraulic atomizing nozzle family and is of the standard spray small capacity type. Measurements were made 40  cm and 62cm below the nozzle. Measured quantities average droplet velocity, droplet flux and average diameter.  
+ A single water mist nozzle was characterized for validation purposes. The experiment was conducted at Tampere University of technology using Direct Imaging technique. The experiments are described in more detail in \cite{vaari:2012}. The characterized  nozzle  was the LN-2 nozzle by Spraying Systems Co.. It belongs to the fine spray hydraulic atomizing nozzle family and is of the standard spray small capacity type. Measurements were made 40  cm and 62cm below the nozzle. Measured quantities average droplet velocity, droplet flux and average diameter.
 
 \clearpage
 
