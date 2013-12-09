@@ -1,0 +1,392 @@
+&HEAD CHID='UL_NFPRF_P-5', TITLE='UL/NFPRF Commodity Test 5' /
+
+&MESH IJK=50,50,60, XB=0.0,7.5,0.0,7.5,0.0,9.0, MULT_ID='mesh' /
+&MULT ID='mesh', DX=7.5, DY=7.5, I_UPPER=3, J_UPPER=3 /
+
+&TIME T_END=1800. /
+
+&MISC TMPA=18., ALLOW_UNDERSIDE_PARTICLES=.TRUE. /
+
+&PRES VELOCITY_TOLERANCE=0.03 /
+
+&SPEC ID='WATER VAPOR' /
+
+&DUMP NFRAMES=100, DT_CTRL=0.5, DT_DEVC=5., DT_HRR=5., SIG_FIGS=4, SIG_FIGS_EXP=2 /
+
+&RADI RADIATIVE_FRACTION=0.5 /
+
+&REAC FUEL = 'POLYSTYRENE'
+      FYI  = 'Styrene, C_8 H_8'
+      H    = 8.
+      C    = 8.
+      HEAT_OF_COMBUSTION = 40000.
+      SOOT_YIELD = 0.164
+      CO_YIELD   = 0.06 /
+
+&PART ID='water drops', SPEC_ID='WATER VAPOR', DIAMETER=1000. /
+
+&PROP ID='K-11', QUANTITY='SPRINKLER LINK TEMPERATURE', RTI=148., C_FACTOR=0.7, ACTIVATION_TEMPERATURE=74.,
+      PART_ID='water drops', FLOW_RATE=189.3, PARTICLE_VELOCITY=10., SPRAY_ANGLE=30.,80., SMOKEVIEW_ID='sprinkler_upright'  /
+
+&MATL ID            = 'CONCRETE'                                                                    
+      FYI           = 'Quintiere, Fire Behavior'                                                    
+      SPECIFIC_HEAT = 0.88                                                                          
+      DENSITY       = 2100.                                                                         
+      CONDUCTIVITY  = 1.0 /                                                                         
+
+&MATL ID            = 'STEEL'                                                        
+      FYI           = 'Quintiere, Fire Behavior'                                     
+      EMISSIVITY    = 0.8                                                            
+      DENSITY       = 7850.                                                          
+      CONDUCTIVITY  = 45.8                                                           
+      SPECIFIC_HEAT = 0.46 /                      
+
+&MATL ID            = 'TILE MATERIAL'                                                                                      
+      FYI           = 'UL Report NC987-96NK37863'
+      DENSITY       = 313.                                                                                              
+      SPECIFIC_HEAT = 0.753
+      CONDUCTIVITY  = 0.0611 /
+
+
+&SURF ID        = 'FLOOR'                                                              
+      COLOR     = 'GRAY'                                                                
+      MATL_ID   = 'CONCRETE'                                                                    
+      THICKNESS = 0.1 /   
+
+&SURF ID        = 'SHEET METAL'
+      MATL_ID   = 'STEEL'
+      COLOR     = 'BLACK'
+      THICKNESS = 0.0013 /
+
+&SURF ID        = 'CEILING TILE'
+      COLOR     = 'IVORY 2'
+      MATL_ID   = 'TILE MATERIAL'
+      BACKING   = 'EXPOSED'
+      THICKNESS = 0.016 /
+
+Adjustable ceiling
+
+&OBST XB=    0, 30.50,     0, 30.50, 8.2, 8.8, SURF_IDS='CEILING TILE','SHEET METAL','CEILING TILE' /
+
+Vents
+
+&HOLE XB=  5.49,  6.71, 17.45, 19.86, 8.2, 8.5,/ Vent Recess 1
+&HOLE XB=  5.49,  6.71, 17.45, 19.86, 8.5, 8.8, DEVC_ID='vent link 1' / Vent Hole 1
+&HOLE XB= 11.58, 12.80, 17.45, 19.86, 8.2, 8.5,/ Vent Recess 2
+&HOLE XB= 11.58, 12.80, 17.45, 19.86, 8.5, 8.8, DEVC_ID='vent link 2' / Vent Hole 2
+&HOLE XB= 26.82, 28.04, 17.45, 19.86, 8.2, 8.5,/ Vent Recess 3
+&HOLE XB= 26.82, 28.04, 17.45, 19.86, 8.5, 8.8, DEVC_ID='vent link 3' / Vent Hole 3
+&HOLE XB= 11.58, 12.80,  2.21,  4.65, 8.2, 8.5,/ Vent Recess 4
+&HOLE XB= 11.58, 12.80,  2.21,  4.65, 8.5, 8.8, DEVC_ID='vent link 4' / Vent Hole 4
+&HOLE XB= 26.82, 28.04,  2.21,  4.65, 8.2, 8.5,/ Vent Recess 5
+&HOLE XB= 26.82, 28.04,  2.21,  4.65, 8.5, 8.8, DEVC_ID='vent link 5' / Vent Hole 5
+
+Draft curtains
+
+&OBST XB= 9.5, 9.5, 0.0, 30.5, 6.4, 8.2, SURF_ID='SHEET METAL' / West  Draft Curtain
+&OBST XB=30.0,30.0, 0.0, 23.1, 6.4, 8.2, SURF_ID='SHEET METAL' / East  Draft Curtain
+&OBST XB= 9.4,30.5, 0.0,  0.0, 6.4, 8.2, SURF_ID='SHEET METAL' / South Draft Curtain
+&OBST XB= 0.0,30.5, 23.1, 23.1, 6.4, 8.2, SURF_ID='SHEET METAL' / North Draft Curtain
+
+Commodity
+
+&MATL ID                    = 'YELLOW PINE'
+      FYI                   = 'Drysdale, Intro to Fire Dynamics'
+      DENSITY               = 640.
+      CONDUCTIVITY          = 0.14
+      SPECIFIC_HEAT         = 2.85
+      HEAT_OF_COMBUSTION    = 15000. /
+
+&MATL ID                    = 'CORRUGATED PAPER'
+      DENSITY               = 200.
+      CONDUCTIVITY          = 0.1
+      SPECIFIC_HEAT         = 1.5
+      HEAT_OF_COMBUSTION    = 11500. /
+      EMISSIVITY            = 0.8 /
+
+&SURF ID                    = 'PLASTIC A'
+      FYI                   = 'FMRC Standard Plastic Commodity'
+      COLOR                 = 'TAN'
+      HRRPUA                = 500.
+      IGNITION_TEMPERATURE  = 370.
+      RAMP_Q                = 'GAP'
+      MATL_ID               = 'CORRUGATED PAPER'
+      BURN_AWAY             = .TRUE.
+      THICKNESS             = 0.005
+      E_COEFFICIENT         =  0.5 /
+&RAMP ID='GAP',T=   0.0,F=0.0 /
+&RAMP ID='GAP',T=   1.0,F=0.6 /
+&RAMP ID='GAP',T=  30.0,F=0.2 /
+&RAMP ID='GAP',T=  80.0,F=1.6 /
+&RAMP ID='GAP',T= 100.0,F=1.0 /
+
+&SURF ID                    = 'PALLET'
+      MATL_ID               = 'YELLOW PINE'
+      COLOR                 = 'BROWN'
+      THICKNESS             = 0.012
+      IGNITION_TEMPERATURE  = 390.
+      HRRPUA                = 165. /
+
+&SURF ID='IGNITOR', HRRPUA=1000., TAU_Q=60., COLOR='RED' /
+
+&MULT ID='pallet spacing', DX0=17.1, DX=1.20, DY0=12.0, DY=1.20, DZ=1.50, I_LOWER=-3, I_UPPER=4, J_UPPER=1, K_UPPER=3 /
+&MULT ID='ignitor spacing', DX0=17.1, DY0=12.0 /
+
+&OBST XB= 0.00, 1.05, 0.00, 1.05,  .15, 1.20, SURF_ID='PLASTIC A', OVERLAY=.FALSE., BULK_DENSITY=43.7, MULT_ID='pallet spacing'  /
+
+&OBST XB= 0.00, 1.05, 0.00, 0.15, 0.00, 0.02, SURF_ID='PALLET', MULT_ID='pallet spacing'  /
+&OBST XB= 0.00, 1.05, 0.30, 0.45, 0.00, 0.02, SURF_ID='PALLET', MULT_ID='pallet spacing'  /
+&OBST XB= 0.00, 1.05, 0.60, 0.75, 0.00, 0.02, SURF_ID='PALLET', MULT_ID='pallet spacing'  /
+&OBST XB= 0.00, 1.05, 0.90, 1.05, 0.00, 0.02, SURF_ID='PALLET', MULT_ID='pallet spacing'  /
+&OBST XB= 0.00, 1.05, 0.00, 0.15, 0.13, 0.15, SURF_ID='PALLET', MULT_ID='pallet spacing'  /
+&OBST XB= 0.00, 1.05, 0.30, 0.45, 0.13, 0.15, SURF_ID='PALLET', MULT_ID='pallet spacing'  /
+&OBST XB= 0.00, 1.05, 0.60, 0.75, 0.13, 0.15, SURF_ID='PALLET', MULT_ID='pallet spacing'  /
+&OBST XB= 0.00, 1.05, 0.90, 1.05, 0.13, 0.15, SURF_ID='PALLET', MULT_ID='pallet spacing'  /
+&OBST XB= 0.00, 0.02, 0.00, 1.05, 0.00, 0.15, SURF_ID='PALLET', MULT_ID='pallet spacing'  /
+&OBST XB= 1.03, 1.05, 0.00, 1.05, 0.00, 0.15, SURF_ID='PALLET', MULT_ID='pallet spacing'  /
+
+&OBST XB= 1.05, 1.20, 0.45, 0.60, 0.00, 0.15, SURF_IDS='IGNITOR','PALLET','PALLET', MULT_ID='ignitor spacing' /
+
+&MULT ID='off pallet spacing', DX0=17.1, DX=1.20, DY0=8.55, DY=8.1, DZ=1.50, I_LOWER=-3, I_UPPER=4, J_UPPER=1, K_UPPER=3 /
+
+&OBST XB= 0.00, 1.05, 0.00, 1.05,  .15, 1.20, SURF_ID='PLASTIC A', BULK_DENSITY=43.7, MULT_ID='off pallet spacing'  /
+
+&OBST XB= 0.00, 1.05, 0.00, 0.15, 0.00, 0.02, SURF_ID='PALLET', MULT_ID='off pallet spacing'  /
+&OBST XB= 0.00, 1.05, 0.30, 0.45, 0.00, 0.02, SURF_ID='PALLET', MULT_ID='off pallet spacing'  /
+&OBST XB= 0.00, 1.05, 0.60, 0.75, 0.00, 0.02, SURF_ID='PALLET', MULT_ID='off pallet spacing'  /
+&OBST XB= 0.00, 1.05, 0.90, 1.05, 0.00, 0.02, SURF_ID='PALLET', MULT_ID='off pallet spacing'  /
+&OBST XB= 0.00, 1.05, 0.00, 0.15, 0.13, 0.15, SURF_ID='PALLET', MULT_ID='off pallet spacing'  /
+&OBST XB= 0.00, 1.05, 0.30, 0.45, 0.13, 0.15, SURF_ID='PALLET', MULT_ID='off pallet spacing'  /
+&OBST XB= 0.00, 1.05, 0.60, 0.75, 0.13, 0.15, SURF_ID='PALLET', MULT_ID='off pallet spacing'  /
+&OBST XB= 0.00, 1.05, 0.90, 1.05, 0.13, 0.15, SURF_ID='PALLET', MULT_ID='off pallet spacing'  /
+&OBST XB= 0.00, 0.02, 0.00, 1.05, 0.00, 0.15, SURF_ID='PALLET', MULT_ID='off pallet spacing'  /
+&OBST XB= 1.03, 1.05, 0.00, 1.05, 0.00, 0.15, SURF_ID='PALLET', MULT_ID='off pallet spacing'  /
+
+Boundaries
+
+&VENT MB='XMAX', SURF_ID='OPEN' /
+&VENT MB='XMIN', SURF_ID='OPEN' /
+&VENT MB='YMAX', SURF_ID='OPEN' /
+&VENT MB='YMIN', SURF_ID='OPEN' /
+&VENT MB='ZMAX', SURF_ID='OPEN' /
+&VENT MB='ZMIN', SURF_ID='FLOOR' /
+
+&SLCF PBZ= 7.4,QUANTITY='TEMPERATURE' /
+
+Sprinklers
+
+&DEVC XYZ=  1.52    .38  8.12, PROP_ID='K-11', OUTPUT=.FALSE., ID='Spr_01' /
+&DEVC XYZ=  4.57    .38  8.12, PROP_ID='K-11', OUTPUT=.FALSE., ID='Spr_02' /
+&DEVC XYZ=  7.62    .38  8.12, PROP_ID='K-11', OUTPUT=.FALSE., ID='Spr_03' /
+&DEVC XYZ= 10.67    .38  8.12, PROP_ID='K-11', OUTPUT=.FALSE., ID='Spr_04' /
+&DEVC XYZ= 13.72    .38  8.12, PROP_ID='K-11', OUTPUT=.FALSE., ID='Spr_05' /
+&DEVC XYZ= 16.77    .38  8.12, PROP_ID='K-11', OUTPUT=.FALSE., ID='Spr_06' /
+&DEVC XYZ= 19.82    .38  8.12, PROP_ID='K-11', OUTPUT=.FALSE., ID='Spr_07' /
+&DEVC XYZ= 22.87    .38  8.12, PROP_ID='K-11', OUTPUT=.FALSE., ID='Spr_08' /
+&DEVC XYZ= 25.92    .38  8.12, PROP_ID='K-11', OUTPUT=.FALSE., ID='Spr_09' /
+&DEVC XYZ= 28.97    .38  8.12, PROP_ID='K-11', OUTPUT=.FALSE., ID='Spr_10' /
+&DEVC XYZ=  1.52   3.43  8.12, PROP_ID='K-11', OUTPUT=.FALSE., ID='Spr_11' /
+&DEVC XYZ=  4.57   3.43  8.12, PROP_ID='K-11', OUTPUT=.FALSE., ID='Spr_12' /
+&DEVC XYZ=  7.62   3.43  8.12, PROP_ID='K-11', OUTPUT=.FALSE., ID='Spr_13' /
+&DEVC XYZ= 10.67   3.43  8.12, PROP_ID='K-11', OUTPUT=.FALSE., ID='Spr_14' /
+&DEVC XYZ= 13.72   3.43  8.12, PROP_ID='K-11', OUTPUT=.FALSE., ID='Spr_15' /
+&DEVC XYZ= 16.77   3.43  8.12, PROP_ID='K-11', OUTPUT=.FALSE., ID='Spr_16' /
+&DEVC XYZ= 19.82   3.43  8.12, PROP_ID='K-11', OUTPUT=.FALSE., ID='Spr_17' /
+&DEVC XYZ= 22.87   3.43  8.12, PROP_ID='K-11', OUTPUT=.FALSE., ID='Spr_18' /
+&DEVC XYZ= 25.92   3.43  8.12, PROP_ID='K-11', OUTPUT=.FALSE., ID='Spr_19' /
+&DEVC XYZ= 28.97   3.43  8.12, PROP_ID='K-11', OUTPUT=.FALSE., ID='Spr_20' /
+&DEVC XYZ=  1.52   6.48  8.12, PROP_ID='K-11', OUTPUT=.FALSE., ID='Spr_21' /
+&DEVC XYZ=  4.57   6.48  8.12, PROP_ID='K-11', OUTPUT=.FALSE., ID='Spr_22' /
+&DEVC XYZ=  7.62   6.48  8.12, PROP_ID='K-11', OUTPUT=.FALSE., ID='Spr_23' /
+&DEVC XYZ= 10.67   6.48  8.12, PROP_ID='K-11', OUTPUT=.FALSE., ID='Spr_24' /
+&DEVC XYZ= 13.72   6.48  8.12, PROP_ID='K-11', OUTPUT=.FALSE., ID='Spr_25' /
+&DEVC XYZ= 16.77   6.48  8.12, PROP_ID='K-11', OUTPUT=.FALSE., ID='Spr_26' /
+&DEVC XYZ= 19.82   6.48  8.12, PROP_ID='K-11', OUTPUT=.FALSE., ID='Spr_27' /
+&DEVC XYZ= 22.87   6.48  8.12, PROP_ID='K-11', OUTPUT=.FALSE., ID='Spr_28' /
+&DEVC XYZ= 25.92   6.48  8.12, PROP_ID='K-11', OUTPUT=.FALSE., ID='Spr_29' /
+&DEVC XYZ= 28.97   6.48  8.12, PROP_ID='K-11', OUTPUT=.FALSE., ID='Spr_30' /
+&DEVC XYZ=  1.52   9.53  8.12, PROP_ID='K-11', OUTPUT=.FALSE., ID='Spr_31' /
+&DEVC XYZ=  4.57   9.53  8.12, PROP_ID='K-11', OUTPUT=.FALSE., ID='Spr_32' /
+&DEVC XYZ=  7.62   9.53  8.12, PROP_ID='K-11', OUTPUT=.FALSE., ID='Spr_33' /
+&DEVC XYZ= 10.67   9.53  8.12, PROP_ID='K-11', OUTPUT=.FALSE., ID='Spr_34' /
+&DEVC XYZ= 13.72   9.53  8.12, PROP_ID='K-11', OUTPUT=.FALSE., ID='Spr_35' /
+&DEVC XYZ= 16.77   9.53  8.12, PROP_ID='K-11', OUTPUT=.FALSE., ID='Spr_36' /
+&DEVC XYZ= 19.82   9.53  8.12, PROP_ID='K-11', OUTPUT=.FALSE., ID='Spr_37' /
+&DEVC XYZ= 22.87   9.53  8.12, PROP_ID='K-11', OUTPUT=.FALSE., ID='Spr_38' /
+&DEVC XYZ= 25.92   9.53  8.12, PROP_ID='K-11', OUTPUT=.FALSE., ID='Spr_39' /
+&DEVC XYZ= 28.97   9.53  8.12, PROP_ID='K-11', OUTPUT=.FALSE., ID='Spr_40' /
+&DEVC XYZ=  1.52  12.57  8.12, PROP_ID='K-11', OUTPUT=.FALSE., ID='Spr_41' /
+&DEVC XYZ=  4.57  12.57  8.12, PROP_ID='K-11', OUTPUT=.FALSE., ID='Spr_42' /
+&DEVC XYZ=  7.62  12.57  8.12, PROP_ID='K-11', OUTPUT=.FALSE., ID='Spr_43' /
+&DEVC XYZ= 10.67  12.57  8.12, PROP_ID='K-11', OUTPUT=.FALSE., ID='Spr_44' /
+&DEVC XYZ= 13.72  12.57  8.12, PROP_ID='K-11', OUTPUT=.FALSE., ID='Spr_45' /
+&DEVC XYZ= 16.77  12.57  8.12, PROP_ID='K-11', OUTPUT=.FALSE., ID='Spr_46' /
+&DEVC XYZ= 19.82  12.57  8.12, PROP_ID='K-11', OUTPUT=.FALSE., ID='Spr_47' /
+&DEVC XYZ= 22.87  12.57  8.12, PROP_ID='K-11', OUTPUT=.FALSE., ID='Spr_48' /
+&DEVC XYZ= 25.92  12.57  8.12, PROP_ID='K-11', OUTPUT=.FALSE., ID='Spr_49' /
+&DEVC XYZ= 28.97  12.57  8.12, PROP_ID='K-11', OUTPUT=.FALSE., ID='Spr_50' /
+&DEVC XYZ=  1.52  15.62  8.12, PROP_ID='K-11', OUTPUT=.FALSE., ID='Spr_51' /
+&DEVC XYZ=  4.57  15.62  8.12, PROP_ID='K-11', OUTPUT=.FALSE., ID='Spr_52' /
+&DEVC XYZ=  7.62  15.62  8.12, PROP_ID='K-11', OUTPUT=.FALSE., ID='Spr_53' /
+&DEVC XYZ= 10.67  15.62  8.12, PROP_ID='K-11', OUTPUT=.FALSE., ID='Spr_54' /
+&DEVC XYZ= 13.72  15.62  8.12, PROP_ID='K-11', OUTPUT=.FALSE., ID='Spr_55' /
+&DEVC XYZ= 16.77  15.62  8.12, PROP_ID='K-11', OUTPUT=.FALSE., ID='Spr_56' /
+&DEVC XYZ= 19.82  15.62  8.12, PROP_ID='K-11', OUTPUT=.FALSE., ID='Spr_57' /
+&DEVC XYZ= 22.87  15.62  8.12, PROP_ID='K-11', OUTPUT=.FALSE., ID='Spr_58' /
+&DEVC XYZ= 25.92  15.62  8.12, PROP_ID='K-11', OUTPUT=.FALSE., ID='Spr_59' /
+&DEVC XYZ= 28.97  15.62  8.12, PROP_ID='K-11', OUTPUT=.FALSE., ID='Spr_60' /
+&DEVC XYZ=  1.52  18.67  8.12, PROP_ID='K-11', OUTPUT=.FALSE., ID='Spr_61' /
+&DEVC XYZ=  4.57  18.67  8.12, PROP_ID='K-11', OUTPUT=.FALSE., ID='Spr_62' /
+&DEVC XYZ=  7.62  18.67  8.12, PROP_ID='K-11', OUTPUT=.FALSE., ID='Spr_63' /
+&DEVC XYZ= 10.67  18.67  8.12, PROP_ID='K-11', OUTPUT=.FALSE., ID='Spr_64' /
+&DEVC XYZ= 13.72  18.67  8.12, PROP_ID='K-11', OUTPUT=.FALSE., ID='Spr_65' /
+&DEVC XYZ= 16.77  18.67  8.12, PROP_ID='K-11', OUTPUT=.FALSE., ID='Spr_66' /
+&DEVC XYZ= 19.82  18.67  8.12, PROP_ID='K-11', OUTPUT=.FALSE., ID='Spr_67' /
+&DEVC XYZ= 22.87  18.67  8.12, PROP_ID='K-11', OUTPUT=.FALSE., ID='Spr_68' /
+&DEVC XYZ= 25.92  18.67  8.12, PROP_ID='K-11', OUTPUT=.FALSE., ID='Spr_69' /
+&DEVC XYZ= 28.97  18.67  8.12, PROP_ID='K-11', OUTPUT=.FALSE., ID='Spr_70' /
+&DEVC XYZ=  1.52  21.72  8.12, PROP_ID='K-11', OUTPUT=.FALSE., ID='Spr_71' /
+&DEVC XYZ=  4.57  21.72  8.12, PROP_ID='K-11', OUTPUT=.FALSE., ID='Spr_72' /
+&DEVC XYZ=  7.62  21.72  8.12, PROP_ID='K-11', OUTPUT=.FALSE., ID='Spr_73' /
+&DEVC XYZ= 10.67  21.72  8.12, PROP_ID='K-11', OUTPUT=.FALSE., ID='Spr_74' /
+&DEVC XYZ= 13.72  21.72  8.12, PROP_ID='K-11', OUTPUT=.FALSE., ID='Spr_75' /
+&DEVC XYZ= 16.77  21.72  8.12, PROP_ID='K-11', OUTPUT=.FALSE., ID='Spr_76' /
+&DEVC XYZ= 19.82  21.72  8.12, PROP_ID='K-11', OUTPUT=.FALSE., ID='Spr_77' /
+&DEVC XYZ= 22.87  21.72  8.12, PROP_ID='K-11', OUTPUT=.FALSE., ID='Spr_78' /
+&DEVC XYZ= 25.92  21.72  8.12, PROP_ID='K-11', OUTPUT=.FALSE., ID='Spr_79' /
+&DEVC XYZ= 28.97  21.72  8.12, PROP_ID='K-11', OUTPUT=.FALSE., ID='Spr_80' /
+&DEVC XYZ=  1.52  24.77  8.12, PROP_ID='K-11', OUTPUT=.FALSE., ID='Spr_81' /
+&DEVC XYZ=  4.57  24.77  8.12, PROP_ID='K-11', OUTPUT=.FALSE., ID='Spr_82' /
+&DEVC XYZ=  7.62  24.77  8.12, PROP_ID='K-11', OUTPUT=.FALSE., ID='Spr_83' /
+&DEVC XYZ= 10.67  24.77  8.12, PROP_ID='K-11', OUTPUT=.FALSE., ID='Spr_84' /
+&DEVC XYZ= 13.72  24.77  8.12, PROP_ID='K-11', OUTPUT=.FALSE., ID='Spr_85' /
+&DEVC XYZ= 16.77  24.77  8.12, PROP_ID='K-11', OUTPUT=.FALSE., ID='Spr_86' /
+&DEVC XYZ= 19.82  24.77  8.12, PROP_ID='K-11', OUTPUT=.FALSE., ID='Spr_87' /
+&DEVC XYZ= 22.87  24.77  8.12, PROP_ID='K-11', OUTPUT=.FALSE., ID='Spr_88' /
+&DEVC XYZ= 25.92  24.77  8.12, PROP_ID='K-11', OUTPUT=.FALSE., ID='Spr_89' /
+&DEVC XYZ= 28.97  24.77  8.12, PROP_ID='K-11', OUTPUT=.FALSE., ID='Spr_90' /
+&DEVC XYZ=  1.52  27.82  8.12, PROP_ID='K-11', OUTPUT=.FALSE., ID='Spr_91' /
+&DEVC XYZ=  4.57  27.82  8.12, PROP_ID='K-11', OUTPUT=.FALSE., ID='Spr_92' /
+&DEVC XYZ=  7.62  27.82  8.12, PROP_ID='K-11', OUTPUT=.FALSE., ID='Spr_93' /
+&DEVC XYZ= 10.67  27.82  8.12, PROP_ID='K-11', OUTPUT=.FALSE., ID='Spr_94' /
+&DEVC XYZ= 13.72  27.82  8.12, PROP_ID='K-11', OUTPUT=.FALSE., ID='Spr_95' /
+&DEVC XYZ= 16.77  27.82  8.12, PROP_ID='K-11', OUTPUT=.FALSE., ID='Spr_96' /
+&DEVC XYZ= 19.82  27.82  8.12, PROP_ID='K-11', OUTPUT=.FALSE., ID='Spr_97' /
+&DEVC XYZ= 22.87  27.82  8.12, PROP_ID='K-11', OUTPUT=.FALSE., ID='Spr_98' /
+&DEVC XYZ= 25.92  27.82  8.12, PROP_ID='K-11', OUTPUT=.FALSE., ID='Spr_99' /
+&DEVC XYZ= 28.97  27.82  8.12, PROP_ID='K-11', OUTPUT=.FALSE., ID='Spr_100' /
+
+&CTRL ID='Act01', FUNCTION_TYPE='ANY', INPUT_ID='Spr_01' /
+&CTRL ID='Act02', FUNCTION_TYPE='ANY', INPUT_ID='Spr_02' /
+&CTRL ID='Act03', FUNCTION_TYPE='ANY', INPUT_ID='Spr_03' /
+&CTRL ID='Act04', FUNCTION_TYPE='ANY', INPUT_ID='Spr_04' /
+&CTRL ID='Act05', FUNCTION_TYPE='ANY', INPUT_ID='Spr_05' /
+&CTRL ID='Act06', FUNCTION_TYPE='ANY', INPUT_ID='Spr_06' /
+&CTRL ID='Act07', FUNCTION_TYPE='ANY', INPUT_ID='Spr_07' /
+&CTRL ID='Act08', FUNCTION_TYPE='ANY', INPUT_ID='Spr_08' /
+&CTRL ID='Act09', FUNCTION_TYPE='ANY', INPUT_ID='Spr_09' /
+&CTRL ID='Act10', FUNCTION_TYPE='ANY', INPUT_ID='Spr_10' /
+&CTRL ID='Act11', FUNCTION_TYPE='ANY', INPUT_ID='Spr_11' /
+&CTRL ID='Act12', FUNCTION_TYPE='ANY', INPUT_ID='Spr_12' /
+&CTRL ID='Act13', FUNCTION_TYPE='ANY', INPUT_ID='Spr_13' /
+&CTRL ID='Act14', FUNCTION_TYPE='ANY', INPUT_ID='Spr_14' /
+&CTRL ID='Act15', FUNCTION_TYPE='ANY', INPUT_ID='Spr_15' /
+&CTRL ID='Act16', FUNCTION_TYPE='ANY', INPUT_ID='Spr_16' /
+&CTRL ID='Act17', FUNCTION_TYPE='ANY', INPUT_ID='Spr_17' /
+&CTRL ID='Act18', FUNCTION_TYPE='ANY', INPUT_ID='Spr_18' /
+&CTRL ID='Act19', FUNCTION_TYPE='ANY', INPUT_ID='Spr_19' /
+&CTRL ID='Act20', FUNCTION_TYPE='ANY', INPUT_ID='Spr_20' /
+&CTRL ID='Act21', FUNCTION_TYPE='ANY', INPUT_ID='Spr_21' /
+&CTRL ID='Act22', FUNCTION_TYPE='ANY', INPUT_ID='Spr_22' /
+&CTRL ID='Act23', FUNCTION_TYPE='ANY', INPUT_ID='Spr_23' /
+&CTRL ID='Act24', FUNCTION_TYPE='ANY', INPUT_ID='Spr_24' /
+&CTRL ID='Act25', FUNCTION_TYPE='ANY', INPUT_ID='Spr_25' /
+&CTRL ID='Act26', FUNCTION_TYPE='ANY', INPUT_ID='Spr_26' /
+&CTRL ID='Act27', FUNCTION_TYPE='ANY', INPUT_ID='Spr_27' /
+&CTRL ID='Act28', FUNCTION_TYPE='ANY', INPUT_ID='Spr_28' /
+&CTRL ID='Act29', FUNCTION_TYPE='ANY', INPUT_ID='Spr_29' /
+&CTRL ID='Act30', FUNCTION_TYPE='ANY', INPUT_ID='Spr_30' /
+&CTRL ID='Act31', FUNCTION_TYPE='ANY', INPUT_ID='Spr_31' /
+&CTRL ID='Act32', FUNCTION_TYPE='ANY', INPUT_ID='Spr_32' /
+&CTRL ID='Act33', FUNCTION_TYPE='ANY', INPUT_ID='Spr_33' /
+&CTRL ID='Act34', FUNCTION_TYPE='ANY', INPUT_ID='Spr_34' /
+&CTRL ID='Act35', FUNCTION_TYPE='ANY', INPUT_ID='Spr_35' /
+&CTRL ID='Act36', FUNCTION_TYPE='ANY', INPUT_ID='Spr_36' /
+&CTRL ID='Act37', FUNCTION_TYPE='ANY', INPUT_ID='Spr_37' /
+&CTRL ID='Act38', FUNCTION_TYPE='ANY', INPUT_ID='Spr_38' /
+&CTRL ID='Act39', FUNCTION_TYPE='ANY', INPUT_ID='Spr_39' /
+&CTRL ID='Act40', FUNCTION_TYPE='ANY', INPUT_ID='Spr_40' /
+&CTRL ID='Act41', FUNCTION_TYPE='ANY', INPUT_ID='Spr_41' /
+&CTRL ID='Act42', FUNCTION_TYPE='ANY', INPUT_ID='Spr_42' /
+&CTRL ID='Act43', FUNCTION_TYPE='ANY', INPUT_ID='Spr_43' /
+&CTRL ID='Act44', FUNCTION_TYPE='ANY', INPUT_ID='Spr_44' /
+&CTRL ID='Act45', FUNCTION_TYPE='ANY', INPUT_ID='Spr_45' /
+&CTRL ID='Act46', FUNCTION_TYPE='ANY', INPUT_ID='Spr_46' /
+&CTRL ID='Act47', FUNCTION_TYPE='ANY', INPUT_ID='Spr_47' /
+&CTRL ID='Act48', FUNCTION_TYPE='ANY', INPUT_ID='Spr_48' /
+&CTRL ID='Act49', FUNCTION_TYPE='ANY', INPUT_ID='Spr_49' /
+&CTRL ID='Act50', FUNCTION_TYPE='ANY', INPUT_ID='Spr_50' /
+&CTRL ID='Act51', FUNCTION_TYPE='ANY', INPUT_ID='Spr_51' /
+&CTRL ID='Act52', FUNCTION_TYPE='ANY', INPUT_ID='Spr_52' /
+&CTRL ID='Act53', FUNCTION_TYPE='ANY', INPUT_ID='Spr_53' /
+&CTRL ID='Act54', FUNCTION_TYPE='ANY', INPUT_ID='Spr_54' /
+&CTRL ID='Act55', FUNCTION_TYPE='ANY', INPUT_ID='Spr_55' /
+&CTRL ID='Act56', FUNCTION_TYPE='ANY', INPUT_ID='Spr_56' /
+&CTRL ID='Act57', FUNCTION_TYPE='ANY', INPUT_ID='Spr_57' /
+&CTRL ID='Act58', FUNCTION_TYPE='ANY', INPUT_ID='Spr_58' /
+&CTRL ID='Act59', FUNCTION_TYPE='ANY', INPUT_ID='Spr_59' /
+&CTRL ID='Act60', FUNCTION_TYPE='ANY', INPUT_ID='Spr_60' /
+&CTRL ID='Act61', FUNCTION_TYPE='ANY', INPUT_ID='Spr_61' /
+&CTRL ID='Act62', FUNCTION_TYPE='ANY', INPUT_ID='Spr_62' /
+&CTRL ID='Act63', FUNCTION_TYPE='ANY', INPUT_ID='Spr_63' /
+&CTRL ID='Act64', FUNCTION_TYPE='ANY', INPUT_ID='Spr_64' /
+&CTRL ID='Act65', FUNCTION_TYPE='ANY', INPUT_ID='Spr_65' /
+&CTRL ID='Act66', FUNCTION_TYPE='ANY', INPUT_ID='Spr_66' /
+&CTRL ID='Act67', FUNCTION_TYPE='ANY', INPUT_ID='Spr_67' /
+&CTRL ID='Act68', FUNCTION_TYPE='ANY', INPUT_ID='Spr_68' /
+&CTRL ID='Act69', FUNCTION_TYPE='ANY', INPUT_ID='Spr_69' /
+&CTRL ID='Act70', FUNCTION_TYPE='ANY', INPUT_ID='Spr_70' /
+&CTRL ID='Act71', FUNCTION_TYPE='ANY', INPUT_ID='Spr_71' /
+&CTRL ID='Act72', FUNCTION_TYPE='ANY', INPUT_ID='Spr_72' /
+&CTRL ID='Act73', FUNCTION_TYPE='ANY', INPUT_ID='Spr_73' /
+&CTRL ID='Act74', FUNCTION_TYPE='ANY', INPUT_ID='Spr_74' /
+&CTRL ID='Act75', FUNCTION_TYPE='ANY', INPUT_ID='Spr_75' /
+&CTRL ID='Act76', FUNCTION_TYPE='ANY', INPUT_ID='Spr_76' /
+&CTRL ID='Act77', FUNCTION_TYPE='ANY', INPUT_ID='Spr_77' /
+&CTRL ID='Act78', FUNCTION_TYPE='ANY', INPUT_ID='Spr_78' /
+&CTRL ID='Act79', FUNCTION_TYPE='ANY', INPUT_ID='Spr_79' /
+&CTRL ID='Act80', FUNCTION_TYPE='ANY', INPUT_ID='Spr_80' /
+&CTRL ID='Act81', FUNCTION_TYPE='ANY', INPUT_ID='Spr_81' /
+&CTRL ID='Act82', FUNCTION_TYPE='ANY', INPUT_ID='Spr_82' /
+&CTRL ID='Act83', FUNCTION_TYPE='ANY', INPUT_ID='Spr_83' /
+&CTRL ID='Act84', FUNCTION_TYPE='ANY', INPUT_ID='Spr_84' /
+&CTRL ID='Act85', FUNCTION_TYPE='ANY', INPUT_ID='Spr_85' /
+&CTRL ID='Act86', FUNCTION_TYPE='ANY', INPUT_ID='Spr_86' /
+&CTRL ID='Act87', FUNCTION_TYPE='ANY', INPUT_ID='Spr_87' /
+&CTRL ID='Act88', FUNCTION_TYPE='ANY', INPUT_ID='Spr_88' /
+&CTRL ID='Act89', FUNCTION_TYPE='ANY', INPUT_ID='Spr_89' /
+&CTRL ID='Act90', FUNCTION_TYPE='ANY', INPUT_ID='Spr_90' /
+&CTRL ID='Act91', FUNCTION_TYPE='ANY', INPUT_ID='Spr_91' /
+&CTRL ID='Act92', FUNCTION_TYPE='ANY', INPUT_ID='Spr_92' /
+&CTRL ID='Act93', FUNCTION_TYPE='ANY', INPUT_ID='Spr_93' /
+&CTRL ID='Act94', FUNCTION_TYPE='ANY', INPUT_ID='Spr_94' /
+&CTRL ID='Act95', FUNCTION_TYPE='ANY', INPUT_ID='Spr_95' /
+&CTRL ID='Act96', FUNCTION_TYPE='ANY', INPUT_ID='Spr_96' /
+&CTRL ID='Act97', FUNCTION_TYPE='ANY', INPUT_ID='Spr_97' /
+&CTRL ID='Act98', FUNCTION_TYPE='ANY', INPUT_ID='Spr_98' /
+&CTRL ID='Act99', FUNCTION_TYPE='ANY', INPUT_ID='Spr_99' /
+&CTRL ID='Act100',FUNCTION_TYPE='ANY', INPUT_ID='Spr_100' /
+
+Vent Link
+
+&DEVC ID='vent link 1', XYZ=24.5,18.5,7.5, QUANTITY='TIME', SETPOINT=100000., INITIAL_STATE=.FALSE. / 
+&DEVC ID='vent link 2', XYZ=24.5,18.5,7.5, QUANTITY='TIME', SETPOINT=74., INITIAL_STATE=.FALSE. / 
+&DEVC ID='vent link 3', XYZ=24.5,18.5,7.5, QUANTITY='TIME', SETPOINT=74., INITIAL_STATE=.FALSE. / 
+&DEVC ID='vent link 4', XYZ=24.5,18.5,7.5, QUANTITY='TIME', SETPOINT=74., INITIAL_STATE=.FALSE. / 
+&DEVC ID='vent link 5', XYZ=24.5,18.5,7.5, QUANTITY='TIME', SETPOINT=74., INITIAL_STATE=.FALSE. / 
+
+Actuated Sprinklers
+
+&DEVC ID='Acts', XYZ=15.0,15.0,1.0, QUANTITY='ACTUATED SPRINKLERS' / 
+
+&TAIL /
