@@ -796,8 +796,6 @@ void read_geom(geomdata *geomi, int flag, int type, int *errorcode){
       if(i>=0){
         PRINTF("time=%.2f triangles: %i\n",times_local[0],ntris);
       }
-      else{
-      }
       if(nverts>0){
         int ii;
 
@@ -836,15 +834,6 @@ void read_geom(geomdata *geomi, int flag, int type, int *errorcode){
         FREEMEMORY(ijk);
         FREEMEMORY(surf_ind);
       }
-    }
-    else{  // geom_type==1
-      float tran_rot[8];
-
-      FORTREADBR(tran_rot,8,stream);
-      memcpy(geomlisti->translate,tran_rot,3*sizeof(float));
-      memcpy(geomlisti->rot0,tran_rot+3,3*sizeof(float));
-      memcpy(geomlisti->rot,tran_rot+6,2*sizeof(float));
-      if(i>=0)PRINTF("time=%.2f",times_local[0]);
     }
   }
   geomi->loaded=1;
