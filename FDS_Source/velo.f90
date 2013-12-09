@@ -1174,7 +1174,7 @@ SUBROUTINE NO_FLUX(NM)
 USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP 
 INTEGER, INTENT(IN) :: NM
 REAL(EB), POINTER, DIMENSION(:,:,:) :: HP=>NULL()
-REAL(EB) :: RFODT,H_OTHER,DUUDT,DVVDT,DWWDT
+REAL(EB) :: RFODT,H_OTHER,DUUDT,DVVDT,DWWDT,UN
 INTEGER  :: IC2,IC1,N,I,J,K,IW,II,JJ,KK,IOR,N_INT_CELLS,IIO,JJO,KKO,NOM
 TYPE (OBSTRUCTION_TYPE), POINTER :: OB=>NULL()
 TYPE (WALL_TYPE), POINTER :: WC=>NULL()
@@ -1313,7 +1313,7 @@ ELSE OBST_FV !CORRECTOR
                IC1 = CELL_INDEX(I,J,K)
                IC2 = CELL_INDEX(I,J,K+1)
                IF (SOLID(IC1) .AND. SOLID(IC2)) THEN
-                 DWWDT = -RFODT*(W(I,J,K)+WS(I,J,K))
+                  DWWDT = -RFODT*(W(I,J,K)+WS(I,J,K))
                   FVZ(I,J,K) = -RDZN(K)*(HP(I,J,K+1)-HP(I,J,K)) - DWWDT
                ENDIF
             ENDDO LOOP3_C
@@ -1339,25 +1339,26 @@ WALL_FV: IF (PREDICTOR) THEN
       KK  = WC%ONE_D%KK
       IOR = WC%ONE_D%IOR
    
-      IF (NOM/=0 .OR. WC%BOUNDARY_TYPE==SOLID_BOUNDARY) THEN
+      IF (NOM/=0 .OR. WC%BOUNDARY_TYPE==SOLID_BOUNDARY .OR. WC%BOUNDARY_TYPE==HVAC_BOUNDARY) THEN
+         UN = -SIGN(1._EB,REAL(IOR,EB))*WC%ONE_D%UWS
          SELECT CASE(IOR)
             CASE( 1) 
-               DUUDT = RFODT*(-WC%ONE_D%UWS-U(II,JJ,KK))
+               DUUDT = RFODT*(UN-U(II,JJ,KK))
                FVX(II,JJ,KK) = -RDXN(II)*(HP(II+1,JJ,KK)-HP(II,JJ,KK)) - DUUDT
             CASE(-1) 
-               DUUDT = RFODT*( WC%ONE_D%UWS-U(II-1,JJ,KK))
+               DUUDT = RFODT*(UN-U(II-1,JJ,KK))
                FVX(II-1,JJ,KK) = -RDXN(II-1)*(HP(II,JJ,KK)-HP(II-1,JJ,KK)) - DUUDT
             CASE( 2) 
-               DVVDT = RFODT*(-WC%ONE_D%UWS-V(II,JJ,KK))
+               DVVDT = RFODT*(UN-V(II,JJ,KK))
                FVY(II,JJ,KK) = -RDYN(JJ)*(HP(II,JJ+1,KK)-HP(II,JJ,KK)) - DVVDT
             CASE(-2)
-               DVVDT = RFODT*( WC%ONE_D%UWS-V(II,JJ-1,KK))
+               DVVDT = RFODT*(UN-V(II,JJ-1,KK))
                FVY(II,JJ-1,KK) = -RDYN(JJ-1)*(HP(II,JJ,KK)-HP(II,JJ-1,KK)) - DVVDT
             CASE( 3) 
-               DWWDT = RFODT*(-WC%ONE_D%UWS-W(II,JJ,KK))
+               DWWDT = RFODT*(UN-W(II,JJ,KK))
                FVZ(II,JJ,KK) = -RDZN(KK)*(HP(II,JJ,KK+1)-HP(II,JJ,KK)) - DWWDT
             CASE(-3) 
-               DWWDT = RFODT*( WC%ONE_D%UWS-W(II,JJ,KK-1))
+               DWWDT = RFODT*(UN-W(II,JJ,KK-1))
                FVZ(II,JJ,KK-1) = -RDZN(KK-1)*(HP(II,JJ,KK)-HP(II,JJ,KK-1)) - DWWDT
          END SELECT
       ENDIF
@@ -1392,25 +1393,26 @@ ELSE WALL_FV !CORRECTOR
       KK  = WC%ONE_D%KK
       IOR = WC%ONE_D%IOR
    
-      IF (NOM/=0 .OR. WC%BOUNDARY_TYPE==SOLID_BOUNDARY) THEN
+      IF (NOM/=0  .OR. WC%BOUNDARY_TYPE==SOLID_BOUNDARY .OR. WC%BOUNDARY_TYPE==HVAC_BOUNDARY) THEN
+         UN = -SIGN(1._EB,REAL(IOR,EB))*WC%ONE_D%UW
          SELECT CASE(IOR)
             CASE( 1) 
-               DUUDT = 2._EB*RFODT*(-WC%ONE_D%UW-0.5_EB*(U(II,JJ,KK)+US(II,JJ,KK)) )
+               DUUDT = 2._EB*RFODT*(UN-0.5_EB*(U(II,JJ,KK)+US(II,JJ,KK)) )
                FVX(II,JJ,KK) = -RDXN(II)*(HP(II+1,JJ,KK)-HP(II,JJ,KK)) - DUUDT
             CASE(-1) 
-               DUUDT = 2._EB*RFODT*( WC%ONE_D%UW-0.5_EB*(U(II-1,JJ,KK)+US(II-1,JJ,KK)) )
+               DUUDT = 2._EB*RFODT*(UN-0.5_EB*(U(II-1,JJ,KK)+US(II-1,JJ,KK)) )
                FVX(II-1,JJ,KK) = -RDXN(II-1)*(HP(II,JJ,KK)-HP(II-1,JJ,KK)) - DUUDT
             CASE( 2) 
-               DVVDT = 2._EB*RFODT*(-WC%ONE_D%UW-0.5_EB*(V(II,JJ,KK)+VS(II,JJ,KK)) )
+               DVVDT = 2._EB*RFODT*(UN-0.5_EB*(V(II,JJ,KK)+VS(II,JJ,KK)) )
                FVY(II,JJ,KK) = -RDYN(JJ)*(HP(II,JJ+1,KK)-HP(II,JJ,KK)) - DVVDT
             CASE(-2)
-               DVVDT = 2._EB*RFODT*( WC%ONE_D%UW-0.5_EB*(V(II,JJ-1,KK)+VS(II,JJ-1,KK)) )
+               DVVDT = 2._EB*RFODT*(UN-0.5_EB*(V(II,JJ-1,KK)+VS(II,JJ-1,KK)) )
                FVY(II,JJ-1,KK) = -RDYN(JJ-1)*(HP(II,JJ,KK)-HP(II,JJ-1,KK)) - DVVDT
             CASE( 3) 
-               DWWDT = 2._EB*RFODT*(-WC%ONE_D%UW-0.5_EB*(W(II,JJ,KK)+WS(II,JJ,KK)) )
+               DWWDT = 2._EB*RFODT*(UN-0.5_EB*(W(II,JJ,KK)+WS(II,JJ,KK)) )
                FVZ(II,JJ,KK) = -RDZN(KK)*(HP(II,JJ,KK+1)-HP(II,JJ,KK)) - DWWDT
             CASE(-3) 
-               DWWDT = 2._EB*RFODT*( WC%ONE_D%UW-0.5_EB*(W(II,JJ,KK-1)+WS(II,JJ,KK-1)) )
+               DWWDT = 2._EB*RFODT*(UN-0.5_EB*(W(II,JJ,KK-1)+WS(II,JJ,KK-1)) )
                FVZ(II,JJ,KK-1) = -RDZN(KK-1)*(HP(II,JJ,KK)-HP(II,JJ,KK-1)) - DWWDT
          END SELECT
       ENDIF
@@ -2978,7 +2980,7 @@ USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP
 REAL(EB), INTENT(IN) :: T
 REAL(EB), POINTER, DIMENSION(:,:,:) :: UU=>NULL(),VV=>NULL(),WW=>NULL(),RHOP=>NULL(),HP=>NULL(),RHMK=>NULL(),RRHO=>NULL()
 INTEGER  :: I,J,K,IC1,IC2,II,JJ,KK,IIG,JJG,KKG,IOR,IW
-REAL(EB) :: P_EXTERNAL,TSI,TIME_RAMP_FACTOR,DUMMY
+REAL(EB) :: P_EXTERNAL,TSI,TIME_RAMP_FACTOR,DUMMY,UN
 LOGICAL  :: INFLOW
 TYPE(VENTS_TYPE), POINTER :: VT=>NULL()
 TYPE(WALL_TYPE), POINTER :: WC=>NULL()
@@ -3044,20 +3046,15 @@ EXTERNAL_WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS
    JJG = WC%ONE_D%JJG
    KKG = WC%ONE_D%KKG
    INFLOW = .FALSE.
-   SELECT CASE(IOR)
-      CASE( 1)
-         IF (UU(II,JJ,KK)>=0._EB)   INFLOW = .TRUE.
-      CASE(-1)
-         IF (UU(II-1,JJ,KK)<=0._EB) INFLOW = .TRUE.
-      CASE( 2)
-         IF (VV(II,JJ,KK)>=0._EB)   INFLOW = .TRUE.
-      CASE(-2)
-         IF (VV(II,JJ-1,KK)<=0._EB) INFLOW = .TRUE.
-      CASE( 3)
-         IF (WW(II,JJ,KK)>=0._EB)   INFLOW = .TRUE.
-      CASE(-3)
-         IF (WW(II,JJ,KK-1)<=0._EB) INFLOW = .TRUE.
-   END SELECT
+   IOR_SELECT: SELECT CASE(IOR)
+      CASE( 1); UN = UU(II,JJ,KK)
+      CASE(-1); UN = UU(II-1,JJ,KK)
+      CASE( 2); UN = VV(II,JJ,KK)
+      CASE(-2); UN = VV(II,JJ-1,KK)
+      CASE( 3); UN = WW(II,JJ,KK)
+      CASE(-3); UN = WW(II,JJ,KK-1)
+   END SELECT IOR_SELECT
+   IF (UN*SIGN(1._EB,REAL(IOR,EB))>TWO_EPSILON_EB) INFLOW=.TRUE.
    IF (INFLOW) THEN
       RHMK(II,JJ,KK) = 2._EB*P_EXTERNAL - RHMK(IIG,JJG,KKG)  ! Pressure at inflow boundary is P_EXTERNAL
    ELSE
