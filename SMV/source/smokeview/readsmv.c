@@ -2358,6 +2358,11 @@ int readsmv(char *file, char *file2){
     ngeominfo=0;
   }
 
+  if(ngeomobjinfo>0){
+    FREEMEMORY(geomobjinfo);
+    ngeomobjinfo=0;
+  }
+
   FREEMEMORY(tickinfo);
   ntickinfo=0;
   ntickinfo_smv=0;
@@ -2710,6 +2715,10 @@ int readsmv(char *file, char *file2){
       ncsvinfo+=nfiles;
       continue;
     }
+    if(match(buffer,"GEOMOBJ") == 1){
+      ngeomobjinfo++;
+      continue;
+    }
     if(match(buffer,"GEOM") == 1){
       ngeominfo++;
       continue;
@@ -3018,6 +3027,10 @@ int readsmv(char *file, char *file2){
  if(ngeominfo>0){
    NewMemory((void **)&geominfo,ngeominfo*sizeof(geomdata));
    ngeominfo=0;
+ }
+ if(ngeomobjinfo>0){
+   NewMemory((void **)&geomobjinfo,ngeomobjinfo*sizeof(geomobjdata));
+   ngeomobjinfo=0;
  }
  if(npropinfo>0){
    NewMemory((void **)&propinfo,npropinfo*sizeof(propdata));
@@ -3425,6 +3438,22 @@ int readsmv(char *file, char *file2){
       strcpy(geomi->file,buff2);
 
       init_geom(geomi);
+
+      ngeominfo++;
+      continue;
+    }
+
+    /*
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    +++++++++++++++++++++++++++++ GEOMOBJ +++++++++++++++++++++++
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  */
+    if(match(buffer,"GEOMOBJ") == 1){
+      geomobjdata *geomobji;
+      char *buff2;
+
+      fgets(buffer,255,stream);
+      geomobji = geomobjinfo + ngeomobjinfo;
 
       ngeominfo++;
       continue;

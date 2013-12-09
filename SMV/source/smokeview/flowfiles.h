@@ -72,7 +72,7 @@ typedef struct {
 typedef struct {
   struct _surfdata *surf;
   struct _texturedata *object_texture;
-} geomobjectdata;
+} geomobjdata;
 
 /* --------------------------  bounds ------------------------------------ */
 
