@@ -1037,24 +1037,22 @@ WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
    
    ENDIF
 
-   SELECT CASE(IOR)
-      CASE( 1)
-         UN = UU(II,JJ,KK)
-      CASE(-1)
-         UN = UU(II-1,JJ,KK)
-      CASE( 2)
-         UN = VV(II,JJ,KK)
-      CASE(-2)
-         UN = VV(II,JJ-1,KK)
-      CASE( 3)
-         UN = WW(II,JJ,KK)
-      CASE(-3)
-         UN = WW(II,JJ,KK-1)
-   END SELECT
-
-   ! In case of interpolated boundary, use the original velocity, not the averaged value
-
-   IF (WC%BOUNDARY_TYPE==INTERPOLATED_BOUNDARY) UN = UVW_SAVE(IW)
+   BOUNDARY_SELECT: SELECT CASE(WC%BOUNDARY_TYPE)
+      CASE DEFAULT
+         IOR_SELECT: SELECT CASE(IOR)
+            CASE( 1); UN = UU(II,JJ,KK)
+            CASE(-1); UN = UU(II-1,JJ,KK)
+            CASE( 2); UN = VV(II,JJ,KK)
+            CASE(-2); UN = VV(II,JJ-1,KK)
+            CASE( 3); UN = WW(II,JJ,KK)
+            CASE(-3); UN = WW(II,JJ,KK-1)
+         END SELECT IOR_SELECT
+      CASE(SOLID_BOUNDARY,HVAC_BOUNDARY)
+         IF (PREDICTOR) UN = -SIGN(1._EB,REAL(IOR,EB))*WC%ONE_D%UWS
+         IF (CORRECTOR) UN = -SIGN(1._EB,REAL(IOR,EB))*WC%ONE_D%UW
+      CASE(INTERPOLATED_BOUNDARY)
+         IF (WC%BOUNDARY_TYPE==INTERPOLATED_BOUNDARY) UN = UVW_SAVE(IW)
+   END SELECT BOUNDARY_SELECT
 
    SELECT CASE(IOR)
       CASE( 1)
@@ -1363,24 +1361,22 @@ WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
 
    IF (.NOT.CONSTANT_SPECIFIC_HEAT_RATIO) THEN
 
-      SELECT CASE(IOR)
-         CASE( 1)
-            UN = UU(II,JJ,KK)
-         CASE(-1)
-            UN = UU(II-1,JJ,KK)
-         CASE( 2)
-            UN = VV(II,JJ,KK)
-         CASE(-2)
-            UN = VV(II,JJ-1,KK)
-         CASE( 3)
-            UN = WW(II,JJ,KK)
-         CASE(-3)
-            UN = WW(II,JJ,KK-1)
-      END SELECT
-   
-      ! In case of interpolated boundary, use the original velocity, not the averaged value
-   
-      IF (WC%BOUNDARY_TYPE==INTERPOLATED_BOUNDARY) UN = UVW_SAVE(IW)
+      BOUNDARY_SELECT: SELECT CASE(WC%BOUNDARY_TYPE)
+         CASE DEFAULT
+            IOR_SELECT: SELECT CASE(IOR)
+               CASE( 1); UN = UU(II,JJ,KK)
+               CASE(-1); UN = UU(II-1,JJ,KK)
+               CASE( 2); UN = VV(II,JJ,KK)
+               CASE(-2); UN = VV(II,JJ-1,KK)
+               CASE( 3); UN = WW(II,JJ,KK)
+               CASE(-3); UN = WW(II,JJ,KK-1)
+            END SELECT IOR_SELECT
+         CASE(SOLID_BOUNDARY,HVAC_BOUNDARY)
+            IF (PREDICTOR) UN = -SIGN(1._EB,REAL(IOR,EB))*WC%ONE_D%UWS
+            IF (CORRECTOR) UN = -SIGN(1._EB,REAL(IOR,EB))*WC%ONE_D%UW
+         CASE(INTERPOLATED_BOUNDARY)
+            IF (WC%BOUNDARY_TYPE==INTERPOLATED_BOUNDARY) UN = UVW_SAVE(IW)
+      END SELECT BOUNDARY_SELECT
    
       SELECT CASE(IOR)
          CASE( 1)
@@ -1716,10 +1712,9 @@ WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
                CASE(-3); UN = WW(II,JJ,KK-1)
             END SELECT IOR_SELECT
          CASE(SOLID_BOUNDARY,HVAC_BOUNDARY)
-            IF (PREDICTOR) UN = -SIGN(1._EB,REAL(IOR,EB))*WC%ONE_D%UW
-            IF (CORRECTOR) UN = -SIGN(1._EB,REAL(IOR,EB))*WC%ONE_D%UWS
+            IF (PREDICTOR) UN = -SIGN(1._EB,REAL(IOR,EB))*WC%ONE_D%UWS
+            IF (CORRECTOR) UN = -SIGN(1._EB,REAL(IOR,EB))*WC%ONE_D%UW
          CASE(INTERPOLATED_BOUNDARY)
-            ! In case of interpolated boundary, use the original velocity, not the averaged value
             IF (WC%BOUNDARY_TYPE==INTERPOLATED_BOUNDARY) UN = UVW_SAVE(IW)
       END SELECT BOUNDARY_SELECT
    

@@ -29,7 +29,7 @@ USE GLOBAL_CONSTANTS, ONLY: N_TRACKED_SPECIES,PREDICTOR,CORRECTOR,EVACUATION_ONL
 
 INTEGER, INTENT(IN) :: NM
 REAL(EB) :: TNOW,UN
-INTEGER  :: I,J,K,N,IOR,IW,II,JJ,KK
+INTEGER  :: I,J,K,N,IOR,IW,IIG,JJG,KKG
 REAL(EB), POINTER, DIMENSION(:,:,:,:) :: ZZP=>NULL()
 TYPE(SPECIES_MIXTURE_TYPE), POINTER :: SM=>NULL()
 TYPE(WALL_TYPE), POINTER :: WC=>NULL()
@@ -53,53 +53,59 @@ ELSE
    IF (N_TRACKED_SPECIES > 0) ZZP => ZZS
 ENDIF
 
+FRHO = 0._EB
+
 WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
 
    WC=>WALL(IW)
    IF (WC%BOUNDARY_TYPE==NULL_BOUNDARY) CYCLE WALL_LOOP
 
-   II  = WC%ONE_D%II
-   JJ  = WC%ONE_D%JJ
-   KK  = WC%ONE_D%KK
+   IIG = WC%ONE_D%IIG
+   JJG = WC%ONE_D%JJG
+   KKG = WC%ONE_D%KKG
    IOR = WC%ONE_D%IOR
 
    BOUNDARY_SELECT: SELECT CASE(WC%BOUNDARY_TYPE)
       CASE DEFAULT
          SELECT CASE(IOR)
             CASE( 1)
-               FX(II,JJ,KK,0)   = WC%RHO_F
+               FX(IIG-1,JJG,KKG,0) = WC%RHO_F
             CASE(-1)
-               FX(II-1,JJ,KK,0) = WC%RHO_F
+               FX(IIG,JJG,KKG,0)   = WC%RHO_F
             CASE( 2)
-               FY(II,JJ,KK,0)   = WC%RHO_F
+               FY(IIG,JJG-1,KKG,0) = WC%RHO_F
             CASE(-2)
-               FY(II,JJ-1,KK,0) = WC%RHO_F
+               FY(IIG,JJG,KKG,0)   = WC%RHO_F
             CASE( 3)
-               FZ(II,JJ,KK,0)   = WC%RHO_F
+               FZ(IIG,JJG,KKG-1,0) = WC%RHO_F
             CASE(-3)
-               FZ(II,JJ,KK-1,0) = WC%RHO_F
+               FZ(IIG,JJG,KKG,0)   = WC%RHO_F
          END SELECT
       CASE(INTERPOLATED_BOUNDARY)
          UN = UVW_SAVE(IW)
          SELECT CASE(IOR)
             CASE( 1)
-               IF (ABS(UU(II,JJ,KK))  >TWO_EPSILON_EB) FX(II,JJ,KK,0)   = WC%RHO_F*UN/UU(II,JJ,KK)
+               FX(IIG-1,JJG,KKG,0) = 0._EB
+               FRHO(IIG,JJG,KKG)   = FRHO(IIG,JJG,KKG) + WC%RHO_F*UN*RDX(IIG)*R(IIG-1)*RRN(IIG)
             CASE(-1)
-               IF (ABS(UU(II-1,JJ,KK))>TWO_EPSILON_EB) FX(II-1,JJ,KK,0) = WC%RHO_F*UN/UU(II-1,JJ,KK)
+               FX(IIG,JJG,KKG,0)   = 0._EB
+               FRHO(IIG,JJG,KKG)   = FRHO(IIG,JJG,KKG) - WC%RHO_F*UN*RDX(IIG)*R(IIG)*RRN(IIG)
             CASE( 2)
-               IF (ABS(VV(II,JJ,KK))  >TWO_EPSILON_EB) FY(II,JJ,KK,0)   = WC%RHO_F*UN/VV(II,JJ,KK)
+               FY(IIG,JJG-1,KKG,0) = 0._EB
+               FRHO(IIG,JJG,KKG)   = FRHO(IIG,JJG,KKG) + WC%RHO_F*UN*RDY(JJG)
             CASE(-2)
-               IF (ABS(VV(II,JJ-1,KK))>TWO_EPSILON_EB) FY(II,JJ-1,KK,0) = WC%RHO_F*UN/VV(II,JJ-1,KK)
+               FY(IIG,JJG,KKG,0)   = 0._EB
+               FRHO(IIG,JJG,KKG)   = FRHO(IIG,JJG,KKG) - WC%RHO_F*UN*RDY(JJG)
             CASE( 3)
-               IF (ABS(WW(II,JJ,KK))  >TWO_EPSILON_EB) FZ(II,JJ,KK,0)   = WC%RHO_F*UN/WW(II,JJ,KK)
+               FZ(IIG,JJG,KKG-1,0) = 0._EB
+               FRHO(IIG,JJG,KKG)   = FRHO(IIG,JJG,KKG) + WC%RHO_F*UN*RDZ(KKG)
             CASE(-3)
-               IF (ABS(WW(II,JJ,KK-1))>TWO_EPSILON_EB) FZ(II,JJ,KK-1,0) = WC%RHO_F*UN/WW(II,JJ,KK-1)
+               FZ(IIG,JJG,KKG,0)   = 0._EB
+               FRHO(IIG,JJG,KKG)   = FRHO(IIG,JJG,KKG) - WC%RHO_F*UN*RDZ(KKG)
          END SELECT
    END SELECT BOUNDARY_SELECT
 
 ENDDO WALL_LOOP
-
-FRHO = 0._EB
 
 !$OMP PARALLEL DO DEFAULT(NONE) COLLAPSE(3) SCHEDULE(STATIC) &
 !$OMP SHARED(KBAR,IBAR,JBAR,SOLID,CELL_INDEX,FRHO,FX,FY,FZ,UU,VV,WW,R,RRN,RDX,RDY,RDZ) &
@@ -108,7 +114,8 @@ DO K=1,KBAR
    DO J=1,JBAR
       DO I=1,IBAR
          IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-         FRHO(I,J,K) = (FX(I,J,K,0)*UU(I,J,K)*R(I)-FX(I-1,J,K,0)*UU(I-1,J,K)*R(I-1))*RDX(I)*RRN(I) &
+         FRHO(I,J,K) = -FRHO(I,J,K)                                                                &
+                     + (FX(I,J,K,0)*UU(I,J,K)*R(I)-FX(I-1,J,K,0)*UU(I-1,J,K)*R(I-1))*RDX(I)*RRN(I) &
                      + (FY(I,J,K,0)*VV(I,J,K)     -FY(I,J-1,K,0)*VV(I,J-1,K)       )*RDY(J)        &
                      + (FZ(I,J,K,0)*WW(I,J,K)     -FZ(I,J,K-1,0)*WW(I,J,K-1)       )*RDZ(K)
       ENDDO
@@ -122,26 +129,26 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
       WC=>WALL(IW)
       IF (WC%BOUNDARY_TYPE==NULL_BOUNDARY) CYCLE WALL_LOOP_2
 
-      II  = WC%ONE_D%II
-      JJ  = WC%ONE_D%JJ
-      KK  = WC%ONE_D%KK
+      IIG = WC%ONE_D%IIG
+      JJG = WC%ONE_D%JJG
+      KKG = WC%ONE_D%KKG
       IOR = WC%ONE_D%IOR
 
       BOUNDARY_SELECT_2: SELECT CASE(WC%BOUNDARY_TYPE)
          CASE DEFAULT
             SELECT CASE(IOR)
                CASE( 1)
-                  FX(II,JJ,KK,N)   = WC%RHO_F*WC%ZZ_F(N)
+                  FX(IIG-1,JJG,KKG,N) = WC%RHO_F*WC%ZZ_F(N)
                CASE(-1)
-                  FX(II-1,JJ,KK,N) = WC%RHO_F*WC%ZZ_F(N)
+                  FX(IIG,JJG,KKG,N)   = WC%RHO_F*WC%ZZ_F(N)
                CASE( 2)
-                  FY(II,JJ,KK,N)   = WC%RHO_F*WC%ZZ_F(N)
+                  FY(IIG,JJG-1,KKG,N) = WC%RHO_F*WC%ZZ_F(N)
                CASE(-2)
-                  FY(II,JJ-1,KK,N) = WC%RHO_F*WC%ZZ_F(N)
+                  FY(IIG,JJG,KKG,N)   = WC%RHO_F*WC%ZZ_F(N)
                CASE( 3)
-                  FZ(II,JJ,KK,N)   = WC%RHO_F*WC%ZZ_F(N)
+                  FZ(IIG,JJG,KKG-1,N) = WC%RHO_F*WC%ZZ_F(N)
                CASE(-3)
-                  FZ(II,JJ,KK-1,N) = WC%RHO_F*WC%ZZ_F(N)
+                  FZ(IIG,JJG,KKG,N)   = WC%RHO_F*WC%ZZ_F(N)
             END SELECT
          CASE(INTERPOLATED_BOUNDARY,SOLID_BOUNDARY,HVAC_BOUNDARY)
             SELECT CASE(WC%BOUNDARY_TYPE)
@@ -153,17 +160,25 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
             END SELECT
             SELECT CASE(IOR)
                CASE( 1)
-                  IF (ABS(UU(II,JJ,KK))  >TWO_EPSILON_EB) FX(II,JJ,KK,N)   = WC%RHO_F*WC%ZZ_F(N)*UN/UU(II,JJ,KK)
+                  FX(IIG-1,JJG,KKG,N) = 0._EB
+                  DEL_RHO_D_DEL_Z(IIG,JJG,KKG,N) = DEL_RHO_D_DEL_Z(IIG,JJG,KKG,N) &
+                                                 + WC%RHO_F*WC%ZZ_F(N)*UN*RDX(IIG)*R(IIG-1)*RRN(IIG)
                CASE(-1)
-                  IF (ABS(UU(II-1,JJ,KK))>TWO_EPSILON_EB) FX(II-1,JJ,KK,N) = WC%RHO_F*WC%ZZ_F(N)*UN/UU(II-1,JJ,KK)
+                  FX(IIG,JJG,KKG,N)   = 0._EB
+                  DEL_RHO_D_DEL_Z(IIG,JJG,KKG,N) = DEL_RHO_D_DEL_Z(IIG,JJG,KKG,N) &
+                                                 - WC%RHO_F*WC%ZZ_F(N)*UN*RDX(IIG)*R(IIG)*RRN(IIG)
                CASE( 2)
-                  IF (ABS(VV(II,JJ,KK))  >TWO_EPSILON_EB) FY(II,JJ,KK,N)   = WC%RHO_F*WC%ZZ_F(N)*UN/VV(II,JJ,KK)
+                  FY(IIG,JJG-1,KKG,N) = 0._EB
+                  DEL_RHO_D_DEL_Z(IIG,JJG,KKG,N) = DEL_RHO_D_DEL_Z(IIG,JJG,KKG,N) + WC%RHO_F*WC%ZZ_F(N)*UN*RDY(JJG)
                CASE(-2)
-                  IF (ABS(VV(II,JJ-1,KK))>TWO_EPSILON_EB) FY(II,JJ-1,KK,N) = WC%RHO_F*WC%ZZ_F(N)*UN/VV(II,JJ-1,KK)
+                  FY(IIG,JJG,KKG,N)   = 0._EB
+                  DEL_RHO_D_DEL_Z(IIG,JJG,KKG,N) = DEL_RHO_D_DEL_Z(IIG,JJG,KKG,N) - WC%RHO_F*WC%ZZ_F(N)*UN*RDY(JJG)
                CASE( 3)
-                  IF (ABS(WW(II,JJ,KK))  >TWO_EPSILON_EB) FZ(II,JJ,KK,N)   = WC%RHO_F*WC%ZZ_F(N)*UN/WW(II,JJ,KK)
+                  FZ(IIG,JJG,KKG-1,N) = 0._EB
+                  DEL_RHO_D_DEL_Z(IIG,JJG,KKG,N) = DEL_RHO_D_DEL_Z(IIG,JJG,KKG,N) + WC%RHO_F*WC%ZZ_F(N)*UN*RDZ(KKG)
                CASE(-3)
-                  IF (ABS(WW(II,JJ,KK-1))>TWO_EPSILON_EB) FZ(II,JJ,KK-1,N) = WC%RHO_F*WC%ZZ_F(N)*UN/WW(II,JJ,KK-1)
+                  FZ(IIG,JJG,KKG,N)   = 0._EB
+                  DEL_RHO_D_DEL_Z(IIG,JJG,KKG,N) = DEL_RHO_D_DEL_Z(IIG,JJG,KKG,N) - WC%RHO_F*WC%ZZ_F(N)*UN*RDZ(KKG)
             END SELECT
       END SELECT BOUNDARY_SELECT_2
 
