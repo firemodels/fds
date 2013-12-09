@@ -3299,33 +3299,18 @@ where $L_{\rm g}$ is the gas diffusion length scale.
 $n_{{\rm O_2},ij}$ is prescribed under the name {\ct N\_O2(j)} on the {\ct MATL} line of the $i$th material. It is zero by default.
 $L_{\rm g}$ is prescribed under the name {\ct GAS\_DIFFUSION\_DEPTH(j)}, and it is 0.001 m by default.
 
-It is very important to keep in mind that $A$ and $E$ are not available for most real materials. If $A$ and $E$ are not known,
-there are several parameters that can be used by FDS to derive effective values. The most important parameter to
-specify in place of $A$ and $E$ is
-the  {\ct REFERENCE\_TEMPERATURE} ($^\circ$C). To understand this parameter, consider the plot shown in Fig.~\ref{pyrolysis}.
-These curves represent the results of a hypothetical TGA experiment.
-The Mass Fraction (blue curve) is the normalized density of the material ($Y$) which decreases as the sample is slowly heated,
-in this case at a rate
-of 5~K/min. The Reaction Rate (green curve) is the rate of change of the mass fraction as a function of time ($-\d Y/\d t$).
-Where this curve peaks is referred to in FDS
-as the {\ct REFERENCE\_TEMPERATURE}.\footnote{The term ``reference temperature'' is used simply to maintain
-backward compatibility with earlier versions of
-FDS.}  Note that the {\ct REFERENCE\_TEMPERATURE} is {\em not} the same as an ignition temperature, nor is it necessarily
-the surface temperature of the burning solid. Rather, it is simply the temperature at which the mass fraction of the material
-decreases at its maximum rate within the context of a TGA or similar experimental apparatus. The
-kinetic constants for the reaction are found from the formulae\footnote{These formulas have been derived from an analysis that considers a first-order reaction. When using the proposed method, do not specify non-unity value for the reaction order {\ct N\_S} on the {\ct MATL} line.}:
+\subsubsection{Estimating Kinetic Parameters}
+
+It is very important to keep in mind that the kinetic constants, $A$ and $E$, are not available for most real materials.  However, there is a way to model such materials using a simplified reaction scheme. The key assumption is that the material components can undergo only one reaction, at most. If, for example, the material undergoes three distinct reactions, there must be at least three material components, each of which undergoes one reaction. If there is an additional residue left over, then a fourth material component is needed.
+
+In lieu of specifying $A$ and $E$, there are several parameters that can be used by FDS to derive effective values, the most important of which is the  {\ct REFERENCE\_TEMPERATURE} ($^\circ$C). To understand this parameter, consider the plot shown in Fig.~\ref{pyrolysis}. These curves represent the results of a hypothetical TGA experiment in which a single component material undergoes a single reaction that converts the solid into a gas. The Mass Fraction (blue curve) is the normalized density of the material ($Y_{\rm s}$) which decreases as the sample is slowly heated, in this case at a rate of 5~K/min. The Reaction Rate (green curve) is the rate of change of the mass fraction as a function of time ($-\d Y_{\rm s}/\d t$). Where this curve peaks is referred to in FDS as the {\ct REFERENCE\_TEMPERATURE}.\footnote{The term ``reference temperature'' is used simply to maintain backward compatibility with earlier versions of FDS.}  Note that the {\ct REFERENCE\_TEMPERATURE} is {\em not} the same as an ignition temperature, nor is it necessarily the surface temperature of the burning solid. Rather, it is simply the temperature at which the mass fraction of the material decreases at its maximum rate within the context of a TGA or similar experimental apparatus. 
+
+The kinetic constants for component $i$ of a multi-component solid are given by\footnote{These formulas have been derived from an analysis that considers a first-order reaction. When using the proposed method, do not specify non-unity value for the reaction order {\ct N\_S} on the {\ct MATL} line.}:
 \be
-   E = \frac{{\rm e} \, r_{\rm p}}{Y_0} \, \frac{R \, T_{\rm p}^2}{\dot{T}} \quad ; \quad
-   A = \frac{{\rm e} \, r_{\rm p}}{Y_0} \, {\rm e}^{E/R \, T_{\rm p}} \label{AandE}
+   E_{i,1} = \frac{ {\rm e} \, r_{{\rm p},i} }{ Y_{{\rm s},i}(0) } \, \frac{R \, T_{{\rm p},i}^2}{\dot{T}} \quad ; \quad
+   A_{i,1} = \frac{ {\rm e} \, r_{{\rm p},i} }{ Y_{{\rm s},i}(0) } \, {\rm e}^{E/R \, T_{{\rm p},i}} \label{AandE}
 \ee
-where $T_{\rm p}$ and $r_{\rm p}/Y_0$ are the reference temperature and rate, respectively. The
-{\ct REFERENCE\_RATE} is the reaction rate, in units of s$^{-1}$, at the given {\ct REFERENCE\_TEMPERATURE} divided by
-the mass fraction, $Y_0$, of material in the original sample undergoing the reaction. For a single component, single
-reaction material, $Y_0=1$. The {\ct HEATING\_RATE} ($\dot{T}$) is
-the rate at which the temperature of the TGA (or equivalent) test
-apparatus was increased. It is input into FDS in units of K/min (in the formula, it is expressed in K/s).
-Its default value is 5~K/min. In Fig.~\ref{pyrolysis}, the area under the green curve
-(Reaction Rate) is equal to the heating rate (in units of K/s).
+where $T_{{\rm p},i}$ and $r_{{\rm p},i}/Y_{{\rm s},i}(0)$ are the reference temperature and rate, respectively. The {\ct REFERENCE\_RATE} is the reaction rate, in units of s$^{-1}$, at the given {\ct REFERENCE\_TEMPERATURE} divided by the mass fraction, $Y_{{\rm s},i}(0)$, of material in the original sample undergoing the reaction. For a single component, single reaction material, $Y_{{\rm s},1}(0)=1$. The {\ct HEATING\_RATE} ($\dot{T}$) is the rate at which the temperature of the TGA (or equivalent) test apparatus was increased. It is input into FDS in units of K/min (in the formula, it is expressed in K/s). Its default value is 5~K/min. In Fig.~\ref{pyrolysis}, the area under the green curve (Reaction Rate) is equal to the heating rate (in units of K/s).
 
 \begin{figure}[ht]
 \noindent
@@ -3335,28 +3320,27 @@ Its default value is 5~K/min. In Fig.~\ref{pyrolysis}, the area under the green 
 \hfill
 \begin{minipage}{0.5\textwidth}
 \begin{equation*}
-   \frac{\d Y}{\d t} = -A \, Y \, \exp(-E/RT)   \quad \; \quad    Y(0) =1
+   \frac{\d Y_{\rm s}}{\d t} = -A \, Y_{\rm s} \, \exp(-E/RT_{\rm s})   \quad \; \quad    Y_{\rm s}(0) =1
 \end{equation*}
 \begin{align*}
    T_{\rm p} &= 300 \; ^\circ\mathrm{C}  \\
-   r_{\rm p} &= 0.002   \; \si{1/s}  \\
+   r_{\rm p} &= 0.002   \; \mathrm{s}^{-1}  \\
    \dot{T} &= 5 \; \mathrm{K/min} \\
    \nu_{\rm s} &= 0 \\
 \end{align*}
 \end{minipage}
-\caption[Simple demonstration of the pyrolysis model]{The blue curve represents the normalized mass, $Y=\rho_{\rm s}/\rho_{\rm s}(0)$, of a solid material
-undergoing heating at a rate of 5~K/min. The green curve represents the reaction rate, $-\d Y/\d t$. The ordinary differential equation that describes the transformation is shown at right. Note that the parameters $T_{\rm p}$, $r_{\rm p}$, and $\nu_{\rm s}$ represent the ``reference'' temperature,
+\caption[Simple demonstration of the pyrolysis model]{The blue curve represents the normalized mass, $Y_{\rm s}=\rho_{\rm s}/\rho_{\rm s}(0)$, of a solid material
+undergoing heating at a rate of 5~K/min. The green curve represents the reaction rate, $-\d Y_{\rm s}/\d t$. The ordinary differential equation that describes the transformation is shown at right. Note that the parameters $T_{\rm p}$, $r_{\rm p}$, and $\nu_{\rm s}$ represent the ``reference'' temperature,
 reaction rate, and residue yield of the single reaction. From these parameters, values of $A$ and $E$ can be estimated using
 the formulae in (\ref{AandE}). The full set of parameters for this case are listed in {\ct pyrolysis\_1.fds}.}
 \label{pyrolysis}
 \end{figure}
 
-There are many cases where it is only possible to estimate the {\ct REFERENCE\_TEMPERATURE} ($T_{\rm p}$) of a particular reaction because micro-scale calorimetry data is unavailable. In such cases, an additional parameter can be specified along with {\ct REFERENCE\_TEMPERATURE} ($T_{\rm p}$) to help fine tune the shape of the reaction rate curve, assuming some sort of measurement or estimate has been made to indicate at what temperature, and over what
-temperature range, the reaction takes place. The {\ct PYROLYSIS\_RANGE} ($\Delta T$) is the approximate width (in degrees Celsius or Kelvin) of the green curve, assuming its shape to be roughly triangular. Its default value is 80~$^\circ$C. Using these input parameters, an estimate is made of the peak reaction rate, $r_{\rm p}$, with which $E$, then $A$, are calculated.
+There are many cases where it is only possible to estimate the {\ct REFERENCE\_TEMPERATURE} ($T_{\rm p}$) of a particular reaction because micro-scale calorimetry data is unavailable. In such cases, an additional parameter can be specified to help fine tune the shape of the reaction rate curve, assuming some sort of measurement or estimate has been made to indicate at what temperature, and over what temperature range, the reaction takes place. The {\ct PYROLYSIS\_RANGE} ($\Delta T$) is the approximate width (in degrees Celsius or Kelvin) of the green curve, assuming its shape to be roughly triangular. Its default value is 80~$^\circ$C. Using these input parameters, an estimate is made of the peak reaction rate, $r_{{\rm p},i}$, with which $E_{i,1}$, then $A_{i,1}$, are calculated.
 \be
-   \frac{r_{\rm p}}{Y_0} = \frac{2 \, \dot{T}} {\Delta T} \, (1-\nu_{\rm s}) \label{r_p}
+   \frac{r_{{\rm p},i}}{Y_{{\rm s},i}(0)} = \frac{2 \, \dot{T}} {\Delta T} \, (1-\nu_{{\rm s},i}) \label{r_p}
 \ee
-The parameter, $\nu_{\rm s}$, is the yield of solid residue.
+The parameter, $\nu_{{\rm s},i}$, is the yield of solid residue.
 
 When in doubt about the values of these parameters, just specify the {\ct REFERENCE\_TEMPERATURE}. Note that FDS will automatically calculate $A$ and $E$ using the above formulae. Do not specify $A$ and $E$ if you specify the \linebreak[3] {\ct REFERENCE\_TEMPERATURE}, and do not specify {\ct PYROLYSIS\_RANGE} if you specify {\ct REFERENCE\_RATE}. For the material decomposition shown in Fig.~\ref{pyrolysis}, the {\ct MATL} would have the form:
 \begin{lstlisting}
@@ -3484,18 +3468,18 @@ neighborhood of 300~$^\circ$C, leaving 20~\% of its mass behind in the form of a
 \begin{minipage}{0.5\textwidth}
 \footnotesize
 \begin{align*}
-   \frac{\d Y_1}{\d t} &= -A_{1,1} \, Y_1 \, \exp(-E_{1,1}/RT)                  & Y_1(0) &=0.1 \\
-   \frac{\d Y_2}{\d t} &= -A_{2,1} \, Y_2 \, \exp(-E_{2,1}/RT)                  & Y_2(0) &=0.9 \\
-   \frac{\d Y_3}{\d t} &= -\nu_{{\rm s},2,1} \frac{dY_2}{dt}                          & Y_3(0) &=0.0
+   \frac{\d Y_{\rm s,1}}{\d t} &= -A_{1,1} \, Y_{\rm s,1} \, \exp(-E_{1,1}/RT_{\rm s})                  & Y_{\rm s,1}(0) &=0.1 \\
+   \frac{\d Y_{\rm s,2}}{\d t} &= -A_{2,1} \, Y_{\rm s,2} \, \exp(-E_{2,1}/RT_{\rm s})                  & Y_{\rm s,2}(0) &=0.9 \\
+   \frac{\d Y_{\rm s,3}}{\d t} &= -\nu_{{\rm s},2,1} \frac{\d Y_{\rm s,2}}{\d t}                        & Y_{\rm s,3}(0) &=0.0
 \end{align*}
 \begin{align*}
    T_{{\rm p},1,1} &= 100+273 \; \mathrm{K}        & T_{{\rm p},2,1}   &= 300+273 \; \mathrm{K} \\
-   r_{{\rm p},1,1} &= 0.0016 \; \si{1/s}           & r_{{\rm p},2,1}   &= 0.0012 \;\si{1/s} \\
+   r_{{\rm p},1,1} &= 0.0016 \; \mathrm{s}^{-1}           & r_{{\rm p},2,1}   &= 0.0012 \; \mathrm{s}^{-1} \\
    \nu_{{\rm s},1,1} &= 0                          & \nu_{{\rm s},2,1} &= 0.2 \\
    \dot{T} &= 5 \; \mathrm{K/min} & &
 \end{align*}
 \end{minipage} \normalsize
-\caption[A more complicated demonstration of the pyrolysis model]{The blue curve represents the combined mass fraction, $\sum Y_i$, and the green curve the net reaction rate, $-\d/\!\d t(\sum Y_i)$, for a material that contains 10~\% water (by mass) that evaporates at a temperature of 100~$^\circ$C, and 90~\% solid material that pyrolyzes at 300~$^\circ$C, leaving a 20~\% (by mass) residue behind. Note that the numbered subscripts refer to the material component and the reaction, respectively. In this case, there are three material components, and the first two each undergo a single reaction. The third material component is formed as a residue of the reaction of the second material.
+\caption[A more complicated demonstration of the pyrolysis model]{The blue curve represents the combined mass fraction, $\sum Y_{\rm s,i}$, and the green curve the net reaction rate, $-\d/\!\d t(\sum Y_{\rm s,i})$, for a material that contains 10~\% water (by mass) that evaporates at a temperature of 100~$^\circ$C, and 90~\% solid material that pyrolyzes at 300~$^\circ$C, leaving a 20~\% (by mass) residue behind. Note that the numbered subscripts refer to the material component and the reaction, respectively. In this case, there are three material components, and the first two each undergo a single reaction. The third material component is formed as a residue of the reaction of the second material.
 The system of ordinary differential equations that governs the transformation of the materials is shown at right.}
 \label{pyrolysis_2}
 \end{figure}
