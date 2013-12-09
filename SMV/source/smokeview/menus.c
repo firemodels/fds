@@ -1821,7 +1821,7 @@ void VectorSkipMenu(int value){
 /* ------------------ TextureShowMenu ------------------------ */
 
 void TextureShowMenu(int value){
-  texture *texti;
+  texturedata *texti;
   int i;
   int texturedisplay=0;
   int texture_flag=0;
@@ -5237,7 +5237,7 @@ updatemenu=0;
     CREATEMENU(textureshowmenu,TextureShowMenu);
     ntextures_used=0;
     for(i=0;i<ntextures;i++){
-      texture *texti;
+      texturedata *texti;
       char menulabel[1024];
 
       texti = textureinfo + i;

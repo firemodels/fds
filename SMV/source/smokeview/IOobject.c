@@ -1740,7 +1740,7 @@ void drawline(float *xyz1, float *xyz2, unsigned char *rgbcolor){
 /* ----------------------- drawtsphere ----------------------------- */
 
 void drawtsphere(int texture_index,float diameter, unsigned char *rgbcolor){
-  texture *texti;
+  texturedata *texti;
 
   if(texture_index<0||texture_index>ntextures-1){
     texti=NULL;

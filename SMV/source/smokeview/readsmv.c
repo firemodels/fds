@@ -997,7 +997,7 @@ void parse_device_keyword(FILE *stream, devicedata *devicei){
   if(nparams_textures>1)nparams_textures=1;
   devicei->ntextures=nparams_textures;
   if(nparams_textures>0){
-     NewMemory((void **)&devicei->textureinfo,sizeof(texture));
+     NewMemory((void **)&devicei->textureinfo,sizeof(texturedata));
   }
   else{
     devicei->textureinfo=NULL;
@@ -1138,7 +1138,7 @@ void init_textures(void){
   ntextures = 0;
   for(i=0;i<nsurfinfo;i++){
     surfdata *surfi;
-    texture *texti;
+    texturedata *texti;
     int len;
 
     surfi = surfinfo + i;
@@ -1156,7 +1156,7 @@ void init_textures(void){
 
   for(i=0;i<ndevice_texture_list;i++){
     char *texturefile;
-    texture *texti;
+    texturedata *texti;
     int len;
 
     texturefile = device_texture_list[i];
@@ -1177,7 +1177,7 @@ void init_textures(void){
   for(i=0;i<ntextures;i++){
     unsigned char *floortex;
     int texwid, texht;
-    texture *texti;
+    texturedata *texti;
     int dup_texture;
     int j;
 
@@ -1188,7 +1188,7 @@ void init_textures(void){
     }
     dup_texture=0;
     for(j=0;j<i;j++){
-      texture *textj;
+      texturedata *textj;
 
       textj = textureinfo + j;
       if(textj->loaded==0)continue;
@@ -1344,7 +1344,7 @@ void init_textures(void){
 #endif
 
   if(autoterrain==1&&use_graphics==1){
-    texture *tt;
+    texturedata *tt;
     unsigned char *floortex;
     int texwid, texht;
     int errorcode;
@@ -2763,10 +2763,10 @@ int readsmv(char *file, char *file2){
     }
     if(match(buffer,"AUTOTERRAIN") == 1){
       int len_buffer;
-      texture *tt;
+      texturedata *tt;
       char *buff2;
 
-      NewMemory((void **)&terrain_texture,sizeof(texture));
+      NewMemory((void **)&terrain_texture,sizeof(texturedata));
       tt = terrain_texture;
       autoterrain=1;
       fgets(buffer,255,stream);
@@ -4922,7 +4922,7 @@ int readsmv(char *file, char *file2){
 
   update_device_textures();
   if(nsurfinfo>0||ndevice_texture_list>0){
-    if(NewMemory((void **)&textureinfo,(nsurfinfo+ndevice_texture_list)*sizeof(texture))==0)return 2;
+    if(NewMemory((void **)&textureinfo,(nsurfinfo+ndevice_texture_list)*sizeof(texturedata))==0)return 2;
   }
   init_textures();
 
@@ -7684,7 +7684,7 @@ void updateusetextures(void){
   int i;
 
   for(i=0;i<ntextures;i++){
-    texture *texti;
+    texturedata *texti;
 
     texti=textureinfo + i;
     texti->used=0;
@@ -7701,7 +7701,7 @@ void updateusetextures(void){
 
         bc=meshi->blockageinfoptrs[j];
         for(k=0;k<6;k++){
-          texture *texti;
+          texturedata *texti;
 
           texti = bc->surf[k]->textureinfo;
           if(texti!=NULL&&texti->loaded==1){
@@ -7728,7 +7728,7 @@ void updateusetextures(void){
       }
       if(textureinfo!=NULL){
         if(vi->surf[0]!=NULL){
-          texture *texti;
+          texturedata *texti;
 
           texti = vi->surf[0]->textureinfo;
           if(texti!=NULL&&texti->loaded==1){
@@ -7741,7 +7741,7 @@ void updateusetextures(void){
   }
   for(i=0;i<ndevice_texture_list;i++){
     int texture_index;
-    texture *texti;
+    texturedata *texti;
 
     texture_index  = device_texture_list_index[i];
     texti=textureinfo + texture_index;
@@ -7752,7 +7752,7 @@ void updateusetextures(void){
   }
   ntextures_loaded_used=0;
   for(i=0;i<ntextures;i++){
-    texture *texti;
+    texturedata *texti;
 
     texti = textureinfo + i;
     if(texti->loaded==0)continue;

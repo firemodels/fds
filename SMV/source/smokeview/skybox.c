@@ -20,7 +20,7 @@ char skybox_revision[]="$Revision$";
 
 /* ------------------ loadskytexture ------------------------ */
 
-void loadskytexture(char *filebase, texture *texti){
+void loadskytexture(char *filebase, texturedata *texti){
   char *filebuffer=NULL;
   int texwid, texht;
   int errorcode;

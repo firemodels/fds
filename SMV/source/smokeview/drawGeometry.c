@@ -2062,7 +2062,7 @@ void readcad2geom(cadgeom *cd){
 
   for(i=0;i<cd->ncadlookinfo;i++){
     cadlook *cdi;
-    texture *texti;
+    texturedata *texti;
     int errorcode;
     int ii;
     size_t lenbuffer,len;
@@ -2323,7 +2323,7 @@ void drawcad2geom(const cadgeom *cd, int trans_flag){
   int ii;
   float *thiscolor,*lastcolor; 
   int colorindex;
-  texture *lasttexture;
+  texturedata *lasttexture;
   float last_block_shininess;
 
   lastcolor=NULL;
@@ -2338,7 +2338,7 @@ void drawcad2geom(const cadgeom *cd, int trans_flag){
   colorindex=0;
   for(ii=0;ii<cd->nquads;ii++){
     float *xyzpoint;
-    texture *texti;
+    texturedata *texti;
     float this_block_shininess;
     float *normal;
     cadquad *quadi;
@@ -2398,7 +2398,7 @@ void drawcad2geom(const cadgeom *cd, int trans_flag){
     glBegin(GL_QUADS);
     for(ii=0;ii<cd->nquads;ii++){
       float *xyzpoint;
-      texture *texti;
+      texturedata *texti;
       float *txypoint;
       float *normal;
       cadquad *quadi;
@@ -3915,7 +3915,7 @@ void draw_faces(){
         facedata *facei;
         float *tvertices;
         float *vertices;
-        texture *texti;
+        texturedata *texti;
 
         facei=meshi->face_textures[i];
         showtimelist_handle = facei->showtimelist_handle;
@@ -6207,7 +6207,7 @@ void draw_facesOLD(){
         facedata *facei;
         float *tvertices;
         float *vertices;
-        texture *texti;
+        texturedata *texti;
 
         facei=meshi->face_textures[i];
         showtimelist_handle = facei->showtimelist_handle;

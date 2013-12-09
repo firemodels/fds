@@ -358,7 +358,7 @@ EXTERNCPP void update_glui_speed(void);
 EXTERNCPP void getnewpos(float *oldpos, float dx, float dy, float dz, float speed_factor);
 EXTERNCPP void free_skybox(void);
 EXTERNCPP void draw_skybox(void);
-EXTERNCPP void loadskytexture(char *filebase, texture *texti);
+EXTERNCPP void loadskytexture(char *filebase, texturedata *texti);
 #ifdef USE_ZLIB
 EXTERNCPP void uncompress_slicedataframe(slicedata *sd,int frame_index);
 EXTERNCPP void uncompress_patchdataframe(mesh *meshi,int frame_index);

@@ -67,6 +67,13 @@ typedef struct {
   int ntimes,itime,*timeslist;
 } geomdata;
 
+/* --------------------------  geomdata ------------------------------------ */
+
+typedef struct {
+  struct _surfdata *surf;
+  struct _texturedata *object_texture;
+} geomobjectdata;
+
 /* --------------------------  bounds ------------------------------------ */
 
 typedef struct {
@@ -202,11 +209,11 @@ typedef struct _labeldata {
 
 /* --------------------------  texture ------------------------------------ */
 
-typedef struct {
+typedef struct _texturedata {
   char *file;
   int loaded, display, used;
   GLuint name;
-} texture;
+} texturedata;
 
 /* --------------------------  terraindata ------------------------------------ */
 
@@ -223,7 +230,7 @@ typedef struct {
   int *timeslist;
   int loaded, display;
   int autoload;
-  texture *ter_texture;
+  texturedata *ter_texture;
   int nx, ny;
   float xmin, xmax, ymin, ymax;
   float *x, *y;
@@ -251,7 +258,7 @@ typedef struct _surfdata {
   float transparent_level;
   int iso_level;
   float t_width, t_height;
-  texture  *textureinfo;
+  texturedata *textureinfo;
   int obst_surface;
   int invisible;
   int location;
@@ -287,7 +294,7 @@ typedef struct {
   int show_bothsides, is_interior;
   struct _blockagedata *bc;
   surfdata *surfinfo;
-  texture *textureinfo;
+  texturedata *textureinfo;
 } facedata;
 
 /* --------------------------  selectdata ------------------------------------ */
@@ -338,7 +345,7 @@ typedef struct {
   int index;
   float texture_width, texture_height, texture_origin[3];
   float rgb[4], shininess;
-  texture textureinfo;
+  texturedata textureinfo;
 } cadlook;
 
 /* --------------------------  cadquad ------------------------------------ */
@@ -389,7 +396,7 @@ typedef struct _cventdata {
   float origin[3], radius;
   float *color;
   surfdata *surf[1];
-  texture *textureinfo[1];
+  texturedata *textureinfo[1];
 } cventdata;
 
 /* --------------------------  ventdata ------------------------------------ */
@@ -418,7 +425,7 @@ typedef struct _ventdata {
   int colorindex;
   int usecolorindex;
   surfdata *surf[1];
-  texture *textureinfo[1];
+  texturedata *textureinfo[1];
   float texture_origin[3];
   float *linewidth;
 } ventdata;
@@ -809,7 +816,7 @@ typedef struct _device{
   int *valids;
   int ival,nvals,type2,type2vis;
   mesh *device_mesh;
-  texture  *textureinfo;
+  texturedata *textureinfo;
   char *texturefile;
   int ntextures;
   float xyz[3], eyedist;
@@ -1345,7 +1352,7 @@ typedef struct {
 } f_units;
 
 typedef struct {
-  texture face[6];
+  texturedata face[6];
 } skyboxdata;
 
 
