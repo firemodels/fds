@@ -39,7 +39,7 @@ The fire source was a natural gas diffusion burner.  The burner surface was hori
 The burner was located near the end of the first floor away from the stairs. A diagram of the test structure is displayed in Figure~\ref{ATF Drawing}.
 
 
-\begin{sidewaysfigure}[h]
+\begin{sidewaysfigure}[p]
 \begin{center}
 \includegraphics[height=6.in]{FIGURES/ATF_Corridors/ATF}
 \end{center}
@@ -47,7 +47,7 @@ The burner was located near the end of the first floor away from the stairs. A d
 \label{ATF Drawing}
 \end{sidewaysfigure}
 
-\clearpage
+
 
 
 
@@ -366,7 +366,7 @@ No.  & Config. & m     &  kW        & g/s       & $^\circ$C   &   No.  & Config.
 \label{LLNL_Enclosure_Drawing}
 \end{sidewaysfigure}
 
-\clearpage
+
 
 \section{McCaffrey Plume Experiments}
 
@@ -425,7 +425,7 @@ ratio was less than that assumed by the various ceiling jet correlations.
 
 
 
-\clearpage
+
 
 \section{NIST Helium Experiments}
 
@@ -439,9 +439,16 @@ Leakage areas were square holes under 10~cm$^2$ in area.  Attempting to resolve 
 
 \section{NIST/NRC Test Series}
 
-These experiments, sponsored by the US NRC and conducted at NIST, consisted of 15 large-scale experiments performed in June 2003. All 15 tests were
-included in the validation study. The experiments are documented in Ref.~\cite{Hamins:SP1013-1}. The fire sizes ranged from 350 kW to 2.2 MW in a compartment with dimensions
-21.7~m by 7.1~m by 3.8~m high, designed to represent a compartment in a nuclear power plant containing power and control cables.
+These experiments, sponsored by the US NRC and conducted at NIST, consisted of 15 large-scale experiments performed in June 2003. All 15 tests were included in the validation study. The experiments are documented in Ref.~\cite{Hamins:SP1013-1}. The fire sizes ranged from 350 kW to 2.2 MW in a compartment with dimensions 21.7~m by 7.1~m by 3.8~m high, designed to represent a compartment in a nuclear power plant containing power and control cables. A diagram of the test structure is displayed in Figure~\ref{NIST_NRC_Drawing}.
+
+\begin{sidewaysfigure}[p]
+\begin{center}
+\includegraphics[height=6.in]{FIGURES/NIST_NRC/NIST_NRC_Drawing}
+\end{center}
+\caption[Geometry of the NIST/NRC Experiments]{Geometry of the NIST/NRC Experiments.}
+\label{NIST_NRC_Drawing}
+\end{sidewaysfigure}
+
 The walls and ceiling were covered with two layers of marinate boards, each layer 0.0125~m thick. The floor
 was covered with one layer of gypsum board on top of a layer of plywood. Thermo-physical and optical properties of the marinate
 and other materials used in the compartment are given in Ref.~\cite{Hamins:SP1013-1}. The room had one door and a mechanical air injection and extraction
@@ -475,30 +482,23 @@ were 17~\% for all of the tests.
 and \SI{0.195 \pm 0.052}{kg/kg} for heptane and toluene, respectively.
 \end{description}
 
-A diagram of the test structure is displayed in Figure~\ref{NIST_NRC_Drawing}.
-
-\begin{sidewaysfigure}[p]
-\begin{center}
-\includegraphics[height=6.in]{FIGURES/NIST_NRC/NIST_NRC_Drawing}
-\end{center}
-\caption[Geometry of the NIST/NRC Experiments]{Geometry of the NIST/NRC Experiments.}
-\label{NIST_NRC_Drawing}
-\end{sidewaysfigure}
 
 
 
 
-\clearpage
+
 
 \section{NIST Full Scale Enclosure Experiments}
-The NIST Full Scale Enclosure Experiments consisted of a series of experiments conducted in an ISO-9705 compartment~\cite{Lock:1}. The experiments were designed to study the effects of fuel type, fuel distribution, and vent size on underventilated compartment fires. Over 20 experiments were considered as part of the analysis, which included 7 different fuels, 3 fuel sources, and 4 ventilation openings. Table~\ref{tab:NIST_FSE_Exp} provides a summary of the experiments. Species concentrations and temperature measurements were made at the front and rear of the compartment.
+
+The NIST Full Scale Enclosure Experiments were conducted in an ISO-9705 compartment~\cite{Lock:1}. The experiments were designed to study the effects of fuel type, fuel distribution, and vent size on under-ventilated compartment fires. Over 20 experiments were conducted, which included 7 different fuels, 3 fuel sources, and 4 ventilation openings. Table~\ref{tab:NIST_FSE_Exp} provides a summary of the experiments. Species concentrations and temperature measurements were made at the front and rear of the compartment.
 
 \begin{table}[h!]
 \caption{Summary of NIST FSE Experiments selected for model validation.}
 \begin{center}
-\begin{tabular}{|c|c|c|c|c|c|}
+\begin{tabular}{|l|l|c|c|c|c|}
 \hline
-Test ID  &  Fuel         &  Fuel Mass (kg) &  \# of Burners  &  Burner Size (m$^2$) &  Doorway Opening (cm)  \\ \hline \hline
+Test          &  Fuel         &  Fuel      &  No.~of   &  Burner       &  Doorway   \\ 
+Name          &  Type         &  Mass (kg) &  Burners  &  Size (m$^2$) &  Opening (cm)  \\ \hline \hline
 %ISONG1        &  Natural Gas  &  Pool Fed  &  1  &  1     &  80               \\ \hline
 %ISONG2        &  Natural Gas  &  Pool Fed  &  1  &  1     &  80               \\ \hline
 ISONG3        &  Natural Gas  &  104       &  1  &  1     &  80               \\ \hline
@@ -535,12 +535,7 @@ ISONG32       &  Natural Gas  &            &  1  &  0.28  &  20               \\
 
 \section{NIST Reduced Scale Enclosure Experiments}
 
-The NIST Reduced Scale Enclosure (RSE) is a 40~\% scale version of the ISO~9705 compartment~\cite{Bryner:1}.
-It measures 0.98 m wide by 1.46 m deep by 0.98 m tall.  The compartment contains a door centered on the smaller
-wall that measures 0.48~m wide by 0.81 m tall.  A 15~cm diameter natural gas burner was positioned in the
-center of the compartment.  The burner was on a stand so that its top was 15~cm above the floor.
-The fires ranged from 50~kW to 600~kW.
-Species measurements, including CO concentration, were made near the ceiling in the front and back of the compartment.
+The NIST Reduced Scale Enclosure (RSE) is a 40~\% scale version of the ISO~9705 compartment~\cite{Bryner:1}. It measures 0.98 m wide by 1.46 m deep by 0.98 m tall.  The compartment contains a door centered on the smaller wall that measures 0.48~m wide by 0.81 m tall.  A 15~cm diameter natural gas burner was positioned in the center of the compartment.  The burner was on a stand so that its top was 15~cm above the floor. The fires ranged from 50~kW to 600~kW. Species measurements, including CO concentration, were made near the ceiling in the front and back of the compartment.
 
 \section{NIST Smoke Alarm Experiments}
 
@@ -627,7 +622,6 @@ experiment, heat flux measurements were made 0.5~m, 1.5~m, 2.5~m, and 3.5~m abov
 \end{sidewaysfigure}
 
 
-\clearpage
 
 %\section{NRL Confined Space Experiments}
 %
@@ -786,7 +780,7 @@ Test    & Width     & Height        & $\dot{Q}$  & Location     & Test  & Width 
 \end{table}
 
 
-\begin{figure}[ht]
+\begin{figure}[p]
 \begin{center}
 \includegraphics[width=6in]{FIGURES/Steckler_Compartment/Room_Drawing.pdf}
 \end{center}
@@ -795,14 +789,14 @@ Test    & Width     & Height        & $\dot{Q}$  & Location     & Test  & Width 
 \end{figure}
 
 
-\clearpage
+
 
 \section{UL/NIST Vent Experiments}
 \label{UL_NIST_Vents_Description}
 
 In 2012, the Fire Fighting Technology Group at NIST conducted experiments at Underwriters Laboratories (UL) in Northbrook, Illinois, to assess the change in compartment temperature due to the opening of one or two 1.2~m square ceiling vents. Four experiments were conducted using a natural gas burner in a 6.1~m by 4.3~m by 2.4~m compartment with a single door opening. The fires ranged in size from 500~kW to 2~MW, and the vents were opened and closed such that during the four experiments there were 31 discrete time intervals in which model predictions could be compared to quasi-steady conditions. The compartment contained two vertical arrays of thermocouples, and the door and vents were instrumented with thermocouples and bi-directional velocity probes. Only the thermocouple data has been used in the validation study. A diagram of the compartment is displayed in Figure~\ref{UL_NIST_Drawing}. The major test parameters are listed in Table~\ref{UL_NIST_Table}.
 
-\begin{sidewaysfigure}[h]
+\begin{sidewaysfigure}[p]
 \begin{center}
 \includegraphics[height=6in]{FIGURES/UL_NIST_Vents/UL_NIST_Vents}
 \end{center}
@@ -844,7 +838,7 @@ No.     & (s)       & (kW)          & Vents     & No.     & (s)       & (kW)    
 \end{table}
 
 
-\clearpage
+
 
 \section{UL/NFPRF Sprinkler, Vent, and Draft Curtain Study}
 \label{UL_NFPRF_Description}
@@ -885,12 +879,8 @@ I-21  & C  & 74$^\circ$C link (7:00)    & 58            & 10        & No   & 4.6
 I-22  & D  & 100$^\circ$C link (DNO)    & 60            & 6         & No   & 4.6 @ 50 \\ \hline
 \end{tabular}
 \end{center}
-\caption[Results of the UL/NFPRF Experiments, Series~I]
-{Results of the UL/NFPRF Series~I Experiments. Note that DNO means
-``Did Not Open''. Also note, the fires grew at a rate proportional
-to the square of the time until a certain flow rate of fuel was achieved
-at which time the flow rate was held steady. Thus, the ``Heat Release Rate''
-was the size of the fire at the time when the fuel supply was leveled off.}
+\caption[Results of the UL/NFPRF heptane spray experiments, Series~I]
+{Results of Series~I of the UL/NFPRF heptane spray experiments. Note that DNO means ``Did Not Open''. Also note, the fires grew at a rate proportional to the square of the time until a certain flow rate of fuel was achieved at which time the flow rate was held steady. Thus, the ``Heat Release Rate'' was the size of the fire at the time when the fuel supply was leveled off.}
 \label{ULmatrix}
 \end{table}
 
@@ -951,12 +941,7 @@ Ceiling}}
 
 \end{picture}
 \end{center}
-\caption[Plan view of the UL/NFPRF Experiments, Series~I.] {Plan view of the UL/NFPRF Experiments, Series~I. The sprinklers are indicated by the solid circles and
-are spaced 3~m apart. The number beside each sprinkler location indicates the channel number of the nearest thermocouple. The vent dimensions
-are 4~ft by 8~ft. The boxed letters A, B, C and D indicate burner positions. Corresponding to each burner position is a vertical array of
-thermocouples. Thermocouples 1--9 hang 7, 22, 36, 50, 64, 78, 92, 106 and 120~in from the ceiling, respectively, above Position A. Thermocouples 10
-and 11 are positioned above and below the ceiling tile directly above Position B, followed by 12--20 that hang at the same levels below the ceiling
-as 1--9. The same pattern is followed at Positions C and D, with thermocouples 21--31 at C and 32--42 at D.}
+\caption[Plan view of the UL/NFPRF heptane spray experiments, Series~I.] {Plan view of the UL/NFPRF heptane spray experiments, Series~I. The sprinklers are indicated by the solid circles and are spaced exactly 10~ft apart. The number beside each sprinkler location indicates the channel number of the nearest thermocouple. The vent dimensions are 4~ft by 8~ft. The boxed letters A, B, C and D indicate burner positions. Corresponding to each burner position is a vertical array of thermocouples. Thermocouples 1--9 hang 7, 22, 36, 50, 64, 78, 92, 106 and 120~in from the ceiling, respectively, above Position A. Thermocouples 10 and 11 are positioned above and below the ceiling tile directly above Position B, followed by 12--20 that hang at the same levels below the ceiling as 1--9. The same pattern is followed at Positions C and D, with thermocouples 21--31 at C and 32--42 at D.}
 \label{layout}
 \end{figure}
 
@@ -980,18 +965,13 @@ II-6  & D  & All Open at Start       & 27 & 1:10 & 5:21 & 127.5 &261.5 \\ \hline
 II-7  & A  & Closed                  & 18 & 1:09 & 4:11 & 117.2 &243.0 \\ \hline
 II-8  & B  & 74$^\circ$C link (1:12) & 13 & 1:10 & 3:34 & 107.7 &225.9 \\ \hline
 II-9  & E  & 74$^\circ$C link (DNO)  & 23 & 1:07 & 3:28 & 115.8 &240.4 \\ \hline
-II-10 & F  & 74$^\circ$C link (3:20) & 19+& 1:14 & 3:01 & 108.4 &227.1 \\ \hline
+II-10 & F  & 74$^\circ$C link (3:20) & 19 & 1:14 & 3:01 & 108.4 &227.1 \\ \hline
 II-11 & C  & 74$^\circ$C link (DNO)  & 23 & 1:02 & 3:56 & 123.4 &254.1 \\ \hline
 II-12 & C  & All Open at Start       & 23 & 0:58 & 4:55 & 119.0 &246.2 \\ \hline
 \end{tabular}
 \end{center}
-\caption[Results of the UL/NFPRF Experiments, Series~II]
-{Results of the heptane spray burner Series II. Note that all fires
-were ramped up to 10~MW in 75~s following a $t$-squared curve. Also, the
-plus sign appended to a value in the ``Sprinklers Opened''
-column indicates that the area of sprinkler activation spread to the
-edge of the adjustable height ceiling, thus more activations might have
-occurred had the ceiling extended further.}
+\caption[Results of the UL/NFPRF heptane spray experiments, Series~II]
+{Results of the UL/NFPRF heptane spray experiments, Series II. Note that all fires were ramped up to 10~MW in 75~s following a $t$-squared curve.}
 \label{ULburnermatrixII}
 \end{table}
 
@@ -1048,10 +1028,8 @@ occurred had the ceiling extended further.}
 
 \end{picture}
 \end{center}
-\caption[Plan view of the UL/NFPRF Experiments, Series~II ]
-{Plan view of the UL/NFPRF Experiments, Series~II. The boxed letters A, B, C, D, E and F indicate burner positions. The sprinklers are indicated
-by the solid circles and are spaced 10~ft apart. The branch lines run
-north to south. The vents are 4~ft by 8~ft. }
+\caption[Plan view of the UL/NFPRF heptane spray experiments, Series~II ]
+{Plan view of the UL/NFPRF heptane spray experiments, Series~II. The boxed letters A, B, C, D, E and F indicate burner positions. The sprinklers are indicated by the solid circles and are spaced exactly 10~ft apart. The vents are 4~ft by 8~ft. }
 \label{burnerlayoutA}
 \end{figure}
 
@@ -1122,8 +1100,8 @@ north to south. The vents are 4~ft by 8~ft. }
 
 \end{picture}
 \end{center}
-\caption[Test layout for Plastic Commodity Test P-3.]
-{Plan view of the UL Large Scale Fire Test Facility with the layout of Plastic Commodity Test P-3. Tests P-1 and P-2 did not include the draft curtains (dashed lines). The sprinklers (dots) were separated by exactly 10~ft in each direction. The racks were located 30~ft south and 20~ft east of the position shown in Tests~P-1, P-4, and P-5. The racks were located 10~ft south of the position shown in Test~P-2. Each pallet load of boxed plastic commodity is represented by a square subdivided into four smaller squares to depict the individual boxes. Pallets containing empty boxes are represented by empty squares. Roof vents are represented by rectangles.}
+\caption[Plan view of the UL/NFPRF plastic commodity Test P-3.]
+{Plan view of the UL Large Scale Fire Test Facility with the layout of plastic commodity Test P-3. Tests P-1 and P-2 did not include the draft curtains (dashed lines). The sprinklers (dots) were separated by exactly 10~ft. The racks were located 30~ft south and 20~ft east of the position shown in Tests~P-1, P-4, and P-5. The racks were located 10~ft south of the position shown in Test~P-2. Each pallet load of boxed plastic commodity is represented by a square subdivided into four smaller squares to depict the individual boxes. Pallets containing empty boxes are represented by empty squares. Roof vents are represented by rectangles.}
 \label{layout3}
 \end{figure}
 
@@ -1194,7 +1172,7 @@ Vettori~\cite{Vettori:2} performed a series of 72 compartment experiments to mea
 \end{itemize}
 
 
-\clearpage
+
 
 
 \section{VTT Large Hall Tests}
@@ -1233,7 +1211,7 @@ A diagram of the test structure is displayed in Figure~\ref{VTT_Drawing}.
 
  A single water mist nozzle was characterized for validation purposes. The experiment was conducted at Tampere University of technology using Direct Imaging technique. The experiments are described in more detail in \cite{vaari:2012}. The characterized  nozzle  was the LN-2 nozzle by Spraying Systems Co.. It belongs to the fine spray hydraulic atomizing nozzle family and is of the standard spray small capacity type. Measurements were made 40  cm and 62cm below the nozzle. Measured quantities average droplet velocity, droplet flux and average diameter.
 
-\clearpage
+
 
 
 
