@@ -776,7 +776,7 @@ The scatter plots below summarize the comparisons of predicted and measured ceil
 \begin{figure}[h!]
 \begin{center}
 \begin{tabular}{c}
-\includegraphics[width=3.8in]{SCRIPT_FIGURES/ScatterPlots/FDS_Flat_Ceiling_Jet_Temperature} 
+\includegraphics[width=3.8in]{SCRIPT_FIGURES/ScatterPlots/FDS_Flat_Ceiling_Jet_Temperature}
 \end{tabular}
 \end{center}
 \caption[Summary of flat ceiling jet temperature predictions]{Summary of flat ceiling jet temperature predictions.}
@@ -796,7 +796,7 @@ The scatter plots below summarize the comparisons of predicted and measured ceil
 \begin{figure}[h!]
 \begin{center}
 \begin{tabular}{c}
-\includegraphics[width=3.8in]{SCRIPT_FIGURES/ScatterPlots/FDS_Low_Ceiling_Jet_Temperature} 
+\includegraphics[width=3.8in]{SCRIPT_FIGURES/ScatterPlots/FDS_Low_Ceiling_Jet_Temperature}
 \end{tabular}
 \end{center}
 \caption[Summary of ceiling jet temperature predictions for very small fires]{Summary of ceiling jet temperature predictions for very small fires.}
@@ -814,25 +814,25 @@ There are two ways to evaluate the model's ability to predict sprinkler activati
 
 \subsection{Time to First Sprinkler Activation}
 
-Figure~\ref{Sprinkler_Activation_Times} compares measured and predicted sprinkler activation times. For the UL/NFPRF Series I and II, only the time to first activation is compared because the resulting water spray sometimes delays the second activation substantially. While the model accounts for the cooling effect of the spray, the disruption of the activation sequence is somewhat random. A better way to check the accuracy of the model is to compare the predicted and measured total number of activation, which is discussed in the next section.
-
-For the Vettori experiments, the sprinklers did not flow water; thus, it is possible to consider the activation times of up to four sprinklers.
+Figure~\ref{Sprinkler_Activation_Times} compares measured and predicted sprinkler activation times. For the UL/NFPRF experiments, only the time to first activation is compared because the resulting water spray sometimes delays the second activation substantially. While the model accounts for the cooling effect of the spray, the disruption of the activation sequence is somewhat random. A better way to check the accuracy of the model is to compare the predicted and measured total number of activation, which is discussed in the next section. For the Vettori experiments, the sprinklers did not flow water; thus, it is possible to consider the activation times of up to four sprinklers.
 
 \begin{figure}[h]
 \begin{center}
 \includegraphics[width=4in]{SCRIPT_FIGURES/ScatterPlots/FDS_Sprinkler_Actuation_Time}
 \end{center}
-\caption[Activation times for the Vettori sprinkler experiments]{Predicted vs. measured activation times for the Vettori sprinkler experiments.}
+\caption[Comparison of measured and predicted sprinkler actuation times]{Comparison of measured and predicted sprinkler actuation times.}
 \label{Sprinkler_Activation_Times}
 \end{figure}
 
 
 \clearpage
 
-\subsection{UL/NFPRF Series I and II: Number of Activations}
+\subsection{Number of Sprinkler Activations}
 \label{UL_NFPRF:Results}
 
-The figures on the following pages display the number of sprinklers actuated as a function of time. The results are then summarized in Fig.~\ref{UL_NFPRF}. The discussion of the uncertainty for this quantity is in Chapter \ref{Error_Chapter}, ``Quantifying Model Uncertainty.'' In Fig.~\ref{UL_NFPRF_Repeatability}, the results of three replicate experiments demonstrate that the total number of actuated sprinklers in each experiment is repeatable, even though individual actuation times may vary. Based on these three replicates, there is very little, if any, uncertainty in the total number of actuated sprinklers for each test. However, the test report~\cite{Sheppard:1} does not include uncertainty estimates for the heat release rate, thermal properties of the ceiling, sprinkler RTI, conductivity factor, actuation temperature, median droplet diameter, and various other parameters that have been input into the model. Consequently, it is not possible to estimate the uncertainty in the total number of actuated sprinklers due to the uncertainty in the reported parameters.
+The figures on the following pages display the number of sprinklers actuated as a function of time. The results are summarized in Fig.~\ref{UL_NFPRF}. The discussion of the uncertainty for this quantity can be found in Section~\ref{uncertainty_sprinkler_acts}. 
+
+Note that no sprinklers were installed for Test~11, Series~I.
 
 \newpage
 
@@ -877,19 +877,6 @@ The figures on the following pages display the number of sprinklers actuated as 
 \label{UL_NFPRF_3}
 \end{figure}
 
-\begin{figure}[p]
-\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/UL_NFPRF/UL_NFPRF_1_01_08_Actuations} &
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/UL_NFPRF/UL_NFPRF_1_04_07_Actuations}
-\end{tabular*}
-\begin{center}
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/UL_NFPRF/UL_NFPRF_1_09_10_Actuations}
-\end{center}
-\caption[The results of three replicate experiments from Series~I]
-{The results of three replicate experiments from Series~I.}
-\label{UL_NFPRF_Repeatability}
-\end{figure}
-
 
 
 \begin{figure}[p]
@@ -917,11 +904,22 @@ The figures on the following pages display the number of sprinklers actuated as 
 \end{figure}
 
 \begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/UL_NFPRF/UL_NFPRF_P-1_Actuations} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/UL_NFPRF/UL_NFPRF_P-2_Actuations} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/UL_NFPRF/UL_NFPRF_P-3_Actuations} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/UL_NFPRF/UL_NFPRF_P-4_Actuations} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/UL_NFPRF/UL_NFPRF_P-5_Actuations} &
+\end{tabular*}
+\label{UL_NFPRF_3}
+\end{figure}
+
+\begin{figure}[p]
 \begin{center}
 \includegraphics[width=4in]{SCRIPT_FIGURES/ScatterPlots/FDS_Sprinkler_Actuations}
 \end{center}
-\caption[Summary of sprinkler actuation predictions, UL/NFPRF Tests]
-{Comparison of predicted and measured sprinkler activation times for the UL/NFPRF Test Series.}
+\caption[Comparison of the number of predicted and measured sprinkler activations]
+{Comparison of the number of predicted and measured sprinkler activations.}
 \label{UL_NFPRF}
 \end{figure}
 
