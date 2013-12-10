@@ -146,7 +146,7 @@ where $L$ is the path length, $I$ and $I_0$ are the laser signal and reference s
 
 \subsubsection{Pressure Gauges}
 
-The uncertainty in pressure measurements is typically small, but depends on the sensor type and calibration. In the NIST/NRC experiments, the differential pressure gauge used was temperature compensated, highly linear, and very stable. The estimated relative standard uncertainty is 0.5~\%. 
+The uncertainty in pressure measurements is typically small, but depends on the sensor type and calibration. In the NIST/NRC experiments, the differential pressure gauge used was temperature compensated, highly linear, and very stable. The estimated relative standard uncertainty is 0.5~\%.
 
 \subsubsection{Bi-Directional Probes}
 
@@ -202,7 +202,7 @@ The maximum compartment pressure is achieved when the pressure rise term in Eq.~
 \ee
 The test report for the NIST/NRC experiments contains estimates of the uncertainty in the HRR, ventilation rate and leakage area. To calculate the uncertainty in the maximum pressure rise resulting from the uncertainty in these three parameters, the pressure rise estimate in Eq.~(\ref{pmax}) was calculated using 1000 randomly selected sets of values of the HRR, ventilation rate, and leakage area. These parameters were assumed to be randomly distributed with mean values of 1000~kW, 1~m$^3$/s, and 0.06~m$^2$ and relative standard uncertainties of 75~kW, 0.1~m$^3$/s, and 0.0021~m$^2$. The mean values of these parameters were typical of the NIST/NRC experiments, and the uncertainties were reported in the test report. The resulting relative standard uncertainty in the pressure of a closed compartment due to the uncertainty in the HRR, ventilation rate, and leakage area is 21~\%.
 
-For an open compartment, in which the ventilation rate and leakage area have much less influence, the relative standard uncertainty in the pressure is twice that of the HRR, 15~\%. 
+For an open compartment, in which the ventilation rate and leakage area have much less influence, the relative standard uncertainty in the pressure is twice that of the HRR, 15~\%.
 
 \subsubsection{Velocity}
 
@@ -229,6 +229,7 @@ where $\epsilon$ is the surface emissivity, $\sigma$ is the Stefan-Boltzmann con
 In actual compartment fires, the heat flux to surfaces is a combination of direct thermal radiation from the fire and indirect radiation and convection from the hot gases. Given that the calculation of the former incurs a 11~\% relative standard uncertainty and the latter 9~\%, to simplify the analyses, a value of 10~\% is used for all heat flux predictions.
 
 \subsubsection{Sprinkler Activation Time}
+\label{uncertainty_sprinkler_acts}
 
 The uncertainty in the reported sprinkler activation times is due mainly to uncertainties in the measured HRR, RTI (Response Time Index), and activation temperature. There is a negligible uncertainty in the measured activation time itself, which is typically determined with a pressure transducer. To determine the effect of the uncertainties in the HRR, RTI and activation temperature, consider the ordinary differential equation governing the temperature, $T_{\rm link}$, of a conventional glass bulb of fusible link sprinkler:
 \be
@@ -246,7 +247,7 @@ Alpert's ceiling jet correlation~\cite{SFPE:Alpert} predicts the temperature ris
 \be
    T-T_\infty = 5.38 \; \frac{ \dot{Q}^{2/3} / H^{5/3} }{ (r/H)^{2/3} } \quad ; \quad r/H > 0.18
 \ee
-For a given ceiling height, $H$, the radial extent of the sprinkler activation temperature is directly proportional to $\dot{Q}$. The number of activated sprinklers is roughly proportional to the square of this radial distance, assuming the sprinklers are uniformly spaced on a rectangular grid. Thus, the uncertainty in the number of activated sprinklers due to the uncertainty in the HRR is 15~\%. 
+For a given ceiling height, $H$, the radial extent of the sprinkler activation temperature is directly proportional to $\dot{Q}$. The number of activated sprinklers is roughly proportional to the square of this radial distance, assuming the sprinklers are uniformly spaced on a rectangular grid. Thus, the uncertainty in the number of activated sprinklers due to the uncertainty in the HRR is 15~\%.
 
 
 \subsubsection{Electrical Cable Failure Time}

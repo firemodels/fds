@@ -315,7 +315,7 @@ The two-step, CO production model in FDS was used to simulate a methane/air slot
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/Smyth_Slot_Burner/Smyth_Slot_Burner_9mm_Fuel} &
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/Smyth_Slot_Burner/Smyth_Slot_Burner_9mm_Oxygen} \\
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/Smyth_Slot_Burner/Smyth_Slot_Burner_7mm_Fuel} &
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/Smyth_Slot_Burner/Smyth_Slot_Burner_7mm_Oxygen} 
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/Smyth_Slot_Burner/Smyth_Slot_Burner_7mm_Oxygen}
 \end{tabular*}
 \caption[Species predictions at 7~mm, 9~mm, and 11~mm above burner, Smyth experiment]
 {Predicted and measured fuel and oxygen species at 7~mm, 9~mm, and 11~mm above a methane-air slot burner.}
@@ -329,7 +329,7 @@ The two-step, CO production model in FDS was used to simulate a methane/air slot
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/Smyth_Slot_Burner/Smyth_Slot_Burner_9mm_Carbon_Dioxide} &
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/Smyth_Slot_Burner/Smyth_Slot_Burner_9mm_Carbon_Monoxide} \\
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/Smyth_Slot_Burner/Smyth_Slot_Burner_7mm_Carbon_Dioxide} &
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/Smyth_Slot_Burner/Smyth_Slot_Burner_7mm_Carbon_Monoxide} 
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/Smyth_Slot_Burner/Smyth_Slot_Burner_7mm_Carbon_Monoxide}
 \end{tabular*}
 \caption[Species predictions at 7~mm, 9~mm, and 11~mm above burner, Smyth experiment]
 {Predicted and measured carbon dioxide and carbon monoxide species at 7~mm, 9~mm, and 11~mm above a methane-air slot burner.}
@@ -384,6 +384,8 @@ The RSE natural gas experiments were selected to assess the CO production capabi
 \label{NIST_RSE_1994_spec1}
 \end{figure}
 
+\newpage
+
 \begin{figure}[h!]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/NIST_RSE_1994/NIST_RSE_1994_O2_Front} &
@@ -398,25 +400,27 @@ The RSE natural gas experiments were selected to assess the CO production capabi
 \begin{figure}[h!]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/NIST_RSE_1994/NIST_RSE_1994_TC_Front} &
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/NIST_RSE_1994/NIST_RSE_1994_TC_Rear} 
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/NIST_RSE_1994/NIST_RSE_1994_TC_Rear}
 \end{tabular*}
 \caption[Summary of thermocouple values in NIST RSE experiments]{Summary of thermocouple values in NIST Reduced Scale Enclosure experiments.}
 \label{NIST_RSE_1994_temp}
 \end{figure}
+
 \clearpage
 
 \subsection{NIST Full Scale Enclosure (FSE) Test Series, 2008}
 
-The FSE experiments were selected to assess CO production capability in underventilated compartment fires over a range of fuels types and fire sizes in a full-scale ISO 9705 enclosure. This study included more than 20 experiments that featured 7 different fuels: heptane, natural gas, nylon, propylene, isopropanol, styrene, and toluene. Peak heat release rates ranged from approximately 100~kW to 2~MW. Compartment ventilation was varied from a full 80~cm door opening to 40~cm, 20~cm, and 10~cm openings. While the fuel sources in the experiments were either pool fires or spray burners, the model used a mass flux boundary condition based on the experimentally calculated heat release rates found from oxygen consumption calorimetry. The measured values are from the test series performed by Lock et al.~\cite{Lock:1}.
+The FSE experiments were selected to assess CO production capability in under-ventilated compartment fires over a range of fuels types and fire sizes in a full-scale ISO 9705 enclosure. This study included more than 20 experiments that featured 7 different fuels: heptane, natural gas, nylon, propylene, isopropanol, styrene, and toluene. Peak heat release rates ranged from approximately 100~kW to 2~MW. Compartment ventilation was varied from a full 80~cm door opening to 40~cm, 20~cm, and 10~cm openings. While the fuel sources in the experiments were either pool fires or spray burners, the model used a mass flux boundary condition based on the experimentally calculated heat release rates found from oxygen consumption calorimetry. The measured values are from the test series performed by Lock et al.~\cite{Lock:1}.
 
 \subsubsection{Fuels Not Pre-defined in FDS}
+
 In this test series there are fuels which are not pre-defined in FDS (e.g., styrene, nylon). Therefore, the user is responsible for providing information about the fuel combustion to occur. The two options are the heat of combustion for those reactions containing the user-defined fuels ({\ct REAC} line) or the enthalpy of formation for the user-defined fuels ({\ct SPEC} line). Typically, heat of combustion is reported for complete combustion. For the reaction mechanism in FSE cases, the oxidation of fuel produces only carbon monoxide (i.e., incomplete combustion), so typical literature values may not be best. Using an inappropriate input value for heat of combustion can result in erroneous model predictions. An alternative to specifying the heat of combustion is to use the enthalpy of formation of the fuel. If that value cannot be found from literature or if a fuel mixture has been created, FDS can be used to determine an approximate value. Consider the following {\ct REAC} line:
-
 \begin{lstlisting}
-&REAC ID='NG', FUEL='NATURAL_GAS',FORMULA='C1.06084H4.076451N0.015529O0.014848' /   
+&REAC ID='NG', FUEL='NATURAL_GAS',FORMULA='C1.06084H4.076451N0.015529O0.014848' /
 \end{lstlisting}
+Based on this {\ct REAC} line, FDS will compute a balanced reaction assuming complete combustion and the heat of combustion will be determined based on oxygen consumption (see User Guide {\ct EPUMO2}). A benefit of this process is that the enthalpy of formation of the fuel is automatically computed and is written to the CHID.out file. Enthalpy of formation is a fundamental fuel property and not a reaction property like heat of combustion. As a result, this value can be used to define the fuel for the reaction mechanism with incomplete combustion.
 
-Based on this {\ct REAC} line, FDS will compute a balanced reaction assuming complete combustion and the heat of combustion will be determined based on oxygen consumption (see User Guide {\ct EPUMO2}). A benefit of this process is that the enthalpy of formation of the fuel is automatically computed and is written to the CHID.out file. Enthalpy of formation is a fundamental fuel property and not a reaction property like heat of combustion. As a result, this value can be used to define the fuel for the reaction mechanism with incomplete combustion. 
+\newpage
 
 %\begin{figure}[p]
 %\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
@@ -454,6 +458,8 @@ Based on this {\ct REAC} line, FDS will compute a balanced reaction assuming com
 \label{NIST_FSE_1994_ISONG3}
 \end{figure}
 
+
+
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/NIST_FSE_2008/ISOHept4_Carbon_Dioxide} &
@@ -465,6 +471,7 @@ Based on this {\ct REAC} line, FDS will compute a balanced reaction assuming com
 \caption[Summary of species concentrations, temperature, and HRR in NIST FSE experiments]{Summary of species concentrations, temperature, and HRR in NIST FSE experiments for Heptane.}
 \label{NIST_FSE_1994_ISOHept4}
 \end{figure}
+
 
 %\begin{figure}[p]
 %\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
@@ -490,6 +497,9 @@ Based on this {\ct REAC} line, FDS will compute a balanced reaction assuming com
 \label{NIST_FSE_1994_ISOHept8}
 \end{figure}
 
+
+
+
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/NIST_FSE_2008/ISOHept9_Carbon_Dioxide} &
@@ -501,6 +511,9 @@ Based on this {\ct REAC} line, FDS will compute a balanced reaction assuming com
 \caption[Summary of species concentrations, temperature, and HRR in NIST FSE experiments]{Summary of species concentrations, temperature, and HRR in NIST FSE experiments for Heptane.}
 \label{NIST_FSE_1994_ISOHept9}
 \end{figure}
+
+
+
 
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
@@ -514,6 +527,8 @@ Based on this {\ct REAC} line, FDS will compute a balanced reaction assuming com
 \label{NIST_FSE_1994_ISONylon10}
 \end{figure}
 
+
+
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/NIST_FSE_2008/ISOPP11_Carbon_Dioxide} &
@@ -525,6 +540,8 @@ Based on this {\ct REAC} line, FDS will compute a balanced reaction assuming com
 \caption[Summary of species concentrations, temperature, and HRR in NIST FSE experiments]{Summary of species concentrations, temperature, and HRR in NIST FSE experiments for Propylene.}
 \label{NIST_FSE_1994_ISOPropylene11}
 \end{figure}
+
+
 
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
@@ -561,6 +578,8 @@ Based on this {\ct REAC} line, FDS will compute a balanced reaction assuming com
 \caption[Summary of species concentrations, temperature, and HRR in NIST FSE experiments]{Summary of species concentrations, temperature, and HRR in NIST FSE experiments for Propanol.}
 \label{NIST_FSE_1994_ISOPropD14}
 \end{figure}
+
+\clearpage
 
 %\begin{figure}[p]
 %\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
@@ -633,7 +652,6 @@ Based on this {\ct REAC} line, FDS will compute a balanced reaction assuming com
 \caption[Summary of species concentrations, temperature, and HRR in NIST FSE experiments]{Summary of species concentrations, temperature, and HRR in NIST FSE experiments for Toluene.}
 \label{NIST_FSE_1994_ISOToluene20}
 \end{figure}
-\newpage
 
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
@@ -773,7 +791,7 @@ Based on this {\ct REAC} line, FDS will compute a balanced reaction assuming com
 
 FDS simulations were performed to predict the helium release and dispersion in a reduced scale garage geometry.
 The figures below show the comparison between FDS predictions and experimental data for eighteen tests with different release locations,
-leak configurations, and release durations as noted in the experimental description.  
+leak configurations, and release durations as noted in the experimental description.
 
 \begin{figure}[h!]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
@@ -808,7 +826,7 @@ leak configurations, and release durations as noted in the experimental descript
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/NIST_He_2009/NIST_He_14400_LR_ULV} &
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/NIST_He_2009/NIST_He_14400_UC_SLV} \\
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/NIST_He_2009/NIST_He_14400_UC_SSV} &
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/NIST_He_2009/NIST_He_14400_UC_ULV} 
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/NIST_He_2009/NIST_He_14400_UC_ULV}
 \end{tabular*}
 \caption[Species concentrations in NIST helium release experiments]{Species concentrations in NIST helium release experiments.}
 \label{NIST_Hydrogen_Species_3}
