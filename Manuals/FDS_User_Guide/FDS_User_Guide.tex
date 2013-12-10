@@ -8037,6 +8037,8 @@ and the accumulated total, respectively.  It should be noted that these quantiti
 cell to another, then it will be counted again.  The cooling of a solid surface by droplets of a
 given type is given by {\ct 'CPUA'}, the \underline{C}ooling \underline{P}er \underline{U}nit \underline{A}rea in units of kW/m$^2$.  Since a typical sprinkler simulation only tracks a small fraction of the droplets emitted from a sprinkler, both MPUA and CPUA also perform an exponential smoothing.  This avoids having spotted distributions on surfaces due to the infrequent arrival of particles that likely have a high weighting factor.
 
+Each of the outputs mentioned above also has an {\ct '\_Z'} variant, for example {\ct 'AMPUA\_Z'}.  Adding {\ct '\_Z'} and giving a {\ct SPEC\_ID} rather than a {\ct PART\_ID} will sum the given output over all particle classes of the given {\ct SPEC\_ID}.
+
 In the test case {\ct bucket\_test}, a single sprinkler is
 mounted 10~cm below a 5~m ceiling. Water flows for 30~s at a constant
 rate of 180~L/min (ramped up and down in 1~s).  The simulation continues for another 10~s to allow
@@ -8826,6 +8828,7 @@ Here, the {\ct ID} is just a label in the output file. When an output quantity i
 {\ct ADIABATIC SURFACE TEMPERATURE}             & Section~\ref{info:AST}                        & $^\circ$C      & B,D          \\ \hline
 {\ct AEROSOL VOLUME FRACTION}$^*$               & Section~\ref{info:soot}                       & mol/mol        & D,I,P,S      \\ \hline
 {\ct AMPUA}$^{**}$                              & Section~\ref{info:part_output}                & kg/m$^2$       & B,D          \\ \hline
+{\ct AMPUA\_Z}$^{*}$                            & Section~\ref{info:part_output}                & kg/m$^2$       & B,D          \\ \hline
 {\ct ASPIRATION}                                & Section~\ref{info:aspiration_detector}        & \%             & D            \\ \hline
 {\ct BACKGROUND PRESSURE}                       & Background pressure, $\bp$                    & Pa             & D,I,P,S      \\ \hline
 {\ct BACK WALL TEMPERATURE}                     & Section~\ref{info:BACK}                       & $^\circ$C      & B,D          \\ \hline
@@ -8836,6 +8839,7 @@ Here, the {\ct ID} is just a label in the output file. When an output quantity i
 {\ct CONTROL VALUE}                             & Section~\ref{info:CTRL}                       &                & D            \\ \hline
 {\ct CONVECTIVE HEAT FLUX}                      & Section~\ref{info:heat_flux}                  & kW/m$^2$       & B,D          \\ \hline
 {\ct CPUA}$^{**}$                               & Section~\ref{info:part_output}                & kW/m$^2$       & B,D          \\ \hline
+{\ct CPUA\_Z}$^{*}$                             & Section~\ref{info:part_output}                & kW/m$^2$       & B,D          \\ \hline
 {\ct CPU TIME}                                  & Elapsed CPU time                              & s              & D            \\ \hline
 {\ct DENSITY}                                   & $\rho$ or $\rho Y_\alpha$ with {\ct SPEC\_ID} & kg/m$^3$       & D,I,P,S      \\ \hline
 {\ct DEPOSITION VELOCITY}                       & Section~\ref{info:deposition}                 & m/s            & B,D          \\ \hline
@@ -8865,6 +8869,7 @@ Here, the {\ct ID} is just a label in the output file. When an output quantity i
 {\ct MASS FRACTION}$^*$                         & $Y_\alpha$                                    & kg/kg          & D,I,P,S      \\ \hline
 {\ct MIXTURE FRACTION}                          & $Z$                                           & kg/kg          & D,I,P,S      \\ \hline
 {\ct MPUA}$^{**}$                               & Section~\ref{info:part_output}                & kg/m$^2$       & B,D          \\ \hline
+{\ct MPUA\_Z}$^{*}$                             & Section~\ref{info:part_output}                & kg/m$^2$       & B,D          \\ \hline
 {\ct MPUV}$^{**}$                               & Section~\ref{info:part_output}                & kg/m$^3$       & D,P,S        \\ \hline
 {\ct NORMAL VELOCITY}                           & Wall normal velocity                          & m/s            & D,B          \\ \hline
 {\ct OPEN NOZZLES}                              & Number of open nozzles                        &                & D            \\ \hline
