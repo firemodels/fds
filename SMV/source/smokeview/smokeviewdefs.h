@@ -11,6 +11,11 @@ void _Sniff_Errors(char *whereat);
 #define SNIFF_ERRORS(f)
 #endif
 
+#define TEXTURE_SPHERE 0
+#define TEXTURE_YZ 1
+#define TEXTURE_XZ 2
+#define TEXTURE_XY 3
+
 #define ADD_KEYFRAME 1
 #define DELETE_KEYFRAME -1
 

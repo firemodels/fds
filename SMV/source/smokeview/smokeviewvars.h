@@ -114,8 +114,6 @@ SVEXTERN int SVDECL(defer_file_loading,0);
 SVEXTERN int SVDECL(regenerate_fed,0);
 SVEXTERN int SVDECL(debug_count,0);
 SVEXTERN geomdata SVDECL(**geominfoptrs,NULL);
-SVEXTERN geomobjdata SVDECL(*geomobjinfo,NULL);
-SVEXTERN int SVDECL(ngeomobjinfo,0);
 SVEXTERN int SVDECL(ngeominfoptrs,0);
 SVEXTERN int SVDECL(update_glui_wui,0);
 SVEXTERN int SVDECL(update_glui_stereo,0);

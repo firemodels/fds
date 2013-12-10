@@ -58,6 +58,16 @@ typedef struct {
 /* --------------------------  geomdata ------------------------------------ */
 
 typedef struct {
+  struct _surfdata *surf;
+  struct _texturedata *texture;
+  char *texture_name;
+  float texture_width, texture_height, texture_center[3];
+  int texture_type;
+} geomobjdata;
+
+/* --------------------------  geomdata ------------------------------------ */
+
+typedef struct {
   char *file;
   int loaded, display;
   geomlistdata *geomlistinfo,*geomlistinfo_0;
@@ -65,14 +75,9 @@ typedef struct {
   int *int_vals, nfloat_vals, nint_vals;
   float *times;
   int ntimes,itime,*timeslist;
+  int ngeomobjinfo;
+  geomobjdata *geomobjinfo;
 } geomdata;
-
-/* --------------------------  geomdata ------------------------------------ */
-
-typedef struct {
-  struct _surfdata *surf;
-  struct _texturedata *object_texture;
-} geomobjdata;
 
 /* --------------------------  bounds ------------------------------------ */
 

@@ -2352,15 +2352,14 @@ int readsmv(char *file, char *file2){
       geomdata *geomi;
 
       geomi = geominfo + i;
+      if(geomi->ngeomobjinfo>0){
+        FREEMEMORY(geomi->geomobjinfo);
+        geomi->ngeomobjinfo=0;
+      }
       FREEMEMORY(geomi->file);
     }
     FREEMEMORY(geominfo);
     ngeominfo=0;
-  }
-
-  if(ngeomobjinfo>0){
-    FREEMEMORY(geomobjinfo);
-    ngeomobjinfo=0;
   }
 
   FREEMEMORY(tickinfo);
@@ -2715,10 +2714,6 @@ int readsmv(char *file, char *file2){
       ncsvinfo+=nfiles;
       continue;
     }
-    if(match(buffer,"GEOMOBJ") == 1){
-      ngeomobjinfo++;
-      continue;
-    }
     if(match(buffer,"GEOM") == 1){
       ngeominfo++;
       continue;
@@ -3027,10 +3022,6 @@ int readsmv(char *file, char *file2){
  if(ngeominfo>0){
    NewMemory((void **)&geominfo,ngeominfo*sizeof(geomdata));
    ngeominfo=0;
- }
- if(ngeomobjinfo>0){
-   NewMemory((void **)&geomobjinfo,ngeomobjinfo*sizeof(geomobjdata));
-   ngeomobjinfo=0;
  }
  if(npropinfo>0){
    NewMemory((void **)&propinfo,npropinfo*sizeof(propdata));
@@ -3429,9 +3420,20 @@ int readsmv(char *file, char *file2){
     if(match(buffer,"GEOM") == 1){
       geomdata *geomi;
       char *buff2;
+      int ngeomobjinfo=0;
+
+      geomi = geominfo + ngeominfo;
+      geomi->ngeomobjinfo=0;
+      geomi->geomobjinfo=NULL;
+
+      trim(buffer);
+      if(strlen(buffer)>4){
+
+        buff2 = buffer+5;
+        sscanf(buff2,"%i",&ngeomobjinfo);
+      }
 
       fgets(buffer,255,stream);
-      geomi = geominfo + ngeominfo;
       trim(buffer);
       buff2 = trim_front(buffer);
       NewMemory((void **)&geomi->file,strlen(buff2)+1);
@@ -3439,21 +3441,49 @@ int readsmv(char *file, char *file2){
 
       init_geom(geomi);
 
-      ngeominfo++;
-      continue;
-    }
+      if(ngeomobjinfo>0){
+        NewMemory((void **)&geomi->geomobjinfo,ngeomobjinfo*sizeof(geomobjdata));
+        for(i=0;i<ngeomobjinfo;i++){
+          geomobjdata *geomobji;
+          int len_name;
+          float *center;
 
-    /*
-    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-    +++++++++++++++++++++++++++++ GEOMOBJ +++++++++++++++++++++++
-    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-  */
-    if(match(buffer,"GEOMOBJ") == 1){
-      geomobjdata *geomobji;
-      char *buff2;
+          geomobji = geomi->geomobjinfo + i;
+          
+          geomobji->texture_name=NULL;
+          geomobji->texture_type=TEXTURE_XY;
 
-      fgets(buffer,255,stream);
-      geomobji = geomobjinfo + ngeomobjinfo;
+
+          fgets(buffer,255,stream);
+          trim(buffer);
+          buff2 = trim_front(buffer);
+          len_name = strlen(buff2);
+          if(len_name>0){
+            NewMemory((void **)&geomobji->texture_name,len_name+1);
+            strcpy(geomobji->texture_name,buff2);
+          }
+
+          fgets(buffer,255,stream);
+          trim(buffer);
+          buff2 = trim_front(buffer);
+          if(strcmp(buff2,"XZ")==0){
+            geomobji->texture_type=TEXTURE_XZ;
+          }
+          else if(strcmp(buff2,"YZ")==0){
+            geomobji->texture_type=TEXTURE_YZ;
+          }
+          else if(strcmp(buff2,"SPHERE")==0){
+            geomobji->texture_type=TEXTURE_SPHERE;
+          }
+
+          fgets(buffer,255,stream);
+          center = geomobji->texture_center;
+          sscanf(buffer,"%f %f %f %f %f",
+               &geomobji->texture_height,&geomobji->texture_width,
+               center,center+1,center+2);
+
+        }
+      }
 
       ngeominfo++;
       continue;
