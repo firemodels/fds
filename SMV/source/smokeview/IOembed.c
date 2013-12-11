@@ -205,11 +205,13 @@ void draw_geom(int flag, int frameflag){
     glBegin(GL_TRIANGLES);
     for(i=0;i<ntris;i++){
       triangle *trianglei;
-      float *xyzptr[3];
-      float *xyznorm;
       float transparent_level_local;
+      texturedata *ti;
+      int  j;
 
       trianglei = tris[i];
+      ti = trianglei->textureinfo;
+      if(visGeomTextures==1&&ti!=NULL&&ti->loaded==1)continue;
       if(hilight_skinny==1&&trianglei->skinny==1){
         color=skinny_color;
         transparent_level_local=1.0;
@@ -224,36 +226,52 @@ void draw_geom(int flag, int frameflag){
         last_transparent_level=transparent_level_local;
       }
       if(smoothtrinormal==0){
-        xyznorm=trianglei->tri_norm;
-        glNormal3fv(xyznorm);
-
-        xyzptr[0] = trianglei->points[0]->xyz;
-        glVertex3fv(xyzptr[0]);
-
-        xyzptr[1] = trianglei->points[1]->xyz;
-        glVertex3fv(xyzptr[1]);
-
-        xyzptr[2] = trianglei->points[2]->xyz;
-        glVertex3fv(xyzptr[2]);
+        glNormal3fv(trianglei->tri_norm);
+        for(j=0;j<2;j++){
+          glVertex3fv(trianglei->points[j]->xyz);
+        }
       }
       else{
-        xyznorm = trianglei->points[0]->point_norm;
-        glNormal3fv(xyznorm);
-        xyzptr[0] = trianglei->points[0]->xyz;
-        glVertex3fv(xyzptr[0]);
-
-        xyznorm = trianglei->points[1]->point_norm;
-        glNormal3fv(xyznorm);
-        xyzptr[1] = trianglei->points[1]->xyz;
-        glVertex3fv(xyzptr[1]);
-
-        xyznorm = trianglei->points[2]->point_norm;
-        glNormal3fv(xyznorm);
-        xyzptr[2] = trianglei->points[2]->xyz;
-        glVertex3fv(xyzptr[2]);
+        for(j=0;j<2;j++){
+          glNormal3fv(trianglei->points[j]->point_norm);
+          glVertex3fv(trianglei->points[j]->xyz);
+        }
       }
     }
     glEnd();
+
+    if(visGeomTextures==1){
+      texturedata *lasttexture;
+
+      glTexEnvf(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_REPLACE);
+      glEnable(GL_TEXTURE_2D);
+
+      lasttexture=NULL;
+      glBegin(GL_TRIANGLES);
+      for(i=0;i<ntris;i++){
+        triangle *trianglei;
+        texturedata *texti;
+        int j;
+
+        trianglei = tris[i];
+        texti = trianglei->textureinfo;
+        if(texti==NULL||texti->loaded!=1)continue;
+
+        if(lasttexture!=texti){
+          glEnd();
+          glBindTexture(GL_TEXTURE_2D,texti->name);
+          glBegin(GL_QUADS);
+          lasttexture=texti;
+        }
+        for(j=0;j<2;j++){
+          glNormal3fv(trianglei->points[j]->point_norm);
+          glTexCoord2fv(trianglei->points[j]->txyz); // texture point locations not defined yet
+          glVertex3fv(trianglei->points[j]->xyz);
+        }
+      }
+      glEnd();
+    }
+
     glDisable(GL_COLOR_MATERIAL);
     glDisable(GL_LIGHTING);
     glPopMatrix();
@@ -830,6 +848,7 @@ void read_geom(geomdata *geomi, int flag, int type, int *errorcode){
           triangles[ii].points[1]=points+ijk[3*ii+1]-1;
           triangles[ii].points[2]=points+ijk[3*ii+2]-1;
           triangles[ii].surf=surfinfo + surf_ind[ii]+offset;
+          triangles[ii].textureinfo=NULL;
         }
         FREEMEMORY(ijk);
         FREEMEMORY(surf_ind);

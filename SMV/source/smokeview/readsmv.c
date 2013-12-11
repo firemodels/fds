@@ -3447,41 +3447,30 @@ int readsmv(char *file, char *file2){
           geomobjdata *geomobji;
           int len_name;
           float *center;
+          char *texture_mapping=NULL, *texture_vals=NULL;
 
           geomobji = geomi->geomobjinfo + i;
           
           geomobji->texture_name=NULL;
-          geomobji->texture_type=TEXTURE_XY;
-
-
-          fgets(buffer,255,stream);
-          trim(buffer);
-          buff2 = trim_front(buffer);
-          len_name = strlen(buff2);
-          if(len_name>0){
-            NewMemory((void **)&geomobji->texture_name,len_name+1);
-            strcpy(geomobji->texture_name,buff2);
-          }
+          geomobji->texture_mapping=TEXTURE_RECTANGULAR;
 
           fgets(buffer,255,stream);
-          trim(buffer);
-          buff2 = trim_front(buffer);
-          if(strcmp(buff2,"XZ")==0){
-            geomobji->texture_type=TEXTURE_XZ;
-          }
-          else if(strcmp(buff2,"YZ")==0){
-            geomobji->texture_type=TEXTURE_YZ;
-          }
-          else if(strcmp(buff2,"SPHERE")==0){
-            geomobji->texture_type=TEXTURE_SPHERE;
+
+          texture_mapping = trim_front(buffer);
+          if(texture_mapping!=NULL)texture_vals = strchr(texture_mapping,' ');
+
+          if(texture_vals!=NULL){
+            texture_vals++;
+            texture_vals[-1]=0;
+
+            fgets(texture_vals,255,stream);
+            center = geomobji->texture_center;
+            sscanf(texture_vals,"%f %f %f",center,center+1,center+2);
           }
 
-          fgets(buffer,255,stream);
-          center = geomobji->texture_center;
-          sscanf(buffer,"%f %f %f %f %f",
-               &geomobji->texture_height,&geomobji->texture_width,
-               center,center+1,center+2);
-
+          if(texture_mapping!=NULL&&strcmp(texture_mapping,"SPHERICAL")==0){
+            geomobji->texture_mapping=TEXTURE_SPHERICAL;
+          }
         }
       }
 

@@ -2448,52 +2448,6 @@ void drawcad2geom(const cadgeom *cd, int trans_flag){
 
 }
 
-/* ------------------ drawcad2ageom ------------------------ */
-
-void drawcad2ageom(const cadgeom *cd){
-  int i;
-  float *xyzpoint;
-  float *thiscolor,*lastcolor; 
-  cadquad *quadi;
-  int colorindex,colorindex2;
-  float *color2;
-
-  lastcolor=NULL;
-
-  glBegin(GL_LINES);
-  colorindex=0;
-  for(i=0;i<cd->nquads;i++){
-
-    quadi = cd->quad+i;
-
-    thiscolor=quadi->cadlookq->rgb;
-    if(thiscolor!=lastcolor){
-      if(thiscolor[0]<0.0){
-        colorindex2 = 15 + (15*colorindex % 230);
-        color2=rgb_cad[colorindex2];
-        glColor3f(color2[0],color2[1],color2[2]);
-        colorindex++;
-      }
-      else{
-        glColor3f(thiscolor[0],thiscolor[1],thiscolor[2]);
-      }
-      lastcolor=thiscolor;
-    }
-    xyzpoint = quadi->xyzpoints;
-
-    glVertex3fv(xyzpoint);
-    glVertex3fv(xyzpoint+3);
-    glVertex3fv(xyzpoint+3);
-    glVertex3fv(xyzpoint+6);
-    glVertex3fv(xyzpoint+6);
-    glVertex3fv(xyzpoint+9);
-    glVertex3fv(xyzpoint+9);
-    glVertex3fv(xyzpoint);
-    glVertex3fv(xyzpoint);
-  }
-  glEnd();
-}
-
 /* ------------------ updatefaces ------------------------ */
 
 void update_faces(void){

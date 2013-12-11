@@ -31,7 +31,7 @@ typedef struct {
 /* --------------------------  point ------------------------------------ */
 
 typedef struct {
-  float xyz[3],point_norm[3];
+  float xyz[3],point_norm[3],txyz[3];
   int itriangle,ntriangles,nused;
   struct _triangle **triangles;
 } point;
@@ -39,11 +39,11 @@ typedef struct {
 /* --------------------------  triangle ------------------------------------ */
 
 typedef struct _triangle {
-  struct _surfdata *surf;
   unsigned char interior, skinny;
-  float distance, *color;
+  float distance, *color, tpoints[6], tri_norm[3];
+  struct _texturedata *textureinfo;
+  struct _surfdata *surf;
   point *points[3];
-  float tri_norm[3];
 } triangle;
 
 /* --------------------------  geomlistdata ------------------------------------ */
@@ -62,7 +62,7 @@ typedef struct {
   struct _texturedata *texture;
   char *texture_name;
   float texture_width, texture_height, texture_center[3];
-  int texture_type;
+  int texture_mapping;
 } geomobjdata;
 
 /* --------------------------  geomdata ------------------------------------ */
