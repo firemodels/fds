@@ -16,3 +16,4 @@ $GEOMTEST test_time2.fds
 $GEOMTEST test_time3.fds
 $GEOMTEST test_time4.fds
 $GEOMTEST test_time5.fds
+$GEOMTEST test_texture.fds
