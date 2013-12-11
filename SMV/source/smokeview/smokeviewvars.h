@@ -105,7 +105,7 @@ SVEXTERN int SVDECL(nini_filelist,0);
 SVEXTERN float this_mouse_time, SVDECL(last_mouse_time,0.0);
 SVEXTERN int move_gslice;
 
-SVEXTERN INT SVDECL(visGeomTextures,0);
+SVEXTERN int SVDECL(visGeomTextures,0);
 SVEXTERN int nplotx_all, nploty_all, nplotz_all;
 SVEXTERN int iplotx_all, iploty_all, iplotz_all;
 SVEXTERN int SVDECL(iplot_state,0);
