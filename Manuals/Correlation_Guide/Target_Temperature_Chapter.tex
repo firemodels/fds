@@ -3,21 +3,24 @@
 \chapter{Target Temperature}
 \label{Target_Temperature_Chapter}
 
+The calculation of target temperature is a common objective of fire modeling analyses. The targets in this validation study include electrical cables as well as unprotected and protected steel members.
+
 \section{Cable Failure Time}
 
 \subsection*{Description}
 
-The thermally-induced electrical failure (THIEF) of a cable can be predicted via a simple
-one-dimensional heat transfer calculation, under the assumption that the cable can be
-treated as a homogeneous cylinder~\cite{CAROLFIRE}. The governing equation for the cable temperature,
+Even though an electrical cable is considered a ``target'', the cable failure time quantity is included in this study to assess the models' ability to predict the time to cable failure. This is an indirect way of assessing the model prediction of temperature. The model only predicts the interior temperature of the cable, and the failure time is considered as the time at which the predicted temperature rises above an experimentally determined value.
+
+The thermally-induced electrical failure (THIEF) of a cable can be predicted via a simple one-dimensional heat transfer calculation, under the assumption that the cable can be treated as a homogeneous cylinder~\cite{CAROLFIRE}. The governing equation for the cable temperature,
 $T(r,t)$, is given by
 \be
 \rho c \left( \frac{\partial T}{\partial t} \right) = \frac{1}{r} \frac{\partial}{\partial r} k r \left( \frac{\partial T}{\partial r} \right)
 \label{eq:cable_temp}
 \ee
-with the boundary condition
+where $\rho$, $c$ and $k$ are the effective density, specific heat, and thermal conductivity of the solid, respectively, and $r$ is the radius of the cable~(\si{m}).
+The boundary condition is defined as
 \be
-\dot q'' = k \left( \frac{\partial T}{\partial r} \right) (R,t)
+\dot q'' = k \left( \frac{\partial T}{\partial r} \right) (r,t)
 \ee
 A finite difference approximation to Eq.~\ref{eq:cable_temp} is given by
 \be

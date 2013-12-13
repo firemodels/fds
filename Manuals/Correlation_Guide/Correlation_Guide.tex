@@ -149,7 +149,7 @@ For each quantity and empirical correlation, Sections~\ref{HGL_Temperature_Chapt
 
 The experimental relative standard deviation was determined by considering the systematic and random uncertainty values for each measurement quantity. The model relative standard deviation is reported as one standard deviation of the predicted quantity. The bias factor is reported as an average underprediction or overprediction of a measured quantity, where a bias factor of 1 indicates perfect agreement, on average, between the measured and predicted quantities. More detailed discussion of the experimental and model relative standard deviations is provided in the FDS Validation Guide~\cite{FDS_Validation_Guide} and in McGrattan and Toman~\cite{McGrattan:Metrologia}.
 
-Section~\ref{Summary_Chapter} includes a table of summary statistics for each quantity and empirical correlation. Appendix~\ref{Inputs_Chapter} shows the input parameters for the empirical correlations that were used for each of the experiments in the data sets.
+Section~\ref{Summary_Chapter} includes a table of summary statistics for each quantity and empirical correlation. For each of the experimental data sets, Appendix~\ref{Inputs_Chapter} lists the input parameters for the empirical correlations that were used in each of the the validation cases.
 
 \cleardoublepage
 \phantomsection
@@ -183,6 +183,7 @@ NBS \> National Bureau of Standards (former name of NIST) \\
 NFPRF \> National Fire Protection Research Foundation \\
 NIST \> National Institute of Standards and Technology \\
 NRC \> Nuclear Regulatory Commission \\
+RTI \> Response Time Index \\
 SNL \> Sandia National Laboratory \\
 SP \>  Statens Provningsanstalt (Technical Research Institute of Sweden) \\
 THIEF \> Thermally-Induced Electrical Failure \\
@@ -191,6 +192,40 @@ USN \> United States Navy \\
 VTT \> Valtion Teknillinen Tutkimuskeskus (Technical Research Centre of Finland) \\
 WTC \> World Trade Center \\
 \end{tabbing}
+
+\chapter{List of Experimental Data Sets}
+
+The experimental data sets included in this validation study are shown in Table~\ref{tab:exp_data_sets}. The experiments are described in more detail in the FDS Validation Guide~\cite{FDS_Validation_Guide} (Volume 3 of the FDS Technical Reference Guide) and their respective test reports.
+
+\begin{table}[!ht]
+\caption[Experimental data sets used in this validation study]
+{Experimental data sets used in this validation study.}
+
+\begin{center}
+\begin{tabular}{|l|c|}
+\hline
+Test Series           &  Reference                                  \\ \hline \hline
+ATF Corridors         &  \cite{Sheppard:Corridors}                  \\ \hline
+CAROLFIRE             &  \cite{CAROLFIRE}                           \\ \hline
+Fleury Heat Flux      &  \cite{Fleury:Masters}                      \\ \hline
+FM/SNL                &  \cite{Nowlen:NUREG4681, Nowlen:NUREG4527}  \\ \hline
+LLNL Enclosure        &  \cite{Foote:LLNL1986}                      \\ \hline
+NBS Multi-Room        &  \cite{Peacock:NBS_Multi-Room}              \\ \hline
+NIST/NRC              &  \cite{Hamins:SP1013-1}                     \\ \hline
+NIST Smoke Alarms     &  \cite{Bukowski:1}                          \\ \hline
+SP AST                &  \cite{Wickstrom_AST}                       \\ \hline
+SP AST Column         &  \cite{Sjostrom:AST}                        \\ \hline
+Steckler              &  \cite{Steckler:NBSIR_82-2520}              \\ \hline
+UL/NFPRF              &  \cite{Sheppard:1, McGrattan:5}             \\ \hline
+USN Hawaii            &  \cite{Gott:1}                              \\ \hline
+USN Iceland           &  \cite{Gott:1}                              \\ \hline
+Vettori Flat Ceiling  &  \cite{Vettori:1}                           \\ \hline
+VTT Large Hall        &  \cite{Hostikka:VTT2104}                    \\ \hline
+WTC                   &  \cite{NIST_NCSTAR_1-5B}                    \\ \hline
+\end{tabular}
+\end{center}
+\label{tab:exp_data_sets}
+\end{table}
 
 \mainmatter
 

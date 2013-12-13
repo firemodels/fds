@@ -1,13 +1,15 @@
 % !TEX root = Correlation_Guide.tex
 
-\chapter{HGL Temperature}
+\chapter{Hot Gas Layer Temperature}
 \label{HGL_Temperature_Chapter}
 
 \section{Natural Ventilation (MQH)}
 
+The empirical correlations predict an average hot gas layer (HGL) temperature. Because there are different empirical correlations for compartments that are naturally ventilated, mechanically ventilated, or unventilated, the results for HGL temperature are divided into three categories.
+
 \subsection*{Description}
 
-For a compartment with natural ventilation, the correlation of McCaffrey, Quintiere, and Harkleroad (MQH)~\cite{SFPE:Walton} predicts that the HGL temperature rise, $\Delta T\sb{g}$, is given by
+For a compartment with natural ventilation, the correlation of McCaffrey, Quintiere, and Harkleroad (MQH)~\cite{SFPE:Walton} predicts that the hot gas layer (HGL) temperature rise, $\Delta T\sb{g}$, is given by
 \be
 \Delta T\sb{g} = 6.85 \left( \frac{\dot Q^2}{A\sb{o} \sqrt{H\sb{o}} h\sb{k} A\sb{T}} \right)^{1/3} \quad ^\circ{\rm C}
 \label{eq:MQH}
@@ -88,6 +90,12 @@ A summary of the comparisons between peak predicted and measured compartment tem
 {Summary of HGL temperature predictions for natural ventilation tests using the MQH method.}
 \label{HGL_Summary_Natural_Ventilation}
 \end{figure}
+
+In Fig.~\ref{HGL_Summary_Natural_Ventilation}, the measured values are represented by the horizontal axis and the predicted values by the vertical axis. If a particular prediction and measurement are the same, then the resulting point falls on the solid diagonal line. To better make use of these results, two statistical parameters are calculated for each model and each predicted quantity. The first parameter, $\delta$, is the bias factor, which indicates the extent to which the model, on average, under or over-predicts the measurements of a given quantity. For example, a bias factor of 1.02 indicates that the model over-estimates the measured quantity by \SI{2}{\percent}, on average. The bias factor is shown graphically by the solid red line.
+
+The second parameter, $\widetilde{\sigma}\sb{M}$, is the relative standard deviation of the model, which indicates the variability of the model. In Fig.~\ref{HGL_Summary_Natural_Ventilation}, there are two sets of off-diagonal lines. The first set, shown as dashed black lines, indicate the uncertainty of the experimental measurements in terms of a relative standard deviation, $\widetilde{\sigma}\sb{E}$. It is assumed that the experiments are unbiased; that is, the bias factor for the experimental measurements is 1. The slopes of the dashed black lines are~$1 \pm 2\widetilde{\sigma}\sb{E}$, which represents the \SI{95}{\percent} confidence intervals. The set of red dashed lines indicate the model relative standard deviation, $\widetilde{\sigma}\sb{M}$. The slopes of these lines are~$\delta \pm 2\widetilde{\sigma}\sb{M}$. If the model were as accurate as the measurements against which it is compared, then the two sets of off-diagonal lines would merge. The extent to which the data scatters outside of the experimental bounds is an indication of the degree of model uncertainty.
+
+These symbols and nomenclature are similar for all of the remaining scatter plots in this document.
 
 
 \clearpage
@@ -177,6 +185,9 @@ A summary of the comparisons between peak predicted and measured compartment tem
 \label{HGL_Summary_Forced_Ventilation_FPA}
 \end{figure}
 
+Note that the LLNL Enclosure experiments were used to develop the FPA correlation.
+
+
 \clearpage
 
 
@@ -265,7 +276,7 @@ A summary of the comparisons between peak predicted and measured compartment tem
 
 \subsection*{Description}
 
-For a compartment with no ventilation (closed doors) and constant HRR, the correlation of Belyer~\cite{SFPE:Walton} predicts that the HGL temperature rise, $\Delta T\sb{g}$, is given by
+For a compartment with no ventilation (closed doors) and constant HRR, the correlation of Beyler~\cite{SFPE:Walton} predicts that the HGL temperature rise, $\Delta T\sb{g}$, is given by
 \be
 \Delta T\sb{g} = \frac{2 K_2}{K_1^2} (K_1 \sqrt{t} - 1 + e^{-K_1 \sqrt{t}}) \quad ^\circ{\rm C}
 \label{eq:Beyler}

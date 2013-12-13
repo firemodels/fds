@@ -3,13 +3,15 @@
 \chapter{Sprinkler Activation Time}
 \label{Sprinkler_Activation_Time_Chapter}
 
+Much like an electrical cable, a sprinkler is merely a ``target'' with a particular set of thermal properties, such as the response time index (RTI) that indicates the sensitivity of the fusible link or glass bulb. Activation is assumed to occur when the link or bulb temperatures reaches a predetermined threshold temperature.
+
 \subsection*{Description}
 
-For a steady-state fire, the correlation of Alpert~\cite{SFPE:Alpert} predicts that the activation time of a sprinkler, $t\sb{act}$, is given by (Budnick, Evans, and Nelson, 1997)
+For a steady-state fire, the correlation of Alpert~\cite{SFPE:Alpert} predicts that the activation time of a sprinkler, $t\sb{act}$, is given by~\cite{NFPA}
 \be
-t\sb{act} =  \frac{RTI}{\sqrt{u\sb{jet}}} \ln \left( \frac{T\sb{jet} - T_\infty}{T\sb{jet} - T\sb{act}} \right)\label{eq:Alpert}
+t\sb{act} =  \frac{\mathrm{RTI}}{\sqrt{u\sb{jet}}} \ln \left( \frac{T\sb{jet} - T_\infty}{T\sb{jet} - T\sb{act}} \right)\label{eq:Alpert}
 \ee
-where $RTI$ is the response time index of the sprinkler~(\si{(m.s)^{1/2}}), $T_\infty$ is the ambient air temperature~(\si{\celsius}), and $T\sb{act}$ is the activation temperature of the sprinkler~(\si{\celsius}). The ceiling jet temperature, $T\sb{jet}$ (\si{\celsius}), is given by
+where RTI is the response time index of the sprinkler~(\si{(m.s)^{1/2}}), $T_\infty$ is the ambient air temperature~(\si{\celsius}), and $T\sb{act}$ is the activation temperature of the sprinkler~(\si{\celsius}). The ceiling jet temperature, $T\sb{jet}$ (\si{\celsius}), is given by
 \be
 T\sb{jet} = \left\{ \begin{array}{cl}
    \frac{16.9 \dot Q^{2/3}}{H^{5/3}} + T_\infty  &  r/H <= 0.18 \\[0.1in]
