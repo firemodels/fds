@@ -3900,7 +3900,7 @@ void LoadPatchMenu(int value){
         patchdata *patchi;
 
         patchi = patchinfo + i;
-        if(strcmp(patchi->label.shortlabel,patchj->label.shortlabel)==0&&patchi->filetype==patchj->filetype){
+        if(strcmp(patchi->label.longlabel,patchj->label.longlabel)==0&&patchi->filetype==patchj->filetype){
           LOCK_COMPRESS
           readpatch(i,LOAD,&errorcode);
           UNLOCK_COMPRESS
