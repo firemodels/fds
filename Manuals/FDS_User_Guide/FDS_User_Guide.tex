@@ -8060,8 +8060,8 @@ floor yields a total of 90~kg (Fig.~\ref{bucket_test_fig}). Note that there real
 
 \subsubsection{Gas Phase}
 
-Away from solid surfaces, {\ct 'MPUV'} is the \underline{M}ass \underline{P}er \underline{U}nit \underline{V}olume of the droplets as they fly through
-the air, in units of kg/m$^3$.  {\ct 'PARTICLE FLUX X'},  {\ct 'PARTICLE FLUX Y'}, and {\ct 'PARTICLE FLUX Z'} produce {\em only} slice and Plot3D files
+Away from solid surfaces, {\ct 'MPUV'} is the \underline{M}ass \underline{P}er \underline{U}nit \underline{V}olume of a type ({\ct PART\_ID}) of  droplets as they fly through
+the air, in units of kg/m$^3$.  {\ct 'MPUV\_Z'} provides the same information integrated over all droplets of a single species ({\ct SPEC\_ID}).  {\ct 'PARTICLE FLUX X'},  {\ct 'PARTICLE FLUX Y'}, and {\ct 'PARTICLE FLUX Z'} produce {\em only} slice and Plot3D files
 of the mass flux of droplets in the $x$, $y$, and $z$ directions, respectively, in units of kg/m$^2$/s.
 
 
@@ -8871,6 +8871,7 @@ Here, the {\ct ID} is just a label in the output file. When an output quantity i
 {\ct MPUA}$^{**}$                               & Section~\ref{info:part_output}                & kg/m$^2$       & B,D          \\ \hline
 {\ct MPUA\_Z}$^{*}$                             & Section~\ref{info:part_output}                & kg/m$^2$       & B,D          \\ \hline
 {\ct MPUV}$^{**}$                               & Section~\ref{info:part_output}                & kg/m$^3$       & D,P,S        \\ \hline
+{\ct MPUV\_Z}$^{*}$                             & Section~\ref{info:part_output}                & kg/m$^3$       & D,P,S        \\ \hline
 {\ct NORMAL VELOCITY}                           & Wall normal velocity                          & m/s            & D,B          \\ \hline
 {\ct OPEN NOZZLES}                              & Number of open nozzles                        &                & D            \\ \hline
 {\ct OPTICAL DENSITY}                           & Section~\ref{info:visibility}                 & 1/m            & D,I,P,S      \\ \hline
@@ -8950,9 +8951,12 @@ be found in Volume~1 of the FDS Technical Reference Guide~\cite{FDS_Math_Guide}.
 {\ct QUANTITY}                           & Symbol                                        & Units          & File Type    \\
 \hline \hline
 \endhead
-{\ct ADA}                                       & Average Droplet (cross sectional) Area            & m$^2$/m$^3$    & D,I,P,S      \\ \hline
-{\ct ADD}                                       & Average Droplet Diameter                          & $\mu$m         & D,I,P,S      \\ \hline
-{\ct ADT}                                       & Average Droplet Temperature                       & $^\circ$C      & D,I,P,S      \\ \hline
+{\ct ADA}$^{**}$                                & Average Droplet (cross sectional) Area            & m$^2$/m$^3$    & D,I,P,S      \\ \hline
+{\ct ADA\_Z}$^{*}$                              & Average Droplet (cross sectional) Area            & m$^2$/m$^3$    & D,I,P,S      \\ \hline
+{\ct ADD}$^{**}$                                & Average Droplet Diameter                          & $\mu$m         & D,I,P,S      \\ \hline
+{\ct ADD\_Z}$^{*}$                              & Average Droplet Diameter                          & $\mu$m         & D,I,P,S      \\ \hline
+{\ct ADT}$^{**}$                                & Average Droplet Temperature                       & $^\circ$C      & D,I,P,S      \\ \hline
+{\ct ADT\_Z}$^{*}$                              & Average Droplet Temperature                       & $^\circ$C      & D,I,P,S      \\ \hline
 {\ct C\_SMAG}                                   & Smagorinsky coefficient                           &                & D,I,P,S      \\ \hline
 {\ct CABLE TEMPERATURE}                         & Inner temperature of cable                        & $^\circ$C      & D            \\ \hline
 {\ct CELL INDEX I}                              & Mesh cell index in x                              &                & D,S          \\ \hline
@@ -8983,8 +8987,10 @@ be found in Volume~1 of the FDS Technical Reference Guide~\cite{FDS_Math_Guide}.
 {\ct PARTICLE RADIATION LOSS}                   & $\nabla \cdot \bq_r''$ due to Lagrangian particles& kW/m$^3$       & D,I,P,S      \\ \hline
 {\ct PDPA}                                      & Droplet diagnostics                               &                & D            \\ \hline
 {\ct PRESSURE ITERATIONS}                       & No. pressure iterations                           &                & D            \\ \hline
-{\ct QABS}                                      & Absorption efficiency of droplets                 &                & D,I,P,S      \\ \hline
-{\ct QSCA}                                      & Scattering efficiency of droplets                 &                & D,I,P,S      \\ \hline
+{\ct QABS}$^{**}$                               & Absorption efficiency of droplets                 &                & D,I,P,S      \\ \hline
+{\ct QABS\_Z}$^{*}$                             & Absorption efficiency of droplets                 &                & D,I,P,S      \\ \hline
+{\ct QSCA}$^{**}$                               & Scattering efficiency of droplets                 &                & D,I,P,S      \\ \hline
+{\ct QSCA\_Z}$^{*}$                             & Scattering efficiency of droplets                 &                & D,I,P,S      \\ \hline
 {\ct RADIATION LOSS}                            & $\nabla \cdot \bq_r''$                            & kW/m$^3$       & D,I,P,S      \\ \hline
 {\ct STRAIN RATE}                               & $2(S_{ij}S_{ij}-1/3(\nabla\cdot\mathbf{u})^2)$    & 1/s            & D,I,P,S      \\ \hline
 {\ct STRAIN RATE X}                             & $\partial w/\partial y + \partial v/\partial z$   & 1/s            & D,I,P,S      \\ \hline
@@ -9002,6 +9008,8 @@ be found in Volume~1 of the FDS Technical Reference Guide~\cite{FDS_Math_Guide}.
 
 \noindent
 \begin{tabbing}
+$^{*}$  \hspace{0.25in} \= Quantity requires the specification of a gas species using {\ct SPEC\_ID}. \\
+$^{**}$                \> Quantity requires the specification of a particle name using {\ct PART\_ID}. \\
 $^{*****}$ \hspace{0.25in} \=  Quantity requires specification of an additional scalar using {\ct QUANTITY2}. \
 \end{tabbing}
 
