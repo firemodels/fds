@@ -11054,6 +11054,20 @@ QUANTITY_INDEX_LOOP: DO ND=-N_OUTPUT_QUANTITIES,N_OUTPUT_QUANTITIES
          ENDIF
       ENDIF
 
+      IF (TRIM(QUANTITY)=='MPUV_Z' .OR. TRIM(QUANTITY)=='ADD_Z' .OR. TRIM(QUANTITY)=='ADT_Z' .OR. TRIM(QUANTITY)=='ADA_Z' .OR. &
+          TRIM(QUANTITY)=='QABS_Z' .OR. TRIM(QUANTITY)=='QSCA_Z' .OR. TRIM(QUANTITY)=='MPUA_Z' .OR. TRIM(QUANTITY)=='CPUA_Z' .OR. &
+          TRIM(QUANTITY)=='AMPUA_Z') THEN
+         IF (N_LAGRANGIAN_CLASSES==0) THEN
+            WRITE(MESSAGE,'(3A)')  'ERROR: The QUANTITY ',TRIM(QUANTITY),' requires liquid droplets'
+            CALL SHUTDOWN(MESSAGE)            
+         ELSE
+            IF (.NOT. ALL(LAGRANGIAN_PARTICLE_CLASS%LIQUID_DROPLET)) THEN
+               WRITE(MESSAGE,'(3A)')  'ERROR: The QUANTITY ',TRIM(QUANTITY),' requires liquid droplets'
+               CALL SHUTDOWN(MESSAGE)            
+            ENDIF
+         ENDIF
+      ENDIF
+      
       SELECT CASE (TRIM(OUTTYPE))
          CASE ('SLCF')
             ! Throw out bad slices
