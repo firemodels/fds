@@ -44,7 +44,9 @@ set bundleinfo=%svn_root%\Utilities\Scripts\bundle_setup
 Rem erase the temporary bundle directory if it already exists
 
 if exist %basedir% rmdir /s /q %basedir%
-echo making directories
+echo.
+echo ***making directories
+echo.
 mkdir %basedir%
 mkdir %out_bundle%
 mkdir %out_bundle%\%fdsversion%
@@ -60,51 +62,45 @@ set release_version=%fdssmv_major_version%_win_%platform%
 set release_version=
 
 echo.
-echo copying fds_win_%platform%.exe to fds.exe
-copy %fdsdir%\fds_win_%platform%.exe         %out_bin%\fds%release_version%.exe
+echo *** Copying executables
+echo.
+CALL :COPY %fdsdir%\fds_win_%platform%.exe         %out_bin%\fds%release_version%.exe
 
-echo copying fds_mpi_win_%platform%.exe to fds_mpi.exe
-copy %fdsmpidir%\fds_mpi_win_%platform%.exe  %out_bin%\fds_mpi.exe
+CALL :COPY  %fdsmpidir%\fds_mpi_win_%platform%.exe  %out_bin%\fds_mpi.exe
 
-echo copying smokeview_win_%platform%.exe to smokeview%release_version%.exe
-copy %in_smv%\smokeview_win_%platform%.exe   %out_bin%\smokeview.exe
+CALL :COPY  %in_smv%\smokeview_win_%platform%.exe   %out_bin%\smokeview.exe
 
-echo copying smokediff_win_%platform%.exe to smokediff.exe
-copy %in_smokediff%\intel_win_%platform%\smokediff_win_%platform%.exe     %out_bin%\smokediff.exe
+CALL :COPY  %in_smokediff%\intel_win_%platform%\smokediff_win_%platform%.exe     %out_bin%\smokediff.exe
 
-echo copying smokezip_win_%platform%.exe to smokezip%release_version%.exe
-copy %in_smokezip%\intel_win_%platform%\smokezip_win_%platform%.exe       %out_bin%\smokezip.exe 
+CALL :COPY  %in_smokezip%\intel_win_%platform%\smokezip_win_%platform%.exe       %out_bin%\smokezip.exe 
 
-echo copying fds2ascii_win_%platform%.exe to fds2ascii%release_version%.exe
-copy %in_fds2ascii%\intel_win_%platform%\fds2ascii_win_%platform%.exe     %out_bin%\fds2ascii.exe
+CALL :COPY  %in_fds2ascii%\intel_win_%platform%\fds2ascii_win_%platform%.exe     %out_bin%\fds2ascii.exe
 
-echo copying background.exe
-copy %in_background%\intel_win_32\background.exe %out_bin%\background.exe
+CALL :COPY  %in_background%\intel_win_32\background.exe %out_bin%\background.exe
 
-echo copying sh2bat.exe
-copy %in_sh2bat%\sh2bat.exe %out_bin%\sh2bat.exe
+CALL :COPY  %in_sh2bat%\sh2bat.exe %out_bin%\sh2bat.exe
 
 echo.
-echo Creating Manifiest
+echo ***Creating Manifiest
+echo.
 
-echo ^<html^> > %manifest%
-echo ^<head^> >> %manifest%
+echo ^<html^>                      > %manifest%
+echo ^<head^>                     >> %manifest%
 echo ^<TITLE^>Build FDS^</TITLE^> >> %manifest%
-echo ^</HEAD^> >> %manifest%
-echo ^<BODY BGCOLOR="#FFFFFF" ^> >> %manifest%
-echo ^<pre^> >> %manifest%
+echo ^</HEAD^>                    >> %manifest%
+echo ^<BODY BGCOLOR="#FFFFFF" ^>  >> %manifest%
+echo ^<pre^>                      >> %manifest%
 echo FDS-Smokeview bundle created >> %manifest%
-date /t >> %manifest%
-time /t >> %manifest%
-echo. >> %manifest%
-echo Versions:>> %manifest%
-echo. >> %manifest%
+date /t                           >> %manifest%
+time /t                           >> %manifest%
+echo.                             >> %manifest%
+echo Versions:                    >> %manifest%
+echo.                             >> %manifest%
 
-echo -------------------------- >> %manifest%
+echo --------------------------   >> %manifest%
 echo | %out_bin%\fds%release_version%.exe 2>> %manifest%
 echo. >> %manifest%
 echo -------------------------- >> %manifest%
-echo | %out_bin%\fds%release_version%.exe 2>> %manifest%
 
 echo. >> %manifest%
 echo -------------------------- >> %manifest%
@@ -128,108 +124,85 @@ echo ^</body^> >> %manifest%
 echo ^</html^> >> %manifest%
 
 echo.
-echo Copying auxillary files to the bin directory
+echo *** Copying auxillary files to the bin directory
+echo.
+CALL :COPY  %in_for_bundle%\objects.svo             %out_bin%\.
 
-echo copying objects.svo
-copy %in_for_bundle%\objects.svo             %out_bin%\.
+if "%platform%"=="32" CALL :COPY %in_for_bundle%\pthreadVC.dll           %out_bin%\.
 
-if "%platform%"=="32" echo copying pthreadVC.dll
-if "%platform%"=="32" copy %in_for_bundle%\pthreadVC.dll           %out_bin%\.
+if "%platform%"=="64" CALL :COPY  %in_for_bundle%\pthreadVC2_x64.dll         %out_bin%\.
 
-if "%platform%"=="64" echo copying pthreadVC2_x64.dll
-if "%platform%"=="64" copy %in_for_bundle%\pthreadVC2_x64.dll         %out_bin%\.
+if "%platform%"=="32" CALL :COPY  %in_for_bundle%\glew32.dll              %out_bin%\.
 
-if "%platform%"=="32" echo copying glew32.dll
-if "%platform%"=="32" copy %in_for_bundle%\glew32.dll              %out_bin%\.
+if "%platform%"=="64" CALL :COPY  %in_for_bundle%\glew32_x64.dll              %out_bin%\.
 
-if "%platform%"=="64" echo copying glew32_x64.dll
-if "%platform%"=="64" copy %in_for_bundle%\glew32_x64.dll              %out_bin%\.
-
-echo copying smokeview.ini
-copy %in_for_bundle%\smokeview.ini           %out_bin%\.
+CALL :COPY  %in_for_bundle%\smokeview.ini           %out_bin%\.
 
 echo.
-echo Copying textures to the bin\textures directory
+echo ***Copying textures to the bin\textures directory
+echo.
 copy %in_for_bundle%\textures\*.jpg          %out_textures%\.
 copy %in_for_bundle%\textures\*.png          %out_textures%\.
 
 echo.
-echo Copying Uninstaller to Uninstall directory
-echo copying uninstall_fds.bat
-copy "%bundleinfo%\uninstall_fds.bat" "%out_uninstall%\uninstall.bat"
+echo ***Copying Uninstaller to Uninstall directory
+echo.
+CALL :COPY  "%bundleinfo%\uninstall_fds.bat" "%out_uninstall%\uninstall.bat"
 
-echo copying set_path.exe
-copy "%bundleinfo%\set_path.exe"         "%out_uninstall%\set_path.exe"
+CALL :COPY  "%bundleinfo%\set_path.exe"         "%out_uninstall%\set_path.exe"
 
 echo.
-echo copying FDS_Release_Notes.htm
-copy "%bundleinfo%\FDS_Release_Notes.htm" "%out_guides%\FDS_Release_Notes.htm"
+echo ***Copying FDS Documentation
+echo.
+
+CALL :COPY  "%bundleinfo%\FDS_Release_Notes.htm" "%out_guides%\FDS_Release_Notes.htm"
+
+CALL :COPY  %in_pdf%\FDS_Configuration_Management_Plan.pdf %out_guides%\.
+
+CALL :COPY  %in_pdf%\FDS_User_Guide.pdf %out_guides%\.
+
+CALL :COPY  %in_pdf%\FDS_Technical_Reference_Guide.pdf %out_guides%\.
+
+CALL :COPY  %in_pdf%\FDS_Validation_Guide.pdf %out_guides%\.
+
+CALL :COPY  %in_pdf%\FDS_Verification_Guide.pdf %out_guides%\.
 
 echo.
-echo copying FDS Documentation to the Documentation directory
+echo ***Copying Smokeview Documentation
+echo.
 
-echo copying FDS_Configuration_Management_Plan.pdf
-copy %in_pdf%\FDS_Configuration_Management_Plan.pdf %out_guides%\.
+CALL :COPY %in_pdf%\SMV_User_Guide.pdf %out_guides%\.
 
-echo copying FDS_User_Guide.pdf
-copy %in_pdf%\FDS_User_Guide.pdf %out_guides%\.
+CALL :COPY %in_pdf%\SMV_Technical_Reference_Guide.pdf %out_guides%\.
 
-echo copying FDS_Technical_Reference_Guide.pdf
-copy %in_pdf%\FDS_Technical_Reference_Guide.pdf %out_guides%\.
-
-echo copying FDS_Validation_Guide.pdf
-copy %in_pdf%\FDS_Validation_Guide.pdf %out_guides%\.
-
-echo copying FDS_Verification_Guide.pdf
-copy %in_pdf%\FDS_Verification_Guide.pdf %out_guides%\.
+CALL :COPY %in_pdf%\SMV_Verification_Guide.pdf %out_guides%\.
 
 echo.
-echo copying Smokeview Documentation to the Documentation directory
+echo ***Copying Starup shortcuts
+echo.
 
-echo copying SMV_User_Guide.pdf
-copy %in_pdf%\SMV_User_Guide.pdf %out_guides%\.
+CALL :COPY "%in_for_bundle%\readme.html" "%out_guides%\Smokeview_release_notes.html"
 
-echo copying SMV_Technical_Reference_Guide.pdf
-copy %in_pdf%\SMV_Technical_Reference_Guide.pdf %out_guides%\.
+CALL :COPY "%bundleinfo%\Overview.html"             "%out_doc%\Overview.html"
 
-echo copying SMV_Verification_Guide.pdf
-copy %in_pdf%\SMV_Verification_Guide.pdf %out_guides%\.
+CALL :COPY "%bundleinfo%\FDS_Web_Site.url"          "%out_web%\Official_Web_Site.url"
 
-echo copying readme.html
-copy "%in_for_bundle%\readme.html" "%out_guides%\Smokeview_release_notes.html"
+CALL :COPY "%bundleinfo%\Updates.url"               "%out_web%\Software_Updates.url"
+
+CALL :COPY "%bundleinfo%\Docs.url"               "%out_web%\Documentation_Updates.url"
+
+CALL :COPY "%bundleinfo%\FDS_Development_Web_Site.url" "%out_web%\Developer_Web_Site.url"
+
+CALL :COPY "%bundleinfo%\discussion_group.url"          "%out_web%\Discussion_Group.url"
+
+CALL :COPY "%bundleinfo%\issue_tracker.url"          "%out_web%\Issue_Tracker.url"
+
+
+CALL :COPY %bundleinfo%\readme_examples.html "%out_examples%\Examples notes.html"
 
 echo.
-echo copying web page shortcuts
-
-echo copying Overview.html
-copy "%bundleinfo%\Overview.html"             "%out_doc%\Overview.html"
-
-echo copying FDS_Web_Site.url
-copy "%bundleinfo%\FDS_Web_Site.url"          "%out_web%\Official_Web_Site.url"
-
-echo copying Updates.url
-copy "%bundleinfo%\Updates.url"               "%out_web%\Software_Updates.url"
-
-echo copying Docs.url
-copy "%bundleinfo%\Docs.url"               "%out_web%\Documentation_Updates.url"
-
-echo copying FDS_Development_Web_Site.url
-copy "%bundleinfo%\FDS_Development_Web_Site.url" "%out_web%\Developer_Web_Site.url"
-
-echo copying discussion_group.url
-copy "%bundleinfo%\discussion_group.url"          "%out_web%\Discussion_Group.url"
-
-echo copying issue_tracker.url
-copy "%bundleinfo%\issue_tracker.url"          "%out_web%\Issue_Tracker.url"
-
-Rem Copy readme_examples file to Examples directory to let user download all examples
-
+echo ***Getting the Verification cases from the repository
 echo.
-echo Copying readme_examples.html to the Examples directory
-copy %bundleinfo%\readme_examples.html "%out_examples%\Examples notes.html"
-
-echo.
-echo Getting the Verification cases from the repository
 svn export --quiet --force https://fds-smv.googlecode.com/svn/trunk/FDS/trunk/Verification %out_examples2%
 
 set outdir=%out_examples%
@@ -252,19 +225,18 @@ cd %out_examples2%
 call %smv_casesbat%
 
 echo.
-echo Copying wrapup scripts for use in final installation
+echo ***Copying wrapup scripts for use in final installation
+echo.
 
-echo copying wrapup_fds_install_%platform%.bat
-copy "%bundleinfo%\wrapup_fds_install.bat" "%out_bundle%\%fdsversion%\wrapup_fds_install.bat
+CALL :COPY  "%bundleinfo%\wrapup_fds_install.bat" "%out_bundle%\%fdsversion%\wrapup_fds_install.bat
 
-echo copying shortcut.exe
-copy "%bundleinfo%\shortcut.exe" "%out_bundle%\%fdsversion%\shortcut.exe"
+CALL :COPY  "%bundleinfo%\shortcut.exe" "%out_bundle%\%fdsversion%\shortcut.exe"
 
-echo copying set_path.exe
-copy "%bundleinfo%\set_path.exe" "%out_bundle%\%fdsversion%\set_path.exe"
+CALL :COPY  "%bundleinfo%\set_path.exe" "%out_bundle%\%fdsversion%\set_path.exe"
 
 echo.
-echo Compressing FDS/Smokeview distribution
+echo ***Compressing FDS/Smokeview distribution
+echo.
 
 cd "%svn_root%\..\Google Drive\Bundle_Versions"
 set gupload=%CD%
@@ -277,17 +249,41 @@ wzzip -a -r -xExamples\*.csv -P ..\..\..\%basename%.zip * > winzip.out
 Rem create an installation file from the zipped bundle directory
 
 echo.
-echo Creating installer
+echo ***Creating installer
+echo.
+
 cd %uploads%
 echo Setup is about to install FDS %fds_version% and Smokeview %smv_version% > %bundleinfo%\message.txt
 echo Press Setup to begin installation. > %bundleinfo%\main.txt
 if exist %basename%.exe erase %basename%.exe
 wzipse32 %basename%.zip -runasadmin -a %bundleinfo%\about.txt -st"FDS %fds_version% Smokeview %smv_version% Setup" -d "c:\Program Files\FDS\%fdsversion%" -c wrapup_fds_install.bat
 
-IF EXIST "%gupload%" echo copying %basename%.exe to %gupload%
-IF EXIST "%gupload%" copy %basename%.exe "%gupload%"
+IF EXIST "%gupload%" CALL :COPY %basename%.exe "%gupload%"
 
-rmdir %out_examples2%
+rmdir /q /s %out_examples2%
 
 start explorer %manifest%
-type %manifest%
+
+echo.
+echo ***FDS/Smokeview win%platform% bundle built
+echo.
+
+cd %CURDIR%
+
+GOTO :EOF
+
+:COPY
+set label=%~n1.%~x1
+set infile=%1
+set outfile=%2
+IF EXIST %infile% (
+   echo Copying %label%
+   copy %infile% %outfile%
+) ELSE (
+   echo.
+   echo *** warning: %infile% does not exist
+   echo.
+   pause
+)
+exit /b
+
