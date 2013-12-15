@@ -53,7 +53,7 @@ echo copying background.exe
 copy ..\..\Utilities\background\intel_win_32\background.exe %smvdir%\background.exe
 
 echo copying set_path.exe
-copy ..\..\Utilities\set_fds_path\intel_win_32\set_path32.exe %smvdir%\set_path.exe
+copy ..\..\Utilities\Scripts\bundle_setup\set_path.exe %smvdir%\set_path.exe
 
 echo copying objects.svo
 copy objects.svo %smvdir%\.
