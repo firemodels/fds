@@ -227,12 +227,12 @@ void draw_geom(int flag, int frameflag){
       }
       if(smoothtrinormal==0){
         glNormal3fv(trianglei->tri_norm);
-        for(j=0;j<2;j++){
+        for(j=0;j<3;j++){
           glVertex3fv(trianglei->points[j]->xyz);
         }
       }
       else{
-        for(j=0;j<2;j++){
+        for(j=0;j<3;j++){
           glNormal3fv(trianglei->points[j]->point_norm);
           glVertex3fv(trianglei->points[j]->xyz);
         }
@@ -263,7 +263,7 @@ void draw_geom(int flag, int frameflag){
           glBegin(GL_QUADS);
           lasttexture=texti;
         }
-        for(j=0;j<2;j++){
+        for(j=0;j<3;j++){
           glNormal3fv(trianglei->points[j]->point_norm);
           glTexCoord2fv(trianglei->points[j]->txyz); // texture point locations not defined yet
           glVertex3fv(trianglei->points[j]->xyz);
