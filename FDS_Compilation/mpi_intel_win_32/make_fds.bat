@@ -1,5 +1,5 @@
 @echo off
-set intelbin="%IFORT_COMPILER13%\bin"
+set intelbin="%IFORT_COMPILER14%\bin"
 
 call %intelbin%\ifortvars ia32
 
