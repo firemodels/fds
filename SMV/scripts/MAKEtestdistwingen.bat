@@ -16,6 +16,7 @@ goto:eof
 
 :endif_envexist
 
+set CURDIR=%CD%
 call %envfile%
 
 %svn_drive%
@@ -32,65 +33,82 @@ set gupload=%CD%
 
 cd %svn_root%\SMV\for_bundle
 
-echo
-echo filling distribution directory
+echo.
+echo ***filling distribution directory
+echo.
 IF EXIST %smvdir% rmdir /S /Q %smvdir%
 mkdir %smvdir%
 
-echo copying smokeview_win_test_%platform%.exe
-copy ..\Build\intel_win_%platform%\smokeview_win_test_%platform%.exe %smvdir%\smokeview.exe
+CALL :COPY ..\Build\intel_win_%platform%\smokeview_win_test_%platform%.exe %smvdir%\smokeview.exe
 
-echo copying .po files
+echo.
+echo ***copying .po files
+echo.
 copy *.po %smvdir%\.
 
-echo copying smokediff_win_%platform%.exe
-copy ..\..\Utilities\smokediff\intel_win_%platform%\smokediff_win_%platform%.exe %smvdir%\smokediff.exe
+CALL :COPY ..\..\Utilities\smokediff\intel_win_%platform%\smokediff_win_%platform%.exe %smvdir%\smokediff.exe
 
-echo copying smokezip_win_%platform%.exe
-copy ..\..\Utilities\smokezip\intel_win_%platform%\smokezip_win_%platform%.exe %smvdir%\smokezip.exe
+CALL :COPY  ..\..\Utilities\smokezip\intel_win_%platform%\smokezip_win_%platform%.exe %smvdir%\smokezip.exe
 
-echo copying background.exe
-copy ..\..\Utilities\background\intel_win_32\background.exe %smvdir%\background.exe
+CALL :COPY  ..\..\Utilities\background\intel_win_32\background.exe %smvdir%\background.exe
 
-echo copying set_path.exe
-copy ..\..\Utilities\Scripts\bundle_setup\set_path.exe %smvdir%\set_path.exe
+echo bundleinfo=%bundleinfo%
+CALL :COPY ..\..\Utilities\Scripts\bundle_setup\set_path.exe %smvdir%\set_path.exe
 
-echo copying objects.svo
-copy objects.svo %smvdir%\.
+CALL :COPY objects.svo %smvdir%\.
 
-if "%platform%"=="32" echo copying glew32.dll
-if "%platform%"=="32" copy glew32.dll %smvdir%\.
-if "%platform%"=="64" echo copying glew32_x64.dll
-if "%platform%"=="64" copy glew32_x64.dll %smvdir%\.
+if "%platform%"=="32" CALL :COPY glew32.dll %smvdir%\glew32.dll
+if "%platform%"=="64" CALL :COPY glew32_x64.dll %smvdir%\glew32_x64.dll
 
-if "%platform%"=="32" echo copying pthreadVC.dll
-if "%platform%"=="32" copy pthreadVC.dll %smvdir%\.
-if "%platform%"=="64" echo copying pthreadVC2_x64.dll
-if "%platform%"=="64" copy pthreadVC2_x64.dll %smvdir%\.
-echo copying sh2bat.exe
-copy %sh2bat%\sh2bat.exe %smvdir%\.
+if "%platform%"=="32" CALL :COPY pthreadVC.dll %smvdir%\pthreadVC.dll
+if "%platform%"=="64" CALL :COPY pthreadVC2_x64.dll %smvdir%\pthreadVC2_x64.dll
 
+CALL :COPY %sh2bat%\sh2bat.exe %smvdir%\sh2bat.exe
 
-echo copying wrapup_smv_install_%platform%.bat
-copy wrapup_smv_install_%platform%.bat "%smvdir%\wrapup_smv_install.bat
+CALL :COPY wrapup_smv_install_%platform%.bat "%smvdir%\wrapup_smv_install.bat
 
-echo copying smokeview.ini
-copy smokeview.ini %smvdir%\.
+CALL :COPY smokeview.ini %smvdir%\smokeview.ini
 
-echo copying textures
+echo.
+echo ***copying textures
+echo.
 mkdir %smvdir%\textures
 copy textures\*.jpg %smvdir%\textures
 copy textures\*.png %smvdir%\textures
 
-echo
-echo winzipping distribution directory
+echo.
+echo ***winzipping distribution directory
+echo.
 cd %smvdir%
 wzzip -a -r -p %zipbase%.zip *
 
-echo
-echo creating self-extracting archive
+echo.
+echo ***creating self-extracting archive
+echo.
 wzipse32 %zipbase%.zip -runasadmin -d "c:\Program Files\FDS\%fds_edition%\bin" -c wrapup_smv_install.bat
 
-copy %zipbase%.exe ..\.
-IF EXIST "%gupload%" echo copying %zipbase%.exe to %gupload%
-IF EXIST "%gupload%" copy %zipbase%.exe "%gupload%"
+CALL :COPY %zipbase%.exe ..\.
+IF EXIST "%gupload%" CALL :COPY %zipbase%.exe "%gupload%"
+
+echo.
+echo ***Smokeview win%platform% test bundle built
+echo.
+
+cd %CURDIR%
+GOTO :EOF
+
+:COPY
+set label=%~n1.%~x1
+set infile=%1
+set outfile=%2
+IF EXIST %infile% (
+   echo Copying %label%
+   copy %infile% %outfile%
+) ELSE (
+   echo.
+   echo *** warning: %infile% does not exist
+   echo.
+   pause
+)
+exit /b
+
