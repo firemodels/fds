@@ -17,20 +17,40 @@ $T(r,t)$, is given by
 \rho c \left( \frac{\partial T}{\partial t} \right) = \frac{1}{r} \frac{\partial}{\partial r} k r \left( \frac{\partial T}{\partial r} \right)
 \label{eq:cable_temp}
 \ee
-where $\rho$, $c$ and $k$ are the effective density, specific heat, and thermal conductivity of the solid, respectively, and $r$ is the radius of the cable~(\si{m}).
-The boundary condition is defined as
+where $\rho$, $c$ and $k$ are the effective density~(\si{kg/m^3}), specific heat~(\si{J/(g.K)}), and thermal conductivity~(\si{W/m.K}) of the solid, respectively, and $r$ is the radius of the cable~(\si{m}).
+The boundary condition at the exterior boundary, $r = R$, is defined as
 \be
-\dot q'' = k \left( \frac{\partial T}{\partial r} \right) (r,t)
+\dot q'' = k \left( \frac{\partial T}{\partial r} \right) (R,t)
 \ee
-A finite difference approximation to Eq.~\ref{eq:cable_temp} is given by
+where $\dot q''$ is the assumed axially-symmetric heat flux to the exterior surface of the cable~(\si{kW/m^2}).
+The net heat flux at the surface of the cable is determined from the exposing gas temperature surrounding the cable at the $n$-th time step, $T\sb{g}(t^n)$
 \be
-\rho c \left[ \frac{T_i^{n+1} - T_i^n}{\delta t} \right] = \frac{2 k}{(r_{i+1} + r_i)} \frac{1}{2 \delta r} \left[ r_i \frac{T_{i+1}^n - T_i^n}{\delta r} - r_{i-1} \frac{T_{i}^n - T_{i-1}^n}{\delta r} + r_i \frac{T_{i+1}^{n+1} - T_i^{n+1}}{\delta r} - r_{i-1} \frac{T_{i}^{n+1} - T_{i-1}^{n+1}}{\delta r} \right]
+\dot q''(t^n) = \varepsilon \sigma (T\sb{g}(t^n)^4 - (T\sb{s}^n)^4) + h (T\sb{g}(t^n) - T\sb{s}^n)
+\label{eq:cable_net_heat_flux}
 \ee
-where the time step $\delta t$ is given by
-\be
-\delta t = \frac{c \rho \delta r^2}{2 k}
-\ee
+where $\varepsilon$ is the emissivity of the cable surface (assumed to be 0.95), $\sigma$ is the Stefan-Boltzmann constant (\SI{5.67e-8}{W/(m^2.K^4)}), $h$ is the convective heat transfer coefficient (assumed to be \SI{10}{W/(m^2.K)}, which is typical of free convection), $T\sb{g}(t^n)$ is the effective gas temperature at the $n$-th time step~(\si{K}), and $T\sb{s}^n$ is the surface temperature of the cable~(\si{K}).
 
+
+\clearpage
+
+
+A slight complication of the solution methodology described above is in situations where the cable is surrounded by a protective layer like a conduit, armor jacket, or tray covering. In CAROLFIRE, only conduits were considered in the modeling, but other protective measures can be handled in similar fashion, assuming test data is available to validate the various physical assumptions.
+
+A conduit forms a thermal barrier between the hot gases of a fire and the cable itself. A simple way to incorporate its effect into the THIEF model is to replace the ``exposing'' gas temperature, $T\sb{g}$, in Eq.~\ref{eq:cable_net_heat_flux} by the conduit's temperature, $T\sb{c}$. In other words, the cable no longer ``sees'' the hot gases from the fire, but rather the interior surface of the conduit.
+
+A steel conduit may be assumed thermally-thin; that is, its conductivity is so large that for all practical purposes it can be assumed that its exterior and interior surface temperatures are equal. Its temperature increases due to the heat flux from the hot gases at its exterior surface, which is given by
+\be
+\dot q''\sb{ext}(t^n) = \varepsilon\sb{c} \sigma (T\sb{g}(t^n)^4 - (T\sb{c}^n)^4) + h (T\sb{g}(t^n) - T\sb{c}^n)
+\ee
+where $T\sb{c}^n$ is the conduit temperature at the $n$-th time step~(\si{K}), and $\varepsilon\sb{c}$ is the emissivity of its surface (assumed to be 0.85, which is typical of non-polished steel). Heat is transferred from the interior surface of the conduit to the cable surface via
+\be
+\dot q''\sb{int}(t^n) = F \sigma ((T\sb{c}^n)^4 - (T\sb{s}^n)^4) + h (T\sb{c}^n - T\sb{s}^n)
+\ee
+where
+\be
+F = \left( \left( \frac{R\sb{c}}{R} \right) \frac{1}{\varepsilon} + \frac{1-\varepsilon\sb{c}}{\varepsilon\sb{c}} \right)^{-1}
+\ee
+where $R\sb{c}$ is the inner radius of the conduit~(\si{m}). The view factor, $F$, is based on the assumption that the conduit and cable are concentric cylinders.
 
 \clearpage
 
