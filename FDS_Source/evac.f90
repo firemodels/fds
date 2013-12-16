@@ -423,7 +423,7 @@ MODULE EVAC
        ALPHA_HAWK, DELTA_HAWK, EPSILON_HAWK, THETA_HAWK, A_HAWK_T_START, T_STOP_HD_GAME, &
        F_MIN_FALL, F_MAX_FALL, D_OVERLAP_FALL, TAU_FALL_DOWN, A_FAC_FALLEN, TIME_FALL_DOWN, PROB_FALL_DOWN, &
        T_ASET_HAWK, T_0_HAWK, T_ASET_TFAC_HAWK, MAX_INITIAL_OVERLAP, TIME_INIT_NERVOUSNESS, &
-       SMOKE_SPEED_ALPHA, SMOKE_SPEED_BETA, CROWBAR_DT_READ
+       SMOKE_SPEED_ALPHA, SMOKE_SPEED_BETA, CROWBAR_DT_READ, NASH_CLOSE_ENOUGH
   INTEGER, DIMENSION(3) :: DEAD_RGB
   !
   REAL(EB), DIMENSION(:), ALLOCATABLE :: Tsteps
@@ -596,7 +596,7 @@ CONTAINS
          TAU_CHANGE_V0, THETA_SECTOR, CONST_DF, FAC_DF, CONST_CF, FAC_CF, &
          FAC_1_WALL, FAC_2_WALL, FAC_V0_DIR, FAC_V0_NOCF, FAC_NOCF, &
          CF_MIN_A, CF_FAC_A_WALL, CF_MIN_TAU, CF_MIN_TAU_INER, CF_FAC_TAUS, &
-         FAC_DOOR_QUEUE, FAC_DOOR_ALPHA, FAC_DOOR_WAIT, CF_MIN_B, &
+         FAC_DOOR_QUEUE, FAC_DOOR_ALPHA, FAC_DOOR_WAIT, CF_MIN_B, NASH_CLOSE_ENOUGH, &
          FAC_V0_UP, FAC_V0_DOWN, FAC_V0_HORI, FAC_DOOR_OLD, FAC_DOOR_OLD2, &
          R_HERDING, W0_HERDING, WR_HERDING, I_HERDING_TYPE, DOT_HERDING, EVAC_FDS6, EVAC_DELTA_SEE, &
          MAX_HUMANS_DIM, C_HAWK, R_HAWK_DOVE, A_HAWK_T_FACTOR, HERDING_TAU_FACTOR, &
@@ -1521,6 +1521,7 @@ CONTAINS
       FAC_DOOR_WAIT   = 0.9_EB  ! Door selection algorithm: patience factor
       FAC_DOOR_OLD    = 0.1_EB  ! The present door is considered "smoke free" longer than others
       FAC_DOOR_OLD2   = 0.9_EB  ! The present door is considered "not too much smoke" longer than others
+      NASH_CLOSE_ENOUGH = 0.05_EB ! If less than 5 percent changes targer door in the initialization => converged
 
       R_HERDING       =  5.0_EB  ! Herding agents: How far to look, the radius
       W0_HERDING      = 10.0_EB  ! Herding agents: Weight at the distance r=0 (linear function)
@@ -6774,13 +6775,20 @@ CONTAINS
                 HR%I_TARGET = GROUP_KNOWN_DOORS(J)%I_TARGET
              END IF           ! First member of a group or a lonely soul
           END DO              ! 1, N_HUMANS
-          IF (N_CHANGE_DOORS-I_CHANGE_OLD == 1) THEN
-             WRITE(LU_EVACOUT,FMT='(A,2I10)') ' INIT: Door changes i_tmp ',  I_TMP, I_TMP2
+          ! Stop Nash iterations if close enough, NASH_CLOSE_ENOUGH
+          IF (REAL(N_CHANGE_DOORS-I_CHANGE_OLD,EB)/REAL(MAX(1,M%N_HUMANS),EB) <= NASH_CLOSE_ENOUGH) THEN
+             WRITE(LU_EVACOUT,FMT='(A,2F10.4)') ' INIT: Nash Changes per agent close enough: ', &
+                  REAL(N_CHANGE_DOORS-I_CHANGE_OLD,EB)/REAL(MAX(1,M%N_HUMANS),EB), NASH_CLOSE_ENOUGH
              I_TMP2 = I_TMP
           ELSE
              I_TMP2 = -1
           END IF
-          IF (N_CHANGE_DOORS/MAX(1,M%N_HUMANS) > 10*M%N_HUMANS) I_TMP2 = I_TMP
+          ! Maximum number of Nash iterations is twenty per agent
+          IF (N_CHANGE_TRIALS/MAX(1,M%N_HUMANS) > 20) THEN
+             I_TMP2 = I_TMP
+             WRITE(LU_EVACOUT,FMT='(A,2F10.4)') ' INIT: Exit Nash iteration after 20 ones: ', &
+                  REAL(N_CHANGE_DOORS-I_CHANGE_OLD,EB)/REAL(MAX(1,M%N_HUMANS),EB), NASH_CLOSE_ENOUGH
+          END IF
           IF (ABS(FAC_DOOR_QUEUE) < TWO_EPSILON_EB) I_CHANGE_OLD = N_CHANGE_DOORS  ! DO NOT ITERATE THE NASH EQUILIBRIUM
           I_MODE = 1  ! change_target_door initializations have now been done
        END DO         ! Nash iterations
