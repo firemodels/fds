@@ -8433,7 +8433,7 @@ fluxes are appropriate output quantities.
 \subsubsection{Volume, Mass, and Heat Flow}
 \label{info:flows}
 
-The net flow of mass and energy into or out of compartments can be useful for many applications. There are several outputs that address these. All are prescribed via
+The net flow of mass and energy into or out of a planar surface can be a useful diagnostic. There are several outputs that address these. All are prescribed via
 the device ({\ct DEVC}) namelist group only. For example:
 
 \begin{lstlisting}
@@ -8443,18 +8443,17 @@ the device ({\ct DEVC}) namelist group only. For example:
 \noindent
 outputs the net integrated mass flux through the given planar area, oriented in the positive $z$ direction, in this case. The three flows {\ct 'VOLUME FLOW'}, {\ct 'MASS FLOW'},
 and {\ct 'HEAT FLOW'} are defined:
-\begin{eqnarray*} \dot{V} &=& \int \bu \cdot \d \mathbf{S}  \\
-                  \dot{m} &=& \int \rho \bu \cdot \d \mathbf{S} \\
-                  \dot{q} &=& \int c_p \rho (T-T_\infty) \, \bu \cdot \d \mathbf{S}
-\end{eqnarray*}
-The addition of a {\ct +} or {\ct -} to the {\ct QUANTITY} names
-yields the integral of the flow in the positive or negative direction
-only. In other words, if you want to know the mass flow out of a
-compartment, use {\ct 'MASS FLOW +'} or {\ct 'MASS FLOW -'}, depending
-on the orientation of the door.
+\begin{align}
+\dot{V} &= \int \bu \cdot \d \mathbf{S}  \\
+\dot{m} &= \int \rho \bu \cdot \d \mathbf{S} \\
+\dot{q} &= \int \rho c_p (T-T_\infty) \, \bu \cdot \d \mathbf{S}
+\end{align}
+The addition of a {\ct +} or {\ct -} to the {\ct QUANTITY} names yields the integral of the flow in the positive or negative direction only. In other words, if you want to know the mass flow out of a compartment, use {\ct 'MASS FLOW +'} or {\ct 'MASS FLOW -'}, depending on the orientation of the door.
 
-The quantities {\ct 'VOLUME FLOW'}, {\ct 'MASS FLOW'}, and {\ct 'HEAT FLOW'} cannot be applied at a solid boundary.  Instead, use the wall equivalents {\ct 'VOLUME FLOW WALL'}, {\ct 'MASS FLOW WALL'}, and {\ct 'HEAT FLOW WALL'}.  These quantities require an {\ct IOR} for the surface (positive points into the domain).  Note that the device should not be placed exactly on the surface, but rather between $\delta x/2$ and $\delta x$ away from the surface.
-
+The quantities {\ct 'VOLUME FLOW'}, {\ct 'MASS FLOW'}, and {\ct 'HEAT FLOW'} cannot be applied at a solid boundary.  Instead, use the wall equivalents {\ct 'VOLUME FLOW WALL'}, {\ct 'MASS FLOW WALL'}, and {\ct 'HEAT FLOW WALL'}.  These quantities require an {\ct IOR} for the surface (positive points into the domain).  Note that, in order to be a more useful diagnostic for global energy balances, the wall heat flow at the wall is defined using the sensible enthalpy of the mixture (composition taken at the wall) and is not relative to ambient conditions:
+\begin{align}
+\dot{q}_{\si{w}} &= \int \rho h_s(T_{\si{w}}) \, \bu \cdot \d \mathbf{S}
+\end{align}
 
 \subsection{Temporally-Integrated Outputs}
 \label{info:time_integral}
@@ -8916,6 +8915,7 @@ Here, the {\ct ID} is just a label in the output file. When an output quantity i
 {\ct VISCOSITY}                                 & $\mu$                                         & \si{kg/(m.s)}  & D,I,P,S      \\ \hline
 {\ct VISIBILITY}                                & Section~\ref{info:visibility}                 & m              & D,I,P,S      \\ \hline
 {\ct VOLUME FLOW}                               & Section~\ref{info:flows}                      & m$^3$/s        & D            \\ \hline
+{\ct VOLUME FLOW WALL}                          & Section~\ref{info:flows}                      & m$^3$/s        & D            \\ \hline
 {\ct VOLUME FRACTION}$^{****}$                  & $X_\alpha$                                    & mol/mol        & D,I,P,S      \\ \hline
 {\ct WALL CLOCK TIME}                           & Elapsed wall clock time                       & s              & D            \\ \hline
 {\ct WALL TEMPERATURE}                          & Surface temperature                           & $^\circ$C      & B,D          \\ \hline
