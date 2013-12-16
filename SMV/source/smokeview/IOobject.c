@@ -735,6 +735,8 @@ void draw_devices(void){
       if(vdevi->unique==0)continue;
       xyz=vdevi->valdev->xyz;
       get_vdevice_vel(global_times[itimes], vdevi, vel, &angle, &dvel, &dangle, &valid);
+      if(vispilot==1){
+      }
       if(valid==1){
         float xxx1[3], xxx2[3];
 
@@ -5652,7 +5654,6 @@ void setup_device_data(void){
 
   setup_tree_devices();
 
-
   // convert velocities to pilot chart format
   
   for(i=0;i<nvdeviceinfo;i++){
@@ -5660,7 +5661,6 @@ void setup_device_data(void){
     devicedata *udev, *vdev, *wdev;
     int j,n,ibucket;
     pilotdata *piloti;
-    float total;
 
     vdevicei = vdeviceinfo + i;
     udev = vdevicei->udev;
@@ -5690,16 +5690,16 @@ void setup_device_data(void){
         piloti->vel[ibucket]+=vel;
       }
     }
-    total=0.0;
+    piloti->total=0;
     for(j=0;j<8;j++){
-      total+=piloti->fraction[j];
+      piloti->total+=piloti->fraction[j];
       if(piloti->fraction[j]>0.0){
         piloti->vel[j]/=piloti->fraction[j];
       }
     }
-    if(total>0.0){
+    if(piloti->total>0){
       for(j=0;j<8;j++){
-        piloti->fraction[j]/=total;
+        piloti->fraction[j]/=(float)piloti->total;
       }
     }
   }
