@@ -845,11 +845,18 @@ typedef struct _device{
   int type;
 } devicedata;
 
+/* --------------------------  pilot ------------------------------------ */
+
+typedef struct {
+  float fraction[8],vel[8];
+} pilotdata;
+
 /* --------------------------  vdevice ------------------------------------ */
 
 typedef struct {
   int unique;
   int filetype;
+  pilotdata pilotinfo;
   devicedata *udev,*vdev,*wdev,*valdev,*veldev,*angledev,*sd_veldev,*sd_angledev;
 } vdevicedata;
 

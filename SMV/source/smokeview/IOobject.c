@@ -832,7 +832,7 @@ void draw_devices(void){
 
     dpsi=0.0;
     if((active_smokesensors==1&&show_smokesensors!=0&&STRCMP(devicei->object->label,"smokesensor")==0)||
-      STRCMP(devicei->object->label,"thermocouple")==0
+       STRCMP(devicei->object->label,"thermocouple")==0
       ){
       float *xyznorm;
 
@@ -5649,7 +5649,60 @@ void setup_device_data(void){
   for(i=0;i<nvdeviceinfo;i++){
     vdeviceptrinfo[i] = vdeviceinfo + i;
   }
+
   setup_tree_devices();
+
+
+  // convert velocities to pilot chart format
+  
+  for(i=0;i<nvdeviceinfo;i++){
+    vdevicedata *vdevicei;
+    devicedata *udev, *vdev, *wdev;
+    int j,n,ibucket;
+    pilotdata *piloti;
+    float total;
+
+    vdevicei = vdeviceinfo + i;
+    udev = vdevicei->udev;
+    vdev = vdevicei->vdev;
+    wdev = vdevicei->wdev;
+
+    if(udev==NULL||vdev==NULL||wdev==NULL)continue;
+    n=MIN(udev->nvals,vdev->nvals);
+    n=MIN(n,wdev->nvals);
+    piloti = &(vdevicei->pilotinfo);
+    for(j=0;j<8;j++){
+      piloti->fraction[j]=0.0;
+      piloti->vel[j]=0.0;
+    }
+    for(j=0;j<n;j++){
+      float uval, vval, wval, vel, veluv, angle;
+
+      uval = udev->vals[j];
+      vval = vdev->vals[j];
+      wval = wdev->vals[j];
+      vel = sqrt(uval*uval+vval*vval+wval*wval);
+      veluv = sqrt(uval*uval+vval*vval);
+      if(veluv>0.0){
+        angle = fmod(atan2(vval,uval)*RAD2DEG+22.5,360.0);
+        ibucket=CLAMP(angle/45.0,0,7);
+        piloti->fraction[ibucket]++;
+        piloti->vel[ibucket]+=vel;
+      }
+    }
+    total=0.0;
+    for(j=0;j<8;j++){
+      total+=piloti->fraction[j];
+      if(piloti->fraction[j]>0.0){
+        piloti->vel[j]/=piloti->fraction[j];
+      }
+    }
+    if(total>0.0){
+      for(j=0;j<8;j++){
+        piloti->fraction[j]/=total;
+      }
+    }
+  }
 
   FREEMEMORY(vals);
   FREEMEMORY(valids);
