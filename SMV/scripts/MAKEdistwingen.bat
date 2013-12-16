@@ -107,9 +107,10 @@ GOTO :EOF
 :COPY
 set label=%~n1.%~x1
 set infile=%1
+set infiletime=%~t1
 set outfile=%2
 IF EXIST %infile% (
-   echo Copying %label%
+   echo Copying %label%, %infiletime%
    copy %infile% %outfile%
 ) ELSE (
    echo.
