@@ -5222,7 +5222,7 @@ INTEGER, INTENT(IN), OPTIONAL :: OPT_WALL_INDEX,OPT_LP_INDEX
 INTEGER, INTENT(IN) :: INDX,Y_INDEX,Z_INDEX,PART_INDEX,NM
 REAL(EB) :: CONCORR,FLUX,DFLUXDT,SOLID_PHASE_OUTPUT_OLD,VOLSUM,C_S_ADJUST_UNITS,TF_MEAN,MFT,&
             ZZ_GET(0:N_TRACKED_SPECIES),Y_SPECIES,KSGS,DEPTH,UN,H_S
-INTEGER :: II1,II2,IIG,JJG,KKG,NN,NR,IWX,SURF_INDEX,I,IW
+INTEGER :: II1,II2,IIG,JJG,KKG,NN,NR,IWX,SURF_INDEX,I,J,K,IW
 LOGICAL :: T_ITERATIVE
 TYPE(WALL_TYPE), POINTER :: WC
 TYPE(LAGRANGIAN_PARTICLE_TYPE), POINTER :: LP
@@ -5255,7 +5255,7 @@ ELSEIF (PRESENT(OPT_LP_INDEX)) THEN
       IF (LPC%N_ORIENTATION > 1) THEN ! if particles are splitted
          T_ITERATIVE = .TRUE.
          DO I = OPT_LP_INDEX,OPT_LP_INDEX+LPC%N_ORIENTATION-1
-               TF_MEAN = TF_MEAN + LAGRANGIAN_PARTICLE(I)%ONE_D%TMP_F - TMPM
+            TF_MEAN = TF_MEAN + LAGRANGIAN_PARTICLE(I)%ONE_D%TMP_F - TMPM
          ENDDO
          TF_MEAN = TF_MEAN / REAL(LPC%N_ORIENTATION, EB)
       ENDIF
@@ -5341,23 +5341,26 @@ SOLID_PHASE_SELECT: SELECT CASE(INDX)
          SOLID_PHASE_OUTPUT = 0._EB
       ENDIF
       IF (INDX==16) SOLID_PHASE_OUTPUT = SOLID_PHASE_OUTPUT/SURFACE(SURF_INDEX)%SURFACE_DENSITY
-   CASE(17:19) ! MASS FLOW WALL, HEAT FLOW WALL
+   CASE(17:19) ! VOLUME FLOW WALL, MASS FLOW WALL, HEAT FLOW WALL
       SOLID_PHASE_OUTPUT = 0._EB
-      DV_K_LOOP: DO KKG=DV%K1,DV%K2
-         DV_J_LOOP: DO JJG=DV%J1,DV%J2
-            DV_I_LOOP: DO IIG=DV%I1,DV%I2
+      DV_K_LOOP: DO K=DV%K1,DV%K2
+         DV_J_LOOP: DO J=DV%J1,DV%J2
+            DV_I_LOOP: DO I=DV%I1,DV%I2
+               IIG=I
+               JJG=J
+               KKG=K
+               SELECT CASE(DV%IOR)
+                  ! convention here is: inflow is positive (adds mass to domain), outflow is negative (subtracts mass)
+                  CASE( 1); UN =  U(I,J,K); IIG=IIG+1
+                  CASE(-1); UN = -U(I,J,K)
+                  CASE( 2); UN =  V(I,J,K); JJG=JJG+1
+                  CASE(-2); UN = -V(I,J,K)
+                  CASE( 3); UN =  W(I,J,K); KKG=KKG+1
+                  CASE(-3); UN = -W(I,J,K)
+               END SELECT
                IW = WALL_INDEX(CELL_INDEX(IIG,JJG,KKG),-DV%IOR)
                IF (IW==0) CYCLE DV_I_LOOP
                WC => WALL(IW)
-               SELECT CASE(DV%IOR)
-                  ! convention here is: inflow is positive (adds mass to domain), outflow is negative (subtracts mass)
-                  CASE( 1); UN = U(IIG-1,JJG,KKG)
-                  CASE(-1); UN = -U(IIG,JJG,KKG)
-                  CASE( 2); UN = V(IIG,JJG-1,KKG)
-                  CASE(-2); UN = -V(IIG,JJG,KKG)
-                  CASE( 3); UN = W(IIG,JJG,KKG-1)
-                  CASE(-3); UN = -W(IIG,JJG,KKG)
-               END SELECT
                SELECT CASE(INDX)
                   CASE(17)
                      SOLID_PHASE_OUTPUT = SOLID_PHASE_OUTPUT + UN*WC%AW
