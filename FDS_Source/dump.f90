@@ -5360,8 +5360,10 @@ SOLID_PHASE_SELECT: SELECT CASE(INDX)
                END SELECT
                SELECT CASE(INDX)
                   CASE(17)
-                     SOLID_PHASE_OUTPUT = SOLID_PHASE_OUTPUT + WC%RHO_F*UN*WC%AW
+                     SOLID_PHASE_OUTPUT = SOLID_PHASE_OUTPUT + UN*WC%AW
                   CASE(18)
+                     SOLID_PHASE_OUTPUT = SOLID_PHASE_OUTPUT + WC%RHO_F*UN*WC%AW
+                  CASE(19)
                      IF (N_TRACKED_SPECIES>0) ZZ_GET(1:N_TRACKED_SPECIES) = WC%ZZ_F(1:N_TRACKED_SPECIES)
                      CALL GET_SENSIBLE_ENTHALPY(ZZ_GET,H_S,WC%ONE_D%TMP_F)
                      SOLID_PHASE_OUTPUT = SOLID_PHASE_OUTPUT + WC%RHO_F*H_S*UN*WC%AW*0.001_EB
