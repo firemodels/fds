@@ -23,7 +23,9 @@
 #include "smokeheaders.h"
 #include "threader.h"
 
+#ifdef pp_PILOT
 SVEXTERN int SVDECL(vispilot,0);
+#endif
 SVEXTERN int SVDECL(compute_fed,0);
 SVEXTERN int SVDECL(tour_global_tension_flag,1);
 SVEXTERN float SVDECL(tour_global_tension,0.0);
