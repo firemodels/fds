@@ -104,12 +104,12 @@ extern "C" void glui_device_setup(int main_window){
       PANEL_objectvalues = glui_device->add_panel_to_panel(PANEL_objects,"Device/Object values",true);
       CHECKBOX_device_1=glui_device->add_checkbox_to_panel(PANEL_objectvalues,_("Velocity vectors"),&showvdeviceval);
       CHECKBOX_device_2=glui_device->add_checkbox_to_panel(PANEL_objectvalues,_("Show values"),&showdeviceval,SHOWDEVICEVALS,Device_CB);
+#ifdef pp_PILOT
+      glui_device->add_checkbox_to_panel(PANEL_objectvalues,_("Pilot view"),&vispilot);
+#endif      
       CHECKBOX_device_4=glui_device->add_checkbox_to_panel(PANEL_objectvalues,_("Color by value"),&colordeviceval,COLORDEVICEVALS,Device_CB);
       glui_device->add_spinner_to_panel(PANEL_objectvalues,"min",GLUI_SPINNER_FLOAT,&device_valmin);
       glui_device->add_spinner_to_panel(PANEL_objectvalues,"max",GLUI_SPINNER_FLOAT,&device_valmax);
-#ifdef pp_PILOT      
-      glui_device->add_checkbox_to_panel(PANEL_objectvalues,_("Pilot view"),&vispilot);
-#endif      
 
       PANEL_devicevis=glui_device->add_panel_to_panel(PANEL_objectvalues,"",false);
       RADIO_devicetypes=glui_device->add_radiogroup_to_panel(PANEL_devicevis,&devicetypes_index,DEVICE_devicetypes,Device_CB);

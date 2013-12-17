@@ -689,7 +689,56 @@ void output_device_val(devicedata *devicei){
   }
 }
 
-  /* ----------------------- draw_devices ----------------------------- */
+/* ----------------------- draw_pilot ----------------------------- */
+
+#ifdef pp_PILOT
+void draw_pilot(void){
+  devicedata *devicei;
+  int i;
+
+  if(showtime==1&&itimes>=0&&itimes<nglobal_times&&vispilot==1&&nvdeviceinfo>0){
+    glEnable(GL_LIGHTING);
+    glMaterialfv(GL_FRONT_AND_BACK,GL_SHININESS,&block_shininess);
+    glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,block_ambient2);
+    glMaterialfv(GL_FRONT_AND_BACK,GL_SPECULAR,specular);
+    glEnable(GL_COLOR_MATERIAL);
+
+    glPushMatrix();
+    glScalef(SCALE2SMV(1.0),SCALE2SMV(1.0),SCALE2SMV(1.0));
+    glTranslatef(-xbar0,-ybar0,-zbar0);
+    glColor3fv(foregroundcolor);
+    glLineWidth(vectorlinewidth);
+    for(i=0;i<nvdeviceinfo;i++){
+      vdevicedata *vdevi;
+      float *xyz;
+      int j,k;
+      float angledir[8]={0.0,45.0,90.0,135.0,180.0,225.0,270.0,315.0};
+      pilotdata *piloti;
+
+      vdevi = vdeviceinfo + i;
+      if(vdevi->unique==0)continue;
+      xyz=vdevi->valdev->xyz;
+
+      piloti = &(vdevi->pilotinfo);
+
+      for(k=0;k<8;k++){
+        glPushMatrix();
+        glTranslatef(xyz[0],xyz[1],xyz[2]);
+        glRotatef(angledir[k],0.0,0.0,1.0);
+        glBegin(GL_LINES);
+        glVertex3f(0.0,0.0,0.0);
+        glVertex3f(0.0,SCALE2FDS(piloti->fraction[k]),0.0);
+        glEnd();
+        glPopMatrix();
+      }
+    }
+    glPopMatrix();
+    glDisable(GL_LIGHTING);
+  }
+}
+#endif
+
+/* ----------------------- draw_devices ----------------------------- */
 
 void draw_devices(void){
   devicedata *devicei;
@@ -735,30 +784,6 @@ void draw_devices(void){
       if(vdevi->unique==0)continue;
       xyz=vdevi->valdev->xyz;
       get_vdevice_vel(global_times[itimes], vdevi, vel, &angle, &dvel, &dangle, &valid);
-#ifdef pp_PILOT
-      if(vispilot==1){
-        int k;
-        float cosx[8]={1.0,sqrt(2.0)/2.0,0.0,-sqrt(2.0)/2.0,-1.0,-sqrt(2.0)/2.0,0.0,sqrt(2.0)/2.0};
-        float sinx[8]={0.0,sqrt(2.0)/2.0,1.0,sqrt(2.0)/2.0,0.0,-sqrt(2.0)/2.0,-1.0,-sqrt(2.0)/2.0};
-        float xxx1[3], xxx2[3];
-        pilotdata *piloti;
-
-        piloti = &(vdevi->pilotinfo);
-
-        glBegin(GL_LINES);
-        for(k=0;k<8;k++){
-           for(j=0;j<3;j++){
-             xxx1[j] = xyz[j];
-           }
-           xxx2[0] = xyz[0] + SCALE2FDS(cosx[k]*piloti->fraction[k]);
-           xxx2[1] = xyz[1] + SCALE2FDS(sinx[k]*piloti->fraction[k]);
-           xxx2[2] = xyz[2];
-           glVertex3fv(xxx1);
-           glVertex3fv(xxx2);
-        }
-        glEnd();
-      }
-#endif
       if(valid==1){
         float xxx1[3], xxx2[3];
 
@@ -946,7 +971,7 @@ void draw_devices(void){
   drawTargetNorm();
 }
 
-/* ----------------------- draw_devices ----------------------------- */
+/* ----------------------- drawTargetNorm ----------------------------- */
 
 void drawTargetNorm(void){
   int i;
@@ -5710,7 +5735,7 @@ void setup_device_data(void){
         vel = sqrt(uval*uval+vval*vval+wval*wval);
         veluv = sqrt(uval*uval+vval*vval);
         if(veluv>0.0){
-          angle = fmod(atan2(vval,uval)*RAD2DEG+22.5,360.0);
+          angle = fmod(180.0+atan2(vval,uval)*RAD2DEG+22.5,360.0);
           ibucket=CLAMP(angle/45.0,0,7);
           piloti->fraction[ibucket]++;
           piloti->vel[ibucket]+=vel;
@@ -5741,7 +5766,7 @@ void setup_device_data(void){
     }
     if(piloti->total>0){
       for(j=0;j<8;j++){
-        piloti->fraction[j]/=(float)piloti->total;
+        piloti->fraction[j]/=piloti->total;
       }
     }
   }
