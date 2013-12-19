@@ -33,6 +33,7 @@ CFAST_SVNROOT="$FIREBOT_HOME_DIR/cfast"
 TIME_LOG=$FIREBOT_DIR/output/timings
 ERROR_LOG=$FIREBOT_DIR/output/errors
 WARNING_LOG=$FIREBOT_DIR/output/warnings
+VALIDATION_STATS_LOG=$FIREBOT_DIR/output/statistics
 DB=_db
 IB=
 if [ "$FDSNETWORK" == "infiniband" ] ; then
@@ -1221,15 +1222,15 @@ check_and_archive_validation_stats()
          # Continue along
          :
       else
-         echo "Warnings from Stage 7b - Matlab plotting and statistics (validation):" >> $WARNING_LOG
-         echo "-------------------------------" >> $WARNING_LOG
-         echo "Validation statistics are different from baseline statistics." >> $WARNING_LOG
-         echo "Baseline validation statistics vs. Revision ${SVN_REVISION}:" >> $WARNING_LOG
-         echo "-------------------------------" >> $WARNING_LOG
-         head -n 1 ${BASELINE_STATS_FILE} >> $WARNING_LOG
-         echo "" >> $WARNING_LOG
-         diff -u <(sed 's/"//g' ${BASELINE_STATS_FILE}) <(sed 's/"//g' ${CURRENT_STATS_FILE}) >> $WARNING_LOG
-         echo "" >> $WARNING_LOG
+         echo "Notice from Stage 7b - Matlab plotting and statistics (validation):" >> $VALIDATION_STATS_LOG
+         echo "-------------------------------" >> $VALIDATION_STATS_LOG
+         echo "Validation statistics are different from baseline statistics." >> $VALIDATION_STATS_LOG
+         echo "Baseline validation statistics vs. Revision ${SVN_REVISION}:" >> $VALIDATION_STATS_LOG
+         echo "-------------------------------" >> $VALIDATION_STATS_LOG
+         head -n 1 ${BASELINE_STATS_FILE} >> $VALIDATION_STATS_LOG
+         echo "" >> $VALIDATION_STATS_LOG
+         diff -u <(sed 's/"//g' ${BASELINE_STATS_FILE}) <(sed 's/"//g' ${CURRENT_STATS_FILE}) >> $VALIDATION_STATS_LOG
+         echo "" >> $VALIDATION_STATS_LOG
       fi
    else
       echo "Warnings from Stage 7b - Matlab plotting and statistics (validation):" >> $WARNING_LOG
@@ -1436,6 +1437,12 @@ email_build_status()
       echo "Nightly Manuals (public):   https://drive.google.com/folderview?id=0B_wB1pJL2bFQaDJaOFNnUDR4LXM#list" >> $TIME_LOG
       echo "-------------------------------" >> $TIME_LOG
       mail -s "[${1}@$hostname] ${2} success! Revision ${SVN_REVISION} passed all build tests." $mailToFDS < $TIME_LOG > /dev/null
+   fi
+
+   # Send email notification if validation statistics have changed.
+   if [ -e $VALIDATION_STATS_LOG ]
+   then
+      mail -s "[${1}@$hostname] ${1} notice. Validation statistics have changed for Revision ${SVN_REVISION}." $mailToFDS < $VALIDATION_STATS_LOG > /dev/null      
    fi
 }
 
