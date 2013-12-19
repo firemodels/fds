@@ -4135,11 +4135,10 @@ The flow through a fan will decrease from $\dot{V}_{\hbox{\footnotesize max}}$ a
 If the pressure difference increases beyond this, air will be forced backwards through the fan.   If the downstream pressure becomes negative, then the volume flow through the fan will increase beyond {\ct MAX\_FLOW}. More complicated fan curves can be specified by defining a {\ct RAMP}.  In the example inputs below, one fan of each type is specified.  A constant volume flow fan with a {\ct VOLUME\_FLOW} of 10~m$^3$/s, a quadratic fan with {\ct MAX\_FLUX=10} and {\ct MAX\_PRESSURE=500}, and a user-defined fan with the {\ct RAMP} set to the values of the quadratic fan in 200~Pa increments,
 
 \begin{lstlisting}
-&HVAC TYPE\_ID='FAN', ID='constant volume', VOLUME_FLOW=10.0/
+&HVAC TYPE_ID='FAN', ID='constant volume', VOLUME_FLOW=10.0/
+&HVAC TYPE_ID='FAN', ID='quadratic', MAX_FLOW=10., MAX_PRESSURE=500./
+&HVAC TYPE_ID='FAN', ID='user fan curve', RAMP_ID='fan curve'/
 
-&HVAC TYPE\_ID='FAN', ID='quadratic', MAX_FLOW=10., MAX_PRESSURE=500./
-
-&HVAC TYPE\_ID='FAN', ID='user fan curve', RAMP_ID='fan curve'/
 &RAMP ID='fan curve',T=-10.00,F= 1000/
 &RAMP ID='fan curve',T= -7.75,F=  800/
 &RAMP ID='fan curve',T= -4.47,F=  600/
@@ -4189,7 +4188,7 @@ a short passageway that draws gases in one side and expels them out the other. T
 
 A sample input for a filter is given by:
 \begin{lstlisting}
-&HVAC TYPE\_ID='FILTER', ID='filter 1', LOADING=0., SPEC_ID='SOOT',
+&HVAC TYPE_ID='FILTER', ID='filter 1', LOADING=0., SPEC_ID='SOOT',
       EFFICIENCY=0.99, LOADING_MULTIPLIER=1, CLEAN_LOSS=2., LOSS=100./
 \end{lstlisting}
 where:
@@ -4198,7 +4197,7 @@ where:
 \item[{\ct EFFICIENCY}] is an array of the species removal efficiency from 0 to 1 where 0 is no removal of that species and 1 is complete filtration of the species.  The species are identified using {\ct SPEC\_ID}.
 \item[{\ct LOADING}] is an array of the initial loading (kg) of the filter for each species being filtered.
 \item[{\ct LOADING\_MULTIPLIER}] is an array of the species multiplier, $M_i$, used in computing the total filter loading when computing loss.
-\item[{\ct LOSS}] invokes a linear flow loss model where the flow loss, $K$, is given as a linear function of the total loading, $K_{filter}=K_{CLEAN\_LOSS}+K_{LOSS} \sum \left( L_i M_i \right)$, where $L_i$ is the species loading and $M_i$ is a multiplier.  Only one of {\ct LOSS} or {\ct RAMP\_ID} should be specified.
+\item[{\ct LOSS}] invokes a linear flow loss model where the flow loss, $K$, is given as a linear function of the total loading, $K_{\si{FILTER}}=K_{\si{CLEAN\_LOSS}}+K_{\si{LOSS}} \sum \left( L_i M_i \right)$, where $L_i$ is the species loading and $M_i$ is a multiplier.  Only one of {\ct LOSS} or {\ct RAMP\_ID} should be specified.
 \item[{\ct RAMP\_ID}] identifies the {\ct RAMP} that contains a table of pressure drop across the filter as a function of total loading (the summation term given in the defintion of {\ct LOSS} above).   Only one of {\ct LOSS} or {\ct RAMP\_ID} should be specified.
 \item[{\ct SPEC\_ID}] identifies the tracked species for the inputs of {\ct LOADING\_MULTIPLIER} and {\ct LOADING}.
 \end{description}
@@ -4246,7 +4245,7 @@ Second, the actual heat exchanged is computed using the {\ct EFFICIENCY}.
 \noindent
 Note that an aircoil input refers to a class of aircoils and that multiple ducts can reference the same aircoil definition.
 
-The sample input file {\ct HVAC\_aircoil.fds} demonstrates the use of the aircoil inputs.  A constant flow duct removes air (defined as 28~g/mol with a specific heat of 1~\si{kJ/(kg.K)}) from the floor and injects in through the ceiling at a volume flow rate of 1~$m^3/s$.  An aircoil is defined with a working fluid flowing at 10~kg/s and 100~$^\circ$C with a specific heat of 4~\si{kJ/(kg.K)}.  The aircoil has an efficiency of 50~\%.  Using the above equations the aircoil will add 45.2~kW of heat to the gas flowing through the duct resulting in a duct exit temperature of 332~K. These results are shown in  Fig.~\ref{fig_aircoil}.
+The sample input file {\ct HVAC\_aircoil.fds} demonstrates the use of the aircoil inputs.  A constant flow duct removes air (defined as 28~g/mol with a specific heat of 1~\si{kJ/(kg.K)}) from the floor and injects in through the ceiling at a volume flow rate of 1~\si{m^3/s}.  An aircoil is defined with a working fluid flowing at 10~kg/s and 100~$^\circ$C with a specific heat of 4~\si{kJ/(kg.K)}.  The aircoil has an efficiency of 50~\%.  Using the above equations the aircoil will add 45.2~kW of heat to the gas flowing through the duct resulting in a duct exit temperature of 332~K. These results are shown in  Fig.~\ref{fig_aircoil}.
 
 \begin{figure}[t]
    \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
