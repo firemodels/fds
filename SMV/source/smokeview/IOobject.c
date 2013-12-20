@@ -724,7 +724,7 @@ void draw_pilot(void){
       for(k=0;k<8;k++){
         glPushMatrix();
         glTranslatef(xyz[0],xyz[1],xyz[2]);
-        glRotatef(angledir[k],0.0,0.0,1.0);
+        glRotatef(180.0+angledir[k],0.0,0.0,1.0);
         glBegin(GL_LINES);
         glVertex3f(0.0,0.0,0.0);
         glVertex3f(0.0,SCALE2FDS(piloti->fraction[k]),0.0);
