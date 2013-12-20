@@ -14,7 +14,7 @@ VPATH = ../FDS_Source
 # Definition of the non-MPI object variables
 
 obj_serial = prec.o mpis.o cons.o devc.o data.o type.o mesh.o func.o smvv.o irad.o \
-             ieva.o pois.o scrc.o radi.o evac.o geom.o part.o vege.o ctrl.o turb.o dump.o hvac.o mass.o \
+             ieva.o pois.o scrc.o radi.o evac.o geom.o part.o vege.o ctrl.o turb.o samr.o dump.o hvac.o mass.o \
              read.o wall.o fire.o divg.o init.o velo.o pres.o main.o
 
 objwin_serial = $(obj_serial:.o=.obj)
@@ -22,7 +22,7 @@ objwin_serial = $(obj_serial:.o=.obj)
 # Definition of the MPI object variables
 
 obj_mpi = prec.o mpip.o cons.o devc.o data.o type.o mesh.o func.o smvv.o irad.o \
-          ieva.o pois.o scrc.o radi.o evac.o geom.o part.o vege.o ctrl.o turb.o dump.o hvac.o mass.o \
+          ieva.o pois.o scrc.o radi.o evac.o geom.o part.o vege.o ctrl.o turb.o samr.o dump.o hvac.o mass.o \
           read.o wall.o fire.o divg.o init.o velo.o pres.o main.o
 
 objwin_mpi = $(obj_mpi:.o=.obj)
@@ -617,11 +617,11 @@ pgi_linux_64 : $(obj_serial)
 	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_serial)
 
 # AMD Opteron 64Bit PC
-mpi_pgi_linux_64: FFLAGS = -fast -tp k8-64 -Mstandard
-mpi_pgi_linux_64: FCOMPL = mpif77
-mpi_pgi_linux_64: LFLAGS  = -fast -tp k8-64 -byteswapio -Bstatic -lc -lgcc_eh
-mpi_pgi_linux_64: obj = fds_mpi_pgi_Opteron64
-mpi_pgi_linux_64: $(obj_mpi)
+mpi_pgi_linux_64 : FFLAGS = -fast -tp k8-64 -Mstandard
+mpi_pgi_linux_64 : FCOMPL = mpif77
+mpi_pgi_linux_64 : LFLAGS  = -fast -tp k8-64 -byteswapio -Bstatic -lc -lgcc_eh
+mpi_pgi_linux_64 : obj = fds_mpi_pgi_Opteron64
+mpi_pgi_linux_64 : $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_mpi)
 
 #XLF-Compiler, IBM Power6 Core, OpenMP, full optimized settings
@@ -719,6 +719,7 @@ func.o : prec.o cons.o type.o mesh.o devc.o
 smvv.o : prec.o func.o
 ctrl.o : prec.o cons.o type.o mesh.o func.o
 turb.o : func.o prec.o cons.o mesh.o
+samr.o : prec.o cons.o mesh.o
 geom.o : func.o prec.o cons.o mesh.o
 scrc.o : prec.o cons.o mesh.o func.o pois.o
 irad.o : func.o prec.o cons.o type.o mesh.o
@@ -750,6 +751,7 @@ func.obj : prec.obj cons.obj type.obj mesh.obj devc.obj
 smvv.obj : prec.obj func.obj
 ctrl.obj : prec.obj cons.obj type.obj mesh.obj func.obj
 turb.obj : func.obj prec.obj cons.obj mesh.obj
+samr.obj : prec.obj cons.obj mesh.obj
 geom.obj : func.obj prec.obj cons.obj mesh.obj
 scrc.obj : prec.obj cons.obj mesh.obj func.obj pois.obj
 irad.obj : func.obj prec.obj cons.obj type.obj mesh.obj
