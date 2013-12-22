@@ -1422,10 +1422,10 @@ email_build_status()
    fi
 
    # Send email notification if validation statistics have changed.
-   if [ -e $VALIDATION_STATS_LOG ]
-   then
-      mail -s "[${1}@$hostname] ${1} notice. Validation statistics have changed for Revision ${SVN_REVISION}." $mailToFDS_nist < $VALIDATION_STATS_LOG > /dev/null      
-   fi
+   # if [ -e $VALIDATION_STATS_LOG ]
+   # then
+   #    mail -s "[${1}@$hostname] ${1} notice. Validation statistics have changed for Revision ${SVN_REVISION}." $mailToFDS_nist < $VALIDATION_STATS_LOG > /dev/null      
+   # fi
 }
 
 #  ============================
