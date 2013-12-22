@@ -33,7 +33,6 @@ CFAST_SVNROOT="$FIREBOT_HOME_DIR/cfast"
 TIME_LOG=$FIREBOT_DIR/output/timings
 ERROR_LOG=$FIREBOT_DIR/output/errors
 WARNING_LOG=$FIREBOT_DIR/output/warnings
-VALIDATION_STATS_LOG=$FIREBOT_DIR/output/statistics
 DB=_db
 IB=
 if [ "$FDSNETWORK" == "infiniband" ] ; then
@@ -1203,38 +1202,21 @@ check_matlab_validation()
    fi
 }
 
-check_and_archive_validation_stats()
+archive_validation_stats()
 {
    cd $FDS_SVNROOT/Utilities/Matlab
 
    STATS_FILE_BASENAME=FDS_validation_scatterplot_output
-
-   BASELINE_STATS_FILE=$FDS_SVNROOT/Utilities/Matlab/${STATS_FILE_BASENAME}_baseline.csv
    CURRENT_STATS_FILE=$FDS_SVNROOT/Utilities/Matlab/${STATS_FILE_BASENAME}.csv
 
    if [ -e ${CURRENT_STATS_FILE} ]
    then
       # Archive stats to Firebot history
       cp ${CURRENT_STATS_FILE} "$FIREBOT_DIR/history/${STATS_FILE_BASENAME}_${SVN_REVISION}.csv"
-      
-      if [[ `diff -u <(sed 's/"//g' ${BASELINE_STATS_FILE}) <(sed 's/"//g' ${CURRENT_STATS_FILE})` == "" ]]
-      then
-         # Continue along
-         :
-      else
-         echo "Notice from Stage 7b - Matlab plotting and statistics (validation):" >> $VALIDATION_STATS_LOG
-         echo "-------------------------------" >> $VALIDATION_STATS_LOG
-         echo "Validation statistics are different from baseline statistics." >> $VALIDATION_STATS_LOG
-         echo "Baseline validation statistics vs. Revision ${SVN_REVISION}:" >> $VALIDATION_STATS_LOG
-         echo "-------------------------------" >> $VALIDATION_STATS_LOG
-         head -n 1 ${BASELINE_STATS_FILE} >> $VALIDATION_STATS_LOG
-         echo "" >> $VALIDATION_STATS_LOG
-         diff -u <(sed 's/"//g' ${BASELINE_STATS_FILE}) <(sed 's/"//g' ${CURRENT_STATS_FILE}) >> $VALIDATION_STATS_LOG
-         echo "" >> $VALIDATION_STATS_LOG
-      fi
+
    else
       echo "Warnings from Stage 7b - Matlab plotting and statistics (validation):" >> $WARNING_LOG
-      echo "Error: The validation statistics output file does not exist." >> $WARNING_LOG
+      echo "Warning: The validation statistics output file does not exist." >> $WARNING_LOG
       echo "Expected the file Utilities/Matlab/FDS_validation_scatterplot_output.csv" >> $WARNING_LOG
       echo "" >> $WARNING_LOG
    fi
@@ -1585,7 +1567,7 @@ if [ $FIREBOT_MODE == "verification" ] ; then
    check_matlab_license_server
    run_matlab_validation
    check_matlab_validation
-   check_and_archive_validation_stats
+   archive_validation_stats
 
    ### Stage 7c ###
    generate_timing_stats
