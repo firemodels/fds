@@ -33,6 +33,7 @@ CFAST_SVNROOT="$FIREBOT_HOME_DIR/cfast"
 TIME_LOG=$FIREBOT_DIR/output/timings
 ERROR_LOG=$FIREBOT_DIR/output/errors
 WARNING_LOG=$FIREBOT_DIR/output/warnings
+# VALIDATION_STATS_LOG=$FIREBOT_DIR/output/statistics
 DB=_db
 IB=
 if [ "$FDSNETWORK" == "infiniband" ] ; then
