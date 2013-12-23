@@ -474,9 +474,9 @@ check_inspect_fds_openmp_db()
    fi
 }
 
-#  =================================================
-#  = Stage 3 - Run verification cases (debug mode) =
-#  =================================================
+#  ===============================================================
+#  = Stage 3 - Run verification or validation cases (debug mode) =
+#  ===============================================================
 
 select_validation_set()
 {
@@ -497,7 +497,7 @@ select_validation_set()
 
 wait_cases_debug_start()
 {
-   # Scans qstat and waits for verification cases to start
+   # Scans qstat and waits for cases to start
    while [[ `qstat | grep $(whoami) | awk '{print $5}' | grep Q` != '' ]]; do
       JOBS_REMAINING=`qstat | grep $(whoami) | awk '{print $5}' | grep Q | wc -l`
       echo "Waiting for ${JOBS_REMAINING} ${1} cases to start." >> $FIREBOT_DIR/output/stage3
@@ -509,7 +509,7 @@ wait_cases_debug_start()
 
 wait_cases_debug_end()
 {
-   # Scans qstat and waits for verification cases to end
+   # Scans qstat and waits for cases to end
    while [[ `qstat | grep $(whoami)` != '' ]]; do
       JOBS_REMAINING=`qstat | grep $(whoami) | wc -l`
       echo "Waiting for ${JOBS_REMAINING} ${1} cases to complete." >> $FIREBOT_DIR/output/stage3
@@ -832,13 +832,13 @@ check_smv_utilities()
    fi
 }
 
-#  ===================================================
-#  = Stage 5 - Run verification cases (release mode) =
-#  ===================================================
+#  =================================================================
+#  = Stage 5 - Run verification or validation cases (release mode) =
+#  =================================================================
 
 wait_cases_release_end()
 {
-   # Scans qstat and waits for verification cases to end
+   # Scans qstat and waits for cases to end
    while [[ `qstat | grep $(whoami)` != '' ]]; do
       JOBS_REMAINING=`qstat | grep $(whoami) | wc -l`
       echo "Waiting for ${JOBS_REMAINING} ${1} cases to complete." >> $FIREBOT_DIR/output/stage5
