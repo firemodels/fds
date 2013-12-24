@@ -86,7 +86,7 @@ Ventilation
 
  SURF ID='EXHAUST'
       COLOR='BLUE'
-      VOLUME_FLOW_RATE=0.4 /
+      VOLUME_FLOW=0.4 /
 &SURF ID='EXHAUST', COLOR='BLUE', MASS_FLUX_TOTAL=0.965, RAMP_V='exhaust ramp' /
 &RAMP ID='exhaust ramp', T=   0., F=1.00 /
 &RAMP ID='exhaust ramp', T= 500., F=0.91 /

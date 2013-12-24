@@ -38,7 +38,7 @@
       COLOR      = 'WHEAT 4'
       THICKNESS  = 0.025 /
 
-&SURF ID='duct',VOLUME_FLOW_RATE=-0.063,COLOR='GREEN' / 
+&SURF ID='duct',VOLUME_FLOW=-0.063,COLOR='GREEN' / 
 
 &MATL ID            = 'STEEL'
       FYI           = 'Quintiere, Fire Behavior'
