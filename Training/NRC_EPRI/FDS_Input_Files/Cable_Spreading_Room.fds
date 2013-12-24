@@ -133,11 +133,11 @@ Ventilation
 
 &SURF ID            = 'SUPPLY'
       COLOR         = 'BLUE'
-      VOLUME_FLUX   = -0.7 / 
+      VOLUME_FLOW_RATE   = -0.7 / 
 
 &SURF ID            = 'RETURN'
       COLOR         = 'GREEN'
-      VOLUME_FLUX   = 0.7 / 
+      VOLUME_FLOW_RATE   = 0.7 / 
 
 &SURF ID            = 'DUCT STEEL'
       COLOR         = 'GRAY'
