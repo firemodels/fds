@@ -2660,8 +2660,7 @@ SURFLOOP: DO N=0,N_SURF
                                   WRITE(LU_OUTPUT,'(A,F8.1)') '     Wall or Vent Temperature (C)', SF%TMP_FRONT - TMPM
    IF (ABS(SF%VEL)>TWO_EPSILON_EB)             WRITE(LU_OUTPUT,'(A,F8.3)')  '     Normal Velocity (m/s       ', SF%VEL
    IF (ABS(SF%MASS_FLUX_TOTAL)>TWO_EPSILON_EB) WRITE(LU_OUTPUT,'(A,ES9.2)') '     Total Mass Flux (kg/m^2/s) ', SF%MASS_FLUX_TOTAL
-   IF (ABS(SF%VOLUME_FLOW_RATE)>TWO_EPSILON_EB) &
-                                               WRITE(LU_OUTPUT,'(A,ES9.2)') '     Volume Flow Rate (m^3/s)   ', SF%VOLUME_FLOW_RATE
+   IF (ABS(SF%VOLUME_FLOW)>TWO_EPSILON_EB)     WRITE(LU_OUTPUT,'(A,ES9.2)') '     Volume Flow     (m^3/s)    ', SF%VOLUME_FLOW
  
    IF (SF%HRRPUA > 0._EB) WRITE(LU_OUTPUT,'(A,F12.1)') '     HRR Per Unit Area (kW/m2) ', SF%HRRPUA/1000._EB
    DO NN=0,N_TRACKED_SPECIES
