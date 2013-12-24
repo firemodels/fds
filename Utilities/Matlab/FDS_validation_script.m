@@ -45,8 +45,9 @@ Scatterplot_Inputs_File = [pwd, '/FDS_validation_scatterplot_inputs.csv'];
 
 % Statistics output options
 
-Stats_Output = 2;
+Stats_Output = 'Validation';
 Output_File = [pwd, '/FDS_validation_scatterplot_output.csv'];
+Output_File_Baseline = [pwd, '/FDS_validation_scatterplot_output_baseline.csv'];
 Statistics_Tex_Output = [pwd, '/../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/validation_statistics.tex'];
 Histogram_Tex_Output = [pwd, '/../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/validation_histograms.tex'];
 

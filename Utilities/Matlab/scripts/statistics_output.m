@@ -6,7 +6,7 @@
 % information (csv and tex files) to be used in various guides.
 
 % Write all verification or validation statistics from output_stats to csv output_file
-if (Stats_Output ~= 0)
+if ~strcmp(Stats_Output, 'None')
     [rows, cols] = size(output_stats);
     fid = fopen(Output_File, 'w');
     for i_row = 1:rows
@@ -33,7 +33,7 @@ end
 
 % Write statistics information to a LaTeX table
 % for inclusion in the FDS Verification Guide
-if Stats_Output == 1
+if strcmp(Stats_Output, 'Verification')
     fid = fopen(Statistics_Tex_Output, 'wt');
     % Generate table header information in .tex file
     fprintf(fid, '%s\n', '\tiny');
@@ -81,7 +81,7 @@ end
 
 % Write statistics information to a LaTeX table for inclusion
 % in the FDS Validation Guide or Correlation Guide
-if Stats_Output == 2
+if strcmp(Stats_Output, 'Validation')
     fid = fopen(Statistics_Tex_Output, 'wt');
     % Generate table header information in .tex file
     fprintf(fid, '%s\n', '\begin{longtable}[c]{|l|c|c|c|c|c|}');
@@ -122,7 +122,7 @@ end
 
 % Write histogram information to a LaTeX file for inclusion
 % in the FDS Validation Guide or Correlation Guide
-if (Stats_Output == 2) && (exist('Output_Histograms','var') == 1) && (isempty(Output_Histograms) == 0)
+if strcmp(Stats_Output, 'Validation') && (exist('Output_Histograms','var') == 1) && (isempty(Output_Histograms) == 0)
     fid = fopen(Histogram_Tex_Output, 'wt');
     % Write plots to LaTeX figures, eight per page
     num_histograms = length(Output_Histograms);
