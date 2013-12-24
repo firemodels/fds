@@ -419,30 +419,31 @@ Namelist  & FDS 5 Parameter & Namelist  & FDS 6 Parameter & Notes \\ \hline \hli
 \begin{tabular}{@{\extracolsep{\fill}}|c|l|c|l|l|}
 \hline
 Namelist      & FDS 5 Parameter                     & Namelist     & FDS 6 Parameter & Notes \\ \hline \hline
-{\ct PART}    & {\ct SPECIFIC\_HEAT}                &  {\ct SPEC}  & {\ct SPECIFIC\_HEAT\_LIQUID}                & Section~\ref{thermal_part_props}         \\ \hline
-{\ct PART}    & {\ct VAPORIZATION\_TEMPERATURE}     &  {\ct SPEC}  & {\ct VAPORIZATION\_TEMPERATURE}             & Section~\ref{thermal_part_props}         \\ \hline
-{\ct PART}    & {\ct WATER}                         &  {\ct PART}  &  {\ct SPEC\_ID='WATER VAPOR'}               & Section~\ref{info:PART_Basics}               \\ \hline
-{\ct PROP}    & {\ct CABLE\_DIAMETER}               &              & New procedure                               & Section~\ref{info:THIEF}      \\ \hline
-{\ct PROP}    & {\ct CABLE\_FAILURE\_TEMPERATURE}   &              & New procedure                               & Section~\ref{info:THIEF}      \\ \hline
-{\ct PROP}    & {\ct CABLE\_JACKET\_THICKNESS}      &              & New procedure                               & Section~\ref{info:THIEF}      \\ \hline
-{\ct PROP}    & {\ct CABLE\_MASS\_PER\_LENGTH}      &              & New procedure                               & Section~\ref{info:THIEF}      \\ \hline
-{\ct PROP}    & {\ct CONDUIT\_DIAMETER}             &              & New procedure                               & Section~\ref{info:THIEF}      \\ \hline
-{\ct PROP}    & {\ct CONDUIT\_THICKNESS}            &              & New procedure                               & Section~\ref{info:THIEF}      \\ \hline
-{\ct PROP}    & {\ct DROPLETS\_PER\_SECOND}         &  {\ct PROP}  &  {\ct PARTICLES\_PER\_SECOND}               & Section~\ref{info:sprinkler_droplets} \\ \hline
-{\ct PROP}    & {\ct DROPLET\_VELOCITY}             &  {\ct PROP}  &  {\ct PARTICLE\_VELOCITY}                   & Section~\ref{info:sprinklers} \\ \hline
+{\ct PART}    & {\ct SPECIFIC\_HEAT}                &  {\ct SPEC}  & {\ct SPECIFIC\_HEAT\_LIQUID}                & Section~\ref{thermal_part_props}        \\ \hline
+{\ct PART}    & {\ct VAPORIZATION\_TEMPERATURE}     &  {\ct SPEC}  & {\ct VAPORIZATION\_TEMPERATURE}             & Section~\ref{thermal_part_props}        \\ \hline
+{\ct PART}    & {\ct WATER}                         &  {\ct PART}  & {\ct SPEC\_ID='WATER VAPOR'}                & Section~\ref{info:PART_Basics}          \\ \hline
+{\ct PROP}    & {\ct CABLE\_DIAMETER}               &              & New procedure                               & Section~\ref{info:THIEF}                \\ \hline
+{\ct PROP}    & {\ct CABLE\_FAILURE\_TEMPERATURE}   &              & New procedure                               & Section~\ref{info:THIEF}                \\ \hline
+{\ct PROP}    & {\ct CABLE\_JACKET\_THICKNESS}      &              & New procedure                               & Section~\ref{info:THIEF}                \\ \hline
+{\ct PROP}    & {\ct CABLE\_MASS\_PER\_LENGTH}      &              & New procedure                               & Section~\ref{info:THIEF}                \\ \hline
+{\ct PROP}    & {\ct CONDUIT\_DIAMETER}             &              & New procedure                               & Section~\ref{info:THIEF}                \\ \hline
+{\ct PROP}    & {\ct CONDUIT\_THICKNESS}            &              & New procedure                               & Section~\ref{info:THIEF}                \\ \hline
+{\ct PROP}    & {\ct DROPLETS\_PER\_SECOND}         &  {\ct PROP}  & {\ct PARTICLES\_PER\_SECOND}                & Section~\ref{info:sprinkler_droplets}   \\ \hline
+{\ct PROP}    & {\ct DROPLET\_VELOCITY}             &  {\ct PROP}  & {\ct PARTICLE\_VELOCITY}                    & Section~\ref{info:sprinklers}           \\ \hline
 {\ct PROP}    & {\ct DT\_INSERT}                    &              & New procedure                               & Section~\ref{info:controlling_droplets} \\ \hline
-{\ct RADI}    & {\ct CH4\_BANDS}                    &              &  Eliminated                                 &                                      \\ \hline
-{\ct REAC}    & {\ct BOF}                           &  {\ct REAC}  &  {\ct A}                                    & Section~\ref{info:finite}           \\ \hline
-{\ct REAC}    & {\ct ID}                            &  {\ct REAC}  &  {\ct FUEL}                                 & Section~\ref{info:simple_chemistry}       \\ \hline
-{\ct REAC}    & {\ct MASS\_EXTINCTION\_COEFFICIENT} &  {\ct SPEC}  &  {\ct MASS\_EXTINCTION\_COEFFICIENT}        & Section~\ref{info:visibility}       \\ \hline
-{\ct REAC}    & {\ct MAXIMUM\_VISIBILITY}           &  {\ct MISC}  &  {\ct MAXIMUM\_VISIBILITY}                  & Section~\ref{info:visibility}       \\ \hline
-{\ct REAC}    & {\ct OXIDIZER}                      &              & New procedure                               & Section~\ref{info:REAC_Diagnostics}          \\ \hline
-{\ct REAC}    & {\ct VISIBILITY\_FACTOR}            &  {\ct MISC}  &  {\ct VISIBILITY\_FACTOR}                   & Section~\ref{info:visibility}       \\ \hline
-{\ct SPEC}    & {\ct ABSORBING}                     &  {\ct SPEC}  &  {\ct RADCAL\_ID }                          & Section~\ref{info:radiative_spec_props}  \\ \hline
-{\ct SURF}    & {\ct H\_FIXED}                      &  {\ct SURF}  & {\ct HEAT\_TRANSFER\_COEFFICIENT}           & Section~\ref{info:convection}                   \\ \hline
-{\ct SURF}    & {\ct POROUS}                        &              & New procedure                               & Section~\ref{info:HVACfan}                   \\ \hline
-{\ct TIME}    & {\ct TWFIN}                         &  {\ct TIME}  & {\ct T\_END}                                & Section~\ref{info:TIME}                  \\ \hline
-{\ct VENT}    & {\ct MASS\_FRACTION}                &              & Eliminated                                  &                                              \\ \hline
+{\ct RADI}    & {\ct CH4\_BANDS}                    &              & Eliminated                                  &                                         \\ \hline
+{\ct REAC}    & {\ct BOF}                           &  {\ct REAC}  & {\ct A}                                     & Section~\ref{info:finite}               \\ \hline
+{\ct REAC}    & {\ct ID}                            &  {\ct REAC}  & {\ct FUEL}                                  & Section~\ref{info:simple_chemistry}     \\ \hline
+{\ct REAC}    & {\ct MASS\_EXTINCTION\_COEFFICIENT} &  {\ct SPEC}  & {\ct MASS\_EXTINCTION\_COEFFICIENT}         & Section~\ref{info:visibility}           \\ \hline
+{\ct REAC}    & {\ct MAXIMUM\_VISIBILITY}           &  {\ct MISC}  & {\ct MAXIMUM\_VISIBILITY}                   & Section~\ref{info:visibility}           \\ \hline
+{\ct REAC}    & {\ct OXIDIZER}                      &              & New procedure                               & Section~\ref{info:REAC_Diagnostics}     \\ \hline
+{\ct REAC}    & {\ct VISIBILITY\_FACTOR}            &  {\ct MISC}  & {\ct VISIBILITY\_FACTOR}                    & Section~\ref{info:visibility}           \\ \hline
+{\ct SPEC}    & {\ct ABSORBING}                     &  {\ct SPEC}  & {\ct RADCAL\_ID }                           & Section~\ref{info:radiative_spec_props} \\ \hline
+{\ct SURF}    & {\ct H\_FIXED}                      &  {\ct SURF}  & {\ct HEAT\_TRANSFER\_COEFFICIENT}           & Section~\ref{info:convection}           \\ \hline
+{\ct SURF}    & {\ct POROUS}                        &              & New procedure                               & Section~\ref{info:HVACfan}              \\ \hline
+{\ct SURF}    & {\ct VOLUME\_FLUX}                  &  {\ct SURF}  & {\ct VOLUME\_FLOW}                          & Section~\ref{info:MASS_FLUX}            \\ \hline
+{\ct TIME}    & {\ct TWFIN}                         &  {\ct TIME}  & {\ct T\_END}                                & Section~\ref{info:TIME}                 \\ \hline
+{\ct VENT}    & {\ct MASS\_FRACTION}                &              & Eliminated                                  &                                         \\ \hline
 \end{tabular}
 \end{sidewaystable}
 
@@ -3901,7 +3902,7 @@ It is sometimes desirable to specify a Neumann boundary condition (specified gra
 \subsection{Species and Species Mass Flux Boundary Conditions}
 \label{info:MASS_FLUX}
 
-There are two types of species boundary conditions (see Chapter~\ref{info:SPEC} for a general discussion of gas species). By default, gas species do not penetrate solid surfaces and you need not specify anything if this is all you need. If the mass fraction of the species is to be some value at a forced flow boundary where {\ct VEL}, {\ct VOLUME\_FLUX}, or {\ct MASS\_FLUX\_TOTAL} is specified, set {\ct MASS\_FRACTION(:)} equal to the desired species mass fractions on the appropriate {\ct SURF} line. If the mass flux of the species is desired, set {\ct MASS\_FLUX(:)} instead of {\ct MASS\_FRACTION(:)}. If {\ct MASS\_FLUX(:)} is set, do not specify {\ct VEL}, {\ct VOLUME\_FLUX}, or \linebreak[4]{\ct MASS\_FLUX\_TOTAL}. These are automatically calculated based on the specified mass flux. The inputs {\ct MASS\_FLUX(:)} (and typically {\ct MASS\_FRACTION(:)}) should only be used for inflow boundary conditions.  {\ct MASS\_FLUX(:)} should be positive with units of \si{kg/(m$^2$.s)}.
+There are two types of species boundary conditions (see Chapter~\ref{info:SPEC} for a general discussion of gas species). By default, gas species do not penetrate solid surfaces and you need not specify anything if this is all you need. If the mass fraction of the species is to be some value at a forced flow boundary where {\ct VEL}, {\ct VOLUME\_FLOW}, or {\ct MASS\_FLUX\_TOTAL} is specified, set {\ct MASS\_FRACTION(:)} equal to the desired species mass fractions on the appropriate {\ct SURF} line. If the mass flux of the species is desired, set {\ct MASS\_FLUX(:)} instead of {\ct MASS\_FRACTION(:)}. If {\ct MASS\_FLUX(:)} is set, do not specify {\ct VEL}, {\ct VOLUME\_FLOW}, or \linebreak[4]{\ct MASS\_FLUX\_TOTAL}. These are automatically calculated based on the specified mass flux. The inputs {\ct MASS\_FLUX(:)} (and typically {\ct MASS\_FRACTION(:)}) should only be used for inflow boundary conditions.  {\ct MASS\_FLUX(:)} should be positive with units of \si{kg/(m$^2$.s)}.
 
 Here is an example of how to specify a surface that generates methane at a rate of 0.025~\si{kg/(m$^2$.s)}:
 \begin{lstlisting}
@@ -3915,9 +3916,7 @@ Here is example of how to specify a surface that blows methane with a velocity o
 &SURF ID='METHANE BLOWER', MASS_FRACTION(1)=1.0, SPEC_ID(1)='METHANE', VEL=-0.1 /
 &VENT XB=..., SURF_ID='METHANE BLOWER' /
 \end{lstlisting}
-%Note that specifying a combination of {\ct VEL} and {\ct MASS\_FRACTION} can lead to inaccurate results if the specified velocity is small because diffusion will dominate the mass transport.  To obtain an accurate species mass flux at a boundary, use {\ct MASS\_FLUX}.
-
-{\bf Caution:} Note that specifying a combination of {\ct VEL} and {\ct MASS\_FRACTION} is \emph{not} numerically equivalent to specifying {\ct MASS\_FLUX}---\emph{even if {\small MASS\_FRACTION=1}!}  For example, suppose you supply a {\ct VENT} with 0.01 \si{m^3/s} of ``pure'' methane.  The total mass flux of methane will be made up of the volume flow \emph{plus} a diffusive component.  The diffusion velocity is approximated using Fick's Law with mixture-averaged diffusivities.  As the grid resolution decreases the species concentration in the near-wall cell may become diluted and the diffusion driving force (gradient of pure minus dilute) may increase.  These errors can be larger than one might expect.  So if a precise mass flux is required of the problem it is important to use a {\ct MASS\_FLUX} boundary condition.
+Note that specifying a combination of {\ct VEL} and {\ct MASS\_FRACTION} can lead to inaccurate results if the specified velocity is small because diffusion will dominate the mass transport.  To obtain an accurate species mass flux at a boundary, use {\ct MASS\_FLUX}.
 
 \subsection{Tangential Velocity Boundary Conditions at Solid Surfaces}
 \label{info:WALL_MODEL}
