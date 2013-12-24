@@ -3816,7 +3816,7 @@ velocity on the face or faces of the obstruction will be given by the specified
 {\ct VOLUME\_FLUX} divided by the area of that particular face. For example:
 
 \begin{lstlisting}
-&SURF ID='SUPPLY', VOLUME_FLUX=-5.0, COLOR='GREEN' /
+&SURF ID='SUPPLY', VOLUME_FLOW=-5.0, COLOR='GREEN' /
 &OBST XB=..., SURF_ID6='BRICK','SUPPLY','BRICK','BRICK','BRICK','BRICK' /
 \end{lstlisting}
 
@@ -7034,7 +7034,7 @@ To learn how to create and remove obstructions multiple times, see Section~\ref{
 When a device or control function is applied to a {\ct VENT}, the purpose is to either activate or deactivate any time ramp associated with
 the {\ct VENT} via its {\ct DEVC\_ID}. For example, to control a fan, do the following:
 \begin{lstlisting}
-&SURF ID='FAN', VOLUME_FLUX=5. /
+&SURF ID='FAN', VOLUME_FLOW=5. /
 &VENT XB=..., SURF_ID='FAN', DEVC_ID='det2' /
 &DEVC ID='det2', XYZ=..., QUANTITY='TIME', SETPOINT=30., INITIAL_STATE=.FALSE. /
 \end{lstlisting}
@@ -7205,7 +7205,7 @@ The reverse will occur if {\ct ON\_BOUND='UPPER'}, i.e., a cooling system.
 For an HVAC system, the following lines of input would set up a simple thermostat:
 
 \begin{lstlisting}
-&SURF ID='FAN', TMP_FRONT=40., VOLUME_FLUX=-1. /
+&SURF ID='FAN', TMP_FRONT=40., VOLUME_FLOW=-1. /
 &VENT XB=-0.3,0.3,-0.3,0.3,0.0,0.0, SURF_ID='FAN', CTRL_ID='thermostat' /
 &DEVC ID='TC', XYZ=2.4,5.7,3.6, QUANTITY='TEMPERATURE' /
 &CTRL ID='thermostat', FUNCTION_TYPE='DEADBAND', INPUT_ID='TC',
@@ -7277,7 +7277,7 @@ same {\ct ID} for both a control function and a device.
 You can make a fan operate on a fixed cycle by using a {\ct CUSTOM} control function based on time:
 
 \begin{lstlisting}
-&SURF ID='FAN', TMP_FRONT=40., VOLUME_FLUX=-1. /
+&SURF ID='FAN', TMP_FRONT=40., VOLUME_FLOW=-1. /
 &VENT XB=-0.3,0.3,-0.3,0.3,0.0,0.0, SURF_ID='FAN', CTRL_ID='cycling timer' /
 &DEVC ID='TIMER', XYZ=2.4,5.7,3.6, QUANTITY='TIME' /
 &CTRL ID='cycling timer', FUNCTION_TYPE='CUSTOM', INPUT_ID='TIMER', RAMP_ID='cycle' /
@@ -10257,7 +10257,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct VEL    }                         & Real            & Section~\ref{info:Velocity_BC}            & m/s                 & 0.                      \\ \hline
 {\ct VEL\_GRAD}                       & Real            & Section~\ref{info:vel_grad}               & 1/s                 &                         \\ \hline
 {\ct VEL\_T }                         & Real Pair       & Section~\ref{info:louvers}                & m/s                 & 0.                      \\ \hline
-{\ct VOLUME\_FLUX}                    & Real            & Section~\ref{info:Velocity_BC}            & \si{m^3/s}          & 0.                      \\ \hline
+{\ct VOLUME\_FLOW}                    & Real            & Section~\ref{info:Velocity_BC}            & \si{m^3/s}          & 0.                      \\ \hline
 {\ct WIDTH}                           & Real            & Section~\ref{info:PART_GEOMETRY}          & m                   &                         \\ \hline
 {\ct XYZ(3)}                          & Real Triplet    & Section~\ref{info:spread}                 & m                   &                         \\ \hline
 {\ct Z0 }                             & Real            & Section~\ref{info:stratification}         & m                   & 10.                     \\ \hline
