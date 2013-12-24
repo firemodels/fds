@@ -6,7 +6,7 @@
 % histogram plots to be used in various guides.
 
 % Print histogram of ln(M/E) and normal distribution
-if (Stats_Output == 2)
+if strcmp(Stats_Output, 'Validation')
     % Wrap histogram routine in try loop
     % Skips case upon any Matlab error
     try
