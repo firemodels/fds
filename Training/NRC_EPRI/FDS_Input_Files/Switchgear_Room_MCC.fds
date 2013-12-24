@@ -96,11 +96,11 @@ Ventilation
 
 &SURF ID             = 'SUPPLY'
       COLOR          = 'BLUE'
-      VOLUME_FLOW_RATE    = -0.735 /
+      VOLUME_FLOW    = -0.735 /
 
 &SURF ID             = 'RETURN'
       COLOR          = 'YELLOW'
-      VOLUME_FLOW_RATE    = 0.735 /
+      VOLUME_FLOW    = 0.735 /
 
 &VENT XB= 2.5, 3.5, 8.5, 8.5, 0.0, 2.0, SURF_ID = 'DOOR' / 
 &VENT XB=14.5,15.5, 0.0, 0.0, 0.0, 2.0, SURF_ID = 'DOOR' / 
