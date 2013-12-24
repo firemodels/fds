@@ -137,11 +137,11 @@ Ventilation
 
 &SURF ID             = 'SUPPLY'
       RGB            = 0,191,255
-      VOLUME_FLUX    = -0.472 /
+      VOLUME_FLOW_RATE    = -0.472 /
 
 &SURF ID             = 'RETURN'
       RGB            = 124,252,0
-      VOLUME_FLUX    = 0.472 / 
+      VOLUME_FLOW_RATE    = 0.472 / 
 
 &OBST XB= 2.0, 2.5, 6.0, 6.6, 5.6, 6.1, SURF_ID = 'DUCT STEEL'/
 &OBST XB= 2.0, 2.5, 6.0, 6.6, 5.4, 5.4, SURF_ID = 'DUCT STEEL'/

@@ -117,11 +117,11 @@ Ventilation
 
 &SURF ID             = 'SUPPLY'
       COLOR          = 'BLACK'
-      VOLUME_FLUX    = -0.25 /
+      VOLUME_FLOW_RATE    = -0.25 /
 
 &SURF ID             = 'RETURN'
       COLOR          = 'BLACK'
-      VOLUME_FLUX    = 0.25 /
+      VOLUME_FLOW_RATE    = 0.25 /
 
 &VENT XB= 3.5, 4.0, 4.6, 4.6, 3.5, 4.0, SURF_ID='SUPPLY' /
 &VENT XB= 3.5, 4.0, 1.5, 1.5, 3.5, 4.0, SURF_ID='RETURN' /

@@ -87,12 +87,12 @@ Ventilation
 
 &SURF ID             = 'SUPPLY'
       COLOR          = 'BLUE 4'
-      VOLUME_FLUX    = -0.45
+      VOLUME_FLOW_RATE    = -0.45
       RAMP_V	     = 'PURGE' /
 
 &SURF ID             = 'RETURN'
       COLOR          = 'CARROT'
-      VOLUME_FLUX    = 1.34
+      VOLUME_FLOW_RATE    = 1.34
       RAMP_V	     = 'PURGE' / 
 
 &RAMP ID='PURGE', T=   0.0, F=0.0 /
