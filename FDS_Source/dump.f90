@@ -2452,7 +2452,7 @@ DO N=0,N_TRACKED_SPECIES
    WRITE(LU_OUTPUT,'(A,F11.5)')   '   Molecular Weight (g/mol)         ',SM%MW
    WRITE(LU_OUTPUT,'(A,F8.3)')    '   Ambient Density (kg/m^3)         ',SM%MW*P_INF/(TMPA*R0)
    WRITE(LU_OUTPUT,'(A,F8.3)')    '   Initial Mass Fraction            ',SM%ZZ0
-   WRITE(LU_OUTPUT,'(A,ES9.2)')  '   Enthalpy of Formation (J/kg)       ',SM%H_F
+   WRITE(LU_OUTPUT,'(A,ES9.2)')   '   Enthalpy of Formation (J/kg)     ',SM%H_F
    WRITE(LU_OUTPUT,'(/3X,A)') 'Sub Species                    Mass Fraction     Mole Fraction'
    DO NN = 1,N_SPECIES
       IF (SM%SPEC_ID(NN)/='null') WRITE(LU_OUTPUT,'( 3X,A29,A,ES13.6,5X,ES13.6)') &
