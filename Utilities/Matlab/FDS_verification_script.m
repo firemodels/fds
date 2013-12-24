@@ -46,7 +46,7 @@ Scatterplot_Inputs_File = [pwd, '/FDS_verification_scatterplot_inputs.csv'];
 
 % Statistics output options
 
-Stats_Output = 1;
+Stats_Output = 'Verification';
 Output_File = [pwd, '/FDS_verification_scatterplot_output.csv'];
 Statistics_Tex_Output = [pwd, '/../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/Scatterplots/verification_statistics.tex'];
 

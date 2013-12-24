@@ -37,7 +37,7 @@ Scatterplot_Inputs_File = [pwd, '/Correlation_validation_scatterplot_inputs.csv'
 
 % Statistics output options
 
-Stats_Output = 2;
+Stats_Output = 'Validation';
 Output_File = [pwd, '/Correlation_validation_scatterplot_output.csv'];
 Statistics_Tex_Output = [pwd, '/../../Manuals/Correlation_Guide/SCRIPT_FIGURES/Scatterplots/validation_statistics.tex'];
 Histogram_Tex_Output = [pwd, '/../../Manuals/Correlation_Guide/SCRIPT_FIGURES/Scatterplots/validation_histograms.tex'];
