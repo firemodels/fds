@@ -467,18 +467,18 @@ check_verification_cases_debug()
    cd $FDS_SVNROOT/Verification/Visualization
 
    if [[ `grep 'Run aborted' -rI ${FIREBOT_DIR}/output/stage3` == "" ]] && \
-      [[ `grep Segmentation -rI *` == "" ]] && \
-      [[ `grep ERROR: -rI *` == "" ]] && \
-      [[ `grep 'STOP: Numerical' -rI *` == "" ]] && \
-      [[ `grep -A 20 forrtl -rI *` == "" ]]
+      [[ `grep Segmentation -rI * ../WUI/*` == "" ]] && \
+      [[ `grep ERROR: -rI * ../WUI/*` == "" ]] && \
+      [[ `grep 'STOP: Numerical' -rI * ../WUI/*` == "" ]] && \
+      [[ `grep -A 20 forrtl -rI * ../WUI/*` == "" ]]
    then
       stage3_success=true
    else
       grep 'Run aborted' -rI $FIREBOT_DIR/output/stage3 > $FIREBOT_DIR/output/stage3_errors
-      grep Segmentation -rI * >> $FIREBOT_DIR/output/stage3_errors
-      grep ERROR: -rI * >> $FIREBOT_DIR/output/stage3_errors
-      grep 'STOP: Numerical' -rI * >> $FIREBOT_DIR/output/stage3_errors
-      grep -A 20 forrtl -rI * >> $FIREBOT_DIR/output/stage3_errors
+      grep Segmentation -rI * ../WUI/* >> $FIREBOT_DIR/output/stage3_errors
+      grep ERROR: -rI * ../WUI/* >> $FIREBOT_DIR/output/stage3_errors
+      grep 'STOP: Numerical' -rI * ../WUI/* >> $FIREBOT_DIR/output/stage3_errors
+      grep -A 20 forrtl -rI * ../WUI/* >> $FIREBOT_DIR/output/stage3_errors
       
       echo "Errors from Stage 3 - Run verification cases (debug mode):" >> $ERROR_LOG
       cat $FIREBOT_DIR/output/stage3_errors >> $ERROR_LOG
