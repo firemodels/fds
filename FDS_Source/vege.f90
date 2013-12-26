@@ -1008,6 +1008,7 @@ TYPE (SURFACE_TYPE), POINTER :: SF =>NULL()
 CALL POINT_TO_MESH(NM)
 
 !--- Initialize variables
+ITER = 0
 HEAD_WIDTH_FCTR  = 1._EB
 IGNITION_WIDTH_Y = 1
 J_FLANK          = 1
