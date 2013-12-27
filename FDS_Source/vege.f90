@@ -22,7 +22,7 @@ LOGICAL, ALLOCATABLE, DIMENSION(:,:,:) :: VEG_PRESENT_FLAG,CELL_TAKEN_FLAG
 INTEGER :: IZERO,NLP_VEG_FUEL,NCONE_TREE,NXB,NYB
 REAL(EB) :: RCELL,R_TREE,XCELL,XI,YJ,YCELL,ZCELL,ZK
 !For Level Set
-INTEGER  :: ITER,LIMITER_LS,LU_SLCF_LS,LU_TOA_LS,NX_LS,NY_LS
+INTEGER  :: LIMITER_LS,LU_SLCF_LS,LU_TOA_LS,NX_LS,NY_LS
 REAL(EB) :: DT_LS,DX_LS,DY_LS,DT_OUTPUT,SUM_T_SLCF,SUMTIME,TIME_LS,TIME_FLANKFIRE_QUENCH
 REAL(EB) :: DT_COEF,DYN_SR_MAX,IDX_LS,IDY_LS,T_FINAL,ROS_HEAD1,UMAG,UMF_TMP 
 REAL(EB) :: CPUTIME,LS_T_BEG,LS_T_END,PHI_MIN_LS,PHI_MAX_LS,ROS_BACKS,ROS_HEADS
@@ -621,7 +621,6 @@ SUMTIME = 0.0_EB ! Used for time step output
 
 SUM_T_SLCF = 0._EB
 DT_LS = 0.1_EB
-ITER = 0
 DT_COEF = 0.5_EB
 
 ROS_HEAD  = 0.0_EB
@@ -991,9 +990,9 @@ SUBROUTINE LEVEL_SET_FIRESPREAD(T_CFD,NM)
 ! ************************************************************************************************
 !
 INTEGER, INTENT(IN) :: NM
-REAL(EB) :: T_CFD
+REAL(EB), INTENT(IN) :: T_CFD
 INTEGER :: J_FLANK,I,IIG,IW,J,JJG,KKG
-INTEGER :: IDUM,JDUM,KDUM,KWIND,ITER
+INTEGER :: IDUM,JDUM,KDUM,KWIND
 LOGICAL :: IGNITION = .FALSE.
 REAL(EB) :: HEAD_WIDTH_FCTR,IGNITION_WIDTH_Y,ROS_FLANK1,TIME_LS_LAST
 REAL(EB) :: PHI_CHECK
@@ -1025,7 +1024,6 @@ ENDIF
 
 DO WHILE (TIME_LS < T_FINAL)
 
-    ITER = ITER + 1
 !
 !-- Find flank-to-flank distance at base of fire assume symmetry about ymid and
 !   define spread rate based on AU head fire width dependence
@@ -1089,7 +1087,7 @@ DO WHILE (TIME_LS < T_FINAL)
  TIME_LS_LAST = TIME_LS
 
 !----------------- Output time steps with increasing step (as in FDS)-------------------------
-IF (((TIME_LS<=10.0_EB) .OR. (SUMTIME > 100.0_EB)) .OR. (SUMTIME > 10.0_EB**FLOOR(LOG10(TIME_LS)))) THEN
+IF ( (TIME_LS<=10.0_EB) .OR. (SUMTIME > 100.0_EB) ) THEN
  SUMTIME = 0._EB
  print*,'vege:LS:-------------------------------------'
  print*,'vege:LS:time_ls',time_ls
