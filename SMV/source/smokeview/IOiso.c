@@ -888,15 +888,15 @@ void drawiso_orig(int tranflag){
         v2 = tri->v2;
         v3 = tri->v3;
 
-        glTexCoord1f(255.0*v1->ctexturecolor);
+        glTexCoord1f(v1->ctexturecolor/255.0);
         glNormal3fv(getnormalvectorptr(sphereinfo,v1->cnorm));
         glVertex3fv(v1->xyz);
         
-        glTexCoord1f(255.0*v2->ctexturecolor);
+        glTexCoord1f(v2->ctexturecolor/255.0);
         glNormal3fv(getnormalvectorptr(sphereinfo,v2->cnorm));
         glVertex3fv(v2->xyz);
         
-        glTexCoord1f(255.0*v3->ctexturecolor);
+        glTexCoord1f(v3->ctexturecolor/255.0);
         glNormal3fv(getnormalvectorptr(sphereinfo,v3->cnorm));
         glVertex3fv(v3->xyz);
       }
