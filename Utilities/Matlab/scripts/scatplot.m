@@ -154,16 +154,16 @@ for j=2:length(Q);
             
             if strcmp(Plot_Type,'linear')
                 K(k) = plot(Nonzeros_Measured_Metric,Nonzeros_Predicted_Metric,...
-                char(Save_Group_Style(i)),'MarkerFaceColor',char(Save_Fill_Color(i))); hold on
+                char(Save_Group_Style(i)),'MarkerFaceColor',char(Save_Fill_Color(i)),'MarkerSize',Marker_Size); hold on
             elseif strcmp(Plot_Type,'loglog')
                 K(k) = loglog(Nonzeros_Measured_Metric,Nonzeros_Predicted_Metric,...
-                char(Save_Group_Style(i)),'MarkerFaceColor',char(Save_Fill_Color(i))); hold on
+                char(Save_Group_Style(i)),'MarkerFaceColor',char(Save_Fill_Color(i)),'MarkerSize',Marker_Size); hold on
             elseif strcmp(Plot_Type,'semilogx')
                 K(k) = semilogx(Nonzeros_Measured_Metric,Nonzeros_Predicted_Metric,...
-                char(Save_Group_Style(i)),'MarkerFaceColor',char(Save_Fill_Color(i))); hold on
+                char(Save_Group_Style(i)),'MarkerFaceColor',char(Save_Fill_Color(i)),'MarkerSize',Marker_Size); hold on
             elseif strcmp(Plot_Type,'semilogy')
                 K(k) = semilogy(Nonzeros_Measured_Metric,Nonzeros_Predicted_Metric,...
-                char(Save_Group_Style(i)),'MarkerFaceColor',char(Save_Fill_Color(i))); hold on
+                char(Save_Group_Style(i)),'MarkerFaceColor',char(Save_Fill_Color(i)),'MarkerSize',Marker_Size); hold on
             end
             
             % Perform this code block for FDS verification scatterplot output

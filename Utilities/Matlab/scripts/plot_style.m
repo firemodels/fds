@@ -12,6 +12,7 @@ Title_Font_Size = 16;
 Label_Font_Size = 16;
 Scat_Title_Font_Size = 14;
 Scat_Label_Font_Size = 14;
+Marker_Size = 4;
 
 % Line properties
 Line_Width      = 1.0;
