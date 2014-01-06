@@ -5,7 +5,7 @@
 export SVNROOT=`pwd`/../..
 source $SVNROOT/Validation/Common_Run_All.sh
 
-$RUNFDS $INDIR ICFMP4_01
-$RUNFDS $INDIR ICFMP5_04
+$QFDS $INDIR ICFMP4_01
+$QFDS $INDIR ICFMP5_04
 
 echo FDS cases submitted
