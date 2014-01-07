@@ -11,9 +11,13 @@ set SVNROOT=%CD%
 cd %SVNROOT%\..\cfast\
 set CFAST=%CD%
 
+cd %SVNROOT%\..\FIRE-LOCAL
+set FIRELOCAL=%CD%
+
 set TIME_FILE=%SCRIPT_DIR%\smv_case_times.txt
 
 set RUNFDS=call %SVNROOT%\Utilities\Scripts\runfds_win32.bat
+set RUNWFDS=call %SVNROOT%\Utilities\Scripts\runwfds_win32.bat
 set RUNCFAST=call %SVNROOT%\Utilities\Scripts\runcfast_win32.bat
 
 Rem VVVVVVVVVVVV set parameters VVVVVVVVVVVVVVVVVVVVVV
@@ -23,6 +27,8 @@ Rem Choose FDS version (repository or release)
 set FDSEXE=%SVNROOT%\FDS_Compilation\intel_win_64\fds_win_64.exe
 Rem set FDSEXE=%SVNROOT%\FDS_Compilation\intel_win_64_db\fds_win_64_db.exe
 Rem set FDSEXE=fds
+
+set WFDSEXE=%FIRELOCAL%\bin\wfds6_9977_win_64.exe
 
 set BACKGROUNDEXE=%SVNROOT%\Utilities\background\intel_win_32\background.exe
 
@@ -74,12 +80,14 @@ goto:eof
 :endif_cfastexist
 
 set FDS=%bg%%FDSEXE%
+set WFDS=%bg%%WFDSEXE%
 set CFAST=%bg%%CFASTEXE%
 set SH2BAT=%SVNROOT%\Utilities\Data_Processing\sh2bat
 
 echo You are about to run the Smokeview Verification Test Suite.
 echo.
 echo FDS=%FDS%
+echo WFDS=%WFDS%
 echo CFAST=%CFAST%
 echo.
 echo Press any key to proceed, CTRL c to abort
@@ -103,7 +111,7 @@ echo "smokeview test cases begin" > %TIME_FILE%
 date /t >> %TIME_FILE%
 time /t >> %TIME_FILE%
 
-Rem create a text file containing the FDS5 version used to run these tests.
+Rem create a text file containing the FDS version used to run these tests.
 Rem This file is included in the smokeview user's guide
 
 set smvug="%SVNROOT%\Manuals\SMV_User_Guide\"
@@ -111,7 +119,7 @@ echo | %FDSEXE% 2> "%smvug%\SCRIPT_FIGURES\fds.version"
 
 call %SCRIPT_DIR%\SMV_Cases.bat
 
-erase %SCRIPT_DIR%\SMV_Cases.bat
+REM erase %SCRIPT_DIR%\SMV_Cases.bat
 
 cd %BASEDIR%
 echo "smokeview test cases end" >> %TIME_FILE%
