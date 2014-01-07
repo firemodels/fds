@@ -528,7 +528,7 @@ NODE_LOOP: DO NN = 1, N_DUCTNODES
    ENDIF   
    IF (DN%VENT_ID /= 'null') THEN
       MESH_LOOP: DO NM = 1, NMESHES
-         DO NV = 1, MESHES(NM)%N_VENT
+         NODE_VENT_LOOP:DO NV = 1, MESHES(NM)%N_VENT
             IF(MESHES(NM)%VENTS(NV)%ID == DN%VENT_ID) THEN
                IF (MESHES(NM)%VENTS(NV)%SURF_INDEX /= HVAC_SURF_INDEX) THEN
                   WRITE(MESSAGE,'(A,A)') 'ERROR: DUCTNODE attached to VENT without SURF_ID HVAC for VENT ID ',&
@@ -547,9 +547,9 @@ NODE_LOOP: DO NN = 1, N_DUCTNODES
                DN%XYZ(1) = 0.5_EB*(MESHES(NM)%X(I1)+MESHES(NM)%X(I2))
                DN%XYZ(2) = 0.5_EB*(MESHES(NM)%Y(J1)+MESHES(NM)%Y(J2))
                DN%XYZ(3) = 0.5_EB*(MESHES(NM)%Z(K1)+MESHES(NM)%Z(K2))
-               EXIT MESH_LOOP            
+               EXIT NODE_VENT_LOOP
             ENDIF
-         ENDDO
+         ENDDO NODE_VENT_LOOP
       ENDDO MESH_LOOP
    ENDIF
    IF (DN%VENT_INDEX > 0 .AND. DN%AMBIENT) THEN
