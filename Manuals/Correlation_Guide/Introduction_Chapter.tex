@@ -1,0 +1,19 @@
+% !TEX root = Correlation_Guide.tex
+
+\chapter{Introduction}
+\label{Introduction_Chapter}
+
+\subsection*{Scope of this Document}
+
+The focus of this document is to compare predictions made using empirical correlations to various experimentally measured quantities (e.g., hot gas layer temperature, heat flux, plume temperature). A Fortran program was developed along with this document that automates the calculations of the empirical correlations and the verification and validation process. This automated verification and validation process is a method for maintaining the empirical correlations in the long term in a centralized location and enables model verification and validation to be performed on the empirical correlations in a systematic manner.
+
+This document is complementary to the verification and validation guides for the Consolidated Model of Fire and Smoke Transport (CFAST)~\cite{CFAST_Tech_Guide_6} and Fire Dynamics Simulator (FDS)~\cite{FDS_Verification_Guide, FDS_Validation_Guide}. The experiments referred to in this study are described in more detail in the FDS Validation Guide~\cite{FDS_Validation_Guide} (Volume 3 of the FDS Technical Reference Guide) and their respective test reports.
+
+
+\subsection*{Organization of this Document}
+
+For each quantity and empirical correlation, Sections~\ref{HGL_Temperature_Chapter} through \ref{Smoke_Detector_Activation_Time_Chapter} provide a short description of the governing equations, a verification example, and a validation scatter plot that shows model predictions compared to measured values. For each empirical correlation, the corresponding validation scatter plot lists the experimental relative standard deviation, model relative standard deviation, and bias factor.
+
+The experimental relative standard deviation was determined by considering the systematic and random uncertainty values for each measurement quantity. The model relative standard deviation is reported as one standard deviation of the predicted quantity. The bias factor is reported as an average underprediction or overprediction of a measured quantity, where a bias factor of 1 indicates perfect agreement, on average, between the measured and predicted quantities. More detailed discussion of the experimental and model relative standard deviations is provided in the FDS Validation Guide~\cite{FDS_Validation_Guide} and in McGrattan and Toman~\cite{McGrattan:Metrologia}.
+
+Section~\ref{Summary_Chapter} includes a table of summary statistics for each quantity and empirical correlation. For each of the experimental data sets, Appendix~\ref{Inputs_Chapter} lists the input parameters for the empirical correlations that were used in each of the the validation cases.
