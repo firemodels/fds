@@ -8187,12 +8187,12 @@ MESH_LOOP_1: DO NM=1,NMESHES
                    XB3>YF+DY(JBP1) .OR. XB4<YS-DY(0) .OR. &
                    XB5>ZF+DZ(KBP1) .OR. XB6<ZS-DZ(0)) REJECT_VENT = .TRUE.
 
-               VT%I1 = NINT( GINV(XB1-XS,1,NM)*RDXI   )
-               VT%I2 = NINT( GINV(XB2-XS,1,NM)*RDXI   )
-               VT%J1 = NINT( GINV(XB3-YS,2,NM)*RDETA  )
-               VT%J2 = NINT( GINV(XB4-YS,2,NM)*RDETA  )
-               VT%K1 = NINT( GINV(XB5-ZS,3,NM)*RDZETA )
-               VT%K2 = NINT( GINV(XB6-ZS,3,NM)*RDZETA )
+               VT%I1 = MAX(0,   NINT(GINV(XB1-XS,1,NM)*RDXI   ))
+               VT%I2 = MIN(IBAR,NINT(GINV(XB2-XS,1,NM)*RDXI   ))
+               VT%J1 = MAX(0,   NINT(GINV(XB3-YS,2,NM)*RDETA  ))
+               VT%J2 = MIN(JBAR,NINT(GINV(XB4-YS,2,NM)*RDETA  ))
+               VT%K1 = MAX(0,   NINT(GINV(XB5-ZS,3,NM)*RDZETA ))
+               VT%K2 = MIN(KBAR,NINT(GINV(XB6-ZS,3,NM)*RDZETA ))
 
                ! Thicken evacuation mesh vents in the z direction
 
