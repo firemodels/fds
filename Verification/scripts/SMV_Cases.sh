@@ -27,6 +27,7 @@ $RUNFDS Visualization vcirctest2
 $RUNFDS Visualization version
 
 $RUNFDS WUI levelset1
+#$RUNWFDS WUI tree_one
 #$RUNFDS WUI fire_line
 $RUNFDS WUI BT10m_2x2km_LS 1
 $RUNFDS WUI wind_test1
