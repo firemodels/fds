@@ -146,6 +146,17 @@ $SMOKEDIFF -r thouse5 thouse5delta
 
 echo Generating images
 
+# copy wui error image in case wfds does not exist
+
+FROMDIR=$SVNROOT/Manuals/SMV_Verification_Guide/FIGURES
+TODIR=$SVNROOT/Manuals/SMV_Verification_Guide/SCRIPT_FIGURES
+cp $FROMDIR/wui_error.png $TODIR/tree_one_part_000.png
+cp $FROMDIR/wui_error.png $TODIR/tree_one_part_010.png
+cp $FROMDIR/wui_error.png $TODIR/tree_one_part_020.png
+cp $FROMDIR/wui_error.png $TODIR/tree_one_partiso_000.png
+cp $FROMDIR/wui_error.png $TODIR/tree_one_partiso_010.png
+cp $FROMDIR/wui_error.png $TODIR/tree_one_partiso_020.png
+
 source $STARTX
 cd $SVNROOT/Verification
 scripts/SMV_Cases.sh
