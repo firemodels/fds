@@ -127,6 +127,10 @@ cd $SVNROOT/Verification/Visualization
 echo Converting particles to isosurfaces in case plumeiso
 $SMOKEZIP -r -part2iso plumeiso
 
+cd $SVNROOT/Verification/WUI
+echo Converting particles to isosurfaces in case plumeiso
+$SMOKEZIP -r -part2iso tree_one
+
 # precompute FED slices
 
 source $STARTX
