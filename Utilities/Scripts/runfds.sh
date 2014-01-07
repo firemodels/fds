@@ -6,11 +6,14 @@ queue=
 background=no
 QSUB=qsub
 
-while getopts 'q:' OPTION
+while getopts 'q:w' OPTION
 do
 case $OPTION in
   q)
    queue="$OPTARG"
+   ;;
+  w)
+   FDS=$WFDS
    ;;
 esac
 done
