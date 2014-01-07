@@ -81,7 +81,9 @@ fi
 export WIND2FDS=$SVNROOT/Utilities/wind2fds/intel_$PLATFORM/wind2fds_$PLATFORM
 export BACKGROUND=$SVNROOT/Utilities/background/intel_$PLATFORM2/background
 export FDSEXE=$SVNROOT/FDS_Compilation/${OPENMP}intel_$PLATFORM$DEBUG/fds_${OPENMP}intel_$PLATFORM$DEBUG
+export WFDSEXE=~/FIRE-LOCAL/bin/wfds6_9977_intel_linux_64
 export FDS=$FDSEXE
+export WFDS=$WFDSEXE
 export FDSMPI=$SVNROOT/FDS_Compilation/mpi_intel_$PLATFORM$IB$DEBUG/fds_mpi_intel_$PLATFORM$IB$DEBUG
 export CFAST=~/cfast/CFAST/intel_$PLATFORM/cfast6_$PLATFORM
 
@@ -112,6 +114,7 @@ fi
 
 export RUNCFAST="$SVNROOT/Utilities/Scripts/runcfast.sh $queue"
 export RUNFDS="$SVNROOT/Utilities/Scripts/runfds.sh $queue"
+export RUNWFDS="$SVNROOT/Utilities/Scripts/runwfds.sh $queue"
 export RUNFDSMPI="$SVNROOT/Utilities/Scripts/runfdsmpi.sh $queue"
 
 if [ $RUN_OPENMP ]; then
