@@ -6,10 +6,11 @@
 Smoke detectors can be modeled in a variety of ways. A common method is to assume that the detector behaves like a very sensitive sprinkler with a low activation temperature and RTI. Other empirical correlations have been developed to predict the detector activation time as a function of the HRR and the location of the smoke detector relative to the fire.
 
 \section{Temperature Rise Method}
+\label{sec:Temperature_Rise}
 
 \subsection*{Description}
 
-In this method, the prediction of smoke detector activation time is identical to that for a sprinkler (as described in Chapter~\ref{Sprinkler_Activation_Time_Chapter}). Bukowski and Averill~\cite{Bukowski:2} suggest an activation temperature that corresponds to a temperature rise above ambient of 5~$^\circ$C to be typical of many residential smoke alarms. It is assumed that the smoke detectors are low-RTI devices ($\textrm{RTI}=5~\si{(m.s)^{1/2}}$).
+For this method, the prediction of smoke detector activation time is identical to that for a sprinkler (as described in Chapter~\ref{Sprinkler_Activation_Time_Chapter}). Bukowski and Averill~\cite{Bukowski:2} suggest an activation temperature that corresponds to a temperature rise above ambient of \SI{5}{\celsius} to be typical of many residential smoke alarms. It is assumed that the smoke detectors are low-RTI devices ($\textrm{RTI}=5~\si{(m.s)^{1/2}}$).
 
 Note that some of these cases assume a quasi-steady approach for a fire source $\dot Q$ that follows a specified t-squared growth, which was specified as $\dot Q = \alpha t^2$ up to a cutoff time of $t\sb{fire}$. After the time $t\sb{fire}$, the fire HRR was steady.
 
@@ -27,27 +28,27 @@ This example case is based on Test SDC02 from the NIST Smoke Alarms series. This
 \begin{center}
 \begin{tabular}{|c|c|c|}
 \hline
-\multicolumn{3}{|c|}{}                                                                  \\
-\multicolumn{3}{|c|}{User-Specified Input}                                              \\
-\multicolumn{3}{|c|}{}                                                                  \\ \hline
-\multicolumn{2}{|c|}{}                              &  \multicolumn{1}{c|}{}            \\
-\multicolumn{2}{|l|}{\rb{Parameter}}                &  \multicolumn{1}{c|}{\rb{Value}}  \\ \hline \hline
-\multicolumn{2}{|l|}{$\alpha$ (kW/s$^2$)}           &  \multicolumn{1}{c|}{0.00463}     \\ \hline
-\multicolumn{2}{|l|}{Location Factor (-)}           &  \multicolumn{1}{c|}{1}           \\ \hline
-\multicolumn{2}{|l|}{$t\sb{fire}$ (s)}              &  \multicolumn{1}{c|}{300}         \\ \hline
-\multicolumn{2}{|l|}{$r$ (m)}                       &  \multicolumn{1}{c|}{1.3}         \\ \hline
-\multicolumn{2}{|l|}{$H$ (m)}                       &  \multicolumn{1}{c|}{2.1}         \\ \hline
-\multicolumn{2}{|l|}{$\Delta T\sb{c}$ ($^\circ$C)}  &  \multicolumn{1}{c|}{5}           \\ \hline
-\multicolumn{2}{|l|}{RTI (\si{(m.s)^{1/2}})}        &  \multicolumn{1}{c|}{5}           \\ \hline
-\multicolumn{2}{|l|}{$T_\infty$ ($^\circ$C)}        &  \multicolumn{1}{c|}{21}          \\ \hline
-\multicolumn{2}{c}{}                                                                    \\ \hline
-\multicolumn{3}{|c|}{}                                                                  \\
-\multicolumn{3}{|c|}{Expected Output}                                                   \\
-\multicolumn{3}{|c|}{}                                                                  \\ \hline
-           &             &                                                              \\
-\rb{Time}  &  \rb{HRR}   &  \rb{Activation Time}                                        \\
-\rb{(s)}   &  \rb{(kW)}  &  \rb{(s)}                                                    \\ \hline \hline
-28         &  3.63       &  35.0                                                        \\ \hline
+\multicolumn{3}{|c|}{}                                                                      \\
+\multicolumn{3}{|c|}{User-Specified Input}                                                  \\
+\multicolumn{3}{|c|}{}                                                                      \\ \hline
+\multicolumn{2}{|c|}{}                                  &  \multicolumn{1}{c|}{}            \\
+\multicolumn{2}{|l|}{\rb{Parameter}}                    &  \multicolumn{1}{c|}{\rb{Value}}  \\ \hline \hline
+\multicolumn{2}{|l|}{$\alpha$ (kW/s$^2$)}               &  \multicolumn{1}{c|}{0.00463}     \\ \hline
+\multicolumn{2}{|l|}{Location Factor}                   &  \multicolumn{1}{c|}{1}           \\ \hline
+\multicolumn{2}{|l|}{$t\sb{fire}$ (s)}                  &  \multicolumn{1}{c|}{300}         \\ \hline
+\multicolumn{2}{|l|}{$r$ (m)}                           &  \multicolumn{1}{c|}{1.3}         \\ \hline
+\multicolumn{2}{|l|}{$H$ (m)}                           &  \multicolumn{1}{c|}{2.1}         \\ \hline
+\multicolumn{2}{|l|}{$\Delta T\sb{c}$ (\si{\celsius})}  &  \multicolumn{1}{c|}{5}           \\ \hline
+\multicolumn{2}{|l|}{RTI (\si{(m.s)^{1/2}})}            &  \multicolumn{1}{c|}{5}           \\ \hline
+\multicolumn{2}{|l|}{$T_\infty$ (\si{\celsius})}        &  \multicolumn{1}{c|}{21}          \\ \hline
+\multicolumn{2}{c}{}                                                                        \\ \hline
+\multicolumn{3}{|c|}{}                                                                      \\
+\multicolumn{3}{|c|}{Expected Output}                                                       \\
+\multicolumn{3}{|c|}{}                                                                      \\ \hline
+           &             &                                                                  \\
+\rb{Time}  &  \rb{HRR}   &  \rb{Activation Time}                                            \\
+\rb{(s)}   &  \rb{(kW)}  &  \rb{(s)}                                                        \\ \hline \hline
+28         &  3.63       &  35.0                                                            \\ \hline
 \end{tabular}
 \end{center}
 \end{table}
@@ -78,10 +79,11 @@ A summary of the comparisons between predicted and measured smoke detector activ
 
 
 \section{Milke Method}
+\label{sec:Milke}
 
 \subsection*{Description}
 
-The correlation of Milke~\cite{Milke:1} predicts that the time of smoke detector activation, $t\sb{act}$, is given by
+The correlation of Milke~\cite{Milke:1} predicts that the time of smoke detector activation, $t\sb{act}$~(\si{s}), is given by
 \be
 t\sb{act} = \frac{X H^{4/3}}{\dot Q^{1/3}}
 \label{eq:Milke}
@@ -110,23 +112,23 @@ This example case is based on Test SDC02 from the NIST Smoke Alarms series. This
 \begin{center}
 \begin{tabular}{|c|c|c|}
 \hline
-\multicolumn{3}{|c|}{}                                                                  \\
-\multicolumn{3}{|c|}{User-Specified Input}                                              \\
-\multicolumn{3}{|c|}{}                                                                  \\ \hline
-\multicolumn{2}{|c|}{}                              &  \multicolumn{1}{c|}{}            \\
-\multicolumn{2}{|l|}{\rb{Parameter}}                &  \multicolumn{1}{c|}{\rb{Value}}  \\ \hline \hline
-\multicolumn{2}{|l|}{$\alpha$ (kW/s$^2$)}           &  \multicolumn{1}{c|}{0.00463}     \\ \hline
-\multicolumn{2}{|l|}{$t\sb{fire}$ (s)}              &  \multicolumn{1}{c|}{300}         \\ \hline
-\multicolumn{2}{|l|}{$H$ (m)}                       &  \multicolumn{1}{c|}{2.1}         \\ \hline
-\multicolumn{2}{|l|}{$\Delta T\sb{c}$ ($^\circ$C)}  &  \multicolumn{1}{c|}{5}           \\ \hline
-\multicolumn{2}{c}{}                                                                    \\ \hline
-\multicolumn{3}{|c|}{}                                                                  \\
-\multicolumn{3}{|c|}{Expected Output}                                                   \\
-\multicolumn{3}{|c|}{}                                                                  \\ \hline
-           &             &                                                              \\
-\rb{Time}  &  \rb{HRR}   &  \rb{Activation Time}                                        \\
-\rb{(s)}   &  \rb{(kW)}  &  \rb{(s)}                                                    \\ \hline \hline
-30         &  4.2        &  30.8                                                        \\ \hline
+\multicolumn{3}{|c|}{}                                                                      \\
+\multicolumn{3}{|c|}{User-Specified Input}                                                  \\
+\multicolumn{3}{|c|}{}                                                                      \\ \hline
+\multicolumn{2}{|c|}{}                                  &  \multicolumn{1}{c|}{}            \\
+\multicolumn{2}{|l|}{\rb{Parameter}}                    &  \multicolumn{1}{c|}{\rb{Value}}  \\ \hline \hline
+\multicolumn{2}{|l|}{$\alpha$ (kW/s$^2$)}               &  \multicolumn{1}{c|}{0.00463}     \\ \hline
+\multicolumn{2}{|l|}{$t\sb{fire}$ (s)}                  &  \multicolumn{1}{c|}{300}         \\ \hline
+\multicolumn{2}{|l|}{$H$ (m)}                           &  \multicolumn{1}{c|}{2.1}         \\ \hline
+\multicolumn{2}{|l|}{$\Delta T\sb{c}$ (\si{\celsius})}  &  \multicolumn{1}{c|}{5}           \\ \hline
+\multicolumn{2}{c}{}                                                                        \\ \hline
+\multicolumn{3}{|c|}{}                                                                      \\
+\multicolumn{3}{|c|}{Expected Output}                                                       \\
+\multicolumn{3}{|c|}{}                                                                      \\ \hline
+           &             &                                                                  \\
+\rb{Time}  &  \rb{HRR}   &  \rb{Activation Time}                                            \\
+\rb{(s)}   &  \rb{(kW)}  &  \rb{(s)}                                                        \\ \hline \hline
+30         &  4.2        &  30.8                                                            \\ \hline
 \end{tabular}
 \end{center}
 \end{table}
@@ -157,10 +159,11 @@ A summary of the comparisons between predicted and measured smoke detector activ
 
 
 \section{Mowrer Method}
+\label{sec:Mowrer}
 
 \subsection*{Description}
 
-The correlation of Mowrer~\cite{Mowrer:1} predicts that the time of smoke detector activation, $t\sb{act}$, is given by
+The correlation of Mowrer~\cite{Mowrer:1} predicts that the time of smoke detector activation, $t\sb{act}$~(\si{s}), is given by
 \be
 t\sb{act} = t\sb{pl} + t\sb{cj}
 \label{eq:Mowrer}
@@ -201,8 +204,8 @@ This example case is based on Test SDC02 from the NIST Smoke Alarms series. This
 \multicolumn{2}{|l|}{\rb{Parameter}}       &  \multicolumn{1}{c|}{\rb{Value}}  \\ \hline \hline
 \multicolumn{2}{|l|}{$\alpha$ (kW/s$^2$)}  &  \multicolumn{1}{c|}{0.00463}     \\ \hline
 \multicolumn{2}{|l|}{$t\sb{fire}$ (s)}     &  \multicolumn{1}{c|}{300}         \\ \hline
-\multicolumn{2}{|l|}{$C\sb{pl}$ (-)}       &  \multicolumn{1}{c|}{0.67}        \\ \hline
-\multicolumn{2}{|l|}{$C\sb{cj}$ (-)}       &  \multicolumn{1}{c|}{1.2}         \\ \hline
+\multicolumn{2}{|l|}{$C\sb{pl}$}           &  \multicolumn{1}{c|}{0.67}        \\ \hline
+\multicolumn{2}{|l|}{$C\sb{cj}$}           &  \multicolumn{1}{c|}{1.2}         \\ \hline
 \multicolumn{2}{|l|}{$r$ (m)}              &  \multicolumn{1}{c|}{1.3}         \\ \hline
 \multicolumn{2}{|l|}{$H$ (m)}              &  \multicolumn{1}{c|}{2.1}         \\ \hline
 \multicolumn{2}{c}{}                                                           \\ \hline

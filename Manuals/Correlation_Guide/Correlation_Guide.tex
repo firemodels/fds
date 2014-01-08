@@ -13,10 +13,6 @@
 
 \input{../Bibliography/commoncommands}
 
-% Rename chapter headings
-\renewcommand{\chaptername}{Section}
-\renewcommand{\bibname}{References}
-
 % Math shortcuts
 \renewcommand{\sb}[1]{_\mathrm{#1}}
 
@@ -125,7 +121,9 @@ CODEN: NSPUE2 }
 
 \chapter{Preface}
 
-This document was created as part of a fire model verification and validation study conducted by the U.S. Nuclear Regulatory Commission (NRC), the Electric Power Research Institute (EPRI), and the National Institute of Standards and Technology (NIST). The results of this verification and validation study are summarized in NUREG-1824 Supplement 1, {\em Verification and Validation of Selected Fire Models for Nuclear Power Plant Applications}~\cite{NUREG_1824_Sup_1}.
+In 2007, the U.S. Nuclear Regulatory Commission (NRC), together with the Electric Power Research Institute (EPRI) and the National Institute of Standards and Technology (NIST), conducted a research project to verify and validate five fire models that have been used for nuclear power plant (NPP) applications. The results of this effort were documented in a seven-volume report, NUREG-1824 (EPRI 1011999), Verification and Validation of Selected Fire Models for Nuclear Power Plant Applications~\cite{NUREG_1824}.
+
+In 2014, the verification and validation study was expanded, and this document was created to serve as a verification and validation guide for the empirical correlations. The full details of this expanded verification and validation study are summarized in NUREG-1824 Supplement 1 (EPRI 3002002182)~\cite{NUREG_1824_Sup_1}.
 
 The model evaluation process consists of two main components: verification and validation. Verification is a process to check the correctness of the solution of the governing equations. Verification does not imply that the governing equations are appropriate; only that the equations are being solved correctly.
 
@@ -151,11 +149,11 @@ Validation is a process to determine the appropriateness of the governing equati
 \begin{tabbing}
 \hspace{1.5in} \= \\
 AST \> Adiabatic Surface Temperature \\
-ATF \> Bureau of Alcohol, Tobacco, and Firearms \\
+ATF \> Bureau of Alcohol, Tobacco, Firearms, and Explosives \\
 CAROLFIRE \> Cable Response to Live Fire Test Program \\
-CFAST \> Consolidated Fire and Smoke Transport \\
+CFAST \> Consolidated Model of Fire Growth and Smoke Transport \\
 FDS \> Fire Dynamics Simulator \\
-FM \> Factory Mutual \\
+FM \> Factory Mutual Global \\
 HGL \> Hot Gas Layer \\
 HRR \> Heat Release Rate \\
 LLNL \> Lawrence Livermore National Laboratory \\
@@ -172,40 +170,6 @@ USN \> United States Navy \\
 VTT \> Valtion Teknillinen Tutkimuskeskus (Technical Research Centre of Finland) \\
 WTC \> World Trade Center \\
 \end{tabbing}
-
-\chapter{List of Experimental Data Sets}
-
-The experimental data sets included in this validation study are shown in Table~\ref{tab:exp_data_sets}. The experiments are described in more detail in the FDS Validation Guide~\cite{FDS_Validation_Guide} (Volume 3 of the FDS Technical Reference Guide) and their respective test reports.
-
-\begin{table}[!ht]
-\caption[Experimental data sets used in this validation study]
-{Experimental data sets used in this validation study.}
-
-\begin{center}
-\begin{tabular}{|l|c|}
-\hline
-Test Series           &  Reference                                  \\ \hline \hline
-ATF Corridors         &  \cite{Sheppard:Corridors}                  \\ \hline
-CAROLFIRE             &  \cite{CAROLFIRE}                           \\ \hline
-Fleury Heat Flux      &  \cite{Fleury:Masters}                      \\ \hline
-FM/SNL                &  \cite{Nowlen:NUREG4681, Nowlen:NUREG4527}  \\ \hline
-LLNL Enclosure        &  \cite{Foote:LLNL1986}                      \\ \hline
-NBS Multi-Room        &  \cite{Peacock:NBS_Multi-Room}              \\ \hline
-NIST/NRC              &  \cite{Hamins:SP1013-1}                     \\ \hline
-NIST Smoke Alarms     &  \cite{Bukowski:1}                          \\ \hline
-SP AST                &  \cite{Wickstrom_AST}                       \\ \hline
-SP AST Column         &  \cite{Sjostrom:AST}                        \\ \hline
-Steckler              &  \cite{Steckler:NBSIR_82-2520}              \\ \hline
-UL/NFPRF              &  \cite{Sheppard:1, McGrattan:5}             \\ \hline
-USN Hawaii            &  \cite{Gott:1}                              \\ \hline
-USN Iceland           &  \cite{Gott:1}                              \\ \hline
-Vettori Flat Ceiling  &  \cite{Vettori:1}                           \\ \hline
-VTT Large Hall        &  \cite{Hostikka:VTT2104}                    \\ \hline
-WTC                   &  \cite{NIST_NCSTAR_1-5B}                    \\ \hline
-\end{tabular}
-\end{center}
-\label{tab:exp_data_sets}
-\end{table}
 
 \mainmatter
 

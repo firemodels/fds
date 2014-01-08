@@ -6,17 +6,18 @@
 Thermal radiation is an important mode of heat transfer in fires. The empirical correlations include simple estimates of flame radiation from a point or cylindrical source.
 
 \section{Point Source Radiation Heat Flux}
+\label{sec:Point_Source_Radiation}
 
 \subsection*{Description}
 
 The point source model assumes that radiative energy is concentrated at a point located within a flame~\cite{Beyler2:SFPE}.
 Here, the point source is located at a point one-third the height of the flame.
-The radiative heat flux, $\dot q''\sb{r}$, at any distance $R$ (\si{m}) from this point can be predicted using
+The radiative heat flux, $\dot q''\sb{r}$~(\si{kW/m^2}), at any distance $R$ (\si{m}) from this point can be predicted using
 \be
-\dot q''\sb{r} = \cos\theta \left( \frac{\chi\sb{r} \dot Q}{4 \pi R^2} \right) \quad \si{kW/m^2}
+\dot q''\sb{r} = \cos\theta \left( \frac{\chi\sb{r} \dot Q}{4 \pi R^2} \right)
 \label{eq:point_source}
 \ee
-where the $\cos\theta$ term (equal to $x/R$ for targets facing sideways, or $z/R$ for gauges facing upward or downward) accounts for a target that is at an angle $\theta$ from the source. The IOR orientation parameter is used to specify which direction the target or gauge is facing: 1 or -1 for the positive or negative $x$ direction, 2 or -2 for the positive or negative $y$ direction, and 3 or -3 for the positive or negative $z$ direction. $\chi\sb{r}$ is the radiative fraction~(-), $\dot Q$ is the HRR of the fire~(\si{kW}), and $R$ is the radial distance from the point source to the edge of the target~(\si{m}) and is given by
+where the $\cos\theta$ term (equal to $x/R$ for targets facing sideways, or $z/R$ for gauges facing upward or downward) accounts for a target that is at an angle $\theta$ from the source. The IOR orientation parameter is used to specify which direction the target or gauge is facing: 1 or -1 for the positive or negative $x$ direction, 2 or -2 for the positive or negative $y$ direction, and 3 or -3 for the positive or negative $z$ direction. $\chi\sb{r}$ is the radiative fraction, $\dot Q$ is the HRR of the fire~(\si{kW}), and $R$ is the radial distance from the point source to the edge of the target~(\si{m}) and is given by
 \be
 R = \sqrt{x^2 + \left(z - \frac{L\sb{f}}{3} \right)^2}
 \label{eq:point_source_R}
@@ -53,14 +54,14 @@ This example case is based on a 100 kW test from the Fleury Heat Flux series. Th
 \multicolumn{2}{|c|}{}                                                      \\
 \multicolumn{2}{|c|}{User-Specified Input}                                  \\
 \multicolumn{2}{|c|}{}                                                      \\ \hline
-                  &                                                         \\
-\rb{Parameter}    &  \rb{Value}                                             \\ \hline \hline
-$\dot Q$ (kW)     &  100                                                    \\ \hline
-$\chi\sb{r}$ (-)  &  0.35                                                   \\ \hline
-$A$ (m$^2$)       &  0.09                                                   \\ \hline
-$x$ (m)           &  0.50, 0.75, 1.0                                        \\ \hline
-$z$ (m)           &  0.0                                                    \\ \hline
-IOR (-)           &  2                                                      \\ \hline
+                                   &                                        \\
+\rb{Parameter}                     &  \rb{Value}                            \\ \hline \hline
+$\dot Q$ (kW)                      &  100                                   \\ \hline
+$\chi\sb{r}$                       &  0.35                                  \\ \hline
+$A$ (m$^2$)                        &  0.09                                  \\ \hline
+$x$ (m)                            &  0.50, 0.75, 1.0                       \\ \hline
+$z$ (m)                            &  0.0                                   \\ \hline
+IOR                                &  2                                     \\ \hline
 \multicolumn{2}{c}{}                                                        \\ \hline
 \multicolumn{2}{|c|}{}                                                      \\
 \multicolumn{2}{|c|}{Expected Output}                                       \\
@@ -101,16 +102,17 @@ A summary of the comparisons between peak predicted and measured heat fluxes is 
 
 
 \section{Solid Flame Radiation Heat Flux}
+\label{sec:Solid_Flame_Radiation}
 
 \subsection*{Description}
 
 The solid flame model predicts the heat flux to a target based on the effective emissive power from a flame and a view factor calculation~\cite{Beyler2:SFPE}.
-The radiative heat flux, $\dot q''\sb{r}$, at any distance $R$ (\si{m}) from the center of the flame can be predicted using
+The radiative heat flux, $\dot q''\sb{r}$~(\si{kW/m^2}), at any distance $R$ (\si{m}) from the center of the flame can be predicted using
 \be
-\dot q''\sb{r} = E F_{12} \quad \si{kW/m^2}
+\dot q''\sb{r} = E F_{12}
 \label{eq:solid_flame}
 \ee
-where $E$ is the effective emissive power of the flame~(\si{kW/m^2}), and $F_{12}$ is the view factor between the target and the flame~(-).
+where $E$ is the effective emissive power of the flame~(\si{kW/m^2}), and $F_{12}$ is the view factor between the target and the flame.
 The effective emissive power of the flame, $E$, is given by
 \be
 E = 58 (10^{-0.0823 D})

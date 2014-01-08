@@ -7,12 +7,12 @@ The ceiling jet is the shallow layer of hot gases below the ceiling that spreads
 
 \subsection*{Description}
 
-For a steady-state fire, the correlation of Alpert~\cite{SFPE:Alpert} predicts that the ceiling jet temperature rise, $\Delta T\sb{jet}$, from a fire plume is given by
+For a steady-state fire, the correlation of Alpert~\cite{SFPE:Alpert} predicts that the ceiling jet temperature rise, $\Delta T\sb{jet}$~(\si{\celsius}), from a fire plume is given by
 \be
 \Delta T\sb{jet} = \left\{ \begin{array}{cl}
    \frac{16.9 \dot Q^{2/3}}{H^{5/3}}  &  r/H <= 0.18 \\[0.1in]
    \frac{5.38 (\dot Q / r)^{2/3}}{H}  &  r/H >  0.18 
-   \end{array} \right. \quad ^\circ{\rm C}
+   \end{array} \right.
 \label{eq:Alpert_Tjet}
 \ee
 where $\dot Q$ is the total HRR~(\si{kW}), $H$ is the height of the ceiling above the fuel~(\si{m}), and $r$~is the radial distance to the detector~(\si{m}).
@@ -43,20 +43,20 @@ This example case is based on Test 1 from the NIST and Nuclear Regulatory Commis
 \multicolumn{2}{|c|}{}                              \\
 \multicolumn{2}{|c|}{User-Specified Input}          \\
 \multicolumn{2}{|c|}{}                              \\ \hline
-                          &                         \\
-\rb{Parameter}            &  \rb{Value}             \\ \hline \hline
-$\dot Q$ (kW)             &  410                    \\ \hline
-Location Factor (-)       &  1                      \\ \hline
-$r$ (m)                   &  5.90                   \\ \hline
-$H$ (m)                   &  3.72                   \\ \hline
-$T_{\infty}$ ($^\circ$C)  &  22                     \\ \hline
+                              &                     \\
+\rb{Parameter}                &  \rb{Value}         \\ \hline \hline
+$\dot Q$ (kW)                 &  410                \\ \hline
+Location Factor               &  1                  \\ \hline
+$r$ (m)                       &  5.90               \\ \hline
+$H$ (m)                       &  3.72               \\ \hline
+$T_{\infty}$ (\si{\celsius})  &  22                 \\ \hline
 \multicolumn{2}{c}{}                                \\ \hline
 \multicolumn{2}{|c|}{}                              \\
 \multicolumn{2}{|c|}{Expected Output}               \\
 \multicolumn{2}{|c|}{}                              \\ \hline
 \multicolumn{2}{|c|}{}                              \\
 \multicolumn{2}{|c|}{\rb{Ceiling Jet Temperature}}  \\
-\multicolumn{2}{|c|}{\rb{($^\circ$C)}}              \\ \hline \hline
+\multicolumn{2}{|c|}{\rb{(\si{\celsius})}}          \\ \hline \hline
 \multicolumn{2}{|c|}{46.45}                         \\ \hline
 \end{tabular}
 \end{center}

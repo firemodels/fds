@@ -6,6 +6,7 @@
 The HGL depth is defined as the distance between the ceiling and the HGL height.
 
 \section{ASET Method}
+\label{sec:ASET}
 
 \subsection*{Description}
 
@@ -23,16 +24,16 @@ The change in volume of the upper layer, $\dot V\sb{ul}$~(\si{m^3/s}), is given 
 \ee
 The volumetric expansion rate, $\dot V\sb{exp}$~(\si{m^3/s}), is given by~\cite{SFPE:Mowrer}
 \be
-\dot V\sb{exp} = \frac{\dot Q\sb{net}}{\rho\sb{g} c\sb{p} T\sb{g}} \approx \frac{(1 - \chi\sb{l}) \dot Q\sb{f}}{353}
+\dot V\sb{exp} = \frac{\dot Q\sb{net}}{\rho\sb{g} c\sb{p} T\sb{g}} \approx \frac{(1 - \chi\sb{l}) \dot Q\sb{f}}{353} \quad ; \quad \dot Q\sb{net} = \dot Q\sb{f} - \dot Q\sb{l} = \dot Q\sb{f}  (1 - \dot \chi\sb{l})
 \label{eq:ASET_3}
 \ee
-where $\dot Q\sb{net}$ and $\dot Q\sb{f}$ are the net and actual HRRs~(\si{kW}), respectively, $\rho\sb{g}$, $c\sb{p}$ and $T\sb{g}$ are the density~(\si{kg/m^3}), specific heat~(\si{kJ/(kg.K)}), and temperature~(\si{K}) of air in the HGL, respectively, and $\chi\sb{l}$ is the heat loss fraction to the enclosure boundaries~(-).
+where $\dot Q\sb{net}$, $\dot Q\sb{f}$, and $\dot Q\sb{l}$ are the net HRR, total HRR, and HRR loss to the boundaries~(\si{kW}), respectively, $\rho\sb{g}$, $c\sb{p}$ and $T\sb{g}$ are the density~(\si{kg/m^3}), specific heat~(\si{kJ/(kg.K)}), and temperature~(\si{K}) of air in the HGL, respectively, and $\chi\sb{l}$ is the heat loss fraction to the enclosure boundaries.
 The volumetric entrainment rate, $\dot V\sb{ent}$~(\si{m^3/s}), is given by~\cite{Zukoski:1981}
 \be
 \dot V\sb{ent} = k\sb{v} \dot Q^{1/3} z^{5/3} = \frac{0.21}{K\sb{f}} \left( \frac{g}{\rho_\infty T_\infty} \right)^{1/3} (K\sb{f} \dot Q)^{1/3} (z - z\sb{f})^{5/3}
 \label{eq:ASET_4}
 \ee
-where $k\sb{v}$ is the volumetric entrainment coefficient, $g$ is the acceleration due to gravity~(\si{m/s^2}), $\rho_\infty$ and $T_\infty$ are the density~(\si{kg/m^3}) and temperature~(\si{K}) of ambient air, respectively, $K\sb{f}$ is the location factor~(-), and $z\sb{f}$ is the fuel height~(\si{m}). The location factor has a value of 1, 2, or 4, which corresponds to a fire away from walls or corners, a fire adjacent to a wall, or a fire located in a corner, respectively.
+where $k\sb{v}$ is the volumetric entrainment coefficient, $g$ is the acceleration due to gravity~(\si{m/s^2}), $\rho_\infty$ and $T_\infty$ are the density~(\si{kg/m^3}) and temperature~(\si{K}) of ambient air, respectively, $K\sb{f}$ is the location factor, and $z\sb{f}$ is the fuel height~(\si{m}). The location factor has a value of 1, 2, or 4, which corresponds to a fire away from walls or corners, a fire adjacent to a wall, or a fire located in a corner, respectively.
 
 The HGL height, $z$, in Eq.~\ref{eq:ASET_1} can be calculated iteratively using
 \be
@@ -58,28 +59,38 @@ This example case is based on Test 1 from the NIST and Nuclear Regulatory Commis
 \multicolumn{2}{|c|}{}                                                           \\
 \multicolumn{2}{|c|}{User-Specified Input}                                       \\
 \multicolumn{2}{|c|}{}                                                           \\ \hline
-                        &                                                        \\
-\rb{Parameter}          &  \rb{Value}                                            \\ \hline \hline
-$\dot Q$ (kW)           &  410                                                   \\ \hline
-$L$ (m)                 &  21.66                                                 \\ \hline
-$W$ (m)                 &  7.04                                                  \\ \hline
-$H$ (m)                 &  3.82                                                  \\ \hline
-$k$ (\si{kW/(m.K)})     &  0.00012                                               \\ \hline
-$\rho$ (kg/m$^3$)       &  737                                                   \\ \hline
-$c$ (\si{kJ/(kg.K)})    &  1.42                                                  \\ \hline
-$T_\infty$ ($^\circ$C)  &  22                                                    \\ \hline
-Location Factor (-)     &  1                                                     \\ \hline
-$\chi\sb{l}$ (-)        &  0                                                     \\ \hline
-$z\sb{f}$ (-)           &  0                                                     \\ \hline
+                            &                                                    \\
+\rb{Parameter}              &  \rb{Value}                                        \\ \hline \hline
+$\dot Q$ (kW)               &  410                                               \\ \hline
+$L$ (m)                     &  21.66                                             \\ \hline
+$W$ (m)                     &  7.04                                              \\ \hline
+$H$ (m)                     &  3.82                                              \\ \hline
+$k$ (\si{kW/(m.K)})         &  0.00012                                           \\ \hline
+$\rho$ (kg/m$^3$)           &  737                                               \\ \hline
+$c$ (\si{kJ/(kg.K)})        &  1.42                                              \\ \hline
+$T_\infty$ (\si{\celsius})  &  22                                                \\ \hline
+Location Factor             &  1                                                 \\ \hline
+$\chi\sb{l}$                &  0                                                 \\ \hline
+$z\sb{f}$                   &  0                                                 \\ \hline
 \multicolumn{2}{c}{}                                                             \\ \hline
 \multicolumn{2}{|c|}{}                                                           \\
 \multicolumn{2}{|c|}{Expected Output}                                            \\
 \multicolumn{2}{|c|}{}                                                           \\ \hline
                                      &                                           \\
-\multicolumn{1}{|c|}{\rb{Time (s)}}  &  \multicolumn{1}{c|}{\rb{HGL Depth (m)}}  \\ \hline \hline
+\multicolumn{1}{|c|}{\rb{Time}}      &  \multicolumn{1}{c|}{\rb{HGL Depth}}      \\
+\multicolumn{1}{|c|}{\rb{(s)}}       &  \multicolumn{1}{c|}{\rb{(m)}}            \\ \hline \hline
+\multicolumn{1}{|c|}{0}              &  \multicolumn{1}{c|}{0.00}                \\ \hline
 \multicolumn{1}{|c|}{10}             &  \multicolumn{1}{c|}{0.35}                \\ \hline
 \multicolumn{1}{|c|}{20}             &  \multicolumn{1}{c|}{0.65}                \\ \hline
 \multicolumn{1}{|c|}{30}             &  \multicolumn{1}{c|}{0.93}                \\ \hline
+\multicolumn{1}{|c|}{40}             &  \multicolumn{1}{c|}{1.17}                \\ \hline
+\multicolumn{1}{|c|}{50}             &  \multicolumn{1}{c|}{1.40}                \\ \hline
+\multicolumn{1}{|c|}{60}             &  \multicolumn{1}{c|}{1.60}                \\ \hline
+\multicolumn{1}{|c|}{100}            &  \multicolumn{1}{c|}{2.26}                \\ \hline
+\multicolumn{1}{|c|}{200}            &  \multicolumn{1}{c|}{3.34}                \\ \hline
+\multicolumn{1}{|c|}{300}            &  \multicolumn{1}{c|}{3.82}                \\ \hline
+\multicolumn{1}{|c|}{1000}           &  \multicolumn{1}{c|}{3.82}                \\ \hline
+\multicolumn{1}{|c|}{1350}           &  \multicolumn{1}{c|}{3.82}                \\ \hline
 \end{tabular}
 \end{center}
 \end{table}
@@ -110,10 +121,11 @@ This correlation is only valid for closed room tests, and the NIST/NRC tests are
 
 
 \section{Yamana and Tanaka Method}
+\label{sec:YT}
 
 \subsection*{Description}
 
-For a compartment with no ventilation (closed doors) and constant HRR, the correlation of Yamana and Tanaka~\cite{Tanaka:1} predicts that the HGL height, $z$, is given by
+For a compartment with no ventilation (closed doors) and constant HRR, the correlation of Yamana and Tanaka~\cite{Tanaka:1} predicts that the HGL height, $z$~(\si{m}), is given by
 \be
 z = \left( \frac{2 k \dot Q^{1/3} t}{3 A\sb{c}} + \frac{1}{h\sb{c}^{2/3}} \right)^{-3/2}
 \label{eq:Yamana_Tanaka}
@@ -131,8 +143,8 @@ where $T\sb{g}$ is the HGL temperature~(\si{K}).
 \subsection*{Verification}
 
 This example case is based on Test 1 from the NIST and Nuclear Regulatory Commission (NIST/NRC) series. This test involved a compartment with a closed door, a heptane spray burner, and no ventilation.
-\\ \\
-\noindent Note: In this verification case, the Beyler method is used to calculate the HGL temperature, $T\sb{g}$.
+
+Note: In this verification case, the Beyler method (see Section~\ref{sec:Beyler}) is used to calculate the HGL temperature, $T\sb{g}$.
 
 % In the FDTs spreadsheets, this HGL depth correlation is used with the MQH correlation (natural ventilation).
 
@@ -145,16 +157,16 @@ This example case is based on Test 1 from the NIST and Nuclear Regulatory Commis
 \multicolumn{2}{|c|}{}                                                   \\
 \multicolumn{2}{|c|}{User-Specified Input}                               \\
 \multicolumn{2}{|c|}{}                                                   \\ \hline
-                        &                                                \\
-\rb{Parameter}          &  \rb{Value}                                    \\ \hline \hline
-$\dot Q$ (kW)           &  410                                           \\ \hline
-$L$ (m)                 &  21.66                                         \\ \hline
-$W$ (m)                 &  7.04                                          \\ \hline
-$H$ (m)                 &  3.82                                          \\ \hline
-$k$ (\si{kW/(m.K)})     &  0.00012                                       \\ \hline
-$\rho$ (kg/m$^3$)       &  737                                           \\ \hline
-$c$ (\si{kJ/(kg.K)})    &  1.42                                          \\ \hline
-$T_\infty$ ($^\circ$C)  &  22                                            \\ \hline
+                            &                                            \\
+\rb{Parameter}              &  \rb{Value}                                \\ \hline \hline
+$\dot Q$ (kW)               &  410                                       \\ \hline
+$L$ (m)                     &  21.66                                     \\ \hline
+$W$ (m)                     &  7.04                                      \\ \hline
+$H$ (m)                     &  3.82                                      \\ \hline
+$k$ (\si{kW/(m.K)})         &  0.00012                                   \\ \hline
+$\rho$ (kg/m$^3$)           &  737                                       \\ \hline
+$c$ (\si{kJ/(kg.K)})        &  1.42                                      \\ \hline
+$T_\infty$ (\si{\celsius})  &  22                                        \\ \hline
 \multicolumn{2}{c}{}                                                     \\ \hline
 \multicolumn{2}{|c|}{}                                                   \\
 \multicolumn{2}{|c|}{Expected Output}                                    \\
@@ -162,9 +174,18 @@ $T_\infty$ ($^\circ$C)  &  22                                            \\ \hli
                                  &                                       \\
 \multicolumn{1}{|c|}{\rb{Time}}  &  \multicolumn{1}{c|}{\rb{HGL Depth}}  \\
 \multicolumn{1}{|c|}{\rb{(s)}}   &  \multicolumn{1}{c|}{\rb{(m)}}        \\ \hline \hline
+\multicolumn{1}{|c|}{0}          &  \multicolumn{1}{c|}{0.00}            \\ \hline
 \multicolumn{1}{|c|}{10}         &  \multicolumn{1}{c|}{0.28}            \\ \hline
 \multicolumn{1}{|c|}{20}         &  \multicolumn{1}{c|}{0.53}            \\ \hline
 \multicolumn{1}{|c|}{30}         &  \multicolumn{1}{c|}{0.75}            \\ \hline
+\multicolumn{1}{|c|}{40}         &  \multicolumn{1}{c|}{0.96}            \\ \hline
+\multicolumn{1}{|c|}{50}         &  \multicolumn{1}{c|}{1.15}            \\ \hline
+\multicolumn{1}{|c|}{60}         &  \multicolumn{1}{c|}{1.31}            \\ \hline
+\multicolumn{1}{|c|}{100}        &  \multicolumn{1}{c|}{1.86}            \\ \hline
+\multicolumn{1}{|c|}{200}        &  \multicolumn{1}{c|}{2.64}            \\ \hline
+\multicolumn{1}{|c|}{300}        &  \multicolumn{1}{c|}{3.04}            \\ \hline
+\multicolumn{1}{|c|}{1000}       &  \multicolumn{1}{c|}{3.67}            \\ \hline
+\multicolumn{1}{|c|}{1350}       &  \multicolumn{1}{c|}{3.73}            \\ \hline
 \end{tabular}
 \end{center}
 \end{table}
