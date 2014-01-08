@@ -1,4 +1,4 @@
-&HEAD CHID='tree_one', TITLE='One tree SVN $Revision: 12191 $' /
+&HEAD CHID='tree_one', TITLE='One tree SVN $Revision$' /
 
 - Specify number of grid cells (IJK) and domain size (XB) in x,y,z directions
 &MESH IJK=30,15,30, XB=2.5,5.5,-1.5,0,0,3 / 
