@@ -1888,11 +1888,12 @@ The turbulent Prandtl number $\PR_t$ and the turbulent Schmidt number $\SC_t$ ar
 \begin{center}
 \begin{tabular}{|lll|}
 \hline
-{\ct TURBULENCE\_MODEL} \hfill  & Description    \hfill                                         & Coefficient   \hfill  \\ \hline
+{\ct TURBULENCE\_MODEL} \hfill  & Description    \hfill                                         & Coefficient(s)  \hfill  \\ \hline
 {\ct 'CONSTANT SMAGORINSKY'}    & Constant coefficient Smagorinsky model \cite{Smagorinsky:1}   & {\ct C\_SMAGORINSKY}  \\
 {\ct 'DYNAMIC SMAGORINSKY'}     & Dynamic Smagorinsky model \cite{Germano:1991,Moin:1991}       & None                  \\
 {\ct 'DEARDORFF'}               & Deardorff model \cite{Deardorff:1980,Pope:2000}               & {\ct C\_DEARDORFF}    \\
-{\ct 'VREMAN'}                  & Vreman's eddy viscosity model \cite{Vreman:2004}              & {\ct C\_VREMAN}       \\ \hline
+{\ct 'VREMAN'}                  & Vreman's eddy viscosity model \cite{Vreman:2004}              & {\ct C\_VREMAN}       \\
+{\ct 'RNG'}                     & Renormalization group eddy viscosity model \cite{Yakhot:1989} & {\ct C\_RNG}, {\ct C\_RNG\_CUTOFF} \\ \hline
 \end{tabular}
 \end{center}
 \end{table}
