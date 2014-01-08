@@ -2403,9 +2403,11 @@ IF (LES) THEN
       CASE(DYNSMAG)
          WRITE(LU_OUTPUT,'(A)')       '   Dynamic Smagorinsky Model'
       CASE(DEARDORFF)
-         WRITE(LU_OUTPUT,'(A)')       '   Deardorff Model'
+         WRITE(LU_OUTPUT,'(A)')       '   Deardorff Model               ',C_DEARDORFF
       CASE(VREMAN)
-         WRITE(LU_OUTPUT,'(A)')       '   Vreman Model'
+         WRITE(LU_OUTPUT,'(A)')       '   Vreman Model                  ',C_VREMAN
+      CASE(RNG)
+         WRITE(LU_OUTPUT,'(A)')       '   RNG Model                     ',C_RNG
    END SELECT
    WRITE(LU_OUTPUT,'(A,F8.2)')   '   Turbulent Prandtl Number      ',PR
    IF (N_TRACKED_SPECIES>0._EB) WRITE(LU_OUTPUT,'(A,F8.2)')   '   Turbulent Schmidt Number      ',SC

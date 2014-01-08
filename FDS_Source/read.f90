@@ -1638,7 +1638,7 @@ APPEND = .FALSE.
 IF (RESTART .AND. RESTART_CHID == CHID) APPEND = .TRUE.
 IF (RESTART) NOISE  = .FALSE.
 
-! Min and Max values of species
+! Min and Max values of flux limiter
 
 IF (FLUX_LIMITER<0 .OR. FLUX_LIMITER>5) THEN
    WRITE(MESSAGE,'(A)')  'ERROR on MISC: Permissible values for FLUX_LIMITER=0:5'
@@ -1656,6 +1656,8 @@ SELECT CASE (TRIM(TURBULENCE_MODEL))
       TURB_MODEL=DEARDORFF
    CASE ('VREMAN')
       TURB_MODEL=VREMAN
+   CASE ('RNG')
+      TURB_MODEL=RNG
    CASE ('null')
       TURB_MODEL=0
    CASE DEFAULT
