@@ -77,6 +77,7 @@ if strcmp(Stats_Output, 'Verification')
         fprintf(fid, '%s%s\n', within_tolerance, ' \\');
     end
     fprintf(fid,'%s\n','\end{longtable}');
+    fprintf(fid, '%s\n', '\normalsize');
 end
 
 % Write statistics information to a LaTeX table for inclusion
