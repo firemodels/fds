@@ -333,7 +333,7 @@ TMP_A = TMP_A + 273.
 RHO_A = 353./(TMP_A)
 M = L*W*H*RHO_A
 
-WRITE(11,'(A)') 'Time,Temp,HGL Depth Yamana Tanaka (m),HGL Depth ASET (m)'
+WRITE(11,'(A)') 'Time,Temp,HGL Height Yamana Tanaka (m),HGL Height ASET (m)'
 
 DO I=0,50
 
@@ -348,7 +348,7 @@ DO I=0,50
    Z_ASET = H
    DELTA_T = 1.
 
-   DO J=1,T_END-1
+   DO J=1,T_END
       V_EXP = (1 - HEAT_LOSS_FRACTION) * Q / 353.
       V_ENT = ((1 / LOCATION_FACTOR) * 0.21 * (G / (RHO_A * TMP_A))**(1./3.)) * (LOCATION_FACTOR * Q)**(1./3.) * (Z_ASET(J) - FUEL_HEIGHT)**(5./3.)
       V_UL = V_EXP + V_ENT
