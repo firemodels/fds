@@ -488,6 +488,7 @@ check_verification_cases_debug()
    if [[ `grep 'Warning' -rI ${FIREBOT_DIR}/output/stage3` == "" ]] ; then 
       echo "Stage 3 warnings:" >> $WARNING_LOG
       grep 'Warning' -rI ${FIREBOT_DIR}/output/stage3 >> $WARNING_LOG
+      echo "" >> $WARNING_LOG
    fi
 }
 
@@ -675,6 +676,7 @@ check_verification_cases_release()
    if [[ `grep 'Warning' -rI ${FIREBOT_DIR}/output/stage5` == "" ]] ; then 
       echo "Stage 5 warnings:" >> $WARNING_LOG
       grep 'Warning' -rI ${FIREBOT_DIR}/output/stage5 >> $WARNING_LOG
+      echo "" >> $WARNING_LOG
    fi
 }
 
