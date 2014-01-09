@@ -4,8 +4,9 @@ FED=
 MOVIE=
 RUNSCRIPT=
 ssffile=
+WFDSCASE="no"
 
-while getopts 'fm' OPTION
+while getopts 'fmw' OPTION
 do
 case $OPTION in
   f)
@@ -13,6 +14,9 @@ case $OPTION in
    ;;
   m)
    MOVIE="y"
+   ;;
+  w)
+   WFDSCASE="y"
    ;;
 esac
 done
@@ -46,11 +50,19 @@ if ! [ -d $fulldir ]; then
   exit
 fi
 if ! [ -e $fulldir/$in.smv ]; then
-  echo "*** Error (fatal): The smokeview file, $fulldir/$in.smv, does not exist. Run aborted."
+  if [ "$WFDSCASE" == "n" ]; then
+    echo "*** Error (fatal): The smokeview file, $fulldir/$in.smv, does not exist. Run aborted."
+  else
+    echo "Warning: The smokeview file, $fulldir/$in.smv, does not exist."
+  fi
   exit
 fi
 if ! [ -e $fulldir/$ssffile ]; then
-  echo "*** Error (fatal): The smokeview script file, $fulldir/$ssffile, does not exist. Run aborted."
+  if [ "$WFDSCASE" == "n" ]; then
+    echo "*** Error (fatal): The smokeview script file, $fulldir/$ssffile, does not exist. Run aborted."
+  else
+    echo "Warning: The smokeview script file, $fulldir/$ssffile, does not exist."
+  fi
   exit
 fi
 
