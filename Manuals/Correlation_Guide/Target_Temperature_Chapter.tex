@@ -39,11 +39,11 @@ A slight complication of the solution methodology described above is in situatio
 
 A conduit forms a thermal barrier between the hot gases of a fire and the cable itself. A simple way to incorporate its effect into the THIEF model is to replace the ``exposing'' gas temperature, $T\sb{g}$, in Eq.~\ref{eq:cable_net_heat_flux} by the conduit's temperature, $T\sb{c}$. In other words, the cable no longer ``sees'' the hot gases from the fire, but rather the interior surface of the conduit.
 
-A steel conduit may be assumed thermally-thin; that is, its conductivity is so large that for all practical purposes it can be assumed that its exterior and interior surface temperatures are equal. Its temperature increases due to the heat flux from the hot gases at its exterior surface, which is given by
+A steel conduit may be assumed to exhibit thermally-thin behavior; that is, its conductivity is so large that for all practical purposes it can be assumed that its exterior and interior surface temperatures are equal. Its temperature increases due to the heat flux from the hot gases at its exterior surface, which is given by
 \be
 \dot q''\sb{ext}(t^n) = \varepsilon\sb{c} \sigma (T\sb{g}(t^n)^4 - (T\sb{c}^n)^4) + h (T\sb{g}(t^n) - T\sb{c}^n)
 \ee
-where $T\sb{c}^n$ is the conduit temperature at the $n$-th time step~(\si{K}), and $\varepsilon\sb{c}$ is the emissivity of its surface (assumed to be 0.85, which is typical of non-polished steel). Heat is transferred from the interior surface of the conduit to the cable surface via
+where $T\sb{c}^n$ is the conduit temperature at the $n$-th time step~(\si{K}), and $\varepsilon\sb{c}$ is the emissivity of its surface (assumed to be 0.85, which is typical of non-polished steel). Heat is transferred from the interior surface of the conduit to the cable surface via radiation and convection
 \be
 \dot q''\sb{int}(t^n) = F \sigma ((T\sb{c}^n)^4 - (T\sb{s}^n)^4) + h (T\sb{c}^n - T\sb{s}^n)
 \ee
@@ -51,14 +51,14 @@ where
 \be
 F = \left( \left( \frac{R\sb{c}}{R} \right) \frac{1}{\varepsilon} + \frac{1-\varepsilon\sb{c}}{\varepsilon\sb{c}} \right)^{-1}
 \ee
-where $R\sb{c}$ is the inner radius of the conduit~(\si{m}). The view factor, $F$, is based on the assumption that the conduit and cable are concentric cylinders.
+where $R\sb{c}$ is the inner radius of the conduit~(\si{m}). The view factor, $F$, was based on the assumption that the conduit and cable are concentric cylinders~\cite{CAROLFIRE}.
 
 \clearpage
 
 
 \subsection*{Verification}
 
-This example case is based on Penlight Test 7 from the Cable Response to Live Fire (CAROLFIRE) series. This test involved a cable inside of conduit that was located in a heated cylindrical enclosure.
+This example case is based on Penlight Test 7 from the Cable Response to Live Fire (CAROLFIRE)~\cite{CAROLFIRE} series. This test involved a cable inside of conduit that was located in a heated cylindrical enclosure.
 
 \begin{table}[!ht]
 \caption[Verification case, cable failure time]
@@ -87,9 +87,21 @@ This example case is based on Penlight Test 7 from the Cable Response to Live Fi
            &  \rb{Exposing}         &  \rb{Cable}            &  \rb{Conduit}                             \\
 \rb{Time}  &  \rb{Temperature}      &  \rb{Temperature}      &  \rb{Temperature}                         \\
 \rb{(s)}   &  \rb{(\si{\celsius})}  &  \rb{(\si{\celsius})}  &  \rb{(\si{\celsius})}                     \\ \hline \hline
+0          &  24.0                  &  24.0                  &  24.0                                     \\ \hline
+24         &  155.0                 &  24.0                  &  25.6                                     \\ \hline
 50         &  296.3                 &  24.1                  &  32.4                                     \\ \hline
 80         &  460.0                 &  24.6                  &  52.3                                     \\ \hline
-1473       &  460.0                 &  400                   &  440.3                                    \\ \hline
+130        &  460.0                 &  27.5                  &  98.7                                     \\ \hline
+240        &  460.0                 &  44.7                  &  186.9                                    \\ \hline
+370        &  460.0                 &  81.5                  &  265.9                                    \\ \hline
+500        &  460.0                 &  130.5                 &  320.6                                    \\ \hline
+740        &  460.0                 &  227.3                 &  379.1                                    \\ \hline
+900        &  460.0                 &  282.8                 &  401.3                                    \\ \hline
+1140       &  460.0                 &  345.8                 &  422.8                                    \\ \hline
+1300       &  460.0                 &  375.9                 &  432.5                                    \\ \hline
+1460       &  460.0                 &  398.4                 &  439.8                                    \\ \hline
+1473       &  460.0                 &  400.0                 &  440.3                                    \\ \hline
+1800       &  460.0                 &  428.6                 &  449.6                                    \\ \hline
 \end{tabular}
 \end{center}
 \end{table}
@@ -100,7 +112,7 @@ This example case is based on Penlight Test 7 from the Cable Response to Live Fi
 
 \subsection*{Validation}
 
-A summary of the comparisons between predicted and measured cable failure times (the time at which the cable reaches its threshold failure temperature) is shown in Fig.~\ref{Surface_Temperature_THIEF_Summary}.
+A summary of the comparisons between predicted and measured cable failure times (the time at which the cable reaches its threshold failure temperature, which corresponds to \SI{200}{\celsius} for thermoplastic cables and \SI{400}{\celsius} for thermoset cables) is shown in Fig.~\ref{Surface_Temperature_THIEF_Summary}.
 
 \begin{figure}[!ht]
 \begin{center}
@@ -134,7 +146,7 @@ where $F/V$ is the ratio of heated surface area to volume~(\si{m^{-1}}), $\rho\s
 
 \subsection*{Verification}
 
-This example case is based on the 1.1 m Diesel Fire Test from the SP AST Column series. This test involved a large test hall with a steel column located in the middle of a diesel pool fire.
+This example case is based on the 1.1 m Diesel Fire Test from the SP AST Column~\cite{Sjostrom:AST} series. This test involved a large test hall with a steel column located in the middle of a diesel pool fire.
 
 Note: In this verification case, the McCaffrey method (see Section~\ref{sec:McCaffrey}) is used to calculate the exposing fire temperature, $T\sb{f}$.
 
@@ -166,9 +178,19 @@ Note: In this verification case, the McCaffrey method (see Section~\ref{sec:McCa
            &  \rb{Fire}             &  \rb{Steel}                                     \\
 \rb{Time}  &  \rb{Temperature}      &  \rb{Temperature}                               \\
 \rb{(s)}   &  \rb{(\si{\celsius})}  &  \rb{(\si{\celsius})}                           \\ \hline \hline
+0          &  872.81                &  20.0                                           \\ \hline
 15         &  872.81                &  89.7                                           \\ \hline
 30         &  872.81                &  162.4                                          \\ \hline
 45         &  872.81                &  232.8                                          \\ \hline
+60         &  872.81                &  300.6                                          \\ \hline
+120        &  872.81                &  536.6                                          \\ \hline
+180        &  872.81                &  700.6                                          \\ \hline
+240        &  872.81                &  793.6                                          \\ \hline
+300        &  872.81                &  838.7                                          \\ \hline
+600        &  872.81                &  872.4                                          \\ \hline
+900        &  872.81                &  872.8                                          \\ \hline
+1200       &  872.81                &  872.8                                          \\ \hline
+1500       &  872.81                &  872.8                                          \\ \hline
 \end{tabular}
 \end{center}
 \end{table}
@@ -198,7 +220,7 @@ where $k\sb{i}$ is the thermal conductivity of the insulation material~(\si{W/(m
 
 \subsection*{Verification}
 
-This example case examines the temperature of a bar structural element in Test 4 of the World Trade Center (WTC) series. This test involved a simple compartment with a heptane spray burner and various structural elements with varying amounts of sprayed fire-resistive materials.
+This example case examines the temperature of a bar structural element in Test 4 of the World Trade Center (WTC)~\cite{NIST_NCSTAR_1-5B} series. This test involved a simple compartment with a heptane spray burner and various structural elements with varying amounts of sprayed fire-resistive materials.
 
 Note: In this verification case, the MQH method (see Section~\ref{sec:MQH}) is used to calculate the exposing fire temperature, $T\sb{f}$.
 
@@ -208,9 +230,9 @@ Note: In this verification case, the MQH method (see Section~\ref{sec:MQH}) is u
 \begin{center}
 \begin{tabular}{|c|c|c|}
 \hline
-\multicolumn{3}{|c|}{}                                                                   \\
-\multicolumn{3}{|c|}{User-Specified Input}                                               \\
-\multicolumn{3}{|c|}{}                                                                   \\ \hline
+\multicolumn{3}{|c|}{}                                                                \\
+\multicolumn{3}{|c|}{User-Specified Input}                                            \\
+\multicolumn{3}{|c|}{}                                                                \\ \hline
 \multicolumn{2}{|c|}{}                            &  \multicolumn{1}{c|}{}            \\
 \multicolumn{2}{|l|}{\rb{Parameter}}              &  \multicolumn{1}{c|}{\rb{Value}}  \\ \hline \hline
 \multicolumn{2}{|l|}{$c\sb{s}$ (\si{kJ/(kg.K)})}  &  \multicolumn{1}{c|}{0.450}       \\ \hline
@@ -231,17 +253,34 @@ Note: In this verification case, the MQH method (see Section~\ref{sec:MQH}) is u
 \multicolumn{2}{|l|}{$c$ (\si{kJ/(kg.K)})}        &  \multicolumn{1}{c|}{1.42}        \\ \hline
 \multicolumn{2}{|l|}{$\delta$ (m)}                &  \multicolumn{1}{c|}{0.0254}      \\ \hline
 \multicolumn{2}{|l|}{$T_\infty$ (\si{\celsius})}  &  \multicolumn{1}{c|}{20}          \\ \hline
-\multicolumn{2}{c}{}                                                                     \\ \hline
-\multicolumn{3}{|c|}{}                                                                   \\
-\multicolumn{3}{|c|}{Expected Output}                                                    \\
-\multicolumn{3}{|c|}{}                                                                   \\ \hline
-           &                        &                                                    \\
-           &  \rb{Fire}             &  \rb{Steel}                                        \\
-\rb{Time}  &  \rb{Temperature}      &  \rb{Temperature}                                  \\
-\rb{(s)}   &  \rb{(\si{\celsius})}  &  \rb{(\si{\celsius})}                              \\ \hline \hline
-15         &  313.5                 &  21.0                                              \\ \hline
-30         &  349.4                 &  22.3                                              \\ \hline
-45         &  372.4                 &  23.66                                             \\ \hline
+\end{tabular}
+\end{center}
+\end{table}
+
+\begin{table}[!ht]
+\caption[Verification case, protected steel temperature (continued)]
+{Verification case, protected steel temperature (continued).}
+\begin{center}
+\begin{tabular}{|c|c|c|}
+\hline
+\multicolumn{3}{|c|}{}                                                                \\
+\multicolumn{3}{|c|}{Expected Output}                                                 \\
+\multicolumn{3}{|c|}{}                                                                \\ \hline
+           &                        &                                                 \\
+           &  \rb{Fire}             &  \rb{Steel}                                     \\
+\rb{Time}  &  \rb{Temperature}      &  \rb{Temperature}                               \\
+\rb{(s)}   &  \rb{(\si{\celsius})}  &  \rb{(\si{\celsius})}                           \\ \hline \hline
+0          &  25.9                  &  20.00                                          \\ \hline
+50         &  378.7                 &  24.14                                          \\ \hline
+100        &  422.6                 &  29.24                                          \\ \hline
+200        &  471.9                 &  40.51                                          \\ \hline
+300        &  503.5                 &  52.54                                          \\ \hline
+400        &  527.3                 &  65.00                                          \\ \hline
+500        &  546.5                 &  77.72                                          \\ \hline
+600        &  562.7                 &  90.60                                          \\ \hline
+700        &  576.9                 &  103.56                                         \\ \hline
+800        &  589.4                 &  116.55                                         \\ \hline
+840        &  594                   &  121.74                                         \\ \hline
 \end{tabular}
 \end{center}
 \end{table}

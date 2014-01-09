@@ -3,16 +3,19 @@
 \chapter{Introduction}
 \label{Introduction_Chapter}
 
-\subsection*{Scope of this Document}
+\section{Scope of this Document}
 
 Various empirical correlations exist for calculating quantities of interest related to fire dynamics in a compartment (e.g., hot gas layer temperature, heat flux, plume temperature). The focus of this document is to compare predictions made using empirical correlations to various experimentally measured quantities for a fire in a compartment and to express the accuracy and uncertainty of the predictions in a consistent manner. The empirical correlations selected for use in this document are based on the correlations that are used in nuclear power plant (NPP) applications, and more details are provided in the verification and validation report, NUREG-1824 Supplement 1 (EPRI 3002002182)~\cite{NUREG_1824_Sup_1}.
 
 A Fortran program was developed along with this document that implements the calculations for the empirical correlations and automates the verification and validation process. This automated verification and validation process is a method for maintaining the empirical correlations in the long term in a centralized location and enables model verification and validation to be performed on the empirical correlations in a systematic manner. As new empirical correlations are developed or relevant compartment fire experiments are conducted, they can be added to this verification and validation suite and documented.
 
-This document is complementary to the verification and validation guides for the Consolidated Model of Fire and Smoke Transport (CFAST)~\cite{CFAST_Tech_Guide_6} and Fire Dynamics Simulator (FDS)~\cite{FDS_Verification_Guide, FDS_Validation_Guide}. The experiments referred to in this study are described in more detail in the FDS Validation Guide~\cite{FDS_Validation_Guide} (Volume 3 of the FDS Technical Reference Guide) and their respective test reports.
+This document is complementary to the verification and validation guides for the Consolidated Model of Fire and Smoke Transport (CFAST)~\cite{CFAST_Tech_Guide_6} and Fire Dynamics Simulator (FDS)~\cite{FDS_Verification_Guide, FDS_Validation_Guide}. The experiments referred to in this study are described in more detail in the FDS Validation Guide~\cite{FDS_Validation_Guide} (Volume 3 of the FDS Technical Reference Guide) and their respective test reports. The source code for the empirical correlations calculation program, the verification and validation scripts used to generate this document, and the experimental data shown in this document are freely available for download from the primary website for FDS.\footnote{\href{http://fire.nist.gov/fds}{http://fire.nist.gov/fds}}
 
 
-\subsection*{Organization of this Document}
+\clearpage
+
+
+\section{Organization of this Document}
 
 For each quantity and empirical correlation, Sections~\ref{HGL_Temperature_Chapter} through \ref{Smoke_Detector_Activation_Time_Chapter} provide a short description of the governing equations, a verification example, and a validation scatter plot that shows model predictions compared to measured values. For each empirical correlation, the corresponding validation scatter plot lists the experimental relative standard deviation, model relative standard deviation, and bias factor.
 
@@ -20,7 +23,7 @@ Section~\ref{Summary_Chapter} includes a table of summary statistics for each qu
 
 For each of the experimental data sets, Appendix~\ref{Inputs_Chapter} lists the input parameters for the empirical correlations that were used in each of the the validation cases.
 
-\subsection*{List of Experimental Data Sets}
+\section{List of Experimental Data Sets}
 
 The experimental data sets included in this validation study are shown in Table~\ref{tab:exp_data_sets}. The experiments are described in more detail in the FDS Validation Guide~\cite{FDS_Validation_Guide} (Volume 3 of the FDS Technical Reference Guide) and their respective test reports.
 

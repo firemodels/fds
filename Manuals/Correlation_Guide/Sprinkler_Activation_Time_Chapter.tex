@@ -9,7 +9,8 @@ Much like an electrical cable, a sprinkler is merely a ``target'' with a particu
 
 For a steady-state fire, the correlation of Alpert~\cite{SFPE:Alpert} predicts that the activation time of a sprinkler, $t\sb{act}$~(\si{s}), is given by~\cite{NFPA}
 \be
-t\sb{act} =  \frac{\mathrm{RTI}}{\sqrt{u\sb{jet}}} \ln \left( \frac{T\sb{jet} - T_\infty}{T\sb{jet} - T\sb{act}} \right)\label{eq:Alpert}
+t\sb{act} =  \frac{\mathrm{RTI}}{\sqrt{u\sb{jet}}} \ln \left( \frac{T\sb{jet} - T_\infty}{T\sb{jet} - T\sb{act}} \right)
+\label{eq:Alpert}
 \ee
 where RTI is the response time index of the sprinkler~(\si{(m.s)^{1/2}}), $T_\infty$ is the ambient air temperature~(\si{\celsius}), and $T\sb{act}$ is the activation temperature of the sprinkler~(\si{\celsius}). The ceiling jet temperature, $T\sb{jet}$ (\si{\celsius}), is given by
 \be
@@ -29,7 +30,7 @@ u\sb{jet} = \left\{ \begin{array}{cl}
 \label{eq:sprinkler_ujet}
 \ee
 
-Note that some of these cases assume a quasi-steady approach for a fire source $\dot Q$ that follows a specified t-squared growth, which is given by Eq.~\ref{eq:t_squared}.
+Note that some of these cases assume a quasi-steady approach for a fire source $\dot Q$ that follows a specified $t$-squared growth rate, which is given by Eq.~\ref{eq:t_squared}.
 
 For cases in which the fire was located against a wall or corner, these correlations are adjusted based on the method of reflection. For a fire adjacent to a flat wall, 2$\dot Q$ is substituted for $\dot Q$; and for a fire in a 90-degree corner, 4$\dot Q$ is substituted for $\dot Q$~\cite{SFPE:Alpert}. This adjustment is denoted in the input parameters as the location factor. For a given case, the location factor has a value of 1, 2, or 4, which corresponds to a fire away from walls or corners, a fire adjacent to a wall, or a fire located in a corner, respectively.
 
@@ -39,7 +40,7 @@ For cases in which the fire was located against a wall or corner, these correlat
 
 \subsection*{Verification}
 
-This example case is based on Test 1 from the Vettori Flat Ceiling series. This test involved residential quick response sprinklers located on a flat ceiling in a compartment with a closed door, a methane burner, and no ventilation.
+This example case is based on Test 1 from the Vettori Flat Ceiling~\cite{Vettori:1} series. This test involved residential quick response sprinklers located on a flat ceiling in a compartment with a closed door, a methane burner, and no ventilation.
 
 \begin{table}[!ht]
 \caption[Verification case, sprinkler activation time]
