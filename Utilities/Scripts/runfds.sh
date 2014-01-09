@@ -5,6 +5,7 @@
 queue=
 background=no
 QSUB=qsub
+USEFDS=yes
 
 while getopts 'q:w' OPTION
 do
@@ -14,6 +15,7 @@ case $OPTION in
    ;;
   w)
    FDS=$WFDS
+   USEFDS=no
    ;;
 esac
 done
@@ -64,7 +66,11 @@ scriptfile=$scratchdir/script.$$
 # ensure that various files and directories exist
 
 if ! [ -e $FDS ];  then
-  echo "The file $FDS does not exist. Run aborted"
+  if [ "$USEFDS" == "yes" ]; then
+    echo "The file $FDS does not exist. Run aborted"
+  else
+    echo "Warning, the file $FDS does not exist."
+  fi
   exit
 fi
 if ! [ -d $fulldir ]; then
