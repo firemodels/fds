@@ -73,7 +73,7 @@ echo background: $BACKGROUND
 echo
 
 export RUNFDS=$SVNROOT/Utilities/Scripts/runsmv.sh
-export RUNWFDS=$SVNROOT/Utilities/Scripts/runsmv.sh
+export RUNWFDS=$SVNROOT/Utilities/Scripts/runwsmv.sh
 export RUNCFAST=$SVNROOT/Utilities/Scripts/runsmv.sh
 export BASEDIR=`pwd`
 
@@ -154,12 +154,12 @@ echo Generating images
 
 FROMDIR=$SVNROOT/Manuals/SMV_Verification_Guide/FIGURES
 TODIR=$SVNROOT/Manuals/SMV_Verification_Guide/SCRIPT_FIGURES
-cp $FROMDIR/wui_error.png $TODIR/tree_one_part_000.png
-cp $FROMDIR/wui_error.png $TODIR/tree_one_part_010.png
-cp $FROMDIR/wui_error.png $TODIR/tree_one_part_020.png
-cp $FROMDIR/wui_error.png $TODIR/tree_one_partiso_000.png
-cp $FROMDIR/wui_error.png $TODIR/tree_one_partiso_010.png
-cp $FROMDIR/wui_error.png $TODIR/tree_one_partiso_020.png
+cp $FROMDIR/wfds_error.png $TODIR/tree_one_part_000.png
+cp $FROMDIR/wfds_error.png $TODIR/tree_one_part_010.png
+cp $FROMDIR/wfds_error.png $TODIR/tree_one_part_020.png
+cp $FROMDIR/wfds_error.png $TODIR/tree_one_partiso_000.png
+cp $FROMDIR/wfds_error.png $TODIR/tree_one_partiso_010.png
+cp $FROMDIR/wfds_error.png $TODIR/tree_one_partiso_020.png
 
 source $STARTX
 cd $SVNROOT/Verification
