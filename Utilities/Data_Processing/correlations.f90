@@ -277,7 +277,7 @@ DO I=0,50
    IF (STEEL_UNPROTECTED) THEN
       DELTA_T = 1
       T_STEEL = TMP_A
-      DO J=1,T_END-1
+      DO J=1,T_END
          T_STEEL(J+1) = (F_V * (1/(RHO_STEEL*C_STEEL)) * ((H_C * ((TMP_G)-(T_STEEL(J)))) + ((SIGMA*1000) * EPSILON * ((TMP_G)**4 - (T_STEEL(J))**4))) * DELTA_T) + (T_STEEL(J))
       ENDDO
    ENDIF
@@ -286,11 +286,11 @@ DO I=0,50
       DELTA_T = 1
       T_STEEL = TMP_A
       IF (C_STEEL * W_D > 2 * C_I * RHO_I * H_I) THEN
-         DO J=1,T_END-1
+         DO J=1,T_END
             T_STEEL(J+1) = (((K_I/(C_STEEL*H_I*W_D)) * ((TMP_G)-(T_STEEL(J)))) * DELTA_T) + (T_STEEL(J))
          ENDDO
       ELSE
-         DO J=1,T_END-1
+         DO J=1,T_END
             T_STEEL(J+1) = ((((K_I/H_I)/(C_STEEL*W_D + 0.5*C_I*RHO_I*H_I)) * ((TMP_G)-(T_STEEL(J)))) * DELTA_T) + (T_STEEL(J))
          ENDDO
       ENDIF
