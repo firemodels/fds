@@ -129,7 +129,9 @@ $SMOKEZIP -r -part2iso plumeiso
 
 cd $SVNROOT/Verification/WUI
 echo Converting particles to isosurfaces in case plumeiso
+if  [ -e tree_one.smv ]; then
 $SMOKEZIP -r -part2iso tree_one
+fi
 
 # precompute FED slices
 
