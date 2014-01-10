@@ -73,6 +73,7 @@ echo background: $BACKGROUND
 echo
 
 export RUNFDS=$SVNROOT/Utilities/Scripts/runsmv.sh
+export RUNTFDS=$SVNROOT/Utilities/Scripts/runtsmv.sh
 export RUNWFDS=$SVNROOT/Utilities/Scripts/runwsmv.sh
 export RUNCFAST=$SVNROOT/Utilities/Scripts/runsmv.sh
 export BASEDIR=`pwd`
