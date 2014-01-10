@@ -1988,11 +1988,6 @@ void initvars(void){
 #ifdef pp_BETA
   STRCAT(TITLE," - ");
   STRCAT(TITLE,__TIME__);
-#else
-  if(time_flag==1){
-    STRCAT(TITLE," - ");
-    STRCAT(TITLE,__TIME__);
-  }
 #endif
 
   STRCPY(FULLTITLE,TITLE);

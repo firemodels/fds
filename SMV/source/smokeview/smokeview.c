@@ -597,6 +597,12 @@ void parse_commandline(int argc, char **argv){
       } 
     }
   }
+#ifndef pp_BETA
+  if(time_flag==1){
+    STRCAT(TITLE," - ");
+    STRCAT(TITLE,__TIME__);
+  }
+#endif
 }
 
 /* ------------------ version ------------------------ */
