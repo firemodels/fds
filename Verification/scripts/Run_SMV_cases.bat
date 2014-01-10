@@ -18,6 +18,7 @@ set TIME_FILE=%SCRIPT_DIR%\smv_case_times.txt
 
 set RUNFDS=call %SVNROOT%\Utilities\Scripts\runfds_win32.bat
 set RUNWFDS=call %SVNROOT%\Utilities\Scripts\runwfds_win32.bat
+set RUNTFDS=call %SVNROOT%\Utilities\Scripts\runwfds_win32.bat
 set RUNCFAST=call %SVNROOT%\Utilities\Scripts\runcfast_win32.bat
 
 Rem VVVVVVVVVVVV set parameters VVVVVVVVVVVVVVVVVVVVVV

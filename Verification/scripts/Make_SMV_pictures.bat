@@ -23,6 +23,8 @@ set smvvg="%SVNROOT%\Manuals\SMV_Verification_Guide"
 set summary="%SVNROOT%\Manuals\Verification_Summary"
 
 set RUNFDS=call "%SCRIPT_DIR%\runsmv.bat"
+set RUNTFDS=call "%SCRIPT_DIR%\runtsmv.bat"
+set RUNWFDS=call "%SCRIPT_DIR%\runsmv.bat"
 set RUNCFAST=call "%SCRIPT_DIR%\runsmv.bat"
 set SH2BAT=%SVNROOT%\Utilities\Data_Processing\sh2bat
 
