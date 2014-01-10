@@ -24,7 +24,7 @@ $RUNFDS Visualization thouse5delta
 $RUNFDS Visualization transparency
 $RUNFDS Visualization vcirctest
 $RUNFDS Visualization vcirctest2
-$RUNFDS Visualization version
+$RUNTFDS Visualization version
 
 $RUNFDS WUI levelset1
 $RUNWFDS WUI tree_one
