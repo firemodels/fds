@@ -69,7 +69,7 @@ if ! [ -e $FDS ];  then
   if [ "$USEFDS" == "yes" ]; then
     echo "The file $FDS does not exist. Run aborted"
   else
-    echo "Warning, the file $FDS does not exist."
+    echo "Warning: The file $FDS does not exist."
   fi
   exit
 fi
