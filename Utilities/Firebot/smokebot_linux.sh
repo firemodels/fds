@@ -485,7 +485,10 @@ check_verification_cases_debug()
       echo "" >> $ERROR_LOG
       THIS_FDS_FAILED=1
    fi
-   if [[ `grep 'Warning' -rI ${FIREBOT_DIR}/output/stage3` == "" ]] ; then 
+   if [[ `grep 'Warning' -rI ${FIREBOT_DIR}/output/stage3` == "" ]] 
+   then
+      no_warnings=true
+   else
       echo "Stage 3 warnings:" >> $WARNING_LOG
       grep 'Warning' -rI ${FIREBOT_DIR}/output/stage3 >> $WARNING_LOG
       echo "" >> $WARNING_LOG
@@ -673,7 +676,10 @@ check_verification_cases_release()
       echo "" >> $ERROR_LOG
       THIS_FDS_FAILED=1
    fi
-   if [[ `grep 'Warning' -rI ${FIREBOT_DIR}/output/stage5` == "" ]] ; then 
+   if [[ `grep 'Warning' -rI ${FIREBOT_DIR}/output/stage5` == "" ]] 
+   then
+      no_warnings=true
+   else
       echo "Stage 5 warnings:" >> $WARNING_LOG
       grep 'Warning' -rI ${FIREBOT_DIR}/output/stage5 >> $WARNING_LOG
       echo "" >> $WARNING_LOG
