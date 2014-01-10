@@ -144,7 +144,7 @@ int main(int argc, char **argv){
       strcat(prefix,"_");
       continue;
     }
-    else if(strcmp(arg,"-h")==0){
+    else if(strcmp(arg,"-h")==0||strcmp(arg,"-help")==0){
       usage(prog);
       exit(0);
     }
