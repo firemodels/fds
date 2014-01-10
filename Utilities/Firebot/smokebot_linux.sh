@@ -995,6 +995,7 @@ email_build_status()
    echo "start time: $start_time " >> $TIME_LOG
    echo " stop time: $stop_time " >> $TIME_LOG
    echo "   results (private web summary): http://blaze.nist.gov/VV/SMV2" >> $TIME_LOG
+   echo "   results (public web summary): https://googledrive.com/host/0B-W-dkXwdHWNX0doOUF5TXdfa0U/index.html" >> $TIME_LOG
    echo "   results (private): http://blaze.nist.gov/smokebot" >> $TIME_LOG
    echo "   results  (public): https://drive.google.com/folderview?id=0B_wB1pJL2bFQaDJaOFNnUDR4LXM#list" >> $TIME_LOG
    if [ "$MAKEMOVIES" == "1" ]
