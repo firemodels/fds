@@ -56,7 +56,7 @@ SVEXTERN unsigned char SVDECL(*partmin_unit,NULL),SVDECL(*partmax_unit,NULL);
 SVEXTERN char degC[3], degF[3];
 SVEXTERN float SVDECL(tmax_part,16.0);
 SVEXTERN int SVDECL(redirect,0);
-SVEXTERN int SVDECL(tempdir_flag,0);
+SVEXTERN int SVDECL(tempdir_flag,0),SVDECL(time_flag,0);
 SVEXTERN int SVDECL(script_render,0);
 SVEXTERN int SVDECL(make_volrender_script,0);
 SVEXTERN char SVDECL(*volrender_scriptname,NULL);

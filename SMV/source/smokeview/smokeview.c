@@ -475,6 +475,9 @@ void parse_commandline(int argc, char **argv){
       tempdir_flag=1;
     }
 #endif
+    else if(strncmp(argv[i],"-time",5)==0){
+      time_flag=1;
+    }
     else if(strncmp(argv[i],"-h",2)==0){
       usage(argv);
       exit(0);
