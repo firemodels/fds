@@ -2,4 +2,4 @@
 
 # defaults
 
-$SVNROOT/Utilities/Scripts/runsmv.sh -time $*
+$SVNROOT/Utilities/Scripts/runsmv.sh -t $*
