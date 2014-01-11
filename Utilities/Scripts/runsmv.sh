@@ -5,8 +5,9 @@ MOVIE=
 RUNSCRIPT=
 ssffile=
 WFDSCASE="no"
+TIMEOPTION=
 
-while getopts 'fmw' OPTION
+while getopts 'fmtw' OPTION
 do
 case $OPTION in
   f)
@@ -14,6 +15,9 @@ case $OPTION in
    ;;
   m)
    MOVIE="y"
+   ;;
+  t)
+   TIMEOPTION=-time
    ;;
   w)
    WFDSCASE="y"
@@ -69,4 +73,4 @@ fi
 source ~/.bashrc_fds intel64
 cd $fulldir
 echo $SMV $FED $SMVBINDIR $RUNSCRIPT $in
-$SMV $FED $SMVBINDIR -redirect $RUNSCRIPT $in
+$SMV $TIMEOPTION $FED $SMVBINDIR -redirect $RUNSCRIPT $in
