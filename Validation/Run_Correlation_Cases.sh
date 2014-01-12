@@ -3,18 +3,18 @@
 # This script runs all of the Correlation cases
 
 export SVNROOT=`pwd`/..
-export correlations=$SVNROOT/Utilities/Data_Processing/correlations
-export VERIFICATION_DIR=$SVNROOT/Verification
+export correlations=$SVNROOT/Utilities/Empirical_Correlations/correlations
+export VERIFICATION_DIR=$SVNROOT/Utilities/Empirical_Correlations/Verification
 export VALIDATION_DIR=$SVNROOT/Validation
 
 # First, compile latest version of correlations.f90
 
-cd $SVNROOT/Utilities/Data_Processing
+cd $SVNROOT/Utilities/Empirical_Correlations
 ifort correlations.f90 -o correlations
 
 # Run all Correlation verification cases
 
-cd $VERIFICATION_DIR/Correlations
+cd $VERIFICATION_DIR
 $correlations Verification.txt
 
 # Run all Correlation validation cases
