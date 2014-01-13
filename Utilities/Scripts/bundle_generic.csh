@@ -202,6 +202,8 @@ svn export -q --force https://fds-smv.googlecode.com/svn/trunk/FDS/trunk/Verific
 cd $example_tmpdir
 setenv OUTDIR $googledir/$bundledir/Examples
 setenv RUNFDS $copycase
+setenv RUNWFDS $copycase
+setenv RUNTFDS $copycase
 setenv RUNCFAST $copycase3
 echo Copying example files to bundle directory
 $fds_cases
