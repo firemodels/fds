@@ -207,6 +207,8 @@ svn export --quiet --force https://fds-smv.googlecode.com/svn/trunk/FDS/trunk/Ve
 
 set outdir=%out_examples%
 set RUNFDS=call %copycases%
+set RUNWFDS=call %copycases%
+set RUNTFDS=call %copycases%
 set RUNFDSMPI=call %copycases2%
 set RUNCFAST=call %copycases3%
 
