@@ -994,13 +994,14 @@ email_build_status()
    echo "      host: $hostname " >> $TIME_LOG
    echo "start time: $start_time " >> $TIME_LOG
    echo " stop time: $stop_time " >> $TIME_LOG
-   echo "   results (private web summary): http://blaze.nist.gov/VV/SMV2" >> $TIME_LOG
-   echo "   results (public web summary): https://googledrive.com/host/0B-W-dkXwdHWNX0doOUF5TXdfa0U/index.html" >> $TIME_LOG
+   echo "   web results (private): http://blaze.nist.gov/VV/SMV2" >> $TIME_LOG
+   echo "   web results (public) : https://googledrive.com/host/0B-W-dkXwdHWNX0doOUF5TXdfa0U/index.html" >> $TIME_LOG
    echo "   results (private): http://blaze.nist.gov/smokebot" >> $TIME_LOG
-   echo "   results  (public): https://drive.google.com/folderview?id=0B_wB1pJL2bFQaDJaOFNnUDR4LXM#list" >> $TIME_LOG
+   echo "   results (public) : https://drive.google.com/folderview?id=0B_wB1pJL2bFQaDJaOFNnUDR4LXM#list" >> $TIME_LOG
    if [ "$MAKEMOVIES" == "1" ]
    then
-     echo "animations: http://blaze.nist.gov/smokebot/movies" >> $TIME_LOG
+     echo "animations (private): http://blaze.nist.gov/smokebot/movies" >> $TIME_LOG
+     echo "animations (public) : https://googledrive.com/host/0B-W-dkXwdHWNWnYxbXo3X3BaS0U/index.html" >> $TIME_LOG
    fi
   if [[ $THIS_SMVSVN != $LAST_SMVSVN ]] ; then
     cat $SVN_SMVLOG >> $TIME_LOG
