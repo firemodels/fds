@@ -1000,7 +1000,7 @@ email_build_status()
    echo "   results (public) : https://drive.google.com/folderview?id=0B_wB1pJL2bFQaDJaOFNnUDR4LXM#list" >> $TIME_LOG
    if [ "$MAKEMOVIES" == "1" ]
    then
-     echo "animations (private): http://blaze.nist.gov/smokebot/movies" >> $TIME_LOG
+     echo "animations (private): http://blaze.nist.gov/smokebot/summary" >> $TIME_LOG
      echo "animations (public) : https://googledrive.com/host/0B-W-dkXwdHWNWnYxbXo3X3BaS0U/index.html" >> $TIME_LOG
    fi
   if [[ $THIS_SMVSVN != $LAST_SMVSVN ]] ; then
