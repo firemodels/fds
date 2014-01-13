@@ -15,20 +15,23 @@ export BASEDIR=`pwd`
 export INDIR=Current_Results
 
 function usage {
-echo "Run_All.sh [ -d -h -q queue_name -s ]"
+echo "Run_All.sh [ -d -h -o output_dir -q queue_name -s -x ]"
 echo "Runs FDS validation set"
 echo ""
 echo "Options"
 echo "-d - use debug version of FDS"
 echo "-h - display this message"
+echo "-o output_dir - specify output directory"
+echo "     default: Current_Results"
 echo "-q queue_name - run cases using the queue queue_name"
 echo "     default: batch"
 echo "     other options: fire60s, fire70s, vis"
 echo "-s - stop FDS runs"
+echo "-x - do not copy FDS input files"
 exit
 }
 
-while getopts 'dhq:s' OPTION
+while getopts 'dho:q:sx' OPTION
 do
 case $OPTION in
   d)
@@ -36,12 +39,18 @@ case $OPTION in
    ;;
   h)
   usage;
-  ;;
+   ;;
+  o)
+   INDIR="$OPTARG"
+   ;;
   q)
    QUEUE="$OPTARG"
    ;;
   s)
    export STOPFDS=1
+   ;;
+  x)
+   export DONOTCOPY=1
    ;;   
 esac
 done
@@ -74,6 +83,7 @@ if [ ! $STOPFDS ] ; then
   fi
 fi
 
-# Copy FDS input files to $INDIR (Current_Results) directory
-cp $BASEDIR/FDS_Input_Files/*.fds $BASEDIR/$INDIR
-
+if [ ! $DONOTCOPY ] ; then
+  # Copy FDS input files to $INDIR (Current_Results) directory
+  cp $BASEDIR/FDS_Input_Files/*.fds $BASEDIR/$INDIR
+fi
