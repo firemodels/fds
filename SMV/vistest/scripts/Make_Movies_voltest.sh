@@ -7,7 +7,7 @@ export SVNROOT=`pwd`/../../..
 cd $SVNROOT
 export SVNROOT=`pwd`
 
-OUTDIR=$SVNROOT/Manuals/SMV_Summary/movies
+OUTDIR=$SVNROOT/Manuals/SMV_Summary/movies2
 
 cd $CURDIR/..
 
