@@ -7007,7 +7007,7 @@ MESH_LOOP: DO NM=1,NMESHES
                      IF (ABS(NNN)==2 .AND. (OB%I1==OB%I2 .OR. OB%K1==OB%K2)) CYCLE FACE_LOOP_2
                      IF (ABS(NNN)==3 .AND. (OB%I1==OB%I2 .OR. OB%J1==OB%J2)) CYCLE FACE_LOOP_2
                      IF (ABS(SURFACE(OB%SURF_INDEX(NNN))%VEL)             >TWO_EPSILON_EB .OR. &
-                         ABS(SURFACE(OB%SURF_INDEX(NNN))%VOLUME_FLOW)>TWO_EPSILON_EB .OR. &
+                         ABS(SURFACE(OB%SURF_INDEX(NNN))%VOLUME_FLOW)     >TWO_EPSILON_EB .OR. &
                          ABS(SURFACE(OB%SURF_INDEX(NNN))%MASS_FLUX_TOTAL) >TWO_EPSILON_EB) THEN
                         WRITE(MESSAGE,'(A,A,A)') 'ERROR: SURF_ID ',TRIM(SURFACE(OB%SURF_INDEX(NNN))%ID), &
                            ' cannot attach velocity boundary to thin obstruction'
