@@ -2399,15 +2399,15 @@ IF (LES) THEN
    WRITE(LU_OUTPUT,'(A)')     '   LES Calculation'
    SELECT CASE (TURB_MODEL)
       CASE(CONSMAG)
-         WRITE(LU_OUTPUT,'(A,F8.2)')  '   Smagorinsky Constant          ',C_SMAGORINSKY
+         WRITE(LU_OUTPUT,'(A,F8.2)')      '   Smagorinsky (C_SMAGORINSKY)    ',C_SMAGORINSKY
       CASE(DYNSMAG)
-         WRITE(LU_OUTPUT,'(A)')       '   Dynamic Smagorinsky Model'
+         WRITE(LU_OUTPUT,'(A)')           '   Dynamic Smagorinsky Model'
       CASE(DEARDORFF)
-         WRITE(LU_OUTPUT,'(A)')       '   Deardorff Model               ',C_DEARDORFF
+         WRITE(LU_OUTPUT,'(A,F8.2)')      '   Deardorff Model (C_DEARDORFF)  ',C_DEARDORFF
       CASE(VREMAN)
-         WRITE(LU_OUTPUT,'(A)')       '   Vreman Model                  ',C_VREMAN
+         WRITE(LU_OUTPUT,'(A,F8.2)')      '   Vreman Model (C_VREMAN)        ',C_VREMAN
       CASE(RNG)
-         WRITE(LU_OUTPUT,'(A)')       '   RNG Model                     ',C_RNG
+         WRITE(LU_OUTPUT,'(A,F8.2,F8.2)') '   RNG Model (C_RNG,C_RNG_CUTOFF) ',C_RNG,C_RNG_CUTOFF
    END SELECT
    WRITE(LU_OUTPUT,'(A,F8.2)')   '   Turbulent Prandtl Number      ',PR
    IF (N_TRACKED_SPECIES>0._EB) WRITE(LU_OUTPUT,'(A,F8.2)')   '   Turbulent Schmidt Number      ',SC
