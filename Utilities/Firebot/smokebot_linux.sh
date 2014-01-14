@@ -824,7 +824,7 @@ make_smv_movies()
 {
    cd $FDS_SVNROOT/Verification
    scripts/Make_SMV_Movies.sh 2>&1  &> $FIREBOT_DIR/output/stage6e
-   rsync -avzu --exclude .svn ~/FDS-SMV/Manuals/SMV_Animations/ /var/www/html/smokebot/summary/movies
+   rsync -avzu --exclude .svn ~/FDS-SMV/Manuals/SMV_Summary/movies/ /var/www/html/smokebot/summary/movies
 }
 
 check_smv_movies()
@@ -996,8 +996,8 @@ email_build_status()
    echo " stop time: $stop_time " >> $TIME_LOG
    echo "   web results (private): http://blaze.nist.gov/VV/SMV2" >> $TIME_LOG
    echo "   web results (public) : https://googledrive.com/host/0B-W-dkXwdHWNX0doOUF5TXdfa0U/index.html" >> $TIME_LOG
-   echo "   results (private): http://blaze.nist.gov/smokebot" >> $TIME_LOG
-   echo "   results (public) : https://drive.google.com/folderview?id=0B_wB1pJL2bFQaDJaOFNnUDR4LXM#list" >> $TIME_LOG
+   echo "   manuals (private): http://blaze.nist.gov/smokebot" >> $TIME_LOG
+   echo "   manuals (public) : https://drive.google.com/folderview?id=0B_wB1pJL2bFQaDJaOFNnUDR4LXM#list" >> $TIME_LOG
    if [ "$MAKEMOVIES" == "1" ]
    then
      echo "animations (private): http://blaze.nist.gov/smokebot/summary" >> $TIME_LOG
