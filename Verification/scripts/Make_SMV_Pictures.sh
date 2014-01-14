@@ -80,7 +80,7 @@ export BASEDIR=`pwd`
 
 export SMVUG=$SVNROOT/Manuals/SMV_User_Guide
 export SMVVG=$SVNROOT/Manuals/SMV_Verification_Guide
-SUMMARY=$SVNROOT/Manuals/Verification_Summary
+SUMMARY=$SVNROOT/Manuals/SMV_Summary
 
 if ! [ -e $SMV ]; then
   echo "The file $SMV does not exist. Run aborted."
