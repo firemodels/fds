@@ -4110,9 +4110,9 @@ Below are given sample inputs for the three types of fans supported by FDS.
 \item[{\ct LOSS}] is the flow loss through the fan when it is not operational.
 \item[{\ct MAX\_FLOW}] is the maximum volumetric flow of the fan in m$^3$/s.  This input activates a quadratic fan model.
 \item[{\ct MAX\_PRESSURE}] is the stall pressure of the fan in units of Pa.  This input activates a quadratic fan model.
-\item[{\ct RAMP\_ID}] identifies the {\ct RAMP} that contains a table of pressure drop across the fan (Pa) versus the volumetric flow rates (m$^3$/s) for a user-defined fan curve or is an optional table of time versus volumetric flow rates (m$^3$/s) for a constant volume fan.
+\item[{\ct RAMP\_ID}] identifies the {\ct RAMP} that contains a table of pressure drop across the fan (Pa) versus the volumetric flow rates (m$^3$/s) for a user-defined fan curve.
 \item[{\ct TAU\_FAN}]  defines a tanh ({\ct TAU\_FAN} > 0) or t$^2$ ramp ({\ct TAU\_FAN} < 0) for the fan.  This is applied to the flow rate computed by any of the three types (constant flow, quadratic, or user-defined ramp) of fans.
-\item[{\ct VOLUME\_FLOW}] is the fixed volumetric flow of the fan (m$^3$/s).
+\item[{\ct VOLUME\_FLOW}] is the fixed volumetric flow of the fan (m$^3$/s).  If you wish to have a time dependent flow use the {\ct VOLUME\_FLOW} input for a duct rather than for a fan.
 \end{description}
 
 \noindent
