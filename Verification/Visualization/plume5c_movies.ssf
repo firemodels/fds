@@ -6,7 +6,7 @@ RENDERALL
  1
 plume5c_tslice
 RENDERDIR
- ../../Manuals/SMV_Summary/images
+ ../../Manuals/SMV_Summary/movies
 SETTIMEVAL
  20.0
 RENDERONCE
@@ -23,7 +23,7 @@ RENDERALL
  1
 plume5c_3dsmoke
 RENDERDIR
- ../../Manuals/SMV_Summary/images
+ ../../Manuals/SMV_Summary/movies
 SETTIMEVAL
  20.0
 RENDERONCE
@@ -38,7 +38,7 @@ RENDERALL
  1
  plume5c_vtslice
 RENDERDIR
- ../../Manuals/SMV_Summary/images
+ ../../Manuals/SMV_Summary/movies
 SETTIMEVAL
  20.0
 RENDERONCE
@@ -53,7 +53,7 @@ RENDERALL
  1
  plume5c_iso
 RENDERDIR
- ../../Manuals/SMV_Summary/images
+ ../../Manuals/SMV_Summary/movies
 SETTIMEVAL
  20.0
 RENDERONCE
@@ -68,7 +68,7 @@ RENDERALL
  1
  plume5c_tbound
 RENDERDIR
- ../../Manuals/SMV_Summary/images
+ ../../Manuals/SMV_Summary/movies
 SETTIMEVAL
  20.0
 RENDERONCE
@@ -85,7 +85,7 @@ RENDERALL
  1
  plume5c_part
 RENDERDIR
- ../../Manuals/SMV_Summary/images
+ ../../Manuals/SMV_Summary/movies
 SETTIMEVAL
  20.0
 RENDERONCE
