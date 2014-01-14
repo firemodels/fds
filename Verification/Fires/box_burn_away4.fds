@@ -28,8 +28,6 @@ The gas species here is mixture fraction fuel, burning rate specified.
 
 &REAC FUEL='ETHYLENE'
       FYI='C_2 H_4'
-      C=2.
-      H=4.
       SOOT_YIELD=0.00
       HEAT_OF_COMBUSTION = 40000.
       AUTO_IGNITION_TEMPERATURE = 15000. / 

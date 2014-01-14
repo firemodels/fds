@@ -18,7 +18,7 @@ Mesh 6: Matrix prevents swelling
 
 &MISC SOLID_PHASE_ONLY=.TRUE.,HUMIDITY=0., Y_O2_INFTY=0.01, Y_CO2_INFTY=0. /
 
-&REAC FUEL='METHANE', C=1., H=4., CRITICAL_FLAME_TEMPERATURE=2000. /  No gas phase reaction
+&REAC FUEL='METHANE', CRITICAL_FLAME_TEMPERATURE=2000. /  No gas phase reaction
 
 &DUMP DT_DEVC=0.5 /
 
