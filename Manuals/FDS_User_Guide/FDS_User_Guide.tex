@@ -62,7 +62,7 @@ User's Guide\\
 \flushright{\today \\
 FDS Version \fdsversion \\
 \emph{SVN Repository}~$Revision$}
-% dummy comment to force svn change - Mon Jan 13 21:57:03 EST 2014
+% dummy comment to force svn change - Thu Jan  9 21:57:06 EST 2014
 
 
 \vfill
@@ -5921,7 +5921,7 @@ another 20 s, and then ramps down linearly in 20 s. The key input
 parameters are given here:
 
 \begin{lstlisting}
-&REAC FUEL='N-HEPTANE',C=7,H=16,SOOT_YIELD=0.01,HEAT_OF_COMBUSTION=44500./
+&REAC FUEL='N-HEPTANE',SOOT_YIELD=0.01,HEAT_OF_COMBUSTION=44500./
 
 &DEVC ID='nozzle_1', XYZ=4.0,-.3,0.5, PROP_ID='nozzle', QUANTITY='TIME', SETPOINT=0. /
 &DEVC ID='nozzle_2', XYZ=4.0,0.3,0.5, PROP_ID='nozzle', QUANTITY='TIME', SETPOINT=0. /
