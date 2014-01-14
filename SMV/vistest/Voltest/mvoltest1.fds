@@ -16,8 +16,6 @@
 &RADI RADIATIVE_FRACTION=0.40 /
 &REAC FUEL='N-HEPTANE'
       FYI='Heptane, C_7 H_16'
-      C=7.
-      H=16. 
       CO_YIELD=0.008 
       SOOT_YIELD=0.015 /
 
