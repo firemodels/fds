@@ -8,9 +8,7 @@
 &DUMP DT_DEVC=15., DT_HRR=15., SIG_FIGS=4, SIG_FIGS_EXP=2 /
 
 &REAC FUEL='METHANE'                       
-      FYI='Methane, C H_4'               
-      C=1.                          
-      H=4.                          
+      FYI='Methane, C H_4'                                  
       SOOT_YIELD=0.01 /                 
                                          
 &RADI RADIATIVE_FRACTION=0.30 /                           

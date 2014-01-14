@@ -9,8 +9,6 @@
 
 &REAC FUEL='METHANE'                       
       FYI='Methane, C H_4'               
-      C=1.                          
-      H=4.                          
       SOOT_YIELD=0.005 /                 
            
 &RADI RADIATIVE_FRACTION=0.20 /                           
