@@ -13,8 +13,6 @@
 
 &REAC FUEL         = 'METHANOL'
       FYI        = 'Methanol, C H_4 O'
-      C          = 1.
-      H          = 4.
       SOOT_YIELD = 0.02 /
 
 &SURF ID='burner', HRRPUA=780., RAMP_Q='fire', COLOR='RED' / 

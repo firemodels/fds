@@ -11,10 +11,8 @@
 &MISC TMPA=17. /
 
 
-&REAC FUEL         = 'HEPTANE'
+&REAC FUEL         = 'N-HEPTANE'
       FYI        = 'Heptane, C_7 H_16'
-      C          = 7.
-      H          = 16.
       SOOT_YIELD = 0.2 /
 
 &SURF ID='burner', HRRPUA=3125., RAMP_Q='fire', COLOR='RED' / 
