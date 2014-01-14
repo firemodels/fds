@@ -8,7 +8,7 @@ RENDERALL
  1
 thouse5_tslice
 RENDERDIR
- ../../Manuals/SMV_Animations/images
+ ../../Manuals/SMV_Summary/images
 SETTIMEVAL
  20.0
 RENDERONCE
@@ -26,7 +26,7 @@ RENDERALL
  1
 thouse5_smoke3d
 RENDERDIR
- ../../Manuals/SMV_Animations/images
+ ../../Manuals/SMV_Summary/images
 SETTIMEVAL
  20.0
 RENDERONCE
