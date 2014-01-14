@@ -20,7 +20,7 @@ RENDERALL
  1
 levelset1_movie
 RENDERDIR
- ../../Manuals/SMV_Animations
+ ../../Manuals/SMV_Summary/movies
 SETTIMEVAL
  120.000000
 RENDERONCE
