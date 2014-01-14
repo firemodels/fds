@@ -1,0 +1,13 @@
+RENDERDIR
+ ../../../Manuals/SMV_Summary/images/
+LOADVOLSMOKEFRAME
+ -1 500
+RENDERONCE
+  volrender_500
+RENDERDIR
+ frames
+RENDERDIR
+ frames
+VOLSMOKERENDERALL
+ 1 0
+ voltest2
