@@ -28,10 +28,11 @@ echo "     default: batch"
 echo "     other options: fire60s, fire70s, vis"
 echo "-s - stop FDS runs"
 echo "-x - do not copy FDS input files"
+echo "-y - overwrite existing files"
 exit
 }
 
-while getopts 'dho:q:sx' OPTION
+while getopts 'dho:q:sxy' OPTION
 do
 case $OPTION in
   d)
@@ -52,6 +53,9 @@ case $OPTION in
   x)
    export DONOTCOPY=1
    ;;   
+  y)
+   export OVERWRITE=1
+   ;;   
 esac
 done
 
@@ -66,16 +70,14 @@ if [ ! $STOPFDS ] ; then
   # Check for existence of $INDIR (Current_Results) directory
   if [ -d "$INDIR" ]; then
       # Check for files in $INDIR (Current_Results) directory
-      if [ "$(ls -A $INDIR)" ]; then
-          while true; do
-              echo "Directory $INDIR already exists with files."
-              read -p "Do you wish to overwrite the files in this directory? [y]es or [n]o `echo $'\n> '`" yn
-              case $yn in
-                  [Yy]* ) break;; # Continue along
-                  [Nn]* ) echo "Exiting."; exit;;
-                  * ) echo "Please answer [y]es or [n]o. `echo $'\n '`";;
-              esac
-          done
+      if [[ "$(ls -A $INDIR)" && ! $OVERWRITE ]]; then
+          echo "Directory $INDIR already exists with files."
+          echo "Use the -y option to overwrite files."
+          echo "Exiting."
+          exit
+      elif [[ "$(ls -A $INDIR)" && $OVERWRITE ]]; then
+        # Continue along
+        :
       fi
   # Create $INDIR (Current_Results) directory if it doesn't exist
   else
