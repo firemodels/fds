@@ -13,8 +13,6 @@
 
 &REAC FUEL         = 'PROPYLENE'
       FYI        = 'Propylene, C_3 H_6'
-      C          = 3.
-      H          = 6.
       SOOT_YIELD = 0.02 /
 
 &SURF ID='burner', HRRPUA=1563., RAMP_Q='fire', COLOR='RED' / 
