@@ -3,11 +3,9 @@
 
 &MESH IJK=10,10,10, XB=0.0,1.0,0.0,1.0,0.0,1.0 /
 
-&REAC FUEL       = 'methane'
+&REAC FUEL       = 'METHANE'
       SOOT_YIELD = 0.10
       CO_YIELD   = 0.10
-      C          = 1.
-      H          = 4.
       HEAT_OF_COMBUSTION = 50000
       IDEAL=.FALSE./
 
