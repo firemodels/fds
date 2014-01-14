@@ -51,7 +51,7 @@
       BURN_AWAY      = .FALSE.
       TMP_FRONT      = 600.0
 /
-&REAC C=3,H=8,SOOT_YIELD=0.01,FUEL='PROPANE'/
+&REAC FUEL='PROPANE',SOOT_YIELD=0.01/
 &SURF ID='BURNER',HRRPUA=600.0,PART_ID='tracers' /  Ignition source
 
 &VENT XB=0.2,0.6,0.2,0.6,0.0,0.0,SURF_ID='BURNER' XYZ=0.4,0.4,0.0,RADIUS=0.2,RGB=255,0,0/  fire source on kitchen stove

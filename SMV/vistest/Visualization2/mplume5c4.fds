@@ -56,7 +56,7 @@
       THICKNESS(1:2) = 0.002,0.1 
       TMP_INNER      = 600.0
 /
-&REAC C=3,H=8,SOOT_YIELD=0.01,FUEL='PROPANE'/
+&REAC FUEL='PROPANE',SOOT_YIELD=0.01/
 &SURF ID='BURNER',HRRPUA=600.0,PART_ID='tracers' /  Ignition source
 
 &VENT XB=0.5,1.1,0.5,1.1,0.1,0.1,SURF_ID='BURNER' /  fire source on kitchen stove
