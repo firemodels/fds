@@ -24,7 +24,12 @@ else
   PLATFORM=linux$size
 fi
 
+CURDIR=`pwd`
 export SVNROOT=`pwd`/..
+cd $SVNROOT
+export SVNROOT=`pwd`
+cd $CURDIR
+
 export SMV=$SVNROOT/SMV/Build/intel_$PLATFORM/smokeview_$PLATFORM
 export RUNSMV="$SVNROOT/Utilities/Scripts/runsmv.sh"
 export SMVBINDIR="-bindir $SVNROOT/SMV/for_bundle"
@@ -44,7 +49,7 @@ mov=.m1v
 VDIR=$SVNROOT/Verification
 INDIR=$SVNROOT/Verification/Visualization/frames
 WUIINDIR=$SVNROOT/Verification/WUI/frames
-export OUTDIR=$SVNROOT/Manuals/SMV_Animations
+export OUTDIR=$SVNROOT/Manuals/SMV_Summary/movies
 
 rm -f $INDIR/*.png
 rm -f $WUIINDIR/*.png
