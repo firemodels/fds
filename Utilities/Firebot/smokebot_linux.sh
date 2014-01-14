@@ -824,7 +824,6 @@ make_smv_movies()
 {
    cd $FDS_SVNROOT/Verification
    scripts/Make_SMV_Movies.sh 2>&1  &> $FIREBOT_DIR/output/stage6e
-   rsync -avzu --exclude .svn ~/FDS-SMV/Manuals/SMV_Summary/movies/ /var/www/html/smokebot/summary/movies
 }
 
 check_smv_movies()
@@ -851,6 +850,8 @@ generate_timing_stats()
    cd $FDS_SVNROOT/Verification/scripts/
    export RUNCFAST="$FDS_SVNROOT/Verification/scripts/copyout.sh"
    export RUNFDS="$FDS_SVNROOT/Verification/scripts/copyout.sh"
+   export RUNWFDS="$FDS_SVNROOT/Verification/scripts/copyout.sh"
+   export RUNTFDS="$FDS_SVNROOT/Verification/scripts/copyout.sh"
 
    cd $FDS_SVNROOT/Verification
    scripts/SMV_Cases.sh
