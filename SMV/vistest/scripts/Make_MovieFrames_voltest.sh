@@ -25,8 +25,6 @@ $QSMV -d Voltest -p 1 -q vis version
 
 # generate images for cases
 
-$QFDS -d Voltest -p 1 -q terminal version
-$QSMV -d Voltest -p 1 -q vis version
 #$QSMV -d Voltest -p 20 mplume8n
 #$QSMV -d Voltest -p 30 -q fire70s  mplumeB8n
 $QSMV -d Voltest -p 1 -q vis voltest2
