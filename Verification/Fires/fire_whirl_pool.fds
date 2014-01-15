@@ -14,7 +14,6 @@
 
 &REAC FUEL               = 'N-HEPTANE'
       FYI                = 'Heptane, C_7 H_16'
-      HEAT_OF_COMBUSTION = 44400.
       SOOT_YIELD         = 0.037 /
 
 &MATL ID                     = 'HEPTANE LIQUID'
