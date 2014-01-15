@@ -5,6 +5,7 @@ echo "runsmv_single.sh [-d -h -r -s size ]"
 echo "Generates figures for Smokeview verification suite"
 echo ""
 echo "Options"
+echo "-b - output build time in title"
 echo "-d - use debug version of smokeview"
 echo "-h - display this message"
 echo "-m script - run smokeview script named script"
@@ -32,8 +33,9 @@ RUNDIR=
 SKIPFRAME=1
 STARTFRAME=0
 VOLRENDER=
+TIME=
 
-while getopts 'dhm:r:s:txy:z:' OPTION
+while getopts 'bdhm:r:s:txy:z:' OPTION
 do
 case $OPTION  in
   d)
@@ -47,6 +49,9 @@ case $OPTION  in
    ;;
   r)
    RUNDIR="$OPTARG"
+   ;;
+  b)
+   TIME=-t
    ;;
   t)
    TEST=_test
@@ -111,7 +116,7 @@ STARTX=$SVNROOT/Utilities/Scripts/startXserver.sh
 STOPX=$SVNROOT/Utilities/Scripts/stopXserver.sh
 
 echo running:
-echo $SMV $RUNDIR $SMVBINDIR $SCRIPT $VOLRENDER $STARTFRAME $SKIPFRAME $CASE
+echo $SMV $RUNDIR $SMVBINDIR $TIME $SCRIPT $VOLRENDER $STARTFRAME $SKIPFRAME $CASE
 source $STARTX
-$SMV $RUNDIR $SMVBINDIR $SCRIPT $VOLRENDER $STARTFRAME $SKIPFRAME $CASE
+$SMV $RUNDIR $SMVBINDIR $TIME $SCRIPT $VOLRENDER $STARTFRAME $SKIPFRAME $CASE
 source $STOPX
