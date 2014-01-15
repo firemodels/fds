@@ -8,9 +8,6 @@
 
 &REAC FUEL                 = 'PROPYLENE'			
       FYI                = 'C3H6'
-      C                  = 3.0
-      H                  = 6.0 
-      HEAT_OF_COMBUSTION = 40500. 
       SOOT_YIELD         = 0.095 /
 
 &SURF ID='BURNER', HRRPUA=555., COLOR='RED' /

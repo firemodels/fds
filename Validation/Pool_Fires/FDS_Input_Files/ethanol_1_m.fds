@@ -7,10 +7,6 @@
 &RADI RADIATIVE_FRACTION=0.18/
 &REAC FUEL               = 'ETHANOL'
       FYI                = 'Ethanol, C_2 H_6 O_1'
-      HEAT_OF_COMBUSTION = 26780.
-      O                  = 1.
-      C                  = 2.
-      H                  = 6.
       SOOT_YIELD         = 0.008 /
 
 &MATL ID                     = 'ETHANOL LIQUID'

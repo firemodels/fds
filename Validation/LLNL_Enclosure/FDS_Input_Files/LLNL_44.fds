@@ -8,7 +8,7 @@
 &REAC FUEL='METHANE'
       FYI= 'C_1 H_4'
       SOOT_YIELD=0
-      HEAT_OF_COMBUSTION=50050. /
+       /
 
 
 &SURF ID= 'BURNER'
