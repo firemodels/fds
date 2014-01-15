@@ -8,7 +8,6 @@ A model of a liquid fuel spray burner used for fire tests at NIST.
 &MISC POROUS_FLOOR=.FALSE., Y_CO2_INFTY=0., HUMIDITY=0. /
 
 &REAC FUEL='N-HEPTANE'
-      HEAT_OF_COMBUSTION=44000.
       CO_YIELD=0.0
       SOOT_H_FRACTION=0.1
       SOOT_YIELD=0.015 /
