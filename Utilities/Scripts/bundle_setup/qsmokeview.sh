@@ -25,9 +25,11 @@ then
   exit
 fi
 
+VOLRENDER="-x "
+
 # default parameter settings
 
-while getopts 'd:p:q:' OPTION
+while getopts 'd:p:q:w' OPTION
 do
 case $OPTION  in
   d)
@@ -38,6 +40,9 @@ case $OPTION  in
   ;;
   q)
   queue="$OPTARG"
+  ;;
+  w)
+  VOLRENDER=
   ;;
 esac
 done
@@ -58,7 +63,7 @@ fi
 
 i=0
 while [ $i -lt $nprocesses ]; do
-  qfds.sh -d $dir -r -s -x -y $i -z $nprocesses -q $queue $input
+  qfds.sh -d $dir -r -s $VOLRENDER -y $i -z $nprocesses -q $queue $input
   sleep 5
   let i=i+1
 done
