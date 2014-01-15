@@ -221,7 +221,7 @@ if [ -e $stopfile ]; then
  rm $stopfile
 fi
 
-QSUB=qsub -q $queue
+QSUB="qsub -q $queue"
 if [ "$queue" == "terminal" ] ; then
   QSUB=
   MPIRUN=
