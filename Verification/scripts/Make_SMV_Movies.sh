@@ -79,6 +79,10 @@ MKMOVIE()
 echo Starting background X server
 source $STARTX
 
+# create version string
+cd $VDIR
+$RUNSMV -t Visualization version2
+
 # The -m option assumes that a script
 # named casename_movies.ssf exists for each 
 
