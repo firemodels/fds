@@ -7,10 +7,6 @@
 
 &REAC FUEL               = 'BENZENE'
       FYI                = 'Benzene, C_6 H_6'
-      HEAT_OF_COMBUSTION = 39900.
-      O                  = 0.
-      C                  = 6.
-      H                  = 6.
       SOOT_YIELD         = 0.181 /
 
 &MATL ID                     = 'BENZENE LIQUID'
