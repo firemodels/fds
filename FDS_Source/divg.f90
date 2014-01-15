@@ -208,6 +208,7 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
    H_RHO_D_DZDY => WORK6
    H_RHO_D_DZDZ => WORK7
 
+   !$OMP PARALLEL DO PRIVATE(TMP_G, HDIFF) SCHEDULE(static)
    DO K=0,KBAR
       DO J=0,JBAR
          DO I=0,IBAR
@@ -228,6 +229,7 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
          ENDDO
       ENDDO
    ENDDO
+   !$OMP END PARALLEL DO
 
    ! Correct rho*D del Z and del dot h_n*rho*D del Z_n at boundaries and store rho*D at boundaries
 
