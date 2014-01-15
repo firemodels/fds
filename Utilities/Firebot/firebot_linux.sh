@@ -630,7 +630,7 @@ run_validation_cases_debug()
 
       CURRENT_VALIDATION_SETS+=($SET)
 
-      check_current_utilization()
+      check_current_utilization
    done
 
    wait_cases_debug_start 'validation'
