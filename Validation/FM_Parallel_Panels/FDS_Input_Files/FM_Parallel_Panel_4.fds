@@ -7,10 +7,7 @@
 &RADI RADIATIVE_FRACTION = 0.29 /
 
 &REAC FUEL                 = 'PROPANE'			
-      FYI                = 'C3H8'
-      C                  = 3.0
-      H                  = 8.0 
-      HEAT_OF_COMBUSTION = 43700. 
+      FYI                = 'C3H8' 
       SOOT_YIELD         = 0.024 /
 
 &SURF ID='BURNER', HRRPUA=167., COLOR='RED' /

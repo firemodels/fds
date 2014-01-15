@@ -7,10 +7,6 @@
 &RADI RADIATIVE_FRACTION=0.27/
 &REAC FUEL               = 'ACETONE'
       FYI                = 'Acetone, C_3 H_6 O_1'
-      HEAT_OF_COMBUSTION = 30509.64
-      O                  = 1.
-      C                  = 3.
-      H                  = 6.
       SOOT_YIELD         = 0.014 /
 
 &MATL ID                     = 'ACETONE LIQUID'
