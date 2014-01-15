@@ -50,23 +50,23 @@ setup_win:
 # FOPENMPFLAG and can be enabled/disabled on a per-file basis below.
 # If the target name includes "openmp", then the OpenMP flags are appended.
 ifeq ($(findstring openmp, $(MAKECMDGOALS)), openmp)
-# divg.o: FFLAGS += $(FOPENMPFLAGS)
+divg.o: FFLAGS += $(FOPENMPFLAGS)
 # fire.o: FFLAGS += $(FOPENMPFLAGS)
 func.o: FFLAGS += $(FOPENMPFLAGS)
 # mass.o: FFLAGS += $(FOPENMPFLAGS)
 # part.o: FFLAGS += $(FOPENMPFLAGS)
 # pois.o: FFLAGS += $(FOPENMPFLAGS)
-pres.o: FFLAGS += $(FOPENMPFLAGS)
+# pres.o: FFLAGS += $(FOPENMPFLAGS)
 # turb.o: FFLAGS += $(FOPENMPFLAGS)
 # velo.o: FFLAGS += $(FOPENMPFLAGS)
 
-# divg.obj: FFLAGS += $(FOPENMPFLAGS)
+divg.obj: FFLAGS += $(FOPENMPFLAGS)
 # fire.obj: FFLAGS += $(FOPENMPFLAGS)
 func.obj: FFLAGS += $(FOPENMPFLAGS)
 # mass.obj: FFLAGS += $(FOPENMPFLAGS)
 # part.obj: FFLAGS += $(FOPENMPFLAGS)
 # pois.obj: FFLAGS += $(FOPENMPFLAGS)
-pres.obj: FFLAGS += $(FOPENMPFLAGS)
+# pres.obj: FFLAGS += $(FOPENMPFLAGS)
 # turb.obj: FFLAGS += $(FOPENMPFLAGS)
 # velo.obj: FFLAGS += $(FOPENMPFLAGS)
 endif
