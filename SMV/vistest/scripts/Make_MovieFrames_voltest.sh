@@ -7,6 +7,7 @@ export SVNROOT=`pwd`
 cd $CURDIR/..
 
 QSMV=/usr/local/bin/qsmokeview.sh
+QFDS=/usr/local/bin/qfds.sh
 # uncomment following line to stop all cases
 #export STOPFDS=1
 
@@ -15,6 +16,10 @@ QSMV=/usr/local/bin/qsmokeview.sh
 rm -f Voltest/frames/voltest2*.png
 #rm -f Voltest/frames/voltest3*.png
 
+
+
+$QFDS -d Voltest -p 1 -q terminal version
+$QSMV -d Voltest -p 1 -q vis version
 #$QSMV -d Voltest -p 20 mplume8n
 #$QSMV -d Voltest -p 30 -q fire70s  mplumeB8n
 $QSMV -d Voltest -p 1 -q vis voltest2
