@@ -51,7 +51,7 @@ case $OPTION  in
    RUNDIR="$OPTARG"
    ;;
   b)
-   TIME=-t
+   TIME="-time"
    ;;
   t)
    TEST=_test
