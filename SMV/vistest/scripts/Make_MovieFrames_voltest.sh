@@ -7,6 +7,7 @@ export SVNROOT=`pwd`
 cd $CURDIR/..
 
 QSMV=/usr/local/bin/qsmokeview.sh
+QSMV2=/usr/local/bin/run_smv_single.sh
 QFDS=/usr/local/bin/qfds.sh
 # uncomment following line to stop all cases
 #export STOPFDS=1
@@ -17,11 +18,12 @@ rm -f Voltest/version*.png
 rm -f Voltest/frames/voltest2*.png
 #rm -f Voltest/frames/voltest3*.png
 
-# create image of smokeview version number used 
-# to view cases
+# create smokeview version image
 
 $QFDS -r -d Voltest -q terminal version.fds
-$QSMV -d Voltest -p 1 -q vis version
+cd $CURDIR/../Voltest
+$QSMV2 -m version.ssf version
+cd $CURDIR/..
 
 # generate images for cases
 
