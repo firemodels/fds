@@ -7,7 +7,7 @@ export SVNROOT=`pwd`
 cd $CURDIR/..
 
 QSMV=/usr/local/bin/qsmokeview.sh
-QSMV2=/usr/local/bin/run_smv_single.sh
+QSMV2=/usr/local/bin/runsmv_single.sh
 QFDS=/usr/local/bin/qfds.sh
 # uncomment following line to stop all cases
 #export STOPFDS=1
