@@ -22,7 +22,7 @@ rm -f Voltest/frames/voltest2*.png
 
 $QFDS -r -d Voltest -q terminal version.fds
 cd $CURDIR/../Voltest
-$QSMV2 -m version.ssf version
+$QSMV2 -b -m version.ssf version
 cd $CURDIR/..
 
 # generate images for cases
