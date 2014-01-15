@@ -221,6 +221,12 @@ if [ -e $stopfile ]; then
  rm $stopfile
 fi
 
+QSUB=qsub -q $queue
+if [ "$queue" == "terminal" ] ; then
+  QSUB=
+  MPIRUN=
+fi
+
 scriptfile=/tmp/script.$$
 cat << EOF > $scriptfile
 #!/bin/bash -f
@@ -249,5 +255,5 @@ echo "             Nodes:$nnodes"
 echo "Processes per node:$nprocesses_per_node"
 fi
 chmod +x $scriptfile
-qsub -q $queue $scriptfile
+$QSUB $scriptfile
 rm $scriptfile
