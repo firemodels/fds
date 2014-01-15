@@ -520,10 +520,12 @@ check_current_utilization()
    # This function is used to determine if the number of current processes currently in use is greater than the
    # number of specified maximum processes. If so, then no more cases are launched (LAUNCH_MORE_CASES=0).
 
+   sleep 5
+
    # Reports the number of nodes currently in use by current user
    NUM_CURRENT_PROCESSES=`qstat -a | grep $(whoami) | awk '{print $7}' | paste -sd+ | bc`
 
-   if [ $NUM_CURRENT_PROCESSES -gt $MAX_VALIDATION_PROCESSES ]; then
+   if [ "$NUM_CURRENT_PROCESSES" -gt "$MAX_VALIDATION_PROCESSES" ]; then
       LAUNCH_MORE_CASES=0
    fi
 }
@@ -617,14 +619,14 @@ run_validation_cases_debug()
    for SET in ${VALIDATION_SETS[*]}
    do
       # Check to see if maximum number of validation processes are in use
-      if [ LAUNCH_MORE_CASES -eq 0 ]; then
+      if [ $LAUNCH_MORE_CASES -eq 0 ]; then
          break
       fi
 
       cd $FDS_SVNROOT/Validation/"$SET"
 
       # Submit FDS validation cases and wait for them to start
-      echo 'Running FDS validation cases for ${SET}:' >> $FIREBOT_DIR/output/stage3
+      echo "Running FDS validation cases for ${SET}:" >> $FIREBOT_DIR/output/stage3
       echo "" >> $FIREBOT_DIR/output/stage3 2>&1
       ./Run_All.sh -d >> $FIREBOT_DIR/output/stage3 2>&1
 
