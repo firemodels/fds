@@ -44,7 +44,7 @@ fi
 source $FIREBOT_DIR/firebot_email_list.sh
 
 function usage {
-echo "firebot.sh [ -q queue_name -r revision_number -s -u svn_username -y ]"
+echo "firebot.sh [ -q queue_name -r revision_number -s -u svn_username -v num_validation_sets -y ]"
 echo "Runs Firebot V&V testing script"
 echo ""
 echo "Options"
@@ -60,18 +60,17 @@ echo ""
 echo "-u - specify SVN username to use"
 echo "     default: fds.firebot"
 echo ""
-echo "-v - run Firebot in validation mode"
-echo "     default: (none, Firebot runs in verification mode)"
+echo "-v n - run Firebot in validation mode with a specified number of validation data sets"
+echo "     default: (none)"
 echo ""
 echo "-y - run Firebot as any user (warning!)"
-echo "     default: (none)"
 exit
 }
 
 QUEUE=firebot
 SVN_REVISION=
 SVN_USERNAME=fds.firebot
-while getopts 'hq:r:su:vy' OPTION
+while getopts 'hq:r:su:v:y' OPTION
 do
 case $OPTION in
   h)
@@ -91,6 +90,7 @@ case $OPTION in
    ;;
   v)
    FIREBOT_MODE="validation"
+   NUM_VALIDATION_SETS="$OPTARG"
    # Set Validationbot email list
    mailToFDS=$mailToFDS_nist
    ;;
@@ -478,7 +478,7 @@ check_inspect_fds_openmp_db()
 #  = Stage 3 - Run verification or validation cases (debug mode) =
 #  ===============================================================
 
-select_validation_set()
+select_validation_sets()
 {
    cd $FDS_SVNROOT/Validation
 
@@ -487,12 +487,12 @@ select_validation_set()
    # sets ordered from oldest to newest.
    VALIDATION_SETS=(`grep '$VDIR' Process_All_Output.sh | grep -v "#" | xargs -n 1 dirname | xargs -n 1 dirname | xargs -n 1 basename | xargs -i svn info {}/FDS_Output_Files | awk '{if($0 != ""){ if(s){s=s"*"$0}else{s=$0}}else{ print s"*";s=""}}END{print s"*"}' | sort -t* -k9 | cut -d '*' -f1 | cut -d ' ' -f2 | xargs -n 1 dirname`)
 
-   # Select a random validation set using a random number between 0 and 4 (selects from the five oldest validation sets).
-   RANDOM_VALIDATION_SET=$(($RANDOM % 5))
-   CURRENT_VALIDATION_SET=${VALIDATION_SETS[RANDOM_VALIDATION_SET]}
+   CURRENT_VALIDATION_SETS=${VALIDATION_SETS[@]:0:$NUM_VALIDATION_SETS}
 
-   echo "Current Validation Set: ${CURRENT_VALIDATION_SET}" >> $FIREBOT_DIR/output/stage3
+   echo "Current validation set(s): ${CURRENT_VALIDATION_SETS[*]}" >> $FIREBOT_DIR/output/stage3
    echo "" >> $FIREBOT_DIR/output/stage3 2>&1
+
+   # Can output this information to a LaTeX table
 }
 
 wait_cases_debug_start()
@@ -598,16 +598,19 @@ run_verification_cases_debug()
 
 run_validation_cases_debug()
 {
+   #  =============================================
+   #  = Run FDS validation cases for current sets =
+   #  =============================================
 
-   #  ============================================
-   #  = Run FDS validation cases for current set =
-   #  ============================================
+   for SET in $CURRENT_VALIDATION_SETS
+   do
+      cd $FDS_SVNROOT/Validation/"$SET"
 
-   cd $FDS_SVNROOT/Validation/"$CURRENT_VALIDATION_SET"
+      # Submit FDS validation cases and wait for them to start
+      echo 'Running FDS validation cases:' >> $FIREBOT_DIR/output/stage3
+      ./Run_All.sh -d >> $FIREBOT_DIR/output/stage3 2>&1
+   done
 
-   # Submit FDS validation cases and wait for them to start
-   echo 'Running FDS validation cases:' >> $FIREBOT_DIR/output/stage3
-   ./Run_All.sh -d >> $FIREBOT_DIR/output/stage3 2>&1
    wait_cases_debug_start 'validation'
 
    # Wait some additional time for all cases to start
@@ -617,10 +620,13 @@ run_validation_cases_debug()
    #  = Stop all cases =
    #  ==================
 
-   cd $FDS_SVNROOT/Validation/"$CURRENT_VALIDATION_SET"
-   
-   ./Run_All.sh -d -s >> $FIREBOT_DIR/output/stage3 2>&1
-   echo "" >> $FIREBOT_DIR/output/stage3 2>&1
+   for SET in $CURRENT_VALIDATION_SETS
+   do
+      cd $FDS_SVNROOT/Validation/"$SET"
+      
+      ./Run_All.sh -d -s >> $FIREBOT_DIR/output/stage3 2>&1
+      echo "" >> $FIREBOT_DIR/output/stage3 2>&1
+   done
 
    # Wait for validation cases to end
    wait_cases_debug_end 'validation'
@@ -871,14 +877,17 @@ run_validation_cases_release()
    #  = Run selected FDS validation set =
    #  ===================================
 
-   cd $FDS_SVNROOT/Validation/"$CURRENT_VALIDATION_SET"
+   for SET in $CURRENT_VALIDATION_SETS
+   do
+      cd $FDS_SVNROOT/Validation/"$SET"
 
-   # Start running FDS validation cases
-   echo "Running FDS validation cases:" >> $FIREBOT_DIR/output/stage5
-   echo "Validation Set: ${CURRENT_VALIDATION_SET}" >> $FIREBOT_DIR/output/stage5
-   echo "" >> $FIREBOT_DIR/output/stage5 2>&1
-   ./Run_All.sh >> $FIREBOT_DIR/output/stage5 2>&1
-   echo "" >> $FIREBOT_DIR/output/stage5 2>&1
+      # Start running FDS validation cases
+      echo "Running FDS validation cases:" >> $FIREBOT_DIR/output/stage5
+      echo "Validation Set: ${SET}" >> $FIREBOT_DIR/output/stage5
+      echo "" >> $FIREBOT_DIR/output/stage5 2>&1
+      ./Run_All.sh >> $FIREBOT_DIR/output/stage5 2>&1
+      echo "" >> $FIREBOT_DIR/output/stage5 2>&1
+   done
 
    # Wait for validation cases to end
    wait_cases_release_end 'validation'
@@ -911,15 +920,18 @@ check_cases_release()
 
 commit_validation_results()
 {
-   # Copy new FDS files from Current_Results to FDS_Output_Files using Process_Output.csh script for the validation set
-   cd $FDS_SVNROOT/Validation/"$CURRENT_VALIDATION_SET"/FDS_Output_Files
-   ./Process_Output.csh
+   for SET in $CURRENT_VALIDATION_SETS
+   do
+      # Copy new FDS files from Current_Results to FDS_Output_Files using Process_Output.csh script for the validation set
+      cd $FDS_SVNROOT/Validation/"$SET"/FDS_Output_Files
+      ./Process_Output.csh
+   done
 
    # cd to SVN root
    cd $FDS_SVNROOT
 
    # Commit new validation results
-   svn commit -m "Validationbot: Updated validation results for ${CURRENT_VALIDATION_SET}" &> /dev/null
+   svn commit -m "Validationbot: Updated validation results for: ${CURRENT_VALIDATION_SETS[*]}" &> /dev/null
 }
 
 #  ================================
@@ -1411,7 +1423,7 @@ email_build_status()
       echo "Host OS: Linux " >> $TIME_LOG
       echo "Host Name: $hostname " >> $TIME_LOG
       if [ $FIREBOT_MODE == "validation" ] ; then
-         echo "Validation Set: ${CURRENT_VALIDATION_SET} " >> $TIME_LOG
+         echo "Validation Set(s): ${CURRENT_VALIDATION_SETS[*]} " >> $TIME_LOG
       fi
       echo "Start Time: $start_time " >> $TIME_LOG
       echo "Stop Time: $stop_time " >> $TIME_LOG
@@ -1475,7 +1487,7 @@ fi
 ### Stage 3 ###
 # Only run if firebot is in "validation" mode
 if [ $FIREBOT_MODE == "validation" ] ; then
-   select_validation_set
+   select_validation_sets
 fi
 
 # Depends on successful FDS debug compile
