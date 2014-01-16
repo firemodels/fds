@@ -10,6 +10,7 @@ set BACKGROUNDDIR=$SVNROOT/Utilities/background/intel_${platform}_32
 set SMOKEVIEWDIR=$SVNROOT/SMV/Build/intel_$platformsize
 set SMOKEZIPDIR=$SVNROOT/Utilities/smokezip/intel_$platformsize
 set SMOKEDIFFDIR=$SVNROOT/Utilities/smokediff/intel_$platformsize
+set WINDDIR=$SVNROOT/Utilities/wind2fds/intel_$platformsize
 set FORBUNDLE=~/$SVNROOT/SMV/for_bundle
 set DIR=smv_${version}_$platform$size
 
@@ -22,9 +23,10 @@ cp $FORBUNDLE/readme.html $DIR/Documentation/release_notes.html
 
 cp $FORBUNDLE/objects.svo $DIR/.
 scp $HOST\:$BACKGROUNDDIR/background $DIR/.
-scp $HOST\:$SMOKEDIFFDIR/smokediff_$platformsize $DIR/.
-scp $HOST\:$SMOKEVIEWDIR/smokeview_$platformsize $DIR/.
-scp $HOST\:$SMOKEZIPDIR/smokezip_$platformsize $DIR/.
+scp $HOST\:$SMOKEDIFFDIR/smokediff_$platformsize $DIR/smokediff
+scp $HOST\:$SMOKEVIEWDIR/smokeview_$platformsize $DIR/smokeview
+scp $HOST\:$SMOKEZIPDIR/smokezip_$platformsize $DIR/smokezip
+scp $HOST\:$WINDDIR/wind2fds_$platformsize $DIR/wind2fds
 rm -f $DIR.tar $DIR.tar.gz
 tar cvf $DIR.tar $DIR/.
 gzip $DIR.tar
