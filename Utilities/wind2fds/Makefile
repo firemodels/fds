@@ -41,6 +41,19 @@ no_target:
 # ********  rules for each platform supported *************
 
 
+# ------------- Win 32 ----------------
+#  32 bit windows
+
+intel_win_32 : CFLAGS    = -Od /Qvec_report0 /nologo -D WIN32 -D pp_WIN_INTEL
+intel_win_32 : FFLAGS    = -Od /Qvec_report0 /nologo -fpp -D pp_cvf /iface:stdref
+intel_win_32 : CC        = icl
+intel_win_32 : CPP       = icl
+intel_win_32 : FC        = ifort
+intel_win_32 : exe       = wind2fds_win_32.exe
+
+intel_win_32 : $(objwin)
+	$(CPP) -o $(bin)/$(exe) $(objwin) $(LIB_DIR)/lib_win_intel_32/pthreads.lib
+
 # ------------- Win 64 ----------------
 #  64 bit windows
 

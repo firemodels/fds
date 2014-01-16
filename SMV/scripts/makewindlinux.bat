@@ -1,6 +1,6 @@
 @echo off
 
-Rem  Windows batch file to copy smokediffset SVNROOT=~/FDS-SMV
+Rem  Windows batch file to build a release Smokeview for Linux 32.
 
 Rem setup environment variables (defining where repository resides etc) 
 
@@ -19,8 +19,12 @@ goto:eof
 call %envfile%
 
 %svn_drive%
+cd %svn_root%\smv\scripts
 
-call %svn_root%\SMV\scripts\MAKEsmdosx.bat
-call %svn_root%\SMV\scripts\MAKEsmzosx.bat
-call %svn_root%\SMV\scripts\MAKEbgosx.bat
-call %svn_root%\SMV\scripts\MAKEf2aosx.bat
+set scriptdir=FDS-SMV/SMV/scripts
+
+plink %svn_logon% %scriptdir%/ssh_command.csh %linux_hostname% %scriptdir% MAKEwindlinux.csh 
+
+echo.
+echo compilation complete
+pause

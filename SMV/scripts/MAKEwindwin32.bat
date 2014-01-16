@@ -20,12 +20,7 @@ call %envfile%
 
 %svn_drive%
 
-call %svn_root%\SMV\scripts\MAKEsmdwin32.bat
-call %svn_root%\SMV\scripts\MAKEsmzwin32.bat
-call %svn_root%\SMV\scripts\MAKEbgwin32.bat
-call %svn_root%\SMV\scripts\MAKEf2awin32.bat
-call %svn_root%\SMV\scripts\MAKEsh2bat.bat
-
-cd %svn_root%\Utilities\Data_Processing
-make_sh2bat
+cd %svn_root%\Utilities\wind2fds\intel_win_32
+erase *.obj
+make_wind.bat
 pause
