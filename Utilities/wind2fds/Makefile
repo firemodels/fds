@@ -73,7 +73,7 @@ intel_win_64 : $(objwin)
 intel_linux_32 : CFLAGS    = -O2 -m32 -vec_report0 -D pp_LINUX
 intel_linux_32 : CC        = icc
 intel_linux_32 : CPP       = icc
-intel_linux_32 : exe       = wind2fds_linux_64
+intel_linux_32 : exe       = wind2fds_linux_32
 
 intel_linux_32 : $(obj)
 	$(CPP) -o $(bin)/$(exe) $(obj)

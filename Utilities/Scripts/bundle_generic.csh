@@ -15,6 +15,10 @@ setenv smokezipdir intel$FDSOS
 setenv smokezip smokezip$FDSOS
 setenv smokezipout smokezip$OUT
 
+setenv wind2fdsdir intel$FDSOS
+setenv wind2fds wind2fds$FDSOS
+setenv wind2fdsout wind2fds$OUT
+
 setenv smokediffdir intel$FDSOS
 setenv smokediff smokediff$FDSOS
 setenv smokediffout smokediff$OUT
@@ -43,6 +47,7 @@ set fdsroot=$scp_fds_smvroot/FDS_Compilation
 set backgroundroot=$scp_fds_smvroot/Utilities/background
 set smokediffroot=$scp_fds_smvroot/Utilities/smokediff
 set smokeziproot=$scp_fds_smvroot/Utilities/smokezip
+set wind2fdsroot=$scp_fds_smvroot/Utilities/wind2fds
 set googledir=$fds_smvroot/Utilities/uploads
 set bundledir=$bundlebase
 set bundle_setup=$fds_smvroot/Utilities/Scripts/bundle_setup
@@ -97,6 +102,11 @@ scp -q $fdshost\:$smokediffroot/$smokediffdir/$smokediff $bundledir/bin/$smokedi
 
 echo copying $smokezip from $smokezipdir on $fdshost
 scp -q $fdshost\:$smokeziproot/$smokezipdir/$smokezip $bundledir/bin/$smokezipout
+
+# wind2fds
+
+echo copying $wind2fds from $wind2fdsdir on $fdshost
+scp -q $fdshost\:$wind2fdsroot/$wind2fdsdir/$wind2fds $bundledir/bin/$wind2fdsout
 
 # FDS 
 
