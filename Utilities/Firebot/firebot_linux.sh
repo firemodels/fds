@@ -488,8 +488,6 @@ generate_validation_set_list()
    # based on the modification date of $VDIR/FDS_Output_Files. The result is an array of the validation
    # sets ordered from oldest to newest.
    VALIDATION_SETS=(`grep '$VDIR' Process_All_Output.sh | grep -v "#" | xargs -n 1 dirname | xargs -n 1 dirname | xargs -n 1 basename | xargs -i svn info {}/FDS_Output_Files | awk '{if($0 != ""){ if(s){s=s"*"$0}else{s=$0}}else{ print s"*";s=""}}END{print s"*"}' | sort -t* -k9 | cut -d '*' -f1 | cut -d ' ' -f2 | xargs -n 1 dirname`)
-
-   # Can output this information to a LaTeX table
 }
 
 wait_cases_debug_start()
