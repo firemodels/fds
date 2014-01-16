@@ -18,7 +18,4 @@ echo Creating figures for the Smokeview User's guide
 
 call %envfile%
 
-%svn_drive%
-cd %svn_root%\Manuals\SMV_Technical_Reference_Guide
-
-start explorer %svn_root%\Manuals\Verification_summary\index.html
+start explorer https://googledrive.com/host/0B-W-dkXwdHWNMkhuakk3WUJFYzg/index.html

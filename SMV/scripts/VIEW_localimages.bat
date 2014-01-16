@@ -19,5 +19,6 @@ echo Viewing animation web page
 call %envfile%
 
 %svn_drive%
+cd %svn_root%\Manuals\SMV_Summary
 
-start explorer %svn_root%\Manuals\SMV_Animations\index.html
+start explorer index.html
