@@ -90,6 +90,7 @@ case $OPTION in
    ;;
   v)
    FIREBOT_MODE="validation"
+   QUEUE=batch
    MAX_VALIDATION_PROCESSES="$OPTARG"
    LAUNCH_MORE_CASES=1
    # Set Validationbot email list
@@ -628,7 +629,7 @@ run_validation_cases_debug()
       # Submit FDS validation cases and wait for them to start
       echo "Running FDS validation cases for ${SET}:" >> $FIREBOT_DIR/output/stage3
       echo "" >> $FIREBOT_DIR/output/stage3 2>&1
-      ./Run_All.sh -d >> $FIREBOT_DIR/output/stage3 2>&1
+      ./Run_All.sh -d -q $QUEUE >> $FIREBOT_DIR/output/stage3 2>&1
 
       CURRENT_VALIDATION_SETS+=($SET)
 
@@ -909,7 +910,7 @@ run_validation_cases_release()
       echo "Running FDS validation cases:" >> $FIREBOT_DIR/output/stage5
       echo "Validation Set: ${SET}" >> $FIREBOT_DIR/output/stage5
       echo "" >> $FIREBOT_DIR/output/stage5 2>&1
-      ./Run_All.sh >> $FIREBOT_DIR/output/stage5 2>&1
+      ./Run_All.sh -q $QUEUE >> $FIREBOT_DIR/output/stage5 2>&1
       echo "" >> $FIREBOT_DIR/output/stage5 2>&1
    done
 
@@ -1259,6 +1260,13 @@ archive_validation_stats()
    fi
 }
 
+validation_svn_stats()
+{
+   # Output a LaTeX file with a table of the FDS validation sets and their corresponding SVN information
+   cd $FDS_SVNROOT/Utilities/Scripts
+   ./validation_svn_stats.sh
+}
+
 #  ======================================
 #  = Stage 7c - FDS run time statistics =
 #  ======================================
@@ -1605,6 +1613,7 @@ if [ $FIREBOT_MODE == "verification" ] ; then
    run_matlab_validation
    check_matlab_validation
    archive_validation_stats
+   validation_svn_stats
 
    ### Stage 7c ###
    generate_timing_stats
