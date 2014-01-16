@@ -25,7 +25,6 @@ $RUNFDS Visualization transparency
 $RUNFDS Visualization vcirctest
 $RUNFDS Visualization vcirctest2
 $RUNTFDS Visualization version
-$RUNTFDS Visualization version2
 
 $RUNFDS WUI levelset1
 $RUNWFDS WUI tree_one
