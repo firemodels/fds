@@ -246,17 +246,13 @@ WTC \> World Trade Center \\
 \chapter{Conclusion}
 
 
-
 \section{Summary of FDS Model Uncertainty Statistics}
-
 
 Table~\ref{summary_stats} lists the summary statistics for the different quantities examined in this Guide. This is, for each quantity of interest, Table~\ref{summary_stats} lists the bias and relative standard deviation of the predicted values. It also lists the total number of experimental data sets on which these statistics are based, as well as the total number of point to point comparisons. Obviously, the more data sets and the more points, the more reliable the statistics.
 
 For further details about model uncertainty and the meaning of these statistics, see Chapter~\ref{Error_Chapter}.
 
 \IfFileExists{SCRIPT_FIGURES/ScatterPlots/validation_statistics.tex}{\input{SCRIPT_FIGURES/ScatterPlots/validation_statistics.tex}}{\typeout{Error: Missing file SCRIPT_FIGURES/ScatterPlots/validation_statistics.tex}}
-
-
 
 
 \section{Normality Tests}
@@ -281,10 +277,16 @@ The flaw in most normality tests is that they tend to reject the assumption of n
 \IfFileExists{SCRIPT_FIGURES/ScatterPlots/validation_histograms.tex}{\input{SCRIPT_FIGURES/ScatterPlots/validation_histograms.tex}}{\typeout{Error: Missing file SCRIPT_FIGURES/ScatterPlots/validation_histograms.tex}}
 
 
+\clearpage
+
+
+\section{Summary of FDS Validation SVN Statistics}
+
+Table~\ref{validation_svn_stats} shows the SVN repository statistics for all of the validation datasets. For each dataset, the corresponding last changed date and SVN revision number are shown. This indicates the SVN revision number and date for which the most recent validation results for a given dataset were committed to the repository.
+
+\IfFileExists{SCRIPT_FIGURES/ScatterPlots/validation_svn_stats.tex}{\input{SCRIPT_FIGURES/ScatterPlots/validation_svn_stats.tex}}{\typeout{Error: Missing file SCRIPT_FIGURES/ScatterPlots/validation_svn_stats.tex}}
+
 
 \bibliography{../Bibliography/FDS_refs,../Bibliography/FDS_general,../Bibliography/FDS_mathcomp}
-
-
-
 
 \end{document}
