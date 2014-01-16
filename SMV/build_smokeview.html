@@ -25,10 +25,8 @@
 <td valign=middle>
 
 <p><table border=on>
-<tr><th colspan=7 align=center>Build and Package Smokeview Test</th></tr>
-<tr><th align=center>All</th><th align=center>win32</th><th>win64</th><th align=center>Linux 32</th><th align=center>Linux 64</th><th align=center>OSX 32</th><th align=center>OSX 64</th></tr>
+<tr><th align=center>win32</th><th>win64</th><th align=center>Linux 32</th><th align=center>Linux 64</th><th align=center>OSX 32</th><th align=center>OSX 64</th></tr>
 <tr>
-<td align=center>-</td>
 <td align=center><a href="scripts/MAKEtestsmvwin32.bat">Build</a></td>
 <td align=center><a href="scripts/MAKEtestsmvwin64.bat">Build</a></td>
 <td align=center><a href="scripts/MAKEtestsmvlinux32.bat">Build</a></td>
@@ -37,7 +35,6 @@
 <td align=center><a href="scripts/MAKEtestsmvosx64.bat">Build</a></td>
 </tr>
 <tr>
-<td align=center><a href="scripts/MAKEtestdistall.bat">Package</a></td>
 <td align=center><a href="scripts/MAKEtestdistwin32.bat">Package</a></td>
 <td align=center><a href="scripts/MAKEtestdistwin64.bat">Package</a></td>
 <td align=center><a href="scripts/MAKEtestdistlinux32.bat">Package</a></td>
@@ -46,7 +43,6 @@
 <td align=center><a href="scripts/MAKEtestdistosx64.bat">Package</a></td>
 </tr>
 <tr>
-<td align=center>-</td>
 <td align=center><a href="scripts/INSTALLtestwin32.bat">Install </a></td>
 <td align=center><a href="scripts/INSTALLtestwin64.bat">Install</a></td>
 <td align=center colspan=4>-</td>
@@ -65,11 +61,9 @@
 <td align=center>
 
 <p><table border=on>
-<tr><th colspan=7>Build, Package and Upload Smokeview Release</th></tr>
-<tr><th>All</th><th>win32</th><th>win64</th><th>Linux 32</th><th>Linux 64</th><th>OSX 32</th><th>OSX 64</th></tr>
+<tr><th>win32</th><th>win64</th><th>Linux 32</th><th>Linux 64</th><th>OSX 32</th><th>OSX 64</th></tr>
 
 <tr>
-<td align=center>-</td>
 <td align=center><a href="scripts/MAKEsmvwin32.bat">Build</a></td>
 <td align=center><a href="scripts/MAKEsmvwin64.bat">Build</a></td>
 <td align=center><a href="scripts/MAKEsmvlinux32.bat">Build</a></td>
@@ -79,7 +73,6 @@
 </tr>
 
 <tr>
-<td align=center><a href="scripts/MAKEdistall.bat">Package</a></td>
 <td align=center><a href="scripts/MAKEdistwin32.bat">Package</a></td>
 <td align=center><a href="scripts/MAKEdistwin64.bat">Package</a></td>
 <td align=center><a href="scripts/MAKEdistlinux32.bat">Package</a></td>
@@ -89,7 +82,6 @@
 </tr>
 
 <tr>
-<td align=center><a href="scripts/UPLOADreleaseall.bat">Upload</a></td>
 <td align=center><a href="scripts/UPLOADreleasewin32.bat">Upload</a></td>
 <td align=center><a href="scripts/UPLOADreleasewin64.bat">Upload</a></td>
 <td align=center><a href="scripts/UPLOADreleaselinux32.bat">Upload</a></td>
@@ -98,7 +90,6 @@
 <td align=center><a href="scripts/UPLOADreleaseosx64.bat">Upload</a></td>
 </tr>
 <tr>
-<td align=center>-</td>
 <td align=center><a href="scripts/INSTALLreleasewin32.bat">Install</a></td>
 <td align=center><a href="scripts/INSTALLreleasewin64.bat">Install</a></td>
 <td align=center colspan=4>-</td>
@@ -162,7 +153,7 @@
 
 </table>
 
-<h3>Smokeview Libraries</h3>
+<h3>Libraries</h3>
 <table border=on>
 <tr>
 <th>win32</th><th>win64</th><th>Linux</th><th>OSX</th>
@@ -179,7 +170,7 @@
 <li>libraries only need to be built once (or when a library source file has changed)
 </ul>
 
-<h3>Smokeview Verification</h3>
+<h3>Verification</h3>
 Run verification suite and generate images and manuals when releasing a new Smokeview
 <p><table border=on>
 <tr><th>Windows</th><th>Linux</th></tr>
@@ -189,7 +180,7 @@ Run verification suite and generate images and manuals when releasing a new Smok
 </tr>
 
 <tr>
-<td align=center>
+<td>
 <a href="scripts/Make_SMV_Pictures.bat">Generate images</a><br>
 <a href="scripts/Make_SMV_GUIDES.bat">Generate: UG, TG, VG</a>
 </td>
@@ -200,8 +191,12 @@ Run verification suite and generate images and manuals when releasing a new Smok
 </tr>
 
 <tr>
-<td></td>
 <td align=center> 
+<a href="scripts/COPYimages.bat">Copy images</a>
+</td>
+<td> 
+<a href="scripts/DOWNLOADimages.bat">Download images</a><br>
+<a href="scripts/DOWNLOADanimations.bat">Download animations</a><br>
 <a href="scripts/DOWNLOADguides.bat">Download: UG, TG, VG</a>
 </td>
 
@@ -221,9 +216,9 @@ Run verification suite and generate images and manuals when releasing a new Smok
 </tr>
 
 <tr>
-<td align=center colspan=2>
+<td colspan=2>
 <a href="scripts/COPY_smv_guides.bat">Copy UG, TG, VG</a>
-to FIRE-LOCAL.  Commit.
+to FIRE-LOCAL repository.<br>Commit.
 </td>
 </tr>
 
