@@ -64,6 +64,8 @@ CALL :COPY  %svdiffbuild%\smokediff_win_%platform%.exe %smvdir%\smokediff.exe
 
 CALL :COPY  %bgbuild%\background.exe %smvdir%\.
 
+CALL :COPY  ..\..\Utilities\wind2fds\intel_win_%platform%\wind2fds_win_%platform%.exe %smvdir%\wind2fds.exe
+
 CALL :COPY  smokeview.ini %smvdir%\smokeview.ini
 
 CALL :COPY  objects.svo %smvdir%\.
