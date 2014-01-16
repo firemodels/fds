@@ -36,6 +36,7 @@ export SMVBINDIR="-bindir $SVNROOT/SMV/for_bundle"
 export MAKEMOVIE=$SVNROOT/Utilities/Scripts/make_movie.sh
 export STARTX=$SVNROOT/Utilities/Scripts/startXserver.sh
 export STOPX=$SVNROOT/Utilities/Scripts/stopXserver.sh
+QFDS=/usr/local/bin/qfds.sh
 
 export BASEDIR=`pwd`
 
@@ -80,6 +81,10 @@ echo Starting background X server
 source $STARTX
 
 # create version string
+
+cd $VDIR
+$QFDS -r -d Visualization -q terminal version2.fds
+
 cd $VDIR
 $RUNSMV -t Visualization version2
 
