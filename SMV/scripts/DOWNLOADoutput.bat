@@ -19,6 +19,23 @@ goto:eof
 call %envfile%
 
 %svn_drive%
+
+echo downloading images
+erase %svn_root%\Manuals\SMV_Summary\images\*.png
+pscp %svn_logon%:FDS-SMV/Manuals/SMV_Summary/images/*.png  %svn_root%\Manuals\SMV_Summary\images\.
+
+echo downloading animations
+erase %svn_root%\Manuals\SMV_Summary\movies\*.m1v
+erase %svn_root%\Manuals\SMV_Summary\movies\*.png
+pscp %svn_logon%:FDS-SMV/Manuals/SMV_Summary/movies/*.m1v  %svn_root%\Manuals\SMV_Summary\movies\.
+pscp %svn_logon%:FDS-SMV/Manuals/SMV_Summary/movies/*.png  %svn_root%\Manuals\SMV_Summary\movies\.
+
+erase %svn_root%\Manuals\SMV_Summary\movies2\*.m1v
+erase %svn_root%\Manuals\SMV_Summary\movies2\*.png
+pscp %svn_logon%:FDS-SMV/Manuals/SMV_Summary/movies2/*.m1v  %svn_root%\Manuals\SMV_Summary\movies2\.
+pscp %svn_logon%:FDS-SMV/Manuals/SMV_Summary/movies2/*.png  %svn_root%\Manuals\SMV_Summary\movies2\.
+
+%svn_drive%
 cd %svn_root%\smv\scripts
 set version=%smv_version%
 
@@ -33,7 +50,9 @@ pscp %svn_logon%:FDS-SMV/Manuals/SMV_User_Guide/SMV_User_Guide.pdf  %svn_root%\%
 echo downloading Smokeview Verification guide
 pscp %svn_logon%:FDS-SMV/Manuals/SMV_Verification_Guide/SMV_Verification_Guide.pdf  %svn_root%\%VG%\.
 
-echo downloading Smokeview Technical Referecne guide
+echo downloading Smokeview Technical Reference guide
 pscp %svn_logon%:FDS-SMV/Manuals/SMV_Technical_Reference_Guide/SMV_Technical_Reference_Guide.pdf %svn_root%\%TG%\.
+
+
 
 pause

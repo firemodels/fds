@@ -4,4 +4,4 @@ cd ~/FDS-SMV
 svn update
 echo starting smokebot
 cd ~/SMOKEBOT
-./run_smokebot.sh 
+./run_smokebot.sh -m
