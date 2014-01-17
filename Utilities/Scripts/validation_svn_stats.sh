@@ -17,11 +17,11 @@ cd $SVNROOT/Validation
 OUTPUT_TEX_FILE=$SVNROOT/Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/validation_svn_stats.tex
 
 # Generate arrays with the name of validation data sets, SVN revision number, and SVN revision date
-VALIDATION_SETS=(`grep '$VDIR' Process_All_Output.sh | grep -v "#" | xargs -n 1 dirname | xargs -n 1 dirname | xargs -n 1 basename | xargs -i svn info {}/FDS_Output_Files | awk '{if($0 != ""){ if(s){s=s"*"$0}else{s=$0}}else{ print s"*";s=""}}END{print s"*"}' | cut -d '*' -f1 | cut -d ' ' -f2 | xargs -n 1 dirname`)
+VALIDATION_SETS=(`grep '$VDIR' Process_All_Output.sh | grep -v "#" | xargs -n 1 dirname | xargs -n 1 dirname | xargs -n 1 basename | xargs -i svn info {}/FDS_Output_Files | awk '{if($0 != ""){ if(s){s=s"*"$0}else{s=$0}}else{ print s"*";s=""}}END{print s"*"}' | sort -t '*' -k 9 | cut -d '*' -f1 | cut -d ' ' -f2 | xargs -n 1 dirname`)
 
-VALIDATION_SVN_REV=(`grep '$VDIR' Process_All_Output.sh | grep -v "#" | xargs -n 1 dirname | xargs -n 1 dirname | xargs -n 1 basename | xargs -i svn info {}/FDS_Output_Files | awk '{if($0 != ""){ if(s){s=s"*"$0}else{s=$0}}else{ print s"*";s=""}}END{print s"*"}' | cut -d '*' -f9 | cut -d ' ' -f4`)
+VALIDATION_SVN_REV=(`grep '$VDIR' Process_All_Output.sh | grep -v "#" | xargs -n 1 dirname | xargs -n 1 dirname | xargs -n 1 basename | xargs -i svn info {}/FDS_Output_Files | awk '{if($0 != ""){ if(s){s=s"*"$0}else{s=$0}}else{ print s"*";s=""}}END{print s"*"}' | sort -t '*' -k 9 | cut -d '*' -f9 | cut -d ' ' -f4`)
 
-VALIDATION_SVN_DATE=(`grep '$VDIR' Process_All_Output.sh | grep -v "#" | xargs -n 1 dirname | xargs -n 1 dirname | xargs -n 1 basename | xargs -i svn info {}/FDS_Output_Files | awk '{if($0 != ""){ if(s){s=s"*"$0}else{s=$0}}else{ print s"*";s=""}}END{print s"*"}' | cut -d '*' -f10 | cut -d ' ' -f4`)
+VALIDATION_SVN_DATE=(`grep '$VDIR' Process_All_Output.sh | grep -v "#" | xargs -n 1 dirname | xargs -n 1 dirname | xargs -n 1 basename | xargs -i svn info {}/FDS_Output_Files | awk '{if($0 != ""){ if(s){s=s"*"$0}else{s=$0}}else{ print s"*";s=""}}END{print s"*"}' | sort -t '*' -k 9 | cut -d '*' -f10 | cut -d ' ' -f4`)
 
 # Calculate number of validation sets
 NUM_VALIDATION_SETS=${#VALIDATION_SETS[@]}
