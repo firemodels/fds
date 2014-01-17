@@ -22,7 +22,8 @@ call %envfile%
 
 echo copying images
 erase %svn_root%\Manuals\SMV_Summary\images\*.png
-copy %svn_root%\Manuals\SMV_User_Guide\SCRIPT_FIGURES\*.png          %svn_root%\Manuals\SMV_Summary\images\.
-copy %svn_root%\Manuals\SMV_Verification_Guide\SCRIPT_FIGURES\*.png  %svn_root%\Manuals\SMV_Summary\images\.
+cd %svn_root%\Manuals
+copy SMV_User_Guide\SCRIPT_FIGURES\*.png          %svn_root%\Manuals\SMV_Summary\images\.
+copy SMV_Verification_Guide\SCRIPT_FIGURES\*.png  %svn_root%\Manuals\SMV_Summary\images\.
 
 pause

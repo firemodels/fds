@@ -20,11 +20,15 @@ call %envfile%
 
 %svn_drive%
 
-echo downloading images
+echo.
+echo ---downloading images
+echo.
 erase %svn_root%\Manuals\SMV_Summary\images\*.png
 pscp %svn_logon%:FDS-SMV/Manuals/SMV_Summary/images/*.png  %svn_root%\Manuals\SMV_Summary\images\.
 
-echo downloading animations
+echo.
+echo ---downloading animations
+echo.
 erase %svn_root%\Manuals\SMV_Summary\movies\*.m1v
 erase %svn_root%\Manuals\SMV_Summary\movies\*.png
 pscp %svn_logon%:FDS-SMV/Manuals/SMV_Summary/movies/*.m1v  %svn_root%\Manuals\SMV_Summary\movies\.
@@ -44,15 +48,11 @@ set UG=Manuals\SMV_User_Guide
 set VG=Manuals\SMV_Verification_Guide
 set TG=Manuals\SMV_Technical_Referecne_Guide
 
-echo downloading Smokeview Users guide
+echo.
+echo ---downloading guides
+echo.
 pscp %svn_logon%:FDS-SMV/Manuals/SMV_User_Guide/SMV_User_Guide.pdf  %svn_root%\%UG%\.
-
-echo downloading Smokeview Verification guide
 pscp %svn_logon%:FDS-SMV/Manuals/SMV_Verification_Guide/SMV_Verification_Guide.pdf  %svn_root%\%VG%\.
-
-echo downloading Smokeview Technical Reference guide
 pscp %svn_logon%:FDS-SMV/Manuals/SMV_Technical_Reference_Guide/SMV_Technical_Reference_Guide.pdf %svn_root%\%TG%\.
-
-
 
 pause
