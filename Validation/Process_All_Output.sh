@@ -16,10 +16,10 @@ $VDIR/CAROLFIRE/FDS_Output_Files/Process_Output.csh
 $VDIR/CHRISTIFIRE/FDS_Output_Files/Process_Output.csh
 $VDIR/Cup_Burner/FDS_Output_Files/Process_Output.csh
 $VDIR/FAA_Cargo_Compartments/FDS_Output_Files/Process_Output.csh
-$VDIR/FAA_Polymers/FDS_Output_Files/Process_Output.csh
+#$VDIR/FAA_Polymers/FDS_Output_Files/Process_Output.csh
 $VDIR/Fleury_Heat_Flux/FDS_Output_Files/Process_Output.csh
 $VDIR/FM_Parallel_Panels/FDS_Output_Files/Process_Output.csh
-$VDIR/FM_SNL/FDS_Output_Files/Process_Output.csh
+#$VDIR/FM_SNL/FDS_Output_Files/Process_Output.csh
 #$VDIR/FPRF_HAI_Corridor/FDS_Output_Files/Process_Output.csh
 $VDIR/Hamins_CH4/FDS_Output_Files/Process_Output.csh
 $VDIR/Harrison_Spill_Plumes/FDS_Output_Files/Process_Output.csh
@@ -32,7 +32,7 @@ $VDIR/McCaffrey_Plume/FDS_Output_Files/Process_Output.csh
 $VDIR/Moody_Chart/FDS_Output_Files/Process_Output.csh
 $VDIR/NBS_Multi-Room/FDS_Output_Files/Process_Output.csh
 #$VDIR/NIJ_HAI_Pool/FDS_Output_Files/Process_Output.csh
-$VDIR/NIST_He_2009/FDS_Output_Files/Process_Output.csh
+#$VDIR/NIST_He_2009/FDS_Output_Files/Process_Output.csh
 $VDIR/NIST_Smoke_Alarms/FDS_Output_Files/Process_Output.csh
 $VDIR/NIST_NRC/FDS_Output_Files/Process_Output.csh
 $VDIR/NIST_RSE_1994/FDS_Output_Files/Process_Output.csh
