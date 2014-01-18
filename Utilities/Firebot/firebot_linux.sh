@@ -637,7 +637,7 @@ run_validation_cases_debug()
    wait_cases_debug_start 'validation'
 
    # Wait some additional time for all cases to start
-   sleep 60
+   sleep 300
 
    #  ==================
    #  = Stop all cases =
