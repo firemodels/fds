@@ -871,6 +871,37 @@ check_smv_utilities()
 #  = Stage 5 - Run verification or validation cases (release mode) =
 #  =================================================================
 
+check_cases_release()
+{
+   # Scan and report any errors in FDS cases
+   cd $1
+
+   if [[ `grep -rI 'Run aborted' ${FIREBOT_DIR}/output/stage5` == "" ]] && \
+      [[ `grep -rI Segmentation *` == "" ]] && \
+      [[ `grep -rI ERROR: *` == "" ]] && \
+      [[ `grep -rI 'STOP: Numerical' *` == "" ]] && \
+      [[ `grep -rI -A 20 forrtl *` == "" ]]
+   then
+      stage5_success=true
+   else
+      grep -rI 'Run aborted' $FIREBOT_DIR/output/stage5 >> $FIREBOT_DIR/output/stage5_errors
+      grep -rI Segmentation * >> $FIREBOT_DIR/output/stage5_errors
+      grep -rI ERROR: * >> $FIREBOT_DIR/output/stage5_errors
+      grep -rI 'STOP: Numerical' * >> $FIREBOT_DIR/output/stage5_errors
+      grep -rI -A 20 forrtl * >> $FIREBOT_DIR/output/stage5_errors
+      
+      echo "Errors from Stage 5 - Run ${2} cases (release mode):" >> $ERROR_LOG
+      cat $FIREBOT_DIR/output/stage5_errors >> $ERROR_LOG
+      echo "" >> $ERROR_LOG
+
+      # If errors encountered in validation mode, then email status and exit
+      if [ $FIREBOT_MODE == "validation" ] ; then
+         email_build_status 'Validationbot' 'Validation'
+         exit
+      fi
+   fi
+}
+
 wait_cases_release_end()
 {
    # Scans qstat and waits for cases to end
@@ -879,6 +910,10 @@ wait_cases_release_end()
       echo "Waiting for ${JOBS_REMAINING} ${1} cases to complete." >> $FIREBOT_DIR/output/stage5
       TIME_LIMIT_STAGE="5"
       check_time_limit
+      if [ $FIREBOT_MODE == "validation" ] ; then
+         check_cases_release $FDS_SVNROOT/Validation 'validation'
+         sleep 300
+      fi
       sleep 60
    done
 }
@@ -920,31 +955,6 @@ run_validation_cases_release()
 
    # Wait for validation cases to end
    wait_cases_release_end 'validation'
-}
-
-check_cases_release()
-{
-   # Scan and report any errors in FDS cases
-   cd $1
-
-   if [[ `grep -rI 'Run aborted' ${FIREBOT_DIR}/output/stage5` == "" ]] && \
-      [[ `grep -rI Segmentation *` == "" ]] && \
-      [[ `grep -rI ERROR: *` == "" ]] && \
-      [[ `grep -rI 'STOP: Numerical' *` == "" ]] && \
-      [[ `grep -rI -A 20 forrtl *` == "" ]]
-   then
-      stage5_success=true
-   else
-      grep -rI 'Run aborted' $FIREBOT_DIR/output/stage5 >> $FIREBOT_DIR/output/stage5_errors
-      grep -rI Segmentation * >> $FIREBOT_DIR/output/stage5_errors
-      grep -rI ERROR: * >> $FIREBOT_DIR/output/stage5_errors
-      grep -rI 'STOP: Numerical' * >> $FIREBOT_DIR/output/stage5_errors
-      grep -rI -A 20 forrtl * >> $FIREBOT_DIR/output/stage5_errors
-      
-      echo "Errors from Stage 5 - Run ${2} cases (release mode):" >> $ERROR_LOG
-      cat $FIREBOT_DIR/output/stage5_errors >> $ERROR_LOG
-      echo "" >> $ERROR_LOG
-   fi
 }
 
 commit_validation_results()
