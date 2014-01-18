@@ -90,7 +90,7 @@ case $OPTION in
    ;;
   v)
    FIREBOT_MODE="validation"
-   QUEUE=firebot
+   QUEUE=batch
    MAX_VALIDATION_PROCESSES="$OPTARG"
    LAUNCH_MORE_CASES=1
    # Set Validationbot email list
@@ -685,6 +685,12 @@ check_cases_debug()
       echo "Errors from Stage 3 - Run ${2} cases (debug mode):" >> $ERROR_LOG
       cat $FIREBOT_DIR/output/stage3_errors >> $ERROR_LOG
       echo "" >> $ERROR_LOG
+
+      # If errors encountered in validation mode, then email status and exit
+      if [ $FIREBOT_MODE == "validation" ] ; then
+         email_build_status 'Validationbot' 'Validation'
+         exit
+      fi
    fi
 
    # After Stage 3, delete all unversioned FDS output files before continuing
