@@ -519,7 +519,7 @@ check_current_utilization()
    # This function is used to determine if the number of current processes currently in use is greater than the
    # number of specified maximum processes. If so, then no more cases are launched (LAUNCH_MORE_CASES=0).
 
-   sleep 5
+   sleep 60
 
    # Reports the number of nodes currently in use by current user
    NUM_CURRENT_PROCESSES=`qstat -u $(whoami) | sed 1,5d | awk '{print $7}' | paste -sd+ | bc`
@@ -637,7 +637,7 @@ run_validation_cases_debug()
    wait_cases_debug_start 'validation'
 
    # Wait some additional time for all cases to start
-   sleep 60
+   sleep 300
 
    #  ==================
    #  = Stop all cases =
