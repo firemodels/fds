@@ -90,7 +90,7 @@ case $OPTION in
    ;;
   v)
    FIREBOT_MODE="validation"
-   QUEUE=batch
+   QUEUE=firebot
    MAX_VALIDATION_PROCESSES="$OPTARG"
    LAUNCH_MORE_CASES=1
    # Set Validationbot email list
