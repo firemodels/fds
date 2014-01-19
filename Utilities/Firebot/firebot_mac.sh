@@ -33,7 +33,7 @@ WARNING_LOG=$FIREBOT_DIR/output/warnings
 
 # Load mailing list for status report
 source $FIREBOT_DIR/firebot_email_list.sh
-mailToFDS=$mailToFDS_nist
+mailToFDS=$mailToFDS_verbose
 
 #  ====================
 #  = End user warning =
