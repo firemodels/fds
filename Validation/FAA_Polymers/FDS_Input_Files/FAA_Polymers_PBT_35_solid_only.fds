@@ -22,7 +22,6 @@
       SPECIFIC_HEAT = 2.23 /
 
 &MATL ID='Kaowool'
-      EMISSIVITY=0.
       CONDUCTIVITY = 0.08
       SPECIFIC_HEAT = 0.80
       DENSITY = 48. /

@@ -289,7 +289,6 @@
 
 &MATL ID='Kaowool'
       ABSORPTION_COEFFICIENT=25600000.
-      EMISSIVITY=0.
       CONDUCTIVITY_RAMP = 'k_Kaowool'
       SPECIFIC_HEAT = 1.07
       DENSITY = 256. /
