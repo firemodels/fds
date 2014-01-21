@@ -488,7 +488,7 @@ END TYPE SCARC_PARENT_TYPE
 !!! OSCARC type for banded system information on other mesh
 !!!----------------------------------------------------------------------------------------------------
 TYPE OSCARC_BANDED_TYPE
-INTEGER :: NX, NY, NZ, NC, NW, NA, NG, NP, NWS=0
+INTEGER :: NX, NY, NZ, NC, NW, NA, NG, NP, NWS, NWR
 INTEGER :: NGE, NGS, NPE, NPS, NA0
 INTEGER :: NCC, NCCE, NCCS
 INTEGER :: NCF, NCFE, NCFS
@@ -503,7 +503,7 @@ END TYPE OSCARC_BANDED_TYPE
 !!! neighborship structures 
 !!!----------------------------------------------------------------------------------------------------
 TYPE OSCARC_COMPACT_TYPE
-INTEGER :: NX, NY, NZ, NC, NA, NW, NG, NP, NR, NWS=0
+INTEGER :: NX, NY, NZ, NC, NA, NW, NG, NP, NR, NWS, NWR
 INTEGER :: NCC , NCF, NCE, NPE, NRE, NGE, NCCI
 INTEGER :: NCC0, NCF0, NCE0, NP0, NR0, NA0, NW0
 INTEGER :: IG, IG0, IG1=0, NLEN_MATRIX_SYSTEM=0
@@ -1580,10 +1580,12 @@ SELECT_SYSTEM: SELECT CASE (TYPE_SYSTEM)
             OSCF%NY = MESHES(NOM)%JBAR 
             OSCF%NZ = MESHES(NOM)%KBAR 
 
-            OSCF%NW = 2*OSCF%NX*OSCF%NY + 2*OSCF%NX*OSCF%NZ + 2*OSCF%NY*OSCF%NZ  
-            OSCF%NC = OSCF%NX*OSCF%NY*OSCF%NZ 
-            OSCF%NG = 0
-            OSCF%NA = 0
+            OSCF%NW  = 2*OSCF%NX*OSCF%NY + 2*OSCF%NX*OSCF%NZ + 2*OSCF%NY*OSCF%NZ  
+            OSCF%NC  = OSCF%NX*OSCF%NY*OSCF%NZ 
+            OSCF%NG  = 0
+            OSCF%NA  = 0
+            OSCF%NWS = 0
+            OSCF%NWR = 0
          
             IF (S%OSCARC(NOM)%NICMAX_S == 0 .AND. S%OSCARC(NOM)%NICMAX_R == 0) CYCLE COMPACT_OTHER_MESHES_LOOP
 
@@ -1825,8 +1827,10 @@ SELECT_SYSTEM: SELECT CASE (TYPE_SYSTEM)
             IF (NOM /= 0) THEN
 
                OSBF => SCARC(NM)%OSCARC(NOM)%BANDED(NLEVEL_MIN)
-               OSBF%NG = 0
-               OSBF%NA = 0
+               OSBF%NG  = 0
+               OSBF%NA  = 0
+               OSBF%NWS = 0
+               OSBF%NWR = 0
 
                SELECT CASE (TYPE_MULTIGRID)
 
@@ -1994,10 +1998,11 @@ SELECT_SYSTEM: SELECT CASE (TYPE_SYSTEM)
          SCF%YCORD => M%Y
          SCF%ZCORD => M%Z
 
-IF (TYPE_DEBUG > NSCARC_DEBUG_MUCH) THEN
+IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) THEN
    WRITE(SCARC_LU,*) '======================= NM=',NM
    WRITE(SCARC_LU,'(a,15f8.2)') 'SCF%XCORD:',SCF%XCORD(0:SCF%NX)
    WRITE(SCARC_LU,'(a,15f8.2)') 'SCF%ZCORD:',SCF%ZCORD(0:SCF%NZ)
+   WRITE(SCARC_LU,*) 'TYPE_LAYER=',TYPE_LAYER
 ENDIF
 
          DO IWF = 1, SCF%NW
@@ -2014,6 +2019,7 @@ ENDIF
             !ELSE
             !   SCF%WALL(IWF)%BTYPE = NEUMANN
             !ENDIF
+
 
             IF (M%WALL(IWF)%NOM /= 0) THEN 
                SCF%WALL(IWF)%BTYPE = INTERNAL
@@ -2049,18 +2055,6 @@ if (TYPE_DEBUG >= NSCARC_DEBUG_LESS) WRITE(SCARC_LU,*) NM,': NEUMANN  : WALL(',I
             SCF%WALL(IWF)%NOM = NOM
             SCF%WALL(IWF)%IOR = M%WALL(IWF)%ONE_D%IOR
 
-!IF (NM==1) THEN
-!IF (SCF%WALL(IWF)%IXW ==1 .AND. SCF%WALL(IWF)%IYW>5.AND.SCF%WALL(IWF)%IYW<12.AND.SCF%WALL(IWF)%IZW>8.AND.SCF%WALL(IWF)%IZW<10) THEN
-!   WRITE(*,'(10i7)') NM, IWF, SCF%WALL(IWF)%IXW, SCF%WALL(IWF)%IYW, SCF%WALL(IWF)%IZW, SCF%WALL(IWF)%ICW,&
-!                     M%WALL(IWF)%BOUNDARY_TYPE, M%WALL(IWF)%PRESSURE_BC_INDEX,SCF%WALL(IWF)%BTYPE, SCF%WALL(IWF)%IOR
-!ENDIF
-!ELSE
-!IF (SCF%WALL(IWF)%IXW ==1 .AND. SCF%WALL(IWF)%IYW>0.AND.SCF%WALL(IWF)%IYW<5.AND.SCF%WALL(IWF)%IZW>8.AND.SCF%WALL(IWF)%IZW<10) THEN
-!   WRITE(*,'(10i7)') NM, IWF, SCF%WALL(IWF)%IXW, SCF%WALL(IWF)%IYW, SCF%WALL(IWF)%IZW, SCF%WALL(IWF)%ICW,&
-!                     M%WALL(IWF)%BOUNDARY_TYPE, M%WALL(IWF)%PRESSURE_BC_INDEX,SCF%WALL(IWF)%BTYPE, SCF%WALL(IWF)%IOR
-!ENDIF
-!ENDIF
-!WRITE(SCARC_LU,'(a,i3,a,i3,a,i3,a,i3)') 'SCARC(',NM,')%COMPACT(',NLEVEL_MIN,')%WALL(',IWF,')%NOM=',SCF%WALL(IWF)%NOM
 
             !!! -----------------------------------------------------------------------------
             !!! Determine neighboring cells and indices which must be exchanged
@@ -2093,7 +2087,7 @@ if (TYPE_DEBUG >= NSCARC_DEBUG_LESS) WRITE(SCARC_LU,*) NM,': NEUMANN  : WALL(',I
                   DO IY = M%WALL(IWF)%NOM_IB(2), M%WALL(IWF)%NOM_IB(5)
                      DO IX = M%WALL(IWF)%NOM_IB(1), M%WALL(IWF)%NOM_IB(4)
                         ICPL=ICPL+1
-                        OSCF%NWS= OSCF%NWS + 1
+                        OSCF%NWR= OSCF%NWR + 1
 IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,*) 'NM=',NM,': NOM=',NOM,': NWS=',OSCF%NWS
                         SCF%NCE = SCF%NCE + 1
                         OSCF%NG = OSCF%NG + 1
@@ -2105,6 +2099,15 @@ IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,*) 'NM=',NM,': NOM=',NOM,': N
                   ENDDO
                ENDDO
 
+IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) THEN
+   WRITE(SCARC_LU,*) 'NM=',NM,': NOM=',NOM,': NCPL=',NCPL
+   WRITE(SCARC_LU,*) 'NM=',NM,': NOM=',NOM,': NOM_IB(1,4)=',M%WALL(IWF)%NOM_IB(1), M%WALL(IWF)%NOM_IB(4)
+   WRITE(SCARC_LU,*) 'NM=',NM,': NOM=',NOM,': NOM_IB(2,5)=',M%WALL(IWF)%NOM_IB(2), M%WALL(IWF)%NOM_IB(5)
+   WRITE(SCARC_LU,*) 'NM=',NM,': NOM=',NOM,': NOM_IB(3,6)=',M%WALL(IWF)%NOM_IB(3), M%WALL(IWF)%NOM_IB(6)
+   WRITE(SCARC_LU,*) 'NM=',NM,': NOM=',NOM,': SCF%NCE =',SCF%NCE
+   WRITE(SCARC_LU,*) 'NM=',NM,': NOM=',NOM,': OSCF%NWR=',OSCF%NWR
+   WRITE(SCARC_LU,*) 'NM=',NM,': NOM=',NOM,': OSCF%NG =',OSCF%NG 
+ENDIF
                SCF%WALL(IWF)%NCPL = ICPL               
 
                SCF%WALL(IWF)%IXN1 = M%WALL(IWF)%NOM_IB(1)
@@ -2152,8 +2155,8 @@ IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,*) 'NM=',NM,': NOM=',NOM,': N
                      DO IY = M%WALL(IWF)%NOM_IB(2), M%WALL(IWF)%NOM_IB(5)
                         DO IX = M%WALL(IWF)%NOM_IB(1), M%WALL(IWF)%NOM_IB(4)
                            ICPL = ICPL + 1
-                           OSCF%NWS= OSCF%NWS + 1
-                           SCF%NCE = SCF%NCE + 1
+                           OSCF%NWR= OSCF%NWR + 1
+                           SCF%NCE = SCF%NCE  + 1
                            OSCF%NG = OSCF%NG  + 1
                            IC = (IZ-1+IOFZ)*MESHES(NOM)%IBAR*MESHES(NOM)%JBAR + &
                                 (IY-1+IOFY)*MESHES(NOM)%IBAR + IX+IOFX
@@ -2315,6 +2318,11 @@ IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,*) 'ALLOCATING NOM_PTR(',NOM,
 
 END SELECT SELECT_SYSTEM
 
+IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,*) 'BEFORE EXCHANGE'
+DO NL=NLEVEL_MIN, NLEVEL_MIN
+   CALL SCARC_DEBUG_QUANTITY (NSCARC_DEBUG_WALLINFO , NL, 'SETUP_WALL', 'WALL')
+ENDDO
+
 !!!-------------------------------------------------------------------------------------------------------
 !!! Initialize communication structures on finest level (if there is more than 1 mesh) 
 !!!-------------------------------------------------------------------------------------------------------
@@ -2325,16 +2333,20 @@ IF (NMESHES>1) THEN
    IF (TYPE_MULTIGRID == NSCARC_MULTIGRID_GEOMETRIC) NLMAX = NLEVEL_MAX
 
    CALL SCARC_EXCHANGE (NSCARC_EXCHANGE_ALLOC_REAL, NLEVEL_MIN)
+IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,*) 'BEFORE EXCHANGE2'
    DO NL = NLMIN, NLMAX
       CALL SCARC_EXCHANGE (NSCARC_EXCHANGE_ALLOC_INT, NL)
+IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,*) 'BEFORE EXCHANGE3'
       CALL SCARC_EXCHANGE (NSCARC_EXCHANGE_WALL, NL)
    ENDDO
 
 ENDIF
 
+IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,*) 'AFTER EXCHANGE'
+
 IF (TYPE_SYSTEM == NSCARC_SYSTEM_COMPACT .AND. &
     TYPE_DEBUG  > NSCARC_DEBUG_NONE      .AND. &
-    TYPE_LATEX  == NSCARC_LATEX_TABLE)   THEN
+    TYPE_LATEX  == NSCARC_LATEX_ALL)   THEN
    MLATEX = 98
    DO NM = NMESHES_MIN, NMESHES_MAX
       CLATEX = "tables/wall  .tex"
@@ -3467,7 +3479,7 @@ ENDDO MESHES_LOOP
 
 DO NL=NLEVEL_MIN, NLEVEL_MIN
    CALL SCARC_DEBUG_QUANTITY (NSCARC_DEBUG_MATRIX , NL, 'SETUP_SYSTEM0', 'MATRIX')
-   !CALL SCARC_DEBUG_QUANTITY (NSCARC_DEBUG_WALLINFO , NL, 'SETUP_SYSTEM0', 'WALL')
+   CALL SCARC_DEBUG_QUANTITY (NSCARC_DEBUG_WALLINFO , NL, 'SETUP_SYSTEM0', 'WALL')
 ENDDO
 
 !!!-------------------------------------------------------------------------------------------------------
@@ -3972,6 +3984,7 @@ SELECT CASE (TYPE_SYSTEM)
 
 END SELECT
 
+CALL SCARC_DEBUG_QUANTITY (NSCARC_DEBUG_MATRIX , NLEVEL_MIN, 'SETUP_MATRIX', 'MATRIX')
 END SUBROUTINE SCARC_SETUP_MATRIX
 
 
@@ -5913,19 +5926,19 @@ CALL SCARC_DEBUG_QUANTITY (NSCARC_DEBUG_PROLONGATION, NL, 'SETUP_PROLONGATION', 
    CALL SCARC_DEBUG_QUANTITY (NSCARC_DEBUG_RESTRICTION, NL, 'SETUP_RESTRICTION', 'FINAL REST 002')
    CALL SCARC_DEBUG_QUANTITY (NSCARC_DEBUG_WALLINFO , NL+1, 'SETUP_SYSTEM', 'WALLINFO 002')
 
-   !IF (TYPE_LATEX == NSCARC_LATEX_ALL) THEN
-   !   CALL SCARC_LATEX_GRID(NSCARC_LATEX_STAGGERED,NL)
-   !   CALL SCARC_LATEX_GRID(NSCARC_LATEX_EQUAL,NL)
-   !   CALL SCARC_LATEX_GRID(NSCARC_LATEX_NUMBER,NL)
-   !ENDIF
+   IF (TYPE_LATEX == NSCARC_LATEX_ALL) THEN
+      CALL SCARC_LATEX_GRID(NSCARC_LATEX_STAGGERED,NL)
+      CALL SCARC_LATEX_GRID(NSCARC_LATEX_EQUAL,NL)
+      CALL SCARC_LATEX_GRID(NSCARC_LATEX_NUMBER,NL)
+   ENDIF
    !IF (TYPE_DEBUG > NSCARC_DEBUG_LESS .AND. NL>=1) THEN
 
    DO NM = NMESHES_MIN, NMESHES_MAX
       SCF => SCARC(NM)%COMPACT(NL)            
 
-      !CALL SCARC_LATEX_MATRIX2(SCF%A, SCF%A_ROW, SCF%A_COL, SCF%NC  , SCF%NC  , NM, NL, 'A')
-      !CALL SCARC_LATEX_MATRIX2(SCF%R, SCF%R_ROW, SCF%R_COL, SCF%NCCE, SCF%NCE , NM, NL, 'R')
-      !CALL SCARC_LATEX_MATRIX2(SCF%P, SCF%P_ROW, SCF%P_COL, SCF%NCE , SCF%NCCE, NM, NL, 'P')
+      CALL SCARC_LATEX_MATRIX2(SCF%A, SCF%A_ROW, SCF%A_COL, SCF%NC  , SCF%NC  , NM, NL, 'A')
+      CALL SCARC_LATEX_MATRIX2(SCF%R, SCF%R_ROW, SCF%R_COL, SCF%NCCE, SCF%NCE , NM, NL, 'R')
+      CALL SCARC_LATEX_MATRIX2(SCF%P, SCF%P_ROW, SCF%P_COL, SCF%NCE , SCF%NCCE, NM, NL, 'P')
 
       CALL SCARC_MATLAB_MATRIX(SCF%A, SCF%A_ROW, SCF%A_COL, SCF%NC  , SCF%NC  , NM, NL, 'A')
       CALL SCARC_MATLAB_MATRIX(SCF%R, SCF%R_ROW, SCF%R_COL, SCF%NCCE, SCF%NCE , NM, NL, 'R')
@@ -13740,6 +13753,8 @@ RECEIVE_MESH_LOOP: DO NM = NMESHES_MIN, NMESHES_MAX
                   OSC => OS%COMPACT(NL)
                   NREQ_SCARC = NREQ_SCARC+1
                   NLEN = 15*OSC%NW + 2*OSC%NWS
+IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,*) 'NM=',NM,': NOM=',NOM,': NW  = ',OSC%NW
+IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,*) 'NM=',NM,': NOM=',NOM,': NWS = ',OSC%NWS
 IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,*) 'NM=',NM,': NOM=',NOM,': RECEIVING IN LENGTH ', NLEN
                   CALL MPI_IRECV(OS%RECV_INT(1),SIZE(OS%RECV_INT),MPI_INTEGER,SNODE, &
                                  TAG_SCARC,MPI_COMM_WORLD,REQ_SCARC(NREQ_SCARC),IERR)
@@ -13860,7 +13875,7 @@ EXCHANGE_SEND_LOOP1: DO NM = NMESHES_MIN, NMESHES_MAX
                      SB  =>  S%BANDED(NL)     
                      OSB => OS%BANDED(NL)    
                      OS%IBUF_SEND(1)= SB%NW
-                     OS%IBUF_SEND(2)=OSB%NWS
+                     OS%IBUF_SEND(2)=OSB%NWR
                      NREQ_SCARC = NREQ_SCARC+1
                      CALL MPI_ISEND(OS%IBUF_SEND(1),SIZE(OS%IBUF_SEND),MPI_INTEGER,SNODE, &
                                     TAG_SCARC,MPI_COMM_WORLD,REQ_SCARC(NREQ_SCARC),IERR)
@@ -13868,8 +13883,11 @@ EXCHANGE_SEND_LOOP1: DO NM = NMESHES_MIN, NMESHES_MAX
                      SC  =>  S%COMPACT(NL)     
                      OSC => OS%COMPACT(NL)     
                      OS%IBUF_SEND(1)= SC%NW
-                     OS%IBUF_SEND(2)=OSC%NWS
+                     OS%IBUF_SEND(2)=OSC%NWR
                      NREQ_SCARC = NREQ_SCARC+1
+                     IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) THEN
+                       WRITE(SCARC_LU,'(4(a,i3))') 'NM=',NM,': NOM=',NOM,': SENDING NW=',SC%NW,', and NG=',OSC%NG
+                     ENDIF
                      CALL MPI_ISEND(OS%IBUF_SEND(1),SIZE(OS%IBUF_SEND),MPI_INTEGER,SNODE, &
                                     TAG_SCARC,MPI_COMM_WORLD,REQ_SCARC(NREQ_SCARC),IERR)
                END SELECT 
@@ -13931,10 +13949,12 @@ EXCHANGE_SEND_LOOP1: DO NM = NMESHES_MIN, NMESHES_MAX
                      OS%SEND_INT(IPTR+12)=SC%WALL(IW)%NOM
                      OS%SEND_INT(IPTR+13)=SC%WALL(IW)%IOR
                      OS%SEND_INT(IPTR+14)=SC%WALL(IW)%NCPL
+IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,'(16i4)') IPTR, (OS%SEND_INT(IPTR+ICPL), ICPL=0,14)
                      IPTR = IPTR + 15
                      IF (SC%WALL(IW)%NOM == NOM) THEN
                         DO ICPL=1,SC%WALL(IW)%NCPL
                            OS%SEND_INT(IPTR)=SC%WALL(IW)%ICN(ICPL)
+IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,'(2i4)') IPTR, OS%SEND_INT(IPTR)
                            IPTR = IPTR + 1
                         ENDDO
                         IF (NL==NLEVEL_MIN.AND.TYPE_LAYER == NSCARC_LAYER_TWO .AND. &
@@ -13948,6 +13968,7 @@ EXCHANGE_SEND_LOOP1: DO NM = NMESHES_MIN, NMESHES_MAX
                      IF (SC%WALL(IW)%NOM == NOM) THEN
                         DO ICPL=1,SC%WALL(IW)%NCPL
                            OS%SEND_INT(IPTR)=SC%WALL(IW)%ICE(ICPL)
+IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,'(2i4)') IPTR, OS%SEND_INT(IPTR)
                            IPTR = IPTR + 1
                         ENDDO
                         IF (NL==NLEVEL_MIN.AND.TYPE_LAYER == NSCARC_LAYER_TWO .AND. &
@@ -13960,7 +13981,7 @@ EXCHANGE_SEND_LOOP1: DO NM = NMESHES_MIN, NMESHES_MAX
                      ENDIF
                   ENDDO
                   NREQ_SCARC = NREQ_SCARC+1
-                  NLEN = 15*OSC%NW+2*OSC%NWS
+                  NLEN = 15*SC%NW+2*OSC%NWS
 IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,*) 'NM=',NM,': NOM=',NOM,': SENDING IN LENGTH ', NLEN
                   CALL MPI_ISEND(OS%SEND_INT(1),SIZE(OS%SEND_INT),MPI_INTEGER,SNODE, &
                                  TAG_SCARC,MPI_COMM_WORLD,REQ_SCARC(NREQ_SCARC),IERR)
@@ -14195,9 +14216,11 @@ EXCHANGE_SEND_LOOP2: DO NOM = NMESHES_MIN, NMESHES_MAX
                      OSB%NW  = OSO%IBUF_RECV(1)
                      OSB%NWS = OSO%IBUF_RECV(2)
 
-                     NLEN = 15*OSB%NW + 2*OSB%NWS
+                     NLEN = 15*OSB%NW + 2*OSB%NWR
                      ALLOCATE (OSO%RECV_INT(NLEN))
                      OSO%RECV_INT = 0
+
+                     NLEN = 15*SB%NW + 2*OSB%NWS
                      ALLOCATE (OSO%SEND_INT(NLEN))
                      OSO%SEND_INT = 0
 
@@ -14237,23 +14260,31 @@ EXCHANGE_SEND_LOOP2: DO NOM = NMESHES_MIN, NMESHES_MAX
       
                   CASE (NSCARC_EXCHANGE_ALLOC_INT) 
                      IF (RNODE/=SNODE) THEN
+IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,'(a,i3,a,i3,a,i3,a,i5)') &
+     'A: SCARC(',NOM,')%OSCARC(',NM,')%COMPACT(',NL,')%NW =',OSC%NW
+IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,'(a,i3,a,i3,a,i3,a,i5)') &
+     'A: SCARC(',NOM,')%OSCARC(',NM,')%COMPACT(',NL,')%NWS=',OSC%NWS
                         OSC%NW  = OSO%IBUF_RECV(1)
                         OSC%NWS = OSO%IBUF_RECV(2)
-!IF (TYPE_DEBUG == NSCARC_DEBUG_INFO2) WRITE(SCARC_LU,'(a,i3,a,i3,a,i3,a,i5)') &
-!     'SCARC(',NOM,')%OSCARC(',NM,')%COMPACT(',NL,')%NW =',OSC%NW
-!IF (TYPE_DEBUG == NSCARC_DEBUG_INFO2) WRITE(SCARC_LU,'(a,i3,a,i3,a,i3,a,i5)') &
-!     'SCARC(',NOM,')%OSCARC(',NM,')%COMPACT(',NL,')%NWS=',OSC%NWS
+IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,'(a,i3,a,i3,a,i3,a,i5)') &
+     'B: SCARC(',NOM,')%OSCARC(',NM,')%COMPACT(',NL,')%NW =',OSC%NW
+IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,'(a,i3,a,i3,a,i3,a,i5)') &
+     'B: SCARC(',NOM,')%OSCARC(',NM,')%COMPACT(',NL,')%NWS=',OSC%NWS
                      ELSE
                         OSC%NW  = SCARC(NM)%COMPACT(NL)%NW
                         OSC%NWS = SCARC(NM)%OSCARC(NOM)%COMPACT(NL)%NWS
                      ENDIF
 
                      IF (NL == NLEVEL_MIN) THEN
-                        NLEN = 15*OSC%NW + 2*OSC%NWS
+
+                        NLEN = 15*OSC%NW + 2*OSC%NWR
                         ALLOCATE (OSO%RECV_INT(NLEN))
                         OSO%RECV_INT = 0
+
+                        NLEN = 15*SC%NW + 2*OSC%NWS
                         ALLOCATE (OSO%SEND_INT(NLEN))
                         OSO%SEND_INT = 0
+
 IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,'(a,i3,a,i3,a,i3,a,5i7)') &
      'LEVEL ', NL,': ALLOCATING SCARC(',NOM,')%OSCARC(',NM,')%SEND_INT in length ', &
      NLEN, OSC%NW, 15*OSC%NW, 2*OSC%NWS, MYID+1
@@ -14263,8 +14294,8 @@ IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,'(a,i3,a,i3,a,i3,a,5i7)') &
                      IF (RNODE/=SNODE) THEN
                         BUF_INT => OSO%RECV_INT
                         IPTR=1
-!IF (TYPE_DEBUG == NSCARC_DEBUG_INFO2) WRITE(SCARC_LU,*) 'NOM=',NOM,': NM=',&
-!     NM,': SIZE(BUF_INT)=',SIZE(OSO%RECV_INT)
+IF (TYPE_DEBUG == NSCARC_DEBUG_INFO2) WRITE(SCARC_LU,*) 'NOM=',NOM,': NM=',&
+     NM,': SIZE(BUF_INT)=',SIZE(OSO%RECV_INT)
                         DO IW = 1, OSC%NW
                            OSC%WALL(IW)%IXG  = BUF_INT(IPTR    )
                            OSC%WALL(IW)%IYG  = BUF_INT(IPTR + 1)
@@ -15793,6 +15824,7 @@ INTEGER, INTENT(IN) :: NTYPE, NL
 INTEGER :: NM, NOM, IP, IC, IW, I, J, K
 CHARACTER (*), INTENT(IN) :: CROUTINE, CNAME
 CHARACTER (20) :: LINE
+TYPE (MESH_TYPE), POINTER :: M
 TYPE (OSCARC_TYPE) , POINTER :: OS
 TYPE (SCARC_BANDED_TYPE) , POINTER :: SB
 TYPE (SCARC_COMPACT_TYPE), POINTER :: SC, SC1, SC2, SC3, SC4
@@ -15961,12 +15993,13 @@ SELECT CASE (NTYPE)
    CASE (NSCARC_DEBUG_WALLINFO)
 
 !WRITE(SCARC_LU,*) ': NL=',NL, ': CNAME=',CNAME,': CROUTINE=',CROUTINE
-      IF (TYPE_MULTIGRID == NSCARC_MULTIGRID_ALGEBRAIC) THEN
+      !IF (TYPE_MULTIGRID == NSCARC_MULTIGRID_ALGEBRAIC) THEN
       DO NM = NMESHES_MIN, NMESHES_MAX
          WRITE(SCARC_LU,1000) CROUTINE, CNAME, NM, NL
          IF (TYPE_SYSTEM == NSCARC_SYSTEM_BANDED) THEN
 
             SB => SCARC(NM)%BANDED(NL)
+            M  => MESHES(NM)
 
             !WRITE(SCARC_LU,*) '============= WALL(.)%ICG:', NM
             !WRITE(SCARC_LU,'(16i5)') (SB%WALL(IW)%ICG(1), IW=1,SB%NW)
@@ -16014,6 +16047,7 @@ SELECT CASE (NTYPE)
          ELSE
 
             SC => SCARC(NM)%COMPACT(NL)
+            M  => MESHES(NM)
 
             IF (NL == 1) THEN
             WRITE(SCARC_LU,*) '============= WALL(.)%IXG:', NM
@@ -16090,8 +16124,61 @@ SELECT CASE (NTYPE)
             ENDDO
             ENDIF
          ENDIF
+
+         WRITE(SCARC_LU,*) '====================================================='
+         WRITE(SCARC_LU,*) ' Plotting out M%WALL-structure'
+         WRITE(SCARC_LU,*) '====================================================='
+         WRITE(SCARC_LU,*) ' M%WALL(.)%WALL_INDEX'
+         WRITE(SCARC_LU,'(16i5)') (M%WALL(IW)%WALL_INDEX, IW=1,SC%NW)
+         WRITE(SCARC_LU,*) ' M%WALL(.)%SURF_INDEX'
+         WRITE(SCARC_LU,'(16i5)') (M%WALL(IW)%SURF_INDEX, IW=1,SC%NW)
+         WRITE(SCARC_LU,*) ' M%WALL(.)%BACK_INDEX'
+         WRITE(SCARC_LU,'(16i5)') (M%WALL(IW)%BACK_INDEX, IW=1,SC%NW)
+         WRITE(SCARC_LU,*) ' M%WALL(.)%BOUNDARY_TYPE'
+         WRITE(SCARC_LU,'(16i5)') (M%WALL(IW)%BOUNDARY_TYPE, IW=1,SC%NW)
+         WRITE(SCARC_LU,*) ' M%WALL(.)%OBST_INDEX'
+         WRITE(SCARC_LU,'(16i5)') (M%WALL(IW)%OBST_INDEX, IW=1,SC%NW)
+         WRITE(SCARC_LU,*) ' M%WALL(.)%PRESSURE_BC_INDEX'
+         WRITE(SCARC_LU,'(16i5)') (M%WALL(IW)%PRESSURE_BC_INDEX, IW=1,SC%NW)
+         WRITE(SCARC_LU,*) ' M%WALL(.)%PRESSURE_ZONE'
+         WRITE(SCARC_LU,'(16i5)') (M%WALL(IW)%PRESSURE_ZONE, IW=1,SC%NW)
+         WRITE(SCARC_LU,*) ' M%WALL(.)%VENT_INDEX'
+         WRITE(SCARC_LU,'(16i5)') (M%WALL(IW)%VENT_INDEX, IW=1,SC%NW)
+         WRITE(SCARC_LU,*) ' M%WALL(.)%NOM'
+         WRITE(SCARC_LU,'(16i5)') (M%WALL(IW)%NOM, IW=1,SC%NW)
+         WRITE(SCARC_LU,*) ' M%WALL(.)%NOM_IB(1)'
+         WRITE(SCARC_LU,'(16i5)') (M%WALL(IW)%NOM_IB(1), IW=1,SC%NW)
+         WRITE(SCARC_LU,*) ' M%WALL(.)%NOM_IB(2)'
+         WRITE(SCARC_LU,'(16i5)') (M%WALL(IW)%NOM_IB(2), IW=1,SC%NW)
+         WRITE(SCARC_LU,*) ' M%WALL(.)%NOM_IB(3)'
+         WRITE(SCARC_LU,'(16i5)') (M%WALL(IW)%NOM_IB(3), IW=1,SC%NW)
+         WRITE(SCARC_LU,*) ' M%WALL(.)%NOM_IB(4)'
+         WRITE(SCARC_LU,'(16i5)') (M%WALL(IW)%NOM_IB(4), IW=1,SC%NW)
+         WRITE(SCARC_LU,*) ' M%WALL(.)%NOM_IB(5)'
+         WRITE(SCARC_LU,'(16i5)') (M%WALL(IW)%NOM_IB(5), IW=1,SC%NW)
+         WRITE(SCARC_LU,*) ' M%WALL(.)%NOM_IB(6)'
+         WRITE(SCARC_LU,'(16i5)') (M%WALL(IW)%NOM_IB(6), IW=1,SC%NW)
+         WRITE(SCARC_LU,*) ' M%WALL(.)%ONE_D%II'
+         WRITE(SCARC_LU,'(16i5)') (M%WALL(IW)%ONE_D%II, IW=1,SC%NW)
+         WRITE(SCARC_LU,*) ' M%WALL(.)%ONE_D%JJ'
+         WRITE(SCARC_LU,'(16i5)') (M%WALL(IW)%ONE_D%JJ, IW=1,SC%NW)
+         WRITE(SCARC_LU,*) ' M%WALL(.)%ONE_D%KK'
+         WRITE(SCARC_LU,'(16i5)') (M%WALL(IW)%ONE_D%KK, IW=1,SC%NW)
+         WRITE(SCARC_LU,*) ' M%WALL(.)%ONE_D%IIG'
+         WRITE(SCARC_LU,'(16i5)') (M%WALL(IW)%ONE_D%IIG, IW=1,SC%NW)
+         WRITE(SCARC_LU,*) ' M%WALL(.)%ONE_D%JJG'
+         WRITE(SCARC_LU,'(16i5)') (M%WALL(IW)%ONE_D%JJG, IW=1,SC%NW)
+         WRITE(SCARC_LU,*) ' M%WALL(.)%ONE_D%KKG'
+         WRITE(SCARC_LU,'(16i5)') (M%WALL(IW)%ONE_D%KKG, IW=1,SC%NW)
+         WRITE(SCARC_LU,*) ' M%WALL(.)%ONE_D%N_LAYER_CELLS'
+         WRITE(SCARC_LU,'(16i5)') (M%WALL(IW)%ONE_D%IOR, IW=1,SC%NW)
+         WRITE(SCARC_LU,*) ' M%WALL(.)%ONE_D%IOR'
+         !WRITE(SCARC_LU,'(16i5)') (M%WALL(IW)%ONE_D%N_LAYER_CELLS, IW=1,SC%NW)
+
+
+
       ENDDO
-      ENDIF
+      !ENDIF
 
 
    !!!----------------------------------------------------------------------------------------------------
@@ -16790,16 +16877,9 @@ SELECT_SYSTEM: SELECT CASE (TYPE_SYSTEM)
          WRITE(SCARC_LU,2001) CROUTINE, CNAME, NM, NL, SC%NC, SC%NCE
          WRITE(SCARC_LU,*) '=========================================================='
          IF (NL == NLEVEL_MIN) THEN
-               !DO KK = NZ8, 1, - 1
-               DO KK = 4, 2, - 1
-                  WRITE(SCARC_LU,'(a,i3,a)')  '-----------------------------------  K = ', KK,&
-                                             '-----------------------------------'
-                  !DO JJ = NY8, 1, - 1
-                  DO JJ = 3, 1, - 1
-                     IF (NMESHES == 1) THEN
-                     !DO II=1,NX8
-                     DO II=31,34
-                     !DO II=1,4
+               DO KK = NZ8, 1, - 1
+                  DO JJ = NY8, 1, - 1
+                     DO II=1,NX8
                         IC = (KK-1)*SC%NX*SC%NY + (JJ-1)*SC%NY + II
                         IF (ABS(VC(IC))<1.0E-14_EB) THEN
                            VALUES(II)=0.0_EB
@@ -16807,72 +16887,9 @@ SELECT_SYSTEM: SELECT CASE (TYPE_SYSTEM)
                            VALUES(II)=VC(IC)
                         ENDIF
                      ENDDO
-                     !WRITE(SCARC_LU, '(a,i3,a,4e18.10)') 'J= ',JJ,' : ',(VALUES(II), II=1, 4)
-                     WRITE(SCARC_LU, '(a,i3,a,4e18.10)') 'J= ',JJ,' : ',(VALUES(II), II=31, 34)
-                     ELSE
-                     DO II=1,4
-                        IC = (KK-1)*SC%NX*SC%NY + (JJ-1)*SC%NY + II
-                        IF (ABS(VC(IC))<1.0E-14_EB) THEN
-                           VALUES(II)=0.0_EB
-                        ELSE
-                           VALUES(II)=VC(IC)
-                        ENDIF
-                     ENDDO
-                     WRITE(SCARC_LU, '(a,i3,a,4e18.10)') 'J= ',JJ,' : ',(VALUES(II), II=1, 4)
-                     ENDIF
-                     !WRITE(SCARC_LU, '(a,i3,a,10e18.10)') 'J= ',JJ,' : ',(VALUES(II), II=1, NX8)
+                     WRITE(SCARC_LU, '(10e18.10)') (VALUES(II), II=1, NX8)
                   ENDDO
                ENDDO
-               WRITE(SCARC_LU,*)  '----------------------------',&
-                                  '-------------------------------'
-         ELSE
-
-         IF (NMESHES == 99999) THEN
-            WRITE(SCARC_LU,*) '======================================='
-            WRITE(SCARC_LU,*) '============== MESH 1'
-            WRITE(SCARC_LU,*) '======================================='
-            WRITE(SCARC_LU,'(i4,a,f25.16)') 1,' : ', VC(1)
-            WRITE(SCARC_LU,'(i4,a,f25.16)') 2,' : ', VC(2)
-            WRITE(SCARC_LU,'(i4,a,f25.16)') 5,' : ', VC(5)
-            WRITE(SCARC_LU,'(i4,a,f25.16)') 6,' : ', VC(6)
-            WRITE(SCARC_LU,'(i4,a,f25.16)') 7,' : ', VC(7)
-            WRITE(SCARC_LU,'(i4,a,f25.16)') 10,' : ', VC(10)
-            WRITE(SCARC_LU,'(i4,a,f25.16)') 11,' : ', VC(11)
-            WRITE(SCARC_LU,'(i4,a,f25.16)') 14,' : ', VC(14)
-            WRITE(SCARC_LU,'(i4,a,f25.16)') 15,' : ', VC(15)
-            WRITE(SCARC_LU,'(i4,a,f25.16)') 16,' : ', VC(16)
-            WRITE(SCARC_LU,*) '======================================='
-            WRITE(SCARC_LU,*) '============== MESH 2'
-            WRITE(SCARC_LU,*) '======================================='
-            WRITE(SCARC_LU,'(i4,a,f25.16)') 3,' : ', VC(3)
-            WRITE(SCARC_LU,'(i4,a,f25.16)') 4,' : ', VC(4)
-            WRITE(SCARC_LU,'(i4,a,f25.16)') 8,' : ', VC(8)
-            WRITE(SCARC_LU,'(i4,a,f25.16)') 9,' : ', VC(9)
-            WRITE(SCARC_LU,'(i4,a,f25.16)') 12,' : ', VC(12)
-            WRITE(SCARC_LU,'(i4,a,f25.16)') 13,' : ', VC(13)
-            WRITE(SCARC_LU,'(i4,a,f25.16)') 17,' : ', VC(17)
-            WRITE(SCARC_LU,'(i4,a,f25.16)') 18,' : ', VC(18)
-            WRITE(SCARC_LU,*) '======================================='
-            !WRITE(SCARC_LU,'(i4,a,f25.16)') (IC,' : ', VC(IC), IC=1,SC%NC)
-            !IF (NL == 1) THEN
-            !   WRITE(SCARC_LU, '(4e13.5)') (VC(IC), IC=1, SC%NC)
-            !ELSE IF (NL == 2) THEN
-            !   WRITE(SCARC_LU, '(2e13.5)') (VC(IC), IC=1, SC%NC)
-            !ELSE IF (NL == 3) THEN
-            !   WRITE(SCARC_LU, '(2e13.5)') (VC(IC), IC=1, SC%NC)
-            !ENDIF
-         ELSE
-            WRITE(SCARC_LU,'(i4,a,f25.16)') (IC,' : ', VC(IC), IC=1,SC%NC)
-            !IF (NL == 1) THEN
-            !   WRITE(SCARC_LU, '(4e13.5)') (VC(IC), IC=1, SC%NC)
-            !ELSE IF (NL == 2) THEN
-            !   WRITE(SCARC_LU, '(2e13.5)') (VC(IC), IC=1, SC%NC)
-            !ELSE IF (NL == 3) THEN
-            !   WRITE(SCARC_LU, '(2e13.5)') (VC(IC), IC=1, SC%NC)
-            !ENDIF
-         ENDIF
-         WRITE(SCARC_LU,*)  '------------------------------------------------',&
-                            '---------------------------------------------------'
          ENDIF
 
       ENDDO
