@@ -406,6 +406,14 @@ openmp_intel_linux_64_db : obj = fds_openmp_intel_linux_64_db
 openmp_intel_linux_64_db : setup $(obj_serial)
 	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_serial)
 
+openmp_intel_linux_64_inspect : FFLAGS = -g -O0
+openmp_intel_linux_64_inspect : LFLAGS = -shared-intel
+openmp_intel_linux_64_inspect : FCOMPL = ifort
+openmp_intel_linux_64_inspect : FOPENMPFLAGS = -openmp
+openmp_intel_linux_64_inspect : obj = fds_openmp_intel_linux_64_inspect
+openmp_intel_linux_64_inspect : setup $(obj_serial)
+	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_serial)
+
 mpi_intel_linux_32_db : FFLAGS = -m32 -check -warn unused -O0 -auto -WB -traceback -g -fpe0 -fltconsistency  -vec_report0
 mpi_intel_linux_32_db : LFLAGS = -static-intel
 mpi_intel_linux_32_db : FCOMPL = mpif77
