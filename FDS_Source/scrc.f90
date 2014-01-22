@@ -488,7 +488,7 @@ END TYPE SCARC_PARENT_TYPE
 !!! OSCARC type for banded system information on other mesh
 !!!----------------------------------------------------------------------------------------------------
 TYPE OSCARC_BANDED_TYPE
-INTEGER :: NX, NY, NZ, NC, NW, NA, NG, NP, NWS, NWR
+INTEGER :: NX, NY, NZ, NC, NW, NA, NG, NP, NWS=0, NWR=0
 INTEGER :: NGE, NGS, NPE, NPS, NA0
 INTEGER :: NCC, NCCE, NCCS
 INTEGER :: NCF, NCFE, NCFS
@@ -503,7 +503,7 @@ END TYPE OSCARC_BANDED_TYPE
 !!! neighborship structures 
 !!!----------------------------------------------------------------------------------------------------
 TYPE OSCARC_COMPACT_TYPE
-INTEGER :: NX, NY, NZ, NC, NA, NW, NG, NP, NR, NWS, NWR
+INTEGER :: NX, NY, NZ, NC, NA, NW, NG, NP, NR, NWS=0, NWR=0
 INTEGER :: NCC , NCF, NCE, NPE, NRE, NGE, NCCI
 INTEGER :: NCC0, NCF0, NCE0, NP0, NR0, NA0, NW0
 INTEGER :: IG, IG0, IG1=0, NLEN_MATRIX_SYSTEM=0
@@ -2088,7 +2088,6 @@ if (TYPE_DEBUG >= NSCARC_DEBUG_LESS) WRITE(SCARC_LU,*) NM,': NEUMANN  : WALL(',I
                      DO IX = M%WALL(IWF)%NOM_IB(1), M%WALL(IWF)%NOM_IB(4)
                         ICPL=ICPL+1
                         OSCF%NWR= OSCF%NWR + 1
-IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,*) 'NM=',NM,': NOM=',NOM,': NWS=',OSCF%NWS
                         SCF%NCE = SCF%NCE + 1
                         OSCF%NG = OSCF%NG + 1
                         IC = (IZ-1)*MESHES(NOM)%IBAR*MESHES(NOM)%JBAR + (IY-1)*MESHES(NOM)%IBAR + IX
@@ -13885,7 +13884,7 @@ EXCHANGE_SEND_LOOP1: DO NM = NMESHES_MIN, NMESHES_MAX
                      OS%IBUF_SEND(1)= SC%NW
                      OS%IBUF_SEND(2)=OSC%NWR
                      NREQ_SCARC = NREQ_SCARC+1
-                     IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) THEN
+                     IF (TYPE_DEBUG > NSCARC_DEBUG_MEDIUM) THEN
                        WRITE(SCARC_LU,'(4(a,i3))') 'NM=',NM,': NOM=',NOM,': SENDING NW=',SC%NW,', and NG=',OSC%NG
                      ENDIF
                      CALL MPI_ISEND(OS%IBUF_SEND(1),SIZE(OS%IBUF_SEND),MPI_INTEGER,SNODE, &
@@ -14220,7 +14219,7 @@ EXCHANGE_SEND_LOOP2: DO NOM = NMESHES_MIN, NMESHES_MAX
                      ALLOCATE (OSO%RECV_INT(NLEN))
                      OSO%RECV_INT = 0
 
-                     NLEN = 15*SB%NW + 2*OSB%NWS
+                     NLEN = 15*SOB%NW + 2*OSB%NWS
                      ALLOCATE (OSO%SEND_INT(NLEN))
                      OSO%SEND_INT = 0
 
@@ -14281,7 +14280,7 @@ IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,'(a,i3,a,i3,a,i3,a,i5)') &
                         ALLOCATE (OSO%RECV_INT(NLEN))
                         OSO%RECV_INT = 0
 
-                        NLEN = 15*SC%NW + 2*OSC%NWS
+                        NLEN = 15*SOC%NW + 2*OSC%NWS
                         ALLOCATE (OSO%SEND_INT(NLEN))
                         OSO%SEND_INT = 0
 
