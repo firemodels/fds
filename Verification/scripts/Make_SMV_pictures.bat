@@ -102,8 +102,11 @@ call %SCRIPT_DIR%\SMV_DIFF_Pictures_Cases.bat
 
 Rem copy images to summary directory
 
+echo copying user guide script figures from %smvug%\SCRIPT_FIGURES to %summary%\images
 copy %smvug%\SCRIPT_FIGURES\*.png %summary%\images
+echo copying verification guide script figures from %smvvg%\SCRIPT_FIGURES to %summary%\images
 copy %smvvg%\SCRIPT_FIGURES\*.png %summary%\images
+echo copying graysquares figures from %smvvg%\FIGURES to %summary%\images
 copy %smvvg%\FIGURES\graysquares.png %summary%\images
 
 

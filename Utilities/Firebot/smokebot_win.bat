@@ -1,7 +1,12 @@
 @echo off
 
 SETLOCAL
+set platform=win_32
+Rem set platform2=ia32
+
 set platform=win_64
+set platform2=intel64
+
 set fdsbasename=FDS-SMV
 set cfastbasename=cfast
 
@@ -16,6 +21,7 @@ Rem ---------------------------------------------
 
 set CURDIR=%CD%
 erase stage*.txt
+call "%IFORT_COMPILER14%\bin\compilervars" %platform2%
 
 set OUTDIR=%CURDIR%
 
@@ -28,7 +34,7 @@ Rem ---------------------------------------
 
 cd %cfastroot%\CFAST\intel_%platform%
 erase *.obj *.mod 1> %OUTDIR%\stage0.txt 2>&1
-call make_cfast 1>> %OUTDIR%\stage0.txt 2>&1
+make VPATH="../Source:../Include" INCLUDE="../Include" -f ..\makefile intel_%platform% 1>> %OUTDIR%\stage0.txt 2>&1
 
 Rem -------------------------
 echo Stage 1 - Updating repository
@@ -43,7 +49,7 @@ Rem --------------------------
 
 cd %svnroot%\FDS_Compilation\intel_%platform%_db
 erase *.obj *.mod 1> %OUTDIR%\stage2.txt 2>&1
-call make_fds.bat 1>> %OUTDIR%\stage2.txt 2>&1
+make VPATH="../../FDS_Source" -f ..\makefile intel_%platform%_db 1>> %OUTDIR%\stage2.txt 2>&1
 
 Rem ----------------------------------------
 echo Stage 3 - Running verification cases (debug) (not implemented)
@@ -55,7 +61,7 @@ Rem ---------------------------
 
 cd %svnroot%\FDS_Compilation\intel_%platform%
 erase *.obj *.mod 1> %OUTDIR%\stage4.txt 2>&1
-call make_fds.bat 1>> %OUTDIR%\stage4.txt 2>&1
+make VPATH="../../FDS_Source" -f ..\makefile intel_%platform% 1>> %OUTDIR%\stage4.txt 2>&1
 
 Rem -----------------------------------  
 echo Stage 5pre - Building Smokeview utilities
@@ -63,15 +69,18 @@ Rem -----------------------------------
 
 echo              smokezip
 cd %svnroot%\Utilities\smokezip\intel_%platform%
-call make_zip.bat 1> %OUTDIR%\stage5pre.txt 2>&1
+erase *.obj *.mod 1> %OUTDIR%\stage5pre.txt 2>&1
+make -f ..\Makefile intel_%platform% 1>> %OUTDIR%\stage5pre.txt 2>&1
 
 echo              smokediff
 cd %svnroot%\Utilities\smokediff\intel_%platform%
-call make_diff.bat 1>> %OUTDIR%\stage5pre.txt 2>&1
+erase *.obj *.mod 1>> %OUTDIR%\stage5pre.txt 2>&1
+make -f ..\Makefile intel_%platform% 1>> %OUTDIR%\stage5pre.txt 2>&1
 
 echo              wind2fds
 cd %svnroot%\Utilities\wind2fds\intel_%platform%
-call make_wind.bat 1>> %OUTDIR%\stage5pre.txt 2>&1
+erase *.obj *.mod 1>> %OUTDIR%\stage5pre.txt 2>&1
+make -f ..\Makefile intel_%platform% 1>> %OUTDIR%\stage5pre.txt 2>&1
 
 Rem ------------------------------------------
 echo Stage 5 - Running verification cases (release)
@@ -85,7 +94,8 @@ echo Stage 6a - Building Smokeview (debug version)
 Rem ---------------------------------
 
 cd %svnroot%\SMV\Build\intel_%platform%_db
-call make_smv.bat 1> %OUTDIR%\stage6a.txt 2>&1
+erase *.obj *.mod 1> %OUTDIR%\stage6a.txt 2>&1
+make -f ..\Makefile intel_%platform%_db 1>> %OUTDIR%\stage6a.txt 2>&1
 
 Rem -----------------------------------------
 echo Stage 6b - Making Smokeview pictures (debug mode) (not implemented)
@@ -96,7 +106,8 @@ echo Stage 6c - Building Smokeview (release version)
 Rem ---------------------------------
 
 cd %svnroot%\SMV\Build\intel_%platform%
-call make_smv.bat 1> %OUTDIR%\stage6c.txt 2>&1
+erase *.obj *.mod 1> %OUTDIR%\stage6c.txt 2>&1
+make -f ..\Makefile intel_%platform% 1>> %OUTDIR%\stage6c.txt 2>&1
 
 Rem -----------------------------------------
 echo Stage 6d - Making Smokeview pictures (release mode)

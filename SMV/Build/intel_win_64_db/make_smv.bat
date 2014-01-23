@@ -10,5 +10,6 @@ echo Setting up compiler environment
 call "%IFORT_COMPILER13%\bin\compilervars" intel64
 :envexist
 
-erase *.obj erase *.mod
+erase *.obj *.mod
 make -j4 -f ..\Makefile intel_win_64_db
+pause
