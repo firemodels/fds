@@ -1,5 +1,6 @@
 @echo off
 
+SETLOCAL
 set platform=win_64
 set fdsbasename=FDS-SMV
 set cfastbasename=cfast
@@ -21,32 +22,13 @@ set OUTDIR=%CURDIR%
 set svnroot=%userprofile%\%fdsbasename%
 set cfastroot=%userprofile%\%cfastbasename%
 
-set fdsbuilddir=%svnroot%\FDS_Compilation\intel_%platform%
-set fdsexeroot=fds_%platform%.exe
-set fdsexe=%fdsbuilddir%\%fdsexeroot%
-
-set smvbuilddir=%svnroot%\SMV\Build\intel_%platform%
-set smvexeroot=smv_%platform%.exe
-set smvexe=%smvbuilddir%\%smvexeroot%
-
-set smdbuilddir=%svnroot%\Utilities\smokediff\intel_%platform%
-set smdexeroot=smokediff_%platform%.exe
-set smdexe=%smdbuilddir%\%smdexeroot%
-
-set smzbuilddir=%svnroot%\Utilities\smokezip\intel_%platform%
-set smzexeroot=smokezip_%platform%.exe
-set smzexe=%smzbuilddir%\%smzexeroot%
-
-set windbuilddir=%svnroot%\Utilities\wind2fds\intel_%platform%
-set windexeroot=wind2fds_%platform%.exe
-set windexe=%windbuilddir%\%windexeroot%
-
 Rem ---------------------------------------
 echo Stage 0 - Building cfast
 Rem ---------------------------------------
 
 cd %cfastroot%\CFAST\intel_%platform%
-call make_cfast 1> %OUTDIR%\stage0.txt 2>&1
+erase *.obj *.mod 1> %OUTDIR%\stage0.txt 2>&1
+call make_cfast 1>> %OUTDIR%\stage0.txt 2>&1
 
 Rem -------------------------
 echo Stage 1 - Updating repository
@@ -56,8 +38,12 @@ cd %svnroot%
 svn update 1> %OUTDIR%\stage1.txt 2>&1
 
 Rem --------------------------
-echo Stage 2 - Building FDS (debug version) (not implemented)
+echo Stage 2 - Building FDS (debug version)
 Rem --------------------------
+
+cd %svnroot%\FDS_Compilation\intel_%platform%_db
+erase *.obj *.mod 1> %OUTDIR%\stage2.txt 2>&1
+call make_fds.bat 1>> %OUTDIR%\stage2.txt 2>&1
 
 Rem ----------------------------------------
 echo Stage 3 - Running verification cases (debug) (not implemented)
@@ -67,7 +53,7 @@ Rem ---------------------------
 echo Stage 4 - Building FDS (release version)
 Rem ---------------------------  
 
-cd %fdsbuilddir%
+cd %svnroot%\FDS_Compilation\intel_%platform%
 erase *.obj *.mod 1> %OUTDIR%\stage4.txt 2>&1
 call make_fds.bat 1>> %OUTDIR%\stage4.txt 2>&1
 
@@ -75,13 +61,16 @@ Rem -----------------------------------
 echo Stage 5pre - Building Smokeview utilities
 Rem -----------------------------------
 
-cd %smzbuilddir%
+echo              smokezip
+cd %svnroot%\Utilities\smokezip\intel_%platform%
 call make_zip.bat 1> %OUTDIR%\stage5pre.txt 2>&1
 
-cd %smdbuilddir%
+echo              smokediff
+cd %svnroot%\Utilities\smokediff\intel_%platform%
 call make_diff.bat 1>> %OUTDIR%\stage5pre.txt 2>&1
 
-cd %windbuilddir%
+echo              wind2fds
+cd %svnroot%\Utilities\wind2fds\intel_%platform%
 call make_wind.bat 1>> %OUTDIR%\stage5pre.txt 2>&1
 
 Rem ------------------------------------------
@@ -92,8 +81,11 @@ cd %svnroot%\Verification\scripts
 call run_smv_cases 1> %OUTDIR%\stage5.txt 2>&1
 
 Rem ---------------------------------
-echo Stage 6a - Building Smokeview (debug version) (not implemented)
+echo Stage 6a - Building Smokeview (debug version)
 Rem ---------------------------------
+
+cd %svnroot%\SMV\Build\intel_%platform%_db
+call make_smv.bat 1> %OUTDIR%\stage6a.txt 2>&1
 
 Rem -----------------------------------------
 echo Stage 6b - Making Smokeview pictures (debug mode) (not implemented)
@@ -103,7 +95,7 @@ Rem ---------------------------------
 echo Stage 6c - Building Smokeview (release version)
 Rem ---------------------------------
 
-cd %smvbuilddir%
+cd %svnroot%\SMV\Build\intel_%platform%
 call make_smv.bat 1> %OUTDIR%\stage6c.txt 2>&1
 
 Rem -----------------------------------------

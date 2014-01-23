@@ -1,4 +1,6 @@
 @echo off
+SETLOCAL
+
 set svn_drive=c:
 
 set SCRIPT_DIR=%CD%
