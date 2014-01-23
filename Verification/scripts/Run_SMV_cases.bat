@@ -25,8 +25,12 @@ Rem VVVVVVVVVVVV set parameters VVVVVVVVVVVVVVVVVVVVVV
 
 Rem Choose FDS version (repository or release)
 
-set FDSEXE=%SVNROOT%\FDS_Compilation\intel_win_64\fds_win_64.exe
-Rem set FDSEXE=%SVNROOT%\FDS_Compilation\intel_win_64_db\fds_win_64_db.exe
+set FDSBASE=fds_win_64.exe
+set FDSEXE=%SVNROOT%\FDS_Compilation\intel_win_64\%FDSBASE%
+
+REM set FDSBASE=fds_win_64.exe
+Rem set FDSEXE=%SVNROOT%\FDS_Compilation\intel_win_64_db\%FDSBASE%
+
 Rem set FDSEXE=fds
 
 set WFDSEXE=%FIRELOCAL%\bin\wfds6_9977_win_64.exe
@@ -85,14 +89,14 @@ set WFDS=%bg%%WFDSEXE%
 set CFAST=%bg%%CFASTEXE%
 set SH2BAT=%SVNROOT%\Utilities\Data_Processing\sh2bat
 
-echo You are about to run the Smokeview Verification Test Suite.
+Rem echo You are about to run the Smokeview Verification Test Suite.
 echo.
 echo FDS=%FDS%
 echo WFDS=%WFDS%
 echo CFAST=%CFAST%
 echo.
-echo Press any key to proceed, CTRL c to abort
-pause > Nul
+Rem echo Press any key to proceed, CTRL c to abort
+Rem ause > Nul
 
 echo Converting wind data
 echo .
@@ -127,7 +131,15 @@ echo "smokeview test cases end" >> %TIME_FILE%
 date /t >> %TIME_FILE%
 time /t >> %TIME_FILE%
 
+:loop1
+tasklist | find /i /c "%FDSBASE%" > temp.out
+set /p numexe=<temp.out
+echo Number of cases running - %numexe%
+if %numexe% == 0 goto finished
+Timeout /t 30 >nul 
+goto loop1
+
+:finished
 echo "FDS/CFAST cases completed"
 
 :eof
-pause

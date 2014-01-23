@@ -14,5 +14,5 @@ find "Fatal error" %paper%.err
 find "Error:" %paper%.err
 
 echo %paper% build complete
-pause
+
 
