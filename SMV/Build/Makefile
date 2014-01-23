@@ -140,6 +140,20 @@ ms_win_64 : exe       = smokeview_win_$(SMV_TESTSTRING)64
 ms_win_64 : $(objwin)
 	$(CPP) /Fe:"$(exe)" $(LFLAGS) $(objwin) $(WIN_LIBS) $(SMV_MSLIBS_64)
 
+# ------------- intel_win_64_db ----------------
+
+intel_win_64_db : INC = -I ../../source/include -I ../../source/shared -I ../../source/smokeview -I ../../source/glew
+intel_win_64_db : FFLAGS    = -O2 -fpp -D pp_cvf -D X64 /iface:stdref
+intel_win_64_db : CFLAGS    = -O1 -D WIN32 -D pp_INTEL -D _CONSOLE -D X64 -D GLEW_STATIC -D PTW32_STATIC_LIB $(SMV_TESTFLAG)
+intel_win_64_db : LFLAGS    = /F32768000 
+intel_win_64_db : CC        = icl
+intel_win_64_db : CPP       = icl
+intel_win_64_db : FC        = ifort
+intel_win_64_db : exe       = smokeview_win_64_db
+
+intel_win_64_db : $(objwin)
+	$(CPP) -o $(bin)/$(exe) $(LFLAGS) $(objwin) $(WIN_LIBS) $(SMV_LIBS_64)
+
 # ------------- intel_win_64 ----------------
 
 intel_win_64 : INC = -I ../../source/include -I ../../source/shared -I ../../source/smokeview -I ../../source/glew
