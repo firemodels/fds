@@ -20,4 +20,4 @@ if "%1" NEQ "-t" goto endif
 
 erase *.obj
 make -j4 SMV_TESTFLAG="%SMV_TESTFLAG%" SMV_TESTSTRING="%SMV_TESTSTRING%" -f ..\Makefile intel_win_64
-pause
+

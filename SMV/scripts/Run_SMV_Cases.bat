@@ -21,4 +21,5 @@ call %envfile%
 %svn_drive%
 cd %svn_root%\Verification\scripts\
 
-Run_SMV_Cases
+call Run_SMV_Cases
+pause

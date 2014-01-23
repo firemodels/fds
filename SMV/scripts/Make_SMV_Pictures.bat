@@ -21,4 +21,4 @@ call %envfile%
 %svn_drive%
 cd %svn_root%\Verification\scripts\
 
-Make_SMV_Pictures
+Make_SMV_pictures
