@@ -1260,14 +1260,16 @@ void initcadcolors(void){
       i2 = (int)(xx+1);
       f2 = xx - (float)i1;
       f1 = 1.0f - f2;
-      sum=0;
+      sum=0.0;
       for(i=0;i<3;i++){
         rgb_cad[n][i] = f1*rgb[i1][i] + f2*rgb[i2][i];
         sum += rgb_cad[n][i]*rgb_cad[n][i];
       }
       sum=sqrt((double)sum);
-      for(i=0;i<3;i++){
-        rgb_cad[n][i] /= sum;
+      if(sum>0.0){
+        for(i=0;i<3;i++){
+          rgb_cad[n][i] /= sum;
+        }
       }
       rgb_cad[n][3]=1.0;
     }
