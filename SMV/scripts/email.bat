@@ -1,9 +1,13 @@
 @echo off
 set to=%1
 set subject=%2
-set message=%3
+set file=%3
 
-:: SMTP_USER_NAME, SMTP_USER_NAME_BASE, SMTP_USER_PASS are predefined environment variables
+:: SMTP_xxx variables are predefined environment variables
 
-mailsend -to %to% -from %SMTP_USER_NAME% -ssl -smtp smtp.gmail.com -port 465 -sub %subject% -M %message% -q -auth-plain -user %SMTP_USER_NAME_BASE%
+set SSL=
+if %SMTP_PORT% == 465 (
+  set SSL=-ssl
+)
 
+mailsend -to %to% -from %SMTP_USER_NAME% -smtp %SMTP_SERVER% %SSL% -port %SMTP_PORT% -sub %subject% -attach %file%,text/plain,i -q -auth-plain -user %SMTP_USER_NAME_BASE%
