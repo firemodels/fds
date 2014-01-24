@@ -1,71 +1,98 @@
 @echo off
 
 SETLOCAL
-set platform=win_32
-Rem set platform2=ia32
+
+:: ----------------------------
+:: set 32 or 64 bit environment
+:: ----------------------------
+
+:: set platform=win_32
+:: set platform2=ia32
 
 set platform=win_64
 set platform2=intel64
 
+:: --------------------
+:: set repository names
+:: --------------------
+
 set fdsbasename=FDS-SMV
 set cfastbasename=cfast
+
+:: --------------
+:: begin smokebot
+:: --------------
 
 echo.
 echo Preliminary Windows version of Smokebot
 echo press any key to continue
 pause>Nul
 
-Rem ---------------------------------------------
-Rem set up environment variables used by smokebot
-Rem ---------------------------------------------
+erase stage*.txt
+
+:: -----------------
+:: setup environment
+:: -----------------
 
 set CURDIR=%CD%
-erase stage*.txt
-call "%IFORT_COMPILER14%\bin\compilervars" %platform2%
-
 set OUTDIR=%CURDIR%
-
 set svnroot=%userprofile%\%fdsbasename%
 set cfastroot=%userprofile%\%cfastbasename%
+call "%IFORT_COMPILER14%\bin\compilervars" %platform2%
+call %svnroot%\Utilities\Firebot\firebot_email_list.bat
+set email=%svnroot%\SMV\scripts\email.bat
 
-Rem ---------------------------------------
+:: -------
+:: stage 0
+:: -------
+
 echo Stage 0 - Building cfast
-Rem ---------------------------------------
 
 cd %cfastroot%\CFAST\intel_%platform%
 erase *.obj *.mod 1> %OUTDIR%\stage0.txt 2>&1
 make VPATH="../Source:../Include" INCLUDE="../Include" -f ..\makefile intel_%platform% 1>> %OUTDIR%\stage0.txt 2>&1
 
-Rem -------------------------
+:: -------
+:: Stage 1
+:: -------
+
 echo Stage 1 - Updating repository
-Rem -------------------------
+
 
 cd %svnroot%
 svn update 1> %OUTDIR%\stage1.txt 2>&1
 
-Rem --------------------------
+:: -------
+:: Stage 2
+:: -------
+
 echo Stage 2 - Building FDS (debug version)
-Rem --------------------------
 
 cd %svnroot%\FDS_Compilation\intel_%platform%_db
 erase *.obj *.mod 1> %OUTDIR%\stage2.txt 2>&1
 make VPATH="../../FDS_Source" -f ..\makefile intel_%platform%_db 1>> %OUTDIR%\stage2.txt 2>&1
 
-Rem ----------------------------------------
-echo Stage 3 - Running verification cases (debug) (not implemented)
-Rem ----------------------------------------
+:: -------
+:: Stage 3
+:: -------
 
-Rem ---------------------------  
+echo Stage 3 - Running verification cases (debug) (not implemented)
+
+:: -------
+:: Stage 4
+:: -------
+
 echo Stage 4 - Building FDS (release version)
-Rem ---------------------------  
 
 cd %svnroot%\FDS_Compilation\intel_%platform%
 erase *.obj *.mod 1> %OUTDIR%\stage4.txt 2>&1
 make VPATH="../../FDS_Source" -f ..\makefile intel_%platform% 1>> %OUTDIR%\stage4.txt 2>&1
 
-Rem -----------------------------------  
+:: ----------
+:: Stage 5pre
+:: ----------
+
 echo Stage 5pre - Building Smokeview utilities
-Rem -----------------------------------
 
 echo              smokezip
 cd %svnroot%\Utilities\smokezip\intel_%platform%
@@ -82,44 +109,56 @@ cd %svnroot%\Utilities\wind2fds\intel_%platform%
 erase *.obj *.mod 1>> %OUTDIR%\stage5pre.txt 2>&1
 make -f ..\Makefile intel_%platform% 1>> %OUTDIR%\stage5pre.txt 2>&1
 
-Rem ------------------------------------------
+:: -------
+:: Stage 5
+:: -------
+
 echo Stage 5 - Running verification cases (release)
-Rem ------------------------------------------
 
 cd %svnroot%\Verification\scripts
 call run_smv_cases 1> %OUTDIR%\stage5.txt 2>&1
 
-Rem ---------------------------------
+:: --------
+:: Stage 6a
+:: --------
+
 echo Stage 6a - Building Smokeview (debug version)
-Rem ---------------------------------
 
 cd %svnroot%\SMV\Build\intel_%platform%_db
 erase *.obj *.mod 1> %OUTDIR%\stage6a.txt 2>&1
 make -f ..\Makefile intel_%platform%_db 1>> %OUTDIR%\stage6a.txt 2>&1
 
-Rem -----------------------------------------
-echo Stage 6b - Making Smokeview pictures (debug mode) (not implemented)
-Rem -----------------------------------------
+:: --------
+:: Stage 6b
+:: --------
 
-Rem ---------------------------------
+echo Stage 6b - Making Smokeview pictures (debug mode) (not implemented)
+
+:: --------
+:: Stage 6c
+:: --------
+
 echo Stage 6c - Building Smokeview (release version)
-Rem ---------------------------------
 
 cd %svnroot%\SMV\Build\intel_%platform%
 erase *.obj *.mod 1> %OUTDIR%\stage6c.txt 2>&1
 make -f ..\Makefile intel_%platform% 1>> %OUTDIR%\stage6c.txt 2>&1
 
-Rem -----------------------------------------
+:: --------
+:: Stage 6d
+:: --------
+
 echo Stage 6d - Making Smokeview pictures (release mode)
-Rem -----------------------------------------
 
 cd %svnroot%\Verification\scripts
-Rem call MAKE_SMV_pictures 1> %OUTDIR%\stage6d.txt 2>&1
+:: call MAKE_SMV_pictures 1> %OUTDIR%\stage6d.txt 2>&1
 call MAKE_SMV_pictures
 
-Rem ---------------------------------
+:: -------
+:: Stage 8
+:: -------
+
 echo Stage 8 - Building Smokeview guides
-Rem ---------------------------------
 
 cd %svnroot%\Manuals\SMV_User_Guide
 echo                 User
@@ -135,9 +174,11 @@ call make_guide 1>> %OUTDIR%\stage8.txt 2>&1
 
 cd %CURDIR%
 
-Rem -------
-Rem Wrap up
-Rem -------
+:: -------
+:: Wrap up
+:: -------
+
+%email% %mailToSMV% "smokebot (windows) completed" "smokebot completed"
 
 echo smokebot_win completed
 pause
