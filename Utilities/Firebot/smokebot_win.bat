@@ -38,15 +38,40 @@ set CURDIR=%CD%
 set OUTDIR=%CURDIR%
 set svnroot=%userprofile%\%fdsbasename%
 set cfastroot=%userprofile%\%cfastbasename%
+set email=%svnroot%\SMV\scripts\email.bat
+
 call "%IFORT_COMPILER14%\bin\compilervars" %platform2%
 call %svnroot%\Utilities\Firebot\firebot_email_list.bat
-set email=%svnroot%\SMV\scripts\email.bat
 
 :: -------
 :: stage 0
 :: -------
 
-echo Stage 0 - Building cfast
+echo Stage 0 - Preliminaries
+
+:: check if compilers are present
+
+echo "" > errors.txt
+ifort 1> stage0a.txt 2>&1
+type stage0a.txt | find /i /c "not recognized" > count0a.txt
+set /p nothaveFORTRAN=<count0a.txt
+if %nothaveFORTRAN% == 1 (
+  echo "***Fatal error: Fortran compiler not present"
+  echo "***Fatal error: Fortran compiler not present" > errors.txt
+  echo "smokebot run aborted"
+  goto abort
+)
+
+icl 1> stage0b.txt 2>&1
+type stage0b.txt | find /i /c "not recognized" > count0b.txt
+set /p nothaveCC=<count0b.txt
+
+:: update cfast repository
+
+cd %cfastroot%
+svn update  1> %OUTDIR%\stage0.txt 2>&1
+
+:: build cfast
 
 cd %cfastroot%\CFAST\intel_%platform%
 erase *.obj *.mod 1> %OUTDIR%\stage0.txt 2>&1
@@ -57,7 +82,6 @@ make VPATH="../Source:../Include" INCLUDE="../Include" -f ..\makefile intel_%pla
 :: -------
 
 echo Stage 1 - Updating repository
-
 
 cd %svnroot%
 svn update 1> %OUTDIR%\stage1.txt 2>&1
@@ -172,13 +196,23 @@ cd %svnroot%\Manuals\SMV_Verification_Guide
 echo                 Verification
 call make_guide 1>> %OUTDIR%\stage8.txt 2>&1
 
+echo smokebot build success on %COMPUTERNAME% > info.txt
+
 cd %CURDIR%
 
 :: -------
 :: Wrap up
 :: -------
 
-%email% %mailToSMV% "smokebot (windows) completed" "smokebot completed"
+%email% %mailToSMV% "smokebot build success on %COMPUTERNAME%" info.txt
 
 echo smokebot_win completed
 pause
+goto eof
+
+:abort
+%email% %mailToSMV% "smokebot build failure on %COMPUTERNAME%" errors.txt
+
+
+
+:eof
