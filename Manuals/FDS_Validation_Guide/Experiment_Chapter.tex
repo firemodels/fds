@@ -80,18 +80,14 @@ and pressure.
 
 \section{Bryant Doorway Velocity Measurements}
 
-Rodney Bryant of the Fire Research Division at NIST performed a series of velocity measurements of the gas
-velocity within the doorway of a standard ISO~9705 compartment for fires ranging from
-34~kW to 511~kW~\cite{Bryant:FSJ2009,Bryant:EF2009,Bryant:CS2010}. A doorway
-served as the only vent for the enclosure. It included a jamb of 30~cm extending outward
-to facilitate the laser measurements. The entire compartment was elevated 0.3~m off the floor of the laboratory.
+Rodney Bryant of the Fire Research Division at NIST performed a series of velocity measurements of the gas velocity within the doorway of a standard ISO~9705 compartment for fires ranging from 34~kW to 511~kW~\cite{Bryant:FSJ2009,Bryant:EF2009,Bryant:CS2010}. A doorway served as the only vent for the enclosure. It included a jamb of 37~cm extending outward to facilitate the laser measurements. The entire compartment was elevated 0.3~m off the floor of the laboratory (see Fig.~\ref{Bryant_Drawing}. The measurements were made using both bi-directional probes and PIV (Particle Image Velocimetry). The PIV measurements only cover the
+lower two-thirds of the doorway because of difficulties in seeding the hot outflow gases. The bi-directional probe measurements span the entire height of the doorway, but Bryant reports that these measurements were up to 20~\% greater than the PIV measurements in certain regions of the flow. Consequently, only the PIV data was used for comparison to the model.
 
-The measurements were made using both bi-directional probes and PIV (Particle Image Velocimetry). The PIV measurements only cover the
-lower two-thirds of the doorway because of difficulties in seeding the hot outflow gases. The bi-directional probe measurements span the
-entire height of the doorway, but Bryant reports that
-these measurements were up to 20~\% greater than the PIV measurements in certain regions of
-the flow. Consequently, only the PIV data was used for comparison to the
-model.
+\begin{figure}[ht]
+\includegraphics[width=\textwidth]{FIGURES/Bryant_Doorway/Bryant_Compartment.png}
+\caption[Geometry of Bryant's compartment]{Geometry of Bryant's compartment.}
+\label{Bryant Drawing}
+\end{figure}
 
 
 \section{Cable Response to Live Fire -- CAROLFIRE}
@@ -145,7 +141,7 @@ Patricia Beaulieu of Worcester Polytechnic Institute made heat flux measurements
 \section{FM/SNL Test Series}
 
 
-The Factory Mutual and Sandia National Laboratories (FM/SNL) test series consists of 25 compartment fire experiments conducted in 1985 for the U.S.~Nuclear Regulatory Commission (NRC) by Factory Mutual Research Corporation (FMRC), under the direction of Sandia National Laboratories (SNL)~\cite{Nowlen:NUREG4681,Nowlen:NUREG4527}. The primary purpose of these experiments was to provide data with which to validate computer models for various types of compartments typical of nuclear power plants. The experiments were conducted in an enclosure measuring approximately 18~m long by 12~m wide by 6~m high, constructed at the FMRC fire test facility in Rhode Island. A drawing is included in Figure~\ref{FM_SNL_Drawing}. All of the experiments included forced ventilation to simulate typical power plant conditions. Six of the experiments were conducted with a full-scale control room mock-up in place. Parameters varied during the experiments included fire intensity, enclosure ventilation rate, and fire location. This guide uses data from nineteen experiments (Tests 1-17, 21, and 22). In these experiments, the fires were fueled by a propylene gas burner, and heptane and methanol liquid pools. In the experiments not selected, the heat release was not reported and could not be estimated with confidence. Table~\ref{FM_SNL_Matrix} lists the test parameters.
+The Factory Mutual and Sandia National Laboratories (FM/SNL) test series consists of 25 compartment fire experiments conducted in 1985 for the U.S.~Nuclear Regulatory Commission (NRC) by Factory Mutual Research Corporation (FMRC), under the direction of Sandia National Laboratories (SNL)~\cite{Nowlen:NUREG4681,Nowlen:NUREG4527}. The primary purpose of these experiments was to provide data with which to validate computer models for various types of compartments typical of nuclear power plants. The experiments were conducted in an enclosure measuring approximately 18~m long by 12~m wide by 6~m high, constructed at the FMRC fire test facility in Rhode Island. A drawing is included in Fig.~\ref{FM_SNL_Drawing}. All of the experiments included forced ventilation to simulate typical power plant conditions. Six of the experiments were conducted with a full-scale control room mock-up in place. Parameters varied during the experiments included fire intensity, enclosure ventilation rate, and fire location. Only data from nineteen experiments (Tests 1-17, 21, and 22) is used in the current study. In these experiments, the fires were fueled by a propylene gas burner, and heptane and methanol liquid pools. In the experiments not selected, the heat release was not reported and could not be estimated with confidence. Table~\ref{FM_SNL_Matrix} lists the test parameters.
 
 The following information was provided by the test director, Steve Nowlen of Sandia National Laboratory. In particular, Tests 4, 5, and 21 were given extra attention.
 \begin{description}
@@ -160,35 +156,29 @@ The following information was provided by the test director, Steve Nowlen of San
 \begin{table}[h!]
 \caption[Summary of FM/SNL Experiments]{Summary of FM/SNL Experiments. ACH stands for Air Changes per Hour.}
 \begin{center}
-\begin{tabular}{|c|c|c|c|c|c|c|}
+\begin{tabular}{|c|c|c|c|c|c|}
 \hline
-Test    &  Fuel             & Nominal Peak  & Fire          & Ventilation       & Room                  & Used in  \\
-No.     &  Type             & HRR (kW)      & Position      & Rate (ACH)        & Configuration         & Guide?      \\ \hline \hline
-1       & Propylene Burner  &     516       & Center        & 10                & Empty                 &        Yes \\ \hline
-2       & Propylene Burner  &     516       & Center        & 10                & Empty                 &        Yes \\ \hline
-3       & Propylene Burner  &    2000       & Center        & 10                & Empty                 &        Yes \\ \hline
-4       & Propylene Burner  &     516       & Center        & 1                 & Empty                 &        Yes \\ \hline
-5       & Propylene Burner  &     516       & Center        & 10                & Empty                 &        Yes \\ \hline
-6       & Heptane Pool      &     500       & Wall          & 1                 & Empty                 &        Yes \\ \hline
-7       & Propylene Burner  &     516       & Center        & 1                 & Empty                 &        Yes \\ \hline
-8       & Propylene Burner  &    1000       & Center        & 1                 & Empty                 &        Yes \\ \hline
-9       & Propylene Burner  &    1000       & Center        & 8                 & Empty                 &        Yes \\ \hline
-10      & Heptane Pool      &    1000       & Wall          & 4.4               & Empty                 &        Yes \\ \hline
-11      & Methanol Pool     &     500       & Wall          & 4.4               & Empty                 &        Yes \\ \hline
-12      & Heptane Pool      &    2000       & Wall          & 4.4               & Empty                 &        Yes \\ \hline
-13      & Heptane Pool      &    2000       & Wall          & 8                 & Empty                 &        Yes \\ \hline
-14      & Methanol Pool     &     500       & Wall          & 1                 & Empty                 &        Yes \\ \hline
-15      & Heptane Pool      &    1000       & Wall          & 1                 & Empty                 &        Yes \\ \hline
-16      & Heptane Pool      &     500       & Corner        & 1                 & Empty                 &        Yes \\ \hline
-17      & Heptane Pool      &     500       & Corner        & 10                & Empty                 &        Yes \\ \hline
-18      &  PMMA Slab        &    1000       & Wall          & 1                 & Empty                 &         No \\ \hline
-19      & Heptane Pool      &    1000       & Center        & 1                 & Furnished             &         No \\ \hline
-20      & Heptane Pool      &    1000       & Corner        & 8                 & Furnished             &         No \\ \hline
-21      & Propylene Burner  &     500       & Cabinet       & 1                 & Furnished             &        Yes \\ \hline
-22      & Propylene Burner  &    1000       & Cabinet       & 1                 & Furnished             &        Yes \\ \hline
-23      & Qualified Cable   &        N/A    & Cabinet       & 1                 & Furnished             &         No \\ \hline
-24      & Unqualified Cable &        N/A    & Cabinet       & 1                 & Furnished             &         No \\ \hline
-25      & Unqualified Cable &        N/A    & Cabinet       & 8                 & Furnished             &         No \\ \hline
+Test    &  Fuel             & Nominal Peak  & Fire          & Ventilation       & Room                   \\
+No.     &  Type             & HRR (kW)      & Position      & Rate (ACH)        & Configuration          \\ \hline \hline
+1       & Propylene Burner  &     516       & Center        & 10                & Empty                  \\ \hline
+2       & Propylene Burner  &     516       & Center        & 10                & Empty                  \\ \hline
+3       & Propylene Burner  &    2000       & Center        & 10                & Empty                  \\ \hline
+4       & Propylene Burner  &     516       & Center        & 1                 & Empty                  \\ \hline
+5       & Propylene Burner  &     516       & Center        & 10                & Empty                  \\ \hline
+6       & Heptane Pool      &     500       & Wall          & 1                 & Empty                  \\ \hline
+7       & Propylene Burner  &     516       & Center        & 1                 & Empty                  \\ \hline
+8       & Propylene Burner  &    1000       & Center        & 1                 & Empty                  \\ \hline
+9       & Propylene Burner  &    1000       & Center        & 8                 & Empty                  \\ \hline
+10      & Heptane Pool      &    1000       & Wall          & 4.4               & Empty                  \\ \hline
+11      & Methanol Pool     &     500       & Wall          & 4.4               & Empty                  \\ \hline
+12      & Heptane Pool      &    2000       & Wall          & 4.4               & Empty                  \\ \hline
+13      & Heptane Pool      &    2000       & Wall          & 8                 & Empty                  \\ \hline
+14      & Methanol Pool     &     500       & Wall          & 1                 & Empty                  \\ \hline
+15      & Heptane Pool      &    1000       & Wall          & 1                 & Empty                  \\ \hline
+16      & Heptane Pool      &     500       & Corner        & 1                 & Empty                  \\ \hline
+17      & Heptane Pool      &     500       & Corner        & 10                & Empty                  \\ \hline
+21      & Propylene Burner  &     500       & Cabinet       & 1                 & Furnished              \\ \hline
+22      & Propylene Burner  &    1000       & Cabinet       & 1                 & Furnished              \\ \hline
 \end{tabular}
 \end{center}
 \label{FM_SNL_Matrix}
@@ -525,7 +515,7 @@ The NIST Reduced Scale Enclosure (RSE) is a 40~\% scale version of the ISO~9705 
 
 \section{NIST Smoke Alarm Experiments}
 
-A series of experiments was conducted by NIST to measure the activation time of ionization and photoelectric smoke alarms in a residential setting~\cite{Bukowski:1}. Tests were conducted in actual homes with representative sizes and floor plans, utilized actual furnishings and household items for fire sources, and tested actual smoke alarms sold in retail stores at that time. Thirty-six tests were conducted in two homes; 27 in a single-story manufactured home, and 8 in a two-story home. Eight experiments that were conducted in the single-story manufactured home were selected for model validation. Only tests that used a flaming ignition source with a couch or mattress fuel package were considered; the cooking oil fires and tests that used a smoldering ignition source were not considered. The flaming ignition tests used a moderate flame source to quickly ignite the fuel package. 
+A series of experiments was conducted by NIST to measure the activation time of ionization and photoelectric smoke alarms in a residential setting~\cite{Bukowski:1}. Tests were conducted in actual homes with representative sizes and floor plans, utilized actual furnishings and household items for fire sources, and tested actual smoke alarms sold in retail stores at that time. Thirty-six tests were conducted in two homes; 27 in a single-story manufactured home, and 8 in a two-story home. Eight experiments that were conducted in the single-story manufactured home were selected for model validation. Only tests that used a flaming ignition source with a couch or mattress fuel package were considered; the cooking oil fires and tests that used a smoldering ignition source were not considered. The flaming ignition tests used a moderate flame source to quickly ignite the fuel package.
 
 The primary partitioning of the single-story floor plan consisted of three bedrooms, one full bathroom, one kitchen/dining area, one living room, and two hallways (see Fig.~\ref{NIST_Smoke_Alarms_Drawing}). For testing, the doors to Bedroom~3 and the bathroom were always closed. The ceiling was peaked on the long axis, reaching a height of 2.4~m. The outside walls were approximately 2.1~m in height. The slope of the ceiling was approximately 8.4$^\circ$. Groups of smoke alarms were located in the room of fire origin, at least one bedroom, and in a central location. Five stations (Station A through Station E) containing smoke alarm\footnote{Note that, in the FDS Guides, smoke detectors and smoke alarms are collectively referred to as smoke detectors because the same smoke detection algorithm is used to predict activation of either type of device.} arrays were mounted parallel to the ceiling.
 
@@ -574,13 +564,11 @@ A series of experiments was conducted by the Fire Research Section of the Instit
 \end{enumerate}
 There were four fire sizes: 5.5~MW, 6.9~MW, 8.6~MW, and 10.3~MW. In all, 19 experiments were conducted, with the exception of the 10.3~MW fire with Window~1. In each experiment, heat flux measurements were made 0.5~m, 1.5~m, 2.5~m, and 3.5~m above the top of the door/window.
 
-\begin{sidewaysfigure}[p]
-\begin{center}
-\includegraphics[height=6.in]{FIGURES/NRCC_Facade/NRCC_Facade-1}
-\end{center}
+\begin{figure}[p]
+\includegraphics[width=\textwidth]{FIGURES/NRCC_Facade/NRCC_Facade.png}
 \caption[Geometry of the NRCC Facade Experiments]{Geometry of the NRCC Facade Experiments.}
 \label{NRCC_Facade_Drawing}
-\end{sidewaysfigure}
+\end{figure}
 
 
 
