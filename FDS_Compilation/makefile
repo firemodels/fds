@@ -185,7 +185,7 @@ openmp_intel_win_64_dv : obj = fds_openmp_win_64_dv
 openmp_intel_win_64_dv : setup_win $(objwin_serial)
 	$(FCOMPL) -o $(obj) $(FFLAGS) $(FOPENMPFLAGS) /F1000000000 $(objwin_serial)
 
-intel_win_64_db : FFLAGS = /Qvec_report0 /nologo /debug:full /Od /extend_source:132 /warn:all /warn:nointerfaces /Qtrapuv /fp:strict /fp:except /traceback /check:all /stand:f03
+intel_win_64_db : FFLAGS = /Qvec_report0 /nologo /debug:full /Od /extend_source:132 /warn:unused /warn:nointerfaces /Qtrapuv /fp:strict /fp:except /traceback /check:all /stand:f03
 intel_win_64_db : FCOMPL = ifort
 intel_win_64_db : obj = fds_win_64_db
 intel_win_64_db : setup_win $(objwin_serial)
