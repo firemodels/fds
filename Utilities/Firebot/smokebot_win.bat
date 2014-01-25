@@ -6,11 +6,11 @@ SETLOCAL
 :: set 32 or 64 bit environment
 :: ----------------------------
 
-:: set platform=win_32
-:: set platform2=ia32
+:: set platform=32
+:: set compile_platform=ia32
 
-set platform=win_64
-set platform2=intel64
+set platform=64
+set compile_platform=intel64
 
 :: --------------------
 :: set repository names
@@ -40,7 +40,7 @@ set infofile=%OUTDIR%\info.txt
 set revisionfile=%OUTDIR%\revision.txt
 set havewarnings=0
 
-call "%IFORT_COMPILER14%\bin\compilervars" %platform2% 1> Nul 2>&1
+call "%IFORT_COMPILER14%\bin\compilervars" %compile_platform% 1> Nul 2>&1
 call %svnroot%\Utilities\Firebot\firebot_email_list.bat
 
 :: -------
@@ -78,9 +78,9 @@ svn update  1> %OUTDIR%\stage0.txt 2>&1
 :: build cfast
 
 echo           building cfast
-cd %cfastroot%\CFAST\intel_%platform%
-erase *.obj *.mod 1> %OUTDIR%\stage0.txt 2>&1
-make VPATH="../Source:../Include" INCLUDE="../Include" -f ..\makefile intel_%platform% 1>> %OUTDIR%\stage0.txt 2>&1
+cd %cfastroot%\CFAST\intel_win_%size%
+erase *.obj *.mod *.exe 1> %OUTDIR%\stage0.txt 2>&1
+make VPATH="../Source:../Include" INCLUDE="../Include" -f ..\makefile intel_win_%size% 1>> %OUTDIR%\stage0.txt 2>&1
 
 :: -------
 :: Stage 1
@@ -99,13 +99,21 @@ set /p revision=<%revisionfile%
 :: -------
 
 echo Stage 2 - Building FDS (debug version)
+echo           serial
+cd %svnroot%\FDS_Compilation\intel_win_%size%_db
+erase *.obj *.mod *.exe 1> %OUTDIR%\stage2a.txt 2>&1
+make VPATH="../../FDS_Source" -f ..\makefile intel_win_%size%_db 1>> %OUTDIR%\stage2a.txt 2>&1
 
-cd %svnroot%\FDS_Compilation\intel_%platform%_db
-erase *.obj *.mod 1> %OUTDIR%\stage2.txt 2>&1
-make VPATH="../../FDS_Source" -f ..\makefile intel_%platform%_db 1>> %OUTDIR%\stage2.txt 2>&1
+call :file_not_found fds_win_%size%_db.exe %OUTDIR%\stage2a.txt
+call :find_string "remark warning" %OUTDIR%\stage2a.txt
 
-call :file_not_found fds_%platform%_db.exe %OUTDIR%\stage2.txt
-call :find_string "remark warning" %OUTDIR%\stage2.txt
+echo           parallel
+cd %svnroot%\FDS_Compilation\mpi_intel_win_%size%_db
+erase *.obj *.mod *.exe 1> %OUTDIR%\stage2b.txt 2>&1
+make MPIINCLUDE="c:\mpich\mpich2_%size%\include" MPILIB="c:\mpich\mpich2_%size%\lib\fmpich2.lib" VPATH="../../FDS_Source" -f ..\makefile mpi_intel_win_%size%_db 1>> %OUTDIR%\stage2b.txt 2>&1
+
+call :file_not_found fds_mpi_win_%size%_db.exe %OUTDIR%\stage2b.txt
+call :find_string "remark warning" %OUTDIR%\stage2b.txt
 
 :: -------
 :: Stage 3
@@ -119,12 +127,21 @@ echo Stage 3 - Running verification cases (debug) (not implemented)
 
 echo Stage 4 - Building FDS (release version)
 
-cd %svnroot%\FDS_Compilation\intel_%platform%
-erase *.obj *.mod 1> %OUTDIR%\stage4.txt 2>&1
-make VPATH="../../FDS_Source" -f ..\makefile intel_%platform% 1>> %OUTDIR%\stage4.txt 2>&1
+echo           serial
+cd %svnroot%\FDS_Compilation\intel_win_%size%
+erase *.obj *.mod *.exe 1> %OUTDIR%\stage4a.txt 2>&1
+make VPATH="../../FDS_Source" -f ..\makefile intel_win_%size% 1>> %OUTDIR%\stage4a.txt 2>&1
 
-call :file_not_found fds_%platform%.exe %OUTDIR%\stage4.txt
-call :find_string "remark warning" %OUTDIR%\stage4.txt
+call :file_not_found fds_win_%size%.exe %OUTDIR%\stage4a.txt
+call :find_string "remark warning" %OUTDIR%\stage4a.txt
+
+echo           parallel
+cd %svnroot%\FDS_Compilation\mpi_intel_win_%size%
+erase *.obj *.mod *.exe 1> %OUTDIR%\stage4b.txt 2>&1
+make MPIINCLUDE="c:\mpich\mpich2_%size%\include" MPILIB="c:\mpich\mpich2_%size%\lib\fmpich2.lib" VPATH="../../FDS_Source" -f ..\makefile mpi_intel_win_%size%  1>> %OUTDIR%\stage4b.txt 2>&1
+
+call :file_not_found fds_mpi_win_%size%.exe %OUTDIR%\stage4b.txt
+call :find_string "remark warning" %OUTDIR%\stage4b.txt
 
 :: ----------
 :: Stage 5pre
@@ -133,19 +150,24 @@ call :find_string "remark warning" %OUTDIR%\stage4.txt
 echo Stage 5pre - Building Smokeview utilities
 
 echo              smokezip
-cd %svnroot%\Utilities\smokezip\intel_%platform%
-erase *.obj *.mod 1> %OUTDIR%\stage5pre.txt 2>&1
-make -f ..\Makefile intel_%platform% 1>> %OUTDIR%\stage5pre.txt 2>&1
+cd %svnroot%\Utilities\smokezip\intel_win_%size%
+erase *.obj *.mod *.exe 1> %OUTDIR%\stage5pre.txt 2>&1
+make -f ..\Makefile intel_win_%size% 1>> %OUTDIR%\stage5pre.txt 2>&1
 
 echo              smokediff
-cd %svnroot%\Utilities\smokediff\intel_%platform%
-erase *.obj *.mod 1>> %OUTDIR%\stage5pre.txt 2>&1
-make -f ..\Makefile intel_%platform% 1>> %OUTDIR%\stage5pre.txt 2>&1
+cd %svnroot%\Utilities\smokediff\intel_win_%size%
+erase *.obj *.mod *.exe 1>> %OUTDIR%\stage5pre.txt 2>&1
+make -f ..\Makefile intel_win_%size% 1>> %OUTDIR%\stage5pre.txt 2>&1
 
 echo              wind2fds
-cd %svnroot%\Utilities\wind2fds\intel_%platform%
-erase *.obj *.mod 1>> %OUTDIR%\stage5pre.txt 2>&1
-make -f ..\Makefile intel_%platform% 1>> %OUTDIR%\stage5pre.txt 2>&1
+cd %svnroot%\Utilities\wind2fds\intel_win_%size%
+erase *.obj *.mod *.exe 1>> %OUTDIR%\stage5pre.txt 2>&1
+make -f ..\Makefile intel_win_%size% 1>> %OUTDIR%\stage5pre.txt 2>&1
+
+echo              fds2ascii
+cd %svnroot%\Utilities\fds2ascii\intel_win_%size%
+erase *.obj *.mod *.exe 1>> %OUTDIR%\stage5pre.txt 2>&1
+make -f ..\Makefile intel_win_%size% 1>> %OUTDIR%\stage5pre.txt 2>&1
 
 :: -------
 :: Stage 5
@@ -162,9 +184,12 @@ call run_smv_cases 1> %OUTDIR%\stage5.txt 2>&1
 
 echo Stage 6a - Building Smokeview (debug version)
 
-cd %svnroot%\SMV\Build\intel_%platform%_db
-erase *.obj *.mod 1> %OUTDIR%\stage6a.txt 2>&1
-make -f ..\Makefile intel_%platform%_db 1>> %OUTDIR%\stage6a.txt 2>&1
+cd %svnroot%\SMV\Build\intel_win_%size%_db
+erase *.obj *.mod *.exe 1> %OUTDIR%\stage6a.txt 2>&1
+make -f ..\Makefile intel_win_%size%_db 1>> %OUTDIR%\stage6a.txt 2>&1
+
+call :file_not_found smokeview_win_%size%_db.exe %OUTDIR%\stage6a.txt
+call :find_string "remark warning" %OUTDIR%\stage6a.txt
 
 :: --------
 :: Stage 6b
@@ -178,10 +203,11 @@ echo Stage 6b - Making Smokeview pictures (debug mode) (not implemented)
 
 echo Stage 6c - Building Smokeview (release version)
 
-cd %svnroot%\SMV\Build\intel_%platform%
-erase *.obj *.mod 1> %OUTDIR%\stage6c.txt 2>&1
-make -f ..\Makefile intel_%platform% 1>> %OUTDIR%\stage6c.txt 2>&1
+cd %svnroot%\SMV\Build\intel_win_%size%
+erase *.obj *.mod *.exe 1> %OUTDIR%\stage6c.txt 2>&1
+make -f ..\Makefile intel_win_%size% 1>> %OUTDIR%\stage6c.txt 2>&1
 
+call :file_not_found smokeview_win_%size%.exe %OUTDIR%\stage6c.txt
 call :find_string "remark warning" %OUTDIR%\stage6c.txt
 
 :: --------
@@ -191,8 +217,9 @@ call :find_string "remark warning" %OUTDIR%\stage6c.txt
 echo Stage 6d - Making Smokeview pictures (release mode)
 
 cd %svnroot%\Verification\scripts
-:: call MAKE_SMV_pictures 1> %OUTDIR%\stage6d.txt 2>&1
-call MAKE_SMV_pictures
+call MAKE_SMV_pictures 1> %OUTDIR%\stage6d.txt 2>&1
+
+call :find_string "error" %OUTDIR%\stage6d.txt
 
 :: -------
 :: Stage 8
