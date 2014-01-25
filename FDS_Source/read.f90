@@ -8000,15 +8000,23 @@ MESH_LOOP_1: DO NM=1,NMESHES
       IF (MULT_ID=='null') THEN
          N_VENT_NEW = 1
       ELSE
+         IF (SURF_ID=='HVAC') THEN
+            WRITE(MESSAGE,'(A,I4)') 'ERROR: Cannot use MULT with an HVAC VENT, VENT ', N_VENT+1
+            CALL SHUTDOWN(MESSAGE)
+         ENDIF
          DO N=1,N_MULT
             MR => MULTIPLIER(N)
             IF (MULT_ID==MR%ID) N_VENT_NEW = MR%N_COPIES
          ENDDO
          IF (N_VENT_NEW==0) THEN
-            WRITE(MESSAGE,'(A,A,A,I3)') 'ERROR: MULT line ', TRIM(MULT_ID),' not found on VENT ', N_VENT+1
+            WRITE(MESSAGE,'(A,A,A,I4)') 'ERROR: MULT line ', TRIM(MULT_ID),' not found on VENT ', N_VENT+1
             CALL SHUTDOWN(MESSAGE)
          ENDIF
       ENDIF
+      IF (SURF_ID=='HVAC' .AND. ID=='null') THEN
+         WRITE(MESSAGE,'(A,I4)') 'ERROR: must specify an ID for an HVAC VENT, VENT ', N_VENT+1
+         CALL SHUTDOWN(MESSAGE)
+      ENDIF      
       N_VENT = N_VENT + N_VENT_NEW
       4 IF (IOS>0) THEN
          WRITE(MESSAGE,'(A,I4)') 'ERROR: Problem with VENT ',N_VENT+1
@@ -8546,6 +8554,15 @@ MESH_LOOP_2: DO NM=1,NMESHES
 
       VT => VENTS(N)
 
+      IF (VT%SURF_INDEX==HVAC_SURF_INDEX .AND. N>1) THEN
+         DO NN=1,N-1
+            IF (TRIM(VT%ID)==TRIM(VENTS(NN)%ID) .AND. VENTS(NN)%SURF_INDEX==HVAC_SURF_INDEX) THEN
+               WRITE(MESSAGE,'(A,A)')  'ERROR: Two HVAC VENTS have the same ID.  VENT ID: ',TRIM(VT%ID)
+               CALL SHUTDOWN(MESSAGE)
+            ENDIF
+         ENDDO
+      ENDIF
+      
       VT%FDS_AREA = 0._EB
       I1 = VT%I1
       I2 = VT%I2
