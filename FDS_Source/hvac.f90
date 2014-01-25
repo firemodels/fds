@@ -448,6 +448,13 @@ ENDIF
 DO ND = 1, N_DUCTS
    DU => DUCT(ND)
    IF (DU%LEAKAGE) CYCLE
+   DO N = 1, ND
+      IF (N==ND) CYCLE
+      IF (TRIM(DU%ID)==TRIM(DUCT(N)%ID)) THEN
+         WRITE(MESSAGE,'(A,A)') 'ERROR: Two ducts with the same ID. DUCT ID:',TRIM(DU%ID)
+         CALL SHUTDOWN(MESSAGE)
+      ENDIF
+   ENDDO
    DO NN = 1, N_DUCTNODES 
       IF(TRIM(DUCTNODE(NN)%ID) == TRIM(DUCT_NODE_A(ND,1))) THEN
         DU%NODE_INDEX(1) = NN
@@ -507,6 +514,14 @@ ENDDO
 
 NODE_LOOP: DO NN = 1, N_DUCTNODES
    DN => DUCTNODE(NN)
+   DO N = 1, NN
+      IF (N==NN) CYCLE
+      IF (TRIM(DN%ID)==TRIM(DUCTNODE(N)%ID)) THEN
+         WRITE(MESSAGE,'(A,A)') 'ERROR: Two duct node with the same ID. DUCTNODE ID:',TRIM(DN%ID)
+         CALL SHUTDOWN(MESSAGE)
+      ENDIF
+   ENDDO
+   
    IF (DN%LEAKAGE) THEN
       DN%TMP  = TMPA
       DN%RHO  = RHOA
