@@ -6,10 +6,10 @@ SETLOCAL
 :: set 32 or 64 bit environment
 :: ----------------------------
 
-:: set platform=32
+:: set size=32
 :: set compile_platform=ia32
 
-set platform=64
+set size=64
 set compile_platform=intel64
 
 :: --------------------
@@ -294,3 +294,4 @@ exit /b
 :eof
 cd %CURDIR%
 pause
+exit
