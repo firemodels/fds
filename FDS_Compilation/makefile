@@ -58,7 +58,7 @@ func.o: FFLAGS += $(FOPENMPFLAGS)
 # pois.o: FFLAGS += $(FOPENMPFLAGS)
 # pres.o: FFLAGS += $(FOPENMPFLAGS)
 # turb.o: FFLAGS += $(FOPENMPFLAGS)
-# velo.o: FFLAGS += $(FOPENMPFLAGS)
+velo.o: FFLAGS += $(FOPENMPFLAGS)
 
 divg.obj: FFLAGS += $(FOPENMPFLAGS)
 # fire.obj: FFLAGS += $(FOPENMPFLAGS)
@@ -68,7 +68,8 @@ func.obj: FFLAGS += $(FOPENMPFLAGS)
 # pois.obj: FFLAGS += $(FOPENMPFLAGS)
 # pres.obj: FFLAGS += $(FOPENMPFLAGS)
 # turb.obj: FFLAGS += $(FOPENMPFLAGS)
-# velo.obj: FFLAGS += $(FOPENMPFLAGS)
+velo.obj: FFLAGS += $(FOPENMPFLAGS)
+
 endif
 
 # Windows Intel Compiler, version 11
