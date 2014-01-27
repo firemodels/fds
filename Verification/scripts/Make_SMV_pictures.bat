@@ -20,7 +20,7 @@ if "%release%" == "" (
   set SMOKEVIEW=smokeview
 ) else (
   set SMOKEDIFF=%SVNROOT%\Utilities\smokediff\intel_win_%release%\smokediff_win_%release%.exe
-  set SMOKEVIEW=%SVNROOT%\SMV\Build\intel_win_%release%\smokeview_win_%release%.exe -bindir %SVNROOT\SMV\for_bundle
+  set SMOKEVIEW=%SVNROOT%\SMV\Build\intel_win_%release%\smokeview_win_%release%.exe -bindir %SVNROOT%\SMV\for_bundle
   set  SMOKEZIP=%SVNROOT%\Utilities\smokezip\intel_win_%release%\smokezip_win_%release%.exe
 )
 
