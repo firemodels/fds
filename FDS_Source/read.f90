@@ -5786,6 +5786,31 @@ PROCESS_SURF_LOOP: DO N=0,N_SURF
       PARTICLE_FILE=.TRUE.
    ENDIF
 
+! Determine if surface has internal radiation
+
+   SF%INTERNAL_RADIATION = .FALSE.
+   DO NL=1,SF%N_LAYERS
+   DO NN =1,SF%N_LAYER_MATL(NL)
+      ML => MATERIAL(SF%LAYER_MATL_INDEX(NL,NN))
+      IF (ML%KAPPA_S<5.0E4_EB) SF%INTERNAL_RADIATION = .TRUE.
+   ENDDO
+   ENDDO
+
+! In case of internal radiation, do not allow zero-emissivity
+
+   IF (SF%INTERNAL_RADIATION) THEN
+      DO NL=1,SF%N_LAYERS
+      DO NN =1,SF%N_LAYER_MATL(NL)
+         ML => MATERIAL(SF%LAYER_MATL_INDEX(NL,NN))
+         IF (ML%EMISSIVITY == 0._EB) THEN
+            WRITE(MESSAGE,'(A)') 'ERROR: Zero emissivity of MATL '//TRIM(MATL_NAME(SF%LAYER_MATL_INDEX(NL,NN)))// &
+            ' is inconsistent with internal radiation in SURF '//TRIM(SF%ID)//'.'
+            CALL SHUTDOWN(MESSAGE)
+         ENDIF
+      ENDDO
+      ENDDO
+   ENDIF
+
   ! Determine if the surface is combustible/burning
 
    SF%PYROLYSIS_MODEL = PYROLYSIS_NONE
@@ -6152,16 +6177,6 @@ SURF_GRID_LOOP: DO SURF_INDEX=0,N_SURF
 
    CALL GET_WALL_NODE_WEIGHTS(SF%N_CELLS_INI,SF%N_LAYERS,SF%N_LAYER_CELLS,SF%LAYER_THICKNESS,SF%GEOMETRY, &
          SF%X_S,SF%LAYER_DIVIDE,SF%DX,SF%RDX,SF%RDXN,SF%DX_WGT,SF%DXF,SF%DXB,SF%LAYER_INDEX,SF%MF_FRAC,SF%INNER_RADIUS)
-
-! Determine if surface has internal radiation
-
-   SF%INTERNAL_RADIATION = .FALSE.
-   DO NL=1,SF%N_LAYERS
-   DO N =1,SF%N_LAYER_MATL(NL)
-      ML => MATERIAL(SF%LAYER_MATL_INDEX(NL,N))
-      IF (ML%KAPPA_S<5.0E4_EB) SF%INTERNAL_RADIATION = .TRUE.
-   ENDDO
-   ENDDO
 
 ! Initialize the material densities of the solid
 
