@@ -246,7 +246,7 @@ gcc_linux_32 : $(obj)
 # ------------- gcc_linux_64 ----------------
 
 gcc_linux_64 : FFLAGS    = -O2 -m64 -x f95-cpp-input -D pp_noappend -ffree-form -frecord-marker=4
-gcc_linux_64 : CFLAGS    = -O2 -m64 -D pp_LINUX
+gcc_linux_64 : CFLAGS    = -O2 -m64 -D pp_LINUX64
 gcc_linux_64 : LFLAGS    = -m64
 gcc_linux_64 : CC        = gcc
 gcc_linux_64 : CPP       = g++
