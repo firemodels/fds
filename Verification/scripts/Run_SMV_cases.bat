@@ -1,5 +1,6 @@
 @echo off
-SETLOCAL
+
+set size=%1
 
 set svn_drive=c:
 
@@ -23,82 +24,51 @@ set RUNWFDS=call %SVNROOT%\Utilities\Scripts\runwfds_win32.bat
 set RUNTFDS=call %SVNROOT%\Utilities\Scripts\runwfds_win32.bat
 set RUNCFAST=call %SVNROOT%\Utilities\Scripts\runcfast_win32.bat
 
-Rem VVVVVVVVVVVV set parameters VVVVVVVVVVVVVVVVVVVVVV
+:: VVVVVVVVVVVV set parameters VVVVVVVVVVVVVVVVVVVVVV
 
-Rem Choose FDS version (repository or release)
+:: Choose FDS version (size is "", 32 or 64)
 
-set FDSBASE=fds_win_64.exe
-set FDSEXE=%SVNROOT%\FDS_Compilation\intel_win_64\%FDSBASE%
-
-REM set FDSBASE=fds_win_64.exe
-Rem set FDSEXE=%SVNROOT%\FDS_Compilation\intel_win_64_db\%FDSBASE%
-
-Rem set FDSEXE=fds
+if %size% equ "" goto if1
+  set FDSBASE=fds_win_%size%
+  set FDSEXE=%SVNROOT%\FDS_Compilation\intel_win_%size%\%FDSBASE%
+  set CFASTEXE=%CFAST%\CFAST\intel_win_%size%\cfast6_win_%size%.exe
+  set WIND2FDSEXE=%SVNROOT%\Utilities\wind2fds\intel_win_%size%\wind2fds_win_%size%.exe
+goto endif1
+:if1
+  set FDSBASE=fds.exe
+  set FDSEXE=%FDSBASE%
+  set CFASTEXE=cfast6
+  set WIND2FDSEXE=wind2fds
+  echo just before else
+:endif1
 
 set WFDSEXE=%FIRELOCAL%\bin\wfds6_9977_win_64.exe
 
 set BACKGROUNDEXE=%SVNROOT%\Utilities\background\intel_win_32\background.exe
 
-Rem Choose CFAST version (repository or release)
-
-Rem set CFASTEXE=cfast6
-set CFASTEXE=%CFAST%\CFAST\intel_win_64\cfast6_win_64.exe
-
-
-Rem Define wind2fds
-
-set WIND2FDSEXE=%SVNROOT%\Utilities\wind2fds\intel_win_64\wind2fds_win_64.exe
-
-Rem Run jobs in background (or not)
+:: Run jobs in background (or not)
 
 set "bg=%BACKGROUNDEXE% -u 85 -d 5 "
-Rem set bg=
+:: set bg=
 
-Rem ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+:: ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Rem ---------- Ensure that wind2fds_win_64 exists
+:: ---------- Ensure that cfast, fds and wind2fds exists
 
-IF EXIST %WIND2FDSEXE% GOTO endif_wind2fdsexist
-echo ***Fatal error.  The file %WIND2FDSEXE% does not exist. 
-echo Aborting now...
-pause>NUL
-goto:eof
-
-:endif_wind2fdsexist
-
-Rem ---------- Ensure that fds exists
-
-IF EXIST %FDSEXE% GOTO endif_fdsexist
-echo ***Fatal error.  The file %FDSEXE% does not exist. 
-echo Aborting now...
-pause>NUL
-goto:eof
-
-:endif_fdsexist
-
-Rem ---------- Ensure that CFAST exists
-
-IF EXIST %CFASTEXE% GOTO endif_cfastexist
-echo ***Fatal error.  The file %CFASTEXE% does not exist. 
-echo Aborting now...
-pause>NUL
-goto:eof
-
-:endif_cfastexist
+call :is_file_installed %CFASTEXE%|| exit /b 1
+call :is_file_installed %FDSEXE%|| exit /b 1
+call :is_file_installed %WIND2FDSEXE%|| exit /b 1
 
 set FDS=%bg%%FDSEXE%
 set WFDS=%bg%%WFDSEXE%
 set CFAST=%bg%%CFASTEXE%
 set SH2BAT=%SVNROOT%\Utilities\Data_Processing\sh2bat
 
-Rem echo You are about to run the Smokeview Verification Test Suite.
 echo.
 echo FDS=%FDS%
 echo WFDS=%WFDS%
 echo CFAST=%CFAST%
 echo.
-Rem echo Press any key to proceed, CTRL c to abort
-Rem ause > Nul
 
 echo Converting wind data
 echo .
@@ -118,15 +88,15 @@ echo "smokeview test cases begin" > %TIME_FILE%
 date /t >> %TIME_FILE%
 time /t >> %TIME_FILE%
 
-Rem create a text file containing the FDS version used to run these tests.
-Rem This file is included in the smokeview user's guide
+:: create a text file containing the FDS version used to run these tests.
+:: This file is included in the smokeview user's guide
 
 set smvug="%SVNROOT%\Manuals\SMV_User_Guide\"
 echo | %FDSEXE% 2> "%smvug%\SCRIPT_FIGURES\fds.version"
 
 call %SCRIPT_DIR%\SMV_Cases.bat
 
-REM erase %SCRIPT_DIR%\SMV_Cases.bat
+:: erase %SCRIPT_DIR%\SMV_Cases.bat
 
 cd %BASEDIR%
 echo "smokeview test cases end" >> %TIME_FILE%
@@ -143,5 +113,21 @@ goto loop1
 
 :finished
 echo "FDS/CFAST cases completed"
+goto eof
+
+:: -----------------------------------------
+:is_file_installed
+:: -----------------------------------------
+  
+  set program=%1
+  %program% -help 1> %SCRIPT_DIR%\exist.txt 2>&1
+  type %SCRIPT_DIR%\exist.txt | find /i /c "not recognized" > %SCRIPT_DIR%\count.txt
+  set /p nothave=<%SCRIPT_DIR%\count.txt
+  if %nothave% GTR 0 (
+    echo "***Fatal error: %program% not present"
+    echo "Verification suite aborted"
+    exit /b 1
+  )
+  exit /b 0
 
 :eof
