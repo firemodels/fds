@@ -2855,6 +2855,9 @@ ENDDO
 
 ! Set baroclinic term to zero at outflow boundaries and P_EXTERNAL at inflow boundaries
 
+!$OMP PARALLEL DO SCHEDULE(guided) &
+!$OMP& PRIVATE(WC, VT, TSI, TIME_RAMP_FACTOR, P_EXTERNAL, &
+!$OMP& II, JJ, KK, IOR, IIG, JJG, KKG, UN, INFLOW)
 EXTERNAL_WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS
    WC=>WALL(IW)
    IF (WC%BOUNDARY_TYPE/=OPEN_BOUNDARY) CYCLE EXTERNAL_WALL_LOOP
@@ -2891,6 +2894,7 @@ EXTERNAL_WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS
       RHMK(II,JJ,KK) = -RHMK(IIG,JJG,KKG)                    ! No baroclinic correction for outflow boundary
    ENDIF
 ENDDO EXTERNAL_WALL_LOOP
+!$OMP END PARALLEL DO
 
 ! Compute baroclinic term in the x momentum equation
 
