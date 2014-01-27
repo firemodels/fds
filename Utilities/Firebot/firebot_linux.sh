@@ -464,7 +464,7 @@ check_inspect_fds_openmp_db()
    # Scan for errors in thread checking results
    cd $FDS_SVNROOT/Utilities/Scripts
    # grep -v 'Warning: One or more threads in the application accessed ...' ignores a known compiler warning that displays even without errors
-   if [[ `grep -i -E 'warning|remark|problem|error' ${FIREBOT_DIR}/output/stage2c_inspect | grep -v 'Warning: One or more threads in the application accessed the stack of another thread'` == "" ]]
+      if [[ `grep -i -E 'warning|remark|problem|error' ${FIREBOT_DIR}/output/stage2c_inspect | grep -v '0 new problem(s) found' | grep -v 'Warning: One or more threads in the application accessed the stack of another thread'` == "" ]]
    then
       # Continue along
       :
