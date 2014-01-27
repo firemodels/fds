@@ -256,19 +256,6 @@ gcc_linux_64 : exe       = smokeview_gcc_$(SMV_TESTSTRING)64
 gcc_linux_64 : $(obj)
 	$(CPP) -o $(bin)/$(exe) $(obj) $(LFLAGS) -L $(LIB_DIR)/lib_linux_gcc_64 $(FULL_SMV_LIBS) -lgfortran $(LINUX_SYSTEMLIBS)
 
-# ------------- gcc_linux ----------------
-
-gcc_linux : FFLAGS    = -O2 -x f95-cpp-input -D pp_noappend -ffree-form
-gcc_linux : CFLAGS    = -O2 -D pp_LINUX
-gcc_linux : LFLAGS    = 
-gcc_linux : CC        = gcc
-gcc_linux : CPP       = g++
-gcc_linux : FC        = gfortran
-gcc_linux : exe       = smokeview_gcc_$(SMV_TESTSTRING)32
-
-gcc_linux : $(obj)
-	$(CPP) -o $(bin)/$(exe) $(obj) $(LFLAGS) -L $(LIB_DIR)/lib_linux_gcc $(FULL_SMV_LIBS) -lgfortran $(LINUX_SYSTEMLIBS)
-
 # VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
 # VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV   OSX   VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
 # VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
