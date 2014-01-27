@@ -38,11 +38,12 @@ set email=%svnroot%\SMV\scripts\email.bat
 set mpichinc="c:\mpich\mpich2_%size%\include"
 set mpichlib="c:\mpich\mpich2_%size%\lib\fmpich2.lib"
 
-set errorfile=%OUTDIR%\errors.txt
-set warningfile=%OUTDIR%\warnings.txt
+set errorlog=%OUTDIR%\errors.txt
+set warninglog=%OUTDIR%\warnings.txt
 set infofile=%OUTDIR%\info.txt
 set revisionfile=%OUTDIR%\revision.txt
 
+set haveerrors=0
 set havewarnings=0
 set haveCC=1
 
@@ -59,15 +60,15 @@ echo Stage 0 - Preliminaries
 
 :: check if compilers are present
 
-echo. > %errorfile%
-echo. > %warningfile%
+echo. > %errorlog%
+echo. > %warninglog%
 
 ifort 1> stage0a.txt 2>&1
 type stage0a.txt | find /i /c "not recognized" > count0a.txt
 set /p nothaveFORTRAN=<count0a.txt
 if %nothaveFORTRAN% == 1 (
   echo "***Fatal error: Fortran compiler not present"
-  echo "***Fatal error: Fortran compiler not present" > %errorfile%
+  echo "***Fatal error: Fortran compiler not present" > %errorlog%
   echo "smokebot run aborted"
   call :output_abort_message
   exit /b 1
@@ -131,7 +132,7 @@ erase *.obj *.mod *.exe 1> %OUTDIR%\stage2a.txt 2>&1
 make -j4 VPATH="../../FDS_Source" -f ..\makefile intel_win_%size%_db 1>> %OUTDIR%\stage2a.txt 2>&1
 
 call :does_file_exist fds_win_%size%_db.exe %OUTDIR%\stage2a.txt|| exit /b 1
-call :find_fds_string "warning" %OUTDIR%\stage2a.txt
+call :find_fds_warnings "warning" %OUTDIR%\stage2a.txt
 
 echo             parallel
 cd %svnroot%\FDS_Compilation\mpi_intel_win_%size%_db
@@ -139,7 +140,7 @@ erase *.obj *.mod *.exe 1> %OUTDIR%\stage2b.txt 2>&1
 make -j4 MPIINCLUDE=%mpichinc% MPILIB=%mpichlib% VPATH="../../FDS_Source" -f ..\makefile mpi_intel_win_%size%_db 1>> %OUTDIR%\stage2b.txt 2>&1
 
 call :does_file_exist fds_mpi_win_%size%_db.exe %OUTDIR%\stage2b.txt|| exit /b 1
-call :find_fds_string "warning" %OUTDIR%\stage2b.txt
+call :find_fds_warnings "warning" %OUTDIR%\stage2b.txt
 
 :: -------
 :: Stage 3
@@ -159,7 +160,7 @@ erase *.obj *.mod *.exe 1> %OUTDIR%\stage4a.txt 2>&1
 make -j4 VPATH="../../FDS_Source" -f ..\makefile intel_win_%size% 1>> %OUTDIR%\stage4a.txt 2>&1
 
 call :does_file_exist fds_win_%size%.exe %OUTDIR%\stage4a.txt|| exit /b 1
-call :find_fds_string "warning" %OUTDIR%\stage4a.txt
+call :find_fds_warnings "warning" %OUTDIR%\stage4a.txt
 
 echo             parallel
 cd %svnroot%\FDS_Compilation\mpi_intel_win_%size%
@@ -167,7 +168,7 @@ erase *.obj *.mod *.exe 1> %OUTDIR%\stage4b.txt 2>&1
 make -j4 MPIINCLUDE=%mpichinc% MPILIB=%mpichlib% VPATH="../../FDS_Source" -f ..\makefile mpi_intel_win_%size%  1>> %OUTDIR%\stage4b.txt 2>&1
 
 call :does_file_exist fds_mpi_win_%size%.exe %OUTDIR%\stage4b.txt|| exit /b 1
-call :find_fds_string "warning" %OUTDIR%\stage4b.txt
+call :find_fds_warnings "warning" %OUTDIR%\stage4b.txt
 
 :: ----------
 :: Stage 5pre
@@ -228,7 +229,7 @@ erase *.obj *.mod *.exe 1> %OUTDIR%\stage6a.txt 2>&1
 make -f ..\Makefile intel_win_%size%_db 1>> %OUTDIR%\stage6a.txt 2>&1
 
 call :does_file_exist smokeview_win_%size%_db.exe %OUTDIR%\stage6a.txt|| exit /b 1
-call :find_string "warning" %OUTDIR%\stage6a.txt
+call :find_smokeview_warnings "warning" %OUTDIR%\stage6a.txt
 
 :: --------
 :: Stage 6b
@@ -247,7 +248,7 @@ erase *.obj *.mod *.exe 1> %OUTDIR%\stage6c.txt 2>&1
 make -f ..\Makefile intel_win_%size% 1>> %OUTDIR%\stage6c.txt 2>&1
 
 call :does_file_exist smokeview_win_%size%.exe %OUTDIR%\stage6c.txt|| exit /b 1
-call :find_string "warning" %OUTDIR%\stage6c.txt
+call :find_smokeview_warnings "warning" %OUTDIR%\stage6c.txt
 
 :: --------
 :: Stage 6d
@@ -258,7 +259,7 @@ echo Stage 6d - Making Smokeview pictures (release mode)
 cd %svnroot%\Verification\scripts
 call MAKE_SMV_pictures %size% 1> %OUTDIR%\stage6d.txt 2>&1
 
-call :find_string "error" %OUTDIR%\stage6d.txt
+call :find_smokeview_warnings "error" %OUTDIR%\stage6d.txt
 
 :: -------
 :: Stage 8
@@ -266,17 +267,14 @@ call :find_string "error" %OUTDIR%\stage6d.txt
 
 echo Stage 8 - Building Smokeview guides
 
-cd %svnroot%\Manuals\SMV_User_Guide
-echo             User
-call make_guide 1> %OUTDIR%\stage8.txt 2>&1
-
-cd %svnroot%\Manuals\SMV_Technical_Reference_Guide
 echo             Technical Reference
-call make_guide 1>> %OUTDIR%\stage8.txt 2>&1
+call :build_guide SMV_Technical_Reference_Guide %svnroot%\Manuals\SMV_Technical_Reference_Guide 1>> %OUTDIR%\stage8.txt 2>&1
 
-cd %svnroot%\Manuals\SMV_Verification_Guide
 echo             Verification
-call make_guide 1>> %OUTDIR%\stage8.txt 2>&1
+call :build_guide SMV_Verification_Guide %svnroot%\Manuals\SMV_Verification_Guide 1>> %OUTDIR%\stage8.txt 2>&1
+
+echo             User
+call :build_guide SMV_User_Guide %svnroot%\Manuals\SMV_User_Guide 1> %OUTDIR%\stage8.txt 2>&1
 
 echo smokebot build success on %COMPUTERNAME% > %infofile%
 
@@ -288,10 +286,17 @@ cd %CURDIR%
 
 if exist %emailexe% (
   if %havewarnings% == 0 (
-    call %email% %mailToSMV% "smokebot build success on %COMPUTERNAME%! %revision%" %infofile%  
-  )
-  if %havewarnings% GTR 0 (
-    %email% %mailToSMV% "smokebot build success with warnings on %COMPUTERNAME% %revision%" %warningfile%
+    if %haveerrors% == 0 (
+      call %email% %mailToSMV% "smokebot build success on %COMPUTERNAME%! %revision%" %infofile%
+    ) else (
+      call %email% %mailToSMV% "smokebot build failure on %COMPUTERNAME%! %revision%" %errorlog%
+    )
+  ) else (
+    if %haveerrors% == 0 (
+      %email% %mailToSMV% "smokebot build success with warnings on %COMPUTERNAME% %revision%" %warninglog%
+    ) else (
+      call %email% %mailToSMV% "smokebot build failure on %COMPUTERNAME%! %revision%" %errorlog%
+    )
   )
 )
 
@@ -301,7 +306,7 @@ goto eof
 :output_abort_message
   echo "***Fatal error: smokebot build failure on %COMPUTERNAME% %revision%"
   if exist %email% (
-    call %email% %mailToSMV% "smokebot build failure on %COMPUTERNAME% %revision%" %errorfile%
+    call %email% %mailToSMV% "smokebot build failure on %COMPUTERNAME% %revision%" %errorlog%
   )
 exit /b
 
@@ -315,7 +320,7 @@ exit /b
   set /p nothave=<count.txt
   if %nothave% == 1 (
     echo "***Fatal error: %program% not present"
-    echo "***Fatal error: %program% not present" > %errorfile%
+    echo "***Fatal error: %program% not present" > %errorlog%
     echo "smokebot run aborted"
     call :output_abort_message
     exit /b 1
@@ -331,44 +336,85 @@ set outputfile=%2
 
 if NOT exist %file% (
   echo ***fatal error: problem building %file%. Aborting smokebot
-  type %outputfile% >> %errorfile%
+  type %outputfile% >> %errorlog%
   call :output_abort_message
   exit /b 1
 )
 exit /b 0
 
 :: -----------------------------------------
-  :find_string
+  :find_smokeview_warnings
 :: -----------------------------------------
 
 set search_string=%1
 set search_file=%2
 
-findstr /I %search_string% %search_file% > %OUTDIR%\warning.txt
-type %OUTDIR%\warning.txt | find /c ":"> %OUTDIR%\nwarning.txt
+findstr /I %search_string% %search_file% | find /V "commands for target" > %OUTDIR%\warning.txt
+type %OUTDIR%\warning.txt | find /v /c "kdkwokwdokwd"> %OUTDIR%\nwarning.txt
 set /p nwarnings=<%OUTDIR%\nwarning.txt
 if %nwarnings% GTR 0 (
-  type %OUTDIR%\warning.txt >> %warningfile%
+  type %OUTDIR%\warning.txt >> %warninglog%
   set havewarnings=1
 )
 exit /b
 
 :: -----------------------------------------
-  :find_fds_string
+  :find_fds_warnings
 :: -----------------------------------------
 
 set search_string=%1
 set search_file=%2
 
-findstr /I %search_string% %search_file% | find /V "mpif.h" | find /V "commands for target" > %OUTDIR%\warning.txt
+findstr /I %search_string% %search_file% | find /V "mpif.h"  > %OUTDIR%\warning.txt
 type %OUTDIR%\warning.txt | find /c ":"> %OUTDIR%\nwarning.txt
 set /p nwarnings=<%OUTDIR%\nwarning.txt
 if %nwarnings% GTR 0 (
-  type %OUTDIR%\warning.txt >> %warningfile%
+  type %OUTDIR%\warning.txt >> %warninglog%
   set havewarnings=1
 )
 exit /b
 
+:: -----------------------------------------
+ :build_guide
+:: -----------------------------------------
+set guide=%1
+set guide_dir=%2
+
+set guideout=%OUTDIR%\stage8_%guide%.txt
+
+cd %guide_dir%
+
+pdflatex -interaction nonstopmode %guide% 1> %guideout% 2>&1
+bibtex %guide% 1> %guideout% 2>&1
+pdflatex -interaction nonstopmode %guide% 1> %guideout% 2>&1
+pdflatex -interaction nonstopmode %guide% 1> %guideout% 2>&1
+bibtex %guide% 1>> %guideout% 2>&1
+
+type %guideout% | find "Undefined control" > %OUTDIR%\error.txt
+type %guideout% | find "! LaTeX Error:" >> %OUTDIR%\error.txt
+type %guideout% | find "Fatal error" >> %OUTDIR%\error.txt
+type %guideout% | find "Error:" >> %OUTDIR%\error.txt
+
+type %OUTDIR%\error.txt | find /v /c "JDIJWIDJIQ"> %OUTDIR%\nerrors.txt
+set /p nerrors=<%OUTDIR%\nerrors.txt
+if %nerrors% GTR 0 (
+  echo Errors from Stage 8 - Build %guide% >> %errorlog%
+  type %OUTDIR%\error.txt >> %errorlog%
+  set haveerrors=1
+)
+
+type %guideout% | find "undefined" > %OUTDIR%\warning.txt
+type %guideout% | find "multiply"  >> %OUTDIR%\warning.txt
+
+type %OUTDIR%\warning.txt | find /c ":"> %OUTDIR%\nwarnings.txt
+set /p nwarnings=<%OUTDIR%\nwarnings.txt
+if %nwarnings% GTR 0 (
+  echo Warnings from Stage 8 - Build %guide% >> %warninglog%
+  type %OUTDIR%\warning.txt >> %warninglog%
+  set havewarnings=1
+)
+
+exit /b
 
 :eof
 cd %CURDIR%
