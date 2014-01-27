@@ -658,60 +658,29 @@ aix_mpi : $(obj_mpi)
 
 #GCC and gfortran Version
 
-gnu_win_32 : FFLAGS  = -O1 -static -ffree-line-length-none -ffree-form
-gnu_win_32 : FCOMPL  = gfortran
-gnu_win_32 : obj     = fds_gnu_win_32
-gnu_win_32 : $(obj_serial)
+gnu_linux : FFLAGS  = -O2
+gnu_linux : FCOMPL  = gfortran
+gnu_linux : obj     = fds_gnu_linux
+gnu_linux : $(obj_serial)
 	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_serial)
 
-gnu_linux_32 : FFLAGS  = -O1 -static -ffree-line-length-none -ffree-form
-gnu_linux_32 : FCOMPL  = gfortran
-gnu_linux_32 : obj     = fds_gnu_linux_32
-gnu_linux_32 : $(obj_serial)
+gnu_osx : FFLAGS  = -O2
+gnu_osx : FCOMPL  = gfortran
+gnu_osx : obj     = fds_gnu_osx
+gnu_osx : $(obj_serial)
 	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_serial)
 
-gnu_osx_32 : FFLAGS  = -O1 -ffree-line-length-none -ffree-form
-gnu_osx_32 : FCOMPL  = gfortran
-gnu_osx_32 : obj     = fds_gnu_osx_32
-gnu_osx_32 : $(obj_serial)
-	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_serial)
-
-gnu_mpi_32 : FFLAGS  = -O1
-gnu_mpi_32 : FCOMPL  = mpif90
-gnu_mpi_32 : obj = fds_gnu_mpi_32
-gnu_mpi_32 : $(obj_mpi)
-	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_mpi)
-
-gnu_linux_64 : FFLAGS = -O2 -unroll -static -frecord-marker=4
-gnu_linux_64 : FCOMPL = gfortran
-gnu_linux_64 : obj = fds_gnu_linux_64
-gnu_linux_64 : setup $(obj_serial)
-	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_serial)
-
-xxxmpi_gnu_linux_64 : FFLAGS = -O2 -unroll -static -frecord-marker=4 
-xxxmpi_gnu_linux_64 : FCOMPL = mpif77
-xxxmpi_gnu_linux_64 : obj = fds_mpi_gnu_linux_64 
-xxxmpi_gnu_linux_64 : setup $(obj_mpi) 
-
-mpi_gnu_linux_64 : FFLAGS = -m64 -O2 -unroll
-mpi_gnu_linux_64 : FCOMPL = mpif77
-mpi_gnu_linux_64 : obj = fds_mpi_gnu_linux_64 
-mpi_gnu_linux_64 : setup $(obj_mpi) 
+mpi_gnu_linux : FFLAGS = -O2
+mpi_gnu_linux : FCOMPL = mpif77
+mpi_gnu_linux : obj = fds_mpi_gnu_linux
+mpi_gnu_linux : setup $(obj_mpi) 
 	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_mpi) 
 
-
-mpi_gnu_osx_32_db : FFLAGS = -O0 -ffree-line-length-256 -g -Wall -Wsurprising -W 
-mpi_gnu_osx_32_db : FCOMPL = mpif90
-mpi_gnu_osx_32_db : obj = fds_mpi_gnu_osx_32_db
-mpi_gnu_osx_32_db : setup $(obj_mpi) 
+mpi_gnu_osx : FFLAGS = -O2
+mpi_gnu_osx : FCOMPL = mpif90
+mpi_gnu_osx : obj = fds_mpi_gnu_osx
+mpi_gnu_osx : setup $(obj_mpi) 
 	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_mpi) 
-
-mpi_gnu_osx_32 : FFLAGS = -O2 -ffree-line-length-256
-mpi_gnu_osx_32 : FCOMPL = mpif90
-mpi_gnu_osx_32 : obj = fds_mpi_gnu_osx_32 
-mpi_gnu_osx_32 : setup $(obj_mpi) 
-	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_mpi) 
-
 
 #*** End Compiler Specific Rules ***
 
