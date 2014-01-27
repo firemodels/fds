@@ -38,9 +38,9 @@ set email=%svnroot%\SMV\scripts\email.bat
 set mpichinc="c:\mpich\mpich2_%size%\include"
 set mpichlib="c:\mpich\mpich2_%size%\lib\fmpich2.lib"
 
-set errorlog=%OUTDIR%\errors.txt
-set warninglog=%OUTDIR%\warnings.txt
-set infofile=%OUTDIR%\info.txt
+set errorlog=%OUTDIR%\stage_errors.txt
+set warninglog=%OUTDIR%\stage_warnings.txt
+set infofile=%OUTDIR%\stage_info.txt
 set revisionfile=%OUTDIR%\revision.txt
 
 set haveerrors=0
@@ -64,8 +64,8 @@ echo. > %errorlog%
 echo. > %warninglog%
 
 ifort 1> stage0a.txt 2>&1
-type stage0a.txt | find /i /c "not recognized" > count0a.txt
-set /p nothaveFORTRAN=<count0a.txt
+type stage0a.txt | find /i /c "not recognized" > stage_count0a.txt
+set /p nothaveFORTRAN=<stage_count0a.txt
 if %nothaveFORTRAN% == 1 (
   echo "***Fatal error: Fortran compiler not present"
   echo "***Fatal error: Fortran compiler not present" > %errorlog%
@@ -76,8 +76,8 @@ if %nothaveFORTRAN% == 1 (
 echo             found Fortran
 
 icl 1> stage0b.txt 2>&1
-type stage0b.txt | find /i /c "not recognized" > count0b.txt
-set /p nothaveCC=<count0b.txt
+type stage0b.txt | find /i /c "not recognized" > stage_count0b.txt
+set /p nothaveCC=<stage_count0b.txt
 if %nothaveCC% == 1 (
   set haveCC=0
   echo "***Warning: C/C++ compiler not found - using installed Smokeview to generate images"
@@ -315,9 +315,9 @@ exit /b
 :: -----------------------------------------
 
   set program=%1
-  %program% -help 1>> exist.txt 2>&1
-  type exist.txt | find /i /c "not recognized" > count.txt
-  set /p nothave=<count.txt
+  %program% -help 1>> stage_exist.txt 2>&1
+  type stage_exist.txt | find /i /c "not recognized" > stage_count.txt
+  set /p nothave=<stage_count.txt
   if %nothave% == 1 (
     echo "***Fatal error: %program% not present"
     echo "***Fatal error: %program% not present" > %errorlog%
@@ -349,11 +349,11 @@ exit /b 0
 set search_string=%1
 set search_file=%2
 
-findstr /I %search_string% %search_file% | find /V "commands for target" > %OUTDIR%\warning.txt
-type %OUTDIR%\warning.txt | find /v /c "kdkwokwdokwd"> %OUTDIR%\nwarning.txt
-set /p nwarnings=<%OUTDIR%\nwarning.txt
+findstr /I %search_string% %search_file% | find /V "commands for target" > %OUTDIR%\stage_warning.txt
+type %OUTDIR%\stage_warning.txt | find /v /c "kdkwokwdokwd"> %OUTDIR%\stage_nwarning.txt
+set /p nwarnings=<%OUTDIR%\stage_nwarning.txt
 if %nwarnings% GTR 0 (
-  type %OUTDIR%\warning.txt >> %warninglog%
+  type %OUTDIR%\stage_warning.txt >> %warninglog%
   set havewarnings=1
 )
 exit /b
@@ -365,11 +365,11 @@ exit /b
 set search_string=%1
 set search_file=%2
 
-findstr /I %search_string% %search_file% | find /V "mpif.h"  > %OUTDIR%\warning.txt
-type %OUTDIR%\warning.txt | find /c ":"> %OUTDIR%\nwarning.txt
-set /p nwarnings=<%OUTDIR%\nwarning.txt
+findstr /I %search_string% %search_file% | find /V "mpif.h"  > %OUTDIR%\stage_warning.txt
+type %OUTDIR%\stage_warning.txt | find /c ":"> %OUTDIR%\stage_nwarning.txt
+set /p nwarnings=<%OUTDIR%\stage_nwarning.txt
 if %nwarnings% GTR 0 (
-  type %OUTDIR%\warning.txt >> %warninglog%
+  type %OUTDIR%\stage_warning.txt >> %warninglog%
   set havewarnings=1
 )
 exit /b
@@ -390,27 +390,27 @@ pdflatex -interaction nonstopmode %guide% 1> %guideout% 2>&1
 pdflatex -interaction nonstopmode %guide% 1> %guideout% 2>&1
 bibtex %guide% 1>> %guideout% 2>&1
 
-type %guideout% | find "Undefined control" > %OUTDIR%\error.txt
-type %guideout% | find "! LaTeX Error:" >> %OUTDIR%\error.txt
-type %guideout% | find "Fatal error" >> %OUTDIR%\error.txt
-type %guideout% | find "Error:" >> %OUTDIR%\error.txt
+type %guideout% | find "Undefined control" > %OUTDIR%\stage_error.txt
+type %guideout% | find "! LaTeX Error:" >> %OUTDIR%\stage_error.txt
+type %guideout% | find "Fatal error" >> %OUTDIR%\stage_error.txt
+type %guideout% | find "Error:" >> %OUTDIR%\stage_error.txt
 
-type %OUTDIR%\error.txt | find /v /c "JDIJWIDJIQ"> %OUTDIR%\nerrors.txt
-set /p nerrors=<%OUTDIR%\nerrors.txt
+type %OUTDIR%\stage_error.txt | find /v /c "JDIJWIDJIQ"> %OUTDIR%\stage_nerrors.txt
+set /p nerrors=<%OUTDIR%\stage_nerrors.txt
 if %nerrors% GTR 0 (
   echo Errors from Stage 8 - Build %guide% >> %errorlog%
-  type %OUTDIR%\error.txt >> %errorlog%
+  type %OUTDIR%\stage_error.txt >> %errorlog%
   set haveerrors=1
 )
 
-type %guideout% | find "undefined" > %OUTDIR%\warning.txt
-type %guideout% | find "multiply"  >> %OUTDIR%\warning.txt
+type %guideout% | find "undefined" > %OUTDIR%\stage_warning.txt
+type %guideout% | find "multiply"  >> %OUTDIR%\stage_warning.txt
 
-type %OUTDIR%\warning.txt | find /c ":"> %OUTDIR%\nwarnings.txt
+type %OUTDIR%\stage_warning.txt | find /c ":"> %OUTDIR%\nwarnings.txt
 set /p nwarnings=<%OUTDIR%\nwarnings.txt
 if %nwarnings% GTR 0 (
   echo Warnings from Stage 8 - Build %guide% >> %warninglog%
-  type %OUTDIR%\warning.txt >> %warninglog%
+  type %OUTDIR%\stage_warning.txt >> %warninglog%
   set havewarnings=1
 )
 
