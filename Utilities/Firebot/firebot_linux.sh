@@ -432,7 +432,8 @@ check_compile_fds_openmp_db()
    cd $FDS_SVNROOT/FDS_Compilation/openmp_intel_linux_64_db
    if [ -e "fds_openmp_intel_linux_64_db" ]
    then
-      stage2c_success=true
+      # Continue along
+      :
    else
       echo "Errors from Stage 2c - Compile and inspect FDS OpenMP debug:" >> $ERROR_LOG
       cat $FIREBOT_DIR/output/stage2c >> $ERROR_LOG
@@ -462,7 +463,8 @@ check_inspect_fds_openmp_db()
 {
    # Scan for errors in thread checking results
    cd $FDS_SVNROOT/Utilities/Scripts
-   if [[ `grep -i -E 'problem' ${FIREBOT_DIR}/output/stage2c_inspect` == "" ]]
+   # grep -v 'Failed to find more than one thread' ignores an expected compiler warning
+   if [[ `grep -i -E 'warning|remark|problem|error' ${FIREBOT_DIR}/output/stage2c_inspect` == "" ]]
    then
       # Continue along
       :
@@ -1524,12 +1526,8 @@ check_compile_fds_mpi_db
 if [ $FIREBOT_MODE == "verification" ] ; then
    compile_fds_openmp_db
    check_compile_fds_openmp_db
-
-   # Depends on successful FDS OpenMP debug compile
-   if [[ $stage2c_success ]] ; then
-      inspect_fds_openmp_db
-      check_inspect_fds_openmp_db
-   fi
+   inspect_fds_openmp_db
+   check_inspect_fds_openmp_db
 fi
 
 ### Stage 3 ###
