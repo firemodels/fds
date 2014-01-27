@@ -2848,6 +2848,9 @@ ENDIF
 
 ! Compute pressure and 1/rho in each grid cell
 
+!$OMP PARALLEL PRIVATE(WC, VT, TSI, TIME_RAMP_FACTOR, P_EXTERNAL, &
+!$OMP& II, JJ, KK, IOR, IIG, JJG, KKG, UN, INFLOW, IC1, IC2)
+!$OMP DO SCHEDULE(static)
 DO K=0,KBP1
    DO J=0,JBP1
       DO I=0,IBP1         
@@ -2856,12 +2859,12 @@ DO K=0,KBP1
       ENDDO
    ENDDO
 ENDDO
+!$OMP END DO
+
 
 ! Set baroclinic term to zero at outflow boundaries and P_EXTERNAL at inflow boundaries
 
-!$OMP PARALLEL DO SCHEDULE(guided) &
-!$OMP& PRIVATE(WC, VT, TSI, TIME_RAMP_FACTOR, P_EXTERNAL, &
-!$OMP& II, JJ, KK, IOR, IIG, JJG, KKG, UN, INFLOW)
+!$OMP DO SCHEDULE(guided)
 EXTERNAL_WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS
    WC=>WALL(IW)
    IF (WC%BOUNDARY_TYPE/=OPEN_BOUNDARY) CYCLE EXTERNAL_WALL_LOOP
@@ -2898,10 +2901,11 @@ EXTERNAL_WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS
       RHMK(II,JJ,KK) = -RHMK(IIG,JJG,KKG)                    ! No baroclinic correction for outflow boundary
    ENDIF
 ENDDO EXTERNAL_WALL_LOOP
-!$OMP END PARALLEL DO
+!$OMP END DO
 
 ! Compute baroclinic term in the x momentum equation
 
+!$OMP DO SCHEDULE(static)
 DO K=1,KBAR
    DO J=1,JBAR
       DO I=0,IBAR
@@ -2912,10 +2916,12 @@ DO K=1,KBAR
       ENDDO
    ENDDO
 ENDDO
+!$OMP END DO nowait
 
 ! Compute baroclinic term in the y momentum equation
  
 IF (.NOT.TWO_D) THEN
+!$OMP DO SCHEDULE(static)
    DO K=1,KBAR
       DO J=0,JBAR
          DO I=1,IBAR
@@ -2926,10 +2932,12 @@ IF (.NOT.TWO_D) THEN
          ENDDO
       ENDDO
    ENDDO
+!$OMP END DO nowait
 ENDIF
 
 ! Compute baroclinic term in the z momentum equation
 
+!$OMP DO SCHEDULE(static)
 DO K=0,KBAR
    DO J=1,JBAR
       DO I=1,IBAR
@@ -2940,6 +2948,8 @@ DO K=0,KBAR
       ENDDO
    ENDDO
 ENDDO
+!$OMP END DO nowait
+!$OMP END PARALLEL
 
  
 END SUBROUTINE BAROCLINIC_CORRECTION
