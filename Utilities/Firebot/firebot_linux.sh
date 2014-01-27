@@ -539,7 +539,7 @@ run_verification_cases_debug()
 
    # Submit FDS verification cases and wait for them to start (run serial cases in debug mode on firebot queue)
    echo 'Running FDS verification cases (serial):' >> $FIREBOT_DIR/output/stage3
-   ./Run_FDS_Cases.sh -c serial -d -q $QUEUE >> $FIREBOT_DIR/output/stage3 2>&1
+   ./Run_FDS_Cases.sh $1 -c serial -d -q $QUEUE >> $FIREBOT_DIR/output/stage3 2>&1
    wait_cases_debug_start 'verification'
 
    # Wait some additional time for all cases to start
@@ -560,7 +560,7 @@ run_verification_cases_debug()
 
    # Submit FDS verification cases and wait for them to start (run MPI cases in debug mode on firebot queue)
    echo 'Running FDS verification cases (MPI):' >> $FIREBOT_DIR/output/stage3 2>&1
-   ./Run_FDS_Cases.sh -c mpi -d -q $QUEUE >> $FIREBOT_DIR/output/stage3 2>&1
+   ./Run_FDS_Cases.sh $1 -c mpi -d -q $QUEUE >> $FIREBOT_DIR/output/stage3 2>&1
    wait_cases_debug_start 'verification'
 
    # Wait some additional time for all cases to start
@@ -581,7 +581,7 @@ run_verification_cases_debug()
 
    # Submit SMV verification cases and wait for them to start (run SMV cases in debug mode on firebot queue)
    echo 'Running SMV verification cases:' >> $FIREBOT_DIR/output/stage3 2>&1
-   ./Run_SMV_Cases.sh -d -q $QUEUE >> $FIREBOT_DIR/output/stage3 2>&1
+   ./Run_SMV_Cases.sh $1 -d -q $QUEUE >> $FIREBOT_DIR/output/stage3 2>&1
    wait_cases_debug_start 'verification'
 
    # Wait some additional time for all cases to start
@@ -925,13 +925,13 @@ run_verification_cases_release()
    # Start running all FDS verification cases (run all cases on firebot queue)
    cd $FDS_SVNROOT/Verification
    echo 'Running FDS verification cases:' >> $FIREBOT_DIR/output/stage5
-   ./Run_FDS_Cases.sh -q $QUEUE >> $FIREBOT_DIR/output/stage5 2>&1
+   ./Run_FDS_Cases.sh $1 -q $QUEUE >> $FIREBOT_DIR/output/stage5 2>&1
    echo "" >> $FIREBOT_DIR/output/stage5 2>&1
 
    # Start running all SMV verification cases (run all cases on firebot queue)
    cd $FDS_SVNROOT/Verification/scripts
    echo 'Running SMV verification cases:' >> $FIREBOT_DIR/output/stage5 2>&1
-   ./Run_SMV_Cases.sh -q $QUEUE >> $FIREBOT_DIR/output/stage5 2>&1
+   ./Run_SMV_Cases.sh $1 -q $QUEUE >> $FIREBOT_DIR/output/stage5 2>&1
 
    # Wait for all verification cases to end
    wait_cases_release_end 'verification'
@@ -1526,10 +1526,10 @@ if [ $FIREBOT_MODE == "verification" ] ; then
    check_compile_fds_openmp_db
 
    # Depends on successful FDS OpenMP debug compile
-   # if [[ $stage2c_success ]] ; then
-      # inspect_fds_openmp_db
-      # check_inspect_fds_openmp_db
-   # fi
+   if [[ $stage2c_success ]] ; then
+      inspect_fds_openmp_db
+      check_inspect_fds_openmp_db
+   fi
 fi
 
 ### Stage 3 ###
@@ -1542,6 +1542,11 @@ fi
 if [[ $stage2a_success && $stage2b_success && $FIREBOT_MODE == "verification" ]] ; then
    run_verification_cases_debug
    check_cases_debug $FDS_SVNROOT/Verification 'verification'
+   
+   # Run cases with OpenMP version
+   run_verification_cases_debug "-o -n 2"
+   check_cases_debug $FDS_SVNROOT/Verification 'verification'
+
 elif [[ $stage2a_success && $stage2b_success && $FIREBOT_MODE == "validation" ]] ; then
    run_validation_cases_debug
    check_cases_debug $FDS_SVNROOT/Validation 'validation'
@@ -1574,6 +1579,11 @@ fi
 if [[ $stage4a_success && $stage4b_success && $FIREBOT_MODE == "verification" ]] ; then
    run_verification_cases_release
    check_cases_release $FDS_SVNROOT/Verification 'verification'
+
+   # Run cases with OpenMP version
+   run_verification_cases_release "-o -n 2"
+   check_cases_release $FDS_SVNROOT/Verification 'verification'
+
 elif [[ $stage4a_success && $stage4b_success && $FIREBOT_MODE == "validation" ]] ; then
    run_validation_cases_release
    check_cases_release $FDS_SVNROOT/Validation 'validation'

@@ -9,6 +9,7 @@ size=64
 DEBUG=
 OPENMP=
 IB=
+nprocs=8
 if [ "$FDSNETWORK" == "infiniband" ] ; then
 IB=ib
 fi
@@ -24,6 +25,7 @@ echo "     other options: serial, mpi"
 echo "-d - use debug version of FDS"
 echo "-h - display this message"
 echo "-o - run OpenMP version of FDS"
+echo "-n nprocesses - number of processes used to run a case (for OpenMP) [default: 8]"
 echo "-p size - platform size"
 echo "     default: 64"
 echo "     other options: 32"
@@ -36,7 +38,7 @@ exit
 
 export SVNROOT=`pwd`/..
 
-while getopts 'c:dhop:q:s' OPTION
+while getopts 'c:dhn:op:q:s' OPTION
 do
 case $OPTION in
   c)
@@ -46,15 +48,18 @@ case $OPTION in
    DEBUG=_db
    ;;
   h)
-  usage;
-  ;;
+   usage;
+   ;;
+  n)
+   nprocs="$OPTARG"
+   ;;
   o)
-  OPENMP=openmp_
-  RUN_OPENMP=1
-  ;;
+   OPENMP=openmp_
+   RUN_OPENMP=1
+   ;;
   p)
-  size="$OPTARG"
-  ;;
+   size="$OPTARG"
+   ;;
   q)
    queue="$OPTARG"
    ;;
@@ -95,7 +100,7 @@ export RUNFDS="$SVNROOT/Utilities/Scripts/runfds.sh $queue"
 export RUNFDSMPI="$SVNROOT/Utilities/Scripts/runfdsmpi.sh $queue"
 
 if [ $RUN_OPENMP ]; then
-  export RUNFDS="$SVNROOT/Utilities/Scripts/runfdsopenmp.sh $queue" 
+  export RUNFDS="$SVNROOT/Utilities/Scripts/runfdsopenmp.sh $queue -n $nprocs" 
 fi
 
 export BASEDIR=`pwd`
