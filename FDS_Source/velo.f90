@@ -262,7 +262,7 @@ ENDDO
 
 ! Mirror viscosity into solids and exterior boundary cells
 
-!$OMP PARALLEL DO SCHEDULE(static) &
+!$OMP PARALLEL DO SCHEDULE(guided) &
 !$OMP& PRIVATE(WC, II, JJ, KK, IOR, IIG, JJG, KKG, SF, &
 !$OMP& ZZ_GET, U2, V2, W2, VEL_GAS, TSI, RAMP_T, VEL_T, DELTA, VDF, NU_EDDY)
 WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
