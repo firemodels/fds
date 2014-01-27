@@ -80,24 +80,6 @@ WIN_LIBDIR_64 = $(LIB_DIR)/lib_win_intel_64
 SMV_LIBS_32 = $(WIN_LIBDIR_32)\glui.lib $(WIN_LIBDIR_32)\glut32.lib $(WIN_LIBDIR_32)\gd.lib $(WIN_LIBDIR_32)\jpeg.lib $(WIN_LIBDIR_32)\png.lib $(WIN_LIBDIR_32)\zlib.lib $(WIN_LIBDIR_32)\pthreads.lib 
 SMV_LIBS_64 = $(WIN_LIBDIR_64)\glui.lib $(WIN_LIBDIR_64)\glut32.lib $(WIN_LIBDIR_64)\gd.lib $(WIN_LIBDIR_64)\jpeg.lib $(WIN_LIBDIR_64)\png.lib $(WIN_LIBDIR_64)\zlib.lib $(WIN_LIBDIR_64)\pthreads.lib
 
-WIN_MSLIBDIR_32 = $(LIB_DIR)/lib_win_ms_32
-WIN_MSLIBDIR_64 = $(LIB_DIR)/lib_win_ms_64
-SMV_MSLIBS_32 = $(WIN_MSLIBDIR_32)\glui.lib $(WIN_MSLIBDIR_32)\glut32.lib $(WIN_MSLIBDIR_32)\gd.lib $(WIN_MSLIBDIR_32)\jpeg.lib $(WIN_MSLIBDIR_32)\png.lib $(WIN_MSLIBDIR_32)\zlib.lib $(WIN_MSLIBDIR_32)\pthreads.lib 
-SMV_MSLIBS_64 = $(WIN_MSLIBDIR_64)\glui.lib $(WIN_MSLIBDIR_64)\glut32.lib $(WIN_MSLIBDIR_64)\gd.lib $(WIN_MSLIBDIR_64)\jpeg.lib $(WIN_MSLIBDIR_64)\png.lib $(WIN_MSLIBDIR_64)\zlib.lib $(WIN_MSLIBDIR_64)\pthreads.lib
-
-# ------------- gcc_win_32 ----------------
-
-gcc_win_32 : INC = -I ../../source/include -I ../../source/shared -I ../../source/smokeview -I ../../source/glew
-gcc_win_32 : FFLAGS    = -O2 -m32 -D pp_noappend -ffree-form
-gcc_win_32 : CFLAGS    = -O2 -m32 -D WIN32 -D GLEW_STATIC
-gcc_win_32 : CC        = gcc
-gcc_win_32 : CPP       = g++
-gcc_win_32 : FC        = gfortran
-gcc_win_32 : exe       = smokeview_gcc_win_32
-
-gcc_win_32 : $(obj)
-	$(CPP) -m32 -o $(bin)/$(exe) $(obj) -L$(GCC_LIBDIR_32) $(FULL_SMV_LIBS) -LC:/MinGW/lib/ -lpthread -lglu32 -lopengl32  -lgfortran
-
 # ------------- intel_win_32 ----------------
 
 intel_win_32 : INC = -I ../../source/include -I ../../source/shared -I ../../source/smokeview -I ../../source/glew
@@ -111,34 +93,6 @@ intel_win_32 : exe       = smokeview_win_$(SMV_TESTSTRING)32
 
 intel_win_32 : $(objwin)
 	$(CPP) -o $(bin)/$(exe) $(LFLAGS) $(objwin) $(WIN_LIBS) $(SMV_LIBS_32)
-
-# ------------- ms_win_32 ----------------
-
-ms_win_32 : INC = -I ../../source/include -I ../../source/shared -I ../../source/smokeview -I ../../source/glew
-ms_win_32 : FFLAGS    = -O2 -fpp -D pp_cvf  /iface:stdref
-ms_win_32 : CFLAGS    = -O2 -D WIN32 -D _CONSOLE -D GLEW_STATIC -D PTW32_STATIC_LIB $(SMV_TESTFLAG)
-ms_win_32 : LFLAGS    = /F32768000 
-ms_win_32 : CC        = cl
-ms_win_32 : CPP       = cl
-ms_win_32 : FC        = ifort
-ms_win_32 : exe       = smokeview_win_$(SMV_TESTSTRING)32
-
-ms_win_32 : $(objwin)
-	$(CPP) /Fe:"$(exe)" $(LFLAGS) $(objwin) $(WIN_LIBS) $(SMV_MSLIBS_32)
-
-# ------------- ms_win_64 ----------------
-
-ms_win_64 : INC = -I ../../source/include -I ../../source/shared -I ../../source/smokeview -I ../../source/glew
-ms_win_64 : FFLAGS    = -O2 -fpp -D pp_cvf -D X64 /iface:stdref
-ms_win_64 : CFLAGS    = -O2 -D WIN32 -D _CONSOLE -D X64 -D GLEW_STATIC -D PTW32_STATIC_LIB $(SMV_TESTFLAG)
-ms_win_64 : LFLAGS    = /F32768000 
-ms_win_64 : CC        = cl
-ms_win_64 : CPP       = cl
-ms_win_64 : FC        = ifort
-ms_win_64 : exe       = smokeview_win_$(SMV_TESTSTRING)64
-
-ms_win_64 : $(objwin)
-	$(CPP) /Fe:"$(exe)" $(LFLAGS) $(objwin) $(WIN_LIBS) $(SMV_MSLIBS_64)
 
 # ------------- intel_win_64_db ----------------
 
