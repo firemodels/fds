@@ -8,9 +8,13 @@ QSUB=qsub
 nnodes=1
 nprocs=8
 
-while getopts 'q:' OPTION
+while getopts 'n:q:' OPTION
 do
 case $OPTION in
+  n)
+   nprocs="$OPTARG"
+   export OMP_NUM_THREADS=$nprocs
+   ;;
   q)
    queue="$OPTARG"
    ;;
