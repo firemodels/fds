@@ -54,8 +54,8 @@ echo Stage 0 - Preliminaries
 
 :: check if compilers are present
 
-echo "" > %errorfile%
-echo "" > %warningfile%
+echo. > %errorfile%
+echo. > %warningfile%
 
 ifort 1> stage0a.txt 2>&1
 type stage0a.txt | find /i /c "not recognized" > count0a.txt
@@ -83,7 +83,7 @@ if NOT exist %emailexe% (
   echo ***warning: email client not found.   
   echo             Smokebot messages will only be sent to the console.
 ) else (
-  echo             found a command line email client
+  echo             found mailsend
 )
 
 call :is_file_installed pdflatex|| exit /b 1
@@ -126,7 +126,7 @@ erase *.obj *.mod *.exe 1> %OUTDIR%\stage2a.txt 2>&1
 make VPATH="../../FDS_Source" -f ..\makefile intel_win_%size%_db 1>> %OUTDIR%\stage2a.txt 2>&1
 
 call :file_not_found fds_win_%size%_db.exe %OUTDIR%\stage2a.txt|| exit /b 1
-call :find_string "remark warning" %OUTDIR%\stage2a.txt
+call :find_fds_string "remark warning" %OUTDIR%\stage2a.txt
 
 echo             parallel
 cd %svnroot%\FDS_Compilation\mpi_intel_win_%size%_db
@@ -134,7 +134,7 @@ erase *.obj *.mod *.exe 1> %OUTDIR%\stage2b.txt 2>&1
 make MPIINCLUDE="c:\mpich\mpich2_%size%\include" MPILIB="c:\mpich\mpich2_%size%\lib\fmpich2.lib" VPATH="../../FDS_Source" -f ..\makefile mpi_intel_win_%size%_db 1>> %OUTDIR%\stage2b.txt 2>&1
 
 call :file_not_found fds_mpi_win_%size%_db.exe %OUTDIR%\stage2b.txt|| exit /b 1
-call :find_string "remark warning" %OUTDIR%\stage2b.txt
+call :find_fds_string "remark warning" %OUTDIR%\stage2b.txt
 
 :: -------
 :: Stage 3
@@ -154,7 +154,7 @@ erase *.obj *.mod *.exe 1> %OUTDIR%\stage4a.txt 2>&1
 make VPATH="../../FDS_Source" -f ..\makefile intel_win_%size% 1>> %OUTDIR%\stage4a.txt 2>&1
 
 call :file_not_found fds_win_%size%.exe %OUTDIR%\stage4a.txt|| exit /b 1
-call :find_string "remark warning" %OUTDIR%\stage4a.txt
+call :find_fds_string "remark warning" %OUTDIR%\stage4a.txt
 
 echo             parallel
 cd %svnroot%\FDS_Compilation\mpi_intel_win_%size%
@@ -162,7 +162,7 @@ erase *.obj *.mod *.exe 1> %OUTDIR%\stage4b.txt 2>&1
 make MPIINCLUDE="c:\mpich\mpich2_%size%\include" MPILIB="c:\mpich\mpich2_%size%\lib\fmpich2.lib" VPATH="../../FDS_Source" -f ..\makefile mpi_intel_win_%size%  1>> %OUTDIR%\stage4b.txt 2>&1
 
 call :file_not_found fds_mpi_win_%size%.exe %OUTDIR%\stage4b.txt|| exit /b 1
-call :find_string "remark warning" %OUTDIR%\stage4b.txt
+call :find_fds_string "remark warning" %OUTDIR%\stage4b.txt
 
 :: ----------
 :: Stage 5pre
@@ -210,7 +210,6 @@ if %haveCC% == 1 (
 echo Stage 5 - Running verification cases (release)
 
 cd %svnroot%\Verification\scripts
-echo call Run_SMV_cases %size%
 call Run_SMV_cases %size% 1> %OUTDIR%\stage5.txt 2>&1
 
 :: --------
@@ -348,6 +347,23 @@ if %nwarnings% GTR 0 (
   set havewarnings=1
 )
 exit /b
+
+:: -----------------------------------------
+  :find_fds_string
+:: -----------------------------------------
+
+set search_string=%1
+set search_file=%2
+
+findstr /I %search_string% %search_file% | find /V "mpif.h" | find /V "remark #110" | find /V ".F90.o" > %OUTDIR%\warning.txt
+type %OUTDIR%\warning.txt | find /c ":"> %OUTDIR%\nwarning.txt
+set /p nwarnings=<%OUTDIR%\nwarning.txt
+if %nwarnings% GTR 0 (
+  type %OUTDIR%\warning.txt >> %warningfile%
+  set havewarnings=1
+)
+exit /b
+
 
 :eof
 cd %CURDIR%
