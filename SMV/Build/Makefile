@@ -73,8 +73,6 @@ no_target:
 
 WIN_LIBS = user32.lib gdi32.lib comdlg32.lib shell32.lib
 
-GCC_LIBDIR_32 = $(LIB_DIR)/lib_win_gcc_32
-
 WIN_LIBDIR_32 = $(LIB_DIR)/lib_win_intel_32
 WIN_LIBDIR_64 = $(LIB_DIR)/lib_win_intel_64
 SMV_LIBS_32 = $(WIN_LIBDIR_32)\glui.lib $(WIN_LIBDIR_32)\glut32.lib $(WIN_LIBDIR_32)\gd.lib $(WIN_LIBDIR_32)\jpeg.lib $(WIN_LIBDIR_32)\png.lib $(WIN_LIBDIR_32)\zlib.lib $(WIN_LIBDIR_32)\pthreads.lib 
