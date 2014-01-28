@@ -157,10 +157,10 @@ MAILTO=""
 #  = Validationbot script =
 #  ========================
 
-# Run svn update every hour at XX:25 to get latest version of Firebot
-25 * * * * cd ~/firebot ; svn revert * ; svn up
+# Run svn update at 9:50 PM to get latest version of Firebot
+50 21 * * * cd ~/firebot ; svn revert * ; svn up
 
-# Run Validationbot every hour at xx:30
+# Run Validationbot at 9:56 PM every night
 # The run-once script maintains a lock to prevent the script from running twice.
 #
 # You can change the argument for -v <num>, where <num> is the maximum number
@@ -168,7 +168,7 @@ MAILTO=""
 # Recommended settings for <num>:
 #     1 for passive mode (run 1 validation set at a time)
 #     150 for aggressive mode (run up to 150 nodes at a time)
-30 * * * * run-one bash -lc "firebot_linux.sh -s -v 150 -y"
+56 21 * * * run-one bash -lc "firebot_linux.sh -s -v 150 -y"
 
 ------------------------------------------------------------------------------------
 
