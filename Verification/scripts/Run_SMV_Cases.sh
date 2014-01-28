@@ -8,14 +8,16 @@ size=64
 DEBUG=
 OPENMP=
 FDS_DEBUG=0
+nprocs=8
 
 function usage {
-echo "Run_SMV_Cases.sh [-d -h -o -p -q queue_name -s ]"
+echo "Run_SMV_Cases.sh [-d -h -n nprocesses -o -p -q queue_name -s ]"
 echo "Runs Smokeview verification suite"
 echo ""
 echo "Options"
 echo "-d - use debug version of FDS"
 echo "-h - display this message"
+echo "-n nprocesses - number of processes used to run a case (for OpenMP) [default: 8]"
 echo "-o - run OpenMP version of FDS"
 echo "-p size - platform size"
 echo "     default: 64"
@@ -31,7 +33,7 @@ CURDIR=`pwd`
 cd ..
 export SVNROOT=`pwd`/..
 
-while getopts 'dhop:q:s' OPTION
+while getopts 'dhn:op:q:s' OPTION
 do
 case $OPTION in
   d)
@@ -39,12 +41,15 @@ case $OPTION in
    FDS_DEBUG=1
    ;;
   h)
-  usage;
-  ;;
+   usage;
+   ;;
+  n)
+   nprocs="$OPTARG"
+   ;;
   o)
-  OPENMP=openmp_
-  RUN_OPENMP=1
-  ;;
+   OPENMP=openmp_
+   RUN_OPENMP=1
+   ;;
   p)
    size="$OPTARG"
    ;;
@@ -119,7 +124,7 @@ export RUNWFDS="$SVNROOT/Utilities/Scripts/runwfds.sh $queue"
 export RUNFDSMPI="$SVNROOT/Utilities/Scripts/runfdsmpi.sh $queue"
 
 if [ $RUN_OPENMP ]; then
-  export RUNFDS="$SVNROOT/Utilities/Scripts/runfdsopenmp.sh $queue" 
+  export RUNFDS="$SVNROOT/Utilities/Scripts/runfdsopenmp.sh $queue -n $nprocs"
 fi
 
 echo "" | $FDSEXE 2> $SVNROOT/Manuals/SMV_User_Guide/SCRIPT_FIGURES/fds.version
