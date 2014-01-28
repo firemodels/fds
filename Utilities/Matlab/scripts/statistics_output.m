@@ -31,6 +31,70 @@ if ~strcmp(Stats_Output, 'None')
     fclose(fid);
 end
 
+% Compare baseline FDS validation stats to current validation stats
+% and write a diff text file with differences
+if strcmp(Stats_Output, 'Validation') && (exist('Output_File_Baseline','var') == 1)
+
+    if ~exist(Output_File_Baseline)
+        display(['Error: File ',Output_File_Baseline,' does not exist.'])
+        break
+    end
+    if ~exist(Output_File)
+        display(['Error: File ',Output_File,' does not exist.'])
+        break
+    end
+
+    % Read in baseline validation statistics file
+    fid_baseline = fopen(Output_File_Baseline);
+    stats_baseline = textscan(fid_baseline, '%q %q %q %q %q %q', 'HeaderLines', 1, 'Delimiter', ',');
+    fclose(fid_baseline);
+
+    % Read in current validation statistics file
+    fid_current = fopen(Output_File);
+    stats_current = textscan(fid_baseline, '%q %q %q %q %q %q', 'HeaderLines', 1, 'Delimiter', ',');
+    fclose(fid_current);
+
+    % Check if model uncertainty or bias are greater than validation diff tolerance
+    count = 1;
+    for i = 1:length(stats_baseline{1})
+        if abs((stats_baseline{5}{i} - stats_current{5}{i})/stats_baseline{5}{i}) > Validation_Diff_Tolerance || abs((stats_baseline{6}{i} - stats_current{6}{i})/stats_baseline{6}{i}) > Validation_Diff_Tolerance
+            different_quantity_baseline{count}{1} = stats_baseline{1}{i};
+            different_quantity_baseline{count}{2} = stats_baseline{2}{i};
+            different_quantity_baseline{count}{3} = stats_baseline{3}{i};
+            different_quantity_baseline{count}{4} = stats_baseline{4}{i};
+            different_quantity_baseline{count}{5} = stats_baseline{5}{i};
+            different_quantity_baseline{count}{6} = stats_baseline{6}{i};
+            different_quantity_current{count}{1} = stats_current{1}{i};
+            different_quantity_current{count}{2} = stats_current{2}{i};
+            different_quantity_current{count}{3} = stats_current{3}{i};
+            different_quantity_current{count}{4} = stats_current{4}{i};
+            different_quantity_current{count}{5} = stats_current{5}{i};
+            different_quantity_current{count}{6} = stats_current{6}{i};
+            count = count + 1;
+            Create_Diff_File = 1;
+        end
+    end
+
+    % If some cases are outside of validation diff tolerance, write a text file
+    if (exist('Create_Diff_File','var') == 1)
+        fid_output = fopen(Validation_Statistics_Log, 'w');
+
+        fprintf(fid_output, '%s\n', 'Validation statistics are different from baseline statistics.');
+        fprintf(fid_output, '\n');
+        
+        fprintf(fid_output, '%s\n', 'Case: Quantity, Number of Datasets, Number of Points, Sigma_Experiment, Sigma_Model, Bias');
+        fprintf(fid_output, '\n');
+        
+        for i = 1:length(different_quantity_baseline)
+            fprintf(fid_output, '%s %s, %s, %s, %s, %s, %s\n', 'Baseline:', different_quantity_baseline{i}{1}, different_quantity_baseline{i}{2}, different_quantity_baseline{i}{3}, different_quantity_baseline{i}{4}, different_quantity_baseline{i}{5}, different_quantity_baseline{i}{6});
+            fprintf(fid_output, '%s %s, %s, %s, %s, %s, %s\n', 'Current:', different_quantity_current{i}{1}, different_quantity_current{i}{2}, different_quantity_current{i}{3}, different_quantity_current{i}{4}, different_quantity_current{i}{5}, different_quantity_current{i}{6});
+            fprintf(fid_output, '\n');
+        end
+
+        fclose(fid_output);
+    end
+end
+
 % Write statistics information to a LaTeX table
 % for inclusion in the FDS Verification Guide
 if strcmp(Stats_Output, 'Verification')
