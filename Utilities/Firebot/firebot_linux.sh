@@ -691,6 +691,7 @@ check_cases_debug()
       # If errors encountered in validation mode, then email status and exit
       if [ $FIREBOT_MODE == "validation" ] ; then
          email_build_status 'Validationbot' 'Validation'
+         set_files_world_readable
          exit
       fi
    fi
@@ -901,6 +902,7 @@ check_cases_release()
          email_build_status 'Validationbot' 'Validation'
          # Stop all Validationbot cases in queue system
          qdel all
+         set_files_world_readable
          exit
       fi
    fi
