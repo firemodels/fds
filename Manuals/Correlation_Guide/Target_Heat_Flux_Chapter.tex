@@ -17,7 +17,7 @@ The radiative heat flux, $\dot q''\sb{r}$~(\si{kW/m^2}), at any distance $R$ (\s
 \dot q''\sb{r} = \cos\theta \left( \frac{\chi\sb{r} \dot Q}{4 \pi R^2} \right)
 \label{eq:point_source}
 \ee
-where the $\cos\theta$ term (equal to $x/R$ for targets facing sideways, or $z/R$ for gauges facing upward or downward) accounts for a target that is at an angle $\theta$ from the source. The IOR orientation parameter is used to specify which direction the target or gauge is facing: 1 or -1 for the positive or negative $x$ direction, 2 or -2 for the positive or negative $y$ direction, and 3 or -3 for the positive or negative $z$ direction. $\chi\sb{r}$ is the radiative fraction, $\dot Q$ is the HRR of the fire~(\si{kW}), and $R$ is the radial distance from the point source to the edge of the target~(\si{m}) and is given by
+where the $\cos\theta$ term (equal to $x/R$ for targets facing sideways, or $z/R$ for gauges facing upward or downward) accounts for a target that is at an angle $\theta$ from the source. The IOR orientation parameter is used to specify which direction the target or gauge is facing: 1 or -1 for the positive or negative $x$ direction, 2 or -2 for the positive or negative $y$ direction, and 3 or -3 for the positive or negative $z$ direction. $\chi\sb{r}$ is the radiative fraction (unless provided in the test report, a value of 0.35 was used), $\dot Q$ is the HRR of the fire~(\si{kW}), and $R$ is the radial distance from the point source to the edge of the target~(\si{m}) and is given by
 \be
 R = \sqrt{x^2 + \left(z - \frac{L\sb{f}}{3} \right)^2}
 \label{eq:point_source_R}
@@ -64,7 +64,7 @@ $z$ (m)                            &  0.0                                   \\ \
 IOR                                &  2                                     \\ \hline
 \multicolumn{2}{c}{}                                                        \\ \hline
 \multicolumn{2}{|c|}{}                                                      \\
-\multicolumn{2}{|c|}{Expected Output}                                       \\
+\multicolumn{2}{|c|}{Calculated Output}                                     \\
 \multicolumn{2}{|c|}{}                                                      \\ \hline
                                    &                                        \\
 \multicolumn{1}{|c|}{\rb{Radius}}  &  \multicolumn{1}{c|}{\rb{Heat Flux}}   \\
@@ -203,7 +203,7 @@ $x$ (m)         &  0.50, 0.75, 1.0                                          \\ \
 $z$ (m)         &  0.0                                                      \\ \hline
 \multicolumn{2}{c}{}                                                        \\ \hline
 \multicolumn{2}{|c|}{}                                                      \\
-\multicolumn{2}{|c|}{Expected Output}                                       \\
+\multicolumn{2}{|c|}{Calculated Output}                                     \\
 \multicolumn{2}{|c|}{}                                                      \\ \hline
                                    &                                        \\
 \multicolumn{1}{|c|}{\rb{Radius}}  &  \multicolumn{1}{c|}{\rb{Heat Flux}}   \\
