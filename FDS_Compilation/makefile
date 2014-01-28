@@ -59,7 +59,7 @@ func.o: FFLAGS += $(FOPENMPFLAGS)
 # pres.o: FFLAGS += $(FOPENMPFLAGS)
 # turb.o: FFLAGS += $(FOPENMPFLAGS)
 velo.o: FFLAGS += $(FOPENMPFLAGS)
-radi.o: FFLAGS += $(FOPENMPFLAGS)
+# radi.o: FFLAGS += $(FOPENMPFLAGS)
 
 divg.obj: FFLAGS += $(FOPENMPFLAGS)
 # fire.obj: FFLAGS += $(FOPENMPFLAGS)
@@ -70,7 +70,7 @@ func.obj: FFLAGS += $(FOPENMPFLAGS)
 # pres.obj: FFLAGS += $(FOPENMPFLAGS)
 # turb.obj: FFLAGS += $(FOPENMPFLAGS)
 velo.obj: FFLAGS += $(FOPENMPFLAGS)
-radi.obj: FFLAGS += $(FOPENMPFLAGS)
+# radi.obj: FFLAGS += $(FOPENMPFLAGS)
 
 endif
 
