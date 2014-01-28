@@ -13,7 +13,6 @@ do
 case $OPTION in
   n)
    nprocs="$OPTARG"
-   export OMP_NUM_THREADS=$nprocs
    ;;
   q)
    queue="$OPTARG"
@@ -95,6 +94,9 @@ cd $fulldir
 echo Time: \`date\`
 echo Running $infile on \`hostname\`
 echo Directory: \`pwd\`
+
+# Set number of OpenMP threads on target machine
+export OMP_NUM_THREADS=$nprocs
 
 $FDS $in 
 EOF
