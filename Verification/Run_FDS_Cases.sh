@@ -15,7 +15,7 @@ IB=ib
 fi
 
 function usage {
-echo "Run_FDS_Cases.sh [ -c cases -d -h -o -q queue_name -s ]"
+echo "Run_FDS_Cases.sh [ -c cases -d -h -n nprocesses -o -q queue_name -s ]"
 echo "Runs FDS verification suite"
 echo ""
 echo "Options"
@@ -100,7 +100,7 @@ export RUNFDS="$SVNROOT/Utilities/Scripts/runfds.sh $queue"
 export RUNFDSMPI="$SVNROOT/Utilities/Scripts/runfdsmpi.sh $queue"
 
 if [ $RUN_OPENMP ]; then
-  export RUNFDS="$SVNROOT/Utilities/Scripts/runfdsopenmp.sh $queue -n $nprocs" 
+  export RUNFDS="$SVNROOT/Utilities/Scripts/runfdsopenmp.sh $queue -n $nprocs"
 fi
 
 export BASEDIR=`pwd`
