@@ -198,7 +198,7 @@ make -f ..\Makefile intel_win_%size% 1>> %OUTDIR%\stage3c.txt 2>&1
 call :does_file_exist fds2ascii_win_%size%.exe %OUTDIR%\stage3c.txt|| exit /b 1
 
 if %haveCC% == 1 (
-    echo            smokediff
+  echo              smokediff
   cd %svnroot%\Utilities\smokediff\intel_win_%size%
   erase *.obj *.mod *.exe 1>> %OUTDIR%\stage3c.txt 2>&1
   make -f ..\Makefile intel_win_%size% 1>> %OUTDIR%\stage3c.txt 2>&1

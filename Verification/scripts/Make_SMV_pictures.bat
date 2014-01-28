@@ -97,12 +97,6 @@ cd %SVNROOT%\Verification\Visualization
 %SMOKEZIP% -f -part2iso plumeiso
 
 echo.
-echo converting tree_one particles to an isosurface
-
-cd %SVNROOT%\Verification\Wui
-%SMOKEZIP% -f -part2iso tree_one
-
-echo.
 echo differencing plume5c and plume5cdelta
 
 %SMOKEDIFF% plume5c plume5cdelta
@@ -110,6 +104,12 @@ echo differencing plume5c and plume5cdelta
 echo.
 echo differencing thouse5 and thouse5delta
 %SMOKEDIFF% thouse5 thouse5delta
+
+echo.
+echo converting tree_one particles to an isosurface
+
+cd %SVNROOT%\Verification\Wui
+%SMOKEZIP% -f -part2iso tree_one
 
 echo.
 echo Generating images
