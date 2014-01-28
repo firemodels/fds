@@ -182,7 +182,7 @@ if [ "$USE_SMOKEVIEW" == "y" ] ; then
   TITLE="$infile(SMV)"
 fi
 
-if [ $RUN_OPENMP -eq 1 ] ; then
+if [ "$RUN_OPENMP" -eq 1 ] ; then
   nprocesses=$nthreads
   nprocesses_per_node=$nthreads
 fi
