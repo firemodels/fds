@@ -7,12 +7,14 @@ background=no
 QSUB=qsub
 nnodes=1
 nprocs=8
+nthreads=8
 
 while getopts 'n:q:' OPTION
 do
 case $OPTION in
   n)
    nprocs="$OPTARG"
+   nthreads="$OPTARG"
    ;;
   q)
    queue="$OPTARG"
@@ -96,7 +98,7 @@ echo Running $infile on \`hostname\`
 echo Directory: \`pwd\`
 
 # Set number of OpenMP threads on target machine
-export OMP_NUM_THREADS=$nprocs
+export OMP_NUM_THREADS=$nthreads
 
 $FDS $in 
 EOF

@@ -1553,7 +1553,7 @@ if [[ $stage2a_success && $stage2b_success && $FIREBOT_MODE == "verification" ]]
    # check_cases_debug $FDS_SVNROOT/Verification 'verification'
    
    # Run cases with OpenMP version of FDS with two threads
-   run_verification_cases_debug "-o -n 2"
+   run_verification_cases_debug "-o 2"
    check_cases_debug $FDS_SVNROOT/Verification 'verification'
 
 elif [[ $stage2a_success && $stage2b_success && $FIREBOT_MODE == "validation" ]] ; then
@@ -1593,7 +1593,7 @@ if [[ $stage4a_success && $stage4b_success && $FIREBOT_MODE == "verification" ]]
    # check_cases_release $FDS_SVNROOT/Verification 'verification'
 
    # Run cases with OpenMP version of FDS with two threads
-   run_verification_cases_release "-o -n 2"
+   run_verification_cases_release "-o 2"
    check_cases_release $FDS_SVNROOT/Verification 'verification'
 
 elif [[ $stage4a_success && $stage4b_success && $FIREBOT_MODE == "validation" ]] ; then
