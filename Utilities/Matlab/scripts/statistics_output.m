@@ -54,10 +54,10 @@ if strcmp(Stats_Output, 'Validation') && (exist('Output_File_Baseline','var') ==
     stats_current = textscan(fid_baseline, '%q %q %q %q %q %q', 'HeaderLines', 1, 'Delimiter', ',');
     fclose(fid_current);
 
-    % Check if model uncertainty or bias are greater than validation diff tolerance
+    % Check if model uncertainty or bias are greater than validation diff tolerance or if quantity names are mismatched
     count = 1;
     for i = 1:length(stats_baseline{1})
-        if abs((stats_baseline{5}{i} - stats_current{5}{i})/stats_baseline{5}{i}) > Validation_Diff_Tolerance || abs((stats_baseline{6}{i} - stats_current{6}{i})/stats_baseline{6}{i}) > Validation_Diff_Tolerance
+        if abs((stats_baseline{5}{i} - stats_current{5}{i})/stats_baseline{5}{i}) > Validation_Diff_Tolerance || abs((stats_baseline{6}{i} - stats_current{6}{i})/stats_baseline{6}{i}) > Validation_Diff_Tolerance || ~strcmp(stats_baseline{1}{i}, stats_current{1}{i})
             different_quantity_baseline{count}{1} = stats_baseline{1}{i};
             different_quantity_baseline{count}{2} = stats_baseline{2}{i};
             different_quantity_baseline{count}{3} = stats_baseline{3}{i};
@@ -79,7 +79,7 @@ if strcmp(Stats_Output, 'Validation') && (exist('Output_File_Baseline','var') ==
     if (exist('Create_Diff_File','var') == 1)
         fid_output = fopen(Validation_Statistics_Log, 'w');
 
-        fprintf(fid_output, '%s\n', 'Validation statistics are different from baseline statistics.');
+        fprintf(fid_output, '%s\n', 'Notice: Validation statistics are different from baseline statistics.');
         fprintf(fid_output, '\n');
         
         fprintf(fid_output, '%s\n', 'Case: Quantity, Number of Datasets, Number of Points, Sigma_Experiment, Sigma_Model, Bias');
