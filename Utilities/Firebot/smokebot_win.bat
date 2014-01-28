@@ -1,4 +1,5 @@
 @echo off
+set reduced=%1
 
 SETLOCAL
 
@@ -123,7 +124,7 @@ call :does_file_exist cfast6_win_%size%.exe %OUTDIR%\stage0.txt|| exit /b 1
 :: -------
 :: Stage 1
 :: -------
-
+if %reduced% == 1 goto skip_stage1
 echo Stage 1 - Building FDS (debug version)
 echo             serial
 cd %svnroot%\FDS_Compilation\intel_win_%size%_db
@@ -141,6 +142,8 @@ make -j4 MPIINCLUDE=%mpichinc% MPILIB=%mpichlib% VPATH="../../FDS_Source" -f ..\
 call :does_file_exist fds_mpi_win_%size%_db.exe %OUTDIR%\stage1b.txt|| exit /b 1
 call :find_fds_warnings "warning" %OUTDIR%\stage1b.txt "Stage 1b"
 
+:skip_stage1
+
 :: -------
 :: Stage 2
 :: -------
@@ -155,6 +158,7 @@ make -j4 VPATH="../../FDS_Source" -f ..\makefile intel_win_%size% 1>> %OUTDIR%\s
 call :does_file_exist fds_win_%size%.exe %OUTDIR%\stage2a.txt|| exit /b 1
 call :find_fds_warnings "warning" %OUTDIR%\stage2a.txt "Stage 2a"
 
+if %reduced% == 1 goto skip_stage2b
 echo             parallel
 cd %svnroot%\FDS_Compilation\mpi_intel_win_%size%
 erase *.obj *.mod *.exe 1> %OUTDIR%\stage2b.txt 2>&1
@@ -163,9 +167,13 @@ make -j4 MPIINCLUDE=%mpichinc% MPILIB=%mpichlib% VPATH="../../FDS_Source" -f ..\
 call :does_file_exist fds_mpi_win_%size%.exe %OUTDIR%\stage2b.txt|| exit /b 1
 call :find_fds_warnings "warning" %OUTDIR%\stage2b.txt "Stage 2b"
 
+:skip_stage2b
+
 :: --------
 :: Stage 3
 :: --------
+
+if %reduced% == 1 goto skip_stage3a
 
 echo Stage 3a - Building Smokeview (debug version)
 
@@ -175,6 +183,8 @@ make -f ..\Makefile intel_win_%size%_db 1>> %OUTDIR%\stage3a.txt 2>&1
 
 call :does_file_exist smokeview_win_%size%_db.exe %OUTDIR%\stage3a.txt|| exit /b 1
 call :find_smokeview_warnings "warning" %OUTDIR%\stage3a.txt "Stage 3a"
+
+:skip_stage3a
 
 echo Stage 3b - Building Smokeview (release version)
 
@@ -228,7 +238,7 @@ if %haveCC% == 1 (
 :: Stage 4
 :: -------
 
-echo Stage 4 - Running verification cases (release)
+echo Stage 4 - Running verification cases
 
 cd %svnroot%\Verification\scripts
 call Run_SMV_cases %size% 1> %OUTDIR%\stage4.txt 2>&1
@@ -239,7 +249,7 @@ call :find_smokeview_warnings "error" %OUTDIR%\stage4.txt "Stage 4"
 :: Stage 5
 :: --------
 
-echo Stage 5 - Making Smokeview pictures (release mode)
+echo Stage 5 - Making Smokeview pictures
 
 cd %svnroot%\Verification\scripts
 call MAKE_SMV_pictures %size% 1> %OUTDIR%\stage5.txt 2>&1
