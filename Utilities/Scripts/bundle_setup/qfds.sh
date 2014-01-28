@@ -15,8 +15,8 @@ nprocesses_per_node=1
 
 if [ $# -lt 1 ]
 then
-  echo "Usage: $progname [-d directory] [-f repository root] [-n processes per node] [-q queue]"
-  echo "               [-r] [-p nprocesses] [fds_command] casename.fds"
+  echo "Usage: $progname [-d directory] [-f repository root] [-n processes per node] [-o nthreads]"
+  echo "                 [-q queue] [-r] [-p nprocesses] [fds_command] casename.fds"
   echo ""
   echo "This script runs 64 bit serial or parallel versions of FDS using an executable"
   echo "specified on the command line or FDS from the respository if -r is specified."
@@ -26,7 +26,9 @@ then
   echo " -b use debug version"
   echo " -d directory [default: .]"
   echo " -n processes per node - maximum number of processes per node [default: "
-  echo "    (serial: 1, parallel: 8 for new cluster and fire70s, 4 for the vis queues)" 
+  echo "    (serial: 1, parallel: 8 for new cluster and fire70s, 4 for the vis queues)"
+  echo " -n processes per node"
+  echo " -o nthreads - run OpenMP version of FDS with a specified number of threads [default: 8]"
   echo " -p nprocesses - number of processes used to run a case [default: 1] "
   echo " -q queue - name of the queue. choices: [default: $queue (other choices:"  
   echo "    vis and fire70s)"
@@ -63,7 +65,7 @@ fi
 
 # read in parameters from command line
 
-while getopts 'bd:f:n:p:q:rsxy:z:' OPTION
+while getopts 'bd:f:n:o:p:q:rsxy:z:' OPTION
 do
 case $OPTION  in
   b)
@@ -79,6 +81,11 @@ case $OPTION  in
   n)
    nprocesses_per_node="$OPTARG"
    nprocesses_per_node_defined=1
+   ;;
+  o)
+   nthreads="$OPTARG"
+   OPENMP=openmp_
+   RUN_OPENMP=1
    ;;
   p)
    nprocesses="$OPTARG"
@@ -139,7 +146,7 @@ else
     exe="$FDSROOT/Verification/scripts/runsmv_single.sh"
     exe2="-x -y $STARTFRAME -z $SKIPFRAME"
   else
-    exe=$FDSROOT/FDS_Compilation/intel_linux_64$DB/fds_intel_linux_64$DB
+    exe=$FDSROOT/FDS_Compilation/${OPENMP}intel_linux_64$DB/fds_${OPENMP}intel_linux_64$DB
   fi
  fi
  in=$1
@@ -173,6 +180,11 @@ if [ $nprocesses -gt 1 ] ; then
 fi
 if [ "$USE_SMOKEVIEW" == "y" ] ; then
   TITLE="$infile(SMV)"
+fi
+
+if [ $RUN_OPENMP -eq 1 ] ; then
+  nprocesses=$nthreads
+  nprocesses_per_node=$nthreads
 fi
 
 nnodes=$(echo "($nprocesses-1)/$nprocesses_per_node+1" | bc)
@@ -238,6 +250,8 @@ cat << EOF > $scriptfile
 #\$ -e $out
 #\$ -o $outlog
 #\$ -l nodes=$nnodes:ppn=$nprocesses_per_node
+
+export OMP_NUM_THREADS=$nthreads
 
 cd $fulldir
 echo Start time: \`date\`
