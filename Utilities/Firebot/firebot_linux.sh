@@ -182,6 +182,12 @@ clean_firebot_history()
    rm output/* > /dev/null
 }
 
+delete_unversioned_files()
+{
+   # Delete all unversioned SVN files
+   svn status --no-ignore | grep '^[I?]' | cut -c 9- | while IFS= read -r f; do rm -rf "$f"; done
+}
+
 #  ========================
 #  ========================
 #  = Firebot Build Stages =
@@ -201,11 +207,11 @@ update_and_compile_cfast()
    # If yes, then update the CFAST repository and compile CFAST
    then
       echo "Updating and compiling CFAST:" >> $FIREBOT_DIR/output/stage0_cfast
-      cd $CFAST_SVNROOT/CFAST
       
       # Clean unversioned and modified files
+      cd $CFAST_SVNROOT/CFAST
       svn revert -Rq *
-      svn status --no-ignore | grep '^[I?]' | cut -c 9- | while IFS= read -r f; do rm -rf "$f"; done
+      delete_unversioned_files
       
       # Update to latest SVN revision
       svn update >> $FIREBOT_DIR/output/stage0_cfast 2>&1
@@ -255,7 +261,7 @@ clean_svn_repo()
       # Revert and clean up temporary unversioned and modified versioned repository files
       cd $FDS_SVNROOT
       svn revert -Rq *
-      svn status --no-ignore | grep '^[I?]' | cut -c 9- | while IFS= read -r f; do rm -rf "$f"; done
+      delete_unversioned_files
    # If not, create FDS repository and checkout
    else
       echo "Downloading FDS repository:" >> $FIREBOT_DIR/output/stage1 2>&1
@@ -695,10 +701,12 @@ check_cases_debug()
          exit
       fi
    fi
+}
 
-   # After Stage 3, delete all unversioned FDS output files before continuing
-   cd $1
-   svn status --no-ignore | grep '^[I?]' | cut -c 9- | while IFS= read -r f; do rm -rf "$f"; done
+clean_debug_stage()
+{
+   cd $FDS_SVNROOT
+   delete_unversioned_files
 }
 
 #  ==================================
@@ -1551,6 +1559,8 @@ elif [[ $stage2a_success && $stage2b_success && $FIREBOT_MODE == "validation" ]]
    run_validation_cases_debug
    check_cases_debug $FDS_SVNROOT/Validation 'validation'
 fi
+
+clean_debug_stage
 
 ### Stage 4a ###
 compile_fds
