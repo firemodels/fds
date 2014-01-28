@@ -693,15 +693,15 @@ check_verification_cases_release()
 compile_smv_db()
 {
    # Clean and compile SMV debug
-   cd $FDS_SVNROOT/SMV/Build/intel_linux_64_db
+   cd $FDS_SVNROOT/SMV/Build/intel_linux_64
    rm -f smokeview_linux_64_db
-   ./make_smv.sh &> $FIREBOT_DIR/output/stage6a
+   ./make_smv_db.sh &> $FIREBOT_DIR/output/stage6a
 }
 
 check_compile_smv_db()
 {
    # Check for errors in SMV debug compilation
-   cd $FDS_SVNROOT/SMV/Build/intel_linux_64_db
+   cd $FDS_SVNROOT/SMV/Build/intel_linux_64
    if [ -e "smokeview_linux_64_db" ]
    then
       stage6a_success=true
