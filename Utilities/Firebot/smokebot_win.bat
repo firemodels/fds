@@ -1,5 +1,8 @@
 @echo off
 set reduced=%1
+if [%reduced%] == [] (
+  set reduced=0
+)
 
 SETLOCAL
 
@@ -45,11 +48,19 @@ set errorwarninglog=%OUTDIR%\stage_errorswarnings.txt
 set infofile=%OUTDIR%\stage_info.txt
 set revisionfile=%OUTDIR%\revision.txt
 
+set fromsummarydir=%svnroot%\Manuals\SMV_Summary
+set tosummarydir="%SMOKEBOT_SUMMARY_DIR%"
+
 set haveerrors=0
 set havewarnings=0
 set haveCC=1
 
 set emailexe=%userprofile%\bin\mailsend.exe
+
+date /t > %OUTDIR%\starttime.txt
+set /p startdate=<%OUTDIR%\starttime.txt
+time /t > %OUTDIR%\starttime.txt
+set /p starttime=<%OUTDIR%\starttime.txt
 
 call "%IFORT_COMPILER14%\bin\compilervars" %compile_platform% 1> Nul 2>&1
 call %svnroot%\Utilities\Firebot\firebot_email_list.bat
@@ -125,7 +136,7 @@ call :does_file_exist cfast6_win_%size%.exe %OUTDIR%\stage0.txt|| exit /b 1
 :: Stage 1
 :: -------
 if %reduced% == 1 goto skip_stage1
-echo Stage 1 - Building FDS (debug version)
+echo Stage 1 - Building FDS (debug)
 echo             serial
 cd %svnroot%\FDS_Compilation\intel_win_%size%_db
 erase *.obj *.mod *.exe 1> %OUTDIR%\stage1a.txt 2>&1
@@ -148,7 +159,7 @@ call :find_fds_warnings "warning" %OUTDIR%\stage1b.txt "Stage 1b"
 :: Stage 2
 :: -------
 
-echo Stage 2 - Building FDS (release version)
+echo Stage 2 - Building FDS (release)
 
 echo             serial
 cd %svnroot%\FDS_Compilation\intel_win_%size%
@@ -175,7 +186,7 @@ call :find_fds_warnings "warning" %OUTDIR%\stage2b.txt "Stage 2b"
 
 if %reduced% == 1 goto skip_stage3a
 
-echo Stage 3a - Building Smokeview (debug version)
+echo Stage 3a - Building Smokeview (debug)
 
 cd %svnroot%\SMV\Build\intel_win_%size%
 erase *.obj *.mod *.exe smokeview_win_%size%_db.exe 1> %OUTDIR%\stage3a.txt 2>&1
@@ -186,7 +197,7 @@ call :find_smokeview_warnings "warning" %OUTDIR%\stage3a.txt "Stage 3a"
 
 :skip_stage3a
 
-echo Stage 3b - Building Smokeview (release version)
+echo Stage 3b - Building Smokeview (release)
 
 cd %svnroot%\SMV\Build\intel_win_%size%
 erase *.obj *.mod smokeview_win_%size%.exe 1> %OUTDIR%\stage3b.txt 2>&1
@@ -271,7 +282,20 @@ call :build_guide SMV_Verification_Guide %svnroot%\Manuals\SMV_Verification_Guid
 echo             User
 call :build_guide SMV_User_Guide %svnroot%\Manuals\SMV_User_Guide 1> %OUTDIR%\stage6.txt 2>&1
 
+date /t > %OUTDIR%\stoptime.txt
+set /p startdate=<%OUTDIR%\stoptime.txt
+time /t > %OUTDIR%\stoptime.txt
+set /p stoptime=<%OUTDIR%\stoptime.txt
+
 echo smokebot build success on %COMPUTERNAME% > %infofile%
+echo start time: %startdate% %starttime% >> %infofile%
+echo  stop time: %stopdate% %stoptime%  >> %infofile%
+if exist %tosummarydir% (
+  echo results: https://googledrive.com/host/0B-W-dkXwdHWNUElBbWpYQTBUejQ/index.html >> %infofile%
+  copy %fromsummarydir%\index*.html %tosummarydir%  1> Nul 2>&1
+  copy %fromsummarydir%\images\*.png %tosummarydir%\images 1> Nul 2>&1
+  copy %fromsummarydir%\images2\*.png %tosummarydir%\images2 1> Nul 2>&1
+)
 
 cd %CURDIR%
 
@@ -279,20 +303,33 @@ cd %CURDIR%
 :: Wrap up
 :: -------
 
+
 if exist %emailexe% (
   if %havewarnings% == 0 (
     if %haveerrors% == 0 (
       call %email% %mailToSMV% "smokebot build success on %COMPUTERNAME%! %revision%" %infofile%
     ) else (
-      call %email% %mailToSMV% "smokebot build failure on %COMPUTERNAME%! %revision%" %errorlog%
+      echo "start time: %starttime% " > %infofile%
+      echo " stop time: %stoptime% " >> %infofile%
+      echo. >> %infofile%
+      type %errorlog% >> %infofile%
+      call %email% %mailToSMV% "smokebot build failure on %COMPUTERNAME%! %revision%" %infofile%
     )
   ) else (
     if %haveerrors% == 0 (
-      %email% %mailToSMV% "smokebot build success with warnings on %COMPUTERNAME% %revision%" %warninglog%
+      echo "start time: %starttime% " > %infofile%
+      echo " stop time: %stoptime% " >> %infofile%
+      echo. >> %infofile%
+      type %warninglog% >> %infofile%
+      %email% %mailToSMV% "smokebot build success with warnings on %COMPUTERNAME% %revision%" %infofile%
     ) else (
-      copy %warninglog% %errorwarninglog%
-      type %errorlog% >> %errorwarninglog%
-      call %email% %mailToSMV% "smokebot build failure on %COMPUTERNAME%! %revision%" %errorwarninglog%
+      echo "start time: %starttime% " > %infofile%
+      echo " stop time: %stoptime% " >> %infofile%
+      echo. >> %infofile%
+      type %errorlog% >> %infofile%
+      echo. >> %infofile%
+      type %warninglog% >> %infofile%
+      call %email% %mailToSMV% "smokebot build failure on %COMPUTERNAME%! %revision%" %infofile%
     )
   )
 )
