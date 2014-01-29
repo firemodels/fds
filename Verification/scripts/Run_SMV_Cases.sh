@@ -108,6 +108,8 @@ if [[ ! $stop_cases ]] ; then
   echo "Removing FDS/CFAST output files"
   export RUNCFAST="$SVNROOT/Verification/scripts/Remove_CFAST_Files.sh"
   export RUNFDS="$SVNROOT/Verification/scripts/Remove_FDS_Files.sh"
+  export RUNTFDS="$SVNROOT/Verification/scripts/Remove_FDS_Files.sh"
+  export RUNWFDS="$SVNROOT/Verification/scripts/Remove_FDS_Files.sh"
   scripts/SMV_Cases.sh
   echo "FDS/CFAST output files removed"
 fi
