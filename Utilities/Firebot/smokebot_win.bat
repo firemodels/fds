@@ -177,8 +177,8 @@ if %reduced% == 1 goto skip_stage3a
 
 echo Stage 3a - Building Smokeview (debug version)
 
-cd %svnroot%\SMV\Build\intel_win_%size%_db
-erase *.obj *.mod *.exe 1> %OUTDIR%\stage3a.txt 2>&1
+cd %svnroot%\SMV\Build\intel_win_%size%
+erase *.obj *.mod *.exe smokeview_win_%size%_db.exe 1> %OUTDIR%\stage3a.txt 2>&1
 make -f ..\Makefile intel_win_%size%_db 1>> %OUTDIR%\stage3a.txt 2>&1
 
 call :does_file_exist smokeview_win_%size%_db.exe %OUTDIR%\stage3a.txt|| exit /b 1
@@ -189,7 +189,7 @@ call :find_smokeview_warnings "warning" %OUTDIR%\stage3a.txt "Stage 3a"
 echo Stage 3b - Building Smokeview (release version)
 
 cd %svnroot%\SMV\Build\intel_win_%size%
-erase *.obj *.mod *.exe 1> %OUTDIR%\stage3b.txt 2>&1
+erase *.obj *.mod smokeview_win_%size%.exe 1> %OUTDIR%\stage3b.txt 2>&1
 make -f ..\Makefile intel_win_%size% 1>> %OUTDIR%\stage3b.txt 2>&1
 
 call :does_file_exist smokeview_win_%size%.exe %OUTDIR%\stage3b.txt|| aexit /b 1
