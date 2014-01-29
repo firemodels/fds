@@ -996,7 +996,7 @@ email_build_status()
    echo "start time: $start_time " >> $TIME_LOG
    echo " stop time: $stop_time " >> $TIME_LOG
    echo "   results (private): http://blaze.nist.gov/VV/SMV2" >> $TIME_LOG
-   echo "   results (public) : https://googledrive.com/host/0B-W-dkXwdHWNMkhuakk3WUJFYzg/index.html" >> $TIME_LOG
+   echo "   results (public) : https://drive.google.com/folderview?id=0B-W-dkXwdHWNN3N2eG92X2taRFk&usp=sharing" >> $TIME_LOG
    echo "   manuals (private): http://blaze.nist.gov/smokebot" >> $TIME_LOG
    echo "   manuals (public) : https://drive.google.com/folderview?id=0B_wB1pJL2bFQaDJaOFNnUDR4LXM#list" >> $TIME_LOG
   if [[ $THIS_SMVSVN != $LAST_SMVSVN ]] ; then
