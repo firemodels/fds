@@ -995,7 +995,7 @@ compile_smv_db()
 {
    # Clean and compile SMV debug
    cd $FDS_SVNROOT/SMV/Build/intel_linux_64
-   ./make_smv.sh &> $FIREBOT_DIR/output/stage6a
+   ./make_smv_db.sh &> $FIREBOT_DIR/output/stage6a
 }
 
 check_compile_smv_db()
