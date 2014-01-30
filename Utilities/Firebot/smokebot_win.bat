@@ -27,14 +27,18 @@ set cfastbasename=cfast
 :: begin smokebot
 :: --------------
 
-erase stage*.txt
-
 :: -----------------
 :: setup environment
 :: -----------------
 
 set CURDIR=%CD%
-set OUTDIR=%CURDIR%
+
+if not exist output mkdir output
+
+set OUTDIR=%CURDIR%\output
+
+erase %OUTDIR%\*.txt 1> Nul 2>&1
+
 set svnroot=%userprofile%\%fdsbasename%
 set cfastroot=%userprofile%\%cfastbasename%
 set email=%svnroot%\SMV\scripts\email.bat
@@ -76,9 +80,9 @@ echo Stage 0 - Preliminaries
 echo. > %errorlog%
 echo. > %warninglog%
 
-ifort 1> stage0a.txt 2>&1
-type stage0a.txt | find /i /c "not recognized" > stage_count0a.txt
-set /p nothaveFORTRAN=<stage_count0a.txt
+ifort 1> %OUTDIR%\stage0a.txt 2>&1
+type %OUTDIR%\stage0a.txt | find /i /c "not recognized" > %OUTDIR%\stage_count0a.txt
+set /p nothaveFORTRAN=<%OUTDIR%\stage_count0a.txt
 if %nothaveFORTRAN% == 1 (
   echo "***Fatal error: Fortran compiler not present"
   echo "***Fatal error: Fortran compiler not present" > %errorlog%
@@ -88,9 +92,9 @@ if %nothaveFORTRAN% == 1 (
 )
 echo             found Fortran
 
-icl 1> stage0b.txt 2>&1
-type stage0b.txt | find /i /c "not recognized" > stage_count0b.txt
-set /p nothaveCC=<stage_count0b.txt
+icl 1> %OUTDIR%\stage0b.txt 2>&1
+type %OUTDIR%\stage0b.txt | find /i /c "not recognized" > %OUTDIR%\stage_count0b.txt
+set /p nothaveCC=<%OUTDIR%\stage_count0b.txt
 if %nothaveCC% == 1 (
   set haveCC=0
   echo "***Warning: C/C++ compiler not found - using installed Smokeview to generate images"
@@ -283,19 +287,22 @@ echo             User
 call :build_guide SMV_User_Guide %svnroot%\Manuals\SMV_User_Guide 1> %OUTDIR%\stage6.txt 2>&1
 
 date /t > %OUTDIR%\stoptime.txt
-set /p startdate=<%OUTDIR%\stoptime.txt
+set /p stopdate=<%OUTDIR%\stoptime.txt
 time /t > %OUTDIR%\stoptime.txt
 set /p stoptime=<%OUTDIR%\stoptime.txt
 
 echo smokebot build success on %COMPUTERNAME% > %infofile%
-echo start time: %startdate% %starttime% >> %infofile%
-echo  stop time: %stopdate% %stoptime%  >> %infofile%
-if exist %tosummarydir% (
-  echo results: https://googledrive.com/host/0B-W-dkXwdHWNUElBbWpYQTBUejQ/index.html >> %infofile%
+echo start: %startdate% %starttime% >> %infofile%
+echo  stop: %stopdate% %stoptime%  >> %infofile%
+
+if NOT exist %tosummarydir% goto skip_copyfiles
+  echo summary (windows): https://googledrive.com/host/0B-W-dkXwdHWNUElBbWpYQTBUejQ/index.html >> %infofile%
+  echo summary   (linux): https://googledrive.com/host/0B-W-dkXwdHWNN3N2eG92X2taRFk/index.html >> %infofile%
   copy %fromsummarydir%\index*.html %tosummarydir%  1> Nul 2>&1
   copy %fromsummarydir%\images\*.png %tosummarydir%\images 1> Nul 2>&1
   copy %fromsummarydir%\images2\*.png %tosummarydir%\images2 1> Nul 2>&1
-)
+:skip_copyfiles
+  
 
 cd %CURDIR%
 
@@ -309,22 +316,22 @@ if exist %emailexe% (
     if %haveerrors% == 0 (
       call %email% %mailToSMV% "smokebot build success on %COMPUTERNAME%! %revision%" %infofile%
     ) else (
-      echo "start time: %starttime% " > %infofile%
-      echo " stop time: %stoptime% " >> %infofile%
+      echo "start: %startdate% %starttime% " > %infofile%
+      echo " stop: %stopdate% %stoptime% " >> %infofile%
       echo. >> %infofile%
       type %errorlog% >> %infofile%
       call %email% %mailToSMV% "smokebot build failure on %COMPUTERNAME%! %revision%" %infofile%
     )
   ) else (
     if %haveerrors% == 0 (
-      echo "start time: %starttime% " > %infofile%
-      echo " stop time: %stoptime% " >> %infofile%
+      echo "start: %startdate% %starttime% " > %infofile%
+      echo " stop: %stopdate% %stoptime% " >> %infofile%
       echo. >> %infofile%
       type %warninglog% >> %infofile%
       %email% %mailToSMV% "smokebot build success with warnings on %COMPUTERNAME% %revision%" %infofile%
     ) else (
-      echo "start time: %starttime% " > %infofile%
-      echo " stop time: %stoptime% " >> %infofile%
+      echo "start: %startdate% %starttime% " > %infofile%
+      echo " stop: %stopdate% %stoptime% " >> %infofile%
       echo. >> %infofile%
       type %errorlog% >> %infofile%
       echo. >> %infofile%
@@ -349,9 +356,9 @@ exit /b
 :: -----------------------------------------
 
   set program=%1
-  %program% -help 1>> stage_exist.txt 2>&1
-  type stage_exist.txt | find /i /c "not recognized" > stage_count.txt
-  set /p nothave=<stage_count.txt
+  %program% -help 1>> %OUTDIR%\stage_exist.txt 2>&1
+  type %OUTDIR%\stage_exist.txt | find /i /c "not recognized" > %OUTDIR%\stage_count.txt
+  set /p nothave=<%OUTDIR%\stage_count.txt
   if %nothave% == 1 (
     echo "***Fatal error: %program% not present"
     echo "***Fatal error: %program% not present" > %errorlog%
