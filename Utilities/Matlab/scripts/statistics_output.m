@@ -62,7 +62,7 @@ if strcmp(Stats_Output, 'Validation') && (exist('Output_File_Baseline','var') ==
 
     % Check if model uncertainty or bias are greater than validation diff tolerance or if quantity names are mismatched
     count = 1;
-    for i = 1:length(stats_baseline{1})
+    for i = 1:length(stats_current{1})
         if abs((stats_baseline{5}(i) - stats_current{5}(i))/stats_baseline{5}(i)) > Validation_Diff_Tolerance || abs((stats_baseline{6}(i) - stats_current{6}(i))/stats_baseline{6}(i)) > Validation_Diff_Tolerance || ~strcmp(stats_baseline{1}(i), stats_current{1}(i))
             different_quantity_baseline{count}{1} = stats_baseline{1}(i);
             different_quantity_baseline{count}{2} = stats_baseline{2}(i);
@@ -86,12 +86,15 @@ if strcmp(Stats_Output, 'Validation') && (exist('Output_File_Baseline','var') ==
         fid_output = fopen(Validation_Statistics_Log, 'w');
 
         fprintf(fid_output, '%s\n', 'Notice: Validation statistics are different from baseline statistics.');
+        fprintf(fid_output, '%s\n', 'Commit a new baseline statistics file if needed.');
+        fprintf(fid_output, '\n');
+        fprintf(fid_output, '%s %s\n', 'Baseline statistics file: ', Output_File_Baseline);
         fprintf(fid_output, '\n');
         
         fprintf(fid_output, '%s\n', 'Case: Quantity, Number of Datasets, Number of Points, Sigma_Experiment, Sigma_Model, Bias');
         fprintf(fid_output, '\n');
         
-        for i = 1:length(different_quantity_baseline)
+        for i = 1:length(different_quantity_current)
             fprintf(fid_output, '%s %s, %s, %s, %s, %0.2f, %0.2f\n', 'Baseline:', different_quantity_baseline{i}{1}{1}, different_quantity_baseline{i}{2}{1}, different_quantity_baseline{i}{3}{1}, different_quantity_baseline{i}{4}{1}, different_quantity_baseline{i}{5}, different_quantity_baseline{i}{6});
             fprintf(fid_output, '%s %s, %s, %s, %s, %0.2f, %0.2f\n', 'Current:', different_quantity_current{i}{1}{1}, different_quantity_current{i}{2}{1}, different_quantity_current{i}{3}{1}, different_quantity_current{i}{4}{1}, different_quantity_current{i}{5}, different_quantity_current{i}{6});
             fprintf(fid_output, '\n');
