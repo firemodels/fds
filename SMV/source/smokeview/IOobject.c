@@ -1064,6 +1064,7 @@ void draw_SVOBJECT(sv_object *object_dev, int iframe_local, propdata *prop, int 
 
     // copy static data from PROP line
 
+//xxx    printf("nvals=%i : ",prop->nvars_indep);
     for(i=0;i<prop->nvars_indep;i++){
       tokendata *toki;
       int index;
@@ -1072,10 +1073,12 @@ void draw_SVOBJECT(sv_object *object_dev, int iframe_local, propdata *prop, int 
       if(index<0||index>framei->ntokens-1)continue;
       toki = framei->tokens + index;
       toki->var=prop->fvals[i];
+//xxx      printf(" %i %f,",index,toki->var);
       if(prop->svals!=NULL&&prop->svals[i]!=NULL&&strlen(prop->svals[i])>0){
         strcpy(toki->string,prop->svals[i]);
       }
     }
+//xxx    printf("\n");
 
     // copy time dependent evac data
 
@@ -1164,12 +1167,14 @@ void draw_SVOBJECT(sv_object *object_dev, int iframe_local, propdata *prop, int 
     else{
       rgbptr_local=select_device_color_ptr;
     }
+//xxx    printf("color= %i %i %i\n",(int)rgbptr_local[0],(int)rgbptr_local[1],(int)rgbptr_local[2]);
     for(j=0;j<toki->nvars;j++){
       tokendata *tokj;
       
       tokj = toki - toki->nvars + j;
       arg[j] = *(tokj->varptr);
     }
+//xxx    printf("arg= %f %f %f\n",arg[0],arg[1],arg[2]);
     if(toki->nvars>0){
       argptr=(toki-1)->varptr;
     }
@@ -1189,30 +1194,54 @@ void draw_SVOBJECT(sv_object *object_dev, int iframe_local, propdata *prop, int 
       }
       break;
     case SV_ORIENX:
+      if(arg[2]<10.0){
+        float u[3]={1.0,0.0,0.0}, axis[3], angle;
+
+        rotateu2v(u, arg, axis, &angle);
+        glRotatef(RAD2DEG*angle,axis[0],axis[1],axis[2]);
+
+      }
+      break;
     case SV_ORIENY:
+      if(arg[2]<10.0){
+        float u[3]={0.0,1.0,0.0}, axis[3], angle;
+
+        rotateu2v(u, arg, axis, &angle);
+        glRotatef(RAD2DEG*angle,axis[0],axis[1],axis[2]);
+
+      }
+      break;
     case SV_ORIENZ:
       if(arg[2]<10.0){
-        float u[3]={0.0,0.0,0.0};
-        float axis[3], angle;
+        float u[3]={0.0,0.0,1.0}, axis[3], angle;
 
-        if(toki->command==SV_ORIENX)u[0]=1.0;
-        if(toki->command==SV_ORIENY)u[1]=1.0;
-        if(toki->command==SV_ORIENZ)u[2]=1.0;
         rotateu2v(u, arg, axis, &angle);
         glRotatef(RAD2DEG*angle,axis[0],axis[1],axis[2]);
 
       }
       break;
     case SV_RANDXY:
+      if(ABS(arg[0]-1.0)<0.01){
+        float random_angle=0.0;
+
+        random_angle=rand_ab(prop->tag_number,0.0,360.0);
+        glRotatef(random_angle,0.0,0.0,1.0);
+      }
+      break;
     case SV_RANDXZ:
+      if(ABS(arg[0]-1.0)<0.01){
+        float random_angle=0.0;
+
+        random_angle=rand_ab(prop->tag_number,0.0,360.0);
+        glRotatef(random_angle,0.0,1.0,0.0);
+      }
+      break;
     case SV_RANDYZ:
       if(ABS(arg[0]-1.0)<0.01){
         float random_angle=0.0;
 
         random_angle=rand_ab(prop->tag_number,0.0,360.0);
-        if(toki->command==SV_RANDXY)glRotatef(random_angle,0.0,0.0,1.0);
-        if(toki->command==SV_RANDXZ)glRotatef(random_angle,0.0,1.0,0.0);
-        if(toki->command==SV_RANDYZ)glRotatef(random_angle,1.0,0.0,0.0);
+        glRotatef(random_angle,1.0,0.0,0.0);
       }
       break;
     case SV_RANDXYZ:
@@ -1719,6 +1748,7 @@ void draw_SVOBJECT(sv_object *object_dev, int iframe_local, propdata *prop, int 
       else{
         rgbptr_local=select_device_color_ptr;
       }
+//xxx      printf("rgb= %f %f %f\n",arg[0],arg[1],arg[2]);
       break;
     case SV_SETLINEWIDTH:
       {
