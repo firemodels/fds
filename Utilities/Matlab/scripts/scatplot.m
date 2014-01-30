@@ -27,14 +27,20 @@ function [] = scatplot(saved_data,drange,varargin)
 % Parse input arguments using ('Key', Value) syntax
 for k=1:2:length(varargin);
     switch (varargin{k})
-    case {'Scatterplot_Inputs_File'}
-        Scatterplot_Inputs_File = varargin{k+1};
     case {'Manuals_Dir'}
         Manuals_Dir = varargin{k+1};
-    case {'Output_File'}
-        Output_File = varargin{k+1};
+    case {'Scatterplot_Inputs_File'}
+        Scatterplot_Inputs_File = varargin{k+1};
     case {'Stats_Output'}
         Stats_Output = varargin{k+1};
+    case {'Validation_Diff_Tolerance'}
+        Validation_Diff_Tolerance = varargin{k+1};
+    case {'Output_File'}
+        Output_File = varargin{k+1};
+    case {'Output_File_Baseline'}
+        Output_File_Baseline = varargin{k+1};
+    case {'Validation_Statistics_Log'}
+        Validation_Statistics_Log = varargin{k+1};
     case {'Statistics_Tex_Output'}
         Statistics_Tex_Output = varargin{k+1};
     case {'Histogram_Tex_Output'}
