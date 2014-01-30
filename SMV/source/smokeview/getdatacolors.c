@@ -567,6 +567,7 @@ void getPart5Colors(partdata *parti, int nlevel){
         float denom;
 
         part5prop *prop_U, *prop_V, *prop_W;
+
         prop_U = get_part5prop(partclassi->labels[partclassi->col_u_vel+2].longlabel);
         prop_V = get_part5prop(partclassi->labels[partclassi->col_v_vel+2].longlabel);
         prop_W = get_part5prop(partclassi->labels[partclassi->col_w_vel+2].longlabel);
@@ -578,6 +579,7 @@ void getPart5Colors(partdata *parti, int nlevel){
           wmax = MAX(ABS(prop_W->valmin),ABS(prop_W->valmax));
 
           denom = sqrt(umax*umax+vmax*vmax+wmax*wmax);
+          if(denom==0.0)denom=1.0;
         }
         else{
           denom=1.0;
