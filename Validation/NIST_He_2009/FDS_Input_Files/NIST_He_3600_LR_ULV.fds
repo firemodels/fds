@@ -1,9 +1,9 @@
-&HEAD CHID='NIST_He_3600_LR_ULV',TITLE='Helium release experiment 3600 seconds, Lower Rear Burner, Upper Lower Vents'/
+&HEAD CHID='NIST_He_3600_LR_ULV',TITLE='Helium release experiment 1 hnds, Lower Rear Burner, Upper Lower Vents'/
 
 &MESH IJK=60,60,30, XB=0.0, 1.50, 0.0, 1.50, 0.0, 0.75 /
 
-&TIME T_END=32460., RESTRICT_TIME_STEP=.FALSE. / 3600 sec. release and an equilibrium phase
-&MISC TMPA=21., NOISE=.FALSE., ISOTHERMAL=.TRUE., DNS=.TRUE. /
+&TIME T_END=32460. / 1 h release and an equilibrium phase
+&MISC TMPA=21. /
 &SPEC ID='HELIUM', MASS_EXTINCTION_COEFFICIENT=500. /
 
 &DUMP DT_DEVC=60., DT_HRR=60., SIG_FIGS=4, SIG_FIGS_EXP=2, SMOKE3D_QUANTITY='MASS FRACTION', SMOKE3D_SPEC_ID='HELIUM' /
