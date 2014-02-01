@@ -146,7 +146,7 @@ MAILTO=""
 
 ------------------------------------------------------------------------------------
 
-#### The following information is in the Linux validationbot user's crontab: ####
+#### The following information is in the Linux Validationbot user's crontab: ####
 
 ------------------------------------------------------------------------------------
 
@@ -165,6 +165,7 @@ MAILTO=""
 #
 # You can change the argument for -v <num>, where <num> is the maximum number
 # of nodes to use for Validationbot running validation cases.
+# NOTE: Only change this line when Validationbot is *NOT* running.
 # Recommended settings for <num>:
 #     1 for passive mode (run 1 validation set at a time)
 #     150 for aggressive mode (run up to 150 nodes at a time)
