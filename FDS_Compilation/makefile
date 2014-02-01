@@ -119,6 +119,17 @@ mpi_intel_win_32 : obj = fds_mpi_win_32
 mpi_intel_win_32 : setup_win $(objwin_mpi)
 	$(FCOMPL) -o $(obj) $(FFLAGS) /F100000000 $(objwin_mpi) $(MPILIB)
 
+msmpi_intel_win_32 : MPILIB = "C:\Program Files\Microsoft HPC Pack 2012\Lib\i386\msmpi.lib"
+msmpi_intel_win_32 : MPILIB2 = "C:\Program Files\Microsoft HPC Pack 2012\Lib\i386\msmpifec.lib"
+msmpi_intel_win_32 : MPILIB3 = "C:\Program Files\Microsoft HPC Pack 2012\Lib\i386\msmpifmc.lib"
+msmpi_intel_win_32 : MPIINCLUDE = "C:\Program Files\Microsoft HPC Pack 2012\Inc"
+msmpi_intel_win_32 : MPIINCLUDE2 = "C:\Program Files\Microsoft HPC Pack 2012\Inc\i386"
+msmpi_intel_win_32 : FFLAGS = /O2 /Qipo /I $(MPIINCLUDE) /I $(MPIINCLUDE2)
+msmpi_intel_win_32 : FCOMPL = ifort
+msmpi_intel_win_32 : obj = fds_mpi_win_32
+msmpi_intel_win_32 : setup_win $(objwin_mpi)
+	$(FCOMPL) -o $(obj) $(FFLAGS) /F100000000 $(objwin_mpi) $(MPILIB) $(MPILIB2) $(MPILIB3)
+
 mpi_intel_win_32_ps : MPILIB = "c:\program files\mpich2\lib\fmpich2.lib"
 mpi_intel_win_32_ps : MPIINCLUDE = "c:\program files\mpich2\include"
 mpi_intel_win_32_ps : FFLAGS = /O2 /Qipo /Qvec_report0  /QxHost  /I $(MPIINCLUDE)
@@ -209,6 +220,17 @@ mpi_intel_win_64 : FCOMPL = ifort
 mpi_intel_win_64 : obj = fds_mpi_win_64
 mpi_intel_win_64 : setup_win $(objwin_mpi)
 	$(FCOMPL) -o $(obj) $(FFLAGS)  /F1000000000 $(objwin_mpi) $(MPILIB)
+
+msmpi_intel_win_64 : MPILIB = "C:\Program Files\Microsoft HPC Pack 2012\Lib\amd64\msmpi.lib"
+msmpi_intel_win_64 : MPILIB2 = "C:\Program Files\Microsoft HPC Pack 2012\Lib\amd64\msmpifec.lib"
+msmpi_intel_win_64 : MPILIB3 = "C:\Program Files\Microsoft HPC Pack 2012\Lib\amd64\msmpifmc.lib"
+msmpi_intel_win_64 : MPIINCLUDE = "C:\Program Files\Microsoft HPC Pack 2012\Inc"
+msmpi_intel_win_64 : MPIINCLUDE2 = "C:\Program Files\Microsoft HPC Pack 2012\Inc\amd64"
+msmpi_intel_win_64 : FFLAGS = /O2 /Qipo /Qvec_report0 /I $(MPIINCLUDE) /I $(MPIINCLUDE2)
+msmpi_intel_win_64 : FCOMPL = ifort
+msmpi_intel_win_64 : obj = fds_mpi_win_64
+msmpi_intel_win_64 : setup_win $(objwin_mpi)
+	$(FCOMPL) -o $(obj) $(FFLAGS)  /F1000000000 $(objwin_mpi) $(MPILIB) $(MPILIB2) $(MPILIB2)
 
 mpi_intel_win_64_ps : MPILIB = "c:\program files\mpich2\lib\fmpich2.lib"
 mpi_intel_win_64_ps : MPIINCLUDE = "c:\program files\mpich2\include"
