@@ -24,7 +24,7 @@ $VDIR/FM_SNL/FDS_Output_Files/Process_Output.csh
 $VDIR/Hamins_CH4/FDS_Output_Files/Process_Output.csh
 $VDIR/Harrison_Spill_Plumes/FDS_Output_Files/Process_Output.csh
 $VDIR/Heskestad_Flame_Height/FDS_Output_Files/Process_Output.csh
-#$VDIR/iBMB/FDS_Output_Files/Process_Output.csh
+$VDIR/iBMB/FDS_Output_Files/Process_Output.csh
 #$VDIR/Lattimer_Tilted_Wall/FDS_Output_Files/Process_Output.csh
 $VDIR/LEMTA_Spray/FDS_Output_Files/Process_Output.csh
 $VDIR/LLNL_Enclosure/FDS_Output_Files/Process_Output.csh
@@ -51,7 +51,7 @@ $VDIR/Steckler_Compartment/FDS_Output_Files/Process_Output.csh
 $VDIR/Turbulent_Jet/FDS_Output_Files/Process_Output.csh
 $VDIR/UL_Commodity/FDS_Output_Files/Process_Output.csh
 $VDIR/UL_NFPRF/FDS_Output_Files/Process_Output.csh
-#$VDIR/UL_NIST_Vents/FDS_Output_Files/Process_Output.csh
+$VDIR/UL_NIST_Vents/FDS_Output_Files/Process_Output.csh
 $VDIR/Ulster_SBI/FDS_Output_Files/Process_Output.csh
 $VDIR/USCG_HAI/FDS_Output_Files/Process_Output.csh
 #$VDIR/USFS_Stick/FDS_Output_Files/Process_Output.csh
