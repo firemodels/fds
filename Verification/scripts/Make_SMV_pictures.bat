@@ -1,6 +1,6 @@
 @echo off
 
-set release=%1
+set size=%1
 
 echo Creating figures for the Smokeview User's and Verification guides
 
@@ -14,14 +14,14 @@ set BASEDIR=%CD%
 cd %BASEDIR%\..\
 set SVNROOT=%CD%
 
-if "%release%" == "" (
+if "%size%" == "" (
   set SMOKEDIFF=smokediff
   set SMOKEZIP=smokezip
   set SMOKEVIEW=smokeview
 ) else (
-  set SMOKEDIFF=%SVNROOT%\Utilities\smokediff\intel_win_%release%\smokediff_win_%release%.exe
-  set SMOKEVIEW=%SVNROOT%\SMV\Build\intel_win_%release%\smokeview_win_%release%.exe -bindir %SVNROOT%\SMV\for_bundle
-  set  SMOKEZIP=%SVNROOT%\Utilities\smokezip\intel_win_%release%\smokezip_win_%release%.exe
+  set SMOKEDIFF=%SVNROOT%\Utilities\smokediff\intel_win_%size%\smokediff_win_%size%.exe
+  set SMOKEVIEW=%SVNROOT%\SMV\Build\intel_win_%size%\smokeview_win_%size%.exe -bindir %SVNROOT%\SMV\for_bundle
+  set  SMOKEZIP=%SVNROOT%\Utilities\smokezip\intel_win_%size%\smokezip_win_%size%.exe
 )
 
 set BACKGROUND="background"
@@ -35,7 +35,7 @@ set vis="%SVNROOT%\Verification\Visualization"
 set wui="%SVNROOT%\Verification\Wui"
 set smvug="%SVNROOT%\Manuals\SMV_User_Guide"
 set smvvg="%SVNROOT%\Manuals\SMV_Verification_Guide"
-set summary="%SVNROOT%\Manuals\Verification_Summary"
+set summary="%SVNROOT%\Manuals\SMV_Summary"
 
 set RUNFDS=call "%SCRIPT_DIR%\runsmv.bat"
 set RUNTFDS=call "%SCRIPT_DIR%\runtsmv.bat"
@@ -124,8 +124,10 @@ call %SCRIPT_DIR%\SMV_DIFF_Pictures_Cases.bat
 
 echo copying user guide script figures from %smvug%\SCRIPT_FIGURES to %summary%\images
 copy %smvug%\SCRIPT_FIGURES\*.png %summary%\images
+
 echo copying verification guide script figures from %smvvg%\SCRIPT_FIGURES to %summary%\images
 copy %smvvg%\SCRIPT_FIGURES\*.png %summary%\images
+
 echo copying graysquares figures from %smvvg%\FIGURES to %summary%\images
 copy %smvvg%\FIGURES\graysquares.png %summary%\images
 
