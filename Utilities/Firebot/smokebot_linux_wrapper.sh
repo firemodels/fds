@@ -1,4 +1,4 @@
 #!/bin/bash
-touch smokebot_running
-./smokebot_linux.sh $*
-rm smokebot_running
+touch ~/SMOKEBOT/smokebot_running
+~/SMOKEBOT/smokebot_linux.sh $*
+rm ~/SMOKEBOT/smokebot_running
