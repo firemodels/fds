@@ -2739,7 +2739,13 @@ PARABOLIC_IF: IF (CHECK_VN) THEN
       DO J=1,JBAR
          IILOOP_OpenMP: DO I=1,IBAR
             IF (SOLID(CELL_INDEX(I,J,K))) CYCLE IILOOP_OpenMP
-            P_MU_TMP = MUP(I,J,K)/RHOP(I,J,K)
+
+            IF (N_TRACKED_SPECIES>0) THEN
+               P_MU_TMP = MAX(D_Z_MAX(I,J,K),MAX(RPR,RSC)*MUP(I,J,K)/RHOP(I,J,K))
+            ELSE
+               P_MU_TMP = MAX(RPR,RSC)*MUP(I,J,K)/RHOP(I,J,K)
+            ENDIF
+
             IF (P_MU_TMP>=P_MU_MAX) THEN
                P_MU_MAX = P_MU_TMP
                P_I_VN=I
@@ -2762,7 +2768,7 @@ PARABOLIC_IF: IF (CHECK_VN) THEN
       R_DX2 = RDX(I_VN)**2 + RDY(J_VN)**2 + RDZ(K_VN)**2
    ENDIF
 
-   MUTRM = MAX(RPR,RSC)*MU_MAX
+   MUTRM = MU_MAX
    VN = DT*2._EB*R_DX2*MUTRM
  
 ENDIF PARABOLIC_IF
