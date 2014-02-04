@@ -6,9 +6,9 @@ if [%reduced%] == [] (
 
 SETLOCAL
 
-:: ----------------------------
-:: set 32 or 64 bit environment
-:: ----------------------------
+:: -------------------------------------------------------------
+::                         set 32 or 64 bit environment
+:: -------------------------------------------------------------
 
 :: set size=32
 :: set compile_platform=ia32
@@ -16,20 +16,16 @@ SETLOCAL
 set size=64
 set compile_platform=intel64
 
-:: --------------------
-:: set repository names
-:: --------------------
+:: -------------------------------------------------------------
+::                         set repository names
+:: -------------------------------------------------------------
 
 set fdsbasename=FDS-SMV
 set cfastbasename=cfast
 
-:: --------------
-:: begin smokebot
-:: --------------
-
-:: -----------------
-:: setup environment
-:: -----------------
+:: -------------------------------------------------------------
+::                         setup environment
+:: -------------------------------------------------------------
 
 set CURDIR=%CD%
 
@@ -69,9 +65,9 @@ set /p starttime=<%OUTDIR%\starttime.txt
 call "%IFORT_COMPILER14%\bin\compilervars" %compile_platform% 1> Nul 2>&1
 call %svnroot%\Utilities\Firebot\firebot_email_list.bat
 
-:: -------
-:: stage 0
-:: -------
+:: -------------------------------------------------------------
+::                           stage 0
+:: -------------------------------------------------------------
 
 echo Stage 0 - Preliminaries
 
@@ -136,12 +132,15 @@ erase *.obj *.mod *.exe 1>> %OUTDIR%\stage0.txt 2>&1
 make VPATH="../Source:../Include" INCLUDE="../Include" -f ..\makefile intel_win_%size% 1>> %OUTDIR%\stage0.txt 2>&1
 call :does_file_exist cfast6_win_%size%.exe %OUTDIR%\stage0.txt|| exit /b 1
 
-:: -------
-:: Stage 1
-:: -------
-if %reduced% == 1 goto skip_fds_debug
+:: -------------------------------------------------------------
+::                           stage 1
+:: -------------------------------------------------------------
+
 echo Stage 1 - Building FDS
+if %reduced% == 1 goto skip_fds_debug
+
 echo             serial debug
+
 cd %svnroot%\FDS_Compilation\intel_win_%size%_db
 erase *.obj *.mod *.exe 1> %OUTDIR%\stage1a.txt 2>&1
 make -j4 VPATH="../../FDS_Source" -f ..\makefile intel_win_%size%_db 1>> %OUTDIR%\stage1a.txt 2>&1
@@ -150,6 +149,7 @@ call :does_file_exist fds_win_%size%_db.exe %OUTDIR%\stage1a.txt|| exit /b 1
 call :find_fds_warnings "warning" %OUTDIR%\stage1a.txt "Stage 1a"
 
 echo             parallel debug
+
 cd %svnroot%\FDS_Compilation\mpi_intel_win_%size%_db
 erase *.obj *.mod *.exe 1> %OUTDIR%\stage1b.txt 2>&1
 make -j4 MPIINCLUDE=%mpichinc% MPILIB=%mpichlib% VPATH="../../FDS_Source" -f ..\makefile mpi_intel_win_%size%_db 1>> %OUTDIR%\stage1b.txt 2>&1
@@ -160,6 +160,7 @@ call :find_fds_warnings "warning" %OUTDIR%\stage1b.txt "Stage 1b"
 :skip_fds_debug
 
 echo             serial release
+
 cd %svnroot%\FDS_Compilation\intel_win_%size%
 erase *.obj *.mod *.exe 1> %OUTDIR%\stage1c.txt 2>&1
 make -j4 VPATH="../../FDS_Source" -f ..\makefile intel_win_%size% 1>> %OUTDIR%\stage1c.txt 2>&1
@@ -168,7 +169,9 @@ call :does_file_exist fds_win_%size%.exe %OUTDIR%\stage1c.txt|| exit /b 1
 call :find_fds_warnings "warning" %OUTDIR%\stage1c.txt "Stage 1c"
 
 if %reduced% == 1 goto skip_fds_parallel
+
 echo             parallel release
+
 cd %svnroot%\FDS_Compilation\mpi_intel_win_%size%
 erase *.obj *.mod *.exe 1> %OUTDIR%\stage1d.txt 2>&1
 make -j4 MPIINCLUDE=%mpichinc% MPILIB=%mpichlib% VPATH="../../FDS_Source" -f ..\makefile mpi_intel_win_%size%  1>> %OUTDIR%\stage1d.txt 2>&1
@@ -178,13 +181,14 @@ call :find_fds_warnings "warning" %OUTDIR%\stage1d.txt "Stage 1d"
 
 :skip_fds_parallel
 
-:: --------
-:: Stage 2
-:: --------
+:: -------------------------------------------------------------
+::                           stage 2
+:: -------------------------------------------------------------
+
+echo Stage 2 - Building Smokeview
 
 if %reduced% == 1 goto skip_smokeview_debug
 
-echo Stage 2 - Building Smokeview
 echo             debug
 
 cd %svnroot%\SMV\Build\intel_win_%size%
@@ -205,17 +209,21 @@ make -f ..\Makefile intel_win_%size% 1>> %OUTDIR%\stage2b.txt 2>&1
 call :does_file_exist smokeview_win_%size%.exe %OUTDIR%\stage2b.txt|| aexit /b 1
 call :find_smokeview_warnings "warning" %OUTDIR%\stage2b.txt "Stage 2b"
 
-:: ----------
-:: Stage 3
-:: ----------
+:: -------------------------------------------------------------
+::                           stage 3
+:: -------------------------------------------------------------
 
 echo Stage 3 - Building FDS/Smokeview utilities
+
+if %reduced% == 1 goto skip_fds2ascii
 
 echo             fds2ascii
 cd %svnroot%\Utilities\fds2ascii\intel_win_%size%
 erase *.obj *.mod *.exe 1> %OUTDIR%\stage3c.txt 2>&1
 make -f ..\Makefile intel_win_%size% 1>> %OUTDIR%\stage3.txt 2>&1
 call :does_file_exist fds2ascii_win_%size%.exe %OUTDIR%\stage3.txt|| exit /b 1
+
+:skip_fds2ascii
 
 if %haveCC% == 1 (
   echo             smokediff
@@ -244,9 +252,9 @@ if %haveCC% == 1 (
   echo             wind2fds not built, using installed version
 )
 
-:: -------
-:: Stage 4
-:: -------
+:: -------------------------------------------------------------
+::                           stage 4
+:: -------------------------------------------------------------
 
 echo Stage 4 - Running verification cases
 
@@ -255,9 +263,9 @@ call Run_SMV_cases %size% 1> %OUTDIR%\stage4.txt 2>&1
 
 call :find_smokeview_warnings "error" %OUTDIR%\stage4.txt "Stage 4"
 
-:: --------
-:: Stage 5
-:: --------
+:: -------------------------------------------------------------
+::                           stage 5
+:: -------------------------------------------------------------
 
 echo Stage 5 - Making Smokeview pictures
 
@@ -266,9 +274,9 @@ call MAKE_SMV_pictures %size% 1> %OUTDIR%\stage5.txt 2>&1
 
 call :find_smokeview_warnings "error" %OUTDIR%\stage5.txt "Stage 5"
 
-:: -------
-:: Stage 6
-:: -------
+:: -------------------------------------------------------------
+::                           stage 6
+:: -------------------------------------------------------------
 
 echo Stage 6 - Building Smokeview guides
 
@@ -301,9 +309,9 @@ if NOT exist %tosummarydir% goto skip_copyfiles
 
 cd %CURDIR%
 
-:: -------
-:: Wrap up
-:: -------
+:: -------------------------------------------------------------
+::                           Wrap up
+:: -------------------------------------------------------------
 
 
 if exist %emailexe% (
@@ -348,9 +356,9 @@ exit
   )
 exit /b
 
-:: -----------------------------------------
+:: -------------------------------------------------------------
 :is_file_installed
-:: -----------------------------------------
+:: -------------------------------------------------------------
 
   set program=%1
   %program% -help 1>> %OUTDIR%\stage_exist.txt 2>&1
@@ -365,9 +373,9 @@ exit /b
   )
   exit /b 0
 
-:: -----------------------------------------
+:: -------------------------------------------------------------
   :does_file_exist
-:: -----------------------------------------
+:: -------------------------------------------------------------
 
 set file=%1
 set outputfile=%2
@@ -380,9 +388,9 @@ if NOT exist %file% (
 )
 exit /b 0
 
-:: -----------------------------------------
+:: -------------------------------------------------------------
   :find_smokeview_warnings
-:: -----------------------------------------
+:: -------------------------------------------------------------
 
 set search_string=%1
 set search_file=%2
@@ -399,9 +407,9 @@ if %nwarnings% GTR 0 (
 )
 exit /b
 
-:: -----------------------------------------
+:: -------------------------------------------------------------
   :find_fds_warnings
-:: -----------------------------------------
+:: -------------------------------------------------------------
 
 set search_string=%1
 set search_file=%2
@@ -418,9 +426,10 @@ if %nwarnings% GTR 0 (
 )
 exit /b
 
-:: -----------------------------------------
+:: -------------------------------------------------------------
  :build_guide
-:: -----------------------------------------
+:: -------------------------------------------------------------
+
 set guide=%1
 set guide_dir=%2
 
