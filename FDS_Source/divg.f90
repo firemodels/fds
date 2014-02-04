@@ -141,6 +141,7 @@ IF (N_TRACKED_SPECIES > 0) THEN
          RHO_D_TURB = MAX(0._EB,MU-MU_DNS)*RSC
       ENDIF
    ENDIF
+   IF (CHECK_VN) D_Z_MAX = 0._EB
 ENDIF
 
 SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
@@ -159,6 +160,10 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
    ENDIF
 
    IF (LES .AND. RESEARCH_MODE) RHO_D = RHO_D + RHO_D_TURB
+
+   ! Store diffusivity for stability check
+
+   IF (CHECK_VN) D_Z_MAX = MAX(D_Z_MAX,RHO_D/RHOP)
 
    ! Manufactured solution
 
