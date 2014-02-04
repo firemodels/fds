@@ -29,14 +29,13 @@ set RUNCFAST=call %SVNROOT%\Utilities\Scripts\runcfast_win32.bat
 :: Choose FDS version (size is "", 32 or 64)
 
 if "%size%" == "" (
-  echo size is blank
   set FDSBASE=fds.exe
   set FDSEXE=%FDSBASE%
   set CFASTEXE=cfast6
   set WIND2FDSEXE=wind2fds
 ) else (
-  set FDSBASE=fds_win_%size%
-  set FDSEXE=%SVNROOT%\FDS_Compilation\intel_win_%size%\%FDSBASE%
+  set FDSBASE=fds_win_%size%.exe
+  set FDSEXE=%SVNROOT%\FDS_Compilation\intel_win_%size%\fds_win_%size%.exe
   set CFASTEXE=%CFAST%\CFAST\intel_win_%size%\cfast6_win_%size%.exe
   set WIND2FDSEXE=%SVNROOT%\Utilities\wind2fds\intel_win_%size%\wind2fds_win_%size%.exe
 )
