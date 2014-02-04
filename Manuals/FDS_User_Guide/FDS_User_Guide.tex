@@ -1991,7 +1991,7 @@ At the end of the first part of the explicit predictor-corrector time update, th
 \subsection{Special Topic: Flux Limiters}
 \label{info:flux_limiters}
 
-FDS employs \emph{total variation diminishing} (TVD) schemes for scalar transport.  The default for LES is Superbee \cite{Roe:1986}, so chosen because this scheme does the best job preserving the scalar variance in highly turbulent flows with coarse grid resolution.  The default scheme for DNS is Charm \cite{Zhou:1995} because the gradient steepening used in Superbee forces a stair step pattern at high resolution, while Charm is convergent.   A few other schemes (including Godunov and central differencing) are included for completeness; more details can be found in the Tech Guide \cite{FDS_Tech_Guide}.  Table \ref{tab:flux_limiters} below shows the integer codes which may be used to invoke the various limiter schemes.
+FDS employs \emph{total variation diminishing} (TVD) schemes for scalar transport.  The default for LES is Superbee \cite{Roe:1986}, so chosen because this scheme does the best job preserving the scalar variance in highly turbulent flows with coarse grid resolution.  The default scheme for DNS is CHARM \cite{Zhou:1995} because the gradient steepening used in Superbee forces a stair step pattern at high resolution, while Charm is convergent.   A few other schemes (including Godunov and central differencing) are included for completeness; more details can be found in the Tech Guide \cite{FDS_Tech_Guide}.  Table \ref{tab:flux_limiters} below shows the integer codes which may be used to invoke the various limiter schemes.
 
 \begin{lstlisting}
 &MISC FLUX_LIMITER=1 / ! invoke Godunov (first-order upwind scheme)
