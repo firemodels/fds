@@ -52,7 +52,7 @@ REAL(EB), INTENT(IN) :: T
 INTEGER, INTENT(IN) :: NM
 REAL(EB) :: ZZ_GET(0:N_TRACKED_SPECIES),NU_EDDY,DELTA,KSGS,U2,V2,W2,AA,A_IJ(3,3),BB,B_IJ(3,3),&
             DUDX,DUDY,DUDZ,DVDX,DVDY,DVDZ,DWDX,DWDY,DWDZ,MU_DNS,MU_EFF,SLIP_COEF,VEL_GAS,VEL_T,RAMP_T,TSI,&
-            VDF,VN_FACTOR,R_DX2
+            VDF
 REAL(EB), PARAMETER :: RAPLUS=1._EB/26._EB
 INTEGER :: I,J,K,IIG,JJG,KKG,II,JJ,KK,IW,TURB_MODEL_TMP,IOR
 REAL(EB), POINTER, DIMENSION(:,:,:) :: RHOP=>NULL(),UP=>NULL(),VP=>NULL(),WP=>NULL(), &
@@ -79,7 +79,6 @@ ELSE
 ENDIF
 
 ! Compute viscosity for DNS using primitive species/mixture fraction
-
 
 IF (N_TRACKED_SPECIES>0 .AND. EVACUATION_ONLY(NM)) ZZ_GET(1:N_TRACKED_SPECIES) = 0._EB
 
@@ -320,29 +319,6 @@ WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
    END SELECT
 
 ENDDO WALL_LOOP
-
-IF (LIMIT_MU) THEN
-   VN_FACTOR = VN_MAX*MIN(PR,SC)/(2._EB*DT)
-   TWO_D_IF: IF (TWO_D) THEN
-      DO K=1,KBAR
-         DO J=1,JBAR
-            DO I=1,IBAR
-               R_DX2 = RDX(I)**2 + RDZ(K)**2
-               MU(I,J,K) = MIN( MU(I,J,K), RHO(I,J,K)*VN_FACTOR/R_DX2 )
-            ENDDO
-         ENDDO
-      ENDDO
-   ELSE TWO_D_IF
-      DO K=1,KBAR
-         DO J=1,JBAR
-            DO I=1,IBAR
-               R_DX2 = RDX(I)**2 + RDY(J)**2 + RDZ(K)**2
-               MU(I,J,K) = MIN( MU(I,J,K), RHO(I,J,K)*VN_FACTOR/R_DX2 )
-            ENDDO
-         ENDDO
-      ENDDO
-   ENDIF TWO_D_IF
-ENDIF
 
 MU(   0,0:JBP1,   0) = MU(   1,0:JBP1,1)
 MU(IBP1,0:JBP1,   0) = MU(IBAR,0:JBP1,1)
