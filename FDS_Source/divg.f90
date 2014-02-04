@@ -127,27 +127,10 @@ IF (N_TRACKED_SPECIES > 0) THEN
    END SELECT
 ENDIF
 
-IF (N_TRACKED_SPECIES > 0) DEL_RHO_D_DEL_Z = 0._EB
-
-! If RESEARCH_MODE, account for molecular and turbulent transport
-
-IF (RESEARCH_MODE) THEN
-   MU_DNS => WORK8
-   MU_DNS = 0._EB
-   DO K=1,KBAR
-      DO J=1,JBAR
-         DO I=1,IBAR
-            IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-            IF (N_TRACKED_SPECIES > 0) ZZ_GET(1:N_TRACKED_SPECIES) = ZZP(I,J,K,1:N_TRACKED_SPECIES)
-            CALL GET_VISCOSITY(ZZ_GET,MU_DNS(I,J,K),TMP(I,J,K))
-         ENDDO
-      ENDDO
-   ENDDO
-ENDIF
-
 ! Add species diffusion terms to divergence expression and compute diffusion term for species equations
 
 IF (N_TRACKED_SPECIES > 0) THEN
+   DEL_RHO_D_DEL_Z = 0._EB
    RHO_D => WORK4
    IF (LES) THEN
       IF (.NOT.RESEARCH_MODE) THEN
@@ -175,9 +158,7 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
       ENDDO
    ENDIF
 
-   IF (LES .AND. RESEARCH_MODE) THEN
-      RHO_D = RHO_D + RHO_D_TURB
-   ENDIF
+   IF (LES .AND. RESEARCH_MODE) RHO_D = RHO_D + RHO_D_TURB
 
    ! Manufactured solution
 
