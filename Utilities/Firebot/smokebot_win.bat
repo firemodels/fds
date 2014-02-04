@@ -139,9 +139,9 @@ call :does_file_exist cfast6_win_%size%.exe %OUTDIR%\stage0.txt|| exit /b 1
 :: -------
 :: Stage 1
 :: -------
-if %reduced% == 1 goto skip_stage1
-echo Stage 1 - Building FDS (debug)
-echo             serial
+if %reduced% == 1 goto skip_fds_debug
+echo Stage 1 - Building FDS
+echo             serial debug
 cd %svnroot%\FDS_Compilation\intel_win_%size%_db
 erase *.obj *.mod *.exe 1> %OUTDIR%\stage1a.txt 2>&1
 make -j4 VPATH="../../FDS_Source" -f ..\makefile intel_win_%size%_db 1>> %OUTDIR%\stage1a.txt 2>&1
@@ -149,7 +149,7 @@ make -j4 VPATH="../../FDS_Source" -f ..\makefile intel_win_%size%_db 1>> %OUTDIR
 call :does_file_exist fds_win_%size%_db.exe %OUTDIR%\stage1a.txt|| exit /b 1
 call :find_fds_warnings "warning" %OUTDIR%\stage1a.txt "Stage 1a"
 
-echo             parallel
+echo             parallel debug
 cd %svnroot%\FDS_Compilation\mpi_intel_win_%size%_db
 erase *.obj *.mod *.exe 1> %OUTDIR%\stage1b.txt 2>&1
 make -j4 MPIINCLUDE=%mpichinc% MPILIB=%mpichlib% VPATH="../../FDS_Source" -f ..\makefile mpi_intel_win_%size%_db 1>> %OUTDIR%\stage1b.txt 2>&1
@@ -157,96 +157,91 @@ make -j4 MPIINCLUDE=%mpichinc% MPILIB=%mpichlib% VPATH="../../FDS_Source" -f ..\
 call :does_file_exist fds_mpi_win_%size%_db.exe %OUTDIR%\stage1b.txt|| exit /b 1
 call :find_fds_warnings "warning" %OUTDIR%\stage1b.txt "Stage 1b"
 
-:skip_stage1
+:skip_fds_debug
 
-:: -------
-:: Stage 2
-:: -------
-
-echo Stage 2 - Building FDS (release)
-
-echo             serial
+echo             serial release
 cd %svnroot%\FDS_Compilation\intel_win_%size%
-erase *.obj *.mod *.exe 1> %OUTDIR%\stage2a.txt 2>&1
-make -j4 VPATH="../../FDS_Source" -f ..\makefile intel_win_%size% 1>> %OUTDIR%\stage2a.txt 2>&1
+erase *.obj *.mod *.exe 1> %OUTDIR%\stage1c.txt 2>&1
+make -j4 VPATH="../../FDS_Source" -f ..\makefile intel_win_%size% 1>> %OUTDIR%\stage1c.txt 2>&1
 
-call :does_file_exist fds_win_%size%.exe %OUTDIR%\stage2a.txt|| exit /b 1
-call :find_fds_warnings "warning" %OUTDIR%\stage2a.txt "Stage 2a"
+call :does_file_exist fds_win_%size%.exe %OUTDIR%\stage1c.txt|| exit /b 1
+call :find_fds_warnings "warning" %OUTDIR%\stage1c.txt "Stage 1c"
 
-if %reduced% == 1 goto skip_stage2b
-echo             parallel
+if %reduced% == 1 goto skip_fds_parallel
+echo             parallel release
 cd %svnroot%\FDS_Compilation\mpi_intel_win_%size%
-erase *.obj *.mod *.exe 1> %OUTDIR%\stage2b.txt 2>&1
-make -j4 MPIINCLUDE=%mpichinc% MPILIB=%mpichlib% VPATH="../../FDS_Source" -f ..\makefile mpi_intel_win_%size%  1>> %OUTDIR%\stage2b.txt 2>&1
+erase *.obj *.mod *.exe 1> %OUTDIR%\stage1d.txt 2>&1
+make -j4 MPIINCLUDE=%mpichinc% MPILIB=%mpichlib% VPATH="../../FDS_Source" -f ..\makefile mpi_intel_win_%size%  1>> %OUTDIR%\stage1d.txt 2>&1
 
-call :does_file_exist fds_mpi_win_%size%.exe %OUTDIR%\stage2b.txt|| exit /b 1
-call :find_fds_warnings "warning" %OUTDIR%\stage2b.txt "Stage 2b"
+call :does_file_exist fds_mpi_win_%size%.exe %OUTDIR%\stage1d.txt|| exit /b 1
+call :find_fds_warnings "warning" %OUTDIR%\stage1d.txt "Stage 1d"
 
-:skip_stage2b
+:skip_fds_parallel
 
 :: --------
+:: Stage 2
+:: --------
+
+if %reduced% == 1 goto skip_smokeview_debug
+
+echo Stage 2 - Building Smokeview
+echo             debug
+
+cd %svnroot%\SMV\Build\intel_win_%size%
+erase *.obj *.mod *.exe smokeview_win_%size%_db.exe 1> %OUTDIR%\stage2a.txt 2>&1
+make -f ..\Makefile intel_win_%size%_db 1>> %OUTDIR%\stage2a.txt 2>&1
+
+call :does_file_exist smokeview_win_%size%_db.exe %OUTDIR%\stage2a.txt|| exit /b 1
+call :find_smokeview_warnings "warning" %OUTDIR%\stage2a.txt "Stage 2a"
+
+:skip_smokeview_debug
+
+echo             release
+
+cd %svnroot%\SMV\Build\intel_win_%size%
+erase *.obj *.mod smokeview_win_%size%.exe 1> %OUTDIR%\stage2b.txt 2>&1
+make -f ..\Makefile intel_win_%size% 1>> %OUTDIR%\stage2b.txt 2>&1
+
+call :does_file_exist smokeview_win_%size%.exe %OUTDIR%\stage2b.txt|| aexit /b 1
+call :find_smokeview_warnings "warning" %OUTDIR%\stage2b.txt "Stage 2b"
+
+:: ----------
 :: Stage 3
-:: --------
-
-if %reduced% == 1 goto skip_stage3a
-
-echo Stage 3a - Building Smokeview (debug)
-
-cd %svnroot%\SMV\Build\intel_win_%size%
-erase *.obj *.mod *.exe smokeview_win_%size%_db.exe 1> %OUTDIR%\stage3a.txt 2>&1
-make -f ..\Makefile intel_win_%size%_db 1>> %OUTDIR%\stage3a.txt 2>&1
-
-call :does_file_exist smokeview_win_%size%_db.exe %OUTDIR%\stage3a.txt|| exit /b 1
-call :find_smokeview_warnings "warning" %OUTDIR%\stage3a.txt "Stage 3a"
-
-:skip_stage3a
-
-echo Stage 3b - Building Smokeview (release)
-
-cd %svnroot%\SMV\Build\intel_win_%size%
-erase *.obj *.mod smokeview_win_%size%.exe 1> %OUTDIR%\stage3b.txt 2>&1
-make -f ..\Makefile intel_win_%size% 1>> %OUTDIR%\stage3b.txt 2>&1
-
-call :does_file_exist smokeview_win_%size%.exe %OUTDIR%\stage3b.txt|| aexit /b 1
-call :find_smokeview_warnings "warning" %OUTDIR%\stage3b.txt "Stage 3b"
-
-:: ----------
-:: Stage 3c
 :: ----------
 
-echo Stage 3c - Building Smokeview utilities
+echo Stage 3 - Building FDS/Smokeview utilities
 
-echo              fds2ascii
+echo             fds2ascii
 cd %svnroot%\Utilities\fds2ascii\intel_win_%size%
 erase *.obj *.mod *.exe 1> %OUTDIR%\stage3c.txt 2>&1
-make -f ..\Makefile intel_win_%size% 1>> %OUTDIR%\stage3c.txt 2>&1
-call :does_file_exist fds2ascii_win_%size%.exe %OUTDIR%\stage3c.txt|| exit /b 1
+make -f ..\Makefile intel_win_%size% 1>> %OUTDIR%\stage3.txt 2>&1
+call :does_file_exist fds2ascii_win_%size%.exe %OUTDIR%\stage3.txt|| exit /b 1
 
 if %haveCC% == 1 (
-  echo              smokediff
+  echo             smokediff
   cd %svnroot%\Utilities\smokediff\intel_win_%size%
-  erase *.obj *.mod *.exe 1>> %OUTDIR%\stage3c.txt 2>&1
-  make -f ..\Makefile intel_win_%size% 1>> %OUTDIR%\stage3c.txt 2>&1
-  call :does_file_exist smokediff_win_%size%.exe %OUTDIR%\stage3c.txt
+  erase *.obj *.mod *.exe 1>> %OUTDIR%\stage3.txt 2>&1
+  make -f ..\Makefile intel_win_%size% 1>> %OUTDIR%\stage3.txt 2>&1
+  call :does_file_exist smokediff_win_%size%.exe %OUTDIR%\stage3.txt
 
-  echo              smokezip
+  echo             smokezip
   cd %svnroot%\Utilities\smokezip\intel_win_%size%
-  erase *.obj *.mod *.exe 1>> %OUTDIR%\stage3c.txt 2>&1
-  make -f ..\Makefile intel_win_%size% 1>> %OUTDIR%\stage3c.txt 2>&1
-  call :does_file_exist smokezip_win_%size%.exe %OUTDIR%\stage3c.txt|| exit /b 1
+  erase *.obj *.mod *.exe 1>> %OUTDIR%\stage3.txt 2>&1
+  make -f ..\Makefile intel_win_%size% 1>> %OUTDIR%\stage3.txt 2>&1
+  call :does_file_exist smokezip_win_%size%.exe %OUTDIR%\stage3.txt|| exit /b 1
 
-  echo              wind2fds
+  echo             wind2fds
   cd %svnroot%\Utilities\wind2fds\intel_win_%size%
-  erase *.obj *.mod *.exe 1>> %OUTDIR%\stage3c.txt 2>&1
-  make -f ..\Makefile intel_win_%size% 1>> %OUTDIR%\stage3c.txt 2>&1
-  call :does_file_exist wind2fds_win_%size%.exe %OUTDIR%\stage3c.txt|| exit /b 1
+  erase *.obj *.mod *.exe 1>> %OUTDIR%\stage3.txt 2>&1
+  make -f ..\Makefile intel_win_%size% 1>> %OUTDIR%\stage3.txt 2>&1
+  call :does_file_exist wind2fds_win_%size%.exe %OUTDIR%\stage3.txt|| exit /b 1
 ) else (
   call :is_file_installed smokediff|| exit /b 1
-  echo              smokediff not built, using installed version
+  echo             smokediff not built, using installed version
   call :is_file_installed smokezip|| exit /b 1
-  echo              smokezip not built, using installed version
+  echo             smokezip not built, using installed version
   call :is_file_installed wind2fds|| exit /b 1
-  echo              wind2fds not built, using installed version
+  echo             wind2fds not built, using installed version
 )
 
 :: -------
@@ -342,7 +337,9 @@ if exist %emailexe% (
 )
 
 echo smokebot_win completed
-goto eof
+cd %CURDIR%
+pause
+exit
 
 :output_abort_message
   echo "***Fatal error: smokebot build failure on %COMPUTERNAME% %revision%"
