@@ -78,6 +78,7 @@ export RUNWFDS=$SVNROOT/Utilities/Scripts/runwsmv.sh
 export RUNCFAST=$SVNROOT/Utilities/Scripts/runsmv.sh
 export BASEDIR=`pwd`
 
+export FDSUG=$SVNROOT/Manuals/FDS_User_Guide
 export SMVUG=$SVNROOT/Manuals/SMV_User_Guide
 export SMVVG=$SVNROOT/Manuals/SMV_Verification_Guide
 SUMMARY=$SVNROOT/Manuals/SMV_Summary
@@ -176,5 +177,6 @@ source $STOPX
 # copy generated images to web summary directory
 
 cp $SMVVG/FIGURES/graysquares.png $SUMMARY/images/.
+cp $FDSUG/SCRIPT_FIGURES/*.png $SUMMARY/images/.
 cp $SMVUG/SCRIPT_FIGURES/*.png $SUMMARY/images/.
 cp $SMVVG/SCRIPT_FIGURES/*.png $SUMMARY/images/.

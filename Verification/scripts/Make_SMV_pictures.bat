@@ -33,6 +33,7 @@ call :is_file_installed %SMOKEZIP%|| exit /b 1
 
 set vis="%SVNROOT%\Verification\Visualization"
 set wui="%SVNROOT%\Verification\Wui"
+set fdsug="%SVNROOT%\Manuals\FDS_User_Guide"
 set smvug="%SVNROOT%\Manuals\SMV_User_Guide"
 set smvvg="%SVNROOT%\Manuals\SMV_Verification_Guide"
 set summary="%SVNROOT%\Manuals\SMV_Summary"
@@ -122,6 +123,9 @@ call %SCRIPT_DIR%\SMV_DIFF_Pictures_Cases.bat
 
 :: copy images to summary directory
 
+echo copying user guide script figures from %fdsug%\SCRIPT_FIGURES to %summary%\images
+copy %fdsug%\SCRIPT_FIGURES\*.png %summary%\images
+
 echo copying user guide script figures from %smvug%\SCRIPT_FIGURES to %summary%\images
 copy %smvug%\SCRIPT_FIGURES\*.png %summary%\images
 
@@ -130,7 +134,6 @@ copy %smvvg%\SCRIPT_FIGURES\*.png %summary%\images
 
 echo copying graysquares figures from %smvvg%\FIGURES to %summary%\images
 copy %smvvg%\FIGURES\graysquares.png %summary%\images
-
 
 cd %SCRIPT_DIR%
 
