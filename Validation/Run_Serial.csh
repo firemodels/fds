@@ -39,10 +39,6 @@ cd Heskestad_Flame_Height
 mkdir Current_Results
 ./Run_All.sh
 cd ..
-cd iBMB
-mkdir Current_Results
-./Run_All.sh
-cd ..
 cd LEMTA_Spray
 mkdir Current_Results
 ./Run_All.sh
