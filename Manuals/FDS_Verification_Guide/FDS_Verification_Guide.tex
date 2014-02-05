@@ -3553,9 +3553,9 @@ F & 150 & 1600 \tabularnewline
 
 \section{Pressure Drop through Stationary Particles (\texorpdfstring{\bf drag\_dt}{drag\_dt})}
 
-The pressure drop test cases consider a 1 m wide by 1 m tall by 2 m long channel with a 2 m/s fixed velocity boundary condition on one end, an \textct{OPEN} boundary condition on the other end, and \textct{FREE\_SLIP} on the y- and z-faces.  Three channels are stacked vertically (each with its own \textct{MESH}, and a plane of particles is placed across each channel at 1 m.  The particles are 0.01 m in diameter and 10 particles are placed per cell.  A \textct{USER\_DRAG\_COEFFICIENT} of 5, 10, and 20 is set for the particles in the channels.  According to
-\be \Delta P=\frac{1}{2} \rho \frac{\sum \, C_{D} \, \pi \, r_{d}^{2}} {A} \ee
-where A$_{cx}$ is the 1 m$^2$ cross-sectional area, the pressure drops in each sub channel are 3.77~Pa, 7.54~Pa, and 15.1~Pa.  Comparisons of computed and analytical results are shown in Fig.~\ref{pressure_drop_plots}. The pressure drop converges to the analytical solution as the time step decreases.
+Consider a 1~m wide by 1~m tall by 2~m long channel with a specified velocity of $u_0=2$~m/s on one end, an \textct{OPEN} boundary condition on the other end, and \textct{FREE\_SLIP} on the side walls.  Three channels are stacked vertically (each with its own \textct{MESH}, and a plane of particles is placed across each channel at 1 m).  The particles are $r_{\rm p}=0.01$~m in diameter and 10 particles are placed per cell.  A \textct{USER\_DRAG\_COEFFICIENT} of 5, 10, and 20 is set for the particles in the channels.  According to
+\be \Delta P=\frac{1}{2} \rho \frac{\sum \, C_{\rm D} \, \pi \, r_{\rm p}^{2} \, u_0^2} {A} \ee
+where $A$ is the 1~m$^2$ cross-sectional area, the pressure drops in each sub channel are 3.77~Pa, 7.54~Pa, and 15.1~Pa.  Comparisons of computed and analytical results are shown in Fig.~\ref{pressure_drop_plots}. The pressure drop converges to the analytical solution as the time step decreases.
 
 \begin{figure}[ht]
 \noindent
@@ -3563,15 +3563,12 @@ where A$_{cx}$ is the 1 m$^2$ cross-sectional area, the pressure drops in each s
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/pressure_drop_p1} &
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/pressure_drop_p01} \\
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/pressure_drop_p001} &
-\\
 \end{tabular*}
-\caption[Sample cases {\bf drag}]{Outputs of the {\bf drag\_dt} test cases compared with analytical solutions.}
+\caption[Sample cases {\ct drag\_dt}]{Outputs of the {\ct drag\_dt} test cases compared with analytical solutions.}
 \label{pressure_drop_plots}
 \end{figure}
 
 \clearpage
-
-\newpage
 
 \section{Mesh Screens (\texorpdfstring{\bf screen\_drag}{screen\_drag})}
 
