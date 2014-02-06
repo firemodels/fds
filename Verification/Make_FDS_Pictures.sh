@@ -33,7 +33,7 @@ while getopts 'dhp:rs:t' OPTION
 do
 case $OPTION  in
   d)
-   DEBUG=_dbg
+   DEBUG=_db
    ;;
   h)
    usage;
@@ -63,7 +63,7 @@ export SVNROOT=`pwd`/..
 if [ "$SMV_PATH" == "" ]; then
   SMV_PATH=$SVNROOT/SMV/Build/intel_$PLATFORM$SIZE
 fi
-export SMV=$SMV_PATH/smokeview_$PLATFORM$TEST$SIZE
+export SMV=$SMV_PATH/smokeview_$PLATFORM$TEST$SIZE$DEBUG
 export RUNSMV=$SVNROOT/Utilities/Scripts/runsmv.sh
 export SMVBINDIR="-bindir $SVNROOT/SMV/for_bundle/"
 export BASEDIR=`pwd`
