@@ -127,7 +127,7 @@ intel_win_64 : $(objwin)
 LINUX_SYSTEMLIBS = -lpthread -lX11 -lXmu -lGLU -lGL -lm
 
 LINUX_INTEL_LIBS_32 = $(IFORT_COMPILER)/lib/ia32/libifcore.a  $(IFORT_COMPILER)/lib/ia32/libirc.a
-LINUX_INTEL_LIBS_64 = $(IFORT_COMPILER)/lib/intel64/libifcore.a  $(IFORT_COMPILER)/lib/intel64/libirc.a
+LINUX_INTEL_LIBS_64 = $(IFORT_COMPILER)/compiler/lib/intel64/libifcore.a  $(IFORT_COMPILER)/compiler/lib/intel64/libirc.a
 
 # ------------- intel_linux_32 ----------------
 
