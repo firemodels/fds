@@ -94,8 +94,10 @@ void RenderFrame(int view_mode){
   char renderfile_name[1024], renderfile_dir[1024], renderfile_full[1024], renderfile_suffix[1024], *renderfile_ext;
   char *renderfile_dir_ptr=NULL;
   int use_scriptfile;
-  int woffset=0;
+  int woffset=0,hoffset=0;
+  int screenH;
 
+  screenH = screenHeight;
   if(view_mode==VIEW_LEFT&&showstereo==STEREO_RB)return;
 
 // construct filename for image to be rendered
@@ -226,13 +228,20 @@ void RenderFrame(int view_mode){
     case VIEW_LEFT:
         if(showstereo==STEREO_LR){
           strcat(suffix,"_L");
+          hoffset=screenHeight/4;
+          screenH = screenHeight/2;
         }
       break;
     case VIEW_RIGHT:
       if(showstereo==STEREO_NONE||showstereo==STEREO_TIME||showstereo==STEREO_LR){
         strcat(suffix,"_R");
       }
-      if(showstereo==STEREO_LR)woffset=screenWidth;
+      if(showstereo==STEREO_LR){
+        woffset=screenWidth;
+        hoffset=0;
+        hoffset=screenHeight/4;
+        screenH = screenHeight/2;
+      }
       if(RenderTime==0)seqnum++;
       break;
     default:
@@ -265,7 +274,7 @@ void RenderFrame(int view_mode){
 
   // render image
 
-  SVimage2file(renderfile_dir_ptr,renderfile_full,renderfiletype,woffset,screenWidth,screenHeight);
+  SVimage2file(renderfile_dir_ptr,renderfile_full,renderfiletype,woffset,screenWidth,hoffset,screenH);
   if(RenderTime==1&&output_slicedata==1){
     output_Slicedata();
   }
@@ -393,7 +402,7 @@ int mergescreenbuffers(int nscreen_rows, GLubyte **screenbuffers){
 
 /* ------------------ SVimage2file ------------------------ */
 
-int SVimage2file(char *directory, char *RENDERfilename, int rendertype, int woffset, int width, int height){
+int SVimage2file(char *directory, char *RENDERfilename, int rendertype, int woffset, int width, int hoffset, int height){
 
   FILE *RENDERfile;
   char *renderfile=NULL;
@@ -406,8 +415,8 @@ int SVimage2file(char *directory, char *RENDERfilename, int rendertype, int woff
 
   width_beg=woffset;
   width_end=width+woffset;
-  height_beg=0;
-  height_end=height;
+  height_beg=hoffset;
+  height_end=hoffset+height;
   if(clip_rendered_scene==1){
     width_beg+=render_clip_left;
     width_end-=render_clip_right;

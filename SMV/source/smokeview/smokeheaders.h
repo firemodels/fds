@@ -865,7 +865,7 @@ EXTERNCPP void setisolabels(float smin, float smax,
                     isodata *sd, int *errorcode);
 EXTERNCPP void getIsoLabels(float tmin, float tmax, int nlevel,
               char labels[12][11],char **scale, float *tlevels256);
-EXTERNCPP int SVimage2file(char *directory, char *GIFfilename, int rendertype, int woffset, int width, int height);
+EXTERNCPP int SVimage2file(char *directory, char *GIFfilename, int rendertype, int woffset, int width, int hoffset, int height);
 EXTERNCPP void update_showhidebuttons(void);
 EXTERNCPP void update_fileload(void);
 EXTERNCPP surfdata *get_surface(char *label);
