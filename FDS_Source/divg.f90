@@ -631,8 +631,13 @@ PREDICT_NORMALS: IF (PREDICTOR) THEN
             WC%ONE_D%UWS = 0._EB
          CASE (SOLID_BOUNDARY)
             SF => SURFACE(WC%SURF_INDEX)
-            IF (SF%SPECIES_BC_INDEX==SPECIFIED_MASS_FLUX .OR. SF%SPECIES_BC_INDEX==INTERPOLATED_BC .OR. &
-               SF%SPECIES_BC_INDEX==HVAC_BOUNDARY .OR. ANY(SF%LEAK_PATH>0._EB)) CYCLE WALL_LOOP3
+
+            IF (SF%SPECIES_BC_INDEX==SPECIFIED_MASS_FLUX .OR. &
+                SF%SPECIES_BC_INDEX==INTERPOLATED_BC     .OR. &
+                SF%SPECIES_BC_INDEX==HVAC_BOUNDARY       .OR. &
+                ANY(SF%LEAK_PATH>0._EB))                      &
+                CYCLE WALL_LOOP3
+            
             IF (ABS(WC%ONE_D%T_IGN-T_BEGIN) < SPACING(WC%ONE_D%T_IGN) .AND. SF%RAMP_INDEX(TIME_VELO)>=1) THEN
                TSI = T + DT
             ELSE
@@ -796,12 +801,12 @@ CONTAINS
 
 SUBROUTINE ENTHALPY_ADVECTION
 
-REAL(EB), POINTER, DIMENSION(:,:,:) :: HX=>NULL(),HY=>NULL(),HZ=>NULL(),DV=>NULL()
+REAL(EB), POINTER, DIMENSION(:,:,:) :: HSX=>NULL(),HSY=>NULL(),HSZ=>NULL(),DV=>NULL()
 REAL(EB) :: DR,B
 
-HX=>WORK2!; HX=1.E20_EB
-HY=>WORK3!; HY=1.E20_EB
-HZ=>WORK4!; HZ=1.E20_EB
+HSX=>WORK2!; HSX=1.E20_EB
+HSY=>WORK3!; HSY=1.E20_EB
+HSZ=>WORK4!; HSZ=1.E20_EB
 U_DOT_DEL_RHO_H_S=>WORK6; U_DOT_DEL_RHO_H_S=0._EB
 
 IF (.NOT.ENTHALPY_TRANSPORT) RETURN
@@ -831,14 +836,14 @@ LIMITER_SELECT: SELECT CASE (FLUX_LIMITER)
                   IF (UU(I,J,K)>0._EB) THEN
                      DR = DV(I-1,J,K)/DV(I,J,K)
                      B = MAX(0._EB,MIN(2._EB*DR,1._EB),MIN(DR,2._EB))
-                     HX(I,J,K) = RHO_H_S_P(I,J,K)   + 0.5_EB*B*DV(I,J,K)
+                     HSX(I,J,K) = RHO_H_S_P(I,J,K)   + 0.5_EB*B*DV(I,J,K)
                   ELSE
                      DR = DV(I+1,J,K)/DV(I,J,K)
                      B = MAX(0._EB,MIN(2._EB*DR,1._EB),MIN(DR,2._EB))
-                     HX(I,J,K) = RHO_H_S_P(I+1,J,K) - 0.5_EB*B*DV(I,J,K)
+                     HSX(I,J,K) = RHO_H_S_P(I+1,J,K) - 0.5_EB*B*DV(I,J,K)
                   ENDIF
                ELSE
-                  HX(I,J,K) = 0.5_EB*(RHO_H_S_P(I,J,K) + RHO_H_S_P(I+1,J,K))
+                  HSX(I,J,K) = 0.5_EB*(RHO_H_S_P(I,J,K) + RHO_H_S_P(I+1,J,K))
                ENDIF
 
             ENDDO
@@ -864,14 +869,14 @@ LIMITER_SELECT: SELECT CASE (FLUX_LIMITER)
                   IF (VV(I,J,K)>0._EB) THEN
                      DR = DV(I,J-1,K)/DV(I,J,K)
                      B = MAX(0._EB,MIN(2._EB*DR,1._EB),MIN(DR,2._EB))
-                     HY(I,J,K) = RHO_H_S_P(I,J,K)   + 0.5_EB*B*DV(I,J,K)
+                     HSY(I,J,K) = RHO_H_S_P(I,J,K)   + 0.5_EB*B*DV(I,J,K)
                   ELSE
                      DR = DV(I,J+1,K)/DV(I,J,K)
                      B = MAX(0._EB,MIN(2._EB*DR,1._EB),MIN(DR,2._EB))
-                     HY(I,J,K) = RHO_H_S_P(I,J+1,K) - 0.5_EB*B*DV(I,J,K)
+                     HSY(I,J,K) = RHO_H_S_P(I,J+1,K) - 0.5_EB*B*DV(I,J,K)
                   ENDIF
                ELSE
-                  HY(I,J,K) = 0.5_EB*(RHO_H_S_P(I,J,K) + RHO_H_S_P(I,J+1,K))
+                  HSY(I,J,K) = 0.5_EB*(RHO_H_S_P(I,J,K) + RHO_H_S_P(I,J+1,K))
                ENDIF
 
             ENDDO
@@ -897,14 +902,14 @@ LIMITER_SELECT: SELECT CASE (FLUX_LIMITER)
                   IF (WW(I,J,K)>0._EB) THEN
                      DR = DV(I,J,K-1)/DV(I,J,K)
                      B = MAX(0._EB,MIN(2._EB*DR,1._EB),MIN(DR,2._EB))
-                     HZ(I,J,K) = RHO_H_S_P(I,J,K)   + 0.5_EB*B*DV(I,J,K)
+                     HSZ(I,J,K) = RHO_H_S_P(I,J,K)   + 0.5_EB*B*DV(I,J,K)
                   ELSE
                      DR = DV(I,J,K+1)/DV(I,J,K)
                      B = MAX(0._EB,MIN(2._EB*DR,1._EB),MIN(DR,2._EB))
-                     HZ(I,J,K) = RHO_H_S_P(I,J,K+1) - 0.5_EB*B*DV(I,J,K)
+                     HSZ(I,J,K) = RHO_H_S_P(I,J,K+1) - 0.5_EB*B*DV(I,J,K)
                   ENDIF
                ELSE
-                  HZ(I,J,K) = 0.5_EB*(RHO_H_S_P(I,J,K) + RHO_H_S_P(I,J,K+1))
+                  HSZ(I,J,K) = 0.5_EB*(RHO_H_S_P(I,J,K) + RHO_H_S_P(I,J,K+1))
                ENDIF
 
             ENDDO
@@ -916,7 +921,7 @@ LIMITER_SELECT: SELECT CASE (FLUX_LIMITER)
       DO K=1,KBAR
          DO J=1,JBAR
             DO I=1,IBM1
-               HX(I,J,K) = 0.5_EB*(RHO_H_S_P(I,J,K) + RHO_H_S_P(I+1,J,K))
+               HSX(I,J,K) = 0.5_EB*(RHO_H_S_P(I,J,K) + RHO_H_S_P(I+1,J,K))
             ENDDO
          ENDDO
       ENDDO
@@ -924,7 +929,7 @@ LIMITER_SELECT: SELECT CASE (FLUX_LIMITER)
       DO K=1,KBAR
          DO J=1,JBM1
             DO I=1,IBAR
-               HY(I,J,K) = 0.5_EB*(RHO_H_S_P(I,J,K) + RHO_H_S_P(I,J+1,K))
+               HSY(I,J,K) = 0.5_EB*(RHO_H_S_P(I,J,K) + RHO_H_S_P(I,J+1,K))
             ENDDO
          ENDDO
       ENDDO
@@ -932,7 +937,7 @@ LIMITER_SELECT: SELECT CASE (FLUX_LIMITER)
       DO K=1,KBM1
          DO J=1,JBAR
             DO I=1,IBAR
-               HZ(I,J,K) = 0.5_EB*(RHO_H_S_P(I,J,K) + RHO_H_S_P(I,J,K+1))
+               HSZ(I,J,K) = 0.5_EB*(RHO_H_S_P(I,J,K) + RHO_H_S_P(I,J,K+1))
             ENDDO
          ENDDO
       ENDDO
@@ -943,7 +948,7 @@ LIMITER_SELECT: SELECT CASE (FLUX_LIMITER)
          DO J=1,JBAR
             DO I=1,IBM1
                ZZZ(1:4) = RHO_H_S_P(I-1:I+2,J,K)
-               HX(I,J,K) = SCALAR_FACE_VALUE(UU(I,J,K),ZZZ,FLUX_LIMITER)
+               HSX(I,J,K) = SCALAR_FACE_VALUE(UU(I,J,K),ZZZ,FLUX_LIMITER)
             ENDDO
          ENDDO
       ENDDO
@@ -952,7 +957,7 @@ LIMITER_SELECT: SELECT CASE (FLUX_LIMITER)
          DO J=1,JBM1
             DO I=1,IBAR
                ZZZ(1:4) = RHO_H_S_P(I,J-1:J+2,K)
-               HY(I,J,K) = SCALAR_FACE_VALUE(VV(I,J,K),ZZZ,FLUX_LIMITER)
+               HSY(I,J,K) = SCALAR_FACE_VALUE(VV(I,J,K),ZZZ,FLUX_LIMITER)
             ENDDO
          ENDDO
       ENDDO
@@ -961,7 +966,7 @@ LIMITER_SELECT: SELECT CASE (FLUX_LIMITER)
          DO J=1,JBAR
             DO I=1,IBAR
                ZZZ(1:4) = RHO_H_S_P(I,J,K-1:K+2)
-               HZ(I,J,K) = SCALAR_FACE_VALUE(WW(I,J,K),ZZZ,FLUX_LIMITER)
+               HSZ(I,J,K) = SCALAR_FACE_VALUE(WW(I,J,K),ZZZ,FLUX_LIMITER)
             ENDDO
          ENDDO
       ENDDO
@@ -993,7 +998,7 @@ WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
             !                       ^ WALL_INDEX(II+1,+1)
             IF ((UU(II+1,JJ,KK)>0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II+1,JJ,KK),+1)>0)) THEN
                ZZZ(1:3) = (/WC%RHO_F*H_S,RHO_H_S_P(II+1:II+2,JJ,KK)/)
-               HX(II+1,JJ,KK) = SCALAR_FACE_VALUE(UU(II+1,JJ,KK),ZZZ,FLUX_LIMITER)
+               HSX(II+1,JJ,KK) = SCALAR_FACE_VALUE(UU(II+1,JJ,KK),ZZZ,FLUX_LIMITER)
             ENDIF
          CASE(-1) OFF_WALL_SELECT_1
             !            FX/UU(II-2)     ghost
@@ -1001,27 +1006,27 @@ WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
             !              ^ WALL_INDEX(II-1,-1)
             IF ((UU(II-2,JJ,KK)<0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II-1,JJ,KK),-1)>0)) THEN
                ZZZ(2:4) = (/RHO_H_S_P(II-2:II-1,JJ,KK),WC%RHO_F*H_S/)
-               HX(II-2,JJ,KK) = SCALAR_FACE_VALUE(UU(II-2,JJ,KK),ZZZ,FLUX_LIMITER)
+               HSX(II-2,JJ,KK) = SCALAR_FACE_VALUE(UU(II-2,JJ,KK),ZZZ,FLUX_LIMITER)
             ENDIF
          CASE( 2) OFF_WALL_SELECT_1
             IF ((VV(II,JJ+1,KK)>0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II,JJ+1,KK),+2)>0)) THEN
                ZZZ(1:3) = (/WC%RHO_F*H_S,RHO_H_S_P(II,JJ+1:JJ+2,KK)/)
-               HY(II,JJ+1,KK) = SCALAR_FACE_VALUE(VV(II,JJ+1,KK),ZZZ,FLUX_LIMITER)
+               HSY(II,JJ+1,KK) = SCALAR_FACE_VALUE(VV(II,JJ+1,KK),ZZZ,FLUX_LIMITER)
             ENDIF
          CASE(-2) OFF_WALL_SELECT_1
             IF ((VV(II,JJ-2,KK)<0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II,JJ-1,KK),-2)>0)) THEN
                ZZZ(2:4) = (/RHO_H_S_P(II,JJ-2:JJ-1,KK),WC%RHO_F*H_S/)
-               HY(II,JJ-2,KK) = SCALAR_FACE_VALUE(VV(II,JJ-2,KK),ZZZ,FLUX_LIMITER)
+               HSY(II,JJ-2,KK) = SCALAR_FACE_VALUE(VV(II,JJ-2,KK),ZZZ,FLUX_LIMITER)
             ENDIF
          CASE( 3) OFF_WALL_SELECT_1
             IF ((WW(II,JJ,KK+1)>0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II,JJ,KK+1),+3)>0)) THEN
                ZZZ(1:3) = (/WC%RHO_F*H_S,RHO_H_S_P(II,JJ,KK+1:KK+2)/)
-               HZ(II,JJ,KK+1) = SCALAR_FACE_VALUE(WW(II,JJ,KK+1),ZZZ,FLUX_LIMITER)
+               HSZ(II,JJ,KK+1) = SCALAR_FACE_VALUE(WW(II,JJ,KK+1),ZZZ,FLUX_LIMITER)
             ENDIF
          CASE(-3) OFF_WALL_SELECT_1
             IF ((WW(II,JJ,KK-2)<0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II,JJ,KK-1),-3)>0)) THEN
                ZZZ(2:4) = (/RHO_H_S_P(II,JJ,KK-2:KK-1),WC%RHO_F*H_S/)
-               HZ(II,JJ,KK-2) = SCALAR_FACE_VALUE(WW(II,JJ,KK-2),ZZZ,FLUX_LIMITER)
+               HSZ(II,JJ,KK-2) = SCALAR_FACE_VALUE(WW(II,JJ,KK-2),ZZZ,FLUX_LIMITER)
             ENDIF
       END SELECT OFF_WALL_SELECT_1
    
@@ -1046,27 +1051,27 @@ WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
 
    SELECT CASE(IOR)
       CASE( 1)
-         HX(II,JJ,KK)   = RHO_H_S_P(IIG,JJG,KKG) ! zero out DU at wall
+         HSX(II,JJ,KK)   = RHO_H_S_P(IIG,JJG,KKG) ! zero out DU at wall
          DU_M = (WC%RHO_F*H_S - RHO_H_S_P(IIG,JJG,KKG))*UN
          U_DOT_DEL_RHO_H_S(IIG,JJG,KKG) = U_DOT_DEL_RHO_H_S(IIG,JJG,KKG) - DU_M*WC%RDN
       CASE(-1)
-         HX(II-1,JJ,KK) = RHO_H_S_P(IIG,JJG,KKG)
+         HSX(II-1,JJ,KK) = RHO_H_S_P(IIG,JJG,KKG)
          DU_P = (WC%RHO_F*H_S - RHO_H_S_P(IIG,JJG,KKG))*UN
          U_DOT_DEL_RHO_H_S(IIG,JJG,KKG) = U_DOT_DEL_RHO_H_S(IIG,JJG,KKG) + DU_P*WC%RDN
       CASE( 2)
-         HY(II,JJ,KK)   = RHO_H_S_P(IIG,JJG,KKG)
+         HSY(II,JJ,KK)   = RHO_H_S_P(IIG,JJG,KKG)
          DU_M = (WC%RHO_F*H_S - RHO_H_S_P(IIG,JJG,KKG))*UN
          U_DOT_DEL_RHO_H_S(IIG,JJG,KKG) = U_DOT_DEL_RHO_H_S(IIG,JJG,KKG) - DU_M*WC%RDN
       CASE(-2)
-         HY(II,JJ-1,KK) = RHO_H_S_P(IIG,JJG,KKG)
+         HSY(II,JJ-1,KK) = RHO_H_S_P(IIG,JJG,KKG)
          DU_P = (WC%RHO_F*H_S - RHO_H_S_P(IIG,JJG,KKG))*UN
          U_DOT_DEL_RHO_H_S(IIG,JJG,KKG) = U_DOT_DEL_RHO_H_S(IIG,JJG,KKG) + DU_P*WC%RDN
       CASE( 3)
-         HZ(II,JJ,KK)   = RHO_H_S_P(IIG,JJG,KKG)
+         HSZ(II,JJ,KK)   = RHO_H_S_P(IIG,JJG,KKG)
          DU_M = (WC%RHO_F*H_S - RHO_H_S_P(IIG,JJG,KKG))*UN
          U_DOT_DEL_RHO_H_S(IIG,JJG,KKG) = U_DOT_DEL_RHO_H_S(IIG,JJG,KKG) - DU_M*WC%RDN
       CASE(-3)
-         HZ(II,JJ,KK-1) = RHO_H_S_P(IIG,JJG,KKG)
+         HSZ(II,JJ,KK-1) = RHO_H_S_P(IIG,JJG,KKG)
          DU_P = (WC%RHO_F*H_S - RHO_H_S_P(IIG,JJG,KKG))*UN
          U_DOT_DEL_RHO_H_S(IIG,JJG,KKG) = U_DOT_DEL_RHO_H_S(IIG,JJG,KKG) + DU_P*WC%RDN
    END SELECT
@@ -1078,16 +1083,16 @@ DO K=1,KBAR
       DO I=1,IBAR
          IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
 
-         DU_P = (HX(I,J,K)   - RHO_H_S_P(I,J,K))*UU(I,J,K)                        ! FDS Tech Guide (B.13)
-         DU_M = (HX(I-1,J,K) - RHO_H_S_P(I,J,K))*UU(I-1,J,K)                      ! FDS Tech Guide (B.14)
+         DU_P = (HSX(I,J,K)   - RHO_H_S_P(I,J,K))*UU(I,J,K)                       ! FDS Tech Guide (B.13)
+         DU_M = (HSX(I-1,J,K) - RHO_H_S_P(I,J,K))*UU(I-1,J,K)                     ! FDS Tech Guide (B.14)
          U_DOT_DEL_RHO_H_S(I,J,K) = U_DOT_DEL_RHO_H_S(I,J,K) + (DU_P-DU_M)*RDX(I) ! FDS Tech Guide (B.12)
 
-         DU_P = (HY(I,J,K)   - RHO_H_S_P(I,J,K))*VV(I,J,K)
-         DU_M = (HY(I,J-1,K) - RHO_H_S_P(I,J,K))*VV(I,J-1,K)
+         DU_P = (HSY(I,J,K)   - RHO_H_S_P(I,J,K))*VV(I,J,K)
+         DU_M = (HSY(I,J-1,K) - RHO_H_S_P(I,J,K))*VV(I,J-1,K)
          U_DOT_DEL_RHO_H_S(I,J,K) = U_DOT_DEL_RHO_H_S(I,J,K) + (DU_P-DU_M)*RDY(J)
 
-         DU_P = (HZ(I,J,K)   - RHO_H_S_P(I,J,K))*WW(I,J,K)
-         DU_M = (HZ(I,J,K-1) - RHO_H_S_P(I,J,K))*WW(I,J,K-1)
+         DU_P = (HSZ(I,J,K)   - RHO_H_S_P(I,J,K))*WW(I,J,K)
+         DU_M = (HSZ(I,J,K-1) - RHO_H_S_P(I,J,K))*WW(I,J,K-1)
          U_DOT_DEL_RHO_H_S(I,J,K) = U_DOT_DEL_RHO_H_S(I,J,K) + (DU_P-DU_M)*RDZ(K)
 
       ENDDO
