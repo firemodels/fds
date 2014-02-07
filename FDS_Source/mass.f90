@@ -275,11 +275,9 @@ IF (EVACUATION_ONLY(NM)) RETURN
 IF (SOLID_PHASE_ONLY) RETURN
 
 ! If the RHS of the continuity equation does not yet satisfy the divergence constraint, return.
-! This is typical of the case where an initial velocity field is specified by the user, and also
-! happens for simple mass injection.
+! This is typical of the case where an initial velocity field is specified by the user.
 
-IF (ICYC<=1) RETURN
-
+IF (PROJECTION .AND. ICYC<=1) RETURN
 IF (PERIODIC_TEST==5) RETURN
 
 TNOW=SECOND()
