@@ -228,19 +228,11 @@ void RenderFrame(int view_mode){
     case VIEW_LEFT:
         if(showstereo==STEREO_LR){
           strcat(suffix,"_L");
-          hoffset=screenHeight/4;
-          screenH = screenHeight/2;
         }
       break;
     case VIEW_RIGHT:
       if(showstereo==STEREO_NONE||showstereo==STEREO_TIME||showstereo==STEREO_LR){
         strcat(suffix,"_R");
-      }
-      if(showstereo==STEREO_LR){
-        woffset=screenWidth;
-        hoffset=0;
-        hoffset=screenHeight/4;
-        screenH = screenHeight/2;
       }
       if(RenderTime==0)seqnum++;
       break;
@@ -249,6 +241,12 @@ void RenderFrame(int view_mode){
       break;
     }
     strcat(renderfile_suffix,suffix);
+  }
+
+  if(showstereo==STEREO_LR&&(view_mode==VIEW_LEFT||view_mode==VIEW_RIGHT)){
+    hoffset=screenHeight/4;
+    screenH = screenHeight/2;
+    if(view_mode==VIEW_RIGHT)woffset=screenWidth;
   }
 
   // filename extension
