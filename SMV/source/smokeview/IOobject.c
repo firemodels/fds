@@ -1062,24 +1062,6 @@ void draw_SVOBJECT(sv_object *object_dev, int iframe_local, propdata *prop, int 
   if(prop!=NULL){
     int i;
 
-    // copy static data from PROP line
-
-//xxx    printf("nvals=%i : ",prop->nvars_indep);
-    for(i=0;i<prop->nvars_indep;i++){
-      tokendata *toki;
-      int index;
-
-      index = prop->vars_indep_index[i];
-      if(index<0||index>framei->ntokens-1)continue;
-      toki = framei->tokens + index;
-      toki->var=prop->fvals[i];
-//xxx      printf(" %i %f,",index,toki->var);
-      if(prop->svals!=NULL&&prop->svals[i]!=NULL&&strlen(prop->svals[i])>0){
-        strcpy(toki->string,prop->svals[i]);
-      }
-    }
-//xxx    printf("\n");
-
     // copy time dependent evac data
 
     if(prop->draw_evac==1&&frame0->nevac_tokens>0){
@@ -1111,6 +1093,22 @@ void draw_SVOBJECT(sv_object *object_dev, int iframe_local, propdata *prop, int 
         toki->var=prop->fvars_dep[i];
       }
     }
+
+    // copy static data from PROP line
+
+    for(i=0;i<prop->nvars_indep;i++){
+      tokendata *toki;
+      int index;
+
+      index = prop->vars_indep_index[i];
+      if(index<0||index>framei->ntokens-1)continue;
+      toki = framei->tokens + index;
+      toki->var=prop->fvals[i];
+      if(prop->svals!=NULL&&prop->svals[i]!=NULL&&strlen(prop->svals[i])>0){
+        strcpy(toki->string,prop->svals[i]);
+      }
+    }
+
   }
 
   if(framei->display_list_ID!=-1&&object->use_displaylist==1){
@@ -1167,14 +1165,12 @@ void draw_SVOBJECT(sv_object *object_dev, int iframe_local, propdata *prop, int 
     else{
       rgbptr_local=select_device_color_ptr;
     }
-//xxx    printf("color= %i %i %i\n",(int)rgbptr_local[0],(int)rgbptr_local[1],(int)rgbptr_local[2]);
     for(j=0;j<toki->nvars;j++){
       tokendata *tokj;
       
       tokj = toki - toki->nvars + j;
       arg[j] = *(tokj->varptr);
     }
-//xxx    printf("arg= %f %f %f\n",arg[0],arg[1],arg[2]);
     if(toki->nvars>0){
       argptr=(toki-1)->varptr;
     }
@@ -1748,7 +1744,6 @@ void draw_SVOBJECT(sv_object *object_dev, int iframe_local, propdata *prop, int 
       else{
         rgbptr_local=select_device_color_ptr;
       }
-//xxx      printf("rgb= %f %f %f\n",arg[0],arg[1],arg[2]);
       break;
     case SV_SETLINEWIDTH:
       {
