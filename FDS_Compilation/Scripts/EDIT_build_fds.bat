@@ -17,4 +17,4 @@ call %envfile%
 
 %svn_drive%
 cd %svn_root%\FDS_Compilation
-start wordpad build_fds.html
+start notepad build_fds.html
