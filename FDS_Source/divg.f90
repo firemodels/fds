@@ -846,6 +846,8 @@ LIMITER_SELECT: SELECT CASE (FLUX_LIMITER)
       ! compute data variation and face value x
 
       !DV = 1.E20_EB
+      !$OMP PARALLEL
+      !$OMP DO SCHEDULE(static)
       DO K=1,KBAR
          DO J=1,JBAR
             DO I=0,IBAR
@@ -853,7 +855,9 @@ LIMITER_SELECT: SELECT CASE (FLUX_LIMITER)
             ENDDO
          ENDDO
       ENDDO
+      !$OMP END DO
 
+      !$OMP DO PRIVATE(DR, B) SCHEDULE(static)
       DO K=1,KBAR
          DO J=1,JBAR
             DO I=1,IBM1
@@ -875,10 +879,12 @@ LIMITER_SELECT: SELECT CASE (FLUX_LIMITER)
             ENDDO
          ENDDO
       ENDDO
+      !$OMP END DO
 
       ! compute data variation and face value in y
 
       !DV = 1.E20_EB
+      !$OMP DO SCHEDULE(static)
       DO K=1,KBAR
          DO J=0,JBAR
             DO I=1,IBAR
@@ -886,7 +892,9 @@ LIMITER_SELECT: SELECT CASE (FLUX_LIMITER)
             ENDDO
          ENDDO
       ENDDO
+      !$OMP END DO
 
+      !$OMP DO PRIVATE(DR, B) SCHEDULE(static)
       DO K=1,KBAR
          DO J=1,JBM1
             DO I=1,IBAR
@@ -908,10 +916,12 @@ LIMITER_SELECT: SELECT CASE (FLUX_LIMITER)
             ENDDO
          ENDDO
       ENDDO
+      !$OMP END DO
 
       ! compute data variation and face value in z
 
       !DV = 1.E20_EB
+      !$OMP DO SCHEDULE(static)
       DO K=0,KBAR
          DO J=1,JBAR
             DO I=1,IBAR
@@ -919,7 +929,9 @@ LIMITER_SELECT: SELECT CASE (FLUX_LIMITER)
             ENDDO
          ENDDO
       ENDDO
+      !$OMP END DO
 
+      !$OMP DO PRIVATE(DR, B) SCHEDULE(static)
       DO K=1,KBM1   
          DO J=1,JBAR
             DO I=1,IBAR
@@ -941,6 +953,8 @@ LIMITER_SELECT: SELECT CASE (FLUX_LIMITER)
             ENDDO
          ENDDO
       ENDDO
+      !$OMP END DO
+      !$OMP END PARALLEL
 
    CASE (CENTRAL_LIMITER) LIMITER_SELECT
 
@@ -1153,6 +1167,8 @@ LIMITER_SELECT: SELECT CASE (FLUX_LIMITER)
       ! compute data variation and face value x
 
       !DV = 1.E20_EB
+      !$OMP PARALLEL
+      !$OMP DO SCHEDULE(static)
       DO K=1,KBAR
          DO J=1,JBAR
             DO I=0,IBAR
@@ -1160,7 +1176,9 @@ LIMITER_SELECT: SELECT CASE (FLUX_LIMITER)
             ENDDO
          ENDDO
       ENDDO
+      !$OMP END DO
 
+      !$OMP DO PRIVATE(DR, B) SCHEDULE(static)
       DO K=1,KBAR
          DO J=1,JBAR
             DO I=1,IBM1
@@ -1182,10 +1200,12 @@ LIMITER_SELECT: SELECT CASE (FLUX_LIMITER)
             ENDDO
          ENDDO
       ENDDO
+      !$OMP END DO
 
       ! compute data variation and face value y
 
       !DV = 1.E20_EB
+      !$OMP DO SCHEDULE(static)
       DO K=1,KBAR
          DO J=0,JBAR
             DO I=1,IBAR
@@ -1193,7 +1213,9 @@ LIMITER_SELECT: SELECT CASE (FLUX_LIMITER)
             ENDDO
          ENDDO
       ENDDO
+      !$OMP END DO
 
+      !$OMP DO PRIVATE(DR, B) SCHEDULE(static)
       DO K=1,KBAR
          DO J=1,JBM1
             DO I=1,IBAR
@@ -1215,10 +1237,12 @@ LIMITER_SELECT: SELECT CASE (FLUX_LIMITER)
             ENDDO
          ENDDO
       ENDDO
+      !$OMP END DO
 
       ! compute data variation and face value z
 
       !DV = 1.E20_EB
+      !$OMP DO SCHEDULE(static)
       DO K=0,KBAR
          DO J=1,JBAR
             DO I=1,IBAR
@@ -1226,7 +1250,9 @@ LIMITER_SELECT: SELECT CASE (FLUX_LIMITER)
             ENDDO
          ENDDO
       ENDDO
+      !$OMP END DO
 
+      !$OMP DO PRIVATE(DR, B) SCHEDULE(static)
       DO K=1,KBM1   
          DO J=1,JBAR
             DO I=1,IBAR
@@ -1248,6 +1274,8 @@ LIMITER_SELECT: SELECT CASE (FLUX_LIMITER)
             ENDDO
          ENDDO
       ENDDO
+      !$OMP END DO
+      !$OMP END PARALLEL
 
    CASE (CENTRAL_LIMITER) LIMITER_SELECT
 
@@ -1495,6 +1523,8 @@ LIMITER_SELECT: SELECT CASE (FLUX_LIMITER)
       ! compute data variation and face value x
 
       !DV = 1.E20_EB
+      !$OMP PARALLEL
+      !$OMP DO SCHEDULE(static)
       DO K=1,KBAR
          DO J=1,JBAR
             DO I=0,IBAR
@@ -1502,7 +1532,9 @@ LIMITER_SELECT: SELECT CASE (FLUX_LIMITER)
             ENDDO
          ENDDO
       ENDDO
+      !$OMP END DO
 
+      !$OMP DO PRIVATE(DR, B) SCHEDULE(static)
       DO K=1,KBAR
          DO J=1,JBAR
             DO I=1,IBM1
@@ -1524,10 +1556,12 @@ LIMITER_SELECT: SELECT CASE (FLUX_LIMITER)
             ENDDO
          ENDDO
       ENDDO
+      !$OMP END DO
 
       ! compute data variation and face value y
 
       !DV = 1.E20_EB
+      !$OMP DO SCHEDULE(static)
       DO K=1,KBAR
          DO J=0,JBAR
             DO I=1,IBAR
@@ -1535,7 +1569,9 @@ LIMITER_SELECT: SELECT CASE (FLUX_LIMITER)
             ENDDO
          ENDDO
       ENDDO
+      !$OMP END DO
 
+      !$OMP DO PRIVATE(DR, B) SCHEDULE(static)
       DO K=1,KBAR
          DO J=1,JBM1
             DO I=1,IBAR
@@ -1557,10 +1593,12 @@ LIMITER_SELECT: SELECT CASE (FLUX_LIMITER)
             ENDDO
          ENDDO
       ENDDO
+      !$OMP END DO
 
       ! compute data variation and face value z
 
       !DV = 1.E20_EB
+      !$OMP DO SCHEDULE(static)
       DO K=0,KBAR
          DO J=1,JBAR
             DO I=1,IBAR
@@ -1568,7 +1606,9 @@ LIMITER_SELECT: SELECT CASE (FLUX_LIMITER)
             ENDDO
          ENDDO
       ENDDO
+      !$OMP END DO
 
+      !$OMP DO PRIVATE(DR, B) SCHEDULE(static)
       DO K=1,KBM1   
          DO J=1,JBAR
             DO I=1,IBAR
@@ -1590,6 +1630,8 @@ LIMITER_SELECT: SELECT CASE (FLUX_LIMITER)
             ENDDO
          ENDDO
       ENDDO
+      !$OMP END DO
+      !$OMP END PARALLEL
 
    CASE (CENTRAL_LIMITER) LIMITER_SELECT
 
@@ -1619,8 +1661,6 @@ LIMITER_SELECT: SELECT CASE (FLUX_LIMITER)
 
    CASE DEFAULT LIMITER_SELECT
 
-      !$OMP PARALLEL PRIVATE(ZZZ)
-      !$OMP DO SCHEDULE(static)
       DO K=1,KBAR
          DO J=1,JBAR
             DO I=1,IBM1
@@ -1629,9 +1669,7 @@ LIMITER_SELECT: SELECT CASE (FLUX_LIMITER)
             ENDDO
          ENDDO
       ENDDO
-      !$OMP END DO NOWAIT
 
-      !$OMP DO SCHEDULE(static)
       DO K=1,KBAR
          DO J=1,JBM1
             DO I=1,IBAR
@@ -1640,9 +1678,7 @@ LIMITER_SELECT: SELECT CASE (FLUX_LIMITER)
             ENDDO
          ENDDO
       ENDDO
-      !$OMP END DO NOWAIT
 
-      !$OMP DO SCHEDULE(static)
       DO K=1,KBM1
          DO J=1,JBAR
             DO I=1,IBAR
@@ -1651,8 +1687,6 @@ LIMITER_SELECT: SELECT CASE (FLUX_LIMITER)
             ENDDO
          ENDDO
       ENDDO
-      !$OMP END DO NOWAIT
-      !$OMP END PARALLEL
 
 END SELECT LIMITER_SELECT
 
