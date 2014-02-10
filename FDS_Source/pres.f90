@@ -111,7 +111,7 @@ WALL_CELL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS
             CASE( 1)
                IF (PREDICTOR) DUUDT =       RFODT*(-WC%ONE_D%UWS -         U(0,J,K)           )
                IF (CORRECTOR) DUUDT = 2._EB*RFODT*(-WC%ONE_D%UW  - 0.5_EB*(U(0,J,K)+US(0,J,K)))
-               BXS(J,K) = HP(1,J,K)     + 0.5_EB*DX(0)  *(DUUDT+FVX(0,J,K))
+               BXS(J,K) = HP(1,J,K)    + 0.5_EB*DX(0)  *(DUUDT+FVX(0,J,K))
             CASE(-1) 
                IF (PREDICTOR) DUUDT =       RFODT*( WC%ONE_D%UWS -         U(IBAR,J,K)              )
                IF (CORRECTOR) DUUDT = 2._EB*RFODT*( WC%ONE_D%UW  - 0.5_EB*(U(IBAR,J,K)+US(IBAR,J,K)))
