@@ -46,6 +46,7 @@ $RUNFDS Flowfields divergence_test
 $RUNFDS Flowfields gas_filling
 $RUNFDS Flowfields helium_2d
 $RUNFDS Flowfields helium_2d_isothermal
+$RUNFDS Flowfields helium_air_jet_floor
 $RUNFDS Flowfields jet_fan
 $RUNFDS Flowfields low_flux_hot_gas_filling
 $RUNFDS Flowfields symmetry_test
