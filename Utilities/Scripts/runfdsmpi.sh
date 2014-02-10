@@ -37,8 +37,25 @@ esac
 done
 shift $(($OPTIND-1))
 
+scratchdir=$SVNROOT/Utilities/Scripts/tmp
+nthreads=$1
+dir=$2
+infile=$3
+
+# Choose the submit and run commands
+
+if [ "$RESOURCE_MANAGER" == "SLURM" ]; then
+  QSUB="sbatch"
+  QOPT="-p"
+  RUNCMD="srun"
+else
+  QSUB="qsub"
+  QOPT="-q "
+  RUNCMD="$MPIDIST/bin/mpirun -np $nthreads"
+fi
+
 # If queue is "none" then use "background" to submit jobs
-# instead of qsub (ie a queing system).
+# instead of a resource manager (qsub or sbatch, ie a queing system).
 
 if [ "$queue" == "none" ]; then
   queue=
@@ -49,14 +66,6 @@ if [ "$queue" == "none" ]; then
     exit
   fi
 fi
-if [ "$queue" != "" ]; then
-   queue="-q $queue"
-fi
-
-scratchdir=$SVNROOT/Utilities/Scripts/tmp
-nthreads=$1
-dir=$2
-infile=$3
 
 if test $nthreads -le 0
 then
@@ -64,7 +73,7 @@ echo "Number of threads specified is $nthreads . Must be bigger than 0."
 echo "Run aborted."
 exit
 fi
-nnodes=$(echo "($nthreads-1)/8+1" | bc)
+nnodes=$(echo "($nthreads-1)/16+1" | bc)
 nprocs=$(echo "($nthreads-1)/$nnodes+1" | bc)
 
 fulldir=$BASEDIR/$dir
@@ -101,14 +110,23 @@ cat << EOF > $scriptfile
 #!/bin/bash
 #PBS -N $JOBPREFIX$infile(MPI$IB)
 #PBS -l nodes=$nnodes:ppn=$nprocs
+#PBS -l walltime=02:00:00
 #PBS -S /bin/bash
 #PBS -e $outerr
+#PBS -l pvmem=1GB
 #PBS -o $outlog
 #\$ -N $JOBPREFIX$infile(MPI$IB)
 #\$ -pe mpi $nthreads
 #\$ -S /bin/bash
 #\$ -e $outerr
 #\$ -o $outlog
+#SBATCH -J $JOBPREFIX$infile(MPI$IB)
+#SBATCH --mem-per-cpu=1000
+#SBATCH -n $nthreads
+#SBATCH -t 04:00:00
+#SBATCH -e $outerr
+#SBATCH -o $outlog
+#SBATCH -p $queue
 
 cd $fulldir
 
@@ -117,13 +135,15 @@ echo Running $infile on \`hostname\`
 echo Directory: \`pwd\`
 
 export LD_LIBRARY_PATH=$MPIDIST/lib:$FORTLIB:$LD_LIBRARY_PATH
-$MPIDIST/bin/mpirun -np $nthreads $FDSMPI $in 
+$RUNCMD $FDSMPI $in 
+
+# Run by $QSUB $QOPT $queue $scriptfile
 EOF
 chmod +x $scriptfile
 if [ "$background" != "yes" ]; then
   echo Running `basename $FDSMPI` $in 
   chmod +x $scriptfile
-  $QSUB $queue $scriptfile
+  $QSUB $QOPT $queue $scriptfile
 else
   echo Running `basename $FDS` $in 
   cd $fulldir
