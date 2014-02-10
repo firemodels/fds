@@ -644,6 +644,11 @@ IF (PERIODIC_TEST==7) THEN
    ENDDO
 ENDIF
 
+! Zero out DEL_RHO_D_DEL_Z during initialization phase.
+! We still need to run through divg because advective fluxes are computed in DENSITY_ADVECTION and SPECIES_ADVECTION.
+
+IF (ICYC<=0) DEL_RHO_D_DEL_Z = 0._EB
+
 ! Compute normal component of velocity at boundaries, UWS
 
 PREDICT_NORMALS: IF (PREDICTOR) THEN
