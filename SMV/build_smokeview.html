@@ -32,8 +32,8 @@ update the version string in <tt>options.h</tt> and <tt>main.c</tt>, then commit
 </td>
 <td>
 <ul>
-<li>Libraries need only be rebuilt if a source file or compiler has changed.
-<li>Wait until win32 build finishes before starting win64 build.
+<li>Libraries only need to be rebuilt if a source file or compiler has changed.
+<li>Wait until the win32 build finishes before starting a win64 build.
 </ul>
 </td>
 </tr>
@@ -112,6 +112,21 @@ update the version string in <tt>options.h</tt> and <tt>main.c</tt>, then commit
 </tr>
 
 <tr>
+<th>background</th>
+<td colspan=2 align=center><a href="scripts/MAKEbgwin32.bat">Build(32)</a></td>
+<td align=center><a href="scripts/MAKEbglinux.bat">Build</a></td>
+<td align=center><a href="scripts/MAKEbgosx.bat">Build</a></td>
+</tr>
+
+<tr>
+<th>fds2ascii</th>
+<td align=center><a href="scripts/MAKEf2awin32.bat">Build</a></td>
+<td align=center><a href="scripts/MAKEf2awin64.bat">Build</a></td>
+<td align=center><a href="scripts/MAKEf2alinux.bat">Build</a></td>
+<td align=center><a href="scripts/MAKEf2aosx.bat">Build</a></td>
+</tr>
+
+<tr>
 <th>smokediff</th>
 <td align=center><a href="scripts/MAKEsmdwin32.bat">Build</a></td>
 <td align=center><a href="scripts/MAKEsmdwin64.bat">Build</a></td>
@@ -125,21 +140,6 @@ update the version string in <tt>options.h</tt> and <tt>main.c</tt>, then commit
 <td align=center><a href="scripts/MAKEsmzwin64.bat">Build</a></td>
 <td align=center><a href="scripts/MAKEsmzlinux.bat">Build</a></td>
 <td align=center><a href="scripts/MAKEsmzosx.bat">Build</a></td>
-</tr>
-
-<tr>
-<th>fds2ascii</th>
-<td align=center><a href="scripts/MAKEf2awin32.bat">Build</a></td>
-<td align=center><a href="scripts/MAKEf2awin64.bat">Build</a></td>
-<td align=center><a href="scripts/MAKEf2alinux.bat">Build</a></td>
-<td align=center><a href="scripts/MAKEf2aosx.bat">Build</a></td>
-</tr>
-
-<tr>
-<th>background</th>
-<td colspan=2 align=center><a href="scripts/MAKEbgwin32.bat">Build(32)</a></td>
-<td align=center><a href="scripts/MAKEbglinux.bat">Build</a></td>
-<td align=center><a href="scripts/MAKEbgosx.bat">Build</a></td>
 </tr>
 
 <tr>
@@ -189,7 +189,7 @@ update the version string in <tt>options.h</tt> and <tt>main.c</tt>, then commit
 <li><a href="scripts/COPYconfig2home.bat"><tt>configuration file</tt> <<=== <tt>FDS-SMV</tt></a>
 <li><a href="scripts/TEST_setup.bat">Test settings and build/bundle environment</tt></a> 
 <li><a href="scripts/EDIT_objects.bat">Edit <tt>FDS-SMV objects.svo</tt></a> 
-<li><a href="../FDS_Compilation/getting_started.html">Getting Started - setting up build scripts</a>
+<li><a href="../FDS_Compilation/getting_started.html">Getting started - setting up build scripts</a>
 <li><a href="https://bintray.com/nist-fire-research/releases/SMV">Downloads</a>
 </ul>
 
