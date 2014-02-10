@@ -1,8 +1,8 @@
 @echo off
 
-REM Windows batch file to upload Smokeview test files to
-REM the download site.  This script assume that the Windows
-REM batch file, MAKEtest.bat, has already been run.
+:: Windows batch file to upload Smokeview test files to
+:: the download site.  This script assume that the Windows
+:: batch file, MAKEtest.bat, has already been run.
 
 set platform=win32
 
@@ -39,12 +39,14 @@ pause>NUL
   echo.
   set /p api_key=<%bintray_api_key%
 
-  REM Repository information
+  :: Repository information
+
   set org_name=nist-fire-research
   set repo_name=releases
   set package_name=SMV
 
-  REM Upload and publish file
+  :: Upload and publish file
+
   %upload% -k -ufds-smv:%api_key% -T %exe% https://api.bintray.com/content/%org_name%/%repo_name%/%package_name%/%smv_version%/%exe%;publish=1
 
 echo.

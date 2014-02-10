@@ -1,7 +1,5 @@
 @echo off
 
-Rem Windows batch file for creating Smokeview User guide figures
-
 set envfile="%userprofile%"\fds_smv_env.bat
 IF EXIST %envfile% GOTO endif_envexist
 echo ***Fatal error.  The environment setup file %envfile% does not exist. 
