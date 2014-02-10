@@ -8,11 +8,39 @@
 <hr size="1">
 
 <ul>
-<li>Update the version number in <tt>options.h</tt>, the version comment in <tt>main.c</tt> and commit (when building Smokeview for release)
+<li>When building Smokeview for a release
+<ul>
+<li>Update the version number in <tt>options.h</tt>
+<li>Update the version comment in <tt>main.c</tt> and commit
+</ul>
 <li><a href="scripts/EDIT_setup.bat">Update</a> configuration file.
 <li><a href="scripts/Update_REPOS_latest4SMV_svn.bat">Update</a> Windows, Linux and OSX repositories to the latest revision.
 <li><a href="scripts/EDIT_release_notes.bat">Update release notes</a> and commit
 </ul>
+
+<p><table>
+<tr><td>
+<table border=on>
+<tr><th colspan=4>Libraries</th></tr>
+<tr>
+<th>win32</th><th>win64</th><th>Linux</th><th>OSX</th>
+</tr>
+<tr>
+<td><a href="scripts/MAKE_LIBS_win32.bat">Build</a></td>
+<td><a href="scripts/MAKE_LIBS_win64.bat">Build</a></td>
+<td><a href="scripts/MAKE_LIBS_linux.bat">Build</a></td>
+<td><a href="scripts/MAKE_LIBS_osx.bat">Build</a></td>
+</tr>
+</table>
+</td>
+<td>
+<ul>
+<li>Wait until win32 build finishes before starting win64
+<li>libraries need only be rebuilt if a source file or compiler have changed
+</ul>
+</td>
+</tr>
+</table>
 
 <p><table border=on>
 <tr><th colspan=6>Test Smokeview</th></tr>
@@ -39,7 +67,6 @@
 <td align=center colspan=4>-</td>
 </tr>
 </table>
-
 
 <p><table border=on>
 <tr><th colspan=6>Release Smokeview</th></tr>
@@ -125,27 +152,7 @@
 <td align=center><a href="scripts/MAKEwindlinux.bat">Build</a></td>
 <td align=center><a href="scripts/MAKEwindosx.bat">Build</a></td>
 </tr>
-
-
 </table>
-</table>
-
-<p><table border=on>
-<tr><th colspan=4>Libraries</th></tr>
-<tr>
-<th>win32</th><th>win64</th><th>Linux</th><th>OSX</th>
-</tr>
-<tr>
-<td><a href="scripts/MAKE_LIBS_win32.bat">Build</a></td>
-<td><a href="scripts/MAKE_LIBS_win64.bat">Build</a></td>
-<td><a href="scripts/MAKE_LIBS_linux.bat">Build</a></td>
-<td><a href="scripts/MAKE_LIBS_osx.bat">Build</a></td>
-</tr>
-</table>
-<ul>
-<li>DO NOT build win32 and win64 libraries at the same time
-<li>libraries only need to be built once (or when a library source file has changed)
-</ul>
 
 <p><table border=on>
 <tr><th colspan=2>Verification</th></tr>
@@ -184,7 +191,7 @@
 <li><a href="scripts/COPYhome2config.bat"><tt>configuration file</tt> ===>> <tt>FDS-SMV</tt></a>
 <li><a href="scripts/COPYconfig2home.bat"><tt>configuration file</tt> <<=== <tt>FDS-SMV</tt></a>
 <li><a href="scripts/TEST_setup.bat">Test settings and build/bundle environment</tt></a> 
-<li><a href="scripts/EDIT_objects.bat">Edit <tt>FDS-SMV/.../objects.svo</tt></a> 
+<li><a href="scripts/EDIT_objects.bat">Edit <tt>FDS-SMV objects.svo</tt></a> 
 <li><a href="../FDS_Compilation/getting_started.html">Getting Started - setting up build scripts</a>
 <li><a href="https://bintray.com/nist-fire-research/releases/SMV">Downloads</a>
 </ul>
