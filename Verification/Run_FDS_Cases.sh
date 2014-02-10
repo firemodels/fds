@@ -10,13 +10,15 @@ DEBUG=
 OPENMP=
 IB=
 nthreads=8
+resource_manager=
 
 if [ "$FDSNETWORK" == "infiniband" ] ; then
 IB=ib
 fi
 
 function usage {
-echo "Run_FDS_Cases.sh [ -c cases -d -h -o nthreads -q queue_name -s ]"
+echo "Run_FDS_Cases.sh [ -c cases -d -h -o nthreads -q queue_name -s "
+echo "                   -r resource_manager ]"
 echo "Runs FDS verification suite"
 echo ""
 echo "Options"
@@ -32,13 +34,16 @@ echo "     other options: 32"
 echo "-q queue_name - run cases using the queue queue_name"
 echo "     default: batch"
 echo "     other options: fire60s, fire70s, vis"
+echo "-r resource_manager - run cases using the resource manager"
+echo "     default: PBS"
+echo "     other options: SLURM"
 echo "-s - stop FDS runs"
 exit
 }
 
 export SVNROOT=`pwd`/..
 
-while getopts 'c:dho:p:q:s' OPTION
+while getopts 'c:dho:p:q:r:s' OPTION
 do
 case $OPTION in
   c)
@@ -60,6 +65,9 @@ case $OPTION in
    ;;
   q)
    queue="$OPTARG"
+   ;;
+  r)
+   resource_manager="$OPTARG"
    ;;
   s)
    export STOPFDS=1
@@ -90,6 +98,11 @@ export BACKGROUND=$SVNROOT/Utilities/background/intel_$PLATFORM2/background
 export FDS=$SVNROOT/FDS_Compilation/${OPENMP}intel_$PLATFORM$DEBUG/fds_${OPENMP}intel_$PLATFORM$DEBUG
 export FDSMPI=$SVNROOT/FDS_Compilation/mpi_intel_$PLATFORM$IB$DEBUG/fds_mpi_intel_$PLATFORM$IB$DEBUG
 
+if [ "$resource_manager" == "SLURM" ]; then
+   export RESOURCE_MANAGER="SLURM"
+else
+   export RESOURCE_MANAGER="PBS"
+fi
 if [ "$queue" != "" ]; then
    queue="-q $queue"
 fi

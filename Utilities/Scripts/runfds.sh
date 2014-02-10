@@ -7,6 +7,10 @@ background=no
 QSUB=qsub
 USEFDS=yes
 
+if [ "$JOBPREFIX" == "" ]; then
+  JOBPREFIX=VV_
+fi
+
 while getopts 'q:w' OPTION
 do
 case $OPTION in
@@ -21,12 +25,25 @@ esac
 done
 shift $(($OPTIND-1))
 
-if [ "$JOBPREFIX" == "" ]; then
-  JOBPREFIX=VV_
-fi
+scratchdir=$SVNROOT/Utilities/Scripts/tmp
+dir=$1
+infile=$2
+debug_flag=$3
 
 # If queue is "none" then use "background" to submit jobs
 # instead of qsub (ie a queing system).
+
+# Choose the submit and run commands
+
+if [ "$RESOURCE_MANAGER" == "SLURM" ]; then
+  QSUB="sbatch"
+  QOPT="-p"
+  RUNCMD="srun"
+else
+  QSUB="qsub"
+  QOPT="-q"
+  RUNCMD=
+fi
 
 if [ "$queue" == "none" ]; then
   queue=
@@ -37,16 +54,8 @@ if [ "$queue" == "none" ]; then
     exit
   fi
 fi
-if [ "$queue" != "" ]; then
-   queue="-q $queue"
-fi
 
 # setup parameters
-
-scratchdir=$SVNROOT/Utilities/Scripts/tmp
-dir=$1
-infile=$2
-debug_flag=$3
 
 if [ "$debug_flag" == "1" ]; then
 echo debug_flag is set to 1
@@ -100,19 +109,30 @@ cat << EOF > $scriptfile
 #\$ -S /bin/bash
 #\$ -N $JOBPREFIX$infile -e $outerr -o $outlog
 #PBS -N $JOBPREFIX$infile -e $outerr -o $outlog
+#PBS -l walltime=04:00:00
+#PBS -l pvmem=1GB
+#SBATCH -J $JOBPREFIX$infile
+#SBATCH --mem-per-cpu=1000
+#SBATCH -t 04:00:00
+#SBATCH -e $outerr
+#SBATCH -o $outlog
+#SBATCH -p $queue
+
 cd $fulldir
 
 echo Time: \`date\`
 echo Running $infile on \`hostname\`
 echo Directory: \`pwd\`
 
-$FDS $in 
+$RUNCMD $FDS $in 
+
+# Run by $QSUB $QOPT $queue $scriptfile
 EOF
 
 echo Running `basename $FDS` $in 
 if [ "$background" != "yes" ]; then
   chmod +x $scriptfile
-  $QSUB $queue $scriptfile
+  $QSUB $QOPT $queue $scriptfile
 else
   cd $fulldir
   $QSUB $FDS $in
