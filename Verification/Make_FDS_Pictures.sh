@@ -4,7 +4,7 @@
 # FDS Verification Cases on a Linux or OS X machine
 
 function usage {
-echo "Make_SMV_Pictures.sh [-d -h -r -s size ]"
+echo "Make_SMV_Pictures.sh [-d -h -r -s size -X ]"
 echo "Generates Smokeview figures from FDS verification suite"
 echo ""
 echo "Options"
@@ -14,6 +14,7 @@ echo "-p path - specify path of the smokeview executable"
 echo "-r - use release version of smokeview"
 echo "-s size - use 32 or 64 bit (default) version of smokeview"
 echo "-t - use test version of smokeview"
+echo "-X - do not start / stop separate X-server"
 exit
 }
 
@@ -28,8 +29,9 @@ SIZE=_64
 DEBUG=
 TEST=
 SMV_PATH=""
+START_X=yes
 
-while getopts 'dhp:rs:t' OPTION
+while getopts 'dhp:rs:tX' OPTION
 do
 case $OPTION  in
   d)
@@ -55,6 +57,9 @@ case $OPTION  in
   t)
    TEST=_test
   ;;
+  X)
+   START_X=no
+  ;;
 esac
 done
 shift $(($OPTIND-1))
@@ -75,9 +80,13 @@ rm -f $SVNROOT/Manuals/FDS_User_Guide/SCRIPT_FIGURES/*.png
 rm -f $SVNROOT/Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/*.png
 rm -f $SVNROOT/Manuals/FDS_Verificaiton_Guide/SCRIPT_FIGURES/*.png
 
-source $SVNROOT/Utilities/Scripts/startXserver.sh
+if [ "$START_X" == "yes" ]; then
+  source $SVNROOT/Utilities/Scripts/startXserver.sh
+fi
 ./FDS_Pictures.sh
-source $SVNROOT/Utilities/Scripts/stopXserver.sh
+if [ "$START_X" == "yes" ]; then
+  source $SVNROOT/Utilities/Scripts/stopXserver.sh
+fi
 
 echo FDS pictures created.
 
