@@ -391,6 +391,8 @@ void drawtours(void){
 
 }
 
+/* ------------------ drawcir ------------------------ */
+
 void drawcir(float *center, float rad, float *color){
   glColor3fv(color);
   glBegin(GL_QUADS);
@@ -400,7 +402,6 @@ void drawcir(float *center, float rad, float *color){
   glVertex3f(center[0]-rad/2.0,center[1]+rad/2.0,center[2]);
   glEnd();
 }
-
 
 /* ------------------ drawselect_tours ------------------------ */
 

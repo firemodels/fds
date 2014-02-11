@@ -101,7 +101,6 @@ void set_unit_vis(void){
   }
 }
 
-
 /* ------------------ add_unit_class ------------------------ */
 
 void add_unit_class(flowlabels *label){

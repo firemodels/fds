@@ -472,7 +472,6 @@ int SUB_portfrustum(int quad,
   return 1;
 }
 
-
  /* ------------------------ CLIP_viewport ------------------------- */
 
 void CLIP_viewport(int quad, GLint screen_left, GLint screen_down){
@@ -516,8 +515,6 @@ void CLIP_viewport(int quad, GLint screen_left, GLint screen_down){
      glVertex2f(c_right,c_bottom);
    }
    glEnd();
-     
-
 }
 
  /* ------------------------ INFO_viewport ------------------------- */

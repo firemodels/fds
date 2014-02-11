@@ -1746,7 +1746,6 @@ void reset_itimes0(void){
   }
 }
 
-
 /* ------------------ updateclipbounds ------------------------ */
 
 void Update_Clipbounds(int set_i0, int *i0, int set_i1, int *i1, int imax){ 
