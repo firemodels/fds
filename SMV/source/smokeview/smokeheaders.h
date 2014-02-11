@@ -6,15 +6,98 @@
 #ifndef SMOKEHEADERS_H_DEFINED
 #define SMOKEHEADERS_H_DEFINED
 
+// glui headers
+
+EXTERNCPP void glui_3dsmoke_setup(int main_window);
+EXTERNCPP void glui_bounds_setup(int main_window);
+EXTERNCPP void glui_clip_setup(int main_window);
+EXTERNCPP void glui_colorbar_setup(int main_window);
+EXTERNCPP void glui_device_setup(int main_window);
+EXTERNCPP void glui_edit_setup(int main_window);
+EXTERNCPP void glui_labels_setup(int main_window);
+EXTERNCPP void glui_motion_setup(int main_window);
+#ifdef pp_SHOOTER
+EXTERNCPP void glui_shooter_setup(int main_window);
+#endif
+EXTERNCPP void glui_stereo_setup(int main_window);
+EXTERNCPP void glui_tour_setup(int main_window);
+EXTERNCPP void glui_trainer_setup(int main_window);
+EXTERNCPP void glui_wui_setup(int main_window);
+
+EXTERNCPP void glui_update_fontindex(void);
+EXTERNCPP void glui_script_disable(void);
+EXTERNCPP void glui_script_enable(void);
+EXTERNCPP void glui_alert_setup(int main_window);
+EXTERNCPP void gluiIdle(void);
+EXTERNCPP void gluiIdleNULL(void);
+EXTERNCPP void update_glui_set_view_xyz(float *xyz);
+EXTERNCPP void update_glui_filelabel(int var);
+EXTERNCPP void update_glui_vecfactor(void);
+EXTERNCPP void update_glui_keyframe(void);
+EXTERNCPP void update_glui_patch_units(void);
+EXTERNCPP void update_glui_slice_units(void);
+EXTERNCPP void update_glui_plot3d_units(void);
+EXTERNCPP void update_glui_plot3dtype(void);
+EXTERNCPP void update_glui_isotype(void);
+EXTERNCPP void update_glui_viewlist(void);
+EXTERNCPP void Update_Glui_Wui(void);
+EXTERNCPP void Update_Glui_Stereo(void);
+EXTERNCPP void update_glui_streakvalue(float rvalue);
+EXTERNCPP void update_glui_speed(void);
+EXTERNCPP void update_glui_zoom(void);
+EXTERNCPP void Update_Glui_Clip(void);
+EXTERNCPP void update_glui_cellcenter(void);
+
+EXTERNCPP void show_glui_alert(void);
+EXTERNCPP void hide_glui_alert(void);
+EXTERNCPP void show_glui_shooter(void);
+EXTERNCPP void hide_glui_shooter(void);
+EXTERNCPP void show_glui_trainer(void);
+EXTERNCPP void hide_glui_trainer(void);
+EXTERNCPP void show_glui_colorbar(void);
+EXTERNCPP void hide_glui_colorbar(void);
+EXTERNCPP void show_glui_motion(void);
+EXTERNCPP void hide_glui_motion(void);
+EXTERNCPP void show_glui_clip(void);
+
+EXTERNCPP void hide_glui_clip(void);
+EXTERNCPP void show_glui_wui(void);
+EXTERNCPP void hide_glui_wui(void);
+EXTERNCPP void show_glui_display(void);
+EXTERNCPP void show_glui_device(void);
+EXTERNCPP void hide_glui_device(void);
+EXTERNCPP void set_labels_controls(void);
+EXTERNCPP void hide_glui_display(void);
+EXTERNCPP void show_glui_tour(void);
+EXTERNCPP void hide_glui_tour(void);
+EXTERNCPP void hide_glui_trainer(void);
+EXTERNCPP void show_glui_stereo(void);
+EXTERNCPP void hide_glui_stereo(void);
+EXTERNCPP void show_glui_3dsmoke(void);
+EXTERNCPP void hide_glui_3dsmoke(void);
+
+EXTERNCPP void enable_boundary_glui(void);
+EXTERNCPP void disable_boundary_glui(void);
+EXTERNCPP void update_clipplanes(void);
+EXTERNCPP void show_glui_bounds(void);
+EXTERNCPP void hide_glui_bounds(void);
+EXTERNCPP void show_glui_edit(void);
+EXTERNCPP void hide_glui_edit(void);
+
+EXTERNCPP void updateslicelistindex(int sfn);
+EXTERNCPP void updatepatchlistindex(int patchfilenum);
+EXTERNCPP void updatepatchlistindex2(char *label);
+EXTERNCPP void updateplot3dlistindex(void);
+
+EXTERNCPP void getsliceparams2(void);
+
 #ifdef pp_PILOT
 EXTERNCPP void draw_pilot(void);
 #endif
 EXTERNCPP void DefineAllFEDs(void);
-EXTERNCPP void update_glui_vecfactor(void);
 EXTERNCPP void update_tour_state(void);
 EXTERNCPP void update_edit_tour(void);
 EXTERNCPP void add_delete_keyframe(int flag);
-EXTERNCPP void update_glui_keyframe(void);
 EXTERNCPP void update_tour_parms(void);
 EXTERNCPP void slerp(float *p0, float *p1, float t, float *pout);
 #ifdef pp_GEOMTEST
@@ -37,9 +120,6 @@ EXTERNCPP void drawcircle(float diameter, unsigned char *rgbcolor, circdata *cir
 EXTERNCPP void drawfilledrectangle(float width, float height, unsigned char *rgbcolor);
 EXTERNCPP void drawrectangle(float width, float height, unsigned char *rgbcolor);
 EXTERNCPP void DrawCircVents(int option);
-EXTERNCPP void update_glui_patch_units(void);
-EXTERNCPP void update_glui_slice_units(void);
-EXTERNCPP void update_glui_plot3d_units(void);
 EXTERNCPP void Update_Smokecolormap(int option);
 #ifdef pp_SUPERMESH
 EXTERNCPP void define_volsmoke_textures(void);
@@ -63,7 +143,6 @@ EXTERNCPP void LABEL_print(void);
 EXTERNCPP labeldata *LABEL_insert(labeldata *labeltemp);
 
 EXTERNCPP void update_nrender_rows(void);
-EXTERNCPP void glui_update_fontindex(void);
 EXTERNCPP void rotateu2v(float *u, float *v, float *axis, float *angle);
 EXTERNCPP void rotation_type_CB(int var);
 EXTERNCPP  void update_rotation_type(int val);
@@ -134,15 +213,11 @@ EXTERNCPP void updateGluiTimeBounds(float time_min, float time_max);
 EXTERNCPP void settimeval(float timeval);
 EXTERNCPP void get_indep_var_indices(sv_object *smv_object,char **var_indep_strings, int nvars_indep,int *index);
 EXTERNCPP void get_evac_indices(sv_object *smv_object, int *evac_index,int *nevac_index);
-EXTERNCPP void update_glui_set_view_xyz(float *xyz);
-EXTERNCPP void update_glui_filelabel(int var);
 EXTERNCPP void update_colorbar_list(void);
 EXTERNCPP void update_colorbar_list2(void);
 EXTERNCPP void update_colorbarflip(void);
 
 EXTERNCPP void script_loadvolsmokeframe2(void);
-EXTERNCPP void update_glui_plot3dtype(void);
-EXTERNCPP void update_glui_isotype(void);
 EXTERNCPP void init_device(devicedata *devicei, float *xyz, float *xyzn, int state0,int nparams, float *params, char *labelptr);
 EXTERNCPP void init_device_plane(devicedata *devicei);
 EXTERNCPP void draw_devices_val(void);
@@ -166,13 +241,10 @@ EXTERNCPP void initterrain_znode(mesh *meshi, terraindata *terri, float xmin, fl
 EXTERNCPP void output_mfed_csv(multislicedata *mslicei);
 EXTERNCPP void ParticlePropShowMenu(int value);
 EXTERNCPP int get_index(float x, int dir, float *plotxyz, int nplotxyz);
-EXTERNCPP void glui_script_disable(void);
 EXTERNCPP void update_slice_contours(int slice_type_index, float line_min, float line_max, int nline_values);
 EXTERNCPP void ScriptMenu(int var);
 EXTERNCPP void SmokeColorBarMenu(int var);
 EXTERNCPP void  OBJECT_CB(int flag);
-EXTERNCPP void update_glui_viewlist(void);
-EXTERNCPP void glui_script_enable(void);
 EXTERNCPP void WUI_CB(int var);
 EXTERNCPP void compress_onoff(int flag);
 EXTERNCPP void compress_svzip2(void);
@@ -209,7 +281,6 @@ EXTERNCPP void next_yindex(int inc,int flag);
 EXTERNCPP void next_zindex(int inc,int flag);
 EXTERNCPP void Init_Sphere(int nlat, int nlong);
 EXTERNCPP void Init_Circle(unsigned int npoints, circdata *circinfo);
-EXTERNCPP void Update_Glui_Wui(void);
 EXTERNCPP int have_terrain_slice(void);
 EXTERNCPP float get_zcell_val_offset(mesh *meshi,float xval, float yval, int *loc);
 EXTERNCPP void update_camera_ypos(camera *camera_data);
@@ -252,7 +323,6 @@ EXTERNCPP void adjust_colorbar_splits(colorbardata *cbi);
 EXTERNCPP colorbardata *getcolorbar(char *label);
 EXTERNCPP void remap_colorbartype(int cb_oldtype, char *cb_newname);
 EXTERNCPP void freecolorbars(void);
-EXTERNCPP void Update_Glui_Stereo(void);
 EXTERNCPP void escape_blanks(char *dirfrom, int maxlen);
 EXTERNCPP void InitOpenGL(void);
 EXTERNCPP void TextureShowMenu(int value);
@@ -306,10 +376,6 @@ EXTERNCPP void initvars(void);
 EXTERNCPP void RenderState(int onoff);
 EXTERNCPP void update_windowsizelist(void);
 EXTERNCPP void ResizeWindow(int width, int height);
-EXTERNCPP void update_glui_streakvalue(float rvalue);
-EXTERNCPP void glui_alert_setup(int main_window);
-EXTERNCPP void show_glui_alert(void);
-EXTERNCPP void hide_glui_alert(void);
 EXTERNCPP void update_trainer_outline(void);
 EXTERNCPP void update_trainer_moves(void);
 EXTERNCPP mesh *getmesh(float *xyz);
@@ -323,12 +389,8 @@ EXTERNCPP void level_scene(int level_x, int level_y, float *quat);
 EXTERNCPP void get_plot3d_uvw(float xyz[3], float uvw[3]);
 EXTERNCPP void solve_shooter_data(void);
 EXTERNCPP void increment_shooter_data(shootpointdata *pold, shootpointdata *pnew, float dt);
-EXTERNCPP void show_glui_shooter(void);
-EXTERNCPP void hide_glui_shooter(void);
 EXTERNCPP void draw_shooter(void);
 #endif
-EXTERNCPP void show_glui_trainer(void);
-EXTERNCPP void hide_glui_trainer(void);
 EXTERNCPP int get_trainee_location(void);
 EXTERNCPP void set_trainer_controls(void);
 EXTERNCPP void load_startup_smoke(void);
@@ -357,7 +419,6 @@ EXTERNCPP void drawTargets(void);
 EXTERNCPP void drawBlockages(int mode, int flag);
 EXTERNCPP void drawLabels(void);
 EXTERNCPP void Update_Tourlist(void);
-EXTERNCPP void update_glui_speed(void);
 EXTERNCPP void getnewpos(float *oldpos, float dx, float dy, float dz, float speed_factor);
 EXTERNCPP void free_skybox(void);
 EXTERNCPP void draw_skybox(void);
@@ -382,7 +443,6 @@ EXTERNCPP void close_smokezippanel(void);
 EXTERNCPP void UpdateIndexColors(void);
 EXTERNCPP void adjusttourtimes(tourdata *touri);
 EXTERNCPP void update_tourindex(void);
-EXTERNCPP void update_glui_zoom(void);
 EXTERNCPP void SetTour(tourdata *thetour);
 EXTERNCPP void freetrainers(void);
 EXTERNCPP void update_plot3d_display(void);
@@ -444,8 +504,6 @@ EXTERNCPP void init_camera_list(void);
 EXTERNCPP camera *insert_camera(camera *cb,camera *source, char *name);
 EXTERNCPP void add_default_views(void);
 EXTERNCPP void update_view_gluilist(void);
-EXTERNCPP void gluiIdle(void);
-EXTERNCPP void gluiIdleNULL(void);
 EXTERNCPP void reset_gltime(void);
 EXTERNCPP void enable_reset_saved_view(void);
 EXTERNCPP void reset_glui_view(int ival);
@@ -520,21 +578,6 @@ EXTERNCPP unsigned char *readpng(const char *filename,int *width, int *height);
 
 EXTERNCPP void update_whichface(int which_face);
 EXTERNCPP void update_blockvals(int flag);
-EXTERNCPP void show_glui_colorbar(void);
-EXTERNCPP void hide_glui_colorbar(void);
-EXTERNCPP void show_glui_motion(void);
-EXTERNCPP void hide_glui_motion(void);
-EXTERNCPP void show_glui_clip(void);
-EXTERNCPP void Update_Glui_Clip(void);
-
-EXTERNCPP void hide_glui_clip(void);
-EXTERNCPP void show_glui_wui(void);
-EXTERNCPP void hide_glui_wui(void);
-EXTERNCPP void show_glui_display(void);
-EXTERNCPP void show_glui_device(void);
-EXTERNCPP void hide_glui_device(void);
-EXTERNCPP void set_labels_controls(void);
-EXTERNCPP void hide_glui_display(void);
 
 EXTERNCPP void create_tourlist(void);
 EXTERNCPP void delete_tourlist(void);
@@ -551,8 +594,6 @@ EXTERNCPP void inittour(tourdata *touri);
 EXTERNCPP void updatetourmenulabels(void);
 EXTERNCPP void update_globaltension(void);
 EXTERNCPP void defaulttour(void);
-EXTERNCPP void show_glui_tour(void);
-EXTERNCPP void hide_glui_tour(void);
 EXTERNCPP void new_select(keyframe *newselect);
 EXTERNCPP void delete_tour(int tour_index);
 EXTERNCPP tourdata *add_tour(char *label);
@@ -561,29 +602,11 @@ EXTERNCPP keyframe *delete_frame(keyframe *step);
 EXTERNCPP void ReallocTourMemory(void);
 EXTERNCPP keyframe *add_frame(keyframe *framei, float time, float *xyz, float key_azimuth, float elevation, float bank,
                     float params[3],int viewtype,float zoom,float view[3]);
-EXTERNCPP void hide_glui_trainer(void);
-EXTERNCPP void show_glui_stereo(void);
-EXTERNCPP void hide_glui_stereo(void);
-EXTERNCPP void show_glui_3dsmoke(void);
-EXTERNCPP void hide_glui_3dsmoke(void);
-
-EXTERNCPP void enable_boundary_glui(void);
-EXTERNCPP void disable_boundary_glui(void);
-EXTERNCPP void update_clipplanes(void);
-EXTERNCPP void show_glui_bounds(void);
-EXTERNCPP void hide_glui_bounds(void);
 
 EXTERNCPP void get_blockvals(float *xmin, float *xmax,
                    float *ymin, float *ymax,
                    float *zmin, float *zmax,
                    int *imin, int *jmin, int *kmin);
-EXTERNCPP void show_glui_edit(void);
-EXTERNCPP void hide_glui_edit(void);
-
-EXTERNCPP void updateslicelistindex(int sfn);
-EXTERNCPP void updatepatchlistindex(int patchfilenum);
-EXTERNCPP void updatepatchlistindex2(char *label);
-EXTERNCPP void updateplot3dlistindex(void);
 EXTERNCPP void transparentoff(void);
 EXTERNCPP void transparenton(void);
 EXTERNCPP void getobstlabels(const char *filein);
@@ -645,7 +668,6 @@ EXTERNCPP void updatepatchtypes(void);
 
 EXTERNCPP void update_mesh_terrain(void);
 EXTERNCPP void update_terrain_options(void);
-EXTERNCPP void update_glui_cellcenter(void);
 EXTERNCPP void update_plot3dtitle(void);
 EXTERNCPP void LoadPlot3dMenu(int value);
 EXTERNCPP void init_plot3dtimelist(void);

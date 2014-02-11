@@ -21,22 +21,6 @@ char startup_revision[]="$Revision$";
 #include "update.h"
 #include "svn_revision.h"
 
-void glui_colorbar_setup(int main_window);
-void glui_motion_setup(int main_window);
-#ifdef pp_SHOOTER
-void glui_shooter_setup(int main_window);
-#endif
-void glui_bounds_setup(int main_window);
-void glui_labels_setup(int main_window);
-void glui_device_setup(int main_window);
-void glui_edit_setup(int main_window);
-void glui_clip_setup(int main_window);
-void glui_wui_setup(int main_window);
-void glui_tour_setup(int main_window);
-void glui_stereo_setup(int main_window);
-void glui_trainer_setup(int main_window);
-void glui_3dsmoke_setup(int main_window);
-
 /* ------------------ Init ------------------------ */
 
 void Init(void){

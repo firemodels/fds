@@ -44,7 +44,6 @@ char readsmv_revision[]="$Revision$";
 propdata *get_prop_id(char *prop_id);
 void init_evac_prop(void);
 void init_prop(propdata *propi, int nsmokeview_ids, char *label);
-void getsliceparams2(void);
 
 /* ------------------ init_default_prop ------------------------ */
 
