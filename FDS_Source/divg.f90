@@ -457,7 +457,7 @@ CASE(.TRUE.) CYLINDER3   ! 2D Cylindrical
          DO I=1,IBAR
             DELKDELT = & 
                  (R(I)*KDTDX(I,J,K)-R(I-1)*KDTDX(I-1,J,K))*RDX(I)*RRN(I) + &
-                 (KDTDZ(I,J,K)-       KDTDZ(I,J,K-1))*RDZ(K)
+                 (KDTDZ(I,J,K)-            KDTDZ(I,J,K-1))*RDZ(K)
             DP(I,J,K) = DP(I,J,K) + DELKDELT + Q(I,J,K) + QR(I,J,K)
          ENDDO
       ENDDO
@@ -620,7 +620,7 @@ IF (STRATIFICATION) THEN
       DO J=1,JBAR
          DO I=1,IBAR
             IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-            DP(I,J,K) = DP(I,J,K) + RTRM(I,J,K)*0.5_EB*(W(I,J,K)+W(I,J,K-1))*RHO_0(K)*GVEC(3)
+            DP(I,J,K) = DP(I,J,K) + RTRM(I,J,K)*0.5_EB*(WW(I,J,K)+WW(I,J,K-1))*RHO_0(K)*GVEC(3)
          ENDDO
       ENDDO
    ENDDO
