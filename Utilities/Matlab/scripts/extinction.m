@@ -232,7 +232,7 @@ end
 % Simple Extinction Model
 %-----------------------
 
-simple_o2 = [0.15 0];
+simple_o2 = [0.119 0];
 simple_temp = [273.15 1600];
 
 
