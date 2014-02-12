@@ -28,8 +28,9 @@ USE COMP_FUNCTIONS, ONLY: SECOND
 USE GLOBAL_CONSTANTS, ONLY: N_TRACKED_SPECIES,PREDICTOR,CORRECTOR,EVACUATION_ONLY,SOLID_PHASE_ONLY,TUSED
 
 INTEGER, INTENT(IN) :: NM
-REAL(EB) :: TNOW,UN
-INTEGER  :: I,J,K,N,IOR,IW,IIG,JJG,KKG
+REAL(EB) :: TNOW,UN,ZZZ(1:4)
+INTEGER  :: I,J,K,N,IOR,IW,IIG,JJG,KKG,II,JJ,KK
+REAL(EB), POINTER, DIMENSION(:,:,:) :: RHO_Z_P=>NULL()
 REAL(EB), POINTER, DIMENSION(:,:,:,:) :: ZZP=>NULL()
 TYPE(SPECIES_MIXTURE_TYPE), POINTER :: SM=>NULL()
 TYPE(WALL_TYPE), POINTER :: WC=>NULL()
@@ -53,17 +54,100 @@ ELSE
    IF (N_TRACKED_SPECIES > 0) ZZP => ZZS
 ENDIF
 
-FRHO = 0._EB
+! Zero out face values to start
+
+FX = 0._EB
+FY = 0._EB
+FZ = 0._EB
+
+! Compute scalar face values
+
+DO K=1,KBAR
+   DO J=1,JBAR
+      DO I=1,IBM1
+         ZZZ(1:4) = RHOP(I-1:I+2,J,K)
+         FX(I,J,K,0) = SCALAR_FACE_VALUE(UU(I,J,K),ZZZ,FLUX_LIMITER)
+      ENDDO
+   ENDDO
+ENDDO
+
+DO K=1,KBAR
+   DO J=1,JBM1
+      DO I=1,IBAR
+         ZZZ(1:4) = RHOP(I,J-1:J+2,K)
+         FY(I,J,K,0) = SCALAR_FACE_VALUE(VV(I,J,K),ZZZ,FLUX_LIMITER)
+      ENDDO
+   ENDDO
+ENDDO
+
+DO K=1,KBM1
+   DO J=1,JBAR
+      DO I=1,IBAR
+         ZZZ(1:4) = RHOP(I,J,K-1:K+2)
+         FZ(I,J,K,0) = SCALAR_FACE_VALUE(WW(I,J,K),ZZZ,FLUX_LIMITER)
+      ENDDO
+   ENDDO
+ENDDO
+
+FRHO = 0._EB ! Zero out RHS of continuity equation
 
 WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
 
    WC=>WALL(IW)
    IF (WC%BOUNDARY_TYPE==NULL_BOUNDARY) CYCLE WALL_LOOP
 
-   IIG = WC%ONE_D%IIG
+   II  = WC%ONE_D%II 
+   JJ  = WC%ONE_D%JJ
+   KK  = WC%ONE_D%KK
+   IIG = WC%ONE_D%IIG 
    JJG = WC%ONE_D%JJG
    KKG = WC%ONE_D%KKG
    IOR = WC%ONE_D%IOR
+
+   ! Overwrite first off-wall advective flux if flow is away from the wall and if the face is not also a wall cell
+
+   OFF_WALL_IF: IF (WC%BOUNDARY_TYPE/=INTERPOLATED_BOUNDARY .AND. WC%BOUNDARY_TYPE/=OPEN_BOUNDARY) THEN
+
+      OFF_WALL_SELECT: SELECT CASE(IOR)
+         CASE( 1) OFF_WALL_SELECT
+            !      ghost          FX/UU(II+1)
+            ! ///   II   ///  II+1  |  II+2  | ...
+            !                       ^ WALL_INDEX(II+1,+1)
+            IF ((UU(II+1,JJ,KK)>0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II+1,JJ,KK),+1)>0)) THEN
+               ZZZ(1:3) = (/WC%RHO_F,RHOP(II+1:II+2,JJ,KK)/)
+               FX(II+1,JJ,KK,0) = SCALAR_FACE_VALUE(UU(II+1,JJ,KK),ZZZ,FLUX_LIMITER)
+            ENDIF
+         CASE(-1) OFF_WALL_SELECT
+            !            FX/UU(II-2)     ghost
+            ! ... |  II-2  |  II-1  ///   II   ///
+            !              ^ WALL_INDEX(II-1,-1)
+            IF ((UU(II-2,JJ,KK)<0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II-1,JJ,KK),-1)>0)) THEN
+               ZZZ(2:4) = (/RHOP(II-2:II-1,JJ,KK),WC%RHO_F/)
+               FX(II-2,JJ,KK,0) = SCALAR_FACE_VALUE(UU(II-2,JJ,KK),ZZZ,FLUX_LIMITER)
+            ENDIF
+         CASE( 2) OFF_WALL_SELECT
+            IF ((VV(II,JJ+1,KK)>0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II,JJ+1,KK),+2)>0)) THEN
+               ZZZ(1:3) = (/WC%RHO_F,RHOP(II,JJ+1:JJ+2,KK)/)
+               FY(II,JJ+1,KK,0) = SCALAR_FACE_VALUE(VV(II,JJ+1,KK),ZZZ,FLUX_LIMITER)
+            ENDIF
+         CASE(-2) OFF_WALL_SELECT
+            IF ((VV(II,JJ-2,KK)<0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II,JJ-1,KK),-2)>0)) THEN
+               ZZZ(2:4) = (/RHOP(II,JJ-2:JJ-1,KK),WC%RHO_F/)
+               FY(II,JJ-2,KK,0) = SCALAR_FACE_VALUE(VV(II,JJ-2,KK),ZZZ,FLUX_LIMITER)
+            ENDIF
+         CASE( 3) OFF_WALL_SELECT
+            IF ((WW(II,JJ,KK+1)>0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II,JJ,KK+1),+3)>0)) THEN
+               ZZZ(1:3) = (/WC%RHO_F,RHOP(II,JJ,KK+1:KK+2)/)
+               FZ(II,JJ,KK+1,0) = SCALAR_FACE_VALUE(WW(II,JJ,KK+1),ZZZ,FLUX_LIMITER)
+            ENDIF
+         CASE(-3) OFF_WALL_SELECT
+            IF ((WW(II,JJ,KK-2)<0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II,JJ,KK-1),-3)>0)) THEN
+               ZZZ(2:4) = (/RHOP(II,JJ,KK-2:KK-1),WC%RHO_F/)
+               FZ(II,JJ,KK-2,0) = SCALAR_FACE_VALUE(WW(II,JJ,KK-2),ZZZ,FLUX_LIMITER)
+            ENDIF
+      END SELECT OFF_WALL_SELECT
+   
+   ENDIF OFF_WALL_IF
 
    BOUNDARY_SELECT: SELECT CASE(WC%BOUNDARY_TYPE)
       CASE DEFAULT
@@ -125,14 +209,103 @@ ENDDO
 
 SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
 
-     WALL_LOOP_2: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
+   RHO_Z_P=>WORK1
+
+   !$OMP PARALLEL DO SCHEDULE(static)
+   DO K=0,KBP1
+      DO J=0,JBP1
+         DO I=0,IBP1
+            RHO_Z_P(I,J,K) = RHOP(I,J,K)*ZZP(I,J,K,N)
+         ENDDO
+      ENDDO
+   ENDDO
+   !$OMP END PARALLEL DO
+
+   ! Compute scalar face values
+
+   DO K=1,KBAR
+      DO J=1,JBAR
+         DO I=1,IBM1
+            ZZZ(1:4) = RHO_Z_P(I-1:I+2,J,K)
+            FX(I,J,K,N) = SCALAR_FACE_VALUE(UU(I,J,K),ZZZ,FLUX_LIMITER)
+         ENDDO
+      ENDDO
+   ENDDO
+
+   DO K=1,KBAR
+      DO J=1,JBM1
+         DO I=1,IBAR
+            ZZZ(1:4) = RHO_Z_P(I,J-1:J+2,K)
+            FY(I,J,K,N) = SCALAR_FACE_VALUE(VV(I,J,K),ZZZ,FLUX_LIMITER)
+         ENDDO
+      ENDDO
+   ENDDO
+
+   DO K=1,KBM1
+      DO J=1,JBAR
+         DO I=1,IBAR
+            ZZZ(1:4) = RHO_Z_P(I,J,K-1:K+2)
+            FZ(I,J,K,N) = SCALAR_FACE_VALUE(WW(I,J,K),ZZZ,FLUX_LIMITER)
+         ENDDO
+      ENDDO
+   ENDDO
+
+   WALL_LOOP_2: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
       WC=>WALL(IW)
       IF (WC%BOUNDARY_TYPE==NULL_BOUNDARY) CYCLE WALL_LOOP_2
 
-      IIG = WC%ONE_D%IIG
+      II  = WC%ONE_D%II 
+      JJ  = WC%ONE_D%JJ
+      KK  = WC%ONE_D%KK
+      IIG = WC%ONE_D%IIG 
       JJG = WC%ONE_D%JJG
       KKG = WC%ONE_D%KKG
       IOR = WC%ONE_D%IOR
+
+      ! Overwrite first off-wall advective flux if flow is away from the wall and if the face is not also a wall cell
+
+      OFF_WALL_IF_2: IF (WC%BOUNDARY_TYPE/=INTERPOLATED_BOUNDARY .AND. WC%BOUNDARY_TYPE/=OPEN_BOUNDARY) THEN
+
+         OFF_WALL_SELECT_2: SELECT CASE(IOR)
+            CASE( 1) OFF_WALL_SELECT_2
+               !      ghost          FX/UU(II+1)
+               ! ///   II   ///  II+1  |  II+2  | ...
+               !                       ^ WALL_INDEX(II+1,+1)
+               IF ((UU(II+1,JJ,KK)>0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II+1,JJ,KK),+1)>0)) THEN
+                  ZZZ(1:3) = (/WC%RHO_F*WC%ZZ_F(N),RHO_Z_P(II+1:II+2,JJ,KK)/)
+                  FX(II+1,JJ,KK,N) = SCALAR_FACE_VALUE(UU(II+1,JJ,KK),ZZZ,FLUX_LIMITER)
+               ENDIF
+            CASE(-1) OFF_WALL_SELECT_2
+               !            FX/UU(II-2)     ghost
+               ! ... |  II-2  |  II-1  ///   II   ///
+               !              ^ WALL_INDEX(II-1,-1)
+               IF ((UU(II-2,JJ,KK)<0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II-1,JJ,KK),-1)>0)) THEN
+                  ZZZ(2:4) = (/RHO_Z_P(II-2:II-1,JJ,KK),WC%RHO_F*WC%ZZ_F(N)/)
+                  FX(II-2,JJ,KK,N) = SCALAR_FACE_VALUE(UU(II-2,JJ,KK),ZZZ,FLUX_LIMITER)
+               ENDIF
+            CASE( 2) OFF_WALL_SELECT_2
+               IF ((VV(II,JJ+1,KK)>0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II,JJ+1,KK),+2)>0)) THEN
+                  ZZZ(1:3) = (/WC%RHO_F*WC%ZZ_F(N),RHO_Z_P(II,JJ+1:JJ+2,KK)/)
+                  FY(II,JJ+1,KK,N) = SCALAR_FACE_VALUE(VV(II,JJ+1,KK),ZZZ,FLUX_LIMITER)
+               ENDIF
+            CASE(-2) OFF_WALL_SELECT_2
+               IF ((VV(II,JJ-2,KK)<0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II,JJ-1,KK),-2)>0)) THEN
+                  ZZZ(2:4) = (/RHO_Z_P(II,JJ-2:JJ-1,KK),WC%RHO_F*WC%ZZ_F(N)/)
+                  FY(II,JJ-2,KK,N) = SCALAR_FACE_VALUE(VV(II,JJ-2,KK),ZZZ,FLUX_LIMITER)
+               ENDIF
+            CASE( 3) OFF_WALL_SELECT_2
+               IF ((WW(II,JJ,KK+1)>0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II,JJ,KK+1),+3)>0)) THEN
+                  ZZZ(1:3) = (/WC%RHO_F*WC%ZZ_F(N),RHO_Z_P(II,JJ,KK+1:KK+2)/)
+                  FZ(II,JJ,KK+1,N) = SCALAR_FACE_VALUE(WW(II,JJ,KK+1),ZZZ,FLUX_LIMITER)
+               ENDIF
+            CASE(-3) OFF_WALL_SELECT_2
+               IF ((WW(II,JJ,KK-2)<0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II,JJ,KK-1),-3)>0)) THEN
+                  ZZZ(2:4) = (/RHO_Z_P(II,JJ,KK-2:KK-1),WC%RHO_F*WC%ZZ_F(N)/)
+                  FZ(II,JJ,KK-2,N) = SCALAR_FACE_VALUE(WW(II,JJ,KK-2),ZZZ,FLUX_LIMITER)
+               ENDIF
+         END SELECT OFF_WALL_SELECT_2
+      
+      ENDIF OFF_WALL_IF_2
 
       BOUNDARY_SELECT_2: SELECT CASE(WC%BOUNDARY_TYPE)
          CASE DEFAULT
