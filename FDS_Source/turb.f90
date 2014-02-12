@@ -754,6 +754,8 @@ REAL, PARAMETER :: K3D(-1:1, -1:1, -1:1) = RESHAPE((/ (((K1D(I)*K1D(J)*K1D(K)/64
                                                    (/ 3,3,3 /))
 
 ! Traverse bulk of mesh
+!$OMP PARALLEL
+!$OMP DO SCHEDULE(static)
 DO K = 1,KBP1-1
   DO J = 1,JBP1-1
     DO I = 1,IBP1-1
@@ -768,30 +770,38 @@ DO K = 1,KBP1-1
     END DO
   END DO
 END DO
+!$OMP END DO
 
 ! Traverse shell of mesh rather crudely.
 ! Edges and corners are calculated several times.
 
+!$OMP DO SCHEDULE(static)
 DO K = 0,KBP1
   DO J = 0,JBP1
     HAT(0,J,K) = 2 * ORIG(0+1,J,K) - ORIG(0+2,J,K)
     HAT(IBP1,J,K) = 2 * ORIG(IBP1-1,J,K) - ORIG(IBP1-2,J,K)
   END DO
 END DO
+!$OMP END DO
 
+!$OMP DO SCHEDULE(static)
 DO K = 0,KBP1
   DO I = 0,IBP1
     HAT(I,0,K) = 2 * ORIG(I,0+1,K) - ORIG(I,0+2,K)
     HAT(I,JBP1,K) = 2 * ORIG(I,JBP1-1,K) - ORIG(I,JBP1-2,K)
   END DO
 END DO
+!$OMP END DO
 
+!$OMP DO SCHEDULE(static)
 DO J = 0,JBP1
   DO I = 0,IBP1
     HAT(I,J,0) = 2 * ORIG(I,J,0+1) - ORIG(I,J,0+2)
     HAT(I,J,KBP1) = 2 * ORIG(I,J,KBP1-1) - ORIG(I,J,KBP1-2)
   END DO
 END DO
+!$OMP END DO
+!$OMP END PARALLEL
 
 END SUBROUTINE TEST_FILTER
 
