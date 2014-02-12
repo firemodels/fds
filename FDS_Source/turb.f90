@@ -741,37 +741,48 @@ A(:,:,KBP1) = MIN(A_MAX,MAX(A_MIN,2._EB*A(:,:,KBAR)-A(:,:,KBM1)))
 END SUBROUTINE EX2G3D
 
 
-SUBROUTINE TEST_FILTER(hat,orig)
+SUBROUTINE TEST_FILTER(HAT,ORIG)
 
 ! Tophat filter
 
-REAL(EB), INTENT(IN) :: ORIG(0:ibp1,0:jbp1,0:kbp1)
-REAL(EB), INTENT(OUT) :: HAT(0:ibp1,0:jbp1,0:kbp1)
-INTEGER :: I, J, K
+REAL(EB), INTENT(IN) :: ORIG(0:IBP1,0:JBP1,0:KBP1)
+REAL(EB), INTENT(OUT) :: HAT(0:IBP1,0:JBP1,0:KBP1)
+INTEGER :: I, J, K, L, N, M
 REAL, PARAMETER :: K1D(3) = (/1.0, 2.0, 1.0/)
-REAL, PARAMETER :: K3D(3,3,3) = RESHAPE((/ (((K1D(I)*K1D(J)*K1D(K)/64.0, &
-                                           I=1,3), J=1,3), K=1,3) /), &
-                                        (/ 3,3,3 /))
+REAL, PARAMETER :: K3D(-1:1, -1:1, -1:1) = RESHAPE((/ (((K1D(I)*K1D(J)*K1D(K)/64.0, &
+                                                      I=1,3), J=1,3), K=1,3) /), &
+                                                   (/ 3,3,3 /))
 
+! Traverse bulk of mesh
 DO K = 1,KBP1-1
   DO J = 1,JBP1-1
     DO I = 1,IBP1-1
-        HAT(I,J,K) = SUM(ORIG(I-1:I+1, J-1:J+1, K-1:K+1) * K3D)
+      ! Apply 3x3x3 Kernel; this is faster than elementwise array multiplication.
+      DO M = -1,1
+        DO N = -1,1
+          DO L = -1,1
+            HAT(I,J,K) = HAT(I,J,K) + ORIG(I+L,J+N,K+M) * K3D(L,N,M)
+          END DO
+        END DO
+      END DO
     END DO
   END DO
 END DO
 
+! Traverse shell of mesh rather crudely.
+! Edges and corners are calculated several times.
+
 DO K = 0,KBP1
   DO J = 0,JBP1
     HAT(0,J,K) = 2 * ORIG(0+1,J,K) - ORIG(0+2,J,K)
-    HAT(ibp1,J,K) = 2 * ORIG(ibp1-1,J,K) - ORIG(ibp1-2,J,K)
+    HAT(IBP1,J,K) = 2 * ORIG(IBP1-1,J,K) - ORIG(IBP1-2,J,K)
   END DO
 END DO
 
 DO K = 0,KBP1
   DO I = 0,IBP1
     HAT(I,0,K) = 2 * ORIG(I,0+1,K) - ORIG(I,0+2,K)
-    HAT(I,jbp1,K) = 2 * ORIG(I,jbp1-1,K) - ORIG(I,jbp1-2,K)
+    HAT(I,JBP1,K) = 2 * ORIG(I,JBP1-1,K) - ORIG(I,JBP1-2,K)
   END DO
 END DO
 
