@@ -497,6 +497,7 @@ ENDIF CONST_GAMMA_IF_1
 
 ! Compute RTRM = 1/(rho*c_p*T) and multiply it by divergence terms already summed up
 
+!$OMP PARALLEL DO SCHEDULE(STATIC)
 DO K=1,KBAR
    DO J=1,JBAR
       DO I=1,IBAR
@@ -506,6 +507,7 @@ DO K=1,KBAR
       ENDDO
    ENDDO
 ENDDO
+!$OMP END PARALLEL DO
 
 ! Compute (1/rho) * Sum( (Wbar/W_alpha-h_s,alpha/cp*T) (del dot rho*D del Z_n - u dot del rho*Z_n)
 
