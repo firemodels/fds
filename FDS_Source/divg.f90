@@ -169,6 +169,7 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
 
    ! Compute rho*D del Z
 
+   !$OMP PARALLEL DO PRIVATE(DZDX, DZDY, DZDZ) SCHEDULE (STATIC)
    DO K=0,KBAR
       DO J=0,JBAR
          DO I=0,IBAR
@@ -181,6 +182,7 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
          ENDDO
       ENDDO
    ENDDO
+   !$OMP END PARALLEL DO
 
    ! Tensor diffusivity model (experimental)
 
