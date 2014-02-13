@@ -284,6 +284,7 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
 
    CYLINDER2: SELECT CASE(CYLINDRICAL)
       CASE(.FALSE.) CYLINDER2  ! 3D or 2D Cartesian Coords
+         !$OMP PARALLEL DO SCHEDULE(STATIC)
          DO K=1,KBAR
             DO J=1,JBAR
                DO I=1,IBAR
@@ -293,6 +294,7 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
                ENDDO
             ENDDO
          ENDDO
+         !$OMP END PARALLEL DO
       CASE(.TRUE.) CYLINDER2  ! 2D Cylindrical Coords
          J=1
          DO K=1,KBAR
