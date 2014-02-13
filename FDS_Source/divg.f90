@@ -389,6 +389,7 @@ ENDIF K_DNS_OR_LES
 
 ! Compute k*dT/dx, etc
 
+!$OMP PARALLEL DO PRIVATE(DTDX, DTDY, DTDZ) SCHEDULE (STATIC)
 DO K=0,KBAR
    DO J=0,JBAR
       DO I=0,IBAR
@@ -401,6 +402,7 @@ DO K=0,KBAR
       ENDDO
    ENDDO
 ENDDO
+!$OMP END PARALLEL DO
 
 ! Correct thermal gradient (k dT/dn) at boundaries
 
