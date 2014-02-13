@@ -253,6 +253,7 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
 
    CYLINDER: SELECT CASE(CYLINDRICAL)
       CASE(.FALSE.) CYLINDER  ! 3D or 2D Cartesian Coords
+         !$OMP PARALLEL DO PRIVATE(DIV_DIFF_HEAT_FLUX) SCHEDULE(STATIC)
          DO K=1,KBAR
             DO J=1,JBAR
                DO I=1,IBAR
@@ -266,6 +267,7 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
                ENDDO
             ENDDO
          ENDDO
+         !$OMP END PARALLEL DO
       CASE(.TRUE.) CYLINDER  ! 2D Cylindrical Coords
          J = 1
          DO K=1,KBAR
