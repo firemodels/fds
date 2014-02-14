@@ -110,7 +110,7 @@ cat << EOF > $scriptfile
 #!/bin/bash
 #PBS -N $JOBPREFIX$infile(MPI$IB)
 #PBS -l nodes=$nnodes:ppn=$nprocs
-#PBS -l walltime=02:00:00
+#PBS -l walltime=04:00:00
 #PBS -S /bin/bash
 #PBS -e $outerr
 #PBS -l pvmem=1GB
