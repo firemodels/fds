@@ -33,7 +33,7 @@ objwin = $(obj:.o=.obj)
 
 # include file directory locations (should be the same for all builds)
 
-INC = -I $(INC_DIR)/glut -I $(INC_DIR)/glui -I $(INC_DIR)/gd -I $(SOURCE_DIR)/shared -I $(SOURCE_DIR)/smokeview -I $(SOURCE_DIR)/glew
+INC = -I $(INC_DIR)/glut -I $(INC_DIR)/glui -I $(INC_DIR)/gd -I $(SOURCE_DIR)/shared -I $(SOURCE_DIR)/smokeview -I $(SOURCE_DIR)/glew -I $(INC_DIR)/zlib
 
 # libraries used by smokeview
 

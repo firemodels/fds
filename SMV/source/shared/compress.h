@@ -6,7 +6,7 @@
 #define COMPRESS_H_DEFINED
 #ifndef DEF_ZLIB
 #define DEF_ZLIB
-#include "zlib.h"
+#include <zlib.h>
 #endif
 unsigned int rle(unsigned char *buffer_in, int nchars_in, unsigned char *buffer_out);
 unsigned int irle(unsigned char *buffer_in, int nchars_in, unsigned char *buffer_out);

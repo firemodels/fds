@@ -1,6 +1,7 @@
 #!/bin/bash
 SIZE="-m64"
 COMPILER="icc"
+COMPILER2="icc"
 PLATFORM=""
 while getopts '36ghit' OPTION
 do

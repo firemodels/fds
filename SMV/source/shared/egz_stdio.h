@@ -18,7 +18,7 @@
 
 #ifndef DEF_ZLIB
 #define DEF_ZLIB
-#include "zlib.h"
+#include <zlib.h>
 #endif
 #endif   /* end USE_ZLIB */
 
