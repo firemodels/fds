@@ -14,7 +14,7 @@
 FIREBOT_QUEUE=smokebot
 MAKEMOVIES=
 RUNAUTO=
-RUNDEBUG=true
+RUNDEBUG="1"
 while getopts 'amq:s' OPTION
 do
 case $OPTION in
@@ -28,7 +28,7 @@ case $OPTION in
    FIREBOT_QUEUE="$OPTARG"
    ;;
   s)
-   RUNDEBUG=false
+   RUNDEBUG="0"
    ;;
 esac
 done
@@ -1072,7 +1072,7 @@ compile_fds_mpi_db
 check_compile_fds_mpi_db
 
 ### Stage 3 ###
-if [[ $stage2a_success && $RUNDEBUG ]] ; then
+if [[ $stage2a_success && "$RUNDEBUG" == "1" ]] ; then
    run_verification_cases_debug
    check_verification_cases_debug
 fi
