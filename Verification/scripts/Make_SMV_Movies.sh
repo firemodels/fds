@@ -102,17 +102,22 @@ cd $INDIR
 
 # make movies out of frames generated above
 echo making plume5c_tslice movie
-$MAKEMOVIE -o $OUTDIR plume5c_tslice  > /dev/null
+$MAKEMOVIE -o $OUTDIR -m plume5c_tslice plume5c_tslice > /dev/null
+
 echo making plume5c_3dsmoke movie
-$MAKEMOVIE -o $OUTDIR plume5c_3dsmoke  > /dev/null
+$MAKEMOVIE -o $OUTDIR  -m plume5c_3dsmoke plume5c_3dsmoke  > /dev/null
+
 echo making plume5c_vtslice movie
-$MAKEMOVIE -o $OUTDIR plume5c_vtslice > /dev/null
+$MAKEMOVIE -o $OUTDIR -m plume5c_vtslice plume5c_vtslice > /dev/null
+
 echo making plume5c_iso movie
-$MAKEMOVIE -o $OUTDIR plume5c_iso  > /dev/null
+$MAKEMOVIE -o $OUTDIR  -m plume5c_iso plume5c_iso  > /dev/null
+
 echo making plume5c_tbound movie
-$MAKEMOVIE -o $OUTDIR plume5c_tbound  > /dev/null
+$MAKEMOVIE -o $OUTDIR  -m plume5c_tbound plume5c_tbound > /dev/null
+
 echo making plume5c_part movie
-$MAKEMOVIE -o $OUTDIR plume5c_part  > /dev/null
+$MAKEMOVIE -o $OUTDIR  -m plume5c_part plume5c_part  > /dev/null
 
 # -------- thouse5 movies -------------------
 
@@ -125,9 +130,10 @@ cd $INDIR
 
 # make movies out of frames generated above
 echo making thouse5_tslice movie
-$MAKEMOVIE -o $OUTDIR thouse5_tslice  > /dev/null
+$MAKEMOVIE -o $OUTDIR  -m thouse5_tslice thouse5_tslice  > /dev/null
+
 echo making thouse5_smoke3d movie
-$MAKEMOVIE -o $OUTDIR thouse5_smoke3d  > /dev/null
+$MAKEMOVIE -o $OUTDIR  -m thouse5_smoke3d thouse5_smoke3d > /dev/null
 
 # -------- BT10m_2x2km_LS movie -------------------
 

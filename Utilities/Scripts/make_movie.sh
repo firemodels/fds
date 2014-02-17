@@ -1,6 +1,6 @@
 #!/bin/bash
 if [ $# -lt 1 ] ; then
-  echo "Usage: makemovie.sh [-d output_directory] [-m movie_name] input_base"
+  echo "Usage: makemovie.sh [-i input_directory] [-d output_directory] [-m movie_name] input_base"
   echo ""
   echo "This script generates a movie from a sequence of "
   echo "png image files.  Each image file has the form basexxxx.png"
