@@ -65,6 +65,7 @@ INSTALL xvfb
 INSTALL msmtp
 INSTALL heirloom-mailx
 INSTALL gfortran
+INSTALL mjpegtools
 
 echo edit ~/.msmtprc_ORIG to ~/.msmtprc and edit
 cat << EOF > ~/.msmtprc_ORIG
