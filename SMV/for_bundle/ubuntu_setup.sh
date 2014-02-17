@@ -1,5 +1,11 @@
 #!/bin/bash
-USERNAME=`whoami`
+
+# run this script using sudo
+
+# set user name of person "owning" cfast and FDS-SMV repositories
+USERNAME=change to your real user name
+
+# ---- shouldn't need to edit below ----
 
 INSTALL ()
 {
@@ -16,17 +22,19 @@ echo > setup_ubuntu.txt
 INSTALL openssh-server
 INSTALL samba
 
-# smbpasswd -a gforney
-# add following to end of /etc/samba/smb.conf
-#[gforney]
-#    path = /home/gforney
-#    browsable = yes
-#    guest ok = yes
-#    read only = no
-#    create mask = 0755
+echo setting up samba
+smbpasswd -a $USERNAME
 
-# sudo restart smbd
-# sudo restart nmbd
+cat << EOF >> /etc/samba.conf
+[$USERNAME]
+    path = /home/$USERNAME
+    browsable = yes
+    guest ok = yes
+    read only = no
+    create mask = 0755
+EOF
+restart smbd
+restart nmbd
 
 INSTALL subversion
 
@@ -46,7 +54,7 @@ echo ------------------------------- >> setup_ubuntu.txt
 
 INSTALL libxmu-dev
 INSTALL libxi-dev
-INSTALL g++multilib >> setup_ubuntu.txt
+INSTALL g++multilib
 INSTALL freeglut3
 INSTALL freeglut3-dev
 INSTALL texlive-latex-base
@@ -58,6 +66,7 @@ INSTALL msmtp
 INSTALL heirloom-mailx
 INSTALL gfortran
 
+echo edit ~/.msmtprc_ORIG to ~/.msmtprc and edit
 cat << EOF > ~/.msmtprc_ORIG
 #---- ~/.msmtprc -----
 #Gmail account
@@ -77,6 +86,7 @@ password userpasswd
 port 587
 EOF
 
+echo copy ~/.mailrc_ORIG to ~/.mailrc
 cat << EOF > ~/.mailrc_ORIG
 # --- ~/.mailrc ---
 set sendmail="/usr/bin/msmtp"
