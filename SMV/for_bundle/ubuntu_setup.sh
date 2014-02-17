@@ -56,6 +56,7 @@ INSTALL texlive-fonts-recommended
 INSTALL xvfb
 INSTALL msmtp
 INSTALL heirloom-mailx
+INSTALL gfortran
 
 cat << EOF > ~/.msmtprc_ORIG
 #---- ~/.msmtprc -----
