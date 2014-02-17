@@ -36,7 +36,7 @@ export SMVBINDIR="-bindir $SVNROOT/SMV/for_bundle"
 export MAKEMOVIE=$SVNROOT/Utilities/Scripts/make_movie.sh
 export STARTX=$SVNROOT/Utilities/Scripts/startXserver.sh
 export STOPX=$SVNROOT/Utilities/Scripts/stopXserver.sh
-QFDS=/usr/local/bin/qfds.sh
+QFDS=$SVNROOT/Utilities/Scripts/bundle_setup/qfds.sh
 
 export BASEDIR=`pwd`
 
