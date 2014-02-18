@@ -2,9 +2,6 @@
 
 set size=%1
 
-::ffmpeg -f image2 -i "thouse5_%%04d.png" mpg_video.mpg
-::ffmpeg -f image2 -i "thouse5_%%04d.png" -intra -coder ac -an mpgh_video.mpg
-
 set SCRIPT_DIR=%CD%
 
 cd %CD%\..
@@ -160,7 +157,7 @@ goto eof
 
   set BASEFILE=%1
   set BASEMOVIE=%2
-  ffmpeg -f image2 -i "%BASEFILE%_%%04d.png" %OUTDIR%\%BASEMOVIE%.m1v
+  ffmpeg -y -f image2 -i "%BASEFILE%_%%04d.png" %OUTDIR%\%BASEMOVIE%.m1v
   exit /b 0
 
 :eof
