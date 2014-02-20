@@ -2660,7 +2660,7 @@ SURFLOOP: DO N=0,N_SURF
  
    IF (SF%THERMAL_BC_INDEX==SPECIFIED_TEMPERATURE .AND. SF%TMP_FRONT>0._EB) &
                                   WRITE(LU_OUTPUT,'(A,F8.1)') '     Wall or Vent Temperature (C)', SF%TMP_FRONT - TMPM
-   IF (ABS(SF%VEL)>TWO_EPSILON_EB)             WRITE(LU_OUTPUT,'(A,F8.3)')  '     Normal Velocity (m/s       ', SF%VEL
+   IF (ABS(SF%VEL)>TWO_EPSILON_EB)             WRITE(LU_OUTPUT,'(A,F8.3)')  '     Normal Velocity (m/s)      ', SF%VEL
    IF (ABS(SF%MASS_FLUX_TOTAL)>TWO_EPSILON_EB) WRITE(LU_OUTPUT,'(A,ES9.2)') '     Total Mass Flux (kg/m^2/s) ', SF%MASS_FLUX_TOTAL
    IF (ABS(SF%VOLUME_FLOW)>TWO_EPSILON_EB)     WRITE(LU_OUTPUT,'(A,ES9.2)') '     Volume Flow     (m^3/s)    ', SF%VOLUME_FLOW
  
