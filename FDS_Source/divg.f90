@@ -219,6 +219,8 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
 
    ! Correct rho*D del Z and del dot h_n*rho*D del Z_n at boundaries and store rho*D at boundaries
 
+   !$OMP PARALLEL DO SCHEDULE(GUIDED) &
+   !$OMP& PRIVATE(WC, IIG, JJG, KKG, IOR, RHO_D, HDIFF, RHO_D_DZDN)
    WALL_LOOP2: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
       WC => WALL(IW)
       IF (WC%BOUNDARY_TYPE==NULL_BOUNDARY .OR. &
@@ -231,25 +233,50 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
       RHO_D_DZDN = 2._EB*WC%RHODW(N)*(ZZP(IIG,JJG,KKG,N)-WC%ZZ_F(N))*WC%RDN
       SELECT CASE(IOR)
          CASE( 1) 
+            !$OMP ATOMIC WRITE
             RHO_D_DZDX(IIG-1,JJG,KKG)   =  RHO_D_DZDN
+            !$OMP END ATOMIC
+            !$OMP ATOMIC WRITE
             H_RHO_D_DZDX(IIG-1,JJG,KKG) =  HDIFF*RHO_D_DZDN
+            !$OMP END ATOMIC
          CASE(-1) 
+            !$OMP ATOMIC WRITE
             RHO_D_DZDX(IIG,JJG,KKG)     = -RHO_D_DZDN
+            !$OMP END ATOMIC
+            !$OMP ATOMIC WRITE
             H_RHO_D_DZDX(IIG,JJG,KKG)   = -HDIFF*RHO_D_DZDN
+            !$OMP END ATOMIC
          CASE( 2) 
+            !$OMP ATOMIC WRITE
             RHO_D_DZDY(IIG,JJG-1,KKG)   =  RHO_D_DZDN
+            !$OMP END ATOMIC
+            !$OMP ATOMIC WRITE
             H_RHO_D_DZDY(IIG,JJG-1,KKG) =  HDIFF*RHO_D_DZDN
+            !$OMP END ATOMIC
          CASE(-2) 
+            !$OMP ATOMIC WRITE
             RHO_D_DZDY(IIG,JJG,KKG)     = -RHO_D_DZDN
+            !$OMP END ATOMIC
+            !$OMP ATOMIC WRITE
             H_RHO_D_DZDY(IIG,JJG,KKG)   = -HDIFF*RHO_D_DZDN
+            !$OMP END ATOMIC
          CASE( 3) 
+            !$OMP ATOMIC WRITE
             RHO_D_DZDZ(IIG,JJG,KKG-1)   =  RHO_D_DZDN
+            !$OMP END ATOMIC
+            !$OMP ATOMIC WRITE
             H_RHO_D_DZDZ(IIG,JJG,KKG-1) =  HDIFF*RHO_D_DZDN
+            !$OMP END ATOMIC
          CASE(-3) 
+            !$OMP ATOMIC WRITE
             RHO_D_DZDZ(IIG,JJG,KKG)     = -RHO_D_DZDN
+            !$OMP END ATOMIC
+            !$OMP ATOMIC WRITE
             H_RHO_D_DZDZ(IIG,JJG,KKG)   = -HDIFF*RHO_D_DZDN
+            !$OMP END ATOMIC
       END SELECT
    ENDDO WALL_LOOP2
+   !$OMP END PARALLEL DO
 
    CYLINDER: SELECT CASE(CYLINDRICAL)
       CASE(.FALSE.) CYLINDER  ! 3D or 2D Cartesian Coords
