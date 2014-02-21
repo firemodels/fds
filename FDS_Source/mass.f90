@@ -191,9 +191,6 @@ WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
 
 ENDDO WALL_LOOP
 
-!$OMP PARALLEL DO DEFAULT(NONE) COLLAPSE(3) SCHEDULE(STATIC) &
-!$OMP SHARED(KBAR,IBAR,JBAR,SOLID,CELL_INDEX,FRHO,FX,FY,FZ,UU,VV,WW,R,RRN,RDX,RDY,RDZ) &
-!$OMP PRIVATE(K,J,I)
 DO K=1,KBAR
    DO J=1,JBAR
       DO I=1,IBAR
@@ -205,13 +202,11 @@ DO K=1,KBAR
       ENDDO
    ENDDO
 ENDDO
-!$OMP END PARALLEL DO
 
 SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
 
    RHO_Z_P=>WORK1
 
-   !$OMP PARALLEL DO SCHEDULE(static)
    DO K=0,KBP1
       DO J=0,JBP1
          DO I=0,IBP1
@@ -219,7 +214,6 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
          ENDDO
       ENDDO
    ENDDO
-   !$OMP END PARALLEL DO
 
    ! Compute scalar face values
 
@@ -357,9 +351,6 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
 
    ENDDO WALL_LOOP_2
 
-   !$OMP PARALLEL DO DEFAULT(NONE) COLLAPSE(3) SCHEDULE(STATIC) &
-   !$OMP SHARED(KBAR,IBAR,JBAR,SOLID,CELL_INDEX,DEL_RHO_D_DEL_Z,N,FX,FY,FZ,UU,VV,WW,R,RRN,RDX,RDY,RDZ) &
-   !$OMP PRIVATE(K,J,I)
    DO K=1,KBAR
       DO J=1,JBAR
          DO I=1,IBAR
@@ -371,7 +362,6 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
          ENDDO
       ENDDO
    ENDDO
-   !$OMP END PARALLEL DO
 
    SM=>SPECIES_MIXTURE(N)
    IF (SM%DEPOSITING .AND. GRAVITATIONAL_DEPOSITION) CALL SETTLING_VELOCITY
@@ -460,12 +450,6 @@ PREDICTOR_STEP: SELECT CASE (PREDICTOR)
 
 CASE(.TRUE.) PREDICTOR_STEP
 
-   !$OMP PARALLEL DEFAULT(NONE) &
-   !$OMP SHARED(CHANGE_TIME_STEP,NM,N_TRACKED_SPECIES,KBAR,JBAR,IBAR,SOLID,CELL_INDEX,ZZS,DT, &
-   !$OMP        DEL_RHO_D_DEL_Z,RHO,ZZ, &
-   !$OMP        DTRATIO,DT_PREV,OMDTRATIO,RHOS, &
-   !$OMP        FRHO,CLIP_MASS_FRACTION,N_ZONE,PBAR_S,PBAR,D_PBAR_DT,KBP1,JBP1,IBP1,RSUM,TMP,PRESSURE_ZONE, &
-   !$OMP        TMPMIN,TMPMAX)
 
    IF (.NOT.CHANGE_TIME_STEP(NM)) THEN
 
@@ -475,7 +459,6 @@ CASE(.TRUE.) PREDICTOR_STEP
    !       DIVERGENCE_PART_1 is inside the loop.  The source terms are then applied to the next substep in
    !       MASS_FINITE_DIFFERENCES.
 
-      !$OMP DO COLLAPSE(4) SCHEDULE(DYNAMIC) PRIVATE(N,K,J,I)
       DO N=1,N_TRACKED_SPECIES
          DO K=1,KBAR
             DO J=1,JBAR
@@ -486,15 +469,11 @@ CASE(.TRUE.) PREDICTOR_STEP
             ENDDO
          ENDDO
       ENDDO
-      !$OMP END DO NOWAIT
 
    ELSE
 
-      !$OMP SINGLE
       DTRATIO   = DT/DT_PREV
       OMDTRATIO = 1._EB - DTRATIO
-      !$OMP END SINGLE
-      !$OMP DO COLLAPSE(4) SCHEDULE(DYNAMIC) PRIVATE(N,K,J,I)
       DO N=1,N_TRACKED_SPECIES
          DO K=1,KBAR
             DO J=1,JBAR
@@ -505,13 +484,11 @@ CASE(.TRUE.) PREDICTOR_STEP
            ENDDO
          ENDDO
       ENDDO
-      !$OMP END DO NOWAIT
 
    ENDIF
 
    ! Predict the density at the next time step (RHOS or RHO^*)
 
-   !$OMP DO COLLAPSE(3) SCHEDULE(STATIC) PRIVATE(K,J,I)
    DO K=1,KBAR
       DO J=1,JBAR
          DO I=1,IBAR
@@ -520,17 +497,13 @@ CASE(.TRUE.) PREDICTOR_STEP
          ENDDO
       ENDDO
    ENDDO
-   !$OMP END DO
 
    ! Correct densities above or below clip limits
 
-   !$OMP SINGLE
    CALL CHECK_DENSITY
-   !$OMP END SINGLE
 
    ! Extract mass fraction from RHO * ZZ
 
-   !$OMP DO COLLAPSE(4) SCHEDULE(DYNAMIC) PRIVATE(N,K,J,I)
    DO N=1,N_TRACKED_SPECIES
       DO K=1,KBAR
          DO J=1,JBAR
@@ -541,15 +514,12 @@ CASE(.TRUE.) PREDICTOR_STEP
          ENDDO
       ENDDO
    ENDDO
-   !$OMP END DO
 
    ! Predict background pressure at next time step
 
-   !$OMP DO PRIVATE(I)
    DO I=1,N_ZONE
       PBAR_S(:,I) = PBAR(:,I) + D_PBAR_DT(I)*DT
    ENDDO
-   !$OMP END DO NOWAIT
 
    ! Manufactured solution
 
@@ -566,19 +536,14 @@ CASE(.TRUE.) PREDICTOR_STEP
    ! Correct mass fractions above or below clip limits
 
    IF (CLIP_MASS_FRACTION .AND. N_TRACKED_SPECIES>0) THEN
-      !$OMP WORKSHARE
       ZZS(1:IBAR,1:JBAR,1:KBAR,1:N_TRACKED_SPECIES) = MAX(0._EB,MIN(1._EB,ZZS(1:IBAR,1:JBAR,1:KBAR,1:N_TRACKED_SPECIES)))
-      !$OMP END WORKSHARE
    ELSEIF (N_TRACKED_SPECIES>0) THEN
-      !$OMP SINGLE
       CALL CHECK_MASS_FRACTION
-      !$OMP END SINGLE
    ENDIF
 
    ! Compute molecular weight term RSUM=R0*SUM(Y_i/W_i)
 
    IF (N_TRACKED_SPECIES>0) THEN
-      !$OMP DO COLLAPSE(3) SCHEDULE(STATIC) PRIVATE(K,J,I,ZZ_GET)
       DO K=1,KBAR
          DO J=1,JBAR
             DO I=1,IBAR
@@ -588,13 +553,11 @@ CASE(.TRUE.) PREDICTOR_STEP
             ENDDO
          ENDDO
       ENDDO
-      !$OMP END DO
    ENDIF
 
    ! Extract predicted temperature at next time step from Equation of State
 
    ISOTHERMAL_IF_1: IF (ISOTHERMAL) THEN
-      !$OMP DO COLLAPSE(3) SCHEDULE(STATIC) PRIVATE(K,J,I)
       DO K=1,KBAR
          DO J=1,JBAR
             DO I=1,IBAR
@@ -603,9 +566,7 @@ CASE(.TRUE.) PREDICTOR_STEP
             ENDDO
          ENDDO
       ENDDO
-      !$OMP END DO
    ELSE ISOTHERMAL_IF_1
-      !$OMP DO COLLAPSE(3) SCHEDULE(STATIC) PRIVATE(K,J,I)
       DO K=1,KBAR
          DO J=1,JBAR
             DO I=1,IBAR
@@ -614,13 +575,9 @@ CASE(.TRUE.) PREDICTOR_STEP
             ENDDO
          ENDDO
       ENDDO
-      !$OMP END DO
    ENDIF ISOTHERMAL_IF_1
 
-   !$OMP WORKSHARE
    TMP = MAX(TMPMIN,MIN(TMPMAX,TMP))
-   !$OMP END WORKSHARE NOWAIT
-   !$OMP END PARALLEL
 
 ! The CORRECTOR step
 
@@ -628,13 +585,7 @@ CASE(.FALSE.) PREDICTOR_STEP
 
    ! Correct species mass fraction at next time step (ZZ here also stores RHO*ZZ)
 
-   !$OMP PARALLEL DEFAULT(NONE) &
-   !$OMP SHARED(N_TRACKED_SPECIES,KBAR,JBAR,IBAR,SOLID,CELL_INDEX,ZZ,RHO,RHOS, &
-   !$OMP        ZZS,DT,DEL_RHO_D_DEL_Z, &
-   !$OMP        FRHO,CLIP_MASS_FRACTION,N_ZONE,PBAR,PBAR_S,D_PBAR_DT_S,KBP1,JBP1,IBP1,RSUM,TMP,PRESSURE_ZONE, &
-   !$OMP        TMPMIN,TMPMAX)
 
-   !$OMP DO COLLAPSE(4) SCHEDULE(DYNAMIC) PRIVATE(N,K,J,I)
    DO N=1,N_TRACKED_SPECIES
       DO K=1,KBAR
          DO J=1,JBAR
@@ -645,11 +596,9 @@ CASE(.FALSE.) PREDICTOR_STEP
          ENDDO
       ENDDO
    ENDDO
-   !$OMP END DO NOWAIT
 
    ! Correct density at next time step
 
-   !$OMP DO COLLAPSE(3) SCHEDULE(STATIC) PRIVATE(K,J,I)
    DO K=1,KBAR
       DO J=1,JBAR
          DO I=1,IBAR
@@ -658,17 +607,13 @@ CASE(.FALSE.) PREDICTOR_STEP
          ENDDO
       ENDDO
    ENDDO
-   !$OMP END DO
 
    ! Correct densities above or below clip limits
 
-   !$OMP SINGLE
    CALL CHECK_DENSITY
-   !$OMP END SINGLE
 
    ! Extract Y_n from rho*Y_n
 
-   !$OMP DO COLLAPSE(4) SCHEDULE(DYNAMIC) PRIVATE(N,K,J,I)
    DO N=1,N_TRACKED_SPECIES
       DO K=1,KBAR
          DO J=1,JBAR
@@ -679,15 +624,12 @@ CASE(.FALSE.) PREDICTOR_STEP
          ENDDO
       ENDDO
    ENDDO
-   !$OMP END DO
 
    ! Correct background pressure
 
-   !$OMP DO PRIVATE(I)
    DO I=1,N_ZONE
       PBAR(:,I) = 0.5_EB*(PBAR(:,I) + PBAR_S(:,I) + D_PBAR_DT_S(I)*DT)
    ENDDO
-   !$OMP END DO NOWAIT
 
    ! Manufactured solution
 
@@ -704,19 +646,14 @@ CASE(.FALSE.) PREDICTOR_STEP
    ! Correct mass fractions above or below clip limits
 
    IF (CLIP_MASS_FRACTION .AND. N_TRACKED_SPECIES>0) THEN
-      !$OMP WORKSHARE
       ZZ(1:IBAR,1:JBAR,1:KBAR,1:N_TRACKED_SPECIES) = MAX(0._EB,MIN(1._EB,ZZ(1:IBAR,1:JBAR,1:KBAR,1:N_TRACKED_SPECIES)))
-      !$OMP END WORKSHARE NOWAIT
    ELSEIF (N_TRACKED_SPECIES>0) THEN
-      !$OMP SINGLE
       CALL CHECK_MASS_FRACTION
-      !$OMP END SINGLE
    ENDIF
 
    ! Compute molecular weight term RSUM=R0*SUM(Y_i/W_i)
 
    IF (N_TRACKED_SPECIES>0) THEN
-      !$OMP DO COLLAPSE(3) SCHEDULE(STATIC) PRIVATE(K,J,I,ZZ_GET)
       DO K=1,KBAR
          DO J=1,JBAR
             DO I=1,IBAR
@@ -726,13 +663,11 @@ CASE(.FALSE.) PREDICTOR_STEP
             ENDDO
          ENDDO
       ENDDO
-      !$OMP END DO
    ENDIF
 
    ! Extract predicted temperature at next time step from Equation of State
 
    ISOTHERMAL_IF_2: IF (ISOTHERMAL) THEN
-      !$OMP DO COLLAPSE(3) SCHEDULE(STATIC) PRIVATE(K,J,I)
       DO K=1,KBAR
          DO J=1,JBAR
             DO I=1,IBAR
@@ -741,9 +676,7 @@ CASE(.FALSE.) PREDICTOR_STEP
             ENDDO
          ENDDO
       ENDDO
-      !$OMP END DO
    ELSE ISOTHERMAL_IF_2
-      !$OMP DO COLLAPSE(3) SCHEDULE(STATIC) PRIVATE(K,J,I)
       DO K=1,KBAR
          DO J=1,JBAR
             DO I=1,IBAR
@@ -752,13 +685,9 @@ CASE(.FALSE.) PREDICTOR_STEP
             ENDDO
          ENDDO
       ENDDO
-      !$OMP END DO
    ENDIF ISOTHERMAL_IF_2
 
-   !$OMP WORKSHARE
    TMP = MAX(TMPMIN,MIN(TMPMAX,TMP))
-   !$OMP END WORKSHARE NOWAIT
-   !$OMP END PARALLEL
 
 END SELECT PREDICTOR_STEP
 
