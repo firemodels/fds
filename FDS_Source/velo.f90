@@ -554,6 +554,8 @@ OMZ => WORK6
 
 ! Compute vorticity and stress tensor components
 
+!$OMP PARALLEL DO PRIVATE(DUDY, DVDX, DUDZ, DWDX, DVDZ, DWDY, &
+!$OMP& MUX, MUY, MUZ) SCHEDULE(STATIC)
 DO K=0,KBAR
    DO J=0,JBAR
       DO I=0,IBAR
@@ -575,6 +577,7 @@ DO K=0,KBAR
       ENDDO
    ENDDO
 ENDDO
+!$OMP END PARALLEL DO
 
 ! Wannier Flow (Stokes flow) test case
 
