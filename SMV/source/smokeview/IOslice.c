@@ -1940,6 +1940,7 @@ int new_multi_slice(slicedata *sdold,slicedata *sd){
       ||sd->idir!=sdold->idir
       ||ABS(sd->position_orig-sdold->position_orig)>delta_orig
       ||sd->mesh_type!=sdold->mesh_type
+      ||sd->slicetype!=sdold->slicetype
         ){
       return 1;
     }
@@ -4306,8 +4307,7 @@ void drawvolslice_cellcenter(const slicedata *sd){
   int plotx, ploty, plotz;
   int ibar,jbar;
   int nx,ny,nxy;
-  char *iblank_x, *iblank_y, *iblank_z;
-  char *iblank_embed;
+  char *iblank_cell, *iblank_embed;
   int incx=0, incy=0, incz=0;
 
   mesh *meshi;
@@ -4334,16 +4334,16 @@ void drawvolslice_cellcenter(const slicedata *sd){
     ploty = sd->js1;
     plotz = sd->ks1;
   }
-  if(plotx<=1)plotx=1;
-  if(ploty<=1)ploty=1;
-  if(plotz<=1)plotz=1;
+  plotx = MAX(1,plotx);
+  ploty = MAX(1,ploty);
+  plotz = MAX(1,plotz);
 
-  ibar=meshi->ibar;
-  jbar=meshi->jbar;
-  iblank_x=meshi->c_iblank_x;
-  iblank_y=meshi->c_iblank_y;
-  iblank_z=meshi->c_iblank_z;
+  ibar = meshi->ibar;
+  jbar = meshi->jbar;
+  
+  iblank_cell = meshi->c_iblank_cell;
   iblank_embed = meshi->c_iblank_embed;
+  
   nx = ibar + 1;
   ny = jbar + 1;
   nxy = nx*ny;
@@ -4375,7 +4375,7 @@ void drawvolslice_cellcenter(const slicedata *sd){
         int i33;
         float z1,z3;
 
-        if(sd->slicetype!=SLICE_CENTER&&show_slice_in_obst==0&&iblank_x[IJK(plotx,j,k)]!=GASGAS)continue;
+        if(sd->slicetype!=SLICE_CENTER&&show_slice_in_obst==0&&iblank_cell[IJK(plotx-1,j,k)]!=GAS)continue;
         if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[IJK(plotx,j,k)]==EMBED_YES)continue;
 
         index_cell = (plotx + 1 -incx-sd->is1)*sd->nslicej*sd->nslicek + (j+1-sd->js1)*sd->nslicek + k + 1 - sd->ks1;
@@ -4412,7 +4412,7 @@ void drawvolslice_cellcenter(const slicedata *sd){
           int index_cell;
           float z1, z3;
 
-          if(sd->slicetype!=SLICE_CENTER&&show_slice_in_obst==0&&iblank_x[IJK(plotx,j,k)]!=GASGAS)continue;
+          if(sd->slicetype!=SLICE_CENTER&&show_slice_in_obst==0&&iblank_cell[IJK(plotx-1,j,k)]!=GASGAS)continue;
           if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[IJK(plotx,j,k)]==EMBED_YES)continue;
           z1 = zplt[k];
           z3 = zplt[k+1];
@@ -4450,7 +4450,7 @@ void drawvolslice_cellcenter(const slicedata *sd){
         int i33;
         float z1, z3;
 
-        if(show_slice_in_obst==0&&iblank_y[IJK(i,ploty,k)]!=GASGAS)continue;
+        if(show_slice_in_obst==0&&iblank_cell[IJKCELL(i,ploty-1,k)]!=GAS)continue;
         if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[IJK(i,ploty,k)]==EMBED_YES)continue;
         index_cell = (i+incx-sd->is1)*sd->nslicej*sd->nslicek + (ploty+1-incy-sd->js1)*sd->nslicek + k+1 - sd->ks1;
         i33 = 4*sd->iqsliceframe[index_cell];
@@ -4486,7 +4486,7 @@ void drawvolslice_cellcenter(const slicedata *sd){
           int i33;
           float z1, z3;
 
-          if(show_slice_in_obst==0&&iblank_y[IJK(i,ploty,k)]!=GASGAS)continue;
+          if(show_slice_in_obst==0&&iblank_cell[IJK(i,ploty-1,k)]!=GAS)continue;
           if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[IJK(i,ploty,k)]==EMBED_YES)continue;
           index_cell = (i+incx-sd->is1)*sd->nslicej*sd->nslicek + (ploty+1-incy-sd->js1)*sd->nslicek + k+1 - sd->ks1;
           i33 = 4*sd->iqsliceframe[index_cell];
@@ -4526,8 +4526,8 @@ void drawvolslice_cellcenter(const slicedata *sd){
         int i33;
         float yy1, y3;
 
-        if(show_slice_in_obst==0&&iblank_z[IJK(i,j,plotz)]!=GASGAS)continue;
-        if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[IJK(i,j,plotz)]==EMBED_YES)continue;
+        if(show_slice_in_obst==0&&iblank_cell[IJKCELL(i,j,plotz-1)]!=GAS)continue;
+        if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[IJKCELL(i,j,plotz)]==EMBED_YES)continue;
         index_cell = (i+1-sd->is1)*sd->nslicej*sd->nslicek + (j+incy-sd->js1)*sd->nslicek + plotz + 1 -incz- sd->ks1;
         i33 = 4*sd->iqsliceframe[index_cell];
         yy1 = yplt[j];
@@ -4563,8 +4563,8 @@ void drawvolslice_cellcenter(const slicedata *sd){
           float yy1, y3;
 
           index_cell = (i+1-sd->is1)*sd->nslicej*sd->nslicek + (j+incy-sd->js1)*sd->nslicek + plotz + 1 -incz- sd->ks1;
-          if(show_slice_in_obst==0&&iblank_z[IJK(i,j,plotz)]!=GASGAS)continue;
-          if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[IJK(i,j,plotz)]==EMBED_YES)continue;
+          if(show_slice_in_obst==0&&iblank_cell[IJKCELL(i,j,plotz-1)]!=GAS)continue;
+          if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[IJKCELL(i,j,plotz)]==EMBED_YES)continue;
           i33 = 4*sd->iqsliceframe[index_cell];
           yy1 = yplt[j];
           y3 = yplt[j+1];
