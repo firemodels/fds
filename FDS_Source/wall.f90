@@ -1308,6 +1308,7 @@ SELECT CASE(SF%BACKING)
       ELSE !Particle backside is the same gas cell
          TMP_BACK  = TMP(IIG,JJG,KKG)
          DTMP = TMP_BACK - TMP_B
+         Q_WATER_B = 0._EB
          HTCB = HEAT_TRANSFER_COEFFICIENT(DTMP,SF%H_FIXED,SF%GEOMETRY,SF%CONV_LENGTH,HT_MODEL=0,ROUGHNESS=0._EB, &
                                           SURF_INDEX=SURF_INDEX,PARTICLE_INDEX=PARTICLE_INDEX)
          QRADINB  = ONE_D%QRADIN
