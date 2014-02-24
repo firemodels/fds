@@ -5548,7 +5548,7 @@ CONTAINS
 SUBROUTINE SET_SURF_DEFAULTS
 
 ADIABATIC               = .FALSE.
-BACKING                 = 'VOID'
+BACKING                 = 'EXPOSED'
 BURN_AWAY               = .FALSE.
 CELL_SIZE_FACTOR        = 1.0
 C_FORCED_CONSTANT       = 0._EB
