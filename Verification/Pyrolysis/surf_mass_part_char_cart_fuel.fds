@@ -16,6 +16,7 @@
 	HEAT_OF_COMBUSTION = 12000./
 
 &SURF ID                        = 'Wood'
+      BACKING = 'INSULATED'
       COLOR                     = 'IVORY BLACK'
       MATL_ID(1,1)            	= 'PINE'
       THICKNESS                 = 0.005

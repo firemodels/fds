@@ -15,6 +15,7 @@
 
 &SURF ID = 'BLOCK'
       MATL_ID = 'STUFF'
+      BACKING='INSULATED'
       THICKNESS = 0.0066666
       STRETCH_FACTOR = 1.
       BURN_AWAY = .TRUE. /
