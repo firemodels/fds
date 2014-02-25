@@ -17,6 +17,7 @@
 
 &SURF ID                        = 'Wood'
       COLOR                     = 'IVORY BLACK'
+      BACKING = 'INSULATED'
       MATL_ID(1,1)            	= 'PINE'
       LENGTH 			= 0.05
       WIDTH			= 0.05
