@@ -562,6 +562,9 @@ verifying the display of cell centered data. Images in Fig. \ref{figcellaslicete
 are drawn at \SI{0}{s}, \SI{10}{s} and \SI{30}{s}. Images in
 Fig. \ref{figcellbslicetest} tests the transfer of data from FDS to Smokeview.
 
+Figure \ref{figslicemasktest} presents images verifying that cell centered and node centered slices
+are masked properly when drawn through blockages. Images are drawn at \SI{10}{s}.
+
 Figure \ref{figvslicetest} present images verifying the display of vector slices.
 Again, vector slice file images are drawn at \SI{0}{s}, \SI{10}{s} and \SI{30}{s}.
 The first column draws all vectors while the second column discards or chops vectors
@@ -656,6 +659,21 @@ files. Difference contours from these slice files are displayed at \SI{0}{s},
  Cell values displayed should match the $(i,j,k)$ grid cell indices.  The three plots
  in the 3D view correspond to the plan, elevation and side view plots.}
 \label{figcellbslicetest}%
+\end{figure}
+
+\begin{figure}[\figoptions]
+\begin{center}
+\begin{tabular}{c}
+
+ \includegraphics[width=5.5in]{SCRIPT_FIGURES/slicemask_cell}\\
+ a) cell centered slice\\
+ \includegraphics[width=5.5in]{SCRIPT_FIGURES/slicemask_node}\\
+ b) node centered slice
+\end{tabular}
+\end{center}
+ \caption[A test to demonstrate that cell and node centered slice files are masked properly when drawn through blockages.]
+ {A test to demonstrate that cell and node centered slice files are masked properly when drawn through blockages.}
+\label{figslicemasktest}%
 \end{figure}
 
 \begin{figure}[\figoptions]
