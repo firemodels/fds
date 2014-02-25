@@ -1,0 +1,24 @@
+
+// put rendered files in specified directory
+
+RENDERDIR
+ ..\..\Manuals\SMV_Verification_Guide\SCRIPT_FIGURES
+LOADFILE
+ slicemask_02.sf
+SETTIMEVAL
+ 10.009391
+RENDERCLIP
+ 1 30 30 145 145
+RENDERONCE
+ slicemask_node
+ 
+UNLOADALL
+LOADFILE
+ slicemask_01.sf
+SETTIMEVAL
+ 10.009391
+RENDERCLIP
+ 1 30 30 145 145
+RENDERONCE
+ slicemask_cell
+ 
