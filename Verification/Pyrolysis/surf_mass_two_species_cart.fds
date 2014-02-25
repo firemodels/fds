@@ -20,6 +20,7 @@
 &RAMP ID = 'T_RAMP', T = 10000, F = 1 /
 
 &SURF ID                        	= 'SAMPLE'
+        BACKING = 'INSULATED'
      	MATL_ID(1,1:2)            	= 'SOLID','MOISTURE'
      	MATL_MASS_FRACTION(1,1:2) 	= 0.8,0.2
      	THICKNESS                 	= 0.0002
