@@ -3,22 +3,61 @@
 
 RENDERDIR
  ..\..\Manuals\SMV_Verification_Guide\SCRIPT_FIGURES
-LOADFILE
- slicemask_02.sf
-SETTIMEVAL
- 10.009391
 RENDERCLIP
- 1 30 30 145 145
-RENDERONCE
- slicemask_node
- 
+ 1 251 237 4 10
+
 UNLOADALL
 LOADFILE
  slicemask_01.sf
 SETTIMEVAL
  10.009391
-RENDERCLIP
- 1 30 30 145 145
 RENDERONCE
- slicemask_cell
+ slicemask_node1
  
+UNLOADALL
+LOADFILE
+ slicemask_02.sf
+SETTIMEVAL
+ 10.009391
+RENDERONCE
+ slicemask_node2
+
+UNLOADALL
+LOADFILE
+ slicemask_03.sf
+SETTIMEVAL
+ 10.009391
+RENDERONCE
+ slicemask_node3
+
+UNLOADALL
+LOADFILE
+ slicemask_04.sf
+SETTIMEVAL
+ 10.009391
+RENDERONCE
+ slicemask_node4
+
+UNLOADALL
+LOADFILE
+ slicemask_05.sf
+SETTIMEVAL
+ 10.009391
+RENDERONCE
+ slicemask_cell1
+ 
+UNLOADALL
+LOADFILE
+ slicemask_06.sf
+SETTIMEVAL
+ 10.009391
+RENDERONCE
+ slicemask_cell2
+
+UNLOADALL
+LOADFILE
+ slicemask_07.sf
+SETTIMEVAL
+ 10.009391
+RENDERONCE
+ slicemask_cell3
