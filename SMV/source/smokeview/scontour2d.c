@@ -541,13 +541,13 @@ void getcontournodes(int ilev, int nlevels, const double x[4], const double y[4]
 
   if(casenum!=40){
     for(n=0;n<4;n++){
-      if(vallownet[n]*vallownet[n+1]<=0.0f){
+      if(vallownet[n]*vallownet[n+1]<0.0f){
         nn=2*n+1;
         factor = vallownet[n+1]/(valcopy[n+1]-valcopy[n]);
         xzero[nn] = xcopy[n]*factor + xcopy[n+1]*(1.0f-factor);
         yzero[nn] = ycopy[n]*factor + ycopy[n+1]*(1.0f-factor);
       }
-      if(valhighnet[n]*valhighnet[n+1]<=0.0f){
+      if(valhighnet[n]*valhighnet[n+1]<0.0f){
         nn = 2*n+2;
         factor = valhighnet[n+1]/(valcopy[n+1]-valcopy[n]);
         xzero[nn] = xcopy[n]*factor + xcopy[n+1]*(1.0f-factor);

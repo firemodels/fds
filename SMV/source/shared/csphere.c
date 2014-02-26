@@ -237,7 +237,7 @@ unsigned int getnormalindex(spherepoints *sphereinfo, float *normal){
 
   returnval=0;
   mindist2 = 100000000.0;
-  for(i=0;i<=sphereinfo->npoints;i++){
+  for(i=0;i<sphereinfo->npoints;i++){
     float xx, yy, zz;
 
     xyznorm = sphereinfo->normals + 3*i;

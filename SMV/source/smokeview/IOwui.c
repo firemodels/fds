@@ -20,9 +20,6 @@ char IOwui_revision[]="$Revision$";
 #include "smv_endian.h"
 #include "smokeviewvars.h"
 
-#ifdef pp_TERRAIN2GEOM
-void terrain2geom(float xmin, float xmax, float ymin, float ymax, int nx, int ny, float (*comp_func)(float, float));
-#endif
 float get_z_terrain(float x, float y);
 void init_tnode(terraindata *terri);
 void init_tnorm(terraindata *terri);
@@ -127,6 +124,7 @@ float get_zcell_val(mesh *meshi,float xval, float yval, float *zval_offset, int 
   int meshstart=-1;
 
   if(meshi==NULL)meshstart=0;
+  if(zval_offset!=NULL)*zval_offset=0.0;
   for(imesh=meshstart;imesh<nmeshes;imesh++){
     mesh *meshj;
     float *xplt, *yplt;
@@ -250,6 +248,62 @@ void update_terrain_colors(void){
   }
 }
 
+/* ------------------ terrain2geom ------------------------ */
+
+void terrain2geom(float xmin, float xmax, float ymin, float ymax, int nx, int ny, float (*comp_func)(float, float)){
+  int i, j;
+  float dx, dy;
+  float x, y, z;
+  int nverts, nfaces;
+  float *verts;
+  int *faces;
+  int ivert, iface;
+
+  if(nx<2||ny<2)return;
+  dx = (xmax-xmin)/(nx-1);
+  dy = (ymax-ymin)/(ny-1);
+
+  nverts = nx*ny;
+  nfaces = 2*(nx-1)*(ny-1);
+
+  NewMemory((void **)&verts,3*nverts*sizeof(float));
+  NewMemory((void **)&faces,3*nfaces*sizeof(int));
+
+  ivert=0;
+  for(j=0;j<ny;j++){
+    y = ymin + j*dy;
+    for(i=0;i<nx;i++){
+      x = xmin + i*dx;
+      z = comp_func(x,y);
+      verts[ivert++]=x;
+      verts[ivert++]=y;
+      verts[ivert++]=z;
+    }
+  }
+#define IJgeom(i,j) (1+(i) + (j)*nx)
+
+  iface=0;
+  for(j=0;j<ny-1;j++){
+    for(i=0;i<nx-1;i++){
+      int i11, i12, i22, i21;
+
+      i11 = IJgeom(i,j);
+      i12 = IJgeom(i,j+1);
+      i22 = IJgeom(i+1,j+1);
+      i21 = IJgeom(i+1,j);
+      faces[iface++]=i11;
+      faces[iface++]=i21;
+      faces[iface++]=i22;
+      faces[iface++]=i11;
+      faces[iface++]=i22;
+      faces[iface++]=i12;
+    }
+  }
+  FORTgeomout(verts,&nverts,faces,&nfaces);
+  FREEMEMORY(verts);
+  FREEMEMORY(faces);
+}
+ 
 /* ------------------ initterrain_all ------------------------ */
 
 void initterrain_all(void){
@@ -309,14 +363,10 @@ void initterrain_all(void){
         val4 =  get_zcell_val(meshi,xnode-dx/2.0,ynode+dy/2.0,&val4_offset,&loc4);
         count = loc1 + loc2 + loc3 + loc4;
 
-        zval = val1*loc1 + val2*loc2 + val3*loc3 + val4*loc4;
-        if(count==0)count=1;
-        zval /= (float)count;
+        zval = (val1*loc1 + val2*loc2 + val3*loc3 + val4*loc4)/(float)MAX(1,count);
 
         znode[ijnode3(i,j)]=zval;
-        zval_offset = SCALE2SMV((val1_offset*loc1 + val2_offset*loc2 + val3_offset*loc3 + val4_offset*loc4));
-        if(count==0)count=1;
-        zval_offset /= (float)count;
+        zval_offset = SCALE2SMV((val1_offset*loc1 + val2_offset*loc2 + val3_offset*loc3 + val4_offset*loc4))/(float)MAX(1,count);
 
         *znode_offset++=zval_offset;
 
@@ -420,7 +470,6 @@ void initterrain_all(void){
     }
   }
 
-
   zmin = meshinfo->terrain->znode[0];
   zmax = zmin;
   for(imesh=0;imesh<nmeshes;imesh++){
@@ -432,8 +481,11 @@ void initterrain_all(void){
     terri = meshi->terrain;
 
     for(i=0;i<(terri->nx+1)*(terri->ny+1);i++){
-      if(terri->znode[i]<zmin)zmin=terri->znode[i];
-      if(terri->znode[i]>zmax)zmax=terri->znode[i];
+      float *znode;
+
+      znode = terri->znode+i;
+      zmin = MIN(zmin,*znode);
+      zmax = MAX(zmax,*znode);
     }
   }
   dz = (zmax - zmin)/12.0;
@@ -460,8 +512,6 @@ void initterrain_all(void){
       &meshi->terrain_contour);
 
   }
-
-#ifdef pp_TERRAIN2GEOM
   {
     int nx, ny;
 
@@ -470,9 +520,6 @@ void initterrain_all(void){
 
     terrain2geom(xbar0ORIG, xbarORIG, ybar0ORIG, ybarORIG, nx, ny,get_z_terrain);
   }
-#endif
-
-
 }
 
 /* ------------------ initterrain_znode ------------------------ */
@@ -550,8 +597,8 @@ void initterrain_znode(mesh *meshi, terraindata *terri, float xmin, float xmax, 
 
       ij = IJCELL2(i,j);
       zval=meshi->zcell[ij];
-      if(zval<zterrain_min)zterrain_min=zval;
-      if(zval>zterrain_max)zterrain_max=zval;
+      zterrain_min = MIN(zval,zterrain_min);
+      zterrain_max = MAX(zval,zterrain_max);
       z[ij]=zval;
     }
   }
@@ -1310,72 +1357,3 @@ float get_z_terrain(float x, float y){
   return zterrain;
 }
 
-/* ------------------ terrain2geom ------------------------ */
-
-/*  
-  WRITE(LU_GEOM) ONE
-  WRITE(LU_GEOM) VERSION
-  WRITE(LU_GEOM) STIME  ! first time step
-  WRITE(LU_GEOM) N_VERT_S, NFACE_S, NVERT_D, N_FACE_D
-  IF (N_VERT_S>0)  WRITE(LU_GEOM) (Xvert_S(I),Yvert_S(I),Zvert_S(I),I=1,N_VERT_S)
-  IF (N_VERT_D>0)  WRITE(LU_GEOM) (Xvert_D(I),Yvert_D(I),Zvert_D(I),I=1,N_VERT_D)
-  IF (N_FACE_S>0)  WRITE(LU_GEOM) (FACE1_S(I),FACE2_S(I),FACE3_S(I),I=1,N_FACE_S)
-  IF (N_FACE_D>0)  WRITE(LU_GEOM) (FACE1_D(I),FACE2_D(I),FACE3_D(I),I=1,N_FACE_D)
-  IF (N_FACE_S>0)  WRITE(LU_GEOM) (SURF_S(I),I=1,N_FACE_S)
-  IF (N_FACE_D>0)  WRITE(LU_GEOM) (SURF_D(I),I=1,N_FACE_D)
-  */
-
-void terrain2geom(float xmin, float xmax, float ymin, float ymax, int nx, int ny, float (*comp_func)(float, float)){
-  int i, j;
-  float dx, dy;
-  float x, y, z;
-  int nverts, nfaces;
-  float *verts;
-  int *faces;
-  int ivert, iface;
-
-  if(nx<2||ny<2)return;
-  dx = (xmax-xmin)/(nx-1);
-  dy = (ymax-ymin)/(ny-1);
-
-  nverts = nx*ny;
-  nfaces = 2*(nx-1)*(ny-1);
-
-  NewMemory((void **)&verts,3*nverts*sizeof(float));
-  NewMemory((void **)&faces,3*nfaces*sizeof(int));
-
-  ivert=0;
-  for(j=0;j<ny;j++){
-    y = ymin + j*dy;
-    for(i=0;i<nx;i++){
-      x = xmin + i*dx;
-      z = comp_func(x,y);
-      verts[ivert++]=x;
-      verts[ivert++]=y;
-      verts[ivert++]=z;
-    }
-  }
-#define IJgeom(i,j) (1+(i) + (j)*nx)
-
-  iface=0;
-  for(j=0;j<ny-1;j++){
-    for(i=0;i<nx-1;i++){
-      int i11, i12, i22, i21;
-
-      i11 = IJgeom(i,j);
-      i12 = IJgeom(i,j+1);
-      i22 = IJgeom(i+1,j+1);
-      i21 = IJgeom(i+1,j);
-      faces[iface++]=i11;
-      faces[iface++]=i21;
-      faces[iface++]=i22;
-      faces[iface++]=i11;
-      faces[iface++]=i22;
-      faces[iface++]=i12;
-    }
-  }
-  FORTgeomout(verts,&nverts,faces,&nfaces);
-  FREEMEMORY(verts);
-  FREEMEMORY(faces);
-}
- 
