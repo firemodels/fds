@@ -5254,7 +5254,7 @@ READ_SURF_LOOP: DO N=0,N_SURF
 
    ! Error checking
 
-   IF (DEFAULT==.TRUE. .AND. &
+   IF (DEFAULT .AND. &
           (TRIM(ID)=='OPEN'               .OR. &
            TRIM(ID)=='MIRROR'             .OR. &
            TRIM(ID)=='INTERPOLATED'       .OR. &
