@@ -2574,7 +2574,6 @@ DO J=J1+1,J2
    ENDDO
 ENDDO
 
-
 ! Nullify block edges on blockage that is to be removed
  
 DO K=K1,K2
