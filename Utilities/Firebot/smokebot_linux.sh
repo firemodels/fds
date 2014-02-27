@@ -14,12 +14,16 @@
 FIREBOT_QUEUE=smokebot
 MAKEMOVIES=
 RUNAUTO=
+BUILDBUNDLE=
 RUNDEBUG="1"
-while getopts 'amq:s' OPTION
+while getopts 'abmq:s' OPTION
 do
 case $OPTION in
   a)
    RUNAUTO="y"
+   ;;
+  b)
+   BUILDBUNDLE="y"
    ;;
   m)
    MAKEMOVIES="1"
