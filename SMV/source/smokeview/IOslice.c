@@ -4376,8 +4376,8 @@ void drawvolslice_cellcenter(const slicedata *sd){
         int i33;
         float z1,z3;
 
-        if(sd->slicetype!=SLICE_CENTER&&show_slice_in_obst==0&&iblank_cell[IJK(plotx-1,j,k)]!=GAS)continue;
-        if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[IJK(plotx,j,k)]==EMBED_YES)continue;
+        if(sd->slicetype!=SLICE_CENTER&&show_slice_in_obst==0&&iblank_cell[IJKCELL(plotx-1,j,k)]!=GAS)continue;
+        if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[IJKCELL(plotx,j,k)]==EMBED_YES)continue;
 
         index_cell = (plotx + 1 -incx-sd->is1)*sd->nslicej*sd->nslicek + (j+1-sd->js1)*sd->nslicek + k + 1 - sd->ks1;
 
@@ -4413,8 +4413,8 @@ void drawvolslice_cellcenter(const slicedata *sd){
           int index_cell;
           float z1, z3;
 
-          if(sd->slicetype!=SLICE_CENTER&&show_slice_in_obst==0&&iblank_cell[IJK(plotx-1,j,k)]!=GASGAS)continue;
-          if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[IJK(plotx,j,k)]==EMBED_YES)continue;
+          if(sd->slicetype!=SLICE_CENTER&&show_slice_in_obst==0&&iblank_cell[IJKCELL(plotx-1,j,k)]!=GAS)continue;
+          if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[IJKCELL(plotx,j,k)]==EMBED_YES)continue;
           z1 = zplt[k];
           z3 = zplt[k+1];
        /*
@@ -4452,7 +4452,7 @@ void drawvolslice_cellcenter(const slicedata *sd){
         float z1, z3;
 
         if(show_slice_in_obst==0&&iblank_cell[IJKCELL(i,ploty-1,k)]!=GAS)continue;
-        if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[IJK(i,ploty,k)]==EMBED_YES)continue;
+        if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[IJKCELL(i,ploty,k)]==EMBED_YES)continue;
         index_cell = (i+incx-sd->is1)*sd->nslicej*sd->nslicek + (ploty+1-incy-sd->js1)*sd->nslicek + k+1 - sd->ks1;
         i33 = 4*sd->iqsliceframe[index_cell];
         z1 = zplt[k];
@@ -4487,8 +4487,8 @@ void drawvolslice_cellcenter(const slicedata *sd){
           int i33;
           float z1, z3;
 
-          if(show_slice_in_obst==0&&iblank_cell[IJK(i,ploty-1,k)]!=GAS)continue;
-          if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[IJK(i,ploty,k)]==EMBED_YES)continue;
+          if(show_slice_in_obst==0&&iblank_cell[IJKCELL(i,ploty-1,k)]!=GAS)continue;
+          if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[IJKCELL(i,ploty,k)]==EMBED_YES)continue;
           index_cell = (i+incx-sd->is1)*sd->nslicej*sd->nslicek + (ploty+1-incy-sd->js1)*sd->nslicek + k+1 - sd->ks1;
           i33 = 4*sd->iqsliceframe[index_cell];
           z1 = zplt[k];
