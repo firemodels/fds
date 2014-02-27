@@ -153,6 +153,7 @@ $RUNFDS Pyrolysis pyrolysis_2
 $RUNFDS Pyrolysis specified_hrr
 $RUNFDS Pyrolysis shrink_swell
 $RUNFDS Pyrolysis surf_mass_vent_liquid_fuel
+$RUNFDS Pyrolysis surf_mass_vent_liquid_fuel_nonconforming
 $RUNFDS Pyrolysis surf_mass_part_char_cart_fuel
 $RUNFDS Pyrolysis surf_mass_part_char_cart_gas
 $RUNFDS Pyrolysis surf_mass_part_char_cyl_fuel
