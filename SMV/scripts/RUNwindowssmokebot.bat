@@ -22,6 +22,6 @@ call %envfile%
 
 %svn_drive%
 cd %userprofile%\SMOKEBOT
-smokebot.lnk 1
+call smokebot.lnk 1 1
 
 pause
