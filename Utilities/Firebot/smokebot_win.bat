@@ -299,6 +299,7 @@ echo start: %startdate% %starttime% >> %infofile%
 echo  stop: %stopdate% %stoptime%  >> %infofile%
 
 if NOT exist %tosummarydir% goto skip_copyfiles
+  echo summary   (local): file://%userprofile%/FDS-SMV/Manuals/SMV_Summary/index.html >> %infofile%
   echo summary (windows): https://googledrive.com/host/0B-W-dkXwdHWNUElBbWpYQTBUejQ/index.html >> %infofile%
   echo summary   (linux): https://googledrive.com/host/0B-W-dkXwdHWNN3N2eG92X2taRFk/index.html >> %infofile%
   copy %fromsummarydir%\index*.html %tosummarydir%  1> Nul 2>&1
