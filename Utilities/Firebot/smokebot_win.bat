@@ -1,7 +1,11 @@
 @echo off
 set reduced=%1
+set build_bundles=%2
 if [%reduced%] == [] (
   set reduced=0
+)
+if [%build_bundles%] == [] (
+  set build_bundles=0
 )
 
 SETLOCAL
@@ -50,6 +54,13 @@ set revisionfile=%OUTDIR%\revision.txt
 
 set fromsummarydir=%svnroot%\Manuals\SMV_Summary
 set tosummarydir="%SMOKEBOT_SUMMARY_DIR%"
+
+set bundle_win32=%svnroot%\Utilities\Scripts\BUNDLE_win32.bat
+set bundle_win64=%svnroot%\Utilities\Scripts\BUNDLE_win64.bat
+set bundle_linux32=%svnroot%\Utilities\Scripts\BUNDLE_linux32.bat
+set bundle_linux64=%svnroot%\Utilities\Scripts\BUNDLE_linux64.bat
+set bundle_osx32=%svnroot%\Utilities\Scripts\BUNDLE_osx32.bat
+set bundle_osx64=%svnroot%\Utilities\Scripts\BUNDLE_osx64.bat
 
 set haveerrors=0
 set havewarnings=0
@@ -287,7 +298,19 @@ echo             Verification
 call :build_guide SMV_Verification_Guide %svnroot%\Manuals\SMV_Verification_Guide 1>> %OUTDIR%\stage6.txt 2>&1
 
 echo             User
-call :build_guide SMV_User_Guide %svnroot%\Manuals\SMV_User_Guide 1> %OUTDIR%\stage6.txt 2>&1
+call :build_guide SMV_User_Guide %svnroot%\Manuals\SMV_User_Guide 1>> %OUTDIR%\stage6.txt 2>&1
+
+:: -------------------------------------------------------------
+::                           stage 6
+:: -------------------------------------------------------------
+
+if %build_bundles% == 1 (
+  echo Stage 7 - Building Bundles
+
+  echo             win64            
+  call %bundle_win64% 1>> %OUTDIR%\stage7.txt 2>&1
+)
+
 
 date /t > %OUTDIR%\stoptime.txt
 set /p stopdate=<%OUTDIR%\stoptime.txt
