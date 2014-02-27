@@ -1710,6 +1710,7 @@ IF (INITIAL_UNMIXED_FRACTION<0._EB .OR. INITIAL_UNMIXED_FRACTION>1._EB) THEN
 ENDIF
 
 ! Level set based model of firespread in vegetation
+
 IF (VEG_LEVEL_SET_COUPLED)   VEG_LEVEL_SET = .TRUE.
 IF (VEG_LEVEL_SET_UNCOUPLED) VEG_LEVEL_SET = .TRUE.
 IF (VEG_LEVEL_SET_UNCOUPLED) WIND_ONLY = .TRUE.
@@ -1731,8 +1732,24 @@ IF (HUMIDITY<0._EB) HUMIDITY=40._EB
 
 IF (ISOTHERMAL) STRATIFICATION=.FALSE.
 
-END SUBROUTINE READ_MISC
+! Do not allow predefined SURF as DEFAULT
 
+IF (TRIM(SURF_DEFAULT)=='INERT'              .OR. &
+    TRIM(SURF_DEFAULT)=='OPEN'               .OR. &
+    TRIM(SURF_DEFAULT)=='MIRROR'             .OR. &
+    TRIM(SURF_DEFAULT)=='INTERPOLATED'       .OR. &
+    TRIM(SURF_DEFAULT)=='PERIODIC'           .OR. &
+    TRIM(SURF_DEFAULT)=='HVAC'               .OR. &
+    TRIM(SURF_DEFAULT)=='MASSLESS TRACER'    .OR. &
+    TRIM(SURF_DEFAULT)=='DROPLET'            .OR. &
+    TRIM(SURF_DEFAULT)=='VEGETATION'         .OR. &
+    TRIM(SURF_DEFAULT)=='EVACUATION_OUTFLOW' .OR. &
+    TRIM(SURF_DEFAULT)=='MASSLESS TARGET'         ) THEN
+   WRITE (MESSAGE,'(A,A,A)') 'ERROR: Problem with MISC. Cannot set predefined SURF as SURF_DEFAULT'
+   CALL SHUTDOWN(MESSAGE)
+ENDIF
+
+END SUBROUTINE READ_MISC
 
 
 SUBROUTINE READ_DUMP
@@ -5238,6 +5255,22 @@ READ_SURF_LOOP: DO N=0,N_SURF
 
    ! Error checking
 
+   IF (DEFAULT==.TRUE. .AND. &
+          (TRIM(ID)=='INERT'              .OR. &
+           TRIM(ID)=='OPEN'               .OR. &
+           TRIM(ID)=='MIRROR'             .OR. &
+           TRIM(ID)=='INTERPOLATED'       .OR. &
+           TRIM(ID)=='PERIODIC'           .OR. &
+           TRIM(ID)=='HVAC'               .OR. &
+           TRIM(ID)=='MASSLESS TRACER'    .OR. &
+           TRIM(ID)=='DROPLET'            .OR. &
+           TRIM(ID)=='VEGETATION'         .OR. &
+           TRIM(ID)=='EVACUATION_OUTFLOW' .OR. &
+           TRIM(ID)=='MASSLESS TARGET')        ) THEN
+      WRITE (MESSAGE,'(A,A,A)') 'ERROR: Problem with SURF: ',TRIM(SF%ID),'. Cannot set predefined SURF as DEFAULT'
+      CALL SHUTDOWN(MESSAGE)
+   ENDIF
+
    IF (ABS(VOLUME_FLUX)>0._EB)  THEN
       WRITE (MESSAGE,'(A,A,A)') 'ERROR: Problem with SURF: ',TRIM(SF%ID),'. VOLUME_FLUX is deprecated; use VOLUME_FLOW'
       CALL SHUTDOWN(MESSAGE)
@@ -5749,7 +5782,6 @@ ENDDO
 END SUBROUTINE PROC_SURF_1
 
 
-
 SUBROUTINE PROC_SURF_2
 
 ! Go through the SURF types and process
@@ -5788,7 +5820,7 @@ PROCESS_SURF_LOOP: DO N=0,N_SURF
       PARTICLE_FILE=.TRUE.
    ENDIF
 
-! Determine if surface has internal radiation
+   ! Determine if surface has internal radiation
 
    SF%INTERNAL_RADIATION = .FALSE.
    DO NL=1,SF%N_LAYERS
@@ -5798,7 +5830,7 @@ PROCESS_SURF_LOOP: DO N=0,N_SURF
    ENDDO
    ENDDO
 
-! In case of internal radiation, do not allow zero-emissivity
+   ! In case of internal radiation, do not allow zero-emissivity
 
    IF (SF%INTERNAL_RADIATION) THEN
       DO NL=1,SF%N_LAYERS
