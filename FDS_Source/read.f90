@@ -1734,8 +1734,7 @@ IF (ISOTHERMAL) STRATIFICATION=.FALSE.
 
 ! Do not allow predefined SURF as DEFAULT
 
-IF (TRIM(SURF_DEFAULT)=='INERT'              .OR. &
-    TRIM(SURF_DEFAULT)=='OPEN'               .OR. &
+IF (TRIM(SURF_DEFAULT)=='OPEN'               .OR. &
     TRIM(SURF_DEFAULT)=='MIRROR'             .OR. &
     TRIM(SURF_DEFAULT)=='INTERPOLATED'       .OR. &
     TRIM(SURF_DEFAULT)=='PERIODIC'           .OR. &
@@ -5256,8 +5255,7 @@ READ_SURF_LOOP: DO N=0,N_SURF
    ! Error checking
 
    IF (DEFAULT==.TRUE. .AND. &
-          (TRIM(ID)=='INERT'              .OR. &
-           TRIM(ID)=='OPEN'               .OR. &
+          (TRIM(ID)=='OPEN'               .OR. &
            TRIM(ID)=='MIRROR'             .OR. &
            TRIM(ID)=='INTERPOLATED'       .OR. &
            TRIM(ID)=='PERIODIC'           .OR. &
