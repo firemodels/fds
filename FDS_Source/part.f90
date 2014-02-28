@@ -1908,7 +1908,9 @@ REAL(EB) :: R_DROP,NUSSELT,K_AIR,H_V,H_V_REF, H_L,&
             CP,H_NEW,ZZ_GET(0:N_TRACKED_SPECIES),ZZ_GET2(0:N_TRACKED_SPECIES), &
             M_GAS_NEW,MW_GAS,CP2,DELTA_H_G,TMP_G_I,H_G_OLD,H_D_OLD, &
             H_L_REF,TMP_G_NEW,DT_SUM,DCPDT,TMP_WGT,X_EQUIL,Y_EQUIL,Y_ALL(1:N_SPECIES),H_S_B,H_S,C_DROP2,&
-            MOMENTUM_SINK_FACTOR,XI,YJ,ZK,UBAR,VBAR,WBAR,QREL,T_BOIL_EFF,P_RATIO
+            MOMENTUM_SINK_FACTOR,XI,YJ,ZK,UBAR,VBAR,WBAR,QREL,T_BOIL_EFF,P_RATIO,K_LIQUID,CP_LIQUID,MU_LIQUID,NU_LIQUID,&
+            BETA_LIQUID,PR_LIQUID,RAYLEIGH,GR
+            
 INTEGER :: IP,II,JJ,KK,IW,N_LPC,NS,N_SUBSTEPS,ITMP,ITMP2,SURF_INDEX,ITCOUNT,Y_INDEX,Z_INDEX,I_BOIL,I_MELT,IIX,JJY,KKZ
 REAL(EB), INTENT(IN) :: T
 INTEGER, INTENT(IN) :: NM
@@ -1940,6 +1942,13 @@ SH_FAC_GAS             = 0.6_EB*SC_AIR**ONTH
 NU_FAC_GAS             = 0.6_EB*PR_AIR**ONTH        
 SH_FAC_WALL            = 0.037_EB*SC_AIR**ONTH
 NU_FAC_WALL            = 0.037_EB*PR_AIR**ONTH        
+
+! Liquid properties (temporary place)
+MU_LIQUID              = 1040E-6_EB  ! Ns/m2
+BETA_LIQUID            = 0.18E-3_EB  ! Volumetric thermal expansion 1/K
+K_LIQUID               = 0.60_EB     ! Conductivity W/(m.K)
+CP_LIQUID              = 4.19E3_EB   ! J/(kg.K)
+PR_LIQUID              = MU_LIQUID*CP_LIQUID/K_LIQUID
 
 ! Working arrays
 
@@ -2003,11 +2012,11 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
    !$OMP         MW_RATIO,R_DROP,FTPR,M_DROP,TMP_DROP,ITMP,TMP_WGT,H_V,C_DROP,H_L,H_D_OLD,WGT,DHOR ,&
    !$OMP         TMP_G,RHO_G,MU_AIR,M_GAS,M_VAP_MAX,K_AIR,Y_INDEX,Y_GAS,U2,V2,W2,IW,A_DROP ,TMP_WALL, &
    !$OMP         LENGTH,RE_L,NUSSELT,SHERWOOD,H_HEAT,H_MASS,H_WALL,Q_DOT_RAD,X_DROP,Y_DROP,DZ_DTMP_DROP, &
-   !$OMP         DENOM,TMP_DROP_NEW,Q_RAD,Q_CON_GAS,Q_CON_WALL,Q_TOT,Q_FRAC,M_VAP,TMP_G_I,&
+   !$OMP         DENOM,TMP_DROP_NEW,Q_RAD,Q_CON_GAS,Q_CON_WALL,Q_TOT,Q_FRAC,M_VAP,TMP_G_I,RAYLEIGH,GR,&
    !$OMP         TEMPITER,ITCOUNT,DCPDT,H_G_OLD,M_GAS_NEW,H_NEW,X_EQUIL,Y_EQUIL,UBAR,VBAR,WBAR,&
    !$OMP         MOMENTUM_SINK_FACTOR,SS,Z_INDEX,MVAP_TOT,CPOPR,NU_FAC_GAS,SH_FAC_GAS,H_S,DELTA_H_G,RSUM, &
-   !$OMP         CP2,ZZ_GET2,TMP_G_NEW,CP,M_DOT,ITMP2,QREL,IIX,JJY,KKZ,XI,YJ,ZK,C_DROP2,VEL,Y_ALL,H_L_REF,H_S_B),
-   !$OMP         I_BOIL,P_RATIO,T_BOIL_EFF,MESSAGE
+   !$OMP         CP2,ZZ_GET2,TMP_G_NEW,CP,M_DOT,ITMP2,QREL,IIX,JJY,KKZ,XI,YJ,ZK,C_DROP2,VEL,Y_ALL,H_L_REF,H_S_B,
+   !$OMP         I_BOIL,P_RATIO,T_BOIL_EFF,MESSAGE,PR_LIQUID,K_LIQUID,NU_LIQUID)
    PARTICLE_LOOP: DO IP=1,NLP
 
       LP  => LAGRANGIAN_PARTICLE(IP)
@@ -2070,6 +2079,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
          WGT      = LP%PWT
          DHOR     = H_V*MW_DROP/R0
 
+
          ! Gas conditions
 
          TMP_G  = TMP(II,JJ,KK)
@@ -2102,13 +2112,38 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                CASE(3)
                   VEL = SQRT(U2**2+V2**2)
             END SELECT
-            LENGTH   = 1._EB
-            RE_L     = MAX(5.E5_EB,RHO_G*VEL*LENGTH/MU_AIR)
-            NUSSELT  = NU_FAC_WALL*RE_L**0.8_EB
-            SHERWOOD = SH_FAC_WALL*RE_L**0.8_EB
+
+            IF (.NOT.CONSTANT_H_SOLID) THEN
+               LENGTH = 2._EB*R_DROP
+
+               NU_LIQUID = MU_LIQUID / LPC%DENSITY
+               !Grashoff number
+               GR = MAXVAL(ABS(GVEC))*LENGTH**3*BETA_LIQUID*ABS(TMP_WALL-TMP_DROP)/(NU_LIQUID**2)
+               RAYLEIGH = GR*PR_LIQUID
+               DIRECTION2: SELECT CASE(LP%ONE_D%IOR)
+               CASE (-2:-1,1:2) DIRECTION2
+               ! Vertical boundary layers (Churchill, S.W.)
+               NUSSELT = 0.68_EB+0.67_EB*RAYLEIGH**(0.25_EB)/((1._EB+(0.492_EB/PR_LIQUID)**(9._EB/16._EB))**(4._EB/9._EB))
+               CASE (-3,3) DIRECTION2
+               ! Horizontal, unstable boundary layers (top of hot plate)
+               ! Raithby, G.D., Hollands, K.G.T. Natural convection. In Rohsenoh, W.M., 
+               ! Hartnett, J.P., and Cho, Y.I. (eds.), Handbook of Heat Transfer, chapter
+               ! 4. McGraw-Hill, New York, 3rd edition, 1998.
+               NUSSELT = 0.560_EB*RAYLEIGH**(0.25_EB)/((1._EB+(0.492_EB/PR_LIQUID)**(9._EB/16._EB))**(4._EB/9._EB))
+               END SELECT DIRECTION2
+               H_WALL   = NUSSELT*K_LIQUID/LENGTH
+               RE_L     = MAX(5.E5_EB,RHO_G*VEL*LENGTH/MU_AIR)
+!               NUSSELT  = NU_FAC_WALL*RE_L**0.8_EB
+               SHERWOOD = SH_FAC_WALL*RE_L**0.8_EB
+            ELSE
+               LENGTH   = 1._EB
+               RE_L     = MAX(5.E5_EB,RHO_G*VEL*LENGTH/MU_AIR)
+               NUSSELT  = NU_FAC_WALL*RE_L**0.8_EB
+               SHERWOOD = SH_FAC_WALL*RE_L**0.8_EB
+               H_WALL    = H_SOLID
+            ENDIF
             H_HEAT   = NUSSELT*K_AIR/LENGTH
             H_MASS   = SHERWOOD*D_AIR/LENGTH
-            H_WALL    = H_SOLID
             Q_DOT_RAD = MIN(A_DROP,WALL(IW)%AW*DT/(WGT*DT_SUBSTEP))*WALL(IW)%ONE_D%QRADIN
             WALL(IW)%ONE_D%QRADIN = (WALL(IW)%AW*DT*WALL(IW)%ONE_D%QRADIN - WGT*DT_SUBSTEP*Q_DOT_RAD)/(WALL(IW)%AW*DT)
 
