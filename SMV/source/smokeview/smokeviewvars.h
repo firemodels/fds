@@ -36,6 +36,7 @@ SVEXTERN int tetrabox_vis[10];
 SVEXTERN int SVDECL(show_geomtest,0),SVDECL(show_intersection,1);
 #endif
 
+SVEXTERN int SVDECL(free_boundarydata,1);
 SVEXTERN int SVDECL(tour_antialias,0);
 SVEXTERN int SVDECL(tour_drag,0);
 
@@ -629,7 +630,7 @@ SVEXTERN int SVDECL(ntarginfo,0);
 SVEXTERN int showallslicevectors;
 SVEXTERN float framerate;
 SVEXTERN int nglobal_times, SVDECL(ntimes_old,0), itimes, itime_save, itimeold, seqnum,RenderTime,RenderTimeOld;
-SVEXTERN int SVDECL(npatchvals,0), nopart;
+SVEXTERN int nopart;
 SVEXTERN int uindex, vindex, windex;
 
 SVEXTERN int SVDECL(contour_type,0), SVDECL(p3cont3dsmooth,0);

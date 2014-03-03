@@ -50,6 +50,7 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
   mesh *meshi;
   float patchmin_global, patchmax_global;
   int local_first,nsize,iblock;
+  int npatchvals;
 
   int nn;
   int filenum;
@@ -261,7 +262,7 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
   one time step at a time rather than for all time steps.
   */
 
-      if(statfile==0&&setpatchmin==1&&setpatchmax==1)loadpatchbysteps=1;
+      if(statfile==0&&setpatchmin==1&&setpatchmax==1&&free_boundarydata==1)loadpatchbysteps=1;
     }
   }
   else{
@@ -945,7 +946,9 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
       meshi->patchventcolors[i]=ventcolors[vent_index];
     }
   }
-  FREEMEMORY(meshi->patchval);
+  if(free_boundarydata==1){
+    FREEMEMORY(meshi->patchval);
+  }
   patchi->loaded=1;
   patchi->display=1;
   ipatchtype=getpatchtype(patchi);

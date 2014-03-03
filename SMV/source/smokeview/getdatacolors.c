@@ -355,6 +355,32 @@ void getBoundaryColors3(patchdata *patchi, float *t, int nt, unsigned char *it,
   num2string(&labels[nlevel-1][0],tval,range);
 }
 
+/* ------------------ UpdateAllPatchColors ------------------------ */
+
+void UpdateAllPatchColors(void){
+  int i;
+
+  for(i=0;i<nmeshes;i++){
+    mesh *meshi;
+    patchdata *patchi;
+    int npatchvals;
+    float patchmin_global, patchmax_global;
+
+    meshi = meshinfo + i;
+    if(meshi->patchval==NULL||meshi->cpatchval==NULL||meshi->patchfilenum<0)continue;
+    patchi = patchinfo + meshi->patchfilenum;
+    if(patchi->loaded==0)continue;
+
+    npatchvals = meshi->npatch_times*meshi->npatchsize;
+
+    getBoundaryColors3(patchi,meshi->patchval, npatchvals, meshi->cpatchval, 
+    setpatchmin,&patchmin, setpatchmax,&patchmax, 
+    &patchmin_global, &patchmax_global,
+    nrgb, colorlabelpatch,patchi->scale,boundarylevels256,
+    &patchi->extreme_min,&patchi->extreme_max);
+  }
+}
+
 /* ------------------ getBoundaryLabels ------------------------ */
 
 void getBoundaryLabels(

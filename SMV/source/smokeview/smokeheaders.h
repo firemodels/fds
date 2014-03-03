@@ -84,6 +84,7 @@ EXTERNCPP void hide_glui_bounds(void);
 EXTERNCPP void show_glui_edit(void);
 EXTERNCPP void hide_glui_edit(void);
 
+EXTERNCPP void UpdateAllPatchColors(void);
 EXTERNCPP void updateslicelistindex(int sfn);
 EXTERNCPP void updatepatchlistindex(int patchfilenum);
 EXTERNCPP void updatepatchlistindex2(char *label);
