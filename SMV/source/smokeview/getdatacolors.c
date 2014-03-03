@@ -958,7 +958,7 @@ void getPlot3DColors(int plot3dvar, int settmin, float *ttmin, int settmax, floa
     meshi = meshinfo+p->blocknumber;
     ntotal=(meshi->ibar+1)*(meshi->jbar+1)*(meshi->kbar+1);
     iblank=meshi->c_iblank_node;
-    if(unload_qdata==0||meshi->qdata!=NULL){
+    if(cache_qdata==1||meshi->qdata!=NULL){
       q=meshi->qdata+plot3dvar*ntotal;
       for(n=0;n<ntotal;n++){
         if(iblank==NULL||*iblank++==GAS){
@@ -1014,7 +1014,7 @@ void getPlot3DColors(int plot3dvar, int settmin, float *ttmin, int settmax, floa
     meshi = meshinfo+p->blocknumber;
     ntotal=(meshi->ibar+1)*(meshi->jbar+1)*(meshi->kbar+1);
 
-    if(unload_qdata==0||meshi->qdata!=NULL){
+    if(cache_qdata==1||meshi->qdata!=NULL){
       q=meshi->qdata+plot3dvar*ntotal;
       iq=meshi->iqdata+plot3dvar*ntotal;
       for(n=0;n<ntotal;n++){
@@ -1087,7 +1087,7 @@ void getPlot3DColors(int plot3dvar, int settmin, float *ttmin, int settmax, floa
     meshi = meshinfo+p->blocknumber;
     ntotal=(meshi->ibar+1)*(meshi->jbar+1)*(meshi->kbar+1);
 
-    if(unload_qdata==1&&meshi->qdata==NULL){
+    if(cache_qdata==0&&meshi->qdata==NULL){
       float qval, *qvals;
 
       qvals=p3levels256[plot3dvar];

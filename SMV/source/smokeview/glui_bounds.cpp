@@ -86,7 +86,7 @@ GLUI_Rollout *ROLLOUT_part_chop=NULL;
 #define STREAKLENGTH 19
 #define TRACERS 21
 #define PLOTISOTYPE 22
-#define FREE_BOUNDARYDATA 23
+#define CACHE_BOUNDARYDATA 23
 #ifdef pp_TRANSFORM
 #define TRANSFORM_SLICE 23
 #define RESET_SLICE 24
@@ -246,7 +246,7 @@ GLUI_EditText *EDIT_part_min=NULL, *EDIT_part_max=NULL;
 GLUI_EditText *EDIT_p3_min=NULL, *EDIT_p3_max=NULL;
 GLUI_EditText *EDIT_p3_chopmin=NULL, *EDIT_p3_chopmax=NULL;
 
-GLUI_Checkbox *CHECKBOX_free_boundarydata=NULL;
+GLUI_Checkbox *CHECKBOX_cache_boundarydata=NULL;
 GLUI_Checkbox *CHECKBOX_showchar=NULL, *CHECKBOX_showonlychar;
 GLUI_Checkbox *CHECKBOX_showtrisurface=NULL;
 GLUI_Checkbox *CHECKBOX_showtrioutline=NULL;
@@ -274,7 +274,7 @@ GLUI_Checkbox *CHECKBOX_cellcenter_slice_interp=NULL;
 GLUI_Checkbox *CHECKBOX_skip_subslice=NULL;
 GLUI_Checkbox *CHECKBOX_turb_slice=NULL;
 GLUI_Checkbox *CHECKBOX_average_slice=NULL;
-GLUI_Checkbox *CHECKBOX_unload_qdata=NULL;
+GLUI_Checkbox *CHECKBOX_cache_qdata=NULL;
 GLUI_Checkbox *CHECKBOX_use_tload_begin=NULL;
 GLUI_Checkbox *CHECKBOX_use_tload_end=NULL;
 GLUI_Checkbox *CHECKBOX_use_tload_skip=NULL;
@@ -505,7 +505,7 @@ extern "C" void glui_bounds_setup(int main_window){
       patchi = patchinfo + i;
       if(patchi->firstshort==1)nradio++;
     }
-    CHECKBOX_free_boundarydata=glui_bounds->add_checkbox_to_panel(ROLLOUT_bound,_("Free boundary data after coloring"),&free_boundarydata,FREE_BOUNDARYDATA,Bound_CB);
+    CHECKBOX_cache_boundarydata=glui_bounds->add_checkbox_to_panel(ROLLOUT_bound,_("Cache boundary data"),&cache_boundarydata,CACHE_BOUNDARYDATA,Bound_CB);
     if(nradio>1){
       for(i=0;i<npatchinfo;i++){
         patchdata *patchi;
@@ -560,7 +560,7 @@ extern "C" void glui_bounds_setup(int main_window){
       Bound_CB);
     updatepatchlistindex2(patchinfo->label.shortlabel);
     update_hidepatchsurface();
-    Bound_CB(FREE_BOUNDARYDATA);
+    Bound_CB(CACHE_BOUNDARYDATA);
   }
 
 
@@ -687,8 +687,7 @@ extern "C" void glui_bounds_setup(int main_window){
     for(i=0;i<mxplot3dvars;i++){
       glui_bounds->add_radiobutton_to_group(RADIO_p3,plot3dinfo[0].label[i].shortlabel);
     }
-    CHECKBOX_unload_qdata=glui_bounds->add_checkbox_to_panel(ROLLOUT_plot3d,_("Free PLOT3D data after coloring"),
-      &unload_qdata,UNLOAD_QDATA,PLOT3D_CB);
+    CHECKBOX_cache_qdata=glui_bounds->add_checkbox_to_panel(ROLLOUT_plot3d,_("Cache PLOT3D PLOT3D data"),&cache_qdata,UNLOAD_QDATA,PLOT3D_CB);
 
     PANEL_pan3 = glui_bounds->add_panel_to_panel(ROLLOUT_plot3d,"",GLUI_PANEL_NONE);
     PANEL_vector = glui_bounds->add_panel_to_panel(PANEL_pan3,_("Vector"));
@@ -1131,7 +1130,7 @@ extern "C" void PLOT3D_CB(int var){
 
   switch (var){
   case UNLOAD_QDATA:
-    if(unload_qdata==1){
+    if(cache_qdata==0){
      PANEL_isosurface->disable();
     }
     else{
@@ -1646,8 +1645,8 @@ void Bound_CB(int var){
   int i;
 
   switch (var) {
-  case FREE_BOUNDARYDATA:
-    if(free_boundarydata==1){
+  case CACHE_BOUNDARYDATA:
+    if(cache_boundarydata==0){
       BUTTON_updatebound->disable();
     }
     else{

@@ -403,8 +403,8 @@ void readplot3d(char *file, int ifile, int flag, int *errorcode){
     PRINTF(" %.1f MB downloaded in %.2f s (overhead: %.2f s)",
     (float)file_size/1000000.,delta_time,delta_time0-delta_time);
   }
-  if(p->compression_type==1||unload_qdata==1){
-    unload_qdata=1;
+  if(p->compression_type==1||cache_qdata==0){
+    cache_qdata=0;
     FREEMEMORY(meshi->qdata);
   }
   update_glui_plot3d();
@@ -1297,7 +1297,7 @@ void updatesurface(void){
   int plot3dsize;
   int i;
 
-  if(unload_qdata==1)return;
+  if(cache_qdata==0)return;
   for(i=0;i<nmeshes;i++){
     float dlevel=-1.0;
     mesh *meshi;

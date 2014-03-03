@@ -1589,7 +1589,7 @@ void keyboard(unsigned char key, int flag){
       break;
     case 'i':
     case 'I':
-      if(unload_qdata==0){
+      if(cache_qdata==1){
         handleiso();
         return;
       }
@@ -1702,7 +1702,7 @@ void keyboard(unsigned char key, int flag){
         plotn=1;
       }
       updateallplotslices();
-      if(visiso==1&&unload_qdata==0)updatesurface();
+      if(visiso==1&&cache_qdata==1)updatesurface();
       updateplot3dlistindex();
       break;
     case 'P':

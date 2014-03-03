@@ -5314,7 +5314,7 @@ updatemenu=0;
       glutAddMenuEntry("-",997);
     }
     glutAddSubMenu(_("2D contours"),staticslicemenu);
-    if(unload_qdata==0){
+    if(cache_qdata==1){
       glutAddSubMenu(_("3D contours"),isosurfacemenu);
     }
 

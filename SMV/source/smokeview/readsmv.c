@@ -8749,10 +8749,24 @@ int readini2(char *inifile, int localfile){
       }
       continue;
     }
+    if(match(buffer,"CACHE_QDATA")==1){
+      fgets(buffer,255,stream);
+      sscanf(buffer,"%i",&cache_qdata);
+      ONEORZERO(cache_qdata);
+      continue;
+    }
     if(match(buffer,"UNLOAD_QDATA")==1){
+      int unload_qdata;
+      
       fgets(buffer,255,stream);
       sscanf(buffer,"%i",&unload_qdata);
-      ONEORZERO(unload_qdata);
+      cache_qdata = 1 - unload_qdata;
+      ONEORZERO(cache_qdata);
+      continue;
+    }
+    if(match(buffer,"CACHE_BOUNDARYDATA")==1){
+      fgets(buffer,255,stream);
+      sscanf(buffer,"%i",&cache_boundarydata);
       continue;
     }
     if(match(buffer,"TREECOLORS")==1){
@@ -11283,6 +11297,8 @@ void writeini(int flag){
         );
     }
   }
+  fprintf(fileout,"CACHE_BOUNDARYDATA\n");
+  fprintf(fileout," %i \n",cache_boundarydata);
   for(i=0;i<npatch2;i++){
     int ii;
     patchdata *patchi;
@@ -11320,8 +11336,8 @@ void writeini(int flag){
     }
   }
 
-  fprintf(fileout,"UNLOAD_QDATA\n");
-  fprintf(fileout," %i\n",unload_qdata);
+  fprintf(fileout,"CACHE_QDATA\n");
+  fprintf(fileout," %i\n",cache_qdata);
 
   fprintf(fileout,"V_TARGET\n");
   fprintf(fileout," %i %f %i %f\n",settargetmin,targetmin,settargetmax,targetmax);

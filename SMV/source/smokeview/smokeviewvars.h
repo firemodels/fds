@@ -36,7 +36,7 @@ SVEXTERN int tetrabox_vis[10];
 SVEXTERN int SVDECL(show_geomtest,0),SVDECL(show_intersection,1);
 #endif
 
-SVEXTERN int SVDECL(free_boundarydata,1);
+SVEXTERN int SVDECL(cache_boundarydata,0);
 SVEXTERN int SVDECL(tour_antialias,0);
 SVEXTERN int SVDECL(tour_drag,0);
 
@@ -503,7 +503,7 @@ SVEXTERN int ReadVolSlice;
 SVEXTERN int Read3DSmoke3DFile;
 SVEXTERN int ReadZoneFile, ReadPartFile, ReadEvacFile;
 
-SVEXTERN int unload_qdata;
+SVEXTERN int SVDECL(cache_qdata,1);
 
 SVEXTERN int editwindow_status;
 SVEXTERN int startup_pass;

@@ -1270,7 +1270,6 @@ void initvars(void){
   partfacedir[1]=0.0;
   partfacedir[2]=1.0;
   
-  unload_qdata=0;
   sb_atstart=1;
   select_device=0;
   selected_device_tag=-1;

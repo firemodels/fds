@@ -197,7 +197,7 @@
 
 #ifndef GET_QVAL
 #define GET_QVAL(i,j,k,n) \
-  if(unload_qdata==0){\
+  if(cache_qdata==1){\
     qval=qdata[IJKN(i,j,k,n)];\
   }\
   else{\
