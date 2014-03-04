@@ -1991,7 +1991,7 @@ void keyboard(unsigned char key, int flag){
       cell_center_text = 1 - cell_center_text;
       break;
     case '#':
-      writeini(LOCAL_INI);
+      writeini(LOCAL_INI,NULL);
       break;
     case '$':
       trainer_active=1-trainer_active;

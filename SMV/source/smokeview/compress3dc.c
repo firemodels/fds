@@ -170,7 +170,7 @@ void compress_svzip2(void){
   PRINTF("Compressing...\n");
   compress_onoff(0);
 
-  writeini(LOCAL_INI);
+  writeini(LOCAL_INI,NULL);
 
 // surround smokezip path name with "'s so that the system call can handle imbedded blanks
 

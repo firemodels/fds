@@ -256,7 +256,7 @@ void parse_commandline(int argc, char **argv){
     init_camera_list();
     InitOpenGL();
     UpdateRGBColors(COLORBAR_INDEX_NONE);
-    writeini(GLOBAL_INI);
+    writeini(GLOBAL_INI,NULL);
     exit(0);
   }
 
@@ -264,7 +264,7 @@ void parse_commandline(int argc, char **argv){
     init_camera_list();
     use_graphics=0;
     UpdateRGBColors(COLORBAR_INDEX_NONE);
-    writeini(GLOBAL_INI);
+    writeini(GLOBAL_INI,NULL);
     exit(0);
   }
   strcpy(SMVFILENAME,"");
@@ -281,10 +281,12 @@ void parse_commandline(int argc, char **argv){
         strncmp(argi,"-script",7)==0||
         strncmp(argi,"-startframe",11)==0||
         strncmp(argi,"-skipframe",10)==0||
-        strncmp(argi,"-bindir",7)==0
+        strncmp(argi,"-bindir",7)==0||
+        strncmp(argi,"-update_ini",11)==0
         ){
         iarg++;
       }
+      if(strncmp(argi,"-convert_ini",12)==0)iarg+=2;
 
       if(smv_parse==0)continue;
       if(smv_parse==1)break;
@@ -434,7 +436,7 @@ void parse_commandline(int argc, char **argv){
   for (i=1;i<argc;i++){
     if(strncmp(argv[i],"-",1)!=0)continue;
     if(strncmp(argv[i],"-ini",3)==0){
-      writeini(GLOBAL_INI);
+      writeini(GLOBAL_INI,NULL);
     }
     else if(strncmp(argv[i],"-update_bounds",14)==0){
       use_graphics=0;
@@ -467,6 +469,34 @@ void parse_commandline(int argc, char **argv){
       }
     }
 #endif    
+    else if(strncmp(argv[i],"-convert_ini",12)==0){
+      char *local_ini_from=NULL, *local_ini_to=NULL;
+
+      if(++i<argc)local_ini_from = argv[i];
+      if(++i<argc)local_ini_to = argv[i];
+      if(local_ini_from!=NULL&&local_ini_to!=NULL){
+        NewMemory((void **)&ini_from,strlen(local_ini_from)+1);
+        strcpy(ini_from,local_ini_from);
+        
+        NewMemory((void **)&ini_to,strlen(local_ini_to)+1);
+        strcpy(ini_to,local_ini_to);
+        convert_ini=1;
+      }
+    }
+    else if(strncmp(argv[i],"-update_ini",11)==0){
+      char *local_ini_from=NULL, *local_ini_to=NULL;
+
+      if(++i<argc)local_ini_from = argv[i];
+      local_ini_to = local_ini_from;
+      if(local_ini_from!=NULL){
+        NewMemory((void **)&ini_from,strlen(local_ini_from)+1);
+        strcpy(ini_from,local_ini_from);
+        
+        NewMemory((void **)&ini_to,strlen(local_ini_to)+1);
+        strcpy(ini_to,local_ini_to);
+        convert_ini=1;
+      }
+    }
     else if(strncmp(argv[i],"-isotest",8)==0){
       isotest=1;
     }

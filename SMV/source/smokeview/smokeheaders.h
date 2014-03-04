@@ -754,8 +754,8 @@ EXTERNCPP void UpdateRGBColors(int colorindex);
 EXTERNCPP void initrgb(void);
 EXTERNCPP void updatechopcolors(void);
 EXTERNCPP void freelabels(flowlabels *label);
-EXTERNCPP int readini(int scriptconfigfile);
-EXTERNCPP void writeini(int flag);
+EXTERNCPP int readini(char *inifile);
+EXTERNCPP void writeini(int flag,char *file);
 EXTERNCPP void DrawFirePlume(float radius, float height, float maxheight);
 EXTERNCPP int ispatchtype(int type);
 EXTERNCPP void adjustdatabounds(const float *pdata, int skip, int ndata, int setpmin, float *pmin, int setpmax, float *pmax);
@@ -772,7 +772,6 @@ EXTERNCPP void num2string(char *string, float tval, float range);
 EXTERNCPP int setup_case(int argc, char **argv);
 EXTERNCPP int get_min_partframes(void);
 EXTERNCPP int Update_Bounds(void);
-
 
 EXTERNCPP void freecadinfo(void);
 

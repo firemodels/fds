@@ -165,7 +165,7 @@ void STEREO_CB(int var){
     hide_glui_stereo();
     break;
   case SAVE_SETTINGS:
-    writeini(LOCAL_INI);
+    writeini(LOCAL_INI,NULL);
     break;
   default:
     ASSERT(0);

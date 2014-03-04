@@ -247,7 +247,7 @@ extern "C" void WUI_CB(int var){
       updatemenu=1;
       break;
   case SAVE_SETTINGS:
-    writeini(LOCAL_INI);
+    writeini(LOCAL_INI,NULL);
     break;
   case WUI_CLOSE:
     hide_glui_wui();

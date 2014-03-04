@@ -248,7 +248,7 @@ int setup_case(int argc, char **argv){
   set_unit_vis();
 
   CheckMemory;
-  readini(0);
+  readini(NULL);
   readboundini();
   if(use_graphics==0)return 0;
 #ifdef pp_LANG

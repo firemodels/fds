@@ -1128,7 +1128,7 @@ void Motion_DLG_CB(int var){
     break;
   case SAVE_SETTINGS:
     updatemenu=1;
-    writeini(LOCAL_INI);
+    writeini(LOCAL_INI,NULL);
     break;
   default:
     ASSERT(0);
@@ -1287,7 +1287,7 @@ void Viewpoint_CB(int var){
   case STARTUP:
     startup_view_ini=LIST_viewpoints->get_int_val();
     selected_view=startup_view_ini;
-    writeini(LOCAL_INI);
+    writeini(LOCAL_INI,NULL);
     break;
   case CYCLEVIEWS:
     ival=LIST_viewpoints->get_int_val();

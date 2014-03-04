@@ -2065,18 +2065,18 @@ void CompressMenu(int value){
 
 void IniSubMenu(int value){
   if(value==-1){
-    readini(0);
+    readini(NULL);
   }
   else{
     char *ini_filename;
+    char *script_filename2;
 
     ini_filename = get_inifilename(value);
     if(ini_filename==NULL||strlen(ini_filename)==0)return;
     script_filename2=script_filename;
     strcpy(script_filename,ini_filename);
     windowresized=0;
-    readini(2);
-    script_filename2=NULL;
+    readini(script_filename2);
   }
 }
 
@@ -2085,14 +2085,14 @@ void IniSubMenu(int value){
 void SmokeviewiniMenu(int value){
   switch (value){
   case 1:
-    readini(0);
+    readini(NULL);
     UpdateRGBColors(COLORBAR_INDEX_NONE);
     break;
   case 2:
-    writeini(GLOBAL_INI);
+    writeini(GLOBAL_INI,NULL);
     break;
   case 3:
-    writeini(LOCAL_INI);
+    writeini(LOCAL_INI,NULL);
     break;
   case 4:
     init_object_defs();
@@ -2207,7 +2207,6 @@ void ScriptMenu(int value){
       if(scriptoutstream!=NULL){
         fclose(scriptoutstream);
         scriptoutstream=NULL;
-        //writeini(SCRIPT_INI);
         PRINTF("Script recorder off\n");
       }
       update_script_stop();
@@ -2221,7 +2220,7 @@ void ScriptMenu(int value){
         if(scriptfile->id!=value)continue;
         error_code=compile_script(file);
         if(error_code==0){
-          readini(1);
+          readini(NULL);
           start_script();
         }
         else{

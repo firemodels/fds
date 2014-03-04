@@ -8224,7 +8224,7 @@ int createnulllabel(flowlabels *flowlabel){
 
 /* ------------------ readini ------------------------ */
 
-int readini(int scriptconfigfile){
+int readini(char *inifile){
   char smvprogini[1024];
   char *smvprogini_ptr=NULL;
 
@@ -8276,23 +8276,22 @@ int readini(int scriptconfigfile){
 
   // read in ini file specified in script
 
-  if(script_filename2!=NULL&&scriptconfigfile==2){
+  if(inifile!=NULL){
     int return_code;
     
-    return_code = readini2(script_filename2,1);
+    return_code = readini2(inifile,1);
 
     if(return_code==1||return_code==2){
-      if(script_filename2==NULL){
+      if(inifile==NULL){
         fprintf(stderr,"*** Error: Unable to read .ini file\n");
       }
       else{
-        fprintf(stderr,"*** Error: Unable to read %s\n",script_filename2);
+        fprintf(stderr,"*** Error: Unable to read %s\n",inifile);
       }
     }
     if(return_code==2)return 2;
     
     UpdateRGBColors(COLORBAR_INDEX_NONE);
-    script_filename2=NULL;
   }
   updateglui();
   if(showall_textures==1)TextureShowMenu(-1);
@@ -11011,7 +11010,7 @@ typedef struct {
 
 /* ------------------ writeini ------------------------ */
 
-void writeini(int flag){
+void writeini(int flag,char *filename){
   FILE *fileout=NULL;
   int i;
 
@@ -11028,8 +11027,8 @@ void writeini(int flag){
       fileout=stdout;
       break;
     case SCRIPT_INI:
-      fileout=fopen(script_filename,"w");
-      outfilename=script_filename;
+      fileout=fopen(filename,"w");
+      outfilename=filename;
       break;
     case LOCAL_INI:
       fileout=fopen(caseini_filename,"w");

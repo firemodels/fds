@@ -1187,11 +1187,8 @@ void script_partclasstype(scriptdata *scripti){
 
 void script_loadinifile(scriptdata *scripti){
   PRINTF("script: loading ini file %s\n\n",scripti->cval);
-  script_filename2=scripti->cval;
   windowresized=0;
-  readini(2);
-  script_filename2=NULL;
-
+  readini(scripti->cval);
 }
 
 /* ------------------ script_loadfile ------------------------ */

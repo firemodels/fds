@@ -36,6 +36,8 @@ SVEXTERN int tetrabox_vis[10];
 SVEXTERN int SVDECL(show_geomtest,0),SVDECL(show_intersection,1);
 #endif
 
+SVEXTERN int SVDECL(convert_ini,0);
+SVEXTERN char SVDECL(*ini_from,NULL), SVDECL(*ini_to,NULL);
 SVEXTERN int SVDECL(cache_boundarydata,0);
 SVEXTERN int SVDECL(tour_antialias,0);
 SVEXTERN int SVDECL(tour_drag,0);
@@ -956,7 +958,6 @@ SVEXTERN scriptfiledata SVDECL(*script_recording,NULL);
 SVEXTERN int SVDECL(runscript,0), SVDECL(noexit,0);
 SVEXTERN int SVDECL(script_multislice,0), SVDECL(script_multivslice,0), SVDECL(script_iso,0);
 SVEXTERN FILE SVDECL(*scriptoutstream,NULL);
-SVEXTERN char SVDECL(*script_filename2,NULL);
 SVEXTERN char SVDECL(*log_filename,NULL);
 SVEXTERN FILE SVDECL(*LOG_FILENAME,NULL);
 SVEXTERN char SVDECL(*flushfile,NULL), SVDECL(*chidfilebase,NULL);

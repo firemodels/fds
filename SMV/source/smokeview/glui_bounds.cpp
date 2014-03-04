@@ -1567,12 +1567,12 @@ extern "C"  void glui_script_disable(void){
 
         strcpy(script_filename,name);
         inifile=insert_inifile(name);
-        writeini(SCRIPT_INI);
+        writeini(SCRIPT_INI,script_filename);
         if(inifile!=NULL&&LIST_ini_list!=NULL){
           LIST_ini_list->add_item(inifile->id,inifile->file);
         }
       }
-      writeini(LOCAL_INI);
+      writeini(LOCAL_INI,NULL);
       break;
     case SCRIPT_LOADINI:
       {
@@ -1581,15 +1581,16 @@ extern "C"  void glui_script_disable(void){
         id = LIST_ini_list->get_int_val();
         ini_filename = get_inifilename(id);
         if(strcmp(ini_filename,caseini_filename)==0){
-          readini(0);
+          readini(NULL);
         }
         else if(id>=0){
+          char *script_filename2;
+
           if(ini_filename==NULL||strlen(ini_filename)==0)break;
           script_filename2=script_filename;
           strcpy(script_filename,ini_filename);
           windowresized=0;
-          readini(2);
-          script_filename2=NULL;
+          readini(script_filename2);
         }
         if(scriptoutstream!=NULL){
           fprintf(scriptoutstream,"LOADINIFILE\n");
@@ -2576,7 +2577,7 @@ void Bounds_DLG_CB(int var){
     updatemenu=1;
     break;
   case SAVE_SETTINGS:
-    writeini(LOCAL_INI);
+    writeini(LOCAL_INI,NULL);
     break;
   case COMPRESS_FILES:
     PRINTF("compressing\n");

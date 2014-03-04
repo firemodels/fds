@@ -305,7 +305,7 @@ void Device_CB(int var){
     }
     break;
   case SAVE_SETTINGS:
-    writeini(LOCAL_INI);
+    writeini(LOCAL_INI,NULL);
     break;
   case DEVICE_close:
     hide_glui_device();

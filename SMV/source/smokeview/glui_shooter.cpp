@@ -354,7 +354,7 @@ void SHOOTER_CB(int var){
       }
       break;
     case SAVE_SETTINGS:
-      writeini(LOCAL_INI);
+      writeini(LOCAL_INI,NULL);
       break;
     case SHOOTER_CLOSE:
       hide_glui_shooter();

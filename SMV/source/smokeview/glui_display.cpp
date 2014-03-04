@@ -1127,7 +1127,7 @@ extern "C" void Labels_CB(int var){
     break;
 #endif    
   case SAVE_SETTINGS:
-    writeini(LOCAL_INI);
+    writeini(LOCAL_INI,NULL);
     break;
   case LABELS_HMS:
     break;
