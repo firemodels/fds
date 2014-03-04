@@ -159,7 +159,7 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
 
    IF (LES .AND. RESEARCH_MODE) RHO_D = RHO_D + RHO_D_TURB
 
-   ! Store diffusivity for stability check
+   ! Store max diffusivity for stability check
 
    IF (CHECK_VN) D_Z_MAX = MAX(D_Z_MAX,RHO_D/RHOP)
 

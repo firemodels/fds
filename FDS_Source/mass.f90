@@ -522,7 +522,7 @@ CASE(.TRUE.) PREDICTOR_STEP
 
    ! Correct densities above or below clip limits
 
-   CALL CHECK_DENSITY
+   IF (.NOT.CLIP_MASS_FRACTION) CALL CHECK_DENSITY
 
    ! Extract mass fraction from RHO * ZZ
 
@@ -632,7 +632,7 @@ CASE(.FALSE.) PREDICTOR_STEP
 
    ! Correct densities above or below clip limits
 
-   CALL CHECK_DENSITY
+   IF (.NOT.CLIP_MASS_FRACTION) CALL CHECK_DENSITY
 
    ! Extract Y_n from rho*Y_n
 
