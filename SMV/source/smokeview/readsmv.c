@@ -9859,7 +9859,7 @@ int readini2(char *inifile, int localfile){
       sscanf(buffer,"%i ",&background_flip);
       continue;
       }
-    if(match(buffer,"COLORBAR_FLIP")==1){
+    if(match(buffer,"COLORBAR_FLIP")==1||match(buffer,"COLORBARFLIP")==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i ",&colorbarflip);
       continue;
