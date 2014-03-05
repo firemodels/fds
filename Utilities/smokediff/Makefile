@@ -54,12 +54,12 @@ intel_win_32 : $(objwin)
 # ------------- Win 64 debug ----------------
 #  64 bit debug windows
 
-intel_win_64_db : CFLAGS    =  /traceback  /debug:full /0d /Qvec_report0 /nologo -D X64 -D WIN32
-intel_win_64_db : FFLAGS    =  /traceback  /debug:full /0d  /Qvec_report0 /nologo -fpp -D pp_cvf -D X64 /iface:stdref
+intel_win_64_db : CFLAGS    =  -D X64 -D WIN32 /Qvec_report0 /nologo /debug:full /Od /Qtrapuv /fp:strict /fp:except 
+intel_win_64_db : FFLAGS    =  -fpp -D pp_cvf -D X64 /iface:stdref /Qvec_report0 /nologo /debug:full /Od /extend_source:132 /warn:unused /warn:nointerfaces /Qtrapuv /fp:strict /fp:except
 intel_win_64_db : CC        = icl
 intel_win_64_db : CPP       = icl
 intel_win_64_db : FC        = ifort
-intel_win_64_db : exe       = smokediff_win_64.exe
+intel_win_64_db : exe       = smokediff_win_64_db.exe
 
 intel_win_64_db : $(objwin)
 	$(CPP) -o $(bin)/$(exe) $(objwin)
