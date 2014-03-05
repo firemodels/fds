@@ -1,3 +1,4 @@
+
 // $Date$ 
 // $Revision$
 // $Author$
@@ -106,7 +107,7 @@
 #endif
 
 #ifdef pp_release
-#define PROGVERSION "1.0.6"
+#define PROGVERSION "1.0.7"
 #endif
 
 #ifdef CPP
