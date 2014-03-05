@@ -706,6 +706,8 @@ void usage(char **argv){
   PRINTF("%s\n",_(" casename       - project id (file names without the extension)"));
   PRINTF("%s\n",_(" -bindir dir    - specify location of smokeview bin directory"));
   PRINTF("%s\n",_(" -build         - show directives used in this build of Smokeview"));
+  PRINTF("%s\n",_(" -convert_ini case1.ini case2.ini - update case1.ini to the current format"));
+  PRINTF("%s\n",_("                  and save results into case2.ini"));
   PRINTF("%s\n",_(" -demo          - use demonstrator mode of Smokeview"));
   PRINTF("%s\n",_(" -fed            - pre-calculate all FED slice files"));
   PRINTF("%s\n",_(" -help          - display this message"));
@@ -718,6 +720,7 @@ void usage(char **argv){
   PRINTF("%s\n",_(" -stereo        - activate stereo mode"));
   PRINTF("%s\n",_(" -tempdir       - forces output files to be written to the temporary directory"));
   PRINTF("%s\n",_(" -update_bounds - calculate boundary file bounds and save to casename.bini"));
+  PRINTF("%s\n",_(" -update_ini case.ini - update case.ini to the current format"));
   PRINTF("%s\n",_(" -version       - display version information"));
   PRINTF("%s\n",_(" -volrender     - generate images of volume rendered smoke and fire"));
 
