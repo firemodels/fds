@@ -1,12 +1,12 @@
 &HEAD CHID='slicemask', TITLE='test of node and cell centered slices drawn through blockages'  /
 
-&MESH IJK=10,30,10, XB=0,1,0,3,0,1 /
+&MESH IJK=10,20,10, XB=0,1,0.0,1.0,0,1 /
 
 &TIME T_END=10 /
 
 &SURF ID='BLOW', VEL=-1.0, TMP_FRONT=500 /
 
-&OBST XB=0.3,0.7,1.0,2.0,0.6,0.7,COLOR='BLUE' /
+&OBST XB=0.3,0.7,0.4,0.6,0.6,0.7,COLOR='BLUE' /
 
 &VENT MB='XMIN', SURF_ID='BLOW' /
 &VENT MB='XMAX', SURF_ID='OPEN' /
