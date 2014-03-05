@@ -1,0 +1,35 @@
+&HEAD CHID='hole' /
+
+&MESH IJK=20,20,20, XB=-0.5,1.5,-0.5,1.5,0.0,2.0 /
+
+&TIME T_END=10 /
+
+&OBST XB = 0.3,0.7,0.3,0.7,0.0,0.10, SURF_IDS = 'BURNER','INERT','INERT' /
+
+&SURF ID = 'BURNER', HRRPUA=625. /
+
+&REAC FUEL = 'PROPANE' /
+
+&OBST XB = -0.2, 1.2, -0.2, 1.2, 1.0, 1.2 /
+
+&OBST XB = -0.2, 1.2, -0.2, 0.0, 0.0, 1.0 /
+&OBST XB = -0.2, 1.2,  1.0, 1.2, 0.0, 1.0 /
+&OBST XB = -0.2, 0.0,  0.0, 1.0, 0.0, 1.0 /
+&OBST XB =  1.0, 1.2,  0.0, 1.0, 0.0, 1.0 /
+
+&HOLE XB = 0.4, 0.6, -0.2, 0.0, 0.0, 0.3 /
+
+&VENT MB='XMIN', SURF_ID='OPEN' /
+&VENT MB='XMAX', SURF_ID='OPEN' /
+&VENT MB='YMIN', SURF_ID='OPEN' /
+&VENT MB='YMAX', SURF_ID='OPEN' /
+&VENT MB='ZMAX', SURF_ID='OPEN' /
+
+&SLCF PBY = 0.5, QUANTITY = 'TEMPERATURE', CELL_CENTERED=.TRUE. /
+&SLCF PBY = 0.9, QUANTITY = 'VISCOSITY', CELL_CENTERED=.TRUE. /
+
+###### The following lines cause changes in the HRR ######
+&HOLE XB = 0.4, 0.6, 1.0, 1.2, 0.0, 1.0, DEVC_ID='TIMER' /
+&DEVC XYZ=0,0,0, ID='TIMER', QUANTITY='TIME', SETPOINT=90, INITIAL_STATE=.FALSE. /
+
+&TAIL /

@@ -60,6 +60,8 @@ $RUNFDS Flowfields mwtest_isothermal
 $RUNFDS Flowfields mwtest_cfl
 $RUNFDS Flowfields mass_heat_wall_device_test
 $RUNFDS Flowfields mass_heat_wall_device_test_2
+$RUNFDS Flowfields hole
+$RUNFDS Flowfields no_hole
 
 $RUNFDS Heat_Transfer adiabatic_net_flux
 $RUNFDS Heat_Transfer convective_cooling
