@@ -4117,23 +4117,20 @@ casename\_smvzip.smv}.
 \section{Differencing Data - Using Smokediff to compare two FDS cases}
 \label{ch:smokediff}
 The utility Smokediff compares two FDS cases with the same
-geometry.  Smokediff examines two .smv files looking for
+geometry.  Smokediff examines two {\tt .smv}\ files looking for
 boundary, slice and Plot3D files containing the same type of data
-and located in the same region in space and/or time. Smokediff
-then subtracts data in one file from corresponding data in the
-other generating a new .smv file and new differenced boundary,
-slice and Plot3D data files. To compare the two .smv files, {\tt
+and located in the same region in space. Data in one file is subtracted from corresponding data in the
+other.  Smokediff then generates a new {\tt .smv} file referencing the differenced boundary,
+slice and Plot3D data files. To compare two .smv files named {\tt
 casename1.smv}\ and {\tt casename2.smv}\ one would use the command
 
 \begin{lstlisting}
-Smokediff -smv casename1 casename2
+smokediff -smv casename1 casename2
 \end{lstlisting}
 
-\noindent which opens Smokeview to examine the differenced data
-after Smokediff completes.  Smokediff subtracts the data
-referenced in casename1 from the data referenced in casename2.
-For slice files, Smokediff allows the grid in casename2 to be
-refined by a factor of 2.  Other usage options for Smokediff are
+\noindent The {\tt -smv}\ option caused Smokeview to open after the differencing is complete to examine the differenced results.
+Smokediff allows the grid for slice files in casename2 to be
+refined by an integer multiple.  Other usage options for Smokediff are
 detailed below
 
 \lstinputlisting{SCRIPT_FIGURES/smokediff.help}
