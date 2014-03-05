@@ -46,7 +46,7 @@ set version=%smv_version%
 set scriptdir=FDS-SMV/SMV/scripts
 set UG=Manuals\SMV_User_Guide
 set VG=Manuals\SMV_Verification_Guide
-set TG=Manuals\SMV_Technical_Referecne_Guide
+set TG=Manuals\SMV_Technical_Reference_Guide
 
 echo.
 echo ---downloading guides
