@@ -105,7 +105,7 @@ int getpatchindex(int in1, boundary *boundaryin, boundary *boundaryout){
 
 /* ------------------ diff_slices ------------------------ */
 
-void diff_boundaries(FILE *stream_out){
+void diff_boundaryes(FILE *stream_out){
   int j;
 
   for(j=0;j<caseinfo->nboundary_files;j++){
