@@ -105,7 +105,7 @@ int getpatchindex(int in1, boundary *boundaryin, boundary *boundaryout){
 
 /* ------------------ diff_slices ------------------------ */
 
-void diff_boundaryes(FILE *stream_out){
+void diff_boundaries(FILE *stream_out){
   int j;
 
   for(j=0;j<caseinfo->nboundary_files;j++){
@@ -294,7 +294,7 @@ void diff_boundaryes(FILE *stream_out){
           }
         }
         update_histogram(pqq1, nsize1, boundary1->histogram);
-        FORToutpatchframe(&unit3, &boundary1->npatches,
+        FORToutpatchframe(&unit3, &npatches3,
                         p3i1, p3i2, p3j1, p3j2, p3k1, p3k2,
                         &patchtime1, pqq3, &error3);
         size_sofar+=nsize1*sizeof(float);
