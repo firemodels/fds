@@ -131,8 +131,8 @@ void diff_boundaryes(FILE *stream_out){
     boundary1 = boundaryi;
     if(boundaryi->boundary2==NULL)continue;
     boundary2 = boundaryi->boundary2;
-    file1 = boundaryi->file;
-    file2 = boundaryi->boundary2->file;
+    file1 = boundary1->file;
+    file2 = boundary2->file;
     fullfile(fullfile1,sourcedir1,file1);
     fullfile(fullfile2,sourcedir2,file2);
 
@@ -234,7 +234,7 @@ void diff_boundaryes(FILE *stream_out){
       FORTget_file_unit(&unit3,&unit3);
       len3=strlen(outfile);
       size_sofar=0;
-      FORToutboundaryheader(outfile,&unit3,&boundary1->npatches,
+      FORToutboundaryheader(outfile,&unit3,&npatches3,
         p3i1,p3i2,p3j1,p3j2,p3k1,p3k2,patchdir3,&error1,len3);
       PRINTF("  Progress: ");
       FFLUSH();
