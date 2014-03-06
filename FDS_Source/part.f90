@@ -2253,7 +2253,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
          TMP_G_NEW = TMP_G
          ITMP     = INT(TMP_DROP_NEW)
          TMP_WGT  = TMP_DROP_NEW - AINT(TMP_DROP_NEW)
-         H_NEW = H_G_OLD -Q_CON_GAS*WGT+WGT*M_VAP*(H_V+H_L)
+         H_NEW = H_G_OLD -Q_CON_GAS*WGT+WGT*M_VAP*(H_V+H_L)!+ H_D_OLD*WGT + Q_RAD - M_DROP*H_L*WGT + Q_CON_WALL
          IF (H_NEW > 0._EB) THEN
             ZZ_GET2 = ZZ_GET * M_GAS/M_GAS_NEW               
             ZZ_GET2(Z_INDEX) = ZZ_GET2(Z_INDEX) + WGT*M_VAP/M_GAS_NEW
@@ -2274,6 +2274,13 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                ! Compute approximation of d(cp)/dT                  
 
                TMP_G_I = TMP_G_I+(H_NEW-CP2*TMP_G_I*M_GAS_NEW)/(M_GAS_NEW*(CP2+TMP_G_I*DCPDT))
+
+               IF (TMP_G_I < 0._EB) THEN
+                  DT_SUBSTEP = DT_SUBSTEP * 0.5_EB
+                  N_SUBSTEPS = NINT(DT/DT_SUBSTEP)
+                  CYCLE TIME_ITERATION_LOOP
+               ENDIF
+
                ITCOUNT = ITCOUNT + 1
                IF (ABS(TMP_G_NEW-TMP_G_I) > 0.5_EB) TEMPITER = .TRUE.
                IF (ITCOUNT > 10) THEN
@@ -2282,6 +2289,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                ENDIF               
                TMP_G_NEW = TMP_G_I
             ENDDO ITERATE_TEMP
+            TMP_G_NEW = MAX(TMP_G_NEW,TMPMIN)
          ELSE
             DT_SUBSTEP = DT_SUBSTEP * 0.5_EB
             N_SUBSTEPS = NINT(DT/DT_SUBSTEP)
