@@ -51,8 +51,6 @@ int main(int argc, char **argv){
   if(return_code!=0)return 1;
   if(convert_ini==1){
     readini(ini_from);
-    writeini(SCRIPT_INI,ini_to);
-    exit(0);
   }
 
   glutMainLoop();

@@ -90,6 +90,10 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
     camera_current->projection_type=projection_type;
     ZoomMenu(-2);
   }
+  if(convert_ini==1){
+    writeini(SCRIPT_INI,ini_to);
+    exit(0);
+  }
 
   Update_Show();
   if(global_times!=NULL&&updateUpdateFrameRateMenu==1)FrameRateMenu(frameratevalue);
