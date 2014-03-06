@@ -10292,6 +10292,8 @@ int readini2(char *inifile, int localfile){
       int is_viewpoint4=0;
       int is_viewpoint5=0;
       int is_viewpoint6=0;
+      float xyzmaxdiff_local=-1.0;
+      float xmin_local=0.0, ymin_local=0.0, zmin_local=0.0;
 
       if(match(buffer,"VIEWPOINT4")==1)is_viewpoint4=1;
       if(match(buffer,"VIEWPOINT5")==1){
@@ -10313,7 +10315,9 @@ int readini2(char *inifile, int localfile){
       }
 
 		  fgets(buffer,255,stream);
-		  sscanf(buffer,"%i %i %i",&camera_ini->rotation_type,&camera_ini->rotation_index,&camera_ini->view_id);
+		  sscanf(buffer,"%i %i %i %f %f %f %f",
+        &camera_ini->rotation_type,&camera_ini->rotation_index,&camera_ini->view_id,
+        &xyzmaxdiff_local,&xmin_local,&ymin_local,&zmin_local);
 
       {
         float zoom_in;
@@ -10323,6 +10327,11 @@ int readini2(char *inifile, int localfile){
         zoomindex_in=zoomindex;
         fgets(buffer,255,stream);
 	  	  sscanf(buffer,"%f %f %f %f %i",eye,eye+1,eye+2,&zoom_in,&zoomindex_in);
+        if(xyzmaxdiff_local>0.0){
+          eye[0] = xmin_local + eye[0]*xyzmaxdiff_local;
+          eye[1] = ymin_local + eye[1]*xyzmaxdiff_local;
+          eye[2] = zmin_local + eye[2]*xyzmaxdiff_local;
+        }
         zoom=zoom_in;
         zoomindex=zoomindex_in;
         if(zoomindex!=-1){
@@ -10351,6 +10360,11 @@ int readini2(char *inifile, int localfile){
 
 	    fgets(buffer,255,stream);
 	    sscanf(buffer,"%f %f %f",&camera_ini->xcen,&camera_ini->ycen,&camera_ini->zcen);
+      if(xyzmaxdiff_local>0.0){
+        camera_ini->xcen = xmin_local + camera_ini->xcen*xyzmaxdiff_local;
+        camera_ini->ycen = ymin_local + camera_ini->ycen*xyzmaxdiff_local;
+        camera_ini->zcen = zmin_local + camera_ini->zcen*xyzmaxdiff_local;
+      }
 
       fgets(buffer,255,stream);
       sscanf(buffer,"%f %f",az_elev,az_elev+1);
@@ -10379,7 +10393,6 @@ int readini2(char *inifile, int localfile){
         fgets(buffer,255,stream);
         sscanf(buffer,"%f %f %f %f",mat+12,mat+13,mat+14,mat+15);
       }
-      
       if(is_viewpoint5==1){
         camera *ci;
 
@@ -10393,6 +10406,14 @@ int readini2(char *inifile, int localfile){
         sscanf(buffer,"%f %f %f %f %f %f",
           &ci->xmin,&ci->ymin,&ci->zmin,
           &ci->xmax,&ci->ymax,&ci->zmax);
+        if(xyzmaxdiff_local>0.0){
+          ci->xmin = xmin_local + ci->xmin*xyzmaxdiff_local;
+          ci->xmax = xmin_local + ci->xmax*xyzmaxdiff_local;
+          ci->ymin = ymin_local + ci->ymin*xyzmaxdiff_local;
+          ci->zmax = ymin_local + ci->ymax*xyzmaxdiff_local;
+          ci->ymin = zmin_local + ci->zmin*xyzmaxdiff_local;
+          ci->zmax = zmin_local + ci->zmax*xyzmaxdiff_local;
+        }
       }
       if(is_viewpoint4==1){
         char *bufferptr;
@@ -10402,17 +10423,7 @@ int readini2(char *inifile, int localfile){
         bufferptr=trim_front(buffer);
         strcpy(camera_ini->name,bufferptr);
         init_camera_list();
-        {
-          //*** following code shouldn't be here but leaving it here commented
-          //    in case it is really necessary
- 
-          //  camera *cam;
-
-          insert_camera(&camera_list_first,camera_ini,bufferptr);
-         // if(cam!=NULL){
-         //   cam->view_id=camera_ini->view_id;
-         // }
-        }
+        insert_camera(&camera_list_first,camera_ini,bufferptr);
       }
 
       enable_reset_saved_view();
