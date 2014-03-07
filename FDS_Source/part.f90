@@ -2199,11 +2199,11 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
          IF (R_DROP<0.5_EB*LPC%MINIMUM_DIAMETER) THEN
             M_VAP  = M_DROP/N_SUBSTEPS
             IF (Q_TOT>0._EB) THEN
-               Q_FRAC = M_VAP*H_V/Q_TOT 
+               Q_FRAC     = M_VAP*H_V/Q_TOT 
                Q_CON_GAS  = Q_CON_GAS*Q_FRAC
                Q_CON_WALL = Q_CON_WALL*Q_FRAC
                Q_RAD      = Q_RAD*Q_FRAC
-               Q_TOT  = Q_RAD+Q_CON_GAS+Q_CON_WALL
+               Q_TOT      = Q_RAD+Q_CON_GAS+Q_CON_WALL
             ENDIF
          ENDIF
          IF (M_VAP < M_DROP) THEN
@@ -2226,11 +2226,11 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
             M_VAP  = MIN(M_VAP_MAX,M_DROP,M_VAP + (TMP_DROP_NEW - T_BOIL_EFF)*C_DROP*M_DROP/H_V)
             TMP_DROP_NEW = T_BOIL_EFF
             IF (Q_TOT>0._EB) THEN
-               Q_FRAC = M_VAP*H_V/Q_TOT
+               Q_FRAC     = M_VAP*H_V/Q_TOT
                Q_CON_GAS  = Q_CON_GAS*Q_FRAC
                Q_CON_WALL = Q_CON_WALL*Q_FRAC
                Q_RAD      = Q_RAD*Q_FRAC
-               Q_TOT  = Q_RAD+Q_CON_GAS+Q_CON_WALL
+               Q_TOT      = Q_RAD+Q_CON_GAS+Q_CON_WALL
             ENDIF
          ENDIF
          M_DROP = M_DROP - M_VAP
@@ -2253,7 +2253,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
          TMP_G_NEW = TMP_G
          ITMP     = INT(TMP_DROP_NEW)
          TMP_WGT  = TMP_DROP_NEW - AINT(TMP_DROP_NEW)
-         H_NEW = H_G_OLD -Q_CON_GAS*WGT+WGT*M_VAP*(H_V+H_L)!+ H_D_OLD*WGT + Q_RAD - M_DROP*H_L*WGT + Q_CON_WALL
+         H_NEW = H_G_OLD - WGT*(Q_CON_GAS + M_VAP*(H_V+H_L))
          IF (H_NEW > 0._EB) THEN
             ZZ_GET2 = ZZ_GET * M_GAS/M_GAS_NEW               
             ZZ_GET2(Z_INDEX) = ZZ_GET2(Z_INDEX) + WGT*M_VAP/M_GAS_NEW
@@ -2262,6 +2262,9 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
             ITCOUNT = 0
             ITERATE_TEMP: DO WHILE (TEMPITER)
                TEMPITER=.FALSE.
+
+               ! Compute approximation of d(cp)/dT
+
                CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET2,CP2,TMP_G_I)
                IF (TMP_G_I > 1._EB) THEN
                   CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET2,CP,TMP_G_I-1._EB)
@@ -2270,8 +2273,6 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                   CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET2,CP,TMP_G_I+1._EB)
                   DCPDT = CP-CP2
                ENDIF
-
-               ! Compute approximation of d(cp)/dT                  
 
                TMP_G_I = TMP_G_I+(H_NEW-CP2*TMP_G_I*M_GAS_NEW)/(M_GAS_NEW*(CP2+TMP_G_I*DCPDT))
 
@@ -2301,7 +2302,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
          H_V      = SS%H_V(ITMP)+TMP_WGT*(SS%H_V(ITMP+1)-SS%H_V(ITMP))
          DHOR     = H_V*MW_DROP/R0 
          X_EQUIL  = MIN(1._EB,P_RATIO*EXP(DHOR*(1._EB/TMP_BOIL-1._EB/TMP_DROP_NEW)))
-         Y_EQUIL = X_EQUIL/(MW_RATIO + (1._EB-MW_RATIO)*X_EQUIL)
+         Y_EQUIL  = X_EQUIL/(MW_RATIO + (1._EB-MW_RATIO)*X_EQUIL)
 
          ! Limit super-saturation
 
