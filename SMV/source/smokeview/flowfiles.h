@@ -1142,6 +1142,7 @@ typedef struct _multislicedata {
   int mesh_type;
   int seq_id, autoload;
   int loaded,display,type;
+  int ndirxyz[4];
   int nslices;
   int *islices;
   float *contour_areas;
@@ -1158,6 +1159,7 @@ typedef struct {
   int seq_id, autoload;
   int loaded,display,type;
   int nvslices;
+  int ndirxyz[4];
   int *ivslices;
   char menulabel[128];
   char menulabel2[128];

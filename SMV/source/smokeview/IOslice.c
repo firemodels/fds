@@ -2736,6 +2736,39 @@ void updatevslices(void){
       vslicei->autoload=0;
     }
   }
+  for(i=0;i<nmultivsliceinfo;i++){
+    multivslicedata *mvslicei;
+
+    mvslicei = multivsliceinfo + i;
+    mvslicei->ndirxyz[0]=0;
+    mvslicei->ndirxyz[1]=0;
+    mvslicei->ndirxyz[2]=0;
+    mvslicei->ndirxyz[3]=0;
+  }
+  for(i=0;i<nmultivsliceinfo;i++){
+    multivslicedata *mvslicei;
+    slicedata *slicei;
+    int j;
+
+    mvslicei = multivsliceinfo + i;
+    slicei = sliceinfo + mvslicei->ivslices[0];
+    if(slicei->idir<1)continue;
+    if(slicei->volslice==1)continue;
+    for(j=0;j<nmultivsliceinfo;j++){
+      multivslicedata *mvslicej;
+      slicedata *slicej;
+
+      mvslicej = multivsliceinfo + j;
+      slicej = sliceinfo + mvslicej->ivslices[0];
+      if(slicej->idir<1)continue;
+      if(slicej->volslice==1)continue;
+      if(strcmp(slicej->label.longlabel,slicei->label.longlabel)!=0)continue;
+      if(slicej->slicetype==SLICE_CENTER&&slicei->slicetype!=SLICE_CENTER||
+        slicej->slicetype!=SLICE_CENTER&&slicei->slicetype==SLICE_CENTER)continue;
+      mvslicei->ndirxyz[slicej->idir]++;
+    }
+  }
+
   if(nvsliceinfo>0)PRINTF("    updating vector slice menus\n");
   updatevslicemenulabels();
   PRINTF("  vector slices update completed\n\n");
@@ -6386,9 +6419,38 @@ void update_slicedir_count(void){
   int i,j;
 
   for(i=0;i<nmultisliceinfo;i++){
+    multislicedata *mslicei;
+
+    mslicei = multisliceinfo + i;
+    mslicei->ndirxyz[0]=0;
+    mslicei->ndirxyz[1]=0;
+    mslicei->ndirxyz[2]=0;
+    mslicei->ndirxyz[3]=0;
+  }
+  for(i=0;i<nmultisliceinfo;i++){
+    multislicedata *mslicei;
+    slicedata *slicei;
+
+    mslicei = multisliceinfo + i;
+    slicei = sliceinfo + mslicei->islices[0];
+    if(slicei->idir<1)continue;
+    if(slicei->volslice==1)continue;
+    for(j=0;j<nmultisliceinfo;j++){
+      multislicedata *mslicej;
+      slicedata *slicej;
+
+      mslicej = multisliceinfo + j;
+      slicej = sliceinfo + mslicej->islices[0];
+      if(slicej->idir<1)continue;
+      if(slicej->volslice==1)continue;
+      if(strcmp(slicej->label.longlabel,slicei->label.longlabel)!=0)continue;
+      if(slicej->slicetype==SLICE_CENTER&&slicei->slicetype!=SLICE_CENTER||
+        slicej->slicetype!=SLICE_CENTER&&slicei->slicetype==SLICE_CENTER)continue;
+      mslicei->ndirxyz[slicej->idir]++;
+    }
   }
   for(i=0;i<nsliceinfo;i++){
-	slicedata *slicei;
+	  slicedata *slicei;
 
     slicei = sliceinfo + i;
 	  slicei->ndirxyz[0]=0;
