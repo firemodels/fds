@@ -147,7 +147,7 @@ void Update_Framenumber(int changetime){
       }
       if(showfed==1){
         fed_areas=NULL;
-        for(i=0;i<nmultislices;i++){
+        for(i=0;i<nmultisliceinfo;i++){
           multislicedata *mslicei;
           int itime;
           int j;

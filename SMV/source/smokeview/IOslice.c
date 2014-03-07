@@ -2206,14 +2206,14 @@ void getsliceparams(void){
     }
     qsort( (int *)sliceorderindex, (size_t)nsliceinfo, sizeof(int), slicecompare );
 
-    for(i=0;i<nmultislices;i++){
+    for(i=0;i<nmultisliceinfo;i++){
       multislicedata *mslicei;
 
       mslicei = multisliceinfo + i;
       FREEMEMORY(mslicei->islices);
     }
     FREEMEMORY(multisliceinfo);
-    nmultislices=0;
+    nmultisliceinfo=0;
 
     NewMemory((void **)&multisliceinfo,sizeof(multislicedata)*nsliceinfo);
 
@@ -2221,7 +2221,7 @@ void getsliceparams(void){
       multislicedata *mslicei;
       slicedata *sd;
       
-      nmultislices=1;
+      nmultisliceinfo=1;
       mslicei = multisliceinfo;
       mslicei->islices=NULL;
       NewMemory((void **)&mslicei->islices,sizeof(int)*nsliceinfo);
@@ -2238,7 +2238,7 @@ void getsliceparams(void){
         sd = sliceinfo + sliceorderindex[i];
         mslicei->autoload=0;
         if(new_multi_slice(sdold,sd)==1){
-          nmultislices++;
+          nmultisliceinfo++;
           mslicei++;
           mslicei->nslices=0;
           mslicei->type=sd->type;
@@ -2254,7 +2254,7 @@ void getsliceparams(void){
     }
   }
 #ifdef pp_HIDEMULTI
-  for(iii=0;iii<nmultislices;iii++){
+  for(iii=0;iii<nmultisliceinfo;iii++){
     int ii;
 
     mslicei = multisliceinfo + iii;
@@ -2287,7 +2287,7 @@ void getsliceparams(void){
     slicei = sliceinfo + i;
     slicei->mslice=NULL;
   }
-  for(i=0;i<nmultislices;i++){
+  for(i=0;i<nmultisliceinfo;i++){
     int ii;
     multislicedata *mslicei;
 
@@ -2312,13 +2312,13 @@ void getsliceparams2(void){
   
   trainer_temp_n=0;
   trainer_oxy_n=0;
-  if(nmultislices>0){
+  if(nmultisliceinfo>0){
     FREEMEMORY(trainer_temp_indexes);
     FREEMEMORY(trainer_oxy_indexes);
-    NewMemory((void **)&trainer_temp_indexes,nmultislices*sizeof(int));
-    NewMemory((void **)&trainer_oxy_indexes,nmultislices*sizeof(int));
+    NewMemory((void **)&trainer_temp_indexes,nmultisliceinfo*sizeof(int));
+    NewMemory((void **)&trainer_oxy_indexes,nmultisliceinfo*sizeof(int));
   }
-  for(i=0;i<nmultislices;i++){
+  for(i=0;i<nmultisliceinfo;i++){
     multislicedata *mslicei;
 
     mslicei = multisliceinfo + i;
@@ -2684,16 +2684,16 @@ void updatevslices(void){
     }
     qsort( (int *)vsliceorderindex, (size_t)nvsliceinfo, sizeof(int), vslicecompare );
 
-    for(i=0;i<nmultivslices;i++){
+    for(i=0;i<nmultivsliceinfo;i++){
       mvslicei = multivsliceinfo + i;
       FREEMEMORY(mvslicei->ivslices);
     }
     FREEMEMORY(multivsliceinfo);
-    nmultivslices=0;
+    nmultivsliceinfo=0;
 
     NewMemory((void **)&multivsliceinfo,sizeof(multislicedata)*nvsliceinfo);
 
-    nmultivslices=1;
+    nmultivsliceinfo=1;
     mvslicei = multivsliceinfo;
     mvslicei->ivslices=NULL;
     NewMemory((void **)&mvslicei->ivslices,sizeof(int)*nvsliceinfo);
@@ -2710,7 +2710,7 @@ void updatevslices(void){
       vsd = vsliceinfo + vsliceorderindex[i];
       sd = sliceinfo + vsd->ival;
       if(new_multi_slice(sdold,sd)==1){
-        nmultivslices++;
+        nmultivsliceinfo++;
         mvslicei++;
         mvslicei->nvslices=0;
         mvslicei->type=sd->type;
@@ -6385,14 +6385,16 @@ int last_vslice_loadstack(void){
 void update_slicedir_count(void){
   int i,j;
 
+  for(i=0;i<nmultisliceinfo;i++){
+  }
   for(i=0;i<nsliceinfo;i++){
 	slicedata *slicei;
 
     slicei = sliceinfo + i;
-	slicei->ndirxyz[0]=0;
-	slicei->ndirxyz[1]=0;
-	slicei->ndirxyz[2]=0;
-	slicei->ndirxyz[3]=0;
+	  slicei->ndirxyz[0]=0;
+	  slicei->ndirxyz[1]=0;
+	  slicei->ndirxyz[2]=0;
+	  slicei->ndirxyz[3]=0;
   }
   for(i=0;i<nsliceinfo;i++){
     slicedata *slicei, *slicej;

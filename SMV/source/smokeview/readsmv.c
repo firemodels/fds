@@ -2526,14 +2526,14 @@ int readsmv(char *file, char *file2){
       FREEMEMORY(sd->size_file);
     }
     FREEMEMORY(sliceorderindex);
-    for(i=0;i<nmultislices;i++){
+    for(i=0;i<nmultisliceinfo;i++){
       multislicedata *mslicei;
 
       mslicei = multisliceinfo + i;
       FREEMEMORY(mslicei->islices);
     }
     FREEMEMORY(multisliceinfo);
-    nmultislices=0;
+    nmultisliceinfo=0;
     FREEMEMORY(sliceinfo);
   }
   nsliceinfo=0;
@@ -2542,14 +2542,14 @@ int readsmv(char *file, char *file2){
 
   if(nvsliceinfo>0){
     FREEMEMORY(vsliceorderindex);
-    for(i=0;i<nmultivslices;i++){
+    for(i=0;i<nmultivsliceinfo;i++){
       multivslicedata *mvslicei;
 
       mvslicei = multivsliceinfo + i;
       FREEMEMORY(mvslicei->ivslices);
     }
     FREEMEMORY(multivsliceinfo);
-    nmultivslices=0;
+    nmultivsliceinfo=0;
   }
 
   if(npatchinfo>0){
@@ -9006,7 +9006,7 @@ int readini2(char *inifile, int localfile){
         fgets(buffer,255,stream);
         sscanf(buffer,"%i",&seq_id);
 
-        if(seq_id>=0&&seq_id<nmultislices){
+        if(seq_id>=0&&seq_id<nmultisliceinfo){
           multislicedata *mslicei;
   
           mslicei = multisliceinfo + seq_id;

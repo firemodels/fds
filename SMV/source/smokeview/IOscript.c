@@ -922,7 +922,7 @@ void script_loadslice(scriptdata *scripti){
 
   PRINTF("script: loading slice files of type: %s\n\n",scripti->cval);
 
-  for(i=0;i<nmultislices;i++){
+  for(i=0;i<nmultisliceinfo;i++){
     multislicedata *mslicei;
     slicedata *slicei;
     int j;
@@ -955,7 +955,7 @@ void script_loadvslice(scriptdata *scripti){
 
   PRINTF("script: loading vector slice files of type: %s\n\n",scripti->cval);
 
-  for(i=0;i<nmultivslices;i++){
+  for(i=0;i<nmultivsliceinfo;i++){
     multivslicedata *mvslicei;
     int j;
     slicedata *slicei;

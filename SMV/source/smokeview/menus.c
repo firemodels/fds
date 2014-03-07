@@ -4665,7 +4665,7 @@ updatemenu=0;
     if(vd->loaded==1)nvsliceloaded++;
   }
 
-  for(i=0;i<nmultislices;i++){
+  for(i=0;i<nmultisliceinfo;i++){
     multislicedata *mslicei;
     int j;
 
@@ -4692,7 +4692,7 @@ updatemenu=0;
       mslicei->display=1;
     }
   }
-  for(i=0;i<nmultivslices;i++){
+  for(i=0;i<nmultivsliceinfo;i++){
     multivslicedata *mvslicei;
     int j;
 
@@ -6503,9 +6503,9 @@ updatemenu=0;
       glutAddMenuEntry(menulabel,HIDE_ALL);
     }
   }
-  if(nsliceinfo>0&&nmultislices<nsliceinfo){
+  if(nsliceinfo>0&&nmultisliceinfo<nsliceinfo){
     CREATEMENU(showmultislicemenu,ShowMultiSliceMenu);
-    for(i=0;i<nmultislices;i++){
+    for(i=0;i<nmultisliceinfo;i++){
       slicedata *sd;
       char menulabel[1024];
       multislicedata *mslicei;
@@ -6930,7 +6930,7 @@ updatemenu=0;
 
   if(nsliceloaded>0){
     glutAddSubMenu(_("Animated Slices"),showhideslicemenu);
-    if(nmultislices<nsliceinfo){
+    if(nmultisliceinfo<nsliceinfo){
       glutAddSubMenu(_("Animated Multi-Slices"),showmultislicemenu);
     }
   }
@@ -7772,9 +7772,9 @@ updatemenu=0;
   if(nvsliceinfo>0){
     int ii;
 
-    if(nmultivslices<nvsliceinfo){
+    if(nmultivsliceinfo<nvsliceinfo){
       CREATEMENU(unloadmultivslicemenu,UnloadMultiVSliceMenu);
-      for(i=0;i<nmultivslices;i++){
+      for(i=0;i<nmultivsliceinfo;i++){
         multivslicedata *mvslicei;
 
         mvslicei = multivsliceinfo + i;
@@ -7785,7 +7785,7 @@ updatemenu=0;
       glutAddMenuEntry(_("Unload all"),-1);
 
       nloadsubmvslicemenu=1;
-      for(i=1;i<nmultivslices;i++){
+      for(i=1;i<nmultivsliceinfo;i++){
         vslicedata *vi, *vim1;
         slicedata *si, *sim1;
 
@@ -7804,7 +7804,7 @@ updatemenu=0;
 
       nmultisliceloaded=0;
       nloadsubmvslicemenu=0;
-      for(i=0;i<nmultivslices;i++){
+      for(i=0;i<nmultivsliceinfo;i++){
         vslicedata *vi, *vim1;
         slicedata *si, *sim1;
         char menulabel[1024];
@@ -7843,7 +7843,7 @@ updatemenu=0;
 
       nloadsubmvslicemenu=0;
       CREATEMENU(loadmultivslicemenu,LoadMultiVSliceMenu);
-      for(i=0;i<nmultivslices;i++){
+      for(i=0;i<nmultivsliceinfo;i++){
         vslicedata *vi, *vim1;
         slicedata *si, *sim1;
 
@@ -7867,7 +7867,7 @@ updatemenu=0;
           nloadsubmvslicemenu++;
         }
       }
-      if(nmultivslices>0)glutAddMenuEntry("-",-999);
+      if(nmultivsliceinfo>0)glutAddMenuEntry("-",-999);
       if(showallslicevectors==0)glutAddMenuEntry(_("Show all vector slice entries"),-20);
       if(showallslicevectors==1)glutAddMenuEntry(_("*Show all vector slice entries"),-20);
       if(nmultisliceloaded>1){
@@ -8052,10 +8052,10 @@ updatemenu=0;
   }
     if(nsliceinfo>0){
 
-      if(nmultislices<nsliceinfo){
+      if(nmultisliceinfo<nsliceinfo){
         CREATEMENU(unloadmultislicemenu,UnloadMultiSliceMenu);
         nmultisliceloaded=0;
-        for(i=0;i<nmultislices;i++){
+        for(i=0;i<nmultisliceinfo;i++){
           multislicedata *mslicei;
 
           mslicei = multisliceinfo + i;
@@ -8066,7 +8066,7 @@ updatemenu=0;
         glutAddMenuEntry(_("Unload all"),-1);
 
         nloadsubmslicemenu=1;
-        for(i=1;i<nmultislices;i++){
+        for(i=1;i<nmultisliceinfo;i++){
           slicedata *sd, *sdim1;
 
           sd = sliceinfo+(multisliceinfo + i)->islices[0];
@@ -8078,7 +8078,7 @@ updatemenu=0;
           loadsubmslicemenu[i]=0;
         }
         nloadsubmslicemenu=0;
-        for(i=0;i<nmultislices;i++){
+        for(i=0;i<nmultisliceinfo;i++){
           slicedata *sd, *sdim1;
           char menulabel[1024];
           multislicedata *mslicei;
@@ -8108,7 +8108,7 @@ updatemenu=0;
         }
         CREATEMENU(loadmultislicemenu,LoadMultiSliceMenu);
         nloadsubmslicemenu=0;
-        for(i=0;i<nmultislices;i++){
+        for(i=0;i<nmultisliceinfo;i++){
           slicedata *sd, *sdim1;
 
           sd = sliceinfo+(multisliceinfo + i)->islices[0];
@@ -8142,7 +8142,7 @@ updatemenu=0;
             nloadsubmslicemenu++;
           }
         }
-        if(nmultislices>0)glutAddMenuEntry("-",-999);
+        if(nmultisliceinfo>0)glutAddMenuEntry("-",-999);
         if(nmultisliceloaded>1){
           glutAddSubMenu(_("Unload"),unloadmultislicemenu);
         }
@@ -9037,7 +9037,7 @@ updatemenu=0;
       if(manual_terrain==1&&nterraininfo>0){
         glutAddSubMenu(_("Terrain"),loadterrainmenu);
       }
-      if(nsliceinfo>0&&nmultislices<nsliceinfo){
+      if(nsliceinfo>0&&nmultisliceinfo<nsliceinfo){
         strcpy(loadmenulabel,_("Multi-Slices"));
         if(sliceframeskip>0){
           sprintf(steplabel,"/Skip %i",sliceframeskip);
@@ -9045,7 +9045,7 @@ updatemenu=0;
         }
         glutAddSubMenu(loadmenulabel,loadmultislicemenu);
       }
-      if(nvsliceinfo>0&&nmultivslices<nvsliceinfo){
+      if(nvsliceinfo>0&&nmultivsliceinfo<nvsliceinfo){
         strcpy(loadmenulabel,_("Multi-Vector Slices"));
         if(sliceframeskip>0){
           sprintf(steplabel,"/Skip %i",sliceframeskip);

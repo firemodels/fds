@@ -834,7 +834,7 @@ void InitOpenGL(void){
    // startup mslice
 
    nstartup=0;
-   for(i=0;i<nmultislices;i++){
+   for(i=0;i<nmultisliceinfo;i++){
       multislicedata *mslicei;
 
       mslicei = multisliceinfo + i;
@@ -844,7 +844,7 @@ void InitOpenGL(void){
    if(nstartup!=0){
      fprintf(fileout,"MSLICEAUTO\n");
      fprintf(fileout," %i \n",nstartup);
-     for(i=0;i<nmultislices;i++){
+     for(i=0;i<nmultisliceinfo;i++){
         multislicedata *mslicei;
 
         mslicei = multisliceinfo + i;
@@ -1883,8 +1883,8 @@ void initvars(void){
   npartclassinfo=0;
   prop_index=1;
   noutlineinfo=0;
-  nmultislices=0;
-  nmultivslices=0;
+  nmultisliceinfo=0;
+  nmultivsliceinfo=0;
 
   svofile_exists=0;
   devicenorm_length = 0.1;
