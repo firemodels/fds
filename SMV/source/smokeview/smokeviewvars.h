@@ -71,9 +71,7 @@ SVEXTERN int SVDECL(script_startframe,-1), SVDECL(script_skipframe,-1);
 SVEXTERN int SVDECL(startframe0,-1), SVDECL(skipframe0,-1);
 SVEXTERN int SVDECL(skip_render_frames,0);
 SVEXTERN int SVDECL(update_smokecolorbar,0);
-#ifdef pp_SUPERMESH
 SVEXTERN int SVDECL(combine_meshes,1);
-#endif
 SVEXTERN int colorbar_left_pos, colorbar_right_pos, colorbar_down_pos, colorbar_top_pos;
 SVEXTERN float scale_2d_x, scale_2d_y;
 SVEXTERN int SVDECL(colorbar_delta,35);
@@ -151,9 +149,7 @@ SVEXTERN char startup_lang_code[3];
 #endif
 SVEXTERN int SVDECL(mouse_down,0);
 SVEXTERN int SVDECL(show_volsmoke_moving,0);
-#ifdef pp_FREEZE_VOLSMOKE
 SVEXTERN int SVDECL(freeze_volsmoke,0);
-#endif
 SVEXTERN int SVDECL(showtrisurface,1),SVDECL(showtrioutline,1),SVDECL(showtripoints,0);
 SVEXTERN int SVDECL(showtrinormal,0),SVDECL(showpointnormal,0),SVDECL(smoothtrinormal,1);
 SVEXTERN geomlistdata SVDECL(*geomlistinfo,NULL);
@@ -585,7 +581,6 @@ SVEXTERN int SVDECL(showstereo_dialog_save,0), SVDECL(showtour_dialog_save,0), S
 SVEXTERN int SVDECL(showwui_dialog_save,0), SVDECL(showdevice_dialog_save,0),SVDECL(show3dsmoke_dialog_save,0);
 SVEXTERN int SVDECL(showalert_dialog_save,0),SVDECL(showtrainer_dialog_save,0);
 
-#ifdef pp_SHOOTER
 SVEXTERN int SVDECL(showshooter_dialog,0);
 SVEXTERN int SVDECL(showshooter_dialog_save,0);
 SVEXTERN float shooter_xyz[3], shooter_dxyz[3], shooter_uvw[3], SVDECL(shooterpointsize,4.0);
@@ -599,7 +594,7 @@ SVEXTERN shootpointdata SVDECL(*shootpointinfo,NULL);
 SVEXTERN shoottimedata SVDECL(*shoottimeinfo,NULL);
 SVEXTERN int SVDECL(*shooter_timeslist,NULL);
 SVEXTERN int SVDECL(shooter_itime,0);
-#endif
+
 SVEXTERN int showgluitrainer;
 SVEXTERN int colorbartype,colorbartype_ini,colorbartype_default;
 SVEXTERN char colorbarname[1024];

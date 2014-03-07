@@ -257,10 +257,7 @@ void Update_Framenumber(int changetime){
 void Update_Show(void){
   int i,evacflag,sliceflag,vsliceflag,partflag,patchflag,isoflag,smoke3dflag,tisoflag;
   int slicecolorbarflag;
-
-#ifdef pp_SHOOTER
   int shooter_flag;
-#endif
 
   showtime=0; 
   showtime2=0; 
@@ -274,9 +271,7 @@ void Update_Show(void){
   showvolrender=0;
   have_extreme_mindata=0;
   have_extreme_maxdata=0;
-#ifdef pp_SHOOTER
   showshooter=0;
-#endif
   showevac=0;
   showevac_colorbar=0;
   showtarget=0;
@@ -544,18 +539,14 @@ void Update_Show(void){
       break;
     }
   }
-#ifdef pp_SHOOTER
   shooter_flag=0;
   if(visShooter!=0&&shooter_active==1){
     shooter_flag=1;
   }
-#endif
 
   if( plotstate==DYNAMIC_PLOTS && 
     ( sliceflag==1 || vsliceflag==1 || partflag==1 || patchflag==1 ||
-#ifdef pp_SHOOTER
     shooter_flag==1||
-#endif
     smoke3dflag==1|| showtours==1 || evacflag==1||
     (ReadZoneFile==1&&visZone==1&&visTimeZone==1)||
     (ReadTargFile==1&&visTarg==1)
@@ -600,15 +591,11 @@ void Update_Show(void){
       showiso=1;
     }
     if(ReadTargFile==1&&visTarg==1)showtarget=1;
-#ifdef pp_SHOOTER
     if(shooter_flag==1)showshooter=1;
-#endif    
   }
   if(showsmoke==1||showevac==1||showpatch==1||showslice==1||showvslice==1||showzone==1||showiso==1||showevac==1)RenderTime=1;
   if(showtours==1||show3dsmoke==1||touring==1||showvolrender==1)RenderTime=1;
-#ifdef pp_SHOOTER
   if(showshooter==1)RenderTime=1;
-#endif
   if(plotstate==STATIC_PLOTS&&ReadPlot3dFile==1&&plotn>0&&plotn<=numplot3dvars)showplot3d=1;
   if(showplot3d==1){
     for(i=0;i<nmeshes;i++){
@@ -754,7 +741,6 @@ void Synch_Times(void){
     }
 
   /* synchronize shooter times */
-#ifdef pp_SHOOTER
     if(visShooter!=0&&shooter_active==1){
       if(n==0){
         istart=0;
@@ -771,7 +757,6 @@ void Synch_Times(void){
       }
       shooter_timeslist[n]=i;
     }
-#endif
 
   /* synchronize slice times */
 
@@ -883,11 +868,9 @@ void Update_Times(void){
       if(terri->loaded==1)nglobal_times+=terri->ntimes;
     }
   }
-#ifdef pp_SHOOTER
   if(visShooter!=0&&shooter_active==1){
     nglobal_times+=nshooter_frames;
   }
-#endif
   for(i=0;i<ntours;i++){
     tourdata *touri;
 
@@ -1017,7 +1000,6 @@ void Update_Times(void){
       }
     }
   }
-#ifdef pp_SHOOTER
   if(visShooter!=0&&shooter_active==1){
     for(i=0;i<nshooter_frames;i++){
       float t_diff;
@@ -1031,7 +1013,6 @@ void Update_Times(void){
     }
     CheckMemory;
   }
-#endif
 
   for(i=0;i<ntours;i++){
     tourdata *touri;
@@ -1320,12 +1301,10 @@ void Update_Times(void){
       }
     }
   }
-#ifdef pp_SHOOTER
   FREEMEMORY(shooter_timeslist);
   if(visShooter!=0&&shooter_active==1){
     NewMemory((void **)&shooter_timeslist,nshooter_frames*sizeof(int));
   }
-#endif
 
   for(i=0;i<nsliceinfo;i++){
     slicedata *sd;
@@ -1678,11 +1657,9 @@ int getplotstate(int choice){
           return DYNAMIC_PLOTS;
         }
       }
-#ifdef pp_SHOOTER
       if(visShooter!=0&&shooter_active==1){
         return DYNAMIC_PLOTS;
       }
-#endif
       if(choice!=DYNAMIC_PLOTS_NORECURSE)return getplotstate(STATIC_PLOTS_NORECURSE);
       break;
     default:
@@ -1843,10 +1820,8 @@ void Update_Glui_Names(void){
   hide_glui_motion();
   update_glui_motion=1;
 
-#ifdef pp_SHOOTER
   hide_glui_shooter();
   update_glui_shooter=1;
-#endif
   
   hide_glui_tour();
   update_glui_tour=1;
@@ -1877,9 +1852,7 @@ void Update_Glui_Dialogs(void){
   if(update_glui_device==1)glui_device_setup(mainwindow_id);
   if(update_glui_labels==1)glui_labels_setup(mainwindow_id);
   if(update_glui_motion==1)glui_motion_setup(mainwindow_id);
-#ifdef pp_SHOOTER
   if(update_glui_shooter==1)glui_shooter_setup(mainwindow_id);
-#endif
   if(update_glui_tour==1){
     glui_tour_setup(mainwindow_id);
   }

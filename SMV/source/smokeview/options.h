@@ -45,12 +45,7 @@
 #define EGZ
 #define USE_ZLIB
 #define pp_THREAD
-#define pp_SLICECONTOURS
 #define pp_LANG
-#define pp_SHOOTER
-#define pp_FREEZE_VOLSMOKE
-#define pp_LIGHT
-#define pp_SUPERMESH
 #define pp_DEG
 
 #define _CRT_SECURE_NO_DEPRECATE

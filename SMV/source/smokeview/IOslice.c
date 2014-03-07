@@ -3031,11 +3031,9 @@ void setslicelabels(float smin, float smax,
 
 void setslicebounds(int slicetype){
   if(slicetype>=0&&slicetype<nslice2){
-#ifdef pp_SLICECONTOURS
     slice_line_contour_min=slicebounds[slicetype].line_contour_min;
     slice_line_contour_max=slicebounds[slicetype].line_contour_max;
     slice_line_contour_num=slicebounds[slicetype].line_contour_num;
-#endif
     slicemin=slicebounds[slicetype].valmin;
     slicemax=slicebounds[slicetype].valmax;
     setslicemin=slicebounds[slicetype].setvalmin;
@@ -3249,13 +3247,11 @@ void drawslice_frame(){
 #endif
 
       if(sd->qslicedata!=NULL)sd->qsliceframe = sd->qslicedata + sd->itime*sd->nsliceii;
-#ifdef pp_SLICECONTOURS
       if(vis_slice_contours==1&&sd->line_contours!=NULL){
         DrawLineContours(sd->line_contours+sd->itime, 3.0);
         SNIFF_ERRORS("after DrawLineContours");
         continue;
       }
-#endif
       switch (sd->slicetype){
         case SLICE_NODE:
           if(usetexturebar!=0){

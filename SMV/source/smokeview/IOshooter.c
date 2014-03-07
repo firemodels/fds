@@ -8,7 +8,6 @@ char IOshooter_revision[]="$Revision$";
 #include "options.h"
 #include <stdio.h>
 #include <stdlib.h>
-#ifdef pp_SHOOTER
 #include <string.h>
 #ifdef pp_OSX
 #include <GLUT/glut.h>
@@ -231,6 +230,3 @@ void draw_shooter(void){
   glEnd();
   glPopMatrix();
 }
-
-
-#endif

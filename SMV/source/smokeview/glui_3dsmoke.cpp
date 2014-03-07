@@ -103,9 +103,7 @@ GLUI_Spinner *SPINNER_extinct=NULL;
 GLUI_Spinner *SPINNER_smokedens=NULL;
 GLUI_Spinner *SPINNER_pathlength=NULL;
 
-#ifdef pp_SUPERMESH
 GLUI_Checkbox *CHECKBOX_combine_meshes=NULL;
-#endif
 #ifdef pp_CULL
 GLUI_Checkbox *CHECKBOX_show_cullports=NULL;
 #endif
@@ -138,13 +136,11 @@ GLUI_Panel *PANEL_testsmoke=NULL;
 GLUI_StaticText *TEXT_smokealpha=NULL;
 GLUI_StaticText *TEXT_smokedepth=NULL;
 
-#ifdef pp_SUPERMESH
 /* ------------------ update_combine_meshes ------------------------ */
 
 extern "C" void update_combine_meshes(void){
   if(CHECKBOX_combine_meshes!=NULL)CHECKBOX_combine_meshes->set_int_val(combine_meshes);
 }
-#endif
 
 /* ------------------ update_gpu ------------------------ */
 
@@ -391,17 +387,13 @@ extern "C" void glui_3dsmoke_setup(int main_window){
     SPINNER_fire_opacity_factor->set_float_limits(1.0,10.0);
     SPINNER_mass_extinct=glui_3dsmoke->add_spinner_to_panel(PANEL_volume,_("Mass extinction coeff"),GLUI_SPINNER_FLOAT,&mass_extinct);
     SPINNER_mass_extinct->set_float_limits(100.0,100000.0);
-#ifdef pp_FREEZE_VOLSMOKE
     glui_3dsmoke->add_checkbox_to_panel(PANEL_volume,_("Freeze"),&freeze_volsmoke);
-#endif
 #ifdef _DEBUG
     CHECKBOX_usevolrender=glui_3dsmoke->add_checkbox_to_panel(PANEL_volume,_("Show"),&usevolrender,VOL_SMOKE,Smoke3d_CB);
     glui_3dsmoke->add_checkbox_to_panel(PANEL_volume,"block smoke",&block_volsmoke);
     glui_3dsmoke->add_checkbox_to_panel(PANEL_volume,"debug",&smoke3dVoldebug);
 #endif
-#ifdef pp_SUPERMESH
     CHECKBOX_combine_meshes=glui_3dsmoke->add_checkbox_to_panel(PANEL_volume,_("Combine meshes"),&combine_meshes,COMBINE_MESHES,Smoke3d_CB);
-#endif
     SPINNER_nongpu_vol_factor=glui_3dsmoke->add_spinner_to_panel(PANEL_volume,_("non-gpu grid multiplier"),GLUI_SPINNER_FLOAT,&nongpu_vol_factor,NONGPU_VOL_FACTOR,Smoke3d_CB);
     SPINNER_nongpu_vol_factor->set_float_limits(1.0,10.0);
     SPINNER_gpu_vol_factor=glui_3dsmoke->add_spinner_to_panel(PANEL_volume,_("gpu grid multiplier"),GLUI_SPINNER_FLOAT,&gpu_vol_factor,GPU_VOL_FACTOR,Smoke3d_CB);
@@ -515,11 +507,9 @@ extern "C" void Smoke3d_CB(int var){
     break;
   case GPU_VOL_FACTOR:
     break;
-#ifdef pp_SUPERMESH
   case COMBINE_MESHES:
     define_volsmoke_textures();
     break;
-#endif
   case SHOW_FIRECOLORMAP:
     Update_Smokecolormap(smoke_render_option);
     if(show_firecolormap==1){
@@ -709,7 +699,6 @@ extern "C" void Smoke3d_CB(int var){
     glutPostRedisplay();
     break;
   case VOL_SMOKE:
-#ifdef pp_SUPERMESH
     {
       volrenderdata *vr;
 
@@ -727,7 +716,6 @@ extern "C" void Smoke3d_CB(int var){
         }
       }
     }
-#endif
     if(smoke_render_option==RENDER_SLICE){
 #ifdef pp_GPU
       if(usegpu==1){

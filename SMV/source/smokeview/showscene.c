@@ -333,13 +333,11 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
     draw_geom(DRAW_OPAQUE,1);
   }
 
-#ifdef pp_SHOOTER
 /* ++++++++++++++++++++++++ draw shooter points +++++++++++++++++++++++++ */
 
   if(showshooter!=0&&shooter_active==1){
     draw_shooter();
   }
-#endif
 
 /* ++++++++++++++++++++++++ draw terrain +++++++++++++++++++++++++ */
 

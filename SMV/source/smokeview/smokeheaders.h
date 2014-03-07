@@ -16,9 +16,7 @@ EXTERNCPP void glui_device_setup(int main_window);
 EXTERNCPP void glui_edit_setup(int main_window);
 EXTERNCPP void glui_labels_setup(int main_window);
 EXTERNCPP void glui_motion_setup(int main_window);
-#ifdef pp_SHOOTER
 EXTERNCPP void glui_shooter_setup(int main_window);
-#endif
 EXTERNCPP void glui_stereo_setup(int main_window);
 EXTERNCPP void glui_tour_setup(int main_window);
 EXTERNCPP void glui_trainer_setup(int main_window);
@@ -122,9 +120,7 @@ EXTERNCPP void drawfilledrectangle(float width, float height, unsigned char *rgb
 EXTERNCPP void drawrectangle(float width, float height, unsigned char *rgbcolor);
 EXTERNCPP void DrawCircVents(int option);
 EXTERNCPP void Update_Smokecolormap(int option);
-#ifdef pp_SUPERMESH
 EXTERNCPP void define_volsmoke_textures(void);
-#endif
 EXTERNCPP void set_colorbar_list_index(int val);
 EXTERNCPP int get_colorbar_list_index(void);
 EXTERNCPP int get_colorbar_index(int flag, int x, int y);
@@ -386,12 +382,10 @@ EXTERNCPP sv_object *get_object(char *label);
 EXTERNCPP void get_labels(char *buffer, int type, char **label1, char **label2, char prop_buffer[255]);
 EXTERNCPP void snap_scene(void);
 EXTERNCPP void level_scene(int level_x, int level_y, float *quat);
-#ifdef pp_SHOOTER
 EXTERNCPP void get_plot3d_uvw(float xyz[3], float uvw[3]);
 EXTERNCPP void solve_shooter_data(void);
 EXTERNCPP void increment_shooter_data(shootpointdata *pold, shootpointdata *pnew, float dt);
 EXTERNCPP void draw_shooter(void);
-#endif
 EXTERNCPP int get_trainee_location(void);
 EXTERNCPP void set_trainer_controls(void);
 EXTERNCPP void load_startup_smoke(void);

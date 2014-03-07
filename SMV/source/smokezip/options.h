@@ -57,7 +57,6 @@
 #define pp_OSX
 #endif
 
-//#define pp_LIGHT
 //#define pp_KDTEST
 #define EGZ
 #define USE_ZLIB

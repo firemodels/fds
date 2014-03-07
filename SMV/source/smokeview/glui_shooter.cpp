@@ -10,7 +10,6 @@ extern "C" char glui_shooter_revision[];
 char glui_shooter_revision[]="$Revision$";
 
 #include <stdio.h>
-#ifdef pp_SHOOTER
 #include <string.h>
 #ifdef pp_OSX
 #include <GLUT/glut.h>
@@ -364,5 +363,3 @@ void SHOOTER_CB(int var){
       break;
   }
 }
-
-#endif

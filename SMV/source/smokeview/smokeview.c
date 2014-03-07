@@ -753,9 +753,6 @@ void usage(char **argv){
 #ifdef ISO_DEBUG
     strcat(label,", ISO_DEBUG");
 #endif
-#ifdef pp_LIGHT
-    strcat(label,", pp_LIGHT");
-#endif
 #ifdef pp_LINUX64
     strcat(label,", pp_LINUX64");
 #endif
@@ -777,14 +774,8 @@ void usage(char **argv){
 #ifdef pp_release
     strcat(label," pp_release");
 #endif
-#ifdef pp_SHOOTER
-    strcat(label,", pp_SHOOTER");
-#endif
 #ifdef pp_SHOWLIGHT
     strcat(label,", pp_SHOWLIGHT");
-#endif
-#ifdef pp_SLICECONTOURS
-    strcat(label,", pp_SLICECONTOURS");
 #endif
 #ifdef pp_SMOKETEST
     strcat(label,", pp_SMOKETEST");

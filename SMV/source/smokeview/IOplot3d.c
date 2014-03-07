@@ -234,11 +234,9 @@ void readplot3d(char *file, int ifile, int flag, int *errorcode){
   p->loaded=1;
   p->display=1;
   speedmax = -1.;
-#ifdef pp_SHOOTER
   meshi->udata=NULL;
   meshi->vdata=NULL;
   meshi->wdata=NULL;
-#endif
   if(p->compression_type==0){
     if(uindex!=-1||vindex!=-1||windex!=-1){
       vectorspresent=1;
@@ -256,11 +254,9 @@ void readplot3d(char *file, int ifile, int flag, int *errorcode){
         sdata++; 
       }
     }
-#ifdef pp_SHOOTER
     if(uindex!=-1)meshi->udata=meshi->qdata + ntotal*uindex;
     if(vindex!=-1)meshi->vdata=meshi->qdata + ntotal*vindex;
     if(windex!=-1)meshi->wdata=meshi->qdata + ntotal*windex;
-#endif
   }
 
   if(NewMemory((void **)&colorlabelp3,mxplot3dvars*sizeof(char **))==0||
@@ -1986,7 +1982,6 @@ void init_plot3dtimelist(void){
     }
   }
 }
-#ifdef pp_SHOOTER
 
 /* ------------------ get_plot3d_uvw  ------------------------ */
 
@@ -2056,7 +2051,6 @@ void get_plot3d_uvw(float xyz[3], float uvw[3]){
     }
   }
 }
-#endif
 
   /* ------------------ getplot3dtime ------------------------ */
 

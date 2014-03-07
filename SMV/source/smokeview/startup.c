@@ -261,9 +261,7 @@ int setup_case(int argc, char **argv){
   glui_colorbar_setup(mainwindow_id);
   glui_motion_setup(mainwindow_id);
   glui_bounds_setup(mainwindow_id);
-#ifdef pp_SHOOTER
   glui_shooter_setup(mainwindow_id);
-#endif
   glui_edit_setup(mainwindow_id);
   glui_clip_setup(mainwindow_id);
   glui_wui_setup(mainwindow_id);
@@ -1253,18 +1251,11 @@ void initvars(void){
   use_iblank=1;
   show_slice_terrain=0;
 
-#ifdef pp_SHOOTER
   shooter_uvw[0]=0.0;
   shooter_uvw[1]=0.0;
   shooter_uvw[2]=0.0;
-#endif
-#ifdef pp_SLICECONTOURS
   vis_slice_contours=0;
   update_slicecontours=0;
-#else
-  vis_slice_contours=0;
-  update_slicecontours=0;
-#endif
   
   partfacedir[0]=0.0;
   partfacedir[1]=0.0;
@@ -2145,9 +2136,7 @@ int getmaxrevision(void){
   MAXREV(glui_device_revision);
   MAXREV(glui_labels_revision);
   MAXREV(glui_motion_revision);
-#ifdef pp_SHOOTER
   MAXREV(glui_shooter_revision);
-#endif
   MAXREV(glui_stereo_revision);
   MAXREV(glui_tour_revision);
   MAXREV(glui_trainer_revision);
@@ -2163,9 +2152,7 @@ int getmaxrevision(void){
   MAXREV(IOpart_revision);
   MAXREV(IOplot3d_revision);
   MAXREV(IOscript_revision);
-#ifdef pp_SHOOTER
   MAXREV(IOshooter_revision);
-#endif
   MAXREV(IOslice_revision);
   MAXREV(IOsmoke_revision);
   MAXREV(IOtarget_revision);

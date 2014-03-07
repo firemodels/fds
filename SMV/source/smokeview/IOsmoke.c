@@ -50,7 +50,6 @@ int cullplane_compare( const void *arg1, const void *arg2 );
             }
 
 // -------------------------- DRAWVERTEX ----------------------------------
-#ifdef pp_LIGHT
 #define DRAWVERTEX(XX,YY,ZZ)        \
 if(show_smoketest==0){\
   if(show_smoke_lighting==1&&have_light==1){\
@@ -109,55 +108,6 @@ else{\
     glVertex3f(XX,YY,ZZ);                                \
   }\
 }
-#else
-#define DRAWVERTEX(XX,YY,ZZ)        \
-if(show_smoketest==0){\
-  value[0]=alphaf_ptr[n11]; \
-  value[1]=alphaf_ptr[n12]; \
-  value[2]=alphaf_ptr[n22]; \
-  value[3]=alphaf_ptr[n21]; \
-  if(value[0]==0&&value[1]==0&&value[2]==0&&value[3]==0)continue;\
-  ivalue[0]=n11<<2;  \
-  ivalue[1]=n12<<2;  \
-  ivalue[2]=n22<<2;  \
-  ivalue[3]=n21<<2;  \
-  if(ABS(value[0]-value[2])<ABS(value[1]-value[3])){     \
-    xyzindex=xyzindex1;                                  \
-  }                                                      \
-  else{                                                  \
-    xyzindex=xyzindex2;                                  \
-  }                                                      \
-  for(node=0;node<6;node++){                             \
-    unsigned char alphabyte;\
-    float alphaval;\
-    int mm;\
-    mm = xyzindex[node];                                 \
-    alphabyte = value[mm];                               \
-    if(skip==2){\
-      alphaval=alphabyte/255.0; \
-      alphaval=alphaval*(2.0-alphaval);                  \
-      alphabyte=alphaval*255.0;\
-    }\
-    else if(skip==3){\
-      alphaval=alphabyte/255.0;                              \
-      alphaval = alphaval*(3.0-alphaval*(3.0-alphaval));\
-      alphabyte = 255*alphaval; \
-    }\
-    colorptr=mergecolorptr+ivalue[mm];\
-    colorptr[3]=alphabyte;                                   \
-    glColor4ubv(colorptr);                                \
-    glVertex3f(XX,YY,ZZ);                                \
-  }\
-}\
-else{\
-  for(node=0;node<6;node++){                             \
-    int mm;\
-    mm = xyzindex1[node];                                 \
-    glColor4ub(0,0,0,(unsigned char)smoke_alpha);\
-    glVertex3f(XX,YY,ZZ);                                \
-  }\
-}
-#endif
 
 // -------------------------- DRAWVERTEXTERRAIN ----------------------------------
 
@@ -934,9 +884,7 @@ int getsmoke3d_sizes(int fortran_skip,char *smokefile, int version, float **time
     else{
       nch_light=0;
       sscanf(buffer,"%f %i %i %i %i",&time_local,&nch_uncompressed,&dummy,&nch_smoke_compressed,&nch_light);
-#ifdef pp_LIGHT      
       if(nch_light<0)*have_light=1;
-#endif      
     }
     *nch_smoke_compressed_full++=nch_smoke_compressed;
     *use_smokeframe_full=0;
@@ -5154,7 +5102,6 @@ void makeiblank_smoke3d(void){
    smoke3di->file=file;
   
    SKIP;EGZ_FREAD(nxyz,4,8,SMOKE3DFILE);SKIP;
-#ifdef pp_LIGHT
    {
      float time_local;
      int nchars[2];
@@ -5169,7 +5116,6 @@ void makeiblank_smoke3d(void){
        }
      }
    }
-#endif
 
    EGZ_FCLOSE(SMOKE3DFILE);
 

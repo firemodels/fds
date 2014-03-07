@@ -2563,11 +2563,9 @@ void UpdateFrame(float thisinterval, int *changetime, int *redisplay){
           itimes=itime_save;
         }
       }
-#ifdef pp_SHOOTER
       if(shooter_firstframe==1&&visShooter!=0&&shooter_active==1){
         reset_itimes0();
       }
-#endif
       checktimebound();
       UpdateTimeLabels();
     }

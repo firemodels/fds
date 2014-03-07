@@ -962,13 +962,11 @@ void ViewpointMenu(int value){
 void DialogMenu(int value){
   glutPostRedisplay();
   switch (value){
-#ifdef pp_SHOOTER
   case 27:
     showshooter_dialog=1-showshooter_dialog;
     if(showshooter_dialog==1)show_glui_shooter();
     if(showshooter_dialog==0)hide_glui_shooter();
     break;
-#endif
   case 25:
     showtrainer_dialog=1-showtrainer_dialog;
     if(showtrainer_dialog==1)show_glui_trainer();
@@ -6245,12 +6243,10 @@ updatemenu=0;
           glutAddMenuEntry(menulabel,i);
         }
         glutAddSubMenu(_("Smoke color map"),smokecolorbarmenu);
-#ifdef pp_LIGHT
         if(have_lighting==1){
           if(show_smoke_lighting==1)glutAddMenuEntry(_("*Light smoke"),HAVE_LIGHT);
           if(show_smoke_lighting==0)glutAddMenuEntry(_("Light smoke"),HAVE_LIGHT);
         }
-#endif
         if(nsmoke3dinfo>1){
           glutAddMenuEntry("-",-999);
           glutAddMenuEntry(_("Show all"),SHOW_ALL);
@@ -7197,10 +7193,8 @@ updatemenu=0;
     if(showedit_dialog==1)glutAddMenuEntry(_("*Examine blockages...  ALT+e"),16);
     if(showedit_dialog==0)glutAddMenuEntry(_("Examine blockages...  ALT+e"),16);
   }
-#ifdef pp_SHOOTER
   if(showshooter_dialog==1)glutAddMenuEntry(_("*Particle tracking..."),27);
   if(showshooter_dialog==0)glutAddMenuEntry(_("Particle tracking..."),27);
-#endif
   if(showstereo_dialog==1)glutAddMenuEntry(_("*Stereo parameters..."),19);
   if(showstereo_dialog==0)glutAddMenuEntry(_("Stereo parameters..."),19);
   if(showtour_dialog==1)glutAddMenuEntry(_("*Tours...  ALT+t"),21);

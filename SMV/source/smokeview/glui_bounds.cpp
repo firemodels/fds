@@ -140,10 +140,8 @@ GLUI_Rollout *ROLLOUT_part_chop=NULL;
 #define RELOAD_BOUNDS 0
 #define UPDATERELOAD_BOUNDS 2
 
-#ifdef pp_SLICECONTOURS
 #define LINE_CONTOUR_VALUE 301
 #define UPDATE_LINE_CONTOUR_VALUE 302
-#endif
 
 GLUI *glui_bounds=NULL;
 
@@ -155,9 +153,7 @@ GLUI_Button *BUTTON_script_stop=NULL;
 GLUI_Button *BUTTON_script_start=NULL;
 GLUI_Button *BUTTON_script_saveini=NULL;
 GLUI_Button *BUTTON_script_render=NULL;
-#ifdef pp_SLICECONTOURS
 GLUI_Button *BUTTON_update_line_contour=NULL;
-#endif
 GLUI_Button *BUTTON_ini_load=NULL;
 GLUI_Button *BUTTON_script_setsuffix=NULL;
 GLUI_Button *BUTTON_script_runscript=NULL;
@@ -182,9 +178,7 @@ GLUI_Panel *PANEL_pan3=NULL;
 GLUI_Panel *PANEL_isosurface=NULL;
 GLUI_Panel *PANEL_vector=NULL;
 GLUI_Panel *PANEL_slice_vector=NULL;
-#ifdef pp_SLICECONTOURS
 GLUI_Panel *PANEL_line_contour=NULL;
-#endif
 GLUI_Panel *PANEL_run=NULL;
 GLUI_Panel *PANEL_record=NULL;
 GLUI_Panel *PANEL_script1=NULL;
@@ -204,11 +198,9 @@ GLUI_Panel *PANEL_time2c=NULL;
 
 GLUI_Spinner *SPINNER_labels_transparency_data2=NULL;
 GLUI_Spinner *SPINNER_transparent_level=NULL;
-#ifdef pp_SLICECONTOURS
 GLUI_Spinner *SPINNER_line_contour_num=NULL;
 GLUI_Spinner *SPINNER_line_contour_min=NULL;
 GLUI_Spinner *SPINNER_line_contour_max=NULL;
-#endif
 GLUI_Spinner *SPINNER_timebounds=NULL;
 GLUI_Spinner *SPINNER_tload_begin=NULL;
 GLUI_Spinner *SPINNER_tload_end=NULL;
@@ -798,8 +790,6 @@ extern "C" void glui_bounds_setup(int main_window){
     SPINNER_vectorlinelength=glui_bounds->add_spinner_to_panel(PANEL_slice_vector,_("Line length"),GLUI_SPINNER_FLOAT,&vecfactor,UPDATE_VECTOR,Slice_CB);
     SPINNER_vectorlinelength->set_float_limits(0.0,20.0);
 
-#ifdef pp_SLICECONTOURS
-
     PANEL_line_contour = glui_bounds->add_panel_to_panel(ROLLOUT_slice,_("Line Contours"));
     slice_line_contour_min=0.0;
     slice_line_contour_max=1.0;
@@ -812,7 +802,6 @@ extern "C" void glui_bounds_setup(int main_window){
       &slice_line_contour_num,LINE_CONTOUR_VALUE,Slice_CB);
     BUTTON_update_line_contour=glui_bounds->add_button_to_panel(PANEL_line_contour,_("Update contours"),UPDATE_LINE_CONTOUR_VALUE,Slice_CB);
     glui_bounds->add_checkbox_to_panel(PANEL_line_contour,_("Show contours"),&vis_slice_contours);
-#endif
 
     if(n_embedded_meshes>0){
       CHECKBOX_skip_subslice=glui_bounds->add_checkbox_to_panel(ROLLOUT_slice,_("Skip coarse sub-slice"),&skip_slice_in_embedded_mesh);
@@ -2286,7 +2275,6 @@ extern "C" void Slice_CB(int var){
       SPINNER_transparent_level->set_float_val(transparent_level);
       if(SPINNER_labels_transparency_data2!=NULL)SPINNER_labels_transparency_data2->set_float_val(transparent_level);
       break;
-#ifdef pp_SLICECONTOURS
     case LINE_CONTOUR_VALUE:
       if(slice_line_contour_num<1){
         slice_line_contour_num=1;
@@ -2303,7 +2291,6 @@ extern "C" void Slice_CB(int var){
     case UPDATE_LINE_CONTOUR_VALUE:
       update_slice_contours(list_slice_index,slice_line_contour_min, slice_line_contour_max,slice_line_contour_num);
       break;
-#endif
   case UPDATE_VECTOR_FROM_SMV:
     if(SPINNER_plot3d_vectorpointsize!=NULL&&SPINNER_plot3d_vectorlinewidth!=NULL&&SPINNER_plot3d_vectorlinelength!=NULL){
       SPINNER_plot3d_vectorpointsize->set_float_val(vectorpointsize);
@@ -2479,11 +2466,9 @@ extern "C" void Slice_CB(int var){
     else{
       EDIT_slice_chopmax->disable();
     }
-#ifdef pp_SLICECONTOURS
     SPINNER_line_contour_min->set_float_val(slice_line_contour_min);
     SPINNER_line_contour_max->set_float_val(slice_line_contour_max);
     SPINNER_line_contour_num->set_int_val(slice_line_contour_num);
-#endif
     break;
   case FILEUPDATE:
     for(ii=0;ii<nslice_loaded;ii++){

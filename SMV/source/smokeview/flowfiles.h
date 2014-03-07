@@ -106,8 +106,6 @@ typedef struct {
   int tag_number;
 } propdata;
 
-#ifdef pp_SHOOTER
-
 /* --------------------------  point ------------------------------------ */
 
 typedef struct _shootpointdata {
@@ -123,8 +121,6 @@ typedef struct {
   int frame;
   shootpointdata *beg, *end;
 } shoottimedata;
-
-#endif
 
 /* --------------------------  infiledata ------------------------------------ */
 
@@ -1173,11 +1169,9 @@ typedef struct {
   char *datalabel;
   int setvalmin, setvalmax;
   int setchopmin, setchopmax;
-#ifdef pp_SLICECONTOURS
   float line_contour_min;
   float line_contour_max;
   int line_contour_num;
-#endif
   float valmin, valmax;
   float chopmin, chopmax;
   float valmin_data,valmax_data;

@@ -26,9 +26,7 @@ extern char glui_colorbar_revision[];
 extern char glui_device_revision[];
 extern char glui_labels_revision[];
 extern char glui_motion_revision[];
-#ifdef pp_SHOOTER
 extern char glui_shooter_revision[];
-#endif
 extern char glui_stereo_revision[];
 extern char glui_tour_revision[];
 extern char glui_trainer_revision[];
@@ -43,9 +41,7 @@ extern char IOobject_revision[];
 extern char IOpart_revision[];
 extern char IOplot3d_revision[];
 extern char IOscript_revision[];
-#ifdef pp_SHOOTER
 extern char IOshooter_revision[];
-#endif
 extern char IOslice_revision[];
 extern char IOsmoke_revision[];
 extern char IOtarget_revision[];

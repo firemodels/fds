@@ -1451,11 +1451,9 @@ void update_bound_info(void){
       slicebounds[nslice2].chopmin=1.0;
       slicebounds[nslice2].setchopmax=0;
       slicebounds[nslice2].setchopmin=0;
-#ifdef pp_SLICECONTOURS
       slicebounds[nslice2].line_contour_min=0.0;
       slicebounds[nslice2].line_contour_max=1.0;
       slicebounds[nslice2].line_contour_num=1;
-#endif
       nslice2++;
       for(n=0;n<i;n++){
         slicedata *slicen;
@@ -7295,7 +7293,6 @@ typedef struct {
     }
   }
 
-#ifdef pp_SHOOTER
   shooter_xyz[0]=xbar/2.0;
   shooter_xyz[1] = 0.0;
   shooter_xyz[2] = zbar/2.0;
@@ -7307,8 +7304,6 @@ typedef struct {
   shooter_veldir=0.0;
   shooter_fps=10;
   shooter_vel_type=1;
-#endif
-
 
   update_plotxyz_all();
 
@@ -9189,15 +9184,11 @@ int readini2(char *inifile, int localfile){
     if(match(buffer,"V_SLICE")==1){
       float valmin, valmax;
       int setvalmin, setvalmax;
-
-#ifdef pp_SLICECONTOURS
       char *level_val;
-#endif
 
       fgets(buffer,255,stream);
       strcpy(buffer2,"");
       sscanf(buffer,"%i %f %i %f %s",&setvalmin,&valmin,&setvalmax,&valmax,buffer2);
-#ifdef pp_SLICECONTOURS
       {
         char *colen;
 
@@ -9215,7 +9206,6 @@ int readini2(char *inifile, int localfile){
           }
         }
       }
-#endif
       if(strcmp(buffer2,"")!=0){
         char *buffer2ptr;
 
@@ -9228,13 +9218,11 @@ int readini2(char *inifile, int localfile){
           slicebounds[i].setvalmax=setvalmax;
           slicebounds[i].valmin=valmin;
           slicebounds[i].valmax=valmax;
-#ifdef pp_SLICECONTOURS
           if(level_val!=NULL){
             slicebounds[i].line_contour_min=slice_line_contour_min;  
             slicebounds[i].line_contour_max=slice_line_contour_max;  
             slicebounds[i].line_contour_num=slice_line_contour_num;  
           }
-#endif
           break;
         }
       }
@@ -9244,11 +9232,9 @@ int readini2(char *inifile, int localfile){
           slicebounds[i].setvalmax=setvalmax;
           slicebounds[i].valmin=valmin;
           slicebounds[i].valmax=valmax;
-#ifdef pp_SLICECONTOURS
           slicebounds[i].line_contour_min=slice_line_contour_min;  
           slicebounds[i].line_contour_max=slice_line_contour_max;  
           slicebounds[i].line_contour_num=slice_line_contour_num;  
-#endif
         }
       }
       continue;
@@ -10480,7 +10466,6 @@ int readini2(char *inifile, int localfile){
       ReallocTourMemory();
       continue;
     }
-#ifdef pp_SHOOTER
     if(localfile==1&&match(buffer,"SHOOTER") == 1){
       if(fgets(buffer,255,stream)==NULL)break;
       sscanf(buffer,"%f %f %f",shooter_xyz,shooter_xyz+1,shooter_xyz+2);
@@ -10501,7 +10486,6 @@ int readini2(char *inifile, int localfile){
       sscanf(buffer,"%f %f",&shooter_duration,&shooter_v_inf);
       continue;
     }
-#endif
     {
       int nkeyframes;
       float key_time, key_xyz[3], key_az_path, key_view[3], params[3], zzoom, key_elev_path;
@@ -11252,17 +11236,11 @@ void writeini(int flag,char *filename){
   if(nslice2>0){
     for(i=0;i<nslice2;i++){
       fprintf(fileout,"V_SLICE\n");
-#ifdef pp_SLICECONTOURS
       fprintf(fileout," %i %f %i %f %s : %f %f %i\n",
-#else
-      fprintf(fileout," %i %f %i %f %s\n",
-#endif
         slicebounds[i].setvalmin,slicebounds[i].valmin,
         slicebounds[i].setvalmax,slicebounds[i].valmax,
         slicebounds[i].label->shortlabel
-#ifdef pp_SLICECONTOURS
         ,slicebounds[i].line_contour_min,slicebounds[i].line_contour_max,slicebounds[i].line_contour_num
-#endif
         );
     }
     for(i=0;i<nslice2;i++){
@@ -11645,7 +11623,6 @@ void writeini(int flag,char *filename){
     fprintf(fileout," %f %f %f\n",user_tick_step[0],user_tick_step[1],user_tick_step[2]);
     fprintf(fileout," %i %i %i\n",user_tick_show_x,user_tick_show_y,user_tick_show_z);
   }
-#ifdef pp_SHOOTER
   if(flag==LOCAL_INI){
     fprintf(fileout,"SHOOTER\n");
     fprintf(fileout," %f %f %f\n",shooter_xyz[0],shooter_xyz[1],shooter_xyz[2]);
@@ -11655,7 +11632,6 @@ void writeini(int flag,char *filename){
     fprintf(fileout," %i %i %i %i %i\n",shooter_fps,shooter_vel_type,shooter_nparts,visShooter,shooter_cont_update);
     fprintf(fileout," %f %f\n",shooter_duration,shooter_v_inf);
   }
-#endif
   fprintf(fileout,"SHOWLABELS\n");
   fprintf(fileout," %i\n",visLabels);
   fprintf(fileout,"SHOWFRAMERATE\n");
