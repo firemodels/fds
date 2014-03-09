@@ -1226,7 +1226,8 @@ check_verification_stats()
    else
       echo "Warnings from Stage 7a - Matlab plotting and statistics (verification):" >> $WARNING_LOG
       echo "The following cases are outside of their specified error tolerance:" >> $WARNING_LOG
-      grep "Out of Tolerance" FDS_verification_scatterplot_output.csv >> $WARNING_LOG
+      echo "" >> $WARNING_LOG
+      grep "Out of Tolerance" FDS_verification_scatterplot_output.csv | sed G >> $WARNING_LOG
       echo "" >> $WARNING_LOG
    fi
 
