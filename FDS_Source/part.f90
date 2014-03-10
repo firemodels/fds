@@ -2253,7 +2253,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
          TMP_G_NEW = TMP_G
          ITMP     = INT(TMP_DROP_NEW)
          TMP_WGT  = TMP_DROP_NEW - AINT(TMP_DROP_NEW)
-         H_NEW = H_G_OLD - WGT*(Q_CON_GAS + M_VAP*(H_V+H_L))
+         H_NEW = H_G_OLD + WGT*(M_VAP*(H_V+H_L) - Q_CON_GAS)
          IF (H_NEW > 0._EB) THEN
             ZZ_GET2 = ZZ_GET * M_GAS/M_GAS_NEW               
             ZZ_GET2(Z_INDEX) = ZZ_GET2(Z_INDEX) + WGT*M_VAP/M_GAS_NEW
