@@ -491,6 +491,9 @@ if %nwarnings% GTR 0 (
   set havewarnings=1
 )
 
+copy %guide%.pdf %fromsummarydir%\manuals
+copy %guide%.pdf %tosummarydir%\manuals
+
 exit /b
 
 :eof

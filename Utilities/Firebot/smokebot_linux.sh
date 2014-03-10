@@ -50,6 +50,7 @@ cd
 FIREBOT_HOME_DIR="`pwd`"
 FIREBOT_DIR="$FIREBOT_HOME_DIR/SMOKEBOT"
 export FDS_SVNROOT="$FIREBOT_HOME_DIR/FDS-SMV"
+export SMV_Summary="$FDS_SVNROOT/Manuals/SMV_Summary"
 CFAST_SVNROOT="$FIREBOT_HOME_DIR/cfast"
 ERROR_LOG=$FIREBOT_DIR/output/errors
 TIME_LOG=$FIREBOT_DIR/output/timings
@@ -888,6 +889,9 @@ check_guide()
    then
       if [ -d $SMOKEBOT_MANDIR ] ; then
         cp $2 $SMOKEBOT_MANDIR/.
+      fi
+      if [ -d $SMV_Summary/manuals ] ; then
+        cp $2 $SMV_Summary/manuals/.
       fi
       if [ -d $FIREBOT_MANDIR ] ; then
         cp $2 $FIREBOT_MANDIR/.
