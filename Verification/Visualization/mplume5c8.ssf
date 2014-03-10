@@ -1,0 +1,7 @@
+// put rendered files in specified directory
+
+RENDERDIR
+ ..\..\Manuals\SMV_Verification_Guide\SCRIPT_FIGURES
+
+
+
