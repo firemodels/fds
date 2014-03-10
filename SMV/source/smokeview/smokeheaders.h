@@ -8,6 +8,7 @@
 
 // glui headers
 
+EXTERNCPP void update_glui_zonebounds(void);
 EXTERNCPP void glui_3dsmoke_setup(int main_window);
 EXTERNCPP void glui_bounds_setup(int main_window);
 EXTERNCPP void glui_clip_setup(int main_window);
@@ -818,7 +819,7 @@ EXTERNCPP void outputText(float x, float y, char *string);
 EXTERNCPP void output3Text(float *color, float x, float y, float z, char *string);
 EXTERNCPP void output3Val(float x, float y, float z, float val);
 EXTERNCPP void outputBarText(float x, float y, const GLfloat *color, char *string);
-EXTERNCPP void getzonebounds(const float *pdata, int ndata, int setpmin, float *pmin, int setpmax, float *pmax);
+EXTERNCPP void getzoneglobalbounds(const float *pdata, int ndata, float *pglobalmin, float *pglobalmax);
 EXTERNCPP void updatechar(void);
 EXTERNCPP void updatetracers(void);
 EXTERNCPP void update_fedinfo(void);
@@ -851,7 +852,7 @@ EXTERNCPP void getBoundaryLabels(
               float tmin, float tmax,
               char **labels, char *scale, float *tvals256, int nlevel);
 EXTERNCPP void getZoneColors(const float *t, int nt, unsigned char *it,
-               const float *tmin, const float *tmax, int nlevel, int nlevel_full,
+               float tmin, float tmax, int nlevel, int nlevel_full,
                char **labels, char *scale, float *tvals256
                );
 EXTERNCPP void get_faceinfo(void);

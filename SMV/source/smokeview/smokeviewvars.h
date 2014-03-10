@@ -333,6 +333,9 @@ SVEXTERN int list_p3_index_old, list_slice_index_old, list_patch_index_old,list_
 SVEXTERN float glui_block_xmin, glui_block_ymin, glui_block_zmin;
 SVEXTERN float glui_block_xmax, glui_block_ymax, glui_block_zmax;
 
+SVEXTERN int SVDECL(nzonetotal,0);
+SVEXTERN float SVDECL(zoneglobalmin,0.0), SVDECL(zoneglobalmax,0.0);
+SVEXTERN float SVDECL(zoneusermin,0.0), SVDECL(zoneusermax,0.0);
 SVEXTERN float zonelevels256[256];
 SVEXTERN float boundarylevels256[256];
 SVEXTERN float partlevels256[256];
@@ -527,7 +530,7 @@ SVEXTERN float slice_line_contour_min;
 SVEXTERN float slice_line_contour_max;
 SVEXTERN int slice_line_contour_num;
 SVEXTERN int setpartmin_old, setpartmax_old;
-SVEXTERN int setpatchmin, setpatchmax, setzonemin, setzonemax;
+SVEXTERN int setpatchmin, setpatchmax, SVDECL(setzonemin,GLOBAL_MIN), SVDECL(setzonemax,GLOBAL_MAX);
 SVEXTERN int loadpatchbysteps;
 SVEXTERN int settargetmin, settargetmax;
 SVEXTERN int setpartchopmin, setpartchopmax;

@@ -458,14 +458,6 @@ void readzone(int ifile, int flag, int *errorcode){
   FREEMEMORY(zoneodl);
   FREEMEMORY(zoneodu);
 
-  if(colorlabelzone!=NULL){
-    for(n=0;n<MAXRGB;n++){
-      FREEMEMORY(colorlabelzone[n]);
-    }
-    FREEMEMORY(colorlabelzone);
-  }
-  CheckMemory;
-
   activezone=NULL;
   if(flag==UNLOAD){
     zonei->loaded=0;
@@ -525,6 +517,7 @@ void readzone(int ifile, int flag, int *errorcode){
   PRINTF("Loading zone data: %s\n",file);
 
   ntotal = nrooms*nzone_times;
+  nzonetotal=ntotal;
 
   if(ntotal>0){
     FREEMEMORY(zone_times); 
@@ -629,28 +622,13 @@ void readzone(int ifile, int flag, int *errorcode){
 
   PRINTF("computing zone color levels \n");
 
-  // allocate memory for temperature labels
-
-  if(NewMemory((void **)&colorlabelzone,MAXRGB*sizeof(char *))==0){
-    *errorcode=1;
-    readzone(ifile,UNLOAD,&error);
-    return;
-  }
-  for(n=0;n<MAXRGB;n++){
-    colorlabelzone[n]=NULL;
-  }
-  for(n=0;n<nrgb;n++){
-    if(NewMemory((void **)&colorlabelzone[n],11)==0){
-      *errorcode=1;
-      readzone(ifile,UNLOAD,&error);
-      return;
-    }
-  }
-
-  if(setzonemin==0||setzonemax==0){
-    getzonebounds(zonetu,ntotal,setzonemin,&zonemin,setzonemax,&zonemax);
-  }
-  getZoneColors(zonetu, ntotal, izonetu,&zonemin, &zonemax, nrgb, nrgb_full, 
+  getzoneglobalbounds(zonetu,ntotal,&zoneglobalmin,&zoneglobalmax);
+  if(setzonemin==GLOBAL_MIN)zonemin = zoneglobalmin;
+  if(setzonemax==GLOBAL_MAX)zonemax = zoneglobalmax;
+  if(setzonemin==SET_MIN)zonemin = zoneusermin;
+  if(setzonemax==SET_MAX)zonemax = zoneusermax;
+  update_glui_zonebounds();
+  getZoneColors(zonetu, ntotal, izonetu, zonemin, zonemax, nrgb, nrgb_full, 
     colorlabelzone, zonescale, zonelevels256);
 
   ReadZoneFile=1;

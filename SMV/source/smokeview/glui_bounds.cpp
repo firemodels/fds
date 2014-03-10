@@ -56,6 +56,7 @@ GLUI_Rollout *ROLLOUT_slice_bound=NULL;
 GLUI_Rollout *ROLLOUT_slice_chop=NULL;
 GLUI_Rollout *ROLLOUT_part_bound=NULL;
 GLUI_Rollout *ROLLOUT_part_chop=NULL;
+GLUI_Rollout *ROLLOUT_zone_bound=NULL;
 
 #ifdef pp_MEMDEBUG
 #define MEMCHECK 1
@@ -115,6 +116,11 @@ GLUI_Rollout *ROLLOUT_part_chop=NULL;
 #define SCRIPT_STEP_NOW 44
 #define SCRIPT_CANCEL_NOW 45
 
+#define ZONEVALMIN 50
+#define ZONEVALMAX 51
+#define SETZONEVALMIN 52
+#define SETZONEVALMAX 53
+
 #define SAVE_SETTINGS 99
 #define CLOSE 98
 #define COMPRESS_FILES 97
@@ -171,6 +177,7 @@ GLUI_Rollout *ROLLOUT_plot3d=NULL,*ROLLOUT_evac=NULL,*ROLLOUT_part=NULL,*ROLLOUT
 GLUI_Rollout *ROLLOUT_smoke3d=NULL,*ROLLOUT_volsmoke3d=NULL;
 GLUI_Rollout *ROLLOUT_time=NULL,*ROLLOUT_colorbar=NULL;
 
+GLUI_Panel *PANEL_zone_a=NULL, *PANEL_zone_b=NULL;
 GLUI_Panel *PANEL_evac_direction=NULL;
 GLUI_Panel *PANEL_pan1=NULL;
 GLUI_Panel *PANEL_pan2=NULL;
@@ -226,6 +233,7 @@ GLUI_Spinner *SPINNER_vectorlinelength=NULL;
 GLUI_Listbox *LIST_scriptlist=NULL;
 GLUI_Listbox *LIST_ini_list=NULL;
 
+GLUI_EditText *EDIT_zone_min=NULL, *EDIT_zone_max=NULL;
 GLUI_EditText *EDIT_ini=NULL;
 GLUI_EditText *EDIT_renderdir=NULL;
 GLUI_EditText *EDIT_rendersuffix=NULL;
@@ -273,6 +281,7 @@ GLUI_Checkbox *CHECKBOX_use_tload_skip=NULL;
 GLUI_Checkbox *CHECKBOX_research_mode=NULL;
 
 
+GLUI_RadioGroup *RADIO_zone_setmin=NULL, *RADIO_zone_setmax=NULL;
 GLUI_RadioGroup *RADIO_bf=NULL, *RADIO_p3=NULL,*RADIO_slice=NULL;
 GLUI_RadioGroup *RADIO_part5=NULL;
 GLUI_RadioGroup *RADIO_plot3d_isotype=NULL;
@@ -286,6 +295,8 @@ GLUI_RadioGroup *RADIO_memcheck=NULL;
 GLUI_RadioGroup *RADIO_p3_setmin=NULL, *RADIO_p3_setmax=NULL;
 
 GLUI_RadioButton *RADIOBUTTON_plot3d_iso_hidden=NULL;
+GLUI_RadioButton *RADIOBUTTON_zone_permin=NULL;
+GLUI_RadioButton *RADIOBUTTON_zone_permax=NULL;
 
 GLUI_StaticText *STATIC_bound_min_unit=NULL;
 GLUI_StaticText *STATIC_bound_max_unit=NULL;
@@ -304,6 +315,12 @@ GLUI_StaticText *STATIC_part_cmax_unit=NULL;
 GLUI_StaticText *STATIC_plot3d_cmin_unit=NULL;
 GLUI_StaticText *STATIC_plot3d_cmax_unit=NULL;
 
+/* ------------------ update_glui_zonebounds ------------------------ */
+
+extern "C" void update_glui_zonebounds(void){
+  if(EDIT_zone_min!=NULL)EDIT_zone_min->set_float_val(zonemin);
+  if(EDIT_zone_max!=NULL)EDIT_zone_max->set_float_val(zonemax);
+}
 /* ------------------ update_glui_vecfactor ------------------------ */
 
 extern "C" void update_glui_vecfactor(void){
@@ -476,6 +493,43 @@ extern "C" void glui_bounds_setup(int main_window){
   overwrite_all=0;
   glui_bounds = GLUI_Master.create_glui( "File/Bounds Settings",0,0,0 );
   if(showbounds_dialog==0)glui_bounds->hide();
+
+  /*  zone (cfast) */
+
+  if(nzoneinfo>0){
+    ROLLOUT_zone_bound = glui_bounds->add_rollout("Zone temperature",false);
+
+    PANEL_zone_a = glui_bounds->add_panel_to_panel(ROLLOUT_zone_bound,"",GLUI_PANEL_NONE);
+
+    EDIT_zone_min = glui_bounds->add_edittext_to_panel(PANEL_zone_a,"",GLUI_EDITTEXT_FLOAT,&zonemin,ZONEVALMIN,Slice_CB);
+    if(setzonemin==0){
+      EDIT_zone_min->disable();
+    }
+    glui_bounds->add_column_to_panel(PANEL_zone_a,false);
+
+    RADIO_zone_setmin = glui_bounds->add_radiogroup_to_panel(PANEL_zone_a,&setzonemin,SETZONEVALMIN,Slice_CB);
+    RADIOBUTTON_zone_permin=glui_bounds->add_radiobutton_to_group(RADIO_zone_setmin,_("percentile min"));
+    glui_bounds->add_radiobutton_to_group(RADIO_zone_setmin,_("set min"));
+    glui_bounds->add_radiobutton_to_group(RADIO_zone_setmin,_("global min"));
+
+    PANEL_zone_b = glui_bounds->add_panel_to_panel(ROLLOUT_zone_bound,"",GLUI_PANEL_NONE);
+
+    EDIT_zone_max = glui_bounds->add_edittext_to_panel(PANEL_zone_b,"",GLUI_EDITTEXT_FLOAT,&zonemax,ZONEVALMAX,Slice_CB);
+    if(setzonemax==0){
+      EDIT_zone_max->disable();
+    }
+    glui_bounds->add_column_to_panel(PANEL_zone_b,false);
+
+    RADIO_zone_setmax = glui_bounds->add_radiogroup_to_panel(PANEL_zone_b,&setzonemax,SETZONEVALMAX,Slice_CB);
+    RADIOBUTTON_zone_permax=glui_bounds->add_radiobutton_to_group(RADIO_zone_setmax,_("percentile max"));
+    glui_bounds->add_radiobutton_to_group(RADIO_zone_setmax,_("set max"));
+    glui_bounds->add_radiobutton_to_group(RADIO_zone_setmax,_("global max"));
+    
+    RADIOBUTTON_zone_permin->disable();
+    RADIOBUTTON_zone_permax->disable();
+    Slice_CB(SETZONEVALMIN);
+    Slice_CB(SETZONEVALMAX);
+  }
 
   /*  3d smoke   */
 
@@ -2190,6 +2244,42 @@ extern "C" void Slice_CB(int var){
     return;
   }
   switch (var){
+    case ZONEVALMIN:
+      getZoneColors(zonetu, nzonetotal, izonetu,zonemin, zonemax, nrgb, nrgb_full, 
+        colorlabelzone, zonescale, zonelevels256);
+      zoneusermin=zonemin;
+      break;
+    case ZONEVALMAX:
+      getZoneColors(zonetu, nzonetotal, izonetu,zonemin, zonemax, nrgb, nrgb_full, 
+        colorlabelzone, zonescale, zonelevels256);
+      zoneusermax=zonemax;
+      break;
+    case SETZONEVALMIN:
+      if(setzonemin==SET_MIN){
+        EDIT_zone_min->enable();
+        zonemin=zoneusermin;
+        EDIT_zone_min->set_float_val(zonemin);
+      }
+      else{
+        EDIT_zone_min->disable();
+        EDIT_zone_min->set_float_val(zoneglobalmin);
+      }
+      getZoneColors(zonetu, nzonetotal, izonetu,zonemin, zonemax, nrgb, nrgb_full, 
+        colorlabelzone, zonescale, zonelevels256);
+      break;
+    case SETZONEVALMAX:
+      if(setzonemax==SET_MAX){
+        EDIT_zone_max->enable();
+        zonemax=zoneusermax;
+        EDIT_zone_max->set_float_val(zonemax);
+      }
+      else{
+        EDIT_zone_max->disable();
+        EDIT_zone_max->set_float_val(zoneglobalmax);
+      }
+      getZoneColors(zonetu, nzonetotal, izonetu,zonemin, zonemax, nrgb, nrgb_full, 
+        colorlabelzone, zonescale, zonelevels256);
+      break;
     case COLORBAR_LIST2:
       break;
     case RESEARCH_MODE:

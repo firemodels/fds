@@ -4400,6 +4400,7 @@ int readsmv(char *file, char *file2){
       char buffer_csv[1000],*buffer_csvptr;
       char *period=NULL;
       size_t len;
+      int n;
 
       zonei = zoneinfo + izone_local;
       if(fgets(buffer,255,stream)==NULL){
@@ -4436,8 +4437,6 @@ int readsmv(char *file, char *file2){
         nzoneinfo--;
       }
       else{
-        int n;
-
         len=strlen(filename);
         NewMemory((void **)&zonei->file,(unsigned int)(len+1));
         STRCPY(zonei->file,filename);
@@ -4447,6 +4446,20 @@ int readsmv(char *file, char *file2){
           }
         }
         izone_local++;
+      }
+      if(colorlabelzone!=NULL){
+        for(n=0;n<MAXRGB;n++){
+          FREEMEMORY(colorlabelzone[n]);
+        }
+        FREEMEMORY(colorlabelzone);
+      }
+      CheckMemory;
+      NewMemory((void **)&colorlabelzone,MAXRGB*sizeof(char *));
+      for(n=0;n<MAXRGB;n++){
+        colorlabelzone[n]=NULL;
+      }
+      for(n=0;n<nrgb;n++){
+        NewMemory((void **)&colorlabelzone[n],11);
       }
       continue;
     }
@@ -9354,7 +9367,12 @@ int readini2(char *inifile, int localfile){
     }
     if(match(buffer,"V_ZONE")==1){
       fgets(buffer,255,stream);
-      sscanf(buffer,"%i %f %i %f",&setzonemin,&zonemin,&setzonemax,&zonemax);
+      sscanf(buffer,"%i %f %i %f",&setzonemin,&zoneusermin,&setzonemax,&zoneusermax);
+      if(setzonemin==PERCENTILE_MIN)setzonemin=GLOBAL_MIN;
+      if(setzonemax==PERCENTILE_MIN)setzonemax=GLOBAL_MIN;
+      if(setzonemin==SET_MIN)zonemin=zoneusermin;
+      if(setzonemax==SET_MAX)zonemax=zoneusermax;
+      update_glui_zonebounds();
       continue;
     }
     if(match(buffer,"V_TARGET")==1){
@@ -11300,8 +11318,10 @@ void writeini(int flag,char *filename){
       patchi->label.shortlabel
       );
   }
-  fprintf(fileout,"V_ZONE\n");
-  fprintf(fileout," %i %f %i %f\n",setzonemin,zonemin,setzonemax,zonemax);
+  if(nzoneinfo>0){
+    fprintf(fileout,"V_ZONE\n");
+    fprintf(fileout," %i %f %i %f\n",setzonemin,zoneusermin,setzonemax,zoneusermax);
+  }
 
   fprintf(fileout,"V_PLOT3D\n");
   {

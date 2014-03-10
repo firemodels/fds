@@ -851,7 +851,7 @@ int getZoneColor(float t, float local_tmin, float local_tmax, int nlevel){
 /* ------------------ getZoneColors ------------------------ */
 
 void getZoneColors(const float *t, int nt, unsigned char *it,
-               const float *ttmin, const float *ttmax, int nlevel, int nlevel_full,
+               float ttmin, float ttmax, int nlevel, int nlevel_full,
                char **labels, char *scale, float *tvals256
                ){
   int n;
@@ -862,8 +862,8 @@ void getZoneColors(const float *t, int nt, unsigned char *it,
   float range;
   float tval;
 
-  local_tmin = *ttmin;
-  local_tmax = *ttmax;
+  local_tmin = ttmin;
+  local_tmax = ttmax;
 
   dt = local_tmax - local_tmin;
   factor=0.0f;

@@ -424,22 +424,20 @@ void adjustPlot3Dbounds(int plot3dvar, int setpmin, float *pmin, int setpmax, fl
 
 /* ------------------ getzonebounds ------------------------ */
 
-void getzonebounds(const float *pdata, int ndata, 
-                   int setpmin, float *pmin, int setpmax, float *pmax)
+void getzoneglobalbounds(const float *pdata, int ndata, float *pglobalmin, float *pglobalmax)
 {
     int n;
     float pmin2, pmax2, val;
 
-    if(setpmin==SET_MIN&&setpmax==SET_MAX)return;
-    pmin2 = *pdata;
+    pmin2 = pdata[0];
     pmax2 = pmin2;
     for (n=0;n<ndata;n++){
       val=*pdata++;
       pmin2=MIN(val,pmin2);
       pmax2=MAX(val,pmax2);
     }
-    if(setpmin!=SET_MIN)*pmin = pmin2; 
-    if(setpmax!=SET_MAX)*pmax = pmax2;
+    *pglobalmin = pmin2; 
+    *pglobalmax = pmax2;
 }
 
 /* ------------------ smoothlabel ------------------------ */
