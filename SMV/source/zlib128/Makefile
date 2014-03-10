@@ -30,10 +30,8 @@ RANLIB=ranlib
 .c.o:
 	$(CC) -c $(CFLAGS) $<
 
-OBJS = adler32.o compress.o crc32.o uncompr.o deflate.o infback.o \
-       inffast.o inflate.o inftrees.o trees.o zutil.o gzclose.o \
-       gzlib.o gzread.o gzwrite.o
-
+OBJS = adler32.o compress.o crc32.o deflate.o gzclose.o gzlib.o gzread.o gzwrite.o infback.o\
+       inffast.o inflate.o inftrees.o trees.o uncompr.o  zutil.o 
 OBJSWIN = $(OBJS:.o=.obj)
 
 libz.a: $(OBJS)

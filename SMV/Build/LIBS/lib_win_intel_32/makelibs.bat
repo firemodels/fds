@@ -30,7 +30,7 @@ call makelib %OPTS%
 copy libpng.lib %LIBDIR%\png.lib
 
 Rem ZLIB
-cd %SRCDIR%\zlib114
+cd %SRCDIR%\zlib128
 call makelib %OPTS%
 copy libz.lib %LIBDIR%\zlib.lib
 
