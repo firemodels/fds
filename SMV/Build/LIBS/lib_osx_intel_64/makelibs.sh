@@ -32,6 +32,6 @@ cd $SRCDIR/png125
 cp libpng.a $LIBDIR/.
 
 # ZLIB
-cd $SRCDIR/zlib114
+cd $SRCDIR/zlib128
 ./makelib.sh $OPTS
 cp libz.a $LIBDIR/.
