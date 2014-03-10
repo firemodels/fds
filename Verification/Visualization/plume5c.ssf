@@ -456,6 +456,16 @@ SETTIMEVAL
 RENDERONCE
  plume5c_smoke_30
 
+// render PLOT3D line contours
+
+UNLOADALL
+LOADINIFILE
+ plume5c_plot3d_line.ini
+LOADPLOT3D
+ 1 40.0
+RENDERONCE
+ plume5c_plot3d_line
+
 // render PLOT3D stepped contours
 
 UNLOADALL
