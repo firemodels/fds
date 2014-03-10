@@ -423,7 +423,7 @@ intel_linux_64_db : obj = fds_intel_linux_64_db
 intel_linux_64_db : setup $(obj_serial)
 	$(FCOMPL) $(FFLAGS) $(LFLAGS) -o $(obj) $(obj_serial)
 
-openmp_intel_linux_64_db : FFLAGS = -m64 -warn unused -O0 -auto -WB -traceback -g -fpe0 -fltconsistency -vec_report0 -stand:f03
+openmp_intel_linux_64_db : FFLAGS = -m64 -check -warn unused -O0 -auto -WB -traceback -g -fpe0 -fltconsistency -vec_report0 -stand:f03
 openmp_intel_linux_64_db : LFLAGS = -static-intel
 openmp_intel_linux_64_db : FCOMPL = ifort
 openmp_intel_linux_64_db : FOPENMPFLAGS = -openmp -openmp-link static
