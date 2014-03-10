@@ -497,7 +497,7 @@ extern "C" void glui_bounds_setup(int main_window){
   /*  zone (cfast) */
 
   if(nzoneinfo>0){
-    ROLLOUT_zone_bound = glui_bounds->add_rollout("Zone temperature",false);
+    ROLLOUT_zone_bound = glui_bounds->add_rollout("Upper layer temperature",false);
 
     PANEL_zone_a = glui_bounds->add_panel_to_panel(ROLLOUT_zone_bound,"",GLUI_PANEL_NONE);
 
