@@ -18,8 +18,8 @@ CC=$(COMPILER) $(SIZE)
 prefix=/usr/local
 
 # Where the zlib library and include files are located.
-ZLIBLIB=../zlib128
-ZLIBINC=../zlib128
+ZLIBLIB=../zlib114
+ZLIBINC=../zlib114
 
 ALIGN=
 # for i386:

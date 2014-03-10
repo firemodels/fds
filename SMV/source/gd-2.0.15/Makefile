@@ -4,7 +4,7 @@ AR=ar
 
 CFLAGS=-g  -DHAVE_LIBPNG -DHAVE_LIBZ -DHAVE_LIBJPEG -DHAVE_LIBX11
 
-INCLUDEDIRS=-I. -I../png125 -I../jpeg-6b -I../zlib128
+INCLUDEDIRS=-I. -I../png125 -I../jpeg-6b -I../zlib114
 
 #
 #
