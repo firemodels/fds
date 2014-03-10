@@ -244,4 +244,4 @@ gcc_osx : $(obj)
 
 .PHONY : clean
 clean:
-	rm -f *.o
+	rm -f *.o *.mod
