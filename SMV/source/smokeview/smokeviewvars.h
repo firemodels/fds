@@ -452,7 +452,7 @@ SVEXTERN int SVDECL(trainerload,0),SVDECL(trainerload_old,0);
 SVEXTERN int fontsize_save;
 SVEXTERN int trainer_mode;
 SVEXTERN int trainer_active;
-SVEXTERN int slice_average_flag;
+SVEXTERN int SVDECL(slice_average_flag,0);
 SVEXTERN int show_slice_average,vis_slice_average;
 SVEXTERN float slice_average_interval;
 

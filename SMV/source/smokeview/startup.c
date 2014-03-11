@@ -1366,7 +1366,6 @@ void initvars(void){
   fontsize_save=0;
   trainer_mode=0;
   trainer_active=0;
-  slice_average_flag=0;
   show_slice_average=0;
   vis_slice_average=1;
   slice_average_interval=10.0;

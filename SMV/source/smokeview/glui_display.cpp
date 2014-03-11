@@ -75,6 +75,10 @@ GLUI_Spinner *SPINNER_scaled_font3d_height2width=NULL;
 GLUI_Spinner *SPINNER_scaled_font3d_thickness=NULL;
 GLUI_Spinner *SPINNER_scaled_font2d_thickness=NULL;
 
+GLUI_Checkbox *CHECKBOX_labels_meshlabel=NULL;
+GLUI_Checkbox *CHECKBOX_labels_version=NULL;
+GLUI_Checkbox *CHECKBOX_vis_user_ticks=NULL;
+GLUI_Checkbox *CHECKBOX_vis_user_ticks2=NULL;
 GLUI_Checkbox *CHECKBOX_show_extreme_mindata=NULL;
 GLUI_Checkbox *CHECKBOX_show_extreme_maxdata=NULL;
 GLUI_Checkbox *CHECKBOX_colorbarflip=NULL;
@@ -100,7 +104,6 @@ GLUI_Checkbox *CHECKBOX_labels_availmemory=NULL;
 GLUI_Checkbox *CHECKBOX_labels_labels=NULL;
 GLUI_Checkbox *CHECKBOX_labels_gridloc=NULL;
 GLUI_Checkbox *CHECKBOX_labels_average=NULL;
-GLUI_Checkbox *CHECKBOX_vis_user_ticks=NULL;
 GLUI_Checkbox *CHECKBOX_user_ticks_show_x=NULL;
 GLUI_Checkbox *CHECKBOX_user_ticks_show_y=NULL;
 GLUI_Checkbox *CHECKBOX_user_ticks_show_z=NULL;
@@ -212,6 +215,10 @@ GLUI_Spinner *SPINNER_tetra_vertices[12];
 #define LABELS_ticks 8
 #define LABELS_drawface 24
 #define LABELS_hide_overlaps 25
+#define LABELS_version 26
+#define LABELS_meshlabel 27
+#define LABELS_usertick 28
+#define LABELS_usertick2 29
 
 #define FILESHOW_particle    10
 #define FILESHOW_slice       11
@@ -336,6 +343,7 @@ extern "C" void glui_labels_rename(void){
   CHECKBOX_labels_availmemory->set_name(_("Memory load"));
 #endif
   CHECKBOX_labels_labels->set_name(_("Text labels"));
+  CHECKBOX_labels_meshlabel->set_name(_("Mesh label"));
   
   CHECKBOX_label_1->set_name(_("Fast blockage drawing"));
   CHECKBOX_label_2->set_name(_("Sort transparent faces"));
@@ -363,7 +371,7 @@ extern "C" void glui_labels_rename(void){
 
   PANEL_tick1->set_name(_("Display settings"));
 
-  CHECKBOX_vis_user_ticks->set_name(_("Show user ticks"));
+  CHECKBOX_vis_user_ticks->set_name(_("User ticks"));
   SPINNER_subtick->set_name(_("sub-intervals")); 
   CHECKBOX_tick_auto->set_name(_("Auto place (2D)"));
 
@@ -411,6 +419,17 @@ extern "C" void glui_labels_setup(int main_window){
   CHECKBOX_labels_hrrlabel=glui_labels->add_checkbox_to_panel(PANEL_gen1,_("HRR label"),&visHRRlabel,HRR_label,Labels_CB);
   CHECKBOX_labels_hrrcutoff=glui_labels->add_checkbox_to_panel(PANEL_gen1,_("HRRPUV cutoff"),&show_hrrcutoff,HRRPUVCUTOFF_label,Labels_CB);
   CHECKBOX_labels_ticks=glui_labels->add_checkbox_to_panel(PANEL_gen1,_("FDS ticks"),&visTicks,LABELS_label,Labels_CB);
+  if(ntickinfo>0){
+    CHECKBOX_labels_ticks->enable();
+  }
+  else{
+    CHECKBOX_labels_ticks->disable();
+    visTicks=0;
+    CHECKBOX_labels_ticks->set_int_val(visTicks);
+  }
+  CHECKBOX_vis_user_ticks2=glui_labels->add_checkbox_to_panel(PANEL_gen1,_("User ticks"),&vis_user_ticks,LABELS_usertick2,Labels_CB);
+  CHECKBOX_labels_version=glui_labels->add_checkbox_to_panel(PANEL_gen1,_("Version info"),&gversion,LABELS_version,Labels_CB);
+
   glui_labels->add_column_to_panel(PANEL_gen1,false);
   if(ntotal_blockages>0||isZoneFireModel==0){
     CHECKBOX_labels_gridloc=glui_labels->add_checkbox_to_panel(PANEL_gen1,_("Grid loc"),&visgridloc,LABELS_label,Labels_CB);
@@ -424,6 +443,7 @@ extern "C" void glui_labels_setup(int main_window){
   CHECKBOX_labels_availmemory=glui_labels->add_checkbox_to_panel(PANEL_gen1,_("Memory load"),&visAvailmemory,LABELS_label,Labels_CB);
 #endif
   CHECKBOX_labels_labels=glui_labels->add_checkbox_to_panel(PANEL_gen1,_("Text labels"),&visLabels,LABELS_label,Labels_CB);
+  CHECKBOX_labels_meshlabel=glui_labels->add_checkbox_to_panel(PANEL_gen1,_("Mesh label"),&visBlocklabel,LABELS_meshlabel,Labels_CB);
 
   PANEL_gen2=glui_labels->add_panel_to_panel(ROLLOUT_label1,"",GLUI_PANEL_NONE);
 
@@ -579,13 +599,13 @@ extern "C" void glui_labels_setup(int main_window){
 
   // -------------- User tick settings -------------------
 
-  ROLLOUT_user_tick = glui_labels->add_rollout("Ticks",false);
+  ROLLOUT_user_tick = glui_labels->add_rollout("User ticks",false);
 
 
   PANEL_tick1 = glui_labels->add_panel_to_panel(ROLLOUT_user_tick,_("Display"),true);
   PANEL_tick1a = glui_labels->add_panel_to_panel(PANEL_tick1,"",false);
 
-  CHECKBOX_vis_user_ticks=glui_labels->add_checkbox_to_panel(PANEL_tick1a,_("Show user ticks"),&vis_user_ticks);
+  CHECKBOX_vis_user_ticks=glui_labels->add_checkbox_to_panel(PANEL_tick1a,_("Show user ticks"),&vis_user_ticks,LABELS_usertick,Labels_CB);
   glui_labels->add_column_to_panel(PANEL_tick1a,false);
   SPINNER_subtick=glui_labels->add_spinner_to_panel(PANEL_tick1a,_("sub-intervals"),GLUI_SPINNER_INT,&user_tick_sub); 
   SPINNER_subtick->set_int_limits(1,10,GLUI_LIMIT_CLAMP);
@@ -1125,7 +1145,18 @@ extern "C" void Labels_CB(int var){
     */
     updatefacelists=1;
     break;
-#endif    
+#endif
+
+  case LABELS_usertick:
+    CHECKBOX_vis_user_ticks2->set_int_val(vis_user_ticks);
+    break;
+  case LABELS_usertick2:
+    CHECKBOX_vis_user_ticks->set_int_val(vis_user_ticks);
+    break;
+  case LABELS_version:
+    break;
+  case LABELS_meshlabel:
+    break;
   case SAVE_SETTINGS:
     writeini(LOCAL_INI,NULL);
     break;
@@ -1210,8 +1241,11 @@ extern "C" void set_labels_controls(){
   if(RADIO_fontsize!=NULL)RADIO_fontsize->set_int_val(fontindex);
   if(CHECKBOX_labels_hms!=NULL)CHECKBOX_labels_hms->set_int_val(vishmsTimelabel);
   if(CHECKBOX_labels_gridloc!=NULL)CHECKBOX_labels_gridloc->set_int_val(visgridloc);
-
+  if(CHECKBOX_labels_version!=NULL)CHECKBOX_labels_version->set_int_val(gversion);
+  if(CHECKBOX_labels_meshlabel!=NULL)CHECKBOX_labels_meshlabel->set_int_val(visBlocklabel);
+  if(CHECKBOX_vis_user_ticks2!=NULL)CHECKBOX_vis_user_ticks2->set_int_val(vis_user_ticks);
 }
+
 
 /* ------------------ update_colorbarflip ------------------------ */
 

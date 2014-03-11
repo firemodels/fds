@@ -177,6 +177,7 @@ GLUI_Rollout *ROLLOUT_plot3d=NULL,*ROLLOUT_evac=NULL,*ROLLOUT_part=NULL,*ROLLOUT
 GLUI_Rollout *ROLLOUT_smoke3d=NULL,*ROLLOUT_volsmoke3d=NULL;
 GLUI_Rollout *ROLLOUT_time=NULL,*ROLLOUT_colorbar=NULL;
 
+GLUI_Panel *PANEL_slice_average=NULL;
 GLUI_Panel *PANEL_zone_a=NULL, *PANEL_zone_b=NULL;
 GLUI_Panel *PANEL_evac_direction=NULL;
 GLUI_Panel *PANEL_pan1=NULL;
@@ -826,14 +827,17 @@ extern "C" void glui_bounds_setup(int main_window){
       Slice_CB);
     SPINNER_transparent_level=glui_bounds->add_spinner_to_panel(ROLLOUT_slice,_("Transparent level"),GLUI_SPINNER_FLOAT,&transparent_level,TRANSPARENTLEVEL,Slice_CB);
     SPINNER_transparent_level->set_float_limits(0.0,1.0);
-    CHECKBOX_average_slice=glui_bounds->add_checkbox_to_panel(ROLLOUT_slice,_("Averaged slice data"),&slice_average_flag);
-    SPINNER_sliceaverage=glui_bounds->add_spinner_to_panel(ROLLOUT_slice,_("Time interval"),GLUI_SPINNER_FLOAT,&slice_average_interval);
+
+    PANEL_slice_average=glui_bounds->add_panel_to_panel(ROLLOUT_slice,_("Average"));
+    CHECKBOX_average_slice=glui_bounds->add_checkbox_to_panel(PANEL_slice_average,_("Average slice data"),&slice_average_flag);
+    SPINNER_sliceaverage=glui_bounds->add_spinner_to_panel(PANEL_slice_average,_("Time interval"),GLUI_SPINNER_FLOAT,&slice_average_interval);
     {
       float tttmax=120.0;
 
       if(view_tstop>tttmax)tttmax=view_tstop;
       SPINNER_sliceaverage->set_float_limits(0.0,tttmax);
     }
+    glui_bounds->add_button_to_panel(PANEL_slice_average,"Reload",FILERELOAD,Slice_CB);
 
     PANEL_slice_vector=glui_bounds->add_panel_to_panel(ROLLOUT_slice,_("Vector"));
     SPINNER_vectorpointsize=glui_bounds->add_spinner_to_panel(PANEL_slice_vector,_("Point size"),GLUI_SPINNER_FLOAT,

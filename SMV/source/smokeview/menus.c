@@ -250,6 +250,7 @@ void LabelMenu(int value){
       }
       hrrinfo->display=1;
     }
+    gversion=1;
     break;
    case 5:
     vis_user_ticks=0;
@@ -274,6 +275,7 @@ void LabelMenu(int value){
     if(ntickinfo>0)visTicks=0;
     visgridloc=0;
     vis_slice_average=0;
+    gversion=0;
 #ifdef pp_memstatus
     visAvailmemory=0;
 #endif
