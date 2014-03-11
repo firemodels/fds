@@ -108,6 +108,7 @@ intel_win_64_db : $(objwin)
 
 # ------------- intel_win_64 ----------------
 
+# intel_win_64 : INC = -I ../../source/include3 -I ../../source/shared -I ../../source/smokeview -I ../../source/glew
 intel_win_64 : INC = -I ../../source/include -I ../../source/shared -I ../../source/smokeview -I ../../source/glew
 intel_win_64 : FFLAGS    = -O2 -fpp -D pp_cvf -D X64 /iface:stdref
 intel_win_64 : CFLAGS    = -O1 -D WIN32 -D pp_INTEL -D _CONSOLE -D X64 -D GLEW_STATIC -D PTW32_STATIC_LIB $(SMV_TESTFLAG)
