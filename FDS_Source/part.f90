@@ -2197,14 +2197,24 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
          ! Evaporate completely small PARTICLEs
 
          IF (R_DROP<0.5_EB*LPC%MINIMUM_DIAMETER) THEN
-            M_VAP  = M_DROP/N_SUBSTEPS
-            IF (Q_TOT>0._EB) THEN
-               Q_FRAC     = M_VAP*H_V/Q_TOT 
-               Q_CON_GAS  = Q_CON_GAS*Q_FRAC
-               Q_CON_WALL = Q_CON_WALL*Q_FRAC
-               Q_RAD      = Q_RAD*Q_FRAC
-               Q_TOT      = Q_RAD+Q_CON_GAS+Q_CON_WALL
+            M_VAP      = M_DROP
+            Q_RAD      = Q_RAD * (DT-DT_SUM)/DT_SUBSTEP
+            Q_CON_WALL = Q_CON_WALL * (DT-DT_SUM)/DT_SUBSTEP
+            IF (Q_RAD + Q_CON_WALL > M_VAP*H_V) THEN
+               Q_TOT = Q_RAD + Q_CON_WALL
+               Q_RAD = Q_RAD * M_VAP*H_V/Q_TOT
+               Q_CON_WALL = Q_CON_WALL * M_VAP*H_V/Q_TOT
             ENDIF
+            Q_CON_GAS  = M_VAP*H_V-Q_RAD-Q_CON_WALL
+            Q_TOT      = 0._EB
+            DT_SUM   = DT
+            !IF (Q_TOT>0._EB) THEN
+            !   Q_FRAC     = M_VAP*H_V/Q_TOT 
+            !   Q_CON_GAS  = Q_CON_GAS*Q_FRAC
+            !   Q_CON_WALL = Q_CON_WALL*Q_FRAC
+            !   Q_RAD      = Q_RAD*Q_FRAC
+            !   Q_TOT      = Q_RAD+Q_CON_GAS+Q_CON_WALL
+            !ENDIF
          ENDIF
          IF (M_VAP < M_DROP) THEN
             TMP_DROP_NEW = TMP_DROP + (Q_TOT - M_VAP * H_V)/(C_DROP * (M_DROP - M_VAP))
@@ -2254,6 +2264,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
          ITMP     = INT(TMP_DROP_NEW)
          TMP_WGT  = TMP_DROP_NEW - AINT(TMP_DROP_NEW)
          H_NEW = H_G_OLD + WGT*(M_VAP*(H_V+H_L) - Q_CON_GAS)
+
          IF (H_NEW > 0._EB) THEN
             ZZ_GET2 = ZZ_GET * M_GAS/M_GAS_NEW               
             ZZ_GET2(Z_INDEX) = ZZ_GET2(Z_INDEX) + WGT*M_VAP/M_GAS_NEW
