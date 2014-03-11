@@ -14,7 +14,7 @@ CHARACTER(255), PARAMETER :: massrev='$Revision$'
 CHARACTER(255), PARAMETER :: massdate='$Date$'
 
 REAL(EB), POINTER, DIMENSION(:,:,:,:) :: ZZP
-REAL(EB), POINTER, DIMENSION(:,:,:) :: UU,VV,WW,RHOP,DP
+REAL(EB), POINTER, DIMENSION(:,:,:) :: UU,VV,WW,RHOP,DP,UP,VP,WP
 
 PUBLIC MASS_FINITE_DIFFERENCES,DENSITY,GET_REV_mass,SCALAR_FACE_VALUE
 
@@ -44,29 +44,34 @@ IF (PREDICTOR) THEN
    UU => U
    VV => V
    WW => W
+   UP => US
+   VP => VS
+   WP => WS
    RHOP => RHO
    IF (N_TRACKED_SPECIES > 0) ZZP => ZZ
 ELSE
    UU => US
    VV => VS
    WW => WS
+   UP => U
+   VP => V
+   WP => W
    RHOP => RHOS
    IF (N_TRACKED_SPECIES > 0) ZZP => ZZS
 ENDIF
 
-! Zero out face values to start
-
-FX = 0._EB
-FY = 0._EB
-FZ = 0._EB
-
 ! Compute scalar face values
+
+! Note: FX,FY,FZ are computed in divg based on old values of the wind direction.  If the
+! wind direction has not changed, there is no need to recompute the face value, which is
+! a relatively expensive operation.
 
 !$OMP PARALLEL PRIVATE(ZZZ)
 !$OMP DO SCHEDULE(STATIC)
 DO K=1,KBAR
    DO J=1,JBAR
       DO I=1,IBM1
+         IF (ENTHALPY_TRANSPORT .AND. SIGN(1._EB,UU(I,J,K))==SIGN(1._EB,UP(I,J,K))) CYCLE
          ZZZ(1:4) = RHOP(I-1:I+2,J,K)
          FX(I,J,K,0) = SCALAR_FACE_VALUE(UU(I,J,K),ZZZ,FLUX_LIMITER)
       ENDDO
@@ -78,6 +83,7 @@ ENDDO
 DO K=1,KBAR
    DO J=1,JBM1
       DO I=1,IBAR
+         IF (ENTHALPY_TRANSPORT .AND. SIGN(1._EB,VV(I,J,K))==SIGN(1._EB,VP(I,J,K))) CYCLE
          ZZZ(1:4) = RHOP(I,J-1:J+2,K)
          FY(I,J,K,0) = SCALAR_FACE_VALUE(VV(I,J,K),ZZZ,FLUX_LIMITER)
       ENDDO
@@ -89,6 +95,7 @@ ENDDO
 DO K=1,KBM1
    DO J=1,JBAR
       DO I=1,IBAR
+         IF (ENTHALPY_TRANSPORT .AND. SIGN(1._EB,WW(I,J,K))==SIGN(1._EB,WP(I,J,K))) CYCLE
          ZZZ(1:4) = RHOP(I,J,K-1:K+2)
          FZ(I,J,K,0) = SCALAR_FACE_VALUE(WW(I,J,K),ZZZ,FLUX_LIMITER)
       ENDDO
@@ -234,6 +241,7 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
    DO K=1,KBAR
       DO J=1,JBAR
          DO I=1,IBM1
+            IF (ENTHALPY_TRANSPORT .AND. SIGN(1._EB,UU(I,J,K))==SIGN(1._EB,UP(I,J,K))) CYCLE
             ZZZ(1:4) = RHO_Z_P(I-1:I+2,J,K)
             FX(I,J,K,N) = SCALAR_FACE_VALUE(UU(I,J,K),ZZZ,FLUX_LIMITER)
          ENDDO
@@ -245,6 +253,7 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
    DO K=1,KBAR
       DO J=1,JBM1
          DO I=1,IBAR
+            IF (ENTHALPY_TRANSPORT .AND. SIGN(1._EB,VV(I,J,K))==SIGN(1._EB,VP(I,J,K))) CYCLE
             ZZZ(1:4) = RHO_Z_P(I,J-1:J+2,K)
             FY(I,J,K,N) = SCALAR_FACE_VALUE(VV(I,J,K),ZZZ,FLUX_LIMITER)
          ENDDO
@@ -256,6 +265,7 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
    DO K=1,KBM1
       DO J=1,JBAR
          DO I=1,IBAR
+            IF (ENTHALPY_TRANSPORT .AND. SIGN(1._EB,WW(I,J,K))==SIGN(1._EB,WP(I,J,K))) CYCLE
             ZZZ(1:4) = RHO_Z_P(I,J,K-1:K+2)
             FZ(I,J,K,N) = SCALAR_FACE_VALUE(WW(I,J,K),ZZZ,FLUX_LIMITER)
          ENDDO
