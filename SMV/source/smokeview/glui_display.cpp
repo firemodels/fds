@@ -1152,6 +1152,7 @@ extern "C" void Labels_CB(int var){
     break;
   case LABELS_usertick2:
     CHECKBOX_vis_user_ticks->set_int_val(vis_user_ticks);
+    if(vis_user_ticks==1)ROLLOUT_user_tick->open();
     break;
   case LABELS_version:
     break;
