@@ -148,7 +148,7 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
 
   if(rotation_type==EYE_CENTERED&&nskyboxinfo>0)draw_skybox();
 
-  if(UpdateLIGHTS==1)updateLights(0);
+  if(UpdateLIGHTS==1)updateLights(NULL,NULL);
 
   if(mode!=DRAWSCENE||viscolorbarpath!=1){
     if(clip_mode==CLIP_BLOCKAGES_DATA)setClipPlanes(&clipinfo,CLIP_ON);

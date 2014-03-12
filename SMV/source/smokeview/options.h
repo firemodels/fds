@@ -31,7 +31,7 @@
 
 //VVVVVVVVVVVVVVVVVVVVVVVVVVVVV  turn on options available on all platforms VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
 
-//#define pp_HIDEMULTI
+// pp_GEOMPRINT turns on debug print
 //#define pp_GEOMPRINT
 
 #define pp_GPU
@@ -58,10 +58,6 @@
 #define pp_PILOT
 #define pp_GEOMTEST
 //#define pp_GPUDEPTH
-#ifdef _DEBUG
-#define pp_OPEN
-#endif
-#define pp_SHOWLIGHT
 #endif
 
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -78,6 +74,18 @@
 #define pp_noappend
 #include "pragmas.h"
 #endif
+//^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+//VVVVVVVVVVVVVVVVVVVVVVVVVVVVV  used to access fortran routines from C VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
+
+#ifndef _F
+#ifdef pp_noappend
+#define _F(name) name
+#else
+#define _F(name) name ## _
+#endif
+#endif
+
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 

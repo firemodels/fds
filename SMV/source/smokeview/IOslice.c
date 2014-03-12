@@ -2253,34 +2253,6 @@ void getsliceparams(void){
       }
     }
   }
-#ifdef pp_HIDEMULTI
-  for(iii=0;iii<nmultisliceinfo;iii++){
-    int ii;
-
-    mslicei = multisliceinfo + iii;
-    for(i=0;i<mslicei->nslices;i++){
-      slicedata *sdi, *sdj;
-      int j;
-
-      if(mslicei->islices[i]==-1)continue;
-      sdi = sliceinfo + mslicei->islices[i];
-      for(j=0;j<mslicei->nslices;j++){
-        if(i==j||mslicei->islices[j]==-1)continue;
-        sdj = sliceinfo + mslicei->islices[j];
-        if(hide_slice2(sdi,sdj)==1){
-          mslicei->islices[j]=-1;
-        }
-      }
-    }
-    ii=0;
-    for(i=0;i<mslicei->nslices;i++){
-      if(mslicei->islices[i]==-1)continue;
-      mslicei->islices[ii]=mslicei->islices[i];
-      ii++;
-    }
-    mslicei->nslices=ii;
-  }
-#endif
   for(i=0;i<nsliceinfo;i++){
     slicedata *slicei;
 

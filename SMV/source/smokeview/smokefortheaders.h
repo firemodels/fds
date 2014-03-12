@@ -10,11 +10,6 @@
 #else
 #define STDCALLF extern void
 #endif
-#ifdef pp_noappend
-#define _F(name) name
-#else
-#define _F(name) name ## _
-#endif
 
 #define FORTgetverts _F(getverts2)
 #define FORTgeomout _F(geomout)

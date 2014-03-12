@@ -351,41 +351,7 @@ void LabelMenu(int value){
      break;
   }
   set_labels_controls();
-
 }
-
-/* ------------------ LightingMenu ------------------------ */
-
-void LightingMenu(int value){
-    if(value<0)return;
-    switch (value){
-      case 1: 
-        visLIGHT0 = 1 - visLIGHT0; 
-        break;
-      case 2: 
-        visLIGHT1 = 1 - visLIGHT1; 
-        break;
-      case 3: 
-        visLIGHT1 = 1 - visLIGHT1; 
-        visLIGHT0 = 1 - visLIGHT0; 
-        break;
-      case 4: 
-        visLIGHT0=1; 
-        visLIGHT1=1; 
-        break;
-      case 5: 
-        visLIGHT0=0; 
-        visLIGHT1=0; 
-        break;
-      default:
-        ASSERT(FFALSE);
-        break;
-    }
-    UpdateLIGHTS=1;
-    updatemenu=1;  
-    glutPostRedisplay();
-}
-
 
 /* ------------------ SmokeColorBarMenu ------------------------ */
 
@@ -4572,7 +4538,7 @@ void InitMenus(int unload){
   int nplot3dloaded;
   int nisoloaded;
   
-static int labelmenu=0, colorbarmenu=0, colorbarsmenu=0, colorbarshademenu, smokecolorbarmenu=0, lightingmenu=0, showhidemenu=0;
+static int labelmenu=0, colorbarmenu=0, colorbarsmenu=0, colorbarshademenu, smokecolorbarmenu=0, showhidemenu=0;
 static int optionmenu=0, rotatetypemenu=0;
 static int resetmenu=0, frameratemenu=0, rendermenu=0, smokeviewinimenu=0, inisubmenu=0, resolutionmultipliermenu=0;
 static int startrenderingmenu=0;
@@ -6184,21 +6150,6 @@ updatemenu=0;
     }
   }
 
-/* --------------------------------lighting menu -------------------------- */
-
-  if(showlightmenu==1){
-    CREATEMENU(lightingmenu,LightingMenu);
-    glutAddMenuEntry(_("OpenGL lighting"),-1);
-    if(visLIGHT0==1)glutAddMenuEntry(_("  *Right"),1);
-    if(visLIGHT0==0)glutAddMenuEntry(_("  Right"),1);
-    if(visLIGHT1==1)glutAddMenuEntry(_("  *Left"),2);
-    if(visLIGHT1==0)glutAddMenuEntry(_("  Left"),2);
-    glutAddMenuEntry(_("  Flip"),3);
-    glutAddMenuEntry(_("  All"),4);
-    glutAddMenuEntry(_("  None"),5);
-  }
-
-
 /* -------------------------------- colorbarmenu -------------------------- */
   
   if(nsmoke3dinfo>0&&Read3DSmoke3DFile==1||nvolrenderinfo>0){
@@ -7353,9 +7304,6 @@ updatemenu=0;
 
   CREATEMENU(optionmenu,OptionMenu);
   if(nunitclasses>0)glutAddSubMenu(_("Display Units"),unitsmenu);
-#ifdef pp_SHOWLIGHT
-  if(showlightmenu==1)glutAddSubMenu(_("Lighting"),lightingmenu);
-#endif
   glutAddSubMenu(_("Rotation type"),rotatetypemenu);
   glutAddSubMenu(_("Max frame rate"),frameratemenu);
   glutAddSubMenu(_("Render"),rendermenu);

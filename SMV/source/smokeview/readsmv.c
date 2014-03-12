@@ -10232,24 +10232,6 @@ int readini2(char *inifile, int localfile){
       sscanf(buffer,"%i",&titlesafe_offsetBASE);
       continue;
     }
-    if(match(buffer,"SHOWLIGHT0")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i",&visLIGHT0);
-      UpdateLIGHTS=1;
-    continue;
-    }
-    if(match(buffer,"SHOWLIGHT1")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i",&visLIGHT1);
-      UpdateLIGHTS=1;
-      continue;
-    }
-    if(match(buffer,"SHOWLIGHTMENU")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i",&showlightmenu);
-      updatemenu=1;
-      continue;
-    }
     if(match(buffer,"AMBIENTLIGHT")==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%f %f %f",ambientlight,ambientlight+1,ambientlight+2);
@@ -11140,14 +11122,6 @@ void writeini(int flag,char *filename){
 
   fprintf(fileout,"\n LIGHTING\n");
   fprintf(fileout,"--------\n\n");
-#ifdef pp_SHOWLIGHT
-  fprintf(fileout,"SHOWLIGHT0\n");
-  fprintf(fileout," %i\n",visLIGHT0);
-  fprintf(fileout,"SHOWLIGHT1\n");
-  fprintf(fileout," %i\n",visLIGHT1);
-  fprintf(fileout,"SHOWLIGHTMENU\n");
-  fprintf(fileout," %i\n",showlightmenu);
-#endif
   fprintf(fileout,"AMBIENTLIGHT\n");
   fprintf(fileout," %f %f %f\n",ambientlight[0],ambientlight[1],ambientlight[2]);
   fprintf(fileout,"DIFFUSELIGHT\n");

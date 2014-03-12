@@ -17,13 +17,8 @@ char compress3dc_revision[]="$Revision$";
 #include "smokeviewvars.h"
 #include "compress.h"
 
-#ifndef pp_noappend
-#define CCsmoke3dheader smoke3dheader_
-#define CCsmoke3dtofile smoke3dtofile_
-#else
-#define CCsmoke3dheader smoke3dheader
-#define CCsmoke3dtofile smoke3dtofile
-#endif
+#define CCsmoke3dheader _F(smoke3dheader)
+#define CCsmoke3dtofile _F(smoke3dtofile)
 
 // this code is only used by FDS - needs to be updated if FDS does the ZLIB compression of 3d smoke files
 

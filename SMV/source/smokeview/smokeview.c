@@ -41,57 +41,27 @@ void _Sniff_Errors(char *whereat){
 
 /* ------------------ updateLights ------------------------ */
 
-void updateLights(int pos){
+void updateLights(float *pos1, float *pos2){
   int i;
+  GLfloat ambientlight2[4], diffuselight2[4];
 
-  if(visLIGHT0==1&&visLIGHT1==1){
-    GLfloat ambientlight2[4], diffuselight2[4];
-
-    for(i=0;i<3;i++){
-      ambientlight2[i]=ambientlight[i]/2.0;
-      diffuselight2[i]=diffuselight[i]/2.0;
-    }
-    ambientlight2[3]=1.0;
-    diffuselight2[3]=1.0;
-    glLightfv(GL_LIGHT0,GL_DIFFUSE,diffuselight2);
-    glLightfv(GL_LIGHT0,GL_AMBIENT,ambientlight2);
-    if(pos==1)glLightfv(GL_LIGHT0,GL_POSITION,light_position0);
-    glEnable(GL_LIGHT0);
-
-    glLightfv(GL_LIGHT1,GL_DIFFUSE,diffuselight2);
-    glLightfv(GL_LIGHT1,GL_AMBIENT,ambientlight2);
-    if(pos==1)glLightfv(GL_LIGHT1,GL_POSITION,light_position1);
-    glEnable(GL_LIGHT1);
-
+  for(i=0;i<3;i++){
+    ambientlight2[i]=ambientlight[i]/2.0;
+    diffuselight2[i]=diffuselight[i]/2.0;
   }
-  if(visLIGHT0==1&&visLIGHT1==0){
-    diffuselight[3]=1.0;
-    ambientlight[3]=1.0;
-    glLightfv(GL_LIGHT0,GL_DIFFUSE,diffuselight);
-    glLightfv(GL_LIGHT0,GL_AMBIENT,ambientlight);
-    if(pos==1)glLightfv(GL_LIGHT0,GL_POSITION,light_position0);
-    glEnable(GL_LIGHT0);
+  ambientlight2[3]=1.0;
+  diffuselight2[3]=1.0;
+  glLightfv(GL_LIGHT0,GL_DIFFUSE,diffuselight2);
+  glLightfv(GL_LIGHT0,GL_AMBIENT,ambientlight2);
+  if(pos1!=NULL)glLightfv(GL_LIGHT0,GL_POSITION,pos1);
+  glEnable(GL_LIGHT0);
 
-    glDisable(GL_LIGHT1);
-
-  }
-  if(visLIGHT0==0&&visLIGHT1==1){
-    diffuselight[3]=1.0;
-    ambientlight[3]=1.0;
-    glEnable(GL_LIGHT0);
-    glLightfv(GL_LIGHT0,GL_DIFFUSE,diffuselight);
-    glLightfv(GL_LIGHT0,GL_AMBIENT,ambientlight);
-    if(pos==1)glLightfv(GL_LIGHT0,GL_POSITION,light_position1);
-    glDisable(GL_LIGHT1);
-  }
-  if(visLIGHT0==0&&visLIGHT1==0){
-    glDisable(GL_LIGHT0);
-    glDisable(GL_LIGHT1);
-  }
-
+  glLightfv(GL_LIGHT1,GL_DIFFUSE,diffuselight2);
+  glLightfv(GL_LIGHT1,GL_AMBIENT,ambientlight2);
+  if(pos2!=NULL)glLightfv(GL_LIGHT1,GL_POSITION,pos2);
+  glEnable(GL_LIGHT1);
 
   UpdateLIGHTS=0;
-
 }
 
 /* ------------------ antialias ------------------------ */
@@ -773,9 +743,6 @@ void usage(char **argv){
 #endif
 #ifdef pp_release
     strcat(label," pp_release");
-#endif
-#ifdef pp_SHOWLIGHT
-    strcat(label,", pp_SHOWLIGHT");
 #endif
 #ifdef pp_SMOKETEST
     strcat(label,", pp_SMOKETEST");

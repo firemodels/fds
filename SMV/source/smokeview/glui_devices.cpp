@@ -53,14 +53,6 @@ GLUI *glui_device=NULL;
 GLUI_Button *BUTTON_open_down=NULL ;
 GLUI_Button *BUTTON_device_1=NULL;
 GLUI_Button *BUTTON_device_2=NULL;
-GLUI_Button *BUTTON_device_3=NULL;
-GLUI_Button *BUTTON_device_4=NULL;
-GLUI_Button *BUTTON_device_5=NULL;
-GLUI_Button *BUTTON_device_6=NULL;
-
-GLUI_Panel *PANEL_open1=NULL;
-GLUI_Panel *PANEL_open2=NULL;
-GLUI_Panel *PANEL_open3=NULL;
 GLUI_Panel *PANEL_objects=NULL;
 GLUI_Panel *PANEL_objectvalues=NULL;
 GLUI_Panel *PANEL_devicevis=NULL;
@@ -130,29 +122,6 @@ extern "C" void glui_device_setup(int main_window){
   glui_device->add_column_to_panel(PANEL_label3,false);
 
   BUTTON_device_2=glui_device->add_button_to_panel(PANEL_label3,_("Close"),DEVICE_close,Device_CB);
-
-#ifdef pp_OPEN
-  strcpy(gluiopen_filter,"*.csv");
-  PANEL_open1 = glui_device->add_panel(_("Open"),true);
-  PANEL_open3 = glui_device->add_panel_to_panel(PANEL_open1,"",false);
-  BUTTON_device_6=glui_device->add_button_to_panel(PANEL_open3,_("Up"),OPEN_UP,Open_CB);
-  glui_device->add_column_to_panel(PANEL_open3);
-  BUTTON_open_down=glui_device->add_button_to_panel(PANEL_open3,_("Down"),OPEN_DOWN,Open_CB);
-  gluiopen_file_index=0;
-  LIST_open=glui_device->add_listbox_to_panel(PANEL_open1,"",&gluiopen_file_index,OPEN_FILEINDEX,Open_CB);
-  strcpy(gluiopen_path_dir,".");
-  Open_CB(OPEN_UPDATE_LIST);
-  PANEL_open2 = glui_device->add_panel_to_panel(PANEL_open1,"",false);
-  EDIT_filter=glui_device->add_edittext_to_panel(PANEL_open2,_("filter:"),GLUI_EDITTEXT_TEXT,gluiopen_filter,OPEN_FILTER,Open_CB);
-  glui_device->add_column_to_panel(PANEL_open2);
-  BUTTON_device_3=glui_device->add_button_to_panel(PANEL_open2,_("Apply Filter"),OPEN_APPLY_FILTER,Open_CB);
-
-  PANEL_open3 = glui_device->add_panel_to_panel(PANEL_open1,"",false);
-  BUTTON_device_4=glui_device->add_button_to_panel(PANEL_open3,_("Open"),OPEN_OPEN,Open_CB);
-  glui_device->add_column_to_panel(PANEL_open3);
-  BUTTON_device_5=glui_device->add_button_to_panel(PANEL_open3,_("Cancel"),OPEN_CANCEL,Open_CB);
-
-#endif
 
   glui_device->set_main_gfx_window( main_window );
 }

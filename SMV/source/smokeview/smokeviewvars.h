@@ -469,7 +469,6 @@ SVEXTERN int snifferrornumber;
 SVEXTERN int xyz_dir;
 SVEXTERN int which_face;
 SVEXTERN int showfontmenu;
-SVEXTERN int showlightmenu;
 
 SVEXTERN float SVDECL(vecfactor,1.0),SVDECL(veclength,0.0);
 
@@ -481,7 +480,7 @@ SVEXTERN int vis3DSmoke3D;
 SVEXTERN int smokeskip,smokeskipm1;
 SVEXTERN int nrooms,nzoneinfo, nfires;
 SVEXTERN float SVDECL(window_aspect_ratio,1.0), SVDECL(scene_aspect_ratio,1.0);
-SVEXTERN int visLIGHT0, visLIGHT1, visLIGHTMENU, UpdateLIGHTS;
+SVEXTERN int UpdateLIGHTS;
 
 SVEXTERN int SVDECL(screenWidth,640), SVDECL(screenHeight,480);
 SVEXTERN int SVDECL(screenWidthINI,640), SVDECL(screenHeightINI,480);

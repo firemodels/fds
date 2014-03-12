@@ -272,7 +272,7 @@ int setup_case(int argc, char **argv){
   glui_stereo_setup(mainwindow_id);
   glui_3dsmoke_setup(mainwindow_id);
 
-  if(UpdateLIGHTS==1)updateLights(0);
+  if(UpdateLIGHTS==1)updateLights(NULL,NULL);
 
   glutReshapeWindow(screenWidth,screenHeight);
 
@@ -536,8 +536,7 @@ void InitOpenGL(void){
   light_position1[3]=0.f;
 
   glLightModeli(GL_LIGHT_MODEL_TWO_SIDE,GL_TRUE);
-//xxx  glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER,GL_TRUE);
-  updateLights(1);
+  updateLights(light_position0,light_position1);
 
   {
     glGetIntegerv(GL_RED_BITS,&nredbits);    
@@ -1383,11 +1382,6 @@ void initvars(void){
   xyz_dir=0;
   which_face=2;
   showfontmenu=1;
-#ifdef pp_SHOWLIGHT
-  showlightmenu=1;
-#else
-  showlightmenu=0;
-#endif
 
   glui_active=0;
 
@@ -1401,9 +1395,6 @@ void initvars(void){
   nrooms=0;
   nzoneinfo=0;
   nfires=0;
-  visLIGHT0=1;
-  visLIGHT1=1;
-  visLIGHTMENU=1;
   UpdateLIGHTS=1;
 
   windowsize_pointer=0;

@@ -83,17 +83,11 @@ typedef struct {
   int closest;
 } orderdata;
 
-#ifndef pp_noappend
-#define CCisosurface2file iso2file_
-#define CCisosurfacet2file isot2file_
-#define CCisoheader isoheader_
-#define CCtisoheader tisoheader_
-#else
-#define CCisosurface2file iso2file
-#define CCisosurfacet2file isot2file
-#define CCtisoheader tisoheader
-#define CCisoheader isoheader
-#endif
+#define CCisosurface2file _F(iso2file)
+#define CCisosurfacet2file _F(isot2file)
+#define CCisoheader _F(isoheader)
+#define CCtisoheader _F(tisoheader)
+
 SV_EXTERN void CCisoheader(char *isofile, 
                  char *isolonglabel, char *isoshortlabel, char *isounits,
                  float *levels, int *nlevels, int *error);
