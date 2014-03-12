@@ -3971,7 +3971,9 @@ DEVICE_LOOP: DO N=1,N_DEVC
                            STAT_VALUE = STAT_VALUE + VALUE
                            STAT_COUNT = STAT_COUNT + 1
                         CASE('SURFACE INTEGRAL')
-                           STAT_VALUE = STAT_VALUE + VALUE*WALL(IW)%AW 
+                           IF (VALUE <= DV%QUANTITY_RANGE(2) .AND. VALUE >=DV%QUANTITY_RANGE(1)) STAT_VALUE = STAT_VALUE + VALUE*WALL(IW)%AW 
+                        CASE('SURFACE AREA')
+                           IF (VALUE <= DV%QUANTITY_RANGE(2) .AND. VALUE >=DV%QUANTITY_RANGE(1)) STAT_VALUE = STAT_VALUE + WALL(IW)%AW 
                      END SELECT
                   ENDIF
                ENDDO WALL_CELL_LOOP
@@ -4024,28 +4026,42 @@ DEVICE_LOOP: DO N=1,N_DEVC
                                                                          DV%PROP_INDEX,T,NM)
                               STAT_COUNT = STAT_COUNT + 1
                            CASE('VOLUME INTEGRAL')
-                              STAT_VALUE = STAT_VALUE + GAS_PHASE_OUTPUT(I,J,K,DV%OUTPUT_INDEX,0,DV%Y_INDEX,DV%Z_INDEX,&
+                              VALUE = GAS_PHASE_OUTPUT(I,J,K,DV%OUTPUT_INDEX,0,DV%Y_INDEX,DV%Z_INDEX,&
                                                                          DV%PART_INDEX,DV%VELO_INDEX,DV%PIPE_INDEX,&
-                                                                         DV%PROP_INDEX,T,NM)*VOL
+                                                                         DV%PROP_INDEX,T,NM)
+                              IF (VALUE <= DV%QUANTITY_RANGE(2) .AND. VALUE >=DV%QUANTITY_RANGE(1)) &
+                                 STAT_VALUE = STAT_VALUE + VALUE*VOL
                            CASE('MASS INTEGRAL')
-                              STAT_VALUE = STAT_VALUE + GAS_PHASE_OUTPUT(I,J,K,DV%OUTPUT_INDEX,0,DV%Y_INDEX,DV%Z_INDEX,&
+                              VALUE = GAS_PHASE_OUTPUT(I,J,K,DV%OUTPUT_INDEX,0,DV%Y_INDEX,DV%Z_INDEX,&
                                                                          DV%PART_INDEX,DV%VELO_INDEX,DV%PIPE_INDEX,&
-                                                                         DV%PROP_INDEX,T,NM)*VOL*RHO(I,J,K)
+                                                                         DV%PROP_INDEX,T,NM)
+                              IF (VALUE <= DV%QUANTITY_RANGE(2) .AND. VALUE >=DV%QUANTITY_RANGE(1)) &
+                                 STAT_VALUE = STAT_VALUE + VALUE*VOL*RHO(I,J,K)
                            CASE('AREA INTEGRAL')
-                              SELECT CASE (ABS(DV%IOR))
-                                 CASE(1)
-                                    STAT_VALUE = STAT_VALUE + RC(I)*DY(J)*DZ(K)* &
-                                                 GAS_PHASE_OUTPUT(I,J,K,DV%OUTPUT_INDEX,0,DV%Y_INDEX,DV%Z_INDEX,&
+                              VALUE = GAS_PHASE_OUTPUT(I,J,K,DV%OUTPUT_INDEX,0,DV%Y_INDEX,DV%Z_INDEX,&
                                                                   DV%PART_INDEX,DV%VELO_INDEX,DV%PIPE_INDEX,DV%PROP_INDEX,T,NM)
-                                 CASE(2)
-                                    STAT_VALUE = STAT_VALUE + DX(I)*DZ(K)* &
-                                                 GAS_PHASE_OUTPUT(I,J,K,DV%OUTPUT_INDEX,0,DV%Y_INDEX,DV%Z_INDEX,&
-                                                                  DV%PART_INDEX,DV%VELO_INDEX,DV%PIPE_INDEX,DV%PROP_INDEX,T,NM)
-                                 CASE(3)
-                                    STAT_VALUE = STAT_VALUE + DX(I)*RC(I)*DY(J)* &
-                                                 GAS_PHASE_OUTPUT(I,J,K,DV%OUTPUT_INDEX,0,DV%Y_INDEX,DV%Z_INDEX,&
-                                                                  DV%PART_INDEX,DV%VELO_INDEX,DV%PIPE_INDEX,DV%PROP_INDEX,T,NM)
-                              END SELECT
+                              IF (VALUE <= DV%QUANTITY_RANGE(2) .AND. VALUE >=DV%QUANTITY_RANGE(1)) THEN
+                                 SELECT CASE (ABS(DV%IOR))
+                                    CASE(1)
+                                       STAT_VALUE = STAT_VALUE + RC(I)*DY(J)*DZ(K)*VALUE
+                                                 
+                                    CASE(2)
+                                       STAT_VALUE = STAT_VALUE + DX(I)*DZ(K)*VALUE
+                                    CASE(3)
+                                       STAT_VALUE = STAT_VALUE + DX(I)*RC(I)*DY(J)*VALUE
+                                    END SELECT
+                              ENDIF
+                           CASE('VOLUME')
+                              VALUE = GAS_PHASE_OUTPUT(I,J,K,DV%OUTPUT_INDEX,0,DV%Y_INDEX,DV%Z_INDEX,&
+                                                                         DV%PART_INDEX,DV%VELO_INDEX,DV%PIPE_INDEX,&
+                                                                         DV%PROP_INDEX,T,NM)
+                              IF (VALUE <= DV%QUANTITY_RANGE(2) .AND. VALUE >=DV%QUANTITY_RANGE(1)) STAT_VALUE = STAT_VALUE + VOL
+                           CASE('MASS')
+                              VALUE = GAS_PHASE_OUTPUT(I,J,K,DV%OUTPUT_INDEX,0,DV%Y_INDEX,DV%Z_INDEX,&
+                                                                         DV%PART_INDEX,DV%VELO_INDEX,DV%PIPE_INDEX,&
+                                                                         DV%PROP_INDEX,T,NM)
+                              IF (VALUE <= DV%QUANTITY_RANGE(2) .AND. VALUE >=DV%QUANTITY_RANGE(1)) &
+                                 STAT_VALUE = STAT_VALUE + VOL*RHO(I,J,K)
                            CASE('TENSOR SURFACE INTEGRAL')
                               ! similar to 'AREA INTEGRAL' but multiplies by outward unit normal and sums along outside of XB
                               IND=0

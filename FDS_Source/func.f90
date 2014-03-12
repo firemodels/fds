@@ -209,10 +209,10 @@ SELECT CASE (STATISTICS)
          UNITS = 'J'
          I = 1
       ENDIF
-   CASE('AREA INTEGRAL')
-      I = INDEX(UNITS,'/m2')
-      IF (I/=0) WRITE(UNITS,'(A,A)') UNITS(1:I-1),UNITS(I+3:UNIT_L)
-   CASE('SURFACE INTEGRAL')
+   CASE('MASS INTEGRAL')      
+      I = INDEX(UNITS,'/kg')
+      IF (I/=0) WRITE(UNITS,'(A,A)') UNITS(1:I-1),UNITS(I+3:UNIT_L)      
+   CASE('AREA INTEGRAL','SURFACE INTEGRAL')
       I = INDEX(UNITS,'/m2')
       IF (I/=0) WRITE(UNITS,'(A,A)') UNITS(1:I-1),UNITS(I+3:UNIT_L)
    CASE('TIME INTEGRAL')
@@ -225,6 +225,12 @@ SELECT CASE (STATISTICS)
          IF (I>1)  WRITE(UNITS,'(A,A,A)') UNITS(1:I-1),'kJ',UNITS(I+2:UNIT_L)
       ENDIF
       IF (QUANTITY=='FED') I=1
+   CASE ('MASS')
+      UNITS = 'kg'
+   CASE ('VOLUME')
+      UNITS = 'm3'
+   CASE ('AREA','SURFACE AREA')
+      UNITS = 'm2'
    CASE DEFAULT
       RETURN
 END SELECT
