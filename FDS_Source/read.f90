@@ -8247,18 +8247,18 @@ MESH_LOOP_1: DO NM=1,NMESHES
                IF (ABS(XB1-XB2)<=SPACING(XB2) ) VT%TOTAL_INPUT_AREA = (XB4-XB3)*(XB6-XB5)
                IF (ABS(XB3-XB4)<=SPACING(XB4) ) VT%TOTAL_INPUT_AREA = (XB2-XB1)*(XB6-XB5)
                IF (ABS(XB5-XB6)<=SPACING(XB6) ) VT%TOTAL_INPUT_AREA = (XB2-XB1)*(XB4-XB3)
-
+             
                XB1 = MAX(XB1,XS)
                XB2 = MIN(XB2,XF)
                XB3 = MAX(XB3,YS)
                XB4 = MIN(XB4,YF)
                XB5 = MAX(XB5,ZS)
                XB6 = MIN(XB6,ZF)
-
-               IF (XB1>XF .OR. XB2<XS .OR. &
-                   XB3>YF .OR. XB4<YS .OR. &
-                   XB5>ZF .OR. XB6<ZS) REJECT_VENT = .TRUE.
-
+            
+               IF ((XB1-XF)>SPACING(XF) .OR. (XS-XB2)>SPACING(XS) .OR. &
+                   (XB3-YF)>SPACING(YF) .OR. (YS-XB4)>SPACING(YS) .OR. &
+                   (XB5-ZF)>SPACING(ZF) .OR. (ZS-XB6)>SPACING(ZS)) REJECT_VENT = .TRUE.
+              
                VT%I1 = MAX(0,   NINT(GINV(XB1-XS,1,NM)*RDXI   ))
                VT%I2 = MIN(IBAR,NINT(GINV(XB2-XS,1,NM)*RDXI   ))
                VT%J1 = MAX(0,   NINT(GINV(XB3-YS,2,NM)*RDETA  ))
