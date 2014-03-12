@@ -1715,8 +1715,8 @@ public:
 
     #ifdef _MSC_VER
     // Explicit template instantiation needed for dll
-    template class GLUIAPI std::allocator<GLUI_String>;
-    template class GLUIAPI std::vector<GLUI_String, std::allocator<GLUI_String> >;
+    //template class GLUIAPI std::allocator<GLUI_String>;
+    //template class GLUIAPI std::vector<GLUI_String, std::allocator<GLUI_String> >;
     #endif
 
     std::vector<GLUI_String> hist_list;
