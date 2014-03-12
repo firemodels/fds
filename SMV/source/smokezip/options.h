@@ -83,6 +83,16 @@
 #define pp_cvf
 #endif
 
+// used to access fortran routines from C
+
+#ifndef _F
+#ifdef pp_noappend
+#define _F(name) name
+#else
+#define _F(name) name ## _
+#endif
+#endif
+
 #ifdef pp_release
 #define PROGVERSION "1.4.6"
 #endif

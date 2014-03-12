@@ -15,11 +15,8 @@
 // svn revision character string
 char CNVplot3d_revision[]="$Revision$";
 
-#ifndef pp_noappend
-#define FORTgetplot3dq getplot3dq_
-#else
-#define FORTgetplot3dq getplot3dq
-#endif
+
+#define FORTgetplot3dq _F(getplot3dq)
 
 STDCALLF FORTgetplot3dq(char *qfilename, int *nx, int *ny, int *nz, float *qq, int *error, int *endian, int *isotest, FILE_SIZE filelen);
 
