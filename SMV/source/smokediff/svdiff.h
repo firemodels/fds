@@ -130,41 +130,23 @@ int similar_grid(mesh *mesh1, mesh *mesh2, int *factor);
 int exact_grid(mesh *mesh1, mesh *mesh2, int *factor);
 int getpatchindex(int in1, boundary *boundaryin, boundary *boundaryout);
 
-#ifdef pp_noappend
-#define FORTgetsliceparms getsliceparms
-#define FORTclosefortranfile closefortranfile
-#define FORTopenslice openslice
-#define FORTgetsliceframe getsliceframe
-#define FORToutsliceframe outsliceframe
-#define FORToutsliceheader outsliceheader
-#define FORTgetplot3dq getplot3dq
-#define FORTplot3dout plot3dout
-#define FORTgetboundaryheader1 getboundaryheader1
-#define FORTgetboundaryheader2 getboundaryheader2
-#define FORTopenboundary openboundary
-#define FORTgetpatchdata getpatchdata
-#define FORToutboundaryheader outboundaryheader
-#define FORToutpatchframe outpatchframe
-#define FORTendianout endianout
-#define FORTget_file_unit get_file_unit
-#else
-#define FORTgetsliceparms getsliceparms_
-#define FORTclosefortranfile closefortranfile_
-#define FORTopenslice openslice_
-#define FORTgetsliceframe getsliceframe_
-#define FORToutsliceframe outsliceframe_
-#define FORToutsliceheader outsliceheader_
-#define FORTgetplot3dq getplot3dq_
-#define FORTplot3dout plot3dout_
-#define FORTgetboundaryheader1 getboundaryheader1_
-#define FORTgetboundaryheader2 getboundaryheader2_
-#define FORTopenboundary openboundary_
-#define FORTgetpatchdata getpatchdata_
-#define FORToutboundaryheader outboundaryheader_
-#define FORToutpatchframe outpatchframe_
-#define FORTendianout endianout_
-#define FORTget_file_unit get_file_unit_
-#endif
+#define FORTgetsliceparms _F(getsliceparms)
+#define FORTclosefortranfile _F(closefortranfile)
+#define FORTopenslice _F(openslice)
+#define FORTgetsliceframe _F(getsliceframe)
+#define FORToutsliceframe _F(outsliceframe)
+#define FORToutsliceheader _F(outsliceheader)
+#define FORTgetplot3dq _F(getplot3dq)
+#define FORTplot3dout _F(plot3dout)
+#define FORTgetboundaryheader1 _F(getboundaryheader1)
+#define FORTgetboundaryheader2 _F(getboundaryheader2)
+#define FORTopenboundary _F(openboundary)
+#define FORTgetpatchdata _F(getpatchdata)
+#define FORToutboundaryheader _F(outboundaryheader)
+#define FORToutpatchframe _F(outpatchframe)
+#define FORTendianout _F(endianout)
+#define FORTget_file_unit _F(get_file_unit)
+
 STDCALLF FORTget_file_unit(int *file_unit, int *file_unit_start);
 STDCALLF FORToutpatchframe(int *lunit, int *npatch,
                           int *pi1, int *pi2, int *pj1, int *pj2, int *pk1, int *pk2,
