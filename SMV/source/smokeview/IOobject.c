@@ -511,7 +511,7 @@ void draw_devices_val(void){
           }
           break;
         default:
-          ASSERT(0);
+          ASSERT(FFALSE);
           break;
       }
       if(devicei->visval>128){

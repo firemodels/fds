@@ -390,7 +390,7 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
           }
           break;
         default:
-          ASSERT(0);
+          ASSERT(FFALSE);
           break;
       }
     }

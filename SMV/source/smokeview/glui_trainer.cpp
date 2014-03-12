@@ -415,7 +415,7 @@ void TRAINER_CB(int var){
     ColorBarMenu(COLORBAR_FLIP);
     break;
   default:
-    ASSERT(0);
+    ASSERT(FFALSE);
     break;
   }
 }

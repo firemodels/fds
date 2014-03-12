@@ -103,7 +103,7 @@ void drawtrees(void){
         drawcone(treei->trunk_diam,crown_height,trunccolor);
         break;
       default:
-        ASSERT(0);
+        ASSERT(FFALSE);
         break;
     }
     glPopMatrix();

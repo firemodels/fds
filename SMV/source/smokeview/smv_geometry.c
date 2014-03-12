@@ -1674,7 +1674,7 @@ mesh *getmesh_in_smesh(mesh *mesh_guess, supermesh *smesh, float *xyz){
         return meshi;
     }
   }
-  ASSERT(0);
+  ASSERT(FFALSE);
   return NULL;
 }
 

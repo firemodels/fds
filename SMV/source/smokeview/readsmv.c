@@ -9146,7 +9146,7 @@ int readini2(char *inifile, int localfile){
               propi->user_min=vmin;
               break;
             default:
-              ASSERT(0);
+              ASSERT(FFALSE);
               break;
           }
           switch (ivmax){
@@ -9160,7 +9160,7 @@ int readini2(char *inifile, int localfile){
               propi->user_max=vmax;
               break;
             default:
-              ASSERT(0);
+              ASSERT(FFALSE);
               break;
           }
         }

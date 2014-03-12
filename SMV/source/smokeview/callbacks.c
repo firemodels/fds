@@ -51,7 +51,7 @@ int get_index(float x, int dir, float *plotxyz, int nplotxyz){
       x=NORMALIZE_X(x);
       break;
     default:
-      ASSERT(0);
+      ASSERT(FFALSE);
       break;
   }
 
@@ -608,7 +608,7 @@ int colorbar_click(int x, int y){
     UpdateRGBColors(COLORBAR_INDEX_NONE);
   }
   else{
-    ASSERT(0);
+    ASSERT(FFALSE);
   }
   return 0;
 }
@@ -709,7 +709,7 @@ void update_mouseinfo(int flag, int xm, int ym){
       mi->lastangle = mi->angle;
       break;
     default:
-      ASSERT(0);
+      ASSERT(FFALSE);
       break;
   }
   
@@ -1023,7 +1023,7 @@ void Drag_Tour_Node(int xm, int ym){
       }
       break;
     default:
-      ASSERT(0);
+      ASSERT(FFALSE);
       break;
   }
 }
@@ -1083,7 +1083,7 @@ void Move_Gen_Slice(int xm, int ym){
     case KEY_SHIFT:
     break;
     default:
-      ASSERT(0);
+      ASSERT(FFALSE);
       break;
   }
 }
@@ -2098,7 +2098,7 @@ void keyboard(unsigned char key, int flag){
       next_zindex(skip_global*FlowDir,0);
       break;
     default:
-      ASSERT(0);
+      ASSERT(FFALSE);
       break;
   }
   if(ReadPlot3dFile==1&&visiso !=0 && current_mesh->slicedir==4){
@@ -2290,7 +2290,7 @@ void handle_plot3d_keys(int  key){
         next_zindex(0,-1);
         break;
       default:
-        ASSERT(0);
+        ASSERT(FFALSE);
         break;
     }
     break;
@@ -2307,12 +2307,12 @@ void handle_plot3d_keys(int  key){
         next_zindex(0,1);
         break;
       default:
-        ASSERT(0);
+        ASSERT(FFALSE);
         break;
     }
     break;
   default:
-    ASSERT(0);
+    ASSERT(FFALSE);
     break;
   }
   if(iplot_state!=0)updateplotslice(iplot_state);
@@ -2910,7 +2910,7 @@ void Display_CB(void){
         update_glui_dialogs=0;
         break;
       default:
-        ASSERT(0);
+        ASSERT(FFALSE);
         break;
     }
   }

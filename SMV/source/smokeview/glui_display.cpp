@@ -1085,7 +1085,7 @@ void Text_Labels_CB(int var){
       memcpy(LABEL_global_ptr->xyz,gl->xyz,3*sizeof(float));
       break;
     default:
-      ASSERT(0);
+      ASSERT(FFALSE);
       break;
   }
 }
@@ -1103,7 +1103,7 @@ extern "C" void Volume_CB(int var){
       box_bounds[5]=box_bounds2[5]+box_translate[2];
       break;
     default:
-      ASSERT(0);
+      ASSERT(FFALSE);
       break;
   }
 }

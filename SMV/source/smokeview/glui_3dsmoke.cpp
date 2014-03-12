@@ -187,7 +187,7 @@ void Update_Smoke_Type(void){
       if(PANEL_volume!=NULL)PANEL_volume->open();
       break;
     default:
-      ASSERT(0);
+      ASSERT(FFALSE);
       break;
   }
 }

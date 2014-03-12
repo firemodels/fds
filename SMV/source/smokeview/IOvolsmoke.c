@@ -457,7 +457,7 @@ void get_cum_smokecolor(float *cum_smokecolor, float *xyzvert, float dstep, mesh
         vert_end[2] = boxmax[2];
         break;
       default:
-        ASSERT(0);
+        ASSERT(FFALSE);
         break;
     }
   }
@@ -692,7 +692,7 @@ void compute_all_smokecolors(void){
           }
           break;
         default:
-          ASSERT(0);
+          ASSERT(FFALSE);
           break;
       }
     }
@@ -778,7 +778,7 @@ void drawsmoke3dVOLdebug(void){
         output3Text(foregroundcolor, (x[0]+x[1])/2.0,(y[0]+y[1])/2.0,(z[0]+z[1])/2.0, label);
         break;
       default:
-        ASSERT(0);
+        ASSERT(FFALSE);
         break;
     }
   }
@@ -866,7 +866,7 @@ void drawsmoke3dVOLdebug(void){
         glVertex3f(x[1],y[0],z[0]);
         break;
       default:
-        ASSERT(0);
+        ASSERT(FFALSE);
         break;
     }
   }
@@ -1196,7 +1196,7 @@ void drawsmoke3dVOL(void){
         }
         break;
       default:
-        ASSERT(0);
+        ASSERT(FFALSE);
         break;
     }
     glEnd();
@@ -1591,7 +1591,7 @@ void drawsmoke3dGPUVOL(void){
         }
         break;
       default:
-        ASSERT(0);
+        ASSERT(FFALSE);
         break;
     }
     glEnd();

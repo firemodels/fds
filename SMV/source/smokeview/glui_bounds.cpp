@@ -1227,7 +1227,7 @@ extern "C" void PLOT3D_CB(int var){
         EDIT_p3_chopmin->enable();
         break;
       default:
-        ASSERT(0);
+        ASSERT(FFALSE);
         break;
     }
     break;
@@ -1241,7 +1241,7 @@ extern "C" void PLOT3D_CB(int var){
         EDIT_p3_chopmax->enable();
         break;
       default:
-        ASSERT(0);
+        ASSERT(FFALSE);
         break;
     }
     break;
@@ -1320,7 +1320,7 @@ extern "C" void PLOT3D_CB(int var){
       EDIT_p3_min->enable();
       break;
     default:
-      ASSERT(0);
+      ASSERT(FFALSE);
       break;
    }
    break;
@@ -1335,7 +1335,7 @@ extern "C" void PLOT3D_CB(int var){
         EDIT_p3_max->enable();
         break;
       default:
-        ASSERT(0);
+        ASSERT(FFALSE);
         break;
      }
    break;
@@ -1354,7 +1354,7 @@ extern "C" void PLOT3D_CB(int var){
    updateglui();
    break;
   default:
-    ASSERT(0);
+    ASSERT(FFALSE);
     break;
   }
 }
@@ -1452,7 +1452,7 @@ void Iso_CB(int var){
     updatemenu=1;
     break;
   default:
-    ASSERT(0);
+    ASSERT(FFALSE);
     break;
   }
 }
@@ -1464,7 +1464,7 @@ void Smoke3D_CB(int var){
     updatemenu=1;
     break;
   default:
-    ASSERT(0);
+    ASSERT(FFALSE);
     break;
   }
 }
@@ -1666,7 +1666,7 @@ extern "C"  void glui_script_disable(void){
     case SCRIPT_SETSUFFIX:
       break;
     default:
-      ASSERT(0);
+      ASSERT(FFALSE);
       break;
     }
   }
@@ -1681,7 +1681,7 @@ extern "C"  void glui_script_disable(void){
       set_memcheck(list_memcheck_index);
       break;
     default:
-      ASSERT(0);
+      ASSERT(FFALSE);
       break;
     }
 }
@@ -1726,7 +1726,7 @@ void Bound_CB(int var){
       EDIT_patch_chopmin->enable();
       break;
     default:
-      ASSERT(0);
+      ASSERT(FFALSE);
       break;
     }
     update_hidepatchsurface();
@@ -1742,7 +1742,7 @@ void Bound_CB(int var){
         EDIT_patch_chopmax->enable();
         break;
       default:
-        ASSERT(0);
+        ASSERT(FFALSE);
         break;
     }
     update_hidepatchsurface();
@@ -1795,7 +1795,7 @@ void Bound_CB(int var){
         EDIT_patch_chopmin->enable();
         break;
       default:
-        ASSERT(0);
+        ASSERT(FFALSE);
         break;
     }
     switch (setpatchchopmax){
@@ -1806,7 +1806,7 @@ void Bound_CB(int var){
         EDIT_patch_chopmax->enable();
         break;
       default:
-        ASSERT(0);
+        ASSERT(FFALSE);
         break;
     }
 
@@ -1823,7 +1823,7 @@ void Bound_CB(int var){
       EDIT_patch_min->enable();
       break;
     default:
-      ASSERT(0);
+      ASSERT(FFALSE);
       break;
     }
     Bound_CB(FILEUPDATE);
@@ -1838,7 +1838,7 @@ void Bound_CB(int var){
       EDIT_patch_max->enable();
       break;
     default:
-      ASSERT(0);
+      ASSERT(FFALSE);
       break;
     }
     Bound_CB(FILEUPDATE);
@@ -1890,7 +1890,7 @@ void Bound_CB(int var){
       load_startup_smoke();
     break;
   default:
-    ASSERT(0);
+    ASSERT(FFALSE);
     break;
   }
 }
@@ -2074,7 +2074,7 @@ void PART_CB(int var){
       EDIT_part_chopmin->enable();
       break;
     default:
-      ASSERT(0);
+      ASSERT(FFALSE);
       break;
     }
     break;
@@ -2090,7 +2090,7 @@ void PART_CB(int var){
       EDIT_part_chopmax->enable();
       break;
     default:
-      ASSERT(0);
+      ASSERT(FFALSE);
       break;
     }
     break;
@@ -2125,7 +2125,7 @@ void PART_CB(int var){
       if(EDIT_part_min!=NULL)EDIT_part_min->enable();
       break;
     default:
-      ASSERT(0);
+      ASSERT(FFALSE);
       break;
     }
     if(prop_new!=NULL)prop_new->valmin=partmin;
@@ -2150,7 +2150,7 @@ void PART_CB(int var){
       if(EDIT_part_max!=NULL)EDIT_part_max->enable();
       break;
     default:
-      ASSERT(0);
+      ASSERT(FFALSE);
       break;
     }
     if(prop_new!=NULL)prop_new->valmax=partmax;
@@ -2170,7 +2170,7 @@ void PART_CB(int var){
     }
     break;
   default:
-    ASSERT(0);
+    ASSERT(FFALSE);
     break;
   }
 }
@@ -2214,7 +2214,7 @@ void Time_CB(int var){
     ReloadMenu(RELOAD_NOW);
     break;
   default:
-    ASSERT(0);
+    ASSERT(FFALSE);
     break;
   }
 }
@@ -2414,7 +2414,7 @@ extern "C" void Slice_CB(int var){
         EDIT_slice_chopmin->enable();
         break;
       default:
-        ASSERT(0);
+        ASSERT(FFALSE);
         break;
     }
     break;
@@ -2429,7 +2429,7 @@ extern "C" void Slice_CB(int var){
       EDIT_slice_chopmax->enable();
       break;
     default:
-      ASSERT(0);
+      ASSERT(FFALSE);
       break;
     }
     break;
@@ -2456,7 +2456,7 @@ extern "C" void Slice_CB(int var){
       EDIT_slice_min->enable();
       break;
     default:
-      ASSERT(0);
+      ASSERT(FFALSE);
       break;
     }
     if(RADIO_slice_setmin!=NULL)RADIO_slice_setmin->set_int_val(setslicemin);
@@ -2473,7 +2473,7 @@ extern "C" void Slice_CB(int var){
         EDIT_slice_max->enable();
         break;
       default:
-        ASSERT(0);
+        ASSERT(FFALSE);
         break;
     }
     if(RADIO_slice_setmax!=NULL)RADIO_slice_setmax->set_int_val(setslicemax);
@@ -2522,7 +2522,7 @@ extern "C" void Slice_CB(int var){
       EDIT_slice_min->enable();
       break;
     default:
-      ASSERT(0);
+      ASSERT(FFALSE);
       break;
     }
     ASSERT(EDIT_slice_max!=NULL);
@@ -2536,7 +2536,7 @@ extern "C" void Slice_CB(int var){
       EDIT_slice_max->enable();
       break;
     default:
-      ASSERT(0);
+      ASSERT(FFALSE);
       break;
     }
 
@@ -2583,7 +2583,7 @@ extern "C" void Slice_CB(int var){
     updateglui();
     break;
   default:
-    ASSERT(0);
+    ASSERT(FFALSE);
     break;
   }
 }
@@ -2662,7 +2662,7 @@ void Bounds_DLG_CB(int var){
     PRINTF("compressing\n");
     break;
   default:
-    ASSERT(0);
+    ASSERT(FFALSE);
     break;
   }
 }

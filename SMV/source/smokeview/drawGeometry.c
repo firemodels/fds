@@ -680,7 +680,7 @@ void DrawCircVentsApproxSolid(int option){
           }
           break;
         default:
-          ASSERT(0);
+          ASSERT(FFALSE);
           break;
       }
     }
@@ -868,7 +868,7 @@ void DrawCircVentsApproxOutline(int option){
           }
           break;
         default:
-          ASSERT(0);
+          ASSERT(FFALSE);
           break;
       }
     }
@@ -965,7 +965,7 @@ void DrawCircVentsExactSolid(int option){
           height = cvi->ymax-cvi->ymin;
           break;
         default:
-          ASSERT(0);
+          ASSERT(FFALSE);
           break;
       }
       if(option==VENT_CIRCLE){
@@ -1071,7 +1071,7 @@ void DrawCircVentsExactOutline(int option){
           height = cvi->ymax-cvi->ymin;
           break;
         default:
-          ASSERT(0);
+          ASSERT(FFALSE);
           break;
       }
       if(option==VENT_CIRCLE){
@@ -1528,7 +1528,7 @@ void SetCVentDirs(void){
           ny = cvi->jmax - cvi->jmin;
           break;
         default:
-          ASSERT(0);
+          ASSERT(FFALSE);
           break;
       }
       nx+=2;
@@ -1606,7 +1606,7 @@ void SetCVentDirs(void){
         }
         break;
       default:
-        ASSERT(0);
+        ASSERT(FFALSE);
         break;
       }
     }
@@ -3140,7 +3140,7 @@ int comparesinglefaces0( const void *arg1, const void *arg2 ){
       if(facei->jmax>facej->jmax)return 1;
       break;
     default:
-      ASSERT(0);
+      ASSERT(FFALSE);
       break;
   }
   if(facei->color<facej->color)return  1;
@@ -3184,7 +3184,7 @@ int comparesinglefaces( const void *arg1, const void *arg2 ){
       if(facei->kmin>facej->kmin)return 1;
       break;
     default:
-      ASSERT(0);
+      ASSERT(FFALSE);
       break;
   }
   if(facei->color<facej->color)return  1;
@@ -3537,7 +3537,7 @@ void UpdateFacelists(void){
             meshi->nface_normals_single_UP_Z++;
             break;
           default:
-            ASSERT(0);
+            ASSERT(FFALSE);
             break;
         }
       }
@@ -5308,7 +5308,7 @@ void draw_user_ticks(void){
         show_tick_y = 1;
         break;
       default:
-        ASSERT(0);
+        ASSERT(FFALSE);
         break;
     }
   }
@@ -5673,7 +5673,7 @@ int get_tick_dir(float *mm){
       if(i>0)norm[2]=1.0;
       break;
     default:
-      ASSERT(0);
+      ASSERT(FFALSE);
       break;
     }
     scalednorm[0]=norm[0]*mscale[0];

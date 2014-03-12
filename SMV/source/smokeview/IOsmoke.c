@@ -4211,7 +4211,7 @@ void drawsmoke3dCULL(void){
           aspectratio = meshi->dxz;
           break;
         default:
-          ASSERT(0);
+          ASSERT(FFALSE);
           break;
         }
 	    {

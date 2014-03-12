@@ -359,7 +359,7 @@ void SHOOTER_CB(int var){
       hide_glui_shooter();
       break;
     default:
-      ASSERT(0);
+      ASSERT(FFALSE);
       break;
   }
 }

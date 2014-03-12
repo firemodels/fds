@@ -1344,7 +1344,7 @@ void drawzonesmokeGPU(roomdata *roomi){
         }
         break;
       default:
-        ASSERT(0);
+        ASSERT(FFALSE);
         break;
     }
     glEnd();
@@ -1434,7 +1434,7 @@ void drawzonesmoke(roomdata *roomi){
         }
         break;
       default:
-        ASSERT(0);
+        ASSERT(FFALSE);
         break;
     }
 

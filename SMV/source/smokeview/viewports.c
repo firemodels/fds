@@ -46,7 +46,7 @@ int getStringWidth(char *string){
       length *= (283.0/402.0)*scale_2d_x;
       break;
     default:
-      ASSERT(0);
+      ASSERT(FFALSE);
       break;
   }
   return length;

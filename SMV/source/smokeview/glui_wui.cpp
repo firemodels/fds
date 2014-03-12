@@ -254,7 +254,7 @@ extern "C" void WUI_CB(int var){
     break;
 
   default:
-    ASSERT(0);
+    ASSERT(FFALSE);
     break;
   }
 }

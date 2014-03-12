@@ -807,7 +807,7 @@ void Gslice_CB(int var){
       gslice_xyz[2]=CLAMP(gslice_xyz[2],zbar0,DENORMALIZE_Z(zbar));
       break;
     default:
-      ASSERT(0);
+      ASSERT(FFALSE);
       break;
   }
 }
@@ -934,7 +934,7 @@ extern "C" void Motion_CB(int var){
           glui_screenHeight=1024;
           break;
         default:
-          ASSERT(0);
+          ASSERT(FFALSE);
           break;
       }
       if(windowsize_pointer>=2){
@@ -1011,7 +1011,7 @@ extern "C" void Motion_CB(int var){
     case GLUI_Z:
       break;
     default:
-      ASSERT(0);
+      ASSERT(FFALSE);
       break;
   }
   
@@ -1131,7 +1131,7 @@ void Motion_DLG_CB(int var){
     writeini(LOCAL_INI,NULL);
     break;
   default:
-    ASSERT(0);
+    ASSERT(FFALSE);
     break;
   }
 }
@@ -1415,7 +1415,7 @@ void Render_CB(int var){
       RenderMenu(RenderCancel);
       break;
     default:
-      ASSERT(0);
+      ASSERT(FFALSE);
       break;
   }
 }

@@ -383,7 +383,7 @@ int mergescreenbuffers(int nscreen_rows, GLubyte **screenbuffers){
     gdImageJpeg(RENDERimage,RENDERfile,-1);
     break;
   default:
-    ASSERT(0);
+    ASSERT(FFALSE);
     break;
   }
   fclose(RENDERfile);
@@ -509,7 +509,7 @@ int SVimage2file(char *directory, char *RENDERfilename, int rendertype, int woff
     gdImageJpeg(RENDERimage,RENDERfile,-1);
     break;
   default:
-    ASSERT(0);
+    ASSERT(FFALSE);
     break;
   }
 

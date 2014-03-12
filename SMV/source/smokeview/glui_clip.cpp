@@ -308,7 +308,7 @@ void CLIP_CB(int var){
     updatefacelists=1;
     break;
   default:
-    ASSERT(0);
+    ASSERT(FFALSE);
     break;
   }
   if(var>=CLIP_xlower&&var<=CLIP_zupper){

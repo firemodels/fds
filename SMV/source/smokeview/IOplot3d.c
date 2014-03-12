@@ -1386,7 +1386,7 @@ int get_plot3d_index(mesh *meshi, int dir, float val){
       nvals = meshi->kbar;
       break;
     default:
-      ASSERT(0);
+      ASSERT(FFALSE);
       break;
   }
   

@@ -1794,7 +1794,7 @@ void HelpMenu(int value){
     case 999:
       break;
     default:
-      ASSERT(0);
+      ASSERT(FFALSE);
       break;
   }
 }
@@ -1995,7 +1995,7 @@ void GridSliceMenu(int value){
         visGrid=GridnoProbe;
         break;
       default:
-        ASSERT(0);
+        ASSERT(FFALSE);
         break;
     }
     break;
@@ -2014,7 +2014,7 @@ void GridSliceMenu(int value){
         visGrid=noGridProbe;
         break;
       default:
-        ASSERT(0);
+        ASSERT(FFALSE);
         break;
     }
     break;
@@ -4120,7 +4120,7 @@ void ImmersedMenu(int value){
       }
       break;
     default:
-      ASSERT(0);
+      ASSERT(FFALSE);
       break;
   }
   visAIso=showtrisurface*1+showtrioutline*2+showtripoints*4;
@@ -4178,7 +4178,7 @@ void BlockageMenu(int value){
     case BLOCKlocation_cad:
       break;
     default:
-      ASSERT(0);
+      ASSERT(FFALSE);
       break;
   }
   if(change_state==1){
@@ -4201,12 +4201,12 @@ void BlockageMenu(int value){
             value=visBLOCKOutline;
             break;
           default:
-            ASSERT(0);
+            ASSERT(FFALSE);
             break;
         }
         break;
       default:
-        ASSERT(0);
+        ASSERT(FFALSE);
         break;
     }
   }
@@ -5751,7 +5751,7 @@ updatemenu=0;
           glutAddMenuEntry(_("    hazard"),5);
           break;
         default:
-          ASSERT(0);
+          ASSERT(FFALSE);
           break;
       }
       if(sethazardcolor!=2){
@@ -5770,7 +5770,7 @@ updatemenu=0;
           glutAddMenuEntry(_("  *3D smoke"),7);
           break;
         default:
-          ASSERT(0);
+          ASSERT(FFALSE);
           break;
       }
       if(visZone==0){
@@ -7561,7 +7561,7 @@ updatemenu=0;
       glutAddMenuEntry(_("horizontal/vertical: rotate about user location"),1);
       break;
     default:
-      ASSERT(0);
+      ASSERT(FFALSE);
       break;
   }
   switch (rotation_type){
@@ -7573,7 +7573,7 @@ updatemenu=0;
       glutAddMenuEntry(_("CTRL horizontal/vertical: translate along x, y axis"),1);
       break;
     default:
-      ASSERT(0);
+      ASSERT(FFALSE);
       break;
   }
   glutAddMenuEntry(    _("ALT vertical: translate along z axis"),1);

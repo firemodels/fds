@@ -265,7 +265,7 @@ void adjustpart5bounds(partdata *parti){
       propi->valmin=propi->user_min;
       break;
     default:
-      ASSERT(0);
+      ASSERT(FFALSE);
       break;
     }
     switch (propi->setvalmax){
@@ -279,7 +279,7 @@ void adjustpart5bounds(partdata *parti){
       propi->valmax=propi->user_max;
       break;
     default:
-      ASSERT(0);
+      ASSERT(FFALSE);
       break;
     }
   }

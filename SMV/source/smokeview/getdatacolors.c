@@ -1501,7 +1501,7 @@ void Update_Smokecolormap(int option){
       }
       break;
     default:
-      ASSERT(0);
+      ASSERT(FFALSE);
       break;
   }
   Update_Texturebar();

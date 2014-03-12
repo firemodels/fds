@@ -378,7 +378,7 @@ void readfed(int file_index, int flag, int file_type, int *errorcode){
       nydata = co->js2 + 1 - co->js1;
       break;
     default:
-      ASSERT(0);
+      ASSERT(FFALSE);
       break;
   }
 
@@ -442,7 +442,7 @@ void readfed(int file_index, int flag, int file_type, int *errorcode){
         }
         break;
       default:
-        ASSERT(0);
+        ASSERT(FFALSE);
         break;
     }
     PRINTF("\n");
@@ -2873,7 +2873,7 @@ void update_slice_contours(int slice_type_index, float line_min, float line_max,
       constval = zplt[sd->ks1]+offset_slice*sd->sliceoffset;
       break;
       default:
-        ASSERT(0);
+        ASSERT(FFALSE);
         break;
     }
 
@@ -2897,7 +2897,7 @@ void update_slice_contours(int slice_type_index, float line_min, float line_max,
         getlinecontours(xplt,yplt,nx,ny,vals,NULL,line_min,line_max,ci);
         break;
         default:
-          ASSERT(0);
+          ASSERT(FFALSE);
           break;
       }
     }
@@ -3325,7 +3325,7 @@ void drawslice_frame(){
           SNIFF_ERRORS("after drawvolslice_terrain");
           break;
         default:
-          ASSERT(0);
+          ASSERT(FFALSE);
           break;
       }
   }

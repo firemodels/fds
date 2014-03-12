@@ -168,7 +168,7 @@ void STEREO_CB(int var){
     writeini(LOCAL_INI,NULL);
     break;
   default:
-    ASSERT(0);
+    ASSERT(FFALSE);
     break;
   }
 }

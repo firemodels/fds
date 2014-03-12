@@ -137,7 +137,7 @@ void CCsmoke3dtofile(char *file, float *smoke_time, float *dx, int *type, float 
 
     break;
   default:
-    ASSERT(0);
+    ASSERT(FFALSE);
   }
 
   nchars_out=rle(buffer_in,nchars_in,buffer_out);

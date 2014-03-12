@@ -1376,7 +1376,7 @@ void drawpatch_texture(const mesh *meshi){
     cpatchval_iframe=meshi->cpatchval_iframe_zlib;
     break;
   default:
-    ASSERT(0);
+    ASSERT(FFALSE);
   }
   patchi = patchinfo + meshi->patchfilenum;
 
@@ -1487,7 +1487,7 @@ void drawpatch_texture(const mesh *meshi){
             glTranslatef(0.00,0.0,dboundz);
             break;
           default:
-            ASSERT(0);
+            ASSERT(FFALSE);
             break;
         }
         glBegin(GL_TRIANGLES);
@@ -1570,7 +1570,7 @@ void drawpatch_texture(const mesh *meshi){
             glTranslatef(0.0,0.0,-dboundz);
             break;
           default:
-            ASSERT(0);
+            ASSERT(FFALSE);
             break;
         }
         glBegin(GL_TRIANGLES);
@@ -1674,7 +1674,7 @@ void drawpatch_texture_threshold(const mesh *meshi){
     cpatchval_iframe=meshi->cpatchval_iframe_zlib;
     break;
   default:
-    ASSERT(0);
+    ASSERT(FFALSE);
   }
   patchi = patchinfo + meshi->patchfilenum;
 
@@ -1984,7 +1984,7 @@ void drawpatch_threshold_cellcenter(const mesh *meshi){
     ASSERT(meshi->cpatchval_iframe_zlib!=NULL);
     break;
   default:
-    ASSERT(0);
+    ASSERT(FFALSE);
   }
   patchi = patchinfo + meshi->patchfilenum;
 
@@ -2266,7 +2266,7 @@ void drawpatch(const mesh *meshi){
     cpatchval_iframe=meshi->cpatchval_iframe_zlib;
     break;
   default:
-    ASSERT(0);
+    ASSERT(FFALSE);
   }
   patchi = patchinfo + meshi->patchfilenum;
 
@@ -2405,7 +2405,7 @@ void drawpatch(const mesh *meshi){
             glTranslatef(0.00,0.0,dboundz);
             break;
           default:
-            ASSERT(0);
+            ASSERT(FFALSE);
             break;
         }
         glBegin(GL_TRIANGLES);
@@ -2520,7 +2520,7 @@ void drawpatch(const mesh *meshi){
             glTranslatef(0.00,0.0,-dboundz);
             break;
           default:
-            ASSERT(0);
+            ASSERT(FFALSE);
             break;
         }
         glBegin(GL_TRIANGLES);
@@ -2660,7 +2660,7 @@ void drawpatch_cellcenter(const mesh *meshi){
     cpatchval_iframe=meshi->cpatchval_iframe_zlib;
     break;
   default:
-    ASSERT(0);
+    ASSERT(FFALSE);
   }
   patchi = patchinfo + meshi->patchfilenum;
 
@@ -2764,7 +2764,7 @@ void drawpatch_cellcenter(const mesh *meshi){
             glTranslatef(0.0,0.0,dboundz);
             break;
           default:
-            ASSERT(0);
+            ASSERT(FFALSE);
             break;
         }
         glBegin(GL_TRIANGLES);
@@ -2846,7 +2846,7 @@ void drawpatch_cellcenter(const mesh *meshi){
             glTranslatef(0.0,0.0,-dboundz);
             break;
           default:
-            ASSERT(0);
+            ASSERT(FFALSE);
             break;
         }
         glBegin(GL_TRIANGLES);
@@ -2941,7 +2941,7 @@ void drawonlythreshold(const mesh *meshi){
     ASSERT(meshi->cpatchval_iframe_zlib!=NULL);
     break;
   default:
-    ASSERT(0);
+    ASSERT(FFALSE);
   }
   patchi = patchinfo + meshi->patchfilenum;
 

@@ -1149,7 +1149,7 @@ void script_showplot3ddata(scriptdata *scripti){
       updatemenu=1;  
       break;
     default:
-      ASSERT(0);
+      ASSERT(FFALSE);
       break;
   }
   updateplotslice(dir);
@@ -1703,7 +1703,7 @@ int run_script(void){
       ColorBarMenu(COLORBAR_FLIP);
       break;
     default:
-      ASSERT(0);
+      ASSERT(FFALSE);
       break;
   }
   glutPostRedisplay();
