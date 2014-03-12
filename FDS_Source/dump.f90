@@ -3971,9 +3971,11 @@ DEVICE_LOOP: DO N=1,N_DEVC
                            STAT_VALUE = STAT_VALUE + VALUE
                            STAT_COUNT = STAT_COUNT + 1
                         CASE('SURFACE INTEGRAL')
-                           IF (VALUE <= DV%QUANTITY_RANGE(2) .AND. VALUE >=DV%QUANTITY_RANGE(1)) STAT_VALUE = STAT_VALUE + VALUE*WALL(IW)%AW 
+                           IF (VALUE <= DV%QUANTITY_RANGE(2) .AND. VALUE >=DV%QUANTITY_RANGE(1)) &
+                              STAT_VALUE = STAT_VALUE + VALUE*WALL(IW)%AW 
                         CASE('SURFACE AREA')
-                           IF (VALUE <= DV%QUANTITY_RANGE(2) .AND. VALUE >=DV%QUANTITY_RANGE(1)) STAT_VALUE = STAT_VALUE + WALL(IW)%AW 
+                           IF (VALUE <= DV%QUANTITY_RANGE(2) .AND. VALUE >=DV%QUANTITY_RANGE(1)) &
+                              STAT_VALUE = STAT_VALUE + WALL(IW)%AW 
                      END SELECT
                   ENDIF
                ENDDO WALL_CELL_LOOP
