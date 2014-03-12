@@ -344,7 +344,7 @@ void TRAINER_CB(int var){
       if(trainer_path_old!=-1){
         trainer_pause=0;
         CHECKBOX_pause->set_int_val(trainer_pause);
-        TourMenu(-2);
+        TourMenu(MENU_TOUR_MANUAL);
         rotation_type=ROTATION_2AXIS;
         handle_rotation_type(0);
         from_glui_trainer=1;
@@ -376,7 +376,7 @@ void TRAINER_CB(int var){
     ResetView(RESTORE_EXTERIOR_VIEW);
     break;
   case LOAD_SMOKE:
-    TrainerViewMenu(1);
+    TrainerViewMenu(MENU_TRAINER_smoke);
     break;
   case LOAD_TEMP:
 // kind of a hack, having to put in code seg twice, but this is required to get data chopping to work
@@ -385,14 +385,13 @@ void TRAINER_CB(int var){
        setslicebounds(islicetype);
       }
     }
-    TrainerViewMenu(2);
+    TrainerViewMenu(MENU_TRAINER_temp);
     updatechopcolors();
     if(slicebounds!=NULL&&islicetype!=-1){
       if(setslicechopmin==1||setslicechopmax==1){
        setslicebounds(islicetype);
       }
     }
-    //TrainerViewMenu(2);
     updatechopcolors();
     colorbarflip=1;
     ColorBarMenu(COLORBAR_FLIP);
@@ -404,14 +403,13 @@ void TRAINER_CB(int var){
        setslicebounds(islicetype);
       }
     }
-    TrainerViewMenu(3);
+    TrainerViewMenu(MENU_TRAINER_oxy);
     updatechopcolors();
     if(slicebounds!=NULL&&islicetype!=-1){
       if(setslicechopmin==1||setslicechopmax==1){
        setslicebounds(islicetype);
       }
     }
-   // TrainerViewMenu(3);
     updatechopcolors();
     colorbarflip=0;
     ColorBarMenu(COLORBAR_FLIP);

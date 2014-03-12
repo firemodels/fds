@@ -80,7 +80,7 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
   if(update_selectedtour_index==1){
     update_tourindex();
   }
-  if(trainer_mode==1&&fontindex!=LARGE_FONT)FontMenu(1);
+  if(trainer_mode==1&&fontindex!=LARGE_FONT)FontMenu(LARGE_FONT);
   if(updateindexcolors==1){
     UpdateIndexColors();
   }
@@ -88,7 +88,7 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
     force_isometric=0;
     projection_type=1;
     camera_current->projection_type=projection_type;
-    ZoomMenu(-2);
+    ZoomMenu(UPDATE_PROJECTION);
   }
   if(convert_ini==1){
     writeini(SCRIPT_INI,ini_to);
@@ -223,13 +223,13 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
  /* ++++++++++++++++++++++++ draw user ticks +++++++++++++++++++++++++ */
 
     if(vis_user_ticks==1){
-      antialias(1);
+      antialias(ON);
       setClipPlanes(NULL,CLIP_OFF);
       draw_user_ticks();
       if(mode!=DRAWSCENE||viscolorbarpath!=1){
         if(clip_mode==CLIP_BLOCKAGES_DATA)setClipPlanes(&clipinfo,CLIP_ON);
       }
-      antialias(0);
+      antialias(OFF);
       SNIFF_ERRORS("after drawticks");
     }
 
@@ -309,14 +309,14 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
   /* ++++++++++++++++++++++++ draw stereo parallax indicator +++++++++++++++++++++++++ */
   
   if(show_parallax==1){
-    antialias(1);
+    antialias(ON);
     glLineWidth(linewidth);
     glBegin(GL_LINES);
     glColor3fv(foregroundcolor);
     glVertex3f(0.75,0.0,0.25);
     glVertex3f(0.75,1.0,0.25);
     glEnd();
-    antialias(0);
+    antialias(OFF);
   }
 
   /* ++++++++++++++++++++++++ draw blockages +++++++++++++++++++++++++ */

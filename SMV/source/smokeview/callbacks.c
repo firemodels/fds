@@ -1369,9 +1369,9 @@ void keyboard(unsigned char key, int flag){
           gbi = meshinfo + i;
           if(gbi->plot3dfilenum==-1)continue;
           update_current_mesh(gbi);
-          updateplotslice(1);
-          updateplotslice(2);
-          updateplotslice(3);
+          updateplotslice(X_SLICE);
+          updateplotslice(Y_SLICE);
+          updateplotslice(Z_SLICE);
         }
         update_current_mesh(gbsave);
       }
@@ -1401,7 +1401,7 @@ void keyboard(unsigned char key, int flag){
     case 'c':
       switch (keystate){
       case GLUT_ACTIVE_ALT:
-        DialogMenu(18); // clip dialog
+        DialogMenu(DIALOG_CLIP); // clip dialog
         break;
       case GLUT_ACTIVE_CTRL:
       default:
@@ -1421,7 +1421,7 @@ void keyboard(unsigned char key, int flag){
     case 'C':
       switch (keystate){
         case GLUT_ACTIVE_ALT:
-          DialogMenu(23); // colorbar dialog
+          DialogMenu(DIALOG_COLORBAR); // colorbar dialog
           break;
         case GLUT_ACTIVE_CTRL:
         default: 
@@ -1452,7 +1452,7 @@ void keyboard(unsigned char key, int flag){
       }
       switch (keystate){
       case GLUT_ACTIVE_ALT:
-        DialogMenu(22); // display dialog
+        DialogMenu(DIALOG_DISPLAY); // display dialog
         break;
       case GLUT_ACTIVE_CTRL:
       default:
@@ -1470,7 +1470,7 @@ void keyboard(unsigned char key, int flag){
     case 'E':
       switch (keystate){
       case GLUT_ACTIVE_ALT:
-        DialogMenu(16); // edit geometry
+        DialogMenu(DIALOG_VIEW_GEOM); // edit geometry
         break;
       case GLUT_ACTIVE_CTRL:
       default:
@@ -1484,7 +1484,7 @@ void keyboard(unsigned char key, int flag){
     case 'f':
       switch (keystate){
       case GLUT_ACTIVE_ALT:
-        DialogMenu(14); // file/bounds dialog
+        DialogMenu(DIALOG_BOUNDS); // file/bounds dialog
         break;
       case GLUT_ACTIVE_CTRL:
       default:
@@ -1614,13 +1614,13 @@ void keyboard(unsigned char key, int flag){
       break;
 #endif
     case 'L':
-      UnloadSliceMenu(-2);
+      UnloadSliceMenu(UNLOAD_LAST);
       break;
     case 'm':
     case 'M':
       switch (keystate){
       case GLUT_ACTIVE_ALT:
-        DialogMenu(15); // motion dialog
+        DialogMenu(DIALOG_MOTION); // motion dialog
         break;
       case GLUT_ACTIVE_CTRL:
       default:
@@ -1849,7 +1849,7 @@ void keyboard(unsigned char key, int flag){
     case 's':
       switch (keystate){
       case GLUT_ACTIVE_ALT:
-        DialogMenu(20); // 3d smoke dialog
+        DialogMenu(DIALOG_3DSMOKE); // 3d smoke dialog
         break;
       case GLUT_ACTIVE_CTRL:
         snap_scene();
@@ -1874,7 +1874,7 @@ void keyboard(unsigned char key, int flag){
     case 't':
       switch (keystate){
       case GLUT_ACTIVE_ALT:
-        DialogMenu(21); // tour dialog
+        DialogMenu(DIALOG_TOUR); // tour dialog
         break;
       case GLUT_ACTIVE_CTRL:
       default:
@@ -1902,7 +1902,7 @@ void keyboard(unsigned char key, int flag){
           skip_slice_in_embedded_mesh = 1 - skip_slice_in_embedded_mesh;
           break;
         default:
-          ReloadMenu(0);
+          ReloadMenu(RELOAD_NOW);
           break;
       }
       break;
@@ -1932,7 +1932,7 @@ void keyboard(unsigned char key, int flag){
     case 'w':
       switch (keystate){
         case GLUT_ACTIVE_ALT:
-          DialogMenu(26); // WUI dialog
+          DialogMenu(DIALOG_WUI); // WUI dialog
           break;
         case GLUT_ACTIVE_CTRL:
         default:
@@ -1954,7 +1954,7 @@ void keyboard(unsigned char key, int flag){
     case 'x':
     case 'X':
       if(keystate==GLUT_ACTIVE_ALT){
-        DialogMenu(-2); // close all dialogs
+        DialogMenu(DIALOG_HIDEALL); // close all dialogs
       }
       else{
         visx_all=1-visx_all;
@@ -1967,7 +1967,7 @@ void keyboard(unsigned char key, int flag){
     case 'z':
     case 'Z':
       if(keystate==GLUT_ACTIVE_ALT){
-        DialogMenu(24); // compress dialog
+        DialogMenu(DIALOG_SMOKEZIP); // compress dialog
       }
       else{
         visz_all = 1 - visz_all;

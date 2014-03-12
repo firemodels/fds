@@ -358,9 +358,9 @@ void readplot3d(char *file, int ifile, int flag, int *errorcode){
     if(gbi->plot3dfilenum==-1)continue;
     if(speedmax<gbi->plot3d_speedmax)speedmax=gbi->plot3d_speedmax;
   }
-  updateplotslice(1);
-  updateplotslice(2);
-  updateplotslice(3);
+  updateplotslice(X_SLICE);
+  updateplotslice(Y_SLICE);
+  updateplotslice(Z_SLICE);
   visGrid=0;
   meshi->visInteriorPatches=0;
   if(visx_all==1){
@@ -526,11 +526,11 @@ void drawplot3d_texture(mesh *meshi){
     if(visVector==0&&contour_type!=STEPPED_CONTOURS){
       if(plotx<0){
         plotx=ibar;
-        updateplotslice(1);
+        updateplotslice(X_SLICE);
       }
       if(plotx>ibar){
         plotx=0;
-        updateplotslice(1);
+        updateplotslice(X_SLICE);
       }
       glBegin(GL_TRIANGLES);
       for(j=0; j<jbar; j++){
@@ -568,7 +568,7 @@ void drawplot3d_texture(mesh *meshi){
 
       yzcolor=yzcolorbase;
       dx_yzcopy=dx_yz; dy_yzcopy=dy_yz; dz_yzcopy=dz_yz;
-      antialias(1);
+      antialias(ON);
       glLineWidth(vectorlinewidth);
       glBegin(GL_LINES);
       for(j=0; j<=jbar; j+=vectorskip){
@@ -594,7 +594,7 @@ void drawplot3d_texture(mesh *meshi){
         }
       } 
       glEnd();
-      antialias(0);
+      antialias(OFF);
 
       /* draw points for yz vectors */
 
@@ -673,7 +673,7 @@ void drawplot3d_texture(mesh *meshi){
       unsigned char*xzcolor;
 
       xzcolor=xzcolorbase;
-      antialias(1);
+      antialias(ON);
       glLineWidth(vectorlinewidth);
       glBegin(GL_LINES);
       for(i=0; i<=ibar; i+=vectorskip){
@@ -699,7 +699,7 @@ void drawplot3d_texture(mesh *meshi){
         }
       } 
       glEnd();
-      antialias(0);
+      antialias(OFF);
 
       /* draw points for xz vectors */
 
@@ -740,11 +740,11 @@ void drawplot3d_texture(mesh *meshi){
     if(visVector==0&&contour_type!=STEPPED_CONTOURS){
       if(plotz<0){
         plotz=kbar;
-        updateplotslice(3);
+        updateplotslice(Z_SLICE);
       }
       if(plotz>kbar){
         plotz=0;
-        updateplotslice(3);
+        updateplotslice(Z_SLICE);
       }
       glBegin(GL_TRIANGLES);
       for(i=0; i<ibar; i++){
@@ -782,7 +782,7 @@ void drawplot3d_texture(mesh *meshi){
       unsigned char *xycolor;
 
       xycolor=xycolorbase;
-      antialias(1);
+      antialias(ON);
       glLineWidth(vectorlinewidth);
       glBegin(GL_LINES);
       for(i=0; i<=ibar; i+=vectorskip){
@@ -808,7 +808,7 @@ void drawplot3d_texture(mesh *meshi){
         }
       } 
       glEnd();
-      antialias(0);
+      antialias(OFF);
 
       /* draw points for xy vectors */
 
@@ -961,11 +961,11 @@ void drawplot3d(mesh *meshi){
     if(visVector==0&&contour_type!=STEPPED_CONTOURS){
       if(plotx<0){
         plotx=ibar;
-        updateplotslice(1);
+        updateplotslice(X_SLICE);
       }
       if(plotx>ibar){
         plotx=0;
-        updateplotslice(1);
+        updateplotslice(X_SLICE);
       }
       glBegin(GL_TRIANGLES);
       for(j=0; j<jbar; j++){
@@ -1003,7 +1003,7 @@ void drawplot3d(mesh *meshi){
 
       yzcolor=yzcolorbase;
       dx_yzcopy=dx_yz; dy_yzcopy=dy_yz; dz_yzcopy=dz_yz;
-      antialias(1);
+      antialias(ON);
       glLineWidth(vectorlinewidth);
       glBegin(GL_LINES);
       for(j=0; j<=jbar; j+=vectorskip){
@@ -1029,7 +1029,7 @@ void drawplot3d(mesh *meshi){
         }
       } 
       glEnd();
-      antialias(0);
+      antialias(OFF);
 
       /* draw points for yz vectors */
 
@@ -1108,7 +1108,7 @@ void drawplot3d(mesh *meshi){
       unsigned char *xzcolor;
 
       xzcolor=xzcolorbase;
-      antialias(1);
+      antialias(ON);
       glLineWidth(vectorlinewidth);
       glBegin(GL_LINES);
       for(i=0; i<=ibar; i+=vectorskip){
@@ -1134,7 +1134,7 @@ void drawplot3d(mesh *meshi){
         }
       } 
       glEnd();
-      antialias(0);
+      antialias(OFF);
 
       /* draw points for xz vectors */
 
@@ -1175,11 +1175,11 @@ void drawplot3d(mesh *meshi){
     if(visVector==0&&contour_type!=STEPPED_CONTOURS){
       if(plotz<0){
         plotz=kbar;
-        updateplotslice(3);
+        updateplotslice(Z_SLICE);
       }
       if(plotz>kbar){
         plotz=0;
-        updateplotslice(3);
+        updateplotslice(Z_SLICE);
       }
       glBegin(GL_TRIANGLES);
       for(i=0; i<ibar; i++){
@@ -1217,7 +1217,7 @@ void drawplot3d(mesh *meshi){
       unsigned char *xycolor;
 
       xycolor=xycolorbase;
-      antialias(1);
+      antialias(ON);
       glLineWidth(vectorlinewidth);
       glBegin(GL_LINES);
       for(i=0; i<=ibar; i+=vectorskip){
@@ -1243,7 +1243,7 @@ void drawplot3d(mesh *meshi){
         }
       } 
       glEnd();
-      antialias(0);
+      antialias(OFF);
 
       /* draw points for xy vectors */
 
@@ -1360,9 +1360,9 @@ void updatesurface(void){
 /* ------------------ updateallplotslices ------------------------ */
 
 void updateallplotslices(void){
-  if(visx_all==1)updateplotslice(1);
-  if(visy_all==1)updateplotslice(2);
-  if(visz_all==1)updateplotslice(3);
+  if(visx_all==1)updateplotslice(X_SLICE);
+  if(visy_all==1)updateplotslice(Y_SLICE);
+  if(visz_all==1)updateplotslice(Z_SLICE);
 }
 
 /* ------------------ get_plot3d_index ------------------------ */
@@ -1848,7 +1848,7 @@ void drawgrid(const mesh *meshi){
   }
   if(visx_all==0&&visy_all==0&&visz_all==0)return;
   if(visGrid==GridProbe||visGrid==GridnoProbe){
-    antialias(1);
+    antialias(ON);
     glLineWidth(gridlinewidth);
     if(meshi->meshrgb_ptr!=NULL){
       glColor3fv(meshi->meshrgb);
@@ -1892,7 +1892,7 @@ void drawgrid(const mesh *meshi){
     }
 
     glEnd();
-    antialias(0);
+    antialias(OFF);
   }
 }
 

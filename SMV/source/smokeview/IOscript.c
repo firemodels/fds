@@ -993,7 +993,7 @@ void script_loadtour(scriptdata *scripti){
     if(strcmp(touri->label,scripti->cval)==0){
       TourMenu(i);
       viewtourfrompath=0;
-      TourMenu(-5);
+      TourMenu(MENU_TOUR_VIEWFROMROUTE);
       count++;
       break;
     }
@@ -1091,9 +1091,9 @@ void script_plot3dprops(scriptdata *scripti){
       gbi = meshinfo + i;
       if(gbi->plot3dfilenum==-1)continue;
       update_current_mesh(gbi);
-      updateplotslice(1);
-      updateplotslice(2);
-      updateplotslice(3);
+      updateplotslice(X_SLICE);
+      updateplotslice(Y_SLICE);
+      updateplotslice(Z_SLICE);
     }
     update_current_mesh(gbsave);
   }
@@ -1640,7 +1640,7 @@ int run_script(void){
       script_loadtour(scripti);
       break;
     case SCRIPT_UNLOADTOUR:
-      TourMenu(-2);
+      TourMenu(MENU_TOUR_MANUAL);
       break;
     case SCRIPT_EXIT:
 #ifndef _DEBUG

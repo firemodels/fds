@@ -953,7 +953,7 @@ extern "C" void Motion_CB(int var){
       ResizeWindow(screenWidth,screenHeight);
       break;
     case PROJECTION:
-      ZoomMenu(-2);
+      ZoomMenu(UPDATE_PROJECTION);
       camera_current->projection_type=projection_type;
       return;
     case EYELEVEL:

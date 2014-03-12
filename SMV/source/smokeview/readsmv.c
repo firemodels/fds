@@ -8302,7 +8302,7 @@ int readini(char *inifile){
     UpdateRGBColors(COLORBAR_INDEX_NONE);
   }
   updateglui();
-  if(showall_textures==1)TextureShowMenu(-1);
+  if(showall_textures==1)TextureShowMenu(MENU_TEXTURE_SHOWALL);
   if(ncolorbars<=ndefaultcolorbars){
     initdefaultcolorbars();
   }
@@ -10997,7 +10997,7 @@ typedef struct {
             selectedtour_index=-1;
             selected_frame=NULL;
             selected_tour=NULL;
-            if(viewalltours==1)TourMenu(-3);
+            if(viewalltours==1)TourMenu(MENU_TOUR_SHOWALL);
           }
           else{
             ntours=0;

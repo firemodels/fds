@@ -778,7 +778,7 @@ void drawroomgeom(void){
 
 /* draw the frame */
 
-  antialias(1);
+  antialias(ON);
   glBegin(GL_LINES);
 
   for(i=0;i<nrooms;i++){
@@ -843,7 +843,7 @@ void drawroomgeom(void){
     glVertex3f(xroom0,yroom,zroom);
   }
   glEnd();
-  antialias(0);
+  antialias(OFF);
 
   if(visVents==1){
     glLineWidth(ventlinewidth);

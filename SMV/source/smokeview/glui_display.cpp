@@ -1147,6 +1147,13 @@ extern "C" void Labels_CB(int var){
     break;
 #endif
 
+  case LABELS_version:
+  case LABELS_meshlabel:
+  case LABELS_label:
+  case LABELS_HMS:
+  case LABELS_transparent:
+  case HRRPUVCUTOFF_label:
+    break;
   case LABELS_usertick:
     CHECKBOX_vis_user_ticks2->set_int_val(vis_user_ticks);
     break;
@@ -1154,30 +1161,22 @@ extern "C" void Labels_CB(int var){
     CHECKBOX_vis_user_ticks->set_int_val(vis_user_ticks);
     if(vis_user_ticks==1)ROLLOUT_user_tick->open();
     break;
-  case LABELS_version:
-    break;
-  case LABELS_meshlabel:
-    break;
   case SAVE_SETTINGS:
     writeini(LOCAL_INI,NULL);
     break;
-  case LABELS_HMS:
-    break;
   case LABELS_showall:
-    LabelMenu(4);
+    LabelMenu(MENU_LABEL_ShowAll);
     break;
   case LABELS_hideall:
-    LabelMenu(5);
+    LabelMenu(MENU_LABEL_HideAll);
     break;
   case LABELS_flip:
     background_flip = 1 - background_flip;
-    ShowHideMenu(15);
+    ShowHideMenu(MENU_SHOWHIDE_FLIP);
     break;
   case LABELS_shade:
     setbw = 1 - setbw;
     ColorBarMenu(COLORBAR_TOGGLE_BW);
-    break;
-  case LABELS_transparent:
     break;
   case LABELS_close:
     hide_glui_display();
@@ -1185,17 +1184,13 @@ extern "C" void Labels_CB(int var){
   case LABELS_fontsize:
     FontMenu(fontindex);
     break;
-  case LABELS_label:
-    break;
   case FRAME_label:
     visFramelabel=1-visFramelabel;
-    LabelMenu(9);
+    LabelMenu(MENU_LABEL_framerate);
     break;
   case HRR_label:
     visHRRlabel=1-visHRRlabel;
-    LabelMenu(16);
-    break;
-  case HRRPUVCUTOFF_label:
+    LabelMenu(MENU_LABEL_hrr);
     break;
   case LABELS_ticks:
     if(auto_user_tick_placement==1){
@@ -1312,10 +1307,10 @@ extern "C" void FileShow_CB(int var){
     case FILESHOW_evac:
       switch (showhide_option){
         case 0:
-          EvacShowMenu(3);
+          EvacShowMenu(SHOWALL_EVAC);
           break;
         case 1:
-          EvacShowMenu(3);
+          EvacShowMenu(SHOWALL_EVAC);
           if(npartloaded!=0)ParticleShowMenu(HIDEALL_PARTICLE);
           if(nsmoke3dloaded!=0)Smoke3DShowMenu(HIDEALL_SMOKE3D);
           if(nisoloaded!=0)IsoShowMenu(HIDEALL_ISO);
@@ -1324,7 +1319,7 @@ extern "C" void FileShow_CB(int var){
           if(npatchloaded!=0)ShowPatchMenu(HIDEALL_BOUNDARY);
           break;
         case 2:
-          EvacShowMenu(4);
+          EvacShowMenu(HIDEALL_EVAC);
           break;
         default:
           ASSERT(FFALSE);
@@ -1334,11 +1329,11 @@ extern "C" void FileShow_CB(int var){
     case  FILESHOW_particle:
       switch (showhide_option){
         case 0:
-          ParticleShowMenu(3);
+          ParticleShowMenu(SHOWALL_PARTICLE);
           break;
         case 1:
-          ParticleShowMenu(3);
-          if(nevacloaded!=0)EvacShowMenu(HIDEALL_PARTICLE);
+          ParticleShowMenu(SHOWALL_PARTICLE);
+          if(nevacloaded!=0)EvacShowMenu(HIDEALL_EVAC);
           if(nsmoke3dloaded!=0)Smoke3DShowMenu(HIDEALL_SMOKE3D);
           if(nisoloaded!=0)IsoShowMenu(HIDEALL_ISO);
           if(nsliceloaded!=0)ShowHideSliceMenu(HIDEALL_SLICE);
@@ -1346,7 +1341,7 @@ extern "C" void FileShow_CB(int var){
           if(npatchloaded!=0)ShowPatchMenu(HIDEALL_BOUNDARY);
           break;
         case 2:
-          ParticleShowMenu(4);
+          ParticleShowMenu(HIDEALL_PARTICLE);
           break;
         default:
           ASSERT(FFALSE);
@@ -1360,7 +1355,7 @@ extern "C" void FileShow_CB(int var){
           break;
         case 1:
           ShowHideSliceMenu(SHOWALL_SLICE);
-          if(nevacloaded!=0)EvacShowMenu(HIDEALL_PARTICLE);
+          if(nevacloaded!=0)EvacShowMenu(HIDEALL_EVAC);
           if(nvsliceloaded!=0)ShowVSliceMenu(HIDEALL_VSLICE);
           if(npatchloaded!=0)ShowPatchMenu(HIDEALL_BOUNDARY);
           if(nsmoke3dloaded!=0)Smoke3DShowMenu(HIDEALL_SMOKE3D);
@@ -1382,7 +1377,7 @@ extern "C" void FileShow_CB(int var){
           break;
         case 1:
           ShowVSliceMenu(SHOWALL_VSLICE);
-          if(nevacloaded!=0)EvacShowMenu(HIDEALL_PARTICLE);
+          if(nevacloaded!=0)EvacShowMenu(HIDEALL_EVAC);
           if(npatchloaded!=0)ShowPatchMenu(HIDEALL_BOUNDARY);
           if(nsmoke3dloaded!=0)Smoke3DShowMenu(HIDEALL_SMOKE3D);
           if(nisoloaded!=0)IsoShowMenu(HIDEALL_ISO);
@@ -1404,7 +1399,7 @@ extern "C" void FileShow_CB(int var){
           break;
         case 1:
           ShowPatchMenu(SHOWALL_BOUNDARY);
-          if(nevacloaded!=0)EvacShowMenu(HIDEALL_PARTICLE);
+          if(nevacloaded!=0)EvacShowMenu(HIDEALL_EVAC);
           if(nsmoke3dloaded!=0)Smoke3DShowMenu(HIDEALL_SMOKE3D);
           if(npartloaded!=0)ParticleShowMenu(HIDEALL_PARTICLE);
           if(nvsliceloaded!=0)ShowVSliceMenu(HIDEALL_VSLICE);
@@ -1426,7 +1421,7 @@ extern "C" void FileShow_CB(int var){
           break;
         case 1:
           Smoke3DShowMenu(SHOWALL_SMOKE3D);
-          if(nevacloaded!=0)EvacShowMenu(HIDEALL_PARTICLE);
+          if(nevacloaded!=0)EvacShowMenu(HIDEALL_EVAC);
           if(npatchloaded!=0)ShowPatchMenu(HIDEALL_BOUNDARY);
           if(npartloaded!=0)ParticleShowMenu(HIDEALL_PARTICLE);
           if(nvsliceloaded!=0)ShowVSliceMenu(HIDEALL_VSLICE);
@@ -1444,11 +1439,11 @@ extern "C" void FileShow_CB(int var){
     case  FILESHOW_isosurface:
       switch (showhide_option){
         case 0:
-          IsoShowMenu(10001);
+          IsoShowMenu(SHOWALL_ISO);
           break;
         case 1:
           IsoShowMenu(SHOWALL_ISO);
-          if(nevacloaded!=0)EvacShowMenu(HIDEALL_PARTICLE);
+          if(nevacloaded!=0)EvacShowMenu(HIDEALL_EVAC);
           if(nsmoke3dloaded!=0)Smoke3DShowMenu(HIDEALL_SMOKE3D);
           if(npatchloaded!=0)ShowPatchMenu(HIDEALL_BOUNDARY);
           if(npartloaded!=0)ParticleShowMenu(HIDEALL_PARTICLE);

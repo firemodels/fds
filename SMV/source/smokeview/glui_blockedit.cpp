@@ -258,7 +258,7 @@ extern "C" void show_glui_edit(void){
 void Blockedit_DLG_CB(int var){
   switch (var){
   case CLOSE_WINDOW: 
-    DialogMenu(16);
+    DialogMenu(DIALOG_VIEW_GEOM);
     smooth_blockages();
     break;
   case UPDATE_WINDOW:

@@ -1165,7 +1165,7 @@ void drawoutlines(void){
   int i;
 
   if(noutlineinfo<=0)return;
-  antialias(1);
+  antialias(ON);
   glLineWidth(linewidth);
   glBegin(GL_LINES);
   glColor3fv(foregroundcolor);
@@ -1188,7 +1188,7 @@ void drawoutlines(void){
     }
   }
   glEnd();
-  antialias(0);
+  antialias(OFF);
 }
 /* ------------------ drawcbox ------------------------ */
 
@@ -3799,7 +3799,7 @@ void draw_faces(){
     int j;
 
     glDisable(GL_LIGHTING);
-    antialias(1);
+    antialias(ON);
     glLineWidth(linewidth);
     glBegin(GL_LINES);
     for(j=0;j<nmeshes;j++){
@@ -3851,7 +3851,7 @@ void draw_faces(){
       }
     }
     glEnd();
-    antialias(0);
+    antialias(OFF);
   }
   if(nface_textures>0){
     int j;
@@ -6087,7 +6087,7 @@ void draw_facesOLD(){
     int j;
 
     glDisable(GL_LIGHTING);
-    antialias(1);
+    antialias(ON);
     glLineWidth(linewidth);
     glBegin(GL_LINES);
     for(j=0;j<nmeshes;j++){
@@ -6143,7 +6143,7 @@ void draw_facesOLD(){
       }
     }
     glEnd();
-    antialias(0);
+    antialias(OFF);
   }
   if(nface_textures>0){
     int j;

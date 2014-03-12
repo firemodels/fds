@@ -288,12 +288,6 @@ int setup_case(int argc, char **argv){
     show_glui_trainer();
     show_glui_alert();
   }
-  /*
-  if(visTerrain==1){
-    visTerrain=1-visTerrain;
-    GeometryMenu(17);
-  }
-*/
   return 0;
 }
 

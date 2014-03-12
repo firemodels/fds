@@ -1210,9 +1210,9 @@ extern "C" void PLOT3D_CB(int var){
     PLOT3D_CB(UPDATE_VECTOR);
     break;
   case UPDATE_VECTOR:
-    updateplotslice(1);
-    updateplotslice(2);
-    updateplotslice(3);
+    updateplotslice(X_SLICE);
+    updateplotslice(Y_SLICE);
+    updateplotslice(Z_SLICE);
     break;
   case CHOPUPDATE:
     updatechopcolors();
@@ -2211,7 +2211,7 @@ void Time_CB(int var){
     update_tbounds();
     break;
   case RELOAD_DATA:
-    ReloadMenu(0);
+    ReloadMenu(RELOAD_NOW);
     break;
   default:
     ASSERT(0);

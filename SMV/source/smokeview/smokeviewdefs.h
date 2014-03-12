@@ -232,9 +232,11 @@ void _Sniff_Errors(char *whereat);
 #define HIDEALL_BOUNDARY 999
 #define SHOW_CHAR 997
 #define HIDEALL_PARTICLE 4
-#define SHOWALL_PARTICLE
+#define SHOWALL_PARTICLE 3
 #define HIDEALL_ISO 10002
 #define SHOWALL_ISO 10001
+#define HIDEALL_EVAC 4
+#define SHOWALL_EVAC 3
 
 
 #define TEMP_IGNITION_MAX 100000.
@@ -326,6 +328,9 @@ void _Sniff_Errors(char *whereat);
 #define ZDIR 2
 
 #define NTARGTIMES 100
+
+#define RELOAD_NOW 0
+#define STOP_RENDERING -1
 
 #define RELOADALL 4
 #define UNLOADALL 1
@@ -466,6 +471,64 @@ void _Sniff_Errors(char *whereat);
 #define VOL_READALL -1
 #define VOL_UNLOAD -2
 #define VOL_READNONE -3
+
+#define MENU_LABEL_ShowAll 4
+#define MENU_LABEL_HideAll 5
+#define MENU_LABEL_framerate 9
+#define MENU_LABEL_hrr 16
+
+#define MENU_TRAINER_smoke 1
+#define MENU_TRAINER_temp 2
+#define MENU_TRAINER_oxy 3
+
+#define ON 1
+#define OFF 0
+
+#define X_SLICE 1
+#define Y_SLICE 2
+#define Z_SLICE 3
+
+#define DIALOG_3DSMOKE 20
+#define DIALOG_BOUNDS 14
+#define DIALOG_CLIP 18
+#define DIALOG_COLORBAR 23
+#define DIALOG_DEVICE 28
+#define DIALOG_DISPLAY 22
+#define DIALOG_HIDEALL -2
+#define DIALOG_MOTION 15
+#define DIALOG_VIEW_GEOM 16
+#define DIALOG_SHOOTER 27
+#define DIALOG_SMOKEZIP 24
+#define DIALOG_STEREO 19
+#define DIALOG_TOUR 21
+#define DIALOG_TRAINER 25
+#define DIALOG_WUI 26
+
+#define UNLOAD_ALL -1
+#define UNLOAD_LAST -2
+
+#define UPDATE_PROJECTION -2
+
+#define MENU_TOUR_EDIT -14
+#define MENU_TOUR_NEW -12
+#define MENU_TOUR_MANUAL -2
+#define MENU_TOUR_SHOWALL -3
+#define MENU_TOUR_VIEWFROMROUTE -5
+
+#define MENU_TEXTURE_SHOWALL -1
+
+#define MENU_SHOWHIDE_FLIP 15
+
+
+
+
+
+
+
+
+
+
+
 
 #endif
 
