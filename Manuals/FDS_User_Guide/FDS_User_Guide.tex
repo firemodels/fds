@@ -5995,7 +5995,7 @@ The {\ct PART} line establishes the class of particles. In this case, the presen
 If the {\ct SURF} line includes a {\ct MATL\_ID}, the particle mass will be based upon the value(s) of {\ct DENSITY} of the referenced {\ct MATL} line(s). If there is to be no heat conduction calculation in depth, do not specify a {\ct MATL\_ID}. Instead, you can specify, for example, the surface temperature, {\ct TMP\_FRONT} ($^\circ$C), heat release rate per unit area, {\ct HRRPUA} (kW/m$^2$), or species {\ct MASS\_FLUX} (\si{kg/(m$^2$.s)}).
 
 The {\ct GEOMETRY} options for solid particles are {\ct 'SPHERICAL'}, {\ct 'CYLINDRICAL'}, or {\ct 'CARTESIAN'}.
-By default, the {\ct GEOMETRY} is {\ct 'CARTESIAN'}, in which case you need to provide the {\ct LENGTH} and {\ct WIDTH} of the rectangular plate. It is assumed that the plate is symmetric front and back. You need only specify the layers that make up the half-thickness. The array {\ct THICKNESS(N)} indicates the thickness(es) of each layer of the plate, not the total thickness of the plate itself. If the plate is composed of only one material component, the specified {\ct THICKNESS} is taken as the half-thickness of the plate.
+By default, the {\ct GEOMETRY} is {\ct 'CARTESIAN'}, in which case you need to provide the {\ct LENGTH} and {\ct WIDTH} of the rectangular plate. It is assumed that the plate is symmetric front and back (note this means you should set {\ct BACKING='INSULATED'} on the {\ct SURF} line). You need only specify the layers that make up the half-thickness. The array {\ct THICKNESS(N)} indicates the thickness(es) of each layer of the plate, not the total thickness of the plate itself. If the plate is composed of only one material component, the specified {\ct THICKNESS} is taken as the half-thickness of the plate.
 
 For  {\ct 'CYLINDRICAL'} or {\ct 'SPHERICAL'} particles, specify the {\ct INNER\_RADIUS} and {\ct THICKNESS} of the individual layers. Alternatively, you can just specify the {\ct RADIUS} if the cylinder or sphere is solid and has only one material component. The default value of {\ct INNER\_RADIUS} is 0~m, which means that the radius of the cylinder or sphere is the sum of the {\ct THICKNESS} values. Remember that the layers are to be listed starting at the surface, not the center. For {\ct 'CYLINDRICAL'} particles, specify a {\ct LENGTH} as well.
 
@@ -8436,6 +8436,22 @@ For a given solid phase output quantity, $\phi$, {\ct STATISTICS='SURFACE INTEGR
 Note that this statistic is only appropriate for solid phase quantities, in particular those whose units involve m$^{-2}$. For example, the various heat and mass
 fluxes are appropriate output quantities.
 
+\subsubsection{Limiting the Integration}
+
+The input parameter {\ct QUANTITY\_RANGE} can be used to limit the region of integration for {\ct STATISTICS} types of {\ct 'AREA INTEGRAL'}, {\ct 'VOLUME INTEGRAL'}, {\ct 'MASS INTEGRAL'}, and {\ct 'SURFACE INTEGRAL'}.  If {\ct QUANTITY\_RANGE} is set, the integration will only be performed if the value of the {\ct QUANTITY} lies within the {\ct QUANTITY\_RANGE} where {\ct QUANTITY\_RANGE(1)} is the lower bound and {\ct QUANTITY\_RANGE(2)} is the upper bound.  For example:
+
+\begin{lstlisting}
+&DEVC XB=..., QUANTITY='MASS FRACTION', SPEC_ID='METHANE', STATISTICS='MASS INTEGRAL',
+QUANTITY_RANGE=0.03,0.15/
+\end{lstlisting}
+would output the total mass of methane in the volume {\ct XB} where the mass fraction was between 0.03 and 0.15.  
+
+A set of additional {\ct STATISTICS} are available for use with {\ct QUANTITY\_RANGE}: {\ct 'AREA'}, {\ct 'MASS'}, {\ct 'VOLUME'}, and {\ct 'SURFACE AREA'}.  These {\ct STATISTICS} output the area, mass, volume, or surface area (for a solid phase quantity) where the {\ct QUANTITY} lies within the {\ct QUANTITY\_RANGE}.  For example:
+
+\begin{lstlisting}
+&DEVC XB=..., QUANTITY='NET HEAT FLUX', STATISTICS='SURFACE AREA',QUANTITY_RANGE(1)=10./
+\end{lstlisting}
+would output the total surface area in the volume {\ct XB} where the net heat flux exceeds 10 kW/m$^2$.
 
 \subsubsection{Volume, Mass, and Heat Flow}
 \label{info:flows}
@@ -9224,12 +9240,12 @@ properties be specified as well. Simply prescribing as many properties as possib
 {\ct PROP\_ID}              & Character       & Section~\ref{info:DEVC}                                         &       &               \\ \hline
 {\ct QUANTITY}              & Character       & Section~\ref{info:DEVC}                                         &       &               \\ \hline
 {\ct QUANTITY2}             & Character       & Section~\ref{info:line_file}                                    &       &               \\ \hline
+{\ct QUANTITY\_RANGE}       & Real(2)         & Section~\ref{info:statistics}                                   &       & -1.E50,1.E50  \\ \hline
 {\ct RELATIVE}              & Logical         & Section~\ref{info:out:DEVC}                                     &       & {\ct .FALSE.} \\ \hline
 {\ct ROTATION}              & Real            & Section~\ref{info:DEVC}                                         & deg.  & 0             \\ \hline
 {\ct SETPOINT}              & Real            & Section~\ref{info:basic_control}                                &       &               \\ \hline
 {\ct SMOOTHING\_FACTOR}     & Real            & Section~\ref{info:basic_control}                                &       & 0             \\ \hline
 {\ct SPEC\_ID}              & Character       & Section~\ref{info:outputquantities}                             &       &               \\ \hline
-{\ct STATISTICS}            & Character       & Section~\ref{info:statistics}                                   &       &               \\ \hline
 {\ct SURF\_ID}              & Character       & Section~\ref{info:statistics}                                   &       &               \\ \hline
 {\ct TIME\_AVERAGED}        & Logical         & Section~\ref{info:out:DEVC}                                     &       &  {\ct .TRUE.} \\ \hline
 {\ct TRIP\_DIRECTION}       & Integer         & Section~\ref{info:basic_control}                                &       &  1            \\ \hline
