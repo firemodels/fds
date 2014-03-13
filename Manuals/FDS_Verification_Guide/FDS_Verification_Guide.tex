@@ -3808,24 +3808,30 @@ In the fourth case, air at 500~\si{\degree C} is forced through a 3~m long, 1~m 
 introduced in the middle of the tunnel at a rate of 0.05~kg/s, starting at 10~s. The water temperature is 20~\si{\degree C}.
 The mass fraction of water vapor in the hot air flowing into the tunnel is 0.
 The water evaporates at approximately the same rate at which it is introduced.
-Figure~\ref{water_evaporation_4_plots}, left, displays the time history of the enthalpy flow out of the tunnel. The enthalpy flow rate of the dry hot air is 228~kW above its ambient value, and this
+Figure~\ref{water_evaporation_4_plot}, left, displays the time history of the enthalpy flow out of the tunnel. The enthalpy flow rate of the dry hot air is 228~kW above its ambient value, and this
 value drops to approximately 100~kW after about 20~s. The evaporation of the water droplets is extracting energy from the hot gas at a rate of
 \be \left( 4.184 \; \hbox{\si{kJ/(kg.K)}} \times 80 \; \hbox{K} + 2260 \; \hbox{kJ/kg} \right) \times 0.05 \; \hbox{kg/s} = 130 \; \hbox{kW} \ee
+
+\begin{figure}[h!]
+\begin{center}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/water_evaporation_4_enthalpy}
+\end{center}
+\caption[Sample case {\bf water\_evaporation\_4}]{Output of {\bf water\_evaporation\_4} test case.}
+\label{water_evaporation_4_plot}
+\end{figure}
 
 \subsection{Case 5}
 
 This test involves a single evaporating water droplet in relatively dry air. The comparison is made with an actual measurement~\cite{Ranz} where a 1~mm water droplet
-shrinks to approximately 0.3~mm in approximately 10~min (see Fig.~\ref{water_evaporation_4_plots}, right).
+shrinks to approximately 0.3~mm in approximately 10~min (see Fig.~\ref{water_evaporation_5_plot}, right).
 As opposed to the other cases above, this case tests the predicted rate of evaporation, not the final steady state.
 
 \begin{figure}[h!]
-\noindent
-\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/water_evaporation_4_enthalpy} &
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/water_evaporation_5_diameter}
-\end{tabular*}
-\caption[Sample cases {\bf water\_evaporation\_4} and {\bf water\_evaporation\_5}]{Output of {\bf water\_evaporation} cases 4 and 5.}
-\label{water_evaporation_4_plots}
+\begin{center}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/water_evaporation_5_diameter}
+\end{center}
+\caption[Sample case {\bf water\_evaporation\_5}]{Output of {\bf water\_evaporation\_5} test case.}
+\label{water_evaporation_5_plot}
 \end{figure}
 
 \subsection{Case 6}
