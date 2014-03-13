@@ -44,6 +44,7 @@ IF (N_FACE_S>0)  WRITE(LU_GEOM) (faces(3*I-2),faces(3*I-1),faces(3*I),I=1,N_FACE
 !IF (N_FACE_S>0)  WRITE(LU_GEOM) (1,I=1,N_FACE_S)
 close(LU_GEOM)
 end subroutine geomout
+
 !  ------------------ getembeddata ------------------------ 
 
 subroutine getembeddata(filename,endian,ntimes,nvals,times,nstatics,ndynamics,vals,redirect_flag,error)
@@ -271,7 +272,6 @@ end do
 return
 end subroutine getdata1
 
-
 !  ------------------ getdata2 ------------------------ 
 
 subroutine getdata2(file_unit,xs,ys,zs,&
@@ -306,7 +306,6 @@ integer, allocatable, dimension(:) :: iitemp
 integer, allocatable, dimension(:) :: oldispr, ispr
 integer :: npp1a, npp2a, nppold
 integer :: factor
-
 
 logical :: load, allocated
 integer :: nf, npoints
@@ -768,7 +767,6 @@ endif
 
 return
 end subroutine getsliceframe
-
 
 !  ------------------ endian_out ------------------------ 
 

@@ -104,8 +104,6 @@ if(error.ne.0)then
 endif
 if(error.ne.0)return
 
-
-
 lu21=21
 inquire(unit=lu21,opened=isopen)
 if(isopen)close(lu21)
@@ -199,7 +197,6 @@ real :: dummy
 integer :: idummy,finish
 integer(2) :: idummy2
 character(len=1) :: idummy1
-
 
 lu20=20
 nisopoints=0
@@ -357,8 +354,6 @@ patchshortlabel=patchshortlabel(1:lenshort)//char(0)
 lenunits = min(len_trim(patchunit),6)
 patchunit=patchunit(1:lenunits)//char(0)
 
-
-
 return
 end subroutine getpatchsizes1
 
@@ -462,7 +457,6 @@ character(len=*) :: partfilename
 logical :: exists, connected
 
 integer :: ibar1, jbar1, kbar1
-
 
 lu10 = file_unit
 error=0
@@ -601,7 +595,6 @@ integer :: idir, joff, koff
 logical :: connected
 character(len=30) :: longlbl, shortlbl, unitlbl
 
-
 integer :: lu11
 
 if(ip1.eq.-1.or.ip2.eq.-1.or.jp1.eq.-1.or.jp2.eq.-1.or.kp1.eq.-1.or.kp2.eq.-1)then
@@ -700,7 +693,6 @@ nxsp = ip2 + 1 - ip1
 nysp = jp2 + 1 - jp1
 nzsp = kp2 + 1 - kp1
 
-
 allocate(qq(nxsp,nysp,nzsp))
 
 call getdirval(ip1,ip2,jp1,jp2,kp1,kp2,idir,joff,koff)
@@ -735,7 +727,6 @@ end do
 error = 0
 close(lu11)
 
-
 return
 
 end subroutine getslicesizes
@@ -751,7 +742,6 @@ logical :: exists
 integer, intent(in) :: endian, unit
 integer, intent(out) :: error
 logical :: connected
-
 
 integer :: lu11
 
@@ -847,7 +837,6 @@ close(unit)
 
 return
 end subroutine closefortranfile
-
 
 !  ------------------ getboundaryheader1 ------------------------ 
 
