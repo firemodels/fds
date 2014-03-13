@@ -3991,7 +3991,7 @@ The \textct{HVAC\_damper} example case is a simple duct network of three ducts c
 
 \clearpage
 
-\section{HVAC Dampers (\texorpdfstring{\bf HVAC\_filter}{HVAC\_filter})}
+\section{HVAC Filters (\texorpdfstring{\bf HVAC\_filter}{HVAC\_filter})}
 
 The sample case \textct{HVAC\_filter} demonstrates the use of the filter input.  A 1~m$^3$ compartment is initialized with a particulate species with a mass fraction of 0.001.  A 100 \% efficient filter with a clean loss of 1 and a loading loss of 7732.446~kg$^{-1}$ (gives a total loss of 10 when all the soot in the compartment is filtered).  A quadratic fan in a 0.01 m$^2$ duct with a maximum pressure of 20~Pa and a maximum flow of 0.2~\si{m^3/s} takes suction from one side of the compartment and discharges into the other.  Over time, the filter removes the particulate from the compartment.  However, since the filter loss increases with the mass of particulate filtered, the rate of removal will decrease over time.  Applying the conservation of energy to the compartment and the steady state duct momentum equation to the duct, we can solve for the compartment temperature and pressure and the duct velocity.  These results along with the loading of the filter and the mass of particulate in the compartment are shown in Fig.~\ref{fig_filter}.
 
