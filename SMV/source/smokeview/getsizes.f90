@@ -5,11 +5,6 @@
 !  ------------------ getembedsize ------------------------ 
 
 subroutine getembeddatasize(filename,endian,ntimes,nvars,error)
-#ifdef pp_cvf
-#ifndef X64
-!DEC$ ATTRIBUTES ALIAS:'_getembeddatasize@24' :: getembeddatasize
-#endif
-#endif
 implicit none
 character(len=*), intent(in) :: filename
 integer, intent(in) :: endian
@@ -27,17 +22,7 @@ inquire(unit=lu20,opened=isopen)
 if(isopen)close(lu20)
 inquire(file=trim(filename),exist=exists)
 if(exists)then
-#ifdef pp_cvf
-endian2=0
-endian2=endian
-if(endian2.eq.1)then
-  open(unit=lu20,file=trim(filename),form="unformatted",action="read",shared,convert="BIG_ENDIAN")
- else
-  open(unit=lu20,file=trim(filename),form="unformatted",action="read",shared)
-endif
-#else	   
-  open(unit=lu20,file=trim(filename),form="unformatted",action="read")
-#endif
+  open(unit=lu20,file=trim(filename),form="unformatted",shared,action="read")
  else
   write(6,*)'The boundary element file name, ',trim(filename),' does not exist'
   error=1
@@ -66,12 +51,6 @@ end subroutine getembeddatasize
 !  ------------------ endian_open ------------------------ 
 
 integer function endian_open(file,lunit,endian)
-#ifdef pp_cvf
-#ifndef X64
-!DEC$ ATTRIBUTES ALIAS:'_endian_open@16' :: endian_open
-#endif
-#endif
-
 character(len=*), intent(in) :: file
 integer, intent(in) :: lunit, endian
 
@@ -88,15 +67,7 @@ if(.not.exists)then
   endian_open=1
   return
 endif
-#ifdef pp_cvf
-if(endian.eq.0)then
-  open(unit=lunit,file=trim(file),form="unformatted",action="read",shared,convert="BIG_ENDIAN")
- else
-  open(unit=lunit,file=trim(file),form="unformatted",action="read",shared)
-endif
-#else
-open(unit=lunit,file=trim(file),form="unformatted",action="read")
-#endif
+open(unit=lunit,file=trim(file),form="unformatted",shared,action="read")
 read(lunit)one
 if(one.eq.1)then
   endian_open=0
@@ -110,11 +81,6 @@ end function endian_open
 !  ------------------ fcreate_part5sizefile ------------------------ 
 
 subroutine fcreate_part5sizefile(part5file, part5sizefile, angle_flag, redirect_flag, error)
-#ifdef pp_cvf
-#ifndef X64
-!DEC$ ATTRIBUTES ALIAS:'_fcreate_part5sizefile@28' :: fcreate_part5sizefile
-#endif
-#endif
 implicit none
 character(len=*), intent(in) :: part5file, part5sizefile
 integer, intent(in) :: angle_flag, redirect_flag
@@ -220,11 +186,6 @@ end subroutine fcreate_part5sizefile
 !  ------------------ getisosize ------------------------ 
 
 subroutine getisosize(isofilename,endian,nisopoints,nisotriangles,nisolevels,nisosteps,error)
-#ifdef pp_cvf
-#ifndef X64
-!DEC$ ATTRIBUTES ALIAS:'_getisosize@32' :: getisosize
-#endif
-#endif
 implicit none
 character(len=*), intent(in) :: isofilename
 integer, intent(in) :: endian
@@ -249,17 +210,7 @@ inquire(unit=lu20,opened=isopen)
 if(isopen)close(lu20)
 inquire(file=trim(isofilename),exist=exists)
 if(exists)then
-#ifdef pp_cvf
-endian2=0
-endian2=endian
-if(endian2.eq.1)then
-  open(unit=lu20,file=trim(isofilename),form="unformatted",action="read",shared,convert="BIG_ENDIAN")
- else
-  open(unit=lu20,file=trim(isofilename),form="unformatted",action="read",shared)
-endif
-#else	   
-  open(unit=lu20,file=trim(isofilename),form="unformatted",action="read")
-#endif
+  open(unit=lu20,file=trim(isofilename),form="unformatted",shared,action="read")
  else
   write(6,*)'The iso file name, ',trim(isofilename),' does not exist'
   error=1
@@ -299,11 +250,6 @@ end subroutine getisosize
 !  ------------------ getzonesize ------------------------ 
 
 subroutine getzonesize(zonefilename,nzonet,nrooms,nfires,endian,error)
-#ifdef pp_cvf
-#ifndef X64
-!DEC$ ATTRIBUTES ALIAS:'_getzonesize@28' :: getzonesize
-#endif
-#endif
 implicit none
 character(len=*) :: zonefilename
 integer, intent(out) :: nzonet,nrooms,nfires,error
@@ -325,17 +271,7 @@ inquire(unit=lu26,opened=isopen)
 if(isopen)close(lu26)
 inquire(file=trim(zonefilename),exist=exists)
 if(exists)then
-#ifdef pp_cvf
-endian2=0
-endian2=endian
-if(endian2.eq.1)then
-  open(unit=lu26,file=trim(zonefilename),form="unformatted",action="read",shared,convert="BIG_ENDIAN")
- else
-  open(unit=lu26,file=trim(zonefilename),form="unformatted",action="read",shared)
-endif
-#else
-  open(unit=lu26,file=trim(zonefilename),form="unformatted",action="read")
-#endif
+  open(unit=lu26,file=trim(zonefilename),form="unformatted",shared,action="read")
  else
   write(6,*)'The zone file name, ',trim(zonefilename),' does not exist'
   error=1
@@ -383,11 +319,6 @@ end subroutine getzonesize
 
 subroutine getpatchsizes1(file_unit,patchfilename,patchlonglabel,patchshortlabel,patchunit, &
        endian,npatch,headersize,error)
-#ifdef pp_cvf
-#ifndef X64
-!DEC$ ATTRIBUTES ALIAS:'_getpatchsizes1@52' :: getpatchsizes1
-#endif
-#endif
 implicit none
 
 character(len=*) :: patchfilename, patchlonglabel, patchshortlabel, patchunit
@@ -407,15 +338,7 @@ inquire(unit=lu15,opened=isopen)
 if(isopen)close(lu15)
 inquire(file=trim(patchfilename),exist=exists)
 if(exists)then
-#ifdef pp_cvf
-if(endian.eq.1)then
-  open(unit=lu15,file=trim(patchfilename),form="unformatted",action="read",shared,convert="BIG_ENDIAN")
- else
-  open(unit=lu15,file=trim(patchfilename),form="unformatted",action="read",shared)
-endif
-#else
-  open(unit=lu15,file=trim(patchfilename),form="unformatted",action="read")
-#endif
+  open(unit=lu15,file=trim(patchfilename),form="unformatted",shared,action="read")
  else
   write(6,*)'The boundary file name, ',trim(patchfilename),' does not exist'
   error=1
@@ -442,11 +365,6 @@ end subroutine getpatchsizes1
 !  ------------------ getpatchsizes2 ------------------------ 
 
 subroutine getpatchsizes2(file_unit,version,npatch,npatchsize,pi1,pi2,pj1,pj2,pk1,pk2,patchdir,headersize,framesize)
-#ifdef pp_cvf
-#ifndef X64
-!DEC$ ATTRIBUTES ALIAS:'_getpatchsizes2@52' :: getpatchsizes2
-#endif
-#endif
 implicit none
 integer, intent(in) :: version, npatch,file_unit
 integer, intent(out) :: npatchsize
@@ -484,11 +402,6 @@ end subroutine getpatchsizes2
 !    FORTgetsizesa(file,&npartpoint,&npartframes,lenfile);
 
 subroutine getsizesa(partfilename,npartpoints,npartframes)
-#ifdef pp_cvf
-#ifndef X64
-!DEC$ ATTRIBUTES ALIAS:'_getsizesa@16' :: getsizesa
-#endif
-#endif
 implicit none
 
 integer, intent(out) :: npartpoints, npartframes
@@ -512,11 +425,7 @@ if(connected)close(lu10)
 
 inquire(file=trim(partfilename),exist=exists)
 if(exists)then
-#ifdef pp_cvf
-  open(unit=lu10,file=trim(partfilename),form="formatted",action="read",shared)
-#else
-  open(unit=lu10,file=trim(partfilename),form="formatted",action="read")
-#endif
+  open(unit=lu10,file=trim(partfilename),form="formatted",shared,action="read")
  else
   write(6,*)'The particle file name, ',trim(partfilename),' does not exist'
   error=-1
@@ -541,11 +450,6 @@ end subroutine getsizesa
 !  ------------------ getsizes ------------------------ 
 
 subroutine getsizes(file_unit,partfilename,ibar,jbar,kbar,nb,nv,nspr,mxframepoints,endian, showstaticsmoke, error)
-#ifdef pp_cvf
-#ifndef X64
-!DEC$ ATTRIBUTES ALIAS:'_getsizes@52' :: getsizes
-#endif
-#endif
 implicit none
 
 integer, intent(out) :: nb, nv, nspr, mxframepoints, showstaticsmoke, error
@@ -567,15 +471,7 @@ if(connected)close(lu10)
 
 inquire(file=trim(partfilename),exist=exists)
 if(exists)then
-#ifdef pp_cvf
-if(endian.eq.1)then
-  open(unit=lu10,file=trim(partfilename),form="unformatted",action="read",convert="BIG_ENDIAN",shared)
- else
-  open(unit=lu10,file=trim(partfilename),form="unformatted",action="read",shared)
-endif
-#else
-  open(unit=lu10,file=trim(partfilename),form="unformatted",action="read")
-#endif
+  open(unit=lu10,file=trim(partfilename),form="unformatted",shared,action="read")
  else
   write(6,*)'The particle file name, ',trim(partfilename),' does not exist'
   error=-1
@@ -617,13 +513,6 @@ end subroutine getsizes
 !  ------------------ getsizes2 ------------------------ 
 
 subroutine getsizes2(file_unit,settmin_p,tmin_p,settmax_p,tmax_p,nspr,frameloadstep,partpointstep,npartpoints,npartframes,error)
-                   
-#ifdef pp_cvf
-#ifndef X64
-!DEC$ ATTRIBUTES ALIAS:'_getsizes2@44' :: getsizes2
-#endif
-#endif
-
 implicit none
 
 integer, intent(in) :: file_unit,settmin_p, settmax_p, nspr
@@ -699,13 +588,6 @@ end subroutine getsizes2
 !  ------------------ getsliceparms ------------------------ 
 
 subroutine getsliceparms(slicefilename, endian, ip1, ip2, jp1, jp2, kp1, kp2, ni, nj, nk, slice3d, error)
-
-#ifdef pp_cvf
-#ifndef X64
-!DEC$ ATTRIBUTES ALIAS:'_getsliceparms@56' :: getsliceparms
-#endif
-#endif
-
 implicit none
 
 character(len=*) :: slicefilename
@@ -736,15 +618,7 @@ if(ip1.eq.-1.or.ip2.eq.-1.or.jp1.eq.-1.or.jp2.eq.-1.or.kp1.eq.-1.or.kp2.eq.-1)th
 
   inquire(file=trim(slicefilename),exist=exists)
   if(exists)then
-#ifdef pp_cvf
-  if(endian.eq.1)then
-    open(unit=lu11,file=trim(slicefilename),form="unformatted",action="read",shared,convert="BIG_ENDIAN")
-   else
-    open(unit=lu11,file=trim(slicefilename),form="unformatted",action="read",shared)
-  endif
-#else
-    open(unit=lu11,file=trim(slicefilename),form="unformatted",action="read")
-#endif
+    open(unit=lu11,file=trim(slicefilename),form="unformatted",shared,action="read")
    else
     error=1
     return
@@ -775,13 +649,6 @@ end subroutine getsliceparms
 
 subroutine getslicesizes(slicefilename, nslicei, nslicej, nslicek, nsteps, sliceframestep,&
    endian, error, settmin_s, settmax_s, tmin_s, tmax_s, headersize, framesize)
-
-#ifdef pp_cvf
-#ifndef X64
-!DEC$ ATTRIBUTES ALIAS:'_getslicesizes@60' :: getslicesizes
-#endif
-#endif
-
 implicit none
 
 character(len=*) :: slicefilename
@@ -813,15 +680,7 @@ if(connected)close(lu11)
 
 inquire(file=trim(slicefilename),exist=exists)
 if(exists)then
-#ifdef pp_cvf
-if(endian.eq.1)then
-  open(unit=lu11,file=trim(slicefilename),form="unformatted",action="read",shared,convert="BIG_ENDIAN")
- else
-  open(unit=lu11,file=trim(slicefilename),form="unformatted",action="read",shared)
-endif
-#else
-  open(unit=lu11,file=trim(slicefilename),form="unformatted",action="read")
-#endif
+  open(unit=lu11,file=trim(slicefilename),form="unformatted",shared,action="read")
  else
   error=1
   return
@@ -884,13 +743,6 @@ end subroutine getslicesizes
 !  ------------------ openoart ------------------------ 
 
 subroutine openpart(partfilename, unit, endian, error)
-
-#ifdef pp_cvf
-#ifndef X64
-!DEC$ ATTRIBUTES ALIAS:'_openpart@20' :: openpart
-#endif
-#endif
-
 implicit none
 
 character(len=*) :: partfilename
@@ -910,15 +762,7 @@ if(connected)close(lu11)
 
 inquire(file=partfilename,exist=exists)
 if(exists)then
-#ifdef pp_cvf
-if(endian.eq.1)then
-  open(unit=lu11,file=trim(partfilename),form="unformatted",action="read",shared,convert="BIG_ENDIAN")
- else
-  open(unit=lu11,file=trim(partfilename),form="unformatted",action="read",shared)
-endif
-#else
-  open(unit=lu11,file=partfilename,form="unformatted",action="read")
-#endif
+  open(unit=lu11,file=partfilename,form="unformatted",shared,action="read")
  else
   error=1
   return
@@ -930,13 +774,6 @@ end subroutine openpart
 !  ------------------ openfortranfile ------------------------ 
 
 subroutine openfortranfile(file_name, file_unit, endian, error)
-
-#ifdef pp_cvf
-#ifndef X64
-!DEC$ ATTRIBUTES ALIAS:'_openfortranfile@20' :: openfortranfile
-#endif
-#endif
-
 implicit none
 
 character(len=*), intent(in) :: file_name
@@ -951,15 +788,7 @@ exists=.true.
 
 inquire(file=file_name,exist=exists)
 if(exists)then
-#ifdef pp_cvf
-if(endian.eq.1)then
-  open(unit=file_unit,file=file_name,form="unformatted",action="read",shared,convert="BIG_ENDIAN")
- else
-  open(unit=file_unit,file=file_name,form="unformatted",action="read",shared)
-endif
-#else
-  open(unit=file_unit,file=file_name,form="unformatted",action="read")
-#endif
+  open(unit=file_unit,file=file_name,form="unformatted",shared,action="read")
  else
   error=1
   return
@@ -971,13 +800,6 @@ end subroutine openfortranfile
 !  ------------------ openslice ------------------------ 
 
 subroutine openslice(slicefilename, unitnum, endian, is1, is2, js1, js2, ks1, ks2, error)
-
-#ifdef pp_cvf
-#ifndef X64
-!DEC$ ATTRIBUTES ALIAS:'_openslice@44' :: openslice
-#endif
-#endif
-
 implicit none
 
 character(len=*) :: slicefilename
@@ -1000,15 +822,7 @@ exists=.true.
 
 inquire(file=slicefilename,exist=exists)
 if(exists)then
-#ifdef pp_cvf
-if(endian.eq.1)then
-  open(unit=lu11,file=trim(slicefilename),form="unformatted",action="read",shared,convert="BIG_ENDIAN")
- else
-  open(unit=lu11,file=trim(slicefilename),form="unformatted",action="read",shared)
-endif
-#else
-  open(unit=lu11,file=slicefilename,form="unformatted",action="read")
-#endif
+  open(unit=lu11,file=slicefilename,form="unformatted",shared,action="read")
  else
   error=1
   return
@@ -1025,13 +839,6 @@ end subroutine openslice
 !  ------------------ closefortranfile ------------------------ 
 
 subroutine closefortranfile(unit)
-
-#ifdef pp_cvf
-#ifndef X64
-!DEC$ ATTRIBUTES ALIAS:'_closefortranfile@4' :: closefortranfile
-#endif
-#endif
-
 implicit none
 
 integer, intent(in) :: unit
@@ -1045,11 +852,6 @@ end subroutine closefortranfile
 !  ------------------ getboundaryheader1 ------------------------ 
 
 subroutine getboundaryheader1(boundaryfilename,boundaryunitnumber,endian,npatch,error)
-#ifdef pp_cvf
-#ifndef X64
-!DEC$ ATTRIBUTES ALIAS:'_getboundaryheader1@24' :: getboundaryheader1
-#endif
-#endif
 implicit none
 
 character(len=*), intent(in) :: boundaryfilename
@@ -1072,15 +874,7 @@ inquire(unit=lu15,opened=isopen)
 if(isopen)close(lu15)
 inquire(file=trim(boundaryfilename),exist=exists)
 if(exists)then
-#ifdef pp_cvf
-if(endian.eq.1)then
-  open(unit=lu15,file=trim(boundaryfilename),form="unformatted",action="read",shared,convert="BIG_ENDIAN")
- else
-  open(unit=lu15,file=trim(boundaryfilename),form="unformatted",action="read",shared)
-endif
-#else
-  open(unit=lu15,file=trim(boundaryfilename),form="unformatted",action="read")
-#endif
+  open(unit=lu15,file=trim(boundaryfilename),form="unformatted",shared,action="read")
  else
   write(6,*)'The boundary file name, ',trim(boundaryfilename),' does not exist'
   error=1
@@ -1099,11 +893,6 @@ end subroutine getboundaryheader1
 !  ------------------ getboundaryheader2 ------------------------ 
 
 subroutine getboundaryheader2(boundaryunitnumber,version,npatch,pi1,pi2,pj1,pj2,pk1,pk2,patchdir)
-#ifdef pp_cvf
-#ifndef X64
-!DEC$ ATTRIBUTES ALIAS:'_getboundaryheader2@40' :: getboundaryheader2
-#endif
-#endif
 implicit none
 integer, intent(in) :: boundaryunitnumber, version, npatch
 integer, intent(out), dimension(npatch) :: pi1, pi2, pj1, pj2, pk1, pk2, patchdir
@@ -1133,11 +922,6 @@ end subroutine getboundaryheader2
 !  ------------------ openboundary ------------------------ 
 
 subroutine openboundary(boundaryfilename,boundaryunitnumber,endian,version,error)
-#ifdef pp_cvf
-#ifndef X64
-!DEC$ ATTRIBUTES ALIAS:'_openboundary@24' :: openboundary
-#endif
-#endif
 implicit none
 
 character(len=*), intent(in) :: boundaryfilename
@@ -1159,15 +943,7 @@ inquire(unit=lu15,opened=isopen)
 if(isopen)close(lu15)
 inquire(file=boundaryfilename,exist=exists)
 if(exists)then
-#ifdef pp_cvf
-if(endian.eq.1)then
-  open(unit=lu15,file=boundaryfilename,form="unformatted",action="read",shared,convert="BIG_ENDIAN")
- else
-  open(unit=lu15,file=boundaryfilename,form="unformatted",action="read",shared)
-endif
-#else
-  open(unit=lu15,file=boundaryfilename,form="unformatted",action="read")
-#endif
+  open(unit=lu15,file=boundaryfilename,form="unformatted",shared,action="read")
  else
   write(6,*)'The boundary file name, ',boundaryfilename,' does not exist'
   error=1
@@ -1195,11 +971,6 @@ end subroutine openboundary
 !  ------------------ getpartheader1 ------------------------ 
 
 subroutine getpartheader1(unit,nclasses,fdsversion,size)
-#ifdef pp_cvf
-#ifndef X64
-!DEC$ ATTRIBUTES ALIAS:'_getpartheader1@16' :: getpartheader1
-#endif
-#endif
 implicit none
 
 integer, intent(in) :: unit
@@ -1220,11 +991,6 @@ end subroutine getpartheader1
 !  ------------------ getpartheader2 ------------------------ 
 
 subroutine getpartheader2(unit,nclasses,nquantities,size)
-#ifdef pp_cvf
-#ifndef X64
-!DEC$ ATTRIBUTES ALIAS:'_getpartheader2@16' :: getpartheader2
-#endif
-#endif
 implicit none
 
 integer, intent(in) :: unit,nclasses
@@ -1252,11 +1018,6 @@ end subroutine getpartheader2
 !  ------------------ getpartdataframe ------------------------ 
 
 subroutine getpartdataframe(unit,nclasses,nquantities,npoints,time,tagdata,pdata,size,error)
-#ifdef pp_cvf
-#ifndef X64
-!DEC$ ATTRIBUTES ALIAS:'_getpartdataframe@36' :: getpartdataframe
-#endif
-#endif
 implicit none
 
 integer, intent(in) :: unit,nclasses

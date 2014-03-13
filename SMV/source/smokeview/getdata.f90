@@ -17,11 +17,6 @@
 !  ------------------ geomout ------------------------ 
 
 subroutine geomout(verts, N_VERT_S, faces, N_FACE_S)
-#ifdef pp_cvf
-#ifndef X64
-!DEC$ ATTRIBUTES ALIAS:'_geomout@16' :: geomout
-#endif
-#endif
 implicit none
 integer, intent(in) :: N_VERT_S, N_FACE_S
 real, intent(in), dimension(3*N_VERT_S) :: verts
@@ -52,11 +47,6 @@ end subroutine geomout
 !  ------------------ getembeddata ------------------------ 
 
 subroutine getembeddata(filename,endian,ntimes,nvals,times,nstatics,ndynamics,vals,redirect_flag,error)
-#ifdef pp_cvf
-#ifndef X64
-!DEC$ ATTRIBUTES ALIAS:'_getembeddata@44' :: getembeddata
-#endif
-#endif
 implicit none
 character(len=*), intent(in) :: filename
 integer, intent(in) :: endian, ntimes, nvals, redirect_flag
@@ -79,17 +69,7 @@ inquire(unit=lu20,opened=isopen)
 if(isopen)close(lu20)
 inquire(file=trim(filename),exist=exists)
 if(exists)then
-#ifdef pp_cvf
-endian2=0
-endian2=endian
-if(endian2.eq.1)then
-  open(unit=lu20,file=trim(filename),form="unformatted",action="read",shared,convert="BIG_ENDIAN")
- else
-  open(unit=lu20,file=trim(filename),form="unformatted",action="read",shared)
-endif
-#else	   
-  open(unit=lu20,file=trim(filename),form="unformatted",action="read")
-#endif
+  open(unit=lu20,file=trim(filename),form="unformatted",shared,action="read")
  else
   write(6,*)'The boundary element file name, ',trim(filename),' does not exist'
   error=1
@@ -130,11 +110,6 @@ end subroutine getembeddata
 !  ------------------ getzonedata ------------------------ 
 
 subroutine getzonedata(zonefilename,nzonet,nrooms, nfires, zonet,zoneqfire,zonepr, zoneylay,zonetl,zonetu,endian,error)
-#ifdef pp_cvf
-#ifndef X64
-!DEC$ ATTRIBUTES ALIAS:'_getzonedata@52' :: getzonedata
-#endif
-#endif
 implicit none
 character(len=*) :: zonefilename
 integer, intent(in) :: nrooms, nfires,endian
@@ -157,15 +132,7 @@ inquire(unit=lu26,opened=isopen)
 if(isopen)close(lu26)
 inquire(file=trim(zonefilename),exist=exists)
 if(exists)then
-#ifdef pp_cvf
-if(endian.eq.1)then
-  open(unit=lu26,file=trim(zonefilename),form="unformatted",action="read",shared,convert="BIG_ENDIAN")
- else
-  open(unit=lu26,file=trim(zonefilename),form="unformatted",action="read",shared)
-endif
-#else
-  open(unit=lu26,file=trim(zonefilename),form="unformatted",action="read")
-#endif
+  open(unit=lu26,file=trim(zonefilename),form="unformatted",shared,action="read")
  else
   write(6,*)'The zone file name, ',trim(zonefilename),' does not exist'
   error=1
@@ -208,13 +175,7 @@ end subroutine getzonedata
 !  ------------------ getpatchdata ------------------------ 
 
 subroutine getpatchdata(lunit,npatch,pi1,pi2,pj1,pj2,pk1,pk2,patchtime,pqq,npqq,error)
-#ifdef pp_cvf
-#ifndef X64
-!DEC$ ATTRIBUTES ALIAS:'_getpatchdata@48' :: getpatchdata
-#endif
-#endif
 implicit none
-
 
 integer, intent(in) :: npatch,lunit
 integer, intent(in), dimension(*) :: pi1, pi2, pj1, pj2, pk1, pk2
@@ -256,12 +217,6 @@ end subroutine getpatchdata
 !  ------------------ getdata1 ------------------------ 
 
 subroutine getdata1(file_unit,ipart,error)
-#ifdef pp_cvf
-#ifndef X64
-!DEC$ ATTRIBUTES ALIAS:'_getdata1@12' :: getdata1
-#endif
-#endif
-
 implicit none
 
 integer, intent(in) :: file_unit
@@ -327,12 +282,6 @@ subroutine getdata2(file_unit,xs,ys,zs,&
                     offset_x, offset_y, offset_z, redirect_flag, &
       	    				error)
                    
-#ifdef pp_cvf
-#ifndef X64
-!DEC$ ATTRIBUTES ALIAS:'_getdata2@136' :: getdata2
-#endif
-#endif
-
 implicit none
 real, dimension(*), intent(out) :: t
 
@@ -565,12 +514,6 @@ end subroutine getdirval
 !  ------------------ writeslicedata ------------------------ 
 
 subroutine writeslicedata(file_unit,slicefilename,is1,is2,js1,js2,ks1,ks2,qdata,times,ntimes,redirect_flag)
-#ifdef pp_cvf
-#ifndef X64
-!DEC$ ATTRIBUTES ALIAS:'_writeslicedata@52' :: writeslicedata
-#endif
-#endif
-
 implicit none
 
 
@@ -624,12 +567,6 @@ end subroutine writeslicedata
 subroutine getslicedata(file_unit,slicefilename,longlabel,shortlabel,units,&
             is1,is2,js1,js2,ks1,ks2,idir,qmin,qmax,qdata,times,nstepsmax,sliceframestep,&
 			endian,settmin_s,settmax_s,tmin_s,tmax_s,redirect_flag)
-#ifdef pp_cvf
-#ifndef X64
-!DEC$ ATTRIBUTES ALIAS:'_getslicedata@112' :: getslicedata
-#endif
-#endif
-
 implicit none
 
 character(len=*) :: slicefilename, longlabel, shortlabel,units
@@ -671,15 +608,7 @@ if(connected)close(lu11)
 
 inquire(file=trim(slicefilename),exist=exists)
 if(exists)then
-#ifdef pp_cvf
-if(endian.eq.1)then
-  open(unit=lu11,file=trim(slicefilename),form="unformatted",action="read",shared,convert="BIG_ENDIAN")
- else
-  open(unit=lu11,file=trim(slicefilename),form="unformatted",action="read",shared)
-endif
-#else
-  open(unit=lu11,file=trim(slicefilename),form="unformatted",action="read")
-#endif
+  open(unit=lu11,file=trim(slicefilename),form="unformatted",shared,action="read")
  else
   write(6,*)'the slice file ',trim(slicefilename),' does not exist'
   nsteps = 0
@@ -797,12 +726,6 @@ end subroutine getslicedata
 !  ------------------ getsliceframe ------------------------ 
 
 subroutine getsliceframe(lu11,is1,is2,js1,js2,ks1,ks2,time,qframe,testslice,error)
-#ifdef pp_cvf
-#ifndef X64
-!DEC$ ATTRIBUTES ALIAS:'_getsliceframe@44' :: getsliceframe
-#endif
-#endif
-
 implicit none
 
 real, intent(out), dimension(*) :: qframe
@@ -851,11 +774,6 @@ end subroutine getsliceframe
 
 subroutine endianout(endianfilename)
 implicit none
-#ifdef pp_cvf
-#ifndef X64
-!DEC$ ATTRIBUTES ALIAS:'_endianout@8' :: endianout
-#endif
-#endif
 character(len=*) :: endianfilename
 integer :: one
 integer :: file_unit
@@ -873,12 +791,6 @@ end subroutine endianout
 !  ------------------ outsliceheader ------------------------ 
 
 subroutine outsliceheader(file_unit,slicefilename,unit,ip1, ip2, jp1, jp2, kp1, kp2, error)
-#ifdef pp_cvf
-#ifndef X64
-!DEC$ ATTRIBUTES ALIAS:'_outsliceheader@44' :: outsliceheader
-#endif
-#endif
-
 implicit none
 
 integer, intent(in) :: file_unit
@@ -911,12 +823,6 @@ end subroutine outsliceheader
 !  ------------------ outsliceframe ------------------------ 
 
 subroutine outsliceframe(lu11,is1,is2,js1,js2,ks1,ks2,time,qframe,error)
-#ifdef pp_cvf
-#ifndef X64
-!DEC$ ATTRIBUTES ALIAS:'_outsliceframe@40' :: outsliceframe
-#endif
-#endif
-
 implicit none
 
 real, intent(in), dimension(*) :: qframe
@@ -943,11 +849,6 @@ end subroutine outsliceframe
 !  ------------------ outboundaryheader ------------------------ 
 
 subroutine outboundaryheader(boundaryfilename,boundaryunitnumber,npatches,pi1,pi2,pj1,pj2,pk1,pk2,patchdir,error)
-#ifdef pp_cvf
-#ifndef X64
-!DEC$ ATTRIBUTES ALIAS:'_outboundaryheader@48' :: outboundaryheader
-#endif
-#endif
 implicit none
 
 character(len=*), intent(in) :: boundaryfilename
@@ -978,13 +879,7 @@ end subroutine outboundaryheader
 !  ------------------ outpatchframe ------------------------ 
 
 subroutine outpatchframe(lunit,npatch,pi1,pi2,pj1,pj2,pk1,pk2,patchtime,pqq,error)
-#ifdef pp_cvf
-#ifndef X64
-!DEC$ ATTRIBUTES ALIAS:'_outpatchframe@44' :: outpatchframe
-#endif
-#endif
 implicit none
-
 
 integer, intent(in) :: npatch,lunit
 integer, intent(in), dimension(*) :: pi1, pi2, pj1, pj2, pk1, pk2
@@ -1017,12 +912,6 @@ end subroutine outpatchframe
 !  ------------------ getplot3dq ------------------------ 
 
 subroutine getplot3dq(qfilename,nx,ny,nz,qq,error,endian,isotest)
-
-#ifdef pp_cvf
-#ifndef X64
-!DEC$ ATTRIBUTES ALIAS:'_getplot3dq@36' :: getplot3dq
-#endif
-#endif
 implicit none
 
 character(len=*) :: qfilename
@@ -1052,15 +941,7 @@ if(isotest.eq.0)then
   error=0
   inquire(file=qfilename,exist=exists)
   if(exists)then
-#ifdef pp_cvf
-  if(endian.eq.1)then
-    open(unit=u_in,file=trim(qfilename),form="unformatted",action="read",shared,iostat=error2,convert="BIG_ENDIAN")
-   else
-    open(unit=u_in,file=trim(qfilename),form="unformatted",action="read",shared,iostat=error2)
-  endif
-#else
-    open(unit=u_in,file=qfilename,form="unformatted",action="read",iostat=error2)
-#endif
+    open(unit=u_in,file=qfilename,form="unformatted",shared,action="read",iostat=error2)
    else
     write(6,*)'The file name, ',trim(qfilename),' does not exist'
     read(5,*)dummy
@@ -1106,11 +987,6 @@ end subroutine getplot3dq
 !  ------------------ plot3dout ------------------------ 
 
 subroutine plot3dout(outfile, nx, ny, nz, qout, error3)
-#ifdef pp_cvf
-#ifndef X64
-!DEC$ ATTRIBUTES ALIAS:'_plot3dout@28' :: plot3dout
-#endif
-#endif
 implicit none
 
 character(len=*), intent(in) :: outfile
@@ -1145,11 +1021,6 @@ end subroutine plot3dout
 SUBROUTINE color2rgb(RGB,COLOR)
 implicit none
 
-#ifdef pp_cvf
-#ifndef X64
-!DEC$ ATTRIBUTES ALIAS:'_color2rgb@12' :: color2rgb
-#endif
-#endif
 ! Translate character string of a color name to RGB value
 
 INTEGER :: RGB(3)
@@ -1697,12 +1568,6 @@ END SUBROUTINE COLOR2RGB
 !  ------------------ funit ------------------------ 
 
 subroutine get_file_unit(funit,first_unit)
-#ifdef pp_cvf
-#ifndef X64
-!DEC$ ATTRIBUTES ALIAS:'_get_file_unit@8' :: get_file_unit
-#endif
-#endif
-
 integer, intent(in) :: first_unit
 integer, intent(out) :: funit
 logical :: is_open
@@ -2642,11 +2507,6 @@ SUBROUTINE GETVERTS2(BOX_BOUNDS,V0,V1,V2,V3,VERTS,NVERTS,FACESTART,FACENUM,NFACE
 USE PRECISION_PARAMETERS
 USE BOXTETRA_ROUTINES
 IMPLICIT NONE
-#ifdef pp_cvf
-#ifndef X64
-!DEC$ ATTRIBUTES ALIAS:'_getverts2@56' :: getverts2
-#endif
-#endif
 
 REAL(FB), DIMENSION(0:5), INTENT(IN) :: BOX_BOUNDS
 REAL(FB), DIMENSION(0:2), INTENT(IN) :: V0, V1, V2, V3

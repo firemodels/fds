@@ -81,7 +81,7 @@ SMV_LIBS_64 = $(WIN_LIBDIR_64)\glui.lib $(WIN_LIBDIR_64)\glut32.lib $(WIN_LIBDIR
 # ------------- intel_win_32 ----------------
 
 intel_win_32 : INC = -I ../../source/include -I ../../source/shared -I ../../source/smokeview -I ../../source/glew
-intel_win_32 : FFLAGS    = -O2 -fpp -D pp_cvf /iface:stdref /arch:IA32
+intel_win_32 : FFLAGS    = -O2 /iface:stdref /arch:IA32
 intel_win_32 : CFLAGS    = -O2 -D WIN32 -D pp_INTEL -D _CONSOLE  -D GLEW_STATIC -D PTW32_STATIC_LIB $(SMV_TESTFLAG) /arch:IA32
 intel_win_32 : LFLAGS    = /F32768000 
 intel_win_32 : CC        = icl
