@@ -27,6 +27,7 @@ lambda = 0.189.
       MATL_ID(1,1) = 'LIQUID'
       THICKNESS = 0.5
       TMP_BACK = 15.
+      BACKING='INSULATED'
       TMP_INNER = 15. /
 
 &MATL ID = 'LIQUID'
