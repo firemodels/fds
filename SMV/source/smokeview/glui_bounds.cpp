@@ -1044,17 +1044,20 @@ extern "C" void glui_bounds_setup(int main_window){
 /* ------------------ compress_onoff ------------------------ */
 
 extern "C" void compress_onoff(int flag){
-  if(flag==0){
-    if(BUTTON_compress!=NULL)BUTTON_compress->disable();
-    if(CHECKBOX_overwrite_all!=NULL)CHECKBOX_overwrite_all->disable();
-    if(CHECKBOX_erase_all!=NULL)CHECKBOX_erase_all->disable();
-    if(CHECKBOX_multi_task!=NULL)CHECKBOX_multi_task->disable();
-  }
-  else{
-    if(BUTTON_compress!=NULL)BUTTON_compress->enable();
-    if(CHECKBOX_overwrite_all!=NULL)CHECKBOX_overwrite_all->enable();
-    if(CHECKBOX_erase_all!=NULL)CHECKBOX_erase_all->enable();
-    if(CHECKBOX_multi_task!=NULL)CHECKBOX_multi_task->enable();
+  switch (flag){
+    case OFF:
+      if(BUTTON_compress!=NULL)BUTTON_compress->disable();
+      if(CHECKBOX_overwrite_all!=NULL)CHECKBOX_overwrite_all->disable();
+      if(CHECKBOX_erase_all!=NULL)CHECKBOX_erase_all->disable();
+      if(CHECKBOX_multi_task!=NULL)CHECKBOX_multi_task->disable();
+    case ON:
+      if(BUTTON_compress!=NULL)BUTTON_compress->enable();
+      if(CHECKBOX_overwrite_all!=NULL)CHECKBOX_overwrite_all->enable();
+      if(CHECKBOX_erase_all!=NULL)CHECKBOX_erase_all->enable();
+      if(CHECKBOX_multi_task!=NULL)CHECKBOX_multi_task->enable();
+    default:
+      ASSERT(FFALSE);
+      break;
   }
 }
 

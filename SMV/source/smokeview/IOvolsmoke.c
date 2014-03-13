@@ -184,7 +184,7 @@ void get_pt_smokecolor(float *smoke_tran, float **smoke_color, float dstep, floa
 
 /* ------------------ init_volrender ------------------------ */
 
-void init_volrender_surface(int firstcall){
+void init_volrender_surface(int flag){
   int i;
 
   for(i=0;i<nmeshes;i++){
@@ -230,7 +230,7 @@ void init_volrender_surface(int firstcall){
 
     meshi = meshinfo + i;
     vr = &(meshi->volrenderinfo);
-    if(firstcall==1){
+    if(flag==FIRSTCALL){
       vr->smokecolor_yz0=NULL;
       vr->smokecolor_yz1=NULL;
       vr->smokecolor_xz0=NULL;

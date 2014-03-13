@@ -205,6 +205,12 @@ void _Sniff_Errors(char *whereat);
 #define ROTATION_1AXIS 2
 #define ROTATION_3AXIS 3
 
+#define FIRSTCALL 1
+#define NOT_FIRSTCALL 0
+
+#define SELECT_BLOCKS 1
+#define NOT_SELECT_BLOCKS 0
+
 #define TO_BW 0
 #define TO_COLOR 1
 

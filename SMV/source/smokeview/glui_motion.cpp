@@ -340,7 +340,7 @@ extern "C" void glui_motion_setup(int main_window){
   RADIOBUTTON_1d=glui_motion->add_radiobutton_to_group(RADIO_rotation_type,"eye centered");
   RADIOBUTTON_1e=glui_motion->add_radiobutton_to_group(RADIO_rotation_type,"level (1 axis)");
   RADIOBUTTON_1e=glui_motion->add_radiobutton_to_group(RADIO_rotation_type,"3 axis");
-  rotation_type_CB(0);
+  rotation_type_CB(rotation_type);
 
   rotation_index=&camera_current->rotation_index;
   *rotation_index=nmeshes;
@@ -1094,7 +1094,7 @@ extern "C" void update_meshlist1(int val){
   LIST_mesh2->set_int_val(val);
   if(val>=0&&val<nmeshes){
     RADIO_rotation_type->set_int_val(ROTATION_2AXIS);
-    handle_rotation_type(0);
+    handle_rotation_type(ROTATION_2AXIS);
   }
 }
 
@@ -1376,13 +1376,13 @@ extern "C" void add_list_view(char *label_in){
 /* ------------------ rotation_type_CB ------------------------ */
 
 extern "C" void rotation_type_CB(int var){
-  if(rotation_type==ROTATION_3AXIS){
+  if(var==ROTATION_3AXIS){
     camera2quat(camera_current,quat_general,quat_rotation);
   }
   else{
     camera_current->quat_defined=0;
   }
-  handle_rotation_type(0);
+  handle_rotation_type(ROTATION_2AXIS);
 }
 
 /* ------------------ Render_CB ------------------------ */

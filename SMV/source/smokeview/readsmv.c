@@ -7416,7 +7416,7 @@ typedef struct {
   }
 
   init_volrender();
-  init_volrender_surface(1);
+  init_volrender_surface(FIRSTCALL);
 
 #ifdef pp_CULL
 
@@ -8548,7 +8548,7 @@ int readini2(char *inifile, int localfile){
       ONEORZERO(load_at_rendertimes);
       fire_opacity_factor=CLAMP(fire_opacity_factor,1.0,10.0);
       mass_extinct=CLAMP(mass_extinct,100.0,100000.0);
-      init_volrender_surface(0);
+      init_volrender_surface(NOT_FIRSTCALL);
       continue;
     }
     if(match(buffer,"MESHOFFSET")==1){

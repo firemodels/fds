@@ -249,7 +249,7 @@ extern "C" void hide_glui_edit(void){
 extern "C" void show_glui_edit(void){
   showedit_dialog=1;
   blockageSelect=1;
-  update_blockvals(0);
+  update_blockvals(NOT_SELECT_BLOCKS);
   glui_edit->show();
 }
 
@@ -313,7 +313,7 @@ extern "C" void update_blockvals(int flag){
     OBJECT_CB(RADIO_WALL);
   }
 
-  if(flag==1){
+  if(flag==SELECT_BLOCKS){
     if(bchighlight!=NULL){
       char dialog_label[255];
       mesh *blockmesh;
@@ -491,7 +491,7 @@ extern "C" void OBJECT_CB(int var){
         else{
           blocklocation=BLOCKlocation_grid;
         }
-        update_blockvals(0);
+        update_blockvals(NOT_SELECT_BLOCKS);
         break;
     default:
       ASSERT(FFALSE);

@@ -503,7 +503,7 @@ extern "C" void Smoke3d_CB(int var){
   float temp_min, temp_max;
 
   case NONGPU_VOL_FACTOR:
-    init_volrender_surface(0);
+    init_volrender_surface(NOT_FIRSTCALL);
     break;
   case GPU_VOL_FACTOR:
     break;

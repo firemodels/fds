@@ -4246,7 +4246,7 @@ void RotateTypeMenu(int value){
   if(value==999)return;
   rotation_type = value;
   update_rotation_type(rotation_type);
-  rotation_type_CB(0);
+  rotation_type_CB(rotation_type);
   updatemenu=1;  
   glutPostRedisplay();
 }
@@ -7106,7 +7106,7 @@ updatemenu=0;
     update_glui_render();
   }
 
-   /* --------------------------------viewpoint menu -------------------------- */
+   /* --------------------------------dialog menu -------------------------- */
 
   CREATEMENU(dialogmenu,DialogMenu);
   if(showbounds_dialog==1)glutAddMenuEntry(_("*File bounds/Script...  ALT+f"),14);
@@ -7186,6 +7186,9 @@ updatemenu=0;
       break;
     }
   }
+
+  /* -------------------------------- units menu -------------------------- */
+
   if(nunitclasses>0){
     for(i=0;i<nunitclasses;i++){
       f_units *uci;
@@ -7234,6 +7237,7 @@ updatemenu=0;
   }
 
 /* --------------------------------languagemenu -------------------------- */
+
 #ifdef pp_LANG
 #define FONTFILL(IBEG,IEND) \
     for(i=IBEG;i<=IEND;i++){\

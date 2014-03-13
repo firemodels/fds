@@ -163,7 +163,7 @@ void compress_svzip2(void){
   char shellcommand[1024];
 
   PRINTF("Compressing...\n");
-  compress_onoff(0);
+  compress_onoff(OFF);
 
   writeini(LOCAL_INI,NULL);
 
@@ -188,7 +188,7 @@ void compress_svzip2(void){
   system(shellcommand);
   updatesmoke3dmenulabels();
   updatepatchmenulabels();
-  compress_onoff(1);
+  compress_onoff(ON);
   updatemenu=1;
   PRINTF("Compression completed\n");
 }

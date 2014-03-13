@@ -391,7 +391,7 @@ void mouse_edit_blockage(int button, int state, int x, int y){
         ASSERT(FFALSE);
         break;
     }
-    update_blockvals(1);
+    update_blockvals(SELECT_BLOCKS);
   }
 }
 
@@ -1476,9 +1476,9 @@ void keyboard(unsigned char key, int flag){
       default:
         rotation_type++;
         if(rotation_type>3)rotation_type=0;
-        rotation_type_CB(0);
+        rotation_type_CB(rotation_type);
         update_rotation_type(rotation_type);
-        handle_rotation_type(0);
+        handle_rotation_type(ROTATION_2AXIS);
       }
       break;
     case 'f':
@@ -2128,19 +2128,19 @@ void handle_rotation_type(int flag){
   switch (rotation_type){
   case ROTATION_3AXIS:
       if(trainer_mode==0)PRINTF("Scene centered (3 axis rotation)\n");
-      if(showtrainer_dialog==0&&flag==0&&rotation_type_old==EYE_CENTERED){
+      if(showtrainer_dialog==0&&flag==ROTATION_2AXIS&&rotation_type_old==EYE_CENTERED){
         ResetView(RESTORE_EXTERIOR_VIEW);
       }
       break;
   case ROTATION_2AXIS:
       if(trainer_mode==0)PRINTF("Scene centered (2 axis rotation)\n");
-      if(showtrainer_dialog==0&&flag==0&&rotation_type_old==EYE_CENTERED){
+      if(showtrainer_dialog==0&&flag==ROTATION_2AXIS&&rotation_type_old==EYE_CENTERED){
         ResetView(RESTORE_EXTERIOR_VIEW);
       }
       break;
   case EYE_CENTERED:
        az_elev[1]=0.0;
-       if(showtrainer_dialog==0&&flag==0&&rotation_type_old!=EYE_CENTERED){
+       if(showtrainer_dialog==0&&flag==ROTATION_2AXIS&&rotation_type_old!=EYE_CENTERED){
          ResetView(RESTORE_EXTERIOR_VIEW);
        }
       if(trainer_mode==0)PRINTF("eye centered\n");
@@ -2148,7 +2148,7 @@ void handle_rotation_type(int flag){
   case ROTATION_1AXIS:
     az_elev[1]=0.0;
     if(trainer_mode==0)PRINTF("Scene centered (level rotation)\n");
-    if(showtrainer_dialog==0&&flag==0&&rotation_type_old==EYE_CENTERED){
+    if(showtrainer_dialog==0&&flag==ROTATION_2AXIS&&rotation_type_old==EYE_CENTERED){
       ResetView(RESTORE_EXTERIOR_VIEW);
     }
     break;

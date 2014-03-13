@@ -259,7 +259,7 @@ void ROTATE_CB(int var){
 
   if(rotation_type!=ROTATION_2AXIS){
     rotation_type=ROTATION_2AXIS;
-    handle_rotation_type(0);
+    handle_rotation_type(ROTATION_2AXIS);
     ResetView(RESTORE_EXTERIOR_VIEW);
   }
 
@@ -346,7 +346,7 @@ void TRAINER_CB(int var){
         CHECKBOX_pause->set_int_val(trainer_pause);
         TourMenu(MENU_TOUR_MANUAL);
         rotation_type=ROTATION_2AXIS;
-        handle_rotation_type(0);
+        handle_rotation_type(ROTATION_2AXIS);
         from_glui_trainer=1;
         trainee_location=0;
       }
@@ -357,7 +357,7 @@ void TRAINER_CB(int var){
     default:
       if(rotation_type!=EYE_CENTERED){
         rotation_type=EYE_CENTERED;
-        handle_rotation_type(0);
+        handle_rotation_type(ROTATION_2AXIS);
       }
       for(i=0;i<ntours;i++){
         tourdata *touri;
@@ -372,7 +372,7 @@ void TRAINER_CB(int var){
     break;
   case MOVETYPE:
     rotation_type=ROTATION_2AXIS;
-    handle_rotation_type(0);
+    handle_rotation_type(ROTATION_2AXIS);
     ResetView(RESTORE_EXTERIOR_VIEW);
     break;
   case LOAD_SMOKE:
