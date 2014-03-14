@@ -1,4 +1,13 @@
 #!/bin/bash -f
 
 sleep 8
-kill $SMV_ID
+if [ "`uname`" == "Darwin" ]; then
+  PIDS=`ps -u $USER | grep Xvfb | grep -v grep |  awk '{print $2}'`
+  for f in $PIDS
+  do
+    kill -9 $f
+  done
+else
+  kill $SMV_ID
+fi
+
