@@ -92,7 +92,7 @@ for i_plot=1:2
     set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
 
     if i_plot==1
-       h=plot(t,xf,'k-',t_fds,dmin,'k--',t_fds,dmax,'r--');
+       h=plot(t,xf,'k-',t_fds,dmin,'b--',t_fds,dmax,'r--');
        xlabel('Time (s)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
        ylabel('Phase interface, {\itx}_f (m)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
        legend('Analytical','FDS min','FDS max','Location','SouthEast')
