@@ -172,7 +172,7 @@ float get_zcell_val(mesh *meshi,float xval, float yval, float *zval_offset, int 
   return 0.0;
 }
 
-/* ------------------ get_zcell_offset ------------------------ */
+/* ------------------ get_zcell_val_offset ------------------------ */
 
 float get_zcell_val_offset(mesh *meshi,float xval, float yval, int *loc){
   int imesh;

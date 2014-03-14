@@ -24,7 +24,7 @@ char IOvolsmoke_revision[]="$Revision$";
 #include "IOvolsmoke.h"
 #include "compress.h"
 
-/* ----------------------- interp3d ----------------------------- */
+/* ----------------------- get_pt_smokecolor ----------------------------- */
 
 void get_pt_smokecolor(float *smoke_tran, float **smoke_color, float dstep, float xyz[3], mesh *meshi, int *inobst, char *blank_local){
   int i, j, k;
@@ -182,7 +182,7 @@ void get_pt_smokecolor(float *smoke_tran, float **smoke_color, float dstep, floa
   }
 }
 
-/* ------------------ init_volrender ------------------------ */
+/* ------------------ init_volrender_surface ------------------------ */
 
 void init_volrender_surface(int flag){
   int i;
@@ -699,7 +699,7 @@ void compute_all_smokecolors(void){
   }
 }
 
-/* ------------------ drawsmoke3dVOL ------------------------ */
+/* ------------------ drawsmoke3dVOLdebug ------------------------ */
 
 void drawsmoke3dVOLdebug(void){
   int ii;
@@ -1204,7 +1204,7 @@ void drawsmoke3dVOL(void){
   if(use_transparency_data==1)transparentoff();
 }
 
-/* ------------------ get_super_index ------------------------ */
+/* ------------------ set_super_index ------------------------ */
 
 void set_super_index(mesh *meshi, int dir){
   mesh *nab;
@@ -1290,7 +1290,7 @@ void update_volsmoke_supertexture(supermesh *smesh){
   glActiveTexture(GL_TEXTURE0);
 }
 
-/* ------------------ update_3dsmoke_texture ------------------------ */
+/* ------------------ update_volsmoke_texture ------------------------ */
 
 void update_volsmoke_texture(mesh *meshi, float *smokedata_local, float *firedata_local){
   GLsizei ni, nj, nk;
@@ -1607,7 +1607,7 @@ void drawsmoke3dGPUVOL(void){
                            if(endianswitch==1)endian_switch(var,size);\
                            FSEEK(SLICEFILE,TRAILER_SIZE,SEEK_CUR)
 
-/* ------------------ get_volsmoke_sizes ------------------------ */
+/* ------------------ get_volsmoke_nframes ------------------------ */
 
 int get_volsmoke_nframes(volrenderdata *vr){
 	slicedata *fireslice, *smokeslice;
@@ -1930,7 +1930,7 @@ void read_volsmoke_frame(volrenderdata *vr, int framenum, int *first){
   PRINTF("\n");
 }
 
-/* ------------------ unload_volsmoke_allframes ------------------------ */
+/* ------------------ unload_volsmoke_frame_allmeshes ------------------------ */
 
 void unload_volsmoke_frame_allmeshes(int framenum){
   int i;
@@ -2357,7 +2357,7 @@ void init_volsmoke_supertexture(supermesh *smesh){
   FFLUSH();
 }
 
-/* ------------------ init_meshnabors ------------------------ */
+/* ------------------ get_minmesh ------------------------ */
 
 mesh *get_minmesh(void){
   int i;
@@ -2381,7 +2381,7 @@ mesh *get_minmesh(void){
   return minmesh;
 }
 
-/* ------------------ can_extend ------------------------ */
+/* ------------------ extend_mesh ------------------------ */
 
 int extend_mesh(supermesh *smesh, int direction){
   int i;
@@ -2409,7 +2409,7 @@ int extend_mesh(supermesh *smesh, int direction){
   return 1;
 }
 
-/* ------------------ init_meshnabors ------------------------ */
+/* ------------------ make_smesh ------------------------ */
 
 void make_smesh(supermesh *smesh, mesh *firstmesh){
   mesh **meshptrs;
@@ -2458,7 +2458,7 @@ int compare_smeshes( const void *arg1, const void *arg2 ){
   return 0;
 }
 
-/* ------------------ init_meshnabors ------------------------ */
+/* ------------------ init_supermesh ------------------------ */
 
 void init_supermesh(void){
   int i;
