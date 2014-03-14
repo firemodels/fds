@@ -2522,11 +2522,9 @@ SUBROUTINE CHECK_STABILITY(NM,CODE)
 
 USE PHYSICAL_FUNCTIONS, ONLY: GET_SPECIFIC_HEAT 
 INTEGER, INTENT(IN) :: NM,CODE
-REAL(EB) :: UODX,VODY,WODZ,UVW,UVWMAX,R_DX2,MU_MAX,MUTRM,CP,ZZ_GET(0:N_TRACKED_SPECIES),PART_CFL,DENSITY_FACTOR
+REAL(EB) :: UODX,VODY,WODZ,UVW,UVWMAX,R_DX2,MU_MAX,MUTRM,CP,ZZ_GET(0:N_TRACKED_SPECIES),PART_CFL,DENSITY_FACTOR,MU_TMP
 INTEGER  :: I,J,K,IW,IIG,JJG,KKG
-REAL(EB) :: P_UVWMAX,P_MU_MAX,P_MU_TMP !private variables for OpenMP-Code
-INTEGER  :: P_ICFL,P_JCFL,P_KCFL,P_I_VN,P_J_VN,P_K_VN !private variables for OpenMP-Code
-REAL(EB), POINTER, DIMENSION(:,:,:) :: UU=>NULL(),VV=>NULL(),WW=>NULL(),RHOP=>NULL(),DP=>NULL(),MUP=>NULL()
+REAL(EB), POINTER, DIMENSION(:,:,:) :: UU=>NULL(),VV=>NULL(),WW=>NULL(),RHOP=>NULL(),DP=>NULL()
 REAL(EB), POINTER, DIMENSION(:,:,:,:) :: ZZP=>NULL()
 TYPE(WALL_TYPE), POINTER :: WC=>NULL()
 
@@ -2558,19 +2556,11 @@ VN     = 0._EB
 MUTRM  = 1.E-9_EB
 R_DX2  = 1.E-9_EB
 DENSITY_FACTOR = 1._EB/(1._EB - RHOMIN/RHOA)
-
-! Strategy for OpenMP version of CFL/VN number determination
-! - find max CFL/VN number for each thread (P_UVWMAX/P_MU_MAX)
-! - save I,J,K of each P_UVWMAX/P_MU_MAX in P_ICFL... for each thread
-! - compare sequentially all P_UVWMAX/P_MU_MAX and find the global maximum
-! - save P_ICFL... of the "winning" thread in the global ICFL... variable
  
 ! Determine max CFL number from all grid cells
 
 SELECT_VELOCITY_NORM: SELECT CASE (CFL_VELOCITY_NORM)
    CASE(0)
-      P_UVWMAX = UVWMAX
-
       DO K=0,KBAR
          DO J=0,JBAR
             DO I=0,IBAR
@@ -2578,70 +2568,46 @@ SELECT_VELOCITY_NORM: SELECT CASE (CFL_VELOCITY_NORM)
                VODY = ABS(VV(I,J,K))*RDYN(J)
                WODZ = ABS(WW(I,J,K))*RDZN(K)
                UVW  = MAX(UODX,VODY,WODZ) + ABS(DP(I,J,K))*DENSITY_FACTOR
-               IF (UVW>=P_UVWMAX) THEN
-                  P_UVWMAX = UVW
-                  P_ICFL = I
-                  P_JCFL = J
-                  P_KCFL = K
+               IF (UVW>=UVWMAX) THEN
+                  UVWMAX = UVW
+                  ICFL = I
+                  JCFL = J
+                  KCFL = K
                ENDIF
             ENDDO
          ENDDO
       ENDDO
-      IF (P_UVWMAX>=UVWMAX) THEN
-         UVWMAX = P_UVWMAX
-         ICFL=P_ICFL
-         JCFL=P_JCFL
-         KCFL=P_KCFL
-      ENDIF
    CASE(1)
-      P_UVWMAX = UVWMAX
-
       DO K=0,KBAR
          DO J=0,JBAR
             DO I=0,IBAR
                UVW = ABS(UU(I,J,K)*RDXN(I)) + ABS(VV(I,J,K)*RDYN(J)) + ABS(WW(I,J,K)*RDZN(K))
                UVW = UVW + ABS(DP(I,J,K))*DENSITY_FACTOR
-               IF (UVW>=P_UVWMAX) THEN
-                  P_UVWMAX = UVW
-                  P_ICFL=I
-                  P_JCFL=J
-                  P_KCFL=K
+               IF (UVW>=UVWMAX) THEN
+                  UVWMAX = UVW
+                  ICFL=I
+                  JCFL=J
+                  KCFL=K
                ENDIF
             ENDDO
          ENDDO
       ENDDO
-      IF (P_UVWMAX>=UVWMAX) THEN
-         UVWMAX = P_UVWMAX
-         ICFL=P_ICFL
-         JCFL=P_JCFL
-         KCFL=P_KCFL
-      ENDIF
    CASE(2)
-      P_UVWMAX = UVWMAX
-
       DO K=0,KBAR
          DO J=0,JBAR
             DO I=0,IBAR
                UVW = SQRT( (UU(I,J,K)*RDXN(I))**2 + (VV(I,J,K)*RDYN(J))**2 + (WW(I,J,K)*RDZN(K))**2 )
                UVW = UVW + ABS(DP(I,J,K))*DENSITY_FACTOR
-               IF (UVW>=P_UVWMAX) THEN
-                  P_UVWMAX = UVW
-                  P_ICFL=I
-                  P_JCFL=J
-                  P_KCFL=K
+               IF (UVW>=UVWMAX) THEN
+                  UVWMAX = UVW
+                  ICFL=I
+                  JCFL=J
+                  KCFL=K
                ENDIF
             ENDDO
          ENDDO
       ENDDO
-      IF (P_UVWMAX>=UVWMAX) THEN
-         UVWMAX = P_UVWMAX
-         ICFL=P_ICFL
-         JCFL=P_JCFL
-         KCFL=P_KCFL
-      ENDIF
    CASE(3) ! same as case 0 without divergence
-      P_UVWMAX = UVWMAX
-
       DO K=0,KBAR
          DO J=0,JBAR
             DO I=0,IBAR
@@ -2649,21 +2615,15 @@ SELECT_VELOCITY_NORM: SELECT CASE (CFL_VELOCITY_NORM)
                VODY = ABS(VV(I,J,K))*RDYN(J)
                WODZ = ABS(WW(I,J,K))*RDZN(K)
                UVW  = MAX(UODX,VODY,WODZ)
-               IF (UVW>=P_UVWMAX) THEN
-                  P_UVWMAX = UVW
-                  P_ICFL = I
-                  P_JCFL = J
-                  P_KCFL = K
+               IF (UVW>=UVWMAX) THEN
+                  UVWMAX = UVW
+                  ICFL = I
+                  JCFL = J
+                  KCFL = K
                ENDIF
             ENDDO
          ENDDO
       ENDDO
-      IF (P_UVWMAX>=UVWMAX) THEN
-         UVWMAX = P_UVWMAX
-         ICFL=P_ICFL
-         JCFL=P_JCFL
-         KCFL=P_KCFL
-      ENDIF
 END SELECT SELECT_VELOCITY_NORM
 
 HEAT_TRANSFER_IF: IF (CHECK_HT) THEN
@@ -2693,35 +2653,24 @@ PART_CFL = DT*PART_UVWMAX
 PARABOLIC_IF: IF (CHECK_VN) THEN
  
    MU_MAX = 0._EB
-   P_MU_MAX = MU_MAX
-   MUP => MU
-
    DO K=1,KBAR
       DO J=1,JBAR
          IILOOP_OpenMP: DO I=1,IBAR
             IF (SOLID(CELL_INDEX(I,J,K))) CYCLE IILOOP_OpenMP
-
             IF (N_TRACKED_SPECIES>0) THEN
-               P_MU_TMP = MAX(D_Z_MAX(I,J,K),MAX(RPR,RSC)*MUP(I,J,K)/RHOP(I,J,K))
+               MU_TMP = MAX(D_Z_MAX(I,J,K),MAX(RPR,RSC)*MU(I,J,K)/RHOP(I,J,K))
             ELSE
-               P_MU_TMP = MAX(RPR,RSC)*MUP(I,J,K)/RHOP(I,J,K)
+               MU_TMP = MAX(RPR,RSC)*MU(I,J,K)/RHOP(I,J,K)
             ENDIF
-
-            IF (P_MU_TMP>=P_MU_MAX) THEN
-               P_MU_MAX = P_MU_TMP
-               P_I_VN=I
-               P_J_VN=J
-               P_K_VN=K
+            IF (MU_TMP>=MU_MAX) THEN
+               MU_MAX = MU_TMP
+               I_VN=I
+               J_VN=J
+               K_VN=K
             ENDIF
          ENDDO IILOOP_OpenMP
       ENDDO
    ENDDO
-   IF (P_MU_MAX>=MU_MAX) THEN
-      MU_MAX = P_MU_MAX
-      I_VN=P_I_VN
-      J_VN=P_J_VN
-      K_VN=P_K_VN
-   ENDIF
    
    IF (TWO_D) THEN
       R_DX2 = RDX(I_VN)**2 + RDZ(K_VN)**2
