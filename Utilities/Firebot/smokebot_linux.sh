@@ -269,14 +269,14 @@ update_and_compile_cfast()
       
    fi
     # Build CFAST
-    cd $CFAST_SVNROOT/CFAST/intel_$platform\_64
-    rm -f cfast6_$platform\_64
+    cd $CFAST_SVNROOT/CFAST/intel_${platform}_64
+    rm -f cfast6_${platform}_64
     make --makefile ../makefile clean &> /dev/null
     ./make_cfast.sh >> $FIREBOT_DIR/output/stage0_cfast 2>&1
 
    # Check for errors in CFAST compilation
-   cd $CFAST_SVNROOT/CFAST/intel_$platform\_64
-   if [ -e "cfast6_$platform\_64" ]
+   cd $CFAST_SVNROOT/CFAST/intel_${platform}_64
+   if [ -e "cfast6_${platform}_64" ]
    then
       stage0_success=true
    else
@@ -337,8 +337,8 @@ check_svn_checkout()
 compile_fds_db()
 {
    # Clean and compile FDS debug
-   cd $FDS_SVNROOT/FDS_Compilation/intel_$platform\_64_db
-   rm -f fds_intel_$platform\_64_db
+   cd $FDS_SVNROOT/FDS_Compilation/intel_${platform}_64_db
+   rm -f fds_intel_${platform}_64_db
    make --makefile ../makefile clean &> /dev/null
    ./make_fds.sh &> $FIREBOT_DIR/output/stage2a
 }
@@ -346,8 +346,8 @@ compile_fds_db()
 compile_fds_mpi_db()
 {
    # Clean and compile mpi FDS debug
-   cd $FDS_SVNROOT/FDS_Compilation/mpi_intel_$platform\_64$IB$DB
-   rm -f fds_mpi_intel_$platform\_64$IB$DB
+   cd $FDS_SVNROOT/FDS_Compilation/mpi_intel_${platform}_64$IB$DB
+   rm -f fds_mpi_intel_${platform}_64$IB$DB
    make --makefile ../makefile clean &> /dev/null
    ./make_fds.sh &> $FIREBOT_DIR/output/stage2b
 }
@@ -355,8 +355,8 @@ compile_fds_mpi_db()
 check_compile_fds_db()
 {
    # Check for errors in FDS debug compilation
-   cd $FDS_SVNROOT/FDS_Compilation/intel_$platform\_64_db
-   if [ -e "fds_intel_$platform\_64_db" ]
+   cd $FDS_SVNROOT/FDS_Compilation/intel_${platform}_64_db
+   if [ -e "fds_intel_${platform}_64_db" ]
    then
       stage2a_success=true
    else
@@ -376,7 +376,7 @@ check_compile_fds_db()
       grep -A 5 -E 'warning|remark' ${FIREBOT_DIR}/output/stage2a >> $WARNING_LOG
       echo "" >> $WARNING_LOG
    # if the executable does not exist then an email has already been sent
-      if [ -e "fds_intel_$platform\_64_db" ] ; then
+      if [ -e "fds_intel_${platform}_64_db" ] ; then
         THIS_FDS_FAILED=1
       fi
    fi
@@ -385,8 +385,8 @@ check_compile_fds_db()
 check_compile_fds_mpi_db()
 {
    # Check for errors in FDS debug compilation
-   cd $FDS_SVNROOT/FDS_Compilation/mpi_intel_$platform\_64$IB$DB
-   if [ -e "fds_mpi_intel_$platform\_64$IB$DB" ]
+   cd $FDS_SVNROOT/FDS_Compilation/mpi_intel_${platform}_64$IB$DB
+   if [ -e "fds_mpi_intel_${platform}_64$IB$DB" ]
    then
       stage2b_success=true
    else
@@ -406,7 +406,7 @@ check_compile_fds_mpi_db()
       grep -A 5 -E 'warning|remark' ${FIREBOT_DIR}/output/stage2b | grep -v 'feupdateenv is not implemented'>> $WARNING_LOG
       echo "" >> $WARNING_LOG
    # if the executable does not exist then an email has already been sent
-      if [ -e "fds_mpi_intel_$platform\_64$IB$DB" ] ; then
+      if [ -e "fds_mpi_intel_${platform}_64$IB$DB" ] ; then
         THIS_FDS_FAILED=1
       fi
    fi
@@ -518,8 +518,8 @@ check_verification_cases_debug()
 compile_fds()
 {
    # Clean and compile FDS
-   cd $FDS_SVNROOT/FDS_Compilation/intel_$platform\_64
-   rm -f fds_intel_$platform\_64
+   cd $FDS_SVNROOT/FDS_Compilation/intel_${platform}_64
+   rm -f fds_intel_${platform}_64
    make --makefile ../makefile clean &> /dev/null
    ./make_fds.sh &> $FIREBOT_DIR/output/stage4a
 }
@@ -527,8 +527,8 @@ compile_fds()
 compile_fds_mpi()
 {
    # Clean and compile FDS
-   cd $FDS_SVNROOT/FDS_Compilation/mpi_intel_$platform\_64$IB
-   rm -f fds_mpi_intel_$platform\_64$IB
+   cd $FDS_SVNROOT/FDS_Compilation/mpi_intel_${platform}_64$IB
+   rm -f fds_mpi_intel_${platform}_64$IB
    make --makefile ../makefile clean &> /dev/null
    ./make_fds.sh &> $FIREBOT_DIR/output/stage4b
 }
@@ -536,8 +536,8 @@ compile_fds_mpi()
 check_compile_fds()
 {
    # Check for errors in FDS compilation
-   cd $FDS_SVNROOT/FDS_Compilation/intel_$platform\_64
-   if [ -e "fds_intel_$platform\_64" ]
+   cd $FDS_SVNROOT/FDS_Compilation/intel_${platform}_64
+   if [ -e "fds_intel_${platform}_64" ]
    then
       stage4a_success=true
    else
@@ -562,8 +562,8 @@ check_compile_fds()
 check_compile_fds_mpi()
 {
    # Check for errors in FDS compilation
-   cd $FDS_SVNROOT/FDS_Compilation/mpi_intel_$platform\_64$IB
-   if [ -e "fds_mpi_intel_$platform\_64$IB" ]
+   cd $FDS_SVNROOT/FDS_Compilation/mpi_intel_${platform}_64$IB
+   if [ -e "fds_mpi_intel_${platform}_64$IB" ]
    then
       stage4b_success=true
    else
@@ -592,33 +592,33 @@ check_compile_fds_mpi()
 compile_smv_utilities()
 {  
    # smokeview libraries
-   cd $FDS_SVNROOT/SMV/Build/LIBS/lib_$platform\_intel_64
+   cd $FDS_SVNROOT/SMV/Build/LIBS/lib_${platform}_intel_64
    echo 'Building Smokeview libraries:' > $FIREBOT_DIR/output/stage5pre 2>&1
    ./makelibs.sh >> $FIREBOT_DIR/output/stage5pre 2>&1
 
    # smokezip:
-   cd $FDS_SVNROOT/Utilities/smokezip/intel_$platform\_64
-   rm -f *.o smokezip_$platform\_64
+   cd $FDS_SVNROOT/Utilities/smokezip/intel_${platform}_64
+   rm -f *.o smokezip_${platform}_64
    echo 'Compiling smokezip:' > $FIREBOT_DIR/output/stage5pre 2>&1
    ./make_zip.sh >> $FIREBOT_DIR/output/stage5pre 2>&1
    echo "" >> $FIREBOT_DIR/output/stage5pre 2>&1
    
    # smokediff:
-   cd $FDS_SVNROOT/Utilities/smokediff/intel_$platform\_64
-   rm -f *.o smokediff_$platform\_64
+   cd $FDS_SVNROOT/Utilities/smokediff/intel_${platform}_64
+   rm -f *.o smokediff_${platform}_64
    echo 'Compiling smokediff:' >> $FIREBOT_DIR/output/stage5pre 2>&1
    ./make_diff.sh >> $FIREBOT_DIR/output/stage5pre 2>&1
    echo "" >> $FIREBOT_DIR/output/stage5pre 2>&1
    
    # background:
-   cd $FDS_SVNROOT/Utilities/background/intel_$platform\_32
+   cd $FDS_SVNROOT/Utilities/background/intel_${platform}_32
    rm -f *.o background
    echo 'Compiling background:' >> $FIREBOT_DIR/output/stage5pre 2>&1
    ./make_background.sh >> $FIREBOT_DIR/output/stage5pre 2>&1
    
   # wind2fds:
-   cd $FDS_SVNROOT/Utilities/wind2fds/intel_$platform\_64
-   rm -f *.o wind2fds_$platform\_64
+   cd $FDS_SVNROOT/Utilities/wind2fds/intel_${platform}_64
+   rm -f *.o wind2fds_${platform}_64
    echo 'Compiling wind2fds:' > $FIREBOT_DIR/output/stage5pre 2>&1
    ./make_wind.sh >> $FIREBOT_DIR/output/stage5pre 2>&1
    echo "" >> $FIREBOT_DIR/output/stage5pre 2>&1
@@ -628,10 +628,10 @@ check_smv_utilities()
 {
    # Check for errors in SMV utilities compilation
    cd $FDS_SVNROOT
-   if [ -e "$FDS_SVNROOT/Utilities/smokezip/intel_$platform\_64/smokezip_$platform\_64" ]  && \
-      [ -e "$FDS_SVNROOT/Utilities/smokediff/intel_$platform\_64/smokediff_$platform\_64" ]  && \
-      [ -e "$FDS_SVNROOT/Utilities/wind2fds/intel_$platform\_64/wind2fds_$platform\_64" ]  && \
-      [ -e "$FDS_SVNROOT/Utilities/background/intel_$platform\_32/background" ]
+   if [ -e "$FDS_SVNROOT/Utilities/smokezip/intel_${platform}_64/smokezip_${platform}_64" ]  && \
+      [ -e "$FDS_SVNROOT/Utilities/smokediff/intel_${platform}_64/smokediff_${platform}_64" ]  && \
+      [ -e "$FDS_SVNROOT/Utilities/wind2fds/intel_${platform}_64/wind2fds_${platform}_64" ]  && \
+      [ -e "$FDS_SVNROOT/Utilities/background/intel_${platform}_32/background" ]
    then
       stage5pre_success=true
    else
@@ -709,16 +709,16 @@ check_verification_cases_release()
 compile_smv_db()
 {
    # Clean and compile SMV debug
-   cd $FDS_SVNROOT/SMV/Build/intel_$platform\_64
-   rm -f smokeview_$platform\_64_db
+   cd $FDS_SVNROOT/SMV/Build/intel_${platform}_64
+   rm -f smokeview_${platform}_64_db
    ./make_smv_db.sh &> $FIREBOT_DIR/output/stage6a
 }
 
 check_compile_smv_db()
 {
    # Check for errors in SMV debug compilation
-   cd $FDS_SVNROOT/SMV/Build/intel_$platform\_64
-   if [ -e "smokeview_$platform\_64_db" ]
+   cd $FDS_SVNROOT/SMV/Build/intel_${platform}_64
+   if [ -e "smokeview_${platform}_64_db" ]
    then
       stage6a_success=true
    else
@@ -774,16 +774,16 @@ check_smv_pictures_db()
 compile_smv()
 {
    # Clean and compile SMV
-   cd $FDS_SVNROOT/SMV/Build/intel_$platform\_64
-   rm -f smokeview_$platform\_64
+   cd $FDS_SVNROOT/SMV/Build/intel_${platform}_64
+   rm -f smokeview_${platform}_64
    ./make_smv.sh &> $FIREBOT_DIR/output/stage6c
 }
 
 check_compile_smv()
 {
    # Check for errors in SMV release compilation
-   cd $FDS_SVNROOT/SMV/Build/intel_$platform\_64
-   if [ -e "smokeview_$platform\_64" ]
+   cd $FDS_SVNROOT/SMV/Build/intel_${platform}_64
+   if [ -e "smokeview_${platform}_64" ]
    then
       stage6c_success=true
    else
