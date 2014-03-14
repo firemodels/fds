@@ -228,6 +228,19 @@ intel_osx_64 : exe       = smokeview_osx_$(SMV_TESTSTRING)64 $(SMV_PROFILESTRING
 intel_osx_64 : $(obj)
 	icpc -o $(bin)/$(exe) $(LFLAGS) $(obj)  -L $(LIB_DIR)/lib_osx_intel_64 $(SMV_LIBS) $(OSX_INTEL_LIBS)
 
+# ------------- intel_osx_64_db ----------------
+
+intel_osx_64_db : FFLAGS    = -O2 -m64 -static-intel -vec_report0 -fpp -D pp_OSX64 -mmacosx-version-min=10.4
+intel_osx_64_db : CFLAGS    = -O2 -m64 -static-intel -vec_report0 -D pp_OSX64  -D pp_INTEL -mmacosx-version-min=10.4 $(SMV_TESTFLAG) $(SMV_PROFILEFLAG)
+intel_osx_64_db : LFLAGS    = -m64 -static-intel -framework OpenGL -framework GLUT -mmacosx-version-min=10.4
+intel_osx_64_db : CC        = icc 
+intel_osx_64_db : CPP       = icpc
+intel_osx_64_db : FC        = ifort
+intel_osx_64_db : exe       = smokeview_osx_$(SMV_TESTSTRING)64_db $(SMV_PROFILESTRING)
+
+intel_osx_64_db : $(obj)
+	icpc -o $(bin)/$(exe) $(LFLAGS) $(obj)  -L $(LIB_DIR)/lib_osx_intel_64 $(SMV_LIBS) $(OSX_INTEL_LIBS)
+
 # ------------- gcc_osx ----------------
 
 gcc_osx : FFLAGS    = -O2 -m64 -x f95-cpp-input -D pp_noappend -ffree-form
