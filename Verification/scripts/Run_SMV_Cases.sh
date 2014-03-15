@@ -71,9 +71,11 @@ OS=`uname`
 if [ "$OS" == "Darwin" ]; then
   PLATFORM=osx$size
   PLATFORM2=osx_32
+  PLATFORM3=osx_64
 else
   PLATFORM=linux$size
   PLATFORM2=linux_32
+  PLATFORM3=linux_64
 fi
 IB=
 if [ "$FDSNETWORK" == "infiniband" ] ; then
@@ -83,7 +85,7 @@ fi
 export WIND2FDS=$SVNROOT/Utilities/wind2fds/intel_$PLATFORM/wind2fds_$PLATFORM
 export BACKGROUND=$SVNROOT/Utilities/background/intel_$PLATFORM2/background
 export FDSEXE=$SVNROOT/FDS_Compilation/${OPENMP}intel_$PLATFORM$DEBUG/fds_${OPENMP}intel_$PLATFORM$DEBUG
-export WFDSEXE=~/FIRE-LOCAL/bin/wfds6_9977_intel_linux_64
+export WFDSEXE=~/FIRE-LOCAL/bin/wfds6_9977_intel_$PLATFORM3
 export FDS=$FDSEXE
 export WFDS=$WFDSEXE
 export FDSMPI=$SVNROOT/FDS_Compilation/mpi_intel_$PLATFORM$IB$DEBUG/fds_mpi_intel_$PLATFORM$IB$DEBUG
