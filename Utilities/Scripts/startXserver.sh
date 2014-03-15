@@ -15,7 +15,7 @@ GETNEWPORT ()
   done
 }
 
-OS=`uname`
+XVFB=/usr/X11/bin/Xvfb
 if [ "`uname`" == "Darwin" ]; then
    XVFB=/usr/X11/bin/Xvfb
 fi
