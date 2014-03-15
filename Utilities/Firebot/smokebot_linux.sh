@@ -421,8 +421,13 @@ wait_verification_cases_debug_start()
    # Scans qstat and waits for verification cases to start
    if [[ "$FIREBOT_QUEUE" == "none" ]]
    then
-      # Continue along
-      :
+     while [[ `ps -u $USER -f | grep fds_intel` != '' ]]; do
+        JOBS_REMAINING=`ps -u $USER -f | grep fds_intel | wc -l`
+        echo "Waiting for ${JOBS_REMAINING} verification cases to start." >> $FIREBOT_DIR/output/stage3
+        TIME_LIMIT_STAGE="3"
+        check_time_limit
+        sleep 30
+     done
    else
      while [[ `qstat -a | grep $(whoami) | grep Q` != '' ]]; do
         JOBS_REMAINING=`qstat -a | grep $(whoami) | grep $JOBPREFIX | grep Q | wc -l`
@@ -439,8 +444,13 @@ wait_verification_cases_debug_end()
    # Scans qstat and waits for verification cases to end
    if [[ "$FIREBOT_QUEUE" == "none" ]]
    then
-      # Continue along
-      :
+     while [[ `ps -u $USER -f | grep fds_intel` != '' ]]; do
+        JOBS_REMAINING=`ps -u $USER -f | grep fds_intel | wc -l`
+        echo "Waiting for ${JOBS_REMAINING} verification cases to complete." >> $FIREBOT_DIR/output/stage3
+        TIME_LIMIT_STAGE="3"
+        check_time_limit
+        sleep 30
+     done
    else
      while [[ `qstat -a | grep $(whoami) | grep $JOBPREFIX` != '' ]]; do
         JOBS_REMAINING=`qstat -a | grep $(whoami) | grep $JOBPREFIX | wc -l`
@@ -662,8 +672,13 @@ wait_verification_cases_release_end()
    # Scans qstat and waits for verification cases to end
    if [[ "$FIREBOT_QUEUE" == "none" ]]
    then
-      # Continue along
-      :
+     while [[ `ps -u $USER -f | grep fds_intel` != '' ]]; do
+        JOBS_REMAINING=`ps -u $USER -f | grep fds_intel | wc -l`
+        echo "Waiting for ${JOBS_REMAINING} verification cases to complete." >> $FIREBOT_DIR/output/stage5
+        TIME_LIMIT_STAGE="5"
+        check_time_limit
+        sleep 60
+     done
    else
      while [[ `qstat -a | grep $(whoami) | grep $JOBPREFIX` != '' ]]; do
         JOBS_REMAINING=`qstat -a | grep $(whoami) | grep $JOBPREFIX | wc -l`
