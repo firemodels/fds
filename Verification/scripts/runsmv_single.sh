@@ -30,6 +30,7 @@ DEBUG=
 TEST=
 SCRIPT=
 RUNDIR=
+RUNDIRECTORY=
 SKIPFRAME=1
 STARTFRAME=0
 VOLRENDER=
@@ -83,12 +84,22 @@ if [ $# == 0 ] ; then
 fi
 
 CASE=$1
+
+# setup script
+
 if [ "$SCRIPT" != "" ]; then
   SCRIPT="-script $SCRIPT"
+  SCRIPTFILE=$SCRIPT
+else
+  SCRIPT="-script ${CASE}.ssf"
+  SCRIPTFILE=${CASE}.ssf
 fi
+
 if [ "$RUNDIR" != "" ]; then
+  RUNDIRECTORY=$RUNDIR
   RUNDIR="-bindir $RUNDIR"
 fi
+
 if [ "$VOLRENDER" == "y" ]; then
   VOLRENDER="-volrender"
   if [ "$STARTFRAME" != "" ]; then
@@ -101,6 +112,7 @@ else
   STARTFRAME=
   SKIPFRAME=
 fi
+
 VERSION=$PLATFORM$TEST$SIZE$DEBUG
 VERSION2=$PLATFORM$SIZE$DEBUG
 
@@ -115,8 +127,18 @@ fi
 STARTX=$SVNROOT/Utilities/Scripts/startXserver.sh
 STOPX=$SVNROOT/Utilities/Scripts/stopXserver.sh
 
-echo running:
-echo $SMV $RUNDIR $SMVBINDIR $TIME $SCRIPT $VOLRENDER $STARTFRAME $SKIPFRAME $CASE
+echo setting up graphics environment
 source $STARTX
-$SMV $RUNDIR $SMVBINDIR $TIME $SCRIPT $VOLRENDER $STARTFRAME $SKIPFRAME $CASE
+echo "smokeview file: ${CASE}.smv"
+echo "   script file: $SCRIPTFILE"
+if [ "$RUNDIR" != "" ]; then
+echo " bin directory: $RUNDIRECTORY"
+fi
+if [ "$VOLRENDER" == "y" ]; then
+echo " *** volume rendering"
+echo "   start frame: $STARTFRAME"
+echo "    skip frame: $SKIPFRAME"
+fi
+$SMV $RUNDIR $SMVBINDIR $TIME $SCRIPT $VOLRENDER $STARTFRAME $SKIPFRAME $CASE >& /dev/null
+echo shutting down graphics environment
 source $STOPX
