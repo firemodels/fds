@@ -1,8 +1,9 @@
-#!/bin/bash -f
+#!/bin/bash
 lockfile=/tmp/startXlock
 GETNEWPORT () 
 {
   while [ -e $lockfile ] ; do
+    echo waiting for lock file, $lockfile, to clear
     sleep 5
   done
   touch $lockfile
@@ -16,6 +17,7 @@ GETNEWPORT ()
 }
 
 XVFB=Xvfb
+echo setting up graphics environment
 GETNEWPORT 
 if [ "`uname`" == "Darwin" ]; then
   $XVFB :$display_port -screen 0 1280x1024x24 &
