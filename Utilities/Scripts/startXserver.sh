@@ -16,12 +16,12 @@ GETNEWPORT ()
 }
 
 XVFB=Xvfb
-if [ "`uname`" == "Darwin" ]; then
-   XVFB=/usr/X11/bin/Xvfb
-fi
 GETNEWPORT 
-$XVFB :$display_port -fp /usr/share/X11/fonts/misc -screen 0 1280x1024x24 &
-export SMV_ID=$!
+if [ "`uname`" == "Darwin" ]; then
+  $XVFB :$display_port -screen 0 1280x1024x24 &
+else
+  $XVFB :$display_port -fp /usr/share/X11/fonts/misc -screen 0 1280x1024x24 &
+  export SMV_ID=$!
+fi
 export DISPLAY=:$display_port
-echo $SMV_ID > /tmp/test.out
-rm $lockfile
+rm -f $lockfile
