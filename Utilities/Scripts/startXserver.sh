@@ -27,3 +27,4 @@ else
 fi
 export DISPLAY=:$display_port
 rm -f $lockfile
+sleep 30
