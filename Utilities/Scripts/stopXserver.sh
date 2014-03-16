@@ -1,5 +1,6 @@
-#!/bin/bash -f
+#!/bin/bash
 
+echo shutting down graphics environment
 sleep 8
 if [ "`uname`" == "Darwin" ]; then
   PIDS=`ps -u $USER | grep Xvfb | grep -v grep |  awk '{print $2}'`
