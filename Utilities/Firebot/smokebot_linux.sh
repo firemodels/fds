@@ -98,44 +98,6 @@ START_TIME=$(date +%s)
 TIME_LIMIT=43200
 TIME_LIMIT_EMAIL_NOTIFICATION="unsent"
 
-get_fds_email()
-{
-  THIS_FDSEMAIL=
-}
-
-get_fds_email2()
-{
-  if [[ $THIS_FDSAUTHOR == mcgratta ]] ; then
-    THIS_FDSEMAIL=mcgratta@gmail.com
-  fi
-  if [[ $THIS_FDSAUTHOR == topisikanen ]] ; then
-    THIS_FDSEMAIL=Topi.Sikanen@gmail.com
-  fi
-  if [[ $THIS_FDSAUTHOR == randy.mcdermott ]] ; then
-    THIS_FDSEMAIL=randy.mcdermott@gmail.com
-  fi
-  if [[ $THIS_FDSAUTHOR == craigweinschenk ]] ; then
-    THIS_FDSEMAIL=CraigWeinschenk@gmail.com
-  fi
-  if [[ $THIS_FDSAUTHOR == drjfloyd ]] ; then
-    THIS_FDSEMAIL=drjfloyd@gmail.com
-  fi
-  if [[ $THIS_FDSAUTHOR == shostikk ]] ; then
-    THIS_FDSEMAIL=shostikk@gmail.com
-  fi
-  if [[ $THIS_FDSAUTHOR == mrctkg@gmail.com ]] ; then
-    THIS_FDSEMAIL=mrctkg@gmail.com
-  fi
-  if [[ $THIS_FDSAUTHOR == kiliansusan@gmail.com ]] ; then
-    THIS_FDSEMAIL=kiliansusan@gmail.com
-  fi
-  if [[ "$LAST_FDS_FAILED" == "1" ]] ; then
-    THIS_FDSEMAIL=
-  fi
-  THIS_FDSEMAIL=
-}
-
-
 run_auto()
 {
   SMV_SOURCE=$FDS_SVNROOT/SMV/source
@@ -179,10 +141,9 @@ run_auto()
     echo $THIS_FDSSVN>$SVN_FDSFILE
     echo -e "FDS source has changed. $LAST_FDSSVN->$THIS_FDSSVN($THIS_FDSAUTHOR)" >> $MESSAGE_FILE
     cat $SVN_FDSLOG >> $MESSAGE_FILE
-    get_fds_email
   fi
   echo -e "Smokebot run initiated." >> $MESSAGE_FILE
-  cat $MESSAGE_FILE | mail -s "smokebot run initiated" $mailTo $THIS_FDSEMAIL > /dev/null
+  cat $MESSAGE_FILE | mail -s "smokebot run initiated" $mailTo > /dev/null
 }
 
 MKDIR ()
@@ -1065,26 +1026,26 @@ email_build_status()
      cat $TIME_LOG >> $ERROR_LOG
      cat $TIME_LOG >> $WARNING_LOG
      # Send email with failure message and warnings, body of email contains appropriate log file
-     mail -s "smokebot build failure and warnings on ${hostname}. Revision ${SVN_REVISION}." $mailTo $THIS_FDSEMAIL < $ERROR_LOG > /dev/null
+     mail -s "smokebot build failure and warnings on ${hostname}. Revision ${SVN_REVISION}." $mailTo < $ERROR_LOG > /dev/null
 
    # Check for errors only
    elif [ -e $ERROR_LOG ]
    then
      cat $TIME_LOG >> $ERROR_LOG
       # Send email with failure message, body of email contains error log file
-      mail -s "smokebot build failure on ${hostname}. Revision ${SVN_REVISION}." $mailTo $THIS_FDSEMAIL < $ERROR_LOG > /dev/null
+      mail -s "smokebot build failure on ${hostname}. Revision ${SVN_REVISION}." $mailTo < $ERROR_LOG > /dev/null
 
    # Check for warnings only
    elif [ -e $WARNING_LOG ]
    then
      cat $TIME_LOG >> $WARNING_LOG
       # Send email with success message, include warnings
-      mail -s "smokebot build success with warnings on ${hostname}. Revision ${SVN_REVISION}." $mailTo $THIS_FDSEMAIL < $WARNING_LOG > /dev/null
+      mail -s "smokebot build success with warnings on ${hostname}. Revision ${SVN_REVISION}." $mailTo < $WARNING_LOG > /dev/null
 
    # No errors or warnings
    else
       # Send empty email with success message
-      mail -s "smokebot build success on ${hostname}! Revision ${SVN_REVISION}." $mailTo $THIS_FDSEMAIL < $TIME_LOG > /dev/null
+      mail -s "smokebot build success on ${hostname}! Revision ${SVN_REVISION}." $mailTo < $TIME_LOG > /dev/null
    fi
 }
 
