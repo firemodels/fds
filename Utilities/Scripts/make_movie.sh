@@ -51,4 +51,5 @@ fi
 echoerr() { echo "$@" 1>&2; }
 echoerr Creating the movie file $outdir/$moviename
 png2yuv -f 25 -I p -j $base$underscore%04d.png | mpeg2enc -o $outdir/$moviename
+#ffmpeg -f image2 -i $base$underscore%04d.png $outdir/$moviename
 echoerr The movie file $outdir/$moviename has been created.
