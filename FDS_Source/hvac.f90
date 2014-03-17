@@ -506,7 +506,7 @@ DO ND = 1, N_DUCTS
          ENDIF
       ENDDO
       IF (DU%AIRCOIL_INDEX <= 0) THEN
-         WRITE(MESSAGE,'(A,I3,A,A)') 'ERROR: Airocil not located for DUCT ',ND,', DUCT ID:',TRIM(DU%ID)
+         WRITE(MESSAGE,'(A,I3,A,A)') 'ERROR: Aircoil not located for DUCT ',ND,', DUCT ID:',TRIM(DU%ID)
          CALL SHUTDOWN(MESSAGE)
       ENDIF
    ENDIF     
