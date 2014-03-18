@@ -16,7 +16,7 @@ exit
 is_file_installed()
 {
   program=$1
-  notfound=`$program -help |& tail -1 |& grep "not found" | wc -l`
+  notfound=`$program -help 2>&1 | tail -1 | grep "not found" | wc -l`
   if [ "$notfound" == "1" ] ; then
     echo "The program $SMV is not available. Run aborted."
     exit
