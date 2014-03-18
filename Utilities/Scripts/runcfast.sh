@@ -27,8 +27,9 @@ if [ "$queue" == "none" ]; then
   queue=
   QSUB="$BACKGROUND -u 75 -d 10 "
   background=yes;
-  if ! [ -e $BACKGROUND ];  then
-    echo "The file $BACKGROUND does not exist. Run aborted"
+  notfound=`$BACKGROUND -help |& tail -1 |& grep "not found" | wc -l`
+  if [ "$notfound" == "1" ];  then
+    echo "The program $BACKGROUND is not available. Run aborted"
     exit
   fi
 fi

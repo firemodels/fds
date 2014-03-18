@@ -25,14 +25,27 @@ echo "-q queue_name - run cases using the queue queue_name"
 echo "     default: batch"
 echo "     other options: fire60s, fire70s, vis"
 echo "-s - stop FDS runs"
+echo "-u - use installed versions of utilities background and wind2fds"
 exit
 }
+
+is_file_installed()
+{
+  program=$1
+  notfound=`$program -help |& tail -1 |& grep "not found" | wc -l`
+  if [ "$notfound" == "1" ] ; then
+    echo "***error: $program not available. Run aborted." 
+    exit
+  fi
+}
+
 
 CURDIR=`pwd`
 cd ..
 export SVNROOT=`pwd`/..
 
-while getopts 'dho:p:q:s' OPTION
+use_installed="0"
+while getopts 'dho:p:q:su' OPTION
 do
 case $OPTION in
   d)
@@ -56,6 +69,9 @@ case $OPTION in
   s)
    stop_cases=true
    export STOPFDS=1
+   ;;
+  u)
+   use_installed="1"
    ;;
 esac
 #shift
@@ -82,8 +98,13 @@ if [ "$FDSNETWORK" == "infiniband" ] ; then
 IB=ib
 fi
 
-export WIND2FDS=$SVNROOT/Utilities/wind2fds/intel_$PLATFORM/wind2fds_$PLATFORM
-export BACKGROUND=$SVNROOT/Utilities/background/intel_$PLATFORM2/background
+if [ "$use_installed" == "1" ] ; then
+  export WIND2FDS=wind2fds
+  export BACKGROUND=background
+else
+  export WIND2FDS=$SVNROOT/Utilities/wind2fds/intel_$PLATFORM/wind2fds_$PLATFORM
+  export BACKGROUND=$SVNROOT/Utilities/background/intel_$PLATFORM2/background
+fi
 export FDSEXE=$SVNROOT/FDS_Compilation/${OPENMP}intel_$PLATFORM$DEBUG/fds_${OPENMP}intel_$PLATFORM$DEBUG
 export WFDSEXE=~/FIRE-LOCAL/bin/wfds6_9977_intel_$PLATFORM3
 export FDS=$FDSEXE
@@ -132,15 +153,17 @@ echo "" | $FDSEXE 2> $SVNROOT/Manuals/SMV_User_Guide/SCRIPT_FIGURES/fds.version
 
 if [[ ! $stop_cases ]] ; then
 if [ "$FDS_DEBUG" == "0" ] ; then
-if [ -e $WIND2FDS ];  then
-  cd $SVNROOT/Verification/WUI
-  echo Converting wind data
-  $WIND2FDS -prefix sd11 -offset " 100.0  100.0 0.0" wind_data1a.csv
-else
-  echo "The file $WIND2FDS does not exist. Run aborted"
+
+is_file_installed $WIND2FDS
+cd $SVNROOT/Verification/WUI
+echo Converting wind data
+$WIND2FDS -prefix sd11 -offset " 100.0  100.0 0.0" wind_data1a.csv
+
 fi
 fi
-fi
+
+is_file_installed $BACKGROUND
+
 cd $SVNROOT/Verification
 scripts/SMV_Cases.sh
 scripts/SMV_MPI_Cases.sh
