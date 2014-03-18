@@ -16,6 +16,18 @@ MAKEMOVIES=
 RUNAUTO=
 BUILDBUNDLE=
 RUNDEBUG="1"
+
+notfound=`icc -help |& tail -1 |& grep "not found" | wc -l`
+if [ "$notfound" == "1" ] ; then
+  export haveCC="0"
+  USEINSTALL="-i"
+  USEINSTALL2="-u"
+else
+  export haveCC="1"
+  USEINSTALL=
+  USEINSTALL2=
+fi
+
 while getopts 'abmq:s' OPTION
 do
 case $OPTION in
@@ -184,7 +196,7 @@ set_files_world_readable()
    chmod -R go+r *
 }
 
-clean_firebot_history()
+clean_smokebot_history()
 {
    
    # Clean Smokebot metafiles
@@ -434,14 +446,14 @@ run_verification_cases_debug()
 
    # Submit SMV verification cases and wait for them to start
    echo 'Running SMV verification cases:' >> $FIREBOT_DIR/output/stage3 2>&1
-   ./Run_SMV_Cases.sh -d -q $FIREBOT_QUEUE >> $FIREBOT_DIR/output/stage3 2>&1
+   ./Run_SMV_Cases.sh $USEINSTALL2 -d -q $FIREBOT_QUEUE >> $FIREBOT_DIR/output/stage3 2>&1
    wait_verification_cases_debug_start
 
    # Wait some additional time for all cases to start
    sleep 30
 
    # Stop all cases
-   ./Run_SMV_Cases.sh -d -s >> $FIREBOT_DIR/output/stage3 2>&1
+   ./Run_SMV_Cases.sh $USEINSTALL2 -d -s >> $FIREBOT_DIR/output/stage3 2>&1
    echo "" >> $FIREBOT_DIR/output/stage3 2>&1
 
    # Wait for SMV verification cases to end
@@ -573,16 +585,19 @@ check_compile_fds_mpi()
 #  ======================================
 
 compile_smv_utilities()
-{  
+{
+   echo "" > $FIREBOT_DIR/output/stage5pre
+   if [ "$haveCC" == "1" ] ; then
+
    # smokeview libraries
    cd $FDS_SVNROOT/SMV/Build/LIBS/lib_${platform}_intel_64
-   echo 'Building Smokeview libraries:' > $FIREBOT_DIR/output/stage5pre 2>&1
+   echo 'Building Smokeview libraries:' >> $FIREBOT_DIR/output/stage5pre 2>&1
    ./makelibs.sh >> $FIREBOT_DIR/output/stage5pre 2>&1
 
    # smokezip:
    cd $FDS_SVNROOT/Utilities/smokezip/intel_${platform}_64
    rm -f *.o smokezip_${platform}_64
-   echo 'Compiling smokezip:' > $FIREBOT_DIR/output/stage5pre 2>&1
+   echo 'Compiling smokezip:' >> $FIREBOT_DIR/output/stage5pre 2>&1
    ./make_zip.sh >> $FIREBOT_DIR/output/stage5pre 2>&1
    echo "" >> $FIREBOT_DIR/output/stage5pre 2>&1
    
@@ -602,25 +617,53 @@ compile_smv_utilities()
   # wind2fds:
    cd $FDS_SVNROOT/Utilities/wind2fds/intel_${platform}_64
    rm -f *.o wind2fds_${platform}_64
-   echo 'Compiling wind2fds:' > $FIREBOT_DIR/output/stage5pre 2>&1
+   echo 'Compiling wind2fds:' >> $FIREBOT_DIR/output/stage5pre 2>&1
    ./make_wind.sh >> $FIREBOT_DIR/output/stage5pre 2>&1
    echo "" >> $FIREBOT_DIR/output/stage5pre 2>&1
+
+   fi
+}
+
+is_file_installed()
+{
+  program=$1
+  notfound=`$program -help |& tail -1 |& grep "not found" | wc -l`
+  if [ "$notfound" == "1" ] ; then
+    stage5pre_success="0"
+    echo "***error: $program not installed" >> $FIREBOT_DIR/output/stage5pre
+  fi
 }
 
 check_smv_utilities()
 {
-   # Check for errors in SMV utilities compilation
-   cd $FDS_SVNROOT
-   if [ -e "$FDS_SVNROOT/Utilities/smokezip/intel_${platform}_64/smokezip_${platform}_64" ]  && \
-      [ -e "$FDS_SVNROOT/Utilities/smokediff/intel_${platform}_64/smokediff_${platform}_64" ]  && \
-      [ -e "$FDS_SVNROOT/Utilities/wind2fds/intel_${platform}_64/wind2fds_${platform}_64" ]  && \
-      [ -e "$FDS_SVNROOT/Utilities/background/intel_${platform}_32/background" ]
-   then
-      stage5pre_success=true
+   if [ "$haveCC" == "1" ] ; then
+     # Check for errors in SMV utilities compilation
+     cd $FDS_SVNROOT
+     if [ -e "$FDS_SVNROOT/Utilities/smokezip/intel_${platform}_64/smokezip_${platform}_64" ]  && \
+        [ -e "$FDS_SVNROOT/Utilities/smokediff/intel_${platform}_64/smokediff_${platform}_64" ]  && \
+        [ -e "$FDS_SVNROOT/Utilities/wind2fds/intel_${platform}_64/wind2fds_${platform}_64" ]  && \
+        [ -e "$FDS_SVNROOT/Utilities/background/intel_${platform}_32/background" ]
+     then
+        stage5pre_success="1"
+     else
+        stage5pre_success="0"
+        echo "Errors from Stage 5pre - Compile SMV utilities:" >> $ERROR_LOG
+        cat $FIREBOT_DIR/output/stage5pre >> $ERROR_LOG
+        echo "" >> $ERROR_LOG
+     fi
    else
-      echo "Errors from Stage 5pre - Compile SMV utilities:" >> $ERROR_LOG
-      cat $FIREBOT_DIR/output/stage5pre >> $ERROR_LOG
-      echo "" >> $ERROR_LOG
+     stage5pre_success="1"
+     is_file_installed smokeview
+     is_file_installed smokezip
+     is_file_installed smokediff
+     is_file_installed wind2fds
+     is_file_installed background
+     if [ "$stage5pre_success" == "0" ] ; then
+        echo "Errors from Stage 5pre - Smokeview and utilities:" >> $ERROR_LOG
+        stage5pre_success="1"
+        cat $FIREBOT_DIR/output/stage5pre >> $ERROR_LOG
+        echo "" >> $ERROR_LOG
+     fi
    fi
 }
 
@@ -656,7 +699,7 @@ run_verification_cases_release()
    # Start running all SMV verification cases
    cd $FDS_SVNROOT/Verification/scripts
    echo 'Running SMV verification cases:' >> $FIREBOT_DIR/output/stage5 2>&1
-   ./Run_SMV_Cases.sh -q $FIREBOT_QUEUE >> $FIREBOT_DIR/output/stage5 2>&1
+   ./Run_SMV_Cases.sh $USEINSTALL2 -q $FIREBOT_QUEUE >> $FIREBOT_DIR/output/stage5 2>&1
 
    # Wait for all verification cases to end
    wait_verification_cases_release_end
@@ -702,14 +745,17 @@ check_verification_cases_release()
 
 compile_smv_db()
 {
+   if [ "$haveCC" == "1" ] ; then
    # Clean and compile SMV debug
    cd $FDS_SVNROOT/SMV/Build/intel_${platform}_64
    rm -f smokeview_${platform}_64_db
    ./make_smv_db.sh &> $FIREBOT_DIR/output/stage6a
+   fi
 }
 
 check_compile_smv_db()
 {
+   if [ "$haveCC" == "1" ] ; then
    # Check for errors in SMV debug compilation
    cd $FDS_SVNROOT/SMV/Build/intel_${platform}_64
    if [ -e "smokeview_${platform}_64_db" ]
@@ -732,6 +778,7 @@ check_compile_smv_db()
       grep -A 5 -E 'warning|remark' ${FIREBOT_DIR}/output/stage6a | grep -v 'feupdateenv is not implemented' | grep -v 'lcilkrts linked' >> $WARNING_LOG
       echo "" >> $WARNING_LOG
    fi
+   fi
 }
 
 #  =============================================
@@ -742,7 +789,7 @@ make_smv_pictures_db()
 {
    # Run Make SMV Pictures script (debug mode)
    cd $FDS_SVNROOT/Verification/scripts
-   ./Make_SMV_Pictures.sh -d 2>&1 | grep -v FreeFontPath &> $FIREBOT_DIR/output/stage6b
+   ./Make_SMV_Pictures.sh $USEINSTALL -d 2>&1 | grep -v FreeFontPath &> $FIREBOT_DIR/output/stage6b
 }
 
 check_smv_pictures_db()
@@ -767,14 +814,17 @@ check_smv_pictures_db()
 
 compile_smv()
 {
+   if [ "$haveCC" == "1" ] ; then
    # Clean and compile SMV
    cd $FDS_SVNROOT/SMV/Build/intel_${platform}_64
    rm -f smokeview_${platform}_64
    ./make_smv.sh &> $FIREBOT_DIR/output/stage6c
+   fi
 }
 
 check_compile_smv()
 {
+   if [ "$haveCC" == "1" ] ; then
    # Check for errors in SMV release compilation
    cd $FDS_SVNROOT/SMV/Build/intel_${platform}_64
    if [ -e "smokeview_${platform}_64" ]
@@ -797,6 +847,7 @@ check_compile_smv()
       grep -A 5 -E 'warning|remark' ${FIREBOT_DIR}/output/stage6c | grep -v 'feupdateenv is not implemented' | grep -v 'lcilkrts linked' >> $WARNING_LOG
       echo "" >> $WARNING_LOG
    fi
+   fi
 }
 
 #  ===============================================
@@ -807,7 +858,7 @@ make_smv_pictures()
 {
    # Run Make SMV Pictures script (release mode)
    cd $FDS_SVNROOT/Verification/scripts
-   ./Make_SMV_Pictures.sh 2>&1 | grep -v FreeFontPath &> $FIREBOT_DIR/output/stage6d
+   ./Make_SMV_Pictures.sh $USEINSTALL 2>&1 | grep -v FreeFontPath &> $FIREBOT_DIR/output/stage6d
 }
 
 check_smv_pictures()
@@ -1062,7 +1113,7 @@ fi
 
 hostname=`hostname`
 start_time=`date`
-clean_firebot_history
+clean_smokebot_history
 
 ### Stage 0 ###
 update_and_compile_cfast

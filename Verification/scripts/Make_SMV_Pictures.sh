@@ -7,10 +7,22 @@ echo ""
 echo "Options"
 echo "-d - use debug version of smokeview"
 echo "-h - display this message"
+echo "-i - use installed version of smokeview"
 echo "-t - use test version of smokeview"
 echo "-s size - use 32 or 64 bit (default) version of smokeview"
 exit
 }
+
+is_file_installed()
+{
+  program=$1
+  notfound=`$program -help |& tail -1 |& grep "not found" | wc -l`
+  if [ "$notfound" == "1" ] ; then
+    echo "The program $SMV is not available. Run aborted."
+    exit
+  fi
+}
+
 
 OS=`uname`
 if [ "$OS" == "Darwin" ]; then
@@ -22,8 +34,9 @@ fi
 SIZE=_64
 DEBUG=
 TEST=
+use_installed="0"
 
-while getopts 'dhts:' OPTION
+while getopts 'dhis:t' OPTION
 do
 case $OPTION  in
   d)
@@ -31,6 +44,9 @@ case $OPTION  in
    ;;
   h)
    usage;
+   ;;
+  i)
+   use_installed="1"
    ;;
   t)
    TEST=_test
@@ -56,12 +72,20 @@ cd ../..
 export SVNROOT=`pwd`
 cd $CURDIR/..
 
-export SMV=$SVNROOT/SMV/Build/intel_$VERSION2/smokeview_$VERSION
+if [ "$use_installed" == "1" ] ; then
+  export SMV=smokeview
+  export SMOKEZIP=smokediff
+  export SMOKEDIFF=smokediff
+  export BACKGROUND=background
+else
+  export SMV=$SVNROOT/SMV/Build/intel_$VERSION2/smokeview_$VERSION
+  export SMOKEZIP=$SVNROOT/Utilities/smokezip/intel_$VERSION2/smokezip_$VERSION2
+  export SMOKEDIFF=$SVNROOT/Utilities/smokediff/intel_$VERSION2/smokediff_$VERSION2
+  export BACKGROUND=$SVNROOT/Utilities/background/intel_$PLATFORM\_32/background
+fi
+
 export SMVBINDIR="-bindir $SVNROOT/SMV/for_bundle"
 
-export SMOKEZIP=$SVNROOT/Utilities/smokezip/intel_$VERSION2/smokezip_$VERSION2
-export SMOKEDIFF=$SVNROOT/Utilities/smokediff/intel_$VERSION2/smokediff_$VERSION2
-export BACKGROUND=$SVNROOT/Utilities/background/intel_$PLATFORM\_32/background
 export STARTX=$SVNROOT/Utilities/Scripts/startXserver.sh
 export STOPX=$SVNROOT/Utilities/Scripts/stopXserver.sh
 
@@ -83,22 +107,10 @@ export SMVUG=$SVNROOT/Manuals/SMV_User_Guide
 export SMVVG=$SVNROOT/Manuals/SMV_Verification_Guide
 SUMMARY=$SVNROOT/Manuals/SMV_Summary
 
-if ! [ -e $SMV ]; then
-  echo "The file $SMV does not exist. Run aborted."
-  exit
-fi
-if ! [ -e $SMOKEZIP ]; then
-  echo "The file $SMOKEZIP does not exist. Run aborted."
-  exit
-fi
-if ! [ -e $SMOKEDIFF ]; then
-  echo "The file $SMOKEDIFF does not exist. Run aborted."
-  exit
-fi
-if ! [ -e $BACKGROUND ]; then
-  echo "The file $BACKGROUND does not exist. Run aborted."
-  exit
-fi
+is_file_installed $SMV
+is_file_installed $SMOKEZIP
+is_file_installed $SMOKEDIFF
+is_file_installed $BACKGROUND
 
 cd $SMVUG/SCRIPT_FIGURES
 rm -f *.png
