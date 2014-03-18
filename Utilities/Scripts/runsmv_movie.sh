@@ -6,7 +6,7 @@ smvscript=$in$movies.ssf
 
 fulldir=$BASEDIR/$dir
 
-notfound=`$SMV -help |& tail -1 |& grep "not found" | wc -l`
+notfound=`$SMV -help 2>&1 | tail -1 | grep "not found" | wc -l`
 if [ "$notfound" == "1" ];  then
   echo "The program $SMV is not available. Run aborted"
   exit
