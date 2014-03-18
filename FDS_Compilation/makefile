@@ -485,6 +485,14 @@ intel_osx_32 : obj = fds_intel_osx_32
 intel_osx_32 : setup $(obj_serial)
 	$(FCOMPL) $(FFLAGS) $(LFLAGS) -o $(obj) $(obj_serial)
 
+openmp_intel_osx_32 : FFLAGS = -m32 -O2 -vec_report0 -ipo
+openmp_intel_osx_32 : LFLAGS = -static-intel
+openmp_intel_osx_32 : FCOMPL = ifort
+openmp_intel_osx_32 : FOPENMPFLAGS = -openmp -openmp-link static
+openmp_intel_osx_32 : obj = fds_openmp_intel_osx_32
+openmp_intel_osx_32 : setup $(obj_serial)
+	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_serial)
+
 mpi_intel_osx_32 : FFLAGS  = -O2 -m32 -heap-arrays -vec_report0 -ipo -mmacosx-version-min=10.4
 mpi_intel_osx_32 : LFLAGS  = -L$(MPIDIST)/lib -static-intel
 mpi_intel_osx_32 : FCOMPL  = mpif77
