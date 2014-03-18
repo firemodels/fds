@@ -17,7 +17,7 @@ RUNAUTO=
 BUILDBUNDLE=
 RUNDEBUG="1"
 
-notfound=`icc -help |& tail -1 |& grep "not found" | wc -l`
+notfound=`icc -help 2>&1 | tail -1 | grep "not found" | wc -l`
 if [ "$notfound" == "1" ] ; then
   export haveCC="0"
   USEINSTALL="-i"
