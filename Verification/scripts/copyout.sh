@@ -15,4 +15,4 @@ fi
 if ! [ -e $fulldir/$outfile ]; then
   exit
 fi
-ln -s $fulldir/$outfile $outdir/$outfile
+ln -f -s $fulldir/$outfile $outdir/$outfile

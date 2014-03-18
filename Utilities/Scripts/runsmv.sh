@@ -45,10 +45,13 @@ echo ""
 echo "--- generating images for: $in.smv"
 
 scriptfile=$scratchdir/script.$$
-if ! [ -e $SMV ];  then
-  echo "*** Error (fatal): The file $SMV does not exist. Run aborted"
+
+notfound=`$SMV -help |& tail -1 |& grep "not found" | wc -l`
+if [ "$notfound" == "1" ];  then
+  echo "*** Error (fatal): The program $SMV is not available. Run aborted."
   exit
 fi
+
 if ! [ -d $fulldir ]; then
   echo "*** Error (fatal): The directory $fulldir does not exist. Run aborted."
   exit
