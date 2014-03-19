@@ -92,6 +92,15 @@ echo Stage 0 - Preliminaries
 echo. > %errorlog%
 echo. > %warninglog%
 
+if NOT exist %emailexe% (
+  echo ***warning: email client not found.   
+  echo             Smokebot messages will only be sent to the console.
+  set havemail=0
+) else (
+  echo             found mailsend
+  set havemail=1
+)
+
 ifort 1> %OUTDIR%\stage0a.txt 2>&1
 type %OUTDIR%\stage0a.txt | find /i /c "not recognized" > %OUTDIR%\stage_count0a.txt
 set /p nothaveFORTRAN=<%OUTDIR%\stage_count0a.txt
@@ -380,7 +389,7 @@ exit
 
 :output_abort_message
   echo "***Fatal error: smokebot build failure on %COMPUTERNAME% %revision%"
-  if exist %email% (
+  if %havemail% == 1 (
     call %email% %mailToSMV% "smokebot build failure on %COMPUTERNAME% %revision%" %errorlog%
   )
 exit /b
