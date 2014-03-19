@@ -1,12 +1,12 @@
 @echo off
 set intelbin="%IFORT_COMPILER14%\bin"
 
-IF "%SETUP_IFORT_COMPILER_32%"=="1" GOTO envexist
+IF "%SETUP_IFORT_COMPILER_64%"=="1" GOTO envexist
 
-set SETUP_IFORT_COMPILER_32=1
+set SETUP_IFORT_COMPILER_64=1
 
 echo Setting up compiler environment
-call %intelbin%\ifortvars ia32
+call %intelbin%\ifortvars intel64
 
 :envexist
 make VPATH="../../FDS_Source" -f ..\makefile openmp_intel_win_64
