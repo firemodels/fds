@@ -20,6 +20,11 @@ SETLOCAL
 set size=64
 set compile_platform=intel64
 
+set OPENMP=
+:: to use non-openmp fds comment the following two lines
+set OPENMP=openmp_
+set OMP_NUM_THREADS=2
+
 :: -------------------------------------------------------------
 ::                         set repository names
 :: -------------------------------------------------------------
@@ -152,11 +157,11 @@ if %reduced% == 1 goto skip_fds_debug
 
 echo             serial debug
 
-cd %svnroot%\FDS_Compilation\intel_win_%size%_db
+cd %svnroot%\FDS_Compilation\%OPENMP%intel_win_%size%_db
 erase *.obj *.mod *.exe 1> %OUTDIR%\stage1a.txt 2>&1
-make VPATH="../../FDS_Source" -f ..\makefile intel_win_%size%_db 1>> %OUTDIR%\stage1a.txt 2>&1
+make VPATH="../../FDS_Source" -f ..\makefile %OPENMP%intel_win_%size%_db 1>> %OUTDIR%\stage1a.txt 2>&1
 
-call :does_file_exist fds_win_%size%_db.exe %OUTDIR%\stage1a.txt|| exit /b 1
+call :does_file_exist fds_%OPENMP%win_%size%_db.exe %OUTDIR%\stage1a.txt|| exit /b 1
 call :find_fds_warnings "warning" %OUTDIR%\stage1a.txt "Stage 1a"
 
 echo             parallel debug
@@ -172,11 +177,11 @@ call :find_fds_warnings "warning" %OUTDIR%\stage1b.txt "Stage 1b"
 
 echo             serial release
 
-cd %svnroot%\FDS_Compilation\intel_win_%size%
+cd %svnroot%\FDS_Compilation\%OPENMP%intel_win_%size%
 erase *.obj *.mod *.exe 1> %OUTDIR%\stage1c.txt 2>&1
-make VPATH="../../FDS_Source" -f ..\makefile intel_win_%size% 1>> %OUTDIR%\stage1c.txt 2>&1
+make VPATH="../../FDS_Source" -f ..\makefile %OPENMP%intel_win_%size% 1>> %OUTDIR%\stage1c.txt 2>&1
 
-call :does_file_exist fds_win_%size%.exe %OUTDIR%\stage1c.txt|| exit /b 1
+call :does_file_exist fds_%OPENMP%win_%size%.exe %OUTDIR%\stage1c.txt|| exit /b 1
 call :find_fds_warnings "warning" %OUTDIR%\stage1c.txt "Stage 1c"
 
 if %reduced% == 1 goto skip_fds_parallel

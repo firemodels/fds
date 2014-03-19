@@ -1,13 +1,21 @@
 @echo off
-set svn_drive=d:
+
+set OPENMP=
+
+:: to use openmp (assuming you have compiled the openmp exe's), uncomment the follwoing two "set" lines
+:: set OPENMP=openmp_
+:: set OMP_NUM_THREADS=2
 
 set BASEDIR="%CD%"
 set SVNROOT=%BASEDIR%\..\
 set TIME_FILE="%BASEDIR%\fds_case_times.txt"
 
-Rem Choose one of the following four FDS "definitions" by commenting all lines but one.
+:: DO NOT erase or comment following line when committing to repository
+set FDSEXE=%SVNROOT%\FDS_Compilation\%OPENMP%intel_win_64\fds_%OPENMP%win_64.exe
 
-set FDSEXE=C:\PROJECTS\FDS_DEVEL\6.0a\fds_win_64
+:: if you wish to use a custom FDS, comment the above "set" and uncomment and customize the below "set"
+:: set FDSEXE=C:\PROJECTS\FDS_DEVEL\6.0a\fds_win_64
+
 set BACKGROUNDEXE=%SVNROOT%\Utilities\background\intel_win_32\background.exe
 
 Rem Choose one of the following run options by commenting the line you don't want to use.
