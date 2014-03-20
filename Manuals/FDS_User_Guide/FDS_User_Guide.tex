@@ -6714,7 +6714,7 @@ When using a {\ct DEVC} output to control FDS, the instantaneous value of the th
 \ee
 
 \noindent
-where n is the time step, $x$ is the instantaneous device output and $\bar{x}$ is the smoothed output.  The \linebreak[4]{\ct SMOOTHING\_FACTOR} defaults to 0 which means no smoothing is performed.
+where n is the time step, $x$ is the instantaneous device output and $\bar{x}$ is the smoothed output.  The \linebreak[4]{\ct SMOOTHING\_FACTOR} defaults to 0 which means no smoothing is performed.  Note that {\ct SMOOTHING\_FACTOR} only changes the value passed to control functions; it has no effect on the value of the {\ct DEVC} written to the {\ct CHID\_devc.csv} file.  
 
 \subsection{Creating and Removing Obstructions}
 \label{info:create_remove}
