@@ -480,12 +480,25 @@ This chapter describes the procedure to run an FDS calculation. The primary requ
 
 \section{Starting an FDS Calculation}
 
-FDS can be run from the command prompt, or with a third-party Graphical User Interface (GUI). In the discussion to follow, it is assumed that FDS is being run from the command prompt. FDS can be run on a single computer, using one or more cores, or it can be run on multiple computers. The executable names are similar under the different supported operating systems (Windows, Linux, and OS~X) and sizes (32~and~64~bits). The single computer executable is called {\ct fds}\ (with an {\ct .exe}\ file extension on Windows).  The multiple computer executable is called {\ct fds\_mpi} (again with an {\ct .exe}\ file extension for Windows). The letters {\ct mpi} in the filename denote Message Passing Interface, which will be discussed below.  Batch files (Windows) or aliases (Linux or OS~X) may be defined to distinguish executables if you wish to install multiple versions of FDS.
+FDS can be run from the command prompt, or with a third-party Graphical User Interface (GUI). In the discussion to follow, it is assumed that FDS is being run from the command prompt. FDS can be run on a single computer, using one or more cores, or it can be run on multiple computers. The executable names are similar under the different supported operating systems (Windows, Linux, and Mac OS~X) and sizes (32~and~64~bits). The single computer executable is called {\ct fds}\ (with an {\ct .exe}\ file extension on Windows).  The multiple computer executable is called {\ct fds\_mpi} (again with an {\ct .exe}\ file extension for Windows). The letters {\ct mpi} in the filename denote Message Passing Interface, which will be discussed below.  Batch files (Windows) or aliases (Linux or Mac OS~X) may be defined to distinguish executables if you wish to install multiple versions of FDS.
 
 
+\clearpage
 \subsection{Single Computer}
 
-Sample input files are provided with the program for new users who are encouraged to first run a sample calculation before attempting to write an input file. Input files are typically given names that help identify the particular case, followed by the suffix {\ct .fds}. Suppose you want to run an input file called {\ct job\_name.fds}. You can start FDS from a DOS or Linux/Unix command prompt as follows:
+Sample input files are provided with the program for new users who are encouraged to first run an example calculation before attempting to write an input file. Input files are typically given names that help identify the particular case, followed by the {\ct .fds} file extension. Suppose you want to run an input file called {\ct job\_name.fds}. You can start FDS from a command prompt in Windows, Mac OS~X, Linux, or Unix as described in the following sections.
+
+FDS uses OpenMP (Open Multi-Processing) to allow a single computer to run a single FDS job on one or more cores/threads. The use of OpenMP does not require the FDS domain to be broken up into multiple meshes, but will still work with cases that have multiple meshes defined.
+
+By default, FDS uses the maximum number of cores/threads available on a single computer. To specify the number of cores/threads that are available to FDS jobs, the {\ct OMP\_NUM\_THREADS} environment variable can be used. For example, to specify 4 available cores/threads on a Windows machine, type the following at the command prompt:
+\begin{lstlisting}
+set OMP_NUM_THREADS=4
+\end{lstlisting}
+To specify 4 available cores/threads on on a Mac OS~X, Linux, or Unix machine, type the following at the command prompt:
+\begin{lstlisting}
+export OMP_NUM_THREADS=4
+\end{lstlisting}
+When the job is started, FDS will print the number of cores/threads that will be used for that job. Note that this setting will only apply until you log out or restart your machine. To set the default value of available cores/threads upon startup, the {\ct OMP\_NUM\_THREADS} environment variable can also be set in the startup configuration scripts on a machine. Refer to the documentation for your operating system for more information on how to configure environment variables upon startup.
 
 
 \subsubsection{MS Windows}
@@ -522,6 +535,7 @@ tail -f job_name.out
 The installer also defines aliases named {\ct fds6}\ and {\ct fds6\_mpi}\ pointing to the executables. Other aliases may be defined by adding entries to the shell start-up script. Note, do not use ``{\ct fds}'' or ``{\ct fds\_mpi}'' for alias names as these are the names used for executables distributed with FDS. You may also need to use ``chmod~+x'' to make the file executable.
 
 
+\clearpage
 \subsection{Multiple Computers (MPI Version)}
 \label{info:parallelprocessing}
 
@@ -576,6 +590,7 @@ mpirun -np 5 fds_mpi job_name.fds >& job_name.err &
 The file {\ct job\_name.err} contains what is normally printed out to the screen.
 
 
+\clearpage
 \section{Monitoring Progress}
 
 Diagnostics for a given calculation are written into a file called {\ct CHID.out}.
@@ -656,7 +671,7 @@ might already have addressed your problem, and telling us what version you are u
 
 An FDS calculation may end before the specified time limit. Following is a list of common error statements and how to diagnose the problems:
 \begin{description}
-\item[{\bf Input File Errors}:] The most common errors in FDS are due to mis-typed input statements. These errors result in the immediate halting of the program and a statement like, ``ERROR: Problem with the HEAD line.'' For these errors, check the line in the input file named in the error statement. Make sure the parameter names are spelled correctly. Make sure that a / (forward slash) is put at the end of each namelist entry. Make sure that the right type of information is being provided for each parameter, like whether one real number is expected, or several integers, or whatever. Make sure there are no non-ASCII characters being used, as can sometimes happen when text is cut and pasted from other applications or word-processing software. Make sure zeros are zeros and O's are O's. Make sure 1's are not !'s. Make sure apostrophes are used to designate character strings. Make sure the text file on a Unix/Linux machine was not created on a DOS machine, and {\em vice versa}. Make sure that all the parameters listed are still being used -- new versions of FDS often drop or change parameters forcing you to re-examine old input files.
+\item[{\bf Input File Errors}:] The most common errors in FDS are due to mis-typed input statements. These errors result in the immediate halting of the program and a statement like, ``ERROR: Problem with the HEAD line.'' For these errors, check the line in the input file named in the error statement. Make sure the parameter names are spelled correctly. Make sure that a / (forward slash) is put at the end of each namelist entry. Make sure that the right type of information is being provided for each parameter, like whether one real number is expected, or several integers, or whatever. Make sure there are no non-ASCII characters being used, as can sometimes happen when text is cut and pasted from other applications or word-processing software. Make sure zeros are zeros and O's are O's. Make sure 1's are not !'s. Make sure apostrophes are used to designate character strings. Make sure the text file on a Unix/Linux machine was not created on a Windows machine, and {\em vice versa}. Make sure that all the parameters listed are still being used -- new versions of FDS often drop or change parameters forcing you to re-examine old input files.
 \item [{\bf Numerical Instability Errors}:] It is possible that during an FDS calculation the flow velocity at some location in the domain can increase due to numerical error causing the time step size to decrease to a point\footnote{By default, the calculation is stopped when the time step drops below 0.0001 of the initial time step. This factor can be changed via the {\ct TIME} line by specifying the {\ct DT\_LIMITING\_RATIO}.} where logic in the code decides that the results are unphysical and stops the calculation with an error message in the file {\ct CHID.out}. In these cases, FDS ends by dumping out one final Plot3D file giving you a hint as to where the error is occurring within the computational domain. Usually, a numerical instability can be identified by fictitiously large velocity vectors emanating from a small region within the domain. Common causes of such instabilities are mesh cells that have an aspect ratio larger than 2 to 1, high speed flow through a small opening, a sudden change in the heat release rate, or any number of sudden changes to the flow field. There are various ways to solve the problem, depending on the situation. Try to diagnose and fix the problem before reporting it. It is difficult for anyone but the originator of the input file to diagnose the problem.
 \item[{\bf Inadequate Computer Resources}:] The calculation might be using more RAM than the machine has (you will see an error message like ``ERROR: Memory allocation failed for ZZ in the routine INIT'') , or the output files could have used up all the available disk space. In these situations, the computer may or may not produce an intelligible error message. Sometimes the computer is just unresponsive. It is your responsibility to ensure that the computer has adequate resources to do the calculation. Remember, there is no limit to how big or how long FDS calculations can be -- it depends on the resources of the computer. For any new simulation, try running the case with a modest-sized mesh, and gradually make refinements until the computer can no longer handle it. Then back off somewhat on the size of the calculation so that the computer can comfortably run the case. Trying to run with 90~\% to 100~\% of computer resources is risky. In fact, for a typical 32~bit Windows PC with 4~GB RAM, only 2~GB will be available to FDS, based on user feedback. If you want to run bigger cases, consider buying a computer with a 64~bit operating system or break up the calculation into multiple meshes and use the MPI version of FDS. If you are using a Linux/Unix machine, make sure that the stacksize is unlimited, which will allow FDS to access as much of the RAM as possible. Changing the stacksize limit differs with each shell type, so it is best to do an on-line search to find out how to ensure that your stacksize is unlimited.
 \item[{\bf Run-Time Errors}:] An error occurs either within the computer operating system or the FDS program. An error message is printed out by the operating system of the computer onto the screen or into the diagnostic output file. This message is most often unintelligible to most people, including the programmers, although occasionally one might get a small clue if there is mention of a specific problem, like ``stack overflow,'' ``divide by zero,'' or ``file write error, unit=...'' Sometimes the error message simply refers to a ``Segmentation Fault.'' These errors may be caused by a bug in FDS, for example if a number is divided by zero, or an array is used before it is allocated, or any number of other problems. Before reporting the error to the Issue Tracker, try to systematically simplify the input file until the error goes away. This process usually brings to light some feature of the calculation responsible for the problem and helps in the debugging.
@@ -1443,7 +1458,7 @@ restart.
 \label{info:velo_restart}
 \label{info:CSVF}
 
-It may be useful to start a calculation from an established flow field.  Usually this can be accomplished with the normal restart functionality.  But in some circumstances restart may be fragile, or you may want to specify a profile throughout the entire domain.  For such situations we have added the ability to read the velocity field information from a comma-delimited (.csv) file.  You have the option of creating the velocity file using FDS or creating your own.  To generate the velocity initialization file with FDS, in the input file add a {\ct DUMP} line with a {\ct UVW\_TIMER} (time in seconds).  The timer will accept up to 10 values, and will write velocity files for each mesh and each timer index to the working directory.  For example, if you want to write the simulation velocity field at 10 minutes into the run, add the following:
+It may be useful to start a calculation from an established flow field.  Usually this can be accomplished with the normal restart functionality.  But in some circumstances restart may be fragile, or you may want to specify a profile throughout the entire domain.  For such situations we have added the ability to read the velocity field information from a comma-separated value (.csv) file.  You have the option of creating the velocity file using FDS or creating your own.  To generate the velocity initialization file with FDS, in the input file add a {\ct DUMP} line with a {\ct UVW\_TIMER} (time in seconds).  The timer will accept up to 10 values, and will write velocity files for each mesh and each timer index to the working directory.  For example, if you want to write the simulation velocity field at 10 minutes into the run, add the following:
 \begin{lstlisting}
 &DUMP UVW_TIMER(1)=600 /
 \end{lstlisting}
@@ -3815,7 +3830,7 @@ Below are given sample inputs for the three types of fans supported by FDS.
 \item[{\ct MAX\_FLOW}] is the maximum volumetric flow of the fan in m$^3$/s.  This input activates a quadratic fan model.
 \item[{\ct MAX\_PRESSURE}] is the stall pressure of the fan in units of Pa.  This input activates a quadratic fan model.
 \item[{\ct RAMP\_ID}] identifies the {\ct RAMP} that contains a table of pressure drop across the fan (Pa) versus the volumetric flow rates (m$^3$/s) for a user-defined fan curve.
-\item[{\ct TAU\_FAN}]  defines a tanh ({\ct TAU\_FAN} > 0) or t$^2$ ramp ({\ct TAU\_FAN} < 0) for the fan.  This is applied to the flow rate computed by any of the three types (constant flow, quadratic, or user-defined ramp) of fans.
+\item[{\ct TAU\_FAN}] defines a tanh ({\ct TAU\_FAN} > 0) or t$^2$ ramp ({\ct TAU\_FAN} < 0) for the fan.  This is applied to the flow rate computed by any of the three types (constant flow, quadratic, or user-defined ramp) of fans.
 \item[{\ct VOLUME\_FLOW}] is the fixed volumetric flow of the fan (m$^3$/s).  If you wish to have a time dependent flow use the {\ct VOLUME\_FLOW} input for a duct rather than for a fan.
 \end{description}
 
@@ -3908,7 +3923,7 @@ where:
 \item[{\ct LOADING}] is an array of the initial loading (kg) of the filter for each species being filtered.
 \item[{\ct LOADING\_MULTIPLIER}] is an array of the species multiplier, $M_i$, used in computing the total filter loading when computing loss.
 \item[{\ct LOSS}] invokes a linear flow loss model where the flow loss, $K$, is given as a linear function of the total loading, $K_{\si{FILTER}}=K_{\si{CLEAN\_LOSS}}+K_{\si{LOSS}} \sum \left( L_i M_i \right)$, where $L_i$ is the species loading and $M_i$ is a multiplier.  Only one of {\ct LOSS} or {\ct RAMP\_ID} should be specified.
-\item[{\ct RAMP\_ID}] identifies the {\ct RAMP} that contains a table of pressure drop across the filter as a function of total loading (the summation term given in the defintion of {\ct LOSS} above).   Only one of {\ct LOSS} or {\ct RAMP\_ID} should be specified.
+\item[{\ct RAMP\_ID}] identifies the {\ct RAMP} that contains a table of pressure drop across the filter as a function of total loading (the summation term given in the definition of {\ct LOSS} above).   Only one of {\ct LOSS} or {\ct RAMP\_ID} should be specified.
 \item[{\ct SPEC\_ID}] identifies the tracked species for the inputs of {\ct LOADING\_MULTIPLIER} and {\ct LOADING}.
 \end{description}
 A sample set of filter inputs is shown below.  These lines define a filter that removes the species {\ct PARTICULATE} with 100~\% efficiency.  The filter has an initial flow loss of 1 and that loss increases by a factor of 7332 for each kg of {\ct PARTICULATE} captured by the filter.  For further details see the sample case {\ct HVAC\_filter}, which is documented in the Verification Guide.
@@ -5721,7 +5736,7 @@ output the surface temperature of a single particle.
 \subsection{Drag}
 \label{info:particle_drag}
 
-For massive particles the default drag law (i.e., the drag coefficient correlation as a function of the Reynolds number based on particle diameter) is that of a sphere. To invoke the cylinder drag law set {\ct DRAG\_LAW} to {\ct 'CYLINDER'} on the {\ct PART} line and to invoke the screen drag law (see Section~\ref{info:particle_screen}) set to {\ct 'SCREEN'}  If neither of these options is applicable, you may specify a constant value of the drag coefficient for a particle class (a specific {\ct PART\_ID}) by setting a {\ct DRAG\_COEFFICIENT} on {\ct PART}. The {\ct DRAG\_COEFFICIENT} over-rides the {\ct DRAG\_LAW}. If local particle density is very high drag may be reduced by particle wake effects. The threshold volumefraction for considering three-way coupling effects is controlled by the {\ct DENSE\_VOLUME\_FRACTION} parameter. Setting this parameter to 1 will turn off the three-way coupling model.
+For massive particles the default drag law (i.e., the drag coefficient correlation as a function of the Reynolds number based on particle diameter) is that of a sphere. To invoke the cylinder drag law set {\ct DRAG\_LAW} to {\ct 'CYLINDER'} on the {\ct PART} line and to invoke the screen drag law (see Section~\ref{info:particle_screen}) set to {\ct 'SCREEN'}  If neither of these options is applicable, you may specify a constant value of the drag coefficient for a particle class (a specific {\ct PART\_ID}) by setting a {\ct DRAG\_COEFFICIENT} on {\ct PART}. The {\ct DRAG\_COEFFICIENT} over-rides the {\ct DRAG\_LAW}. If local particle density is very high drag may be reduced by particle wake effects. The threshold volume fraction for considering three-way coupling effects is controlled by the {\ct DENSE\_VOLUME\_FRACTION} parameter. Setting this parameter to 1 will turn off the three-way coupling model.
 
 \subsection{Splitting particles}
 \label{info:particle_split}
@@ -6014,7 +6029,7 @@ Note that by default the parameter {\ct PARTICLE\_CFL} is set to {\ct .FALSE.} (
 \label{info:initial_droplets}
 
 Sometimes it is convenient to introduce Lagrangian particles within a particular region of the domain. To do this, use an {\ct INIT} line which contains the {\ct PART\_ID} for the type of particle to be inserted. Particles specified via an {\ct INIT} line can represent a number of different kinds of subgrid-scale objects. The particles can be massless tracers or they can be solid or liquid particles with mass. If not massless, specify {\ct MASS\_PER\_VOLUME} in units of kg/m$^3$. Do not confuse this parameter with {\ct DENSITY}, explained in the next section.
-For example, water has a {\ct DENSITY} of 1000~kg/m$^3$, whereas a liter of water broken up into droplets and spread over a cubic meter has a {\ct MASS\_PER\_VOLUME} of 1~kg/m$^3$. The number of lagrangian particles inserted is controlled by the parameter {\ct N\_PARTICLES}.
+For example, water has a {\ct DENSITY} of 1000~kg/m$^3$, whereas a liter of water broken up into droplets and spread over a cubic meter has a {\ct MASS\_PER\_VOLUME} of 1~kg/m$^3$. The number of Lagrangian particles inserted is controlled by the parameter {\ct N\_PARTICLES}.
 
 \subsubsection{Randomly Distributed Particles within a Specified Volume}
 
@@ -6207,7 +6222,7 @@ Each device has a {\ct QUANTITY} associated with it.
 The time history of each {\ct DEVC} quantity is output to a comma-delimited
 ASCII file called {\ct CHID\_devc.csv}
 (see Section~\ref{out:DEVC} for output file format).
-This file can be imported into most spread sheet software packages.  Most spreadsheet programs limit the number of columns to some number (for example the 2003 version Microsoft Excel had a 256 column limit).  As a default, FDS places no limit on the amount of columns in a csv file.  If your spreadsheet application allows fewer columns than the number of {\ct DEVC} or {\ct CTRL} in your input file then set {\ct COLUMN\_DUMP\_LIMIT} equal to {\ct .TRUE.} on the {\ct DUMP} line.
+This file can be imported into most spread sheet software packages.  Most spreadsheet programs limit the number of columns to some number (for example the 2003 version Microsoft Excel had a 256 column limit).  As a default, FDS places no limit on the amount of columns in a comma-separated value (.csv) file.  If your spreadsheet application allows fewer columns than the number of {\ct DEVC} or {\ct CTRL} in your input file then set {\ct COLUMN\_DUMP\_LIMIT} equal to {\ct .TRUE.} on the {\ct DUMP} line.
 Use {\ct DEVC\_COLUMN\_LIMIT} and {\ct CTRL\_COLUMN\_LIMIT} to indicate the limit of columns in the
 device and control output files. Their default values are 254.
 
@@ -6282,7 +6297,7 @@ The angles outline a conical spray pattern relative to the
 south pole of the sphere centered at the sprinkler with radius {\ct OFFSET}.
 For example, {\ct SPRAY\_ANGLE=30.,80.} directs the water droplets to leave
 the sprinkler through a band between 60$^\circ$ and 10$^\circ$ south latitude, assuming the orientation of
-the sprinkler is (0,0,-1), the default. Elliptical spray patterns can be defined by giving a pair of spray angles. For exmple, {\ct SPRAY\_ANGLE(1,1:2)=0.,60.}  and {\ct SPRAY\_ANGLE(2,1:2)=0.,30.}, defines a spray pattern with 60 degree angle in the direction of $x$ axis and a 30 degree angle in the direction of $y$ axis.
+the sprinkler is (0,0,-1), the default. Elliptical spray patterns can be defined by giving a pair of spray angles. For example, {\ct SPRAY\_ANGLE(1,1:2)=0.,60.}  and {\ct SPRAY\_ANGLE(2,1:2)=0.,30.}, defines a spray pattern with 60 degree angle in the direction of $x$ axis and a 30 degree angle in the direction of $y$ axis.
 {\ct SPRAY\_PATTERN\_SHAPE} determines how the droplets are distributed within the specified {\ct SPRAY\_ANGLE}.
 Choices are {\ct 'UNIFORM'} for uniform distribution and {\ct 'GAUSSIAN'}. The default distribution is {\ct 'GAUSSIAN'}. The parameter {\ct SPRAY\_PATTERN\_MU} controls the latitude of
 the maximum density of droplets for the {\ct 'GAUSSIAN'} distribution. The width of the distribution is controlled by the parameter {\ct SPRAY\_PATTERN\_BETA}.
@@ -6566,7 +6581,7 @@ A similar {\ct QUANTITY} is {\ct 'TRANSMISSION'} which is given by the following
 \be
   \hbox{Transmission}  = \exp \left( -K_{\rm m} \frac{L_0}{L} \sum_{i=1}^N {\rho_{{\rm s},i}\; \Delta x_i} \right)  \times 100  \; \; \hbox{\%/m}
 \ee
-Note that the transmission is given in units of \%/m rather than \% like obscuration. $L$ is the total pathlength of the beam, and $L_0$ is the reference dimension of 1~m.
+Note that the transmission is given in units of \%/m rather than \% like obscuration. $L$ is the total path length of the beam, and $L_0$ is the reference dimension of 1~m.
 
 Since a single linear path cannot span more than one mesh, having a beam detector that crosses multiple meshes will require post processing.
 Break the beam detector path into multiple {\ct DEVC} lines, one for each mesh that the beam crosses.  The total obscuration is given by
@@ -7839,7 +7854,7 @@ A summary of the available PDPA quantities is shown in Table~\ref{tbl:pdpa}.
 ${}^*$ $T_{\rm m}$ is the melting temperature of the associated species.
 \end{table}
 
-It is also possible to output histograms of PDPA output quantities. When {\ct PDPA\_HISTOGRAM} is set to {\ct .TRUE.}, normalized histogram bin counts are output to a csv file from all devices associated with this {\ct PROP} line. The number of bins and the limits of the histogram are controlled by parameters on the {\ct PROP} line. The value used in creating the histogram is $D_i^m \; \phi$. Note that when making a histogram of diameters, the limits must be given in meters, not microns. Values falling outside the histogram limits are included in the counts of the first and last bins. Cumulative distributions can be output by setting {\ct PDPA\_HISTOGRAM\_CUMULATIVE=.TRUE.} on the {\ct PROP} line.
+It is also possible to output histograms of PDPA output quantities. When {\ct PDPA\_HISTOGRAM} is set to {\ct .TRUE.}, normalized histogram bin counts are output to a comma-separated value (.csv) file from all devices associated with this {\ct PROP} line. The number of bins and the limits of the histogram are controlled by parameters on the {\ct PROP} line. The value used in creating the histogram is $D_i^m \; \phi$. Note that when making a histogram of diameters, the limits must be given in meters, not microns. Values falling outside the histogram limits are included in the counts of the first and last bins. Cumulative distributions can be output by setting {\ct PDPA\_HISTOGRAM\_CUMULATIVE=.TRUE.} on the {\ct PROP} line.
 
 The histogram output file contains of two-columns for each device. The first column gives the bin centers, and the second column gives the normalized bin count. The bin counts are normalized so that the total area of the histogram is 1. Here the histogram consists of equal width bars centered at the given bin centers and heights equal to the corresponding bin count. Volume and area based distributions can be output by setting the {\ct PDPA\_M} parameter on the {\ct PROP} line to {\ct 3} and {\ct 2} respectively. Notice that this works differently from the mean diameter computation.
 
@@ -8307,8 +8322,7 @@ associated with the normal component of velocity at solid or interpolated bounda
 \subsection{Output File Precision}
 \label{info:SIG_FIGS}
 
-There are several different output files that have the format of a comma-delimited spreadsheet (.csv). These files consist of real numbers in columns separated by
-commas. By default, the real numbers are formatted
+There are several different output files that have the format of a comma-separated value (.csv) file. These files consist of real numbers in columns separated by commas. By default, the real numbers are formatted
 
 \begin{lstlisting}
 -1.2345678E+123
@@ -8451,7 +8465,7 @@ where $\mu_t$ is the turbulent viscosity and $|\tilde{S}|$ is the filtered strai
 
 \subsection{Extinction}
 \label{info:extinct_out}
-In combustion, knowing if/when/where chemical reactions have been extinguished is important. The {\ct EXTINCTION} parameter tells the user wether or not combustion has been prevented by FDS' extinction routine. By default, {\ct EXTINCTION} = 1, which means that the FDS extinction routine has not prevented combustion. An {\ct EXTINCTION} value of 0 means that the routine has prevented combustion. The criteria for an {\ct EXTINCTION} value of 0 is the presence of fuel and oxidizer without any energy release. An {\ct EXTINCTION} value of -1 means that there is no fuel or oxidizer present.
+In combustion, knowing if/when/where chemical reactions have been extinguished is important. The {\ct EXTINCTION} parameter tells the user whether or not combustion has been prevented by FDS' extinction routine. By default, {\ct EXTINCTION} = 1, which means that the FDS extinction routine has not prevented combustion. An {\ct EXTINCTION} value of 0 means that the routine has prevented combustion. The criteria for an {\ct EXTINCTION} value of 0 is the presence of fuel and oxidizer without any energy release. An {\ct EXTINCTION} value of -1 means that there is no fuel or oxidizer present.
 
 
 
@@ -8784,7 +8798,7 @@ of a {\ct DUCT\_ID}, and quantities for a node require the specification of a {\
 
 \chapter{Alphabetical List of Input Parameters}
 
-This Appendix lists all of the input parameters for FDS in separate tables grouped by Namelist,these tables are in alphabetical order along with the parameters within them. This is intended to be used as a quick reference and does not replace reading the detailed description of the parameters in the main body of this guide. See Table \ref{tbl:namelistgroups} for a cross-reference of relevant sections and the tables in this Appendix. The reason for this statement is that many of the listed parameters are mutually exclusive -- specifying more than one can cause the program to either fail or run in an unpredictable manner. Also, some of the parameters trigger the code to work in a certain mode when specified. For example, specifying the thermal conductivity of a solid surface triggers the code to assume the material to be thermally-thick, mandating that other
+This appendix lists all of the input parameters for FDS in separate tables grouped by namelist, these tables are in alphabetical order along with the parameters within them. This is intended to be used as a quick reference and does not replace reading the detailed description of the parameters in the main body of this guide. See Table \ref{tbl:namelistgroups} for a cross-reference of relevant sections and the tables in this appendix. The reason for this statement is that many of the listed parameters are mutually exclusive -- specifying more than one can cause the program to either fail or run in an unpredictable manner. Also, some of the parameters trigger the code to work in a certain mode when specified. For example, specifying the thermal conductivity of a solid surface triggers the code to assume the material to be thermally-thick, mandating that other
 properties be specified as well. Simply prescribing as many properties as possible from a handbook is bad practice. Only prescribe those parameters which are necessary to describe the desired scenario. Note that you may use the character string {\ct FYI} on any namelist line to make a note or comment.
 
 
