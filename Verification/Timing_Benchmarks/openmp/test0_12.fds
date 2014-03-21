@@ -1,4 +1,4 @@
-&HEAD CHID='test0_12', TITLE='General purpose input file to test FDS timings, SVN $Revision: 12143 $' /
+&HEAD CHID='test0_12', TITLE='General purpose input file to test FDS timings, SVN $Revision$' /
 
 &MESH IJK=64,64,64, XB=0.0,1.0,0.0,1.0,0.0,1.0 /
 
