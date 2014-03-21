@@ -3,6 +3,9 @@
 # this script is called by bundle_platform_size.csh
 # where platform may be linux or osx and size may be 32 or 64
 
+# setenv OPENMP 
+setenv OPENMP openmp_
+
 setenv manifest manifest$FDSOS.html
 setenv OUT $MAJOR$FDSOS
 setenv OUT
@@ -27,8 +30,8 @@ setenv backgrounddir intel$FDSOS2
 setenv background background
 setenv backgroundout background
 
-setenv fdsdir intel$FDSOS
-setenv fds fds_intel$FDSOS
+setenv fdsdir ${OPENMP}intel$FDSOS
+setenv fds fds_${OPENMP}intel$FDSOS
 setenv fdsout fds$OUT
 
 setenv fdsmpidir mpi_intel$FDSOS
