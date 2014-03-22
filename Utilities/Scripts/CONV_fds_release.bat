@@ -28,7 +28,7 @@ set bundlesetup=%scriptdir%/bundle_setup
 echo.
 echo Converting the FDS release notes from wiki to html format
 
-plink %svn_logon%  %scriptdir%/ssh_command2.csh blaze %scriptdir% CONV_fds_release.sh
+plink %svn_logon%  %scriptdir%/ssh_command2.csh %linux_hostname% %scriptdir% CONV_fds_release.sh
 
 pscp %svn_logon%:%bundlesetup%/release_notes.htm FDS_Release_Notes.htm
 pause
