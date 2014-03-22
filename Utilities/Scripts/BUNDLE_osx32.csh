@@ -5,8 +5,8 @@
 setenv fds_smvroot $1
 setenv bundlebase $2
 setenv runhost $3
-setenv fdshost bluesky
-setenv smvhost bluesky
+setenv fdshost $3
+setenv smvhost $3
 setenv OSXBUNDLE
 setenv PLATFORM OSX32
 setenv FDSEDITION $4

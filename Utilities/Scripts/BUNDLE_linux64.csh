@@ -5,8 +5,8 @@
 setenv fds_smvroot $1
 setenv bundlebase $2
 setenv runhost $3
-setenv fdshost blaze.nist.gov
-setenv smvhost blaze.nist.gov
+setenv fdshost $3
+setenv smvhost $3
 setenv PLATFORM LINUX64
 setenv FDSEDITION $4
 setenv FDSVERSION $5
