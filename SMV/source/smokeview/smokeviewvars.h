@@ -493,7 +493,12 @@ SVEXTERN int SVDECL(timebar_drag,0),SVDECL(colorbar_drag,0),SVDECL(colorbar_spli
 SVEXTERN int SVDECL(global_colorbar_index,-1);
 SVEXTERN int fontindex;
 
-SVEXTERN float xcenGLOBAL, ycenGLOBAL, zcenGLOBAL;
+SVEXTERN int SVDECL(custom_worldcenter,0),SVDECL(show_rotation_center,0);
+SVEXTERN float SVDECL(xcenGLOBAL,0.5), SVDECL(ycenGLOBAL,0.5), SVDECL(zcenGLOBAL,0.5);
+SVEXTERN float SVDECL(xcenCUSTOM,0.5), SVDECL(ycenCUSTOM,0.5), SVDECL(zcenCUSTOM,0.5);
+SVEXTERN float SVDECL(xcenCUSTOMsmv,0.5), SVDECL(ycenCUSTOMsmv,0.5), SVDECL(zcenCUSTOMsmv,0.5);
+SVEXTERN int glui_rotation_index,SVDECL(update_rotation_center,0);
+
 SVEXTERN float xbar, ybar, zbar;
 SVEXTERN float xbar0, ybar0, zbar0;
 SVEXTERN float xbarORIG, ybarORIG, zbarORIG;
@@ -1096,7 +1101,6 @@ SVEXTERN int view_ntimes;
 SVEXTERN int ntours,selectedtour_index,selectedtour_index_old,selectedtour_index_ini;
 SVEXTERN int update_selectedtour_index;
 SVEXTERN int viewtourfrompath,viewalltours,viewanytours,edittour;
-SVEXTERN int rotation_index_OLD;
 SVEXTERN selectdata SVDECL(*selectfaceinfo,NULL);
 SVEXTERN blockagedata SVDECL(**selectblockinfo,NULL);
 SVEXTERN tickdata SVDECL(*tickinfo,NULL);

@@ -22,6 +22,8 @@ char showscene_revision[]="$Revision$";
 #include "smokeviewvars.h"
 #include "viewports.h"
 
+void drawsphere(float diameter, unsigned char *rgbcolor);
+
 /* ------------------ ShowScene ------------------------ */
 
 void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
@@ -67,6 +69,13 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
   }
   if(update_gslice==1){
     update_gslice_parms();
+  }
+  if(update_rotation_center==1){
+#define MESH_LIST 4
+    
+    camera_current->rotation_index=glui_rotation_index;
+    Motion_CB(MESH_LIST);
+    update_rotation_center=0;
   }
   if(camera_current->dirty==1){
     update_camera(camera_current);
@@ -248,6 +257,18 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
     if(isZoneFireModel==0&&visFrame==1&&highlight_flag==2){
       drawoutlines();
       SNIFF_ERRORS("after drawoutlines");
+    }
+
+    if(show_rotation_center==1){
+      unsigned char pcolor[4];
+
+      glPushMatrix();
+      glTranslatef(camera_current->xcen,camera_current->ycen,camera_current->zcen);
+      pcolor[0]=255*foregroundcolor[0];
+      pcolor[1]=255*foregroundcolor[1];
+      pcolor[2]=255*foregroundcolor[2];
+      drawsphere(0.03,pcolor);
+      glPopMatrix();
     }
 
 

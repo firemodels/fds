@@ -1401,7 +1401,6 @@ void initvars(void){
   sethazardcolor=0;
   fontindex=0;
 
-  xcenGLOBAL=0.5, ycenGLOBAL=0.5, zcenGLOBAL=0.5;
   xbar=1.0, ybar=1.0, zbar=1.0;
   xbar0=0.0, ybar0=0.0, zbar0=0.0;
   xbarORIG=1.0, ybarORIG=1.0, zbarORIG=1.0;
@@ -1824,7 +1823,6 @@ void initvars(void){
   update_selectedtour_index=0;
   viewtourfrompath=0,viewalltours=0,viewanytours=0,edittour=0;
   tour_usecurrent=0;
-  rotation_index_OLD=-1;
   visTicks=0;
   visCadTextures=1;
   visTerrainTexture=1;

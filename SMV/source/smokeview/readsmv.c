@@ -7347,6 +7347,8 @@ typedef struct {
   update_faces();
 
   xcenGLOBAL=xbar/2.0;  ycenGLOBAL=ybar/2.0; zcenGLOBAL=zbar/2.0;
+  xcenCUSTOM=xbar/2.0;  ycenCUSTOM=ybar/2.0; zcenCUSTOM=zbar/2.0;
+  glui_rotation_index = nmeshes;
 
   update_endian_info();
 
@@ -10254,6 +10256,12 @@ int readini2(char *inifile, int localfile){
       updategluiview=1;
       continue;
     }
+    if(match(buffer,"USER_ROTATE") == 1){
+      if(fgets(buffer,255,stream)==NULL)break;
+      sscanf(buffer,"%i %i %f %f %f",&glui_rotation_index,&show_rotation_center,&xcenCUSTOM,&ycenCUSTOM,&zcenCUSTOM);
+      update_rotation_center=1;
+      continue;
+    }
     if(match(buffer,"INPUT_FILE") == 1){
       size_t len;
 
@@ -11355,6 +11363,8 @@ void writeini(int flag,char *filename){
   fprintf(fileout," %i %i %i\n",show_evac_slices,constant_evac_coloring,show_evac_colorbar);
   fprintf(fileout,"DIRECTIONCOLOR\n");
   fprintf(fileout," %f %f %f\n",direction_color[0],direction_color[1],direction_color[2]);
+  fprintf(fileout,"USER_ROTATE\n");
+  fprintf(fileout,"%i %i %f %f %f\n",glui_rotation_index,show_rotation_center,xcenCUSTOM,ycenCUSTOM,zcenCUSTOM);
  
   if(flag==LOCAL_INI){
     fprintf(fileout,"AVATAREVAC\n");
