@@ -30,8 +30,6 @@ NAMELIST /SPRINKLER/ T_SQUARED,ALPHA,CUTOFF_TIME,RTI,ACTIVATION_TEMPERATURE,H,R,
 NAMELIST /HESKESTAD/ TIME_RAMP,Q_RAMP,Z,A_C,TMP_A,RADIATIVE_FRACTION,OUTPUT_FILE,Z_LABEL
 NAMELIST /MCCAFFREY/ TIME_RAMP,Q_RAMP,Z,TMP_A,OUTPUT_FILE,Z_LABEL,PROFILE,STEEL_UNPROTECTED, &
                      STEEL_PROTECTED,F_V,RHO_STEEL,C_STEEL,H_C,EPSILON,W_D,K_I,RHO_I,C_I,H_I
-NAMELIST /MILKE/ T_SQUARED,ALPHA,CUTOFF_TIME,DELTA_T_C,H,OUTPUT_FILE
-NAMELIST /MOWRER/ T_SQUARED,ALPHA,CUTOFF_TIME,C_PL,C_CJ,H,R,OUTPUT_FILE
 
 CALL GET_COMMAND_ARGUMENT(1,INPUT_FILE)
 
@@ -132,24 +130,6 @@ DO
    CALL COMPUTE_MCCAFFREY
 ENDDO
 109 WRITE(0,*) 'Completed McCaffrey Plume.'
-REWIND(10)
-
-! Process MOWRER (Smoke Detector Activation) lines
-
-DO
-   READ(10,NML=MOWRER,END=110,ERR=99,IOSTAT=IOS)
-   CALL COMPUTE_MOWRER
-ENDDO
-110 WRITE(0,*) 'Completed Smoke Detector Activation (Mowrer).'
-REWIND(10)
-
-! Process MILKE (Smoke Detector Activation) lines
-
-DO
-   READ(10,NML=MILKE,END=111,ERR=99,IOSTAT=IOS)
-   CALL COMPUTE_MILKE
-ENDDO
-111 WRITE(0,*) 'Completed Smoke Detector Activation (Milke).'
 REWIND(10)
 
 ! Error message
@@ -889,99 +869,6 @@ STEEL_PROTECTED = .FALSE.
 PROFILE=.FALSE.
 
 END SUBROUTINE COMPUTE_MCCAFFREY
-
-
-SUBROUTINE COMPUTE_MILKE
-
-REAL :: Q,Y,X
-
-OPEN(11,FILE=TRIM(OUTPUT_FILE),FORM='FORMATTED',STATUS='REPLACE')
-
-WRITE(11,'(A)') 'Time,Activation,Activation time,Total HRR'
-
-ITER = .TRUE.
-T = 1
-
-DO WHILE (ITER)
-   IF ((T_SQUARED) .AND. (T<=CUTOFF_TIME)) THEN
-      Q = ALPHA * T**2
-   ELSEIF ((T_SQUARED) .AND. (T>CUTOFF_TIME)) THEN
-      Q = ALPHA * CUTOFF_TIME**2
-   ENDIF
-
-   ! Note, these equations contain conversion factors (NIST SP 811) from m to ft,
-   ! C to F, and kW to Btu/s to match the units of the original correlation.
-   
-   Y = (DELTA_T_C*1.8) * (H/0.3048)**(5./3.) / (Q/1.055056)**(2./3.)
-
-   X = 4.6*1E-4*Y**2 + 2.7*1E-15*Y**6
-
-   t_activation = X * (H/0.3048)**(4./3.) / (Q/1.055056)**(1./3.)
-
-   IF (t_activation>9999) THEN
-      WRITE(11,'(F6.1,A1,I2,A5,F6.1)') T,',',-1,',NaN,',Q
-   ELSEIF (t_activation>T) THEN
-      WRITE(11,'(F6.1,A1,I2,A1,F6.1,A1,F6.1)') T,',',-1,',',t_activation,',',Q
-   ELSE
-      WRITE(11,'(F6.1,A1,I2,A1,F6.1,A1,F6.1)') T,',',1,',',t_activation,',',Q
-   ENDIF
-
-   IF ((t_activation>0) .AND. (t_activation<=T)) THEN
-      ITER = .FALSE.
-   ELSE
-      T = T + 1
-   ENDIF
-ENDDO
-
-CLOSE(11)
-
-T_SQUARED=.FALSE.
-
-END SUBROUTINE COMPUTE_MILKE
-
-
-SUBROUTINE COMPUTE_MOWRER
-
-REAL :: Q,T_PL,T_CJ
-
-OPEN(11,FILE=TRIM(OUTPUT_FILE),FORM='FORMATTED',STATUS='REPLACE')
-
-WRITE(11,'(A)') 'Time,Activation,Activation time,Total HRR'
-
-ITER = .TRUE.
-T = 1
-
-DO WHILE (ITER)
-   IF ((T_SQUARED) .AND. (T<=CUTOFF_TIME)) THEN
-      Q = ALPHA * T**2
-   ELSEIF ((T_SQUARED) .AND. (T>CUTOFF_TIME)) THEN
-      Q = ALPHA * CUTOFF_TIME**2
-   ENDIF
-
-   T_PL = C_PL*H**(4./3.) / (Q)**(1./3.)
-
-   T_CJ = R**(11./6.) / (C_CJ*(Q)**(1./3.)*H**(1./2.))
-
-   t_activation = T_PL + T_CJ
-
-   IF (t_activation>T) THEN
-      WRITE(11,'(F6.1,A1,I2,A1,F6.1,A1,F6.1)') T,',',-1,',',t_activation,',',Q
-   ELSE
-      WRITE(11,'(F6.1,A1,I2,A1,F6.1,A1,F6.1)') T,',',1,',',t_activation,',',Q
-   ENDIF
-
-   IF ((t_activation>0) .AND. (t_activation<=T)) THEN
-      ITER = .FALSE.
-   ELSE
-      T = T + 1
-   ENDIF
-ENDDO
-
-CLOSE(11)
-
-T_SQUARED=.FALSE.
-
-END SUBROUTINE COMPUTE_MOWRER
 
 
 END PROGRAM
