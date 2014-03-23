@@ -782,25 +782,24 @@ movement has no effect.
 \begin{figure}[\figoptions]
 \centerline{
 \begin{tabular}{cc}
-\includegraphics[width=2.33333in]{FIGURES/figMOTION}&
+\includegraphics[width=2.4027777in]{FIGURES/figMOTION}&
 \includegraphics[width=2.33333in]{FIGURES/figMOTION2}\\
  a) Scene motion and Viewpoints&b) Render image and Scaling
 \end{tabular}
 } \caption[{\em Motion/View/Render}\ dialog box]{{\em
-Motion/View/Render}\ dialog box - Dialog box for controlling scene
-movement and orientation, specifying window sizes, rendering
+Motion/View/Render}\ dialog box - Dialog box for translating and rotating the scene, 
+specifying window sizes, rendering
 images, defining and selecting viewpoints and scaling the scene.
 This dialog box is invoked by selecting {\em
 Dialogs$>$Motion/View/Render} menu item. } \label{figMOTION}
 \end{figure}
 
 The {\em Motion/View/Render}\ dialog box may be used to move the
-scene in a more controlled manner. Buttons in the {\em Motion}\
-region allows one to translate or rotate the scene. The
-\frameit{Horizontal} button allows one to translate the scene
-horizontally in a left/right or in/out direction while the
-\frameit{Vertical}\ button allows one to translate the scene in an
-up/down direction.
+scene. Buttons in the {\em Motion}\
+region allow one to translate or rotate the scene. The
+\frameit{Horizontal} button is used to translate the scene
+horizontally within a horizontal plane (left/right or in/out within the scene).  The
+\frameit{Vertical}\ button allows one to translate the scene vertically.
 
 Controls in the {\em Window Properties} region of the {\em Motion/View/Render}\ dialog box
 allow one to change the scene magnification or zoom factor and the
@@ -833,11 +832,11 @@ external, internal (to the scene), or previously saved viewpoint.
 
 \blist
 
-\hitem{Rotate about}A pull down list appears in
-multi-mesh cases allowing one to change the rotation center.
-Therefore one could rotate the scene about the center of the
-entire physical domain or about the center of any one particular
-mesh. This is handy when meshes are defined far apart.
+\hitem{Rotate about}The {\em Rotate about}\ selection list allows one to change the rotation center.
+The choices are the scene center, denoted as {\em world center}\ in this list, the center of each mesh and a center specified by the user.
+Changing the rotation center is useful for cases where the portion of the scene being viewed is far away from the currently used rotation center.
+The rotation center may be made visible (drawn as a small black sphere) by selecting the {\em Show user center}\ checkbox and specified using the 
+{\em x, y, z}\ spinners below it.
 
 \hitem{Rotation Buttons}Rotation buttons are enabled or disabled
 as appropriate for the mode of scene motion. For example, if
