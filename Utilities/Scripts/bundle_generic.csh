@@ -54,7 +54,6 @@ set wind2fdsroot=$scp_fds_smvroot/Utilities/wind2fds
 set googledir=$fds_smvroot/Utilities/uploads
 set bundledir=$bundlebase
 set bundle_setup=$fds_smvroot/Utilities/Scripts/bundle_setup
-#set mandir=$fds_smvroot/Manuals/All_PDF_Files
 set mandir=~/FIRE-LOCAL/reports/fds_manuals
 set smvbindir=$scp_fds_smvroot/SMV/Build/$smokeviewdir
 set forbundle=$fds_smvroot/SMV/for_bundle
