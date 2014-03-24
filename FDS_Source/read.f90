@@ -2949,7 +2949,6 @@ REAC_READ_LOOP: DO NR=1,N_REACTIONS
    ! Set up the SIMPLE_CHEMISTRY model
 
    RN => REACTION(NR)
-
    IF (SIMPLE_CHEMISTRY) THEN
       IF(C<=TWO_EPSILON_EB .AND. H<=TWO_EPSILON_EB) THEN
          IF (TRIM(FORMULA)=='null') THEN
@@ -2968,7 +2967,7 @@ REAC_READ_LOOP: DO NR=1,N_REACTIONS
                H = ATOM_COUNTS(1)
                O = ATOM_COUNTS(8)
                N = ATOM_COUNTS(7)
-            ENDIF            
+            ENDIF  
             IF (C<=TWO_EPSILON_EB .AND. H<=TWO_EPSILON_EB) THEN
                WRITE(MESSAGE,'(A)') 'ERROR: Must specify fuel chemistry using C and/or H when using simple chemistry'
                CALL SHUTDOWN(MESSAGE)
@@ -3133,6 +3132,10 @@ ENDIF
 
 IF (SIMPLE_CHEMISTRY) THEN
    RN => REACTION(1)
+   IF (RN%NU_O2<=0._EB) THEN
+      WRITE(MESSAGE,'(A)') 'ERROR: Fuel specified for simple chemistry has NU_O2 <=0 and it must require air for combustion.'
+      CALL SHUTDOWN(MESSAGE)      
+   ENDIF
    RN%SPEC_ID_NU_READ(1) = RN%FUEL
    RN%SPEC_ID_NU_READ(2) = 'AIR'
    RN%SPEC_ID_NU_READ(3) = 'PRODUCTS'
