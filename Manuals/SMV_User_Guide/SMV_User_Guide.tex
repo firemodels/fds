@@ -740,10 +740,10 @@ problems found in video cards on older computers.
 \chapter{Manipulating the Scene}
 
 A Smokeview scene may be manipulated using two different reference
-points, the scene center and the user location. Motion about the
+points, the scene center or the user location. Motion about the
 scene center is called world or global view while motion about the
 user location is called eye or first person view. These view
-methods may be switched by pressing the ``e'' key or by selecting
+methods may be swapped by pressing the ``e'' key or by selecting
 the appropriate radio button in the {\em Motion/View/Render}\
 dialog box.
 
@@ -751,7 +751,7 @@ dialog box.
 
 The scene may be rotated or translated directly using the mouse or
 by using controls in the {\em Motion/View/Render}\ dialog box.
-This dialog box, illustrated in Fig. \ref{figMOTION}a, is opened
+This dialog box, illustrated in Fig. \ref{figMOTIONmotion}, is opened
 using the {\em Dialogs$>$Motion/View/Render}\ menu item.
 
 Clicking on the scene and dragging the mouse horizontally,
@@ -782,88 +782,27 @@ movement has no effect.
 \begin{figure}[\figoptions]
 \centerline{
 \begin{tabular}{cc}
-\includegraphics[width=2.4027777in]{FIGURES/figMOTION}&
-\includegraphics[width=2.33333in]{FIGURES/figMOTION2}\\
- a) Scene motion and Viewpoints&b) Render image and Scaling
+\includegraphics[width=2.4027777in]{FIGURES/figMOTION}
 \end{tabular}
-} \caption[{\em Motion/View/Render}\ dialog box]{{\em
-Motion/View/Render}\ dialog box - Dialog box for translating and rotating the scene, 
-specifying window sizes, rendering
-images, defining and selecting viewpoints and scaling the scene.
-This dialog box is invoked by selecting {\em
-Dialogs$>$Motion/View/Render} menu item. } \label{figMOTION}
+} \caption[{\em Scene motion}\ panel in the {\em Motion/View/Render}\ dialog box.]{{\em Scene motion}\ pane in the {\em Motion/View/Render}\ dialog box. - This panel allows one to translate and rotate the scene, select the rotation type
+and select the rotation center (scene center, any mesh center or user specified center).
+This pane is invoked by selecting the {\em
+Dialogs$>$Motion/View/Render} menu item and selecting the {\em Scene motion} panel. } \label{figMOTIONmotion}
 \end{figure}
 
-The {\em Motion/View/Render}\ dialog box may be used to move the
+
+The {\em Motion/View/Render}\ dialog box may also be used to move the
 scene. Buttons in the {\em Motion}\
 region allow one to translate or rotate the scene. The
 \frameit{Horizontal} button is used to translate the scene
 horizontally within a horizontal plane (left/right or in/out within the scene).  The
 \frameit{Vertical}\ button allows one to translate the scene vertically.
 
-Controls in the {\em Window Properties} region of the {\em Motion/View/Render}\ dialog box
-allow one to change the scene magnification or zoom factor and the
-projection method used to draw objects (perspective or size preserving).
-These two projection methods differ in how objects are displayed
-at a distance.  A perspective projection for-shortens or draws an
-object smaller when drawn at a distance. An isometric or size preserving projection
-on the other hand draws an objects the same size regardless of
-where it is drawn in the scene.
-
-Controls in the {\em Render} and {\em Scaling Depth} regions, as
-illustrated in Fig. \ref{figMOTION}b, allow one to render images
-using either PNG or JPEG image file formats and to scale the
-Smokeview scene (say for visualizing tunnel scenarios) in any or
-all of the coordinate directions.
-
-The {\em zoom}\ and {\em aperture} edit boxes allow one to change
-the magnification of the scene or equivalently the angle of view
-across the scene.  The relation between these two parameters is
-given by
-\begin{eqnarray}
-\mbox{zoom}=\tan(45^\circ/2)/\tan(\mbox{aperture}/2)
-\end{eqnarray}
-A default aperture of $45^\circ$ is chosen so that Smokeview
-scenes have a normal perspective.
-
-
-\fbox{\tt View} may be used to reset the scene back to either an
-external, internal (to the scene), or previously saved viewpoint.
-
-\blist
-
-\hitem{Rotate about}The {\em Rotate about}\ selection list allows one to change the rotation center.
+ The \frameit{Rotate about}\ selection list allows one to change the rotation center.
 The choices are the scene center, denoted as {\em world center}\ in this list, the center of each mesh and a center specified by the user.
 Changing the rotation center is useful for cases where the portion of the scene being viewed is far away from the currently used rotation center.
-The rotation center may be made visible (drawn as a small black sphere) by selecting the {\em Show user center}\ checkbox and specified using the 
+The rotation center may be made visible (drawn as a small black sphere) by selecting the {\em Show user center}\ checkbox and specified using the
 {\em x, y, z}\ spinners below it.
-
-\hitem{Rotation Buttons}Rotation buttons are enabled or disabled
-as appropriate for the mode of scene motion. For example, if
-{\em about world center - level rotations}\ has been selected, then
-the \frameit{Rotate X} and \frameit{Rotate eye} buttons are
-disabled.  A rotation button labeled \frameit{90 deg} has been
-added to allow one to rotate 90 degrees while in {\em eye center}\
-mode. This is handy when one wishes to move down a long corridor
-precisely parallel to one of the walls.  The first click of {\em 90
-deg}\ snaps the view to the closest forward or side direction
-while each additional click rotates the view 90 degrees clockwise.
-
-\hitem{View Buttons}A viewpoint is the combination of a location
-and a view direction.  Several new buttons have been added to this
-dialog box to save and restore viewpoints.  The scene is
-manipulated to the desired orientation then stored by pressing the
-\frameit{Add}\ button which adds the new viewpoint or the
-\frameit{Replace}\ button which replaces this viewpoint with the
-currently selected one. To change the view to a currently stored
-viewpoint, use the {\em Select} listbox to select the desired
-viewpoint. The \frameit{Delete}\ button may be used to remove a
-viewpoint from the stored list.  The {\em View name} text box may
-be used to change the name or label for the selected viewpoint.
-The \frameit{view at startup}\ button is used to specify the
-viewpoint that should be set when Smokeview first starts up.
-
-\elist
 
 \section{First Person View}
 \label{section:eyeview}
@@ -1938,6 +1877,92 @@ be enabled.
 \label{figstereodialog}
 \end{center}
 \end{figure}
+
+\section{Setting window parameters}
+Controls in the {\em Window Properties} region of the {\em Motion/View/Render}\ dialog box as illustrated in Fig. \ref{figMOTIONwindow},
+allow one to change the scene magnification or zoom factor and the
+projection method used to draw objects (perspective or size preserving).
+These two projection methods differ in how objects are displayed
+at a distance.  A perspective projection for-shortens or draws an
+object smaller when drawn at a distance. An isometric or size preserving projection
+on the other hand draws an objects the same size regardless of
+where it is drawn in the scene.
+
+The {\em zoom}\ and {\em aperture} edit boxes allow one to change
+the magnification of the scene or equivalently the angle of view
+across the scene.  The relation between these two parameters is
+given by
+\begin{eqnarray}
+\mbox{zoom}=\tan(45^\circ/2)/\tan(\mbox{aperture}/2)
+\end{eqnarray}
+A default aperture of $45^\circ$ is chosen so that Smokeview
+scenes have a normal perspective.
+
+\begin{figure}[\figoptions]
+\centerline{
+\begin{tabular}{cc}
+\includegraphics[width=2.4027777in]{FIGURES/figMOTION3}
+\end{tabular}
+} \caption[{\em Window properties}\ panel in the {\em Motion/View/Render}\ dialog box.]{{\em Window properties}\ panel in the {\em Motion/View/Render}\ dialog box.
+ This panel allows one to set the window size, projection type (perspective or size preserving) and zoom level.  This panel is invoked by selecting the {\em
+Dialogs$>$Motion/View/Render} menu item and selecting the {\em Window properties} panel.  } \label{figMOTIONwindow}
+\end{figure}
+
+\section{Rendering Scenes}
+Controls in the {\em Render}\ portion of the Motion/View dialog box
+as illustrated in Fig. \ref{figMOTIONrender}, allow one to render images
+using either PNG or JPEG image file formats.
+One may also clip or crop the rendered images removing unwanted portions.
+\begin{figure}[\figoptions]
+\centerline{
+\begin{tabular}{cc}
+\includegraphics[width=2.4027777in]{FIGURES/figMOTION4}
+\end{tabular}
+} \caption[{\em Render}\ pane in the {\em Motion/View/Render}\ dialog box.]{{\em Render}\ panel in the {\em Motion/View/Render}\ dialog box. This panel allows one to create images of the smokeview scene. One may also clip or crop the rendered image. This pane is invoked by selecting the {\em
+Dialogs$>$Motion/View/Render} menu item and selecting the {\em Render} panel.  } \label{figMOTIONrender}
+\end{figure}
+
+\section{Scaling Scenes}
+Controls in the {\em Scaling Depth} portion of the Motion/View dialog box, as
+illustrated in Fig. \ref{figMOTIONscale}, allow one to scale the
+Smokeview scene.  For example, a tunnel scenario could be scaled making all dimension appear the same or similar sizes on the screen.
+\begin{figure}[\figoptions]
+\centerline{
+\begin{tabular}{cc}
+\includegraphics[width=2.4027777in]{FIGURES/figMOTION6}
+\end{tabular}
+} \caption[{\em Scaling/Depth params}\ panel in the {\em Motion/View/Render}\ dialog box.]{{\em Scaling/Depth params}\ panel in the {\em Motion/View/Render}\ dialog box.
+This panel allows one to specify scaling parameters for x, y and z dimensions and
+to specify the near and far depth planes.
+This panel is invoked by selecting the {\em
+Dialogs$>$Motion/View/Render} menu item and selecting the {\em Scaling/Depth params} panel. } \label{figMOTIONscale}
+\end{figure}
+
+\section{Setting Viewpoints}
+Controls in the {\em Viewpoint}\ portion of the Motion/View dialog box, as
+illustrated in Fig. \ref{figMOTIONviewpoints}, allow one to save the position and orientation of the scene.  These saved position/orientations are called viewpoints.  Viewpoints may then be selected resulting in the scene returning to a previsouslyi saved position and orientation.
+
+To define a viewpoint, manipulate the scene to the desired position and orientation. Then press
+{\em Add}\ button.  This adds the new viewpoint to a list of available viewpoints.
+The {\em Replace}\ button replaces the currently active viewpoint (as named by the {\em Select} list item) with the current position and orientation.
+
+To change the view to a currently saved
+viewpoint, use the {\em Select} listbox to select the desired
+viewpoint. The {\em Delete}\ button, as one would expect, removes the
+viewpoint.  The {\em Edit} text box is used to change the name of the currently  selected viewpoint.
+The {\em view at startup}\ button is used to specify the
+viewpoint that should be active when Smokeview starts up.
+
+\begin{figure}[\figoptions]
+\centerline{
+\begin{tabular}{cc}
+\includegraphics[width=2.4027777in]{FIGURES/figMOTION5}
+\end{tabular}
+} \caption[{\em Viewpoints}\ panel in the {\em Motion/View/Render}\ dialog box.]{{\em Viewpoints}\ panel in the {\em Motion/View/Render}\ dialog box. This panel allows one to define viewpoints.  This panel is invoked by selecting the {\em
+Dialogs$>$Motion/View/Render} menu item and selecting the {\em Viewpoints} panel. } \label{figMOTIONviewpoints}
+\end{figure}
+
+
 \section{Clipping Scenes}
 \label{section:clipping}
 
@@ -1992,6 +2017,7 @@ the data.
 
 The clipping dialog box also allows one to hide blockages.  Blockages for any given mesh may be hidden
 by selecting the appropriate checkbox in the {\em Hide blockages}\ rollout panel.
+
 
 %---------------------------------------------------------------------------------
 %--------------- Creating Custom Objects -----------------------------------------
