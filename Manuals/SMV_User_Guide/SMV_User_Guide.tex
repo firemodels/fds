@@ -736,8 +736,8 @@ problems found in video cards on older computers.
 \section{Manipulating the Scene}
 
 A Smokeview scene may be manipulated using two different reference
-points, the scene center or the user location. Motion about the
-scene center is called world or global view while motion about the
+points, the scene center and the user location. Motion about the
+scene center which is the default is called world or global view while motion about the
 user location is called eye or first person view. These view
 methods may be swapped by pressing the ``e'' key or by selecting
 the appropriate radio button in the {\em Motion/View/Render}\
@@ -745,14 +745,14 @@ dialog box.
 
 \subsection{World View}
 
-The scene may be rotated or translated directly using the mouse or
+The scene may be rotated or translated using the mouse or
 by using controls in the {\em Motion/View/Render}\ dialog box.
 This dialog box, illustrated in Fig. \ref{figMOTIONmotion}, is opened
 using the {\em Dialogs$>$Motion/View/Render}\ menu item.
 
-Clicking on the scene and dragging the mouse horizontally,
+Clicking the left mouse button and dragging horizontally,
 vertically or a combination of both results in scene rotation or
-translation depending upon whether the modifier keys CTRL or ALT
+translation depending upon whether the CTRL or ALT modifier keys
 are pressed or not.
 
 \blist
@@ -789,16 +789,16 @@ Dialogs$>$Motion/View/Render} menu item and selecting the {\em Scene motion} pan
 
 The {\em Motion/View/Render}\ dialog box may also be used to move the
 scene. Buttons in the {\em Motion}\
-region allow one to translate or rotate the scene. The
+region of the dialog box allow one to translate or rotate the scene. The
 \frameit{Horizontal} button is used to translate the scene
 horizontally within a horizontal plane (left/right or in/out within the scene).  The
 \frameit{Vertical}\ button allows one to translate the scene vertically.
 
- The \frameit{Rotate about}\ selection list allows one to change the rotation center.
-The choices are the scene center, denoted as {\em world center}\ in this list, the center of each mesh and a center specified by the user.
+The \frameit{Rotate about}\ selection list allows one to change the center of rotation.
+Rotation center choices are: the scene center, denoted as {\em world center}\ in this list, the center of each mesh and a center specified by the user.
 Changing the rotation center is useful for cases where the portion of the scene being viewed is far away from the currently used rotation center.
-The rotation center may be made visible (drawn as a small black sphere) by selecting the {\em Show user center}\ checkbox and specified using the
-{\em x, y, z}\ spinners below it.
+To allow for easier changes, the rotation center may be made visible (drawn as a small black sphere) by selecting the {\em Show user center}\ checkbox.  The rotation center may be changed by using the
+{\em x, y, z}\ spinners below this checkbox..
 
 \subsection{First Person View}
 \label{section:eyeview}
