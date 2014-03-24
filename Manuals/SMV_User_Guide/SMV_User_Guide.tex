@@ -1777,6 +1777,52 @@ the display or {\em look}\ of the Smokeview scene.  It may be
 invoked by selecting the {\em Dialogs$>$Display}\ menu item. This
 dialog box also allows one to show or hide loaded data files.
 
+\subsection{Setting window parameters}
+Controls in the {\em Window Properties} region of the {\em Motion/View/Render}\ dialog box as illustrated in Fig. \ref{figMOTIONwindow},
+allow one to change the scene magnification or zoom factor and the
+projection method used to draw objects (perspective or size preserving).
+These two projection methods differ in how objects are displayed
+at a distance.  A perspective projection for-shortens or draws an
+object smaller when drawn at a distance. An isometric or size preserving projection
+on the other hand draws an objects the same size regardless of
+where it is drawn in the scene.
+
+The {\em zoom}\ and {\em aperture} edit boxes allow one to change
+the magnification of the scene or equivalently the angle of view
+across the scene.  The relation between these two parameters is
+given by
+\begin{eqnarray}
+\mbox{zoom}=\tan(45^\circ/2)/\tan(\mbox{aperture}/2)
+\end{eqnarray}
+A default aperture of $45^\circ$ is chosen so that Smokeview
+scenes have a normal perspective.
+
+\begin{figure}[\figoptions]
+\centerline{
+\begin{tabular}{cc}
+\includegraphics[width=2.4027777in]{FIGURES/figMOTION3}
+\end{tabular}
+} \caption[{\em Window properties}\ panel in the {\em Motion/View/Render}\ dialog box.]{{\em Window properties}\ panel in the {\em Motion/View/Render}\ dialog box.
+ This panel allows one to set the window size, projection type (perspective or size preserving) and zoom level.  This panel is invoked by selecting the {\em
+Dialogs$>$Motion/View/Render} menu item and selecting the {\em Window properties} panel.  } \label{figMOTIONwindow}
+\end{figure}
+
+\subsection{Scaling Scenes}
+Controls in the {\em Scaling Depth} portion of the Motion/View dialog box, as
+illustrated in Fig. \ref{figMOTIONscale}, allow one to scale the
+Smokeview scene.  For example, a tunnel scenario could be scaled making all dimension appear the same or similar sizes on the screen.
+\begin{figure}[\figoptions]
+\centerline{
+\begin{tabular}{cc}
+\includegraphics[width=2.4027777in]{FIGURES/figMOTION6}
+\end{tabular}
+} \caption[{\em Scaling/Depth params}\ panel in the {\em Motion/View/Render}\ dialog box.]{{\em Scaling/Depth params}\ panel in the {\em Motion/View/Render}\ dialog box.
+This panel allows one to specify scaling parameters for x, y and z dimensions and
+to specify the near and far depth planes.
+This panel is invoked by selecting the {\em
+Dialogs$>$Motion/View/Render} menu item and selecting the {\em Scaling/Depth params} panel. } \label{figMOTIONscale}
+\end{figure}
+
 \subsection{Stereo}
 \label{section:stereo} Smokeview implements several methods for displaying scenes in
 stereo or 3D.  Each method separates the Smokeview scene in some
@@ -1878,35 +1924,6 @@ be enabled.
 \end{center}
 \end{figure}
 
-\section{Setting window parameters}
-Controls in the {\em Window Properties} region of the {\em Motion/View/Render}\ dialog box as illustrated in Fig. \ref{figMOTIONwindow},
-allow one to change the scene magnification or zoom factor and the
-projection method used to draw objects (perspective or size preserving).
-These two projection methods differ in how objects are displayed
-at a distance.  A perspective projection for-shortens or draws an
-object smaller when drawn at a distance. An isometric or size preserving projection
-on the other hand draws an objects the same size regardless of
-where it is drawn in the scene.
-
-The {\em zoom}\ and {\em aperture} edit boxes allow one to change
-the magnification of the scene or equivalently the angle of view
-across the scene.  The relation between these two parameters is
-given by
-\begin{eqnarray}
-\mbox{zoom}=\tan(45^\circ/2)/\tan(\mbox{aperture}/2)
-\end{eqnarray}
-A default aperture of $45^\circ$ is chosen so that Smokeview
-scenes have a normal perspective.
-
-\begin{figure}[\figoptions]
-\centerline{
-\begin{tabular}{cc}
-\includegraphics[width=2.4027777in]{FIGURES/figMOTION3}
-\end{tabular}
-} \caption[{\em Window properties}\ panel in the {\em Motion/View/Render}\ dialog box.]{{\em Window properties}\ panel in the {\em Motion/View/Render}\ dialog box.
- This panel allows one to set the window size, projection type (perspective or size preserving) and zoom level.  This panel is invoked by selecting the {\em
-Dialogs$>$Motion/View/Render} menu item and selecting the {\em Window properties} panel.  } \label{figMOTIONwindow}
-\end{figure}
 
 \section{Rendering Scenes}
 Controls in the {\em Render}\ portion of the Motion/View dialog box
@@ -1920,22 +1937,6 @@ One may also clip or crop the rendered images removing unwanted portions.
 \end{tabular}
 } \caption[{\em Render}\ pane in the {\em Motion/View/Render}\ dialog box.]{{\em Render}\ panel in the {\em Motion/View/Render}\ dialog box. This panel allows one to create images of the smokeview scene. One may also clip or crop the rendered image. This pane is invoked by selecting the {\em
 Dialogs$>$Motion/View/Render} menu item and selecting the {\em Render} panel.  } \label{figMOTIONrender}
-\end{figure}
-
-\section{Scaling Scenes}
-Controls in the {\em Scaling Depth} portion of the Motion/View dialog box, as
-illustrated in Fig. \ref{figMOTIONscale}, allow one to scale the
-Smokeview scene.  For example, a tunnel scenario could be scaled making all dimension appear the same or similar sizes on the screen.
-\begin{figure}[\figoptions]
-\centerline{
-\begin{tabular}{cc}
-\includegraphics[width=2.4027777in]{FIGURES/figMOTION6}
-\end{tabular}
-} \caption[{\em Scaling/Depth params}\ panel in the {\em Motion/View/Render}\ dialog box.]{{\em Scaling/Depth params}\ panel in the {\em Motion/View/Render}\ dialog box.
-This panel allows one to specify scaling parameters for x, y and z dimensions and
-to specify the near and far depth planes.
-This panel is invoked by selecting the {\em
-Dialogs$>$Motion/View/Render} menu item and selecting the {\em Scaling/Depth params} panel. } \label{figMOTIONscale}
 \end{figure}
 
 \section{Setting Viewpoints}
