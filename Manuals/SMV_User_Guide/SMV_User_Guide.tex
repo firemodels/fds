@@ -735,7 +735,8 @@ problems found in video cards on older computers.
 
 \section{Manipulating the Scene}
 
-A Smokeview scene may be manipulated using two different reference
+A Smokeview scene may be rotated or translated by clicking and dragging the mouse with the left mouse button.
+Rotations have two different reference
 points, the scene center and the user location. Motion about the
 scene center which is the default is called world or global view while motion about the
 user location is called eye or first person view. These view
@@ -1775,13 +1776,13 @@ dialog box also allows one to show or hide loaded data files.
 
 \subsection{Setting window parameters}
 Controls in the {\em Window Properties} region of the {\em Motion/View/Render}\ dialog box as illustrated in Fig. \ref{figMOTIONwindow},
-allow one to change the scene magnification or zoom factor and the
-projection method used to draw objects (perspective or size preserving).
-These two projection methods differ in how objects are displayed
+allow one to change the scene magnification or zoom factor, the
+projection method used to draw objects (perspective or size preserving) and the window size.
+Perspective and size preserving projections differ in how objects are displayed
 at a distance.  A perspective projection for-shortens or draws an
-object smaller when drawn at a distance. An isometric or size preserving projection
-on the other hand draws an objects the same size regardless of
-where it is drawn in the scene.
+object smaller when at a distance. An isometric or size preserving projection
+on the other hand draws objects the same size regardless of
+where it occurs in the scene.
 
 The {\em zoom}\ and {\em aperture} edit boxes allow one to change
 the magnification of the scene or equivalently the angle of view
@@ -1792,6 +1793,9 @@ given by
 \end{eqnarray}
 A default aperture of $45^\circ$ is chosen so that Smokeview
 scenes have a normal perspective.
+
+The size selection list gives the user several pre-defined choices for changing window size or one may alter 
+the width and height spinners to construct a window with a custom size.
 
 \begin{figure}[\figoptions]
 \centerline{
@@ -1806,7 +1810,9 @@ Dialogs$>$Motion/View/Render} menu item and selecting the {\em Window properties
 \subsection{Scaling Scenes}
 Controls in the {\em Scaling Depth} portion of the Motion/View dialog box, as
 illustrated in Fig. \ref{figMOTIONscale}, allow one to scale the
-Smokeview scene.  For example, a tunnel scenario could be scaled making all dimension appear the same or similar sizes on the screen.
+Smokeview scene.  The x, y and z scene dimenions may be scaled independently.  For example, a tunnel scenario could be scaled to make the tunnel's {\em long}\ dimension 
+appear the same size on the screen as the {\em height} dimension. The near and far depth planes are used by OpenGL for setting up the depth buffer which in turn is used for determining 
+when objects hidden by {\em closer} objects.
 \begin{figure}[\figoptions]
 \centerline{
 \begin{tabular}{cc}
@@ -1923,9 +1929,8 @@ be enabled.
 
 \section{Rendering Scenes}
 Controls in the {\em Render}\ portion of the Motion/View dialog box
-as illustrated in Fig. \ref{figMOTIONrender}, allow one to render images
-using either PNG or JPEG image file formats.
-One may also clip or crop the rendered images removing unwanted portions.
+as illustrated in Fig. \ref{figMOTIONrender}, allow one to convert iamges appearing on the screen to image files in either PNG or JPEG image file formats.
+One may also clip or crop the rendered images removing unwanted portions. 
 \begin{figure}[\figoptions]
 \centerline{
 \begin{tabular}{cc}
