@@ -57,9 +57,6 @@ esac
 done
 shift $(($OPTIND-1))
 
-echo RUN_OPENMP=$RUN_OPENMP
-exit
-
 DB=_db
 IB=
 if [ "$FDSNETWORK" == "infiniband" ] ; then
