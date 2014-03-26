@@ -7,6 +7,7 @@ queue=
 size=64
 DEBUG=
 OPENMP=
+OPENMPOPTS=
 FDS_DEBUG=0
 nthreads=8
 
@@ -22,8 +23,8 @@ echo "-p size - platform size"
 echo "     default: 64"
 echo "     other options: 32"
 echo "-q queue_name - run cases using the queue queue_name"
-echo "     default: batch"
-echo "     other options: fire60s, fire70s, vis"
+echo "     default: none"
+echo "     other options: batch, fire60s, fire70s, vis"
 echo "-s - stop FDS runs"
 echo "-u - use installed versions of utilities background and wind2fds"
 exit
@@ -42,7 +43,13 @@ is_file_installed()
 
 CURDIR=`pwd`
 cd ..
+
 export SVNROOT=`pwd`/..
+cd $SVNROOT
+export SVNROOT=`pwd`
+
+cd $CURDIR/..
+
 
 use_installed="0"
 while getopts 'dho:p:q:su' OPTION
@@ -58,7 +65,7 @@ case $OPTION in
   o)
    nthreads="$OPTARG"
    OPENMP=openmp_
-   RUN_OPENMP=1
+   OPENMPOPTS="-n $nthreads"
    ;;
   p)
    size="$OPTARG"
@@ -77,6 +84,10 @@ esac
 #shift
 done
 export FDS_DEBUG
+#export OPENMP
+#export OPENMPOPTS
+echo OPENMP=$OPENMP
+echo OPENMPOPTS=$OPENMPOPTS
 
 if [ "$size" != "32" ]; then
   size=64
@@ -140,14 +151,12 @@ fi
 # run cases    
 
 export RUNCFAST="$SVNROOT/Utilities/Scripts/runcfast.sh $queue"
-export RUNFDS="$SVNROOT/Utilities/Scripts/runfds.sh $queue"
-export RUNTFDS="$SVNROOT/Utilities/Scripts/runfds.sh $queue"
+export RUNFDS="$SVNROOT/Utilities/Scripts/runfds.sh $OPENMPOPTS $queue"
+export RUNTFDS="$SVNROOT/Utilities/Scripts/runfds.sh $OPENMPOPTS $queue"
 export RUNWFDS="$SVNROOT/Utilities/Scripts/runwfds.sh $queue"
 export RUNFDSMPI="$SVNROOT/Utilities/Scripts/runfdsmpi.sh $queue"
-
-if [ $RUN_OPENMP ]; then
-  export RUNFDS="$SVNROOT/Utilities/Scripts/runfdsopenmp.sh $queue -n $nthreads"
-fi
+echo RUNFDS=$RUNFDS
+echo FDS=$FDS
 
 echo "" | $FDSEXE 2> $SVNROOT/Manuals/SMV_User_Guide/SCRIPT_FIGURES/fds.version
 
