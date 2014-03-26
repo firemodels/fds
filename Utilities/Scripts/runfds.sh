@@ -1,4 +1,4 @@
-#!/bin/bash
+  #!/bin/bash
 
 # defaults
 
@@ -6,7 +6,7 @@ queue=
 background=no
 QSUB=qsub
 USEFDS=yes
-nthreads=2
+nthreads=1
 
 if [ "$JOBPREFIX" == "" ]; then
   JOBPREFIX=VV_
@@ -23,6 +23,7 @@ case $OPTION in
    ;;
   w)
    FDS=$WFDS
+   nthreads=1
    USEFDS=no
    ;;
 esac
@@ -114,6 +115,7 @@ cat << EOF > $scriptfile
 #\$ -S /bin/bash
 #\$ -N $JOBPREFIX$infile -e $outerr -o $outlog
 #PBS -N $JOBPREFIX$infile -e $outerr -o $outlog
+#PBS -l nodes=1:ppn=$nthreads
 #PBS -l walltime=04:00:00
 #PBS -l pvmem=1GB
 #SBATCH -J $JOBPREFIX$infile
