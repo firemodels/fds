@@ -16,6 +16,8 @@ MAKEMOVIES=
 RUNAUTO=
 BUILDBUNDLE=
 RUNDEBUG="1"
+OPENMP=
+RUN_OPENMP=
 
 notfound=`icc -help 2>&1 | tail -1 | grep "not found" | wc -l`
 if [ "$notfound" == "1" ] ; then
@@ -28,7 +30,7 @@ else
   USEINSTALL2=
 fi
 
-while getopts 'abmq:s' OPTION
+while getopts 'abmo:q:s' OPTION
 do
 case $OPTION in
   a)
@@ -40,6 +42,11 @@ case $OPTION in
   m)
    MAKEMOVIES="1"
    ;;
+  o)
+   nthreads="$OPTARG"
+   OPENMP=openmp_
+   RUN_OPENMP="-o $nthreads"
+   ;;
   q)
    FIREBOT_QUEUE="$OPTARG"
    ;;
@@ -49,6 +56,9 @@ case $OPTION in
 esac
 done
 shift $(($OPTIND-1))
+
+echo RUN_OPENMP=$RUN_OPENMP
+exit
 
 DB=_db
 IB=
@@ -310,8 +320,8 @@ check_svn_checkout()
 compile_fds_db()
 {
    # Clean and compile FDS debug
-   cd $FDS_SVNROOT/FDS_Compilation/intel_${platform}_64_db
-   rm -f fds_intel_${platform}_64_db
+   cd $FDS_SVNROOT/FDS_Compilation/${OPENMP}intel_${platform}_64_db
+   rm -f fds_${OPENMP}intel_${platform}_64_db
    make --makefile ../makefile clean &> /dev/null
    ./make_fds.sh &> $FIREBOT_DIR/output/stage2a
 }
@@ -328,8 +338,8 @@ compile_fds_mpi_db()
 check_compile_fds_db()
 {
    # Check for errors in FDS debug compilation
-   cd $FDS_SVNROOT/FDS_Compilation/intel_${platform}_64_db
-   if [ -e "fds_intel_${platform}_64_db" ]
+   cd $FDS_SVNROOT/FDS_Compilation/${OPENMP}intel_${platform}_64_db
+   if [ -e "fds_${OPENMP}intel_${platform}_64_db" ]
    then
       stage2a_success=true
    else
@@ -349,7 +359,7 @@ check_compile_fds_db()
       grep -A 5 -E 'warning|remark' ${FIREBOT_DIR}/output/stage2a >> $WARNING_LOG
       echo "" >> $WARNING_LOG
    # if the executable does not exist then an email has already been sent
-      if [ -e "fds_intel_${platform}_64_db" ] ; then
+      if [ -e "fds_${OPENMP}intel_${platform}_64_db" ] ; then
         THIS_FDS_FAILED=1
       fi
    fi
@@ -513,8 +523,8 @@ check_verification_cases_debug()
 compile_fds()
 {
    # Clean and compile FDS
-   cd $FDS_SVNROOT/FDS_Compilation/intel_${platform}_64
-   rm -f fds_intel_${platform}_64
+   cd $FDS_SVNROOT/FDS_Compilation/${OPENMP}intel_${platform}_64
+   rm -f fds_${OPENMP}intel_${platform}_64
    make --makefile ../makefile clean &> /dev/null
    ./make_fds.sh &> $FIREBOT_DIR/output/stage4a
 }
@@ -531,8 +541,8 @@ compile_fds_mpi()
 check_compile_fds()
 {
    # Check for errors in FDS compilation
-   cd $FDS_SVNROOT/FDS_Compilation/intel_${platform}_64
-   if [ -e "fds_intel_${platform}_64" ]
+   cd $FDS_SVNROOT/FDS_Compilation/${OPENMP}intel_${platform}_64
+   if [ -e "fds_${OPENMP}intel_${platform}_64" ]
    then
       stage4a_success=true
    else
@@ -699,7 +709,7 @@ run_verification_cases_release()
    # Start running all SMV verification cases
    cd $FDS_SVNROOT/Verification/scripts
    echo 'Running SMV verification cases:' >> $FIREBOT_DIR/output/stage5 2>&1
-   ./Run_SMV_Cases.sh $USEINSTALL2 -q $FIREBOT_QUEUE >> $FIREBOT_DIR/output/stage5 2>&1
+   ./Run_SMV_Cases.sh $USEINSTALL2 $RUN_OPENMP -q $FIREBOT_QUEUE >> $FIREBOT_DIR/output/stage5 2>&1
 
    # Wait for all verification cases to end
    wait_verification_cases_release_end
