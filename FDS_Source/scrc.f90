@@ -472,7 +472,7 @@ TYPE SCARC_SCOPE_TYPE
 INTEGER :: X, F, Y, G, W, D, Z                        ! logic number for dereferencing the solver vectors
 INTEGER :: ITE, NIT
 REAL(EB) :: EPS, RES, RESIN, OMEGA
-CHARACTER(30) :: CROUTINE = 'null'
+CHARACTER(LABEL_LENGTH) :: CROUTINE = 'null'
 END TYPE SCARC_SCOPE_TYPE
 
 
