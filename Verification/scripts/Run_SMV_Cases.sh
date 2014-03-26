@@ -7,9 +7,9 @@ queue=
 size=64
 DEBUG=
 OPENMP=
-OPENMPOPTS=
+OPENMP_OPTS=
 FDS_DEBUG=0
-nthreads=8
+nthreads=2
 
 function usage {
 echo "Run_SMV_Cases.sh [-d -h -o nthreads -p -q queue_name -s ]"
@@ -18,7 +18,7 @@ echo ""
 echo "Options"
 echo "-d - use debug version of FDS"
 echo "-h - display this message"
-echo "-o nthreads - run OpenMP version of FDS with a specified number of threads [default: 8]"
+echo "-o nthreads - run OpenMP version of FDS with a specified number of threads [default: $nthreads]"
 echo "-p size - platform size"
 echo "     default: 64"
 echo "     other options: 32"
@@ -65,7 +65,7 @@ case $OPTION in
   o)
    nthreads="$OPTARG"
    OPENMP=openmp_
-   OPENMPOPTS="-n $nthreads"
+   OPENMP_OPTS="-n $nthreads"
    ;;
   p)
    size="$OPTARG"
@@ -84,10 +84,6 @@ esac
 #shift
 done
 export FDS_DEBUG
-#export OPENMP
-#export OPENMPOPTS
-echo OPENMP=$OPENMP
-echo OPENMPOPTS=$OPENMPOPTS
 
 if [ "$size" != "32" ]; then
   size=64
@@ -155,8 +151,6 @@ export RUNFDS="$SVNROOT/Utilities/Scripts/runfds.sh $OPENMPOPTS $queue"
 export RUNTFDS="$SVNROOT/Utilities/Scripts/runfds.sh $OPENMPOPTS $queue"
 export RUNWFDS="$SVNROOT/Utilities/Scripts/runwfds.sh $queue"
 export RUNFDSMPI="$SVNROOT/Utilities/Scripts/runfdsmpi.sh $queue"
-echo RUNFDS=$RUNFDS
-echo FDS=$FDS
 
 echo "" | $FDSEXE 2> $SVNROOT/Manuals/SMV_User_Guide/SCRIPT_FIGURES/fds.version
 
