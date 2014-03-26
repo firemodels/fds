@@ -1,4 +1,4 @@
-#!/bin/bash -f
+#!/bin/bash
 
 # defaults
 
@@ -6,14 +6,18 @@ queue=
 background=no
 QSUB=qsub
 USEFDS=yes
+nthreads=2
 
 if [ "$JOBPREFIX" == "" ]; then
   JOBPREFIX=VV_
 fi
 
-while getopts 'q:w' OPTION
+while getopts 'n:q:w' OPTION
 do
 case $OPTION in
+  n)
+  nthreads="$OPTARG"
+  ;;
   q)
    queue="$OPTARG"
    ;;
@@ -120,6 +124,9 @@ cat << EOF > $scriptfile
 #SBATCH -p $queue
 
 cd $fulldir
+
+# Set number of OpenMP threads on target machine
+export OMP_NUM_THREADS=$nthreads
 
 echo Time: \`date\`
 echo Running $infile on \`hostname\`
