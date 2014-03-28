@@ -5748,15 +5748,15 @@ void setup_device_data(void){
       piloti->vel[j]=0.0;
     }
     piloti->total=0;
-    if(udev!=NULL&&vdev!=NULL&&wdev!=NULL){
+    if(udev!=NULL&&vdev!=NULL){
       n=MIN(udev->nvals,vdev->nvals);
       n=MIN(n,wdev->nvals);
       for(j=0;j<n;j++){
-        float uval, vval, wval, vel, veluv, angle;
+        float uval, vval, wval=0.0, vel, veluv, angle;
 
         uval = udev->vals[j];
         vval = vdev->vals[j];
-        wval = wdev->vals[j];
+        if(wdev!=NULL)wval = wdev->vals[j];
         vel = sqrt(uval*uval+vval*vval+wval*wval);
         veluv = sqrt(uval*uval+vval*vval);
         if(veluv>0.0){
