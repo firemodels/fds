@@ -1,5 +1,7 @@
 \documentclass[11pt]{book}
 
+%\RequirePackage[12tabu, orthodox]{nag}
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %                                                                                                 %
 % The mathematical style of these documents follows                                               %
@@ -59,15 +61,19 @@ User's Guide\\
 \authorsigs
 }
 
-\flushright{\today \\
+\begin{flushright}
+\today \\
 FDS Version \fdsversion \\
-\emph{SVN Repository}~$Revision$}
+\emph{SVN Repository}~$Revision$
+\end{flushright}
 % dummy comment to force svn change - Thu Mar 27 21:57:10 EDT 2014
 
 
 \vfill
 
-\flushright{\includegraphics[width=1in]{../Bibliography/doc} }
+\begin{flushright}
+\includegraphics[width=1in]{../Bibliography/doc} 
+\end{flushright}
 
 \titlesigs
 
@@ -77,20 +83,23 @@ FDS Version \fdsversion \\
 
 \begin{minipage}[t][9in][s]{6.25in}
 
-\flushright{Certain commercial entities, equipment, or materials may be identified in this \\
+\begin{flushright}
+Certain commercial entities, equipment, or materials may be identified in this \\
 document in order to describe an experimental procedure or concept adequately. \\
 Such identification is not intended to imply recommendation or endorsement by the \\
 National Institute of Standards and Technology, nor is it intended to imply that the \\
-entities, materials, or equipment are necessarily the best available for the purpose.\\
-}
+entities, materials, or equipment are necessarily the best available for the purpose.
+\end{flushright}
 
 \vspace{3in}
 
 \large
-\flushright{\bf National Institute of Standards and Technology Special Publication 1019 \\
+\begin{flushright}
+{\bf National Institute of Standards and Technology Special Publication 1019 \\
 Natl.~Inst.~Stand.~Technol.~Spec.~Publ.~1019, \pageref{LastPage} pages (April 2013) \\
 %http://dx.doi.org/10.6028/NIST.SP.1019 \\
 CODEN: NSPUE2 }
+\end{flushright}
 
 \vfill
 

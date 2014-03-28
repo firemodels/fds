@@ -1,5 +1,7 @@
 \documentclass[11pt]{book}
 
+%\RequirePackage[12tabu, orthodox]{nag}
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %                                                                                                 %
 % The mathematical style of these documents follows                                               %
@@ -60,15 +62,19 @@ Volume 2: Verification\\
 \authorsigs
 }
 
-\flushright{\today \\
+\begin{flushright}
+\today \\
 FDS Version \fdsversion \\
-\emph{SVN Repository}~$Revision$}
+\emph{SVN Repository}~$Revision$
+\end{flushright}
 % dummy comment to force svn change - Thu Mar 27 21:57:10 EDT 2014
 
 
 \vfill
 
-\flushright{\includegraphics[width=1in]{../Bibliography/doc} }
+\begin{flushright}
+\includegraphics[width=1in]{../Bibliography/doc} 
+\end{flushright}
 
 \titlesigs
 
@@ -984,7 +990,7 @@ With the same grid set up as described above the smooth walls, a series of cases
 
 {\bf Hyun-Wook Park and Jung-il Choi, Yonsei University, Seoul, South Korea}\\
 
-\noindent Consider a steady flow over a semi-infinite flat plate aligned with the flow with free stream velocity $u_0$ . The Prandtl boundary layer equations (see \cite{Panton:1}) are:
+\noindent Consider a steady flow over a semi-infinite flat plate aligned with the flow with free stream velocity, $u_0$. The Prandtl boundary layer equations~\cite{Panton:1} are:
 \begin{equation}
 \label{eqn_BL_momentum}
 u \frac{\partial u}{\partial x} + w \frac{\partial u}{\partial z} = \nu \frac{\partial^2 u}{\partial z^2} \,\mbox{,}
@@ -993,29 +999,28 @@ u \frac{\partial u}{\partial x} + w \frac{\partial u}{\partial z} = \nu \frac{\p
 \label{eqn_BL_continuity}
 \frac{\partial u}{\partial x}+\frac{\partial w}{\partial z} = 0 \,\mbox{.}
 \end{equation}
-
-Famously, Paul Richard Heinrich Blasius found a solution to Eqs.~(\ref{eqn_BL_momentum}) and (\ref{eqn_BL_continuity}) by introducing a similarity variable:
+Paul Richard Heinrich Blasius found a solution to Eqs.~(\ref{eqn_BL_momentum}) and (\ref{eqn_BL_continuity}) by introducing a similarity variable:
 \begin{equation}
 \label{eta}
 \eta\equiv\frac{z}{\sqrt{\nu x/u_0}} \,\mbox{.}
 \end{equation}
-By substituting $\eta$ and the stream function ($u = \partial \psi/\partial z$, $w = -\partial \psi/\partial x$) into Eq.~(\ref{eqn_BL_momentum}), we get the following ODEs:
+Substituting $\eta$ and the stream function ($u = \partial \psi/\partial z$, $w = -\partial \psi/\partial x$) into Eq.~(\ref{eqn_BL_momentum}) yields the following ODEs:
 \begin{eqnarray}
 \label{BL_ODE}
 \frac{1}{2}f f^{''}+f^{'''}&=&0 \\
 u&=&u_0 f^{'} \\
 w&=&\frac{1}{2}\sqrt{\frac{\nu \,u_0}{x}}(\eta f^{'}-f)
 \end{eqnarray}
-The solution of Eq.~(\ref{BL_ODE}) is the Blasius solution (see \cite{Panton:1}).
+The solution of Eq.~(\ref{BL_ODE}) is the Blasius solution~\cite{Panton:1}.
 
-The physical domain of the present verification case is a rectangle with length $L=0.15$ m in the streamwise direction and $H=0.3$ m in the wall-normal direction. The grid spacing is uniform $\delta x = L/N_x$, $\delta z =H/N_z$ in each direction, and $N_x = 1.5 N_z$ with $N_z = \{16, 32, 64\}$ for each test series. The Boundary conditions for the inlet and outlet boundaries are \textct{OPEN} with the dynamic pressure set to zero at the inlet boundary. On the top boundary, the gradient of $w$ in the $z$ direction is zero combined with a free-slip condition that combines to yield an irrotational field. The boundary condition along the bottom of the domain is free-slip upstream of the plate ($x<0.5$ m) and no-slip on the plate. The initial velocity is $1$ m/s and $u_0$ is taken as the value of $u$ at the top boundary since boundary conditions at $z=\infty$ cannot be directly applied. The case is run with constant properties: $\rho=1.2$ \si{kg/m^3}, $\mu = 0.001$ kg/m/s.
+The physical domain of the present verification case is a rectangle with length $L=0.15$ m in the streamwise direction and $H=0.3$ m in the wall-normal direction. The grid spacing is uniform ($\delta x = L/N_x$, $\delta z =H/N_z$) in each direction, and $N_x = 1.5 \, N_z$ with $N_z = \{16, 32, 64\}$ for each test series. The Boundary conditions for the inlet and outlet boundaries are \textct{OPEN} with the dynamic pressure set to zero at the inlet boundary. On the top boundary, the gradient of $w$ in the $z$ direction is zero combined with a free-slip condition that combines to yield an irrotational field. The boundary condition along the bottom of the domain is free-slip upstream of the plate ($x<0.5$ m) and no-slip on the plate. The initial velocity is $1$ m/s and $u_0$ is taken as the value of $u$ at the top boundary since boundary conditions at $z=\infty$ cannot be directly applied. The case is run with constant properties: $\rho=1.2$ \si{kg/m^3}, $\mu = 0.001$ kg/m/s.
 
-Figure \ref{blasius} (left) shows a comparison of the streamwise velocity from FDS with the Blasius solution. It is seen that the FDS solution (lines) converges to Blasius (open circles) as the mesh resolution is increased. Figure \ref{blasius} (right) shows root mean square (RMS) error, $\varepsilon$, in $u$ (streamwise component) at $x=0.1$ m ($0.05$ m from the leading edge of the plate) for the dimensional Blasius solution. The error is defined by
+Figure~\ref{blasius} (left) shows a comparison of the streamwise velocity from FDS with the Blasius solution. The FDS solution (lines) converges to Blasius (open circles) as the mesh resolution is increased. Figure~\ref{blasius} (right) shows the root mean square (RMS) error, $\varepsilon$, in $u$ (streamwise component) at $x=0.1$ m ($0.05$~m from the leading edge of the plate) for the dimensional Blasius solution. The error is defined by
 \begin{equation}
 \label{error_l2norm_bl}
-\varepsilon \equiv \sqrt{ \frac{1}{N_z} \sum_{k=1}^{N_z} \left[ u_{k} - u_{B,k} \right]^2 } \,\mbox{,}
+\varepsilon \equiv \sqrt{ \frac{1}{N_z} \sum_{k=1}^{N_z} \left[ u_{k} - u_{{\rm B},k} \right]^2 }
 \end{equation}
-where $k$ is the $z$ index. The value $u_k$ represents the FDS result for $u$ at the staggered grid storage location for cell $k$, $u_{B,k}$ is the dimensional Blasius solution at the corresponding location. The slight departure from second-order accuracy is likely due to numerical issues in representing the singularity in the Blasius solution at the leading edge of the plate as well as errors in the boundary conditions due to truncation of the domain.
+where $k$ is the $z$ index. The value $u_k$ represents the FDS result for $u$ at the staggered grid storage location for cell $k$, $u_{{\rm B},k}$ is the dimensional Blasius solution at the corresponding location. The slight departure from second-order accuracy is likely due to numerical issues in representing the singularity in the Blasius solution at the leading edge of the plate as well as errors in the boundary conditions due to truncation of the domain.
 \begin{figure}[h]
    \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
       \includegraphics[width=3.2in]{SCRIPT_FIGURES/blasius_profile} &
