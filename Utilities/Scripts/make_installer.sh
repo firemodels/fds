@@ -31,6 +31,7 @@ fi
 cat << EOF > $INSTALLER
 #!/bin/bash
 
+OVERRIDE=\$1
 echo ""
 echo "FDS $FDSVERSION and Smokeview $SMVVERSION installer for $ostype $ossize"
 echo ""
@@ -107,7 +108,12 @@ MKDIR()
     then
     while true; do
         echo "The directory, \$DIR, already exists."
-        read -p "Do you wish to overwrite it? (yes/no) " yn
+        if [ "\$OVERRIDE" == "y" ]
+        then
+          yn="y"
+        else
+          read -p "Do you wish to overwrite it? (yes/no) " yn
+        fi
         case \$yn in
             [Yy]* ) break;;
             [Nn]* ) echo "Installation cancelled";exit;;
@@ -152,7 +158,12 @@ SKIP=\`awk '/^__TARFILE_FOLLOWS__/ { print NR + 1; exit 0; }' \$0\`
 
 #--- extract tar.gz file from this script if 'extract' specified
 
-read  option
+if [ "\$OVERRIDE" == "y" ] 
+then
+  option=""
+else
+  read  option
+fi
 if [ "\$option" == "extract" ]
 then
   name=\$0
@@ -186,7 +197,13 @@ echo "Where would you like to install FDS?"
     echo "  Press 3 to install in /usr/local/bin/$INSTALLDIR"
   fi
 echo "  Enter directory path to install elsewhere"
-read answer
+
+if [ "\$OVERRIDE" == "y" ] 
+then
+  answer="1"
+else
+  read answer
+fi
 
 if [ "$ostype" == "OSX" ]; then
   if [[ "\$answer" == "1" || "\$answer" == "" ]]; then
@@ -211,7 +228,12 @@ fi
 while true; do
     echo ""
     echo "Installation directory: \$FDS_root"
-    read -p "Do you wish to begin the installation? (yes/no) " yn
+    if [ "\$OVERRIDE" == "y" ] 
+    then
+      yn="y"
+    else
+      read -p "Do you wish to begin the installation? (yes/no) " yn
+    fi
     case \$yn in
         [Yy]* ) break;;
         [Nn]* ) echo "Installation cancelled";exit;;
