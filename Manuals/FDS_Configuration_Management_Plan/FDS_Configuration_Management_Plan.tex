@@ -1,5 +1,7 @@
 \documentclass[11pt]{book}
 
+%\RequirePackage[12tabu, orthodox]{nag}
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %                                                                                                 %
 % The mathematical style of these documents follows                                               %
@@ -55,14 +57,18 @@ Volume 4: Configuration Management\\
 \authorsigs
 }
 
-\flushright{\today \\
+\begin{flushright}
+\today \\
 FDS Version \fdsversion \\
-\emph{SVN Repository}~$Revision$}
+\emph{SVN Repository}~$Revision$
+\end{flushright}
 % dummy comment to force svn change - Thu Mar 27 21:57:10 EDT 2014
 
 \vfill
 
-\flushright{\includegraphics[width=1.2in]{../Bibliography/doc} }
+\begin{flushright}
+\includegraphics[width=1.2in]{../Bibliography/doc} 
+\end{flushright}
 
 \titlesigs
 
