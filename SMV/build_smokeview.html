@@ -15,10 +15,9 @@ update the version string in <tt>options.h</tt> and <tt>main.c</tt>, then commit
 <li><a href="scripts/EDIT_release_notes.bat">Update release notes</a> and commit.
 </ul>
 
-<p><table>
-<tr><td>
-<table border=on>
-<tr><th colspan=4>Libraries</th></tr>
+<h3>Libraries</h3>
+<p>Build win32 after win64 completes.
+<p><table border=on>
 <tr>
 <th>win32</th><th>win64</th><th>Linux</th><th>OSX</th>
 </tr>
@@ -29,17 +28,9 @@ update the version string in <tt>options.h</tt> and <tt>main.c</tt>, then commit
 <td><a href="scripts/BUILD_LIBS_osx.bat">Build</a></td>
 </tr>
 </table>
-</td>
-<td>
-<ul>
-<li>Build win32 after win64 completes.
-</ul>
-</td>
-</tr>
-</table>
 
+<h3>Test Smokeview</h3>
 <p><table border=on>
-<tr><th colspan=6>Test Smokeview</th></tr>
 <tr><th align=center>win32</th><th>win64</th><th align=center>Linux 32</th><th align=center>Linux 64</th><th align=center>OSX 32</th><th align=center>OSX 64</th></tr>
 <tr>
 <td align=center><a href="scripts/BUILDtestsmvwin32.bat">Build</a></td>
@@ -64,8 +55,8 @@ update the version string in <tt>options.h</tt> and <tt>main.c</tt>, then commit
 </tr>
 </table>
 
+<h3>Release Smokeview</h3>
 <p><table border=on>
-<tr><th colspan=6>Release Smokeview</th></tr>
 <tr><th>win32</th><th>win64</th><th>Linux 32</th><th>Linux 64</th><th>OSX 32</th><th>OSX 64</th></tr>
 <tr>
 <td align=center><a href="scripts/BUILDsmvwin32.bat">Build</a></td>
@@ -100,8 +91,8 @@ update the version string in <tt>options.h</tt> and <tt>main.c</tt>, then commit
 </tr>
 </table>
 
+<h3>Utilities</h3>
 <p><table border=on>
-<tr><th colspan=5>Utilities</th></tr>
 <tr>
 <th></th>
 <th>Windows</th>
@@ -145,8 +136,8 @@ update the version string in <tt>options.h</tt> and <tt>main.c</tt>, then commit
 </tr>
 </table>
 
+<h3>Verification</h3>
 <p><table border=on>
-<tr><th colspan=2>Verification</th></tr>
 <tr><th>Windows</th><th>Linux</th></tr>
 
 <tr>
