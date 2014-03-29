@@ -21,7 +21,23 @@ call %envfile%
 
 %svn_drive%
 
+echo.
+echo ---------------------------------------------
+echo Building 64 bit Windows versions of smokediff
+echo ---------------------------------------------
+
 cd %svn_root%\Utilities\smokediff\intel_win_64
-erase *.obj
-make_diff.bat
+call "%IFORT_COMPILER14%\bin\compilervars" intel64
+erase *.obj *.mod
+make -f ..\Makefile intel_win_64
+
+echo.
+echo ---------------------------------------------
+echo Building 32 bit Windows versions of smokediff
+echo ---------------------------------------------
+
+cd %svn_root%\Utilities\smokediff\intel_win_32
+call "%IFORT_COMPILER14%\bin\compilervars" ia32
+erase *.obj *.mod
+make -f ..\Makefile intel_win_32
 pause

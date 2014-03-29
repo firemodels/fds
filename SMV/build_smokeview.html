@@ -32,8 +32,7 @@ update the version string in <tt>options.h</tt> and <tt>main.c</tt>, then commit
 </td>
 <td>
 <ul>
-<li>Libraries only need to be rebuilt if a source file or compiler has changed.
-<li>Wait until the win32 build completes before proceeding with win64.
+<li>Build win32 after win64 completes.
 </ul>
 </td>
 </tr>
@@ -105,47 +104,42 @@ update the version string in <tt>options.h</tt> and <tt>main.c</tt>, then commit
 <tr><th colspan=5>Utilities</th></tr>
 <tr>
 <th></th>
-<th>win32</th>
-<th>win64</th>
+<th>Windows</th>
 <th>Linux</th>
 <th>OSX</th>
 </tr>
 
 <tr>
 <th>background</th>
-<td colspan=2 align=center><a href="scripts/BUILDbgwin32.bat">Build(32)</a></td>
+<td align=center><a href="scripts/BUILDbgwin32.bat">Build(32)</a></td>
 <td align=center><a href="scripts/BUILDbglinux.bat">Build</a></td>
 <td align=center><a href="scripts/BUILDbgosx.bat">Build</a></td>
 </tr>
 
 <tr>
 <th>fds2ascii</th>
-<td align=center><a href="scripts/BUILDf2awin32.bat">Build</a></td>
-<td align=center><a href="scripts/BUILDf2awin64.bat">Build</a></td>
+<td align=center><a href="scripts/BUILDf2awin.bat">Build</a></td>
 <td align=center><a href="scripts/BUILDf2alinux.bat">Build</a></td>
 <td align=center><a href="scripts/BUILDf2aosx.bat">Build</a></td>
 </tr>
 
 <tr>
 <th>smokediff</th>
-<td align=center><a href="scripts/BUILDsmdwin32.bat">Build</a></td>
-<td align=center><a href="scripts/BUILDsmdwin64.bat">Build</a></td>
+<td align=center><a href="scripts/BUILDsmdwin.bat">Build</a></td>
 <td align=center><a href="scripts/BUILDsmdlinux.bat">Build</a></td>
 <td align=center><a href="scripts/BUILDsmdosx.bat">Build</a></td>
 </tr>
 
 <tr>
 <th>smokezip</th>
-<td align=center><a href="scripts/BUILDsmzwin32.bat">Build</a></td>
-<td align=center><a href="scripts/BUILDsmzwin64.bat">Build</a></td>
+<td align=center><a href="scripts/BUILDsmzwin.bat">Build</a></td>
 <td align=center><a href="scripts/BUILDsmzlinux.bat">Build</a></td>
 <td align=center><a href="scripts/BUILDsmzosx.bat">Build</a></td>
 </tr>
 
 <tr>
 <th>wind2fds</th>
-<td align=center><a href="scripts/BUILDwindwin32.bat">Build</a></td>
-<td align=center><a href="scripts/BUILDwindwin64.bat">Build</a></td>
+<td align=center><a href="scripts/BUILDwindwin.bat">Build</a></td>
 <td align=center><a href="scripts/BUILDwindlinux.bat">Build</a></td>
 <td align=center><a href="scripts/BUILDwindosx.bat">Build</a></td>
 </tr>
