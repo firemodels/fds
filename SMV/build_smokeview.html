@@ -8,15 +8,16 @@
 <hr size="1">
 
 <ul>
-<li>When building Smokeview for release, 
-update the version string in <tt>options.h</tt> and <tt>main.c</tt>, then commit.
-<li><a href="scripts/EDIT_setup.bat">Update</a> configuration file.
-<li><a href="scripts/Update_REPOS_latest4SMV_svn.bat">Update</a> Windows, Linux and OSX repositories to the latest revision.
+<li>Update version info in 
+<a href="scripts/EDIT_options.bat">options.h</a>, 
+<a href="scripts/EDIT_main.bat">main.c</a> and commit.
+<li><a href="scripts/EDIT_setup.bat">Update</a> web configuration file.
+<li><a href="scripts/Update_REPOS_latest4SMV_svn.bat">Update</a> Windows, Linux and OSX repositories.
 <li><a href="scripts/EDIT_release_notes.bat">Update release notes</a> and commit.
 </ul>
 
 <h3>Libraries</h3>
-<p>Build win32 after win64 completes.
+<p>Start win64 build only after win32 build completes.
 <p><table border=on>
 <tr>
 <th>win32</th><th>win64</th><th>Linux</th><th>OSX</th>
@@ -31,7 +32,7 @@ update the version string in <tt>options.h</tt> and <tt>main.c</tt>, then commit
 
 <h3>Test Smokeview</h3>
 <p><table border=on>
-<tr><th align=center>win32</th><th>win64</th><th align=center>Linux 32</th><th align=center>Linux 64</th><th align=center>OSX 32</th><th align=center>OSX 64</th></tr>
+<tr><th align=center>win32</th><th>win64</th><th align=center>Linux32</th><th align=center>Linux64</th><th align=center>OSX32</th><th align=center>OSX64</th></tr>
 <tr>
 <td align=center><a href="scripts/BUILDtestsmvwin32.bat">Build</a></td>
 <td align=center><a href="scripts/BUILDtestsmvwin64.bat">Build</a></td>
@@ -60,7 +61,7 @@ update the version string in <tt>options.h</tt> and <tt>main.c</tt>, then commit
 
 <h3>Release Smokeview</h3>
 <p><table border=on>
-<tr><th>win32</th><th>win64</th><th>Linux 32</th><th>Linux 64</th><th>OSX 32</th><th>OSX 64</th></tr>
+<tr><th>win32</th><th>win64</th><th>Linux32</th><th>Linux64</th><th>OSX32</th><th>OSX64</th></tr>
 <tr>
 <td align=center><a href="scripts/BUILDsmvwin32.bat">Build</a></td>
 <td align=center><a href="scripts/BUILDsmvwin64.bat">Build</a></td>
@@ -147,12 +148,12 @@ update the version string in <tt>options.h</tt> and <tt>main.c</tt>, then commit
 <tr><th>Windows</th><th>Linux</th></tr>
 
 <tr>
-<td align=center rowspan=2><a href="scripts/RUNwindowssmokebot.bat">Run Smokebot</a></td>
-<td align=center><a href="scripts/RUNlinuxsmokebot.bat">Run Smokebot</a></td>
+<td align=center rowspan=2><a href="scripts/RUNwindowssmokebot.bat">Smokebot</a></td>
+<td align=center><a href="scripts/RUNlinuxsmokebot.bat">Smokebot</a></td>
 </tr>
 
 <tr>
-<td align=center><a href="scripts/DOWNLOADoutput.bat">Download<br>images,movies,guides</a></td>
+<td align=center><a href="scripts/DOWNLOADoutput.bat">Download images,<br>movies, guides</a></td>
 </tr>
 
 <tr>
@@ -174,14 +175,14 @@ update the version string in <tt>options.h</tt> and <tt>main.c</tt>, then commit
 
 <h3>Other</h3>
 <ul>
-<li><a href="scripts/EDIT_build_smokeview.bat">Edit this page</a> 
-<li><a href="scripts/EDIT_setup.bat">Edit <tt>configuration file</tt></a> 
-<li><a href="scripts/COPYhome2config.bat"><tt>configuration file</tt> ===>> <tt>FDS-SMV</tt></a>
-<li><a href="scripts/COPYconfig2home.bat"><tt>configuration file</tt> <<=== <tt>FDS-SMV</tt></a>
-<li><a href="scripts/TEST_setup.bat">Test settings and build/bundle environment</tt></a> 
-<li><a href="scripts/EDIT_objects.bat">Edit <tt>FDS-SMV objects.svo</tt></a> 
-<li><a href="../FDS_Compilation/getting_started.html">Getting started - setting up build scripts</a>
-<li><a href="https://bintray.com/nist-fire-research/releases/SMV">Downloads</a>
+<li><a href="scripts/EDIT_build_smokeview.bat">Edit this page.</a> 
+<li><a href="scripts/EDIT_setup.bat">Edit <tt>configuration file</tt>.</a> 
+<li><a href="scripts/COPYhome2config.bat"><tt>configuration file</tt> ===>> <tt>FDS-SMV</tt>.</a>
+<li><a href="scripts/COPYconfig2home.bat"><tt>configuration file</tt> <<=== <tt>FDS-SMV</tt>.</a>
+<li><a href="scripts/TEST_setup.bat">Test settings and build/bundle environment</tt></a>. 
+<li><a href="scripts/EDIT_objects.bat">Edit <tt>FDS-SMV objects.svo</tt></a>. 
+<li><a href="../FDS_Compilation/getting_started.html">Getting started - setting up build scripts</a>.
+<li><a href="https://bintray.com/nist-fire-research/releases/SMV">Downloads</a>.
 </ul>
 
 <p><hr>
