@@ -105,6 +105,10 @@ int main(int argc, char **argv){
       lendate=strlen(c_date);
       continue;
     }
+    else if(strcmp(arg,"-v")==0){
+      version("wind2fds");
+      return 1;
+    }
     else if(strcmp(arg,"-mindate")==0){
       i++;
       if(i>argc)continue;
@@ -162,22 +166,32 @@ int main(int argc, char **argv){
     fprintf(stderr,"*** Error: An input file was not specified\n");
     return 1;
   }
-  csv=strstr(argin,".csv");
-  if(csv!=NULL)*csv=0;
-  strcpy(file_in,argin);
-  strcat(file_in,".csv");
-  if(argout==NULL){
-    strcpy(file_out,argin);
-    strcat(file_out,"_exp.csv");
+  if(strcmp(argin,"-")==0){
+    stream_in=stdin;
   }
   else{
-    strcpy(file_out,argout);
+    csv=strstr(argin,".csv");
+    if(csv!=NULL)*csv=0;
+    strcpy(file_in,argin);
+    strcat(file_in,".csv");
+    stream_in=fopen(file_in,"r");
   }
-
-  stream_in=fopen(file_in,"r");
   if(stream_in==NULL){
     fprintf(stderr,"*** Error: The file %s could not be opened for input\n",file_in);
     return 1;
+  }
+
+  if(argout==NULL){
+    if(strcmp(argin,"-")==0){
+      strcpy(file_out,"stdin_exp.csv");
+    }
+    else{
+      strcpy(file_out,argin);
+      strcat(file_out,"_exp.csv");
+    }
+  }
+  else{
+    strcpy(file_out,argout);
   }
 
   stream_out=fopen(file_out,"w");
