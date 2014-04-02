@@ -18,10 +18,12 @@ if "%size%" == "" (
   set SMOKEDIFF=smokediff
   set SMOKEZIP=smokezip
   set SMOKEVIEW=smokeview
+  set WIND2FDS=wind2fds
 ) else (
   set SMOKEDIFF=%SVNROOT%\Utilities\smokediff\intel_win_%size%\smokediff_win_%size%.exe
   set SMOKEVIEW=%SVNROOT%\SMV\Build\intel_win_%size%\smokeview_win_%size%.exe -bindir %SVNROOT%\SMV\for_bundle
   set  SMOKEZIP=%SVNROOT%\Utilities\smokezip\intel_win_%size%\smokezip_win_%size%.exe
+  set  WIND2FDS=%SVNROOT%\Utilities\wind2fds\intel_win_%size%\wind2fds_win_%size%.exe
 )
 
 set BACKGROUND="background"
@@ -61,6 +63,13 @@ erase smokeview.version
 erase smokediff.version
 erase smokezip.version
 erase background.version
+erase wind2fds.version
+
+erase smokeview.help
+erase smokediff..help
+erase smokezip..help
+erase background..help
+erase wind2fds..help
 
 echo.
 echo Creating Smokeview User guide info files
@@ -69,11 +78,13 @@ echo Creating Smokeview User guide info files
 %SMOKEZIP%   -help > smokezip.help
 %SMOKEDIFF%  -help > smokediff.help
 %BACKGROUND% -help > background.help
+%WIND2FDS% -help > wind2fds.help
 
 %SMOKEVIEW%  -v > smokeview.version
 %SMOKEZIP%   -v > smokezip.version
 %SMOKEDIFF%  -v > smokediff.version
 %BACKGROUND% -v > background.version
+%WIND2FDS% -v > wind2fds.version
 
 :: --------------  verification guide ----------------
 
