@@ -77,11 +77,13 @@ if [ "$use_installed" == "1" ] ; then
   export SMOKEZIP=smokediff
   export SMOKEDIFF=smokediff
   export BACKGROUND=background
+  export WIND2FDS=wind2fds
 else
   export SMV=$SVNROOT/SMV/Build/intel_$VERSION2/smokeview_$VERSION
   export SMOKEZIP=$SVNROOT/Utilities/smokezip/intel_$VERSION2/smokezip_$VERSION2
   export SMOKEDIFF=$SVNROOT/Utilities/smokediff/intel_$VERSION2/smokediff_$VERSION2
   export BACKGROUND=$SVNROOT/Utilities/background/intel_$PLATFORM\_32/background
+  export WIND2DFS=$SVNROOT/Utilities/wind2fds/intel_$VERSION2/wind2fds_$VERSION2
 fi
 
 export SMVBINDIR="-bindir $SVNROOT/SMV/for_bundle"
@@ -111,14 +113,24 @@ is_file_installed $SMV
 is_file_installed $SMOKEZIP
 is_file_installed $SMOKEDIFF
 is_file_installed $BACKGROUND
+is_file_installed $WIND2FDS
 
 cd $SMVUG/SCRIPT_FIGURES
 rm -f *.png
 rm -f *.help
+
 rm -f smokeview.version
 rm -f smokediff.version
 rm -f smokezip.version
 rm -f background.version
+rm -f wind2fds.version
+
+rm -f smokeview.help
+rm -f smokediff.help
+rm -f smokezip.help
+rm -f background.help
+rm -f wind2fds.help
+
 rm -f $SUMMARY/images/*.png
 source ~/.bashrc_fds $IPLATFORM
 
@@ -126,11 +138,13 @@ $SMV -help > smokeview.help
 $SMOKEZIP -help > smokezip.help
 $SMOKEDIFF -help > smokediff.help
 $BACKGROUND -help > background.help
+$WIND2FDS -help > wind2fds.help
 
 $SMV -version > smokeview.version
 $SMOKEZIP -v > smokezip.version
 $SMOKEDIFF -v > smokediff.version
 $BACKGROUND -version > background.version
+$WIND2FDS -v > wind2fds.version
 
 cd $SMVVG/SCRIPT_FIGURES
 rm -f *.version
