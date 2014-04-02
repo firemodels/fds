@@ -475,7 +475,8 @@ void usage(char *prog){
   printf("  -date mm/dd/yyyy - only convert data recorded on the mm/dd/yyyy\n");
   printf("  -mindate \"mm/dd/yyyy [hh:mm:ss]\" - ignore data recorded before specified date\n");
   printf("  -maxdate \"mm/dd/yyyy [hh:mm:ss]\" - ignore data recorded after specified date\n");
-  printf("  datafile.csv   - spreadsheet file to be converted\n");
+  printf("  datafile.csv   - spreadsheet file to be converted. Use '-' to input data\n");
+  printf("                   from standard input\n");
 }
 
 /* ------------------ version ------------------------ */
