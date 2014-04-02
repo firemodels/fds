@@ -50,6 +50,8 @@ CALL :COPY ..\..\Utilities\smokediff\intel_win_%platform%\smokediff_win_%platfor
 
 CALL :COPY  ..\..\Utilities\smokezip\intel_win_%platform%\smokezip_win_%platform%.exe %smvdir%\smokezip.exe
 
+CALL :COPY  ..\..\Utilities\wind2fds\intel_win_%platform%\wind2fds_win_%platform%.exe %smvdir%\wind2fds.exe
+
 CALL :COPY  ..\..\Utilities\background\intel_win_32\background.exe %smvdir%\background.exe
 
 echo bundleinfo=%bundleinfo%
