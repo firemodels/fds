@@ -669,9 +669,11 @@ void display_version_info(void){
 /* ------------------ usage ------------------------ */
 
 void usage(char **argv){
+  char buffer[1000];
+
   PRINTF("%s\n",TITLERELEASE);
   PRINTF("%s\n\n",_("Visualize fire/smoke flow simulations."));
-  PRINTF("Usage: %s [options] casename",argv[0]);
+  PRINTF("Usage: %s [options] casename",get_basefilename(buffer,argv[0]));
   PRINTF("%s\n\n",_("where "));
   PRINTF("%s\n",_(" casename       - project id (file names without the extension)"));
   PRINTF("%s\n",_(" -bindir dir    - specify location of smokeview bin directory"));
