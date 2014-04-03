@@ -484,7 +484,8 @@ GEOC_LOOP: DO N=1,N_GEOM
       IF ( ABS(T-REAL(TIME_STRU,EB)) > DT_BNDC*0.1_EB) THEN
          CLOSE(LU_GEOC)
          WRITE(LU_ERR,'(4X,A,I2,A)')  'waiting ... ', I,' s'
-         CALL SLEEP(1)
+         ! this call was breaking an FDS build - ***gf
+         ! CALL SLEEP(1)
       ELSE
          WRITE(LU_ERR,'(4X,A,F10.2,A,F10.2)')  'GEOM was updated at ',T,' s, GEOM Time:', TIME_STRU
          EXIT GEOC_CHECK_LOOP
@@ -787,7 +788,8 @@ BNDC_LOOP: DO N=1,N_GEOM
       IF (OWNER_INDEX /=1 .OR. T-REAL(TIME_STRU,EB)>DT_BNDC*0.1_EB) THEN
          CLOSE(LU_BNDC)
          WRITE(LU_ERR,'(4X,A,F10.2,A)')  'BNDC not updated at ',T,' s'
-         CALL SLEEP(1)
+         ! this call was breaking an FDS build - ***gf
+         ! CALL sleep(1)
       ELSE
          WRITE(LU_ERR,'(4X,A,F10.2,A)')  'BNDC was updated at ',T,' s'
          EXIT BNDC_CHECK_LOOP
