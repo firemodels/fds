@@ -10,6 +10,7 @@
 #include "svn_revision.h"
 #include "datadefs.h"
 #include "string_util.h"
+#include "file_util.h"
 #include "MALLOC.h"
 
 //dummy change to bump version number to  0.9
@@ -501,7 +502,7 @@ void usage(char *prog){
   printf("\n");
   printf("wind2fds %s(%i) - %s\n",prog_version,svn_num,__DATE__);
   printf("  Convert spreadheets containing wind data to files compatible with Smokeview:\n\n");
-  printf("  %s",prog);
+  printf("  %s",get_basefilename(prog));
   printf(" prog [-prefix label] [-offset x y z] datafile\n\n");
 
   printf("where\n\n");

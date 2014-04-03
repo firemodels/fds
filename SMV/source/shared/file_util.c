@@ -179,7 +179,22 @@ char *setdir(char *argdir){
   return dir;
 }
 
-/* ------------------ fullfile ------------------------ */
+/* ------------------ get_basefilename ------------------------ */
+
+char *get_basefilename(char *file){
+  char *filebase;
+
+  filebase=strrchr(file,(int)dirseparator);
+  if(filebase==NULL){
+    filebase=file;
+  }
+  else{
+    filebase++;
+  }
+  return filebase;
+}
+
+/* ------------------ get_filename ------------------------ */
 
 char *get_filename(char *temp_dir, char *file, int flag){
   char *file2;
@@ -205,7 +220,6 @@ char *get_filename(char *temp_dir, char *file, int flag){
   }
   return file_out;
 }
-
 
 /* ------------------ fullfile ------------------------ */
 
@@ -732,34 +746,4 @@ char *which(char *progname){
   fprintf(stderr,"*** Error: %s not found in any path directory\n",prog);
 #endif
   return NULL;
-}
-
-#define HEADER_SIZE 4
-#define TRAILER_SIZE 4
-#define FORTREAD(var,size) FSEEK(FORTSTREAM,HEADER_SIZE,SEEK_CUR);\
-                           returncode=fread(var,4,size,FORTSTREAM);\
-                           if(endianswitch==1)endian_switch(var,size);\
-                           FSEEK(FORTSTREAM,TRAILER_SIZE,SEEK_CUR)
-
-/* ------------------ get_slice_frame ------------------------ */
-
-size_t get_slice_frame(char *file, int frame_index_local, int framesize, float *time_local, float *vals){
-  int skip_local;
-  FILE *FORTSTREAM;
-  int returncode;
-  int endianswitch=0;
-
-  skip_local =         (HEADER_SIZE +30                     +TRAILER_SIZE); // long label
-  skip_local +=        (HEADER_SIZE +30                     +TRAILER_SIZE); // short label
-  skip_local +=        (HEADER_SIZE +30                     +TRAILER_SIZE); // unit label
-  skip_local +=        (HEADER_SIZE +6*sizeof(int)          +TRAILER_SIZE); // is1, is2, js1, js2, ks1, ks2
-  skip_local += frame_index_local*(HEADER_SIZE +sizeof(float)          +TRAILER_SIZE); // framenum time's
-  skip_local += frame_index_local*(HEADER_SIZE +framesize*sizeof(float)+TRAILER_SIZE); // framenum slice data's
-  FORTSTREAM=fopen(file,"r");
-  if(FORTSTREAM==NULL)return 0;
-  FSEEK(FORTSTREAM,skip_local,SEEK_SET); // skip from beginning of file
-  FORTREAD(time_local,1);
-  FORTREAD(vals,framesize);
-  fclose(FORTSTREAM);
-  return returncode;
 }
