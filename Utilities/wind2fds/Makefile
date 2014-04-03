@@ -11,7 +11,7 @@ bin = .
 
 # Definition of the object variables
 
-obj =    main.o assert.o dmalloc.o string_util.o
+obj =    main.o assert.o dmalloc.o string_util.o file_util.o
 objwin = $(obj:.o=.obj)
 
 # main has to be compiled without optimization (on a Windows PC) otherwise errors occcur
