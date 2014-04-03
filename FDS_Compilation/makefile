@@ -124,7 +124,7 @@ msmpi_intel_win_32 : MPILIB2 = "C:\Program Files\Microsoft HPC Pack 2012\Lib\i38
 msmpi_intel_win_32 : MPILIB3 = "C:\Program Files\Microsoft HPC Pack 2012\Lib\i386\msmpifmc.lib"
 msmpi_intel_win_32 : MPIINCLUDE = "C:\Program Files\Microsoft HPC Pack 2012\Inc"
 msmpi_intel_win_32 : MPIINCLUDE2 = "C:\Program Files\Microsoft HPC Pack 2012\Inc\i386"
-msmpi_intel_win_32 : FFLAGS = /O2 /Qipo /I $(MPIINCLUDE) /I $(MPIINCLUDE2)
+msmpi_intel_win_32 : FFLAGS = /O2 /Qipo /names:lowercase /I $(MPIINCLUDE) /I $(MPIINCLUDE2)
 msmpi_intel_win_32 : FCOMPL = ifort
 msmpi_intel_win_32 : obj = fds_mpi_win_32
 msmpi_intel_win_32 : setup_win $(objwin_mpi)
@@ -226,7 +226,7 @@ msmpi_intel_win_64_db : MPILIB2 = "C:\Program Files\Microsoft MPI\Lib\amd64\msmp
 msmpi_intel_win_64_db : MPILIB3 = "C:\Program Files\Microsoft MPI\Lib\amd64\\msmpifmc.lib"
 msmpi_intel_win_64_db : MPIINCLUDE = "C:\Program Files\Microsoft MPI\Inc"
 msmpi_intel_win_64_db : MPIINCLUDE2 = "C:\Program Files\Microsoft MPI\Inc\amd64"
-msmpi_intel_win_64_db : FFLAGS = /I $(MPIINCLUDE) /I $(MPIINCLUDE2)  /Qvec_report0 /nologo /debug:full /extend_source:132 /warn:unused /warn:nointerfaces /Qtrapuv /fp:strict /fp:except /traceback /check:all /stand:f03
+msmpi_intel_win_64_db : FFLAGS = /I $(MPIINCLUDE) /I $(MPIINCLUDE2)  /Qvec_report0 /names:lowercase /nologo /debug:full /extend_source:132 /warn:unused /warn:nointerfaces /Qtrapuv /fp:strict /fp:except /traceback /check:all /stand:f03
 msmpi_intel_win_64_db : FCOMPL = ifort
 msmpi_intel_win_64_db : obj = fds_mpi_win_64_db
 msmpi_intel_win_64_db : setup_win $(objwin_mpi)
@@ -237,7 +237,7 @@ msmpi_intel_win_64 : MPILIB2 = "C:\Program Files\Microsoft MPI\Lib\amd64\msmpife
 msmpi_intel_win_64 : MPILIB3 = "C:\Program Files\Microsoft MPI\Lib\amd64\\msmpifmc.lib"
 msmpi_intel_win_64 : MPIINCLUDE = "C:\Program Files\Microsoft MPI\Inc"
 msmpi_intel_win_64 : MPIINCLUDE2 = "C:\Program Files\Microsoft MPI\Inc\amd64"
-msmpi_intel_win_64 : FFLAGS = /O2 /Qipo /Qvec_report0 /I $(MPIINCLUDE) /I $(MPIINCLUDE2)
+msmpi_intel_win_64 : FFLAGS = /O2 /Qipo /names:lowercase /Qvec_report0 /I $(MPIINCLUDE) /I $(MPIINCLUDE2)
 msmpi_intel_win_64 : FCOMPL = ifort
 msmpi_intel_win_64 : obj = fds_mpi_win_64
 msmpi_intel_win_64 : setup_win $(objwin_mpi)
