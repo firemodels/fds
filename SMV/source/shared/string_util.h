@@ -26,6 +26,7 @@ EXTERNCPP char *STRCHRR(char *strbeg, char *searchbeg, int c);
 EXTERNCPP unsigned int diffdate(char *token, char *tokenbase);
 EXTERNCPP unsigned int time2sec(char *tokenorig);
 EXTERNCPP unsigned int date2sec(char *tokenorig);
+EXTERNCPP unsigned int date2sec2(char *tokenorig);
 EXTERNCPP unsigned int date2day(char *tokenorig);
 EXTERNCPP int setlabels(flowlabels *flowlabel, char *longlabel, char *shortlabel, char *unit);
 EXTERNCPP int setlabels_iso(flowlabels *flowlabel, char *longlabel, char *shortlabel, char *unit, float *levels, int nlevels);

@@ -1019,12 +1019,8 @@ unsigned int date2day(char *tokenorig){
     if(yearend!=NULL)*yearend=0;
   }
   days_local=0;
-  if(year!=NULL){
-    iyear = atoi(year)-2000;
-  }
-  else{
-    iyear=0;
-  }
+  iyear=0;
+  if(year!=NULL)iyear = atoi(year)-2000;
   imonth = atoi(month);
   iday = atoi(day);
   ileap = iyear/4 + 1;
@@ -1102,6 +1098,29 @@ char *STRCHRR(char *strbeg, char *searchbeg, int c){
     }
     return strbeg;
   }
+}
+
+/* ------------------ date2sec2 ------------------------ */
+
+unsigned int date2sec2(char *tokenorig){
+  char token[256];
+  char *slash, *colen;
+  char *tim=NULL,*timend=NULL;
+  int secs=0;
+  int local_time;
+
+  strcpy(token,tokenorig);
+  slash=strchr(token,'/');
+  colen=strchr(token,':');
+  if(colen!=NULL)tim=STRCHRR(token,colen,' ');
+
+  if(tim!=NULL){
+    timend=strchr(tim,' ');
+    if(timend!=NULL)*timend=0;
+    secs=time2sec(tim);
+  }
+  local_time=secs;
+  return local_time;
 }
 
 /* ------------------ date2sec ------------------------ */

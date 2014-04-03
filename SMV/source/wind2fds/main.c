@@ -61,11 +61,17 @@ int main(int argc, char **argv){
   char coffset[255];
   int is_sodar_file=1;
   char tokenbase[256], *tokenbaseptr=NULL;
-  char *c_dateptr=NULL, c_date[256];
-  char *c_mindateptr=NULL, c_mindate[256];
-  char *c_maxdateptr=NULL, c_maxdate[256];
+  char *c_date_ptr=NULL, c_date[256];
+
+  char *c_mintime_ptr=NULL, c_mintime[256];
+  char *c_maxtime_ptr=NULL, c_maxtime[256];
   int have_mintime=0, have_maxtime=0;
-  unsigned int i_mindate, i_maxdate;
+  unsigned int i_mintime, i_maxtime;
+
+  char *c_mindatetime_ptr=NULL, c_mindatetime[256];
+  char *c_maxdatetime_ptr=NULL, c_maxdatetime[256];
+  int have_mindatetime=0, have_maxdatetime=0;
+  unsigned int i_mindatetime, i_maxdatetime;
   int lendate=0;
 
   strcpy(percen,"%");
@@ -97,7 +103,7 @@ int main(int argc, char **argv){
       continue;
     }
     else if(strcmp(arg,"-date")==0){
-      c_dateptr=c_date;
+      c_date_ptr=c_date;
       i++;
       if(i>=argc)continue;
       arg=argv[i];
@@ -109,18 +115,38 @@ int main(int argc, char **argv){
       version("wind2fds");
       return 1;
     }
+    else if(strcmp(arg,"-mintime")==0){
+      i++;
+      if(i>argc)continue;
+      arg=argv[i];
+      c_mintime_ptr=c_mintime;
+      strcpy(c_mintime_ptr,arg);
+      have_mintime=1;
+      i_mintime=date2sec2(c_mintime_ptr);
+      continue;
+    }
+    else if(strcmp(arg,"-maxtime")==0){
+      i++;
+      if(i>argc)continue;
+      arg=argv[i];
+      c_maxtime_ptr=c_maxtime;
+      strcpy(c_maxtime_ptr,arg);
+      have_maxtime=1;
+      i_maxtime=date2sec2(c_maxtime_ptr);
+      continue;
+    }
     else if(strcmp(arg,"-mindate")==0){
       i++;
       if(i>argc)continue;
       arg=argv[i];
-      c_mindateptr=c_mindate;
-      strcpy(c_mindateptr,arg);
-      if(strchr(c_mindateptr,':')!=NULL){
-        have_mintime=1;
-        i_mindate=date2sec(c_mindateptr);
+      c_mindatetime_ptr=c_mindatetime;
+      strcpy(c_mindatetime_ptr,arg);
+      if(strchr(c_mindatetime_ptr,':')!=NULL){
+        have_mindatetime=1;
+        i_mindatetime=date2sec(c_mindatetime_ptr);
       }
       else{
-        i_mindate=date2day(c_mindateptr);
+        i_mindatetime=date2day(c_mindatetime_ptr);
       }
       continue;
     }
@@ -128,14 +154,14 @@ int main(int argc, char **argv){
       i++;
       if(i>argc)continue;
       arg=argv[i];
-      c_maxdateptr=c_maxdate;
-      strcpy(c_maxdateptr,arg);
-      if(strchr(c_maxdateptr,':')!=NULL){
-        have_maxtime=1;
-        i_maxdate=date2sec(c_maxdateptr);
+      c_maxdatetime_ptr=c_maxdatetime;
+      strcpy(c_maxdatetime_ptr,arg);
+      if(strchr(c_maxdatetime_ptr,':')!=NULL){
+        have_maxdatetime=1;
+        i_maxdatetime=date2sec(c_maxdatetime_ptr);
       }
       else{
-        i_maxdate=date2day(c_maxdateptr);
+        i_maxdatetime=date2day(c_maxdatetime_ptr);
       }
       continue;
     }
@@ -281,14 +307,14 @@ int main(int argc, char **argv){
     }
   }
   fprintf(stream_out,"//HEADER\n");
-  if(c_dateptr!=NULL){
-    fprintf(stream_out,"  //  date: %s\n",c_dateptr);
+  if(c_date_ptr!=NULL){
+    fprintf(stream_out,"  //  date: %s\n",c_date_ptr);
   }
-  if(c_mindateptr!=NULL){
-    fprintf(stream_out,"  //  mindate: %s\n",c_mindateptr);
+  if(c_mindatetime_ptr!=NULL){
+    fprintf(stream_out,"  //  mindate: %s\n",c_mindatetime_ptr);
   }
-  if(c_maxdateptr!=NULL){
-    fprintf(stream_out,"  //  maxdate: %s\n",c_maxdateptr);
+  if(c_maxdatetime_ptr!=NULL){
+    fprintf(stream_out,"  //  maxdate: %s\n",c_maxdatetime_ptr);
   }
   for(i=0;i<nlabelptrs;i++){
     char token2[256];
@@ -395,18 +421,30 @@ int main(int argc, char **argv){
         if(strchr(token,':')!=NULL){
           unsigned int time_local=0;
 
-          if(c_dateptr!=NULL&&strncmp(c_dateptr,token,lendate)!=0){
+          if(c_date_ptr!=NULL&&strncmp(c_date_ptr,token,lendate)!=0){
             skip_time=1;
             break;
           }
-          if(c_mindateptr!=NULL){
-            if(have_mintime==0&&date2day(token)<i_mindate||have_mintime==1&&date2sec(token)<i_mindate){
+          if(c_mintime_ptr!=NULL){
+            if(have_mintime==1&&date2sec2(token)<i_mintime){
               skip_time=1;
               break;
             }
           }
-          if(c_maxdateptr!=NULL){
-            if(have_maxtime==0&&date2day(token)>i_maxdate||have_maxtime==1&&date2sec(token)>i_maxdate){
+          if(c_maxtime_ptr!=NULL){
+            if(have_maxtime==1&&date2sec2(token)<i_maxtime){
+              skip_time=1;
+              break;
+            }
+          }
+          if(c_mindatetime_ptr!=NULL){
+            if(have_mindatetime==0&&date2day(token)<i_mindatetime||have_mindatetime==1&&date2sec(token)<i_mindatetime){
+              skip_time=1;
+              break;
+            }
+          }
+          if(c_maxdatetime_ptr!=NULL){
+            if(have_maxdatetime==0&&date2day(token)>i_maxdatetime||have_maxdatetime==1&&date2sec(token)>i_maxdatetime){
               skip_time=1;
               break;
             }
@@ -472,9 +510,11 @@ void usage(char *prog){
   printf("  -prefix label  - prefix column headers with label\n");
   printf("  -offset x y z  - offset sensor locations by (x,y,z)\n");
   printf("  -wv            - converting a non-sodar file\n");
-  printf("  -date mm/dd/yyyy - only convert data recorded on the mm/dd/yyyy\n");
+  printf("  -date mm/dd/yyyy - only convert data recorded on mm/dd/yyyy\n");
   printf("  -mindate \"mm/dd/yyyy [hh:mm:ss]\" - ignore data recorded before specified date\n");
   printf("  -maxdate \"mm/dd/yyyy [hh:mm:ss]\" - ignore data recorded after specified date\n");
+  printf("  -mintime \"hh:mm:ss\" - ignore data recorded before specified time (on any date)\n");
+  printf("  -maxtime \"hh:mm:ss\" - ignore data recorded after specified time (on any date)\n");
   printf("  datafile.csv   - spreadsheet file to be converted. Use '-' to input data\n");
   printf("                   from standard input\n");
 }
