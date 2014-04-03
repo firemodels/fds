@@ -181,16 +181,23 @@ char *setdir(char *argdir){
 
 /* ------------------ get_basefilename ------------------------ */
 
-char *get_basefilename(char *file){
-  char *filebase;
+char *get_basefilename(char *buffer,char *file){
+  char *filebase,*ext;
 
-  filebase=strrchr(file,(int)dirseparator);
+  strcpy(buffer,file);
+#ifdef WIN32
+  filebase=strrchr(buffer,'\\');
+#else
+  filebase=strrchr(buffer,'/');
+#endif
   if(filebase==NULL){
-    filebase=file;
+    filebase=buffer;
   }
   else{
     filebase++;
   }
+  ext = strrchr(filebase,'.');
+  if(ext!=NULL)*ext=0;
   return filebase;
 }
 

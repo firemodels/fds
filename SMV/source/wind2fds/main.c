@@ -495,6 +495,7 @@ int main(int argc, char **argv){
 void usage(char *prog){
   char prog_version[100];
   int svn_num;
+  char buffer[1024];
 
   getPROGversion(prog_version);  // get version (ie 5.x.z)
   svn_num=getmaxrevision();    // get svn revision number
@@ -502,7 +503,7 @@ void usage(char *prog){
   printf("\n");
   printf("wind2fds %s(%i) - %s\n",prog_version,svn_num,__DATE__);
   printf("  Convert spreadheets containing wind data to files compatible with Smokeview:\n\n");
-  printf("  %s",get_basefilename(prog));
+  printf("  %s",get_basefilename(buffer,prog));
   printf(" prog [-prefix label] [-offset x y z] datafile\n\n");
 
   printf("where\n\n");

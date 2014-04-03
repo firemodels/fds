@@ -33,7 +33,7 @@ EXTERNCPP int filecat(char *file_in1, char *file_in2, char *file_out);
 EXTERNCPP void make_outfile(char *outfile, char *destdir, char *file1, char *ext);
 EXTERNCPP void fullfile(char *fileout, char *dir, char *file);
 EXTERNCPP char *get_filename(char *temp_dir, char *file, int flag);
-EXTERNCPP char *get_basefilename(char *file);
+EXTERNCPP char *get_basefilename(char *buffer, char *file);
 
 EXTERNCPP char *setdir(char *argdir);
 EXTERNCPP int getfileinfo(char *filename, char *sourcedir, FILE_SIZE *filesize);
