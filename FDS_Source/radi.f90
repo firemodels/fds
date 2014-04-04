@@ -892,6 +892,7 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
  
             ! Boundary conditions: Intensities leaving the boundaries.
             
+            !$OMP PARALLEL DO PRIVATE(IOR, II, JJ, KK) SCHEDULE(GUIDED)
             WALL_LOOP1: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
                IF (WALL(IW)%BOUNDARY_TYPE==NULL_BOUNDARY) CYCLE WALL_LOOP1
                IOR = WALL(IW)%ONE_D%IOR
@@ -902,18 +903,30 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                IF (.NOT.TWO_D .OR. ABS(IOR)/=2) THEN
                   SELECT CASE (WALL(IW)%BOUNDARY_TYPE)
                      CASE (OPEN_BOUNDARY) 
+                        !$OMP ATOMIC WRITE
                         IL(II,JJ,KK) = BBFA*RPI_SIGMA*TMPA4
+                        !$OMP END ATOMIC
                      CASE (MIRROR_BOUNDARY) 
+                        !$OMP ATOMIC WRITE
                         WALL(IW)%ONE_D%ILW(N,IBND) = WALL(IW)%ONE_D%ILW(DLM(N,ABS(IOR)),IBND)
+                        !$OMP END ATOMIC
+                        !$OMP ATOMIC WRITE
                         IL(II,JJ,KK) = WALL(IW)%ONE_D%ILW(N,IBND)
+                        !$OMP END ATOMIC
                      CASE (INTERPOLATED_BOUNDARY) 
+                        !$OMP ATOMIC WRITE
                         IL(II,JJ,KK) = WALL(IW)%ONE_D%ILW(N,IBND)
+                        !$OMP END ATOMIC
                      CASE DEFAULT ! solid wall
+                        !$OMP ATOMIC WRITE
                         WALL(IW)%ONE_D%ILW(N,IBND) = OUTRAD_W(IW) + RPI*(1._EB-WALL(IW)%ONE_D%EMISSIVITY)*INRAD_W(IW)
+                        !$OMP END ATOMIC
                   END SELECT
                ELSEIF (CYLINDRICAL) THEN
                   IF (WALL(IW)%BOUNDARY_TYPE==OPEN_BOUNDARY) CYCLE WALL_LOOP1
+                        !$OMP ATOMIC WRITE
                   IL(II,JJ,KK) = WALL(IW)%ONE_D%ILW(N,IBND)
+                        !$OMP END ATOMIC
                ENDIF
             ENDDO WALL_LOOP1
 
@@ -1072,6 +1085,8 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
  
             ! Boundary values: Incoming radiation
             
+            !$OMP PARALLEL PRIVATE(IOR, IIG, JJG, KKG)
+            !$OMP DO SCHEDULE(GUIDED)
             WALL_LOOP2: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
                IF (WALL(IW)%BOUNDARY_TYPE==NULL_BOUNDARY)   CYCLE WALL_LOOP2     
                IF (WALL(IW)%BOUNDARY_TYPE==OPEN_BOUNDARY)   CYCLE WALL_LOOP2  
@@ -1085,7 +1100,9 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                WALL(IW)%ONE_D%ILW(N,IBND) = IL(IIG,JJG,KKG)
                INRAD_W(IW) = INRAD_W(IW) - DLN(IOR,N) * WALL(IW)%ONE_D%ILW(N,IBND) ! update incoming radiation,step 2
             ENDDO WALL_LOOP2
+            !$OMP END DO
  
+            !$OMP DO SCHEDULE(GUIDED)
             WALL_LOOP3: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
                IF (WALL(IW)%BOUNDARY_TYPE/=OPEN_BOUNDARY)   CYCLE WALL_LOOP3 
                IOR = WALL(IW)%ONE_D%IOR
@@ -1095,6 +1112,9 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                KKG = WALL(IW)%ONE_D%KKG
                WALL(IW)%ONE_D%ILW(ANGLE_INC_COUNTER,IBND) = WALL(IW)%ONE_D%ILW(ANGLE_INC_COUNTER,IBND)-DLN(IOR,N)*IL(IIG,JJG,KKG)
             ENDDO WALL_LOOP3
+            !$OMP END DO
+            !$OMP END PARALLEL
+
 
             ! Calculate integrated intensity UIID
  
