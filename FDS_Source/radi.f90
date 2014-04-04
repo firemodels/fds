@@ -581,7 +581,9 @@ REAL(EB), PARAMETER :: Q_MINIMUM=100._EB
 INTEGER  :: N, NN,IIG,JJG,KKG,I,J,K,IW,II,JJ,KK,IOR,IC,IWUP,IWDOWN, &
             ISTART, IEND, ISTEP, JSTART, JEND, JSTEP, &
             KSTART, KEND, KSTEP, NSTART, NEND, NSTEP, &
-            I_UIID, N_UPDATES, IBND, TYY, NOM, SURF_INDEX,ARRAY_INDEX,NRA, N_PART
+            I_UIID, N_UPDATES, IBND, TYY, NOM, SURF_INDEX,ARRAY_INDEX,NRA, N_PART, &
+            IMIN, JMIN, KMIN, IMAX, JMAX, KMAX, N_SLICE, M_IJK, IJK
+INTEGER, ALLOCATABLE :: IJK_SLICE(:,:)
 REAL(EB) :: XID,YJD,ZKD,KAPPA_PART,SURFACE_AREA,DLF,DLA(3),KAPPA_1
 REAL(EB), ALLOCATABLE, DIMENSION(:) :: ZZ_GET
 INTEGER :: IID,JJD,KKD,IP
@@ -595,6 +597,7 @@ TYPE(LAGRANGIAN_PARTICLE_CLASS_TYPE), POINTER :: LPC=>NULL()
 TYPE(LAGRANGIAN_PARTICLE_TYPE), POINTER :: LP=>NULL()
 
 ALLOCATE(ZZ_GET(0:N_TRACKED_SPECIES))
+ALLOCATE( IJK_SLICE(3, IBAR*KBAR) )
 
 KFST4    => WORK1
 IL       => WORK2
@@ -929,6 +932,7 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                         !$OMP END ATOMIC
                ENDIF
             ENDDO WALL_LOOP1
+            !$omp end parallel do
 
             ! Determine sweep direction in physical space
  
@@ -941,20 +945,32 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
             ISTEP  = 1
             JSTEP  = 1
             KSTEP  = 1
+            IMIN = ISTART
+            JMIN = JSTART
+            KMIN = KSTART
+            IMAX = IEND
+            JMAX = JEND
+            KMAX = KEND
             IF (DLX(N) < 0._EB) THEN
                ISTART = IBAR
                IEND   = 1
                ISTEP  = -1
+               IMIN = IEND
+               IMAX = ISTART
             ENDIF
             IF (DLY(N) < 0._EB) THEN
                JSTART = JBAR
                JEND   = 1
                JSTEP  = -1
+               JMIN = JEND
+               JMAX = JSTART
             ENDIF
             IF (DLZ(N) < 0._EB) THEN
                KSTART = KBAR
                KEND   = 1
                KSTEP  = -1
+               KMIN = KEND
+               KMAX = KSTART
             ENDIF
  
             GEOMETRY: IF (CYLINDRICAL) THEN  ! Sweep in axisymmetric geometry
@@ -1027,6 +1043,69 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
 
             ELSE GEOMETRY  ! Sweep in 3D cartesian geometry
 
+              OMP_OR_SERIAL: IF (USE_OPENMP) THEN
+              DO N_SLICE = ISTEP*ISTART + JSTEP*JSTART + KSTEP*KSTART, &
+                          ISTEP*IEND + JSTEP*JEND + KSTEP*KEND
+                M_IJK = 0
+                IJK_SLICE = 0
+                DO K = KMIN, KMAX
+                  IF (ISTEP*JSTEP > 0) THEN ! I STARTS HIGH
+                    JSTART = MAX(JMIN, JSTEP*(N_SLICE - KSTEP*K - ISTEP*IMAX))
+                    JEND   = MIN(JMAX, JSTEP*(N_SLICE - KSTEP*K - ISTEP*IMIN))
+                  ELSE IF (ISTEP*JSTEP < 0) THEN ! I STARTS LOW
+                    JSTART = MAX(JMIN, JSTEP*(N_SLICE - KSTEP*K - ISTEP*IMIN))
+                    JEND   = MIN(JMAX, JSTEP*(N_SLICE - KSTEP*K - ISTEP*IMAX))
+                  ENDIF
+                  IF (JSTART > JEND) THEN
+                    CYCLE
+                  ENDIF
+                  DO J = JSTART, JEND
+                    I = ISTEP * (N_SLICE - J*JSTEP - K*KSTEP)
+                    M_IJK = M_IJK+1
+                    IJK_SLICE(:,M_IJK) = (/I,J,K/)
+                  ENDDO
+                ENDDO
+
+                 !$OMP PARALLEL DO SCHEDULE(GUIDED) &
+                 !$OMP& PRIVATE(I, J, K, AY1, AX, VC1, AZ1, IC, ILXU, ILYU, &
+                 !$OMP& ILZU, VC, AY, AZ, IW, A_SUM, AIU_SUM, RAP)
+                 SLICELOOP: DO IJK = 1, M_IJK
+                   I = IJK_SLICE(1,IJK)
+                   J = IJK_SLICE(2,IJK)
+                   K = IJK_SLICE(3,IJK)
+
+                   AY1 = DZ(K) * ABS(DLY(N))
+                   AX  = DY(J) * DZ(K) * ABS(DLX(N))
+                   VC1 = DY(J) * DZ(K)
+                   AZ1 = DY(J) * ABS(DLZ(N))
+                   IC = CELL_INDEX(I,J,K)
+                   IF (SOLID(IC)) CYCLE SLICELOOP
+                   ILXU  = IL(I-ISTEP,J,K)
+                   ILYU  = IL(I,J-JSTEP,K)
+                   ILZU  = IL(I,J,K-KSTEP)
+                   VC  = DX(I) * VC1
+                   AY  = DX(I) * AY1
+                   AZ  = DX(I) * AZ1
+                   IF (IC/=0) THEN
+                       IW = WALL_INDEX(IC,-ISTEP)
+                       IF (WALL(IW)%BOUNDARY_TYPE==SOLID_BOUNDARY) ILXU = WALL(IW)%ONE_D%ILW(N,IBND)
+                       IW = WALL_INDEX(IC,-JSTEP*2)
+                       IF (WALL(IW)%BOUNDARY_TYPE==SOLID_BOUNDARY) ILYU = WALL(IW)%ONE_D%ILW(N,IBND)
+                       IW = WALL_INDEX(IC,-KSTEP*3)
+                       IF (WALL(IW)%BOUNDARY_TYPE==SOLID_BOUNDARY) ILZU = WALL(IW)%ONE_D%ILW(N,IBND)
+                   ENDIF
+                   A_SUM = AX + AY + AZ
+                   AIU_SUM = AX*ILXU + AY*ILYU + AZ*ILZU
+                   IF (VIRTUAL_PARTICLES) IL_UP(I,J,K) = MAX(0._EB,AIU_SUM/A_SUM)
+                   RAP = 1._EB/(A_SUM + EXTCOE(I,J,K)*VC*RSA(N))
+                   IL(I,J,K) = MAX(0._EB, RAP * (AIU_SUM + VC*RSA(N)*RFPI* &
+                                   ( KFST4(I,J,K)+KFST4W(I,J,K) + RSA_RAT*SCAEFF(I,J,K)*UIIOLD(I,J,K) ) ) )
+                 ENDDO SLICELOOP
+                 !$OMP END PARALLEL DO
+
+               ENDDO ! IPROP
+             ELSE OMP_OR_SERIAL
+               ! Serial code
                KLOOP: DO K=KSTART,KEND,KSTEP
                   AY1 = DZ(K) * ABS(DLY(N))
                   JLOOP: DO J=JSTART,JEND,JSTEP
@@ -1039,7 +1118,7 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                         ILXU  = IL(I-ISTEP,J,K)
                         ILYU  = IL(I,J-JSTEP,K)
                         ILZU  = IL(I,J,K-KSTEP)
-                        VC  = DX(I) * VC1                        
+                        VC  = DX(I) * VC1
                         AY  = DX(I) * AY1
                         AZ  = DX(I) * AZ1
                         IF (IC/=0) THEN
@@ -1051,7 +1130,7 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                            IF (WALL(IW)%BOUNDARY_TYPE==SOLID_BOUNDARY) ILZU = WALL(IW)%ONE_D%ILW(N,IBND)
                         ENDIF
                         A_SUM = AX + AY + AZ
-                        AIU_SUM = AX*ILXU + AY*ILYU + AZ*ILZU 
+                        AIU_SUM = AX*ILXU + AY*ILYU + AZ*ILZU
                         IF (VIRTUAL_PARTICLES) IL_UP(I,J,K) = MAX(0._EB,AIU_SUM/A_SUM)
                         RAP = 1._EB/(A_SUM + EXTCOE(I,J,K)*VC*RSA(N))
                         IL(I,J,K) = MAX(0._EB, RAP * (AIU_SUM + VC*RSA(N)*RFPI* &
@@ -1059,6 +1138,7 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                      ENDDO ILOOP
                   ENDDO JLOOP
                ENDDO KLOOP
+             ENDIF OMP_OR_SERIAL
  
             ENDIF GEOMETRY
 
