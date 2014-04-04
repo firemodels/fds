@@ -88,10 +88,6 @@ GLUI_Rollout *ROLLOUT_zone_bound=NULL;
 #define TRACERS 21
 #define PLOTISOTYPE 22
 #define CACHE_BOUNDARYDATA 23
-#ifdef pp_TRANSFORM
-#define TRANSFORM_SLICE 23
-#define RESET_SLICE 24
-#endif
 #define HIDEPATCHSURFACE 25
 #define DATA_transparent 26
 #define UNLOAD_QDATA 203

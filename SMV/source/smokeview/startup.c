@@ -1797,11 +1797,7 @@ void initvars(void){
 
   pixel_skip=0;
   smoke_extinct=7.600,smoke_dens=.50,smoke_pathlength=1.0;
-#ifdef pp_SMOKETEST
-  smoketest=1,show_smoketest=1;
-#else
   smoketest=0,show_smoketest=0;
-#endif
   showall_textures=0;
 
   update_load_startup=0;

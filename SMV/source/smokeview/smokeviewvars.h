@@ -1059,11 +1059,7 @@ SVEXTERN int SVDECL(updategetobstlabels,1);
 SVEXTERN int pixel_skip;
 SVEXTERN float smoke_extinct,smoke_dens,smoke_pathlength;
 SVEXTERN int smoke_alpha;
-#ifdef pp_SMOKETEST
 SVEXTERN int smoketest,show_smoketest;
-#else
-SVEXTERN int smoketest,show_smoketest;
-#endif
 SVEXTERN int showall_textures;
 
 SVEXTERN int SVDECL(ncolorbars,0);

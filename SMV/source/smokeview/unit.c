@@ -463,7 +463,7 @@ void InitUnits(void){
 
   ut = unitclasses_default + 3;
   ut->unit_index=0;
-#ifdef pp_SMOKDIFF
+#ifdef pp_SMOKEDIFF
   if(smokediff==1){
     ut->diff_index=2;
     ut->nunits=3;
@@ -538,7 +538,7 @@ void InitUnits(void){
 
   ut = unitclasses_default + 5;
   ut->unit_index=0;
-#ifdef pp_SMOKDIFF
+#ifdef pp_SMOKEDIFF
   if(smokediff==1){
     ut->diff_index=2;
     ut->nunits=3;
@@ -561,7 +561,7 @@ void InitUnits(void){
   strcpy(units[1].unit,"ppm");
   units[1].scale[0]=1000000.0;
   units[1].scale[1]=0.0;
-#ifdef pp_SMOKDIFF
+#ifdef pp_SMOKEDIFF
   if(smokediff==1){
     strcpy(units[2].unit,"% diff");
     units[3].scale[0]=0.16667;

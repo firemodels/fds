@@ -701,20 +701,35 @@ void usage(char **argv){
 
     labelptr=label+2;
     strcpy(label,"");
+#ifdef _DEBUG
+    strcat(label,", _DEBUG");
+#endif
+#ifdef EGZ
+    strcat(label,", EGZ");
+#endif
+#ifdef ISO_DEBUG
+    strcat(label,", ISO_DEBUG");
+#endif
+#ifdef pp_BETA
+    strcat(label,", pp_BETA");
+#endif
 #ifdef pp_COMPRESS
     strcat(label,", pp_COMPRESS");
 #endif
 #ifdef pp_CULL
     strcat(label,", pp_CULL");
 #endif
-#ifdef _DEBUG
-    strcat(label," _DEBUG");
+#ifdef pp_DEG
+    strcat(label,", pp_DEG");
 #endif
-#ifdef pp_DRAWISO
-    strcat(label,", pp_DRAWISO");
+#ifdef pp_DEVICE
+    strcat(label,", pp_DEVICE");
 #endif
-#ifdef EGZ
-    strcat(label,", EGZ");
+#ifdef pp_GEOMPRINT
+    strcat(label,", pp_GEOMPRINT");
+#endif
+#ifdef pp_GEOMTEST
+    strcat(label,", pp_GEOMTEST");
 #endif
 #ifdef pp_GPU
     strcat(label,", pp_GPU");
@@ -722,44 +737,59 @@ void usage(char **argv){
 #ifdef pp_GPUDEPTH
     strcat(label,", pp_GPUDEPTH");
 #endif
-#ifdef ISO_DEBUG
-    strcat(label,", ISO_DEBUG");
+#ifdef pp_GPUTHROTTLE
+    strcat(label,", pp_GPUTHROTTLE");
+#endif
+#ifdef pp_INTEL
+    strcat(label,", pp_INTEL");
+#endif
+#ifdef pp_LANG
+    strcat(label,", pp_LANG");
+#endif
+#ifdef pp_LINUX
+    strcat(label,", pp_LINUX");
 #endif
 #ifdef pp_LINUX64
     strcat(label,", pp_LINUX64");
 #endif
+#ifdef pp_MEMDEBUG
+    strcat(label,", pp_MEMDEBUG");
+#endif
 #ifdef pp_memstatus
     strcat(label,", pp_memstatus");
-#endif
-#ifdef pp_MESSAGE
-    strcat(label,", pp_MESSAGE");
-#endif
-#ifdef pp_OSX64
-    strcat(label,", pp_OSX64");
 #endif
 #ifdef pp_noappend
     strcat(label,", pp_noappend");
 #endif
+#ifdef pp_OFFICIAL_RELEASE
+    strcat(label,", pp_OFFICIAL_RELEASE");
+#endif
 #ifdef pp_OSX
     strcat(label,", pp_OSX");
+#endif
+#ifdef pp_OSX64
+    strcat(label,", pp_OSX64");
+#endif
+#ifdef pp_PILOT
+    strcat(label,", pp_PILOT");
 #endif
 #ifdef pp_release
     strcat(label," pp_release");
 #endif
-#ifdef pp_SMOKETEST
-    strcat(label,", pp_SMOKETEST");
+#ifdef pp_SMOKEDIFF
+    strcat(label,", pp_SMOKEDIFF");
 #endif
 #ifdef pp_THREAD
     strcat(label,", pp_THREAD");
-#endif
-#ifdef X64
-    strcat(label,", X64");
 #endif
 #ifdef USE_ZLIB
     strcat(label,", USE_ZLIB");
 #endif
 #ifdef WIN32
     strcat(label,", WIN32");
+#endif
+#ifdef X64
+    strcat(label,", X64");
 #endif
     PRINTF("  \n");
     PRINTF("%s\n\n",_("  Smokeview was built using the following pre-processing directives:"));

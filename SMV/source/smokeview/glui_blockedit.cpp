@@ -307,9 +307,6 @@ extern "C" void update_blockvals(int flag){
   EDIT_zmax->set_float_val(zmax);
   if(bchighlight!=NULL&&nsurfinfo>0){
     wall_case=bchighlight->walltype;
-#ifdef pp_WALLGROUP
-    wallgroup->set_int_val(wall_case);
-#endif
     OBJECT_CB(RADIO_WALL);
   }
 
