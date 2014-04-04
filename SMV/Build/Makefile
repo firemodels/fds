@@ -159,7 +159,7 @@ intel_linux_64 : $(obj)
 # ------------- intel_linux_64_db ----------------
 
 intel_linux_64_db : FFLAGS    = -O0 -m64 -static-intel -traceback -g -fpe0 -fltconsistency -WB -vec_report0 -fpp -D pp_noappend
-intel_linux_64_db : CFLAGS    = -O0 -g -m64 -static-intel -vec_report0 -D pp_LINUX64 -D pp_INTEL $(SMV_PROFILEFLAG)
+intel_linux_64_db : CFLAGS    = -O0 -g -m64 -static-intel -vec_report0 -D pp_LINUX64 -D pp_INTEL $(SMV_PROFILEFLAG) -Wall -Wextra
 intel_linux_64_db : LFLAGS    = -m64 -static-intel
 intel_linux_64_db : CC        = icc
 intel_linux_64_db : CPP       = icpc
