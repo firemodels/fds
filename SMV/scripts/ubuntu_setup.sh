@@ -12,6 +12,7 @@ INSTALL ()
 }
 
 echo > setup_ubuntu.txt
+apt-get update >> setup_ubuntu.txt
 
 INSTALL openssh-server
 INSTALL samba
@@ -46,16 +47,16 @@ echo ------------------------------- >> setup_ubuntu.txt
 
 INSTALL libxmu-dev
 INSTALL libxi-dev
-INSTALL g++multilib >> setup_ubuntu.txt
+INSTALL g++-multilib >> setup_ubuntu.txt
 INSTALL freeglut3
 INSTALL freeglut3-dev
 
 echo adding grive repository
 echo adding grive repository >> setup_ubuntu.txt
 echo >> setup_ubuntu.txt
-add-apt-repository ppa:thefanclub/grive-tools >> setup_ubuntu.txt
+add-apt-repository -y ppa:thefanclub/grive-tools >> setup_ubuntu.txt
 apt-get update >> setup_ubuntu.txt
-INSTALL grive-tools
+INSTALL grive
 INSTALL grive-tools
 INSTALL tcsh
 
