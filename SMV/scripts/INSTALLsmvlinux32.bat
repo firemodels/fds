@@ -25,9 +25,10 @@ cd %svn_root%\smv\scripts
 
 set scriptdir=FDS-SMV/SMV/scripts
 set uploaddir=FDS-SMV/SMV/for_bundle/uploads
-set smvdir=smv_%smv_version%_linux32
+set exe=smv_%smv_version%_linux32.sh
 
 echo updating 32 bit smokeview
-plink %svn_logon% %scriptdir%/copy_smokeview.csh %linux_hostname% %uploaddir%/%smvdir% FDS/%fds_edition%/bin
+
+plink %svn_logon% %linux_svn_root%/Utilities/uploads/%exe% y
 
 pause
