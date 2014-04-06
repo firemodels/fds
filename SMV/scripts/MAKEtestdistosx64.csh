@@ -32,5 +32,4 @@ cd $OSXDIR
 tar cvf ../$OSXDIR.tar .
 cd ..
 gzip $OSXDIR.tar
-$UPDATER osx 64 $OSXDIR.tar.gz $OSXDIR.sh FDS/FDS6
-
+$UPDATER OSX 64 $revision $OSXDIR.tar.gz $OSXDIR.sh FDS/FDS6 test

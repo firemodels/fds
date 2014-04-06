@@ -35,4 +35,13 @@ cd $DIR
 tar cvf ../$DIR.tar .
 cd ..
 gzip $DIR.tar
-$UPDATER $platform $DIR.tar.gz $DIR.sh FDS/$FDS_EDITION
+
+set platform2=$platform
+if ( "$platform" == "linux" ) then
+set platform2=Linux
+endif
+if ( "$platform" == "osx" ) then
+set platform2=OSX
+endif
+
+$UPDATER $platform2 $size $version $DIR.tar.gz $DIR.sh FDS/$FDS_EDITION release
