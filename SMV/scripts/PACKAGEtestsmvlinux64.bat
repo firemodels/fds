@@ -33,9 +33,9 @@ echo making 64 bit Linux test distribution archive
 plink %svn_logon% %scriptdir%/MAKEtestdistlinux64.csh %smv_revision%
 
 echo downloading Linux Smokeview files
-pscp %svn_logon%:%bundledir%/smv_test_%smv_revision%_linux64.tar.gz ..\for_bundle\uploads\.
+pscp %svn_logon%:%bundledir%/smv_test_%smv_revision%_linux64.sh ..\for_bundle\uploads\.
 
-echo copying ..\for_bundle\uploads\smv_test_%smv_revision%_linux64.tar.gz to %gupload%
-copy ..\for_bundle\uploads\smv_test_%smv_revision%_linux64.tar.gz "%gupload%"
+echo copying ..\for_bundle\uploads\smv_test_%smv_revision%_linux64.sh to %gupload%
+copy ..\for_bundle\uploads\smv_test_%smv_revision%_linux64.sh "%gupload%"
 
 pause

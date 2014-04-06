@@ -34,9 +34,9 @@ echo making Linux archives
 plink %svn_logon% %scriptdir%/MAKEtestdistlinux32.csh %smv_revision%
 
 echo downloading Linux Smokeview files
-pscp %svn_logon%:%bundledir%/smv_test_%smv_revision%_linux32.tar.gz ..\for_bundle\uploads\.
+pscp %svn_logon%:%bundledir%/smv_test_%smv_revision%_linux32.sh ..\for_bundle\uploads\.
 
-echo copying ..\for_bundle\uploads\smv_test_%smv_revision%_linux32.tar.gz to %gupload%
-copy ..\for_bundle\uploads\smv_test_%smv_revision%_linux32.tar.gz "%gupload%"
+echo copying ..\for_bundle\uploads\smv_test_%smv_revision%_linux32.sh to %gupload%
+copy ..\for_bundle\uploads\smv_test_%smv_revision%_linux32.sh "%gupload%"
 
 pause
