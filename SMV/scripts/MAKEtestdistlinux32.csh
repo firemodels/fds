@@ -29,5 +29,5 @@ cd $LINUXDIR
 tar cvf ../$LINUXDIR.tar .
 cd ..
 gzip $LINUXDIR.tar
-$UPDATER linux $LINUXDIR.tar.gz $LINUXDIR.sh FDS/FDS6
+$UPDATER linux 32 $LINUXDIR.tar.gz $LINUXDIR.sh FDS/FDS6
 
