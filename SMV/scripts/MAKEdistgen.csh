@@ -18,15 +18,18 @@ cd $FORBUNDLE/uploads
 
 rm -rf $DIR
 mkdir -p $DIR
+mkdir -p $DIR/bin
 mkdir -p $DIR/Documentation
 cp $FORBUNDLE/readme.html $DIR/Documentation/release_notes.html
 
-cp $FORBUNDLE/objects.svo $DIR/.
-scp $HOST\:$BACKGROUNDDIR/background $DIR/.
-scp $HOST\:$SMOKEDIFFDIR/smokediff_$platformsize $DIR/smokediff
-scp $HOST\:$SMOKEVIEWDIR/smokeview_$platformsize $DIR/smokeview
-scp $HOST\:$SMOKEZIPDIR/smokezip_$platformsize $DIR/smokezip
-scp $HOST\:$WINDDIR/wind2fds_$platformsize $DIR/wind2fds
+cp $FORBUNDLE/objects.svo $DIR/bin/.
+scp $HOST\:$BACKGROUNDDIR/background $DIR/bin/.
+scp $HOST\:$SMOKEDIFFDIR/smokediff_$platformsize $DIR/bin/smokediff
+scp $HOST\:$SMOKEVIEWDIR/smokeview_$platformsize $DIR/bin/smokeview
+scp $HOST\:$SMOKEZIPDIR/smokezip_$platformsize $DIR/bin/smokezip
+scp $HOST\:$WINDDIR/wind2fds_$platformsize $DIR/bin/wind2fds
 rm -f $DIR.tar $DIR.tar.gz
-tar cvf $DIR.tar $DIR/.
+cd $DIR
+tar cvf ../$DIR.tar .
+cd ..
 gzip $DIR.tar

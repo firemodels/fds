@@ -8,6 +8,7 @@ set BACKGROUNDDIR=$REMOTESVNROOT/Utilities/background/intel_osx_32
 set SMVDIR=$REMOTESVNROOT/SMV/Build/intel_osx_64
 set SMZDIR=$REMOTESVNROOT/Utilities/smokezip/intel_osx_64
 set SMDDIR=$REMOTESVNROOT/Utilities/smokediff/intel_osx_64
+set WINDDIR=$REMOTESVNROOT/Utilities/wind2fds/intel_osx_64
 set FORBUNDLE=$SVNROOT/SMV/for_bundle
 set OSXDIR=smv_test\_$revision\_osx64
 
@@ -15,14 +16,18 @@ cd $FORBUNDLE/uploads
 
 rm -rf $OSXDIR
 mkdir -p $OSXDIR
+mkdir -p $OSXDIR/bin
 mkdir -p $OSXDIR/Documentation
 
-cp $FORBUNDLE/objects.svo $OSXDIR/.
-cp $FORBUNDLE/*.po $OSXDIR/.
-scp $OSXHOST\:$BACKGROUNDDIR/background $OSXDIR/.
-scp $OSXHOST\:$SMVDIR/smokeview_osx_test_64 $OSXDIR/.
-scp $OSXHOST\:$SMZDIR/smokezip_osx_64 $OSXDIR/.
-scp $OSXHOST\:$SMDDIR/smokediff_osx_64 $OSXDIR/.
+cp $FORBUNDLE/objects.svo $OSXDIR/bin/.
+cp $FORBUNDLE/*.po $OSXDIR/bin/.
+scp $OSXHOST\:$BACKGROUNDDIR/background $OSXDIR/bin/.
+scp $OSXHOST\:$SMVDIR/smokeview_osx_test_64 $OSXDIR/bin/smokeview
+scp $OSXHOST\:$SMZDIR/smokezip_osx_64 $OSXDIR/bin/smokezip
+scp $OSXHOST\:$SMDDIR/smokediff_osx_64 $OSXDIR/bin/smokediff
+scp $OSXHOST\:$SMDDIR/wind2fds_osx_64 $OSXDIR/bin/wind2fds
 rm -f $OSXDIR.tar $OSXDIR.tar.gz
-tar cvf $OSXDIR.tar $OSXDIR/.
+cd $OSXDIR
+tar cvf ../$OSXDIR.tar .
+cd ..
 gzip $OSXDIR.tar
