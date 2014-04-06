@@ -1,5 +1,5 @@
 #!/bin/bash
-EXPECTED_ARGS=5
+EXPECTED_ARGS=7
 
 if [ $# -ne $EXPECTED_ARGS ]
 then
@@ -18,16 +18,25 @@ fi
 
 ostype=$1
 ossize=$2
-SMV_TAR=$3
-INSTALLER=$4
-INSTALLDIR=$5
+revision=$3
+SMV_TAR=$4
+INSTALLER=$5
+INSTALLDIR=$6
+TYPE=$7
+
+if [ "$TYPE" == "test" ] 
+then
+  TYPE=revision
+else
+  TYPE=version
+fi
 
 cat << EOF > $INSTALLER
 #!/bin/bash
 
 OVERRIDE=\$1
 echo ""
-echo "Smokeview $SMVVERSION updater for $ostype $ossize"
+echo "Updating Smokeview to $TYPE $revision for $ossize bit $ostype"
 echo ""
 echo "Options:"
 echo "  1) Press <Enter> to begin update"
