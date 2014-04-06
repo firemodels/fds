@@ -11,6 +11,7 @@ set SMDDIR=$REMOTESVNROOT/Utilities/smokediff/intel_osx_64
 set WINDDIR=$REMOTESVNROOT/Utilities/wind2fds/intel_osx_64
 set FORBUNDLE=$SVNROOT/SMV/for_bundle
 set OSXDIR=smv_test\_$revision\_osx64
+set UPDATER=$SVNROOT/Utilities/Scripts/make_updater.sh
 
 cd $FORBUNDLE/uploads
 
@@ -31,3 +32,5 @@ cd $OSXDIR
 tar cvf ../$OSXDIR.tar .
 cd ..
 gzip $OSXDIR.tar
+$UPDATER osx $OSXDIR.tar.gz $OSXDIR.sh FDS/FDS6
+

@@ -30,12 +30,12 @@ set scriptdir=FDS-SMV/SMV/scripts
 set bundledir=FDS-SMV/SMV/for_bundle/uploads
 
 echo making 64 bit Smokeview OSX distribution archive
-plink %svn_logon% %scriptdir%/MAKEdistgen.csh %version% osx 64 %osx_hostname%
+plink %svn_logon% %scriptdir%/MAKEdistgen.csh %version% osx 64 %osx_hostname% %fds_edition%
 
 echo downloading 64 bit Smokeview OSX distribution archive
-pscp %svn_logon%:%bundledir%/smv_%version%_osx64.tar.gz ..\for_bundle\uploads\.
+pscp %svn_logon%:%bundledir%/smv_%version%_osx64.sh ..\for_bundle\uploads\.
 
-echo copying ..\for_bundle\uploads\smv_%version%_osx64.tar.gz to %gupload%
-copy ..\for_bundle\uploads\smv_%version%_osx64.tar.gz "%gupload%"
+echo copying ..\for_bundle\uploads\smv_%version%_osx64.sh to %gupload%
+copy ..\for_bundle\uploads\smv_%version%_osx64.sh "%gupload%"
 
 pause

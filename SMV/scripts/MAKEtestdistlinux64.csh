@@ -9,6 +9,7 @@ set SMDDIR=$SVNROOT/Utilities/smokediff/intel_linux_64
 set WINDDIR=$SVNROOT/Utilities/wind2fds/intel_linux_64
 set FORBUNDLE=$SVNROOT/SMV/for_bundle
 set LINUXDIR=smv_test\_$revision\_linux64
+set UPDATER=$SVNROOT/Utilities/Scripts/make_updater.sh
 
 cd $FORBUNDLE/uploads
 
@@ -28,3 +29,4 @@ cd $LINUXDIR
 tar cvf ../$LINUXDIR.tar .
 cd ..
 gzip $LINUXDIR.tar
+$UPDATER linux $LINUXDIR.tar.gz $LINUXDIR.sh FDS/FDS6

@@ -4,6 +4,7 @@ set platform=$2
 set size=$3
 set SVNROOT=FDS-SMV
 set HOST=$4
+set FDS_EDITION=$5
 
 set platformsize=${platform}_$size
 set BACKGROUNDDIR=$SVNROOT/Utilities/background/intel_${platform}_32
@@ -13,6 +14,7 @@ set SMOKEDIFFDIR=$SVNROOT/Utilities/smokediff/intel_$platformsize
 set WINDDIR=$SVNROOT/Utilities/wind2fds/intel_$platformsize
 set FORBUNDLE=~/$SVNROOT/SMV/for_bundle
 set DIR=smv_${version}_$platform$size
+set UPDATER=~/$SVNROOT/Utilities/Scripts/make_updater.sh
 
 cd $FORBUNDLE/uploads
 
@@ -33,3 +35,4 @@ cd $DIR
 tar cvf ../$DIR.tar .
 cd ..
 gzip $DIR.tar
+$UPDATER $platform $DIR.tar.gz $DIR.sh FDS/$FDS_EDITION
