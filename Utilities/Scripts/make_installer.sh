@@ -28,12 +28,26 @@ then
 LDLIBPATH=DYLD_LIBRARY_PATH
 fi
 
+if [ "$ossize" == "intel64" ]
+then
+size2=64
+else
+size2=32
+fi
+
+ostype2=$ostype
+if [ "$ostype" == "LINUX" ]
+then
+ostype2=Linux
+fi
+
+
 cat << EOF > $INSTALLER
 #!/bin/bash
 
 OVERRIDE=\$1
 echo ""
-echo "FDS $FDSVERSION and Smokeview $SMVVERSION installer for $ostype $ossize"
+echo "Installing FDS $FDSVERSION and Smokeview $SMVVERSION on $size2 bit $ostype2"
 echo ""
 echo "Options:"
 echo "  1) Press <Enter> to begin installation"
