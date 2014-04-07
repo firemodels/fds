@@ -107,6 +107,7 @@ EOF
   if [ "$ostype" == "OSX" ]; then
 cat << EOF >> $INSTALLER
     echo "  Press 1 to update in /Applications/$INSTALLDIR"
+    echo "  Press 2 to update in \$HOME/$INSTALLDIR"
 EOF
   else
 cat << EOF >> $INSTALLER
@@ -130,6 +131,8 @@ if [ "$ostype" == "OSX" ]; then
 cat << EOF >> $INSTALLER
   if [[ "\$answer" == "1" || "\$answer" == "" ]]; then
     eval SMV_root=/Applications/$INSTALLDIR
+  elif [ "\$answer" == "2" ]; then
+    eval SMV_root=\$HOME/$INSTALLDIR
   else
     eval SMV_root=\$answer
   fi
