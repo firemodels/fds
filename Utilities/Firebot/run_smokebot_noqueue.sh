@@ -8,4 +8,4 @@ do case $OPTION in
   ;;
 esac
 done
-bash -lc "./smokebot_linux_wrapper.sh -o 2 -s -q none $MAKEMOVIES" &
+bash -lc "./smokebot_linux_wrapper.sh -s -q none $MAKEMOVIES" &
