@@ -47,7 +47,7 @@ cat << EOF > $INSTALLER
 
 OVERRIDE=\$1
 echo ""
-echo "Installing FDS $FDSVERSION and Smokeview $SMVVERSION on $size2 bit $ostype2"
+echo "Installing $size2 bit $ostype2 FDS $FDSVERSION and Smokeview $SMVVERSION"
 echo ""
 echo "Options:"
 echo "  1) Press <Enter> to begin installation"
@@ -203,13 +203,21 @@ fi
 
 echo ""
 echo "Where would you like to install FDS?"
-  if [ "$ostype" == "OSX" ]; then
+EOF
+  if [ "$ostype" == "OSX" ]
+then
+cat << EOF >> $INSTALLER
     echo "  Press 1 to install in /Applications/$INSTALLDIR"
+    echo "  Press 2 to install in \$HOME/$INSTALLDIR"
+EOF
   else
+cat << EOF >> $INSTALLER
     echo "  Press 1 to install in \$HOME/$INSTALLDIR"
     echo "  Press 2 to install in /opt/$INSTALLDIR"
     echo "  Press 3 to install in /usr/local/bin/$INSTALLDIR"
+EOF
   fi
+cat << EOF >> $INSTALLER
 echo "  Enter directory path to install elsewhere"
 
 if [ "\$OVERRIDE" == "y" ] 
@@ -219,13 +227,20 @@ else
   read answer
 fi
 
-if [ "$ostype" == "OSX" ]; then
+EOF
+if [ "$ostype" == "OSX" ]
+then
+cat << EOF >> $INSTALLER
   if [[ "\$answer" == "1" || "\$answer" == "" ]]; then
     eval FDS_root=/Applications/$INSTALLDIR
+  elif [[ "\$answer" == "2" ]]; then
+    eval FDS_root=\$HOME/$INSTALLDIR
   else
     eval FDS_root=\$answer
   fi
+EOF
 else
+cat << EOF >> $INSTALLER
   if [[ "\$answer" == "1" || "\$answer" == "" ]]; then
     eval FDS_root=\$HOME/$INSTALLDIR
   elif [ "\$answer" == "2" ]; then
@@ -235,7 +250,9 @@ else
   else
     eval FDS_root=\$answer
   fi
+EOF
 fi
+cat << EOF >> $INSTALLER
 
 #--- do we want to proceed
 
@@ -417,8 +434,9 @@ cp \$BASHFDS ~/.bashrc_fds
 rm \$BASHFDS
 
 #--- update .bash_profile
-
+EOF
 if [ "$ostype" == "OSX" ]; then
+cat << EOF >> $INSTALLER
   BACKUP_FILE ~/.bash_profile
 
   BASHPROFILETEMP=/tmp/.bash_profile_temp_\$\$
@@ -431,11 +449,12 @@ if [ "$ostype" == "OSX" ]; then
   echo source \~/.bashrc_fds $ossize >> \$BASHPROFILETEMP
   cp \$BASHPROFILETEMP ~/.bash_profile
   rm \$BASHPROFILETEMP
+EOF
 fi
 
-#--- update .bashrc
-
 if [ "$ostype" != "OSX" ]; then
+cat << EOF >> $INSTALLER
+#--- update .bashrc
   BACKUP_FILE ~/.bashrc
 
   BASHRCTEMP=/tmp/.bashrc_temp_\$\$
@@ -448,8 +467,10 @@ if [ "$ostype" != "OSX" ]; then
   echo source \~/.bashrc_fds $ossize >> \$BASHRCTEMP
   cp \$BASHRCTEMP ~/.bashrc
   rm \$BASHRCTEMP
+EOF
 fi
 
+cat << EOF >> $INSTALLER
 #--- update .cshrc
 
 BACKUP_FILE ~/.cshrc
