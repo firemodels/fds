@@ -84,6 +84,8 @@ tls_trust_file /usr/share/ca-certificates/mozilla/Equifax_Secure_CA.crt
 user user@gmail.com
 password userpasswd
 port 587
+
+account default: gmail
 EOF
 
 echo copy ~/.mailrc_ORIG to ~/.mailrc
