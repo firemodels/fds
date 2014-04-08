@@ -103,5 +103,6 @@ apt-get update >> setup_ubuntu.txt
 INSTALL grive
 INSTALL grive-tools
 INSTALL tcsh
+INSTALL libnuma-dev
 
 echo setup complete

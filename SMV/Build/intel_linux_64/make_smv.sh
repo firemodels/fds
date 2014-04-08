@@ -1,4 +1,4 @@
-#!/bin/bash -f
+#!/bin/bash
 source ../setopts.sh $*
 source ../test_ifort.sh
 source $IFORT_COMPILER/bin/compilervars.sh intel64
