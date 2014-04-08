@@ -73,7 +73,7 @@ FDS Version \fdsversion \\
 \vfill
 
 \begin{flushright}
-\includegraphics[width=1in]{../Bibliography/doc} 
+\includegraphics[width=1in]{../Bibliography/doc}
 \end{flushright}
 
 \titlesigs
@@ -1743,7 +1743,16 @@ this off almost immediately.
 \label{symmetry_test}
 \end{figure}
 
+\subsection{Axial symmetry (\texorpdfstring{{\bf cyl\_test}}{cyl\_test})}
 
+FDS has an option to perform an axially-symmetric calculation, which can be useful for simulating a laminar diffusion flame, like a bunsen burner or candle. When invoking this option, the user still specifies three coordinates, $x$, $y$, and $z$, but it is understood that $x$ is the radial coordinate, $r$, and $z$ is the vertical coordinate. The coordinate, $y$, is used only by Smokeview to draw the domain, and it should not influence the calculation at all. However, since FDS is primarily a three-dimensional, cartesian code, there is a possibility that a coding error might cause the specification of the $y$ dimension to have an effect on the result. Figure~\ref{cyl_test} displays a temperature trace from two axially-symmetric simulations, one in which the lateral size of the cells, $\delta y$, is 2~mm, and one in which it is 2~cm. The two curves ought to lie exactly upon each other, which is indicated by a single red curve.
+\begin{figure}[h!]
+\begin{center}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/cyl_test} 
+\end{center}
+\caption[The {\bf cyl\_test} case]{Temperature trace from two axially-symmetric calculations with different $\delta y$.}
+\label{cyl_test}
+\end{figure}
 
 \subsection{Velocity boundary condition implementation (\texorpdfstring{{\bf velocity\_bc\_test}}{velocity\_bc\_test})}
 

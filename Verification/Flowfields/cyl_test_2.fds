@@ -1,0 +1,10 @@
+&HEAD CHID='cyl_test_2' /         
+&TIME T_END=20 /             
+&MESH IJK=100,1,24, XB=0,10,-0.01,0.01 ,0.0,2.4, CYLINDRICAL=.TRUE. /
+&SURF ID='HEAT', TMP_FRONT=250, VEL=-0.05 /
+&OBST XB=0,2,-0.01,0.01, 0.0,0.4 /         
+&VENT XB=0,2,-0.01,0.01, 0.4,0.4, SURF_ID='HEAT' /             
+&VENT MB='XMAX', SURF_ID='OPEN' /       
+&SLCF PBY=0., QUANTITY='TEMPERATURE', VECTOR=.TRUE. /
+&DEVC ID='temp2', XYZ=1,0,2.39, QUANTITY='TEMPERATURE' /
+&TAIL /
