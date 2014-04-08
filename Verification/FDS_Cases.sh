@@ -43,6 +43,8 @@ $RUNFDS Fires HoC_Ideal
 $RUNFDS Fires HoC_NonIdeal
 
 $RUNFDS Flowfields divergence_test
+$RUNFDS Flowfields cyl_test_1
+$RUNFDS Flowfields cyl_test_2
 $RUNFDS Flowfields gas_filling
 $RUNFDS Flowfields helium_2d
 $RUNFDS Flowfields helium_2d_isothermal
