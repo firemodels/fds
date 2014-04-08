@@ -1,11 +1,9 @@
 #!/bin/bash
-
 # run this script using sudo
 
 # set user name of person "owning" cfast and FDS-SMV repositories
 USERNAME=change to your real user name
 
-# ---- shouldn't need to edit below ----
 
 INSTALL ()
 {
@@ -18,6 +16,7 @@ INSTALL ()
 }
 
 echo > setup_ubuntu.txt
+apt-get update >> setup_ubuntu.txt
 
 INSTALL openssh-server
 INSTALL samba
@@ -54,7 +53,7 @@ echo ------------------------------- >> setup_ubuntu.txt
 
 INSTALL libxmu-dev
 INSTALL libxi-dev
-INSTALL g++multilib
+INSTALL g++-multilib
 INSTALL freeglut3
 INSTALL freeglut3-dev
 INSTALL texlive-latex-base
@@ -67,7 +66,7 @@ INSTALL heirloom-mailx
 INSTALL gfortran
 INSTALL mjpegtools
 
-echo edit ~/.msmtprc_ORIG to ~/.msmtprc and edit
+echo copy ~/.msmtprc_ORIG to ~/.msmtprc and edit
 cat << EOF > ~/.msmtprc_ORIG
 #---- ~/.msmtprc -----
 #Gmail account
@@ -93,14 +92,14 @@ cat << EOF > ~/.mailrc_ORIG
 set sendmail="/usr/bin/msmtp"
 set message-sendmail-extra-arguments="-a gmail"
 EOF
- 
-#account default : gmail
 
 echo adding grive repository
 echo adding grive repository >> setup_ubuntu.txt
 echo >> setup_ubuntu.txt
 add-apt-repository -y ppa:thefanclub/grive-tools >> setup_ubuntu.txt
-apt-get -y update >> setup_ubuntu.txt
+apt-get update >> setup_ubuntu.txt
+INSTALL grive
 INSTALL grive-tools
+INSTALL tcsh
 
 echo setup complete
