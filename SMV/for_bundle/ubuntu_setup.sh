@@ -106,4 +106,14 @@ INSTALL tcsh
 INSTALL libnuma-dev
 INSTALL gparted
 
+# adding NVIDIA video drivers (by hand)
+
+# first time
+#sudo add-apt-repository ppa:xorg-edgers/ppa
+#sudo apt-get update
+#sudo apt-get install nvidia-331
+#
+# next and succeeding times
+#sudo apt-get dist-upgrade
+
 echo setup complete
