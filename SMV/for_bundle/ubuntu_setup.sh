@@ -105,15 +105,17 @@ INSTALL grive-tools
 INSTALL tcsh
 INSTALL libnuma-dev
 INSTALL gparted
+INSTALL mesa-utils
+INSTALL apache2
 
 # adding NVIDIA video drivers (by hand)
 
 # first time
-#sudo add-apt-repository ppa:xorg-edgers/ppa
-#sudo apt-get update
-#sudo apt-get install nvidia-331
-#
+
+#sudo apt-get install nvidia-current
+
 # next and succeeding times
+
 #sudo apt-get dist-upgrade
 
 echo setup complete
