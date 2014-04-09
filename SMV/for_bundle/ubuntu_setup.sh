@@ -104,5 +104,6 @@ INSTALL grive
 INSTALL grive-tools
 INSTALL tcsh
 INSTALL libnuma-dev
+INSTALL gparted
 
 echo setup complete
