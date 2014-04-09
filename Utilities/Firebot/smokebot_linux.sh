@@ -19,6 +19,11 @@ RUNDEBUG="1"
 OPENMP=
 RUN_OPENMP=
 
+WEBHOSTNAME=blaze.nist.gov
+if [ "$SMOKEBOT_HOSTNAME" != "" ] ; then
+WEBHOSTNAME=$SMOKEBOT_HOSTNAME
+fi
+ 
 notfound=`icc -help 2>&1 | tail -1 | grep "not found" | wc -l`
 if [ "$notfound" == "1" ] ; then
   export haveCC="0"
@@ -1066,9 +1071,9 @@ email_build_status()
    echo "      host: $hostname " >> $TIME_LOG
    echo "start time: $start_time " >> $TIME_LOG
    echo " stop time: $stop_time " >> $TIME_LOG
-   echo "   results (private): http://blaze.nist.gov/VV/SMV2" >> $TIME_LOG
-   echo "   results (public) :  https://googledrive.com/host/0B-W-dkXwdHWNN3N2eG92X2taRFk/index.html" >> $TIME_LOG
-   echo "   manuals (private): http://blaze.nist.gov/smokebot" >> $TIME_LOG
+   echo "   results (private): http://$WEBHOSTNAME/VV/SMV2" >> $TIME_LOG
+   echo "   results (public) : https://googledrive.com/host/0B-W-dkXwdHWNN3N2eG92X2taRFk/index.html" >> $TIME_LOG
+   echo "   manuals (private): http://$WEBHOSTNAME/smokebot" >> $TIME_LOG
    echo "   manuals (public) : https://drive.google.com/folderview?id=0B_wB1pJL2bFQaDJaOFNnUDR4LXM#list" >> $TIME_LOG
   if [[ $THIS_SMVSVN != $LAST_SMVSVN ]] ; then
     cat $SVN_SMVLOG >> $TIME_LOG
