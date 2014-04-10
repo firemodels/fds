@@ -4,14 +4,14 @@
 # This script is a simplified version of Kris Overholt's firebot script.
 # It runs the smokeview verification suite (not FDS) on the latest
 # revision of the repository.  It does not erase files that are not
-# the repository.  This allows one to test working files before they
+# in the repository.  This allows one to test working files before they
 # have been committed.  
 
 #  ===================
 #  = Input variables =
 #  ===================
 
-FIREBOT_QUEUE=smokebot
+SMOKEBOT_QUEUE=smokebot
 MAKEMOVIES=
 RUNAUTO=
 BUILDBUNDLE=
@@ -53,7 +53,7 @@ case $OPTION in
    RUN_OPENMP="-o $nthreads"
    ;;
   q)
-   FIREBOT_QUEUE="$OPTARG"
+   SMOKEBOT_QUEUE="$OPTARG"
    ;;
   s)
    RUNDEBUG="0"
@@ -69,25 +69,27 @@ IB=ib
 fi
 
 platform="linux"
+platform2="Linux"
 if [ "`uname`" == "Darwin" ]
 then
   platform="osx"
+  platform2="OSX"
 fi
 export platform
 
-FIREBOT_USERNAME="`whoami`"
+SMOKEBOT_USERNAME="`whoami`"
 
 cd
-FIREBOT_HOME_DIR="`pwd`"
-FIREBOT_DIR="$FIREBOT_HOME_DIR/SMOKEBOT"
-export FDS_SVNROOT="$FIREBOT_HOME_DIR/FDS-SMV"
+SMOKEBOT_HOME_DIR="`pwd`"
+SMOKEBOT_DIR="$SMOKEBOT_HOME_DIR/SMOKEBOT"
+export FDS_SVNROOT="$SMOKEBOT_HOME_DIR/FDS-SMV"
 export SMV_Summary="$FDS_SVNROOT/Manuals/SMV_Summary"
-CFAST_SVNROOT="$FIREBOT_HOME_DIR/cfast"
-ERROR_LOG=$FIREBOT_DIR/output/errors
-TIME_LOG=$FIREBOT_DIR/output/timings
-WARNING_LOG=$FIREBOT_DIR/output/warnings
-GUIDE_DIR=$FIREBOT_DIR/guides
-STAGE_STATUS=$FIREBOT_DIR/output/stage_status
+CFAST_SVNROOT="$SMOKEBOT_HOME_DIR/cfast"
+ERROR_LOG=$SMOKEBOT_DIR/output/errors
+TIME_LOG=$SMOKEBOT_DIR/output/timings
+WARNING_LOG=$SMOKEBOT_DIR/output/warnings
+GUIDE_DIR=$SMOKEBOT_DIR/guides
+STAGE_STATUS=$SMOKEBOT_DIR/output/stage_status
 
 THIS_FDS_AUTHOR=
 THIS_FDS_FAILED=0
@@ -98,7 +100,7 @@ if [ -e $FDS_STATUS_FILE ] ; then
 fi
 
 # Load mailing list for status report
-source $FIREBOT_DIR/firebot_email_list.sh
+source $SMOKEBOT_DIR/firebot_email_list.sh
 
 mailTo=$mailToSMV
 if [[ "$LAST_FDS_FAILED" == "1" ]] ; then
@@ -132,9 +134,6 @@ run_auto()
   FDS_SOURCE=$FDS_SVNROOT/FDS_Source
   SVN_FDSFILE=$FDS_SVNROOT/fds_revision
   SVN_FDSLOG=$FDS_SVNROOT/FDS_log
-
-  SMOKEBOTDIR=~/SMOKEBOT/
-  SMOKEBOTEXE=./run_smokebot.sh
 
   MESSAGE_FILE=$FDS_SVNROOT/message
 
@@ -224,8 +223,8 @@ clean_smokebot_history()
 {
    
    # Clean Smokebot metafiles
-   MKDIR $FIREBOT_DIR
-   cd $FIREBOT_DIR
+   MKDIR $SMOKEBOT_DIR
+   cd $SMOKEBOT_DIR
    MKDIR guides
    MKDIR history
    MKDIR output
@@ -244,32 +243,32 @@ clean_smokebot_history()
 
 update_and_compile_cfast()
 {
-   cd $FIREBOT_HOME_DIR
+   cd $SMOKEBOT_HOME_DIR
 
    # Check to see if CFAST repository exists
    if [ -e "$CFAST_SVNROOT" ]
    # If yes, then update the CFAST repository and compile CFAST
    then
-      echo "Updating and compiling CFAST:" > $FIREBOT_DIR/output/stage0_cfast
+      echo "Updating and compiling CFAST:" > $SMOKEBOT_DIR/output/stage0_cfast
       cd $CFAST_SVNROOT/CFAST
       
       # Update to latest SVN revision
-      svn update >> $FIREBOT_DIR/output/stage0_cfast 2>&1
+      svn update >> $SMOKEBOT_DIR/output/stage0_cfast 2>&1
       
    # If no, then checkout the CFAST repository and compile CFAST
    else
-      echo "Downloading and compiling CFAST:" > $FIREBOT_DIR/output/stage0_cfast
+      echo "Downloading and compiling CFAST:" > $SMOKEBOT_DIR/output/stage0_cfast
       mkdir -p $CFAST_SVNROOT
       cd $CFAST_SVNROOT
 
-      svn co https://cfast.googlecode.com/svn/trunk/cfast/trunk/CFAST CFAST >> $FIREBOT_DIR/output/stage0_cfast 2>&1
+      svn co https://cfast.googlecode.com/svn/trunk/cfast/trunk/CFAST CFAST >> $SMOKEBOT_DIR/output/stage0_cfast 2>&1
       
    fi
     # Build CFAST
     cd $CFAST_SVNROOT/CFAST/intel_${platform}_64
     rm -f cfast6_${platform}_64
     make --makefile ../makefile clean &> /dev/null
-    ./make_cfast.sh >> $FIREBOT_DIR/output/stage0_cfast 2>&1
+    ./make_cfast.sh >> $SMOKEBOT_DIR/output/stage0_cfast 2>&1
 
    # Check for errors in CFAST compilation
    cd $CFAST_SVNROOT/CFAST/intel_${platform}_64
@@ -279,7 +278,7 @@ update_and_compile_cfast()
    else
       echo "Errors from Stage 0 - CFAST:" >> $ERROR_LOG
       echo "CFAST failed to compile" >> $ERROR_LOG
-      cat $FIREBOT_DIR/output/stage0_cfast >> $ERROR_LOG
+      cat $SMOKEBOT_DIR/output/stage0_cfast >> $ERROR_LOG
       echo "" >> $ERROR_LOG
    fi
 
@@ -297,28 +296,28 @@ clean_svn_repo()
    # If not, create FDS repository and checkout
      dummy=true
    else
-      echo "Downloading FDS repository:" >> $FIREBOT_DIR/output/stage1 2>&1
-      cd $FIREBOT_HOME_DIR
-      svn co https://fds-smv.googlecode.com/svn/trunk/FDS/trunk/ FDS-SMV >> $FIREBOT_DIR/output/stage1 2>&1
+      echo "Downloading FDS repository:" >> $SMOKEBOT_DIR/output/stage1 2>&1
+      cd $SMOKEBOT_HOME_DIR
+      svn co https://fds-smv.googlecode.com/svn/trunk/FDS/trunk/ FDS-SMV >> $SMOKEBOT_DIR/output/stage1 2>&1
    fi
 }
 
 do_svn_checkout()
 {
    cd $FDS_SVNROOT
-   echo "Checking out latest revision." >> $FIREBOT_DIR/output/stage1 2>&1
-   svn update >> $FIREBOT_DIR/output/stage1 2>&1
-   SVN_REVISION=`tail -n 1 $FIREBOT_DIR/output/stage1 | sed "s/[^0-9]//g"`
+   echo "Checking out latest revision." >> $SMOKEBOT_DIR/output/stage1 2>&1
+   svn update >> $SMOKEBOT_DIR/output/stage1 2>&1
+   SVN_REVISION=`tail -n 1 $SMOKEBOT_DIR/output/stage1 | sed "s/[^0-9]//g"`
 }
 
 check_svn_checkout()
 {
    cd $FDS_SVNROOT
    # Check for SVN errors
-   if [[ `grep -E 'Updated|At revision' $FIREBOT_DIR/output/stage1 | wc -l` -ne 1 ]];
+   if [[ `grep -E 'Updated|At revision' $SMOKEBOT_DIR/output/stage1 | wc -l` -ne 1 ]];
    then
       echo "Errors from Stage 1 - SVN operations:" >> $ERROR_LOG
-      cat $FIREBOT_DIR/output/stage1 >> $ERROR_LOG
+      cat $SMOKEBOT_DIR/output/stage1 >> $ERROR_LOG
       echo "" >> $ERROR_LOG
       email_build_status
       exit
@@ -337,7 +336,7 @@ compile_fds_db()
    cd $FDS_SVNROOT/FDS_Compilation/${OPENMP}intel_${platform}_64_db
    rm -f fds_${OPENMP}intel_${platform}_64_db
    make --makefile ../makefile clean &> /dev/null
-   ./make_fds.sh &> $FIREBOT_DIR/output/stage2a
+   ./make_fds.sh &> $SMOKEBOT_DIR/output/stage2a
 }
 
 compile_fds_mpi_db()
@@ -346,7 +345,7 @@ compile_fds_mpi_db()
    cd $FDS_SVNROOT/FDS_Compilation/mpi_intel_${platform}_64$IB$DB
    rm -f fds_mpi_intel_${platform}_64$IB$DB
    make --makefile ../makefile clean &> /dev/null
-   ./make_fds.sh &> $FIREBOT_DIR/output/stage2b
+   ./make_fds.sh &> $SMOKEBOT_DIR/output/stage2b
 }
 
 check_compile_fds_db()
@@ -358,19 +357,19 @@ check_compile_fds_db()
       stage2a_success=true
    else
       echo "Errors from Stage 2a - Compile FDS debug:" >> $ERROR_LOG
-      cat $FIREBOT_DIR/output/stage2a >> $ERROR_LOG
+      cat $SMOKEBOT_DIR/output/stage2a >> $ERROR_LOG
       echo "" >> $ERROR_LOG
       THIS_FDS_FAILED=1
    fi
 
    # Check for compiler warnings/remarks
-   if [[ `grep -A 5 -E 'warning|remark' ${FIREBOT_DIR}/output/stage2a` == "" ]]
+   if [[ `grep -A 5 -E 'warning|remark' ${SMOKEBOT_DIR}/output/stage2a` == "" ]]
    then
       # Continue along
       :
    else
       echo "Stage 2a warnings:" >> $WARNING_LOG
-      grep -A 5 -E 'warning|remark' ${FIREBOT_DIR}/output/stage2a >> $WARNING_LOG
+      grep -A 5 -E 'warning|remark' ${SMOKEBOT_DIR}/output/stage2a >> $WARNING_LOG
       echo "" >> $WARNING_LOG
    # if the executable does not exist then an email has already been sent
       if [ -e "fds_${OPENMP}intel_${platform}_64_db" ] ; then
@@ -388,19 +387,19 @@ check_compile_fds_mpi_db()
       stage2b_success=true
    else
       echo "Errors from Stage 2b - Compile FDS MPI debug:" >> $ERROR_LOG
-      cat $FIREBOT_DIR/output/stage2b >> $ERROR_LOG
+      cat $SMOKEBOT_DIR/output/stage2b >> $ERROR_LOG
       echo "" >> $ERROR_LOG
       THIS_FDS_FAILED=1
    fi
 
    # Check for compiler warnings/remarks
-   if [[ `grep -A 5 -E 'warning|remark' ${FIREBOT_DIR}/output/stage2b| grep -v 'feupdateenv is not implemented'` == "" ]]
+   if [[ `grep -A 5 -E 'warning|remark' ${SMOKEBOT_DIR}/output/stage2b| grep -v 'feupdateenv is not implemented'` == "" ]]
    then
       # Continue along
       :
    else
       echo "Stage 2b warnings:" >> $WARNING_LOG
-      grep -A 5 -E 'warning|remark' ${FIREBOT_DIR}/output/stage2b | grep -v 'feupdateenv is not implemented'>> $WARNING_LOG
+      grep -A 5 -E 'warning|remark' ${SMOKEBOT_DIR}/output/stage2b | grep -v 'feupdateenv is not implemented'>> $WARNING_LOG
       echo "" >> $WARNING_LOG
    # if the executable does not exist then an email has already been sent
       if [ -e "fds_mpi_intel_${platform}_64$IB$DB" ] ; then
@@ -416,11 +415,11 @@ check_compile_fds_mpi_db()
 wait_verification_cases_debug_start()
 {
    # Scans qstat and waits for verification cases to start
-   if [[ "$FIREBOT_QUEUE" == "none" ]]
+   if [[ "$SMOKEBOT_QUEUE" == "none" ]]
    then
      while [[ `ps -u $USER -f | fgrep .fds | grep -v grep` != '' ]]; do
         JOBS_REMAINING=`ps -u $USER -f | fgrep .fds | grep -v grep | wc -l`
-        echo "Waiting for ${JOBS_REMAINING} verification cases to start." >> $FIREBOT_DIR/output/stage3
+        echo "Waiting for ${JOBS_REMAINING} verification cases to start." >> $SMOKEBOT_DIR/output/stage3
         TIME_LIMIT_STAGE="3"
         check_time_limit
         sleep 30
@@ -428,7 +427,7 @@ wait_verification_cases_debug_start()
    else
      while [[ `qstat -a | grep $(whoami) | grep Q` != '' ]]; do
         JOBS_REMAINING=`qstat -a | grep $(whoami) | grep $JOBPREFIX | grep Q | wc -l`
-        echo "Waiting for ${JOBS_REMAINING} verification cases to start." >> $FIREBOT_DIR/output/stage3
+        echo "Waiting for ${JOBS_REMAINING} verification cases to start." >> $SMOKEBOT_DIR/output/stage3
         TIME_LIMIT_STAGE="3"
         check_time_limit
         sleep 30
@@ -439,11 +438,11 @@ wait_verification_cases_debug_start()
 wait_verification_cases_debug_end()
 {
    # Scans qstat and waits for verification cases to end
-   if [[ "$FIREBOT_QUEUE" == "none" ]]
+   if [[ "$SMOKEBOT_QUEUE" == "none" ]]
    then
      while [[ `ps -u $USER -f | fgrep .fds | grep -v grep` != '' ]]; do
         JOBS_REMAINING=`ps -u $USER -f | fgrep .fds | grep -v grep | wc -l`
-        echo "Waiting for ${JOBS_REMAINING} verification cases to complete." >> $FIREBOT_DIR/output/stage3
+        echo "Waiting for ${JOBS_REMAINING} verification cases to complete." >> $SMOKEBOT_DIR/output/stage3
         TIME_LIMIT_STAGE="3"
         check_time_limit
         sleep 30
@@ -451,7 +450,7 @@ wait_verification_cases_debug_end()
    else
      while [[ `qstat -a | grep $(whoami) | grep $JOBPREFIX` != '' ]]; do
         JOBS_REMAINING=`qstat -a | grep $(whoami) | grep $JOBPREFIX | wc -l`
-        echo "Waiting for ${JOBS_REMAINING} verification cases to complete." >> $FIREBOT_DIR/output/stage3
+        echo "Waiting for ${JOBS_REMAINING} verification cases to complete." >> $SMOKEBOT_DIR/output/stage3
         TIME_LIMIT_STAGE="3"
         check_time_limit
         sleep 30
@@ -469,16 +468,16 @@ run_verification_cases_debug()
    cd $FDS_SVNROOT/Verification/scripts
 
    # Submit SMV verification cases and wait for them to start
-   echo 'Running SMV verification cases:' >> $FIREBOT_DIR/output/stage3 2>&1
-   ./Run_SMV_Cases.sh $USEINSTALL2 -d -q $FIREBOT_QUEUE >> $FIREBOT_DIR/output/stage3 2>&1
+   echo 'Running SMV verification cases:' >> $SMOKEBOT_DIR/output/stage3 2>&1
+   ./Run_SMV_Cases.sh $USEINSTALL2 -d -q $SMOKEBOT_QUEUE >> $SMOKEBOT_DIR/output/stage3 2>&1
    wait_verification_cases_debug_start
 
    # Wait some additional time for all cases to start
    sleep 30
 
    # Stop all cases
-   ./Run_SMV_Cases.sh $USEINSTALL2 -d -s >> $FIREBOT_DIR/output/stage3 2>&1
-   echo "" >> $FIREBOT_DIR/output/stage3 2>&1
+   ./Run_SMV_Cases.sh $USEINSTALL2 -d -s >> $SMOKEBOT_DIR/output/stage3 2>&1
+   echo "" >> $SMOKEBOT_DIR/output/stage3 2>&1
 
    # Wait for SMV verification cases to end
    wait_verification_cases_debug_end
@@ -501,7 +500,7 @@ check_verification_cases_debug()
    # Scan and report any errors in FDS verification cases
    cd $FDS_SVNROOT/Verification/Visualization
 
-   if [[ `grep 'Run aborted' -rI ${FIREBOT_DIR}/output/stage3` == "" ]] && \
+   if [[ `grep 'Run aborted' -rI ${SMOKEBOT_DIR}/output/stage3` == "" ]] && \
       [[ `grep Segmentation -rI * ../WUI/*` == "" ]] && \
       [[ `grep ERROR: -rI * ../WUI/*` == "" ]] && \
       [[ `grep 'STOP: Numerical' -rI * ../WUI/*` == "" ]] && \
@@ -509,23 +508,23 @@ check_verification_cases_debug()
    then
       stage3_success=true
    else
-      grep 'Run aborted' -rI $FIREBOT_DIR/output/stage3 > $FIREBOT_DIR/output/stage3_errors
-      grep Segmentation -rI * ../WUI/* >> $FIREBOT_DIR/output/stage3_errors
-      grep ERROR: -rI * ../WUI/* >> $FIREBOT_DIR/output/stage3_errors
-      grep 'STOP: Numerical' -rI * ../WUI/* >> $FIREBOT_DIR/output/stage3_errors
-      grep -A 20 forrtl -rI * ../WUI/* >> $FIREBOT_DIR/output/stage3_errors
+      grep 'Run aborted' -rI $SMOKEBOT_DIR/output/stage3 > $SMOKEBOT_DIR/output/stage3_errors
+      grep Segmentation -rI * ../WUI/* >> $SMOKEBOT_DIR/output/stage3_errors
+      grep ERROR: -rI * ../WUI/* >> $SMOKEBOT_DIR/output/stage3_errors
+      grep 'STOP: Numerical' -rI * ../WUI/* >> $SMOKEBOT_DIR/output/stage3_errors
+      grep -A 20 forrtl -rI * ../WUI/* >> $SMOKEBOT_DIR/output/stage3_errors
       
       echo "Errors from Stage 3 - Run verification cases (debug mode):" >> $ERROR_LOG
-      cat $FIREBOT_DIR/output/stage3_errors >> $ERROR_LOG
+      cat $SMOKEBOT_DIR/output/stage3_errors >> $ERROR_LOG
       echo "" >> $ERROR_LOG
       THIS_FDS_FAILED=1
    fi
-   if [[ `grep 'Warning' -rI ${FIREBOT_DIR}/output/stage3` == "" ]] 
+   if [[ `grep 'Warning' -rI ${SMOKEBOT_DIR}/output/stage3` == "" ]] 
    then
       no_warnings=true
    else
       echo "Stage 3 warnings:" >> $WARNING_LOG
-      grep 'Warning' -rI ${FIREBOT_DIR}/output/stage3 >> $WARNING_LOG
+      grep 'Warning' -rI ${SMOKEBOT_DIR}/output/stage3 >> $WARNING_LOG
       echo "" >> $WARNING_LOG
    fi
 }
@@ -540,7 +539,7 @@ compile_fds()
    cd $FDS_SVNROOT/FDS_Compilation/${OPENMP}intel_${platform}_64
    rm -f fds_${OPENMP}intel_${platform}_64
    make --makefile ../makefile clean &> /dev/null
-   ./make_fds.sh &> $FIREBOT_DIR/output/stage4a
+   ./make_fds.sh &> $SMOKEBOT_DIR/output/stage4a
 }
 
 compile_fds_mpi()
@@ -549,7 +548,7 @@ compile_fds_mpi()
    cd $FDS_SVNROOT/FDS_Compilation/mpi_intel_${platform}_64$IB
    rm -f fds_mpi_intel_${platform}_64$IB
    make --makefile ../makefile clean &> /dev/null
-   ./make_fds.sh &> $FIREBOT_DIR/output/stage4b
+   ./make_fds.sh &> $SMOKEBOT_DIR/output/stage4b
 }
 
 check_compile_fds()
@@ -561,19 +560,19 @@ check_compile_fds()
       stage4a_success=true
    else
       echo "Errors from Stage 4a - Compile FDS release:" >> $ERROR_LOG
-      cat $FIREBOT_DIR/output/stage4a >> $ERROR_LOG
+      cat $SMOKEBOT_DIR/output/stage4a >> $ERROR_LOG
       echo "" >> $ERROR_LOG
    fi
 
    # Check for compiler warnings/remarks
    # 'performing multi-file optimizations' and 'generating object file' are part of a normal compile
-   if [[ `grep -A 5 -E 'warning|remark' ${FIREBOT_DIR}/output/stage4a | grep -v 'performing multi-file optimizations' | grep -v 'generating object file'` == "" ]]
+   if [[ `grep -A 5 -E 'warning|remark' ${SMOKEBOT_DIR}/output/stage4a | grep -v 'performing multi-file optimizations' | grep -v 'generating object file'` == "" ]]
    then
       # Continue along
       :
    else
       echo "Stage 4a warnings:" >> $WARNING_LOG
-      grep -A 5 -E 'warning|remark' ${FIREBOT_DIR}/output/stage4a | grep -v 'performing multi-file optimizations' | grep -v 'generating object file'>> $WARNING_LOG
+      grep -A 5 -E 'warning|remark' ${SMOKEBOT_DIR}/output/stage4a | grep -v 'performing multi-file optimizations' | grep -v 'generating object file'>> $WARNING_LOG
       echo "" >> $WARNING_LOG
    fi
 }
@@ -587,19 +586,19 @@ check_compile_fds_mpi()
       stage4b_success=true
    else
       echo "Errors from Stage 4b - Compile FDS release:" >> $ERROR_LOG
-      cat $FIREBOT_DIR/output/stage4b >> $ERROR_LOG
+      cat $SMOKEBOT_DIR/output/stage4b >> $ERROR_LOG
       echo "" >> $ERROR_LOG
    fi
 
    # Check for compiler warnings/remarks
    # 'performing multi-file optimizations' and 'generating object file' are part of a normal compile
-   if [[ `grep -A 5 -E 'warning|remark' ${FIREBOT_DIR}/output/stage4b | grep -v 'performing multi-file optimizations' | grep -v 'generating object file'| grep -v 'feupdateenv is not implemented'` == "" ]]
+   if [[ `grep -A 5 -E 'warning|remark' ${SMOKEBOT_DIR}/output/stage4b | grep -v 'performing multi-file optimizations' | grep -v 'generating object file'| grep -v 'feupdateenv is not implemented'` == "" ]]
    then
       # Continue along
       :
    else
       echo "Stage 4b warnings:" >> $WARNING_LOG
-      grep -A 5 -E 'warning|remark' ${FIREBOT_DIR}/output/stage4b | grep -v 'performing multi-file optimizations' | grep -v 'generating object file'| grep -v 'feupdateenv is not implemented' >> $WARNING_LOG
+      grep -A 5 -E 'warning|remark' ${SMOKEBOT_DIR}/output/stage4b | grep -v 'performing multi-file optimizations' | grep -v 'generating object file'| grep -v 'feupdateenv is not implemented' >> $WARNING_LOG
       echo "" >> $WARNING_LOG
    fi
 }
@@ -610,40 +609,40 @@ check_compile_fds_mpi()
 
 compile_smv_utilities()
 {
-   echo "" > $FIREBOT_DIR/output/stage5pre
+   echo "" > $SMOKEBOT_DIR/output/stage5pre
    if [ "$haveCC" == "1" ] ; then
 
    # smokeview libraries
    cd $FDS_SVNROOT/SMV/Build/LIBS/lib_${platform}_intel_64
-   echo 'Building Smokeview libraries:' >> $FIREBOT_DIR/output/stage5pre 2>&1
-   ./makelibs.sh >> $FIREBOT_DIR/output/stage5pre 2>&1
+   echo 'Building Smokeview libraries:' >> $SMOKEBOT_DIR/output/stage5pre 2>&1
+   ./makelibs.sh >> $SMOKEBOT_DIR/output/stage5pre 2>&1
 
    # smokezip:
    cd $FDS_SVNROOT/Utilities/smokezip/intel_${platform}_64
    rm -f *.o smokezip_${platform}_64
-   echo 'Compiling smokezip:' >> $FIREBOT_DIR/output/stage5pre 2>&1
-   ./make_zip.sh >> $FIREBOT_DIR/output/stage5pre 2>&1
-   echo "" >> $FIREBOT_DIR/output/stage5pre 2>&1
+   echo 'Compiling smokezip:' >> $SMOKEBOT_DIR/output/stage5pre 2>&1
+   ./make_zip.sh >> $SMOKEBOT_DIR/output/stage5pre 2>&1
+   echo "" >> $SMOKEBOT_DIR/output/stage5pre 2>&1
    
    # smokediff:
    cd $FDS_SVNROOT/Utilities/smokediff/intel_${platform}_64
    rm -f *.o smokediff_${platform}_64
-   echo 'Compiling smokediff:' >> $FIREBOT_DIR/output/stage5pre 2>&1
-   ./make_diff.sh >> $FIREBOT_DIR/output/stage5pre 2>&1
-   echo "" >> $FIREBOT_DIR/output/stage5pre 2>&1
+   echo 'Compiling smokediff:' >> $SMOKEBOT_DIR/output/stage5pre 2>&1
+   ./make_diff.sh >> $SMOKEBOT_DIR/output/stage5pre 2>&1
+   echo "" >> $SMOKEBOT_DIR/output/stage5pre 2>&1
    
    # background:
    cd $FDS_SVNROOT/Utilities/background/intel_${platform}_32
    rm -f *.o background
-   echo 'Compiling background:' >> $FIREBOT_DIR/output/stage5pre 2>&1
-   ./make_background.sh >> $FIREBOT_DIR/output/stage5pre 2>&1
+   echo 'Compiling background:' >> $SMOKEBOT_DIR/output/stage5pre 2>&1
+   ./make_background.sh >> $SMOKEBOT_DIR/output/stage5pre 2>&1
    
   # wind2fds:
    cd $FDS_SVNROOT/Utilities/wind2fds/intel_${platform}_64
    rm -f *.o wind2fds_${platform}_64
-   echo 'Compiling wind2fds:' >> $FIREBOT_DIR/output/stage5pre 2>&1
-   ./make_wind.sh >> $FIREBOT_DIR/output/stage5pre 2>&1
-   echo "" >> $FIREBOT_DIR/output/stage5pre 2>&1
+   echo 'Compiling wind2fds:' >> $SMOKEBOT_DIR/output/stage5pre 2>&1
+   ./make_wind.sh >> $SMOKEBOT_DIR/output/stage5pre 2>&1
+   echo "" >> $SMOKEBOT_DIR/output/stage5pre 2>&1
 
    fi
 }
@@ -654,7 +653,7 @@ is_file_installed()
   notfound=`$program -help |& tail -1 |& grep "not found" | wc -l`
   if [ "$notfound" == "1" ] ; then
     stage5pre_success="0"
-    echo "***error: $program not installed" >> $FIREBOT_DIR/output/stage5pre
+    echo "***error: $program not installed" >> $SMOKEBOT_DIR/output/stage5pre
   fi
 }
 
@@ -672,7 +671,7 @@ check_smv_utilities()
      else
         stage5pre_success="0"
         echo "Errors from Stage 5pre - Compile SMV utilities:" >> $ERROR_LOG
-        cat $FIREBOT_DIR/output/stage5pre >> $ERROR_LOG
+        cat $SMOKEBOT_DIR/output/stage5pre >> $ERROR_LOG
         echo "" >> $ERROR_LOG
      fi
    else
@@ -685,7 +684,7 @@ check_smv_utilities()
      if [ "$stage5pre_success" == "0" ] ; then
         echo "Errors from Stage 5pre - Smokeview and utilities:" >> $ERROR_LOG
         stage5pre_success="1"
-        cat $FIREBOT_DIR/output/stage5pre >> $ERROR_LOG
+        cat $SMOKEBOT_DIR/output/stage5pre >> $ERROR_LOG
         echo "" >> $ERROR_LOG
      fi
    fi
@@ -698,11 +697,11 @@ check_smv_utilities()
 wait_verification_cases_release_end()
 {
    # Scans qstat and waits for verification cases to end
-   if [[ "$FIREBOT_QUEUE" == "none" ]]
+   if [[ "$SMOKEBOT_QUEUE" == "none" ]]
    then
      while [[ `ps -u $USER -f | fgrep .fds | grep -v grep` != '' ]]; do
         JOBS_REMAINING=`ps -u $USER -f | fgrep .fds | grep -v grep | wc -l`
-        echo "Waiting for ${JOBS_REMAINING} verification cases to complete." >> $FIREBOT_DIR/output/stage5
+        echo "Waiting for ${JOBS_REMAINING} verification cases to complete." >> $SMOKEBOT_DIR/output/stage5
         TIME_LIMIT_STAGE="5"
         check_time_limit
         sleep 60
@@ -710,7 +709,7 @@ wait_verification_cases_release_end()
    else
      while [[ `qstat -a | grep $(whoami) | grep $JOBPREFIX` != '' ]]; do
         JOBS_REMAINING=`qstat -a | grep $(whoami) | grep $JOBPREFIX | wc -l`
-        echo "Waiting for ${JOBS_REMAINING} verification cases to complete." >> $FIREBOT_DIR/output/stage5
+        echo "Waiting for ${JOBS_REMAINING} verification cases to complete." >> $SMOKEBOT_DIR/output/stage5
         TIME_LIMIT_STAGE="5"
         check_time_limit
         sleep 60
@@ -722,8 +721,8 @@ run_verification_cases_release()
 {
    # Start running all SMV verification cases
    cd $FDS_SVNROOT/Verification/scripts
-   echo 'Running SMV verification cases:' >> $FIREBOT_DIR/output/stage5 2>&1
-   ./Run_SMV_Cases.sh $USEINSTALL2 $RUN_OPENMP -q $FIREBOT_QUEUE >> $FIREBOT_DIR/output/stage5 2>&1
+   echo 'Running SMV verification cases:' >> $SMOKEBOT_DIR/output/stage5 2>&1
+   ./Run_SMV_Cases.sh $USEINSTALL2 $RUN_OPENMP -q $SMOKEBOT_QUEUE >> $SMOKEBOT_DIR/output/stage5 2>&1
 
    # Wait for all verification cases to end
    wait_verification_cases_release_end
@@ -734,7 +733,7 @@ check_verification_cases_release()
    # Scan and report any errors in FDS verification cases
    cd $FDS_SVNROOT/Verification
 
-   if [[ `grep 'Run aborted' -rI ${FIREBOT_DIR}/output/stage5` == "" ]] && \
+   if [[ `grep 'Run aborted' -rI ${SMOKEBOT_DIR}/output/stage5` == "" ]] && \
       [[ `grep Segmentation -rI *` == "" ]] && \
       [[ `grep ERROR: -rI *` == "" ]] && \
       [[ `grep 'STOP: Numerical' -rI *` == "" ]] && \
@@ -742,23 +741,23 @@ check_verification_cases_release()
    then
       stage5_success=true
    else
-      grep 'Run aborted' -rI $FIREBOT_DIR/output/stage5 > $FIREBOT_DIR/output/stage5_errors
-      grep Segmentation -rI * >> $FIREBOT_DIR/output/stage5_errors
-      grep ERROR: -rI * >> $FIREBOT_DIR/output/stage5_errors
-      grep 'STOP: Numerical' -rI * >> $FIREBOT_DIR/output/stage5_errors
-      grep -A 20 forrtl -rI * >> $FIREBOT_DIR/output/stage5_errors
+      grep 'Run aborted' -rI $SMOKEBOT_DIR/output/stage5 > $SMOKEBOT_DIR/output/stage5_errors
+      grep Segmentation -rI * >> $SMOKEBOT_DIR/output/stage5_errors
+      grep ERROR: -rI * >> $SMOKEBOT_DIR/output/stage5_errors
+      grep 'STOP: Numerical' -rI * >> $SMOKEBOT_DIR/output/stage5_errors
+      grep -A 20 forrtl -rI * >> $SMOKEBOT_DIR/output/stage5_errors
       
       echo "Errors from Stage 5 - Run verification cases (release mode):" >> $ERROR_LOG
-      cat $FIREBOT_DIR/output/stage5_errors >> $ERROR_LOG
+      cat $SMOKEBOT_DIR/output/stage5_errors >> $ERROR_LOG
       echo "" >> $ERROR_LOG
       THIS_FDS_FAILED=1
    fi
-   if [[ `grep 'Warning' -rI ${FIREBOT_DIR}/output/stage5` == "" ]] 
+   if [[ `grep 'Warning' -rI ${SMOKEBOT_DIR}/output/stage5` == "" ]] 
    then
       no_warnings=true
    else
       echo "Stage 5 warnings:" >> $WARNING_LOG
-      grep 'Warning' -rI ${FIREBOT_DIR}/output/stage5 >> $WARNING_LOG
+      grep 'Warning' -rI ${SMOKEBOT_DIR}/output/stage5 >> $WARNING_LOG
       echo "" >> $WARNING_LOG
    fi
 }
@@ -773,7 +772,7 @@ compile_smv_db()
    # Clean and compile SMV debug
    cd $FDS_SVNROOT/SMV/Build/intel_${platform}_64
    rm -f smokeview_${platform}_64_db
-   ./make_smv_db.sh &> $FIREBOT_DIR/output/stage6a
+   ./make_smv_db.sh &> $SMOKEBOT_DIR/output/stage6a
    fi
 }
 
@@ -787,19 +786,19 @@ check_compile_smv_db()
       stage6a_success=true
    else
       echo "Errors from Stage 6a - Compile SMV debug:" >> $ERROR_LOG
-      cat $FIREBOT_DIR/output/stage6a >> $ERROR_LOG
+      cat $SMOKEBOT_DIR/output/stage6a >> $ERROR_LOG
       echo "" >> $ERROR_LOG
    fi
 
    # Check for compiler warnings/remarks
    # grep -v 'feupdateenv ...' ignores a known FDS MPI compiler warning (http://software.intel.com/en-us/forums/showthread.php?t=62806)
-   if [[ `grep -A 5 -E 'warning|remark' ${FIREBOT_DIR}/output/stage6a | grep -v 'feupdateenv is not implemented' | grep -v 'lcilkrts linked'` == "" ]]
+   if [[ `grep -A 5 -E 'warning|remark' ${SMOKEBOT_DIR}/output/stage6a | grep -v 'feupdateenv is not implemented' | grep -v 'lcilkrts linked'` == "" ]]
    then
       # Continue along
       :
    else
       echo "Stage 6a warnings:" >> $WARNING_LOG
-      grep -A 5 -E 'warning|remark' ${FIREBOT_DIR}/output/stage6a | grep -v 'feupdateenv is not implemented' | grep -v 'lcilkrts linked' >> $WARNING_LOG
+      grep -A 5 -E 'warning|remark' ${SMOKEBOT_DIR}/output/stage6a | grep -v 'feupdateenv is not implemented' | grep -v 'lcilkrts linked' >> $WARNING_LOG
       echo "" >> $WARNING_LOG
    fi
    fi
@@ -813,21 +812,21 @@ make_smv_pictures_db()
 {
    # Run Make SMV Pictures script (debug mode)
    cd $FDS_SVNROOT/Verification/scripts
-   ./Make_SMV_Pictures.sh $USEINSTALL -d 2>&1 | grep -v FreeFontPath &> $FIREBOT_DIR/output/stage6b
+   ./Make_SMV_Pictures.sh $USEINSTALL -d 2>&1 | grep -v FreeFontPath &> $SMOKEBOT_DIR/output/stage6b
 }
 
 check_smv_pictures_db()
 {
    # Scan and report any errors in make SMV pictures process
-   cd $FIREBOT_DIR
-   if [[ `grep -I -E "Segmentation|Error" $FIREBOT_DIR/output/stage6b` == "" ]]
+   cd $SMOKEBOT_DIR
+   if [[ `grep -I -E "Segmentation|Error" $SMOKEBOT_DIR/output/stage6b` == "" ]]
    then
       stage6b_success=true
    else
-      cp $FIREBOT_DIR/output/stage6b $FIREBOT_DIR/output/stage6b_errors
+      cp $SMOKEBOT_DIR/output/stage6b $SMOKEBOT_DIR/output/stage6b_errors
 
       echo "Errors from Stage 6b - Make SMV pictures (debug mode):" >> $ERROR_LOG
-      cat $FIREBOT_DIR/output/stage6b_errors >> $ERROR_LOG
+      cat $SMOKEBOT_DIR/output/stage6b_errors >> $ERROR_LOG
       echo "" >> $ERROR_LOG
    fi
 }
@@ -842,7 +841,7 @@ compile_smv()
    # Clean and compile SMV
    cd $FDS_SVNROOT/SMV/Build/intel_${platform}_64
    rm -f smokeview_${platform}_64
-   ./make_smv.sh &> $FIREBOT_DIR/output/stage6c
+   ./make_smv.sh &> $SMOKEBOT_DIR/output/stage6c
    fi
 }
 
@@ -856,19 +855,19 @@ check_compile_smv()
       stage6c_success=true
    else
       echo "Errors from Stage 6c - Compile SMV release:" >> $ERROR_LOG
-      cat $FIREBOT_DIR/output/stage6c >> $ERROR_LOG
+      cat $SMOKEBOT_DIR/output/stage6c >> $ERROR_LOG
       echo "" >> $ERROR_LOG
    fi
 
    # Check for compiler warnings/remarks
    # grep -v 'feupdateenv ...' ignores a known FDS MPI compiler warning (http://software.intel.com/en-us/forums/showthread.php?t=62806)
-   if [[ `grep -A 5 -E 'warning|remark' ${FIREBOT_DIR}/output/stage6c | grep -v 'feupdateenv is not implemented' | grep -v 'lcilkrts linked'` == "" ]]
+   if [[ `grep -A 5 -E 'warning|remark' ${SMOKEBOT_DIR}/output/stage6c | grep -v 'feupdateenv is not implemented' | grep -v 'lcilkrts linked'` == "" ]]
    then
       # Continue along
       :
    else
       echo "Stage 6c warnings:" >> $WARNING_LOG
-      grep -A 5 -E 'warning|remark' ${FIREBOT_DIR}/output/stage6c | grep -v 'feupdateenv is not implemented' | grep -v 'lcilkrts linked' >> $WARNING_LOG
+      grep -A 5 -E 'warning|remark' ${SMOKEBOT_DIR}/output/stage6c | grep -v 'feupdateenv is not implemented' | grep -v 'lcilkrts linked' >> $WARNING_LOG
       echo "" >> $WARNING_LOG
    fi
    fi
@@ -882,21 +881,21 @@ make_smv_pictures()
 {
    # Run Make SMV Pictures script (release mode)
    cd $FDS_SVNROOT/Verification/scripts
-   ./Make_SMV_Pictures.sh $USEINSTALL 2>&1 | grep -v FreeFontPath &> $FIREBOT_DIR/output/stage6d
+   ./Make_SMV_Pictures.sh $USEINSTALL 2>&1 | grep -v FreeFontPath &> $SMOKEBOT_DIR/output/stage6d
 }
 
 check_smv_pictures()
 {
    # Scan and report any errors in make SMV pictures process
-   cd $FIREBOT_DIR
-   if [[ `grep -I -E "Segmentation|Error" $FIREBOT_DIR/output/stage6d` == "" ]]
+   cd $SMOKEBOT_DIR
+   if [[ `grep -I -E "Segmentation|Error" $SMOKEBOT_DIR/output/stage6d` == "" ]]
    then
       stage6d_success=true
    else
-      cp $FIREBOT_DIR/output/stage6d  $FIREBOT_DIR/output/stage6d_errors
+      cp $SMOKEBOT_DIR/output/stage6d  $SMOKEBOT_DIR/output/stage6d_errors
 
       echo "Errors from Stage 6d - Make SMV pictures (release mode):" >> $ERROR_LOG
-      cat $FIREBOT_DIR/output/stage6d >> $ERROR_LOG
+      cat $SMOKEBOT_DIR/output/stage6d >> $ERROR_LOG
       echo "" >> $ERROR_LOG
    fi
 }
@@ -908,20 +907,20 @@ check_smv_pictures()
 make_smv_movies()
 {
    cd $FDS_SVNROOT/Verification
-   scripts/Make_SMV_Movies.sh 2>&1  &> $FIREBOT_DIR/output/stage6e
+   scripts/Make_SMV_Movies.sh 2>&1  &> $SMOKEBOT_DIR/output/stage6e
 }
 
 check_smv_movies()
 {
-   cd $FIREBOT_DIR
-   if [[ `grep -I -E "Segmentation|Error" $FIREBOT_DIR/output/stage6e` == "" ]]
+   cd $SMOKEBOT_DIR
+   if [[ `grep -I -E "Segmentation|Error" $SMOKEBOT_DIR/output/stage6e` == "" ]]
    then
       stage6e_success=true
    else
-      cp $FIREBOT_DIR/output/stage6e  $FIREBOT_DIR/output/stage6e_errors
+      cp $SMOKEBOT_DIR/output/stage6e  $SMOKEBOT_DIR/output/stage6e_errors
 
       echo "Errors from Stage 6e - Make SMV movies " >> $ERROR_LOG
-      cat $FIREBOT_DIR/output/stage6e >> $ERROR_LOG
+      cat $SMOKEBOT_DIR/output/stage6e >> $ERROR_LOG
       echo "" >> $ERROR_LOG
    fi
 }
@@ -948,7 +947,7 @@ generate_timing_stats()
 archive_timing_stats()
 {
    cd $FDS_SVNROOT/Utilities/Scripts
-   cp fds_timing_stats.csv "$FIREBOT_DIR/history/${SVN_REVISION}_timing.csv"
+   cp fds_timing_stats.csv "$SMOKEBOT_DIR/history/${SVN_REVISION}_timing.csv"
 }
 
 #  ==================================
@@ -959,8 +958,7 @@ check_guide()
 {
    # Scan and report any errors in build process for guides
    SMOKEBOT_MANDIR=/var/www/html/smokebot/manuals/
-   FIREBOT_MANDIR=/var/www/html/firebot/manuals/
-   cd $FIREBOT_DIR
+   cd $SMOKEBOT_DIR
    if [[ `grep "! LaTeX Error:" -I $1` == "" ]]
    then
       if [ -d $SMOKEBOT_MANDIR ] ; then
@@ -968,9 +966,6 @@ check_guide()
       fi
       if [ -d $SMV_Summary/manuals ] ; then
         cp $2 $SMV_Summary/manuals/.
-      fi
-      if [ -d $FIREBOT_MANDIR ] ; then
-        cp $2 $FIREBOT_MANDIR/.
       fi
       cp $2 $GUIDE_DIR/.
    else
@@ -998,13 +993,13 @@ make_smv_user_guide()
    # Build SMV User Guide
    cd $FDS_SVNROOT/Manuals/SMV_User_Guide
    export TEXINPUTS=".:../LaTeX_Style_Files:"
-   pdflatex -interaction nonstopmode SMV_User_Guide &> $FIREBOT_DIR/output/stage8_smv_user_guide
-   bibtex SMV_User_Guide &> $FIREBOT_DIR/output/stage8_smv_user_guide
-   pdflatex -interaction nonstopmode SMV_User_Guide &> $FIREBOT_DIR/output/stage8_smv_user_guide
-   pdflatex -interaction nonstopmode SMV_User_Guide &> $FIREBOT_DIR/output/stage8_smv_user_guide
+   pdflatex -interaction nonstopmode SMV_User_Guide &> $SMOKEBOT_DIR/output/stage8_smv_user_guide
+   bibtex SMV_User_Guide &> $SMOKEBOT_DIR/output/stage8_smv_user_guide
+   pdflatex -interaction nonstopmode SMV_User_Guide &> $SMOKEBOT_DIR/output/stage8_smv_user_guide
+   pdflatex -interaction nonstopmode SMV_User_Guide &> $SMOKEBOT_DIR/output/stage8_smv_user_guide
 
    # Check guide for completion and copy to website if successful
-   check_guide $FIREBOT_DIR/output/stage8_smv_user_guide $FDS_SVNROOT/Manuals/SMV_User_Guide/SMV_User_Guide.pdf 'SMV User Guide'
+   check_guide $SMOKEBOT_DIR/output/stage8_smv_user_guide $FDS_SVNROOT/Manuals/SMV_User_Guide/SMV_User_Guide.pdf 'SMV User Guide'
 }
 
 make_smv_technical_guide()
@@ -1012,13 +1007,13 @@ make_smv_technical_guide()
    # Build SMV Technical Guide
    cd $FDS_SVNROOT/Manuals/SMV_Technical_Reference_Guide
    export TEXINPUTS=".:../LaTeX_Style_Files:"
-   pdflatex -interaction nonstopmode SMV_Technical_Reference_Guide &> $FIREBOT_DIR/output/stage8_smv_technical_guide
-   bibtex SMV_Technical_Reference_Guide &> $FIREBOT_DIR/output/stage8_smv_technical_guide
-   pdflatex -interaction nonstopmode SMV_Technical_Reference_Guide &> $FIREBOT_DIR/output/stage8_smv_technical_guide
-   pdflatex -interaction nonstopmode SMV_Technical_Reference_Guide &> $FIREBOT_DIR/output/stage8_smv_technical_guide
+   pdflatex -interaction nonstopmode SMV_Technical_Reference_Guide &> $SMOKEBOT_DIR/output/stage8_smv_technical_guide
+   bibtex SMV_Technical_Reference_Guide &> $SMOKEBOT_DIR/output/stage8_smv_technical_guide
+   pdflatex -interaction nonstopmode SMV_Technical_Reference_Guide &> $SMOKEBOT_DIR/output/stage8_smv_technical_guide
+   pdflatex -interaction nonstopmode SMV_Technical_Reference_Guide &> $SMOKEBOT_DIR/output/stage8_smv_technical_guide
 
    # Check guide for completion and copy to website if successful
-   check_guide $FIREBOT_DIR/output/stage8_smv_technical_guide $FDS_SVNROOT/Manuals/SMV_Technical_Reference_Guide/SMV_Technical_Reference_Guide.pdf 'SMV Technical Reference Guide'
+   check_guide $SMOKEBOT_DIR/output/stage8_smv_technical_guide $FDS_SVNROOT/Manuals/SMV_Technical_Reference_Guide/SMV_Technical_Reference_Guide.pdf 'SMV Technical Reference Guide'
 }
 
 make_smv_verification_guide()
@@ -1026,13 +1021,13 @@ make_smv_verification_guide()
    # Build SMV Verification Guide
    cd $FDS_SVNROOT/Manuals/SMV_Verification_Guide
    export TEXINPUTS=".:../LaTeX_Style_Files:"
-   pdflatex -interaction nonstopmode SMV_Verification_Guide &> $FIREBOT_DIR/output/stage8_smv_verification_guide
-   bibtex SMV_Verification_Guide &> $FIREBOT_DIR/output/stage8_smv_verification_guide
-   pdflatex -interaction nonstopmode SMV_Verification_Guide &> $FIREBOT_DIR/output/stage8_smv_verification_guide
-   pdflatex -interaction nonstopmode SMV_Verification_Guide &> $FIREBOT_DIR/output/stage8_smv_verification_guide
+   pdflatex -interaction nonstopmode SMV_Verification_Guide &> $SMOKEBOT_DIR/output/stage8_smv_verification_guide
+   bibtex SMV_Verification_Guide &> $SMOKEBOT_DIR/output/stage8_smv_verification_guide
+   pdflatex -interaction nonstopmode SMV_Verification_Guide &> $SMOKEBOT_DIR/output/stage8_smv_verification_guide
+   pdflatex -interaction nonstopmode SMV_Verification_Guide &> $SMOKEBOT_DIR/output/stage8_smv_verification_guide
 
    # Check guide for completion and copy to website if successful
-   check_guide $FIREBOT_DIR/output/stage8_smv_verification_guide $FDS_SVNROOT/Manuals/SMV_Verification_Guide/SMV_Verification_Guide.pdf 'SMV Verification Guide'
+   check_guide $SMOKEBOT_DIR/output/stage8_smv_verification_guide $FDS_SVNROOT/Manuals/SMV_Verification_Guide/SMV_Verification_Guide.pdf 'SMV Verification Guide'
 }
 
 #  =====================================================
@@ -1041,33 +1036,33 @@ make_smv_verification_guide()
 
 save_build_status()
 {
-   cd $FIREBOT_DIR
+   cd $SMOKEBOT_DIR
    # Save status outcome of build to a text file
    if [[ -e $WARNING_LOG && -e $ERROR_LOG ]]
    then
      cat "" >> $ERROR_LOG
      cat $WARNING_LOG >> $ERROR_LOG
-     echo "Build failure and warnings for Revision ${SVN_REVISION}." > "$FIREBOT_DIR/history/${SVN_REVISION}.txt"
-     cat $ERROR_LOG > "$FIREBOT_DIR/history/${SVN_REVISION}_errors.txt"
+     echo "Build failure and warnings for Revision ${SVN_REVISION}." > "$SMOKEBOT_DIR/history/${SVN_REVISION}.txt"
+     cat $ERROR_LOG > "$SMOKEBOT_DIR/history/${SVN_REVISION}_errors.txt"
      touch output/status_errors_and_warnings
 
    # Check for errors only
    elif [ -e $ERROR_LOG ]
    then
-      echo "Build failure for Revision ${SVN_REVISION}." > "$FIREBOT_DIR/history/${SVN_REVISION}.txt"
-      cat $ERROR_LOG > "$FIREBOT_DIR/history/${SVN_REVISION}_errors.txt"
+      echo "Build failure for Revision ${SVN_REVISION}." > "$SMOKEBOT_DIR/history/${SVN_REVISION}.txt"
+      cat $ERROR_LOG > "$SMOKEBOT_DIR/history/${SVN_REVISION}_errors.txt"
       touch output/status_errors
 
    # Check for warnings only
    elif [ -e $WARNING_LOG ]
    then
-      echo "Revision ${SVN_REVISION} has warnings." > "$FIREBOT_DIR/history/${SVN_REVISION}.txt"
-      cat $WARNING_LOG > "$FIREBOT_DIR/history/${SVN_REVISION}_warnings.txt"
+      echo "Revision ${SVN_REVISION} has warnings." > "$SMOKEBOT_DIR/history/${SVN_REVISION}.txt"
+      cat $WARNING_LOG > "$SMOKEBOT_DIR/history/${SVN_REVISION}_warnings.txt"
       touch output/status_warnings
 
    # No errors or warnings
    else
-      echo "Build success! Revision ${SVN_REVISION} passed all build tests." > "$FIREBOT_DIR/history/${SVN_REVISION}.txt"
+      echo "Build success! Revision ${SVN_REVISION} passed all build tests." > "$SMOKEBOT_DIR/history/${SVN_REVISION}.txt"
       touch output/status_success
    fi
 }
@@ -1081,17 +1076,13 @@ email_build_status()
    stop_time=`date`
    echo "-------------------------------" > $TIME_LOG
    echo "         host: $hostname " >> $TIME_LOG
-   echo "   start time: $start_time " >> $TIME_LOG
-   echo "    stop time: $stop_time " >> $TIME_LOG
-   echo "    build FDS: $DIFF_BUILDFDS" >> $TIME_LOG
-   echo "    build SMV: $DIFF_BUILSSMV" >> $TIME_LOG
+   echo "        start: $start_time " >> $TIME_LOG
+   echo "         stop: $stop_time " >> $TIME_LOG
    echo "    run cases: $DIFF_RUNCASES" >> $TIME_LOG
-   echo "make pictures: $DIFF_$MAKEPICTURES" >> $TIME_LOG
-   echo "  make guides: $DIFF_MAKEGUIDES" >> $TIME_LOG
-   echo "   results (private): http://$WEBHOSTNAME/VV/SMV2" >> $TIME_LOG
-   echo "   results (public) : https://googledrive.com/host/0B-W-dkXwdHWNN3N2eG92X2taRFk/index.html" >> $TIME_LOG
-   echo "   manuals (private): http://$WEBHOSTNAME/smokebot" >> $TIME_LOG
-   echo "   manuals (public) : https://drive.google.com/folderview?id=0B_wB1pJL2bFQaDJaOFNnUDR4LXM#list" >> $TIME_LOG
+   echo "make pictures: $DIFF_MAKEPICTURES" >> $TIME_LOG
+   echo "        total: $DIFF_SCRIPT_TIME" >> $TIME_LOG
+   echo "   results (local): http://$WEBHOSTNAME/VV/SMV2" >> $TIME_LOG
+   echo " results (public) : https://googledrive.com/host/0B-W-dkXwdHWNN3N2eG92X2taRFk/index.html" >> $TIME_LOG
   if [[ $THIS_SMVSVN != $LAST_SMVSVN ]] ; then
     cat $SVN_SMVLOG >> $TIME_LOG
   fi
@@ -1099,7 +1090,7 @@ email_build_status()
     cat $SVN_FDSLOG >> $TIME_LOG
   fi
    echo "-------------------------------" >> $TIME_LOG
-   cd $FIREBOT_DIR
+   cd $SMOKEBOT_DIR
    # Check for warnings and errors
    if [[ -e $WARNING_LOG && -e $ERROR_LOG ]]
    then
@@ -1140,7 +1131,8 @@ fi
 #  = Primary script execution =
 #  ============================
 
-PRELIM_begin=`GET_TIME`
+SCRIPT_TIME_beg=`GET_TIME`
+PRELIM_beg=`GET_TIME`
 echo "" > $STAGE_STATUS
 hostname=`hostname`
 start_time=`date`
@@ -1155,10 +1147,10 @@ do_svn_checkout
 check_svn_checkout
 PRELIM_end=`GET_TIME`
 DIFF_PRELIM=`GET_DURATION $PRELIM_beg $PRELIM_end`
-echo Prelim time: $DIFF_PRELIM >> $STAGE_STATUS
+echo "Prelim time: $DIFF_PRELIM" >> $STAGE_STATUS
 
 ### Stage 2a ###
-BUILDFDS_begin=`GET_TIME`
+BUILDFDS_beg=`GET_TIME`
 compile_fds_db
 check_compile_fds_db
 
@@ -1167,7 +1159,7 @@ compile_fds_mpi_db
 check_compile_fds_mpi_db
 
 ### Stage 4a ###
-stage4_begin=`GET_TIME`
+stage4_beg=`GET_TIME`
 if [[ $stage2a_success ]] ; then
    compile_fds
    check_compile_fds
@@ -1180,18 +1172,18 @@ if [[ $stage2b_success ]] ; then
 fi
 BUILDFDS_end=`GET_TIME`
 DIFF_BUILDFDS=`GET_DURATION $BUILDFDS_beg $BUILDFDS_end`
-echo Build FDS time: $DIFF_BUILDFDS >> $STAGE_STATUS
+echo "Build FDS time: $DIFF_BUILDFDS" >> $STAGE_STATUS
 
 ### Stage 5pre ###
-SMVUTILSpre_begin=`GET_TIME`
+SMVUTILSpre_beg=`GET_TIME`
 compile_smv_utilities
 check_smv_utilities
 SMVUTILSpre_end=`GET_TIME`
 DIFF_SMVUTILSpre=`GET_DURATION $SMVUTILSpre_beg $SMVUTILSpre_end`
-echo Build SMV Utilities time: $DIFF_SMVUTILSpre >> $STAGE_STATUS
+echo "Build SMV Utilities time: $DIFF_SMVUTILSpre" >> $STAGE_STATUS
 
 ### Stage 3 ###
-RUNCASES_begin=`GET_TIME`
+RUNCASES_beg=`GET_TIME`
 if [[ $stage2a_success && "$RUNDEBUG" == "1" ]] ; then
    run_verification_cases_debug
    check_verification_cases_debug
@@ -1204,7 +1196,7 @@ if [[ $stage4a_success && $stage4b_success ]] ; then
 fi
 RUNCASES_end=`GET_TIME`
 DIFF_RUNCASES=`GET_DURATION $RUNCASES_beg $RUNCASES_end`
-echo Run cases time: $DIFF_RUNCASES >> $STAGE_STATUS
+echo "Run cases time: $DIFF_RUNCASES" >> $STAGE_STATUS
 
 ### Stage 6a ###
 BUILDSMV_beg=`GET_TIME`
@@ -1216,7 +1208,7 @@ compile_smv
 check_compile_smv
 BUILDSMV_end=`GET_TIME`
 DIFF_BUILDSMV=`GET_DURATION $BUILDSMV_beg $BUILDSMV_end`
-echo Build SMV time: $DIFF_BUILDSMV >> $STAGE_STATUS
+echo "Build SMV time: $DIFF_BUILDSMV" >> $STAGE_STATUS
 
 ### Stage 6b ###
 MAKEPICTURES_beg=`GET_TIME`
@@ -1232,19 +1224,20 @@ if [[ $stage4a_success && $stage4b_success && $stage6c_success ]] ; then
 fi
 MAKEPICTURES_end=`GET_TIME`
 DIFF_MAKEPICTURES=`GET_DURATION $MAKEPICTURES_beg $MAKEPICTURES_end`
-echo "Make pictures time: $DIFF_MAKEPICTURES >> $STAGE_STATUS
+echo "Make pictures time: $DIFF_MAKEPICTURES" >> $STAGE_STATUS
 
 ### Stage 6e ###
-MAKEMOVIES_beg=`GET_TIME`
-stage6e_beg=`GET_TIME`
 if [ "$MAKEMOVIES" == "1" ]
 then
+  MAKEMOVIES_beg=`GET_TIME`
+ 
   make_smv_movies
   check_smv_movies
+
+  MAKEMOVIES_end=`GET_TIME`
+  DIFF_MAKEMOVIES=`GET_DURATION $MAKEMOVIES_beg $MAKEMOVIES_end`
+  echo "Make movies time: $DIFF_MAKEMOVIES" >> $STAGE_STATUS
 fi
-MAKEMOVIES_END`GET_TIME`
-DIFF_MAKEMOVIES=`GET_DURATION $MAKEMOVIES_beg $MAKEMOVIES_end`
-echo Make movies time: $DIFF_MAKEMOVIES >> $STAGE_STATUS
 
 ### Stage 7 ###
 if [[ $stage4a_success && $stage4b_success ]] ; then
@@ -1261,7 +1254,11 @@ if [[ $stage4a_success && $stage4b_success && $stage6d_success ]] ; then
 fi
 MAKEGUIDES_end=`GET_TIME`
 DIFF_MAKEGUIDES=`GET_DURATION $MAKEGUIDES_beg $MAKEGUIDES_end`
-echo Make guides time: $DIFF_MAKEGUIDES >> $STAGE_STATUS
+echo "Make guides time: $DIFF_MAKEGUIDES" >> $STAGE_STATUS
+
+SCRIPT_TIME_end=`GET_TIME`
+DIFF_SCRIPT_TIME=`GET_DURATION $SCRIPT_TIME_beg $SCRIPT_TIME_end`
+echo "Total time: $DIFF_SCRIPT_TIME" >> $STAGE_STATUS
 
 ### Report results ###
 set_files_world_readable
