@@ -87,6 +87,7 @@ ERROR_LOG=$FIREBOT_DIR/output/errors
 TIME_LOG=$FIREBOT_DIR/output/timings
 WARNING_LOG=$FIREBOT_DIR/output/warnings
 GUIDE_DIR=$FIREBOT_DIR/guides
+STAGE_STATUS=$FIREBOT_DIR/output/stage_status
 
 THIS_FDS_AUTHOR=
 THIS_FDS_FAILED=0
@@ -168,6 +169,17 @@ run_auto()
   fi
   echo -e "Smokebot run initiated." >> $MESSAGE_FILE
   cat $MESSAGE_FILE | mail -s "smokebot run initiated" $mailTo > /dev/null
+}
+
+GET_TIME(){
+  echo $(date +"%s")
+}
+
+GET_DURATION(){
+  time_before=$1
+  time_after=$2
+  DIFF_TIME=`echo $(($time_after-$time_before))`
+  echo "$(($DIFF_TIME / 3600 ))h $((($DIFF_TIME % 3600) / 60))m $(($DIFF_TIME % 60))s"
 }
 
 MKDIR ()
@@ -1068,9 +1080,14 @@ email_build_status()
    echo $THIS_FDS_FAILED>$FDS_STATUS_FILE
    stop_time=`date`
    echo "-------------------------------" > $TIME_LOG
-   echo "      host: $hostname " >> $TIME_LOG
-   echo "start time: $start_time " >> $TIME_LOG
-   echo " stop time: $stop_time " >> $TIME_LOG
+   echo "         host: $hostname " >> $TIME_LOG
+   echo "   start time: $start_time " >> $TIME_LOG
+   echo "    stop time: $stop_time " >> $TIME_LOG
+   echo "    build FDS: $DIFF_BUILDFDS" >> $TIME_LOG
+   echo "    build SMV: $DIFF_BUILSSMV" >> $TIME_LOG
+   echo "    run cases: $DIFF_RUNCASES" >> $TIME_LOG
+   echo "make pictures: $DIFF_$MAKEPICTURES" >> $TIME_LOG
+   echo "  make guides: $DIFF_MAKEGUIDES" >> $TIME_LOG
    echo "   results (private): http://$WEBHOSTNAME/VV/SMV2" >> $TIME_LOG
    echo "   results (public) : https://googledrive.com/host/0B-W-dkXwdHWNN3N2eG92X2taRFk/index.html" >> $TIME_LOG
    echo "   manuals (private): http://$WEBHOSTNAME/smokebot" >> $TIME_LOG
@@ -1123,6 +1140,8 @@ fi
 #  = Primary script execution =
 #  ============================
 
+PRELIM_begin=`GET_TIME`
+echo "" > $STAGE_STATUS
 hostname=`hostname`
 start_time=`date`
 clean_smokebot_history
@@ -1134,8 +1153,12 @@ update_and_compile_cfast
 clean_svn_repo
 do_svn_checkout
 check_svn_checkout
+PRELIM_end=`GET_TIME`
+DIFF_PRELIM=`GET_DURATION $PRELIM_beg $PRELIM_end`
+echo Prelim time: $DIFF_PRELIM >> $STAGE_STATUS
 
 ### Stage 2a ###
+BUILDFDS_begin=`GET_TIME`
 compile_fds_db
 check_compile_fds_db
 
@@ -1143,13 +1166,8 @@ check_compile_fds_db
 compile_fds_mpi_db
 check_compile_fds_mpi_db
 
-### Stage 3 ###
-if [[ $stage2a_success && "$RUNDEBUG" == "1" ]] ; then
-   run_verification_cases_debug
-   check_verification_cases_debug
-fi
-
 ### Stage 4a ###
+stage4_begin=`GET_TIME`
 if [[ $stage2a_success ]] ; then
    compile_fds
    check_compile_fds
@@ -1160,43 +1178,73 @@ if [[ $stage2b_success ]] ; then
    compile_fds_mpi
    check_compile_fds_mpi
 fi
+BUILDFDS_end=`GET_TIME`
+DIFF_BUILDFDS=`GET_DURATION $BUILDFDS_beg $BUILDFDS_end`
+echo Build FDS time: $DIFF_BUILDFDS >> $STAGE_STATUS
 
 ### Stage 5pre ###
+SMVUTILSpre_begin=`GET_TIME`
 compile_smv_utilities
 check_smv_utilities
+SMVUTILSpre_end=`GET_TIME`
+DIFF_SMVUTILSpre=`GET_DURATION $SMVUTILSpre_beg $SMVUTILSpre_end`
+echo Build SMV Utilities time: $DIFF_SMVUTILSpre >> $STAGE_STATUS
+
+### Stage 3 ###
+RUNCASES_begin=`GET_TIME`
+if [[ $stage2a_success && "$RUNDEBUG" == "1" ]] ; then
+   run_verification_cases_debug
+   check_verification_cases_debug
+fi
 
 ### Stage 5 ###
 if [[ $stage4a_success && $stage4b_success ]] ; then
    run_verification_cases_release
    check_verification_cases_release
 fi
+RUNCASES_end=`GET_TIME`
+DIFF_RUNCASES=`GET_DURATION $RUNCASES_beg $RUNCASES_end`
+echo Run cases time: $DIFF_RUNCASES >> $STAGE_STATUS
 
 ### Stage 6a ###
+BUILDSMV_beg=`GET_TIME`
 compile_smv_db
 check_compile_smv_db
-
-### Stage 6b ###
-if [[ $stage4a_success && $stage4b_success && $stage6a_success && "$RUNDEBUG" == "1" ]] ; then
-  make_smv_pictures_db
-  check_smv_pictures_db
-fi
 
 ### Stage 6c ###
 compile_smv
 check_compile_smv
+BUILDSMV_end=`GET_TIME`
+DIFF_BUILDSMV=`GET_DURATION $BUILDSMV_beg $BUILDSMV_end`
+echo Build SMV time: $DIFF_BUILDSMV >> $STAGE_STATUS
+
+### Stage 6b ###
+MAKEPICTURES_beg=`GET_TIME`
+if [[ $stage4a_success && $stage4b_success && $stage6a_success && "$RUNDEBUG" == "1" ]] ; then
+  make_smv_pictures_db
+  check_smv_pictures_db
+fi
 
 ### Stage 6d ###
 if [[ $stage4a_success && $stage4b_success && $stage6c_success ]] ; then
   make_smv_pictures
   check_smv_pictures
 fi
+MAKEPICTURES_end=`GET_TIME`
+DIFF_MAKEPICTURES=`GET_DURATION $MAKEPICTURES_beg $MAKEPICTURES_end`
+echo "Make pictures time: $DIFF_MAKEPICTURES >> $STAGE_STATUS
 
 ### Stage 6e ###
+MAKEMOVIES_beg=`GET_TIME`
+stage6e_beg=`GET_TIME`
 if [ "$MAKEMOVIES" == "1" ]
 then
   make_smv_movies
   check_smv_movies
 fi
+MAKEMOVIES_END`GET_TIME`
+DIFF_MAKEMOVIES=`GET_DURATION $MAKEMOVIES_beg $MAKEMOVIES_end`
+echo Make movies time: $DIFF_MAKEMOVIES >> $STAGE_STATUS
 
 ### Stage 7 ###
 if [[ $stage4a_success && $stage4b_success ]] ; then
@@ -1205,11 +1253,15 @@ if [[ $stage4a_success && $stage4b_success ]] ; then
 fi
 
 ### Stage 8 ###
+MAKEGUIDES_beg=`GET_TIME`
 if [[ $stage4a_success && $stage4b_success && $stage6d_success ]] ; then
   make_smv_user_guide
   make_smv_technical_guide
   make_smv_verification_guide
 fi
+MAKEGUIDES_end=`GET_TIME`
+DIFF_MAKEGUIDES=`GET_DURATION $MAKEGUIDES_beg $MAKEGUIDES_end`
+echo Make guides time: $DIFF_MAKEGUIDES >> $STAGE_STATUS
 
 ### Report results ###
 set_files_world_readable
