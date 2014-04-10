@@ -1148,7 +1148,7 @@ do_svn_checkout
 check_svn_checkout
 PRELIM_end=`GET_TIME`
 DIFF_PRELIM=`GET_DURATION $PRELIM_beg $PRELIM_end`
-echo "Prelim time: $DIFF_PRELIM" >> $STAGE_STATUS
+echo "Preliminary: $DIFF_PRELIM" >> $STAGE_STATUS
 
 ### Stage 2a ###
 BUILDFDS_beg=`GET_TIME`
@@ -1173,7 +1173,7 @@ if [[ $stage2b_success ]] ; then
 fi
 BUILDFDS_end=`GET_TIME`
 DIFF_BUILDFDS=`GET_DURATION $BUILDFDS_beg $BUILDFDS_end`
-echo "Build FDS time: $DIFF_BUILDFDS" >> $STAGE_STATUS
+echo "Build FDS: $DIFF_BUILDFDS" >> $STAGE_STATUS
 
 ### Stage 5pre ###
 SMVUTILSpre_beg=`GET_TIME`
@@ -1181,7 +1181,7 @@ compile_smv_utilities
 check_smv_utilities
 SMVUTILSpre_end=`GET_TIME`
 DIFF_SMVUTILSpre=`GET_DURATION $SMVUTILSpre_beg $SMVUTILSpre_end`
-echo "Build SMV Utilities time: $DIFF_SMVUTILSpre" >> $STAGE_STATUS
+echo "Build SMV Utilities: $DIFF_SMVUTILSpre" >> $STAGE_STATUS
 
 ### Stage 3 ###
 RUNCASES_beg=`GET_TIME`
@@ -1197,7 +1197,7 @@ if [[ $stage4a_success && $stage4b_success ]] ; then
 fi
 RUNCASES_end=`GET_TIME`
 DIFF_RUNCASES=`GET_DURATION $RUNCASES_beg $RUNCASES_end`
-echo "Run cases time: $DIFF_RUNCASES" >> $STAGE_STATUS
+echo "Run cases: $DIFF_RUNCASES" >> $STAGE_STATUS
 
 ### Stage 6a ###
 BUILDSMV_beg=`GET_TIME`
@@ -1209,7 +1209,7 @@ compile_smv
 check_compile_smv
 BUILDSMV_end=`GET_TIME`
 DIFF_BUILDSMV=`GET_DURATION $BUILDSMV_beg $BUILDSMV_end`
-echo "Build SMV time: $DIFF_BUILDSMV" >> $STAGE_STATUS
+echo "Build SMV: $DIFF_BUILDSMV" >> $STAGE_STATUS
 
 ### Stage 6b ###
 MAKEPICTURES_beg=`GET_TIME`
@@ -1225,7 +1225,7 @@ if [[ $stage4a_success && $stage4b_success && $stage6c_success ]] ; then
 fi
 MAKEPICTURES_end=`GET_TIME`
 DIFF_MAKEPICTURES=`GET_DURATION $MAKEPICTURES_beg $MAKEPICTURES_end`
-echo "Make pictures time: $DIFF_MAKEPICTURES" >> $STAGE_STATUS
+echo "Make pictures: $DIFF_MAKEPICTURES" >> $STAGE_STATUS
 
 ### Stage 6e ###
 if [ "$MAKEMOVIES" == "1" ]
@@ -1237,7 +1237,7 @@ then
 
   MAKEMOVIES_end=`GET_TIME`
   DIFF_MAKEMOVIES=`GET_DURATION $MAKEMOVIES_beg $MAKEMOVIES_end`
-  echo "Make movies time: $DIFF_MAKEMOVIES" >> $STAGE_STATUS
+  echo "Make movies: $DIFF_MAKEMOVIES" >> $STAGE_STATUS
 fi
 
 ### Stage 7 ###
@@ -1255,7 +1255,7 @@ if [[ $stage4a_success && $stage4b_success && $stage6d_success ]] ; then
 fi
 MAKEGUIDES_end=`GET_TIME`
 DIFF_MAKEGUIDES=`GET_DURATION $MAKEGUIDES_beg $MAKEGUIDES_end`
-echo "Make guides time: $DIFF_MAKEGUIDES" >> $STAGE_STATUS
+echo "Make guides: $DIFF_MAKEGUIDES" >> $STAGE_STATUS
 
 SCRIPT_TIME_end=`GET_TIME`
 DIFF_SCRIPT_TIME=`GET_DURATION $SCRIPT_TIME_beg $SCRIPT_TIME_end`
