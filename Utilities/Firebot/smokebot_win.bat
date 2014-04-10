@@ -1,14 +1,9 @@
 @echo off
 set reduced=%1
-set build_bundles=%2
 if [%reduced%] == [] (
   set reduced=0
 )
-if [%build_bundles%] == [] (
-  set build_bundles=0
-)
 
-SETLOCAL
 
 :: -------------------------------------------------------------
 ::                         set 32 or 64 bit environment
@@ -56,6 +51,7 @@ set warninglog=%OUTDIR%\stage_warnings.txt
 set errorwarninglog=%OUTDIR%\stage_errorswarnings.txt
 set infofile=%OUTDIR%\stage_info.txt
 set revisionfile=%OUTDIR%\revision.txt
+set stagestatus=%OUTDIR%\stage_status.log
 
 set fromsummarydir=%svnroot%\Manuals\SMV_Summary
 set tosummarydir="%SMOKEBOT_SUMMARY_DIR%"
@@ -72,6 +68,7 @@ set havewarnings=0
 set haveCC=1
 
 set emailexe=%userprofile%\bin\mailsend.exe
+set gettimeexe=%svnroot%\Utilities\get_time\intel_win_64\get_time.exe
 
 date /t > %OUTDIR%\starttime.txt
 set /p startdate=<%OUTDIR%\starttime.txt
@@ -91,15 +88,16 @@ echo Stage 0 - Preliminaries
 
 echo. > %errorlog%
 echo. > %warninglog%
+echo. > %stagestatus%
 
-if NOT exist %emailexe% (
-  echo ***warning: email client not found.   
-  echo             Smokebot messages will only be sent to the console.
-  set havemail=0
-) else (
-  echo             found mailsend
-  set havemail=1
-)
+call :is_file_installed %gettimeexe%|| exit /b 1
+echo             found get_time
+
+call :GET_TIME
+set TIME_beg=%current_time%
+
+call :GET_TIME
+set PRELIM_beg=%current_time% 
 
 ifort 1> %OUTDIR%\stage0a.txt 2>&1
 type %OUTDIR%\stage0a.txt | find /i /c "not recognized" > %OUTDIR%\stage_count0a.txt
@@ -157,10 +155,17 @@ erase *.obj *.mod *.exe 1>> %OUTDIR%\stage0.txt 2>&1
 make VPATH="../Source:../Include" INCLUDE="../Include" -f ..\makefile intel_win_%size% 1>> %OUTDIR%\stage0.txt 2>&1
 call :does_file_exist cfast6_win_%size%.exe %OUTDIR%\stage0.txt|| exit /b 1
 
+call :GET_TIME
+set PRELIM_end=%current_time%
+call :GET_DURATION PRELIM %PRELIM_beg% %PRELIM_end%
+set DIFF_PRELIM=%duration%
+
 :: -------------------------------------------------------------
 ::                           stage 1
 :: -------------------------------------------------------------
 
+call :GET_TIME
+set BUILDFDS_beg=%current_time% 
 echo Stage 1 - Building FDS
 if %reduced% == 1 goto skip_fds_debug
 
@@ -206,10 +211,17 @@ call :find_fds_warnings "warning" %OUTDIR%\stage1d.txt "Stage 1d"
 
 :skip_fds_parallel
 
+call :GET_TIME
+set BUILDFDS_end=%current_time%
+call :GET_DURATION BUILDFDS %BUILDFDS_beg% %BUILDFDS_end%
+set DIFF_BUILDFDS=%duration%
+
 :: -------------------------------------------------------------
 ::                           stage 2
 :: -------------------------------------------------------------
 
+call :GET_TIME
+set BUILDSMV_beg=%current_time% 
 echo Stage 2 - Building Smokeview
 
 if %reduced% == 1 goto skip_smokeview_debug
@@ -234,10 +246,17 @@ make -f ..\Makefile intel_win_%size% 1>> %OUTDIR%\stage2b.txt 2>&1
 call :does_file_exist smokeview_win_%size%.exe %OUTDIR%\stage2b.txt|| aexit /b 1
 call :find_smokeview_warnings "warning" %OUTDIR%\stage2b.txt "Stage 2b"
 
+call :GET_TIME
+set BUILDSMV_end=%current_time% 
+call :GET_DURATION BUILDSMV %BUILDSMV_beg% %BUILDSMV_end%
+set DIFF_BUILDSMV=%duration%
+
 :: -------------------------------------------------------------
 ::                           stage 3
 :: -------------------------------------------------------------
 
+call :GET_TIME
+set BUILDUTIL_beg=%current_time% 
 echo Stage 3 - Building FDS/Smokeview utilities
 
 if %reduced% == 1 goto skip_fds2ascii
@@ -277,9 +296,17 @@ if %haveCC% == 1 (
   echo             wind2fds not built, using installed version
 )
 
+call :GET_TIME
+set BUILDUTIL_end=%current_time% 
+call :GET_DURATION BUILDUTIL %BUILDUTIL_beg% %BUILDUTIL_end%
+set DIFF_BUILDUTIL=%duration%
+
 :: -------------------------------------------------------------
 ::                           stage 4
 :: -------------------------------------------------------------
+
+call :GET_TIME
+set RUNVV_beg=%current_time% 
 
 echo Stage 4 - Running verification cases
 
@@ -288,10 +315,17 @@ call Run_SMV_cases %size% 1> %OUTDIR%\stage4.txt 2>&1
 
 call :find_smokeview_warnings "error" %OUTDIR%\stage4.txt "Stage 4"
 
+call :GET_TIME
+set RUNVV_end=%current_time% 
+call :GET_DURATION RUNVV %RUNVV_beg% %RUNVV_end%
+set DIFF_RUNVV=%duration%
+
 :: -------------------------------------------------------------
 ::                           stage 5
 :: -------------------------------------------------------------
 
+call :GET_TIME
+set MAKEPICS_beg=%current_time% 
 echo Stage 5 - Making Smokeview pictures
 
 cd %svnroot%\Verification\scripts
@@ -299,10 +333,17 @@ call MAKE_SMV_pictures %size% 1> %OUTDIR%\stage5.txt 2>&1
 
 call :find_smokeview_warnings "error" %OUTDIR%\stage5.txt "Stage 5"
 
+call :GET_TIME
+set MAKEPICS_end=%current_time% 
+call :GET_DURATION MAKEPICS %MAKEPICS_beg% %MAKEPICS_end%
+set DIFF_MAKEPICS=%duration%
+
 :: -------------------------------------------------------------
 ::                           stage 6
 :: -------------------------------------------------------------
 
+call :GET_TIME
+set MAKEGUIDES_beg=%current_time% 
 echo Stage 6 - Building Smokeview guides
 
 echo             Technical Reference
@@ -314,17 +355,19 @@ call :build_guide SMV_Verification_Guide %svnroot%\Manuals\SMV_Verification_Guid
 echo             User
 call :build_guide SMV_User_Guide %svnroot%\Manuals\SMV_User_Guide 1>> %OUTDIR%\stage6.txt 2>&1
 
+call :GET_TIME
+set MAKEGUIDES_end=%current_time%
+call :GET_DURATION MAKEGUIDES %MAKEGUIDES_beg% %MAKEGUIDES_end%
+set DIFF_MAKEGUIDES=%duration%
+
+call :GET_TIME
+set TIME_end=%current_time% 
+call :GET_DURATION TOTALTIME %TIME_beg% %TIME_end%
+set DIFF_TIME=%duration%
+
 :: -------------------------------------------------------------
-::                           stage 6
+::                           wrap up
 :: -------------------------------------------------------------
-
-if %build_bundles% == 1 (
-  echo Stage 7 - Building Bundles
-
-  echo             win64            
-  call %bundle_win64% 1>> %OUTDIR%\stage7.txt 2>&1
-)
-
 
 date /t > %OUTDIR%\stoptime.txt
 set /p stopdate=<%OUTDIR%\stoptime.txt
@@ -336,6 +379,13 @@ echo start: %startdate% %starttime% >> %infofile%
 echo  stop: %stopdate% %stoptime%  >> %infofile%
 
 if NOT exist %tosummarydir% goto skip_copyfiles
+  echo "  Build FDS: %DIFF_BUILDFDS% >> %infofile%
+  echo "  Build SMV: %DIFF_BUILDSMV% >> %infofile%
+  echo " Build Util: %DIFF_BUILDUTIL% >> %infofile%
+  echo "     Run VV: %DIFF_RUNVV% >> %infofile%
+  echo "  Make Pics: %DIFF_MAKEPICS% >> %infofile%
+  echo "Make Guides: %DIFF_MAKEGUIDES% >> %infofile%
+  echo "      Total: %DIFF_TIME% >> %infofile%
   echo summary   (local): file://%userprofile%/FDS-SMV/Manuals/SMV_Summary/index.html >> %infofile%
   echo summary (windows): https://googledrive.com/host/0B-W-dkXwdHWNUElBbWpYQTBUejQ/index.html >> %infofile%
   echo summary   (linux): https://googledrive.com/host/0B-W-dkXwdHWNN3N2eG92X2taRFk/index.html >> %infofile%
@@ -346,11 +396,6 @@ if NOT exist %tosummarydir% goto skip_copyfiles
   
 
 cd %CURDIR%
-
-:: -------------------------------------------------------------
-::                           Wrap up
-:: -------------------------------------------------------------
-
 
 if exist %emailexe% (
   if %havewarnings% == 0 (
@@ -393,6 +438,25 @@ exit
     call %email% %mailToSMV% "smokebot build failure on %COMPUTERNAME% %revision%" %errorlog%
   )
 exit /b
+
+:: -------------------------------------------------------------
+:GET_TIME
+:: -------------------------------------------------------------
+
+%gettimeexe% > time.txt
+set /p current_time=<time.txt
+exit /b 0
+
+:: -------------------------------------------------------------
+:GET_DURATION
+:: -------------------------------------------------------------
+set /a difftime=%3 - %2
+set /a diff_h= %difftime%/3600
+set /a diff_m= (%difftime% %% 3600 )/60
+set /a diff_s= %difftime% %% 60
+set duration= %diff_h% h %diff_m% m %diff_s% s
+echo %1: %duration% >> %stagestatus%
+exit /b 0
 
 :: -------------------------------------------------------------
 :is_file_installed
