@@ -375,17 +375,17 @@ time /t > %OUTDIR%\stoptime.txt
 set /p stoptime=<%OUTDIR%\stoptime.txt
 
 echo smokebot build success on %COMPUTERNAME% > %infofile%
-echo start: %startdate% %starttime% >> %infofile%
-echo  stop: %stopdate% %stoptime%  >> %infofile%
+echo "      start: %startdate% %starttime%" >> %infofile%
+echo "       stop: %stopdate% %stoptime%"  >> %infofile%
+echo "  Build FDS: %DIFF_BUILDFDS%" >> %infofile%
+echo "  Build SMV: %DIFF_BUILDSMV%" >> %infofile%
+echo " Build Util: %DIFF_BUILDUTIL%" >> %infofile%
+echo "     Run VV: %DIFF_RUNVV%" >> %infofile%
+echo "  Make Pics: %DIFF_MAKEPICS%" >> %infofile%
+echo "Make Guides: %DIFF_MAKEGUIDES%" >> %infofile%
+echo "      Total: %DIFF_TIME%" >> %infofile%
 
 if NOT exist %tosummarydir% goto skip_copyfiles
-  echo "  Build FDS: %DIFF_BUILDFDS% >> %infofile%
-  echo "  Build SMV: %DIFF_BUILDSMV% >> %infofile%
-  echo " Build Util: %DIFF_BUILDUTIL% >> %infofile%
-  echo "     Run VV: %DIFF_RUNVV% >> %infofile%
-  echo "  Make Pics: %DIFF_MAKEPICS% >> %infofile%
-  echo "Make Guides: %DIFF_MAKEGUIDES% >> %infofile%
-  echo "      Total: %DIFF_TIME% >> %infofile%
   echo summary   (local): file://%userprofile%/FDS-SMV/Manuals/SMV_Summary/index.html >> %infofile%
   echo summary (windows): https://googledrive.com/host/0B-W-dkXwdHWNUElBbWpYQTBUejQ/index.html >> %infofile%
   echo summary   (linux): https://googledrive.com/host/0B-W-dkXwdHWNN3N2eG92X2taRFk/index.html >> %infofile%
