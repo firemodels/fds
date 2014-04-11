@@ -107,6 +107,7 @@ INSTALL libnuma-dev
 INSTALL gparted
 INSTALL mesa-utils
 INSTALL apache2
+INSTALL gpicview
 
 # adding NVIDIA video drivers (by hand)
 
