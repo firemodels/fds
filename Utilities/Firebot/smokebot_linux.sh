@@ -179,7 +179,18 @@ GET_DURATION(){
   time_before=$1
   time_after=$2
   DIFF_TIME=`echo $(($time_after-$time_before))`
-  echo "$(($DIFF_TIME / 3600 ))h $((($DIFF_TIME % 3600) / 60))m $(($DIFF_TIME % 60))s"
+  TIME_H=`echo $(($DIFF_TIME / 3600 ))`
+  TIME_M=`echo $((($DIFF_TIME % 3600 ) / 60))`
+  TIME_S=`echo $(($DIFF_TIME % 60 ))`
+  if (( "$DIFF_TIME" >= 3600 )) ; then
+    echo "${TIME_H}h ${TIME_M}m ${TIME_S}s"
+  else
+    if (( "$DIFF_TIME" >= 60 )) ; then
+      echo "${TIME_M}m ${TIME_S}s"
+    else
+      echo "${TIME_S}s"
+    fi
+  fi
 }
 
 MKDIR ()
@@ -1075,22 +1086,22 @@ email_build_status()
    fi
    echo $THIS_FDS_FAILED>$FDS_STATUS_FILE
    stop_time=`date`
-   echo "-------------------------------" > $TIME_LOG
-   echo "         host: $hostname " >> $TIME_LOG
-   echo "        start: $start_time " >> $TIME_LOG
-   echo "         stop: $stop_time " >> $TIME_LOG
-   echo "    run cases: $DIFF_RUNCASES" >> $TIME_LOG
-   echo "make pictures: $DIFF_MAKEPICTURES" >> $TIME_LOG
-   echo "        total: $DIFF_SCRIPT_TIME" >> $TIME_LOG
-   echo "   results (local): http://$WEBHOSTNAME/VV/SMV2" >> $TIME_LOG
-   echo " results (public) : https://googledrive.com/host/0B-W-dkXwdHWNN3N2eG92X2taRFk/index.html" >> $TIME_LOG
+   echo "----------------------------------------------" > $TIME_LOG
+   echo ".         host: $hostname " >> $TIME_LOG
+   echo ".        start: $start_time " >> $TIME_LOG
+   echo ".         stop: $stop_time " >> $TIME_LOG
+   echo ".    run cases: $DIFF_RUNCASES" >> $TIME_LOG
+   echo ".make pictures: $DIFF_MAKEPICTURES" >> $TIME_LOG
+   echo ".        total: $DIFF_SCRIPT_TIME" >> $TIME_LOG
+   echo ".   results (local): http://$WEBHOSTNAME/VV/SMV2" >> $TIME_LOG
+   echo ". results (public) : https://googledrive.com/host/0B-W-dkXwdHWNN3N2eG92X2taRFk/index.html" >> $TIME_LOG
   if [[ $THIS_SMVSVN != $LAST_SMVSVN ]] ; then
     cat $SVN_SMVLOG >> $TIME_LOG
   fi
   if [[ $THIS_FDSSVN != $LAST_FDSSVN ]] ; then
     cat $SVN_FDSLOG >> $TIME_LOG
   fi
-   echo "-------------------------------" >> $TIME_LOG
+   echo "----------------------------------------------" >> $TIME_LOG
    cd $SMOKEBOT_DIR
    # Check for warnings and errors
    if [[ -e $WARNING_LOG && -e $ERROR_LOG ]]
