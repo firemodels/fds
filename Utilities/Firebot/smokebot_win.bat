@@ -221,7 +221,7 @@ set DIFF_BUILDFDS=%duration%
 :: -------------------------------------------------------------
 
 call :GET_TIME
-set BUILDSMV_beg=%current_time% 
+set BUILDSMVUTIL_beg=%current_time% 
 echo Stage 2 - Building Smokeview
 
 if %reduced% == 1 goto skip_smokeview_debug
@@ -246,17 +246,10 @@ make -f ..\Makefile intel_win_%size% 1>> %OUTDIR%\stage2b.txt 2>&1
 call :does_file_exist smokeview_win_%size%.exe %OUTDIR%\stage2b.txt|| aexit /b 1
 call :find_smokeview_warnings "warning" %OUTDIR%\stage2b.txt "Stage 2b"
 
-call :GET_TIME
-set BUILDSMV_end=%current_time% 
-call :GET_DURATION BUILDSMV %BUILDSMV_beg% %BUILDSMV_end%
-set DIFF_BUILDSMV=%duration%
-
 :: -------------------------------------------------------------
 ::                           stage 3
 :: -------------------------------------------------------------
 
-call :GET_TIME
-set BUILDUTIL_beg=%current_time% 
 echo Stage 3 - Building FDS/Smokeview utilities
 
 if %reduced% == 1 goto skip_fds2ascii
@@ -297,9 +290,9 @@ if %haveCC% == 1 (
 )
 
 call :GET_TIME
-set BUILDUTIL_end=%current_time% 
-call :GET_DURATION BUILDUTIL %BUILDUTIL_beg% %BUILDUTIL_end%
-set DIFF_BUILDUTIL=%duration%
+set BUILDSMVUTIL_end=%current_time% 
+call :GET_DURATION BUILDSMVUTIL %BUILDSMVUTIL_beg% %BUILDSMVUTIL_end%
+set DIFF_BUILDSMVUTIL=%duration%
 
 :: -------------------------------------------------------------
 ::                           stage 4
@@ -374,16 +367,15 @@ set /p stopdate=<%OUTDIR%\stoptime.txt
 time /t > %OUTDIR%\stoptime.txt
 set /p stoptime=<%OUTDIR%\stoptime.txt
 
-echo smokebot build success on %COMPUTERNAME% > %infofile%
-echo "      start: %startdate% %starttime%" >> %infofile%
-echo "       stop: %stopdate% %stoptime%"  >> %infofile%
-echo "  Build FDS: %DIFF_BUILDFDS%" >> %infofile%
-echo "  Build SMV: %DIFF_BUILDSMV%" >> %infofile%
-echo " Build Util: %DIFF_BUILDUTIL%" >> %infofile%
-echo "     Run VV: %DIFF_RUNVV%" >> %infofile%
-echo "  Make Pics: %DIFF_MAKEPICS%" >> %infofile%
-echo "Make Guides: %DIFF_MAKEGUIDES%" >> %infofile%
-echo "      Total: %DIFF_TIME%" >> %infofile%
+echo. > %infofile%
+echo . ----------------------------- >> %infofile%
+echo .         host: %COMPUTERNAME% >> %infofile%
+echo .        start: %startdate% %starttime% >> %infofile%
+echo .         stop: %stopdate% %stoptime%  >> %infofile%
+echo .    run cases: %DIFF_RUNVV% >> %infofile%
+echo .make pictures: %DIFF_MAKEPICS% >> %infofile%
+echo .        total: %DIFF_TIME% >> %infofile%
+echo . ----------------------------- >> %infofile%
 
 if NOT exist %tosummarydir% goto skip_copyfiles
   echo summary   (local): file://%userprofile%/FDS-SMV/Manuals/SMV_Summary/index.html >> %infofile%
@@ -454,7 +446,9 @@ set /a difftime=%3 - %2
 set /a diff_h= %difftime%/3600
 set /a diff_m= (%difftime% %% 3600 )/60
 set /a diff_s= %difftime% %% 60
-set duration= %diff_h% h %diff_m% m %diff_s% s
+if %difftime% GEQ 3600 set duration= %diff_h%h %diff_m%m %diff_s%s
+if %difftime% LSS 3600 if %difftime% GEQ 60 set duration= %diff_m%m %diff_s%s
+if %difftime% LSS 3600 if %difftime% LSS 60 set duration= %diff_s%s
 echo %1: %duration% >> %stagestatus%
 exit /b 0
 
