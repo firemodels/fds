@@ -1043,7 +1043,6 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
 
             ELSE GEOMETRY  ! Sweep in 3D cartesian geometry
 
-              OMP_OR_SERIAL: IF (USE_OPENMP) THEN
               DO N_SLICE = ISTEP*ISTART + JSTEP*JSTART + KSTEP*KSTART, &
                           ISTEP*IEND + JSTEP*JEND + KSTEP*KEND
                 M_IJK = 0
@@ -1104,41 +1103,6 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                  !$OMP END PARALLEL DO
 
                ENDDO ! IPROP
-             ELSE OMP_OR_SERIAL
-               ! Serial code
-               KLOOP: DO K=KSTART,KEND,KSTEP
-                  AY1 = DZ(K) * ABS(DLY(N))
-                  JLOOP: DO J=JSTART,JEND,JSTEP
-                     AX  = DY(J) * DZ(K) * ABS(DLX(N))
-                     VC1 = DY(J) * DZ(K)
-                     AZ1 = DY(J) * ABS(DLZ(N))
-                     ILOOP: DO I=ISTART,IEND,ISTEP
-                        IC = CELL_INDEX(I,J,K)
-                        IF (SOLID(IC)) CYCLE ILOOP
-                        ILXU  = IL(I-ISTEP,J,K)
-                        ILYU  = IL(I,J-JSTEP,K)
-                        ILZU  = IL(I,J,K-KSTEP)
-                        VC  = DX(I) * VC1
-                        AY  = DX(I) * AY1
-                        AZ  = DX(I) * AZ1
-                        IF (IC/=0) THEN
-                           IW = WALL_INDEX(IC,-ISTEP)
-                           IF (WALL(IW)%BOUNDARY_TYPE==SOLID_BOUNDARY) ILXU = WALL(IW)%ONE_D%ILW(N,IBND)
-                           IW = WALL_INDEX(IC,-JSTEP*2)
-                           IF (WALL(IW)%BOUNDARY_TYPE==SOLID_BOUNDARY) ILYU = WALL(IW)%ONE_D%ILW(N,IBND)
-                           IW = WALL_INDEX(IC,-KSTEP*3)
-                           IF (WALL(IW)%BOUNDARY_TYPE==SOLID_BOUNDARY) ILZU = WALL(IW)%ONE_D%ILW(N,IBND)
-                        ENDIF
-                        A_SUM = AX + AY + AZ
-                        AIU_SUM = AX*ILXU + AY*ILYU + AZ*ILZU
-                        IF (VIRTUAL_PARTICLES) IL_UP(I,J,K) = MAX(0._EB,AIU_SUM/A_SUM)
-                        RAP = 1._EB/(A_SUM + EXTCOE(I,J,K)*VC*RSA(N))
-                        IL(I,J,K) = MAX(0._EB, RAP * (AIU_SUM + VC*RSA(N)*RFPI* &
-                                       ( KFST4(I,J,K)+KFST4W(I,J,K) + RSA_RAT*SCAEFF(I,J,K)*UIIOLD(I,J,K) ) ) )
-                     ENDDO ILOOP
-                  ENDDO JLOOP
-               ENDDO KLOOP
-             ENDIF OMP_OR_SERIAL
  
             ENDIF GEOMETRY
 
