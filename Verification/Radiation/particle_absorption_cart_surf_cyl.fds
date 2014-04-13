@@ -15,10 +15,10 @@ value of dT should be equal to the time averaged Q_abs.
 --------------------FDS Data-----------------------------
 &HEAD CHID='particle_absorption_cart_surf_cyl',TITLE='Cartesian particle absorption test case $Revision$' /
 
-MESH 1 has particles with cartesian surf.
-MESH 2 has particles with cartesian surf and split = 2 (x)
-MESH 2 has particles with cartesian surf and split = 2 (y)
-MESH 2 has particles with cartesian surf and split = 2 (z)
+MESH 1 has particles with cylindrical surf.
+MESH 2 has particles with cylindrical surf and split = 2 (x)
+MESH 2 has particles with cylindrical surf and split = 2 (y)
+MESH 2 has particles with cylindrical surf and split = 2 (z)
 
 &MESH IJK=3,3,3, XB=0,3,0,3,0,3/ 
 &MESH IJK=3,3,3, XB=4,7,0,3,0,3/ 
@@ -38,24 +38,35 @@ MESH 2 has particles with cartesian surf and split = 2 (z)
 &SURF ID='HOT'
       DEFAULT=.TRUE.
       EMISSIVITY = 1.
+      TMP_FRONT = 900.
+      HEAT_TRANSFER_COEFFICIENT=0.
+      TAU_T = 0.0 /
+
+&SURF ID='REALLY HOT 0'
+      EMISSIVITY = 1.
       TMP_FRONT = 1000.
+      HEAT_TRANSFER_COEFFICIENT=0.
       TAU_T = 0.0 /
 
 &SURF ID='REALLY HOT 1'
       EMISSIVITY = 1.
       TMP_FRONT = 1170.
+      HEAT_TRANSFER_COEFFICIENT=0.
       TAU_T = 0.0 /
 
 &SURF ID='REALLY HOT 2'
       EMISSIVITY = 1.
       TMP_FRONT = 1330.
+      HEAT_TRANSFER_COEFFICIENT=0.
       TAU_T = 0.0 /
 
 &SURF ID='REALLY HOT 3'
       EMISSIVITY = 1.
       TMP_FRONT = 1500.
+      HEAT_TRANSFER_COEFFICIENT=0.
       TAU_T = 0.0 /
 
+&VENT XB = 7,7,0,3,0,3 SURF_ID = 'REALLY HOT 0' /
 &VENT XB = 7,7,0,3,0,3 SURF_ID = 'REALLY HOT 1' /
 &VENT XB = 8,11,3,3,0,3 SURF_ID = 'REALLY HOT 2' /
 &VENT XB = 12,15,0,3,3,3 SURF_ID = 'REALLY HOT 3' /
@@ -156,6 +167,12 @@ mesh 4
 &DEVC QUANTITY='MPUV', PART_ID='part_4', ID = 'MPUV_4', STATISTICS = 'VOLUME INTEGRAL', XB = 12,15,1,2,1,2 /
 &DEVC QUANTITY = 'WALL TEMPERATURE', INIT_ID = 'init_4' ID = 'TMP_4', XYZ = 13.5,1.5,1.5/
 
+Net energy change within volume integrated on boundaries
+
+&DEVC XB=0,3,0,3,0,3 QUANTITY='NET HEAT FLUX' STATISTICS='SURFACE INTEGRAL' ID='NET_1'/
+&DEVC XB=4,7,0,3,0,3 QUANTITY='NET HEAT FLUX' STATISTICS='SURFACE INTEGRAL' ID='NET_2'/
+&DEVC XB=8,11,0,3,0,3 QUANTITY='NET HEAT FLUX' STATISTICS='SURFACE INTEGRAL' ID='NET_3'/
+&DEVC XB=12,15,0,3,0,3 QUANTITY='NET HEAT FLUX' STATISTICS='SURFACE INTEGRAL' ID='NET_4'/
 &TAIL /
 
 
