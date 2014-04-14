@@ -2,7 +2,7 @@
 # run this script using sudo
 
 # set user name of person "owning" cfast and FDS-SMV repositories
-USERNAME=change to your real user name
+USERNAME=gforney
 
 
 INSTALL ()
@@ -118,5 +118,14 @@ INSTALL gpicview
 # next and succeeding times
 
 #sudo apt-get dist-upgrade
+
+# install openmpi libraries
+
+wget https://bintray.com/nist-fire-research/releases/Open_MPI/view/files/openmpi_1.6.5_linux_32.tar.gz
+wget https://bintray.com/nist-fire-research/releases/Open_MPI/view/files/openmpi_1.6.5_linux_64.tar.gz
+mkdir /shared
+cd /shared
+tar xvf ~/openmpi_1.6.5_linux_32.tar.gz
+tar xvf ~/openmpi_1.6.5_linux_64.tar.gz
 
 echo setup complete
