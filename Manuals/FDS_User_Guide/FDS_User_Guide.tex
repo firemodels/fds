@@ -5174,19 +5174,19 @@ In this case we explicitly define all primitive species:
 &SPEC ID='WATER VAPOR' /
 &SPEC ID='CARBON DIOXIDE' /
 \end{lstlisting}
-If $C_{\alpha}$ represents the concentration of species $\alpha$ that can react with a rate constant $k$, then the rate expression for the fuel, $\mathrm{C_3H_8}$, is
+The rate expression for the fuel, $\mathrm{C_3H_8}$, is
 \begin{equation}\label{eq:finite_rate}
-\frac{\d C_{\mathrm{C_3H_8}}}{\d t}= -k \, \prod C_{\alpha}\,^{N_S}
+\frac{\d C_{\mathrm{C_3H_8}}}{\d t}= -k \, \prod C_{\alpha}\,^{N_{S,\alpha}}
 \end{equation}
 where the rate constant is defined as
 \begin{equation}\label{eq:reac_rate}
-k = A \, T^{N_{T}} \, {\rm e}^{-E/RT}
+k = A \, T^{N_{T}} \, {\rm e}^{-E_a/RT}
 \end{equation}
 \begin{description}
-\item[{\ct A}] is the pre-exponential factor (in appropriate units),
-\item[{\ct E}] is the activation energy in units of J/mol,
-\item[{\ct N\_S}] is an array containing the concentration exponents (default 1),
-\item[{\ct N\_T}] is the temperature exponent (default is 0, meaning no temperature dependence).
+\item[$A$] is the pre-exponential factor [\,((\si{mol/L})$^{1-n}$)/s\,], where $n=\sum N_{S,\alpha}$ is the \emph{order} of the reaction,
+\item[$E_a$] is the activation energy [\,\si{J/mol}\,],
+\item[$N_{S,\alpha}$] is an array containing the concentration exponents (default 1),
+\item[$N_T$] is the temperature exponent (default is 0, meaning no temperature dependence).
 \end{description}
 
 If we use Arrhenius parameters found from experiments or the literature (for this case Westbrook and Dryer~\cite{Westbrook:1}), the rate expression for the single-step propane reaction defined by Eq.~(\ref{eq:propane_1step}) becomes:
