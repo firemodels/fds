@@ -421,19 +421,19 @@ Consider a simple one-step forward reaction:
 \begin{equation}\label{eq:generic_1step}
 a\mathrm{A} + b\mathrm{B} \rightarrow c\mathrm{C} + d\mathrm{D}
 \end{equation}
-The rate expression for species A with a mixed zone concentration of $C_{\mbox{\scriptsize A}}$ in mol/L and rate constant $k$ is
+The rate expression for species A with a mixed zone concentration of $C_{\mbox{\scriptsize A}}$ in \si{mol/cm^3} and rate constant $k$ is
 \begin{equation}\label{eq:generic_rate}
 \frac{\d C_{\mbox{\scriptsize A}}}{\d t}= -k\; C_{\mbox{\scriptsize A}}^{\,a}\; C_{\mbox{\scriptsize B}}^{\,b}
 \end{equation}
-Consider a set of $N_r$ reactions with fuel F. The reaction rate (\si{mol/(L.s)}) for F in the $i$th reaction is
+Consider a set of $N_r$ reactions with fuel F. The reaction rate (\si{mol/(cm^3.s)}) for F in the $i$th reaction is
 \begin{equation}\label{eq:rate_f}
 r_{\si{F},i}= -k_{i}\; \prod C_{\alpha}^{\,a_{\alpha,i}}
 \end{equation}
 For the $i$th Arrhenius reaction, the rate constant, $k_i$, depends on the temperature, $T$, the temperature exponent, $n_i$, the pre-exponential factor, $A_i$, and the activation energy, $E_i$:
 \begin{equation}\label{eq:rate_cons}
-k_i = A_i\;T^{n_i}\;\mathrm{e}^{-E_i/RT}
+k_i = A_i\;T^{n_i}\;\mathrm{e}^{-E_{a,i}/RT}
 \end{equation}
-Note that the units of $E$ are J/mol and units of $A$ are dependent upon the order of the reaction and take the appropriate form to ensure the units of Eq.~(\ref{eq:rate_f}) are correct.
+Note that the units of $E_a$ are J/mol and units of $A$ are ((\si{mol/cm^3})$^{1-\sum a_{\alpha}}$)/s.  Note that $\sum a_{\alpha}$ is the \emph{order} of the reaction.  The units of $A$ take the appropriate form to ensure the units of Eq.~(\ref{eq:rate_f}) are \si{mol/(cm^3.s)}.
 
 The reaction rate for species $\alpha$ of the $i$th reaction is based on the ratio of stoichiometric coefficients:
 \begin{equation}\label{eq:rate_a}
@@ -445,22 +445,22 @@ The change in concentration for species $\alpha$ within the mixed reactor zone i
 \end{equation}
 FDS only transports lumped species and only lumped species can be consumed or created.  Note, however, that any of the primitive species may participate in a reaction rate law.
 
-It is more convenient for FDS to work in terms of mass fractions, $Y_{\alpha}$.  The concentration (mol/L) and mass fractions (kg $\alpha$/kg) are related by $C_{\alpha}=Y_{\alpha} \rho/W_{\alpha}$.
-To simplify the calculations within FDS, density and molecular weight are pulled out of the product of the concentrations on the right hand side of Eq.~(\ref{eq:rate_f}) and calculated with the other constants to form $A^{\prime}$:
+It is more convenient for FDS to work in terms of mass fractions, $Y_{\alpha}$.  The concentrations (\si{mol/cm^3}) and mass fractions (kg $\alpha$/kg) are related by $C_{\alpha}=Y_{\alpha} \rho/(W_{\alpha} \times 1000)$, where the density, $\rho$, has units of \si{kg/m^3}.
+To simplify the calculations within FDS, density and molecular weight are pulled out of the product concentrations on the right hand side of Eq.~(\ref{eq:rate_f}) and combined with the other constants to form $A^{\prime}$:
 \begin{equation}\label{eq:aprime}
-A^{\prime}_{i} = A_{i}\;\rho^{\sum a_{\alpha}}\prod W_{\alpha}^{\,-a_{\alpha,i}}
+A^{\prime}_{i} = A_{i} \, \prod \, (W_{\alpha} \times 1000)^{\,-a_{\alpha,i}} \times \left(\frac{1 \; \si{kmol}}{10^3 \; \si{mol}}\right) \times \left(\frac{10^6 \; \si{cm^3}}{1 \; \si{m^3}}\right) \times W_{\,\si{F}}
 \end{equation}
-Using $A_i^{\prime}$, the rate becomes
+Using $A_i^{\prime}$, the reaction rate in becomes
 \begin{equation}\label{eq:finite_rate_fin}
-r^{\prime}_{F,i} = -A_i^{\prime}\;T^{n_i}\;\mathrm{e}^{-E_i/RT}\;\prod Y_{\alpha}^{\,a_{\alpha,i}}
+r^{\prime}_{\si{F},i} = -A_i^{\prime}\;\rho^{\sum a_{\alpha,i}}\;T^{n_i}\;\mathrm{e}^{-E_i/RT}\;\prod Y_{\alpha}^{\,a_{\alpha,i}} \quad [=] \quad \left(\frac{\si{kg \; F}}{\si{m^3.s}}\right)
 \end{equation}
-The reaction rate on a mass basis for species $\alpha$ in the $i$th reaction is
+The mass rate of reaction per unit volume for species $\alpha$ in the $i$th reaction is
 \begin{equation}\label{eq:rate_a_y}
-r^{\prime}_{\alpha,i}= \left(\frac{\nu_{\alpha,i}\,W_{\alpha}}{\nu_{F,i}\,W_{F}}\right)\,r^{\prime}_{F,i}
+r^{\prime}_{\alpha,i}= \left(\frac{\nu_{\alpha,i}\,W_{\alpha}}{\nu_{\si{F},i}\,W_{\,\si{F}}}\right)\,r^{\prime}_{\si{F},i} \quad [=] \quad \left(\frac{\si{kg \; \alpha}}{\si{m^3.s}}\right)
 \end{equation}
-Last, the rate of change in composition for species $\alpha$ (\si{kg $\alpha$/(m^3.s)}) in the mixed reactor zone becomes
+Last, the rate of change in composition for species $\alpha$ in the mixed reactor zone becomes
 \begin{equation}\label{rate_expression_y}
-\frac{\d \hat{Y}_{\alpha}}{\d t} = \frac{1}{\rho}\sum_{i} r^{\prime}_{\alpha,i}
+\frac{\d \hat{Y}_{\alpha}}{\d t} = \frac{1}{\rho}\sum_{i} r^{\prime}_{\alpha,i} \quad [=] \quad \left(\frac{\si{kg \; \alpha}}{\si{kg.s}}\right)
 \end{equation}
 See Section \ref{boundedness} for a discussion on the algorithm used to ensure species remain realizable.
 
