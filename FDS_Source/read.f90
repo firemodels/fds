@@ -3249,7 +3249,7 @@ REAC_LOOP: DO NR=1,N_REACTIONS
          IF (TRIM(RN%SPEC_ID_N_S_READ(NS))==TRIM(SPECIES(NS2)%ID)) THEN
             RN%SPEC_ID_N_S(NS2) = RN%SPEC_ID_N_S_READ(NS)
             RN%N_S(NS2)       = RN%N_S_READ(NS)
-            RN%A_PRIME        = RN%A_PRIME * (1000._EB*SPECIES(NS2)%MW)**(-RN%N_S(NS2))
+            RN%A_PRIME        = RN%A_PRIME * (1000._EB*SPECIES(NS2)%MW)**(-RN%N_S(NS2)) ! FDS Tech Guide, Eq. (5.48), product term
             RN%RHO_EXPONENT   = RN%RHO_EXPONENT + RN%N_S(NS2)
             NAME_FOUND = .TRUE.
             EXIT
@@ -3262,8 +3262,8 @@ REAC_LOOP: DO NR=1,N_REACTIONS
       ENDIF
    ENDDO
 
-   RN%RHO_EXPONENT = RN%RHO_EXPONENT - 1._EB
-   RN%A_PRIME = RN%A_PRIME * 1000._EB*SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%MW
+   RN%RHO_EXPONENT = RN%RHO_EXPONENT - 1._EB ! subtracting 1 accounts for division by rho in Eq. (5.51)
+   RN%A_PRIME = RN%A_PRIME * 1000._EB*SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%MW ! conversion terms in Eq. (5.48)
    IF (RN%FUEL/='null' .AND. RN%FUEL_SMIX_INDEX<1) THEN
       WRITE(MESSAGE,'(A,I3,A,A,A)') 'ERROR: Problem with REAC ',NR,'. Fuel ',TRIM(RN%FUEL),' not found.'
       CALL SHUTDOWN(MESSAGE)
