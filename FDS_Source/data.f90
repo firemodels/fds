@@ -1779,7 +1779,7 @@ SELECT CASE (SPEC_ID_USE)
       TE=MIN(3000._EB,MAX(TE,50._EB))
       CP = -2.112E-02_EB + 4.491E-03_EB*TE  -2.193E-06_EB*TE**2 + 4.422e-10_EB*TE**3-2.678E-14_EB*TE**4
       CP = CP*1000._EB !J/kg/K
-      H = 260323.992102 !J/kg/K
+      H = 260323.992102_EB !J/kg
       FUEL = .TRUE.
    CASE('BUTANE') !NIST webbook
       TE = MIN(1500._EB,MAX(50._EB,TE))
@@ -1790,7 +1790,7 @@ SELECT CASE (SPEC_ID_USE)
       TE = MIN(5727._EB,MAX(25._EB,TE))
       CP = -0.013103_EB/(TE/1000._EB)**2-0.043256_EB*(TE/1000._EB)**3+0.448537_EB*(TE/1000._EB)**2-0.812428_EB*(TE/1000._EB) &
            +21.17510_EB
-      CP = CP /  12.0107!J/kg/K
+      CP = CP / 12.0107_EB !J/kg/K
    CASE('CARBON DIOXIDE')
       IF (TE<100._EB) THEN
          CP = 658._EB + TE * 0.06981_EB !J/kg/K
@@ -1859,10 +1859,10 @@ SELECT CASE (SPEC_ID_USE)
          CP = CP /  2.01588*1000_EB!J/kg/K
       ENDIF
       H = 200059.42623_EB !J/kg
-   CASE('HYDROGEN ATOM')
-      CP = 20.786 !J/mol/K
-      CP = CP / 1.00849 !J/kg/K
-         
+   CASE('HYDROGEN ATOM') !NIST webbook
+      TE = TE*0.001_EB
+      CP = 20.78603_EB + 4.850638E-10_EB*TE - 1.582916E-10_EB*TE**2 + 1.525102E-11_EB*TE**3 + 3.196347E-11_EB/TE**2 !J/mol/K
+      CP = CP / 1.00849_EB * 1000 !J/kg/K
    CASE('HYDROGEN BROMIDE')
       IF (TE<100._EB) THEN
          CP = 350.925_EB + TE * 0.084659_EB !J/kg/K
@@ -1895,6 +1895,29 @@ SELECT CASE (SPEC_ID_USE)
          CP = CP / 27.02534_EB * 1000._EB !J/kg/K
       ENDIF
       H = 672724.43873_EB !J/kg
+   CASE('HYDROGEN PEROXIDE') ! H2O2 (NIST webbook)
+      ! valid up to 1500 K, but no guidance above that temperature
+      TE = TE*0.001_EB
+      CP = 34.25667_EB + 55.18445_EB*TE - 35.15443_EB*TE**2 + 9.087440_EB*TE**3 - 0.422157_EB/TE**2 !J/mol/K
+      CP = CP / 34.0147_EB * 1000._EB !J/kg/K
+   CASE('HYDROXYL RADICAL') ! OH (NIST webbook)
+      IF (TE<1300._EB) THEN
+         TE = TE*0.001_EB
+         CP = 32.27768_EB - 11.36291_EB*TE - 13.60545_EB*TE**2 - 3.846486_EB*TE**3 - 0.001335_EB/TE**2 !J/mol/K
+      ELSE
+         TE = TE*0.001_EB
+         CP = 28.74701_EB + 4.714489_EB*TE - 0.814725_EB*TE**2 + 0.054748_EB*TE**3 - 2.747829_EB/TE**2 !J/mol/K
+      ENDIF
+      CP = CP / 17.0073_EB * 1000._EB !J/kg/K
+   CASE('HYDROPEROXY RADICAL') ! HO2 (NIST webbook)
+      IF (TE<2000._EB) THEN
+         TE = TE*0.001_EB
+         CP = 26.00960_EB + 34.85810_EB*TE - 16.30060_EB*TE**2 + 3.110441_EB*TE**3 - 0.018611_EB/TE**2 !J/mol/K
+      ELSE
+         TE = TE*0.001_EB
+         CP = 45.87510_EB + 8.814350_EB*TE - 1.636031_EB*TE**2 + 0.098053_EB*TE**3 - 10.17380_EB/TE**2 !J/mol/K
+      ENDIF
+      CP = CP / 33.0067_EB * 1000._EB !J/kg/K
    CASE('HYDROGEN FLUORIDE')
       IF (TE<100._EB) THEN
          CP = 1370.6_EB + TE * 0.858_EB !J/kg/K
@@ -1906,9 +1929,11 @@ SELECT CASE (SPEC_ID_USE)
          CP = CP / 20.00634_EB * 1000._EB !J/kg/K
       ENDIF
       H = 187582.15786_EB !J/kg
-   CASE('HELIUM')
-         CP = 20.786_EB / 0.004_EB !J/kg/K
-         H = -1498.49102_EB !J/kg
+   CASE('HELIUM') ! NIST webbook
+      TE = TE*0.001_EB
+      CP = 20.78603_EB + 4.850638E-10_EB*TE - 1.582916E-10_EB*TE**2 + 1.525102E-11_EB*TE**3 + 3.196347E-11_EB/TE**2 !J/mol/K
+      CP = CP / 4.002602_EB * 1000._EB !J/kg/K
+      H = -1498.49102_EB !J/kg
    CASE('ISOPROPANOL') !NIST webbook
       TE = MIN(3000._EB,MAX(50._EB,TE))
       CP = -7.06262E-11_EB*TE**4 + 7.07732E-07_EB*TE**3 - 2.72345E-03_EB*TE**2 + 4.97716E+00_EB*TE + 2.90147E+02_EB !J/kg/K
@@ -1971,7 +1996,6 @@ SELECT CASE (SPEC_ID_USE)
       CP = 21.13581_EB - 0.388842_EB*(TE/1000._EB) + 0.043545_EB*(TE/1000._EB)**2 + 0.024685_EB*(TE/1000._EB)**3 &
            - 0.025678/(TE/1000._EB)**2 !J/mol/K
       CP = CP / 14.0067_EB ! J/kg/K
-   
    CASE('NITROGEN DIOXIDE')
       IF (TE<100._EB) THEN
          CP = 722.2609_EB + TE * 0.010559_EB !J/kg/K
@@ -1983,10 +2007,10 @@ SELECT CASE (SPEC_ID_USE)
       H = 323472.03341_EB !J/kg
    CASE('NITROUS OXIDE')
       IF (TE < 100._EB) THEN
-         CP = 656.1590909_EB+TE*0.107857955_EB!J/kg/K
+         CP = 656.1590909_EB+TE*0.107857955_EB !J/kg/K
       ELSE
          CP = 135.4775_EB-37971.38_EB/TE**2+3432.027_EB/TE-0.01912358_EB*TE+0.000001548166_EB*TE**2+0.0000000002536593_EB*TE**3-&
-              7.117205E-14_EB*TE**4+4.652381E-18_EB*TE**5+29.57471_EB*LOG(TE)!J/mol/K
+              7.117205E-14_EB*TE**4+4.652381E-18_EB*TE**5+29.57471_EB*LOG(TE) !J/mol/K
          CP = CP / 44.0128_EB * 1000._EB !J/kg/K
       ENDIF
       H = 254813.7971_EB !J/kg         
@@ -1996,19 +2020,18 @@ SELECT CASE (SPEC_ID_USE)
       ELSE
          CP = 72.69494_EB - 566.7158_EB/TE + 0.03684584_EB*TE - 0.0000168704_EB*TE**2 + 0.000000004308058_EB*TE**3 &
               - 0.0000000000005561213_EB*TE**4 + 2.857776E-17_EB*TE**5 - 8.989582_EB*LOG(TE) !kJ/mol/K
-         CP = CP / 31.9988*1000_EB!J/kg-K
+         CP = CP / 31.9988 * 1000_EB !J/kg/K
       ENDIF
       H = 190302.3147857_EB !J/kg     
    CASE('OXYGEN ATOM')
-     IF (TE<100._EB) THEN
-        CP = 0.237_EB*TE + 3.0E-15_EB
-     ELSEIF (TE >= 100._EB .AND. TE < 600._EB) THEN
-        CP = -1E-8_EB*TE**3 + 2E-5_EB*TE**2 - 0.017_EB*TE + 25.001_EB
-     ELSE
-        CP = -1E-11_EB*TE**3 + 2E-7_EB*TE**2 - 0.0007_EB*TE +21.455_EB !J/mol/K
-     ENDIF
-     CP = CP / 15.9994 !J/kg
-     
+      IF (TE<100._EB) THEN
+         CP = 0.237_EB*TE + 3.0E-15_EB
+      ELSEIF (TE >= 100._EB .AND. TE < 600._EB) THEN
+         CP = -1E-8_EB*TE**3 + 2E-5_EB*TE**2 - 0.017_EB*TE + 25.001_EB
+      ELSE
+         CP = -1E-11_EB*TE**3 + 2E-7_EB*TE**2 - 0.0007_EB*TE +21.455_EB !J/mol/K
+      ENDIF
+      CP = CP / 15.9994 !J/kg
    CASE('PROPANE') !NIST webbook
       TE = MIN(1500._EB,MAX(100._EB,TE))
       CP = 1.67536E-09_EB*TE**4 - 5.46675E-06_EB*TE**3 + 4.38029E-03_EB*TE**2 + 2.79490E+00_EB*TE + 6.11728E+02_EB !J/kg/K   
@@ -2400,7 +2423,8 @@ SUBROUTINE GAS_PROPS(GAS_NAME,SIGMA,EPSOK,MW,FORMULA,LISTED,ATOM_COUNTS,H_F,RADC
 
 ! Molecular weight (g/mol) and Lennard-Jones properties
 ! Brodkey, R. and Hershey, H. Transport Phenomena: A Unified Approach. McGraw-Hill. 1988
-! Heat of Formation (H_F) has units of kJ/kmol
+! Heat of Formation (H_F) has units of kJ/mol (see NIST Webbook)
+! Some species (O,H,OH,HO2,H2O2) LJ parameters were taken from Jasper and Miller, Combustion and Flame, Vol. 161, 2014.
 USE GLOBAL_CONSTANTS, ONLY: MW_AIR 
 REAL(EB) :: SIGMA,EPSOK,MW,SIGMAIN,EPSOKIN,MWIN,ATOM_COUNTS(118),H_F,H_FIN
 CHARACTER(LABEL_LENGTH) :: GAS_NAME,RADCAL_NAME
@@ -2511,6 +2535,11 @@ SELECT CASE(GAS_NAME)
       EPSOK = 59.7_EB
       FORMULA = 'H2'
       H_F = 0._EB
+   CASE('HYDROGEN ATOM')        
+      SIGMA = 2.31_EB 
+      EPSOK = 123.6_EB
+      FORMULA = 'H'
+      H_F = 218.0_EB
    CASE('HYDROGEN BROMIDE')   
       SIGMA = 3.353_EB
       EPSOK = 449._EB
@@ -2526,11 +2555,26 @@ SELECT CASE(GAS_NAME)
       EPSOK = 569.1_EB
       FORMULA = 'HCN'
       H_F = 135.14_EB  
-    CASE('HYDROGEN FLUORIDE')   
+   CASE('HYDROGEN FLUORIDE')   
       SIGMA = 3.148_EB
       EPSOK = 330._EB
       FORMULA = 'HF'
-      H_F = -272.55_EB  
+      H_F = -272.55_EB
+   CASE('HYDROGEN PEROXIDE')   
+      SIGMA = 3.02_EB
+      EPSOK = 106.5_EB
+      FORMULA = 'H2O2'
+      H_F = -136.11_EB
+   CASE('HYDROXYL RADICAL')
+      SIGMA = 2.66_EB
+      EPSOK = 92.1_EB
+      FORMULA = 'OH'
+      H_F = 38.99_EB
+   CASE('HYDROPEROXY RADICAL')
+      SIGMA = 3.02_EB
+      EPSOK = 106.5_EB
+      FORMULA = 'HO2'
+      H_F = 2.09_EB
    CASE('ISOPROPANOL')
       SIGMA = 4.549_EB
       EPSOK = 576.7_EB 
@@ -2592,12 +2636,17 @@ SELECT CASE(GAS_NAME)
       SIGMA = 3.828_EB 
       EPSOK = 232.4_EB  
       FORMULA = 'N2O'
-      H_F = 82.05_EB      
-   CASE('OXYGEN')          
+      H_F = 82.05_EB
+   CASE('OXYGEN')
       SIGMA = 3.467_EB 
       EPSOK = 106.7_EB
       FORMULA ='O2'
-      H_F = 0._EB  
+      H_F = 0._EB
+   CASE('OXYGEN ATOM')
+      SIGMA = 2.66_EB 
+      EPSOK = 92.1_EB
+      FORMULA ='O'
+      H_F = 249.18_EB  
    CASE('PROPANE')
       SIGMA = 5.118_EB
       EPSOK = 237.1_EB
