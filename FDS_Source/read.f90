@@ -1471,7 +1471,7 @@ NAMELIST /MISC/ AL2O3,ALLOW_SURFACE_PARTICLES,ALLOW_UNDERSIDE_PARTICLES,ASSUMED_
                 EVACUATION_DRILL,EVACUATION_MC_MODE,EVAC_PRESSURE_ITERATIONS,EVAC_SURF_DEFAULT,EVAC_TIME_ITERATIONS,&
                 EVAPORATION_DRAG,EXTINCTION_MODEL,PARTICLE_CFL_MAX,PARTICLE_CFL_MIN,PARTICLE_CFL,&
                 FDS5_OPTIONS,FLUX_LIMITER,FORCE_VECTOR,FREEZE_VELOCITY,FYI,GAMMA,GRAVITATIONAL_DEPOSITION,&
-                GROUND_LEVEL,GVEC,HRRPUV_MAX_SMV,HUMIDITY,&
+                GROUND_LEVEL,GVEC,HRRPUV_AVERAGE,HRRPUV_MAX_SMV,HRRPUA_SHEET,HUMIDITY,&
                 INITIAL_UNMIXED_FRACTION,ISOTROPIC_PARTICLE_FORCE,ISOTHERMAL,&
                 KINETIC_ENERGY_SOURCE,LAPSE_RATE,LES_FILTER_WIDTH,MAX_CHEMISTRY_ITERATIONS,&
                 MAXIMUM_VISIBILITY,MEAN_FORCING,NOISE,NOISE_VELOCITY,NO_EVACUATION,&
@@ -1540,6 +1540,8 @@ RAMP_GX              = 'null'
 RAMP_GY              = 'null'
 RAMP_GZ              = 'null'
 EXTINCTION_MODEL     = 'null'
+HRRPUA_SHEET         = 200._EB      ! kW/m^2
+HRRPUV_AVERAGE       = 2500._EB     ! kW/m^3
 GVEC(1)              = 0._EB        ! x-component of gravity
 GVEC(2)              = 0._EB        ! y-component of gravity
 GVEC(3)              = -GRAV        ! z-component of gravity
@@ -1747,6 +1749,11 @@ IF (TRIM(SURF_DEFAULT)=='OPEN'               .OR. &
    WRITE (MESSAGE,'(A,A,A)') 'ERROR: Problem with MISC. Cannot set predefined SURF as SURF_DEFAULT'
    CALL SHUTDOWN(MESSAGE)
 ENDIF
+
+! Change units of combustion quantities
+
+HRRPUV_AVERAGE = HRRPUV_AVERAGE*1000._EB   ! W/m3
+HRRPUA_SHEET   = HRRPUA_SHEET*  1000._EB   ! W/m2
 
 END SUBROUTINE READ_MISC
 
@@ -3089,8 +3096,6 @@ FWD_ID                      = 'null'
 FYI                         = 'null'
 H                           = 0._EB
 HEAT_OF_COMBUSTION          = -2.E20_EB
-HRRPUV_AVERAGE              = 2500._EB
-HRRPUA_SHEET                = 200._EB
 ID                          = 'null'
 N                           = 0._EB
 NU                          = 0._EB
@@ -3105,7 +3110,7 @@ SERIES_REACTION             = .FALSE.
 SOOT_H_FRACTION             = 0.1_EB
 SOOT_YIELD                  = 0.0_EB
 SPEC_ID_NU                  = 'null'
-SPEC_ID_N_S                   = 'null'
+SPEC_ID_N_S                 = 'null'
 
 END SUBROUTINE SET_REAC_DEFAULTS
 
@@ -3284,6 +3289,7 @@ REAC_LOOP: DO NR=1,N_REACTIONS
    ENDDO
 
    ! Check atom balance of the reaction
+
    IF (.NOT. SIMPLE_CHEMISTRY .AND. RN%CHECK_ATOM_BALANCE) THEN
       SKIP_ATOM_BALANCE = .FALSE.
       REACTION_BALANCE = 0._EB
@@ -3291,8 +3297,9 @@ REAC_LOOP: DO NR=1,N_REACTIONS
          IF (ABS(RN%NU(NS))>TWO_EPSILON_EB .AND. .NOT. SPECIES_MIXTURE(NS)%VALID_ATOMS) SKIP_ATOM_BALANCE = .TRUE.
          REACTION_BALANCE = REACTION_BALANCE + RN%NU(NS)*SPECIES_MIXTURE(NS)%ATOMS
       ENDDO
-      IF (ANY(ABS(REACTION_BALANCE)>REAC_ATOM_ERROR) .AND. .NOT. SKIP_ATOM_BALANCE) &
+      IF (ANY(ABS(REACTION_BALANCE)>REAC_ATOM_ERROR) .AND. .NOT. SKIP_ATOM_BALANCE) THEN
          CALL SHUTDOWN_ATOM(REACTION_BALANCE,NR,REAC_ATOM_ERROR)
+      ENDIF
    ENDIF
 
    ! Check the mass balance of the reaction
@@ -3477,13 +3484,7 @@ ELSE
    ENDDO FAST_CHEM_LOOP
 ENDIF
 
-! Change units of combustion quantities
-
-HRRPUV_AVERAGE = HRRPUV_AVERAGE*1000._EB   ! W/m3
-HRRPUA_SHEET   = HRRPUA_SHEET*  1000._EB   ! W/m2
-
 END SUBROUTINE PROC_REAC
-
 
 
 SUBROUTINE READ_PART
