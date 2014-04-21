@@ -5137,14 +5137,9 @@ When specifying a reaction scheme using all primitive variables ({\em i.e., no l
 \noindent For example, if the reaction defines the complete combustion of methane using primitive species, then the following would be equivalent:
 
 \begin{lstlisting}
-&REAC FUEL='METHANE', EQUATION ='METHANE+2*OXYGEN=CARBON DIOXIDE+2*WATER VAPOR',
-      HEAT_OF_COMBUSTION=50000. /
-
-&REAC FUEL='METHANE', EQUATION ='CH4+2*O2=CO2+2*H2O',
-      HEAT_OF_COMBUSTION=50000. /
-
-&REAC FUEL='METHANE', EQUATION ='METHANE+2*O2=CO2+2*H2O',
-      HEAT_OF_COMBUSTION=50000. /
+&REAC FUEL='METHANE', EQUATION ='METHANE+2*OXYGEN=CARBON DIOXIDE+2*WATER VAPOR' /
+&REAC FUEL='METHANE', EQUATION ='CH4+2*O2=CO2+2*H2O' /
+&REAC FUEL='METHANE', EQUATION ='METHANE+2*O2=CO2+2*H2O' /
 \end{lstlisting}
 
 
