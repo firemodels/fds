@@ -8,6 +8,8 @@ All material properties etc. are completely fabricated.
 
 &DUMP MASS_FILE=.TRUE., DT_DEVC=0.5 /
 
+&MISC HRRPUV_AVERAGE=1e8/
+
 Fire
 HRR = 100 kW 
 MLR = 0.002 kg/s Methane
@@ -26,8 +28,7 @@ Yields       kg/kg fuel	  kg
 
 Species and reactions
 
-&REAC FUEL='METHANE',  CO_YIELD = 0.1
-      HRRPUV_AVERAGE = 1e8 /
+&REAC FUEL='METHANE',  CO_YIELD = 0.1/
 
 Measurements
 
