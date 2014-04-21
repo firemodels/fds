@@ -4895,7 +4895,7 @@ per unit volume is used:
 \be
    \dq'''_{\si{max}} = \frac{ \hbox{\ct HRRPUA\_SHEET} }{\dx} + \hbox{\ct HRRPUV\_AVERAGE}
 \ee
-where the default values of {\ct HRRPUA\_SHEET} and {\ct HRRPUV\_AVERAGE} are 200 kW/m$^2$ and 2500 kW/m$^3$, respectively. The use of these limiting values comes from a scaling analysis of pool fires by Orloff and De Ris~\cite{Orloff:19th_Symposium}.
+where the default values of {\ct HRRPUA\_SHEET} and {\ct HRRPUV\_AVERAGE} are 200 kW/m$^2$ and 2500 kW/m$^3$, respectively. The use of limiting values comes from a scaling analysis of pool fires by Orloff and De Ris~\cite{Orloff:19th_Symposium}.  These parameters may be changed on the {\ct MISC} line.
 
 
 
@@ -9369,7 +9369,9 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct GRAVITATIONAL\_DEPOSITION}                 & Logical       & Section~\ref{info:deposition}                         &               & {\ct .TRUE.}      \\ \hline
 {\ct GROUND\_LEVEL}                             & Real          & Section~\ref{info:stratification}                     & m             & 0.                \\ \hline
 {\ct GVEC}                                      & Real triplet  & Section~\ref{info:GVEC}                               & m/s$^2$       & 0,0,-9.81         \\ \hline
-{\ct HUMIDITY}                                  & Real           & Section~\ref{info:humidity}                          & \%                & 40.           \\ \hline
+{\ct HUMIDITY}                                  & Real          & Section~\ref{info:humidity}                           & \%            & 40.               \\ \hline
+{\ct HRRPUA\_SHEET}                             & Real          & Section~\ref{info:REAC_Limiters}                      & kW/m$^2$      & 200.              \\ \hline
+{\ct HRRPUV\_AVERAGE}                           & Real          & Section~\ref{info:REAC_Limiters}                      & kW/m$^3$      & 2500.             \\ \hline
 %{\ct IMMERSED\_BOUNDARY\_METHOD}                & Logical       &                                                       &               & {\ct .FALSE.}     \\ \hline
 {\ct INITIAL\_UNMIXED\_FRACTION}                & Real          & Section~\ref{info:turbulent_combustion}               &               & 1.0               \\ \hline
 {\ct ISOTHERMAL}                                & Logical       & Section~\ref{info:isothermal}                         &               & {\ct .FALSE.}     \\ \hline
@@ -9798,8 +9800,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct FUEL\_RADCAL\_ID}                    & Character   & Section~\ref{info:simple_chemistry}       &                   &       \\ \hline
 {\ct H}                                   & Real        & Section~\ref{info:simple_chemistry}       &                   & 0    \\ \hline
 {\ct HEAT\_OF\_COMBUSTION}                & Real        & Section~\ref{info:heat_of_combustion}     & kJ/kg             &         \\ \hline
-{\ct HRRPUA\_SHEET}                       & Real        & Section~\ref{info:REAC_Limiters}          & kW/m$^2$          &         \\ \hline
-{\ct HRRPUV\_AVERAGE}                     & Real        & Section~\ref{info:REAC_Limiters}          & kW/m$^3$          &         \\ \hline
 {\ct ID}                                  & Character   & Section~\ref{info:simple_chemistry}       &                   &   \\ \hline
 {\ct IDEAL}                               & Logical     & Section~\ref{info:simple_chemistry}       &                   & {\ct .FALSE.}    \\ \hline
 {\ct N}                                   & Real        & Section~\ref{info:simple_chemistry}       &                   & 0    \\ \hline
