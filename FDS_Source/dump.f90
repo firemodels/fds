@@ -2501,48 +2501,54 @@ REACTION_LOOP: DO N=1,N_REACTIONS
          EXTINCTION_MODEL = 'EXTINCTION 3'   
    END SELECT    
       
-   IF (RN%FYI/='null') WRITE(LU_OUTPUT,'(/3X,A)') RN%FYI
-   IF (RN%ID/='null')  WRITE(LU_OUTPUT,'(/3X,A,A)')   'Reaction ID:  ', RN%ID   
-      
-   WRITE(LU_OUTPUT,'(3X,A,A)')  'ODE Solver:  ', ODE_SOLVER
-   IF (SUPPRESSION .AND. RN%FAST_CHEMISTRY) THEN
-      WRITE(LU_OUTPUT,'(3X,A,A)')  'Extinction Model:  ', EXTINCTION_MODEL
-      WRITE(LU_OUTPUT,'(3X,A,F8.1)')  'Critical Flame Temperature (K):  ', RN%CRIT_FLAME_TMP
-   ENDIF
-   WRITE(LU_OUTPUT,'(/3X,A)') 'Tracked Species'
-   WRITE(LU_OUTPUT,'(A)') '   Species ID                     Stoich. Coeff.'         
+   IF (RN%FYI/='null') WRITE(LU_OUTPUT,'(/3X,A)') TRIM(RN%FYI)
+   IF (RN%ID/='null')  WRITE(LU_OUTPUT,'(/3X,A,A)')   'Reaction ID:  ', TRIM(RN%ID)
+   IF (RN%REVERSE)     WRITE(LU_OUTPUT,'(/3X,A,A)')   'Reverse Reaction of ID:  ', TRIM(RN%FWD_ID)
+
+   WRITE(LU_OUTPUT,'(/3X,A)')     'Fuel                                           Heat of Combustion (kJ/kg)'
+   WRITE(LU_OUTPUT,'(3X,A,1X,F12.4)') RN%FUEL,RN%HEAT_OF_COMBUSTION/1000._EB
+   
+   WRITE(LU_OUTPUT,'(/3X,A)')     'Stoichiometry'
+
+   WRITE(LU_OUTPUT,'(/3X,A)')     'Primitive Species'
+   WRITE(LU_OUTPUT,'(3X,A)')      'Species ID                                                 Stoich. Coeff.'
+   DO NN=1,N_SPECIES
+      IF (ABS(RN%NU_SPECIES(NN))>=TWO_EPSILON_EB) WRITE(LU_OUTPUT,'(3X,A,1X,F12.6)') SPECIES(NN)%ID,RN%NU_SPECIES(NN)
+   ENDDO
+
+   WRITE(LU_OUTPUT,'(/3X,A)')     'Tracked (Lumped) Species'
+   WRITE(LU_OUTPUT,'(3X,A)')      'Species ID                                                 Stoich. Coeff.'
    DO NN=0,N_TRACKED_SPECIES
       IF (ABS(RN%NU(NN)) <=TWO_EPSILON_EB) CYCLE
       IF (ABS(RN%NU(NN)) < 10000._EB) WRITE(LU_OUTPUT,'(3X,A,1X,F12.6)') SPECIES_MIXTURE(NN)%ID,RN%NU(NN) 
       IF (ABS(RN%NU(NN)) > 10000._EB) WRITE(LU_OUTPUT,'(3X,A,1X,E12.5)') SPECIES_MIXTURE(NN)%ID,RN%NU(NN) 
    ENDDO
-   IF (RN%REVERSE) THEN
-       WRITE(LU_OUTPUT,'(/3X,A,A)')   'Reverse Reaction of ID:  ', RN%FWD_ID 
-   ELSE   
-      WRITE(LU_OUTPUT,'(/3X,A)') 'Detailed Species'
-      WRITE(LU_OUTPUT,'(A)') '   Species ID                     Stoich. Coeff.'
-      DO NN=1,N_SPECIES
-         IF (ABS(RN%NU_SPECIES(NN))>=TWO_EPSILON_EB) WRITE(LU_OUTPUT,'(3X,A,1X,F9.4)') SPECIES(NN)%ID,RN%NU_SPECIES(NN)
-      ENDDO
-      IF (.NOT. RN%FAST_CHEMISTRY) WRITE(LU_OUTPUT,'(/A)') '   Species ID                     Rate Exponent'
-      DO NN=1,N_SPECIES
-        IF (RN%N_S(NN) <=-998._EB) CYCLE
-        WRITE(LU_OUTPUT,'(3X,A,1X,F11.5)') SPECIES(NN)%ID,RN%N_S(NN) 
-      ENDDO
-      WRITE(LU_OUTPUT,'(/3X,A)')  'Reaction Kinetics'
-      IF (RN%FAST_CHEMISTRY) THEN
-         WRITE(LU_OUTPUT,'(A)')            '   Arrhenius Constants'
-         WRITE(LU_OUTPUT,'(A)')            '   Pre-exponential:    Infinite'
-         WRITE(LU_OUTPUT,'(A)')            '   Activation Energy:  N/A'         
-      ELSE
-         WRITE(LU_OUTPUT,'(A)') '   Arrhenius Constants'
-         WRITE(LU_OUTPUT,'(A,1X,ES13.6)')  '   Pre-exponential:  ',RN%A_IN
-         WRITE(LU_OUTPUT,'(A,1X,ES13.6)')  '   Activation Energy:',RN%E_IN
-      ENDIF
+
+   WRITE(LU_OUTPUT,'(/3X,A)')     'Reaction Kinetics'
+
+   WRITE(LU_OUTPUT,'(/3X,A)')              'Arrhenius Parameters'
+   IF (RN%FAST_CHEMISTRY) THEN
+      WRITE(LU_OUTPUT,'(3X,A)')            'Pre-exponential:    Infinite'
+      WRITE(LU_OUTPUT,'(3X,A)')            'Activation Energy:  N/A'
+   ELSE
+      WRITE(LU_OUTPUT,'(3X,A,1X,ES13.6)')  'Pre-exponential ((mol/cm^3)^(1-order)/s): ',RN%A_IN
+      WRITE(LU_OUTPUT,'(3X,A,1X,ES13.6)')  'Activation Energy (J/mol):                ',RN%E_IN
    ENDIF
-   WRITE(LU_OUTPUT,'(/A)') '   Fuel                           Heat of Combustion (kJ/kg)'            
-   WRITE(LU_OUTPUT,'(3X,A,1X,F12.5)') RN%FUEL,RN%HEAT_OF_COMBUSTION/1000._EB
- 
+   IF (.NOT. RN%FAST_CHEMISTRY) THEN
+      WRITE(LU_OUTPUT,'(/3X,A)')  'Species ID                                                  Rate Exponent'
+      DO NN=1,N_SPECIES
+         IF (RN%N_S(NN) <=-998._EB) CYCLE
+         WRITE(LU_OUTPUT,'(3X,A,1X,F12.6)') SPECIES(NN)%ID,RN%N_S(NN) 
+      ENDDO
+      IF (ABS(RN%N_T)>TWO_EPSILON_EB) WRITE(LU_OUTPUT,'(3X,A,50X,F12.6)') 'Temperature',RN%N_T 
+   ENDIF
+
+   WRITE(LU_OUTPUT,'(/3X,A,A)')      'ODE Solver:  ', TRIM(ODE_SOLVER)
+   IF (SUPPRESSION .AND. RN%FAST_CHEMISTRY) THEN
+      WRITE(LU_OUTPUT,'(3X,A,A)')    'Extinction Model:  ', TRIM(EXTINCTION_MODEL)
+      WRITE(LU_OUTPUT,'(3X,A,F8.1)') 'Critical Flame Temperature (K): ', RN%CRIT_FLAME_TMP
+   ENDIF
+
 ENDDO REACTION_LOOP
 
 ! Print out information about materials
