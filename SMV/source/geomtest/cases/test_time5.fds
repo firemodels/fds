@@ -1,7 +1,6 @@
 &HEAD CHID='test_time5' /
 
-&MESH XB=-1.0,1.0,-1.0,1.0,-1.0,1.0 /
-&GRID IBAR=10,JBAR=10,KBAR=10 /
+&MESH IBAR=10,JBAR=10,KBAR=10,XB=-1.0,1.0,-1.0,1.0,-1.0,1.0 /
 &TIME T_END=1000.0 /
 
 &SURF ID='surf1',RGB=255,0,0 /
