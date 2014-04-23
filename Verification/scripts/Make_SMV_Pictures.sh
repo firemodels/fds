@@ -98,6 +98,7 @@ echo smokediff : $SMOKEDIFF
 echo background: $BACKGROUND
 echo
 
+export RUNGEOM=$SVNROOT/Utilities/Scripts/runsmv.sh
 export RUNFDS=$SVNROOT/Utilities/Scripts/runsmv.sh
 export RUNTFDS=$SVNROOT/Utilities/Scripts/runtsmv.sh
 export RUNWFDS=$SVNROOT/Utilities/Scripts/runwsmv.sh
