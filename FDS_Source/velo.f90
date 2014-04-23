@@ -845,7 +845,6 @@ IF (PATCH_VELOCITY) CALL PATCH_VELOCITY_FLUX
 
 ! Adjust FVX, FVY and FVZ at solid, internal obstructions for no flux
 
-CALL NO_FLUX(NM)
 IF (EVACUATION_ONLY(NM)) FVZ = 0._EB
 
 ! Source term in manufactured solution
@@ -1039,8 +1038,6 @@ ENDDO
 IF (BAROCLINIC) CALL BAROCLINIC_CORRECTION(T)
  
 ! Adjust FVX and FVZ at solid, internal obstructions for no flux
- 
-CALL NO_FLUX(NM)
  
 END SUBROUTINE VELOCITY_FLUX_CYLINDRICAL
  
