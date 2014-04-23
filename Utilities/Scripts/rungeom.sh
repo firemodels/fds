@@ -117,12 +117,12 @@ echo Time: \`date\`
 echo Running $infile on \`hostname\`
 echo Directory: \`pwd\`
 
-$RUNCMD $FDS $in 
+$RUNCMD $GEOM $in 
 
 # Run by $QSUB $QOPT $queue $scriptfile
 EOF
 
-echo Running `basename $FDS` $in 
+echo Running `basename $GEOM` $in 
 if [ "$background" != "yes" ]; then
   chmod +x $scriptfile
   $QSUB $QOPT $queue $scriptfile
