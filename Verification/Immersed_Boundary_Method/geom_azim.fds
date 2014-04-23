@@ -1,6 +1,6 @@
 &HEAD CHID='geom_azim' /
 
-&MESH IBAR=10,JBAR=10,KBAR=10,XB=-1.0,1.0,-1.0,1.0,-1.0,1.0 /
+&MESH IBAR=10,JBAR=10,KBAR=10,XB=0.0,1.0,0.0,1.0,0.0,1.0 /
 
 &SURF ID='surf1',RGB=255,0,0 /
 &SURF ID='surf2',RGB=0,255,0 /
@@ -9,17 +9,14 @@
 ***AZIMUTHAL TEST
 
 &GEOM ID='geom1',
-        VERTS=-2.0,0.0,0.0,
-              -2.0,1.0,0.0,
-              -2.0,1.0,1.0,FACES=1,2,3,XYZ0=-2.0,0.0,0.0,AZIM=0.0,ELEV=0,SURF_ID='surf1'/
+        VERTS=0.0,0.0,0.0, 0.0,1.0,0.0, 0.0,1.0,1.0,
+        FACES=1,2,3,AZIM=0.0,SURF_ID='surf1'/
 
 
 &GEOM ID='geom2',
-        VERTS=0.0,0.0,0.0,
-              0.0,1.0,0.0,
-              0.0,1.0,1.0,FACES=1,2,3,XYZ0=0.0,0.0,0.0,AZIM=45.0,ELEV=0,SURF_ID='surf2'/
+        VERTS=0.0,0.0,0.0, 0.0,1.0,0.0, 0.0,1.0,1.0,
+        FACES=1,2,3,AZIM=45.0,SURF_ID='surf2'/
 
 &GEOM ID='geom3',
-        VERTS=2.0,0.0,0.0,
-              2.0,1.0,0.0,
-              2.0,1.0,1.0,FACES=1,2,3,XYZ0=2.0,0.0,0.0,AZIM=90.0,ELEV=0,SURF_ID='surf3'/
+        VERTS=0.0,0.0,0.0, 0.0,1.0,0.0, 0.0,1.0,1.0,
+        FACES=1,2,3,AZIM=90.0,SURF_ID='surf3'/
