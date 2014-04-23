@@ -51,21 +51,23 @@ $RUNFDS Flowfields gas_filling
 $RUNFDS Flowfields helium_2d
 $RUNFDS Flowfields helium_2d_isothermal
 $RUNFDS Flowfields helium_air_jet_floor
+$RUNFDS Flowfields hole
+$RUNFDS Flowfields no_hole
 $RUNFDS Flowfields jet_fan
-$RUNFDS Flowfields low_flux_hot_gas_filling
 $RUNFDS Flowfields symmetry_test
 $RUNFDS Flowfields tangential_velocity
 $RUNFDS Flowfields velocity_bc_test
 $RUNFDS Flowfields blasius_16
 $RUNFDS Flowfields blasius_32
 $RUNFDS Flowfields blasius_64
-$RUNFDS Flowfields sealed_box
 $RUNFDS Flowfields mwtest_isothermal
 $RUNFDS Flowfields mwtest_cfl
 $RUNFDS Flowfields mass_heat_wall_device_test
 $RUNFDS Flowfields mass_heat_wall_device_test_2
-$RUNFDS Flowfields hole
-$RUNFDS Flowfields no_hole
+$RUNFDS Flowfields species_conservation_1
+$RUNFDS Flowfields species_conservation_2
+$RUNFDS Flowfields species_conservation_3
+$RUNFDS Flowfields species_conservation_4
 
 $RUNFDS Heat_Transfer adiabatic_net_flux
 $RUNFDS Heat_Transfer convective_cooling
