@@ -1,4 +1,4 @@
-&HEAD CHID='test_elev' /
+&HEAD CHID='geom_elev' /
 
 &MESH IBAR=10,JBAR=10,KBAR=10,XB=-1.0,1.0,-1.0,1.0,-1.0,1.0 /
 
