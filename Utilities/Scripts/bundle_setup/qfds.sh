@@ -59,13 +59,14 @@ exe2=
 ABORTRUN=n
 IB=
 DB=
+SCRIPTFILE=
 if [ "$FDSNETWORK" == "infiniband" ] ; then
 IB=ib
 fi
 
 # read in parameters from command line
 
-while getopts 'bd:f:n:o:p:q:rsxy:z:' OPTION
+while getopts 'bd:f:m:n:o:p:q:rsxy:z:' OPTION
 do
 case $OPTION  in
   b)
@@ -77,6 +78,9 @@ case $OPTION  in
   f)
    FDSROOT="$OPTARG"
    use_repository=1
+   ;;
+  m)
+   SCRIPTFILE="$OPTARG"
    ;;
   n)
    nprocesses_per_node="$OPTARG"
@@ -122,6 +126,9 @@ if [ "$USE_SMOKEVIEW" == "y" ] ; then
   if [ "$queue" == "batch" ] ; then
     queue=fire70s
   fi
+  if [ "$SCRIPTFILE" != "" ] ; then
+    SCRIPTFILE = "-m $SCRIPTFILE"
+  fi
 fi
 if [ "$use_debug" == "1" ] ; then
 DB=_db
@@ -144,7 +151,7 @@ else
     nprocesses_per_node=1
     nprocesses=1
     exe="$FDSROOT/Verification/scripts/runsmv_single.sh"
-    exe2="-x -y $STARTFRAME -z $SKIPFRAME"
+    exe2="-x -y $STARTFRAME -z $SKIPFRAME $SCRIPTFILE"
   else
     exe=$FDSROOT/FDS_Compilation/${OPENMP}intel_linux_64$DB/fds_${OPENMP}intel_linux_64$DB
   fi
