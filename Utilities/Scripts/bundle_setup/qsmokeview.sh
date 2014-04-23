@@ -26,14 +26,18 @@ then
 fi
 
 VOLRENDER="-x "
+SCRIPTFILE=
 
 # default parameter settings
 
-while getopts 'd:p:q:w' OPTION
+while getopts 'd:m:p:q:w' OPTION
 do
 case $OPTION  in
   d)
   dir="$OPTARG"
+  ;;
+  m)
+   SCRIPTFILE="$OPTARG"
   ;;
   p)
    nprocesses="$OPTARG"
@@ -49,6 +53,11 @@ done
 shift $(($OPTIND-1))
 input=$1
 
+if [ "$SCRIPTFILE" != "" ] ; then
+  SCRIPTFILE="-m $SCRIPTFILE"
+fi
+echo SCRIPTFILE=$SCRIPTFILE
+
 stopfile=$dir/$input.stop
 
 if [ $STOPFDS ]; then
@@ -63,7 +72,7 @@ fi
 
 i=0
 while [ $i -lt $nprocesses ]; do
-  qfds.sh -d $dir -r -s $VOLRENDER -y $i -z $nprocesses -q $queue $input
+  qfds.sh -d $dir -r -s $VOLRENDER $SCRIPTFILE -y $i -z $nprocesses -q $queue $input
   sleep 5
   let i=i+1
 done
