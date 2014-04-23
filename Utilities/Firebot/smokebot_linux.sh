@@ -655,6 +655,13 @@ compile_smv_utilities()
    echo 'Compiling wind2fds:' >> $OUTPUT_DIR/stage5pre 2>&1
    ./make_wind.sh >> $OUTPUT_DIR/stage5pre 2>&1
    echo "" >> $OUTPUT_DIR/stage5pre 2>&1
+  
+  # geomtest:
+   cd $FDS_SVNROOT/SMV/source/geomtest/intel_${platform}_64
+   rm -f *.o geomtest
+   echo 'Compiling geomtest:' >> $OUTPUT_DIR/stage5pre 2>&1
+   ./make_geom.sh >> $OUTPUT_DIR/stage5pre 2>&1
+   echo "" >> $OUTPUT_DIR/stage5pre 2>&1
 
    fi
 }
