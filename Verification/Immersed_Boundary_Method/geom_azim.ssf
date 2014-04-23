@@ -13,4 +13,4 @@ SETTIMEVAL
 RENDERCLIP
  1 52 24 200 144
 RENDERONCE
- test_azim
+ geom_azim
