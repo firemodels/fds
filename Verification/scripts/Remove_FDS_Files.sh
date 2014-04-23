@@ -10,3 +10,5 @@ rm -f $case*.sz
 rm -f $case*.csv
 rm -f $case*.q
 rm -f $case*.restart
+rm -f $case*.out
+rm -f $case*.err
