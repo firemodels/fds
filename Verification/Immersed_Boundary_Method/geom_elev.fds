@@ -1,0 +1,25 @@
+&HEAD CHID='test_elev' /
+
+&MESH IBAR=10,JBAR=10,KBAR=10,XB=-1.0,1.0,-1.0,1.0,-1.0,1.0 /
+
+&SURF ID='surf1',RGB=255,0,0 /
+&SURF ID='surf2',RGB=0,255,0 /
+&SURF ID='surf3',RGB=0,0,255 /
+
+***AZIMUTHAL TEST
+
+&GEOM ID='geom1',
+        VERTS=-2.0,0.0,0.0,
+              -1.0,0.0,0.0,
+              -1.0,1.0,0.0,FACES=1,2,3,XYZ0=-2.0,0.0,0.0,ELEV=0,SURF_ID='surf1'/
+
+
+&GEOM ID='geom2',
+        VERTS= 0.0,0.0,0.0,
+               1.0,0.0,0.0,
+               1.0,1.0,0.0,FACES=1,2,3,XYZ0=0.0,0.0,0.0,ELEV=45,SURF_ID='surf2'/
+
+&GEOM ID='geom3',
+        VERTS=2.0,0.0,0.0,
+              3.0,0.0,0.0,
+              3.0,1.0,0.0,FACES=1,2,3,XYZ0=2.0,0.0,0.0,ELEV=90,SURF_ID='surf3'/
