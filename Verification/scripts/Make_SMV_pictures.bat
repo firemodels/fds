@@ -40,6 +40,7 @@ set smvug="%SVNROOT%\Manuals\SMV_User_Guide"
 set smvvg="%SVNROOT%\Manuals\SMV_Verification_Guide"
 set summary="%SVNROOT%\Manuals\SMV_Summary"
 
+set RUNGEOM=call "%SCRIPT_DIR%\runsmv.bat"
 set RUNFDS=call "%SCRIPT_DIR%\runsmv.bat"
 set RUNTFDS=call "%SCRIPT_DIR%\runtsmv.bat"
 set RUNWFDS=call "%SCRIPT_DIR%\runsmv.bat"
