@@ -15,6 +15,10 @@ cd CAROLFIRE
 mkdir Current_Results
 ./Run_All.sh
 cd ..
+cd CHRISTIFIRE
+mkdir Current_Results
+./Run_All.sh
+cd ..
 cd Cup_Burner
 mkdir Current_Results
 ./Run_All.sh
@@ -96,10 +100,6 @@ mkdir Current_Results
 ./Run_All.sh
 cd ..
 cd UL_Commodity
-mkdir Current_Results
-./Run_All.sh
-cd ..
-cd UL_NFPRF
 mkdir Current_Results
 ./Run_All.sh
 cd ..
