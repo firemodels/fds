@@ -20,3 +20,13 @@ case $OPTION in
 esac
 done
 export SMV_MAKE_OPTS
+if [ "$IFORT_COMPILER" == "" ] ; then
+  echo warning IFORT_COMPILER environment variable is not defined
+  echo defining as /opt/composerxe
+  export IFORT_COMPILER=/opt/intel/composerxe
+fi
+if [ "$IFORT_COMPILER_LIB" == "" ] ; then
+  echo warning IFORT_COMPILER_LIB is not defined
+  echo defining as $IFORT_COMPILER/lib
+  export IFORT_COMPILER_LIB=$IFORT_COMPILER/lib
+fi
