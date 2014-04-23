@@ -1,5 +1,9 @@
 #!/bin/bash
 
+$RUNGEOM Visualization geom_azim
+$RUNGEOM Visualization geom_elev
+$RUNGEOM Visualization geom_scale
+
 $RUNFDS Visualization cell_test
 $RUNCFAST Visualization cfast_test
 $RUNFDS Visualization colorbar

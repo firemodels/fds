@@ -112,6 +112,7 @@ else
   export WIND2FDS=$SVNROOT/Utilities/wind2fds/intel_$PLATFORM/wind2fds_$PLATFORM
   export BACKGROUND=$SVNROOT/Utilities/background/intel_$PLATFORM2/background
 fi
+export GEOM=$SVNROOT/SMV/source/geomtest/intel_$PLATFORM/geomtest
 export FDSEXE=$SVNROOT/FDS_Compilation/${OPENMP}intel_$PLATFORM$DEBUG/fds_${OPENMP}intel_$PLATFORM$DEBUG
 export WFDSEXE=~/FIRE-LOCAL/bin/wfds6_9977_intel_$PLATFORM3
 export FDS=$FDSEXE
@@ -138,6 +139,7 @@ if [[ ! $stop_cases ]] ; then
   echo "Removing FDS/CFAST output files"
   export RUNCFAST="$SVNROOT/Verification/scripts/Remove_CFAST_Files.sh"
   export RUNFDS="$SVNROOT/Verification/scripts/Remove_FDS_Files.sh"
+  export RUNGEOM="$SVNROOT/Verification/scripts/Remove_FDS_Files.sh"
   export RUNTFDS="$SVNROOT/Verification/scripts/Remove_FDS_Files.sh"
   export RUNWFDS="$SVNROOT/Verification/scripts/Remove_FDS_Files.sh"
   scripts/SMV_Cases.sh
@@ -148,6 +150,7 @@ fi
 
 export RUNCFAST="$SVNROOT/Utilities/Scripts/runcfast.sh $queue"
 export RUNFDS="$SVNROOT/Utilities/Scripts/runfds.sh $OPENMPOPTS $queue"
+export RUNGEOM="$SVNROOT/Utilities/Scripts/rungeom.sh $queue"
 export RUNTFDS="$SVNROOT/Utilities/Scripts/runfds.sh $OPENMPOPTS $queue"
 export RUNWFDS="$SVNROOT/Utilities/Scripts/runwfds.sh $queue"
 export RUNFDSMPI="$SVNROOT/Utilities/Scripts/runfdsmpi.sh $queue"
