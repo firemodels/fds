@@ -163,6 +163,14 @@ update_and_compile_cfast()
       echo "" >> $ERROR_LOG
    fi
 
+   # geomtest: (these lines will be removed, once geomtest capabilities
+   #            have been added to FDS)
+   cd $FDS_SVNROOT/SMV/source/geomtest/intel_osx_64
+   rm -f *.o geomtest
+   echo 'Compiling geomtest:' >> $FIREBOT_DIR/output/stage0_cfast 2>&1
+   ./make_geom.sh >> $FIREBOT_DIR/output/stage0_cfast 2>&1
+   echo "" >> $FIREBOT_DIR/stage0_cfast 2>&1
+
 }
 
 #  ============================
