@@ -1060,7 +1060,7 @@ It was suspected that fire plume behavior and response of detection devices in a
 
 \section{Vettori Flat Ceiling Experiments}
 
-Vettori~\cite{Vettori:1} analyzed a series of 45 experiments conducted at NIST that were intended to compare the effects of different ceiling configurations on the activation times of quick response residential pendent sprinklers. The two ceiling configurations used consisted of an obstructed ceiling, with parallel beams 0.038~m wide by 0.24~m deep placed 0.41~m on center, and a smooth ceiling configuration, in which the beams were covered by a sheet of gypsum board.  In addition to the two ceiling configurations, there were also three fire growth rates and three burner locations used -- a total of 18 test configurations. The fire growth rate was provided by a computer controlled methane gas burner to mimic a standard t-squared fire growth rate with either a slow, medium, or fast ramp up. The burner was placed in a corner of the room, then against an adjacent wall, and then in a location removed from any wall. Measurements were taken to record sprinkler activation time, temperatures at varying heights and locations within the room, and the ceiling jet velocities at several other locations.  A diagram of the test structure is displayed in Figure~\ref{Vettori_Drawing}.
+Vettori~\cite{Vettori:1} analyzed a series of 45 experiments conducted at NIST that were intended to compare the effects of different ceiling configurations on the activation times of quick response residential pendent sprinklers. The two ceiling configurations used consisted of an obstructed ceiling, with parallel beams 0.038~m wide by 0.24~m deep placed 0.41~m on center, and a smooth ceiling configuration, in which the beams were covered by a sheet of gypsum board.  In addition to the two ceiling configurations, there were also three fire growth rates and three burner locations used -- a total of 18 test configurations. The fire growth rate was provided by a computer controlled methane gas burner to mimic a standard t-squared\footnote{The actual heat release rate are presented in Table~\ref{Vettori_Ramps}.} fire growth rate with either a slow, medium, or fast ramp up. The burner was placed in a corner of the room, then against an adjacent wall, and then in a location removed from any wall. Measurements were taken to record sprinkler activation time, temperatures at varying heights and locations within the room, and the ceiling jet velocities at several other locations.  A diagram of the test structure is displayed in Figure~\ref{Vettori_Drawing}.
 
 \begin{figure}[p]
 \includegraphics[width=\textwidth]{FIGURES/Vettori_Flat_Ceiling/Vettori_Flat_Ceiling.png}
@@ -1068,9 +1068,57 @@ Vettori~\cite{Vettori:1} analyzed a series of 45 experiments conducted at NIST t
 \label{Vettori_Drawing}
 \end{figure}
 
-
+\begin{table}[h!]
+\caption[Heat release rate profiles for the Vettori experiments]{Heat release rate profiles for the Vettori experiments.}
+\begin{center}
+\begin{tabular}{|c|c|c|c|}
+\hline
+Time    & Slow     & Medium     & Fast   \\
+(s)     & (kW)     & (kW)       & (kW)   \\  \hline \hline
+0       & 0        & 0          & 0      \\ \hline 10		& 9        &  20        &  75    \\ \hline
+20		& 16       &  34        &  127   \\ \hline
+30		&   23     &  51        &  173   \\ \hline
+40		&   30     &  67        &  196   \\ \hline
+50		&   35     &  83        &  271   \\ \hline
+60		&   42     &  104       &  379   \\ \hline
+70		&   52     &  125       &  515   \\ \hline
+80		&   62     &  143       &  673   \\ \hline
+90		&   68     &  162       &  852   \\ \hline
+100		&  78      &  174       & 1053   \\ \hline
+110		&  85      &  192       &        \\ \hline
+120		&  94      &  239       &        \\ \hline
+130		&  100     &  279       &        \\ \hline
+140		&  109     &  325       &        \\ \hline
+150		&  115     &  373       &        \\ \hline
+160		&  125     &  424       &        \\ \hline
+170		&  137     &  479       &        \\ \hline
+180		&  148     &  537       &        \\ \hline
+190		&  163     &  599       &        \\ \hline
+200		&  179     &  663       &        \\ \hline
+210		&  195     &            &        \\ \hline
+220		&  213     &            &        \\ \hline
+230		&  231     &            &        \\ \hline
+240		&  250     &            &        \\ \hline
+250		&  269     &            &        \\ \hline
+260		&  290     &            &        \\ \hline
+270		&  311     &            &        \\ \hline
+280		&  333     &            &        \\ \hline
+290		&  354     &            &        \\ \hline
+300		&  378     &            &        \\ \hline
+310		&  402     &            &        \\ \hline
+320		&  427     &            &        \\ \hline
+330		&  453     &            &        \\ \hline
+340		&  479     &            &        \\ \hline
+350		&  506     &            &        \\ \hline
+360		&  534     &            &        \\ \hline
+370		&  562     &            &        \\ \hline
+\end{tabular}                        
+\end{center}                         
+\label{Vettori_Ramps}
+\end{table}
+    	
 \section{Vettori Sloped Ceiling Experiments}
-
+    	
 Vettori~\cite{Vettori:2} performed a series of 72 compartment experiments to measure the activation times of quick-response residential pendent sprinklers mounted under a ceiling with an adjustable slope. There were 36 unique configurations (2 replicates of each) combining the following parameters:
 \begin{itemize}
 \item \underline{F}lat, \underline{13}$^\circ$, or \underline{24}$^\circ$ Ceiling Slope
@@ -1078,6 +1126,7 @@ Vettori~\cite{Vettori:2} performed a series of 72 compartment experiments to mea
 \item \underline{F}ast or \underline{S}low Growth Fire
 \item \underline{C}orner, \underline{W}all, or \underline{D}etached Burner Location
 \end{itemize}
+Note that the Slow and Fast fire growth profiles were the same as those reported in Table~\ref{Vettori_Ramps}.
 
 
 
