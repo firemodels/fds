@@ -5239,10 +5239,18 @@ In this case we will combine fast chemistry with finite-rate chemistry to create
 \noindent For {\ct REAC ID='R2'}, the reaction rate depends on the water vapor concentration, as indicated by its assignment of a value of {\ct N\_S}. However, it does not explicitly participate in the reaction because it is not assigned a stoichiometric coefficient, {\ct NU}.  Reactions of this sort are often written in textbooks as
 
 \begin{equation}\label{eq:inert_1step}
-\mathrm{a \, X + b \, Y + M \rightarrow X_aY_b + M }
+\mathrm{a \, X + b \, Y \overset{H_2O}{\rightarrow} X_aY_b}
 \end{equation}
 
 However, for the purposes of inputting into FDS, since M is neither a product nor a species it would not be specified in the chemical reaction using either {\ct REACTION} or {\ct NU}.  It would instead be given a rate exponent using {\ct N\_S} to indicate that its presence is required.
+
+Some reactions require the presence of any third body to stabilize the reaction rather than just a specific species.  Reactions of this type are often write in textbooks as
+
+\begin{equation}\label{eq:third_body}
+\mathrm{a \, X + b \, Y + M \rightarrow X_aY_b + M }
+\end{equation}
+
+This type of reaction can be done by adding {\ct THIRD\_BODY=.TRUE.} to the {\ct REAC} line for the reaction.  The species M should not otherwise be defined.  
 
 As discussed previously (Section~\ref{info:heat_of_combustion}), energy release is calculated using the net change of species in a time step along with the enthalpy of formation of each species. This approach makes specifying an endothermic reaction, such as the reversible CO$_2$ reaction (R3), no different than typical FDS exothermic combustion reactions.
 
@@ -9809,6 +9817,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct SOOT\_YIELD}                         & Real        & Section~\ref{info:simple_chemistry}       & kg/kg             & 0.0    \\ \hline
 {\ct SPEC\_ID\_N\_S(:)}                   & Char.~Array & Section~\ref{info:finite}                   &                   &     \\ \hline
 {\ct SPEC\_ID\_NU(:)}                     & Char.~Array & Section~\ref{info:finite}                   &                   &     \\ \hline
+{\ct THIRD\_BODY}                         & Logical     & Section~\ref{info:finite}                 &                   & {\ct .FALSE.}    \\ \hline
 %{\ct TAU\_CHEM}                           & Real        & Section~\ref{??}                          &                   & 1.E-10   \\ \hline
 %{\ct TAU\_FLAME}                          & Real        & Section~\ref{??}                          &                   & 1.E-10   \\ \hline
 \end{longtable}
