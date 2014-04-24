@@ -3431,6 +3431,7 @@ REVERSE_LOOP: DO NRR=1,N_REACTIONS
       RR%RHO_EXPONENT = FR%RHO_EXPONENT
       RR%N_T = FR%N_T
       RR%N_S = FR%N_S
+      RR%THIRD_BODY = FR%THIRD_BODY
    ENDDO FORWARD_LOOP   
    IF(.NOT. R_COUNT /= F_COUNT) CYCLE REVERSE_LOOP
    WRITE(MESSAGE,'(A)') 'ERROR: Problem with REAC. Forward reaction is not recognized.'
