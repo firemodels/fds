@@ -172,6 +172,12 @@ endif
 echo copying smokeview.ini from $forbundle
 cp $forbundle/smokeview.ini $bundledir/bin/.
 
+echo copying volrender.ssf from $forbundle
+cp $forbundle/volrender.ssf $bundledir/bin/.
+
+echo copying objects.svo from $forbundle
+cp $forbundle/objects.svo $bundledir/bin/objects.svo
+
 echo copying $fds2ascii from $fds2asciiroot on $fdshost
 scp -q $fdshost\:$fds2asciiroot/$fds2asciidir/$fds2ascii $bundledir/bin/$fds2asciiout
 
@@ -185,9 +191,6 @@ cp $mandir/FDS_Verification_Guide.pdf $bundledir/Documentation/.
 cp $mandir/SMV_User_Guide.pdf $bundledir/Documentation/.
 cp $mandir/SMV_Technical_Reference_Guide.pdf $bundledir/Documentation/.
 cp $mandir/SMV_Verification_Guide.pdf $bundledir/Documentation/.
-
-echo Copy objects.svo
-cp $forbundle/objects.svo $bundledir/bin/objects.svo
 
 if ($?INTELLIB) then
 echo copying  run time libraries
