@@ -2713,7 +2713,7 @@ LOGICAL  :: INFLOW
 TYPE(VENTS_TYPE), POINTER :: VT=>NULL()
 TYPE(WALL_TYPE), POINTER :: WC=>NULL()
 
-RHMK => WORK1 ! p=rho*(H-K)
+RHMK => WORK1 ! rho*(H-K)
 RRHO => WORK2 ! reciprocal of rho
  
 IF (PREDICTOR) THEN
@@ -2730,7 +2730,6 @@ ELSE
    HP => HS
 ENDIF
 
-
 ! Compute pressure and 1/rho in each grid cell
 
 !$OMP PARALLEL PRIVATE(WC, VT, TSI, TIME_RAMP_FACTOR, P_EXTERNAL, &
@@ -2745,7 +2744,6 @@ DO K=0,KBP1
    ENDDO
 ENDDO
 !$OMP END DO
-
 
 ! Set baroclinic term to zero at outflow boundaries and P_EXTERNAL at inflow boundaries
 
@@ -2836,7 +2834,6 @@ DO K=0,KBAR
 ENDDO
 !$OMP END DO nowait
 !$OMP END PARALLEL
-
  
 END SUBROUTINE BAROCLINIC_CORRECTION
 
