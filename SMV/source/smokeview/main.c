@@ -42,6 +42,7 @@ int main(int argc, char **argv){
   if(smokeview_bindir==NULL){
     smokeview_bindir=getprogdir(progname,&smokeviewpath);
   }
+  init_volrender_scriptfile();
   init_texturedir();
   smokezippath=get_smokezippath(smokeview_bindir);
   display_version_info();

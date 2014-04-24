@@ -23,6 +23,7 @@
 #include "smokeheaders.h"
 #include "threader.h"
 
+SVEXTERN char SVDECL(*volrender_scriptfile,NULL);
 #ifdef pp_PILOT
 SVEXTERN int SVDECL(vispilot,0);
 #endif

@@ -126,6 +126,20 @@ void Init(void){
   Update_Show();
 }
 
+/* ------------------ init_volrender_scriptfile ------------------------ */
+
+void init_volrender_scriptfile(void){
+  int len;
+
+  if(smokeview_bindir==NULL)return;
+  len = strlen(smokeview_bindir)+strlen("volrender.ssf")+1;
+  NewMemory((void **)&volrender_scriptfile,len);
+  strcpy(volrender_scriptfile,smokeview_bindir);
+  strcat(volrender_scriptfile,"volrender.ssf");
+  if(file_exists(volrender_scriptfile)==1)return;
+  FREEMEMORY(volrender_scriptfile);
+}
+
 /* ------------------ init_lang ------------------------ */
 
 #ifdef pp_LANG
