@@ -33,6 +33,7 @@ void init_volrender(void);
 void init_volrender_surface(int firstcall);
 void read_volsmoke_allframes(volrenderdata *vr);
 void read_volsmoke_allframes_allmeshes(void);
+void free_volsmoke_frame(volrenderdata *vr, int framenum);
 void read_volsmoke_frame(volrenderdata *vr, int framenum, int *first);
 void read_volsmoke_frame_allmeshes(int framenum, supermesh *smesh);
 void unload_volsmoke_allframes(volrenderdata *vr);

@@ -1739,6 +1739,21 @@ void get_volsmoke_all_times(volrenderdata *vr){
   }
 }
 
+/* ------------------ free_volsmoke_frame ------------------------ */
+
+void free_volsmoke_frame(volrenderdata *vr, int framenum){
+  int i;
+  void *smokedataptr;
+
+//  for(i=0;i<vr->ntimes;i++){
+  for(i=0;i<framenum;i++){
+    if(i==framenum)continue;
+    smokedataptr=vr->smokedataptrs[i];
+    FREEMEMORY(smokedataptr);
+    vr->smokedataptrs[i]=NULL;
+  }
+}
+
 /* ------------------ read_volsmoke_frame ------------------------ */
 #define VOL_OFFSET 32
 void read_volsmoke_frame(volrenderdata *vr, int framenum, int *first){

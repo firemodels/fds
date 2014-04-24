@@ -854,6 +854,7 @@ void script_loadvolsmokeframe(scriptdata *scripti, int flag){
 
       meshi = meshinfo + i;
       vr = &meshi->volrenderinfo;
+      free_volsmoke_frame(vr,framenum);
       read_volsmoke_frame(vr,framenum,&first);
       if(vr->times_defined==0){
         vr->times_defined=1;
