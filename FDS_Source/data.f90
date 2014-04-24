@@ -1860,6 +1860,7 @@ SELECT CASE (SPEC_ID_USE)
       ENDIF
       H = 200059.42623_EB !J/kg
    CASE('HYDROGEN ATOM') !NIST webbook
+      TE = MIN(MAX(TE,298._EB),6000._EB)
       TE = TE*0.001_EB
       CP = 20.78603_EB + 4.850638E-10_EB*TE - 1.582916E-10_EB*TE**2 + 1.525102E-11_EB*TE**3 + 3.196347E-11_EB/TE**2 !J/mol/K
       CP = CP / 1.00849_EB * 1000 !J/kg/K
@@ -1897,12 +1898,13 @@ SELECT CASE (SPEC_ID_USE)
       ENDIF
       H = 672724.43873_EB !J/kg
    CASE('HYDROGEN PEROXIDE') ! H2O2 (NIST webbook)
-      ! valid up to 1500 K, but no guidance above that temperature
+      TE = MIN(MAX(TE,298._EB),1500._EB)
       TE = TE*0.001_EB
       CP = 34.25667_EB + 55.18445_EB*TE - 35.15443_EB*TE**2 + 9.087440_EB*TE**3 - 0.422157_EB/TE**2 !J/mol/K
       CP = CP / 34.0147_EB * 1000._EB !J/kg/K
       G_F = 9.E-6_EB*TE**2 + 0.0942_EB*TE - 132.71_EB !kJ/mol (JANAF)
    CASE('HYDROXYL RADICAL') ! OH (NIST webbook)
+      TE = MIN(MAX(TE,298._EB),6000._EB)
       IF (TE<1300._EB) THEN
          TE = TE*0.001_EB
          CP = 32.27768_EB - 11.36291_EB*TE - 13.60545_EB*TE**2 - 3.846486_EB*TE**3 - 0.001335_EB/TE**2 !J/mol/K
@@ -1913,6 +1915,7 @@ SELECT CASE (SPEC_ID_USE)
       CP = CP / 17.0073_EB * 1000._EB !J/kg/K
       G_F = 4.E-7_EB*TE**2 - 0.0154_EB*TE + 38.598_EB !kJ/mol (JANAF)
    CASE('HYDROPEROXY RADICAL') ! HO2 (NIST webbook)
+      TE = MIN(MAX(TE,298._EB),6000._EB)
       IF (TE<2000._EB) THEN
          TE = TE*0.001_EB
          CP = 26.00960_EB + 34.85810_EB*TE - 16.30060_EB*TE**2 + 3.110441_EB*TE**3 - 0.018611_EB/TE**2 !J/mol/K
@@ -1934,6 +1937,7 @@ SELECT CASE (SPEC_ID_USE)
       ENDIF
       H = 187582.15786_EB !J/kg
    CASE('HELIUM') ! NIST webbook
+      TE = MIN(MAX(TE,298._EB),6000._EB)
       TE = TE*0.001_EB
       CP = 20.78603_EB + 4.850638E-10_EB*TE - 1.582916E-10_EB*TE**2 + 1.525102E-11_EB*TE**3 + 3.196347E-11_EB/TE**2 !J/mol/K
       CP = CP / 4.002602_EB * 1000._EB !J/kg/K
@@ -2035,7 +2039,7 @@ SELECT CASE (SPEC_ID_USE)
       ELSE
          CP = -1E-11_EB*TE**3 + 2E-7_EB*TE**2 - 0.0007_EB*TE +21.455_EB !J/mol/K
       ENDIF
-      CP = CP / 15.9994 * 1000._EB !J/kg
+      CP = CP / 15.9994 * 1000._EB !J/kg/K
    CASE('PROPANE') !NIST webbook
       TE = MIN(1500._EB,MAX(100._EB,TE))
       CP = 1.67536E-09_EB*TE**4 - 5.46675E-06_EB*TE**3 + 4.38029E-03_EB*TE**2 + 2.79490E+00_EB*TE + 6.11728E+02_EB !J/kg/K   
@@ -2051,7 +2055,7 @@ SELECT CASE (SPEC_ID_USE)
          CP = -39.5_EB + TE * 1.790405_EB !J/kg/K
       ELSE
          CP = -367.0215_EB-377212.2_EB/TE**2+12303.11_EB/TE-0.07902181_EB*TE+0.00002325095_EB*TE**2-0.000000004567174_EB*TE**3+ &
-               0.00000000000049475_EB*TE**4-2.218908E-17_EB*TE**5+63.20294*LOG(TE)!J/mol/K
+               0.00000000000049475_EB*TE**4-2.218908E-17_EB*TE**5+63.20294*LOG(TE) !J/mol/K
          CP = CP / 12.0107_EB * 1000._EB !J/kg/K
       ENDIF
       H = 0._EB !J/kg
