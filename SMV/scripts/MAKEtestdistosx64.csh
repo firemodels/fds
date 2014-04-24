@@ -22,6 +22,7 @@ mkdir -p $OSXDIR/Documentation
 
 cp $FORBUNDLE/objects.svo $OSXDIR/bin/.
 cp $FORBUNDLE/*.po $OSXDIR/bin/.
+cp $FORBUNDLE/volrender.ssf $OSXDIR/bin/.
 scp $OSXHOST\:$BACKGROUNDDIR/background $OSXDIR/bin/.
 scp $OSXHOST\:$SMVDIR/smokeview_osx_test_64 $OSXDIR/bin/smokeview
 scp $OSXHOST\:$SMZDIR/smokezip_osx_64 $OSXDIR/bin/smokezip

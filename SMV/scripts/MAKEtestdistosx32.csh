@@ -20,6 +20,7 @@ mkdir -p $OSXDIR
 mkdir -p $OSXDIR/bin
 mkdir -p $OSXDIR/Documentation
 
+cp $FORBUNDLE/volrender.ssf $OSXDIR/bin/.
 cp $FORBUNDLE/objects.svo $OSXDIR/bin/.
 cp $FORBUNDLE/*.po $OSXDIR/bin/.
 scp $OSXHOST\:$BACKGROUNDDIR/background $OSXDIR/bin/.

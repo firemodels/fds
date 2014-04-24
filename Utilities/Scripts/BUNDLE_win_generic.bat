@@ -133,6 +133,7 @@ echo.
 echo *** Copying auxillary files to the bin directory
 echo.
 CALL :COPY  %in_for_bundle%\objects.svo             %out_bin%\.
+CALL :COPY  %in_for_bundle%\volrender.ssf           %out_bin%\.
 
 if "%platform%"=="32" CALL :COPY %in_for_bundle%\pthreadVC.dll           %out_bin%\.
 

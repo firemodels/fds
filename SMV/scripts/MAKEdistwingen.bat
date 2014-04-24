@@ -58,6 +58,11 @@ echo ***copying .po files
 echo.
 copy *.po %smvdir%\.
 
+echo.
+echo ***copying volrender.ssf
+echo.
+copy volrender.ssf %smvdir%\.
+
 CALL :COPY  %svzipbuild%\smokezip_win_%platform%.exe %smvdir%\smokezip.exe
 
 CALL :COPY  %svdiffbuild%\smokediff_win_%platform%.exe %smvdir%\smokediff.exe

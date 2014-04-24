@@ -17,6 +17,7 @@ rm -rf $LINUXDIR
 mkdir -p $LINUXDIR
 mkdir -p $LINUXDIR/bin
 mkdir -p $LINUXDIR/Documentation
+cp $FORBUNDLE/volrender.ssf $LINUXDIR/bin/.
 cp $FORBUNDLE/objects.svo $LINUXDIR/bin/.
 cp $FORBUNDLE/*.po $LINUXDIR/bin/.
 cp $BACKGROUNDDIR/background $LINUXDIR/bin/.
