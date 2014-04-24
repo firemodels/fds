@@ -246,15 +246,6 @@ update_and_compile_cfast()
       cat $FIREBOT_DIR/output/stage0_cfast >> $ERROR_LOG
       echo "" >> $ERROR_LOG
    fi
-
-   # geomtest: (these lines will be removed, once geomtest capabilities
-   #            have been added to FDS)
-   cd $FDS_SVNROOT/SMV/source/geomtest/intel_linux_64
-   rm -f *.o geomtest
-   echo 'Compiling geomtest:' >> $FIREBOT_DIR/output/stage0_cfast 2>&1
-   ./make_geom.sh >> $FIREBOT_DIR/output/stage0_cfast 2>&1
-   echo "" >> $FIREBOT_DIR/stage0_cfast 2>&1
-
 }
 
 #  ============================
@@ -364,6 +355,14 @@ compile_fds_db()
    cd $FDS_SVNROOT/FDS_Compilation/intel_linux_64_db
    make -f ../makefile clean &> /dev/null
    ./make_fds.sh &> $FIREBOT_DIR/output/stage2a
+
+   # geomtest: (these lines will be removed, once geomtest capabilities
+   #            have been added to FDS)
+   cd $FDS_SVNROOT/SMV/source/geomtest/intel_linux_64
+   rm -f *.o geomtest
+   echo 'Compiling geomtest:' >> $FIREBOT_DIR/output/stage2a 2>&1
+   ./make_geom.sh >> $FIREBOT_DIR/output/stage2a 2>&1
+   echo "" >> $FIREBOT_DIR/stage2a 2>&1
 }
 
 check_compile_fds_db()
