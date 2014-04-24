@@ -1042,7 +1042,7 @@ WALL_CELL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
          ELSE
             DO N=1,N_TRACKED_SPECIES
                DD = 2._EB*WC%RHODW(N)*WC%RDN
-               WC%ZZ_F(N) = ( WC%ONE_D%MASSFLUX(N) + DD*ZZ_G(N) ) / ( DD + UN*WC%RHO_F )
+               WC%ZZ_F(N) = ( WC%ONE_D%MASSFLUX(N) + DD*ZZ_G(N) ) / ( DD + UN*WC%RHO_F + TWO_EPSILON_EB)
                IF (ZZ_0(N) > 1.E-10_EB) ZZ_ERR = MAX(ZZ_ERR,ABS(WC%ZZ_F(N)-ZZ_0(N))/ZZ_0(N))
             ENDDO
          ENDIF
