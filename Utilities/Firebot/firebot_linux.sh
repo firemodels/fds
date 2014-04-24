@@ -234,7 +234,7 @@ update_and_compile_cfast()
       make -f ../makefile clean &> /dev/null
       ./make_cfast.sh >> $FIREBOT_DIR/output/stage0_cfast 2>&1
    fi
-
+  
    # Check for errors in CFAST compilation
    cd $CFAST_SVNROOT/CFAST/intel_linux_64
    if [ -e "cfast6_linux_64" ]
@@ -246,6 +246,15 @@ update_and_compile_cfast()
       cat $FIREBOT_DIR/output/stage0_cfast >> $ERROR_LOG
       echo "" >> $ERROR_LOG
    fi
+
+   # geomtest: (these lines will be removed, once geomtest capabilities
+   #            have been added to FDS)
+   cd $FDS_SVNROOT/SMV/source/geomtest/intel_linux_64
+   rm -f *.o geomtest
+   echo 'Compiling geomtest:' >> $FIREBOT_DIR/output/stage0_cfast 2>&1
+   ./make_geom.sh >> $FIREBOT_DIR/output/stage0_cfast 2>&1
+   echo "" >> $FIREBOT_DIR/stage0_cfast 2>&1
+
 }
 
 #  ============================
