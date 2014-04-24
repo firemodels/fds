@@ -10253,7 +10253,7 @@ int readini2(char *inifile, int localfile){
       front=trim_front(buffer);
       trim(front);
       strcpy(label_startup_view,front);
-      updategluiview=1;
+      updategluiview=2;
       continue;
     }
     if(match(buffer,"USER_ROTATE") == 1){

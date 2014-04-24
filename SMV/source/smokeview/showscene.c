@@ -50,16 +50,13 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
   if(loadfiles_at_startup&&update_load_startup==1){
     load_startup_smoke();
   }
-  if(updategluiview==1){
+  if(updategluiview>0){
     camera *ca;
 
     ca = get_camera(label_startup_view);
-    if(ca!=NULL){
-      startup_view_ini = ca->view_id;
-    }
-
+    if(ca!=NULL)startup_view_ini = ca->view_id;
     reset_glui_view(startup_view_ini);
-    updategluiview=0;
+    updategluiview--;
   }
   if(menusmooth==1&&smoothing_blocks==0&&updatesmoothblocks==1){
     smooth_blockages();
@@ -84,7 +81,6 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
     clip2cam(camera_current);
     update_clip_all();
     updateclipvals=0;
-    updategluiview=0;
   }
   if(update_selectedtour_index==1){
     update_tourindex();
