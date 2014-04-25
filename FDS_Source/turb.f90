@@ -752,6 +752,7 @@ REAL(EB), PARAMETER :: K1D(3) = (/1.0, 2.0, 1.0/)
 REAL(EB), PARAMETER :: K3D(-1:1, -1:1, -1:1) = RESHAPE( (/ (((K1D(I)*K1D(J)*K1D(K)/64.0,I=1,3),J=1,3),K=1,3) /), (/ 3,3,3 /) )
 
 ! Traverse bulk of mesh
+
 !$OMP PARALLEL
 !$OMP DO SCHEDULE(static)
 DO K = 1,KBP1-1
