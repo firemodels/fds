@@ -6,6 +6,8 @@
 #ifndef SMOKEHEADERS_H_DEFINED
 #define SMOKEHEADERS_H_DEFINED
 
+EXTERNCPP void init_volrender_script(char *prefix, int startframe, int skipframe);
+
 // glui headers
 
 EXTERNCPP void update_glui_zonebounds(void);

@@ -205,6 +205,35 @@ void ResetView(int option){
   update_glui_zoom();
 }
 
+/* ------------------ init_volrender_script ------------------------ */
+
+void init_volrender_script(char *prefix, int startframe, int skipframe){
+  scriptfiledata *sfd;
+  FILE *script_stream;
+
+  if(volrender_scriptname==NULL){
+    int len;
+
+    len = strlen(fdsprefix)+strlen("_volrender.ssf")+1;
+    NewMemory((void **)&volrender_scriptname,(unsigned int)(len));
+    STRCPY(volrender_scriptname,fdsprefix);
+    STRCAT(volrender_scriptname,"_volrender.ssf");
+  }
+
+  sfd = insert_scriptfile(volrender_scriptname);
+  if(sfd!=NULL)default_script=sfd;
+  script_stream=fopen(volrender_scriptname,"w");
+  if(script_stream!=NULL){
+    fprintf(script_stream,"RENDERDIR\n");
+    fprintf(script_stream," .\n");
+    fprintf(script_stream,"VOLSMOKERENDERALL\n");
+    fprintf(script_stream," %i %i\n",skipframe,startframe);
+    fprintf(script_stream," %s\n",prefix);
+    runscript=1;
+    fclose(script_stream);
+  }
+} 
+
 /* ------------------ parse_commandline ------------------------ */
 
 void parse_commandline(int argc, char **argv){
@@ -572,30 +601,13 @@ void parse_commandline(int argc, char **argv){
     }
   }
   if(make_volrender_script==1){
-    scriptfiledata *sfd;
-    FILE *script_stream;
 
     NewMemory((void **)&volrender_scriptname,(unsigned int)(len_casename+14+1));
     STRCPY(volrender_scriptname,fdsprefix);
     STRCAT(volrender_scriptname,"_volrender.ssf");
 
-    sfd = insert_scriptfile(volrender_scriptname);
-    if(sfd!=NULL)default_script=sfd;
-    if(file_exists(volrender_scriptname)==1){
-      runscript=1;
-    }
-    else{
-      script_stream=fopen(volrender_scriptname,"w");
-      if(script_stream!=NULL){
-        fprintf(script_stream,"RENDERDIR\n");
-        fprintf(script_stream," .\n");
-        fprintf(script_stream,"VOLSMOKERENDERALL\n");
-        fprintf(script_stream," 1 0\n");
-        fprintf(script_stream," %s\n",fdsprefix);
-        runscript=1;
-        fclose(script_stream);
-      } 
-    }
+    init_volrender_script(fdsprefix, startframe0, skipframe0);
+
   }
 #ifndef pp_BETA
   if(time_flag==1){

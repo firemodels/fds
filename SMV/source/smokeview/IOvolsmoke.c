@@ -349,7 +349,6 @@ void init_volrender(void){
   if(nvolrenderinfo>0){
     NewMemory((void **)&volfacelistinfo,6*nmeshes*sizeof(volfacelistdata));
     NewMemory((void **)&volfacelistinfoptrs,6*nmeshes*sizeof(volfacelistdata *));
-    if(volrender_scriptfile!=NULL)insert_scriptfile(volrender_scriptfile);
   }
   if(nvolrenderinfo>0){
     init_supermesh();

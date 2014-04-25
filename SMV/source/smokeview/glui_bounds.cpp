@@ -1522,6 +1522,7 @@ extern "C"  void glui_script_disable(void){
       script_skipframe=-1;
       script_step=0;
       glui_script_enable();
+      render_state=0;
       break;
     case SCRIPT_RENDER_DIR:
       strcpy(label,script_renderdir);

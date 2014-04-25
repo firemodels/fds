@@ -58,8 +58,16 @@ extern "C" void init_volrender_surface(int firstcall);
 #define COMBINE_MESHES 24
 #define NONGPU_VOL_FACTOR 26
 #define GPU_VOL_FACTOR 27
+#define GENERATE_IMAGES 28
+#define CANCEL_GENERATE_IMAGES 31
+#define SCRIPT_CANCEL_NOW 45
+
+void Script_CB(int var);
 
 GLUI *glui_3dsmoke=NULL;
+
+GLUI_Button *BUTTON_startrender=NULL;
+GLUI_Button *BUTTON_cancelrender=NULL;
 
 GLUI_Listbox *LISTBOX_smoke_colorbar=NULL;
 
@@ -72,8 +80,8 @@ GLUI_RadioGroup *RADIO_use_colormap=NULL;
 
 GLUI_RadioButton *RADIOBUTTON_direct=NULL,*RADIOBUTTON_constraint=NULL, *RADIOBUTTON_noconstraint=NULL;
 
-
-
+GLUI_Spinner *SPINNER_startframe=NULL;
+GLUI_Spinner *SPINNER_skipframe=NULL;
 #ifdef pp_CULL
 GLUI_Spinner *SPINNER_cull_portsize=NULL;
 #endif
@@ -121,17 +129,18 @@ GLUI_Checkbox *CHECKBOX_show_smoketest=NULL;
 
 GLUI_Panel *PANEL_overall=NULL;
 GLUI_Panel *PANEL_colormap2=NULL;
-GLUI_Rollout *PANEL_colormap2a=NULL;
-GLUI_Rollout *PANEL_colormap2b=NULL;
-GLUI_Rollout *PANEL_colormap3=NULL;
 GLUI_Panel *PANEL_colormap3a=NULL;
 GLUI_Panel *PANEL_colormap3b=NULL;
 GLUI_Panel *PANEL_colormap=NULL;
-GLUI_Rollout *PANEL_meshvis=NULL;
 GLUI_Panel *PANEL_absorption=NULL,*PANEL_smokesensor=NULL;
+GLUI_Panel *PANEL_testsmoke=NULL;
+GLUI_Rollout *PANEL_generate_images=NULL;
+GLUI_Rollout *PANEL_colormap2a=NULL;
+GLUI_Rollout *PANEL_colormap2b=NULL;
+GLUI_Rollout *PANEL_colormap3=NULL;
+GLUI_Rollout *PANEL_meshvis=NULL;
 GLUI_Rollout *PANEL_slices=NULL;
 GLUI_Rollout *PANEL_volume=NULL;
-GLUI_Panel *PANEL_testsmoke=NULL;
 
 GLUI_StaticText *TEXT_smokealpha=NULL;
 GLUI_StaticText *TEXT_smokedepth=NULL;
@@ -398,6 +407,13 @@ extern "C" void glui_3dsmoke_setup(int main_window){
     SPINNER_nongpu_vol_factor->set_float_limits(1.0,10.0);
     SPINNER_gpu_vol_factor=glui_3dsmoke->add_spinner_to_panel(PANEL_volume,_("gpu grid multiplier"),GLUI_SPINNER_FLOAT,&gpu_vol_factor,GPU_VOL_FACTOR,Smoke3d_CB);
     SPINNER_gpu_vol_factor->set_float_limits(1.0,10.0);
+
+    PANEL_generate_images = glui_3dsmoke->add_rollout_to_panel(PANEL_volume,_("Generate images"),false);
+
+    SPINNER_startframe=glui_3dsmoke->add_spinner_to_panel(PANEL_generate_images,_("start frame"),GLUI_SPINNER_INT,&startframe0);
+    SPINNER_skipframe=glui_3dsmoke->add_spinner_to_panel(PANEL_generate_images,_("skip frame"),GLUI_SPINNER_INT,&skipframe0);
+    BUTTON_startrender=glui_3dsmoke->add_button_to_panel(PANEL_generate_images,_("Generate images"),GENERATE_IMAGES,Smoke3d_CB);
+    BUTTON_cancelrender=glui_3dsmoke->add_button_to_panel(PANEL_generate_images,_("Cancel"),CANCEL_GENERATE_IMAGES,Smoke3d_CB);
   }
 
   // slice render dialog
@@ -502,6 +518,12 @@ extern "C" void Smoke3d_CB(int var){
   switch (var){
   float temp_min, temp_max;
 
+  case CANCEL_GENERATE_IMAGES:
+    Script_CB(SCRIPT_CANCEL_NOW);
+    break;
+  case GENERATE_IMAGES:
+    init_volrender_script(fdsprefix, startframe0, skipframe0);
+    break;
   case NONGPU_VOL_FACTOR:
     init_volrender_surface(NOT_FIRSTCALL);
     break;

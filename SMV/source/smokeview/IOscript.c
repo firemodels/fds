@@ -240,7 +240,7 @@ scriptfiledata *insert_scriptfile(char *file){
   for(scriptfile=first_scriptfile.next;scriptfile->next!=NULL;scriptfile=scriptfile->next){
     if(scriptfile->id>idmax)idmax=scriptfile->id;
     if(scriptfile->file==NULL)continue;
-    if(strcmp(file,scriptfile->file)==0)return NULL;
+    if(strcmp(file,scriptfile->file)==0)return scriptfile;
   }
 
   NewMemory((void **)&thisptr,sizeof(scriptfiledata));
@@ -722,7 +722,7 @@ void script_renderall(scriptdata *scripti){
 
 
   if(script_startframe>0)scripti->ival3=script_startframe;
-  if(startframe0>0)scripti->ival3=startframe0;
+  if(startframe0>=0)scripti->ival3=startframe0;
   first_frame_index=scripti->ival3;
   itimes=first_frame_index;
 
