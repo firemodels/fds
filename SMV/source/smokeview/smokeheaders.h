@@ -6,7 +6,7 @@
 #ifndef SMOKEHEADERS_H_DEFINED
 #define SMOKEHEADERS_H_DEFINED
 
-EXTERNCPP void init_volrender_script(char *prefix, int startframe, int skipframe);
+EXTERNCPP void init_volrender_script(char *prefix, char *tour_label, int startframe, int skipframe);
 
 // glui headers
 
@@ -577,6 +577,8 @@ EXTERNCPP unsigned char *readpng(const char *filename,int *width, int *height);
 EXTERNCPP void update_whichface(int which_face);
 EXTERNCPP void update_blockvals(int flag);
 
+EXTERNCPP void create_vol_tourlist(void);
+EXTERNCPP void delete_vol_tourlist(void);
 EXTERNCPP void create_tourlist(void);
 EXTERNCPP void delete_tourlist(void);
 EXTERNCPP void updateviewtour(void);

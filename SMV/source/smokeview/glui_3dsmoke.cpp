@@ -59,13 +59,28 @@ extern "C" void init_volrender_surface(int firstcall);
 #define NONGPU_VOL_FACTOR 26
 #define GPU_VOL_FACTOR 27
 #define GENERATE_IMAGES 28
+#define START_FRAME 29
+#define SKIP_FRAME 30
 #define CANCEL_GENERATE_IMAGES 31
+#define VOL_TOUR_LIST 46
+#define VOL_PREFIX 47
+#define VOL_UNLOAD_ALL 48
+
+// two defines below are also defined elsewhere
+
 #define SCRIPT_CANCEL_NOW 45
+#define TOUR_LIST 24
 
 void Script_CB(int var);
+void TOUR_CB(int var);
 
 GLUI *glui_3dsmoke=NULL;
 
+GLUI_EditText *EDIT_vol_prefix=NULL;
+
+GLUI_Listbox *LISTBOX_VOL_tour=NULL;
+
+GLUI_Button *BUTTON_volunload=NULL;
 GLUI_Button *BUTTON_startrender=NULL;
 GLUI_Button *BUTTON_cancelrender=NULL;
 
@@ -144,6 +159,43 @@ GLUI_Rollout *PANEL_volume=NULL;
 
 GLUI_StaticText *TEXT_smokealpha=NULL;
 GLUI_StaticText *TEXT_smokedepth=NULL;
+
+extern "C" void UnLoadVolSmoke3DMenu(int var);
+
+/* ------------------ delete_vol_tourlsit ------------------------ */
+
+extern "C" void delete_vol_tourlist(void){
+  int i;
+
+  if(LISTBOX_VOL_tour==NULL)return;
+  for(i=0;i<ntours;i++){
+    LISTBOX_VOL_tour->delete_item(i);
+  }
+}
+
+/* ------------------ create_vol_tourlist ------------------------ */
+
+extern "C" void create_vol_tourlist(void){
+  int i;
+  tourdata *touri;
+  char label[1000];
+  
+  if(LISTBOX_VOL_tour==NULL)return;
+  for(i=0;i<ntours;i++){
+    touri = tourinfo + i;
+    if(i==selectedtour_index){
+      strcpy(label,"*");
+      strcat(label,touri->label);
+      LISTBOX_VOL_tour->add_item(i,label);
+    }
+    else{
+      LISTBOX_VOL_tour->add_item(i,touri->label);
+    }
+  }
+  LISTBOX_VOL_tour->set_int_val(selectedtour_index);
+
+}
+
 
 /* ------------------ update_combine_meshes ------------------------ */
 
@@ -410,10 +462,33 @@ extern "C" void glui_3dsmoke_setup(int main_window){
 
     PANEL_generate_images = glui_3dsmoke->add_rollout_to_panel(PANEL_volume,_("Generate images"),false);
 
-    SPINNER_startframe=glui_3dsmoke->add_spinner_to_panel(PANEL_generate_images,_("start frame"),GLUI_SPINNER_INT,&startframe0);
-    SPINNER_skipframe=glui_3dsmoke->add_spinner_to_panel(PANEL_generate_images,_("skip frame"),GLUI_SPINNER_INT,&skipframe0);
+    SPINNER_startframe=glui_3dsmoke->add_spinner_to_panel(PANEL_generate_images,_("start frame"),GLUI_SPINNER_INT,&startframe0,START_FRAME,Smoke3d_CB);
+    SPINNER_skipframe=glui_3dsmoke->add_spinner_to_panel(PANEL_generate_images,_("skip frame"),GLUI_SPINNER_INT,&skipframe0,SKIP_FRAME,Smoke3d_CB);
+    Smoke3d_CB(START_FRAME);
+    Smoke3d_CB(SKIP_FRAME);
+    if(ntours>0){
+      selectedtour_index=-1;
+      selectedtour_index_old=-1;
+      LISTBOX_VOL_tour=glui_3dsmoke->add_listbox_to_panel(PANEL_generate_images,"Tour:",&selectedtour_index,VOL_TOUR_LIST,Smoke3d_CB);
+
+      LISTBOX_VOL_tour->add_item(-1,"Manual");
+      LISTBOX_VOL_tour->add_item(-999,"-");
+      for(i=0;i<ntours;i++){
+        tourdata *touri;
+
+        touri = tourinfo + i;
+        LISTBOX_VOL_tour->add_item(i,touri->label);
+      }
+      LISTBOX_VOL_tour->set_int_val(selectedtour_index);
+    }
+
+    strcpy(vol_prefix,fdsprefix);
+    EDIT_vol_prefix=glui_3dsmoke->add_edittext_to_panel(PANEL_generate_images,"image prefix:",GLUI_EDITTEXT_TEXT,vol_prefix,VOL_PREFIX,Smoke3d_CB);
+    EDIT_vol_prefix->set_w(200);
+
     BUTTON_startrender=glui_3dsmoke->add_button_to_panel(PANEL_generate_images,_("Generate images"),GENERATE_IMAGES,Smoke3d_CB);
     BUTTON_cancelrender=glui_3dsmoke->add_button_to_panel(PANEL_generate_images,_("Cancel"),CANCEL_GENERATE_IMAGES,Smoke3d_CB);
+    BUTTON_volunload=glui_3dsmoke->add_button_to_panel(PANEL_generate_images,_("Unload"),VOL_UNLOAD_ALL,Smoke3d_CB);
   }
 
   // slice render dialog
@@ -513,16 +588,47 @@ extern "C" void show_glui_3dsmoke(void){
 
 extern "C" void Smoke3d_CB(int var){
   int i;
+  char *tour_label;
+  char *vol_prefixptr;
 
   updatemenu=1;
   switch (var){
   float temp_min, temp_max;
 
+  case VOL_UNLOAD_ALL:
+    UnLoadVolSmoke3DMenu(-1);
+    break;
+  case VOL_PREFIX:
+    break;
+  case VOL_TOUR_LIST:
+    TOUR_CB(TOUR_LIST);
+    break;
+  case START_FRAME:
+    if(startframe0<0){
+      startframe0=0;
+      SPINNER_startframe->set_int_val(startframe0);
+    }
+    break;
+  case SKIP_FRAME:
+    if(skipframe0<1){
+      skipframe0=1;
+      SPINNER_skipframe->set_int_val(skipframe0);
+    }
+    break;
   case CANCEL_GENERATE_IMAGES:
     Script_CB(SCRIPT_CANCEL_NOW);
     break;
   case GENERATE_IMAGES:
-    init_volrender_script(fdsprefix, startframe0, skipframe0);
+    if(selected_tour==NULL){
+      tour_label=NULL;
+    }
+    else{
+      tour_label=selected_tour->label;
+    }
+    trim(vol_prefix);
+    vol_prefixptr=trim_front(vol_prefix);
+    if(strlen(vol_prefixptr)==0)vol_prefixptr=fdsprefix;
+    init_volrender_script(vol_prefixptr, tour_label, startframe0, skipframe0);
     break;
   case NONGPU_VOL_FACTOR:
     init_volrender_surface(NOT_FIRSTCALL);

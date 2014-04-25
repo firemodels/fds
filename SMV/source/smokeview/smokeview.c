@@ -207,7 +207,7 @@ void ResetView(int option){
 
 /* ------------------ init_volrender_script ------------------------ */
 
-void init_volrender_script(char *prefix, int startframe, int skipframe){
+void init_volrender_script(char *prefix, char *tour_label, int startframe, int skipframe){
   scriptfiledata *sfd;
   FILE *script_stream;
 
@@ -226,6 +226,10 @@ void init_volrender_script(char *prefix, int startframe, int skipframe){
   if(script_stream!=NULL){
     fprintf(script_stream,"RENDERDIR\n");
     fprintf(script_stream," .\n");
+    if(tour_label!=NULL&&strcmp(tour_label,"Manual")!=0){
+      fprintf(script_stream,"LOADTOUR\n");
+      fprintf(script_stream," %s\n",tour_label);
+    }
     fprintf(script_stream,"VOLSMOKERENDERALL\n");
     fprintf(script_stream," %i %i\n",skipframe,startframe);
     fprintf(script_stream," %s\n",prefix);
@@ -606,8 +610,7 @@ void parse_commandline(int argc, char **argv){
     STRCPY(volrender_scriptname,fdsprefix);
     STRCAT(volrender_scriptname,"_volrender.ssf");
 
-    init_volrender_script(fdsprefix, startframe0, skipframe0);
-
+    init_volrender_script(fdsprefix, NULL, startframe0, skipframe0);
   }
 #ifndef pp_BETA
   if(time_flag==1){
