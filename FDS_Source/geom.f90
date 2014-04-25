@@ -16,7 +16,7 @@ CHARACTER(255), PARAMETER :: geomrev='$Revision$'
 CHARACTER(255), PARAMETER :: geomdate='$Date$'
 
 PRIVATE
-PUBLIC :: INIT_IBM,TRILINEAR,GETU,GETGRAD,INIT_FACE,GET_REV_geom, &
+PUBLIC :: INIT_IBM,TRILINEAR,GETU,GETGRAD,GET_VELO_IBM,INIT_FACE,GET_REV_geom, &
           READ_GEOM,READ_VERT,READ_FACE,READ_VOLU,LINKED_LIST_INSERT
  
 CONTAINS
@@ -383,76 +383,18 @@ REAL(EB), INTENT(IN) :: T
 INTEGER :: I,J,K,N,IERR,IERR1,IERR2,I_MIN,I_MAX,J_MIN,J_MAX,K_MIN,K_MAX,IC,IOR,IIG,JJG,KKG
 INTEGER :: NP,NXP,IZERO,LU,CUTCELL_COUNT,GEOM_TYPE,OWNER_INDEX,VERSION,NV,NF,DUMMY_INTEGER
 TYPE (MESH_TYPE), POINTER :: M
-REAL(EB) :: BB(6),V1(3),V2(3),V3(3),AREA,PC(18),XPC(60),V_POLYGON_CENTROID(3),VC,AREA_CHECK,&
-            X_MIN,X_MAX,Y_MIN,Y_MAX,Z_MIN,Z_MAX
+REAL(EB) :: BB(6),V1(3),V2(3),V3(3),AREA,PC(18),XPC(60),V_POLYGON_CENTROID(3),VC,AREA_CHECK
 LOGICAL :: EX,OP
 CHARACTER(60) :: FN
 CHARACTER(100) :: MESSAGE
 REAL(FB) :: DUMMY_FB_REAL,TIME_STRU
-REAL(EB), PARAMETER :: CUTCELL_TOLERANCE=1.E-10_EB,MIN_AREA=1.E-16_EB,TOL=1.E-9_EB
+REAL(EB), PARAMETER :: CUTCELL_TOLERANCE=1.E+10_EB,MIN_AREA=1.E-16_EB,TOL=1.E-9_EB
 !LOGICAL :: END_OF_LIST
-TYPE(GEOMETRY_TYPE), POINTER :: G
 TYPE(FACET_TYPE), POINTER :: FC=>NULL()
 TYPE(CUTCELL_LINKED_LIST_TYPE), POINTER :: CL=>NULL()
 
 IF (EVACUATION_ONLY(NM)) RETURN
 M => MESHES(NM)
-
-! primitive geometry loop
-
-IF (N_GEOM>0) THEN
-   IF (ABS(T-T_BEGIN)<TWO_EPSILON_EB .OR. ANY(GEOMETRY%TRANSLATE) .OR. ANY(GEOMETRY%ROTATE)) THEN
-      M%U_MASK=1
-      M%V_MASK=1
-      M%W_MASK=1
-      M%P_MASK=1
-   ENDIF
-ENDIF
-
-GEOM_LOOP: DO N=1,N_GEOM
-
-   G => GEOMETRY(N)
-
-   IF ( ABS(T-T_BEGIN)>TWO_EPSILON_EB .AND. (.NOT. G%TRANSLATE) .AND. (.NOT. G%ROTATE) ) CYCLE GEOM_LOOP
-   
-   ! acceleration (not implemented yet)
-   
-   G%U = G%U0
-   G%V = G%V0
-   G%W = G%W0
-   
-   ! translation (linear for now)
-   
-   G%X = G%X0 + G%U*T
-   G%Y = G%Y0 + G%V*T
-   G%Z = G%Z0 + G%W*T
-        
-   DELTA_IBM = LES_FILTER_WIDTH_FUNCTION(M%DX(1),M%DY(1),M%DZ(1))
-
-   ! find bounding box
-
-   G%MIN_I(NM) = M%IBAR
-   G%MIN_J(NM) = M%JBAR
-   G%MIN_K(NM) = M%KBAR
-
-   IF (X_MIN>=M%XS .AND. X_MIN<=M%XF) G%MIN_I(NM) = MAX(0,FLOOR((X_MIN-DELTA_IBM-M%XS)/M%DX(1))-1)
-   IF (Y_MIN>=M%YS .AND. Y_MIN<=M%YF) G%MIN_J(NM) = MAX(0,FLOOR((Y_MIN-DELTA_IBM-M%YS)/M%DY(1))-1)
-   IF (Z_MIN>=M%ZS .AND. Z_MIN<=M%ZF) G%MIN_K(NM) = MAX(0,FLOOR((Z_MIN-DELTA_IBM-M%ZS)/M%DZ(1))-1)
-   
-   G%MAX_I(NM) = 0
-   G%MAX_J(NM) = 0
-   G%MAX_K(NM) = 0
-
-   IF (X_MAX>=M%XS .AND. X_MAX<=M%XF) G%MAX_I(NM) = MIN(M%IBAR,CEILING((X_MAX+DELTA_IBM-M%XS)/M%DX(1))+1)
-   IF (Y_MAX>=M%YS .AND. Y_MAX<=M%YF) G%MAX_J(NM) = MIN(M%JBAR,CEILING((Y_MAX+DELTA_IBM-M%YS)/M%DY(1))+1)
-   IF (Z_MAX>=M%ZS .AND. Z_MAX<=M%ZF) G%MAX_K(NM) = MIN(M%KBAR,CEILING((Z_MAX+DELTA_IBM-M%ZS)/M%DZ(1))+1)
-  
-   
-   IF ( G%MAX_I(NM)<G%MIN_I(NM) .OR. &
-        G%MAX_J(NM)<G%MIN_J(NM) .OR. &
-        G%MAX_K(NM)<G%MIN_K(NM) ) CYCLE GEOM_LOOP
-   
-ENDDO GEOM_LOOP
 
 ! reinitialize complex geometry from geometry coordinate (.gc) file based on DT_GEOC frequency
 
@@ -1598,6 +1540,97 @@ G_DATA(1,1,0) = DUDX(II+1,JJ+1,KK)
 G_DATA(1,1,1) = DUDX(II+1,JJ+1,KK+1)
 
 END SUBROUTINE GETGRAD
+
+
+SUBROUTINE GET_VELO_IBM(VELO_IBM,U_VELO,IERR,VELO_INDEX,XVELO,TRI_INDEX,IBM_INDEX,DXC,NM)
+USE MATH_FUNCTIONS, ONLY: CROSS_PRODUCT,NORM2
+IMPLICIT NONE
+
+REAL(EB), INTENT(OUT) :: VELO_IBM
+INTEGER, INTENT(OUT) :: IERR
+REAL(EB), INTENT(IN) :: XVELO(3),DXC(3),U_VELO(3)
+INTEGER, INTENT(IN) :: VELO_INDEX,TRI_INDEX,IBM_INDEX,NM
+REAL(EB) :: NN(3),R(3),V1(3),V2(3),V3(3),T,U_DATA(0:1,0:1,0:1),XI(3),DXI(3),C(3,3),SS(3),PP(3),U_STRM,U_ORTH,U_NORM,KE
+REAL(EB), PARAMETER :: EPS=1.E-10_EB
+! Cartesian grid coordinate system orthonormal basis vectors
+REAL(EB), DIMENSION(3), PARAMETER :: E1=(/1._EB,0._EB,0._EB/),E2=(/0._EB,1._EB,0._EB/),E3=(/0._EB,0._EB,1._EB/)
+
+IERR=0
+VELO_IBM=0._EB
+
+V1 = (/VERTEX(FACET(TRI_INDEX)%VERTEX(1))%X,VERTEX(FACET(TRI_INDEX)%VERTEX(1))%Y,VERTEX(FACET(TRI_INDEX)%VERTEX(1))%Z/)
+V2 = (/VERTEX(FACET(TRI_INDEX)%VERTEX(2))%X,VERTEX(FACET(TRI_INDEX)%VERTEX(2))%Y,VERTEX(FACET(TRI_INDEX)%VERTEX(2))%Z/)
+V3 = (/VERTEX(FACET(TRI_INDEX)%VERTEX(3))%X,VERTEX(FACET(TRI_INDEX)%VERTEX(3))%Y,VERTEX(FACET(TRI_INDEX)%VERTEX(3))%Z/)
+NN = FACET(TRI_INDEX)%NVEC
+
+R = XVELO-V1
+IF ( NORM2(R)<EPS ) R = XVELO-V2 ! select a different vertex
+
+T = DOT_PRODUCT(R,NN)
+
+IF (IBM_INDEX==0 .AND. T<EPS) RETURN ! the velocity point is on or interior to the surface
+
+IF (IBM_INDEX==1) THEN
+   XI = XVELO + T*NN
+   CALL GETU(U_DATA,DXI,XI,VELO_INDEX,NM)
+   VELO_IBM = 0.5_EB*TRILINEAR(U_DATA,DXI,DXC)
+   RETURN
+ENDIF
+
+IF (IBM_INDEX==2) THEN
+
+   ! find a vector PP in the tangent plane of the surface and orthogonal to U_VELO
+   CALL CROSS_PRODUCT(PP,NN,U_VELO) ! PP = NN x U_VELO
+   IF (ABS(NORM2(PP))<=TWO_EPSILON_EB) THEN
+      ! tangent vector is completely arbitrary, just perpendicular to NN
+      IF (ABS(NN(1))>=TWO_EPSILON_EB .OR.  ABS(NN(2))>=TWO_EPSILON_EB) PP = (/NN(2),-NN(1),0._EB/)
+      IF (ABS(NN(1))<=TWO_EPSILON_EB .AND. ABS(NN(2))<=TWO_EPSILON_EB) PP = (/NN(3),0._EB,-NN(1)/)
+   ENDIF
+   PP = PP/NORM2(PP) ! normalize to unit vector
+   CALL CROSS_PRODUCT(SS,PP,NN) ! define the streamwise unit vector SS
+
+   !! check unit normal vectors
+   !print *,DOT_PRODUCT(SS,SS) ! should be 1
+   !print *,DOT_PRODUCT(SS,PP) ! should be 0
+   !print *,DOT_PRODUCT(SS,NN) ! should be 0
+   !print *,DOT_PRODUCT(PP,PP) ! should be 1
+   !print *,DOT_PRODUCT(PP,NN) ! should be 0
+   !print *,DOT_PRODUCT(NN,NN) ! should be 1
+   !print *                    ! blank line
+
+   ! directional cosines (see Pope, Eq. A.11)
+   C(1,1) = DOT_PRODUCT(E1,SS)
+   C(1,2) = DOT_PRODUCT(E1,PP)
+   C(1,3) = DOT_PRODUCT(E1,NN)
+   C(2,1) = DOT_PRODUCT(E2,SS)
+   C(2,2) = DOT_PRODUCT(E2,PP)
+   C(2,3) = DOT_PRODUCT(E2,NN)
+   C(3,1) = DOT_PRODUCT(E3,SS)
+   C(3,2) = DOT_PRODUCT(E3,PP)
+   C(3,3) = DOT_PRODUCT(E3,NN)
+
+   ! transform velocity (see Pope, Eq. A.17)
+   U_STRM = C(1,1)*U_VELO(1) + C(2,1)*U_VELO(2) + C(3,1)*U_VELO(3)
+   U_ORTH = C(1,2)*U_VELO(1) + C(2,2)*U_VELO(2) + C(3,2)*U_VELO(3)
+   U_NORM = C(1,3)*U_VELO(1) + C(2,3)*U_VELO(2) + C(3,3)*U_VELO(3)
+
+   !! check U_ORTH, should be zero
+   !print *, U_ORTH
+
+   KE = 0.5_EB*(U_STRM**2 + U_NORM**2)
+
+   ! here's a crude model: set U_NORM to zero
+   U_NORM = 0._EB
+   U_STRM = 0.5_EB*SQRT(2._EB*KE)
+
+   ! transform velocity back to Cartesian component I_VEL
+   VELO_IBM = C(VELO_INDEX,1)*U_STRM + C(VELO_INDEX,3)*U_NORM
+   RETURN
+ENDIF
+
+IERR=1
+
+END SUBROUTINE GET_VELO_IBM
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
