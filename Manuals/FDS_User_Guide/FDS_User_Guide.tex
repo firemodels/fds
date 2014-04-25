@@ -1585,7 +1585,7 @@ By default FDS uses the Deardorff~\cite{Deardorff:1980,Pope:2000} turbulent visc
 \begin{equation}
 (\mu_{\hbox{\tiny LES}}/\rho) = C_\nu \Delta \sqrt{k_{\rm sgs}}
 \end{equation}
-where $C_\nu=0.1$ and the subgrid scale (sgs) kinetic energy is taken from an algebraic relationship based on scale similarity (see the FDS Technical Reference Guide~\cite{FDS_Math_Guide}). The LES filter width is taken as the maximum cell dimension, $\Delta = \max(\delta x,\delta y,\delta z)$.  This selection is intended to promote the use of cubic grid cells, which are optimal for isotropic turbulent flows typical of thermally-driven fire plumes.  Alternatively, you may invoke the geometric mean definition of the filter width, $\Delta = (\delta x\, \delta y\, \delta z)^{(1/3)}$, by setting {\ct LES\_FILTER\_WIDTH='MEAN'} on {\ct MISC}.
+where $C_\nu=0.1$ and the subgrid scale (sgs) kinetic energy is taken from an algebraic relationship based on scale similarity (see the FDS Technical Reference Guide~\cite{FDS_Math_Guide}). The LES filter width is taken as the geometric mean of the local mesh spacing in each direction, $\Delta = (\delta x\, \delta y\, \delta z)^{(1/3)}$.
 
 Options for the {\ct TURBULENCE\_MODEL} on the {\ct MISC} line are listed in Table~\ref{turb_table}. Note that the model used in FDS versions 1-5 is {\ct 'CONSTANT SMAGORINSKY'}. The thermal conductivity and material diffusivity are related to the turbulent viscosity by:
 \be
@@ -9371,16 +9371,15 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct GAMMA}                                     & Real          & Section~\ref{gas_species_props}                       &               & 1.4               \\ \hline
 {\ct GRAVITATIONAL\_DEPOSITION}                 & Logical       & Section~\ref{info:deposition}                         &               & {\ct .TRUE.}      \\ \hline
 {\ct GROUND\_LEVEL}                             & Real          & Section~\ref{info:stratification}                     & m             & 0.                \\ \hline
-{\ct GVEC}                                      & Real triplet  & Section~\ref{info:GVEC}                               & m/s$^2$       & 0,0,-9.81         \\ \hline
+{\ct GVEC}                                      & Real triplet  & Section~\ref{info:GVEC}                               & \si{m/s^2}    & 0,0,-9.81         \\ \hline
 {\ct HUMIDITY}                                  & Real          & Section~\ref{info:humidity}                           & \%            & 40.               \\ \hline
-{\ct HRRPUA\_SHEET}                             & Real          & Section~\ref{info:REAC_Limiters}                      & kW/m$^2$      & 200.              \\ \hline
-{\ct HRRPUV\_AVERAGE}                           & Real          & Section~\ref{info:REAC_Limiters}                      & kW/m$^3$      & 2500.             \\ \hline
+{\ct HRRPUA\_SHEET}                             & Real          & Section~\ref{info:REAC_Limiters}                      & \si{kW/m^2}   & 200.              \\ \hline
+{\ct HRRPUV\_AVERAGE}                           & Real          & Section~\ref{info:REAC_Limiters}                      & \si{kW/m^3}   & 2500.             \\ \hline
 %{\ct IMMERSED\_BOUNDARY\_METHOD}                & Logical       &                                                       &               & {\ct .FALSE.}     \\ \hline
 {\ct INITIAL\_UNMIXED\_FRACTION}                & Real          & Section~\ref{info:turbulent_combustion}               &               & 1.0               \\ \hline
 {\ct ISOTHERMAL}                                & Logical       & Section~\ref{info:isothermal}                         &               & {\ct .FALSE.}     \\ \hline
 %{\ct KINETIC\_ENERGY\_SOURCE}                   & Logical       &                                                       &               & {\ct .FALSE.}     \\ \hline
-{\ct LAPSE\_RATE}                               & Real          & Section~\ref{info:stratification}                     &  $^\circ$C/m  & 0                 \\ \hline
-{\ct LES\_FILTER\_WIDTH}                        & Character     & Section~\ref{info:LES}                                &               & {\ct 'MEAN'}      \\ \hline
+{\ct LAPSE\_RATE}                               & Real          & Section~\ref{info:stratification}                     & \si{\degree C/m} & 0              \\ \hline
 {\ct MAX\_CHEMISTRY\_ITERATIONS}                & Integer       & Section~\ref{info:finite}                             &               &  1000             \\ \hline
 {\ct MAXIMUM\_VISIBILITY}                       & Real          & Section~\ref{info:visibility}                         &  m            &  30               \\ \hline
 {\ct MEAN\_FORCING(3)}                          & Logical       & Section~\ref{info:mean_forcing}                       &               & {\ct .FALSE.}     \\ \hline
@@ -9417,7 +9416,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct TEXTURE\_ORIGIN(3)}                        & Real Triplet  & Section~\ref{info:texture_map}                        & m             & (0.,0.,0.)        \\ \hline
 {\ct THERMOPHORETIC\_DEPOSITION}                & Logical       & Section~\ref{info:deposition}                         &               & {\ct .TRUE.}      \\ \hline
 {\ct THICKEN\_OBSTRUCTIONS}                     & Logical       & Section~\ref{info:OBST_Basics}                        &               & {\ct .FALSE.}     \\ \hline
-{\ct TMPA}                                      & Real          & Section~\ref{info:MISC_Basics}                        & $^\circ$C     & 20.               \\ \hline
+{\ct TMPA}                                      & Real          & Section~\ref{info:MISC_Basics}                        & \si{\degree C} & 20.               \\ \hline
 {\ct TURBULENCE\_MODEL}                         & Character     & Section~\ref{info:LES}                                &               & {\ct 'DEARDORFF'} \\ \hline
 {\ct TURBULENT\_DEPOSITION}                     & Logical       & Section~\ref{info:deposition}                         &               & {\ct .TRUE.}      \\ \hline
 {\ct U0,V0,W0}                                  & Reals         & Section~\ref{info:MISC_Basics}                        & m/s           & 0.                \\ \hline
