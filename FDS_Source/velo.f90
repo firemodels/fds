@@ -843,7 +843,9 @@ IF (BAROCLINIC .AND. .NOT.EVACUATION_ONLY(NM)) CALL BAROCLINIC_CORRECTION(T)
 
 IF (PATCH_VELOCITY) CALL PATCH_VELOCITY_FLUX
 
-! Adjust FVX, FVY and FVZ at solid, internal obstructions for no flux
+! Direct-forcing Immersed Boundary Method
+
+IF (N_FACE>0) CALL IBM_VELOCITY_FLUX(NM)
 
 IF (EVACUATION_ONLY(NM)) FVZ = 0._EB
 
@@ -2836,6 +2838,135 @@ ENDDO
 !$OMP END PARALLEL
  
 END SUBROUTINE BAROCLINIC_CORRECTION
+
+
+!===========================================================================
+! The following are experimental routines for implementation of a second-
+! order immersed boundary method (IBM). ~RJM
+!===========================================================================
+
+SUBROUTINE IBM_VELOCITY_FLUX(NM)
+
+USE COMPLEX_GEOMETRY, ONLY: GET_VELO_IBM
+
+INTEGER, INTENT(IN) :: NM
+REAL(EB), POINTER, DIMENSION(:,:,:) :: UU,VV,WW,DP,RHOP,HP,UBAR,VBAR,WBAR
+REAL(EB) :: U_IBM,V_IBM,W_IBM,DXC(3),XV(3),U_VEC(3),DUUDT,DVVDT,DWWDT
+
+INTEGER :: I,J,K,IJK(3),IP1,IM1,JP1,JM1,KP1,KM1,TRI_INDEX,IERR,IC
+TYPE(CUTCELL_LINKED_LIST_TYPE), POINTER :: CL=>NULL()
+TYPE(FACET_TYPE), POINTER :: FC=>NULL()
+
+! References:
+!
+! E.A. Fadlun, R. Verzicco, P. Orlandi, and J. Mohd-Yusof. Combined Immersed-
+! Boundary Finite-Difference Methods for Three-Dimensional Complex Flow
+! Simulations. J. Comp. Phys. 161:35-60, 2000.
+!
+! R. McDermott. A Direct-Forcing Immersed Boundary Method with Dynamic Velocity
+! Interpolation. APS/DFD Annual Meeting, Long Beach, CA, Nov. 2010.
+ 
+IF (PREDICTOR) THEN
+   UU => U
+   VV => V
+   WW => W
+   DP => D
+   RHOP => RHOS
+   HP => H
+ELSE
+   UU => US
+   VV => VS
+   WW => WS
+   DP => DS
+   RHOP => RHO
+   HP => HS
+ENDIF
+
+! store cell centered velocity
+
+UBAR => WORK2
+VBAR => WORK3
+WBAR => WORK4
+UBAR = 0._EB
+VBAR = 0._EB
+WBAR = 0._EB
+DO K=0,KBAR
+   DO J=0,JBAR
+      DO I=0,IBAR
+         IP1 = MIN(I+1,IBP1)
+         JP1 = MIN(J+1,JBP1)
+         KP1 = MIN(K+1,KBP1)
+         IM1 = MAX(I-1,0)   
+         JM1 = MAX(J-1,0)
+         KM1 = MAX(K-1,0)
+         UBAR(I,J,K) = 0.5_EB*(UU(I,J,K)+UU(IM1,J,K))
+         VBAR(I,J,K) = 0.5_EB*(VV(I,J,K)+VV(I,JM1,K))
+         WBAR(I,J,K) = 0.5_EB*(WW(I,J,K)+WW(I,J,KM1))
+      ENDDO
+   ENDDO
+ENDDO
+
+UNSTRUCTURED_GEOMETRY_LOOP: DO TRI_INDEX=1,N_FACE
+
+   FC=>FACET(TRI_INDEX)
+   CL=>FC%CUTCELL_LIST
+
+   CUTCELL_LOOP: DO
+
+      IF ( .NOT. ASSOCIATED(CL) ) EXIT
+
+      IC = CL%INDEX
+      I = I_CUTCELL(IC)
+      J = J_CUTCELL(IC)
+      K = K_CUTCELL(IC)
+      IJK = (/I,J,K/)
+      IP1 = MIN(I+1,IBP1)
+      JP1 = MIN(J+1,JBP1)
+      KP1 = MIN(K+1,KBP1)
+      IM1 = MAX(I-1,0)
+      JM1 = MAX(J-1,0)
+      KM1 = MAX(K-1,0)
+
+      DXC = (/DXN(I),DY(J),DZ(K)/)
+      XV = (/X(I),YC(J),ZC(K)/)
+
+      U_VEC = (/UU(I,J,K),0.5_EB*(VBAR(I,J,K)+VBAR(IP1,J,K)),0.5_EB*(WBAR(I,J,K)+WBAR(IP1,J,K))/)
+      CALL GET_VELO_IBM(U_IBM,U_VEC,IERR,1,XV,TRI_INDEX,IMMERSED_BOUNDARY_METHOD,DXC,NM)
+      IF (IERR==0) THEN
+         IF (PREDICTOR) DUUDT = (U_IBM-U(I,J,K))/DT
+         IF (CORRECTOR) DUUDT = (2._EB*U_IBM-(U(I,J,K)+US(I,J,K)))/DT
+         FVX(I,J,K) = -RDXN(I)*(HP(I+1,J,K)-HP(I,J,K)) - DUUDT
+      ENDIF
+
+      DXC = (/DX(I),DYN(J),DZ(K)/)
+      XV = (/XC(I),Y(J),ZC(K)/)
+
+      U_VEC  = (/0.5_EB*(UBAR(I,J,K)+UBAR(I,JP1,K)),VV(I,J,K),0.5_EB*(WBAR(I,J,K)+WBAR(I,JP1,K))/)
+      CALL GET_VELO_IBM(V_IBM,U_VEC,IERR,2,XV,TRI_INDEX,IMMERSED_BOUNDARY_METHOD,DXC,NM)
+      IF (IERR==0) THEN
+         IF (PREDICTOR) DVVDT = (V_IBM-V(I,J,K))/DT
+         IF (CORRECTOR) DVVDT = (2._EB*V_IBM-(V(I,J,K)+VS(I,J,K)))/DT
+         FVY(I,J,K) = -RDYN(J)*(HP(I,J+1,K)-HP(I,J,K)) - DVVDT
+      ENDIF
+
+      DXC = (/DX(I),DY(J),DZN(K)/)
+      XV = (/XC(I),YC(J),Z(K)/)
+
+      U_VEC  = (/0.5_EB*(UBAR(I,J,K)+UBAR(I,J,KP1)),0.5_EB*(VBAR(I,J,K)+VBAR(I,J,KP1)),WW(I,J,K)/)
+      CALL GET_VELO_IBM(W_IBM,U_VEC,IERR,3,XV,TRI_INDEX,IMMERSED_BOUNDARY_METHOD,DXC,NM)
+      IF (IERR==0) THEN
+         IF (PREDICTOR) DWWDT = (W_IBM-W(I,J,K))/DT
+         IF (CORRECTOR) DWWDT = (2._EB*W_IBM-(W(I,J,K)+WS(I,J,K)))/DT
+         FVZ(I,J,K) = -RDZN(K)*(HP(I,J,K+1)-HP(I,J,K)) - DWWDT
+      ENDIF
+
+      CL=>CL%NEXT
+
+   ENDDO CUTCELL_LOOP
+   
+ENDDO UNSTRUCTURED_GEOMETRY_LOOP
+
+END SUBROUTINE IBM_VELOCITY_FLUX
 
 
 SUBROUTINE PATCH_VELOCITY_FLUX
