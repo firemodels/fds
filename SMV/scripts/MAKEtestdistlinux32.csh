@@ -24,7 +24,7 @@ cp $BACKGROUNDDIR/background $LINUXDIR/bin/.
 cp $SMVDIR/smokeview_linux_test_32 $LINUXDIR/bin/smokeview
 cp $SMZDIR/smokezip_linux_32 $LINUXDIR/bin/smokezip
 cp $SMDDIR/smokediff_linux_32 $LINUXDIR/bin/smokediff
-cp $WINDDIR/wind2fds_linux_32 $DIR/bin/wind2fds
+cp $WINDDIR/wind2fds_linux_32 $LINUXDIR/bin/wind2fds
 rm -f $LINUXDIR.tar $LINUXDIR.tar.gz
 cd $LINUXDIR
 tar cvf ../$LINUXDIR.tar .
