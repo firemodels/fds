@@ -2576,7 +2576,7 @@ SELECT CASE(GAS_NAME)
    CASE('DODECANE') ! N-Heptane as surrogate
       SIGMA = 4.701_EB
       EPSOK = 205.78_EB
-      FORMULA = 'C7H16'
+      FORMULA = 'C12H26'
       H_F = -187.8_EB
       IF (RADCAL_NAME=='null') RADCAL_NAME='N-HEPTANE'      
    CASE('ETHANE')
