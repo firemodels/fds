@@ -155,12 +155,6 @@ erase *.obj *.mod *.exe 1>> %OUTDIR%\stage0.txt 2>&1
 make VPATH="../Source:../Include" INCLUDE="../Include" -f ..\makefile intel_win_%size% 1>> %OUTDIR%\stage0.txt 2>&1
 call :does_file_exist cfast6_win_%size%.exe %OUTDIR%\stage0.txt|| exit /b 1
 
-echo             building geomtest
-cd %svnroot%\SMV\source\geomtest\intel_win_%size%
-erase *.obj *.mod *.exe 1>> %OUTDIR%\stage0.txt 2>&1
-make VPATH=".." -f ..\makefile intel_win_%size% 1>> %OUTDIR%\stage0.txt 2>&1
-call :does_file_exist geomtest.exe %OUTDIR%\stage0.txt|| exit /b 1
-
 call :GET_TIME
 set PRELIM_end=%current_time%
 call :GET_DURATION PRELIM %PRELIM_beg% %PRELIM_end%
