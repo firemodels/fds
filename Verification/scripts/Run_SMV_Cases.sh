@@ -122,7 +122,7 @@ export CFAST=~/cfast/CFAST/intel_$PLATFORM/cfast6_$PLATFORM
 
 SMVUGDIR=$SVNROOT/Manuals/SMV_User_Guide/SCRIPT_FIGURES
 SMVVGDIR=$SVNROOT/Manuals/SMV_Verification_Guide/SCRIPT_FIGURES
-SMVVSDIR=$SVNROOT/Manuals/Verification_Summary/images
+SMVVSDIR=$SVNROOT/Manuals/SMV_Summary/images
 
 rm -rf $SMVVSDIR/*.png
 
