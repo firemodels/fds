@@ -1,17 +1,17 @@
 #!/bin/bash
 
 function usage {
-echo "runsmv_single.sh [-d -h -r -s size ]"
-echo "Generates figures for Smokeview verification suite"
+echo "runsmv_single.sh [options ]"
+echo "Run smokeview in batch mode"
 echo ""
 echo "Options"
 echo "-b - output build time in title"
 echo "-d - use debug version of smokeview"
 echo "-h - display this message"
-echo "-m script - run smokeview script named script"
-echo "-r - run-time directory"
+echo "-m script - run smokeview using the script named script"
+echo "-r - smokeview bin directory"
 echo "-t - use test version of smokeview"
-echo "-s size - use 32 or 64 bit (default) version of smokeview"
+echo "-s size - 32 or 64"
 echo "-x - invoke -volrender option in smokeview"
 echo "-y startframe - invoke -startframe option in smokeview"
 echo "-z skipframe - invoke -skipframe option in smokeview"
@@ -29,12 +29,11 @@ SIZE=_64
 DEBUG=
 TEST=
 SCRIPT=
-RUNDIR=
-RUNDIRECTORY=
 SKIPFRAME=1
 STARTFRAME=0
 VOLRENDER=
 TIME=
+BINDIR=
 
 while getopts 'bdhm:r:s:txy:z:' OPTION
 do
@@ -49,7 +48,7 @@ case $OPTION  in
    SCRIPT="$OPTARG"
    ;;
   r)
-   RUNDIR="$OPTARG"
+   BINDIR="$OPTARG"
    ;;
   b)
    TIME="-time"
@@ -95,11 +94,6 @@ else
   SCRIPTFILE=${CASE}.ssf
 fi
 
-if [ "$RUNDIR" != "" ]; then
-  RUNDIRECTORY=$RUNDIR
-  RUNDIR="-bindir $RUNDIR"
-fi
-
 if [ "$VOLRENDER" == "y" ]; then
   VOLRENDER="-volrender"
   if [ "$STARTFRAME" != "" ]; then
@@ -116,29 +110,27 @@ fi
 VERSION=$PLATFORM$TEST$SIZE$DEBUG
 VERSION2=$PLATFORM$SIZE$DEBUG
 
-export SVNROOT=~/FDS-SMV/
+SVNROOT=~/FDS-SMV
 
-export SMV=$SVNROOT/SMV/Build/intel_$VERSION2/smokeview_$VERSION
-export SMVBINDIR="-bindir $SVNROOT/SMV/for_bundle"
-if [ "$RUNDIR" != "" ]; then
-  SMVDIR="-bindir $RUNDIR"
+SMOKEVIEW=$SVNROOT/SMV/Build/intel_$VERSION2/smokeview_$VERSION
+
+if [ "$BINDIR" == "" ]; then
+  BINDIR="$SVNROOT/SMV/for_bundle"
 fi
+SMVBINDIR="-bindir $BINDIR"
 
 STARTX=$SVNROOT/Utilities/Scripts/startXserver.sh
 STOPX=$SVNROOT/Utilities/Scripts/stopXserver.sh
 
-echo setting up graphics environment
 source $STARTX
+echo "     smokeview: $SMOKEVIEW"
 echo "smokeview file: ${CASE}.smv"
 echo "   script file: $SCRIPTFILE"
-if [ "$RUNDIR" != "" ]; then
-echo " bin directory: $RUNDIRECTORY"
-fi
+echo " bin directory: $BINDIR"
 if [ "$VOLRENDER" == "y" ]; then
 echo " *** volume rendering"
 echo "   start frame: $STARTFRAME"
 echo "    skip frame: $SKIPFRAME"
 fi
-$SMV $RUNDIR $SMVBINDIR $TIME $SCRIPT $VOLRENDER $STARTFRAME $SKIPFRAME $CASE >& /dev/null
-echo shutting down graphics environment
+$SMOKEVIEW $SMVBINDIR $TIME $SCRIPT $VOLRENDER $STARTFRAME $SKIPFRAME $CASE >& /dev/null
 source $STOPX
