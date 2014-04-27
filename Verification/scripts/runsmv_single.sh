@@ -124,8 +124,8 @@ STOPX=$SVNROOT/Utilities/Scripts/stopXserver.sh
 
 source $STARTX
 echo "     smokeview: $SMOKEVIEW"
-echo "smokeview file: ${CASE}.smv"
-echo "   script file: $SCRIPTFILE"
+echo "          case: ${CASE}.smv"
+echo "        script: $SCRIPTFILE"
 echo " bin directory: $BINDIR"
 if [ "$VOLRENDER" == "y" ]; then
 echo " *** volume rendering"
