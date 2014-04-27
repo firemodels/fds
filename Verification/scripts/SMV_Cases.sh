@@ -1,8 +1,8 @@
 #!/bin/bash
 
-$RUNGEOM Immersed_Boundary_Method geom_azim
-$RUNGEOM Immersed_Boundary_Method geom_elev
-$RUNGEOM Immersed_Boundary_Method geom_scale
+#$RUNGEOM Immersed_Boundary_Method geom_azim
+#$RUNGEOM Immersed_Boundary_Method geom_elev
+#$RUNGEOM Immersed_Boundary_Method geom_scale
 
 $RUNFDS Visualization cell_test
 $RUNCFAST Visualization cfast_test
