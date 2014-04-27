@@ -132,8 +132,8 @@ LINUX_INTEL_LIBS_64 = $(IFORT_COMPILER_LIB)/intel64/libifcore.a  $(IFORT_COMPILE
 
 # ------------- intel_linux_32 ----------------
 
-intel_linux_32 : FFLAGS    = -O0 -m32 -static-intel -vec_report0 -fpp -D pp_noappend
-intel_linux_32 : CFLAGS    = -O0 -m32 -static-intel -vec_report0 -D pp_LINUX -D pp_INTEL $(SMV_TESTFLAG) $(SMV_PROFILEFLAG)
+intel_linux_32 : FFLAGS    = -O0 -traceback -m32 -static-intel -vec_report0 -fpp -D pp_noappend
+intel_linux_32 : CFLAGS    = -O0 -traceback -m32 -static-intel -vec_report0 -D pp_LINUX -D pp_INTEL $(SMV_TESTFLAG) $(SMV_PROFILEFLAG)
 intel_linux_32 : LFLAGS    = -m32 -static-intel
 intel_linux_32 : CC        = icc 
 intel_linux_32 : CPP       = icpc
@@ -145,8 +145,8 @@ intel_linux_32 : $(obj)
 
 # ------------- intel_linux_64 ----------------
 
-intel_linux_64 : FFLAGS    = -O0 -m64 -static-intel -vec_report0 -fpp -D pp_noappend
-intel_linux_64 : CFLAGS    = -O0 -m64 -static-intel -vec_report0 -D pp_LINUX64 -D pp_INTEL $(SMV_TESTFLAG) $(SMV_PROFILEFLAG)
+intel_linux_64 : FFLAGS    = -O0 -traceback -m64 -static-intel -vec_report0 -fpp -D pp_noappend
+intel_linux_64 : CFLAGS    = -O0 -traceback -m64 -static-intel -vec_report0 -D pp_LINUX64 -D pp_INTEL $(SMV_TESTFLAG) $(SMV_PROFILEFLAG)
 intel_linux_64 : LFLAGS    = -m64 -static-intel
 intel_linux_64 : CC        = icc 
 intel_linux_64 : CPP       = icpc
