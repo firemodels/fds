@@ -863,7 +863,7 @@ extern "C" void delete_tourlist(void){
   for(i=0;i<ntours;i++){
     LISTBOX_tour->delete_item(i);
   }
-  delete_vol_tourlist();
+  //xx delete_vol_tourlist();
 }
 
 /* ------------------ create_tourlist ------------------------ */
@@ -889,7 +889,7 @@ extern "C" void create_tourlist(void){
   }
   if(selectedtour_index>=-1&&selectedtour_index<ntours)LISTBOX_tour->set_int_val(selectedtour_index);
 
-  create_vol_tourlist();
+  //xx create_vol_tourlist();
 }
 
 /* ------------------ nexttour ------------------------ */
