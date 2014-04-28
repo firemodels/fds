@@ -177,23 +177,26 @@ extern "C" void delete_vol_tourlist(void){
 
 extern "C" void create_vol_tourlist(void){
   int i;
-  tourdata *touri;
-  char label[1000];
   
   if(LISTBOX_VOL_tour==NULL)return;
   for(i=0;i<ntours;i++){
+    tourdata *touri;
+    char label[1000];
+
     touri = tourinfo + i;
-    if(i==selectedtour_index){
-      strcpy(label,"*");
-      strcat(label,touri->label);
+    strcpy(label,"");
+    if(i==selectedtour_index)strcat(label,"*");
+    if(touri->label!=NULL&&strlen(touri->label)>0)strcat(label,touri->label);
+    if(strlen(label)>0){
       LISTBOX_VOL_tour->add_item(i,label);
     }
     else{
-      LISTBOX_VOL_tour->add_item(i,touri->label);
+      LISTBOX_VOL_tour->add_item(i,"error");
     }
   }
-  LISTBOX_VOL_tour->set_int_val(selectedtour_index);
-
+  if(selectedtour_index>=-1&&selectedtour_index<ntours){
+    LISTBOX_VOL_tour->set_int_val(selectedtour_index);
+  }
 }
 
 
