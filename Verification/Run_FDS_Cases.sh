@@ -3,7 +3,7 @@
 # This script runs the FDS Verification Cases on a linux machine with
 # a batch queuing system
 
-queue=
+queue=batch
 cases=all
 size=64
 DEBUG=
