@@ -3883,10 +3883,10 @@ or as specified in the input file.
 \end{figure}
 
 
-\chapter{Making Movies} \label{section:movie} A movie can be made
+\chapter{Making Movies} \label{section:movie} A movie may be made
 of a Smokeview animation by converting the visualized scene into a
-series of PNG or JPEG files, one file for each time step and then
-combining the individual images together into one movie file. More
+series of image files, one image for each time step and then
+combining the individual images into one movie file. More
 specifically:
 
 \begin{enumerate}
@@ -3895,9 +3895,15 @@ desired data files.
 
 \item Select the \fbox{Options/Render}\ menu and pick the
 desired frame skip value. The more frames you include in
-the animation, the smoother it will look. Of course more
+the animation, the smoother it will appear. Of course, more
 frames result in larger file sizes.  Choose fewer frames
-if the movie is to appear on a web site.
+if the movie is to appear on a web site.  
+
+The dialog box illustrated 
+in Figure \ref{figRENDER} may also be used for generating an image
+sequence.  Widgets exist for selecting the image type, the number of 
+frames to skip between images and for creating the image sequence.
+One may also select a clipping region making the final image size smaller.
 
 \item Use a program such as the Antechinus Media Editor
 (\hhref{http://www.c-point.com}),
@@ -3908,6 +3914,15 @@ to assemble the
 JPEGS or PNGS rendered in the previous step into a movie
 file.
 \end{enumerate}
+
+\begin{figure}[\figoptions]
+\centerline{
+\includegraphics[width=2.in]{FIGURES/figRENDER}
+}
+\caption[Render dialog box.]{Render dialog box. This dialog box allows one to specify
+options for rendering an image sequence of the displayed scene.} 
+\label{figRENDER}
+\end{figure}
 
 The default Smokeview image size is $640\times 480$ .  This size
 is fine if the movie is to appear in a presentation located on a
@@ -3930,6 +3945,28 @@ the WINDOW\_OFFSET keyword in the \svini\ file.
 
 Note, the Smokeview animation must be running when the render command is
 selected or only one frame will be saved instead of the entire image sequence.
+
+Volume rendered smoke files which are really 3D slice files can be quite large.
+Normally Smokeview loads an entire data set before visualizing it.  
+When creating image sequences for volume rendered smoke files,
+Smokeview allows one to load data and create an image one frame or time step at a time.
+Figure \ref{figVOLRENDER} shows the dialog for doing this.  This dialog
+is a part of the 3D smoke dialog box. One can specify the starting frame index
+and the number of frames to skip.  This allows one to run multiple Smokeview's in 
+parallel.
+
+\begin{figure}[\figoptions]
+\centerline{
+\includegraphics[width=1.5625in]{FIGURES/figVOLRENDER}
+}
+\caption[Volume Render dialog box.]{Volume Render dialog box. 
+This dialog box allows one to specify
+options for rendering an image sequence of a volume rendered smoke file. Data is loaded
+and an image is constructed one frame at a time allowing movies to be made of cases
+with very large data sets.
+}
+\label{figVOLRENDER}
+\end{figure}
 
 \chapter{Annotating the Scene }
 \label{section:annotate} \label{subsect_features}
@@ -4289,7 +4326,7 @@ date,          time, ws30, ws35, wd30, wd35
 
 The program, {\tt wind2fds}, then converts this spreadsheet file, optionally excluding data before and/or after specified date/times, into
 a one used by Smokeview to visualize this data.  The converted file starts with a {\tt HEADER}\ section
-containing information about where various wind measurements were taken. It is followed by a {\tt DATA} section which is identical 
+containing information about where various wind measurements were taken. It is followed by a {\tt DATA} section which is identical
 to the file format used by FDS to store device data.
 
 Running {\tt wind2fds}\ on the above SODAR data results in the following Smokeview compatible file
