@@ -28,6 +28,11 @@ char renderfile_revision[]="$Revision$";
 
 void Render(int view_mode){
   if(current_script_command!=NULL&&current_script_command->command==SCRIPT_VOLSMOKERENDERALL){
+    if(jiggle_mouse!=0){
+      JiggleMouse(0,100,0,100);
+      jiggle_mouse++;
+      if(jiggle_mouse==20)jiggle_mouse=0;
+    }
     if( (render_frame[itimes]>0&&showstereo==STEREO_NONE)||(render_frame[itimes]>1&&showstereo!=STEREO_NONE) ){
       if(itimes==0){
         current_script_command->remove_frame=itimes;

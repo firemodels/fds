@@ -23,6 +23,7 @@
 #include "smokeheaders.h"
 #include "threader.h"
 
+SVEXTERN int SVDECL(jiggle_mouse,0);
 #ifdef pp_PILOT
 SVEXTERN int SVDECL(vispilot,0);
 #endif
