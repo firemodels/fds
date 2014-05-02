@@ -4584,6 +4584,9 @@ would use the RadCal absorptivities for {\ct METHANOL} when computing the absorp
 
 Species molecular mass also affects the spectrum: a heavier species of a given molecular functional group tends to absorb and emit more infrared radiation than a lighter species of the same functional group.  For simple chemistry, if the fuel is not present in Table~\ref{tab:gasspecies} and no {\ct FUEL\_RADCAL\_ID} is provided on the {\ct REAC} line, then the absorption properties of methane will be used.
 
+\subsubsection{Gibbs Energy}
+If a reverse chemical reaction is specified using {\ct REVERSE=.TRUE.} on a {\ct REAC} input, FDS can use the forward reaction kinetics along with the equilibrium values of the reaction to determine the reverse kinetics.  The equilibrium is determined by minimizing the Gibbs energy.  The temperature vs. Gibbs energy (kJ/mol) for a species can be specified with {\ct RAMP\_G\_F}.
+
 \subsubsection{Liquids}
 
 If the species listed in Table~\ref{tab:gasspecies} includes liquid properties, it can be applied to liquid droplets, in which case the following relationship should hold:
@@ -9911,6 +9914,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct RAMP\_CP}                      & Character   & Section~\ref{gas_species_props}         &                   &               \\ \hline
 {\ct RAMP\_CP\_L}                   & Character   & Section~\ref{thermal_part_props}        &                   &               \\ \hline
 {\ct RAMP\_D}                       & Character   & Section~\ref{gas_species_props}         &                   &               \\ \hline
+{\ct RAMP\_G\_F}                    & Character   & Section~\ref{gas_species_props}         &                   &               \\ \hline
 {\ct RAMP\_K}                       & Character   & Section~\ref{gas_species_props}         &                   &               \\ \hline
 {\ct RAMP\_MU}                      & Character   & Section~\ref{gas_species_props}         &                   &               \\ \hline
 {\ct REFERENCE\_ENTHALPY}           & Real        & Section~\ref{gas_species_props}         & kJ/kg             &               \\ \hline
