@@ -1,6 +1,6 @@
 &HEAD CHID='geom_azim' /
 
-&MESH IBAR=10,JBAR=10,KBAR=10,XB=0.0,1.0,0.0,1.0,0.0,1.0 /
+&MESH IJK=10,10,10,XB=0.0,1.0,0.0,1.0,0.0,1.0 /
 
 &SURF ID='surf1',RGB=255,0,0 /
 &SURF ID='surf2',RGB=0,255,0 /
