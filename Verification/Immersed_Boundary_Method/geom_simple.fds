@@ -1,0 +1,15 @@
+&HEAD CHID='geom_simple' /
+
+&TIME T_END=0.0 /
+&MESH IJK=10,10,10,XB=0.0,1.0,0.0,1.0,0.0,1.0 /
+
+&SURF ID='surf1',RGB=255,0,0 /
+
+&GEOM ID='geom1',
+        VERTS=0.0,0.0,0.0,
+              1.0,0.5,0.0,
+              1.0,1.0,1.0,
+        FACES=1,2,3,
+        SURF_ID='surf1'/
+
+
