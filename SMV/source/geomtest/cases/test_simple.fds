@@ -1,6 +1,7 @@
 &HEAD CHID='test_simple' /
 
-&MESH IBAR=10,JBAR=10,KBAR=10,XB=0.0,1.0,0.0,1.0,0.0,1.0 /
+&TIME T_END=0.0 /
+&MESH IJK=10,10,10,XB=0.0,1.0,0.0,1.0,0.0,1.0 /
 
 &SURF ID='surf1',RGB=255,0,0 /
 
