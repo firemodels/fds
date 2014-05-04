@@ -7,8 +7,26 @@
 \section{Unstructured Geometry: The \texorpdfstring{{\tt GEOM}}{GEOM} Namelist Group (Table \ref{tbl:GEOM})}
 \label{info:GEOM}
 
-Unstructured geometric solids are defined using the {\tt \&GEOM}\ namelist. These solids consist of vertices and triangular faces.
-A simple form of the {\tt \&GEOM}\ namelist is given by
+Unstructured geometric solids are defined using the {\tt \&GEOM}\ namelist.
+These solids consist of triangular faces each formed from three vertices.
+A simple form of the {\tt \&GEOM}\ namelist defining one triangular face is given by
+
+\begin{verbatim}
+&GEOM ID='triangle'
+      VERTS=0.0,0.0,0.0, 1.0,0.0,0.0, 1.0,0.0,1.0,
+      FACES=1,2,3
+/
+\end{verbatim}
+
+\noindent The keyword {\tt ID}\ specifies the object name, in this case {\tt triangle}.
+The object's vertices and triangular faces are specified using the {\tt VERTS}\ and {\tt FACES}\ keywords.
+{\tt VERTS}\ is a list of $(x,y,z)$ coordinates and {\tt FACES}\ is a list of vertex indices, 3 indices for each triangular 
+face.
+Each index ranges from 1 to the number of vertices found on this {\tt \&GEOM}\ line.
+
+An object may be transformed.  It  may be translated, scaled and rotated by specifying
+{\tt XYZ}, {\tt SCALE}, {\tt AZIM}\ and/or {\tt ELEV}\ in addition to {\tt VERTS}\ and {\tt FACES}\ keywords.
+For example, in the following {\tt \&GEOM}\ namelist
 
 \begin{verbatim}
 &GEOM ID='chair'
@@ -17,7 +35,7 @@ A simple form of the {\tt \&GEOM}\ namelist is given by
 
       FACES=F1_1,F1_2,F1_3,...,FN_1,FN_2,FN_3,
 
-      SCALE=[1],
+      SCALE=[1,1,1],
       AZIM=[0],
       ELEV=[0],
 
@@ -26,11 +44,19 @@ A simple form of the {\tt \&GEOM}\ namelist is given by
 /
 \end{verbatim}
 
-\noindent The keyword {\tt ID}\ specifies the name of the object.  The object's vertices and triangular faces are specified using the {\tt VERTS}\ and {\tt FACES}\ keywords.  {\tt VERTS}\ is a list of $(x,y,z)$ coordinates and {\tt FACES}\ is a list of vertex indices, 3 indices for each triangular face\footnote{Parameters within brackets, [], indicate default values}.  Each index ranges from 1 to the number of vertices found on this {\tt \&GEOM}\ line.
+\noindent the chair object may be translated by $(x,y,z)$ by using {\tt XYZ=x,y,z}.
+Similarly, it may be scaled by $sx$, $sy$, $sz$ along each coordinate direction using {\tt SCALE=sx,sy,sz}.\footnote{Parameters within brackets, [], indicate default values.}
+It may be flipped by using a negative scale factor
+and rotated by using rotation angles {\tt AZIM}\ and {\tt ELEV}.
+{\tt AZIM}\ is used to specify an azimuthal rotation angle about a vertical (z) axis centered at an origin defined by {\tt XYZ0}.
+{\tt ELEV}\ specifies an elevation angle.
+An object may also be rotated about an arbitrary axis.  {\tt GAXIS} is used to specify this axis.
+{\tt GROTATE}\ is used to specify the amount of rotation about this axis.
+All rotation angles are specified in degrees.
 
-An object may be translated, scaled and rotated.  An object is translated by $(x,y,z)$ using {\tt XYZ=x,y,z}.  An object is scaled or magnified by $sx$, $sy$, $sz$ along each of 3 dimensions independently using {\tt SCALE=sx,sy,sz}. An object may be flipped by using a negative scale factor.  An object is rotated by using {\tt AZIM}\ and {\tt ELEV}.  AZIM is used to specify an azimuthal rotation angle about a vertical axis centered at an origin defined by {\tt XYZ0}.  ELEV specifies an elevation angle.  An object may also be rotated about an arbitrary axis.  {\tt GAXIS} is used to specify this axis.  GROTATE is used to specify the amount of rotation about this axis.  All rotation angles are in degrees.
-
-One may create a new object using objects defined in previous {\tt \&GEOM}\ namelist. These previous objects are specified on the current {\tt \&GEOM}\ line using the {\tt GEOM\_IDS}\ keyword.  An example is given by
+One may create a new object in terms of previously defined objects.  In the following example,
+{\tt chair}\ and {\tt couch}\ are objects that have been defined previously.  A new object, {\tt group 1}\
+is defined in terms of these two objects by referencing {\tt chair}\ and {\tt couch}\ using the {\tt GEOM\_IDS}\ keyword.
 
 {%\footnotesize
 \begin{verbatim}
@@ -48,20 +74,29 @@ One may create a new object using objects defined in previous {\tt \&GEOM}\ name
 \end{verbatim}
 }
 
-\noindent where {\tt GEOM\_IDS}\ is used incorporate a previously defined chair and couch into the new object named {\tt group 1}.  These two objects must be defined in previous {\&GEOM}\ lines (forward references are not allowed).   One may scale, rotate and translate objects as they are placed in the group using {\tt DSCALE}\, for scaling, {\tt DAZIM} and {\tt DELEV} for rotation and {\tt DXYZ} for translation. 
+\noindent The two referenced objects, {\tt chair}\ and {\tt couch}, must be defined in 
+previous {\&GEOM}\ lines as forward references are not permitted.
+One may scale, rotate and translate objects as they are placed in the group using 
+{\tt DSCALE}\, for scaling, {\tt DAZIM} and {\tt DELEV} for rotation and {\tt DXYZ} for translation.
 
-The {\tt DXYZ0}\ and {\tt DXYZ}\ keywords are two dimensional.  The first coordinate specifies the spatial component (1 for x, 2 for y, 3 for z or 1:3 for x, y, z).  The second coordinate specifies the object number in the {\tt GEOM\_IDS}\ array. 
+The {\tt DXYZ0}\ and {\tt DXYZ}\ keywords are two dimensional keywords.
+The first coordinate specifies the spatial component (1 for x, 2 for y, 3 for z or 1:3 for x, y, z).
+The second coordinate specifies the object number in the {\tt GEOM\_IDS}\ array.
 
-The {\tt COMPONENT\_ONLY}\ keyword if .TRUE., indicates that the object being defined is only a component of other geometries does not appear by itself in the FDS model.
+The {\tt COMPONENT\_ONLY}\ keyword if .TRUE., indicates that the object being defined is only a component found in other geometries.
+It does not itself appear in the FDS model.
 
-An object's position and orientation may change with time.  These changes are specified using various keywords that end with {\tt \_DOT}.  See Table \ref{tbl:GEOM} for a complete list of these keywords. In the following example, {\tt AZIM\_DOT} is used to vary the azimuthal rotation angle by 1 deg/s.  Similarly, the position may be changed by using {\tt XYZ\_DOT}.  For example, {\tt XYZ\_DOT=0.0,0.0,1.0}\ would cause an object to move 1~m/s in a vertical direction.
+An object's position and orientation may change with time.
+These changes are specified using various keywords that end with {\tt \_DOT}.
+See Table \ref{tbl:GEOM} for a complete list of these keywords.
+In the following example, {\tt AZIM\_DOT} is used to vary the azimuthal rotation angle by 1 deg/s.
+Similarly, the position may be changed by using {\tt XYZ\_DOT}.
+For example, {\tt XYZ\_DOT=0.0,0.0,1.0}\ would cause an object to move 1~m/s in a vertical direction.
 \begin{verbatim}
 &GEOM VERTS=...,FACES=....,AZIM=0.0,AZIM_DOT=1.0 /
 \end{verbatim}
 
 \vspace{\baselineskip}
-
-% This section is under construction!
 
 \section{\texorpdfstring{{\tt GEOM}}{GEOM} (Unstructured Geometry Parameters)}
 
@@ -113,7 +148,10 @@ An object's position and orientation may change with time.  These changes are sp
 
 (add to FDS user's guide 20.13 when ready)
 
-Both immersed geometric surfaces (generalized obstructions) and FDS generated isosurfaces are stored using a file format described in this section. Iso-surface files are used to store one or more surfaces where the specified {\ct QUANTITY} is a specified value. FDS outputs iso-surface data at fixed time intervals.  These surfaces are defined in terms of vertices and triangles.  A vertex consists of an $(x,y,z)$ coordinate. A triangle consists of 3 connected vertices.  The file format allows one to specify objects that change with time. Static geometry is defined once and displayed by Smokeview unchanged at each time step. Dynamic geometry is defined at each time step either in terms of nodes and faces or in terms of a translation and two rotations (azimuthal and elevation) of dynamic geometry defined in the first time step. These files are written out from {\ct dump.f90} using lines equivalent to the following:
+Both immersed geometric surfaces (generalized obstructions) and FDS generated isosurfaces are stored using a file format described in this section.
+Iso-surface files are used to store one or more surfaces where the specified {\ct QUANTITY} is a specified value.
+FDS outputs iso-surface data at fixed time intervals.  These surfaces are defined in terms of vertices and triangles.
+A vertex consists of an $(x,y,z)$ coordinate. A triangle consists of 3 connected vertices.  The file format allows one to specify objects that change with time. Static geometry is defined once and displayed by Smokeview unchanged at each time step. Dynamic geometry is defined at each time step either in terms of nodes and faces or in terms of a translation and two rotations (azimuthal and elevation) of dynamic geometry defined in the first time step. These files are written out from {\ct dump.f90} using lines equivalent to the following:
 \begin{lstlisting}
 ! header
 
