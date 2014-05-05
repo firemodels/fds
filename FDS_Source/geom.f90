@@ -468,7 +468,7 @@ DO I = 1, NLAT - 1
       I12 = I11 + 1
 
       SPHERE_FACES(IJ:IJ+2)   = (/I11,I12,I22/)
-      SPHERE_FACES(IJ+3:IJ+5) = (/I11,I22,I12/)
+      SPHERE_FACES(IJ+3:IJ+5) = (/I11,I22,I21/)
 
       IJ = IJ + 6
    END DO
