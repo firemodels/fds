@@ -6,9 +6,10 @@
 \vspace{1.0in}
 \section{Unstructured Geometry: The \texorpdfstring{{\tt GEOM}}{GEOM} Namelist Group (Table \ref{tbl:GEOM})}
 \label{info:GEOM}
+\subsection{Defining Objects}
 
 Unstructured geometric solids are defined using the {\tt \&GEOM}\ namelist.
-These solids consist of triangular faces each formed from three vertices.
+These solids consist of a group of triangular faces where each face consists of three vertices.
 A simple form of the {\tt \&GEOM}\ namelist defining one triangular face is given by
 
 \begin{verbatim}
@@ -18,15 +19,31 @@ A simple form of the {\tt \&GEOM}\ namelist defining one triangular face is give
 /
 \end{verbatim}
 
-\noindent The keyword {\tt ID}\ specifies the object name, in this case {\tt triangle}.
-The object's vertices and triangular faces are specified using the {\tt VERTS}\ and {\tt FACES}\ keywords.
-{\tt VERTS}\ is a list of $(x,y,z)$ coordinates and {\tt FACES}\ is a list of vertex indices, 3 indices for each triangular 
-face.
-Each index ranges from 1 to the number of vertices found on this {\tt \&GEOM}\ line.
+\noindent where {\tt ID}\ specifies the object name, in this case {\tt triangle},
+{\tt VERTS}\ specifies a list of $(x,y,z)$ coordinates and {\tt FACES}\ specifies a list of vertex indices, 3 indices for each triangular
+face. Each index ranges from 1 to the number of vertices found on this {\tt \&GEOM}\ line.  
+One may also define blocks and spheres.  Vertices and faces are then defined internally by FDS to represent these objects.  
+A {\tt \&GEOM}\ namelist defining a block is given by
 
+\begin{verbatim}
+&GEOM ID='block'
+      XB=0.0,1.0,0.0,1.0,0.0,1.0 /
+/
+\end{verbatim}
+where {\tt XB=xmin,xmax,ymin,ymax,zmin,zmax} defines min and max bounds of the block.  
+{\tt XB}\ is used here the same as on the {\tt \&OBST}\ line.
+A {\tt \&GEOM}\ namelist defining a sphere centered at $(0,0,0)$ with radius $1$ is given by
+
+\begin{verbatim}
+&GEOM ID='sphere'
+      SPHERICAL_ORIGIN=0.0,0.0,0.0,SPHERICAL_RADIUS=1.0 /
+/
+\end{verbatim}
+
+\subsection{Transforming Objects}
 An object may be transformed.  It  may be translated, scaled and rotated by specifying
-{\tt XYZ}, {\tt SCALE}, {\tt AZIM}\ and/or {\tt ELEV}\ in addition to {\tt VERTS}\ and {\tt FACES}\ keywords.
-For example, in the following {\tt \&GEOM}\ namelist
+{\tt XYZ}, {\tt SCALE}, {\tt AZIM}\ and/or {\tt ELEV}\ values on the {\tt \&GEOM} line.
+For example, in the following {\tt \&GEOM}\ namelist,
 
 \begin{verbatim}
 &GEOM ID='chair'
@@ -44,8 +61,8 @@ For example, in the following {\tt \&GEOM}\ namelist
 /
 \end{verbatim}
 
-\noindent the chair object may be translated by $(x,y,z)$ by using {\tt XYZ=x,y,z}.
-Similarly, it may be scaled by $sx$, $sy$, $sz$ along each coordinate direction using {\tt SCALE=sx,sy,sz}.\footnote{Parameters within brackets, [], indicate default values.}
+\noindent the chair object may be translated by $(x,y,z)$ by specifying {\tt XYZ=x,y,z} .
+Similarly, the chair may be scaled by $sx$, $sy$, $sz$ along each coordinate direction using {\tt SCALE=sx,sy,sz}.\footnote{Parameters within brackets, [], indicate default values.}
 It may be flipped by using a negative scale factor
 and rotated by using rotation angles {\tt AZIM}\ and {\tt ELEV}.
 {\tt AZIM}\ is used to specify an azimuthal rotation angle about a vertical (z) axis centered at an origin defined by {\tt XYZ0}.
@@ -54,6 +71,7 @@ An object may also be rotated about an arbitrary axis.  {\tt GAXIS} is used to s
 {\tt GROTATE}\ is used to specify the amount of rotation about this axis.
 All rotation angles are specified in degrees.
 
+\subsection{Grouping Objects}
 One may create a new object in terms of previously defined objects.  In the following example,
 {\tt chair}\ and {\tt couch}\ are objects that have been defined previously.  A new object, {\tt group 1}\
 is defined in terms of these two objects by referencing {\tt chair}\ and {\tt couch}\ using the {\tt GEOM\_IDS}\ keyword.
@@ -74,9 +92,9 @@ is defined in terms of these two objects by referencing {\tt chair}\ and {\tt co
 \end{verbatim}
 }
 
-\noindent The two referenced objects, {\tt chair}\ and {\tt couch}, must be defined in 
+\noindent The two referenced objects, {\tt chair}\ and {\tt couch}, must be defined in
 previous {\&GEOM}\ lines as forward references are not permitted.
-One may scale, rotate and translate objects as they are placed in the group using 
+One may scale, rotate and translate objects as they are placed in the group using
 {\tt DSCALE}\, for scaling, {\tt DAZIM} and {\tt DELEV} for rotation and {\tt DXYZ} for translation.
 
 The {\tt DXYZ0}\ and {\tt DXYZ}\ keywords are two dimensional keywords.
@@ -86,6 +104,7 @@ The second coordinate specifies the object number in the {\tt GEOM\_IDS}\ array.
 The {\tt COMPONENT\_ONLY}\ keyword if .TRUE., indicates that the object being defined is only a component found in other geometries.
 It does not itself appear in the FDS model.
 
+\subsection{Dynamic Objects}
 An object's position and orientation may change with time.
 These changes are specified using various keywords that end with {\tt \_DOT}.
 See Table \ref{tbl:GEOM} for a complete list of these keywords.
@@ -115,25 +134,33 @@ For example, {\tt XYZ\_DOT=0.0,0.0,1.0}\ would cause an object to move 1~m/s in 
 {\ct AZIM}         & Real                   & Section~\ref{info:GEOM}            &  deg      &    0.0                   \\ \hline
 {\ct AZIM\_DOT}    & Real                   & Section~\ref{info:GEOM}            &  deg/s    &    0.0                   \\ \hline
 {\ct COMPONENT\_ONLY} & LOGICAL             & Section~\ref{info:GEOM}            &           &  {\ct .FALSE.}           \\ \hline
-{\ct ELEV}         & Real                   & Section~\ref{info:GEOM}            &  deg      &    0.0                   \\ \hline
-{\ct ELEV\_DOT}    & Real                   & Section~\ref{info:GEOM}            &  deg/s    &    0.0                   \\ \hline
 {\ct DAZIM}        & array of Reals         & Section~\ref{info:GEOM}            &  deg      &    0.0                   \\ \hline
 {\ct DELEV}        & array of Reals         & Section~\ref{info:GEOM}            &  deg      &    0.0                   \\ \hline
 {\ct DSCALE}       & array of Real Triplets & Section~\ref{info:GEOM}            &           &   1.0                    \\ \hline
+{\ct DXYZ0}        & array of Real Triplets & Section~\ref{info:GEOM}            &   m       &   0.0                    \\ \hline
 {\ct DXYZ}         & array of Real Triplets & Section~\ref{info:GEOM}            &   m       &   0.0                    \\ \hline
 {\ct ELEV}         & Real                   & Section~\ref{info:GEOM}            &  deg      &    0.0                   \\ \hline
 {\ct ELEV\_DOT}    & Real                   & Section~\ref{info:GEOM}            &  deg/s    &    0.0                   \\ \hline
 {\ct FACES}        & array of Integer Triplets     & Section~\ref{info:GEOM}     &           &    0                     \\ \hline
 {\ct GAXIS}        & Real Triplet           & Section~\ref{info:GEOM}            &           &                          \\ \hline
 {\ct GROTATE}      & Real Triplet           & Section~\ref{info:GEOM}            &           &                          \\ \hline
+{\ct GROTATE\_DOT}  & Real Triplet           & Section~\ref{info:GEOM}            &           &                          \\ \hline
 {\ct GEOM\_IDS}    & Real                   & Section~\ref{info:GEOM}            &           &                          \\ \hline
 {\ct ID}           & Character              & Section~\ref{info:GEOM}            &           &   {\ct 'geom'}           \\ \hline
+{\ct NLAT}         & Integer                & Section~\ref{info:GEOM}            &           &                          \\ \hline
+{\ct NLONG}        & Integer                & Section~\ref{info:GEOM}            &           &                          \\ \hline
+{\ct NX}           & Integer                & Section~\ref{info:GEOM}            &           &                          \\ \hline
+{\ct NY}           & Integer                & Section~\ref{info:GEOM}            &           &                          \\ \hline
+{\ct NZ}           & Integer                & Section~\ref{info:GEOM}            &           &                          \\ \hline
 {\ct SCALE}        & Real Triplet           & Section~\ref{info:GEOM}            &           &   1.0                    \\ \hline
 {\ct SCALE\_DOT}   & Real Triplet           & Section~\ref{info:GEOM}            &  1/s      &   1.0                    \\ \hline
+{\ct SPHERE\_ORIGIN}& Real Triplet           & Section~\ref{info:GEOM}            &   m       &                          \\ \hline
+{\ct SPHERE\_RADIUS}& Real                   & Section~\ref{info:GEOM}            &   m       &                          \\ \hline
 {\ct SURF\_ID}     & Character              & Section~\ref{info:GEOM}            &           &  {\ct 'INERT'}           \\ \hline
 {\ct TEXTURE\_ORIGIN} & Real Triplet        & Section~\ref{info:GEOM}            &   m       &   0.0,0.0,0.0            \\ \hline
 {\ct TEXTURE\_MAPPING}& Character           & Section~\ref{info:GEOM}            &           & {\ct 'RECTANGULAR'}      \\ \hline
 {\ct VERTS}        & array of Real Triplets & Section~\ref{info:GEOM}            &   m       &   0.0                    \\ \hline
+{\ct XB}           & Real sex-tuplet        & Section~\ref{info:GEOM}            &   m       &   0.0                    \\ \hline
 {\ct XYZ0}         & Real Triplet           & Section~\ref{info:GEOM}            &   m       &   0.0                    \\ \hline
 {\ct XYZ}          & Real Triplet           & Section~\ref{info:GEOM}            &   m       &   0.0                    \\ \hline
 {\ct XYZ\_DOT}     & Real Triplet           & Section~\ref{info:GEOM}            &   m/s     &   0.0                    \\ \hline
