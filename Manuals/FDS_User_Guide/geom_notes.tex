@@ -22,7 +22,9 @@ A simple form of the {\tt \&GEOM}\ namelist defining one triangular face is give
 \noindent where {\tt ID}\ specifies the object name, in this case {\tt triangle},
 {\tt VERTS}\ specifies a list of one or more $(x,y,z)$ coordinates and {\tt FACES}\ specifies a list of vertices, 3 vertex indices for each
 face. Each index ranges from 1 to the number of vertices found on this {\tt \&GEOM}\ line.  
-One may also define blocks and spheres.  Vertices and faces are defined internally by FDS to represent these objects.  
+
+One may also define blocks using {\tt XB} and spheres using {\tt SPHERE\_ORIGIN}\ and {\tt SPHERE\_RADIUS}.  
+FDS generate vertices and faces that represent these objects.
 A {\tt \&GEOM}\ namelist defining a block is given by
 
 \begin{verbatim}
@@ -31,26 +33,26 @@ A {\tt \&GEOM}\ namelist defining a block is given by
 \end{verbatim}
 
 \noindent where {\tt XB=xmin,xmax,ymin,ymax,zmin,zmax} defines the min and max bounds of the block.  
-The {\tt XB}\ parameter is used in the same way as on the {\tt \&OBST}\ line.  The block may be discretized by
+The {\tt XB}\ parameter is used in the same way as on an {\tt \&OBST}\ or {\tt \&VENT}\ line.  
+A block may be discretized by
 specifying {\tt NX}, {\tt NY} and/or {\tt NZ} parameters.  For example, {\tt NX=4} would split the block 
-into 4 parts along the $x$ direction. By default, the block is discretized
-so that the individual faces are consistent in size with the grid resolution.
-
+into 4 parts along the $x$ direction. By default, blocks are discretized
+so that the block faces are consistent in size with the grid resolution.
 
 A {\tt \&GEOM}\ namelist defining a sphere centered at $(0,0,0)$ with radius $1$ is given by
 
 \begin{verbatim}
 &GEOM ID='sphere'
-      SPHERICAL_ORIGIN=0.0,0.0,0.0,SPHERICAL_RADIUS=1.0 /
+      SPHERE_ORIGIN=0.0,0.0,0.0,SPHERE_RADIUS=1.0 /
 \end{verbatim}
 
-Similar to the block, a sphere may be discretized by
+Similar to blocks, spheres may be discretized by
 specifying {\tt NLAT} and/or {\tt NLONG} parameters.  {\tt NLONG=6} would split the sphere
-into 6 parts around the longitudinal direction. By default, the sphere is discretized
-so that the individual faces are consistent in size with the grid resolution.
+into 6 parts around the longitudinal direction. Like blocks, spheres are discretized by default
+so that individual faces are consistent in size with the grid resolution.
 
 \subsection{Transforming Objects}
-An object may be transformed after it has been defined.  
+An object may be transformed.  
 It  may be translated using {\tt XYZ}, scaled using {\tt SCALE} and rotated about {\tt XYZ0}\ using {\tt AZIM}\ and/or {\tt ELEV}.
 For example, in the following {\tt \&GEOM}\ namelist,
 
@@ -61,19 +63,19 @@ For example, in the following {\tt \&GEOM}\ namelist,
 
       FACES=F1_1,F1_2,F1_3,...,FN_1,FN_2,FN_3,
 
-      SCALE=[1,1,1],
-      AZIM=[0],
-      ELEV=[0],
+      SCALE=sx,sy,sz,
+      AZIM=az,
+      ELEV=elev,
 
-      XYZ0=[0,0,0],
-      XYZ=[0,0,0],
+      XYZ0=x0,y0,z0,
+      XYZ=x,y,z,
 /
 \end{verbatim}
 
-\noindent the chair object is translated by $(x,y,z)$ by specifying {\tt XYZ=x,y,z} .
-Similarly, the chair is scaled by $sx$, $sy$, $sz$ along each coordinate direction using {\tt SCALE=sx,sy,sz}.\footnote{Parameters within brackets, [], are default values.}
+\noindent the chair object is translated by $(x,y,z)$ by specifying {\tt XYZ=x,y,z}.
+Similarly, the chair is scaled by $sx$, $sy$, $sz$ along each coordinate direction using {\tt SCALE=sx,sy,sz}.
 An object may be flipped by using a negative scale factor.
-An object is rotated using {\tt AZIM}\ and {\tt ELEV} keywords.
+An object is rotated using {\tt AZIM=az}\ and {\tt ELEV=elev}.
 {\tt AZIM}\ is used to specify an azimuthal rotation angle about a vertical (z) axis centered at an origin defined by {\tt XYZ0}.
 {\tt ELEV}\ specifies a rotation angle relative to a horizontal plane again containing an origin defined by {\tt XYZ0}..
 An object may also be rotated about an arbitrary axis.  
@@ -83,11 +85,16 @@ All rotation angles are specified in degrees.
 
 \subsection{Grouping Objects}
 One may group objects to form a new object.  In the following example,
-{\tt chair}\ and {\tt couch}\ are objects that have been defined previously.  A new object, {\tt living room set}\
-is defined in terms of these two objects by referencing {\tt chair}\ and {\tt couch}\ in the {\tt GEOM\_IDS}\ keyword.
+{\tt chair}\ and {\tt couch}\ are objects that have been defined previously.  A new {\tt living room set}\ object
+is defined by referencing {\tt chair}\ and {\tt couch}\ in the {\tt GEOM\_IDS}\ keyword.  The chair and couch
+are place at a particular locations using the {\tt DXYZ}\ keyword.
 
 {%\footnotesize
 \begin{verbatim}
+&GEOM ID='chair' ..... /
+
+&GEOM ID='sofa' ...... /
+
 &GEOM ID='living room set'
 
       XYZ=[0,0,0],
@@ -102,7 +109,7 @@ is defined in terms of these two objects by referencing {\tt chair}\ and {\tt co
 \end{verbatim}
 }
 
-\noindent The two referenced objects, {\tt chair}\ and {\tt couch}, must be defined in
+\noindent Referenced objects such as {\tt chair}\ and {\tt couch} in this case must be defined in
 previous {\&GEOM}\ lines.  Forward references are not permitted.
 One may scale, rotate and translate objects as they are placed in the group using
 {\tt DSCALE}\, for scaling, {\tt DAZIM} and {\tt DELEV} for rotation and {\tt DXYZ} for translation.
@@ -155,8 +162,8 @@ For example, {\tt XYZ\_DOT=0.0,0.0,1.0}\ would cause an object to move 1~m/s in 
 {\ct ELEV\_DOT}    & Real                   & Section~\ref{info:GEOM}            &  deg/s    &    0.0                   \\ \hline
 {\ct FACES}        & array of Integer Triplets     & Section~\ref{info:GEOM}     &           &    0                     \\ \hline
 {\ct GAXIS}        & Real Triplet           & Section~\ref{info:GEOM}            &           &                          \\ \hline
-{\ct GROTATE}      & Real Triplet           & Section~\ref{info:GEOM}            &           &                          \\ \hline
-{\ct GROTATE\_DOT}  & Real Triplet           & Section~\ref{info:GEOM}            &           &                          \\ \hline
+{\ct GROTATE}      & Real Triplet           & Section~\ref{info:GEOM}            &  deg      &    0.0                   \\ \hline
+{\ct GROTATE\_DOT}  & Real Triplet           & Section~\ref{info:GEOM}            & deg/s    &    0.0                   \\ \hline
 {\ct GEOM\_IDS}    & Real                   & Section~\ref{info:GEOM}            &           &                          \\ \hline
 {\ct ID}           & Character              & Section~\ref{info:GEOM}            &           &   {\ct 'geom'}           \\ \hline
 {\ct NLAT}         & Integer                & Section~\ref{info:GEOM}            &           &                          \\ \hline
@@ -164,10 +171,10 @@ For example, {\tt XYZ\_DOT=0.0,0.0,1.0}\ would cause an object to move 1~m/s in 
 {\ct NX}           & Integer                & Section~\ref{info:GEOM}            &           &                          \\ \hline
 {\ct NY}           & Integer                & Section~\ref{info:GEOM}            &           &                          \\ \hline
 {\ct NZ}           & Integer                & Section~\ref{info:GEOM}            &           &                          \\ \hline
-{\ct SCALE}        & Real Triplet           & Section~\ref{info:GEOM}            &           &   1.0                    \\ \hline
+{\ct SCALE}        & Real Triplet           & Section~\ref{info:GEOM}            &           &   1.0,1.0,1.0            \\ \hline
 {\ct SCALE\_DOT}   & Real Triplet           & Section~\ref{info:GEOM}            &  1/s      &   1.0                    \\ \hline
-{\ct SPHERE\_ORIGIN}& Real Triplet           & Section~\ref{info:GEOM}            &   m       &                          \\ \hline
-{\ct SPHERE\_RADIUS}& Real                   & Section~\ref{info:GEOM}            &   m       &                          \\ \hline
+{\ct SPHERE\_ORIGIN}& Real Triplet           & Section~\ref{info:GEOM}            &   m       &  0.0,0.0,0.0            \\ \hline
+{\ct SPHERE\_RADIUS}& Real                   & Section~\ref{info:GEOM}            &   m       &  1.0                    \\ \hline
 {\ct SURF\_ID}     & Character              & Section~\ref{info:GEOM}            &           &  {\ct 'INERT'}           \\ \hline
 {\ct TEXTURE\_ORIGIN} & Real Triplet        & Section~\ref{info:GEOM}            &   m       &   0.0,0.0,0.0            \\ \hline
 {\ct TEXTURE\_MAPPING}& Character           & Section~\ref{info:GEOM}            &           & {\ct 'RECTANGULAR'}      \\ \hline
