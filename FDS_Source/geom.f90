@@ -22,6 +22,8 @@ PUBLIC :: INIT_IBM,TRILINEAR,GETU,GETGRAD,GET_VELO_IBM,INIT_FACE,GET_REV_geom, &
  
 CONTAINS
 
+! ---------------------------- READ_GEOM ----------------------------------------
+
 SUBROUTINE READ_GEOM
 
 ! input &GEOM lines
@@ -39,24 +41,29 @@ REAL(EB), PARAMETER :: MAX_COORD=1.0E20_EB
 REAL(EB) :: VERTS(3*MAX_VERTS)
 REAL(EB) :: SPHERE_ORIGIN(3), SPHERE_RADIUS
 REAL(EB) :: TEXTURE_ORIGIN(3), TEXTURE_SCALE(2)
-REAL(EB) :: XB(6)
+REAL(EB) :: XB(6), DX
 INTEGER :: FACES(3*MAX_FACES)
 INTEGER :: N_VERTS, N_FACES
 INTEGER :: SURF_INDEX
 INTEGER :: IOS,IZERO,N, I, NSUB_GEOMS, GEOM_INDEX
-INTEGER :: GEOM_TYPE, NXB, NLAT, NLONG
+INTEGER :: GEOM_TYPE, NXB, NLAT, NLONG, NX, NY, NZ, FACE_OFFSET, VERT_OFFSET
+TYPE (MESH_TYPE), POINTER :: M=>NULL()
+
 LOGICAL COMPONENT_ONLY
 LOGICAL, ALLOCATABLE, DIMENSION(:) :: DEFAULT_COMPONENT_ONLY
 TYPE(GEOMETRY_TYPE), POINTER :: G=>NULL(), GSUB=>NULL()
 NAMELIST /GEOM/ AZIM, AZIM_DOT, COMPONENT_ONLY, DAZIM, DELEV, DSCALE, DXYZ0, DXYZ, &
-                ELEV, ELEV_DOT, FACES, GAXIS, GROTATE, GROTATE_DOT,GEOM_IDS, ID, NLAT, NLONG, SPHERE_RADIUS, SCALE, &
-                SCALE_DOT, SPHERE_ORIGIN, SURF_ID, TEXTURE_ORIGIN, TEXTURE_SCALE, TEXTURE_MAPPING,&
-                VERTS, XB, XYZ0, XYZ, XYZ_DOT
+                ELEV, ELEV_DOT, FACES, GAXIS, GROTATE, GROTATE_DOT,GEOM_IDS, ID, NLAT, NLONG, NX, NY, NZ, &
+                SPHERE_RADIUS, SCALE, SCALE_DOT, SPHERE_ORIGIN, SURF_ID, &
+                TEXTURE_ORIGIN, TEXTURE_SCALE, TEXTURE_MAPPING, VERTS, XB, XYZ0, XYZ, XYZ_DOT
 
 ! count &GEOM lines
 
-NLAT=0
-NLONG=0
+NLAT = 0
+NLONG = 0
+NX = 0
+NY = 0
+NZ = 0
 N_GEOMETRY=0
 IS_GEOMETRY_DYNAMIC = .FALSE.
 REWIND(LU_INPUT)
@@ -169,51 +176,55 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
    N_VERTS=0
    DO I = 1, MAX_VERTS
       IF (VERTS(3*I-2).GE.MAX_COORD.OR.VERTS(3*I-1).GE.MAX_COORD.OR.VERTS(3*I).GE.MAX_COORD) EXIT
-      N_VERTS=N_VERTS+1
+      N_VERTS = N_VERTS+1
    END DO
    
    N_FACES=0
    DO I = 1, MAX_FACES
       IF (FACES(3*I-2).EQ.0.OR.FACES(3*I-1).EQ.0.OR.FACES(3*I).EQ.0) EXIT
-      N_FACES=N_FACES+1
+      N_FACES = N_FACES+1
    END DO
    
    NXB=0
    DO I = 1, 6
-     IF(XB(I).LT.MAX_COORD)NXB=NXB+1
+     IF (XB(I).LT.MAX_COORD) NXB=NXB+1
    END DO
-   IF(NXB==6)THEN
-      GEOM_TYPE=1
+   IF (NXB==6) THEN
+      GEOM_TYPE = 1
       CALL CHECK_XB(XB)
       G%XB=XB
-      N_VERTS=8
-      N_FACES=12
-      VERTS( 1: 3) = (/XB(1), XB(3), XB(5)/)
-      VERTS( 4: 6) = (/XB(2), XB(3), XB(5)/)
-      VERTS( 7: 9) = (/XB(1), XB(4), XB(5)/)
-      VERTS(10:12) = (/XB(2), XB(4), XB(5)/)
-      VERTS(13:15) = (/XB(1), XB(3), XB(6)/)
-      VERTS(16:18) = (/XB(2), XB(3), XB(6)/)
-      VERTS(19:21) = (/XB(1), XB(4), XB(6)/)
-      VERTS(22:24) = (/XB(2), XB(4), XB(6)/)
-      FACES( 1: 3) = (/1,2,6/)
-      FACES( 4: 6) = (/1,6,5/)
-      FACES( 7: 9) = (/2,4,8/)
-      FACES(10:12) = (/2,8,6/)
-      FACES(13:15) = (/4,3,7/)
-      FACES(16:18) = (/4,7,8/)
-      FACES(19:21) = (/3,1,5/)
-      FACES(22:24) = (/3,5,7/)
-      FACES(25:27) = (/5,6,8/)
-      FACES(28:30) = (/5,8,7/)
-      FACES(31:33) = (/2,3,4/)
-      FACES(34:36) = (/1,3,2/)
+
+ ! make NX, NY, NZ consistent with grid resolution (if not specified on &GEOM line)
+ 
+      M => MESHES(1)
+      DX = MIN(M%DXMIN,M%DYMIN,M%DZMIN)
+      IF (NX.LT.2) NX = MAX(2,INT((XB(2)-XB(1)/DX)+1))
+      IF (NY.LT.2) NY = MAX(2,INT((XB(4)-XB(3)/DX)+1))
+      IF (NZ.LT.2) NZ = MAX(2,INT((XB(6)-XB(5)/DX)+1))
+
+      FACE_OFFSET = 0
+      VERT_OFFSET = 0
+      N_VERTS = 2*(NY*NZ + NX*NZ + NX*NY)
+      N_FACES = 4*((NY-1)*(NZ-1) + (NX-1)*(NZ-1) + (NX-1)*(NY-1))
+      CALL INIT_QUAD(NY,NZ,XB,1,N_VERTS,N_FACES,VERT_OFFSET,FACE_OFFSET,VERTS,FACES)
+      CALL INIT_QUAD(NY,NZ,XB,2,N_VERTS,N_FACES,VERT_OFFSET,FACE_OFFSET,VERTS,FACES)
+      CALL INIT_QUAD(NX,NZ,XB,3,N_VERTS,N_FACES,VERT_OFFSET,FACE_OFFSET,VERTS,FACES)
+      CALL INIT_QUAD(NX,NZ,XB,4,N_VERTS,N_FACES,VERT_OFFSET,FACE_OFFSET,VERTS,FACES)
+      CALL INIT_QUAD(NX,NY,XB,5,N_VERTS,N_FACES,VERT_OFFSET,FACE_OFFSET,VERTS,FACES)
+      CALL INIT_QUAD(NX,NY,XB,6,N_VERTS,N_FACES,VERT_OFFSET,FACE_OFFSET,VERTS,FACES)
    ENDIF
    
-   IF(SPHERE_RADIUS.LT.MAX_COORD.AND. &
-      SPHERE_ORIGIN(1).LT.MAX_COORD.AND.SPHERE_ORIGIN(2).LT.MAX_COORD.AND.SPHERE_ORIGIN(3).LT.MAX_COORD.AND. &
-      NLAT>2.AND.NLONG.GT.2)THEN
-      GEOM_TYPE=2
+   IF (SPHERE_RADIUS.LT.MAX_COORD.AND. &
+      SPHERE_ORIGIN(1).LT.MAX_COORD.AND.SPHERE_ORIGIN(2).LT.MAX_COORD.AND.SPHERE_ORIGIN(3).LT.MAX_COORD) THEN
+      GEOM_TYPE = 2
+      
+      ! make NLAT, NLONG consistent with grid resolution  (if not specified on &GEOM line)
+
+      M => MESHES(1)
+      DX = M%DXMIN
+      IF (NLONG.LT.6) NLONG = MAX(6,INT(2.0_EB*PI*SPHERE_RADIUS/DX)+1)
+      IF (NLAT.LT.3)  NLAT = MAX(3,INT(PI*SPHERE_RADIUS/DX)+1)
+      
       N_VERTS = NLAT*NLONG
       N_FACES = 2*(NLAT-1)*(NLONG-1)
       CALL INIT_SPHERE(NLAT,NLONG,VERTS,FACES)
@@ -228,13 +239,16 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
    G%SPHERE_RADIUS=SPHERE_RADIUS
    G%NLAT = NLAT
    G%NLONG = NLONG
-   G%COMPONENT_ONLY=COMPONENT_ONLY
-   G%GEOM_TYPE=GEOM_TYPE
+   G%NX = NX
+   G%NY = NY
+   G%NZ = NZ
+   G%COMPONENT_ONLY = COMPONENT_ONLY
+   G%GEOM_TYPE = GEOM_TYPE
    
-   NSUB_GEOMS=0
+   NSUB_GEOMS = 0
    DO I = 1, MAX_IDS
       IF (GEOM_IDS(I)=='') EXIT
-      NSUB_GEOMS=NSUB_GEOMS+1
+      NSUB_GEOMS = NSUB_GEOMS+1
    END DO
    IF (NSUB_GEOMS.GT.0) THEN
       ALLOCATE(G%SUB_GEOMS(NSUB_GEOMS),STAT=IZERO)
@@ -255,8 +269,8 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
       ALLOCATE(G%DXYZ(3,NSUB_GEOMS),STAT=IZERO)
       CALL ChkMemErr('READ_GEOM','DXYZ',IZERO)
 
-      N_FACES=0 ! ignore vertex and face entries if there are any GEOM_IDS
-      N_VERTS=0
+      N_FACES = 0 ! ignore vertex and face entries if there are any GEOM_IDS
+      N_VERTS = 0
    ENDIF
    G%NSUB_GEOMS=NSUB_GEOMS
    
@@ -307,7 +321,7 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
    DO I = 1, NSUB_GEOMS
       GEOM_INDEX = GET_GEOM_ID(GEOM_IDS(I),N-1)
       IF (GEOM_INDEX.GE.1.AND.GEOM_INDEX.LE.N-1) THEN
-         G%SUB_GEOMS(I)=GEOM_INDEX
+         G%SUB_GEOMS(I) = GEOM_INDEX
       ELSE
          CALL SHUTDOWN('ERROR: problem with GEOM '//TRIM(G%ID)//' line, '//TRIM(GEOM_IDS(I))//' not yet defined.')
       ENDIF
@@ -315,19 +329,19 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
    
 ! use GROTATE/GAXIS or AZIM/ELEV but not both
 
-   IF(ANY(GAXIS(1:3).LT.MAX_COORD).OR.GROTATE.LT.MAX_COORD.OR.GROTATE_DOT.LT.MAX_COORD)THEN
-      IF(GAXIS(1).GT.MAX_COORD) GAXIS(1) = 0.0_EB
-      IF(GAXIS(2).GT.MAX_COORD) GAXIS(2) = 0.0_EB
-      IF(GAXIS(3).GT.MAX_COORD) GAXIS(3) = 0.0_EB
+   IF (ANY(GAXIS(1:3).LT.MAX_COORD).OR.GROTATE.LT.MAX_COORD.OR.GROTATE_DOT.LT.MAX_COORD) THEN
+      IF (GAXIS(1).GT.MAX_COORD) GAXIS(1) = 0.0_EB
+      IF (GAXIS(2).GT.MAX_COORD) GAXIS(2) = 0.0_EB
+      IF (GAXIS(3).GT.MAX_COORD) GAXIS(3) = 0.0_EB
       AZIM = 0.0_EB
       ELEV = 0.0_EB
       AZIM_DOT = 0.0_EB
       ELEV_DOT = 0.0_EB
       
-      IF(GROTATE.GT.MAX_COORD) GROTATE = 0.0_EB
-      IF(GROTATE_DOT.GT.MAX_COORD) GROTATE_DOT = 0.0_EB
+      IF (GROTATE.GT.MAX_COORD) GROTATE = 0.0_EB
+      IF (GROTATE_DOT.GT.MAX_COORD) GROTATE_DOT = 0.0_EB
       
-      IF(ALL(ABS(GAXIS(1:3)).LT.TWO_EPSILON_EB))THEN
+      IF (ALL(ABS(GAXIS(1:3)).LT.TWO_EPSILON_EB)) THEN
          GAXIS(1) = 0.0_EB
          GAXIS(2) = 0.0_EB
          GAXIS(3) = 1.0_EB
@@ -423,6 +437,119 @@ CALL CONVERTGEOM(.FALSE.,T_BEGIN) ! for now, only do the conversion for static g
                                   
 END SUBROUTINE READ_GEOM
 
+! ---------------------------- INIT_QUAD ----------------------------------------
+
+SUBROUTINE INIT_QUAD(NA,NB,XB,DIR,N_VERTS,N_FACES,VERT_OFFSET,FACE_OFFSET,QUAD_VERTS,QUAD_FACES)
+
+! for each side of a box, define a list of vertices and faces
+
+INTEGER, INTENT(IN) :: NA, NB, DIR, N_VERTS, N_FACES
+REAL(EB), INTENT(IN) :: XB(6)
+INTEGER, INTENT(INOUT) :: VERT_OFFSET, FACE_OFFSET
+REAL(EB), INTENT(OUT), DIMENSION(1:3*N_VERTS) :: QUAD_VERTS
+INTEGER, INTENT(OUT),  DIMENSION(1:3*N_FACES) :: QUAD_FACES
+
+INTEGER :: I, J, IJ
+INTEGER :: I11, I12, I21, I22
+
+! define vertices
+
+IJ = 1
+SELECT CASE(DIR)
+   CASE (1) ! xmin
+      DO J = 1, NB
+         DO I = 1, NA
+            QUAD_VERTS(3*VERT_OFFSET + IJ)   =  XB(1)
+            QUAD_VERTS(3*VERT_OFFSET + IJ+1) = (XB(4)*REAL(NA-I,EB) + XB(3)*REAL(I-1,EB))/REAL(NA-1,EB)
+            QUAD_VERTS(3*VERT_OFFSET + IJ+2) = (XB(5)*REAL(NB-J,EB) + XB(6)*REAL(J-1,EB))/REAL(NB-1,EB)
+            IJ = IJ + 3
+         END DO
+      END DO
+   CASE (2) ! xmax
+      DO J = 1, NB
+         DO I = 1, NA
+            QUAD_VERTS(3*VERT_OFFSET + IJ)   =  XB(2)
+            QUAD_VERTS(3*VERT_OFFSET + IJ+1) = (XB(3)*REAL(NA-I,EB) + XB(4)*REAL(I-1,EB))/REAL(NA-1,EB)
+            QUAD_VERTS(3*VERT_OFFSET + IJ+2) = (XB(5)*REAL(NB-J,EB) + XB(6)*REAL(J-1,EB))/REAL(NB-1,EB)
+            IJ = IJ + 3 
+         END DO
+      END DO
+   CASE (3) ! ymin
+      DO J = 1, NB
+         DO I = 1, NA
+            QUAD_VERTS(3*VERT_OFFSET + IJ)   = (XB(1)*REAL(NA-I,EB) + XB(2)*REAL(I-1,EB))/REAL(NA-1,EB)
+            QUAD_VERTS(3*VERT_OFFSET + IJ+1) = XB(3)
+            QUAD_VERTS(3*VERT_OFFSET + IJ+2) = (XB(5)*REAL(NB-J,EB) + XB(6)*REAL(J-1,EB))/REAL(NB-1,EB)
+            IJ = IJ + 3
+         END DO
+      END DO
+   CASE (4) ! ymax
+      DO J = 1, NB
+         DO I = 1, NA
+            QUAD_VERTS(3*VERT_OFFSET + IJ)   = (XB(2)*REAL(NA-I,EB) + XB(1)*REAL(I-1,EB))/REAL(NA-1,EB)
+            QUAD_VERTS(3*VERT_OFFSET + IJ+1) = XB(4)
+            QUAD_VERTS(3*VERT_OFFSET + IJ+2) = (XB(5)*REAL(NB-J,EB) + XB(6)*REAL(J-1,EB))/REAL(NB-1,EB)
+            IJ = IJ + 3
+         END DO
+      END DO
+   CASE (5) ! zmin
+      DO J = 1, NB
+         DO I = 1, NA
+            QUAD_VERTS(3*VERT_OFFSET + IJ)   = (XB(1)*REAL(NA-I,EB) + XB(2)*REAL(I-1,EB))/REAL(NA-1,EB)
+            QUAD_VERTS(3*VERT_OFFSET + IJ+1) = (XB(4)*REAL(NB-J,EB) + XB(3)*REAL(J-1,EB))/REAL(NB-1,EB)
+            QUAD_VERTS(3*VERT_OFFSET + IJ+2) = XB(5)
+            IJ = IJ + 3
+         END DO
+      END DO
+   CASE (6) ! zmax
+      DO J = 1, NB
+         DO I = 1, NA
+            QUAD_VERTS(3*VERT_OFFSET + IJ)   = (XB(1)*REAL(NA-I,EB) + XB(2)*REAL(I-1,EB))/REAL(NA-1,EB)
+            QUAD_VERTS(3*VERT_OFFSET + IJ+1) = (XB(3)*REAL(NB-J,EB) + XB(4)*REAL(J-1,EB))/REAL(NB-1,EB)
+            QUAD_VERTS(3*VERT_OFFSET + IJ+2) = XB(6)
+            IJ = IJ + 3
+         END DO
+      END DO
+END SELECT
+
+! define faces
+
+!  I21------I22
+!   |      /  |
+!   |    /    |
+!   |  /      |
+!  I11------I21
+
+! for each quad, form two triangular faces (vertices oriented counter clockwise)
+!   1) I11, I21, I22
+!   2) I11, I22, I21
+
+IJ = 1
+DO J = 1, NB-1
+   DO I = 1, NA-1
+      I11 = VERT_OFFSET + (J-1)*NA + I
+      I12 = I11 + 1
+      I21 = I11 + NA
+      I22 = I21 + 1
+      
+      QUAD_FACES(3*FACE_OFFSET + IJ  ) = I11
+      QUAD_FACES(3*FACE_OFFSET + IJ+1) = I12
+      QUAD_FACES(3*FACE_OFFSET + IJ+2) = I22
+
+      QUAD_FACES(3*FACE_OFFSET + IJ+3) = I11
+      QUAD_FACES(3*FACE_OFFSET + IJ+4) = I22
+      QUAD_FACES(3*FACE_OFFSET + IJ+5) = I21
+      IJ = IJ + 6
+   END DO
+END DO
+
+VERT_OFFSET = VERT_OFFSET + NA*NB
+FACE_OFFSET = FACE_OFFSET + (NA-1)*(NB-1)*2
+
+END SUBROUTINE INIT_QUAD
+
+! ---------------------------- INIT_SPHERE ----------------------------------------
+
 SUBROUTINE INIT_SPHERE(NLAT,NLONG,SPHERE_VERTS,SPHERE_FACES)
 INTEGER, INTENT(IN) :: NLAT, NLONG
 REAL(EB), INTENT(OUT), DIMENSION(3*NLAT*NLONG) :: SPHERE_VERTS
@@ -476,6 +603,8 @@ END DO
 
 END SUBROUTINE INIT_SPHERE
 
+! ---------------------------- GET_GEOM_ID ----------------------------------------
+
 INTEGER FUNCTION GET_GEOM_ID(ID,N_LAST)
 
 ! return the index of the geometry array with label ID
@@ -486,11 +615,11 @@ INTEGER, INTENT(IN) :: N_LAST
 INTEGER :: N
 TYPE(GEOMETRY_TYPE), POINTER :: G=>NULL()
    
-GET_GEOM_ID=0
+GET_GEOM_ID = 0
 DO N=1,N_LAST
    G=>GEOMETRY(N)
    IF (TRIM(G%ID)==TRIM(ID)) THEN
-      GET_GEOM_ID=N
+      GET_GEOM_ID = N
       RETURN
    ENDIF
 END DO
@@ -501,12 +630,14 @@ CHARACTER(30), INTENT(IN) :: ID
 INTEGER :: N
 
 DO N = 1, N_SURF
-   IF( TRIM(SURFACE(N)%ID) .NE. TRIM(ID) )CYCLE
+   IF ( TRIM(SURFACE(N)%ID) .NE. TRIM(ID) )CYCLE
    GET_SURF_INDEX = N
    RETURN
 END DO
 GET_SURF_INDEX = 0
 END FUNCTION GET_SURF_INDEX
+
+! ---------------------------- SETUP_TRANSFORM ----------------------------------------
 
 SUBROUTINE SETUP_TRANSFORM(SCALE,AZ,ELEV,GAXIS,GROTATE,M)
 
@@ -538,6 +669,8 @@ MTEMP2 = MATMUL(M2,MTEMP)
 M = MATMUL(M3,MTEMP2)
 END SUBROUTINE SETUP_TRANSFORM
 
+! ---------------------------- SETUP_ROTATE ----------------------------------------
+
 SUBROUTINE SETUP_ROTATE(ALPHA,U,M)
 
 ! construct a rotation matrix M that rotates a vector by
@@ -563,6 +696,8 @@ IDENTITY = RESHAPE ((/&
 M = UUT + COS(ALPHA*DEG2RAD)*(IDENTITY - UUT) + SIN(ALPHA*DEG2RAD)*S
 END SUBROUTINE SETUP_ROTATE
 
+! ---------------------------- TRANSLATE_VEC ----------------------------------------
+
 SUBROUTINE TRANSLATE_VEC(XYZ,N,XIN,XOUT)
 
 ! translate a geometry by the vector XYZ
@@ -580,6 +715,8 @@ DO I = 1, N
 END DO
 END SUBROUTINE TRANSLATE_VEC
 
+! ---------------------------- ROTATE_VEC ----------------------------------------
+
 SUBROUTINE ROTATE_VEC(M,N,XYZ0,XIN,XOUT)
 
 ! rotate the vector XIN about the origin XYZ0
@@ -596,6 +733,8 @@ DO I = 1, N
    XOUT(3*I-2:3*I) = VEC(1:3) + XYZ0(1:3)
 END DO
 END SUBROUTINE ROTATE_VEC
+
+! ---------------------------- PROCESS_GEOM ----------------------------------------
 
 SUBROUTINE PROCESS_GEOM(IS_DYNAMIC,TIME)
 
@@ -644,6 +783,8 @@ SUBROUTINE PROCESS_GEOM(IS_DYNAMIC,TIME)
    !CALL GEOM2TEXTURE  !not implemented yet
 END SUBROUTINE PROCESS_GEOM
 
+! ---------------------------- GEOM2TEXTURE ----------------------------------------
+
 SUBROUTINE GEOM2TEXTURE
    INTEGER :: I,J
    TYPE(GEOMETRY_TYPE), POINTER :: G=>NULL()
@@ -656,8 +797,8 @@ SUBROUTINE GEOM2TEXTURE
    DO I = 0, N_GEOMETRY
       G=>GEOMETRY(I)
       
-      IF(G%NSUB_GEOMS .NE. 0) CYCLE
-      IF(G%TEXTURE_MAPPING .EQ. 'RECTANGULAR') THEN
+      IF (G%NSUB_GEOMS .NE. 0) CYCLE
+      IF (G%TEXTURE_MAPPING .EQ. 'RECTANGULAR') THEN
          DO J = 1, G%N_VERTS
             SURF_INDEX = G%SURFS(J)
             SF=>SURFACE(SURF_INDEX)
@@ -685,6 +826,8 @@ SUBROUTINE GEOM2TEXTURE
       ENDIF
    END DO
 END SUBROUTINE GEOM2TEXTURE
+
+! ---------------------------- MERGE_GEOMS ----------------------------------------
 
 SUBROUTINE MERGE_GEOMS(VERTS,N_VERTS,FACES,SURF_IDS,N_FACES,IS_DYNAMIC)
 
@@ -724,6 +867,8 @@ DO I = 0, N_GEOMETRY
    OFFSET = OFFSET + G%N_VERTS
 END DO
 END SUBROUTINE MERGE_GEOMS
+
+! ---------------------------- EXPAND_GROUPS ----------------------------------------
 
 SUBROUTINE EXPAND_GROUPS(IGEOM)
 
@@ -791,14 +936,16 @@ DO J = 1, G%NSUB_GEOMS
    IVERT = IVERT + NSUB_VERTS
    IFACE = IFACE + NSUB_FACES
 END DO
-G%N_VERTS=IVERT
-G%N_FACES=IFACE
+G%N_VERTS = IVERT
+G%N_FACES = IFACE
 IF (G%HAS_SURF.AND.IFACE>0) THEN
    SURF_INDEX = GET_SURF_INDEX(G%SURF_ID)
    G%SURFS(1:G%N_FACES) = SURF_INDEX
 ENDIF
-IF(IVERT>0)G%VERTS(1:3*G%N_VERTS)=G%VERTS_BASE(1:3*G%N_VERTS)
+IF (IVERT>0) G%VERTS(1:3*G%N_VERTS) = G%VERTS_BASE(1:3*G%N_VERTS)
 END SUBROUTINE EXPAND_GROUPS
+
+! ---------------------------- CONVERTGEOM ----------------------------------------
 
 SUBROUTINE CONVERTGEOM(IS_DYNAMIC,TIME)
    REAL(EB), INTENT(IN) :: TIME
@@ -817,8 +964,8 @@ SUBROUTINE CONVERTGEOM(IS_DYNAMIC,TIME)
 
    CALL PROCESS_GEOM(IS_DYNAMIC,TIME)  ! scale, rotate, translate GEOM vertices 
 
-   N_VERTS=0
-   N_FACES=0
+   N_VERTS = 0
+   N_FACES = 0
    DO I = 0, N_GEOMETRY ! count vertices and faces
       G=>GEOMETRY(I)
       
@@ -907,6 +1054,8 @@ SUBROUTINE CONVERTGEOM(IS_DYNAMIC,TIME)
    ENDIF
 END SUBROUTINE CONVERTGEOM
 
+! ---------------------------- OUTGEOM ----------------------------------------
+
 SUBROUTINE OUTGEOM(LUNIT,IS_DYNAMIC,TIME)
    INTEGER, INTENT(IN) :: LUNIT
    REAL(EB), INTENT(IN) :: TIME
@@ -923,8 +1072,8 @@ SUBROUTINE OUTGEOM(LUNIT,IS_DYNAMIC,TIME)
 
    CALL PROCESS_GEOM(IS_DYNAMIC,TIME)  ! scale, rotate, translate GEOM vertices 
 
-   N_VERTS=0
-   N_FACES=0
+   N_VERTS = 0
+   N_FACES = 0
    DO I = 0, N_GEOMETRY ! count vertices and faces
       G=>GEOMETRY(I)
       
@@ -963,6 +1112,8 @@ SUBROUTINE OUTGEOM(LUNIT,IS_DYNAMIC,TIME)
    ENDIF
 END SUBROUTINE OUTGEOM
 
+! ---------------------------- WRITE_GEOM_ALL ----------------------------------------
+
 SUBROUTINE WRITE_GEOM_ALL
 INTEGER :: I
 REAL(EB) :: STIME
@@ -973,6 +1124,8 @@ DO I = 1, NFRAMES
    CALL WRITE_GEOM(STIME)
 END DO
 END SUBROUTINE WRITE_GEOM_ALL
+
+! ---------------------------- WRITE_GEOM ----------------------------------------
 
 SUBROUTINE WRITE_GEOM(TIME)
 
