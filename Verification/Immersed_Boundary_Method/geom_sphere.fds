@@ -17,8 +17,6 @@
 &VENT XB=-1.0, 1.0,-1.0, 1.0, 1.0,1.0,SURF_ID='OPEN' /
 
 &SURF ID='surf1',RGB=255,0,0 /
-&SURF ID='surf2',RGB=0,255,0 /
-&SURF ID='surf3',RGB=0,0,255 /
 
 &GEOM ID='sphere',SURF_ID='surf1',SPHERE_RADIUS=0.5,SPHERE_ORIGIN=0.0,0.0,0.0 /
 
