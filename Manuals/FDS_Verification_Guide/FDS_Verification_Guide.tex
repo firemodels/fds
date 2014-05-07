@@ -1579,14 +1579,14 @@ Propane is injected into a 4~m cube with 1~m$^2$ vents on all six faces.  The ma
 \subsubsection{Case 2: Air Injection into a Pressurized Compartment}
 
  Air is injected into one of two cubic chambers separated by a solid partition.  The mass flux of air is 1~kg/(m$^2\cdot$s) through a vent that is 0.04~m$^2$ in area. After 25~s, the mass of air introduced should be 1~kg. The accumulation of air in the chamber is shown in Fig.~\ref{species_conservation}.
- 
+
  \subsubsection{Case 3: Gases Released by Solid Phase Reactions within a Solid Obstruction}
 
  A 0.2~m solid cube undergoes a reaction that releases four different gases into a sealed unit cube. The solid has a density of 100~kg/m$^3$. The inert gases have different yields, all summing to one, meaning that the solid cube ought to be vaporized creating a total mass of 0.8~kg. The accumulation of all the gases in the chamber is shown in Fig.~\ref{species_conservation}. Note that in this case, when the solid cube vaporizes, its volume is filled with the background species, nitrogen. The total mass of the newly created nitrogen is 0.0093~kg.
- 
+
  \subsubsection{Case 4: Gases Released by Solid Phase Reactions at the Boundary of the Domain}
 
- This case is similar to Case~3. A 0.2~m by 0.2~m solid surface undergoes a reaction that releases four different gases into a sealed unit cube. The solid has a density of 100~kg/m$^3$ and thickness of 0.1~m. The inert gases have different yields, all summing to one, meaning that the solid surface ought to be vaporized creating a total mass of 0.4~kg. The accumulation of all the gases in the chamber is shown in Fig.~\ref{species_conservation}. 
+ This case is similar to Case~3. A 0.2~m by 0.2~m solid surface undergoes a reaction that releases four different gases into a sealed unit cube. The solid has a density of 100~kg/m$^3$ and thickness of 0.1~m. The inert gases have different yields, all summing to one, meaning that the solid surface ought to be vaporized creating a total mass of 0.4~kg. The accumulation of all the gases in the chamber is shown in Fig.~\ref{species_conservation}.
 
 
 \begin{figure}[h]
@@ -1594,7 +1594,7 @@ Propane is injected into a 4~m cube with 1~m$^2$ vents on all six faces.  The ma
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/species_conservation_1} &
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/species_conservation_2} \\
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/species_conservation_3} &
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/species_conservation_4} 
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/species_conservation_4}
 \end{tabular*}
 \caption[The \textct{species\_conservation} test cases]{Results of the \textct{species\_conservation} test cases. Case~1: Hot gas is injected at a very low flow rate into a 4~m cube. Case~2: Air is injected into one side of a partitioned compartment. Case~3: A solid cube vaporizes yielding four gases whose total mass is 0.8~kg. A small amount of nitrogen is created to fill the void left by the vaporized solid cube. Case~4: A patch of solid surface reacts to form four gases whose total mass is 0.4~kg.}
 \label{species_conservation}
@@ -2032,7 +2032,7 @@ By setting $T_0=0$~\si{\degree C}, $\Delta t =0.01$~s, $m =0.01$~kg, and $c_p =1
 \section{Radiation Absorbed by Solid Particles (\texorpdfstring{\textct{particle\_absorption}}{particle\_absorption}) }
 \label{particle_absorption}
 
-Tests similar to those in Section~\ref{droplet_absorption} are performed for solid particles with Cartesian, cylindrical and spherical shapes. All the properties are the same, except the particle mass ($m_{\rm cart} = 6.26\times 10^{-4}$~kg, $m_{\rm cyl} = 1.96\times 10^{-3}$~kg, $m_{\rm sph} = 6.54\times 10^{-4}$~kg). It is also necessary to define a high thermal conductivity $k = 1\times 10^{9}$~W/(m$\cdot$K) because the particles are not assumed to be thermally-thin like liquid droplets. Figure~\ref{droplet_absorption_surface_figures} shows comparisons of the predicted average droplet temperature and the expected value. By default, the radiation is expressed in terms of an integrated average (0 angles), but there is an option to ``split'' the particles into multiple parts that absorb radiation impinging from different directions. In this case, radiation is split into opposite $x$, $y$ and $z$ directions (except for Cartesian particles; it is only in the $z$ direction).
+Tests similar to those in Section~\ref{droplet_absorption} are performed for solid particles with Cartesian (flat plate), cylindrical and spherical geometries. All the relevant properties are the same, along with a high thermal conductivity, 100~W/(m$\cdot$K), because the particles are not assumed to be thermally-thin like liquid droplets. Figure~\ref{particle_absorption_figures} shows comparisons of the predicted and expected particle temperatures. By default, the radiation is expressed in terms of an integrated average (0 angles), but there is an option to ``split'' the particles into multiple parts that absorb radiation impinging from different directions. In this case, radiation is split into opposite $x$, $y$ and $z$ directions (except for Cartesian particles which are only split in the $z$ direction).
 
 \begin{figure}[h]
 \noindent
@@ -2042,7 +2042,7 @@ Tests similar to those in Section~\ref{droplet_absorption} are performed for sol
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/particle_absorption_cart_surf_sph}
 \end{tabular*}
 \caption[Radiation absorbed by solid particles]{Temperature increase of solid particles due to absorbed radiation.}
-\label{droplet_absorption_surface_figures}
+\label{particle_absorption_figures}
 \end{figure}
 
 \clearpage
