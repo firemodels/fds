@@ -25,9 +25,8 @@ then
   echo ""
   echo " -b use debug version"
   echo " -d directory [default: .]"
-  echo " -n processes per node - maximum number of processes per node [default: "
+  echo " -n processes per node - maximum number of processes per node [default: 1]"
   echo "    (serial: 1, parallel: 8 for new cluster and fire70s, 4 for the vis queues)"
-  echo " -n processes per node"
   echo " -o nthreads - run OpenMP version of FDS with a specified number of threads [default: 8]"
   echo " -p nprocesses - number of processes used to run a case [default: 1] "
   echo " -q queue - name of the queue. choices: [default: $queue (other choices:"  
@@ -198,6 +197,9 @@ nnodes=$(echo "($nprocesses-1)/$nprocesses_per_node+1" | bc)
 if test $nnodes -le 0
 then
   nnodes=1
+elif test $nnodes -gt 32
+then
+  nnodes=32
 fi
 
 cd $dir
