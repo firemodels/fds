@@ -32,12 +32,6 @@ echo "-y - overwrite existing files"
 exit
 }
 
-# for openmp validation
-OPENMP="-o 1"
-
-# for non-openmp validation
-#OPENMP=
-
 DEBUG=$OPENMP
 while getopts 'dho:q:sxy' OPTION
 do
