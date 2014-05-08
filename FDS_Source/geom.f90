@@ -2754,6 +2754,13 @@ ENDDO EDGE_LOOP
 ! For more than 3 intersection points
 ! they have to be sorted in order to create a convex polygon
 CALL ELIMATE_REPEATED_POINTS(NP,PC_TMP)
+IF ( NP > 6) THEN
+   WRITE(LU_OUTPUT,*)"*** Triangle box intersections"
+   DO I = 1, NP
+      WRITE(LU_OUTPUT,*)I,PC_TMP(3*I-2),PC_TMP(3*I-1),PC_TMP(3*I)
+   END DO
+   CALL SHUTDOWN("ERROR: more than 6 triangle box intersections")
+ENDIF
 IF (NP > 3) THEN 
    CALL SORT_POLYGON_CORNERS(NP,V1,V2,V3,PC_TMP)
 ENDIF
@@ -2959,7 +2966,6 @@ IMPLICIT NONE
 INTEGER, INTENT(INOUT):: NP
 REAL(EB), INTENT(INOUT) :: PC(60)
 INTEGER :: NP2,I,J,K
-REAL(EB), PARAMETER :: EPS=1.E-16_EB
 REAL(EB) :: U(3),V(3),W(3)
 
 I = 1
@@ -2975,7 +2981,10 @@ DO WHILE (I <= NP-1)
          V(K) = PC(3*(J-1)+K)
       ENDDO
       W = U-V
-      IF (NORM2(W) <= EPS) THEN
+      ! use hybrid comparison test
+      !    absolute for small values
+      !    relative for large values
+      IF (NORM2(W) <= MAX(1.0_EB,NORM2(U),NORM2(V))*TWO_EPSILON_EB) THEN
          DO K=3*J+1,3*NP
             PC(K-3) = PC(K)
          ENDDO
