@@ -1,8 +1,8 @@
 #!/bin/bash
 
-#$RUNFDS Immersed_Boundary_Method geom_azim
-#$RUNFDS Immersed_Boundary_Method geom_elev
-#$RUNFDS Immersed_Boundary_Method geom_scale
+$RUNFDS Immersed_Boundary_Method geom_azim
+$RUNFDS Immersed_Boundary_Method geom_elev
+$RUNFDS Immersed_Boundary_Method geom_scale
 
 $RUNFDS Visualization cell_test
 $RUNCFAST Visualization cfast_test
