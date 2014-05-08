@@ -761,6 +761,13 @@ check_verification_cases_release()
       grep ERROR: -rI * $SEARCHLIST >> $OUTPUT_DIR/stage5_errors
       grep 'STOP: Numerical' -rI $SEARCHLIST >> $OUTPUT_DIR/stage5_errors
       grep -A 20 forrtl -rI * $SEARCHLIST >> $OUTPUT_DIR/stage5_errors
+
+      echo "Errors from Stage 5 - Run verification cases (release mode):" >> $ERROR_LOG
+      cat $OUTPUT_DIR/stage5_errors >> $ERROR_LOG
+      echo "" >> $ERROR_LOG
+      THIS_FDS_FAILED=1
+   fi
+
       
    if [[ `grep 'Warning' -rI $OUTPUT_DIR/stage5` == "" ]] 
    then
