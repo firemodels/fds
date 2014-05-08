@@ -510,21 +510,22 @@ run_verification_cases_debug()
 check_verification_cases_debug()
 {
    # Scan and report any errors in FDS verification cases
-   cd $FDS_SVNROOT/Verification/Visualization
+   cd $FDS_SVNROOT/Verification
 
+   SEARCHLIST=Visualization/\*\ WUI/\*\ Immersed_Boundary_Method/\*
    if [[ `grep 'Run aborted' -rI $OUTPUT_DIR/stage3` == "" ]] && \
-      [[ `grep Segmentation -rI * ../WUI/*` == "" ]] && \
-      [[ `grep ERROR: -rI * ../WUI/*` == "" ]] && \
-      [[ `grep 'STOP: Numerical' -rI * ../WUI/*` == "" ]] && \
-      [[ `grep -A 20 forrtl -rI * ../WUI/*` == "" ]]
+      [[ `grep Segmentation -rI $SEARCHLIST` == "" ]] && \
+      [[ `grep ERROR: -rI * $SEARCHLIST` == "" ]] && \
+      [[ `grep 'STOP: Numerical' -rI $SEARCHLIST` == "" ]] && \
+      [[ `grep -A 20 forrtl -rI $SEARCHLIST` == "" ]]
    then
       stage3_success=true
    else
       grep 'Run aborted' -rI $OUTPUT_DIR/stage3 > $OUTPUT_DIR/stage3_errors
-      grep Segmentation -rI * ../WUI/* >> $OUTPUT_DIR/stage3_errors
-      grep ERROR: -rI * ../WUI/* >> $OUTPUT_DIR/stage3_errors
-      grep 'STOP: Numerical' -rI * ../WUI/* >> $OUTPUT_DIR/stage3_errors
-      grep -A 20 forrtl -rI * ../WUI/* >> $OUTPUT_DIR/stage3_errors
+      grep Segmentation -rI $SEARCHLIST >> $OUTPUT_DIR/stage3_errors
+      grep ERROR: -rI $SEARCHLIST >> $OUTPUT_DIR/stage3_errors
+      grep 'STOP: Numerical' -rI $SEARCHLIST >> $OUTPUT_DIR/stage3_errors
+      grep -A 20 forrtl -rI $SEARCHLIST >> $OUTPUT_DIR/stage3_errors
       
       echo "Errors from Stage 3 - Run verification cases (debug mode):" >> $ERROR_LOG
       cat $OUTPUT_DIR/stage3_errors >> $ERROR_LOG
@@ -746,25 +747,21 @@ check_verification_cases_release()
    # Scan and report any errors in FDS verification cases
    cd $FDS_SVNROOT/Verification
 
+   SEARCHLIST=Visualization/\*\ WUI/\*\ Immersed_Boundary_Method/\*
    if [[ `grep 'Run aborted' -rI $OUTPUT_DIR/stage5` == "" ]] && \
-      [[ `grep Segmentation -rI *` == "" ]] && \
-      [[ `grep ERROR: -rI *` == "" ]] && \
-      [[ `grep 'STOP: Numerical' -rI *` == "" ]] && \
-      [[ `grep -A 20 forrtl -rI *` == "" ]]
+      [[ `grep Segmentation -rI $SEARCHLIST ` == "" ]] && \
+      [[ `grep ERROR: -rI $SEARCHLIST ` == "" ]] && \
+      [[ `grep 'STOP: Numerical' -rI $SEARCHLIST ` == "" ]] && \
+      [[ `grep -A 20 forrtl -rI $SEARCHLIST ` == "" ]]
    then
       stage5_success=true
    else
       grep 'Run aborted' -rI $OUTPUT_DIR/stage5 > $OUTPUT_DIR/stage5_errors
-      grep Segmentation -rI * >> $OUTPUT_DIR/stage5_errors
-      grep ERROR: -rI * >> $OUTPUT_DIR/stage5_errors
-      grep 'STOP: Numerical' -rI * >> $OUTPUT_DIR/stage5_errors
-      grep -A 20 forrtl -rI * >> $OUTPUT_DIR/stage5_errors
+      grep Segmentation -rI * $SEARCHLIST >> $OUTPUT_DIR/stage5_errors
+      grep ERROR: -rI * $SEARCHLIST >> $OUTPUT_DIR/stage5_errors
+      grep 'STOP: Numerical' -rI $SEARCHLIST >> $OUTPUT_DIR/stage5_errors
+      grep -A 20 forrtl -rI * $SEARCHLIST >> $OUTPUT_DIR/stage5_errors
       
-      echo "Errors from Stage 5 - Run verification cases (release mode):" >> $ERROR_LOG
-      cat $OUTPUT_DIR/stage5_errors >> $ERROR_LOG
-      echo "" >> $ERROR_LOG
-      THIS_FDS_FAILED=1
-   fi
    if [[ `grep 'Warning' -rI $OUTPUT_DIR/stage5` == "" ]] 
    then
       no_warnings=true
