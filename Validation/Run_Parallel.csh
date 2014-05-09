@@ -35,6 +35,10 @@ cd NIST_RSE_1994
 mkdir Current_Results
 ./Run_All.sh
 cd ..
+cd Purdue_Flames
+mkdir Current_Results
+./Run_All.sh
+cd ..
 cd Sandia_Plumes
 mkdir Current_Results
 ./Run_All.sh
