@@ -8,6 +8,7 @@
 \label{info:GEOM}
 \subsection{Defining Objects}
 
+\subsubsection{General Objects}
 Unstructured geometric solids are defined using the {\tt \&GEOM}\ namelist.
 These solids consist of a collection of triangular faces where each face consists of three vertices.
 A simple form of the {\tt \&GEOM}\ namelist defining one triangular face is given by
@@ -21,9 +22,10 @@ A simple form of the {\tt \&GEOM}\ namelist defining one triangular face is give
 
 \noindent where {\tt ID}\ specifies the object name, in this case {\tt triangle},
 {\tt VERTS}\ specifies a list of one or more $(x,y,z)$ coordinates and {\tt FACES}\ specifies a list of vertices, 3 vertex indices for each
-face. Each index ranges from 1 to the number of vertices found on this {\tt \&GEOM}\ line.  
+face. Each index ranges from 1 to the number of vertices found on this {\tt \&GEOM}\ line.
 
-One may also define blocks using {\tt XB} and spheres using {\tt SPHERE\_ORIGIN}\ and {\tt SPHERE\_RADIUS}.  
+\subsubsection{Blocks}
+One may also define blocks using {\tt XB} and spheres using {\tt SPHERE\_ORIGIN}\ and {\tt SPHERE\_RADIUS}.
 FDS generate vertices and faces that represent these objects.
 A {\tt \&GEOM}\ namelist defining a block is given by
 
@@ -32,13 +34,15 @@ A {\tt \&GEOM}\ namelist defining a block is given by
       XB=0.0,1.0,0.0,1.0,0.0,1.0 /
 \end{verbatim}
 
-\noindent where {\tt XB=xmin,xmax,ymin,ymax,zmin,zmax} defines the min and max bounds of the block.  
-The {\tt XB}\ parameter is used in the same way as on an {\tt \&OBST}\ or {\tt \&VENT}\ line.  
+\noindent where {\tt XB=xmin,xmax,ymin,ymax,zmin,zmax} defines the min and max bounds of the block.
+The {\tt XB}\ parameter is used in the same way as on an {\tt \&OBST}\ or {\tt \&VENT}\ line.
 A block may be discretized by
-specifying {\tt NX}, {\tt NY} and/or {\tt NZ} parameters.  For example, {\tt NX=4} would split the block 
-into 4 parts along the $x$ direction. By default, blocks are discretized
+specifying a {\tt IJK} parameter.  For example, {\tt IJK=8,6,4} would split the block
+into 8 parts along the $x$ direction, 6 parts along the $y$ direction and 4 parts along 
+the $z$ direction. By default, blocks are discretized
 so that the block faces are consistent in size with the grid resolution.
 
+\subsubsection{Spheres}
 A {\tt \&GEOM}\ namelist defining a sphere centered at $(0,0,0)$ with radius $1$ is given by
 
 \begin{verbatim}
@@ -46,13 +50,34 @@ A {\tt \&GEOM}\ namelist defining a sphere centered at $(0,0,0)$ with radius $1$
       SPHERE_ORIGIN=0.0,0.0,0.0,SPHERE_RADIUS=1.0 /
 \end{verbatim}
 
-Similar to blocks, spheres may be discretized by
+\noindent Similar to blocks, spheres may be discretized by
 specifying {\tt NLAT} and/or {\tt NLONG} parameters.  {\tt NLONG=6} would split the sphere
 into 6 parts around the longitudinal direction. Like blocks, spheres are discretized by default
 so that individual faces are consistent in size with the grid resolution.
 
+\subsubsection{2D Surfaces}
+A {\tt \&GEOM}\ namelist defining a 2D surface is given by
+
+\begin{verbatim}
+&GEOM ID='terrain'
+      IJK=ivals,jvals,XB=xmin,xmax,ymin,ymax,ZVALS=..... /
+\end{verbatim}
+
+\noindent where {\tt XB}\ defines a rectangular region xmin, xmax, ymin and ymax.
+{\tt IJK}\ specifies how many vertices occur in this region. 
+In this example {\tt ivals}\ values occur along the x direction and {\tt jval}\ values occur along the y direction. 
+The {\tt ZVALS} keyword is used to specify elevations at each $(x,y)$ location.
+The elevation data specified after the {\tt ZVALS}\ keyword is arranged in row major order.
+The first row contains {\tt ivals} elevation values occurring at the the ymax position from xmin to xmax.  
+Similarly, the last row contains
+{\tt ivals}\ elevation values for the ymin position again from xmin to xmax.
+There are then {\tt jvals}\ rows and {\tt ivals}\ columns of elevation data.
+As with the blocks and spheres, FDS uses the information
+provided by these keywords to construct  
+vertices and triangular faces.
+
 \subsection{Transforming Objects}
-An object may be transformed.  
+An object may be transformed.
 It  may be translated using {\tt XYZ}, scaled using {\tt SCALE} and rotated about {\tt XYZ0}\ using {\tt AZIM}\ and/or {\tt ELEV}.
 For example, in the following {\tt \&GEOM}\ namelist,
 
@@ -78,7 +103,7 @@ An object may be flipped by using a negative scale factor.
 An object is rotated using {\tt AZIM=az}\ and {\tt ELEV=elev}.
 {\tt AZIM}\ is used to specify an azimuthal rotation angle about a vertical (z) axis centered at an origin defined by {\tt XYZ0}.
 {\tt ELEV}\ specifies a rotation angle relative to a horizontal plane again containing an origin defined by {\tt XYZ0}..
-An object may also be rotated about an arbitrary axis.  
+An object may also be rotated about an arbitrary axis.
 {\tt GAXIS} is used to specify this axis.
 {\tt GROTATE}\ is used to specify the amount of rotation about this axis.
 All rotation angles are specified in degrees.
@@ -116,7 +141,7 @@ One may scale, rotate and translate objects as they are placed in the group usin
 
 The {\tt DXYZ0}\ and {\tt DXYZ}\ keywords use two coordinates (array indices) to specify data.
 The first coordinate specifies the spatial component (1 for x, 2 for y, 3 for z or 1:3 for all three).
-The second coordinate specifies the object number according to its position in the {\tt GEOM\_IDS}\ array. 
+The second coordinate specifies the object number according to its position in the {\tt GEOM\_IDS}\ array.
 For example,
 DXYZ(1,3) would specify the translation along the x direction for the third object in the {\tt GEOM\_IDS}\ array.
 
@@ -124,7 +149,7 @@ The {\tt COMPONENT\_ONLY}\ keyword if .TRUE., indicates that the object being de
 It will not appear by itself in the FDS model.
 
 \subsection{Dynamic Objects}
-An object's position and orientation may change with time. 
+An object's position and orientation may change with time.
 These changes are specified using various keywords that end with {\tt \_DOT}.
 See Table \ref{tbl:GEOM} for a complete list of these keywords.
 In the following example, {\tt AZIM\_DOT} is used to vary the azimuthal rotation angle by 1 deg/s.
@@ -166,11 +191,9 @@ For example, {\tt XYZ\_DOT=0.0,0.0,1.0}\ would cause an object to move 1~m/s in 
 {\ct GROTATE\_DOT}  & Real Triplet           & Section~\ref{info:GEOM}            & deg/s    &    0.0                   \\ \hline
 {\ct GEOM\_IDS}    & Real                   & Section~\ref{info:GEOM}            &           &                          \\ \hline
 {\ct ID}           & Character              & Section~\ref{info:GEOM}            &           &   {\ct 'geom'}           \\ \hline
+{\ct IJK}          & Integer Triplet        & Section~\ref{info:GEOM}            &           &   0,0,0                  \\ \hline
 {\ct NLAT}         & Integer                & Section~\ref{info:GEOM}            &           &                          \\ \hline
 {\ct NLONG}        & Integer                & Section~\ref{info:GEOM}            &           &                          \\ \hline
-{\ct NX}           & Integer                & Section~\ref{info:GEOM}            &           &                          \\ \hline
-{\ct NY}           & Integer                & Section~\ref{info:GEOM}            &           &                          \\ \hline
-{\ct NZ}           & Integer                & Section~\ref{info:GEOM}            &           &                          \\ \hline
 {\ct SCALE}        & Real Triplet           & Section~\ref{info:GEOM}            &           &   1.0,1.0,1.0            \\ \hline
 {\ct SCALE\_DOT}   & Real Triplet           & Section~\ref{info:GEOM}            &  1/s      &   1.0                    \\ \hline
 {\ct SPHERE\_ORIGIN}& Real Triplet           & Section~\ref{info:GEOM}            &   m       &  0.0,0.0,0.0            \\ \hline
