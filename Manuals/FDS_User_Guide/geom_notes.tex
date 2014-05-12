@@ -273,8 +273,9 @@ ENDIF
 \end{itemize}
 
 \section{Some Notes on Geometry Implementation}
-Most likely these implementation notes will not appear as is in an FDS or Smokeview technical manual. They are written down here to help verify various geometric algorithms coded in FDS and Smokeview.
+These implementation notes will not appear as is in an FDS or Smokeview technical manual. They are written down here to help verify various geometric algorithms coded in FDS and Smokeview.
 
+\subsection{Spheres}
 Icosahedron vertex locations
 \begin{eqnarray*}
 v_1&=&(0,0,1)\\
@@ -293,7 +294,7 @@ V_0&=&12\\
 F_0&=&20\\
 E_0&=&30\\
 \end{eqnarray*}
-Recursion formulas for relating the number of vertices, faces and edges at the $n+1$'st refinement step given the number at the $n$'th refinement step.
+Recursion formulas for relating the number of vertices, faces and edges at the $n+1$'st refinement step given the corresponding number at the $n$'th refinement step.
 \begin{eqnarray}
 \label{eq:recursion1}
 V_{n+1}&=&V_n+E_n\\
@@ -339,8 +340,8 @@ n& V&F&E\\
 \label{table:refinement}
 \end{table}
 
-Table \ref{table:facelist} gives the list of vertices for each face in 
-an icosahedron where the vertices are numbered as given  in 
+Table \ref{table:facelist} gives the list of vertices for each face in
+an icosahedron where the vertices are numbered as given  in
 Figure \ref{figure:facelist}.
 \begin{table}
 \caption{Vertex list for each Icosahedron face}
@@ -364,6 +365,9 @@ Figure \ref{figure:facelist}.
 \caption{Schematic of icosahedron vertex locations for defining face lists}
 \label{figure:facelist}
 \end{figure}
+
+\subsection{Boxes}
+\subsection{2D Surfaces}
 
 \end{document}
 
