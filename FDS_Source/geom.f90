@@ -161,9 +161,7 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
    DXYZ0 = 0.0_EB
    DXYZ = 0.0_EB
    
-   GAXIS(1) = 1.001_EB*MAX_VAL
-   GAXIS(2) = 1.001_EB*MAX_VAL
-   GAXIS(3) = 1.001_EB*MAX_VAL
+   GAXIS(1:3) = 1.001_EB*MAX_VAL
    GROTATE = 1.001_EB*MAX_VAL
    GROTATE_DOT = 1.001_EB*MAX_VAL
    
@@ -422,16 +420,12 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
       IF (GROTATE_DOT.GT.MAX_VAL) GROTATE_DOT = 0.0_EB
       
       IF (ALL(ABS(GAXIS(1:3)).LT.TWO_EPSILON_EB)) THEN
-         GAXIS(1) = 0.0_EB
-         GAXIS(2) = 0.0_EB
-         GAXIS(3) = 1.0_EB
+         GAXIS(1:3) = (/0.0_EB,0.0_EB,1.0_EB/)
       ELSE
          GAXIS = GAXIS/SQRT(DOT_PRODUCT(GAXIS,GAXIS))
       ENDIF
    ELSE
-      GAXIS(1) = 0.0_EB
-      GAXIS(2) = 0.0_EB
-      GAXIS(3) = 1.0_EB
+      GAXIS(1:3) = (/0.0_EB,0.0_EB,1.0_EB/)
       GROTATE = 0.0_EB
       GROTATE_DOT = 0.0_EB
    ENDIF
@@ -690,10 +684,10 @@ INTEGER :: I,IFACE
 INTEGER, DIMENSION(60) :: FACE_LIST
 
 DATA (FACE_LIST(I),I=1,60) /&
-  1,2,3,   1, 3,4,  1, 4, 5,   1, 5, 6,   1, 6,2,  &
-  2,7,3,   3, 7,8,  3, 8, 4,   4, 8, 9,   4, 9,5,  &
-  5,9,10,  5,10,6,  6,10,11,   6,11, 2,   2,11,7,  &
-  7,12,8,  8,12,9,  9,12,10,  10,12,11,  11,12,7   &
+   1, 2,3,  1, 3, 4,  1, 4,5,  1, 5, 6,   1, 6, 2,  &
+   2,11,7,  2, 7, 3,  3, 7,8,  3, 8, 4,   4, 8, 9,  & 
+   4, 9,5,  5, 9,10,  5,10,6,  6,10,11,   6,11, 2,     &
+  11,12,7,  7,12, 8,  8,12,9,  9,12,10,  10,12,11   &
   /
 
   ! initial approximation to the sphere is a regular icosahedron
@@ -986,11 +980,11 @@ END SUBROUTINE PROCESS_GEOM
 ! ---------------------------- GEOM2TEXTURE ----------------------------------------
 
 SUBROUTINE GEOM2TEXTURE
-   INTEGER :: I,J
+   INTEGER :: I,J,K,JJ
    TYPE(GEOMETRY_TYPE), POINTER :: G=>NULL()
    REAL(EB), POINTER, DIMENSION(:) :: XYZ, TXYZ
+   INTEGER, POINTER, DIMENSION(:) :: FACES
    REAL(EB) :: DXYZ(3), AZ, ELEV, XYNORM
-   REAL, PARAMETER :: PI=4.0*ATAN(1.0_EB)
    INTEGER :: SURF_INDEX
    TYPE(SURFACE_TYPE), POINTER :: SF=>NULL()
    
@@ -999,29 +993,37 @@ SUBROUTINE GEOM2TEXTURE
       
       IF (G%NSUB_GEOMS .NE. 0) CYCLE
       IF (G%TEXTURE_MAPPING .EQ. 'RECTANGULAR') THEN
-         DO J = 1, G%N_VERTS
+         DO J = 1, G%N_FACES
             SURF_INDEX = G%SURFS(J)
             SF=>SURFACE(SURF_INDEX)
             IF (TRIM(SF%TEXTURE_MAP).EQ.'null') CYCLE
+            FACES(1:3)=>G%FACES(3*J-2:3*J)
+            DO K = 1, 3
+               JJ = FACES(K)
             
-            XYZ(1:3) => G%VERTS(3*J-2:3*J)
-            TXYZ(1:2) => G%TVERTS(2*J-1:2*J)
-            TXYZ(1:2) = (XYZ(1:2) - G%TEXTURE_ORIGIN(1:2))/G%TEXTURE_SCALE(1:2)
+               XYZ(1:3) => G%VERTS(3*JJ-2:3*JJ)
+               TXYZ(1:2) => G%TVERTS(2*JJ-1:2*JJ)
+               TXYZ(1:2) = (XYZ(1:2) - G%TEXTURE_ORIGIN(1:2))/G%TEXTURE_SCALE(1:2)
+            END DO
          END DO
       ELSE
-         DO J = 1, G%N_VERTS
+         DO J = 1, G%N_FACES
             SURF_INDEX = G%SURFS(J)
             SF=>SURFACE(SURF_INDEX)
             IF (TRIM(SF%TEXTURE_MAP).EQ.'null') CYCLE
+            FACES(1:3)=>G%FACES(3*J-2:3*J)
+            DO K = 1, 3
+               JJ = FACES(K)
             
-            XYZ(1:3) => G%VERTS(3*J-2:3*J)
-            TXYZ(1:2) => G%TVERTS(2*J-1:2*J)
-            DXYZ = XYZ - G%TEXTURE_ORIGIN
-            XYNORM = SQRT(DXYZ(1)*DXYZ(1)+DXYZ(2)*DXYZ(2))
-            AZ = ATAN2(DXYZ(2),DXYZ(1))  ! ranges from -PI to +PI
-            ELEV = ATAN2(DXYZ(3),XYNORM) ! ranges from -PI/2 to +PI/2 (since XYNORM>=0)
-            TXYZ(1) = (AZ + PI)/(2.0_EB*PI) ! scale from (-PI,PI) to (0.0,1.0)
-            TXYZ(2) = (ELEV + PI/2.0_EB)/PI ! scale from (-PI/2,PI/2) to (0.0,1.0)
+               XYZ(1:3) => G%VERTS(3*JJ-2:3*JJ)
+               TXYZ(1:2) => G%TVERTS(2*JJ-1:2*JJ)
+               DXYZ = XYZ - G%TEXTURE_ORIGIN
+               XYNORM = SQRT(DXYZ(1)*DXYZ(1)+DXYZ(2)*DXYZ(2))
+                 AZ = ATAN2(DXYZ(2),DXYZ(1))  ! ranges from -PI to +PI
+               ELEV = ATAN2(DXYZ(3),XYNORM) ! ranges from -PI/2 to +PI/2 (since XYNORM>=0)
+               TXYZ(1) = (AZ + PI)/(2.0_EB*PI) ! scale from (-PI,PI) to (0.0,1.0)
+               TXYZ(2) = (ELEV + PI/2.0_EB)/PI ! scale from (-PI/2,PI/2) to (0.0,1.0)
+            END DO
          END DO
       ENDIF
    END DO
