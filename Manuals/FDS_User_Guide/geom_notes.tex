@@ -24,9 +24,11 @@ A simple form of the {\tt \&GEOM}\ namelist defining one triangular face is give
 {\tt VERTS}\ specifies a list of one or more $(x,y,z)$ coordinates and {\tt FACES}\ specifies a list of vertices, 3 vertex indices for each
 face. Each index ranges from 1 to the number of vertices found on this {\tt \&GEOM}\ line.
 
+One may also define particular kinds of geometric objects,  blocks using {\tt XB}, spheres using {\tt SPHERE\_ORIGIN}\ and {\tt SPHERE\_RADIUS}
+and a 2D surface using {\tt ZVALS}.
+FDS generate vertices and faces to represent these objects, equivalent to what would have been defined using {\tt VERTS}\ and {\tt FACES}.
+
 \subsubsection{Blocks}
-One may also define blocks using {\tt XB} and spheres using {\tt SPHERE\_ORIGIN}\ and {\tt SPHERE\_RADIUS}.
-FDS generate vertices and faces that represent these objects.
 A {\tt \&GEOM}\ namelist defining a block is given by
 
 \begin{verbatim}
@@ -36,10 +38,10 @@ A {\tt \&GEOM}\ namelist defining a block is given by
 
 \noindent where {\tt XB=xmin,xmax,ymin,ymax,zmin,zmax} defines the min and max bounds of the block.
 The {\tt XB}\ parameter is used in the same way as on an {\tt \&OBST}\ or {\tt \&VENT}\ line.
-A block may be discretized by
-specifying a {\tt IJK} parameter.  For example, {\tt IJK=8,6,4} would split the block
-into 8 parts along the $x$ direction, 6 parts along the $y$ direction and 4 parts along 
-the $z$ direction. By default, blocks are discretized
+A block may be discretized into many parts by
+specifying the {\tt IJK} parameter.  For example, {\tt IJK=8,6,4} would split the block
+into 8 parts along the $x$ dimension, 6 parts along the $y$ dimension and 4 parts along
+the $z$ dimension. By default, blocks are discretized
 so that the block faces are consistent in size with the grid resolution.
 
 \subsubsection{Spheres}
@@ -50,10 +52,8 @@ A {\tt \&GEOM}\ namelist defining a sphere centered at $(0,0,0)$ with radius $1$
       SPHERE_ORIGIN=0.0,0.0,0.0,SPHERE_RADIUS=1.0 /
 \end{verbatim}
 
-\noindent Similar to blocks, spheres may be discretized by
-specifying {\tt NLAT} and/or {\tt NLONG} parameters.  {\tt NLONG=6} would split the sphere
-into 6 parts around the longitudinal direction. Like blocks, spheres are discretized by default
-so that individual faces are consistent in size with the grid resolution.
+\noindent Spheres are discretized by default so that each face is consistent in size with the grid resolution.
+One may specify a {\tt N\_LEVEL}\ parameter which specifies the number of times the sphere is split.
 
 \subsubsection{2D Surfaces}
 A {\tt \&GEOM}\ namelist defining a 2D surface is given by
@@ -63,17 +63,17 @@ A {\tt \&GEOM}\ namelist defining a 2D surface is given by
       IJK=ivals,jvals,XB=xmin,xmax,ymin,ymax,ZVALS=..... /
 \end{verbatim}
 
-\noindent where {\tt XB}\ defines a rectangular region xmin, xmax, ymin and ymax.
-{\tt IJK}\ specifies how many vertices occur in this region. 
-In this example {\tt ivals}\ values occur along the x direction and {\tt jval}\ values occur along the y direction. 
+\noindent where {\tt XB}\ defines a rectangular region bounded by xmin, xmax, ymin and ymax where elevation data is defined with {\tt ZVALS}.
+{\tt IJK}\ specifies how many vertices occur in this region along each dimension in this region.
+In this example {\tt ivals}\ values occur along the x dimension and {\tt jval}\ values occur along the y dimension.
 The {\tt ZVALS} keyword is used to specify elevations at each $(x,y)$ location.
 The elevation data specified after the {\tt ZVALS}\ keyword is arranged in row major order.
-The first row contains {\tt ivals} elevation values occurring at the the ymax position from xmin to xmax.  
+The first row contains {\tt ivals} elevation values occurring at the the ymax position from xmin to xmax.
 Similarly, the last row contains
 {\tt ivals}\ elevation values for the ymin position again from xmin to xmax.
 There are then {\tt jvals}\ rows and {\tt ivals}\ columns of elevation data.
 As with the blocks and spheres, FDS uses the information
-provided by these keywords to construct  
+provided by these keywords to construct
 vertices and triangular faces.
 
 \subsection{Transforming Objects}
@@ -187,25 +187,26 @@ For example, {\tt XYZ\_DOT=0.0,0.0,1.0}\ would cause an object to move 1~m/s in 
 {\ct ELEV\_DOT}    & Real                   & Section~\ref{info:GEOM}            &  deg/s    &    0.0                   \\ \hline
 {\ct FACES}        & array of Integer Triplets     & Section~\ref{info:GEOM}     &           &    0                     \\ \hline
 {\ct GAXIS}        & Real Triplet           & Section~\ref{info:GEOM}            &           &                          \\ \hline
-{\ct GROTATE}      & Real Triplet           & Section~\ref{info:GEOM}            &  deg      &    0.0                   \\ \hline
-{\ct GROTATE\_DOT}  & Real Triplet           & Section~\ref{info:GEOM}            & deg/s    &    0.0                   \\ \hline
 {\ct GEOM\_IDS}    & Real                   & Section~\ref{info:GEOM}            &           &                          \\ \hline
+{\ct GROTATE}      & Real Triplet           & Section~\ref{info:GEOM}            &  deg      &    0.0                   \\ \hline
+{\ct GROTATE\_DOT}  & Real Triplet          & Section~\ref{info:GEOM}            & deg/s     &    0.0                   \\ \hline
 {\ct ID}           & Character              & Section~\ref{info:GEOM}            &           &   {\ct 'geom'}           \\ \hline
 {\ct IJK}          & Integer Triplet        & Section~\ref{info:GEOM}            &           &   0,0,0                  \\ \hline
-{\ct NLAT}         & Integer                & Section~\ref{info:GEOM}            &           &                          \\ \hline
-{\ct NLONG}        & Integer                & Section~\ref{info:GEOM}            &           &                          \\ \hline
+{\ct N\_LEVELS}    & Integer                & Section~\ref{info:GEOM}            &           &   0                      \\ \hline
 {\ct SCALE}        & Real Triplet           & Section~\ref{info:GEOM}            &           &   1.0,1.0,1.0            \\ \hline
 {\ct SCALE\_DOT}   & Real Triplet           & Section~\ref{info:GEOM}            &  1/s      &   1.0                    \\ \hline
-{\ct SPHERE\_ORIGIN}& Real Triplet           & Section~\ref{info:GEOM}            &   m       &  0.0,0.0,0.0            \\ \hline
-{\ct SPHERE\_RADIUS}& Real                   & Section~\ref{info:GEOM}            &   m       &  1.0                    \\ \hline
+{\ct SPHERE\_ORIGIN}& Real Triplet          & Section~\ref{info:GEOM}            &   m       &  0.0,0.0,0.0             \\ \hline
+{\ct SPHERE\_RADIUS}& Real                  & Section~\ref{info:GEOM}            &   m       &  1.0                     \\ \hline
 {\ct SURF\_ID}     & Character              & Section~\ref{info:GEOM}            &           &  {\ct 'INERT'}           \\ \hline
-{\ct TEXTURE\_ORIGIN} & Real Triplet        & Section~\ref{info:GEOM}            &   m       &   0.0,0.0,0.0            \\ \hline
 {\ct TEXTURE\_MAPPING}& Character           & Section~\ref{info:GEOM}            &           & {\ct 'RECTANGULAR'}      \\ \hline
+{\ct TEXTURE\_ORIGIN} & Real Triplet        & Section~\ref{info:GEOM}            &   m       &   0.0,0.0,0.0            \\ \hline
+{\ct TEXTURE\_SCALE}& Real                  & Section~\ref{info:GEOM}            &           &   1.0                    \\ \hline
 {\ct VERTS}        & array of Real Triplets & Section~\ref{info:GEOM}            &   m       &   0.0                    \\ \hline
 {\ct XB}           & Real sex-tuplet        & Section~\ref{info:GEOM}            &   m       &   0.0                    \\ \hline
 {\ct XYZ0}         & Real Triplet           & Section~\ref{info:GEOM}            &   m       &   0.0                    \\ \hline
 {\ct XYZ}          & Real Triplet           & Section~\ref{info:GEOM}            &   m       &   0.0                    \\ \hline
 {\ct XYZ\_DOT}     & Real Triplet           & Section~\ref{info:GEOM}            &   m/s     &   0.0                    \\ \hline
+{\ct ZVALS}        & Real                   & Section~\ref{info:GEOM}            &   m/s     &   0.0                    \\ \hline
 
 \end{longtable}
 
@@ -271,5 +272,100 @@ ENDIF
 \item {\ct GEOM\_TYPE}\ is flag indicating how dynamic geometry is represented. If {\ct GEOM\_TYPE}\ is 0 then time dependent geometry is written out in terms of nodes and faces using the same format as the static geometry. If {\ct GEOM\_TYPE}\ is 1 then time dependent geometry is written out in terms of a scaling, translation and rotation for each GEOM defined at the first time step.
 \end{itemize}
 
+\section{Some Notes on Geometry Implementation}
+Most likely these implementation notes will not appear as is in an FDS or Smokeview technical manual. They are written down here to help verify various geometric algorithms coded in FDS and Smokeview.
+
+Icosahedron vertex locations
+\begin{eqnarray*}
+v_1&=&(0,0,1)\\
+v_i&=&\left(\cos\left(2\pi\frac{i-1}{5}\right)\sqrt{5/6},\sin\left(2\pi\frac{i-1}{5}\right)\sqrt{5/6},\sqrt{1/6}\right)i=2,\cdots, 6\\
+v_i&=&\left(\cos\left(2\pi\frac{i-7+.5}{5}\right)\sqrt{5/6},\sin\left(2\pi\frac{i-7+.5}{5}\right)\sqrt{5/6},\sqrt{1/6}\right)i=7,\cdots, 11\\
+v_{12}&=&(0,0,-1)
+\end{eqnarray*}
+
+Euler formula for relating the number vertices (V), edges (E) and faces (F) of a closed geometric surface such as the icoshedron used to discretize the sphere.
+\begin{eqnarray*}
+V+F-E&=&2
+\end{eqnarray*}
+Number of vertices, face and edges for an icosahedron.
+\begin{eqnarray*}
+V_0&=&12\\
+F_0&=&20\\
+E_0&=&30\\
+\end{eqnarray*}
+Recursion formulas for relating the number of vertices, faces and edges at the $n+1$'st refinement step given the number at the $n$'th refinement step.
+\begin{eqnarray}
+\label{eq:recursion1}
+V_{n+1}&=&V_n+E_n\\
+\label{eq:recursion2}
+F_{n+1}&=&4 F_n\\
+\label{eq:recursion3}
+E_{n+1}&=&3 F_n+2 E_n
+\end{eqnarray}
+
+For $n\ge 0$ show that $V_{n+1}+F_{n+1}-E_{n+1}=2$.
+Substituting $n=0$ into Eqs. (\ref{eq:recursion1}) through (\ref{eq:recursion3})  results in
+\begin{eqnarray*}
+V_1+F_1-E_1&=&V_0+E_0+4 F_0 -(3 F_0+2 E_0)\\
+&=&12+30+80-(60+60)\\
+&=&2
+\end{eqnarray*}
+
+Assuming the recursion formulas in Eqs. (\ref{eq:recursion1}) through (\ref{eq:recursion3}) and that $V_n+F_n-E_n=2$ (the induction step) results in
+\begin{eqnarray*}
+V_{n+1}+F_{n+1}-E_{n+1}&=&V_n+E_n+4 F_n-(3 F_n+2 E_n)\\
+&=&V_n+F_n-E_n\\
+&=&2
+\end{eqnarray*}
+
+Table \ref{table:refinement} gives the number of vertices, faces and edges for the 0'th through 5'th refinements.
+This table will be used to verify that the sphere discretization routine, {\tt INIT\_SPHERE}, found in FDS generates the correct number of faces and vertices..
+\vskip 0.1in
+\par
+\begin{table}
+\caption{Number of vertices, faces and edges for the 0'th through 5'th icosahedron refinements}
+\begin{tabular}{|c|c|c|c|}
+  \hline
+n& V&F&E\\
+\hline
+0&	12&	20&	30\\
+1&	42&	80&	120\\
+2&	162&	320&	480\\
+3&	642&	1280&	1920\\
+4&	2562&	5120&	7680\\
+5&	10242&	20480&	30720\\
+  \hline
+\end{tabular}
+\label{table:refinement}
+\end{table}
+
+Table \ref{table:facelist} gives the list of vertices for each face in 
+an icosahedron where the vertices are numbered as given  in 
+Figure \ref{figure:facelist}.
+\begin{table}
+\caption{Vertex list for each Icosahedron face}
+\begin{center}
+\begin{tabular}{ccccc}
+  \hline
+  (1,2,3)&   (1, 3,4)&  (1, 4, 5)&   (1, 5, 6)&   (1, 6,2)\\
+  (2,11,7)&  (2,7,3)&   (3, 7,8)&  (3, 8, 4)&   (4, 8, 9)\\
+  (4, 9,5)&  (5,9,10)&   (5,10,6)& (6,10,11)&   (6,11, 2)   \\
+  (11,12,7)& (7,12,8)&   (8,12,9)&   (9,12,10)&   (10,12,11)   \\
+  \hline
+\end{tabular}
+\end{center}
+\label{table:facelist}
+\end{table}
+
+\begin{figure}[\figoptions]
+\begin{center}
+\includegraphics[width=4.0in]{../SMV_Technical_Reference_Guide/FIGURES/icosahedron_setup}
+\end{center}
+\caption{Schematic of icosahedron vertex locations for defining face lists}
+\label{figure:facelist}
+\end{figure}
+
 \end{document}
+
+
 
