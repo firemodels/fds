@@ -1,0 +1,16 @@
+&HEAD CHID='geom_volume' /
+
+&TIME T_END=0.0 /
+&MESH IJK=10,10,10,XB=0.0,1.0,0.0,1.0,0.0,1.0 /
+
+&SURF ID='surf1',RGB=255,0,0 /
+
+&GEOM ID='geom1',
+        VERTS=0.0,0.0,0.0,
+              1.0,0.0,0.0,
+              1.0,1.0,0.0,
+              1.0,1.0,1.0,
+        VOLUS=1,2,3,4
+        /
+
+
