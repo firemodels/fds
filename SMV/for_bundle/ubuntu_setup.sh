@@ -108,6 +108,12 @@ INSTALL gparted
 INSTALL mesa-utils
 INSTALL apache2
 INSTALL gpicview
+# install torque queuing
+INSTALL torque-server
+INSTALL torque-scheduler
+INSTALL torque-client
+INSTALL torque-mom
+echo set default server in /var/spool/torque/server_name
 
 # adding NVIDIA video drivers (by hand)
 
