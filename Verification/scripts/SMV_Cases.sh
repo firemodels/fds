@@ -4,6 +4,7 @@ $RUNFDS Immersed_Boundary_Method geom_azim
 $RUNFDS Immersed_Boundary_Method geom_elev
 $RUNFDS Immersed_Boundary_Method geom_scale
 $RUNFDS Immersed_Boundary_Method geom_terrain
+$RUNFDS Immersed_Boundary_Method geom_volume
 
 $RUNFDS Visualization cell_test
 $RUNCFAST Visualization cfast_test
