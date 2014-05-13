@@ -514,7 +514,7 @@ check_verification_cases_debug()
 
    if [[ `grep 'Run aborted' -rIi $OUTPUT_DIR/stage3` == "" ]] && \
       [[ `grep 'Segmentation' -rIi Visualization/* WUI/* Immersed_Boundary_Method/*` == "" ]] && \
-      [[ `grep 'ERROR:' -rIi Visualization/* WUI/* Immersed_Boundary_Method/*` == "" ]] && \
+      [[ `grep 'ERROR:' -rI Visualization/* WUI/* Immersed_Boundary_Method/*` == "" ]] && \
       [[ `grep 'STOP: Numerical' -rIi Visualization/* WUI/* Immersed_Boundary_Method/*` == "" ]] && \
       [[ `grep -A 20 'forrtl' -rIi Visualization/* WUI/* Immersed_Boundary_Method/*` == "" ]]
    then
@@ -522,7 +522,7 @@ check_verification_cases_debug()
    else
       grep 'Run aborted' -rIi $OUTPUT_DIR/stage3 > $OUTPUT_DIR/stage3_errors
       grep 'Segmentation' -rIi Visualization/* WUI/* Immersed_Boundary_Method/* >> $OUTPUT_DIR/stage3_errors
-      grep 'ERROR:' -rIi Visualization/* WUI/* Immersed_Boundary_Method/* >> $OUTPUT_DIR/stage3_errors
+      grep 'ERROR:' -rI Visualization/* WUI/* Immersed_Boundary_Method/* >> $OUTPUT_DIR/stage3_errors
       grep 'STOP: Numerical' -rIi Visualization/* WUI/* Immersed_Boundary_Method/* >> $OUTPUT_DIR/stage3_errors
       grep -A 20 'forrtl' -rIi Visualization/* WUI/* Immersed_Boundary_Method/* >> $OUTPUT_DIR/stage3_errors
       
@@ -748,7 +748,7 @@ check_verification_cases_release()
 
    if [[ `grep 'Run aborted' -rIi $OUTPUT_DIR/stage5` == "" ]] && \
       [[ `grep 'Segmentation' -rIi Visualization/* WUI/* Immersed_Boundary_Method/* ` == "" ]] && \
-      [[ `grep 'ERROR:' -rIi Visualization/* WUI/* Immersed_Boundary_Method/* ` == "" ]] && \
+      [[ `grep 'ERROR:' -rI Visualization/* WUI/* Immersed_Boundary_Method/* ` == "" ]] && \
       [[ `grep 'STOP: Numerical' -rIi Visualization/* WUI/* Immersed_Boundary_Method/* ` == "" ]] && \
       [[ `grep -A 20 'forrtl' -rIi Visualization/* WUI/* Immersed_Boundary_Method/* ` == "" ]]
    then
@@ -756,7 +756,7 @@ check_verification_cases_release()
    else
       grep 'Run aborted' -rIi $OUTPUT_DIR/stage5 > $OUTPUT_DIR/stage5_errors
       grep 'Segmentation' -rIi Visualization/* WUI/* Immersed_Boundary_Method/* >> $OUTPUT_DIR/stage5_errors
-      grep 'ERROR:' -rIi Visualization/* WUI/* Immersed_Boundary_Method/* >> $OUTPUT_DIR/stage5_errors
+      grep 'ERROR:' -rI Visualization/* WUI/* Immersed_Boundary_Method/* >> $OUTPUT_DIR/stage5_errors
       grep 'STOP: Numerical' -rI Visualization/* WUI/* Immersed_Boundary_Method/* >> $OUTPUT_DIR/stage5_errors
       grep -A 20 'forrtl' -rIi Visualization/* WUI/* Immersed_Boundary_Method/* >> $OUTPUT_DIR/stage5_errors
 
