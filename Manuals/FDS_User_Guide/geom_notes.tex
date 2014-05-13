@@ -6,11 +6,11 @@
 \vspace{1.0in}
 \section{Unstructured Geometry: The \texorpdfstring{{\tt GEOM}}{GEOM} Namelist Group (Table \ref{tbl:GEOM})}
 \label{info:GEOM}
-\subsection{Defining Objects}
+\subsection{Defining Surfaces}
 
-\subsubsection{General Objects}
-Unstructured geometric solids are defined using the {\tt \&GEOM}\ namelist.
-These solids consist of a collection of triangular faces where each face consists of three vertices.
+\subsubsection{General Surfaces}
+Unstructured geometric surfaces are defined using the {\tt \&GEOM}\ namelist.
+These surfaces consist of a collection of triangular faces where each face consists of three vertices.
 A simple form of the {\tt \&GEOM}\ namelist defining one triangular face is given by
 
 \begin{verbatim}
@@ -75,6 +75,23 @@ There are then {\tt jvals}\ rows and {\tt ivals}\ columns of elevation data.
 As with the blocks and spheres, FDS uses the information
 provided by these keywords to construct
 vertices and triangular faces.
+
+\subsection{Defining Solids}
+Unstructured geometric solids are also defined using the {\tt \&GEOM}\ namelist.
+These solids consist of a collection of tetrahedrons where each tetrahedron consists of four vertices.
+A simple form of the {\tt \&GEOM}\ namelist defining one tetrahedron is given by
+
+\begin{verbatim}
+&GEOM ID='tetrahedron'
+      VERTS=0.0,0.0,0.0, 1.0,0.0,0.0, 1.0,1.0,0.0,  1.0,1.0,1.0,
+      VOLUS=1,2,3,4
+/
+\end{verbatim}
+
+\noindent where {\tt ID}\ specifies the object name, in this case {\tt tetrahedron},
+{\tt VERTS}\ specifies a list of one or more $(x,y,z)$ coordinates and {\tt VOLUS}\ specifies a list of vertices, 4 vertex indices for each
+tetrahedron. Each index ranges from 1 to the number of vertices found on this {\tt \&GEOM}\ line.
+
 
 \subsection{Transforming Objects}
 An object may be transformed.
@@ -192,6 +209,7 @@ For example, {\tt XYZ\_DOT=0.0,0.0,1.0}\ would cause an object to move 1~m/s in 
 {\ct GROTATE\_DOT}  & Real Triplet          & Section~\ref{info:GEOM}            & deg/s     &    0.0                   \\ \hline
 {\ct ID}           & Character              & Section~\ref{info:GEOM}            &           &   {\ct 'geom'}           \\ \hline
 {\ct IJK}          & Integer Triplet        & Section~\ref{info:GEOM}            &           &   0,0,0                  \\ \hline
+{\ct MATL\_ID}     & Character              & Section~\ref{info:GEOM}            &           &  {\ct 'INERT'}           \\ \hline
 {\ct N\_LEVELS}    & Integer                & Section~\ref{info:GEOM}            &           &   0                      \\ \hline
 {\ct SCALE}        & Real Triplet           & Section~\ref{info:GEOM}            &           &   1.0,1.0,1.0            \\ \hline
 {\ct SCALE\_DOT}   & Real Triplet           & Section~\ref{info:GEOM}            &  1/s      &   1.0                    \\ \hline
@@ -202,6 +220,7 @@ For example, {\tt XYZ\_DOT=0.0,0.0,1.0}\ would cause an object to move 1~m/s in 
 {\ct TEXTURE\_ORIGIN} & Real Triplet        & Section~\ref{info:GEOM}            &   m       &   0.0,0.0,0.0            \\ \hline
 {\ct TEXTURE\_SCALE}& Real                  & Section~\ref{info:GEOM}            &           &   1.0                    \\ \hline
 {\ct VERTS}        & array of Real Triplets & Section~\ref{info:GEOM}            &   m       &   0.0                    \\ \hline
+{\ct VOLUS}        & array of Integer Quadruplets     & Section~\ref{info:GEOM}  &           &    0                     \\ \hline
 {\ct XB}           & Real sex-tuplet        & Section~\ref{info:GEOM}            &   m       &   0.0                    \\ \hline
 {\ct XYZ0}         & Real Triplet           & Section~\ref{info:GEOM}            &   m       &   0.0                    \\ \hline
 {\ct XYZ}          & Real Triplet           & Section~\ref{info:GEOM}            &   m       &   0.0                    \\ \hline
@@ -272,7 +291,7 @@ ENDIF
 \item {\ct GEOM\_TYPE}\ is flag indicating how dynamic geometry is represented. If {\ct GEOM\_TYPE}\ is 0 then time dependent geometry is written out in terms of nodes and faces using the same format as the static geometry. If {\ct GEOM\_TYPE}\ is 1 then time dependent geometry is written out in terms of a scaling, translation and rotation for each GEOM defined at the first time step.
 \end{itemize}
 
-\section{Some Notes on Geometry Implementation}
+\section{Some Geometry Implementation Notes}
 These implementation notes will not appear as is in an FDS or Smokeview technical manual. They are written down here to help verify various geometric algorithms coded in FDS and Smokeview.
 
 \subsection{Spheres}
