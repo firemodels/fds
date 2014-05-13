@@ -150,7 +150,6 @@ fi
 
 export RUNCFAST="$SVNROOT/Utilities/Scripts/runcfast.sh $queue"
 export RUNFDS="$SVNROOT/Utilities/Scripts/runfds.sh $OPENMPOPTS $queue"
-export RUNGEOM="$SVNROOT/Utilities/Scripts/rungeom.sh $queue"
 export RUNTFDS="$SVNROOT/Utilities/Scripts/runfds.sh $OPENMPOPTS $queue"
 export RUNWFDS="$SVNROOT/Utilities/Scripts/runwfds.sh $queue"
 export RUNFDSMPI="$SVNROOT/Utilities/Scripts/runfdsmpi.sh $queue"
