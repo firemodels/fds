@@ -28,11 +28,11 @@ SUBROUTINE READ_GEOM
 
 ! input &GEOM lines
 
-INTEGER, PARAMETER :: MAX_ZVALS=100000
-INTEGER, PARAMETER :: MAX_VERTS=100000 ! at some point we may decide to use dynamic memory allocation
+INTEGER, PARAMETER :: MAX_ZVALS=1000
+INTEGER, PARAMETER :: MAX_VERTS=1000 ! at some point we may decide to use dynamic memory allocation
 INTEGER, PARAMETER :: MAX_FACES=MAX_VERTS ! for now there is a limit of 100000 vertices/faces
 INTEGER, PARAMETER :: MAX_VOLUS=MAX_VERTS ! for now there is a limit of 100000 vertices/faces
-INTEGER, PARAMETER :: MAX_IDS=1000000
+INTEGER, PARAMETER :: MAX_IDS=1000
 CHARACTER(30) :: ID,SURF_ID, MATL_ID, GEOM_IDS(MAX_IDS)
 CHARACTER(30) :: TEXTURE_MAPPING
 CHARACTER(100) :: MESSAGE
