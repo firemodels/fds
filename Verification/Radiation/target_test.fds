@@ -1,0 +1,50 @@
+&HEAD CHID='target_test', TITLE='Test particle target model' /
+
+&MESH IJK=25,25,25, XB=0,1,0,1,0,1 / 
+&MESH IJK=25,25,25, XB=2,3,0,1,0,1 / 
+
+&TIME T_END=5 /
+
+&MISC GVEC=0,0,0, Y_CO2_INFTY=0., HUMIDITY=0. / 
+
+&RADI TIME_STEP_INCREMENT=1, ANGLE_INCREMENT=1 /
+
+&DUMP NFRAMES=20 /
+
+&SURF ID='HOT'
+      EMISSIVITY = 1.
+      TMP_FRONT = 1000.
+      HEAT_TRANSFER_COEFFICIENT = 0.
+      TAU_T = 0.0 /
+
+&VENT XB=0,1,0,1,1,1 SURF_ID='HOT' /
+&VENT XB=2,3,0,1,1,1 SURF_ID='HOT' /
+
+&PART ID='part'
+      STATIC = .TRUE.
+      SAMPLING_FACTOR=1
+      SURF_ID = 'part_surf'
+      ORIENTATION(1:3,1)=0,0,1 /
+
+&SURF ID = 'part_surf'
+      HEAT_TRANSFER_COEFFICIENT = 0.
+      GEOMETRY = 'CARTESIAN'
+      THICKNESS = 0.01
+      LENGTH = 0.04
+      WIDTH = 0.04
+      EMISSIVITY = 1. /
+
+&SURF ID = 'obst_surf'
+      HEAT_TRANSFER_COEFFICIENT = 0.
+      EMISSIVITY = 1. /
+
+&INIT N_PARTICLES=1, XB= 0.5, 0.5,0.5,0.5,0.5,0.5, ID='init', PART_ID='part' /
+
+&OBST XB=2.48,2.52,0.48,0.52,0.44,0.48, SURF_ID='obst_surf' /
+
+&DEVC ID='flux 1', QUANTITY='RADIATIVE HEAT FLUX', INIT_ID='init' /
+&DEVC ID='flux 2', QUANTITY='RADIATIVE HEAT FLUX', XYZ=2.5,0.5,0.48, IOR=3 /
+
+&TAIL /
+
+
