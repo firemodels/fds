@@ -70,7 +70,11 @@ inquire(unit=lu20,opened=isopen)
 if(isopen)close(lu20)
 inquire(file=trim(filename),exist=exists)
 if(exists)then
+#ifdef pp_GCC
+  open(unit=lu20,file=trim(filename),form="unformatted",action="read")
+#else
   open(unit=lu20,file=trim(filename),form="unformatted",shared,action="read")
+#endif
  else
   write(6,*)'The boundary element file name, ',trim(filename),' does not exist'
   error=1
@@ -133,7 +137,11 @@ inquire(unit=lu26,opened=isopen)
 if(isopen)close(lu26)
 inquire(file=trim(zonefilename),exist=exists)
 if(exists)then
+#ifdef pp_GCC
+  open(unit=lu26,file=trim(zonefilename),form="unformatted",action="read")
+#else
   open(unit=lu26,file=trim(zonefilename),form="unformatted",shared,action="read")
+#endif
  else
   write(6,*)'The zone file name, ',trim(zonefilename),' does not exist'
   error=1
@@ -607,7 +615,11 @@ if(connected)close(lu11)
 
 inquire(file=trim(slicefilename),exist=exists)
 if(exists)then
+#ifdef pp_GCC
+  open(unit=lu11,file=trim(slicefilename),form="unformatted",action="read")
+#else
   open(unit=lu11,file=trim(slicefilename),form="unformatted",shared,action="read")
+#endif
  else
   write(6,*)'the slice file ',trim(slicefilename),' does not exist'
   nsteps = 0
@@ -939,7 +951,11 @@ if(isotest.eq.0)then
   error=0
   inquire(file=qfilename,exist=exists)
   if(exists)then
+#ifdef pp_GCC
+    open(unit=u_in,file=qfilename,form="unformatted",action="read",iostat=error2)
+#else
     open(unit=u_in,file=qfilename,form="unformatted",shared,action="read",iostat=error2)
+#endif
    else
     write(6,*)'The file name, ',trim(qfilename),' does not exist'
     read(5,*)dummy
@@ -2503,89 +2519,3 @@ END FUNCTION VEC_NORMALIZE
 
 END MODULE BOXTETRA_ROUTINES
 
-!  ------------------ GETVERTS2 ------------------------ 
-
-SUBROUTINE GETVERTS2(BOX_BOUNDS,V0,V1,V2,V3,VERTS,NVERTS,FACESTART,FACENUM,NFACES,VOLUME,FLAG,ERROR,ERR)
-USE PRECISION_PARAMETERS
-USE BOXTETRA_ROUTINES
-IMPLICIT NONE
-
-REAL(FB), DIMENSION(0:5), INTENT(IN) :: BOX_BOUNDS
-REAL(FB), DIMENSION(0:2), INTENT(IN) :: V0, V1, V2, V3
-REAL(FB), DIMENSION(0:299), INTENT(OUT) :: VERTS
-INTEGER, DIMENSION(0:99), INTENT(OUT) :: FACESTART, FACENUM
-INTEGER, INTENT(OUT) :: NVERTS,NFACES
-REAL(FB), INTENT(OUT) :: VOLUME
-INTEGER, INTENT(IN) :: FLAG
-INTEGER, INTENT(OUT) :: ERROR
-
-REAL(EB), DIMENSION(0:5) :: BOX_BOUNDS_EB, BOX_BOUNDS_IJK_EB
-REAL(EB), DIMENSION(0:2) :: V0_EB, V1_EB, V2_EB, V3_EB, V_CENTER
-REAL(EB), DIMENSION(0:299), TARGET :: VERTS_EB
-
-REAL(EB) :: XMIN, YMIN, ZMIN
-REAL(EB) :: XMAX, YMAX, ZMAX
-
-REAL(EB) :: VOL, VOL_TOTAL
-REAL(EB), DIMENSION(0:3) :: VOL_IJK
-
-INTEGER :: I, J, K
-
-INTEGER :: IBOX_MIN, IBOX_MAX, JBOX_MIN, JBOX_MAX, KBOX_MIN, KBOX_MAX
-REAL(EB), INTENT(OUT) :: ERR
-
-ERROR = 0
-V0_EB=REAL(V0,EB)
-V1_EB=REAL(V1,EB)
-V2_EB=REAL(V2,EB)
-V3_EB=REAL(V3,EB)
-BOX_BOUNDS_EB=REAL(BOX_BOUNDS,EB)
-
-CALL GET_VERTS(BOX_BOUNDS_EB,V0_EB,V1_EB,V2_EB,V3_EB,VERTS_EB,NVERTS,FACESTART,FACENUM,NFACES)
-
-VERTS(0:3*NVERTS-1) = REAL(VERTS_EB(0:3*NVERTS-1),FB)
-
-VOLUME = REAL(GET_TETRABOX_VOLUME(BOX_BOUNDS_EB,V0_EB,V1_EB,V2_EB,V3_EB),FB)
-
-XMIN = MIN(V0_EB(0), V1_EB(0), V2_EB(0), V3_EB(0))
-XMAX = MAX(V0_EB(0), V1_EB(0), V2_EB(0), V3_EB(0))
-
-YMIN = MIN(V0_EB(1), V1_EB(1), V2_EB(1), V3_EB(1))
-YMAX = MAX(V0_EB(1), V1_EB(1), V2_EB(1), V3_EB(1))
-
-ZMIN = MIN(V0_EB(2), V1_EB(2), V2_EB(2), V3_EB(2))
-ZMAX = MAX(V0_EB(2), V1_EB(2), V2_EB(2), V3_EB(2))
-
-IBOX_MIN = (XMIN-BOX_BOUNDS_EB(0))/(BOX_BOUNDS_EB(1)-BOX_BOUNDS_EB(0))-1
-IBOX_MAX = (XMAX-BOX_BOUNDS_EB(0))/(BOX_BOUNDS_EB(1)-BOX_BOUNDS_EB(0))+1
-
-JBOX_MIN = (YMIN-BOX_BOUNDS_EB(2))/(BOX_BOUNDS_EB(3)-BOX_BOUNDS_EB(2))-1
-JBOX_MAX = (YMAX-BOX_BOUNDS_EB(2))/(BOX_BOUNDS_EB(3)-BOX_BOUNDS_EB(2))+1
-
-KBOX_MIN = (ZMIN-BOX_BOUNDS_EB(4))/(BOX_BOUNDS_EB(5)-BOX_BOUNDS_EB(4))-1
-KBOX_MAX = (ZMAX-BOX_BOUNDS_EB(4))/(BOX_BOUNDS_EB(5)-BOX_BOUNDS_EB(4))+1
-
-VOL=0.0_EB
-DO K = KBOX_MIN, KBOX_MAX
-DO J = JBOX_MIN, JBOX_MAX
-DO I = IBOX_MIN, IBOX_MAX
-   BOX_BOUNDS_IJK_EB(0) = BOX_BOUNDS_EB(0) +   REAL(I,EB)*(BOX_BOUNDS_EB(1) - BOX_BOUNDS_EB(0))
-   BOX_BOUNDS_IJK_EB(1) = BOX_BOUNDS_EB(0) + REAL(I+1,EB)*(BOX_BOUNDS_EB(1) - BOX_BOUNDS_EB(0))
-   BOX_BOUNDS_IJK_EB(2) = BOX_BOUNDS_EB(2) +   REAL(J,EB)*(BOX_BOUNDS_EB(3) - BOX_BOUNDS_EB(2))
-   BOX_BOUNDS_IJK_EB(3) = BOX_BOUNDS_EB(2) + REAL(J+1,EB)*(BOX_BOUNDS_EB(3) - BOX_BOUNDS_EB(2))
-   BOX_BOUNDS_IJK_EB(4) = BOX_BOUNDS_EB(4) +   REAL(K,EB)*(BOX_BOUNDS_EB(5) - BOX_BOUNDS_EB(4))
-   VOL = VOL + GET_TETRABOX_VOLUME(BOX_BOUNDS_IJK_EB,V0_EB,V1_EB,V2_EB,V3_EB)
-END DO
-END DO
-END DO
-VOL_TOTAL=VOLUME_VERTS(V0_EB,V1_EB,V2_EB,V3_EB)
-ERR = ABS(VOL-VOL_TOTAL)
-IF(ERR.GT.1.0E-10_EB)THEN
-  ERROR = 1
-ENDIF
-IF(FLAG.EQ.0.OR.ERR.GT.1.0E-10_EB)THEN
-  WRITE(LU_OUTPUT,*)"check: ",VOL,VOL_TOTAL,(VOL-VOL_TOTAL)/VOL_TOTAL
-ENDIF
-
-RETURN
-END SUBROUTINE GETVERTS2

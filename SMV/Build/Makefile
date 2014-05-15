@@ -185,7 +185,7 @@ intel_linux_64_profile : $(obj)
 
 # ------------- gcc_linux ----------------
 
-gcc_linux : FFLAGS    = -O0 -m64 -x f95-cpp-input -D pp_noappend -ffree-form -frecord-marker=4
+gcc_linux : FFLAGS    = -O0 -m64 -x f95-cpp-input -D pp_GCC -D pp_noappend -ffree-form -frecord-marker=4
 gcc_linux : CFLAGS    = -O0 -m64 -D pp_LINUX64
 gcc_linux : LFLAGS    = -m64
 gcc_linux : CC        = gcc
@@ -243,7 +243,7 @@ intel_osx_64_db : $(obj)
 
 # ------------- gcc_osx ----------------
 
-gcc_osx : FFLAGS    = -O0 -m64 -x f95-cpp-input -D pp_noappend -ffree-form
+gcc_osx : FFLAGS    = -O0 -m64 -x f95-cpp-input -D pp_GCC -D pp_noappend -ffree-form
 gcc_osx : CFLAGS    = -O0 -m64 -D pp_OSX -Wno-write-strings
 gcc_osx : LFLAGS    = -m64 -framework OpenGL -framework GLUT
 gcc_osx : CC        = gcc
