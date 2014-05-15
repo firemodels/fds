@@ -259,6 +259,7 @@ $RUNFDS Radiation radiation_plane_layer_6_3
 $RUNFDS Radiation radiation_plane_layer_6_4
 $RUNFDS Radiation radiation_plane_layer_6_5
 $RUNFDS Radiation radiation_shield
+$RUNFDS Radiation target_test
 $RUNFDS Radiation thermocouples
 $RUNFDS Radiation TC_heating
 $RUNFDS Radiation TC_view_factor
