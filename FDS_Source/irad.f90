@@ -14,7 +14,7 @@ MODULE RADCONS
 USE PRECISION_PARAMETERS
 IMPLICIT NONE
 
-REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: DLN
+REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: DLN,ORIENTATION_FACTOR
 REAL(EB), ALLOCATABLE, DIMENSION(:)   :: BBFRAC, WL_LOW, WL_HIGH
 REAL(EB), ALLOCATABLE, DIMENSION(:)   :: DLX, DLY, DLZ, DLB, RSA
 
@@ -65,6 +65,8 @@ CHARACTER(LABEL_LENGTH) :: RADCAL_SPECIES(11)='null'
 !     NUMBER_SPECTRA_BANDS
 !     NSB       Number of spectral bands (1=gray, 6=wide band, 9=wide band w. CH4)
 !     OUTRAD_W  Emitted intensity from a wall (OUTRAD_W = QRADOUT/PI)
+!     ORIENTATION_FACTOR
+!               0.5 if the particle orientation most closely aligns with the solid angle; 0 otherwise
 !     PHIUP     Upper limit of solid angle component PHI
 !     PHILOW    Lower limit of solid angle component PHI
 !     RADTMP    Radiation temperature for absorption properties (Mie)
