@@ -23,6 +23,7 @@
 #include "smokeheaders.h"
 #include "threader.h"
 
+SVEXTERN int SVDECL(slice_show_contours,0);
 #ifdef pp_PILOT
 SVEXTERN int SVDECL(vispilot,0);
 #endif

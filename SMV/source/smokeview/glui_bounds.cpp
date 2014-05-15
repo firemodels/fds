@@ -243,6 +243,7 @@ GLUI_EditText *EDIT_part_min=NULL, *EDIT_part_max=NULL;
 GLUI_EditText *EDIT_p3_min=NULL, *EDIT_p3_max=NULL;
 GLUI_EditText *EDIT_p3_chopmin=NULL, *EDIT_p3_chopmax=NULL;
 
+GLUI_Checkbox *CHECKBOX_slice_show_contours=NULL;
 GLUI_Checkbox *CHECKBOX_cache_boundarydata=NULL;
 GLUI_Checkbox *CHECKBOX_showchar=NULL, *CHECKBOX_showonlychar;
 GLUI_Checkbox *CHECKBOX_showtrisurface=NULL;
@@ -843,6 +844,7 @@ extern "C" void glui_bounds_setup(int main_window){
     SPINNER_vectorlinewidth->set_float_limits(1.0,10.0);
     SPINNER_vectorlinelength=glui_bounds->add_spinner_to_panel(PANEL_slice_vector,_("Line length"),GLUI_SPINNER_FLOAT,&vecfactor,UPDATE_VECTOR,Slice_CB);
     SPINNER_vectorlinelength->set_float_limits(0.0,20.0);
+    CHECKBOX_slice_show_contours=glui_bounds->add_checkbox_to_panel(PANEL_slice_vector,_("Show contours"),&slice_show_contours);
 
     PANEL_line_contour = glui_bounds->add_panel_to_panel(ROLLOUT_slice,_("Line Contours"));
     slice_line_contour_min=0.0;
