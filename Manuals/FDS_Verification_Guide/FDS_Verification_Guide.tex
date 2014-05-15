@@ -2032,7 +2032,7 @@ By setting $T_0=0$~\si{\degree C}, $\Delta t =0.01$~s, $m =0.01$~kg, and $c_p =1
 \section{Radiation Absorbed by Solid Particles (\texorpdfstring{\textct{particle\_absorption}}{particle\_absorption}) }
 \label{particle_absorption}
 
-Tests similar to those in Section~\ref{droplet_absorption} are performed for solid particles with Cartesian (flat plate), cylindrical and spherical geometries. All the relevant properties are the same, along with a high thermal conductivity, 100~W/(m$\cdot$K), because the particles are not assumed to be thermally-thin like liquid droplets. Figure~\ref{particle_absorption_figures} shows comparisons of the predicted and expected particle temperatures. By default, the radiation is expressed in terms of an integrated average (0 angles), but there is an option to ``split'' the particles into multiple parts that absorb radiation impinging from different directions. In this case, radiation is split into opposite $x$, $y$ and $z$ directions (except for Cartesian particles which are only split in the $z$ direction).
+Tests similar to those in Section~\ref{droplet_absorption} are performed for solid particles with Cartesian (flat plate), cylindrical and spherical geometries. All the relevant properties are the same, along with a high thermal conductivity, 100~W/(m$\cdot$K), because solid particles are not assumed to be thermally-thin like liquid droplets. Figure~\ref{particle_absorption_figures} shows comparisons of the predicted and expected mass-averaged particle temperatures. By default, the radiation is expressed in terms of an integrated average over the entire particle surface, but there is an option to ``split'' the particles into multiple parts that absorb radiation impinging from different directions. In this case, the cylindrical and spherical particles are split in half along the $x$, $y$ and $z$ axes. The plate particles are split into two halves facing upwards and downwards, or into 5 randomly selected fragments to test for asymmetry bugs.
 
 \begin{figure}[h]
 \noindent
@@ -2122,6 +2122,22 @@ This is essentially what is plotted in Fig.~\ref{TC_view_factor_plot}, compared 
 \caption[Radiation/thermocouple test case]{Temperature of a thermocouple equidistant from walls at temperatures of 20~\si{\degree C} and 500~\si{\degree C}.}
 \label{TC_view_factor_plot}
 \end{figure}
+
+\clearpage
+
+\section{Radiation Targets (\texorpdfstring{\textct{target\_test}}{target\_test}) }
+\label{target_test}
+
+This case tests the functionality of particle ``targets;'' that is, massless Lagrangian particles that serve to record the heat flux at a given point with a given orientation. Essentially, the particle is an infinitesimally small heat flux gauge. Two unit cubes are set up, each with a top surface set to 1000~$^\circ$C. In one cube, a small solid obstruction is created with a device embedded in its top facing upwards. In the other cube, a plate-shaped particle is placed at the same location and given an upward facing orientation. The radiative heat flux to both the obstruction and the particle should be the same, as shown in Fig.~\ref{target_test_plot}.
+\noindent
+\begin{figure}[h]
+\begin{center}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/target_test}
+\end{center}
+\caption[The \textct{target\_test} case]{Heat flux from a hot plate to two different types of targets.}
+\label{target_test_plot}
+\end{figure}
+
 
 \clearpage
 
