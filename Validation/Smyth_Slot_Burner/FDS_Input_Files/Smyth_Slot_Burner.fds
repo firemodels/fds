@@ -1,7 +1,7 @@
 &HEAD CHID='Smyth_Slot_Burner',TITLE='Kermit Smyth Wolfhard-Parker Co-Flowing Methane Slot Burner' /
 
-&MULT ID='mesh array', DX=0.008,DZ=0.012, I_UPPER= 3,K_UPPER=3 /
-&MESH XB=0.0,0.008,0.0,0.00025,-0.003,0.009, IJK=32,1,48, MULT_ID='mesh array' / 
+&MULT ID='mesh array', DX=0.016,DZ=0.012, I_UPPER= 1,K_UPPER=3 /
+&MESH XB=0.0,0.016,0.0,0.00025,-0.003,0.009, IJK=64,1,48, MULT_ID='mesh array' / 
 
 &TIME T_END=3. /
 &DUMP DT_DEVC_LINE = 0.25 /
