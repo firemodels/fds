@@ -175,9 +175,8 @@ set_files_world_readable()
    chmod -R go+r *
 }
 
-clean_firebot_history()
+clean_firebot_metafiles()
 {
-   # Clean Firebot metafiles
    cd $FIREBOT_DIR
    rm output/* > /dev/null
 }
@@ -343,6 +342,11 @@ fix_svn_properties()
 
    # Commit back results
    svn commit -m 'Firebot: Fix SVN properties throughout repository' &> /dev/null
+}
+
+archive_compiler_version()
+{
+   ifort -V &> "$FIREBOT_DIR/history/${SVN_REVISION}_compiler_info.txt"
 }
 
 #  ================================
@@ -1510,7 +1514,7 @@ hostname=`hostname`
 start_time=`date`
 
 ### Clean up on start ###
-clean_firebot_history
+clean_firebot_metafiles
 
 ### Stage 0 ###
 update_and_compile_cfast
@@ -1523,6 +1527,7 @@ check_svn_checkout
 if [[ ! $SKIP_SVN_PROPS ]] ; then
    fix_svn_properties
 fi
+archive_compiler_version
 
 ### Stage 2a ###
 compile_fds_db
