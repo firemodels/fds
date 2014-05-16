@@ -72,7 +72,7 @@ FDS Version \fdsversion \\
 \vfill
 
 \begin{flushright}
-\includegraphics[width=1in]{../Bibliography/doc} 
+\includegraphics[width=1in]{../Bibliography/doc}
 \end{flushright}
 
 \titlesigs
@@ -4887,7 +4887,7 @@ For most fuels of interest, the AIT and CFT may be found in \cite{SFPE:Beyler}. 
 
 If the lower flammability limit (LFL) of the fuel mixture is known but the CFT is not, then Beyler's Eq.~(4) may be used to estimate the CFT.  The formula is repeated here for convenience:
 \begin{align}
-T_{\si{CFT}} = T_0 + \left(\frac{\mbox{LFL}}{100}\right) \frac{\Delta H_c}{n \, C_{\si{p}}} 
+T_{\si{CFT}} = T_0 + \left(\frac{\mbox{LFL}}{100}\right) \frac{\Delta H_c}{n \, C_{\si{p}}}
 \end{align}
 where
 \begin{itemize}
@@ -5264,7 +5264,7 @@ Some reactions require the presence of any third body to stabilize the reaction 
 \mathrm{a \, X + b \, Y + M \rightarrow X_aY_b + M }
 \end{equation}
 
-This type of reaction can be done by adding {\ct THIRD\_BODY=.TRUE.} to the {\ct REAC} line for the reaction.  The species M should not otherwise be defined.  
+This type of reaction can be done by adding {\ct THIRD\_BODY=.TRUE.} to the {\ct REAC} line for the reaction.  The species M should not otherwise be defined.
 
 As discussed previously (Section~\ref{info:heat_of_combustion}), energy release is calculated using the net change of species in a time step along with the enthalpy of formation of each species. This approach makes specifying an endothermic reaction, such as the reversible CO$_2$ reaction (R3), no different than typical FDS exothermic combustion reactions.
 
@@ -5383,18 +5383,9 @@ on the gas temperature and the chemical composition. By default, the {\ct RADIAT
 
 \label{info:RADI_Resolution}
 
-There are several ways to improve the spatial and temporal accuracy of the Finite Volume
-Method in solving the radiation transport equation (RTE), but these will
-increase the computation time. You can increase the number
-of angles from the default 100 with the integer parameter
-{\ct NUMBER\_RADIATION\_ANGLES}. The frequency of calls to the radiation
-solver can be changed from every 3 time steps with an integer called
-{\ct TIME\_STEP\_INCREMENT}. The increment over which the angles are
-updated can be reduced from 5 with the integer called {\ct ANGLE\_INCREMENT}.
-If {\ct TIME\_STEP\_INCREMENT} and {\ct ANGLE\_INCREMENT} are
-both set to 1, the radiation field is completely updated in a single
-time step, but the cost of the calculation increases significantly. By default,
-the radiation transport equation is fully updated every 15 time steps.
+There are several ways to improve the spatial and temporal accuracy of the Finite Volume Method in solving the radiation transport equation (RTE), but these will increase the computation time. You can increase the number of angles from the default 100 with the integer parameter {\ct NUMBER\_RADIATION\_ANGLES}. The frequency of calls to the radiation solver can be changed from every 3 time steps with an integer called {\ct TIME\_STEP\_INCREMENT}. The increment over which the angles are updated can be reduced from 5 with the integer called {\ct ANGLE\_INCREMENT}. If {\ct TIME\_STEP\_INCREMENT} and {\ct ANGLE\_INCREMENT} are both set to 1, the radiation field is completely updated in a single time step, but the cost of the calculation increases significantly. By default, the radiation transport equation is fully updated every 15 time steps.
+
+The radiation solver is called before the start of the calculation to establish the radiation field in the event that you specify something to have a non-ambient temperature initially. By default, the radiation and wall boundary routines are iterated 10 times to establish thermal equilibrium. To change the number of iterations, set {\ct NUMBER\_INITIAL\_ITERATIONS} on the {\ct RADI} line.
 
 
 
@@ -5510,7 +5501,7 @@ defined via the line
 \begin{lstlisting}
 &PART ID='tracers', MASSLESS=.TRUE., ... /
 \end{lstlisting}
-Note that if the particles are {\ct MASSLESS}, it is not appropriate to color them according to any particular property. Particles are not colored by gas phase quantities, but rather by properties of the particle itself. For example, {\ct 'PARTICLE TEMPERATURE'} for a non-massless particle refers to the temperature of the particle itself rather than the local gas temperature. Also note that if {\ct MASSLESS=.TRUE.}, the {\ct SAMPLING\_FACTOR} (Section~\ref{info:particle_quantities}) is set to 1 unless you say otherwise, which would be pointless
+Note that if the particles are {\ct MASSLESS}, it is not appropriate to color them according to any particular property. Particles are not colored by gas phase quantities, but rather by properties of the particle itself. For example, {\ct 'PARTICLE TEMPERATURE'} for a non-massless particle refers to the temperature of the particle itself rather than the local gas temperature. Also note that if {\ct MASSLESS=.TRUE.}, the {\ct SAMPLING\_FACTOR} (Section~\ref{info:part_output}) is set to 1 unless you say otherwise, which would be pointless
 since {\ct MASSLESS} particles are for visualization only.
 
 
@@ -5538,23 +5529,6 @@ then no further inputs are required. Otherwise, you must provide all of the foll
 \item[{\ct H\_V\_REFERENCE\_TEMPERATURE}] The temperature corresponding to the provided {\ct HEAT\_OF\_VAPORIZATION} ($^\circ$C).
 \end{description}
 
-
-\subsection{Output Options for Liquid Droplets}
-\label{info:particle_quantities}
-
-The parameter {\ct QUANTITIES} on the {\ct PART} line is an array of character strings indicating which scalar quantities should be used to color the droplets when viewed as an animation. The choices are \\
-{\ct 'PARTICLE TEMPERATURE'} ($^\circ$C) \\
-{\ct 'PARTICLE DIAMETER'} ($\mu$m) \\
-{\ct 'PARTICLE VELOCITY'} (m/s) \\
-{\ct 'PARTICLE MASS'} (kg) \\
-{\ct 'PARTICLE AGE'} (s) \\
-By default, if no {\ct QUANTITIES} are specified and none are selected in Smokeview, then Smokeview will display particles with a single color.  To select this color specify either {\ct RGB} or {\ct COLOR}. By default, water droplets are colored blue and fuel droplets yellow. All others are colored black.
-
-It is not unusual to include hundreds of thousands of particles in a simulation. Visualizing all of the particles in Smokeview can sometimes be impractical due to memory limitations. To limit the amount of particle amount, you can make use of the following parameters on the {\ct PART} line:
-\begin{description}
-\item[{\ct SAMPLING\_FACTOR}] Sampling factor for the output file {\ct CHID.prt5}. This parameter can be used to reduce the size of the particle output file used to animate the simulation. The default value is 1 for {\ct MASSLESS} particles, meaning that every particle or droplet will be shown in Smokeview. The default is 10 for all other types of particles. {\ct MASSLESS} particles are discussed in Section~\ref{info:MASSLESS}.
-\item[{\ct AGE}]  Number of seconds the particle or droplet exists, after which time it is removed from the calculation. This is a useful parameter to use when trying to reduce the number of droplets or particles in a simulation.
-\end{description}
 
 
 
@@ -5720,15 +5694,12 @@ If the {\ct SURF} line that is associated with the particle class calls for it, 
 \label{info:PART_GEOMETRY}
 
 To demonstrate the basic syntax for solid particles, the following input lines create a collection of hot spheres:
-
 \begin{lstlisting}
 &PART ID='spheres', SURF_ID='HOT', STATIC=.TRUE., PROP_ID='ball' /
 &SURF ID='HOT', TMP_FRONT=500., RADIUS=0.005, GEOMETRY='SPHERICAL' /
 &PROP ID='ball', SMOKEVIEW_ID='SPHERE', SMOKEVIEW_PARAMETERS(1)='D=0.01' /
 &INIT PART_ID='spheres', XB=0.25,0.75,0.25,0.75,0.25,0.75, N_PARTICLES=10 /
 \end{lstlisting}
-
-\noindent
 The {\ct PART} line establishes the class of particles. In this case, the presence of a {\ct SURF\_ID} indicates that the particles are solids with the properties given by the {\ct SURF} line {\ct 'HOT'}. {\ct STATIC} is a logical parameter whose default is {\ct .FALSE.} that indicates if the particles are stationary. The {\ct PROP\_ID} references a {\ct PROP} (property) line that just tells Smokeview that the particles are to be drawn as spheres of diameter 0.01~m. See Section~\ref{info:SMOKEVIEW_PART} for details and options. The {\ct INIT} line randomly fills the given volume with 10 of these hot spheres. See Section~\ref{info:initial_droplets} for details.
 
 If the {\ct SURF} line includes a {\ct MATL\_ID}, the particle mass will be based upon the value(s) of {\ct DENSITY} of the referenced {\ct MATL} line(s). If there is to be no heat conduction calculation in depth, do not specify a {\ct MATL\_ID}. Instead, you can specify, for example, the surface temperature, {\ct TMP\_FRONT} ($^\circ$C), heat release rate per unit area, {\ct HRRPUA} (kW/m$^2$), or species {\ct MASS\_FLUX} (\si{kg/(m$^2$.s)}).
@@ -5740,62 +5711,43 @@ For  {\ct 'CYLINDRICAL'} or {\ct 'SPHERICAL'} particles, specify the {\ct INNER\
 
 
 
-\subsection{Output Options for Solid Particles}
-\label{info:solid_particle_quantities}
-
-Solid particles can be colored in Smokeview using the same {\ct QUANTITIES} that are listed in Section~\ref{info:particle_quantities}. For particles with a specified {\ct SURF\_ID}, you may also specify any of the solid phase output quantities listed in Table~\ref{tab:output}. If the specified quantity is associated with a species, use the parameter {\ct QUANTITIES\_SPEC\_ID(N)} to specify the species. Here {\ct N} refers to the order of the specified output quantities on the {\ct PART} line. You may also use {\ct DEVC} (device) lines to output data for a given particle. For example, the lines:
-\begin{lstlisting}
-&INIT ID='my particle', PART_ID='...', XB=..., N_PARTICLES=1 /
-&DEVC ID='...', INIT_ID='my particle', QUANTITY='WALL TEMPERATURE' /
-\end{lstlisting}
-
-\noindent
-output the surface temperature of a single particle.
-
 
 \subsection{Drag}
 \label{info:particle_drag}
 
-For massive particles the default drag law (i.e., the drag coefficient correlation as a function of the Reynolds number based on particle diameter) is that of a sphere. To invoke the cylinder drag law set {\ct DRAG\_LAW} to {\ct 'CYLINDER'} on the {\ct PART} line and to invoke the screen drag law (see Section~\ref{info:particle_screen}) set to {\ct 'SCREEN'}  If neither of these options is applicable, you may specify a constant value of the drag coefficient for a particle class (a specific {\ct PART\_ID}) by setting a {\ct DRAG\_COEFFICIENT} on {\ct PART}. The {\ct DRAG\_COEFFICIENT} over-rides the {\ct DRAG\_LAW}. If local particle density is very high drag may be reduced by particle wake effects. The threshold volume fraction for considering three-way coupling effects is controlled by the {\ct DENSE\_VOLUME\_FRACTION} parameter. Setting this parameter to 1 will turn off the three-way coupling model.
+For solid particles, the default drag law (i.e., the drag coefficient correlation as a function of the Reynolds number based on particle diameter) is that of a sphere. To invoke the cylinder drag law, set {\ct DRAG\_LAW} to {\ct 'CYLINDER'} on the {\ct PART} line, and to invoke the screen drag law (see Section~\ref{info:particle_screen}), set it to {\ct 'SCREEN'}  If neither of these options is applicable, you may specify a constant value of the drag coefficient for a particle class (a specific {\ct PART\_ID}) by setting a {\ct DRAG\_COEFFICIENT} on the {\ct PART} line. The {\ct DRAG\_COEFFICIENT} over-rides the {\ct DRAG\_LAW}. If the local particle density is very high, the drag may be reduced by particle wake effects. The threshold volume fraction for considering three-way coupling effects is controlled by the {\ct DENSE\_VOLUME\_FRACTION} parameter. Setting this parameter to 1 will turn off the three-way coupling model.
 
-\subsection{Splitting particles}
+\subsection{Splitting Particles}
 \label{info:particle_split}
 
-If the radiation heat flux is not uniformly distributed about the particle, it may be useful to split the particle into pieces, each with its own orientation. This can be done by using the parameter {\ct ORIENTATION(1:3,1:N)} to specify {\ct N} unique outward facing directions for the particle. For example,
+If the radiation heat flux is not uniformly distributed about the particle, it may be useful to split the particle into pieces, each with its own orientation. This can be done by using the parameter {\ct ORIENTATION} to specify  more than one outward facing directions for the particle. For example,
 \begin{lstlisting}
 &PART ..., ORIENTATION(1:3,1)=0,0,-1, ORIENTATION(1:3,2)=0,0,1 /
 \end{lstlisting}
-specifies that half the particle is facing downwards and half is facing upwards.  Each orientation is modeled in practice by a separate particle that ``sees'' the radiation that is directed to a plane normal to the orientation. The particle mass and the surface area are scaled by the number of orientations. The splitting along the coordinate axis is demonstrated for all geometries in Fig.~\ref{cart_split} through Fig.~\ref{sphere_split}. The orientation direction does not have to align with the coordinate axes. For a Cartesian particle (i.e., a plate), only the orientations that are perpendicular to the plate make physical sense. Keep in mind that the heat conducted within the different facets does not transfer through to the other facets. The heat conduction is still only one dimensional, in the direction normal to the face and towards the center.
+specifies that half the particle is facing downwards and half is facing upwards. FDS now essentially tracks two particles. The radiative flux to the downward facing particle is the integrated average over the southern hemisphere; the flux to the upward facing particle is the average over the northern hemisphere. The particle mass and the surface area are scaled by the number of orientations. The splitting along the coordinate axis is demonstrated for all geometries in Fig.~\ref{part_split}. The orientation direction does not have to align with the coordinate axes. In fact, the {\ct ORIENTATION}s do not have to be symmetric or come in pairs, even though for most applications it makes sense to do it this way. For a Cartesian particle (i.e., a plate), only the orientations that are perpendicular to the plate make physical sense. Keep in mind that the heat conducted within the different facets does not transfer through to the other facets. The heat conduction is still only one dimensional, in the direction normal to the face and towards the center.
 
-\begin{figure}[ht]
+\begin{figure}[p]
 \begin{center}
-\includegraphics[height=1.5in]{FIGURES/FDS_User_Guide_Cartesian_Particle_Drawing}
-\end{center}
-\caption[Cartesian particle split in two directions]{A Cartesian particle split into two. Note that the parameter {\ct ORIENTATION} refers to the direction of the outward looking face of the plate.}
-\label{cart_split}
-\end{figure}
+\includegraphics[height=2.0in]{FIGURES/FDS_User_Guide_Cartesian_Particle_Drawing}
 
-\begin{figure}[ht]
-\begin{center}
-\includegraphics[height=2.5in]{FIGURES/FDS_User_Guide_Cylindrical_Particle_Drawing}
-\end{center}
-\caption[Cylindrical particle split in four directions]{A cylindrical particle split into four. Note that the parameter {\ct ORIENTATION} refers to the direction of the outward looking face of the cylinder.}
-\label{cyl_split}
-\end{figure}
+\vspace{0.5in}
 
-\begin{figure}[ht]
-\begin{center}
+\includegraphics[height=2.8in]{FIGURES/FDS_User_Guide_Cylindrical_Particle_Drawing}
+
+\vspace{0.5in}
+
 \includegraphics[height=2.5in]{FIGURES/FDS_User_Guide_Sphere_Particle_Drawing}
 \end{center}
-\caption[Spherical particle split in six directions]{A spherical particle split into six. Note that the parameter {\ct ORIENTATION} refers to the direction of the outward looking face of the sphere.}
-\label{sphere_split}
+\caption[Examples of particle splitting]{Examples of a Cartesian (plate), cylindrical, and spherical particle split into multiple parts.}
+\label{part_split}
 \end{figure}
+
+Note that if only a single {\ct ORIENTATION} vector is assigned on a {\ct PART} line, the radiative flux to the particle is calculated as if there is a flat plate normal to the direction of the vector, like a conventional heat flux gauge. That is, the heat flux is not an integrated average over the entire particle but rather the directional heat flux with the given orientation. The reason for this exception to the general rule is that often single particles are used as ``targets'' to record a heat flux at a given point in the domain with a given orientation. These particles can be thought of as tiny heat flux gauges that do not disturb the flow.
 
 \subsection{Gas Generating Particles}
 \label{info:particle_mass_generation}
 
 Lagrangian particles can be used to generate gases at a specified rate. The syntax is similar to that used for a solid wall. For example, the following input lines create three particles -- one shaped like a rectangular plate, one a cylinder, and one a sphere -- that generate argon, sulfur dioxide, and helium, respectively. The particles have no mass; they simply are used to generate the gases at a specified rate.
-
 \begin{lstlisting}
 &SPEC ID='ARGON' /
 &SPEC ID='SULFUR DIOXIDE' /
@@ -5816,8 +5768,7 @@ Lagrangian particles can be used to generate gases at a specified rate. The synt
 &SURF ID='ball bc',  GEOMETRY='SPHERICAL', RADIUS=0.01, SPEC_ID(1)='HELIUM',
       MASS_FLUX(1)=0.1, TAU_MF(1)=0.001 /
 \end{lstlisting}
-
-\noindent In this case, there is no calculation of heat conduction in depth. Only the surface area is important. For the plate, the surface area is twice the length times the width. For the cylinder, the area is twice the radius times the length. For the sphere, the area is $4\pi$ times the radius squared. Figure~\ref{surf_mass_part_specified} displays the output of the test case called {\ct surf\_mass\_part\_specified.fds}, demonstrating that the production rate of the gases is as expected.
+In this case, there is no calculation of heat conduction in depth. Only the surface area is important. For the plate, the surface area is twice the length times the width. For the cylinder, the area is twice the radius times the length. For the sphere, the area is $4\pi$ times the radius squared. Figure~\ref{surf_mass_part_specified} displays the output of the test case called {\ct surf\_mass\_part\_specified.fds}, demonstrating that the production rate of the gases is as expected.
 
 \begin{figure}[ht]
 \begin{center}
@@ -5983,12 +5934,14 @@ The THIEF model assumes that the cable plastic material has a thermal conductivi
 \section{Particle Insertion}
 \label{info:controlling_droplets}
 
-There are three ways of introducing droplets or particles into a simulation. The first way is to define a sprinkler or
-nozzle using a {\ct PROP} line that includes a {\ct PART\_ID} that specifies the particle or droplet parameters. The second way is to
-add a {\ct PART\_ID} to a {\ct SURF} line, in which case particles or droplets will be ejected from that surface. Note that
-this only works if the surface has a normal velocity pointing into the flow domain. The third way to introduce particles or
-droplets is via an {\ct INIT} line that defines a volume within the computational domain in which the particles/droplets are
-to be introduced initially and/or periodically in time.
+There are three ways of introducing droplets or particles into a simulation. The first way is to define a sprinkler or nozzle using a {\ct PROP} line that includes a {\ct PART\_ID} that specifies the particle or droplet parameters. The second way is to add a {\ct PART\_ID} to a {\ct SURF} line, in which case particles or droplets will be ejected from that surface. Note that this only works if the surface has a normal velocity pointing into the flow domain. The third way to introduce particles or droplets is via an {\ct INIT} line that defines a volume within the computational domain in which the particles/droplets are to be introduced initially and/or periodically in time.
+
+It is not unusual to include hundreds of thousands of particles in a simulation. Visualizing all of the particles in Smokeview can sometimes be impractical due to memory limitations. To limit the amount of particles, you can make use of the following parameters on the {\ct PART} line:
+\begin{description}
+\item[{\ct SAMPLING\_FACTOR}] Sampling factor for the output file {\ct CHID.prt5}. This parameter can be used to reduce the size of the particle output file used to animate the simulation. The default value is 1 for {\ct MASSLESS} particles, meaning that every particle or droplet will be shown in Smokeview. The default is 10 for all other types of particles. {\ct MASSLESS} particles are discussed in Section~\ref{info:MASSLESS}.
+\item[{\ct AGE}]  Number of seconds the particle or droplet exists, after which time it is removed from the calculation. This is a useful parameter to use when trying to reduce the number of droplets or particles in a simulation.
+\end{description}
+
 
 
 \subsection{Particles Introduced at a Solid Surface}
@@ -7349,7 +7302,7 @@ either {\ct -x}, {\ct -y}, or {\ct -z}. To change these labels, use {\ct X\_ID},
 \subsubsection{Single-Point Statistics}
 
 \begin{description}
-\item[Mean] By default, a {\em line} of devices records a mean profile of a particular quantity,
+\item[Mean] By default, a {\em line} of devices records a mean or time-averaged profile of a particular quantity,
 \be
    \overline{\phi} = \frac{ \sum_{i=1}^n \phi_i }{n}
 \ee
@@ -7377,41 +7330,41 @@ Here again you must add a {\ct QUANTITY2} to the device line.
 \end{description}
 
 
-
-
-
-
-\section{Quantities within Solids}
-
 \subsection{Quantities at Certain Depth}
 \label{info:DEPTH}
 
 To record the temperature inside the surface, you can use a device as follows:
-
 \begin{lstlisting}
 &DEVC XYZ=..., QUANTITY='INSIDE WALL TEMPERATURE', DEPTH=0.005, ID='Temp_1', IOR=3 /
 \end{lstlisting}
-
-\noindent
 The parameter {\ct DEPTH} (m) indicates the distance inside the solid surface. If {\ct DEPTH} is positive the distance is measured from the front surface. If negative, it is measured from the back surface. Note that if the wall thickness is decreasing over time due to the solid phase reactions, and the distance is measured from the current front surface, the measurement point will be moving towards the back side of the solid. Eventually, the measurement point may emerge from the solid, in which case it starts to show ambient temperature. Measuring the distance from the back surface can then be better suited for the purpose.
 
 To record the material component's density with time, use the output quantity {\ct 'SOLID DENSITY'} in the following way:
-
 \begin{lstlisting}
 &DEVC ID='...', XYZ=..., IOR=3, QUANTITY='SOLID DENSITY', MATL_ID='wood', DEPTH=0.001 /
 \end{lstlisting}
-
-\noindent
-This produces a time history of the density of the material referred to as {\ct 'wood'} on a {\ct MATL} line. The density is recorded 1~mm beneath
-the surface which is oriented in the positive $z$ direction. Note that if {\ct 'wood'} is part of a mixture, the
-density represents the mass of {\ct 'wood'} per unit volume of the mixture.
+This produces a time history of the density of the material referred to as {\ct 'wood'} on a {\ct MATL} line. The density is recorded 1~mm beneath the surface which is oriented in the positive $z$ direction. Note that if {\ct 'wood'} is part of a mixture, the density represents the mass of {\ct 'wood'} per unit volume of the mixture.
 
 To record the solid conductivity, use {\ct QUANTITY='SOLID CONDUCTIVITY'}. To record the solid specific heat, use {\ct QUANTITY='SOLID SPECIFIC HEAT'}. These quantities do not need the {\ct MATL\_ID} keyword.
 
 Note that these quantities are allowed only as a {\ct DEVC}, not a {\ct BNDF}, output.
 
 
-\subsection{Profiles of Quantities: The \texorpdfstring{{\tt PROF}}{PROF} Namelist Group}
+\subsection{Back Surface Temperature}
+\label{info:BACK}
+
+If you just want to know the temperature of the back surface of the ``wall,'' then use
+\begin{lstlisting}
+&DEVC XYZ=..., QUANTITY='BACK WALL TEMPERATURE', ID='Temp_b', IOR=3 /
+\end{lstlisting}
+Note that this quantity is only meaningful if the front or exposed surface of the ``wall'' has the attribute {\ct BACKING='EXPOSED'} on the {\ct SURF} line that defines it. The coordinates, {\ct XYZ}, and orientation, {\ct IOR}, refer to the front surface. To check that the heat conduction calculation is being done properly, you can add the additional line
+\begin{lstlisting}
+&DEVC XYZ=..., QUANTITY='WALL TEMPERATURE', ID='Temp_f', IOR=-3 /
+\end{lstlisting}
+where now {\ct XYZ} and {\ct IOR} refer to the coordinates and orientation of the back side of the wall. These two wall temperatures ought to be the same. Remember that the ``wall'' in this case can only be at most one mesh cell thick, and its {\ct THICKNESS} need not be the same as the mesh cell width. Rather, the {\ct THICKNESS} ought to be the actual thickness of the ``wall'' through which FDS performs a 1-D heat conduction calculation.
+
+
+\section{Profiles of Quantities: The \texorpdfstring{{\tt PROF}}{PROF} Namelist Group}
 \label{info:PROF}
 
 FDS uses a fine one-dimensional mesh at each boundary cell to compute heat transfer within a solid. Use the {\ct PROF} output to record the properties of the solid over the entire thickness. The parameters (Table~\ref{tbl:PROF}) to specify a given {\ct PROF}ile are similar to those used to specify a surface quantity in the {\ct DEVC} group. {\ct XYZ} designates the triplet of coordinates, {\ct QUANTITY} is the physical quantity to monitor, {\ct IOR} the orientation, and {\ct ID} an identifying character string. Here is an example of how you would use this feature to get a time history of temperature profiles within a given solid obstruction:
@@ -7423,29 +7376,6 @@ FDS uses a fine one-dimensional mesh at each boundary cell to compute heat trans
 \noindent
 Other possible quantities are the total density of the wall ({\ct QUANTITY = 'DENSITY'}) or densities of solid material components
 ({\ct QUANTITY = '[MATL\_ID]'}), where {\ct MATL\_ID} is the name of the material. Each {\ct PROF} line creates a separate file. The format of the file produced by each {\ct PROF} line includes the node coordinates and specified quantity every {\ct DT\_PROF}~s. However, if you specify {\ct FORMAT\_INDEX=2} on the {\ct PROF} line, the resulting file will contain columns containing only the final set of node coordinates and quantity values. This is handy for displaying a steady-state temperature profile.
-
-\subsection{Back Surface Temperature}
-\label{info:BACK}
-
-If you just want to know the temperature of the back surface of the ``wall,'' then use
-
-\begin{lstlisting}
-&DEVC XYZ=..., QUANTITY='BACK WALL TEMPERATURE', ID='Temp_b', IOR=3 /
-\end{lstlisting}
-
-\noindent
-Note that this quantity is only meaningful if the front or exposed surface of the ``wall'' has the attribute {\ct BACKING='EXPOSED'} on the {\ct SURF} line that defines it. The coordinates, {\ct XYZ}, and orientation, {\ct IOR}, refer to the front surface. To check that the heat conduction calculation is being done properly, you can add the additional line
-
-\begin{lstlisting}
-&DEVC XYZ=..., QUANTITY='WALL TEMPERATURE', ID='Temp_f', IOR=-3 /
-\end{lstlisting}
-
-\noindent
-where now {\ct XYZ} and {\ct IOR} refer to the coordinates and orientation of the back side of the wall. These two wall temperatures ought to be
-the same. Remember that the ``wall'' in this case can only be at most one mesh cell thick, and its {\ct THICKNESS} need not be the same as the
-mesh cell width. Rather, the {\ct THICKNESS} ought to be the actual thickness of the ``wall'' through which FDS performs a 1-D heat conduction
-calculation.
-
 
 
 
@@ -7570,6 +7500,64 @@ An alternative to {\ct SOOT} mass fraction can be specified via {\ct SMOKE3D\_QU
 &DUMP SMOKE3D_QUANTITY='MASS FRACTION', SMOKE3D_SPEC_ID='MY SMOKE' /
 \end{lstlisting}
 The {\ct MASS\_EXTINCTION\_COEFFICIENT} is passed to Smokeview to be used for visualization.
+
+
+
+\section{Particle Output Quantities}
+\label{info:part_output}
+
+This section discusses output options for Lagrangian particles.
+
+\subsection{Droplets that are Attached to Solid Surfaces}
+
+Liquid droplets ``stick'' to solid surfaces unless directed otherwise. There are various quantities that describe these populations. For example, {\ct 'MPUA'} is the \underline{M}ass \underline{P}er \underline{U}nit \underline{A}rea of the droplets defined by {\ct PART\_ID}. Likewise, {\ct 'AMPUA'} is the \underline{A}ccumulated \underline{M}ass \underline{P}er \underline{U}nit \underline{A}rea. Both of these are given in units of kg/m$^2$. Think of these outputs as measures of the instantaneous mass density per unit area, and the accumulated total, respectively. These quantities are not identical measures.  The quantity {\ct 'AMPUA'} is analogous to a ``bucket test,'' where the droplets are collected in buckets and the total mass determined at the end of a given time period. In this case each grid cell on the floor is considered its own bucket.  Each droplet is counted only once when it reaches the floor\footnote{Be aware of the fact that the default behavior for droplets hitting the ``floor,'' that is, the plane $z=\hbox{\ct ZMIN}$, is to disappear ({\ct POROUS\_FLOOR=.TRUE.} on the {\ct MISC} line). In this case, {\ct 'MPUA'} will be zero, but {\ct 'AMPUA'} will not. FDS stores the droplet mass just before removing the droplet from the simulation for the purpose of saving CPU time.}. {\ct MPUA} counts a droplet whenever it is on any solid surface, including the walls. If the droplet moves from one solid wall cell to another, it will be counted again. The cooling of a solid surface by droplets of a given type is given by {\ct 'CPUA'}, the \underline{C}ooling \underline{P}er \underline{U}nit \underline{A}rea in units of kW/m$^2$. Since a typical sprinkler simulation only tracks a small fraction of the droplets emitted from a sprinkler, both {\ct MPUA} and {\ct CPUA} also perform an exponential smoothing. This avoids having spotted distributions on surfaces due to the infrequent arrival of droplets that likely have a high weighting factor.
+
+Each of the output quantities mentioned above has a variant in which the quantity is summed by species rather than particle type. For example, the quantity {\ct 'AMPUA\_Z'} along with a specified {\ct SPEC\_ID} rather than a {\ct PART\_ID} will sum the given output quantity over all particle classes with the given {\ct SPEC\_ID}.
+
+As an example of how to use these kinds of output quantities, the test case {\ct bucket\_test} describes a single sprinkler mounted 10~cm below a 5~m ceiling. Water flows for 30~s at a constant rate of 180~L/min (ramped up and down in 1~s).  The simulation continues for another 10~s to allow water drops time to reach the floor. The total mass of water discharged is
+\be
+  \mathrm{ 180 \; \frac{L}{min} \times 1 \; \frac{kg}{L} \times \frac{1}{60} \; \frac{min}{s} \times 30 \; s = 90 \; kg }
+\ee
+In the simulation, the quantity {\ct 'AMPUA'} with {\ct STATISTICS='SURFACE INTEGRAL'} is specified on the {\ct DEVC} line.  This results in FDS summing {\ct 'AMPUA'} over each grid cell in the volume defined by {\ct XB}, in this case the entire floor, analogous to if there were an single bucket present that was the same size as the area specified with {\ct XB}. Summing the values of {\ct 'AMPUA'} over the entire floor yields a total of 90~kg (Fig.~\ref{bucket_test_fig}). Note that there really is no need to time-average the results. The quantity is inherently accumulating.
+
+\begin{figure}[ht]
+\centering
+\includegraphics[scale=0.55]{SCRIPT_FIGURES/bucket_test}
+\caption[Results of the {\ct bucket\_test} case]{Accumulated water collected at the floor in the {\ct bucket\_test} case.}
+\label{bucket_test_fig}
+\end{figure}
+
+
+\subsection{Droplet and Particle Densities and Fluxes in the Gas Phase}
+
+Away from solid surfaces, {\ct 'MPUV'} is the \underline{M}ass \underline{P}er \underline{U}nit \underline{V}olume of particles or droplets of type ({\ct PART\_ID}) in units of kg/m$^3$.  {\ct 'MPUV\_Z'} provides the same information integrated over all droplets of a single species, ({\ct SPEC\_ID}).  {\ct 'PARTICLE FLUX X'},  {\ct 'PARTICLE FLUX Y'}, and {\ct 'PARTICLE FLUX Z'} produce {\em only} slice and Plot3D files
+of the mass flux of droplets in the $x$, $y$, and $z$ directions, respectively, in units of kg/m$^2$/s.
+
+
+\subsection{Coloring Particles and Droplets in Smokeview}
+
+The parameter {\ct QUANTITIES} on the {\ct PART} line is an array of character strings indicating which scalar quantities should be used to color particles and droplets in Smokeview. The choices are \\
+{\ct 'PARTICLE TEMPERATURE'} ($^\circ$C) \\
+{\ct 'PARTICLE DIAMETER'} ($\mu$m) \\
+{\ct 'PARTICLE VELOCITY'} (m/s) \\
+{\ct 'PARTICLE MASS'} (kg) \\
+{\ct 'PARTICLE AGE'} (s) \\
+By default, if no {\ct QUANTITIES} are specified and none are selected in Smokeview, then Smokeview will display particles with a single color. To select this color specify either {\ct RGB} or {\ct COLOR}. By default, water droplets are colored blue. All others are colored black.
+
+For solid particles with a specified {\ct SURF\_ID}, you may specify any of the solid phase output quantities listed in Table~\ref{tab:output}. If the specified quantity is associated with a species, use the parameter \linebreak[4] {\ct QUANTITIES\_SPEC\_ID(N)} to specify the species. Here {\ct N} refers to the order of the specified output quantities on the {\ct PART} line.
+
+
+\subsection{Detailed Properties of Solid Particles}
+
+You may output properties of a single solid particle using a {\ct DEVC} (device) line. For example, the lines:
+\begin{lstlisting}
+&INIT ID='my particle', PART_ID='...', XB=..., N_PARTICLES=1 /
+&DEVC ID='...', INIT_ID='my particle', QUANTITY='WALL TEMPERATURE' /
+\end{lstlisting}
+output the surface temperature of a single particle that has been introduced into the simulation via an {\ct INIT} line. If the particle is split (by means of multiple {\ct ORIENTATION} vectors on the {\ct PART} line), you can specify which of the particle fragments you want using the parameter {\ct ORIENTATION\_NUMBER} on the {\ct DEVC} line.
+
+
+
 
 
 \section{Special Output Quantities}
@@ -7767,47 +7755,6 @@ For more information about specifying arrays of devices via the parameter {\ct P
 
 
 
-\subsection{Particle Output Quantities}
-\label{info:part_output}
-
-This section lists various output quantities associated with Lagrangian particles.
-
-\subsubsection{Solid Phase}
-
-It is possible to record various properties of droplets and particles. Some of the output quantities are associated with solid boundaries. For example,
-{\ct 'MPUA'} is the \underline{M}ass \underline{P}er \underline{U}nit \underline{A}rea of the droplets named {\ct PART\_ID}.
-Likewise, {\ct 'AMPUA'} is the \underline{A}ccumulated \underline{M}ass \underline{P}er \underline{U}nit \underline{A}rea.
-Both of these are given in units of kg/m$^2$. Think of these outputs as measures of the instantaneous mass density per unit area,
-and the accumulated total, respectively.  It should be noted that these quantities are not identical measures.  The quantity {\ct 'AMPUA'} is analogous to a ``bucket test,'' where the droplets are collected in buckets and the total mass determined at the end of a given time period.  In this case each grid cell on the floor is considered its own bucket.  Each droplet is counted only once when it reaches the floor\footnote{Be aware of the fact that the default behavior for droplets hitting the ``floor,'' that is, the plane $z=\hbox{\ct ZMIN}$, is to disappear ({\ct POROUS\_FLOOR=.TRUE.} on the {\ct MISC} line). In this case, {\ct 'MPUA'} will be zero, but {\ct 'AMPUA'} will not. FDS stores the droplet mass just before removing the droplet from the simulation for the purpose of saving CPU time.}. MPUA counts a particle whenever it is on any solid surface, including the walls.  If the particle or droplet moves from one solid wall
-cell to another, then it will be counted again.  The cooling of a solid surface by droplets of a
-given type is given by {\ct 'CPUA'}, the \underline{C}ooling \underline{P}er \underline{U}nit \underline{A}rea in units of kW/m$^2$.  Since a typical sprinkler simulation only tracks a small fraction of the droplets emitted from a sprinkler, both MPUA and CPUA also perform an exponential smoothing.  This avoids having spotted distributions on surfaces due to the infrequent arrival of particles that likely have a high weighting factor.
-
-Each of the outputs mentioned above also has an {\ct '\_Z'} variant, for example {\ct 'AMPUA\_Z'}.  Adding {\ct '\_Z'} and giving a {\ct SPEC\_ID} rather than a {\ct PART\_ID} will sum the given output over all particle classes of the given {\ct SPEC\_ID}.
-
-In the test case {\ct bucket\_test}, a single sprinkler is
-mounted 10~cm below a 5~m ceiling. Water flows for 30~s at a constant
-rate of 180~L/min (ramped up and down in 1~s).  The simulation continues for another 10~s to allow
-water drops time to reach the floor. The total mass of water discharged is
-\be
-  \mathrm{ 180 \; \frac{L}{min} \times 1 \; \frac{kg}{L} \times \frac{1}{60} \; \frac{min}{s} \times 30 \; s = 90 \; kg }
-\ee
-In the simulation, the quantity {\ct 'AMPUA'} with {\ct STATISTICS='SURFACE INTEGRAL'} is applied to the {\ct DEVC} line.  This results in FDS summing {\ct 'AMPUA'} over each grid cell in the volume defined by {\ct XB}, in this case the entire floor, analogous to if there were an single bucket present that was the same size as the area specified with {\ct XB}.
-Summing the values of {\ct 'AMPUA'} over the entire
-floor yields a total of 90~kg (Fig.~\ref{bucket_test_fig}). Note that there really is no need to time-average the results. The quantity is inherently accumulating.
-
-\begin{figure}[ht]
-\centering
-\includegraphics[scale=0.55]{SCRIPT_FIGURES/bucket_test}
-\caption[Results of the {\ct bucket\_test} case]{Accumulated water collected at the floor in the {\ct bucket\_test} case.}
-\label{bucket_test_fig}
-\end{figure}
-
-
-\subsubsection{Gas Phase}
-
-Away from solid surfaces, {\ct 'MPUV'} is the \underline{M}ass \underline{P}er \underline{U}nit \underline{V}olume of a type ({\ct PART\_ID}) of  droplets as they fly through
-the air, in units of kg/m$^3$.  {\ct 'MPUV\_Z'} provides the same information integrated over all droplets of a single species ({\ct SPEC\_ID}).  {\ct 'PARTICLE FLUX X'},  {\ct 'PARTICLE FLUX Y'}, and {\ct 'PARTICLE FLUX Z'} produce {\em only} slice and Plot3D files
-of the mass flux of droplets in the $x$, $y$, and $z$ directions, respectively, in units of kg/m$^2$/s.
 
 
 
@@ -8637,14 +8584,14 @@ Here, the {\ct ID} is just a label in the output file. When an output quantity i
 {\ct OPEN NOZZLES}                              & Number of open nozzles                        &                & D            \\ \hline
 {\ct OPTICAL DENSITY}                           & Section~\ref{info:visibility}                 & 1/m            & D,I,P,S      \\ \hline
 {\ct PATH OBSCURATION}                          & Section~\ref{info:beam_detector}              & \%             & D            \\ \hline
-{\ct PARTICLE AGE}                              & Section~\ref{info:particle_quantities}        & s              & PA           \\ \hline
-{\ct PARTICLE DIAMETER}                         & Section~\ref{info:particle_quantities}        & $\mu$m         & PA           \\ \hline
+{\ct PARTICLE AGE}                              & Section~\ref{info:part_output}                & s              & PA           \\ \hline
+{\ct PARTICLE DIAMETER}                         & Section~\ref{info:part_output}                & $\mu$m         & PA           \\ \hline
 {\ct PARTICLE FLUX X}$^{**}$                    & Section~\ref{info:part_output}                & \si{kg/(m$^2$.s)} & P,S       \\ \hline
 {\ct PARTICLE FLUX Y}$^{**}$                    & Section~\ref{info:part_output}                & \si{kg/(m$^2$.s)} & P,S       \\ \hline
 {\ct PARTICLE FLUX Z}$^{**}$                    & Section~\ref{info:part_output}                & \si{kg/(m$^2$.s)} & P,S       \\ \hline
-{\ct PARTICLE MASS}                             & Section~\ref{info:particle_quantities}        & kg             & PA           \\ \hline
-{\ct PARTICLE TEMPERATURE}                      & Section~\ref{info:particle_quantities}        & $^\circ$C      & PA           \\ \hline
-{\ct PARTICLE VELOCITY}                         & Section~\ref{info:particle_quantities}        & m/s            & PA           \\ \hline
+{\ct PARTICLE MASS}                             & Section~\ref{info:part_output}                & kg             & PA           \\ \hline
+{\ct PARTICLE TEMPERATURE}                      & Section~\ref{info:part_output}                & $^\circ$C      & PA           \\ \hline
+{\ct PARTICLE VELOCITY}                         & Section~\ref{info:part_output}                & m/s            & PA           \\ \hline
 {\ct PRESSURE}                                  & Perturbation pressure, $\tp-p_\infty$         & Pa             & D,I,P,S      \\ \hline
 {\ct PRESSURE COEFFICIENT}                      & Section~\ref{info:wind}                       &                & B,D          \\ \hline
 {\ct PRESSURE ZONE}                             & Section~\ref{info:ZONE}                       &                & D,S          \\ \hline
@@ -8971,6 +8918,7 @@ properties be specified as well. Simply prescribing as many properties as possib
 {\ct NO\_UPDATE\_DEVC\_ID}  & Character       & Section~\ref{info:freeze_device}                                &       &               \\ \hline
 {\ct NO\_UPDATE\_CTRL\_ID}  & Character       & Section~\ref{info:freeze_device}                                &       &               \\ \hline
 {\ct ORIENTATION}           & Real Triplet    & Section~\ref{info:DEVC}                                         &       & 0,0,-1        \\ \hline
+{\ct ORIENTATION\_NUMBER}   & Integer         & Section~\ref{info:part_output}                                  &       & 1             \\ \hline
 {\ct OUTPUT}                & Logical         & Section~\ref{info:out:DEVC}                                     &       & {\ct .TRUE.}  \\ \hline
 {\ct PART\_ID}              & Character       & Section~\ref{info:outputquantities}                             &       &               \\ \hline
 {\ct PIPE\_INDEX}           & Integer         & Section~\ref{info:pressureramp}                                 &       &  1            \\ \hline
@@ -9548,7 +9496,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \multicolumn{5}{|c|}{{\ct PART} (Lagrangian Particles/Droplets)} \\
 \hline \hline
 \endhead
-{\ct AGE}                           & Real            & Section~\ref{info:particle_quantities}  & s         & 100000.       \\ \hline
+{\ct AGE}                           & Real            & Section~\ref{info:part_output}          & s         & 100000.       \\ \hline
 {\ct BREAKUP}                       & Logical         & Section~\ref{info:secondary_breakup}    &           & {\ct .FALSE.} \\ \hline
 {\ct BREAKUP\_CNF\_RAMP\_ID}        & Character       & Section~\ref{info:secondary_breakup}    &           &               \\ \hline
 {\ct BREAKUP\_DISTRIBUTION}         & Character       & Section~\ref{info:secondary_breakup}    &           & {\ct 'ROSIN...'} \\ \hline
@@ -9557,7 +9505,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct BREAKUP\_SIGMA\_D}             & Real            & Section~\ref{info:secondary_breakup}    &           &               \\ \hline
 {\ct CHECK\_DISTRIBUTION}           & Logical         & Section~\ref{info:particle_size}        &           & {\ct .FALSE.} \\ \hline
 {\ct CNF\_RAMP\_ID}                 & Character       & Section~\ref{info:particle_size}        &           &               \\ \hline
-{\ct COLOR}                         & Character       & Section~\ref{info:particle_quantities}  &           & {\ct 'BLACK'} \\ \hline
+{\ct COLOR}                         & Character       & Section~\ref{info:part_output}          &           & {\ct 'BLACK'} \\ \hline
 {\ct COMPLEX\_REFRACTIVE\_INDEX}    & Real            & Section~\ref{radiative_part_props}      &           & 0.01          \\ \hline
 {\ct CTRL\_ID}                      & Character       & Section~\ref{info:particle_flux}        &           &               \\ \hline
 {\ct DENSE\_VOLUME\_FRACTION}       & Real            & Section~\ref{info:particle_drag}        & m$^3$/m$^3$ & 1.E-5         \\ \hline
@@ -9578,12 +9526,12 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct N\_STRATA}                     & Integer         & Section~\ref{info:particle_size}        &           & 7             \\ \hline
 {\ct ORIENTATION(1:3,:)}            & Real Array      & Section~\ref{info:PART_SURF}            &           &               \\ \hline
 {\ct PROP\_ID}                      & Character       & Section~\ref{info:PART_Basics}          &           &               \\ \hline
-{\ct QUANTITIES(10)}                & Character       & Section~\ref{info:particle_quantities}  &           &               \\ \hline
-{\ct QUANTITIES\_SPEC\_ID(10)}      & Character       & Section~\ref{info:particle_quantities}  &           &               \\ \hline
+{\ct QUANTITIES(10)}                & Character       & Section~\ref{info:part_output}          &           &               \\ \hline
+{\ct QUANTITIES\_SPEC\_ID(10)}      & Character       & Section~\ref{info:part_output}          &           &               \\ \hline
 {\ct RADIATIVE\_PROPERTY\_TABLE}    & Real            & Section~\ref{radiative_part_props}      &           &               \\ \hline
 {\ct REAL\_REFRACTIVE\_INDEX}       & Real            & Section~\ref{radiative_part_props}      &           & 1.33          \\ \hline
-{\ct RGB(3)}                        & Integers        & Section~\ref{info:particle_quantities}  &           &               \\ \hline
-{\ct SAMPLING\_FACTOR}              & Integer         & Section~\ref{info:particle_quantities}  &           & 1             \\ \hline
+{\ct RGB(3)}                        & Integers        & Section~\ref{info:part_output}          &           &               \\ \hline
+{\ct SAMPLING\_FACTOR}              & Integer         & Section~\ref{info:part_output}          &           & 1             \\ \hline
 {\ct SIGMA\_D}                      & Real            & Section~\ref{info:particle_size}        &           &               \\ \hline
 {\ct SPEC\_ID}                      & Character       & Section~\ref{thermal_part_props}        &           &               \\ \hline
 {\ct STATIC}                        & Logical         & Section~\ref{info:PART_SURF}            &           & {\ct .FALSE.} \\ \hline
@@ -9749,6 +9697,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct MIE\_MAXIMUM\_DIAMETER}        & Real          & Section~\ref{info:RADI_Absorption}        & $\mu$m            & 1.5$\times D$     \\ \hline
 {\ct MIE\_NDG}                      & Integer       & Section~\ref{info:RADI_Absorption}        &                   & 50                \\ \hline
 {\ct NMIEANG                  }     & Integer       & Section~\ref{info:RADI_Absorption}        &                   & 15                \\ \hline
+{\ct NUMBER\_INITIAL\_ITERATIONS}   & Integer       & Section~\ref{info:RADI_Resolution}        &                   & 10                \\ \hline
 {\ct NUMBER\_RADIATION\_ANGLES}     & Integer       & Section~\ref{info:RADI_Resolution}        &                   & 100               \\ \hline
 {\ct PATH\_LENGTH }                 & Real          & Section~\ref{info:RADI_Wide_Band}         &   m               &                   \\ \hline
 {\ct RADIATION}                     & Logical       & Section~\ref{info:RADI}                   &                   & {\ct .TRUE.}      \\ \hline
