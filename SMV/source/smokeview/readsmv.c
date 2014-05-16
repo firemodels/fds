@@ -8651,8 +8651,8 @@ int readini2(char *inifile, int localfile){
     }
     if(match(buffer,"VECCONTOURS")==1){
       fgets(buffer,255,stream);
-      sscanf(buffer,"%i",&slice_show_contours);
-      ONEORZERO(slice_show_contours);
+      sscanf(buffer,"%i",&show_slices_and_vectors);
+      ONEORZERO(show_slices_and_vectors);
       continue;
     }
     if(match(buffer,"ISOTRAN2")==1){
@@ -11150,7 +11150,7 @@ void writeini(int flag,char *filename){
   fprintf(fileout,"VECLENGTH\n");
   fprintf(fileout," %i %f 1.0\n",4,vecfactor);
   fprintf(fileout,"VECCONTOURS\n");
-  fprintf(fileout," %i\n",slice_show_contours);
+  fprintf(fileout," %i\n",show_slices_and_vectors);
   fprintf(fileout,"VECTORPOINTSIZE\n");
   fprintf(fileout," %f\n",vectorpointsize);
   fprintf(fileout,"PARTPOINTSIZE\n");

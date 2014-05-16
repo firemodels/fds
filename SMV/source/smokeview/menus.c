@@ -653,6 +653,7 @@ void ShowVSliceMenu(int value){
   vslicedata *vd;
   slicedata *sd;
   int i;
+
   updatemenu=1;  
   glutPostRedisplay();
   if(value==SHOW_ALL){
@@ -681,6 +682,10 @@ void ShowVSliceMenu(int value){
   }
   if(value==-12){
     offset_slice=1-offset_slice;
+    return;
+  }
+  if(value==-15){
+    show_slices_and_vectors=1-show_slices_and_vectors;
     return;
   }
   vd = vsliceinfo + value;
@@ -750,6 +755,10 @@ void ShowHideSliceMenu(int value){
       break;
     case -14:
       show_fed_area=1-show_fed_area;
+      break;
+    case -15:
+      show_slices_and_vectors=1-show_slices_and_vectors;
+      return;
       break;
     default:
       ASSERT(FFALSE);
@@ -6432,6 +6441,8 @@ updatemenu=0;
     }
     if(show_slice_in_obst==1)glutAddMenuEntry(_("*Show vector slice in blockage"),-11);
     if(show_slice_in_obst==0)glutAddMenuEntry(_("Show vector slice in blockage"),-11);
+    if(show_slices_and_vectors==1)glutAddMenuEntry(_("*Show slices and vectors"),-15);
+    if(show_slices_and_vectors==0)glutAddMenuEntry(_("Show slices and vectors"),-15);
     if(offset_slice==1)glutAddMenuEntry(_("*Offset vector slice"),-12);
     if(offset_slice==0)glutAddMenuEntry(_("Offset vector slice"),-12);
     if(vd_shown!=NULL&&nvsliceloaded0!=0){
@@ -6526,6 +6537,8 @@ updatemenu=0;
     if(show_slice_in_obst==0)glutAddMenuEntry(_("Show slice in blockage"),-11);
     if(offset_slice==1)glutAddMenuEntry(_("*Offset slice"),-12);
     if(offset_slice==0)glutAddMenuEntry(_("Offset slice"),-12);
+    if(show_slices_and_vectors==1)glutAddMenuEntry(_("*Show slices and vectors"),-15);
+    if(show_slices_and_vectors==0)glutAddMenuEntry(_("Show slices and vectors"),-15);
     if(nfedinfo>0){
       if(show_fed_area==1)glutAddMenuEntry("*Show FED areas",-14);
       if(show_fed_area==0)glutAddMenuEntry("Show FED areas",-14);

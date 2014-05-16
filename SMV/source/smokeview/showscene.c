@@ -419,7 +419,7 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
   if(show_gslice_triangles==1||show_gslice_normal==1||show_gslice_normal_keyboard==1||show_gslice_triangulation==1){
     drawgslice_outline();
   }
-  if((slice_show_contours==1&&showvslice==1)||(showslice==1&&use_transparency_data==0)){
+  if((show_slices_and_vectors==1&&showvslice==1)||(showslice==1&&use_transparency_data==0)){
     drawslice_frame();
   } 
 
@@ -504,7 +504,7 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
 
 /* ++++++++++++++++++++++++ draw slice files +++++++++++++++++++++++++ */
 
-  if((slice_show_contours==1&&showvslice==1)||(showslice==1&&use_transparency_data==1)){
+  if((show_slices_and_vectors==1&&showvslice==1)||(showslice==1&&use_transparency_data==1)){
     drawslice_frame();
     SNIFF_ERRORS("after drawslice_frame");
   } 
