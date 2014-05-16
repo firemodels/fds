@@ -3232,7 +3232,8 @@ void drawslice_frame(){
 
       i=slice_loaded_list[ii];
       sd = sliceinfo + i;
-      if((slice_show_contours==0&&sd->display==0)||sd->type!=islicetype)continue;
+      if(sd->type!=islicetype)continue;
+      if((showvslice==0||slice_show_contours==0)&&sd->display==0)continue;
       if(sd->times[0]>global_times[itimes])continue;
       if(sd->compression_type==1||sd->compression_type==2){
 #ifdef USE_ZLIB
@@ -4858,13 +4859,18 @@ void drawvvolslice(const vslicedata *vd){
       yy1 = yplttemp[j];
       for(k=sd->ks1; k<sd->ks2+1; k+=vectorskip){
         n+=vectorskip; 
-        if(sd->constant_color==NULL){
-          i11 = sd->iqsliceframe[n];
-          rgb_ptr = rgb_slice + 4*i11;
-	      }
-	      else{
-	        rgb_ptr = sd->constant_color;
-	      }
+        if(slice_show_contours==0){
+          if(sd->constant_color==NULL){
+            i11 = sd->iqsliceframe[n];
+            rgb_ptr = rgb_slice + 4*i11;
+          }
+          else{
+            rgb_ptr = sd->constant_color;
+          }
+        }
+        else{
+          rgb_ptr = foregroundcolor;
+        }
         if(show_slice_in_obst==1||(iblank[IJK(plotx,j,k)]==GAS&&rgb_ptr[3]>0.5)){
           z1 = zplttemp[k];
           GET_VEC_DXYZ(u,dx,n);
@@ -4889,13 +4895,18 @@ void drawvvolslice(const vslicedata *vd){
       yy1 = yplttemp[j];
       for(k=sd->ks1; k<sd->ks2+1; k+=vectorskip){
         n+=vectorskip;
-	      if(sd->constant_color==NULL){
-          i11 = sd->iqsliceframe[n];
-          rgb_ptr = rgb_slice + 4*i11;
-	      }
-	      else{
-	        rgb_ptr = sd->constant_color;
-	      }
+        if(slice_show_contours==0){
+          if(sd->constant_color==NULL){
+            i11 = sd->iqsliceframe[n];
+            rgb_ptr = rgb_slice + 4*i11;
+          }
+          else{
+            rgb_ptr = sd->constant_color;
+          }
+        }
+        else{
+          rgb_ptr = foregroundcolor;
+        }
         if(show_slice_in_obst==1||(iblank[IJK(plotx,j,k)]==GAS&&rgb_ptr[3]>0.5)){
           z1 = zplttemp[k];
           GET_VEC_DXYZ(u,dx,n);
@@ -5140,7 +5151,12 @@ void drawvvolslice_cellcenter(const vslicedata *vd){
           float dy;
 
           index_v = (plotx-sd->is1)*sd->nslicej*sd->nslicek + (j-sd->js1)*sd->nslicek + k + 1 - sd->ks1;
-          GET_SLICE_COLOR(color_v,index_v);
+          if(slice_show_contours==0){
+            GET_SLICE_COLOR(color_v,index_v);
+          }
+          else{
+            color_v = foregroundcolor;
+          }
           GET_VEC_DXYZ(v,dy,index_v);
           glColor4fv(color_v);
           glVertex3f(constval,yy1-dy,zhalf);
@@ -5152,7 +5168,12 @@ void drawvvolslice_cellcenter(const vslicedata *vd){
           float dz;
 
           index_w = (plotx-sd->is1)*sd->nslicej*sd->nslicek + (j-sd->js1+1)*sd->nslicek + k - sd->ks1;
-          GET_SLICE_COLOR(color_w,index_w);
+          if(slice_show_contours==0){
+            GET_SLICE_COLOR(color_w,index_w);
+          }
+          else{
+            color_w = foregroundcolor;
+          }
           GET_VEC_DXYZ(w,dz,index_w);
           glColor4fv(color_w);
           glVertex3f(constval,yhalf,z1-dz);
@@ -5183,7 +5204,12 @@ void drawvvolslice_cellcenter(const vslicedata *vd){
           float dy;
 
           index_v = (plotx-sd->is1)*sd->nslicej*sd->nslicek + (j-sd->js1)*sd->nslicek + k - sd->ks1 + 1;
-          GET_SLICE_COLOR(color_v,index_v);
+          if(slice_show_contours==0){
+            GET_SLICE_COLOR(color_v,index_v);
+          }
+          else{
+            color_v = foregroundcolor;
+          }
           GET_VEC_DXYZ(v,dy,index_v);
           glColor4fv(color_v);
           glVertex3f(constval,yy1+dy,zhalf);
@@ -5194,7 +5220,12 @@ void drawvvolslice_cellcenter(const vslicedata *vd){
           float dz;
 
           index_w = (plotx-sd->is1)*sd->nslicej*sd->nslicek + (j-sd->js1+1)*sd->nslicek + k-sd->ks1;
-          GET_SLICE_COLOR(color_w,index_w);
+          if(slice_show_contours==0){
+            GET_SLICE_COLOR(color_w,index_w);
+          }
+          else{
+            color_w = foregroundcolor;
+          }
           GET_VEC_DXYZ(w,dz,index_w);
           glColor4fv(color_w);
           glVertex3f(constval,yhalf,z1+dz);
@@ -5276,7 +5307,12 @@ void drawvvolslice_cellcenter(const vslicedata *vd){
           float dx;
           
           index_u = (i-sd->is1)*sd->nslicej*sd->nslicek + (ploty-sd->js1)*sd->nslicek + k + 1 - sd->ks1;
-          GET_SLICE_COLOR(color_u,index_u)
+          if(slice_show_contours==0){
+            GET_SLICE_COLOR(color_u,index_u)
+          }
+          else{
+            color_u = foregroundcolor;
+          }
           GET_VEC_DXYZ(u,dx,index_u);
           glColor4fv(color_u);
           glVertex3f(x1-dx,constval,zhalf);
@@ -5288,7 +5324,12 @@ void drawvvolslice_cellcenter(const vslicedata *vd){
           float dz;
            
           index_w = (i+1-sd->is1)*sd->nslicej*sd->nslicek + (ploty-sd->js1)*sd->nslicek + k - sd->ks1;
-          GET_SLICE_COLOR(color_w,index_w)
+          if(slice_show_contours==0){
+            GET_SLICE_COLOR(color_w,index_w)
+          }
+          else{
+            color_w = foregroundcolor;
+          }
           GET_VEC_DXYZ(w,dz,index_w);
           glColor4fv(color_w);
           glVertex3f(xhalf,constval,z1-dz);
@@ -5322,7 +5363,12 @@ void drawvvolslice_cellcenter(const vslicedata *vd){
           float dx;
           
           index_u = (i-sd->is1)*sd->nslicej*sd->nslicek + (ploty-sd->js1)*sd->nslicek + k + 1 - sd->ks1;
-          GET_SLICE_COLOR(color_u,index_u)
+          if(slice_show_contours==0){
+            GET_SLICE_COLOR(color_u,index_u)
+          }
+          else{
+            color_u = foregroundcolor;
+          }
           GET_VEC_DXYZ(u,dx,index_u);
           glColor4fv(color_u);
           glVertex3f(x1+dx,constval,zhalf);
@@ -5333,7 +5379,12 @@ void drawvvolslice_cellcenter(const vslicedata *vd){
           float dz;
            
           index_w = (i+1-sd->is1)*sd->nslicej*sd->nslicek + (ploty-sd->js1)*sd->nslicek + k - sd->ks1;
-          GET_SLICE_COLOR(color_w,index_w)
+          if(slice_show_contours==0){
+            GET_SLICE_COLOR(color_w,index_w)
+          }
+          else{
+            color_w = foregroundcolor;
+          }
           GET_VEC_DXYZ(w,dz,index_w);
           glColor4fv(color_w);
           glVertex3f(xhalf,constval,z1+dz);
@@ -5419,7 +5470,12 @@ void drawvvolslice_cellcenter(const vslicedata *vd){
           float dx;
            
           index_u = (i-sd->is1)*sd->nslicej*sd->nslicek + (plotz-sd->ks1)+(j+1-sd->js1)*sd->nslicek;
-          GET_SLICE_COLOR(color_u,index_u)
+          if(slice_show_contours==0){
+            GET_SLICE_COLOR(color_u,index_u)
+          }
+          else{
+            color_u = foregroundcolor;
+          }
           GET_VEC_DXYZ(u,dx,index_u);
           glColor4fv(color_u);
           glVertex3f(x1-dx,yhalf,constval);
@@ -5431,7 +5487,12 @@ void drawvvolslice_cellcenter(const vslicedata *vd){
           float dy;
            
           index_v = (i+1-sd->is1)*sd->nslicej*sd->nslicek + (plotz-sd->ks1)+(j-sd->js1)*sd->nslicek;
-          GET_SLICE_COLOR(color_v,index_v)
+          if(slice_show_contours==0){
+            GET_SLICE_COLOR(color_v,index_v)
+          }
+          else{
+            color_v = foregroundcolor;
+          }
           GET_VEC_DXYZ(v,dy,index_v);
           glColor4fv(color_v);
           glVertex3f(xhalf,yy1-dy,constval);
@@ -5467,7 +5528,12 @@ void drawvvolslice_cellcenter(const vslicedata *vd){
           float dx;
            
           index_u = (i-sd->is1)*sd->nslicej*sd->nslicek + (plotz-sd->ks1)+(j+1-sd->js1)*sd->nslicek;
-          GET_SLICE_COLOR(color_u,index_u)
+          if(slice_show_contours==0){
+            GET_SLICE_COLOR(color_u,index_u)
+          }
+          else{
+            color_u = foregroundcolor;
+          }
           GET_VEC_DXYZ(u,dx,index_u);
           glColor4fv(color_u);
           glVertex3f(x1+dx,yhalf,constval);
@@ -5478,7 +5544,12 @@ void drawvvolslice_cellcenter(const vslicedata *vd){
           float dy;
            
           index_v = (i+1-sd->is1)*sd->nslicej*sd->nslicek + (plotz-sd->ks1)+(j-sd->js1)*sd->nslicek;
-          GET_SLICE_COLOR(color_v,index_v)
+          if(slice_show_contours==0){
+            GET_SLICE_COLOR(color_v,index_v)
+          }
+          else{
+            color_v = foregroundcolor;
+          }
           GET_VEC_DXYZ(v,dy,index_v);
           glColor4fv(color_v);
           glVertex3f(xhalf,yy1+dy,constval);
@@ -5592,7 +5663,12 @@ void drawvvolslice_terrain(const vslicedata *vd){
       for(k=sd->ks1; k<sd->ks2+1; k+=vectorskip){
         n+=vectorskip;
         i11 = sd->iqsliceframe[n];
-        rgb_ptr = rgb_slice + 4*i11;
+        if(slice_show_contours==0){
+          rgb_ptr = rgb_slice + 4*i11;
+        }
+        else{
+          rgb_ptr = foregroundcolor;
+        }
         if(iblank[IJK(plotx,j,k)]==GAS&&rgb_ptr[3]>0.5){
           z1 = zplttemp[k];
           GET_VEC_DXYZ(u,dx,n);
@@ -5616,7 +5692,12 @@ void drawvvolslice_terrain(const vslicedata *vd){
       for(k=sd->ks1; k<sd->ks2+1; k+=vectorskip){
         n+=vectorskip;
         i11 = sd->iqsliceframe[n];
-        rgb_ptr = rgb_slice + 4*i11;
+        if(slice_show_contours==0){
+          rgb_ptr = rgb_slice + 4*i11;
+        }
+        else{
+          rgb_ptr = foregroundcolor;
+        }
         if(iblank[IJK(plotx,j,k)]==GAS&&rgb_ptr[3]>0.5){
           z1 = zplttemp[k];
           GET_VEC_DXYZ(u,dx,n);
@@ -5647,7 +5728,12 @@ void drawvvolslice_terrain(const vslicedata *vd){
       for(k=sd->ks1; k<sd->ks2+1; k+=vectorskip){
         n+=vectorskip; 
         i11 = sd->iqsliceframe[n];
-        rgb_ptr = rgb_slice + 4*i11;
+        if(slice_show_contours==0){
+          rgb_ptr = rgb_slice + 4*i11;
+        }
+        else{
+          rgb_ptr = foregroundcolor;
+        }
         if(iblank[IJK(i,ploty,k)]==GAS&&rgb_ptr[3]>0.5){
           z1 = zplttemp[k];
           GET_VEC_DXYZ(u,dx,n);
@@ -5672,7 +5758,12 @@ void drawvvolslice_terrain(const vslicedata *vd){
       for(k=sd->ks1; k<sd->ks2+1; k+=vectorskip){
         n+=vectorskip; 
         i11 = sd->iqsliceframe[n];
-        rgb_ptr = rgb_slice + 4*i11;
+        if(slice_show_contours==0){
+          rgb_ptr = rgb_slice + 4*i11;
+        }
+        else{
+          rgb_ptr = foregroundcolor;
+        }
         if(iblank[IJK(i,ploty,k)]==GAS&&rgb_ptr[3]>0.5){
           z1 = zplttemp[k];
           GET_VEC_DXYZ(u,dx,n);
@@ -5709,7 +5800,12 @@ void drawvvolslice_terrain(const vslicedata *vd){
         ij2 = IJ2(i,j);
         z11 = MIN(zmax,constval + znode[ij2]);
         n11=i*sd->nslicej*sd->nslicek+j*sd->nslicek;
-        rgb_ptr = rgb_slice + 4*interp3dsliceindex(sd->iqsliceframe,meshi->zplt,meshi->kbar,n11,constval);
+        if(slice_show_contours==0){
+          rgb_ptr = rgb_slice + 4*interp3dsliceindex(sd->iqsliceframe,meshi->zplt,meshi->kbar,n11,constval);
+        }
+        else{
+          rgb_ptr = foregroundcolor;
+        }
         if(rgb_ptr[3]>0.5){
           float f1, f2;
           int k1, k2;
@@ -5749,7 +5845,12 @@ void drawvvolslice_terrain(const vslicedata *vd){
         ij2 = IJ2(i,j);
         z11 = MIN(constval + znode[ij2],zmax);
         n11=i*sd->nslicej*sd->nslicek+j*sd->nslicek;
-        rgb_ptr = rgb_slice + 4*interp3dsliceindex(sd->iqsliceframe,meshi->zplt,meshi->kbar,n11,constval);
+        if(slice_show_contours==0){
+          rgb_ptr = rgb_slice + 4*interp3dsliceindex(sd->iqsliceframe,meshi->zplt,meshi->kbar,n11,constval);
+        }
+        else{
+          rgb_ptr = foregroundcolor;
+        }
         if(rgb_ptr[3]>0.5){
           float f1, f2;
           int k1, k2;
