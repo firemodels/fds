@@ -1,11 +1,9 @@
 &HEAD CHID='jet_vreman_dx5cm', TITLE='Centerline decay of a turbulent jet' /    
-	
-MESH IJK=400,96,96,  XB= 0.0,20.0,-2.4,2.4,-2.4,2.4 /
 
 &MESH IJK=100,16,16, XB=-5,0,-.4,.4,-.4,.4 /
 
-&MULT ID='m1', DX=2.5,DY=1.6,DZ=1.6, I_UPPER=7,J_UPPER=2,K_UPPER=2 / 3 x 3 x 8 = 72 meshes
-&MESH IJK=50,32,32, XB=0,2.5, -2.4,-0.8, -2.4,-0.8, MULT_ID='m1' /
+&MULT ID='m1', DX=5.0,DY=1.6,DZ=1.6, I_UPPER=3,J_UPPER=2,K_UPPER=2 / 4 x 3 x 3 = 36 meshes
+&MESH IJK=100,32,32, XB=0,5.0, -2.4,-0.8, -2.4,-0.8, MULT_ID='m1' /
 
 &TIME T_END=100. /
 
