@@ -10,9 +10,9 @@ $QFDS $DEBUG -r $QUEUE -d $INDIR jet_dsmag_dx10cm.fds
 $QFDS $DEBUG -r $QUEUE -d $INDIR jet_deardorff_dx10cm.fds
 $QFDS $DEBUG -r $QUEUE -d $INDIR jet_vreman_dx10cm.fds
 
-$QFDS $DEBUG -p 73 -r $QUEUE -d $INDIR jet_csmag_dx5cm.fds
-$QFDS $DEBUG -p 73 -r $QUEUE -d $INDIR jet_dsmag_dx5cm.fds
-$QFDS $DEBUG -p 73 -r $QUEUE -d $INDIR jet_deardorff_dx5cm.fds
-$QFDS $DEBUG -p 73 -r $QUEUE -d $INDIR jet_vreman_dx5cm.fds
+$QFDS $DEBUG -p 37 -r $QUEUE -d $INDIR jet_csmag_dx5cm.fds
+$QFDS $DEBUG -p 37 -r $QUEUE -d $INDIR jet_dsmag_dx5cm.fds
+$QFDS $DEBUG -p 37 -r $QUEUE -d $INDIR jet_deardorff_dx5cm.fds
+$QFDS $DEBUG -p 37 -r $QUEUE -d $INDIR jet_vreman_dx5cm.fds
 
 echo FDS cases submitted
