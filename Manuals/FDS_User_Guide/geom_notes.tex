@@ -239,10 +239,12 @@ For example, {\tt XYZ\_DOT=0.0,0.0,1.0}\ would cause an object to move 1~m/s in 
 
 FDS generated isosurfaces are stored using a
 file format described in this section.
-Iso-surface files are used to store one or more surfaces where the specified {\ct QUANTITY} is a specified value.
+Iso-surface files are used to store one or more surfaces where the 
+surface has the value specified in the {\ct QUANTITY}\ keyword.
 FDS outputs iso-surface data at fixed time intervals.
 These surfaces are defined in terms of vertices and triangles.
-A vertex consists of an $(x,y,z)$ coordinate. A triangle consists of 3 connected vertices.
+A vertex is represented as an $(x,y,z)$ coordinate (three floating point values).
+A triangle is represented as three vertex (integer) indices.
 These files are written out from {\ct dump.f90} using lines equivalent to the following:
 \begin{lstlisting}
 ! header
@@ -276,13 +278,14 @@ ENDIF
 
 \begin{itemize}
 \item {\ct ONE}\ has the value 1. Smokeview uses this number to determine whether the computer creating the geometry file and the computer viewing the geometry file use the same or different byte swap (endian) conventions for storing floating point numbers.
-\item {\ct VERSION}\ currently has value 0 and indicates the version number of this file format.
+\item {\ct VERSION}\ has value 0 (for isosurface files but has value 1 for geometry files) and indicates the version number of this file format.
 \item {\ct N\_FLOATS, N\_INTS} The number of floating point and integer data items stored at the beginning of the file.
 \item {\ct FLOAT\_HEADER, INT\_HEADER} Floating point and integer data stored at the beginning of the file.
 \item {\ct STIME} is the FDS simulation time.
-\item {\ct N\_VERT\_S, N\_FACE\_S, N\_VERT\_D, N\_FACE\_D} are the number of static and dynamic vertices, faces and volumes.
+\item {\ct N\_VERT\_S, N\_FACE\_S, N\_VERT\_D, N\_FACE\_D} are the number of static and dynamic vertices and faces.
 \item {\ct Xvert\_S, Yvert\_S, Zvert\_S, Xvert\_D, Yvert\_D, Zvert\_D}\ are the static and dynamic vertex coordinates.
-\item {\ct FACE1\_S, FACE2\_S, FACE3\_S, FACE1\_S, FACE2\_S, FACE3\_S}\ are the static and dynamic vertex indices for each face (triangle).  The indices are numbered relative to how vertices were written out earlier.
+\item {\ct FACE1\_S, FACE2\_S, FACE3\_S, FACE1\_S, FACE2\_S, FACE3\_S}\ are the static and dynamic vertex indices for each face (triangle).  
+    The indices range from 1 to the number of vertices.
 \item {\ct SURF\_S, SURF\_D}\ are the static and dynamic SURF indices for each face (color indices for isosurface files.
 \end{itemize}
 
@@ -293,11 +296,13 @@ ENDIF
 
 Immersed geometric objects (generalized obstructions) are stored using a file format described in this section.
 These objects are defined in terms of vertices, triangles and tetrahedrons.
-A vertex consists of an $(x,y,z)$ coordinate.
-A triangle consists of 3 connected vertices and a tetrahedron consists of 4 connected vertices.
+A vertex is represented as an $(x,y,z)$ coordinate (three floating point values).
+A triangle is represented as three vertex (integer) indices.
+A tetrahedron is represented
+as four vertex (integer) indices.
 The file format allows one to specify objects that change with time.
 Static geometry is defined once and displayed by Smokeview unchanged at each time step.
-Dynamic geometry is defined at each time step.
+Dynamic geometry is defined at each time step. 
 These files are written out from {\ct dump.f90} using lines equivalent to the following:
 
 \begin{lstlisting}
@@ -347,16 +352,18 @@ ENDIF
 
 \begin{itemize}
 \item {\ct ONE}\ has the value 1. Smokeview uses this number to determine whether the computer creating the geometry file and the computer viewing the geometry file use the same or different byte swap (endian) conventions for storing floating point numbers.
-\item {\ct VERSION}\ currently has value 0 and indicates the version number of this file format.
+\item {\ct VERSION}\ currently has value 1 and indicates the version number of this file format.
 \item {\ct N\_FLOATS, N\_INTS} The number of floating point and integer data items stored at the beginning of the file.
 \item {\ct FLOAT\_HEADER, INT\_HEADER} Floating point and integer data stored at the beginning of the file.
 \item {\ct STIME} is the FDS simulation time.
 \item {\ct N\_VERT\_S, N\_FACE\_S, N\_VOL\_S, N\_VERT\_D, N\_FACE\_D, N\_VOL\_D}\ are the number of static and dynamic vertices, faces and volumes.
 \item {\ct Xtext\_S, Ytext\_S, Xtext\_D, Ytext\_D}\ are the static and dynamic texture coordinates.
 \item {\ct Xvert\_S, Yvert\_S, Zvert\_S, Xvert\_D, Yvert\_D, Zvert\_D}\ are the static and dynamic vertex coordinates.
-\item {\ct FACE1\_S, FACE2\_S, FACE3\_S, FACE1\_S, FACE2\_S, FACE3\_S}\ are the static and dynamic vertex indices for each face (triangle).  The indices are numbered relative to how vertices were written out earlier.
-\item {\ct VOL1\_S, VOL2\_S, VOL3\_S, VOL4\_S, VOL1\_D, VOL2\_D, VOL3\_D, VOL4\_D}\ are the static and dynamic vertex indices for each volume (tetrahedron).  The indices are numbered relative to how vertices were written out earlier.
-\item {\ct SURF\_S, SURF\_D}\ are the static and dynamic SURF indices for each face (color indices for isosurface files).
+\item {\ct FACE1\_S, FACE2\_S, FACE3\_S, FACE1\_S, FACE2\_S, FACE3\_S}\ are the static and dynamic vertex indices for each face (triangle).  
+    The indices range from 1 to the 
+    number of vertices.
+\item {\ct VOL1\_S, VOL2\_S, VOL3\_S, VOL4\_S, VOL1\_D, VOL2\_D, VOL3\_D, VOL4\_D}\ are the static and dynamic vertex indices for each volume (tetrahedron).  The indices are numbered from 1 to the number of vertices.
+\item {\ct SURF\_S, SURF\_D}\ are the static and dynamic SURF indices for each face.
 \item {\ct MATL\_S, MATL\_D}\ are the static and dynamic MATL indices for each volume face.
 \end{itemize}
 
