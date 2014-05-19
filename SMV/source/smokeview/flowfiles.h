@@ -31,7 +31,7 @@ typedef struct {
 /* --------------------------  point ------------------------------------ */
 
 typedef struct {
-  float xyz[3],point_norm[3],txyz[3];
+  float xyz[3],point_norm[3],texture_xy[3];
   int itriangle,ntriangles,nused;
   struct _triangle **triangles;
 } point;
