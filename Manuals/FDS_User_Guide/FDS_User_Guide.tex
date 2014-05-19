@@ -4114,6 +4114,7 @@ Likewise, the boundaries of Zone~1 and Zone~2 must include solids whose {\ct SUR
 
 The HVAC output quantities can be used to determine the leakage flows.  FDS give the duct connecting Zone~A with Zone~B the name {\ct 'LEAK A B'} and the duct nodes will be named {\ct 'LEAK A B'} for the Zone A side of the leak and {\ct 'LEAK B A'} for the Zone B side of the leak.  Note that for the duct names, FDS will use the lower numbered zone as Zone~A.
 
+FDS is limited by default to a maximum of 200 {\ct ZONE} inputs.  This can be increased if needed by the parameter {\ct MAX\_LEAK\_PATHS} on the {\ct MISC} line.
 
 \subsubsection{Example Case: door\_crack}
 
@@ -9343,6 +9344,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 %{\ct KINETIC\_ENERGY\_SOURCE}                   & Logical       &                                                       &               & {\ct .FALSE.}     \\ \hline
 {\ct LAPSE\_RATE}                               & Real          & Section~\ref{info:stratification}                     & \si{\degree C/m} & 0              \\ \hline
 {\ct MAX\_CHEMISTRY\_ITERATIONS}                & Integer       & Section~\ref{info:finite}                             &               &  1000             \\ \hline
+{\ct MAX\_LEAK\_PATHS}                          & Integer       & Section~\ref{info:Leaks}                             &               &  200              \\ \hline
 {\ct MAXIMUM\_VISIBILITY}                       & Real          & Section~\ref{info:visibility}                         &  m            &  30               \\ \hline
 {\ct MEAN\_FORCING(3)}                          & Logical       & Section~\ref{info:mean_forcing}                       &               & {\ct .FALSE.}     \\ \hline
 {\ct NOISE}                                     & Logical       & Section~\ref{info:MISC_Basics}                        &               & {\ct .TRUE.}      \\ \hline
