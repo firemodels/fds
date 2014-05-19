@@ -1283,7 +1283,7 @@ archive_validation_stats()
    if [ -e ${CURRENT_STATS_FILE} ]
    then
       # Archive stats to Firebot history
-      cp ${CURRENT_STATS_FILE} "$FIREBOT_DIR/history/${STATS_FILE_BASENAME}_${SVN_REVISION}.csv"
+      cp ${CURRENT_STATS_FILE} "$FIREBOT_DIR/history/${SVN_REVISION}_${STATS_FILE_BASENAME}.csv"
 
    else
       echo "Warnings from Stage 7b - Matlab plotting and statistics (validation):" >> $WARNING_LOG
