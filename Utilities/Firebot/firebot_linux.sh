@@ -547,6 +547,10 @@ run_verification_cases_debug()
    #  = Run all FDS serial cases =
    #  ============================
 
+   echo 'Creating openmp timing test cases' >> $FIREBOT_DIR/output/stage3
+   cd $FDS_SVNROOT/Verification/Timing_Benchmarks
+   ./make_cases.sh
+
    cd $FDS_SVNROOT/Verification
 
    # Submit FDS verification cases and wait for them to start (run serial cases in debug mode on firebot queue)
@@ -939,6 +943,13 @@ wait_cases_release_end()
 run_verification_cases_release()
 {
    # Start running all FDS verification cases (run all cases on firebot queue)
+   
+   echo 'Creating openmp timing test cases:' >> $FIREBOT_DIR/output/stage5
+   cd $FDS_SVNROOT/Verification/Timing_Benchmarks
+   ./make_cases.sh
+
+   ./Run_FDS_Cases.sh $1 -q $QUEUE >> $FIREBOT_DIR/output/stage5 2>&1
+   
    cd $FDS_SVNROOT/Verification
    echo 'Running FDS verification cases:' >> $FIREBOT_DIR/output/stage5
    ./Run_FDS_Cases.sh $1 -q $QUEUE >> $FIREBOT_DIR/output/stage5 2>&1
