@@ -371,23 +371,18 @@ because  the time  step is not  limited by the  large flow speeds in a fire plum
 
 \subsection{Sensitivity of Large Eddy Simulation Parameters}
 
-FDS  uses the  Smagorinsky form  of  the Large  Eddy Simulation  (LES) technique.  This  means  that   instead  of  using  the  actual  fluid
-viscosity, the model uses a viscosity of the form
+FDS uses Deardorff's isotropic eddy viscosity along with the gradient diffusion hypothesis to close the subgrid stress in the LES equations.  The turbulent viscosity has the form
 \be
-  \mu_{\hbox{\tiny LES}} =  \rho \,  (C_{\rm s}\, \Delta)^2  \, |S|
+  \mu_{\hbox{\tiny LES}} =  \rho \,  C_{\nu}\, \Delta \, \sqrt{k_{sgs}}
 \ee
-where $C_{\rm s}$  is an empirical constant, $\Delta$ is a length on the order of the size of a grid  cell,  and  the  deformation   term  $|S|$  is
-related  to  the Dissipation Function (see FDS Technical Reference Guide~\cite{FDS_Math_Guide} for details). Related to the ``turbulent  viscosity'' are  comparable
-expressions  for  the thermal conductivity  and  material diffusivity:  \be  k_{\hbox{\tiny LES}}  = \frac{\mu_{\hbox{\tiny  LES}}   \;  c_p}{\PR_t}
-\quad   ;  \quad  (\rho D)_{\hbox{\tiny  LES}}  =\frac{\mu_{\hbox{\tiny  LES}}}{\SC_t}  \ee  where $\PR_t$ and $\SC_t$ are the turbulent Prandtl and Schmidt numbers, respectively.
-Thus, $C_{\rm s}$, $\PR_t$  and $\SC_t$ are  a set  of  empirical constants.  Most  FDS users
-simply use  the default values  of (0.2,0.5,0.5), but some have  explored their effect on the solution of the equations.
+where $C_{\nu}$  is an empirical constant, $\Delta$ is a length on the order of the size of a grid cell, and $k_{sgs}$ is the unresolved (subgrid scale) kinetic energy. Related to the ``turbulent  viscosity'' are  comparable expressions  for  the thermal conductivity  and  material diffusivity:
+\be
+   k_{\hbox{\tiny LES}}  = \frac{\mu_{\hbox{\tiny  LES}}   \;  c_p}{\PR_t}
+   \quad   ;  \quad  (\rho D)_{\hbox{\tiny  LES}}  =\frac{\mu_{\hbox{\tiny  LES}}}{\SC_t}
+\ee
+where $\PR_t$ and $\SC_t$ are the turbulent Prandtl and Schmidt numbers, respectively. Thus, $C_{\nu}$, $\PR_t$ and $\SC_t$ are a set of empirical constants.  Most FDS users simply use the default values of (0.1,0.5,0.5), but some have explored their effect on the solution of the equations.  The value of $C_{\nu}=0.1$ is a theoretical value developed from Lilly's analysis.  The value is confirmed for a canonical flow, decaying isotropic turbulence, within this volume.
 
-In an effort  to validate FDS with some  simple room temperature data, Zhang et al.~\cite{Zhang:2}  tried different combinations of the
-Smagorinsky parameters,  and suggested the current  default values. Of the  three parameters,  the  Smagorinsky constant  $C_{\rm s}$  is the  most
-sensitive.   Smagorinsky~\cite{Smagorinsky:1}  originally  proposed  a value of 0.23,  but researchers over the past  three decades have used values
-ranging  from 0.1  to 0.23. There  are also refinements  of the original  Smagorinsky  model~\cite{Deardorff:1,Germano:1,Lilly:1} that do  not
-require the  user  to  prescribe  the constants,  but  rather generate them automatically as part of the numerical scheme.
+Previous versions of FDS used the constant coefficient Smagorinsky model for the eddy viscosity. In an effort to validate FDS with some simple room temperature data, Zhang et al.~\cite{Zhang:2} tried different combinations of the Smagorinsky parameters, and suggested the current  default values. Of the  three parameters, the viscosity coefficient is the most sensitive.  Smagorinsky~\cite{Smagorinsky:1} originally proposed  a value of 0.23, but researchers over the past  three decades have used values ranging from 0.1 to 0.23. There are also refinements of the original Smagorinsky model~\cite{Germano:1,Lilly:1,Moin:1991} that do not require the user to prescribe the constants, but rather generate them automatically as part of the numerical scheme.
 
 \subsection{Sensitivity of Radiation Parameters}
 
