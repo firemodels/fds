@@ -1,0 +1,17 @@
+@echo off
+call run1
+timeout 180
+call run2
+timeout 180
+call run3
+timeout 180
+call run4
+timeout 180
+call run5
+timeout 180
+call run6
+timeout 180
+call run7
+timeout 180
+call run8
+timeout 180
