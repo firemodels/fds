@@ -707,6 +707,13 @@ gnu_linux : obj     = fds_gnu_linux
 gnu_linux : $(obj_serial)
 	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_serial)
 
+openmp_gnu_linux : FFLAGS = -O2
+openmp_gnu_linux : FCOMPL = gfortran
+openmp_gnu_linux : FOPENMPFLAGS = -fopenmp
+openmp_gnu_linux : obj = fds_openmp_gnu_linux
+openmp_gnu_linux : $(obj_serial)
+	$(FCOMPL) $(FFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_serial)
+
 gnu_osx : FFLAGS  = -O2
 gnu_osx : FCOMPL  = gfortran
 gnu_osx : obj     = fds_gnu_osx
