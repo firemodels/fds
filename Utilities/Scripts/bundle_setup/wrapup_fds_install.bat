@@ -21,7 +21,7 @@ set SHORTCUTSDIR=%CD%\shortcuts
 
 cd %SAVECD%
 
-Rem create shortcuts directory
+:: create shortcuts directory
 
 echo.
 if exist "%SHORTCUTSDIR%" goto existbin
@@ -31,11 +31,12 @@ mkdir "%SHORTCUTSDIR%"
 :existbin
 
 echo *** Adding program shortcuts to %SHORTCUTSDIR%
-Rem ------------ create aliases ----------------
+:: ------------ create aliases ----------------
 
 set tempfile="%TEMP%\fds_tempfile"
+set numcoresfile="%TEMP%\numcoresfile"
 
-Rem *** fds5 (32 bit)
+:: *** fds5 (32 bit)
 
 set fds5exe="c:\Program Files\FDS\FDS5\bin\fds5.exe"
 set fds5bat="%SHORTCUTSDIR%\fds5.bat"
@@ -46,7 +47,7 @@ if exist %fds5exe% (
   copy %tempfile% "%SHORTCUTSDIR%\fds5.bat" > Nul
 )
 
-Rem *** fds5 (64 bit)
+:: *** fds5 (64 bit)
 
 set fds5exe="c:\Program Files\FDS\FDS5\bin\fds5_win_64.exe"
 if exist %fds5exe% (
@@ -55,7 +56,7 @@ if exist %fds5exe% (
   copy %tempfile% "%SHORTCUTSDIR%\fds5.bat" > Nul
 )
 
-Rem *** smokeview5
+:: *** smokeview5
 
 set smv5exe="c:\Program Files\FDS\FDS5\bin\smokeview.exe"
 set smv5bat="%SHORTCUTSDIR%\smokeview5.bat"
@@ -65,42 +66,42 @@ if exist %smv5exe% (
   copy %tempfile% "%SHORTCUTSDIR%\smokeview5.bat" > Nul
 )
 
-Rem *** fds6
+:: *** fds6
 
 echo @echo off > %tempfile%
 echo "%CD%\bin\fds" %%* >> %tempfile%
 copy %tempfile% "%SHORTCUTSDIR%\fds6.bat" > Nul
 
-Rem *** smokeview6
+:: *** smokeview6
 
 echo @echo off > %tempfile%
 echo "%CD%\bin\smokeview" %%* >> %tempfile%
 copy %tempfile% "%SHORTCUTSDIR%\smokeview6.bat" > Nul
 
-Rem *** smokediff6
+:: *** smokediff6
 
 echo @echo off > %tempfile%
 echo "%CD%\bin\smokediff" %%* >> %tempfile%
 copy %tempfile% %smd6% "%SHORTCUTSDIR%\smokediff6.bat" > Nul
 
-Rem *** smokezip6
+:: *** smokezip6
 
 echo @echo off > %tempfile%
 echo "%CD%\bin\smokezip" %%* >> %tempfile%
 copy %tempfile% %smd6% "%SHORTCUTSDIR%\smokezip6.bat" > Nul
 
-Rem ------------ setting up path ------------
+:: ------------ setting up path ------------
 
 echo.
 echo *** Setting up the PATH variable
 
-Rem *** c:\...\FDS\FDS6\bin
+:: *** c:\...\FDS\FDS6\bin
 call "%CD%\set_path.exe" -s -m -a "%CD%\bin"
 
-Rem *** c:\...\FDS\shortcuts
+:: *** c:\...\FDS\shortcuts
 call "%CD%\set_path.exe" -s -m -a "%SHORTCUTSDIR%"
 
-Rem ------------- file association -------------
+:: ------------- file association -------------
 echo.
 echo *** Associating the .smv file extension with smokeview.exe
 
@@ -109,7 +110,7 @@ assoc .smv=smvDoc>Nul
 
 set FDSSTART=%ALLUSERSPROFILE%\Start Menu\Programs\FDS6
 
-Rem ------------- start menu shortcuts ---------------
+:: ------------- start menu shortcuts ---------------
 echo. 
 echo *** Adding document shortcuts to the Start menu.
 if exist "%FDSSTART%" rmdir /q /s "%FDSSTART%"
@@ -137,12 +138,28 @@ mkdir "%FDSSTART%\Guides and Release Notes"
 "%CD%\shortcut.exe" /F:"%FDSSTART%\Guides and Release Notes\Smokeview release notes.lnk"             /T:"%CD%\Documentation\Guides_and_Release_Notes\Smokeview_release_notes.html" /A:C >NUL
 
 "%CD%\shortcut.exe" /F:"%FDSSTART%\Overview.lnk"  /T:"%CD%\Documentation\Overview.html" /A:C >NUL
-Rem "%CD%\shortcut.exe" /F:"%FDSSTART%\Uninstall.lnk"  /T:"%CD%\Uninstall\uninstall.bat" /A:C >NUL
+:: "%CD%\shortcut.exe" /F:"%FDSSTART%\Uninstall.lnk"  /T:"%CD%\Uninstall\uninstall.bat" /A:C >NUL
 
 erase "%CD%"\set_path.exe
 erase "%CD%"\shortcut.exe
 
-Rem ----------- setting up uninstall file
+:: ----------- setting up openmp threads environment variable
+
+WMIC CPU Get NumberofLogicalProcessors | more +1 > %numcoresfile%
+set /p ncores=<%numcoresfile%
+
+if %ncores% GEQ 8 (
+  set nthreads=4
+) else (
+  if %ncores% GEQ 4 (
+    set nthreads=2
+  ) else (
+    set nthreads=1 
+  )
+)
+setx OMP_NUM_THREADS %nthreads%
+
+:: ----------- setting up uninstall file
 
 echo echo. >> Uninstall\Uninstall.bat
 echo echo Removing directories, %CD%\bin and %SHORTCUTSDIR%, from the System Path >> Uninstall\Uninstall.bat
