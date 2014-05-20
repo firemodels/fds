@@ -7308,25 +7308,7 @@ either {\ct -x}, {\ct -y}, or {\ct -z}. To change these labels, use {\ct X\_ID},
    \overline{\phi} = \frac{ \sum_{i=1}^n \phi_i }{n}
 \ee
 where $n$ is the number of uniform output samples.
-\item[Root Mean Square] If you set {\ct STATISTICS='RMS'} on the {\ct DEVC} line, the output will be an unbiased estimate of the {\em root mean square} value:
-\be
-   \phi_{\rm rms} = \sqrt{ \frac{ \sum_{i=1}^n (\phi_i - \overline{\phi})^2 }{n-1} }
-\ee
-Note that the {\ct 'RMS'} statistic is only appropriate for a line of devices. It is not meant to be used with single devices that record a time history of a given quantity. The {\em root mean square} is only meaningful in terms of a steady-state output quantity.
-\item[Covariance] If $u = U - \overline{U}$ and $v= V-\overline{V}$ are the deviations for two random variables, $U$ and $V$, then an unbiased estimate of the \emph{covariance} is given by
-\be
-   \overline{u\, v} = \frac{ \sum_{i=1}^n (U_i - \overline{U}) (V_i - \overline{V}) }{n-1}
-\ee
-To output this statistic you must add a {\ct QUANTITY2} to the device line and set {\ct STATISTICS='COV'}:
-\begin{lstlisting}
-&DEVC XB=X1,X2,Y1,Y2,Z1,Z2, QUANTITY='CELL W', QUANTITY2='TEMPERATURE',
-      STATISTICS='COV', ID='wT-cov', POINTS=20 /
-\end{lstlisting}
-\item[Correlation Coefficient] Setting {\ct STATISTICS='CORRCOEF'} outputs the \emph{correlation coefficient} given by
-\be
-   \rho_{uv} = \frac{ \overline{u\, v} }{ u_{\rm rms} \,v_{\rm rms} }
-\ee
-Here again you must add a {\ct QUANTITY2} to the device line.
+
 \item[Min, Max] For line devices it is also possible to record the \emph{min} or the \emph{max} values of the output quantity for each point on the line.  Set {\ct STATISTICS='TIME MIN'} or {\ct STATISTICS='TIME MAX'}.  FDS will output the values over the last {\ct DT\_DEVC\_LINE} of the simulation.
 \end{description}
 
@@ -8175,7 +8157,43 @@ In addition to the spatial statistics, a time integral of an {\ct DEVC} output c
 \ee
 Note that the spatial and time integrals can not be used simultaneously.
 
+\subsection{Statistical Outputs}
+\label{info:rmscovcorr}
 
+Statistical quantities can also be generated for either point or line devices.  Note that these are quantities only have significant meaning if the flow is steady-state.  These quantities are estimated using a logarithmic averaging process.  The weighting coefficient for the averaging is determined by the desired time interval for the device (the time interval which will dominate the average value).  For a point device this time interval is set with the parameter {\ct STATISTICS\_DT} on the {\ct DEVC} line.  For a line device is is determined by {\ct DT\_DEVC\_LINE} on the {\ct DUMP} line.
+
+\subsubsection{Root Mean Square}
+\label{info:rms}
+
+If you set {\ct STATISTICS='RMS'} on the {\ct DEVC} line, the output will be an unbiased estimate of the {\em root mean square} value:
+\be
+   \phi_{\rm rms} = \sqrt{ \frac{ \sum_{i=1}^n (\phi_i - \overline{\phi})^2 }{n-1} }
+\ee
+
+\subsubsection{Covariance}
+\label{info:covariance}
+
+If $u = U - \overline{U}$ and $v= V-\overline{V}$ are the deviations for two random variables, $U$ and $V$, then an unbiased estimate of the \emph{covariance} is given by
+\be
+   \overline{u\, v} = \frac{ \sum_{i=1}^n (U_i - \overline{U}) (V_i - \overline{V}) }{n-1}
+\ee
+To output this statistic you must add a {\ct QUANTITY2} to the device line and set {\ct STATISTICS='COV'}.  The following lines would create a line of devices and a single point device equivalent to the first point in the line:
+\begin{lstlisting}
+&DUMP DT_DEVC_LINE=20/
+&DEVC XB=X1,X2,Y1,Y2,Z1,Z2, QUANTITY='CELL W', QUANTITY2='TEMPERATURE',
+      STATISTICS='COV', ID='wT-cov_line', POINTS=20/
+&DEVC XYZ=X1,Y1,Z1, QUANTITY='CELL W', QUANTITY2='TEMPERATURE',
+      STATISTICS='COV', ID='wT-cov_point', STATISTICS_DT=20/
+\end{lstlisting}
+
+\subsubsection{Correlation Coefficient}
+\label{info:corrcoef}
+
+Setting {\ct STATISTICS='CORRCOEF'} outputs the \emph{correlation coefficient} given by
+\be
+   \rho_{uv} = \frac{ \overline{u\, v} }{ u_{\rm rms} \,v_{\rm rms} }
+\ee
+Here again you must add a {\ct QUANTITY2} to the device line.
 
 \subsection{Wind and the Pressure Coefficient}
 \label{info:wind}
@@ -8931,6 +8949,8 @@ properties be specified as well. Simply prescribing as many properties as possib
 {\ct RELATIVE}              & Logical         & Section~\ref{info:out:DEVC}                                     &       & {\ct .FALSE.} \\ \hline
 {\ct ROTATION}              & Real            & Section~\ref{info:DEVC}                                         & deg.  & 0             \\ \hline
 {\ct SETPOINT}              & Real            & Section~\ref{info:basic_control}                                &       &               \\ \hline
+{\ct STATISTICS}            & Character       & Section~\ref{info:statistics}                                &       &               \\ \hline
+{\ct STATISTICS\_DT}        & Real            & Section~\ref{info:rmscovcorr}                                &       &               \\ \hline
 {\ct SMOOTHING\_FACTOR}     & Real            & Section~\ref{info:basic_control}                                &       & 0             \\ \hline
 {\ct SPEC\_ID}              & Character       & Section~\ref{info:outputquantities}                             &       &               \\ \hline
 {\ct SURF\_ID}              & Character       & Section~\ref{info:statistics}                                   &       &               \\ \hline
