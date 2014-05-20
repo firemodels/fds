@@ -66,8 +66,11 @@ set release_version=%fdssmv_major_version%_win_%platform%
 set release_version=
 
 echo.
-echo *** Copying executables
+echo *** Copying executables and scripts
 echo.
+
+CALL :COPY %in_for_bundle%\fds_open.bat %out_bin%\fds_open.bat
+
 CALL :COPY %fdsdir%\fds_%OPENMP%win_%platform%.exe         %out_bin%\fds%release_version%.exe
 
 CALL :COPY  %fdsmpidir%\fds_mpi_win_%platform%.exe  %out_bin%\fds_mpi.exe
