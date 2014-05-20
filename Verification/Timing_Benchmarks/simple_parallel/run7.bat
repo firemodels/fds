@@ -1,6 +1,5 @@
 @echo off
-set fdsrun=fds
-set bg=call background -d 0 -u 100 
+call setopts 
 call makecase bench7a
 call makecase bench7b
 call makecase bench7c
