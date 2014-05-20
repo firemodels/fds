@@ -233,7 +233,7 @@ at the same time providing a tool to study fundamental fire dynamics and combust
 \item[Radiation Transport] Radiative heat transfer is included in the model via the solution of the radiation transport equation for a gray gas, and in some limited cases using a wide band model. The equation is solved using a technique similar to finite volume methods for convective transport, thus the name given to it is the Finite Volume Method (FVM).  Using approximately 100 discrete angles, the finite volume solver requires about 20~\% of the total CPU time of a calculation, a modest cost given the complexity of radiation heat transfer. The absorption coefficients of the gas-soot mixtures are computed using the RadCal narrow-band model~\cite{RadCal}.  Liquid droplets can absorb and scatter thermal radiation. This is important in cases involving mist sprinklers, but also plays a role in all sprinkler cases.  The absorption and scattering coefficients are based on Mie theory.
 \item[Geometry] FDS approximates the governing equations on a rectilinear mesh. Rectangular obstructions are forced to conform with the underlying mesh.
 \item[Multiple Meshes] This is a term used to describe the use of more than one rectangular mesh in a calculation. It is possible to prescribe more than one rectangular mesh to handle cases where the computational domain is not easily embedded within a single mesh.
-\item[Parallel Processing] It is possible to run an FDS calculation on more than one computer using the Message Passing Interface (MPI). Details can be found in Section~\ref{info:parallelprocessing}.
+\item[Parallel Processing] FDS employs OpenMP~\cite{Chapman:OpenMP}, a programming interface that exploits multiple processing units on a single computer. For clusters of computers, FDS employs Message Passing Interface (MPI)~\cite{Gropp:1}. Details can be found in Section~\ref{info:parallelprocessing}.
 \item[Boundary Conditions] All solid surfaces are assigned thermal boundary conditions, plus information about the burning behavior of the material. Heat and mass transfer to and from solid surfaces is usually handled with empirical correlations, although it is possible to compute directly the heat and mass transfer when performing a Direct Numerical Simulation (DNS).
 \end{description}
 
@@ -323,8 +323,7 @@ Many of the changes in FDS~6 are improvements to the various sub-models that do 
 
 \section{Changes to Input Parameters in FDS 6}
 
-This section describes the changes in the input parameters between FDS version~5 and version~6. Table~\ref{tbl:Changes} lists in alphabetical order parameters from
-FDS~5 that have changed. Note that this table does not list new parameters in FDS~6.
+This section describes the changes in the input parameters between FDS version~5 and version~6. Table~\ref{tbl:Changes} lists in alphabetical order parameters from FDS~5 that have changed. Note that this table does not list new parameters in FDS~6.
 
 There has been a limited amount of backward compatibility programmed into FDS 6. In other words, several commonly used parameters and conventions from previous versions still
 work, but you are encouraged to gradually modify your input files to conform to the new conventions. Gradually, obsolescent features will be removed. Some of the more notable changes
@@ -416,7 +415,9 @@ Namelist      & FDS 5 Parameter                     & Namelist     & FDS 6 Param
 
 \section{A Note on Longer Run Times in FDS 6}
 
-A number of changes made in FDS 6 are aimed at improving the robustness and accuracy of the simulations. However, these improvements come at increased cost in both CPU time and memory usage. Some of this increased cost is offset by increasingly faster computers and improved parallel processing, but in most cases you will notice an increase in CPU time of approximately 50~\% over FDS~5. Listed below are suggested ways to decrease CPU time, but these options should be considered very carefully. The default parameter settings are designed to address a wide range of fire scenarios, but there are scenarios for which approximations used in past versions of FDS may still be appropriate. The best way to determine if one or more of these time-saving assumptions is appropriate, run identical simulations with and without the assumption to determine if the difference in results is acceptable.
+A number of changes made in FDS 6 are aimed at improving the robustness and accuracy of the simulations. However, these improvements come at increased cost in both CPU time and memory usage. Some of this increased cost is offset by increasingly faster computers and improved parallel processing. In particular, starting with FDS~6.1.0, the default released version of FDS will employ OpenMP~\cite{Chapman:OpenMP} by default. OpenMP is a programming interface that enables FDS to exploit multiple processing units on a given computer. Most Windows-based personal computers now come with multi-core processors, but past versions of FDS could only exploit a single core for a given calculation. With this new release and the increasingly faster processors available on the market, FDS~6 ought to maintain and eventually surpass the computing speed of past versions. 
+
+Listed below are suggested ways to decrease CPU time, but these options should be considered very carefully. The default parameter settings are designed to address a wide range of fire scenarios, but there are scenarios for which approximations used in past versions of FDS may still be appropriate. The best way to determine if one or more of these time-saving assumptions is appropriate, run identical simulations with and without the assumption to determine if the difference in results is acceptable.
 
 \begin{enumerate}
 \item The improved turbulence model in FDS 6 has been found to produce comparable results to older versions of FDS using slightly less refined numerical grids. Section~\ref{info:Mesh_Resolution} introduces a dimensionless parameter, $D^*/\dx$, that indicates the number of grid cells of dimension $\dx$ that span the characteristic width of the fire, $D^*$. A grid resolution study should be performed to determine the loss of accuracy caused by a reduced value of $D^*/\dx$.
@@ -491,23 +492,21 @@ This chapter describes the procedure to run an FDS calculation. The primary requ
 
 FDS can be run from the command prompt, or with a third-party Graphical User Interface (GUI). In the discussion to follow, it is assumed that FDS is being run from the command prompt. FDS can be run on a single computer, using one or more cores, or it can be run on multiple computers. The executable names are similar under the different supported operating systems (Windows, Linux, and Mac OS~X) and sizes (32~and~64~bits). The single computer executable is called {\ct fds}\ (with an {\ct .exe}\ file extension on Windows).  The multiple computer executable is called {\ct fds\_mpi} (again with an {\ct .exe}\ file extension for Windows). The letters {\ct mpi} in the filename denote Message Passing Interface, which will be discussed below.  Batch files (Windows) or aliases (Linux or Mac OS~X) may be defined to distinguish executables if you wish to install multiple versions of FDS.
 
-
-\clearpage
 \subsection{Single Computer}
 
 Sample input files are provided with the program for new users who are encouraged to first run an example calculation before attempting to write an input file. Input files are typically given names that help identify the particular case, followed by the {\ct .fds} file extension. Suppose you want to run an input file called {\ct job\_name.fds}. You can start FDS from a command prompt in Windows, Mac OS~X, Linux, or Unix as described in the following sections.
 
-FDS uses OpenMP (Open Multi-Processing) to allow a single computer to run a single FDS job on one or more cores/threads. The use of OpenMP does not require the FDS domain to be broken up into multiple meshes, but will still work with cases that have multiple meshes defined.
+FDS uses OpenMP (Open Multi-Processing)~\cite{Chapman:OpenMP} to allow a single computer to run a single FDS simulation on one or more cores. The use of OpenMP does not require the computational domain to be broken up into multiple meshes, and it will still work with cases that have multiple meshes defined.
 
-By default, FDS uses the maximum number of cores/threads available on a single computer. To specify the number of cores/threads that are available to FDS jobs, the {\ct OMP\_NUM\_THREADS} environment variable can be used. For example, to specify 4 available cores/threads on a Windows machine, type the following at the command prompt:
+By default, FDS uses approximately half of the available cores\footnote{To determine the number of cores used by OpenMP, just type {\ct fds} at the command prompt.} on a single computer. To change the number of cores that are available for a given FDS simulation, you can set an environment variable called {\ct OMP\_NUM\_THREADS}. For example, to specify 4 available cores on a Windows machine, type the following at the command prompt:
 \begin{lstlisting}
 set OMP_NUM_THREADS=4
 \end{lstlisting}
-To specify 4 available cores/threads on a Mac OS~X, Linux, or Unix machine, type the following at the command prompt:
+To specify 4 available cores on a Mac OS~X, Linux, or Unix machine, type the following at the command prompt:
 \begin{lstlisting}
 export OMP_NUM_THREADS=4
 \end{lstlisting}
-When the job is started, FDS will print the number of cores/threads that will be used for that job. Note that this setting will only apply until you log out or restart your machine. To set the default value of available cores/threads upon startup, the {\ct OMP\_NUM\_THREADS} environment variable can also be set in the startup configuration scripts on a machine. Refer to the documentation for your operating system for more information on how to configure environment variables upon startup.
+When the job is started, FDS will print the number of cores that will be used for that job. Note that this setting only applies until you log out or restart your machine. To set the default value of available cores upon startup, the {\ct OMP\_NUM\_THREADS} environment variable can also be set in the startup configuration scripts on the machine. Refer to the documentation for your operating system for more information on how to configure environment variables upon startup.
 
 
 \subsubsection{MS Windows}
@@ -544,7 +543,6 @@ tail -f job_name.out
 The installer also defines aliases named {\ct fds6}\ and {\ct fds6\_mpi}\ pointing to the executables. Other aliases may be defined by adding entries to the shell start-up script. Note, do not use ``{\ct fds}'' or ``{\ct fds\_mpi}'' for alias names as these are the names used for executables distributed with FDS. You may also need to use ``chmod~+x'' to make the file executable.
 
 
-\clearpage
 \subsection{Multiple Computers (MPI Version)}
 \label{info:parallelprocessing}
 
@@ -599,7 +597,7 @@ mpirun -np 5 fds_mpi job_name.fds >& job_name.err &
 The file {\ct job\_name.err} contains what is normally printed out to the screen.
 
 
-\clearpage
+
 \section{Monitoring Progress}
 
 Diagnostics for a given calculation are written into a file called {\ct CHID.out}.
@@ -1727,7 +1725,7 @@ MP5                    & {\ct 5}  \\ \hline
 \end{table}
 
 
-\clearpage
+
 
 
 \section{Initial Conditions: The \texorpdfstring{{\tt INIT}}{INIT} Namelist Group (Table \ref{tbl:INIT})}
@@ -3351,7 +3349,6 @@ The same case is tested in two dimensions ({\ct box\_burn\_away\_2D} and {\ct bo
 
 
 
-\clearpage
 
 \section{Testing Your Pyrolysis Model}
 \label{solid_phase_verification}
