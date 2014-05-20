@@ -939,9 +939,9 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                         IL(II,JJ,KK) = BBFA*RPI_SIGMA*TMPA4
                         !$OMP END ATOMIC
                      CASE (MIRROR_BOUNDARY) 
-                        !$OMP ATOMIC WRITE
+                        !$OMP CRITICAL
                         WALL(IW)%ONE_D%ILW(N,IBND) = WALL(IW)%ONE_D%ILW(DLM(N,ABS(IOR)),IBND)
-                        !$OMP END ATOMIC
+                        !$OMP END CRITICAL
                         !$OMP ATOMIC WRITE
                         IL(II,JJ,KK) = WALL(IW)%ONE_D%ILW(N,IBND)
                         !$OMP END ATOMIC
@@ -950,9 +950,9 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                         IL(II,JJ,KK) = WALL(IW)%ONE_D%ILW(N,IBND)
                         !$OMP END ATOMIC
                      CASE DEFAULT ! solid wall
-                        !$OMP ATOMIC WRITE
+                        !$OMP CRITICAL
                         WALL(IW)%ONE_D%ILW(N,IBND) = OUTRAD_W(IW) + RPI*(1._EB-WALL(IW)%ONE_D%EMISSIVITY)*INRAD_W(IW)
-                        !$OMP END ATOMIC
+                        !$OMP END CRITICAL
                   END SELECT
                ELSEIF (CYLINDRICAL) THEN
                   IF (WALL(IW)%BOUNDARY_TYPE==OPEN_BOUNDARY) CYCLE WALL_LOOP1
