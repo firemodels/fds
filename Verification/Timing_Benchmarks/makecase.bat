@@ -7,7 +7,7 @@ set casename=%chid%.fds
 > %casename% (
 @echo.^&HEAD CHID='%chid%', TITLE='General purpose input file to test FDS timings, SVN $Revision: 19308 $' /
 @echo.
-@echo.^&MESH IJK=128,128,128, XB=0.0,1.0,0.0,1.0,0.0,1.0 /
+@echo.^&MESH IJK=64,64,64, XB=0.0,1.0,0.0,1.0,0.0,1.0 /
 @echo.
 @echo.^&TIME T_END=1.0 /
 @echo.
