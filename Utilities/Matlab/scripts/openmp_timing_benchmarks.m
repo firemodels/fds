@@ -52,7 +52,7 @@ set(h,'Interpreter',Font_Interpreter)
 
 % add SVN if file is available
 
-svn_file = [dir,'test64a_svn.txt'];
+svn_file = [dir,'openmp_test64a_svn.txt'];
 if exist(svn_file,'file')
     SVN = importdata(svn_file);
     x_lim = get(gca,'XLim');
