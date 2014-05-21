@@ -9,7 +9,7 @@ cat <<EOF > $casename
 REM DO NOT EDIT the .fds input files directly.  When making changes:
 REM 1. edit the template file, makecase.sh
 REM 2. rerun the script makecases.sh
-REM 3. commit updated test64...fds and test128...fds input files
+REM 3. commit updated openmp_test64...fds and openmp_test128...fds input files
 
 &MESH IJK=$size,$size,$size, XB=0.0,1.0,0.0,1.0,0.0,1.0 /
 
