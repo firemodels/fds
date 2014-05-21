@@ -11,6 +11,7 @@ OPENMP=
 IB=
 nthreads=8
 resource_manager=
+export RUN_OPENMP
 
 if [ "$FDSNETWORK" == "infiniband" ] ; then
 IB=ib
@@ -112,6 +113,9 @@ export RUNFDSMPI="$SVNROOT/Utilities/Scripts/runfdsmpi.sh $queue"
 
 if [ $RUN_OPENMP ]; then
   export RUNFDS="$SVNROOT/Utilities/Scripts/runfdsopenmp.sh $queue -n $nthreads"
+  export RUNFDSBENCHMARK="$SVNROOT/Utilities/Scripts/runfdsopenmp.sh -b $queue"
+else
+  export RUNFDSBENCHMARK="$SVNROOT/Utilities/Scripts/runfds.sh $queue"
 fi
 
 export BASEDIR=`pwd`

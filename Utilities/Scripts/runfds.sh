@@ -12,11 +12,14 @@ if [ "$JOBPREFIX" == "" ]; then
   JOBPREFIX=VV_
 fi
 
-while getopts 'n:q:w' OPTION
+while getopts 'n:o:q:w' OPTION
 do
 case $OPTION in
   n)
   nthreads="$OPTARG"
+  ;;
+  o)
+  ignored="$OPTARG"
   ;;
   q)
    queue="$OPTARG"

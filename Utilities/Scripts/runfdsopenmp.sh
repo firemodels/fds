@@ -8,12 +8,19 @@ QSUB=qsub
 nnodes=1
 nprocs=8
 nthreads=8
+benchmark=no
 
-while getopts 'n:q:' OPTION
+while getopts 'bn:o:q:' OPTION
 do
 case $OPTION in
+  b)
+   benchmark=yes
+   ;;
   n)
    nprocs="$OPTARG"
+   nthreads="$OPTARG"
+   ;;
+  o)
    nthreads="$OPTARG"
    ;;
   q)
@@ -22,6 +29,11 @@ case $OPTION in
 esac
 done
 shift $(($OPTIND-1))
+
+# in benchmark mode run a case "alone" on a node
+if [ "$benchmark" == "yes" ]; then
+  nprocs=8
+fi
 
 if [ "$JOBPREFIX" == "" ]; then
   JOBPREFIX=VV_
