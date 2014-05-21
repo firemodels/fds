@@ -69,7 +69,7 @@ echo.
 echo *** Copying executables and scripts
 echo.
 
-CALL :COPY %in_for_bundle%\fds_open.bat %out_bin%\fds_open.bat
+CALL :COPY %in_for_bundle%\fds_openmp.bat %out_bin%\fds_openmp.bat
 
 CALL :COPY %fdsdir%\fds_%OPENMP%win_%platform%.exe         %out_bin%\fds%release_version%.exe
 
