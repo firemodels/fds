@@ -376,14 +376,14 @@ $RUNFDS Scalar_Analytical_Solution shunn3_128
 $RUNFDS Scalar_Analytical_Solution shunn3_256
 $RUNFDS Scalar_Analytical_Solution shunn3_512
 
-$RUNFDS Timing_Benchmarks test1
-$RUNFDS Timing_Benchmarks test2
-$RUNFDS Timing_Benchmarks test3
-$RUNFDS Timing_Benchmarks test4
-$RUNFDS Timing_Benchmarks test5
-$RUNFDS Timing_Benchmarks test6
-$RUNFDS Timing_Benchmarks test7
-$RUNFDS Timing_Benchmarks test8
+$RUNFDSBENCHMARK -o 1 Timing_Benchmarks test1
+$RUNFDSBENCHMARK -o 2 Timing_Benchmarks test2
+$RUNFDSBENCHMARK -o 3 Timing_Benchmarks test3
+$RUNFDSBENCHMARK -o 4 Timing_Benchmarks test4
+$RUNFDSBENCHMARK -o 5 Timing_Benchmarks test5
+$RUNFDSBENCHMARK -o 6 Timing_Benchmarks test6
+$RUNFDSBENCHMARK -o 7 Timing_Benchmarks test7
+$RUNFDSBENCHMARK -o 8 Timing_Benchmarks test8
 
 $RUNFDS Turbulence csmag0_32
 $RUNFDS Turbulence csmag_32
