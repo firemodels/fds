@@ -23,7 +23,7 @@ cat <<EOF > $casename
 &VENT PBZ=0.0,   SURF_ID='HOT' /
 &VENT MB='ZMAX', SURF_ID='OPEN' /
 
-&DEVC XYZ=0.5,0.5,0.5, QUANTITY='CPU TIME', ID='cpu time' /
+&DEVC XYZ=0.5,0.5,0.5, QUANTITY='WALL CLOCK TIME ITERATIONS', ID='clock time' /
 
 &TAIL /
 EOF
