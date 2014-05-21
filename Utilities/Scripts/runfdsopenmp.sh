@@ -1,4 +1,4 @@
-#!/bin/bash -f
+#!/bin/bash
 
 # defaults
 
@@ -99,7 +99,7 @@ fi
 # create run script
 
 cat << EOF > $scriptfile
-#!/bin/bash -f
+#!/bin/bash
 #\$ -S /bin/bash
 #\$ -N $JOBPREFIX$infile -e $outerr -o $outlog
 #PBS -l nodes=$nnodes:ppn=$nprocs

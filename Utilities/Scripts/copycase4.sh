@@ -1,13 +1,14 @@
 #!/bin/bash
 
-dir=$2
-in=$3
+dir=$3
+in=$4
 
 
+cd $dir
 if ! [ -d $OUTDIR/$dir ]; then
   mkdir $OUTDIR/$dir
 fi
-cd $dir
+
 cp $in.fds $OUTDIR/$dir/.
 if [ -e $in.ini ]; then
   cp $in.ini $OUTDIR/$dir/.

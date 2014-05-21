@@ -114,7 +114,7 @@ fi
 # create run script
 
 cat << EOF > $scriptfile
-#!/bin/bash -f
+#!/bin/bash
 #\$ -S /bin/bash
 #\$ -N $JOBPREFIX$infile -e $outerr -o $outlog
 #PBS -N $JOBPREFIX$infile -e $outerr -o $outlog

@@ -1,4 +1,4 @@
-#!/bin/bash -f
+#!/bin/bash
 dir=$1
 in=$2
 movies=_movies
