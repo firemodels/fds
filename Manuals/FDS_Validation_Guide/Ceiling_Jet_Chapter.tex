@@ -770,6 +770,9 @@ In the WTC experiments, the compartment was 7~m long, 3.6~m wide and 3.8~m high.
 \clearpage
 
 \subsection{Summary of Ceiling Jet Temperature Predictions}
+\label{Ceiling Jet Temperature}
+\label{Sloped Ceiling Jet Temperature}
+\label{Low Ceiling Jet Temperature}
 
 The scatter plots below summarize the comparisons of predicted and measured ceiling jet temperatures. Figure~\ref{Flat_Ceiling_Jet_Summary} includes the majority of the experimental data where the ceiling was relatively flat and smooth. This data has been used in the most recent NRC/EPRI fire model validation study~\cite{NUREG_1824_Sup_1}. Figure~\ref{Sloped_Ceiling_Jet_Summary} includes data from experiments in which the ceiling was sloped or arched. Empirical correlations and zone models do not typically address this situation; thus, these results are compiled separately. Similarly, Fig.~\ref{Low_Ceiling_Jet_Summary} includes results of experiments in which the fire was very small (less than 5~kW) and the ceiling jet temperatures were close to ambient.
 
@@ -813,6 +816,7 @@ The scatter plots below summarize the comparisons of predicted and measured ceil
 There are two ways to evaluate the model's ability to predict sprinkler activation. The first is to simply compare the total number of predicted versus observed activations. The second is to compare the time to first activation. Comparing the total number of activations indirectly indicates if the model accurately predicts the cooling of the hot gases by the water spray. Comparing time to first activation indirectly indicates if the model accurately predicts the velocity and temperature of the ceiling jet.
 
 \subsection{Time to First Sprinkler Activation}
+\label{Sprinkler Activation Time}
 
 Figure~\ref{Sprinkler_Activation_Times} compares measured and predicted sprinkler activation times. For the UL/NFPRF experiments, only the time to first activation is compared because the resulting water spray sometimes delays the second activation substantially. While the model accounts for the cooling effect of the spray, the disruption of the activation sequence is somewhat random. A better way to check the accuracy of the model is to compare the predicted and measured total number of activation, which is discussed in the next section. For the Vettori experiments, the sprinklers did not flow water; thus, it is possible to consider the activation times of up to four sprinklers.
 
@@ -829,6 +833,7 @@ Figure~\ref{Sprinkler_Activation_Times} compares measured and predicted sprinkle
 
 \subsection{Number of Sprinkler Activations}
 \label{UL_NFPRF:Results}
+\label{Sprinkler Actuations}
 
 The figures on the following pages display the number of sprinklers actuated as a function of time. The results are summarized in Fig.~\ref{UL_NFPRF}. The discussion of the uncertainty for this quantity can be found in Section~\ref{uncertainty_sprinkler_acts}. 
 
@@ -929,6 +934,8 @@ Note that no sprinklers were installed for Test~11, Series~I.
 \clearpage
 
 \section{Smoke Detector Activation Times}
+\label{Smoke Detector Activation Time}
+\label{Smoke Detector Activation Time, Temp. Rise}
 
 FDS can model smoke detector activation in two ways. The first method is based on the assumption that activation occurs when the gas temperature near the detector rises above a given threshold. Essentially this method treats the smoke detector exactly like a heat detector with a relatively low RTI value. Figure~\ref{NIST_Smoke_Alarms_Scatterplot_Temp_Rise} compares the measured versus predicted smoke detector activation times using a heat detector/temperature rise approach. The heat detectors were set with an RTI of 5~$\sqrt{\hbox{m}\cdot \hbox{s}}$ and an activation temperature of \SI{5}{\celsius} above ambient, based on the suggestion of Bukowski and Averill~\cite{Bukowski:2}.
 
