@@ -1,22 +1,22 @@
 #!/bin/bash
 
-$RUNFDSBENCHMARK -o 1 Timing_Benchmarks test64a
-$RUNFDSBENCHMARK -o 2 Timing_Benchmarks test64b
-$RUNFDSBENCHMARK -o 3 Timing_Benchmarks test64c
-$RUNFDSBENCHMARK -o 4 Timing_Benchmarks test64d
-$RUNFDSBENCHMARK -o 5 Timing_Benchmarks test64e
-$RUNFDSBENCHMARK -o 6 Timing_Benchmarks test64f
-$RUNFDSBENCHMARK -o 7 Timing_Benchmarks test64g
-$RUNFDSBENCHMARK -o 8 Timing_Benchmarks test64h
+$RUNFDSBENCHMARK -o 1 Timing_Benchmarks openmp_test64a
+$RUNFDSBENCHMARK -o 2 Timing_Benchmarks openmp_test64b
+$RUNFDSBENCHMARK -o 3 Timing_Benchmarks openmp_test64c
+$RUNFDSBENCHMARK -o 4 Timing_Benchmarks openmp_test64d
+$RUNFDSBENCHMARK -o 5 Timing_Benchmarks openmp_test64e
+$RUNFDSBENCHMARK -o 6 Timing_Benchmarks openmp_test64f
+$RUNFDSBENCHMARK -o 7 Timing_Benchmarks openmp_test64g
+$RUNFDSBENCHMARK -o 8 Timing_Benchmarks openmp_test64h
 
-$RUNFDSBENCHMARK -o 1 Timing_Benchmarks test128a
-$RUNFDSBENCHMARK -o 2 Timing_Benchmarks test128b
-$RUNFDSBENCHMARK -o 3 Timing_Benchmarks test128c
-$RUNFDSBENCHMARK -o 4 Timing_Benchmarks test128d
-$RUNFDSBENCHMARK -o 5 Timing_Benchmarks test128e
-$RUNFDSBENCHMARK -o 6 Timing_Benchmarks test128f
-$RUNFDSBENCHMARK -o 7 Timing_Benchmarks test128g
-$RUNFDSBENCHMARK -o 8 Timing_Benchmarks test128h
+$RUNFDSBENCHMARK -o 1 Timing_Benchmarks openmp_test128a
+$RUNFDSBENCHMARK -o 2 Timing_Benchmarks openmp_test128b
+$RUNFDSBENCHMARK -o 3 Timing_Benchmarks openmp_test128c
+$RUNFDSBENCHMARK -o 4 Timing_Benchmarks openmp_test128d
+$RUNFDSBENCHMARK -o 5 Timing_Benchmarks openmp_test128e
+$RUNFDSBENCHMARK -o 6 Timing_Benchmarks openmp_test128f
+$RUNFDSBENCHMARK -o 7 Timing_Benchmarks openmp_test128g
+$RUNFDSBENCHMARK -o 8 Timing_Benchmarks openmp_test128h
 
 $RUNFDS Atmospheric_Effects lee_waves
 $RUNFDS Atmospheric_Effects stack_effect
