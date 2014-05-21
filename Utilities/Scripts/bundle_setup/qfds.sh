@@ -59,13 +59,15 @@ ABORTRUN=n
 IB=
 DB=
 SCRIPTFILE=
+benchmark=no
+
 if [ "$FDSNETWORK" == "infiniband" ] ; then
 IB=ib
 fi
 
 # read in parameters from command line
 
-while getopts 'bd:f:m:n:o:p:q:rsxy:z:' OPTION
+while getopts 'bd:f:m:n:o:p:q:rsxy:z:t' OPTION
 do
 case $OPTION  in
   b)
@@ -101,6 +103,9 @@ case $OPTION  in
    ;;
   s)
    USE_SMOKEVIEW="y"
+   ;;
+  t)
+   benchmark="yes"
    ;;
   x)
    VOLRENDER=y
@@ -200,6 +205,12 @@ then
 elif test $nnodes -gt 32
 then
   nnodes=32
+fi
+
+# in benchmark mode run a case "alone" on one node
+if [ "$benchmark" == "yes" ]; then
+  nodes=1
+  nprocesses_per_node=8
 fi
 
 cd $dir
