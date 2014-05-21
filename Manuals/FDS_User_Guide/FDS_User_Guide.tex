@@ -415,7 +415,7 @@ Namelist      & FDS 5 Parameter                     & Namelist     & FDS 6 Param
 
 \section{A Note on Longer Run Times in FDS 6}
 
-A number of changes made in FDS 6 are aimed at improving the robustness and accuracy of the simulations. However, these improvements come at increased cost in both CPU time and memory usage. Some of this increased cost is offset by increasingly faster computers and improved parallel processing. In particular, starting with FDS~6.1.0, the default released version of FDS will employ OpenMP~\cite{Chapman:OpenMP} by default. OpenMP is a programming interface that enables FDS to exploit multiple processing units on a given computer. Most Windows-based personal computers now come with multi-core processors, but past versions of FDS could only exploit a single core for a given calculation. With this new release and the increasingly faster processors available on the market, FDS~6 ought to maintain and eventually surpass the computing speed of past versions. 
+A number of changes made in FDS 6 are aimed at improving the robustness and accuracy of the simulations. However, these improvements come at increased cost in both CPU time and memory usage. Some of this increased cost is offset by increasingly faster computers and improved parallel processing. In particular, starting with FDS~6.1.0, the default released version of FDS will employ OpenMP~\cite{Chapman:OpenMP} by default. OpenMP is a programming interface that enables FDS to exploit multiple processing units on a given computer. Most Windows-based personal computers now come with multi-core processors, but past versions of FDS could only exploit a single core for a given calculation. With this new release and the increasingly faster processors available on the market, FDS~6 ought to maintain and eventually surpass the computing speed of past versions.
 
 Listed below are suggested ways to decrease CPU time, but these options should be considered very carefully. The default parameter settings are designed to address a wide range of fire scenarios, but there are scenarios for which approximations used in past versions of FDS may still be appropriate. The best way to determine if one or more of these time-saving assumptions is appropriate, run identical simulations with and without the assumption to determine if the difference in results is acceptable.
 
@@ -7196,13 +7196,13 @@ parameters associated with particles.
 \section{Output Control Parameters: The \texorpdfstring{{\tt DUMP}}{DUMP} Namelist Group}
 \label{info:DUMP}
 
-The namelist group {\ct DUMP} contains parameters (Table \ref{tbl:DUMP}) that control the rate at which output files
-are written, and various other global parameters associated with output files. Its parameters include:
+The namelist group {\ct DUMP} contains parameters (Table \ref{tbl:DUMP}) that control the rate at which output files are written, and various other global parameters associated with output files. Its parameters include:
 \begin{description}
 \item[{\ct NFRAMES}] Number of output dumps per calculation. The default is 1000. Device data, slice data, particle data, isosurface data, 3D smoke data, boundary data, solid phase profile data, and control function data are saved every {\ct (T\_END-T\_BEGIN)/NFRAMES} seconds unless otherwise specified using {\ct DT\_DEVC}, {\ct DT\_SLCF}, {\ct DT\_PART}, {\ct DT\_ISOF}, {\ct DT\_BNDF}, {\ct DT\_PROF}, or {\ct DT\_CTRL}. Note that {\ct DT\_SLCF} controls Smoke3D output. {\ct DT\_HRR} controls the output of heat release rate and associated quantities.
 \item[{\ct MASS\_FILE}] If {\ct .TRUE.}, produce an output file listing the total masses of all gas species as a function of time. It is {\ct .FALSE.} by default because the calculation of all gas species in all mesh cells is time-consuming. The parameter {\ct DT\_MASS} controls the frequency of output.
 \item[{\ct MAXIMUM\_PARTICLES}] Maximum number of Lagrangian particles that can be included on any mesh at any given time. (Default 500000)
 \item[{\ct SMOKE3D}] If {\ct .FALSE.}, do not produce an animation of the smoke and fire. It is {\ct .TRUE.} by default.
+\item[{\ct DT\_PL3D}] The time between Plot3D file output. Note that versions of FDS before 6 output Plot3D files by default. Now, you must specify the interval of output using this parameter. Its default value is 1000000~s, meaning that there is no Plot3D output unless specified.
 \item[{\ct FLUSH\_FILE\_BUFFERS}] FDS purges the output file buffers periodically and forces the data to be written out into the respective output files. It does this to make it easier to view the case in Smokeview while it is running. It has been noticed on Windows machines that occasionally a runtime error occurs because of file access problems related to the buffer flushing. If this happens, set this parameter to {\ct .FALSE.}, but be aware that it may not be possible to look at output in Smokeview until after the calculation is finished. You may also set {\ct DT\_FLUSH} to control the frequency of the file flushing. Its default value is the duration of the simulation divided by {\ct NFRAMES}.
 \item[{\ct STATUS\_FILES}] If {\ct .TRUE.}, produces an output file {\ct CHID.notready} which is deleted, if the simulation is completed successfully. This file can be used as an error indicator. It is {\ct .FALSE.} by default.
 \end{description}
@@ -7447,24 +7447,16 @@ Any gas phase quantity can be animated via iso-surfaces, but use caution. To ren
 \section{Plot3D Static Data Dumps}
 \label{info:PL3D}
 
-Data stored in Plot3D~\cite{PLOT3D} files (See Section~\ref{out:PL3D}) use a format developed by NASA that is used by many CFD programs for representing simulation results. Plot3D data is visualized in three ways: as 2-D contours, vector plots and iso-surfaces. Vector plots may be viewed if one or more of the $u$, $v$ and $w$ velocity components are stored in the Plot3D file. The vector length and direction show the direction and relative speed of the fluid flow. The vector colors show a scalar fluid quantity such as temperature.
-
-Five quantities are written out to a file at one instant in time. The default specification is:
+Data stored in Plot3D~\cite{PLOT3D} files use a format developed by NASA that is used by many CFD programs for representing simulation results. See Section~\ref{out:PL3D} for a description of the file structure. Plot3D data is visualized in three ways: as 2-D contours, vector plots and iso-surfaces. Vector plots may be viewed if one or more of the $u$, $v$ and $w$ velocity components are stored in the Plot3D file. The vector length and direction show the direction and relative speed of the fluid flow. The vector colors show a scalar fluid quantity such as temperature. Five quantities are written out to a file at one instant in time. The default specification is:
 \begin{lstlisting}
 &DUMP ..., PLOT3D_QUANTITY(1:5)='TEMPERATURE',
       'U-VELOCITY','V-VELOCITY','W-VELOCITY','HRRPUV' /
 \end{lstlisting}
-It's best to leave the velocity components as is, because Smokeview
-uses them to draw velocity vectors. If any of the specified quantities require the additional specification of a particular species,
-use {\ct PLOT3D\_SPEC\_ID(n)} to provide the {\ct SPEC\_ID} for {\ct PLOT3D\_QUANTITY(n)}.
+It's best to leave the velocity components as is, because Smokeview uses them to draw velocity vectors. If any of the specified quantities require the additional specification of a particular species, use {\ct PLOT3D\_SPEC\_ID(n)} to provide the {\ct SPEC\_ID} for {\ct PLOT3D\_QUANTITY(n)}.
 
-Plot3D data are stored in files with extension {\ct .q} . There is
-an optional file that can be output with coordinate information
-if another visualization package is being used to render the
-files. If you write {\ct WRITE\_XYZ=.TRUE.} on the {\ct DUMP}
-line, a file with suffix {\ct .xyz} is written out. Smokeview
-does not require this file because the coordinate information can be
-obtained elsewhere.
+Plot3D data are stored in files with extension {\ct .q} . There is an optional file that can be output with coordinate information if another visualization package is being used to render the files. If you write {\ct WRITE\_XYZ=.TRUE.} on the {\ct DUMP} line, a file with suffix {\ct .xyz} is written out. Smokeview does not require this file because the coordinate information can be obtained elsewhere.
+
+Past versions of FDS (1-5) output Plot3D files by default. Now, you must specify the time interval between dumps using {\ct DT\_PL3D} on the {\ct DUMP} line.
 
 
 
