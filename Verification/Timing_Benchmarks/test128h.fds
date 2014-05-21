@@ -1,17 +1,11 @@
-#!/bin/bash
-size=$1
-chid=$2
-casename=$chid.fds
-echo generating test case $casename
-cat <<EOF > $casename
-&HEAD CHID='$chid', TITLE='General purpose input file to test FDS timings, SVN $Revision: 19308 $' /
+&HEAD CHID='test128h', TITLE='General purpose input file to test FDS timings, SVN : 19308 $' /
 
 REM DO NOT EDIT the .fds input files directly.  Whhen making changes:
 REM 1. edit the template file, makecase.sh
 REM 2. rerun the script makecases.sh
 REM 3. commit updated test64...fds and test128...fds input files
 
-&MESH IJK=$size,$size,$size, XB=0.0,1.0,0.0,1.0,0.0,1.0 /
+&MESH IJK=128,128,128, XB=0.0,1.0,0.0,1.0,0.0,1.0 /
 
 &TIME T_END=1.0 /
 
@@ -32,4 +26,3 @@ REM 3. commit updated test64...fds and test128...fds input files
 &DEVC XYZ=0.5,0.5,0.5, QUANTITY='WALL CLOCK TIME ITERATIONS', ID='clock time' /
 
 &TAIL /
-EOF
