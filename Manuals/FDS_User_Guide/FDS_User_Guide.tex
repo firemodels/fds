@@ -492,7 +492,7 @@ This chapter describes the procedure to run an FDS calculation. The primary requ
 
 FDS can be run from the command prompt, or with a third-party Graphical User Interface (GUI). In the discussion to follow, it is assumed that FDS is being run from the command prompt. FDS can be run on a single computer, using one or more cores, or it can be run on multiple computers. The executable names are similar under the different supported operating systems (Windows, Linux, and Mac OS~X) and sizes (32~and~64~bits). The single computer executable is called {\ct fds}\ (with an {\ct .exe}\ file extension on Windows).  The multiple computer executable is called {\ct fds\_mpi} (again with an {\ct .exe}\ file extension for Windows). The letters {\ct mpi} in the filename denote Message Passing Interface, which will be discussed below.  Batch files (Windows) or aliases (Linux or Mac OS~X) may be defined to distinguish executables if you wish to install multiple versions of FDS.
 
-\subsection{Single Computer}
+\subsection{Single Computer (OpenMP Version)}
 
 Sample input files are provided with the program for new users who are encouraged to first run an example calculation before attempting to write an input file. Input files are typically given names that help identify the particular case, followed by the {\ct .fds} file extension. Suppose you want to run an input file called {\ct job\_name.fds}. You can start FDS from a command prompt in Windows, Mac OS~X, Linux, or Unix as described in the following sections.
 
@@ -507,6 +507,15 @@ To specify 4 available cores on a Mac OS~X, Linux, or Unix machine, type the fol
 export OMP_NUM_THREADS=4
 \end{lstlisting}
 When the job is started, FDS will print the number of cores that will be used for that job. Note that this setting only applies until you log out or restart your machine. To set the default value of available cores upon startup, the {\ct OMP\_NUM\_THREADS} environment variable can also be set in the startup configuration scripts on the machine. Refer to the documentation for your operating system for more information on how to configure environment variables upon startup.
+
+To confirm the speedup for the OpenMP version of the code, a series of test cases are run for two problem sizes ($64^3$ and $128^3$) varying the number of OpenMP threads.  The setup is a simple channel flow carrying two extra species to mimic the scalar transport performed in typical fire problems (see the {\ct Timing\_Benchmarks/openmp\_test} series in the FDS verification suite).  The results are shown in Fig.~\ref{fig:openmp_timing_benchmarks}.  Generally, users can expect a factor of 2 speedup using 4 cores (default setting).
+
+\begin{figure}[ht!]
+\centering
+\includegraphics[width=4.0in]{SCRIPT_FIGURES/openmp_timing_benchmarks}
+\caption[OpenMP timings]{Benchmark timing comparison for the OpenMP test cases.}
+\label{fig:openmp_timing_benchmarks}
+\end{figure}
 
 
 \subsubsection{MS Windows}
