@@ -1,4 +1,4 @@
-#!/bin/bash -f
+#!/bin/bash
 
 # defaults
 

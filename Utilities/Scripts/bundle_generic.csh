@@ -69,6 +69,7 @@ set smv_cases=$fds_smvroot/Verification/scripts/SMV_Cases.sh
 set copycase=$fds_smvroot/Utilities/Scripts/copycase.sh
 set copycase2=$fds_smvroot/Utilities/Scripts/copycase2.sh
 set copycase3=$fds_smvroot/Utilities/Scripts/copycase3.sh
+set copycase4=$fds_smvroot/Utilities/Scripts/copycase4.sh
 set example_tmpdir=/tmp/examples.$$
 
 cd $googledir
@@ -117,6 +118,9 @@ scp -q $fdshost\:$fdsroot/$fdsdir/$fds $bundledir/bin/$fdsout
 
 echo copying $fdsmpi from $fdsdir on $fdshost
 scp -q $fdshost\:$fdsroot/$fdsmpidir/$fdsmpi $bundledir/bin/$fdsmpiout
+
+echo copying fds_openmp.sh from $forbundle
+cp $forbundle/fds_openmp.sh $bundledir/bin/.
 
 if ($PLATFORM == "LINUX32" || $PLATFORM == "LINUX64") then
 set ostype=LINUX
@@ -220,6 +224,7 @@ setenv RUNFDS $copycase
 setenv RUNWFDS $copycase
 setenv RUNTFDS $copycase
 setenv RUNCFAST $copycase3
+setenv RUNFDSBENCHMARK $copycase4
 echo Copying example files to bundle directory
 $fds_cases
 $smv_cases
