@@ -1,5 +1,23 @@
 #!/bin/bash
 
+$RUNFDSBENCHMARK -o 1 Timing_Benchmarks test64a
+$RUNFDSBENCHMARK -o 2 Timing_Benchmarks test64b
+$RUNFDSBENCHMARK -o 3 Timing_Benchmarks test64c
+$RUNFDSBENCHMARK -o 4 Timing_Benchmarks test64d
+$RUNFDSBENCHMARK -o 5 Timing_Benchmarks test64e
+$RUNFDSBENCHMARK -o 6 Timing_Benchmarks test64f
+$RUNFDSBENCHMARK -o 7 Timing_Benchmarks test64g
+$RUNFDSBENCHMARK -o 8 Timing_Benchmarks test64h
+
+$RUNFDSBENCHMARK -o 1 Timing_Benchmarks test128a
+$RUNFDSBENCHMARK -o 2 Timing_Benchmarks test128b
+$RUNFDSBENCHMARK -o 3 Timing_Benchmarks test128c
+$RUNFDSBENCHMARK -o 4 Timing_Benchmarks test128d
+$RUNFDSBENCHMARK -o 5 Timing_Benchmarks test128e
+$RUNFDSBENCHMARK -o 6 Timing_Benchmarks test128f
+$RUNFDSBENCHMARK -o 7 Timing_Benchmarks test128g
+$RUNFDSBENCHMARK -o 8 Timing_Benchmarks test128h
+
 $RUNFDS Atmospheric_Effects lee_waves
 $RUNFDS Atmospheric_Effects stack_effect
 $RUNFDS Atmospheric_Effects lapse_rate
@@ -375,15 +393,6 @@ $RUNFDS Scalar_Analytical_Solution shunn3_64
 $RUNFDS Scalar_Analytical_Solution shunn3_128
 $RUNFDS Scalar_Analytical_Solution shunn3_256
 $RUNFDS Scalar_Analytical_Solution shunn3_512
-
-$RUNFDSBENCHMARK -o 1 Timing_Benchmarks test1
-$RUNFDSBENCHMARK -o 2 Timing_Benchmarks test2
-$RUNFDSBENCHMARK -o 3 Timing_Benchmarks test3
-$RUNFDSBENCHMARK -o 4 Timing_Benchmarks test4
-$RUNFDSBENCHMARK -o 5 Timing_Benchmarks test5
-$RUNFDSBENCHMARK -o 6 Timing_Benchmarks test6
-$RUNFDSBENCHMARK -o 7 Timing_Benchmarks test7
-$RUNFDSBENCHMARK -o 8 Timing_Benchmarks test8
 
 $RUNFDS Turbulence csmag0_32
 $RUNFDS Turbulence csmag_32
