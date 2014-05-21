@@ -1,7 +1,7 @@
 #!/bin/bash
 #  1.  after making changes to the template input file in
 #      makecase.sh, run this script
-#  2.  then commit the updated test...fds input files to the repository
+#  2.  then commit the updated openmp_testxxx.fds input files to the repository
 
 ./makecase.sh 64 openmp_test64a
 ./makecase.sh 64 openmp_test64b
