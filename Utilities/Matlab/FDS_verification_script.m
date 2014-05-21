@@ -87,5 +87,6 @@ fan_curve
 mesh_transformation
 synthetic_eddy_method
 shunn_mms_error
+openmp_timing_benchmarks
 
 display('verification scripts completed successfully!')
