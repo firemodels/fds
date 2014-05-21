@@ -549,7 +549,7 @@ run_verification_cases_debug()
 
    echo 'Creating openmp timing test cases' >> $FIREBOT_DIR/output/stage3
    cd $FDS_SVNROOT/Verification/Timing_Benchmarks
-   ./make_cases.sh
+   ./makecases.sh
 
    cd $FDS_SVNROOT/Verification
 
@@ -946,7 +946,7 @@ run_verification_cases_release()
    
    echo 'Creating openmp timing test cases:' >> $FIREBOT_DIR/output/stage5
    cd $FDS_SVNROOT/Verification/Timing_Benchmarks
-   ./make_cases.sh
+   ./makecases.sh
 
    ./Run_FDS_Cases.sh $1 -q $QUEUE >> $FIREBOT_DIR/output/stage5 2>&1
    
