@@ -6,7 +6,7 @@ echo generating test case $casename
 cat <<EOF > $casename
 &HEAD CHID='$chid', TITLE='General purpose input file to test FDS timings, SVN $Revision: 19308 $' /
 
-REM DO NOT EDIT the .fds input files directly.  Whhen making changes:
+REM DO NOT EDIT the .fds input files directly.  When making changes:
 REM 1. edit the template file, makecase.sh
 REM 2. rerun the script makecases.sh
 REM 3. commit updated test64...fds and test128...fds input files
