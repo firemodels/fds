@@ -32,6 +32,7 @@ then
   echo " -q queue - name of the queue. choices: [default: $queue (other choices:"  
   echo "    vis and fire70s)"
   echo " -r - use FDS (or Smokeview if -s is specified) located in repository"
+  echo " -t - used for timing studies, run a job alone on a node"
   echo " -f repository root - name and location of repository where FDS is located"
   echo "    [default: ~/FDS-SMV]"
   echo " command - full path to command name (not used if either -f or -r"
