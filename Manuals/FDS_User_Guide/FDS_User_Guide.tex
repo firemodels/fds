@@ -5511,6 +5511,10 @@ defined via the line
 Note that if the particles are {\ct MASSLESS}, it is not appropriate to color them according to any particular property. Particles are not colored by gas phase quantities, but rather by properties of the particle itself. For example, {\ct 'PARTICLE TEMPERATURE'} for a non-massless particle refers to the temperature of the particle itself rather than the local gas temperature. Also note that if {\ct MASSLESS=.TRUE.}, the {\ct SAMPLING\_FACTOR} (Section~\ref{info:part_output}) is set to 1 unless you say otherwise, which would be pointless
 since {\ct MASSLESS} particles are for visualization only.
 
+\subsection*{Turbulent Dispersion}
+
+Massless tracer particles may also be useful in modeling dispersion of a tracer gas that does not affect the mean flow field (passive scalar).  The number density of the particles then may be translated into a local mass concentration.  See how to output number concentration in Sec.~\ref{PDPA}.  To properly account for subgrid-scale (unresolved) turbulent motions, add the parameter {\ct TURBULENT\_DISPERSION=.TRUE.} to the {\ct PART} line.  The particles will then undergo a random walk based on the subgrid diffusivity.  For further information, see the {\ct random\_walk} test cases in the {\ct WUI} directory of the verification suite.
+
 
 \section{Liquid Droplets}
 
@@ -9052,7 +9056,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \vspace{\baselineskip}
 
 
-
+\newpage
 \section{\texorpdfstring{{\tt HOLE}}{HOLE} (Obstruction Cutout Parameters)}
 
 
@@ -9500,7 +9504,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \vspace{\baselineskip}
 
 
-
+\newpage
 \section{\texorpdfstring{{\tt PART}}{PART} (Lagrangian Particles/Droplets)}
 
 
@@ -9516,22 +9520,23 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \multicolumn{5}{|c|}{{\ct PART} (Lagrangian Particles/Droplets)} \\
 \hline \hline
 \endhead
-{\ct AGE}                           & Real            & Section~\ref{info:part_output}          & s         & 100000.       \\ \hline
+{\ct AGE}                           & Real            & Section~\ref{info:part_output}          & s         & $1\times 10^5$ \\ \hline
 {\ct BREAKUP}                       & Logical         & Section~\ref{info:secondary_breakup}    &           & {\ct .FALSE.} \\ \hline
 {\ct BREAKUP\_CNF\_RAMP\_ID}        & Character       & Section~\ref{info:secondary_breakup}    &           &               \\ \hline
 {\ct BREAKUP\_DISTRIBUTION}         & Character       & Section~\ref{info:secondary_breakup}    &           & {\ct 'ROSIN...'} \\ \hline
 {\ct BREAKUP\_GAMMA\_D}             & Real            & Section~\ref{info:secondary_breakup}    &           & 2.4           \\ \hline
-{\ct BREAKUP\_RATIO}                & Real            & Section~\ref{info:secondary_breakup}    &           & $\frac{3}{7}$ \\ \hline
+{\ct BREAKUP\_RATIO}                & Real            & Section~\ref{info:secondary_breakup}    &           & $3/7$         \\ \hline
 {\ct BREAKUP\_SIGMA\_D}             & Real            & Section~\ref{info:secondary_breakup}    &           &               \\ \hline
 {\ct CHECK\_DISTRIBUTION}           & Logical         & Section~\ref{info:particle_size}        &           & {\ct .FALSE.} \\ \hline
 {\ct CNF\_RAMP\_ID}                 & Character       & Section~\ref{info:particle_size}        &           &               \\ \hline
 {\ct COLOR}                         & Character       & Section~\ref{info:part_output}          &           & {\ct 'BLACK'} \\ \hline
 {\ct COMPLEX\_REFRACTIVE\_INDEX}    & Real            & Section~\ref{radiative_part_props}      &           & 0.01          \\ \hline
 {\ct CTRL\_ID}                      & Character       & Section~\ref{info:particle_flux}        &           &               \\ \hline
-{\ct DENSE\_VOLUME\_FRACTION}       & Real            & Section~\ref{info:particle_drag}        & m$^3$/m$^3$ & 1.E-5         \\ \hline
+{\ct DENSE\_VOLUME\_FRACTION}       & Real            & Section~\ref{info:particle_drag}        & m$^3$/m$^3$ & $1\times 10^{-5}$ \\ \hline
 {\ct DEVC\_ID}                      & Character       & Section~\ref{info:particle_flux}        &           &               \\ \hline
 {\ct DIAMETER}                      & Real            & Section~\ref{info:particle_size}        & $\mu$m    &               \\ \hline
 {\ct DISTRIBUTION}                  & Character       & Section~\ref{info:particle_size}        &           & {\ct 'ROSIN...'} \\ \hline
+{\ct DRAG\_COEFFICIENT}             & Real            & Section~\ref{info:particle_drag}        &           &               \\ \hline
 {\ct DRAG\_LAW}                     & Character       & Section~\ref{info:particle_drag}        &           & {\ct 'SPHERE'}\\ \hline
 {\ct FREE\_AREA\_FRACTION}          & Real            & Section~\ref{info:particle_screen}               &           &               \\ \hline
 {\ct GAMMA\_D}                      & Real            & Section~\ref{info:particle_size}        &           & 2.4           \\ \hline
@@ -9540,7 +9545,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct ID}                            & Character       & Section~\ref{info:PART_Basics}          &           &               \\ \hline
 {\ct INITIAL\_TEMPERATURE}          & Real            & Section~\ref{thermal_part_props}        & $^\circ$C & {\ct TMPA}    \\ \hline
 {\ct MASSLESS}                      & Logical         & Section~\ref{info:MASSLESS}             &           & {\ct .FALSE.} \\ \hline
-{\ct MAXIMUM\_DIAMETER}             & Real            & Section~\ref{info:particle_size}        & $\mu$m    & $\infty$      \\ \hline
+{\ct MAXIMUM\_DIAMETER}             & Real            & Section~\ref{info:particle_size}        & $\mu$m    & Infinite      \\ \hline
 {\ct MINIMUM\_DIAMETER}             & Real            & Section~\ref{info:particle_size}        & $\mu$m    & 20.           \\ \hline
 {\ct MONODISPERSE}                  & Logical         & Section~\ref{info:particle_size}        &           & {\ct .FALSE.} \\ \hline
 {\ct N\_STRATA}                     & Integer         & Section~\ref{info:particle_size}        &           & 7             \\ \hline
@@ -9555,10 +9560,9 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct SIGMA\_D}                      & Real            & Section~\ref{info:particle_size}        &           &               \\ \hline
 {\ct SPEC\_ID}                      & Character       & Section~\ref{thermal_part_props}        &           &               \\ \hline
 {\ct STATIC}                        & Logical         & Section~\ref{info:PART_SURF}            &           & {\ct .FALSE.} \\ \hline
-{\ct SURFACE\_TENSION}              & Real            & Section~\ref{info:secondary_breakup}    &   N/m     & $72.8 \times 10^3$  \\ \hline
+{\ct SURFACE\_TENSION}              & Real            & Section~\ref{info:secondary_breakup}    &   N/m     & $7.28 \times 10^4$  \\ \hline
 {\ct SURF\_ID}                      & Character       & Section~\ref{info:PART_SURF}            &           &               \\ \hline
-%{\ct TURBULENT\_DISPERSION}         & Logical         &                                         &           & {\ct .FALSE.} \\ \hline
-{\ct DRAG\_COEFFICIENT}             & Real            & Section~\ref{info:particle_drag}        &           & -1.           \\ \hline
+{\ct TURBULENT\_DISPERSION}         & Logical         & Section~\ref{info:MASSLESS}             &           & {\ct .FALSE.} \\ \hline
 {\ct VERTICAL\_VELOCITY}            & Real            & Section~\ref{info:surface_droplets}     & m/s       &  0.5          \\ \hline
 \end{longtable}
 
@@ -9695,7 +9699,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 
 \vspace{\baselineskip}
 
-
 \section{\texorpdfstring{{\tt RADI}}{RADI} (Radiation Parameters)}
 
 \begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
@@ -9755,7 +9758,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 
 \vspace{\baselineskip}
 
-
+\newpage
 \section{\texorpdfstring{{\tt REAC}}{REAC} (Reaction Parameters)}
 
 \begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
@@ -10060,6 +10063,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 
 \vspace{\baselineskip}
 
+\newpage
 \section{\texorpdfstring{{\tt TRNX, TRNY, TRNZ}}{TRNX, TRNY, TRNZ} (MESH Transformations)}
 
 \begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
