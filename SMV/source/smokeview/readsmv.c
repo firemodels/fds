@@ -5924,14 +5924,14 @@ typedef struct {
         ventdata *vi;
 
         vi=vinfo+nn;
-        vi->type=0;
+        vi->type=VENT_SOLID;
         vi->dummyptr=NULL;
         vi->transparent=0;
         vi->useventcolor=0;
         vi->usecolorindex=0;
         vi->nshowtime=0;
         vi->isOpenvent=0;
-		vi->hideboundary=0;
+        vi->hideboundary=0;
         vi->surf[0]=vent_surfacedefault;
         vi->textureinfo[0]=NULL;
         vi->texture_origin[0]=texture_origin[0];
