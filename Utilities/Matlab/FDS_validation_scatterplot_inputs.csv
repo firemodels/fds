@@ -25,10 +25,10 @@ Smoke Detector Activation Time,Measured Time to Activation (s),Predicted Time to
 Cable Failure Time,Measured Time to Threshold Temperature (s),Predicted Time to Threshold Temperature (s),0,1800,0.03 0.95,SouthEast,1,12,yes,linear,FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/FDS_Cable_Failure_Time
 Sprinkler Actuations,Measured Actuations,Predicted Actuations,0,40,0.03 0.95,SouthEast,1,15,yes,linear,FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/FDS_Sprinkler_Actuations
 Aerosol Deposition Velocity,Measured Deposition Velocity (m/s),Predicted Deposition Velocity (m/s),1.00E-07,1.00E-01,0.03 0.95,SouthEast,1,-1,yes,loglog,FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/FDS_Aerosol_Deposition_Velocity
-Burning Rate,Measured Burning Rate (kg/m^2/s),Predicted Burning Rate (kg/m^2/s),0,0.1,0.03 0.95,SouthEast,1,-1,yes,linear,FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/FDS_Burning_Rates
+Burning Rate,Measured Burning Rate (kg/m^2/s),Predicted Burning Rate (kg/m^2/s),0,0.1,0.03 0.95,SouthEast,1,8,yes,linear,FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/FDS_Burning_Rates
 Carbon Monoxide Concentration,Measured Change in Volume Fraction,Predicted Change in Volume Fraction,0,0.1,0.03 0.95,SouthEast,1,19,yes,linear,FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/FDS_Carbon_Monoxide_Concentration
 Entrainment,Measured Mass Flow Rate (kg/s),Predicted Mass Flow Rate (kg/s),0,0.6,0.03 0.95,SouthEast,1,10,yes,linear,FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/FDS_Entrainment
-Extinction Time,Measured Time (s),Predicted Time (s),0,650,0.03 0.95,SouthEast,1,-1,yes,linear,FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/FDS_Extinction_Time
+Extinction Time,Measured Time (s),Predicted Time (s),0,650,0.03 0.95,SouthEast,1,10,yes,linear,FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/FDS_Extinction_Time
 Species Concentration,Measured Change in Volume Fraction (%),Predicted Change in Volume Fraction (%),0,100,0.03 0.95,SouthEast,1,8,yes,linear,FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/FDS_Species_Concentration
 Low Ceiling Jet Temperature,Measured Temperature Rise (\circC),Predicted Temperature Rise (\circC),0,30,0.03 0.95,SouthEast,1,7,yes,linear,FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/FDS_Low_Ceiling_Jet_Temperature
 Low Heat Flux,Measured Heat Flux (kW/m^2),Predicted Heat Flux (kW/m^2),0,5,0.03 0.95,SouthEast,1,11,yes,linear,FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/FDS_Low_Heat_Flux

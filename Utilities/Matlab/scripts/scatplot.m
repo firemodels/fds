@@ -271,12 +271,11 @@ for j=2:length(Q);
         % Plot diagonal lines
         plot([Plot_Min,Plot_Max],[Plot_Min,Plot_Max],'k-')
         if strcmp(Model_Error,'yes')
-            plot([Plot_Min,Plot_Max],[Plot_Min,Plot_Max],'k-')
-            plot([Plot_Min,Plot_Max],[Plot_Min,Plot_Max*(1+2*Sigma_E)],'k--')
-            plot([Plot_Min,Plot_Max],[Plot_Min,Plot_Max*(1-2*Sigma_E)],'k--')
-            plot([Plot_Min,Plot_Max],[Plot_Min,delta*Plot_Max],'r-')
-            plot([Plot_Min,Plot_Max],[Plot_Min,delta*Plot_Max*(1+2*Sigma_M)],'r--')
-            plot([Plot_Min,Plot_Max],[Plot_Min,delta*Plot_Max*(1-2*Sigma_M)],'r--')
+            plot([Plot_Min,Plot_Max],[Plot_Min*(1+2*Sigma_E),Plot_Max*(1+2*Sigma_E)],'k--')
+            plot([Plot_Min,Plot_Max],[Plot_Min*(1-2*Sigma_E),Plot_Max*(1-2*Sigma_E)],'k--')
+            plot([Plot_Min,Plot_Max],[Plot_Min*delta,Plot_Max*delta],'r-')
+            plot([Plot_Min,Plot_Max],[Plot_Min*delta*(1+2*Sigma_M),Plot_Max*delta*(1+2*Sigma_M)],'r--')
+            plot([Plot_Min,Plot_Max],[Plot_Min*delta*(1-2*Sigma_M),Plot_Max*delta*(1-2*Sigma_M)],'r--')
         end
         
         % Format the legend and axis labels
@@ -290,31 +289,33 @@ for j=2:length(Q);
         set(gca,'YTick',get(gca,'XTick'))
         set(gca,'Position',[Scat_Plot_X,Scat_Plot_Y,Scat_Plot_Width,Scat_Plot_Height])
         
-        if strcmp(Plot_Type,'linear')
-            text(Plot_Min+Title_Position(1)*(Plot_Max-Plot_Min),Plot_Min+Title_Position(2)*(Plot_Max-Plot_Min),...
-            [Scatter_Plot_Title, Append_To_Scatterplot_Title],'FontSize',Scat_Title_Font_Size,'FontName',Font_Name,'Interpreter',Font_Interpreter)
-        elseif strcmp(Plot_Type,'loglog')
-            text(10^(log10(Plot_Min)+Title_Position(1)*(log10(Plot_Max)-log10(Plot_Min))),10^(log10(Plot_Min)+Title_Position(2)*(log10(Plot_Max)-log10(Plot_Min))),...
-            [Scatter_Plot_Title, Append_To_Scatterplot_Title],'FontSize',Scat_Title_Font_Size,'FontName',Font_Name,'Interpreter',Font_Interpreter)
-        elseif strcmp(Plot_Type,'semilogx')
-            text(10^(log10(Plot_Min)+Title_Position(1)*(log10(Plot_Max)-log10(Plot_Min))),Plot_Min+Title_Position(2)*(Plot_Max-Plot_Min),...
-            [Scatter_Plot_Title, Append_To_Scatterplot_Title],'FontSize',Scat_Title_Font_Size,'FontName',Font_Name,'Interpreter',Font_Interpreter)
-        elseif strcmp(Plot_Type,'semilogy')
-            text(Plot_Min+Title_Position(1)*(Plot_Max-Plot_Min),10^(log10(Plot_Min)+Title_Position(2)*(log10(Plot_Max)-log10(Plot_Min))),...
-            [Scatter_Plot_Title, Append_To_Scatterplot_Title],'FontSize',Scat_Title_Font_Size,'FontName',Font_Name,'Interpreter',Font_Interpreter)
+        if strcmp(Plot_Type,'linear') | strcmp(Plot_Type,'semilogy')
+            Title_Position_X = Plot_Min+Title_Position(1)*(Plot_Max-Plot_Min);
+        else
+            Title_Position_X = 10^(log10(Plot_Min)+Title_Position(1)*(log10(Plot_Max)-log10(Plot_Min)));
         end
+
+        if strcmp(Plot_Type,'linear') | strcmp(Plot_Type,'semilogx')
+            Title_Position_Y_1 = Plot_Min+Title_Position(2)*(Plot_Max-Plot_Min);
+            Title_Position_Y_2 = Plot_Min+(Title_Position(2)-0.05)*(Plot_Max-Plot_Min);
+            Title_Position_Y_3 = Plot_Min+(Title_Position(2)-0.10)*(Plot_Max-Plot_Min);
+            Title_Position_Y_4 = Plot_Min+(Title_Position(2)-0.15)*(Plot_Max-Plot_Min);
+        else
+            Title_Position_Y_1 = 10^(log10(Plot_Min)+Title_Position(2)*(log10(Plot_Max)-log10(Plot_Min)));
+            Title_Position_Y_2 = 10^(log10(Plot_Min)+(Title_Position(2)-0.05)*(log10(Plot_Max)-log10(Plot_Min)));
+            Title_Position_Y_3 = 10^(log10(Plot_Min)+(Title_Position(2)-0.10)*(log10(Plot_Max)-log10(Plot_Min)));
+            Title_Position_Y_4 = 10^(log10(Plot_Min)+(Title_Position(2)-0.15)*(log10(Plot_Max)-log10(Plot_Min)));
+        end
+
+        text(Title_Position_X,Title_Position_Y_1,[Scatter_Plot_Title, Append_To_Scatterplot_Title],'FontSize',Scat_Title_Font_Size,'FontName',Font_Name,'Interpreter',Font_Interpreter)
   
         if Sigma_E > 0.0
-            text(Plot_Min+(Title_Position(1))*(Plot_Max-Plot_Min),Plot_Min+(Title_Position(2)-0.05)*(Plot_Max-Plot_Min),...
-                 ['Exp. Rel. Std. Dev.: ',num2str(Sigma_E,'%4.2f')],'FontSize',12,'FontName',Font_Name,'Interpreter',Font_Interpreter)
+            text(Title_Position_X,Title_Position_Y_2,['Exp. Rel. Std. Dev.: ',num2str(Sigma_E,'%4.2f')],'FontSize',12,'FontName',Font_Name,'Interpreter',Font_Interpreter)
         end
          
         if strcmp(Model_Error,'yes')
-            text(Plot_Min+(Title_Position(1))*(Plot_Max-Plot_Min),Plot_Min+(Title_Position(2)-0.10)*(Plot_Max-Plot_Min),...
-                ['Model Rel. Std. Dev.: ',num2str(Sigma_M,'%4.2f')],'FontSize',12,'FontName',Font_Name,'Interpreter',Font_Interpreter)
-            
-            text(Plot_Min+(Title_Position(1))*(Plot_Max-Plot_Min),Plot_Min+(Title_Position(2)-0.15)*(Plot_Max-Plot_Min),...
-                ['Model Bias Factor: ',num2str(delta,'%4.2f')],'FontSize',12,'FontName',Font_Name,'Interpreter',Font_Interpreter)
+            text(Title_Position_X,Title_Position_Y_3,['Model Rel. Std. Dev.: ',num2str(Sigma_M,'%4.2f')],'FontSize',12,'FontName',Font_Name,'Interpreter',Font_Interpreter)
+            text(Title_Position_X,Title_Position_Y_4,['Model Bias Factor: ',num2str(delta,'%4.2f')],'FontSize',12,'FontName',Font_Name,'Interpreter',Font_Interpreter)
         end
         
         C = stripcell(Group_Key_Label);
