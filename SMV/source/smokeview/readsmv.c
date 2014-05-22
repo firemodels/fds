@@ -5873,6 +5873,14 @@ typedef struct {
 
         /* 
         new VENT format:
+
+        xmin xmax ymin ymax zmin zmax ventid surf_index tx ty tz
+
+        xyz min/max - vent boundaries
+        ventid - index of vent
+        surf_index - index of SURF
+        tx, ty, yz - texture origin
+        
         i1 i2 j1 j2 k1 k2 ventindex venttype r g b a
         
         ventindex: -99 or 99 : use default color
@@ -6051,6 +6059,7 @@ typedef struct {
               s_color[3]=s2_color[3];
             }
             vi->useventcolor=1;
+            ventindex = SIGN(ventindex)*99;
           }
           if(ventindex<0)vi->hideboundary=1;
           if(venttype!=-99)vi->type=venttype;

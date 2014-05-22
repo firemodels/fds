@@ -2475,7 +2475,6 @@ void update_faces(void){
       ventdata *vi;
 
       vi = meshi->ventinfo+j;
-      if(vi->type==VENT_HIDDEN)continue;
       obst_or_vent2faces(meshi,NULL,vi,faceptr,VENT_face);
       faceptr++;
     }
