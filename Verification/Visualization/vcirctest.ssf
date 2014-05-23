@@ -22,6 +22,8 @@ LOADINIFILE
  vcirctest_outline.ini
 SETVIEWPOINT
  view 1
+SETVIEWPOINT
+ view 1
 RENDERONCE
  vcirctest_fds_outline 
 KEYBOARD
