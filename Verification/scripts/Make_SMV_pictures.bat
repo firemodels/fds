@@ -67,10 +67,10 @@ erase background.version
 erase wind2fds.version
 
 erase smokeview.help
-erase smokediff..help
-erase smokezip..help
-erase background..help
-erase wind2fds..help
+erase smokediff.help
+erase smokezip.help
+erase background.help
+erase wind2fds.help
 
 echo.
 echo Creating Smokeview User guide info files
