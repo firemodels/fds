@@ -2,6 +2,8 @@ RENDERDIR
  ..\..\Manuals\SMV_User_Guide\SCRIPT_FIGURES
 SETVIEWPOINT
  drawcone
+SETVIEWPOINT
+ drawcone
 RENDERONCE
 drawcone 
 SETVIEWPOINT
