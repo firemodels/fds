@@ -4161,6 +4161,33 @@ A cut-cell algorithm is developed for calculating the intersection area between 
 
 \newpage
 
+\chapter{Outputs}
+
+\section{Statistical Quantities (\texorpdfstring\textct{rms\_cov\_corr}{rms\_cov\_corr})}
+
+FDS can output the root mean square (RMS), co-variance, and cross-correlation for both point and line {\ct DEVC} outputs.  To test these outputs a 1 m$^3$ box with open sides and a 10 cm grid size is defined with two inlet vents centered on adjacent faces.  This results in two orthogonal flow streams that collide at the center of the box and exit diagonally.  Within the diagonal portion of the flow, are placed point measurements for the FDS outputs of the u-velocity RMS, the u-velocity/w-velocity co-variance, and the u-velocity/w-velocity cross-correlation.   
+
+Computation of the these quantities by their typical statistical definition would require having the entire time history for the velocities.  This is obviously not possible during run-time.  Instead FDS computes the values using logarithmic averaging and a user-defined averaging window.  One would expect, once steady-state conditions are reached, that the FDS predicted values should approach the analytic values.  Results are shown in Fig.~\ref{rms_cov_corr_plots}.  In each figure the red line represents the value computed using the entire time history after steady-state is reached.  As seen, the FDS predicted values approach the analytic values.
+
+\begin{figure}[h!]
+\begin{center}
+\begin{tabular}{l}
+\includegraphics[width=4in]{SCRIPT_FIGURES/rms_cov_corr_rms}\\
+\includegraphics[width=4in]{SCRIPT_FIGURES/rms_cov_corr_cov} \\
+\includegraphics[width=4in]{SCRIPT_FIGURES/rms_cov_corr_corr}
+\end{tabular}
+\end{center}
+\caption[Sample case \textct{rms\_cov\_corr}]{Output of the \textct{rms\_cov\_corr} test case.}
+\label{rms_cov_corr_plots}
+\end{figure}
+
+\clearpage
+
+
+
+
+\newpage
+
 \bibliography{../Bibliography/FDS_refs,../Bibliography/FDS_general,../Bibliography/FDS_mathcomp}
 
 \newpage
