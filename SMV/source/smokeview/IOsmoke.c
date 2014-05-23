@@ -4924,7 +4924,7 @@ void makeiblank_smoke3d(void){
     nxy = nx*ny;
 
     for(ii=0;ii<ijksize;ii++){
-      *iblank_smoke3d++=1;
+      *iblank_smoke3d++=GAS;
     }
 
     iblank_smoke3d=smokemesh->iblank_smoke3d;
@@ -4944,9 +4944,9 @@ void makeiblank_smoke3d(void){
     for(ii=0;ii<smokemesh->nbptrs;ii++){
       bc=smokemesh->blockageinfoptrs[ii];
       if(bc->invisible==1||bc->hidden==1||bc->nshowtime!=0)continue;
-      for(i=bc->ijk[IMIN];i<bc->ijk[IMAX];i++){
-      for(j=bc->ijk[JMIN];j<bc->ijk[JMAX];j++){
-      for(k=bc->ijk[KMIN];k<bc->ijk[KMAX];k++){
+      for(i=bc->ijk[IMIN];i<=bc->ijk[IMAX];i++){
+      for(j=bc->ijk[JMIN];j<=bc->ijk[JMAX];j++){
+      for(k=bc->ijk[KMIN];k<=bc->ijk[KMAX];k++){
         ijk = IJKNODE(i,j,k);
         iblank_smoke3d[ijk]=SOLID;
       }
