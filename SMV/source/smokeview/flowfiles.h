@@ -55,7 +55,7 @@ typedef struct {
   float translate[3], rot0[3], rot[2];
 } geomlistdata;
 
-/* --------------------------  geomdata ------------------------------------ */
+/* --------------------------  geomobjdata ------------------------------------ */
 
 typedef struct {
   struct _surfdata *surf;
@@ -70,6 +70,7 @@ typedef struct {
 typedef struct {
   char *file;
   int loaded, display;
+  struct _surfdata *surf;
   geomlistdata *geomlistinfo,*geomlistinfo_0;
   float *float_vals;
   int *int_vals, nfloat_vals, nint_vals;

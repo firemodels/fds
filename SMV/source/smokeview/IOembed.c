@@ -270,6 +270,7 @@ void draw_geom(int flag, int frameflag){
         }
       }
       glEnd();
+      glDisable(GL_TEXTURE_2D);
     }
 
     glDisable(GL_COLOR_MATERIAL);
@@ -1310,6 +1311,7 @@ void init_geom(geomdata *geomi){
   geomi->display=0;
   geomi->loaded=0;
   geomi->geomlistinfo_0=NULL;
+  geomi->surf=NULL;
   geomi->geomlistinfo=NULL;
   geomi->times=NULL;
   geomi->ntimes=0;

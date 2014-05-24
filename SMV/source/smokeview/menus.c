@@ -1840,7 +1840,21 @@ void TextureShowMenu(int value){
       break;
     }
   }
+  visGeomTextures=0;
   if(texturedisplay==1){
+    for(i=0;i<ngeominfo;i++){
+      geomdata *geomi;
+      surfdata *surf;
+      texturedata *texti=NULL;
+
+      geomi = geominfo + i;
+      surf = geomi->surf;
+      if(surf!=NULL)texti=surf->textureinfo;
+      if(texti!=NULL&&texti->display==1){
+        visGeomTextures=1;
+        break;
+      }
+    }
     if(value!=visBLOCKOutline&&value!=visBLOCKSolidOutline&&value!=visBLOCKHide){
       BlockageMenu(visBLOCKAsInput);
     }

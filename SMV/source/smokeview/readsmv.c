@@ -3457,12 +3457,18 @@ int readsmv(char *file, char *file2){
           if(texture_mapping!=NULL)texture_vals = strchr(texture_mapping,' ');
 
           if(texture_vals!=NULL){
+            char *surflabel;
+
             texture_vals++;
             texture_vals[-1]=0;
-
-            fgets(texture_vals,255,stream);
             center = geomobji->texture_center;
             sscanf(texture_vals,"%f %f %f",center,center+1,center+2);
+            surflabel=strchr(texture_vals,'%');
+            if(surflabel!=NULL){
+              trim(surflabel);
+              surflabel=trim_front(surflabel+1);
+              geomi->surf=get_surface(surflabel);
+            }
           }
 
           if(texture_mapping!=NULL&&strcmp(texture_mapping,"SPHERICAL")==0){
@@ -7814,6 +7820,20 @@ void updateusetextures(void){
     if(texti!=NULL&&texti->loaded==1){
       if(usetextures==1)texti->display=1;
       texti->used=1;
+    }
+  }
+  for(i=0;i<ngeominfo;i++){
+    geomdata *geomi;
+
+    geomi = geominfo + i;
+    if(textureinfo!=NULL&&geomi->surf!=NULL){
+        texturedata *texti;
+
+      texti = geomi->surf->textureinfo;
+      if(texti!=NULL&&texti->loaded==1){
+        if(usetextures==1)texti->display=1;
+        texti->used=1;
+      }
     }
   }
   ntextures_loaded_used=0;
