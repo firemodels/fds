@@ -191,7 +191,7 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
 
    !--- setup a 2D surface (terrain) object (ZVALS keyword )
    
-   IF (N_ZVALS.GT.0) THEN
+   ZVALS_IF: IF (N_ZVALS.GT.0) THEN
       GEOM_TYPE = 3
       CALL CHECK_XB(XB)
       IF (N_ZVALS.NE.IJK(1)*IJK(2) ) THEN
@@ -213,16 +213,16 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
       N_FACES=2*(IJK(1)-1)*(IJK(2)-1)
       N_VERTS=IJK(1)*IJK(2)
 
-! define terrain vertices
+      ! define terrain vertices
 
       IJ = 1
       DO J = 1, IJK(2)
-      DO I = 1, IJK(1)
-         VERTS(3*IJ-2) = (XB(1)*REAL(IJK(1)-I,EB) + XB(2)*REAL(I-1,EB))/REAL(IJK(1)-1,EB)
-         VERTS(3*IJ-1) = (XB(4)*REAL(IJK(2)-J,EB) + XB(3)*REAL(J-1,EB))/REAL(IJK(2)-1,EB)
-         VERTS(3*IJ) = ZVALS(IJ)
-         IJ = IJ + 1
-      END DO
+         DO I = 1, IJK(1)
+            VERTS(3*IJ-2) = (XB(1)*REAL(IJK(1)-I,EB) + XB(2)*REAL(I-1,EB))/REAL(IJK(1)-1,EB)
+            VERTS(3*IJ-1) = (XB(4)*REAL(IJK(2)-J,EB) + XB(3)*REAL(J-1,EB))/REAL(IJK(2)-1,EB)
+            VERTS(3*IJ) = ZVALS(IJ)
+            IJ = IJ + 1
+         END DO
       END DO
 
 ! define terrain faces
@@ -230,38 +230,38 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
 !    I11   I21      
       IJ = 1
       DO J = 1, IJK(2) - 1
-      DO I = 1, IJK(1) - 1
-         I21 = (J-1)*IJK(1) + I
-         I22 = I21 + 1
-         I11 = I21 + IJK(1)
-         I12 = I11 + 1
-         
-         FACES(3*IJ-2) = I11
-         FACES(3*IJ-1) = I21
-         FACES(3*IJ) = I22 
-         IJ = IJ + 1
-         
-         FACES(3*IJ-2) = I11
-         FACES(3*IJ-1) = I22
-         FACES(3*IJ) = I12
-         IJ = IJ + 1
-      END DO 
+         DO I = 1, IJK(1) - 1
+            I21 = (J-1)*IJK(1) + I
+            I22 = I21 + 1
+            I11 = I21 + IJK(1)
+            I12 = I11 + 1
+            
+            FACES(3*IJ-2) = I11
+            FACES(3*IJ-1) = I21
+            FACES(3*IJ) = I22 
+            IJ = IJ + 1
+            
+            FACES(3*IJ-2) = I11
+            FACES(3*IJ-1) = I22
+            FACES(3*IJ) = I12
+            IJ = IJ + 1
+         END DO 
       END DO 
       G%ZVALS(1:N_ZVALS) = ZVALS(1:N_ZVALS)
-   ENDIF
+   ENDIF ZVALS_IF
    
    !--- setup a block object (XB keyword )
    
    NXB=0
    DO I = 1, 6
-     IF (XB(I).LT.MAX_VAL) NXB=NXB+1
+      IF (XB(I).LT.MAX_VAL) NXB=NXB+1
    END DO
    IF (NXB==6.AND.N_ZVALS==0) THEN
       GEOM_TYPE = 1
       CALL CHECK_XB(XB)
       G%XB=XB
 
- ! make IJK(1), IJK(2), IJK(3) consistent with grid resolution (if not specified on &GEOM line)
+      ! make IJK(1), IJK(2), IJK(3) consistent with grid resolution (if not specified on &GEOM line)
  
       M => MESHES(1)
       DX = MIN(M%DXMIN,M%DYMIN,M%DZMIN)
@@ -341,11 +341,11 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
    ENDIF
    G%NSUB_GEOMS=NSUB_GEOMS
    
-  ! remove duplicate vertices
+   ! remove duplicate vertices
 
    CALL REMOVE_DUP_VERTS(N_VERTS,N_FACES,N_VOLUS,MAX_VERTS,MAX_FACES,MAX_VOLUS,VERTS,FACES,VOLUS)
 
-  ! wrap up
+   ! wrap up
    
    G%ID = ID
    G%N_VOLUS_BASE = N_VOLUS
@@ -370,7 +370,7 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
    ENDIF
    G%MATL_ID = MATL_ID
 
-   ! setup a volums
+   ! setup a volume s
    
    IF (N_VOLUS.GT.0) THEN
       ALLOCATE(G%VOLUS(4*N_VOLUS),STAT=IZERO)
@@ -424,7 +424,7 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
       ENDIF
    END DO
    
-! use GROTATE/GAXIS or AZIM/ELEV but not both
+   ! use GROTATE/GAXIS or AZIM/ELEV but not both
 
    IF (ANY(GAXIS(1:3).LT.MAX_VAL).OR.GROTATE.LT.MAX_VAL.OR.GROTATE_DOT.LT.MAX_VAL) THEN
       IF (GAXIS(1).GT.MAX_VAL) GAXIS(1) = 0.0_EB
@@ -497,7 +497,7 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
       G%DSCALE(1:3,1:NSUB_GEOMS) = DSCALE(1:3,1:NSUB_GEOMS)
       G%DXYZ(1:3,1:NSUB_GEOMS) =  DXYZ(1:3,1:NSUB_GEOMS)
 
-! allocate memory for vertex and face arrays for GEOMs that contain groups (entres in GEOM_IDs )
+      ! allocate memory for vertex and face arrays for GEOMs that contain groups (entres in GEOM_IDs )
 
       DO I = 1, NSUB_GEOMS
          GSUB=>GEOMETRY(G%SUB_GEOMS(I))
@@ -812,7 +812,6 @@ DO WHILE (I.LE.N_VERTS)
    I=I+1
 END DO
 END SUBROUTINE REMOVE_DUP_VERTS      
-
 
 ! ---------------------------- INIT_SPHERE ----------------------------------------
 
@@ -1411,7 +1410,7 @@ SUBROUTINE CONVERTGEOM(IS_DYNAMIC,TIME)
    IF (N_FACES.GT.0) THEN
       N_FACE = N_FACES
       
-! Allocate FACET array
+      ! Allocate FACET array
 
       ALLOCATE(FACET(N_FACE),STAT=IZERO)
       CALL ChkMemErr('CONVERTGEOM','FACET',IZERO)
@@ -1420,13 +1419,13 @@ SUBROUTINE CONVERTGEOM(IS_DYNAMIC,TIME)
    
          SURFACE_LABEL = TRIM(SURFACE(SURF_IDS(I))%ID)
          
-    ! put in some error checking to make sure face indices are not out of bounds
+         ! put in some error checking to make sure face indices are not out of bounds
       
          FACET(I)%VERTEX(1) = FACES(3*I-2) 
          FACET(I)%VERTEX(2) = FACES(3*I-1)
          FACET(I)%VERTEX(3) = FACES(3*I)
 
-   ! Check the SURF_ID against the list of SURF's
+         ! Check the SURF_ID against the list of SURF's
 
          EX = .FALSE.
          DO NS=0,N_SURF
@@ -1437,7 +1436,7 @@ SUBROUTINE CONVERTGEOM(IS_DYNAMIC,TIME)
             CALL SHUTDOWN(MESSAGE)
          ENDIF
 
-   ! Assign SURF_INDEX, Index of the Boundary Condition
+         ! Assign SURF_INDEX, Index of the Boundary Condition
 
          FACET(I)%SURF_ID = SURFACE_LABEL
          FACET(I)%SURF_INDEX = DEFAULT_SURF_INDEX
@@ -1445,7 +1444,7 @@ SUBROUTINE CONVERTGEOM(IS_DYNAMIC,TIME)
             IF (SURFACE_LABEL==SURFACE(NNN)%ID) FACET(I)%SURF_INDEX = NNN
          ENDDO
 
-   ! Allocate 1D arrays
+         ! Allocate 1D arrays
 
          IF (N_TRACKED_SPECIES>0) THEN
             ALLOCATE(FACET(I)%RHODW(N_TRACKED_SPECIES),STAT=IZERO)
