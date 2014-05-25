@@ -199,7 +199,7 @@ for j=2:length(Q);
                         within_tolerance = 'Out of Tolerance';
                     end
                     
-                    % Write descriptive statistics to output_stats cell
+                    % Write verification statistics to output_stats cell
                     output_stats{stat_line,1} = i;
                     output_stats{stat_line,2} = Save_Group_Key_Label{i,1};
                     output_stats{stat_line,3} = Save_Dataname{i,1};
@@ -218,7 +218,8 @@ for j=2:length(Q);
         end
     end
     
-    if k > 0
+    % Perform this code block for FDS validation scatterplot output
+    if k > 0 && strcmp(Stats_Output, 'Validation')
         
         Measured_Values = nonzeros(Measured_Metric);
         Predicted_Values = nonzeros(Predicted_Metric);
@@ -270,12 +271,12 @@ for j=2:length(Q);
         
         % Plot diagonal lines
         plot([Plot_Min,Plot_Max],[Plot_Min,Plot_Max],'k-')
-        if strcmp(Model_Error,'yes')
-            plot([Plot_Min,Plot_Max],[Plot_Min,Plot_Max*(1+2*Sigma_E)],'k--')
-            plot([Plot_Min,Plot_Max],[Plot_Min,Plot_Max*(1-2*Sigma_E)],'k--')
-            plot([Plot_Min,Plot_Max],[Plot_Min,Plot_Max*delta],'r-')
-            plot([Plot_Min,Plot_Max],[Plot_Min,Plot_Max*delta*(1+2*Sigma_M)],'r--')
-            plot([Plot_Min,Plot_Max],[Plot_Min,Plot_Max*delta*(1-2*Sigma_M)],'r--')
+        if strcmp(Model_Error, 'yes')
+            plot([Plot_Min,Plot_Max],[Plot_Min*(1+2*Sigma_E),Plot_Max*(1+2*Sigma_E)],'k--')
+            plot([Plot_Min,Plot_Max],[Plot_Min*(1-2*Sigma_E),Plot_Max*(1-2*Sigma_E)],'k--')
+            plot([Plot_Min,Plot_Max],[Plot_Min*delta,Plot_Max*delta],'r-')
+            plot([Plot_Min,Plot_Max],[Plot_Min*delta*(1+2*Sigma_M),Plot_Max*delta*(1+2*Sigma_M)],'r--')
+            plot([Plot_Min,Plot_Max],[Plot_Min*delta*(1-2*Sigma_M),Plot_Max*delta*(1-2*Sigma_M)],'r--')
         end
         
         % Format the legend and axis labels
@@ -351,17 +352,14 @@ for j=2:length(Q);
         % Print histogram of ln(M/E) and normal distribution
         statistics_histogram
         
-        % Perform this code block for FDS validation scatterplot output
-        if strcmp(Stats_Output, 'Validation')
-            % Write descriptive statistics to output_stats cell
-            output_stats{stat_line,1} = Scatter_Plot_Title; % Quantity
-            output_stats{stat_line,2} = size(B, 2); % Number of data sets
-            output_stats{stat_line,3} = size(Predicted_Values, 1); % Number of data points
-            output_stats{stat_line,4} = sprintf('%0.2f', Sigma_E); % Sigma_E
-            output_stats{stat_line,5} = sprintf('%0.2f', Sigma_M); % Sigma_M
-            output_stats{stat_line,6} = sprintf('%0.2f', delta); % Bias
-            stat_line = stat_line + 1;
-        end
+        % Write validation statistics to output_stats cell
+        output_stats{stat_line,1} = Scatter_Plot_Title; % Quantity
+        output_stats{stat_line,2} = size(B, 2); % Number of data sets
+        output_stats{stat_line,3} = size(Predicted_Values, 1); % Number of data points
+        output_stats{stat_line,4} = sprintf('%0.2f', Sigma_E); % Sigma_E
+        output_stats{stat_line,5} = sprintf('%0.2f', Sigma_M); % Sigma_M
+        output_stats{stat_line,6} = sprintf('%0.2f', delta); % Bias
+        stat_line = stat_line + 1;
         
     else
         display(['No data for scatter plot ',Scatter_Plot_Title])
