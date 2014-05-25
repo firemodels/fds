@@ -271,11 +271,11 @@ for j=2:length(Q);
         % Plot diagonal lines
         plot([Plot_Min,Plot_Max],[Plot_Min,Plot_Max],'k-')
         if strcmp(Model_Error,'yes')
-            plot([Plot_Min,Plot_Max],[Plot_Min*(1+2*Sigma_E),Plot_Max*(1+2*Sigma_E)],'k--')
-            plot([Plot_Min,Plot_Max],[Plot_Min*(1-2*Sigma_E),Plot_Max*(1-2*Sigma_E)],'k--')
-            plot([Plot_Min,Plot_Max],[Plot_Min*delta,Plot_Max*delta],'r-')
-            plot([Plot_Min,Plot_Max],[Plot_Min*delta*(1+2*Sigma_M),Plot_Max*delta*(1+2*Sigma_M)],'r--')
-            plot([Plot_Min,Plot_Max],[Plot_Min*delta*(1-2*Sigma_M),Plot_Max*delta*(1-2*Sigma_M)],'r--')
+            plot([Plot_Min,Plot_Max],[Plot_Min,Plot_Max*(1+2*Sigma_E)],'k--')
+            plot([Plot_Min,Plot_Max],[Plot_Min,Plot_Max*(1-2*Sigma_E)],'k--')
+            plot([Plot_Min,Plot_Max],[Plot_Min,Plot_Max*delta],'r-')
+            plot([Plot_Min,Plot_Max],[Plot_Min,Plot_Max*delta*(1+2*Sigma_M)],'r--')
+            plot([Plot_Min,Plot_Max],[Plot_Min,Plot_Max*delta*(1-2*Sigma_M)],'r--')
         end
         
         % Format the legend and axis labels
