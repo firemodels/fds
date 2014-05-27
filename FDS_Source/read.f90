@@ -8405,6 +8405,7 @@ MESH_LOOP_1: DO NM=1,NMESHES
                      CALL SHUTDOWN(MESSAGE)
                   ENDIF
                   VT%RADIUS = RADIUS
+                  VT%INPUT_AREA = PI*VT%RADIUS**2
                ENDIF
 
                ! Dynamic Pressure
