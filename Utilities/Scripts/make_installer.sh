@@ -344,6 +344,10 @@ endif
 setenv $LDLIBPATH \\\$MPIDIST/lib:\\\$$LDLIBPATH
 set path=(\\\$FDSBINDIR \\\$MPIDIST/bin ~/bin \\\$path)
 
+# Set number of OMP threads
+
+setenv OMP_NUM_THREADS 4
+
 CSHRC
 
 #--- create BASH startup file
