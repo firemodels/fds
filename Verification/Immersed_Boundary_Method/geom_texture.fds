@@ -8,5 +8,5 @@
       TEXTURE_HEIGHT=0.2,COLOR='BLUE' /
 
 &GEOM ID='texture',
-        VERTS=0.0,0.0,0.0, 1.0,0.0,0.0, 1.0,1.0,0.05,
+        VERTS=0.0,0.0,0.0, 1.0,0.0,0.0, 1.0,1.0,0.0,
         FACES=1,2,3,SURF_ID='surf1'/
