@@ -8626,6 +8626,7 @@ MESH_LOOP_2: DO NM=1,NMESHES
             DO K=K1+1,K2
                DO J=J1+1,J2
                   IF (J>=1 .AND. J<=JBAR .AND. K>=1 .AND. K<=KBAR) VT%GHOST_CELLS_ONLY = .FALSE.
+                  IF ( VT%RADIUS>0._EB .AND. ((YC(J)-VT%Y0)**2 + (ZC(K)-VT%Z0)**2)>(VT%RADIUS**2) ) CYCLE
                   VT%FDS_AREA = VT%FDS_AREA + DY(J)*DZ(K)
                ENDDO
             ENDDO
@@ -8633,6 +8634,7 @@ MESH_LOOP_2: DO NM=1,NMESHES
             DO K=K1+1,K2
                DO I=I1+1,I2
                   IF (I>=1 .AND. I<=IBAR .AND. K>=1 .AND. K<=KBAR) VT%GHOST_CELLS_ONLY = .FALSE.
+                  IF ( VT%RADIUS>0._EB .AND. ((XC(I)-VT%X0)**2 + (ZC(K)-VT%Z0)**2)>(VT%RADIUS**2) ) CYCLE
                   VT%FDS_AREA = VT%FDS_AREA + DX(I)*DZ(K)
                ENDDO
             ENDDO
@@ -8640,6 +8642,7 @@ MESH_LOOP_2: DO NM=1,NMESHES
             DO J=J1+1,J2
                DO I=I1+1,I2
                   IF (I>=1 .AND. I<=IBAR .AND. J>=1 .AND. J<=JBAR) VT%GHOST_CELLS_ONLY = .FALSE.
+                  IF ( VT%RADIUS>0._EB .AND. ((XC(I)-VT%X0)**2 + (YC(J)-VT%Y0)**2)>(VT%RADIUS**2) ) CYCLE
                   VT%FDS_AREA = VT%FDS_AREA + DX(I)*DY(J)
                ENDDO
             ENDDO
