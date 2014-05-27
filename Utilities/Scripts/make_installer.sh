@@ -405,6 +405,9 @@ fi
 export $LDLIBPATH=\\\$MPIDIST/lib:\\\$RUNTIMELIBDIR:\\\$$LDLIBPATH
 export PATH=\\\$FDSBINDIR:\\\$SHORTCUTDIR:\\\$MPIDIST/bin:\\\$PATH
 
+# Set number of OMP threads
+
+export OMP_NUM_THREADS=4
 BASH
 
 #--- create .cshrc_fds startup file
