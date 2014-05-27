@@ -239,7 +239,7 @@ For example, {\tt XYZ\_DOT=0.0,0.0,1.0}\ would cause an object to move 1~m/s in 
 
 (add to FDS user's guide 20.13 when ready)
 
-Immersed geometric objects (generalized obstructions) are stored using a file format described in this section.
+Immersed geometric objects (generalized obstructions) are stored using a file format described below.
 These objects are defined in terms of vertices, triangles and tetrahedrons.
 A vertex is represented as an $(x,y,z)$ coordinate (three floating point values).
 A triangle is represented as three vertex (integer) indices.
@@ -255,44 +255,25 @@ These files are written out from {\ct dump.f90} using lines equivalent to the fo
 
 WRITE(LU_GEOM) ONE
 WRITE(LU_GEOM) VERSION
-WRITE(LU_GEOM) N_FLOATS
+WRITE(LU_GEOM) N_FLOATS, N_INTS, FIRST_FRAME_STATIC
 IF (N_FLOATS>0) WRITE(LU_GEOM) (FLOAT_HEADER(I),I=1,N_FLOATS)
-WRITE(LU_GEOM) N_INTS
 IF (N_INTS>0) WRITE(LU_GEOM) (INT_HEADER(I),I=1,N_INTS)
 
-! static geometry - geometry specified once and appearing at all time steps
-
-WRITE(LU_GEOM) N_VERT_S, N_FACE_S, N_VOL_S
-WRITE(LU_GEOM) HAVE_TEXTURE, HAVE_SURF, HAVE_MATL
-IF (N_VERT_S>0)  THEN
-   WRITE(LU_GEOM) (Xvert_S(I),Yvert_S(I),Zvert_S(I),I=1,N_VERT_S)
-   IF(HAVE_TEXTURE.EQ.1)WRITE(LU_GEOM) (Xtext_S(I),Ytext_S(I),I=1,N_VERT_S)
-ENDIF
-IF (N_FACE_S>0)  THEN
-   WRITE(LU_GEOM) (FACE1_S(I),FACE2_S(I),FACE3_S(I),I=1,N_FACE_S)
-   IF(HAVE_SURF.EQ.1)WRITE(LU_GEOM) (SURF_S(I),I=1,N_FACE_S)
-ENDIF
-IF (N_VOL_S>0)  THEN
-   WRITE(LU_GEOM) (VOL1_S(I),VOL2_S(I),VOL3_S(I),VOL4_S(I),I=1,N_VOL_S)
-   IF(HAVE_MATL.EQ.1)WRITE(LU_GEOM) (MATL_S(I),I=1,N_FACE_S)
-ENDIF
-
-! dynamic geometry - geometry specified and appearing for each time step
+! geometry frame
+! STIME ignored and first frame static if FIRST_FRAME_STATIC set to 1
 
 WRITE(LU_GEOM) STIME
-WRITE(LU_GEOM) N_VERT_D, N_FACE_D, N_VOL_D
-WRITE(LU_GEOM) HAVE_TEXTURE, HAVE_SURF, HAVE_MATL
-IF (N_VERT_D>0) THEN
-   WRITE(LU_GEOM)(Xvert_D(I),Yvert_D(I),Zvert_D(I),I=1,N_VERT_D)
-   IF(HAVE_TEXTURE.EQ.1)WRITE(LU_GEOM)(Xtext_D(I),Ytext_D(I),I=1,N_VERT_D)
+WRITE(LU_GEOM) N_VERT, N_FACE, N_VOL
+WRITE(LU_GEOM) HAS_SURF, HAS_MATL, HAS_TEXTURE
+IF (N_VERT>0) WRITE(LU_GEOM)(Xvert(I),Yvert(I),Zvert(I),I=1,N_VERT)
+IF (N_FACE>0) THEN
+   WRITE(LU_GEOM) (FACE1(I),FACE2(I),FACE3(I),I=1,N_FACE)
+   IF (HAS_SURF.EQ.1) WRITE(LU_GEOM) (SURF(I),I=1,N_FACE)
+   IF (HAS_TEXTURE.EQ.1) WRITE(LU_GEOM) (Xtext(I),Ytext(I),I=1,3*N_FACE)
 ENDIF
-IF (N_FACE_D>0) THEN
-   WRITE(LU_GEOM) (FACE1_D(I),FACE2_D(I),FACE3_D(I),I=1,N_FACE_D)
-   IF(HAVE_GEOM.EQ.1)WRITE(LU_GEOM) (SURF_D(I),I=1,N_FACE_D)
-ENDIF
-IF (N_VOL_D>0) THEN
-   WRITE(LU_GEOM) (VOL1_D(I),VOL2_D(I),VOL3_D(I),VOL4_D(I),I=1,N_VOL_D)
-   IF(HAVE_MATL.EQ.1)WRITE(LU_GEOM) (MATL_D(I),I=1,N_VOL_D)
+IF (N_VOL>0) THEN
+   WRITE(LU_GEOM) (VOL1(I),VOL2(I),VOL3(I),VOL4(I),I=1,N_VOL)
+   IF (HAS_MATL.EQ.1) WRITE(LU_GEOM) (MATL(I),I=1,N_VOL)
 ENDIF
               .
 \end{lstlisting}
@@ -303,15 +284,15 @@ ENDIF
 \item {\ct N\_FLOATS, N\_INTS} The number of floating point and integer data items stored at the beginning of the file.
 \item {\ct FLOAT\_HEADER, INT\_HEADER} Floating point and integer data stored at the beginning of the file.
 \item {\ct STIME} is the FDS simulation time.
-\item {\ct N\_VERT\_S, N\_FACE\_S, N\_VOL\_S, N\_VERT\_D, N\_FACE\_D, N\_VOL\_D}\ are the number of static and dynamic vertices, faces and volumes.
-\item {\ct Xtext\_S, Ytext\_S, Xtext\_D, Ytext\_D}\ are the static and dynamic texture coordinates.
-\item {\ct Xvert\_S, Yvert\_S, Zvert\_S, Xvert\_D, Yvert\_D, Zvert\_D}\ are the static and dynamic vertex coordinates.
-\item {\ct FACE1\_S, FACE2\_S, FACE3\_S, FACE1\_S, FACE2\_S, FACE3\_S}\ are the static and dynamic vertex indices for each face (triangle).
+\item {\ct N\_VERT, N\_FACE, N\_VOL}  are the number of static and dynamic vertices, faces and volumes.
+\item {\ct Xtext, Ytext}\ are the static and dynamic texture coordinates.
+\item {\ct Xvert, Yvert, Zvert}\ are the static and dynamic vertex coordinates.
+\item {\ct FACE1, FACE2, FACE3}\ are the static and dynamic vertex indices for each face (triangle).
     The indices range from 1 to the
     number of vertices.
-\item {\ct VOL1\_S, VOL2\_S, VOL3\_S, VOL4\_S, VOL1\_D, VOL2\_D, VOL3\_D, VOL4\_D}\ are the static and dynamic vertex indices for each volume (tetrahedron).  The indices are numbered from 1 to the number of vertices.
-\item {\ct SURF\_S, SURF\_D}\ are the static and dynamic SURF indices for each face.
-\item {\ct MATL\_S, MATL\_D}\ are the static and dynamic MATL indices for each volume face.
+\item {\ct VOL1, VOL2, VOL3, VOL4}\ are the static and dynamic vertex indices for each volume (tetrahedron).  The indices are numbered from 1 to the number of vertices.
+\item {\ct SURF}\ are the static and dynamic SURF indices for each face.
+\item {\ct MATL}\ are the static and dynamic MATL indices for each volume face.
 \end{itemize}
 
 
@@ -321,7 +302,7 @@ ENDIF
 
 (add to FDS user's guide 20.13 when ready)
 
-This section describes the file format used for 
+This section describes the file format used for
 storing data associated with unstructured geometric objects.  This format will be used to unify file formats for storing 3D smoke, boundary, particle and slice data.
 Unstructured data files are written out from {\ct dump.f90} using lines equivalent to the following:
 
@@ -336,14 +317,18 @@ IF (N_FLOATS>0) WRITE(LU_GEOM) (FLOAT_HEADER(I),I=1,N_FLOATS)
 WRITE(LU_GEOM) N_INTS
 IF (N_INTS>0) WRITE(LU_GEOM) (INT_HEADER(I),I=1,N_INTS)
 
-! data for each time step 
+! data for each time step
 
 WRITE(LU_GEOM) STIME
 WRITE(LU_GEOM) N_VERT, N_FACE, N_VOL
-IF (N_VERT>0) WRITE(LU_GEOM)(ValVert(I),I=1,N_VERT)
+WRITE(LU_GEOM) HAS_VERT_ID
+IF (N_VERT>0) THEN
+   WRITE(LU_GEOM)(ValVert(I),I=1,N_VERT)
+   IF (HAS_VERT_ID.EQ.1) WRITE(LU_GEOM)(Vert_ID(I),I=1,N_VERT)
+ENDIF
 IF (N_FACE>0) WRITE(LU_GEOM)(ValFace(I),I=1,N_FACE)
 IF (N_VOLS>0) WRITE(LU_GEOM)(ValVol(I),I=1,N_VOLS)
-              .
+       
 \end{lstlisting}
 
 \begin{itemize}
