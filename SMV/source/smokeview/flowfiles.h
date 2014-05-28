@@ -5,7 +5,7 @@
 #ifndef FLOWFILES_H_DEFINED
 #define FLOWFILES_H_DEFINED
 
-/* --------------------------  langlistdata ------------------------------------ */
+/* --------------------------  circdata ------------------------------------ */
 
 typedef struct {
   float *xcirc, *ycirc;
@@ -80,7 +80,7 @@ typedef struct {
   geomobjdata *geomobjinfo;
 } geomdata;
 
-/* --------------------------  bounds ------------------------------------ */
+/* --------------------------  bounddata ------------------------------------ */
 
 typedef struct {
   float percentile_min, percentile_max;
@@ -88,7 +88,7 @@ typedef struct {
   int defined;
 } bounddata;
 
-/* --------------------------  point ------------------------------------ */
+/* --------------------------  propdata ------------------------------------ */
 #define PROPVARMAX 100
 typedef struct {
   char *label;
@@ -107,7 +107,7 @@ typedef struct {
   int tag_number;
 } propdata;
 
-/* --------------------------  point ------------------------------------ */
+/* --------------------------  shootpointdata ------------------------------------ */
 
 typedef struct _shootpointdata {
   struct _shootpointdata *prev;
@@ -115,7 +115,7 @@ typedef struct _shootpointdata {
   float xyz[3], uvw[3], uvw_air[3], val;
 } shootpointdata;
 
-/* --------------------------  point ------------------------------------ */
+/* --------------------------  shoottimedata ------------------------------------ */
 
 typedef struct {
   float time;
@@ -217,7 +217,7 @@ typedef struct _texturedata {
   GLuint name;
 } texturedata;
 
-/* --------------------------  terraindata ------------------------------------ */
+/* --------------------------  terraincell ------------------------------------ */
 
 typedef struct {
   int nallocated, nstates;
@@ -225,6 +225,8 @@ typedef struct {
   int interval;
   unsigned char *state;
 } terraincell;
+
+/* --------------------------  terraindata ------------------------------------ */
 
 typedef struct {
   char *file;
@@ -477,7 +479,6 @@ typedef struct _isodata {
   float *levels, **colorlevels;
   int nlevels;
   char menulabel[128];
-
 } isodata;
 
 /* --------------------------  smoothblockage ------------------------------------ */
@@ -851,7 +852,7 @@ typedef struct {
 } pilotdata;
 #endif
 
-/* --------------------------  vdevice ------------------------------------ */
+/* --------------------------  vdevicedata ------------------------------------ */
 
 typedef struct {
   int unique;
@@ -887,7 +888,7 @@ typedef struct {
   char menulabel[128];
 } camdata;
 
-/* --------------------------  camdata ------------------------------------ */
+/* --------------------------  portdata ------------------------------------ */
 
 typedef struct {
 GLint left, right, down, top, width, height;
@@ -934,7 +935,7 @@ typedef struct _camera {
   char name[301];
 } camera;
 
-/* --------------------------  partclass ------------------------------------ */
+/* --------------------------  part5class ------------------------------------ */
 
 typedef struct {
   char *name;
@@ -957,7 +958,7 @@ typedef struct {
 } part5class;
 
 
-/* --------------------------  partvarprop ------------------------------------ */
+/* --------------------------  part5prop ------------------------------------ */
 
 typedef struct {
   flowlabels *label;
@@ -1048,10 +1049,11 @@ typedef struct {
   unsigned char *color;
 } targpos;
 
+/* --------------------------  compinfo ------------------------------------ */
+
 typedef struct {
   int offset, size;
 } compinfo;
-
 
 /* --------------------------  menudata ------------------------------------ */
 
@@ -1153,7 +1155,7 @@ typedef struct _multislicedata {
   char menulabel2[128];
 } multislicedata;
 
-/* --------------------------  multivslice ------------------------------------ */
+/* --------------------------  multivslicedata ------------------------------------ */
 
 typedef struct {
   int mesh_type;
@@ -1199,6 +1201,8 @@ typedef struct {
   char menulabel[128];
   char menulabel2[128];
 } vslicedata;
+
+/* --------------------------  smokedata ------------------------------------ */
 
 typedef struct {
   int ncomp_total;
@@ -1281,7 +1285,7 @@ typedef struct {
   bounddata bounds;
 } patchdata;
 
-/* --------------------------  plot3d ------------------------------------ */
+/* --------------------------  plot3ddata ------------------------------------ */
 
 typedef struct {
   int seq_id, autoload;
@@ -1297,7 +1301,7 @@ typedef struct {
   char menulabel[256],longlabel[256];
 } plot3ddata;
 
-/* --------------------------  zone ------------------------------------ */
+/* --------------------------  zonedata ------------------------------------ */
 
 typedef struct {
   int seq_id, autoload;
@@ -1364,6 +1368,8 @@ typedef struct {
   int diff_index;
   f_unit *units;
 } f_units;
+
+/* --------------------------  skyboxdata ------------------------------------ */
 
 typedef struct {
   texturedata face[6];
