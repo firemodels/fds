@@ -276,6 +276,7 @@ do_svn_checkout()
    if [[ $SVN_REVISION != "" ]]; then
       echo "Checking out revision r${SVN_REVISION}." >> $FIREBOT_DIR/output/stage1 2>&1
       svn update -r $SVN_REVISION >> $FIREBOT_DIR/output/stage1 2>&1
+      echo "At revision ${SVN_REVISION}." >> $FIREBOT_DIR/output/stage1 2>&1
    # If no SVN revision number is specified, then get the latest revision
    else
       echo "Checking out latest revision." >> $FIREBOT_DIR/output/stage1 2>&1
