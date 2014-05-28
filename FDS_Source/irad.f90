@@ -37,6 +37,8 @@ REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: Z2RADCAL_SPECIES
 REAL(EB), ALLOCATABLE, DIMENSION(:,:,:,:) :: RADCAL_SPECIES2KAPPA
 CHARACTER(LABEL_LENGTH) :: RADCAL_SPECIES(11)='null'
 
+INTEGER, ALLOCATABLE, DIMENSION(:,:,:) :: SLICE_IJK
+INTEGER, ALLOCATABLE, DIMENSION(:) :: SLICE_LBOUND, SLICE_UBOUND
 
 !------------------------------------------------------------------------------
 !
@@ -75,6 +77,10 @@ CHARACTER(LABEL_LENGTH) :: RADCAL_SPECIES(11)='null'
 !     RSA       Array of solid angles
 !     RTMPMAX   Maximum temperature for tabulation of radiative properties
 !     RTMPMIN   Minimum temperature for tabulation of radiative properties
+!     SLICE_IJK Cell indices of the wavefront slices used to parallelise the
+!               radiation solver. (ijk, cell_count, propagation direction)
+!     SLICE_LBOUND Lower edge for each slice in slice_ijk
+!     SLICE_UBOUND Upper edge for each slice in slice_ijk
 !     THETAUP   Upper limit of solid angle component THETA
 !     THETALOW  Lower limit of solid angle component THETA
 !     UII       Integrated intensity
