@@ -10,6 +10,7 @@ set fdsmpidir=%svn_root%\FDS_Compilation\mpi_intel_win_%platform%
 set basename=FDS_%fds_version%-SMV_%smv_version%_win%platform%
 
 set in_pdf=%svn_root%\..\FIRE-LOCAL\reports\fds_manuals\
+set in_intel_dll=%svn_root%\..\FIRE-LOCAL\LIBS\WINDOWS
 set in_fds2ascii=%svn_root%\Utilities\fds2ascii
 set in_smokediff=%svn_root%\Utilities\smokediff
 set in_smokezip=%svn_root%\Utilities\smokezip
@@ -68,6 +69,9 @@ set release_version=
 echo.
 echo *** Copying executables and scripts
 echo.
+
+
+copy %in_for_bundle%\*.po %out_bin%\.
 
 CALL :COPY %in_for_bundle%\fds_openmp.bat %out_bin%\fds_openmp.bat
 
@@ -137,6 +141,10 @@ echo *** Copying auxillary files to the bin directory
 echo.
 CALL :COPY  %in_for_bundle%\objects.svo             %out_bin%\.
 CALL :COPY  %in_for_bundle%\volrender.ssf           %out_bin%\.
+
+if "%platform%"=="32" CALL :COPY %in_intel_dll%\LIB32\libiomp5md.dll           %out_bin%\.
+
+if "%platform%"=="64" CALL :COPY %in_intel_dll%\LIB64\libiomp5md.dll           %out_bin%\.
 
 if "%platform%"=="32" CALL :COPY %in_for_bundle%\pthreadVC.dll           %out_bin%\.
 
