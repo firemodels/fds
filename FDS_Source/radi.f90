@@ -1075,7 +1075,6 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
               DO N_SLICE = ISTEP*ISTART + JSTEP*JSTART + KSTEP*KSTART, &
                           ISTEP*IEND + JSTEP*JEND + KSTEP*KEND
                 M_IJK = 0
-                IJK_SLICE = 0
                 DO K = KMIN, KMAX
                   IF (ISTEP*JSTEP > 0) THEN ! I STARTS HIGH
                     JSTART = MAX(JMIN, JSTEP*(N_SLICE - KSTEP*K - ISTEP*IMAX))
