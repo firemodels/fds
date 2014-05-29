@@ -1106,6 +1106,10 @@ void read_geom2(geomdata *geomi, int flag, int type, int *errorcode){
           triangles[ii].surf=surfi;
           triangles[ii].textureinfo=surfi->textureinfo;
         }
+        else{
+          triangles[ii].surf=surfacedefault;
+          triangles[ii].textureinfo=NULL;
+        }
       }
 
       FREEMEMORY(ijk);
@@ -1442,7 +1446,7 @@ void Sort_Embedded_Geometry(float *mm){
     geomdata *geomi;
 
     geomi = geominfoptrs[i];
-    for(itime=0;itime<2;itime++){
+    for(itime=0;itime<1;itime++){ //xxx was itime<2 check this
       if(itime==0){
         geomlisti = geomi->geomlistinfo-1;
       }
