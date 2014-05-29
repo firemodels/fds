@@ -24,100 +24,11 @@ SUBROUTINE INIT_RADIATION
 USE MEMORY_FUNCTIONS, ONLY : CHKMEMERR
 USE COMP_FUNCTIONS, ONLY: SHUTDOWN
 USE MIEV
-USE MESH_POINTERS, ONLY: IBAR, JBAR, KBAR
 USE RADCALV
 REAL(EB) :: THETAUP,THETALOW,PHIUP,PHILOW,F_THETA,PLANCK_C2,KSI,LT,RCRHO,YY,YY2,BBF,AP0,AMEAN
-INTEGER  :: N,I,J,K,IPC,IZERO,NN,NI,II,JJ,IIM,JJM,IBND, &
-            NS,NS2,NRA,NSB,RADCAL_TEMP(13)=0,RCT_SKIP=-1,OR_IN,I1,I2, &
-            ISTART, IEND, ISTEP, JSTART, JEND, JSTEP, KSTART, KEND, KSTEP, &
-            IMIN, JMIN, KMIN, IMAX, JMAX, KMAX, IDIR, JDIR, KDIR, &
-            N_SLICE, CELL_COUNT, SLICE_COUNT, RAD_DIR
+INTEGER  :: N,I,J,K,IPC,IZERO,NN,NI,II,JJ,IIM,JJM,IBND,NS,NS2,NRA,NSB,RADCAL_TEMP(13)=0,RCT_SKIP=-1,OR_IN,I1,I2
 TYPE (LAGRANGIAN_PARTICLE_CLASS_TYPE), POINTER :: LPC
 REAL(EB), ALLOCATABLE, DIMENSION(:) :: COSINE_ARRAY
-
-! Determine indices of waveslices for the parallelised radiation propagation
-
-ALLOCATE(SLICE_IJK(3, IBAR*JBAR*KBAR, 8),STAT=IZERO)
-CALL ChkMemErr('RADI','SLICE_IJK',IZERO)
-ALLOCATE(SLICE_LBOUND(IBAR+JBAR+KBAR-2),STAT=IZERO)
-CALL ChkMemErr('RADI','SLICE_LBOUND',IZERO)
-ALLOCATE(SLICE_UBOUND(IBAR+JBAR+KBAR-2),STAT=IZERO)
-CALL ChkMemErr('RADI','SLICE_UBOUND',IZERO)
-
-DO IDIR=1,-1,-2
-  DO JDIR=1,-1,-2
-    DO KDIR=1,-1,-2
-      ISTART = 1
-      JSTART = 1
-      KSTART = 1
-      IEND   = IBAR
-      JEND   = JBAR
-      KEND   = KBAR
-      ISTEP  = 1
-      JSTEP  = 1
-      KSTEP  = 1
-      IMIN = ISTART
-      JMIN = JSTART
-      KMIN = KSTART
-      IMAX = IEND
-      JMAX = JEND
-      KMAX = KEND
-      RAD_DIR=1
-      IF (IDIR < 0._EB) THEN
-          RAD_DIR = RAD_DIR+4
-          ISTART = IBAR
-          IEND   = 1
-          ISTEP  = -1
-          IMIN = IEND
-          IMAX = ISTART
-      ENDIF
-      IF (JDIR < 0._EB) THEN
-          RAD_DIR = RAD_DIR+2
-          JSTART = JBAR
-          JEND   = 1
-          JSTEP  = -1
-          JMIN = JEND
-          JMAX = JSTART
-      ENDIF
-      IF (KDIR < 0._EB) THEN
-          RAD_DIR = RAD_DIR+1
-          KSTART = KBAR
-          KEND   = 1
-          KSTEP  = -1
-          KMIN = KEND
-          KMAX = KSTART
-      ENDIF
-
-      CELL_COUNT  = 0
-      SLICE_COUNT = 0
-
-      DO N_SLICE = ISTEP*ISTART + JSTEP*JSTART + KSTEP*KSTART, &
-                   ISTEP*IEND + JSTEP*JEND + KSTEP*KEND
-        SLICE_COUNT = SLICE_COUNT+1
-        SLICE_LBOUND(SLICE_COUNT) = CELL_COUNT+1
-        DO K = KMIN, KMAX
-          IF (ISTEP*JSTEP > 0) THEN ! I STARTS HIGH
-            JSTART = MAX(JMIN, JSTEP*(N_SLICE - KSTEP*K - ISTEP*IMAX))
-            JEND   = MIN(JMAX, JSTEP*(N_SLICE - KSTEP*K - ISTEP*IMIN))
-          ELSE IF (ISTEP*JSTEP < 0) THEN ! I STARTS LOW
-            JSTART = MAX(JMIN, JSTEP*(N_SLICE - KSTEP*K - ISTEP*IMIN))
-            JEND   = MIN(JMAX, JSTEP*(N_SLICE - KSTEP*K - ISTEP*IMAX))
-          ENDIF
-          IF (JSTART > JEND) THEN
-            CYCLE
-          ENDIF
-          DO J = JSTART, JEND
-            I = ISTEP * (N_SLICE - J*JSTEP - K*KSTEP)
-            CELL_COUNT = CELL_COUNT+1
-            SLICE_IJK(:, CELL_COUNT, RAD_DIR) = (/I,J,K/)
-          ENDDO
-        ENDDO
-        SLICE_UBOUND(SLICE_COUNT) = CELL_COUNT
-      ENDDO ! N_SLICE
-
-    ENDDO ! KDIR
-  ENDDO ! JDIR
-ENDDO ! IDIR
 
 ! A few miscellaneous constants
 
@@ -700,8 +611,8 @@ INTEGER  :: N, NN,IIG,JJG,KKG,I,J,K,IW,II,JJ,KK,IOR,IC,IWUP,IWDOWN, &
             ISTART, IEND, ISTEP, JSTART, JEND, JSTEP, &
             KSTART, KEND, KSTEP, NSTART, NEND, NSTEP, &
             I_UIID, N_UPDATES, IBND, TYY, NOM, SURF_INDEX,ARRAY_INDEX,NRA, N_PART, &
-            IMIN, JMIN, KMIN, IMAX, JMAX, KMAX, &
-            N_SLICE, M_IJK, CELL_COUNT, SLICE_COUNT, RAD_DIR
+            IMIN, JMIN, KMIN, IMAX, JMAX, KMAX, N_SLICE, M_IJK, IJK
+INTEGER, ALLOCATABLE :: IJK_SLICE(:,:)
 REAL(EB) :: XID,YJD,ZKD,KAPPA_PART,SURFACE_AREA,DLF,DLA(3),KAPPA_1
 REAL(EB), ALLOCATABLE, DIMENSION(:) :: ZZ_GET
 INTEGER :: IID,JJD,KKD,IP
@@ -715,6 +626,7 @@ TYPE(LAGRANGIAN_PARTICLE_CLASS_TYPE), POINTER :: LPC=>NULL()
 TYPE(LAGRANGIAN_PARTICLE_TYPE), POINTER :: LP=>NULL()
 
 ALLOCATE(ZZ_GET(0:N_TRACKED_SPECIES))
+ALLOCATE( IJK_SLICE(3, IBAR*KBAR) )
 
 KFST4    => WORK1
 IL       => WORK2
@@ -1068,9 +980,7 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
             IMAX = IEND
             JMAX = JEND
             KMAX = KEND
-            RAD_DIR = 1
             IF (DLX(N) < 0._EB) THEN
-               RAD_DIR = RAD_DIR + 4
                ISTART = IBAR
                IEND   = 1
                ISTEP  = -1
@@ -1078,7 +988,6 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                IMAX = ISTART
             ENDIF
             IF (DLY(N) < 0._EB) THEN
-               RAD_DIR = RAD_DIR + 2
                JSTART = JBAR
                JEND   = 1
                JSTEP  = -1
@@ -1086,7 +995,6 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                JMAX = JSTART
             ENDIF
             IF (DLZ(N) < 0._EB) THEN
-               RAD_DIR = RAD_DIR + 1
                KSTART = KBAR
                KEND   = 1
                KSTEP  = -1
@@ -1164,14 +1072,34 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
 
             ELSE GEOMETRY  ! Sweep in 3D cartesian geometry
 
-              DO N_SLICE = 1, ubound(slice_ubound, 1)
+              DO N_SLICE = ISTEP*ISTART + JSTEP*JSTART + KSTEP*KSTART, &
+                          ISTEP*IEND + JSTEP*JEND + KSTEP*KEND
+                M_IJK = 0
+                DO K = KMIN, KMAX
+                  IF (ISTEP*JSTEP > 0) THEN ! I STARTS HIGH
+                    JSTART = MAX(JMIN, JSTEP*(N_SLICE - KSTEP*K - ISTEP*IMAX))
+                    JEND   = MIN(JMAX, JSTEP*(N_SLICE - KSTEP*K - ISTEP*IMIN))
+                  ELSE IF (ISTEP*JSTEP < 0) THEN ! I STARTS LOW
+                    JSTART = MAX(JMIN, JSTEP*(N_SLICE - KSTEP*K - ISTEP*IMIN))
+                    JEND   = MIN(JMAX, JSTEP*(N_SLICE - KSTEP*K - ISTEP*IMAX))
+                  ENDIF
+                  IF (JSTART > JEND) THEN
+                    CYCLE
+                  ENDIF
+                  DO J = JSTART, JEND
+                    I = ISTEP * (N_SLICE - J*JSTEP - K*KSTEP)
+                    M_IJK = M_IJK+1
+                    IJK_SLICE(:,M_IJK) = (/I,J,K/)
+                  ENDDO
+                ENDDO
+
                  !$OMP PARALLEL DO SCHEDULE(GUIDED) &
                  !$OMP& PRIVATE(I, J, K, AY1, AX, VC1, AZ1, IC, ILXU, ILYU, &
                  !$OMP& ILZU, VC, AY, AZ, IW, A_SUM, AIU_SUM, RAP)
-                 SLICELOOP: DO M_IJK = slice_lbound(n_slice), slice_ubound(n_slice)
-                   I = SLICE_IJK(1,M_IJK,RAD_DIR)
-                   J = SLICE_IJK(2,M_IJK,RAD_DIR)
-                   K = SLICE_IJK(3,M_IJK,RAD_DIR)
+                 SLICELOOP: DO IJK = 1, M_IJK
+                   I = IJK_SLICE(1,IJK)
+                   J = IJK_SLICE(2,IJK)
+                   K = IJK_SLICE(3,IJK)
 
                    AY1 = DZ(K) * ABS(DLY(N))
                    AX  = DY(J) * DZ(K) * ABS(DLX(N))
@@ -1202,7 +1130,7 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                  ENDDO SLICELOOP
                  !$OMP END PARALLEL DO
 
-               ENDDO ! N_SLICE
+               ENDDO ! IPROP
  
             ENDIF GEOMETRY
 
