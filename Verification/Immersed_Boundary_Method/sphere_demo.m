@@ -44,10 +44,6 @@ time = ['&TIME T_END=10./']; fprintf(fid,'%s\n',time);
 
 fprintf(fid,'%s\n','  '); % blank line
 
-misc = ['&MISC IMMERSED_BOUNDARY_METHOD=0 /']; fprintf(fid,'%s\n',misc);
-
-fprintf(fid,'%s\n','  '); % blank line
-
 vent = ['&VENT MB=''XMIN'', SURF_ID=''supply'' /']; fprintf(fid,'%s\n',vent);
 vent = ['&VENT MB=''XMAX'', SURF_ID=''OPEN'' /']; fprintf(fid,'%s\n',vent);
 
@@ -59,27 +55,27 @@ surf = ['&SURF ID=''sphere'', COLOR=''GREEN''/'];  fprintf(fid,'%s\n',surf);
 fprintf(fid,'%s\n','  '); % blank line
 
 slcf = ['&SLCF PBY=0, QUANTITY=''VELOCITY'', VECTOR=.TRUE. /'];  fprintf(fid,'%s\n',slcf);
-slcf = ['&SLCF XB=-4,4,-2,2,-2,2, QUANTITY=''P MASK'', CELL_CENTERED=.TRUE. /'];  fprintf(fid,'%s\n',slcf);
-slcf = ['&SLCF XB=-4,4,-2,2,-2,2, QUANTITY=''U MASK'', CELL_CENTERED=.TRUE. /'];  fprintf(fid,'%s\n',slcf);
-slcf = ['&SLCF XB=-4,4,-2,2,-2,2, QUANTITY=''V MASK'', CELL_CENTERED=.TRUE. /'];  fprintf(fid,'%s\n',slcf);
-slcf = ['&SLCF XB=-4,4,-2,2,-2,2, QUANTITY=''W MASK'', CELL_CENTERED=.TRUE. /'];  fprintf(fid,'%s\n',slcf);
 
 fprintf(fid,'%s\n','  '); % blank line
 
-% write VERT lines
+% write GEOM lines
 
-for i=1:length(x)
-    vert = ['&VERT X=',num2str(x(i)),',',num2str(y(i)),',',num2str(z(i)),' /']; fprintf(fid,'%s\n',vert);
+nx = length(x);
+geom  = ['&GEOM ID=''sphere'', SURF_ID=''sphere'',']; fprintf(fid,'%s\n',geom);
+verts = ['      VERTS=',num2str(x(1)),',',num2str(y(1)),',',num2str(z(1)),',']; fprintf(fid,'%s\n',verts);
+for i=2:nx-1
+verts = ['            ',num2str(x(i)),',',num2str(y(i)),',',num2str(z(i)),',']; fprintf(fid,'%s\n',verts);
 end
+verts = ['            ',num2str(x(nx)),',',num2str(y(nx)),',',num2str(z(nx)),',']; fprintf(fid,'%s\n',verts);
 
-fprintf(fid,'%s\n','  '); % blank line
+% write FACES
 
-% write FACE lines
-
-surf_id='''sphere''';
-for i=1:length(F(:,1))
-    face = ['&FACE N=',num2str(F(i,1)),',',num2str(F(i,3)),',',num2str(F(i,2)),', SURF_ID=',surf_id,' /']; fprintf(fid,'%s\n',face);
+nf = length(F(:,1));
+faces = ['      FACES=',num2str(F(1,1)),',',num2str(F(1,3)),',',num2str(F(1,2)),',']; fprintf(fid,'%s\n',faces);
+for i=2:nf-1
+faces = ['            ',num2str(F(i,1)),',',num2str(F(i,3)),',',num2str(F(i,2)),',']; fprintf(fid,'%s\n',faces);
 end
+faces = ['            ',num2str(F(nf,1)),',',num2str(F(nf,3)),',',num2str(F(nf,2)),'/']; fprintf(fid,'%s\n',faces);
 
 fprintf(fid,'%s\n','  '); % blank line
 
