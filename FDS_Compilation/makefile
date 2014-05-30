@@ -577,6 +577,14 @@ intel_osx_64_dv : obj = fds_intel_osx_64_dv
 intel_osx_64_dv : setup $(obj_serial)
 	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_serial)
 
+openmp_intel_osx_64_dv : FFLAGS = -m64 -O2 -vec_report0 -traceback -stand:f03
+openmp_intel_osx_64_dv : LFLAGS = -static-intel
+openmp_intel_osx_64_dv : FCOMPL = ifort
+openmp_intel_osx_64_dv : FOPENMPFLAGS = -openmp -openmp-link static
+openmp_intel_osx_64_dv : obj = fds_openmp_intel_osx_64_dv
+openmp_intel_osx_64_dv : setup $(obj_serial)
+	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_serial)
+
 #*** IBM XLF Compiler ***
 
 ibm_osx_ppc : FFLAGS = -O4 -qstrict -qextname -qarch=auto -qtune=auto
