@@ -210,11 +210,14 @@ For example, {\tt XYZ\_DOT=0.0,0.0,1.0}\ would cause an object to move 1~m/s in 
 {\ct ID}           & Character              & Section~\ref{info:GEOM}            &           &   {\ct 'geom'}           \\ \hline
 {\ct IJK}          & Integer Triplet        & Section~\ref{info:GEOM}            &           &   0,0,0                  \\ \hline
 {\ct MATL\_ID}     & Character              & Section~\ref{info:GEOM}            &           &  {\ct 'INERT'}           \\ \hline
+{\ct N\_LAT}       & Integer                & Section~\ref{info:GEOM}            &           &   0                      \\ \hline
 {\ct N\_LEVELS}    & Integer                & Section~\ref{info:GEOM}            &           &   0                      \\ \hline
+{\ct N\_LONG}      & Integer                & Section~\ref{info:GEOM}            &           &   0                      \\ \hline
 {\ct SCALE}        & Real Triplet           & Section~\ref{info:GEOM}            &           &   1.0,1.0,1.0            \\ \hline
 {\ct SCALE\_DOT}   & Real Triplet           & Section~\ref{info:GEOM}            &  1/s      &   1.0                    \\ \hline
 {\ct SPHERE\_ORIGIN}& Real Triplet          & Section~\ref{info:GEOM}            &   m       &  0.0,0.0,0.0             \\ \hline
 {\ct SPHERE\_RADIUS}& Real                  & Section~\ref{info:GEOM}            &   m       &  1.0                     \\ \hline
+{\ct SPHERE\_TYPE} & Integer                & Section~\ref{info:GEOM}            &           &  1                       \\ \hline
 {\ct SURF\_ID}     & Character              & Section~\ref{info:GEOM}            &           &  {\ct 'INERT'}           \\ \hline
 {\ct TEXTURE\_MAPPING}& Character           & Section~\ref{info:GEOM}            &           & {\ct 'RECTANGULAR'}      \\ \hline
 {\ct TEXTURE\_ORIGIN} & Real Triplet        & Section~\ref{info:GEOM}            &   m       &   0.0,0.0,0.0            \\ \hline
@@ -236,6 +239,8 @@ For example, {\tt XYZ\_DOT=0.0,0.0,1.0}\ would cause an object to move 1~m/s in 
 
 \subsection{Unstructured Geometry}
 \label{out:GEOMETRY}
+
+{\it Note: I'm checking now that FDS and Smokeview are following this format properly.  I'll remove this comment when various geometry test cases run and visualize correctly}
 
 (add to FDS user's guide 20.13 when ready)
 
@@ -260,7 +265,7 @@ IF (N_FLOATS>0) WRITE(LU_GEOM) (FLOAT_HEADER(I),I=1,N_FLOATS)
 IF (N_INTS>0) WRITE(LU_GEOM) (INT_HEADER(I),I=1,N_INTS)
 
 ! geometry frame
-! STIME ignored and first frame static if FIRST_FRAME_STATIC set to 1
+! STIME ignored if first frame is static ( FIRST_FRAME_STATIC set to 1)
 
 WRITE(LU_GEOM) STIME
 WRITE(LU_GEOM) N_VERT, N_FACE, N_VOL
@@ -280,19 +285,20 @@ ENDIF
 
 \begin{itemize}
 \item {\ct ONE}\ has the value 1. Smokeview uses this number to determine whether the computer creating the geometry file and the computer viewing the geometry file use the same or different byte swap (endian) conventions for storing floating point numbers.
-\item {\ct VERSION}\ currently has value 1 and indicates the version number of this file format.
+\item {\ct VERSION}\ currently has value 2 and indicates the version number of this file format.
 \item {\ct N\_FLOATS, N\_INTS} The number of floating point and integer data items stored at the beginning of the file.
 \item {\ct FLOAT\_HEADER, INT\_HEADER} Floating point and integer data stored at the beginning of the file.
 \item {\ct STIME} is the FDS simulation time.
-\item {\ct N\_VERT, N\_FACE, N\_VOL}  are the number of static and dynamic vertices, faces and volumes.
-\item {\ct Xtext, Ytext}\ are the static and dynamic texture coordinates.
-\item {\ct Xvert, Yvert, Zvert}\ are the static and dynamic vertex coordinates.
-\item {\ct FACE1, FACE2, FACE3}\ are the static and dynamic vertex indices for each face (triangle).
+\item {\ct N\_VERT, N\_FACE, N\_VOL}  are the number of vertices, faces and volumes.
+\item {\ct HAS\_SURF, HAS\_MATL, HAS\_TEXTURE}\ these parameters are set to 1 if SURF, MATL or TEXTURE data is present, these parameters are set to 0 otherwise.
+\item {\ct Xtext, Ytext}\ are the texture coordinates.
+\item {\ct Xvert, Yvert, Zvert}\ are the vertex coordinates.
+\item {\ct FACE1, FACE2, FACE3}\ are the vertex indices for each face (triangle).
     The indices range from 1 to the
     number of vertices.
-\item {\ct VOL1, VOL2, VOL3, VOL4}\ are the static and dynamic vertex indices for each volume (tetrahedron).  The indices are numbered from 1 to the number of vertices.
-\item {\ct SURF}\ are the static and dynamic SURF indices for each face.
-\item {\ct MATL}\ are the static and dynamic MATL indices for each volume face.
+\item {\ct VOL1, VOL2, VOL3, VOL4}\ are the verrtex indices for each volume (tetrahedron).  The indices are numbered from 1 to the number of vertices.
+\item {\ct SURF}\ are the SURF indices for each face.
+\item {\ct MATL}\ are the MATL indices for each volume.
 \end{itemize}
 
 
@@ -300,7 +306,7 @@ ENDIF
 
 \label{out:GEOMETRYDATA}
 
-(add to FDS user's guide 20.13 when ready)
+(add to FDS user's guide 20.13 when ready) 
 
 This section describes the file format used for
 storing data associated with unstructured geometric objects.  This format will be used to unify file formats for storing 3D smoke, boundary, particle and slice data.
@@ -328,7 +334,7 @@ IF (N_VERT>0) THEN
 ENDIF
 IF (N_FACE>0) WRITE(LU_GEOM)(ValFace(I),I=1,N_FACE)
 IF (N_VOLS>0) WRITE(LU_GEOM)(ValVol(I),I=1,N_VOLS)
-       
+
 \end{lstlisting}
 
 \begin{itemize}
@@ -404,6 +410,8 @@ ENDIF
 These implementation notes will not appear as is in an FDS or Smokeview technical manual. They are written down here to help verify various geometric algorithms coded in FDS and Smokeview.
 
 \subsection{Spheres}
+\subsubsection{Latitude/Longitude Discretization}
+\subsubsection{Icosahedron Discretization}
 Icosahedron vertex locations
 \begin{eqnarray*}
 v_1&=&(0,0,1)\\
