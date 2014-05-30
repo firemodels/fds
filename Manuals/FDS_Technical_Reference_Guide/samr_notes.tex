@@ -3,9 +3,161 @@
 
 \begin{document}
 
+\vspace{1.0in}
+\section{Numerical Grid in FDS}
+
+\subsection{Overview}
+
+\begin{figure}[h]
+\centering
+\begin{tikzpicture}
+
+% grid
+\draw[step=2cm,ultra thick] (0, 0) grid (4,4);
+
+% u arrows
+% coarse mesh
+\draw[line width=1.5pt,->] (-0.25,1) -- (0.25,1) node[anchor=west] {$u$};
+\draw[line width=1.5pt,->] (-0.25,3) -- (0.25,3);
+\draw[line width=1.5pt,->] (1.75,1) -- (2.25,1);
+\draw[line width=1.5pt,->] (1.75,3) -- (2.25,3);
+\draw[line width=1.5pt,->] (3.75,1) -- (4.25,1);
+\draw[line width=1.5pt,->] (3.75,3) -- (4.25,3);
+
+% v arrow
+\draw[line width=1.5pt,->] (1,-0.25) -- (1,0.25) node[anchor=south] {$v$};
+\draw[line width=1.5pt,->] (1,1.75) -- (1,2.25);
+\draw[line width=1.5pt,->] (1,3.75) -- (1,4.25);
+\draw[line width=1.5pt,->] (3,-0.25) -- (3,0.25);
+\draw[line width=1.5pt,->] (3,1.75) -- (3,2.25);
+\draw[line width=1.5pt,->] (3,3.75) -- (3,4.25);
+
+% scalars
+\node[draw,circle,inner sep=2pt,fill,label={$H$}] at (1, 1) {};
+\node[draw,circle,inner sep=2pt,fill] at (3, 1) {};
+\node[draw,circle,inner sep=2pt,fill] at (1, 3) {};
+\node[draw,circle,inner sep=2pt,fill] at (3, 3) {};
+
+\end{tikzpicture}
+\caption{2D grid topology.}
+\end{figure}
+
+\subsection{Boundary Conditions}
+% periodic, interpolated, open, walls
+
+\subsection{Grid Communication}
+
+\begin{figure}[h]
+\centering
+\begin{tikzpicture}
+
+% https://tex.stackexchange.com/a/3172
+\usetikzlibrary{decorations.markings}
+\usetikzlibrary{arrows}
+
+% grids
+% coarse grid (on the left)
+\draw[step=4cm,ultra thick] (0, 0) grid (8,8);
+% fine grid (on the right)
+\draw[step=2cm,ultra thick] (4, 0) grid (8,8);
+
+% interpolation lines
+%\node[draw,circle,inner sep=2pt,fill,gray] at (2, 1) {};
+%\node[draw,circle,inner sep=2pt,fill,gray] at (2, 3) {};
+%\node[draw,circle,inner sep=2pt,fill,gray] at (2, 5) {};
+%\node[draw,circle,inner sep=2pt,fill,gray] at (2, 7) {};
+\begin{scope}[thick,decoration={markings,mark=at position 0.5 with {\arrow{triangle 45}}}]
+   %\draw[gray,dashed,postaction={decorate}] (2,1) -- (5,1);
+   %\draw[gray,dashed,postaction={decorate}] (2,3) -- (5,3);
+   %\draw[gray,dashed,postaction={decorate}] (2,5) -- (5,5);
+   %\draw[gray,dashed,postaction={decorate}] (2,7) -- (5,7);
+   
+   %\draw[gray,dashed,postaction={decorate}] (2,2) -- (2,1);
+   %\draw[gray,dashed,postaction={decorate}] (2,2) -- (2,3);
+   %\draw[gray,dashed,postaction={decorate}] (2,6) -- (2,5);
+   %\draw[gray,dashed,postaction={decorate}] (2,6) -- (2,7);
+   
+   \draw[gray,dashed,postaction={decorate}] (2,2) -- (5,1);
+   \draw[gray,dashed,postaction={decorate}] (2,2) -- (5,3);
+   \draw[gray,dashed,postaction={decorate}] (2,6) -- (5,5);
+   \draw[gray,dashed,postaction={decorate}] (2,6) -- (5,7);
+\end{scope}
+
+% scalars for the coarse cells
+\node[draw,circle,inner sep=2pt,fill] at (2, 2) {};
+\node[draw,circle,inner sep=2pt,fill] at (2, 6) {};
+
+% scalars for the fine cells
+\node[draw,circle,inner sep=2pt,fill,gray] at (5, 1) {};
+\node[draw,circle,inner sep=2pt,fill,gray] at (5, 3) {};
+\node[draw,circle,inner sep=2pt,fill,gray] at (5, 5) {};
+\node[draw,circle,inner sep=2pt,fill,gray] at (5, 7) {};
+\node[draw,circle,inner sep=2pt,fill] at (7, 1) {};
+\node[draw,circle,inner sep=2pt,fill] at (7, 3) {};
+\node[draw,circle,inner sep=2pt,fill] at (7, 5) {};
+\node[draw,circle,inner sep=2pt,fill] at (7, 7) {};
+
+% u vectors
+\draw[line width=1.5pt,->] (-0.25,2) -- (0.25,2) {};
+\draw[line width=1.5pt,->] (-0.25,6) -- (0.25,6) {};
+
+\draw[line width=1.5pt,->] (3.75,2) -- (4.25,2) {};
+\draw[line width=1.5pt,->] (3.75,6) -- (4.25,6) {};
+
+\draw[line width=1.5pt,->] (3.75,1) -- (4.25,1) {};
+\draw[line width=1.5pt,->] (3.75,3) -- (4.25,3) {};
+\draw[line width=1.5pt,->] (3.75,5) -- (4.25,5) {};
+\draw[line width=1.5pt,->] (3.75,7) -- (4.25,7) {};
+\draw[line width=1.5pt,->] (5.75,1) -- (6.25,1) {};
+\draw[line width=1.5pt,->] (5.75,3) -- (6.25,3) {};
+\draw[line width=1.5pt,->] (5.75,5) -- (6.25,5) {};
+\draw[line width=1.5pt,->] (5.75,7) -- (6.25,7) {};
+\draw[line width=1.5pt,->] (7.75,1) -- (8.25,1) {};
+\draw[line width=1.5pt,->] (7.75,3) -- (8.25,3) {};
+\draw[line width=1.5pt,->] (7.75,5) -- (8.25,5) {};
+\draw[line width=1.5pt,->] (7.75,7) -- (8.25,7) {};
+
+% v vectors
+\draw[line width=1.5pt,->] (2,-0.25) -- (2,0.25) {};
+\draw[line width=1.5pt,->] (2,3.75) -- (2,4.25) {};
+\draw[line width=1.5pt,->] (2,7.75) -- (2,8.25) {};
+
+\draw[line width=1.5pt,->] (5,-0.25) -- (5,0.25) {};
+\draw[line width=1.5pt,->] (7,-0.25) -- (7,0.25) {};
+\draw[line width=1.5pt,->] (5,1.75) -- (5,2.25) {};
+\draw[line width=1.5pt,->] (7,1.75) -- (7,2.25) {};
+\draw[line width=1.5pt,->] (5,3.75) -- (5,4.25) {};
+\draw[line width=1.5pt,->] (7,3.75) -- (7,4.25) {};
+\draw[line width=1.5pt,->] (5,5.75) -- (5,6.25) {};
+\draw[line width=1.5pt,->] (7,5.75) -- (7,6.25) {};
+\draw[line width=1.5pt,->] (5,7.75) -- (5,8.25) {};
+\draw[line width=1.5pt,->] (7,7.75) -- (7,8.25) {};
+
+\end{tikzpicture}
+\caption{Interface of two (2D) grids with different resolution.}
+\end{figure}
+
+%\subsubsection{(coarse to fine)}
+
+%\subsubsection{(fine to coarse)}
+
 % How is the H BC currently obtained for an interior mesh?
 % Randy said see starting at
 % ! Interpolated boundary -- set boundary value of H to be average of neighboring cells from previous time step
 % in the FDS source code file pres.f90.
+
+% From a text file from 2012:
+
+%Correspondence between variables in the FDS guide and variables in the source code
+
+%Detailed description of the grid in FDS
+   %ghost cells
+   %cell indices
+   %what things like IIG, IIJ, etc., mean
+
+%Randy spoke about writing a NIST technical note about the FDS grid and stencil
+   %topics would include the configurations of the cells (ghost cells, cell indices, spatial locations of points, corners, etc.) and the development of different operators to simplify notation
+   
+   %The technical note comes first, then the tech. guide and code could be updated to correspond to the improved notation
 
 \end{document}

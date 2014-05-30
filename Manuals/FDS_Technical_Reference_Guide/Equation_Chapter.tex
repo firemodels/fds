@@ -44,7 +44,7 @@ preferred, and the only numerical parameters chosen by the end user are the thre
 is relatively simple to define rectangular obstructions that define the geometry to the level of resolution determined by the
 grid. These obstructions ``snap'' to the underlying grid, a very elementary form of an immersed boundary method (IBM).
 
-The governing equations are approximated using second-order accurate finite differences on a collection of uniformly spaced three-dimensional grids. Multiple meshes can be processed in parallel using Message Passing Interface (MPI) libraries. Scalar quantities are assigned to the center of each grid cell; vector components are assigned at the appropriate cell faces. This is what is commonly referred to as a staggered grid \cite{Harlow:1}.  Its main purpose is to avoid ``checker-boarding'' in pressure-velocity coupling by naturally representing the pressure cell velocity divergence, a very important thermodynamic quantity in the model.
+The governing equations are approximated using second-order accurate finite differences on a collection of uniformly spaced three-dimensional grids. Multiple meshes can be processed in parallel using Message Passing Interface (MPI) libraries. Scalar quantities are assigned to the center of each grid cell; vector components are assigned at the appropriate cell faces. This is what is commonly referred to as a staggered grid \cite{Harlow:1,Morinishi}.  Its main purpose is to avoid ``checker-boarding'' in pressure-velocity coupling by naturally representing the pressure cell velocity divergence, a very important thermodynamic quantity in the model.
 
 \section{Mass and Species Transport}
 \label{sec_lumped_species}
