@@ -6570,7 +6570,7 @@ BNDC_LOOP: DO N=1,1 ! placeholder for multiple boundary files
       OPEN(LU_BNDC,FILE=FN,FORM='UNFORMATTED',STATUS='REPLACE')
    ENDIF
    
-   WRITE(LU_BNDC) ZERO_INTEGER ! 0 means written by FDS, 1 by Abq
+   WRITE(LU_BNDC) ZERO_INTEGER ! 0 means written by FDS, 1 by FEM
    WRITE(LU_BNDC) ZERO_INTEGER
 
    WRITE(LU_BNDC) STIME
