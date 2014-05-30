@@ -70,10 +70,10 @@ inquire(unit=lu20,opened=isopen)
 if(isopen)close(lu20)
 inquire(file=trim(filename),exist=exists)
 if(exists)then
-#ifdef pp_GCC
-  open(unit=lu20,file=trim(filename),form="unformatted",action="read")
-#else
+#ifdef WIN32
   open(unit=lu20,file=trim(filename),form="unformatted",shared,action="read")
+#else
+  open(unit=lu20,file=trim(filename),form="unformatted",action="read")
 #endif
  else
   write(6,*)'The boundary element file name, ',trim(filename),' does not exist'
@@ -137,10 +137,10 @@ inquire(unit=lu26,opened=isopen)
 if(isopen)close(lu26)
 inquire(file=trim(zonefilename),exist=exists)
 if(exists)then
-#ifdef pp_GCC
-  open(unit=lu26,file=trim(zonefilename),form="unformatted",action="read")
-#else
+#ifdef WIN32
   open(unit=lu26,file=trim(zonefilename),form="unformatted",shared,action="read")
+#else
+  open(unit=lu26,file=trim(zonefilename),form="unformatted",action="read")
 #endif
  else
   write(6,*)'The zone file name, ',trim(zonefilename),' does not exist'
@@ -615,10 +615,10 @@ if(connected)close(lu11)
 
 inquire(file=trim(slicefilename),exist=exists)
 if(exists)then
-#ifdef pp_GCC
-  open(unit=lu11,file=trim(slicefilename),form="unformatted",action="read")
-#else
+#ifdef WIN32
   open(unit=lu11,file=trim(slicefilename),form="unformatted",shared,action="read")
+#else
+  open(unit=lu11,file=trim(slicefilename),form="unformatted",action="read")
 #endif
  else
   write(6,*)'the slice file ',trim(slicefilename),' does not exist'
@@ -951,10 +951,10 @@ if(isotest.eq.0)then
   error=0
   inquire(file=qfilename,exist=exists)
   if(exists)then
-#ifdef pp_GCC
-    open(unit=u_in,file=qfilename,form="unformatted",action="read",iostat=error2)
-#else
+#ifdef WIN32
     open(unit=u_in,file=qfilename,form="unformatted",shared,action="read",iostat=error2)
+#else
+    open(unit=u_in,file=qfilename,form="unformatted",action="read",iostat=error2)
 #endif
    else
     write(6,*)'The file name, ',trim(qfilename),' does not exist'
