@@ -306,7 +306,7 @@ ENDIF
 
 \label{out:GEOMETRYDATA}
 
-(add to FDS user's guide 20.13 when ready) 
+(add to FDS user's guide 20.13 when ready)
 
 This section describes the file format used for
 storing data associated with unstructured geometric objects.  This format will be used to unify file formats for storing 3D smoke, boundary, particle and slice data.
@@ -504,6 +504,405 @@ Figure \ref{figure:facelist}.
 
 \subsection{Boxes}
 \subsection{2D Surfaces}
+
+\section{Examples}
+This section describes some of the test cases used to verify that FDS and Smokeview are computing
+and visualizing unstructured geometric objects correctly.  This section will be used as source material for adding
+more details to the various guides on how to setup unstructured geometries for use with FDS. (i.e. this section
+is not intended to be included verbatim in the FDS UG).
+
+\newcommand{\geominput}[1]{{\scriptsize\verbatiminput{../../Verification/Immersed_Boundary_Method/#1}}}
+\newcommand{\figheightD}{2.75in}
+
+\subsection{geom\_arch.fds}
+Figure \ref{fig:geom_arch} was created using VERTS and FACES keywords.  
+
+\begin{figure}[\figoptions]
+\begin{center}
+\begin{tabular}{c}
+ \includegraphics[width=4.0in]{SCRIPT_FIGURES/geom_arch}
+  \end{tabular}
+\end{center}
+ \caption{case: geom\_arch.fds . Created with FACES and VERTS keywords.}
+\label{fig:geom_arch}
+\end{figure}
+
+\subsection{geom\_azim.fds}
+Figure \ref{fig:geom_azim} was created using the following \&GEOM namelists.
+The {\tt AZIM}\ keyword is used to rotate the object about a vertical axis
+centered at $(0,0,0)$.
+
+{\scriptsize
+\begin{verbatim}
+&GEOM ID='geom1',
+VERTS=0.0,0.0,0.0, 0.0,1.0,0.0, 0.0,1.0,1.0,
+FACES=1,2,3,AZIM=0.0,SURF_ID='surf1'/
+
+&GEOM ID='geom2',
+VERTS=0.0,0.0,0.0, 0.0,1.0,0.0, 0.0,1.0,1.0,
+FACES=1,2,3,AZIM=45.0,SURF_ID='surf2'/
+
+&GEOM ID='geom3',
+VERTS=0.0,0.0,0.0, 0.0,1.0,0.0, 0.0,1.0,1.0,
+FACES=1,2,3,AZIM=90.0,SURF_ID='surf3'/
+\end{verbatim}
+}
+
+\begin{figure}[\figoptions]
+\begin{center}
+\begin{tabular}{c}
+ \includegraphics[width=3.0in]{SCRIPT_FIGURES/geom_azim}
+  \end{tabular}
+\end{center}
+ \caption{geom\_azim}
+\label{fig:geom_azim}
+\end{figure}
+
+\subsection{geom\_elev.fds}
+Figure \ref{fig:geom_elev} was created using the following \&GEOM namelists.
+The {\tt ELEV}\ keyword is used to rotate the object with respect to a horizontal plane
+passing through $(0,0,0)$.
+
+{\scriptsize
+\begin{verbatim}
+&GEOM ID='geom1',
+VERTS=0.0,0.0,1.0,1.0,0.0,1.0,1.0,1.0,1.0,
+FACES=1,2,3,ELEV=0,XYZ0=0.0,0.0,1.0,SURF_ID='surf1'/
+
+&GEOM ID='geom2',
+VERTS=0.0,0.0,1.0,1.0,0.0,1.0,1.0,1.0,1.0,
+FACES=1,2,3,ELEV=45,XYZ0=0.0,0.0,1.0,SURF_ID='surf2'/
+
+&GEOM ID='geom3',
+VERTS=0.0,0.0,1.0,1.0,0.0,1.0,1.0,1.0,1.0,
+FACES=1,2,3,ELEV=90,XYZ0=0.0,0.0,1.0,SURF_ID='surf3'/
+\end{verbatim}
+}
+
+\begin{figure}[\figoptions]
+\begin{center}
+\begin{tabular}{c}
+ \includegraphics[width=3.0in]{SCRIPT_FIGURES/geom_elev}
+  \end{tabular}
+\end{center}
+ \caption{geom\_elev}
+\label{fig:geom_elev}
+\end{figure}
+
+\subsection{geom\_obst.fds}
+Figure \ref{fig:geom_obst} was created using the following \&GEOM namelist.
+The {\tt XB}\ keyword is used the same way to specify a block as on
+a {\tt \&OBST}\ or {\tt \&VENT}\ line.
+
+{\scriptsize
+\begin{verbatim}
+&GEOM ID='obst',SURF_ID='surf1', XB=-0.6,0.6,-0.6,0.6,-0.2,0.2,AZIM=90.0,ELEV=30.0 /
+\end{verbatim}
+}
+
+\begin{figure}[\figoptions]
+\begin{center}
+\begin{tabular}{c}
+ \includegraphics[height=\figheightD]{SCRIPT_FIGURES/geom_obst}
+  \end{tabular}
+\end{center}
+ \caption{geom\_obst}
+\label{fig:geom_obst}
+\end{figure}
+
+\subsection{geom\_scale.fds}
+Figure \ref{fig:geom_scale} was created using the following \&GEOM namelists.
+The {\tt SCALE}\ keyword is used to change the size of the object.
+
+{\scriptsize
+\begin{verbatim}
+&GEOM ID='geom4',
+VERTS=-2.0,0.0,0.0,-1.0,0.0,0.0,-1.0,0.0,1.0,
+FACES=1,2,3,XYZ0=-2.0,0.0,0.0,SCALE=1.0,1.0,1.0,SURF_ID='surf1'/
+
+&GEOM ID='geom4',
+VERTS= 0.0,0.0,0.0,1.0,0.0,0.0,1.0,0.0,1.0,
+FACES=1,2,3,XYZ0= 0.0,0.0,0.0,SCALE=1.0,1.0,2.0,SURF_ID='surf2'/
+
+&GEOM ID='geom4',
+VERTS= 2.0,0.0,0.0,3.0,0.0,0.0,3.0,0.0,1.0,
+FACES=1,2,3,XYZ0= 2.0,0.0,0.0,SCALE=2.0,1.0,1.0,SURF_ID='surf3'/
+\end{verbatim}
+}
+
+\begin{figure}[\figoptions]
+\begin{center}
+\begin{tabular}{c}
+ \includegraphics[width=6.0in]{SCRIPT_FIGURES/geom_scale}
+  \end{tabular}
+\end{center}
+ \caption{geom\_scale}
+\label{fig:geom_scale}
+\end{figure}
+
+\subsection{geom\_simple.fds}
+Figure \ref{fig:geom_simple} was created using the following \&GEOM namelist.
+The {\tt VERTS}\ keyword is used to specify 3 vertices and the {\tt FACES}\ keyword
+is used to specify the indices of the triangular face.
+
+{\scriptsize
+\begin{verbatim}
+&GEOM ID='geom1',
+VERTS=0.0,0.0,0.0,1.0,0.5,0.0,1.0,1.0,1.0,
+FACES=1,2,3,
+SURF_ID='surf1'/
+\end{verbatim}
+}
+
+\begin{figure}[\figoptions]
+\begin{center}
+\begin{tabular}{c}
+ \includegraphics[width=4.0in]{SCRIPT_FIGURES/geom_simple}
+  \end{tabular}
+\end{center}
+ \caption{geom\_simple}
+\label{fig:geom_simple}
+\end{figure}
+
+\subsection{geom\_sphere.fds}
+Figure \ref{fig:geom_sphere} was created using the following \&GEOM namelists.
+The {\tt SPHERE\_RADIUS}\ and {\tt SPHERE\_ORIGIN}\ keywords are used to specify
+the size and location of the sphere.  The {\tt N\_LEVELS}\ keyword is used
+to specify the resolution of the sphere (larger {\tt N\_LEVELS}\ values result
+in a more highly resovled sphere).
+
+{\scriptsize
+\begin{verbatim}
+&GEOM ID='sphere',SURF_ID='surf1',SPHERE_RADIUS=0.5,N_LEVELS=0,SPHERE_ORIGIN=-3.0,0.0,0.0 /
+&GEOM ID='sphere',SURF_ID='surf2',SPHERE_RADIUS=0.5,N_LEVELS=1,SPHERE_ORIGIN=-2.0,0.0,0.0 /
+&GEOM ID='sphere',SURF_ID='surf3',SPHERE_RADIUS=0.5,N_LEVELS=2,SPHERE_ORIGIN=-1.0,0.0,0.0 /
+&GEOM ID='sphere',SURF_ID='surf4',SPHERE_RADIUS=0.5,N_LEVELS=3,SPHERE_ORIGIN= 0.0,0.0,0.0 /
+&GEOM ID='sphere',SURF_ID='surf5',SPHERE_RADIUS=0.5,N_LEVELS=4,SPHERE_ORIGIN= 1.0,0.0,0.0 /
+&GEOM ID='sphere',SURF_ID='surf6',SPHERE_RADIUS=0.5,N_LEVELS=5,SPHERE_ORIGIN= 2.0,0.0,0.0 /
+\end{verbatim}
+}
+
+\begin{figure}[\figoptions]
+\begin{center}
+\begin{tabular}{c}
+ \includegraphics[width=6.0in]{SCRIPT_FIGURES/geom_sphere}
+  \end{tabular}
+\end{center}
+ \caption{geom\_sphere}
+\label{fig:geom_sphere}
+\end{figure}
+
+%\geominput{geom_terrain.fds}
+\subsection{geom\_terrain.fds}
+Figure \ref{fig:geom_terrain} was created using the {\tt ZVALS}\ keyword.
+
+\begin{figure}[\figoptions]
+\begin{center}
+\begin{tabular}{c}
+ \includegraphics[height=\figheightD]{SCRIPT_FIGURES/geom_terrain}
+  \end{tabular}
+\end{center}
+ \caption{geom\_terrain}
+\label{fig:geom_terrain}
+\end{figure}
+
+\subsection{geom\_texture.fds}
+Figure \ref{fig:geom_texture} was created using the following \&SURF and \&GEOM namelists.
+The {\tt TEXTURE\_MAP}\ keyword on the {\tt \&SURF}\ is used to specify the name of the image
+file used to texture map the geometric object.  
+
+{\scriptsize
+\begin{verbatim}
+&SURF ID='surf1',TEXTURE_MAP='nistleft.jpg',TEXTURE_WIDTH=0.6,TEXTURE_HEIGHT=0.2,COLOR='BLUE' /
+
+&GEOM ID='texture',
+VERTS=0.0,0.0,0.0, 1.0,0.0,0.0, 1.0,1.0,0.0,
+FACES=1,2,3,SURF_ID='surf1'/
+\end{verbatim}
+}
+
+\begin{figure}[\figoptions]
+\begin{center}
+\begin{tabular}{c}
+ \includegraphics[width=4.0in]{SCRIPT_FIGURES/geom_texture}
+  \end{tabular}
+\end{center}
+ \caption{geom\_texture}
+\label{fig:geom_texture}
+\end{figure}
+
+\subsection{geom\_texture2.fds}
+Figure \ref{fig:geom_texture2} was created using the following \&SURF and \&GEOM namelists.
+The {\tt TEXTURE\_MAP}\ keyword on the {\tt \&SURF}\ is used to specify the name of the image
+file used to texture map the geometric object. This example has two textures.
+
+{\scriptsize
+\begin{verbatim}
+&SURF ID='surf1' TEXTURE_MAP='nistleft.jpg',TEXTURE_WIDTH=0.6,TEXTURE_HEIGHT=0.2,COLOR='BLUE' /
+&SURF ID='surf2',TEXTURE_MAP='grass.jpg',TEXTURE_WIDTH=0.6,TEXTURE_HEIGHT=0.2,COLOR='GREEN' /
+
+&GEOM ID='texture',
+VERTS=0.0,0.0,0.0, 1.0,0.0,0.0, 1.0,1.0,0.0,
+FACES=1,2,3,SURF_ID='surf1'/
+
+&GEOM ID='texture2',
+VERTS=0.0,0.0,0.0, 1.0,1.0,0.0, 0.0,1.0,0.0,
+FACES=1,2,3,SURF_ID='surf2'/
+\end{verbatim}
+}
+
+\begin{figure}[\figoptions]
+\begin{center}
+\begin{tabular}{c}
+ \includegraphics[width=4.0in]{SCRIPT_FIGURES/geom_texture2}
+  \end{tabular}
+\end{center}
+ \caption{geom\_texture2}
+\label{fig:geom_texture2}
+\end{figure}
+
+\subsection{geom\_texture3.fds}
+Figure \ref{fig:geom_texture2} was created using the following \&SURF and \&GEOM namelists.
+The {\tt TEXTURE\_MAP}\ keyword on the {\tt \&SURF}\ is used to specify the name of the image
+file used to texture map the geometric object. The {\tt SPHERICAL}\ parameter
+on the {\tt TEXTURE\_MAPPING}\ keyword indicates that that the texture map image
+is applied to the object using spherical coordinates.
+
+
+{\scriptsize
+\begin{verbatim}
+&SURF ID='surf1',TEXTURE_MAP='sphere_cover_01.png'COLOR='BLUE',TEXTURE_WIDTH=1.0,TEXTURE_HEIGHT=1.0/
+&SURF ID='surf2'TEXTURE_MAP='sphere_cover_03.png'COLOR='RED',TEXTURE_WIDTH=1.0,TEXTURE_HEIGHT=1.0/
+
+&GEOM ID='sphere1',SURF_ID='surf1',
+N_LAT=50,N_LONG=50,SPHERE_RADIUS=0.25,SPHERE_ORIGIN=0.25,0.5,0.5,
+TEXTURE_ORIGIN=0.25,0.5,0.5,TEXTURE_MAPPING='SPHERICAL' /
+
+&GEOM ID='sphere2',SURF_ID='surf2',
+N_LEVELS=3,SPHERE_RADIUS=0.25,SPHERE_ORIGIN=0.75,0.5,0.5,
+TEXTURE_ORIGIN=0.75,0.5,0.5,TEXTURE_MAPPING='SPHERICAL' /
+\end{verbatim}
+}
+
+\begin{figure}[\figoptions]
+\begin{center}
+\begin{tabular}{c}
+ \includegraphics[width=6.0in]{SCRIPT_FIGURES/geom_texture3}
+  \end{tabular}
+\end{center}
+ \caption{geom\_texture3}
+\label{fig:geom_texture3}
+\end{figure}
+
+\subsection{geom\_time.fds}
+Figure \ref{fig:geom_time} was created using the following \&GEOM namelist.
+The {\tt AZIM}\ keyword is used to specify the initial rotational angle
+and the {\tt AXIM\_DOT}\ is used to specify that rate at which
+the azimuthal angle changes, in this  case 0.36 deg/s. 
+{\bf Figure \ref{fig:geom_time} is wrong - it is not rotating. remove this note when smokeview is fixed} 
+
+{\scriptsize
+\begin{verbatim}
+&GEOM ID='geom4',
+VERTS=0.0,0.0,0.0,0.0,1.0,0.0,0.0,1.0,1.0,
+FACES=1,2,3,AZIM=0.0,AZIM_DOT=0.36,SURF_ID='surf1'/
+\end{verbatim}
+}
+
+\begin{figure}[\figoptions]
+\begin{center}
+\begin{tabular}{cc}c
+ \includegraphics[width=2.0in]{SCRIPT_FIGURES/geom_time_000}
+ \includegraphics[width=2.0in]{SCRIPT_FIGURES/geom_time_500}
+ \includegraphics[width=2.0in]{SCRIPT_FIGURES/geom_time_1000}
+  \end{tabular}
+\end{center}
+ \caption{geom\_time}
+\label{fig:geom_time}
+\end{figure}
+
+\subsection{geom\_time2.fds}
+Figure \ref{fig:geom_time2} was created using the following \&GEOM namelists.
+The {\tt AZIM}\ keyword is used to specify the initial rotational angle
+and the {\tt AXIM\_DOT}\ is used to specify that rate at which
+the azimuthal angle changes, in this  case 0.72 deg/s.
+The {\tt blade}\ object is used as components to create four blade objects
+{\tt blade1}, {\tt blade2}, {\tt blade3} and {\tt blade4} of the
+{\tt prop}\  object. The blades are positioned within the {\tt prop} using the {\tt DAZIM}\ keyword.
+{\bf Figure \ref{fig:geom_time2} is wrong - it is not rotating. remove this note when smokeview is fixed}
+
+{\tt \scriptsize
+\begin{verbatim}
+&GEOM ID='blade',AZIM=0.0,AZIM_DOT=0.72
+VERTS=0.0,0.0,0.0,1.0,0.0,0.0,1.0,0.0,1.0,
+FACES=1,2,3,COMPONENT_ONLY=.TRUE.,SURF_ID='surf4'/
+
+&GEOM ID='blade1',GEOM_IDS(1)='blade',SURF_ID='surf1',COMPONENT_ONLY=.TRUE. /
+&GEOM ID='blade2',GEOM_IDS(1)='blade',SURF_ID='surf2',COMPONENT_ONLY=.TRUE. /
+&GEOM ID='blade3',GEOM_IDS(1)='blade',SURF_ID='surf3',COMPONENT_ONLY=.TRUE. /
+&GEOM ID='prop' GEOM_IDS(1)='blade1',DAZIM(1)=0.0,
+GEOM_IDS(2)='blade2',DAZIM(2)=90.0,
+GEOM_IDS(3)='blade1',DAZIM(3)=180.0,
+GEOM_IDS(4)='blade3',DAZIM(4)=270.0,
+\end{verbatim}
+}
+
+\begin{figure}[\figoptions]
+\begin{center}
+\begin{tabular}{cc}c
+ \includegraphics[width=2.0in]{SCRIPT_FIGURES/geom_time2_000}
+ \includegraphics[width=2.0in]{SCRIPT_FIGURES/geom_time2_500}
+ \includegraphics[width=2.0in]{SCRIPT_FIGURES/geom_time2_1000}
+  \end{tabular}
+\end{center}
+ \caption{geom\_time2}
+\label{fig:geom_time2}
+\end{figure}
+
+\subsection{geom\_time3.fds}
+{\bf Figure \ref{fig:geom_time3} is wrong - it is not rotating. remove this note when smokeview is fixed}
+
+\begin{figure}[\figoptions]
+\begin{center}
+\begin{tabular}{cc}c
+ \includegraphics[width=2.0in]{SCRIPT_FIGURES/geom_time3_000}
+ \includegraphics[width=2.0in]{SCRIPT_FIGURES/geom_time3_500}
+ \includegraphics[width=2.0in]{SCRIPT_FIGURES/geom_time3_1000}
+  \end{tabular}
+\end{center}
+ \caption{geom\_time3}
+\label{fig:geom_time3}
+\end{figure}
+
+\subsection{geom\_time4.fds}
+{\bf Figure \ref{fig:geom_time4} is wrong - it is not rotating. remove this note when smokeview is fixed}
+
+\begin{figure}[\figoptions]
+\begin{center}
+\begin{tabular}{cc}c
+ \includegraphics[width=2.0in]{SCRIPT_FIGURES/geom_time4_000}
+ \includegraphics[width=2.0in]{SCRIPT_FIGURES/geom_time4_500}
+ \includegraphics[width=2.0in]{SCRIPT_FIGURES/geom_time4_1000}
+  \end{tabular}
+\end{center}
+ \caption{geom\_time4}
+\label{fig:geom_time4}
+\end{figure}
+
+\subsection{geom\_time5.fds}
+{\bf Figure \ref{fig:geom_time5} is wrong - it is not rotating. remove this note when smokeview is fixed}
+
+\begin{figure}[\figoptions]
+\begin{center}
+\begin{tabular}{cc}c
+ \includegraphics[width=2.0in]{SCRIPT_FIGURES/geom_time5_000}
+ \includegraphics[width=2.0in]{SCRIPT_FIGURES/geom_time5_500}
+ \includegraphics[width=2.0in]{SCRIPT_FIGURES/geom_time5_1000}
+  \end{tabular}
+\end{center}
+ \caption{geom\_time5}
+\label{fig:geom_time5}
+\end{figure}
 
 \end{document}
 
