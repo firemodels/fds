@@ -737,6 +737,11 @@ void read_geom_header2(geomdata *geomi, int *ntimes_local){
     ntris=nvertfacesvolus[1];
     nvolus=nvertfacesvolus[2];
 
+    FORTREADBR(haves,3,stream);
+    have_surf=haves[0];
+    have_matl=haves[1];
+    have_texture=haves[2];
+
     // vertices
 
     if(nverts>0){
