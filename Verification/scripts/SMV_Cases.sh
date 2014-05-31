@@ -1,11 +1,22 @@
 #!/bin/bash
 
+$RUNFDS Immersed_Boundary_Method geom_arch
 $RUNFDS Immersed_Boundary_Method geom_azim
 $RUNFDS Immersed_Boundary_Method geom_elev
+$RUNFDS Immersed_Boundary_Method geom_obst
 $RUNFDS Immersed_Boundary_Method geom_scale
+$RUNFDS Immersed_Boundary_Method geom_simple
+$RUNFDS Immersed_Boundary_Method geom_sphere
+$RUNFDS Immersed_Boundary_Method geom_sphere2
 $RUNFDS Immersed_Boundary_Method geom_terrain
 $RUNFDS Immersed_Boundary_Method geom_texture
-$RUNFDS Immersed_Boundary_Method geom_volume
+$RUNFDS Immersed_Boundary_Method geom_texture2
+$RUNFDS Immersed_Boundary_Method geom_texture3
+$RUNFDS Immersed_Boundary_Method geom_time
+$RUNFDS Immersed_Boundary_Method geom_time2
+$RUNFDS Immersed_Boundary_Method geom_time3
+$RUNFDS Immersed_Boundary_Method geom_time4
+$RUNFDS Immersed_Boundary_Method geom_time5
 
 $RUNFDS Visualization cell_test
 $RUNCFAST Visualization cfast_test
