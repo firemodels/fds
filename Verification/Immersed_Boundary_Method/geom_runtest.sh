@@ -1,5 +1,8 @@
 #!/bin/bash
-fds=../../../bin/fds6_db
+# fds=../../../bin/fds6_db
+# fds=../../FDS_Compilation/intel_osx_64/fds_intel_osx_64
+# fds=../../FDS_Compilation/intel_linux_64/fds_intel_linux_64
+fds=qfds -r
 $fds geom_arch.fds
 $fds geom_azim.fds
 $fds geom_elev.fds

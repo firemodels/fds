@@ -1,5 +1,6 @@
 @echo off
-set fds=call ..\..\..\bin\fds_db
+:: set fds=call ..\..\..\bin\fds_db
+set fds=..\..\FDS_Compilation\intel_win_64\fds_win_64
 %fds% geom_arch.fds
 %fds% geom_azim.fds
 %fds% geom_elev.fds
@@ -17,4 +18,3 @@ set fds=call ..\..\..\bin\fds_db
 %fds% geom_time3.fds
 %fds% geom_time4.fds
 %fds% geom_time5.fds
-%fds% geom_volume.fds
