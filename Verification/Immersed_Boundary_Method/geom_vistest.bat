@@ -1,5 +1,6 @@
 @echo off
-set smv=call ..\..\..\bin\smv_r 
+:: set smv=call ..\..\..\bin\smv_r -runscript -bindir ..\..\SMV\for_bundle
+set smv=..\..\SMV\Build\intel_win_64\smokeview_win_64 -runscript -bindir ..\..\SMV\for_bundle
 %smv% geom_arch
 %smv% geom_azim
 %smv% geom_elev
@@ -17,4 +18,3 @@ set smv=call ..\..\..\bin\smv_r
 %smv% geom_time3
 %smv% geom_time4
 %smv% geom_time5
-%smv% geom_volume
