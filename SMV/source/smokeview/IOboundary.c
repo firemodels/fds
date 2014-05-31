@@ -2166,7 +2166,8 @@ void drawpatch_frame(void){
     patchi = patchinfo + i;
     if(patchi->filetype!=2)continue;
     if(patchi->loaded==0||patchi->display==0)continue;
-    draw_geomdata(patchi,1);
+    draw_geomdata(patchi,GEOM_STATIC); // need to add logic to select static or dynammic option
+    //draw_geomdata(patchi,GEOM_DYNAMIC); 
   }
   for(i=0;i<nmeshes;i++){
     meshi=meshinfo+i;

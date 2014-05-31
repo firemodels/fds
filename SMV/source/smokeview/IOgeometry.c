@@ -167,7 +167,7 @@ void get_faceinfo(void){
 
 /* ------------------ draw_geom ------------------------ */
 
-void draw_geom(int flag, int frameflag){
+void draw_geom(int flag, int geomtype){
   int i;
   float black[]={0.0,0.0,0.0,1.0};
   float blue[]={0.0,0.0,1.0,1.0};
@@ -175,7 +175,7 @@ void draw_geom(int flag, int frameflag){
   float *last_color=NULL;
   float last_transparent_level=-1.0;
 
-  if(patchembedded==0&&showtrisurface==1&&frameflag==0){
+  if(patchembedded==0&&showtrisurface==1&&geomtype==GEOM_STATIC){
     int ntris;
     triangle **tris;
     float *color;
@@ -304,7 +304,7 @@ void draw_geom(int flag, int frameflag){
 
     geomi = geominfoptrs[i];
     if(geomi->loaded==0||geomi->display==0)continue;
-    if(frameflag==0){
+    if(geomtype==GEOM_STATIC){
       geomlisti = geomi->geomlistinfo-1;
     }
     else{
@@ -1261,7 +1261,7 @@ void read_geomdata(int ifile, int flag, int *errorcode){
 
 /* ------------------ draw_geomdata ------------------------ */
 
-void draw_geomdata(patchdata *patchi, int frameflag){
+void draw_geomdata(patchdata *patchi, int geomtype){
   int i;
 
   for(i=0;i<ngeominfoptrs;i++){
@@ -1273,7 +1273,7 @@ void draw_geomdata(patchdata *patchi, int frameflag){
 
     geomi = geominfoptrs[i];
     if(geomi->display==0||geomi->loaded==0)continue;
-    if(frameflag==0){
+    if(geomtype==GEOM_STATIC){
       geomlisti = geomi->geomlistinfo-1;
     }
     else{
@@ -1281,6 +1281,7 @@ void draw_geomdata(patchdata *patchi, int frameflag){
     }
 
     ntris = geomlisti->ntriangles;
+    if(ntris==0)continue;
 
     glEnable(GL_NORMALIZE);
     glShadeModel(GL_SMOOTH);

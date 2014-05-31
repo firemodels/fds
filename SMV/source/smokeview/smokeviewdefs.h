@@ -226,6 +226,9 @@ void _Sniff_Errors(char *whereat);
 #define UP_Z   5
 #define NOT_USED 6
 
+#define GEOM_STATIC 0
+#define GEOM_DYNAMIC 1
+
 #define NO_PLOTS 0
 #define STATIC_PLOTS 1
 #define STATIC_PLOTS_NORECURSE 3

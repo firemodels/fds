@@ -347,8 +347,8 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
   /* ++++++++++++++++++++++++ draw triangles +++++++++++++++++++++++++ */
   
   if(ngeominfoptrs>0){
-    draw_geom(DRAW_OPAQUE,0);
-    draw_geom(DRAW_OPAQUE,1);
+    draw_geom(DRAW_OPAQUE,GEOM_STATIC);
+    draw_geom(DRAW_OPAQUE,GEOM_DYNAMIC);
   }
 
 /* ++++++++++++++++++++++++ draw shooter points +++++++++++++++++++++++++ */
@@ -470,8 +470,8 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
   /* ++++++++++++++++++++++++ draw triangles +++++++++++++++++++++++++ */
   
   if(ngeominfoptrs>0){
-    draw_geom(DRAW_TRANSPARENT,0);
-    draw_geom(DRAW_TRANSPARENT,1);
+    draw_geom(DRAW_TRANSPARENT,GEOM_STATIC);
+    draw_geom(DRAW_TRANSPARENT,GEOM_DYNAMIC);
   }
 
   if(showiso==1){
