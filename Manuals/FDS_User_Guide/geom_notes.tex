@@ -514,17 +514,28 @@ is not intended to be included verbatim in the FDS UG).
 \newcommand{\geominput}[1]{{\scriptsize\verbatiminput{../../Verification/Immersed_Boundary_Method/#1}}}
 \newcommand{\figheightD}{2.75in}
 
-\subsection{geom\_arch.fds}
-Figure \ref{fig:geom_arch} was created using VERTS and FACES keywords.  
+\subsection{geom\_simple.fds}
+Figure \ref{fig:geom_simple} was created using the following \&GEOM namelist.
+The {\tt VERTS}\ keyword is used to specify 3 vertices and the {\tt FACES}\ keyword
+is used to specify the indices of the triangular face.
+
+{\scriptsize
+\begin{verbatim}
+&GEOM ID='geom1',
+VERTS=0.0,0.0,0.0,1.0,0.5,0.0,1.0,1.0,1.0,
+FACES=1,2,3,
+SURF_ID='surf1'/
+\end{verbatim}
+}
 
 \begin{figure}[\figoptions]
 \begin{center}
 \begin{tabular}{c}
- \includegraphics[width=4.0in]{SCRIPT_FIGURES/geom_arch}
+ \includegraphics[width=4.0in]{SCRIPT_FIGURES/geom_simple}
   \end{tabular}
 \end{center}
- \caption{case: geom\_arch.fds . Created with FACES and VERTS keywords.}
-\label{fig:geom_arch}
+ \caption{A triangle created using 3 vertices and 1 face. Case: geom\_simple}
+\label{fig:geom_simple}
 \end{figure}
 
 \subsection{geom\_azim.fds}
@@ -554,7 +565,7 @@ FACES=1,2,3,AZIM=90.0,SURF_ID='surf3'/
  \includegraphics[width=3.0in]{SCRIPT_FIGURES/geom_azim}
   \end{tabular}
 \end{center}
- \caption{geom\_azim}
+ \caption{Three triangles generated at different azmuthal angles using the {\tt AZIM}\ keyword. Case: geom\_azim.fds}
 \label{fig:geom_azim}
 \end{figure}
 
@@ -585,29 +596,8 @@ FACES=1,2,3,ELEV=90,XYZ0=0.0,0.0,1.0,SURF_ID='surf3'/
  \includegraphics[width=3.0in]{SCRIPT_FIGURES/geom_elev}
   \end{tabular}
 \end{center}
- \caption{geom\_elev}
+ \caption{Three triangles generated at different elevation angles using the {\tt ELEV}\ keyword. Case: geom\_elev.fds}
 \label{fig:geom_elev}
-\end{figure}
-
-\subsection{geom\_obst.fds}
-Figure \ref{fig:geom_obst} was created using the following \&GEOM namelist.
-The {\tt XB}\ keyword is used the same way to specify a block as on
-a {\tt \&OBST}\ or {\tt \&VENT}\ line.
-
-{\scriptsize
-\begin{verbatim}
-&GEOM ID='obst',SURF_ID='surf1', XB=-0.6,0.6,-0.6,0.6,-0.2,0.2,AZIM=90.0,ELEV=30.0 /
-\end{verbatim}
-}
-
-\begin{figure}[\figoptions]
-\begin{center}
-\begin{tabular}{c}
- \includegraphics[height=\figheightD]{SCRIPT_FIGURES/geom_obst}
-  \end{tabular}
-\end{center}
- \caption{geom\_obst}
-\label{fig:geom_obst}
 \end{figure}
 
 \subsection{geom\_scale.fds}
@@ -636,32 +626,29 @@ FACES=1,2,3,XYZ0= 2.0,0.0,0.0,SCALE=2.0,1.0,1.0,SURF_ID='surf3'/
  \includegraphics[width=6.0in]{SCRIPT_FIGURES/geom_scale}
   \end{tabular}
 \end{center}
- \caption{geom\_scale}
+\caption{Three triangles generated at different scale sizes using the {\tt SCALE}\ keyword. Case: geom\_scale.fds}
 \label{fig:geom_scale}
 \end{figure}
 
-\subsection{geom\_simple.fds}
-Figure \ref{fig:geom_simple} was created using the following \&GEOM namelist.
-The {\tt VERTS}\ keyword is used to specify 3 vertices and the {\tt FACES}\ keyword
-is used to specify the indices of the triangular face.
+\subsection{geom\_obst.fds}
+Figure \ref{fig:geom_obst} was created using the following \&GEOM namelist.
+The {\tt XB}\ keyword is used the same way to specify a block as on
+a {\tt \&OBST}\ or {\tt \&VENT}\ line.
 
 {\scriptsize
 \begin{verbatim}
-&GEOM ID='geom1',
-VERTS=0.0,0.0,0.0,1.0,0.5,0.0,1.0,1.0,1.0,
-FACES=1,2,3,
-SURF_ID='surf1'/
+&GEOM ID='obst',SURF_ID='surf1', XB=-0.6,0.6,-0.6,0.6,-0.2,0.2,AZIM=90.0,ELEV=30.0 /
 \end{verbatim}
 }
 
 \begin{figure}[\figoptions]
 \begin{center}
 \begin{tabular}{c}
- \includegraphics[width=4.0in]{SCRIPT_FIGURES/geom_simple}
+ \includegraphics[height=\figheightD]{SCRIPT_FIGURES/geom_obst}
   \end{tabular}
 \end{center}
- \caption{geom\_simple}
-\label{fig:geom_simple}
+ \caption{A block generated using the {\tt XB}\ keyword.  The block is refined automatically to be consistent with the underlying grid resolution. Case: geom\_obst.fds}
+\label{fig:geom_obst}
 \end{figure}
 
 \subsection{geom\_sphere.fds}
@@ -688,7 +675,7 @@ in a more highly resovled sphere).
  \includegraphics[width=6.0in]{SCRIPT_FIGURES/geom_sphere}
   \end{tabular}
 \end{center}
- \caption{geom\_sphere}
+ \caption{Six sphere discretizations.  Each sphere has four times the triangles of the sphere to the right. Case: geom\_sphere.fds}
 \label{fig:geom_sphere}
 \end{figure}
 
@@ -702,14 +689,14 @@ Figure \ref{fig:geom_terrain} was created using the {\tt ZVALS}\ keyword.
  \includegraphics[height=\figheightD]{SCRIPT_FIGURES/geom_terrain}
   \end{tabular}
 \end{center}
- \caption{geom\_terrain}
+ \caption{Elevations are defined on a rectangular array of grid points using the {\tt ZVALUES}\ keyword.  Case: gridgeom\_terrain.fds}
 \label{fig:geom_terrain}
 \end{figure}
 
 \subsection{geom\_texture.fds}
 Figure \ref{fig:geom_texture} was created using the following \&SURF and \&GEOM namelists.
 The {\tt TEXTURE\_MAP}\ keyword on the {\tt \&SURF}\ is used to specify the name of the image
-file used to texture map the geometric object.  
+file used to texture map the geometric object.
 
 {\scriptsize
 \begin{verbatim}
@@ -727,7 +714,7 @@ FACES=1,2,3,SURF_ID='surf1'/
  \includegraphics[width=4.0in]{SCRIPT_FIGURES/geom_texture}
   \end{tabular}
 \end{center}
- \caption{geom\_texture}
+ \caption{A texture is applied to a triangle. Case: geom\_texture.fds}
 \label{fig:geom_texture}
 \end{figure}
 
@@ -757,7 +744,7 @@ FACES=1,2,3,SURF_ID='surf2'/
  \includegraphics[width=4.0in]{SCRIPT_FIGURES/geom_texture2}
   \end{tabular}
 \end{center}
- \caption{geom\_texture2}
+ \caption{Two texture maps are applied to two separate triangles.  Case: geom\_texture2.fds}
 \label{fig:geom_texture2}
 \end{figure}
 
@@ -790,16 +777,31 @@ TEXTURE_ORIGIN=0.75,0.5,0.5,TEXTURE_MAPPING='SPHERICAL' /
  \includegraphics[width=6.0in]{SCRIPT_FIGURES/geom_texture3}
   \end{tabular}
 \end{center}
- \caption{geom\_texture3}
+ \caption{Two texture maps applied to two separate spheres. 
+ The sphere on the left is discretized by splitting the sphere along longitudinal (east/west) and latitudinal (north/south) directions.
+ The sphere on the right is discretized recursively starting with a 12 sided approximation to a sphere.  Case: geom\_texture3.fds}
 \label{fig:geom_texture3}
+\end{figure}
+
+\subsection{geom\_arch.fds}
+Figure \ref{fig:geom_arch} was created using VERTS and FACES keywords.
+
+\begin{figure}[\figoptions]
+\begin{center}
+\begin{tabular}{c}
+ \includegraphics[width=4.0in]{SCRIPT_FIGURES/geom_arch}
+  \end{tabular}
+\end{center}
+ \caption{An arch structure created with FACES and VERTS keywords.
+ Case: geom\_arch.fds . }
+\label{fig:geom_arch}
 \end{figure}
 
 \subsection{geom\_time.fds}
 Figure \ref{fig:geom_time} was created using the following \&GEOM namelist.
 The {\tt AZIM}\ keyword is used to specify the initial rotational angle
 and the {\tt AXIM\_DOT}\ is used to specify that rate at which
-the azimuthal angle changes, in this  case 0.36 deg/s. 
-{\bf Figure \ref{fig:geom_time} is wrong - it is not rotating. remove this note when smokeview is fixed} 
+the azimuthal angle changes, in this  case 0.36 deg/s.
 
 {\scriptsize
 \begin{verbatim}
@@ -811,25 +813,25 @@ FACES=1,2,3,AZIM=0.0,AZIM_DOT=0.36,SURF_ID='surf1'/
 
 \begin{figure}[\figoptions]
 \begin{center}
-\begin{tabular}{cc}c
- \includegraphics[width=2.0in]{SCRIPT_FIGURES/geom_time_000}
- \includegraphics[width=2.0in]{SCRIPT_FIGURES/geom_time_500}
- \includegraphics[width=2.0in]{SCRIPT_FIGURES/geom_time_1000}
+\begin{tabular}{ccc}
+ \includegraphics[width=2.0in]{SCRIPT_FIGURES/geom_time_050}&
+ \includegraphics[width=2.0in]{SCRIPT_FIGURES/geom_time_100}&
+ \includegraphics[width=2.0in]{SCRIPT_FIGURES/geom_time_150}\\
+ \SI{50.0}{s}&\SI{100.0}{s}&\SI{150.0}{s}
   \end{tabular}
 \end{center}
- \caption{geom\_time}
+ \caption{A triangle rotating about the scene center. Case: geom\_time.fds}
 \label{fig:geom_time}
 \end{figure}
 
-\subsection{geom\_time2.fds}
+\subsection{geom\_time2.fds, geom\_time3.fds, geom\_time4.fds}
 Figure \ref{fig:geom_time2} was created using the following \&GEOM namelists.
 The {\tt AZIM}\ keyword is used to specify the initial rotational angle
 and the {\tt AXIM\_DOT}\ is used to specify that rate at which
 the azimuthal angle changes, in this  case 0.72 deg/s.
 The {\tt blade}\ object is used as components to create four blade objects
 {\tt blade1}, {\tt blade2}, {\tt blade3} and {\tt blade4} of the
-{\tt prop}\  object. The blades are positioned within the {\tt prop} using the {\tt DAZIM}\ keyword.
-{\bf Figure \ref{fig:geom_time2} is wrong - it is not rotating. remove this note when smokeview is fixed}
+{\tt prop}\  object. The blades are positioned within the {\tt prop} using the {\tt DAZIM}\ keyword. Figures \ref{fig:geom_time3} and \ref{fig:geom_time4} were created similarly using rotation keywords to incline the geometric objects.
 
 {\tt \scriptsize
 \begin{verbatim}
@@ -849,59 +851,62 @@ GEOM_IDS(4)='blade3',DAZIM(4)=270.0,
 
 \begin{figure}[\figoptions]
 \begin{center}
-\begin{tabular}{cc}c
- \includegraphics[width=2.0in]{SCRIPT_FIGURES/geom_time2_000}
- \includegraphics[width=2.0in]{SCRIPT_FIGURES/geom_time2_500}
- \includegraphics[width=2.0in]{SCRIPT_FIGURES/geom_time2_1000}
+\begin{tabular}{ccc}
+ \includegraphics[width=2.0in]{SCRIPT_FIGURES/geom_time2_050}&
+ \includegraphics[width=2.0in]{SCRIPT_FIGURES/geom_time2_100}&
+ \includegraphics[width=2.0in]{SCRIPT_FIGURES/geom_time2_150}\\
+ \SI{50.0}{s}&\SI{100.0}{s}&\SI{150.0}{s}
   \end{tabular}
 \end{center}
- \caption{geom\_time2}
+ \caption{Four triangles defined as a group rotating about the scene center. A Case: geom\_time2.fds}
 \label{fig:geom_time2}
 \end{figure}
 
-\subsection{geom\_time3.fds}
-{\bf Figure \ref{fig:geom_time3} is wrong - it is not rotating. remove this note when smokeview is fixed}
-
 \begin{figure}[\figoptions]
 \begin{center}
-\begin{tabular}{cc}c
- \includegraphics[width=2.0in]{SCRIPT_FIGURES/geom_time3_000}
- \includegraphics[width=2.0in]{SCRIPT_FIGURES/geom_time3_500}
- \includegraphics[width=2.0in]{SCRIPT_FIGURES/geom_time3_1000}
+\begin{tabular}{ccc}
+ \includegraphics[width=2.0in]{SCRIPT_FIGURES/geom_time3_050}&
+ \includegraphics[width=2.0in]{SCRIPT_FIGURES/geom_time3_100}&
+ \includegraphics[width=2.0in]{SCRIPT_FIGURES/geom_time3_150}\\
+ \SI{50.0}{s}&\SI{100.0}{s}&\SI{150.0}{s}
   \end{tabular}
 \end{center}
- \caption{geom\_time3}
+ \caption{Four inclined triangles defined as a group rotating and about the scene center. A Case: geom\_time3.fds}
 \label{fig:geom_time3}
 \end{figure}
 
-\subsection{geom\_time4.fds}
-{\bf Figure \ref{fig:geom_time4} is wrong - it is not rotating. remove this note when smokeview is fixed}
-
 \begin{figure}[\figoptions]
 \begin{center}
-\begin{tabular}{cc}c
- \includegraphics[width=2.0in]{SCRIPT_FIGURES/geom_time4_000}
- \includegraphics[width=2.0in]{SCRIPT_FIGURES/geom_time4_500}
- \includegraphics[width=2.0in]{SCRIPT_FIGURES/geom_time4_1000}
+\begin{tabular}{ccc}
+ \includegraphics[width=2.0in]{SCRIPT_FIGURES/geom_time4_050}&
+ \includegraphics[width=2.0in]{SCRIPT_FIGURES/geom_time4_100}&
+ \includegraphics[width=2.0in]{SCRIPT_FIGURES/geom_time4_150}\\
+ \SI{50.0}{s}&\SI{100.0}{s}&\SI{150.0}{s}
   \end{tabular}
 \end{center}
- \caption{geom\_time4}
+ \caption{Two sets of four triangles rotating about the scene center. Each set of 4 triangles are defined as a group. Case: geom\_time4.fds}
 \label{fig:geom_time4}
 \end{figure}
 
-\subsection{geom\_time5.fds}
-{\bf Figure \ref{fig:geom_time5} is wrong - it is not rotating. remove this note when smokeview is fixed}
+\subsection{geom\_sphere\_fire.fds}
+Figure \ref{fig:geom_sphere_fire} tests visualization of a boundary file data on a sphere.
 
 \begin{figure}[\figoptions]
 \begin{center}
-\begin{tabular}{cc}c
- \includegraphics[width=2.0in]{SCRIPT_FIGURES/geom_time5_000}
- \includegraphics[width=2.0in]{SCRIPT_FIGURES/geom_time5_500}
- \includegraphics[width=2.0in]{SCRIPT_FIGURES/geom_time5_1000}
+\begin{tabular}{cc}
+ \includegraphics[width=3.0in]{SCRIPT_FIGURES/geom_sphere_fire_000}&
+ \includegraphics[width=3.0in]{SCRIPT_FIGURES/geom_sphere_fire_020}\\
+ \SI{0.0}{s}&\SI{2.0}{s}\\
+ \includegraphics[width=3.0in]{SCRIPT_FIGURES/geom_sphere_fire_040}&
+ \includegraphics[width=3.0in]{SCRIPT_FIGURES/geom_sphere_fire_060}\\
+ \SI{4.0}{s}&\SI{6.0}{s}\\
+ \includegraphics[width=3.0in]{SCRIPT_FIGURES/geom_sphere_fire_080}&
+ \includegraphics[width=3.0in]{SCRIPT_FIGURES/geom_sphere_fire_100}\\
+ \SI{8.0}{s}&\SI{10.0}{s}\\
   \end{tabular}
 \end{center}
- \caption{geom\_time5}
-\label{fig:geom_time5}
+ \caption{Boundary file data visualized on a sphere.  Case: geom\_sphere\_fire.fds}
+\label{fig:geom_sphere_fire}
 \end{figure}
 
 \end{document}
