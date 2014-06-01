@@ -11,7 +11,8 @@ $RUNFDS Immersed_Boundary_Method geom_sphere2
 $RUNFDS Immersed_Boundary_Method geom_terrain
 $RUNFDS Immersed_Boundary_Method geom_texture
 $RUNFDS Immersed_Boundary_Method geom_texture2
-$RUNFDS Immersed_Boundary_Method geom_texture3
+$RUNFDS Immersed_Boundary_Method geom_texture3a
+$RUNFDS Immersed_Boundary_Method geom_texture3b
 $RUNFDS Immersed_Boundary_Method geom_time
 $RUNFDS Immersed_Boundary_Method geom_time2
 $RUNFDS Immersed_Boundary_Method geom_time3
