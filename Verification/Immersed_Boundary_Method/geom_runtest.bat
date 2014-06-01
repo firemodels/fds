@@ -12,7 +12,8 @@ set fds=..\..\FDS_Compilation\intel_win_64\fds_win_64
 %fds% geom_terrain.fds
 %fds% geom_texture.fds
 %fds% geom_texture2.fds
-%fds% geom_texture3.fds
+%fds% geom_texture3a.fds
+%fds% geom_texture3b.fds
 %fds% geom_time.fds
 %fds% geom_time2.fds
 %fds% geom_time3.fds

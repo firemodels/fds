@@ -1,6 +1,10 @@
 RENDERDIR
  ..\..\Manuals\FDS_User_Guide\SCRIPT_FIGURES
+SETTIMEVAL
+ 0.000000
+RENDERCLIP
+ 1 114 97 34 16
 SETVIEWPOINT
- view_all
+ view 1
 RENDERONCE
- geom_sphere
+ geom_texture3a
