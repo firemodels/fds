@@ -1,7 +1,15 @@
 #!/bin/bash
+
+# comment or uncomment following lines according to which FDS is running cases
+
+# for local copy in ~/bin directory
 # fds=../../../bin/fds6_db
+
+# for repository
 # fds=../../FDS_Compilation/intel_osx_64/fds_intel_osx_64
 # fds=../../FDS_Compilation/intel_linux_64/fds_intel_linux_64
+
+# for blaze
 fds=qfds -r
 $fds geom_arch.fds
 $fds geom_azim.fds
