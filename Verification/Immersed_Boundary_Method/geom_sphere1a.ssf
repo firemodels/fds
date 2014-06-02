@@ -1,6 +1,10 @@
 RENDERDIR
  ..\..\Manuals\FDS_User_Guide\SCRIPT_FIGURES
 SETVIEWPOINT
- view_all
+ view 1
+SETVIEWPOINT
+ view 1
+RENDERCLIP
+ 1 415 469 1 1
 RENDERONCE
- geom_sphere
+ geom_sphere1a
