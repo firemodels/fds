@@ -1,6 +1,11 @@
 @echo off
-:: set smv=call ..\..\..\bin\smv_r -runscript -bindir ..\..\SMV\for_bundle
-set smv=..\..\SMV\Build\intel_win_64\smokeview_win_64 -runscript -bindir ..\..\SMV\for_bundle
+
+:: repository smokeview
+:: set smv=..\..\SMV\Build\intel_win_64\smokeview_win_64 -bindir ..\..\SMV\for_bundle -runscript
+
+:: installed smokeview
+set smv=smokeview  -runscript
+
 %smv% geom_arch
 %smv% geom_azim
 %smv% geom_elev
