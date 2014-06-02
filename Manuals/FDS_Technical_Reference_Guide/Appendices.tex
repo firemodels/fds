@@ -1337,11 +1337,11 @@ The values of $\d \mathbf{u}_\text{r} / \d t(0)$ and $\d \mathbf{u}_\text{d} / \
     \frac{\d \mathbf{u}_\text{d}}{\d t}(0) &= -K_{\rm p} \mathbf{u}_{\text{r}}(0) |\mathbf{u}_{\text{r}}(0)| \,.
 \end{align*}
 % = -K_{\rm p} \left(\frac{\d \mathbf{u} |\mathbf{u}|}{\d t} - \frac{\d \mathbf{u}_\text{d} |\mathbf{u}_\text{d}|}{\d t} \right)
-The derivative of the $L_2$ norm must now be found. It can be shown that for an arbitrary vector $\mathbf{a}$,
+The derivative of the length of the velocity vectors (speed) must now be found. It can be shown that for an arbitrary vector $\mathbf{a}$,
 \begin{align*}
     \frac{\d |\mathbf{a}|}{\d t} = \left(\frac{\mathbf{a}}{|\mathbf{a}|}\right) \cdot \frac{\d \mathbf{a}}{\d t} \,.
 \end{align*}
-The derivatives of the vector norms can be written as
+The derivatives of the vector lengths can be written as
 \begin{align}
     \frac{\d |\mathbf{u}_\text{r}|}{\d t} &= \left(\frac{\mathbf{u}_\text{r}}{|\mathbf{u}_\text{r}|}\right) \cdot \frac{\d \mathbf{u}_\text{r}}{\d t} = \left(\frac{\mathbf{u}_{\text{r}}(0)}{|\mathbf{u}_{\text{r}}(0)|}\right) \cdot (-K_{\rm p} \mathbf{u}_{\text{r}}(0) |\mathbf{u}_{\text{r}}(0)| + \mathbf{g}) \,,  \\
     \frac{\d |\mathbf{u}_\text{d}|}{\d t} &= \left(\frac{\mathbf{u}_\text{d}}{|\mathbf{u}_\text{d}|}\right) \cdot \frac{\d \mathbf{u}_\text{d}}{\d t} = \left(\frac{\mathbf{u}_{\text{r}}(0)}{|\mathbf{u}_{\text{r}}(0)|}\right) \cdot (-K_{\rm p} \mathbf{u}_{\text{r}}(0) |\mathbf{u}_{\text{r}}(0)|) \,.
@@ -1375,10 +1375,10 @@ The fluid and particles can gain or lose momentum due to gravity. Drag forces ex
     \label{part_mom_cons}
     \mathbf{u} + \alpha_{\rm p} \mathbf{U} &= \mathbf{u}(0) + \alpha_{\rm p} \mathbf{U}(0) + \mathbf{g} t \quad ; \quad \alpha_{\rm p} \equiv \frac{M_{\rm p}}{m_{\rm p}} \,.
 \end{align}
-%Eq. (\ref{part_mom_cons}) can be combined with Eq. (\ref{ur_short}) to get solution for $\mathbf{u}$.
-Solving for $\mathbf{U}$ leads to
+After recognizing that $\mathbf{u} = \mathbf{U} + \mathbf{u}_\text{r}$ and $\mathbf{u}_\text{r} \equiv \mathbf{u}_\text{d} + \mathbf{u}_\text{g}$, we can write that $\mathbf{u} = \mathbf{U} + \mathbf{u}_\text{d} + \mathbf{u}_\text{g}$ Substituting that result in and solving for $\mathbf{U}$ leads to
 \begin{align*}
-    \mathbf{U} + \frac{\mathbf{u}_{\text{r}}(0)}{1 + \beta_{\rm p} t} + \mathbf{u}_\text{g} + \alpha_{\rm p} \mathbf{U} = \mathbf{u}(0) + \alpha_{\rm p} \mathbf{U}(0) + \mathbf{g} t \,,
+    \mathbf{U} + \mathbf{u}_\text{d} + \mathbf{u}_\text{g} + \alpha_{\rm p} \mathbf{U} &= \mathbf{u}(0) + \alpha_{\rm p} \mathbf{U}(0) + \mathbf{g} t \,, \\
+    \mathbf{U} + \frac{\mathbf{u}_{\text{r}}(0)}{1 + \beta_{\rm p} t} + \mathbf{u}_\text{g} + \alpha_{\rm p} \mathbf{U} &= \mathbf{u}(0) + \alpha_{\rm p} \mathbf{U}(0) + \mathbf{g} t \,,
 \end{align*}
 \begin{align}
     \label{mom_U_p}
