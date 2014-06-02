@@ -923,20 +923,41 @@ GEOM_IDS(4)='blade3',DAZIM(4)=270.0,
 \label{fig:geom_time4}
 \end{figure}
 
+\subsection{geom\_sphere2.fds}
+Figure \ref{fig:geom_sphere2} tests motion of a scaled,  moving, rotating sphere. The sphere was scaled using {\tt SCALE=0.6,0.4,0.2}\, placed initially at the righ side of the domain using {\tt XYZ=10.0,0.5,1.0}, translated to the left and down using {\tt XYZ\_DOT=-0.01,0.0,-0.001} and rotated using {\tt GROTATE\_DOT=0.36}.  The axis of rotation was specified using {\tt GAXIS=0.0,1.0,0.0}.
+
+\begin{figure}[\figoptions]
+\begin{center}
+\begin{tabular}{c}
+\includegraphics[width=6.0in]{SCRIPT_FIGURES/geom_sphere2_000}\\
+\includegraphics[width=6.0in]{SCRIPT_FIGURES/geom_sphere2_200}\\
+\includegraphics[width=6.0in]{SCRIPT_FIGURES/geom_sphere2_400}\\
+\includegraphics[width=6.0in]{SCRIPT_FIGURES/geom_sphere2_600}\\
+\includegraphics[width=6.0in]{SCRIPT_FIGURES/geom_sphere2_800}\\
+\includegraphics[width=6.0in]{SCRIPT_FIGURES/geom_sphere2_1000}
+  \end{tabular}
+\end{center}
+ \caption{Motion of a scaled, moving, rotating sphere.  Case: geom\_sphere2.fds}
+\label{fig:geom_sphere_fire}
+\end{figure}
+
+\end{document}
+
+
 \subsection{geom\_sphere\_fire.fds}
 Figure \ref{fig:geom_sphere_fire} tests visualization of a boundary file data on a sphere.
 
 \begin{figure}[\figoptions]
 \begin{center}
 \begin{tabular}{cc}
- \includegraphics[width=3.0in]{SCRIPT_FIGURES/geom_sphere_fire_000}&
- \includegraphics[width=3.0in]{SCRIPT_FIGURES/geom_sphere_fire_020}\\
+ \includegraphics[width=3.5in]{SCRIPT_FIGURES/geom_sphere_fire_000}&
+ \includegraphics[width=3.5in]{SCRIPT_FIGURES/geom_sphere_fire_020}\\
  \SI{0.0}{s}&\SI{2.0}{s}\\
- \includegraphics[width=3.0in]{SCRIPT_FIGURES/geom_sphere_fire_040}&
- \includegraphics[width=3.0in]{SCRIPT_FIGURES/geom_sphere_fire_060}\\
+ \includegraphics[width=3.5in]{SCRIPT_FIGURES/geom_sphere_fire_040}&
+ \includegraphics[width=3.5in]{SCRIPT_FIGURES/geom_sphere_fire_060}\\
  \SI{4.0}{s}&\SI{6.0}{s}\\
- \includegraphics[width=3.0in]{SCRIPT_FIGURES/geom_sphere_fire_080}&
- \includegraphics[width=3.0in]{SCRIPT_FIGURES/geom_sphere_fire_100}\\
+ \includegraphics[width=3.5in]{SCRIPT_FIGURES/geom_sphere_fire_080}&
+ \includegraphics[width=3.5in]{SCRIPT_FIGURES/geom_sphere_fire_100}\\
  \SI{8.0}{s}&\SI{10.0}{s}\\
   \end{tabular}
 \end{center}
