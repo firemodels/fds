@@ -4082,10 +4082,40 @@ void ImmersedMenu(int value){
       }
       break;
     case IMMERSED_SOLID:
-      showtrisurface=1-showtrisurface;
+      if(showtrisurface==1&&showtrioutline==1){
+        showtrisurface=1;
+        showtrioutline=0;
+      }
+      else if(showtrisurface==1&&showtrioutline==0){
+        showtrisurface=0;
+        showtrioutline=1;
+      }
+      else if(showtrisurface==0&&showtrioutline==1){
+        showtrisurface=1;
+        showtrioutline=0;
+      }
+      else{
+        showtrisurface=1;
+        showtrioutline=0;
+      }
       break;
     case IMMERSED_OUTLINE:
-      showtrioutline=1-showtrioutline;
+      if(showtrisurface==1&&showtrioutline==1){
+        showtrisurface=0;
+        showtrioutline=1;
+      }
+      else if(showtrisurface==1&&showtrioutline==0){
+        showtrisurface=0;
+        showtrioutline=1;
+      }
+      else if(showtrisurface==0&&showtrioutline==1){
+        showtrisurface=1;
+        showtrioutline=0;
+      }
+      else{
+        showtrisurface=0;
+        showtrioutline=1;
+      }
       break;
     case 3:
       showtrinormal=1-showtrinormal;
@@ -4895,16 +4925,16 @@ updatemenu=0;
     glutAddMenuEntry(_(" Solid and outline"),IMMERSED_SOLIDOUTLINE);
   }
   if(showtrisurface==1){
-    glutAddMenuEntry(_(" *Solid"),IMMERSED_SOLID);
+    glutAddMenuEntry(_(" *Solid only"),IMMERSED_SOLID);
   }
   else{
-    glutAddMenuEntry(_(" Solid"),IMMERSED_SOLID);
+    glutAddMenuEntry(_(" Solid only"),IMMERSED_SOLID);
   }
   if(showtrioutline==1){
-    glutAddMenuEntry(_(" *Outline"),IMMERSED_OUTLINE);
+    glutAddMenuEntry(_(" *Outline only"),IMMERSED_OUTLINE);
   }
   else{
-    glutAddMenuEntry(_(" Outline"),IMMERSED_OUTLINE);
+    glutAddMenuEntry(_(" Outline only"),IMMERSED_OUTLINE);
   }
   if(showtrisurface==0&&showtrioutline==0){
     glutAddMenuEntry(_(" *Hide"),IMMERSED_HIDE);
