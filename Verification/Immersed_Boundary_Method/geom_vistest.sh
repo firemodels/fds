@@ -19,6 +19,7 @@ $smv geom_sphere3c
 $smv geom_sphere3d
 $smv geom_sphere3e
 $smv geom_sphere3f
+$smv geom_sphere_fire
 $smv geom_terrain
 $smv geom_texture
 $smv geom_texture2

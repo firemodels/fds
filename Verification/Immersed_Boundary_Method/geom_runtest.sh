@@ -30,6 +30,7 @@ $fds geom_sphere3c.fds
 $fds geom_sphere3d.fds
 $fds geom_sphere3e.fds
 $fds geom_sphere3f.fds
+$fds geom_sphere_fire.fds
 $fds geom_terrain.fds
 $fds geom_texture.fds
 $fds geom_texture2.fds
