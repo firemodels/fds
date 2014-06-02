@@ -1,5 +1,5 @@
 #!/bin/bash
-smv=smokeview
+smv='smokeview -runscript'
 $smv geom_arch
 $smv geom_azim
 $smv geom_elev
