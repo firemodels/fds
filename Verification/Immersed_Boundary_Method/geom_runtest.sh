@@ -10,7 +10,7 @@
 # fds=../../FDS_Compilation/intel_linux_64/fds_intel_linux_64
 
 # for blaze
-fds=qfds -r
+fds='qfds.sh -r'
 $fds geom_arch.fds
 $fds geom_azim.fds
 $fds geom_elev.fds
