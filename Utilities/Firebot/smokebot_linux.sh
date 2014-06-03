@@ -1004,46 +1004,21 @@ check_guide()
    fi
 }
 
-make_smv_user_guide()
+make_guide()
 {
-   # Build SMV User Guide
-   cd $FDS_SVNROOT/Manuals/SMV_User_Guide
+   document=$1
+   directory=$2
+   label=$3
+
+   cd $directory
    export TEXINPUTS=".:../LaTeX_Style_Files:"
-   pdflatex -interaction nonstopmode SMV_User_Guide &> $OUTPUT_DIR/stage8_smv_user_guide
-   bibtex SMV_User_Guide &> $OUTPUT_DIR/stage8_smv_user_guide
-   pdflatex -interaction nonstopmode SMV_User_Guide &> $OUTPUT_DIR/stage8_smv_user_guide
-   pdflatex -interaction nonstopmode SMV_User_Guide &> $OUTPUT_DIR/stage8_smv_user_guide
+   pdflatex -interaction nonstopmode $document &> $OUTPUT_DIR/stage8_$document
+   bibtex $document &> $OUTPUT_DIR/stage8_$document
+   pdflatex -interaction nonstopmode $document &> $OUTPUT_DIR/stage8_$document
+   pdflatex -interaction nonstopmode $document &> $OUTPUT_DIR/stage8_$document
 
    # Check guide for completion and copy to website if successful
-   check_guide $OUTPUT_DIR/stage8_smv_user_guide $FDS_SVNROOT/Manuals/SMV_User_Guide/SMV_User_Guide.pdf 'SMV User Guide'
-}
-
-make_smv_technical_guide()
-{
-   # Build SMV Technical Guide
-   cd $FDS_SVNROOT/Manuals/SMV_Technical_Reference_Guide
-   export TEXINPUTS=".:../LaTeX_Style_Files:"
-   pdflatex -interaction nonstopmode SMV_Technical_Reference_Guide &> $OUTPUT_DIR/stage8_smv_technical_guide
-   bibtex SMV_Technical_Reference_Guide &> $OUTPUT_DIR/stage8_smv_technical_guide
-   pdflatex -interaction nonstopmode SMV_Technical_Reference_Guide &> $OUTPUT_DIR/stage8_smv_technical_guide
-   pdflatex -interaction nonstopmode SMV_Technical_Reference_Guide &> $OUTPUT_DIR/stage8_smv_technical_guide
-
-   # Check guide for completion and copy to website if successful
-   check_guide $OUTPUT_DIR/stage8_smv_technical_guide $FDS_SVNROOT/Manuals/SMV_Technical_Reference_Guide/SMV_Technical_Reference_Guide.pdf 'SMV Technical Reference Guide'
-}
-
-make_smv_verification_guide()
-{
-   # Build SMV Verification Guide
-   cd $FDS_SVNROOT/Manuals/SMV_Verification_Guide
-   export TEXINPUTS=".:../LaTeX_Style_Files:"
-   pdflatex -interaction nonstopmode SMV_Verification_Guide &> $OUTPUT_DIR/stage8_smv_verification_guide
-   bibtex SMV_Verification_Guide &> $OUTPUT_DIR/stage8_smv_verification_guide
-   pdflatex -interaction nonstopmode SMV_Verification_Guide &> $OUTPUT_DIR/stage8_smv_verification_guide
-   pdflatex -interaction nonstopmode SMV_Verification_Guide &> $OUTPUT_DIR/stage8_smv_verification_guide
-
-   # Check guide for completion and copy to website if successful
-   check_guide $OUTPUT_DIR/stage8_smv_verification_guide $FDS_SVNROOT/Manuals/SMV_Verification_Guide/SMV_Verification_Guide.pdf 'SMV Verification Guide'
+   check_guide $OUTPUT_DIR/stage8_$document $directory/$document.pdf $label
 }
 
 #  =====================================================
@@ -1264,9 +1239,10 @@ fi
 ### Stage 8 ###
 MAKEGUIDES_beg=`GET_TIME`
 if [[ $stage4a_success && $stage4b_success && $stage6d_success ]] ; then
-  make_smv_user_guide
-  make_smv_technical_guide
-  make_smv_verification_guide
+  make_guide geom_notes $FDS_SVNROOT/Manuals/FDS_User_Guide 'geometry notes'
+  make_guide SMV_User_Guide $FDS_SVNROOT/Manuals/SMV_User_Guide 'SMV User Guide'
+  make_guide SMV_Technical_Reference_Guide $FDS_SVNROOT/Manuals/SMV_Technical_Reference_Guide 'SMV Technical Reference Guide'
+  make_guide SMV_Verification_Guide $FDS_SVNROOT/Manuals/SMV_Verification_Guide 'SMV Verification Guide'
 fi
 MAKEGUIDES_end=`GET_TIME`
 DIFF_MAKEGUIDES=`GET_DURATION $MAKEGUIDES_beg $MAKEGUIDES_end`
