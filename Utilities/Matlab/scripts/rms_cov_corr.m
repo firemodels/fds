@@ -11,7 +11,7 @@ addpath('../../Verification/Controls');
 M = importdata('rms_cov_corr_devc.csv',',',2);
 fds_data = M.data;
 
-startrow=60/0.02+1;
+startrow=100/0.02+1;
 endrow=size(fds_data,1);
 
 umean=mean(fds_data(startrow:endrow,2));
@@ -35,10 +35,9 @@ wrms=sqrt(mean(wdiff2));
 uwcov=mean(uwcova);
 uwcorr=uwcov/urms/wrms;
 
-startrow2=500/0.02+1;
-urms_fds=mean(fds_data(startrow2:endrow,4));
-uwcov_fds=mean(fds_data(startrow2:endrow,5));
-uwcorr_fds=mean(fds_data(startrow2:endrow,6));
+urms_fds=fds_data(endrow,4);
+uwcov_fds=fds_data(endrow,5);
+uwcorr_fds=fds_data(endrow,6);
 
 xcalc(1)=60;
 xcalc(2)=1000;
@@ -155,12 +154,12 @@ print(gcf,'-dpdf',plotname);
 clear h
 
 % check errors
-if abs((urms-urms_fds)/urms) > 0.05
+if abs((urms-urms_fds)/urms) > 0.0001
    display(['Matlab Warning: urms in rms_cov_corr is out of tolerance.'])
 end
-if abs((uwcov-uwcov_fds)/urms) > 0.05
+if abs((uwcov-uwcov_fds)/urms) > 0.0001
    display(['Matlab Warning: uwcov in rms_cov_corr is out of tolerance.'])
 end
-if abs((uwcorr-uwcorr_fds)/urms) > 0.05
+if abs((uwcorr-uwcorr_fds)/urms) > 0.0001
    display(['Matlab Warning: uwcorr in rms_cov_corr is out of tolerance.'])
 end
