@@ -1,6 +1,9 @@
 \documentclass[12pt]{article}
 \input{../Bibliography/commoncommands}
 
+\usepackage{tikz}
+\usetikzlibrary{arrows}
+
 \begin{document}
 
 \vspace{1.0in}
@@ -939,9 +942,6 @@ Figure \ref{fig:geom_sphere2} tests motion of a scaled,  moving, rotating sphere
 \label{fig:geom_sphere_fire}
 \end{figure}
 
-\end{document}
-
-
 \subsection{geom\_sphere\_fire.fds}
 Figure \ref{fig:geom_sphere_fire} tests visualization of a boundary file data on a sphere.
 
@@ -962,6 +962,292 @@ Figure \ref{fig:geom_sphere_fire} tests visualization of a boundary file data on
  \caption{Boundary file data visualized on a sphere.  Case: geom\_sphere\_fire.fds}
 \label{fig:geom_sphere_fire}
 \end{figure}
+
+\clearpage
+
+\section{Cutcell Immersed Boundary Method (CIBM)}
+
+\paragraph{Abstract} In this chapter, we discuss implementation of a hybrid cutcell direct-forcing immersed boundary method (CIBM) to handle complex geometry in the Fire Dynamics Simulator (FDS).  Particular attention is paid to the challenges associated with thin (zero thickness) obstructions in variable density flows with heat and mass transfer.  The triangular facet is chosen as the basic element for construction of complex geometry.  Reasons behind this choice are discussed.  A linked-list data structure for the facets is presented.  One-sided differencing and methods for overcoming numerical diffusion issues are discussed.  Verification cases for momentum, heat, and mass transport are presented.
+
+\subsection{Introduction}
+
+The Fire Dynamics Simulator (FDS) has always used a simple direct forcing immersed boundary method (IBM) to handle flow obstructions.  Generally, obstructions are restricted to conform to the underlying Cartesian mesh, leading to stair-step approximations to curvilinear geometries (see Fig.~\ref{fig:circle}).
+
+\begin{figure}
+\begin{center}
+\begin{tabular}{cc}
+\begin{tikzpicture}
+\draw[line width=1mm,fill=lightgray] (1.8,1.8) circle [radius=1.5];
+\draw[help lines] (0,0) grid (5,5);
+\draw[ultra thick,->] (2.66,4.5) -- (3.33,4.5);
+\draw[ultra thick,->] (2.66,3.5) -- (3.33,3.5);
+\draw[ultra thick,->] (3.66,4.5) -- (4.33,4.5);
+\draw[ultra thick,->] (3.66,3.5) -- (4.33,3.5);
+\draw[thick] (2.665,3.0255) -- (3.335,3.9745);
+\draw[fill] (3.335,3.9745) circle [radius=0.1];
+\end{tikzpicture}
+\hspace{1cm}&\hspace{1cm}
+\begin{tikzpicture}
+\draw[line width=1mm,fill=lightgray] (1,0) to (1,1) to (0,1) to (0,2) to (1,2) to (1,3) to (3,3) to (3,1) to (2,1) to (2,0) to (.95,0);
+\draw[help lines] (0,0) grid (5,5);
+\end{tikzpicture}
+\end{tabular}
+\caption{(Left) Desired geometry (circle). (Right) FDS representation---a cell is solid if more than half its volume is occupied by the desired geometry.}
+\label{fig:circle}
+\end{center}
+\end{figure}
+
+
+There are two shortcomings of the block geometry method.  First, it is zeroth-order accurate for curvilinear geometries \cite{Fadlun}.  
+In other words, as the grid is refined---even after laborious reconstruction of the block geometry---we never recover the exact solution.  Second, creation of even simple geometries can be tedious. For example, users will go to incredible lengths to carve out rounded tunnels for circular ducts, a task that is fairly simple for most unstructured codes (not that the meshes tend to be much better!).
+
+In direct forcing IBM, the force term in the momentum equation is set to drive a specific velocity component to a desired value.  In the block geometry approach (Fig.~\ref{fig:circle}, right), the impermeability condition is enforced by setting the normal component of velocity to zero on the solid surface. But as shown by Fadlun \cite{Fadlun}, it is relatively simple to obtain a second-order solution for the velocity field: the velocity component is found from a linear interpolation between the velocity of the solid surface (no slip, impermeability) and a value at some distance normal to the surface.  This is illustrated on the left in Fig.~\ref{fig:circle}.  Away from the surface the staggered $u$ velocity components are interpolated to the point marked by the solid dot, which is twice the normal distance from the surface as the nearest velocity component.
+
+More elaborate schemes exist to obtain the velocity near the surface \cite{Balaras,Choi,McDermott}.  But the emphasis here is on the implementation of a scheme to transport heat and mass near thin obstructions (an issue yet to be addressed in the literature).  Therefore, Fadlun's simple interpolation method is sufficient for momentum.   In 2D, complex surfaces are constructed from a series of connected line segments. In 3D, surfaces are constructed from triangular facets.  Our goal is to minimize numerical diffusion across thin obstructions arbitrarily oriented relative to the Cartesian mesh.  The cause of this diffusion is discussed in more detail below.
+
+In the following sections, we first discuss the linked-list data structure used to connect the surface elements to the grid, similar to the wall cell type used in the basic FDS scheme.  Next, we illustrate the momentum scheme for both simple and complex flow geometries.  We then discuss the unique issues faced by the FDS flow solver for simulating variable density flows with thin obstructions not aligned with the mesh.  Hopefully, we can develop a scheme that handles these problems!
+
+\subsection{Data Structure}
+
+\subsubsection{Block Geometry}
+
+In the basic FDS method, a wall cell (WC) is one face of a gas phase cell.  A WC derived type stores the indices of the gas phase cell\footnote{Here I am not getting into the difference between wall cell and 1D in-depth derived types.  When I say WC, in most cases I mean precisely {\ct WC\%ONE\_D}.}.  It also stores face values of density, species mass fraction, and temperature, and the wall-normal cell dimension used to construct gradients.  The relevant variables in the code are:
+
+\begin{table}[h!]
+\begin{tabular}{ll}
+{\ct WC\%IIG, WC\%JJG, WC\%KKG} & gas phase cell indices \\
+{\ct WC\%UW}                    & wall-normal velocity component \\
+{\ct WC\%RHO\_F}                & gas phase mass density at the wall \\
+{\ct WC\%ZZ\_F}                 & lumped species mass fraction at the wall \\
+{\ct WC\%TMP\_F}                & temperature at the wall \\
+{\ct WC\%DN}                    & wall-normal cell dimension \\
+{\ct WC\%IOR}                   & orientation from wall to cell center
+\end{tabular}
+\end{table}
+
+The face values serve as Dirichlet boundary conditions.  If Neumann boundary conditions are needed, they are constructed from a one-sided difference.  For example, the temperature gradient at the wall is obtained from
+\begin{equation}
+\frac{\partial T}{\partial n} \approx \frac{T_g - T_f}{\delta n/2}
+\end{equation}
+
+\subsubsection{Complex Geometry}
+
+As we move toward complex shapes immersed within the Cartesian mesh, to the extent possible we have tried to maintain a correspondence with the WC data type.  The analog in the new approach is, in 3D, a triangular facet, FC. This choice was made for the following reasons:
+\begin{enumerate}[{\,\,\,\,(}a{)}]
+\item For simplicity, we wanted to restrict ourselves to one generic element type.
+\item Curvilinear surfaces can be approximated to second-order accuracy with linear elements.
+\item Three points are unambiguously planar.
+\item Algorithms for triangle/box intersection are readily available.
+\end{enumerate}
+
+Note that a basic WC face must be constructed from two FC faces (see Fig.~\ref{fig:facetcell}), thus doubling computational effort for the same resolution.  The FC approach makes up for this deficiency with the following benefits:
+\begin{enumerate}[{(}i{)}]
+\item We have the flexibility to create arbitrarily complex shapes.
+\item The resolution of the solid surface need not be the same as the gas phase.  When coarser resolution is permissible, we achieve a cost savings.
+\end{enumerate}
+
+The first item may be obvious, but the second deserves elaboration. For many objects in the scenario, the boundary conditions may not change much or may not be important enough to finely resolve.  Suppose there is a door that is only partially open (say 45$^\circ$ angle) and the gas phase resolution within the room is 10 cm.  A standard doorway in the U.S. is 91 cm by 203 cm.  Therefore, resolving each gas phase cell with a wall cell on the door would require roughly $9 \times 20 \times 2 = 360$ facets.  But if detailed resolution of the door is unnecessary, we can get away with only 2 facets (see Fig.~\ref{fig:opendoor}).
+
+\begin{figure}
+\begin{center}
+\begin{tikzpicture}
+
+\draw (0,0)--(0,3);
+\draw (0,3)--(3,3);
+\draw (3,3)--(3,0);
+\draw (3,0)--(0,0);
+
+\draw (1,4)--(4,4);
+\draw (4,4)--(4,1);
+
+\draw (0,3)--(1,4);
+\draw (3,3)--(4,4);
+\draw (3,0)--(4,1);
+
+\draw (0,0)--(3,3);
+\draw (3,3)--(4,1);
+\draw (1,4)--(3,3);
+
+\end{tikzpicture}
+
+\caption{Triangular facets covering a cubic cell.  Two facets are needed for each face, as opposed to one wall cell.}
+\label{fig:facetcell}
+\end{center}
+\end{figure}
+
+
+\begin{figure}
+\begin{center}
+\begin{tikzpicture}[scale=0.75]
+
+\draw (0,6) -- (2,8);
+\draw (0,0) -- (2,2);
+
+\draw (12,6) -- (10,8);
+\draw (12,0) -- (10,2);
+
+\draw (2,8) -- (10,8);
+\draw (2,8) -- (2,2);
+\draw (10,8) -- (10,2);
+
+\draw (4,6.5) -- (6.5,6.5);
+\draw (4,2) -- (4,6.5);
+\draw (2,2) -- (4,2);
+\draw (6.5,2) -- (10,2);
+
+\draw (0,0) -- (0,6);
+\draw (12,0) -- (12,6);
+\draw (0,0) -- (12,0);
+
+\draw[help lines] (1.499,1.499) grid [step=.25cm] (10.5,7.5);
+
+\draw[help lines,fill=white] (5,1) to (5,5.5) to (6.5,2) to (5,1);
+\draw[help lines,fill=white] (6.5,6.5) to (5,5.5) to (6.5,2) to (6.5,6.5);
+
+\draw (6.5,2) -- (6.5,6.5);
+\draw (6.5,6.5) -- (5,5.5);
+\draw (6.5,2) -- (5,1);
+\draw (5,1) -- (5,5.5);
+\draw (5,5.5) -- (6.5,2);
+
+\draw[help lines] (5.7499,1.5) grid [step=.25cm] (7.5,7.5);
+
+\end{tikzpicture}
+
+\caption{Partially open door composed of two facets, illustrating that the solid resolution may be coarser than the gas phase resolution.}
+\label{fig:opendoor}
+\end{center}
+\end{figure}
+
+
+\subsection{Momentum}
+\label{sec:momentum}
+
+Consider the following semi-implicit (fractional step) update for the $i$th component of momentum:
+\begin{equation}
+\label{eqn:mom}
+\frac{u_i^{n+1} - u_i^n}{\delta t} = -\left(F_i^n + \frac{\delta H^{n+1}}{\delta x_i}\right)
+\end{equation}
+This is a fractional step method because a Poisson equation is solved to obtain the pressure term, $H$ (not discussed here). In a direct-forcing immersed boundary method, the force term is replaced by
+\begin{equation}
+\label{eqn:force}
+F_i^* = - \left( \frac{u_i^{ibm} - u_i^n}{\delta t} + \frac{\delta H^*}{\delta x_i}\right)
+\end{equation}
+which drives the velocity component $u_i^{n+1}$ toward $u_i^{ibm}$.  The superscript asterisk indicates that the initial guess for the pressure term is taken from the previous time step.  The update may be iterated to drive the error between $u_i^{n+1}$ and $u_i^{ibm}$ to a desired tolerance.  Note, however, that when this approach is imbedded in a second-order predictor-corrector scheme the error in most cases is remarkably small when $H^n$ is used in the force term (no iteration).
+
+\subsubsection{Block Geometry}
+
+For the basic block geometry method used in FDS, the impermeability condition at a surface is enforced by setting $u_i^{ibm} = 0$. If mass transfer is present the surface-normal IBM velocity component is set to $u_i^{ibm} = u_n$, where $u_n$ is the wall-normal component of velocity satisfying the scalar transport equation.  Note that $u_n$ is stored as {\ct WC\%UW} in the code.
+
+\subsubsection{Complex Geometry}
+
+For complex geometry the surface usually does not align itself with the face of a Cartesian grid cell. A given velocity component, therefore, is not on a boundary, but must still satisfy the governing equations subject to the prescribed boundary conditions (position and properties of the surface).  The essential task of a direct-forcing immersed boundary method is to set $u_i^{ibm}$ to achieve a stable and accurate numerical solution as well as an adequate representation of the local flow physics (surface stress, pressure gradient, etc.) without the luxury of infinitely high resolution.
+
+In FDS, there are three IBM options for momentum, set by, for example,
+\small
+\begin{verbatim}
+&MISC IMMERSED_BOUNDARY_METHOD=1/ ! options are 0,1,2
+\end{verbatim}
+\normalsize
+Following is a brief description of each option. The basic linear interpolation method of Fadlun \cite{fadlun} is given by option (1), and will be used for the examples to follow later in this paper. Refer to the diagram in Fig.~\ref{fig:position_definitions} for position definitions.
+
+\paragraph{\ct IMMERSED\_BOUNDARY\_METHOD=0}
+
+The velocity component force term is unaltered if it falls on the positive side of the surface.  Let $\mathbf{x}_{velo}$ denote the location of the velocity component, $\mathbf{v}_i, (i=1,2,3)$ are the vertices of a face, $\mathbf{n} = (\mathbf{v}_2-\mathbf{v}_1) \times (\mathbf{v}_3-\mathbf{v}_1)$ is the face normal, and let $\mathbf{r} \equiv \mathbf{x}_{velo} - \mathbf{v}_1$ (any of the vertices will do); then if $\delta n =\mathbf{r} \cdot \mathbf{n} > 0$ the velocity component is processed as usual; if the dot product is negative the velocity is ``inside'' the obstruction and is set to zero.  This effectively leads to a zeroth-order (Lego block) representation of the surface.
+
+\paragraph{\ct IMMERSED\_BOUNDARY\_METHOD=1}
+
+The basic linear interpolation scheme of Fadlun starts by identifying a point $\mathbf{x}_{int}$ (see Fig.~\ref{fig:position_definitions}) which is twice the normal distance from the surface as the position of the velocity component, $\mathbf{x}_{velo}$.  The value $u_i(\mathbf{x}_{int}) = u_{i,int}$ is found from a trilinear interpolation of the neighboring staggered velocity component values from the previous time step.  The value of $u_i^{ibm}$ is then taken from a linear interpolation between $u_{i,int}$ and the wall value of the velocity component, $u_{i,w}$ (usually zero).  Thus, $u_i^{ibm} = \frac{1}{2}(u_{i,int} + u_{i,w})$.
+
+\paragraph{\ct IMMERSED\_BOUNDARY\_METHOD=2}
+
+Here the linear profile is replaced by a prescribed wall-normal profile for the mean streamwise velocity.  This requires that we first define a new streamwise coordinate system.  Referring to Fig.~\ref{fig:position_definitions}, let $\mathbf{e}_i, (i=1,2,3)$ define an orthonormal set of basis vectors for our Cartesian grid system and let $\mathbf{\bar{e}}_i, (i=1,2,3)$ define the new streamwise system where $\mathbf{\bar{e}}_1$ is the streamwise direction and $\mathbf{\bar{e}}_3$ is the wall-normal direction.  It is useful to define the new system so that the velocity component in $\mathbf{\bar{e}}_2$ is always zero.  This is achieved as follows: Define a tangent vector $\mathbf{t} \equiv \mathbf{n} \times (\mathbf{u} - \mathbf{u}_w)$ where $\mathbf{u}_w$ is the velocity of the wall (usually zero) and $\mathbf{n}$ is a wall-normal vector. The streamwise basis vector is then found from $\mathbf{\hat{s}} = \mathbf{\hat{t}} \times \mathbf{\hat{n}}$.  The hat represents a unit normal, e.g., $\mathbf{\hat{n}} \equiv \mathbf{n}/|\mathbf{n}|$.  The new streamwise system is then given by $\mathbf{\bar{e}_1}=\mathbf{\hat{s}}$, $\mathbf{\bar{e}_2}=\mathbf{\hat{t}}$, and $\mathbf{\bar{e}_3}=\mathbf{\hat{n}}$. (To conform to the convention used in the atmospheric community, in FDS, the ``vertical'' or surface-normal component is taken as the ``$z$'' component.  Hence, 2D flows are in the $x-z$ plane.)  The elements of the directional cosine matrix are now simply $a_{ij} = \mathbf{e}_i \cdot \mathbf{\bar{e}}_j$.  Velocity vectors may be transformed from the grid system to the streamwise system via $\bar{u}_k = a_{ik} u_i$ and back again via $u_i = a_{ik} \bar{u}_k$ (see, e.g., \cite{Pope:2000} Appendix B).
+
+To evaluate the streamwise profile, all three staggered velocity components are interpolated to $\mathbf{x}_{int}$ and the vector is transformed into the streamwise system.  The streamwise component at $\mathbf{x}_{int}$ is used to define the profile $f(n)$, which is then used to specify the streamwise component at the position of interest ($\mathbf{x}_{velo}$ in the grid system).  Thus we obtain $\bar{u}_1^{ibm} = f(\delta n)$.  Note that here the bar indicates we are in the streamwise coordinate system.  We need to specify the other two components before we can transform back to the grid system.  As mentioned, the tangential component is zero by construction. Specification of the normal component is currently an active area of research \cite{Choi:2007}.  What complicates matters is that we have two invariants to satisfy: (1) the divergence and (2) the kinetic energy. The kinetic energy is the easier of the two because it does not involve differences.  Still, since all we know from the model is a mean profile, some sort of \emph{ad hoc} assumption must be made.  Given $k_{int}=\frac{1}{2}u_i u_i$ at $\mathbf{x}_{int}$, we use a linear interpolation to determine $k(\delta n) = \frac{1}{2}(k_{int} + k_w)$, where $k_w$ is the kinetic energy at the wall (usually zero).  The magnitude of the normal component is then found from $|\bar{u}_3^{ibm}| = +\sqrt{2k(\delta n) - (\bar{u}_1^{ibm})^2}$.  Finally, the component value of interest is obtained from the transformation $u_i^{ibm} = a_{ik} \bar{u}_k^{ibm}$, where only the $i$th component is retained at the staggered location.
+
+\begin{figure}
+\begin{center}
+\begin{tikzpicture}[scale=1.25]
+
+\draw [fill=lightgray] (0.2,0.5) -- (2.2,3.8) -- (4.5,3.1) -- (0.2,0.5);
+
+\draw[help lines] (-3,-1) grid [step=2cm] (5,7);
+
+\draw (0.30,0.25) node {$\mathbf{v}_1$};
+\draw (4.80,3.10) node {$\mathbf{v}_2$};
+\draw (2.20,4.00) node {$\mathbf{v}_3$};
+
+\draw [->, very thick, >=latex] (-2.5,5.0) -- (-1.5,5.0);
+\draw [->, very thick, >=latex] (-2.5,3.0) -- (-1.5,3.0);
+\draw [->, very thick, >=latex] (-0.5,5.0) -- (0.5,5.0);
+\draw [->, very thick, >=latex] (-0.5,3.0) -- (0.5,3.0);
+\draw (0.5,3.3) node {$\mathbf{x}_{velo}$};
+
+\draw [->, very thick, >=latex] (0.2,0.5) -- (0.0,3.0);
+\draw (-0.15,1.8) node {$\mathbf{r}$};
+
+\draw [->, very thick, >=latex] (0.2,0.5) -- (-1,2.0);
+\draw (-0.5,1.0) node {$\mathbf{n}$};
+
+\draw [->, >=*] (1.1,1.545) -- (-1.3,4.7);
+\draw (-1.5,4.3) node {$\mathbf{x}_{int}$};
+
+\draw [|-] (0.9,1.37) -- (0.57,1.8);
+\draw [-|] (0.24,2.25) -- (-0.19,2.85);
+\draw (.4,2.02) node {$\delta n$};
+
+\draw [->, very thick, >=latex] (1.08,1.55) -- (2.35,1.55);
+\draw [->, very thick, >=latex] (1.1,1.545) -- (0.45,2.4);
+\draw [->, very thick, >=latex] (1.1,1.545) -- (1.75,2.6);
+\draw (2.9,1.55) node {$\mathbf{\hat{s}} \, (\mathbf{\bar{e}}_1)$};
+\draw (1.9,2.60) node {$\mathbf{\hat{t}}$};
+\draw (0.6,2.60) node {$\mathbf{\hat{n}}$};
+
+\draw [->, very thick, >=latex] (-2,0) -- (-2,1);
+\draw [->, very thick, >=latex] (-2,0) -- (-1,0);
+\draw (-0.9,-0.25) node {$\mathbf{e}_1$};
+\draw (-2.35,1) node {$\mathbf{e}_3$};
+
+\draw (1,4.7) .. controls (2.5,2) .. (1.1,1.545);
+\draw [->] (-1.15,4.500) -- (1.10,4.500);
+\draw [->] (-0.58,3.750) -- (1.52,3.750);
+\draw [->] ( 0.20,3.003) -- (1.90,3.003);
+\draw [->] ( 0.54,2.280) -- (2.15,2.280);
+\draw [->] ( 0.90,1.800) -- (1.80,1.800);
+\draw (1.5,5.0) node {$f(n)$};
+
+\end{tikzpicture}
+
+\caption{Position definitions for a single facet.  The function $f(n)$ represents the mean streamwise velocity profile in the wall-normal direction.}
+\label{fig:position_definitions}
+\end{center}
+\end{figure}
+
+\paragraph{Remark} As can be seen, in going from IBM methods 0 to 2 the level of complexity increases significantly.  For the remainder of this paper, we utilize method 1.  The main reason is that our focus here is on the additional complexities that arise with considering heat and mass transfer near infinitely thin obstructions.
+
+%\subsubsection{Convergence of IBM 1}
+%\label{sec:momentum_convergence}
+%
+%In this section we show second-order convergence for IBM 1 by examining the 2D flow near a rotating disk.
+
+\subsection{Heat and Mass Transfer}
+
+This is where the formulation gets tricky.  Both heat and mass transfer present challenges for a typical IBM formulation.  For heat transfer, numerical diffusion from the gas phase domain into the solid domain implies that global energy is not conserved.  For mass transfer, when considering the ``mixed is burnt'' model for combustion chemistry, any numerical diffusion of reactant species across a solid boundary can be fatal to a calculation.  For these reasons, we have chosen to implement a hybrid cutcell immersed boundary method (CIBM), where the cutcells on the immersed boundary surface are treated by an unstructured finite volume solver for heat and mass transport.  This ensures strict conservation of mass and energy in the fluid domain.
+
+\subsubsection{To-Do List}
+
+\begin{enumerate}
+\item Identify cutcells.  Find the Cartesian cells that intersect with solid tet volumes.  To handle zero thickness obstructions we either need the ability to treat facets by themselves or we may allow ``volumes'' with zero volume.  To be discussed.
+\item Compute cutcell (CC) volumes.  Let $V_{cell}$ denote the volume of the Cartesian cell.  Let $V_{tet}$ denote a tetrahedral volume.  The cutcell volume is $V_{cc} = V_{cell} - ( V_{cell} \cap V_{tet} )$.
+\item Merge small cells.  If $V_{cc} < V_{tol}$, merge with a neighboring cell (Cartesian cell or cutcell).  This limits CFL time step restrictions.
+\item Compute surface areas and unit normal vectors for final cutcell volumes.
+\item Interpolate scalars (density, mass fractions, temperature) to CC volume faces (see below).
+\item Interpolate velocity components to CC faces (see below).
+\item Update finite volumes equations (see below).
+\item Construct Cartesian divergence from CC divergence integral (see below).
+\item Update Poisson equation as usual (see FDS Tech Guide).
+\item Reconstruct velocity field to satisfy projection and CC constraints (see below).
+\end{enumerate}
 
 \end{document}
 
