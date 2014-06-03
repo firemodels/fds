@@ -348,6 +348,9 @@ call :build_guide SMV_Verification_Guide %svnroot%\Manuals\SMV_Verification_Guid
 echo             User
 call :build_guide SMV_User_Guide %svnroot%\Manuals\SMV_User_Guide 1>> %OUTDIR%\stage6.txt 2>&1
 
+echo             Geom Notes
+call :build_guide geom_notes %svnroot%\Manuals\FDS_User_Guide 1>> %OUTDIR%\stage6.txt 2>&1
+
 call :GET_TIME
 set MAKEGUIDES_end=%current_time%
 call :GET_DURATION MAKEGUIDES %MAKEGUIDES_beg% %MAKEGUIDES_end%
