@@ -2381,18 +2381,23 @@ ENDIF
 ! Write out the input parameters to output file (unit 6)
  
 WRITE(LU_OUTPUT,'(/A/)')      ' Fire Dynamics Simulator'
+WRITE(LU_OUTPUT,'(A,A)')      ' Version          : ',TRIM(VERSION_STRING)
+WRITE(LU_OUTPUT,'(A,I5)')     ' SVN Revision No. : ',SVN_REVISION_NUMBER
 WRITE(LU_OUTPUT,'(A,A)')      ' Compilation Date : ',TRIM(COMPILE_DATE)
-IF (.NOT.USE_MPI)   WRITE(LU_OUTPUT,'(A,A,A)')      ' Version          : ',TRIM(VERSION_STRING),' Serial'
-IF (USE_MPI)        WRITE(LU_OUTPUT,'(A,A,A)')      ' Version          : ',TRIM(VERSION_STRING),' Parallel'
+
+! Add MPI information
+
+IF (.NOT.USE_MPI)   WRITE(LU_OUTPUT,'(/A)')     ' MPI Disabled'
+IF (USE_MPI)        WRITE(LU_OUTPUT,'(/A,I5)')  ' MPI Enabled; Number of MPI Processes: ',NUMPROCS
 
 ! ADD Version and OpenMP Information
 
-IF (.NOT. USE_OPENMP) WRITE (LU_OUTPUT,'(/A/)')      ' OpenMP Disabled'
-IF (USE_OPENMP) WRITE(LU_OUTPUT,'(/A/)')             ' OpenMP Enabled'
-IF (USE_OPENMP) WRITE(LU_OUTPUT,'(A,I3/)')           ' Number of OpenMP threads: ',OPENMP_AVAILABLE_THREADS
+IF (.NOT. USE_OPENMP) WRITE(LU_OUTPUT,'(/A)')    ' OpenMP Disabled'
+IF (USE_OPENMP)       WRITE(LU_OUTPUT,'(/A,I3)') ' OpenMP Enabled; Number of OpenMP Threads: ',OPENMP_AVAILABLE_THREADS
 
-WRITE(LU_OUTPUT,'(A,I5/)')    ' SVN Revision No. : ',SVN_REVISION_NUMBER
-WRITE(LU_OUTPUT,'(A,A)')      ' Job TITLE        : ',TRIM(TITLE)
+! Add job TITLE and CHID
+
+WRITE(LU_OUTPUT,'(/A,A)')     ' Job TITLE        : ',TRIM(TITLE)
 WRITE(LU_OUTPUT,'(A,A/)')     ' Job ID string    : ',TRIM(CHID)
  
 IF (APPEND) RETURN
