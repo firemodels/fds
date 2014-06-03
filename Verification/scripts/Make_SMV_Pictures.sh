@@ -6,6 +6,7 @@ echo "Generates figures for Smokeview verification suite"
 echo ""
 echo "Options"
 echo "-d - use debug version of smokeview"
+echo "-g - only generate geometry case images"
 echo "-h - display this message"
 echo "-i - use installed version of smokeview"
 echo "-t - use test version of smokeview"
@@ -35,12 +36,18 @@ SIZE=_64
 DEBUG=
 TEST=
 use_installed="0"
+RUN_SMV=1
+RUN_GEOM=1
 
-while getopts 'dhis:t' OPTION
+while getopts 'dghis:t' OPTION
 do
 case $OPTION  in
   d)
    DEBUG=_db
+   ;;
+  g)
+   RUN_SMV=0
+   RUN_GEOM=1
    ;;
   h)
    usage;
@@ -152,58 +159,69 @@ rm -f *.version
 rm -f *.png
 $SMV -version > smokeview.version
 
-cd $SVNROOT/Verification/Visualization
-echo Converting particles to isosurfaces in case plumeiso
-$SMOKEZIP -r -part2iso plumeiso
+if [ "$RUN_SMV" == "1" ] ; then
+  cd $SVNROOT/Verification/Visualization
+  echo Converting particles to isosurfaces in case plumeiso
+  $SMOKEZIP -r -part2iso plumeiso
 
-cd $SVNROOT/Verification/WUI
-echo Converting particles to isosurfaces in case plumeiso
-if  [ -e tree_one.smv ]; then
-$SMOKEZIP -r -part2iso tree_one
-fi
+  cd $SVNROOT/Verification/WUI
+  echo Converting particles to isosurfaces in case plumeiso
+  if  [ -e tree_one.smv ]; then
+    $SMOKEZIP -r -part2iso tree_one
+  fi
 
 # precompute FED slices
 
-source $STARTX
-$RUNFDS -f Visualization plume5c
-$RUNFDS -f Visualization plume5cdelta
-$RUNFDS -f Visualization thouse5
-$RUNFDS -f Visualization thouse5delta
-source $STOPX
+  source $STARTX
+  $RUNFDS -f Visualization plume5c
+  $RUNFDS -f Visualization plume5cdelta
+  $RUNFDS -f Visualization thouse5
+  $RUNFDS -f Visualization thouse5delta
+  source $STOPX
 
 # difference plume5c and thouse5
 
-cd $SVNROOT/Verification/Visualization
-echo Differencing cases plume5c and plume5cdelta
-$SMOKEDIFF -r plume5c plume5cdelta
-echo Differencing cases thouse5 and thouse5delta
-$SMOKEDIFF -r thouse5 thouse5delta
+  cd $SVNROOT/Verification/Visualization
+  echo Differencing cases plume5c and plume5cdelta
+  $SMOKEDIFF -r plume5c plume5cdelta
+  echo Differencing cases thouse5 and thouse5delta
+  $SMOKEDIFF -r thouse5 thouse5delta
 
-echo Generating images
+  echo Generating images
 
 # copy wui error image in case wfds does not exist
 
-FROMDIR=$SVNROOT/Manuals/SMV_Verification_Guide/FIGURES
-TODIR=$SVNROOT/Manuals/SMV_Verification_Guide/SCRIPT_FIGURES
-cp $FROMDIR/wfds_error.png $TODIR/tree_one_part_000.png
-cp $FROMDIR/wfds_error.png $TODIR/tree_one_part_010.png
-cp $FROMDIR/wfds_error.png $TODIR/tree_one_part_020.png
-cp $FROMDIR/wfds_error.png $TODIR/tree_one_partiso_000.png
-cp $FROMDIR/wfds_error.png $TODIR/tree_one_partiso_010.png
-cp $FROMDIR/wfds_error.png $TODIR/tree_one_partiso_020.png
+  FROMDIR=$SVNROOT/Manuals/SMV_Verification_Guide/FIGURES
+  TODIR=$SVNROOT/Manuals/SMV_Verification_Guide/SCRIPT_FIGURES
+  cp $FROMDIR/wfds_error.png $TODIR/tree_one_part_000.png
+  cp $FROMDIR/wfds_error.png $TODIR/tree_one_part_010.png
+  cp $FROMDIR/wfds_error.png $TODIR/tree_one_part_020.png
+  cp $FROMDIR/wfds_error.png $TODIR/tree_one_partiso_000.png
+  cp $FROMDIR/wfds_error.png $TODIR/tree_one_partiso_010.png
+  cp $FROMDIR/wfds_error.png $TODIR/tree_one_partiso_020.png
+  
+  source $STARTX
+  cd $SVNROOT/Verification
+  scripts/SMV_Cases.sh
 
-source $STARTX
-cd $SVNROOT/Verification
-scripts/SMV_Cases.sh
-
-cd $SVNROOT/Verification
-scripts/SMV_DIFF_Cases.sh
-cd $CURDIDR
-source $STOPX
+  cd $SVNROOT/Verification
+  scripts/SMV_DIFF_Cases.sh
+  cd $CURDIDR
+  source $STOPX
 
 # copy generated images to web summary directory
 
-cp $SMVVG/FIGURES/graysquares.png $SUMMARY/images/.
-cp $FDSUG/SCRIPT_FIGURES/*.png $SUMMARY/images/.
-cp $SMVUG/SCRIPT_FIGURES/*.png $SUMMARY/images/.
-cp $SMVVG/SCRIPT_FIGURES/*.png $SUMMARY/images/.
+  cp $SMVVG/FIGURES/graysquares.png $SUMMARY/images/.
+  cp $FDSUG/SCRIPT_FIGURES/*.png $SUMMARY/images/.
+  cp $SMVUG/SCRIPT_FIGURES/*.png $SUMMARY/images/.
+  cp $SMVVG/SCRIPT_FIGURES/*.png $SUMMARY/images/.
+fi
+
+# generate geometry images
+
+if [ "$RUN_GEOM" == "1" ] ; then
+  source $STARTX
+  cd $SVNROOT/Verification
+  scripts/SMV_geom_Cases.sh
+fi
+

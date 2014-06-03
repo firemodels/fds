@@ -10,6 +10,9 @@ OPENMP=
 OPENMP_OPTS=
 FDS_DEBUG=0
 nthreads=2
+RUN_SMV=1
+RUN_MPI=1
+RUN_GEOM=1
 
 function usage {
 echo "Run_SMV_Cases.sh [-d -h -o nthreads -p -q queue_name -s ]"
@@ -17,6 +20,7 @@ echo "Runs Smokeview verification suite"
 echo ""
 echo "Options"
 echo "-d - use debug version of FDS"
+echo "-g - run only geometry caases"
 echo "-h - display this message"
 echo "-o nthreads - run OpenMP version of FDS with a specified number of threads [default: $nthreads]"
 echo "-p size - platform size"
@@ -52,12 +56,17 @@ cd $CURDIR/..
 
 
 use_installed="0"
-while getopts 'dho:p:q:su' OPTION
+while getopts 'dgho:p:q:su' OPTION
 do
 case $OPTION in
   d)
    DEBUG=_db
    FDS_DEBUG=1
+   ;;
+  g)
+   RUN_SMV=0
+   RUN_MPI=0
+   RUN_GEOM=1
    ;;
   h)
    usage;
@@ -157,21 +166,27 @@ export RUNFDSMPI="$SVNROOT/Utilities/Scripts/runfdsmpi.sh $queue"
 echo "" | $FDSEXE 2> $SVNROOT/Manuals/SMV_User_Guide/SCRIPT_FIGURES/fds.version
 
 if [[ ! $stop_cases ]] ; then
-if [ "$FDS_DEBUG" == "0" ] ; then
+  if [ "$FDS_DEBUG" == "0" ] ; then
 
-is_file_installed $WIND2FDS
-cd $SVNROOT/Verification/WUI
-echo Converting wind data
-$WIND2FDS -prefix sd11 -offset " 100.0  100.0 0.0" wind_data1a.csv
-
-fi
+    is_file_installed $WIND2FDS
+    cd $SVNROOT/Verification/WUI
+    echo Converting wind data
+    $WIND2FDS -prefix sd11 -offset " 100.0  100.0 0.0" wind_data1a.csv
+  fi
 fi
 
 is_file_installed $BACKGROUND
 
 cd $SVNROOT/Verification
-scripts/SMV_Cases.sh
-scripts/SMV_MPI_Cases.sh
+if [ "$RUN_SMV" == "1" ] ; then
+  scripts/SMV_Cases.sh
+fi
+if [ "$RUN_GEOM" == "1" ] ; then
+  scripts/SMV_geom_Cases.sh
+fi
+if [ "$RUN_MPI" == "1" ] ; then
+  scripts/SMV_MPI_Cases.sh
+fi
 
 cp $SMVUGDIR/*.png $SMVVSDIR/.
 cp $SMVVGDIR/*.png $SMVVSDIR/.
