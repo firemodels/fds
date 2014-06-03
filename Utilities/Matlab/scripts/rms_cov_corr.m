@@ -1,6 +1,6 @@
 % Floyd
 % 5-23-2014
-% rms_cov_corr_hood.m
+% rms_cov_corr.m
 
 close all
 clear all
@@ -8,7 +8,8 @@ clear all
 addpath('../../Verification/Controls');
 
 % load experimental data and FDS prediction
-[fds_data] = csvread('rms_cov_corr_devc.csv',2);
+M = importdata('rms_cov_corr_devc.csv',',',2);
+fds_data = M.data;
 
 startrow=60/0.02+1;
 endrow=size(fds_data,1);
@@ -43,7 +44,7 @@ xcalc(1)=60;
 xcalc(2)=1000;
 ycalc(1)=urms;
 ycalc(2)=urms;
-maxval= max(fds_data(:,4));
+maxval=max(fds_data(:,4));
 maxval=ceil(maxval*10)/10;
 
 h=plot(xcalc,ycalc,'r-',fds_data(:,1),fds_data(:,4),'k-','LineWidth',1.5);
@@ -54,8 +55,8 @@ set(gca,'Units',Plot_Units)
 set(gca,'FontName',Font_Name)
 set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
 xlabel('Time(s)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
-ylabel('urms (m/s)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
-legend('Analytic','FDS','Location','NorthEast')
+ylabel('{\it u} rms (m/s)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
+legend('Analytic','FDS','Location','SouthWest')
 
 svn_file = '../../Verification/Controls/rms_cov_corr_svn.txt';
 
@@ -82,7 +83,7 @@ clear h
 
 ycalc(1)=uwcov;
 ycalc(2)=uwcov;
-maxval= max(fds_data(:,5));
+maxval=max(fds_data(:,5));
 maxval=ceil(maxval*10)/10;
 
 h=plot(xcalc,ycalc,'r-',fds_data(:,1),fds_data(:,5),'k-','LineWidth',1.5);
@@ -93,7 +94,7 @@ set(gca,'Units',Plot_Units)
 set(gca,'FontName',Font_Name)
 set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
 xlabel('Time(s)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
-ylabel('u-w convariance (m^2/s^2)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
+ylabel('{\it uw} covariance (m^2/s^2)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
 legend('Analytic','FDS','Location','NorthEast')
 
 if exist(svn_file,'file')
@@ -130,7 +131,7 @@ set(gca,'Units',Plot_Units)
 set(gca,'FontName',Font_Name)
 set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
 xlabel('Time(s)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
-ylabel('u-w cross correlation','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
+ylabel('{\it uw} cross correlation','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
 legend('Analytic','FDS','Location','NorthEast')
 
 if exist(svn_file,'file')
