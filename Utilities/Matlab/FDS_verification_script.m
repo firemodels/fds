@@ -36,7 +36,6 @@ cutcell_area
 cat_propane_depo
 burke_schumann
 convective_cooling_convergence
-rms_cov_corr
 
 % Dataplot and scatplot options
 
@@ -89,5 +88,6 @@ mesh_transformation
 synthetic_eddy_method
 shunn_mms_error
 openmp_timing_benchmarks
+rms_cov_corr
 
 display('verification scripts completed successfully!')

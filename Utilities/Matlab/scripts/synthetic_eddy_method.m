@@ -133,12 +133,12 @@ print(gcf,'-dpdf',[plotdir,'sem_par_leddy_p2'])
 % compute error
 umean_error = norm(umean-uprof)/umax/length(umean);
 if umean_error>error_tolerance
-    display(['Matlab Warning: sem_par_leddy_p2.fds umean_error = ',umean_error])
+    display(['Matlab Warning: sem_par_leddy_p2.fds umean_error = ',num2str(umean_error)])
 end
 
 urms_error = norm(umean+urms-1.1*uprof)/umax/length(umean);
 if urms_error>error_tolerance
-    display(['Matlab Warning: sem_par_leddy_p2.fds urms_error = ',urms_error])
+    display(['Matlab Warning: sem_par_leddy_p2.fds urms_error = ',num2str(urms_error)])
 end
 
 % Atmospheric profile
@@ -198,12 +198,12 @@ print(gcf,'-dpdf',[plotdir,'sem_atm_leddy_p2'])
 % compute error
 umean_error = norm(umean-uprof)/u0/length(umean);
 if umean_error>error_tolerance
-    display(['Matlab Warning: sem_atm_leddy_p2.fds umean_error = ',umean_error])
+    display(['Matlab Warning: sem_atm_leddy_p2.fds umean_error = ',num2str(umean_error)])
 end
 
 urms_error = norm(umean+urms-1.1*uprof)/u0/length(umean);
 if urms_error>error_tolerance
-    display(['Matlab Warning: sem_atm_leddy_p2.fds urms_error = ',urms_error])
+    display(['Matlab Warning: sem_atm_leddy_p2.fds urms_error = ',num2str(urms_error)])
 end
 
 
