@@ -174,22 +174,26 @@ void draw_geom(int flag, int geomtype){
   float skinny_color[]={1.0,0.0,0.0,1.0};
   float *last_color=NULL;
   float last_transparent_level=-1.0;
+  int ntris;
+  triangle **tris;
 
-  if(patchembedded==0&&showtrisurface==1&&geomtype==GEOM_STATIC){
-    int ntris;
-    triangle **tris;
+  if(flag==DRAW_OPAQUE){
+    ntris=nopaque_triangles;
+    tris=opaque_triangles;
+  }
+  if(flag==DRAW_TRANSPARENT){
+    ntris=ntransparent_triangles;
+    tris=transparent_triangles;
+  }
+
+  if(ntris>0&&patchembedded==0&&showtrisurface==1&&geomtype==GEOM_STATIC){
     float *color;
 
-    if(flag==DRAW_OPAQUE){
-      ntris=nopaque_triangles;
-      tris=opaque_triangles;
-    }
-    if(flag==DRAW_TRANSPARENT){
-      if(use_transparency_data==1)transparenton();
-      ntris=ntransparent_triangles;
-      tris=transparent_triangles;
-    }
-    
+    if(flag==DRAW_TRANSPARENT&&use_transparency_data==1)transparenton();
+
+  // draw geometry surface
+
+    if(flag==DRAW_TRANSPARENT&&use_transparency_data==1)transparenton();
     if(cullfaces==1)glDisable(GL_CULL_FACE);
     glEnable(GL_NORMALIZE);
     glShadeModel(GL_SMOOTH);
@@ -298,7 +302,7 @@ void draw_geom(int flag, int geomtype){
   for(i=0;i<ngeominfoptrs;i++){
     geomdata *geomi;
     geomlistdata *geomlisti;
-    int ntris,npoints;
+    int npoints;
     int j;
     float *color;
 
@@ -312,7 +316,10 @@ void draw_geom(int flag, int geomtype){
     }
     ntris = geomlisti->ntriangles;
     npoints = geomlisti->npoints;
-    if(showtrioutline==1){
+
+    // draw geometry outline
+
+    if(ntris>0&&showtrioutline==1){
       glPushMatrix();
       glScalef(SCALE2SMV(1.0),SCALE2SMV(1.0),SCALE2SMV(1.0));
       glTranslatef(-xbar0,-ybar0,-zbar0);
@@ -348,6 +355,9 @@ void draw_geom(int flag, int geomtype){
       glEnd();
       glPopMatrix();
     }
+
+    // draw geometry points
+
     if(showtripoints==1&&geomlisti->npoints>0){
       glPushMatrix();
       glScalef(SCALE2SMV(1.0),SCALE2SMV(1.0),SCALE2SMV(1.0));
@@ -365,8 +375,11 @@ void draw_geom(int flag, int geomtype){
       glEnd();
       glPopMatrix();
     }
+
+    // draw geometry normal vectors
+
     if(showtrinormal==1){
-      if(smoothtrinormal==0){
+      if(ntris>0&&smoothtrinormal==0){  // draw faceted normals
         glPushMatrix();
         glScalef(SCALE2SMV(1.0),SCALE2SMV(1.0),SCALE2SMV(1.0));
         glTranslatef(-xbar0,-ybar0,-zbar0);
@@ -398,7 +411,7 @@ void draw_geom(int flag, int geomtype){
         }
         glEnd();
         
-        glPointSize(6.0);
+        glPointSize(6.0);  // draw points at end of vector
         glBegin(GL_POINTS);
         for(j=0;j<ntris;j++){
           float *p1, *p2, *p3;
@@ -427,7 +440,7 @@ void draw_geom(int flag, int geomtype){
         glEnd();
         glPopMatrix();
       }
-      if(smoothtrinormal==1){
+      if(npoints>0&&smoothtrinormal==1){ // draw smooth normals
         glPushMatrix();
         glScalef(SCALE2SMV(1.0),SCALE2SMV(1.0),SCALE2SMV(1.0));
         glTranslatef(-xbar0,-ybar0,-zbar0);
@@ -452,7 +465,7 @@ void draw_geom(int flag, int geomtype){
         }
         glEnd();
 
-        glPointSize(6.0);
+        glPointSize(6.0);  // draw points at end of vector
         glBegin(GL_POINTS);
         for(j=0;j<npoints;j++){
           float *xyznorm;

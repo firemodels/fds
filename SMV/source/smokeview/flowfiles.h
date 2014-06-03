@@ -52,7 +52,6 @@ typedef struct {
   int npoints,ntriangles;
   point *points;
   triangle *triangles;
-  float translate[3], rot0[3], rot[2];
 } geomlistdata;
 
 /* --------------------------  geomobjdata ------------------------------------ */
