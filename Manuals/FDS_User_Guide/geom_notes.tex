@@ -240,8 +240,6 @@ For example, {\tt XYZ\_DOT=0.0,0.0,1.0}\ would cause an object to move 1~m/s in 
 \subsection{Unstructured Geometry}
 \label{out:GEOMETRY}
 
-{\it Note: I'm checking now that FDS and Smokeview are following this format properly.  I'll remove this comment when various geometry test cases run and visualize correctly}
-
 (add to FDS user's guide 20.13 when ready)
 
 Immersed geometric objects (generalized obstructions) are stored using a file format described below.
@@ -351,8 +349,6 @@ IF (N_VOLS>0) WRITE(LU_GEOM)(ValVol(I),I=1,N_VOLS)
 
 \subsection{Isosurface Data}
 \label{out:ISOSURFACE}
-
-(Note, the plan is to change the isosurface file format described in this Section and implemented now in FDS and Smokeview to be compatible with Section \ref{out:GEOMETRY}.)
 
 FDS generated isosurfaces are stored using a
 file format described in this section.
@@ -814,7 +810,7 @@ TEXTURE_ORIGIN=0.75,0.5,0.5,TEXTURE_MAPPING='SPHERICAL' /
 \end{center}
  \caption{Two texture maps applied to two separate spheres.
  The sphere on the left is discretized by splitting the sphere along longitudinal (east/west) and latitudinal (north/south) directions.
- The sphere on the right is discretized recursively starting with a 12 sided approximation to a sphere.  Note: errors in texture mapping occur when a triangle crosses the  `prime meridian' .  This occurs on the sphere on the right. Cases: geom\_texture3a.fds, geom\_texture3b.fds}
+ The sphere on the right is discretized recursively starting with a 12 sided approximation to a sphere.  Cases: geom\_texture3a.fds, geom\_texture3b.fds}
 \label{fig:geom_texture3}
 \end{figure}
 
