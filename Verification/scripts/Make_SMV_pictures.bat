@@ -101,6 +101,7 @@ echo converting SMV_Cases.sh case list to SMV_Pictures_Cases.bat
 
 cd %SCRIPT_DIR%
 %SH2BAT% SMV_Cases.sh SMV_Pictures_Cases.bat
+%SH2BAT% SMV_geom_Cases.sh SMV_geom_Pictures_Cases.bat
 %SH2BAT% SMV_DIFF_Cases.sh SMV_DIFF_Pictures_Cases.bat
 
 echo.
@@ -129,6 +130,9 @@ echo Generating images
 
 cd %BASEDIR%
 call %SCRIPT_DIR%\SMV_Pictures_Cases.bat
+
+cd %BASEDIR%
+call %SCRIPT_DIR%\SMV_geom_Pictures_Cases.bat
 
 cd %BASEDIR%
 call %SCRIPT_DIR%\SMV_DIFF_Pictures_Cases.bat
