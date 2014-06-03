@@ -1973,27 +1973,13 @@ Obstructions may be created or removed during a simulation. See Section~\ref{inf
 
 \subsection{Thin Obstructions}
 
-Obstructions can have zero thickness. Often, thin sheets, like a window, form a barrier,
-but if the numerical mesh is coarse relative to the thickness of the barrier, the obstruction
-might be unnecessarily large if it is assumed to be one layer of mesh cells thick. All faces
-of an obstruction are shifted to the closest mesh cell. If the obstruction is very thin, the two
-faces may be approximated on the same cell face. FDS and Smokeview render
-this obstruction as a thin sheet, but it is allowed to have thermally
-thick boundary conditions. This feature is fragile, especially in terms
-of burning and blowing gas. A thin sheet obstruction can only have one velocity
-vector on its face, thus a gas cannot be injected reliably from a
-thin obstruction because whatever is pushed from one side is necessarily pulled from the other.
-For full functionality, the obstruction should be specified to
-be at least one mesh cell thick. Thin sheet obstructions
-work fine as flow barriers, but other features are fragile and should be used with
-caution. To prevent FDS from allowing thin sheet obstructions, set {\ct THICKEN\_OBSTRUCTIONS=.TRUE.} on the
-{\ct MISC} line, or {\ct THICKEN=.TRUE.} on each {\ct OBST} line for which the thin sheet assumption is not allowed.
+Obstructions can have zero thickness. Often, thin sheets, like a window, form a barrier, but if the numerical mesh is coarse relative to the thickness of the barrier, the obstruction might be unnecessarily large if it is assumed to be one layer of mesh cells thick. All faces of an obstruction are shifted to the closest mesh cell. If the obstruction is very thin, the two faces may be approximated on the same cell face. FDS and Smokeview render this obstruction as a thin sheet, but it is allowed to have thermally thick boundary conditions. This feature is fragile, especially in terms of burning and blowing gas. A thin sheet obstruction can only have one velocity vector on its face, thus a gas cannot be injected reliably from a thin obstruction because whatever is pushed from one side is necessarily pulled from the other. For full functionality, the obstruction should be specified to be at least one mesh cell thick. Thin sheet obstructions work fine as flow barriers, but other features are fragile and should be used with caution. To prevent FDS from allowing thin sheet obstructions, set {\ct THICKEN\_OBSTRUCTIONS=.TRUE.} on the {\ct MISC} line, or {\ct THICKEN=.TRUE.} on each {\ct OBST} line for which the thin sheet assumption is not allowed.
 
 Obstructions that are too small relative to the underlying numerical mesh are rejected. Be careful when testing cases on coarse meshes.
 
 \subsection{Overlapping Obstructions}
 
-If the faces of two obstructions overlap each other, FDS will choose the surface properties of the obstruction that is specified first. Alternatively, add {\ct OVERLAY=.FALSE.} when specifying the obstruction that you do {\bf not} want to take precedence. The default value of {\ct OVERLAY} is {\ct .TRUE.}
+If the faces of two obstructions overlap each other, FDS will choose the surface properties of the obstruction that is specified second in the input file. If you do not want this, add {\ct OVERLAY=.FALSE.} to the {\ct OBST} line of the second obstruction, in which case the surface properties of the first obstruction will be applied. The default value of {\ct OVERLAY} is {\ct .TRUE.}
 
 When obstructions overlap, Smokeview renders both obstructions independently of each other, often leading to an unsightly cross-hatching of the two surface colors where there is an overlap. A simple remedy for this is to ``shrink'' the obstruction you do not wish to take precedence by slightly by adjusting its coordinates ({\ct XB}) accordingly. Then, in Smokeview, toggle the ``q'' key to show the obstructions as you specified them, rather than as FDS rendered them.
 
