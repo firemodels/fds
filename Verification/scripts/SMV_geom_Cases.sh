@@ -1,5 +1,6 @@
 #!/bin/bash
 
+$RUNFDS Immersed_Boundary_Method geom_sphere_fire
 $RUNFDS Immersed_Boundary_Method geom_arch
 $RUNFDS Immersed_Boundary_Method geom_azim
 $RUNFDS Immersed_Boundary_Method geom_elev
@@ -19,7 +20,6 @@ $RUNFDS Immersed_Boundary_Method geom_sphere3c
 $RUNFDS Immersed_Boundary_Method geom_sphere3d
 $RUNFDS Immersed_Boundary_Method geom_sphere3e
 $RUNFDS Immersed_Boundary_Method geom_sphere3f
-$RUNFDS Immersed_Boundary_Method geom_sphere_fire
 $RUNFDS Immersed_Boundary_Method geom_terrain
 $RUNFDS Immersed_Boundary_Method geom_texture
 $RUNFDS Immersed_Boundary_Method geom_texture2
