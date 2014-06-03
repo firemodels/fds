@@ -31,6 +31,8 @@ set smv=smokeview  -runscript
 %smv% geom_texture2
 %smv% geom_texture3a
 %smv% geom_texture3b
+%smv% geom_texture4a
+%smv% geom_texture4b
 %smv% geom_time
 %smv% geom_time2
 %smv% geom_time3
