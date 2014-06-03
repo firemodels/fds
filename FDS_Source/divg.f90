@@ -190,7 +190,7 @@ PREDICT_NORMALS: IF (PREDICTOR) THEN
                   JJ = WC%ONE_D%JJ
                   KK = WC%ONE_D%KK
                   IF (SF%PROFILE/=0 .AND. ABS(SF%VEL)>TWO_EPSILON_EB) THEN
-                     PROFILE_FACTOR = ABS(WC%ONE_D%UWS/SF%VEL)
+                     PROFILE_FACTOR = ABS(WC%UW0/SF%VEL)
                   ELSE
                      PROFILE_FACTOR = 1._EB
                   ENDIF
