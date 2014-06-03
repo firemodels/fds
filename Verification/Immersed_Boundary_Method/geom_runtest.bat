@@ -26,6 +26,8 @@ set fds=..\..\FDS_Compilation\intel_win_64\fds_win_64
 %fds% geom_texture2.fds
 %fds% geom_texture3a.fds
 %fds% geom_texture3b.fds
+%fds% geom_texture4a.fds
+%fds% geom_texture4b.fds
 %fds% geom_time.fds
 %fds% geom_time2.fds
 %fds% geom_time3.fds
