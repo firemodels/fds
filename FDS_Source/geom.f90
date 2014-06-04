@@ -407,8 +407,6 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
       CALL ChkMemErr('READ_GEOM','G%MATLS',IZERO)
       MATL_INDEX = GET_MATL_INDEX(MATL_ID) ! MATL_ID is a SURF until FDS outputs MATL info to the .smv file
       G%MATLS(1:N_VOLUS) = MATL_INDEX
-      
-      N_FACES = 0 ! if there are volumes then ignore any faces
    ENDIF
 
    IF (N_FACES.GT.0) THEN
@@ -1513,7 +1511,11 @@ SUBROUTINE GEOM2TEXTURE
       
       IF (G%NSUB_GEOMS.NE.0.OR.G%TEXTURE_MAPPING.NE.'RECTANGULAR') CYCLE
       DO J = 0, G%N_FACES-1
-         SURF_INDEX = G%SURFS(1+J)
+         IF (G%HAS_SURF.EQ.1) THEN
+           SURF_INDEX = G%SURFS(1+J)
+         ELSE
+           SURF_INDEX = 1
+         ENDIF
          SF=>SURFACE(SURF_INDEX)
          IF (TRIM(SF%TEXTURE_MAP).EQ.'null') CYCLE
          FACES(1:3)=>G%FACES(1+3*J:3+3*J)
