@@ -12,7 +12,7 @@ FDS_DEBUG=0
 nthreads=2
 RUN_SMV=1
 RUN_MPI=1
-RUN_GEOM=1
+RUN_GEOM=0
 
 function usage {
 echo "Run_SMV_Cases.sh [-d -h -o nthreads -p -q queue_name -s ]"
