@@ -46,12 +46,20 @@ typedef struct _triangle {
   point *points[3];
 } triangle;
 
+/* --------------------------  triangle ------------------------------------ */
+
+typedef struct _tetrahedron {
+  float distance, *color, face_norm[4];
+  point *points[4];
+} tetrahedron;
+
 /* --------------------------  geomlistdata ------------------------------------ */
 
 typedef struct {
-  int npoints,ntriangles;
+  int npoints,ntriangles,nvolus;
   point *points;
   triangle *triangles;
+  tetrahedron *volumes;
 } geomlistdata;
 
 /* --------------------------  geomobjdata ------------------------------------ */

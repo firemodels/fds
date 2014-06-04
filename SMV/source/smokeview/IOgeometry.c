@@ -303,6 +303,7 @@ void draw_geom(int flag, int geomtype){
     geomdata *geomi;
     geomlistdata *geomlisti;
     int npoints;
+    int nvolus;
     int j;
     float *color;
 
@@ -316,8 +317,45 @@ void draw_geom(int flag, int geomtype){
     }
     ntris = geomlisti->ntriangles;
     npoints = geomlisti->npoints;
+    nvolus = geomlisti->nvolus;
 
-    // draw geometry outline
+  // draw volume outline
+  
+    if(nvolus>0){
+      glPushMatrix();
+      glScalef(SCALE2SMV(1.0),SCALE2SMV(1.0),SCALE2SMV(1.0));
+      glTranslatef(-xbar0,-ybar0,-zbar0);
+      glBegin(GL_LINES);
+      for(j=0;j<nvolus;j++){
+        tetrahedron *volumei;
+        float *xyzptr[4];
+
+        volumei = geomlisti->volumes+j;
+        xyzptr[0] = volumei->points[0]->xyz;
+        xyzptr[1] = volumei->points[1]->xyz;
+        xyzptr[2] = volumei->points[2]->xyz;
+        xyzptr[3] = volumei->points[3]->xyz;
+        glColor3fv(black);
+        glVertex3fv(xyzptr[0]);
+        glVertex3fv(xyzptr[1]);
+        glVertex3fv(xyzptr[1]);
+        glVertex3fv(xyzptr[2]);
+        glVertex3fv(xyzptr[2]);
+        glVertex3fv(xyzptr[0]);
+
+        glVertex3fv(xyzptr[0]);
+        glVertex3fv(xyzptr[3]);
+        glVertex3fv(xyzptr[1]);
+        glVertex3fv(xyzptr[3]);
+        glVertex3fv(xyzptr[2]);
+        glVertex3fv(xyzptr[3]);
+      }
+
+      glEnd();
+      glPopMatrix();
+    }
+
+    // draw geometry (faces) outline
 
     if(ntris>0&&showtrioutline==1){
       glPushMatrix();
@@ -918,8 +956,10 @@ void read_geom0(geomdata *geomi, int flag, int type, int *errorcode){
     geomlisti = geomi->geomlistinfo+i;
     geomlisti->points=NULL;
     geomlisti->triangles=NULL;
+    geomlisti->volumes=NULL;
     geomlisti->npoints=0;
     geomlisti->ntriangles=0;
+    geomlisti->nvolus=0;
     if(i>=0){
       FORTREADBR(times_local,2,stream);
       geomi->times[i]=times_local[0];
@@ -989,6 +1029,7 @@ void read_geom2(geomdata *geomi, int flag, int type, int *errorcode){
   int i;
   point *points;
   triangle *triangles;
+  tetrahedron *volumes;
   int version;
   int nvertfacesvolus[3];
   int nheaders[3], nfloat_vals, nint_vals, first_frame_static;
@@ -1001,6 +1042,7 @@ void read_geom2(geomdata *geomi, int flag, int type, int *errorcode){
       geomlisti = geomi->geomlistinfo+i;
       FREEMEMORY(geomlisti->points);
       FREEMEMORY(geomlisti->triangles);
+      FREEMEMORY(geomlisti->volumes);
     }  
   }
   FREEMEMORY(geomi->times);
@@ -1048,8 +1090,10 @@ void read_geom2(geomdata *geomi, int flag, int type, int *errorcode){
     geomlisti = geomi->geomlistinfo+i;
     geomlisti->points=NULL;
     geomlisti->triangles=NULL;
+    geomlisti->volumes=NULL;
     geomlisti->npoints=0;
     geomlisti->ntriangles=0;
+    geomlisti->nvolus=0;
 
     FORTREADBR(&time_local,1,stream);
     if(i>=0)geomi->times[i]=time_local;
@@ -1134,9 +1178,23 @@ void read_geom2(geomdata *geomi, int flag, int type, int *errorcode){
       FREEMEMORY(surf_ind);
       if(has_texture==1)FREEMEMORY(texture_coords);
     }
-    if(nvolus>0){ // skip volumes for now
-      FSEEK(stream,4+4*nvolus*4+4,SEEK_CUR);
-      if(has_matl==1)FSEEK(stream,4+nvolus*4+4,SEEK_CUR);
+    if(nvolus>0){ 
+      int ii;
+      int *ijk;
+
+      NewMemory((void **)&volumes,nvolus*sizeof(tetrahedron));
+      geomlisti->volumes=volumes;
+      NewMemory((void **)&ijk,4*nvolus*sizeof(int));
+      FORTREADBR(ijk,4*nvolus,stream);
+      for(ii=0;ii<nvolus;ii++){
+        volumes[ii].points[0]=points+ijk[4*ii]-1;
+        volumes[ii].points[1]=points+ijk[4*ii+1]-1;
+        volumes[ii].points[2]=points+ijk[4*ii+2]-1;
+        volumes[ii].points[3]=points+ijk[4*ii+3]-1;
+      }
+      FREEMEMORY(ijk);
+      if(has_matl==1)FSEEK(stream,4+nvolus*4+4,SEEK_CUR); // skip materials for now
+      geomlisti->nvolus=nvolus;
     }
   }
   geomi->loaded=1;
