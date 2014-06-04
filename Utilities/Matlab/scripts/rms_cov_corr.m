@@ -154,12 +154,12 @@ print(gcf,'-dpdf',plotname);
 clear h
 
 % check errors
-if abs((urms-urms_fds)/urms) > 0.0001
+if abs((urms-urms_fds)/urms) > 0.001
    display(['Matlab Warning: urms in rms_cov_corr is out of tolerance.'])
 end
-if abs((uwcov-uwcov_fds)/urms) > 0.0001
+if abs((uwcov-uwcov_fds)/urms) > 0.001
    display(['Matlab Warning: uwcov in rms_cov_corr is out of tolerance.'])
 end
-if abs((uwcorr-uwcorr_fds)/urms) > 0.0001
+if abs((uwcorr-uwcorr_fds)/urms) > 0.001
    display(['Matlab Warning: uwcorr in rms_cov_corr is out of tolerance.'])
 end
