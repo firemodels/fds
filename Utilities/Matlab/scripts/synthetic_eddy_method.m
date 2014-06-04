@@ -206,6 +206,75 @@ if urms_error>error_tolerance
     display(['Matlab Warning: sem_atm_leddy_p2.fds urms_error = ',num2str(urms_error)])
 end
 
+% RAMP profile
+% -------------------
+figure
+
+if ~exist([datadir,'sem_ramp_leddy_p2_line.csv'])
+   display(['Error: File ',[datadir,'sem_ramp_leddy_p2_line.csv'],' does not exist. Skipping case.'])
+   return
+end
+
+M = importdata([datadir,'sem_ramp_leddy_p2_line.csv'],',',2);
+
+k = find(strcmp(M.colheaders,'umean'));
+z = M.data(:,k-1);
+umean = M.data(:,k);
+
+u0=1;
+for i=1:length(z)
+    if z(i)<.5
+        uprof(i) = z(i)*2*u0;
+    else
+        uprof(i) = (1-z(i))*2*u0;
+    end
+end
+
+H(1)=plot(uprof,z,'k-'); hold on
+H(2)=plot(1.1*uprof,z,'k--');
+plot(0.9*uprof,z,'k--')
+
+H(3)=plot(umean,z,'b>-');
+axis([0 1.75 0 1])
+xlabel('{\it u} (m/s)')
+ylabel('{\it z} (m)')
+
+k = find(strcmp(M.colheaders,'urms'));
+z = M.data(:,k-1);
+urms = M.data(:,k);
+
+H(4)=plot(umean+urms,z,'r--');
+plot(umean-urms,z,'r--')
+
+h = legend(H,'Prescribed mean','Prescribed rms','FDS mean','FDS rms','location','northeast');
+set(h,'Interpreter',Font_Interpreter)
+
+% add SVN if file is available
+
+SVN_Filename = [datadir,'sem_atm_leddy_p2_svn.txt'];
+if exist(SVN_Filename,'file')
+    SVN = importdata(SVN_Filename);
+    x_lim = get(gca,'XLim');
+    y_lim = get(gca,'YLim');
+    X_SVN_Position = x_lim(1)+SVN_Scale_X*(x_lim(2)-x_lim(1));
+    Y_SVN_Position = y_lim(1)+SVN_Scale_Y*(y_lim(2)-y_lim(1));
+    text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
+        'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
+end
+
+% print to pdf
+print(gcf,'-dpdf',[plotdir,'sem_ramp_leddy_p2'])
+
+% compute error
+umean_error = norm(umean-uprof)/u0/length(umean);
+if umean_error>error_tolerance
+    display(['Matlab Warning: sem_ramp_leddy_p2.fds umean_error = ',num2str(umean_error)])
+end
+
+urms_error = norm(umean+urms-1.1*uprof)/u0/length(umean);
+if urms_error>error_tolerance
+    display(['Matlab Warning: sem_ramp_leddy_p2.fds urms_error = ',num2str(urms_error)])
+end
 
 
 
