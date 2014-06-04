@@ -4067,10 +4067,31 @@ void VentMenu(int value){
 #define IMMERSED_SOLID 0
 #define IMMERSED_OUTLINE 1
 #define IMMERSED_SOLIDOUTLINE 2
+#define IMMERSED_EXTERIOR 8
+#define IMMERSED_INTERIOR 9
+#define IMMERSED_DUPLICATES 10
 #define IMMERSED_HIDE 7
 void ImmersedMenu(int value){
   updatemenu=1;
   switch (value){
+
+    case IMMERSED_EXTERIOR:
+      show_geometry_exterior=1-show_geometry_exterior;
+      break;
+    case IMMERSED_INTERIOR:
+      show_geometry_interior=1-show_geometry_interior;
+      break;
+    case IMMERSED_DUPLICATES:
+      show_geometry_duplicates=1-show_geometry_duplicates;
+      if(show_geometry_duplicates==1){
+        show_geometry_exterior=0;
+        show_geometry_interior=0;
+      }
+      else{
+        show_geometry_exterior=1;
+        show_geometry_interior=1;
+      }
+      break;
     case IMMERSED_SOLIDOUTLINE:
       if(showtrisurface==1&&showtrioutline==1){
         showtrisurface=1;
@@ -4918,54 +4939,63 @@ updatemenu=0;
 
   CREATEMENU(immersedmenu,ImmersedMenu);
   glutAddMenuEntry(_("View Method:"),999);
+  glutAddMenuEntry("Volumes",999);
+  if(show_geometry_exterior==1)glutAddMenuEntry(_("   *Show exterior"),IMMERSED_EXTERIOR);
+  if(show_geometry_exterior==0)glutAddMenuEntry(_("   Show exterior"),IMMERSED_EXTERIOR);
+  if(show_geometry_interior==1)glutAddMenuEntry(_("   *Show interior"),IMMERSED_INTERIOR);
+  if(show_geometry_interior==0)glutAddMenuEntry(_("   Show interior"),IMMERSED_INTERIOR);
+  if(show_geometry_duplicates==1)glutAddMenuEntry(_("   *Show only duplicates"),IMMERSED_DUPLICATES);
+  if(show_geometry_duplicates==0)glutAddMenuEntry(_("   Show only duplicates"),IMMERSED_DUPLICATES);
+
+  glutAddMenuEntry("Faces",999);
   if(showtrisurface==1&&showtrioutline==1){
-    glutAddMenuEntry(_(" *Solid and outline"),IMMERSED_SOLIDOUTLINE);
+    glutAddMenuEntry(_("   *Solid and outline"),IMMERSED_SOLIDOUTLINE);
   }
   else{
-    glutAddMenuEntry(_(" Solid and outline"),IMMERSED_SOLIDOUTLINE);
+    glutAddMenuEntry(_("   Solid and outline"),IMMERSED_SOLIDOUTLINE);
   }
   if(showtrisurface==1){
-    glutAddMenuEntry(_(" *Solid only"),IMMERSED_SOLID);
+    glutAddMenuEntry(_("   *Solid only"),IMMERSED_SOLID);
   }
   else{
-    glutAddMenuEntry(_(" Solid only"),IMMERSED_SOLID);
+    glutAddMenuEntry(_("   Solid only"),IMMERSED_SOLID);
   }
   if(showtrioutline==1){
-    glutAddMenuEntry(_(" *Outline only"),IMMERSED_OUTLINE);
+    glutAddMenuEntry(_("   *Outline only"),IMMERSED_OUTLINE);
   }
   else{
-    glutAddMenuEntry(_(" Outline only"),IMMERSED_OUTLINE);
+    glutAddMenuEntry(_("   Outline only"),IMMERSED_OUTLINE);
   }
   if(showtrisurface==0&&showtrioutline==0){
-    glutAddMenuEntry(_(" *Hide"),IMMERSED_HIDE);
+    glutAddMenuEntry(_("   *Hide"),IMMERSED_HIDE);
   }
   else{
-    glutAddMenuEntry(_(" Hide"),IMMERSED_HIDE);
+    glutAddMenuEntry(_("   Hide"),IMMERSED_HIDE);
   }
   if(sort_embedded_geometry==1){
-    glutAddMenuEntry(_(" *Sort faces"),6);
+    glutAddMenuEntry(_("   *Sort faces"),6);
   }
   else{
-    glutAddMenuEntry(_(" Sort faces"),6);
+    glutAddMenuEntry(_("   Sort faces"),6);
   }
 #ifdef pp_BETA
   if(showtrinormal==1){
-    glutAddMenuEntry(_(" *Show normal"),3);
+    glutAddMenuEntry(_("   *Show normal"),3);
   }
   else{
-    glutAddMenuEntry(_(" Show normal"),3);
+    glutAddMenuEntry(_("   Show normal"),3);
   }
   if(smoothtrinormal==1){
-    glutAddMenuEntry(_(" *Smooth normal"),4);
+    glutAddMenuEntry(_("   *Smooth normal"),4);
   }
   else{
-    glutAddMenuEntry(_(" Smooth normal"),4);
+    glutAddMenuEntry(_("   Smooth normal"),4);
   }
   if(hilight_skinny==1){
-    glutAddMenuEntry(_(" *Hilight skinny triangles"),5);
+    glutAddMenuEntry(_("   *Hilight skinny triangles"),5);
   }
   else{
-    glutAddMenuEntry(_(" Hilight skinny triangles"),5);
+    glutAddMenuEntry(_("   Hilight skinny triangles"),5);
   }
 #endif
 

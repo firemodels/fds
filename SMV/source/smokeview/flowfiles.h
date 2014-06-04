@@ -39,17 +39,19 @@ typedef struct {
 /* --------------------------  triangle ------------------------------------ */
 
 typedef struct _triangle {
-  unsigned char interior, skinny;
+  unsigned char skinny;
   float distance, *color, tpoints[6], tri_norm[3];
   struct _texturedata *textureinfo;
   struct _surfdata *surf;
+  int vert_index[3], interior;
   point *points[3];
 } triangle;
 
-/* --------------------------  triangle ------------------------------------ */
+/* --------------------------  tetrahedron ------------------------------------ */
 
 typedef struct _tetrahedron {
   float distance, *color, face_norm[4];
+  int vert_index[4],exterior[4],duplicate[4],faces[12];
   point *points[4];
 } tetrahedron;
 

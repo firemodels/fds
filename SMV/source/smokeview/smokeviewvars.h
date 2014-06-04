@@ -23,6 +23,9 @@
 #include "smokeheaders.h"
 #include "threader.h"
 
+SVEXTERN int SVDECL(show_geometry_exterior,1);
+SVEXTERN int SVDECL(show_geometry_interior,1);
+SVEXTERN int SVDECL(show_geometry_duplicates,0);
 SVEXTERN int SVDECL(show_slices_and_vectors,0);
 #ifdef pp_PILOT
 SVEXTERN int SVDECL(vispilot,0);

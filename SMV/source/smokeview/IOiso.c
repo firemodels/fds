@@ -170,7 +170,7 @@ void getisosizes(const char *isofile, int dataflag, EGZ_FILE **isostreamptr, int
 
 /* ------------------ readiso_geom ------------------------ */
 
-void readiso_geom(const char *file, int ifile, int flag, int *errorcode){
+void readiso_geom(const char *file, int ifile, int load_flag, int *errorcode){
   isodata *isoi;
   geomdata *geomi;
   int ilevel,error;
@@ -183,8 +183,8 @@ void readiso_geom(const char *file, int ifile, int flag, int *errorcode){
   geomi = isoi->geominfo;
   unloadiso(meshi);
 
-  read_geom(geomi,flag,GEOM_ISO,errorcode);
-  if(flag==UNLOAD){
+  read_geom(geomi,load_flag,GEOM_ISO,errorcode);
+  if(load_flag==UNLOAD){
     FREEMEMORY(meshi->iso_times);
     FREEMEMORY(meshi->showlevels);
     meshi->isofilenum=-1;

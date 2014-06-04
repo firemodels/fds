@@ -986,7 +986,7 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
 
 /* ------------------ readpatch ------------------------ */
 
-void readpatch(int ifile, int flag, int *errorcode){
+void readpatch(int ifile, int load_flag, int *errorcode){
   patchdata *patchi;
 
   patchi = patchinfo + ifile;
@@ -995,12 +995,12 @@ void readpatch(int ifile, int flag, int *errorcode){
 
     ASSERT(ifile>=0&&ifile<ngeominfo);
     geomi = geominfo + ifile;
-  //  read_geom(geomi,flag,GEOM_NORMAL,errorcode); // do not unload geometry when unloading data
-    read_geomdata(ifile,flag,errorcode);
+  //  read_geom(geomi,load_flag,GEOM_NORMAL,errorcode); // do not unload geometry when unloading data
+    read_geomdata(ifile,load_flag,errorcode);
   }
   else{
     ASSERT(ifile>=0&&ifile<npatchinfo);
-    readpatch_bndf(ifile,flag,errorcode);
+    readpatch_bndf(ifile,load_flag,errorcode);
   }
 }
 

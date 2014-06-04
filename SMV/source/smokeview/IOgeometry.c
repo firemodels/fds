@@ -329,26 +329,38 @@ void draw_geom(int flag, int geomtype){
       for(j=0;j<nvolus;j++){
         tetrahedron *volumei;
         float *xyzptr[4];
+        int *exterior,*duplicate;
+        //             0
+        //               \
+        //           /   .3
+        //             .  3
+        //         / .  ./  
+        //         1---2
+        //
+        int facelist[12]={0,1,2, 0,2,3, 0,3,1, 1,3,2};
+        int k;
 
         volumei = geomlisti->volumes+j;
+        exterior = volumei->exterior;
+        duplicate = volumei->duplicate;
         xyzptr[0] = volumei->points[0]->xyz;
         xyzptr[1] = volumei->points[1]->xyz;
         xyzptr[2] = volumei->points[2]->xyz;
         xyzptr[3] = volumei->points[3]->xyz;
         glColor3fv(black);
-        glVertex3fv(xyzptr[0]);
-        glVertex3fv(xyzptr[1]);
-        glVertex3fv(xyzptr[1]);
-        glVertex3fv(xyzptr[2]);
-        glVertex3fv(xyzptr[2]);
-        glVertex3fv(xyzptr[0]);
 
-        glVertex3fv(xyzptr[0]);
-        glVertex3fv(xyzptr[3]);
-        glVertex3fv(xyzptr[1]);
-        glVertex3fv(xyzptr[3]);
-        glVertex3fv(xyzptr[2]);
-        glVertex3fv(xyzptr[3]);
+        for(k=0;k<4;k++){
+          if(exterior[k]==1&&show_geometry_exterior==1||
+             exterior[k]==0&&show_geometry_interior==1||
+             duplicate[k]==1&&show_geometry_duplicates==1){
+               glVertex3fv(xyzptr[facelist[3*k]]);
+               glVertex3fv(xyzptr[facelist[3*k+1]]);
+               glVertex3fv(xyzptr[facelist[3*k+1]]);
+               glVertex3fv(xyzptr[facelist[3*k+2]]);
+               glVertex3fv(xyzptr[facelist[3*k+2]]);
+               glVertex3fv(xyzptr[facelist[3*k+0]]);
+          }
+        }
       }
 
       glEnd();
@@ -893,7 +905,7 @@ void read_all_geom(void){
 
 /* ------------------ read_geom0 ------------------------ */
 
-void read_geom0(geomdata *geomi, int flag, int type, int *errorcode){
+void read_geom0(geomdata *geomi, int load_flag, int type, int *errorcode){
   FILE *stream;
   int one=1, endianswitch=0;
   int returncode;
@@ -922,7 +934,7 @@ void read_geom0(geomdata *geomi, int flag, int type, int *errorcode){
   geomi->nfloat_vals=0;
   geomi->nint_vals=0;
 
-  if(flag==UNLOAD){
+  if(load_flag==UNLOAD){
     geomi->loaded=0;
     geomi->display=0;
     return;
@@ -1021,7 +1033,7 @@ void read_geom0(geomdata *geomi, int flag, int type, int *errorcode){
 
 /* ------------------ read_geom2 ------------------------ */
 
-void read_geom2(geomdata *geomi, int flag, int type, int *errorcode){
+void read_geom2(geomdata *geomi, int load_flag, int type, int *errorcode){
   FILE *stream;
   int one=1, endianswitch=0;
   int returncode;
@@ -1053,7 +1065,7 @@ void read_geom2(geomdata *geomi, int flag, int type, int *errorcode){
   geomi->nfloat_vals=0;
   geomi->nint_vals=0;
 
-  if(flag==UNLOAD){
+  if(load_flag==UNLOAD){
     geomi->loaded=0;
     geomi->display=0;
     return;
@@ -1201,9 +1213,157 @@ void read_geom2(geomdata *geomi, int flag, int type, int *errorcode){
   geomi->display=1;
 }
 
+/* ------------------ reorder_face ------------------------ */
+
+void reorder_face(int *faces){
+  int face_temp[5];
+
+  face_temp[0]=faces[0];
+  face_temp[1]=faces[1];
+  face_temp[2]=faces[2];
+  face_temp[3]=faces[0];
+  face_temp[4]=faces[1];
+  if(faces[0]<=MIN(faces[1],faces[2]))return;
+  if(faces[1]<=MIN(faces[0],faces[2])){
+    faces[0]=face_temp[1];
+    faces[1]=face_temp[2];
+    faces[2]=face_temp[3];
+    return;
+  }
+  faces[0]=face_temp[2];
+  faces[1]=face_temp[3];
+  faces[2]=face_temp[4];
+}
+
+/* ------------------ find_common_face ------------------------ */
+
+void find_common_face(tetrahedron *tetra1, tetrahedron *tetra2){
+  int *verts1,*verts2, *face1, *face2;
+  int i;
+  int ncommon=0;
+
+  verts1=tetra1->vert_index;
+  verts2=tetra2->vert_index;
+  face1=tetra1->faces;
+  face2=tetra2->faces;
+  for(i=0;i<4;i++){
+    int j;
+
+    for(j=0;j<4;j++){
+      if(verts1[i]==verts2[j]){
+        ncommon++;
+        break;
+      }
+    }
+  }
+  if(ncommon<3)return; // two tetrahedrons need at least 3 common vertices to have a common face
+
+  for(i=0;i<4;i++){
+    int j;
+    int *facei;
+
+    facei = face1 + 3*i;
+
+    for(j=0;j<4;j++){
+      int *facej;
+
+      facej = face2 + 3*j;
+      if(facei[0]!=facej[0])continue;
+      if(facei[1]==facej[1]&&facei[2]==facej[2]){ // duplicate face
+        tetra1->duplicate[i]=1;
+        tetra2->duplicate[j]=1;
+      }
+      if(facei[1]==facej[2]&&facei[2]==facej[1]){ // exterior face
+        tetra1->exterior[i]=0;
+        tetra2->exterior[j]=0;
+      }
+
+    }
+  }
+
+}
+
+/* ------------------ classify_geom ------------------------ */
+
+void classify_geom(geomdata *geomi){
+  int ntimes,i;
+  
+  ntimes = geomi->ntimes;
+  for(i=-1;i<ntimes;i++){
+    float time_local;
+    geomlistdata *geomlisti;
+    int nverts, ntris, nvolus;
+    int j;
+    point *pointbase;
+
+    geomlisti = geomi->geomlistinfo+i;
+    nverts=geomlisti->npoints;
+    nvolus=geomlisti->nvolus;
+    if(nverts==0||nvolus==0||geomlisti->points==NULL)continue;
+    pointbase = geomlisti->points;
+    for(j=0;j<nvolus;j++){
+      tetrahedron *tetrai;
+      int *vert_index;
+      point **points;
+      int *faces;
+
+      tetrai = geomlisti->volumes+j;
+      vert_index = tetrai->vert_index;
+      points = tetrai->points;
+      faces = tetrai->faces;
+      tetrai->exterior[0]=1;
+      tetrai->exterior[1]=1;
+      tetrai->exterior[2]=1;
+      tetrai->exterior[3]=1;
+      tetrai->duplicate[0]=0;
+      tetrai->duplicate[1]=0;
+      tetrai->duplicate[2]=0;
+      tetrai->duplicate[3]=0;
+      vert_index[0] = points[0]-pointbase;
+      vert_index[1] = points[1]-pointbase;
+      vert_index[2] = points[2]-pointbase;
+      vert_index[3] = points[3]-pointbase;
+
+      faces[0]=vert_index[0];
+      faces[1]=vert_index[1];
+      faces[2]=vert_index[2];
+      reorder_face(faces);
+
+      faces[3]=vert_index[0];
+      faces[4]=vert_index[2];
+      faces[5]=vert_index[3];
+      reorder_face(faces+3);
+
+      faces[6]=vert_index[0];
+      faces[7]=vert_index[3];
+      faces[8]=vert_index[1];
+      reorder_face(faces+6);
+
+      faces[9]=vert_index[1];
+      faces[10]=vert_index[3];
+      faces[11]=vert_index[2];
+      reorder_face(faces+9);
+    }
+    for(j=0;j<nvolus;j++){
+      int k;
+      tetrahedron *tetraj;
+
+      tetraj = geomlisti->volumes+j;
+
+      for(k=0;k<nvolus;k++){
+        tetrahedron *tetrak;
+
+          if(j==k)continue;
+          tetrak = geomlisti->volumes+k;
+          find_common_face(tetraj,tetrak);
+      }
+    }
+  }
+}
+
 /* ------------------ read_geom ------------------------ */
 
-void read_geom(geomdata *geomi, int flag, int type, int *errorcode){
+void read_geom(geomdata *geomi, int load_flag, int type, int *errorcode){
   FILE *stream;
   int version;
   int returncode;
@@ -1219,16 +1379,17 @@ void read_geom(geomdata *geomi, int flag, int type, int *errorcode){
   fclose(stream);
 
   if(version<=1){
-    read_geom0(geomi,flag,type,errorcode);
+    read_geom0(geomi,load_flag,type,errorcode);
   }
   else{
-    read_geom2(geomi,flag,type,errorcode);
+    read_geom2(geomi,load_flag,type,errorcode);
   }
+  if(load_flag==LOAD)classify_geom(geomi);
 }
 
 /* ------------------ read_geomdata ------------------------ */
 
-void read_geomdata(int ifile, int flag, int *errorcode){
+void read_geomdata(int ifile, int load_flag, int *errorcode){
   patchdata *patchi;
   char *file;
   int ntimes_local;
@@ -1260,7 +1421,7 @@ void read_geomdata(int ifile, int flag, int *errorcode){
   FREEMEMORY(patchi->geom_vals);
   FREEMEMORY(patchi->geom_ivals);
   FREEMEMORY(patchi->geom_times);
-  if(flag==UNLOAD){
+  if(load_flag==UNLOAD){
     plotstate=getplotstate(DYNAMIC_PLOTS);
     update_patchtype();
     update_unit_defs();
