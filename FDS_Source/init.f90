@@ -2130,29 +2130,6 @@ PROCESS_VENT: IF (WC%VENT_INDEX>0) THEN
       ENDIF
       WC%UW0 =  WC%UW0*((M%ZC(K)-GROUND_LEVEL)/SF%Z0)**SF%PLE
    ENDIF
- 
-   IF (SF%PROFILE==ONED_PARABOLIC_PROFILE) THEN 
-      SELECT CASE(ABS(IOR))
-         CASE(1)
-            Y1 = M%Y(VT%J1)
-            Y2 = M%Y(VT%J2)
-            PY = 4._EB*(M%YC(J)-Y1)*(Y2-M%YC(J))/(Y2-Y1)**2
-            WC%UW0 =  WC%UW0*PY
-         CASE(2)
-            X1 = M%X(VT%I1)
-            X2 = M%X(VT%I2)
-            PX = 4._EB*(M%XC(I)-X1)*(X2-M%XC(I))/(X2-X1)**2
-            WC%UW0 =  WC%UW0*PX
-         CASE(3)
-            X1 = M%X(VT%I1)
-            X2 = M%X(VT%I2)
-            Y1 = M%Y(VT%J1)
-            Y2 = M%Y(VT%J2)
-            PX = 4._EB*(M%XC(I)-X1)*(X2-M%XC(I))/(X2-X1)**2
-            PY = 4._EB*(M%YC(J)-Y1)*(Y2-M%YC(J))/(Y2-Y1)**2
-            WC%UW0 =  WC%UW0*PX*PY
-      END SELECT
-   ENDIF
 
    IF (SF%PROFILE==RAMP_PROFILE) THEN
       SELECT CASE(ABS(IOR))

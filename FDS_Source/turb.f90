@@ -1344,21 +1344,22 @@ VENT_LOOP: DO NV=1,N_VENT
       CASE(1)
          EDDY_LOOP_1: DO NE=1,VT%N_EDDY ! loop over eddies
             ! This IF block is needed because eddies may be centered outside the vent.
-            IF (VT%Y_EDDY(NE)>VT%Y1 .AND. VT%Y_EDDY(NE)<VT%Y2 .AND. &
-                VT%Z_EDDY(NE)>VT%Z1 .AND. VT%Z_EDDY(NE)<VT%Z2 .AND. &
-                VT%Y_EDDY(NE)>YS .AND. VT%Y_EDDY(NE)<YF .AND. &
-                VT%Z_EDDY(NE)>ZS .AND. VT%Z_EDDY(NE)<ZF .AND. &
-                ABS(SF%VEL)>TWO_EPSILON_EB) THEN
-               SELECT CASE (VT%IOR)
-                  CASE( 1); CALL GET_IJK(VT%X1+EPSDX,VT%Y_EDDY(NE),VT%Z_EDDY(NE),NM,XI,YJ,ZK,II,JJ,KK)
-                  CASE(-1); CALL GET_IJK(VT%X1-EPSDX,VT%Y_EDDY(NE),VT%Z_EDDY(NE),NM,XI,YJ,ZK,II,JJ,KK)
-               END SELECT
-               IC = CELL_INDEX(II,JJ,KK)
-               IW = WALL_INDEX(IC,-VT%IOR)
-               PROFILE_FACTOR = ABS(WALL(IW)%UW0/SF%VEL)
-            ELSE
-               PROFILE_FACTOR = 0._EB
-            ENDIF
+!             IF (VT%Y_EDDY(NE)>VT%Y1 .AND. VT%Y_EDDY(NE)<VT%Y2 .AND. &
+!                 VT%Z_EDDY(NE)>VT%Z1 .AND. VT%Z_EDDY(NE)<VT%Z2 .AND. &
+!                 VT%Y_EDDY(NE)>YS .AND. VT%Y_EDDY(NE)<YF .AND. &
+!                 VT%Z_EDDY(NE)>ZS .AND. VT%Z_EDDY(NE)<ZF .AND. &
+!                 ABS(SF%VEL)>TWO_EPSILON_EB) THEN
+!                SELECT CASE (VT%IOR)
+!                   CASE( 1); CALL GET_IJK(VT%X1+EPSDX,VT%Y_EDDY(NE),VT%Z_EDDY(NE),NM,XI,YJ,ZK,II,JJ,KK)
+!                   CASE(-1); CALL GET_IJK(VT%X1-EPSDX,VT%Y_EDDY(NE),VT%Z_EDDY(NE),NM,XI,YJ,ZK,II,JJ,KK)
+!                END SELECT
+!                IC = CELL_INDEX(II,JJ,KK)
+!                IW = WALL_INDEX(IC,-VT%IOR)
+!                PROFILE_FACTOR = ABS(WALL(IW)%UW0/SF%VEL)
+!             ELSE
+!                PROFILE_FACTOR = 0._EB
+!             ENDIF
+            PROFILE_FACTOR=1._EB
             VT%X_EDDY(NE) = VT%X_EDDY(NE) - DT*SF%VEL*SIGN(1._EB,REAL(VT%IOR,EB))*PROFILE_FACTOR*RAMP_T
             VT%Y_EDDY(NE) = VT%Y_EDDY(NE) + DT*SF%VEL_T(1)*PROFILE_FACTOR*RAMP_T
             VT%Z_EDDY(NE) = VT%Z_EDDY(NE) + DT*SF%VEL_T(2)*PROFILE_FACTOR*RAMP_T
@@ -1388,21 +1389,22 @@ VENT_LOOP: DO NV=1,N_VENT
          ENDDO EDDY_LOOP_1
       CASE(2)
          EDDY_LOOP_2: DO NE=1,VT%N_EDDY
-            IF (VT%X_EDDY(NE)>VT%X1 .AND. VT%X_EDDY(NE)<VT%X2 .AND. &
-                VT%Z_EDDY(NE)>VT%Z1 .AND. VT%Z_EDDY(NE)<VT%Z2 .AND. &
-                VT%X_EDDY(NE)>XS .AND. VT%X_EDDY(NE)<XF .AND. &
-                VT%Z_EDDY(NE)>ZS .AND. VT%Z_EDDY(NE)<ZF .AND. &
-                ABS(SF%VEL)>TWO_EPSILON_EB) THEN
-               SELECT CASE (VT%IOR)
-                  CASE( 2); CALL GET_IJK(VT%X_EDDY(NE),VT%Y1+EPSDX,VT%Z_EDDY(NE),NM,XI,YJ,ZK,II,JJ,KK)
-                  CASE(-2); CALL GET_IJK(VT%X_EDDY(NE),VT%Y1-EPSDX,VT%Z_EDDY(NE),NM,XI,YJ,ZK,II,JJ,KK)
-               END SELECT
-               IC = CELL_INDEX(II,JJ,KK)
-               IW = WALL_INDEX(IC,-VT%IOR)
-               PROFILE_FACTOR = ABS(WALL(IW)%UW0/SF%VEL)
-            ELSE
-               PROFILE_FACTOR = 0._EB
-            ENDIF
+!             IF (VT%X_EDDY(NE)>VT%X1 .AND. VT%X_EDDY(NE)<VT%X2 .AND. &
+!                 VT%Z_EDDY(NE)>VT%Z1 .AND. VT%Z_EDDY(NE)<VT%Z2 .AND. &
+!                 VT%X_EDDY(NE)>XS .AND. VT%X_EDDY(NE)<XF .AND. &
+!                 VT%Z_EDDY(NE)>ZS .AND. VT%Z_EDDY(NE)<ZF .AND. &
+!                 ABS(SF%VEL)>TWO_EPSILON_EB) THEN
+!                SELECT CASE (VT%IOR)
+!                   CASE( 2); CALL GET_IJK(VT%X_EDDY(NE),VT%Y1+EPSDX,VT%Z_EDDY(NE),NM,XI,YJ,ZK,II,JJ,KK)
+!                   CASE(-2); CALL GET_IJK(VT%X_EDDY(NE),VT%Y1-EPSDX,VT%Z_EDDY(NE),NM,XI,YJ,ZK,II,JJ,KK)
+!                END SELECT
+!                IC = CELL_INDEX(II,JJ,KK)
+!                IW = WALL_INDEX(IC,-VT%IOR)
+!                PROFILE_FACTOR = ABS(WALL(IW)%UW0/SF%VEL)
+!             ELSE
+!                PROFILE_FACTOR = 0._EB
+!             ENDIF
+            PROFILE_FACTOR=1._EB
             VT%X_EDDY(NE) = VT%X_EDDY(NE) + DT*SF%VEL_T(2)*PROFILE_FACTOR*RAMP_T
             VT%Y_EDDY(NE) = VT%Y_EDDY(NE) - DT*SF%VEL*SIGN(1._EB,REAL(VT%IOR,EB))*PROFILE_FACTOR*RAMP_T
             VT%Z_EDDY(NE) = VT%Z_EDDY(NE) + DT*SF%VEL_T(1)*PROFILE_FACTOR*RAMP_T
@@ -1432,21 +1434,22 @@ VENT_LOOP: DO NV=1,N_VENT
          ENDDO EDDY_LOOP_2
       CASE(3)
          EDDY_LOOP_3: DO NE=1,VT%N_EDDY
-            IF (VT%X_EDDY(NE)>VT%X1 .AND. VT%X_EDDY(NE)<VT%X2 .AND. &
-                VT%Y_EDDY(NE)>VT%Y1 .AND. VT%Y_EDDY(NE)<VT%Y2 .AND. &
-                VT%X_EDDY(NE)>XS .AND. VT%X_EDDY(NE)<XF .AND. &
-                VT%Y_EDDY(NE)>YS .AND. VT%Y_EDDY(NE)<YF .AND. &
-                ABS(SF%VEL)>TWO_EPSILON_EB) THEN
-               SELECT CASE (VT%IOR)
-                  CASE( 3); CALL GET_IJK(VT%X_EDDY(NE),VT%Y_EDDY(NE),VT%Z1+EPSDX,NM,XI,YJ,ZK,II,JJ,KK)
-                  CASE(-3); CALL GET_IJK(VT%X_EDDY(NE),VT%Y_EDDY(NE),VT%Z1-EPSDX,NM,XI,YJ,ZK,II,JJ,KK)
-               END SELECT
-               IC = CELL_INDEX(II,JJ,KK)
-               IW = WALL_INDEX(IC,-VT%IOR)
-               PROFILE_FACTOR = ABS(WALL(IW)%UW0/SF%VEL)
-            ELSE
-               PROFILE_FACTOR = 0._EB
-            ENDIF
+!             IF (VT%X_EDDY(NE)>VT%X1 .AND. VT%X_EDDY(NE)<VT%X2 .AND. &
+!                 VT%Y_EDDY(NE)>VT%Y1 .AND. VT%Y_EDDY(NE)<VT%Y2 .AND. &
+!                 VT%X_EDDY(NE)>XS .AND. VT%X_EDDY(NE)<XF .AND. &
+!                 VT%Y_EDDY(NE)>YS .AND. VT%Y_EDDY(NE)<YF .AND. &
+!                 ABS(SF%VEL)>TWO_EPSILON_EB) THEN
+!                SELECT CASE (VT%IOR)
+!                   CASE( 3); CALL GET_IJK(VT%X_EDDY(NE),VT%Y_EDDY(NE),VT%Z1+EPSDX,NM,XI,YJ,ZK,II,JJ,KK)
+!                   CASE(-3); CALL GET_IJK(VT%X_EDDY(NE),VT%Y_EDDY(NE),VT%Z1-EPSDX,NM,XI,YJ,ZK,II,JJ,KK)
+!                END SELECT
+!                IC = CELL_INDEX(II,JJ,KK)
+!                IW = WALL_INDEX(IC,-VT%IOR)
+!                PROFILE_FACTOR = ABS(WALL(IW)%UW0/SF%VEL)
+!             ELSE
+!                PROFILE_FACTOR = 0._EB
+!             ENDIF
+            PROFILE_FACTOR=1._EB
             VT%X_EDDY(NE) = VT%X_EDDY(NE) + DT*SF%VEL_T(1)*PROFILE_FACTOR*RAMP_T
             VT%Y_EDDY(NE) = VT%Y_EDDY(NE) + DT*SF%VEL_T(2)*PROFILE_FACTOR*RAMP_T
             VT%Z_EDDY(NE) = VT%Z_EDDY(NE) - DT*SF%VEL*SIGN(1._EB,REAL(VT%IOR,EB))*PROFILE_FACTOR*RAMP_T
