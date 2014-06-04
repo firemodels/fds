@@ -17,7 +17,7 @@ error_tolerance = 0.01;
 figure
 
 if ~exist([datadir,'sem_flat_leddy_p2_line.csv'])
-   display(['Error: File ', [datadir,'sem_flat_leddy_p2_line.csv'],' does not exist. Skipping case.'])
+   display(['Error: File ',[datadir,'sem_flat_leddy_p2_line.csv'],' does not exist. Skipping case.'])
    return
 end
 
@@ -35,8 +35,8 @@ plot(0.9*uprof,z,'k--')
 
 H(3)=plot(umean,z,'b>-');
 axis([.4 1.2 0 1])
-xlabel('\it{u} (m/s)')
-ylabel('\it{z} (m)')
+xlabel('{\it u} (m/s)')
+ylabel('{\it z} (m)')
 
 k = find(strcmp(M.colheaders,'urms'));
 z = M.data(:,k-1);
@@ -81,7 +81,7 @@ end
 figure
 
 if ~exist([datadir,'sem_par_leddy_p2_line.csv'])
-   display(['Error: File ', [datadir,'sem_par_leddy_p2_line.csv'],' does not exist. Skipping case.'])
+   display(['Error: File ',[datadir,'sem_par_leddy_p2_line.csv'],' does not exist. Skipping case.'])
    return
 end
 
@@ -101,8 +101,8 @@ plot(0.9*uprof,z,'k--')
 
 H(3)=plot(umean,z,'b>-');
 axis([0 1.2 0 1])
-xlabel('\it{u} (m/s)')
-ylabel('\it{z} (m)')
+xlabel('{\it u} (m/s)')
+ylabel('{\itz} (m)')
 
 k = find(strcmp(M.colheaders,'urms'));
 z = M.data(:,k-1);
@@ -146,7 +146,7 @@ end
 figure
 
 if ~exist([datadir,'sem_atm_leddy_p2_line.csv'])
-   display(['Error: File ', [datadir,'sem_atm_leddy_p2_line.csv'],' does not exist. Skipping case.'])
+   display(['Error: File ',[datadir,'sem_atm_leddy_p2_line.csv'],' does not exist. Skipping case.'])
    return
 end
 
@@ -166,8 +166,8 @@ plot(0.9*uprof,z,'k--')
 
 H(3)=plot(umean,z,'b>-');
 axis([0 1.4 0 1])
-xlabel('\it{u} (m/s)')
-ylabel('\it{z} (m)')
+xlabel('{\it u} (m/s)')
+ylabel('{\it z} (m)')
 
 k = find(strcmp(M.colheaders,'urms'));
 z = M.data(:,k-1);
