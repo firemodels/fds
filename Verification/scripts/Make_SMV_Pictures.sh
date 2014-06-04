@@ -37,7 +37,7 @@ DEBUG=
 TEST=
 use_installed="0"
 RUN_SMV=1
-RUN_GEOM=1
+RUN_GEOM=0
 
 while getopts 'dghis:t' OPTION
 do
