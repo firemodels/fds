@@ -2855,112 +2855,114 @@ CASE(1)
 
 CASE(2) ! Kernel smoothing. Experimental
 
-FVXN  => WORK4
-FVYN  => WORK5
-FVZN  => WORK6
+   FVXN  => WORK4
+   FVYN  => WORK5
+   FVZN  => WORK6
 
-FVXN  = 0._EB
-FVYN  = 0._EB
-FVZN  = 0._EB
+   FVXN  = 0._EB
+   FVYN  = 0._EB
+   FVZN  = 0._EB
 
-SUMX=0._EB
-SUMY=0._EB
-SUMZ=0._EB
-SUM_MOMENTUM_LOOP2: DO I=1,NLP
-   LP=>LAGRANGIAN_PARTICLE(I)
-   LPC=>LAGRANGIAN_PARTICLE_CLASS(LP%CLASS_INDEX)
-   IF (LPC%MASSLESS_TRACER .OR. LPC%MASSLESS_TARGET) CYCLE SUM_MOMENTUM_LOOP2
-   IF (LP%ONE_D%IOR/=0) CYCLE SUM_MOMENTUM_LOOP2
-   CALL GET_IJK(LP%X,LP%Y,LP%Z,NM,XI,YJ,ZK,II,JJ,KK)
-   IF (SOLID(CELL_INDEX(II,JJ,KK))) CYCLE SUM_MOMENTUM_LOOP2
-   IF (AVG_DROP_DEN_ALL(II,JJ,KK)<TWO_EPSILON_EB) CYCLE SUM_MOMENTUM_LOOP2
-   ! LOOP over a small neighborhood of the particle [-1,+1]
-   ! Assumming kernel has compact support and half_width DX
-   SUMX=SUMX-LP%ACCEL_X
-   SUMY=SUMY-LP%ACCEL_Y
-   SUMZ=SUMZ-LP%ACCEL_Z
-   IIX = FLOOR(XI+.5_EB)
-   JJY = FLOOR(YJ+.5_EB)
-   KKZ = FLOOR(ZK+.5_EB)
-   I1=MAX(IIX-2,0)
-   I2=MIN(IIX+2,IBAR)
-   J1=MAX(JJ-2,0)
-   J2=MIN(JJ+2,JBAR)
-   K1=MAX(KK-2,0)
-   K2=MIN(KK+2,KBAR)
-   WIDTH=0._EB
-   
-   WIDTH=(DX(II)*DY(JJ)*DZ(KK))**(1._EB/3._EB)
-   ! Interpolate force density at (upper) (staggered) cell corners 
-   DO III=I1,I2
-       DO JJJ=J1,J2
-          DO KKK=K1,K2
-                RK=SQRT((XC(III+1)-LP%X)**2+(Y(JJJ)-LP%Y)**2+(Z(KKK)-LP%Z)**2)      
-                FVXN(III,JJJ,KKK) =  FVXN(III,JJJ,KKK) - KERNEL(RK,WIDTH) * LP%ACCEL_X
-                
-         ENDDO
-       ENDDO
-   ENDDO
-
-   I1=MAX(II-2,0)
-   I2=MIN(II+2,IBAR)
-   J1=MAX(JJY-2,0)
-   J2=MIN(JJY+2,JBAR)
-   K1=MAX(KK-2,0)
-   K2=MIN(KK+2,KBAR)
+   SUMX=0._EB
+   SUMY=0._EB
+   SUMZ=0._EB
+   SUM_MOMENTUM_LOOP2: DO I=1,NLP
+      LP=>LAGRANGIAN_PARTICLE(I)
+      LPC=>LAGRANGIAN_PARTICLE_CLASS(LP%CLASS_INDEX)
+      IF (LPC%MASSLESS_TRACER .OR. LPC%MASSLESS_TARGET) CYCLE SUM_MOMENTUM_LOOP2
+      IF (LP%ONE_D%IOR/=0) CYCLE SUM_MOMENTUM_LOOP2
+      CALL GET_IJK(LP%X,LP%Y,LP%Z,NM,XI,YJ,ZK,II,JJ,KK)
+      IF (SOLID(CELL_INDEX(II,JJ,KK))) CYCLE SUM_MOMENTUM_LOOP2
+      IF (AVG_DROP_DEN_ALL(II,JJ,KK)<TWO_EPSILON_EB) CYCLE SUM_MOMENTUM_LOOP2
+      ! LOOP over a small neighborhood of the particle [-1,+1]
+      ! Assumming kernel has compact support and half_width DX
+      SUMX=SUMX-LP%ACCEL_X
+      SUMY=SUMY-LP%ACCEL_Y
+      SUMZ=SUMZ-LP%ACCEL_Z
+      IIX = FLOOR(XI+.5_EB)
+      JJY = FLOOR(YJ+.5_EB)
+      KKZ = FLOOR(ZK+.5_EB)
+      I1=MAX(IIX-2,0)
+      I2=MIN(IIX+2,IBAR)
+      J1=MAX(JJ-2,0)
+      J2=MIN(JJ+2,JBAR)
+      K1=MAX(KK-2,0)
+      K2=MIN(KK+2,KBAR)
+      WIDTH=0._EB
+      
+      WIDTH=(DX(II)*DY(JJ)*DZ(KK))**(1._EB/3._EB)
+      ! Interpolate force density at (upper) (staggered) cell corners 
       DO III=I1,I2
-       DO JJJ=J1,J2
-          DO KKK=K1,K2                   
-                RK=SQRT((X(III)-LP%X)**2+(YC(JJJ+1)-LP%Y)**2+(Z(KKK)-LP%Z)**2)
-                FVYN(III,JJJ,KKK) =  FVYN(III,JJJ,KKK) - KERNEL(RK,WIDTH) * LP%ACCEL_Y
+          DO JJJ=J1,J2
+             DO KKK=K1,K2
+                   RK=SQRT((XC(III+1)-LP%X)**2+(Y(JJJ)-LP%Y)**2+(Z(KKK)-LP%Z)**2)      
+                   FVXN(III,JJJ,KKK) =  FVXN(III,JJJ,KKK) - KERNEL(RK,WIDTH) * LP%ACCEL_X
+                   
+            ENDDO
           ENDDO
-       ENDDO
-   ENDDO
+      ENDDO
 
-   I1=MAX(II-2,0)
-   I2=MIN(II+2,IBAR)
-   J1=MAX(JJ-2,0)
-   J2=MIN(JJ+2,JBAR)
-   K1=MAX(KKZ-2,0)
-   K2=MIN(KKZ+2,KBAR)
-   DO III=I1,I2
-       DO JJJ=J1,J2
-          DO KKK=K1,K2
-             IC = CELL_INDEX(III,JJJ,KKK)   
+      I1=MAX(II-2,0)
+      I2=MIN(II+2,IBAR)
+      J1=MAX(JJY-2,0)
+      J2=MIN(JJY+2,JBAR)
+      K1=MAX(KK-2,0)
+      K2=MIN(KK+2,KBAR)
+         DO III=I1,I2
+          DO JJJ=J1,J2
+             DO KKK=K1,K2                   
+                   RK=SQRT((X(III)-LP%X)**2+(YC(JJJ+1)-LP%Y)**2+(Z(KKK)-LP%Z)**2)
+                   FVYN(III,JJJ,KKK) =  FVYN(III,JJJ,KKK) - KERNEL(RK,WIDTH) * LP%ACCEL_Y
+             ENDDO
+          ENDDO
+      ENDDO
 
-             RK=SQRT((X(III)-LP%X)**2+(Y(JJJ)-LP%Y)**2+(ZC(KKK+1)-LP%Z)**2)
-             FVZN(III,JJJ,KKK) =  FVZN(III,JJJ,KKK) - KERNEL(RK,WIDTH) * LP%ACCEL_Z
+      I1=MAX(II-2,0)
+      I2=MIN(II+2,IBAR)
+      J1=MAX(JJ-2,0)
+      J2=MIN(JJ+2,JBAR)
+      K1=MAX(KKZ-2,0)
+      K2=MIN(KKZ+2,KBAR)
+      DO III=I1,I2
+          DO JJJ=J1,J2
+             DO KKK=K1,K2
+                IC = CELL_INDEX(III,JJJ,KKK)   
+
+                RK=SQRT((X(III)-LP%X)**2+(Y(JJJ)-LP%Y)**2+(ZC(KKK+1)-LP%Z)**2)
+                FVZN(III,JJJ,KKK) =  FVZN(III,JJJ,KKK) - KERNEL(RK,WIDTH) * LP%ACCEL_Z
+              ENDDO
            ENDDO
         ENDDO
-     ENDDO
-ENDDO SUM_MOMENTUM_LOOP2
-! Approximate volume integrals
-DO III=0,IBAR
-  DO JJJ=0,JBAR
-     DO KKK=0,KBAR
-        I1=MAX(III-1,0)
-        I2=III
-        J1=MAX(JJJ-1,0)
-        J2=JJJ
-        K1=MAX(KKK-1,0)
-        K2=KKK
-        RVC   = RDX(III)*RRN(III)*RDY(JJJ)*RDZ(KKK)
-        FVXS(III,JJJ,KKK) = 1._EB/8._EB * (FVXN(I1,J1,K1) + FVXN(I1,J1,K2) + FVXN(I1,J2,K2) + &
-                                           FVXN(I2,J2,K2) + FVXN(I2,J2,K1) + FVXN(I2,J1,K1) + &
-                                           FVXN(I1,J2,K1) + FVXN(I2,J1,K2)) / RVC
-        FVYS(III,JJJ,KKK) = 1._EB/8._EB * (FVYN(I1,J1,K1) + FVYN(I1,J1,K2) + FVYN(I1,J2,K2) + &
-                                           FVYN(I2,J2,K2) + FVYN(I2,J2,K1) + FVYN(I2,J1,K1) + &
-                                           FVYN(I1,J2,K1) + FVYN(I2,J1,K2)) / RVC
-        FVZS(III,JJJ,KKK) = 1._EB/8._EB * (FVZN(I1,J1,K1) + FVZN(I1,J1,K2) + FVZN(I1,J2,K2) + &
-                                           FVZN(I2,J2,K2) + FVZN(I2,J2,K1) + FVZN(I2,J1,K1) + &
-                                           FVZN(I1,J2,K1) + FVZN(I2,J1,K2)) / RVC
-     ENDDO
-  ENDDO
-ENDDO
-IF(ABS(SUMX)>TWO_EPSILON_EB) FVXS=FVXS*SUMX/SUM(FVXS)
-IF(ABS(SUMY)>TWO_EPSILON_EB) FVYS=FVYS*SUMY/SUM(FVYS)
-IF(ABS(SUMZ)>TWO_EPSILON_EB) FVZS=FVZS*SUMZ/SUM(FVZS)
-WALL_LOOP1: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
+   ENDDO SUM_MOMENTUM_LOOP2
+
+   ! Approximate volume integrals
+
+   DO III=0,IBAR
+      DO JJJ=0,JBAR
+         DO KKK=0,KBAR
+            I1=MAX(III-1,0)
+            I2=III
+            J1=MAX(JJJ-1,0)
+            J2=JJJ
+            K1=MAX(KKK-1,0)
+            K2=KKK
+            RVC   = RDX(III)*RRN(III)*RDY(JJJ)*RDZ(KKK)
+            FVXS(III,JJJ,KKK) = 1._EB/8._EB * (FVXN(I1,J1,K1) + FVXN(I1,J1,K2) + FVXN(I1,J2,K2) + &
+                                              FVXN(I2,J2,K2) + FVXN(I2,J2,K1) + FVXN(I2,J1,K1) + &
+                                              FVXN(I1,J2,K1) + FVXN(I2,J1,K2)) / RVC
+            FVYS(III,JJJ,KKK) = 1._EB/8._EB * (FVYN(I1,J1,K1) + FVYN(I1,J1,K2) + FVYN(I1,J2,K2) + &
+                                              FVYN(I2,J2,K2) + FVYN(I2,J2,K1) + FVYN(I2,J1,K1) + &
+                                              FVYN(I1,J2,K1) + FVYN(I2,J1,K2)) / RVC
+            FVZS(III,JJJ,KKK) = 1._EB/8._EB * (FVZN(I1,J1,K1) + FVZN(I1,J1,K2) + FVZN(I1,J2,K2) + &
+                                              FVZN(I2,J2,K2) + FVZN(I2,J2,K1) + FVZN(I2,J1,K1) + &
+                                              FVZN(I1,J2,K1) + FVZN(I2,J1,K2)) / RVC
+         ENDDO
+      ENDDO
+   ENDDO
+   IF (ABS(SUMX)>TWO_EPSILON_EB) FVXS=FVXS*SUMX/SUM(FVXS)
+   IF (ABS(SUMY)>TWO_EPSILON_EB) FVYS=FVYS*SUMY/SUM(FVYS)
+   IF (ABS(SUMZ)>TWO_EPSILON_EB) FVZS=FVZS*SUMZ/SUM(FVZS)
+   WALL_LOOP1: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
       WC=>WALL(IW)
       IF (WC%BOUNDARY_TYPE==NULL_BOUNDARY) CYCLE WALL_LOOP1
       II  = WC%ONE_D%II
@@ -2997,20 +2999,22 @@ WALL_LOOP1: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
                CASE(-3); FVZS(IIG,JJG,KBP1) = FVZS(IIG,JJG,1)
             END SELECT
       END SELECT
-ENDDO WALL_LOOP1
+   ENDDO WALL_LOOP1
 
-DO K=0,KBAR
-  DO J=0,JBAR
-    DO I=0,IBAR
-      FVX(I,J,K) = FVX(I,J,K) + FVXS(I,J,K)
-      FVY(I,J,K) = FVY(I,J,K) + FVYS(I,J,K)
-      FVZ(I,J,K) = FVZ(I,J,K) + FVZS(I,J,K)
-    ENDDO
-  ENDDO
-ENDDO
+   DO K=0,KBAR
+      DO J=0,JBAR
+         DO I=0,IBAR
+            FVX(I,J,K) = FVX(I,J,K) + FVXS(I,J,K)
+            FVY(I,J,K) = FVY(I,J,K) + FVYS(I,J,K)
+            FVZ(I,J,K) = FVZ(I,J,K) + FVZS(I,J,K)
+         ENDDO
+      ENDDO
+   ENDDO
 
 END SELECT ISO_SELECT
+
 CONTAINS
+
 REAL(EB) FUNCTION KERNEL(R,DELTA)
    REAL(EB),INTENT(IN)::R,DELTA
    IF(R/DELTA>2.0_EB) THEN
