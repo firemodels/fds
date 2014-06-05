@@ -493,6 +493,7 @@ void CLIP_viewport(int quad, GLint screen_left, GLint screen_down){
    glMatrixMode(GL_MODELVIEW);
    glLoadIdentity();
    glLineWidth(3.0);
+   glColor3fv(foregroundcolor);
    glBegin(GL_LINES);
 
    if(c_left>0){

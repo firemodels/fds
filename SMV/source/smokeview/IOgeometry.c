@@ -347,7 +347,9 @@ void draw_geom(int flag, int geomtype){
         xyzptr[1] = volumei->points[1]->xyz;
         xyzptr[2] = volumei->points[2]->xyz;
         xyzptr[3] = volumei->points[3]->xyz;
-        glColor3fv(black);
+
+        color = volumei->surf->color;
+        glColor3fv(color);
 
         for(k=0;k<4;k++){
           if(exterior[k]==1&&show_geometry_exterior==1||
@@ -1193,6 +1195,8 @@ void read_geom2(geomdata *geomi, int load_flag, int type, int *errorcode){
     if(nvolus>0){ 
       int ii;
       int *ijk;
+      int *surf_ind=NULL;
+      int offset=0;
 
       NewMemory((void **)&volumes,nvolus*sizeof(tetrahedron));
       geomlisti->volumes=volumes;
@@ -1205,7 +1209,20 @@ void read_geom2(geomdata *geomi, int load_flag, int type, int *errorcode){
         volumes[ii].points[3]=points+ijk[4*ii+3]-1;
       }
       FREEMEMORY(ijk);
-      if(has_matl==1)FSEEK(stream,4+nvolus*4+4,SEEK_CUR); // skip materials for now
+      NewMemory((void **)&surf_ind,nvolus*sizeof(int));
+      if(has_matl==1){
+        FORTREADBR(surf_ind,nvolus,stream);
+      }
+      if(type==GEOM_ISO)offset=nsurfinfo;
+      for(ii=0;ii<nvolus;ii++){
+        surfdata *surfi;
+
+        surfi=surfinfo + offset;
+        if(has_matl==1)surfi+=surf_ind[ii];
+        volumes[ii].surf=surfi;
+        volumes[ii].textureinfo=surfi->textureinfo;
+      }
+      FREEMEMORY(surf_ind);
       geomlisti->nvolus=nvolus;
     }
   }
