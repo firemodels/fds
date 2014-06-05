@@ -516,7 +516,7 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
       G%DAZIM(1:NSUB_GEOMS) = DAZIM(1:NSUB_GEOMS)
       G%DELEV(1:NSUB_GEOMS) = DELEV(1:NSUB_GEOMS)
       G%DSCALE(1:3,1:NSUB_GEOMS) = DSCALE(1:3,1:NSUB_GEOMS)
-      G%DXYZ(1:3,1:NSUB_GEOMS) =  DXYZ(1:3,1:NSUB_GEOMS)
+      G%DXYZ(1:3,1:NSUB_GEOMS) = DXYZ(1:3,1:NSUB_GEOMS)
 
       ! allocate memory for vertex and face arrays for GEOMs that contain groups (entres in GEOM_IDs )
 
@@ -1679,7 +1679,7 @@ DO J = 1, G%NSUB_GEOMS
       FOUT = FIN + IVERT
 
       ! copy matl indices
-        
+
       MATLIN(1:NSUB_VOLUS) => GSUB%MATLS(1:NSUB_VOLUS)
       MATLOUT(1:NSUB_VOLUS) => G%MATLS(IVOLUS+1:IVOLUS+NSUB_VOLUS)
       MATLOUT = MATLIN
@@ -2482,7 +2482,7 @@ ENDIF CUTCELL_INDEX_IF
 !    ENDDO
 !ENDIF
 
-! Set up any face parameters related to cut cells and check area sums
+! Set up any face parameters related to cutcells and check area sums
 
 DO N=1,N_FACE
 
