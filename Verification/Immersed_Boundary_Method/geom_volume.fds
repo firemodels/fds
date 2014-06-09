@@ -4,7 +4,7 @@
 &MESH IJK=10,10,10,XB=0.0,1.0,0.0,1.0,0.0,1.0 /
 
 &SURF ID='surf1',RGB=0,255,0 /
-&MATL ID='my solid', DENSITY=1000., CONDUCTIVITY=1., SPECIFIC_HEAT=1.,RGB=0,255,0 /
+&MATL ID='matl1', DENSITY=1000., CONDUCTIVITY=1., SPECIFIC_HEAT=1.,RGB=255,0,0 /
 
 
 &GEOM ID='geom1',
@@ -13,8 +13,7 @@
               1.0,0.0,0.0,
               1.0,1.0,0.0,
               0.0,1.0,0.0,
-        VOLUS=1,2,3,4,1,5,2,4
-        MATL_ID='surf1' /
-        /
+        VOLUS=1,2,3,4,1,5,2,4,
+        MATL_ID='matl1' /
 
 
