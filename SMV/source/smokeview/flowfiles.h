@@ -52,8 +52,7 @@ typedef struct _triangle {
 typedef struct _tetrahedron {
   float distance, *color, face_norm[4];
   int vert_index[4],exterior[4],duplicate[4],faces[12];
-  struct _texturedata *textureinfo;
-  struct _surfdata *surf;
+  struct _matldata *matl;
   point *points[4];
 } tetrahedron;
 
@@ -257,6 +256,13 @@ typedef struct {
   struct _mesh *terrain_mesh;
   int ntimes;
 } terraindata;
+
+/* --------------------------  matldata ------------------------------------ */
+
+typedef struct _matldata {
+  char *matllabel;
+  float *color;
+} matldata;
 
 /* --------------------------  surfdata ------------------------------------ */
 

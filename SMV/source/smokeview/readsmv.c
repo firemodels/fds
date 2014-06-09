@@ -2589,6 +2589,7 @@ int readsmv(char *file, char *file2){
   nOBST=0;
   noffset=0;
   nsurfinfo=0;
+  nmatlinfo=1;
   nvent_transparent=0;
 
   nvents=0; 
@@ -2893,6 +2894,10 @@ int readsmv(char *file, char *file2){
     }
     if(match(buffer,"SURFACE") ==1){
       nsurfinfo++;
+      continue;
+    }
+    if(match(buffer,"MATERIAL") ==1){
+      nmatlinfo++;
       continue;
     }
     if(match(buffer,"GRID") == 1){
@@ -3240,6 +3245,21 @@ int readsmv(char *file, char *file2){
   FREEMEMORY(surfinfo);
   if(NewMemory((void **)&surfinfo,(nsurfinfo+10)*sizeof(surfdata))==0)return 2;
 
+  {
+    matldata *matli;
+    float s_color[4];
+
+    FREEMEMORY(matlinfo);
+    if(NewMemory((void **)&matlinfo,nmatlinfo*sizeof(matldata))==0)return 2;
+    matli = matlinfo;
+    initmatl(matli);
+    s_color[0]=matli->color[0];
+    s_color[1]=matli->color[1];
+    s_color[2]=matli->color[2];
+    s_color[3]=matli->color[3];
+    matli->color = getcolorptr(s_color);
+  }
+
   if(cadgeominfo!=NULL)freecadinfo();
   if(ncadgeom>0){
     if(NewMemory((void **)&cadgeominfo,ncadgeom*sizeof(cadgeom))==0)return 2;
@@ -3282,6 +3302,7 @@ int readsmv(char *file, char *file2){
   iobst=0;
   ncadgeom=0;
   nsurfinfo=0;
+  nmatlinfo=1;
   noutlineinfo=0;
   if(noffset==0)ioffset=1;
   rewind(stream1);
@@ -4301,6 +4322,42 @@ int readsmv(char *file, char *file2){
         }
       }
       nsurfinfo++;
+      continue;
+    }
+  /*
+    ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    ++++++++++++++++++++++ MATL ++++++++++++++++++++++++++++++
+    ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  */
+    if(match(buffer,"MATERIAL") ==1){
+      matldata *matli;
+      float s_color[4];
+      int len;
+
+      matli = matlinfo + nmatlinfo;
+      initmatl(matli);
+
+      fgets(buffer,255,stream);
+      trim(buffer);
+      len=strlen(buffer);
+      NewMemory((void **)&matli->matllabel,(len+1)*sizeof(char));
+      strcpy(matli->matllabel,trim_front(buffer));
+      
+      s_color[0]=matli->color[0];
+      s_color[1]=matli->color[1];
+      s_color[2]=matli->color[2];
+      s_color[3]=matli->color[3];
+      fgets(buffer,255,stream);
+      sscanf(buffer,"%f %f %f %f",s_color,s_color+1,s_color+2,s_color+3);
+
+      s_color[0]=CLAMP(s_color[0],0.0,1.0);
+      s_color[1]=CLAMP(s_color[1],0.0,1.0);
+      s_color[2]=CLAMP(s_color[2],0.0,1.0);
+      s_color[3]=CLAMP(s_color[3],0.0,1.0);
+
+      matli->color = getcolorptr(s_color);
+
+      nmatlinfo++;
       continue;
     }
   /*
@@ -7866,6 +7923,13 @@ void initsurface(surfdata *surf){
   surf->location=0;
   surf->invisible=0;
   surf->transparent=0;
+}
+
+/* ------------------ initmatl ------------------------ */
+
+void initmatl(matldata *matl){
+  matl->matllabel=NULL;
+  matl->color=block_ambient2;
 }
 
 /* ------------------ initventsurface ------------------------ */
