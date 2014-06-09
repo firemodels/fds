@@ -8755,7 +8755,7 @@ int readini2(char *inifile, int localfile){
     }
     if(match(buffer,"SHOWTETRAS")==1){
       fgets(buffer,255,stream);
-      sscanf(buffer,"%i %i %i",&show_geometry_exterior,&show_geometry_interior,&show_geometry_duplicates);
+      sscanf(buffer,"%i %i %i",&show_geometry_interior_solid,&show_geometry_interior_outline,&show_geometry_duplicates);
       continue;
     }
     if(match(buffer,"SHOWTRIANGLES")==1){
@@ -11681,7 +11681,7 @@ void writeini(int flag,char *filename){
   fprintf(fileout,"OFFSETSLICE\n");
   fprintf(fileout," %i\n",offset_slice);
   fprintf(fileout,"SHOWTETRAS\n");
-  fprintf(fileout," %i %i %i\n",show_geometry_exterior,show_geometry_interior,show_geometry_duplicates);
+  fprintf(fileout," %i %i %i\n",show_geometry_interior_solid,show_geometry_interior_outline,show_geometry_duplicates);
   fprintf(fileout,"SHOWTRIANGLES\n");
   fprintf(fileout," %i %i %i %i %i %i\n",showtrisurface,showtrioutline,showtripoints,showtrinormal,showpointnormal,smoothtrinormal);
   fprintf(fileout,"SHOWSTREAK\n");

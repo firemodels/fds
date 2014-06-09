@@ -348,13 +348,20 @@ void draw_geom(int flag, int geomtype){
         xyzptr[2] = volumei->points[2]->xyz;
         xyzptr[3] = volumei->points[3]->xyz;
 
-        color = volumei->matl->color;
-        glColor3fv(color);
-
         for(k=0;k<4;k++){
           if(exterior[k]==1&&show_geometry_exterior==1||
-             exterior[k]==0&&show_geometry_interior==1||
+             exterior[k]==0&&show_geometry_interior_outline==1||
              duplicate[k]==1&&show_geometry_duplicates==1){
+               if(exterior[k]==0&&show_geometry_interior_outline==1&&show_geometry_interior_solid==1){
+                 color=black;
+               }
+               else{
+                 color = volumei->matl->color;
+               }
+               if(last_color!=color){
+                 glColor3fv(color);
+                 last_color=color;
+               }
                glVertex3fv(xyzptr[facelist[3*k]]);
                glVertex3fv(xyzptr[facelist[3*k+1]]);
                glVertex3fv(xyzptr[facelist[3*k+1]]);
@@ -366,11 +373,52 @@ void draw_geom(int flag, int geomtype){
       }
 
       glEnd();
+      last_color=NULL;
+      glBegin(GL_TRIANGLES);
+      for(j=0;j<nvolus;j++){
+        tetrahedron *volumei;
+        float *xyzptr[4];
+        int *exterior;
+        //             0
+        //               \
+        //           /   .3
+        //             .  3
+        //         / .  ./  
+        //         1---2
+        //
+        int facelist[12]={0,1,2, 0,2,3, 0,3,1, 1,3,2};
+        int k;
+
+        volumei = geomlisti->volumes+j;
+        exterior = volumei->exterior;
+        xyzptr[0] = volumei->points[0]->xyz;
+        xyzptr[1] = volumei->points[1]->xyz;
+        xyzptr[2] = volumei->points[2]->xyz;
+        xyzptr[3] = volumei->points[3]->xyz;
+
+        
+        color = volumei->matl->color;
+        if(last_color!=color){
+          glColor3fv(color);
+          last_color=color;
+        }
+
+        for(k=0;k<4;k++){
+          if(exterior[k]==0&&show_geometry_interior_solid==1){
+              glVertex3fv(xyzptr[facelist[3*k]]);
+              glVertex3fv(xyzptr[facelist[3*k+1]]);
+              glVertex3fv(xyzptr[facelist[3*k+2]]);
+          }
+        }
+      }
+
+      glEnd();
       glPopMatrix();
     }
 
     // draw geometry (faces) outline
 
+    last_color=NULL;
     if(ntris>0&&showtrioutline==1){
       glPushMatrix();
       glScalef(SCALE2SMV(1.0),SCALE2SMV(1.0),SCALE2SMV(1.0));
@@ -396,7 +444,10 @@ void draw_geom(int flag, int geomtype){
         else{
           color = trianglei->surf->color;
         }
-        glColor3fv(color);
+        if(last_color!=color){
+          glColor3fv(color);
+          last_color=color;
+        }
         glVertex3fv(xyzptr[0]);
         glVertex3fv(xyzptr[1]);
         glVertex3fv(xyzptr[1]);
@@ -410,6 +461,7 @@ void draw_geom(int flag, int geomtype){
 
     // draw geometry points
 
+    last_color=NULL;
     if(showtripoints==1&&geomlisti->npoints>0){
       glPushMatrix();
       glScalef(SCALE2SMV(1.0),SCALE2SMV(1.0),SCALE2SMV(1.0));
@@ -421,7 +473,10 @@ void draw_geom(int flag, int geomtype){
 
         pointi = geomlisti->points+j;
         color = pointi->triangles[0]->surf->color;
-        glColor3fv(color);
+        if(last_color!=color){
+          glColor3fv(color);
+          last_color=color;
+        }
         glVertex3fv(pointi->xyz);
       }
       glEnd();
@@ -436,6 +491,7 @@ void draw_geom(int flag, int geomtype){
         glScalef(SCALE2SMV(1.0),SCALE2SMV(1.0),SCALE2SMV(1.0));
         glTranslatef(-xbar0,-ybar0,-zbar0);
         glBegin(GL_LINES);
+        glColor3fv(blue);
         for(j=0;j<ntris;j++){
           float *p1, *p2, *p3;
           float *xyznorm;
@@ -457,7 +513,6 @@ void draw_geom(int flag, int geomtype){
           xyz2[1] = xyz1[1] + SCALE2FDS(VECFACTOR)*xyznorm[1];
           xyz2[2] = xyz1[2] + SCALE2FDS(VECFACTOR)*xyznorm[2];
 
-          glColor3fv(blue);
           glVertex3fv(xyz1);
           glVertex3fv(xyz2);
         }
@@ -465,6 +520,7 @@ void draw_geom(int flag, int geomtype){
         
         glPointSize(6.0);  // draw points at end of vector
         glBegin(GL_POINTS);
+        glColor3fv(blue);
         for(j=0;j<ntris;j++){
           float *p1, *p2, *p3;
           float *xyznorm;
@@ -486,7 +542,6 @@ void draw_geom(int flag, int geomtype){
           xyz2[1] = xyz1[1] + SCALE2FDS(VECFACTOR)*xyznorm[1];
           xyz2[2] = xyz1[2] + SCALE2FDS(VECFACTOR)*xyznorm[2];
 
-          glColor3fv(blue);
           glVertex3fv(xyz2);
         }
         glEnd();
@@ -497,6 +552,8 @@ void draw_geom(int flag, int geomtype){
         glScalef(SCALE2SMV(1.0),SCALE2SMV(1.0),SCALE2SMV(1.0));
         glTranslatef(-xbar0,-ybar0,-zbar0);
         glBegin(GL_LINES);
+        color = black;
+        glColor3fv(color);
         for(j=0;j<npoints;j++){
           float *xyznorm;
           point *pointi;
@@ -510,8 +567,6 @@ void draw_geom(int flag, int geomtype){
           xyz2[1] = xyz1[1] + SCALE2FDS(VECFACTOR)*xyznorm[1];
           xyz2[2] = xyz1[2] + SCALE2FDS(VECFACTOR)*xyznorm[2];
 
-          color = black;
-          glColor3fv(color);
           glVertex3fv(xyz1);
           glVertex3fv(xyz2);
         }
@@ -519,6 +574,8 @@ void draw_geom(int flag, int geomtype){
 
         glPointSize(6.0);  // draw points at end of vector
         glBegin(GL_POINTS);
+        color = black;
+        glColor3fv(color);
         for(j=0;j<npoints;j++){
           float *xyznorm;
           point *pointi;
@@ -532,8 +589,6 @@ void draw_geom(int flag, int geomtype){
           xyz2[1] = xyz1[1] + SCALE2FDS(VECFACTOR)*xyznorm[1];
           xyz2[2] = xyz1[2] + SCALE2FDS(VECFACTOR)*xyznorm[2];
 
-          color = black;
-          glColor3fv(color);
           glVertex3fv(xyz2);
         }
         glEnd();
@@ -1116,6 +1171,7 @@ void read_geom2(geomdata *geomi, int load_flag, int type, int *errorcode){
     nverts=nvertfacesvolus[0];
     ntris=nvertfacesvolus[1];
     nvolus=nvertfacesvolus[2];
+    if(nvolus>0)have_volume=1;
 
     FORTREADBR(has_vals,3,stream);
     has_surf=has_vals[0];
