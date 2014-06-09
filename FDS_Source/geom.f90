@@ -405,7 +405,7 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
       
       ALLOCATE(G%MATLS(N_VOLUS),STAT=IZERO)
       CALL ChkMemErr('READ_GEOM','G%MATLS',IZERO)
-      MATL_INDEX = GET_MATL_INDEX(MATL_ID) ! MATL_ID is a SURF until FDS outputs MATL info to the .smv file
+      MATL_INDEX = GET_MATL_INDEX(MATL_ID)
       G%MATLS(1:N_VOLUS) = MATL_INDEX
    ENDIF
 
@@ -1326,10 +1326,8 @@ INTEGER FUNCTION GET_MATL_INDEX(ID)
 CHARACTER(30), INTENT(IN) :: ID
 INTEGER :: N
 
- ! need to change this over to materials
- ! for now this routine is just a placeholder
-DO N = 1, N_SURF 
-   IF (TRIM(SURFACE(N)%ID) /= TRIM(ID)) CYCLE
+DO N = 1, N_MATL
+   IF (TRIM(MATERIAL(N)%ID) /= TRIM(ID)) CYCLE
    GET_MATL_INDEX = N
    RETURN
 END DO
