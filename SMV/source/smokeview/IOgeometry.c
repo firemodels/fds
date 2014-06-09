@@ -3,7 +3,7 @@
 // $Author$
 
 // svn revision character string
-char IOembed_revision[]="$Revision$";
+char IOgeometry_revision[]="$Revision$";
 
 #include "options.h"
 #include <stdio.h>  

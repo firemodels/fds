@@ -6,8 +6,8 @@
 #include "options.h"
 
 // svn revision character string2
-extern "C" char glui_labels_revision[];
-char glui_labels_revision[]="$Revision$";
+extern "C" char glui_display_revision[];
+char glui_display_revision[]="$Revision$";
 
 extern "C" void FileShow_CB(int var);
 extern "C" void ShowHideMenu(int val);

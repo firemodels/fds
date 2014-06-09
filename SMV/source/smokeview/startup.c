@@ -2095,7 +2095,7 @@ int getmaxrevision(void){
   MAXREV(assert_revision);
   MAXREV(callbacks_revision);
   MAXREV(camera_revision);
-  MAXREV(colorbar_revision);
+  MAXREV(colortimebar_revision);
   MAXREV(compress3dc_revision);
   MAXREV(compress_revision);
   MAXREV(csphere_revision);
@@ -2111,8 +2111,8 @@ int getmaxrevision(void){
   MAXREV(glui_bounds_revision);
   MAXREV(glui_clip_revision);
   MAXREV(glui_colorbar_revision);
-  MAXREV(glui_device_revision);
-  MAXREV(glui_labels_revision);
+  MAXREV(glui_devices_revision);
+  MAXREV(glui_display_revision);
   MAXREV(glui_motion_revision);
   MAXREV(glui_shooter_revision);
   MAXREV(glui_stereo_revision);
@@ -2123,7 +2123,7 @@ int getmaxrevision(void){
   MAXREV(interp_revision);
 
   MAXREV(IOboundary_revision);
-  MAXREV(IOembed_revision);
+  MAXREV(IOgeometry_revision);
   MAXREV(IOhrr_revision);
   MAXREV(IOiso_revision);
   MAXREV(IOobject_revision);

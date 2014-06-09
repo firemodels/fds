@@ -3,7 +3,7 @@
 // $Author$
 
 // svn revision character string
-char colorbar_revision[]="$Revision$";
+char colortimebar_revision[]="$Revision$";
 
 #include "options.h"
 #include <stdio.h>
