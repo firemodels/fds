@@ -42,9 +42,10 @@ REAL(EB), ALLOCATABLE, DIMENSION(:) :: ZVALS
 
 INTEGER :: MAX_VERTS=0
 REAL(EB), ALLOCATABLE, TARGET, DIMENSION(:) :: VERTS
+LOGICAL, ALLOCATABLE, DIMENSION(:) :: IS_EXTERNAL
 
 INTEGER :: MAX_FACES=0, MAX_VOLUS=0
-INTEGER, ALLOCATABLE, DIMENSION(:) :: FACES, VOLUS
+INTEGER, ALLOCATABLE, TARGET, DIMENSION(:) :: FACES, VOLUS
 REAL(EB), ALLOCATABLE, DIMENSION(:) :: TFACES
 
 REAL(EB) :: AZIM, ELEV, SCALE(3), XYZ0(3), XYZ(3)
@@ -54,13 +55,14 @@ REAL(EB), PARAMETER :: MAX_VAL=1.0E20_EB
 REAL(EB) :: SPHERE_ORIGIN(3), SPHERE_RADIUS
 REAL(EB) :: TEXTURE_ORIGIN(3), TEXTURE_SCALE(2)
 REAL(EB) :: XB(6), DX
-INTEGER :: N_VERTS, N_FACES, N_VOLUS, N_ZVALS
+INTEGER :: N_VERTS, N_FACES, N_FACES_TEMP, N_VOLUS, N_ZVALS
 INTEGER :: MATL_INDEX,SURF_INDEX
 INTEGER :: IOS,IZERO,N, I, J, IJ, NSUB_GEOMS, GEOM_INDEX
 INTEGER :: I11, I12, I21, I22
 INTEGER :: GEOM_TYPE, NXB, IJK(3), FACE_OFFSET, VERT_OFFSET
 INTEGER :: N_LEVELS, N_LAT, N_LONG, SPHERE_TYPE
 TYPE (MESH_TYPE), POINTER :: M=>NULL()
+INTEGER, POINTER, DIMENSION(:) :: FACEI, FACEJ, FACE_FROM, FACE_TO
 
 LOGICAL COMPONENT_ONLY
 LOGICAL, ALLOCATABLE, DIMENSION(:) :: DEFAULT_COMPONENT_ONLY
@@ -143,7 +145,7 @@ READ_GEOM_LOOP0: DO N=1,N_GEOMETRY
             DEFAULT_COMPONENT_ONLY(GEOM_INDEX) = .TRUE.
          ENDIF
       ENDIF
-   END DO
+   ENDDO
    
 ENDDO READ_GEOM_LOOP0
 25 REWIND(LU_INPUT)
@@ -165,7 +167,7 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
    DO I = 1, MAX_VERTS
       IF (ANY(VERTS(3*I-2:3*I)>=MAX_VAL)) EXIT
       N_VERTS = N_VERTS+1
-   END DO
+   ENDDO
    
    ! count FACES
    
@@ -173,7 +175,7 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
    DO I = 1, MAX_FACES
       IF (ANY(FACES(3*I-2:3*I)==0)) EXIT
       N_FACES = N_FACES+1
-   END DO
+   ENDDO
    TFACES(1:6*MAX_FACES) = -1.0_EB
    
    ! count VOLUS
@@ -182,7 +184,7 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
    DO I = 1, MAX_VOLUS
       IF (ANY(VOLUS(4*I-3:4*I)==0)) EXIT
       N_VOLUS = N_VOLUS+1
-   END DO
+   ENDDO
 
    ! count ZVALS
    
@@ -190,7 +192,7 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
    DO I = 1, MAX_ZVALS
       IF (ZVALS(I)>MAX_VAL) EXIT
       N_ZVALS=N_ZVALS+1
-   END DO
+   ENDDO
 
    !--- setup a 2D surface (terrain) object (ZVALS keyword )
    
@@ -207,7 +209,7 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
       NXB=0
       DO I = 1, 4 ! first 4 XB values must be set, don't care about 5th and 6th
         IF (XB(I)<MAX_VAL) NXB=NXB+1
-      END DO
+      ENDDO
       IF (NXB<4) THEN
          CALL SHUTDOWN('ERROR: At least 4 XB values (xmin, xmax, ymin, ymax) required when using ZVALS')
       ENDIF
@@ -225,8 +227,8 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
             VERTS(3*IJ-1) = (XB(4)*REAL(IJK(2)-J,EB) + XB(3)*REAL(J-1,EB))/REAL(IJK(2)-1,EB)
             VERTS(3*IJ) = ZVALS(IJ)
             IJ = IJ + 1
-         END DO
-      END DO
+         ENDDO
+      ENDDO
 
 ! define terrain faces
 !    I21   I22
@@ -248,8 +250,8 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
             FACES(3*IJ-1) = I22
             FACES(3*IJ) = I12
             IJ = IJ + 1
-         END DO 
-      END DO 
+         ENDDO 
+      ENDDO 
       G%ZVALS(1:N_ZVALS) = ZVALS(1:N_ZVALS)
    ENDIF ZVALS_IF
    
@@ -258,7 +260,7 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
    NXB=0
    DO I = 1, 6
       IF (XB(I)<MAX_VAL) NXB=NXB+1
-   END DO
+   ENDDO
    IF (NXB==6 .AND. N_ZVALS==0) THEN
       GEOM_TYPE = 1
       CALL CHECK_XB(XB)
@@ -315,7 +317,7 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
  
       DO I = 1, N_VERTS
          VERTS(3*I-2:3*I) = SPHERE_ORIGIN(1:3) + SPHERE_RADIUS*VERTS(3*I-2:3*I)
-      END DO
+      ENDDO
    ENDIF
 
    G%N_LEVELS = N_LEVELS
@@ -331,7 +333,7 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
    DO I = 1, MAX_IDS
       IF (GEOM_IDS(I)=='') EXIT
       NSUB_GEOMS = NSUB_GEOMS+1
-   END DO
+   ENDDO
    IF (NSUB_GEOMS>0) THEN
       ALLOCATE(G%SUB_GEOMS(NSUB_GEOMS),STAT=IZERO)
       CALL ChkMemErr('READ_GEOM','G%SUB_GEOMS',IZERO)
@@ -398,15 +400,79 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
    IF (N_VOLUS>0) THEN
       ALLOCATE(G%VOLUS(4*N_VOLUS),STAT=IZERO)
       CALL ChkMemErr('READ_GEOM','G%VOLUS',IZERO)
-      G%VOLUS(1:4*N_VOLUS) = VOLUS(1:4*N_VOLUS)
+      G%VOLUS(1: 4*N_VOLUS) = VOLUS(1:4*N_VOLUS)
       IF (ANY(VOLUS(1:4*N_VOLUS)<1 .OR. VOLUS(1:4*N_VOLUS)>N_VERTS)) THEN
          CALL SHUTDOWN('ERROR: problem with GEOM, vertex index out of bounds')
       ENDIF
-      
+
       ALLOCATE(G%MATLS(N_VOLUS),STAT=IZERO)
       CALL ChkMemErr('READ_GEOM','G%MATLS',IZERO)
       MATL_INDEX = GET_MATL_INDEX(MATL_ID)
       G%MATLS(1:N_VOLUS) = MATL_INDEX
+
+! construct an array of external faces
+
+! determine which tetrahedron faces are external
+      
+      N_FACES = 4*N_VOLUS
+      ALLOCATE(IS_EXTERNAL(0:N_FACES-1),STAT=IZERO)
+      CALL ChkMemErr('READ_GEOM','IS_EXTERNAL',IZERO)
+      
+      IS_EXTERNAL(0:N_FACES-1)=.TRUE.  ! start off by assuming all faces are external
+      
+ ! reorder face indices so the the first index is always the smallest      
+ 
+      DO I = 0, N_VOLUS-1
+         FACES(12*I+1) = VOLUS(4*I+1)
+         FACES(12*I+2) = VOLUS(4*I+2)
+         FACES(12*I+3) = VOLUS(4*I+3)
+         CALL REORDER_VERTS(FACES(12*I+1:12*I+3))
+
+         FACES(12*I+4) = VOLUS(4*I+1)
+         FACES(12*I+5) = VOLUS(4*I+3)
+         FACES(12*I+6) = VOLUS(4*I+4)
+         CALL REORDER_VERTS(FACES(12*I+4:12*I+6))
+         
+         FACES(12*I+7) = VOLUS(4*I+1)
+         FACES(12*I+8) = VOLUS(4*I+4)
+         FACES(12*I+9) = VOLUS(4*I+2)
+         CALL REORDER_VERTS(FACES(12*I+7:12*I+9))
+         
+         FACES(12*I+10) = VOLUS(4*I+2)
+         FACES(12*I+11) = VOLUS(4*I+4)
+         FACES(12*I+12) = VOLUS(4*I+3)
+         CALL REORDER_VERTS(FACES(12*I+10:12*I+12))
+      ENDDO
+      
+! find faces that match - for now ignore face orientation      
+ 
+       DO I = 0, N_FACES-1
+          FACEI=>FACES(3*I+1:3*I+3)
+         DO J = 0, N_FACES-1
+            IF (I==J) CYCLE
+            FACEJ=>FACES(3*J+1:3*J+3)
+            IF (FACEI(1)/=FACEJ(1)) CYCLE
+            IF ((FACEI(2)==FACEJ(2) .AND. FACEI(3)==FACEJ(3)) .OR. &
+                (FACEI(2)==FACEJ(3) .AND. FACEI(3)==FACEJ(2))) THEN
+               IS_EXTERNAL(I) = .FALSE.
+               IS_EXTERNAL(J) = .FALSE.
+            ENDIF
+         ENDDO
+      ENDDO
+
+! create new FACES index array keeping only external faces
+      
+      N_FACES_TEMP = N_FACES  
+      N_FACES=0
+      DO I = 0, N_FACES_TEMP-1
+         IF (IS_EXTERNAL(I)) THEN
+            FACE_FROM=>FACES(3*I+1:3*I+3)
+            FACE_TO=>FACES(3*N_FACES+1:3*N_FACES+3)
+            FACE_TO(1:3) = FACE_FROM(1:3)
+            N_FACES=N_FACES+1
+         ENDIF
+      ENDDO
+      G%N_FACES_BASE = N_FACES
    ENDIF
 
    IF (N_FACES>0) THEN
@@ -443,7 +509,7 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
       ELSE
          CALL SHUTDOWN('ERROR: problem with GEOM '//TRIM(G%ID)//' line, '//TRIM(GEOM_IDS(I))//' not yet defined.')
       ENDIF
-   END DO
+   ENDDO
    
    ! use GROTATE/GAXIS or AZIM/ELEV but not both
 
@@ -509,7 +575,7 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
             IS_GEOMETRY_DYNAMIC = .TRUE.
             EXIT
          ENDIF
-      END DO
+      ENDDO
       
       G%DXYZ0(1:3,1:NSUB_GEOMS) = DXYZ0(1:3,1:NSUB_GEOMS)
 
@@ -525,7 +591,7 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
          G%N_VOLUS_BASE = G%N_VOLUS_BASE + GSUB%N_VOLUS_BASE
          G%N_FACES_BASE = G%N_FACES_BASE + GSUB%N_FACES_BASE
          G%N_VERTS_BASE = G%N_VERTS_BASE + GSUB%N_VERTS_BASE
-      END DO
+      ENDDO
 
       IF (G%N_VOLUS_BASE>0) THEN
          ALLOCATE(G%VOLUS(4*G%N_VOLUS_BASE),STAT=IZERO)
@@ -699,8 +765,8 @@ SELECT CASE(DIR)
             QUAD_VERTS(3*VERT_OFFSET + IJ+1) = (XB(4)*REAL(NA-I,EB) + XB(3)*REAL(I-1,EB))/REAL(NA-1,EB)
             QUAD_VERTS(3*VERT_OFFSET + IJ+2) = (XB(5)*REAL(NB-J,EB) + XB(6)*REAL(J-1,EB))/REAL(NB-1,EB)
             IJ = IJ + 3
-         END DO
-      END DO
+         ENDDO
+      ENDDO
    CASE (2) ! xmax
       DO J = 1, NB
          DO I = 1, NA
@@ -708,8 +774,8 @@ SELECT CASE(DIR)
             QUAD_VERTS(3*VERT_OFFSET + IJ+1) = (XB(3)*REAL(NA-I,EB) + XB(4)*REAL(I-1,EB))/REAL(NA-1,EB)
             QUAD_VERTS(3*VERT_OFFSET + IJ+2) = (XB(5)*REAL(NB-J,EB) + XB(6)*REAL(J-1,EB))/REAL(NB-1,EB)
             IJ = IJ + 3 
-         END DO
-      END DO
+         ENDDO
+      ENDDO
    CASE (3) ! ymin
       DO J = 1, NB
          DO I = 1, NA
@@ -717,8 +783,8 @@ SELECT CASE(DIR)
             QUAD_VERTS(3*VERT_OFFSET + IJ+1) = XB(3)
             QUAD_VERTS(3*VERT_OFFSET + IJ+2) = (XB(5)*REAL(NB-J,EB) + XB(6)*REAL(J-1,EB))/REAL(NB-1,EB)
             IJ = IJ + 3
-         END DO
-      END DO
+         ENDDO
+      ENDDO
    CASE (4) ! ymax
       DO J = 1, NB
          DO I = 1, NA
@@ -726,8 +792,8 @@ SELECT CASE(DIR)
             QUAD_VERTS(3*VERT_OFFSET + IJ+1) = XB(4)
             QUAD_VERTS(3*VERT_OFFSET + IJ+2) = (XB(5)*REAL(NB-J,EB) + XB(6)*REAL(J-1,EB))/REAL(NB-1,EB)
             IJ = IJ + 3
-         END DO
-      END DO
+         ENDDO
+      ENDDO
    CASE (5) ! zmin
       DO J = 1, NB
          DO I = 1, NA
@@ -735,8 +801,8 @@ SELECT CASE(DIR)
             QUAD_VERTS(3*VERT_OFFSET + IJ+1) = (XB(4)*REAL(NB-J,EB) + XB(3)*REAL(J-1,EB))/REAL(NB-1,EB)
             QUAD_VERTS(3*VERT_OFFSET + IJ+2) = XB(5)
             IJ = IJ + 3
-         END DO
-      END DO
+         ENDDO
+      ENDDO
    CASE (6) ! zmax
       DO J = 1, NB
          DO I = 1, NA
@@ -744,8 +810,8 @@ SELECT CASE(DIR)
             QUAD_VERTS(3*VERT_OFFSET + IJ+1) = (XB(3)*REAL(NB-J,EB) + XB(4)*REAL(J-1,EB))/REAL(NB-1,EB)
             QUAD_VERTS(3*VERT_OFFSET + IJ+2) = XB(6)
             IJ = IJ + 3
-         END DO
-      END DO
+         ENDDO
+      ENDDO
 END SELECT
 
 ! define faces
@@ -776,8 +842,8 @@ DO J = 1, NB-1
       QUAD_FACES(3*FACE_OFFSET + IJ+4) = I22
       QUAD_FACES(3*FACE_OFFSET + IJ+5) = I21
       IJ = IJ + 6
-   END DO
-END DO
+   ENDDO
+ENDDO
 
 VERT_OFFSET = VERT_OFFSET + NA*NB
 FACE_OFFSET = FACE_OFFSET + (NA-1)*(NB-1)*2
@@ -825,23 +891,23 @@ DO WHILE (I<=N_VERTS)
          
          DO K = 1, 3*N_FACES
            IF(SPHERE_FACES(K)==J)SPHERE_FACES(K)=I
-         END DO
+         ENDDO
          DO K = 1, 4*N_VOLUS
            IF(SPHERE_VOLUS(K)==J)SPHERE_VOLUS(K)=I
-         END DO
+         ENDDO
          VJ(1:3)=SPHERE_VERTS(3*N_VERTS-2:3*N_VERTS)
          DO K = 1, 3*N_FACES
            IF(SPHERE_FACES(K)==N_VERTS)SPHERE_FACES(K)=J
-         END DO
+         ENDDO
          DO K = 1, 4*N_VOLUS
            IF(SPHERE_VOLUS(K)==N_VERTS)SPHERE_VOLUS(K)=J
-         END DO
+         ENDDO
          N_VERTS=N_VERTS-1
       ENDIF
       J=J+1
-   END DO
+   ENDDO
    I=I+1
-END DO
+ENDDO
 END SUBROUTINE REMOVE_DUP_VERTS      
 
 ! ---------------------------- INIT_SPHERE ----------------------------------------
@@ -881,13 +947,13 @@ DO I=2, 6
    ARG = 2.0_EB*PI*ARG/360.0_EB
    VERT = (/COS(ARG),SIN(ARG),1.0_EB/SQRT(5.0_EB)/) 
    SPHERE_VERTS(3*I-2:3*I) = VERT/NORM2(VERT)  ! 2-6
-END DO
+ENDDO
 DO I=7, 11
    ARG = 36.0_EB+REAL(I-7,EB)*72.0_EB
    ARG = 2.0_EB*PI*ARG/360.0_EB
    VERT = (/COS(ARG),SIN(ARG),-1.0_EB/SQRT(5.0_EB)/) 
    SPHERE_VERTS(3*I-2:3*I) = VERT/NORM2(VERT)  ! 7-11
-END DO
+ENDDO
 SPHERE_VERTS(34:36) = (/0.0,0.0,-1.0/) ! 12
 
 SPHERE_FACES(1:60) = FACE_LIST(1:60)
@@ -897,7 +963,7 @@ DO I=0, 4
    TFACE(1:2) = (/0.1_EB + REAL(I,EB)/5.0_EB,1.0_EB/)
    TFACE(3:4) = (/REAL(I,EB)/5.0_EB,TWOTHIRDS/)
    TFACE(5:6) = (/REAL(I+1,EB)/5.0_EB,TWOTHIRDS/)
-END DO
+ENDDO
 DO I = 0, 4
    TFACE=>SPHERE_TFACES(30+12*I+1:30+12*I+6)
    TFACE(1:2) = (/REAL(I,EB)/5.0_EB,TWOTHIRDS/)
@@ -908,20 +974,20 @@ DO I = 0, 4
    TFACE(1:2) =  (/REAL(I+1,EB)/5.0_EB,TWOTHIRDS/)
    TFACE(3:4) = (/REAL(I,EB)/5.0_EB,ONETHIRD/)
    TFACE(5:6) = (/REAL(I+1,EB)/5.0_EB,ONETHIRD/)
-END DO
+ENDDO
 DO I=0, 4
    TFACE=>SPHERE_TFACES(90+6*I+1:90+6*I+6)
    TFACE(1:2) = (/0.1_EB + REAL(I,EB)/5.0_EB,0.0_EB/)
    TFACE(3:4) = (/REAL(I+1,EB)/5.0_EB,ONETHIRD/)
    TFACE(5:6) = (/REAL(I,EB)/5.0_EB,ONETHIRD/)
-END DO
+ENDDO
 
 ! refine each triangle of the icosahedron recursively until the
 ! refined triangle sides are the same size as the grid mesh
 
 DO IFACE = 1, 20 ! can't use N_FACES since N_FACES is altered by each call to REFINE_FACE
    CALL REFINE_FACE(N_LEVELS,IFACE,N_VERTS,N_FACES,MAX_VERTS,MAX_FACES,SPHERE_VERTS,SPHERE_FACES,SPHERE_TFACES)
-END DO
+ENDDO
 
 EPS_TEXTURE=0.25_EB
 IFACE_LOOP: DO IFACE=0, N_FACES-1
@@ -1013,12 +1079,12 @@ DO I = 1, NLAT
    LAT = PI/2.0_EB - PI*REAL(I-1,EB)/REAL(NLAT-1,EB)
    COSLAT(I) = COS(LAT)
    SINLAT(I) = SIN(LAT)
-END DO
+ENDDO
 DO I = 1, NLONG 
    LONG = -PI + 2.0_EB*PI*REAL(I-1,EB)/REAL(NLONG,EB)
    COSLONG(I) = COS(LONG)
    SINLONG(I) = SIN(LONG)
-END DO
+ENDDO
 
 ! define vertices
 
@@ -1033,8 +1099,8 @@ DO I = 2, NLAT-1
    DO J = 1, NLONG
       SPHERE_VERTS(IJ:IJ+2)   = (/COSLONG(J)*COSLAT(I),SINLONG(J)*COSLAT(I),SINLAT(I)/)
       IJ = IJ + 3
-   END DO
-END DO
+   ENDDO
+ENDDO
 
 ! south pole
 
@@ -1051,7 +1117,7 @@ DO ILONG = 1, NLONG
    IF(ILONG==NLONG)I12=2
    SPHERE_FACES(IJ:IJ+2)   = (/I22, I11,I12/)
    IJ = IJ + 3
-END DO
+ENDDO
 
 DO ILAT = 2, NLAT - 2
    DO ILONG = 1, NLONG
@@ -1068,8 +1134,8 @@ DO ILAT = 2, NLAT - 2
       SPHERE_FACES(IJ:IJ+2)   = (/I12,I11,I22/)
       SPHERE_FACES(IJ+3:IJ+5) = (/I22,I11,I21/)
       IJ = IJ + 6
-   END DO
-END DO
+   ENDDO
+ENDDO
 
 ! faces connected to south pole
 
@@ -1080,7 +1146,7 @@ DO ILONG = 1, NLONG
    IF (ILONG==NLONG) I12=2+NLONG*(NLAT-3)
    SPHERE_FACES(IJ:IJ+2)   = (/I11,I22,I12/)
    IJ = IJ + 3
-END DO
+ENDDO
 
 DO IFACE=0, NLONG-1
    FACEPTR=>SPHERE_FACES(3*IFACE+1:3*IFACE+3)
@@ -1098,7 +1164,7 @@ DO IFACE=0, NLONG-1
    TFACE(1)=REAL(IFACE,EB)/REAL(NLONG-1,EB)
    IF (IFACE==0)TFACE(3)=0.0_EB
    IF (IFACE==NLONG-1)TFACE(5)=1.0_EB
-END DO
+ENDDO
 
 DO IFACE=NLONG, N_FACES-NLONG-1
    FACEPTR=>SPHERE_FACES(3*IFACE+1:3*IFACE+3)
@@ -1124,7 +1190,7 @@ DO IFACE=NLONG, N_FACES-NLONG-1
       TFACE(1)=1.0_EB
       TFACE(5)=1.0_EB
    ENDIF
-END DO
+ENDDO
 
 DO IFACE=N_FACES-NLONG, N_FACES-1
    FACEPTR=>SPHERE_FACES(3*IFACE+1:3*IFACE+3)
@@ -1142,7 +1208,7 @@ DO IFACE=N_FACES-NLONG, N_FACES-1
    IF (IFACE==N_FACES-NLONG) TFACE(1)=0.0_EB
    TFACE(3)=REAL(IFACE-N_FACES+NLONG,EB)/REAL(NLONG-1,EB)
    IF (IFACE==N_FACES-1) TFACE(5)=1.0_EB
-END DO
+ENDDO
 END SUBROUTINE INIT_SPHERE2
 
 ! ---------------------------- REFINE_FACE ----------------------------------------
@@ -1317,7 +1383,7 @@ DO N=1,N_LAST
       GET_GEOM_ID = N
       RETURN
    ENDIF
-END DO
+ENDDO
 END FUNCTION GET_GEOM_ID
 
 ! ---------------------------- GET_MATL_INDEX ----------------------------------------
@@ -1330,7 +1396,7 @@ DO N = 1, N_MATL
    IF (TRIM(MATERIAL(N)%ID) /= TRIM(ID)) CYCLE
    GET_MATL_INDEX = N
    RETURN
-END DO
+ENDDO
 GET_MATL_INDEX = 0
 END FUNCTION GET_MATL_INDEX
 
@@ -1344,7 +1410,7 @@ DO N = 1, N_SURF
    IF (TRIM(SURFACE(N)%ID) /= TRIM(ID)) CYCLE
    GET_SURF_INDEX = N
    RETURN
-END DO
+ENDDO
 GET_SURF_INDEX = 0
 END FUNCTION GET_SURF_INDEX
 
@@ -1445,7 +1511,7 @@ INTEGER :: I
 DO I = 1, N
    VEC(1:3) = MATMUL(M,XIN(3*I-2:3*I)-XYZ0(1:3))  ! copy into a temp array so XIN and XOUT can point to same space
    XOUT(3*I-2:3*I) = VEC(1:3) + XYZ0(1:3)
-END DO
+ENDDO
 END SUBROUTINE ROTATE_VEC
 
 ! ---------------------------- PROCESS_GEOM ----------------------------------------
@@ -1485,7 +1551,7 @@ SUBROUTINE PROCESS_GEOM(IS_DYNAMIC,TIME)
          G%N_FACES = 0
          G%N_VOLUS = 0
       ENDIF
-   END DO
+   ENDDO
    
    DO I = 0, N_GEOMETRY
       G=>GEOMETRY(I)
@@ -1495,7 +1561,7 @@ SUBROUTINE PROCESS_GEOM(IS_DYNAMIC,TIME)
       CALL SETUP_TRANSFORM(G%SCALE,G%AZIM,G%ELEV,G%GAXIS,G%GROTATE,M)
       CALL ROTATE_VEC(M,G%N_VERTS,G%XYZ0,G%VERTS_BASE,G%VERTS)
       CALL TRANSLATE_VEC(G%XYZ,G%N_VERTS,G%VERTS,G%VERTS)
-   END DO
+   ENDDO
    CALL GEOM2TEXTURE
 
 END SUBROUTINE PROCESS_GEOM
@@ -1529,9 +1595,9 @@ SUBROUTINE GEOM2TEXTURE
             
             XYZ(1:3) => G%VERTS(3*JJ-2:3*JJ)
             TFACES(1+2*K:2+2*K) = (XYZ(1:2) - G%TEXTURE_ORIGIN(1:2))/G%TEXTURE_SCALE(1:2)
-         END DO
-      END DO
-   END DO
+         ENDDO
+      ENDDO
+   ENDDO
 END SUBROUTINE GEOM2TEXTURE
 
 ! ---------------------------- MERGE_GEOMS ----------------------------------------
@@ -1603,7 +1669,7 @@ END SUBROUTINE MERGE_GEOMS
 
 SUBROUTINE EXPAND_GROUPS(IGEOM)
 
-! for each geometry specifed in a &GEOM line, merge geometries referened
+! for each geometry specifed in a &GEOM line, merge geometries referenced
 ! by GEOM_IDS after scaling, rotating and translating
 
 INTEGER, INTENT(IN) :: IGEOM
@@ -1734,7 +1800,7 @@ SUBROUTINE CONVERTGEOM(IS_DYNAMIC,TIME)
       N_VERTS = N_VERTS + G%N_VERTS
       N_FACES = N_FACES + G%N_FACES
       N_VOLUS = N_VOLUS + G%N_VOLUS
-   END DO
+   ENDDO
    
    IF (N_VERTS>0 .AND. (N_FACES>0 .OR. N_VOLUS>0)) THEN
       ALLOCATE(VERTS(3*N_VERTS),STAT=IZERO)   ! create arrays to contain all vertices and faces
@@ -1758,6 +1824,8 @@ SUBROUTINE CONVERTGEOM(IS_DYNAMIC,TIME)
       CALL MERGE_GEOMS(HAS_SURF,HAS_MATL,HAS_TEXTURE,&
            VERTS,N_VERTS,FACES,TFACES,SURF_IDS,N_FACES,VOLUS,MATL_IDS,N_VOLUS,IS_DYNAMIC)
    ENDIF
+
+! copy geometry info from input data structures to computational data structures
    
    N_VERT = N_VERTS
    IF (N_VERT>0) THEN
@@ -1827,11 +1895,33 @@ SUBROUTINE CONVERTGEOM(IS_DYNAMIC,TIME)
 
       DO I=1,N_VOLU
          VOLUME(I)%VERTEX(1:4) = VOLUS(4*I-3:4*I)
-         VOLUME(I)%MATL_ID = TRIM(SURFACE(MATL_IDS(I))%ID) ! for now MATL_IDS is pointing to a SURFACE
-      END DO
+         VOLUME(I)%MATL_ID = TRIM(MATERIAL(MATL_IDS(I))%ID)
+      ENDDO
    ENDIF
    
+   
 END SUBROUTINE CONVERTGEOM
+
+! ---------------------------- REORDER_FACE ----------------------------------------
+
+SUBROUTINE REORDER_VERTS(VERTS)
+! the VERTS triplet V1, V2, V3 defines a face
+! reorder V1,V2,V3 so that V1 has the smallest index
+INTEGER, INTENT(INOUT) :: VERTS(3)
+
+INTEGER :: VERTS_TEMP(5)
+
+IF( VERTS(1)<MIN(VERTS(2),VERTS(3))) RETURN ! already in correct order
+
+VERTS_TEMP(1:3) = VERTS(1:3)
+VERTS_TEMP(4:5) = VERTS(1:2)
+
+IF(VERTS(2)<MIN(VERTS(1),VERTS(3)))THEN
+   VERTS(1:3) = VERTS_TEMP(2:4)
+ELSE
+   VERTS(1:3) = VERTS_TEMP(3:5)
+ENDIF
+END SUBROUTINE REORDER_VERTS
 
 ! ---------------------------- OUTGEOM ----------------------------------------
 
@@ -1862,7 +1952,7 @@ SUBROUTINE OUTGEOM(LUNIT,IS_DYNAMIC,TIME)
       N_VERTS = N_VERTS + G%N_VERTS
       N_FACES = N_FACES + G%N_FACES
       N_VOLUS = N_VOLUS + G%N_VOLUS
-   END DO
+   ENDDO
    
    ALLOCATE(VERTS(MAX(1,3*N_VERTS)),STAT=IZERO)   ! create arrays to contain all vertices and faces
    CALL ChkMemErr('OUTGEOM','VERTS',IZERO)
@@ -1917,7 +2007,7 @@ CALL WRITE_GEOM(T_BEGIN)
 DO I = 1, NFRAMES
    STIME = (T_BEGIN*REAL(NFRAMES-I,EB) + T_END_GEOM*REAL(I,EB))/REAL(NFRAMES,EB)
    CALL WRITE_GEOM(STIME)
-END DO
+ENDDO
 END SUBROUTINE WRITE_GEOM_ALL
 
 ! ---------------------------- WRITE_GEOM ----------------------------------------
@@ -3579,7 +3669,7 @@ IF ( NP > 6) THEN
    WRITE(LU_OUTPUT,*)"*** Triangle box intersections"
    DO I = 1, NP
       WRITE(LU_OUTPUT,*)I,PC_TMP(3*I-2),PC_TMP(3*I-1),PC_TMP(3*I)
-   END DO
+   ENDDO
    CALL SHUTDOWN("ERROR: more than 6 triangle box intersections")
 ENDIF
 IF (NP > 3) THEN 
