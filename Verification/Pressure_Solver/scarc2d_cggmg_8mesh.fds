@@ -14,9 +14,7 @@
       SCARC_MULTIGRID_ACCURACY =  2E-1
       SCARC_MULTIGRID_CYCLE    =  'V'
       SCARC_SMOOTH             = 'SSOR'
-      SCARC_SMOOTH_ITERATIONS  =   8
-      SCARC_DEBUG              = 'NONE'
-      SCARC_SYSTEM             = 'COMPACT' /
+      SCARC_SMOOTH_ITERATIONS  =   8      /
 
 &TIME T_END=1.0 /
 
