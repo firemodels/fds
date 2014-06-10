@@ -12,7 +12,7 @@ FDS_DEBUG=0
 nthreads=2
 RUN_SMV=1
 RUN_MPI=1
-RUN_GEOM=0
+RUN_GEOM=1
 
 function usage {
 echo "Run_SMV_Cases.sh [-d -h -o nthreads -p -q queue_name -s ]"
@@ -20,7 +20,7 @@ echo "Runs Smokeview verification suite"
 echo ""
 echo "Options"
 echo "-d - use debug version of FDS"
-echo "-g - run only geometry caases"
+echo "-g - run only geometry cases"
 echo "-h - display this message"
 echo "-o nthreads - run OpenMP version of FDS with a specified number of threads [default: $nthreads]"
 echo "-p size - platform size"
@@ -177,14 +177,16 @@ fi
 
 is_file_installed $BACKGROUND
 
-cd $SVNROOT/Verification
 if [ "$RUN_SMV" == "1" ] ; then
+  cd $SVNROOT/Verification
   scripts/SMV_Cases.sh
 fi
 if [ "$RUN_GEOM" == "1" ] ; then
+  cd $SVNROOT/Verification
   scripts/SMV_geom_Cases.sh
 fi
 if [ "$RUN_MPI" == "1" ] ; then
+  cd $SVNROOT/Verification
   scripts/SMV_MPI_Cases.sh
 fi
 
