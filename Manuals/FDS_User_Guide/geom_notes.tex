@@ -270,16 +270,15 @@ IF (N_INTS>0) WRITE(LU_GEOM) (INT_HEADER(I),I=1,N_INTS)
 
 WRITE(LU_GEOM) STIME
 WRITE(LU_GEOM) N_VERT, N_FACE, N_VOL
-WRITE(LU_GEOM) HAS_SURF, HAS_MATL, HAS_TEXTURE
 IF (N_VERT>0) WRITE(LU_GEOM)(Xvert(I),Yvert(I),Zvert(I),I=1,N_VERT)
 IF (N_FACE>0) THEN
    WRITE(LU_GEOM) (FACE1(I),FACE2(I),FACE3(I),I=1,N_FACE)
-   IF (HAS_SURF.EQ.1) WRITE(LU_GEOM) (SURF(I),I=1,N_FACE)
-   IF (HAS_TEXTURE.EQ.1) WRITE(LU_GEOM) (Xtext(I),Ytext(I),I=1,3*N_FACE)
+   WRITE(LU_GEOM) (SURF(I),I=1,N_FACE)
+   WRITE(LU_GEOM) (Xtext(I),Ytext(I),I=1,3*N_FACE)
 ENDIF
 IF (N_VOL>0) THEN
    WRITE(LU_GEOM) (VOL1(I),VOL2(I),VOL3(I),VOL4(I),I=1,N_VOL)
-   IF (HAS_MATL.EQ.1) WRITE(LU_GEOM) (MATL(I),I=1,N_VOL)
+   WRITE(LU_GEOM) (MATL(I),I=1,N_VOL)
 ENDIF
               .
 \end{lstlisting}
@@ -291,7 +290,6 @@ ENDIF
 \item {\ct FLOAT\_HEADER, INT\_HEADER} Floating point and integer data stored at the beginning of the file.
 \item {\ct STIME} is the FDS simulation time.
 \item {\ct N\_VERT, N\_FACE, N\_VOL}  are the number of vertices, faces and volumes.
-\item {\ct HAS\_SURF, HAS\_MATL, HAS\_TEXTURE}\ these parameters are set to 1 if SURF, MATL or TEXTURE data is present, these parameters are set to 0 otherwise.
 \item {\ct Xtext, Ytext}\ are the texture coordinates.
 \item {\ct Xvert, Yvert, Zvert}\ are the vertex coordinates.
 \item {\ct FACE1, FACE2, FACE3}\ are the vertex indices for each face (triangle).
@@ -998,7 +996,7 @@ The Fire Dynamics Simulator (FDS) has always used a simple direct forcing immers
 \end{figure}
 
 
-There are two shortcomings of the block geometry method.  First, it is zeroth-order accurate for curvilinear geometries \cite{Fadlun}.  
+There are two shortcomings of the block geometry method.  First, it is zeroth-order accurate for curvilinear geometries \cite{Fadlun}.
 In other words, as the grid is refined---even after laborious reconstruction of the block geometry---we never recover the exact solution.  Second, creation of even simple geometries can be tedious. For example, users will go to incredible lengths to carve out rounded tunnels for circular ducts, a task that is fairly simple for most unstructured codes (not that the meshes tend to be much better!).
 
 In direct forcing IBM, the force term in the momentum equation is set to drive a specific velocity component to a desired value.  In the block geometry approach (Fig.~\ref{fig:circle}, right), the impermeability condition is enforced by setting the normal component of velocity to zero on the solid surface. But as shown by Fadlun \cite{Fadlun}, it is relatively simple to obtain a second-order solution for the velocity field: the velocity component is found from a linear interpolation between the velocity of the solid surface (no slip, impermeability) and a value at some distance normal to the surface.  This is illustrated on the left in Fig.~\ref{fig:circle}.  Away from the surface the staggered $u$ velocity components are interpolated to the point marked by the solid dot, which is twice the normal distance from the surface as the nearest velocity component.
