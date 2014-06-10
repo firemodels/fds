@@ -9,8 +9,7 @@
 &PRES SCARC_METHOD             = 'KRYLOV'
       SCARC_KRYLOV             = 'CG'
       SCARC_KRYLOV_ACCURACY    =  1E-10
-      SCARC_PRECON             = 'SSOR'
-      SCARC_SYSTEM             = 'COMPACT' /
+      SCARC_PRECON             = 'SSOR'    /
 
 &TIME T_END=1.0 /
 
