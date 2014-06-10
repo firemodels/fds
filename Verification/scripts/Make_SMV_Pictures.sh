@@ -223,5 +223,6 @@ if [ "$RUN_GEOM" == "1" ] ; then
   source $STARTX
   cd $SVNROOT/Verification
   scripts/SMV_geom_Cases.sh
+  source $STOPX
 fi
 
