@@ -832,7 +832,6 @@ void read_geom_header2(geomdata *geomi, int *ntimes_local){
   float *float_vals;
   int nverts=0, ntris=0, nvolus=0;
   int first_frame_static;
-  int haves[3], have_surf=0, have_matl=0, have_texture=0;
   int header[3];
   float time_local;
 
@@ -857,30 +856,25 @@ void read_geom_header2(geomdata *geomi, int *ntimes_local){
     ntris=nvertfacesvolus[1];
     nvolus=nvertfacesvolus[2];
 
-    FORTREADBR(haves,3,stream);
-    have_surf=haves[0];
-    have_matl=haves[1];
-    have_texture=haves[2];
-
     // vertices
 
     if(nverts>0){
-      FSEEK(stream,4+3*nverts*4+4,SEEK_CUR);
+      FSEEK(stream,4+3*nverts*4+4,SEEK_CUR); // skip vertices
     }
 
     // faces
 
     if(ntris>0){
-      FSEEK(stream,4+3*ntris*4+4,SEEK_CUR); 
-      if(have_surf==1)FSEEK(stream,4+ntris*4+4,SEEK_CUR);
-      if(have_texture==1)FSEEK(stream,4+6*ntris*4+4,SEEK_CUR);
+      FSEEK(stream,4+3*ntris*4+4,SEEK_CUR); // skip triangles
+      FSEEK(stream,4+ntris*4+4,SEEK_CUR);   // skip surf
+      FSEEK(stream,4+6*ntris*4+4,SEEK_CUR); // skip textures
     }
 
     // volumes
 
     if(nvolus>0){
-      FSEEK(stream,4+4*nvolus*4+4,SEEK_CUR);
-      if(have_matl==1)FSEEK(stream,4+nvolus*4+4,SEEK_CUR);
+      FSEEK(stream,4+4*nvolus*4+4,SEEK_CUR); // skip volumes
+      FSEEK(stream,4+nvolus*4+4,SEEK_CUR);   // skip matl
     }
     nt++;
   }
@@ -1102,7 +1096,6 @@ void read_geom2(geomdata *geomi, int load_flag, int type, int *errorcode){
   int version;
   int nvertfacesvolus[3];
   int nheaders[3], nfloat_vals, nint_vals, first_frame_static;
-  int has_vals[3], has_surf, has_matl, has_texture;
 
   if(geomi->geomlistinfo!=NULL){
     for(i=-1;i<geomi->ntimes;i++){
@@ -1173,11 +1166,6 @@ void read_geom2(geomdata *geomi, int load_flag, int type, int *errorcode){
     nvolus=nvertfacesvolus[2];
     if(nvolus>0)have_volume=1;
 
-    FORTREADBR(has_vals,3,stream);
-    has_surf=has_vals[0];
-    has_matl=has_vals[1];
-    has_texture=has_vals[2];
-
     if(i>=0){
       PRINTF("time=%.2f triangles: %i\n",time_local,ntris);
     }
@@ -1207,46 +1195,33 @@ void read_geom2(geomdata *geomi, int load_flag, int type, int *errorcode){
       NewMemory((void **)&triangles,ntris*sizeof(triangle));
       NewMemory((void **)&ijk,3*ntris*sizeof(int));
       NewMemory((void **)&surf_ind,ntris*sizeof(int));
-      if(has_texture==1)NewMemory((void **)&texture_coords,6*ntris*sizeof(float));
+      NewMemory((void **)&texture_coords,6*ntris*sizeof(float));
       geomlisti->triangles=triangles;
       geomlisti->ntriangles=ntris;
       FORTREADBR(ijk,3*ntris,stream);
-      if(has_surf==1){
-        FORTREADBR(surf_ind,ntris,stream);
-      }
-      if(has_texture==1){
-        FORTREADBR(texture_coords,6*ntris,stream);
-      }
+      FORTREADBR(surf_ind,ntris,stream);
+      FORTREADBR(texture_coords,6*ntris,stream);
       if(type==GEOM_ISO)offset=nsurfinfo;
       for(ii=0;ii<ntris;ii++){
         surfdata *surfi;
+        int k;
 
-        triangles[ii].points[0]=points+ijk[3*ii]-1;
-        triangles[ii].points[1]=points+ijk[3*ii+1]-1;
-        triangles[ii].points[2]=points+ijk[3*ii+2]-1;
-        if(has_texture==1){
-          triangles[ii].tpoints[0]=texture_coords[6*ii];
-          triangles[ii].tpoints[1]=texture_coords[6*ii+1];
-          triangles[ii].tpoints[2]=texture_coords[6*ii+2];
-          triangles[ii].tpoints[3]=texture_coords[6*ii+3];
-          triangles[ii].tpoints[4]=texture_coords[6*ii+4];
-          triangles[ii].tpoints[5]=texture_coords[6*ii+5];
-          CheckMemory;
+        for(k=0;k<3;k++){
+          triangles[ii].points[k]=points+ijk[3*ii+k]-1;
         }
-        if(has_surf==1){
-          surfi=surfinfo + surf_ind[ii]+offset;
-          triangles[ii].surf=surfi;
-          triangles[ii].textureinfo=surfi->textureinfo;
+
+        for(k=0;k<6;k++){
+          triangles[ii].tpoints[k]=texture_coords[6*ii+k];
         }
-        else{
-          triangles[ii].surf=surfacedefault;
-          triangles[ii].textureinfo=NULL;
-        }
+
+        surfi=surfinfo + surf_ind[ii]+offset;
+        triangles[ii].surf=surfi;
+        triangles[ii].textureinfo=surfi->textureinfo;
       }
 
       FREEMEMORY(ijk);
       FREEMEMORY(surf_ind);
-      if(has_texture==1)FREEMEMORY(texture_coords);
+      FREEMEMORY(texture_coords);
     }
     if(nvolus>0){ 
       int ii;
@@ -1259,16 +1234,15 @@ void read_geom2(geomdata *geomi, int load_flag, int type, int *errorcode){
       NewMemory((void **)&ijk,4*nvolus*sizeof(int));
       FORTREADBR(ijk,4*nvolus,stream);
       for(ii=0;ii<nvolus;ii++){
-        volumes[ii].points[0]=points+ijk[4*ii]-1;
-        volumes[ii].points[1]=points+ijk[4*ii+1]-1;
-        volumes[ii].points[2]=points+ijk[4*ii+2]-1;
-        volumes[ii].points[3]=points+ijk[4*ii+3]-1;
+        int k;
+
+        for(k=0;k<4;k++){
+          volumes[ii].points[k]=points+ijk[4*ii+k]-1;
+        }
       }
       FREEMEMORY(ijk);
       NewMemory((void **)&matl_ind,nvolus*sizeof(int));
-      if(has_matl==1){
-        FORTREADBR(matl_ind,nvolus,stream);
-      }
+      FORTREADBR(matl_ind,nvolus,stream);
       if(type==GEOM_ISO)offset=nsurfinfo;
       for(ii=0;ii<nvolus;ii++){
         matldata *matli;

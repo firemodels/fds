@@ -207,6 +207,7 @@ extern "C" void Update_Glui_Clip(void){
 void CLIP_CB(int var){
   int i;
 
+  glutPostRedisplay();
   switch (var){
   case CLIP_MESH:
     if(clip_mesh==0){
@@ -281,7 +282,6 @@ void CLIP_CB(int var){
       CHECKBOX_clip_ymax->disable();
       CHECKBOX_clip_zmax->disable();
     }
-    glutPostRedisplay();
     break;
   case SPINNER_xlower:
     SPINNER_clip_xmax->set_float_limits(clipinfo.xmin,xclip_max,GLUI_LIMIT_CLAMP);
