@@ -18,7 +18,7 @@ set compile_platform=intel64
 set OPENMP=
 :: to use non-openmp fds comment the following two lines
 set OPENMP=openmp_
-set OMP_NUM_THREADS=2
+set OMP_NUM_THREADS=1
 
 :: -------------------------------------------------------------
 ::                         set repository names

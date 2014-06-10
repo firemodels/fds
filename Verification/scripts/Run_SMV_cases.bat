@@ -1,6 +1,7 @@
 @echo off
 
 set size=%1
+set runonlygeom=%2
 
 set svn_drive=c:
 
@@ -40,9 +41,7 @@ if "%size%" == "" (
   set WIND2FDSEXE=%SVNROOT%\Utilities\wind2fds\intel_win_%size%\wind2fds_win_%size%.exe
 )
 
-set GEOMEXE=%SVNROOT%\SMV\source\geomtest\intel_win_%size%\geomtest.exe
 set WFDSEXE=%FIRELOCAL%\bin\wfds6_9977_win_64.exe
-
 set BACKGROUNDEXE=%SVNROOT%\Utilities\background\intel_win_32\background.exe
 
 :: Run jobs in background (or not)
@@ -58,7 +57,6 @@ call :is_file_installed %CFASTEXE%|| exit /b 1
 call :is_file_installed %FDSEXE%|| exit /b 1
 call :is_file_installed %WIND2FDSEXE%|| exit /b 1
 
-set GEOM=%bg%%GEOMEXE%
 set FDS=%bg%%FDSEXE%
 set WFDS=%bg%%WFDSEXE%
 set CFAST=%bg%%CFASTEXE%
@@ -95,8 +93,12 @@ time /t >> %TIME_FILE%
 set smvug="%SVNROOT%\Manuals\SMV_User_Guide\"
 echo | %FDSEXE% 2> "%smvug%\SCRIPT_FIGURES\fds.version"
 
-call %SCRIPT_DIR%\SMV_Cases.bat
-call %SCRIPT_DIR%\SMV_geom_Cases.bat
+if "%runonlygeom%" == "1" (
+  call %SCRIPT_DIR%\SMV_geom_Cases.bat
+) else (
+  call %SCRIPT_DIR%\SMV_Cases.bat
+  call %SCRIPT_DIR%\SMV_geom_Cases.bat
+)
 
 :: erase %SCRIPT_DIR%\SMV_Cases.bat
 
