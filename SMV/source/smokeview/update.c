@@ -654,15 +654,11 @@ void Update_Show(void){
 int get_itime(int n, int *timeslist, float *times, int ntimes){
   int istart=0;
 
-  if(n>0){
-    istart=timeslist[n-1];
-  }
-  while(times[istart]<global_times[n]&&istart<ntimes){
+  if(n>0)istart=timeslist[n-1];
+  while(istart<ntimes-1&&times[istart+1]<global_times[n]){
     istart++;
   }
-  if(istart>=ntimes){
-    istart--;
-  }
+  istart=CLAMP(istart,0,ntimes-1);
   return istart;
 }
 
