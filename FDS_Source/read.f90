@@ -21,7 +21,7 @@ CHARACTER(255), PARAMETER :: readid='$Id$'
 CHARACTER(255), PARAMETER :: readrev='$Revision$'
 CHARACTER(255), PARAMETER :: readdate='$Date$'
 
-PUBLIC READ_DATA, GET_REV_read
+PUBLIC READ_DATA, READ_STOP, GET_REV_read
 
 CHARACTER(LABEL_LENGTH) :: ID,LABEL,MB,ODE_SOLVER,EXTINCTION_MODEL
 CHARACTER(100) :: MESSAGE,FYI
@@ -232,12 +232,37 @@ ENDIF
 FN_STOP = TRIM(CHID)//'.stop'
 INQUIRE(FILE=FN_STOP,EXIST=EX)
 IF (EX) THEN
-   WRITE(MESSAGE,'(A,A,A)') "ERROR: Remove the file, ",TRIM(FN_STOP),", from the current directory"
-   CALL SHUTDOWN(MESSAGE)
+   STOP_AT_ITER=READ_STOP() ! READ_STOP() returns 0 if there is nothing in the .stop file
+   IF (STOP_AT_ITER<=0) THEN
+      WRITE(MESSAGE,'(A,A,A)') "ERROR: Remove the file, ",TRIM(FN_STOP),", from the current directory"
+      CALL SHUTDOWN(MESSAGE)
+   ELSE
+      WRITE(LU_ERR,'(A,A,A)') "NOTE: The file, ",TRIM(FN_STOP),", was detected."
+      WRITE(LU_ERR,'(A,I5,A)')"This FDS run will stop after ",STOP_AT_ITER," iterations."
+   ENDIF
 ENDIF
 
 END SUBROUTINE READ_HEAD
 
+INTEGER FUNCTION READ_STOP()
+
+! if a stop file exists and it contains a positive integer then
+! stop the fds run at when it computes that number of iterations
+
+   INTEGER :: IERROR 
+   
+   READ_STOP=0
+
+! this routine is only called if the stop file exists
+
+   OPEN(UNIT=LU_STOP,FILE=FN_STOP,FORM='FORMATTED',STATUS='OLD',IOSTAT=IERROR)
+   IF (IERROR==0) THEN
+      READ(LU_STOP,'(I5)',END=10,IOSTAT=IERROR) READ_STOP
+      IF (IERROR/=0) READ_STOP=0
+   ENDIF
+10 CLOSE(LU_STOP)
+
+END FUNCTION READ_STOP
 
 SUBROUTINE READ_MESH(IMODE)
 USE EVAC, ONLY: N_DOORS, N_EXITS, N_CO_EXITS, EVAC_EMESH_EXITS_TYPE, EMESH_EXITS, EMESH_ID, EMESH_IJK, EMESH_XB, &
