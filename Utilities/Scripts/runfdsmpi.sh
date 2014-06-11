@@ -74,8 +74,20 @@ echo "Number of threads specified is $nthreads . Must be bigger than 0."
 echo "Run aborted."
 exit
 fi
-nnodes=$(echo "($nthreads-1)/16+1" | bc)
-nprocs=$(echo "($nthreads-1)/$nnodes+1" | bc)
+# original method used by runmpifds.sh
+#nnodes=$(echo "($nthreads-1)/16+1" | bc)
+#nprocs=$(echo "($nthreads-1)/$nnodes+1" | bc)
+# try running firebot using qfds method for 
+# defining nodes/processes
+nprocs=1
+nnodes=$(echo "($nthreads-1)/$nprocs+1" | bc)
+if test $nnodes -le 0
+then
+  nnodes=1
+elif test $nnodes -gt 32
+then
+  nnodes=32
+fi
 
 fulldir=$BASEDIR/$dir
 in=$infile.fds
