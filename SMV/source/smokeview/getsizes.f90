@@ -2,7 +2,7 @@
 ! $Revision$
 ! $Author$
 
-!  ------------------ getembedsize ------------------------ 
+!  ------------------ getembeddatasize ------------------------ 
 
 subroutine getembeddatasize(filename,endian,ntimes,nvars,error)
 implicit none
@@ -767,7 +767,7 @@ return
 
 end subroutine getslicesizes
 
-!  ------------------ openoart ------------------------ 
+!  ------------------ openpart ------------------------ 
 
 subroutine openpart(partfilename, unit, endian, error)
 implicit none
