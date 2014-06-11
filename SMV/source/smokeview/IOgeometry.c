@@ -1157,6 +1157,8 @@ void read_geom2(geomdata *geomi, int load_flag, int type, int *errorcode){
     geomlisti->ntriangles=0;
     geomlisti->nvolus=0;
 
+    if(first_frame_static==0&&i==-1)continue;
+
     FORTREADBR(&time_local,1,stream);
     if(i>=0)geomi->times[i]=time_local;
 
