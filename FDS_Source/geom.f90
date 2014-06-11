@@ -36,7 +36,7 @@ CHARACTER(100) :: MESSAGE, BUFFER
 INTEGER :: MAX_IDS=0
 CHARACTER(30),  ALLOCATABLE, DIMENSION(:) :: GEOM_IDS
 REAL(EB), ALLOCATABLE, DIMENSION(:) :: DAZIM, DELEV
-REAL(EB),  ALLOCATABLE, DIMENSION(:,:) :: DSCALE, DXYZ0, DXYZ
+REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: DSCALE, DXYZ0, DXYZ
 
 INTEGER :: MAX_ZVALS=0
 REAL(EB), ALLOCATABLE, DIMENSION(:) :: ZVALS
@@ -68,7 +68,7 @@ INTEGER, POINTER, DIMENSION(:) :: FACEI, FACEJ, FACE_FROM, FACE_TO
 LOGICAL COMPONENT_ONLY
 LOGICAL, ALLOCATABLE, DIMENSION(:) :: DEFAULT_COMPONENT_ONLY
 TYPE(GEOMETRY_TYPE), POINTER :: G=>NULL(), GSUB=>NULL()
-NAMELIST /GEOM/ AZIM, AZIM_DOT, COMPONENT_ONLY, DAZIM, DELEV, DSCALE, DXYZ0, DXYZ, &
+NAMELIST /GEOM/ AZIM, AZIM_DOT, COMPONENT_ONLY, DAZIM, DELEV, DSCALE, DT_BNDC, DT_GEOC, DXYZ0, DXYZ, &
                 ELEV, ELEV_DOT, FACES, GAXIS, GEOM_IDS, GROTATE, GROTATE_DOT, ID, IJK, &
                 MATL_ID, N_LAT, N_LEVELS, N_LONG, SCALE, SCALE_DOT, &
                 SPHERE_ORIGIN, SPHERE_RADIUS, SPHERE_TYPE, SURF_ID, &
@@ -404,9 +404,9 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
       ENDIF
       G%MATLS(1:N_VOLUS) = MATL_INDEX
 
-! construct an array of external faces
+      ! construct an array of external faces
 
-! determine which tetrahedron faces are external
+      ! determine which tetrahedron faces are external
       
       N_FACES = 4*N_VOLUS
       ALLOCATE(IS_EXTERNAL(0:N_FACES-1),STAT=IZERO)
@@ -414,7 +414,7 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
       
       IS_EXTERNAL(0:N_FACES-1)=.TRUE.  ! start off by assuming all faces are external
       
- ! reorder face indices so the the first index is always the smallest      
+      ! reorder face indices so the the first index is always the smallest      
  
       DO I = 0, N_VOLUS-1
          FACES(12*I+1) = VOLUS(4*I+1)
@@ -438,7 +438,7 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
          CALL REORDER_VERTS(FACES(12*I+10:12*I+12))
       ENDDO
       
-! find faces that match - for now ignore face orientation      
+      ! find faces that match - for now ignore face orientation      
  
        DO I = 0, N_FACES-1
           FACEI=>FACES(3*I+1:3*I+3)
@@ -454,7 +454,7 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
          ENDDO
       ENDDO
 
-! create new FACES index array keeping only external faces
+      ! create new FACES index array keeping only external faces
       
       N_FACES_TEMP = N_FACES  
       N_FACES=0
@@ -2541,7 +2541,7 @@ CUTCELL_INDEX_IF: IF (CUTCELL_COUNT>0) THEN
                M%K_CUTCELL(IC) = K
                M%P_MASK(I,J,K) = 0
 
-               ! new stuff
+               ! new stuff -- specific to tet_fire_1.fds
                CC=>M%CUTCELL(IC)
                VC = M%DX(I)*M%DY(J)*M%DZ(K)
                V1 = (/X(I-1),Y(J),Z(K-1)/)
@@ -2555,6 +2555,8 @@ CUTCELL_INDEX_IF: IF (CUTCELL_COUNT>0) THEN
                   ALLOCATE(CC%ZZ(N_TRACKED_SPECIES),STAT=IZERO)
                   CALL ChkMemErr('INIT_IBM','M%CUTCELL%ZZ',IZERO)
                ENDIF
+
+               !print *, CC%VOL, VC
 
             ENDIF
          ENDDO
