@@ -7,9 +7,17 @@ IF "%SETUP_IFORT_COMPILER_64%"=="1" GOTO envexist
 set SETUP_IFORT_COMPILER_64=1
 
 echo Setting up compiler environment
-call "%IFORT_COMPILER13%\bin\compilervars" intel64
+call "%IFORT_COMPILER14%\bin\compilervars" intel64
 :envexist
 
-erase *.obj *.mod
+set SMV_TESTFLAG=
+set SMV_TESTSTRING=
+
+if "%1" NEQ "-t" goto endif
+  set SMV_TESTFLAG=-D pp_BETA
+  set SMV_TESTSTRING=test_
+:endif
+
+
 make -j4 -f ..\Makefile intel_win_64_db
 pause
