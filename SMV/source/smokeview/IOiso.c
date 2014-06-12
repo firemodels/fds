@@ -69,13 +69,13 @@ void getisolevels(const char *isofile, int dataflag, float **levelsptr, float **
 void getisosizes(const char *isofile, int dataflag, EGZ_FILE **isostreamptr, int *nvertices, int *ntriangles, 
                  float **levelsptr, int *nisolevels, int *niso_times, 
                  float *tmin_local, float *tmax_local, int endian_local){
-	int len[3],labellengths=0;
-	int nlevels, n;
+  int len[3],labellengths=0;
+  int nlevels, n;
   int nvertices_i, ntriangles_i;
-	int i;
-	float time_local, time_max;
-	int beg;
-	int version;
+  int i;
+  float time_local, time_max;
+  int beg;
+  int version;
   int one;
   int skip_local;
   float ttmin, ttmax;
@@ -142,13 +142,13 @@ void getisosizes(const char *isofile, int dataflag, EGZ_FILE **isostreamptr, int
         }
       }
       if(nvertices_i<256){                 /* number of triangles */
-	      skip_local+=ntriangles_i;
+        skip_local+=ntriangles_i;
       }
       else if(nvertices_i>=256&&nvertices_i<65536){
-	      skip_local+=ntriangles_i*2;
+        skip_local+=ntriangles_i*2;
       }
       else{
-	      skip_local+=ntriangles_i*4;
+        skip_local+=ntriangles_i*4;
       }
       {EGZ_FSEEK(*isostreamptr,skip_local,SEEK_CUR);}
     }
@@ -159,8 +159,8 @@ void getisosizes(const char *isofile, int dataflag, EGZ_FILE **isostreamptr, int
     if((settmax_i==1&&time_local>tmax_i))continue;
 
     *nvertices += nvertices_i;
-	  *ntriangles += ntriangles_i;
-	  *niso_times += 1;
+    *ntriangles += ntriangles_i;
+    *niso_times += 1;
   }
   EGZ_FSEEK(*isostreamptr,beg,SEEK_SET);
   if(dataflag==1&&axislabels_smooth==1){
@@ -432,13 +432,13 @@ void readiso_orig(const char *file, int ifile, int flag, int *errorcode){
         if(nvertices_i<=0||ntriangles_i<=0)continue;
         skip_local += (6*nvertices_i);
         if(ib->dataflag==1)skip_local += (8 + 2*nvertices_i);
-  	    if(nvertices_i<256){
-  	      skip_local += (ntriangles_i);
+        if(nvertices_i<256){
+          skip_local += (ntriangles_i);
         }
         else if(nvertices_i>=256&&nvertices_i<65536){
-  	      skip_local += (ntriangles_i*2);
+          skip_local += (ntriangles_i*2);
         }
-	      else{
+        else{
           skip_local += (ntriangles_i*4);
         }
         EGZ_FSEEK(isostream,skip_local,SEEK_CUR);
@@ -1149,10 +1149,10 @@ void drawstaticiso(const isosurface *asurface,int surfacetype,
     }
 
     if(transparenton_flag==1){
-	  glColor4fv(rgbtemp);
+      glColor4fv(rgbtemp);
     }
     else{
-	  glColor3fv(rgbtemp);
+      glColor3fv(rgbtemp);
     }
     vertices_i=asurface->vertices;
     triangles_i=asurface->triangles;
@@ -1278,7 +1278,7 @@ void drawstaticiso(const isosurface *asurface,int surfacetype,
       if(smoothtrinormal==1){
         norm1 = vertexnorm+i1;
         norm2 = vertexnorm+i2;
-		    norm3 = vertexnorm+i3;
+        norm3 = vertexnorm+i3;
         for(k=0;k<3;k++){
           vv1n[k]=vv1[k]+norm1[k]/(8.*32768.)/4.0;
           vv2n[k]=vv2[k]+norm2[k]/(8.*32768.)/4.0;

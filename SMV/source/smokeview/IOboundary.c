@@ -193,7 +193,7 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
     FILE_SIZE labellen=LABELLEN;
     char patchlonglabel[31], patchshortlabel[31], patchunit[31];
 
-    FORTgetpatchsizes1(&file_unit,file,patchlonglabel,patchshortlabel,patchunit,&endian_smv,&meshi->npatches,&headersize,&error,
+    FORTgetpatchsizes1(&file_unit,file,patchlonglabel,patchshortlabel,patchunit,&meshi->npatches,&headersize,&error,
                        lenfile,labellen,labellen,labellen);
     if(error!=0){
       readpatch(ifile,UNLOAD,&error);
@@ -3280,28 +3280,28 @@ int getpatchfacedir(mesh *meshi, int i1, int i2, int j1, int j2, int k1, int k2,
   *blockonpatch=-1;
   *meshonpatch=NULL;
   if(i1==i2){
-	  if(i1==0&&j1==0&&j2==meshi->jbar&&k1==0&&k2==meshi->kbar){
-		  return(1);
-	  }
-	  if(i1==meshi->ibar&&j1==0&&j2==meshi->jbar&&k1==0&&k2==meshi->kbar){
-		  return(-1);
-	  }
+    if(i1==0&&j1==0&&j2==meshi->jbar&&k1==0&&k2==meshi->kbar){
+      return(1);
+    }
+    if(i1==meshi->ibar&&j1==0&&j2==meshi->jbar&&k1==0&&k2==meshi->kbar){
+      return(-1);
+    }
   }
   else if(j1==j2){
-	  if(j1==0&&i1==0&&i2==meshi->ibar&&k1==0&&k2==meshi->kbar){
-		  return(-1);
-	  }
-	  if(j1==meshi->jbar&&i1==0&&i2==meshi->ibar&&k1==0&&k2==meshi->kbar){
-		  return(1);
-	  }
+    if(j1==0&&i1==0&&i2==meshi->ibar&&k1==0&&k2==meshi->kbar){
+      return(-1);
+    }
+    if(j1==meshi->jbar&&i1==0&&i2==meshi->ibar&&k1==0&&k2==meshi->kbar){
+      return(1);
+    }
   }
   else if(k1==k2){
-	  if(k1==0&&j1==0&&j2==meshi->jbar&&i1==0&&i2==meshi->ibar){
-		  return(1);
-	  }
-	  if(k1==meshi->kbar&&j1==0&&j2==meshi->jbar&&i1==0&&i2==meshi->ibar){
-		  return(-1);
-	  }
+    if(k1==0&&j1==0&&j2==meshi->jbar&&i1==0&&i2==meshi->ibar){
+      return(1);
+    }
+    if(k1==meshi->kbar&&j1==0&&j2==meshi->jbar&&i1==0&&i2==meshi->ibar){
+      return(-1);
+    }
   }
   return(0);
 }
@@ -3508,9 +3508,9 @@ void updatepatchmenulabels(void){
       patchi = patchinfo + i;
       STRCPY(patchi->menulabel,patchi->label.longlabel);
       if(nmeshes>1){
-	    mesh *patchmesh;
+        mesh *patchmesh;
 
-		patchmesh = meshinfo + patchi->blocknumber;
+        patchmesh = meshinfo + patchi->blocknumber;
         sprintf(label,"%s",patchmesh->label);
         STRCAT(patchi->menulabel,", ");
         STRCAT(patchi->menulabel,label);
@@ -3919,7 +3919,7 @@ int update_patch_hist(patchdata *patchj){
     lenfile=strlen(patchi->file);
 
     FORTget_file_unit(&unit1,&patchi->unit_start);
-    FORTgetboundaryheader1(patchi->file,&unit1,&endian_local, &npatches, &error, lenfile);
+    FORTgetboundaryheader1(patchi->file,&unit1, &npatches, &error, lenfile);
     if(npatches==0){
       FORTclosefortranfile(&unit1);
       continue;
@@ -3947,7 +3947,7 @@ int update_patch_hist(patchdata *patchj){
     }
     
     FORTget_file_unit(&unit1,&patchi->unit_start);
-    FORTopenboundary(patchi->file,&unit1,&endiandata,&patchi->version,&error1,lenfile);
+    FORTopenboundary(patchi->file,&unit1,&patchi->version,&error1,lenfile);
 
     NewMemory((void **)&patchframe,patchframesize*sizeof(float));
     init_histogram(patchi->histogram);

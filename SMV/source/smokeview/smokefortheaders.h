@@ -42,15 +42,15 @@
 STDCALLF FORTgetverts(float *box_bounds, float *v0, float *v1, float *v2, float *v3, float *out_verts, 
                       int *nverts, int *facestart, int *facenum, int *nfaces, float *volume, int *flag, int *error, double *err);
 STDCALLF FORTgeomout(float *verts, int *nverts, int *faces, int *nfaces);
-STDCALLF FORTgetembeddatasize(char *filename, int *endian, int *ntimes, int *nvars, int *error, FILE_SIZE lenfile);
-STDCALLF FORTgetembeddata(char *filename, int *endian, int *ntimes, int *nvals, float *times, int *nstatics, int *ndynamics,
+STDCALLF FORTgetembeddatasize(char *filename, int *ntimes, int *nvars, int *error, FILE_SIZE lenfile);
+STDCALLF FORTgetembeddata(char *filename, int *ntimes, int *nvals, float *times, int *nstatics, int *ndynamics,
                          float *vals, int *redirect, int *error, FILE_SIZE lenfile);
 STDCALLF FORTgetboundaryheader1(char *boundaryfilename, int *boundaryunitnumber, 
-                               int *endian, int *npatch, int *error, FILE_SIZE lenfile);
+                               int *npatch, int *error, FILE_SIZE lenfile);
 STDCALLF FORTgetboundaryheader2(int *boundaryunitnumber, int *version, int *npatches,
                                int *pi1, int *pi2, int *pj1, int *pj2, int *pk1, int *pk2, int *patchdir);
 STDCALLF FORTopenboundary(char *boundaryfilename, int *boundaryunitnumber, 
-                         int *endian, int *version, int *error, FILE_SIZE len);
+                         int *version, int *error, FILE_SIZE len);
 STDCALLF FORTclosefortranfile(int *lunit);
 STDCALLF FORTget_file_unit(int *funit, int *first_unit);
 STDCALLF FORTcolor2rgb(int *rgb, char *color, FILE_SIZE colorsize);
@@ -58,15 +58,15 @@ STDCALLF FORTcolor2rgb(int *rgb, char *color, FILE_SIZE colorsize);
 STDCALLF FORTfcreate_part5sizefile(char *part5file, char *part5sizefile, int *angle_flag, int *redirect_flag, int *error,
                                   FILE_SIZE lenpart5file, FILE_SIZE lenpart5sizefile);
 
-STDCALLF FORTgetsliceparms(char *file,int *endian,
+STDCALLF FORTgetsliceparms(char *file,
                           int *is1,int *is2,int *js1,int *js2,int *ks1, int *ks2,int *ni, int *nj, int *nk, int *slice3d, int *error,FILE_SIZE lenfile);
-STDCALLF FORTgetzonesize(char *zonefilename, int *nzone_times, int *nrooms, int *nfires, int *endian, int *error, FILE_SIZE len);
+STDCALLF FORTgetzonesize(char *zonefilename, int *nzone_times, int *nrooms, int *nfires, int *error, FILE_SIZE len);
 STDCALLF FORTgetzonedata(char *zonefilename, int *nzone_times, int *nrooms, int *nfires, 
-                        float *zone_times, float *zoneqfire, float *zonepr, float *zoneylay,float *zonetl,float *zonetu, int *endian,
+                        float *zone_times, float *zoneqfire, float *zonepr, float *zoneylay,float *zonetl,float *zonetu, 
                         int *error, FILE_SIZE len);
 STDCALLF FORTgetxyzdata(int *iblank,int *nx,int *ny,int *nz,int *error);
 STDCALLF FORTgetpatchsizes1(int *file_unit,char *patchfilename,char *patchlonglabel,char *patchshortlabel,char *patchunit,
-                           int *endian,int *npatch, int *headersize, int *error,
+                           int *npatch, int *headersize, int *error,
                            FILE_SIZE len1, FILE_SIZE len2, FILE_SIZE len3, FILE_SIZE len4);
 STDCALLF FORTgetpatchsizes2(int *file_unit,int *version, int *npatch,int *npatchsize, 
                            int *pi1,int *pi2,int *pj1,int *pj2,int *pk1,int *pk2, int *patchdir,
@@ -86,22 +86,22 @@ STDCALLF FORTgetdata2(int *file_unit,
                      FILE_SIZE lenisprink);
 
 STDCALLF FORTgetsizesa(char *partfilename, int *npartpoint,int *npartframes,FILE_SIZE lenfile);
-STDCALLF FORTgetsizes(int *file_unit,char *partfilename, int *ibar, int *jbar, int *kbar, 
-                     int *nb, int *nv, int *nspr,int *mxframepoints, int *endian, int *showstaticsmoke, int *error, FILE_SIZE filelen);
+STDCALLF FORTgetsizes(int *file_unit,char *partfilename, 
+                     int *nb, int *nv, int *nspr,int *mxframepoints, int *showstaticsmoke, int *error, FILE_SIZE filelen);
 STDCALLF FORTgetsizes2(int *file_unit,int *settmin_p, float *tmin_p, int *settmax_p, float *tmax_p,
                       int *nspr, int *frameloadstep, int *partpointstep, int *npartpoints, int *npartframes, int *error);
 STDCALLF FORTgetslicesizes(char *slicefilename, int *nslicei, int *nslicej, int *nslicek, 
-                          int *nsteps,int *sliceframestep, int *endian, int *error, 
+                          int *nsteps,int *sliceframestep, int *error, 
                           int *settime_p, int *settmax_p, float *tmin_p, float *tmax_p,
                           int *headersize, int *framesize,FILE_SIZE slicefilelen);
 STDCALLF FORTwriteslicedata(int *file_unit,char *slicefilename, 
                             int *is1,int *is2,int *js1,int *js2,int *ks1,int *ks2,
                             float *qdata,float *times,int *ntimes, int *redirect,FILE_SIZE slicefilelen);
-STDCALLF FORTgetslicedata(int *file_unit,char *slicefilename, char *longlabels, char *shortlabels, 
-                         char *units, int *is1,int *is2,int *js1,int *js2, int *ks1,int *ks2,
+STDCALLF FORTgetslicedata(int *file_unit,char *slicefilename, char *shortlabels, 
+                         int *is1,int *is2,int *js1,int *js2, int *ks1,int *ks2,
                          int *idir, float *qslicemin,float *qslicemax,
-                         float *qslicedata,float *times, int *nsteps, int *sliceframestep, int *endian,
+                         float *qslicedata,float *times, int *nsteps, int *sliceframestep, 
                          int *settime_p, int *settmax_p, float *tmin_p, float *tmax_p, int *redirect,
                          FILE_SIZE slicefilelen, FILE_SIZE longlableslen, FILE_SIZE shortlabelslen, FILE_SIZE unitslen);
-STDCALLF FORTgetplot3dq(char *qfilename, int *nx, int *ny, int *nz, float *qq, int *error, int *endian, int *isotest, FILE_SIZE filelen);
+STDCALLF FORTgetplot3dq(char *qfilename, int *nx, int *ny, int *nz, float *qq, int *error, int *isotest, FILE_SIZE filelen);
 #endif

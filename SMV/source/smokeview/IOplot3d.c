@@ -220,7 +220,7 @@ void readplot3d(char *file, int ifile, int flag, int *errorcode){
   PRINTF("Loading plot3d data: %s\n",file);
   local_starttime = glutGet(GLUT_ELAPSED_TIME);
   if(p->compression_type==0){
-    FORTgetplot3dq(file,&nx,&ny,&nz,meshi->qdata,&error,&endian_smv,&isotest,plot3dfilelen);
+    FORTgetplot3dq(file,&nx,&ny,&nz,meshi->qdata,&error,&isotest,plot3dfilelen);
   }
   if(NewMemory((void **)&meshi->iqdata,numplot3dvars*ntotal*sizeof(unsigned char))==0){
     *errorcode=1;

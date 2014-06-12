@@ -158,7 +158,7 @@ int Creadslice_frame(int frame_index_local,int sd_index,int flag){
   if(frame_index_local==first_frame_index){
     if(sd->compression_type==0){
 
-      FORTgetslicesizes(sd->file, &sd->nslicei, &sd->nslicej, &sd->nslicek, &sd->ntimes, &sliceframestep, &endian_smv,&error,
+      FORTgetslicesizes(sd->file, &sd->nslicei, &sd->nslicej, &sd->nslicek, &sd->ntimes, &sliceframestep,&error,
         &settmin_s, &settmax_s, &tmin_s, &tmax_s, &headersize, &framesize,
         slicefilelen);
     }
@@ -1078,7 +1078,7 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
 
     slicefilelen = strlen(file);
     if(sd->compression_type==0){
-      FORTgetslicesizes(file, &sd->nslicei, &sd->nslicej, &sd->nslicek, &sd->ntimes, &sliceframestep, &endian_smv,&error,
+      FORTgetslicesizes(file, &sd->nslicei, &sd->nslicej, &sd->nslicek, &sd->ntimes, &sliceframestep,&error,
         &settmin_s, &settmax_s, &tmin_s, &tmax_s, &headersize, &framesize,
         slicefilelen);
     }
@@ -1147,9 +1147,9 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
       ASSERT(ValidPointer(sd->qslicedata,sizeof(float)*sd->nslicei*sd->nslicej*sd->nslicek*sd->ntimes));
 #endif      
       FORTget_file_unit(&file_unit,&file_unit);
-      FORTgetslicedata(&file_unit,file,slicelonglabels,sliceshortlabels,sliceunits,
+      FORTgetslicedata(&file_unit,file,sliceshortlabels,
                    &sd->is1,&sd->is2,&sd->js1,&sd->js2,&sd->ks1,&sd->ks2,&sd->idir,
-                   &qmin,&qmax,sd->qslicedata,sd->times,&sd->ntimes,&sliceframestep, &endian_smv,
+                   &qmin,&qmax,sd->qslicedata,sd->times,&sd->ntimes,&sliceframestep,
                    &settmin_s,&settmax_s,&tmin_s,&tmax_s, &redirect,
                    slicefilelen,labellen,labellen,labellen);
 #ifdef pp_MEMDEBUG                   
@@ -2017,7 +2017,7 @@ void getsliceparams(void){
         js2=sd->js2;
         ks1=sd->ks1;
         ks2=sd->ks2;
-        FORTgetsliceparms(file,&endian_smv,
+        FORTgetsliceparms(file,
           &is1,&is2,&js1,&js2,&ks1,&ks2,&ni,&nj,&nk,&sd->volslice,&error,lenfile);
         if(stream!=NULL&&doit_anyway==0)fprintf(stream,"%i %i %i %i %i %i %i %i %i %i %i\n",sd->seq_id,is1,is2,js1,js2,ks1,ks2,ni,nj,nk,sd->volslice);
       }

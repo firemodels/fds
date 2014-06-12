@@ -477,7 +477,7 @@ void readzone(int ifile, int flag, int *errorcode){
     getzonesizecsv(&nzone_times,&nrooms2,&nfires2,&nzhvents2,&nzvvents2,&error);
   }
   else{
-    FORTgetzonesize(file,&nzone_times,&nrooms2,&nfires2,&endian_smv ,&error,zonefilelen);
+    FORTgetzonesize(file,&nzone_times,&nrooms2,&nfires2,&error,zonefilelen);
     nzhvents2=nzhvents;
     nzvvents2=nzvvents;
   }
@@ -577,7 +577,7 @@ void readzone(int ifile, int flag, int *errorcode){
                    zonepr,zoneylay,zonetl,zonetu,&zoneodl,&zoneodu, zonehvents, zonevvents, &error);
   }
   else{
-    FORTgetzonedata(file,&nzone_times,&nrooms, &nfires, zone_times,zoneqfire,zonepr,zoneylay,zonetl,zonetu,&endian_smv,&error,zonefilelen);
+    FORTgetzonedata(file,&nzone_times,&nrooms, &nfires, zone_times,zoneqfire,zonepr,zoneylay,zonetl,zonetu,&error,zonefilelen);
   }
 
   if(zonei->csv==0){

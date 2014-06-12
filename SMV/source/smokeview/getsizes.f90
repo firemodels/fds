@@ -4,13 +4,12 @@
 
 !  ------------------ getembeddatasize ------------------------ 
 
-subroutine getembeddatasize(filename,endian,ntimes,nvars,error)
+subroutine getembeddatasize(filename,ntimes,nvars,error)
 implicit none
 character(len=*), intent(in) :: filename
-integer, intent(in) :: endian
 integer, intent(out) :: ntimes, nvars, error
 
-integer :: endian2, lu20, finish
+integer :: lu20, finish
 logical :: isopen,exists
 real :: time, dummy
 integer :: i, one, version
@@ -54,9 +53,9 @@ end subroutine getembeddatasize
 
 !  ------------------ endian_open ------------------------ 
 
-integer function endian_open(file,lunit,endian)
+integer function endian_open(file,lunit)
 character(len=*), intent(in) :: file
-integer, intent(in) :: lunit, endian
+integer, intent(in) :: lunit
 
 logical isopen,exists
 integer :: error
@@ -95,21 +94,17 @@ integer, intent(in) :: angle_flag, redirect_flag
 integer, intent(out) :: error
 
 integer :: lu20, lu21, version, nclasses
-logical :: isopen, exists
+logical :: isopen
 integer, allocatable, dimension(:) :: numtypes, numpoints
 character(len=30) :: dummy
 integer :: i, j,one,idummy
 real :: rdummy,time
-integer :: endian
 integer :: endian_open
 
 error=1
 lu20=20
 
-error=endian_open(trim(part5file),lu20,1)
-if(error.ne.0)then
-  error=endian_open(trim(part5file),lu20,0)
-endif
+error=endian_open(trim(part5file),lu20)
 if(error.ne.0)return
 
 lu21=21
@@ -189,84 +184,16 @@ close(lu21)
 return
 end subroutine fcreate_part5sizefile
 
-!  ------------------ getisosize ------------------------ 
-
-subroutine getisosize(isofilename,endian,nisopoints,nisotriangles,nisolevels,nisosteps,error)
-implicit none
-character(len=*), intent(in) :: isofilename
-integer, intent(in) :: endian
-integer, intent(out) :: nisopoints, nisotriangles, nisolevels, nisosteps, error
-
-integer :: endian2, lu20
-logical :: isopen,exists
-character(len=30) :: label
-integer :: version,i,j, nisopoints_i, nisotriangles_i
-real :: dummy
-integer :: idummy,finish
-integer(2) :: idummy2
-character(len=1) :: idummy1
-
-lu20=20
-nisopoints=0
-nisotriangles=0
-nisosteps=0
-inquire(unit=lu20,opened=isopen)
-
-if(isopen)close(lu20)
-inquire(file=trim(isofilename),exist=exists)
-if(exists)then
-#ifdef WIN32
-  open(unit=lu20,file=trim(isofilename),form="unformatted",shared,action="read")
-#else
-  open(unit=lu20,file=trim(isofilename),form="unformatted",action="read")
-#endif
- else
-  write(6,*)'The iso file name, ',trim(isofilename),' does not exist'
-  error=1
-  return
-endif
-
-error = 0
-read(lu20)version
-read(lu20)label
-read(lu20)label
-read(lu20)label
-read(lu20)nisolevels
-read(lu20)(dummy,i=1,nisolevels)
-
-do 
-  read(lu20,iostat=finish)dummy
-  if(finish.ne.0)return
-  do i = 1, nisolevels
-    read(lu20,iostat=finish)nisopoints_i,nisotriangles_i
-	if(finish.ne.0)return
-	if(nisopoints_i.lt.256)then
-      read(lu20,iostat=finish)(idummy2,j=1,3*nisopoints_i),(idummy1,j=1,nisotriangles_i)
-	 elseif(nisopoints_i.ge.256.and.nisopoints_i.lt.32768)then
-      read(lu20,iostat=finish)(idummy2,j=1,3*nisopoints_i),(idummy2,j=1,nisotriangles_i)
-	 else
-      read(lu20,iostat=finish)(idummy2,j=1,3*nisopoints_i),(idummy,j=1,nisotriangles_i)
-	endif
-	if(finish.ne.0)return
-	nisopoints = nisopoints + nisopoints_i
-	nisotriangles = nisotriangles + nisotriangles_i
-  end do
-  nisosteps=nisosteps+1
-end do
-
-end subroutine getisosize
-
 !  ------------------ getzonesize ------------------------ 
 
-subroutine getzonesize(zonefilename,nzonet,nrooms,nfires,endian,error)
+subroutine getzonesize(zonefilename,nzonet,nrooms,nfires,error)
 implicit none
 character(len=*) :: zonefilename
 integer, intent(out) :: nzonet,nrooms,nfires,error
-integer, intent(in) :: endian
 
 logical :: isopen, exists
 integer :: lu26, version
-integer :: i, endian2
+integer :: i
 real :: dummy, dummy2
 integer :: exit_all
 integer :: file_unit
@@ -331,11 +258,11 @@ end subroutine getzonesize
 !  ------------------ getpatchsizes1 ------------------------ 
 
 subroutine getpatchsizes1(file_unit,patchfilename,patchlonglabel,patchshortlabel,patchunit, &
-       endian,npatch,headersize,error)
+       npatch,headersize,error)
 implicit none
 
 character(len=*) :: patchfilename, patchlonglabel, patchshortlabel, patchunit
-integer, intent(in) :: endian,file_unit
+integer, intent(in) :: file_unit
 integer, intent(out) :: npatch
 integer, intent(out) :: headersize
 
@@ -468,14 +395,13 @@ end subroutine getsizesa
 
 !  ------------------ getsizes ------------------------ 
 
-subroutine getsizes(file_unit,partfilename,ibar,jbar,kbar,nb,nv,nspr,mxframepoints,endian, showstaticsmoke, error)
+subroutine getsizes(file_unit,partfilename,nb,nv,nspr,mxframepoints,showstaticsmoke, error)
 implicit none
 
 integer, intent(out) :: nb, nv, nspr, mxframepoints, showstaticsmoke, error
-integer, intent(in) :: file_unit,ibar, jbar, kbar
+integer, intent(in) :: file_unit
 
 integer :: lu10, ii, i, j, k
-integer, intent(in) :: endian
 real :: xx, yy
 character(len=*) :: partfilename
 logical :: exists, connected
@@ -587,12 +513,12 @@ do
   if(naspr.ne.0)then       ! read in sprinkler data
     read(lu10,iostat=error) npp2
     if(error.ne.0)go to 999
-	if(npp2.ge.0)then
+    if(npp2.ge.0)then
       read(lu10,iostat=error) (dummy,i=1,npp2),(dummy,i=1,npp2),(dummy,i=1,npp2)
-	 else
+     else
       read(lu10,iostat=error) (dummy,i=1,npp2),(dummy,i=1,npp2),(dummy,i=1,npp2),(dummy,i=1,npp2)
-	endif
-  	if(load)npoints2 = (abs(npp2)-1)/partpointstep + 1
+    endif
+    if(load)npoints2 = (abs(npp2)-1)/partpointstep + 1
   end if
   if(error.ne.0)goto 999
   if(load)then
@@ -609,7 +535,7 @@ end subroutine getsizes2
 
 !  ------------------ getsliceparms ------------------------ 
 
-subroutine getsliceparms(slicefilename, endian, ip1, ip2, jp1, jp2, kp1, kp2, ni, nj, nk, slice3d, error)
+subroutine getsliceparms(slicefilename, ip1, ip2, jp1, jp2, kp1, kp2, ni, nj, nk, slice3d, error)
 implicit none
 
 character(len=*) :: slicefilename
@@ -617,7 +543,6 @@ logical :: exists
 
 integer, intent(inout) :: ip1, ip2, jp1, jp2, kp1, kp2
 integer, intent(out) :: ni, nj, nk, slice3d, error
-integer, intent(in) :: endian
 
 integer :: idir, joff, koff
 logical :: connected
@@ -673,14 +598,13 @@ end subroutine getsliceparms
 !  ------------------ getslicesizes ------------------------ 
 
 subroutine getslicesizes(slicefilename, nslicei, nslicej, nslicek, nsteps, sliceframestep,&
-   endian, error, settmin_s, settmax_s, tmin_s, tmax_s, headersize, framesize)
+   error, settmin_s, settmax_s, tmin_s, tmax_s, headersize, framesize)
 implicit none
 
 character(len=*) :: slicefilename
 logical :: exists
 
 integer, intent(out) :: nslicei, nslicej, nslicek, nsteps, error
-integer, intent(in) :: endian
 integer, intent(in) :: settmin_s, settmax_s, sliceframestep
 integer, intent(out) :: headersize, framesize
 real, intent(in) :: tmin_s, tmax_s
@@ -769,13 +693,13 @@ end subroutine getslicesizes
 
 !  ------------------ openpart ------------------------ 
 
-subroutine openpart(partfilename, unit, endian, error)
+subroutine openpart(partfilename, unit, error)
 implicit none
 
 character(len=*) :: partfilename
 logical :: exists
 
-integer, intent(in) :: endian, unit
+integer, intent(in) :: unit
 integer, intent(out) :: error
 logical :: connected
 
@@ -801,52 +725,18 @@ endif
 return
 end subroutine openpart
 
-!  ------------------ openfortranfile ------------------------ 
-
-subroutine openfortranfile(file_name, file_unit, endian, error)
-implicit none
-
-character(len=*), intent(in) :: file_name
-integer, intent(inout) :: file_unit
-integer, intent(in) :: endian
-integer, intent(out) :: error
-
-logical :: exists
-
-error=0
-exists=.true.
-
-inquire(file=file_name,exist=exists)
-if(exists)then
-#ifdef WIN32
-  open(unit=file_unit,file=file_name,form="unformatted",shared,action="read")
-#else
-  open(unit=file_unit,file=file_name,form="unformatted",action="read")
-#endif
- else
-  error=1
-  return
-endif
-
-return
-end subroutine openfortranfile
-
 !  ------------------ openslice ------------------------ 
 
-subroutine openslice(slicefilename, unitnum, endian, is1, is2, js1, js2, ks1, ks2, error)
+subroutine openslice(slicefilename, unitnum, is1, is2, js1, js2, ks1, ks2, error)
 implicit none
 
 character(len=*) :: slicefilename
 logical :: exists
 
-integer, intent(in) :: endian
 integer, intent(inout) :: unitnum
 integer, intent(out) :: is1, is2, js1, js2, ks1, ks2
 integer, intent(out) :: error
-logical :: connected
 character(len=30) :: longlbl, shortlbl, unitlbl
-integer :: funit
-integer :: len1
 
 integer :: lu11
 
@@ -888,20 +778,18 @@ end subroutine closefortranfile
 
 !  ------------------ getboundaryheader1 ------------------------ 
 
-subroutine getboundaryheader1(boundaryfilename,boundaryunitnumber,endian,npatch,error)
+subroutine getboundaryheader1(boundaryfilename,boundaryunitnumber,npatch,error)
 implicit none
 
 character(len=*), intent(in) :: boundaryfilename
-integer, intent(in) :: endian
 integer, intent(inout) :: boundaryunitnumber
 integer, intent(out) :: npatch, error
 
 character(len=30) :: patchlonglabel, patchshortlabel, patchunit
 
-integer :: lu15, lenshort, lenunits
+integer :: lu15
 logical :: exists
 logical :: isopen
-integer :: funit
 
 error=0
 call get_file_unit(boundaryunitnumber,boundaryunitnumber)
@@ -962,16 +850,16 @@ end subroutine getboundaryheader2
 
 !  ------------------ openboundary ------------------------ 
 
-subroutine openboundary(boundaryfilename,boundaryunitnumber,endian,version,error)
+subroutine openboundary(boundaryfilename,boundaryunitnumber,version,error)
 implicit none
 
 character(len=*), intent(in) :: boundaryfilename
-integer, intent(in) :: boundaryunitnumber, endian,version
+integer, intent(in) :: boundaryunitnumber,version
 integer, intent(out) :: error
 
 character(len=30) :: patchlonglabel, patchshortlabel, patchunit
 
-integer :: lu15, lenshort, lenunits
+integer :: lu15
 logical :: exists
 logical :: isopen
 integer :: npatch,n
@@ -1075,7 +963,7 @@ integer, intent(out) :: size,error
 
 integer :: pstart, pend
 integer :: tagstart, tagend
-integer :: i, j, nparticles, dummy
+integer :: i, j, nparticles
 
 size=0
 pend=0

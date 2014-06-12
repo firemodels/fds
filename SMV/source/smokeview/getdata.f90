@@ -47,17 +47,16 @@ end subroutine geomout
 
 !  ------------------ getembeddata ------------------------ 
 
-subroutine getembeddata(filename,endian,ntimes,nvals,times,nstatics,ndynamics,vals,redirect_flag,error)
+subroutine getembeddata(filename,ntimes,nvals,times,nstatics,ndynamics,vals,redirect_flag,error)
 implicit none
 character(len=*), intent(in) :: filename
-integer, intent(in) :: endian, ntimes, nvals, redirect_flag
+integer, intent(in) :: ntimes, nvals, redirect_flag
 integer, intent(out) :: error
 real, intent(out), dimension(:) :: times(ntimes), vals(nvals)
 integer, intent(out), dimension(:) :: nstatics(ntimes), ndynamics(ntimes)
 
-integer :: endian2, lu20, finish
+integer :: lu20, finish
 logical :: isopen,exists
-real :: time, dummy
 integer :: i
 integer :: one, itime, nvars
 integer :: nvert_s, ntri_s, nvert_d, ntri_d
@@ -114,10 +113,10 @@ end subroutine getembeddata
 
 !  ------------------ getzonedata ------------------------ 
 
-subroutine getzonedata(zonefilename,nzonet,nrooms, nfires, zonet,zoneqfire,zonepr, zoneylay,zonetl,zonetu,endian,error)
+subroutine getzonedata(zonefilename,nzonet,nrooms, nfires, zonet,zoneqfire,zonepr, zoneylay,zonetl,zonetu,error)
 implicit none
 character(len=*) :: zonefilename
-integer, intent(in) :: nrooms, nfires,endian
+integer, intent(in) :: nrooms, nfires
 integer, intent(inout) :: nzonet
 real, intent(out), dimension(nrooms*nzonet) :: zonepr, zoneylay, zonetl, zonetu
 real, intent(out), dimension(nfires*nzonet) :: zoneqfire
@@ -286,9 +285,9 @@ subroutine getdata2(file_unit,xs,ys,zs,&
                     t,&
                     sprinkflag,isprink,tspr,bframe,sframe,sprframe,stimes,nspr,nmax,mxframes,nframes,&
                     settmin_p,settmax_p,tmin_p,tmax_p,frameloadstep,partpointstep, &
-              			xbox0, xbox, ybox0, ybox, zbox0, zbox, &
+                    xbox0, xbox, ybox0, ybox, zbox0, zbox, &
                     offset_x, offset_y, offset_z, redirect_flag, &
-      	    				error)
+                    error)
                    
 implicit none
 real, dimension(*), intent(out) :: t
@@ -353,7 +352,7 @@ do
   allocated = .false.
   if(npp1.gt.0.and.npp1.gt.nppold)then
     allocated=.true.
-  	nppold = npp1
+    nppold = npp1
    else
     allocated = .false.
   endif
@@ -379,8 +378,8 @@ do
       go to 999
     endif
    iitemp(1:npoints) = factor*(offset_x+xpp(1:npp1:partpointstep)-xbox0)/(xbox-xbox0)
-	 where(iitemp(1:npoints)<0)iitemp(1:npoints)=0
-	 where(iitemp(1:npoints).gt.factor-1)iitemp(1:npoints)=factor-1
+   where(iitemp(1:npoints)<0)iitemp(1:npoints)=0
+   where(iitemp(1:npoints).gt.factor-1)iitemp(1:npoints)=factor-1
    xs(n+1:n+npoints) = iitemp(1:npoints)
 
    iitemp(1:npoints) = factor*(offset_y+ypp(1:npp1:partpointstep)-ybox0)/(ybox-ybox0)
@@ -395,16 +394,16 @@ do
 
    t(n+1:n+npoints) = brp(1:npp1:partpointstep)
    isprink(n+1:n+npoints) = char(0)
-  	npp1a = npoints
-    n = n + npp1a
+   npp1a = npoints
+   n = n + npp1a
   endif
   npp2 = 0
 
 
   if(naspr.ne.0)then       ! read in sprinkler data
     read(lu10,iostat=error) npp2
-	if(npp2.lt.0)sprinkflag=1
-	npp2 = abs(npp2)
+    if(npp2.lt.0)sprinkflag=1
+    npp2 = abs(npp2)
     if(error.ne.0)go to 999
     if(npp2.gt.0.and.npp2.gt.nppold)then
       allocated=.true.
@@ -416,19 +415,19 @@ do
       deallocate(iitemp,xpp,ypp,zpp,brp)
       allocate(iitemp(npp2),xpp(npp2),ypp(npp2),zpp(npp2),brp(npp2),stat=error)
     endif
-	if(sprinkflag.eq.0)then
+    if(sprinkflag.eq.0)then
       read(lu10,iostat=error) (xpp(i),i=1,npp2),(ypp(i),i=1,npp2),(zpp(i),i=1,npp2)
-	 else
+     else
       read(lu10,iostat=error) (xpp(i),i=1,npp2),(ypp(i),i=1,npp2),(zpp(i),i=1,npp2),(brp(i),i=1,npp2)
-	endif
-  	if(load)then
+    endif
+    if(load)then
       npoints = (npp2-1)/partpointstep + 1
       if(n+npoints.gt.nmax)go to 999
-	  if(sprinkflag.eq.1)then
+      if(sprinkflag.eq.1)then
         t(n+1:n+npoints) = brp(1:npp2:partpointstep)
-	   else
+       else
         t(n+1:n+npoints) = -1.0
-	  endif
+      endif
       isprink(n+1:n+npoints) = char(1)
         iitemp(1:npoints) = factor*(xpp(1:npp2:partpointstep)-xbox0)/(xbox-xbox0)
         where(iitemp(1:npoints)<0)iitemp(1:npoints)=0
@@ -444,9 +443,9 @@ do
         where(iitemp(1:npoints)<0)iitemp(1:npoints)=0
         where(iitemp(1:npoints).gt.factor-1)iitemp(1:npoints)=factor-1
         zs(n+1:n+npoints) = iitemp(1:npoints)
-  	  npp2a = npoints
-      n = n + npp2a
-  	endif
+        npp2a = npoints
+        n = n + npp2a
+    endif
   end if
   if(error.ne.0)goto 999
   if(load)then
@@ -456,9 +455,9 @@ do
     sprframe(nframes) = npp2a
     if(nframes+1.le.mxframes)bframe(nframes+1) = bframe(nframes) + sframe(nframes)
     if(npp2.eq.0)then
-  	  if(redirect_flag.eq.0)write(6,10)stime
+      if(redirect_flag.eq.0)write(6,10)stime
 10    format("particle time=",f9.2)
-  	 else
+     else
       if(redirect_flag.eq.0)then
         write(6,*)"particle time=",stime,"particles",npp1,"droplets",npp2
         write(6,20)stime,npp2
@@ -536,7 +535,7 @@ integer :: error
 character(len=30) :: longlbl, shortlbl, unitlbl
 integer :: ibeg, iend, nframe
 integer :: nxsp, nysp, nzsp
-integer :: i,ii,jj,kk
+integer :: i,ii
 inquire(unit=file_unit,opened=connected)
 if(connected)close(file_unit)
 
@@ -571,12 +570,12 @@ end subroutine writeslicedata
 
 !  ------------------ getslicedata ------------------------ 
 
-subroutine getslicedata(file_unit,slicefilename,longlabel,shortlabel,units,&
+subroutine getslicedata(file_unit,slicefilename,shortlabel,&
             is1,is2,js1,js2,ks1,ks2,idir,qmin,qmax,qdata,times,nstepsmax,sliceframestep,&
-			endian,settmin_s,settmax_s,tmin_s,tmax_s,redirect_flag)
+            settmin_s,settmax_s,tmin_s,tmax_s,redirect_flag)
 implicit none
 
-character(len=*) :: slicefilename, longlabel, shortlabel,units
+character(len=*) :: slicefilename, shortlabel
 
 integer, intent(in) :: file_unit
 real, intent(out) :: qmin, qmax
@@ -584,7 +583,7 @@ real, intent(out), dimension(*) :: qdata
 real, intent(out), dimension(*) :: times
 integer, intent(out) :: idir
 integer, intent(out) :: is1, is2, js1, js2, ks1, ks2
-integer, intent(in) :: endian, redirect_flag
+integer, intent(in) :: redirect_flag
 integer, intent(inout) :: nstepsmax
 integer, intent(in) :: settmin_s, settmax_s, sliceframestep
 real, intent(in) :: tmin_s, tmax_s
@@ -605,7 +604,6 @@ logical :: connected, load
 integer :: ii, kk
 integer :: joff, koff
 integer :: count
-integer :: funit
 
 lu11 = file_unit
 joff = 0
@@ -695,7 +693,7 @@ do
     istart = (nsteps-1)*nxsp*nysp
     do i = 1, nxsp
       irowstart = (i-1)*nysp
-  	  ii = istart+irowstart
+      ii = istart+irowstart
       qdata(ii+1:ii+nysp)=qq(i,1:nysp,1)
       qmax = max(qmax,maxval(qq(i,1:nysp,1)))
       qmin = min(qmin,minval(qq(i,1:nysp,1)))
@@ -704,7 +702,7 @@ do
     istart = (nsteps-1)*nxsp*(nzsp+koff)
     do i = 1, nxsp
       irowstart = (i-1)*(nzsp+koff)
-  	  kk = istart + irowstart
+      kk = istart + irowstart
       qdata(kk+1:kk+nzsp+koff) = qq(i,1,1:nzsp+koff)
       qmax = max(qmax,maxval(qq(i,1,1:nzsp+koff)))
       qmin = min(qmin,minval(qq(i,1,1:nzsp+koff)))
@@ -800,10 +798,9 @@ end subroutine endianout
 
 !  ------------------ outsliceheader ------------------------ 
 
-subroutine outsliceheader(file_unit,slicefilename,unit,ip1, ip2, jp1, jp2, kp1, kp2, error)
+subroutine outsliceheader(slicefilename,unit,ip1, ip2, jp1, jp2, kp1, kp2, error)
 implicit none
 
-integer, intent(in) :: file_unit
 character(len=*) :: slicefilename
 integer, intent(in) :: unit
 integer, intent(in) :: ip1, ip2, jp1, jp2, kp1, kp2
@@ -921,20 +918,19 @@ end subroutine outpatchframe
 
 !  ------------------ getplot3dq ------------------------ 
 
-subroutine getplot3dq(qfilename,nx,ny,nz,qq,error,endian,isotest)
+subroutine getplot3dq(qfilename,nx,ny,nz,qq,error,isotest)
 implicit none
 
 character(len=*) :: qfilename
 integer, intent(in) :: nx, ny, nz
 integer, intent(out) :: error
 real, dimension(nx,ny,nz,5)  :: qq
-integer, intent(in) :: endian, isotest
+integer, intent(in) :: isotest
 
 real :: dum1, dum2, dum3, dum4
 logical :: exists
 integer :: error2
 real :: dummy, qval
-integer :: funit
 
 integer :: nxpts, nypts, nzpts
 integer :: i, j, k, n
@@ -968,10 +964,10 @@ if(isotest.eq.0)then
     read(u_in,iostat=error)((((qq(i,j,k,n),i=1,nxpts),j=1,nypts),k=1,nzpts),n=1,5)
    else
     error = 1
-	write(6,*)"*** Fatal error in getplot3dq ***"
-  	write(6,*)"Grid size found in plot3d file was:",nxpts,nypts,nzpts
-  	write(6,*)"Was expecting:",nx,ny,nz
-  	stop
+    write(6,*)"*** Fatal error in getplot3dq ***"
+    write(6,*)"Grid size found in plot3d file was:",nxpts,nypts,nzpts
+    write(6,*)"Was expecting:",nx,ny,nz
+    stop
   endif
   close(u_in)
  else
@@ -1004,15 +1000,14 @@ subroutine plot3dout(outfile, nx, ny, nz, qout, error3)
 implicit none
 
 character(len=*), intent(in) :: outfile
-real, dimension(nx,ny,nz,5)  :: qout
 integer, intent(in) :: nx, ny, nz
+real, dimension(nx,ny,nz,5)  :: qout
 integer, intent(out) :: error3
 
 integer :: u_out
 logical :: connected
 integer :: i, j, k, n
 real :: dummy
-integer :: funit
 
 error3 = 0
 
@@ -1817,12 +1812,9 @@ REAL(EB), POINTER, DIMENSION(:) :: TETRAVERT, TETRANORMAL, TETRAVERT0, TETRAVERT
 REAL(EB), POINTER, DIMENSION(:) :: FACEVERTS
 INTEGER, POINTER, DIMENSION(:) :: EDGE
 INTEGER, DIMENSION(0:9) :: NORMAL_INDEX
-INTEGER, DIMENSION(0:5) :: PLANE_INDEX
 REAL(EB), DIMENSION(:), POINTER :: B_PLANE_BOUNDS, T_PLANE_BOUNDS
 
 INTEGER :: V,E,F,BP,BE,BV,TP,TE,TV
-
-DATA PLANE_INDEX /0,0,1,1,2,2/
 
 REAL(EB), DIMENSION(0:2) :: V0, V1, V2, V3, VC
 
@@ -2034,7 +2026,6 @@ INTEGER :: I1, I2, J1, J2, K1, K2
 INTEGER :: I3, I4, J3, J4, K3, K4
 REAL(FB), DIMENSION(0:2) :: V0, V1, V2, V3
 INTEGER :: N
-REAL(EB) :: VOL_TETRA, VOL
 REAL(FB), DIMENSION(0:5) :: BOX_BOUNDS
 INTEGER :: COUNT
 REAL(EB) :: TBEFORE, TAFTER
@@ -2180,18 +2171,17 @@ SUBROUTINE ORDER_VERTS(FACEVERTS,NVERTS,NORMAL_INDEX)
 
 ! order vertices of a given face
 
-REAL(EB), DIMENSION(0:3*NVERTS-1), INTENT(INOUT), TARGET :: FACEVERTS
 INTEGER, INTENT(IN) :: NVERTS, NORMAL_INDEX
+REAL(EB), DIMENSION(0:3*NVERTS-1), INTENT(INOUT), TARGET :: FACEVERTS
 
 REAL(EB), DIMENSION(:), POINTER :: NORMAL
-REAL(EB), DIMENSION(0:2) :: VERT_CENTER, CROSSVERT
+REAL(EB), DIMENSION(0:2) :: VERT_CENTER
 REAL(EB), DIMENSION(:), POINTER :: VERT, VERT1, VERT2
 REAL(EB), DIMENSION(0:3*NVERTS-1) :: FACEVERTS_TEMP
 INTEGER :: ORIENTATION
 INTEGER :: I, II, IIP1, J
 INTEGER, DIMENSION(0:100) :: ORDER
 INTEGER :: N_CLOCKWISE, N_COUNTER_CLOCKWISE
-INTEGER :: TEMP
 
 ! first 6 (starting at 0) normal indices are for box faces
 ! next 4 (6->9) normal indices are for tetrahedron faces
@@ -2477,7 +2467,6 @@ INTEGER FUNCTION IN_TETRA(XYZ, IGNORE_PLANE)
 
 REAL(EB), INTENT(IN), DIMENSION(0:2) :: XYZ
 INTEGER, INTENT(IN) :: IGNORE_PLANE
-INTEGER I
 REAL(EB), DIMENSION(0:2) :: VECDIFF
 REAL(EB), DIMENSION(:), POINTER :: TETRAVERT, TETRANORMAL
 
@@ -2536,14 +2525,13 @@ INTEGER, INTENT(IN) :: FLAG
 INTEGER, INTENT(OUT) :: ERROR
 
 REAL(EB), DIMENSION(0:5) :: BOX_BOUNDS_EB, BOX_BOUNDS_IJK_EB
-REAL(EB), DIMENSION(0:2) :: V0_EB, V1_EB, V2_EB, V3_EB, V_CENTER
+REAL(EB), DIMENSION(0:2) :: V0_EB, V1_EB, V2_EB, V3_EB
 REAL(EB), DIMENSION(0:299), TARGET :: VERTS_EB
 
 REAL(EB) :: XMIN, YMIN, ZMIN
 REAL(EB) :: XMAX, YMAX, ZMAX
 
 REAL(EB) :: VOL, VOL_TOTAL
-REAL(EB), DIMENSION(0:3) :: VOL_IJK
 
 INTEGER :: I, J, K
 

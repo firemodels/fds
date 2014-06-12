@@ -2513,7 +2513,7 @@ void UpdateFrame(float thisinterval, int *changetime, int *redisplay){
     if(oldcpuframe<0)oldcpuframe+=20;
     totalcpu=cputimes[cpuframe]-cputimes[oldcpuframe];
     if(totalcpu==0.0){
- 		  framerate=0.0;
+      framerate=0.0;
     }
     else{
      framerate=10.0/totalcpu;

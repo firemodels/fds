@@ -1482,7 +1482,7 @@ void read_geomdata(int ifile, int load_flag, int *errorcode){
   endian_smv = getendian();
   lenfile = strlen(file);
 
-  FORTgetembeddatasize(file, &endian_smv, &ntimes_local, &nvals, &error, lenfile);
+  FORTgetembeddatasize(file, &ntimes_local, &nvals, &error, lenfile);
 
   if(nvals>0&&ntimes_local>0){
     NewMemory((void **)&patchi->geom_nstatics,ntimes_local*sizeof(int));
@@ -1493,7 +1493,7 @@ void read_geomdata(int ifile, int load_flag, int *errorcode){
     NewMemory((void **)&patchi->geom_vals,nvals*sizeof(float));
     NewMemory((void **)&patchi->geom_ivals,nvals*sizeof(char));
   }
-  FORTgetembeddata(file, &endian_smv, &ntimes_local, &nvals, patchi->geom_times, 
+  FORTgetembeddata(file, &ntimes_local, &nvals, patchi->geom_times, 
     patchi->geom_nstatics, patchi->geom_ndynamics, patchi->geom_vals, &redirect, &error, lenfile);
 
   init_histogram(patchi->histogram);

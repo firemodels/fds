@@ -549,8 +549,8 @@ EXTERNCPP int getplot3dtime(float *time);
 EXTERNCPP void normalize(float *xyz, int n);
 #ifndef CPP
 EXTERNCPP void getisosizes(const char *isofile, int dataflag, EGZ_FILE **isostreamptr,
-				 int *nvertices, int *ntriangles, float **levels, int *nisolevels,
-				 int *niso_times, float *tmin, float *tmax, int endian);
+                           int *nvertices, int *ntriangles, float **levels, int *nisolevels,
+                           int *niso_times, float *tmin, float *tmax, int endian);
 #endif
 EXTERNCPP void array2string(float *array, int narray, char *string);
 EXTERNCPP void getisolevels(const char *isofile, int dataflag, float **levelsptr, float ***colorlevelsptr, int *nisolevels);

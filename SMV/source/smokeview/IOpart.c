@@ -1200,7 +1200,7 @@ void readpart(char *file, int ifile, int flag, int *errorcode){
   PRINTF("Sizing particle data: %s\n",file);
   file_unit=15;
   FORTget_file_unit(&file_unit,&file_unit);
-  FORTgetsizes(&file_unit,file,&ibar,&jbar,&kbar,&nb,&nv,&nspr,&mxframepoints,&endian_smv,&staticframe0,&error,lenfile);
+  FORTgetsizes(&file_unit,file,&nb,&nv,&nspr,&mxframepoints,&staticframe0,&error,lenfile);
   STRCPY(partsizefile,file);
   STRCAT(partsizefile,".sz");
   statfile=STAT(file,&statbuffer);
@@ -1230,7 +1230,7 @@ void readpart(char *file, int ifile, int flag, int *errorcode){
     }
     file_unit=15;
     FORTget_file_unit(&file_unit,&file_unit);
-    FORTgetsizes(&file_unit,file,&ibar,&jbar,&kbar,&nb,&nv,&nspr,&mxframepoints,&endian_smv,&staticframe0,&error,lenfile);
+    FORTgetsizes(&file_unit,file,&nb,&nv,&nspr,&mxframepoints,&staticframe0,&error,lenfile);
   }
   npartpoints2=npartpoints;
   npartframes2=npartframes;
