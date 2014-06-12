@@ -99,19 +99,20 @@ if ! [ -e $fulldir/$in ]; then
   echo "The fds input file, $fulldir/$in, does not exist. Run aborted."
   exit
 fi
-if [[ $STOPFDS -gt 1 ]]; then
-  echo "creating delayed stop file: $infile"
-  echo $STOPFDS > $fulldir/$stopfile
-  exit
-elif [ $STOPFDS ]; then
+
+if [ -e $fulldir/$stopfile ]; then
+  rm $fulldir/$stopfile
+fi
+if [ $STOPFDS ]; then
   echo "stopping case: $infile"
   touch $fulldir/$stopfile
   exit
-else
-  if [ -e $fulldir/$stopfile ]; then
-    rm $fulldir/$stopfile
-  fi
 fi
+if [ $STOPFDSMAXITER ]; then
+  echo "creating delayed stop file: $infile"
+  echo $STOPFDSMAXITER > $fulldir/$stopfile
+fi
+
 if [ -e $outlog ]; then
   rm $outlog
 fi
