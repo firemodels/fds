@@ -482,15 +482,7 @@ run_verification_cases_debug()
 
    # Submit SMV verification cases and wait for them to start
    echo 'Running SMV verification cases:' >> $OUTPUT_DIR/stage3 2>&1
-   ./Run_SMV_Cases.sh $USEINSTALL2 -d -q $SMOKEBOT_QUEUE >> $OUTPUT_DIR/stage3 2>&1
-   wait_verification_cases_debug_start
-
-   # Wait some additional time for all cases to start
-   sleep 30
-
-   # Stop all cases
-   ./Run_SMV_Cases.sh $USEINSTALL2 -d -s >> $OUTPUT_DIR/stage3 2>&1
-   echo "" >> $OUTPUT_DIR/stage3 2>&1
+   ./Run_SMV_Cases.sh $USEINSTALL2 -m 10 -d -q $SMOKEBOT_QUEUE >> $OUTPUT_DIR/stage3 2>&1
 
    # Wait for SMV verification cases to end
    wait_verification_cases_debug_end
@@ -503,8 +495,9 @@ run_verification_cases_debug()
    cd $FDS_SVNROOT/Verification
    find . -name '*.stop' -exec rm -f {} \;
    find . -name '*.err' -exec rm -f {} \;
-   find Visualization -name '*.smv' -exec rm -f {} \;
    find scripts/Outfiles -name '*.out' -exec rm -f {} \;
+   find Visualization -name '*.smv' -exec rm -f {} \;
+   find Immersed_Boundary_Method -name '*.smv' -exec rm -f {} \;
    find WUI -name '*.smv' -exec rm -f {} \;
 }
 
