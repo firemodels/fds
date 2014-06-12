@@ -503,18 +503,6 @@ generate_validation_set_list()
    VALIDATION_SETS=(`grep '$VDIR' Process_All_Output.sh | grep -v "#" | xargs -n 1 dirname | xargs -n 1 dirname | xargs -n 1 basename | xargs -i svn info {}/FDS_Output_Files | awk '{if($0 != ""){ if(s){s=s"*"$0}else{s=$0}}else{ print s"*";s=""}}END{print s"*"}' | sort -t* -k9 | cut -d '*' -f1 | cut -d ' ' -f2 | xargs -n 1 dirname`)
 }
 
-wait_cases_debug_start()
-{
-   # Scans qstat and waits for cases to start
-   while [[ `qstat | grep $(whoami) | awk '{print $5}' | grep Q` != '' ]]; do
-      JOBS_REMAINING=`qstat | grep $(whoami) | awk '{print $5}' | grep Q | wc -l`
-      echo "Waiting for ${JOBS_REMAINING} ${1} cases to start." >> $FIREBOT_DIR/output/stage3
-      TIME_LIMIT_STAGE="3"
-      check_time_limit
-      sleep 30
-   done
-}
-
 wait_cases_debug_end()
 {
    # Scans qstat and waits for cases to end
@@ -544,75 +532,23 @@ check_current_utilization()
 
 run_verification_cases_debug()
 {
-   #  ============================
-   #  = Run all FDS serial cases =
-   #  ============================
-
+   # Start running all FDS verification cases in delayed stop debug mode
    cd $FDS_SVNROOT/Verification
-
-   # Submit FDS verification cases and wait for them to start (run serial cases in debug mode on firebot queue)
-   echo 'Running FDS verification cases (serial):' >> $FIREBOT_DIR/output/stage3
-   ./Run_FDS_Cases.sh $1 -c serial -d -q $QUEUE >> $FIREBOT_DIR/output/stage3 2>&1
-   wait_cases_debug_start 'verification'
-
-   # Wait some additional time for all cases to start
-   sleep 30
-
-   # Stop all cases
-   ./Run_FDS_Cases.sh -c serial -d -s >> $FIREBOT_DIR/output/stage3 2>&1
+   # Create delayed stop files (10 iterations)
+   ./Run_FDS_Cases.sh $1 -d -s 10 >> $FIREBOT_DIR/output/stage3 2>&1
+   echo 'Running FDS verification cases:' >> $FIREBOT_DIR/output/stage3
+   ./Run_FDS_Cases.sh $1 -d -q $QUEUE >> $FIREBOT_DIR/output/stage3 2>&1
    echo "" >> $FIREBOT_DIR/output/stage3 2>&1
 
-   # Wait for serial verification cases to end
-   wait_cases_debug_end 'verification'
-
-   #  =========================
-   #  = Run all FDS MPI cases =
-   #  =========================
-
-   cd $FDS_SVNROOT/Verification
-
-   # Submit FDS verification cases and wait for them to start (run MPI cases in debug mode on firebot queue)
-   echo 'Running FDS verification cases (MPI):' >> $FIREBOT_DIR/output/stage3 2>&1
-   ./Run_FDS_Cases.sh $1 -c mpi -d -q $QUEUE >> $FIREBOT_DIR/output/stage3 2>&1
-   wait_cases_debug_start 'verification'
-
-   # Wait some additional time for all cases to start
-   sleep 30
-
-   # Stop all cases
-   ./Run_FDS_Cases.sh -c mpi -d -s >> $FIREBOT_DIR/output/stage3 2>&1
-   echo "" >> $FIREBOT_DIR/output/stage3 2>&1
-
-   # Wait for MPI verification cases to end
-   wait_cases_debug_end 'verification'
-
-   #  =====================
-   #  = Run all SMV cases =
-   #  =====================
-
+   # Start running all SMV verification cases in delayed stop debug mode
    cd $FDS_SVNROOT/Verification/scripts
-
-   # Submit SMV verification cases and wait for them to start (run SMV cases in debug mode on firebot queue)
+   # Create delayed stop files (10 iterations)
+   ./Run_SMV_Cases.sh $1 -d -s 10 >> $FIREBOT_DIR/output/stage3 2>&1
    echo 'Running SMV verification cases:' >> $FIREBOT_DIR/output/stage3 2>&1
    ./Run_SMV_Cases.sh $1 -d -q $QUEUE >> $FIREBOT_DIR/output/stage3 2>&1
-   wait_cases_debug_start 'verification'
 
-   # Wait some additional time for all cases to start
-   sleep 30
-
-   #  ==================
-   #  = Stop all cases =
-   #  ==================
-
-   ./Run_SMV_Cases.sh -d -s >> $FIREBOT_DIR/output/stage3 2>&1
-   echo "" >> $FIREBOT_DIR/output/stage3 2>&1
-
-   # Wait for SMV verification cases to end
+   # Wait for all verification cases to end
    wait_cases_debug_end 'verification'
-
-   #  ======================
-   #  = Remove .stop files =
-   #  ======================
 
    # Remove all .stop files from Verification directories (recursively)
    cd $FDS_SVNROOT/Verification
@@ -939,13 +875,13 @@ wait_cases_release_end()
 
 run_verification_cases_release()
 {
-   # Start running all FDS verification cases (run all cases on firebot queue)   
+   # Start running all FDS verification cases
    cd $FDS_SVNROOT/Verification
    echo 'Running FDS verification cases:' >> $FIREBOT_DIR/output/stage5
    ./Run_FDS_Cases.sh $1 -q $QUEUE >> $FIREBOT_DIR/output/stage5 2>&1
    echo "" >> $FIREBOT_DIR/output/stage5 2>&1
 
-   # Start running all SMV verification cases (run all cases on firebot queue)
+   # Start running all SMV verification cases
    cd $FDS_SVNROOT/Verification/scripts
    echo 'Running SMV verification cases:' >> $FIREBOT_DIR/output/stage5 2>&1
    ./Run_SMV_Cases.sh $1 -q $QUEUE >> $FIREBOT_DIR/output/stage5 2>&1
