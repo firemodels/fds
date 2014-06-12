@@ -3,7 +3,7 @@
 # This script runs the Smokeview Verification Cases on a 
 # Linux machine with a batch queuing system
 
-queue=
+queue=batch
 size=64
 DEBUG=
 OPENMP=
@@ -22,7 +22,7 @@ echo "Options"
 echo "-d - use debug version of FDS"
 echo "-g - run only geometry cases"
 echo "-h - display this message"
-echo "-m - stop FDS runs after a specifed number of iterations (delayed stop)"
+echo "-m max_iterations - stop FDS runs after a specifed number of iterations (delayed stop)"
 echo "     example: an option of 10 would cause FDS to stop after 10 iterations"
 echo "-o nthreads - run OpenMP version of FDS with a specified number of threads [default: $nthreads]"
 echo "-p size - platform size"
