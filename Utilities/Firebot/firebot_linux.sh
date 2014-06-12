@@ -534,18 +534,17 @@ run_verification_cases_debug()
 {
    # Start running all FDS verification cases in delayed stop debug mode
    cd $FDS_SVNROOT/Verification
-   # Create delayed stop files (10 iterations)
-   ./Run_FDS_Cases.sh $1 -d -s 10 >> $FIREBOT_DIR/output/stage3 2>&1
+   # Run FDS with delayed stop files (with a maximum of 10 iterations)
    echo 'Running FDS verification cases:' >> $FIREBOT_DIR/output/stage3
-   ./Run_FDS_Cases.sh $1 -d -q $QUEUE >> $FIREBOT_DIR/output/stage3 2>&1
+   ./Run_FDS_Cases.sh $1 -d -m 10 -q $QUEUE >> $FIREBOT_DIR/output/stage3 2>&1
    echo "" >> $FIREBOT_DIR/output/stage3 2>&1
 
    # Start running all SMV verification cases in delayed stop debug mode
    cd $FDS_SVNROOT/Verification/scripts
-   # Create delayed stop files (10 iterations)
-   ./Run_SMV_Cases.sh $1 -d -s 10 >> $FIREBOT_DIR/output/stage3 2>&1
+   # Run FDS with delayed stop files (with a maximum of 10 iterations)
    echo 'Running SMV verification cases:' >> $FIREBOT_DIR/output/stage3 2>&1
-   ./Run_SMV_Cases.sh $1 -d -q $QUEUE >> $FIREBOT_DIR/output/stage3 2>&1
+   ./Run_SMV_Cases.sh $1 -d -m 10 -q $QUEUE >> $FIREBOT_DIR/output/stage3 2>&1
+   echo "" >> $FIREBOT_DIR/output/stage3 2>&1
 
    # Wait for all verification cases to end
    wait_cases_debug_end 'verification'
@@ -885,6 +884,7 @@ run_verification_cases_release()
    cd $FDS_SVNROOT/Verification/scripts
    echo 'Running SMV verification cases:' >> $FIREBOT_DIR/output/stage5 2>&1
    ./Run_SMV_Cases.sh $1 -q $QUEUE >> $FIREBOT_DIR/output/stage5 2>&1
+   echo "" >> $FIREBOT_DIR/output/stage5 2>&1
 
    # Wait for all verification cases to end
    wait_cases_release_end 'verification'
