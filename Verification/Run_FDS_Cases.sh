@@ -18,7 +18,7 @@ IB=ib
 fi
 
 function usage {
-echo "Run_FDS_Cases.sh [ -c cases -d -h -o nthreads -q queue_name -s "
+echo "Run_FDS_Cases.sh [ -c cases -d -h -o nthreads -q queue_name -s iterations "
 echo "                   -r resource_manager ]"
 echo "Runs FDS verification suite"
 echo ""
@@ -39,12 +39,16 @@ echo "-r resource_manager - run cases using the resource manager"
 echo "     default: PBS"
 echo "     other options: SLURM"
 echo "-s - stop FDS runs"
+echo "     option: use a number greater than 1 to stop after a number of specified iterations,"
+echo "     use any other value to create an empty stopfile"
+echo "     for example: an option of 10 would cause FDS to stop after 10 iterations,"
+echo "     and an option of 1 would cause FDS to stop immediately"
 exit
 }
 
 export SVNROOT=`pwd`/..
 
-while getopts 'c:dho:p:q:r:s' OPTION
+while getopts 'c:dho:p:q:r:s:' OPTION
 do
 case $OPTION in
   c)
@@ -71,7 +75,7 @@ case $OPTION in
    resource_manager="$OPTARG"
    ;;
   s)
-   export STOPFDS=1
+   export STOPFDS="$OPTARG"
    ;;   
 esac
 done
