@@ -939,10 +939,7 @@ wait_cases_release_end()
 
 run_verification_cases_release()
 {
-   # Start running all FDS verification cases (run all cases on firebot queue)
-   
-   ./Run_FDS_Cases.sh $1 -q $QUEUE >> $FIREBOT_DIR/output/stage5 2>&1
-   
+   # Start running all FDS verification cases (run all cases on firebot queue)   
    cd $FDS_SVNROOT/Verification
    echo 'Running FDS verification cases:' >> $FIREBOT_DIR/output/stage5
    ./Run_FDS_Cases.sh $1 -q $QUEUE >> $FIREBOT_DIR/output/stage5 2>&1
