@@ -7,9 +7,9 @@ SUBROUTINE FDS2AST (CHID,NOMASTER,C_S,TBEG,TEND,TINT,COUNTER,VARIABLE,N)
 
 ! Program to convert various FDS output files to ASCII
 
-! $Id: fds2ascii.f90 6404 2010-06-27 18:04:56Z mcgratta $  
-! $Revision: 6404 $
-! $Date: 2010-06-27 15:04:56 -0300 (dom, 27 jun 2010) $
+! $Id$  
+! $Revision$
+! $Date$
  
 IMPLICIT NONE
 
