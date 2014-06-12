@@ -100,16 +100,20 @@ if ! [ -e $fulldir/$in ]; then
   exit
 fi
 if [[ $STOPFDS -gt 1 ]]; then
- echo "creating delayed stop file: $infile"
- echo $STOPFDS > $fulldir/$stopfile
- exit
+  echo "creating delayed stop file: $infile"
+  echo $STOPFDS > $fulldir/$stopfile
+  exit
 elif [ $STOPFDS ]; then
- echo "stopping case: $infile"
- touch $fulldir/$stopfile
- exit
+  echo "stopping case: $infile"
+  touch $fulldir/$stopfile
+  exit
+else
+  if [ -e $fulldir/$stopfile ]; then
+    rm $fulldir/$stopfile
+  fi
 fi
 if [ -e $outlog ]; then
- rm $outlog
+  rm $outlog
 fi
 
 # create run script
