@@ -93,9 +93,6 @@ elif [ $STOPFDS ]; then
  touch $fulldir/$stopfile
  exit
 fi
-if [ -e $fulldir/$stopfile ]; then
- rm $fulldir/$stopfile
-fi
 if [ -e $outlog ]; then
  rm $outlog
 fi
