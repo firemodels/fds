@@ -15,13 +15,15 @@ RUN_MPI=1
 RUN_GEOM=1
 
 function usage {
-echo "Run_SMV_Cases.sh [-d -h -o nthreads -p -q queue_name -s iterations ]"
+echo "Run_SMV_Cases.sh [-d -h -m max_iterations -o nthreads -p -q queue_name -s ]"
 echo "Runs Smokeview verification suite"
 echo ""
 echo "Options"
 echo "-d - use debug version of FDS"
 echo "-g - run only geometry cases"
 echo "-h - display this message"
+echo "-m - stop FDS runs after a specifed number of iterations (delayed stop)"
+echo "     example: an option of 10 would cause FDS to stop after 10 iterations"
 echo "-o nthreads - run OpenMP version of FDS with a specified number of threads [default: $nthreads]"
 echo "-p size - platform size"
 echo "     default: 64"
@@ -30,10 +32,6 @@ echo "-q queue_name - run cases using the queue queue_name"
 echo "     default: none"
 echo "     other options: batch, fire60s, fire70s, vis"
 echo "-s - stop FDS runs"
-echo "     option: use a number greater than 1 to stop after a number of specified iterations,"
-echo "     use any other value to create an empty stopfile"
-echo "     for example: an option of 10 would cause FDS to stop after 10 iterations,"
-echo "     and an option of 1 would cause FDS to stop immediately"
 echo "-u - use installed versions of utilities background and wind2fds"
 exit
 }
@@ -60,7 +58,7 @@ cd $CURDIR/..
 
 
 use_installed="0"
-while getopts 'dgho:p:q:s:u' OPTION
+while getopts 'dghm:o:p:q:su' OPTION
 do
 case $OPTION in
   d)
@@ -75,6 +73,9 @@ case $OPTION in
   h)
    usage;
    ;;
+  m)
+   export STOPFDSMAXITER="$OPTARG"
+   ;;
   o)
    nthreads="$OPTARG"
    OPENMP=openmp_
@@ -88,7 +89,7 @@ case $OPTION in
    ;;
   s)
    stop_cases=true
-   export STOPFDS="$OPTARG"
+   export STOPFDS=1
    ;;
   u)
    use_installed="1"
