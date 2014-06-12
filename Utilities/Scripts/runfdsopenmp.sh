@@ -85,8 +85,8 @@ if ! [ -e $fulldir/$in ]; then
   exit
 fi
 if [[ $STOPFDS -gt 1 ]]; then
- echo "stopping case: $infile"
- echo $STOPFDS $fulldir/$stopfile
+ echo "creating delayed stop file: $infile"
+ echo $STOPFDS > $fulldir/$stopfile
  exit
 elif [ $STOPFDS ]; then
  echo "stopping case: $infile"
