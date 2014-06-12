@@ -15,7 +15,7 @@ RUN_MPI=1
 RUN_GEOM=1
 
 function usage {
-echo "Run_SMV_Cases.sh [-d -h -o nthreads -p -q queue_name -s ]"
+echo "Run_SMV_Cases.sh [-d -h -o nthreads -p -q queue_name -s iterations ]"
 echo "Runs Smokeview verification suite"
 echo ""
 echo "Options"
@@ -30,6 +30,10 @@ echo "-q queue_name - run cases using the queue queue_name"
 echo "     default: none"
 echo "     other options: batch, fire60s, fire70s, vis"
 echo "-s - stop FDS runs"
+echo "     option: use a number greater than 1 to stop after a number of specified iterations,"
+echo "     use any other value to create an empty stopfile"
+echo "     for example: an option of 10 would cause FDS to stop after 10 iterations,"
+echo "     and an option of 1 would cause FDS to stop immediately"
 echo "-u - use installed versions of utilities background and wind2fds"
 exit
 }
@@ -56,7 +60,7 @@ cd $CURDIR/..
 
 
 use_installed="0"
-while getopts 'dgho:p:q:su' OPTION
+while getopts 'dgho:p:q:s:u' OPTION
 do
 case $OPTION in
   d)
@@ -84,7 +88,7 @@ case $OPTION in
    ;;
   s)
    stop_cases=true
-   export STOPFDS=1
+   export STOPFDS="$OPTARG"
    ;;
   u)
    use_installed="1"
