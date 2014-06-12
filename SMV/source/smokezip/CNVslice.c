@@ -905,7 +905,7 @@ void update_slice_hist(void){
     
     LOCK_COMPRESS;
     FORTget_file_unit(&unit1,&slicei->unit_start);
-    FORTopenslice(slicei->file,&unit1,&endiandata,&is1,&is2,&js1,&js2,&ks1,&ks2,&error1,lenfile);
+    FORTopenslice(slicei->file,&unit1,&is1,&is2,&js1,&js2,&ks1,&ks2,&error1,lenfile);
     UNLOCK_COMPRESS;
 
     sliceframesize=(is2+1-is1)*(js2+1-js1)*(ks2+1-ks1);

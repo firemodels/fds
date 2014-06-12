@@ -624,7 +624,7 @@ int readsmv(char *smvfile){
           lenfile=strlen(patchi->file);
           endian=getendian();
           boundaryunitnumber=15;
-          FORTgetboundaryheader1(patchi->file,&boundaryunitnumber,&endian, &npatches, &error, lenfile);
+          FORTgetboundaryheader1(patchi->file,&boundaryunitnumber, &npatches, &error, lenfile);
           if(npatches>0){
             int *pi1, *pi2, *pj1, *pj2, *pk1, *pk2, *patchdir, *patchsize;
             int i;

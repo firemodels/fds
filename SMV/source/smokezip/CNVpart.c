@@ -368,7 +368,7 @@ void convert_part(part *parti, int *thread_index){
   lenfile=strlen(parti->file);
   LOCK_COMPRESS;
   FORTget_file_unit(&unit,&parti->unit_start);
-  FORTopenpart(parti->file,&unit,&endiandata,&error,lenfile);
+  FORTopenpart(parti->file,&unit,&error,lenfile);
   UNLOCK_COMPRESS;
 
   FORTgetpartheader1(&unit,&nclasses,&fdsversion,&size);
@@ -586,7 +586,7 @@ void Get_Part_Bounds(void){
     LOCK_COMPRESS;
     unit=15;
     FORTget_file_unit(&unit,&parti->unit_start);
-    FORTopenpart(parti->file,&unit,&endiandata,&error1,lenfile);
+    FORTopenpart(parti->file,&unit,&error1,lenfile);
     UNLOCK_COMPRESS;
 
     FORTgetpartheader1(&unit,&nclasses,&fdsversion,&size);
@@ -722,7 +722,7 @@ void part2iso(part *parti, int *thread_index){
   len_partfile=strlen(parti->file);
   LOCK_COMPRESS;
   FORTget_file_unit(&unit,&parti->unit_start);
-  FORTopenpart(parti->file,&unit,&endiandata,&error1,len_partfile);
+  FORTopenpart(parti->file,&unit,&error1,len_partfile);
   UNLOCK_COMPRESS;
 
   FORTgetpartheader1(&unit,&nclasses,&fdsversion,&size);
@@ -1083,7 +1083,7 @@ void part2object(part *parti, int *thread_index){
   len_partfile=strlen(parti->file);
   LOCK_COMPRESS;
   FORTget_file_unit(&unit,&parti->unit_start);
-  FORTopenpart(parti->file,&unit,&endiandata,&error1,len_partfile);
+  FORTopenpart(parti->file,&unit,&error1,len_partfile);
   UNLOCK_COMPRESS;
 
   FORTgetpartheader1(&unit,&nclasses,&fdsversion,&size);

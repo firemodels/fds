@@ -18,7 +18,7 @@ char CNVplot3d_revision[]="$Revision$";
 
 #define FORTgetplot3dq _F(getplot3dq)
 
-STDCALLF FORTgetplot3dq(char *qfilename, int *nx, int *ny, int *nz, float *qq, int *error, int *endian, int *isotest, FILE_SIZE filelen);
+STDCALLF FORTgetplot3dq(char *qfilename, int *nx, int *ny, int *nz, float *qq, int *error, int *isotest, FILE_SIZE filelen);
 
 /* ------------------ convert_plot3d ------------------------ */
 
@@ -138,7 +138,7 @@ int convert_plot3d(plot3d *plot3di){
     NewMemory((void **)&plot3dframe_compressed,1.1*5*framesize*sizeof(unsigned char));
     NewMemory((void **)&plot3dframe_uncompressed,5*framesize*sizeof(unsigned char));
     
-    FORTgetplot3dq(plot3d_file, &nx, &ny, &nz, plot3dframe_data, &error, &endian, &isotest, len);
+    FORTgetplot3dq(plot3d_file, &nx, &ny, &nz, plot3dframe_data, &error, &isotest, len);
     kk=0;
     for(j=0;j<5;j++){
       float valmin, valmax;

@@ -580,7 +580,7 @@ void update_patch_hist(void){
 
     LOCK_COMPRESS;
     FORTget_file_unit(&unit1,&patchi->unit_start);
-    FORTopenboundary(patchi->file,&unit1,&endiandata,&patchi->version,&error1,lenfile);
+    FORTopenboundary(patchi->file,&unit1,&patchi->version,&error1,lenfile);
     UNLOCK_COMPRESS;
 
     patchframesize=0;

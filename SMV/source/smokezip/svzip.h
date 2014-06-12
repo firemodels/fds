@@ -321,7 +321,7 @@ void getsliceparms_c(char *file, int *ni, int *nj, int *nk);
 #endif
 
 STDCALLF FORTget_file_unit(int *file_unit,int *file_unit_start);
-STDCALLF FORTopenpart(char *partfilename, int *unit, int *endian, int *error, FILE_SIZE lenfile);
+STDCALLF FORTopenpart(char *partfilename, int *unit, int *error, FILE_SIZE lenfile);
 STDCALLF FORTgetpartheader1(int *unit, int *nclasses, int *fdsversion, int *size);
 STDCALLF FORTgetpartheader2(int *unit, int *nclasses, int *nquantities, int *size);
 STDCALLF FORTgetpartdataframe(int *unit, int *nclasses, int *nquantities, int *npoints, float *time, int *tagdata, float *pdata, int *size, int *error);
@@ -331,16 +331,16 @@ STDCALLF FORTclosefortranfile(int *lunit);
 STDCALLF FORTgetpatchdata(int *lunit, int *npatch,int *pi1,int *pi2,int *pj1,int *pj2,int *pk1,int *pk2,
                          float *patch_times,float *pqq, int *ndummy, int *error);
 STDCALLF FORTopenboundary(char *boundaryfilename, int *boundaryunitnumber, 
-                         int *endian, int *version, int *error, FILE_SIZE len);
+                         int *version, int *error, FILE_SIZE len);
 STDCALLF FORTgetboundaryheader1(char *boundaryfilename, int *boundaryunitnumber, 
-                               int *endian, int *npatch, int *error, FILE_SIZE lenfile);
+                               int *npatch, int *error, FILE_SIZE lenfile);
 STDCALLF FORTgetboundaryheader2(int *boundaryunitnumber, int *version, int *npatches,
                                int *pi1, int *pi2, int *pj1, int *pj2, int *pk1, int *pk2, int *patchdir);
 
 STDCALLF FORTgetsliceframe(int *lu11,
                           int *is1,int *is2,int *js1,int *js2,int *ks1,int *ks2,
                           float *time,float *qframe,int *slicetest, int *error);
-STDCALLF FORTopenslice(char *slicefilename, int *unit, int *endian, 
+STDCALLF FORTopenslice(char *slicefilename, int *unit, 
                       int *is1, int *is2, int *js1, int *js2, int *ks1, int *ks2,
                       int *error, FILE_SIZE lenfile);
 
