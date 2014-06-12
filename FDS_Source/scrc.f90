@@ -98,7 +98,7 @@ CHARACTER(1)  :: SCARC_MULTIGRID_CYCLE         = 'V'        !< Cycling type  (F/
 CHARACTER(20) :: SCARC_MULTIGRID_COARSENING    = 'FALGOUT'  !< Coarsening strategy  (RS3/A1/A2/PMIS/FDS...)
 CHARACTER(20) :: SCARC_MULTIGRID_INTERPOL      = 'DIRECT'   !< Interpolation strategy (DIRECT/RS/STANDARD)
 INTEGER       :: SCARC_MULTIGRID_ITERATIONS    = 1000       !< Max number of iterations
-REAL (EB)     :: SCARC_MULTIGRID_ACCURACY      = 1.E-10_EB  !< Requested accuracy for convergence
+REAL (EB)     :: SCARC_MULTIGRID_ACCURACY      = 1.E-8_EB  !< Requested accuracy for convergence
 
 !! Parameters for Krylov-type methods
 CHARACTER(20) :: SCARC_KRYLOV            = 'CG'             !< Type of Krylov-method (CG/BICG)
@@ -2313,7 +2313,7 @@ NOMZ = MESHES(NOM)%KBAR
 IF (NL > 1) THEN
    DO JL = 2, NL
       NOMX = MESHES(NOM)%IBAR/NL
-      NOMY = MESHES(NOM)%JBAR/NL
+      IF (TYPE_DIMENSION == NSCARC_DIMENSION_THREE) NOMY = MESHES(NOM)%JBAR/NL
       NOMZ = MESHES(NOM)%KBAR/NL
    ENDDO
 ENDIF
@@ -9476,8 +9476,8 @@ DO NM = NMESHES_MIN, NMESHES_MAX
    AC_ROW => SCARC(NM)%LEVEL(NL)%A_ROW                                !< row pointer
    AC_COL => SCARC(NM)%LEVEL(NL)%A_COL                                !< column pointer
 
-!WRITE(SCARC_LU,'(a, 8f12.5,a4)') 'V1:', (V1(IC),IC=1,8)
-!WRITE(SCARC_LU,'(a, 8f12.5,a4)') 'V2:', (V2(IC),IC=1,8)
+!WRITE(SCARC_LU,'(a, 14f10.5)') 'V1:', (V1(IC),IC=1,12)
+!WRITE(SCARC_LU,'(a, 14f10.5)') 'V2:', (V2(IC),IC=1,12)
 
    DO IC = 1, NC
            
@@ -9948,6 +9948,7 @@ TYPE (SCARC_PARENT_TYPE) :: PARENT
 
 TNOW_KRYLOV = SECOND()
 
+
 !> ------------------------------------------------------------------------------------------------
 !> Initialization:
 !>   - Set environment variables and define working level
@@ -10015,6 +10016,8 @@ IF (TYPE_DEBUG >NSCARC_DEBUG_LESS.AND.MYID==0) &
    CALL SCARC_PRECONDITIONING (CG%W, CG%G, NL, NSCOPE)                    !<  G := PRECON(W)
 
 CALL SCARC_DEBUG_LEVEL (CG%G, 'SCARC_METHOD_CG', 'G PRECON ', NL)
+CALL SCARC_DEBUG_LEVEL (CG%W, 'SCARC_METHOD_CG', 'W PRECON ', NL)
+
    SIGMA1 = SCARC_SCALAR_PRODUCT (CG%W, CG%G, NL)                         !<  SIGMA1 := (W,G)
    GAMMA0 = SIGMA1/SIGMA0                                                   
    SIGMA0 = SIGMA1                                                         
@@ -10205,6 +10208,8 @@ ICYCLE = SCARC_CYCLE_CONTROL(NSCARC_CYCLE_SETUP, NL)
 MG%RESIN = SCARC_L2NORM (MG%D, NL)                                               !<  RESIN := ||D||
 
 CALL SCARC_CONVERGENCE_INFO(MG%RESIN, 0, NL, MG%CROUTINE)
+
+MG%NIT=10    !!! ONLY TEMPORARILY
 
 !> ------------------------------------------------------------------------------------------------
 
@@ -11810,7 +11815,7 @@ IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) &
 
             VECTOR => POINT_TO_VECTOR(TYPE_VECTOR, NM, NL)
 
-            IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) THEN
+            IF (TYPE_DEBUG > NSCARC_DEBUG_LESS) THEN
                WRITE(SCARC_LU,*) 'VECTOR TO BE SENT:', SL%NC, TYPE_VECTOR, OSL%NCG, OSL%NCPLR
                WRITE(SCARC_LU,'(4f18.12)') (VECTOR(ICG), ICG=1,SL%NC)
             ENDIF
@@ -11819,10 +11824,10 @@ IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) &
             PACK_VECTOR: DO ICG = 1, OSL%NCG
                DO ICPL=1,OSL%NCPLR
                   ICN = OSL%WALL(ICG)%ICN(ICPL) 
-IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,*) 'ICG=',ICG,': ICN=', ICN, OSL%NCPLR
+IF (TYPE_DEBUG > NSCARC_DEBUG_LESS) WRITE(SCARC_LU,*) 'ICG=',ICG,': ICN=', ICN, OSL%NCPLR
                   OS%SEND_REAL(LL) = VECTOR(ICN)
-               IF (TYPE_DEBUG > NSCARC_DEBUG_NONE)  &
-                  WRITE(SCARC_LU,'(a,i4,a,f12.6,2i3)') 'SEND_REAL(',LL,')=',OS%SEND_REAL(ICG), ICG, ICN
+               IF (TYPE_DEBUG > NSCARC_DEBUG_LESS)  &
+                  WRITE(SCARC_LU,'(a,i6,a,f12.6,2i6)') 'SEND_REAL(',LL,')=',OS%SEND_REAL(ICG), ICG, ICN
                   LL = LL + 1
                ENDDO
             ENDDO PACK_VECTOR
@@ -12245,7 +12250,7 @@ IF (TYPE_DEBUG == NSCARC_DEBUG_INFO2) &
 
 IF (USE_MPI.AND.NREQ_SCARC/=0) CALL MPI_WAITALL(NREQ_SCARC,REQ_SCARC(1:NREQ_SCARC),MPI_STATUSES_IGNORE,IERR)
 
-IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) &
+IF (TYPE_DEBUG > NSCARC_DEBUG_MEDIUM) &
    WRITE(SCARC_LU,*) 'AFTER WAITALL', IERR
 
 
@@ -12500,7 +12505,7 @@ IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) &
 
                VECTOR => POINT_TO_VECTOR (TYPE_VECTOR, NM, NL)
             
-IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,'(a,16f12.6)') 'RECV_REAL:',(RECV_REAL(ICG),ICG=1,OSL%NCG)
+IF (TYPE_DEBUG > NSCARC_DEBUG_LESS) WRITE(SCARC_LU,'(a,16f12.6)') 'RECV_REAL:',(RECV_REAL(ICG),ICG=1,OSL%NCG)
 
                LL = 1
                UNPACK_VECTOR: DO IWL = 1, OSL%NWL
@@ -12509,12 +12514,12 @@ IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,'(a,16f12.6)') 'RECV_REAL:',(
                   ICO = OSL%IWL_TO_ICO(IWL)
                   ICO = SL%WALL(IWG)%ICO
                   DO ICPL = 1, OSL%NCPL
-IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,*) 'IWL=',IWL,': ICO=',ICO,': ICPL=',ICPL,': ICG=',ICG
+IF (TYPE_DEBUG > NSCARC_DEBUG_LESS) WRITE(SCARC_LU,*) 'IWL=',IWL,': ICO=',ICO,': ICPL=',ICPL,': ICG=',ICG
                      ZSUM = ZSUM + RECV_REAL(LL)
                      LL = LL + 1
                   ENDDO
                   VECTOR(ICO) = ZSUM/REAL(OSL%NCPL,EB)
-                  IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) WRITE(SCARC_LU,'(a,i4,a,i4,a,f12.6,3i3)') &
+                  IF (TYPE_DEBUG > NSCARC_DEBUG_LESS) WRITE(SCARC_LU,'(a,i4,a,i4,a,f12.6)') &
                      'IWL=',IWL,':  UNPACK VECTOR(',ICO,')=',VECTOR(ICO)
                ENDDO UNPACK_VECTOR
                
@@ -13730,10 +13735,10 @@ DO NM = NMESHES_MIN, NMESHES_MAX
    VC => POINT_TO_VECTOR (NVECTOR, NM, NL)
    NX8=MIN(4,SL%NX)
    NY8=MIN(4,SL%NY)
-   NZ8=MIN(4,SL%NZ)
+   NZ8=MIN(16,SL%NZ)
 
    WRITE(SCARC_LU,*) '=========================================================='
-   WRITE(SCARC_LU,2001) CROUTINE, CNAME, NM, NL, SL%NC, SL%NCE, NX8, NY8, NZ8
+   WRITE(SCARC_LU,2001) CROUTINE, CNAME, NM, NL, SL%NC, SL%NCE, NX8, NY8, NZ8, NVECTOR
    WRITE(SCARC_LU,*) '=========================================================='
    !IF (NL == NLEVEL_MIN) THEN
          DO KK = NZ8, 1, - 1
@@ -13753,8 +13758,8 @@ DO NM = NMESHES_MIN, NMESHES_MAX
 
 ENDDO
 
-2000 FORMAT('=== ',A,' : ',A,' on mesh ',I4,' on level ',I4, ': NX, NY, NZ=',3i3)
-2001 FORMAT('=== ',A,' : ',A,' on mesh ',I4,' on level ',I4, ': NC=',3i3, ': NCE=',3i3)
+2000 FORMAT('=== ',A,' : ',A,' on mesh ',I4,' on level ',I4, ': NX, NY, NZ=',3i4,': NVECTOR=',I4)
+2001 FORMAT('=== ',A,' : ',A,' on mesh ',I4,' on level ',I4, ': NC, NCE=',2i4, ': NX, NY, NZ=',3i4,': NVECTOR=',I4)
 END SUBROUTINE SCARC_DEBUG_LEVEL
 
 
