@@ -123,8 +123,8 @@ export BASEDIR=`pwd`
 # Run appropriate set of cases depending on user specified set (-c option)
 case "$cases" in
   all)
-    ./FDS_Cases.sh
     ./FDS_MPI_Cases.sh
+    ./FDS_Cases.sh
     ;;
   serial)
     ./FDS_Cases.sh
