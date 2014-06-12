@@ -157,29 +157,29 @@ STDCALLF FORToutboundaryheader(char *outfile, int *unit3, int *npatches,
 STDCALLF FORTgetpatchdata(int *lunit, int *npatch,int *pi1,int *pi2,int *pj1,int *pj2,int *pk1,int *pk2,
                          float *patch_times,float *pqq, int *npqq, int *error);
 STDCALLF FORTopenboundary(char *boundaryfilename, int *boundaryunitnumber, 
-                         int *endian, int *version, int *error, FILE_SIZE len);
+                         int *version, int *error, FILE_SIZE len);
 STDCALLF FORTgetboundaryheader1(char *boundaryfilename, int *boundaryunitnumber, 
-                               int *endian, int *npatch, int *error, FILE_SIZE lenfile);
+                               int *npatch, int *error, FILE_SIZE lenfile);
 STDCALLF FORTgetboundaryheader2(int *boundaryunitnumber, int *version, int *npatches,
                                int *pi1, int *pi2, int *pj1, int *pj2, int *pk1, int *pk2, int *patchdir);
 STDCALLF FORTgetsliceframe(int *lu11,
                           int *is1,int *is2,int *js1,int *js2,int *ks1,int *ks2,
                           float *time,float *qframe,int *slicetest, int *error);
-STDCALLF FORTgetsliceparms(char *file,int *endian,
+STDCALLF FORTgetsliceparms(char *file,
                           int *is1,int *is2,int *js1,int *js2,int *ks1, int *ks2,
                           int *ni, int *nj, int *nk,
                           int *slice3d, int *error,FILE_SIZE lenfile);
-STDCALLF FORTopenslice(char *slicefilename, int *unit, int *endian, 
+STDCALLF FORTopenslice(char *slicefilename, int *unit, 
                       int *is1, int *is2, int *js1, int *js2, int *ks1, int *ks2,
                       int *error, FILE_SIZE lenfile);
 STDCALLF FORTclosefortranfile(int *unit);
 STDCALLF FORToutsliceframe(int *unit3,
                           int *is1a,int *is1b,int *js1a,int *js1b,int *ks1a,int *ks1b,
                           float *time1,float *qframeout, int *error);
-STDCALLF FORToutsliceheader(int *file_unit,char *outfile,int *unit3,
+STDCALLF FORToutsliceheader(char *outfile,int *unit3,
                              int *is1a,int *is2a,int *js1a,int *js2a,int *ks1a,int *ks2a,
                              int *error1,int len);
-STDCALLF FORTgetplot3dq(char *qfilename, int *nx, int *ny, int *nz, float *qq, int *error, int *endian, int *isotest, int len);
+STDCALLF FORTgetplot3dq(char *qfilename, int *nx, int *ny, int *nz, float *qq, int *error, int *isotest, int len);
 STDCALLF FORTplot3dout(char *outfile,int *nx,int *ny,int *nz,float *qout,int *error3,int lenout);
 STDCALLF FORTendianout(char *endian_filename,int lenout);
 

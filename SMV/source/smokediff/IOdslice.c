@@ -138,11 +138,11 @@ void diff_slices(FILE *stream_out){
     }
     unit1=11;
     FORTget_file_unit(&unit1,&unit1);
-    FORTopenslice(fullfile1,&unit1,&caseinfo->endian,&is1a,&is2a,&js1a,&js2a,&ks1a,&ks2a,&error1,len1);
+    FORTopenslice(fullfile1,&unit1,&is1a,&is2a,&js1a,&js2a,&ks1a,&ks2a,&error1,len1);
     unit2=12;
     FORTget_file_unit(&unit2,&unit2);
     len2=strlen(fullfile2);
-    FORTopenslice(fullfile2,&unit2,&caseinfo->endian,&is1b,&is2b,&js1b,&js2b,&ks1b,&ks2b,&error2a,len2);
+    FORTopenslice(fullfile2,&unit2,&is1b,&is2b,&js1b,&js2b,&ks1b,&ks2b,&error2a,len2);
     if(error1!=0||error2a!=0){
       FORTclosefortranfile(&unit1);
       FORTclosefortranfile(&unit2);
@@ -170,7 +170,7 @@ void diff_slices(FILE *stream_out){
     len=strlen(outfile);
     unit3=13;
     FORTget_file_unit(&unit3,&unit3);
-    FORToutsliceheader(&unit3,outfile,&unit3,&is1a,&is2a,&js1a,&js2a,&ks1a,&ks2a,&error1,len);
+    FORToutsliceheader(outfile,&unit3,&is1a,&is2a,&js1a,&js2a,&ks1a,&ks2a,&error1,len);
     if(error1!=0){
       FORTclosefortranfile(&unit1);
       FORTclosefortranfile(&unit2);

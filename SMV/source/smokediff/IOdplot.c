@@ -152,12 +152,12 @@ void diff_plot3ds(FILE *stream_out){
     PRINTF("  Progress: reading %s,",fullfile1);
     FFLUSH();
 
-    FORTgetplot3dq(fullfile1,&nx,&ny,&nz,qframe1,&error1,&endian,&isotest,len1);
+    FORTgetplot3dq(fullfile1,&nx,&ny,&nz,qframe1,&error1,&isotest,len1);
     if(test_mode==1)isotest=2;
     PRINTF(" reading %s,",fullfile2);
     FFLUSH();
 
-    FORTgetplot3dq(fullfile2,&nx,&ny,&nz,qframe2,&error2,&endian,&isotest,len2);
+    FORTgetplot3dq(fullfile2,&nx,&ny,&nz,qframe2,&error2,&isotest,len2);
     PRINTF(" differencing data,");
     FFLUSH();
 

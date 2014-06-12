@@ -479,7 +479,7 @@ int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
         }
         slicei->filesize=filesize;
         lenfile=strlen(full_file);
-        FORTgetsliceparms(full_file,&endian,&is1,&is2,&js1,&js2,&ks1,&ks2,&ni,&nj,&nk,&slicei->volslice,&error,lenfile);
+        FORTgetsliceparms(full_file,&is1,&is2,&js1,&js2,&ks1,&ks2,&ni,&nj,&nk,&slicei->volslice,&error,lenfile);
         slicei->is1=is1;
         slicei->is2=is2;
         slicei->js1=js1;
@@ -563,7 +563,7 @@ int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
         lenfile=strlen(full_file);
         endian=getendian();
         boundaryunitnumber=15;
-        FORTgetboundaryheader1(full_file,&boundaryunitnumber,&endian, &npatches, &error, lenfile);
+        FORTgetboundaryheader1(full_file,&boundaryunitnumber, &npatches, &error, lenfile);
         if(npatches>0){
           int *pi1, *pi2, *pj1, *pj2, *pk1, *pk2, *patchdir, *patch2index, *patchsize, *qoffset;
           int i;
