@@ -108,7 +108,11 @@ if ! [ -e $fulldir/$in ]; then
   echo "The fds input file, $fulldir/$in, does not exist. Run aborted."
   exit
 fi
-if [ $STOPFDS ]; then
+if [[ $STOPFDS -gt 1 ]]; then
+ echo "stopping case: $infile"
+ echo $STOPFDS $fulldir/$stopfile
+ exit
+elif [ $STOPFDS ]; then
  echo "stopping case: $infile"
  touch $fulldir/$stopfile
  exit
