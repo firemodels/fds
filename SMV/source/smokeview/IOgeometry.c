@@ -1638,19 +1638,22 @@ void draw_geomdata(patchdata *patchi, int geomtype){
         glColor3fv(color);
 
         xyzptr[0] = trianglei->points[0]->xyz;
-        glVertex3fv(xyzptr[0]);
-
         xyzptr[1] = trianglei->points[1]->xyz;
-        glVertex3fv(xyzptr[1]);
-
         xyzptr[2] = trianglei->points[2]->xyz;
+
+        glVertex3fv(xyzptr[0]);
+        glVertex3fv(xyzptr[1]);
         glVertex3fv(xyzptr[2]);
+
+        glVertex3fv(xyzptr[0]);
+        glVertex3fv(xyzptr[2]);
+        glVertex3fv(xyzptr[1]);
       }
     }
     else{
       for(j=0;j<ntris;j++){
         float *xyzptr[3];
-        float *xyznorm;
+        float *xyznorm[3];
         triangle *trianglei;
         int color_index;
 
@@ -1661,21 +1664,32 @@ void draw_geomdata(patchdata *patchi, int geomtype){
         color=rgb_patch+4*color_index;
         glColor3fv(color);
 
-        xyznorm = trianglei->points[0]->point_norm;
-        glNormal3fv(xyznorm);
         xyzptr[0] = trianglei->points[0]->xyz;
+        xyzptr[1] = trianglei->points[1]->xyz;
+        xyzptr[2] = trianglei->points[2]->xyz;
+
+        xyznorm[0] = trianglei->points[0]->point_norm;
+        xyznorm[1] = trianglei->points[1]->point_norm;
+        xyznorm[2] = trianglei->points[2]->point_norm;
+
+        glNormal3fv(xyznorm[0]);
         glVertex3fv(xyzptr[0]);
 
-        xyznorm = trianglei->points[1]->point_norm;
-        glNormal3fv(xyznorm);
-        xyzptr[1] = trianglei->points[1]->xyz;
+        glNormal3fv(xyznorm[1]);
         glVertex3fv(xyzptr[1]);
 
-        xyznorm = trianglei->points[2]->point_norm;
-        glNormal3fv(xyznorm);
-        xyzptr[2] = trianglei->points[2]->xyz;
+        glNormal3fv(xyznorm[2]);
         glVertex3fv(xyzptr[2]);
-      }
+
+        glNormal3fv(xyznorm[0]);
+        glVertex3fv(xyzptr[0]);
+
+        glNormal3fv(xyznorm[2]);
+        glVertex3fv(xyzptr[2]);
+
+        glNormal3fv(xyznorm[1]);
+        glVertex3fv(xyzptr[1]);
+     }
     }
     glEnd();
     glPopMatrix();
