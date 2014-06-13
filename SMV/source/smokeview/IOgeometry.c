@@ -319,23 +319,100 @@ void draw_geom(int flag, int geomtype){
     npoints = geomlisti->npoints;
     nvolus = geomlisti->nvolus;
 
-  // draw volume outline
-  
     if(nvolus>0){
+
+      // draw volume solid
+      
+      last_color=NULL;
       glPushMatrix();
       glScalef(SCALE2SMV(1.0),SCALE2SMV(1.0),SCALE2SMV(1.0));
       glTranslatef(-xbar0,-ybar0,-zbar0);
+
+      glEnable(GL_NORMALIZE);
+      glShadeModel(GL_SMOOTH);
+      glEnable(GL_LIGHTING);
+      glMaterialfv(GL_FRONT_AND_BACK,GL_SPECULAR,iso_specular);
+      glMaterialf(GL_FRONT_AND_BACK,GL_SHININESS,iso_shininess);
+      glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,block_ambient2);
+      glEnable(GL_COLOR_MATERIAL);
+      
+      last_color=NULL;
+      glBegin(GL_TRIANGLES);
+      for(j=0;j<nvolus;j++){
+        tetrahedron *volumei;
+        float *xyzptr[4];
+        int *exterior;
+        //             
+        //             0
+        //            /  \
+        //           /   .3
+        //             .   \ 
+        //         / .      \
+        //         1--------2
+        //
+        int facelist[12]={0,1,2, 0,2,3, 0,3,1, 1,3,2};
+        int k;
+
+        volumei = geomlisti->volumes+j;
+        exterior = volumei->exterior;
+        xyzptr[0] = volumei->points[0]->xyz;
+        xyzptr[1] = volumei->points[1]->xyz;
+        xyzptr[2] = volumei->points[2]->xyz;
+        xyzptr[3] = volumei->points[3]->xyz;
+
+        
+        color = volumei->matl->color;
+        if(last_color!=color){
+          glColor3fv(color);
+          last_color=color;
+        }
+
+        for(k=0;k<4;k++){
+          if(exterior[k]==0&&show_geometry_interior_solid==1){
+              int kk;
+              float *v0, *v1, *v2;
+              float v01temp[3], v02temp[3], vcross[3];
+              float v0temp[3], v1temp[3], v2temp[3];
+
+              v0 = xyzptr[facelist[3*k]];
+              v1 = xyzptr[facelist[3*k+1]];
+              v2 = xyzptr[facelist[3*k+2]];
+              VECDIFF3(v01temp,v1,v0);
+              VECDIFF3(v02temp,v2,v0);
+              CROSS(vcross,v01temp,v02temp);
+
+              for(kk=0;kk<3;kk++){
+                v0temp[kk] = v0[kk] + 0.01*(v1[kk]-v0[kk]) + 0.01*(v2[kk]-v0[kk]);
+                v1temp[kk] = v1[kk] + 0.01*(v0[kk]-v1[kk]) + 0.01*(v2[kk]-v1[kk]);
+                v2temp[kk] = v2[kk] + 0.01*(v0[kk]-v2[kk]) + 0.01*(v1[kk]-v2[kk]);
+              }
+              glNormal3fv(vcross);
+              glVertex3fv(v0temp);
+              glVertex3fv(v1temp);
+              glVertex3fv(v2temp);
+          }
+        }
+      }
+      glEnd();
+      glDisable(GL_COLOR_MATERIAL);
+
+      // draw volume outline
+
+      glDisable(GL_COLOR_MATERIAL);
+      glDisable(GL_LIGHTING);
+      glLineWidth(20.0);
       glBegin(GL_LINES);
       for(j=0;j<nvolus;j++){
         tetrahedron *volumei;
         float *xyzptr[4];
         int *exterior,*duplicate;
+        //             
         //             0
-        //               \
+        //            /  \
         //           /   .3
-        //             .  3
-        //         / .  ./  
-        //         1---2
+        //             .   \ 
+        //         / .      \
+        //         1--------2
         //
         int facelist[12]={0,1,2, 0,2,3, 0,3,1, 1,3,2};
         int k;
@@ -371,48 +448,8 @@ void draw_geom(int flag, int geomtype){
           }
         }
       }
-
       glEnd();
-      last_color=NULL;
-      glBegin(GL_TRIANGLES);
-      for(j=0;j<nvolus;j++){
-        tetrahedron *volumei;
-        float *xyzptr[4];
-        int *exterior;
-        //             0
-        //               \
-        //           /   .3
-        //             .  3
-        //         / .  ./  
-        //         1---2
-        //
-        int facelist[12]={0,1,2, 0,2,3, 0,3,1, 1,3,2};
-        int k;
 
-        volumei = geomlisti->volumes+j;
-        exterior = volumei->exterior;
-        xyzptr[0] = volumei->points[0]->xyz;
-        xyzptr[1] = volumei->points[1]->xyz;
-        xyzptr[2] = volumei->points[2]->xyz;
-        xyzptr[3] = volumei->points[3]->xyz;
-
-        
-        color = volumei->matl->color;
-        if(last_color!=color){
-          glColor3fv(color);
-          last_color=color;
-        }
-
-        for(k=0;k<4;k++){
-          if(exterior[k]==0&&show_geometry_interior_solid==1){
-              glVertex3fv(xyzptr[facelist[3*k]]);
-              glVertex3fv(xyzptr[facelist[3*k+1]]);
-              glVertex3fv(xyzptr[facelist[3*k+2]]);
-          }
-        }
-      }
-
-      glEnd();
       glPopMatrix();
     }
 
@@ -423,6 +460,7 @@ void draw_geom(int flag, int geomtype){
       glPushMatrix();
       glScalef(SCALE2SMV(1.0),SCALE2SMV(1.0),SCALE2SMV(1.0));
       glTranslatef(-xbar0,-ybar0,-zbar0);
+      glLineWidth(4.0);
       glBegin(GL_LINES);
       for(j=0;j<ntris;j++){
         float *xyzptr[3];
