@@ -69,6 +69,10 @@ slcf = ['&SLCF PBY=0, QUANTITY=''MASS FRACTION'', SPEC_ID=''PROPANE'', CELL_CENT
 
 fprintf(fid,'%s\n','  '); % blank line
 
+bnde = ['&BNDE QUANTITY=''GAS TEMPERATURE'' /'];  fprintf(fid,'%s\n',bnde);
+
+fprintf(fid,'%s\n','  '); % blank line
+
 % write GEOM lines
 
 nx = length(x);
