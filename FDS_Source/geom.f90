@@ -825,6 +825,8 @@ INTEGER :: GEOM_TYPE, NXB, IJK(3), FACE_OFFSET, VERT_OFFSET
 INTEGER :: N_LEVELS, N_LAT, N_LONG, SPHERE_TYPE
 TYPE (MESH_TYPE), POINTER :: M=>NULL()
 INTEGER, POINTER, DIMENSION(:) :: FACEI, FACEJ, FACE_FROM, FACE_TO
+REAL(EB) :: ZERO3(3)=(/0.0_EB,0.0_EB,0.0_EB/)
+REAL(EB) :: ZMIN
 
 LOGICAL COMPONENT_ONLY
 LOGICAL, ALLOCATABLE, DIMENSION(:) :: DEFAULT_COMPONENT_ONLY
@@ -834,7 +836,7 @@ NAMELIST /GEOM/ AZIM, AZIM_DOT, COMPONENT_ONLY, DAZIM, DELEV, DSCALE, DT_BNDC, D
                 MATL_ID, N_LAT, N_LEVELS, N_LONG, SCALE, SCALE_DOT, &
                 SPHERE_ORIGIN, SPHERE_RADIUS, SPHERE_TYPE, SURF_ID, &
                 TEXTURE_MAPPING, TEXTURE_ORIGIN, TEXTURE_SCALE, &
-                VERTS, VOLUS, XB, XYZ0, XYZ, XYZ_DOT, ZVALS
+                VERTS, VOLUS, XB, XYZ0, XYZ, XYZ_DOT, ZMIN, ZVALS
 
 ! first pass - determine max number of ZVALS, VERTS, FACES, VOLUS and IDS over all &GEOMs
 
@@ -1015,6 +1017,8 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
          ENDDO 
       ENDDO 
       G%ZVALS(1:N_ZVALS) = ZVALS(1:N_ZVALS)
+      CALL EXTRUDE_SURFACE(ZMIN,VERTS,MAX_VERTS,N_VERTS,FACES,N_FACES,VOLUS,MAX_VOLUS, N_VOLUS)
+      N_FACES=0
    ENDIF ZVALS_IF
    
    !--- setup a block object (XB keyword )
@@ -1046,6 +1050,7 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
       CALL INIT_QUAD(IJK(1),IJK(3),XB,4,N_VERTS,N_FACES,VERT_OFFSET,FACE_OFFSET,VERTS,FACES)
       CALL INIT_QUAD(IJK(1),IJK(2),XB,5,N_VERTS,N_FACES,VERT_OFFSET,FACE_OFFSET,VERTS,FACES)
       CALL INIT_QUAD(IJK(1),IJK(2),XB,6,N_VERTS,N_FACES,VERT_OFFSET,FACE_OFFSET,VERTS,FACES)
+      
    ENDIF
 
    ! setup a sphere object (SPHERE_RADIUS and SPHERE_ORIGIN keywords)
@@ -1076,6 +1081,9 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
       ELSE
          CALL INIT_SPHERE2(N_VERTS,N_FACES,N_LAT,N_LONG,VERTS,FACES,TFACES)
       ENDIF
+      CALL EXTRUDE_SPHERE(ZERO3,VERTS,MAX_VERTS,N_VERTS,FACES,N_FACES,VOLUS,MAX_VOLUS, N_VOLUS)
+      N_FACES=0;
+
  
       DO I = 1, N_VERTS
          VERTS(3*I-2:3*I) = SPHERE_ORIGIN(1:3) + SPHERE_RADIUS*VERTS(3*I-2:3*I)
@@ -1159,7 +1167,7 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
          IF (TRIM(MATL_ID)=='null') THEN
            WRITE(MESSAGE,'(A)') 'ERROR: problem with GEOM, the material keyword, MATL_ID, is not defined.'
          ELSE
-           WRITE(MESSAGE,'(3A)') 'ERROR: problem with GEOM, the material',TRIM(MATL_ID),' is not defined.'
+           WRITE(MESSAGE,'(3A)') 'ERROR: problem with GEOM, the material ',TRIM(MATL_ID),' is not defined.'
          ENDIF
          CALL SHUTDOWN(MESSAGE)
       ENDIF
@@ -1177,6 +1185,21 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
       
       ! reorder face indices so the the first index is always the smallest      
  
+               
+!              1 
+!             /|\  
+!            / | \
+!           /  |  \  
+!          /   |   \  
+!         /    |    \ 
+!        /     4     \
+!       /     . .     \
+!      /     .    .    \   
+!     /    .        .   \
+!    /   .            .  \    
+!   /  .               .  \
+!  / .                    .\
+! 2-------------------------3
       DO I = 0, N_VOLUS-1
          FACES(12*I+1) = VOLUS(4*I+1)
          FACES(12*I+2) = VOLUS(4*I+2)
@@ -1446,6 +1469,7 @@ SUBROUTINE SET_GEOM_DEFAULTS
    
    ! Set defaults
    
+   ZMIN=ZS_MIN
    COMPONENT_ONLY=DEFAULT_COMPONENT_ONLY(N)
    ID = 'geom'
    SURF_ID = 'null'
@@ -1491,6 +1515,175 @@ SUBROUTINE SET_GEOM_DEFAULTS
    SPHERE_TYPE=-1
    GEOM_TYPE = 0
 END SUBROUTINE SET_GEOM_DEFAULTS
+
+! ---------------------------- EXTRUDE_SPHERE ----------------------------------------
+
+SUBROUTINE EXTRUDE_SPHERE(ZCENTER,VERTS,MAXVERTS,NVERTS,FACES,NFACES,VOLS,MAXVOLS, NVOLS)
+
+! convert a closed surface defined by VERTS and FACES into a solid
+
+INTEGER, INTENT(IN) :: NFACES, MAXVERTS,MAXVOLS
+INTEGER, INTENT(INOUT) :: NVERTS
+REAL(EB), INTENT(INOUT), TARGET :: VERTS(3*MAXVERTS)
+INTEGER, INTENT(IN) :: FACES(3*NFACES)
+INTEGER, INTENT(OUT) :: NVOLS
+INTEGER, INTENT(OUT) :: VOLS(4*MAXVOLS)
+REAL(EB), INTENT(IN) :: ZCENTER(3)
+
+INTEGER :: I
+
+! define a new vertex at ZCENTER
+VERTS(3*NVERTS+1:3*NVERTS+3)=ZCENTER(1:3)
+
+! form a tetrahedron using each face and the vertex ZCENTER
+DO I = 1, NFACES
+   VOLS(4*I-3:4*I)=(/FACES(3*I-2:3*I),NVERTS+1/)
+ENDDO
+NVERTS=NVERTS+1
+NVOLS=NFACES
+
+END SUBROUTINE EXTRUDE_SPHERE
+
+! ---------------------------- EXTRUDE_SURFACE ----------------------------------------
+
+SUBROUTINE EXTRUDE_SURFACE(ZMIN,VERTS,MAXVERTS,NVERTS,FACES,NFACES,VOLS,MAXVOLS, NVOLS)
+
+! extend a 2D surface defined by VERTS and FACES to a plane defined by ZMIN
+
+INTEGER, INTENT(IN) :: NFACES, MAXVERTS,MAXVOLS
+INTEGER, INTENT(INOUT) :: NVERTS
+REAL(EB), INTENT(INOUT), TARGET :: VERTS(3*MAXVERTS)
+INTEGER, INTENT(IN) :: FACES(3*NFACES)
+INTEGER, INTENT(OUT) :: NVOLS
+INTEGER, INTENT(OUT) :: VOLS(4*MAXVOLS)
+REAL(EB), INTENT(IN) :: ZMIN
+INTEGER :: PRISM(6)
+
+INTEGER :: I
+REAL(EB), POINTER, DIMENSION(:) :: VNEW, VOLD
+
+! define a new vertex on the plane z=ZMIN for each vertex in original list
+DO I = 1, NVERTS
+   VNEW=>VERTS(3*NVERTS+3*I-2:3*NVERTS+3*I)
+   VOLD=>VERTS(3*I-2:3*I)
+   VNEW(1:3)=(/VOLD(1:2),ZMIN/)
+END DO
+! construct 3 tetrahedrons for each prism (solid between original face and face on plane z=zplane)
+DO I = 1, NFACES
+   PRISM(1:3)=FACES(3*I-2:3*I)
+   PRISM(4:6)=FACES(3*I-2:3*I)+NVERTS
+   CALL PRISM2TETRA(PRISM,VOLS(12*I-11:12*I))
+END DO
+NVOLS=3*NFACES
+NVERTS=2*NVERTS
+
+END SUBROUTINE EXTRUDE_SURFACE
+
+! ---------------------------- BOX2TETRA ----------------------------------------
+
+SUBROUTINE BOX2TETRA(BOX,TETRAS)
+
+! split a box defined by a list of 8 vertices (not necessarily cubic) into 5 tetrahedrons
+
+!     8-------7
+!   / .     / |
+! 5-------6   |
+! |   .   |   |
+! |   .   |   |
+! |   4-------3
+! | /     | /
+! 1-------2
+
+
+INTEGER, INTENT(IN) :: BOX(8)
+INTEGER, INTENT(OUT) :: TETRAS(1:20)
+
+TETRAS(1:4)   = (/BOX(1),BOX(2),BOX(4),BOX(5)/)
+TETRAS(5:8)   = (/BOX(2),BOX(6),BOX(7),BOX(5)/)
+TETRAS(9:12)  = (/BOX(4),BOX(8),BOX(5),BOX(7)/)
+TETRAS(13:16) = (/BOX(3),BOX(4),BOX(2),BOX(7)/)
+TETRAS(17:20) = (/BOX(4),BOX(5),BOX(2),BOX(7)/)
+
+END SUBROUTINE BOX2TETRA
+
+! ---------------------------- PRISM2TETRA ----------------------------------------
+
+SUBROUTINE PRISM2TETRA(PRISM,TETRAS)
+
+! split a prism defined by a list of 6 vertices into 3 tetrahedrons
+
+!       6
+!      /.\
+!    /  .  \
+!  /    .    \
+! 4-----------5
+! |     .     |
+! |     .     |
+! |     3     |
+! |    / \    |
+! |  /     \  |
+! |/         \|
+! 1-----------2
+INTEGER, INTENT(IN) :: PRISM(6)
+INTEGER, INTENT(OUT) :: TETRAS(1:12)
+
+TETRAS(1:4)   = (/PRISM(1),PRISM(6),PRISM(4),PRISM(5)/)
+TETRAS(5:8)   = (/PRISM(1),PRISM(3),PRISM(6),PRISM(5)/)
+TETRAS(9:12)  = (/PRISM(1),PRISM(2),PRISM(3),PRISM(5)/)
+
+END SUBROUTINE PRISM2TETRA
+
+! ---------------------------- SPLIT_TETRA ----------------------------------------
+
+SUBROUTINE SPLIT_TETRA(VERTS,MAXVERTS,NVERTS,TETRAS)
+! split a tetrahedron defined by a list of 4 vertices into 4 tetrahedrons
+
+!        1 
+!        | 
+!       .|.  
+!       .|.
+!      . | .  
+!     .  7 .  
+!     .  |  . 
+!    .   4  .
+!    5  / \  6
+!   .  /   \ .   
+!   . /     \ .
+!  . /       \ .    
+!  ./         \.
+!  /           \.
+! 2-------------3
+
+INTEGER, INTENT(IN) :: MAXVERTS
+INTEGER, INTENT(INOUT) :: NVERTS
+REAL(EB), INTENT(INOUT), TARGET :: VERTS(3*MAXVERTS)
+INTEGER, INTENT(INOUT) :: TETRAS(16)
+
+REAL(EB), POINTER, DIMENSION(:) :: VERT1, VERT2, VERT3, VERT4, VERT5, VERT6, VERT7
+INTEGER :: TETRANEW(16)
+
+VERT1=>VERTS(3*TETRAS(1)-2:3*TETRAS(1))
+VERT2=>VERTS(3*TETRAS(2)-2:3*TETRAS(2))
+VERT3=>VERTS(3*TETRAS(3)-2:3*TETRAS(3))
+VERT4=>VERTS(3*TETRAS(4)-2:3*TETRAS(4))
+VERT5=>VERTS(3*NVERTS+1:3*NVERTS+3)
+VERT6=>VERTS(3*NVERTS+4:3*NVERTS+6)
+VERT7=>VERTS(3*NVERTS+7:3*NVERTS+9)
+
+! add 3 vertices
+VERT5(1:3) = ( VERT1(1:3)+VERT2(1:3) )/2.0_EB
+VERT6(1:3) = ( VERT1(1:3)+VERT3(1:3) )/2.0_EB
+VERT7(1:3) = ( VERT1(1:3)+VERT4(1:3) )/2.0_EB
+TETRAS(5)=NVERTS+1
+TETRAS(6)=NVERTS+2
+TETRAS(7)=NVERTS+3
+NVERTS=NVERTS+3
+
+TETRANEW(1:4)=(/TETRAS(1),TETRAS(5),TETRAS(6),TETRAS(7)/)
+CALL PRISM2TETRA(TETRAS(2:7),TETRANEW(5:16))
+TETRAS(1:16)=TETRANEW(1:16)
+
+END SUBROUTINE SPLIT_TETRA
 
 END SUBROUTINE READ_GEOM
 
