@@ -371,25 +371,26 @@ void draw_geom(int flag, int geomtype){
           if(exterior[k]==0&&show_geometry_interior_solid==1){
               int kk;
               float *v0, *v1, *v2;
-              float v01temp[3], v02temp[3], vcross[3];
-              float v0temp[3], v1temp[3], v2temp[3];
+              float v1m0[3], v2m0[3], v2m1[3], vcross[3];
+              float v0delta[3], v1delta[3], v2delta[3];
 
               v0 = xyzptr[facelist[3*k]];
               v1 = xyzptr[facelist[3*k+1]];
               v2 = xyzptr[facelist[3*k+2]];
-              VECDIFF3(v01temp,v1,v0);
-              VECDIFF3(v02temp,v2,v0);
-              CROSS(vcross,v01temp,v02temp);
+              VECDIFF3(v1m0,v1,v0);
+              VECDIFF3(v2m0,v2,v0);
+              VECDIFF3(v2m1,v2,v1);
+              CROSS(vcross,v1m0,v2m0);
 
               for(kk=0;kk<3;kk++){
-                v0temp[kk] = v0[kk] + 0.01*(v1[kk]-v0[kk]) + 0.01*(v2[kk]-v0[kk]);
-                v1temp[kk] = v1[kk] + 0.01*(v0[kk]-v1[kk]) + 0.01*(v2[kk]-v1[kk]);
-                v2temp[kk] = v2[kk] + 0.01*(v0[kk]-v2[kk]) + 0.01*(v1[kk]-v2[kk]);
+                v0delta[kk] = v0[kk] + 0.01*v1m0[kk] + 0.01*v2m0[kk];
+                v1delta[kk] = v1[kk] - 0.01*v1m0[kk] + 0.01*v2m1[kk];
+                v2delta[kk] = v2[kk] - 0.01*v2m0[kk] - 0.01*v2m1[kk];
               }
               glNormal3fv(vcross);
-              glVertex3fv(v0temp);
-              glVertex3fv(v1temp);
-              glVertex3fv(v2temp);
+              glVertex3fv(v0delta);
+              glVertex3fv(v1delta);
+              glVertex3fv(v2delta);
           }
         }
       }
