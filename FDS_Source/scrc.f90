@@ -1259,11 +1259,11 @@ MESHES_LOOP: DO NM = NMESHES_MIN, NMESHES_MAX
 
    S => SCARC(NM)
 
-WRITE(*,*) NM, ': ALLOCATING OSCARC(',NMESHES,')'
+!WRITE(*,*) NM, ': ALLOCATING OSCARC(',NMESHES,')'
    ALLOCATE (S%OSCARC(NMESHES), STAT=IERR)
    CALL CHKMEMERR ('SCARC_SETUP_STRUCTURES', 'OSCARC', IERR)
       
-WRITE(*,*) NM, ': ALLOCATING LEVEL(',NLEVEL_MIN,':',NLEVEL_MAX,')'
+!WRITE(*,*) NM, ': ALLOCATING LEVEL(',NLEVEL_MIN,':',NLEVEL_MAX,')'
    ALLOCATE (SCARC(NM)%LEVEL(NLEVEL_MIN:NLEVEL_MAX), STAT=IERR)
    CALL CHKMEMERR ('SCARC_SETUP_STRUCTURES', 'LEVEL', IERR)
 
@@ -1593,7 +1593,7 @@ LEVEL_MESHES_LOOP: DO NM = NMESHES_MIN, NMESHES_MAX
       IF (OS%NICMAX_S==0 .AND. OS%NICMAX_R==0)  CYCLE LEVEL_OTHER_MESHES_LOOP
 
       !> Allocate OSCARC level structure for mesh NM
-WRITE(*,*) NM,': ALLOCATING SCARC(',NM,')%OSCARC(',NOM,')%LEVEL(',NLEVEL_MIN,':',NLEVEL_MAX,')'
+!WRITE(*,*) NM,': ALLOCATING SCARC(',NM,')%OSCARC(',NOM,')%LEVEL(',NLEVEL_MIN,':',NLEVEL_MAX,')'
 
       ALLOCATE (S%OSCARC(NOM)%LEVEL(NLEVEL_MIN:NLEVEL_MAX), STAT=IERR)
       CALL CHKMEMERR ('SCARC_SETUP_TYPES', 'OS%LEVEL', IERR)
@@ -1989,7 +1989,7 @@ MESHES_LOOP: DO NM = NMESHES_MIN, NMESHES_MAX
          FACE_NEIGHBORS(NUM_FACE_NEIGHBORS(IOR0), IOR0) = NOM             !< store number of neighbor
          MESH_NEIGHBORS(NUM_FACE_NEIGHBORS(IOR0))       = NOM             !< store number of neighbor
 
-WRITE(*,'(5(a,i5))') 'NM=',NM,': NOM=',NOM,':IOR0=',IOR0,': #NBR=',NUM_FACE_NEIGHBORS(IOR0),': NBR=',NOM
+!WRITE(*,'(5(a,i5))') 'NM=',NM,': NOM=',NOM,':IOR0=',IOR0,': #NBR=',NUM_FACE_NEIGHBORS(IOR0),': NBR=',NOM
       ENDIF
 
       IOR0_LAST = IOR0                                                    !< save former values
@@ -2040,8 +2040,8 @@ IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) &
             S%NEIGHBORS(INBR_MESH)              = NOM                   !< store NOM as a neighbor of that mesh                
             INBR_MESH = INBR_MESH + 1
 
-WRITE(*,'(4(a,i4))') 'NM=',NM,': IOR0=',IOR0,': NUM_FACE_NBRS=',NUM_FACE_NEIGHBORS(IOR0), &
-           ': NBR=',SLF%FACE(IOR0)%NEIGHBORS(INBR_FACE)
+!WRITE(*,'(4(a,i4))') 'NM=',NM,': IOR0=',IOR0,': NUM_FACE_NBRS=',NUM_FACE_NEIGHBORS(IOR0), &
+!           ': NBR=',SLF%FACE(IOR0)%NEIGHBORS(INBR_FACE)
 
             !! allocate administrative arrays for neighboring meshes
             CALL SCARC_SETUP_OMAPPINGS(NM, NOM, NLEVEL_MIN)
@@ -3307,7 +3307,7 @@ END SELECT
 
 MESHES_LOOP: DO NM = NMESHES_MIN, NMESHES_MAX
 
-WRITE(*,*) 'ALLOCATING MATRIX FOR MESH ',NM
+!WRITE(*,*) 'ALLOCATING MATRIX FOR MESH ',NM
    SELECT_SOLVER: SELECT CASE (TYPE_METHOD)
    
       !< ---------------------------------------------------------------------------------------------
