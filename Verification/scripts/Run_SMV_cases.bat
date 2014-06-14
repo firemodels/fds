@@ -2,8 +2,14 @@
 
 set size=%1
 set runonlygeom=%2
+set rundebug=%3
 
 set svn_drive=c:
+if "%rundebug%" == "1" (
+set DEBUG=_db
+) else (
+set DEBUG=
+)
 
 set SCRIPT_DIR=%CD%
 cd %CD%\..
@@ -20,10 +26,20 @@ set FIRELOCAL=%CD%
 
 set TIME_FILE=%SCRIPT_DIR%\smv_case_times.txt
 
-set RUNFDS=call %SVNROOT%\Utilities\Scripts\runfds_win32.bat
-set RUNWFDS=call %SVNROOT%\Utilities\Scripts\runwfds_win32.bat
-set RUNTFDS=call %SVNROOT%\Utilities\Scripts\runfds_win32.bat
-set RUNCFAST=call %SVNROOT%\Utilities\Scripts\runcfast_win32.bat
+set RUNFDS_R=call %SVNROOT%\Utilities\Scripts\runfds_win32.bat
+set RUNWFDS_R=call %SVNROOT%\Utilities\Scripts\runwfds_win32.bat
+set RUNTFDS_R=call %SVNROOT%\Utilities\Scripts\runfds_win32.bat
+set RUNCFAST_R=call %SVNROOT%\Utilities\Scripts\runcfast_win32.bat
+
+set RUNFDS_M=call %SVNROOT%\Verification\scripts\make_stop.bat
+set RUNWFDS_M=call %SVNROOT%\Verification\scripts\make_stop.bat
+set RUNTFDS_M=call %SVNROOT%\Verification\scripts\make_stop.bat
+set RUNCFAST_M=call %SVNROOT%\Verification\scripts\make_stop.bat
+
+set RUNFDS_E=call %SVNROOT%\Verification\scripts\erase_stop.bat
+set RUNWFDS_E=call %SVNROOT%\Verification\scripts\erase_stop.bat
+set RUNTFDS_E=call %SVNROOT%\Verification\scripts\erase_stop.bat
+set RUNCFAST_E=call %SVNROOT%\Verification\scripts\erase_stop.bat
 
 :: VVVVVVVVVVVV set parameters VVVVVVVVVVVVVVVVVVVVVV
 
@@ -35,8 +51,8 @@ if "%size%" == "" (
   set CFASTEXE=cfast6
   set WIND2FDSEXE=wind2fds
 ) else (
-  set FDSBASE=fds_%OPENMP%win_%size%.exe
-  set FDSEXE=%SVNROOT%\FDS_Compilation\%OPENMP%intel_win_%size%\fds_%OPENMP%win_%size%.exe
+  set FDSBASE=fds_%OPENMP%win_%size%%DEBUG%.exe
+  set FDSEXE=%SVNROOT%\FDS_Compilation\%OPENMP%intel_win_%size%%DEBUG%\fds_%OPENMP%win_%size%%DEBUG%.exe
   set CFASTEXE=%CFAST%\CFAST\intel_win_%size%\cfast6_win_%size%.exe
   set WIND2FDSEXE=%SVNROOT%\Utilities\wind2fds\intel_win_%size%\wind2fds_win_%size%.exe
 )
@@ -93,6 +109,20 @@ time /t >> %TIME_FILE%
 set smvug="%SVNROOT%\Manuals\SMV_User_Guide\"
 echo | %FDSEXE% 2> "%smvug%\SCRIPT_FIGURES\fds.version"
 
+if "%rundebug%" == "1" (
+  SET RUNFDS=%RUNFDS_M%
+  SET RUNWFDS=%RUNWFDS_M%
+  SET RUNTFDS=%RUNTFDS_M%
+  SET RUNCFAST=%RUNCFAST_M%
+) else (
+  SET RUNFDS=%RUNFDS_E%
+  SET RUNWFDS=%RUNWFDS_E%
+  SET RUNTFDS=%RUNTFDS_E%
+  SET RUNCFAST=%RUNCFAST_E%
+)
+
+:: create or erase stop files
+
 if "%runonlygeom%" == "1" (
   call %SCRIPT_DIR%\SMV_geom_Cases.bat
 ) else (
@@ -100,7 +130,20 @@ if "%runonlygeom%" == "1" (
   call %SCRIPT_DIR%\SMV_geom_Cases.bat
 )
 
-:: erase %SCRIPT_DIR%\SMV_Cases.bat
+:: run cases
+
+SET RUNFDS=%RUNFDS_R%
+SET RUNWFDS=%RUNWFDS_R%
+SET RUNTFDS=%RUNTFDS_R%
+SET RUNCFAST=%RUNCFAST_R%
+if "%runonlygeom%" == "1" (
+  call %SCRIPT_DIR%\SMV_geom_Cases.bat
+) else (
+  call %SCRIPT_DIR%\SMV_Cases.bat
+  call %SCRIPT_DIR%\SMV_geom_Cases.bat
+)
+
+erase %SCRIPT_DIR%\SMV_Cases.bat
 
 cd %BASEDIR%
 echo "smokeview test cases end" >> %TIME_FILE%
