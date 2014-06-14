@@ -1644,10 +1644,6 @@ void draw_geomdata(patchdata *patchi, int geomtype){
         glVertex3fv(xyzptr[0]);
         glVertex3fv(xyzptr[1]);
         glVertex3fv(xyzptr[2]);
-
-        glVertex3fv(xyzptr[0]);
-        glVertex3fv(xyzptr[2]);
-        glVertex3fv(xyzptr[1]);
       }
     }
     else{
@@ -1680,15 +1676,6 @@ void draw_geomdata(patchdata *patchi, int geomtype){
 
         glNormal3fv(xyznorm[2]);
         glVertex3fv(xyzptr[2]);
-
-        glNormal3fv(xyznorm[0]);
-        glVertex3fv(xyzptr[0]);
-
-        glNormal3fv(xyznorm[2]);
-        glVertex3fv(xyzptr[2]);
-
-        glNormal3fv(xyznorm[1]);
-        glVertex3fv(xyzptr[1]);
      }
     }
     glEnd();
