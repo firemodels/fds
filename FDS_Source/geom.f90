@@ -846,7 +846,6 @@ REAL(EB) :: ZMIN
 INTEGER, POINTER, DIMENSION(:) :: VOL
 INTEGER :: IVOL
 REAL(EB) :: VOLUME
-LOGICAL :: VOLUME_ERROR
 REAL(EB), POINTER, DIMENSION(:) :: V1, V2, V3, V4
 
 LOGICAL COMPONENT_ONLY
@@ -1176,7 +1175,6 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
    IF (N_VOLUS>0) THEN
       ALLOCATE(G%VOLUS(4*N_VOLUS),STAT=IZERO)
       CALL ChkMemErr('READ_GEOM','G%VOLUS',IZERO)
-      VOLUME_ERROR=.FALSE.
       DO I = 0, N_VOLUS-1
          VOL(1:4)=> VOLUS(4*I+1:4*I+4)
          V1(1:3) => VERTS(3*VOL(1)-2:3*VOL(1))
@@ -1184,24 +1182,10 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
          V3(1:3) => VERTS(3*VOL(3)-2:3*VOL(3))
          V4(1:3) => VERTS(3*VOL(4)-2:3*VOL(4))
          VOLUME = VOLUME_VERTS(V3,V4,V2,V1) 
-         IF ( VOLUME<0.0_EB ) THEN
-            WRITE(MESSAGE,'(A,4(I5,1x),A)')"Warning: tetrahedron vertices:",VOL(1),VOL(2),VOL(3),VOL(4)," are out of order."
-            WRITE(LU_ERR,'(A)')TRIM(MESSAGE)
+         IF ( VOLUME<0.0_EB ) THEN ! reorder vertices if tetrahedron volume is negative
             IVOL=VOL(3)
             VOL(3)=VOL(4)
             VOL(4)=IVOL
-         ENDIF
-      ENDDO
-      IF (VOLUME_ERROR) CALL SHUTDOWN('ERROR: co-planar volume vertices found.')
-      DO I = 0, N_VOLUS-1
-         VOL(1:4)=> VOLUS(4*I+1:4*I+4)
-         V1(1:3) => VERTS(3*VOL(1)-2:3*VOL(1))
-         V2(1:3) => VERTS(3*VOL(2)-2:3*VOL(2))
-         V3(1:3) => VERTS(3*VOL(3)-2:3*VOL(3))
-         V4(1:3) => VERTS(3*VOL(4)-2:3*VOL(4))
-         VOLUME = VOLUME_VERTS(V3,V4,V2,V1)
-         IF ( VOLUME<0.0_EB ) THEN
-            CALL SHUTDOWN('ERROR: tetrahedron vertices still out of order.')
          ENDIF
       ENDDO
       G%VOLUS(1: 4*N_VOLUS) = VOLUS(1:4*N_VOLUS)
