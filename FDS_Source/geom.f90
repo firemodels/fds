@@ -116,6 +116,21 @@ END FUNCTION GET_TETRABOX_VOLUME
 
 !  ------------------ VOLUME_VERTS ------------------------ 
 
+!              D1 
+!             /|\  
+!            / | \
+!           /  |  \  
+!          /   |   \  
+!         /    |    \ 
+!        /     B4    \
+!       /     . .     \
+!      /     .    .    \   
+!     /    .        .   \
+!    /   .            .  \    
+!   /  .               .  \
+!  / .                    .\
+! C2------------------------A3
+
 REAL(EB) FUNCTION VOLUME_VERTS(A,B,C,D)
 
 ! determine the volume of a tetrahedron formed from vertices A, B, C and D
@@ -147,7 +162,7 @@ REAL(EB) :: VOLUME
 V_CENTER=0.0_EB
 DO I = 0, NVERTS - 1
    V_CENTER = V_CENTER + VERTS(3*I:3*I+2)
-END DO
+ENDDO
 V_CENTER = V_CENTER/NVERTS
 
 ! sum volumes of each region formed using polyhedron face and center
@@ -161,8 +176,8 @@ DO I = 0, NFACES-1
       V1(0:2) => VERTS(3*J:3*J+2)
       V2(0:2) => VERTS(3*J+3:3*J+5)
       VOLUME = VOLUME + ABS(VOLUME_VERTS(V0,V1,V2,V_CENTER))
-   END DO
-END DO
+   ENDDO
+ENDDO
 
 GET_POLYHEDRON_VOLUME = VOLUME
 
@@ -216,7 +231,7 @@ NFACES=0
 DO F = 0,99
   FACESTART(F) = 0
   FACENUM(F) = 0
-END DO
+ENDDO
 
 IF(BOX_BOUNDS(1).LT.TETRA_BOUNDS(0))RETURN
 IF(BOX_BOUNDS(0).GT.TETRA_BOUNDS(1))RETURN
@@ -252,7 +267,7 @@ DO BP = 0, 5
       VERTS(3*NVERTS:3*NVERTS+2)=VERT(0:2)
       FACENUM(NFACES) = FACENUM(NFACES) + 1
       NVERTS=NVERTS+1
-   END DO
+   ENDDO
 
 !  add intersection of box plane edge and tetrahedron plane (if on tetrahedron)
   
@@ -279,8 +294,8 @@ DO BP = 0, 5
                NVERTS=NVERTS+1
             ENDIF
          ENDIF
-      END DO
-   END DO
+      ENDDO
+   ENDDO
 
 ! add box plane vertices if inside tetrahedron
 
@@ -291,14 +306,14 @@ DO BP = 0, 5
          FACENUM(NFACES) = FACENUM(NFACES) + 1
          NVERTS=NVERTS+1
       ENDIF
-   END DO
+   ENDDO
    
    IF(FACENUM(NFACES).GT.0) THEN
       NORMAL_INDEX(NFACES) = BP
       NFACES = NFACES + 1
    ENDIF
 
-END DO
+ENDDO
 
 ! for each tetrahedron plane ....
 
@@ -325,7 +340,7 @@ DO TP = 0, 3
       VERTS(3*NVERTS:3*NVERTS+2)=VERT(0:2)
       FACENUM(NFACES) = FACENUM(NFACES) + 1
       NVERTS=NVERTS+1
-   END DO
+   ENDDO
 
 !  add intersection of tetrahedron plane edge and box plane (if on box)
   
@@ -351,8 +366,8 @@ DO TP = 0, 3
          VERTS(3*NVERTS:3*NVERTS+2)=VERT(0:2)
          FACENUM(NFACES) = FACENUM(NFACES) + 1
          NVERTS=NVERTS+1
-      END DO
-   END DO
+      ENDDO
+   ENDDO
 
 ! add tetrahedron plane vertices if inside box
 
@@ -363,20 +378,20 @@ DO TP = 0, 3
          FACENUM(NFACES) = FACENUM(NFACES) + 1
          NVERTS=NVERTS+1
       ENDIF
-   END DO
+   ENDDO
    
    IF(FACENUM(NFACES).GT.0) THEN
       NORMAL_INDEX(NFACES) = 6+TP
       NFACES = NFACES + 1
    ENDIF
 
-END DO
+ENDDO
 
 ! determine vertex index at the start of each face
 
 DO F = 1, NFACES
   FACESTART(F) = FACESTART(F-1) + FACENUM(F-1)
-END DO
+ENDDO
 
 ! order vertices of each face clockwise
 
@@ -384,7 +399,7 @@ DO F = 0, NFACES-1
   IF(FACENUM(F).LE.3) CYCLE
   FACEVERTS(0:3*FACENUM(F)-1) => VERTS(3*FACESTART(F):3*FACESTART(F+1)-1)
   CALL ORDER_VERTS(FACEVERTS,FACENUM(F),NORMAL_INDEX(F))
-END DO
+ENDDO
 
 RETURN
 END SUBROUTINE GET_VERTS
@@ -445,7 +460,7 @@ VERT_CENTER=0.0_EB
 DO I = 0, NVERTS-1
   VERT(0:2) => FACEVERTS(3*I:3*I+2)
   VERT_CENTER = VERT_CENTER + VERT
-END DO
+ENDDO
 VERT_CENTER = VERT_CENTER/REAL(NVERTS,EB)
 
 ! split vertices into two parts
@@ -464,7 +479,7 @@ DO I = 1, NVERTS-1
     ORDER(N_COUNTER_CLOCKWISE) = I
     N_COUNTER_CLOCKWISE = N_COUNTER_CLOCKWISE + 1
   ENDIF
-END DO
+ENDDO
 ORDER(N_COUNTER_CLOCKWISE) = 0
 
 ! order vertices that are counter clockwise from vertex 0
@@ -481,8 +496,8 @@ IF (N_COUNTER_CLOCKWISE.GT.1) THEN
          ORDER(I) = IIP1
          ORDER(I+1) = II
       ENDIF
-   END DO
-   END DO
+   ENDDO
+   ENDDO
 ENDIF
 
 ! order vertices that are counter clockwise from vertex 0
@@ -499,8 +514,8 @@ IF (N_CLOCKWISE.GT.1) THEN
          ORDER(N_COUNTER_CLOCKWISE+1+I) = IIP1
          ORDER(N_COUNTER_CLOCKWISE+1+I+1) = II
       ENDIF
-   END DO
-   END DO
+   ENDDO
+   ENDDO
 ENDIF
 
 ! copy ordered vertices into original data structure
@@ -508,7 +523,7 @@ ENDIF
 FACEVERTS_TEMP(0:3*NVERTS-1) = FACEVERTS(0:3*NVERTS-1)
 DO I = 0, NVERTS-1
    FACEVERTS(3*I:3*I+2) = FACEVERTS_TEMP(3*ORDER(I):3*ORDER(I)+2)
-END DO
+ENDDO
 
 END SUBROUTINE ORDER_VERTS
 
@@ -570,7 +585,7 @@ DO TP = 0, 3
   TETRA_PLANE_BOUNDS(3,TP) = MAX(TETRA_VERTS(1,VERTS(0)),TETRA_VERTS(1,VERTS(1)),TETRA_VERTS(1,VERTS(2)))
   TETRA_PLANE_BOUNDS(4,TP) = MIN(TETRA_VERTS(2,VERTS(0)),TETRA_VERTS(2,VERTS(1)),TETRA_VERTS(2,VERTS(2)))
   TETRA_PLANE_BOUNDS(5,TP) = MAX(TETRA_VERTS(2,VERTS(0)),TETRA_VERTS(2,VERTS(1)),TETRA_VERTS(2,VERTS(2)))
-END DO
+ENDDO
 
 DO BP = 0, 5
   VERTS(0:3) => BOX_PLANE2VERT(0:3,BP)
@@ -580,7 +595,7 @@ DO BP = 0, 5
   BOX_PLANE_BOUNDS(3,BP) = MAX(BOX_VERTS(1,VERTS(0)),BOX_VERTS(1,VERTS(1)),BOX_VERTS(1,VERTS(2)),BOX_VERTS(0,VERTS(3)))
   BOX_PLANE_BOUNDS(4,BP) = MIN(BOX_VERTS(2,VERTS(0)),BOX_VERTS(2,VERTS(1)),BOX_VERTS(2,VERTS(2)),BOX_VERTS(0,VERTS(3)))
   BOX_PLANE_BOUNDS(5,BP) = MAX(BOX_VERTS(2,VERTS(0)),BOX_VERTS(2,VERTS(1)),BOX_VERTS(2,VERTS(2)),BOX_VERTS(0,VERTS(3)))
-END DO
+ENDDO
 
 ! define tetrahedron vertices
 
@@ -703,7 +718,7 @@ DO BP = 0, 5
       IN_BOX=0
       RETURN
    ENDIF
-END DO
+ENDDO
 END FUNCTION IN_BOX
 
 !  ------------------ IN_TETRA ------------------------ 
@@ -729,7 +744,7 @@ DO TP = 0, 3
       IN_TETRA=0
       RETURN
    ENDIF
-END DO
+ENDDO
 END FUNCTION IN_TETRA
 
 !  ------------------ VEC_NORMALIZE ------------------------ 
@@ -787,6 +802,7 @@ CONTAINS
 ! ---------------------------- READ_GEOM ----------------------------------------
 
 SUBROUTINE READ_GEOM
+USE BOXTETRA_ROUTINES, ONLY: VOLUME_VERTS
 
 ! input &GEOM lines
 
@@ -827,6 +843,11 @@ TYPE (MESH_TYPE), POINTER :: M=>NULL()
 INTEGER, POINTER, DIMENSION(:) :: FACEI, FACEJ, FACE_FROM, FACE_TO
 REAL(EB) :: ZERO3(3)=(/0.0_EB,0.0_EB,0.0_EB/)
 REAL(EB) :: ZMIN
+INTEGER, POINTER, DIMENSION(:) :: VOL
+INTEGER :: IVOL
+REAL(EB) :: VOLUME
+LOGICAL :: VOLUME_ERROR
+REAL(EB), POINTER, DIMENSION(:) :: V1, V2, V3, V4
 
 LOGICAL COMPONENT_ONLY
 LOGICAL, ALLOCATABLE, DIMENSION(:) :: DEFAULT_COMPONENT_ONLY
@@ -1155,6 +1176,39 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
    IF (N_VOLUS>0) THEN
       ALLOCATE(G%VOLUS(4*N_VOLUS),STAT=IZERO)
       CALL ChkMemErr('READ_GEOM','G%VOLUS',IZERO)
+      VOLUME_ERROR=.FALSE.
+      DO I = 0, N_VOLUS-1
+         VOL(1:4)=> VOLUS(4*I+1:4*I+4)
+         V1(1:3) => VERTS(3*VOL(1)-2:3*VOL(1))
+         V2(1:3) => VERTS(3*VOL(2)-2:3*VOL(2))
+         V3(1:3) => VERTS(3*VOL(3)-2:3*VOL(3))
+         V4(1:3) => VERTS(3*VOL(4)-2:3*VOL(4))
+         VOLUME = VOLUME_VERTS(V3,V4,V2,V1) 
+         IF (ABS(VOLUME) <= TWO_EPSILON_EB ) THEN
+            WRITE(MESSAGE,'(A,4(I5,1x),A)')"Error: tetrahedron vertices:",VOL(1),VOL(2),VOL(3),VOL(4)," are co-planar."
+            WRITE(LU_ERR,'(A)')TRIM(MESSAGE)
+            VOLUME_ERROR = .TRUE.
+         ENDIF
+         IF ( VOLUME<0.0_EB ) THEN
+            WRITE(MESSAGE,'(A,4(I5,1x),A)')"Warning: tetrahedron vertices:",VOL(1),VOL(2),VOL(3),VOL(4)," are out of order."
+            WRITE(LU_ERR,'(A)')TRIM(MESSAGE)
+            IVOL=VOL(3)
+            VOL(3)=VOL(4)
+            VOL(4)=IVOL
+         ENDIF
+      ENDDO
+      IF (VOLUME_ERROR) CALL SHUTDOWN('ERROR: co-planar volume vertices found.')
+      DO I = 0, N_VOLUS-1
+         VOL(1:4)=> VOLUS(4*I+1:4*I+4)
+         V1(1:3) => VERTS(3*VOL(1)-2:3*VOL(1))
+         V2(1:3) => VERTS(3*VOL(2)-2:3*VOL(2))
+         V3(1:3) => VERTS(3*VOL(3)-2:3*VOL(3))
+         V4(1:3) => VERTS(3*VOL(4)-2:3*VOL(4))
+         VOLUME = VOLUME_VERTS(V3,V4,V2,V1)
+         IF ( VOLUME<0.0_EB ) THEN
+            CALL SHUTDOWN('ERROR: tetrahedron vertices still out of order.')
+         ENDIF
+      ENDDO
       G%VOLUS(1: 4*N_VOLUS) = VOLUS(1:4*N_VOLUS)
       IF (ANY(VOLUS(1:4*N_VOLUS)<1 .OR. VOLUS(1:4*N_VOLUS)>N_VERTS)) THEN
          CALL SHUTDOWN('ERROR: problem with GEOM, vertex index out of bounds')
@@ -1200,6 +1254,7 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
 !   /  .               .  \
 !  / .                    .\
 ! 2-------------------------3
+
       DO I = 0, N_VOLUS-1
          FACES(12*I+1) = VOLUS(4*I+1)
          FACES(12*I+2) = VOLUS(4*I+2)
@@ -1226,16 +1281,16 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
  
        DO I = 0, N_FACES-1
           FACEI=>FACES(3*I+1:3*I+3)
-         DO J = 0, N_FACES-1
-            IF (I==J) CYCLE
-            FACEJ=>FACES(3*J+1:3*J+3)
-            IF (FACEI(1)/=FACEJ(1)) CYCLE
-            IF ((FACEI(2)==FACEJ(2) .AND. FACEI(3)==FACEJ(3)) .OR. &
+          DO J = 0, N_FACES-1
+             IF (I==J) CYCLE
+             FACEJ=>FACES(3*J+1:3*J+3)
+             IF (FACEI(1)/=FACEJ(1)) CYCLE
+             IF ((FACEI(2)==FACEJ(2) .AND. FACEI(3)==FACEJ(3)) .OR. &
                 (FACEI(2)==FACEJ(3) .AND. FACEI(3)==FACEJ(2))) THEN
-               IS_EXTERNAL(I) = .FALSE.
-               IS_EXTERNAL(J) = .FALSE.
-            ENDIF
-         ENDDO
+                IS_EXTERNAL(I) = .FALSE.
+                IS_EXTERNAL(J) = .FALSE.
+             ENDIF
+          ENDDO
       ENDDO
 
       ! create new FACES index array keeping only external faces
@@ -1567,13 +1622,13 @@ DO I = 1, NVERTS
    VNEW=>VERTS(3*NVERTS+3*I-2:3*NVERTS+3*I)
    VOLD=>VERTS(3*I-2:3*I)
    VNEW(1:3)=(/VOLD(1:2),ZMIN/)
-END DO
+ENDDO
 ! construct 3 tetrahedrons for each prism (solid between original face and face on plane z=zplane)
 DO I = 1, NFACES
    PRISM(1:3)=FACES(3*I-2:3*I)
    PRISM(4:6)=FACES(3*I-2:3*I)+NVERTS
    CALL PRISM2TETRA(PRISM,VOLS(12*I-11:12*I))
-END DO
+ENDDO
 NVOLS=3*NFACES
 NVERTS=2*NVERTS
 
