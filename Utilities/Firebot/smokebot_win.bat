@@ -302,11 +302,21 @@ call :GET_TIME
 set RUNVV_beg=%current_time% 
 
 echo Stage 4 - Running verification cases
+echo             debug mode
 
 cd %svnroot%\Verification\scripts
-call Run_SMV_cases %size% 1> %OUTDIR%\stage4.txt 2>&1
+call Run_SMV_cases %size% 0 1 1> %OUTDIR%\stage4a.txt 2>&1
 
-call :find_smokeview_warnings "error" %OUTDIR%\stage4.txt "Stage 4"
+call :find_smokeview_warnings "error" %OUTDIR%\stage4a.txt "Stage 4a_1"
+call :find_smokeview_warnings "forrtl: severe" %OUTDIR%\stage4a.txt "Stage 4a_2"
+
+echo             release mode
+
+cd %svnroot%\Verification\scripts
+call Run_SMV_cases %size% 0 0 1> %OUTDIR%\stage4b.txt 2>&1
+
+call :find_smokeview_warnings "error" %OUTDIR%\stage4b.txt "Stage 4b_1"
+call :find_smokeview_warnings "forrtl: severe" %OUTDIR%\stage4a.txt "Stage 4b_2"
 
 call :GET_TIME
 set RUNVV_end=%current_time% 
