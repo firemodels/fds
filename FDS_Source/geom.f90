@@ -1184,11 +1184,6 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
          V3(1:3) => VERTS(3*VOL(3)-2:3*VOL(3))
          V4(1:3) => VERTS(3*VOL(4)-2:3*VOL(4))
          VOLUME = VOLUME_VERTS(V3,V4,V2,V1) 
-         IF (ABS(VOLUME) <= TWO_EPSILON_EB ) THEN
-            WRITE(MESSAGE,'(A,4(I5,1x),A)')"Error: tetrahedron vertices:",VOL(1),VOL(2),VOL(3),VOL(4)," are co-planar."
-            WRITE(LU_ERR,'(A)')TRIM(MESSAGE)
-            VOLUME_ERROR = .TRUE.
-         ENDIF
          IF ( VOLUME<0.0_EB ) THEN
             WRITE(MESSAGE,'(A,4(I5,1x),A)')"Warning: tetrahedron vertices:",VOL(1),VOL(2),VOL(3),VOL(4)," are out of order."
             WRITE(LU_ERR,'(A)')TRIM(MESSAGE)
