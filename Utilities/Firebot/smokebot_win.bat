@@ -69,6 +69,7 @@ set haveCC=1
 
 set emailexe=%userprofile%\bin\mailsend.exe
 set gettimeexe=%svnroot%\Utilities\get_time\intel_win_64\get_time.exe
+set runbatchexe=%svnroot%\SMV\source\runbatch\intel_win_64\runbatch.exe
 
 date /t > %OUTDIR%\starttime.txt
 set /p startdate=<%OUTDIR%\starttime.txt
@@ -130,6 +131,9 @@ if NOT exist %emailexe% (
 
 call :is_file_installed pdflatex|| exit /b 1
 echo             found pdflatex
+
+call :is_file_installed grep|| exit /b 1
+echo             found grep
 
 :: update cfast repository
 
@@ -505,7 +509,7 @@ set search_string=%1
 set search_file=%2
 set stage=%3
 
-findstr /I %search_string% %search_file% | find /V "commands for target" > %OUTDIR%\stage_warning.txt
+grep -i -A 5 -B 5 %search_string% %search_file% | find /V "commands for target" > %OUTDIR%\stage_warning.txt
 type %OUTDIR%\stage_warning.txt | find /v /c "kdkwokwdokwd"> %OUTDIR%\stage_nwarning.txt
 set /p nwarnings=<%OUTDIR%\stage_nwarning.txt
 if %nwarnings% GTR 0 (
@@ -524,7 +528,7 @@ set search_string=%1
 set search_file=%2
 set stage=%3
 
-findstr /I %search_string% %search_file% | find /V "mpif.h"  > %OUTDIR%\stage_warning.txt
+grep -i -A 5 -B 5 %search_string% %search_file% | find /V "mpif.h"  > %OUTDIR%\stage_warning.txt
 type %OUTDIR%\stage_warning.txt | find /c ":"> %OUTDIR%\stage_nwarning.txt
 set /p nwarnings=<%OUTDIR%\stage_nwarning.txt
 if %nwarnings% GTR 0 (
