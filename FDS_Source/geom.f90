@@ -835,12 +835,14 @@ REAL(EB) :: TEXTURE_ORIGIN(3), TEXTURE_SCALE(2)
 REAL(EB) :: XB(6), DX
 INTEGER :: N_VERTS, N_FACES, N_FACES_TEMP, N_VOLUS, N_ZVALS
 INTEGER :: MATL_INDEX
-INTEGER :: IOS,IZERO,N, I, J, IJ, NSUB_GEOMS, GEOM_INDEX
+INTEGER :: IOS,IZERO,N, I, J, K, IJ, NSUB_GEOMS, GEOM_INDEX
 INTEGER :: I11, I12, I21, I22
-INTEGER :: GEOM_TYPE, NXB, IJK(3), FACE_OFFSET, VERT_OFFSET
+INTEGER :: GEOM_TYPE, NXB, IJK(3)
 INTEGER :: N_LEVELS, N_LAT, N_LONG, SPHERE_TYPE
 TYPE (MESH_TYPE), POINTER :: M=>NULL()
 INTEGER, POINTER, DIMENSION(:) :: FACEI, FACEJ, FACE_FROM, FACE_TO
+REAL(EB) :: BOX_XYZ(3)
+INTEGER :: BOXVERTLIST(8), NI, NIJ
 REAL(EB) :: ZERO3(3)=(/0.0_EB,0.0_EB,0.0_EB/)
 REAL(EB) :: ZMIN
 INTEGER, POINTER, DIMENSION(:) :: VOL
@@ -1060,17 +1062,52 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
       IF (IJK(2).LT.2) IJK(2) = MAX(2,INT((XB(4)-XB(3)/DX)+1))
       IF (IJK(3).LT.2) IJK(3) = MAX(2,INT((XB(6)-XB(5)/DX)+1))
 
-      FACE_OFFSET = 0
-      VERT_OFFSET = 0
-      N_VERTS = 2*(IJK(2)*IJK(3) + IJK(1)*IJK(3) + IJK(1)*IJK(2))
-      N_FACES = 4*((IJK(2)-1)*(IJK(3)-1) + (IJK(1)-1)*(IJK(3)-1) + (IJK(1)-1)*(IJK(2)-1))
-      CALL INIT_QUAD(IJK(2),IJK(3),XB,1,N_VERTS,N_FACES,VERT_OFFSET,FACE_OFFSET,VERTS,FACES)
-      CALL INIT_QUAD(IJK(2),IJK(3),XB,2,N_VERTS,N_FACES,VERT_OFFSET,FACE_OFFSET,VERTS,FACES)
-      CALL INIT_QUAD(IJK(1),IJK(3),XB,3,N_VERTS,N_FACES,VERT_OFFSET,FACE_OFFSET,VERTS,FACES)
-      CALL INIT_QUAD(IJK(1),IJK(3),XB,4,N_VERTS,N_FACES,VERT_OFFSET,FACE_OFFSET,VERTS,FACES)
-      CALL INIT_QUAD(IJK(1),IJK(2),XB,5,N_VERTS,N_FACES,VERT_OFFSET,FACE_OFFSET,VERTS,FACES)
-      CALL INIT_QUAD(IJK(1),IJK(2),XB,6,N_VERTS,N_FACES,VERT_OFFSET,FACE_OFFSET,VERTS,FACES)
+! define verts in box
+
+      N_VERTS = 0
+      DO K = 0, IJK(3)-1
+         BOX_XYZ(3) = (REAL(IJK(3)-1-K,EB)*XB(5) + REAL(K,EB)*XB(6))/REAL(IJK(3)-1,EB)
+         DO J = 0, IJK(2)-1
+            BOX_XYZ(2) = (REAL(IJK(2)-1-J,EB)*XB(3) + REAL(J,EB)*XB(4))/REAL(IJK(2)-1,EB)
+            DO I = 0, IJK(1)-1
+               BOX_XYZ(1) = (REAL(IJK(1)-1-I,EB)*XB(1) + REAL(I,EB)*XB(2))/REAL(IJK(1)-1,EB)
+               VERTS(3*N_VERTS+1:3*N_VERTS+3) =  BOX_XYZ(1:3)
+               N_VERTS = N_VERTS + 1
+            ENDDO
+         ENDDO
+      ENDDO
       
+! define tetrahedrons in box
+      
+      N_VOLUS = 0
+      NI = IJK(1)
+      NIJ = IJK(1)*IJK(2)
+      DO K = 0, IJK(3)-2
+         DO J = 0, IJK(2)-2
+            DO I = 0, IJK(1)-2
+            
+!     8-------7
+!   / .     / |
+! 5-------6   |
+! |   .   |   |
+! |   .   |   |
+! |   4-------3
+! | /     | /
+! 1-------2
+               BOXVERTLIST(1) = K*NIJ + J*NI + I + 1
+               BOXVERTLIST(2) = BOXVERTLIST(1) + 1
+               BOXVERTLIST(3) = BOXVERTLIST(2) + NI
+               BOXVERTLIST(4) = BOXVERTLIST(3) - 1
+               BOXVERTLIST(5) = BOXVERTLIST(1) + NIJ
+               BOXVERTLIST(6) = BOXVERTLIST(2) + NIJ
+               BOXVERTLIST(7) = BOXVERTLIST(3) + NIJ
+               BOXVERTLIST(8) = BOXVERTLIST(4) + NIJ
+               CALL BOX2TETRA(BOXVERTLIST,VOLUS(4*N_VOLUS+1:4*N_VOLUS+20))
+               N_VOLUS = N_VOLUS + 5
+            ENDDO
+         ENDDO
+      ENDDO
+      N_FACES=0
    ENDIF
 
    ! setup a sphere object (SPHERE_RADIUS and SPHERE_ORIGIN keywords)
