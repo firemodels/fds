@@ -268,6 +268,7 @@ TYPE GEOMETRY_TYPE
    INTEGER :: N_VERTS_BASE, N_FACES_BASE, N_VOLUS_BASE
    INTEGER :: N_VERTS, N_FACES, N_VOLUS, NSUB_GEOMS
    INTEGER :: GEOM_TYPE
+   LOGICAL :: HAVE_SURF, HAVE_MATL
    CHARACTER(60) :: BNDC_FILENAME='null', GEOC_FILENAME='null' ! for compatibility with existing FDS code
    REAL(EB) :: OMEGA=0._EB                                     ! for compatibility with existing FDS code
    INTEGER, ALLOCATABLE, DIMENSION(:) :: FACES, VOLUS, SUB_GEOMS, SURFS, MATLS
