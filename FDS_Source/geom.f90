@@ -1254,14 +1254,15 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
       ! construct an array of external faces
 
       ! determine which tetrahedron faces are external
+   
+      IF (N_FACES==0) THEN   
+         N_FACES = 4*N_VOLUS
+         ALLOCATE(IS_EXTERNAL(0:N_FACES-1),STAT=IZERO)
+         CALL ChkMemErr('READ_GEOM','IS_EXTERNAL',IZERO)
       
-      N_FACES = 4*N_VOLUS
-      ALLOCATE(IS_EXTERNAL(0:N_FACES-1),STAT=IZERO)
-      CALL ChkMemErr('READ_GEOM','IS_EXTERNAL',IZERO)
+         IS_EXTERNAL(0:N_FACES-1)=.TRUE.  ! start off by assuming all faces are external
       
-      IS_EXTERNAL(0:N_FACES-1)=.TRUE.  ! start off by assuming all faces are external
-      
-      ! reorder face indices so the the first index is always the smallest      
+! reorder face indices so the the first index is always the smallest      
  
                
 !              1 
@@ -1279,58 +1280,59 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
 !  / .                    .\
 ! 2-------------------------3
 
-      DO I = 0, N_VOLUS-1
-         FACES(12*I+1) = VOLUS(4*I+1)
-         FACES(12*I+2) = VOLUS(4*I+2)
-         FACES(12*I+3) = VOLUS(4*I+3)
-         CALL REORDER_VERTS(FACES(12*I+1:12*I+3))
+         DO I = 0, N_VOLUS-1
+            FACES(12*I+1) = VOLUS(4*I+1)
+            FACES(12*I+2) = VOLUS(4*I+2)
+            FACES(12*I+3) = VOLUS(4*I+3)
+            CALL REORDER_VERTS(FACES(12*I+1:12*I+3))
 
-         FACES(12*I+4) = VOLUS(4*I+1)
-         FACES(12*I+5) = VOLUS(4*I+3)
-         FACES(12*I+6) = VOLUS(4*I+4)
-         CALL REORDER_VERTS(FACES(12*I+4:12*I+6))
+            FACES(12*I+4) = VOLUS(4*I+1)
+            FACES(12*I+5) = VOLUS(4*I+3)
+            FACES(12*I+6) = VOLUS(4*I+4)
+            CALL REORDER_VERTS(FACES(12*I+4:12*I+6))
          
-         FACES(12*I+7) = VOLUS(4*I+1)
-         FACES(12*I+8) = VOLUS(4*I+4)
-         FACES(12*I+9) = VOLUS(4*I+2)
-         CALL REORDER_VERTS(FACES(12*I+7:12*I+9))
+            FACES(12*I+7) = VOLUS(4*I+1)
+            FACES(12*I+8) = VOLUS(4*I+4)
+            FACES(12*I+9) = VOLUS(4*I+2)
+            CALL REORDER_VERTS(FACES(12*I+7:12*I+9))
          
-         FACES(12*I+10) = VOLUS(4*I+2)
-         FACES(12*I+11) = VOLUS(4*I+4)
-         FACES(12*I+12) = VOLUS(4*I+3)
-         CALL REORDER_VERTS(FACES(12*I+10:12*I+12))
-      ENDDO
+            FACES(12*I+10) = VOLUS(4*I+2)
+            FACES(12*I+11) = VOLUS(4*I+4)
+            FACES(12*I+12) = VOLUS(4*I+3)
+            CALL REORDER_VERTS(FACES(12*I+10:12*I+12))
+         ENDDO
       
       ! find faces that match - for now ignore face orientation      
  
-       DO I = 0, N_FACES-1
-          FACEI=>FACES(3*I+1:3*I+3)
-          DO J = 0, N_FACES-1
-             IF (I==J) CYCLE
-             FACEJ=>FACES(3*J+1:3*J+3)
-             IF (FACEI(1)/=FACEJ(1)) CYCLE
-             IF ((FACEI(2)==FACEJ(2) .AND. FACEI(3)==FACEJ(3)) .OR. &
-                (FACEI(2)==FACEJ(3) .AND. FACEI(3)==FACEJ(2))) THEN
-                IS_EXTERNAL(I) = .FALSE.
-                IS_EXTERNAL(J) = .FALSE.
-             ENDIF
-          ENDDO
-      ENDDO
+          DO I = 0, N_FACES-1
+             FACEI=>FACES(3*I+1:3*I+3)
+             DO J = 0, N_FACES-1
+                IF (I==J) CYCLE
+                FACEJ=>FACES(3*J+1:3*J+3)
+                IF (FACEI(1)/=FACEJ(1)) CYCLE
+                IF ((FACEI(2)==FACEJ(2) .AND. FACEI(3)==FACEJ(3)) .OR. &
+                   (FACEI(2)==FACEJ(3) .AND. FACEI(3)==FACEJ(2))) THEN
+                   IS_EXTERNAL(I) = .FALSE.
+                   IS_EXTERNAL(J) = .FALSE.
+                ENDIF
+             ENDDO
+         ENDDO
 
       ! create new FACES index array keeping only external faces
       
-      N_FACES_TEMP = N_FACES  
-      N_FACES=0
-      DO I = 0, N_FACES_TEMP-1
-         IF (IS_EXTERNAL(I)) THEN
-            FACE_FROM=>FACES(3*I+1:3*I+3)
-            FACE_TO=>FACES(3*N_FACES+1:3*N_FACES+3)
-            FACE_TO(1:3) = FACE_FROM(1:3)
-            N_FACES=N_FACES+1
-         ENDIF
-      ENDDO
-      G%N_FACES_BASE = N_FACES
-      CALL COMPUTE_TEXTURES(VERTS,FACES,TFACES,MAX_VERTS,MAX_FACES,N_FACES)
+         N_FACES_TEMP = N_FACES  
+         N_FACES=0
+         DO I = 0, N_FACES_TEMP-1
+            IF (IS_EXTERNAL(I)) THEN
+               FACE_FROM=>FACES(3*I+1:3*I+3)
+               FACE_TO=>FACES(3*N_FACES+1:3*N_FACES+3)
+               FACE_TO(1:3) = FACE_FROM(1:3)
+               N_FACES=N_FACES+1
+            ENDIF
+         ENDDO
+         G%N_FACES_BASE = N_FACES
+         CALL COMPUTE_TEXTURES(VERTS,FACES,TFACES,MAX_VERTS,MAX_FACES,N_FACES)
+      ENDIF
    ENDIF
 
    IF (N_FACES>0) THEN
