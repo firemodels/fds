@@ -1283,27 +1283,27 @@ The correction terms that guarantee mass conservation ($V_c \, \rho_c \, \delta 
 
 The trajectories of Lagrangian particles in FDS could be calculated with Forward Euler (FE) time integration. However, Forward Euler extracts momentum from the cell corresponding to each particle's initial position and this may cause large changes in the flow field and ultimately instability unless the time step is extremely small. Consequently, a stable, single-step approximate solution is developed and is implemented in FDS.
 
-Two effects are neglected in this formulation. The first is the effect of the change in droplet mass between  time steps. The droplet's evaporation is not coupled to this model. This is justified because the change in droplet mass per time step is small. The second neglected effect is the change in drag coefficient between time steps. This is justified because of the large uncertainties in the drag coefficients. Modeling the time derivative of the drag coefficient would not improve accuracy beyond these uncertainties, but it would slow down the code.
+Several effects are neglected in this formulation. One is the effect of the change in droplet mass between  time steps. The droplet's evaporation is not coupled to this model. This is justified because the change in droplet mass per time step is small. A second neglected effect is the change in drag coefficient between time steps. This is justified because of the large uncertainties in the drag coefficients. Modeling the time derivative of the drag coefficient would not improve accuracy beyond these uncertainties, but it would slow down the computation.
 
 \subsubsection*{Relative velocities}
-Let $m_{\rm p}$ denote the particle mass, $\mathbf{u}$ the particle velocity, $A_{\rm p}$ the particle cross-sectional area, $C_\text{d}$ the particle drag coefficient, $\rho$ the fluid mass density, $\mathbf{U}$ the fluid velocity around the particle, $V_\text{g}$ the volume occupied by the fluid in a cell, $M \equiv \rho V_\text{g}$ the fluid mass of a cell, $n_\text{p}$ the number of particles in a cell, $M_\text{p} \equiv M/n_\text{p}$ the average fluid mass per particle in a cell, and $\mathbf{g}$ the gravitational acceleration vector.
+Let $m_{\rm p}$ denote the particle mass, $\mathbf{u}$ the particle velocity, $A_\text{p}$ the particle cross-sectional area, $C_\text{d}$ the particle drag coefficient, $\rho$ the fluid mass density, $\mathbf{U}$ the fluid velocity around the particle, $V_\text{g}$ the volume occupied by the fluid in a cell, $M \equiv \rho V_\text{g}$ the fluid mass of a cell, $n_\text{p}$ the number of particles in a cell, $M_\text{p} \equiv M/n_\text{p}$ the average fluid mass per particle in a cell, and $\mathbf{g}$ the gravitational acceleration vector.
 
 The equations of motion of the particles and fluid are formulated as follows from Newton's second law,
 \begin{align}
     \label{particle_eom}
-    m_{\rm p} \frac{\d \mathbf{u}}{\d t} &= - \frac{1}{2} \rho C_\text{d} A_{\rm p} (\mathbf{u} - \mathbf{U}) |\mathbf{u} - \mathbf{U}| + m_{\rm p} \mathbf{g} \\
+    m_{\rm p} \frac{\d \mathbf{u}}{\d t} &= - \frac{1}{2} \rho C_\text{d} A_\text{p} (\mathbf{u} - \mathbf{U}) |\mathbf{u} - \mathbf{U}| + m_{\rm p} \mathbf{g} \\
     \label{fluid_eom}
-    M_{\rm p} \frac{\d \mathbf{U}}{\d t} &= \frac{1}{2} \rho C_\text{d} A_{\rm p} (\mathbf{u} - \mathbf{U}) |\mathbf{u} - \mathbf{U}| \,.
+    M_{\rm p} \frac{\d \mathbf{U}}{\d t} &= \frac{1}{2} \rho C_\text{d} A_\text{p} (\mathbf{u} - \mathbf{U}) |\mathbf{u} - \mathbf{U}| \,.
 \end{align}
-Note that the fluid Eq. (\ref{fluid_eom}) does not include a gravity term. This gravity term is included in the Navier-Stokes equations; including it here would be redundant. Also note that lift is not included here.
+The fluid Eq.\ (\ref{fluid_eom}) is a greatly simplified version of Eq.\ (\ref{momeq}). It exists to get a reasonable estimate of the momentum coupling between the fluid and particle phases. Because it neglects terms corresponding to the pressure gradient, viscosity, etc., it is at best first-order accurate when those effects exist. However, unlike first-order accurate Forward Euler, this approach is stable. Additional terms could be added to improve accuracy in certain verification test cases such as the \texttt{drag\_dt} cases, however, the current approach would solve these with a Forward Euler like step, which can cause instabilities if these terms are not constant. Thus, for the moment these terms are neglected despite their potential utility.
 
 If we define $\mathbf{u}_\text{r} \equiv \mathbf{u} - \mathbf{U}$ as the relative velocity between the fluid and the particle, we can find a single equation for the relative velocity by dividing both equations by their respective masses (i.e., $m_{\rm p}$ and $M_{\rm p}$) and then subtracting the second from the first. This result is
 \begin{align}
-    \frac{\d \mathbf{u}_\text{r}}{\d t} = -\frac{1}{2} \rho C_\text{d} A_{\rm p} \left(\frac{1}{m_{\rm p}} + \frac{1}{M_{\rm p}} \right) \mathbf{u}_\text{r} |\mathbf{u}_\text{r}| + \mathbf{g} \,.
+    \frac{\d \mathbf{u}_\text{r}}{\d t} = -\frac{1}{2} \rho C_\text{d} A_\text{p} \left(\frac{1}{m_{\rm p}} + \frac{1}{M_{\rm p}} \right) \mathbf{u}_\text{r} |\mathbf{u}_\text{r}| + \mathbf{g} \,.
 \end{align}
 The equation above can be written in short as
 \begin{align}
-    \frac{\d \mathbf{u}_\text{r}}{\d t} = -K_{\rm p} \mathbf{u}_\text{r} |\mathbf{u}_\text{r}| + \mathbf{g} \quad ; \quad K_{\rm p} \equiv \frac{1}{2} \rho C_\text{d} A_{\rm p} \left(\frac{1}{m_{\rm p}} + \frac{1}{M_{\rm p}} \right) \,.
+    \frac{\d \mathbf{u}_\text{r}}{\d t} = -K_{\rm p} \mathbf{u}_\text{r} |\mathbf{u}_\text{r}| + \mathbf{g} \quad ; \quad K_{\rm p} \equiv \frac{1}{2} \rho C_\text{d} A_\text{p} \left(\frac{1}{m_{\rm p}} + \frac{1}{M_{\rm p}} \right) \,.
 \end{align}
 Note that the $p$ subscripts have been dropped in $\mathbf{u}_\text{r}$ terms for convenience. The $p$ subscript also will be dropped from some other variables later as convenient.
 
@@ -1369,7 +1369,7 @@ Assembling Eqs. (\ref{ud_exact}) and (\ref{ug_second_order}), the solution for $
 
 The results of the previous section are not directly useful unless $\mathbf{U}(t)$ is known. $\mathbf{U}(t)$ can be found via the conservation of momentum and this leads to a solution for the particle velocities and positions.
 
-The fluid and particles can gain or lose momentum due to gravity. Drag forces exchange momentum between the fluid and particle, which does not change the total momentum of the system. As gravity is the only force that can change momentum, the time derivative of the fluid-particle system momentum is $m_{\rm p} \mathbf{g}$ by Newton's second law, so we can write
+The fluid and particles can gain or lose momentum due to gravity. Drag forces exchange momentum between the fluid and particle, which does not change the total momentum of the system. Summing the equations of motion and integrating in time to find the total momentum at an instant, we find that
 \begin{align}
     m_{\rm p} \mathbf{u} + M_{\rm p} \mathbf{U} &= m_{\rm p} \mathbf{u}(0) + M_{\rm p} \mathbf{U}(0) + m_{\rm p} \mathbf{g} t \,, \\
     \label{part_mom_cons}
@@ -1384,7 +1384,7 @@ After recognizing that $\mathbf{u} = \mathbf{U} + \mathbf{u}_\text{r}$ and $\mat
     \label{mom_U_p}
     \mathbf{U} = \frac{\mathbf{u}(0) + \alpha_{\rm p} \mathbf{U}(0) + \mathbf{g} t - \mathbf{u}_\text{g}}{1 + \alpha_{\rm p}} - \frac{\mathbf{u}_{\text{r}}(0)}{(1 + \beta_{\rm p} t)(1 + \alpha_{\rm p})} \,.
 \end{align}
-Eq. (\ref{mom_U_p}) can be substituted into Eq. (\ref{ur_short}) to get the solution for $\mathbf{u}$.
+Eq.\ (\ref{mom_U_p}) can be substituted into Eq.\ (\ref{ur_short}) to get the solution for $\mathbf{u}$.
 \begin{align*}
     \mathbf{u} &= \mathbf{U} + \frac{\mathbf{u}(0) - \mathbf{U}(0)}{1 + \beta_{\rm p} t} + \mathbf{u}_\text{g} \\
     &= \frac{\mathbf{u}(0) + \alpha_{\rm p} \mathbf{U}(0) + \mathbf{g} t - \mathbf{u}_\text{g}}{1 + \alpha_{\rm p}} - \frac{\mathbf{u}(0) - \mathbf{U}(0)}{(1 + \beta_{\rm p} t)(1 + \alpha_{\rm p})} + \frac{\mathbf{u}(0) - \mathbf{U}(0)}{1 + \beta_{\rm p} t} + \mathbf{u}_\text{g} \\
@@ -1394,7 +1394,7 @@ Eq. (\ref{mom_U_p}) can be substituted into Eq. (\ref{ur_short}) to get the solu
     \label{mom_u_p_full}
     \mathbf{u} = \frac{\mathbf{u}(0)}{1 + \beta_{\rm p} t} + \frac{(\mathbf{u}(0) + \alpha_{\rm p} \mathbf{U}(0))\beta_{\rm p} t}{(1 + \beta_{\rm p} t)(1 + \alpha_{\rm p})} + \mathbf{g} t - \frac{\alpha_{\rm p} \beta_{\rm p} t^2}{2 (1 + \alpha_{\rm p})} \left[\mathbf{u}_{\text{r}}(0) \left(\frac{\mathbf{u}_{\text{r}}(0) \cdot \mathbf{g}}{|\mathbf{u}_{\text{r}}(0)|^2}\right) + \mathbf{g}\right] + \mathit{O}(t^3)
 \end{align}
-Integrating Eq. (\ref{mom_u_p_full}) leads to an equation for the particle positions,
+Integrating Eq.\ (\ref{mom_u_p_full}) leads to an equation for the particle positions,
 \begin{align}
     \label{mom_x_p_full}
     \mathbf{x} = \mathbf{x}_{p}(0) + \left(\frac{\mathbf{u}(0) + \alpha_{\rm p} \mathbf{U}(0)}{1 + \alpha_{\rm p}}\right) t - \frac{\alpha_{\rm p} (\mathbf{u}(0) - \mathbf{U}(0))}{\beta_{\rm p} (1 + \alpha_{\rm p})} \text{ln}(\beta_{\rm p} t + 1) + \frac{\mathbf{g} t^2}{2} - \frac{\alpha_{\rm p} \beta_{\rm p} t^3}{6 (1 + \alpha_{\rm p})} \left[\mathbf{u}_{\text{r}}(0) \left(\frac{\mathbf{u}_{\text{r}}(0) \cdot \mathbf{g}}{|\mathbf{u}_{\text{r}}(0)|^2}\right) + \mathbf{g}\right] + \mathit{O}(t^4) \,.
@@ -1409,10 +1409,34 @@ The following solutions are used to advance the particle positions forward in ti
     \mathbf{x}^{n+1} &= \mathbf{x}^n + \left(\frac{\mathbf{u}^n + \alpha_{\rm p} \mathbf{U}^n}{1 + \alpha_{\rm p}}\right) \Delta t + \frac{\alpha_{\rm p} (\mathbf{u}^n - \mathbf{U}^n)}{\beta_{\rm p} (1 + \alpha_{\rm p})} \text{ln}(\beta_{\rm p} \Delta t + 1) + \frac{\mathbf{g} (\Delta t)^2}{2} \\
     & \notag \\
     \alpha_{\rm p} &\equiv \frac{\rho V_{\rm g}}{m_{\rm p} n_{\rm p}} \notag \\
-    \beta_{\rm p} &\equiv \frac{1}{2} \rho C_\text{d} A_{\rm p} \left(\frac{1}{m_{\rm p}} + \frac{1}{M_{\rm p}} \right) |\mathbf{u}_{\text{r}}(0)| \notag
+    \beta_{\rm p} &\equiv \frac{1}{2} \rho C_\text{d} A_\text{p} \left(\frac{1}{m_{\rm p}} + \frac{1}{M_{\rm p}} \right) |\mathbf{u}_{\text{r}}(0)| \notag
 \end{align}
 At first glance, the theoretical accuracy of the original equation for $\mathbf{x}^{n+1}$, Eq.~(\ref{mom_x_p_full}), appears to be $\mathit{O}(\Delta t^3)$. But computation reveals it is actually $\mathit{O}(\Delta t^2)$. This is due to the velocity error reducing the overall accuracy of the position solution. The $\Delta t^3$ term, therefore, may be dropped from Eq.~(\ref{mom_x_p_full}) without loss of accuracy. More details about this are available in the Lagrangian Particles chapter in the FDS Verification Guide~\cite{FDS_Verification_Guide}.
 
+The particle force terms in the fluid momentum equation in the FDS source code are called \texttt{LP\%ACCEL\_X}, \texttt{LP\%ACCEL\_Y}, and \texttt{LP\%ACCEL\_Z}. In the tech.\ guide notation these terms are the components of $\bof_{\rm b} / \rho$. The definition of \texttt{LP\%ACCEL\_$i$} (neglecting mass loss related terms seen in Eq.\ \ref{part_force}) is
+\begin{equation}
+   \texttt{LP\%ACCEL\_$i$} = \bof_{\rm b} / \rho = \frac{1}{V} \sum \frac{1}{2} C_\text{d} A_\text{p} (\mathbf{u} - \mathbf{U}) |\mathbf{u} - \mathbf{U}| \,,
+\end{equation}
+where $V$ is the cell volume.
+
+To conserve momentum, rather than using the above result directly, the difference in momentum between the next and current time steps is calculated. This will discretely conserve momentum by construction. It also is often necessary for stability, as using the above result directly can be unstable as it is analogous to Forward Euler integration.
+
+Another way to look at this is to consider rearranging Eq.\ \ref{particle_eom} to solve for the momentum transfered due to drag alone. If the particle phase momentum equation is multiplied by the product of the particle weight (\texttt{LP\%PWT}) multiplied by the reciprocal of the cell volume (\texttt{RVC}) (making a number density, $n$ for short) and divided by the fluid density, the particle force can be found.
+\begin{equation}
+   -\left(\frac{n m_{\rm p}}{\rho}\right) \frac{\d \mathbf{u}_\text{d}}{\d t} =  n \cdot \frac{1}{2} C_\text{d} A_\text{p} (\mathbf{u}_\text{d} - \mathbf{U}_\text{d}) |\mathbf{u}_\text{d} - \mathbf{U}_\text{d}| = \bof_{\rm b} / \rho \,.
+\end{equation}
+
+As $n \equiv (1/V) \sum$, the above expression is equal to the particle force term. Also note that the \text{d} subscript means that this is the velocity field induced solely due to drag, prior to including other terms for effects like gravity. This is necessary as the fluid force term is due solely to gravity.
+
+Implemented in FDS, the time derivative is treated with Forward Euler, which is stable here, as it is merely the difference of momentum between the two time steps previously integrated in a different (stable) fashion. Thus,
+\begin{equation}
+   \texttt{LP\%ACCEL\_$i$} = \bof_{\rm b} / \rho = \left(\frac{n m_{\rm p}}{\rho}\right) \left(\frac{\mathbf{u}_\text{d}^n - \mathbf{u}_\text{d}^{n+1}}{\Delta t}\right) = \texttt{LP\%PWT*LP\%MASS/(RHO\_G/RVC)} \cdot \left(\frac{\mathbf{u}_\text{d}^n - \mathbf{u}_\text{d}^{n+1}}{\Delta t}\right) \,.
+\end{equation}
+
+For static particles, a slightly different approach is used. The fluid momentum equation, Eq.\ \ref{fluid_eom}, is rearranged to solve for the particle force term and this is implemented in FDS:
+\begin{equation}
+   \texttt{LP\%ACCEL\_$i$} = \bof_{\rm b} / \rho = \left(\frac{\mathbf{U}_\text{d}^{n+1} - \mathbf{U}_\text{d}^{n}}{\Delta t}\right) \,.
+\end{equation}
 
 \chapter{Simplifications of the Radiation Transport Equation}
 \label{radiation_derivations}
