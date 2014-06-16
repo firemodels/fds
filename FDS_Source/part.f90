@@ -1775,8 +1775,8 @@ PARTICLE_NON_STATIC_IF: IF (.NOT.LPC%STATIC) THEN ! Move airborne, non-stationar
       LP%Z = Z_OLD + DT*W_OLD + GVEC(3)*HALF_DT2
    ENDIF
    
-   ! gravitational acceleration
-
+   ! gravitational acceleration terms
+   
    LP%U = LP%U + GVEC(1)*DT
    LP%V = LP%V + GVEC(2)*DT
    LP%W = LP%W + GVEC(3)*DT
@@ -1805,13 +1805,13 @@ ELSE PARTICLE_NON_STATIC_IF ! Drag calculation for stationary, airborne particle
 
    SELECT CASE (LPC%DRAG_LAW)
       CASE DEFAULT
-         BETA = 0.5_EB*RVC*C_DRAG*A_DRAG*QREL
+         BETA = 0.5_EB*LP%PWT*RVC*C_DRAG*A_DRAG*QREL
          OBDT = 1._EB+BETA*DT
-         LP%ACCEL_X = LP%PWT*UBAR*(1._EB/OBDT-1._EB)*RDT 
-         LP%ACCEL_Y = LP%PWT*VBAR*(1._EB/OBDT-1._EB)*RDT
-         LP%ACCEL_Z = LP%PWT*WBAR*(1._EB/OBDT-1._EB)*RDT
+         LP%ACCEL_X = UBAR*(1._EB/OBDT-1._EB)*RDT
+         LP%ACCEL_Y = VBAR*(1._EB/OBDT-1._EB)*RDT
+         LP%ACCEL_Z = WBAR*(1._EB/OBDT-1._EB)*RDT
       CASE (SCREEN_DRAG)
-         IF (QREL > 0.015_EB .AND. LPC%FREE_AREA_FRACTION < 1.0_EB ) THEN !Testing shows below this can have instability  
+         IF (QREL > 0.015_EB .AND. LPC%FREE_AREA_FRACTION < 1.0_EB ) THEN ! Testing shows below this can have instability  
             TMP_G  = MAX(TMPMIN,TMP(IIG,JJG,KKG))
             IF (N_TRACKED_SPECIES>0) ZZ_GET(1:N_TRACKED_SPECIES) = ZZ(IIG,JJG,KKG,1:N_TRACKED_SPECIES)
             CALL GET_VISCOSITY(ZZ_GET,MU_AIR,TMP_G)
