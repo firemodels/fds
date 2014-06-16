@@ -23,6 +23,7 @@
 #include "smokeheaders.h"
 #include "threader.h"
 
+SVEXTERN float SVDECL(face_factor,0.01);
 SVEXTERN int SVDECL(have_volume,0);
 SVEXTERN int SVDECL(show_geometry_exterior,0);
 SVEXTERN int SVDECL(show_geometry_interior_solid,1);
@@ -136,7 +137,7 @@ SVEXTERN int SVDECL(update_glui_message,0);
 SVEXTERN int SVDECL(update_glui_labels,0);
 SVEXTERN int SVDECL(update_glui_device,0);
 SVEXTERN int SVDECL(update_glui_clip,0);
-SVEXTERN int SVDECL(update_glui_edit,0);
+SVEXTERN int SVDECL(update_glui_geometry,0);
 SVEXTERN int SVDECL(update_glui_colorbar,0);
 SVEXTERN int SVDECL(update_glui_bounds,0);
 SVEXTERN int SVDECL(update_glui_shooter,0);

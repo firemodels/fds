@@ -262,7 +262,7 @@ int setup_case(int argc, char **argv){
   glui_motion_setup(mainwindow_id);
   glui_bounds_setup(mainwindow_id);
   glui_shooter_setup(mainwindow_id);
-  glui_edit_setup(mainwindow_id);
+  glui_geometry_setup(mainwindow_id);
   glui_clip_setup(mainwindow_id);
   glui_wui_setup(mainwindow_id);
   glui_labels_setup(mainwindow_id);

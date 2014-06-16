@@ -1801,8 +1801,8 @@ void Update_Glui_Names(void){
   hide_glui_3dsmoke();
   update_glui_bounds=1;
 
-  hide_glui_edit();
-  update_glui_edit=1;
+  hide_glui_geometry();
+  update_glui_geometry=1;
   
   hide_glui_clip();
   update_glui_clip=1;
@@ -1843,7 +1843,7 @@ void Update_Glui_Dialogs(void){
     glui_bounds_setup(mainwindow_id);
     glui_3dsmoke_setup(mainwindow_id);
   }
-  if(update_glui_edit==1)glui_edit_setup(mainwindow_id);
+  if(update_glui_geometry==1)glui_geometry_setup(mainwindow_id);
   if(update_glui_clip==1)glui_clip_setup(mainwindow_id);
   if(update_glui_device==1)glui_device_setup(mainwindow_id);
   if(update_glui_labels==1)glui_labels_setup(mainwindow_id);
@@ -1865,7 +1865,7 @@ void Show_Glui_Dialogs(void){
 
   if(showbounds_dialog_save==1)show_glui_bounds();
   if(showmotion_dialog_save==1)show_glui_motion();
-  if(showedit_dialog_save==1)show_glui_edit();
+  if(showedit_dialog_save==1)show_glui_geometry();
   if(showclip_dialog_save==1)show_glui_clip();
   if(showstereo_dialog_save==1)show_glui_stereo();
   if(showtour_dialog_save==1)show_glui_tour();

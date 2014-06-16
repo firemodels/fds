@@ -1032,11 +1032,11 @@ void DialogMenu(int value){
         updategetobstlabels=0;
       }
       visBlocksSave=visBlocks;
-      show_glui_edit();
+      show_glui_geometry();
       visBlocks=visBLOCKNormal;
     }
     if(showedit_dialog==0){
-      hide_glui_edit();
+      hide_glui_geometry();
       visBlocks=visBlocksSave;
     }
     update_trainer_outline();
@@ -7258,8 +7258,8 @@ updatemenu=0;
     if(showdevice_dialog==0)glutAddMenuEntry(_("Devices/Objects..."),28);
   }
   if(isZoneFireModel==0){
-    if(showedit_dialog==1)glutAddMenuEntry(_("*Examine blockages...  ALT+e"),16);
-    if(showedit_dialog==0)glutAddMenuEntry(_("Examine blockages...  ALT+e"),16);
+    if(showedit_dialog==1)glutAddMenuEntry(_("*Geometry...  ALT+e"),16);
+    if(showedit_dialog==0)glutAddMenuEntry(_("Geometry...  ALT+e"),16);
   }
   if(showshooter_dialog==1)glutAddMenuEntry(_("*Particle tracking..."),27);
   if(showshooter_dialog==0)glutAddMenuEntry(_("Particle tracking..."),27);
