@@ -473,6 +473,18 @@ wait_verification_cases_debug_end()
 
 run_verification_cases_debug()
 {
+   #  ======================
+   #  = Remove .stop files =
+   #  ======================
+
+   # Remove all .stop and .err files from Verification directories (recursively)
+   cd $FDS_SVNROOT/Verification
+   find .                        -name '*.stop' -exec rm -f {} \;
+   find .                        -name '*.err' -exec rm -f {} \;
+   find scripts/Outfiles         -name '*.out' -exec rm -f {} \;
+   find Visualization            -name '*.smv' -exec rm -f {} \;
+   find Immersed_Boundary_Method -name '*.smv' -exec rm -f {} \;
+   find WUI                      -name '*.smv' -exec rm -f {} \;
 
    #  =====================
    #  = Run all SMV cases =
@@ -487,18 +499,6 @@ run_verification_cases_debug()
    # Wait for SMV verification cases to end
    wait_verification_cases_debug_end
 
-   #  ======================
-   #  = Remove .stop files =
-   #  ======================
-
-   # Remove all .stop and .err files from Verification directories (recursively)
-   cd $FDS_SVNROOT/Verification
-   find . -name '*.stop' -exec rm -f {} \;
-   find . -name '*.err' -exec rm -f {} \;
-   find scripts/Outfiles -name '*.out' -exec rm -f {} \;
-   find Visualization -name '*.smv' -exec rm -f {} \;
-   find Immersed_Boundary_Method -name '*.smv' -exec rm -f {} \;
-   find WUI -name '*.smv' -exec rm -f {} \;
 }
 
 check_verification_cases_debug()
@@ -726,6 +726,19 @@ wait_verification_cases_release_end()
 
 run_verification_cases_release()
 {
+   #  ======================
+   #  = Remove .stop files =
+   #  ======================
+
+   # Remove all .stop and .err files from Verification directories (recursively)
+   cd $FDS_SVNROOT/Verification
+   find .                        -name '*.stop' -exec rm -f {} \;
+   find .                        -name '*.err' -exec rm -f {} \;
+   find scripts/Outfiles         -name '*.out' -exec rm -f {} \;
+   find Visualization            -name '*.smv' -exec rm -f {} \;
+   find Immersed_Boundary_Method -name '*.smv' -exec rm -f {} \;
+   find WUI                      -name '*.smv' -exec rm -f {} \;
+
    # Start running all SMV verification cases
    cd $FDS_SVNROOT/Verification/scripts
    echo 'Running SMV verification cases:' >> $OUTPUT_DIR/stage5 2>&1
