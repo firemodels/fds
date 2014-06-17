@@ -1507,10 +1507,8 @@ PRESSURE_ZONE_LOOP: DO IPZ=1,N_ZONE
 
    ! Compute change in background pressure
  
-   IF (ABS(PSUM(IPZ,NM)) > TWO_EPSILON_EB) THEN
-      D_PBAR_DT_P(IPZ) = (DSUM(IPZ,NM) - USUM(IPZ,NM))/PSUM(IPZ,NM)
-      IF (CORRECTOR) P_ZONE(IPZ)%DPSTAR = D_PBAR_DT_P(IPZ)
-   ENDIF
+   IF (ABS(PSUM(IPZ,NM)) > TWO_EPSILON_EB) D_PBAR_DT_P(IPZ) = (DSUM(IPZ,NM) - USUM(IPZ,NM))/PSUM(IPZ,NM)      
+   IF (CORRECTOR) P_ZONE(IPZ)%DPSTAR =  D_PBAR_DT_P(IPZ)
 
    ! Add pressure derivative to divergence
 
