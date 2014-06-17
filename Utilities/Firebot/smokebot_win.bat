@@ -509,7 +509,8 @@ set search_string=%1
 set search_file=%2
 set stage=%3
 
-grep -i -A 5 -B 5 %search_string% %search_file% | find /V "commands for target" > %OUTDIR%\stage_warning.txt
+grep -v "commands for target" %search_file% > %OUTDIR%\stage_warning0.txt
+grep -i -A 5 -B 5 %search_string% %OUTDIR%\stage_warning0.txt > %OUTDIR%\stage_warning.txt
 type %OUTDIR%\stage_warning.txt | find /v /c "kdkwokwdokwd"> %OUTDIR%\stage_nwarning.txt
 set /p nwarnings=<%OUTDIR%\stage_nwarning.txt
 if %nwarnings% GTR 0 (
@@ -528,7 +529,8 @@ set search_string=%1
 set search_file=%2
 set stage=%3
 
-grep -i -A 5 -B 5 %search_string% %search_file% | find /V "mpif.h"  > %OUTDIR%\stage_warning.txt
+grep -v "mpif.h" %search_file% > %OUTDIR%\stage_warning0.txt
+grep -i -A 5 -B 5 %search_string% %OUTDIR%\stage_warning0.txt  > %OUTDIR%\stage_warning.txt
 type %OUTDIR%\stage_warning.txt | find /c ":"> %OUTDIR%\stage_nwarning.txt
 set /p nwarnings=<%OUTDIR%\stage_nwarning.txt
 if %nwarnings% GTR 0 (
