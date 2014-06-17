@@ -506,19 +506,19 @@ check_verification_cases_debug()
    # Scan and report any errors in FDS verification cases
    cd $FDS_SVNROOT/Verification
 
-   if [[ `grep 'Run aborted' -rIi $OUTPUT_DIR/stage3` == "" ]] && \
-      [[ `grep 'Segmentation' -rIi Visualization/* WUI/* Immersed_Boundary_Method/*` == "" ]] && \
-      [[ `grep 'ERROR:' -rI Visualization/* WUI/* Immersed_Boundary_Method/*` == "" ]] && \
-      [[ `grep 'STOP: Numerical' -rIi Visualization/* WUI/* Immersed_Boundary_Method/*` == "" ]] && \
-      [[ `grep -A 20 'forrtl' -rIi Visualization/* WUI/* Immersed_Boundary_Method/*` == "" ]]
+   if [[ `grep -rIi 'Run aborted' $OUTPUT_DIR/stage3` == "" ]] && \
+      [[ `grep -rIi 'Segmentation' Visualization/* WUI/* Immersed_Boundary_Method/*` == "" ]] && \
+      [[ `grep -rIi 'ERROR:' Visualization/* WUI/* Immersed_Boundary_Method/*` == "" ]] && \
+      [[ `grep -rIi 'STOP: Numerical' Visualization/* WUI/* Immersed_Boundary_Method/*` == "" ]] && \
+      [[ `grep -rIi -A 20 'forrtl' Visualization/* WUI/* Immersed_Boundary_Method/*` == "" ]]
    then
       stage3_success=true
    else
-      grep 'Run aborted' -rIi $OUTPUT_DIR/stage3 > $OUTPUT_DIR/stage3_errors
-      grep 'Segmentation' -rIi Visualization/* WUI/* Immersed_Boundary_Method/* >> $OUTPUT_DIR/stage3_errors
-      grep 'ERROR:' -rI Visualization/* WUI/* Immersed_Boundary_Method/* >> $OUTPUT_DIR/stage3_errors
-      grep 'STOP: Numerical' -rIi Visualization/* WUI/* Immersed_Boundary_Method/* >> $OUTPUT_DIR/stage3_errors
-      grep -A 20 'forrtl' -rIi Visualization/* WUI/* Immersed_Boundary_Method/* >> $OUTPUT_DIR/stage3_errors
+      grep -rIi 'Run aborted' $OUTPUT_DIR/stage3 > $OUTPUT_DIR/stage3_errors
+      grep -rIi 'Segmentation' Visualization/* WUI/* Immersed_Boundary_Method/* >> $OUTPUT_DIR/stage3_errors
+      grep -rIi 'ERROR:' Visualization/* WUI/* Immersed_Boundary_Method/* >> $OUTPUT_DIR/stage3_errors
+      grep -rIi 'STOP: Numerical' -rIi Visualization/* WUI/* Immersed_Boundary_Method/* >> $OUTPUT_DIR/stage3_errors
+      grep -rIi -A 20 'forrtl' Visualization/* WUI/* Immersed_Boundary_Method/* >> $OUTPUT_DIR/stage3_errors
       
       echo "Errors from Stage 3 - Run verification cases (debug mode):" >> $ERROR_LOG
       cat $OUTPUT_DIR/stage3_errors >> $ERROR_LOG
@@ -530,7 +530,7 @@ check_verification_cases_debug()
       no_warnings=true
    else
       echo "Stage 3 warnings:" >> $WARNING_LOG
-      grep 'Warning' -rI $OUTPUT_DIR/stage3 >> $WARNING_LOG
+      grep 'Warning' -rIi $OUTPUT_DIR/stage3 >> $WARNING_LOG
       echo "" >> $WARNING_LOG
    fi
 }
@@ -740,19 +740,19 @@ check_verification_cases_release()
    # Scan and report any errors in FDS verification cases
    cd $FDS_SVNROOT/Verification
 
-   if [[ `grep 'Run aborted' -rIi $OUTPUT_DIR/stage5` == "" ]] && \
-      [[ `grep 'Segmentation' -rIi Visualization/* WUI/* Immersed_Boundary_Method/* ` == "" ]] && \
-      [[ `grep 'ERROR:' -rI Visualization/* WUI/* Immersed_Boundary_Method/* ` == "" ]] && \
-      [[ `grep 'STOP: Numerical' -rIi Visualization/* WUI/* Immersed_Boundary_Method/* ` == "" ]] && \
-      [[ `grep -A 20 'forrtl' -rIi Visualization/* WUI/* Immersed_Boundary_Method/* ` == "" ]]
+   if [[ `grep -rIi 'Run aborted' $OUTPUT_DIR/stage5` == "" ]] && \
+      [[ `grep -rIi 'Segmentation' Visualization/* WUI/* Immersed_Boundary_Method/* ` == "" ]] && \
+      [[ `grep -rIi 'ERROR:' Visualization/* WUI/* Immersed_Boundary_Method/* ` == "" ]] && \
+      [[ `grep -rIi 'STOP: Numerical' Visualization/* WUI/* Immersed_Boundary_Method/* ` == "" ]] && \
+      [[ `grep -rIi  -A 20 'forrtl' Visualization/* WUI/* Immersed_Boundary_Method/* ` == "" ]]
    then
       stage5_success=true
    else
-      grep 'Run aborted' -rIi $OUTPUT_DIR/stage5 > $OUTPUT_DIR/stage5_errors
-      grep 'Segmentation' -rIi Visualization/* WUI/* Immersed_Boundary_Method/* >> $OUTPUT_DIR/stage5_errors
-      grep 'ERROR:' -rI Visualization/* WUI/* Immersed_Boundary_Method/* >> $OUTPUT_DIR/stage5_errors
-      grep 'STOP: Numerical' -rI Visualization/* WUI/* Immersed_Boundary_Method/* >> $OUTPUT_DIR/stage5_errors
-      grep -A 20 'forrtl' -rIi Visualization/* WUI/* Immersed_Boundary_Method/* >> $OUTPUT_DIR/stage5_errors
+      grep -rIi 'Run aborted' $OUTPUT_DIR/stage5 > $OUTPUT_DIR/stage5_errors
+      grep -rIi 'Segmentation' Visualization/* WUI/* Immersed_Boundary_Method/* >> $OUTPUT_DIR/stage5_errors
+      grep -rIi 'ERROR:' Visualization/* WUI/* Immersed_Boundary_Method/* >> $OUTPUT_DIR/stage5_errors
+      grep -rIi 'STOP: Numerical' Visualization/* WUI/* Immersed_Boundary_Method/* >> $OUTPUT_DIR/stage5_errors
+      grep -rIi -A 20 'forrtl' Visualization/* WUI/* Immersed_Boundary_Method/* >> $OUTPUT_DIR/stage5_errors
 
       echo "Errors from Stage 5 - Run verification cases (release mode):" >> $ERROR_LOG
       cat $OUTPUT_DIR/stage5_errors >> $ERROR_LOG
@@ -761,12 +761,12 @@ check_verification_cases_release()
    fi
 
       
-   if [[ `grep 'Warning' -rI $OUTPUT_DIR/stage5` == "" ]] 
+   if [[ `grep 'Warning' -rIi $OUTPUT_DIR/stage5` == "" ]] 
    then
       no_warnings=true
    else
       echo "Stage 5 warnings:" >> $WARNING_LOG
-      grep 'Warning' -rI $OUTPUT_DIR/stage5 >> $WARNING_LOG
+      grep 'Warning' -rIi $OUTPUT_DIR/stage5 >> $WARNING_LOG
       echo "" >> $WARNING_LOG
    fi
 }
