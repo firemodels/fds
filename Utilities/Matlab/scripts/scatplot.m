@@ -33,8 +33,6 @@ for k=1:2:length(varargin);
         Scatterplot_Inputs_File = varargin{k+1};
     case {'Stats_Output'}
         Stats_Output = varargin{k+1};
-    case {'Validation_Diff_Tolerance'}
-        Validation_Diff_Tolerance = varargin{k+1};
     case {'Output_File'}
         Output_File = varargin{k+1};
     case {'Output_File_Baseline'}
