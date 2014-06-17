@@ -33,7 +33,6 @@ CFAST_SVNROOT="$FIREBOT_HOME_DIR/cfast"
 TIME_LOG=$FIREBOT_DIR/output/timings
 ERROR_LOG=$FIREBOT_DIR/output/errors
 WARNING_LOG=$FIREBOT_DIR/output/warnings
-VALIDATION_STATS_DIFF=$FDS_SVNROOT/Utilities/Matlab/FDS_validation_scatterplot_output_diff.txt
 DB=_db
 IB=
 if [ "$FDSNETWORK" == "infiniband" ] ; then
@@ -1434,12 +1433,6 @@ email_build_status()
       echo "Nightly Manuals (public):   https://drive.google.com/folderview?id=0B_wB1pJL2bFQaDJaOFNnUDR4LXM#list" >> $TIME_LOG
       echo "-------------------------------" >> $TIME_LOG
       mail -s "[${1}@$hostname] ${2} success! Revision ${SVN_REVISION} passed all build tests." $mailToFDS < $TIME_LOG > /dev/null
-   fi
-
-   # Send email notification if validation statistics have changed.
-   if [ -e $VALIDATION_STATS_DIFF ]
-   then
-      mail -s "[${1}@$hostname] ${2} notice. Validation statistics have changed for Revision ${SVN_REVISION}." $mailToFDS_verbose < $VALIDATION_STATS_DIFF > /dev/null      
    fi
 }
 
