@@ -1291,6 +1291,7 @@ This is where the formulation gets tricky.  Both heat and mass transfer present 
   \draw[fill=gray!50,opacity=0.5] (O) -- (A) -- (E) -- (D) -- cycle;
   \draw[fill=gray!50,opacity=0.5] (O) -- (A) -- (B) -- (C) -- cycle;
   \draw[fill=gray!50,opacity=0.5] (A) -- (B) -- (F) -- (E) -- cycle;
+  
   \draw[fill=gray!50,opacity=0.5,thick] (D) -- (E) -- (F) -- (G) -- cycle;
   \draw[fill=gray!50,opacity=0.5,thick] (C) -- (B) -- (F) -- (G) -- cycle;
   \draw[fill=gray!50,opacity=0.5,thick] (O) -- (C) -- (G) -- (D) -- cycle;
@@ -1300,6 +1301,54 @@ This is where the formulation gets tricky.  Both heat and mass transfer present 
   \foreach \xy in {O, A, B, C, D, E, F, G}{
       \node at (\xy) {\xy};
   }
+  
+  % DX(I)
+  \draw [blue,<-] (0,-.4*\Width,0) -- (.35*\Depth,-.4*\Width,0);
+  \draw [blue,->] (.65*\Depth,-.4*\Width,0) -- (\Depth,-.4*\Width,0);
+  \draw [blue,-] (0,-.5*\Width,0) -- (0,-.1*\Width,0);
+  \draw [blue,-] (\Depth,-.5*\Width,0) -- (\Depth,-.1*\Width,0);
+  \draw (.5*\Depth,-.4*\Width,0) node {\ct DX(I)};
+  
+  % DY(J)
+  \draw [blue,<-] (1.3*\Depth,0,0) -- (1.3*\Depth,0.35*\Width,0);
+  \draw [blue,->] (1.3*\Depth,0.65*\Width,0) -- (1.3*\Depth,\Width,0);
+  \draw [blue,-] (1.1*\Depth,0,0) -- (1.4*\Depth,0,0);
+  \draw [blue,-] (1.1*\Depth,\Width,0) -- (1.4*\Depth,\Width,0);
+  \draw (1.3*\Depth,.5*\Width,0) node {\ct DY(J)};
+  
+  % DZ(K)
+  \draw [blue,<-] (1.3*\Depth,\Width,0) -- (1.3*\Depth,\Width,0.45*\Height);
+  \draw [blue,->] (1.3*\Depth,\Width,0.55*\Height) -- (1.3*\Depth,\Width,\Height);
+  \draw [blue,-] (1.1*\Depth,\Width,\Height) -- (1.4*\Depth,\Width,\Height);
+  \draw (1.3*\Depth,\Width,.5*\Height) node {\ct DZ(K)};
+  
+  % XC(I),YC(J),ZC(K)
+  \filldraw [black] (.5*\Depth,.5*\Width,.5*\Height) circle (2pt);
+  \node at (.5*\Depth,1.3*\Width,1.2*\Height) {\ct XC(I),YC(J),ZC(K)};
+  \node at (.5*\Depth,1.3*\Width,1.3*\Height) {\ct RHO(I,J,K),ZZ(I,J,K,N),TMP(I,J,K),H(I,J,K)};
+  \draw [blue] (.5*\Depth,.55*\Width,.55*\Height) -- (.5*\Depth,1.25*\Width,1.15*\Height);
+    
+  % facet vertices intersecting with box
+  \coordinate (V1) at (.75*\Depth,0,\Height);
+  \coordinate (V2) at (0,.75*\Width,\Height);
+  \coordinate (V3) at (0,0,.1*\Height);
+  \draw[fill=red,opacity=0.5,thick] (V1) -- (V2) -- (V3) -- cycle;
+  \draw (C) -- (G);
+  \filldraw [gray] (V1) circle (2pt);
+  \filldraw [gray] (V2) circle (2pt);
+  \filldraw [gray] (V3) circle (2pt);
+  \node at (.75*\Depth,0,.9*\Height) {$V_1$};
+  \node at (-.05*\Depth,.75*\Width,1.05*\Height) {$V_2$};
+  \node at (-.05*\Depth,-.05*\Width,.1*\Height) {$V_3$};
+  
+  % velocity components
+  \draw [->, ultra thick, >=latex] (.9*\Depth,.5*\Width,.5*\Height) -- (1.1*\Depth,.5*\Width,.5*\Height);
+  \draw [->, ultra thick, >=latex] (.5*\Depth,.9*\Width,.5*\Height) -- (.5*\Depth,1.1*\Width,.5*\Height);
+  \draw [->, ultra thick, >=latex] (.5*\Depth,.5*\Width,.9*\Height) -- (.5*\Depth,.5*\Width,1.1*\Height);
+  
+  \node at (\Depth,.5*\Width,.4*\Height) {\ct U(I,J,K)};
+  \node at (.75*\Depth,\Width,.5*\Height) {\ct V(I,J,K)};
+  \node at (.45*\Depth,.6*\Width,1.1*\Height) {\ct W(I,J,K)};
   
 \end{tikzpicture}
 
@@ -1346,7 +1395,7 @@ This is where the formulation gets tricky.  Both heat and mass transfer present 
 %\draw [->] ( 0.90,1.800) -- (1.80,1.800);
 %\draw (1.5,5.0) node {$f(n)$};
 
-\caption{Cartesian cell in FDS.}
+\caption{Cartesian cell {\ct (I,J,K)} in FDS.}
 \label{fig:cartesian_cell}
 \end{center}
 \end{figure}
