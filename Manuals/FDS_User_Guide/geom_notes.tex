@@ -1327,19 +1327,6 @@ This is where the formulation gets tricky.  Both heat and mass transfer present 
   \node at (.5*\Depth,1.3*\Width,1.2*\Height) {\ct XC(I),YC(J),ZC(K)};
   \node at (.5*\Depth,1.3*\Width,1.3*\Height) {\ct RHO(I,J,K),ZZ(I,J,K,N),TMP(I,J,K),H(I,J,K)};
   \draw [blue] (.5*\Depth,.55*\Width,.55*\Height) -- (.5*\Depth,1.25*\Width,1.15*\Height);
-    
-  % facet vertices intersecting with box
-  \coordinate (V1) at (.75*\Depth,0,\Height);
-  \coordinate (V2) at (0,.75*\Width,\Height);
-  \coordinate (V3) at (0,0,.1*\Height);
-  \draw[fill=red,opacity=0.5,thick] (V1) -- (V2) -- (V3) -- cycle;
-  \draw (C) -- (G);
-  \filldraw [gray] (V1) circle (2pt);
-  \filldraw [gray] (V2) circle (2pt);
-  \filldraw [gray] (V3) circle (2pt);
-  \node at (.75*\Depth,0,.9*\Height) {$V_1$};
-  \node at (-.05*\Depth,.75*\Width,1.05*\Height) {$V_2$};
-  \node at (-.05*\Depth,-.05*\Width,.1*\Height) {$V_3$};
   
   % velocity components
   \draw [->, ultra thick, >=latex] (.9*\Depth,.5*\Width,.5*\Height) -- (1.1*\Depth,.5*\Width,.5*\Height);
@@ -1349,6 +1336,27 @@ This is where the formulation gets tricky.  Both heat and mass transfer present 
   \node at (\Depth,.5*\Width,.4*\Height) {\ct U(I,J,K)};
   \node at (.75*\Depth,\Width,.5*\Height) {\ct V(I,J,K)};
   \node at (.45*\Depth,.6*\Width,1.1*\Height) {\ct W(I,J,K)};
+  
+  % shade solid volume
+  \coordinate (V1) at (0,.75*\Width,\Height);
+  \coordinate (V2) at (.75*\Depth,0,\Height);
+  \coordinate (V3) at (0,0,.1*\Height);
+  
+  % face normal
+  \coordinate (N1) at (.25*\Depth,.25*\Width,.7*\Height);
+  \coordinate (N2) at (.4*\Depth,.4*\Width,.55*\Height);
+  \draw [->, thick, >=latex] (N1) -- (N2);
+  \draw [fill=red,opacity=0.5,thick] (V1) -- (V2) -- (V3) -- cycle;
+  \draw [fill=green,opacity=0.5] (V2) -- (V1) -- (C) -- (V3) -- cycle;
+  
+  % facet vertices intersecting with box
+  \draw (C) -- (G);
+  \filldraw [gray] (V1) circle (2pt);
+  \filldraw [gray] (V2) circle (2pt);
+  \filldraw [gray] (V3) circle (2pt);
+  \node at (.75*\Depth,0,.9*\Height) {$V_2$};
+  \node at (-.05*\Depth,.75*\Width,1.05*\Height) {$V_1$};
+  \node at (-.05*\Depth,-.05*\Width,.1*\Height) {$V_3$};
   
 \end{tikzpicture}
 
