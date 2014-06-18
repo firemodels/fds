@@ -28,7 +28,6 @@ SVEXTERN int SVDECL(have_volume,0);
 SVEXTERN int SVDECL(show_geometry_exterior,0);
 SVEXTERN int SVDECL(show_geometry_interior_solid,1);
 SVEXTERN int SVDECL(show_geometry_interior_outline,0);
-SVEXTERN int SVDECL(show_geometry_duplicates,0);
 SVEXTERN int SVDECL(show_slices_and_vectors,0);
 #ifdef pp_PILOT
 SVEXTERN int SVDECL(vispilot,0);

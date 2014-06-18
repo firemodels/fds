@@ -15,6 +15,8 @@ char IOgeometry_revision[]="$Revision$";
 #include "update.h"
 #include "smokeviewvars.h"
 
+tetrahedron *volume_list;
+
 /* ------------------ CalcTriNormal ------------------------ */
 
 void CalcTriNormal(float *v1, float *v2, float *v3, float *norm){
@@ -406,7 +408,7 @@ void draw_geom(int flag, int geomtype){
       for(j=0;j<nvolus;j++){
         tetrahedron *volumei;
         float *xyzptr[4];
-        int *exterior,*duplicate;
+        int *exterior;
         //             
         //             0
         //            /  \
@@ -420,7 +422,6 @@ void draw_geom(int flag, int geomtype){
 
         volumei = geomlisti->volumes+j;
         exterior = volumei->exterior;
-        duplicate = volumei->duplicate;
         xyzptr[0] = volumei->points[0]->xyz;
         xyzptr[1] = volumei->points[1]->xyz;
         xyzptr[2] = volumei->points[2]->xyz;
@@ -428,8 +429,7 @@ void draw_geom(int flag, int geomtype){
 
         for(k=0;k<4;k++){
           if(exterior[k]==1&&show_geometry_exterior==1||
-             exterior[k]==0&&show_geometry_interior_outline==1||
-             duplicate[k]==1&&show_geometry_duplicates==1){
+             exterior[k]==0&&show_geometry_interior_outline==1){
                if(exterior[k]==0&&show_geometry_interior_outline==1&&show_geometry_interior_solid==1){
                  color=black;
                }
@@ -1323,52 +1323,38 @@ void reorder_face(int *faces){
   faces[2]=face_temp[4];
 }
 
-/* ------------------ find_common_face ------------------------ */
+/* ------------------ compare_faces ------------------------ */
 
-void find_common_face(tetrahedron *tetra1, tetrahedron *tetra2){
-  int *verts1,*verts2, *face1, *face2;
-  int i;
-  int ncommon=0;
+int compare_faces(const void *arg1, const void *arg2){
+  int face1, face2;
+  tetrahedron *vol1, *vol2;
+  int *verts1, *verts2;
+  int v1[3], v2[3];
 
-  verts1=tetra1->vert_index;
-  verts2=tetra2->vert_index;
-  face1=tetra1->faces;
-  face2=tetra2->faces;
-  for(i=0;i<4;i++){
-    int j;
+  face1=*(int *)arg1;
+  face2=*(int *)arg2;
+  vol1 = volume_list + face1/4;
+  vol2 = volume_list + face2/4;
+  face1 %= 4;
+  face2 %= 4;
+  verts1 = vol1->faces+3*face1;
+  verts2 = vol2->faces+3*face2;
+  
+  v1[1]=MIN(verts1[1],verts1[2]);
+  v1[2]=MAX(verts1[1],verts1[2]);
 
-    for(j=0;j<4;j++){
-      if(verts1[i]==verts2[j]){
-        ncommon++;
-        break;
-      }
-    }
-  }
-  if(ncommon<3)return; // two tetrahedrons need at least 3 common vertices to have a common face
-
-  for(i=0;i<4;i++){
-    int j;
-    int *facei;
-
-    facei = face1 + 3*i;
-
-    for(j=0;j<4;j++){
-      int *facej;
-
-      facej = face2 + 3*j;
-      if(facei[0]!=facej[0])continue;
-      if(facei[1]==facej[1]&&facei[2]==facej[2]){ // duplicate face
-        tetra1->duplicate[i]=1;
-        tetra2->duplicate[j]=1;
-      }
-      if(facei[1]==facej[2]&&facei[2]==facej[1]){ // exterior face
-        tetra1->exterior[i]=0;
-        tetra2->exterior[j]=0;
-      }
-
-    }
-  }
-
+  v2[1]=MIN(verts2[1],verts2[2]);
+  v2[2]=MAX(verts2[1],verts2[2]);
+  
+  if(verts1[0]<verts2[0])return -1;
+  if(verts1[0]>verts2[0])return 1;
+  
+  if(v1[1]<v2[1])return -1;
+  if(v1[1]>v2[1])return 1;
+  
+  if(v1[2]<v2[2])return -1;
+  if(v1[2]>v2[2])return 1;
+  return 0;
 }
 
 /* ------------------ classify_geom ------------------------ */
@@ -1403,10 +1389,6 @@ void classify_geom(geomdata *geomi){
       tetrai->exterior[1]=1;
       tetrai->exterior[2]=1;
       tetrai->exterior[3]=1;
-      tetrai->duplicate[0]=0;
-      tetrai->duplicate[1]=0;
-      tetrai->duplicate[2]=0;
-      tetrai->duplicate[3]=0;
       vert_index[0] = points[0]-pointbase;
       vert_index[1] = points[1]-pointbase;
       vert_index[2] = points[2]-pointbase;
@@ -1432,19 +1414,37 @@ void classify_geom(geomdata *geomi){
       faces[11]=vert_index[2];
       reorder_face(faces+9);
     }
-    for(j=0;j<nvolus;j++){
-      int k;
-      tetrahedron *tetraj;
+    if(nvolus>0){
+      int *facelist=NULL,nfacelist;
 
-      tetraj = geomlisti->volumes+j;
-
-      for(k=0;k<nvolus;k++){
-        tetrahedron *tetrak;
-
-          if(j==k)continue;
-          tetrak = geomlisti->volumes+k;
-          find_common_face(tetraj,tetrak);
+      nfacelist=4*nvolus;
+      volume_list=geomlisti->volumes;
+      NewMemory((void **)&facelist,4*nfacelist*sizeof(int));
+      for(i=0;i<nfacelist;i++){
+        facelist[i]=i;
       }
+      qsort(facelist,nfacelist,sizeof(int),compare_faces);
+      for(i=1;i<nfacelist;i++){
+        int face1, face2;
+        tetrahedron *vol1, *vol2;
+        int *verts1, *verts2;
+
+        face1=facelist[i-1];
+        face2=facelist[i];
+        vol1 = volume_list + face1/4;
+        vol2 = volume_list + face2/4;
+        face1 %= 4;
+        face2 %= 4;
+        verts1 = vol1->faces+3*face1;
+        verts2 = vol2->faces+3*face2;
+        if(verts1[0]<verts2[0]||verts1[0]>verts2[0])continue;
+        if(MIN(verts1[1],verts1[2])<MIN(verts2[1],verts2[2])||MIN(verts1[1],verts1[2])>MIN(verts2[1],verts2[2]))continue;
+        if(MAX(verts1[1],verts1[2])<MAX(verts2[1],verts2[2])||MAX(verts1[1],verts1[2])>MAX(verts2[1],verts2[2]))continue;
+        vol1->exterior[face1]=0;
+        vol2->exterior[face2]=0;
+      }
+
+      FREEMEMORY(facelist);
     }
   }
 }

@@ -51,7 +51,7 @@ typedef struct _triangle {
 
 typedef struct _tetrahedron {
   float distance, *color, face_norm[4];
-  int vert_index[4],exterior[4],duplicate[4],faces[12];
+  int vert_index[4],exterior[4],faces[12];
   struct _matldata *matl;
   point *points[4];
 } tetrahedron;

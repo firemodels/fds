@@ -4086,31 +4086,16 @@ void ImmersedMenu(int value){
     case GEOMETRY_INTERIOR_OUTLINE:
       show_geometry_interior_outline=1-show_geometry_interior_outline;
       break;
-    case GEOMETRY_DUPLICATES:
-      show_geometry_duplicates=1-show_geometry_duplicates;
-      if(show_geometry_duplicates==1){
-        show_geometry_exterior=0;
-        show_geometry_interior_solid=0;
-        show_geometry_interior_outline=0;
-      }
-      else{
-        show_geometry_exterior=1;
-        show_geometry_interior_solid=1;
-        show_geometry_interior_outline=0;
-      }
-      break;
     case GEOMETRY_TETRA_HIDE:
-      if(show_geometry_exterior==1||show_geometry_interior_solid==1||show_geometry_interior_outline==1||show_geometry_duplicates==1){
+      if(show_geometry_exterior==1||show_geometry_interior_solid==1||show_geometry_interior_outline==1){
         show_geometry_exterior=0;
         show_geometry_interior_solid=0;
         show_geometry_interior_outline=0;
-        show_geometry_duplicates=0;
       }
       else{
         show_geometry_exterior=1;
         show_geometry_interior_solid=1;
         show_geometry_interior_outline=0;
-        show_geometry_duplicates=0;
       }
       break;
     case GEOMETRY_SOLIDOUTLINE:
@@ -4995,9 +4980,7 @@ updatemenu=0;
     if(show_geometry_interior_solid==0)glutAddMenuEntry(_("   Show interior (solid)"),GEOMETRY_INTERIOR_SOLID);
     if(show_geometry_interior_outline==1)glutAddMenuEntry(_("   *Show interior (outline)"),GEOMETRY_INTERIOR_OUTLINE);
     if(show_geometry_interior_outline==0)glutAddMenuEntry(_("   Show interior (outline)"),GEOMETRY_INTERIOR_OUTLINE);
-    if(show_geometry_duplicates==1)glutAddMenuEntry(_("   *Show duplicates"),GEOMETRY_DUPLICATES);
-    if(show_geometry_duplicates==0)glutAddMenuEntry(_("   Show duplicates"),GEOMETRY_DUPLICATES);
-    if(show_geometry_exterior==1&&show_geometry_interior_solid==1&&show_geometry_duplicates==0){
+    if(show_geometry_exterior==1&&show_geometry_interior_solid==1){
       glutAddMenuEntry(_("   *Hide"),GEOMETRY_TETRA_HIDE);
     }
     else{
