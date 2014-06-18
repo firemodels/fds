@@ -644,7 +644,7 @@ CONTAINS
           ID                          = 'null'
           XB                          = 0._EB
           XB_CORE                     = 0._EB
-          XB_CORES                    = 0._EB
+          XB_CORES                    = -9999999999999._EB
           XB_LANDINGS                 = 0._EB
           MESH_ID                     = 'null'
           N_LANDINGS                  = 0
@@ -667,7 +667,7 @@ CONTAINS
           ! Count number of cores
           N_CORES = 0
           DO I = 1,500
-             IF (ANY(XB_CORES(I,:)/=0._EB)) N_CORES = N_CORES + 1
+             IF (ANY(XB_CORES(I,:)>-9999999999998._EB)) N_CORES = N_CORES + 1
           ENDDO
 
           IF (N_LANDINGS>500) THEN
@@ -824,8 +824,10 @@ CONTAINS
              END IF
           END SELECT
           ! Doors/Exits are always vertical
-          XB(5) = EMESH_XB(5,EMESH_EXITS(N_TMP)%EMESH)
-          XB(6) = EMESH_XB(6,EMESH_EXITS(N_TMP)%EMESH)
+          IF (EMESH_EXITS(N_TMP)%EMESH>0) THEN
+             XB(5) = EMESH_XB(5,EMESH_EXITS(N_TMP)%EMESH)
+             XB(6) = EMESH_XB(6,EMESH_EXITS(N_TMP)%EMESH)
+          END IF
           ! 
           ! Save the information needed in READ_MESH, etc.
           EMESH_EXITS(N_TMP)%NEXIT       = N     ! N is the exit line index (including count only ones)
@@ -947,8 +949,10 @@ CONTAINS
              END IF
           END SELECT
           ! Doors/Exits are always vertical
-          XB(5) = EMESH_XB(5,EMESH_EXITS(N_TMP)%EMESH)
-          XB(6) = EMESH_XB(6,EMESH_EXITS(N_TMP)%EMESH)
+          IF (EMESH_EXITS(N_TMP)%EMESH>0) THEN
+             XB(5) = EMESH_XB(5,EMESH_EXITS(N_TMP)%EMESH)
+             XB(6) = EMESH_XB(6,EMESH_EXITS(N_TMP)%EMESH)
+          END IF
           ! 
           ! Save the information needed in READ_MESH, etc.
           ! Default, for "no flow field" exits
