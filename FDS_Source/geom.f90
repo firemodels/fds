@@ -823,7 +823,7 @@ REAL(EB), ALLOCATABLE, TARGET, DIMENSION(:) :: VERTS
 LOGICAL, ALLOCATABLE, DIMENSION(:) :: IS_EXTERNAL
 
 INTEGER :: MAX_FACES=0, MAX_VOLUS=0
-INTEGER, ALLOCATABLE, TARGET, DIMENSION(:) :: FACES, VOLUS
+INTEGER, ALLOCATABLE, TARGET, DIMENSION(:) :: FACES, VOLUS, OFACES
 REAL(EB), ALLOCATABLE, DIMENSION(:) :: TFACES
 
 REAL(EB) :: AZIM, ELEV, SCALE(3), XYZ0(3), XYZ(3)
@@ -850,6 +850,7 @@ INTEGER :: IVOL
 REAL(EB) :: VOLUME
 REAL(EB), POINTER, DIMENSION(:) :: V1, V2, V3, V4
 LOGICAL :: HAVE_SURF, HAVE_MATL
+INTEGER :: SORT_FACES
 
 LOGICAL COMPONENT_ONLY
 LOGICAL, ALLOCATABLE, DIMENSION(:) :: DEFAULT_COMPONENT_ONLY
@@ -1303,20 +1304,38 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
          ENDDO
       
       ! find faces that match - for now ignore face orientation      
- 
-          DO I = 0, N_FACES-1
-             FACEI=>FACES(3*I+1:3*I+3)
-             DO J = 0, N_FACES-1
-                IF (I==J) CYCLE
-                FACEJ=>FACES(3*J+1:3*J+3)
-                IF (FACEI(1)/=FACEJ(1)) CYCLE
-                IF ((FACEI(2)==FACEJ(2) .AND. FACEI(3)==FACEJ(3)) .OR. &
-                   (FACEI(2)==FACEJ(3) .AND. FACEI(3)==FACEJ(2))) THEN
-                   IS_EXTERNAL(I) = .FALSE.
-                   IS_EXTERNAL(J) = .FALSE.
-                ENDIF
-             ENDDO
-         ENDDO
+         
+         SORT_FACES=0 
+         IF (SORT_FACES==1 )THEN  ! o(n*log(n)) algorithm for determining external faces (turned off for now)
+            ALLOCATE(OFACES(N_FACES),STAT=IZERO)
+            CALL ChkMemErr('READ_GEOM','OFACES',IZERO)
+            CALL ORDER_FACES(OFACES,N_FACES)
+            DO I = 1, N_FACES-1
+               FACEI=>FACES(3*OFACES(I)-2:3*OFACES(I))
+               FACEJ=>FACES(3*OFACES(I)+1:3*OFACES(I)+3)
+               IF(FACEI(1)==FACEJ(1).AND.&
+                  MIN(FACEI(2),FACEI(3))==MIN(FACEJ(2),FACEJ(3)).AND.&
+                  MAX(FACEI(2),FACEI(3))==MAX(FACEJ(2),FACEJ(3)))THEN
+                  IS_EXTERNAL(OFACES(I))=.FALSE.
+                  IS_EXTERNAL(OFACES(I-1))=.FALSE.
+               ENDIF
+            
+            END DO
+         ELSE
+            DO I = 0, N_FACES-1  ! o(n^2) algorithm for determining external faces
+               FACEI=>FACES(3*I+1:3*I+3)
+               DO J = 0, N_FACES-1
+                  IF (I==J) CYCLE
+                  FACEJ=>FACES(3*J+1:3*J+3)
+                  IF (FACEI(1)/=FACEJ(1)) CYCLE  
+                  IF ((FACEI(2)==FACEJ(2) .AND. FACEI(3)==FACEJ(3)) .OR. &
+                     (FACEI(2)==FACEJ(3) .AND. FACEI(3)==FACEJ(2))) THEN
+                     IS_EXTERNAL(I) = .FALSE.
+                     IS_EXTERNAL(J) = .FALSE.
+                  ENDIF
+               ENDDO
+            ENDDO
+         ENDIF
 
       ! create new FACES index array keeping only external faces
       
@@ -1768,6 +1787,103 @@ CALL PRISM2TETRA(TETRAS(2:7),TETRANEW(5:16))
 TETRAS(1:16)=TETRANEW(1:16)
 
 END SUBROUTINE SPLIT_TETRA
+
+! ---------------------------- ORDER_FACES ----------------------------------------
+
+SUBROUTINE ORDER_FACES(ORDER,N) ! 
+INTEGER, INTENT(IN) :: N
+INTEGER, INTENT(OUT) :: ORDER(1:N)
+
+INTEGER, ALLOCATABLE, DIMENSION(:) :: WORK
+INTEGER :: I, IZERO
+
+DO I = 1, N
+   ORDER(I) = I
+ENDDO
+ALLOCATE(WORK(N),STAT=IZERO)
+CALL ChkMemErr('ORDER_FACES','WORK',IZERO)
+CALL ORDER_FACES1(ORDER,WORK,1,N,N)
+END SUBROUTINE ORDER_FACES
+
+! ---------------------------- ORDER_FACES1 ----------------------------------------
+
+RECURSIVE SUBROUTINE ORDER_FACES1(ORDER,WORK,LEFT,RIGHT,N)
+INTEGER, INTENT(IN) :: N, LEFT, RIGHT
+INTEGER, INTENT(INOUT) :: ORDER(1:N)
+INTEGER :: TEMP
+INTEGER :: I1, I2
+INTEGER, INTENT(OUT) :: WORK(N)
+INTEGER :: ICOUNT
+
+INTEGER :: NMID
+
+IF (RIGHT-LEFT>1) THEN
+   NMID = (LEFT+RIGHT)/2
+   CALL ORDER_FACES1(ORDER,WORK,LEFT,NMID,N)
+   CALL ORDER_FACES1(ORDER,WORK,NMID+1,RIGHT,N)
+   I1=LEFT
+   I2=NMID+1
+   ICOUNT=LEFT
+   DO WHILE (I1<=NMID .OR. I2.LE.RIGHT)
+      IF(I1<=NMID.AND.I2.LE.RIGHT)THEN
+        IF(COMPARE(ORDER(I1),ORDER(I2))==-1)THEN
+           WORK(ICOUNT)=ORDER(I1)
+           I1=I1+1
+        ELSE
+           WORK(ICOUNT)=ORDER(I2)
+           I2=I2+1
+        ENDIF
+      ELSE IF(I1<=NMID.AND.I2.GT.RIGHT)THEN
+         WORK(ICOUNT)=ORDER(I1)
+         I1=I1+1
+      ELSE IF(I1>NMID.AND.I2.LE.RIGHT)THEN
+         WORK(ICOUNT)=ORDER(I2)
+         I2=I2+1
+      ENDIF
+      ICOUNT=ICOUNT+1
+   ENDDO
+   ORDER(LEFT:RIGHT)=WORK(LEFT:RIGHT)
+ELSE IF (RIGHT-LEFT==1) THEN
+   IF(COMPARE(ORDER(LEFT),ORDER(RIGHT))==1)RETURN
+   TEMP=ORDER(LEFT)
+   ORDER(LEFT) = ORDER(RIGHT)
+   ORDER(RIGHT) = TEMP
+ENDIF
+END SUBROUTINE ORDER_FACES1
+
+! ---------------------------- SWAP ----------------------------------------
+
+INTEGER FUNCTION COMPARE(INDEX1,INDEX2)
+INTEGER, INTENT(IN) :: INDEX1, INDEX2
+INTEGER, POINTER, DIMENSION(:) :: FACE1, FACE2
+INTEGER :: F1(3), F2(3)
+
+FACE1=>FACES(3*INDEX1-2:3*INDEX1)
+FACE2=>FACES(3*INDEX2-2:3*INDEX2)
+F1(1:3) = (/FACE1(1),MIN(FACE1(2),FACE1(3)),MAX(FACE1(2),FACE1(3))/)
+F2(1:3) = (/FACE2(1),MIN(FACE2(2),FACE2(3)),MAX(FACE2(2),FACE2(3))/)
+
+COMPARE=0
+IF(F1(1)<F2(1))THEN
+   COMPARE=1
+ELSE IF(F1(1)>F2(1))THEN
+   COMPARE=-1
+ENDIF
+IF(COMPARE/=0)RETURN
+
+IF(F1(2)<F2(2))THEN
+   COMPARE=1
+ELSE IF(F1(2)>F2(2))THEN
+   COMPARE=-1
+ENDIF
+IF(COMPARE/=0)RETURN
+
+IF(F1(3)<F2(3))THEN
+   COMPARE=1
+ELSE IF(F1(3)>F2(3))THEN
+   COMPARE=-1
+ENDIF
+END FUNCTION COMPARE
 
 END SUBROUTINE READ_GEOM
 
