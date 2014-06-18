@@ -1,0 +1,42 @@
+\documentclass[12pt]{article}
+\input{../../../Manuals/Bibliography/commoncommands}
+
+\begin{document}
+
+\vspace{1.0in}
+\section{Fire-ThermoMechanical Interface: FTMI}
+
+Fire-ThermoMechanical Interface is an one-way coupling procedure that uses the Adiabatic Surface Temperature ($T_{\hbox{\tiny AST}}$) concept to establish an interface between FDS and FEA models.
+The procedure recriates the heat flux evaluated in FDS, and presented on Eq. (\ref{eq_ast}), on the FEA environment by transferring $T_{\hbox{\tiny AST}}$ and the heat transfer coefficient ($h$) from the FDS results,
+and considering the wall temperature ($T_{\rm w}$) evaluated at each time step by the FEA model ($h$ can also be adopted as a constant value).
+Then, heat flux can be calculated in FEA model and applied into each node of the exposed surface. The net heat flux in FDS can be defined as the sum of radiative and convective heat fluxes:
+
+\be \label{eq_ast} \dot{q}_{\rm r}'' + \dot{q}_{\rm c}'' = \epsilon \sigma \, \left(T_{\hbox{\tiny AST}}^4 - T_{\rm w}^4 \right) + h (T_{\hbox{\tiny AST}} - T_{\rm w})  \ee
+
+\noindent where $\dot{q}_{\rm r}''$ is the radiative heat flux, $\dot{q}_{\rm c}''$ is the convective heat flux, $\epsilon$ is the emissivity and $\sigma$ is the Stefan-Boltzmann constant ($5.67{\rm x}10^{-8}$ W/(m$^2$.K$^4$)).
+The FTMI can be used with any FEA model, but at this time, this procedure is implemented between FDS and A{\footnotesize NSYS}.
+
+The interface between those two models starts on the definition of a Cartesian coordinate system, the communication between the two models is based on the spatial position of the nodes on the exposed surfaces,
+so the geometry defined for both analysis need to be consistent. One of the advantages of the one-way coupling is that refining the FEA mesh does not implies in restart all the process.
+Therefore, to prevent the necessity of prescribe the nodes positions at the FDS simulation using {\ct DEVC}s this procedure is based on results stored in {\ct BNDF} files.
+
+An automated code called fds2ftmi (based on fds2ascii) was created to get $T_{\hbox{\tiny AST}}$ and $h$ from {\ct BNDF} files and apply into A{\footnotesize NSYS} models, the source code and a makefile can be founded at Utilities/ Structural\_interaction/ fds2ftmi.
+After generate the mesh in A{\footnotesize NSYS} is necessary to generate input files that contain information about the mesh. 
+The code fds2ftmi uses the nodes positions and the normal vector (related to exposed surfaces) to determine the correct position and orientation of the result the code need to get from {\ct BNDF} files and prescribe in FEA model.
+At the same folder there are two A{\footnotesize NSYS} macros that can be used in this task.
+It is possible to export the mesh using the macros ``ansys2ftmi.geom'' or ``ansys2ftmi\_shell.geom'', the first can be used to solid elements and the last one is devoted to shell elements creating interfaces at both sides of the shell elements.
+Both macros can be edited to consider specific scenarios (or surfaces). This process will generate 2 files: nodes.dat and elements.dat that contain the node positions and the exposed elements faces respectivelly.  
+
+During the execution of fds2ftmi, the code will ask a series of questions regarding information about the FDS simulation. 
+The {\ct CHID} is related to the FDS simulation, it is needed to give the path to the code get information in .smv file.
+The cell size is used to create a virtual cell over the node position to search for results in {\ct BNDF} files. It is generally adopted as the same value than the cell size in FDS simulation.
+The number of variables (1 or 2) is used to determine if the interface will get $h$ from FDS simulation or use a constant value. 
+If variable is defined as 1, the code will get just the results for $T_{\hbox{\tiny AST}}$ and ask for the constant value of $h$ that will be prescribed in A{\footnotesize NSYS}.
+To address the time boundary, the code asks for the starting, ending time and the time interval. The last one need to be related to the interval that the results were written in {\ct BNDF} files.
+This step will generate two files per exposed face, one with $T_{\hbox{\tiny AST}}$ and the other with $h$ values over time, and one ``output'' file, those files has the .dat extention.
+
+After run the fds2ftmi code, A{\footnotesize NSYS} need to read the ``output'' file generated (File > Read input from...).
+This will create all elements, parameters and loads (reading information from the .dat files) necessary to input the heat flux from the flames and hot gases into the nodes of the exposed surfaces.
+
+
+\end{document}
