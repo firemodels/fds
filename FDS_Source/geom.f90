@@ -1303,10 +1303,10 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
             CALL REORDER_VERTS(FACES(12*I+10:12*I+12))
          ENDDO
       
-      ! find faces that match - for now ignore face orientation      
+      ! find faces that match      
          
-         SORT_FACES=0 
-         IF (SORT_FACES==1 )THEN  ! o(n*log(n)) algorithm for determining external faces (turned off for now)
+         SORT_FACES=1
+         IF (SORT_FACES==1 )THEN  ! o(n*log(n)) algorithm for determining external faces
             ALLOCATE(OFACES(N_FACES),STAT=IZERO)
             CALL ChkMemErr('READ_GEOM','OFACES',IZERO)
             CALL ORDER_FACES(OFACES,N_FACES)
@@ -1315,9 +1315,12 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
                FACEJ=>FACES(3*OFACES(I)+1:3*OFACES(I)+3)
                IF(FACEI(1)==FACEJ(1).AND.&
                   MIN(FACEI(2),FACEI(3))==MIN(FACEJ(2),FACEJ(3)).AND.&
-                  MAX(FACEI(2),FACEI(3))==MAX(FACEJ(2),FACEJ(3)))THEN
+                  MAX(FACEI(2),FACEI(3))==MAX(FACEJ(2),FACEJ(3))) THEN
                   IS_EXTERNAL(OFACES(I))=.FALSE.
                   IS_EXTERNAL(OFACES(I-1))=.FALSE.
+                  IF(FACEI(2)==FACEJ(2) .AND. FACEI(3)==FACEJ(3)) THEN
+                     WRITE(LU_ERR,*) 'WARNING: duplicate faces found:', FACEI(1),FACEI(2),FACEI(3)
+                  ENDIF
                ENDIF
             
             END DO
