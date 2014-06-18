@@ -1113,7 +1113,7 @@ email_build_status()
    # No errors or warnings
    else
       # Send empty email with success message
-      if [ "$MUTT_MISSING" == 1 ] ; then
+      if [ "$MUTT_MISSING" == "1" ] ; then
         mail -s "smokebot build success on ${hostname}! Revision ${SVN_REVISION}." $mailTo < $TIME_LOG > /dev/null
       else
         mutt -a $SMV_VV_GUIDE -s "smokebot build success on ${hostname}! Revision ${SVN_REVISION}." $mailTo < $TIME_LOG > /dev/null
