@@ -1,4 +1,4 @@
-&HEAD CHID='Cable_Spreading_Room', TITLE='Trash can fire in Cable Spreading Room' /
+&HEAD CHID='Cable_Spreading_Room_v6', TITLE='Trash can fire in Cable Spreading Room' /
 
 &MESH IJK= 40, 36,40, XB=31.0,35.0,14.9,18.5,0.0,4.0 /
 &MESH IJK=155, 25,20, XB= 0.0,31.0,-1.5, 3.5,0.0,4.0 /

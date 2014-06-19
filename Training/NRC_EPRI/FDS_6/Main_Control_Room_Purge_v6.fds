@@ -1,4 +1,4 @@
-&HEAD CHID='Main_Control_Room_No_Purge', TITLE='Cabinet fire in MCR affecting visibility of operators.'/
+&HEAD CHID='Main_Control_Room_Purge_v6', TITLE='Cabinet fire in MCR affecting visibility of operators.'/
 
 &MESH IJK=123,81,25, XB=0.0,24.6,0.0,16.2,0.0,5.2 /
 
@@ -96,7 +96,8 @@ Ventilation
       RAMP_V	     = 'PURGE' / 
 
 &RAMP ID='PURGE', T=   0.0, F=0.0 /
-&RAMP ID='PURGE', T=3600.0, F=0.0 /
+&RAMP ID='PURGE', T=  10.0, F=5.0 /
+&RAMP ID='PURGE', T=3600.0, F=5.0 /
 
 &OBST XB=  3.4,  4.0,  3.0,  3.6, 3.0, 5.2, SURF_ID = 'DUCT STEEL' /
 &VENT XB=  3.4,  4.0,  3.0,  3.6, 3.0, 3.0, SURF_ID = 'SUPPLY' /
