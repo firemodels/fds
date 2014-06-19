@@ -2156,13 +2156,21 @@ MESHES_LOOP: DO NM = NMESHES_MIN, NMESHES_MAX
                   OSLC%NCPL = OSLF%NCPL
 
                   CALL SCARC_CHECK_DIVISIBILITY(OSLF%NWL, 'OSLF%NWL', 'SCARC_SETUP_WALLINFO')
-                  OSLC%NWL = OSLF%NWL/2
-
                   CALL SCARC_CHECK_DIVISIBILITY(OSLF%NCG, 'OSLF%NCG', 'SCARC_SETUP_WALLINFO')
-                  OSLC%NCG = OSLF%NCG/2
+
+                  IF (TYPE_DIMENSION == NSCARC_DIMENSION_THREE) THEN
+                     OSLC%NWL = OSLF%NWL/4
+                     OSLC%NCG = OSLF%NCG/4
+                  ELSE
+                     OSLC%NWL = OSLF%NWL/2
+                     OSLC%NCG = OSLF%NCG/2
+                  ENDIF
 
                   !< ---- START DEBUG MESSAGE
-                  !WRITE(LU_SCARC,'(4(a,i4))') 'NOM=',NOM,': NCPL=',OSLC%NCPL,': NWL=',OSLC%NWL,': NL=',NL
+                  !WRITE(LU_SCARC,'(5(a,i4))') 'HIII_FINE   : NOM=',NOM,': NCPL=',OSLC%NCPL,&
+                  !                            ': NWL=',OSLF%NWL,': NL=',NL,': NCG=',OSLF%NCG
+                  !WRITE(LU_SCARC,'(5(a,i4))') 'HIII_COARSE: NOM=',NOM,': NCPL=',OSLC%NCPL,&
+                  !                            ': NWL=',OSLC%NWL,': NL=',NL,': NCG=',OSLC%NCG
                   !< ---- START DEBUG MESSAGE
 
                   !< compute exchange dimensions of coarser mesh level (analogues to NIC, I_MIN ... )
@@ -2781,6 +2789,7 @@ DO IZ = NZ1, NZ2
          !WRITE(LU_SCARC,*) 'WC(',IWC,')%IXW =',WC(IWC)%IXW
          !WRITE(LU_SCARC,*) 'WC(',IWC,')%IYW =',WC(IWC)%IYW
          !WRITE(LU_SCARC,*) 'WC(',IWC,')%IZW =',WC(IWC)%IZW
+         !WRITE(LU_SCARC,*) 'FF%IWG_MARKER=',FF%IWG_MARKER
          !< ---- END DEBUG MESSAGE
 
          SELECT CASE (TYPE_DIMENSION)
@@ -2913,14 +2922,14 @@ DO IZ = NZ1, NZ2
                !< determine fine IW's, which must be merged to one coarse IW
                SELECT CASE (ABS(IOR0))
                   CASE (1)
-                     IWF(1) = FF%IWG_MARKER + (2*IZ-2)*SLF%NY + 2*IY - 1
-                     IWF(3) = FF%IWG_MARKER + (2*IZ-1)*SLF%NY + 2*IY - 1
+                     IWF(1) = FF%IWG_MARKER + (2*IZ-2)*SLF%NY + 2*IY - 2
+                     IWF(3) = FF%IWG_MARKER + (2*IZ-1)*SLF%NY + 2*IY - 2
                   CASE (2)
-                     IWF(1) = FF%IWG_MARKER + (2*IZ-2)*SLF%NX + 2*IX - 1
-                     IWF(3) = FF%IWG_MARKER + (2*IZ-1)*SLF%NX + 2*IX - 1
+                     IWF(1) = FF%IWG_MARKER + (2*IZ-2)*SLF%NX + 2*IX - 2
+                     IWF(3) = FF%IWG_MARKER + (2*IZ-1)*SLF%NX + 2*IX - 2
                   CASE (3)
-                     IWF(1) = FF%IWG_MARKER + (2*IY-2)*SLF%NX + 2*IX - 1
-                     IWF(3) = FF%IWG_MARKER + (2*IY-1)*SLF%NX + 2*IX - 1
+                     IWF(1) = FF%IWG_MARKER + (2*IY-2)*SLF%NX + 2*IX - 2
+                     IWF(3) = FF%IWG_MARKER + (2*IY-1)*SLF%NX + 2*IX - 2
                END SELECT
                IWF(2) = IWF(1)+1
                IWF(4) = IWF(3)+1
@@ -2931,7 +2940,8 @@ DO IZ = NZ1, NZ2
                ENDDO
                   
                IF (NOMF(1)/=NOMF(2) .OR. NOMF(1)/=NOMF(3) .OR. NOMF(1)/=NOMF(4)) THEN
-                  WRITE(SCARC_MESSAGE,'(2A,I4,A)') TRIM(SCARC_ROUTINE),': Inconsistent neighbors on IOR=', IOR0,' not allowed!'
+                  WRITE(SCARC_MESSAGE,'(2A,I4,A)') &
+                     TRIM(SCARC_ROUTINE),': Inconsistent neighbors on IOR=', IOR0,' not allowed!'
                   CALL SHUTDOWN(SCARC_MESSAGE)
                ENDIF
                WC(IWC)%NOM = NOMF(1) 
@@ -11776,7 +11786,8 @@ MESH_PACK_LOOP: DO NM = NMESHES_MIN, NMESHES_MAX
             IPTR=1
             DO IWL = 1, OSL%NWL
                IWG = OSL%IWL_TO_IWG(IWL)
-               !WRITE(LU_SCARC,'(a,i4,a,i4,a,i4)') 'IWL=',IWL,': IWG=',IWG,': NCPLS=',OSL%NCPLS
+               !WRITE(LU_SCARC,'(5(a,i4))') &
+               !   'NL=',NL,': IWL=',IWL,': IWG=',IWG,': NCPLS=',OSL%NCPLS,': SIZE(SL%WALL)=', SIZE(SL%WALL)
                OS%SEND_INTEGER(IPTR   ) = SL%WALL(IWG)%IXG
                OS%SEND_INTEGER(IPTR+ 1) = SL%WALL(IWG)%IYG
                OS%SEND_INTEGER(IPTR+ 2) = SL%WALL(IWG)%IZG
@@ -12970,6 +12981,14 @@ SELECT CASE (NTYPE)
                DO INBR=1,SL%FACE(IOR0)%NUM_NEIGHBORS
                   NOM = SL%FACE(IOR0)%NEIGHBORS(INBR)
                   OSL => SCARC(NM)%OSCARC(NOM)%LEVEL(NL)
+                  WRITE(LU_SCARC,*) 'SIZE(OSL%ICG_TO_IWG)=',SIZE(OSL%ICG_TO_IWG)
+                  WRITE(LU_SCARC,*) 'SIZE(OSL%ICG_TO_ICW)=',SIZE(OSL%ICG_TO_ICW)
+                  WRITE(LU_SCARC,*) 'SIZE(OSL%ICG_TO_ICE)=',SIZE(OSL%ICG_TO_ICE)
+                  WRITE(LU_SCARC,*) 'SIZE(OSL%ICG_TO_ICN)=',SIZE(OSL%ICG_TO_ICN)
+                  WRITE(LU_SCARC,*) 'SIZE(OSL%IWL_TO_ICW)=',SIZE(OSL%IWL_TO_ICW)
+                  WRITE(LU_SCARC,*) 'SIZE(OSL%IWL_TO_ICO)=',SIZE(OSL%IWL_TO_ICO)
+                  WRITE(LU_SCARC,*) 'SIZE(OSL%IWL_TO_ICN)=',SIZE(OSL%IWL_TO_ICN)
+                  WRITE(LU_SCARC,*) 'SIZE(OSL%IWL_TO_ICG)=',SIZE(OSL%IWL_TO_ICG)
                   WRITE(LU_SCARC,'(a,i4,a,2f12.6)') '---OSL(',NOM,')%DH :',OSL%DH
                   WRITE(LU_SCARC,'(a,i4,a,2i4)') '---OSL(',NOM,')%IOR   :',OSL%IOR
                   WRITE(LU_SCARC,'(a,i4,a,2i4)') '---OSL(',NOM,')%NWL(.):',OSL%NWL
@@ -13035,7 +13054,10 @@ SELECT CASE (NTYPE)
          WRITE(LU_SCARC,1000) CROUTINE, CNAME, NM, NL
          SL => SCARC(NM)%LEVEL(NL)
          M  => MESHES(NM)
-
+            WRITE(LU_SCARC,*) 'SIZE(SL%ICE_TO_IWG)=',SIZE(SL%ICE_TO_IWG)
+            WRITE(LU_SCARC,*) 'SIZE(SL%ICE_TO_IWL)=',SIZE(SL%ICE_TO_IWL)
+            WRITE(LU_SCARC,*) 'SIZE(SL%ICE_TO_ICG)=',SIZE(SL%ICE_TO_ICG)
+            WRITE(LU_SCARC,*) 'SIZE(SL%ICE_TO_ICW)=',SIZE(SL%ICE_TO_ICW)
             WRITE(LU_SCARC,*) 'NCE =',SL%NCE
             WRITE(LU_SCARC,*) 'NG =',SL%NCG
             WRITE(LU_SCARC,*)
