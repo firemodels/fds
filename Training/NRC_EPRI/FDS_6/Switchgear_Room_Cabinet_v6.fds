@@ -1,4 +1,4 @@
-&HEAD CHID='Switchgear_Room_Cabinet', TITLE='Cabinet Fire in Switchgear Room'/
+&HEAD CHID='Switchgear_Room_Cabinet_v6', TITLE='Cabinet Fire in Switchgear Room'/
 
 &MESH IJK= 26,20,60, XB=7.0, 9.6, 8.4,10.4,0.0,6.1 /
 &MESH IJK= 35,92,60, XB=0.0, 7.0, 0.0,18.4,0.0,6.1 /
