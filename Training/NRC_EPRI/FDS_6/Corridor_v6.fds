@@ -1,0 +1,174 @@
+&HEAD CHID='Corridor_v6', TITLE='Transient Combustibles Fire in Multi-Compartment Corridor'/
+
+&MESH IJK=337,20,30, XB= 0.0, 67.4, 0.0,  4.1, 0.0, 6.1 /
+&MESH IJK=10, 96,30, XB= 8.0, 10.0, 4.1, 23.4, 0.0, 6.1 /
+&MESH IJK=52, 96,30, XB=20.6, 31.0, 4.1, 23.4, 0.0, 6.1 /
+&MESH IJK=61, 96,30, XB=55.2, 67.4, 4.1, 23.4, 0.0, 6.1 /
+
+&TIME T_END=3600. /
+
+Construction information
+
+&MISC SURF_DEFAULT='CONCRETE WALL'/
+
+&MATL ID            = 'CONCRETE'
+      SPECIFIC_HEAT = 0.75
+      CONDUCTIVITY  = 1.6
+      DENSITY       = 2400. /
+                    
+&SURF ID            = 'CONCRETE WALL'
+      COLOR         = 'GRAY'
+      MATL_ID       = 'CONCRETE'
+      THICKNESS     = 0.6 /
+
+&OBST XB=  0.0,  2.5, 3.1,  4.1, 0.0, 6.1, SURF_ID='CONCRETE WALL' /
+&OBST XB= 28.8, 31.0, 4.1, 10.1, 0.0, 6.1, SURF_ID='CONCRETE WALL' /
+&OBST XB= 55.2, 64.4, 8.2, 23.4, 0.0, 6.1, SURF_ID='CONCRETE WALL' /
+&OBST XB= 10.0, 10.2, 0.0,  4.1, 4.5, 6.1, SURF_ID='CONCRETE WALL' / 
+&OBST XB= 20.6, 31.0,16.6, 16.8, 0.0, 6.1, SURF_ID='CONCRETE WALL' / 
+&HOLE XB= 25.0, 26.6,16.5, 16.9, 0.0, 2.4 / Open Door in Wall
+
+Fire
+
+&REAC ID                 = 'WOOD'
+      FYI                = 'Tewarson, SFPE Handbook, Douglas Fir'
+      C                  = 1.
+      H                  = 1.7
+      O                  = 0.74
+      N                  = 0.002
+      HEAT_OF_COMBUSTION = 16400.
+      SOOT_YIELD         = 0.015 /
+
+&SURF ID      = 'BURNING PALLETS'
+      COLOR   = 'ORANGE'
+      RAMP_Q  = 'fire ramp'
+      HRRPUA  = 1136. / 
+
+&RAMP ID='fire ramp', T=   0., F=0.000 /
+&RAMP ID='fire ramp', T=  30., F=0.005 /
+&RAMP ID='fire ramp', T=  60., F=0.020 /
+&RAMP ID='fire ramp', T=  90., F=0.046 /
+&RAMP ID='fire ramp', T= 120., F=0.082 /
+&RAMP ID='fire ramp', T= 150., F=0.128 /
+&RAMP ID='fire ramp', T= 180., F=0.184 /
+&RAMP ID='fire ramp', T= 210., F=0.250 /
+&RAMP ID='fire ramp', T= 240., F=0.327 /
+&RAMP ID='fire ramp', T= 270., F=0.413 /
+&RAMP ID='fire ramp', T= 300., F=0.510 /
+&RAMP ID='fire ramp', T= 330., F=0.617 /
+&RAMP ID='fire ramp', T= 360., F=0.735 /
+&RAMP ID='fire ramp', T= 390., F=0.862 /
+&RAMP ID='fire ramp', T= 420., F=1.000 /
+&RAMP ID='fire ramp', T= 900., F=1.000 /
+&RAMP ID='fire ramp', T=1380., F=0.000 /
+
+&OBST XB= 66.4, 67.4, 22.4, 23.4, 0.0, 0.6, SURF_ID = 'BURNING PALLETS' /
+
+Cables
+
+&MATL ID            = 'XPE'
+      SPECIFIC_HEAT = 1.39
+      CONDUCTIVITY  = 0.235
+      DENSITY       = 1375.0 
+      EMISSIVITY    = 0.95 /
+
+&SURF ID            = 'CABLE'
+      COLOR         = 'BLACK'
+      MATL_ID       = 'XPE'
+      GEOMETRY      = 'CYLINDRICAL'
+      THICKNESS     = 0.0075 /
+
+&OBST XB= 8.0, 8.8, 5.9,22.9, 3.0, 3.15, SURF_ID = 'CABLE' /
+&OBST XB= 8.0, 8.8, 5.4, 5.9, 3.0, 3.25, SURF_ID = 'CABLE' /
+&OBST XB= 8.0, 8.8, 4.9, 5.4, 3.2, 3.45, SURF_ID = 'CABLE' /
+&OBST XB= 8.0, 8.8, 4.4, 4.9, 3.4, 3.65, SURF_ID = 'CABLE' /
+&OBST XB= 8.0, 8.8, 3.9, 4.4, 3.6, 3.85, SURF_ID = 'CABLE' /
+&OBST XB= 8.0, 8.8, 3.4, 3.9, 3.8, 4.05, SURF_ID = 'CABLE' /
+&OBST XB= 8.0, 8.8, 2.9, 3.4, 4.0, 4.25, SURF_ID = 'CABLE' /
+&OBST XB= 8.0, 8.8, 2.4, 2.9, 4.2, 4.45, SURF_ID = 'CABLE' /
+&OBST XB= 8.0, 8.8, 1.9, 2.4, 4.4, 4.65, SURF_ID = 'CABLE' /
+&OBST XB= 8.0, 8.8, 1.4, 1.9, 4.6, 4.85, SURF_ID = 'CABLE' /
+&OBST XB= 8.0, 8.8, 0.9, 1.4, 4.8, 4.95, SURF_ID = 'CABLE' /
+
+&OBST XB= 2.0,62.0, 0.0, 0.9, 4.8, 5.00, SURF_ID = 'CABLE' /
+&OBST XB=21.0,29.0,20.5,21.4, 4.8, 5.00, SURF_ID = 'CABLE' /
+
+Cabinets
+
+&MATL ID            = 'STEEL'
+      SPECIFIC_HEAT = 0.465
+      CONDUCTIVITY  = 54.0
+      DENSITY       = 7850.0 /
+
+&SURF ID            = 'CABINET'
+      COLOR         = 'OLIVE'
+      MATL_ID       = 'STEEL'
+      THICKNESS     = 0.0015 /
+
+&OBST XB= 8.1, 9.1, 5.4, 18.4, 0.0, 2.4, SURF_ID = 'CABINET' /
+
+Ventilation
+
+&SURF ID        = 'DOOR'
+      COLOR     = 'BROWN'
+      MATL_ID   = 'STEEL'
+      THICKNESS = 0.05 /
+
+&VENT XB= 0.0, 0.0, 0.4, 2.4, 0.0, 0.2, SURF_ID = 'OPEN' / Door Crack
+&VENT XB= 8.6, 9.6,23.4,23.4, 0.0, 0.2, SURF_ID = 'OPEN' / Door Crack
+&VENT XB=65.0,67.0,23.4,23.4, 0.0, 0.2, SURF_ID = 'OPEN' / Door Crack
+
+&VENT XB= 0.0, 0.0, 0.9, 2.4, 0.2, 2.0, SURF_ID = 'DOOR' /
+&VENT XB= 8.6, 9.6,23.4,23.4, 0.2, 2.0, SURF_ID = 'DOOR' /
+&VENT XB=64.6,65.6,23.4,23.4, 0.2, 2.0, SURF_ID = 'DOOR' /
+
+&SURF ID        = 'DUCT STEEL'
+      COLOR     = 'GRAY'
+      MATL_ID   = 'STEEL'
+      THICKNESS = 0.002 /
+
+&SURF ID='SUPPLY', COLOR='BLUE',  VOLUME_FLOW=-1.67 /
+&SURF ID='RETURN', COLOR='GREEN', VOLUME_FLOW= 1.67 /
+
+&OBST XB= 6.5, 7.5, 2.4, 3.4, 4.8, 6.1, SURF_ID = 'DUCT STEEL' /
+&VENT XB= 6.5, 7.5, 2.4, 3.4, 4.8, 4.8, SURF_ID = 'SUPPLY' /
+
+&OBST XB=57.0,58.0, 6.0, 7.0, 4.8, 6.1, SURF_ID = 'DUCT STEEL' /
+&VENT XB=57.0,58.0, 6.0, 7.0, 4.8, 4.8, SURF_ID = 'RETURN' /
+
+Output
+
+&DUMP DT_DEVC=15., DT_HRR=15. /
+
+&DEVC ID='HGL_Temp_RoO_FDS',   XB=65.9,65.9,18.4,18.4,0.0,6.1, QUANTITY='UPPER TEMPERATURE' /
+&DEVC ID='HGL_Temp_Cor_FDS',   XB=32.0,32.0, 1.6, 1.6,0.0,6.1, QUANTITY='UPPER TEMPERATURE' /
+&DEVC ID='HGL_Temp_Cab_FDS',   XB= 9.6, 9.6, 6.0, 6.0,0.0,6.1, QUANTITY='UPPER TEMPERATURE' /
+
+&DEVC ID='HGL_Height_RoO_FDS', XB=65.9,65.9,18.4,18.4,0.0,6.1, QUANTITY='LAYER HEIGHT' /
+&DEVC ID='HGL_Height_Cor_FDS', XB=32.0,32.0, 1.6, 1.6,0.0,6.1, QUANTITY='LAYER HEIGHT' /
+&DEVC ID='HGL_Height_Cab_FDS', XB= 9.6, 9.6, 6.0, 6.0,0.0,6.1, QUANTITY='LAYER HEIGHT' /
+
+&PROP ID='Smoke Detector', QUANTITY='CHAMBER OBSCURATION', LENGTH=1.8, ACTIVATION_OBSCURATION = 4.9 /
+
+&DEVC ID='Smoke1_FDS', XYZ= 1.5, 1.6, 6.0, PROP_ID='Smoke Detector' /
+&DEVC ID='Smoke2_FDS', XYZ=12.7, 1.6, 6.0, PROP_ID='Smoke Detector' /
+&DEVC ID='Smoke3_FDS', XYZ=32.0, 1.6, 6.0, PROP_ID='Smoke Detector' /
+&DEVC ID='Smoke4_FDS', XYZ=50.0, 1.6, 6.0, PROP_ID='Smoke Detector' /
+&DEVC ID='Smoke5_FDS', XYZ=61.7, 4.5, 6.0, PROP_ID='Smoke Detector' /
+&DEVC ID='Smoke6_FDS', XYZ= 9.0,21.9, 6.0, PROP_ID='Smoke Detector' /
+&DEVC ID='Smoke7_FDS', XYZ=25.9,12.7, 6.0, PROP_ID='Smoke Detector' /
+&DEVC ID='Smoke8_FDS', XYZ=25.9,20.1, 6.0, PROP_ID='Smoke Detector' /
+&DEVC ID='Smoke9_FDS', XYZ=65.9,18.4, 6.0, PROP_ID='Smoke Detector' /
+
+Smokeview output
+
+&BNDF QUANTITY='WALL TEMPERATURE'/
+&BNDF QUANTITY='GAUGE HEAT FLUX'/
+
+&SLCF PBX= 8.5, VECTOR=.TRUE., QUANTITY='TEMPERATURE'/
+&SLCF PBY= 0.5, VECTOR=.TRUE., QUANTITY='TEMPERATURE'/
+&SLCF PBY=21.0, VECTOR=.TRUE., QUANTITY='TEMPERATURE'/
+
+End file
+
+&TAIL /

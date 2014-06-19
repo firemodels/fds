@@ -1,4 +1,4 @@
-&HEAD CHID='Switchgear_Room_MCC', TITLE='MCC fire in a switchgear room'  /
+&HEAD CHID='Switchgear_Room_MCC_v5', TITLE='MCC fire in a switchgear room'  /
 
 &MESH IJK=85,85,30, XB= 0.0, 8.5,0.0,8.5,0.0,3.0 /
 &MESH IJK=28,85,90, XB= 8.5,11.3,0.0,8.5,0.0,9.0 /

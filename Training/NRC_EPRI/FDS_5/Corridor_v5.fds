@@ -1,4 +1,4 @@
-&HEAD CHID='Corridor', TITLE='Transient Combustibles Fire in Multi-Compartment Corridor'/
+&HEAD CHID='Corridor_v5', TITLE='Transient Combustibles Fire in Multi-Compartment Corridor'/
 
 &MESH IJK=337,20,30, XB= 0.0, 67.4, 0.0,  4.1, 0.0, 6.1 /
 &MESH IJK=10, 96,30, XB= 8.0, 10.0, 4.1, 23.4, 0.0, 6.1 /

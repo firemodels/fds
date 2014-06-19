@@ -1,0 +1,190 @@
+&HEAD CHID='Turbine_Building_Location_2_v6', TITLE='Large Lube Oil Fire in the Turbine Building'/
+
+&MESH IJK=100,100, 5, XB= 0.,100.,0.,100.,0.0, 4.6 /
+&MESH IJK= 95, 72,16, XB= 0., 95.,9., 81.,4.6,19.8 / 
+
+&TIME T_END=3600. /
+
+Concrete walls
+
+&MISC SURF_DEFAULT='CONCRETE WALL', TMPA=36. /
+
+&MATL ID             = 'CONCRETE'
+      SPECIFIC_HEAT  = 0.75
+      CONDUCTIVITY   = 1.6
+      DENSITY        = 2400. /
+
+&SURF ID             = 'CONCRETE WALL'
+      COLOR          = 'GRAY'
+      MATL_ID        = 'CONCRETE'
+      TRANSPARENCY   = 0.5
+      THICKNESS      = 1.0 /
+
+&OBST XB= 63.0, 95.0, 32.0, 57.0, 5.6,14.5, SURF_ID='CONCRETE WALL' / HVAC Room
+&OBST XB=  0.0, 95.0,  9.0, 81.0, 4.6, 5.6, SURF_ID='CONCRETE WALL' / Turbine Deck Slab
+
+&HOLE XB=  3.0,  8.0, 19.0, 22.0, 3.0, 7.0 / grate
+&HOLE XB=  3.0,  8.0, 59.0, 62.0, 3.0, 7.0 / grate
+&HOLE XB=  3.0,  6.0, 42.0, 44.0, 3.0, 7.0 / stair
+&HOLE XB= 77.0, 80.0, 63.0, 65.0, 3.0, 7.0 / stair
+&HOLE XB= 77.0, 80.0, 25.0, 27.0, 3.0, 7.0 / stair
+&HOLE XB= 85.0, 94.0, 20.0, 32.0, 3.0, 7.0 / Large Opening
+&HOLE XB= 85.0, 94.0, 58.0, 70.0, 3.0, 7.0 / Large Opening
+
+&SURF ID             = 'STEEL WALL'
+      COLOR          = 'SILVER'
+      MATL_ID        = 'STEEL'
+      THICKNESS      = 0.003 /
+
+&VENT XB=  0.0,  0.0,  9.0, 81.0, 4.6,19.8, SURF_ID='STEEL WALL' / 
+&VENT XB= 95.0, 95.0,  9.0, 81.0, 4.6,19.8, SURF_ID='STEEL WALL' / 
+&VENT XB=  0.0, 95.0,  9.0,  9.0, 4.6,19.8, SURF_ID='STEEL WALL' / 
+&VENT XB=  0.0, 95.0, 81.0, 81.0, 4.6,19.8, SURF_ID='STEEL WALL' / 
+&VENT XB=  0.0, 95.0,  9.0, 81.0,19.8,19.8, SURF_ID='STEEL WALL' / 
+
+Turbines
+
+&SURF ID             = 'TURBINE'
+      COLOR          = 'BLACK'
+      MATL_ID        = 'STEEL'
+      THICKNESS      = 0.01 /
+
+&OBST XB= 25.0, 60.0, 16.0, 26.0, 5.6, 10.0, SURF_ID='TURBINE'/
+&OBST XB= 25.0, 60.0, 66.0, 76.0, 5.6, 10.0, SURF_ID='TURBINE'/
+
+Fire
+
+&REAC ID                 = 'LUBE OIL'
+      FYI                = 'Kerosene, C_14 H_30'
+      C                  = 14.
+      H                  = 30.
+      HEAT_OF_COMBUSTION = 46000.
+      CO_YIELD           = 0.019
+      SOOT_YIELD         = 0.059 /
+
+&SURF ID             = 'LUBE OIL SPILL'
+      COLOR          = 'ORANGE'
+      HRRPUA         = 1796.   
+      RAMP_Q         = 'fire' /
+
+&RAMP ID='fire', T=   0., F=0. /
+&RAMP ID='fire', T=  10., F=1. /
+&RAMP ID='fire', T=2144., F=1. /
+&RAMP ID='fire', T=2145., F=0. /
+
+&VENT XB= 15.5, 21.1, 26.0, 32.1, 0.0, 0.0, SURF_ID='LUBE OIL SPILL'/
+
+Columns
+
+&MATL ID             = 'STEEL'
+      SPECIFIC_HEAT  = 0.465
+      CONDUCTIVITY   = 54.
+      DENSITY        = 7850. /
+
+&SURF ID             = 'COLUMN'
+      COLOR          = 'TOMATO'
+      MATL_ID        = 'STEEL'
+      BACKING        = 'EXPOSED'
+      THICKNESS      = 0.017 /
+
+&OBST XB=  0.0,  1.0,  9.0, 10.0, 0.0, 19.8, SURF_ID='COLUMN' /
+&OBST XB= 10.0, 11.0,  9.0, 10.0, 0.0, 19.8, SURF_ID='COLUMN' /
+&OBST XB= 21.0, 22.0,  9.0, 10.0, 0.0, 19.8, SURF_ID='COLUMN' /
+&OBST XB= 31.0, 32.0,  9.0, 10.0, 0.0, 19.8, SURF_ID='COLUMN' /
+&OBST XB= 42.0, 43.0,  9.0, 10.0, 0.0, 19.8, SURF_ID='COLUMN' /
+&OBST XB= 52.0, 53.0,  9.0, 10.0, 0.0, 19.8, SURF_ID='COLUMN' /
+&OBST XB= 63.0, 64.0,  9.0, 10.0, 0.0, 19.8, SURF_ID='COLUMN' /
+&OBST XB= 73.0, 74.0,  9.0, 10.0, 0.0, 19.8, SURF_ID='COLUMN' /
+&OBST XB= 84.0, 85.0,  9.0, 10.0, 0.0, 19.8, SURF_ID='COLUMN' /
+&OBST XB= 94.0, 95.0,  9.0, 10.0, 0.0, 19.8, SURF_ID='COLUMN' /
+
+&OBST XB=  0.0,  1.0, 32.0, 33.0, 0.0, 19.8, SURF_ID='COLUMN' /
+&OBST XB= 10.0, 11.0, 32.0, 33.0, 0.0, 19.8, SURF_ID='COLUMN' / C
+&OBST XB= 21.0, 22.0, 32.0, 33.0, 0.0, 19.8, SURF_ID='COLUMN' / D
+&OBST XB= 31.0, 32.0, 32.0, 33.0, 0.0, 19.8, SURF_ID='COLUMN' /
+&OBST XB= 42.0, 43.0, 32.0, 33.0, 0.0, 19.8, SURF_ID='COLUMN' /
+&OBST XB= 52.0, 53.0, 32.0, 33.0, 0.0, 19.8, SURF_ID='COLUMN' /
+&OBST XB= 63.0, 64.0, 32.0, 33.0, 0.0, 19.8, SURF_ID='COLUMN' /
+&OBST XB= 73.0, 74.0, 32.0, 33.0, 0.0, 19.8, SURF_ID='COLUMN' /
+&OBST XB= 84.0, 85.0, 32.0, 33.0, 0.0, 19.8, SURF_ID='COLUMN' /
+&OBST XB= 94.0, 95.0, 32.0, 33.0, 0.0, 19.8, SURF_ID='COLUMN' /
+
+&OBST XB=  0.0,  1.0, 57.0, 58.0, 0.0, 19.8, SURF_ID='COLUMN' /
+&OBST XB= 10.0, 11.0, 57.0, 58.0, 0.0, 19.8, SURF_ID='COLUMN' / A
+&OBST XB= 21.0, 22.0, 57.0, 58.0, 0.0, 19.8, SURF_ID='COLUMN' / B
+&OBST XB= 31.0, 32.0, 57.0, 58.0, 0.0, 19.8, SURF_ID='COLUMN' /
+&OBST XB= 42.0, 43.0, 57.0, 58.0, 0.0, 19.8, SURF_ID='COLUMN' /
+&OBST XB= 52.0, 53.0, 57.0, 58.0, 0.0, 19.8, SURF_ID='COLUMN' / E
+&OBST XB= 63.0, 64.0, 57.0, 58.0, 0.0, 19.8, SURF_ID='COLUMN' /
+&OBST XB= 73.0, 74.0, 57.0, 58.0, 0.0, 19.8, SURF_ID='COLUMN' /
+&OBST XB= 84.0, 85.0, 57.0, 58.0, 0.0, 19.8, SURF_ID='COLUMN' /
+&OBST XB= 94.0, 95.0, 57.0, 58.0, 0.0, 19.8, SURF_ID='COLUMN' / F
+
+&OBST XB=  0.0,  1.0, 80.0, 81.0, 0.0, 19.8, SURF_ID='COLUMN' /
+&OBST XB= 10.0, 11.0, 80.0, 81.0, 0.0, 19.8, SURF_ID='COLUMN' /
+&OBST XB= 21.0, 22.0, 80.0, 81.0, 0.0, 19.8, SURF_ID='COLUMN' /
+&OBST XB= 31.0, 32.0, 80.0, 81.0, 0.0, 19.8, SURF_ID='COLUMN' /
+&OBST XB= 42.0, 43.0, 80.0, 81.0, 0.0, 19.8, SURF_ID='COLUMN' /
+&OBST XB= 52.0, 53.0, 80.0, 81.0, 0.0, 19.8, SURF_ID='COLUMN' /
+&OBST XB= 63.0, 64.0, 80.0, 81.0, 0.0, 19.8, SURF_ID='COLUMN' /
+&OBST XB= 73.0, 74.0, 80.0, 81.0, 0.0, 19.8, SURF_ID='COLUMN' /
+&OBST XB= 84.0, 85.0, 80.0, 81.0, 0.0, 19.8, SURF_ID='COLUMN' /
+&OBST XB= 94.0, 95.0, 80.0, 81.0, 0.0, 19.8, SURF_ID='COLUMN' /
+
+Ventilation
+
+&VENT XB= 10.0, 13.0, 88.0, 90.0, 4.6,  4.6, SURF_ID='OPEN' / ext. stair
+&VENT XB= 10.0, 13.0,  6.0,  8.0, 4.6,  4.6, SURF_ID='OPEN' / ext. stair
+
+&VENT XB=  3.0,  8.0,  2.0,  5.0, 4.6,  4.6, SURF_ID='OPEN' /
+&VENT XB= 13.0, 18.0,  2.0,  5.0, 4.6,  4.6, SURF_ID='OPEN' / 
+&VENT XB= 23.0, 28.0,  2.0,  5.0, 4.6,  4.6, SURF_ID='OPEN' /
+&VENT XB= 33.0, 38.0,  2.0,  5.0, 4.6,  4.6, SURF_ID='OPEN' / 
+&VENT XB= 65.0, 70.0,  2.0,  5.0, 4.6,  4.6, SURF_ID='OPEN' / 
+&VENT XB= 75.0, 80.0,  2.0,  5.0, 4.6,  4.6, SURF_ID='OPEN' / 
+&VENT XB= 85.0, 90.0,  2.0,  5.0, 4.6,  4.6, SURF_ID='OPEN' / 
+
+&VENT XB=  3.0,  8.0, 93.0, 96.0, 4.6,  4.6, SURF_ID='OPEN' / 
+&VENT XB= 13.0, 18.0, 93.0, 96.0, 4.6,  4.6, SURF_ID='OPEN' / 
+&VENT XB= 23.0, 28.0, 93.0, 96.0, 4.6,  4.6, SURF_ID='OPEN' /
+&VENT XB= 33.0, 38.0, 93.0, 96.0, 4.6,  4.6, SURF_ID='OPEN' / 
+&VENT XB= 65.0, 70.0, 93.0, 96.0, 4.6,  4.6, SURF_ID='OPEN' / 
+&VENT XB= 75.0, 80.0, 93.0, 96.0, 4.6,  4.6, SURF_ID='OPEN' /
+&VENT XB= 85.0, 90.0, 93.0, 96.0, 4.6,  4.6, SURF_ID='OPEN' /
+
+&VENT XB= 97.0, 99.0, 11.0, 16.0, 4.6,  4.6, SURF_ID='OPEN' /
+&VENT XB= 97.0, 99.0, 23.0, 28.0, 4.6,  4.6, SURF_ID='OPEN' /
+&VENT XB= 97.0, 99.0, 61.0, 66.0, 4.6,  4.6, SURF_ID='OPEN' /
+&VENT XB= 97.0, 99.0, 73.0, 78.0, 4.6,  4.6, SURF_ID='OPEN' /
+
+Output
+
+&DUMP DT_DEVC=15., DT_HRR=15. /
+
+&DEVC QUANTITY='WALL TEMPERATURE', ID='Temp_Col_A_FDS', XB=10.0,11.0,57.0,58.0,0.0,4.5, SURF_ID='COLUMN', STATISTICS='MAX' /
+&DEVC QUANTITY='WALL TEMPERATURE', ID='Temp_Col_B_FDS', XB=21.0,22.0,57.0,58.0,0.0,4.5, SURF_ID='COLUMN', STATISTICS='MAX' /
+&DEVC QUANTITY='WALL TEMPERATURE', ID='Temp_Col_C_FDS', XB=10.0,11.0,32.0,33.0,0.0,4.5, SURF_ID='COLUMN', STATISTICS='MAX' /
+&DEVC QUANTITY='WALL TEMPERATURE', ID='Temp_Col_D_FDS', XB=21.0,22.0,32.0,33.0,0.0,4.5, SURF_ID='COLUMN', STATISTICS='MAX' /
+&DEVC QUANTITY='WALL TEMPERATURE', ID='Temp_Col_E_FDS', XB=52.0,53.0,57.0,58.0,0.0,4.5, SURF_ID='COLUMN', STATISTICS='MAX' /
+&DEVC QUANTITY='WALL TEMPERATURE', ID='Temp_Col_F_FDS', XB=94.0,95.0,57.0,58.0,0.0,4.5, SURF_ID='COLUMN', STATISTICS='MAX' /
+
+&DEVC QUANTITY='GAUGE HEAT FLUX', ID='Flux_Col_A_FDS',  XB=10.0,11.0,57.0,58.0,0.0,4.5, SURF_ID='COLUMN', STATISTICS='MAX' /
+&DEVC QUANTITY='GAUGE HEAT FLUX', ID='Flux_Col_B_FDS',  XB=21.0,22.0,57.0,58.0,0.0,4.5, SURF_ID='COLUMN', STATISTICS='MAX' /
+&DEVC QUANTITY='GAUGE HEAT FLUX', ID='Flux_Col_C_FDS',  XB=10.0,11.0,32.0,33.0,0.0,4.5, SURF_ID='COLUMN', STATISTICS='MAX' /
+&DEVC QUANTITY='GAUGE HEAT FLUX', ID='Flux_Col_D_FDS',  XB=21.0,22.0,32.0,33.0,0.0,4.5, SURF_ID='COLUMN', STATISTICS='MAX' /
+&DEVC QUANTITY='GAUGE HEAT FLUX', ID='Flux_Col_E_FDS',  XB=52.0,53.0,57.0,58.0,0.0,4.5, SURF_ID='COLUMN', STATISTICS='MAX' /
+&DEVC QUANTITY='GAUGE HEAT FLUX', ID='Flux_Col_F_FDS',  XB=94.0,95.0,57.0,58.0,0.0,4.5, SURF_ID='COLUMN', STATISTICS='MAX' /
+
+Smokeview output
+
+&BNDF QUANTITY='WALL TEMPERATURE'/
+&BNDF QUANTITY='GAUGE HEAT FLUX'/
+
+&SLCF PBY= 3.5, VECTOR=.TRUE., QUANTITY='TEMPERATURE'/
+&SLCF PBY=50.0, VECTOR=.TRUE., QUANTITY='TEMPERATURE'/
+&SLCF PBY=95.0, VECTOR=.TRUE., QUANTITY='TEMPERATURE'/
+&SLCF PBY=50.0, QUANTITY='PRESSURE'/
+
+End file
+
+&TAIL /
