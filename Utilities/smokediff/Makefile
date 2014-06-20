@@ -10,7 +10,7 @@ FORTLIBDIR = /opt/intel/composerxe/lib
 
 # Definition of the object variables
 
-obj = assert.o dmalloc.o histogram.o IOdboundary.o IOdplot.o IOdslice.o main.o readsmv.o smv_endian.o file_util.o string_util.o utilities.o getsizes.o getdata.o 
+obj = assert.o dmalloc.o histogram.o IOdboundary.o IOdplot.o IOdslice.o main.o readsmv.o smv_endian.o file_util.o string_util.o utilities.o fdsmodules.o gsmv.o getsizes.o getdata.o 
 objwin = $(obj:.o=.obj)
 
 #*** General Purpose Rules ***
