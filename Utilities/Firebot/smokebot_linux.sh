@@ -1167,11 +1167,11 @@ if [[ $stage2a_success ]] ; then
 fi
 
 ### Stage 4b ###
-if [[ $stage2b_success ]] ; then
+#if [[ $stage2b_success ]] ; then
 #   compile_fds_mpi
 #   check_compile_fds_mpi
 fi
-BUILDFDS_end=`GET_TIME`
+#BUILDFDS_end=`GET_TIME`
 DIFF_BUILDFDS=`GET_DURATION $BUILDFDS_beg $BUILDFDS_end`
 echo "Build FDS: $DIFF_BUILDFDS" >> $STAGE_STATUS
 
