@@ -11,8 +11,9 @@ OPENMP_OPTS=
 FDS_DEBUG=0
 nthreads=2
 RUN_SMV=1
-RUN_MPI=1
 RUN_GEOM=1
+# not running any mpi cases now
+RUN_MPI=0
 
 function usage {
 echo "Run_SMV_Cases.sh [-d -h -m max_iterations -o nthreads -p -q queue_name -s ]"
