@@ -1156,8 +1156,8 @@ compile_fds_db
 check_compile_fds_db
 
 ### Stage 2b ###
-compile_fds_mpi_db
-check_compile_fds_mpi_db
+#compile_fds_mpi_db
+#check_compile_fds_mpi_db
 
 ### Stage 4a ###
 stage4_beg=`GET_TIME`
@@ -1168,8 +1168,8 @@ fi
 
 ### Stage 4b ###
 if [[ $stage2b_success ]] ; then
-   compile_fds_mpi
-   check_compile_fds_mpi
+#   compile_fds_mpi
+#   check_compile_fds_mpi
 fi
 BUILDFDS_end=`GET_TIME`
 DIFF_BUILDFDS=`GET_DURATION $BUILDFDS_beg $BUILDFDS_end`
