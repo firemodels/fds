@@ -6,5 +6,5 @@ LIBDIR=../LIBS/lib_linux_intel_64/
 source ../test_libs.sh
 
 make -f ../Makefile clean
-eval make -j4 ${SMV_MAKE_OPTS} -f ../Makefile intel_linux_64
+eval make ${SMV_MAKE_OPTS} -f ../Makefile intel_linux_64
 
