@@ -4609,7 +4609,7 @@ The following are all equivalent:
 \subsubsection{Two Gas Species with the Same Properties}
 \label{info:SPEC_advanced}
 
-In general only one species for a given {\ct ID} can be defined; however, you may wish to model multiple inlet streams of a species and be able to identify how well the streams are mixing.  This can be done by defining a lumped species, see Chapter~\ref{info:lumped}, with a single component.  For example, the lines:
+In general only one species for a given {\ct ID} can be defined; however, you may wish to model multiple inlet streams of a species and be able to identify how well the streams are mixing.  This can be done by defining a new species with a single component.  For example, the lines:
 \begin{lstlisting}
 &SPEC ID='CARBON DIOXIDE', LUMPED_COMPONENT_ONLY=.TRUE./
 &SPEC ID='CO2 1',SPEC_ID='CARBON DIOXIDE'/
@@ -4617,7 +4617,7 @@ In general only one species for a given {\ct ID} can be defined; however, you ma
 &DEVC XYZ=..., QUANTITY='MASS FRACTION', SPEC_ID='CO2 1', ID='Device 1'/
 &DEVC XYZ=..., QUANTITY='MASS FRACTION', SPEC_ID='CO2 2', ID='Device 2'/
 \end{lstlisting}
-define two species, both of which are {\ct CARBON DIOXIDE}.  Both will use the built in property data for CO$_2$ (specifying one or more properties for the duplicate species will override the default properties).  The {\ct ID} for each species is then used in the remainder of the input file.  The {\ct LUMPED\_COMPONENT\_ONLY} is given so that FDS only tracks {\ct CO2 1} and {\ct CO2 2} and not {\ct CARBON DIOXIDE}.  Note that the {\ct ID} you provide for a duplicate species cannot match the {\ct ID} of any other primitive or lumped {\ct SPEC} input.  Also note that this feature is only for use in duplicating a predefined species.
+define two duplicate species, both of which are {\ct CARBON DIOXIDE}.  Both will use the built in property data for CO$_2$ (note specifying one or more properties for a duplicate species will override the default properties).  The {\ct ID} for each duplicate species can then be used in the remainder of the input file.  In this exmaple, the {\ct LUMPED\_COMPONENT\_ONLY} was given so that FDS only tracks {\ct CO2 1} and {\ct CO2 2} and not {\ct CARBON DIOXIDE}.  Note that the {\ct ID} you provide for a duplicate species cannot match the {\ct ID} of any other primitive or lumped {\ct SPEC} input.  Also note that this feature can only be used to duplicate a predefined species (i.e. a species listed in Table~\ref{tab:gasspecies}).
 
 In the above example, the two {\ct DEVC} lines refer to the {\ct ID}s of the duplicate species.  If instead the primitive species {\ct ID} was used, then the output would sum the mass fractions over all species containing that primitive species.  For example, if the output quantities in the example above are changed as shown below, then {\ct Device 1} would just output the mass fraction of {\ct CO2 1} and {\ct Device 2} would output the sum of both.
 \begin{lstlisting}
@@ -4633,15 +4633,18 @@ that resulted from combustion.  The following inputs would allow you to do that:
 &DEVC XYZ=..., QUANTITY='MASS FRACTION', SPEC_ID='WATER VAPOR SPK', ID='Spr H2O'/
 &DEVC XYZ=..., QUANTITY='MASS FRACTION', SPEC_ID='WATER VAPOR', ID='All H2O'/
 \end{lstlisting}
-The gas species called {\ct 'WATER VAPOR SPK'} has the same properties as {\ct 'WATER VAPOR'}. The first device records only water that results from droplet evaporation, and the second device records water that originates from both sprinklers and combustion.
+The gas species called {\ct WATER VAPOR SPK} has the same properties as {\ct WATER VAPOR}. The first device records only water that results from droplet evaporation, and the second device records water that originates from both sprinklers and combustion.
 
-Duplicate species behave as primitive species and can be used in another lumped species definition.  For example the inputs below define two duplicate CO$_2_$ species.  The first is used in the definition of a lumped species and the second is a tracked species.
+By default, duplicate species are considered to be a lumped species and not a primitive species.  That is, by default, a duplicate species cannot be used in a lumped species definition.  Setting {\ct PRIMITIVE=.TRUE.} will have FDS treat the duplicate species as a primitive species and allow it to be used in a lumped species definition.  Note that when this is done, one can no longer aggregate {\ct SPEC\_ID} based outputs over the original and the duplicate species as the aggregation is done on the basis of the primitive species names.  This is demonstrated in the example below.  The species {\ct O2} and {\ct O3} are duplicate species of {\ct OXYGEN}.  {\ct O3} is defined as a primitive species and {\ct O2} is considered only a lumped species.  The initial {\ct DEVC} outputs in order would be 0.3 (0.1 for {\ct OXYGEN} plus 0.2 for {\ct O2}), 0.2 (the {\ct O2} initial value), and 0.3 (the {\ct O3} initial value).  Note the {\ct OXYGEN} output is not 0.6 since the {\ct O3} is defined as a new primitive species.
 \begin{lstlisting}
-&SPEC ID='OXYGEN', LUMPED_COMPONENT_ONLY=.TRUE./
-&SPEC ID='CARBON DIOXIDE', LUMPED_COMPONENT_ONLY=.TRUE./
-&SPEC ID='CO2 1',SPEC_ID='CARBON DIOXIDE',LUMPED_COMPONENT_ONLY=.TRUE./
-&SPEC ID='CO2 2',SPEC_ID='CARBON DIOXIDE'/
-&SPEC ID='MIXTURE 1',SPEC_ID='OXYGEN','CO2 1',MASS_FRACTION=0.1,0.9/
+&SPEC ID='NITROGEN',BACKGROUND=.TRUE./
+&SPEC ID='OXYGEN',MASS_FRACTION_0=0.1/
+&SPEC ID='O2',SPEC_ID='OXYGEN',MASS_FRACTION_0=0.2/
+&SPEC ID='O3',SPEC_ID='OXYGEN',MASS_FRACTION_0=0.3,PRIMITIVE=.TRUE./
+
+&DEVC XYZ=0.5,0.5,0.5,QUANTITY='MASS FRACTION',SPEC_ID='OXYGEN'/
+&DEVC XYZ=0.5,0.5,0.5,QUANTITY='MASS FRACTION',SPEC_ID='O2'/
+&DEVC XYZ=0.5,0.5,0.5,QUANTITY='MASS FRACTION',SPEC_ID='O3'/
 \end{lstlisting}
 
 \section{Specifying Lumped Species (Mixtures of Primitive Species)}
@@ -9871,6 +9874,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct MEAN\_DIAMETER}                & Real        & Section~\ref{info:deposition}           & m                 & 1.E-6         \\ \hline
 {\ct MELTING\_TEMPERATURE}          & Real        & Section~\ref{thermal_part_props}        & $^\circ$C         &               \\ \hline
 {\ct MW}                            & Real        & Section~\ref{gas_species_props}         & g/mol             & 29.           \\ \hline
+{\ct PRIMITIVE}                     & Logical     & Section~\ref{gas_species_props}         &                   &               \\ \hline
 {\ct RADCAL\_ID}                    & Character   & Section~\ref{info:SPEC_advanced}        &                   &               \\ \hline
 {\ct RAMP\_CP}                      & Character   & Section~\ref{gas_species_props}         &                   &               \\ \hline
 {\ct RAMP\_CP\_L}                   & Character   & Section~\ref{thermal_part_props}        &                   &               \\ \hline
