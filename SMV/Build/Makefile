@@ -17,7 +17,7 @@ SMV_PROFILESTRING =
 
 # The variable VPATH defines the source code directory relative to the current directory
 
-VPATH = $(SOURCE_DIR)/smokeview:$(SOURCE_DIR)/shared:$(SOURCE_DIR)/glew
+VPATH = $(SOURCE_DIR)/smokeview:../../../FDS_Source:$(SOURCE_DIR)/shared:$(SOURCE_DIR)/glew
 bin = .
 
 # BUILD_DIR defined directory containing this Makefile
@@ -28,7 +28,18 @@ INC_DIR = $(SOURCE_DIR)/include2
 
 # Definition of the object variables
 
-obj = main.o menus.o IOscript.o IOshooter.o glui_devices.o glui_shooter.o glui_wui.o csphere.o colortimebar.o smv_endian.o camera.o IOgeometry.o IOhrr.o IOwui.o IOobject.o IOtour.o glui_display.o glui_tour.o getdatacolors.o smokeview.o output.o renderfile.o isobox.o getdatabounds.o readsmv.o scontour2d.o glui_3dsmoke.o glui_clip.o glui_stereo.o glui_geometry.o glui_motion.o glui_bounds.o egz_stdio.o dmalloc.o interp.o assert.o compress3dc.o compress.o IOvolsmoke.o IOsmoke.o IOplot3d.o IOslice.o IOboundary.o IOpart.o IOzone.o IOiso.o IOtarget.o callbacks.o drawGeometry.o glui_colorbar.o skybox.o file_util.o string_util.o startup.o glui_trainer.o shaders.o unit.o threader.o histogram.o translate.o update.o viewports.o smv_geometry.o geometry.o showscene.o fdsmodules.o gsmv.o getdata.o getsizes.o glew.o
+obj = main.o menus.o IOscript.o IOshooter.o glui_devices.o glui_shooter.o glui_wui.o\
+      csphere.o colortimebar.o smv_endian.o camera.o IOgeometry.o IOhrr.o IOwui.o\
+      IOobject.o IOtour.o glui_display.o glui_tour.o getdatacolors.o smokeview.o\
+      output.o renderfile.o isobox.o getdatabounds.o readsmv.o scontour2d.o\
+      glui_3dsmoke.o glui_clip.o glui_stereo.o glui_geometry.o glui_motion.o\
+      glui_bounds.o egz_stdio.o dmalloc.o interp.o assert.o compress3dc.o\
+      compress.o IOvolsmoke.o IOsmoke.o IOplot3d.o IOslice.o IOboundary.o\
+      IOpart.o IOzone.o IOiso.o IOtarget.o callbacks.o drawGeometry.o\
+      glui_colorbar.o skybox.o file_util.o string_util.o startup.o glui_trainer.o\
+      shaders.o unit.o threader.o histogram.o translate.o update.o viewports.o\
+      smv_geometry.o geometry.o showscene.o fdsmodules.o\
+      gsmv.o getdata.o getsizes.o glew.o
 objwin = $(obj:.o=.obj)
 
 # include file directory locations (should be the same for all builds)

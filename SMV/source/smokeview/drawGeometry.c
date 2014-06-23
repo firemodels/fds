@@ -419,9 +419,11 @@ void DrawGeomTest(int option){
   clipdata tetra_clipinfo, box_clipinfo;
   float *v1, *v2, *v3, *v4;
   int nverts;
-  int facestart[100], facenum[100], nfaces;
-  float verts[300]; 
+  int facestart[200], facenum[200], nfaces;
+  float verts[600]; 
+  int b_state[7],*box_state;
 
+  box_state = b_state+1;
   v1 = tetra_vertices;
   v2 = v1 + 3;
   v3 = v2 + 3;
@@ -445,7 +447,27 @@ void DrawGeomTest(int option){
   ymax = box_bounds+3;
   zmin = box_bounds+4;
   zmax = box_bounds+5;
-  initBoxClipInfo(&box_clipinfo,*xmin,*xmax,*ymin,*ymax,*zmin,*zmax);
+  {
+    float volume;
+    int flag=0,error,i;
+    double err;
+
+    FORTgetverts(box_bounds, v1, v2, v3, v4, verts, &nverts, facestart, facenum, &nfaces, &volume, &flag, b_state, &error, &err);
+    initBoxClipInfo(&box_clipinfo,*xmin,*xmax,*ymin,*ymax,*zmin,*zmax);
+    if(box_state[0]!=-1)box_clipinfo.clip_xmin=0;
+    if(box_state[1]!=-1)box_clipinfo.clip_xmax=0;
+    if(box_state[2]!=-1)box_clipinfo.clip_ymin=0;
+    if(box_state[3]!=-1)box_clipinfo.clip_ymax=0;
+    if(box_state[4]!=-1)box_clipinfo.clip_zmin=0;
+    if(box_state[5]!=-1)box_clipinfo.clip_zmax=0;
+#define  EPSBOX 0.0001
+    box_clipinfo.xmin+=EPSBOX;
+    box_clipinfo.xmax-=EPSBOX;
+    box_clipinfo.ymin+=EPSBOX;
+    box_clipinfo.ymax-=EPSBOX;
+    box_clipinfo.zmin+=EPSBOX;
+    box_clipinfo.zmax-=EPSBOX;
+  }
 
   glPushMatrix();
   glScalef(SCALE2SMV(1.0),SCALE2SMV(1.0),SCALE2SMV(1.0));
@@ -455,7 +477,65 @@ void DrawGeomTest(int option){
   glPushMatrix();
   glTranslatef(*xmin,*ymin,*zmin);
   glScalef(ABS(*xmax-*xmin),ABS(*ymax-*ymin),ABS(*zmax-*zmin));
-  if(option==0)drawcubec(1.0,cubecolor);
+  if(option==0){
+    float volume;
+    int flag=0,error;
+    double err;
+
+    FORTgetverts(box_bounds, v1, v2, v3, v4, verts, &nverts, facestart, facenum, &nfaces, &volume, &flag, b_state, &error, &err);
+
+    glBegin(GL_QUADS);
+    glColor3ubv(cubecolor);
+
+    if(box_state[4]==-1){
+      glNormal3f( 0.0, 0.0,-1.0);
+      glVertex3f( 0.0,0.0,0.0);  // 1
+      glVertex3f( 0.0,1.0,0.0);  // 4
+      glVertex3f( 1.0,1.0,0.0);  // 3
+      glVertex3f( 1.0,0.0,0.0);  // 2
+    }
+
+    if(box_state[5]==-1){
+      glNormal3f(0.0,0.0,1.0);
+      glVertex3f(0.0,0.0,1.0);  // 5
+      glVertex3f(1.0,0.0,1.0);  // 6
+      glVertex3f(1.0,1.0,1.0);  // 7
+      glVertex3f(0.0,1.0,1.0);  // 8
+    }
+
+    if(box_state[2]==-1){
+      glNormal3f(0.0,-1.0,0.0);
+      glVertex3f(0.0,0.0,0.0);  // 1
+      glVertex3f(1.0,0.0,0.0);  // 2
+      glVertex3f(1.0,0.0,1.0);  // 6
+      glVertex3f(0.0,0.0,1.0);  // 5
+    }
+
+    if(box_state[3]==-1){
+      glNormal3f(0.0,1.0,0.0);
+      glVertex3f(1.0,1.0,0.0);  // 3
+      glVertex3f(0.0,1.0,0.0);  // 4
+      glVertex3f(0.0,1.0,1.0);  // 8
+      glVertex3f(1.0,1.0,1.0);  // 7
+    }
+
+    if(box_state[0]==-1){
+      glNormal3f(-1.0,0.0,0.0);
+      glVertex3f(0.0,0.0,0.0);  // 1
+      glVertex3f(0.0,0.0,1.0);  // 5
+      glVertex3f(0.0,1.0,1.0);  // 8
+      glVertex3f(0.0,1.0,0.0);  // 4
+    }
+
+    if(box_state[1]==-1){
+      glNormal3f(1.0,0.0,0.0);
+      glVertex3f(1.0,0.0,0.0);  // 2
+      glVertex3f(1.0,1.0,0.0);  // 3
+      glVertex3f(1.0,1.0,1.0);  // 7
+      glVertex3f(1.0,0.0,1.0);  // 6
+    }
+    glEnd();
+  }
 #define EPS 0.02
   if(option==1){
     output3Text(foregroundcolor, -EPS, 0.5, 0.5, "xmin");
@@ -494,7 +574,7 @@ void DrawGeomTest(int option){
     int flag=0,error;
     double err;
 
-    FORTgetverts(box_bounds, v1, v2, v3, v4, verts, &nverts, facestart, facenum, &nfaces, &volume, &flag, &error, &err);
+    FORTgetverts(box_bounds, v1, v2, v3, v4, verts, &nverts, facestart, facenum, &nfaces, &volume, &flag, b_state, &error, &err);
     printf("volume=%f\n\n",volume);
     if(nverts>0){
       int j;
