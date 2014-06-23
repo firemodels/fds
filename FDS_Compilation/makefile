@@ -789,6 +789,7 @@ smvv.obj : prec.obj func.obj
 ctrl.obj : prec.obj cons.obj type.obj mesh.obj func.obj
 turb.obj : func.obj prec.obj cons.obj mesh.obj
 samr.obj : prec.obj cons.obj mesh.obj
+gsmv.obj : func.obj prec.obj cons.obj mesh.obj
 geom.obj : func.obj prec.obj cons.obj mesh.obj
 scrc.obj : prec.obj cons.obj mesh.obj func.obj pois.obj
 irad.obj : func.obj prec.obj cons.obj type.obj mesh.obj
