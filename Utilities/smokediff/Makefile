@@ -3,7 +3,7 @@ INC_DIR = -I $(SOURCE_DIR)/shared -I $(SOURCE_DIR)/smokediff
 FILTERC =
 FILTERF =
 
-VPATH = $(SOURCE_DIR)/smokediff ..\..\..\FDS_Source $(SOURCE_DIR)/shared $(SOURCE_DIR)/smokeview
+VPATH = $(SOURCE_DIR)/smokediff ../../../FDS_Source $(SOURCE_DIR)/shared $(SOURCE_DIR)/smokeview
 bin = .
 
 FORTLIBDIR = /opt/intel/composerxe/lib
