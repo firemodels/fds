@@ -1414,18 +1414,20 @@ ENDIF
  
 ! Write out immersed file info
 
-WRITE(LU_SMV,'(/A,1X,I6)') 'GEOM',N_GEOMETRY
-IF (N_GEOMETRY>0) WRITE(LU_SMV,'(1X,A)') FN_GEOM(1)
-DO I = 1, N_GEOMETRY
-   GEOMI=>GEOMETRY(I)
+IF (N_GEOMETRY>0) THEN
+   WRITE(LU_SMV,'(/A,1X,I6)') 'GEOM',N_GEOMETRY
+   WRITE(LU_SMV,'(1X,A)') FN_GEOM(1)
+   DO I = 1, N_GEOMETRY
+      GEOMI=>GEOMETRY(I)
    
-   IF (GEOMI%SURF_ID .EQ. 'null') THEN
-      WRITE(LU_SMV,'(1X,A,1X,3(E13.6,1X))')TRIM(GEOMI%TEXTURE_MAPPING), GEOMI%TEXTURE_ORIGIN
-   ELSE
-      WRITE(LU_SMV,'(1X,A,1X,3(E13.6,1X),A,1X,A)')TRIM(GEOMI%TEXTURE_MAPPING), GEOMI%TEXTURE_ORIGIN,'%',&
-                                                  TRIM(GEOMI%SURF_ID)
-   ENDIF
-END DO
+      IF (GEOMI%SURF_ID .EQ. 'null') THEN
+         WRITE(LU_SMV,'(1X,A,1X,3(E13.6,1X))')TRIM(GEOMI%TEXTURE_MAPPING), GEOMI%TEXTURE_ORIGIN
+      ELSE
+         WRITE(LU_SMV,'(1X,A,1X,3(E13.6,1X),A,1X,A)')TRIM(GEOMI%TEXTURE_MAPPING), GEOMI%TEXTURE_ORIGIN,'%',&
+                                                     TRIM(GEOMI%SURF_ID)
+      ENDIF
+   END DO
+ENDIF
  
 ! Write out info about particle types
 
