@@ -1457,6 +1457,7 @@ void read_geom(geomdata *geomi, int load_flag, int type, int *errorcode){
   int returncode;
   int one=0,endianswitch=0;
 
+  if(geomi->file==NULL)return;
   stream = fopen(geomi->file,"rb");
   if(stream==NULL){
     return;
