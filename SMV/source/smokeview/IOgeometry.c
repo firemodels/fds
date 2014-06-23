@@ -1869,6 +1869,7 @@ void Sort_Embedded_Geometry(float *mm){
 /* ------------------ init_geom ------------------------ */
 
 void init_geom(geomdata *geomi){
+  geomi->file=NULL;
   geomi->display=0;
   geomi->loaded=0;
   geomi->geomlistinfo_0=NULL;

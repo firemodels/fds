@@ -3451,15 +3451,15 @@ int readsmv(char *file, char *file2){
         sscanf(buff2,"%i",&ngeomobjinfo);
       }
 
-      fgets(buffer,255,stream);
-      trim(buffer);
-      buff2 = trim_front(buffer);
-      NewMemory((void **)&geomi->file,strlen(buff2)+1);
-      strcpy(geomi->file,buff2);
-
       init_geom(geomi);
 
       if(ngeomobjinfo>0){
+        fgets(buffer,255,stream);
+        trim(buffer);
+        buff2 = trim_front(buffer);
+        NewMemory((void **)&geomi->file,strlen(buff2)+1);
+        strcpy(geomi->file,buff2);
+
         NewMemory((void **)&geomi->geomobjinfo,ngeomobjinfo*sizeof(geomobjdata));
         for(i=0;i<ngeomobjinfo;i++){
           geomobjdata *geomobji;
