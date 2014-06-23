@@ -14,7 +14,7 @@ VPATH = ../FDS_Source
 # Definition of the non-MPI object variables
 
 obj_serial = prec.o mpis.o cons.o devc.o data.o type.o mesh.o func.o smvv.o irad.o \
-             ieva.o pois.o scrc.o radi.o evac.o geom.o part.o vege.o ctrl.o turb.o samr.o dump.o hvac.o mass.o \
+             ieva.o pois.o scrc.o radi.o evac.o gsmv.o geom.o part.o vege.o ctrl.o turb.o samr.o dump.o hvac.o mass.o \
              read.o wall.o fire.o divg.o init.o velo.o pres.o main.o
 
 objwin_serial = $(obj_serial:.o=.obj)
@@ -22,7 +22,7 @@ objwin_serial = $(obj_serial:.o=.obj)
 # Definition of the MPI object variables
 
 obj_mpi = prec.o mpip.o cons.o devc.o data.o type.o mesh.o func.o smvv.o irad.o \
-          ieva.o pois.o scrc.o radi.o evac.o geom.o part.o vege.o ctrl.o turb.o samr.o dump.o hvac.o mass.o \
+          ieva.o pois.o scrc.o radi.o evac.o gsmv.o geom.o part.o vege.o ctrl.o turb.o samr.o dump.o hvac.o mass.o \
           read.o wall.o fire.o divg.o init.o velo.o pres.o main.o
 
 objwin_mpi = $(obj_mpi:.o=.obj)
@@ -756,6 +756,7 @@ smvv.o : prec.o func.o
 ctrl.o : prec.o cons.o type.o mesh.o func.o
 turb.o : func.o prec.o cons.o mesh.o
 samr.o : prec.o cons.o mesh.o
+gsmv.o : func.o prec.o cons.o mesh.o
 geom.o : func.o prec.o cons.o mesh.o
 scrc.o : prec.o cons.o mesh.o func.o pois.o
 irad.o : func.o prec.o cons.o type.o mesh.o
