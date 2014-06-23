@@ -1415,7 +1415,7 @@ ENDIF
 ! Write out immersed file info
 
 WRITE(LU_SMV,'(/A,1X,I6)') 'GEOM',N_GEOMETRY
-WRITE(LU_SMV,'(1X,A)') FN_GEOM(1)
+IF (N_GEOMETRY>0) WRITE(LU_SMV,'(1X,A)') FN_GEOM(1)
 DO I = 1, N_GEOMETRY
    GEOMI=>GEOMETRY(I)
    
