@@ -4,7 +4,6 @@ if [%reduced%] == [] (
   set reduced=0
 )
 
-
 :: -------------------------------------------------------------
 ::                         set 32 or 64 bit environment
 :: -------------------------------------------------------------
@@ -182,14 +181,14 @@ make VPATH="../../FDS_Source" -f ..\makefile %OPENMP%intel_win_%size%_db 1>> %OU
 call :does_file_exist fds_%OPENMP%win_%size%_db.exe %OUTDIR%\stage1a.txt|| exit /b 1
 call :find_fds_warnings "warning" %OUTDIR%\stage1a.txt "Stage 1a"
 
-echo             parallel debug
+:: echo             parallel debug
 
-cd %svnroot%\FDS_Compilation\mpi_intel_win_%size%_db
-erase *.obj *.mod *.exe 1> %OUTDIR%\stage1b.txt 2>&1
-make MPIINCLUDE=%mpichinc% MPILIB=%mpichlib% VPATH="../../FDS_Source" -f ..\makefile mpi_intel_win_%size%_db 1>> %OUTDIR%\stage1b.txt 2>&1
+:: cd %svnroot%\FDS_Compilation\mpi_intel_win_%size%_db
+:: erase *.obj *.mod *.exe 1> %OUTDIR%\stage1b.txt 2>&1
+:: make MPIINCLUDE=%mpichinc% MPILIB=%mpichlib% VPATH="../../FDS_Source" -f ..\makefile mpi_intel_win_%size%_db 1>> %OUTDIR%\stage1b.txt 2>&1
 
-call :does_file_exist fds_mpi_win_%size%_db.exe %OUTDIR%\stage1b.txt|| exit /b 1
-call :find_fds_warnings "warning" %OUTDIR%\stage1b.txt "Stage 1b"
+:: call :does_file_exist fds_mpi_win_%size%_db.exe %OUTDIR%\stage1b.txt|| exit /b 1
+:: call :find_fds_warnings "warning" %OUTDIR%\stage1b.txt "Stage 1b"
 
 :skip_fds_debug
 
@@ -204,14 +203,14 @@ call :find_fds_warnings "warning" %OUTDIR%\stage1c.txt "Stage 1c"
 
 if %reduced% == 1 goto skip_fds_parallel
 
-echo             parallel release
+:: echo             parallel release
 
-cd %svnroot%\FDS_Compilation\mpi_intel_win_%size%
-erase *.obj *.mod *.exe 1> %OUTDIR%\stage1d.txt 2>&1
-make MPIINCLUDE=%mpichinc% MPILIB=%mpichlib% VPATH="../../FDS_Source" -f ..\makefile mpi_intel_win_%size%  1>> %OUTDIR%\stage1d.txt 2>&1
+:: cd %svnroot%\FDS_Compilation\mpi_intel_win_%size%
+:: erase *.obj *.mod *.exe 1> %OUTDIR%\stage1d.txt 2>&1
+:: make MPIINCLUDE=%mpichinc% MPILIB=%mpichlib% VPATH="../../FDS_Source" -f ..\makefile mpi_intel_win_%size%  1>> %OUTDIR%\stage1d.txt 2>&1
 
-call :does_file_exist fds_mpi_win_%size%.exe %OUTDIR%\stage1d.txt|| exit /b 1
-call :find_fds_warnings "warning" %OUTDIR%\stage1d.txt "Stage 1d"
+:: call :does_file_exist fds_mpi_win_%size%.exe %OUTDIR%\stage1d.txt|| exit /b 1
+:: call :find_fds_warnings "warning" %OUTDIR%\stage1d.txt "Stage 1d"
 
 :skip_fds_parallel
 
