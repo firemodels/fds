@@ -1170,7 +1170,7 @@ fi
 #if [[ $stage2b_success ]] ; then
 #   compile_fds_mpi
 #   check_compile_fds_mpi
-fi
+#fi
 #BUILDFDS_end=`GET_TIME`
 DIFF_BUILDFDS=`GET_DURATION $BUILDFDS_beg $BUILDFDS_end`
 echo "Build FDS: $DIFF_BUILDFDS" >> $STAGE_STATUS
