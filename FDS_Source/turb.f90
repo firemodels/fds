@@ -854,16 +854,6 @@ INTEGER :: ITER
 ! References:
 !
 ! S. B. Pope (2000) Turbulent Flows, Cambridge.
-!
-! Comments:
-!
-! The slip factor (SF) is based on the following approximation to the wall gradient
-! (note that u0 is the ghost cell value of the streamwise velocity component and
-! y is the wall-normal direction):
-! dudy = (u-u0)/dy = (u-SF*u)/dy = u/dy*(1-SF) => SF = 1 - dudy*dy/u
-! In this routine, dudy is sampled from the wall model at the location y_cell_center.
-
-! New scheme
 
 ! Step 1: compute laminar (DNS) stress, and initial guess for LES stress
 
@@ -923,6 +913,18 @@ LES_IF: IF (LES) THEN
       DELTA_NU = NU/(U_TAU+EPS)
 
    ENDDO
+
+   ! NOTE: SLIP_FACTOR is no longer used to compute the wall stress, see VELOCITY_BC.
+   ! The stress is taken directly from U_TAU. SLIP_FACTOR is, however, still used to 
+   ! compute the velocity gradient at the wall that feeds into the wall vorticity.
+   ! Since the gradients implied by the wall function can be large and lead to instabilities,
+   ! we bound the wall slip between no slip and free slip.
+
+   ! The slip factor (SF) is based on the following approximation to the wall gradient
+   ! (note that u0 is the ghost cell value of the streamwise velocity component and
+   ! y is the wall-normal direction):
+   ! dudy = (u-u0)/dy = (u-SF*u)/dy = u/dy*(1-SF) => SF = 1 - dudy*dy/u
+   ! In this routine, dudy is sampled from the wall model at the location y_cell_center.
 
    SLIP_FACTOR = MAX(-1._EB,MIN(1._EB,1._EB-DUDY*DY/(ABS(U)+EPS))) ! -1.0 <= SLIP_FACTOR <= 1.0
 
