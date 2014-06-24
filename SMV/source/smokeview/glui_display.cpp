@@ -177,6 +177,11 @@ GLUI_Panel *PANEL_geom2=NULL;
 GLUI_Panel *PANEL_geom2a=NULL;
 GLUI_Panel *PANEL_geom2b=NULL;
 GLUI_Panel *PANEL_geom2c=NULL;
+GLUI_Panel *PANEL_geom3a=NULL;
+GLUI_Panel *PANEL_geom3b=NULL;
+GLUI_Panel *PANEL_geom3c=NULL;
+GLUI_Panel *PANEL_geom3ab=NULL;
+GLUI_Panel *PANEL_geom3abc=NULL;
 GLUI_Spinner *SPINNER_box_bounds[6];
 GLUI_Spinner *SPINNER_box_translate[3];
 GLUI_Spinner *SPINNER_tetra_vertices[12];
@@ -771,16 +776,28 @@ extern "C" void glui_labels_setup(int main_window){
   SPINNER_tetra_vertices[11]=glui_labels->add_spinner_to_panel(PANEL_geom2c,"z:",GLUI_SPINNER_FLOAT,tetra_vertices+11);
 
   glui_labels->add_checkbox_to_panel(ROLLOUT_geomtest,"show intersection",&show_intersection);
-  {
-    int i;
-    
-    for(i=0;i<10;i++){
-      char label[100];
 
-      sprintf(label,"face %i",i);
-      glui_labels->add_checkbox_to_panel(ROLLOUT_geomtest,label,tetrabox_vis+i);
-    }
-  }
+  PANEL_geom3abc=glui_labels->add_panel_to_panel(ROLLOUT_geomtest,"box/tetrahedron faces",GLUI_PANEL_NONE);
+
+  PANEL_geom3ab=glui_labels->add_panel_to_panel(PANEL_geom3abc,"box");
+  PANEL_geom3a=glui_labels->add_panel_to_panel(PANEL_geom3ab,"",GLUI_PANEL_NONE);
+  glui_labels->add_column_to_panel(PANEL_geom3ab,false);
+  PANEL_geom3b=glui_labels->add_panel_to_panel(PANEL_geom3ab,"",GLUI_PANEL_NONE);
+
+
+  glui_labels->add_column_to_panel(PANEL_geom3abc,false);
+  PANEL_geom3c=glui_labels->add_panel_to_panel(PANEL_geom3abc,"tetrahedron");
+
+  glui_labels->add_checkbox_to_panel(PANEL_geom3a,"xmin",tetrabox_vis+0);
+  glui_labels->add_checkbox_to_panel(PANEL_geom3b,"xmax",tetrabox_vis+1);
+  glui_labels->add_checkbox_to_panel(PANEL_geom3a,"ymin",tetrabox_vis+2);
+  glui_labels->add_checkbox_to_panel(PANEL_geom3b,"ymax",tetrabox_vis+3);
+  glui_labels->add_checkbox_to_panel(PANEL_geom3a,"zmin",tetrabox_vis+4);
+  glui_labels->add_checkbox_to_panel(PANEL_geom3b,"zmax",tetrabox_vis+5);
+  glui_labels->add_checkbox_to_panel(PANEL_geom3c,"0",tetrabox_vis+6);
+  glui_labels->add_checkbox_to_panel(PANEL_geom3c,"1",tetrabox_vis+7);
+  glui_labels->add_checkbox_to_panel(PANEL_geom3c,"2",tetrabox_vis+8);
+  glui_labels->add_checkbox_to_panel(PANEL_geom3c,"3",tetrabox_vis+9);
 
 #endif
 

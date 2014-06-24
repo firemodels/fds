@@ -419,7 +419,7 @@ void DrawGeomTest(int option){
   clipdata tetra_clipinfo, box_clipinfo;
   float *v1, *v2, *v3, *v4;
   int nverts;
-  int facestart[200], facenum[200], nfaces;
+  int facestart[200], facenum[200], face_id[200], nfaces;
   float verts[600]; 
   int b_state[7],*box_state;
 
@@ -452,7 +452,10 @@ void DrawGeomTest(int option){
     int flag=0,error,i;
     double err;
 
-    FORTgetverts(box_bounds, v1, v2, v3, v4, verts, &nverts, facestart, facenum, &nfaces, &volume, &flag, b_state, &error, &err);
+    FORTgetverts(box_bounds, v1, v2, v3, v4, verts, &nverts, facestart, facenum, face_id, &nfaces, &volume, &flag, b_state, &error, &err);
+    if(nfaces>10){
+      printf("***error: nface=%i should not be bigger than 10\n",nfaces);
+    }
     initBoxClipInfo(&box_clipinfo,*xmin,*xmax,*ymin,*ymax,*zmin,*zmax);
     if(box_state[0]!=-1)box_clipinfo.clip_xmin=0;
     if(box_state[1]!=-1)box_clipinfo.clip_xmax=0;
@@ -460,7 +463,7 @@ void DrawGeomTest(int option){
     if(box_state[3]!=-1)box_clipinfo.clip_ymax=0;
     if(box_state[4]!=-1)box_clipinfo.clip_zmin=0;
     if(box_state[5]!=-1)box_clipinfo.clip_zmax=0;
-#define  EPSBOX 0.0001
+#define  EPSBOX (-0.0001)
     box_clipinfo.xmin+=EPSBOX;
     box_clipinfo.xmax-=EPSBOX;
     box_clipinfo.ymin+=EPSBOX;
@@ -482,7 +485,10 @@ void DrawGeomTest(int option){
     int flag=0,error;
     double err;
 
-    FORTgetverts(box_bounds, v1, v2, v3, v4, verts, &nverts, facestart, facenum, &nfaces, &volume, &flag, b_state, &error, &err);
+    FORTgetverts(box_bounds, v1, v2, v3, v4, verts, &nverts, facestart, facenum, face_id, &nfaces, &volume, &flag, b_state, &error, &err);
+    if(nfaces>10){
+      printf("***error: nface=%i should not be bigger than 10\n",nfaces);
+    }
 
     glBegin(GL_QUADS);
     glColor3ubv(cubecolor);
@@ -544,6 +550,7 @@ void DrawGeomTest(int option){
     output3Text(foregroundcolor, 0.5, 1.0+EPS, 0.5, "ymax");
     output3Text(foregroundcolor, 0.5, 0.5, -EPS, "zmin");
     output3Text(foregroundcolor, 0.5, 0.5, 1.0+EPS, "zmax");
+    glLineWidth(vectorlinewidth);
     drawcubec_outline(1.0,cubecolor);
   }
   glPopMatrix();
@@ -563,6 +570,7 @@ void DrawGeomTest(int option){
     output3Text(foregroundcolor, v2[0]+EPS, v2[1]-EPS, v2[2]-EPS, "2");
     output3Text(foregroundcolor, v3[0], v3[1]+EPS, v3[2]-EPS, "3");
     output3Text(foregroundcolor, v4[0], v4[1], v4[2]+EPS, "4");
+    glLineWidth(vectorlinewidth);
     drawtetra_outline(v1,v2,v3,v4,tetracolor);
   }
 
@@ -573,8 +581,12 @@ void DrawGeomTest(int option){
     float volume;
     int flag=0,error;
     double err;
+    int i;
 
-    FORTgetverts(box_bounds, v1, v2, v3, v4, verts, &nverts, facestart, facenum, &nfaces, &volume, &flag, b_state, &error, &err);
+    FORTgetverts(box_bounds, v1, v2, v3, v4, verts, &nverts, facestart, facenum, face_id, &nfaces, &volume, &flag, b_state, &error, &err);
+    if(nfaces>10){
+      printf("***error: nface=%i should not be bigger than 10\n",nfaces);
+    }
     printf("volume=%f\n\n",volume);
     if(nverts>0){
       int j;
@@ -588,7 +600,7 @@ void DrawGeomTest(int option){
       for(j=0;j<nfaces;j++){
         int i;
 
-        if(tetrabox_vis[j]==0)continue;
+        if(tetrabox_vis[face_id[j]]==0)continue;
         for(i=facestart[j];i<facestart[j+1];i++){
           glVertex3fv(verts+3*i);
         }
@@ -598,7 +610,7 @@ void DrawGeomTest(int option){
         for(j=0;j<nfaces;j++){
           int i;
 
-          if(tetrabox_vis[j]==0)continue;
+          if(tetrabox_vis[face_id[j]]==0)continue;
           for(i=facestart[j];i<facestart[j+1];i++){
             char label[100];
 
