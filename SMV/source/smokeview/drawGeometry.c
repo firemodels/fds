@@ -37,6 +37,8 @@ typedef struct {
   edge *edges[4];
 } plane;
 
+void Volume_CB(int var);
+
 
 /* ------------------ set_edge ------------------------ */
 
@@ -423,9 +425,8 @@ void DrawGeomTest(int option){
   clipdata tetra_clipinfo, box_clipinfo;
   float *v1, *v2, *v3, *v4;
   int nverts;
-  int facestart[200], facenum[200], face_id[200], nfaces;
+  int facestart[200], facenum[200], nfaces;
   float verts[600]; 
-  int b_state[7],*box_state;
 
   box_state = b_state+1;
   v1 = tetra_vertices;
@@ -457,6 +458,29 @@ void DrawGeomTest(int option){
     double err;
 
     FORTgetverts(box_bounds, v1, v2, v3, v4, verts, &nverts, facestart, facenum, face_id, &nfaces, &volume, &flag, b_state, &error, &err);
+    if(update_volbox_controls==1){
+      for(i=0;i<10;i++){
+        face_vis[i]=0;
+      }
+      for(i=0;i<nfaces;i++){
+        face_vis[face_id[i]]=1;
+      }
+      for(i=0;i<nfaces;i++){
+        int face;
+        int tet_face;
+
+        face = face_id[i];
+        if(face<6){
+          tet_face=box_state[face];
+          if(tet_face>-1){
+            ASSERT(tet_face>=0&&tet_face<4);
+            face_vis[tet_face+6]=1;
+          }
+        }
+      }
+      Volume_CB(2);
+    }
+
     if(nfaces>10){
       printf("***error: nface=%i should not be bigger than 10\n",nfaces);
     }

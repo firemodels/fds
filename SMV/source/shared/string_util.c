@@ -412,7 +412,7 @@ void num2string(char *string, float tval,float range){
 
     /*sprintf(string,"%1.1e",tval); */
   }
-  if(strlen(string)>9)fprintf(stderr,"ut oh - overwriting string\n");
+  if(strlen(string)>9)fprintf(stderr,"***fatal error - overwriting string\n");
 }
 
 /* ------------------ trim_string ------------------------ */

@@ -1122,6 +1122,16 @@ void initvars(void){
   for(i=0;i<10;i++){
     tetrabox_vis[i]=1;
   }
+  for(i=0;i<200;i++){
+    face_id[i]=1;
+  }
+  for(i=0;i<10;i++){
+    face_vis[i]=1;
+    face_vis_old[i]=1;
+  }
+  for(i=0;i<7;i++){
+    b_state[i]=-1;
+  }
 #endif
 #ifdef pp_DEG
   degC[0]=176; // deg symbol (small superscript 0)
