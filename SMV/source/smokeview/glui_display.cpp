@@ -752,7 +752,6 @@ extern "C" void glui_labels_setup(int main_window){
   glui_labels->add_column_to_panel(PANEL_geom1c,false);
   SPINNER_box_translate[2]=glui_labels->add_spinner_to_panel(PANEL_geom1c,"z",GLUI_SPINNER_FLOAT,box_translate+2,VOL_BOXTRANSLATE,Volume_CB);
   Volume_CB(VOL_BOXTRANSLATE);
-
   PANEL_geom2=glui_labels->add_panel_to_panel(ROLLOUT_geomtest,"tetrahedron vertices");
   PANEL_geom2a=glui_labels->add_panel_to_panel(PANEL_geom2,"",GLUI_PANEL_NONE);
   glui_labels->add_column_to_panel(PANEL_geom2,false);

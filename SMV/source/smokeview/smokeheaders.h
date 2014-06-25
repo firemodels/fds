@@ -114,6 +114,8 @@ EXTERNCPP void init_clip(void);
 EXTERNCPP void setClipPlanes(clipdata *ci, int option);
 
 EXTERNCPP void drawfilledtetra(float *v1, float *v2, float *v3, float *v4, unsigned char *rgbcolor);
+EXTERNCPP void drawfilled2tetra(float *v1, float *v2, float *v3, float *v4, 
+   unsigned char *rgb0color,unsigned char *rgb1color,unsigned char *rgb2color,unsigned char *rgb3color,int *vis_state);
 EXTERNCPP void drawtetra_outline(float *v1, float *v2, float *v3, float *v4, unsigned char *rgbcolor);
 EXTERNCPP void drawfilledcircle(float diameter, unsigned char *rgbcolor, circdata *circinfo);
 EXTERNCPP void drawcubec(float size, unsigned char *rgbcolor);

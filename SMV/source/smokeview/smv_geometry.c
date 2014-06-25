@@ -136,6 +136,96 @@ void drawfilledtetra(float *v1, float *v2, float *v3, float *v4, unsigned char *
   glEnd();
 }
 
+/* ----------------------- drawfilled2tetra ----------------------------- */
+
+void drawfilled2tetra(float *v1, float *v2, float *v3, float *v4, 
+                     unsigned char *rgb0color,
+                     unsigned char *rgb1color,
+                     unsigned char *rgb2color,
+                     unsigned char *rgb3color,
+                     int *vis_plane
+                     ){
+  float diff1[3],diff2[3],cross[3];
+
+  glBegin(GL_TRIANGLES);
+  if(vis_plane[0]==1){
+     if(rgb0color!=NULL)glColor3ubv(rgb0color);
+    VECDIFF3(diff1,v1,v2);
+    VECDIFF3(diff2,v4,v2);
+    CROSS(cross,diff1,diff2);
+    glNormal3f(cross[0],cross[1],cross[2]);
+    glVertex3fv(v1);
+    glVertex3fv(v2);
+    glVertex3fv(v4);
+
+    VECDIFF3(diff1,v1,v4);
+    VECDIFF3(diff2,v2,v4);
+    CROSS(cross,diff1,diff2);
+    glNormal3f(cross[0],cross[1],cross[2]);
+    glVertex3fv(v1);
+    glVertex3fv(v4);
+    glVertex3fv(v2);
+  }
+
+  if(vis_plane[1]==1){
+    if(rgb1color!=NULL)glColor3ubv(rgb1color);
+    VECDIFF3(diff1,v2,v3);
+    VECDIFF3(diff2,v4,v3);
+    CROSS(cross,diff1,diff2);
+    glNormal3f(cross[0],cross[1],cross[2]);
+    glVertex3fv(v2);
+    glVertex3fv(v3);
+    glVertex3fv(v4);
+
+    VECDIFF3(diff1,v2,v4);
+    VECDIFF3(diff2,v3,v4);
+    CROSS(cross,diff1,diff2);
+    glNormal3f(cross[0],cross[1],cross[2]);
+    glVertex3fv(v2);
+    glVertex3fv(v4);
+    glVertex3fv(v3);
+  }
+
+  if(vis_plane[2]==1){
+    if(rgb2color!=NULL)glColor3ubv(rgb2color);
+    VECDIFF3(diff1,v4,v1);
+    VECDIFF3(diff2,v3,v4);
+    CROSS(cross,diff1,diff2);
+    glNormal3f(cross[0],cross[1],cross[2]);
+    glVertex3fv(v1);
+    glVertex3fv(v4);
+    glVertex3fv(v3);
+
+    VECDIFF3(diff1,v1,v3);
+    VECDIFF3(diff2,v4,v3);
+    CROSS(cross,diff1,diff2);
+    glNormal3f(cross[0],cross[1],cross[2]);
+    glVertex3fv(v1);
+    glVertex3fv(v3);
+    glVertex3fv(v4);
+  }
+
+  if(vis_plane[3]==1){
+    if(rgb3color!=NULL)glColor3ubv(rgb3color);
+    VECDIFF3(diff1,v1,v3);
+    VECDIFF3(diff2,v2,v3);
+    CROSS(cross,diff1,diff2);
+    glNormal3f(cross[0],cross[1],cross[2]);
+    glVertex3fv(v1);
+    glVertex3fv(v3);
+    glVertex3fv(v2);
+
+    VECDIFF3(diff1,v1,v2);
+    VECDIFF3(diff2,v3,v2);
+    CROSS(cross,diff1,diff2);
+    glNormal3f(cross[0],cross[1],cross[2]);
+    glVertex3fv(v1);
+    glVertex3fv(v2);
+    glVertex3fv(v3);
+  }
+  glEnd();
+}
+
 /* ------------------ getmesh_zcell ------------------------ */
 
 float getmesh_zcell(mesh *meshi, float xval, float yval, int *valid){

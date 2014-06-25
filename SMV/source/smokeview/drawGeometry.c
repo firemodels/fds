@@ -414,8 +414,12 @@ int GetVerts(float boxbounds[6],
 
 void DrawGeomTest(int option){
   float *xmin, *xmax, *ymin, *ymax, *zmin, *zmax;
-  unsigned char cubecolor[4]={255,0,0,255};
-  unsigned char tetracolor[4]={0,0,255,255};
+  unsigned char cubecolor[4]={0,255,255,255};
+  unsigned char tetra0color[4]={255,0,0,255};
+  unsigned char tetra1color[4]={0,255,0,255};
+  unsigned char tetra2color[4]={0,0,255,255};
+  unsigned char tetra3color[4]={255,255,0,255};
+  unsigned char tetracoloroutline[4]={255,0,255,255};
   clipdata tetra_clipinfo, box_clipinfo;
   float *v1, *v2, *v3, *v4;
   int nverts;
@@ -493,7 +497,7 @@ void DrawGeomTest(int option){
     glBegin(GL_QUADS);
     glColor3ubv(cubecolor);
 
-    if(box_state[4]==-1){
+    if(box_state[4]==-1&&tetrabox_vis[4]==1){
       glNormal3f( 0.0, 0.0,-1.0);
       glVertex3f( 0.0,0.0,0.0);  // 1
       glVertex3f( 0.0,1.0,0.0);  // 4
@@ -501,7 +505,7 @@ void DrawGeomTest(int option){
       glVertex3f( 1.0,0.0,0.0);  // 2
     }
 
-    if(box_state[5]==-1){
+    if(box_state[5]==-1&&tetrabox_vis[5]==1){
       glNormal3f(0.0,0.0,1.0);
       glVertex3f(0.0,0.0,1.0);  // 5
       glVertex3f(1.0,0.0,1.0);  // 6
@@ -509,7 +513,7 @@ void DrawGeomTest(int option){
       glVertex3f(0.0,1.0,1.0);  // 8
     }
 
-    if(box_state[2]==-1){
+    if(box_state[2]==-1&&tetrabox_vis[2]==1){
       glNormal3f(0.0,-1.0,0.0);
       glVertex3f(0.0,0.0,0.0);  // 1
       glVertex3f(1.0,0.0,0.0);  // 2
@@ -517,7 +521,7 @@ void DrawGeomTest(int option){
       glVertex3f(0.0,0.0,1.0);  // 5
     }
 
-    if(box_state[3]==-1){
+    if(box_state[3]==-1&&tetrabox_vis[3]==1){
       glNormal3f(0.0,1.0,0.0);
       glVertex3f(1.0,1.0,0.0);  // 3
       glVertex3f(0.0,1.0,0.0);  // 4
@@ -525,7 +529,7 @@ void DrawGeomTest(int option){
       glVertex3f(1.0,1.0,1.0);  // 7
     }
 
-    if(box_state[0]==-1){
+    if(box_state[0]==-1&&tetrabox_vis[0]==1){
       glNormal3f(-1.0,0.0,0.0);
       glVertex3f(0.0,0.0,0.0);  // 1
       glVertex3f(0.0,0.0,1.0);  // 5
@@ -533,7 +537,7 @@ void DrawGeomTest(int option){
       glVertex3f(0.0,1.0,0.0);  // 4
     }
 
-    if(box_state[1]==-1){
+    if(box_state[1]==-1&&tetrabox_vis[1]==1){
       glNormal3f(1.0,0.0,0.0);
       glVertex3f(1.0,0.0,0.0);  // 2
       glVertex3f(1.0,1.0,0.0);  // 3
@@ -563,7 +567,7 @@ void DrawGeomTest(int option){
   glTranslatef(-xbar0,-ybar0,-zbar0);
   if(option==0){
     setClipPlanes(&box_clipinfo,CLIP_ON_DENORMAL);
-    drawfilledtetra(v1,v2,v3,v4,tetracolor);
+    drawfilled2tetra(v1,v2,v3,v4,tetra0color,tetra1color,tetra2color,tetra3color,tetrabox_vis+6);
   }
   if(option==1){
     output3Text(foregroundcolor, v1[0]-EPS, v1[1]-EPS, v1[2]-EPS, "1");
@@ -571,7 +575,7 @@ void DrawGeomTest(int option){
     output3Text(foregroundcolor, v3[0], v3[1]+EPS, v3[2]-EPS, "3");
     output3Text(foregroundcolor, v4[0], v4[1], v4[2]+EPS, "4");
     glLineWidth(vectorlinewidth);
-    drawtetra_outline(v1,v2,v3,v4,tetracolor);
+    drawtetra_outline(v1,v2,v3,v4,tetracoloroutline);
   }
 
   glPopMatrix();
