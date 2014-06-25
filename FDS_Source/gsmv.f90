@@ -412,7 +412,7 @@ ENDDO
 ! for each tetrahedron plane ....
 
 DO TP = 0, 3
-   IF (TETRA_STATE(TP) /= -1 ) CYCLE ! this tetrahedron plane coincides with a tetrhedon plane
+   IF (TETRA_STATE(TP) /= -1 ) CYCLE ! this tetrahedron plane coincides with a box plane
                                    ! in this case, use a 2D method to find intersections
    
    V = TETRA_PLANE2VERT(0,TP)
@@ -504,6 +504,7 @@ END SUBROUTINE GET_VERTS
 !  ------------------ GET_VERTS2D ------------------------ 
 
 SUBROUTINE GET_VERTS2D(XB,PLANE_INDEX,VV0,VV1,VV2,VERTS,NVERTS)
+
 ! find vertices formed by the intersection of a rectangle and a triangle.  
 ! The rectangle and triangle lie in the same plane.  The rectangle sides 
 ! are aligned with the coordinate axes
@@ -539,6 +540,7 @@ REAL(EB), POINTER, DIMENSION(:) :: VIN, VOUT
 REAL(EB), POINTER, DIMENSION(:) :: R0, R1, T0, T1
 REAL(EB), TARGET :: VERT_SEGS(0:3)
 INTEGER :: NVERT_SEGS
+REAL(EB) :: VMID(0:1), VCOPY(0:1)
 
 NVERTS=0
 PLANE_VAL = XB(PLANE_INDEX)
@@ -580,6 +582,14 @@ RECT_VERTS(6:7)=(/RECT(1),RECT(3)/)
 V0(0:1)=>TRI_VERTS(0:1)
 V1(0:1)=>TRI_VERTS(2:3)
 V2(0:1)=>TRI_VERTS(4:5)
+VMID=(V0+V1+V2)/3.0_EB
+IF (.NOT.IN_TRIANGLE2D(V0,V1,V2,VMID)) THEN ! make sure vertices are ordered counter-clockwise
+   VCOPY=TRI_VERTS(0:1)
+   TRI_VERTS(0:1)=TRI_VERTS(2:3)
+   TRI_VERTS(2:3)=VCOPY
+   V0(0:1)=>TRI_VERTS(0:1)
+   V1(0:1)=>TRI_VERTS(2:3)
+ENDIF
 
 ! check for triangle verts inside rectangles
 
@@ -769,8 +779,8 @@ DVERT=VERT-V1
 N(0:1)=(/DV(1),-DV(0)/) 
 IF (N(0)*DVERT(0)+N(1)*DVERT(1)>0.0_EB) RETURN
 
-DV=V0-V1
-DVERT=VERT-V1
+DV=V0-V2
+DVERT=VERT-V2
 N(0:1)=(/DV(1),-DV(0)/) 
 IF (N(0)*DVERT(0)+N(1)*DVERT(1)>0.0_EB) RETURN
 
