@@ -500,15 +500,18 @@ MESH_LOOP: DO N=1,NMESHES_READ
 
             ! Determine which PROCESS to assign the MESH to
 
-            IF (MPI_PROCESS>-1) THEN
-               CURRENT_MPI_PROCESS = MPI_PROCESS
-               IF (CURRENT_MPI_PROCESS>NUMPROCS-1) THEN
-                  WRITE(MESSAGE,'(A)') 'ERROR: MPI_PROCESS greater than total number of processes'
-                  CALL SHUTDOWN(MESSAGE)
+            IF (USE_MPI) THEN
+               IF (MPI_PROCESS>-1) THEN
+                  CURRENT_MPI_PROCESS = MPI_PROCESS
+                  IF (CURRENT_MPI_PROCESS>NUMPROCS-1) THEN
+                     WRITE(MESSAGE,'(A)') 'ERROR: MPI_PROCESS greater than total number of processes'
+                     CALL SHUTDOWN(MESSAGE)
+                  ENDIF
+               ELSE
+                  CURRENT_MPI_PROCESS = MIN(NM-1,NUMPROCS-1)
                ENDIF
-            ELSE
-               IF (     USE_MPI) CURRENT_MPI_PROCESS = MIN(NM-1,NUMPROCS-1)
-               IF (.NOT.USE_MPI) CURRENT_MPI_PROCESS = 0
+            ELSE ! .NOT. USE_MPI
+               CURRENT_MPI_PROCESS=0
             ENDIF
 
             ! Fill in MESH related variables
