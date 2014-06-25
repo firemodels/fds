@@ -35,6 +35,7 @@ cat_mccaffrey
 NIST_RSE
 sippola_aerosol_deposition
 layer_height
+Hamins_CH4_Average
 
 % Dataplot and scatplot options
 
