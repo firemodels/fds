@@ -16,6 +16,7 @@ char IOgeometry_revision[]="$Revision$";
 #include "smokeviewvars.h"
 
 tetrahedron *volume_list;
+void Volume_CB(int var);
 
 /* ------------------ CalcTriNormal ------------------------ */
 
@@ -1583,6 +1584,251 @@ void read_geomdata(int ifile, int load_flag, int *errorcode){
   update_unit_defs();
   Update_Times();
   Update_Framenumber(1);
+}
+
+/* ------------------ DrawGeomTest ------------------------ */
+
+void DrawGeomTest(int option){
+  float *xmin, *xmax, *ymin, *ymax, *zmin, *zmax;
+  unsigned char cubecolor[4]={0,255,255,255};
+  unsigned char tetra0color[4]={255,0,0,255};
+  unsigned char tetra1color[4]={0,255,0,255};
+  unsigned char tetra2color[4]={0,0,255,255};
+  unsigned char tetra3color[4]={255,255,0,255};
+  unsigned char tetracoloroutline[4]={255,0,255,255};
+  clipdata tetra_clipinfo, box_clipinfo;
+  float *v1, *v2, *v3, *v4;
+  int nverts;
+  int facestart[200], facenum[200], nfaces;
+  float verts[600]; 
+
+  box_state = b_state+1;
+  v1 = tetra_vertices;
+  v2 = v1 + 3;
+  v3 = v2 + 3;
+  v4 = v3 + 3;
+
+  if(option==0){
+    float specular[4]={0.4,0.4,0.4,1.0};
+
+    glEnable(GL_LIGHTING);
+    glMaterialfv(GL_FRONT_AND_BACK,GL_SHININESS,&block_shininess);
+    glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,block_ambient2);
+    glMaterialfv(GL_FRONT_AND_BACK,GL_SPECULAR,specular);
+    glEnable(GL_COLOR_MATERIAL);
+  }
+
+  initTetraClipInfo(&tetra_clipinfo,v1,v2,v3,v4);
+
+  xmin = box_bounds;
+  xmax = box_bounds+1;
+  ymin = box_bounds+2;
+  ymax = box_bounds+3;
+  zmin = box_bounds+4;
+  zmax = box_bounds+5;
+  {
+    float volume;
+    int flag=0,error,i;
+    double err;
+
+    FORTgetverts(box_bounds, v1, v2, v3, v4, verts, &nverts, facestart, facenum, face_id, &nfaces, &volume, &flag, b_state, &error, &err);
+    if(update_volbox_controls==1){
+      for(i=0;i<10;i++){
+        face_vis[i]=0;
+      }
+      for(i=0;i<nfaces;i++){
+        face_vis[face_id[i]]=1;
+      }
+      for(i=0;i<nfaces;i++){
+        int face;
+        int tet_face;
+
+        face = face_id[i];
+        if(face<6){
+          tet_face=box_state[face];
+          if(tet_face>-1){
+            ASSERT(tet_face>=0&&tet_face<4);
+            face_vis[tet_face+6]=1;
+          }
+        }
+      }
+      Volume_CB(2);
+    }
+
+    if(nfaces>10){
+      printf("***error: nface=%i should not be bigger than 10\n",nfaces);
+    }
+    initBoxClipInfo(&box_clipinfo,*xmin,*xmax,*ymin,*ymax,*zmin,*zmax);
+    if(box_state[0]!=-1)box_clipinfo.clip_xmin=0;
+    if(box_state[1]!=-1)box_clipinfo.clip_xmax=0;
+    if(box_state[2]!=-1)box_clipinfo.clip_ymin=0;
+    if(box_state[3]!=-1)box_clipinfo.clip_ymax=0;
+    if(box_state[4]!=-1)box_clipinfo.clip_zmin=0;
+    if(box_state[5]!=-1)box_clipinfo.clip_zmax=0;
+#define  EPSBOX (-0.0001)
+    box_clipinfo.xmin+=EPSBOX;
+    box_clipinfo.xmax-=EPSBOX;
+    box_clipinfo.ymin+=EPSBOX;
+    box_clipinfo.ymax-=EPSBOX;
+    box_clipinfo.zmin+=EPSBOX;
+    box_clipinfo.zmax-=EPSBOX;
+  }
+
+  glPushMatrix();
+  glScalef(SCALE2SMV(1.0),SCALE2SMV(1.0),SCALE2SMV(1.0));
+  glTranslatef(-xbar0,-ybar0,-zbar0);
+
+  if(option==0)setClipPlanes(&tetra_clipinfo,CLIP_ON_DENORMAL);
+  glPushMatrix();
+  glTranslatef(*xmin,*ymin,*zmin);
+  glScalef(ABS(*xmax-*xmin),ABS(*ymax-*ymin),ABS(*zmax-*zmin));
+  if(option==0){
+    float volume;
+    int flag=0,error;
+    double err;
+
+    FORTgetverts(box_bounds, v1, v2, v3, v4, verts, &nverts, facestart, facenum, face_id, &nfaces, &volume, &flag, b_state, &error, &err);
+    if(nfaces>10){
+      printf("***error: nface=%i should not be bigger than 10\n",nfaces);
+    }
+
+    glBegin(GL_QUADS);
+    glColor3ubv(cubecolor);
+
+    if(box_state[4]==-1&&tetrabox_vis[4]==1){
+      glNormal3f( 0.0, 0.0,-1.0);
+      glVertex3f( 0.0,0.0,0.0);  // 1
+      glVertex3f( 0.0,1.0,0.0);  // 4
+      glVertex3f( 1.0,1.0,0.0);  // 3
+      glVertex3f( 1.0,0.0,0.0);  // 2
+    }
+
+    if(box_state[5]==-1&&tetrabox_vis[5]==1){
+      glNormal3f(0.0,0.0,1.0);
+      glVertex3f(0.0,0.0,1.0);  // 5
+      glVertex3f(1.0,0.0,1.0);  // 6
+      glVertex3f(1.0,1.0,1.0);  // 7
+      glVertex3f(0.0,1.0,1.0);  // 8
+    }
+
+    if(box_state[2]==-1&&tetrabox_vis[2]==1){
+      glNormal3f(0.0,-1.0,0.0);
+      glVertex3f(0.0,0.0,0.0);  // 1
+      glVertex3f(1.0,0.0,0.0);  // 2
+      glVertex3f(1.0,0.0,1.0);  // 6
+      glVertex3f(0.0,0.0,1.0);  // 5
+    }
+
+    if(box_state[3]==-1&&tetrabox_vis[3]==1){
+      glNormal3f(0.0,1.0,0.0);
+      glVertex3f(1.0,1.0,0.0);  // 3
+      glVertex3f(0.0,1.0,0.0);  // 4
+      glVertex3f(0.0,1.0,1.0);  // 8
+      glVertex3f(1.0,1.0,1.0);  // 7
+    }
+
+    if(box_state[0]==-1&&tetrabox_vis[0]==1){
+      glNormal3f(-1.0,0.0,0.0);
+      glVertex3f(0.0,0.0,0.0);  // 1
+      glVertex3f(0.0,0.0,1.0);  // 5
+      glVertex3f(0.0,1.0,1.0);  // 8
+      glVertex3f(0.0,1.0,0.0);  // 4
+    }
+
+    if(box_state[1]==-1&&tetrabox_vis[1]==1){
+      glNormal3f(1.0,0.0,0.0);
+      glVertex3f(1.0,0.0,0.0);  // 2
+      glVertex3f(1.0,1.0,0.0);  // 3
+      glVertex3f(1.0,1.0,1.0);  // 7
+      glVertex3f(1.0,0.0,1.0);  // 6
+    }
+    glEnd();
+  }
+#define EPS 0.02
+  if(option==1){
+    output3Text(foregroundcolor, -EPS, 0.5, 0.5, "xmin");
+    output3Text(foregroundcolor, 1.0+EPS, 0.5, 0.5, "xmax");
+    output3Text(foregroundcolor, 0.5, -EPS, 0.5, "ymin");
+    output3Text(foregroundcolor, 0.5, 1.0+EPS, 0.5, "ymax");
+    output3Text(foregroundcolor, 0.5, 0.5, -EPS, "zmin");
+    output3Text(foregroundcolor, 0.5, 0.5, 1.0+EPS, "zmax");
+    glLineWidth(gridlinewidth);
+    drawcubec_outline(1.0,cubecolor);
+  }
+  glPopMatrix();
+  glPopMatrix();
+
+  // tetrahedron
+
+  glPushMatrix();
+  glScalef(SCALE2SMV(1.0),SCALE2SMV(1.0),SCALE2SMV(1.0));
+  glTranslatef(-xbar0,-ybar0,-zbar0);
+  if(option==0){
+    setClipPlanes(&box_clipinfo,CLIP_ON_DENORMAL);
+    drawfilled2tetra(v1,v2,v3,v4,tetra0color,tetra1color,tetra2color,tetra3color,tetrabox_vis+6);
+  }
+  if(option==1){
+    output3Text(foregroundcolor, v1[0]-EPS, v1[1]-EPS, v1[2]-EPS, "v1");
+    output3Text(foregroundcolor, v2[0]+EPS, v2[1]-EPS, v2[2]-EPS, "v2");
+    output3Text(foregroundcolor, v3[0], v3[1]+EPS, v3[2]-EPS, "v3");
+    output3Text(foregroundcolor, v4[0], v4[1], v4[2]+EPS, "v4");
+    glLineWidth(gridlinewidth);
+    drawtetra_outline(v1,v2,v3,v4,tetracoloroutline);
+  }
+
+  glPopMatrix();
+  // tetrahedron
+
+  if(option==1){
+    float volume;
+    int flag=0,error;
+    double err;
+    int i;
+
+    FORTgetverts(box_bounds, v1, v2, v3, v4, verts, &nverts, facestart, facenum, face_id, &nfaces, &volume, &flag, b_state, &error, &err);
+    if(nfaces>10){
+      printf("***error: nface=%i should not be bigger than 10\n",nfaces);
+    }
+    printf("volume=%f\n\n",volume);
+    if(nverts>0){
+      int j;
+
+      glPushMatrix();
+      glScalef(SCALE2SMV(1.0),SCALE2SMV(1.0),SCALE2SMV(1.0));
+      glTranslatef(-xbar0,-ybar0,-zbar0);
+      glPointSize(10.0);
+      glBegin(GL_POINTS);
+      glColor3fv(foregroundcolor);
+      for(j=0;j<nfaces;j++){
+        int i;
+
+        if(tetrabox_vis[face_id[j]]==0)continue;
+        for(i=facestart[j];i<facestart[j+1];i++){
+          glVertex3fv(verts+3*i);
+        }
+      }
+      glEnd();
+      if(option==1){
+        for(j=0;j<nfaces;j++){
+          int i;
+
+          if(tetrabox_vis[face_id[j]]==0)continue;
+          for(i=facestart[j];i<facestart[j+1];i++){
+            char label[100];
+
+            sprintf(label,"%i",i-facestart[j]);
+            output3Text(foregroundcolor, verts[3*i]-3*EPS, verts[3*i+1]-3*EPS, verts[3*i+2]+3*EPS, label);
+          }
+        }
+      }
+      glPopMatrix();
+    }
+  }
+  if(option==0){
+    setClipPlanes(NULL,CLIP_OFF);
+    glDisable(GL_LIGHTING);
+    glDisable(GL_COLOR_MATERIAL);
+  }
 }
 
 /* ------------------ draw_geomdata ------------------------ */
