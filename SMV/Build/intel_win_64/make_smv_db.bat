@@ -18,6 +18,6 @@ if "%1" NEQ "-t" goto endif
   set SMV_TESTSTRING=test_
 :endif
 
-
-make -j4 -f ..\Makefile intel_win_64_db
+erase *.obj *.mod
+make -f ..\Makefile intel_win_64_db
 pause
