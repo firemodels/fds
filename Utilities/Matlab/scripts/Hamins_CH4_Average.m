@@ -11,6 +11,9 @@
 % The averaged proviles are written in files Hamins_CH4_#_devc_aver.csv
 %
 
+close all
+clear all
+
 % 10 cm burners
 mintime = 3.0;
 ncol = 37;
