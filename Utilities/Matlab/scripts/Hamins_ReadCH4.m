@@ -4,7 +4,7 @@ cd(fileparts(mfilename('fullpath')))
 cd ..
 cd ..
 cd ..
-cd Validation\Hamins_CH4\FDS_Output_Files
+cd Validation/Hamins_CH4/FDS_Output_Files
 
 c1 = 2;
 c2 = c1 + nR;
@@ -18,7 +18,7 @@ RaV = zeros(1,nV);
 if exist(fullfile(cd,infile), 'file') == 2
     fileID = fopen(fullfile(cd,infile));
     Reading = 'Reading';
-    display([Reading ' ' infile]);
+  % display([Reading ' ' infile]);
     fgets(fileID);
     fgets(fileID);
     nt = 0;
@@ -57,7 +57,7 @@ else
      return
 end
 
-titleString = ' ''Radius'',''Radial Flux'', ''Height'', ''Vertical Flux'' ';
+titleString = 'Radius,Radial Flux,Height,Vertical Flux';
 fileID = fopen(outfile,'w+');
 fprintf(fileID, '%s', titleString);
 
