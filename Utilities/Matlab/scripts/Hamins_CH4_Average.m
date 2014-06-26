@@ -71,3 +71,4 @@ infile = 'Hamins_CH4_19_devc.csv';
 outfile = 'Hamins_CH4_19_devc_avg.csv';
 Hamins_ReadCH4(infile,outfile,mintime,ncol,nR,nV,R,Z);
 
+cd ..
