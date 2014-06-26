@@ -1,10 +1,15 @@
 \documentclass[12pt]{article}
 \input{../Bibliography/commoncommands}
 
+\usepackage{tikz,tikz-3dplot}
+\usetikzlibrary{arrows}
+
 \begin{document}
 
+% LU - logical unit
+
 \vspace{1.0in}
-\section{Numerical Grid in FDS}
+\section{Numerical grid in FDS}
 
 \subsection{Overview}
 
@@ -42,10 +47,16 @@
 \caption{2D grid topology.}
 \end{figure}
 
-\subsection{Boundary Conditions}
+\subsection{Boundary conditions}
 % periodic, interpolated, open, walls
 
-\subsection{Grid Communication}
+\subsection{Communication between grids}
+
+\subsubsection{Pressure}
+
+% How is the H BC currently obtained for an interior mesh?
+% ! Interpolated boundary -- set boundary value of H to be average of neighboring cells from previous time step
+% in the FDS source code file pres.f90.
 
 \begin{figure}[h]
 \centering
@@ -62,36 +73,38 @@
 \draw[step=2cm,ultra thick] (4, 0) grid (8,8);
 
 % interpolation lines
-%\node[draw,circle,inner sep=2pt,fill,gray] at (2, 1) {};
-%\node[draw,circle,inner sep=2pt,fill,gray] at (2, 3) {};
-%\node[draw,circle,inner sep=2pt,fill,gray] at (2, 5) {};
-%\node[draw,circle,inner sep=2pt,fill,gray] at (2, 7) {};
-\begin{scope}[thick,decoration={markings,mark=at position 0.5 with {\arrow{triangle 45}}}]
-   %\draw[gray,dashed,postaction={decorate}] (2,1) -- (5,1);
-   %\draw[gray,dashed,postaction={decorate}] (2,3) -- (5,3);
-   %\draw[gray,dashed,postaction={decorate}] (2,5) -- (5,5);
-   %\draw[gray,dashed,postaction={decorate}] (2,7) -- (5,7);
-   
-   %\draw[gray,dashed,postaction={decorate}] (2,2) -- (2,1);
-   %\draw[gray,dashed,postaction={decorate}] (2,2) -- (2,3);
-   %\draw[gray,dashed,postaction={decorate}] (2,6) -- (2,5);
-   %\draw[gray,dashed,postaction={decorate}] (2,6) -- (2,7);
-   
-   \draw[gray,dashed,postaction={decorate}] (2,2) -- (5,1);
-   \draw[gray,dashed,postaction={decorate}] (2,2) -- (5,3);
-   \draw[gray,dashed,postaction={decorate}] (2,6) -- (5,5);
-   \draw[gray,dashed,postaction={decorate}] (2,6) -- (5,7);
+\begin{scope}[thick,decoration={markings,mark=at position 0.65 with {\arrow{triangle 45}}}]
+   \draw[gray,dashed,postaction={decorate}] (2,2) -- (2,1);
+   \draw[gray,dashed] (2,1) -- (5,1);
+   \draw[gray,dashed,postaction={decorate}] (2,2) -- (2,3);
+   \draw[gray,dashed] (2,3) -- (5,3);
+   \draw[gray,dashed,postaction={decorate}] (2,6) -- (2,5);
+   \draw[gray,dashed] (2,5) -- (5,5);
+   \draw[gray,dashed,postaction={decorate}] (2,6) -- (2,7);
+   \draw[gray,dashed] (2,7) -- (5,7);
 \end{scope}
+
+% moved large cell pressure
+\node[draw,circle,inner sep=2pt,fill,gray] at (2, 1) {};
+\node[draw,circle,inner sep=2pt,fill,gray] at (2, 3) {};
+\node[draw,circle,inner sep=2pt,fill,gray] at (2, 5) {};
+\node[draw,circle,inner sep=2pt,fill,gray] at (2, 7) {};
+
+% interpolated pressure BC
+\node[draw,circle,inner sep=2pt] at (4, 1) {};
+\node[draw,circle,inner sep=2pt] at (4, 3) {};
+\node[draw,circle,inner sep=2pt] at (4, 5) {};
+\node[draw,circle,inner sep=2pt] at (4, 7) {};
 
 % scalars for the coarse cells
 \node[draw,circle,inner sep=2pt,fill] at (2, 2) {};
 \node[draw,circle,inner sep=2pt,fill] at (2, 6) {};
 
 % scalars for the fine cells
-\node[draw,circle,inner sep=2pt,fill,gray] at (5, 1) {};
-\node[draw,circle,inner sep=2pt,fill,gray] at (5, 3) {};
-\node[draw,circle,inner sep=2pt,fill,gray] at (5, 5) {};
-\node[draw,circle,inner sep=2pt,fill,gray] at (5, 7) {};
+\node[draw,circle,inner sep=2pt,fill] at (5, 1) {};
+\node[draw,circle,inner sep=2pt,fill] at (5, 3) {};
+\node[draw,circle,inner sep=2pt,fill] at (5, 5) {};
+\node[draw,circle,inner sep=2pt,fill] at (5, 7) {};
 \node[draw,circle,inner sep=2pt,fill] at (7, 1) {};
 \node[draw,circle,inner sep=2pt,fill] at (7, 3) {};
 \node[draw,circle,inner sep=2pt,fill] at (7, 5) {};
@@ -134,17 +147,94 @@
 \draw[line width=1.5pt,->] (7,7.75) -- (7,8.25) {};
 
 \end{tikzpicture}
-\caption{Interface of two (2D) grids with different resolution.}
+\caption{Interface of two (2D) grids with different resolution. Left is ``other'' mesh. Right is ``current'' mesh, for which boundary conditions are being found for. The filled circle is an intermediate value of the pressure from the other mesh cells. This value is currently taken directly from the cell center; no interpolation between other cells is done. The open circle is the actual pressure BC for the current mesh that is found by interpolating between the intermediate value and the previous time step's pressure value for the outermost cell of the current mesh.}
 \end{figure}
 
-%\subsubsection{(coarse to fine)}
+\begin{figure}[h]
+\centering
+\begin{tikzpicture}
 
-%\subsubsection{(fine to coarse)}
+% https://tex.stackexchange.com/a/3172
+\usetikzlibrary{decorations.markings}
+\usetikzlibrary{arrows}
 
-% How is the H BC currently obtained for an interior mesh?
-% Randy said see starting at
-% ! Interpolated boundary -- set boundary value of H to be average of neighboring cells from previous time step
-% in the FDS source code file pres.f90.
+% grids
+% coarse grid (on the left)
+\draw[step=4cm,ultra thick] (0, 0) grid (8,8);
+% fine grid (on the right)
+\draw[step=2cm,ultra thick] (4, 0) grid (8,8);
+
+% interpolation lines
+\draw[gray,thick,dashed] (5,3) -- (5,1);
+\draw[gray,thick,dashed] (2,2) -- (5,2);
+\draw[gray,thick,dashed] (5,5) -- (5,7);
+\draw[gray,thick,dashed] (2,6) -- (5,6);
+
+% interpolated pressure BC
+\node[draw,circle,inner sep=2pt,fill,gray] at (5, 2) {};
+\node[draw,circle,inner sep=2pt] at (4, 2) {};
+\node[draw,circle,inner sep=2pt,fill,gray] at (5, 6) {};
+\node[draw,circle,inner sep=2pt] at (4, 6) {};
+
+% scalars for the coarse cells
+\node[draw,circle,inner sep=2pt,fill] at (2, 2) {};
+\node[draw,circle,inner sep=2pt,fill] at (2, 6) {};
+
+% scalars for the fine cells
+\node[draw,circle,inner sep=2pt,fill] at (5, 1) {};
+\node[draw,circle,inner sep=2pt,fill] at (5, 3) {};
+\node[draw,circle,inner sep=2pt,fill] at (5, 5) {};
+\node[draw,circle,inner sep=2pt,fill] at (5, 7) {};
+\node[draw,circle,inner sep=2pt,fill] at (7, 1) {};
+\node[draw,circle,inner sep=2pt,fill] at (7, 3) {};
+\node[draw,circle,inner sep=2pt,fill] at (7, 5) {};
+\node[draw,circle,inner sep=2pt,fill] at (7, 7) {};
+
+% u vectors
+\draw[line width=1.5pt,->] (-0.25,2) -- (0.25,2) {};
+\draw[line width=1.5pt,->] (-0.25,6) -- (0.25,6) {};
+
+\draw[line width=1.5pt,->] (3.75,2) -- (4.25,2) {};
+\draw[line width=1.5pt,->] (3.75,6) -- (4.25,6) {};
+
+\draw[line width=1.5pt,->] (3.75,1) -- (4.25,1) {};
+\draw[line width=1.5pt,->] (3.75,3) -- (4.25,3) {};
+\draw[line width=1.5pt,->] (3.75,5) -- (4.25,5) {};
+\draw[line width=1.5pt,->] (3.75,7) -- (4.25,7) {};
+\draw[line width=1.5pt,->] (5.75,1) -- (6.25,1) {};
+\draw[line width=1.5pt,->] (5.75,3) -- (6.25,3) {};
+\draw[line width=1.5pt,->] (5.75,5) -- (6.25,5) {};
+\draw[line width=1.5pt,->] (5.75,7) -- (6.25,7) {};
+\draw[line width=1.5pt,->] (7.75,1) -- (8.25,1) {};
+\draw[line width=1.5pt,->] (7.75,3) -- (8.25,3) {};
+\draw[line width=1.5pt,->] (7.75,5) -- (8.25,5) {};
+\draw[line width=1.5pt,->] (7.75,7) -- (8.25,7) {};
+
+% v vectors
+\draw[line width=1.5pt,->] (2,-0.25) -- (2,0.25) {};
+\draw[line width=1.5pt,->] (2,3.75) -- (2,4.25) {};
+\draw[line width=1.5pt,->] (2,7.75) -- (2,8.25) {};
+
+\draw[line width=1.5pt,->] (5,-0.25) -- (5,0.25) {};
+\draw[line width=1.5pt,->] (7,-0.25) -- (7,0.25) {};
+\draw[line width=1.5pt,->] (5,1.75) -- (5,2.25) {};
+\draw[line width=1.5pt,->] (7,1.75) -- (7,2.25) {};
+\draw[line width=1.5pt,->] (5,3.75) -- (5,4.25) {};
+\draw[line width=1.5pt,->] (7,3.75) -- (7,4.25) {};
+\draw[line width=1.5pt,->] (5,5.75) -- (5,6.25) {};
+\draw[line width=1.5pt,->] (7,5.75) -- (7,6.25) {};
+\draw[line width=1.5pt,->] (5,7.75) -- (5,8.25) {};
+\draw[line width=1.5pt,->] (7,7.75) -- (7,8.25) {};
+
+\end{tikzpicture}
+\caption{Interface of two (2D) grids with different resolution. Right is ``other'' mesh. Left is ``current'' mesh, for which boundary conditions are being found for. The filled circle is an intermediate value of the pressure from the other mesh cells. The $H$ value at this point is found by averaging. The open circle is the actual pressure BC for the current mesh that is found by interpolating between the intermediate value and the previous time step's pressure value for the outermost cell of the current mesh.}
+\end{figure}
+
+\subsubsection{Velocity}
+
+% See FDS Tech Guide \S4.6.3 (Boundary Conditions at Mesh Interfaces)
+
+\subsubsection{Scalars other than pressure}
 
 % From a text file from 2012:
 
