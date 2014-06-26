@@ -733,7 +733,7 @@ extern "C" void glui_labels_setup(int main_window){
 #ifdef pp_GEOMTEST
   ROLLOUT_geomtest = glui_labels->add_rollout("Cube/Tetra intersection test",false);
   glui_labels->add_checkbox_to_panel(ROLLOUT_geomtest,"show",&show_geomtest);
-  PANEL_geom1=glui_labels->add_panel_to_panel(ROLLOUT_geomtest,"box bounds");
+  PANEL_geom1=glui_labels->add_panel_to_panel(ROLLOUT_geomtest,"box bounding planes");
 
   PANEL_geom1d=glui_labels->add_panel_to_panel(PANEL_geom1,"",GLUI_PANEL_NONE);
   PANEL_geom1a=glui_labels->add_panel_to_panel(PANEL_geom1d,"",GLUI_PANEL_NONE);
