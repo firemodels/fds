@@ -1427,6 +1427,13 @@ IF (N_GEOMETRY>0) THEN
                                                      TRIM(GEOMI%SURF_ID)
       ENDIF
    END DO
+   WRITE(LU_SMV,'(/A,1X,I4)') 'CUTCELLS',1
+   WRITE(LU_SMV,'( I5)') MESHES(1)%N_CUTCELLS
+   IF (MESHES(1)%N_CUTCELLS>0) THEN
+      DO I = 0, (MESHES(1)%N_CUTCELLS-1)/15
+         WRITE(LU_SMV,'(1X,15(I7,1X))')(MESHES(1)%CUTCELL_LIST(J),J=15*I,MIN(15*(I+1),MESHES(1)%N_CUTCELLS)-1)
+      ENDDO
+   ENDIF
 ENDIF
  
 ! Write out info about particle types
