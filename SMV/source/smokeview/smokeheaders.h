@@ -103,7 +103,8 @@ EXTERNCPP void add_delete_keyframe(int flag);
 EXTERNCPP void update_tour_parms(void);
 EXTERNCPP void slerp(float *p0, float *p1, float t, float *pout);
 #ifdef pp_GEOMTEST
-EXTERNCPP void DrawGeomTest(int option);
+EXTERNCPP void draw_geomtestclip(void);
+EXTERNCPP void draw_geomtestoutline(void);
 #endif
 EXTERNCPP void VentMenu(int value);
 EXTERNCPP void init_vent_colors(void);
@@ -120,6 +121,7 @@ EXTERNCPP void drawtetra_outline(float *v1, float *v2, float *v3, float *v4, uns
 EXTERNCPP void drawfilledcircle(float diameter, unsigned char *rgbcolor, circdata *circinfo);
 EXTERNCPP void drawcubec(float size, unsigned char *rgbcolor);
 EXTERNCPP void drawcubec_outline(float size, unsigned char *rgbcolor);
+EXTERNCPP void drawbox_outline(float x1, float x2, float y1, float y2, float z1, float z2, float *rgbcolor);
 EXTERNCPP void drawcircle(float diameter, unsigned char *rgbcolor, circdata *circinfo);
 EXTERNCPP void drawfilledrectangle(float width, float height, unsigned char *rgbcolor);
 EXTERNCPP void drawrectangle(float width, float height, unsigned char *rgbcolor);

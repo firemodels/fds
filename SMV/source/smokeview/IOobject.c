@@ -2596,6 +2596,42 @@ void drawcubec_outline(float size, unsigned char *rgbcolor){
     glEnd();
 }
 
+/* ----------------------- drawbox_outline ----------------------------- */
+
+void drawbox_outline(float x1, float x2, float y1, float y2, float z1, float z2, float *rgbcolor){
+
+  glBegin(GL_LINES);
+  if(rgbcolor!=NULL)glColor3fv(rgbcolor);
+
+  glVertex3f(x1,y1,z1);
+  glVertex3f(x1,y1,z2);
+  glVertex3f(x2,y1,z1);
+  glVertex3f(x2,y1,z2);
+  glVertex3f(x2,y2,z1);
+  glVertex3f(x2,y2,z2);
+  glVertex3f(x1,y2,z1);
+  glVertex3f(x1,y2,z2);
+
+  glVertex3f(x1,y1,z1);
+  glVertex3f(x1,y2,z1);
+  glVertex3f(x2,y1,z1);
+  glVertex3f(x2,y2,z1);
+  glVertex3f(x2,y1,z2);
+  glVertex3f(x2,y2,z2);
+  glVertex3f(x1,y1,z2);
+  glVertex3f(x1,y2,z2);
+
+  glVertex3f(x1,y1,z1);
+  glVertex3f(x2,y1,z1);
+  glVertex3f(x1,y2,z1);
+  glVertex3f(x2,y2,z1);
+  glVertex3f(x1,y2,z2);
+  glVertex3f(x2,y2,z2);
+  glVertex3f(x1,y1,z2);
+  glVertex3f(x2,y1,z2);
+  glEnd();
+}
+
 /* ----------------------- drawcubec ----------------------------- */
 
 void drawcubec(float size, unsigned char *rgbcolor){

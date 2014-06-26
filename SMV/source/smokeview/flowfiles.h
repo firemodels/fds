@@ -539,6 +539,7 @@ typedef struct _mesh {
   int smokeloaded;
   int is_bottom;
 
+  int *cutcells, ncutcells;
   int update_firehalfdepth;
   terraindata *terrain;
   int mesh_type;

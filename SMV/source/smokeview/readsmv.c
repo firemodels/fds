@@ -4682,7 +4682,44 @@ int readsmv(char *file, char *file2){
       sscanf(buffer,"%f %f %f",&pref,&pamb,&tamb);
       continue;
     }
-  /*
+    /*
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    +++++++++++++++++++++++++++++ CELLSTATE ++++++++++++++++++++++++++
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  */
+    if(match(buffer,"CUTCELLS") == 1){
+      mesh *meshi;
+      int imesh,ncutcells;
+
+      sscanf(buffer+10,"%i",&imesh);
+      imesh=CLAMP(imesh-1,0,nmeshes-1);
+      meshi = meshinfo + imesh;
+
+      fgets(buffer,255,stream);
+      sscanf(buffer,"%i",&ncutcells);
+      meshi->ncutcells=ncutcells;
+
+      if(ncutcells>0){
+        NewMemory((void **)&meshi->cutcells,ncutcells*sizeof(int));
+        for(i=0;i<1+(ncutcells-1)/15;i++){
+          int cc[15],j;
+
+          fgets(buffer,255,stream);
+          for(j=0;j<15;j++){
+            cc[j]=0;
+          }
+          sscanf(buffer,"%i %i %i %i %i %i %i %i %i %i %i %i %i %i %i",
+            cc,cc+1,cc+2,cc+3,cc+4,cc+5,cc+6,cc+7,cc+8,cc+9,cc+10,cc+11,cc+12,cc+13,cc+14);
+          for(j=15*i;j<MIN(15*(i+1),ncutcells);j++){
+            meshi->cutcells[j]=cc[j%15];
+          }
+        }
+      }
+
+      continue;
+    }
+
+/*
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     ++++++++++++++++++++++ DEVICE +++++++++++++++++++++++++++++++
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -8076,6 +8113,8 @@ void initobst(blockagedata *bc, surfdata *surf,int index,int meshindex){
 /* ------------------ initmesh ------------------------ */
 
 void initmesh(mesh *meshi){
+  meshi->ncutcells=0;
+  meshi->cutcells=NULL;
   meshi->slice_min[0]=1.0;
   meshi->slice_min[1]=1.0;
   meshi->slice_min[2]=1.0;

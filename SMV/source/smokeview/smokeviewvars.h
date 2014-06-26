@@ -42,7 +42,7 @@ SVEXTERN float SVDECL(tour_global_tension,0.0);
 #ifdef pp_GEOMTEST
 SVEXTERN float box_bounds[6],box_bounds2[6],box_translate[3],tetra_vertices[12];
 SVEXTERN int tetrabox_vis[10];
-SVEXTERN int SVDECL(show_geomtest,0),SVDECL(show_intersection,1);
+SVEXTERN int SVDECL(show_geomtest,0);
 #endif
 
 SVEXTERN int SVDECL(convert_ini,0);

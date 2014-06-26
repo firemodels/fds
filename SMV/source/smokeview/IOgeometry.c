@@ -1586,9 +1586,10 @@ void read_geomdata(int ifile, int load_flag, int *errorcode){
   Update_Framenumber(1);
 }
 
-/* ------------------ DrawGeomTest ------------------------ */
+#ifdef pp_GEOMTEST
+/* ------------------ draw_geomtest ------------------------ */
 
-void DrawGeomTest(int option){
+void draw_geomtestclip(void){
   float *xmin, *xmax, *ymin, *ymax, *zmin, *zmax;
   unsigned char cubecolor[4]={0,255,255,255};
   unsigned char tetra0color[4]={255,0,0,255};
@@ -1608,7 +1609,7 @@ void DrawGeomTest(int option){
   v3 = v2 + 3;
   v4 = v3 + 3;
 
-  if(option==0){
+  {
     float specular[4]={0.4,0.4,0.4,1.0};
 
     glEnable(GL_LIGHTING);
@@ -1678,19 +1679,16 @@ void DrawGeomTest(int option){
   glScalef(SCALE2SMV(1.0),SCALE2SMV(1.0),SCALE2SMV(1.0));
   glTranslatef(-xbar0,-ybar0,-zbar0);
 
-  if(option==0)setClipPlanes(&tetra_clipinfo,CLIP_ON_DENORMAL);
+  // draw box
+
+  setClipPlanes(&tetra_clipinfo,CLIP_ON_DENORMAL);
   glPushMatrix();
   glTranslatef(*xmin,*ymin,*zmin);
   glScalef(ABS(*xmax-*xmin),ABS(*ymax-*ymin),ABS(*zmax-*zmin));
-  if(option==0){
+  {
     float volume;
     int flag=0,error;
     double err;
-
-    FORTgetverts(box_bounds, v1, v2, v3, v4, verts, &nverts, facestart, facenum, face_id, &nfaces, &volume, &flag, b_state, &error, &err);
-    if(nfaces>10){
-      printf("***error: nface=%i should not be bigger than 10\n",nfaces);
-    }
 
     glBegin(GL_QUADS);
     glColor3ubv(cubecolor);
@@ -1745,16 +1743,69 @@ void DrawGeomTest(int option){
     glEnd();
   }
 #define EPS 0.02
-  if(option==1){
-    output3Text(foregroundcolor, -EPS, 0.5, 0.5, "xmin");
-    output3Text(foregroundcolor, 1.0+EPS, 0.5, 0.5, "xmax");
-    output3Text(foregroundcolor, 0.5, -EPS, 0.5, "ymin");
-    output3Text(foregroundcolor, 0.5, 1.0+EPS, 0.5, "ymax");
-    output3Text(foregroundcolor, 0.5, 0.5, -EPS, "zmin");
-    output3Text(foregroundcolor, 0.5, 0.5, 1.0+EPS, "zmax");
-    glLineWidth(gridlinewidth);
-    drawcubec_outline(1.0,cubecolor);
-  }
+  glPopMatrix();
+  glPopMatrix();
+
+  // draw tetrahedron
+
+  glPushMatrix();
+  glScalef(SCALE2SMV(1.0),SCALE2SMV(1.0),SCALE2SMV(1.0));
+  glTranslatef(-xbar0,-ybar0,-zbar0);
+  setClipPlanes(&box_clipinfo,CLIP_ON_DENORMAL);
+  drawfilled2tetra(v1,v2,v3,v4,tetra0color,tetra1color,tetra2color,tetra3color,tetrabox_vis+6);
+
+  glPopMatrix();
+  // tetrahedron
+
+  setClipPlanes(NULL,CLIP_OFF);
+  glDisable(GL_LIGHTING);
+  glDisable(GL_COLOR_MATERIAL);
+}
+
+/* ------------------ draw_geomtest2 ------------------------ */
+
+void draw_geomtestoutline(void){
+  float *xmin, *xmax, *ymin, *ymax, *zmin, *zmax;
+  unsigned char cubecolor[4]={0,255,255,255};
+  unsigned char tetra0color[4]={255,0,0,255};
+  unsigned char tetra1color[4]={0,255,0,255};
+  unsigned char tetra2color[4]={0,0,255,255};
+  unsigned char tetra3color[4]={255,255,0,255};
+  unsigned char tetracoloroutline[4]={255,0,255,255};
+  float *v1, *v2, *v3, *v4;
+  int nverts;
+  int facestart[200], facenum[200], nfaces;
+  float verts[600]; 
+
+  box_state = b_state+1;
+  v1 = tetra_vertices;
+  v2 = v1 + 3;
+  v3 = v2 + 3;
+  v4 = v3 + 3;
+
+  xmin = box_bounds;
+  xmax = box_bounds+1;
+  ymin = box_bounds+2;
+  ymax = box_bounds+3;
+  zmin = box_bounds+4;
+  zmax = box_bounds+5;
+
+  glPushMatrix();
+  glScalef(SCALE2SMV(1.0),SCALE2SMV(1.0),SCALE2SMV(1.0));
+  glTranslatef(-xbar0,-ybar0,-zbar0);
+
+  glPushMatrix();
+  glTranslatef(*xmin,*ymin,*zmin);
+  glScalef(ABS(*xmax-*xmin),ABS(*ymax-*ymin),ABS(*zmax-*zmin));
+#define EPS 0.02
+  output3Text(foregroundcolor, -EPS, 0.5, 0.5, "xmin");
+  output3Text(foregroundcolor, 1.0+EPS, 0.5, 0.5, "xmax");
+  output3Text(foregroundcolor, 0.5, -EPS, 0.5, "ymin");
+  output3Text(foregroundcolor, 0.5, 1.0+EPS, 0.5, "ymax");
+  output3Text(foregroundcolor, 0.5, 0.5, -EPS, "zmin");
+  output3Text(foregroundcolor, 0.5, 0.5, 1.0+EPS, "zmax");
+  glLineWidth(gridlinewidth);
+  drawcubec_outline(1.0,cubecolor);
   glPopMatrix();
   glPopMatrix();
 
@@ -1763,23 +1814,17 @@ void DrawGeomTest(int option){
   glPushMatrix();
   glScalef(SCALE2SMV(1.0),SCALE2SMV(1.0),SCALE2SMV(1.0));
   glTranslatef(-xbar0,-ybar0,-zbar0);
-  if(option==0){
-    setClipPlanes(&box_clipinfo,CLIP_ON_DENORMAL);
-    drawfilled2tetra(v1,v2,v3,v4,tetra0color,tetra1color,tetra2color,tetra3color,tetrabox_vis+6);
-  }
-  if(option==1){
-    output3Text(foregroundcolor, v1[0]-EPS, v1[1]-EPS, v1[2]-EPS, "v1");
-    output3Text(foregroundcolor, v2[0]+EPS, v2[1]-EPS, v2[2]-EPS, "v2");
-    output3Text(foregroundcolor, v3[0], v3[1]+EPS, v3[2]-EPS, "v3");
-    output3Text(foregroundcolor, v4[0], v4[1], v4[2]+EPS, "v4");
-    glLineWidth(gridlinewidth);
-    drawtetra_outline(v1,v2,v3,v4,tetracoloroutline);
-  }
+  output3Text(foregroundcolor, v1[0]-EPS, v1[1]-EPS, v1[2]-EPS, "v1");
+  output3Text(foregroundcolor, v2[0]+EPS, v2[1]-EPS, v2[2]-EPS, "v2");
+  output3Text(foregroundcolor, v3[0], v3[1]+EPS, v3[2]-EPS, "v3");
+  output3Text(foregroundcolor, v4[0], v4[1], v4[2]+EPS, "v4");
+  glLineWidth(gridlinewidth);
+  drawtetra_outline(v1,v2,v3,v4,tetracoloroutline);
 
   glPopMatrix();
   // tetrahedron
 
-  if(option==1){
+  {
     float volume;
     int flag=0,error;
     double err;
@@ -1808,29 +1853,51 @@ void DrawGeomTest(int option){
         }
       }
       glEnd();
-      if(option==1){
-        for(j=0;j<nfaces;j++){
-          int i;
+      for(j=0;j<nfaces;j++){
+        int i;
 
-          if(tetrabox_vis[face_id[j]]==0)continue;
-          for(i=facestart[j];i<facestart[j+1];i++){
-            char label[100];
+        if(tetrabox_vis[face_id[j]]==0)continue;
+        for(i=facestart[j];i<facestart[j+1];i++){
+          char label[100];
 
-            sprintf(label,"%i",i-facestart[j]);
-            output3Text(foregroundcolor, verts[3*i]-3*EPS, verts[3*i+1]-3*EPS, verts[3*i+2]+3*EPS, label);
-          }
+          sprintf(label,"%i",i-facestart[j]);
+          output3Text(foregroundcolor, verts[3*i]-3*EPS, verts[3*i+1]-3*EPS, verts[3*i+2]+3*EPS, label);
         }
       }
       glPopMatrix();
     }
-  }
-  if(option==0){
-    setClipPlanes(NULL,CLIP_OFF);
-    glDisable(GL_LIGHTING);
-    glDisable(GL_COLOR_MATERIAL);
+    glPushMatrix();
+    glScalef(SCALE2SMV(1.0),SCALE2SMV(1.0),SCALE2SMV(1.0));
+    glTranslatef(-xbar0,-ybar0,-zbar0);
+    for(i=0;i<nmeshes;i++){
+      mesh *meshi;
+      int j;
+      int nx, nxy;
+      float *x, *y, *z;
+
+      meshi = meshinfo + i;
+      nx = meshi->ibar;
+      nxy = meshi->ibar*meshi->jbar;
+      x = meshi->xplt_orig;
+      y = meshi->yplt_orig;
+      z = meshi->zplt_orig;
+
+      if(meshi->ncutcells==0)continue;
+      for(j=0;j<meshi->ncutcells;j++){
+        int ijk, ii, jj, kk;
+        float x1, x2, y1, y2, z1, z2;
+        
+        ijk = meshi->cutcells[j];
+        kk = ijk/nxy;
+        jj = (ijk-kk*nxy)/nx;
+        ii = ijk%nx;
+        drawbox_outline(x[ii],x[ii+1],y[jj],y[jj+1],z[kk],z[kk+1],foregroundcolor);
+      }
+    }
+    glPopMatrix();
   }
 }
-
+#endif
 /* ------------------ draw_geomdata ------------------------ */
 
 void draw_geomdata(patchdata *patchi, int geomtype){

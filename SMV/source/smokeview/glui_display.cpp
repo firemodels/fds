@@ -777,8 +777,6 @@ extern "C" void glui_labels_setup(int main_window){
   SPINNER_tetra_vertices[8]=glui_labels->add_spinner_to_panel(PANEL_geom2c,"z:",GLUI_SPINNER_FLOAT,tetra_vertices+8,VOL_TETRA,Volume_CB);
   SPINNER_tetra_vertices[11]=glui_labels->add_spinner_to_panel(PANEL_geom2c,"z:",GLUI_SPINNER_FLOAT,tetra_vertices+11,VOL_TETRA,Volume_CB);
 
-  glui_labels->add_checkbox_to_panel(ROLLOUT_geomtest,"show intersection",&show_intersection);
-
   PANEL_geom3abc=glui_labels->add_panel_to_panel(ROLLOUT_geomtest,"box/tetrahedron faces",GLUI_PANEL_NONE);
 
   PANEL_geom3ab=glui_labels->add_panel_to_panel(PANEL_geom3abc,"box");
