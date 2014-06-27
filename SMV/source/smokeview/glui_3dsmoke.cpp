@@ -199,7 +199,6 @@ extern "C" void create_vol_tourlist(void){
   }
 }
 
-
 /* ------------------ update_combine_meshes ------------------------ */
 
 extern "C" void update_combine_meshes(void){

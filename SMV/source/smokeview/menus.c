@@ -4171,6 +4171,8 @@ void ImmersedMenu(int value){
       ASSERT(FFALSE);
       break;
   }
+  update_geometry_controls();
+
   visAIso=showtrisurface*1+showtrioutline*2+showtripoints*4;
   glutPostRedisplay();
 }
@@ -4974,12 +4976,10 @@ updatemenu=0;
   }
   if(have_volume==1){
     glutAddMenuEntry("Interior",999);
-    //if(show_geometry_exterior==1)glutAddMenuEntry(_("   *Show exterior"),GEOMETRY_EXTERIOR);
-    //if(show_geometry_exterior==0)glutAddMenuEntry(_("   Show exterior"),GEOMETRY_EXTERIOR);
-    if(show_geometry_interior_solid==1)glutAddMenuEntry(_("   *Show interior (solid)"),GEOMETRY_INTERIOR_SOLID);
-    if(show_geometry_interior_solid==0)glutAddMenuEntry(_("   Show interior (solid)"),GEOMETRY_INTERIOR_SOLID);
-    if(show_geometry_interior_outline==1)glutAddMenuEntry(_("   *Show interior (outline)"),GEOMETRY_INTERIOR_OUTLINE);
-    if(show_geometry_interior_outline==0)glutAddMenuEntry(_("   Show interior (outline)"),GEOMETRY_INTERIOR_OUTLINE);
+    if(show_geometry_interior_solid==1)glutAddMenuEntry(_("   *solid"),GEOMETRY_INTERIOR_SOLID);
+    if(show_geometry_interior_solid==0)glutAddMenuEntry(_("   solid"),GEOMETRY_INTERIOR_SOLID);
+    if(show_geometry_interior_outline==1)glutAddMenuEntry(_("   *outline"),GEOMETRY_INTERIOR_OUTLINE);
+    if(show_geometry_interior_outline==0)glutAddMenuEntry(_("   outline"),GEOMETRY_INTERIOR_OUTLINE);
     if(show_geometry_exterior==1&&show_geometry_interior_solid==1){
       glutAddMenuEntry(_("   *Hide"),GEOMETRY_TETRA_HIDE);
     }
