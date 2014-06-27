@@ -7,14 +7,14 @@
 \begin{document}
 
 \vspace{1.0in}
-\section{Unstructured Geometry: The \texorpdfstring{{\tt GEOM}}{GEOM} Namelist Group (Table \ref{tbl:GEOM})}
+\section{Unstructured Geometry: The \texorpdfstring{{\ct GEOM}}{GEOM} Namelist Group (Table \ref{tbl:GEOM})}
 \label{info:GEOM}
 \subsection{Defining Surfaces}
 
 \subsubsection{General Surfaces}
-Unstructured geometric surfaces are defined using the {\tt \&GEOM}\ namelist.
+Unstructured geometric surfaces are defined using the {\ct \&GEOM}\ namelist.
 These surfaces consist of a collection of triangular faces where each face consists of three vertices.
-A simple form of the {\tt \&GEOM}\ namelist defining one triangular face is given by
+A simple form of the {\ct \&GEOM}\ namelist defining one triangular face is given by
 
 \begin{verbatim}
 &GEOM ID='triangle'
@@ -23,32 +23,32 @@ A simple form of the {\tt \&GEOM}\ namelist defining one triangular face is give
 /
 \end{verbatim}
 
-\noindent where {\tt ID}\ specifies the object name, in this case {\tt triangle},
-{\tt VERTS}\ specifies a list of one or more $(x,y,z)$ coordinates and {\tt FACES}\ specifies a list of vertices, 3 vertex indices for each
-face. Each index ranges from 1 to the number of vertices found on this {\tt \&GEOM}\ line.
+\noindent where {\ct ID}\ specifies the object name, in this case {\ct triangle},
+{\ct VERTS}\ specifies a list of one or more $(x,y,z)$ coordinates and {\ct FACES}\ specifies a list of vertices, 3 vertex indices for each
+face. Each index ranges from 1 to the number of vertices found on this {\ct \&GEOM}\ line.
 
-One may also define particular kinds of geometric objects,  blocks using {\tt XB}, spheres using {\tt SPHERE\_ORIGIN}\ and {\tt SPHERE\_RADIUS}
-and a 2D surface using {\tt ZVALS}.
-FDS generate vertices and faces to represent these objects, equivalent to what would have been defined using {\tt VERTS}\ and {\tt FACES}.
+One may also define particular kinds of geometric objects,  blocks using {\ct XB}, spheres using {\ct SPHERE\_ORIGIN}\ and {\ct SPHERE\_RADIUS}
+and a 2D surface using {\ct ZVALS}.
+FDS generate vertices and faces to represent these objects, equivalent to what would have been defined using {\ct VERTS}\ and {\ct FACES}.
 
 \subsubsection{Blocks}
-A {\tt \&GEOM}\ namelist defining a block is given by
+A {\ct \&GEOM}\ namelist defining a block is given by
 
 \begin{verbatim}
 &GEOM ID='block'
       XB=0.0,1.0,0.0,1.0,0.0,1.0 /
 \end{verbatim}
 
-\noindent where {\tt XB=xmin,xmax,ymin,ymax,zmin,zmax} defines the min and max bounds of the block.
-The {\tt XB}\ parameter is used in the same way as on an {\tt \&OBST}\ or {\tt \&VENT}\ line.
+\noindent where {\ct XB=xmin,xmax,ymin,ymax,zmin,zmax} defines the min and max bounds of the block.
+The {\ct XB}\ parameter is used in the same way as on an {\ct \&OBST}\ or {\ct \&VENT}\ line.
 A block may be discretized into many parts by
-specifying the {\tt IJK} parameter.  For example, {\tt IJK=8,6,4} would split the block
+specifying the {\ct IJK} parameter.  For example, {\ct IJK=8,6,4} would split the block
 into 8 parts along the $x$ dimension, 6 parts along the $y$ dimension and 4 parts along
 the $z$ dimension. By default, blocks are discretized
 so that the block faces are consistent in size with the grid resolution.
 
 \subsubsection{Spheres}
-A {\tt \&GEOM}\ namelist defining a sphere centered at $(0,0,0)$ with radius $1$ is given by
+A {\ct \&GEOM}\ namelist defining a sphere centered at $(0,0,0)$ with radius $1$ is given by
 
 \begin{verbatim}
 &GEOM ID='sphere'
@@ -56,33 +56,33 @@ A {\tt \&GEOM}\ namelist defining a sphere centered at $(0,0,0)$ with radius $1$
 \end{verbatim}
 
 \noindent Spheres are discretized by default so that each face is consistent in size with the grid resolution.
-One may specify a {\tt N\_LEVEL}\ parameter which specifies the number of times the sphere is split.
+One may specify a {\ct N\_LEVEL}\ parameter which specifies the number of times the sphere is split.
 
 \subsubsection{2D Surfaces}
-A {\tt \&GEOM}\ namelist defining a 2D surface is given by
+A {\ct \&GEOM}\ namelist defining a 2D surface is given by
 
 \begin{verbatim}
 &GEOM ID='terrain'
       IJK=ivals,jvals,XB=xmin,xmax,ymin,ymax,ZVALS=..... /
 \end{verbatim}
 
-\noindent where {\tt XB}\ defines a rectangular region bounded by xmin, xmax, ymin and ymax where elevation data is defined with {\tt ZVALS}.
-{\tt IJK}\ specifies how many vertices occur in this region along each dimension in this region.
-In this example {\tt ivals}\ values occur along the x dimension and {\tt jval}\ values occur along the y dimension.
-The {\tt ZVALS} keyword is used to specify elevations at each $(x,y)$ location.
-The elevation data specified after the {\tt ZVALS}\ keyword is arranged in row major order.
-The first row contains {\tt ivals} elevation values occurring at the the ymax position from xmin to xmax.
+\noindent where {\ct XB}\ defines a rectangular region bounded by xmin, xmax, ymin and ymax where elevation data is defined with {\ct ZVALS}.
+{\ct IJK}\ specifies how many vertices occur in this region along each dimension in this region.
+In this example {\ct ivals}\ values occur along the x dimension and {\ct jval}\ values occur along the y dimension.
+The {\ct ZVALS} keyword is used to specify elevations at each $(x,y)$ location.
+The elevation data specified after the {\ct ZVALS}\ keyword is arranged in row major order.
+The first row contains {\ct ivals} elevation values occurring at the the ymax position from xmin to xmax.
 Similarly, the last row contains
-{\tt ivals}\ elevation values for the ymin position again from xmin to xmax.
-There are then {\tt jvals}\ rows and {\tt ivals}\ columns of elevation data.
+{\ct ivals}\ elevation values for the ymin position again from xmin to xmax.
+There are then {\ct jvals}\ rows and {\ct ivals}\ columns of elevation data.
 As with the blocks and spheres, FDS uses the information
 provided by these keywords to construct
 vertices and triangular faces.
 
 \subsection{Defining Solids}
-Unstructured geometric solids are also defined using the {\tt \&GEOM}\ namelist.
+Unstructured geometric solids are also defined using the {\ct \&GEOM}\ namelist.
 These solids consist of a collection of tetrahedrons where each tetrahedron consists of four vertices.
-A simple form of the {\tt \&GEOM}\ namelist defining one tetrahedron is given by
+A simple form of the {\ct \&GEOM}\ namelist defining one tetrahedron is given by
 
 \begin{verbatim}
 &GEOM ID='tetrahedron'
@@ -91,16 +91,17 @@ A simple form of the {\tt \&GEOM}\ namelist defining one tetrahedron is given by
 /
 \end{verbatim}
 
-\noindent where {\tt ID}\ specifies the object name, in this case {\tt tetrahedron},
-{\tt VERTS}\ specifies a list of one or more $(x,y,z)$ coordinates and {\tt VOLUS}\ specifies a list of vertices, 4 vertex indices for each
-tetrahedron. Each index ranges from 1 to the number of vertices found on this {\tt \&GEOM}\ line.
+\noindent where {\ct ID}\ specifies the object name, in this case {\ct tetrahedron},
+{\ct VERTS}\ specifies a list of one or more $(x,y,z)$ coordinates and {\ct VOLUS}\ specifies a list of vertices, 4 vertex indices for each
+tetrahedron. Each index ranges from 1 to the number of vertices found on this {\ct \&GEOM}\ line.
 
 
 \subsection{Transforming Objects}
 An object may be transformed.
-It  may be translated using {\tt XYZ}, scaled using {\tt SCALE} and rotated about {\tt XYZ0}\ using {\tt AZIM}\ and/or {\tt ELEV}.
-For example, in the following {\tt \&GEOM}\ namelist,
+It  may be translated using {\ct XYZ}, scaled using {\ct SCALE} and rotated about {\ct XYZ0}\ using {\ct AZIM}\ and/or {\ct ELEV}.
+For example, in the following {\ct \&GEOM}\ namelist,
 
+{\small
 \begin{verbatim}
 &GEOM ID='chair'
 
@@ -116,25 +117,26 @@ For example, in the following {\tt \&GEOM}\ namelist,
       XYZ=x,y,z,
 /
 \end{verbatim}
+}
 
-\noindent the chair object is translated by $(x,y,z)$ by specifying {\tt XYZ=x,y,z}.
-Similarly, the chair is scaled by $sx$, $sy$, $sz$ along each coordinate direction using {\tt SCALE=sx,sy,sz}.
+\noindent the chair object is translated by $(x,y,z)$ by specifying {\ct XYZ=x,y,z}.
+Similarly, the chair is scaled by $sx$, $sy$, $sz$ along each coordinate direction using {\ct SCALE=sx,sy,sz}.
 An object may be flipped by using a negative scale factor.
-An object is rotated using {\tt AZIM=az}\ and {\tt ELEV=elev}.
-{\tt AZIM}\ is used to specify an azimuthal rotation angle about a vertical (z) axis centered at an origin defined by {\tt XYZ0}.
-{\tt ELEV}\ specifies a rotation angle relative to a horizontal plane again containing an origin defined by {\tt XYZ0}..
+An object is rotated using {\ct AZIM=az}\ and {\ct ELEV=elev}.
+{\ct AZIM}\ is used to specify an azimuthal rotation angle about a vertical (z) axis centered at an origin defined by {\ct XYZ0}.
+{\ct ELEV}\ specifies a rotation angle relative to a horizontal plane again containing an origin defined by {\ct XYZ0}..
 An object may also be rotated about an arbitrary axis.
-{\tt GAXIS} is used to specify this axis.
-{\tt GROTATE}\ is used to specify the amount of rotation about this axis.
+{\ct GAXIS} is used to specify this axis.
+{\ct GROTATE}\ is used to specify the amount of rotation about this axis.
 All rotation angles are specified in degrees.
 
 \subsection{Grouping Objects}
 One may group objects to form a new object.  In the following example,
-{\tt chair}\ and {\tt couch}\ are objects that have been defined previously.  A new {\tt living room set}\ object
-is defined by referencing {\tt chair}\ and {\tt couch}\ in the {\tt GEOM\_IDS}\ keyword.  The chair and couch
-are place at a particular locations using the {\tt DXYZ}\ keyword.
+{\ct chair}\ and {\ct couch}\ are objects that have been defined previously.  A new {\ct living room set}\ object
+is defined by referencing {\ct chair}\ and {\ct couch}\ in the {\ct GEOM\_IDS}\ keyword.  The chair and couch
+are place at a particular locations using the {\ct DXYZ}\ keyword.
 
-{%\footnotesize
+{\small
 \begin{verbatim}
 &GEOM ID='chair' ..... /
 
@@ -154,34 +156,36 @@ are place at a particular locations using the {\tt DXYZ}\ keyword.
 \end{verbatim}
 }
 
-\noindent Referenced objects such as {\tt chair}\ and {\tt couch} in this case must be defined in
+\noindent Referenced objects such as {\ct chair}\ and {\ct couch} in this case must be defined in
 previous {\&GEOM}\ lines.  Forward references are not permitted.
 One may scale, rotate and translate objects as they are placed in the group using
-{\tt DSCALE}\, for scaling, {\tt DAZIM} and {\tt DELEV} for rotation and {\tt DXYZ} for translation.
+{\ct DSCALE}\, for scaling, {\ct DAZIM} and {\ct DELEV} for rotation and {\ct DXYZ} for translation.
 
-The {\tt DXYZ0}\ and {\tt DXYZ}\ keywords use two coordinates (array indices) to specify data.
+The {\ct DXYZ0}\ and {\ct DXYZ}\ keywords use two coordinates (array indices) to specify data.
 The first coordinate specifies the spatial component (1 for x, 2 for y, 3 for z or 1:3 for all three).
-The second coordinate specifies the object number according to its position in the {\tt GEOM\_IDS}\ array.
+The second coordinate specifies the object number according to its position in the {\ct GEOM\_IDS}\ array.
 For example,
-DXYZ(1,3) would specify the translation along the x direction for the third object in the {\tt GEOM\_IDS}\ array.
+DXYZ(1,3) would specify the translation along the x direction for the third object in the {\ct GEOM\_IDS}\ array.
 
-The {\tt COMPONENT\_ONLY}\ keyword if .TRUE., indicates that the object being defined is only a component found in other geometries.
+The {\ct COMPONENT\_ONLY}\ keyword if .TRUE., indicates that the object being defined is only a component found in other geometries.
 It will not appear by itself in the FDS model.
 
 \subsection{Dynamic Objects}
 An object's position and orientation may change with time.
-These changes are specified using various keywords that end with {\tt \_DOT}.
+These changes are specified using various keywords that end with {\ct \_DOT}.
 See Table \ref{tbl:GEOM} for a complete list of these keywords.
-In the following example, {\tt AZIM\_DOT} is used to vary the azimuthal rotation angle by 1 deg/s.
-Similarly, the position may be changed by using {\tt XYZ\_DOT}.
-For example, {\tt XYZ\_DOT=0.0,0.0,1.0}\ would cause an object to move 1~m/s in a vertical direction.
+In the following example, {\ct AZIM\_DOT} is used to vary the azimuthal rotation angle by 1 deg/s.
+Similarly, the position may be changed by using {\ct XYZ\_DOT}.
+For example, {\ct XYZ\_DOT=0.0,0.0,1.0}\ would cause an object to move 1~m/s in a vertical direction.
+{\small
 \begin{verbatim}
 &GEOM VERTS=...,FACES=....,AZIM=0.0,AZIM_DOT=1.0 /
 \end{verbatim}
+}
 
 \vspace{\baselineskip}
 
-\section{\texorpdfstring{{\tt GEOM}}{GEOM} (Unstructured Geometry Parameters)}
+\section{\texorpdfstring{{\ct GEOM}}{GEOM} (Unstructured Geometry Parameters)}
 
 \begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
 \caption[Unstructured geometry parameters ({\ct GEOM} namelist group)]{For more information see Section~\ref{info:GEOM}.}
@@ -453,7 +457,7 @@ V_{n+1}+F_{n+1}-E_{n+1}&=&V_n+E_n+4 F_n-(3 F_n+2 E_n)\\
 \end{eqnarray*}
 
 Table \ref{table:refinement} gives the number of vertices, faces and edges for the 0'th through 5'th refinements.
-This table will be used to verify that the sphere discretization routine, {\tt INIT\_SPHERE}, found in FDS generates the correct number of faces and vertices..
+This table will be used to verify that the sphere discretization routine, {\ct INIT\_SPHERE}, found in FDS generates the correct number of faces and vertices..
 \vskip 0.1in
 \par
 \begin{table}
@@ -513,10 +517,10 @@ is not intended to be included verbatim in the FDS UG).
 
 \subsection{geom\_simple.fds}
 Figure \ref{fig:geom_simple} was created using the following \&GEOM namelist.
-The {\tt VERTS}\ keyword is used to specify 3 vertices and the {\tt FACES}\ keyword
+The {\ct VERTS}\ keyword is used to specify 3 vertices and the {\ct FACES}\ keyword
 is used to specify the indices of the triangular face.
 
-{\scriptsize
+{\small
 \begin{verbatim}
 &GEOM ID='geom1',
 VERTS=0.0,0.0,0.0,1.0,0.5,0.0,1.0,1.0,1.0,
@@ -537,10 +541,10 @@ SURF_ID='surf1'/
 
 \subsection{geom\_azim.fds}
 Figure \ref{fig:geom_azim} was created using the following \&GEOM namelists.
-The {\tt AZIM}\ keyword is used to rotate the object about a vertical axis
+The {\ct AZIM}\ keyword is used to rotate the object about a vertical axis
 centered at $(0,0,0)$.
 
-{\scriptsize
+{\small
 \begin{verbatim}
 &GEOM ID='geom1',
 VERTS=0.0,0.0,0.0, 0.0,1.0,0.0, 0.0,1.0,1.0,
@@ -562,16 +566,16 @@ FACES=1,2,3,AZIM=90.0,SURF_ID='surf3'/
  \includegraphics[width=3.0in]{SCRIPT_FIGURES/geom_azim}
   \end{tabular}
 \end{center}
- \caption{Three triangles generated at different azmuthal angles using the {\tt AZIM}\ keyword. Case: geom\_azim.fds}
+ \caption{Three triangles generated at different azmuthal angles using the {\ct AZIM}\ keyword. Case: geom\_azim.fds}
 \label{fig:geom_azim}
 \end{figure}
 
 \subsection{geom\_elev.fds}
 Figure \ref{fig:geom_elev} was created using the following \&GEOM namelists.
-The {\tt ELEV}\ keyword is used to rotate the object with respect to a horizontal plane
+The {\ct ELEV}\ keyword is used to rotate the object with respect to a horizontal plane
 passing through $(0,0,0)$.
 
-{\scriptsize
+{\small
 \begin{verbatim}
 &GEOM ID='geom1',
 VERTS=0.0,0.0,1.0,1.0,0.0,1.0,1.0,1.0,1.0,
@@ -593,15 +597,15 @@ FACES=1,2,3,ELEV=90,XYZ0=0.0,0.0,1.0,SURF_ID='surf3'/
  \includegraphics[width=3.0in]{SCRIPT_FIGURES/geom_elev}
   \end{tabular}
 \end{center}
- \caption{Three triangles generated at different elevation angles using the {\tt ELEV}\ keyword. Case: geom\_elev.fds}
+ \caption{Three triangles generated at different elevation angles using the {\ct ELEV}\ keyword. Case: geom\_elev.fds}
 \label{fig:geom_elev}
 \end{figure}
 
 \subsection{geom\_scale.fds}
 Figure \ref{fig:geom_scale} was created using the following \&GEOM namelists.
-The {\tt SCALE}\ keyword is used to change the size of the object.
+The {\ct SCALE}\ keyword is used to change the size of the object.
 
-{\scriptsize
+{\small
 \begin{verbatim}
 &GEOM ID='geom4',
 VERTS=-2.0,0.0,0.0,-1.0,0.0,0.0,-1.0,0.0,1.0,
@@ -623,14 +627,14 @@ FACES=1,2,3,XYZ0= 2.0,0.0,0.0,SCALE=2.0,1.0,1.0,SURF_ID='surf3'/
  \includegraphics[width=6.0in]{SCRIPT_FIGURES/geom_scale}
   \end{tabular}
 \end{center}
-\caption{Three triangles generated at different scale sizes using the {\tt SCALE}\ keyword. Case: geom\_scale.fds}
+\caption{Three triangles generated at different scale sizes using the {\ct SCALE}\ keyword. Case: geom\_scale.fds}
 \label{fig:geom_scale}
 \end{figure}
 
 \subsection{geom\_obst.fds}
 Figure \ref{fig:geom_obst} was created using the following \&GEOM namelist.
-The {\tt XB}\ keyword is used the same way to specify a block as on
-a {\tt \&OBST}\ or {\tt \&VENT}\ line.
+The {\ct XB}\ keyword is used the same way to specify a block as on
+a {\ct \&OBST}\ or {\ct \&VENT}\ line.
 
 {\scriptsize
 \begin{verbatim}
@@ -644,14 +648,14 @@ a {\tt \&OBST}\ or {\tt \&VENT}\ line.
  \includegraphics[height=\figheightD]{SCRIPT_FIGURES/geom_obst}
   \end{tabular}
 \end{center}
- \caption{A block generated using the {\tt XB}\ keyword.  The block is refined automatically to be consistent with the underlying grid resolution. Case: geom\_obst.fds}
+ \caption{A block generated using the {\ct XB}\ keyword.  The block is refined automatically to be consistent with the underlying grid resolution. Case: geom\_obst.fds}
 \label{fig:geom_obst}
 \end{figure}
 
 \subsection{geom\_sphere1a.fds,...,geom\_sphere3f.fds}
-Figure \ref{fig:geom_sphere} was created using {\tt LEVEL=n}\
+Figure \ref{fig:geom_sphere} was created using {\ct LEVEL=n}\
 in the following \&GEOM namelist
-where {\tt n}\ ranges from 0 to 5.
+where {\ct n}\ ranges from 0 to 5.
 
 {\scriptsize
 \begin{verbatim}
@@ -659,12 +663,12 @@ where {\tt n}\ ranges from 0 to 5.
 \end{verbatim}
 }
 
-The {\tt N\_LEVELS}\ keyword is used
-to specify the resolution of the sphere, larger {\tt N\_LEVELS}\ values result
-in a more highly resolved sphere.{\tt LEVEL=0} produces a 20 sided sphere approximation, an icosahedron .
-{\tt LEVEL=n} produces a sphere approximation with four times as many triangles as the
-sphere produced with {\tt LEVEL=n-1}.
-The {\tt SPHERE\_RADIUS}\ and {\tt SPHERE\_ORIGIN}\ keywords are used to specify
+The {\ct N\_LEVELS}\ keyword is used
+to specify the resolution of the sphere, larger {\ct N\_LEVELS}\ values result
+in a more highly resolved sphere.{\ct LEVEL=0} produces a 20 sided sphere approximation, an icosahedron .
+{\ct LEVEL=n} produces a sphere approximation with four times as many triangles as the
+sphere produced with {\ct LEVEL=n-1}.
+The {\ct SPHERE\_RADIUS}\ and {\ct SPHERE\_ORIGIN}\ keywords are used to specify
 the size and location of the sphere.  This discretization technique results in equilateral triangles at each recursion level {(\em check to make sure this statement is true - when verified remove this comment)}.
 
 
@@ -687,8 +691,8 @@ the size and location of the sphere.  This discretization technique results in e
 \label{fig:geom_sphere}
 \end{figure}
 
-Figure \ref{fig:geom_sphere2} was created by using {\tt N\_LAT}\ and {\tt N\_LONG}\ keywords in a {\tt \&GEOM}\ namelist
-to split a sphere in latitudinal (north/south) and longitudinal (east/west) direcions respectively. The minimum values of {\tt N\_LAT}\ and {\tt N\_LONG} permitted are 3 and 6.  This discretization technique results in triangles with high aspect ratios near the poles at higher discretization levels.
+Figure \ref{fig:geom_sphere2} was created by using {\ct N\_LAT}\ and {\ct N\_LONG}\ keywords in a {\ct \&GEOM}\ namelist
+to split a sphere in latitudinal (north/south) and longitudinal (east/west) direcions respectively. The minimum values of {\ct N\_LAT}\ and {\ct N\_LONG} permitted are 3 and 6.  This discretization technique results in triangles with high aspect ratios near the poles at higher discretization levels.
 
 \begin{figure}[\figoptions]
 \begin{center}
@@ -705,13 +709,13 @@ to split a sphere in latitudinal (north/south) and longitudinal (east/west) dire
   \end{tabular}
 \end{center}
  \caption{Latitude/Longitude sphere discretizations.  Spheres are
- split in longitudinal (east/west) and latitudinal (north/south) directions using the {\tt N\_LAT}\ and {\tt N\_LONG} keywords. Cases: geom\_sphere3a.fds,...,geom\_sphere3f.fds}
+ split in longitudinal (east/west) and latitudinal (north/south) directions using the {\ct N\_LAT}\ and {\ct N\_LONG} keywords. Cases: geom\_sphere3a.fds,...,geom\_sphere3f.fds}
 \label{fig:geom_sphere2}
 \end{figure}
 
 %\geominput{geom_terrain.fds}
 \subsection{geom\_terrain.fds}
-Figure \ref{fig:geom_terrain} was created using the {\tt ZVALS}\ keyword.
+Figure \ref{fig:geom_terrain} was created using the {\ct ZVALS}\ keyword.
 
 \begin{figure}[\figoptions]
 \begin{center}
@@ -719,16 +723,16 @@ Figure \ref{fig:geom_terrain} was created using the {\tt ZVALS}\ keyword.
  \includegraphics[height=\figheightD]{SCRIPT_FIGURES/geom_terrain}
   \end{tabular}
 \end{center}
- \caption{Elevations are defined on a rectangular array of grid points using the {\tt ZVALUES}\ keyword.  Case: gridgeom\_terrain.fds}
+ \caption{Elevations are defined on a rectangular array of grid points using the {\ct ZVALUES}\ keyword.  Case: gridgeom\_terrain.fds}
 \label{fig:geom_terrain}
 \end{figure}
 
 \subsection{geom\_texture.fds}
 Figure \ref{fig:geom_texture} was created using the following \&SURF and \&GEOM namelists.
-The {\tt TEXTURE\_MAP}\ keyword on the {\tt \&SURF}\ is used to specify the name of the image
+The {\ct TEXTURE\_MAP}\ keyword on the {\ct \&SURF}\ is used to specify the name of the image
 file used to texture map the geometric object.
 
-{\scriptsize
+{\small
 \begin{verbatim}
 &SURF ID='surf1',TEXTURE_MAP='nistleft.jpg',TEXTURE_WIDTH=0.6,TEXTURE_HEIGHT=0.2,COLOR='BLUE' /
 
@@ -750,10 +754,10 @@ FACES=1,2,3,SURF_ID='surf1'/
 
 \subsection{geom\_texture2.fds}
 Figure \ref{fig:geom_texture2} was created using the following \&SURF and \&GEOM namelists.
-The {\tt TEXTURE\_MAP}\ keyword on the {\tt \&SURF}\ is used to specify the name of the image
+The {\ct TEXTURE\_MAP}\ keyword on the {\ct \&SURF}\ is used to specify the name of the image
 file used to texture map the geometric object. This example has two textures.
 
-{\scriptsize
+{\small
 \begin{verbatim}
 &SURF ID='surf1' TEXTURE_MAP='nistleft.jpg',TEXTURE_WIDTH=0.6,TEXTURE_HEIGHT=0.2,COLOR='BLUE' /
 &SURF ID='surf2',TEXTURE_MAP='grass.jpg',TEXTURE_WIDTH=0.6,TEXTURE_HEIGHT=0.2,COLOR='GREEN' /
@@ -781,22 +785,23 @@ FACES=1,2,3,SURF_ID='surf2'/
 \subsection{geom\_texture3a.fds, geom\_texture3b.fds, geom\_texture4a.fds, geom\_texture4b.fds}
 The spheres in Figure \ref{fig:geom_texture3} were created using \&SURF and \&GEOM namelists similar to the following.
 
-{\scriptsize
+{\small
 \begin{verbatim}
-&SURF ID='surf1',TEXTURE_MAP='sphere_cover_03.png'COLOR='BLUE',TEXTURE_WIDTH=1.0,TEXTURE_HEIGHT=1.0/
+&SURF ID='surf1',TEXTURE_MAP='sphere_cover_03.png'COLOR='BLUE',
+      TEXTURE_WIDTH=1.0,TEXTURE_HEIGHT=1.0/
 
 &GEOM ID='sphere1',SURF_ID='surf1',
-N_LAT=50,N_LONG=50,SPHERE_RADIUS=0.25,SPHERE_ORIGIN=0.25,0.5,0.5,
-TEXTURE_ORIGIN=0.25,0.5,0.5,TEXTURE_MAPPING='SPHERICAL' /
+      N_LAT=50,N_LONG=50,SPHERE_RADIUS=0.25,SPHERE_ORIGIN=0.25,0.5,0.5,
+      TEXTURE_ORIGIN=0.25,0.5,0.5,TEXTURE_MAPPING='SPHERICAL' /
 
 &GEOM ID='sphere2',SURF_ID='surf3',
-N_LEVELS=3,SPHERE_RADIUS=0.25,SPHERE_ORIGIN=0.75,0.5,0.5,
-TEXTURE_ORIGIN=0.75,0.5,0.5,TEXTURE_MAPPING='SPHERICAL' /
+      N_LEVELS=3,SPHERE_RADIUS=0.25,SPHERE_ORIGIN=0.75,0.5,0.5,
+      TEXTURE_ORIGIN=0.75,0.5,0.5,TEXTURE_MAPPING='SPHERICAL' /
 \end{verbatim}
 }
 
-The {\tt TEXTURE\_MAP}\ keyword is used to specify the name of the image
-file applied to the geometric object. The {\tt SPHERICAL}\ setting indicates that that the texture map image
+The {\ct TEXTURE\_MAP}\ keyword is used to specify the name of the image
+file applied to the geometric object. The {\ct SPHERICAL}\ setting indicates that that the texture map image
 is applied to the object using spherical coordinates.
 
 
@@ -833,15 +838,15 @@ Figure \ref{fig:geom_arch} was created using VERTS and FACES keywords.
 
 \subsection{geom\_time.fds}
 Figure \ref{fig:geom_time} was created using the following \&GEOM namelist.
-The {\tt AZIM}\ keyword is used to specify the initial rotational angle
-and the {\tt AXIM\_DOT}\ is used to specify that rate at which
+The {\ct AZIM}\ keyword is used to specify the initial rotational angle
+and the {\ct AXIM\_DOT}\ is used to specify that rate at which
 the azimuthal angle changes, in this  case 0.36 deg/s.
 
-{\scriptsize
+{\small
 \begin{verbatim}
 &GEOM ID='geom4',
-VERTS=0.0,0.0,0.0,0.0,1.0,0.0,0.0,1.0,1.0,
-FACES=1,2,3,AZIM=0.0,AZIM_DOT=0.36,SURF_ID='surf1'/
+      VERTS=0.0,0.0,0.0,0.0,1.0,0.0,0.0,1.0,1.0,
+      FACES=1,2,3,AZIM=0.0,AZIM_DOT=0.36,SURF_ID='surf1'/
 \end{verbatim}
 }
 
@@ -860,14 +865,14 @@ FACES=1,2,3,AZIM=0.0,AZIM_DOT=0.36,SURF_ID='surf1'/
 
 \subsection{geom\_time2.fds, geom\_time3.fds, geom\_time4.fds}
 Figure \ref{fig:geom_time2} was created using the following \&GEOM namelists.
-The {\tt AZIM}\ keyword is used to specify the initial rotational angle
-and the {\tt AXIM\_DOT}\ is used to specify that rate at which
+The {\ct AZIM}\ keyword is used to specify the initial rotational angle
+and the {\ct AXIM\_DOT}\ is used to specify that rate at which
 the azimuthal angle changes, in this  case 0.72 deg/s.
-The {\tt blade}\ object is used as components to create four blade objects
-{\tt blade1}, {\tt blade2}, {\tt blade3} and {\tt blade4} of the
-{\tt prop}\  object. The blades are positioned within the {\tt prop} using the {\tt DAZIM}\ keyword. Figures \ref{fig:geom_time3} and \ref{fig:geom_time4} were created similarly using rotation keywords to incline the geometric objects.
+The {\ct blade}\ object is used as components to create four blade objects
+{\ct blade1}, {\ct blade2}, {\ct blade3} and {\ct blade4} of the
+{\ct prop}\  object. The blades are positioned within the {\ct prop} using the {\ct DAZIM}\ keyword. Figures \ref{fig:geom_time3} and \ref{fig:geom_time4} were created similarly using rotation keywords to incline the geometric objects.
 
-{\tt \scriptsize
+{\small
 \begin{verbatim}
 &GEOM ID='blade',AZIM=0.0,AZIM_DOT=0.72
 VERTS=0.0,0.0,0.0,1.0,0.0,0.0,1.0,0.0,1.0,
@@ -923,7 +928,7 @@ GEOM_IDS(4)='blade3',DAZIM(4)=270.0,
 \end{figure}
 
 \subsection{geom\_sphere2.fds}
-Figure \ref{fig:geom_sphere2} tests motion of a scaled,  moving, rotating sphere. The sphere was scaled using {\tt SCALE=0.6,0.4,0.2}\, placed initially at the righ side of the domain using {\tt XYZ=10.0,0.5,1.0}, translated to the left and down using {\tt XYZ\_DOT=-0.01,0.0,-0.001} and rotated using {\tt GROTATE\_DOT=0.36}.  The axis of rotation was specified using {\tt GAXIS=0.0,1.0,0.0}.
+Figure \ref{fig:geom_sphere2} tests motion of a scaled,  moving, rotating sphere. The sphere was scaled using {\ct SCALE=0.6,0.4,0.2}\, placed initially at the righ side of the domain using {\ct XYZ=10.0,0.5,1.0}, translated to the left and down using {\ct XYZ\_DOT=-0.01,0.0,-0.001} and rotated using {\ct GROTATE\_DOT=0.36}.  The axis of rotation was specified using {\ct GAXIS=0.0,1.0,0.0}.
 
 \begin{figure}[\figoptions]
 \begin{center}
@@ -1250,7 +1255,22 @@ This is where the formulation gets tricky.  Both heat and mass transfer present 
 \subsubsection{FDS Grid Data Structure}
 
 \begin{figure}
+\begin{center}
+\begin{tikzpicture}[scale=1]
 
+\coordinate (O) at (0,0);
+\coordinate (P) at (10,10);
+
+\draw[help lines] (O) grid [step=2cm] (P);
+
+\end{tikzpicture}
+\caption{Structured, staggered grid in FDS.  Mesh variables belong to {\ct M=>MESHES(NM)}. }
+\label{fig:struc_stag_grid}
+\end{center}
+\end{figure}
+
+
+\begin{figure}
 \begin{center}
 
 \newcommand{\Depth}{3}
