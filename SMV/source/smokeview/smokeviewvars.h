@@ -40,11 +40,9 @@ SVEXTERN int SVDECL(compute_fed,0);
 SVEXTERN int SVDECL(tour_global_tension_flag,1);
 SVEXTERN float SVDECL(tour_global_tension,0.0);
 
-#ifdef pp_GEOMTEST
 SVEXTERN float box_bounds[6],box_bounds2[6],box_translate[3],tetra_vertices[12];
 SVEXTERN int tetrabox_vis[10];
 SVEXTERN int SVDECL(show_geomtest,0);
-#endif
 
 SVEXTERN int SVDECL(convert_ini,0);
 SVEXTERN char SVDECL(*ini_from,NULL), SVDECL(*ini_to,NULL);

@@ -727,7 +727,7 @@ void update_triangles(void){
       }
     }  
   }
-#ifdef pp_GEOMTEST
+
   box_bounds2[0]=DENORMALIZE_XX(0.25);
   box_bounds2[1]=DENORMALIZE_XX(0.75);
   box_bounds2[2]=DENORMALIZE_YY(0.25);
@@ -753,8 +753,6 @@ void update_triangles(void){
   tetra_vertices[9]=DENORMALIZE_XX(0.5);
   tetra_vertices[10]=DENORMALIZE_YY(0.5);
   tetra_vertices[11]=DENORMALIZE_ZZ(0.8);
-
-#endif
 
 }
 
@@ -1586,7 +1584,6 @@ void read_geomdata(int ifile, int load_flag, int *errorcode){
   Update_Framenumber(1);
 }
 
-#ifdef pp_GEOMTEST
 /* ------------------ draw_geomtest ------------------------ */
 
 void draw_geomtestclip(void){
@@ -1904,8 +1901,6 @@ void draw_geom_cutcells(void){
   }
   glPopMatrix();
 }
-
-#endif
 
 /* ------------------ draw_geomdata ------------------------ */
 

@@ -36,7 +36,6 @@ GLUI_Panel *PANEL_geom_interior=NULL;
 GLUI_Checkbox *CHECKBOX_surface_solid=NULL, *CHECKBOX_surface_outline;
 GLUI_Checkbox *CHECKBOX_interior_solid=NULL, *CHECKBOX_interior_outline;
 
-#ifdef pp_GEOMTEST
 GLUI_Rollout *ROLLOUT_geomtest=NULL;
 GLUI_Panel *PANEL_geom1=NULL;
 GLUI_Panel *PANEL_geom1a=NULL;
@@ -56,8 +55,6 @@ GLUI_Spinner *SPINNER_box_bounds[6];
 GLUI_Spinner *SPINNER_box_translate[3];
 GLUI_Spinner *SPINNER_tetra_vertices[12];
 GLUI_Checkbox *CHECKBOX_tetrabox_showhide[10];
-
-#endif
 
 #define VOL_BOXTRANSLATE 0
 #define VOL_TETRA 1
@@ -277,6 +274,7 @@ extern "C" void glui_geometry_setup(int main_window){
   EDIT_zmin->set_float_limits(zplt_orig[0],zplt_orig[kbar],GLUI_LIMIT_CLAMP);
   EDIT_zmax->set_float_limits(zplt_orig[0],zplt_orig[kbar],GLUI_LIMIT_CLAMP);
 
+#ifdef pp_GEOMTEST
   ROLLOUT_geometry = glui_geometry->add_rollout("Unstructured",false);
   SPINNER_face_factor=glui_geometry->add_spinner_to_panel(ROLLOUT_geometry,"face factor",GLUI_SPINNER_FLOAT,&face_factor);
   SPINNER_face_factor->set_float_limits(0.0,0.5);
@@ -301,7 +299,7 @@ extern "C" void glui_geometry_setup(int main_window){
   CHECKBOX_interior_outline=glui_geometry->add_checkbox_to_panel(PANEL_interior,"outline",&show_geometry_interior_outline,VOL_SHOWHIDE,Volume_CB);
 
   // -------------- Cube/Tetra intersection test -------------------
-#ifdef pp_GEOMTEST
+
   ROLLOUT_geomtest = glui_geometry->add_rollout_to_panel(ROLLOUT_geometry,"Cube/Tetra intersection test",false);
   glui_geometry->add_checkbox_to_panel(ROLLOUT_geomtest,"show",&show_geomtest);
   PANEL_geom1=glui_geometry->add_panel_to_panel(ROLLOUT_geomtest,"box bounding planes");
@@ -369,7 +367,6 @@ extern "C" void glui_geometry_setup(int main_window){
   CHECKBOX_tetrabox_showhide[7]=glui_geometry->add_checkbox_to_panel(PANEL_geom3c,"v2 v3 v4",tetrabox_vis+7);
   CHECKBOX_tetrabox_showhide[8]=glui_geometry->add_checkbox_to_panel(PANEL_geom3c,"v1 v3 v4",tetrabox_vis+8);
   CHECKBOX_tetrabox_showhide[9]=glui_geometry->add_checkbox_to_panel(PANEL_geom3c,"v1 v2 v3",tetrabox_vis+9);
-
 #endif
 
   glui_geometry->add_separator();
@@ -382,7 +379,6 @@ extern "C" void glui_geometry_setup(int main_window){
 
 /* ------------------ Volume_CB ------------------------ */
 
-#ifdef pp_GEOMTEST
 extern "C" void Volume_CB(int var){
   int i;
   switch (var){
@@ -420,7 +416,6 @@ extern "C" void Volume_CB(int var){
       break;
   }
 }
-#endif
 
 /* ------------------ hide_glui_geometry ------------------------ */
 

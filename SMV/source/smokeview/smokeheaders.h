@@ -103,11 +103,9 @@ EXTERNCPP void update_edit_tour(void);
 EXTERNCPP void add_delete_keyframe(int flag);
 EXTERNCPP void update_tour_parms(void);
 EXTERNCPP void slerp(float *p0, float *p1, float t, float *pout);
-#ifdef pp_GEOMTEST
 EXTERNCPP void draw_geomtestclip(void);
 EXTERNCPP void draw_geomtestoutline(void);
 EXTERNCPP void draw_geom_cutcells(void);
-#endif
 EXTERNCPP void VentMenu(int value);
 EXTERNCPP void init_vent_colors(void);
 EXTERNCPP void MergeClipPlanes(clipdata *ci, clipdata *cj);
