@@ -3751,7 +3751,7 @@ CONTAINS
          !
          IF (MYID==MAX(0,EVAC_PROCESS)) THEN
             IF(TRIM(CROWBAR_INPUT_FILE)/='null' .AND. &
-                 (MAX_FLOW > TWO_EPSILON_EB) .OR. TRIM(MAX_HUMANS_RAMP)/='null') THEN
+                 ((MAX_FLOW > TWO_EPSILON_EB) .OR. TRIM(MAX_HUMANS_RAMP)/='null')) THEN
                WRITE(MESSAGE,'(A,A,A)') 'ERROR: ENTR line ',TRIM(ID),&
                     ' problem with CROWBAR_INPUT_FILE and MAX_FLOW or MAX_HUMANS_RAMP'
                CALL SHUTDOWN(MESSAGE)
