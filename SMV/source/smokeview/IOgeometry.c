@@ -1866,38 +1866,47 @@ void draw_geomtestoutline(void){
       }
       glPopMatrix();
     }
-    glPushMatrix();
-    glScalef(SCALE2SMV(1.0),SCALE2SMV(1.0),SCALE2SMV(1.0));
-    glTranslatef(-xbar0,-ybar0,-zbar0);
-    for(i=0;i<nmeshes;i++){
-      mesh *meshi;
-      int j;
-      int nx, nxy;
-      float *x, *y, *z;
-
-      meshi = meshinfo + i;
-      nx = meshi->ibar;
-      nxy = meshi->ibar*meshi->jbar;
-      x = meshi->xplt_orig;
-      y = meshi->yplt_orig;
-      z = meshi->zplt_orig;
-
-      if(meshi->ncutcells==0)continue;
-      for(j=0;j<meshi->ncutcells;j++){
-        int ijk, ii, jj, kk;
-        float x1, x2, y1, y2, z1, z2;
-        
-        ijk = meshi->cutcells[j];
-        kk = ijk/nxy;
-        jj = (ijk-kk*nxy)/nx;
-        ii = ijk%nx;
-        drawbox_outline(x[ii],x[ii+1],y[jj],y[jj+1],z[kk],z[kk+1],foregroundcolor);
-      }
-    }
-    glPopMatrix();
   }
 }
+
+/* ------------------ draw_geom_cutcells ------------------------ */
+
+void draw_geom_cutcells(void){
+  int i;
+
+  glPushMatrix();
+  glScalef(SCALE2SMV(1.0),SCALE2SMV(1.0),SCALE2SMV(1.0));
+  glTranslatef(-xbar0,-ybar0,-zbar0);
+  for(i=0;i<nmeshes;i++){
+    mesh *meshi;
+    int j;
+    int nx, nxy;
+    float *x, *y, *z;
+
+    meshi = meshinfo + i;
+    nx = meshi->ibar;
+    nxy = meshi->ibar*meshi->jbar;
+    x = meshi->xplt_orig;
+    y = meshi->yplt_orig;
+    z = meshi->zplt_orig;
+
+    if(meshi->ncutcells==0)continue;
+    for(j=0;j<meshi->ncutcells;j++){
+      int ijk, ii, jj, kk;
+      float x1, x2, y1, y2, z1, z2;
+
+      ijk = meshi->cutcells[j];
+      kk = ijk/nxy;
+      jj = (ijk-kk*nxy)/nx;
+      ii = ijk%nx;
+      drawbox_outline(x[ii],x[ii+1],y[jj],y[jj+1],z[kk],z[kk+1],foregroundcolor);
+    }
+  }
+  glPopMatrix();
+}
+
 #endif
+
 /* ------------------ draw_geomdata ------------------------ */
 
 void draw_geomdata(patchdata *patchi, int geomtype){

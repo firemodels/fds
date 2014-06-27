@@ -237,6 +237,8 @@ extern "C" void glui_geometry_setup(int main_window){
   SPINNER_face_factor=glui_geometry->add_spinner_to_panel(ROLLOUT_geometry,"face factor",GLUI_SPINNER_FLOAT,&face_factor);
   SPINNER_face_factor->set_float_limits(0.0,0.5);
 
+  glui_geometry->add_checkbox_to_panel(ROLLOUT_geometry,_("Show cutcells"),&show_cutcells);
+
   glui_geometry->add_separator();
   glui_geometry->add_button(_("Save settings"),SAVE_SETTINGS,Blockedit_DLG_CB);
   BUTTON_blockage_1=glui_geometry->add_button(_("Close"),CLOSE_WINDOW,Blockedit_DLG_CB);
