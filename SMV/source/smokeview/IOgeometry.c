@@ -754,6 +754,9 @@ void update_triangles(void){
   tetra_vertices[10]=DENORMALIZE_YY(0.5);
   tetra_vertices[11]=DENORMALIZE_ZZ(0.8);
 
+  tetra_vertices[12]=DENORMALIZE_XX(1.0);
+  tetra_vertices[13]=DENORMALIZE_YY(0.7);
+  tetra_vertices[14]=DENORMALIZE_ZZ(0.2);
 }
 
 #define FORTREAD(var,count,STREAM) FSEEK(STREAM,4,SEEK_CUR);\
@@ -1595,7 +1598,7 @@ void draw_geomtestclip(void){
   unsigned char tetra3color[4]={255,255,0,255};
   unsigned char tetracoloroutline[4]={255,0,255,255};
   clipdata tetra_clipinfo, box_clipinfo;
-  float *v1, *v2, *v3, *v4;
+  float *v1, *v2, *v3, *v4, *v5;
   int nverts;
   int facestart[200], facenum[200], nfaces;
   float verts[600]; 
@@ -1605,6 +1608,7 @@ void draw_geomtestclip(void){
   v2 = v1 + 3;
   v3 = v2 + 3;
   v4 = v3 + 3;
+  v5 = v4 + 3;
 
   {
     float specular[4]={0.4,0.4,0.4,1.0};
@@ -1769,7 +1773,7 @@ void draw_geomtestoutline(void){
   unsigned char tetra2color[4]={0,0,255,255};
   unsigned char tetra3color[4]={255,255,0,255};
   unsigned char tetracoloroutline[4]={255,0,255,255};
-  float *v1, *v2, *v3, *v4;
+  float *v1, *v2, *v3, *v4, *v5;
   int nverts;
   int facestart[200], facenum[200], nfaces;
   float verts[600]; 
@@ -1779,6 +1783,7 @@ void draw_geomtestoutline(void){
   v2 = v1 + 3;
   v3 = v2 + 3;
   v4 = v3 + 3;
+  v5 = v4 + 3;
 
   xmin = box_bounds;
   xmax = box_bounds+1;
@@ -1815,8 +1820,10 @@ void draw_geomtestoutline(void){
   output3Text(foregroundcolor, v2[0]+EPS, v2[1]-EPS, v2[2]-EPS, "v2");
   output3Text(foregroundcolor, v3[0], v3[1]+EPS, v3[2]-EPS, "v3");
   output3Text(foregroundcolor, v4[0], v4[1], v4[2]+EPS, "v4");
+  output3Text(foregroundcolor, v5[0]+EPS, v5[1]+EPS, v5[2]+EPS, "v5");
   glLineWidth(gridlinewidth);
   drawtetra_outline(v1,v2,v3,v4,tetracoloroutline);
+  drawtetra_outline(v2,v3,v4,v5,tetracoloroutline);
 
   glPopMatrix();
   // tetrahedron
