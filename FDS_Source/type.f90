@@ -311,7 +311,7 @@ TYPE CUTCELL_LINKED_LIST_TYPE
 END TYPE CUTCELL_LINKED_LIST_TYPE
 
 TYPE CUTCELL_TYPE
-   REAL(EB) :: VOL,RHO,TMP,DIV
+   REAL(EB) :: VOL,RHO,TMP,DIV,A(6),S,N(3)
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: ZZ
    ! identify each face with area contribution to current cutcell
    ! note: this must include the faces and areas of Cartesian cells
