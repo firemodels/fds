@@ -2731,11 +2731,42 @@ CUTCELL_INDEX_IF: IF (CUTCELL_COUNT>0) THEN
                ! new stuff -- specific to tet_fire_1.fds
                CC=>M%CUTCELL(IC)
                VC = M%DX(I)*M%DY(J)*M%DZ(K)
-               V1 = (/X(I-1),Y(J),Z(K-1)/)
-               V2 = (/X(I-1),Y(J),Z(K)/)
-               V3 = (/X(I-1),Y(J-1),Z(K)/)
-               V4 = (/X(I),Y(J),Z(K)/)
-               CC%VOL = VC - TETRAHEDRON_VOLUME(V1,V2,V3,V4)
+               CC%A(1) = M%DY(J)*M%DZ(K)
+               CC%A(2) = M%DY(J)*M%DZ(K)
+               CC%A(3) = M%DX(I)*M%DZ(K)
+               CC%A(4) = M%DX(I)*M%DZ(K)
+               CC%A(5) = M%DX(I)*M%DY(J)
+               CC%A(6) = M%DX(I)*M%DY(J)
+
+               IF (I==4 .OR. J==13 .OR. K==13) THEN
+                  CC%VOL = VC
+                  IF (I==4) THEN
+                     CC%S = CC%A(2)
+                     CC%N = (/-1._EB,0._EB,0._EB/)
+                  ENDIF
+                  IF (J==13) THEN
+                     CC%S = CC%A(3)
+                     CC%N = (/0._EB,1._EB,0._EB/)
+                  ENDIF
+                  IF (K==13) THEN
+                     CC%S = CC%A(5)
+                     CC%N = (/0._EB,0._EB,1._EB/)
+                  ENDIF
+               ELSE
+                  V1 = (/X(I-1),Y(J),Z(K-1)/)
+                  V2 = (/X(I-1),Y(J),Z(K)/)
+                  V3 = (/X(I-1),Y(J-1),Z(K)/)
+                  V4 = (/X(I),Y(J),Z(K)/)
+                  CC%VOL = VC - TETRAHEDRON_VOLUME(V1,V2,V3,V4)
+                  CC%A(1) = 0.5_EB*CC%A(1)
+                  CC%A(4) = 0.5_EB*CC%A(4)
+                  CC%A(6) = 0.5_EB*CC%A(6)
+                  ! area = 1/2 * base * height
+                  CC%S = 0.5_EB * SQRT(M%DX(I)**2 + M%DY(J)**2) * SQRT(0.5_EB*MAX((M%DX(I)**2-M%DY(J)**2),0._EB) + M%DZ(K)**2)
+                  CC%N = (/M%DX(I),M%DY(J),-M%DZ(K)/)
+                  CC%N = CC%N/SQRT(DOT_PRODUCT(CC%N,CC%N)) ! normalize
+               ENDIF
+
                CC%RHO = RHOA
                CC%TMP = TMPA
                IF (N_TRACKED_SPECIES>0) THEN
