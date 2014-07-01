@@ -112,8 +112,8 @@ WALL_CELL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS
 
       ! Interpolated boundary -- set boundary value of H to be average of neighboring cells from previous time step
  
-      INTERPOLATED_ONLY: IF (WC%BOUNDARY_TYPE==INTERPOLATED_BOUNDARY) THEN
-
+      INTERPOLATED_ONLY: IF (WC%BOUNDARY_TYPE==INTERPOLATED_BOUNDARY .AND. MESH_LEVEL==0) THEN
+         
          NOM     = WC%NOM
          H_OTHER = 0._EB
          DO KKO=WC%NOM_IB(3),WC%NOM_IB(6)
@@ -147,9 +147,49 @@ WALL_CELL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS
                DZ_OTHER = MESHES(NOM)%DZ(WC%NOM_IB(3))
                BZF(I,J) = (DZ_OTHER*HP(I,J,KBAR) + DZ(KBAR)*H_OTHER)/(DZ(KBAR)+DZ_OTHER) + WALL_WORK1(IW)
          END SELECT
-
+      
       ENDIF INTERPOLATED_ONLY
- 
+      
+      ! Interpolation for embedded meshes --- set H on the boundary of mesh level 1 to an interpolated value from mesh level 0
+      
+      EMBEDDED_MESH_IF: IF (WC%BOUNDARY_TYPE==INTERPOLATED_BOUNDARY .AND. MESH_LEVEL==1) THEN
+         
+         NOM     = WC%NOM
+         H_OTHER = 0._EB
+         DO KKO=WC%NOM_IB(3),WC%NOM_IB(6)
+            DO JJO=WC%NOM_IB(2),WC%NOM_IB(5)
+               DO IIO=WC%NOM_IB(1),WC%NOM_IB(4)
+                  IF (PREDICTOR) H_OTHER = H_OTHER + OMESH(NOM)%H(IIO,JJO,KKO)
+                  IF (CORRECTOR) H_OTHER = H_OTHER + OMESH(NOM)%HS(IIO,JJO,KKO)
+               ENDDO
+            ENDDO
+         ENDDO
+         N_INT_CELLS = (WC%NOM_IB(4)-WC%NOM_IB(1)+1) * (WC%NOM_IB(5)-WC%NOM_IB(2)+1) * (WC%NOM_IB(6)-WC%NOM_IB(3)+1)
+         H_OTHER = H_OTHER/REAL(N_INT_CELLS,EB)
+         
+         SELECT CASE(IOR)
+            CASE( 1)
+               DX_OTHER = MESHES(NOM)%DX(WC%NOM_IB(1))
+               BXS(J,K) = (DX_OTHER*HP(1,J,K) + DX(1)*H_OTHER)/(DX(1)+DX_OTHER) + WALL_WORK1(IW)
+            CASE(-1)
+               DX_OTHER = MESHES(NOM)%DX(WC%NOM_IB(1))
+               BXF(J,K) = (DX_OTHER*HP(IBAR,J,K) + DX(IBAR)*H_OTHER)/(DX(IBAR)+DX_OTHER) + WALL_WORK1(IW)
+            CASE( 2)
+               DY_OTHER = MESHES(NOM)%DY(WC%NOM_IB(2))
+               BYS(I,K) = (DY_OTHER*HP(I,1,K) + DY(1)*H_OTHER)/(DY(1)+DY_OTHER) + WALL_WORK1(IW)
+            CASE(-2)
+               DY_OTHER = MESHES(NOM)%DY(WC%NOM_IB(2))
+               BYF(I,K) = (DY_OTHER*HP(I,JBAR,K) + DY(JBAR)*H_OTHER)/(DY(JBAR)+DY_OTHER) + WALL_WORK1(IW)
+            CASE( 3)
+               DZ_OTHER = MESHES(NOM)%DZ(WC%NOM_IB(3))
+               BZS(I,J) = (DZ_OTHER*HP(I,J,1) + DZ(1)*H_OTHER)/(DZ(1)+DZ_OTHER) + WALL_WORK1(IW)
+            CASE(-3)
+               DZ_OTHER = MESHES(NOM)%DZ(WC%NOM_IB(3))
+               BZF(I,J) = (DZ_OTHER*HP(I,J,KBAR) + DZ(KBAR)*H_OTHER)/(DZ(KBAR)+DZ_OTHER) + WALL_WORK1(IW)
+         END SELECT
+      
+      ENDIF EMBEDDED_MESH_IF
+      
       ! OPEN (passive opening to exterior of domain) boundary. Apply inflow/outflow BC.
 
       OPEN_IF: IF (WC%BOUNDARY_TYPE==OPEN_BOUNDARY) THEN
