@@ -803,7 +803,7 @@ MAIN_LOOP: DO
    ! Force normal components of velocity to match at interpolated boundaries
 
    DO NM=1,NMESHES
-      IF (PROCESS(NM)/=MYID .OR. .NOT.ACTIVE_MESH(NM) .OR. MESHES(NM)%MESH_LEVEL/=0) CYCLE
+      IF (PROCESS(NM)/=MYID .OR. .NOT.ACTIVE_MESH(NM)) CYCLE
       CALL MATCH_VELOCITY(NM)
    ENDDO
 
@@ -920,7 +920,7 @@ MAIN_LOOP: DO
    ! Force normal components of velocity to match at interpolated boundaries
 
    DO NM=1,NMESHES
-      IF (PROCESS(NM)/=MYID .OR. .NOT.ACTIVE_MESH(NM) .OR. MESHES(NM)%MESH_LEVEL/=0) CYCLE
+      IF (PROCESS(NM)/=MYID .OR. .NOT.ACTIVE_MESH(NM)) CYCLE
       CALL MATCH_VELOCITY(NM)
    ENDDO
 
