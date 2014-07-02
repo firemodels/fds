@@ -30,7 +30,7 @@ CONTAINS
 ! ---------------------------- READ_GEOM ----------------------------------------
 
 SUBROUTINE READ_GEOM
-USE BOXTETRA_ROUTINES, ONLY: TETRAHEDRON_VOLUME
+USE BOXTETRA_ROUTINES, ONLY: TETRAHEDRON_VOLUME, REMOVE_DUPLICATE_VERTS
 
 ! input &GEOM lines
 
@@ -417,7 +417,7 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
    
    ! remove duplicate vertices
 
-   CALL REMOVE_DUP_VERTS(N_VERTS,N_FACES,N_VOLUS,MAX_VERTS,MAX_FACES,MAX_VOLUS,VERTS,FACES,VOLUS)
+   CALL REMOVE_DUPLICATE_VERTS(N_VERTS,N_FACES,N_VOLUS,MAX_VERTS,MAX_FACES,MAX_VOLUS,VERTS,FACES,VOLUS)
 
    ! wrap up
    
@@ -1190,66 +1190,6 @@ M%N_CUTCELLS = N_CUTCELLS
 WRITE(LU_ERR,*)"Cells Total:",N_TOTALCELLS," solid:",N_SOLIDCELLS," gas:",N_GASCELLS," cutcells:",N_CUTCELLS
 
 END SUBROUTINE GENERATE_CUTCELLS
-
-! ---------------------------- REMOVE_DUP_VERTS ----------------------------------------
-
-SUBROUTINE REMOVE_DUP_VERTS(N_VERTS,N_FACES,N_VOLUS,&
-                            MAX_VERTS,MAX_FACES,MAX_VOLUS,&
-                            SPHERE_VERTS,SPHERE_FACES,SPHERE_VOLUS)
-INTEGER, INTENT(INOUT) :: N_VERTS
-INTEGER, INTENT(IN) :: N_FACES, N_VOLUS
-INTEGER, INTENT(IN) :: MAX_VERTS, MAX_FACES, MAX_VOLUS
-INTEGER, TARGET, INTENT(INOUT) :: SPHERE_VOLUS(4*MAX_VOLUS)
-REAL(EB), TARGET, INTENT(INOUT) :: SPHERE_VERTS(3*MAX_VERTS)
-INTEGER, TARGET, INTENT(INOUT) :: SPHERE_FACES(3*MAX_FACES)
-
-REAL(EB), POINTER, DIMENSION(:) :: VI, VJ
-REAL(EB), DIMENSION(3) :: VIMVJ
-REAL(EB) :: NORM_VI, NORM_VJ, NORM_VIMVJ
-
-INTEGER :: I, J, K
-
-I = 1
-DO WHILE (I<=N_VERTS)
-   VI=>SPHERE_VERTS(3*I-2:3*I)
-   NORM_VI = MAX(ABS(VI(1)),ABS(VI(2)),ABS(VI(3)))
-   J = I+1
-   DO WHILE (J<=N_VERTS)
-      VJ=>SPHERE_VERTS(3*J-2:3*J)
-      VIMVJ = VI-VJ
-      NORM_VJ = MAX(ABS(VJ(1)),ABS(VJ(2)),ABS(VJ(3)))
-      NORM_VIMVJ = MAX(ABS(VIMVJ(1)),ABS(VIMVJ(2)),ABS(VIMVJ(3)))
-      IF (NORM_VIMVJ <= 100.0_EB*MAX(1.0_EB,NORM_VI,NORM_VJ)*TWO_EPSILON_EB) THEN
-         ! vertex I and J are the same
-         ! first copy index J -> I in face list
-         ! next copy index N_VERTS -> J in face list
-         ! finally reduce N_VERTS by 1
-         
-    !     WHERE ( SPHERE_FACES(1:N_FACES)==J )       SPHERE_FACES(1:N_FACES)= I
-    !     WHERE ( SPHERE_FACES(1:N_FACES)==N_VERTS ) SPHERE_FACES(1:N_FACES)= J
-    !     WHERE ( SPHERE_VOLUS(1:N_VOLUS)==J )       SPHERE_VOLUS(1:N_VOLUS)= I
-    !     WHERE ( SPHERE_VOLUS(1:N_VOLUS)==N_VERTS ) SPHERE_VOLUS(1:N_VOLUS)= I
-         
-         DO K = 1, 3*N_FACES
-           IF (SPHERE_FACES(K)==J)SPHERE_FACES(K)=I
-         ENDDO
-         DO K = 1, 4*N_VOLUS
-           IF (SPHERE_VOLUS(K)==J)SPHERE_VOLUS(K)=I
-         ENDDO
-         VJ(1:3)=SPHERE_VERTS(3*N_VERTS-2:3*N_VERTS)
-         DO K = 1, 3*N_FACES
-           IF (SPHERE_FACES(K)==N_VERTS)SPHERE_FACES(K)=J
-         ENDDO
-         DO K = 1, 4*N_VOLUS
-           IF (SPHERE_VOLUS(K)==N_VERTS)SPHERE_VOLUS(K)=J
-         ENDDO
-         N_VERTS=N_VERTS-1
-      ENDIF
-      J=J+1
-   ENDDO
-   I=I+1
-ENDDO
-END SUBROUTINE REMOVE_DUP_VERTS      
 
 ! ---------------------------- INIT_SPHERE ----------------------------------------
 
