@@ -320,18 +320,44 @@ IF (BOX_BOUNDS(5)<TETRA_BOUNDS(4) .OR. BOX_BOUNDS(4)>TETRA_BOUNDS(5)) RETURN
 
 VERT_STATE=1
 DO I = 0, 7
-IF (IN_TETRA(BOX_VERTS(0:2,I),-1)==0) THEN
-   VERT_STATE=0
-   EXIT
-ENDIF
+   IF (IN_TETRA(BOX_VERTS(0:2,I),-1)==0) THEN
+      VERT_STATE=0
+      EXIT
+   ENDIF
 ENDDO
-IF (VERT_STATE==1) THEN
+IF (VERT_STATE==1) THEN ! box is inside tetrahedron
 ! define verts and faces for a box
+   VERTS(0:2)=BOX_VERTS(0:2,0)
+   VERTS(3:5)=BOX_VERTS(0:2,1)
+   VERTS(6:8)=BOX_VERTS(0:2,2)
+   VERTS(9:11)=BOX_VERTS(0:2,3)
+   VERTS(12:14)=BOX_VERTS(0:2,4)
+   VERTS(15:17)=BOX_VERTS(0:2,5)
+   VERTS(18:20)=BOX_VERTS(0:2,6)
+   VERTS(21:23)=BOX_VERTS(0:2,7)
+   NVERTS=8
+   FACES(0:5)  =(/0,1,5,0,5,4/)
+   FACES(6:11) =(/0,3,7,1,7,5/)
+   FACES(12:17)=(/3,2,6,3,6,7/)
+   FACES(18:23)=(/2,0,4,2,4,6/)
+   FACES(24:29)=(/4,5,7,4,7,6/)
+   FACES(30:35)=(/2,3,1,2,1,0/)
+   NFACES=12
    RETURN
 ENDIF
 
-IF (IN_BOX(V0,-1)==1 .AND. IN_BOX(V1,-1)==1 .AND. IN_BOX(V2,-1)==1 .AND. IN_BOX(V3,-1)==1) THEN
+IF (IN_BOX(V0,-1)==1 .AND. IN_BOX(V1,-1)==1 .AND. IN_BOX(V2,-1)==1 .AND. IN_BOX(V3,-1)==1) THEN ! tetrahedron is inside box
 ! define verts and faces for a tetrahedron
+   VERTS(0:2)=TETRA_VERTS(0:2,0)
+   VERTS(3:5)=TETRA_VERTS(0:2,1)
+   VERTS(6:8)=TETRA_VERTS(0:2,2)
+   VERTS(9:11)=TETRA_VERTS(0:2,3)
+   NVERTS=4
+   FACES(0:2)=(/0,1,3/)
+   FACES(3:5)=(/1,2,3/)
+   FACES(6:8)=(/0,3,2/)
+   FACES(9:11)=(/0,2,1/)
+   NFACES=4
    VERT_STATE=2
    RETURN
 ENDIF
