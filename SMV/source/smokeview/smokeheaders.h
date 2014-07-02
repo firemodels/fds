@@ -6,6 +6,7 @@
 #ifndef SMOKEHEADERS_H_DEFINED
 #define SMOKEHEADERS_H_DEFINED
 
+EXTERNCPP void update_visaxislabels(void);
 EXTERNCPP void update_geometry_controls(void);
 EXTERNCPP void init_volrender_script(char *prefix, char *tour_label, int startframe, int skipframe);
 

@@ -1600,7 +1600,7 @@ void draw_geomtestclip(void){
   clipdata tetra_clipinfo, box_clipinfo;
   float *v1, *v2, *v3, *v4, *v5;
   int nverts;
-  int facestart[200], facenum[200], nfaces;
+  int faces[600], npolys, nfaces;
   float verts[600]; 
 
   box_state = b_state+1;
@@ -1633,15 +1633,15 @@ void draw_geomtestclip(void){
     int flag=0,error,i;
     double err;
 
-    FORTgetverts(box_bounds, v1, v2, v3, v4, verts, &nverts, facestart, facenum, face_id, &nfaces, &volume, &flag, b_state, &error, &err);
+    FORTgetverts(box_bounds, v1, v2, v3, v4, verts, &nverts, faces, face_id, &nfaces, &npolys, &volume, &flag, b_state, &error, &err);
     if(update_volbox_controls==1){
       for(i=0;i<10;i++){
         face_vis[i]=0;
       }
-      for(i=0;i<nfaces;i++){
-        face_vis[face_id[i]]=1;
+      for(i=0;i<npolys;i++){
+        face_vis[CLAMP(face_id[i],0,9)]=1;
       }
-      for(i=0;i<nfaces;i++){
+      for(i=0;i<npolys;i++){
         int face;
         int tet_face;
 
@@ -1657,8 +1657,8 @@ void draw_geomtestclip(void){
       Volume_CB(2);
     }
 
-    if(nfaces>10){
-      printf("***error: nface=%i should not be bigger than 10\n",nfaces);
+    if(npolys>10){
+      printf("***error: nface=%i should not be bigger than 10\n",npolys);
     }
     initBoxClipInfo(&box_clipinfo,*xmin,*xmax,*ymin,*ymax,*zmin,*zmax);
     if(box_state[0]!=-1)box_clipinfo.clip_xmin=0;
@@ -1775,7 +1775,7 @@ void draw_geomtestoutline(void){
   unsigned char tetracoloroutline[4]={255,0,255,255};
   float *v1, *v2, *v3, *v4, *v5;
   int nverts;
-  int facestart[200], facenum[200], nfaces;
+  int faces[600], npolys, nfaces;
   float verts[600]; 
 
   box_state = b_state+1;
@@ -1834,9 +1834,9 @@ void draw_geomtestoutline(void){
     double err;
     int i;
 
-    FORTgetverts(box_bounds, v1, v2, v3, v4, verts, &nverts, facestart, facenum, face_id, &nfaces, &volume, &flag, b_state, &error, &err);
-    if(nfaces>10){
-      printf("***error: nface=%i should not be bigger than 10\n",nfaces);
+    FORTgetverts(box_bounds, v1, v2, v3, v4, verts, &nverts, faces, face_id, &nfaces, &npolys, &volume, &flag, b_state, &error, &err);
+    if(npolys>10){
+      printf("***error: nface=%i should not be bigger than 10\n",npolys);
     }
     printf("volume=%f\n\n",volume);
     if(nverts>0){
@@ -1849,25 +1849,11 @@ void draw_geomtestoutline(void){
       glBegin(GL_POINTS);
       glColor3fv(foregroundcolor);
       for(j=0;j<nfaces;j++){
-        int i;
-
-        if(tetrabox_vis[face_id[j]]==0)continue;
-        for(i=facestart[j];i<facestart[j+1];i++){
-          glVertex3fv(verts+3*i);
-        }
+        glVertex3fv(verts+3*faces[3*j]);
+        glVertex3fv(verts+3*faces[3*j+1]);
+        glVertex3fv(verts+3*faces[3*j+2]);
       }
       glEnd();
-      for(j=0;j<nfaces;j++){
-        int i;
-
-        if(tetrabox_vis[face_id[j]]==0)continue;
-        for(i=facestart[j];i<facestart[j+1];i++){
-          char label[100];
-
-          sprintf(label,"%i",i-facestart[j]);
-          output3Text(foregroundcolor, verts[3*i]-3*EPS, verts[3*i+1]-3*EPS, verts[3*i+2]+3*EPS, label);
-        }
-      }
       glPopMatrix();
     }
   }

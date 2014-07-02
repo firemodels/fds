@@ -224,7 +224,6 @@ void _Sniff_Errors(char *whereat);
 #define DOWN_X 3 
 #define DOWN_Z 4
 #define UP_Z   5
-#define NOT_USED 6
 
 #define GEOM_STATIC 0
 #define GEOM_DYNAMIC 1

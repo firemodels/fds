@@ -282,6 +282,7 @@ void LabelMenu(int value){
     break;
    case 6:
     visaxislabels = 1 - visaxislabels;
+    update_visaxislabels();
     break;
    case 7:
      visLabels = 1 - visLabels;

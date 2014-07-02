@@ -30,6 +30,7 @@ extern "C" void Volume_CB(int var);
 #define UPDATE_LIST 31
 #define RADIO_WALL 32
 #define SAVE_SETTINGS 33
+#define VISAXISLABELS 34
 
 GLUI_Panel *PANEL_geom_surface=NULL;
 GLUI_Panel *PANEL_geom_interior=NULL;
@@ -55,6 +56,7 @@ GLUI_Spinner *SPINNER_box_bounds[6];
 GLUI_Spinner *SPINNER_box_translate[3];
 GLUI_Spinner *SPINNER_tetra_vertices[15];
 GLUI_Checkbox *CHECKBOX_tetrabox_showhide[10];
+GLUI_Checkbox *CHECKBOX_visaxislabels;
 
 #define VOL_BOXTRANSLATE 0
 #define VOL_TETRA 1
@@ -89,6 +91,12 @@ void Blockedit_DLG_CB(int var);
 
 char a_updatelabel[1000];
 char *updatelabel=NULL;
+
+/* ------------------ update_axislabels ------------------------ */
+
+extern "C" void update_visaxislabels(void){
+  if(CHECKBOX_visaxislabels!=NULL)CHECKBOX_visaxislabels->set_int_val(visaxislabels);
+}
 
 /* ------------------ update_geometry_controls ------------------------ */
 
@@ -134,34 +142,6 @@ extern "C" void glui_geometry_setup(int main_window){
     int not_used=0;
 
     glui_geometry->add_statictext_to_panel(PANEL_surface,"");
-
-    LIST_surface[NOT_USED] = glui_geometry->add_listbox_to_panel(PANEL_surface,_("Unused SURFs"),surface_indices+NOT_USED,UPDATE_LIST,OBJECT_CB);
-    LIST_surface[NOT_USED]->set_w(260);
-    for(i=0;i<nsurfinfo;i++){
-      surfi = surfinfo + sorted_surfidlist[i];
-      if(surfi->used_by_obst==1)continue;
-      if(surfi->used_by_vent==1)continue;
-      if(surfi->obst_surface==0)continue;
-      not_used++;
-    }
-    if(not_used>0){
-      for(i=0;i<nsurfinfo;i++){
-        surfi = surfinfo + sorted_surfidlist[i];
-        if(surfi->used_by_obst==1)continue;
-        if(surfi->used_by_vent==1)continue;
-        if(surfi->obst_surface==0)continue;
-        surfacelabel = surfi->surfacelabel;
-        LIST_surface[NOT_USED]->add_item(i,surfacelabel);
-        surface_indices[NOT_USED]=i;
-        surface_indices_bak[NOT_USED]=surface_indices[NOT_USED];
-      }
-    }
-    else{
-      LIST_surface[NOT_USED]->add_item(0,_("None"));
-      surface_indices[NOT_USED]=0;
-      surface_indices_bak[NOT_USED]=surface_indices[NOT_USED];
-    }
-    LIST_surface[NOT_USED]->set_int_val(surface_indices[NOT_USED]);
 
     LIST_surface[DOWN_X] = glui_geometry->add_listbox_to_panel(PANEL_surface,_("Left"),surface_indices+DOWN_X,UPDATE_LIST,OBJECT_CB);
     LIST_surface[DOWN_X]->set_w(260);
@@ -248,6 +228,7 @@ extern "C" void glui_geometry_setup(int main_window){
 
   CHECKBOX_blockage=glui_geometry->add_checkbox_to_panel(PANEL_obj_stretch2,_("Dimensions snapped to grid"),&blockage_snapped,
     BLOCKAGE_AS_INPUT,OBJECT_CB);
+  CHECKBOX_visaxislabels=glui_geometry->add_checkbox_to_panel(PANEL_obj_stretch2,_("Show axis labels"),&visaxislabels,VISAXISLABELS,OBJECT_CB);
   PANEL_obj_stretch3 = glui_geometry->add_panel_to_panel(PANEL_obj_stretch2,"",GLUI_PANEL_NONE);
   EDIT_xmin=glui_geometry->add_edittext_to_panel(PANEL_obj_stretch3,"x",GLUI_EDITTEXT_FLOAT,&glui_block_xmin,XMIN_SPIN,OBJECT_CB);
   EDIT_ymin=glui_geometry->add_edittext_to_panel(PANEL_obj_stretch3,"y",GLUI_EDITTEXT_FLOAT,&glui_block_ymin,YMIN_SPIN,OBJECT_CB);
@@ -557,11 +538,10 @@ extern "C" void update_blockvals(int flag){
 extern "C" void OBJECT_CB(int var){
   int i,temp;
   switch (var){
+    case VISAXISLABELS:
+      updatemenu=1;
+      break;
     case UPDATE_LIST:
-      if(surface_indices[NOT_USED]!=surface_indices_bak[NOT_USED]){
-        surface_indices[NOT_USED]=surface_indices_bak[NOT_USED];
-        LIST_surface[NOT_USED]->set_int_val(surface_indices[NOT_USED]);
-      }
       switch (wall_case){
       case WALL_1:
         temp=surface_indices_bak[UP_Z];
