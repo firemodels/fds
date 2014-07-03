@@ -3514,13 +3514,13 @@ realignment of the {\ct VENT} onto the FDS mesh. Regardless of the
 orientation of the plane $x=5$, the flow will be directed {\em into} the room because of the sign of {\ct VEL}.
 In this example the {\ct VENT} may not be exactly
 0.16~m$^2$ in area because it may not align exactly with the computational mesh. If this is the case then
-{\ct VOLUME\_FLUX} can be prescribed instead of {\ct VEL}. The units
-are m$^3$/s. If the flow is entering the computational domain, {\ct VOLUME\_FLUX}
+{\ct VOLUME\_FLOW} can be prescribed instead of {\ct VEL}. The units
+are m$^3$/s. If the flow is entering the computational domain, {\ct VOLUME\_FLOW}
 should be a negative number, the same convention as for {\ct VEL}. Note that a {\ct SURF}
-with a {\ct VOLUME\_FLUX} prescribed can be invoked by either a
+with a {\ct VOLUME\_FLOW} prescribed can be invoked by either a
 {\ct VENT} or an {\ct OBST}, but be aware that in the latter case, the resulting
 velocity on the face or faces of the obstruction will be given by the specified
-{\ct VOLUME\_FLUX} divided by the area of that particular face. For example:
+{\ct VOLUME\_FLOW} divided by the area of that particular face. For example:
 
 \begin{lstlisting}
 &SURF ID='SUPPLY', VOLUME_FLOW=-5.0, COLOR='GREEN' /
@@ -3533,7 +3533,7 @@ equal to 5~m$^3$/s divided by the area of the face (as approximated within FDS) 
 computational domain.
 
 
-Note that either {\ct VEL} or {\ct VOLUME\_FLUX} should be prescribed,
+Note that either {\ct VEL} or {\ct VOLUME\_FLOW} should be prescribed,
 not both.  The choice depends on whether an exact velocity is desired at a
 given vent, or whether the given volume flux is desired.
 
@@ -4281,7 +4281,7 @@ things turn on, or turn off, by specifying time histories either with
 pre-defined functions or with user-defined functions.  The parameters {\ct
 TAU\_Q}, {\ct TAU\_T}, and {\ct TAU\_V} indicate that the heat release
 rate ({\ct HRRPUA}); surface temperature ({\ct TMP\_FRONT}); and/or
-normal velocity ({\ct VEL}, {\ct VOLUME\_FLUX}), or {\ct
+normal velocity ({\ct VEL}, {\ct VOLUME\_FLOW}), or {\ct
 MASS\_FLUX\_TOTAL} are to ramp up to their prescribed values in {\ct
 TAU} seconds and remain there. To prescribe different heat release rate ramps, the
 {\ct TAU\_Q} parameter can be defined as a negative value ($t$-squared growth rate) or
@@ -4350,7 +4350,7 @@ Quantity            & Group       & Input Parameter(s)                          
 Heat Release Rate   & {\ct SURF}  & {\ct HRRPUA}                                            & {\ct TAU\_Q}        & {\ct RAMP\_Q}       \\ \hline
 Temperature         & {\ct SURF}  & {\ct TMP\_FRONT}                                        & {\ct TAU\_T}        & {\ct RAMP\_T}       \\ \hline
 Velocity            & {\ct SURF}  & {\ct VEL}                                               & {\ct TAU\_V}        & {\ct RAMP\_V}       \\ \hline
-Volume Flux         & {\ct SURF}  & {\ct VOLUME\_FLUX}                                      & {\ct TAU\_V}        & {\ct RAMP\_V}       \\ \hline
+Volume Flux         & {\ct SURF}  & {\ct VOLUME\_FLOW}                                      & {\ct TAU\_V}        & {\ct RAMP\_V}       \\ \hline
 Mass Flux           & {\ct SURF}  & {\ct MASS\_FLUX\_TOTAL}                                 & {\ct TAU\_V}        & {\ct RAMP\_V}       \\ \hline
 Mass Fraction       & {\ct SURF}  & {\ct MASS\_FRACTION(N)}                                 & {\ct TAU\_MF(N)}    & {\ct RAMP\_MF(N)}   \\ \hline
 Mass Flux           & {\ct SURF}  & {\ct MASS\_FLUX(N)}                                     & {\ct TAU\_MF(N)}    & {\ct RAMP\_MF(N)}   \\ \hline
