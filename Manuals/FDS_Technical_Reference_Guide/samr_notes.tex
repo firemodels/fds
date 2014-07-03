@@ -53,31 +53,57 @@
 \centering
 \begin{tikzpicture}
 
-% grid
-\draw[step=3.0cm,thick] (0, 0) grid (12, 12);
-\draw[step=1.5cm,thick] (3, 3) grid (9, 9);
-\draw[line width=1.5pt,-,blue] (3, 3) rectangle (9, 9);
-\draw[line width=2.0pt,-,red] (3,3) -- (3,4.5);
-\draw[line width=1.0pt,->] (3,3.75) -- (3.5,3.75);
-
-%\draw[line width=1.0pt,dashed,-] (3.75,3) -- (3.75,4.5);
+% ghost cells
 \draw[line width=1.0pt,-,dashed] (3-1.5, 3-1.5) rectangle (9+1.5, 9+1.5);
+\draw[line width=1.0pt,-,dashed] (3.0, 3.0) rectangle (9.0, 9.0);
+
 \draw[line width=1.0pt,-,dashed] (1.5,3.0) -- (3.0,3.0);
 \draw[line width=1.0pt,-,dashed] (1.5,4.5) -- (3.0,4.5);
 \draw[line width=1.0pt,-,dashed] (1.5,6.0) -- (3.0,6.0);
 \draw[line width=1.0pt,-,dashed] (1.5,7.5) -- (3.0,7.5);
 \draw[line width=1.0pt,-,dashed] (1.5,9.0) -- (3.0,9.0);
 
-\node at (3 - 0.75, 3 + 0.75) {\texttt{II}};
-\node at (3 + 0.75, 3 + 0.75) {\texttt{IIG}};
+\draw[line width=1.0pt,-,dashed] (3.0,1.5) -- (3.0,3.0);
+\draw[line width=1.0pt,-,dashed] (4.5,1.5) -- (4.5,3.0);
+\draw[line width=1.0pt,-,dashed] (6.0,1.5) -- (6.0,3.0);
+\draw[line width=1.0pt,-,dashed] (7.5,1.5) -- (7.5,3.0);
+\draw[line width=1.0pt,-,dashed] (9.0,1.5) -- (9.0,3.0);
+
+\draw[line width=1.0pt,-,dashed] (9.0,3.0) -- (10.5,3.0);
+\draw[line width=1.0pt,-,dashed] (9.0,4.5) -- (10.5,4.5);
+\draw[line width=1.0pt,-,dashed] (9.0,6.0) -- (10.5,6.0);
+\draw[line width=1.0pt,-,dashed] (9.0,7.5) -- (10.5,7.5);
+\draw[line width=1.0pt,-,dashed] (9.0,9.0) -- (10.5,9.0);
+
+\draw[line width=1.0pt,-,dashed] (3.0,9.0) -- (3.0,10.5);
+\draw[line width=1.0pt,-,dashed] (4.5,9.0) -- (4.5,10.5);
+\draw[line width=1.0pt,-,dashed] (6.0,9.0) -- (6.0,10.5);
+\draw[line width=1.0pt,-,dashed] (7.5,9.0) -- (7.5,10.5);
+\draw[line width=1.0pt,-,dashed] (9.0,9.0) -- (9.0,10.5);
+
+% grid
+\draw[line width=1.0pt,step=3.0cm] (0, 0) grid (12, 12);
+\draw[line width=1.0pt,step=1.5cm] (3, 3) grid (9, 9);
+\draw[line width=1.5pt,-,green] (0, 3) rectangle (3, 6);
+\draw[line width=1.5pt,-,blue] (3, 3) rectangle (9, 9);
+\draw[line width=1.5pt,-,red] (3,3) -- (3,4.5);
+\draw[line width=1.0pt,->] (3,3.75) -- (3.5,3.75); % node[anchor=west] {\texttt{IOR}};
+
+%\node at (3 - 0.75, 3 + 0.75) {\texttt{II}};
+%\node at (3 + 0.75, 3 + 0.75) {\texttt{IIG}};
+\node[draw,circle,inner sep=2pt,fill,label={\texttt{II}}] at (3 - 0.75, 3 + 0.75) {}; % ghost cell bordering wall cell
+\node[draw,circle,inner sep=2pt,fill,label={\texttt{IIG}}] at (3 + 0.75, 3 + 0.75) {}; % gas cell bordering wall cell
+\node[draw,circle,inner sep=2pt,fill,red] at (3, 3 + 0.75) {};
 
 % legend
 %\draw[line width=1.5pt,thick,-] (0,-1) -- (3,-1) node[anchor=west] {mesh 1};
 %\draw[line width=1.5pt,ultra thick,-] (0,-2) -- (3,-2) node[anchor=west] {mesh 2};
 
-\draw[line width=1.5pt,-,blue] (0,-1) -- (3,-1) node[anchor=west] {wall cells};
-\draw[line width=2.0pt,-,red] (0,-2) -- (3,-2) node[anchor=west] {highlighted wall cell};
-\draw[line width=1.0pt,->] (0,-3) -- (3,-3) node[anchor=west] {\texttt{IOR}};
+\draw[line width=1.5pt,-,blue] (0,-1) -- (1.5,-1) node[anchor=west] {wall cells};
+\draw[line width=1.5pt,-,red] (0,-2) -- (1.5,-2) node[anchor=west] {highlighted wall cell};
+\draw[line width=1.5pt,-,green] (0,-3) -- (1.5,-3) node[anchor=west] {cell in \texttt{NOM\_IB}};
+\draw[line width=1.0pt,->] (0,-4) -- (1.5,-4) node[anchor=west] {\texttt{IOR}};
+\node[draw,circle,inner sep=2pt,fill,red,label=right:{\texttt{BXS} for this wall cell}] at (1, -5) {};
 
 \end{tikzpicture}
 \caption{Examples of wall data structures in an embedded mesh.}
