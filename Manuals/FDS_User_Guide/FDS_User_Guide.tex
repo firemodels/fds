@@ -8289,14 +8289,22 @@ Both have units of kJ/kg. The quantities {\ct 'ENTHALPY'} and {\ct SPECIFIC ENTH
 \subsection{Computer Performance}
 \label{info:TIMING}
 
-There are a variety of ways to test the performance of your computer in running an FDS simulation. In no particular order, here is a list inputs and/or outputs to help:
+There are several useful {\ct DEVC} {\ct QUANTITY}'s that can help monitor the performance of your computer: 
 \begin{description}
-\item[{\ct DEBUG}]  If set to {\ct .TRUE.} on the {\ct DUMP} line, this parameter will cause FDS to print out debugging information concerning the progress of an MPI
-calculation.
-\item[{\ct TIMING}] If set to {\ct .TRUE.} on the {\ct DUMP} line, this parameter will cause FDS to print out timing information concerning the data exchanges in an MPI
-calculation.
-\item[{\ct VELOCITY\_ERROR\_FILE}] If set to {\ct .TRUE.} on the {\ct DUMP} line, this parameter will cause FDS to create a file with a time history of the maximum error
-associated with the normal component of velocity at solid or interpolated boundaries.
+\item[{\ct 'ACTUATED SPRINKLERS'}] Number of activated sprinklers.
+\item[{\ct 'CPU TIME'}] Elapsed CPU time since the start of the simulation, in seconds.
+\item[{\ct 'CPU TIME PER STEP'}] CPU time per time step, in seconds, for the {\ct MESH} in which the {\ct DEVC} is located.
+\item[{\ct 'ITERATION'}] Number of time steps completed at the given time of the simulation. 
+\item[{\ct 'NUMBER OF PARTICLES'}] Number of Lagrangian particles for the {\ct MESH} in which the {\ct DEVC} is located. 
+\item[{\ct 'TIME STEP'}] Duration of a simulation time step, $\delta t$, in seconds.
+\item[{\ct 'WALL CLOCK TIME'}] Elapsed wall clock time since the start of the simulation, in seconds.
+\item[{\ct 'WALL CLOCK TIME ITERATIONS'}] Elapsed wall clock time since the start of the time stepping loop, in seconds.
+\end{description}
+In addition, the following flags can be useful in monitoring the performance of an MPI calculation. They are typically used for debugging.
+\begin{description}
+\item[{\ct DEBUG}]  If set to {\ct .TRUE.} on the {\ct DUMP} line, this parameter will cause FDS to print out debugging information concerning the progress of an MPI calculation.
+\item[{\ct TIMING}] If set to {\ct .TRUE.} on the {\ct DUMP} line, this parameter will cause FDS to print out timing information concerning the data exchanges in an MPI calculation.
+\item[{\ct VELOCITY\_ERROR\_FILE}] If set to {\ct .TRUE.} on the {\ct DUMP} line, this parameter will cause FDS to create a file with a time history of the maximum error associated with the normal component of velocity at solid or interpolated boundaries.
 \end{description}
 
 
@@ -8304,35 +8312,28 @@ associated with the normal component of velocity at solid or interpolated bounda
 \label{info:SIG_FIGS}
 
 There are several different output files that have the format of a comma-separated value (.csv) file. These files consist of real numbers in columns separated by commas. By default, the real numbers are formatted
-
 \begin{lstlisting}
 -1.2345678E+123
 \end{lstlisting}
-
-\noindent
-To change the precision of the numbers, use {\ct SIG\_FIGS} on the {\ct DUMP} line to indicate the number of significant figures in the mantissa (default is 8). Use
-{\ct SIG\_FIGS\_EXP} to change the number of digits in the exponent (default is 3). Keep in mind that the precision of real numbers used internally in an FDS calculation
-is approximately 12, equivalent to 8 byte or double precision following conventional Fortran rules.
+To change the precision of the numbers, use {\ct SIG\_FIGS} on the {\ct DUMP} line to indicate the number of significant figures in the mantissa (default is 8). Use {\ct SIG\_FIGS\_EXP} to change the number of digits in the exponent (default is 3). Keep in mind that the precision of real numbers used internally in an FDS calculation is approximately 12, equivalent to 8 byte or double precision following conventional Fortran rules.
 
 
 \subsection{\emph{A Posteriori} Mesh Quality Metrics}
 \label{info:meshquality}
+
 The quality of a particular simulation is most directly tied to grid resolution.  Three slice file output quantities are suggested here for measuring errors in the velocity and scalar fields:
 \begin{enumerate}
 \item A model for the fraction of unresolved kinetic energy called the \emph{measure of turbulence resolution} (similar to what is often called the ``Pope criterion'' \cite{Pope:2004}), MTR
 \item A model for the fraction of unresolved scalar energy fluctuations called the \emph{measure of scalar resolution} \cite{Vervisch:2010}, MSR
 \item A \emph{wavelet-based error measure} \cite{McDermott:2010}, WEM
 \end{enumerate}
-
-\noindent Examples:
-
+Examples:
 \begin{lstlisting}
 &SLCF PBY=0, QUANTITY='TURBULENCE RESOLUTION' /
 &SLCF PBY=0, QUANTITY='SCALAR RESOLUTION', QUANTITY2='MASS FRACTION', SPEC_ID='HELIUM' /
 &SLCF PBY=0, QUANTITY='WAVELET ERROR', QUANTITY2='HRRPUV' /
 \end{lstlisting}
-Note that an additional scalar {\ct QUANTITY2} is required for MSR and WEM.  {\ct QUANTITY2} may be any output quantity appropriate for {\ct SLCF}.
-Also, {\ct CELL\_CENTERED} is optional for any of the three metrics.
+Note that an additional scalar {\ct QUANTITY2} is required for MSR and WEM.  {\ct QUANTITY2} may be any output quantity appropriate for {\ct SLCF}. Also, {\ct CELL\_CENTERED} is optional for any of the three metrics.
 
 \subsubsection{Measure of Turbulence Resolution}
 
@@ -8362,6 +8363,7 @@ For the canonical case of isotropic turbulence Pope actually defines LES such th
 
 \subsubsection{Measure of Scalar Resolution}
 \label{mtr}
+
 The \emph{measure of scalar resolution} is defined locally as
 \begin{eqnarray}
 \mbox{MSR}(\mathbf{x},t) = \frac{T_{\rm sgs}}{T_{\rm res} + T_{\rm sgs}}
@@ -8376,6 +8378,7 @@ Here again the model for the SGS scalar energy fluctuations is taken from scale 
 
 \subsubsection{Wavelet Error Measure}
 \label{wavelets}
+
 We begin by providing background on the simple Haar wavelet \cite{Nievergelt:1999}.  For a thorough and more sophisticated review of wavelet methods, the reader is referred to Schneider and Vasilyev \cite{Schneider:2010}.
 
 Suppose the scalar function $f(r)$ is sampled at discrete points $r_j$, separated by a distance $h$, giving values $s_j$.  Defining the \emph{unit step function} over the interval $[r_1,r_2]$ by
@@ -8544,7 +8547,7 @@ Here, the {\ct ID} is just a label in the output file. When an output quantity i
 \hline \hline
 \endhead
 {\ct ABSORPTION COEFFICIENT}                    & Section~\ref{info:RADI_RADCAL_Absorption}     & 1/m            & D,I,P,S      \\ \hline
-{\ct ACTUATED SPRINKLERS}                       & Number of actuated sprinklers                 &                & D            \\ \hline
+{\ct ACTUATED SPRINKLERS}                       & Section~\ref{info:TIMING}                     &                & D            \\ \hline
 {\ct ADIABATIC SURFACE TEMPERATURE}             & Section~\ref{info:AST}                        & $^\circ$C      & B,D          \\ \hline
 {\ct AEROSOL VOLUME FRACTION}$^*$               & Section~\ref{info:soot}                       & mol/mol        & D,I,P,S      \\ \hline
 {\ct AMPUA}$^{**}$                              & Section~\ref{info:part_output}                & kg/m$^2$       & B,D          \\ \hline
@@ -8560,7 +8563,8 @@ Here, the {\ct ID} is just a label in the output file. When an output quantity i
 {\ct CONVECTIVE HEAT FLUX}                      & Section~\ref{info:heat_flux}                  & kW/m$^2$       & B,D          \\ \hline
 {\ct CPUA}$^{**}$                               & Section~\ref{info:part_output}                & kW/m$^2$       & B,D          \\ \hline
 {\ct CPUA\_Z}$^{*}$                             & Section~\ref{info:part_output}                & kW/m$^2$       & B,D          \\ \hline
-{\ct CPU TIME}                                  & Elapsed CPU time                              & s              & D            \\ \hline
+{\ct CPU TIME}                                  & Section~\ref{info:TIMING}                     & s              & D            \\ \hline
+{\ct CPU TIME PER STEP}                         & Section~\ref{info:TIMING}                     & s              & D            \\ \hline
 {\ct DENSITY}                                   & $\rho$ or $\rho Y_\alpha$ with {\ct SPEC\_ID} & kg/m$^3$       & D,I,P,S      \\ \hline
 {\ct DEPOSITION VELOCITY}                       & Section~\ref{info:deposition}                 & m/s            & B,D          \\ \hline
 {\ct DIVERGENCE}                                & $\nabla \cdot \bu$                            & 1/s            & D,I,P,S      \\ \hline
@@ -8578,7 +8582,7 @@ Here, the {\ct ID} is just a label in the output file. When an output quantity i
 {\ct HRRPUV}                                    & $\dq'''$                                      & kW/m$^3$       & D,I,P,S      \\ \hline
 {\ct INCIDENT HEAT FLUX}                        & Section~\ref{info:heat_flux}                  & kW/m$^2$       & B,D          \\ \hline
 {\ct INSIDE WALL TEMPERATURE}                   & Section~\ref{info:DEPTH}                      & $^\circ$C      & D            \\ \hline
-{\ct ITERATION}                                 & Current time step                             &                & D            \\ \hline
+{\ct ITERATION}                                 & Section~\ref{info:TIMING}                     &                & D            \\ \hline
 {\ct LAYER HEIGHT}                              & Section~\ref{info:layerheight}                & m              & D            \\ \hline
 {\ct LINK TEMPERATURE}                          & Section~\ref{info:heat_detectors}             & $^\circ$C      & D            \\ \hline
 {\ct LOWER TEMPERATURE}                         & Section~\ref{info:layerheight}                & $^\circ$C      & D            \\ \hline
@@ -8595,7 +8599,8 @@ Here, the {\ct ID} is just a label in the output file. When an output quantity i
 {\ct MPUV}$^{**}$                               & Section~\ref{info:part_output}                & kg/m$^3$       & D,P,S        \\ \hline
 {\ct MPUV\_Z}$^{*}$                             & Section~\ref{info:part_output}                & kg/m$^3$       & D,P,S        \\ \hline
 {\ct NORMAL VELOCITY}                           & Wall normal velocity                          & m/s            & D,B          \\ \hline
-{\ct OPEN NOZZLES}                              & Number of open nozzles                        &                & D            \\ \hline
+{\ct NUMBER OF PARTICLES}                       & Section~\ref{info:TIMING}                     &                & D            \\ \hline
+{\ct OPEN NOZZLES}                              & Section~\ref{info:TIMING}                     &                & D            \\ \hline
 {\ct OPTICAL DENSITY}                           & Section~\ref{info:visibility}                 & 1/m            & D,I,P,S      \\ \hline
 {\ct PATH OBSCURATION}                          & Section~\ref{info:beam_detector}              & \%             & D            \\ \hline
 {\ct PARTICLE AGE}                              & Section~\ref{info:part_output}                & s              & PA           \\ \hline
@@ -8627,7 +8632,7 @@ Here, the {\ct ID} is just a label in the output file. When an output quantity i
 {\ct TEMPERATURE}                               & Section~\ref{info:THERMOCOUPLE}               & $^\circ$C      & D,I,P,S      \\ \hline
 {\ct THERMOCOUPLE}                              & Section~\ref{info:THERMOCOUPLE}               & $^\circ$C      & D            \\ \hline
 {\ct TIME}                                      & Section~\ref{info:DEVC}                       & s              & D            \\ \hline
-{\ct TIME STEP}                                 & $\delta t$, Numerical time step               & s              & D            \\ \hline
+{\ct TIME STEP}                                 & Section~\ref{info:TIMING}                     & s              & D            \\ \hline
 {\ct TRANSMISSION}                              & Section~\ref{info:beam_detector}              & \%/m           & D            \\ \hline
 {\ct U-VELOCITY}                                & Gas velocity component, $u$                   & m/s            & D,I,P,S      \\ \hline
 {\ct V-VELOCITY}                                & Gas velocity component, $v$                   & m/s            & D,I,P,S      \\ \hline
@@ -8639,7 +8644,8 @@ Here, the {\ct ID} is just a label in the output file. When an output quantity i
 {\ct VOLUME FLOW}                               & Section~\ref{info:flows}                      & m$^3$/s        & D            \\ \hline
 {\ct VOLUME FLOW WALL}                          & Section~\ref{info:flows}                      & m$^3$/s        & D            \\ \hline
 {\ct VOLUME FRACTION}$^{****}$                  & $X_\alpha$                                    & mol/mol        & D,I,P,S      \\ \hline
-{\ct WALL CLOCK TIME}                           & Elapsed wall clock time                       & s              & D            \\ \hline
+{\ct WALL CLOCK TIME}                           & Section~\ref{info:TIMING}                     & s              & D            \\ \hline
+{\ct WALL CLOCK TIME ITERATIONS}                & Section~\ref{info:TIMING}                     & s              & D            \\ \hline
 {\ct WALL TEMPERATURE}                          & Surface temperature                           & $^\circ$C      & B,D          \\ \hline
 {\ct WALL THICKNESS}                            & Section~\ref{info:material_components}        & m              & B,D          \\ \hline
 \end{longtable}
