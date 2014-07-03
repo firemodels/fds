@@ -6,7 +6,7 @@
 &SURF ID='surf1',RGB=0,255,0 /
 &MATL ID='matl1', DENSITY=1000., CONDUCTIVITY=1., SPECIFIC_HEAT=1.,RGB=64,128,255/
 
-&GEOM ID='geom1',
+&GEOM ID='geom1',CUTCELLS=.TRUE.,
         VERTS=1.0,1.0,1.0,
               0.0,0.0,0.0,
               1.0,0.0,0.0,
