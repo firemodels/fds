@@ -40,7 +40,7 @@
 #define FORTgetboundaryheader2 _F(getboundaryheader2)
 
 STDCALLF FORTgetverts(float *box_bounds, float *v0, float *v1, float *v2, float *v3, float *out_verts, 
-                      int *nverts, int *faces, int *face_id, int *nfaces, int *npolys, float *volume, int *box_state);
+                      int *nverts, int *faces, int *face_id, int *which_poly, int *nfaces, int *npolys, float *volume, int *box_state);
 STDCALLF FORTgeomout(float *verts, int *nverts, int *faces, int *nfaces);
 STDCALLF FORTgetembeddatasize(char *filename, int *ntimes, int *nvars, int *error, FILE_SIZE lenfile);
 STDCALLF FORTgetembeddata(char *filename, int *ntimes, int *nvals, float *times, int *nstatics, int *ndynamics,

@@ -1601,6 +1601,7 @@ void draw_geomtestclip(void){
   float *v1, *v2, *v3, *v4, *v5;
   int nverts;
   int faces[600], npolys, nfaces;
+  int which_poly[200];
   float verts[600]; 
 
   box_state = b_state+1;
@@ -1632,8 +1633,8 @@ void draw_geomtestclip(void){
     float volume,volume2,box_volume;
     int i;
 
-    FORTgetverts(box_bounds, v2, v3, v4, v5, verts, &nverts, faces, face_id, &nfaces, &npolys, &volume2, b_state);
-    FORTgetverts(box_bounds, v1, v2, v3, v4, verts, &nverts, faces, face_id, &nfaces, &npolys, &volume, b_state);
+    FORTgetverts(box_bounds, v2, v3, v4, v5, verts, &nverts, faces, face_id, which_poly, &nfaces, &npolys, &volume2, b_state);
+    FORTgetverts(box_bounds, v1, v2, v3, v4, verts, &nverts, faces, face_id, which_poly, &nfaces, &npolys, &volume, b_state);
     box_volume=(*xmax-*xmin)*(*ymax-*ymin)*(*zmax-*zmin);
     printf("\n intersection check: vol1=%f vol2=%f vol1+vol2=%f box_volume=%f, rel err=%f\n\n",
                   volume,volume2,volume+volume2,box_volume,(volume+volume2-box_volume)/box_volume);
@@ -1779,6 +1780,7 @@ void draw_geomtestoutline(void){
   float *v1, *v2, *v3, *v4, *v5;
   int nverts;
   int faces[600], npolys, nfaces;
+  int which_poly[200];
   float verts[600]; 
 
   box_state = b_state+1;
@@ -1835,7 +1837,7 @@ void draw_geomtestoutline(void){
     float volume;
     int i;
 
-    FORTgetverts(box_bounds, v1, v2, v3, v4, verts, &nverts, faces, face_id, &nfaces, &npolys, &volume, b_state);
+    FORTgetverts(box_bounds, v1, v2, v3, v4, verts, &nverts, faces, face_id, which_poly, &nfaces, &npolys, &volume, b_state);
     if(npolys>10){
       printf("***error: nface=%i should not be bigger than 10\n",npolys);
     }
@@ -1850,9 +1852,11 @@ void draw_geomtestoutline(void){
       glBegin(GL_POINTS);
       glColor3fv(foregroundcolor);
       for(j=0;j<nfaces;j++){
-        glVertex3fv(verts+3*faces[3*j]);
-        glVertex3fv(verts+3*faces[3*j+1]);
-        glVertex3fv(verts+3*faces[3*j+2]);
+        if(tetrabox_vis[which_poly[j]]==1){
+          glVertex3fv(verts+3*faces[3*j]);
+          glVertex3fv(verts+3*faces[3*j+1]);
+          glVertex3fv(verts+3*faces[3*j+2]);
+        }
       }
       glEnd();
       glPopMatrix();
