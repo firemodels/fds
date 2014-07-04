@@ -332,6 +332,11 @@ extern "C" void glui_geometry_setup(int main_window){
 
   PANEL_geom3abc=glui_geometry->add_panel_to_panel(ROLLOUT_geomtest,"box/tetrahedron faces",GLUI_PANEL_NONE);
 
+  glui_geometry->add_checkbox_to_panel(ROLLOUT_geomtest,"tetra test",&show_test_in_tetra);
+  glui_geometry->add_spinner_to_panel(ROLLOUT_geomtest,"tetra x:",GLUI_SPINNER_FLOAT,tetra_xyz);
+  glui_geometry->add_spinner_to_panel(ROLLOUT_geomtest,"tetra y:",GLUI_SPINNER_FLOAT,tetra_xyz+1);
+  glui_geometry->add_spinner_to_panel(ROLLOUT_geomtest,"tetra z:",GLUI_SPINNER_FLOAT,tetra_xyz+2);
+
   PANEL_geom3ab=glui_geometry->add_panel_to_panel(PANEL_geom3abc,"box");
   PANEL_geom3a=glui_geometry->add_panel_to_panel(PANEL_geom3ab,"",GLUI_PANEL_NONE);
   glui_geometry->add_column_to_panel(PANEL_geom3ab,false);

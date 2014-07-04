@@ -1850,6 +1850,15 @@ void draw_geomtestoutline(void){
       glTranslatef(-xbar0,-ybar0,-zbar0);
       glPointSize(10.0);
       glBegin(GL_POINTS);
+      if(show_test_in_tetra==1){
+        float green[4]={0.0,1.0,0.0,1.0};
+        int in_tetra, tetra_state[4];
+        
+        glColor3fv(green);
+        glVertex3fv(tetra_xyz);
+        FORTtest_in_tetra(tetra_xyz,&in_tetra,tetra_state);
+        printf("in tetra:%i tetra state: %i %i %i %i\n",in_tetra,tetra_state[0],tetra_state[1],tetra_state[2],tetra_state[3]);
+      }
       glColor3fv(foregroundcolor);
       for(j=0;j<nfaces;j++){
         if(tetrabox_vis[which_poly[j]]==1){

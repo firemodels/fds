@@ -11,6 +11,7 @@
 #define STDCALLF extern void
 #endif
 
+#define FORTtest_in_tetra _F(test_in_tetra)
 #define FORTgetverts _F(getverts2)
 #define FORTgeomout _F(geomout)
 #define FORTgetembeddatasize _F(getembeddatasize)
@@ -39,6 +40,7 @@
 #define FORTgetboundaryheader1 _F(getboundaryheader1)
 #define FORTgetboundaryheader2 _F(getboundaryheader2)
 
+STDCALLF FORTtest_in_tetra(float *xyz, int *in_tetra, int *tetra_state);
 STDCALLF FORTgetverts(float *box_bounds, float *v0, float *v1, float *v2, float *v3, float *out_verts, 
                       int *nverts, int *faces, int *face_id, int *which_poly, int *nfaces, int *npolys, float *volume, int *box_state);
 STDCALLF FORTgeomout(float *verts, int *nverts, int *faces, int *nfaces);

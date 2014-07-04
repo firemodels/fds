@@ -23,6 +23,8 @@
 #include "smokeheaders.h"
 #include "threader.h"
 
+SVEXTERN float tetra_xyz[3];
+SVEXTERN int SVDECL(show_test_in_tetra,0);
 SVEXTERN int SVDECL(show_cutcells,0);
 SVEXTERN int b_state[7],SVDECL(*box_state,b_state+1);
 SVEXTERN int face_id[200],face_vis[10], face_vis_old[10];
