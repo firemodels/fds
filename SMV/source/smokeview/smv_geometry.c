@@ -1829,7 +1829,7 @@ void initTetraClipInfo(clipdata *ci,float *v1, float *v2, float *v3, float *v4){
   //    v1-------v2    v1---v2      v2---v3     v3---v1       v1---v3
 
   clipvals = ci->clipvals;
-  ci->option=1;
+  ci->option=TETRA_CLIPPLANES;
   VECDIFF3(v1d,v2,v1);
   VECDIFF3(v2d,v4,v1);
   CROSS(clipvals,v2d,v1d);
@@ -1861,7 +1861,7 @@ void initTetraClipInfo(clipdata *ci,float *v1, float *v2, float *v3, float *v4){
 /* ----------------------- initBoxClipInfo ----------------------------- */
 
 void initBoxClipInfo(clipdata *ci,float xmin, float xmax, float ymin, float ymax, float zmin, float zmax){
-  ci->option=0;
+  ci->option=BOX_CLIPPLANES;
   ci->clip_xmin=1;
   ci->clip_xmax=1;
   ci->clip_ymin=1;
@@ -1916,10 +1916,18 @@ void MergeClipPlanes(clipdata *ci, clipdata *cj){
 /* ----------------------- setClipPlanes ----------------------------- */
 
 void setClipPlanes(clipdata *ci, int option){
-  // n .dot. (x-x0) = 0
-  // n .dot. x - n .dot. x0 = 0
 
-  if(ci!=NULL&&ci->option==1){
+  if(ci==NULL||option==CLIP_OFF){
+    glDisable(GL_CLIP_PLANE0);
+    glDisable(GL_CLIP_PLANE1);
+    glDisable(GL_CLIP_PLANE2);
+    glDisable(GL_CLIP_PLANE3);
+    glDisable(GL_CLIP_PLANE4);
+    glDisable(GL_CLIP_PLANE5);
+    return;
+  }
+
+  if(ci->option==TETRA_CLIPPLANES){
     glClipPlane(GL_CLIP_PLANE0,ci->clipvals);
     glEnable(GL_CLIP_PLANE0);
 
@@ -1937,7 +1945,7 @@ void setClipPlanes(clipdata *ci, int option){
     return;
   }
 
-  if(ci!=NULL&&ci->clip_xmin==1&&option!=CLIP_OFF){
+  if(ci->clip_xmin==1){
     GLdouble clipplane[4];
 
     clipplane[0]=1.0;
@@ -1949,10 +1957,10 @@ void setClipPlanes(clipdata *ci, int option){
     glEnable(GL_CLIP_PLANE0);
   }
   else{
-    if(ci==NULL||ci->clip_xmin==0)glDisable(GL_CLIP_PLANE0);
+    glDisable(GL_CLIP_PLANE0);
   }
 
-  if(ci!=NULL&&ci->clip_xmax==1&&option!=CLIP_OFF){
+  if(ci->clip_xmax==1){
     GLdouble clipplane[4];
 
     clipplane[0]=-1.0;
@@ -1964,10 +1972,10 @@ void setClipPlanes(clipdata *ci, int option){
     glEnable(GL_CLIP_PLANE3);
   }
   else{
-    if(ci==NULL||ci->clip_xmax==0)glDisable(GL_CLIP_PLANE3);
+    glDisable(GL_CLIP_PLANE3);
   }
 
-  if(ci!=NULL&&ci->clip_ymin==1&&option!=CLIP_OFF){
+  if(ci->clip_ymin==1){
     GLdouble clipplane[4];
 
     clipplane[0]=0.0;
@@ -1979,10 +1987,10 @@ void setClipPlanes(clipdata *ci, int option){
     glEnable(GL_CLIP_PLANE1);
   }
   else{
-    if(ci==NULL||ci->clip_ymin==0)glDisable(GL_CLIP_PLANE1);
+    glDisable(GL_CLIP_PLANE1);
   }
 
-  if(ci!=NULL&&ci->clip_ymax==1&&option!=CLIP_OFF){
+  if(ci->clip_ymax==1){
     GLdouble clipplane[4];
 
     clipplane[0]=0.0;
@@ -1994,10 +2002,10 @@ void setClipPlanes(clipdata *ci, int option){
     glEnable(GL_CLIP_PLANE4);
   }
   else{
-    if(ci==NULL||ci->clip_ymax==0)glDisable(GL_CLIP_PLANE4);
+    glDisable(GL_CLIP_PLANE4);
   }
 
-  if(ci!=NULL&&ci->clip_zmin==1&&option!=CLIP_OFF){
+  if(ci->clip_zmin==1){
     GLdouble clipplane[4];
 
     clipplane[0]=0.0;
@@ -2009,10 +2017,10 @@ void setClipPlanes(clipdata *ci, int option){
     glEnable(GL_CLIP_PLANE2);
   }
   else{
-    if(ci==NULL||ci->clip_zmin==0)glDisable(GL_CLIP_PLANE2);
+    glDisable(GL_CLIP_PLANE2);
   }
 
-  if(ci!=NULL&&ci->clip_zmax==1&&option!=CLIP_OFF){
+  if(ci->clip_zmax==1){
     GLdouble clipplane[4];
 
     clipplane[0]=0.0;
@@ -2024,7 +2032,7 @@ void setClipPlanes(clipdata *ci, int option){
     glEnable(GL_CLIP_PLANE5);
   }
   else{
-    if(ci==NULL||ci->clip_zmax==0)glDisable(GL_CLIP_PLANE5);
+    glDisable(GL_CLIP_PLANE5);
   }
 }
 

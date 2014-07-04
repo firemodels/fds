@@ -1630,11 +1630,10 @@ void draw_geomtestclip(void){
   zmax = box_bounds+5;
   {
     float volume,volume2,box_volume;
-    int flag=0,error,i;
-    double err;
+    int i;
 
-    FORTgetverts(box_bounds, v2, v3, v4, v5, verts, &nverts, faces, face_id, &nfaces, &npolys, &volume2, &flag, b_state, &error, &err);
-    FORTgetverts(box_bounds, v1, v2, v3, v4, verts, &nverts, faces, face_id, &nfaces, &npolys, &volume, &flag, b_state, &error, &err);
+    FORTgetverts(box_bounds, v2, v3, v4, v5, verts, &nverts, faces, face_id, &nfaces, &npolys, &volume2, b_state);
+    FORTgetverts(box_bounds, v1, v2, v3, v4, verts, &nverts, faces, face_id, &nfaces, &npolys, &volume, b_state);
     box_volume=(*xmax-*xmin)*(*ymax-*ymin)*(*zmax-*zmin);
     printf("\n intersection check: vol1=%f vol2=%f vol1+vol2=%f box_volume=%f, rel err=%f\n\n",
                   volume,volume2,volume+volume2,box_volume,(volume+volume2-box_volume)/box_volume);
@@ -1834,11 +1833,9 @@ void draw_geomtestoutline(void){
 
   {
     float volume;
-    int flag=0,error;
-    double err;
     int i;
 
-    FORTgetverts(box_bounds, v1, v2, v3, v4, verts, &nverts, faces, face_id, &nfaces, &npolys, &volume, &flag, b_state, &error, &err);
+    FORTgetverts(box_bounds, v1, v2, v3, v4, verts, &nverts, faces, face_id, &nfaces, &npolys, &volume, b_state);
     if(npolys>10){
       printf("***error: nface=%i should not be bigger than 10\n",npolys);
     }

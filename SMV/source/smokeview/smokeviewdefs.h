@@ -218,6 +218,9 @@ void _Sniff_Errors(char *whereat);
 #define VENT_RECTANGLE 1
 #define VENT_HIDE 2
 
+#define TETRA_CLIPPLANES 1
+#define BOX_CLIPPLANES 0
+
 #define DOWN_Y 0
 #define UP_X   1 
 #define UP_Y   2
