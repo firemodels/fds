@@ -502,6 +502,18 @@ generate_validation_set_list()
    VALIDATION_SETS=(`grep '$VDIR' Process_All_Output.sh | grep -v "#" | xargs -n 1 dirname | xargs -n 1 dirname | xargs -n 1 basename | xargs -i svn info {}/FDS_Output_Files | awk '{if($0 != ""){ if(s){s=s"*"$0}else{s=$0}}else{ print s"*";s=""}}END{print s"*"}' | sort -t* -k9 | cut -d '*' -f1 | cut -d ' ' -f2 | xargs -n 1 dirname`)
 }
 
+wait_cases_debug_start()
+{
+   # Scans qstat and waits for cases to start
+   while [[ `qstat | grep $(whoami) | awk '{print $5}' | grep Q` != '' ]]; do
+      JOBS_REMAINING=`qstat | grep $(whoami) | awk '{print $5}' | grep Q | wc -l`
+      echo "Waiting for ${JOBS_REMAINING} ${1} cases to start." >> $FIREBOT_DIR/output/stage3
+      TIME_LIMIT_STAGE="3"
+      check_time_limit
+      sleep 30
+   done
+}
+
 wait_cases_debug_end()
 {
    # Scans qstat and waits for cases to end
@@ -581,9 +593,8 @@ run_validation_cases_debug()
       check_current_utilization
    done
 
+   # Wait for validation cases to start
    wait_cases_debug_start 'validation'
-
-   # Wait some additional time for all cases to start
    sleep 300
 
    #  ==================
@@ -593,13 +604,13 @@ run_validation_cases_debug()
    for SET in ${CURRENT_VALIDATION_SETS[*]}
    do
       cd $FDS_SVNROOT/Validation/"$SET"
-      
       ./Run_All.sh -d -s >> $FIREBOT_DIR/output/stage3 2>&1
       echo "" >> $FIREBOT_DIR/output/stage3 2>&1
    done
 
    # Wait for validation cases to end
    wait_cases_debug_end 'validation'
+   sleep 300
 
    #  ======================
    #  = Remove .stop files =
