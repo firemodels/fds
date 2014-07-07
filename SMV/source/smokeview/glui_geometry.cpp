@@ -54,7 +54,7 @@ GLUI_Panel *PANEL_geom3ab=NULL;
 GLUI_Panel *PANEL_geom3abc=NULL;
 GLUI_Spinner *SPINNER_box_bounds[6];
 GLUI_Spinner *SPINNER_box_translate[3];
-GLUI_Spinner *SPINNER_tetra_vertices[15];
+GLUI_Spinner *SPINNER_tetra_vertices[12];
 GLUI_Checkbox *CHECKBOX_tetrabox_showhide[10];
 GLUI_Checkbox *CHECKBOX_visaxislabels;
 
@@ -316,19 +316,16 @@ extern "C" void glui_geometry_setup(int main_window){
   SPINNER_tetra_vertices[3]=glui_geometry->add_spinner_to_panel(PANEL_geom2a,"v2 x:",GLUI_SPINNER_FLOAT,tetra_vertices+3,VOL_TETRA,Volume_CB);
   SPINNER_tetra_vertices[6]=glui_geometry->add_spinner_to_panel(PANEL_geom2a,"v3 x:",GLUI_SPINNER_FLOAT,tetra_vertices+6,VOL_TETRA,Volume_CB);
   SPINNER_tetra_vertices[9]=glui_geometry->add_spinner_to_panel(PANEL_geom2a,"v4 x:",GLUI_SPINNER_FLOAT,tetra_vertices+9,VOL_TETRA,Volume_CB);
-  SPINNER_tetra_vertices[12]=glui_geometry->add_spinner_to_panel(PANEL_geom2a,"v5 x:",GLUI_SPINNER_FLOAT,tetra_vertices+12,VOL_TETRA,Volume_CB);
 
   SPINNER_tetra_vertices[1]=glui_geometry->add_spinner_to_panel(PANEL_geom2b,"y:",GLUI_SPINNER_FLOAT,tetra_vertices+1,VOL_TETRA,Volume_CB);
   SPINNER_tetra_vertices[4]=glui_geometry->add_spinner_to_panel(PANEL_geom2b,"y:",GLUI_SPINNER_FLOAT,tetra_vertices+4,VOL_TETRA,Volume_CB);
   SPINNER_tetra_vertices[7]=glui_geometry->add_spinner_to_panel(PANEL_geom2b,"y:",GLUI_SPINNER_FLOAT,tetra_vertices+7,VOL_TETRA,Volume_CB);
   SPINNER_tetra_vertices[10]=glui_geometry->add_spinner_to_panel(PANEL_geom2b,"y:",GLUI_SPINNER_FLOAT,tetra_vertices+10,VOL_TETRA,Volume_CB);
-  SPINNER_tetra_vertices[13]=glui_geometry->add_spinner_to_panel(PANEL_geom2b,"y:",GLUI_SPINNER_FLOAT,tetra_vertices+13,VOL_TETRA,Volume_CB);
 
   SPINNER_tetra_vertices[2]=glui_geometry->add_spinner_to_panel(PANEL_geom2c,"z:",GLUI_SPINNER_FLOAT,tetra_vertices+2,VOL_TETRA,Volume_CB);
   SPINNER_tetra_vertices[5]=glui_geometry->add_spinner_to_panel(PANEL_geom2c,"z:",GLUI_SPINNER_FLOAT,tetra_vertices+5,VOL_TETRA,Volume_CB);
   SPINNER_tetra_vertices[8]=glui_geometry->add_spinner_to_panel(PANEL_geom2c,"z:",GLUI_SPINNER_FLOAT,tetra_vertices+8,VOL_TETRA,Volume_CB);
   SPINNER_tetra_vertices[11]=glui_geometry->add_spinner_to_panel(PANEL_geom2c,"z:",GLUI_SPINNER_FLOAT,tetra_vertices+11,VOL_TETRA,Volume_CB);
-  SPINNER_tetra_vertices[14]=glui_geometry->add_spinner_to_panel(PANEL_geom2c,"z:",GLUI_SPINNER_FLOAT,tetra_vertices+14,VOL_TETRA,Volume_CB);
 
   PANEL_geom3abc=glui_geometry->add_panel_to_panel(ROLLOUT_geomtest,"box/tetrahedron faces",GLUI_PANEL_NONE);
 

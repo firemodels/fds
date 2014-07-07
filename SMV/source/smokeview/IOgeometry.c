@@ -753,10 +753,6 @@ void update_triangles(void){
   tetra_vertices[9]=DENORMALIZE_XX(0.5);
   tetra_vertices[10]=DENORMALIZE_YY(0.5);
   tetra_vertices[11]=DENORMALIZE_ZZ(0.8);
-
-  tetra_vertices[12]=DENORMALIZE_XX(1.0);
-  tetra_vertices[13]=DENORMALIZE_YY(0.7);
-  tetra_vertices[14]=DENORMALIZE_ZZ(0.2);
 }
 
 #define FORTREAD(var,count,STREAM) FSEEK(STREAM,4,SEEK_CUR);\
@@ -1598,7 +1594,7 @@ void draw_geomtestclip(void){
   unsigned char tetra3color[4]={255,255,0,255};
   unsigned char tetracoloroutline[4]={255,0,255,255};
   clipdata tetra_clipinfo, box_clipinfo;
-  float *v1, *v2, *v3, *v4, *v5;
+  float *v1, *v2, *v3, *v4;
   int nverts;
   int faces[600], npolys, nfaces;
   int which_poly[200];
@@ -1609,7 +1605,6 @@ void draw_geomtestclip(void){
   v2 = v1 + 3;
   v3 = v2 + 3;
   v4 = v3 + 3;
-  v5 = v4 + 3;
 
   {
     float specular[4]={0.4,0.4,0.4,1.0};
@@ -1633,11 +1628,7 @@ void draw_geomtestclip(void){
     float volume,volume2,box_volume;
     int i;
 
-    FORTgetverts(box_bounds, v2, v3, v4, v5, verts, &nverts, faces, face_id, which_poly, &nfaces, &npolys, &volume2, b_state);
     FORTgetverts(box_bounds, v1, v2, v3, v4, verts, &nverts, faces, face_id, which_poly, &nfaces, &npolys, &volume, b_state);
-    box_volume=(*xmax-*xmin)*(*ymax-*ymin)*(*zmax-*zmin);
-    printf("\n intersection check: vol1=%f vol2=%f vol1+vol2=%f box_volume=%f, rel err=%f\n\n",
-                  volume,volume2,volume+volume2,box_volume,(volume+volume2-box_volume)/box_volume);
     if(update_volbox_controls==1){
       for(i=0;i<10;i++){
         face_vis[i]=0;
@@ -1777,7 +1768,7 @@ void draw_geomtestoutline(void){
   unsigned char tetra2color[4]={0,0,255,255};
   unsigned char tetra3color[4]={255,255,0,255};
   unsigned char tetracoloroutline[4]={255,0,255,255};
-  float *v1, *v2, *v3, *v4, *v5;
+  float *v1, *v2, *v3, *v4;
   int nverts;
   int faces[600], npolys, nfaces;
   int which_poly[200];
@@ -1788,7 +1779,6 @@ void draw_geomtestoutline(void){
   v2 = v1 + 3;
   v3 = v2 + 3;
   v4 = v3 + 3;
-  v5 = v4 + 3;
 
   xmin = box_bounds;
   xmax = box_bounds+1;
@@ -1825,10 +1815,8 @@ void draw_geomtestoutline(void){
   output3Text(foregroundcolor, v2[0]+EPS, v2[1]-EPS, v2[2]-EPS, "v2");
   output3Text(foregroundcolor, v3[0], v3[1]+EPS, v3[2]-EPS, "v3");
   output3Text(foregroundcolor, v4[0], v4[1], v4[2]+EPS, "v4");
-  output3Text(foregroundcolor, v5[0]+EPS, v5[1]+EPS, v5[2]+EPS, "v5");
   glLineWidth(gridlinewidth);
   drawtetra_outline(v1,v2,v3,v4,tetracoloroutline);
-  drawtetra_outline(v2,v3,v4,v5,tetracoloroutline);
 
   glPopMatrix();
   // tetrahedron
