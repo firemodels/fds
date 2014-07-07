@@ -1163,9 +1163,9 @@ DO K = 0, M%KBAR - 1
          XB(1:2) = (/X(I),X(I+1)/)
          BOX_VOLUME = (XB(6)-XB(5))*(XB(4)-XB(3))*(XB(2)-XB(1))
 
-!         IF (I==J.AND.I>5.AND.K.GT.1)THEN
-!            WRITE(6,*)"debug"
-!         ENDIF
+         IF (I==J.AND.I==8.AND.K.EQ.0)THEN
+            WRITE(6,*)"debug"
+         ENDIF
          INTERSECTION_VOLUME=0.0_EB
          DO IV=1,N_VOLU
             VINDEX=VOLUME(IV)%VERTEX(1)
