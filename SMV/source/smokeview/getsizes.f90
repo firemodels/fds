@@ -620,6 +620,7 @@ character(len=30) :: longlbl, shortlbl, unitlbl
 logical :: connected, load
 integer :: idir, joff, koff
 integer :: count
+!real :: qmin, qmax
 
 error=0
 lu11 = 11
@@ -678,6 +679,18 @@ do
     return
   endif
   read(lu11,iostat=error)(((qq(i,j,k),i=1,nxsp),j=1,nysp),k=1,nzsp)
+!  qmin=qq(1,1,1)
+!  qmax=qmin
+!  do i = 1, nxsp
+!  do j = 1, nysp
+!  do k = 1, nzsp
+!     qmin = min(qmin,qq(i,j,k))
+!     qmax = max(qmax,qq(i,j,k))
+!  end do
+!  end do
+!  end do
+!  write(6,*)"time=",time
+!  write(6,*)"qmin=",qmin," qmax=",qmax
   count = count + 1
   if(mod(count,sliceframestep).ne.0)load = .false.
   if(error.ne.0)exit
