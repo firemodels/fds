@@ -1374,21 +1374,30 @@ IND=MIN(NBINS,MAX(CEILING((VAL-LIMITS(1))/(LIMITS(2)-LIMITS(1))*NBINS),1))
 COUNTS(IND)=COUNTS(IND)+WEIGHT
 END SUBROUTINE UPDATE_HISTOGRAM
 
+
 REAL(EB) FUNCTION AFILL(A111,A211,A121,A221,A112,A212,A122,A222,P,R,S)
-! Linear interpolation function
+
+! Linear interpolation function that returns the weighted average of values at 8 corners of a parallelpiped. A111, etc, are the
+! eight values, and P, R, S are fractions of the distance from the origin in the x, y, and z directions.
+
 REAL(EB) :: A111,A211,A121,A221,A112,A212,A122,A222,P,R,S,PP,RR,SS
+
 PP = 1._EB-P
 RR = 1._EB-R
 SS = 1._EB-S
-AFILL = ((PP*A111+P*A211)*RR+(PP*A121+P*A221)*R)*SS+((PP*A112+P*A212)*RR+(PP*A122+P*A222)*R)*S
+AFILL = ((PP*A111+P*A211)*RR + (PP*A121+P*A221)*R)*SS + ((PP*A112+P*A212)*RR + (PP*A122+P*A222)*R)*S
+
 END FUNCTION AFILL
  
 
 REAL(EB) FUNCTION AFILL2(A,I,J,K,P,R,S)
+
 ! Linear interpolation function. Same as AFILL, only it reads in entire array.
+
 REAL(EB), INTENT(IN), DIMENSION(0:,0:,0:) :: A
 INTEGER, INTENT(IN) :: I,J,K
 REAL(EB) A111,A211,A121,A221,A112,A212,A122,A222,P,R,S,PP,RR,SS
+
 A111 = A(I,J,K)
 A211 = A(I+1,J,K)
 A121 = A(I,J+1,K)
@@ -1401,6 +1410,7 @@ PP = 1._EB-P
 RR = 1._EB-R
 SS = 1._EB-S
 AFILL2 = ((PP*A111+P*A211)*RR+(PP*A121+P*A221)*R)*SS+ ((PP*A112+P*A212)*RR+(PP*A122+P*A222)*R)*S
+
 END FUNCTION AFILL2
 
 
@@ -1417,6 +1427,7 @@ END FUNCTION POLYVAL
  
  
 SUBROUTINE GET_RAMP_INDEX(ID,TYPE,RAMP_INDEX)
+
 USE GLOBAL_CONSTANTS, ONLY: N_RAMP,RAMP_ID,RAMP_TYPE
 CHARACTER(*), INTENT(IN) :: ID,TYPE
 INTEGER, INTENT(OUT) :: RAMP_INDEX
@@ -1438,10 +1449,12 @@ N_RAMP                = N_RAMP + 1
 RAMP_INDEX            = N_RAMP
 RAMP_ID(RAMP_INDEX)   = ID
 RAMP_TYPE(RAMP_INDEX) = TYPE
+
 END SUBROUTINE GET_RAMP_INDEX
 
 
 SUBROUTINE GET_TABLE_INDEX(ID,TYPE,TABLE_INDEX)
+
 USE GLOBAL_CONSTANTS, ONLY: N_TABLE,TABLE_ID,TABLE_TYPE
 CHARACTER(*), INTENT(IN) :: ID
 INTEGER, INTENT(IN) :: TYPE
@@ -1503,7 +1516,6 @@ END SELECT
 END FUNCTION EVALUATE_RAMP
 
 
-
 REAL(EB) FUNCTION ERF(X)
 
 ! Error function
@@ -1513,7 +1525,6 @@ REAL(EB),INTENT(IN)::X
 ERF = 1._EB-ERFC(X)
    
 END FUNCTION ERF
-
 
 
 REAL(EB) FUNCTION ERFC(X)
@@ -1609,7 +1620,6 @@ ENDIF
 RETURN
  
 END FUNCTION ERFC
- 
  
 
 REAL(EB) FUNCTION IERFC(Y)
@@ -1779,6 +1789,7 @@ END FUNCTION CSEVL
 
 
 SUBROUTINE INTERPOLATE1D(X,Y,XI,ANS)
+
 REAL(EB), INTENT(IN), DIMENSION(:) :: X, Y
 REAL(EB), INTENT(IN) :: XI
 REAL(EB), INTENT(OUT) :: ANS
@@ -1805,7 +1816,9 @@ ENDIF
 
 END SUBROUTINE INTERPOLATE1D
 
+
 SUBROUTINE INTERPOLATE1D_UNIFORM(X,XI,ANS)
+
 REAL(EB), INTENT(IN), DIMENSION(:) :: X
 REAL(EB), INTENT(IN) :: XI
 REAL(EB), INTENT(OUT) :: ANS
@@ -1827,7 +1840,10 @@ ENDIF
 
 END SUBROUTINE INTERPOLATE1D_UNIFORM
 
-REAL(EB) FUNCTION NORMAL(MEAN,SIGMA) !returns a normal distribution
+
+REAL(EB) FUNCTION NORMAL(MEAN,SIGMA) 
+
+! Randomly choose a point from a normal distribution
 
 REAL(EB) :: MEAN,SIGMA,TMP,FAC,GSAVE,RSQ,R1,R2
 REAL     :: RN
@@ -1853,29 +1869,38 @@ ELSE
 ENDIF
 NORMAL=TMP*SIGMA+MEAN
 RETURN
+
 END FUNCTION NORMAL
 
 
 SUBROUTINE CROSS_PRODUCT(C,A,B)
 
+! C = A x B
+
 REAL(EB), INTENT(IN) :: A(3),B(3)
 REAL(EB), INTENT(OUT) :: C(3)
-! C = A x B
+
 C(1) = A(2)*B(3)-A(3)*B(2)
 C(2) = A(3)*B(1)-A(1)*B(3)
 C(3) = A(1)*B(2)-A(2)*B(1)
+
 END SUBROUTINE CROSS_PRODUCT
 
 
-
 REAL(EB) FUNCTION NORM2(V)
-REAL(EB), INTENT(IN) :: V(3)
+
 ! Returns the L2 norm of the 3-vector V
+
+REAL(EB), INTENT(IN) :: V(3)
+
 NORM2 = SQRT(DOT_PRODUCT(V,V))
+
 END FUNCTION NORM2
 
 
 SUBROUTINE RANDOM_CHOICE(CDF,VAR,NPTS,CHOICE)
+
+! Randomly choose a value from the distribution with given CDF
  
 INTEGER,  INTENT(IN)  :: NPTS
 REAL(EB), INTENT(IN)  :: CDF(0:NPTS),VAR(0:NPTS)
@@ -1917,11 +1942,12 @@ END FUNCTION MINMOD4
 
 
 SUBROUTINE BOX_MULLER(Z0,Z1)
+
+! Generate pairs of normally distributed pseudo-random numbers with zero mean and unit variance based on the 
+! Box-Muller transformation.
+
 REAL(EB), INTENT(OUT) :: Z0,Z1
 REAL(EB) :: U1,U2,A
-
-! Generate pairs of normally distributed pseudo-random numbers with zero mean and unit variance
-! based on the Box-Muller transformation.
 
 CALL RANDOM_NUMBER(U1)
 CALL RANDOM_NUMBER(U2)
@@ -1933,6 +1959,7 @@ END SUBROUTINE BOX_MULLER
 
 
 END MODULE MATH_FUNCTIONS
+
 
 
 MODULE PHYSICAL_FUNCTIONS
@@ -2796,6 +2823,11 @@ END FUNCTION GINV
 
 
 SUBROUTINE GET_IJK(X,Y,Z,NM,XI,YJ,ZK,I,J,K)
+
+! Given the point (X,Y,Z) in mesh NM, GET_IJK returns the continuous and discrete form of the cell indices, (XI,YJ,ZK) and (I,J,K). 
+! For example, if the mesh is the unit cube with 10 cm cells, for the point (X,Y,Z)=(0.23,0.46,0.66), GET_IJK would return 
+! (XI,JK,ZK)=(2.3,4.6,6.6) and (I,J,K)=(3,5,7).
+
 USE MESH_VARIABLES
 REAL(EB),INTENT(IN) :: X,Y,Z
 INTEGER,INTENT(IN) :: NM
