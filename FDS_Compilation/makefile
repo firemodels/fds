@@ -234,7 +234,7 @@ msmpi_intel_win_64_db : setup_win $(objwin_mpi)
 
 msmpi_intel_win_64 : MPILIB = "C:\Program Files\Microsoft MPI\Lib\amd64\msmpi.lib"
 msmpi_intel_win_64 : MPILIB2 = "C:\Program Files\Microsoft MPI\Lib\amd64\msmpifec.lib"
-msmpi_intel_win_64 : MPILIB3 = "C:\Program Files\Microsoft MPI\Lib\amd64\\msmpifmc.lib"
+msmpi_intel_win_64 : MPILIB3 = "C:\Program Files\Microsoft MPI\Lib\amd64\msmpifmc.lib"
 msmpi_intel_win_64 : MPIINCLUDE = "C:\Program Files\Microsoft MPI\Inc"
 msmpi_intel_win_64 : MPIINCLUDE2 = "C:\Program Files\Microsoft MPI\Inc\amd64"
 msmpi_intel_win_64 : FFLAGS = /O2 /Qipo /names:lowercase /Qvec_report0 /I $(MPIINCLUDE) /I $(MPIINCLUDE2)
@@ -242,6 +242,22 @@ msmpi_intel_win_64 : FCOMPL = ifort
 msmpi_intel_win_64 : obj = fds_mpi_win_64
 msmpi_intel_win_64 : setup_win $(objwin_mpi)
 	$(FCOMPL) -o $(obj) $(FFLAGS)  /F1000000000 $(objwin_mpi) $(MPILIB) $(MPILIB2) $(MPILIB2)
+
+impi_intel_win_64 : MPILIB = "C:\Program Files (x86)\Intel\MPI\5.0.0.028\intel64\lib\impi.lib"
+impi_intel_win_64 : MPIINCLUDE = "C:\Program Files (x86)\Intel\MPI\5.0.0.028\intel64\include"
+impi_intel_win_64 : FFLAGS = /Qipo /O2 /Qvec_report0 /I$(MPIINCLUDE)
+impi_intel_win_64 : FCOMPL = mpiifort
+impi_intel_win_64 : obj = fds_impi_win_64
+impi_intel_win_64 : setup_win $(objwin_mpi)
+	$(FCOMPL) -o $(obj) $(FFLAGS) /F1000000000 $(objwin_mpi) $(MPILIB)
+
+impi_intel_win_64_db : MPILIB = "C:\Program Files (x86)\Intel\MPI\5.0.0.028\intel64\lib\impi.lib"
+impi_intel_win_64_db : MPIINCLUDE = "C:\Program Files (x86)\Intel\MPI\5.0.0.028\intel64\include"
+impi_intel_win_64_db : FFLAGS = /Od /Qvec_report0 /nologo /debug:all /I$(MPIINCLUDE) /extend_source:132 /warn:unused /warn:nointerfaces /Qtrapuv /fp:strict /fp:except /traceback /check:all /stand:f03
+impi_intel_win_64_db : FCOMPL = mpiifort
+impi_intel_win_64_db : obj = fds_impi_win_64_db
+impi_intel_win_64_db : setup_win $(objwin_mpi)
+	$(FCOMPL) -o $(obj) $(FFLAGS) /F1000000000 $(objwin_mpi) $(MPILIB)
 
 mpi_intel_win_64_ps : MPILIB = "c:\program files\mpich2\lib\fmpich2.lib"
 mpi_intel_win_64_ps : MPIINCLUDE = "c:\program files\mpich2\include"
