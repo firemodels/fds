@@ -161,9 +161,6 @@ $RUNFDS Pressure_Effects zone_shape
 
 $RUNFDS Pressure_Solver dancing_eddies_1mesh
 $RUNFDS Pressure_Solver scarc2d_fft_1mesh
-$RUNFDS Pressure_Solver scarc2d_fft_8mesh
-$RUNFDS Pressure_Solver scarc2d_cg_8mesh
-$RUNFDS Pressure_Solver scarc2d_gmg_8mesh
 
 $RUNFDS Pyrolysis cable_11_insulation_mcc
 $RUNFDS Pyrolysis cable_23_insulation_mcc
