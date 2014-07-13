@@ -106,9 +106,6 @@ DATA ( (BOX_PLANE2EDGE(I,J), I=0,3),J=0,5) /&
   0,4,  1,5,  2,6,  3,7&
   /
 
-
-
-
 !           3
 !          /.\  
 !         / . \
@@ -1168,7 +1165,19 @@ TETRA_VERTS(0:2,1) = V1
 TETRA_VERTS(0:2,2) = V2
 TETRA_VERTS(0:2,3) = V3
 
+!           3
+!          /.\  
+!         / . \
+!        /  .  \
+!       /   .   \
+!      /    2    \
+!     /   .   .   \
+!    /  .       .  \
+!   / .           . \
+!  0-----------------1
+
 ! compute normals for each tetrahedron face
+! orient vertices (clockwise) so that normals point outwards
 
 VDIFF1 = V1 - V0
 VDIFF2 = V3 - V0
