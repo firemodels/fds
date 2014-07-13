@@ -773,7 +773,7 @@ ctrl.o : prec.o cons.o type.o mesh.o func.o
 turb.o : func.o prec.o cons.o mesh.o
 samr.o : prec.o cons.o mesh.o
 gsmv.o : func.o prec.o cons.o mesh.o
-geom.o : func.o prec.o cons.o mesh.o
+geom.o : gsmv.o func.o prec.o cons.o mesh.o
 scrc.o : prec.o cons.o mesh.o func.o pois.o
 irad.o : func.o prec.o cons.o type.o mesh.o
 ieva.o : func.o prec.o cons.o type.o mesh.o
