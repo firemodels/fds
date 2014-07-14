@@ -19,7 +19,8 @@ PRIVATE
 PUBLIC :: NS_ANALYTICAL_SOLUTION, INIT_TURB_ARRAYS, VARDEN_DYNSMAG, WANNIER_FLOW, &
           GET_REV_turb, WALL_MODEL, COMPRESSION_WAVE, VELTAN2D,VELTAN3D, &
           SYNTHETIC_TURBULENCE, SYNTHETIC_EDDY_SETUP, TEST_FILTER, EX2G3D, TENSOR_DIFFUSIVITY_MODEL, &
-          TWOD_VORTEX_CERFACS, HEAT_FLUX_MODEL, ABL_HEAT_FLUX_MODEL, RNG_EDDY_VISCOSITY, NS_ANALYTICAL_SOLUTION_TIME
+          TWOD_VORTEX_CERFACS, HEAT_FLUX_MODEL, ABL_HEAT_FLUX_MODEL, RNG_EDDY_VISCOSITY, NS_ANALYTICAL_SOLUTION_TIME, &
+          NS_ANALYTICAL_SOLUTION_STATIC
  
 CONTAINS
 
@@ -128,7 +129,7 @@ END SUBROUTINE NS_ANALYTICAL_SOLUTION
 
 SUBROUTINE NS_ANALYTICAL_SOLUTION_TIME(NM,T)
 
-! Initialize flow variables with an analytical solution of the governing equations
+! Initialize flow variables with an analytical solution of the governing equations at a later time
 
 INTEGER, INTENT(IN) :: NM
 REAL, INTENT(IN) :: T
@@ -163,6 +164,42 @@ DO K=0,KBP1
 ENDDO
 
 END SUBROUTINE NS_ANALYTICAL_SOLUTION_TIME
+
+SUBROUTINE NS_ANALYTICAL_SOLUTION_STATIC(NM)
+
+! Initialize flow variables with an analytical solution of the governing equations. Same as classical Taylor-Green vortex, i.e., this case does not translate.
+
+INTEGER, INTENT(IN) :: NM
+INTEGER :: I,J,K
+REAL(EB) :: UU,WW
+
+CALL POINT_TO_MESH(NM)
+
+DO K=1,KBAR
+   DO J=1,JBAR
+      DO I=0,IBAR
+         U(I,J,K) = 2._EB * SIN(X(I))*COS(ZC(K))
+      ENDDO
+   ENDDO
+ENDDO
+DO K=0,KBAR
+   DO J=1,JBAR
+      DO I=1,IBAR
+         W(I,J,K) = -2._EB * COS(XC(I))*SIN(Z(K))
+      ENDDO
+   ENDDO
+ENDDO
+DO K=0,KBP1
+   DO J=0,JBP1
+      DO I=0,IBP1
+         UU = SIN(XC(I))*COS(ZC(K))
+         WW = -COS(XC(I))*SIN(ZC(K))
+         H(I,J,K) = -( COS(2._EB*XC(I)) + COS(2._EB*ZC(K)) ) + 0.5_EB*(UU**2+WW**2)
+      ENDDO
+   ENDDO
+ENDDO
+
+END SUBROUTINE NS_ANALYTICAL_SOLUTION_STATIC
 
 
 REAL(EB) FUNCTION WANNIER_FLOW(XX,YY,IVEL)
