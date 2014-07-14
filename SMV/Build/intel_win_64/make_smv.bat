@@ -13,7 +13,10 @@ call "%IFORT_COMPILER14%\bin\compilervars" intel64
 set SMV_TESTFLAG=
 set SMV_TESTSTRING=
 
+
+Title Building Smokeview for 64 bit Windows
 if "%1" NEQ "-t" goto endif
+  Title Building Test Smokeview for 64 bit Windows
   set SMV_TESTFLAG=-D pp_BETA
   set SMV_TESTSTRING=test_
 :endif

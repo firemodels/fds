@@ -1,9 +1,8 @@
 @echo off
-Title Building Smokeview for 23 bit Windows
 
-Rem  Windows batch file to build a release Smokeview for Windows 32.
+::  Windows batch file to build a release Smokeview for Windows 32.
 
-Rem setup environment variables (defining where repository resides etc) 
+:: setup environment variables (defining where repository resides etc) 
 
 set envfile="%userprofile%"\fds_smv_env.bat
 IF EXIST %envfile% GOTO endif_envexist

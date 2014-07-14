@@ -9,5 +9,6 @@ echo Setting up compiler environment
 call %intelbin%\ifortvars intel64
 
 :envexist
+Title Building FDS (mpi) for 64 bit Windows
 make VPATH="../../FDS_Source" -f ..\makefile mpi_intel_win_64
 pause

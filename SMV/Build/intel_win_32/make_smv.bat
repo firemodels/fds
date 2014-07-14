@@ -1,6 +1,5 @@
 @echo off
-
-Rem windows batch file to build smokeview from the command line
+:: windows batch file to build smokeview from the command line
 
 IF "%VS_VERSION%"=="" SET VS_VERSION=vs2012
 IF "%SETUP_IFORT_COMPILER_IA32%"=="1" GOTO envexist
@@ -14,9 +13,11 @@ call "%IFORT_COMPILER14%\bin\compilervars" ia32 %VS_VERSION%
 set SMV_TESTFLAG=
 set SMV_TESTSTRING=
 
+Title Building Smokeview for 32 bit Windows
 if "%1" NEQ "-t" goto endif
   set SMV_TESTFLAG=-D pp_BETA
   set SMV_TESTSTRING=test_
+  Title Building Test Smokeview for 32 bit Windows
 :endif
 echo %SMV_TESTFLAG%
 echo %SMV_TESTSTRING%

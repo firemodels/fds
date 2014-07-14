@@ -1,6 +1,6 @@
 @echo off
 
-Rem windows batch file to build smokezip from the command line
+:: windows batch file to build smokezip from the command line
 
 IF "%SETUP_IFORT_COMPILER_IA32%"=="1" GOTO envexist
 
@@ -12,5 +12,6 @@ if exist "%VS_COMPILER%\vcvars32x86_amd64.bat" call "%VS_COMPILER%\vcvars32x86_a
 :envexist
 erase *.obj
 erase *.mod
+Title Building smokezipo for 32 bit Windows
 make -f ..\Makefile intel_win_32
 pause
