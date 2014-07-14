@@ -1151,7 +1151,7 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
                    &sd->is1,&sd->is2,&sd->js1,&sd->js2,&sd->ks1,&sd->ks2,&sd->idir,
                    &qmin,&qmax,sd->qslicedata,sd->times,&sd->ntimes,&sliceframestep,
                    &settmin_s,&settmax_s,&tmin_s,&tmax_s, &redirect,
-                   slicefilelen,labellen,labellen,labellen);
+                   slicefilelen,labellen);
 #ifdef pp_MEMDEBUG                   
       ASSERT(ValidPointer(sd->qslicedata,sizeof(float)*sd->nslicei*sd->nslicej*sd->nslicek*sd->ntimes));
 #endif      

@@ -100,10 +100,10 @@ STDCALLF FORTwriteslicedata(int *file_unit,char *slicefilename,
                             int *is1,int *is2,int *js1,int *js2,int *ks1,int *ks2,
                             float *qdata,float *times,int *ntimes, int *redirect,FILE_SIZE slicefilelen);
 STDCALLF FORTgetslicedata(int *file_unit,char *slicefilename, char *shortlabels, 
-                         int *is1,int *is2,int *js1,int *js2, int *ks1,int *ks2,
-                         int *idir, float *qslicemin,float *qslicemax,
-                         float *qslicedata,float *times, int *nsteps, int *sliceframestep, 
-                         int *settime_p, int *settmax_p, float *tmin_p, float *tmax_p, int *redirect,
-                         FILE_SIZE slicefilelen, FILE_SIZE longlableslen, FILE_SIZE shortlabelslen, FILE_SIZE unitslen);
+                          int *is1,int *is2,int *js1,int *js2, int *ks1,int *ks2,
+                          int *idir, float *qslicemin,float *qslicemax,
+                          float *qslicedata,float *times, int *nsteps, int *sliceframestep, 
+                          int *settime_p, int *settmax_p, float *tmin_p, float *tmax_p, int *redirect,
+                          FILE_SIZE slicefilelen, FILE_SIZE shortlabelslen);
 STDCALLF FORTgetplot3dq(char *qfilename, int *nx, int *ny, int *nz, float *qq, int *error, int *isotest, FILE_SIZE filelen);
 #endif
