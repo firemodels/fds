@@ -9,6 +9,7 @@ echo Setting up compiler environment
 call %intelbin%\ifortvars intel64
 
 :envexist
+Title Building FDS for 64 bit Windows
 make VPATH="../../FDS_Source" -f ..\makefile intel_win_64
 pause
 
