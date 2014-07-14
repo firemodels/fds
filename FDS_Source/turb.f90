@@ -167,7 +167,8 @@ END SUBROUTINE NS_ANALYTICAL_SOLUTION_TIME
 
 SUBROUTINE NS_ANALYTICAL_SOLUTION_STATIC(NM)
 
-! Initialize flow variables with an analytical solution of the governing equations. Same as classical Taylor-Green vortex, i.e., this case does not translate.
+! Initialize flow variables with an analytical solution of the governing equations.
+! Same as classical Taylor-Green vortex, i.e., this case does not translate.
 
 INTEGER, INTENT(IN) :: NM
 INTEGER :: I,J,K
