@@ -13,6 +13,8 @@ echo *** Removing previous FDS/Smokeview entries from the system and user path.
 call "%CD%\set_path.exe" -s -m -b -r "nist\fds"
 call "%CD%\set_path.exe" -u -m -b -r "FDS\FDS5"
 call "%CD%\set_path.exe" -s -m -b -r "FDS\FDS5"
+call "%CD%\set_path.exe" -u -m -b -r "FDS\FDS6"
+call "%CD%\set_path.exe" -s -m -b -r "FDS\FDS6"
 
 set SAVECD="%CD%"
 
@@ -96,10 +98,10 @@ echo.
 echo *** Setting up the PATH variable
 
 :: *** c:\...\FDS\FDS6\bin
-call "%CD%\set_path.exe" -s -m -a "%CD%\bin"
+call "%CD%\set_path.exe" -s -m -f "%CD%\bin"
 
 :: *** c:\...\FDS\shortcuts
-call "%CD%\set_path.exe" -s -m -a "%SHORTCUTSDIR%"
+call "%CD%\set_path.exe" -s -m -f "%SHORTCUTSDIR%"
 
 :: ------------- file association -------------
 echo.
@@ -181,5 +183,5 @@ echo.
 echo *** Press any key to complete the installation.
 pause>NUL
 
-erase "%CD%"\wrapup_fds_install.bat
+:: erase "%CD%"\wrapup_fds_install.bat
 
