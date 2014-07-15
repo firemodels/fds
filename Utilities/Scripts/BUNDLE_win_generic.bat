@@ -7,6 +7,7 @@ set fdsversion=%fds_edition%
 
 set fdsdir=%svn_root%\FDS_Compilation\%OPENMP%intel_win_%platform%
 set fdsmpidir=%svn_root%\FDS_Compilation\mpi_intel_win_%platform%
+set fdsimpidir=%svn_root%\FDS_Compilation\impi_intel_win_%platform%
 set basename=FDS_%fds_version%-SMV_%smv_version%_win%platform%
 
 set in_pdf=%svn_root%\..\FIRE-LOCAL\reports\fds_manuals\
@@ -19,6 +20,7 @@ set in_background=%svn_root%\Utilities\background
 set in_smv=%svn_root%\SMV\Build\intel_win_%platform%
 set in_for_bundle=%svn_root%\SMV\for_bundle
 set in_sh2bat=%svn_root%\Utilities\Data_Processing
+set in_impi=%userprofile%\FIRE-LOCAL\LIBS\RUNTIME\WINDOWS
 
 set uploads=%svn_root%\Utilities\uploads
 set basedir=%uploads%\%basename%
@@ -79,6 +81,8 @@ CALL :COPY %fdsdir%\fds_%OPENMP%win_%platform%.exe         %out_bin%\fds%release
 
 CALL :COPY  %fdsmpidir%\fds_mpi_win_%platform%.exe  %out_bin%\fds_mpi.exe
 
+CALL :COPY  %fdsimpidir%\fds_impi_win_%platform%.exe  %out_bin%\fds_impi.exe
+
 CALL :COPY  %in_smv%\smokeview_win_%platform%.exe   %out_bin%\smokeview.exe
 
 CALL :COPY  %in_smokediff%\intel_win_%platform%\smokediff_win_%platform%.exe     %out_bin%\smokediff.exe
@@ -90,6 +94,10 @@ CALL :COPY  %in_wind2fds%\intel_win_%platform%\wind2fds_win_%platform%.exe      
 CALL :COPY  %in_fds2ascii%\intel_win_%platform%\fds2ascii_win_%platform%.exe     %out_bin%\fds2ascii.exe
 
 CALL :COPY  %in_background%\intel_win_32\background.exe %out_bin%\background.exe
+
+CALL :COPY %in_impi%\impi.dll         %out_bin%\impi.dll
+CALL :COPY %in_impi%\mpiexec.smpd.exe %out_bin%\mpiexec.smpd.exe
+CALL :COPY %in_impi%\smpd.exe         %out_bin%\smpd.exe
 
 CALL :COPY  %in_sh2bat%\sh2bat.exe %out_bin%\sh2bat.exe
 
