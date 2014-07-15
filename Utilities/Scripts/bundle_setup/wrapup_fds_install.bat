@@ -159,6 +159,13 @@ if %ncores% GEQ 8 (
 )
 setx OMP_NUM_THREADS %nthreads%
 
+:: ----------- setting up firewall for mpi version of FDS
+
+set firewall_setup="%USERPROFILE%\setup_fds_firewall.bat"
+if exist "%firewall_setup%" (
+   call "%firewall_setup%"
+)
+
 :: ----------- setting up uninstall file
 
 echo echo. >> Uninstall\Uninstall.bat
