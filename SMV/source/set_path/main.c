@@ -19,6 +19,7 @@ char main_revision[]="$Revision$";
 #define BUFFER_SIZE 10050
 
 int add_path=0;
+int at_end=1;
 int remove_path=0;
 int display_path=0;
 int act_on_user_path=1;
@@ -88,6 +89,7 @@ int main(int argc, char **argv){
   int i;
   char *newentry=NULL;
   char pathbuffer[BUFFER_SIZE];
+  char pathbuffer2[BUFFER_SIZE];
   char tokens[BUFFER_SIZE], newpath[BUFFER_SIZE], *token;
   int newentry_present;
 
@@ -103,6 +105,14 @@ int main(int argc, char **argv){
 
     switch(arg[1]){
       case 'a':
+        at_end=1;
+        add_path=1;
+        remove_path=0;
+        newentry=argv[i+1];
+        i++;
+        break;
+      case 'f':
+        at_end=0;
         add_path=1;
         remove_path=0;
         newentry=argv[i+1];
@@ -200,8 +210,16 @@ int main(int argc, char **argv){
       }
       if(prompt_user_flag==0||answer==1){
         backup_path(path_type,pathbuffer);
-        if(strlen(pathbuffer)>0)strcat(pathbuffer,";");
-        strcat(pathbuffer,newentry);
+        if(at_end==1){
+          if(strlen(pathbuffer)>0)strcat(pathbuffer,";");
+          strcat(pathbuffer,newentry);
+        }
+        else{
+          strcpy(pathbuffer2,newentry);
+          strcat(pathbuffer2,";");
+          strcat(pathbuffer2,pathbuffer);
+          strcpy(pathbuffer,pathbuffer2);
+        }
         if(act_on_user_path==1){
           if(reg_path(REG_SET,REG_USER_PATH,pathbuffer)==0)return 1;
         }
@@ -402,6 +420,7 @@ void usage(void){
   printf("  set_path [-s][-u] [-a path_entry] [-r path_entry] [-d][-p][-v]\n\n");
   printf("where\n\n");
   printf("  -a entry - append entry to the path variable being modified\n");
+  printf("  -f entry - prepend entry to the path variable being modified\n");
   printf("  -r label - remove any entry containing label from the path\n");
   printf("             variable being modified\n");
   printf("  -s - add/remove/display entries in the System path\n");
