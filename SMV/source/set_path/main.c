@@ -14,6 +14,8 @@
 #include "string_util.h"
 #include "datadefs.h"
 
+// dummy change to bump version to 1.0
+
 char main_revision[]="$Revision$";
 
 #define BUFFER_SIZE 10050
