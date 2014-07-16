@@ -81,7 +81,7 @@ CALL :COPY %fdsdir%\fds_%OPENMP%win_%platform%.exe         %out_bin%\fds%release
 
 CALL :COPY  %fdsmpidir%\fds_mpi_win_%platform%.exe  %out_bin%\fds_mpi.exe
 
-CALL :COPY  %fdsimpidir%\fds_impi_win_%platform%.exe  %out_bin%\fds_impi.exe
+if "%platform%"=="64" CALL :COPY  %fdsimpidir%\fds_impi_win_%platform%.exe  %out_bin%\fds_impi.exe
 
 CALL :COPY  %in_smv%\smokeview_win_%platform%.exe   %out_bin%\smokeview.exe
 
@@ -95,9 +95,9 @@ CALL :COPY  %in_fds2ascii%\intel_win_%platform%\fds2ascii_win_%platform%.exe    
 
 CALL :COPY  %in_background%\intel_win_32\background.exe %out_bin%\background.exe
 
-CALL :COPY %in_impi%\impi.dll         %out_bin%\impi.dll
-CALL :COPY %in_impi%\mpiexec.smpd.exe %out_bin%\mpiexec.smpd.exe
-CALL :COPY %in_impi%\smpd.exe         %out_bin%\smpd.exe
+if "%platform%"=="64" CALL :COPY %in_impi%\impi.dll         %out_bin%\impi.dll
+if "%platform%"=="64" CALL :COPY %in_impi%\mpiexec.smpd.exe %out_bin%\mpiexec.smpd.exe
+if "%platform%"=="64" CALL :COPY %in_impi%\smpd.exe         %out_bin%\smpd.exe
 
 CALL :COPY  %in_sh2bat%\sh2bat.exe %out_bin%\sh2bat.exe
 
@@ -150,17 +150,13 @@ echo.
 CALL :COPY  %in_for_bundle%\objects.svo             %out_bin%\.
 CALL :COPY  %in_for_bundle%\volrender.ssf           %out_bin%\.
 
-if "%platform%"=="32" CALL :COPY %in_intel_dll%\LIB32\libiomp5md.dll           %out_bin%\.
-
-if "%platform%"=="64" CALL :COPY %in_intel_dll%\LIB64\libiomp5md.dll           %out_bin%\.
-
+if "%platform%"=="32" CALL :COPY %in_intel_dll%\LIB32\libiomp5md.dll     %out_bin%\.
 if "%platform%"=="32" CALL :COPY %in_for_bundle%\pthreadVC.dll           %out_bin%\.
+if "%platform%"=="32" CALL :COPY  %in_for_bundle%\glew32.dll             %out_bin%\.
 
-if "%platform%"=="64" CALL :COPY  %in_for_bundle%\pthreadVC2_x64.dll         %out_bin%\.
-
-if "%platform%"=="32" CALL :COPY  %in_for_bundle%\glew32.dll              %out_bin%\.
-
-if "%platform%"=="64" CALL :COPY  %in_for_bundle%\glew32_x64.dll              %out_bin%\.
+if "%platform%"=="64" CALL :COPY %in_intel_dll%\LIB64\libiomp5md.dll     %out_bin%\.
+if "%platform%"=="64" CALL :COPY  %in_for_bundle%\pthreadVC2_x64.dll     %out_bin%\.
+if "%platform%"=="64" CALL :COPY  %in_for_bundle%\glew32_x64.dll         %out_bin%\.
 
 CALL :COPY  %in_for_bundle%\smokeview.ini           %out_bin%\.
 
@@ -175,7 +171,7 @@ echo ***Copying Uninstaller to Uninstall directory
 echo.
 CALL :COPY  "%bundleinfo%\uninstall_fds.bat" "%out_uninstall%\uninstall.bat"
 
-CALL :COPY  "%bundleinfo%\set_path.exe"         "%out_uninstall%\set_path.exe"
+CALL :COPY  "%bundleinfo%\set_path.exe"      "%out_uninstall%\set_path.exe"
 
 echo.
 echo ***Copying FDS Documentation
@@ -206,25 +202,25 @@ CALL :COPY %in_pdf%\SMV_Verification_Guide.pdf %out_guides%\.
 echo.
 echo ***Copying Starup shortcuts
 echo.
+ 
+CALL :COPY "%in_for_bundle%\readme.html"               "%out_guides%\Smokeview_release_notes.html"
 
-CALL :COPY "%in_for_bundle%\readme.html" "%out_guides%\Smokeview_release_notes.html"
+CALL :COPY "%bundleinfo%\Overview.html"                "%out_doc%\Overview.html"
 
-CALL :COPY "%bundleinfo%\Overview.html"             "%out_doc%\Overview.html"
+CALL :COPY "%bundleinfo%\FDS_Web_Site.url"             "%out_web%\Official_Web_Site.url"
 
-CALL :COPY "%bundleinfo%\FDS_Web_Site.url"          "%out_web%\Official_Web_Site.url"
+CALL :COPY "%bundleinfo%\Updates.url"                  "%out_web%\Software_Updates.url"
 
-CALL :COPY "%bundleinfo%\Updates.url"               "%out_web%\Software_Updates.url"
-
-CALL :COPY "%bundleinfo%\Docs.url"               "%out_web%\Documentation_Updates.url"
+CALL :COPY "%bundleinfo%\Docs.url"                     "%out_web%\Documentation_Updates.url"
 
 CALL :COPY "%bundleinfo%\FDS_Development_Web_Site.url" "%out_web%\Developer_Web_Site.url"
 
-CALL :COPY "%bundleinfo%\discussion_group.url"          "%out_web%\Discussion_Group.url"
+CALL :COPY "%bundleinfo%\discussion_group.url"         "%out_web%\Discussion_Group.url"
 
-CALL :COPY "%bundleinfo%\issue_tracker.url"          "%out_web%\Issue_Tracker.url"
+CALL :COPY "%bundleinfo%\issue_tracker.url"            "%out_web%\Issue_Tracker.url"
 
-
-CALL :COPY %bundleinfo%\readme_examples.html "%out_examples%\Examples notes.html"
+ 
+CALL :COPY %bundleinfo%\readme_examples.html           "%out_examples%\Examples notes.html"
 
 echo.
 echo ***Getting the Verification cases from the repository
@@ -258,9 +254,9 @@ echo.
 
 CALL :COPY  "%bundleinfo%\wrapup_fds_install.bat" "%out_bundle%\%fdsversion%\wrapup_fds_install.bat
 
-CALL :COPY  "%bundleinfo%\shortcut.exe" "%out_bundle%\%fdsversion%\shortcut.exe"
+CALL :COPY  "%bundleinfo%\shortcut.exe"           "%out_bundle%\%fdsversion%\shortcut.exe"
 
-CALL :COPY  "%bundleinfo%\set_path.exe" "%out_bundle%\%fdsversion%\set_path.exe"
+CALL :COPY  "%bundleinfo%\set_path.exe"           "%out_bundle%\%fdsversion%\set_path.exe"
 
 echo.
 echo ***Compressing FDS/Smokeview distribution
