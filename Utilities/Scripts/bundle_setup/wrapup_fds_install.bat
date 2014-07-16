@@ -163,17 +163,12 @@ setx OMP_NUM_THREADS %nthreads%
 
 :: ----------- setting up firewall for mpi version of FDS
 
-set scriptdir="%CD%\scriptdir"
-if not exist "%scriptdir%" mkdir "%scriptdir%"
-echo.
-echo copy setup_fds_firewall.bat into %scriptdir%
-echo press any key to proceed
-pause>Nul
-set firewall_setup="%scriptdir%\setup_fds_firewall.bat"
-if exist "%firewall_setup%" (
-   echo setting up firewall exceptions
-   call "%firewall_setup%"
-)
+::new
+:: set firewall_setup="%CD%\setup_fds_firewall.bat"
+:: if exist "%firewall_setup%" (
+::    echo setting up firewall exceptions
+::    call "%firewall_setup%"
+:: )
 
 :: ----------- setting up uninstall file
 
