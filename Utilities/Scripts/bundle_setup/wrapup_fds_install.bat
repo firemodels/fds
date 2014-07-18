@@ -140,7 +140,7 @@ mkdir "%FDSSTART%\Guides and Release Notes"
 "%CD%\shortcut.exe" /F:"%FDSSTART%\Guides and Release Notes\Smokeview release notes.lnk"             /T:"%CD%\Documentation\Guides_and_Release_Notes\Smokeview_release_notes.html" /A:C >NUL
 
 "%CD%\shortcut.exe" /F:"%FDSSTART%\Overview.lnk"  /T:"%CD%\Documentation\Overview.html" /A:C >NUL
-"%CD%\shortcut.exe" /F:"%FDSSTART%\Uninstall.lnk"  /T:"%CD%\uninstall.bat" /A:C >NUL
+"%CD%\shortcut.exe" /F:"%FDSSTART%\Uninstall.lnk"  /T:"%CD%\Uninstall\uninstall.vbs" /A:C >NUL
 
 erase "%CD%"\set_path.exe
 erase "%CD%"\shortcut.exe
@@ -169,19 +169,30 @@ if exist "%firewall_setup%" (
   call %firewall_setup%
 )
 
+:: ----------- copy backup files to Uninstall directory
+
+copy *.txt Uninstall > Nul
+erase /q *.txt
+
 :: ----------- setting up uninstall file
 
-copy Uninstall\Uninstall.bat Uninstall.bat
-echo echo. >> Uninstall.bat
-echo echo Removing directories, %CD%\bin and %SHORTCUTSDIR%, from the System Path >> Uninstall.bat
-echo call "%CD%\Uninstall\set_path.exe" -s -b -r "%CD%\bin" >> Uninstall.bat
-echo call "%CD%\Uninstall\set_path.exe" -s -b -r "%SHORTCUTSDIR%" >> Uninstall.bat
+echo echo. >> Uninstall\Uninstall_base.bat
+echo echo Removing directories, %CD%\bin and %SHORTCUTSDIR%, from the System Path >> Uninstall\Uninstall_base.bat
+echo call "%CD%\Uninstall\set_path.exe" -s -b -r "%CD%\bin" >> Uninstall\Uninstall_base.bat
+echo call "%CD%\Uninstall\set_path.exe" -s -b -r "%SHORTCUTSDIR%" >> Uninstall\Uninstall_base.bat
 
-echo echo. >> Uninstall.bat
-echo echo Removing %CD% >> Uninstall.bat
-echo rmdir /s /q "%SHORTCUTSDIR%" >> Uninstall.bat
-echo rmdir /s /q "%CD%" >> Uninstall.bat
-echo pause >> Uninstall.bat
+echo echo. >> Uninstall\Uninstall_base.bat
+echo echo Removing %CD% >> Uninstall\Uninstall_base.bat
+echo rmdir /s /q "%SHORTCUTSDIR%" >> Uninstall\Uninstall_base.bat
+echo rmdir /s /q "%CD%" >> Uninstall\Uninstall_base.bat
+echo pause >> Uninstall\Uninstall_base.bat
+
+set ELEVATE_APP=%CD%\Uninstall\Uninstall_base.bat
+set ELEVATE_PARMS=
+echo Set objShell = CreateObject("Shell.Application") >>Uninstall\uninstall.vbs
+echo Set objWshShell = WScript.CreateObject("WScript.Shell") >>Uninstall\uninstall.vbs
+echo Set objWshProcessEnv = objWshShell.Environment("PROCESS") >>Uninstall\uninstall.vbs
+echo objShell.ShellExecute "%ELEVATE_APP%", "%ELEVATE_PARMS%", "", "runas" >>Uninstall\uninstall.vbs
 
 echo.
 echo *** Press any key to complete the installation.
