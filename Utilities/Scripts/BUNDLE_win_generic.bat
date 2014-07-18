@@ -82,7 +82,7 @@ CALL :COPY %fdsdir%\fds_%OPENMP%win_%platform%.exe         %out_bin%\fds%release
 :: CALL :COPY  %fdsmpidir%\fds_mpi_win_%platform%.exe  %out_bin%\fds_mpi.exe
 
 ::new
-if "%platform%"=="64" CALL :COPY  %fdsimpidir%\fds_impi_win_%platform%.exe  %out_bin%\fds_impi.exe
+if "%platform%"=="64" CALL :COPY  %fdsimpidir%\fds_impi_win_%platform%.exe  %out_bin%\fds_mpi.exe
 
 CALL :COPY  %in_smv%\smokeview_win_%platform%.exe   %out_bin%\smokeview.exe
 
@@ -171,7 +171,8 @@ copy %in_for_bundle%\textures\*.png          %out_textures%\.
 echo.
 echo ***Copying Uninstaller to Uninstall directory
 echo.
-CALL :COPY  "%bundleinfo%\uninstall_fds.bat" "%out_uninstall%\uninstall.bat"
+CALL :COPY  "%bundleinfo%\uninstall_fds.bat" "%out_uninstall%\uninstall_base.bat"
+echo @echo off > "out_install%\uninstall.vbs"
 
 CALL :COPY  "%bundleinfo%\set_path.exe"      "%out_uninstall%\set_path.exe"
 
