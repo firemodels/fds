@@ -30,12 +30,16 @@ Cables
       DENSITY       = 1380.
       EMISSIVITY    = 0.95 / Properties of the plastics within the cable
 
-&PROP ID                        = 'PE/PVC CABLE'
-      QUANTITY                  = 'CABLE TEMPERATURE'
-      CABLE_DIAMETER            = 0.015
-      CABLE_JACKET_THICKNESS    = 0.0015
-      CABLE_MASS_PER_LENGTH     = 0.38
-      CABLE_FAILURE_TEMPERATURE = 205. / THIEF model inputs
+&MATL ID='THIEF cable material', DENSITY=2263., CONDUCTIVITY=0.2, SPECIFIC_HEAT=1.5 /
+&SURF ID='THIEF cable surface', THICKNESS=0.0075, LENGTH=0.1, MATL_ID='THIEF cable material', GEOMETRY='CYLINDRICAL' /
+&PART ID='THIEF cable segment', SURF_ID='THIEF cable surface', ORIENTATION=0,0,-1, STATIC=.TRUE., PROP_ID='THIEF cable picture' /
+&PROP ID='THIEF cable picture', SMOKEVIEW_ID='TUBE', SMOKEVIEW_PARAMETERS='L=0.1','D=0.015' /
+&INIT ID='THIEF cable position A', XYZ=8.3,9.5,3.8, N_PARTICLES=1, PART_ID='THIEF cable segment' /
+&INIT ID='THIEF cable position B', XYZ=8.3,9.5,4.3, N_PARTICLES=1, PART_ID='THIEF cable segment' /
+&INIT ID='THIEF cable position C', XYZ=8.3,9.5,4.8, N_PARTICLES=1, PART_ID='THIEF cable segment' /
+&DEVC ID='Temp_Cable_A_FDS', INIT_ID='THIEF cable position A', QUANTITY='INSIDE WALL TEMPERATURE', DEPTH=0.002, SETPOINT=205. /
+&DEVC ID='Temp_Cable_B_FDS', INIT_ID='THIEF cable position B', QUANTITY='INSIDE WALL TEMPERATURE', DEPTH=0.002, SETPOINT=205. /
+&DEVC ID='Temp_Cable_C_FDS', INIT_ID='THIEF cable position C', QUANTITY='INSIDE WALL TEMPERATURE', DEPTH=0.002, SETPOINT=205. /
 
 &SURF ID                        = 'NON-BURNING CABLE'
       COLOR                     = 'BLACK'
@@ -95,15 +99,26 @@ Cabinets
 
 Cabinet Fire
 
-&REAC ID                 = 'PE/PVC'
-      FYI                = 'Assume C_2 H_3.5 Cl_0.5'
-      C                  = 2.
-      H                  = 3.5
-      OTHER              = 0.5
-      MW_OTHER           = 35.5
-      HEAT_OF_COMBUSTION = 20900.
-      CO_YIELD           = 0.147 /
-      SOOT_YIELD         = 0.136 /
+&SPEC ID = 'PE/PVC', FORMULA = 'C2H3.5Cl0.5' /
+&SPEC ID = 'OXYGEN',            LUMPED_COMPONENT_ONLY = .TRUE. /
+&SPEC ID = 'NITROGEN',          LUMPED_COMPONENT_ONLY = .TRUE. /
+&SPEC ID = 'HYDROGEN CHLORIDE', LUMPED_COMPONENT_ONLY = .TRUE. /
+&SPEC ID = 'WATER VAPOR',       LUMPED_COMPONENT_ONLY = .TRUE. /
+&SPEC ID = 'CARBON MONOXIDE',   LUMPED_COMPONENT_ONLY = .TRUE. /
+&SPEC ID = 'CARBON DIOXIDE',    LUMPED_COMPONENT_ONLY = .TRUE. /
+&SPEC ID = 'SOOT',              LUMPED_COMPONENT_ONLY = .TRUE. /
+
+&SPEC ID='AIR', BACKGROUND=.TRUE., SPEC_ID(1)='OXYGEN',   VOLUME_FRACTION(1)=0.21,
+                                   SPEC_ID(2)='NITROGEN', VOLUME_FRACTION(2)=0.79 /
+
+&SPEC ID='PRODUCTS',               SPEC_ID(1)='HYDROGEN CHLORIDE', VOLUME_FRACTION(1)=0.5,
+                                   SPEC_ID(2)='WATER VAPOR',       VOLUME_FRACTION(2)=1.5,
+                                   SPEC_ID(3)='CARBON MONOXIDE',   VOLUME_FRACTION(3)=0.2376,
+                                   SPEC_ID(4)='CARBON DIOXIDE',    VOLUME_FRACTION(4)=1.2496,
+                                   SPEC_ID(5)='SOOT',              VOLUME_FRACTION(5)=0.5128,
+                                   SPEC_ID(6)='NITROGEN',          VOLUME_FRACTION(6)=7.9692 /
+
+&REAC ID='PE/PVC', HEAT_OF_COMBUSTION = 20900., SPEC_ID_NU='PE/PVC','AIR','PRODUCTS', NU=-1,-10.0876,1 /
 
 &RADI RADIATIVE_FRACTION = 0.49 /
 
@@ -175,10 +190,6 @@ Ventilation
 Output
 
 &DUMP DT_DEVC=15., DT_HRR=15. /
-
-&DEVC ID='Temp_Cable_A_FDS', PROP_ID='PE/PVC CABLE', XYZ=8.3,9.5,3.8, ORIENTATION=0,0,-1, SETPOINT=205. /
-&DEVC ID='Temp_Cable_B_FDS', PROP_ID='PE/PVC CABLE', XYZ=8.3,9.5,4.3, ORIENTATION=0,0,-1, SETPOINT=205. /
-&DEVC ID='Temp_Cable_C_FDS', PROP_ID='PE/PVC CABLE', XYZ=8.3,9.5,4.8, ORIENTATION=0,0,-1, SETPOINT=205. /
 
 &DEVC QUANTITY='RADIATIVE HEAT FLUX GAS',  ID='Flux_Cable_A_FDS', XYZ=8.3,9.5,3.9, ORIENTATION=0,0,-1 /
 &DEVC QUANTITY='RADIATIVE HEAT FLUX GAS',  ID='Flux_Cable_B_FDS', XYZ=8.3,9.5,4.4, ORIENTATION=0,0,-1 /

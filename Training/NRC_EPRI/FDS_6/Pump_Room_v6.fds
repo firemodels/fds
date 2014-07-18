@@ -29,12 +29,12 @@ General construction
 
 Cable
 
-&PROP ID                        = 'PE/PVC CABLE'
-      QUANTITY                  = 'CABLE TEMPERATURE'
-      CABLE_DIAMETER            = 0.015
-      CABLE_JACKET_THICKNESS    = 0.002
-      CABLE_MASS_PER_LENGTH     = 0.4
-      CABLE_FAILURE_TEMPERATURE = 205. / THIEF model inputs
+&MATL ID='THIEF cable material', DENSITY=2263., CONDUCTIVITY=0.2, SPECIFIC_HEAT=1.5 /
+&SURF ID='THIEF cable surface', THICKNESS=0.0075, LENGTH=0.1, MATL_ID='THIEF cable material', GEOMETRY='CYLINDRICAL' /
+&PART ID='THIEF cable segment', SURF_ID='THIEF cable surface', ORIENTATION=0,0,-1, STATIC=.TRUE., PROP_ID='THIEF cable picture' /
+&PROP ID='THIEF cable picture', SMOKEVIEW_ID='TUBE', SMOKEVIEW_PARAMETERS='L=0.1','D=0.015' /
+&INIT ID='THIEF cable position', XYZ=1.4,3.0,4.6, N_PARTICLES=1, PART_ID='THIEF cable segment' /
+&DEVC ID='Max_Temp_ERFBS_FDS', INIT_ID='THIEF cable position', QUANTITY='INSIDE WALL TEMPERATURE', DEPTH=0.002, SETPOINT=205. /
 
 &MATL ID             = 'Kaowool'
       SPECIFIC_HEAT  = 1.07
@@ -55,7 +55,7 @@ Cable
 
 Fire
 
-&REAC ID                 = 'HYDROCARBON'
+&REAC FUEL               = 'HYDROCARBON'
       FYI                = 'General Hydrocarbon, C_14 H_30'
       C                  = 14.
       H                  = 30.
@@ -133,7 +133,6 @@ Output devices
 &DEVC ID='Gas_Temp_FDS', XYZ=2.0,3.0,4.5, QUANTITY='TEMPERATURE' /
 &DEVC QUANTITY='WALL TEMPERATURE', ID='Temp_Wall_FDS', XYZ=0.0,3.0,4.0, IOR=1 /
 &DEVC QUANTITY='WALL TEMPERATURE', ID='Max_Surf_Temp_ERFBS_FDS', XB=0,3,0,5,2,6, STATISTICS='MAX', SURF_ID='BLANKET' /
-&DEVC ID='Max_Temp_ERFBS_FDS', PROP_ID='PE/PVC CABLE', XYZ=1.4,3.0,4.6, ORIENTATION=-3 /
 
 Smokeview
 
@@ -142,9 +141,8 @@ Smokeview
 
 &SLCF PBY=2.5, VECTOR=.TRUE., QUANTITY='TEMPERATURE'/
 &SLCF PBY=0.5, VECTOR=.TRUE., QUANTITY='TEMPERATURE'/
-&SLCF PBY=0.5, QUANTITY='MIXTURE FRACTION'/
-&SLCF PBY=0.5, QUANTITY='MASS FRACTION', SPEC_ID='oxygen' /
-&SLCF PBY=0.5, QUANTITY='MASS FRACTION', SPEC_ID='fuel' /
+&SLCF PBY=0.5, QUANTITY='MASS FRACTION', SPEC_ID='OXYGEN' /
+&SLCF PBY=0.5, QUANTITY='MASS FRACTION', SPEC_ID='HYDROCARBON' /
 
 End of file
 
