@@ -1,11 +1,11 @@
+@echo off
 :: This script deletes previous Intel MPI firewall exceptions
 :: and creates 2 new rules opening ports equivalent to PORT_VAL.
 :: It then sets env variable MPICH_PORT_RANGE to match PORT_VAL.
 
 
-@echo off
-echo in setup_fds_fireall
-pause
+echo.
+echo *** Setting up firewall exceptions.
 
 set PORT_VAL=8670-8690
 netsh advfirewall firewall delete rule name="Intel MPI Port for FDS"
@@ -17,7 +17,5 @@ setx MPICH_PORT_RANGE 8670:8690
 
 smpd -install
 
-echo FDS directory=%CD%\bin
-
-echo press any key to continue
-pause>Nul
+echo.
+echo *** Firewall exception setup complete.

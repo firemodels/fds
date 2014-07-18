@@ -79,10 +79,10 @@ CALL :COPY %in_for_bundle%\fds_openmp.bat %out_bin%\fds_openmp.bat
 
 CALL :COPY %fdsdir%\fds_%OPENMP%win_%platform%.exe         %out_bin%\fds%release_version%.exe
 
-CALL :COPY  %fdsmpidir%\fds_mpi_win_%platform%.exe  %out_bin%\fds_mpi.exe
+:: CALL :COPY  %fdsmpidir%\fds_mpi_win_%platform%.exe  %out_bin%\fds_mpi.exe
 
 ::new
-:: if "%platform%"=="64" CALL :COPY  %fdsimpidir%\fds_impi_win_%platform%.exe  %out_bin%\fds_impi.exe
+if "%platform%"=="64" CALL :COPY  %fdsimpidir%\fds_impi_win_%platform%.exe  %out_bin%\fds_impi.exe
 
 CALL :COPY  %in_smv%\smokeview_win_%platform%.exe   %out_bin%\smokeview.exe
 
@@ -97,9 +97,9 @@ CALL :COPY  %in_fds2ascii%\intel_win_%platform%\fds2ascii_win_%platform%.exe    
 CALL :COPY  %in_background%\intel_win_32\background.exe %out_bin%\background.exe
 
 ::new
-:: if "%platform%"=="64" CALL :COPY %in_impi%\impi.dll         %out_bin%\impi.dll
-:: if "%platform%"=="64" CALL :COPY %in_impi%\mpiexec.smpd.exe %out_bin%\mpiexec.smpd.exe
-:: if "%platform%"=="64" CALL :COPY %in_impi%\smpd.exe         %out_bin%\smpd.exe
+if "%platform%"=="64" CALL :COPY %in_impi%\impi.dll         %out_bin%\impi.dll
+if "%platform%"=="64" CALL :COPY %in_impi%\mpiexec.smpd.exe %out_bin%\mpiexec.smpd.exe
+if "%platform%"=="64" CALL :COPY %in_impi%\smpd.exe         %out_bin%\smpd.exe
 
 CALL :COPY  %in_sh2bat%\sh2bat.exe %out_bin%\sh2bat.exe
 
@@ -256,7 +256,8 @@ echo.
 
 CALL :COPY  "%bundleinfo%\wrapup_fds_install.bat" "%out_bundle%\%fdsversion%\wrapup_fds_install.bat"
 ::new
-::CALL :COPY  "%bundleinfo%\setup_fds_firewall.bat" "%out_bundle%\%fdsversion%\setup_fds_firewall.bat" 
+CALL :COPY  "%bundleinfo%\setup_fds_firewall.bat" "%out_bundle%\%fdsversion%\setup_fds_firewall.bat"
+
 CALL :COPY  "%bundleinfo%\shortcut.exe"           "%out_bundle%\%fdsversion%\shortcut.exe"
 
 CALL :COPY  "%bundleinfo%\set_path.exe"           "%out_bundle%\%fdsversion%\set_path.exe"
