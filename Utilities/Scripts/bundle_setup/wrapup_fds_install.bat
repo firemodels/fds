@@ -140,7 +140,7 @@ mkdir "%FDSSTART%\Guides and Release Notes"
 "%CD%\shortcut.exe" /F:"%FDSSTART%\Guides and Release Notes\Smokeview release notes.lnk"             /T:"%CD%\Documentation\Guides_and_Release_Notes\Smokeview_release_notes.html" /A:C >NUL
 
 "%CD%\shortcut.exe" /F:"%FDSSTART%\Overview.lnk"  /T:"%CD%\Documentation\Overview.html" /A:C >NUL
-:: "%CD%\shortcut.exe" /F:"%FDSSTART%\Uninstall.lnk"  /T:"%CD%\Uninstall\uninstall.bat" /A:C >NUL
+"%CD%\shortcut.exe" /F:"%FDSSTART%\Uninstall.lnk"  /T:"%CD%\uninstall.bat" /A:C >NUL
 
 erase "%CD%"\set_path.exe
 erase "%CD%"\shortcut.exe
@@ -164,26 +164,29 @@ setx OMP_NUM_THREADS %nthreads%
 :: ----------- setting up firewall for mpi version of FDS
 
 ::new
-:: set firewall_setup="%CD%\setup_fds_firewall.bat"
-:: if exist "%firewall_setup%" (
-::    echo setting up firewall exceptions
-::    call "%firewall_setup%"
-:: )
+set firewall_setup="%CD%\setup_fds_firewall.bat"
+if exist "%firewall_setup%" (
+  call %firewall_setup%
+)
 
 :: ----------- setting up uninstall file
 
-echo echo. >> Uninstall\Uninstall.bat
-echo echo Removing directories, %CD%\bin and %SHORTCUTSDIR%, from the System Path >> Uninstall\Uninstall.bat
-echo call "%CD%\Uninstall\set_path.exe" -s -b -r "%CD%\bin" >> Uninstall\Uninstall.bat
-echo call "%CD%\Uninstall\set_path.exe" -s -b -r "%SHORTCUTSDIR%" >> Uninstall\Uninstall.bat
+copy Uninstall\Uninstall.bat Uninstall.bat
+echo echo. >> Uninstall.bat
+echo echo Removing directories, %CD%\bin and %SHORTCUTSDIR%, from the System Path >> Uninstall.bat
+echo call "%CD%\Uninstall\set_path.exe" -s -b -r "%CD%\bin" >> Uninstall.bat
+echo call "%CD%\Uninstall\set_path.exe" -s -b -r "%SHORTCUTSDIR%" >> Uninstall.bat
 
-echo echo. >> Uninstall\Uninstall.bat
-echo echo Delete the directory %CD% by hand (as administrator) to complete the removal of FDS and Smokeview >> Uninstall\Uninstall.bat
-echo pause >> Uninstall\Uninstall.bat
+echo echo. >> Uninstall.bat
+echo echo Removing %CD% >> Uninstall.bat
+echo rmdir /s /q "%SHORTCUTSDIR%" >> Uninstall.bat
+echo rmdir /s /q "%CD%" >> Uninstall.bat
+echo pause >> Uninstall.bat
 
 echo.
 echo *** Press any key to complete the installation.
 pause>NUL
 
-:: erase "%CD%"\wrapup_fds_install.bat
+erase "%CD%"\setup_fds_firewall.bat
+erase "%CD%"\wrapup_fds_install.bat
 

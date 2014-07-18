@@ -24,4 +24,8 @@ echo.
 echo Removing FDS from the Start menu.
 rmdir /q /s "%ALLUSERSPROFILE%\Start Menu\Programs\FDS6"
 
+echo.
+echo Removing smpd
+smpd -remove
+
 
