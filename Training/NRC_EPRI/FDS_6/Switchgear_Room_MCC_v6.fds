@@ -55,14 +55,26 @@ Cabinets
 
 Fire
 
-&REAC ID='XPE/Neoprene'
-      C = 3.
-      H = 4.5
-      OTHER = 0.5
-      MW_OTHER=35.5
-      HEAT_OF_COMBUSTION=10300.
-      CO_YIELD=0.082
-      SOOT_YIELD=0.175 /
+&SPEC ID = 'XPE/Neoprene', FORMULA = 'C3H4.5Cl0.5' /
+&SPEC ID = 'OXYGEN',            LUMPED_COMPONENT_ONLY = .TRUE. /
+&SPEC ID = 'NITROGEN',          LUMPED_COMPONENT_ONLY = .TRUE. /
+&SPEC ID = 'HYDROGEN CHLORIDE', LUMPED_COMPONENT_ONLY = .TRUE. /
+&SPEC ID = 'WATER VAPOR',       LUMPED_COMPONENT_ONLY = .TRUE. /
+&SPEC ID = 'CARBON MONOXIDE',   LUMPED_COMPONENT_ONLY = .TRUE. /
+&SPEC ID = 'CARBON DIOXIDE',    LUMPED_COMPONENT_ONLY = .TRUE. /
+&SPEC ID = 'SOOT',              LUMPED_COMPONENT_ONLY = .TRUE. /
+
+&SPEC ID='AIR', BACKGROUND=.TRUE., SPEC_ID(1)='OXYGEN',   VOLUME_FRACTION(1)=0.21,
+                                   SPEC_ID(2)='NITROGEN', VOLUME_FRACTION(2)=0.79 /
+
+&SPEC ID='PRODUCTS',               SPEC_ID(1)='HYDROGEN CHLORIDE', VOLUME_FRACTION(1)=0.5,
+                                   SPEC_ID(2)='WATER VAPOR',       VOLUME_FRACTION(2)=2.0,
+                                   SPEC_ID(3)='CARBON MONOXIDE',   VOLUME_FRACTION(3)=0.2080,
+                                   SPEC_ID(4)='CARBON DIOXIDE',    VOLUME_FRACTION(4)=1.9425,
+                                   SPEC_ID(5)='SOOT',              VOLUME_FRACTION(5)=0.8495,
+                                   SPEC_ID(6)='NITROGEN',          VOLUME_FRACTION(6)=11.4606 /
+
+&REAC FUEL='XPE/Neoprene', HEAT_OF_COMBUSTION = 10300., SPEC_ID_NU='XPE/Neoprene','AIR','PRODUCTS', NU=-1,-14.5071,1 /
 
 &RADI RADIATIVE_FRACTION=0.53 /
 
