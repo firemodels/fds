@@ -172,6 +172,7 @@ echo.
 echo ***Copying Uninstaller to Uninstall directory
 echo.
 CALL :COPY  "%bundleinfo%\uninstall_fds.bat" "%out_uninstall%\uninstall_base.bat"
+CALL :COPY  "%bundleinfo%\uninstall.bat" "%out_uninstall%\uninstall.bat"
 echo @echo off > "out_install%\uninstall.vbs"
 
 CALL :COPY  "%bundleinfo%\set_path.exe"      "%out_uninstall%\set_path.exe"
