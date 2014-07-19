@@ -10,11 +10,11 @@ echo.
 echo *** Wrapping up the FDS and Smokeview installation.
 echo.
 echo *** Removing previous FDS/Smokeview entries from the system and user path.
-call "%CD%\set_path.exe" -s -m -b -r "nist\fds"
-call "%CD%\set_path.exe" -u -m -b -r "FDS\FDS5"
-call "%CD%\set_path.exe" -s -m -b -r "FDS\FDS5"
-call "%CD%\set_path.exe" -u -m -b -r "FDS\FDS6"
-call "%CD%\set_path.exe" -s -m -b -r "FDS\FDS6"
+call "%CD%\set_path.exe" -s -m -b -r "nist\fds" >Nul
+call "%CD%\set_path.exe" -u -m -b -r "FDS\FDS5" >Nul
+call "%CD%\set_path.exe" -s -m -b -r "FDS\FDS5" >Nul
+call "%CD%\set_path.exe" -u -m -b -r "FDS\FDS6" >Nul
+call "%CD%\set_path.exe" -s -m -b -r "FDS\FDS6" >Nul
 
 set SAVECD="%CD%"
 
@@ -28,7 +28,6 @@ cd %SAVECD%
 echo.
 if exist "%SHORTCUTSDIR%" goto existbin
 echo.
-echo Creating the directory %SHORTCUTSDIR%
 mkdir "%SHORTCUTSDIR%"
 :existbin
 
@@ -95,13 +94,13 @@ copy %tempfile% %smd6% "%SHORTCUTSDIR%\smokezip6.bat" > Nul
 :: ------------ setting up path ------------
 
 echo.
-echo *** Setting up the PATH variable
+echo *** Setting up the PATH variable.
 
 :: *** c:\...\FDS\FDS6\bin
-call "%CD%\set_path.exe" -s -m -f "%CD%\bin"
+call "%CD%\set_path.exe" -s -m -f "%CD%\bin" >Nul
 
 :: *** c:\...\FDS\shortcuts
-call "%CD%\set_path.exe" -s -m -f "%SHORTCUTSDIR%"
+call "%CD%\set_path.exe" -s -m -f "%SHORTCUTSDIR%" > Nul
 
 :: ------------- file association -------------
 echo.
@@ -140,7 +139,7 @@ mkdir "%FDSSTART%\Guides and Release Notes"
 "%CD%\shortcut.exe" /F:"%FDSSTART%\Guides and Release Notes\Smokeview release notes.lnk"             /T:"%CD%\Documentation\Guides_and_Release_Notes\Smokeview_release_notes.html" /A:C >NUL
 
 "%CD%\shortcut.exe" /F:"%FDSSTART%\Overview.lnk"  /T:"%CD%\Documentation\Overview.html" /A:C >NUL
-"%CD%\shortcut.exe" /F:"%FDSSTART%\Uninstall.lnk"  /T:"%CD%\Uninstall\uninstall.vbs" /A:C >NUL
+"%CD%\shortcut.exe" /F:"%FDSSTART%\Uninstall.lnk"  /T:"%CD%\Uninstall\uninstall.bat" /A:C >NUL
 
 erase "%CD%"\set_path.exe
 erase "%CD%"\shortcut.exe
@@ -159,13 +158,15 @@ if %ncores% GEQ 8 (
     set nthreads=1 
   )
 )
-setx OMP_NUM_THREADS %nthreads%
+setx OMP_NUM_THREADS %nthreads% > Nul
 
 :: ----------- setting up firewall for mpi version of FDS
 
 ::new
 set firewall_setup="%CD%\setup_fds_firewall.bat"
 if exist "%firewall_setup%" (
+echo.
+echo *** Setting up firewall exceptions.
   call %firewall_setup%
 )
 
@@ -176,16 +177,21 @@ erase /q *.txt
 
 :: ----------- setting up uninstall file
 
-echo echo. >> Uninstall\Uninstall_base.bat
-echo echo Removing directories, %CD%\bin and %SHORTCUTSDIR%, from the System Path >> Uninstall\Uninstall_base.bat
-echo call "%CD%\Uninstall\set_path.exe" -s -b -r "%CD%\bin" >> Uninstall\Uninstall_base.bat
-echo call "%CD%\Uninstall\set_path.exe" -s -b -r "%SHORTCUTSDIR%" >> Uninstall\Uninstall_base.bat
+echo echo. >> Uninstall\uninstall_base.bat
+echo echo Removing directories, %CD%\bin and %SHORTCUTSDIR%, from the System Path >> Uninstall\uninstall_base.bat
+echo call "%CD%\Uninstall\set_path.exe" -s -b -r "%CD%\bin" >> Uninstall\uninstall_base.bat
+echo call "%CD%\Uninstall\set_path.exe" -s -b -r "%SHORTCUTSDIR%" >> Uninstall\uninstall_base.bat
 
-echo echo. >> Uninstall\Uninstall_base.bat
-echo echo Removing %CD% >> Uninstall\Uninstall_base.bat
-echo rmdir /s /q "%SHORTCUTSDIR%" >> Uninstall\Uninstall_base.bat
+echo echo. >> Uninstall\uninstall_base.bat
+echo echo Removing %CD% >> Uninstall\uninstall_base.bat
+echo rmdir /s /q "%SHORTCUTSDIR%" >> Uninstall\uninstall_base.bat
 echo rmdir /s /q "%CD%" >> Uninstall\Uninstall_base.bat
-echo pause >> Uninstall\Uninstall_base.bat
+echo echo *** Uninstall complete >> Uninstall\uninstall_base.bat
+echo pause>Nul >> Uninstall\uninstall_base.bat
+
+echo "%CD%\Uninstall\uninstall.vbs" >> Uninstall\uninstall.bat
+echo echo Uninstall complete >> Uninstall\uninstall.bat
+echo pause >> Uninstall\uninstall.bat
 
 set ELEVATE_APP=%CD%\Uninstall\Uninstall_base.bat
 set ELEVATE_PARMS=
