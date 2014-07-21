@@ -8341,13 +8341,18 @@ You may output a scalar quantity which is referred to as the \emph{measure of tu
 \begin{eqnarray}
 \mbox{MTR}(\mathbf{x},t) = \frac{k_{\rm sgs}}{k_{\rm res} + k_{\rm sgs}}
 \end{eqnarray}
-where
+where the resolved kinetic energy per unit mass is
 \vskip-.6cm
-\begin{eqnarray}
-k_{\rm res} &=& \mbox{$\frac{1}{2}$}\tilde{u}_i \tilde{u}_i \\
-k_{\rm sgs} &=& \mbox{$\frac{1}{2}$}(\tilde{u}_i - \hat{\tilde{u}}_i)(\tilde{u}_i - \hat{\tilde{u}}_i)
-\end{eqnarray}
-Here, $\tilde{u}_i$ is the resolved LES velocity and $\hat{\tilde{u}}_i$ is test filtered at a scale $2\Delta$ where $\Delta$ is the LES filter width (in FDS, $\Delta=\delta x$).  The model for the SGS fluctuations is taken from scale similarity \cite{Bardina:1980}.  Cross-term energy is ignored. The basic idea is to provide an approximation to the Pope criterion \cite{Pope:2004}, $M$, which is easily accessible in Smokeview (the FDS visualization tool).  In Smokeview, you may readily time average MTR in a specified plane.  The time average of MTR is a reasonable estimate of $M$.  The measure falls within the range [0,1], with 0 indicating perfect resolution and 1 indicating poor resolution.  The concept is illustrated in Figure \ref{fig_mtr}. Notice that on the left the difference between the grid signal and the test signal is very small.  On the right, the grid signal is highly turbulent and the corresponding test signal is much smoother.  We infer then that the flow is under-resolved.
+\begin{align}
+k_{\rm res} &= \mbox{$\frac{1}{2}$}\tilde{u}_i \tilde{u}_i
+\end{align}
+and the subgrid kinetic energy is estimated from Deardorff's eddy viscosity model
+\begin{align}
+k_{\rm sgs} &\approx \mbox{$\frac{1}{2}$}(\tilde{u}_i - \hat{\tilde{u}}_i)(\tilde{u}_i - \hat{\tilde{u}}_i) = ( \mu_t/(\rho C_\nu \Delta) )^2
+\end{align}
+Here, $\tilde{u}_i$ is the resolved LES velocity and $\hat{\tilde{u}}_i$ is test filtered at a scale $2\Delta$ where $\Delta$ is the LES filter width (in FDS, $\Delta=\delta x$).  In the bulk flow region, the model for the SGS fluctuations is taken from scale similarity \cite{Bardina:1980}.  Cross-term energy is ignored.  Keep in the mind, however, that the test filter operation is ill-defined near walls, and so FDS employs constant Smagorinsky in these cells to compute the eddy viscosity.
+
+The basic idea behind MTR is to provide an approximation to the Pope criterion \cite{Pope:2004}, $M$, which is easily accessible in Smokeview (the FDS visualization tool).  In Smokeview, you may readily time average MTR in a specified plane.  The time average of MTR is a reasonable estimate of $M$.  The measure falls within the range [0,1], with 0 indicating perfect resolution and 1 indicating poor resolution.  The concept is illustrated in Figure \ref{fig_mtr}. Notice that on the left the difference between the grid signal and the test signal is very small.  On the right, the grid signal is highly turbulent and the corresponding test signal is much smoother.  We infer then that the flow is under-resolved.
 \begin{figure}[ht]
 \centering
 \begin{tabular}{rl}
@@ -8360,6 +8365,12 @@ Here, $\tilde{u}_i$ is the resolved LES velocity and $\hat{\tilde{u}}_i$ is test
 \end{figure}
 
 For the canonical case of isotropic turbulence Pope actually defines LES such that $M<0.2$.  That is, LES requires resolution of 80\% of the kinetic energy in the flow field (because this puts the grid Nyquist limit within the inertial subrange).  The question remains as to whether this critical value is sufficient or necessary for a given engineering problem.  As shown in Ref.~\cite{McDermott:2010}, maintaining mean values of MTR near 0.2 indeed provides satisfactory results (simulation results within experimental error bounds) for mean velocities and species concentrations in nonreacting, buoyant plumes.
+
+If you wish to output an estimate of the subgrid kinetic energy per unit mass only, this may be done with
+\begin{lstlisting}
+&SLCF PBY=0, QUANTITY='SUBGRID KINETIC ENERGY' /
+\end{lstlisting}
+
 
 \subsubsection{Measure of Scalar Resolution}
 \label{mtr}
@@ -8725,6 +8736,7 @@ be found in Volume~1 of the FDS Technical Reference Guide~\cite{FDS_Math_Guide}.
 {\ct STRAIN RATE X}                             & $\partial w/\partial y + \partial v/\partial z$   & 1/s            & D,I,P,S      \\ \hline
 {\ct STRAIN RATE Y}                             & $\partial u/\partial z + \partial w/\partial x$   & 1/s            & D,I,P,S      \\ \hline
 {\ct STRAIN RATE Z}                             & $\partial v/\partial x + \partial u/\partial y$   & 1/s            & D,I,P,S      \\ \hline
+{\ct SUBGRID KINETIC ENERGY}                    & Section~\ref{info:meshquality}                    & \si{m^2/s^2}   & D,S          \\ \hline
 {\ct TURBULENCE RESOLUTION}                     & Section~\ref{info:meshquality}                    &                & D,S          \\ \hline
 {\ct VELOCITY ERROR}                            & Section \ref{info:PRES}                           &                & B            \\ \hline
 {\ct VORTICITY X}                               & $\partial w/\partial y - \partial v/\partial z$   & 1/s            & D,I,P,S      \\ \hline
