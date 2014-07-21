@@ -16,6 +16,7 @@ set in_fds2ascii=%svn_root%\Utilities\fds2ascii
 set in_smokediff=%svn_root%\Utilities\smokediff
 set in_smokezip=%svn_root%\Utilities\smokezip
 set in_wind2fds=%svn_root%\Utilities\wind2fds
+set in_testmpi=%svn_root%\Utilities\test_mpi\impi_intel_win
 set in_background=%svn_root%\Utilities\background
 set in_smv=%svn_root%\SMV\Build\intel_win_%platform%
 set in_for_bundle=%svn_root%\SMV\for_bundle
@@ -83,6 +84,7 @@ CALL :COPY %fdsdir%\fds_%OPENMP%win_%platform%.exe         %out_bin%\fds%release
 
 ::new
 if "%platform%"=="64" CALL :COPY  %fdsimpidir%\fds_impi_win_%platform%.exe  %out_bin%\fds_mpi.exe
+if "%platform%"=="64" CALL :COPY  %in_testmpi%\test_mpi.exe  %out_bin%\test_mpi.exe
 
 CALL :COPY  %in_smv%\smokeview_win_%platform%.exe   %out_bin%\smokeview.exe
 
