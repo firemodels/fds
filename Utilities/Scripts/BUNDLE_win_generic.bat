@@ -101,7 +101,7 @@ CALL :COPY  %in_background%\intel_win_32\background.exe %out_bin%\background.exe
 ::new
 if "%platform%"=="64" CALL :COPY %in_impi%\impi.dll         %out_bin%\impi.dll
 if "%platform%"=="64" CALL :COPY %in_impi%\mpiexec.smpd.exe %out_bin%\mpiexec.smpd.exe
-if "%platform%"=="64" CALL :COPY %in_impi%\smpd.exe         %out_bin%\smpd.exe
+if "%platform%"=="64" CALL :COPY %in_impi%\smpd.exe         %out_bin%\smpd2.exe
 
 CALL :COPY  %in_sh2bat%\sh2bat.exe %out_bin%\sh2bat.exe
 
