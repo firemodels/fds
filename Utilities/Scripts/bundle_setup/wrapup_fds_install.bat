@@ -162,21 +162,19 @@ setx OMP_NUM_THREADS %nthreads% > Nul
 
 :: ----------- setting up firewall for mpi version of FDS
 
-:: commands for removing smpd if it is present in case we can use them
-::smpd -help 1>> smpd.out 2>&1
-::type smpd.out | find /i /c "not recognized" > smpd.check
-::set /p nothave=<smpd.check
-::if %nothave% == 0 (
-::  smpd -remove
-::)
-::erase smpd.out smpd.check >Nul
+:: remove smpd
+
+smpd -remove 1>> Nul 2>&1
+
+copy "%CD%\bin"\smpd2.exe "%CD%\bin"\smpd.exe>Nul
+erase "%CD%\bin"\smpd2.exe >Nul
 
 ::new
 set firewall_setup="%CD%\setup_fds_firewall.bat"
 if exist "%firewall_setup%" (
 echo.
 echo *** Setting up firewall exceptions.
-  call %firewall_setup%
+  call %firewall_setup% "%CD%\bin"
 )
 
 :: ----------- copy backup files to Uninstall directory
