@@ -305,7 +305,7 @@ cd %CURDIR%
 GOTO :EOF
 
 :COPY
-set label=%~n1.%~x1
+set label=%~n1%~x1
 set infiletime=%~t1
 set infile=%1
 set outfile=%2
