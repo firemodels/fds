@@ -468,16 +468,16 @@ REAL(EB) :: DIV,LHSS,RES,POIS_ERR
 CALL POINT_TO_MESH(NM)
 
 IF (PREDICTOR) THEN
-  ! note: PROJECT_VELOCITY is called AFTER the predictor update of velocity
-  UU=>US
-  VV=>VS
-  WW=>WS
-  DP=>D
+   ! note: PROJECT_VELOCITY is called AFTER the predictor update of velocity
+   UU=>US
+   VV=>VS
+   WW=>WS
+   DP=>D
 ELSEIF (CORRECTOR) THEN
-  UU=>U
-  VV=>V
-  WW=>W
-  DP=>DS
+   UU=>U
+   VV=>V
+   WW=>W
+   DP=>DS
 ENDIF
 PP=>WORK1
 PRHS_SAVE=>WORK2
@@ -485,12 +485,12 @@ PRHS_SAVE=>WORK2
 ! build source
 
 DO K=1,KBAR
-  DO J=1,JBAR
-     DO I=1,IBAR
-        DIV = (UU(I,J,K)-UU(I-1,J,K))*RDX(I) + (VV(I,J,K)-VV(I,J-1,K))*RDY(J) + (WW(I,J,K)-WW(I,J,K-1))*RDZ(K)
-        PRHS(I,J,K) = DIV-DP(I,J,K)
-     ENDDO
-  ENDDO
+   DO J=1,JBAR
+      DO I=1,IBAR
+         DIV = (UU(I,J,K)-UU(I-1,J,K))*RDX(I) + (VV(I,J,K)-VV(I,J-1,K))*RDY(J) + (WW(I,J,K)-WW(I,J,K-1))*RDZ(K)
+         PRHS(I,J,K) = DIV-DP(I,J,K)
+      ENDDO
+   ENDDO
 ENDDO
 
 ! solve Poisson equation
@@ -510,24 +510,43 @@ PP(1:IBAR,1:JBAR,1:KBAR) = PRHS
 ! Apply boundary conditions to PP
 
 DO K=1,KBAR
-  DO J=1,JBAR
-     PP(0,J,K)    = -PP(1,J,K) ! use minus if Dirichlet, plus if Neumann, see init of SAVE2
-     PP(IBP1,J,K) = -PP(IBAR,J,K)
-  ENDDO
+   DO J=1,JBAR
+      SELECT CASE (MBC_EMB)
+          ! use minus if Dirichlet, plus if Neumann, see init of SAVE2
+         CASE (FISHPAK_BC_DIRICHLET_DIRICHLET)
+            PP(0,J,K)    = -PP(1,J,K)
+            PP(IBP1,J,K) = -PP(IBAR,J,K)
+         CASE (FISHPAK_BC_NEUMANN_NEUMANN)
+            PP(0,J,K)    = PP(1,J,K)
+            PP(IBP1,J,K) = PP(IBAR,J,K)
+      END SELECT
+   ENDDO
 ENDDO
 
 DO K=1,KBAR
-  DO I=1,IBAR
-     PP(I,0,K)    = -PP(I,1,K)
-     PP(I,JBP1,K) = -PP(I,JBAR,K)
-  ENDDO
+   DO I=1,IBAR
+      SELECT CASE (LBC_EMB)
+         CASE (FISHPAK_BC_DIRICHLET_DIRICHLET)
+            PP(I,0,K)    = -PP(I,1,K)
+            PP(I,JBP1,K) = -PP(I,JBAR,K)
+         CASE (FISHPAK_BC_NEUMANN_NEUMANN)
+            PP(I,0,K)    = PP(I,1,K)
+            PP(I,JBP1,K) = PP(I,JBAR,K)
+      END SELECT
+   ENDDO
 ENDDO
 
 DO J=1,JBAR
-  DO I=1,IBAR
-     PP(I,J,0)    = -PP(I,J,1)
-     PP(I,J,KBP1) = -PP(I,J,KBAR)
-  ENDDO
+   DO I=1,IBAR
+      SELECT CASE (MBC_EMB)
+         CASE (FISHPAK_BC_DIRICHLET_DIRICHLET)
+            PP(I,J,0)    = -PP(I,J,1)
+            PP(I,J,KBP1) = -PP(I,J,KBAR)
+         CASE (FISHPAK_BC_NEUMANN_NEUMANN)
+            PP(I,J,0)    = PP(I,J,1)
+            PP(I,J,KBP1) = PP(I,J,KBAR)
+      END SELECT
+   ENDDO
 ENDDO
 
 ! ************************* Check the Solution *************************
@@ -627,16 +646,18 @@ ENDDO
 END SUBROUTINE SORT_MESH_LEVEL
 
 
-SUBROUTINE MATCH_VELOCITY_EMB(NM1,NM2,IERROR)
+SUBROUTINE MATCH_VELOCITY_EMB(NM1,NM2,IERROR,T)
+
+USE TURBULENCE, ONLY: NS_U_EXACT,NS_V_EXACT
 
 INTEGER, INTENT(IN) :: NM1,NM2
+REAL(EB), INTENT(IN) :: T
 
 TYPE(MESH_TYPE), POINTER :: M1,M2
 INTEGER :: I,J,K,I_LO,I_HI,J_LO,J_HI,K_LO,K_HI,II_0,JJ_0,KK_0,II,JJ,KK, &
           NRX,NRY,NRZ,II_LO,JJ_LO,KK_LO,INDEX_LIST(12),IERROR,IW,IOR
 REAL(EB) :: VOLUME_LIST(3)
 REAL(EB), POINTER, DIMENSION(:,:,:) :: UU1,VV1,WW1,UU2,VV2,WW2
-REAL(EB), PARAMETER :: RF=0.5_EB,OMRF=0.5_EB
 TYPE(WALL_TYPE), POINTER :: WC=>NULL()
 
 CALL LOCATE_MESH(INDEX_LIST,VOLUME_LIST,NM1,NM2,IERROR)
@@ -657,6 +678,9 @@ SELECT CASE (IERROR)
   CASE(1)
      RETURN
 END SELECT
+
+!print *, INDEX_LIST
+!stop
 
 M1=>MESHES(NM1) ! coarse mesh
 M2=>MESHES(NM2) ! fine mesh
@@ -692,18 +716,22 @@ DO K = K_LO,K_HI
      IF (II_0==M2%IBAR) THEN
         DO KK = KK_0+1,KK_0+NRZ
            DO JJ = JJ_0+1,JJ_0+NRY
-              UU2(II_0,JJ,KK) = UU1(I,J,K)
+              !UU2(II_0,JJ,KK) = UU1(I,J,K)
+              !UU2(II_0,JJ,KK) = PROLONG_VEL(1,II_0,JJ,KK,I,J,K)
+              UU2(II_0,JJ,KK) = NS_U_EXACT(M2%X(II_0),M2%ZC(KK),T,M2%MU(II_0,JJ,KK),M2%RHO(II_0,JJ,KK),2._EB)
            ENDDO
         ENDDO
      ENDIF
-        
+
      ! west face
      I = I_LO-1
      II_0 = II_LO + (I-I_LO+1)*NRX
      IF (II_0==0) THEN
         DO KK = KK_0+1,KK_0+NRZ
            DO JJ = JJ_0+1,JJ_0+NRY
-              UU2(II_0,JJ,KK) = UU1(I,J,K)
+              !UU2(II_0,JJ,KK) = UU1(I,J,K)
+              !UU2(II_0,JJ,KK) = PROLONG_VEL(1,II_0,JJ,KK,I,J,K)
+              UU2(II_0,JJ,KK) = NS_U_EXACT(M2%X(II_0),M2%ZC(KK),T,M2%MU(II_0,JJ,KK),M2%RHO(II_0,JJ,KK),2._EB)
            ENDDO
         ENDDO
      ENDIF
@@ -724,7 +752,9 @@ DO K = K_LO,K_HI
      IF (JJ_0==M2%JBAR) THEN
         DO KK = KK_0+1,KK_0+NRZ
            DO II = II_0+1,II_0+NRX
-              VV2(II,JJ_0,KK) = VV1(I,J,K)
+              !VV2(II,JJ_0,KK) = VV1(I,J,K)
+              !VV2(II,JJ_0,KK) = PROLONG_VEL(2,II,JJ_0,KK,I,J,K)
+              VV2(II,JJ_0,KK) = 0._EB
            ENDDO
         ENDDO
      ENDIF
@@ -735,7 +765,9 @@ DO K = K_LO,K_HI
      IF (JJ_0==0) THEN
         DO KK = KK_0+1,KK_0+NRZ
            DO II = II_0+1,II_0+NRX
-              VV2(II,JJ_0,KK) = VV1(I,J,K)
+              !VV2(II,JJ_0,KK) = VV1(I,J,K)
+              !VV2(II,JJ_0,KK) = PROLONG_VEL(2,II,JJ_0,KK,I,J,K)
+              VV2(II,JJ_0,KK) = 0._EB
            ENDDO
         ENDDO
      ENDIF
@@ -756,7 +788,9 @@ DO J = J_LO,J_HI
      IF (KK_0==M2%KBAR) THEN
         DO JJ = JJ_0+1,JJ_0+NRY
            DO II = II_0+1,II_0+NRX
-              WW2(II,JJ,KK_0) = WW1(I,J,K)
+              !WW2(II,JJ,KK_0) = WW1(I,J,K)
+              !WW2(II,JJ,KK_0) = PROLONG_VEL(3,II,JJ,KK_0,I,J,K)
+              WW2(II,JJ,KK_0) = NS_V_EXACT(M2%XC(II),M2%Z(KK_0),T,M2%MU(II,JJ,KK_0),M2%RHO(II,JJ,KK_0),2._EB)
            ENDDO
         ENDDO
      ENDIF
@@ -767,7 +801,9 @@ DO J = J_LO,J_HI
      IF (KK_0==0) THEN
         DO JJ = JJ_0+1,JJ_0+NRY
            DO II = II_0+1,II_0+NRX
-              WW2(II,JJ,KK_0) = WW1(I,J,K)
+              !WW2(II,JJ,KK_0) = WW1(I,J,K)
+              !WW2(II,JJ,KK_0) = PROLONG_VEL(3,II,JJ,KK_0,I,J,K)
+              WW2(II,JJ,KK_0) = NS_V_EXACT(M2%XC(II),M2%Z(KK_0),T,M2%MU(II,JJ,KK_0),M2%RHO(II,JJ,KK_0),2._EB)
            ENDDO
         ENDDO
      ENDIF
@@ -799,7 +835,260 @@ FINE_MESH_WALL_LOOP: DO IW=1,M2%N_EXTERNAL_WALL_CELLS
    END SELECT
 ENDDO FINE_MESH_WALL_LOOP
 
+CONTAINS
+
+REAL(EB) FUNCTION PROLONG_VEL(VEL_INDEX,II,JJ,KK,I,J,K)
+INTEGER, INTENT(IN) :: VEL_INDEX,II,JJ,KK,I,J,K
+REAL(EB) :: Q(0:1,0:1),X1(0:1),Y1(0:1),Z1(0:1),X2,Y2,Z2
+INTEGER :: I_LO,J_LO,K_LO
+
+! Comments:
+! VEL_INDEX = 1 for U, 2 for V, 3 for W
+! I,J,K     = indices of coarse mesh (M1) cell face
+! II,JJ,KK  = indices of fine mesh (M2) cell face
+
+! initialize (prevent unused warnings)
+Q = 0._EB
+X1 = 0._EB
+Y1 = 0._EB
+Z1 = 0._EB
+X2 = 0._EB
+Y2 = 0._EB
+Z2 = 0._EB
+I_LO = -1
+J_LO = -1
+K_LO = -1
+
+VEL_INDEX_SELECT: SELECT CASE (VEL_INDEX)
+   CASE(1) VEL_INDEX_SELECT
+
+      Y2 = M2%YC(JJ)
+      Z2 = M2%ZC(KK)
+
+      ! see from which quadrant to grab data
+   
+      IF (Y2<M1%YC(J)) THEN
+         J_LO = J-1
+      ELSE
+         J_LO = J
+      ENDIF
+
+      IF (Z2<M1%ZC(K)) THEN
+         K_LO = K-1
+      ELSE
+         K_LO = K
+      ENDIF
+
+      Y1 = (/M1%YC(J_LO),M1%YC(J_LO+1)/)
+      Z1 = (/M1%ZC(K_LO),M1%ZC(K_LO+1)/)
+      Q(0,0) = UU1(I,J_LO,K_LO)
+      Q(1,0) = UU1(I,J_LO+1,K_LO)
+      Q(0,1) = UU1(I,J_LO,K_LO+1)
+      Q(1,1) = UU1(I,J_LO+1,K_LO+1)
+
+      IF (TWO_D) THEN
+         Y1 = (/M1%YC(1),M1%YC(1)/)
+         Q(0,0) = UU1(I,1,K_LO)
+         Q(1,0) = UU1(I,1,K_LO)
+         Q(0,1) = UU1(I,1,K_LO+1)
+         Q(1,1) = UU1(I,1,K_LO+1)
+      ENDIF
+   
+      PROLONG_VEL = INTERP2(Y2,Z2,Q,Y1,Z1)
+   
+   CASE(2) VEL_INDEX_SELECT
+
+      IF (TWO_D) THEN
+         PROLONG_VEL=0._EB
+         RETURN
+      ENDIF
+
+      X2 = M2%XC(II)
+      Z2 = M2%ZC(KK)
+   
+      IF (X2<M1%XC(I)) THEN
+         I_LO = I-1
+      ELSE
+         I_LO = I
+      ENDIF
+
+      IF (Z2<M1%ZC(K)) THEN
+         K_LO = K-1
+      ELSE
+         K_LO = K
+      ENDIF
+
+      X1 = (/M1%XC(I_LO),M1%XC(I_LO+1)/)
+      Z1 = (/M1%ZC(K_LO),M1%ZC(K_LO+1)/)
+      Q(0,0) = VV1(I_LO,J,K_LO)
+      Q(1,0) = VV1(I_LO+1,J,K_LO)
+      Q(0,1) = VV1(I_LO,J,K_LO+1)
+      Q(1,1) = VV1(I_LO+1,J,K_LO+1)
+   
+      PROLONG_VEL = INTERP2(X2,Z2,Q,X1,Z1)
+   
+   CASE(3) VEL_INDEX_SELECT
+
+      X2 = M2%XC(II)
+      Y2 = M2%YC(JJ)
+   
+      IF (X2<M1%XC(I)) THEN
+         I_LO = I-1
+      ELSE
+         I_LO = I
+      ENDIF
+
+      IF (Y2<M1%YC(J)) THEN
+         J_LO = J-1
+      ELSE
+         J_LO = J
+      ENDIF
+
+      X1 = (/M1%XC(I_LO),M1%XC(I_LO+1)/)
+      Y1 = (/M1%YC(J_LO),M1%YC(J_LO+1)/)
+      Q(0,0) = WW1(I_LO,J_LO,K)
+      Q(1,0) = WW1(I_LO+1,J_LO,K)
+      Q(0,1) = WW1(I_LO,J_LO+1,K)
+      Q(1,1) = WW1(I_LO+1,J_LO+1,K)
+
+      IF (TWO_D) THEN
+         Y1 = (/M1%YC(1),M1%YC(1)/)
+         Q(0,0) = WW1(I_LO,1,K)
+         Q(1,0) = WW1(I_LO+1,1,K)
+         Q(0,1) = WW1(I_LO,1,K)
+         Q(1,1) = WW1(I_LO+1,1,K)
+      ENDIF
+   
+      PROLONG_VEL = INTERP2(X2,Y2,Q,X1,Y1)
+
+END SELECT VEL_INDEX_SELECT
+
+END FUNCTION PROLONG_VEL
+
 END SUBROUTINE MATCH_VELOCITY_EMB
+
+
+REAL(EB) FUNCTION INTERP2(XI,YI,F,X,Y)
+
+! Bilinear interpolation
+
+REAL(EB), INTENT(IN) :: X(0:1),Y(0:1),F(0:1,0:1),XI,YI
+REAL(EB) :: B(4),XB,YB,DX,DY
+
+! F(0,1)------F(1,1)  Y(1)
+! |           |
+! | .(XI,YI)  |
+! |           |
+! F(0,0)------F(1,0)  Y(0)
+!
+! X(0)        X(1)
+
+DX = X(1)-X(0)
+IF (DX>TWO_EPSILON_EB) THEN
+   XB = (XI-X(0))/DX
+ELSE
+   XB = 0._EB
+ENDIF
+
+DY = Y(1)-Y(0)
+IF (DY>TWO_EPSILON_EB) THEN
+   YB = (YI-Y(0))/DY
+ELSE
+   YB = 0._EB
+ENDIF
+
+B(1) = F(0,0)
+B(2) = F(1,0) - F(0,0)
+B(3) = F(0,1) - F(0,0)
+B(4) = F(0,0) - F(1,0) - F(0,1) + F(1,1)
+INTERP2 = B(1) + B(2)*XB + B(3)*YB + B(4)*XB*YB
+
+END FUNCTION INTERP2
+
+
+! SUBROUTINE TANGENTIAL_VELOCITY_BC_EMB(NM1,NM2,IERROR,T)
+
+! ! Set ghost cell values of tangential velocity and edge values of vorticity at fine mesh boundaries
+
+! USE TURBULENCE, ONLY: NS_U_EXACT,NS_V_EXACT
+
+! INTEGER, INTENT(IN) :: NM1,NM2
+! REAL(EB), INTENT(IN) :: T
+
+! TYPE(MESH_TYPE), POINTER :: M1,M2
+! INTEGER :: I,J,K,I_LO,I_HI,J_LO,J_HI,K_LO,K_HI,II_0,JJ_0,KK_0,II,JJ,KK, &
+!           NRX,NRY,NRZ,II_LO,JJ_LO,KK_LO,INDEX_LIST(12),IERROR,IW,IOR
+! REAL(EB) :: VOLUME_LIST(3)
+! REAL(EB), POINTER, DIMENSION(:,:,:) :: UU1,VV1,WW1,UU2,VV2,WW2
+
+! CALL LOCATE_MESH(INDEX_LIST,VOLUME_LIST,NM1,NM2,IERROR)
+! SELECT CASE (IERROR)
+!   CASE(0)
+!      I_LO = INDEX_LIST(1)
+!      I_HI = INDEX_LIST(2)
+!      J_LO = INDEX_LIST(3)
+!      J_HI = INDEX_LIST(4)
+!      K_LO = INDEX_LIST(5)
+!      K_HI = INDEX_LIST(6)
+!      II_LO = INDEX_LIST(7)
+!      JJ_LO = INDEX_LIST(8)
+!      KK_LO = INDEX_LIST(9)
+!      NRX = INDEX_LIST(10)
+!      NRY = INDEX_LIST(11)
+!      NRZ = INDEX_LIST(12)
+!   CASE(1)
+!      RETURN
+! END SELECT
+
+! !print *, INDEX_LIST
+! !stop
+
+! M1=>MESHES(NM1) ! coarse mesh
+! M2=>MESHES(NM2) ! fine mesh
+
+! IF (PREDICTOR) THEN
+!   UU1=>M1%US
+!   VV1=>M1%VS
+!   WW1=>M1%WS
+!   UU2=>M2%US
+!   VV2=>M2%VS
+!   WW2=>M2%WS
+! ELSEIF (CORRECTOR) THEN
+!   UU1=>M1%U
+!   VV1=>M1%V
+!   WW1=>M1%W
+!   UU2=>M2%U
+!   VV2=>M2%V
+!   WW2=>M2%W
+! ENDIF
+
+! ! Set OME_E and TAU_E to very negative number
+
+! M2%TAU_E = -1.E6_EB
+! M2%OME_E = -1.E6_EB
+
+! ! Loop over all cell edges and determine the appropriate velocity BCs
+
+! EDGE_LOOP: DO IE=1,M2%N_EDGES
+
+!    ! Loop over all 4 normal directions and compute vorticity and stress tensor components for each
+
+!    SIGN_LOOP: DO I_SGN=-1,1,2
+!       ORIENTATION_LOOP: DO ICD=1,2
+!          IF (ICD==1) THEN
+!             ICDO=2
+!          ELSE ! ICD=2
+!             ICDO=1
+!          ENDIF
+!          ICD_SGN = I_SGN*ICD
+!          M2%OME_E(ICD_SGN,IE) =    DUIDXJ(1) -    DUIDXJ(2)
+!          M2%TAU_E(ICD_SGN,IE) = MU_DUIDXJ(1) + MU_DUIDXJ(2)    
+!       ENDDO ORIENTATION_LOOP
+!    ENDDO SIGN_LOOP
+
+! ENDDO EDGE_LOOP
+
+! END SUBROUTINE TANGENTIAL_VELOCITY_BC_EMB
 
 
 SUBROUTINE SCALAR_GHOST_EMB(NM1,NM2,IERROR)
