@@ -7,7 +7,7 @@ REM 3. commit updated openmp_test64...fds and openmp_test128...fds input files
 
 &MESH IJK=64,64,64, XB=0.0,1.0,0.0,1.0,0.0,1.0 /
 
-&TIME T_END=1.0 /
+&TIME T_END=10.0 /
 
 &DUMP NFRAMES=2,DT_DEVC=0.1 /
 
