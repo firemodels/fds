@@ -771,7 +771,7 @@ func.o : prec.o cons.o type.o mesh.o devc.o
 smvv.o : prec.o func.o
 ctrl.o : prec.o cons.o type.o mesh.o func.o
 turb.o : func.o prec.o cons.o mesh.o
-samr.o : prec.o cons.o mesh.o
+samr.o : prec.o cons.o mesh.o turb.o
 gsmv.o : func.o prec.o cons.o mesh.o
 geom.o : gsmv.o func.o prec.o cons.o mesh.o
 scrc.o : prec.o cons.o mesh.o func.o pois.o
@@ -804,7 +804,7 @@ func.obj : prec.obj cons.obj type.obj mesh.obj devc.obj
 smvv.obj : prec.obj func.obj
 ctrl.obj : prec.obj cons.obj type.obj mesh.obj func.obj
 turb.obj : func.obj prec.obj cons.obj mesh.obj
-samr.obj : prec.obj cons.obj mesh.obj
+samr.obj : prec.obj cons.obj mesh.obj turb.obj
 gsmv.obj : func.obj prec.obj cons.obj mesh.obj
 geom.obj : func.obj prec.obj cons.obj mesh.obj
 scrc.obj : prec.obj cons.obj mesh.obj func.obj pois.obj
