@@ -16,11 +16,11 @@ CHARACTER(255), PARAMETER :: turbrev='$Revision$'
 CHARACTER(255), PARAMETER :: turbdate='$Date$'
 
 PRIVATE
-PUBLIC :: NS_ANALYTICAL_SOLUTION, INIT_TURB_ARRAYS, VARDEN_DYNSMAG, WANNIER_FLOW, &
+PUBLIC :: INIT_TURB_ARRAYS, VARDEN_DYNSMAG, WANNIER_FLOW, &
           GET_REV_turb, WALL_MODEL, COMPRESSION_WAVE, VELTAN2D,VELTAN3D, &
           SYNTHETIC_TURBULENCE, SYNTHETIC_EDDY_SETUP, TEST_FILTER, EX2G3D, TENSOR_DIFFUSIVITY_MODEL, &
-          TWOD_VORTEX_CERFACS, HEAT_FLUX_MODEL, ABL_HEAT_FLUX_MODEL, RNG_EDDY_VISCOSITY, NS_ANALYTICAL_SOLUTION_TIME, &
-          NS_ANALYTICAL_SOLUTION_STATIC
+          TWOD_VORTEX_CERFACS, HEAT_FLUX_MODEL, ABL_HEAT_FLUX_MODEL, RNG_EDDY_VISCOSITY, &
+          NS_ANALYTICAL_SOLUTION, NS_U_EXACT, NS_V_EXACT, NS_H_EXACT
  
 CONTAINS
 
@@ -91,116 +91,87 @@ ENDIF
 END SUBROUTINE INIT_TURB_ARRAYS
 
 
-SUBROUTINE NS_ANALYTICAL_SOLUTION(NM)
+SUBROUTINE NS_ANALYTICAL_SOLUTION(NM,T,RK_STAGE)
 
 ! Initialize flow variables with an analytical solution of the governing equations
 
-INTEGER, INTENT(IN) :: NM
+INTEGER, INTENT(IN) :: NM,RK_STAGE
+REAL(EB), INTENT(IN) :: T
 INTEGER :: I,J,K
-REAL(EB) :: UU,WW
+REAL(EB) :: UP,WP
+REAL(EB), POINTER, DIMENSION(:,:,:) :: UU=>NULL(),WW=>NULL(),RHOP=>NULL()
+REAL(EB), PARAMETER :: AA=2._EB
 
 CALL POINT_TO_MESH(NM)
+
+SELECT CASE(RK_STAGE)
+   CASE(1)
+      UU=>US
+      WW=>WS
+      RHOP=>RHOS
+   CASE(2)
+      UU=>U
+      WW=>W
+      RHOP=>RHO
+END SELECT
 
 DO K=1,KBAR
    DO J=1,JBAR
       DO I=0,IBAR
-         U(I,J,K) = 1._EB - 2._EB*COS(X(I))*SIN(ZC(K))
+         UU(I,J,K) = NS_U_EXACT(X(I),ZC(K),T,MU(I,J,K),RHOP(I,J,K),AA)
       ENDDO
    ENDDO
 ENDDO
 DO K=0,KBAR
    DO J=1,JBAR
       DO I=1,IBAR
-         W(I,J,K) = 1._EB + 2._EB*SIN(XC(I))*COS(Z(K))
+         WW(I,J,K) = NS_V_EXACT(XC(I),Z(K),T,MU(I,J,K),RHOP(I,J,K),AA)
       ENDDO
    ENDDO
 ENDDO
 DO K=0,KBP1
    DO J=0,JBP1
       DO I=0,IBP1
-         UU = 1._EB - 2._EB*COS(XC(I))*SIN(ZC(K))
-         WW = 1._EB + 2._EB*SIN(XC(I))*COS(ZC(K))
-         H(I,J,K) = -( COS(2._EB*XC(I)) + COS(2._EB*ZC(K)) ) + 0.5_EB*(UU**2+WW**2)
+         H(I,J,K)  = NS_H_EXACT(XC(I),ZC(K),T,MU(I,J,K),RHOP(I,J,K),AA)
+         HS(I,J,K) = NS_H_EXACT(XC(I),ZC(K),T,MU(I,J,K),RHOP(I,J,K),AA)
+      ENDDO
+   ENDDO
+ENDDO
+
+! KRES loop
+
+DO K=1,KBAR
+   DO J=1,JBAR
+      DO I=1,IBAR
+         UP = 0.5_EB*(UU(I,J,K) + UU(I-1,J,K))
+         WP = 0.5_EB*(WW(I,J,K) + WW(I,J,K-1))
+         KRES(I,J,K) = 0.5_EB*(UP**2 + WP**2)
       ENDDO
    ENDDO
 ENDDO
 
 END SUBROUTINE NS_ANALYTICAL_SOLUTION
 
-SUBROUTINE NS_ANALYTICAL_SOLUTION_TIME(NM,T)
 
-! Initialize flow variables with an analytical solution of the governing equations at a later time
+REAL(EB) FUNCTION NS_U_EXACT(XX,YY,TT,MUP,RHOP,AA)
+REAL(EB), INTENT(IN) :: XX,YY,TT,MUP,RHOP,AA
+NS_U_EXACT = 1._EB - AA*COS(XX - TT)*SIN(YY - TT)*EXP(-2._EB * MUP / RHOP * TT)
+END FUNCTION NS_U_EXACT
 
-INTEGER, INTENT(IN) :: NM
-REAL, INTENT(IN) :: T
-INTEGER :: I,J,K
-REAL(EB) :: UU,WW
 
-CALL POINT_TO_MESH(NM)
+REAL(EB) FUNCTION NS_V_EXACT(XX,YY,TT,MUP,RHOP,AA)
+REAL(EB), INTENT(IN) :: XX,YY,TT,MUP,RHOP,AA
+NS_V_EXACT = 1._EB + AA*SIN(XX - TT)*COS(YY - TT)*EXP(-2._EB * MUP / RHOP * TT)
+END FUNCTION NS_V_EXACT
 
-DO K=1,KBAR
-   DO J=1,JBAR
-      DO I=0,IBAR
-         U(I,J,K) = 1._EB - 2._EB*COS(X(I) - T)*SIN(ZC(K) - T)*EXP(-2 * MU(I,J,K) * T / RHO(I,J,K))
-      ENDDO
-   ENDDO
-ENDDO
-DO K=0,KBAR
-   DO J=1,JBAR
-      DO I=1,IBAR
-         W(I,J,K) = 1._EB + 2._EB*SIN(XC(I) - T)*COS(Z(K) - T)*EXP(-2 * MU(I,J,K) * T / RHO(I,J,K))
-      ENDDO
-   ENDDO
-ENDDO
-DO K=0,KBP1
-   DO J=0,JBP1
-      DO I=0,IBP1
-         UU = 1._EB - 2._EB*COS(XC(I) - T)*SIN(ZC(K) - T)*EXP(-2 * MU(I,J,K) * T / RHO(I,J,K))
-         WW = 1._EB + 2._EB*SIN(XC(I) - T)*COS(ZC(K) - T)*EXP(-2 * MU(I,J,K) * T / RHO(I,J,K))
-         H(I,J,K) = -( COS(2._EB*(XC(I) - T)) + COS(2._EB*(ZC(K) - T)) )*EXP(-4 * MU(I,J,K) * T / RHO(I,J,K)) &
-                     + 0.5_EB*(UU**2+WW**2)
-      ENDDO
-   ENDDO
-ENDDO
 
-END SUBROUTINE NS_ANALYTICAL_SOLUTION_TIME
-
-SUBROUTINE NS_ANALYTICAL_SOLUTION_STATIC(NM)
-
-! Initialize flow variables with an analytical solution of the governing equations.
-! Same as classical Taylor-Green vortex, i.e., this case does not translate.
-
-INTEGER, INTENT(IN) :: NM
-INTEGER :: I,J,K
-REAL(EB) :: UU,WW
-
-CALL POINT_TO_MESH(NM)
-
-DO K=1,KBAR
-   DO J=1,JBAR
-      DO I=0,IBAR
-         U(I,J,K) = 2._EB * SIN(X(I))*COS(ZC(K))
-      ENDDO
-   ENDDO
-ENDDO
-DO K=0,KBAR
-   DO J=1,JBAR
-      DO I=1,IBAR
-         W(I,J,K) = -2._EB * COS(XC(I))*SIN(Z(K))
-      ENDDO
-   ENDDO
-ENDDO
-DO K=0,KBP1
-   DO J=0,JBP1
-      DO I=0,IBP1
-         UU = SIN(XC(I))*COS(ZC(K))
-         WW = -COS(XC(I))*SIN(ZC(K))
-         H(I,J,K) = -( COS(2._EB*XC(I)) + COS(2._EB*ZC(K)) ) + 0.5_EB*(UU**2+WW**2)
-      ENDDO
-   ENDDO
-ENDDO
-
-END SUBROUTINE NS_ANALYTICAL_SOLUTION_STATIC
+REAL(EB) FUNCTION NS_H_EXACT(XX,YY,TT,MUP,RHOP,AA)
+REAL(EB), INTENT(IN) :: XX,YY,TT,MUP,RHOP,AA
+REAL(EB) :: UP,VP
+UP = NS_U_EXACT(XX,YY,TT,MUP,RHOP,AA)
+VP = NS_V_EXACT(XX,YY,TT,MUP,RHOP,AA)
+NS_H_EXACT = -AA**2/4._EB*( COS(2._EB*(XX-TT)) + COS(2._EB*(YY-TT)) )*EXP(-4._EB * MUP / RHOP * TT) + 0.5_EB*(UP**2 + VP**2)
+END FUNCTION NS_H_EXACT
 
 
 REAL(EB) FUNCTION WANNIER_FLOW(XX,YY,IVEL)
