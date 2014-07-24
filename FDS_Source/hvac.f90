@@ -370,7 +370,6 @@ DAMPER       = .FALSE.
 DEVC_ID      = 'null'
 DIAMETER     = -1._EB
 DUCT_ID      = 'null'
-EFFICIENCY   = 0._EB
 FAN_ID       = 'null'
 FIXED_Q      = -1.E10_EB
 FILTER_ID    = 'null'
