@@ -121,9 +121,9 @@ mkdir "%FDSSTART%"
 mkdir "%FDSSTART%\FDS on the Web"
 copy "%CD%\Documentation\FDS_on_the_Web\Software_Updates.url"            "%FDSSTART%\FDS on the Web\Software Updates.url" > Nul
 copy "%CD%\Documentation\FDS_on_the_Web\Documentation_Updates.url"       "%FDSSTART%\FDS on the Web\Documentation Updates.url" > Nul
-copy "%CD%\Documentation\FDS_on_the_Web\Discussion_Group.url"   "%FDSSTART%\FDS on the Web\Discussion Group.url" > Nul
-copy "%CD%\Documentation\FDS_on_the_Web\Official_Web_Site.url"  "%FDSSTART%\FDS on the Web\Official Web Site.url" > Nul
-copy "%CD%\Documentation\FDS_on_the_Web\Discussion_Group.url"   "%FDSSTART%\FDS on the Web\Discussion Group.url" > Nul
+copy "%CD%\Documentation\FDS_on_the_Web\Discussion_Group.url"            "%FDSSTART%\FDS on the Web\Discussion Group.url" > Nul
+copy "%CD%\Documentation\FDS_on_the_Web\Official_Web_Site.url"           "%FDSSTART%\FDS on the Web\Official Web Site.url" > Nul
+copy "%CD%\Documentation\FDS_on_the_Web\Discussion_Group.url"            "%FDSSTART%\FDS on the Web\Discussion Group.url" > Nul
 copy "%CD%\Documentation\FDS_on_the_Web\Issue_Tracker.url"      "%FDSSTART%\FDS on the Web\Issue Tracker.url" > Nul
 
 mkdir "%FDSSTART%\Guides and Release Notes"
@@ -169,13 +169,10 @@ smpd -remove 1>> Nul 2>&1
 copy "%CD%\bin"\smpd2.exe "%CD%\bin"\smpd.exe>Nul
 erase "%CD%\bin"\smpd2.exe >Nul
 
-::new
 set firewall_setup="%CD%\setup_fds_firewall.bat"
-if exist "%firewall_setup%" (
 echo.
 echo *** Setting up firewall exceptions.
-  call %firewall_setup% "%CD%\bin"
-)
+call %firewall_setup% "%CD%\bin"
 
 :: ----------- copy backup files to Uninstall directory
 
@@ -184,6 +181,8 @@ erase /q *.txt
 
 :: ----------- setting up uninstall file
 
+echo.
+echo *** Setting up Uninstall script.
 echo echo. >> Uninstall\uninstall_base.bat
 echo echo Removing directories, %CD%\bin and %SHORTCUTSDIR%, from the System Path >> Uninstall\uninstall_base.bat
 echo call "%CD%\Uninstall\set_path.exe" -s -b -r "%CD%\bin" >> Uninstall\uninstall_base.bat
@@ -211,6 +210,6 @@ echo.
 echo *** Press any key to complete the installation.
 pause>NUL
 
-erase "%CD%"\setup_fds_firewall.bat
-erase "%CD%"\wrapup_fds_install.bat
+erase "%CD%"\setup_fds_firewall.bat >Nul
+erase "%CD%"\wrapup_fds_install.bat >Nul
 
