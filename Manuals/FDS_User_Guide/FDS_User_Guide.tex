@@ -3710,7 +3710,7 @@ Additionally you must define the locations where the HVAC network joins the comp
 
 
 \begin{description}
-\item[{\ct TYPE\_ID}] is a character string that indicates the type of component that the namelist group is defining.   {\ct TYPE\_ID} can be {\ct 'DUCT'}, {\ct 'NODE'}, {\ct 'FAN'}, {\ct 'FILTER'}, or {\ct 'AIRCOIL'}.
+\item[{\ct TYPE\_ID}] is a character string that indicates the type of component that the namelist group is defining.   {\ct TYPE\_ID} can be {\ct DUCT}, {\ct NODE}, {\ct FAN}, {\ct FILTER}, or {\ct AIRCOIL}.
 \item[{\ct ID}] is a character string giving a name to the component.  The name must be unique amongst all other components of that type; however, the same name can be given to components of different types (i.e., a duct and a node can have the same name but two ducts cannot).
 \end{description}
 A number of examples of simple HVAC systems are given in the HVAC folder of the sample cases and are discussed in the FDS Verification Guide.
@@ -3812,7 +3812,6 @@ Below are given sample inputs for the three types of fans supported by FDS.
 \noindent where:
 
 \begin{description}
-\item[{\ct DEVC\_ID}] is the name of a device controlling the operation of the fan. A {\ct CTRL\_ID} can be used as an alternative.
 \item[{\ct LOSS}] is the flow loss through the fan when it is not operational.
 \item[{\ct MAX\_FLOW}] is the maximum volumetric flow of the fan in m$^3$/s.  This input activates a quadratic fan model.
 \item[{\ct MAX\_PRESSURE}] is the stall pressure of the fan in units of Pa.  This input activates a quadratic fan model.
