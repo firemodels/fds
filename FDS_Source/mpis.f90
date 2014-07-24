@@ -1580,6 +1580,14 @@ subroutine mpi_finalize ( ierror )
 end subroutine
 
 
+subroutine mpi_abort ( comm, errorcode, ierror )
+  integer ierror,comm,errorcode
+  dummy = ierror
+  errorcode = ierror
+  comm = ierror
+end subroutine
+
+
 subroutine mpi_init ( ierror )
   integer ierror
   dummy = ierror
