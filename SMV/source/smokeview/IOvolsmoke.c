@@ -12,11 +12,7 @@ char IOvolsmoke_revision[]="$Revision$";
 #include <string.h>
 #include <math.h>
 #include <float.h>
-#ifdef pp_OSX
-#include <GLUT/glut.h>
-#else
-#include <GL/glut.h>
-#endif
+#include GLUT_H
 
 #include "smv_endian.h"
 #include "update.h"

@@ -10,11 +10,7 @@ char IOplot3d_revision[]="$Revision$";
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-#ifdef pp_OSX
-#include <GLUT/glut.h>
-#else
-#include <GL/glut.h>
-#endif
+#include GLUT_H
 
 #include "update.h"
 #include "smokeviewvars.h"

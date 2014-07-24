@@ -10,11 +10,7 @@ char IOwui_revision[]="$Revision$";
 #include <stdlib.h>
 #include <math.h>
 #include <string.h>
-#ifdef pp_OSX
-#include <GLUT/glut.h>
-#else
-#include <GL/glut.h>
-#endif
+#include GLUT_H
 
 #include "update.h"
 #include "smv_endian.h"

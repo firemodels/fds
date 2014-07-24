@@ -15,11 +15,7 @@ char readsmv_revision[]="$Revision$";
 #include <ctype.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#ifdef pp_OSX
-#include <GLUT/glut.h>
-#else
-#include <GL/glut.h>
-#endif
+#include GLUT_H
 #include <pthread.h>
 
 #include "smv_endian.h"

@@ -6,11 +6,7 @@
 char output_revision[]="$Revision$";
 
 #include "options.h"
-#ifdef pp_OSX
-#include <GLUT/glut.h>
-#else
-#include <GL/glut.h>
-#endif
+#include GLUT_H
 #include <stdio.h>
 #include <string.h>
 #include <math.h>

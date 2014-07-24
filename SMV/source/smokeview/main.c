@@ -10,11 +10,7 @@ char main_revision[]="$Revision$";
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#ifdef pp_OSX
-#include <GLUT/glut.h>
-#else
-#include <GL/glut.h>
-#endif
+#include GLUT_H
 
 #include "string_util.h"
 #include "smokeviewvars.h"

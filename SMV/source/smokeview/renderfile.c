@@ -14,11 +14,7 @@ char renderfile_revision[]="$Revision$";
 
 #include "smokeviewvars.h"
 
-#ifdef pp_OSX
-#include <GLUT/glut.h>
-#else
-#include <GL/glut.h>
-#endif
+#include GLUT_H
 #include "gd.h"
 
 #define PNG 0

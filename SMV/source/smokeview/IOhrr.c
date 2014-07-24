@@ -10,11 +10,7 @@ char IOhrr_revision[]="$Revision$";
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
-#ifdef pp_OSX
-#include <GLUT/glut.h>
-#else
-#include <GL/glut.h>
-#endif
+#include GLUT_H
 
 #include "smokeviewvars.h"
 

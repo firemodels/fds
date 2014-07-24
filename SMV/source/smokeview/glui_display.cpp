@@ -17,11 +17,7 @@ void Text_Labels_CB(int var);
 
 #include <stdio.h>
 #include <string.h>
-#ifdef pp_OSX
-#include <GLUT/glut.h>
-#else
-#include <GL/glut.h>
-#endif
+#include GLUT_H
 #include <math.h>
 
 #include "smokeviewvars.h"

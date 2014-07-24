@@ -8,11 +8,7 @@ char IOtarget_revision[]="$Revision$";
 #include "options.h"
 #include <stdio.h>  
 #include <stdlib.h>
-#ifdef pp_OSX
-#include <GLUT/glut.h>
-#else
-#include <GL/glut.h>
-#endif
+#include GLUT_H
 
 #include "update.h"
 #include "smokeviewvars.h"

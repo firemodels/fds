@@ -10,11 +10,7 @@ char IOboundary_revision[]="$Revision$";
 #include <stdlib.h>
 #include <sys/stat.h>
 #include <string.h>
-#ifdef pp_OSX
-#include <GLUT/glut.h>
-#else
-#include <GL/glut.h>
-#endif
+#include GLUT_H
 
 #include "egz_stdio.h"
 #include "smv_endian.h"

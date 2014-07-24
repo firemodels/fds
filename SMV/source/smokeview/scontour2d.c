@@ -8,11 +8,7 @@ char scontour2d_revision[]="$Revision$";
 #include "options.h"
 #include <stdlib.h>
 #include <stdio.h>
-#ifdef pp_OSX
-#include <GLUT/glut.h>
-#else
-#include <GL/glut.h>
-#endif
+#include GLUT_H
 #include "contourdefs.h"
 #include "MALLOC.h"
 

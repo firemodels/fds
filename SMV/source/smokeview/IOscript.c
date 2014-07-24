@@ -11,11 +11,7 @@ char IOscript_revision[]="$Revision$";
 #include <string.h>
 #include <sys/stat.h>
 #include <math.h>
-#ifdef pp_OSX
-#include <GLUT/glut.h>
-#else
-#include <GL/glut.h>
-#endif
+#include GLUT_H
 
 #include "update.h"
 #include "smokeviewvars.h"

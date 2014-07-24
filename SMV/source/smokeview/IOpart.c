@@ -12,11 +12,7 @@ char IOpart_revision[]="$Revision$";
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
-#ifdef pp_OSX
-#include <GLUT/glut.h>
-#else
-#include <GL/glut.h>
-#endif
+#include GLUT_H
 #include <math.h>
 
 #include "smv_endian.h"

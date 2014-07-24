@@ -9,11 +9,7 @@ char IOshooter_revision[]="$Revision$";
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#ifdef pp_OSX
-#include <GLUT/glut.h>
-#else
-#include <GL/glut.h>
-#endif
+#include GLUT_H
 #include <math.h>
 
 #include "smokeviewvars.h"

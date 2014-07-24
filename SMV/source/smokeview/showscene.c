@@ -9,11 +9,7 @@
 #include <math.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#ifdef pp_OSX
-#include <GLUT/glut.h>
-#else
-#include <GL/glut.h>
-#endif
+#include GLUT_H
 
 // svn revision character string
 char showscene_revision[]="$Revision$";

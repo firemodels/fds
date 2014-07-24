@@ -170,6 +170,13 @@
 #define EXTERNCPP
 #endif
 
+#ifdef pp_OSX
+#define GLUT_H <GLUT/glut.h>
+#else
+#define GLUT_H <GL/glut.h>
+#endif
+
+
 #include "lint.h"
 #endif
 

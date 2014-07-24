@@ -9,11 +9,7 @@ char colortimebar_revision[]="$Revision$";
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
-#ifdef pp_OSX
-#include <GLUT/glut.h>
-#else
-#include <GL/glut.h>
-#endif
+#include GLUT_H
 
 #include "smokeviewvars.h"
 

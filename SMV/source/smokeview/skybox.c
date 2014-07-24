@@ -7,11 +7,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "glew.h"
-#ifdef pp_OSX
-#include <GLUT/glut.h>
-#else
-#include <GL/glut.h>
-#endif
+#include GLUT_H
 
 // svn revision character string
 char skybox_revision[]="$Revision$";

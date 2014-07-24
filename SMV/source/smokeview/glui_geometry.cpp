@@ -13,11 +13,7 @@ extern "C" void Volume_CB(int var);
 
 #include <stdio.h>
 #include <string.h>
-#ifdef pp_OSX
-#include <GLUT/glut.h>
-#else
-#include <GL/glut.h>
-#endif
+#include GLUT_H
 
 #include "smokeviewvars.h"
 
