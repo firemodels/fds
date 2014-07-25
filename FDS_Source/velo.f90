@@ -478,8 +478,7 @@ REAL(EB) :: T,MUX,MUY,MUZ,UP,UM,VP,VM,WP,WM,VTRM,OMXP,OMXM,OMYP,OMYM,OMZP,OMZM,T
             DUDX,DVDY,DWDZ,DUDY,DUDZ,DVDX,DVDZ,DWDX,DWDY, &
             VOMZ,WOMY,UOMY,VOMX,UOMZ,WOMX, &
             RRHO,GX(0:IBAR_MAX),GY(0:IBAR_MAX),GZ(0:IBAR_MAX),TXXP,TXXM,TYYP,TYYM,TZZP,TZZM,DTXXDX,DTYYDY,DTZZDZ, &
-            DUMMY=0._EB, &
-            INTEGRAL,SUM_VOLUME,VC,UMEAN,VMEAN,WMEAN,DU_FORCING=0._EB,DV_FORCING=0._EB,DW_FORCING=0._EB
+            DUMMY=0._EB
 REAL(EB) :: VEG_UMAG
 INTEGER :: I,J,K,IEXP,IEXM,IEYP,IEYM,IEZP,IEZM,IC,IC1,IC2
 REAL(EB), POINTER, DIMENSION(:,:,:) :: TXY=>NULL(),TXZ=>NULL(),TYZ=>NULL(),OMX=>NULL(),OMY=>NULL(),OMZ=>NULL(), &
@@ -744,68 +743,7 @@ ENDDO
 
 ! Mean forcing
 
-MEAN_FORCING_X: IF (MEAN_FORCING(1)) THEN
-   INTEGRAL = 0._EB
-   SUM_VOLUME = 0._EB
-   DO K=1,KBAR
-      DO J=1,JBAR
-         DO I=0,IBAR
-            IC1 = CELL_INDEX(I,J,K)
-            IC2 = CELL_INDEX(I+1,J,K)
-            IF (SOLID(IC1)) CYCLE
-            IF (SOLID(IC2)) CYCLE
-            VC = DXN(I)*DY(J)*DZ(K)
-            INTEGRAL = INTEGRAL + UU(I,J,K)*VC
-            SUM_VOLUME = SUM_VOLUME + VC
-         ENDDO
-      ENDDO
-   ENDDO
-   UMEAN = INTEGRAL/SUM_VOLUME
-   DU_FORCING = RFAC_FORCING(1)*(U0*EVALUATE_RAMP(T-T_BEGIN,DUMMY,I_RAMP_U0)-UMEAN)/DT
-   FVX = FVX-DU_FORCING
-ENDIF MEAN_FORCING_X
-   
-MEAN_FORCING_Y: IF (MEAN_FORCING(2)) THEN
-   INTEGRAL = 0._EB
-   SUM_VOLUME = 0._EB
-   DO K=1,KBAR
-      DO J=0,JBAR
-         DO I=1,IBAR
-            IC1 = CELL_INDEX(I,J,K)
-            IC2 = CELL_INDEX(I,J+1,K)
-            IF (SOLID(IC1)) CYCLE
-            IF (SOLID(IC2)) CYCLE
-            VC = DX(I)*DYN(J)*DZ(K)
-            INTEGRAL = INTEGRAL + VV(I,J,K)*VC
-            SUM_VOLUME = SUM_VOLUME + VC
-         ENDDO
-      ENDDO
-   ENDDO
-   VMEAN = INTEGRAL/SUM_VOLUME
-   DV_FORCING = RFAC_FORCING(2)*(V0*EVALUATE_RAMP(T-T_BEGIN,DUMMY,I_RAMP_V0)-VMEAN)/DT
-   FVY=FVY-DV_FORCING
-ENDIF MEAN_FORCING_Y
-   
-MEAN_FORCING_Z: IF (MEAN_FORCING(3)) THEN
-   INTEGRAL = 0._EB
-   SUM_VOLUME = 0._EB
-   DO K=0,KBAR
-      DO J=1,JBAR
-         DO I=1,IBAR
-            IC1 = CELL_INDEX(I,J,K)
-            IC2 = CELL_INDEX(I,J,K+1)
-            IF (SOLID(IC1)) CYCLE
-            IF (SOLID(IC2)) CYCLE
-            VC = DX(I)*DY(J)*DZN(K)
-            INTEGRAL = INTEGRAL + WW(I,J,K)*VC
-            SUM_VOLUME = SUM_VOLUME + VC
-         ENDDO
-      ENDDO
-   ENDDO
-   WMEAN = INTEGRAL/SUM_VOLUME
-   DW_FORCING = RFAC_FORCING(3)*(W0-EVALUATE_RAMP(T-T_BEGIN,DUMMY,I_RAMP_W0)-WMEAN)/DT
-   FVZ=FVZ-DW_FORCING
-ENDIF MEAN_FORCING_Z
+IF (ANY(MEAN_FORCING)) CALL MOMENTUM_NUDGING()
 
 ! Surface vegetation drag 
 
@@ -852,6 +790,148 @@ IF (EVACUATION_ONLY(NM)) FVZ = 0._EB
 ! Source term in manufactured solution
 
 IF (PERIODIC_TEST==7) CALL MMS_VELOCITY_FLUX(NM,T)
+
+CONTAINS
+
+SUBROUTINE MOMENTUM_NUDGING()
+REAL(EB) :: UBAR,VBAR,WBAR,INTEGRAL,SUM_VOLUME,VC,UMEAN,VMEAN,WMEAN,DU_FORCING,DV_FORCING,DW_FORCING
+
+MEAN_FORCING_X: IF (MEAN_FORCING(1)) THEN
+   SELECT_RAMP_U: SELECT CASE(I_RAMP_U0_Z)
+      CASE(0) SELECT_RAMP_U
+         INTEGRAL = 0._EB
+         SUM_VOLUME = 0._EB
+         DO K=1,KBAR
+            DO J=1,JBAR
+               DO I=0,IBAR
+                  IC1 = CELL_INDEX(I,J,K)
+                  IC2 = CELL_INDEX(I+1,J,K)
+                  IF (SOLID(IC1)) CYCLE
+                  IF (SOLID(IC2)) CYCLE
+                  VC = DXN(I)*DY(J)*DZ(K)
+                  INTEGRAL = INTEGRAL + UU(I,J,K)*VC
+                  SUM_VOLUME = SUM_VOLUME + VC
+               ENDDO
+            ENDDO
+         ENDDO
+         UMEAN = INTEGRAL/SUM_VOLUME
+         UBAR = U0*EVALUATE_RAMP(T-T_BEGIN,DUMMY,I_RAMP_U0)
+         DU_FORCING = RFAC_FORCING(1)*(UBAR-UMEAN)/DT
+         FVX = FVX - DU_FORCING
+      CASE(1:) SELECT_RAMP_U
+         K_LOOP_U: DO K=1,KBAR
+            INTEGRAL = 0._EB
+            SUM_VOLUME = 0._EB
+            DO J=1,JBAR
+               DO I=0,IBAR
+                  IC1 = CELL_INDEX(I,J,K)
+                  IC2 = CELL_INDEX(I+1,J,K)
+                  IF (SOLID(IC1)) CYCLE
+                  IF (SOLID(IC2)) CYCLE
+                  VC = DXN(I)*DY(J)*DZ(K)
+                  INTEGRAL = INTEGRAL + UU(I,J,K)*VC
+                  SUM_VOLUME = SUM_VOLUME + VC
+               ENDDO
+            ENDDO
+            UMEAN = INTEGRAL/SUM_VOLUME
+            UBAR = U0*EVALUATE_RAMP(T-T_BEGIN,DUMMY,I_RAMP_U0)*EVALUATE_RAMP(ZC(K),DUMMY,I_RAMP_U0_Z)
+            DU_FORCING = RFAC_FORCING(1)*(UBAR-UMEAN)/DT
+            FVX(:,:,K) = FVX(:,:,K) - DU_FORCING
+         ENDDO K_LOOP_U
+   END SELECT SELECT_RAMP_U
+ENDIF MEAN_FORCING_X
+   
+MEAN_FORCING_Y: IF (MEAN_FORCING(2)) THEN
+   SELECT_RAMP_V: SELECT CASE(I_RAMP_V0_Z)
+      CASE(0) SELECT_RAMP_V
+         INTEGRAL = 0._EB
+         SUM_VOLUME = 0._EB
+         DO K=1,KBAR
+            DO J=0,JBAR
+               DO I=1,IBAR
+                  IC1 = CELL_INDEX(I,J,K)
+                  IC2 = CELL_INDEX(I,J+1,K)
+                  IF (SOLID(IC1)) CYCLE
+                  IF (SOLID(IC2)) CYCLE
+                  VC = DX(I)*DYN(J)*DZ(K)
+                  INTEGRAL = INTEGRAL + VV(I,J,K)*VC
+                  SUM_VOLUME = SUM_VOLUME + VC
+               ENDDO
+            ENDDO
+         ENDDO
+         VMEAN = INTEGRAL/SUM_VOLUME
+         VBAR = V0*EVALUATE_RAMP(T-T_BEGIN,DUMMY,I_RAMP_V0)
+         DV_FORCING = RFAC_FORCING(2)*(VBAR-VMEAN)/DT
+         FVY = FVY - DV_FORCING
+      CASE(1:) SELECT_RAMP_V
+         K_LOOP_V: DO K=1,KBAR
+            INTEGRAL = 0._EB
+            SUM_VOLUME = 0._EB
+            DO J=0,JBAR
+               DO I=1,IBAR
+                  IC1 = CELL_INDEX(I,J,K)
+                  IC2 = CELL_INDEX(I,J+1,K)
+                  IF (SOLID(IC1)) CYCLE
+                  IF (SOLID(IC2)) CYCLE
+                  VC = DX(I)*DYN(J)*DZ(K)
+                  INTEGRAL = INTEGRAL + VV(I,J,K)*VC
+                  SUM_VOLUME = SUM_VOLUME + VC
+               ENDDO
+            ENDDO
+            VMEAN = INTEGRAL/SUM_VOLUME
+            VBAR = V0*EVALUATE_RAMP(T-T_BEGIN,DUMMY,I_RAMP_V0)*EVALUATE_RAMP(ZC(K),DUMMY,I_RAMP_V0_Z)
+            DV_FORCING = RFAC_FORCING(2)*(VBAR-VMEAN)/DT
+            FVY(:,:,K) = FVY(:,:,K) - DV_FORCING
+         ENDDO K_LOOP_V
+   END SELECT SELECT_RAMP_V
+ENDIF MEAN_FORCING_Y
+   
+MEAN_FORCING_Z: IF (MEAN_FORCING(3)) THEN
+   SELECT_RAMP_W: SELECT CASE(I_RAMP_W0_Z)
+      CASE(0) SELECT_RAMP_W
+         INTEGRAL = 0._EB
+         SUM_VOLUME = 0._EB
+         DO K=0,KBAR
+            DO J=1,JBAR
+               DO I=1,IBAR
+                  IC1 = CELL_INDEX(I,J,K)
+                  IC2 = CELL_INDEX(I,J,K+1)
+                  IF (SOLID(IC1)) CYCLE
+                  IF (SOLID(IC2)) CYCLE
+                  VC = DX(I)*DY(J)*DZN(K)
+                  INTEGRAL = INTEGRAL + WW(I,J,K)*VC
+                  SUM_VOLUME = SUM_VOLUME + VC
+               ENDDO
+            ENDDO
+         ENDDO
+         WMEAN = INTEGRAL/SUM_VOLUME
+         WBAR = W0-EVALUATE_RAMP(T-T_BEGIN,DUMMY,I_RAMP_W0)
+         DW_FORCING = RFAC_FORCING(3)*(WBAR-WMEAN)/DT
+         FVZ = FVZ - DW_FORCING
+      CASE(1:)
+         K_LOOP_W: DO K=0,KBAR
+            INTEGRAL = 0._EB
+            SUM_VOLUME = 0._EB
+            DO J=1,JBAR
+               DO I=1,IBAR
+                  IC1 = CELL_INDEX(I,J,K)
+                  IC2 = CELL_INDEX(I,J,K+1)
+                  IF (SOLID(IC1)) CYCLE
+                  IF (SOLID(IC2)) CYCLE
+                  VC = DX(I)*DY(J)*DZN(K)
+                  INTEGRAL = INTEGRAL + WW(I,J,K)*VC
+                  SUM_VOLUME = SUM_VOLUME + VC
+               ENDDO
+            ENDDO
+            WMEAN = INTEGRAL/SUM_VOLUME
+            WBAR = W0-EVALUATE_RAMP(T-T_BEGIN,DUMMY,I_RAMP_W0)*EVALUATE_RAMP(Z(K),DUMMY,I_RAMP_W0_Z)
+            DW_FORCING = RFAC_FORCING(3)*(WBAR-WMEAN)/DT
+            FVZ = FVZ - DW_FORCING
+         ENDDO K_LOOP_W
+   END SELECT SELECT_RAMP_W
+ENDIF MEAN_FORCING_Z
+
+END SUBROUTINE MOMENTUM_NUDGING
 
 END SUBROUTINE VELOCITY_FLUX
 
