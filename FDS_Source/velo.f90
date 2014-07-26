@@ -814,7 +814,11 @@ MEAN_FORCING_X: IF (MEAN_FORCING(1)) THEN
                ENDDO
             ENDDO
          ENDDO
-         UMEAN = INTEGRAL/SUM_VOLUME
+         IF (SUM_VOLUME>TWO_EPSILON_EB) THEN
+            UMEAN = INTEGRAL/SUM_VOLUME
+         ELSE
+            UMEAN = 0._EB
+         ENDIF
          UBAR = U0*EVALUATE_RAMP(T-T_BEGIN,DUMMY,I_RAMP_U0)
          DU_FORCING = RFAC_FORCING(1)*(UBAR-UMEAN)/DT
          FVX = FVX - DU_FORCING
@@ -833,7 +837,12 @@ MEAN_FORCING_X: IF (MEAN_FORCING(1)) THEN
                   SUM_VOLUME = SUM_VOLUME + VC
                ENDDO
             ENDDO
-            UMEAN = INTEGRAL/SUM_VOLUME
+            IF (SUM_VOLUME>TWO_EPSILON_EB) THEN
+               UMEAN = INTEGRAL/SUM_VOLUME
+            ELSE
+               ! this can happen if all cells in a given row, k, are solid
+               UMEAN = 0._EB
+            ENDIF
             UBAR = U0*EVALUATE_RAMP(T-T_BEGIN,DUMMY,I_RAMP_U0)*EVALUATE_RAMP(ZC(K),DUMMY,I_RAMP_U0_Z)
             DU_FORCING = RFAC_FORCING(1)*(UBAR-UMEAN)/DT
             FVX(:,:,K) = FVX(:,:,K) - DU_FORCING
@@ -859,7 +868,11 @@ MEAN_FORCING_Y: IF (MEAN_FORCING(2)) THEN
                ENDDO
             ENDDO
          ENDDO
-         VMEAN = INTEGRAL/SUM_VOLUME
+         IF (SUM_VOLUME>TWO_EPSILON_EB) THEN
+            VMEAN = INTEGRAL/SUM_VOLUME
+         ELSE
+            VMEAN = 0._EB
+         ENDIF
          VBAR = V0*EVALUATE_RAMP(T-T_BEGIN,DUMMY,I_RAMP_V0)
          DV_FORCING = RFAC_FORCING(2)*(VBAR-VMEAN)/DT
          FVY = FVY - DV_FORCING
@@ -878,7 +891,11 @@ MEAN_FORCING_Y: IF (MEAN_FORCING(2)) THEN
                   SUM_VOLUME = SUM_VOLUME + VC
                ENDDO
             ENDDO
-            VMEAN = INTEGRAL/SUM_VOLUME
+            IF (SUM_VOLUME>TWO_EPSILON_EB) THEN
+               VMEAN = INTEGRAL/SUM_VOLUME
+            ELSE
+               VMEAN = 0._EB
+            ENDIF
             VBAR = V0*EVALUATE_RAMP(T-T_BEGIN,DUMMY,I_RAMP_V0)*EVALUATE_RAMP(ZC(K),DUMMY,I_RAMP_V0_Z)
             DV_FORCING = RFAC_FORCING(2)*(VBAR-VMEAN)/DT
             FVY(:,:,K) = FVY(:,:,K) - DV_FORCING
@@ -904,7 +921,11 @@ MEAN_FORCING_Z: IF (MEAN_FORCING(3)) THEN
                ENDDO
             ENDDO
          ENDDO
-         WMEAN = INTEGRAL/SUM_VOLUME
+         IF (SUM_VOLUME>TWO_EPSILON_EB) THEN
+            WMEAN = INTEGRAL/SUM_VOLUME
+         ELSE
+            WMEAN = 0._EB
+         ENDIF
          WBAR = W0-EVALUATE_RAMP(T-T_BEGIN,DUMMY,I_RAMP_W0)
          DW_FORCING = RFAC_FORCING(3)*(WBAR-WMEAN)/DT
          FVZ = FVZ - DW_FORCING
@@ -923,7 +944,11 @@ MEAN_FORCING_Z: IF (MEAN_FORCING(3)) THEN
                   SUM_VOLUME = SUM_VOLUME + VC
                ENDDO
             ENDDO
-            WMEAN = INTEGRAL/SUM_VOLUME
+            IF (SUM_VOLUME>TWO_EPSILON_EB) THEN
+               WMEAN = INTEGRAL/SUM_VOLUME
+            ELSE
+               WMEAN = 0._EB
+            ENDIF
             WBAR = W0-EVALUATE_RAMP(T-T_BEGIN,DUMMY,I_RAMP_W0)*EVALUATE_RAMP(Z(K),DUMMY,I_RAMP_W0_Z)
             DW_FORCING = RFAC_FORCING(3)*(WBAR-WMEAN)/DT
             FVZ = FVZ - DW_FORCING
