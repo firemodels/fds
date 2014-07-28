@@ -39,14 +39,22 @@ setup_win:
 
 #Compiler Rules
 
-openmp_mpi_intel_win: MPILIB = "C:\Program Files (x86)\Intel\MPI\5.0.0.028\intel64\lib\impi.lib"
-openmp_mpi_intel_win: MPIINCLUDE = "C:\Program Files (x86)\Intel\MPI\5.0.0.028\intel64\include"
-openmp_mpi_intel_win: FFLAGS = /Qipo /O2 /Qvec_report0 /openmp /I$(MPIINCLUDE) 
-openmp_mpi_intel_win: FCOMPL = mpiifort
-openmp_mpi_intel_win: obj = test_mpi_openmp
-openmp_mpi_intel_win: setup_win $(objwin_mpi)
+openmp_impi_intel_win: MPILIB = "C:\Program Files (x86)\Intel\MPI\5.0.0.028\intel64\lib\impi.lib"
+openmp_impi_intel_win: MPIINCLUDE = "C:\Program Files (x86)\Intel\MPI\5.0.0.028\intel64\include"
+openmp_impi_intel_win: FFLAGS = /Qipo /O2 /Qvec_report0 /openmp /I$(MPIINCLUDE) 
+openmp_impi_intel_win: FCOMPL = mpiifort
+openmp_impi_intel_win: obj = test_mpi_openmp
+openmp_impi_intel_win: setup_win $(objwin_mpi)
 	$(FCOMPL) -o $(obj) $(FFLAGS) /F1000000000 $(objwin_mpi) $(MPILIB)
 
+openmp_impi_intel_linux : FFLAGS = -m64 -O2 -vec_report0 
+openmp_impi_intel_linux : LFLAGS = -static-intel
+openmp_impi_intel_linux : FCOMPL = mpiifort
+openmp_impi_intel_linux : FOPENMPFLAGS = -openmp -openmp-link static -liomp5 
+openmp_impi_intel_linux : obj = test_mpi_openmp
+openmp_impi_intel_linux : setup $(obj_mpi)
+	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi)
+	
 openmp_mpi_intel_linux : FFLAGS = -m64 -O2 -vec_report0 
 openmp_mpi_intel_linux : LFLAGS = -static-intel
 openmp_mpi_intel_linux : FCOMPL = mpif90
