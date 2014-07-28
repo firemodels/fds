@@ -12,5 +12,5 @@ call %intelbin%\..\..\MPI\%impiversion%\intel64\bin\mpivars.bat
 
 
 Title Building FDS (MPI with openmp) for 64 bit Windows
-make VPATH=".." -f ..\makefile openmp_mpi_intel_win
+make VPATH=".." -f ..\makefile openmp_impi_intel_win
 pause
