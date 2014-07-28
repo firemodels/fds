@@ -57,7 +57,7 @@ openmp_impi_intel_linux : setup $(obj_mpi)
 	
 openmp_mpi_intel_linux : FFLAGS = -m64 -O2 -vec_report0 
 openmp_mpi_intel_linux : LFLAGS = -static-intel
-openmp_mpi_intel_linux : FCOMPL = mpif90
+openmp_mpi_intel_linux : FCOMPL = mpifort
 openmp_mpi_intel_linux : FOPENMPFLAGS = -openmp -openmp-link static -liomp5 
 openmp_mpi_intel_linux : obj = test_mpi_openmp
 openmp_mpi_intel_linux : setup $(obj_mpi)
