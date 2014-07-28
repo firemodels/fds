@@ -1,0 +1,28 @@
+#!/bin/sh
+### Job name
+#PBS -N test_mpi_openmp
+### Output files
+#PBS -o test_mpi_openmp.stdout
+#PBS -e test_mpi_openmp.stderr
+### Queue name
+#PBS -q batch
+### Number of nodes
+#PBS -l nodes=4:ppn=1
+# Print the job's working directory and enter it.
+echo Working directory is $PBS_O_WORKDIR
+cd $PBS_O_WORKDIR
+# Print some other environment information
+echo Running on host `hostname`
+echo Time is `date`
+echo Directory is `pwd`
+echo This jobs runs on the following processors:
+NODES=`cat $PBS_NODEFILE`
+echo $NODES
+# Compute the number of processors
+NPROCS=`wc -l < $PBS_NODEFILE`
+echo This job has allocated $NPROCS nodes
+
+export OMP_NUM_THREADS=1
+
+mpirun -bynode -np 4 -x OMP_NUM_THREADS /home/mcgratta/FDS-SMV/Utilities/test_mpi_openmp/openmp_mpi_intel_linux_64/test_mpi_openmp
+
