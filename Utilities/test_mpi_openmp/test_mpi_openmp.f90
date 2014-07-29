@@ -62,7 +62,8 @@
       integer sNthreads             ! nthreads from sender
       integer r                     ! Rank loop counter
       integer t                     ! Thread loop counter
-
+      integer OPENMP_AVAILABLE_THREADS
+      
       ! Initialize MPI with threading
 
       call MPI_INIT_THREAD(required, provided, ierr)
@@ -72,8 +73,20 @@
       call MPI_COMM_SIZE(MPI_COMM_WORLD,nproc,ierr)
       call MPI_COMM_RANK(MPI_COMM_WORLD,rank,ierr)
       call MPI_GET_PROCESSOR_NAME(name,namelen,ierr)
+call OMP_SET_NUM_THREADS(2)
+   
+!$OMP PARALLEL
+!$OMP MASTER
+!$ IF (OMP_GET_NUM_THREADS() /= 0) THEN
+!$    OPENMP_AVAILABLE_THREADS = OMP_GET_NUM_THREADS()
+!$ ENDIF
+!$OMP END MASTER
+!$OMP BARRIER
+!$OMP END PARALLEL
 
-      ! Check the threading support level
+write(*,*) "OPENMP_AVAILABLE_THREADS = ", OPENMP_AVAILABLE_THREADS
+
+      !Check the threading support level
 
       if (provided .lt. required) then
       
@@ -95,6 +108,8 @@
       
       threadID=omp_get_thread_num()    ! Get the thread ID
       nthreads=omp_get_num_threads()   ! Get the total number of threads 
+      
+      write(*,*) "nthreads = ", nthreads
       
       ! Time to say hello, the master process performs all output.
       ! Within the master process, each thread will handle its own
