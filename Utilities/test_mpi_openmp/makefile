@@ -1,19 +1,5 @@
 # Makefile for test_mpi_openmp
 
-# A make utility for windows may be downloaded from http://gnuwin32.sourceforge.net/packages/make.htm
-
-# The variable VPATH defines where the source code is relative to the current directory
-
-VPATH = cd
-
-# Definition of the non-MPI object variables
-
-obj_serial = test_mpi_openmp.o
-
-objwin_serial = $(obj_serial:.o=.obj)
-
-# Definition of the MPI object variables
-
 obj_mpi = test_mpi_openmp.o
 
 objwin_mpi = $(obj_mpi:.o=.obj)
@@ -55,10 +41,10 @@ openmp_impi_intel_linux : obj = test_mpi_openmp
 openmp_impi_intel_linux : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi)
 	
-openmp_mpi_intel_linux : FFLAGS = -m64 -O2 -vec_report0 
+openmp_mpi_intel_linux : FFLAGS = -m64 -O2 -vec_report0
 openmp_mpi_intel_linux : LFLAGS = -static-intel
 openmp_mpi_intel_linux : FCOMPL = mpifort
-openmp_mpi_intel_linux : FOPENMPFLAGS = -openmp -openmp-link static -liomp5 
+openmp_mpi_intel_linux : FOPENMPFLAGS = -openmp -openmp-link static -liomp5
 openmp_mpi_intel_linux : obj = test_mpi_openmp
 openmp_mpi_intel_linux : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi)
