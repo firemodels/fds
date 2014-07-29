@@ -139,7 +139,7 @@
      &            1000*r+10*dThread+1, MPI_COMM_WORLD, stat, ierr)
                write(*,91) "Hello from thread ",dThread," of ",         &
      &            sNthreads," in rank ",dRank," of ",nproc," on ",      &
-     &            trim(name)
+     &            dName(1:dNamelen)
             end do
          end do
          !$OMP END MASTER
