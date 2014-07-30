@@ -21,7 +21,7 @@ objwin_serial = $(obj_serial:.o=.obj)
 
 # Definition of the MPI object variables
 
-obj_mpi = prec.o mpip.o cons.o devc.o data.o type.o mesh.o func.o smvv.o irad.o \
+obj_mpi = prec.o cons.o devc.o data.o type.o mesh.o func.o smvv.o irad.o \
           ieva.o pois.o scrc.o radi.o evac.o gsmv.o geom.o part.o vege.o ctrl.o turb.o samr.o dump.o hvac.o mass.o \
           read.o wall.o fire.o divg.o init.o velo.o pres.o main.o
 
@@ -483,7 +483,7 @@ openmp_mpi_intel_linux_32_db : setup $(obj_mpi)
 
 mpi_intel_linux_64_db : FFLAGS = -m64 -check -warn unused -O0 -auto -WB -traceback -g -fpe0 -fltconsistency -vec_report0
 mpi_intel_linux_64_db : LFLAGS = -static-intel
-mpi_intel_linux_64_db : FCOMPL = mpif77
+mpi_intel_linux_64_db : FCOMPL = mpifort
 mpi_intel_linux_64_db : obj = fds_mpi_intel_linux_64_db
 mpi_intel_linux_64_db : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) $(LFLAGS) -o $(obj) $(obj_mpi)
