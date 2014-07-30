@@ -1495,12 +1495,8 @@ fi
 
 # Depends on successful FDS debug compile
 if [[ $stage2a_success && $stage2b_success && $FIREBOT_MODE == "verification" ]] ; then
-   # Uncomment one of the below lines to run the serial or OpenMP version of FDS
-   # Run cases with serial version of FDS
-   run_verification_cases_debug
    # Run cases with OpenMP version of FDS with specified number of threads
-   # run_verification_cases_debug "-o 1"
-
+   run_verification_cases_debug "-o 1"
    check_cases_debug $FDS_SVNROOT/Verification 'verification'
 
 elif [[ $stage2a_success && $stage2b_success && $FIREBOT_MODE == "validation" ]] ; then
@@ -1535,12 +1531,8 @@ fi
 ### Stage 5 ###
 # Depends on successful FDS compile
 if [[ $stage4a_success && $stage4b_success && $FIREBOT_MODE == "verification" ]] ; then
-   # Uncomment one of the below lines to run the serial or OpenMP version of FDS
-   # Run cases with serial version of FDS
-   run_verification_cases_release
    # Run cases with OpenMP version of FDS with specified number of threads
-   # run_verification_cases_release "-o 1"
-   
+   run_verification_cases_release "-o 1"
    check_cases_release $FDS_SVNROOT/Verification 'verification'
 
 elif [[ $stage4a_success && $stage4b_success && $FIREBOT_MODE == "validation" ]] ; then
