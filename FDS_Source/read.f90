@@ -7005,7 +7005,6 @@ MESH_LOOP: DO NM=1,NMESHES
                   XB5   = ZS
                   XB6   = ZF
                ENDIF
-
                OB%I1 = NINT( GINV(XB1-XS,1,NM)*RDXI   )
                OB%I2 = NINT( GINV(XB2-XS,1,NM)*RDXI   )
                OB%J1 = NINT( GINV(XB3-YS,2,NM)*RDETA  )
@@ -7015,17 +7014,42 @@ MESH_LOOP: DO NM=1,NMESHES
 
                ! If desired, thicken small obstructions
 
-               IF (THICKEN .AND. OB%I1==OB%I2) THEN
-                  OB%I1 = GINV(.5_EB*(XB1+XB2)-XS,1,NM)*RDXI
-                  OB%I2 = MIN(OB%I1+1,IBAR)
-               ENDIF
-               IF (THICKEN .AND. OB%J1==OB%J2) THEN
-                  OB%J1 = GINV(.5_EB*(XB3+XB4)-YS,2,NM)*RDETA
-                  OB%J2 = MIN(OB%J1+1,JBAR)
-               ENDIF
-               IF (THICKEN .AND. OB%K1==OB%K2) THEN
-                  OB%K1 = GINV(.5_EB*(XB5+XB6)-ZS,3,NM)*RDZETA
-                  OB%K2 = MIN(OB%K1+1,KBAR)
+               IF (THICKEN) THEN
+                  IF(OB%I1==OB%I2) THEN
+                     OB%I1 = GINV(.5_EB*(XB1+XB2)-XS,1,NM)*RDXI
+                     OB%I2 = MIN(OB%I1+1,IBAR)
+                  ENDIF
+                  IF (OB%J1==OB%J2) THEN
+                     OB%J1 = GINV(.5_EB*(XB3+XB4)-YS,2,NM)*RDETA
+                     OB%J2 = MIN(OB%J1+1,JBAR)
+                  ENDIF
+                  IF (OB%K1==OB%K2) THEN
+                     OB%K1 = GINV(.5_EB*(XB5+XB6)-ZS,3,NM)*RDZETA
+                     OB%K2 = MIN(OB%K1+1,KBAR)
+                  ENDIF
+               ELSE
+                  !Don't allow thickening if an OBST straddles the midpoint and is small compared to grid cell
+                  IF (GINV(XB2-XS,1,NM)-GINV(XB1-XS,1,NM)<0.25_EB/RDXI .AND. OB%I1 /= OB%I2) THEN
+                     IF(GINV(XB1-XS,1,NM)-REAL(OB%I1,EB) < REAL(OB%I2,EB) - GINV(XB2-XS,1,NM)) THEN
+                        OB%I2=OB%I1
+                     ELSE
+                        OB%I1=OB%I2
+                     ENDIF
+                  ENDIF
+                  IF (GINV(XB4-YS,2,NM)-GINV(XB3-YS,2,NM)<0.25_EB/RDETA .AND. OB%J1 /= OB%J2) THEN
+                     IF(GINV(XB3-XS,2,NM)-REAL(OB%J1,EB) < REAL(OB%J2,EB) - GINV(XB4-YS,2,NM)) THEN
+                        OB%J2=OB%J1
+                     ELSE
+                        OB%J1=OB%J2
+                     ENDIF
+                  ENDIF
+                  IF (GINV(XB6-ZS,3,NM)-GINV(XB5-ZS,3,NM)<0.25_EB/RDZETA .AND. OB%K1 /= OB%K2) THEN
+                     IF(GINV(XB5-ZS,3,NM)-REAL(OB%I1,EB) < REAL(OB%I2,EB) - GINV(XB6-ZS,3,NM)) THEN
+                        OB%K2=OB%K1
+                     ELSE
+                        OB%K1=OB%K2
+                     ENDIF
+                  ENDIF                  
                ENDIF
 
                ! Throw out obstructions that are too small
