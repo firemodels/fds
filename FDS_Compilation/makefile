@@ -313,7 +313,7 @@ intel_osx_64 : setup $(obj_serial)
 
 mpi_intel_osx_64 : FFLAGS  = -O2 -m64 -heap-arrays -vec_report0 -ipo -mmacosx-version-min=10.4
 mpi_intel_osx_64 : LFLAGS  = -L$(MPIDIST)/lib -static-intel
-mpi_intel_osx_64 : FCOMPL  = mpif77
+mpi_intel_osx_64 : FCOMPL  = mpifort
 mpi_intel_osx_64 : obj = fds_mpi_intel_osx_64
 mpi_intel_osx_64 : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) $(LFLAGS) -o $(obj) $(obj_mpi)
@@ -335,7 +335,7 @@ intel_osx_64_db : setup $(obj_serial)
 
 mpi_intel_osx_64_db : FFLAGS = -m64 -check -warn unused -O0 -auto -WB -traceback -g -fpe0 -fltconsistency -vec_report0 -stand:f03 -mmacosx-version-min=10.4
 mpi_intel_osx_64_db : LFLAGS = -L$(MPIDIST)/lib -static-intel
-mpi_intel_osx_64_db : FCOMPL = mpif77
+mpi_intel_osx_64_db : FCOMPL = mpifort
 mpi_intel_osx_64_db : obj = fds_mpi_intel_osx_64_db
 mpi_intel_osx_64_db : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_mpi)
@@ -456,7 +456,7 @@ pgi_linux_64 : $(obj_serial)
 
 # AMD Opteron 64Bit PC
 mpi_pgi_linux_64 : FFLAGS = -fast -tp k8-64 -Mstandard
-mpi_pgi_linux_64 : FCOMPL = mpif77
+mpi_pgi_linux_64 : FCOMPL = mpifort
 mpi_pgi_linux_64 : LFLAGS  = -fast -tp k8-64 -byteswapio -Bstatic -lc -lgcc_eh
 mpi_pgi_linux_64 : obj = fds_mpi_pgi_Opteron64
 mpi_pgi_linux_64 : $(obj_mpi)
@@ -507,7 +507,7 @@ gnu_osx : $(obj_serial)
 	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_serial)
 
 mpi_gnu_linux : FFLAGS = -O2
-mpi_gnu_linux : FCOMPL = mpif77
+mpi_gnu_linux : FCOMPL = mpifort
 mpi_gnu_linux : obj = fds_mpi_gnu_linux
 mpi_gnu_linux : setup $(obj_mpi) 
 	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_mpi) 
