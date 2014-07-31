@@ -77,9 +77,10 @@ radi.obj: FFLAGS += $(FOPENMPFLAGS)
 
 intel_win_64_ps : FFLAGS = -O2 /Qipo /Qvec_report0  
 intel_win_64_ps : FCOMPL = ifort
+intel_win_64_ps : FOPENMPFLAGS = /Qopenmp
 intel_win_64_ps : obj = fds_win_64_ps
 intel_win_64_ps : setup_win $(objwin_serial)
-	$(FCOMPL) -o $(obj) $(FFLAGS) /F1000000000 $(objwin_serial) /link /SUBSYSTEM:CONSOLE,5.02
+	$(FCOMPL) -o $(obj) $(FFLAGS) $(FOPENMPFLAGS) /F1000000000 $(objwin_serial) /link /SUBSYSTEM:CONSOLE,5.02
 
 intel_win_64 : FFLAGS = /O2 /Qvec_report0 /Qipo
 intel_win_64 : FCOMPL = ifort
@@ -109,7 +110,7 @@ mpi_intel_win_64 : FOPENMPFLAGS = /Qopenmp
 mpi_intel_win_64 : FCOMPL = mpiifort
 mpi_intel_win_64 : obj = fds_mpi_win_64
 mpi_intel_win_64 : setup_win $(objwin_mpi)
-	$(FCOMPL) -o $(obj) $(FFLAGS) /F1000000000 $(objwin_mpi) $(MPILIB)
+	$(FCOMPL) -o $(obj) $(FFLAGS) $(FOPENMPFLAGS) /F1000000000 $(objwin_mpi) $(MPILIB)
 
 mpi_intel_win_64_db : MPILIB = "C:\Program Files (x86)\Intel\MPI\5.0.0.028\intel64\lib\impi.lib"
 mpi_intel_win_64_db : MPIINCLUDE = "C:\Program Files (x86)\Intel\MPI\5.0.0.028\intel64\include"
@@ -118,7 +119,7 @@ mpi_intel_win_64 : FOPENMPFLAGS = /Qopenmp
 mpi_intel_win_64_db : FCOMPL = mpiifort
 mpi_intel_win_64_db : obj = fds_mpi_win_64_db
 mpi_intel_win_64_db : setup_win $(objwin_mpi)
-	$(FCOMPL) -o $(obj) $(FFLAGS) /F1000000000 $(objwin_mpi) $(MPILIB)
+	$(FCOMPL) -o $(obj) $(FFLAGS) $(FOPENMPFLAGS) /F1000000000 $(objwin_mpi) $(MPILIB)
 
 # Intel Compiler for Linux
 
