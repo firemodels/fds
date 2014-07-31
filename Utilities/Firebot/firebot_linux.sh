@@ -631,7 +631,7 @@ compile_fds()
    # Clean and compile FDS
    cd $FDS_SVNROOT/FDS_Compilation/intel_linux_64
    make -f ../makefile clean &> /dev/null
-   ./make_fds.sh &> $FIREBOT_DIR/output/stage4c
+   ./make_fds.sh &> $FIREBOT_DIR/output/stage4a
 }
 
 check_compile_fds()
@@ -640,22 +640,22 @@ check_compile_fds()
    cd $FDS_SVNROOT/FDS_Compilation/intel_linux_64
    if [ -e "fds_intel_linux_64" ]
    then
-      stage4c_success=true
+      stage4a_success=true
    else
-      echo "Errors from Stage 4c - Compile FDS release:" >> $ERROR_LOG
-      cat $FIREBOT_DIR/output/stage4c >> $ERROR_LOG
+      echo "Errors from Stage 4a - Compile FDS release:" >> $ERROR_LOG
+      cat $FIREBOT_DIR/output/stage4a >> $ERROR_LOG
       echo "" >> $ERROR_LOG
    fi
 
    # Check for compiler warnings/remarks
    # 'performing multi-file optimizations' and 'generating object file' are part of a normal compile
-   if [[ `grep -A 5 -E 'warning|remark' ${FIREBOT_DIR}/output/stage4c | grep -v 'performing multi-file optimizations' | grep -v 'generating object file'` == "" ]]
+   if [[ `grep -A 5 -E 'warning|remark' ${FIREBOT_DIR}/output/stage4a | grep -v 'performing multi-file optimizations' | grep -v 'generating object file'` == "" ]]
    then
       # Continue along
       :
    else
-      echo "Warnings from Stage 4c - Compile FDS release:" >> $WARNING_LOG
-      grep -A 5 -E 'warning|remark' ${FIREBOT_DIR}/output/stage4c | grep -v 'performing multi-file optimizations' | grep -v 'generating object file' >> $WARNING_LOG
+      echo "Warnings from Stage 4a - Compile FDS release:" >> $WARNING_LOG
+      grep -A 5 -E 'warning|remark' ${FIREBOT_DIR}/output/stage4a | grep -v 'performing multi-file optimizations' | grep -v 'generating object file' >> $WARNING_LOG
       echo "" >> $WARNING_LOG
    fi
 }
