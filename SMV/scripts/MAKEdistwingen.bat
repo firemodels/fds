@@ -77,10 +77,8 @@ CALL :COPY  smokeview.ini %smvdir%\smokeview.ini
 
 CALL :COPY  objects.svo %smvdir%\.
 
-if "%platform%"=="32" CALL :COPY  glew32.dll %smvdir%\.
 if "%platform%"=="64" CALL :COPY  glew32_x64.dll %smvdir%\.
 
-if "%platform%"=="32" CALL :COPY  pthreadVC.dll %smvdir%\.
 if "%platform%"=="64" CALL :COPY  pthreadVC2_x64.dll %smvdir%\.
 
 CALL :COPY  %sh2bat%\sh2bat.exe %smvdir%\.

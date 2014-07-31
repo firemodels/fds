@@ -1,9 +1,7 @@
 @echo off
-Title Building Smokeview for 32 bit Linux
+Title Building 64 bit Linux libraries for smokeview
 
-Rem  Windows batch file to build a release Smokeview for Linux 32.
-
-Rem setup environment variables (defining where repository resides etc) 
+:: setup environment variables (defining where repository resides etc) 
 
 set envfile="%userprofile%"\fds_smv_env.bat
 IF EXIST %envfile% GOTO endif_envexist
@@ -24,8 +22,6 @@ cd %svn_root%\smv\scripts
 
 set scriptdir=FDS-SMV/Utilities/Scripts
 set LIBDIR=FDS-SMV/SMV/Build/LIBS
-
-plink %svn_logon% %scriptdir%/ssh_command2.csh %linux_hostname% %LIBDIR%/lib_linux_intel_32 makelibs.sh
 
 plink %svn_logon% %scriptdir%/ssh_command2.csh %linux_hostname% %LIBDIR%/lib_linux_intel_64 makelibs.sh
 

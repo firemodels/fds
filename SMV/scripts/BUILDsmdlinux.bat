@@ -1,8 +1,6 @@
 @echo off
 Title Building Smokediff for Linux
 
-Rem  Windows batch file to build 32 and 64 bit Linux versions of smokediff
-
 Rem setup environment variables (defining where repository resides etc) 
 
 set envfile="%userprofile%"\fds_smv_env.bat

@@ -33,17 +33,4 @@ make -f ..\Makefile intel_win_64
 echo.
 echo 64 bit fds2ascii compilation complete
 echo.
-echo ---------------------------------------------
-echo Building 32 bit Windows versions of fds2ascii
-echo ---------------------------------------------
-
-%svn_drive%
-cd %svn_root%\Utilities\fds2ascii\intel_win_32
-call "%IFORT_COMPILER14%\bin\compilervars" ia32 > Nul
-Title Building fds2ascii for 32 bit Windows
-erase *.obj
-make -f ..\Makefile intel_win_32
-
-echo.
-echo 32 bit fds2ascii compilation complete
 pause

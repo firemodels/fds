@@ -64,10 +64,8 @@ CALL :COPY ..\..\Utilities\Scripts\bundle_setup\set_path.exe %smvdir%\set_path.e
 
 CALL :COPY objects.svo %smvdir%\.
 
-if "%platform%"=="32" CALL :COPY glew32.dll %smvdir%\glew32.dll
 if "%platform%"=="64" CALL :COPY glew32_x64.dll %smvdir%\glew32_x64.dll
 
-if "%platform%"=="32" CALL :COPY pthreadVC.dll %smvdir%\pthreadVC.dll
 if "%platform%"=="64" CALL :COPY pthreadVC2_x64.dll %smvdir%\pthreadVC2_x64.dll
 
 CALL :COPY %sh2bat%\sh2bat.exe %smvdir%\sh2bat.exe

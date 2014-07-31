@@ -30,13 +30,4 @@ call "%IFORT_COMPILER14%\bin\compilervars" intel64
 erase *.obj *.mod
 make -f ..\Makefile intel_win_64
 
-echo.
-echo --------------------------------------------
-echo Building 32 bit Windows versions of wind2fds
-echo --------------------------------------------
-
-cd %svn_root%\Utilities\wind2fds\intel_win_32
-call "%IFORT_COMPILER14%\bin\compilervars" ia32
-erase *.obj *.mod
-make -f ..\Makefile intel_win_32
 pause
