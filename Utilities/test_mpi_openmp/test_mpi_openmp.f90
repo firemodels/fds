@@ -87,7 +87,7 @@ if (rank .eq. 0) then
    ! This requires MPI_THREAD_SERIALIZED.
 
    !$OMP CRITICAL
-   write(*,91) "Hello from thread ",threadID," of ",nthreads," in rank ",rank," of ",nproc," on ",trim(name)
+   write(*,91) "Hello from OpenMP thread ",threadID+1," of ",nthreads," on MPI process ",rank+1," of ",nproc," (",trim(name),")"
    !$OMP END CRITICAL
 
    !$OMP BARRIER
@@ -110,7 +110,8 @@ if (rank .eq. 0) then
          call MPI_RECV(dThread,  1, MPI_INTEGER, r, 10*r+2,            MPI_COMM_WORLD, stat, ierr)
          call MPI_RECV(dNamelen, 1, MPI_INTEGER, r, 1000*r+10*dThread, MPI_COMM_WORLD, stat, ierr)
          call MPI_RECV(dName, dNamelen, MPI_CHARACTER, r, 1000*r+10*dThread+1, MPI_COMM_WORLD, stat, ierr)
-         write(*,91) "Hello from thread ",dThread," of ", sNthreads," in rank ",dRank," of ",nproc," on ",dName(1:dNamelen)
+         write(*,91) "Hello from OpenMP thread ",dThread+1," of ", sNthreads," on MPI process ",dRank+1," of ",nproc," (",&
+                     dName(1:dNamelen),")"
       end do
    end do
    !$OMP END MASTER
@@ -145,6 +146,6 @@ stop
 
 ! Format statement
 
-91 format(a,i3,a,i3,a,i3,a,i3,a,a)
+91 format(a,i3,a,i3,a,i3,a,i3,a,a,a)
 
 end program test_mpi_openmp
