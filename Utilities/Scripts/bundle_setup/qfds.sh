@@ -12,6 +12,7 @@ queue=batch
 
 nprocesses=1
 nprocesses_per_node=1
+nthreads=1
 
 if [ $# -lt 1 ]
 then
@@ -27,7 +28,7 @@ then
   echo " -d directory [default: .]"
   echo " -n processes per node - maximum number of processes per node [default: 1]"
   echo "    (serial: 1, parallel: 8 for new cluster and fire70s, 4 for the vis queues)"
-  echo " -o nthreads - run OpenMP version of FDS with a specified number of threads [default: 8]"
+  echo " -o nthreads - run FDS (OpenMP) with a specified number of threads [default: $nthreads]"
   echo " -p nprocesses - number of processes used to run a case [default: 1] "
   echo " -q queue - name of the queue. choices: [default: $queue (other choices:"  
   echo "    vis and fire70s)"
@@ -90,8 +91,6 @@ case $OPTION  in
    ;;
   o)
    nthreads="$OPTARG"
-   OPENMP=openmp_
-   RUN_OPENMP=1
    ;;
   p)
    nprocesses="$OPTARG"
@@ -158,7 +157,7 @@ else
     exe="$FDSROOT/Verification/scripts/runsmv_single.sh"
     exe2="-x -y $STARTFRAME -z $SKIPFRAME $SCRIPTFILE"
   else
-    exe=$FDSROOT/FDS_Compilation/${OPENMP}intel_linux_64$DB/fds_${OPENMP}intel_linux_64$DB
+    exe=$FDSROOT/FDS_Compilation/intel_linux_64$DB/fds_intel_linux_64$DB
   fi
  fi
  in=$1
@@ -194,10 +193,8 @@ if [ "$USE_SMOKEVIEW" == "y" ] ; then
   TITLE="$infile(SMV)"
 fi
 
-if [ $RUN_OPENMP ] ; then
-  nprocesses=$nthreads
-  nprocesses_per_node=$nthreads
-fi
+nprocesses=$nthreads
+nprocesses_per_node=$nthreads
 
 nnodes=$(echo "($nprocesses-1)/$nprocesses_per_node+1" | bc)
 if test $nnodes -le 0
