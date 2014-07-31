@@ -46,10 +46,8 @@ setup_win:
 .f90.obj:
 	$(FCOMPL) -c $(FFLAGS) $<
 
-# Files which have OpenMP compiler directives are compiled using the
-# FOPENMPFLAG and can be enabled/disabled on a per-file basis below.
-# If the target name includes "openmp", then the OpenMP flags are appended.
-ifeq ($(findstring openmp, $(MAKECMDGOALS)), openmp)
+# Files which have OpenMP compiler directives are compiled using the FOPENMPFLAG and can be enabled/disabled on a per-file basis.
+
 divg.o: FFLAGS += $(FOPENMPFLAGS)
 # fire.o: FFLAGS += $(FOPENMPFLAGS)
 func.o: FFLAGS += $(FOPENMPFLAGS)
@@ -72,18 +70,10 @@ turb.obj: FFLAGS += $(FOPENMPFLAGS)
 velo.obj: FFLAGS += $(FOPENMPFLAGS)
 radi.obj: FFLAGS += $(FOPENMPFLAGS)
 
-endif
-
 # Windows Intel Compiler
 
- #*** note: the following scripts (located in ..\Scripts directory) must be run before running make with this target
- #    ..\Scripts\ifortvars intel64
-
-intel_win_64 : FFLAGS = /O2 /Qvec_report0 /Qipo
-intel_win_64 : FCOMPL = ifort
-intel_win_64 : obj = fds_win_64
-intel_win_64 : setup_win $(objwin_serial)
-	$(FCOMPL) -o $(obj) $(FFLAGS) /F1000000000 $(objwin_serial)
+#*** note: the following scripts (located in ..\Scripts directory) must be run before running make with this target
+#    ..\Scripts\ifortvars intel64
 
 intel_win_64_ps : FFLAGS = -O2 /Qipo /Qvec_report0  
 intel_win_64_ps : FCOMPL = ifort
@@ -91,97 +81,44 @@ intel_win_64_ps : obj = fds_win_64_ps
 intel_win_64_ps : setup_win $(objwin_serial)
 	$(FCOMPL) -o $(obj) $(FFLAGS) /F1000000000 $(objwin_serial) /link /SUBSYSTEM:CONSOLE,5.02
 
-openmp_intel_win_64 : FFLAGS = /O2 /Qvec_report0 /Qipo
-openmp_intel_win_64 : FCOMPL = ifort
-openmp_intel_win_64 : FOPENMPFLAGS = /Qopenmp
-openmp_intel_win_64 : obj = fds_openmp_win_64
-openmp_intel_win_64 : setup_win $(objwin_serial)
+intel_win_64 : FFLAGS = /O2 /Qvec_report0 /Qipo
+intel_win_64 : FCOMPL = ifort
+intel_win_64 : FOPENMPFLAGS = /Qopenmp
+intel_win_64 : obj = fds_win_64
+intel_win_64 : setup_win $(objwin_serial)
 	$(FCOMPL) -o $(obj) $(FFLAGS) $(FOPENMPFLAGS) /F1000000000 $(objwin_serial)
 
 intel_win_64_dv : FFLAGS = /O2 /Qvec_report0
 intel_win_64_dv : FCOMPL = ifort
+intel_win_64_dv : FOPENMPFLAGS = /Qopenmp
 intel_win_64_dv : obj = fds_win_64_dv
 intel_win_64_dv : setup_win $(objwin_serial)
-	$(FCOMPL) -o $(obj) $(FFLAGS) /F1000000000 $(objwin_serial)
-
-openmp_intel_win_64_dv : FFLAGS = /O2 /Qvec_report0
-openmp_intel_win_64_dv : FCOMPL = ifort
-openmp_intel_win_64_dv : FOPENMPFLAGS = /Qopenmp
-openmp_intel_win_64_dv : obj = fds_openmp_win_64_dv
-openmp_intel_win_64_dv : setup_win $(objwin_serial)
 	$(FCOMPL) -o $(obj) $(FFLAGS) $(FOPENMPFLAGS) /F1000000000 $(objwin_serial)
 
-intel_win_64_db : FFLAGS = /Qvec_report0 /nologo /debug:full /Od /extend_source:132 /warn:unused /warn:nointerfaces /Qtrapuv /fp:strict /fp:except /traceback /check:all /stand:f03
+intel_win_64_db : FFLAGS = /Od /Qvec_report0 /nologo /debug:full /extend_source:132 /traceback /stand:f03 /Zi /MDd
 intel_win_64_db : FCOMPL = ifort
+intel_win_64_db : FOPENMPFLAGS = /Qopenmp
 intel_win_64_db : obj = fds_win_64_db
 intel_win_64_db : setup_win $(objwin_serial)
-	$(FCOMPL) -o $(obj) $(FFLAGS) /F1000000000 $(objwin_serial)
-
-openmp_intel_win_64_db : FFLAGS = $(FOPTIMIZATIONFLAGS) /Qvec_report0 /nologo /debug:full /extend_source:132 /traceback /stand:f03 /Zi /MDd
-openmp_intel_win_64_db : FCOMPL = ifort
-openmp_intel_win_64_db : FOPENMPFLAGS = /Qopenmp
-openmp_intel_win_64_db : FOPTIMIZATIONFLAGS = /Od
-openmp_intel_win_64_db : obj = fds_openmp_win_64_db
-openmp_intel_win_64_db : setup_win $(objwin_serial)
 	$(FCOMPL) -o $(obj) $(FFLAGS) $(FOPENMPFLAGS) /F1000000000 $(objwin_serial)
 
-mpi_intel_win_64 : MPILIB = "c:\program files\mpich2\lib\fmpich2.lib"
-mpi_intel_win_64 : MPIINCLUDE = "c:\program files\mpich2\include"
-mpi_intel_win_64 : FFLAGS = /O2 /Qipo /Qvec_report0 /I $(MPIINCLUDE)
-mpi_intel_win_64 : FCOMPL = ifort
+mpi_intel_win_64 : MPILIB = "C:\Program Files (x86)\Intel\MPI\5.0.0.028\intel64\lib\impi.lib"
+mpi_intel_win_64 : MPIINCLUDE = "C:\Program Files (x86)\Intel\MPI\5.0.0.028\intel64\include"
+mpi_intel_win_64 : FFLAGS = /Qipo /O2 /Qvec_report0 /I$(MPIINCLUDE)
+mpi_intel_win_64 : FOPENMPFLAGS = /Qopenmp
+mpi_intel_win_64 : FCOMPL = mpiifort
 mpi_intel_win_64 : obj = fds_mpi_win_64
 mpi_intel_win_64 : setup_win $(objwin_mpi)
-	$(FCOMPL) -o $(obj) $(FFLAGS)  /F1000000000 $(objwin_mpi) $(MPILIB)
-
-impi_intel_win_64 : MPILIB = "C:\Program Files (x86)\Intel\MPI\5.0.0.028\intel64\lib\impi.lib"
-impi_intel_win_64 : MPIINCLUDE = "C:\Program Files (x86)\Intel\MPI\5.0.0.028\intel64\include"
-impi_intel_win_64 : FFLAGS = /Qipo /O2 /Qvec_report0 /I$(MPIINCLUDE)
-impi_intel_win_64 : FCOMPL = mpiifort
-impi_intel_win_64 : obj = fds_impi_win_64
-impi_intel_win_64 : setup_win $(objwin_mpi)
 	$(FCOMPL) -o $(obj) $(FFLAGS) /F1000000000 $(objwin_mpi) $(MPILIB)
 
-impi_intel_win_64_db : MPILIB = "C:\Program Files (x86)\Intel\MPI\5.0.0.028\intel64\lib\impi.lib"
-impi_intel_win_64_db : MPIINCLUDE = "C:\Program Files (x86)\Intel\MPI\5.0.0.028\intel64\include"
-impi_intel_win_64_db : FFLAGS = /Od /Qvec_report0 /nologo /debug:all /I$(MPIINCLUDE) /extend_source:132 /warn:unused /warn:nointerfaces /Qtrapuv /fp:strict /fp:except /traceback /check:all /stand:f03
-impi_intel_win_64_db : FCOMPL = mpiifort
-impi_intel_win_64_db : obj = fds_impi_win_64_db
-impi_intel_win_64_db : setup_win $(objwin_mpi)
-	$(FCOMPL) -o $(obj) $(FFLAGS) /F1000000000 $(objwin_mpi) $(MPILIB)
-
-mpi_intel_win_64_ps : MPILIB = "c:\program files\mpich2\lib\fmpich2.lib"
-mpi_intel_win_64_ps : MPIINCLUDE = "c:\program files\mpich2\include"
-mpi_intel_win_64_ps : FFLAGS = -O2 /Qipo /Qvec_report0  /QxHost  /I $(MPIINCLUDE)
-mpi_intel_win_64_ps : FCOMPL = ifort
-mpi_intel_win_64_ps : obj = fds_mpi_win_64_ps
-mpi_intel_win_64_ps : setup_win $(objwin_mpi)
-	$(FCOMPL) -o $(obj) $(FFLAGS)  /F1000000000 $(objwin_mpi) $(MPILIB) /link /SUBSYSTEM:CONSOLE,5.02
-
-openmp_mpi_intel_win_64 : MPILIB = "c:\program files\mpich2\lib\fmpich2.lib"
-openmp_mpi_intel_win_64 : MPIINCLUDE = "c:\program files\mpich2\include"
-openmp_mpi_intel_win_64 : FFLAGS = /O2 /Qipo /Qvec_report0 /I $(MPIINCLUDE)
-openmp_mpi_intel_win_64 : FCOMPL = ifort
-openmp_mpi_intel_win_64 : FOPENMPFLAGS = /Qopenmp
-openmp_mpi_intel_win_64 : obj = fds_openmp_mpi_win_64
-openmp_mpi_intel_win_64 : setup_win $(objwin_mpi)
-	$(FCOMPL) -o $(obj) $(FFLAGS) $(FOPENMPFLAGS) /F1000000000 $(objwin_mpi) $(MPILIB)
-
-mpi_intel_win_64_db : MPILIB = "c:\program files\mpich2\lib\fmpich2.lib"
-mpi_intel_win_64_db : MPIINCLUDE = "c:\program files\mpich2\include"
-mpi_intel_win_64_db : FFLAGS = /Od /I $(MPIINCLUDE) /Qvec_report0 /nologo /debug:full /extend_source:132 /warn:unused /warn:nointerfaces /Qtrapuv /fp:strict /fp:except /traceback /check:all /stand:f03
-mpi_intel_win_64_db : FCOMPL = ifort
+mpi_intel_win_64_db : MPILIB = "C:\Program Files (x86)\Intel\MPI\5.0.0.028\intel64\lib\impi.lib"
+mpi_intel_win_64_db : MPIINCLUDE = "C:\Program Files (x86)\Intel\MPI\5.0.0.028\intel64\include"
+mpi_intel_win_64_db : FFLAGS = /Od /Qvec_report0 /nologo /debug:all /I$(MPIINCLUDE) /extend_source:132 /warn:unused /warn:nointerfaces /Qtrapuv /fp:strict /fp:except /traceback /check:all /stand:f03
+mpi_intel_win_64 : FOPENMPFLAGS = /Qopenmp
+mpi_intel_win_64_db : FCOMPL = mpiifort
 mpi_intel_win_64_db : obj = fds_mpi_win_64_db
 mpi_intel_win_64_db : setup_win $(objwin_mpi)
 	$(FCOMPL) -o $(obj) $(FFLAGS) /F1000000000 $(objwin_mpi) $(MPILIB)
-
-openmp_mpi_intel_win_64_db : MPILIB = "c:\program files\mpich2\lib\fmpich2.lib"
-openmp_mpi_intel_win_64_db : MPIINCLUDE = "c:\program files\mpich2\include"
-openmp_mpi_intel_win_64_db : FFLAGS = /O2 /I $(MPIINCLUDE) /Qvec_report0 /nologo /debug:full /Od /extend_source:132 /warn:all /warn:nointerfaces /Qtrapuv /fp:strict /fp:except /traceback /check:all /stand:f03
-openmp_mpi_intel_win_64_db : FCOMPL = ifort
-openmp_mpi_intel_win_64_db : FOPENMPFLAGS = /Qopenmp
-openmp_mpi_intel_win_64_db : obj = fds_openmp_mpi_win_64_db
-openmp_mpi_intel_win_64_db : setup_win $(objwin_mpi)
-	$(FCOMPL) -o $(obj) $(FFLAGS) $(FOPENMPFLAGS) /F1000000000 $(objwin_mpi) $(MPILIB)
 
 # Intel Compiler for Linux
 
@@ -193,174 +130,99 @@ openmp_mpi_intel_win_64_db : setup_win $(objwin_mpi)
 intel_linux_64_profile : FFLAGS = -m64 -O2 -vec_report0 -p
 intel_linux_64_profile : LFLAGS = -static-intel
 intel_linux_64_profile : FCOMPL = ifort
+intel_linux_64_profile : FOPENMPFLAGS = -openmp -openmp-link static -liomp5
 intel_linux_64_profile : obj = fds_intel_linux_64_profile
 intel_linux_64_profile : setup $(obj_serial)
-	$(FCOMPL) $(FFLAGS) $(LFLAGS) -o $(obj) $(obj_serial)
-
-openmp_intel_linux_64_profile : FFLAGS = -m64 -O2 -vec_report0 -p
-openmp_intel_linux_64_profile : LFLAGS = -static-intel
-openmp_intel_linux_64_profile : FCOMPL = ifort
-openmp_intel_linux_64_profile : FOPENMPFLAGS = -openmp -openmp-link static -liomp5
-openmp_intel_linux_64_profile : obj = fds_openmp_intel_linux_64_profile
-openmp_intel_linux_64_profile : setup $(obj_serial)
 	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_serial)
 
 intel_linux_64 : FFLAGS = -m64 -O2 -vec_report0 -ipo
 intel_linux_64 : LFLAGS = -static-intel
 intel_linux_64 : FCOMPL = ifort
+intel_linux_64 : FOPENMPFLAGS = -openmp -openmp-link static -liomp5
 intel_linux_64 : obj = fds_intel_linux_64
 intel_linux_64 : setup $(obj_serial)
-	$(FCOMPL) $(FFLAGS) $(LFLAGS) -o $(obj) $(obj_serial)
-
-openmp_intel_linux_64 : FFLAGS = -m64 -O2 -vec_report0 -ipo
-openmp_intel_linux_64 : LFLAGS = -static-intel
-openmp_intel_linux_64 : FCOMPL = ifort
-openmp_intel_linux_64 : FOPENMPFLAGS = -openmp -openmp-link static -liomp5
-openmp_intel_linux_64 : obj = fds_openmp_intel_linux_64
-openmp_intel_linux_64 : setup $(obj_serial)
 	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_serial)
 
 intel_linux_64_dv : FFLAGS = -m64 -O2 -vec_report0 -traceback
 intel_linux_64_dv : LFLAGS = -static-intel
 intel_linux_64_dv : FCOMPL = ifort
+intel_linux_64_dv : FOPENMPFLAGS = -openmp -openmp-link static -liomp5
 intel_linux_64_dv : obj = fds_intel_linux_64_dv
 intel_linux_64_dv : setup $(obj_serial)
-	$(FCOMPL) $(FFLAGS) $(LFLAGS) -o $(obj) $(obj_serial)
-
-openmp_intel_linux_64_dv : FFLAGS = -m64 -O2 -vec_report0 -traceback
-openmp_intel_linux_64_dv : LFLAGS = -static-intel
-openmp_intel_linux_64_dv : FCOMPL = ifort
-openmp_intel_linux_64_dv : FOPENMPFLAGS = -openmp -openmp-link static -liomp5
-openmp_intel_linux_64_dv : obj = fds_openmp_intel_linux_64_dv
-openmp_intel_linux_64_dv : setup $(obj_serial)
 	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_serial)
 
 mpi_intel_linux_64 : FFLAGS = -m64 -O2 -vec_report0 -ipo
 mpi_intel_linux_64 : LFLAGS = -static-intel
 mpi_intel_linux_64 : FCOMPL = mpifort
+mpi_intel_linux_64 : FOPENMPFLAGS = -openmp -openmp-link static -liomp5
 mpi_intel_linux_64 : obj = fds_mpi_intel_linux_64
 mpi_intel_linux_64 : setup $(obj_mpi)
-	$(FCOMPL) $(FFLAGS) $(LFLAGS) -o $(obj) $(obj_mpi)
-
-mpi_intel_linux_64ib : FFLAGS = -m64 -O2 -vec_report0 -ipo
-mpi_intel_linux_64ib : LFLAGS = -static-intel
-mpi_intel_linux_64ib : FCOMPL = mpifort
-mpi_intel_linux_64ib : obj = fds_mpi_intel_linux_64ib
-mpi_intel_linux_64ib : setup $(obj_mpi)
-	$(FCOMPL) $(FFLAGS) $(LFLAGS) -o $(obj) $(obj_mpi)
-
-openmp_mpi_intel_linux_64 : FFLAGS = -m64 -O2 -vec_report0 -ipo
-openmp_mpi_intel_linux_64 : LFLAGS = -static-intel
-openmp_mpi_intel_linux_64 : FCOMPL = mpifort
-openmp_mpi_intel_linux_64 : FOPENMPFLAGS = -openmp -openmp-link static -liomp5
-openmp_mpi_intel_linux_64 : obj = fds_openmp_mpi_intel_linux_64
-openmp_mpi_intel_linux_64 : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi)
 
 intel_linux_64_db : FFLAGS = -m64 -check -warn unused -O0 -auto -WB -traceback -g -fpe0 -fltconsistency -vec_report0 -stand:f03
 intel_linux_64_db : LFLAGS = -static-intel
 intel_linux_64_db : FCOMPL = ifort
+intel_linux_64_db : FOPENMPFLAGS = -openmp -openmp-link static -liomp5
 intel_linux_64_db : obj = fds_intel_linux_64_db
 intel_linux_64_db : setup $(obj_serial)
-	$(FCOMPL) $(FFLAGS) $(LFLAGS) -o $(obj) $(obj_serial)
-
-openmp_intel_linux_64_db : FFLAGS = -m64 -check -warn unused -O0 -auto -WB -traceback -g -fpe0 -fltconsistency -vec_report0 -stand:f03
-openmp_intel_linux_64_db : LFLAGS = -static-intel
-openmp_intel_linux_64_db : FCOMPL = ifort
-openmp_intel_linux_64_db : FOPENMPFLAGS = -openmp -openmp-link static -liomp5
-openmp_intel_linux_64_db : obj = fds_openmp_intel_linux_64_db
-openmp_intel_linux_64_db : setup $(obj_serial)
 	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_serial)
 
-openmp_intel_linux_64_inspect : FFLAGS = -g -O0
-openmp_intel_linux_64_inspect : LFLAGS = -shared-intel
-openmp_intel_linux_64_inspect : FCOMPL = ifort
-openmp_intel_linux_64_inspect : FOPENMPFLAGS = -openmp
-openmp_intel_linux_64_inspect : obj = fds_openmp_intel_linux_64_inspect -liomp5
-openmp_intel_linux_64_inspect : setup $(obj_serial)
+intel_linux_64_inspect : FFLAGS = -g -O0
+intel_linux_64_inspect : LFLAGS = -shared-intel
+intel_linux_64_inspect : FCOMPL = ifort
+intel_linux_64_inspect : FOPENMPFLAGS = -openmp
+intel_linux_64_inspect : obj = fds_intel_linux_64_inspect -liomp5
+intel_linux_64_inspect : setup $(obj_serial)
 	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_serial)
 
 mpi_intel_linux_64_db : FFLAGS = -m64 -check -warn unused -O0 -auto -WB -traceback -g -fpe0 -fltconsistency -vec_report0
 mpi_intel_linux_64_db : LFLAGS = -static-intel
 mpi_intel_linux_64_db : FCOMPL = mpifort
+mpi_intel_linux_64_db : FOPENMPFLAGS = -openmp -openmp-link static -liomp5
 mpi_intel_linux_64_db : obj = fds_mpi_intel_linux_64_db
 mpi_intel_linux_64_db : setup $(obj_mpi)
-	$(FCOMPL) $(FFLAGS) $(LFLAGS) -o $(obj) $(obj_mpi)
-
-mpi_intel_linux_64ib_db : FFLAGS = -m64 -check -warn unused -O0 -auto -WB -traceback -g -fpe0 -fltconsistency -vec_report0
-mpi_intel_linux_64ib_db : LFLAGS = -static-intel
-mpi_intel_linux_64ib_db : FCOMPL = mpifort
-mpi_intel_linux_64ib_db : obj = fds_mpi_intel_linux_64ib_db
-mpi_intel_linux_64ib_db : setup $(obj_mpi)
-	$(FCOMPL) $(FFLAGS) $(LFLAGS) -o $(obj) $(obj_mpi)
-
-openmp_mpi_intel_linux_64_db : FFLAGS = -m64 -check -warn unused -O0 -auto -WB -traceback -g -fpe0 -fltconsistency -vec_report0
-openmp_mpi_intel_linux_64_db : LFLAGS = -static-intel
-openmp_mpi_intel_linux_64_db : FCOMPL = mpifort
-openmp_mpi_intel_linux_64_db : FOPENMPFLAGS = -openmp -openmp-link static -liomp5
-openmp_mpi_intel_linux_64_db : obj = fds_openmp_mpi_intel_linux_64_db
-openmp_mpi_intel_linux_64_db : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi)
 
 # OSX   
 
-intel_osx_64 : FFLAGS = -O2 -m64 -heap-arrays -ipo -mmacosx-version-min=10.4
+intel_osx_64 : FFLAGS = -m64 -O2 -vec_report0 -ipo
 intel_osx_64 : LFLAGS = -static-intel
+intel_osx_64 : FOPENMPFLAGS = -openmp -openmp-link static
 intel_osx_64 : FCOMPL = ifort
 intel_osx_64 : obj = fds_intel_osx_64
 intel_osx_64 : setup $(obj_serial)
-	$(FCOMPL) $(FFLAGS) $(LFLAGS) -o $(obj) $(obj_serial)
-
-mpi_intel_osx_64 : FFLAGS  = -O2 -m64 -heap-arrays -vec_report0 -ipo -mmacosx-version-min=10.4
-mpi_intel_osx_64 : LFLAGS  = -L$(MPIDIST)/lib -static-intel
-mpi_intel_osx_64 : FCOMPL  = mpifort
-mpi_intel_osx_64 : obj = fds_mpi_intel_osx_64
-mpi_intel_osx_64 : setup $(obj_mpi)
-	$(FCOMPL) $(FFLAGS) $(LFLAGS) -o $(obj) $(obj_mpi)
-
-openmp_intel_osx_64 : FFLAGS = -m64 -O2 -vec_report0 -ipo
-openmp_intel_osx_64 : LFLAGS = -static-intel
-openmp_intel_osx_64 : FCOMPL = ifort
-openmp_intel_osx_64 : FOPENMPFLAGS = -openmp -openmp-link static
-openmp_intel_osx_64 : obj = fds_openmp_intel_osx_64
-openmp_intel_osx_64 : setup $(obj_serial)
 	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_serial)
 
-intel_osx_64_db : FFLAGS = -m64 -check -warn unused -O0 -auto -WB -traceback -g -fpe0 -fltconsistency -vec_report0 -stand:f03 -mmacosx-version-min=10.4
+intel_osx_64_db : FFLAGS = -m64 -check -warn unused -O0 -auto -WB -traceback -g -fpe0 -fltconsistency -vec_report0 -stand:f03
 intel_osx_64_db : LFLAGS = -static-intel
+intel_osx_64_db : FOPENMPFLAGS = -openmp -openmp-link static
 intel_osx_64_db : FCOMPL = ifort
 intel_osx_64_db : obj = fds_intel_osx_64_db
 intel_osx_64_db : setup $(obj_serial)
-	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_serial)
+	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_serial)
 
-mpi_intel_osx_64_db : FFLAGS = -m64 -check -warn unused -O0 -auto -WB -traceback -g -fpe0 -fltconsistency -vec_report0 -stand:f03 -mmacosx-version-min=10.4
+mpi_intel_osx_64 : FFLAGS = -m64 -O2 -vec_report0 -ipo
+mpi_intel_osx_64 : LFLAGS = -L$(MPIDIST)/lib -static-intel
+mpi_intel_osx_64 : FOPENMPFLAGS = -openmp -openmp-link static
+mpi_intel_osx_64 : FCOMPL = mpifort
+mpi_intel_osx_64 : obj = fds_mpi_intel_osx_64
+mpi_intel_osx_64 : setup $(obj_mpi)
+	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi)
+
+mpi_intel_osx_64_db : FFLAGS = -m64 -check -warn unused -O0 -auto -WB -traceback -g -fpe0 -fltconsistency -vec_report0 -stand:f03
 mpi_intel_osx_64_db : LFLAGS = -L$(MPIDIST)/lib -static-intel
+mpi_intel_osx_64_db : FOPENMPFLAGS = -openmp -openmp-link static
 mpi_intel_osx_64_db : FCOMPL = mpifort
 mpi_intel_osx_64_db : obj = fds_mpi_intel_osx_64_db
 mpi_intel_osx_64_db : setup $(obj_mpi)
-	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_mpi)
+	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi)
 
-openmp_intel_osx_64_db : FFLAGS = -m64 -check -warn unused -O0 -auto -WB -traceback -g -fpe0 -fltconsistency -vec_report0 -stand:f03
-openmp_intel_osx_64_db : LFLAGS = -static-intel
-openmp_intel_osx_64_db : FCOMPL = ifort
-openmp_intel_osx_64_db : FOPENMPFLAGS = -openmp -openmp-link static
-openmp_intel_osx_64_db : obj = fds_openmp_intel_osx_64_db
-openmp_intel_osx_64_db : setup $(obj_serial)
-	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_serial)
-
-intel_osx_64_dv : FFLAGS = -m64 -O2 -vec_report0 -traceback -stand:f03 -mmacosx-version-min=10.4
+intel_osx_64_dv : FFLAGS = -m64 -O2 -vec_report0 -traceback -stand:f03
 intel_osx_64_dv : LFLAGS = -static-intel
+intel_osx_64_dv : FOPENMPFLAGS = -openmp -openmp-link static
 intel_osx_64_dv : FCOMPL = ifort
 intel_osx_64_dv : obj = fds_intel_osx_64_dv
 intel_osx_64_dv : setup $(obj_serial)
-	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_serial)
-
-openmp_intel_osx_64_dv : FFLAGS = -m64 -O2 -vec_report0 -traceback -stand:f03
-openmp_intel_osx_64_dv : LFLAGS = -static-intel
-openmp_intel_osx_64_dv : FCOMPL = ifort
-openmp_intel_osx_64_dv : FOPENMPFLAGS = -openmp -openmp-link static
-openmp_intel_osx_64_dv : obj = fds_openmp_intel_osx_64_dv
-openmp_intel_osx_64_dv : setup $(obj_serial)
 	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_serial)
 
 #*** IBM XLF Compiler ***
