@@ -1,5 +1,5 @@
 @echo off
-set intelbin="%IFORT_COMPILER13%\bin"
+set intelbin="%IFORT_COMPILER14%\bin"
 
 IF "%SETUP_IFORT_COMPILER_64%"=="1" GOTO envexist
 
