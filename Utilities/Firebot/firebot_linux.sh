@@ -367,9 +367,10 @@ check_compile_fds_db()
    cd $FDS_SVNROOT/FDS_Compilation/intel_linux_64_db
    if [ -e "fds_intel_linux_64_db" ]
    then
-      stage2a_success=true
+      # Continue along
+      :
    else
-      echo "Errors from Stage 2a - Compile FDS debug:" >> $ERROR_LOG
+      echo "Errors from Stage 2a - Compile and inspect FDS debug:" >> $ERROR_LOG
       cat $FIREBOT_DIR/output/stage2a >> $ERROR_LOG
       echo "" >> $ERROR_LOG
    fi
@@ -380,9 +381,35 @@ check_compile_fds_db()
       # Continue along
       :
    else
-      echo "Warnings from Stage 2a - Compile FDS debug:" >> $WARNING_LOG
+      echo "Warnings from Stage 2a - Compile and inspect FDS debug:" >> $WARNING_LOG
       grep -A 5 -E 'warning|remark' ${FIREBOT_DIR}/output/stage2a >> $WARNING_LOG
       echo "" >> $WARNING_LOG
+   fi
+}
+
+inspect_fds_db()
+{
+   # Perform OpenMP thread checking (locate deadlocks and data races)
+   cd $FDS_SVNROOT/Utilities/Scripts
+   ./inspect_openmp.sh &> $FIREBOT_DIR/output/stage2a_inspect
+}
+
+check_inspect_fds_db()
+{
+   # Scan for errors in thread checking results
+   cd $FDS_SVNROOT/Utilities/Scripts
+   # grep -v 'Warning: One or more threads in the application accessed ...' ignores a known compiler warning that displays even without errors
+      if [[ `grep -i -E 'warning|remark|problem|error' ${FIREBOT_DIR}/output/stage2a_inspect | grep -v '0 new problem(s) found' | grep -v 'Warning: One or more threads in the application accessed the stack of another thread'` == "" ]]
+   then
+      # Continue along
+      :
+   else
+      echo "Errors from Stage 2a - Compile and inspect FDS debug:" >> $ERROR_LOG
+      cat ${FIREBOT_DIR}/output/stage2a_inspect >> $ERROR_LOG
+      echo "" >> $ERROR_LOG
+      echo "For more details, view the inspector log in the FDS-SMV/Utilities/Scripts folder" >> $ERROR_LOG
+      echo "by using the FDS-SMV/Utilities/Scripts/inspect_report.sh script." >> $ERROR_LOG
+      echo "" >> $ERROR_LOG
    fi
 }
 
@@ -421,70 +448,6 @@ check_compile_fds_mpi_db()
       echo "Warnings from Stage 2b - Compile FDS MPI debug:" >> $WARNING_LOG
       grep -A 5 -E 'warning|remark' ${FIREBOT_DIR}/output/stage2b | grep -v 'feupdateenv is not implemented' >> $WARNING_LOG
       echo "" >> $WARNING_LOG
-   fi
-}
-
-#  ===================================================
-#  = Stage 2c - Compile and inspect FDS OpenMP debug =
-#  ===================================================
-
-compile_fds_openmp_db()
-{
-   # Clean and compile FDS OpenMP debug
-   cd $FDS_SVNROOT/FDS_Compilation/openmp_intel_linux_64_db
-   make -f ../makefile clean &> /dev/null
-   ./make_fds.sh &> $FIREBOT_DIR/output/stage2c
-}
-
-check_compile_fds_openmp_db()
-{
-   # Check for errors in FDS OpenMP debug compilation
-   cd $FDS_SVNROOT/FDS_Compilation/openmp_intel_linux_64_db
-   if [ -e "fds_openmp_intel_linux_64_db" ]
-   then
-      # Continue along
-      :
-   else
-      echo "Errors from Stage 2c - Compile and inspect FDS OpenMP debug:" >> $ERROR_LOG
-      cat $FIREBOT_DIR/output/stage2c >> $ERROR_LOG
-      echo "" >> $ERROR_LOG
-   fi
-
-   # Check for compiler warnings/remarks
-   if [[ `grep -A 5 -E 'warning|remark' ${FIREBOT_DIR}/output/stage2c` == "" ]]
-   then
-      # Continue along
-      :
-   else
-      echo "Warnings from Stage 2c - Compile and inspect FDS OpenMP debug:" >> $WARNING_LOG
-      grep -A 5 -E 'warning|remark' ${FIREBOT_DIR}/output/stage2c >> $WARNING_LOG
-      echo "" >> $WARNING_LOG
-   fi
-}
-
-inspect_fds_openmp_db()
-{
-   # Perform OpenMP thread checking (locate deadlocks and data races)
-   cd $FDS_SVNROOT/Utilities/Scripts
-   ./inspect_openmp.sh &> $FIREBOT_DIR/output/stage2c_inspect
-}
-
-check_inspect_fds_openmp_db()
-{
-   # Scan for errors in thread checking results
-   cd $FDS_SVNROOT/Utilities/Scripts
-   # grep -v 'Warning: One or more threads in the application accessed ...' ignores a known compiler warning that displays even without errors
-      if [[ `grep -i -E 'warning|remark|problem|error' ${FIREBOT_DIR}/output/stage2c_inspect | grep -v '0 new problem(s) found' | grep -v 'Warning: One or more threads in the application accessed the stack of another thread'` == "" ]]
-   then
-      # Continue along
-      :
-   else
-      echo "Errors from Stage 2c - Compile and inspect FDS OpenMP debug:" >> $ERROR_LOG
-      cat ${FIREBOT_DIR}/output/stage2c_inspect >> $ERROR_LOG
-      echo "" >> $ERROR_LOG
-      echo "For more details, view the inspector log in the FDS-SMV/Utilities/Scripts folder" >> $ERROR_LOG
-      echo "by using the FDS-SMV/Utilities/Scripts/inspect_report.sh script." >> $ERROR_LOG
-      echo "" >> $ERROR_LOG
    fi
 }
 
@@ -545,16 +508,16 @@ run_verification_cases_debug()
 {
    # Start running all FDS verification cases in delayed stop debug mode
    cd $FDS_SVNROOT/Verification
-   # Run FDS with delayed stop files (with a maximum of 10 iterations)
+   # Run FDS with delayed stop files (with 1 OpenMP thread and a maximum of 10 iterations)
    echo 'Running FDS verification cases:' >> $FIREBOT_DIR/output/stage3
-   ./Run_FDS_Cases.sh $1 -d -m 10 -q $QUEUE >> $FIREBOT_DIR/output/stage3 2>&1
+   ./Run_FDS_Cases.sh -o 1 -d -m 10 -q $QUEUE >> $FIREBOT_DIR/output/stage3 2>&1
    echo "" >> $FIREBOT_DIR/output/stage3 2>&1
 
    # Start running all SMV verification cases in delayed stop debug mode
    cd $FDS_SVNROOT/Verification/scripts
-   # Run FDS with delayed stop files (with a maximum of 10 iterations)
+   # Run FDS with delayed stop files (with 1 OpenMP thread and a maximum of 10 iterations)
    echo 'Running SMV verification cases:' >> $FIREBOT_DIR/output/stage3 2>&1
-   ./Run_SMV_Cases.sh $1 -d -m 10 -q $QUEUE >> $FIREBOT_DIR/output/stage3 2>&1
+   ./Run_SMV_Cases.sh -o 1 -d -m 10 -q $QUEUE >> $FIREBOT_DIR/output/stage3 2>&1
    echo "" >> $FIREBOT_DIR/output/stage3 2>&1
 
    # Wait for all verification cases to end
@@ -668,7 +631,7 @@ compile_fds()
    # Clean and compile FDS
    cd $FDS_SVNROOT/FDS_Compilation/intel_linux_64
    make -f ../makefile clean &> /dev/null
-   ./make_fds.sh &> $FIREBOT_DIR/output/stage4a
+   ./make_fds.sh &> $FIREBOT_DIR/output/stage4c
 }
 
 check_compile_fds()
@@ -677,22 +640,22 @@ check_compile_fds()
    cd $FDS_SVNROOT/FDS_Compilation/intel_linux_64
    if [ -e "fds_intel_linux_64" ]
    then
-      stage4a_success=true
+      stage4c_success=true
    else
-      echo "Errors from Stage 4a - Compile FDS release:" >> $ERROR_LOG
-      cat $FIREBOT_DIR/output/stage4a >> $ERROR_LOG
+      echo "Errors from Stage 4c - Compile FDS release:" >> $ERROR_LOG
+      cat $FIREBOT_DIR/output/stage4c >> $ERROR_LOG
       echo "" >> $ERROR_LOG
    fi
 
    # Check for compiler warnings/remarks
    # 'performing multi-file optimizations' and 'generating object file' are part of a normal compile
-   if [[ `grep -A 5 -E 'warning|remark' ${FIREBOT_DIR}/output/stage4a | grep -v 'performing multi-file optimizations' | grep -v 'generating object file'` == "" ]]
+   if [[ `grep -A 5 -E 'warning|remark' ${FIREBOT_DIR}/output/stage4c | grep -v 'performing multi-file optimizations' | grep -v 'generating object file'` == "" ]]
    then
       # Continue along
       :
    else
-      echo "Warnings from Stage 4a - Compile FDS release:" >> $WARNING_LOG
-      grep -A 5 -E 'warning|remark' ${FIREBOT_DIR}/output/stage4a | grep -v 'performing multi-file optimizations' | grep -v 'generating object file' >> $WARNING_LOG
+      echo "Warnings from Stage 4c - Compile FDS release:" >> $WARNING_LOG
+      grep -A 5 -E 'warning|remark' ${FIREBOT_DIR}/output/stage4c | grep -v 'performing multi-file optimizations' | grep -v 'generating object file' >> $WARNING_LOG
       echo "" >> $WARNING_LOG
    fi
 }
@@ -732,44 +695,6 @@ check_compile_fds_mpi()
    else
       echo "Warnings from Stage 4b - Compile FDS MPI release:" >> $WARNING_LOG
       grep -A 5 -E 'warning|remark' ${FIREBOT_DIR}/output/stage4b | grep -v 'feupdateenv is not implemented' | grep -v 'performing multi-file optimizations' | grep -v 'generating object file' >> $WARNING_LOG
-      echo "" >> $WARNING_LOG
-   fi
-}
-
-#  =========================================
-#  = Stage 4c - Compile FDS OpenMP release =
-#  =========================================
-
-compile_fds_openmp()
-{
-   # Clean and compile FDS OpenMP
-   cd $FDS_SVNROOT/FDS_Compilation/openmp_intel_linux_64
-   make -f ../makefile clean &> /dev/null
-   ./make_fds.sh &> $FIREBOT_DIR/output/stage4c
-}
-
-check_compile_fds_openmp()
-{
-   # Check for errors in FDS OpenMP compilation
-   cd $FDS_SVNROOT/FDS_Compilation/openmp_intel_linux_64
-   if [ -e "fds_openmp_intel_linux_64" ]
-   then
-      stage4c_success=true
-   else
-      echo "Errors from Stage 4c - Compile FDS OpenMP release:" >> $ERROR_LOG
-      cat $FIREBOT_DIR/output/stage4c >> $ERROR_LOG
-      echo "" >> $ERROR_LOG
-   fi
-
-   # Check for compiler warnings/remarks
-   # 'performing multi-file optimizations' and 'generating object file' are part of a normal compile
-   if [[ `grep -A 5 -E 'warning|remark' ${FIREBOT_DIR}/output/stage4c | grep -v 'performing multi-file optimizations' | grep -v 'generating object file'` == "" ]]
-   then
-      # Continue along
-      :
-   else
-      echo "Warnings from Stage 4c - Compile FDS OpenMP release:" >> $WARNING_LOG
-      grep -A 5 -E 'warning|remark' ${FIREBOT_DIR}/output/stage4c | grep -v 'performing multi-file optimizations' | grep -v 'generating object file' >> $WARNING_LOG
       echo "" >> $WARNING_LOG
    fi
 }
@@ -886,14 +811,16 @@ run_verification_cases_release()
 {
    # Start running all FDS verification cases
    cd $FDS_SVNROOT/Verification
+   # Run FDS with 1 OpenMP thread
    echo 'Running FDS verification cases:' >> $FIREBOT_DIR/output/stage5
-   ./Run_FDS_Cases.sh $1 -q $QUEUE >> $FIREBOT_DIR/output/stage5 2>&1
+   ./Run_FDS_Cases.sh -o 1 -q $QUEUE >> $FIREBOT_DIR/output/stage5 2>&1
    echo "" >> $FIREBOT_DIR/output/stage5 2>&1
 
    # Start running all SMV verification cases
    cd $FDS_SVNROOT/Verification/scripts
+   # Run FDS with 1 OpenMP thread
    echo 'Running SMV verification cases:' >> $FIREBOT_DIR/output/stage5 2>&1
-   ./Run_SMV_Cases.sh $1 -q $QUEUE >> $FIREBOT_DIR/output/stage5 2>&1
+   ./Run_SMV_Cases.sh -o 1 -q $QUEUE >> $FIREBOT_DIR/output/stage5 2>&1
    echo "" >> $FIREBOT_DIR/output/stage5 2>&1
 
    # Wait for all verification cases to end
@@ -1473,19 +1400,12 @@ archive_compiler_version
 ### Stage 2a ###
 compile_fds_db
 check_compile_fds_db
+inspect_fds_db
+check_inspect_fds_db
 
 ### Stage 2b ###
 compile_fds_mpi_db
 check_compile_fds_mpi_db
-
-### Stage 2c ###
-# Only run if firebot is in "verification" mode
-if [ $FIREBOT_MODE == "verification" ] ; then
-   compile_fds_openmp_db
-   check_compile_fds_openmp_db
-   inspect_fds_openmp_db
-   check_inspect_fds_openmp_db
-fi
 
 ### Stage 3 ###
 # Only run if firebot is in "validation" mode
@@ -1495,8 +1415,7 @@ fi
 
 # Depends on successful FDS debug compile
 if [[ $stage2a_success && $stage2b_success && $FIREBOT_MODE == "verification" ]] ; then
-   # Run cases with OpenMP version of FDS with specified number of threads
-   run_verification_cases_debug "-o 1"
+   run_verification_cases_debug
    check_cases_debug $FDS_SVNROOT/Verification 'verification'
 
 elif [[ $stage2a_success && $stage2b_success && $FIREBOT_MODE == "validation" ]] ; then
@@ -1514,13 +1433,6 @@ check_compile_fds
 compile_fds_mpi
 check_compile_fds_mpi
 
-### Stage 4c ###
-# Only run if firebot is in "verification" mode
-if [ $FIREBOT_MODE == "verification" ] ; then
-   compile_fds_openmp
-   check_compile_fds_openmp
-fi
-
 ### Stage 5pre ###
 # Only run if firebot is in "verification" mode
 if [ $FIREBOT_MODE == "verification" ] ; then
@@ -1531,8 +1443,7 @@ fi
 ### Stage 5 ###
 # Depends on successful FDS compile
 if [[ $stage4a_success && $stage4b_success && $FIREBOT_MODE == "verification" ]] ; then
-   # Run cases with OpenMP version of FDS with specified number of threads
-   run_verification_cases_release "-o 1"
+   run_verification_cases_release
    check_cases_release $FDS_SVNROOT/Verification 'verification'
 
 elif [[ $stage4a_success && $stage4b_success && $FIREBOT_MODE == "validation" ]] ; then
