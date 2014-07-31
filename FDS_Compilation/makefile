@@ -345,42 +345,37 @@ aix_mpi : obj     = fds_jump_mpi_64
 aix_mpi : $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_mpi)
 
+
 #*** GNU Compilers ***
 
-#GCC and gfortran Version
-
-gnu_linux : FFLAGS  = -O2
-gnu_linux : FCOMPL  = gfortran
-gnu_linux : obj     = fds_gnu_linux
+gnu_linux : FFLAGS = -O2
+gnu_linux : FCOMPL = gfortran
+gnu_linux : FOPENMPFLAGS = -fopenmp
+gnu_linux : obj = fds_gnu_linux
 gnu_linux : $(obj_serial)
-	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_serial)
-
-openmp_gnu_linux : FFLAGS = -O2
-openmp_gnu_linux : FCOMPL = gfortran
-openmp_gnu_linux : FOPENMPFLAGS = -fopenmp
-openmp_gnu_linux : obj = fds_openmp_gnu_linux
-openmp_gnu_linux : $(obj_serial)
 	$(FCOMPL) $(FFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_serial)
 
 gnu_osx : FFLAGS  = -O2
 gnu_osx : FCOMPL  = gfortran
+gnu_osx : FOPENMPFLAGS = -fopenmp
 gnu_osx : obj     = fds_gnu_osx
 gnu_osx : $(obj_serial)
-	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_serial)
+	$(FCOMPL) $(FFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_serial)
 
 mpi_gnu_linux : FFLAGS = -O2
 mpi_gnu_linux : FCOMPL = mpifort
+mpi_gnu_linux : FOPENMPFLAGS = -fopenmp
 mpi_gnu_linux : obj = fds_mpi_gnu_linux
 mpi_gnu_linux : setup $(obj_mpi) 
-	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_mpi) 
+	$(FCOMPL) $(FFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi) 
 
 mpi_gnu_osx : FFLAGS = -O2
 mpi_gnu_osx : FCOMPL = mpif90
+mpi_gnu_osx : FOPENMPFLAGS = -fopenmp
 mpi_gnu_osx : obj = fds_mpi_gnu_osx
 mpi_gnu_osx : setup $(obj_mpi) 
-	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_mpi) 
+	$(FCOMPL) $(FFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi) 
 
-#*** End Compiler Specific Rules ***
 
 # *** Object Dependencies ***
 
