@@ -51,8 +51,8 @@ if "%size%" == "" (
   set CFASTEXE=cfast6
   set WIND2FDSEXE=wind2fds
 ) else (
-  set FDSBASE=fds_%OPENMP%win_%size%%DEBUG%.exe
-  set FDSEXE=%SVNROOT%\FDS_Compilation\%OPENMP%intel_win_%size%%DEBUG%\fds_%OPENMP%win_%size%%DEBUG%.exe
+  set FDSBASE=fds_%win_%size%%DEBUG%.exe
+  set FDSEXE=%SVNROOT%\FDS_Compilation\%intel_win_%size%%DEBUG%\fds_%win_%size%%DEBUG%.exe
   set CFASTEXE=%CFAST%\CFAST\intel_win_%size%\cfast6_win_%size%.exe
   set WIND2FDSEXE=%SVNROOT%\Utilities\wind2fds\intel_win_%size%\wind2fds_win_%size%.exe
 )

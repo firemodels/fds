@@ -1,20 +1,18 @@
 @echo off
 
-set OPENMP=
 set BASEDIR="%CD%"
 cd ..
 set SVNROOT="%CD%"
 cd %BASEDIR%
 set TIME_FILE="%BASEDIR%\fds_case_times.txt"
 
-::*** uncomment following two lines to use openmp
+::*** uncomment following two lines to use OpenMP
 
-:: set OPENMP=openmp_
-:: set OMP_NUM_THREADS=2
+:: set OMP_NUM_THREADS=1
 
 :: default FDS location
 
-set FDSEXE=%SVNROOT%\FDS_Compilation\%OPENMP%intel_win_64\fds_%OPENMP%win_64.exe
+set FDSEXE=%SVNROOT%\FDS_Compilation\%intel_win_64\fds_%win_64.exe
 
 ::*** uncomment following line to define a custom FDS location - (Do not commit un-commented)
 
