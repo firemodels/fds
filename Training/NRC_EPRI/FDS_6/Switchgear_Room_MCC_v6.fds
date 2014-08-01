@@ -9,7 +9,7 @@
 
 Construction
 
-&MISC SURF_DEFAULT='CONCRETE WALL' /
+&MISC SUPPRESSION=.FALSE. /
 
 &MATL ID            = 'CONCRETE'
       SPECIFIC_HEAT = 0.750
@@ -17,6 +17,7 @@ Construction
       DENSITY       = 2400. /
 
 &SURF ID            = 'CONCRETE WALL'
+      DEFAULT       = .TRUE.
       COLOR         = 'GRAY'
       MATL_ID       = 'CONCRETE'
       THICKNESS     = 0.6 /
