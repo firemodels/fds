@@ -9,6 +9,7 @@ PROG=$0
 
 progname=qfds.sh
 queue=batch
+haltjob=0
 
 nprocesses=1
 nprocesses_per_node=1
@@ -26,6 +27,7 @@ then
   echo ""
   echo " -b use debug version"
   echo " -d directory [default: .]"
+  echo " -h halt job"
   echo " -n processes per node - maximum number of processes per node [default: 1]"
   echo "    (serial: 1, parallel: 8 for new cluster and fire70s, 4 for the vis queues)"
   echo " -o nthreads - run FDS (OpenMP) with a specified number of threads [default: $nthreads]"
@@ -33,6 +35,7 @@ then
   echo " -q queue - name of the queue. choices: [default: $queue (other choices:"  
   echo "    vis and fire70s)"
   echo " -r - use FDS (or Smokeview if -s is specified) located in repository"
+  echo " -s - use FDS (or Smokeview if -s is specified) located in repository"
   echo " -t - used for timing studies, run a job alone on a node"
   echo " -f repository root - name and location of repository where FDS is located"
   echo "    [default: ~/FDS-SMV]"
@@ -69,7 +72,7 @@ fi
 
 # read in parameters from command line
 
-while getopts 'bd:f:m:n:o:p:q:rsxy:z:t' OPTION
+while getopts 'bd:f:hm:n:o:p:q:rsxy:z:t' OPTION
 do
 case $OPTION  in
   b)
@@ -81,6 +84,9 @@ case $OPTION  in
   f)
    FDSROOT="$OPTARG"
    use_repository=1
+   ;;
+  h)
+   haltjob=1
    ;;
   m)
    SCRIPTFILE="$OPTARG"
@@ -243,6 +249,11 @@ if [ "$ABORTRUN" == "y" ] ; then
   exit
 fi
 if [ $STOPFDS ]; then
+ echo "stopping case: $in"
+ touch $stopfile
+ exit
+fi
+if [ $haltjob ]; then
  echo "stopping case: $in"
  touch $stopfile
  exit
