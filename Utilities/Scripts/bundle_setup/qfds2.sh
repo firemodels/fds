@@ -134,7 +134,6 @@ else
 fi
 
 infile=${in%.*}
-echo infile=$infile
 
 # if there is more than 1 process then use the mpirun command
 
@@ -179,19 +178,25 @@ in_full_file=$fulldir/$in
 # make sure files that are needed exist
 
 if ! [ -e $in_full_file ]; then
-  echo "The input file, $in_full_file, does not exist. Run aborted."
-  ABORTRUN=y
+  if [ "$showinput" == "0" ] ; then
+    echo "The input file, $in_full_file, does not exist. Run aborted."
+    ABORTRUN=y
+  fi
 fi
 if ! [ -e $exe ]; then
-  echo "The program, $exe, does not exist. Run aborted."
-  ABORTRUN=y
+  if [ "$showinput" == "0" ] ; then
+    echo "The program, $exe, does not exist. Run aborted."
+    ABORTRUN=y
+  fi
 fi
 if [ -e $outlog ]; then
   echo "Removing log file: $outlog"
   rm $outlog
 fi
 if [ "$ABORTRUN" == "y" ] ; then
-  exit
+  if [ "$showinput" == "0" ] ; then
+    exit
+  fi
 fi
 if [ $STOPFDS ]; then
  echo "stopping case: $in"
@@ -233,14 +238,22 @@ echo Running $infile on \`hostname\`
 echo Directory: \`pwd\`
 $MPIRUN $exe $exe2 $in
 EOF
-echo "        Input file:$in"
-echo "        Executable:$exe"
-echo "             Queue:$queue"
-echo "         Processes:$nmpi_processes"
 if test $nmpi_processes -gt 1
 then
-echo "             Nodes:$nodes"
-echo "Processes per node:$nmpi_processes_per_node"
+  echo "                Input file:$in"
+  echo "                Executable:$exe"
+  echo "                     Queue:$queue"
+  echo "                     Nodes:$nodes"
+  echo "             MPI Processes:$nmpi_processes"
+  echo "    MPI Processes per node:$nmpi_processes_per_node"
+  echo "OpenMP threads per process:$nopenmp_threads"
+else
+  echo "        Input file:$in"
+  echo "        Executable:$exe"
+  echo "             Queue:$queue"
+  echo "         Processes:$nmpi_processes"
+  echo "             Nodes:$nodes"
+  echo "Processes per node:$nmpi_processes_per_node"
 fi
 chmod +x $scriptfile
 if [ "$showinput" == "1" ] ; then
