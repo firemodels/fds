@@ -3,7 +3,7 @@
 #PBS -o test_mpi_openmp.stdout
 #PBS -e test_mpi_openmp.stderr
 #PBS -q batch
-#PBS -l nodes=3:ppn=4
+#PBS -l nodes=3:ppn=8
 
 echo Working directory is $PBS_O_WORKDIR
 cd $PBS_O_WORKDIR
@@ -15,5 +15,5 @@ echo This job has allocated $NPROCS cores
 
 export OMP_NUM_THREADS=4
 
-mpirun --map-by node -np 3 ./test_mpi_openmp
+mpirun --map-by ppr:2:node -np 6 ./test_mpi_openmp
 
