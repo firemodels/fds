@@ -7,36 +7,25 @@ PROG=$0
 
 # setup default queue name
 
-progname=qfds.sh
+progname=qsmv.sh
 queue=batch
 haltjob=0
 
-nprocesses=1
-nprocesses_per_node=1
 nthreads=1
 
 if [ $# -lt 1 ]
 then
-  echo "Usage: $progname [-d directory] [-f repository root] [-n processes per node] [-o nthreads]"
-  echo "                 [-q queue] [-r] [-p nprocesses] [fds_command] casename.fds"
+  echo "Usage: $progname [-d directory] [-r] [-f repository root] [-q queue] [smokeview_command] casename"
   echo ""
-  echo "This script runs 64 bit serial or parallel versions of FDS using an executable"
-  echo "specified on the command line or FDS from the respository if -r is specified."
-  echo "The parallel FDS is invoked by using -p to specifying multiple processes."
+  echo "This script runs Smokeiew using an executable"
+  echo "specified on the command line or from the respository if -r is specified."
   echo "Alternate queues (vis, fire70s) are set using the -q option."
   echo ""
   echo " -b use debug version"
   echo " -d directory [default: .]"
-  echo " -h halt job"
-  echo " -n processes per node - maximum number of processes per node [default: 1]"
-  echo "    (serial: 1, parallel: 8 for new cluster and fire70s, 4 for the vis queues)"
-  echo " -o nthreads - run FDS (OpenMP) with a specified number of threads [default: $nthreads]"
-  echo " -p nprocesses - number of processes used to run a case [default: 1] "
   echo " -q queue - name of the queue. choices: [default: $queue (other choices:"  
   echo "    vis and fire70s)"
   echo " -r - use FDS (or Smokeview if -s is specified) located in repository"
-  echo " -s - use FDS (or Smokeview if -s is specified) located in repository"
-  echo " -t - used for timing studies, run a job alone on a node"
   echo " -f repository root - name and location of repository where FDS is located"
   echo "    [default: ~/FDS-SMV]"
   echo " command - full path to command name (not used if either -f or -r"
@@ -52,23 +41,15 @@ use_repository=0
 use_debug=0
 FDSROOT=~/FDS-SMV
 MPIRUN=
-nprocesses_per_node_defined=0
 dir=.
 # parameters used by Smokeview
-USE_SMOKEVIEW=
 VOLRENDER=
 SKIPFRAME=1
 STARTFRAME=0
 exe2=
 ABORTRUN=n
-IB=
 DB=
 SCRIPTFILE=
-benchmark=no
-
-if [ "$FDSNETWORK" == "infiniband" ] ; then
-IB=ib
-fi
 
 # read in parameters from command line
 
@@ -85,33 +66,14 @@ case $OPTION  in
    FDSROOT="$OPTARG"
    use_repository=1
    ;;
-  h)
-   haltjob=1
-   ;;
   m)
    SCRIPTFILE="$OPTARG"
-   ;;
-  n)
-   nprocesses_per_node="$OPTARG"
-   nprocesses_per_node_defined=1
-   ;;
-  o)
-   nthreads="$OPTARG"
-   ;;
-  p)
-   nprocesses="$OPTARG"
    ;;
   q)
    queue="$OPTARG"
    ;;
   r)
    use_repository=1
-   ;;
-  s)
-   USE_SMOKEVIEW="y"
-   ;;
-  t)
-   benchmark="yes"
    ;;
   x)
    VOLRENDER=y
@@ -131,15 +93,14 @@ shift $(($OPTIND-1))
 #  may have been specified  (ie can't use batch queue, must use
 #  smokeview bash script in repository)
 
-if [ "$USE_SMOKEVIEW" == "y" ] ; then
-  use_repository=1
-  if [ "$queue" == "batch" ] ; then
-    queue=fire70s
-  fi
-  if [ "$SCRIPTFILE" != "" ] ; then
-    SCRIPTFILE = "-m $SCRIPTFILE"
-  fi
+use_repository=1
+if [ "$queue" == "batch" ] ; then
+  queue=fire70s
 fi
+if [ "$SCRIPTFILE" != "" ] ; then
+  SCRIPTFILE = "-m $SCRIPTFILE"
+fi
+
 if [ "$use_debug" == "1" ] ; then
 DB=_db
 fi
@@ -150,22 +111,9 @@ then
   exe=$1
   in=$2
 else
- if [ $nprocesses -gt 1 ]
-# only set the input file using the command line, the fds exe is defined
-# using the repository (serial if nprocesses==1 parallel otherwise)
-  then
-  exe=$FDSROOT/FDS_Compilation/mpi_intel_linux_64$IB$DB/fds_mpi_intel_linux_64$IB$DB
- else
-  if [ "$USE_SMOKEVIEW" == "y" ] ; then
 # for now only one instance of smokeview can occur per node
-    nprocesses_per_node=1
-    nprocesses=1
     exe="$FDSROOT/Verification/scripts/runsmv_single.sh"
     exe2="-x -y $STARTFRAME -z $SKIPFRAME $SCRIPTFILE"
-  else
-    exe=$FDSROOT/FDS_Compilation/intel_linux_64$DB/fds_intel_linux_64$DB
-  fi
- fi
  in=$1
 fi
 
@@ -173,14 +121,10 @@ infile=${in%.*}
 
 # define options used by smokeview (for computing volume rendering smoke frames) 
 
-if [[ "$USE_SMOKEVIEW" == "y" && "$VOLRENDER" == "y" ]] ; then
+if [[ "$VOLRENDER" == "y" ]] ; then
   VOLRENDER="-volrender"
   STARTFRAME="-startframe $STARTFRAME"
   SKIPFRAME="-skipframe $SKIPFRAME"
-else
-  VOLRENDER=
-  STARTFRAME=
-  SKIPFRAME=
 fi
 
 # if there is more than 1 process then use the mpirun command
@@ -188,34 +132,7 @@ fi
 
 TITLE="$infile"
 
-if [ $nprocesses -gt 1 ] ; then
-  MPIRUN="$MPIDIST/bin/mpirun -np $nprocesses"
-  TITLE="$infile(MPI)"
-  case $FDSNETWORK in
-    "infiniband") TITLE="$infile(MPI_IB)"
-  esac
-fi
-if [ "$USE_SMOKEVIEW" == "y" ] ; then
-  TITLE="$infile(SMV)"
-fi
-
-nprocesses=$nthreads
-nprocesses_per_node=$nthreads
-
-nnodes=$(echo "($nprocesses-1)/$nprocesses_per_node+1" | bc)
-if test $nnodes -le 0
-then
-  nnodes=1
-elif test $nnodes -gt 32
-then
-  nnodes=32
-fi
-
-# in benchmark mode run a case "alone" on one node
-if [ "$benchmark" == "yes" ]; then
-  nodes=1
-  nprocesses_per_node=8
-fi
+TITLE="$infile(SMV)"
 
 cd $dir
 fulldir=`pwd`
@@ -225,11 +142,7 @@ outlog=$fulldir/$infile.log
 stopfile=$fulldir/$infile.stop
 
 
-if [ "$USE_SMOKEVIEW" = "y" ] ; then
-  in_full_file=$fulldir/$infile.smv
-else
-  in_full_file=$fulldir/$in
-fi
+in_full_file=$fulldir/$infile.smv
 
 # make sure files that are needed exist
 
@@ -248,19 +161,6 @@ fi
 if [ "$ABORTRUN" == "y" ] ; then
   exit
 fi
-if [ $STOPFDS ]; then
- echo "stopping case: $in"
- touch $stopfile
- exit
-fi
-if [ "$haltjob" == "1" ]; then
- echo "stopping case: $in"
- touch $stopfile
- exit
-fi
-if [ -e $stopfile ]; then
- rm $stopfile
-fi
 
 QSUB="qsub -q $queue"
 if [ "$queue" == "terminal" ] ; then
@@ -274,11 +174,11 @@ cat << EOF > $scriptfile
 #PBS -N $TITLE
 #PBS -e $out
 #PBS -o $outlog
-#PBS -l nodes=$nnodes:ppn=$nprocesses_per_node
+#PBS -l nodes=1:ppn=1
 #\$ -N $TITLE
 #\$ -e $out
 #\$ -o $outlog
-#\$ -l nodes=$nnodes:ppn=$nprocesses_per_node
+#\$ -l nodes=1:ppn=1
 
 export OMP_NUM_THREADS=$nthreads
 
@@ -291,12 +191,7 @@ EOF
 echo "        Input file:$in"
 echo "        Executable:$exe"
 echo "             Queue:$queue"
-echo "         Processes:$nprocesses"
-if test $nprocesses -gt 1
-then
-echo "             Nodes:$nnodes"
-echo "Processes per node:$nprocesses_per_node"
-fi
+echo "         Processes:1"
 chmod +x $scriptfile
 $QSUB $scriptfile
 rm $scriptfile
