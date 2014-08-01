@@ -1,12 +1,13 @@
 &HEAD CHID='Main_Control_Room_No_Purge_v6', TITLE='Cabinet fire in MCR affecting visibility of operators.'/
 
-&MESH IJK=123,81,25, XB=0.0,24.6,0.0,16.2,0.0,5.2 /
+&MESH IJK=41,27,25, XB=0.0,8.2,0.0,5.4,0.0,5.2, MULT_ID='mesh' /
+&MULT ID='mesh', DX=8.2, DY=5.4, I_UPPER=2, J_UPPER=2 /
 
 &TIME T_END=3600.0 /
 
 General construction
 
-&MISC SURF_DEFAULT='CONCRETE WALL' /
+&MISC SUPPRESSION=.FALSE. /
 
 &MATL ID             = 'CONCRETE'
       SPECIFIC_HEAT  = 0.750
@@ -14,6 +15,7 @@ General construction
       DENSITY        = 2400. /
 
 &SURF ID             = 'CONCRETE WALL'
+      DEFAULT        = .TRUE.
       COLOR          = 'GRAY 65'
       MATL_ID        = 'CONCRETE'
       THICKNESS      = 0.9 /
@@ -158,9 +160,9 @@ Miscellaneous construction
       MATL_ID        = 'GYPSUM'
       THICKNESS      = 0.016 /
 
-&VENT MB='XMIN', SURF_ID='GYPSUM BOARD'/ west wall
-&VENT MB='XMAX', SURF_ID='GYPSUM BOARD'/ east wall
-&VENT MB='YMAX', SURF_ID='GYPSUM BOARD'/ north wall
+&VENT PBX= 0.0, SURF_ID='GYPSUM BOARD'/ west wall
+&VENT PBX=24.6, SURF_ID='GYPSUM BOARD'/ east wall
+&VENT PBY=16.2, SURF_ID='GYPSUM BOARD'/ north wall
 
 &OBST XB=  0.0,  1.0, 10.0, 10.0, 0.0, 5.2, SURF_ID='GYPSUM BOARD' / 
 &OBST XB=  1.0,  1.0, 10.0, 14.5, 0.0, 5.2, SURF_ID='GYPSUM BOARD' / 
@@ -213,7 +215,7 @@ Human target
 
 Output
 
-&DUMP DT_DEVC=15., DT_HRR=15. /
+&DUMP DT_DEVC=15., DT_HRR=15., SMOKE3D_QUANTITY='MASS FRACTION', SMOKE3D_SPEC_ID='SOOT' /
 
 &DEVC ID='HGL_Temp_FDS',   XB=11.4,11.4,5.8,5.8,0.0,5.2, QUANTITY='UPPER TEMPERATURE' /
 &DEVC ID='HGL_Height_FDS', XB=11.4,11.4,5.8,5.8,0.0,5.2, QUANTITY='LAYER HEIGHT' /
