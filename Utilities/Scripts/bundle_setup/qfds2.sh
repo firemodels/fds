@@ -1,7 +1,7 @@
 #!/bin/bash
-# $Date$ 
-# $Revision$
-# $Author$
+# $Date: 2014-08-01 12:07:22 -0400 (Fri, 01 Aug 2014) $ 
+# $Revision: 20080 $
+# $Author: gforney $
 #
 PROG=$0
 
@@ -11,28 +11,30 @@ progname=qfds.sh
 queue=batch
 stopjob=0
 
-nprocesses=1
-nprocesses_per_node=1
-nthreads=1
+nmpi_processes=1
+nmpi_processes_per_node=1
+maxmpi_processes_per_node=1
+nopenmp_threads=1
 
 if [ $# -lt 1 ]
 then
-  echo "Usage: $progname [-d directory] [-f repository root] [-n processes per node] [-o nthreads]"
-  echo "                 [-q queue] [-r] [-p nprocesses] [fds_command] casename.fds"
+  echo "Usage: $progname [-d directory] [-f repository root] [-n mpi processes per node] [-o nopenmp_threads]"
+  echo "                 [-q queue] [-r] [-p nmpi_processes] [fds_command] casename.fds"
   echo ""
-  echo "This script runs 64 bit serial or parallel versions of FDS using an executable"
-  echo "specified on the command line or FDS from the respository if -r is specified."
-  echo "The parallel FDS is invoked by using -p to specifying multiple processes."
+  echo "This script runs serial or parallel versions of FDS using an executable"
+  echo "specified on the command line or from the respository (if -r is specified)."
+  echo "A parallel FDS is invoked by using -p to specify multiple MPI processes"
+  echo "and -o to specify multiple OpenMP threads."
   echo "Alternate queues (vis, fire70s) are set using the -q option."
   echo ""
   echo " -b use debug version"
-  echo " -d directory [default: .]"
-  echo " -n processes per node - maximum number of processes per node [default: 1]"
-  echo "    (serial: 1, parallel: 8 for new cluster and fire70s, 4 for the vis queues)"
-  echo " -o nthreads - run FDS (OpenMP) with a specified number of threads [default: $nthreads]"
-  echo " -p nprocesses - number of processes used to run a case [default: 1] "
-  echo " -q queue - name of the queue. choices: [default: $queue (other choices:"  
-  echo "    vis and fire70s)"
+  echo " -d directory - specify directory where the case is found [default: .]"
+  echo " -i - output script file, don't run case"
+  echo " -m max_ppn - reserve max_ppn processes per [default: ppn]"
+  echo " -n ppn - number of MPI processes per node [default: 1]"
+  echo " -o nopenmp_threads - number of OpenMP threads [default: 1]"
+  echo " -p nmpi_processes - number of MPI processes [default: 1] "
+  echo " -q queue - name of the queue. choices: [default: $queue]"  
   echo " -r - use FDS located in repository"
   echo " -s stop job"
   echo " -t - used for timing studies, run a job alone on a node"
@@ -58,6 +60,7 @@ IB=
 DB=
 SCRIPTFILE=
 benchmark=no
+showinput=0
 
 if [ "$FDSNETWORK" == "infiniband" ] ; then
 IB=ib
@@ -65,7 +68,7 @@ fi
 
 # read in parameters from command line
 
-while getopts 'bd:f:m:n:o:p:q:rst' OPTION
+while getopts 'bd:f:im:n:o:p:q:rst' OPTION
 do
 case $OPTION  in
   b)
@@ -78,17 +81,20 @@ case $OPTION  in
    FDSROOT="$OPTARG"
    use_repository=1
    ;;
+  i)
+   showinput=1
+   ;;
   m)
-   SCRIPTFILE="$OPTARG"
+   maxmpi_processes_per_node="$OPTARG"
    ;;
   n)
-   nprocesses_per_node="$OPTARG"
+   nmpi_processes_per_node="$OPTARG"
    ;;
   o)
-   nthreads="$OPTARG"
+   nopenmp_threads="$OPTARG"
    ;;
   p)
-   nprocesses="$OPTARG"
+   nmpi_processes="$OPTARG"
    ;;
   q)
    queue="$OPTARG"
@@ -116,9 +122,9 @@ then
   exe=$1
   in=$2
 else
- if [ $nprocesses -gt 1 ]
+ if [ $nmpi_processes -gt 1 ]
 # only set the input file using the command line, the fds exe is defined
-# using the repository (serial if nprocesses==1 parallel otherwise)
+# using the repository (serial if nmpi_processes==1 parallel otherwise)
   then
   exe=$FDSROOT/FDS_Compilation/mpi_intel_linux_64$IB$DB/fds_mpi_intel_linux_64$IB$DB
  else
@@ -128,32 +134,36 @@ else
 fi
 
 infile=${in%.*}
+echo infile=$infile
 
 # if there is more than 1 process then use the mpirun command
 
 TITLE="$infile"
 
-if [ $nprocesses -gt 1 ] ; then
-  MPIRUN="$MPIDIST/bin/mpirun -np $nprocesses"
+if [ $nmpi_processes -gt 1 ] ; then
+  MPIRUN="$MPIDIST/bin/mpirun --map-by ppr:$nmpi_processes_per_node:node -np $nmpi_processes"
   TITLE="$infile(MPI)"
   case $FDSNETWORK in
     "infiniband") TITLE="$infile(MPI_IB)"
   esac
 fi
 
-nnodes=$(echo "($nprocesses-1)/$nprocesses_per_node+1" | bc)
-if test $nnodes -le 0
+let "nodes=($nmpi_processes-1)/$nmpi_processes_per_node+1"
+let "ppn=($nopenmp_threads)*($nmpi_processes_per_node)"
+if test $maxmpi_processes_per_node -gt $ppn
 then
-  nnodes=1
-elif test $nnodes -gt 32
+  ppn=$maxmpi_processes_per_node
+fi
+
+if test $nodes -le 0
 then
-  nnodes=32
+  nodes=1
 fi
 
 # in benchmark mode run a case "alone" on one node
 if [ "$benchmark" == "yes" ]; then
   nodes=1
-  nprocesses_per_node=8
+  nmpi_processes_per_node=8
 fi
 
 cd $dir
@@ -209,13 +219,13 @@ cat << EOF > $scriptfile
 #PBS -N $TITLE
 #PBS -e $out
 #PBS -o $outlog
-#PBS -l nodes=$nnodes:ppn=$nprocesses_per_node
+#PBS -l nodes=$nodes:ppn=$ppn
 #\$ -N $TITLE
 #\$ -e $out
 #\$ -o $outlog
-#\$ -l nodes=$nnodes:ppn=$nprocesses_per_node
+#\$ -l nodes=$nodes:ppn=$ppn
 
-export OMP_NUM_THREADS=$nthreads
+export OMP_NUM_THREADS=$nopenmp_threads
 
 cd $fulldir
 echo Start time: \`date\`
@@ -226,12 +236,16 @@ EOF
 echo "        Input file:$in"
 echo "        Executable:$exe"
 echo "             Queue:$queue"
-echo "         Processes:$nprocesses"
-if test $nprocesses -gt 1
+echo "         Processes:$nmpi_processes"
+if test $nmpi_processes -gt 1
 then
-echo "             Nodes:$nnodes"
-echo "Processes per node:$nprocesses_per_node"
+echo "             Nodes:$nodes"
+echo "Processes per node:$nmpi_processes_per_node"
 fi
 chmod +x $scriptfile
+if [ "$showinput" == "1" ] ; then
+  cat $scriptfile
+  exit
+fi
 $QSUB $scriptfile
 rm $scriptfile
