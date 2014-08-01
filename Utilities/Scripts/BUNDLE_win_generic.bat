@@ -1,11 +1,8 @@
 @echo off
 
-:: set OPENMP=
-set OPENMP=openmp_
-
 set fdsversion=%fds_edition%
 
-set fdsdir=%svn_root%\FDS_Compilation\%OPENMP%intel_win_%platform%
+set fdsdir=%svn_root%\FDS_Compilation\intel_win_%platform%
 set fdsmpidir=%svn_root%\FDS_Compilation\mpi_intel_win_%platform%
 set fdsimpidir=%svn_root%\FDS_Compilation\impi_intel_win_%platform%
 set basename=FDS_%fds_version%-SMV_%smv_version%_win%platform%
@@ -78,7 +75,7 @@ copy %in_for_bundle%\*.po %out_bin%\.
 
 CALL :COPY %in_for_bundle%\fds_openmp.bat %out_bin%\fds_openmp.bat
 
-CALL :COPY %fdsdir%\fds_%OPENMP%win_%platform%.exe         %out_bin%\fds%release_version%.exe
+CALL :COPY %fdsdir%\fds_win_%platform%.exe         %out_bin%\fds%release_version%.exe
 
 :: CALL :COPY  %fdsmpidir%\fds_mpi_win_%platform%.exe      %out_bin%\fds_mpi.exe
 
