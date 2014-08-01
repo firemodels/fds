@@ -367,8 +367,7 @@ check_compile_fds_db()
    cd $FDS_SVNROOT/FDS_Compilation/intel_linux_64_db
    if [ -e "fds_intel_linux_64_db" ]
    then
-      # Continue along
-      :
+      stage2a_success=true
    else
       echo "Errors from Stage 2a - Compile and inspect FDS debug:" >> $ERROR_LOG
       cat $FIREBOT_DIR/output/stage2a >> $ERROR_LOG
