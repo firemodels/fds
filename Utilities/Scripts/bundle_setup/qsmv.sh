@@ -9,7 +9,7 @@ PROG=$0
 
 progname=qfds.sh
 queue=batch
-stopjob=0
+haltjob=0
 
 nprocesses=1
 nprocesses_per_node=1
@@ -27,14 +27,15 @@ then
   echo ""
   echo " -b use debug version"
   echo " -d directory [default: .]"
+  echo " -h halt job"
   echo " -n processes per node - maximum number of processes per node [default: 1]"
   echo "    (serial: 1, parallel: 8 for new cluster and fire70s, 4 for the vis queues)"
   echo " -o nthreads - run FDS (OpenMP) with a specified number of threads [default: $nthreads]"
   echo " -p nprocesses - number of processes used to run a case [default: 1] "
   echo " -q queue - name of the queue. choices: [default: $queue (other choices:"  
   echo "    vis and fire70s)"
-  echo " -r - use FDS located in repository"
-  echo " -s stop job"
+  echo " -r - use FDS (or Smokeview if -s is specified) located in repository"
+  echo " -s - use FDS (or Smokeview if -s is specified) located in repository"
   echo " -t - used for timing studies, run a job alone on a node"
   echo " -f repository root - name and location of repository where FDS is located"
   echo "    [default: ~/FDS-SMV]"
@@ -53,6 +54,11 @@ FDSROOT=~/FDS-SMV
 MPIRUN=
 nprocesses_per_node_defined=0
 dir=.
+# parameters used by Smokeview
+USE_SMOKEVIEW=
+VOLRENDER=
+SKIPFRAME=1
+STARTFRAME=0
 exe2=
 ABORTRUN=n
 IB=
@@ -66,7 +72,7 @@ fi
 
 # read in parameters from command line
 
-while getopts 'bd:f:m:n:o:p:q:rsxy:z:t' OPTION
+while getopts 'bd:f:hm:n:o:p:q:rsxy:z:t' OPTION
 do
 case $OPTION  in
   b)
@@ -78,6 +84,9 @@ case $OPTION  in
   f)
    FDSROOT="$OPTARG"
    use_repository=1
+   ;;
+  h)
+   haltjob=1
    ;;
   m)
    SCRIPTFILE="$OPTARG"
@@ -99,15 +108,38 @@ case $OPTION  in
    use_repository=1
    ;;
   s)
-   stopjob=1
+   USE_SMOKEVIEW="y"
    ;;
   t)
    benchmark="yes"
    ;;
+  x)
+   VOLRENDER=y
+   ;;
+  y)
+   STARTFRAME="$OPTARG"
+   ;;
+  z)
+   SKIPFRAME="$OPTARG"
+   ;;
+
 esac
 done
 shift $(($OPTIND-1))
 
+#  if smokeview is invoked then override various options that 
+#  may have been specified  (ie can't use batch queue, must use
+#  smokeview bash script in repository)
+
+if [ "$USE_SMOKEVIEW" == "y" ] ; then
+  use_repository=1
+  if [ "$queue" == "batch" ] ; then
+    queue=fire70s
+  fi
+  if [ "$SCRIPTFILE" != "" ] ; then
+    SCRIPTFILE = "-m $SCRIPTFILE"
+  fi
+fi
 if [ "$use_debug" == "1" ] ; then
 DB=_db
 fi
@@ -124,14 +156,35 @@ else
   then
   exe=$FDSROOT/FDS_Compilation/mpi_intel_linux_64$IB$DB/fds_mpi_intel_linux_64$IB$DB
  else
-  exe=$FDSROOT/FDS_Compilation/intel_linux_64$DB/fds_intel_linux_64$DB
+  if [ "$USE_SMOKEVIEW" == "y" ] ; then
+# for now only one instance of smokeview can occur per node
+    nprocesses_per_node=1
+    nprocesses=1
+    exe="$FDSROOT/Verification/scripts/runsmv_single.sh"
+    exe2="-x -y $STARTFRAME -z $SKIPFRAME $SCRIPTFILE"
+  else
+    exe=$FDSROOT/FDS_Compilation/intel_linux_64$DB/fds_intel_linux_64$DB
+  fi
  fi
  in=$1
 fi
 
 infile=${in%.*}
 
+# define options used by smokeview (for computing volume rendering smoke frames) 
+
+if [[ "$USE_SMOKEVIEW" == "y" && "$VOLRENDER" == "y" ]] ; then
+  VOLRENDER="-volrender"
+  STARTFRAME="-startframe $STARTFRAME"
+  SKIPFRAME="-skipframe $SKIPFRAME"
+else
+  VOLRENDER=
+  STARTFRAME=
+  SKIPFRAME=
+fi
+
 # if there is more than 1 process then use the mpirun command
+#  (which will never happen if smokeview is running)
 
 TITLE="$infile"
 
@@ -141,6 +194,9 @@ if [ $nprocesses -gt 1 ] ; then
   case $FDSNETWORK in
     "infiniband") TITLE="$infile(MPI_IB)"
   esac
+fi
+if [ "$USE_SMOKEVIEW" == "y" ] ; then
+  TITLE="$infile(SMV)"
 fi
 
 nprocesses=$nthreads
@@ -169,7 +225,11 @@ outlog=$fulldir/$infile.log
 stopfile=$fulldir/$infile.stop
 
 
-in_full_file=$fulldir/$in
+if [ "$USE_SMOKEVIEW" = "y" ] ; then
+  in_full_file=$fulldir/$infile.smv
+else
+  in_full_file=$fulldir/$in
+fi
 
 # make sure files that are needed exist
 
@@ -193,7 +253,7 @@ if [ $STOPFDS ]; then
  touch $stopfile
  exit
 fi
-if [ "$stopjob" == "1" ]; then
+if [ "$haltjob" == "1" ]; then
  echo "stopping case: $in"
  touch $stopfile
  exit
