@@ -6,10 +6,9 @@
 queue=batch
 size=64
 DEBUG=
-OPENMP=
 OPENMP_OPTS=
 FDS_DEBUG=0
-nthreads=2
+nthreads=1
 RUN_SMV=1
 RUN_GEOM=1
 # not running any mpi cases now
@@ -79,7 +78,6 @@ case $OPTION in
    ;;
   o)
    nthreads="$OPTARG"
-   OPENMP=openmp_
    OPENMP_OPTS="-n $nthreads"
    ;;
   p)
@@ -128,7 +126,7 @@ else
   export BACKGROUND=$SVNROOT/Utilities/background/intel_$PLATFORM2/background
 fi
 export GEOM=$SVNROOT/SMV/source/geomtest/intel_$PLATFORM/geomtest
-export FDSEXE=$SVNROOT/FDS_Compilation/${OPENMP}intel_$PLATFORM$DEBUG/fds_${OPENMP}intel_$PLATFORM$DEBUG
+export FDSEXE=$SVNROOT/FDS_Compilation/intel_$PLATFORM$DEBUG/fds_intel_$PLATFORM$DEBUG
 export WFDSEXE=~/FIRE-LOCAL/bin/wfds6_9977_intel_$PLATFORM3
 export FDS=$FDSEXE
 export WFDS=$WFDSEXE

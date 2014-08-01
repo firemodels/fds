@@ -7,7 +7,7 @@ background=no
 QSUB=qsub
 nnodes=1
 nprocs=8
-nthreads=8
+nthreads=1
 benchmark=no
 
 while getopts 'bn:o:q:' OPTION

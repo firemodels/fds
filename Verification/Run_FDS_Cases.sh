@@ -7,9 +7,8 @@ queue=batch
 cases=all
 size=64
 DEBUG=
-OPENMP=
 IB=
-nthreads=8
+nthreads=1
 resource_manager=
 export RUN_OPENMP
 
@@ -30,7 +29,7 @@ echo "-d - use debug version of FDS"
 echo "-h - display this message"
 echo "-m max_iterations - stop FDS runs after a specifed number of iterations (delayed stop)"
 echo "     example: an option of 10 would cause FDS to stop after 10 iterations"
-echo "-o nthreads - run OpenMP version of FDS with a specified number of threads [default: 8]"
+echo "-o nthreads - run OpenMP version of FDS with a specified number of threads [default: $nthreads]"
 echo "-p size - platform size"
 echo "     default: 64"
 echo "     other options: 32"
@@ -63,7 +62,6 @@ case $OPTION in
    ;;
   o)
    nthreads="$OPTARG"
-   OPENMP=openmp_
    RUN_OPENMP=1
    ;;
   p)
