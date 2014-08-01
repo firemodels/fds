@@ -3,9 +3,6 @@
 # this script is called by bundle_platform_size.csh
 # where platform may be linux or osx and size may be 32 or 64
 
-# setenv OPENMP 
-setenv OPENMP openmp_
-
 setenv manifest manifest$FDSOS.html
 setenv OUT $MAJOR$FDSOS
 setenv OUT
@@ -30,8 +27,8 @@ setenv backgrounddir intel$FDSOS2
 setenv background background
 setenv backgroundout background
 
-setenv fdsdir ${OPENMP}intel$FDSOS
-setenv fds fds_${OPENMP}intel$FDSOS
+setenv fdsdir intel$FDSOS
+setenv fds fds_intel$FDSOS
 setenv fdsout fds$OUT
 
 setenv fdsmpidir mpi_intel$FDSOS
@@ -122,17 +119,14 @@ scp -q $fdshost\:$fdsroot/$fdsmpidir/$fdsmpi $bundledir/bin/$fdsmpiout
 echo copying fds_openmp.sh from $forbundle
 cp $forbundle/fds_openmp.sh $bundledir/bin/.
 
-if ($PLATFORM == "LINUX32" || $PLATFORM == "LINUX64") then
-set ostype=LINUX
+if ($PLATFORM == "LINUX64") then
+   set ostype=LINUX
 endif
-if ($PLATFORM == "OSX32" || $PLATFORM == "OSX64") then
-set ostype=OSX
-endif
-if ($PLATFORM == "LINUX32" || $PLATFORM == "OSX32") then
-set ossize=ia32
+if ($PLATFORM == "OSX64") then
+   set ostype=OSX
 endif
 if ($PLATFORM == "LINUX64" || $PLATFORM == "OSX64") then
-set ossize=intel64
+   set ossize=intel64
 endif
 
 cat <<EOF > $fullmanifest
