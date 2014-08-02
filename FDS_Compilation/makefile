@@ -160,6 +160,14 @@ mpi_intel_linux_64 : obj = fds_mpi_intel_linux_64
 mpi_intel_linux_64 : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi)
 
+mpi_intel_linux_64ib : FFLAGS = -m64 -O2 -vec_report0 -ipo
+mpi_intel_linux_64ib : LFLAGS = -static-intel
+mpi_intel_linux_64ib : FCOMPL = mpif90
+mpi_intel_linux_64ib : FOPENMPFLAGS = -openmp -openmp-link static -liomp5
+mpi_intel_linux_64ib : obj = fds_mpi_intel_linux_64ib
+mpi_intel_linux_64ib : setup $(obj_mpi)
+	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi)
+
 intel_linux_64_db : FFLAGS = -m64 -check -warn unused -O0 -auto -WB -traceback -g -fpe0 -fltconsistency -vec_report0 -stand:f03
 intel_linux_64_db : LFLAGS = -static-intel
 intel_linux_64_db : FCOMPL = ifort
@@ -182,6 +190,14 @@ mpi_intel_linux_64_db : FCOMPL = mpifort
 mpi_intel_linux_64_db : FOPENMPFLAGS = -openmp -openmp-link static -liomp5
 mpi_intel_linux_64_db : obj = fds_mpi_intel_linux_64_db
 mpi_intel_linux_64_db : setup $(obj_mpi)
+	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi)
+
+mpi_intel_linux_64ib_db : FFLAGS = -m64 -check -warn unused -O0 -auto -WB -traceback -g -fpe0 -fltconsistency -vec_report0
+mpi_intel_linux_64ib_db : LFLAGS = -static-intel
+mpi_intel_linux_64ib_db : FCOMPL = mpif90
+mpi_intel_linux_64ib_db : FOPENMPFLAGS = -openmp -openmp-link static -liomp5
+mpi_intel_linux_64ib_db : obj = fds_mpi_intel_linux_64ib_db
+mpi_intel_linux_64ib_db : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi)
 
 # OSX   
@@ -456,3 +472,11 @@ clean:
 .PHONY : winclean
 winclean:
 	-erase *.mod *.obj 
+
+mpi_intel_linux_64ib_db : FFLAGS = -m64 -check -warn unused -O0 -auto -WB -traceback -g -fpe0 -fltconsistency -vec_report0
+mpi_intel_linux_64ib_db : LFLAGS = -static-intel
+mpi_intel_linux_64ib_db : FCOMPL = mpif90
+mpi_intel_linux_64ib_db : FOPENMPFLAGS = -openmp -openmp-link static -liomp5
+mpi_intel_linux_64ib_db : obj = fds_mpi_intel_linux_64ib_db
+mpi_intel_linux_64ib : setup $(obj_mpi)
+	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi)
