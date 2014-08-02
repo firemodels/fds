@@ -27,20 +27,20 @@ then
   echo "and -o to specify multiple OpenMP threads."
   echo "Alternate queues (vis, fire70s) are set using the -q option."
   echo ""
-  echo " -b use debug version"
-  echo " -d directory - specify directory where the case is found [default: .]"
-  echo " -i - output script file, don't run case"
-  echo " -m max_ppn - reserve max_ppn processes per [default: ppn]"
-  echo " -n ppn - number of MPI processes per node [default: 1]"
-  echo " -o nopenmp_threads - number of OpenMP threads [default: 1]"
-  echo " -p nmpi_processes - number of MPI processes [default: 1] "
-  echo " -q queue - name of the queue. choices: [default: $queue]"  
-  echo " -r - use FDS located in repository"
-  echo " -s stop job"
-  echo " -t - used for timing studies, run a job alone on a node"
-  echo " -f repository root - name and location of repository where FDS is located"
+  echo " -b   - use debug version of FDS"
+  echo " -d dir - specify directory where the case is found [default: .]"
+  echo " -i   - output PBS script file, don't run case"
+  echo " -m m - reserve m processes per node [default: 1]"
+  echo " -n n - number of MPI processes per node [default: 1]"
+  echo " -o o - number of OpenMP threads per process [default: 1]"
+  echo " -p p - number of MPI processes [default: 1] "
+  echo " -q queue - name of the queue. [default: $queue]"  
+  echo " -r   - use FDS located in repository"
+  echo " -s   - stop job"
+  echo " -t   - used for timing studies, run a job alone on a node"
+  echo " -f repository root - full path name of repository where FDS is located"
   echo "    [default: ~/FDS-SMV]"
-  echo " command - full path to command name (not used if either -f or -r"
+  echo " command - full path of command used to run case (not used if either -f or -r"
   echo "    options are specified)"
   echo "input_file - input file"
   echo ""
@@ -54,7 +54,6 @@ use_debug=0
 FDSROOT=~/FDS-SMV
 MPIRUN=
 dir=.
-exe2=
 ABORTRUN=n
 IB=
 DB=
@@ -149,17 +148,16 @@ fi
 
 let "nodes=($nmpi_processes-1)/$nmpi_processes_per_node+1"
 let "ppn=($nopenmp_threads)*($nmpi_processes_per_node)"
-if test $maxmpi_processes_per_node -gt $ppn
-then
+if test $maxmpi_processes_per_node -gt $ppn ; then
   ppn=$maxmpi_processes_per_node
 fi
 
-if test $nodes -le 0
-then
+if test $nodes -le 0 ; then
   nodes=1
 fi
 
 # in benchmark mode run a case "alone" on one node
+
 if [ "$benchmark" == "yes" ]; then
   nodes=1
   nmpi_processes_per_node=8
@@ -172,10 +170,9 @@ out=$fulldir/$infile.err
 outlog=$fulldir/$infile.log
 stopfile=$fulldir/$infile.stop
 
-
 in_full_file=$fulldir/$in
 
-# make sure files that are needed exist
+# make sure files exist
 
 if ! [ -e $in_full_file ]; then
   if [ "$showinput" == "0" ] ; then
@@ -218,6 +215,8 @@ if [ "$queue" == "terminal" ] ; then
   MPIRUN=
 fi
 
+# create script file
+
 scriptfile=/tmp/script.$$
 cat << EOF > $scriptfile
 #!/bin/bash -f
@@ -236,29 +235,30 @@ cd $fulldir
 echo Start time: \`date\`
 echo Running $infile on \`hostname\`
 echo Directory: \`pwd\`
-$MPIRUN $exe $exe2 $in
+$MPIRUN $exe $in
 EOF
-if test $nmpi_processes -gt 1
-then
-  echo "                Input file:$in"
-  echo "                Executable:$exe"
-  echo "                     Queue:$queue"
-  echo "                     Nodes:$nodes"
-  echo "             MPI Processes:$nmpi_processes"
-  echo "    MPI Processes per node:$nmpi_processes_per_node"
-  echo "OpenMP threads per process:$nopenmp_threads"
-else
-  echo "        Input file:$in"
-  echo "        Executable:$exe"
-  echo "             Queue:$queue"
-  echo "         Processes:$nmpi_processes"
-  echo "             Nodes:$nodes"
-  echo "Processes per node:$nmpi_processes_per_node"
+
+# output info to terminal
+
+echo "         Input file:$in"
+echo "         Executable:$exe"
+echo "              Queue:$queue"
+echo "              Nodes:$nodes"
+echo "          Processes:$nmpi_processes"
+echo " Processes per node:$nmpi_processes_per_node"
+if test $nmpi_processes -gt 1 ; then
+  echo "Threads per process:$nopenmp_threads"
 fi
-chmod +x $scriptfile
+
+# output script file to terminal
+
 if [ "$showinput" == "1" ] ; then
   cat $scriptfile
   exit
 fi
+
+# run script
+
+chmod +x $scriptfile
 $QSUB $scriptfile
 rm $scriptfile
