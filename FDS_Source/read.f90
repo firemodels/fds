@@ -540,7 +540,7 @@ MESH_LOOP: DO N=1,NMESHES_READ
             ! Associate the MESH with the PROCESS
 
             PROCESS(NM) = CURRENT_MPI_PROCESS
-            IF (MYID==0 .AND. USE_MPI) WRITE(LU_ERR,'(A,I3,A,I3)') 'Mesh ',NM,' is assigned to Process ',PROCESS(NM)
+            IF (MYID==0 .AND. USE_MPI) WRITE(LU_ERR,'(A,I3,A,I3)') ' Mesh ',NM,' is assigned to MPI Process ',PROCESS(NM)+1
             IF (EVACUATION_ONLY(NM) .AND. USE_MPI) EVAC_PROCESS = NUMPROCS-1
 
             ! Mesh boundary colors
@@ -687,7 +687,7 @@ CONTAINS
        ! Associate the MESH with the PROCESS
 
        PROCESS(NM) = CURRENT_MPI_PROCESS
-       IF (MYID==0 .AND. USE_MPI) WRITE(LU_ERR,'(A,I3,A,I3)') 'Mesh ',NM,' is assigned to Process ',PROCESS(NM)
+       IF (MYID==0 .AND. USE_MPI) WRITE(LU_ERR,'(A,I3,A,I3)') ' Mesh ',NM,' is assigned to MPI Process ',PROCESS(NM)+1
        IF (EVACUATION_ONLY(NM) .AND. USE_MPI) EVAC_PROCESS = NUMPROCS-1
 
        ! Mesh boundary colors
@@ -819,7 +819,7 @@ CONTAINS
        ! Associate the MESH with the PROCESS
 
        PROCESS(NM) = CURRENT_MPI_PROCESS
-       IF (MYID==0 .AND. USE_MPI) WRITE(LU_ERR,'(A,I3,A,I3)') 'Mesh ',NM,' is assigned to Process ',PROCESS(NM)
+       IF (MYID==0 .AND. USE_MPI) WRITE(LU_ERR,'(A,I3,A,I3)') ' Mesh ',NM,' is assigned to MPI Process ',PROCESS(NM)+1
        IF (EVACUATION_ONLY(NM) .AND. USE_MPI) EVAC_PROCESS = NUMPROCS-1
 
        ! Mesh boundary colors

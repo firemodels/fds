@@ -1594,6 +1594,14 @@ subroutine mpi_init ( ierror )
 end subroutine
 
 
+subroutine mpi_init_thread (required,provided,ierror)
+  integer, intent(in) :: required
+  integer ierror,provided
+  provided = required
+  dummy = ierror
+end subroutine
+
+
 subroutine mpi_wait ( irequest, istatus, ierror )
   integer ierror
   integer irequest
