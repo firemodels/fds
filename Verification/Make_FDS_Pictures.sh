@@ -1,4 +1,4 @@
-#!/bin/bash -f
+#!/bin/bash
 
 # This script generates SMV pictures from the
 # FDS Verification Cases on a Linux or OS X machine

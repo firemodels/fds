@@ -1,4 +1,4 @@
-#!/bin/bash -f
+#!/bin/bash
 
 outdir=$FDS_SVNROOT/Verification/scripts/Outfiles
 dir=$1
