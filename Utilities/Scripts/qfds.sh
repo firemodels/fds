@@ -62,14 +62,18 @@ dir=.
 benchmark=no
 showinput=0
 use_repository=1
+strip_extension=0
 
 # read in parameters from command line
 
-while getopts 'bd:e:f:m:n:o:p:q:stv' OPTION
+while getopts 'bcd:e:f:m:n:o:p:q:stv' OPTION
 do
 case $OPTION  in
   b)
    use_debug=1
+   ;;
+  c)
+   strip_extension=1
    ;;
   d)
    dir="$OPTARG"
@@ -177,6 +181,9 @@ if ! [ -e $in_full_file ]; then
     echo "The input file, $in_full_file, does not exist. Run aborted."
     ABORTRUN=y
   fi
+fi
+if [ "$strip_extension" == "1" ] ; then
+  in=infile
 fi
 if ! [ -e $exe ]; then
   if [ "$showinput" == "0" ] ; then

@@ -160,7 +160,7 @@ fi
 
 # run cases    
 
-export  RUNCFAST="$QFDSSH -e $CFAST $queue $STOPFDS "
+export  RUNCFAST="$QFDSSH -c -e $CFAST $queue $STOPFDS "
 export      QFDS="$QFDSSH -e $FDSEXE $OPENMPOPTS $queue $STOPFDS"
 export   RUNTFDS="$QFDSSH -e $FDSEXE $OPENMPOPTS $queue $STOPFDS"
 export   RUNWFDS="$QFDSSH -e $WFDSEXE $queue $STOPFDS"
