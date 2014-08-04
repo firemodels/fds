@@ -12,13 +12,14 @@ then
   echo ""
   echo "qfds.sh runs FDS using an executable specified with the -e option or"
   echo "from the respository if -e is not specified (the -r option is no longer" 
-  echo "used.  A parallel version of FDS is invoked by using -p to specify the"
+  echo "used).  A parallel version of FDS is invoked by using -p to specify the"
   echo "number of MPI processes and/or -o to specify the number of OpenMP threads."
   echo ""
   echo " -b     - use debug version of FDS"
   echo " -d dir - specify directory where the case is found [default: .]"
   echo " -e exe - full path of FDS used to run case"
-  echo " -i   - output script file used to run case (case is not run)"
+  echo " -f repository root - name and location of repository where FDS is located"
+  echo "    [default: ~/FDS-SMV]"
   echo " -m m - reserve m processes per node [default: 1]"
   echo " -n n - number of MPI processes per node [default: 1]"
   echo " -o o - number of OpenMP threads per process [default: 1]"
@@ -26,6 +27,7 @@ then
   echo " -q q - name of queue. [default: batch]"  
   echo " -s   - stop job"
   echo " -t   - used for timing studies, run a job alone on a node"
+  echo " -v   - list script used to run case to standard output"
   echo "input_file - input file"
   echo ""
   exit
@@ -33,9 +35,7 @@ fi
 
 # default parameter settings
 
-if [ "$FDSROOT" == "" ] ; then
-  FDSROOT=~/FDS-SMV
-fi
+FDSROOT=~/FDS-SMV
 MPIRUN=
 ABORTRUN=n
 IB=
@@ -65,7 +65,7 @@ use_repository=1
 
 # read in parameters from command line
 
-while getopts 'bd:e:im:n:o:p:q:st' OPTION
+while getopts 'bd:e:f:m:n:o:p:q:stv' OPTION
 do
 case $OPTION  in
   b)
@@ -78,8 +78,8 @@ case $OPTION  in
    exe="$OPTARG"
    use_repository=0
    ;;
-  i)
-   showinput=1
+  f)
+   FDSROOT="$OPTARG"
    ;;
   m)
    maxmpi_processes_per_node="$OPTARG"
@@ -101,6 +101,9 @@ case $OPTION  in
    ;;
   t)
    benchmark="yes"
+   ;;
+  v)
+   showinput=1
    ;;
 esac
 done
