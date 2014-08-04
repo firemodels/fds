@@ -1,7 +1,7 @@
 #!/bin/bash
 
 $QFDS -d Visualization cell_test.fds
-$RUNCFAST -d Visualization cfast_test
+$RUNCFAST -d Visualization cfast_test.in
 $QFDS -d Visualization colorbar.fds
 $QFDS -d Visualization colorconv.fds
 $QFDS -d Visualization fed_test.fds
@@ -31,7 +31,7 @@ $RUNTFDS -d Visualization version.fds
 $QFDS -d WUI levelset1.fds
 $RUNWFDS -d WUI tree_one.fds
 #$QFDS -d WUI fire_line.fds
-$QFDS -d WUI BT10m_2x2km_LS 1.fds
+$QFDS -d WUI BT10m_2x2km_LS.fds
 $QFDS -d WUI wind_test1.fds
 $QFDS -d WUI tree_test2.fds
 $QFDS -d WUI hill_structure.fds
