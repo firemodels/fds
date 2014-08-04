@@ -1,4 +1,4 @@
-#/bin/bash -f
+#/bin/bash
 
 # This script runs the Smokeview Verification Cases on a 
 # Linux machine with a batch queuing system
@@ -13,6 +13,7 @@ RUN_SMV=1
 RUN_GEOM=1
 # not running any mpi cases now
 RUN_MPI=0
+STOPFDS=
 
 function usage {
 echo "Run_SMV_Cases.sh [-d -h -m max_iterations -o nthreads -p -q queue_name -s ]"
@@ -88,7 +89,7 @@ case $OPTION in
    ;;
   s)
    stop_cases=true
-   export STOPFDS=1
+   export STOPFDS=-s
    ;;
   u)
    use_installed="1"
@@ -96,12 +97,10 @@ case $OPTION in
 esac
 #shift
 done
+
 export FDS_DEBUG
 
-if [ "$size" != "32" ]; then
-  size=64
-fi
-size=_$size
+size=_64
 
 OS=`uname`
 if [ "$OS" == "Darwin" ]; then
@@ -132,6 +131,7 @@ export FDS=$FDSEXE
 export WFDS=$WFDSEXE
 export FDSMPI=$SVNROOT/FDS_Compilation/mpi_intel_$PLATFORM$IB$DEBUG/fds_mpi_intel_$PLATFORM$IB$DEBUG
 export CFAST=~/cfast/CFAST/intel_$PLATFORM/cfast6_$PLATFORM
+QFDSSH="$SVNROOT/Utilities/Scripts/qfds.sh"
 
 SMVUGDIR=$SVNROOT/Manuals/SMV_User_Guide/SCRIPT_FIGURES
 SMVVGDIR=$SVNROOT/Manuals/SMV_Verification_Guide/SCRIPT_FIGURES
@@ -151,8 +151,7 @@ export BASEDIR=`pwd`
 if [[ ! $stop_cases ]] ; then
   echo "Removing FDS/CFAST output files"
   export RUNCFAST="$SVNROOT/Verification/scripts/Remove_CFAST_Files.sh"
-  export RUNFDS="$SVNROOT/Verification/scripts/Remove_FDS_Files.sh"
-  export RUNGEOM="$SVNROOT/Verification/scripts/Remove_FDS_Files.sh"
+  export QFDS="$SVNROOT/Verification/scripts/Remove_FDS_Files.sh"
   export RUNTFDS="$SVNROOT/Verification/scripts/Remove_FDS_Files.sh"
   export RUNWFDS="$SVNROOT/Verification/scripts/Remove_FDS_Files.sh"
   scripts/SMV_Cases.sh
@@ -161,11 +160,10 @@ fi
 
 # run cases    
 
-export RUNCFAST="$SVNROOT/Utilities/Scripts/runcfast.sh $queue"
-export RUNFDS="$SVNROOT/Utilities/Scripts/runfds.sh $OPENMPOPTS $queue"
-export RUNTFDS="$SVNROOT/Utilities/Scripts/runfds.sh $OPENMPOPTS $queue"
-export RUNWFDS="$SVNROOT/Utilities/Scripts/runwfds.sh $queue"
-export RUNFDSMPI="$SVNROOT/Utilities/Scripts/runfdsmpi.sh $queue"
+export  RUNCFAST="$QFDSSH -e $CFAST $queue $STOPFDS "
+export      QFDS="$QFDSSH -e $FDSEXE $OPENMPOPTS $queue $STOPFDS"
+export   RUNTFDS="$QFDSSH -e $FDSEXE $OPENMPOPTS $queue $STOPFDS"
+export   RUNWFDS="$QFDSSH -e $WFDSEXE $queue $STOPFDS"
 
 echo "" | $FDSEXE 2> $SVNROOT/Manuals/SMV_User_Guide/SCRIPT_FIGURES/fds.version
 
@@ -191,6 +189,7 @@ if [ "$RUN_GEOM" == "1" ] ; then
 fi
 if [ "$RUN_MPI" == "1" ] ; then
   cd $SVNROOT/Verification
+export QFDS="$QFDSSH -e $FDSMPI $queue $STOPFDS"
   scripts/SMV_MPI_Cases.sh
 fi
 

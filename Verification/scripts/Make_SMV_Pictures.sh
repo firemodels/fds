@@ -105,11 +105,11 @@ echo smokediff : $SMOKEDIFF
 echo background: $BACKGROUND
 echo
 
-export RUNGEOM=$SVNROOT/Utilities/Scripts/runsmv.sh
-export RUNFDS=$SVNROOT/Utilities/Scripts/runsmv.sh
-export RUNTFDS=$SVNROOT/Utilities/Scripts/runtsmv.sh
-export RUNWFDS=$SVNROOT/Utilities/Scripts/runwsmv.sh
-export RUNCFAST=$SVNROOT/Utilities/Scripts/runsmv.sh
+RUNSMV=$SVNROOT/Utilities/Scripts/runsmv.sh
+export QFDS=$RUNSMV
+export RUNTFDS="$RUNSMV -t"
+export RUNWFDS="$RUNSMV -w"
+export RUNCFAST=$RUNSMV
 export BASEDIR=`pwd`
 
 export FDSUG=$SVNROOT/Manuals/FDS_User_Guide
@@ -173,10 +173,10 @@ if [ "$RUN_SMV" == "1" ] ; then
 # precompute FED slices
 
   source $STARTX
-  $RUNFDS -f Visualization plume5c
-  $RUNFDS -f Visualization plume5cdelta
-  $RUNFDS -f Visualization thouse5
-  $RUNFDS -f Visualization thouse5delta
+  $QFDS -d Visualization plume5c
+  $QFDS -d Visualization plume5cdelta
+  $QFDS -d Visualization thouse5
+  $QFDS -d Visualization thouse5delta
   source $STOPX
 
 # difference plume5c and thouse5

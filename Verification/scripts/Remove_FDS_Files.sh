@@ -1,6 +1,17 @@
 #!/bin/bash
-DIR=$1
-case=$2
+
+# parse options
+while getopts 'bd:e:im:n:o:p:q:st' OPTION
+do
+case $OPTION  in
+  b)
+   dummy=1
+   ;;
+esac
+done
+shift $(($OPTIND-1))
+
+case=$1
 cd $DIR
 rm -f $case*.s3d
 rm -f $case*.sf

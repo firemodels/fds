@@ -3,11 +3,51 @@
 # $Revision: 20080 $
 # $Author: gforney $
 #
-PROG=$0
 
-# setup default queue name
 
-progname=qfds.sh
+if [ $# -lt 1 ]
+then
+  echo "Usage: qfds.sh [-d directory] [-f repository root] [-n mpi processes per node] [-o nopenmp_threads]"
+  echo "                 [-q queue] [-p nmpi_processes] [-e fds_command] casename.fds"
+  echo ""
+  echo "qfds.sh runs FDS using an executable specified with the -e option or"
+  echo "from the respository if -e is not specified (the -r option is no longer" 
+  echo "used.  A parallel version of FDS is invoked by using -p to specify the"
+  echo "number of MPI processes and/or -o to specify the number of OpenMP threads."
+  echo ""
+  echo " -b     - use debug version of FDS"
+  echo " -d dir - specify directory where the case is found [default: .]"
+  echo " -e exe - full path of FDS used to run case"
+  echo " -i   - output script file used to run case (case is not run)"
+  echo " -m m - reserve m processes per node [default: 1]"
+  echo " -n n - number of MPI processes per node [default: 1]"
+  echo " -o o - number of OpenMP threads per process [default: 1]"
+  echo " -p p - number of MPI processes [default: 1] "
+  echo " -q q - name of queue. [default: batch]"  
+  echo " -s   - stop job"
+  echo " -t   - used for timing studies, run a job alone on a node"
+  echo "input_file - input file"
+  echo ""
+  exit
+fi
+
+# default parameter settings
+
+if [ "$FDSROOT" == "" ] ; then
+  FDSROOT=~/FDS-SMV
+fi
+MPIRUN=
+ABORTRUN=n
+IB=
+DB=
+if [ "$FDSNETWORK" == "infiniband" ] ; then
+  IB=ib
+fi
+
+# --------------------------- parse options --------------------
+
+# default parameter settings
+
 queue=batch
 stopjob=0
 
@@ -16,58 +56,16 @@ nmpi_processes_per_node=1
 maxmpi_processes_per_node=1
 nopenmp_threads=1
 
-if [ $# -lt 1 ]
-then
-  echo "Usage: $progname [-d directory] [-f repository root] [-n mpi processes per node] [-o nopenmp_threads]"
-  echo "                 [-q queue] [-r] [-p nmpi_processes] [fds_command] casename.fds"
-  echo ""
-  echo "This script runs serial or parallel versions of FDS using an executable"
-  echo "specified on the command line or from the respository (if -r is specified)."
-  echo "A parallel FDS is invoked by using -p to specify multiple MPI processes"
-  echo "and -o to specify multiple OpenMP threads."
-  echo "Alternate queues (vis, fire70s) are set using the -q option."
-  echo ""
-  echo " -b   - use debug version of FDS"
-  echo " -d dir - specify directory where the case is found [default: .]"
-  echo " -i   - output PBS script file, don't run case"
-  echo " -m m - reserve m processes per node [default: 1]"
-  echo " -n n - number of MPI processes per node [default: 1]"
-  echo " -o o - number of OpenMP threads per process [default: 1]"
-  echo " -p p - number of MPI processes [default: 1] "
-  echo " -q queue - name of the queue. [default: $queue]"  
-  echo " -r   - use FDS located in repository"
-  echo " -s   - stop job"
-  echo " -t   - used for timing studies, run a job alone on a node"
-  echo " -f repository root - full path name of repository where FDS is located"
-  echo "    [default: ~/FDS-SMV]"
-  echo " command - full path of command used to run case (not used if either -f or -r"
-  echo "    options are specified)"
-  echo "input_file - input file"
-  echo ""
-  exit
-fi
-
-# default parameter settings
-
 use_repository=0
 use_debug=0
-FDSROOT=~/FDS-SMV
-MPIRUN=
 dir=.
-ABORTRUN=n
-IB=
-DB=
-SCRIPTFILE=
 benchmark=no
 showinput=0
-
-if [ "$FDSNETWORK" == "infiniband" ] ; then
-IB=ib
-fi
+use_repository=1
 
 # read in parameters from command line
 
-while getopts 'bd:f:im:n:o:p:q:rst' OPTION
+while getopts 'bd:e:im:n:o:p:q:st' OPTION
 do
 case $OPTION  in
   b)
@@ -76,9 +74,9 @@ case $OPTION  in
   d)
    dir="$OPTARG"
    ;;
-  f)
-   FDSROOT="$OPTARG"
-   use_repository=1
+  e)
+   exe="$OPTARG"
+   use_repository=0
    ;;
   i)
    showinput=1
@@ -98,9 +96,6 @@ case $OPTION  in
   q)
    queue="$OPTARG"
    ;;
-  r)
-   use_repository=1
-   ;;
   s)
    stopjob=1
    ;;
@@ -111,26 +106,23 @@ esac
 done
 shift $(($OPTIND-1))
 
+# ^^^^^^^^^^^^^^^^^^^^^^^^parse options^^^^^^^^^^^^^^^^^^^^^^^^^
+
 if [ "$use_debug" == "1" ] ; then
-DB=_db
+  DB=_db
 fi
 
-if [ $use_repository -eq 0 ]
-then
-#set fds and the input file using the command line
-  exe=$1
-  in=$2
-else
- if [ $nmpi_processes -gt 1 ]
-# only set the input file using the command line, the fds exe is defined
-# using the repository (serial if nmpi_processes==1 parallel otherwise)
-  then
+if [ $use_repository -eq 1 ] ; then
+# use fds from repository (-e was not specified)
+ if [ $nmpi_processes -gt 1 ] ; then
+# use mpi version of fds 
   exe=$FDSROOT/FDS_Compilation/mpi_intel_linux_64$IB$DB/fds_mpi_intel_linux_64$IB$DB
  else
+# use non-mpi version of fds 
   exe=$FDSROOT/FDS_Compilation/intel_linux_64$DB/fds_intel_linux_64$DB
  fi
- in=$1
 fi
+in=$1
 
 infile=${in%.*}
 
@@ -160,7 +152,10 @@ fi
 
 if [ "$benchmark" == "yes" ]; then
   nodes=1
+# use 8 on blaze cluster
   nmpi_processes_per_node=8
+# use 12 on burn cluster
+#  nmpi_processes_per_node=12
 fi
 
 cd $dir
@@ -172,7 +167,7 @@ stopfile=$fulldir/$infile.stop
 
 in_full_file=$fulldir/$in
 
-# make sure files exist
+# make sure various files exist before running case
 
 if ! [ -e $in_full_file ]; then
   if [ "$showinput" == "0" ] ; then
@@ -219,7 +214,7 @@ fi
 
 scriptfile=/tmp/script.$$
 cat << EOF > $scriptfile
-#!/bin/bash -f
+#!/bin/bash
 #PBS -N $TITLE
 #PBS -e $out
 #PBS -o $outlog

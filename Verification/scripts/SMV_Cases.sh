@@ -1,40 +1,40 @@
 #!/bin/bash
 
-$RUNFDS Visualization cell_test
-$RUNCFAST Visualization cfast_test
-$RUNFDS Visualization colorbar
-$RUNFDS Visualization colorconv
-$RUNFDS Visualization fed_test
-$RUNFDS Visualization mplume5c8
-$RUNFDS Visualization objects_dynamic
-$RUNFDS Visualization objects_elem
-$RUNFDS Visualization objects_static
-$RUNFDS Visualization plume5c
-$RUNFDS Visualization plume5cdelta
-$RUNFDS Visualization plumeiso
-$RUNFDS Visualization plume5c_bounddef
-$RUNFDS Visualization script_test
-$RUNFDS Visualization script_slice_test
-$RUNFDS Visualization sillytexture
-$RUNFDS Visualization slicemask
-$RUNFDS Visualization smoke_sensor
-$RUNFDS Visualization smoke_test
-$RUNFDS Visualization smoke_test2
-$RUNFDS Visualization sprinkler_many
-$RUNFDS Visualization thouse5
-$RUNFDS Visualization thouse5delta
-$RUNFDS Visualization transparency
-$RUNFDS Visualization vcirctest
-$RUNFDS Visualization vcirctest2
-$RUNTFDS Visualization version
+$QFDS -d Visualization cell_test.fds
+$RUNCFAST -d Visualization cfast_test
+$QFDS -d Visualization colorbar.fds
+$QFDS -d Visualization colorconv.fds
+$QFDS -d Visualization fed_test.fds
+$QFDS -d Visualization mplume5c8.fds
+$QFDS -d Visualization objects_dynamic.fds
+$QFDS -d Visualization objects_elem.fds
+$QFDS -d Visualization objects_static.fds
+$QFDS -d Visualization plume5c.fds
+$QFDS -d Visualization plume5cdelta.fds
+$QFDS -d Visualization plumeiso.fds
+$QFDS -d Visualization plume5c_bounddef.fds
+$QFDS -d Visualization script_test.fds
+$QFDS -d Visualization script_slice_test.fds
+$QFDS -d Visualization sillytexture.fds
+$QFDS -d Visualization slicemask.fds
+$QFDS -d Visualization smoke_sensor.fds
+$QFDS -d Visualization smoke_test.fds
+$QFDS -d Visualization smoke_test2.fds
+$QFDS -d Visualization sprinkler_many.fds
+$QFDS -d Visualization thouse5.fds
+$QFDS -d Visualization thouse5delta.fds
+$QFDS -d Visualization transparency.fds
+$QFDS -d Visualization vcirctest.fds
+$QFDS -d Visualization vcirctest2.fds
+$RUNTFDS -d Visualization version.fds
 
-$RUNFDS WUI levelset1
-$RUNWFDS WUI tree_one
-#$RUNFDS WUI fire_line
-$RUNFDS WUI BT10m_2x2km_LS 1
-$RUNFDS WUI wind_test1
-$RUNFDS WUI tree_test2
-$RUNFDS WUI hill_structure
-#$RUNFDS WUI pine_tree
+$QFDS -d WUI levelset1.fds
+$RUNWFDS -d WUI tree_one.fds
+#$QFDS -d WUI fire_line.fds
+$QFDS -d WUI BT10m_2x2km_LS 1.fds
+$QFDS -d WUI wind_test1.fds
+$QFDS -d WUI tree_test2.fds
+$QFDS -d WUI hill_structure.fds
+#$QFDS -d WUI pine_tree.fds
 
-# $RUNFDS WUI onetree_surf_1mesh
+# $QFDS -d WUI onetree_surf_1mesh.fds
