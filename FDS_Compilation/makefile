@@ -474,11 +474,3 @@ clean:
 .PHONY : winclean
 winclean:
 	-erase *.mod *.obj 
-
-mpi_intel_linux_64ib_db : FFLAGS = -m64 -check -warn unused -O0 -auto -WB -traceback -g -fpe0 -fltconsistency -vec_report0
-mpi_intel_linux_64ib_db : LFLAGS = -static-intel
-mpi_intel_linux_64ib_db : FCOMPL = mpifort
-mpi_intel_linux_64ib_db : FOPENMPFLAGS = -openmp -openmp-link static -liomp5
-mpi_intel_linux_64ib_db : obj = fds_mpi_intel_linux_64ib_db
-mpi_intel_linux_64ib : setup $(obj_mpi)
-	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi)
