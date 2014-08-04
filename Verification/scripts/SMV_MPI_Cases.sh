@@ -1,3 +1,3 @@
 #!/bin/bash
 
-#$RUNFDSMPI 2 Visualization mplume5c
+#$QFDS -p 2 -d Visualization mplume5c.fds

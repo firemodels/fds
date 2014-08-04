@@ -7,9 +7,12 @@ ssffile=
 WFDSCASE="no"
 TIMEOPTION=
 
-while getopts 'fmtw' OPTION
+while getopts 'd:fmtw' OPTION
 do
 case $OPTION in
+  d)
+   dir="$OPTARG"
+   ;;
   f)
    FED="-fed"
    ;;
@@ -26,8 +29,8 @@ esac
 done
 shift $(($OPTIND-1))
 
-dir=$1
-in=$2
+in=$1
+in=${in%*.*}
 
 if [ "$FED" == "" ]; then
 if [ "$MOVIE" == "" ]; then

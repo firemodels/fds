@@ -10,7 +10,13 @@
 # the Run_All. scripts, such as option flags, directory creation, and
 # FDS file copying.
 
-export QFDS=/usr/local/bin/qfds.sh
+CURDIR=`pwd`
+
+cd $SVNROOT/Utilities/Scripts/
+SCRIPTDIR=`pwd`
+export QFDS=$SCRIPTDIR/qfds.sh
+cd $CURDIR
+
 export BASEDIR=`pwd`
 export INDIR=Current_Results
 
