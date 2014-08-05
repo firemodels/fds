@@ -187,7 +187,7 @@ if ! [ -e $in_full_file ]; then
   fi
 fi
 if [ "$strip_extension" == "1" ] ; then
-  in=infile
+  in=$infile
 fi
 if ! [ -e $exe ]; then
   if [ "$showinput" == "0" ] ; then
