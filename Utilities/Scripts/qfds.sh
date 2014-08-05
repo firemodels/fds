@@ -40,6 +40,7 @@ MPIRUN=
 ABORTRUN=n
 IB=
 DB=
+JOBPREFIX=
 if [ "$FDSNETWORK" == "infiniband" ] ; then
   IB=ib
 fi
@@ -66,7 +67,7 @@ strip_extension=0
 
 # read in parameters from command line
 
-while getopts 'bcd:e:f:m:n:o:p:q:stv' OPTION
+while getopts 'bcd:e:f:j:m:n:o:p:q:stv' OPTION
 do
 case $OPTION  in
   b)
@@ -84,6 +85,9 @@ case $OPTION  in
    ;;
   f)
    FDSROOT="$OPTARG"
+   ;;
+  j)
+   JOBPREFIX="$OPTARG"
    ;;
   m)
    maxmpi_processes_per_node="$OPTARG"
@@ -231,11 +235,11 @@ fi
 scriptfile=/tmp/script.$$
 cat << EOF > $scriptfile
 #!/bin/bash
-#PBS -N $TITLE
+#PBS -N $JOBPREFIX$TITLE
 #PBS -e $out
 #PBS -o $outlog
 #PBS -l nodes=$nodes:ppn=$ppn
-#\$ -N $TITLE
+#\$ -N $JOBPREFIX$TITLE
 #\$ -e $out
 #\$ -o $outlog
 #\$ -l nodes=$nodes:ppn=$ppn

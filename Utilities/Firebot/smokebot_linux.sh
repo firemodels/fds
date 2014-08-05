@@ -109,7 +109,7 @@ if [[ "$LAST_FDS_FAILED" == "1" ]] ; then
   mailTo=$mailToFDS
 fi
 
-export JOBPREFIX=SB_
+JOBPREFIX=SB_
 
 #  =============================================
 #  = Smokebot timing and notification mechanism =
@@ -425,29 +425,6 @@ check_compile_fds_mpi_db()
 #  = Stage 3 - Run verification cases (debug mode) =
 #  =================================================
 
-wait_verification_cases_debug_start()
-{
-   # Scans qstat and waits for verification cases to start
-   if [[ "$SMOKEBOT_QUEUE" == "none" ]]
-   then
-     while [[ `ps -u $USER -f | fgrep .fds | grep -v grep` != '' ]]; do
-        JOBS_REMAINING=`ps -u $USER -f | fgrep .fds | grep -v grep | wc -l`
-        echo "Waiting for ${JOBS_REMAINING} verification cases to start." >> $OUTPUT_DIR/stage3
-        TIME_LIMIT_STAGE="3"
-        check_time_limit
-        sleep 30
-     done
-   else
-     while [[ `qstat -a | grep $(whoami) | grep Q` != '' ]]; do
-        JOBS_REMAINING=`qstat -a | grep $(whoami) | grep $JOBPREFIX | grep Q | wc -l`
-        echo "Waiting for ${JOBS_REMAINING} verification cases to start." >> $OUTPUT_DIR/stage3
-        TIME_LIMIT_STAGE="3"
-        check_time_limit
-        sleep 30
-     done
-   fi
-}
-
 wait_verification_cases_debug_end()
 {
    # Scans qstat and waits for verification cases to end
@@ -494,7 +471,7 @@ run_verification_cases_debug()
 
    # Submit SMV verification cases and wait for them to start
    echo 'Running SMV verification cases:' >> $OUTPUT_DIR/stage3 2>&1
-   ./Run_SMV_Cases.sh $USEINSTALL2 -m 10 -d -q $SMOKEBOT_QUEUE >> $OUTPUT_DIR/stage3 2>&1
+   ./Run_SMV_Cases.sh $USEINSTALL2 -m 5 -d -q $SMOKEBOT_QUEUE -j $JOBPREFIX >> $OUTPUT_DIR/stage3 2>&1
 
    # Wait for SMV verification cases to end
    wait_verification_cases_debug_end
@@ -742,7 +719,7 @@ run_verification_cases_release()
    # Start running all SMV verification cases
    cd $FDS_SVNROOT/Verification/scripts
    echo 'Running SMV verification cases:' >> $OUTPUT_DIR/stage5 2>&1
-   ./Run_SMV_Cases.sh $USEINSTALL2 $RUN_OPENMP -q $SMOKEBOT_QUEUE >> $OUTPUT_DIR/stage5 2>&1
+   ./Run_SMV_Cases.sh $USEINSTALL2 $RUN_OPENMP -q $SMOKEBOT_QUEUE -j $JOBPREFIX >> $OUTPUT_DIR/stage5 2>&1
 
    # Wait for all verification cases to end
    wait_verification_cases_release_end
@@ -1158,6 +1135,7 @@ check_compile_fds_db
 ### Stage 2b ###
 #compile_fds_mpi_db
 #check_compile_fds_mpi_db
+stage2b_success=true
 
 ### Stage 4a ###
 stage4_beg=`GET_TIME`
@@ -1170,6 +1148,7 @@ fi
 #if [[ $stage2b_success ]] ; then
 #   compile_fds_mpi
 #   check_compile_fds_mpi
+stage4b_success=true
 #fi
 #BUILDFDS_end=`GET_TIME`
 DIFF_BUILDFDS=`GET_DURATION $BUILDFDS_beg $BUILDFDS_end`
