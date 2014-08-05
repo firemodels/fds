@@ -11,6 +11,7 @@ FDS_DEBUG=0
 nthreads=1
 RUN_SMV=1
 RUN_GEOM=1
+JOBPREFIX=
 # not running any mpi cases now
 RUN_MPI=0
 STOPFDS=
@@ -59,7 +60,7 @@ cd $CURDIR/..
 
 
 use_installed="0"
-while getopts 'dghm:o:p:q:su' OPTION
+while getopts 'dghj:m:o:p:q:su' OPTION
 do
 case $OPTION in
   d)
@@ -76,6 +77,9 @@ case $OPTION in
    ;;
   m)
    export STOPFDSMAXITER="$OPTARG"
+   ;;
+  j)
+   JOBPREFIX="$OPTARG"
    ;;
   o)
    nthreads="$OPTARG"
@@ -111,6 +115,9 @@ else
   PLATFORM=linux$size
   PLATFORM2=linux_32
   PLATFORM3=linux_64
+fi
+if [ "$JOBPREFIX" != "" ]; then
+  JOBPREFIX="-j $JOBPREFIX"
 fi
 IB=
 if [ "$FDSNETWORK" == "infiniband" ] ; then
@@ -160,10 +167,10 @@ fi
 
 # run cases    
 
-export  RUNCFAST="$QFDSSH -c -e $CFAST $queue $STOPFDS "
-export      QFDS="$QFDSSH -e $FDSEXE $OPENMPOPTS $queue $STOPFDS"
-export   RUNTFDS="$QFDSSH -e $FDSEXE $OPENMPOPTS $queue $STOPFDS"
-export   RUNWFDS="$QFDSSH -e $WFDSEXE $queue $STOPFDS"
+export  RUNCFAST="$QFDSSH -c -e $CFAST $queue $STOPFDS $JOBPREFIX"
+export      QFDS="$QFDSSH -e $FDSEXE $OPENMPOPTS $queue $STOPFDS $JOBPREFIX"
+export   RUNTFDS="$QFDSSH -e $FDSEXE $OPENMPOPTS $queue $STOPFDS $JOBPREFIX"
+export   RUNWFDS="$QFDSSH -e $WFDSEXE $queue $STOPFDS $JOBPREFIX"
 
 echo "" | $FDSEXE 2> $SVNROOT/Manuals/SMV_User_Guide/SCRIPT_FIGURES/fds.version
 
@@ -189,7 +196,7 @@ if [ "$RUN_GEOM" == "1" ] ; then
 fi
 if [ "$RUN_MPI" == "1" ] ; then
   cd $SVNROOT/Verification
-export QFDS="$QFDSSH -e $FDSMPI $queue $STOPFDS"
+export QFDS="$QFDSSH -e $FDSMPI $queue $STOPFDS $JOBPREFIX"
   scripts/SMV_MPI_Cases.sh
 fi
 
