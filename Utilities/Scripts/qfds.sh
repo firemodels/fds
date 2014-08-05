@@ -24,7 +24,8 @@ then
   echo " -n n - number of MPI processes per node [default: 1]"
   echo " -o o - number of OpenMP threads per process [default: 1]"
   echo " -p p - number of MPI processes [default: 1] "
-  echo " -q q - name of queue. [default: batch]"  
+  echo " -q q - name of queue. [default: batch]"
+  echo "        If queue is terminal then job is run in the foreground on local computer"
   echo " -r   - report bindings"
   echo " -s   - stop job"
   echo " -t   - used for timing studies, run a job alone on a node"
@@ -124,8 +125,7 @@ shift $(($OPTIND-1))
 
 # ^^^^^^^^^^^^^^^^^^^^^^^^parse options^^^^^^^^^^^^^^^^^^^^^^^^^
 
-# force nmpi_processes_per_node to be at least 2
-# and a multiple of 2
+# force nmpi_processes_per_node to be at least 2 and even
 
 if test $nmpi_processes_per_node -lt 2  ; then
   nmpi_processes_per_node=2
@@ -137,6 +137,8 @@ if [ "$use_debug" == "1" ] ; then
   DB=_db
 fi
 
+# define executables if the repository is used
+
 if [ $use_repository -eq 1 ] ; then
 # use fds from repository (-e was not specified)
  if [ $nmpi_processes -gt 1 ] ; then
@@ -147,27 +149,35 @@ if [ $use_repository -eq 1 ] ; then
   exe=$FDSROOT/FDS_Compilation/intel_linux_64$DB/fds_intel_linux_64$DB
  fi
 fi
-in=$1
 
+#define input file
+
+in=$1
 infile=${in%.*}
 
 # if there is more than 1 process then use the mpirun command
 
 TITLE="$infile"
 
+# define number of nodes
+
 let "nodes=($nmpi_processes-1)/$nmpi_processes_per_node+1"
+if test $nodes -lt 1 ; then
+  nodes=1
+fi
+
+# define processes per node
+
 let "ppn=($nopenmp_threads)*($nmpi_processes_per_node)"
-if test $maxmpi_processes_per_node -gt $ppn ; then
+if test $ppn -le $maxmpi_processes_per_node ; then
   ppn=$maxmpi_processes_per_node
 fi
+
+# bind to sockets if OpenMP is being used (number of threads > 1)
 
 SOCKET_OPTION=
 if test $nopenmp_threads -gt 1 ; then
   SOCKET_OPTION="--bind-to socket"
-fi
-
-if test $nodes -le 0 ; then
-  nodes=1
 fi
 
 # in benchmark mode run a case "alone" on one node
@@ -180,6 +190,8 @@ if [ "$benchmark" == "yes" ]; then
 #  nmpi_processes_per_node=12
 fi
 
+# use mpirun if there is more than 1 process
+
 if [ $nmpi_processes -gt 1 ] ; then
   MPIRUN="$MPIDIST/bin/mpirun $REPORT_BINDINGS $(SOCKET_OPTION) --map-by ppr:$nmpi_processes_per_node_div_2:node -np $nmpi_processes"
   TITLE="$infile(MPI)"
@@ -191,10 +203,11 @@ fi
 cd $dir
 fulldir=`pwd`
 
-out=$fulldir/$infile.err
+# define files
+
+outerr=$fulldir/$infile.err
 outlog=$fulldir/$infile.log
 stopfile=$fulldir/$infile.stop
-
 in_full_file=$fulldir/$in
 
 # make sure various files exist before running case
@@ -255,13 +268,17 @@ scriptfile=/tmp/script.$$
 cat << EOF > $scriptfile
 #!/bin/bash
 #PBS -N $JOBPREFIX$TITLE
-#PBS -e $out
+#PBS -e $outerr
 #PBS -o $outlog
 #PBS -l nodes=$nodes:ppn=$ppn
-#\$ -N $JOBPREFIX$TITLE
-#\$ -e $out
-#\$ -o $outlog
-#\$ -l nodes=$nodes:ppn=$ppn
+#PBS -l walltime=04:00:00
+#PBS -l pvmem=1GB
+#SBATCH -J $JOBPREFIX$infile
+#SBATCH --mem-per-cpu=1000
+#SBATCH -t 04:00:00
+#SBATCH -e $outerr
+#SBATCH -o $outlog
+#SBATCH -p $queue
 
 export OMP_NUM_THREADS=$nopenmp_threads
 
