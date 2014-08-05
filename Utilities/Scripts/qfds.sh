@@ -25,6 +25,7 @@ then
   echo " -o o - number of OpenMP threads per process [default: 1]"
   echo " -p p - number of MPI processes [default: 1] "
   echo " -q q - name of queue. [default: batch]"  
+  echo " -r   - report bindings"
   echo " -s   - stop job"
   echo " -t   - used for timing studies, run a job alone on a node"
   echo " -v   - list script used to run case to standard output"
@@ -53,7 +54,7 @@ queue=batch
 stopjob=0
 
 nmpi_processes=1
-nmpi_processes_per_node=1
+nmpi_processes_per_node=2
 maxmpi_processes_per_node=1
 nopenmp_threads=1
 
@@ -64,10 +65,11 @@ benchmark=no
 showinput=0
 use_repository=1
 strip_extension=0
+REPORT_BINDINGS=
 
 # read in parameters from command line
 
-while getopts 'bcd:e:f:j:m:n:o:p:q:stv' OPTION
+while getopts 'bcd:e:f:j:m:n:o:p:q:rstv' OPTION
 do
 case $OPTION  in
   b)
@@ -104,6 +106,9 @@ case $OPTION  in
   q)
    queue="$OPTARG"
    ;;
+  r)
+   REPORT_BINDINGS="--report-bindings"
+   ;;
   s)
    stopjob=1
    ;;
@@ -118,6 +123,15 @@ done
 shift $(($OPTIND-1))
 
 # ^^^^^^^^^^^^^^^^^^^^^^^^parse options^^^^^^^^^^^^^^^^^^^^^^^^^
+
+# force nmpi_processes_per_node to be at least 2
+# and a multiple of 2
+
+if test $nmpi_processes_per_node -lt 2  ; then
+  nmpi_processes_per_node=2
+fi
+let "nmpi_processes_per_node=2*(($nmpi_processes_per_node+1)/2)"
+let "nmpi_processes_per_node_div_2=$nmpi_processes_per_node/2"
 
 if [ "$use_debug" == "1" ] ; then
   DB=_db
@@ -141,18 +155,15 @@ infile=${in%.*}
 
 TITLE="$infile"
 
-if [ $nmpi_processes -gt 1 ] ; then
-  MPIRUN="$MPIDIST/bin/mpirun --map-by ppr:$nmpi_processes_per_node:node -np $nmpi_processes"
-  TITLE="$infile(MPI)"
-  case $FDSNETWORK in
-    "infiniband") TITLE="$infile(MPI_IB)"
-  esac
-fi
-
 let "nodes=($nmpi_processes-1)/$nmpi_processes_per_node+1"
 let "ppn=($nopenmp_threads)*($nmpi_processes_per_node)"
 if test $maxmpi_processes_per_node -gt $ppn ; then
   ppn=$maxmpi_processes_per_node
+fi
+
+SOCKET_OPTION=
+if test $nopenmp_threads -gt 1 ; then
+  SOCKET_OPTION="--bind-to socket"
 fi
 
 if test $nodes -le 0 ; then
@@ -167,6 +178,14 @@ if [ "$benchmark" == "yes" ]; then
   nmpi_processes_per_node=8
 # use 12 on burn cluster
 #  nmpi_processes_per_node=12
+fi
+
+if [ $nmpi_processes -gt 1 ] ; then
+  MPIRUN="$MPIDIST/bin/mpirun $REPORT_BINDINGS $(SOCKET_OPTION) --map-by ppr:$nmpi_processes_per_node_div_2:node -np $nmpi_processes"
+  TITLE="$infile(MPI)"
+  case $FDSNETWORK in
+    "infiniband") TITLE="$infile(MPI_IB)"
+  esac
 fi
 
 cd $dir
