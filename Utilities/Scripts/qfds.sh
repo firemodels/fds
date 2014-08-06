@@ -175,7 +175,7 @@ fi
 
 # bind to sockets if OpenMP is being used (number of threads > 1)
 
-SOCKET_OPTION=
+SOCKET_OPTION=" "
 if test $nopenmp_threads -gt 1 ; then
   SOCKET_OPTION="--bind-to socket"
 fi
@@ -193,7 +193,7 @@ fi
 # use mpirun if there is more than 1 process
 
 if [ $nmpi_processes -gt 1 ] ; then
-  MPIRUN="$MPIDIST/bin/mpirun $REPORT_BINDINGS $(SOCKET_OPTION) --map-by ppr:$nmpi_processes_per_node_div_2:node -np $nmpi_processes"
+  MPIRUN="$MPIDIST/bin/mpirun $REPORT_BINDINGS $SOCKET_OPTION --map-by ppr:$nmpi_processes_per_node_div_2:socket -np $nmpi_processes"
   TITLE="$infile(MPI)"
   case $FDSNETWORK in
     "infiniband") TITLE="$infile(MPI_IB)"
@@ -283,11 +283,7 @@ cat << EOF > $scriptfile
 #PBS -e $outerr
 #PBS -o $outlog
 #PBS -l nodes=$nodes:ppn=$ppn
-#PBS -l walltime=04:00:00
-#PBS -l pvmem=1GB
 #SBATCH -J $JOBPREFIX$infile
-#SBATCH --mem-per-cpu=1000
-#SBATCH -t 04:00:00
 #SBATCH -e $outerr
 #SBATCH -o $outlog
 #SBATCH -p $queue
