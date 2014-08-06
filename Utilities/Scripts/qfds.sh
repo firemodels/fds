@@ -37,6 +37,10 @@ fi
 
 # default parameter settings
 
+ncores=8
+if [ "`uname`" != "Darwin" ]; then
+  ncores=`grep processor /proc/cpuinfo | wc -l`
+fi
 FDSROOT=~/FDS-SMV
 MPIRUN=
 ABORTRUN=n
@@ -189,10 +193,7 @@ fi
 
 if [ "$benchmark" == "yes" ]; then
   nodes=1
-# use 8 on blaze cluster
-  nmpi_processes_per_node=8
-# use 12 on burn cluster
-#  nmpi_processes_per_node=12
+  nmpi_processes_per_node=$ncores
 fi
 
 # use mpirun if there is more than 1 process
@@ -335,3 +336,4 @@ else
   $QSUB $scriptfile
 fi
 rm $scriptfile
+grep processor /proc/cpuinfo | wc -l
