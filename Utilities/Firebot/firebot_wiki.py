@@ -55,9 +55,6 @@ The latest nightly versions of the documentation/manuals from Firebot [https://d
   * Stage 7b: Matlab plotting (validation)
   * Stage 7c: FDS run time statistics
   * Stage 8:  Build FDS-SMV guides
-  * Stage 9a: Run correlations cases
-  * Stage 9b: Matlab plotting (correlations)
-  * Stage 9c: Build correlations guide
 
 """
 
