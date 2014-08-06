@@ -8,17 +8,21 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 
 void trim(char *line);
 void usage(char *prog);
+char *trim_front(char *line);
 
 /* ------------------ main ------------------------ */
 
 int main(int argc, char **argv){
   char buffer[1024],*buffptr;
+  char buffer2[1024];
   int i;
   char *filein=NULL,*fileout=NULL,*prog;
   FILE *streamin=NULL,*streamout=NULL;
+  int lendata;
 
   buffptr=buffer;
   prog=argv[0];
@@ -76,21 +80,61 @@ int main(int argc, char **argv){
     }
     if(buffer[0]=='#'){
       if(strlen(buffer)>0){
-        fprintf(streamout,"REM %s\n",buffer+1);
+        fprintf(streamout,":: %s\n",buffer+1);
       }
       else{
-        fprintf(streamout,"REM\n");
+        fprintf(streamout,"::\n");
       }
       continue;
     }
     if(buffer[0]=='$'){
       char *comm_beg, *comm_end, *data;
+      char *casename;
+      int j;
+      char *datato, *datafrom;
       
       comm_beg=buffer+1;
       comm_end=strchr(buffer,' ');
       data = comm_end+1;
       *comm_end=0;
-      fprintf(streamout,"%s%s%s %s\n","%",comm_beg,"%",data);
+
+      trim(data);
+      for(j=strlen(data)-1;j>=0;j--){
+        if(data[j]==' '){
+          casename = data + j + 1;
+          data[j]=0;
+          break;
+        }
+      }
+
+      // remove consecutive blanks
+
+      trim(data);
+      data = trim_front(data);
+      datafrom=data;
+      datato=data;
+      for(j=1;j<strlen(data);j++){
+        datafrom++;
+        if(data[j]!=' '||data[j-1]!=' '){
+          datato++;
+          if(datato!=datafrom)*datato = *datafrom;
+        }
+      }
+      datato[1]=0;
+
+      // -d directory -e -f
+      // -d:directory -e
+
+      trim(data);
+      lendata = strlen(data);
+      if(lendata>2){
+        for(j=2;j<lendata;j++){
+          if(data[j]==' '&&data[j-2]=='-'&&j+1<lendata&&data[j+1]!='-'){
+            data[j]='%';
+          }
+        }
+      }
+      fprintf(streamout,"%s%s%s %s %s\n","%",comm_beg,"%",data,casename);
       continue;
 
     }
@@ -131,3 +175,16 @@ void trim(char *line){
   *line='\0';
 }
 
+/* ------------------ trim_front ------------------------ */
+
+char *trim_front(char *line){
+  /*! \fn char *trim_front(char *line)
+      \brief returns a pointer to the first non-blank character in the character string line
+  */
+  char *c;
+
+  for(c=line;c<=line+strlen(line)-1;c++){
+    if(!isspace(*c))return c;
+  }
+  return line;
+}
