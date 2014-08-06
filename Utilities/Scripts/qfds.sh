@@ -1,7 +1,7 @@
 #!/bin/bash
-# $Date: 2014-08-01 12:07:22 -0400 (Fri, 01 Aug 2014) $ 
-# $Revision: 20080 $
-# $Author: gforney $
+# $Date$ 
+# $Revision$
+# $Author$
 #
 
 
