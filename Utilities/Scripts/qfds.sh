@@ -257,10 +257,23 @@ if [ "$STOPFDSMAXITER" == "" ]; then
 fi
 
 QSUB="qsub -q $queue"
+
 if [ "$queue" == "terminal" ] ; then
   QSUB=
   MPIRUN=
 fi
+
+if [ "$queue" == "none" ]; then
+  queue=
+  QSUB="$BACKGROUND -u 75 -d 10 "
+  background=yes;
+  notfound=`$BACKGROUND -help 2>&1 | tail -1 | grep "not found" | wc -l`
+  if [ "$notfound" == "1" ];  then
+    echo "The program $BACKGROUND (background) is not available. Run aborted"
+    exit
+  fi
+fi
+
 
 # create script file
 
