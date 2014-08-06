@@ -56,7 +56,7 @@ stopjob=0
 
 nmpi_processes=1
 nmpi_processes_per_node=2
-maxmpi_processes_per_node=1
+max_processes_per_node=1
 nopenmp_threads=1
 
 use_repository=0
@@ -93,7 +93,7 @@ case $OPTION  in
    JOBPREFIX="$OPTARG"
    ;;
   m)
-   maxmpi_processes_per_node="$OPTARG"
+   max_processes_per_node="$OPTARG"
    ;;
   n)
    nmpi_processes_per_node="$OPTARG"
@@ -127,11 +127,16 @@ shift $(($OPTIND-1))
 
 # force nmpi_processes_per_node to be at least 2 and even
 
-if test $nmpi_processes_per_node -lt 2  ; then
-  nmpi_processes_per_node=2
+if test $nmpi_processes -eq 1 ; then
+   nmpi_processes_per_node=1
+   nmpi_processes_per_node_div_2=1
+else
+   if test $nmpi_processes_per_node -lt 2  ; then
+     nmpi_processes_per_node=2
+   fi
+   let "nmpi_processes_per_node=2*(($nmpi_processes_per_node+1)/2)"
+   let "nmpi_processes_per_node_div_2=$nmpi_processes_per_node/2"
 fi
-let "nmpi_processes_per_node=2*(($nmpi_processes_per_node+1)/2)"
-let "nmpi_processes_per_node_div_2=$nmpi_processes_per_node/2"
 
 if [ "$use_debug" == "1" ] ; then
   DB=_db
@@ -169,8 +174,8 @@ fi
 # define processes per node
 
 let "ppn=($nopenmp_threads)*($nmpi_processes_per_node)"
-if test $ppn -le $maxmpi_processes_per_node ; then
-  ppn=$maxmpi_processes_per_node
+if test $ppn -le $max_processes_per_node ; then
+  ppn=$max_processes_per_node
 fi
 
 # bind to sockets if OpenMP is being used (number of threads > 1)
