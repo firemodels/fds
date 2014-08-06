@@ -264,7 +264,6 @@ if [ "$queue" == "terminal" ] ; then
 fi
 
 if [ "$queue" == "none" ]; then
-  queue=
   QSUB="$BACKGROUND -u 75 -d 10 "
   background=yes;
   notfound=`$BACKGROUND -help 2>&1 | tail -1 | grep "not found" | wc -l`
@@ -304,25 +303,34 @@ EOF
 
 # output info to terminal
 
-echo "         Input file:$in"
-echo "         Executable:$exe"
-echo "              Queue:$queue"
-echo "              Nodes:$nodes"
-echo "          Processes:$nmpi_processes"
-echo " Processes per node:$nmpi_processes_per_node"
-if test $nmpi_processes -gt 1 ; then
-  echo "Threads per process:$nopenmp_threads"
-fi
-
+if [ "$queue" != "none" ] ; then
+  echo "         Input file:$in"
+  echo "         Executable:$exe"
+  echo "              Queue:$queue"
+  echo "              Nodes:$nodes"
+  echo "          Processes:$nmpi_processes"
+  echo " Processes per node:$nmpi_processes_per_node"
+  if test $nmpi_processes -gt 1 ; then
+    echo "Threads per process:$nopenmp_threads"
+  fi
 # output script file to terminal
 
-if [ "$showinput" == "1" ] ; then
-  cat $scriptfile
-  exit
+  if [ "$showinput" == "1" ] ; then
+    cat $scriptfile
+    exit
+  fi
 fi
 
 # run script
 
-chmod +x $scriptfile
-$QSUB $scriptfile
+if [ "$queue" == "none" ] ; then
+  echo "running: $QSUB $MPIRUN $exe $in"
+  if [ "$showinput" == "1" ] ; then
+    exit
+  fi
+  $QSUB $MPIRUN $exe $in
+else
+  chmod +x $scriptfile
+  $QSUB $scriptfile
+fi
 rm $scriptfile
