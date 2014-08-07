@@ -1,2 +1,5 @@
 @echo off
-if exist %1\%2.stop erase %1\%2.stop
+
+call %SVNROOT%\Utilities\Scripts\getopts.bat %*
+
+if exist %dir%\%infile%.stop erase %dir%\%infile%.stop

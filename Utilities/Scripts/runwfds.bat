@@ -1,6 +1,6 @@
 @echo off
-set dir=%1
-set infile=%2
+
+call %SVNROOT%\Utilities\Scripts\getopts.bat %*
 
 set fulldir=%BASEDIR%/%dir%
 
@@ -19,9 +19,11 @@ Rem if STOPFDS=1 then create %fulldir%/%stopfile% and exit
 Rem erase %fulldir%\%stopfile%
 
 cd %fulldir%
+
+IF NOT EXIST %WFDSEXE% GOTO notexist
 echo %in% started
 
-%FDS% %in%  > %out%
-
+%WFDS% %in%  > %out%
+:notexist
 
 cd %BASEDIR%
