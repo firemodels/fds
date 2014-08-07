@@ -59,7 +59,7 @@ queue=batch
 stopjob=0
 
 nmpi_processes=1
-nmpi_processes_per_node=2
+nmpi_processes_per_node=1
 max_processes_per_node=1
 nopenmp_threads=1
 
@@ -129,19 +129,6 @@ shift $(($OPTIND-1))
 
 # ^^^^^^^^^^^^^^^^^^^^^^^^parse options^^^^^^^^^^^^^^^^^^^^^^^^^
 
-# force nmpi_processes_per_node to be at least 2 and even
-
-if test $nmpi_processes -eq 1 ; then
-   nmpi_processes_per_node=1
-   nmpi_processes_per_node_div_2=1
-else
-   if test $nmpi_processes_per_node -lt 2  ; then
-     nmpi_processes_per_node=2
-   fi
-   let "nmpi_processes_per_node=2*(($nmpi_processes_per_node+1)/2)"
-   let "nmpi_processes_per_node_div_2=$nmpi_processes_per_node/2"
-fi
-
 if [ "$use_debug" == "1" ] ; then
   DB=_db
 fi
@@ -186,7 +173,7 @@ fi
 
 SOCKET_OPTION=" "
 if test $nopenmp_threads -gt 1 ; then
-  SOCKET_OPTION="--bind-to socket"
+  SOCKET_OPTION="--bind-to socket --map-by ppr:1:socket"
 fi
 
 # in benchmark mode run a case "alone" on one node
@@ -199,7 +186,7 @@ fi
 # use mpirun if there is more than 1 process
 
 if [ $nmpi_processes -gt 1 ] ; then
-  MPIRUN="$MPIDIST/bin/mpirun $REPORT_BINDINGS $SOCKET_OPTION --map-by ppr:$nmpi_processes_per_node_div_2:socket -np $nmpi_processes"
+  MPIRUN="$MPIDIST/bin/mpirun $REPORT_BINDINGS $SOCKET_OPTION -np $nmpi_processes"
   TITLE="$infile(MPI)"
   case $FDSNETWORK in
     "infiniband") TITLE="$infile(MPI_IB)"
