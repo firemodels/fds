@@ -5,11 +5,8 @@ if [%reduced%] == [] (
 )
 
 :: -------------------------------------------------------------
-::                         set 32 or 64 bit environment
+::                         set environment
 :: -------------------------------------------------------------
-
-:: set size=32
-:: set compile_platform=ia32
 
 set size=64
 set compile_platform=intel64
@@ -41,9 +38,6 @@ set svnroot=%userprofile%\%fdsbasename%
 set cfastroot=%userprofile%\%cfastbasename%
 set email=%svnroot%\SMV\scripts\email.bat
 
-set mpichinc="c:\mpich\mpich2_%size%\include"
-set mpichlib="c:\mpich\mpich2_%size%\lib\fmpich2.lib"
-
 set errorlog=%OUTDIR%\stage_errors.txt
 set warninglog=%OUTDIR%\stage_warnings.txt
 set errorwarninglog=%OUTDIR%\stage_errorswarnings.txt
@@ -53,13 +47,6 @@ set stagestatus=%OUTDIR%\stage_status.log
 
 set fromsummarydir=%svnroot%\Manuals\SMV_Summary
 set tosummarydir="%SMOKEBOT_SUMMARY_DIR%"
-
-set bundle_win32=%svnroot%\Utilities\Scripts\BUNDLE_win32.bat
-set bundle_win64=%svnroot%\Utilities\Scripts\BUNDLE_win64.bat
-set bundle_linux32=%svnroot%\Utilities\Scripts\BUNDLE_linux32.bat
-set bundle_linux64=%svnroot%\Utilities\Scripts\BUNDLE_linux64.bat
-set bundle_osx32=%svnroot%\Utilities\Scripts\BUNDLE_osx32.bat
-set bundle_osx64=%svnroot%\Utilities\Scripts\BUNDLE_osx64.bat
 
 set haveerrors=0
 set havewarnings=0
@@ -184,7 +171,7 @@ call :find_fds_warnings "warning" %OUTDIR%\stage1a.txt "Stage 1a"
 
 :: cd %svnroot%\FDS_Compilation\mpi_intel_win_%size%_db
 :: erase *.obj *.mod *.exe 1> %OUTDIR%\stage1b.txt 2>&1
-:: make MPIINCLUDE=%mpichinc% MPILIB=%mpichlib% VPATH="../../FDS_Source" -f ..\makefile mpi_intel_win_%size%_db 1>> %OUTDIR%\stage1b.txt 2>&1
+:: make VPATH="../../FDS_Source" -f ..\makefile mpi_intel_win_%size%_db 1>> %OUTDIR%\stage1b.txt 2>&1
 
 :: call :does_file_exist fds_mpi_win_%size%_db.exe %OUTDIR%\stage1b.txt|| exit /b 1
 :: call :find_fds_warnings "warning" %OUTDIR%\stage1b.txt "Stage 1b"
@@ -206,7 +193,7 @@ if %reduced% == 1 goto skip_fds_parallel
 
 :: cd %svnroot%\FDS_Compilation\mpi_intel_win_%size%
 :: erase *.obj *.mod *.exe 1> %OUTDIR%\stage1d.txt 2>&1
-:: make MPIINCLUDE=%mpichinc% MPILIB=%mpichlib% VPATH="../../FDS_Source" -f ..\makefile mpi_intel_win_%size%  1>> %OUTDIR%\stage1d.txt 2>&1
+:: make VPATH="../../FDS_Source" -f ..\makefile mpi_intel_win_%size%  1>> %OUTDIR%\stage1d.txt 2>&1
 
 :: call :does_file_exist fds_mpi_win_%size%.exe %OUTDIR%\stage1d.txt|| exit /b 1
 :: call :find_fds_warnings "warning" %OUTDIR%\stage1d.txt "Stage 1d"

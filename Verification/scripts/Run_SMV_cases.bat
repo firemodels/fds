@@ -26,10 +26,10 @@ set FIRELOCAL=%CD%
 
 set TIME_FILE=%SCRIPT_DIR%\smv_case_times.txt
 
-set RUNFDS_R=call %SVNROOT%\Utilities\Scripts\runfds_win32.bat
-set RUNWFDS_R=call %SVNROOT%\Utilities\Scripts\runwfds_win32.bat
-set RUNTFDS_R=call %SVNROOT%\Utilities\Scripts\runfds_win32.bat
-set RUNCFAST_R=call %SVNROOT%\Utilities\Scripts\runcfast_win32.bat
+set RUNFDS_R=call %SVNROOT%\Utilities\Scripts\runfds.bat
+set RUNWFDS_R=call %SVNROOT%\Utilities\Scripts\runwfds.bat
+set RUNTFDS_R=call %SVNROOT%\Utilities\Scripts\runfds.bat
+set RUNCFAST_R=call %SVNROOT%\Utilities\Scripts\runcfast.bat
 
 set RUNFDS_M=call %SVNROOT%\Verification\scripts\make_stop.bat
 set RUNWFDS_M=call %SVNROOT%\Verification\scripts\make_stop.bat
@@ -43,7 +43,7 @@ set RUNCFAST_E=call %SVNROOT%\Verification\scripts\erase_stop.bat
 
 :: VVVVVVVVVVVV set parameters VVVVVVVVVVVVVVVVVVVVVV
 
-:: Choose FDS version (size is "", 32 or 64)
+:: Choose FDS version (size is "" or 64)
 
 if "%size%" == "" (
   set FDSBASE=fds.exe
@@ -51,8 +51,8 @@ if "%size%" == "" (
   set CFASTEXE=cfast6
   set WIND2FDSEXE=wind2fds
 ) else (
-  set FDSBASE=fds_%win_%size%%DEBUG%.exe
-  set FDSEXE=%SVNROOT%\FDS_Compilation\%intel_win_%size%%DEBUG%\fds_%win_%size%%DEBUG%.exe
+  set FDSBASE=fds_win_%size%%DEBUG%.exe
+  set FDSEXE=%SVNROOT%\FDS_Compilation\intel_win_%size%%DEBUG%\fds_win_%size%%DEBUG%.exe
   set CFASTEXE=%CFAST%\CFAST\intel_win_%size%\cfast6_win_%size%.exe
   set WIND2FDSEXE=%SVNROOT%\Utilities\wind2fds\intel_win_%size%\wind2fds_win_%size%.exe
 )
@@ -76,7 +76,9 @@ call :is_file_installed %WIND2FDSEXE%|| exit /b 1
 set FDS=%bg%%FDSEXE%
 set WFDS=%bg%%WFDSEXE%
 set CFAST=%bg%%CFASTEXE%
+
 set SH2BAT=%SVNROOT%\Utilities\Data_Processing\sh2bat
+call :is_file_installed %sh2bat%|| exit /b 1
 
 echo.
 echo FDS=%FDS%
@@ -110,12 +112,12 @@ set smvug="%SVNROOT%\Manuals\SMV_User_Guide\"
 echo | %FDSEXE% 2> "%smvug%\SCRIPT_FIGURES\fds.version"
 
 if "%rundebug%" == "1" (
-  SET RUNFDS=%RUNFDS_M%
+  SET QFDS=%RUNFDS_M%
   SET RUNWFDS=%RUNWFDS_M%
   SET RUNTFDS=%RUNTFDS_M%
   SET RUNCFAST=%RUNCFAST_M%
 ) else (
-  SET RUNFDS=%RUNFDS_E%
+  SET QFDS=%RUNFDS_E%
   SET RUNWFDS=%RUNWFDS_E%
   SET RUNTFDS=%RUNTFDS_E%
   SET RUNCFAST=%RUNCFAST_E%

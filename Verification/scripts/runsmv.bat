@@ -1,9 +1,8 @@
 @echo off
-set dir=%1
-set infile=%2
+
+call %SVNROOT%\Utilities\Scripts\getopts.bat %*
 
 set fulldir=%BASEDIR%/%dir%
-
 
 cd %fulldir%
 echo %infile%

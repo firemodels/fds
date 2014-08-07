@@ -5,7 +5,6 @@ set runonlygeom=%2
 
 echo Creating figures for the Smokeview User's and Verification guides
 
-
 SETLOCAL
 set SCRIPT_DIR=%CD%
 

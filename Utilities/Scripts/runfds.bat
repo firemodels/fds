@@ -1,6 +1,10 @@
 @echo off
-set dir=%1
-set infile=%2
+
+:: set number of openmp threads
+
+set OMP_NUM_THREADS=1
+
+call %SVNROOT%\Utilities\Scripts\getopts.bat %*
 
 set fulldir=%BASEDIR%/%dir%
 
@@ -19,11 +23,8 @@ Rem if STOPFDS=1 then create %fulldir%/%stopfile% and exit
 Rem erase %fulldir%\%stopfile%
 
 cd %fulldir%
-
-IF NOT EXIST %WFDSEXE% GOTO notexist
 echo %in% started
 
-%WFDS% %in%  > %out%
-:notexist
+%FDS% %in%  > %out%
 
 cd %BASEDIR%
