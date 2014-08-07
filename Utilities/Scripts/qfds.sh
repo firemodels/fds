@@ -270,12 +270,17 @@ if [ "$queue" == "terminal" ] ; then
 fi
 
 if [ "$queue" == "none" ]; then
+  if [ "$BACKGROUND" == "" ]; then
+    BACKGROUND=background
+  fi
   QSUB="$BACKGROUND -u 75 -d 10 "
   background=yes;
   notfound=`$BACKGROUND -help 2>&1 | tail -1 | grep "not found" | wc -l`
-  if [ "$notfound" == "1" ];  then
-    echo "The program $BACKGROUND (background) is not available. Run aborted"
-    exit
+  if [ "$showinput" == "0" ]; then
+    if [ "$notfound" == "1" ];  then
+      echo "The program $BACKGROUND (background) is not available. Run aborted"
+      exit
+    fi
   fi
 fi
 
@@ -302,6 +307,16 @@ echo Running $infile on \`hostname\`
 echo Directory: \`pwd\`
 $MPIRUN $exe $in
 EOF
+if [ "$queue" == "none" ] ; then
+cat << EOF > $scriptfile
+#!/bin/bash
+export OMP_NUM_THREADS=$nopenmp_threads
+echo "running: $QSUB $MPIRUN $exe $in"
+$QSUB $MPIRUN $exe $in
+EOF
+chmod +x $scriptfile
+fi
+
 
 # output info to terminal
 
@@ -315,22 +330,22 @@ if [ "$queue" != "none" ] ; then
   if test $nmpi_processes -gt 1 ; then
     echo "Threads per process:$nopenmp_threads"
   fi
+fi
+
 # output script file to terminal
 
-  if [ "$showinput" == "1" ] ; then
-    cat $scriptfile
-    exit
-  fi
+if [ "$showinput" == "1" ] ; then
+  cat $scriptfile
+  exit
 fi
 
 # run script
 
 if [ "$queue" == "none" ] ; then
-  echo "running: $QSUB $MPIRUN $exe $in"
   if [ "$showinput" == "1" ] ; then
     exit
   fi
-  $QSUB $MPIRUN $exe $in
+  $scriptfile
 else
   chmod +x $scriptfile
   $QSUB $scriptfile
