@@ -585,7 +585,7 @@ run_validation_cases_debug()
 
 check_cases_debug()
 {
-   # Scan and report any errors in FDS cases
+   # Scan for and report any errors in FDS cases
    cd $1
 
    if [[ `grep -rI 'Run aborted' ${FIREBOT_DIR}/output/stage3` == "" ]] && \
@@ -758,7 +758,7 @@ check_smv_utilities()
 
 check_cases_release()
 {
-   # Scan and report any errors in FDS cases
+   # Scan for and report any errors in FDS cases
    cd $1
 
    if [[ `grep -rI 'Run aborted' ${FIREBOT_DIR}/output/stage5` == "" ]] && \
@@ -914,7 +914,7 @@ make_smv_pictures_db()
 
 check_smv_pictures_db()
 {
-   # Scan and report any errors in make SMV pictures process
+   # Scan for and report any errors in make SMV pictures process
    cd $FIREBOT_DIR
    if [[ `grep -I -E "Segmentation|Error" $FIREBOT_DIR/output/stage6b` == "" ]]
    then
@@ -925,6 +925,18 @@ check_smv_pictures_db()
       echo "Errors from Stage 6b - Make SMV pictures (debug mode):" >> $ERROR_LOG
       cat $FIREBOT_DIR/output/stage6b_errors >> $ERROR_LOG
       echo "" >> $ERROR_LOG
+   fi
+
+   # Scan for and report any warnings in make SMV pictures process
+   cd $FIREBOT_DIR
+   if [[ `grep -I -E "Warning" $FIREBOT_DIR/output/stage6b` == "" ]]
+   then
+      # Continue along
+      :
+   else
+      echo "Warnings from Stage 6b - Make SMV pictures (debug mode):" >> $WARNING_LOG
+      grep -I -E "Warning" $FIREBOT_DIR/output/stage6b >> $WARNING_LOG
+      echo "" >> $WARNING_LOG
    fi
 }
 
@@ -978,7 +990,7 @@ make_smv_pictures()
 
 check_smv_pictures()
 {
-   # Scan and report any errors in make SMV pictures process
+   # Scan for and report any errors in make SMV pictures process
    cd $FIREBOT_DIR
    if [[ `grep -I -E "Segmentation|Error" $FIREBOT_DIR/output/stage6d` == "" ]]
    then
@@ -989,6 +1001,18 @@ check_smv_pictures()
       echo "Errors from Stage 6d - Make SMV pictures (release mode):" >> $ERROR_LOG
       cat $FIREBOT_DIR/output/stage6d >> $ERROR_LOG
       echo "" >> $ERROR_LOG
+   fi
+
+   # Scan for and report any warnings in make SMV pictures process
+   cd $FIREBOT_DIR
+   if [[ `grep -I -E "Warning" $FIREBOT_DIR/output/stage6d` == "" ]]
+   then
+      # Continue along
+      :
+   else
+      echo "Warnings from Stage 6d - Make SMV pictures (release mode):" >> $WARNING_LOG
+      grep -I -E "Warning" $FIREBOT_DIR/output/stage6d >> $WARNING_LOG
+      echo "" >> $WARNING_LOG
    fi
 }
 
@@ -1005,7 +1029,7 @@ make_fds_pictures()
 
 check_fds_pictures()
 {
-   # Scan and report any errors in make FDS pictures process
+   # Scan for and report any errors in make FDS pictures process
    cd $FIREBOT_DIR
    if [[ `grep -I -E "Segmentation|Error" $FIREBOT_DIR/output/stage6e` == "" ]]
    then
@@ -1016,6 +1040,18 @@ check_fds_pictures()
       echo "Errors from Stage 6e - Make FDS pictures:" >> $ERROR_LOG
       cat $FIREBOT_DIR/output/stage6e_errors >> $ERROR_LOG
       echo "" >> $ERROR_LOG
+   fi
+
+   # Scan for and report any warnings in make FDS pictures process
+   cd $FIREBOT_DIR
+   if [[ `grep -I -E "Warning" $FIREBOT_DIR/output/stage6e` == "" ]]
+   then
+      # Continue along
+      :
+   else
+      echo "Warnings from Stage 6e - Make FDS pictures:" >> $WARNING_LOG
+      grep -I -E "Warning" $FIREBOT_DIR/output/stage6e >> $WARNING_LOG
+      echo "" >> $WARNING_LOG
    fi
 }
 
@@ -1067,7 +1103,7 @@ run_matlab_verification()
 
 check_matlab_verification()
 {
-   # Scan and report any errors in Matlab scripts
+   # Scan for and report any errors in Matlab scripts
    cd $FIREBOT_DIR
    if [[ `grep -A 50 "Error" $FIREBOT_DIR/output/stage7a_verification` == "" ]]
    then
@@ -1094,7 +1130,7 @@ check_verification_stats()
       echo "" >> $WARNING_LOG
    fi
 
-   # Scan and report warnings for any verification cases that are outside of their specified error tolerance
+   # Scan for and report warnings for any verification cases that are outside of their specified error tolerance
    cd $FDS_SVNROOT/Utilities/Matlab
    if [[ `grep "Out of Tolerance" FDS_verification_scatterplot_output.csv` == "" ]]
    then
@@ -1108,7 +1144,7 @@ check_verification_stats()
       echo "" >> $WARNING_LOG
    fi
 
-   # Scan and report any case warnings in Matlab scripts
+   # Scan for and report any case warnings in Matlab scripts
    cd $FIREBOT_DIR
    if [[ `grep "Matlab Warning" $FIREBOT_DIR/output/stage7a_verification` == "" ]]
    then
@@ -1134,7 +1170,7 @@ run_matlab_validation()
 
 check_matlab_validation()
 {
-   # Scan and report any errors in Matlab scripts
+   # Scan for and report any errors in Matlab scripts
    cd $FIREBOT_DIR
    if [[ `grep -A 50 "Error" $FIREBOT_DIR/output/stage7b_validation` == "" ]]
    then
@@ -1195,7 +1231,7 @@ archive_timing_stats()
 
 check_guide()
 {
-   # Scan and report any errors or warnings in build process for guides
+   # Scan for and report any errors or warnings in build process for guides
    cd $FIREBOT_DIR
    if [[ `grep -I "successfully" $1` == "" ]]
    then
