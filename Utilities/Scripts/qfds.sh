@@ -284,12 +284,17 @@ if [ "$queue" == "none" ]; then
   fi
 fi
 
-
-# create script file
+# create script file for queuing systems
 
 scriptfile=/tmp/script.$$
+
+
 cat << EOF > $scriptfile
 #!/bin/bash
+EOF
+
+if [ "$queue" != "none" ] ; then
+cat << EOF >> $scriptfile
 #PBS -N $JOBPREFIX$TITLE
 #PBS -e $outerr
 #PBS -o $outlog
@@ -298,7 +303,10 @@ cat << EOF > $scriptfile
 #SBATCH -e $outerr
 #SBATCH -o $outlog
 #SBATCH -p $queue
+EOF
+fi
 
+cat << EOF >> $scriptfile
 export OMP_NUM_THREADS=$nopenmp_threads
 
 cd $fulldir
@@ -307,18 +315,15 @@ echo Running $infile on \`hostname\`
 echo Directory: \`pwd\`
 $MPIRUN $exe $in
 EOF
-if [ "$queue" == "none" ] ; then
-cat << EOF > $scriptfile
-#!/bin/bash
-export OMP_NUM_THREADS=$nopenmp_threads
-echo "running: $QSUB $MPIRUN $exe $in"
-$QSUB $MPIRUN $exe $in
-EOF
-chmod +x $scriptfile
+
+# if requested, output script file to screen
+
+if [ "$showinput" == "1" ] ; then
+  cat $scriptfile
+  exit
 fi
 
-
-# output info to terminal
+# output info to screen
 
 if [ "$queue" != "none" ] ; then
   echo "         Input file:$in"
@@ -332,23 +337,11 @@ if [ "$queue" != "none" ] ; then
   fi
 fi
 
-# output script file to terminal
-
-if [ "$showinput" == "1" ] ; then
-  cat $scriptfile
-  exit
-fi
-
 # run script
 
-if [ "$queue" == "none" ] ; then
-  if [ "$showinput" == "1" ] ; then
-    exit
-  fi
-  $scriptfile
-else
-  chmod +x $scriptfile
-  $QSUB $scriptfile
+chmod +x $scriptfile
+$QSUB $scriptfile
+if [ "$queue" != "none" ] ; then
+  rm $scriptfile
 fi
-rm $scriptfile
-grep processor /proc/cpuinfo | wc -l
+
