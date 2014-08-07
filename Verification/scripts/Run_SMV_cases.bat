@@ -134,7 +134,7 @@ if "%runonlygeom%" == "1" (
 
 :: run cases
 
-SET RUNFDS=%RUNFDS_R%
+SET QFDS=%RUNFDS_R%
 SET RUNWFDS=%RUNWFDS_R%
 SET RUNTFDS=%RUNTFDS_R%
 SET RUNCFAST=%RUNCFAST_R%
@@ -144,8 +144,6 @@ if "%runonlygeom%" == "1" (
   call %SCRIPT_DIR%\SMV_Cases.bat
   call %SCRIPT_DIR%\SMV_geom_Cases.bat
 )
-
-erase %SCRIPT_DIR%\SMV_Cases.bat
 
 cd %BASEDIR%
 echo "smokeview test cases end" >> %TIME_FILE%
