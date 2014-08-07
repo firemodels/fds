@@ -71,6 +71,7 @@ int main(int argc, char **argv){
     }
     exit(1);
   }
+  fprintf(streamout,"@echo off\n");
   for(;;){
     if(fgets(buffer,1024,streamin)==NULL)break;
     trim(buffer);
@@ -99,42 +100,7 @@ int main(int argc, char **argv){
       *comm_end=0;
 
       trim(data);
-      for(j=strlen(data)-1;j>=0;j--){
-        if(data[j]==' '){
-          casename = data + j + 1;
-          data[j]=0;
-          break;
-        }
-      }
-
-      // remove consecutive blanks
-
-      trim(data);
-      data = trim_front(data);
-      datafrom=data;
-      datato=data;
-      for(j=1;j<strlen(data);j++){
-        datafrom++;
-        if(data[j]!=' '||data[j-1]!=' '){
-          datato++;
-          if(datato!=datafrom)*datato = *datafrom;
-        }
-      }
-      datato[1]=0;
-
-      // -d directory -e -f
-      // -d:directory -e
-
-      trim(data);
-      lendata = strlen(data);
-      if(lendata>2){
-        for(j=2;j<lendata;j++){
-          if(data[j]==' '&&data[j-2]=='-'&&j+1<lendata&&data[j+1]!='-'){
-            data[j]='%';
-          }
-        }
-      }
-      fprintf(streamout,"%s%s%s %s %s\n","%",comm_beg,"%",data,casename);
+      fprintf(streamout,"%s%s%s %s\n","%",comm_beg,"%",data);
       continue;
 
     }
