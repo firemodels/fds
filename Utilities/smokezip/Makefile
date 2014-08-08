@@ -68,6 +68,7 @@ gcc_linux : $(obj)
 
 # ------------- Linux 64 ----------------
 #  64 bit linux
+LINUXFORTLIBS_64=$(FORTLIBDIR)/intel64/libifcore.a
 
 intel_linux_64 : FFLAGS    = -O2 -m64 -vec_report0 -fpp -D pp_noappend -D pp_LINUX64
 intel_linux_64 : CFLAGS    = -O2 -m64 -vec_report0 -D pp_LINUX64
