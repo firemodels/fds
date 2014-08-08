@@ -29,7 +29,7 @@ $QFDS -d Visualization vcirctest2.fds
 $RUNTFDS -d Visualization version.fds
 
 $QFDS -d WUI levelset1.fds
-$RUNWFDS -d WUI tree_one.fds
+$QFDS -d WUI pine_tree.fds
 #$QFDS -d WUI fire_line.fds
 $QFDS -d WUI BT10m_2x2km_LS.fds
 $QFDS -d WUI wind_test1.fds
