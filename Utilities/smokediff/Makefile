@@ -10,7 +10,7 @@ FORTLIBDIR = /opt/intel/composerxe/lib
 
 # Definition of the object variables
 
-obj = assert.o dmalloc.o histogram.o IOdboundary.o IOdplot.o IOdslice.o main.o readsmv.o smv_endian.o file_util.o string_util.o utilities.o fdsmodules.o gsmv.o getsizes.o getdata.o 
+obj = assert.o dmalloc.o histogram.o IOdboundary.o IOdplot.o IOdslice.o main.o readsmv.o smv_endian.o file_util.o string_util.o utilities.o fdsmodules.o gsmv.o getdata.o getsizes.o
 objwin = $(obj:.o=.obj)
 
 #*** General Purpose Rules ***
@@ -33,23 +33,6 @@ no_target:
 	$(FC) -c $(FFLAGS) $(FILTERF) $<
 .f90.o:
 	$(FC) -c $(FFLAGS) $(FILTERF) $<
-
-
-
-# ********  rules for each platform supported *************
-
-# ------------- Win 32 ----------------
-#  32 bit windows
-
-intel_win_32 : CFLAGS    = -O2 /Qvec_report0 /nologo -D WIN32
-intel_win_32 : FFLAGS    = -O2 /Qvec_report0 /nologo -fpp -D pp_cvf /iface:stdref
-intel_win_32 : CC        = icl
-intel_win_32 : CPP       = icl
-intel_win_32 : FC        = ifort
-intel_win_32 : exe       = smokediff_win_32.exe
-
-intel_win_32 : $(objwin)
-	$(CPP) -o $(bin)/$(exe) $(objwin)
 
 # ------------- Win 64 debug ----------------
 #  64 bit debug windows
@@ -80,19 +63,19 @@ intel_win_64 : $(objwin)
 LINUXFORTLIBS_32=$(FORTLIBDIR)/ia32/libifcore.a
 LINUXFORTLIBS_64=$(FORTLIBDIR)/intel64/libifcore.a
 
-# ------------- Linux 32 ----------------
-#  32 bit linux
+# ------------- Linux gcc ----------------
+#  gcc linux
 
-intel_linux_32 : FFLAGS    = -O2 -m32 -vec_report0 -fpp -D pp_noappend
-intel_linux_32 : CFLAGS    = -O2 -m32 -vec_report0 -D pp_LINUX
-intel_linux_32 : CC        = icc
-intel_linux_32 : CPP       = icc
-intel_linux_32 : FC        = ifort
-intel_linux_32 : exe       = smokediff_linux_32
+gcc_linux : FFLAGS    = -O0 -m64 -x f95-cpp-input -D pp_GCC -D pp_noappend -ffree-form -frecord-marker=4
+gcc_linux : CFLAGS    = -O0 -m64 -D pp_LINUX64
+gcc_linux : LFLAGS    = -m64
+gcc_linux : CC        = gcc
+gcc_linux : CPP       = g++
+gcc_linux : FC        = gfortran
+gcc_linux : exe       = smokediff_linux_64
 
-intel_linux_32 : $(obj)
-	$(CPP) -o $(bin)/$(exe) -static-intel $(obj) $(LINUXFORTLIBS_32)
-
+gcc_linux : $(obj)
+	$(CPP) -o $(bin)/$(exe) $(obj) $(LFLAGS) -lgfortran
 
 # ------------- Linux 64 ----------------
 #  64 bit linux
@@ -109,19 +92,6 @@ intel_linux_64 : $(obj)
 	
 
 MACFORTLIBS=$(FORTLIBDIR)/libifcoremt.a $(FORTLIBDIR)/libimf.a $(FORTLIBDIR)/libirc.a $(FORTLIBDIR)/libsvml.a
-
-# ------------- OSX 32 ----------------
-#  32 bit OSX
-
-intel_osx_32 : FFLAGS    = -O2 -m32 -vec_report0 -fpp -D pp_OSX
-intel_osx_32 : CFLAGS    = -O2 -m32 -vec_report0 -D pp_OSX
-intel_osx_32 : CC        = icc
-intel_osx_32 : CPP       = icc
-intel_osx_32 : FC        = ifort
-intel_osx_32 : exe       = smokediff_osx_32
-
-intel_osx_32 : $(obj)
-	$(CPP) -o $(bin)/$(exe) -m32 -static-intel $(obj) -mmacosx-version-min=10.4 $(MACFORTLIBS)
 
 # ------------- OSX 64 ----------------
 #  64 bit OSX
