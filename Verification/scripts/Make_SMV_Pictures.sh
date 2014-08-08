@@ -165,9 +165,9 @@ if [ "$RUN_SMV" == "1" ] ; then
   $SMOKEZIP -r -part2iso plumeiso
 
   cd $SVNROOT/Verification/WUI
-  echo Converting particles to isosurfaces in case plumeiso
-  if  [ -e tree_one.smv ]; then
-    $SMOKEZIP -r -part2iso tree_one
+  echo Converting particles to isosurfaces in case pine_tree
+  if  [ -e pine_tree.smv ]; then
+    $SMOKEZIP -r -part2iso pine_tree
   fi
 
 # precompute FED slices
