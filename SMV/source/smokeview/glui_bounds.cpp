@@ -93,6 +93,8 @@ GLUI_Rollout *ROLLOUT_zone_bound=NULL;
 #define RELOAD_DATA 207
 #define SHOW_EVAC_SLICES 208
 #define DATA_EVAC_COLORING 209
+#define SLICE_VECTORSKIP 210
+#define PLOT3D_VECTORSKIP 211
 
 #define SCRIPT_START 31
 #define SCRIPT_STOP 32
@@ -222,6 +224,8 @@ GLUI_Spinner *SPINNER_streaklinewidth=NULL;
 GLUI_Spinner *SPINNER_vectorpointsize=NULL;
 GLUI_Spinner *SPINNER_vectorlinewidth=NULL;
 GLUI_Spinner *SPINNER_vectorlinelength=NULL;
+GLUI_Spinner *SPINNER_slicevectorskip=NULL;
+GLUI_Spinner *SPINNER_plot3dvectorskip=NULL;
 
 GLUI_Listbox *LIST_scriptlist=NULL;
 GLUI_Listbox *LIST_ini_list=NULL;
@@ -734,10 +738,12 @@ extern "C" void glui_bounds_setup(int main_window){
     glui_bounds->add_checkbox_to_panel(PANEL_vector,_("Show vectors"),&visVector,UPDATEPLOT,PLOT3D_CB);
     SPINNER_plot3d_vectorpointsize=glui_bounds->add_spinner_to_panel(PANEL_vector,_("Point size"),GLUI_SPINNER_FLOAT,&vectorpointsize,UPDATE_VECTOR,PLOT3D_CB);
     SPINNER_plot3d_vectorpointsize->set_float_limits(1.0,10.0);
-    SPINNER_plot3d_vectorlinewidth=glui_bounds->add_spinner_to_panel(PANEL_vector,_("Line width"),GLUI_SPINNER_FLOAT,&vectorlinewidth,UPDATE_VECTOR,PLOT3D_CB);
+    SPINNER_plot3d_vectorlinewidth=glui_bounds->add_spinner_to_panel(PANEL_vector,_("Vector width"),GLUI_SPINNER_FLOAT,&vectorlinewidth,UPDATE_VECTOR,PLOT3D_CB);
     SPINNER_plot3d_vectorlinewidth->set_float_limits(1.0,10.0);
-    SPINNER_plot3d_vectorlinelength=glui_bounds->add_spinner_to_panel(PANEL_vector,_("Line length"),GLUI_SPINNER_FLOAT,&vecfactor,UPDATE_VECTOR,PLOT3D_CB);
+    SPINNER_plot3d_vectorlinelength=glui_bounds->add_spinner_to_panel(PANEL_vector,_("Vector length"),GLUI_SPINNER_FLOAT,&vecfactor,UPDATE_VECTOR,PLOT3D_CB);
     SPINNER_plot3d_vectorlinelength->set_float_limits(0.0,20.0);
+    SPINNER_plot3dvectorskip=glui_bounds->add_spinner_to_panel(PANEL_vector,_("Vector skip"),GLUI_SPINNER_INT,&vectorskip,PLOT3D_VECTORSKIP,PLOT3D_CB);
+    SPINNER_plot3dvectorskip->set_int_limits(1,4);
 
     PANEL_isosurface = glui_bounds->add_panel_to_panel(ROLLOUT_plot3d,"Isosurface");
     PANEL_pan1 = glui_bounds->add_panel_to_panel(PANEL_isosurface,"",GLUI_PANEL_NONE);
@@ -836,10 +842,12 @@ extern "C" void glui_bounds_setup(int main_window){
     SPINNER_vectorpointsize=glui_bounds->add_spinner_to_panel(PANEL_slice_vector,_("Point size"),GLUI_SPINNER_FLOAT,
       &vectorpointsize,UPDATE_VECTOR,Slice_CB);
     SPINNER_vectorpointsize->set_float_limits(1.0,10.0);
-    SPINNER_vectorlinewidth=glui_bounds->add_spinner_to_panel(PANEL_slice_vector,_("Line width"),GLUI_SPINNER_FLOAT,&vectorlinewidth,UPDATE_VECTOR,Slice_CB);
+    SPINNER_vectorlinewidth=glui_bounds->add_spinner_to_panel(PANEL_slice_vector,_("Vector width"),GLUI_SPINNER_FLOAT,&vectorlinewidth,UPDATE_VECTOR,Slice_CB);
     SPINNER_vectorlinewidth->set_float_limits(1.0,10.0);
-    SPINNER_vectorlinelength=glui_bounds->add_spinner_to_panel(PANEL_slice_vector,_("Line length"),GLUI_SPINNER_FLOAT,&vecfactor,UPDATE_VECTOR,Slice_CB);
+    SPINNER_vectorlinelength=glui_bounds->add_spinner_to_panel(PANEL_slice_vector,_("Vector length"),GLUI_SPINNER_FLOAT,&vecfactor,UPDATE_VECTOR,Slice_CB);
     SPINNER_vectorlinelength->set_float_limits(0.0,20.0);
+    SPINNER_slicevectorskip=glui_bounds->add_spinner_to_panel(PANEL_slice_vector,_("Vector skip"),GLUI_SPINNER_INT,&vectorskip,SLICE_VECTORSKIP,Slice_CB);
+    SPINNER_slicevectorskip->set_int_limits(1,4);
     CHECKBOX_show_slices_and_vectors=glui_bounds->add_checkbox_to_panel(PANEL_slice_vector,_("Show contours"),&show_slices_and_vectors);
 
     PANEL_line_contour = glui_bounds->add_panel_to_panel(ROLLOUT_slice,_("Line Contours"));
@@ -1197,6 +1205,9 @@ extern "C" void PLOT3D_CB(int var){
       if(enable_isosurface==1)PANEL_isosurface->enable();
       if(enable_isosurface==0)PANEL_isosurface->disable();
     }
+    break;
+  case PLOT3D_VECTORSKIP:
+    SPINNER_slicevectorskip->set_int_val(vectorskip);
     break;
   case UPDATE_VECTOR_FROM_SMV:
     if(SPINNER_vectorpointsize!=NULL&&SPINNER_vectorlinewidth!=NULL&&SPINNER_vectorlinelength!=NULL){
@@ -2246,6 +2257,9 @@ extern "C" void Slice_CB(int var){
     return;
   }
   switch (var){
+    case SLICE_VECTORSKIP:
+      SPINNER_plot3dvectorskip->set_int_val(vectorskip);
+      break;
     case ZONEVALMIN:
       getZoneColors(zonetu, nzonetotal, izonetu,zonemin, zonemax, nrgb, nrgb_full, 
         colorlabelzone, zonescale, zonelevels256);
