@@ -271,10 +271,8 @@ if [ "$queue" == "none" ]; then
   fi
 fi
 
-# create script file for queuing systems
-
-scriptfile=/tmp/script.$$
-
+# create a random script file for submitting jobs
+scriptfile=`mktemp /tmp/script.$$.XXXXXX`
 
 cat << EOF > $scriptfile
 #!/bin/bash
