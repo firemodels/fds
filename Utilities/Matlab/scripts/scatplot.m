@@ -270,11 +270,11 @@ for j=2:length(Q);
         % Plot diagonal lines
         plot([Plot_Min,Plot_Max],[Plot_Min,Plot_Max],'k-')
         if strcmp(Model_Error, 'yes')
-            plot([Plot_Min,Plot_Max],[Plot_Min*(1+2*Sigma_E),Plot_Max*(1+2*Sigma_E)],'k--')
-            plot([Plot_Min,Plot_Max],[Plot_Min*(1-2*Sigma_E),Plot_Max*(1-2*Sigma_E)],'k--')
-            plot([Plot_Min,Plot_Max],[Plot_Min*delta,Plot_Max*delta],'r-')
-            plot([Plot_Min,Plot_Max],[Plot_Min*delta*(1+2*Sigma_M),Plot_Max*delta*(1+2*Sigma_M)],'r--')
-            plot([Plot_Min,Plot_Max],[Plot_Min*delta*(1-2*Sigma_M),Plot_Max*delta*(1-2*Sigma_M)],'r--')
+            plot([Plot_Min,Plot_Max],[Plot_Min,Plot_Max*(1+2*Sigma_E)],'k--')
+            plot([Plot_Min,Plot_Max],[Plot_Min,Plot_Max*(1-2*Sigma_E)],'k--')
+            plot([Plot_Min,Plot_Max],[Plot_Min,Plot_Max*delta],'r-')
+            plot([Plot_Min,Plot_Max],[Plot_Min,Plot_Max*delta*(1+2*Sigma_M)],'r--')
+            plot([Plot_Min,Plot_Max],[Plot_Min,Plot_Max*delta*(1-2*Sigma_M)],'r--')
         end
         
         % Format the legend and axis labels
@@ -359,8 +359,8 @@ for j=2:length(Q);
         output_stats{stat_line,6} = sprintf('%0.2f', delta); % Bias
         stat_line = stat_line + 1;
         
-    else
-        display(['No data for scatter plot ',Scatter_Plot_Title])
+    elseif k == 0 && strcmp(Stats_Output, 'Validation')
+        display(['No data for scatter plot ', Scatter_Plot_Title])
     end
     
     clear Measured_Metric Measured_Values Predicted_Metric Predicted_Values Group_Key_Label K
