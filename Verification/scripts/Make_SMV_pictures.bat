@@ -41,7 +41,7 @@ set smvvg="%SVNROOT%\Manuals\SMV_Verification_Guide"
 set summary="%SVNROOT%\Manuals\SMV_Summary"
 
 set RUNGEOM=call "%SCRIPT_DIR%\runsmv.bat"
-set RUNFDS=call "%SCRIPT_DIR%\runsmv.bat"
+set QFDS=call "%SCRIPT_DIR%\runsmv.bat"
 set RUNTFDS=call "%SCRIPT_DIR%\runtsmv.bat"
 set RUNWFDS=call "%SCRIPT_DIR%\runsmv.bat"
 set RUNCFAST=call "%SCRIPT_DIR%\runsmv.bat"
@@ -126,7 +126,7 @@ if "%runonlygeom%" == "1" (
   echo converting tree_one particles to an isosurface
 
   cd %SVNROOT%\Verification\Wui
-  %SMOKEZIP% -f -part2iso tree_one
+  %SMOKEZIP% -f -part2iso pine_tree
 )
 
 
@@ -163,8 +163,6 @@ copy %smvvg%\FIGURES\graysquares.png %summary%\images
 
 cd %SCRIPT_DIR%
 
-erase SMV_Pictures_Cases.bat
-erase SMV_DIFF_Pictures_Cases.bat
 
 goto eof
 
