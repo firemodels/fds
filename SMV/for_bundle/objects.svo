@@ -253,6 +253,16 @@ OBJECTDEF
  push "BLUE" setcolor 
    0.0 0.0 0.0414 translate 0.012 drawsphere pop
 
+OBJECTDEF
+ arrow1
+push 0.0 0.0 1.0 translate 0.4 0.6 drawcone pop
+push 0.1 0.1 1.0 scalexyz -.50 -.5 0.0 translate 1.0 drawcubec pop
+
+OBJECTDEF
+ arrow2
+push 0.0 0.0 1.0 translate 0.4 0.6 drawcone pop
+push 0.1 0.1 1.0 scalexyz 1.0 1.0 drawdisk pop
+
    // ************ object definitions used for FDS-EVAC ********************
 
 
