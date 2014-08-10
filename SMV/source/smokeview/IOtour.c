@@ -19,7 +19,7 @@ void drawcir(float *center, float rad, float *color);
 void hermiteeye(float f1, keyframe *kf1, keyframe *kf2, float *eye, float *slope);
 void hermiteother(float f1, keyframe *kf1, keyframe *kf2, pathdata *pj);
 void hermiteview(float t, keyframe *kf1, keyframe *kf2, float *view);
-void draw_SVOBJECT(sv_object *object, int frame_index_local,propdata *prop,int recurse_level,float *rgbval);
+void draw_SVOBJECT(sv_object *object, int frame_index_local,propdata *prop,int recurse_level,float *rgbval,int vis_override);
 
 /* ------------------ freetour ------------------------ */
 
@@ -375,7 +375,7 @@ void drawtours(void){
 
           glRotatef(az_angle,0.0,0.0,1.0);
 
-          draw_SVOBJECT(avatar_types[touri->glui_avatar_index],0,NULL,0,NULL);
+          draw_SVOBJECT(avatar_types[touri->glui_avatar_index],0,NULL,0,NULL,0);
           glPopMatrix();
         }
         break;

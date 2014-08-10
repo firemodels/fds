@@ -858,6 +858,7 @@ typedef struct _device{
   isosurface **plane_surface;
   propdata *prop;
   sv_object *object;
+  struct _vdevicedata *vdevice;
   int type;
 } devicedata;
 
@@ -872,7 +873,7 @@ typedef struct {
 
 /* --------------------------  vdevicedata ------------------------------------ */
 
-typedef struct {
+typedef struct _vdevicedata {
   int unique;
   int filetype;
 #ifdef pp_PILOT

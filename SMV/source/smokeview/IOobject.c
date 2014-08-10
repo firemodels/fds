@@ -308,7 +308,7 @@ void drawhexdisk(float diameter, float height, unsigned char *rgbcolor);
 void drawpolydisk(int nsides, float diameter, float height, unsigned char *rgbcolor);
 void drawring(float d_inner, float d_outer, float height, unsigned char *rgbcolor);
 void drawnotchplate(float diameter, float height, float notchheight, float direction, unsigned char *rgbcolor);
-void draw_SVOBJECT(sv_object *object, int frame_index_local, propdata *prop, int recurse_level,float *valrgb);
+void draw_SVOBJECT(sv_object *object, int frame_index_local, propdata *prop, int recurse_level, float *valrgb, int vis_override);
 void free_object(sv_object *object);
 void freecircle(circdata *circinfo);
 
@@ -741,11 +741,13 @@ void draw_pilot(void){
 /* ----------------------- draw_devices ----------------------------- */
 
 void draw_devices(void){
-  devicedata *devicei;
   int i;
+  int drawvectors;
 
   if(select_device==0||show_mode!=SELECTOBJECT){
     for(i=0;i<ndeviceinfo;i++){
+      devicedata *devicei;
+
       devicei = deviceinfo + i;
       if(devicei->object->visible==0)continue;
       if(devicei->in_zone_csv==1)continue;
@@ -760,8 +762,9 @@ void draw_devices(void){
       }
     }
   }
-
+  drawvectors=0;
   if(showtime==1&&itimes>=0&&itimes<nglobal_times&&showvdeviceval==1&&nvdeviceinfo>0){
+    drawvectors=1;
     glEnable(GL_LIGHTING);
     glMaterialfv(GL_FRONT_AND_BACK,GL_SHININESS,&block_shininess);
     glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,block_ambient2);
@@ -775,31 +778,51 @@ void draw_devices(void){
     glPointSize(vectorpointsize);
     for(i=0;i<nvdeviceinfo;i++){
       vdevicedata *vdevi;
+      devicedata *devicei;
       float vel[3], angle, dvel, dangle;
       float *xyz;
       int j;
-      int valid;
+      int velocity_type;
 
       vdevi = vdeviceinfo + i;
+      devicei = vdevi->valdev;
       if(vdevi->unique==0)continue;
       xyz=vdevi->valdev->xyz;
-      get_vdevice_vel(global_times[itimes], vdevi, vel, &angle, &dvel, &dangle, &valid);
-      if(valid==1){
-        float xxx1[3], xxx2[3];
+      get_vdevice_vel(global_times[itimes], vdevi, vel, &angle, &dvel, &dangle, &velocity_type);
+      if(velocity_type==1){
+        float xyz1[3], xyz2[3], dxyz[3], vec0[3]={0.0,0.0,0.0},zvec[3]={0.0,0.0,1.0};
+        float axis[3], angle, speed, arrow_color[4]={1.0,0.0,0.0,1.0};
+        int state=0;
 
         for(j=0;j<3;j++){
-          xxx1[j] = xyz[j];
-          xxx2[j] = xyz[j] + SCALE2FDS(vel[j])/max_dev_vel;
+          dxyz[j] = 0.5*SCALE2FDS(vel[j])/max_dev_vel;
         }
-        glBegin(GL_LINES);
-        glVertex3fv(xxx1);
-        glVertex3fv(xxx2);
-        glEnd();
-        glBegin(GL_POINTS);
-        glVertex3fv(xxx2);
-        glEnd();
+        speed = sqrt(dxyz[0]*dxyz[0]+dxyz[1]*dxyz[1]+dxyz[2]*dxyz[2]);
+        for(j=0;j<3;j++){
+          xyz1[j] = xyz[j] - dxyz[j];
+          xyz2[j] = xyz[j] + dxyz[j];
+        }
+
+        rotateu2v(zvec, dxyz, axis, &angle);
+        glPushMatrix();
+        glTranslatef(xyz[0],xyz[1],xyz[2]);
+        glRotatef(RAD2DEG*angle,axis[0],axis[1],axis[2]);
+        glScalef(1.0,1.0,speed);
+        if(vectortype==0){
+          glBegin(GL_LINES);
+          glVertex3fv(vec0);
+          glVertex3fv(zvec);
+          glEnd();
+          glBegin(GL_POINTS);
+          glVertex3fv(zvec);
+          glEnd();
+        }
+        else{
+          draw_SVOBJECT(devicei->object,state,devicei->prop,0,arrow_color,1);
+        }
+        glPopMatrix();
       }
-      if(valid==2){
+      if(velocity_type==2){
         float dd,d1=0.0, d2, height, vv;
         float anglemin, anglemax, rmin, rmax;
 
@@ -835,6 +858,7 @@ void draw_devices(void){
   glScalef(SCALE2SMV(1.0),SCALE2SMV(1.0),SCALE2SMV(1.0));
   glTranslatef(-xbar0,-ybar0,-zbar0);
   for(i=0;i<ndeviceinfo;i++){
+    devicedata *devicei;
     int tagval;
     int save_use_displaylist;
     propdata *prop;
@@ -846,9 +870,7 @@ void draw_devices(void){
     prop=devicei->prop;
 
     if(devicei->object->visible==0||(devicei->prop!=NULL&&devicei->prop->smv_object->visible==0))continue;
-    if(devicei->plane_surface!=NULL){
-      continue;
-    }
+    if(devicei->plane_surface!=NULL)continue;
     if(isZoneFireModel==1&&STRCMP(devicei->object->label,"target")==0&&visSensor==0)continue;
     if(devicei->in_zone_csv==1)continue;
     if(isZoneFireModel==1&&STRCMP(devicei->label,"TIME")==0)continue;
@@ -932,32 +954,34 @@ void draw_devices(void){
         output_device_val(devicei);
       }
     }
-    if(showtime==1&&itimes>=0&&itimes<nglobal_times){
-      int state;
-      float valcolor[3],*valcolorptr=NULL;
+    if(devicei->vdevice==NULL||drawvectors==0){
+      if(showtime==1&&itimes>=0&&itimes<nglobal_times){
+        int state;
+        float valcolor[3],*valcolorptr=NULL;
 
-      if(devicei->showstatelist==NULL){
-        state=devicei->state0;
-      }
-      else{
-        state=devicei->showstatelist[itimes];
-      }
-      if(colordeviceval==1){
-        int type,vistype=0;
+        if(devicei->showstatelist==NULL){
+          state=devicei->state0;
+        }
+        else{
+          state=devicei->showstatelist[itimes];
+        }
+        if(colordeviceval==1){
+          int type,vistype=0;
 
-        type=devicei->type2;
-        if(type>=0&&type<ndevicetypes)vistype=devicetypes[type]->type2vis;
-        if(vistype==1){
-          valcolorptr=get_device_color(devicei,valcolor,device_valmin,device_valmax);
-          draw_SVOBJECT(devicei->object,state,prop,0,valcolorptr);
+          type=devicei->type2;
+          if(type>=0&&type<ndevicetypes)vistype=devicetypes[type]->type2vis;
+          if(vistype==1){
+            valcolorptr=get_device_color(devicei,valcolor,device_valmin,device_valmax);
+            draw_SVOBJECT(devicei->object,state,prop,0,valcolorptr,0);
+          }
+        }
+        else{
+          draw_SVOBJECT(devicei->object,state,prop,0,NULL,0);
         }
       }
       else{
-        draw_SVOBJECT(devicei->object,state,prop,0,NULL);
+        draw_SVOBJECT(devicei->object,devicei->state0,prop,0,NULL,0);
       }
-    }
-    else{
-      draw_SVOBJECT(devicei->object,devicei->state0,prop,0,NULL);
     }
     if(devicei->nparams>0&&prop!=NULL){
       prop->nvars_indep=0;
@@ -1007,7 +1031,7 @@ void drawTargetNorm(void){
 
 /* ----------------------- draw_SVOBJECT ----------------------------- */
 
-void draw_SVOBJECT(sv_object *object_dev, int iframe_local, propdata *prop, int recurse_level,float *valrgb){
+void draw_SVOBJECT(sv_object *object_dev, int iframe_local, propdata *prop, int recurse_level,float *valrgb,int vis_override){
   sv_object_frame *framei,*frame0;
   tokendata *toknext;
   unsigned char *rgbptr_local;
@@ -1023,7 +1047,7 @@ void draw_SVOBJECT(sv_object *object_dev, int iframe_local, propdata *prop, int 
   else{
     object=object_dev;
   }
-  if(object->visible==0)return;
+  if(object->visible==0&&vis_override==0)return;
   if(iframe_local>object->nframes-1||iframe_local<0)iframe_local=0;
   framei=object->obj_frames[iframe_local];
   frame0=object->obj_frames[0];
@@ -1288,7 +1312,7 @@ void draw_SVOBJECT(sv_object *object_dev, int iframe_local, propdata *prop, int 
           iframe_local2=toki->included_frame;
           included_object = toki->included_object;
         }
-        draw_SVOBJECT(included_object, iframe_local2, NULL, recurse_level+1,NULL);
+        draw_SVOBJECT(included_object, iframe_local2, NULL, recurse_level+1,NULL,0);
       }
       break;
     case SV_ABS:
@@ -5534,6 +5558,7 @@ void setup_device_data(void){
 
     devi = deviceinfo + i;
     xyzval=devi->xyz;
+    devi->vdevice=NULL;
 
     vdevi = vdeviceinfo + nvdeviceinfo;
     vdevi->valdev = devi;
@@ -5692,6 +5717,9 @@ void setup_device_data(void){
     vdevi = vdeviceinfo + i;
     if(vdevi->unique==0)continue;
     devval = vdevi->valdev;
+    if(vdevi->udev!=NULL)vdevi->udev->vdevice=vdevi;
+    if(vdevi->vdev!=NULL)vdevi->vdev->vdevice=vdevi;
+    if(vdevi->wdev!=NULL)vdevi->wdev->vdevice=vdevi;
     if(vdevi->filetype==CSV_FDS){
       devicedata *udev,*vdev,*wdev;
 

@@ -61,6 +61,7 @@ GLUI_EditText *EDIT_filter=NULL;
 GLUI_Spinner *SPINNER_sensorrelsize=NULL;
 
 GLUI_RadioGroup *RADIO_devicetypes=NULL;
+GLUI_RadioGroup *RADIO_vectortype=NULL;
 
 GLUI_Checkbox *CHECKBOX_device_1=NULL;
 GLUI_Checkbox *CHECKBOX_device_2=NULL;
@@ -91,6 +92,9 @@ extern "C" void glui_device_setup(int main_window){
 
       PANEL_objectvalues = glui_device->add_panel_to_panel(PANEL_objects,"Device/Object values",true);
       CHECKBOX_device_1=glui_device->add_checkbox_to_panel(PANEL_objectvalues,_("Velocity vectors"),&showvdeviceval);
+      RADIO_vectortype=glui_device->add_radiogroup_to_panel(PANEL_objectvalues,&vectortype);
+      glui_device->add_radiobutton_to_group(RADIO_vectortype,"line");
+      glui_device->add_radiobutton_to_group(RADIO_vectortype,"object");
       CHECKBOX_device_2=glui_device->add_checkbox_to_panel(PANEL_objectvalues,_("Show values"),&showdeviceval,SHOWDEVICEVALS,Device_CB);
 #ifdef pp_PILOT
       glui_device->add_checkbox_to_panel(PANEL_objectvalues,_("Pilot view"),&vispilot);
