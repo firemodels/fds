@@ -742,7 +742,7 @@ void draw_pilot(void){
 
 void draw_devices(void){
   int i;
-  int drawvectors;
+  int drawobjects_as_vectors;
 
   if(select_device==0||show_mode!=SELECTOBJECT){
     for(i=0;i<ndeviceinfo;i++){
@@ -762,9 +762,11 @@ void draw_devices(void){
       }
     }
   }
-  drawvectors=0;
+  drawobjects_as_vectors=0;
   if(showtime==1&&itimes>=0&&itimes<nglobal_times&&showvdeviceval==1&&nvdeviceinfo>0){
-    drawvectors=1;
+    unsigned char arrow_color[4];
+    float arrow_color_float[4];
+
     glEnable(GL_LIGHTING);
     glMaterialfv(GL_FRONT_AND_BACK,GL_SHININESS,&block_shininess);
     glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,block_ambient2);
@@ -774,8 +776,12 @@ void draw_devices(void){
     glPushMatrix();
     glScalef(SCALE2SMV(1.0),SCALE2SMV(1.0),SCALE2SMV(1.0));
     glTranslatef(-xbar0,-ybar0,-zbar0);
-    glColor3fv(foregroundcolor);
     glPointSize(vectorpointsize);
+    arrow_color[0]=255*foregroundcolor[0];
+    arrow_color[1]=255*foregroundcolor[1];
+    arrow_color[2]=255*foregroundcolor[2];
+    arrow_color[3]=255;
+    glColor3ubv(arrow_color);
     for(i=0;i<nvdeviceinfo;i++){
       vdevicedata *vdevi;
       devicedata *devicei;
@@ -789,9 +795,22 @@ void draw_devices(void){
       if(vdevi->unique==0)continue;
       xyz=vdevi->valdev->xyz;
       get_vdevice_vel(global_times[itimes], vdevi, vel, &angle, &dvel, &dangle, &velocity_type);
+      if(colordeviceval==1){
+        float valcolor[4], *valcolorptr;
+        valcolorptr=get_device_color(devicei,valcolor,device_valmin,device_valmax);
+        arrow_color[0]=255*valcolor[0];
+        arrow_color[1]=255*valcolor[1];
+        arrow_color[2]=255*valcolor[2];
+        arrow_color[3]=255;
+        glColor3ubv(arrow_color);
+      }
+      arrow_color_float[0] = (float)arrow_color[0]/255.0;
+      arrow_color_float[1] = (float)arrow_color[1]/255.0;
+      arrow_color_float[2] = (float)arrow_color[2]/255.0;
+      arrow_color_float[3] = (float)arrow_color[3]/255.0;
       if(velocity_type==1){
         float xyz1[3], xyz2[3], dxyz[3], vec0[3]={0.0,0.0,0.0},zvec[3]={0.0,0.0,1.0};
-        float axis[3], angle, speed, arrow_color[4]={1.0,0.0,0.0,1.0};
+        float axis[3], angle, speed;
         int state=0;
 
         for(j=0;j<3;j++){
@@ -807,8 +826,8 @@ void draw_devices(void){
         glPushMatrix();
         glTranslatef(xyz[0],xyz[1],xyz[2]);
         glRotatef(RAD2DEG*angle,axis[0],axis[1],axis[2]);
-        glScalef(1.0,1.0,speed);
         if(vectortype==0){
+          glScalef(1.0,1.0,speed);
           glBegin(GL_LINES);
           glVertex3fv(vec0);
           glVertex3fv(zvec);
@@ -817,8 +836,18 @@ void draw_devices(void){
           glVertex3fv(zvec);
           glEnd();
         }
+        else if(vectortype==1){
+          glPushMatrix();
+          glScalef(1.0,1.0,speed);
+          drawdisk(0.1,1.0,arrow_color);
+          glPopMatrix();
+          glTranslatef(0.0,0.0,speed);
+          drawcone(0.2,0.2,arrow_color);
+        }
         else{
-          draw_SVOBJECT(devicei->object,state,devicei->prop,0,arrow_color,1);
+          drawobjects_as_vectors=1;
+          glScalef(sensorrelsize,sensorrelsize,sensorrelsize);
+          draw_SVOBJECT(devicei->object,state,devicei->prop,0,arrow_color_float,1);
         }
         glPopMatrix();
       }
@@ -954,7 +983,7 @@ void draw_devices(void){
         output_device_val(devicei);
       }
     }
-    if(devicei->vdevice==NULL||drawvectors==0){
+    if(drawobjects_as_vectors==0){
       if(showtime==1&&itimes>=0&&itimes<nglobal_times){
         int state;
         float valcolor[3],*valcolorptr=NULL;

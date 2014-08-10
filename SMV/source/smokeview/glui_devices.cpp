@@ -50,7 +50,10 @@ GLUI_Button *BUTTON_open_down=NULL ;
 GLUI_Button *BUTTON_device_1=NULL;
 GLUI_Button *BUTTON_device_2=NULL;
 GLUI_Panel *PANEL_objects=NULL;
-GLUI_Panel *PANEL_objectvalues=NULL;
+GLUI_Panel *PANEL_velocityvectors=NULL;
+GLUI_Panel *PANEL_vectors=NULL;
+GLUI_Panel *PANEL_devicevalues=NULL;
+GLUI_Panel *PANEL_smvobjects=NULL;
 GLUI_Panel *PANEL_devicevis=NULL;
 GLUI_Panel *PANEL_label3=NULL;
 
@@ -86,24 +89,30 @@ extern "C" void glui_device_setup(int main_window){
     int i;
 
     PANEL_objects = glui_device->add_panel("Devices/Objects",false);
-    SPINNER_sensorrelsize=glui_device->add_spinner_to_panel(PANEL_objects,_("Scaling"),GLUI_SPINNER_FLOAT,&sensorrelsize,DEVICE_sensorsize,Device_CB);
     if(ndevicetypes>0){
-      CHECKBOX_device_3=glui_device->add_checkbox_to_panel(PANEL_objects,_("Outline"),&object_outlines);
 
-      PANEL_objectvalues = glui_device->add_panel_to_panel(PANEL_objects,"Device/Object values",true);
-      CHECKBOX_device_1=glui_device->add_checkbox_to_panel(PANEL_objectvalues,_("Velocity vectors"),&showvdeviceval);
-      RADIO_vectortype=glui_device->add_radiogroup_to_panel(PANEL_objectvalues,&vectortype);
-      glui_device->add_radiobutton_to_group(RADIO_vectortype,"line");
-      glui_device->add_radiobutton_to_group(RADIO_vectortype,"object");
-      CHECKBOX_device_2=glui_device->add_checkbox_to_panel(PANEL_objectvalues,_("Show values"),&showdeviceval,SHOWDEVICEVALS,Device_CB);
+      PANEL_smvobjects = glui_device->add_panel_to_panel(PANEL_objects,"Objects",true);
+      SPINNER_sensorrelsize=glui_device->add_spinner_to_panel(PANEL_smvobjects,_("Scaling"),GLUI_SPINNER_FLOAT,&sensorrelsize,DEVICE_sensorsize,Device_CB);
+      CHECKBOX_device_3=glui_device->add_checkbox_to_panel(PANEL_smvobjects,_("Outline"),&object_outlines);
+
+      PANEL_velocityvectors = glui_device->add_panel_to_panel(PANEL_objects,"Vectors",true);
+      if(nvdeviceinfo==0)PANEL_velocityvectors->disable();
+      CHECKBOX_device_1=glui_device->add_checkbox_to_panel(PANEL_velocityvectors,_("Show"),&showvdeviceval);
 #ifdef pp_PILOT
-      glui_device->add_checkbox_to_panel(PANEL_objectvalues,_("Pilot view"),&vispilot);
-#endif      
-      CHECKBOX_device_4=glui_device->add_checkbox_to_panel(PANEL_objectvalues,_("Color by value"),&colordeviceval,COLORDEVICEVALS,Device_CB);
-      glui_device->add_spinner_to_panel(PANEL_objectvalues,"min",GLUI_SPINNER_FLOAT,&device_valmin);
-      glui_device->add_spinner_to_panel(PANEL_objectvalues,"max",GLUI_SPINNER_FLOAT,&device_valmax);
+      glui_device->add_checkbox_to_panel(PANEL_velocityvectors,_("Pilot view"),&vispilot);
+#endif
+      RADIO_vectortype=glui_device->add_radiogroup_to_panel(PANEL_velocityvectors,&vectortype);
+      glui_device->add_radiobutton_to_group(RADIO_vectortype,"line");
+      glui_device->add_radiobutton_to_group(RADIO_vectortype,"arrow");
+      glui_device->add_radiobutton_to_group(RADIO_vectortype,"object");
+      PANEL_devicevalues = glui_device->add_panel_to_panel(PANEL_objects,"Device values",true);
 
-      PANEL_devicevis=glui_device->add_panel_to_panel(PANEL_objectvalues,"",false);
+      CHECKBOX_device_2=glui_device->add_checkbox_to_panel(PANEL_devicevalues,_("Show values"),&showdeviceval,SHOWDEVICEVALS,Device_CB);
+      CHECKBOX_device_4=glui_device->add_checkbox_to_panel(PANEL_devicevalues,_("Color"),&colordeviceval,COLORDEVICEVALS,Device_CB);
+      glui_device->add_spinner_to_panel(PANEL_devicevalues,"min",GLUI_SPINNER_FLOAT,&device_valmin);
+      glui_device->add_spinner_to_panel(PANEL_devicevalues,"max",GLUI_SPINNER_FLOAT,&device_valmax);
+
+      PANEL_devicevis=glui_device->add_panel_to_panel(PANEL_devicevalues,"",false);
       RADIO_devicetypes=glui_device->add_radiogroup_to_panel(PANEL_devicevis,&devicetypes_index,DEVICE_devicetypes,Device_CB);
       for(i=0;i<ndevicetypes;i++){
         glui_device->add_radiobutton_to_group(RADIO_devicetypes,devicetypes[i]->quantity);
