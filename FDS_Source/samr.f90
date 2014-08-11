@@ -425,8 +425,8 @@ IF (PREDICTOR) THEN
   DP1 => M1%DS
   DP2 => M2%DS
 ELSEIF (CORRECTOR) THEN
-  DP1 => M1%DDDT
-  DP2 => M2%DDDT
+  DP1 => M1%D
+  DP2 => M2%D
 ENDIF
 
 ! Restrict divergence
@@ -461,9 +461,9 @@ SUBROUTINE PROJECT_VELOCITY(NM)
 USE POIS, ONLY: H3CZSS,H2CZSS
 
 INTEGER, INTENT(IN) :: NM
-INTEGER :: I,J,K
+INTEGER :: I,J,K,I_DP_MAX,J_DP_MAX,K_DP_MAX
 REAL(EB), POINTER, DIMENSION(:,:,:) :: UU,VV,WW,DP,PP,PRHS_SAVE
-REAL(EB) :: DIV,LHSS,RES,POIS_ERR
+REAL(EB) :: DIV,LHSS,RES,POIS_ERR,DP_MAX
 
 CALL POINT_TO_MESH(NM)
 
@@ -472,12 +472,12 @@ IF (PREDICTOR) THEN
    UU=>US
    VV=>VS
    WW=>WS
-   DP=>D
+   DP=>DS
 ELSEIF (CORRECTOR) THEN
    UU=>U
    VV=>V
    WW=>W
-   DP=>DS
+   DP=>D
 ENDIF
 PP=>WORK1
 PRHS_SAVE=>WORK2
@@ -551,7 +551,7 @@ ENDDO
 
 ! ************************* Check the Solution *************************
 
-IF (.FALSE.) THEN
+IF (.TRUE.) THEN
 
   POIS_ERR = 0._EB
   DO K=1,KBAR
@@ -565,6 +565,12 @@ IF (.FALSE.) THEN
         ENDDO
      ENDDO
   ENDDO
+
+  IF (PREDICTOR) THEN
+    WRITE(0,*) 'PREDICTOR'
+  ELSE
+    WRITE(0,*) 'CORRECTOR'
+  ENDIF
   WRITE(0,*) 'POIS ERROR:',pois_ptb,pois_err
 
 ENDIF
@@ -597,19 +603,28 @@ ENDDO
 
 ! check divergence
 
-IF (.FALSE.) THEN
-  POIS_ERR = 0._EB
-  DO K=1,KBAR
-     DO J=1,JBAR
-        DO I=1,IBAR
-           DIV = (UU(I,J,K)-UU(I-1,J,K))*RDX(I) + (VV(I,J,K)-VV(I,J-1,K))*RDY(J) + (WW(I,J,K)-WW(I,J,K-1))*RDZ(K)
-           RES = ABS(DIV-DP(I,J,K))
-           POIS_ERR = MAX(RES,POIS_ERR)
-        ENDDO
-     ENDDO
-  ENDDO
-  WRITE(0,*) NM,MAXVAL(ABS(DP)),POIS_ERR
-
+IF (.TRUE.) THEN
+   POIS_ERR = 0._EB
+   DP_MAX = 0._EB
+   I_DP_MAX = 0
+   J_DP_MAX = 0
+   K_DP_MAX = 0
+   DO K=1,KBAR
+      DO J=1,JBAR
+         DO I=1,IBAR
+            DIV = (UU(I,J,K)-UU(I-1,J,K))*RDX(I) + (VV(I,J,K)-VV(I,J-1,K))*RDY(J) + (WW(I,J,K)-WW(I,J,K-1))*RDZ(K)
+            RES = ABS(DIV-DP(I,J,K))
+            POIS_ERR = MAX(RES,POIS_ERR)
+            IF (ABS(DP(I,J,K))>DP_MAX) THEN
+               DP_MAX = ABS(DP(I,J,K))
+               I_DP_MAX = I
+               J_DP_MAX = J
+               K_DP_MAX = K
+            ENDIF
+         ENDDO
+      ENDDO
+   ENDDO
+   WRITE(0,*) NM,DP_MAX,I_DP_MAX,J_DP_MAX,K_DP_MAX !,POIS_ERR
 ENDIF
 
 END SUBROUTINE PROJECT_VELOCITY
@@ -656,7 +671,7 @@ REAL(EB), INTENT(IN) :: T
 TYPE(MESH_TYPE), POINTER :: M1,M2
 INTEGER :: I,J,K,I_LO,I_HI,J_LO,J_HI,K_LO,K_HI,II_0,JJ_0,KK_0,II,JJ,KK, &
           NRX,NRY,NRZ,II_LO,JJ_LO,KK_LO,INDEX_LIST(12),IERROR,IW,IOR
-REAL(EB) :: VOLUME_LIST(3)
+REAL(EB) :: VOLUME_LIST(3),DUMMY
 REAL(EB), POINTER, DIMENSION(:,:,:) :: UU1,VV1,WW1,UU2,VV2,WW2
 TYPE(WALL_TYPE), POINTER :: WC=>NULL()
 
@@ -681,6 +696,8 @@ END SELECT
 
 !print *, INDEX_LIST
 !stop
+
+DUMMY=T ! prevent unused warning while T is commented out
 
 M1=>MESHES(NM1) ! coarse mesh
 M2=>MESHES(NM2) ! fine mesh
@@ -716,9 +733,9 @@ DO K = K_LO,K_HI
      IF (II_0==M2%IBAR) THEN
         DO KK = KK_0+1,KK_0+NRZ
            DO JJ = JJ_0+1,JJ_0+NRY
-              !UU2(II_0,JJ,KK) = UU1(I,J,K)
+              UU2(II_0,JJ,KK) = UU1(I,J,K)
               !UU2(II_0,JJ,KK) = PROLONG_VEL(1,II_0,JJ,KK,I,J,K)
-              UU2(II_0,JJ,KK) = NS_U_EXACT(M2%X(II_0),M2%ZC(KK),T,M2%MU(II_0,JJ,KK),M2%RHO(II_0,JJ,KK),2._EB)
+              !UU2(II_0,JJ,KK) = NS_U_EXACT(M2%X(II_0),M2%ZC(KK),T,M2%MU(II_0,JJ,KK),M2%RHO(II_0,JJ,KK),2._EB)
            ENDDO
         ENDDO
      ENDIF
@@ -729,9 +746,9 @@ DO K = K_LO,K_HI
      IF (II_0==0) THEN
         DO KK = KK_0+1,KK_0+NRZ
            DO JJ = JJ_0+1,JJ_0+NRY
-              !UU2(II_0,JJ,KK) = UU1(I,J,K)
+              UU2(II_0,JJ,KK) = UU1(I,J,K)
               !UU2(II_0,JJ,KK) = PROLONG_VEL(1,II_0,JJ,KK,I,J,K)
-              UU2(II_0,JJ,KK) = NS_U_EXACT(M2%X(II_0),M2%ZC(KK),T,M2%MU(II_0,JJ,KK),M2%RHO(II_0,JJ,KK),2._EB)
+              !UU2(II_0,JJ,KK) = NS_U_EXACT(M2%X(II_0),M2%ZC(KK),T,M2%MU(II_0,JJ,KK),M2%RHO(II_0,JJ,KK),2._EB)
            ENDDO
         ENDDO
      ENDIF
@@ -752,9 +769,9 @@ DO K = K_LO,K_HI
      IF (JJ_0==M2%JBAR) THEN
         DO KK = KK_0+1,KK_0+NRZ
            DO II = II_0+1,II_0+NRX
-              !VV2(II,JJ_0,KK) = VV1(I,J,K)
+              VV2(II,JJ_0,KK) = VV1(I,J,K)
               !VV2(II,JJ_0,KK) = PROLONG_VEL(2,II,JJ_0,KK,I,J,K)
-              VV2(II,JJ_0,KK) = 0._EB
+              !VV2(II,JJ_0,KK) = 0._EB
            ENDDO
         ENDDO
      ENDIF
@@ -765,9 +782,9 @@ DO K = K_LO,K_HI
      IF (JJ_0==0) THEN
         DO KK = KK_0+1,KK_0+NRZ
            DO II = II_0+1,II_0+NRX
-              !VV2(II,JJ_0,KK) = VV1(I,J,K)
+              VV2(II,JJ_0,KK) = VV1(I,J,K)
               !VV2(II,JJ_0,KK) = PROLONG_VEL(2,II,JJ_0,KK,I,J,K)
-              VV2(II,JJ_0,KK) = 0._EB
+              !VV2(II,JJ_0,KK) = 0._EB
            ENDDO
         ENDDO
      ENDIF
@@ -788,9 +805,9 @@ DO J = J_LO,J_HI
      IF (KK_0==M2%KBAR) THEN
         DO JJ = JJ_0+1,JJ_0+NRY
            DO II = II_0+1,II_0+NRX
-              !WW2(II,JJ,KK_0) = WW1(I,J,K)
+              WW2(II,JJ,KK_0) = WW1(I,J,K)
               !WW2(II,JJ,KK_0) = PROLONG_VEL(3,II,JJ,KK_0,I,J,K)
-              WW2(II,JJ,KK_0) = NS_V_EXACT(M2%XC(II),M2%Z(KK_0),T,M2%MU(II,JJ,KK_0),M2%RHO(II,JJ,KK_0),2._EB)
+              !WW2(II,JJ,KK_0) = NS_V_EXACT(M2%XC(II),M2%Z(KK_0),T,M2%MU(II,JJ,KK_0),M2%RHO(II,JJ,KK_0),2._EB)
            ENDDO
         ENDDO
      ENDIF
@@ -801,9 +818,9 @@ DO J = J_LO,J_HI
      IF (KK_0==0) THEN
         DO JJ = JJ_0+1,JJ_0+NRY
            DO II = II_0+1,II_0+NRX
-              !WW2(II,JJ,KK_0) = WW1(I,J,K)
+              WW2(II,JJ,KK_0) = WW1(I,J,K)
               !WW2(II,JJ,KK_0) = PROLONG_VEL(3,II,JJ,KK_0,I,J,K)
-              WW2(II,JJ,KK_0) = NS_V_EXACT(M2%XC(II),M2%Z(KK_0),T,M2%MU(II,JJ,KK_0),M2%RHO(II,JJ,KK_0),2._EB)
+              !WW2(II,JJ,KK_0) = NS_V_EXACT(M2%XC(II),M2%Z(KK_0),T,M2%MU(II,JJ,KK_0),M2%RHO(II,JJ,KK_0),2._EB)
            ENDDO
         ENDDO
      ENDIF
@@ -814,7 +831,7 @@ ENDDO
 ! fine mesh boundary loop
 
 FINE_MESH_WALL_LOOP: DO IW=1,M2%N_EXTERNAL_WALL_CELLS
-   WC => WALL(IW)
+   WC => M2%WALL(IW)
    II  = WC%ONE_D%II
    JJ  = WC%ONE_D%JJ
    KK  = WC%ONE_D%KK
@@ -1260,15 +1277,15 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
       ENDDO
    ENDDO
 
-   WALL_LOOP: DO IW=1,M2%N_EXTERNAL_WALL_CELLS+M2%N_INTERNAL_WALL_CELLS
-      WC => WALL(IW)
-      IF (WC%BOUNDARY_TYPE/=INTERPOLATED_BOUNDARY) CYCLE WALL_LOOP
+   FINE_MESH_WALL_LOOP: DO IW=1,M2%N_EXTERNAL_WALL_CELLS+M2%N_INTERNAL_WALL_CELLS
+      WC => M2%WALL(IW)
+      IF (WC%BOUNDARY_TYPE/=INTERPOLATED_BOUNDARY) CYCLE FINE_MESH_WALL_LOOP
       II = WC%ONE_D%II
       JJ = WC%ONE_D%JJ
       KK = WC%ONE_D%KK
       WC%RHO_F = RHOP2(II,JJ,KK) 
       WC%ZZ_F(N) = ZZP2(II,JJ,KK,N)
-   ENDDO WALL_LOOP
+   ENDDO FINE_MESH_WALL_LOOP
 
 ENDDO SPECIES_LOOP
 
