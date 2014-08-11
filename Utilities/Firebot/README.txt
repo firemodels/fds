@@ -7,8 +7,6 @@
 # Kristopher Overholt
 # 7/2/2012
 
-RUNNING FIREBOT: To run Firebot manually on Blaze at NIST, use the run_firebot_linux.sh script.
-
 =========
 = About =
 =========
@@ -31,13 +29,10 @@ More details on the Firebot build stages can be found in the FDS Configuration M
 
 3. cd to the newly created ~/firebot directory
 
-4. Run the ./firebot_linux.sh or ./firebot_mac.sh command, then the automated Firebot build process
+4. Run the ./firebot_linux_wrapper.sh or ./firebot_mac_wrapper.sh command, then the automated Firebot build process
    will begin and will create directories and check out repositories as needed.
 
-(Optional) When running Firebot automatically using the cron system, the use of the run-one script is recommended,
-which is available from https://launchpad.net/ubuntu/+source/run-one. This script ensures that one instance of
-Firebot will not run over another instance of Firebot, which would cause file conflicts. The run-one script
-can be installed and used locally, and you can see examples of its usage in the crontab information below.
+(Note) The *_wrapper script uses a semaphore file that ensures multiple instances of Firebot do not run, which would cause file conflicts.
 
 =========================
 = Firebot files/scripts =
@@ -46,7 +41,7 @@ can be installed and used locally, and you can see examples of its usage in the 
 # run_firebot_linux.sh
 
     This script can be used to start Firebot manually. First, the script performs an "svn update".
-    Then, the script runs Firebot using the run-one script and backgrounds Firebot.
+    Then, the script runs Firebot using the firebot_linux_wrapper script.
 
 # firebot_linux.sh
 
@@ -80,12 +75,6 @@ can be installed and used locally, and you can see examples of its usage in the 
     This Python script generates a Google Code wiki markup file showing the status of recent Firebot test/build cycles.
     This script writes out a plaintext .wiki file that can be 'cat' to /home/firebot/firebot/wiki_output/Firebot_Build_Status.wiki
     This script is invoked via crontab (details below).
-
-# /usr/local/bin/run-one (from https://launchpad.net/ubuntu/+source/run-one)
-
-    This wrapper script allows the execution of only one instance of a command and its args at a time.
-    It does this by using a flock mechanism. This is useful to prepend to Firebot's crontab for firebot.sh so that,
-    if Firebot is stalled for a long period of time, then multiple Firebot scripts do not run over each other.
 
 ===========
 = Crontab =
@@ -123,8 +112,7 @@ MAILTO=""
 
 # Run Firebot at 9:56 PM every night
 # If no SVN argument is specified, then the latest SVN revision is used
-# The run-once script maintains a lock to prevent the script from running twice
-56 21 * * * run-one bash -lc firebot_linux.sh
+56 21 * * * cd ~/firebot ; ./firebot_linux.sh
 
 # ============================
 # = DiskHog disk space alert =
@@ -161,7 +149,6 @@ MAILTO=""
 50 21 * * * cd ~/firebot ; svn revert * ; svn up
 
 # Run Validationbot at 9:56 PM every night
-# The run-once script maintains a lock to prevent the script from running twice.
 #
 # You can change the argument for -v <num>, where <num> is the maximum number
 # of nodes to use for Validationbot running validation cases.
@@ -169,7 +156,7 @@ MAILTO=""
 # Recommended settings for <num>:
 #     1 for passive mode (run 1 validation set at a time)
 #     150 for aggressive mode (run up to 150 nodes at a time)
-56 21 * * * run-one bash -lc "firebot_linux.sh -s -v 150 -y"
+56 21 * * * cd ~/firebot ; ./firebot_linux_wrapper.sh -s -v 150 -y
 
 ------------------------------------------------------------------------------------
 
