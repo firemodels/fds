@@ -9,4 +9,3 @@ do case $OPTION in
 esac
 done
 bash -lc "./smokebot_linux_wrapper.sh -q smokebot $MAKEMOVIES" &
-#run-one bash -lc "./smokebot_linux_wrapper.sh -q smokebot $MAKEMOVIES" &
