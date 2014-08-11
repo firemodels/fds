@@ -115,7 +115,7 @@ WALL_CELL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS
 
       ! Interpolated boundary -- set boundary value of H to be average of neighboring cells from previous time step
  
-      INTERPOLATED_ONLY: IF (WC%BOUNDARY_TYPE==INTERPOLATED_BOUNDARY .AND. MESH_LEVEL==0) THEN
+      INTERPOLATED_ONLY: IF (WC%BOUNDARY_TYPE==INTERPOLATED_BOUNDARY) THEN
          
          NOM     = WC%NOM
          H_OTHER = 0._EB
@@ -155,7 +155,7 @@ WALL_CELL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS
       
       ! Interpolation for embedded meshes --- set H on the boundary of mesh level 1 to an interpolated value from mesh level 0
       
-      EMBEDDED_MESH_IF: IF (WC%BOUNDARY_TYPE==INTERPOLATED_BOUNDARY .AND. MESH_LEVEL==1) THEN
+      EMBEDDED_MESH_IF: IF (PERIODIC_TEST==8 .AND. WC%BOUNDARY_TYPE==INTERPOLATED_BOUNDARY .AND. MESH_LEVEL==1) THEN
          
          NOM = WC%NOM
          
