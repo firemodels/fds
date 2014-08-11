@@ -156,7 +156,7 @@ MAILTO=""
 # Recommended settings for <num>:
 #     1 for passive mode (run 1 validation set at a time)
 #     150 for aggressive mode (run up to 150 cores at a time)
-56 21 * * * cd ~/firebot ; ./firebot_linux_wrapper.sh -s -v 150 -y
+56 21 * * * cd ~/firebot ; ./firebot_linux_wrapper.sh -s -v 1 -y
 
 ------------------------------------------------------------------------------------
 
@@ -172,7 +172,7 @@ MAILTO=""
 #  ========================
 
 # Run svn update at 9:50 PM to get latest version of Firebot
-50 21 * * * cd ~/firebot ; svn up
+50 21 * * * cd ~/firebot ; svn revert * ; svn up
 
 # Run Firebot at 9:56 PM every night
 # If no SVN argument is specified, then the latest SVN revision is used
