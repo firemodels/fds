@@ -112,7 +112,7 @@ MAILTO=""
 
 # Run Firebot at 9:56 PM every night
 # If no SVN argument is specified, then the latest SVN revision is used
-56 21 * * * cd ~/firebot ; ./firebot_linux.sh
+56 21 * * * cd ~/firebot ; ./firebot_linux_wrapper.sh
 
 # ============================
 # = DiskHog disk space alert =
@@ -176,6 +176,6 @@ MAILTO=""
 
 # Run Firebot at 9:56 PM every night
 # If no SVN argument is specified, then the latest SVN revision is used
-56 21 * * * cd ~/firebot ; ./firebot_mac.sh
+56 21 * * * cd ~/firebot ; ./firebot_mac_wrapper.sh
 
 ------------------------------------------------------------------------------------
