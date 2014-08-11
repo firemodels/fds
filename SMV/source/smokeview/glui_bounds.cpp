@@ -1207,7 +1207,7 @@ extern "C" void PLOT3D_CB(int var){
     }
     break;
   case PLOT3D_VECTORSKIP:
-    SPINNER_slicevectorskip->set_int_val(vectorskip);
+    if(SPINNER_slicevectorskip!=NULL)SPINNER_slicevectorskip->set_int_val(vectorskip);
     break;
   case UPDATE_VECTOR_FROM_SMV:
     if(SPINNER_vectorpointsize!=NULL&&SPINNER_vectorlinewidth!=NULL&&SPINNER_vectorlinelength!=NULL){
@@ -2258,7 +2258,7 @@ extern "C" void Slice_CB(int var){
   }
   switch (var){
     case SLICE_VECTORSKIP:
-      SPINNER_plot3dvectorskip->set_int_val(vectorskip);
+      if(SPINNER_plot3dvectorskip!=NULL)SPINNER_plot3dvectorskip->set_int_val(vectorskip);
       break;
     case ZONEVALMIN:
       getZoneColors(zonetu, nzonetotal, izonetu,zonemin, zonemax, nrgb, nrgb_full, 
