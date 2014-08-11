@@ -5,5 +5,5 @@ if [ -e $running ] ; then
   exit
 fi
 touch $running
-~/firebot/firebot_mac.sh $*
+~/firebot/firebot_mac.sh "$@"
 rm $running
