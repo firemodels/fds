@@ -1719,14 +1719,14 @@ ILOOP: DO I = 1,NX_LS
    Z(2) = PHI0_LS(I,J)
    Z(3) = PHI0_LS(IP1,J)
    Z(4) = PHI0_LS(IP2,J)
-   F_EAST = SCALAR_FACE_VALUE(SR_X_LS(I,J),Z,LIMITER_LS)
+   F_EAST = SCALAR_FACE_VALUE_LS(SR_X_LS(I,J),Z,LIMITER_LS)
    
 !-- west face
    Z(1) = PHI0_LS(IM2,J)
    Z(2) = PHI0_LS(IM1,J)
    Z(3) = PHI0_LS(I,J)
    Z(4) = PHI0_LS(IP1,J)
-   F_WEST = SCALAR_FACE_VALUE(SR_X_LS(I,J),Z,LIMITER_LS)
+   F_WEST = SCALAR_FACE_VALUE_LS(SR_X_LS(I,J),Z,LIMITER_LS)
    
  IF (J<2 .OR. J>(NY_LS-2)) THEN  
    
@@ -1736,14 +1736,14 @@ ILOOP: DO I = 1,NX_LS
             Z(2) = PHI0_LS(I,J)
             Z(3) = PHI0_LS(I,JP1)
             Z(4) = PHI0_LS(I,JP2)
-            F_NORTH = SCALAR_FACE_VALUE(SR_Y_LS(I,J),Z,LIMITER_LS)
+            F_NORTH = SCALAR_FACE_VALUE_LS(SR_Y_LS(I,J),Z,LIMITER_LS)
 
         !    south face
             Z(1) = PHI_MAX_LS
             Z(2) = PHI_MAX_LS
             Z(3) = PHI0_LS(I,J)
             Z(4) = PHI0_LS(I,JP1)
-            F_SOUTH = SCALAR_FACE_VALUE(SR_Y_LS(I,J),Z,LIMITER_LS)
+            F_SOUTH = SCALAR_FACE_VALUE_LS(SR_Y_LS(I,J),Z,LIMITER_LS)
 
        ELSEIF (j==2) THEN
         !    north face
@@ -1751,14 +1751,14 @@ ILOOP: DO I = 1,NX_LS
             Z(2) = PHI0_LS(I,J)
             Z(3) = PHI0_LS(I,JP1)
             Z(4) = PHI0_LS(I,JP2)
-            F_NORTH = SCALAR_FACE_VALUE(SR_Y_LS(I,J),Z,LIMITER_LS)
+            F_NORTH = SCALAR_FACE_VALUE_LS(SR_Y_LS(I,J),Z,LIMITER_LS)
 
         !    south face
             Z(1) = PHI_MAX_LS
             Z(2) = PHI0_LS(I,JM1)
             Z(3) = PHI0_LS(I,J)
             Z(4) = PHI0_LS(I,JP1)
-            F_SOUTH = SCALAR_FACE_VALUE(SR_Y_LS(I,J),Z,LIMITER_LS)
+            F_SOUTH = SCALAR_FACE_VALUE_LS(SR_Y_LS(I,J),Z,LIMITER_LS)
    
    
         ELSEIF (J == NY_LS-1) THEN
@@ -1767,14 +1767,14 @@ ILOOP: DO I = 1,NX_LS
             Z(2) = PHI0_LS(I,J)
             Z(3) = PHI0_LS(I,JP1)
             Z(4) = PHI_MIN_LS
-            F_NORTH = SCALAR_FACE_VALUE(SR_Y_LS(I,J),Z,LIMITER_LS)
+            F_NORTH = SCALAR_FACE_VALUE_LS(SR_Y_LS(I,J),Z,LIMITER_LS)
 
         !    south face
             Z(1) = PHI0_LS(I,JM2)
             Z(2) = PHI0_LS(I,JM1)
             Z(3) = PHI0_LS(I,J)
             Z(4) = PHI0_LS(I,JP1)
-            F_SOUTH = SCALAR_FACE_VALUE(SR_Y_LS(I,J),Z,LIMITER_LS)
+            F_SOUTH = SCALAR_FACE_VALUE_LS(SR_Y_LS(I,J),Z,LIMITER_LS)
 
            ELSE ! must be J == NY_LS
         !    north face
@@ -1782,14 +1782,14 @@ ILOOP: DO I = 1,NX_LS
             Z(2) = PHI0_LS(I,J)
             Z(3) = PHI_MIN_LS
             Z(4) = PHI_MIN_LS
-            F_NORTH = SCALAR_FACE_VALUE(SR_Y_LS(I,J),Z,LIMITER_LS)
+            F_NORTH = SCALAR_FACE_VALUE_LS(SR_Y_LS(I,J),Z,LIMITER_LS)
 
         !    south face
             Z(1) = PHI0_LS(I,JM2)
             Z(2) = PHI0_LS(I,JM1)
             Z(3) = PHI0_LS(I,J)
             Z(4) = PHI_MIN_LS
-            F_SOUTH = SCALAR_FACE_VALUE(SR_Y_LS(I,J),Z,LIMITER_LS)
+            F_SOUTH = SCALAR_FACE_VALUE_LS(SR_Y_LS(I,J),Z,LIMITER_LS)
     
            ENDIF !IF (J==1) 
    
@@ -1800,14 +1800,14 @@ ILOOP: DO I = 1,NX_LS
        Z(2) = PHI0_LS(I,J)
        Z(3) = PHI0_LS(I,JP1)
        Z(4) = PHI0_LS(I,JP2)
-       F_NORTH = SCALAR_FACE_VALUE(SR_Y_LS(I,J),Z,LIMITER_LS)
+       F_NORTH = SCALAR_FACE_VALUE_LS(SR_Y_LS(I,J),Z,LIMITER_LS)
 
     !    south face
        Z(1) = PHI0_LS(I,JM2)
        Z(2) = PHI0_LS(I,JM1)
        Z(3) = PHI0_LS(I,J)
        Z(4) = PHI0_LS(I,JP1)
-       F_SOUTH = SCALAR_FACE_VALUE(SR_Y_LS(I,J),Z,LIMITER_LS)
+       F_SOUTH = SCALAR_FACE_VALUE_LS(SR_Y_LS(I,J),Z,LIMITER_LS)
    
    ENDIF !IF (J<2 .OR. J>(NY_LS-2) 
         
@@ -1836,7 +1836,7 @@ IF (.NOT. RK2_PREDICTOR_LS) FLUX1_LS = FLUX_LS
 END SUBROUTINE LEVEL_SET_ADVECT_FLUX 
 !
 ! ----------------------------------------------------
-REAL(EB) FUNCTION SCALAR_FACE_VALUE(SR_XY,Z,LIMITER)
+REAL(EB) FUNCTION SCALAR_FACE_VALUE_LS(SR_XY,Z,LIMITER)
 !
 ! From Randy 7-11-08
 ! This function computes the scalar value on a face.
@@ -1900,9 +1900,9 @@ ELSEIF (limiter==3) THEN
     B = 0._EB
 ENDIF
 
-SCALAR_FACE_VALUE = ZUP + 0.5_EB * B * ( ZDWN - ZUP )
+SCALAR_FACE_VALUE_LS = ZUP + 0.5_EB * B * ( ZDWN - ZUP )
 
-END FUNCTION SCALAR_FACE_VALUE
+END FUNCTION SCALAR_FACE_VALUE_LS
 !
 
 SUBROUTINE GET_REV_vege(MODULE_REV,MODULE_DATE)
