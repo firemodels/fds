@@ -1574,7 +1574,7 @@ BC_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
 ENDDO BC_LOOP
 
 ! temporary debug
-IF (MESH_REFINEMENT) DP = 0._EB
+IF (EMBEDDED_MESH) DP = 0._EB
 
 ! Compute time derivative of the divergence, dD/dt
 
