@@ -68,6 +68,9 @@
    QUANTITIES(1:4)='U-VELOCITY','V-VELOCITY','W-VELOCITY'
    SAMPLING_FACTOR=10 /  Description of massless tracer particles. Apply at a
                                                              solid surface with the PART_ID='tracers'
+
+&SLCF PBX=0.8,QUANTITY='TEMPERATURE',VECTOR=.TRUE. /  Add vector slices colored by temperature
+
 &PROP ID='sprinkler' SMOKEVIEW_ID='sprinkler_upright' /
 
 &DEVC XYZ=0.4,0.8,0.0 QUANTITY='U-VELOCITY' PROP_ID='sprinkler' /
