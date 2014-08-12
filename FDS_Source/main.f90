@@ -429,7 +429,7 @@ ENDDO
 
 ! Restrict velocity components from fine mesh to coarse mesh
 
-IF (MESH_REFINEMENT) THEN
+IF (EMBEDDED_MESH) THEN
   DO NM=NMESHES,1,-1
      DO NOM=NMESHES,1,-1
         IF (MESHES(NOM)%MESH_LEVEL<=MESHES(NM)%MESH_LEVEL) CYCLE
@@ -440,7 +440,7 @@ ENDIF
 
 ! Apply normal boundary conditions to embedded meshes
    
-IF (MESH_REFINEMENT) THEN
+IF (EMBEDDED_MESH) THEN
    DO NM=1,NMESHES
       DO NOM=1,NMESHES
          IF (MESHES(NOM)%MESH_LEVEL<=MESHES(NM)%MESH_LEVEL) CYCLE
@@ -688,7 +688,7 @@ MAIN_LOOP: DO
 
    ! Retrict scalar flux from fine mesh to coarse mesh
 
-   IF (MESH_REFINEMENT) THEN
+   IF (EMBEDDED_MESH) THEN
       DO NM=NMESHES,1,-1
          DO NOM=NMESHES,1,-1
             IF (MESHES(NOM)%MESH_LEVEL<=MESHES(NM)%MESH_LEVEL) CYCLE
@@ -714,7 +714,7 @@ MAIN_LOOP: DO
 
       ! Restrict mass from fine mesh to coarse mesh (redundant if SCALARF_EMB is done correctly)
 
-      IF (MESH_REFINEMENT) THEN
+      IF (EMBEDDED_MESH) THEN
         DO NM=NMESHES,1,-1
            DO NOM=NMESHES,1,-1
               IF (MESHES(NOM)%MESH_LEVEL<=MESHES(NM)%MESH_LEVEL) CYCLE
@@ -747,18 +747,21 @@ MAIN_LOOP: DO
          CALL UPDATE_PARTICLES(T(NM),NM)
          CALL WALL_BC(T(NM),NM)
          CALL PARTICLE_MOMENTUM_TRANSFER(NM)
-         CALL DIVERGENCE_PART_1(T(NM),NM)
+         IF (MESHES(NM)%MESH_LEVEL==0) CALL DIVERGENCE_PART_1(T(NM),NM)
       ENDDO COMPUTE_WALL_BC_LOOP_A
 
       ! Apply coarse mesh scalar bc to fine mesh
 
-      IF (MESH_REFINEMENT) THEN
+      IF (EMBEDDED_MESH) THEN
          DO NM=1,NMESHES
             DO NOM=1,NMESHES
                IF (MESHES(NOM)%MESH_LEVEL<=MESHES(NM)%MESH_LEVEL) CYCLE
                CALL SCALAR_GHOST_EMB(NM,NOM,IERROR)
-               CALL DIVERGENCE_PART_1(T(NM),NM) ! recompute divg on embedded meshes
             ENDDO
+         ENDDO
+         DO NM=1,NMESHES
+            IF (MESHES(NM)%MESH_LEVEL==0) CYCLE
+            CALL DIVERGENCE_PART_1(T(NM),NM)
          ENDDO
       ENDIF
 
@@ -775,7 +778,7 @@ MAIN_LOOP: DO
 
       ! Restrict fine mesh divergence to coarse mesh
 
-      IF (MESH_REFINEMENT) THEN
+      IF (EMBEDDED_MESH) THEN
          DO NM=NMESHES,1,-1
             DO NOM=NMESHES,1,-1
                IF (MESHES(NOM)%MESH_LEVEL<=MESHES(NM)%MESH_LEVEL) CYCLE
@@ -866,7 +869,7 @@ MAIN_LOOP: DO
 
    ! Restrict fine mesh velocity components to coarse mesh
 
-   IF (MESH_REFINEMENT) THEN
+   IF (EMBEDDED_MESH) THEN
       DO NM=NMESHES,1,-1
          DO NOM=NMESHES,1,-1
             IF (MESHES(NOM)%MESH_LEVEL<=MESHES(NM)%MESH_LEVEL) CYCLE
@@ -877,7 +880,7 @@ MAIN_LOOP: DO
    
    ! Apply normal boundary conditions to embedded meshes
    
-   IF (MESH_REFINEMENT) THEN
+   IF (EMBEDDED_MESH) THEN
       DO NM=1,NMESHES
          DO NOM=1,NMESHES
             IF (MESHES(NOM)%MESH_LEVEL<=MESHES(NM)%MESH_LEVEL) CYCLE
@@ -924,7 +927,7 @@ MAIN_LOOP: DO
 
    ! Retrict scalar flux from fine mesh to coarse mesh
 
-   IF (MESH_REFINEMENT) THEN
+   IF (EMBEDDED_MESH) THEN
       DO NM=NMESHES,1,-1
          DO NOM=NMESHES,1,-1
             IF (MESHES(NOM)%MESH_LEVEL<=MESHES(NM)%MESH_LEVEL) CYCLE
@@ -946,7 +949,7 @@ MAIN_LOOP: DO
 
    ! Restrict mass from fine mesh to coarse mesh (redundant if SCALARF_EMB is done correctly)
 
-   IF (MESH_REFINEMENT) THEN
+   IF (EMBEDDED_MESH) THEN
       DO NM=NMESHES,1,-1
          DO NOM=NMESHES,1,-1
             IF (MESHES(NOM)%MESH_LEVEL/=MESHES(NM)%MESH_LEVEL+1) CYCLE
@@ -969,7 +972,7 @@ MAIN_LOOP: DO
 
    ! Restrict mass from fine mesh to coarse mesh (absolutely necessary to capture combustion source term)
 
-   IF (MESH_REFINEMENT .AND. N_REACTIONS>0) THEN
+   IF (EMBEDDED_MESH .AND. N_REACTIONS>0) THEN
       DO NM=NMESHES,1,-1
          DO NOM=NMESHES,1,-1
             IF (MESHES(NOM)%MESH_LEVEL<=MESHES(NM)%MESH_LEVEL) CYCLE
@@ -988,18 +991,21 @@ MAIN_LOOP: DO
       CALL BNDRY_VEG_MASS_ENERGY_TRANSFER(T(NM),NM)
       IF (VEG_LEVEL_SET_COUPLED) CALL LEVEL_SET_FIRESPREAD(T(1),1)
       CALL COMPUTE_RADIATION(T(NM),NM)
-      CALL DIVERGENCE_PART_1(T(NM),NM)
+      IF (MESHES(NM)%MESH_LEVEL==0) CALL DIVERGENCE_PART_1(T(NM),NM)
    ENDDO COMPUTE_WALL_BC_2A
 
    ! Apply coarse mesh scalar bc to fine mesh
    
-   IF (MESH_REFINEMENT) THEN
+   IF (EMBEDDED_MESH) THEN
       DO NM=1,NMESHES
          DO NOM=1,NMESHES
             IF (MESHES(NOM)%MESH_LEVEL<=MESHES(NM)%MESH_LEVEL) CYCLE
             CALL SCALAR_GHOST_EMB(NM,NOM,IERROR)
-            CALL DIVERGENCE_PART_1(T(NM),NM)
          ENDDO
+      ENDDO
+      DO NM=1,NMESHES
+         IF (MESHES(NM)%MESH_LEVEL==0) CYCLE
+         CALL DIVERGENCE_PART_1(T(NM),NM)
       ENDDO
    ENDIF
 
@@ -1016,7 +1022,7 @@ MAIN_LOOP: DO
 
    ! Restrict fine mesh divergence to coarse mesh
 
-   IF (MESH_REFINEMENT) THEN
+   IF (EMBEDDED_MESH) THEN
       DO NM=NMESHES,1,-1
          DO NOM=NMESHES,1,-1
             IF (MESHES(NOM)%MESH_LEVEL<=MESHES(NM)%MESH_LEVEL) CYCLE
@@ -1062,7 +1068,7 @@ MAIN_LOOP: DO
 
    ! Restrict fine mesh velocity components to coarse mesh
    
-   IF (MESH_REFINEMENT) THEN
+   IF (EMBEDDED_MESH) THEN
       DO NM=NMESHES,1,-1
          DO NOM=NMESHES,1,-1
             IF (MESHES(NOM)%MESH_LEVEL<=MESHES(NM)%MESH_LEVEL) CYCLE
@@ -1073,7 +1079,7 @@ MAIN_LOOP: DO
 
    ! Apply normal boundary conditions to embedded meshes
    
-   IF (MESH_REFINEMENT) THEN
+   IF (EMBEDDED_MESH) THEN
       DO NM=1,NMESHES
          DO NOM=1,NMESHES
             IF (MESHES(NOM)%MESH_LEVEL<=MESHES(NM)%MESH_LEVEL) CYCLE
