@@ -3,11 +3,15 @@
 export SVNROOT=`pwd`/..
 export VDIR=$SVNROOT/Validation
 
+# This list of active validation data sets is used by Validationbot
+# to automatically run validation cases on a regular basis.
+
 # There should exist a line entry for every directory under Validation.
 # If the case is under development, simply comment out the line.
 
 $VDIR/Arup_Tunnel/FDS_Output_Files/Process_Output.csh
 $VDIR/ATF_Corridors/FDS_Output_Files/Process_Output.csh
+$VDIR/Backward_Facing_Step/FDS_Output_Files/Process_Output.csh
 $VDIR/Beyler_Hood/FDS_Output_Files/Process_Output.csh
 $VDIR/BRE_Spray/FDS_Output_Files/Process_Output.csh
 $VDIR/Bryant_Doorway/FDS_Output_Files/Process_Output.csh
@@ -55,4 +59,3 @@ $VDIR/Vettori_Sloped_Ceiling/FDS_Output_Files/Process_Output.csh
 $VDIR/VTT/FDS_Output_Files/Process_Output.csh
 $VDIR/VTT_Sprays/FDS_Output_Files/Process_Output.csh
 $VDIR/WTC/FDS_Output_Files/Process_Output.csh
-
