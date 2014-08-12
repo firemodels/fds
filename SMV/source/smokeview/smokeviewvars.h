@@ -23,6 +23,7 @@
 #include "smokeheaders.h"
 #include "threader.h"
 
+SVEXTERN int SVDECL(clipon,0);
 SVEXTERN int SVDECL(vectortype,0);
 SVEXTERN float tetra_xyz[3];
 SVEXTERN int SVDECL(show_test_in_tetra,0);
