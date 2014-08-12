@@ -1096,6 +1096,70 @@ As seen in the left side of Fig.~\ref{fig_heated_channel}, the velocity profile 
 
 \clearpage
 
+\subsection{Flow Over a Backward Facing Step (\texorpdfstring{\textct{backward\_facing\_step}}{backward\_facing\_step})}
+\label{sec:backward_facing_step}
+
+\textbf{Benjamin A.~Toms, NIST SURF student}\\
+
+\noindent Large-eddy simulation (LES) of turbulent flow over a backward facing step is studied using the Fire Dynamics Simulator (FDS).  A set of cases is designed to test the influence of grid resolution, inlet turbulence, wall boundary treatments, and eddy viscosity models.  The computational results are validated with experimental data.  A grid resolution of $h/ \delta z=10$ adequately modeled the flow, although a doubling of resolution resulted in the realization of smaller scale kinematic features.  The inlet turbulence conditions are determined to be the most significant contributor to downstream flow evolution.  Reattachment length is found to be strongly dependent on the magnitude of the inlet RMS velocity.  The choice of eddy viscosity model is found to have negligible influence, while the no-slip condition and an LES log-law-based wall function performed similarly for the given flow. 
+
+FDS has recently been applied to urban canopy modeling \cite{Moon:2014} and wind engineering.  As such, it is important to study geometrically complex flows, including the appropriate specification of boundary conditions and resultant downstream flow evolution. Le et al.~\cite{Le:1997} first modeled flow over a backward facing step using DNS with a Reynolds number of 5,100.  To verify the results, Jovic and Driver (J\&D) \cite{JD:1994} supplemented the DNS simulation with an identically proportioned wind tunnel experiment.  Together, the data sets from these two studies have provided the baseline for analysis of recent simulations of flow over a backward facing step.
+
+Sarwar et al.~\cite{Sarwar:2013} used FDS to compare SGS eddy viscosity models. The constant Smagorinsky model performed the best, although the dynamic Smagorinsky and Deardorff models, nearly equivalent in accuracy, were found to perform better than the Vreman model.  To avoid explicit specification of inlet turbulence conditions, Sarwar et al.~created an extremely long inlet section to allow turbulence to develop.  One of the goals of the present study is to show that synthetic turbulent inflow boundary conditions can be successfully used to greatly reduce the size of the inlet domain and hence the calculation cost.
+
+\subsubsection*{Computational Domain}
+
+A schematic view of the computational domain is provided in Fig.~\ref{fig:computational_domain}. The dimensions of the channel are based on step height $h$ = .0098 m.  The length of channel is $24h$. The width of channel is $4h$. The height of the inlet section is $5h$, and the height of channel post-step is $6h$. The expansion ratio is thus 1.2.  The inlet is split into three sub-inlets to permit localized variation of inlet turbulence.  The simulation uses a step-height Reynolds number of 5,100 based on a free-stream velocity of $U_0$ = 7.2 m/s. Fig.~\ref{fig:vel_slice} presents an example of instantaneous contours of velocity magnitude.
+
+Virtual measurement devices are placed throughout the channel to collect data relating to flow characteristics such as velocity, turbulence RMS velocity, and friction velocity.  These virtual measurement devices are placed into lines---four vertical and one horizontal---with a device in the volumetric center of each grid cell.  A vertical line device is placed within the inlet region at a location of $x=-3h$, and three line devices are placed in the post-step region at locations of $4h$, $6h$, and $10h$. The post-step vertical line devices are placed accordingly to sample the recirculation, reattachment, and recovery regions.  A horizontal line device is used to sample data directly adjacent to the bottom wall of the channel in the post-step region ($0h$ to $20h$).
+
+\begin{figure}
+    \centering
+    \includegraphics[width=\textwidth]{FIGURES/backward_facing_step_computational_domain.JPG}
+    \caption[Schematic of the channel computational domain]{Schematic of the channel computational domain.  Virtual measurement devices are denoted by dotted green lines.}
+    \label{fig:computational_domain}
+\end{figure}
+
+\begin{figure}
+    \centering
+    \includegraphics[width=\textwidth]{FIGURES/backward_facing_step_vel_slice.png}
+    \caption[Instantaneous contours of velocity magnitude]{Instantaneous contours of velocity magnitude.}
+    \label{fig:vel_slice}
+\end{figure}
+
+\subsubsection*{Boundary Conditions}
+
+The inlet $\overline{u}(z)$ profile is established using experimental data provided by J\&D \cite{JD:1994}, while $\overline{v}(z)$, $\overline{w}(z)$, and inlet free-stream turbulence are set to zero.  Turbulent eddies are injected using the Synthetic Eddy Method of Jarrin \cite{Jarrin:2008}.  Eddies are injected at random locations in the bottom two inlets, advected with the flow over a distance equal to the maximum eddy length scale and recycled at the inlet.  The inlet maximum eddy length scale is 0.03 m, the number of eddies is 100, and the RMS velocity is set to 0.5 m/s for the middle inlet and 1.0 m/s for the bottom inlet to match the J\&D inlet data at $x/h=-3$ as closely as possible.
+
+The boundary conditions for velocity and pressure on the top of the domain are ``mirror'', that is, zero gradient.  The spanwise boundaries are periodic.  The outlet boundary is ``open'', see the FDS Tech Guide \cite{FDS_Tech_Guide}.
+
+\subsubsection*{Results}
+
+Fig.~\ref{fig:friction_pressure_coefficients} shows the longitudinal profiles of the friction coefficient (left) and the pressure coefficient (right).  The $x/h$ location where $C_f$ crosses zero is the reattachment length, a key validation metric for this flow.  The values of the reattachment length for the three grid resolutions studied where 9.9, 6.0, and 5.3, for the $h/\delta x=5$, $10$, and $20$ resolutions, respectively.  The experimental value is approximately 6 \cite{JD:1994}.  Thus, the $h/\delta x=20$ case under-predicts the reattachment length for the given inlet conditions.
+
+Fig.~\ref{fig:flow_profiles} shows the inlet ($x/h=-3$) and downstream mean and covariance profiles.
+
+\begin{figure}
+    \centering
+    \includegraphics[scale=.49]{SCRIPT_FIGURES/backward_facing_step_Cf.pdf}
+    \includegraphics[scale=.49]{SCRIPT_FIGURES/backward_facing_step_Cp.pdf}
+    \caption[Friction coefficient and pressure coefficient]{Longitudinal profiles of (left) friction coefficient and (right) pressure coefficient.}
+    \label{fig:friction_pressure_coefficients}
+\end{figure}
+
+\begin{figure}
+    \centering
+    \includegraphics[scale=.47]{SCRIPT_FIGURES/backward_facing_step_U.pdf}
+    \includegraphics[scale=.47]{SCRIPT_FIGURES/backward_facing_step_W.pdf}\\
+    \includegraphics[scale=.47]{SCRIPT_FIGURES/backward_facing_step_uu.pdf}
+    \includegraphics[scale=.47]{SCRIPT_FIGURES/backward_facing_step_ww.pdf}\\
+    \includegraphics[scale=.47]{SCRIPT_FIGURES/backward_facing_step_uw.pdf}
+    \caption[Flow profiles]{Flow profiles for various grid resolutions.  Symbols: --$\mathlarger{\mathlarger{\star}}$--, $h/\delta z$=5; --$\Box$--, $h/\delta z$=10; --$\Diamond$--, $h/\delta z$=20; $\mathlarger{\mathlarger{\boldsymbol\circ}}$, J\&D experimental data.}
+    \label{fig:flow_profiles}
+\end{figure}
+
+\clearpage
+
 \subsection{Ribbed Square Duct Flow (\texorpdfstring{\textct{ribbed\_channel}}{ribbed\_channel})}
 \label{sec:ribbed_channel}
 
