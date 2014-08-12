@@ -7,6 +7,10 @@ cd ATF_Corridors
 mkdir Current_Results
 ./Run_All.sh
 cd ..
+cd Backward_Facing_Step
+mkdir Current_Results
+./Run_All.sh
+cd ..
 cd FAA_Cargo_Compartments
 mkdir Current_Results
 ./Run_All.sh
