@@ -112,7 +112,7 @@ MAILTO=""
 
 # Run Firebot at 9:56 PM every night
 # If no SVN argument is specified, then the latest SVN revision is used
-56 21 * * * cd ~/firebot ; ./firebot_linux_wrapper.sh
+56 21 * * * cd ~/firebot ; bash -lc "./firebot_linux_wrapper.sh"
 
 # ============================
 # = DiskHog disk space alert =
@@ -156,7 +156,7 @@ MAILTO=""
 # Recommended settings for <num>:
 #     1 for passive mode (run 1 validation set at a time)
 #     150 for aggressive mode (run up to 150 cores at a time)
-56 21 * * * cd ~/firebot ; ./firebot_linux_wrapper.sh -s -v 1 -y
+56 21 * * * cd ~/firebot ; bash -lc "./firebot_linux_wrapper.sh -s -v 1 -y"
 
 ------------------------------------------------------------------------------------
 
@@ -176,6 +176,6 @@ MAILTO=""
 
 # Run Firebot at 9:56 PM every night
 # If no SVN argument is specified, then the latest SVN revision is used
-56 21 * * * cd ~/firebot ; ./firebot_mac_wrapper.sh
+56 21 * * * cd ~/firebot ; bash -lc "./firebot_mac_wrapper.sh"
 
 ------------------------------------------------------------------------------------
