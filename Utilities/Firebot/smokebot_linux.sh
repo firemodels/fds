@@ -828,6 +828,19 @@ check_smv_pictures_db()
       cat $OUTPUT_DIR/stage6b_errors >> $ERROR_LOG
       echo "" >> $ERROR_LOG
    fi
+
+   # Scan for and report any warnings in make SMV pictures process
+   cd $SMOKEBOT_DIR
+   if [[ `grep -I -E "Warning" $OUTPUT_DIR/stage6b` == "" ]]
+   then
+      # Continue along
+      :
+   else
+      echo "Warnings from Stage 6b - Make SMV pictures (debug mode):" >> $WARNING_LOG
+      grep -I -E "Warning" $OUTPUT_DIR/stage6b >> $WARNING_LOG
+      echo "" >> $WARNING_LOG
+   fi
+
 }
 
 #  ==================================
@@ -922,6 +935,19 @@ check_smv_movies()
       cat $OUTPUT_DIR/stage6e >> $ERROR_LOG
       echo "" >> $ERROR_LOG
    fi
+
+   # Scan for and report any warnings in make SMV pictures process
+   cd $SMOKEBOT_DIR
+   if [[ `grep -I -E "Warning" $OUTPUT_DIR/stage6d` == "" ]]
+   then
+      # Continue along
+      :
+   else
+      echo "Warnings from Stage 6d - Make SMV pictures (release mode):" >> $WARNING_LOG
+      grep -I -E "Warning" $OUTPUT_DIR/stage6d >> $WARNING_LOG
+      echo "" >> $WARNING_LOG
+   fi
+
 }
 
 #  ======================================
