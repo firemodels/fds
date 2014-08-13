@@ -8136,6 +8136,9 @@ and {\ct 'HEAT FLOW'} are defined:
 \end{align}
 The addition of a {\ct +} or {\ct -} to the {\ct QUANTITY} names yields the integral of the flow in the positive or negative direction only. In other words, if you want to know the mass flow out of a compartment, use {\ct 'MASS FLOW +'} or {\ct 'MASS FLOW -'}, depending on the orientation of the door.
 
+\subsubsection{Volume, Mass, and Heat Flow at a Wall}
+\label{info:wallflows}
+
 The quantities {\ct 'VOLUME FLOW'}, {\ct 'MASS FLOW'}, and {\ct 'HEAT FLOW'} cannot be applied at a solid boundary.  Instead, use the wall equivalents {\ct 'VOLUME FLOW WALL'}, {\ct 'MASS FLOW WALL'}, and {\ct 'HEAT FLOW WALL'}.  These quantities require an {\ct IOR} for the surface (positive points into the domain).  Note that, in order to be a more useful diagnostic for global energy balances, the heat flow at the wall is defined using the sensible enthalpy of the mixture (composition taken at the wall) and is not relative to ambient conditions:
 \begin{align}
 \dot{q}_{\si{w}} &= \int \rho h_s(T) \, \bu \cdot \d \mathbf{S}
