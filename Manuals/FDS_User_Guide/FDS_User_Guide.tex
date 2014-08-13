@@ -4389,10 +4389,34 @@ value of {\ct CONDUCTIVITY} given. Note also that for values of temperature, {\c
 given range, FDS will assume a constant value equal to the first or last {\ct F} specified. Note also that the {\ct DENSITY} of a material cannot be controlled with a {\ct RAMP} function.
 
 
+\section{Spatially-Dependent Velocity Profiles}
+\label{info:RAMP_Vel_Prof}
 
+Similar to using {\ct PROFILE=`ATMOSPHERIC'} on {\ct SURF}, it is possible to specify {\ct PROFILE=`RAMP'} to generate 1D or 2D profiles of the normal component of velocity on a surface.  The following code generates a $u(z)$ profile on the {\ct `XMIN'} boundary.
 
+\begin{lstlisting}
+&SURF ID='inlet', VEL=-7.72, PROFILE='RAMP', RAMP_V_Z='u_prof' /
+&VENT MB='XMIN', SURF_ID='inlet'/
 
+&RAMP ID='u_prof', T=0.,      F=0.   /
+&RAMP ID='u_prof', T=0.0098,  F=0.   /
+&RAMP ID='u_prof', T=0.01005, F=0.2474 /
+&RAMP ID='u_prof', T=0.01029, F=0.4521 /
+&RAMP ID='u_prof', T=0.01077, F=0.6256 /
+&RAMP ID='u_prof', T=0.01174, F=0.7267 /
+&RAMP ID='u_prof', T=0.01368, F=0.8238 /
+&RAMP ID='u_prof', T=0.01562, F=0.8795 /
+&RAMP ID='u_prof', T=0.01756, F=0.9378 /
+&RAMP ID='u_prof', T=0.0195,  F=0.9663 /
+&RAMP ID='u_prof', T=0.02144, F=0.9922 /
+&RAMP ID='u_prof', T=0.02338, F=0.9987 /
+&RAMP ID='u_prof', T=0.02532, F=1 /
+&RAMP ID='u_prof', T=0.0588,  F=1 /
+\end{lstlisting}
 
+Note that {\ct V} indicates the velocity component normal to the surface.  You can also specify {\ct RAMP\_V\_X} and {\ct RAMP\_V\_Y} and add these to the {\ct SURF}.  Note that only profiles in the planar directions will affect a given surface.  That is, if the surface is oriented in the $y-z$ plane, only {\ct RAMP\_V\_Y} and {\ct RAMP\_V\_Z} apply.  In the {\ct RAMP} definition {\ct T} is the independent variable and {\ct F} is the dependent variable.  In this example, {\ct T} is the $z$ coordinate in meters and {\ct F} is the factor multiplying {\ct VEL} on the {\ct SURF} line.  Two ramps may be applied to a surface.
+
+{\ct T} does not need to be directly related to the FDS mesh.  The velocity points will be interpolated linearly by the ramp function.  In fact, this functionality is convenient for taking experimental data directly as a boundary condition to FDS.  You basically just need to list {\ct T} and {\ct F} from the data (you can set {\ct VEL=-1} if you want).  The results for this particular case can be seen in the section, ``Flow Over a Backward Facing Step'', in the FDS Verification Guide \cite{FDS_Verification_Guide}. In this problem, the step height is $h=0.0098$ m, and the specification of the inlet profile is critical to correctly matching the reattachment point downstream of the step.
 
 
 \chapter{Chemical Species}
@@ -9993,6 +10017,9 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct RAMP\_Q}                         & Character       & Section~\ref{info:RAMP_Time}              &                     &                         \\ \hline
 {\ct RAMP\_T}                         & Character       & Section~\ref{info:RAMP_Time}              &                     &                         \\ \hline
 {\ct RAMP\_V}                         & Character       & Section~\ref{info:RAMP_Time}              &                     &                         \\ \hline
+{\ct RAMP\_V\_X}                      & Character       & Section~\ref{info:RAMP_Vel_Prof}          &                     &                         \\ \hline
+{\ct RAMP\_V\_Y}                      & Character       & Section~\ref{info:RAMP_Vel_Prof}          &                     &                         \\ \hline
+{\ct RAMP\_V\_Z}                      & Character       & Section~\ref{info:RAMP_Vel_Prof}          &                     &                         \\ \hline
 {\ct RGB(3)}                          & Int.~Triplet    & Section~\ref{info:colors}                 &                     & \small 255,204,102      \\ \hline
 {\ct ROUGHNESS}                       & Real            & Section~\ref{info:WALL_MODEL}             & m                   & 0.                      \\ \hline
 {\ct SPEC\_ID}                        & Character       & Section~\ref{info:MASS_FLUX}              &                     &                         \\ \hline
