@@ -35,6 +35,7 @@ int main(int argc, char **argv){
   int open_smokeview=0;
   int redirect=0;
 
+  display_warnings=1;
   set_stdout(stdout);
   initMALLOC();
 #ifdef WIN32
@@ -130,6 +131,9 @@ int main(int argc, char **argv){
         break;
       case 'v':
         version();
+        return 1;
+      case 'w':
+        display_warnings=0;
         return 1;
       default:
         usage();

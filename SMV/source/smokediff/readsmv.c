@@ -398,7 +398,7 @@ int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
         iplot3d++;
       }
       else{
-        fprintf(stderr,"*** Warning: the file, %s, does not exist.\n",full_file);
+        if(display_warnings==1)fprintf(stderr,"*** Warning: the file, %s, does not exist.\n",full_file);
         CheckMemory;
         if(readlabels(plot3di->labels+0,streamsmv)==2)break;
         if(readlabels(plot3di->labels+1,streamsmv)==2)break;

@@ -188,7 +188,7 @@ STDCALLF FORTendianout(char *endian_filename,int lenout);
 EXTERN char pp[2];
 EXTERN casedata *caseinfo;
 EXTERN char *sourcedir1, *sourcedir2, *destdir;
-EXTERN int test_mode;
+EXTERN int test_mode, display_warnings;
 EXTERN char type_label[1024];
 EXTERN FILE *LOG_FILENAME;
 
