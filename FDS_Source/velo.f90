@@ -779,7 +779,7 @@ IF (BAROCLINIC .AND. .NOT.EVACUATION_ONLY(NM)) CALL BAROCLINIC_CORRECTION(T)
 
 ! Specified patch velocity
 
-IF (PATCH_VELOCITY) CALL PATCH_VELOCITY_FLUX
+IF (PATCH_VELOCITY) CALL PATCH_VELOCITY_FLUX(NM)
 
 ! Direct-forcing Immersed Boundary Method
 
@@ -3006,7 +3006,7 @@ ENDDO UNSTRUCTURED_GEOMETRY_LOOP
 END SUBROUTINE IBM_VELOCITY_FLUX
 
 
-SUBROUTINE PATCH_VELOCITY_FLUX
+SUBROUTINE PATCH_VELOCITY_FLUX(NM)
 
 ! The user may specify a polynomial profile using the PROP and DEVC lines. This routine 
 ! specifies the source term in the momentum equation to drive the local velocity toward
@@ -3014,10 +3014,11 @@ SUBROUTINE PATCH_VELOCITY_FLUX
 ! (see IBM_VELOCITY_FLUX).
 
 USE DEVICE_VARIABLES, ONLY: DEVICE_TYPE,PROPERTY_TYPE,N_DEVC,DEVICE,PROPERTY
-
+USE TRAN, ONLY: GINV
 TYPE(DEVICE_TYPE), POINTER :: DV=>NULL()
 TYPE(PROPERTY_TYPE), POINTER :: PY=>NULL()
-INTEGER :: N,I,J,K,IC1,IC2
+INTEGER, INTENT(IN):: NM
+INTEGER :: N,I,J,K,IC1,IC2,I1,I2,J1,J2,K1,K2
 REAL(EB), POINTER, DIMENSION(:,:,:) :: UU=>NULL(),VV=>NULL(),WW=>NULL(),HP=>NULL()
 REAL(EB) :: VELP,DX0,DY0,DZ0
 
@@ -3039,15 +3040,27 @@ DEVC_LOOP: DO N=1,N_DEVC
    IF (DV%QUANTITY/='VELOCITY PATCH') CYCLE DEVC_LOOP
    IF (DV%PROP_INDEX<1)               CYCLE DEVC_LOOP
    IF (.NOT.DEVICE(DV%DEVC_INDEX(1))%CURRENT_STATE) CYCLE DEVC_LOOP
+   
+   IF (DV%X1 > XF .OR. DV%X2 < XS .OR. &
+       DV%Y1 > YF .OR. DV%Y2 < YS .OR. &
+       DV%Z1 > ZF .OR. DV%Z2 < ZS) CYCLE DEVC_LOOP
+   
    PY=>PROPERTY(DV%PROP_INDEX)
 
    I_VEL_SELECT: SELECT CASE(PY%I_VEL)
    
       CASE(1) I_VEL_SELECT
       
-         DO K=1,KBAR
-            DO J=1,JBAR
-               DO I=0,IBAR
+         I1 = MAX(0,   NINT( GINV(DV%X1-XS,1,NM)*RDXI   )-1)
+         I2 = MIN(IBAR,NINT( GINV(DV%X2-XS,1,NM)*RDXI   )+1)
+         J1 = MAX(0,   NINT( GINV(DV%Y1-YS,2,NM)*RDETA  )-1)
+         J2 = MIN(JBAR,NINT( GINV(DV%Y2-YS,2,NM)*RDETA  )+1)
+         K1 = MAX(0,   NINT( GINV(DV%Z1-ZS,3,NM)*RDZETA )-1)
+         K2 = MIN(KBAR,NINT( GINV(DV%Z2-ZS,3,NM)*RDZETA )+1)    
+
+         DO K=K1,K2
+            DO J=J1,J2
+               DO I=I1,I2
                
                   IC1 = CELL_INDEX(I,J,K)
                   IC2 = CELL_INDEX(I+1,J,K)
@@ -3063,7 +3076,7 @@ DEVC_LOOP: DO N=1,N_DEVC
                   VELP = PY%P0 + DX0*PY%PX(1) + 0.5_EB*(DX0*DX0*PY%PXX(1,1)+DX0*DY0*PY%PXX(1,2)+DX0*DZ0*PY%PXX(1,3)) &
                                + DY0*PY%PX(2) + 0.5_EB*(DY0*DX0*PY%PXX(2,1)+DY0*DY0*PY%PXX(2,2)+DY0*DZ0*PY%PXX(2,3)) &
                                + DZ0*PY%PX(3) + 0.5_EB*(DZ0*DX0*PY%PXX(3,1)+DZ0*DY0*PY%PXX(3,2)+DZ0*DZ0*PY%PXX(3,3))
-        
+
                   FVX(I,J,K) = -RDXN(I)*(HP(I+1,J,K)-HP(I,J,K)) - (VELP-UU(I,J,K))/DT
                ENDDO
             ENDDO
@@ -3071,12 +3084,20 @@ DEVC_LOOP: DO N=1,N_DEVC
      
       CASE(2) I_VEL_SELECT
      
-         DO K=1,KBAR
-            DO J=0,JBAR
-               DO I=1,IBAR
-               
+         I1 = MAX(0,   NINT( GINV(DV%X1-XS,1,NM)*RDXI   )-1)
+         I2 = MIN(IBAR,NINT( GINV(DV%X2-XS,1,NM)*RDXI   )+1)
+         J1 = MAX(0,   NINT( GINV(DV%Y1-YS,2,NM)*RDETA  )-1)
+         J2 = MIN(JBAR,NINT( GINV(DV%Y2-YS,2,NM)*RDETA  )+1)
+         K1 = MAX(0,   NINT( GINV(DV%Z1-ZS,3,NM)*RDZETA )-1)
+         K2 = MIN(KBAR,NINT( GINV(DV%Z2-ZS,3,NM)*RDZETA )+1)    
+      
+         DO K=K1,K2
+            DO J=J1,J2
+               DO I=I1,I2
+
                   IC1 = CELL_INDEX(I,J,K)
                   IC2 = CELL_INDEX(I,J+1,K)
+
                   IF (SOLID(IC1) .OR. SOLID(IC2)) CYCLE
                
                   IF (XC(I)<DV%X1 .OR. XC(I)>DV%X2) CYCLE
@@ -3089,7 +3110,7 @@ DEVC_LOOP: DO N=1,N_DEVC
                   VELP = PY%P0 + DX0*PY%PX(1) + 0.5_EB*(DX0*DX0*PY%PXX(1,1)+DX0*DY0*PY%PXX(1,2)+DX0*DZ0*PY%PXX(1,3)) &
                                + DY0*PY%PX(2) + 0.5_EB*(DY0*DX0*PY%PXX(2,1)+DY0*DY0*PY%PXX(2,2)+DY0*DZ0*PY%PXX(2,3)) &
                                + DZ0*PY%PX(3) + 0.5_EB*(DZ0*DX0*PY%PXX(3,1)+DZ0*DY0*PY%PXX(3,2)+DZ0*DZ0*PY%PXX(3,3))
-        
+
                   FVY(I,J,K) = -RDYN(J)*(HP(I,J+1,K)-HP(I,J,K)) - (VELP-VV(I,J,K))/DT
                ENDDO
             ENDDO
@@ -3097,10 +3118,17 @@ DEVC_LOOP: DO N=1,N_DEVC
      
       CASE(3) I_VEL_SELECT
      
-         DO K=0,KBAR
-            DO J=1,JBAR
-               DO I=1,IBAR
-               
+         I1 = MAX(0,   NINT( GINV(DV%X1-XS,1,NM)*RDXI   )-1)
+         I2 = MIN(IBAR,NINT( GINV(DV%X2-XS,1,NM)*RDXI   )+1)
+         J1 = MAX(0,   NINT( GINV(DV%Y1-YS,2,NM)*RDETA  )-1)
+         J2 = MIN(JBAR,NINT( GINV(DV%Y2-YS,2,NM)*RDETA  )+1)
+         K1 = MAX(0,   NINT( GINV(DV%Z1-ZS,3,NM)*RDZETA )-1)
+         K2 = MIN(KBAR,NINT( GINV(DV%Z2-ZS,3,NM)*RDZETA )+1)    
+      
+         DO K=K1,K2
+            DO J=J1,J2
+               DO I=I1,I2
+                  
                   IC1 = CELL_INDEX(I,J,K)
                   IC2 = CELL_INDEX(I,J,K+1)
                   IF (SOLID(IC1) .OR. SOLID(IC2)) CYCLE
