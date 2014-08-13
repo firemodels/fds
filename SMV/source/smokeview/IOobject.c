@@ -827,7 +827,7 @@ void draw_devices(void){
         glTranslatef(xyz[0],xyz[1],xyz[2]);
         glRotatef(RAD2DEG*angle,axis[0],axis[1],axis[2]);
         if(vectortype==0){
-          glScalef(1.0,1.0,speed);
+          glScalef(1.0,1.0,vectorrelsize*speed);
           glBegin(GL_LINES);
           glVertex3fv(vec0);
           glVertex3fv(zvec);
@@ -838,15 +838,15 @@ void draw_devices(void){
         }
         else if(vectortype==1){
           glPushMatrix();
-          glScalef(1.0,1.0,speed);
+          glScalef(1.0,1.0,speed*vectorrelsize);
           drawdisk(0.1,1.0,arrow_color);
           glPopMatrix();
-          glTranslatef(0.0,0.0,speed);
+          glTranslatef(0.0,0.0,speed*vectorrelsize);
           drawcone(0.2,0.2,arrow_color);
         }
         else{
           drawobjects_as_vectors=1;
-          glScalef(sensorrelsize,sensorrelsize,sensorrelsize);
+          glScalef(sensorrelsize*vectorrelsize,sensorrelsize*vectorrelsize,sensorrelsize*vectorrelsize);
           draw_SVOBJECT(devicei->object,state,devicei->prop,0,arrow_color_float,1);
         }
         glPopMatrix();

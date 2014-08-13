@@ -97,6 +97,7 @@ extern "C" void glui_device_setup(int main_window){
 
       PANEL_velocityvectors = glui_device->add_panel_to_panel(PANEL_objects,"Vectors",true);
       if(nvdeviceinfo==0)PANEL_velocityvectors->disable();
+      glui_device->add_spinner_to_panel(PANEL_velocityvectors,_("Scaling"),GLUI_SPINNER_FLOAT,&vectorrelsize);
       CHECKBOX_device_1=glui_device->add_checkbox_to_panel(PANEL_velocityvectors,_("Show"),&showvdeviceval);
 #ifdef pp_PILOT
       glui_device->add_checkbox_to_panel(PANEL_velocityvectors,_("Pilot view"),&vispilot);
