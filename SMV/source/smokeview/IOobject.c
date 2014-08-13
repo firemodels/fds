@@ -787,6 +787,7 @@ void draw_devices(void){
       devicedata *devicei;
       float vel[3], angle, dvel, dangle;
       float *xyz;
+      float valcolor[4], *valcolorptr;
       int j;
       int velocity_type;
 
@@ -796,13 +797,18 @@ void draw_devices(void){
       xyz=vdevi->valdev->xyz;
       get_vdevice_vel(global_times[itimes], vdevi, vel, &angle, &dvel, &dangle, &velocity_type);
       if(colordeviceval==1){
-        float valcolor[4], *valcolorptr;
-        valcolorptr=get_device_color(devicei,valcolor,device_valmin,device_valmax);
-        arrow_color[0]=255*valcolor[0];
-        arrow_color[1]=255*valcolor[1];
-        arrow_color[2]=255*valcolor[2];
-        arrow_color[3]=255;
-        glColor3ubv(arrow_color);
+        int type,vistype=0;
+
+        type=devicei->type2;
+        if(type>=0&&type<ndevicetypes)vistype=devicetypes[type]->type2vis;
+        if(vistype==1){
+          valcolorptr=get_device_color(devicei,valcolor,device_valmin,device_valmax);
+          arrow_color[0]=255*valcolorptr[0];
+          arrow_color[1]=255*valcolorptr[1];
+          arrow_color[2]=255*valcolorptr[2];
+          arrow_color[3]=255;
+          glColor3ubv(arrow_color);
+        }
       }
       arrow_color_float[0] = (float)arrow_color[0]/255.0;
       arrow_color_float[1] = (float)arrow_color[1]/255.0;
