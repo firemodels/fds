@@ -183,9 +183,9 @@ if [ "$RUN_SMV" == "1" ] ; then
 
   cd $SVNROOT/Verification/Visualization
   echo Differencing cases plume5c and plume5cdelta
-  $SMOKEDIFF -r plume5c plume5cdelta
+  $SMOKEDIFF -w -r plume5c plume5cdelta
   echo Differencing cases thouse5 and thouse5delta
-  $SMOKEDIFF -r thouse5 thouse5delta
+  $SMOKEDIFF -w -r thouse5 thouse5delta
 
   echo Generating images
 
