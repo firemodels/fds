@@ -500,7 +500,7 @@ int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
         islice++;
       }
       else{
-        fprintf(stderr,"*** Warning: the file, %s, does not exist.\n",buffer);
+        if(display_warnings==1)fprintf(stderr,"*** Warning: the file, %s, does not exist.\n",buffer);
         if(readlabels(&sliceinfo[islice].label,streamsmv)==2)break;
         nsliceinfo--;
         smvcase->nsliceinfo=nsliceinfo;

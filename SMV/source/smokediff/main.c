@@ -134,7 +134,7 @@ int main(int argc, char **argv){
         return 1;
       case 'w':
         display_warnings=0;
-        return 1;
+        break;
       default:
         usage();
         return 1;
