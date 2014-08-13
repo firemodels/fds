@@ -533,7 +533,7 @@ void draw_devices_val(void){
 void get_vdevice_vel(float time_local, vdevicedata *vdevicei, float *vel, float *angle_local, float *dvel, float *dangle, int *valid_vel){
   float uvel=0.0, vvel=0.0, wvel=0.0;
   devicedata *udev, *vdev, *wdev;
-  int validu=0,validv=0,validw=0;
+  int validu=1,validv=1,validw=1;
 
   udev = vdevicei->udev;
   vdev = vdevicei->vdev;
