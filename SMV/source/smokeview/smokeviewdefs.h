@@ -57,27 +57,17 @@ void _Sniff_Errors(char *whereat);
 #define CLIP_DATA 3
 
 #define CLIP_GEOMETRY   \
-  if( clipon==0&&(clip_mode==CLIP_BLOCKAGES||clip_mode==CLIP_BLOCKAGES_DATA){\
-    setClipPlanes(&clipinfo,CLIP_ON);\
-    clipon=1;\
-  }\
-  else{\
-    if( clipon==1&&clip_mode==!CLIP_BLOCKAGES&&clip_mode!=CLIP_BLOCKAGES_DATA){\
-      setClipPlanes(NULL,CLIP_OFF);\
-      clipon=0;\
-    }\
+  {int clipgeom=0;\
+    if(clip_mode==CLIP_BLOCKAGES||clip_mode==CLIP_BLOCKAGES_DATA)clipgeom=1;\
+    if( clipon==0&&clipgeom==1){setClipPlanes(&clipinfo,CLIP_ON);clipon=1;}\
+    else if( clipon==1&&clipgeom==0){setClipPlanes(NULL,CLIP_OFF);clipon=0;}\
   }
 
 #define CLIP_VALS   \
-  if( clipon==0&&(clip_mode==CLIP_DATA||clip_mode==CLIP_BLOCKAGES_DATA){\
-  setClipPlanes(&clipinfo,CLIP_ON);\
-  clipon=1;\
-  }\
-  else{\
-    if( clipon==1&&clip_mode==!CLIP_DATA&&clip_mode!=CLIP_BLOCKAGES_DATA){\
-      setClipPlanes(NULL,CLIP_OFF);\
-      clipon=0;\
-    }\
+  {int clipdata=0;\
+  if(clip_mode==CLIP_DATA||clip_mode==CLIP_BLOCKAGES_DATA)clipdata=1;\
+  if( clipon==0&&clipdata==1){setClipPlanes(&clipinfo,CLIP_ON);clipon=1;}\
+    else if( clipon==1&&clipdata==0){setClipPlanes(NULL,CLIP_OFF);clipon=0;}\
   }
 
 #define UNCLIP setClipPlanes(NULL,CLIP_OFF);clipon=0
