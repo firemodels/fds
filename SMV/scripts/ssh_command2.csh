@@ -6,4 +6,4 @@ set arg=$4
 echo copying $dir/$command to $host
 scp $dir/$command $host\:.
 echo running command $command $arg on $host
-ssh -q $host ./$command $arg
+ssh -q $host bash -lc ./$command $arg

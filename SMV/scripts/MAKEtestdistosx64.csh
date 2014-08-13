@@ -27,7 +27,7 @@ scp $OSXHOST\:$BACKGROUNDDIR/background $OSXDIR/bin/.
 scp $OSXHOST\:$SMVDIR/smokeview_osx_test_64 $OSXDIR/bin/smokeview
 scp $OSXHOST\:$SMZDIR/smokezip_osx_64 $OSXDIR/bin/smokezip
 scp $OSXHOST\:$SMDDIR/smokediff_osx_64 $OSXDIR/bin/smokediff
-scp $OSXHOST\:$SMDDIR/wind2fds_osx_64 $OSXDIR/bin/wind2fds
+scp $OSXHOST\:$WINDDIR/wind2fds_osx_64 $OSXDIR/bin/wind2fds
 rm -f $OSXDIR.tar $OSXDIR.tar.gz
 cd $OSXDIR
 tar cvf ../$OSXDIR.tar .
