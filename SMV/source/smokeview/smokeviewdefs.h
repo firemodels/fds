@@ -56,10 +56,31 @@ void _Sniff_Errors(char *whereat);
 #define CLIP_BLOCKAGES 2
 #define CLIP_DATA 3
 
-#define CLIP_GEOMETRY   ( clipon==0&&(clip_mode==CLIP_BLOCKAGES||clip_mode==CLIP_BLOCKAGES_DATA) ? setClipPlanes(&clipinfo,CLIP_ON);clipon=1;:)
-#define UNCLIP_GEOMETRY ( clipon==1&&(clip_mode==CLIP_BLOCKAGES||clip_mode==CLIP_BLOCKAGES_DATA) ? setClipPlanes(NULL,CLIP_OFF);clipon=0;:)
-#define CLIP_VALS       ( clipon==0&&(clip_mode==CLIP_DATA||clip_mode==CLIP_BLOCKAGES_DATA) ? setClipPlanes(&clipinfo,CLIP_ON);clipon=1;:)
-#define UNCLIP_VALS     ( clipon==1&&(clip_mode==CLIP_DATA||clip_mode==CLIP_BLOCKAGES_DATA) ? setClipPlanes(NULL,CLIP_OFF);clipon=0;:)
+#define CLIP_GEOMETRY   \
+  if( clipon==0&&(clip_mode==CLIP_BLOCKAGES||clip_mode==CLIP_BLOCKAGES_DATA){\
+    setClipPlanes(&clipinfo,CLIP_ON);\
+    clipon=1;\
+  }\
+  else{\
+    if( clipon==1&&clip_mode==!CLIP_BLOCKAGES&&clip_mode!=CLIP_BLOCKAGES_DATA){\
+      setClipPlanes(NULL,CLIP_OFF);\
+      clipon=0;\
+    }\
+  }
+
+#define CLIP_VALS   \
+  if( clipon==0&&(clip_mode==CLIP_DATA||clip_mode==CLIP_BLOCKAGES_DATA){\
+  setClipPlanes(&clipinfo,CLIP_ON);\
+  clipon=1;\
+  }\
+  else{\
+    if( clipon==1&&clip_mode==!CLIP_DATA&&clip_mode!=CLIP_BLOCKAGES_DATA){\
+      setClipPlanes(NULL,CLIP_OFF);\
+      clipon=0;\
+    }\
+  }
+
+#define UNCLIP setClipPlanes(NULL,CLIP_OFF);clipon=0
 
 #define GAS 1
 #define SOLID 0
