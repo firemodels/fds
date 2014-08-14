@@ -41,19 +41,6 @@ no_target:
 # ********  rules for each platform supported *************
 
 
-# ------------- Win 32 ----------------
-#  32 bit windows
-
-intel_win_32 : CFLAGS    = -Od /Qvec_report0 /nologo -D WIN32 -D pp_WIN_INTEL
-intel_win_32 : FFLAGS    = -Od /Qvec_report0 /nologo -fpp -D pp_cvf /iface:stdref
-intel_win_32 : CC        = icl
-intel_win_32 : CPP       = icl
-intel_win_32 : FC        = ifort
-intel_win_32 : exe       = wind2fds_win_32.exe
-
-intel_win_32 : $(objwin)
-	$(CPP) -o $(bin)/$(exe) $(objwin) $(LIB_DIR)/lib_win_intel_32/pthreads.lib
-
 # ------------- Win 64 ----------------
 #  64 bit windows
 
@@ -67,15 +54,15 @@ intel_win_64 : exe       = wind2fds_win_64.exe
 intel_win_64 : $(objwin)
 	$(CPP) -o $(bin)/$(exe) $(objwin) $(LIB_DIR)/lib_win_intel_64/pthreads.lib
 
-# ------------- Linux 32 ----------------
-#  32 bit linux
+# ------------- gcc Linux 64 ----------------
+#  64 bit gcc linux
 
-intel_linux_32 : CFLAGS    = -O2 -m32 -vec_report0 -D pp_LINUX
-intel_linux_32 : CC        = icc
-intel_linux_32 : CPP       = icc
-intel_linux_32 : exe       = wind2fds_linux_32
+gcc_linux_64 : CFLAGS    = -O0 -m64 
+gcc_linux_64 : CC        = gcc
+gcc_linux_64 : CPP       = g++
+gcc_linux_64 : exe       = wind2fds_linux_64
 
-intel_linux_32 : $(obj)
+gcc_linux_64 : $(obj)
 	$(CPP) -o $(bin)/$(exe) $(obj)
 
 # ------------- Linux 64 ----------------
@@ -88,18 +75,6 @@ intel_linux_64 : exe       = wind2fds_linux_64
 
 intel_linux_64 : $(obj)
 	$(CPP) -o $(bin)/$(exe) $(obj)
-
-# ------------- OSX 32 ----------------
-#  32 bit OSX
-
-intel_osx_32 : CFLAGS    = -O2 -m32 -vec_report0 -D pp_OSX
-intel_osx_32 : CC        = icc
-intel_osx_32 : CPP       = icc
-intel_osx_32 : exe       = wind2fds_osx_32
-
-intel_osx_32 : $(obj)
-	$(CPP) -o $(bin)/$(exe) -m32 $(obj)
-
 
 # ------------- OSX 64 ----------------
 #  64 bit OSX
