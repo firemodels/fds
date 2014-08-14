@@ -5570,6 +5570,48 @@ void read_device_data(char *file, int filetype, int loadstatus){
   FREEMEMORY(devices);
 }
 
+/* ----------------------- get_device ----------------------------- */
+
+devicedata *get_device(float *xyzval, char *device_label, int device_type){
+  int j;
+
+  for(j=0;j<ndeviceinfo;j++){
+    devicedata *devj;
+    float *xyz;
+
+    devj = deviceinfo + j;
+    if(devj->filetype!=device_type)continue;
+    xyz = devj->xyz;
+    if(strcmp(devj->quantity,device_label)!=0)continue;
+    if(ABS(xyz[0]-xyzval[0])>EPSDEV)continue;
+    if(ABS(xyz[1]-xyzval[1])>EPSDEV)continue;
+    if(ABS(xyz[2]-xyzval[2])>EPSDEV)continue;
+    return devj;
+  }
+  return NULL;
+}
+
+/* ----------------------- get_vdevice ----------------------------- */
+
+vdevicedata *get_vdevice(float *xyzval){
+  int j;
+  
+  for(j=0;j<nvdeviceinfo;j++){
+    vdevicedata *vdevj;
+    float *xyzj;
+
+    vdevj = vdeviceinfo + j;
+
+    xyzj = vdevj->valdev->xyz;
+    if(ABS(xyzval[0]-xyzj[0])>EPSDEV)continue;
+    if(ABS(xyzval[1]-xyzj[1])>EPSDEV)continue;
+    if(ABS(xyzval[2]-xyzj[2])>EPSDEV)continue;
+    return vdevj;
+  }
+  return NULL;
+}
+
+
 /* ----------------------- setup_device_data ----------------------------- */
 
 void setup_device_data(void){
@@ -5587,7 +5629,7 @@ void setup_device_data(void){
   nvdeviceinfo=0;
   for(i=0;i<ndeviceinfo;i++){
     vdevicedata *vdevi;
-    devicedata *devi;
+    devicedata *devi,*devj;
     float *xyzval;
     int j;
 
@@ -5604,117 +5646,48 @@ void setup_device_data(void){
     vdevi->veldev=NULL;
     vdevi->sd_angledev=NULL;
     vdevi->sd_veldev=NULL;
+    vdevi->colordev=NULL;
 
-    for(j=0;j<ndeviceinfo;j++){
-      devicedata *devj;
-      float *xyz;
-
-      devj = deviceinfo + j;
-      if(devj->filetype!=CSV_EXP)continue;
-      xyz = devj->xyz;
-      if(strcmp(devj->quantity,"VELOCITY")!=0)continue;
-      if(ABS(xyz[0]-xyzval[0])>EPSDEV)continue;
-      if(ABS(xyz[1]-xyzval[1])>EPSDEV)continue;
-      if(ABS(xyz[2]-xyzval[2])>EPSDEV)continue;
+    devj = get_device(xyzval,"VELOCITY",CSV_EXP);
+    if(devj!=NULL){
       vdevi->veldev=devj;
       vdevi->filetype=CSV_EXP;
-      break;
     }
 
-    for(j=0;j<ndeviceinfo;j++){
-      devicedata *devj;
-      float *xyz;
-
-      devj = deviceinfo + j;
-      if(devj->filetype!=CSV_EXP)continue;
-      xyz = devj->xyz;
-      if(strcmp(devj->quantity,"SD_VELOCITY")!=0)continue;
-      if(ABS(xyz[0]-xyzval[0])>EPSDEV)continue;
-      if(ABS(xyz[1]-xyzval[1])>EPSDEV)continue;
-      if(ABS(xyz[2]-xyzval[2])>EPSDEV)continue;
+    devj = get_device(xyzval,"SD_VELOCITY",CSV_EXP);
+    if(devj!=NULL){
       vdevi->sd_veldev=devj;
       vdevi->filetype=CSV_EXP;
-      break;
     }
 
-    for(j=0;j<ndeviceinfo;j++){
-      devicedata *devj;
-      float *xyz;
-
-      devj = deviceinfo + j;
-      if(devj->filetype!=CSV_EXP)continue;
-      xyz = devj->xyz;
-      if(strcmp(devj->quantity,"ANGLE")!=0)continue;
-      if(ABS(xyz[0]-xyzval[0])>EPSDEV)continue;
-      if(ABS(xyz[1]-xyzval[1])>EPSDEV)continue;
-      if(ABS(xyz[2]-xyzval[2])>EPSDEV)continue;
+    devj = get_device(xyzval,"ANGLE",CSV_EXP);
+    if(devj!=NULL){
       vdevi->angledev=devj;
       vdevi->filetype=CSV_EXP;
-      break;
     }
 
-    for(j=0;j<ndeviceinfo;j++){
-      devicedata *devj;
-      float *xyz;
-
-      devj = deviceinfo + j;
-      if(devj->filetype!=CSV_EXP)continue;
-      xyz = devj->xyz;
-      if(strcmp(devj->quantity,"SD_ANGLE")!=0)continue;
-      if(ABS(xyz[0]-xyzval[0])>EPSDEV)continue;
-      if(ABS(xyz[1]-xyzval[1])>EPSDEV)continue;
-      if(ABS(xyz[2]-xyzval[2])>EPSDEV)continue;
+    devj = get_device(xyzval,"SD_ANGLE",CSV_EXP);
+    if(devj!=NULL){
       vdevi->sd_angledev=devj;
       vdevi->filetype=CSV_EXP;
-      break;
     }
 
-    for(j=0;j<ndeviceinfo;j++){
-      devicedata *devj;
-      float *xyz;
-
-      devj = deviceinfo + j;
-      if(devj->filetype!=CSV_FDS)continue;
-      xyz = devj->xyz;
-      if(strcmp(devj->quantity,"U-VELOCITY")!=0)continue;
-      if(ABS(xyz[0]-xyzval[0])>EPSDEV)continue;
-      if(ABS(xyz[1]-xyzval[1])>EPSDEV)continue;
-      if(ABS(xyz[2]-xyzval[2])>EPSDEV)continue;
+    devj = get_device(xyzval,"U-VELOCITY",CSV_FDS);
+    if(devj!=NULL){
       vdevi->udev=devj;
       vdevi->filetype=CSV_FDS;
-      break;
     }
 
-    for(j=0;j<ndeviceinfo;j++){
-      devicedata *devj;
-      float *xyz;
-
-      devj = deviceinfo + j;
-      if(devj->filetype!=CSV_FDS)continue;
-      xyz = devj->xyz;
-      if(strcmp(devj->quantity,"V-VELOCITY")!=0)continue;
-      if(ABS(xyz[0]-xyzval[0])>EPSDEV)continue;
-      if(ABS(xyz[1]-xyzval[1])>EPSDEV)continue;
-      if(ABS(xyz[2]-xyzval[2])>EPSDEV)continue;
+    devj = get_device(xyzval,"V-VELOCITY",CSV_FDS);
+    if(devj!=NULL){
       vdevi->vdev=devj;
       vdevi->filetype=CSV_FDS;
-      break;
     }
 
-    for(j=0;j<ndeviceinfo;j++){
-      devicedata *devj;
-      float *xyz;
-
-      devj = deviceinfo + j;
-      if(devj->filetype!=CSV_FDS)continue;
-      xyz = devj->xyz;
-      if(strcmp(devj->quantity,"W-VELOCITY")!=0)continue;
-      if(ABS(xyz[0]-xyzval[0])>EPSDEV)continue;
-      if(ABS(xyz[1]-xyzval[1])>EPSDEV)continue;
-      if(ABS(xyz[2]-xyzval[2])>EPSDEV)continue;
+    devj = get_device(xyzval,"W-VELOCITY",CSV_FDS);
+    if(devj!=NULL){
       vdevi->wdev=devj;
       vdevi->filetype=CSV_FDS;
-      break;
     }
 
     if(vdevi->udev!=NULL||vdevi->vdev!=NULL||vdevi->wdev!=NULL||
@@ -5796,23 +5769,13 @@ void setup_device_data(void){
       devicedata *devi;
       int j;
       float *xyzi;
+      vdevicedata *vdevj;
 
       devi = deviceinfo + i;
       if(devi->vdevice!=NULL)continue;
       xyzi = devi->xyz;
-      for(j=0;j<nvdeviceinfo;j++){
-        vdevicedata *vdevj;
-        float *xyzj;
-
-        vdevj = vdeviceinfo + j;
-
-        xyzj = vdevj->valdev->xyz;
-        if(ABS(xyzi[0]-xyzj[0])>EPSDEV)continue;
-        if(ABS(xyzi[1]-xyzj[1])>EPSDEV)continue;
-        if(ABS(xyzi[2]-xyzj[2])>EPSDEV)continue;
-        devi->vdevice=vdevj;
-        break;
-      }
+      vdevj = get_vdevice(xyzi);
+      if(vdevj!=NULL)devi->vdevice=vdevj;
     }
   }
 

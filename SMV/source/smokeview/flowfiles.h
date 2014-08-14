@@ -879,7 +879,7 @@ typedef struct _vdevicedata {
 #ifdef pp_PILOT
   pilotdata pilotinfo;
 #endif
-  devicedata *udev,*vdev,*wdev,*valdev,*veldev,*angledev,*sd_veldev,*sd_angledev;
+  devicedata *udev,*vdev,*wdev,*valdev,*colordev,*veldev,*angledev,*sd_veldev,*sd_angledev;
 } vdevicedata;
 
 /* --------------------------  treedevice ------------------------------------ */
