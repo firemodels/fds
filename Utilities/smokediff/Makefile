@@ -66,15 +66,15 @@ LINUXFORTLIBS_64=$(FORTLIBDIR)/intel64/libifcore.a
 # ------------- Linux gcc ----------------
 #  gcc linux
 
-gcc_linux : FFLAGS    = -O0 -m64 -x f95-cpp-input -D pp_GCC -D pp_noappend -ffree-form -frecord-marker=4
-gcc_linux : CFLAGS    = -O0 -m64 -D pp_LINUX64
-gcc_linux : LFLAGS    = -m64
-gcc_linux : CC        = gcc
-gcc_linux : CPP       = g++
-gcc_linux : FC        = gfortran
-gcc_linux : exe       = smokediff_linux_64
+gcc_linux_64 : FFLAGS    = -O0 -m64 -x f95-cpp-input -D pp_GCC -D pp_noappend -ffree-form -frecord-marker=4
+gcc_linux_64 : CFLAGS    = -O0 -m64 -D pp_LINUX64
+gcc_linux_64 : LFLAGS    = -m64
+gcc_linux_64 : CC        = gcc
+gcc_linux_64 : CPP       = g++
+gcc_linux_64 : FC        = gfortran
+gcc_linux_64 : exe       = smokediff_linux_64
 
-gcc_linux : $(obj)
+gcc_linux_64 : $(obj)
 	$(CPP) -o $(bin)/$(exe) $(obj) $(LFLAGS) -lgfortran
 
 # ------------- Linux 64 ----------------
