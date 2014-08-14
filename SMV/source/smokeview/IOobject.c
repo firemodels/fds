@@ -5789,6 +5789,33 @@ void setup_device_data(void){
     }
   }
 
+  // find devices linked with each vdevice
+
+  if(ndeviceinfo>0){
+    for(i=0;i<ndeviceinfo;i++){
+      devicedata *devi;
+      int j;
+      float *xyzi;
+
+      devi = deviceinfo + i;
+      if(devi->vdevice!=NULL)continue;
+      xyzi = devi->xyz;
+      for(j=0;j<nvdeviceinfo;j++){
+        vdevicedata *vdevj;
+        float *xyzj;
+
+        vdevj = vdeviceinfo + j;
+
+        xyzj = vdevj->valdev->xyz;
+        if(ABS(xyzi[0]-xyzj[0])>EPSDEV)continue;
+        if(ABS(xyzi[1]-xyzj[1])>EPSDEV)continue;
+        if(ABS(xyzi[2]-xyzj[2])>EPSDEV)continue;
+        devi->vdevice=vdevj;
+        break;
+      }
+    }
+  }
+
   if(ndeviceinfo>0){
     ndevicetypes=0;
     FREEMEMORY(devicetypes);
