@@ -25,18 +25,6 @@ no_target:
 .f90.o:
 	$(FC) -c $(FFLAGS) $(FILTERF) $<
 
-
-# ------------- Win 32 ----------------
-#  32 bit windows
-
-intel_win_32 : FFLAGS    = -O2 /Qvec_report0 /nologo 
-intel_win_32 : FC        = ifort
-intel_win_32 : exe       = fds2ascii_win_32.exe
-
-intel_win_32 : $(objwin)
-	$(FC) -o $(bin)/$(exe) $(objwin)
-
-
 # ------------- Win 64 ----------------
 #  64 bit windows
 
@@ -47,15 +35,16 @@ intel_win_64 : exe       = fds2ascii_win_64.exe
 intel_win_64 : $(objwin)
 	$(FC) -o $(bin)/$(exe) $(objwin)
 
-# ------------- Linux 32 ----------------
-#  32 bit linux
+# ------------- gcc 64 ----------------
+#  64 bit gcc linux
 
-intel_linux_32 : FFLAGS    = -O2 -m32 -vec_report0 
-intel_linux_32 : FC        = ifort
-intel_linux_32 : exe       = fds2ascii_linux_32
+gcc_linux_64 : FFLAGS    = -O0 -m64 -ffree-form -frecord-marker=4
+gcc_linux_64 : FC        = gfortran
+gcc_linux_64 : exe       = fds2ascii_linux_64
 
-intel_linux_32 : $(obj)
+gcc_linux_64 : $(obj)
 	$(FC) -o $(bin)/$(exe) $(obj)
+
 
 # ------------- Linux 64 ----------------
 #  64 bit linux
@@ -66,16 +55,6 @@ intel_linux_64 : exe       = fds2ascii_linux_64
 
 intel_linux_64 : $(obj)
 	$(FC) -o $(bin)/$(exe) $(obj)
-
-# ------------- OSX 32 ----------------
-#  32 bit OSX
-
-intel_osx_32 : FFLAGS    = -O2 -m32 -vec_report0 
-intel_osx_32 : FC        = ifort
-intel_osx_32 : exe       = fds2ascii_osx_32
-
-intel_osx_32 : $(obj)
-	$(FC) -o $(bin)/$(exe)  -mmacosx-version-min=10.4 $(obj)
 
 # ------------- OSX 64 ----------------
 #  64 bit OSX
