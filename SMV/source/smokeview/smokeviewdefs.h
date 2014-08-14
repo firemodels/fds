@@ -56,21 +56,22 @@ void _Sniff_Errors(char *whereat);
 #define CLIP_BLOCKAGES 2
 #define CLIP_DATA 3
 
+#define UNCLIP setClipPlanes(NULL,CLIP_OFF)
+#define CLIP setClipPlanes(&clipinfo,CLIP_ON)
+
 #define CLIP_GEOMETRY   \
   {int clip_geom=0;\
     if(clip_mode==CLIP_BLOCKAGES||clip_mode==CLIP_BLOCKAGES_DATA)clip_geom=1;\
-    if( clipon==0&&clip_geom==1){setClipPlanes(&clipinfo,CLIP_ON);clipon=1;}\
-    else if( clipon==1&&clip_geom==0){setClipPlanes(NULL,CLIP_OFF);clipon=0;}\
+    if( clipon==0&&clip_geom==1){setClipPlanes(&clipinfo,CLIP_ON);}\
+    else if( clipon==1&&clip_geom==0){setClipPlanes(NULL,CLIP_OFF);}\
   }
 
 #define CLIP_VALS   \
   {int clip_data=0;\
   if(clip_mode==CLIP_DATA||clip_mode==CLIP_BLOCKAGES_DATA)clip_data=1;\
-  if( clipon==0&&clip_data==1){setClipPlanes(&clipinfo,CLIP_ON);clipon=1;}\
-    else if( clipon==1&&clip_data==0){setClipPlanes(NULL,CLIP_OFF);clipon=0;}\
+  if( clipon==0&&clip_data==1){setClipPlanes(&clipinfo,CLIP_ON);}\
+    else if( clipon==1&&clip_data==0){setClipPlanes(NULL,CLIP_OFF);}\
   }
-
-#define UNCLIP setClipPlanes(NULL,CLIP_OFF);clipon=0
 
 #define GAS 1
 #define SOLID 0

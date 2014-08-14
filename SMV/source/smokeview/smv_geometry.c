@@ -1920,8 +1920,10 @@ void setClipPlanes(clipdata *ci, int option){
     glDisable(GL_CLIP_PLANE3);
     glDisable(GL_CLIP_PLANE4);
     glDisable(GL_CLIP_PLANE5);
+    clipon=0;
     return;
   }
+  clipon=1;
 
   if(ci->option==TETRA_CLIPPLANES){
     glClipPlane(GL_CLIP_PLANE0,ci->clipvals);

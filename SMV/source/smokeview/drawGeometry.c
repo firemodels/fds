@@ -563,7 +563,6 @@ void DrawCircVentsExactOutline(int option){
       if(option==VENT_CIRCLE)setClipPlanes(&clipinfo,CLIP_ON);
     }
   }
-
 }
 
 /* ------------------ DrawCircVentsExact ------------------------ */
