@@ -4882,7 +4882,7 @@ SELECT CASE(IND)
                      AREA = DX(I)*DY(J)*RC(I)
                      R_DN  = RDZN(K)
                END SELECT
-               IF ((SOLID(CELL_INDEX(I,J,K)).OR.SOLID(CELL_INDEX(IP,JP,KP))) .AND. FLOW_INDEX/=1) THEN
+               IF ((SOLID(CELL_INDEX(I,J,K)).OR.SOLID(CELL_INDEX(IP,JP,KP))) .AND. FLOW_INDEX/=1 & .AND. DV%CURRENT_STATE) THEN
                   WRITE(MESSAGE,'(A)') "ERROR: MASS OR HEAT FLOW not appropriate at solid boundary"
                   CALL SHUTDOWN(MESSAGE)
                ENDIF
