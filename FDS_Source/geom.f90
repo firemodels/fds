@@ -2447,7 +2447,7 @@ G => GEOMETRY(N)
       WRITE(6,*) OWNER_INDEX
       IF (OWNER_INDEX==0) THEN
          CLOSE(LU_GEOC)
-         CALL sleep(60)
+         !CALL sleep(60)
          WRITE(LU_ERR,'(4X,A,I2,A)')  'waiting ... ', I,' min'
          IF (I==30) CALL SHUTDOWN('ERROR: BNDC FILE WAS NOT UPDATED BY STRUCTURE CODE')
       ELSEIF (OWNER_INDEX==1) THEN
