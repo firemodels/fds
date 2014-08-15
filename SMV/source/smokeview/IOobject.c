@@ -653,21 +653,21 @@ float get_device_val(float time_local, devicedata *devicei, int *valid){
 
 /* ----------------------- get_device_color ----------------------------- */
 
-float *get_device_color(devicedata *devicei, float *rgbval,float valmin, float valmax){
+unsigned char *get_device_color(devicedata *devicei, unsigned char *colorval,float valmin, float valmax){
   float val;
   int valid,colorindex;
   float *rgb_local;
 
-  if(valmax<=valmin)return NULL;
+  if(devicei==NULL||valmax<=valmin)return NULL;
   val=get_device_val(global_times[itimes],devicei,&valid);
   if(valid!=1)return NULL;
   val = (val-valmin)/(valmax-valmin);
   colorindex=CLAMP(255*val,1,254);
   rgb_local=current_colorbar->colorbar+3*colorindex;
-  rgbval[0]=255*rgb_local[0];
-  rgbval[1]=255*rgb_local[1];
-  rgbval[2]=255*rgb_local[2];
-  return rgbval;
+  colorval[0]=255*rgb_local[0];
+  colorval[1]=255*rgb_local[1];
+  colorval[2]=255*rgb_local[2];
+  return colorval;
 }
 
 /* ----------------------- output_device_val ----------------------------- */
@@ -787,12 +787,12 @@ void draw_devices(void){
       devicedata *devicei;
       float vel[3], angle, dvel, dangle;
       float *xyz;
-      float valcolor[4], *valcolorptr;
       int j;
       int velocity_type;
 
       vdevi = vdeviceinfo + i;
-      devicei = vdevi->valdev;
+      devicei = vdevi->colordev;
+      if(devicei==NULL)continue;
       if(vdevi->unique==0)continue;
       xyz=vdevi->valdev->xyz;
       get_vdevice_vel(global_times[itimes], vdevi, vel, &angle, &dvel, &dangle, &velocity_type);
@@ -802,11 +802,22 @@ void draw_devices(void){
         type=devicei->type2;
         if(type>=0&&type<ndevicetypes)vistype=devicetypes[type]->type2vis;
         if(vistype==1){
-          valcolorptr=get_device_color(devicei,valcolor,device_valmin,device_valmax);
-          arrow_color[0]=255*valcolorptr[0];
-          arrow_color[1]=255*valcolorptr[1];
-          arrow_color[2]=255*valcolorptr[2];
-          arrow_color[3]=255;
+          float valcolor[4], *valcolorptr;
+          unsigned char color[4], *colorptr;
+
+          colorptr=get_device_color(devicei,color,device_valmin,device_valmax);
+          if(colorptr!=NULL){
+            arrow_color[0]=colorptr[0];
+            arrow_color[1]=colorptr[1];
+            arrow_color[2]=colorptr[2];
+            arrow_color[3]=255;
+          }
+          else{
+            arrow_color[0]=255*foregroundcolor[0];
+            arrow_color[1]=255*foregroundcolor[1];
+            arrow_color[2]=255*foregroundcolor[2];
+            arrow_color[3]=255;
+          }
           glColor3ubv(arrow_color);
         }
       }
@@ -992,7 +1003,6 @@ void draw_devices(void){
     if(drawobjects_as_vectors==0){
       if(showtime==1&&itimes>=0&&itimes<nglobal_times){
         int state;
-        float valcolor[3],*valcolorptr=NULL;
 
         if(devicei->showstatelist==NULL){
           state=devicei->state0;
@@ -1006,7 +1016,13 @@ void draw_devices(void){
           type=devicei->type2;
           if(type>=0&&type<ndevicetypes)vistype=devicetypes[type]->type2vis;
           if(vistype==1){
-            valcolorptr=get_device_color(devicei,valcolor,device_valmin,device_valmax);
+            float valcolor[3],*valcolorptr=NULL;
+            unsigned char color[3], *colorptr;
+
+            colorptr=get_device_color(devicei,color,device_valmin,device_valmax);
+            valcolor[0]=color[0];
+            valcolor[1]=color[1];
+            valcolor[2]=color[2];
             draw_SVOBJECT(devicei->object,state,prop,0,valcolorptr,0);
           }
         }
@@ -5611,6 +5627,32 @@ vdevicedata *get_vdevice(float *xyzval){
   return NULL;
 }
 
+/* ----------------------- update_colordevs ----------------------------- */
+
+void update_colordevs(void){
+  int i;
+  devicedata *colordev;
+
+  colordev = devicetypes[devicetypes_index];
+
+  for(i=0;i<nvdeviceinfo;i++){
+    vdevicedata *vdevi;
+
+    vdevi = vdeviceinfo + i;
+    vdevi->colordev=NULL;
+  }
+  for(i=0;i<ndeviceinfo;i++){
+    devicedata *devi;
+    vdevicedata *vdevi;
+    int j;
+
+    devi = deviceinfo + i;
+    vdevi = devi->vdevice;
+    if(strcmp(colordev->quantity,devi->quantity)==0){
+      vdevi->colordev=devi;
+    }
+  }
+}
 
 /* ----------------------- setup_device_data ----------------------------- */
 
@@ -5814,6 +5856,7 @@ void setup_device_data(void){
   }
 
   setup_tree_devices();
+  update_colordevs();
 
   // convert velocities to pilot chart format
 #ifdef pp_PILOT

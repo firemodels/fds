@@ -262,6 +262,7 @@ void Device_CB(int var){
       devicetypes[i]->type2vis=0;
     }
     devicetypes[devicetypes_index]->type2vis=1;
+    update_colordevs();
     break;
   case SHOWDEVICEVALS:
   case COLORDEVICEVALS:
