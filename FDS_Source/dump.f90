@@ -4883,35 +4883,37 @@ SELECT CASE(IND)
                      R_DN  = RDZN(K)
                END SELECT
                IF ((SOLID(CELL_INDEX(I,J,K)).OR.SOLID(CELL_INDEX(IP,JP,KP))) .AND. FLOW_INDEX/=1) THEN
-                  WRITE(MESSAGE,'(A)') "ERROR: MASS OR HEAT FLOW not appropriate at solid boundary"
-                  CALL SHUTDOWN(MESSAGE)
+                  !!WRITE(MESSAGE,'(A)') "ERROR: MASS OR HEAT FLOW not appropriate at solid boundary"
+                  !!CALL SHUTDOWN(MESSAGE)
+                  HMFAC = 0._EB
+               ELSE
+                  SELECT CASE(FLOW_INDEX)
+                     CASE(1) 
+                        HMFAC = 1._EB
+                     CASE(2)
+                        Y_SPECIES2=1._EB
+                        IF (N_TRACKED_SPECIES > 0) THEN
+                           ZZ_GET(1:N_TRACKED_SPECIES) = ZZ(IP,JP,KP,1:N_TRACKED_SPECIES)
+                           IF (Z_INDEX == 0) THEN
+                              Y_SPECIES2 = 1._EB-SUM(ZZ_GET)
+                           ELSEIF (Z_INDEX > 0) THEN   
+                              Y_SPECIES2 = ZZ_GET(Z_INDEX)
+                           ELSEIF (Y_INDEX > 0) THEN
+                              CALL GET_MASS_FRACTION(ZZ_GET,Y_INDEX,Y_SPECIES2)      
+                           ENDIF   
+                        ENDIF      
+                        HMFAC = 0.5_EB*(Y_SPECIES*RHO(I,J,K)+Y_SPECIES2*RHO(IP,JP,KP))
+                     CASE(3)
+                        TMP_TC = 0.5_EB*(TMP(I,J,K)+TMP(IP,JP,KP))
+                        IF (N_TRACKED_SPECIES>0) &    
+                           ZZ_GET(1:N_TRACKED_SPECIES) = 0.5_EB*(ZZ(I,J,K,1:N_TRACKED_SPECIES)+ZZ(IP,JP,KP,1:N_TRACKED_SPECIES))
+                        CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET,CPBAR,TMP_TC)
+                        H_G_SUM = CPBAR*TMP_TC
+                        CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET,CPBAR,TMPA)
+                        H_G = CPBAR*TMPA
+                        HMFAC = 0.5_EB*(RHO(I,J,K)+RHO(IP,JP,KP))*(H_G_SUM-H_G)*0.001_EB
+                  END SELECT
                ENDIF
-               SELECT CASE(FLOW_INDEX)
-                  CASE(1) 
-                     HMFAC = 1._EB
-                  CASE(2)
-                     Y_SPECIES2=1._EB
-                     IF (N_TRACKED_SPECIES > 0) THEN
-                        ZZ_GET(1:N_TRACKED_SPECIES) = ZZ(IP,JP,KP,1:N_TRACKED_SPECIES)
-                        IF (Z_INDEX == 0) THEN
-                           Y_SPECIES2 = 1._EB-SUM(ZZ_GET)
-                        ELSEIF (Z_INDEX > 0) THEN   
-                           Y_SPECIES2 = ZZ_GET(Z_INDEX)
-                        ELSEIF (Y_INDEX > 0) THEN
-                           CALL GET_MASS_FRACTION(ZZ_GET,Y_INDEX,Y_SPECIES2)      
-                        ENDIF   
-                     ENDIF      
-                     HMFAC = 0.5_EB*(Y_SPECIES*RHO(I,J,K)+Y_SPECIES2*RHO(IP,JP,KP))
-                  CASE(3)
-                     TMP_TC = 0.5_EB*(TMP(I,J,K)+TMP(IP,JP,KP))
-                     IF (N_TRACKED_SPECIES>0) &    
-                        ZZ_GET(1:N_TRACKED_SPECIES) = 0.5_EB*(ZZ(I,J,K,1:N_TRACKED_SPECIES)+ZZ(IP,JP,KP,1:N_TRACKED_SPECIES))
-                     CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET,CPBAR,TMP_TC)
-                     H_G_SUM = CPBAR*TMP_TC
-                     CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET,CPBAR,TMPA)
-                     H_G = CPBAR*TMPA
-                     HMFAC = 0.5_EB*(RHO(I,J,K)+RHO(IP,JP,KP))*(H_G_SUM-H_G)*0.001_EB
-               END SELECT
                
                SELECT CASE(IND)
                   CASE(111:113)
