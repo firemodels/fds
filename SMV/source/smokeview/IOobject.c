@@ -5648,6 +5648,7 @@ void update_colordevs(void){
 
     devi = deviceinfo + i;
     vdevi = devi->vdevice;
+    if(vdevi==NULL)continue;
     if(strcmp(colordev->quantity,devi->quantity)==0){
       vdevi->colordev=devi;
     }
