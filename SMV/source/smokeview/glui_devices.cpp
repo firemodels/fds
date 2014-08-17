@@ -49,13 +49,18 @@ GLUI *glui_device=NULL;
 GLUI_Button *BUTTON_open_down=NULL ;
 GLUI_Button *BUTTON_device_1=NULL;
 GLUI_Button *BUTTON_device_2=NULL;
+
 GLUI_Panel *PANEL_objects=NULL;
 GLUI_Panel *PANEL_velocityvectors=NULL;
 GLUI_Panel *PANEL_vectors=NULL;
+GLUI_Panel *PANEL_arrow_base=NULL;
+GLUI_Panel *PANEL_arrow_height=NULL;
 GLUI_Panel *PANEL_devicevalues=NULL;
 GLUI_Panel *PANEL_smvobjects=NULL;
 GLUI_Panel *PANEL_devicevis=NULL;
 GLUI_Panel *PANEL_label3=NULL;
+GLUI_Rollout *ROLLOUT_arrow_dimensions=NULL;
+GLUI_Panel *PANEL_vector_type=NULL;
 
 GLUI_Listbox *LIST_open=NULL;
 
@@ -95,17 +100,25 @@ extern "C" void glui_device_setup(int main_window){
       SPINNER_sensorrelsize=glui_device->add_spinner_to_panel(PANEL_smvobjects,_("Scaling"),GLUI_SPINNER_FLOAT,&sensorrelsize,DEVICE_sensorsize,Device_CB);
       CHECKBOX_device_3=glui_device->add_checkbox_to_panel(PANEL_smvobjects,_("Outline"),&object_outlines);
 
-      PANEL_velocityvectors = glui_device->add_panel_to_panel(PANEL_objects,"Vectors",true);
+      PANEL_velocityvectors = glui_device->add_panel_to_panel(PANEL_objects,"Flow Vectors",true);
       if(nvdeviceinfo==0)PANEL_velocityvectors->disable();
-      glui_device->add_spinner_to_panel(PANEL_velocityvectors,_("Scaling"),GLUI_SPINNER_FLOAT,&vectorrelsize);
       CHECKBOX_device_1=glui_device->add_checkbox_to_panel(PANEL_velocityvectors,_("Show"),&showvdeviceval);
-#ifdef pp_PILOT
-      glui_device->add_checkbox_to_panel(PANEL_velocityvectors,_("Pilot view"),&vispilot);
-#endif
-      RADIO_vectortype=glui_device->add_radiogroup_to_panel(PANEL_velocityvectors,&vectortype);
+      PANEL_vector_type=glui_device->add_panel_to_panel(PANEL_velocityvectors,"type",true);
+      RADIO_vectortype=glui_device->add_radiogroup_to_panel(PANEL_vector_type,&vectortype);
       glui_device->add_radiobutton_to_group(RADIO_vectortype,"line");
       glui_device->add_radiobutton_to_group(RADIO_vectortype,"arrow");
       glui_device->add_radiobutton_to_group(RADIO_vectortype,"object");
+      ROLLOUT_arrow_dimensions=glui_device->add_rollout_to_panel(PANEL_velocityvectors,"dimensions",false);
+      PANEL_arrow_base=glui_device->add_panel_to_panel(ROLLOUT_arrow_dimensions,"base",true);
+      glui_device->add_spinner_to_panel(PANEL_arrow_base,_("height"),GLUI_SPINNER_FLOAT,&vector_baseheight);
+      glui_device->add_spinner_to_panel(PANEL_arrow_base,_("diameter"),GLUI_SPINNER_FLOAT,&vector_basediameter);
+      PANEL_arrow_height=glui_device->add_panel_to_panel(ROLLOUT_arrow_dimensions,"height",true);
+      glui_device->add_spinner_to_panel(PANEL_arrow_height,_("height"),GLUI_SPINNER_FLOAT,&vector_headheight);
+      glui_device->add_spinner_to_panel(PANEL_arrow_height,_("diameter"),GLUI_SPINNER_FLOAT,&vector_headdiameter);
+#ifdef pp_PILOT
+      glui_device->add_checkbox_to_panel(PANEL_velocityvectors,_("Pilot view"),&vispilot);
+#endif
+
       PANEL_devicevalues = glui_device->add_panel_to_panel(PANEL_objects,"Device values",true);
 
       CHECKBOX_device_2=glui_device->add_checkbox_to_panel(PANEL_devicevalues,_("Show values"),&showdeviceval,SHOWDEVICEVALS,Device_CB);

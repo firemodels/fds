@@ -8614,6 +8614,22 @@ int readini2(char *inifile, int localfile){
         continue;
       }
     }
+    if(match(buffer,"SHOWDEVICEVALS")==1){
+      fgets(buffer,255,stream);
+      sscanf(buffer," %i %i %i %i %i %i",
+        &showdeviceval,&showvdeviceval,&devicetypes_index,&colordeviceval,&vectortype,&vispilot);
+      continue;
+    }
+    if(match(buffer,"DEVICEVECTORDIMENSIONS")==1){
+      fgets(buffer,255,stream);
+      sscanf(buffer,"%f %f %f %f",&vector_baseheight,&vector_basediameter,&vector_headheight,&vector_headdiameter);
+      continue;
+    }
+    if(match(buffer,"DEVICEBOUNDS")==1){
+      fgets(buffer,255,stream);
+      sscanf(buffer,"%f %f",&device_valmin,&device_valmax);
+      continue;
+    }
     if(match(buffer,"GVERSION")==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i",&gversion);
@@ -8643,16 +8659,6 @@ int readini2(char *inifile, int localfile){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i",&show_fed_area);
       ONEORZERO(show_fed_area);
-      continue;
-    }
-    if(match(buffer,"DEVICEBOUNDS")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%f %f",&device_valmin,&device_valmax);
-      continue;
-    }
-    if(match(buffer,"SHOWDEVICEVALS")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i %i %i %i",&showdeviceval,&showvdeviceval,&devicetypes_index,&colordeviceval);
       continue;
     }
     if(match(buffer,"USENEWDRAWFACE")==1){
@@ -11541,9 +11547,12 @@ void writeini(int flag,char *filename){
     }
 
     fprintf(fileout,"SHOWDEVICEVALS\n");
-    fprintf(fileout," %i %i %i %i\n",showdeviceval,showvdeviceval,devicetypes_index,colordeviceval);
+    fprintf(fileout," %i %i %i %i %i %i\n",showdeviceval,showvdeviceval,devicetypes_index,colordeviceval,vectortype,vispilot);
+    fprintf(fileout,"DEVICEVECTORDIMENSIONS\n");
+    fprintf(fileout,"%f %f %f %f\n",vector_baseheight,vector_basediameter,vector_headheight,vector_headdiameter);
     fprintf(fileout,"DEVICEBOUNDS\n");
     fprintf(fileout," %f %f\n",device_valmin,device_valmax);
+
     put_startup_smoke3d(fileout);
     fprintf(fileout,"LOADFILESATSTARTUP\n");
     fprintf(fileout," %i\n",loadfiles_at_startup);

@@ -37,9 +37,7 @@ SVEXTERN int SVDECL(show_geometry_exterior,0);
 SVEXTERN int SVDECL(show_geometry_interior_solid,1);
 SVEXTERN int SVDECL(show_geometry_interior_outline,0);
 SVEXTERN int SVDECL(show_slices_and_vectors,0);
-#ifdef pp_PILOT
 SVEXTERN int SVDECL(vispilot,0);
-#endif
 SVEXTERN int SVDECL(compute_fed,0);
 SVEXTERN int SVDECL(tour_global_tension_flag,1);
 SVEXTERN float SVDECL(tour_global_tension,0.0);
@@ -749,7 +747,10 @@ SVEXTERN int SVDECL(clip_rendered_scene,0);
 
 SVEXTERN float sprinklerabssize, sensorabssize, heatabssize;
 SVEXTERN float sensorrelsize,sensorrelsizeMIN;
-SVEXTERN float SVDECL(vectorrelsize,1.0);
+SVEXTERN float SVDECL(vector_baseheight,1.0);
+SVEXTERN float SVDECL(vector_basediameter,0.1);
+SVEXTERN float SVDECL(vector_headheight,0.2);
+SVEXTERN float SVDECL(vector_headdiameter,0.2);
 
 SVEXTERN float linewidth, ventlinewidth, highlight_linewidth,solidlinewidth;
 SVEXTERN float SVDECL(sliceoffset_factor,0.1), SVDECL(ventoffset_factor,0.01);
