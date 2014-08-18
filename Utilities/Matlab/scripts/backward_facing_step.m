@@ -136,7 +136,7 @@ axis([0 20 -4E-3 4E-3])
 
 lh = legend([h_dat,h_leg([1:length(h_leg)])], ['J&D',fds_key([1:length(h_leg)])], 'Location', 'SouthEast');
 set(lh,'box','off')
-%set(lh,'Interpreter','latex','Fontsize',20,'FontName',Font_Name); 
+%set(lh,'Interpreter',Font_Interpreter,'Fontsize',20,'FontName',Font_Name); 
 
 % add SVN if file is available
 
@@ -206,7 +206,7 @@ end
 
 lh = legend([h_dat,h_leg2([1:length(h_leg2)])], ['J&D',fds_key([1:length(h_leg2)])], 'Location', 'SouthEast');
 set(lh,'box','off')
-%set(lh,'Interpreter','latex','Fontsize',20,'FontName',Font_Name); 
+%set(lh,'Interpreter',Font_Interpreter,'Fontsize',20,'FontName',Font_Name); 
     
 hold on
 
@@ -273,14 +273,12 @@ for i = 1:4
 
         axis([-.2 1.0 0 3.5])
 
+        Pos = get(gca,'Position');
+        set(gca,'Position',[Pos(1) Pos(2)+.015 Pos(3) Pos(4)*0.98])
+
         if i == 1
-            ylabel('{$z/h$}','Interpreter','latex','Fontsize',20,'FontName',Font_Name);
-            xh=xlabel('{$\overline{u}/U_0$}','Interpreter','latex','Fontsize',20,'FontName',Font_Name);   
-            if q == 1
-                xh_pos = get(xh,'Position');
-                xh_pos(2) = xh_pos(2) - .05;
-                set(xh,'Position',xh_pos)
-            end                                       
+            ylabel('{\it z/h}','Interpreter',Font_Interpreter,'Fontsize',20,'FontName',Font_Name);
+            xh=xlabel('{\it <u>/U_0}','Interpreter',Font_Interpreter,'Fontsize',20,'FontName',Font_Name);                                       
         else
             set(gca,'XTickLabel',[])                
             set(gca,'YTickLabel',[])
@@ -292,10 +290,6 @@ for i = 1:4
             set(th,'Position',tpos)
         end
     end
-
-    tpos = get(th,'Position');
-    tpos(2) = tpos(2) * .90;
-    set(th,'Position',tpos)
     
 end
 
@@ -358,14 +352,12 @@ for i = 1:4
 
         axis([-.1 .1 0 3.5])
 
+        Pos = get(gca,'Position');
+        set(gca,'Position',[Pos(1) Pos(2)+.015 Pos(3) Pos(4)*0.98])
+
         if i == 1
-            ylabel('{$z/h$}','Interpreter','latex','Fontsize',20,'FontName',Font_Name);
-            xh=xlabel('{$\overline{w}/U_0$}','Interpreter','latex','Fontsize',20,'FontName',Font_Name);    
-            if q == 1
-                xh_pos = get(xh,'Position');
-                xh_pos(2) = xh_pos(2) - .05;
-                set(xh,'Position',xh_pos)
-            end                
+            ylabel('{\it z/h}','Interpreter',Font_Interpreter,'Fontsize',20,'FontName',Font_Name);
+            xh=xlabel('{\it <w>/U_0}','Interpreter',Font_Interpreter,'Fontsize',20,'FontName',Font_Name);               
         else
             set(gca,'XTickLabel',[])
             set(gca,'YTickLabel',[])
@@ -449,14 +441,12 @@ for i = 1:4
 
         axis([0 0.04 0 3.5])
 
+        Pos = get(gca,'Position');
+        set(gca,'Position',[Pos(1) Pos(2)+.015 Pos(3) Pos(4)*0.98])
+
         if i == 1
-            ylabel('{$z/h$}','Interpreter','latex','Fontsize',20,'FontName',Font_Name);
-            xh=xlabel('{$\overline{u \rq u \rq}/U_0^2$}','Interpreter','latex','Fontsize',20,'FontName',Font_Name);
-            if q == 1
-                xh_pos = get(xh,'Position');
-                xh_pos(2) = xh_pos(2) - .05;
-                set(xh,'Position',xh_pos)
-            end
+            ylabel('{\it z/h}','Interpreter',Font_Interpreter,'Fontsize',20,'FontName',Font_Name);
+            xh=xlabel('{\it <uu>/U_0^2}','Interpreter',Font_Interpreter,'Fontsize',20,'FontName',Font_Name);
         else
             set(gca,'YTickLabel',[])
             set(gca,'XTickLabel',[])
@@ -538,14 +528,12 @@ for i = 1:4
 
         axis([0 .04 0 3.5])
 
+        Pos = get(gca,'Position');
+        set(gca,'Position',[Pos(1) Pos(2)+.015 Pos(3) Pos(4)*0.98])
+
         if i == 1
-            ylabel('{$z/h$}','Interpreter','latex','Fontsize',20,'FontName',Font_Name)
-            xh=xlabel('{$\overline{w \rq w \rq}/U_0^2$}','Interpreter','latex','Fontsize',20,'FontName',Font_Name);
-            if q == 1
-                xh_pos = get(xh,'Position');
-                xh_pos(2) = xh_pos(2) - .05;
-                set(xh,'Position',xh_pos)
-            end
+            ylabel('{\it z/h}','Interpreter',Font_Interpreter,'Fontsize',20,'FontName',Font_Name)
+            xh=xlabel('{\it <ww>/U_0^2}','Interpreter',Font_Interpreter,'Fontsize',20,'FontName',Font_Name);
         else
             set(gca,'YTickLabel',[])
             set(gca,'XTickLabel',[])
@@ -623,16 +611,15 @@ for i = 1:4
         h_leg(q)=plot(uw_fds(1:round(length(uw_fds)/15):end)/U_0^2,z(1:round(length(z)/15):end)/h,char(symbol_vect_noleg(q)), 'MarkerSize', 10, 'Color',line_color_vect{q}, 'LineWidth', 1);
 
         axis([0 .04 0 3.5])
+
+        Pos = get(gca,'Position');
+        set(gca,'Position',[Pos(1) Pos(2)+.015 Pos(3) Pos(4)*0.98])
+
         th = title(strcat('{\it x/h}','=',x_loc{i}),'Interpreter',Font_Interpreter,'Fontsize',Label_Font_Size,'FontName',Font_Name);
 
         if i == 1
-            ylabel('{$z/h$}','Interpreter','latex','Fontsize',20,'FontName',Font_Name)
-            xh=xlabel('{$\overline{u \rq w \rq}/U_0^2$}','Interpreter','latex','Fontsize',20,'FontName',Font_Name);
-            if q == 1
-                xh_pos = get(xh,'Position');
-                xh_pos(2) = xh_pos(2) - .05;
-                set(xh,'Position',xh_pos)
-            end
+            ylabel('{\it z/h}','Interpreter',Font_Interpreter,'Fontsize',20,'FontName',Font_Name)
+            xh=xlabel('{\it -<uw>/U_0^2}','Interpreter',Font_Interpreter,'Fontsize',20,'FontName',Font_Name);
         else
             set(gca,'YTickLabel',[])
             set(gca,'XTickLabel',[])
