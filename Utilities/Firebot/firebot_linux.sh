@@ -349,9 +349,9 @@ archive_compiler_version()
    ifort -V &> "$FIREBOT_DIR/history/${SVN_REVISION}_compiler_info.txt"
 }
 
-#  ================================
-#  = Stage 2a - Compile FDS debug =
-#  ================================
+#  ============================================
+#  = Stage 2a - Compile and inspect FDS debug =
+#  ============================================
 
 compile_fds_db()
 {
