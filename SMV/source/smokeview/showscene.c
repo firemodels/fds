@@ -152,10 +152,7 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
 
   if(UpdateLIGHTS==1)updateLights(NULL,NULL);
 
-  if(mode!=DRAWSCENE||viscolorbarpath!=1){
-    if(clip_mode==CLIP_BLOCKAGES_DATA)setClipPlanes(&clipinfo,CLIP_ON);
-  }
-  else{
+  if(mode==DRAWSCENE&&viscolorbarpath==1){
     if(colorbar_hidescene==1){
       setClipPlanes(&colorbar_clipinfo,CLIP_ON);
     }
@@ -163,6 +160,12 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
       setClipPlanes(NULL,CLIP_OFF);
     }
     SNIFF_ERRORS("after setColorbarClipPlanes 2");
+  }
+  else{
+    if(clip_mode==CLIP_BLOCKAGES_DATA){
+      setClipPlanes(&clipinfo,CLIP_ON);
+      SNIFF_ERRORS("after setColorbarClipPlanes 2");
+    }
   }
   if(mode==DRAWSCENE){
     glPointSize((float)1.0);
@@ -178,7 +181,13 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
 /* ++++++++++++++++++++++++ draw particles +++++++++++++++++++++++++ */
 
     if(showsmoke==1){
+#ifdef pp_DATACLIPPING    
+      if(clip_mode==CLIP_DATA)setClipPlanes(&clipinfo,CLIP_ON);
+#endif
       drawpart_frame();
+#ifdef pp_DATACLIPPING    
+      if(clip_mode==CLIP_DATA)setClipPlanes(NULL,CLIP_OFF);
+#endif
     }
 
 /* ++++++++++++++++++++++++ draw evacuation +++++++++++++++++++++++++ */
