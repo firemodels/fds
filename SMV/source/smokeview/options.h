@@ -57,7 +57,7 @@
 #ifdef pp_BETA
 #define pp_PILOT
 #define pp_GEOMTEST
-//#define pp_DATACLIPPING
+#define pp_DATACLIPPING
 //#define pp_GPUDEPTH
 #endif
 

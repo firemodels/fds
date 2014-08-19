@@ -28,14 +28,7 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
 
   show_mode=mode;
 
-  if(clip_mode==CLIP_BLOCKAGES_DATA){
-    if(clipinfo.clip_xmin==1)glDisable(GL_CLIP_PLANE0);
-    if(clipinfo.clip_ymin==1)glDisable(GL_CLIP_PLANE1);
-    if(clipinfo.clip_zmin==1)glDisable(GL_CLIP_PLANE2);
-    if(clipinfo.clip_xmax==1)glDisable(GL_CLIP_PLANE3);
-    if(clipinfo.clip_ymax==1)glDisable(GL_CLIP_PLANE4);
-    if(clipinfo.clip_zmax==1)glDisable(GL_CLIP_PLANE5);
-  }
+  UNCLIP;
 
 /* ++++++++++++++++++++++++ update variables as needed +++++++++++++++++++++++++ */
 
@@ -142,9 +135,8 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
 /* ++++++++++++++++++++++++ draw "fancy" colorbar +++++++++++++++++++++++++ */
 
   if(viscolorbarpath==1){
-    if(colorbar_hidescene==1)setClipPlanes(NULL,CLIP_OFF);
+    if(colorbar_hidescene==1)UNCLIP;
     drawcolorbarpath();
-    if(colorbar_hidescene==1)setClipPlanes(&colorbar_clipinfo,CLIP_ON);
     SNIFF_ERRORS("after setColorbarClipPlanes 1");
   }
 
@@ -152,21 +144,6 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
 
   if(UpdateLIGHTS==1)updateLights(NULL,NULL);
 
-  if(mode==DRAWSCENE&&viscolorbarpath==1){
-    if(colorbar_hidescene==1){
-      setClipPlanes(&colorbar_clipinfo,CLIP_ON);
-    }
-    else{
-      setClipPlanes(NULL,CLIP_OFF);
-    }
-    SNIFF_ERRORS("after setColorbarClipPlanes 2");
-  }
-  else{
-    if(clip_mode==CLIP_BLOCKAGES_DATA){
-      setClipPlanes(&clipinfo,CLIP_ON);
-      SNIFF_ERRORS("after setColorbarClipPlanes 2");
-    }
-  }
   if(mode==DRAWSCENE){
     glPointSize((float)1.0);
 
@@ -174,6 +151,7 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
     /* ++++++++++++++++++++++++ draw trees +++++++++++++++++++++++++ */
 
     if(ntreeinfo>0){
+      CLIP_GEOMETRY;
       drawtrees();
       SNIFF_ERRORS("after drawtrees");
     }
@@ -181,29 +159,27 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
 /* ++++++++++++++++++++++++ draw particles +++++++++++++++++++++++++ */
 
     if(showsmoke==1){
-#ifdef pp_DATACLIPPING    
-      if(clip_mode==CLIP_DATA)setClipPlanes(&clipinfo,CLIP_ON);
-#endif
+      CLIP_VALS;
       drawpart_frame();
-#ifdef pp_DATACLIPPING    
-      if(clip_mode==CLIP_DATA)setClipPlanes(NULL,CLIP_OFF);
-#endif
     }
 
 /* ++++++++++++++++++++++++ draw evacuation +++++++++++++++++++++++++ */
 
     if(showevac==1){
+      CLIP_VALS;
       drawevac_frame();
     }
 
 /* ++++++++++++++++++++++++ draw targets +++++++++++++++++++++++++ */
 
     if(showtarget==1){
+      CLIP_VALS;
       drawTargets();
     }
 
 #ifdef pp_GEOMTEST
     if(show_geomtest==1){
+      CLIP_GEOMETRY;
       draw_geomtestclip();
       draw_geomtestoutline();
     }
@@ -218,15 +194,15 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
 
 /* ++++++++++++++++++++++++ draw sensors/sprinklers/heat detectors +++++++++++++++++++++++++ */
 
-    if(clip_mode==CLIP_BLOCKAGES)setClipPlanes(&clipinfo,CLIP_ON);
+    CLIP_GEOMETRY;
     draw_devices();
 #ifdef pp_PILOT
     draw_pilot();
 #endif    
-    if(clip_mode==CLIP_BLOCKAGES)setClipPlanes(NULL,CLIP_OFF);
     SNIFF_ERRORS("after draw_devices");
 
     if(visaxislabels==1){
+      UNCLIP;
       outputAxisLabels();
       SNIFF_ERRORS("after outputAxisLables");
     }
@@ -236,11 +212,8 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
 
     if(vis_user_ticks==1){
       antialias(ON);
-      setClipPlanes(NULL,CLIP_OFF);
+      UNCLIP;
       draw_user_ticks();
-      if(mode!=DRAWSCENE||viscolorbarpath!=1){
-        if(clip_mode==CLIP_BLOCKAGES_DATA)setClipPlanes(&clipinfo,CLIP_ON);
-      }
       antialias(OFF);
       SNIFF_ERRORS("after drawticks");
     }
@@ -248,6 +221,7 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
  /* ++++++++++++++++++++++++ draw ticks +++++++++++++++++++++++++ */
 
     if(visTicks==1&&ntickinfo>0){
+      UNCLIP;
       drawticks();
       SNIFF_ERRORS("after drawticks");
     }
@@ -258,6 +232,7 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
 /* ++++++++++++++++++++++++ draw simulation frame (corners at (0,0,0) and (xbar,ybar,zbar) +++++++++++++++++++++++++ */
 
     if(isZoneFireModel==0&&visFrame==1&&highlight_flag==2){
+      CLIP_GEOMETRY;
       drawoutlines();
       SNIFF_ERRORS("after drawoutlines");
     }
@@ -265,6 +240,7 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
     if(show_rotation_center==1){
       unsigned char pcolor[4];
 
+      CLIP_GEOMETRY;
       glPushMatrix();
       glTranslatef(camera_current->xcen,camera_current->ycen,camera_current->zcen);
       pcolor[0]=255*foregroundcolor[0];
@@ -282,6 +258,7 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
         int igrid;
         mesh *meshi;
 
+        CLIP_GEOMETRY;
         for(igrid=0;igrid<nmeshes;igrid++){
           meshi=meshinfo+igrid;
           drawgrid(meshi);
@@ -296,7 +273,8 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
 
   if(mode==SELECTOBJECT){
     if(select_device==1){
-     draw_devices();
+      CLIP_GEOMETRY;
+      draw_devices();
       SNIFF_ERRORS("after drawselect_devices");
       return;
     }
@@ -306,6 +284,7 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
 
   if(mode==SELECTOBJECT){
     if(select_avatar==1){
+      CLIP_GEOMETRY;
       drawselect_avatars();
       SNIFF_ERRORS("after drawselect_avatars");
       return;
@@ -316,6 +295,7 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
 
   if(mode==SELECTOBJECT){
     if(edittour==1&&ntours>0){
+      CLIP_GEOMETRY;
       drawselect_tours();
       SNIFF_ERRORS("after drawselect_tours");
       return;
@@ -326,6 +306,7 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
 /* ++++++++++++++++++++++++ draw tours +++++++++++++++++++++++++ */
 
   if(showtours==1){
+    CLIP_GEOMETRY;
     drawtours();
     SNIFF_ERRORS("after drawTours");
   }
@@ -333,6 +314,7 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
   /* ++++++++++++++++++++++++ draw stereo parallax indicator +++++++++++++++++++++++++ */
   
   if(show_parallax==1){
+    UNCLIP;
     antialias(ON);
     glLineWidth(linewidth);
     glBegin(GL_LINES);
@@ -345,14 +327,14 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
 
   /* ++++++++++++++++++++++++ draw blockages +++++++++++++++++++++++++ */
 
-  if(clip_mode==CLIP_BLOCKAGES)setClipPlanes(&clipinfo,CLIP_ON);
+  CLIP_GEOMETRY;
   drawBlockages(mode,DRAW_OPAQUE);
-  if(clip_mode==CLIP_BLOCKAGES)setClipPlanes(NULL,CLIP_OFF);
   SNIFF_ERRORS("drawBlockages");
 
   /* ++++++++++++++++++++++++ draw triangles +++++++++++++++++++++++++ */
   
   if(ngeominfoptrs>0){
+    CLIP_GEOMETRY;
     draw_geom(DRAW_OPAQUE,GEOM_STATIC);
     draw_geom(DRAW_OPAQUE,GEOM_DYNAMIC);
   }
@@ -360,6 +342,7 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
 /* ++++++++++++++++++++++++ draw shooter points +++++++++++++++++++++++++ */
 
   if(showshooter!=0&&shooter_active==1){
+    CLIP_VALS;
     draw_shooter();
   }
 
@@ -374,6 +357,7 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
     //texture 20 3
     //hidden 20 4
 
+    CLIP_GEOMETRY;
     for(i=0;i<nterraininfo;i++){
       terraindata *terri;
       int only_geom;
@@ -423,21 +407,25 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
 /* ++++++++++++++++++++++++ draw slice files +++++++++++++++++++++++++ */
 
   if(show_gslice_triangles==1||show_gslice_normal==1||show_gslice_normal_keyboard==1||show_gslice_triangulation==1){
+    CLIP_VALS;
     drawgslice_outline();
   }
   if((show_slices_and_vectors==1&&showvslice==1)||(showslice==1&&use_transparency_data==0)){
+    CLIP_VALS;
     drawslice_frame();
   } 
 
   /* ++++++++++++++++++++++++ draw boundary files +++++++++++++++++++++++++ */
 
   if(showpatch==1){
+    CLIP_VALS;
     drawpatch_frame();
   }
 
 /* ++++++++++++++++++++++++ draw labels +++++++++++++++++++++++++ */
 
   if(visLabels==1){
+    CLIP_GEOMETRY;
     drawLabels();
   }
 
@@ -445,15 +433,20 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
 
     //if(isoinfo!=NULL)drawspherepoints(sphereinfo);
   if(showiso==1){
+    CLIP_VALS;
     drawiso(DRAW_OPAQUE);
   }
 
 /* ++++++++++++++++++++++++ draw zone fire modeling info +++++++++++++++++++++++++ */
 
   if(nrooms>0){
+    CLIP_GEOMETRY;
     drawroomgeom();
     SNIFF_ERRORS("after drawroomgeom");
+  }
+  if(nrooms>0){
     if(showzone==1){
+      CLIP_VALS;
       drawfiredata();
       SNIFF_ERRORS("after drawroomdata");
       if(ReadZoneFile==1&&nzvents>0){
@@ -476,27 +469,30 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
   /* ++++++++++++++++++++++++ draw triangles +++++++++++++++++++++++++ */
   
   if(ngeominfoptrs>0){
+    CLIP_GEOMETRY;
     draw_geom(DRAW_TRANSPARENT,GEOM_STATIC);
     draw_geom(DRAW_TRANSPARENT,GEOM_DYNAMIC);
   }
 
   if(showiso==1){
+    CLIP_VALS;
     drawiso(DRAW_TRANSPARENT);
   }
 
 /* ++++++++++++++++++++++++ draw transparent faces +++++++++++++++++++++++++ */
 
-  if(clip_mode==CLIP_BLOCKAGES)setClipPlanes(&clipinfo,CLIP_ON);
+  CLIP_GEOMETRY;
   draw_transparent_faces();
-  if(clip_mode==CLIP_BLOCKAGES)setClipPlanes(NULL,CLIP_OFF);
 
 /* ++++++++++++++++++++++++ draw 3D smoke +++++++++++++++++++++++++ */
 
   if(show3dsmoke==1||showvolrender==1){
+    CLIP_VALS;
     drawsmoke_frame();
   }
 
   if(active_smokesensors==1&&show_smokesensors!=0){
+    CLIP_VALS;
     getsmokesensors();
     draw_devices_val();
   }
@@ -504,6 +500,7 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
 /* ++++++++++++++++++++++++ draw zone fire modeling info +++++++++++++++++++++++++ */
 
   if(nrooms>0&&showzone==1){
+    CLIP_VALS;
     drawroomdata();
     SNIFF_ERRORS("after drawroomdata");
   }
@@ -511,6 +508,7 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
 /* ++++++++++++++++++++++++ draw slice files +++++++++++++++++++++++++ */
 
   if((show_slices_and_vectors==1&&showvslice==1)||(showslice==1&&use_transparency_data==1)){
+    CLIP_VALS;
     drawslice_frame();
     SNIFF_ERRORS("after drawslice_frame");
   } 
@@ -519,12 +517,14 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
 
 //  draw_demo(20,20);
 //  draw_demo2(1);
+  CLIP_GEOMETRY;
   drawBlockages(mode,DRAW_TRANSPARENT);
   SNIFF_ERRORS("after drawBlokcages");
 
 /* ++++++++++++++++++++++++ draw vector slice files +++++++++++++++++++++++++ */
 
   if(showvslice==1){
+    CLIP_VALS;
     drawvslice_frame();
   }
   SNIFF_ERRORS("after drawvslice");
@@ -532,6 +532,7 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
 /* ++++++++++++++++++++++++ draw plot3d files +++++++++++++++++++++++++ */
 
   if(showplot3d==1){
+    CLIP_VALS;
     drawplot3d_frame();
   }
   SNIFF_ERRORS("after drawplot3d");
@@ -542,9 +543,6 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
 
  /* ++++++++++++++++++++++++ draw "fancy" colorbar +++++++++++++++++++++++++ */
 
-  if(viscolorbarpath==1&&colorbar_hidescene==1){
-    setClipPlanes(NULL,CLIP_OFF);
-  }
   SNIFF_ERRORS("end of loop");
 }
 
