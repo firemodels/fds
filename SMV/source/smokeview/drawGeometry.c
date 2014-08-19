@@ -2443,10 +2443,10 @@ void obst_or_vent2faces(const mesh *meshi,blockagedata *bc,
   }
 }
 
-/* ------------------ clip_face ------------------------ */
+/* ------------------ Clip_Face ------------------------ */
 
-int clip_face(clipdata *ci, facedata *facei){
-  if(clip_mode==CLIP_OFF)return 0;
+int Clip_Face(clipdata *ci, facedata *facei){
+  if(clip_mode==CLIP_OFF||clip_mode==CLIP_DATA)return 0;
   if(ci->clip_xmin==1&&DENORMALIZE_X(facei->xmax)<ci->xmin)return 1;
   if(ci->clip_xmax==1&&DENORMALIZE_X(facei->xmin)>ci->xmax)return 1;
   if(ci->clip_ymin==1&&DENORMALIZE_Y(facei->ymax)<ci->ymin)return 1;
@@ -2774,7 +2774,7 @@ void UpdateFacelists(void){
       if(showonly_hiddenfaces==1&&facej->hidden==0)continue;
       if(facej->thinface==1)continue;
       if(facej->bc!=NULL&&facej->bc->prop!=NULL&&facej->bc->prop->blockvis==0)continue;
-      if(clip_face(&clipinfo,facej)==1)continue;
+      if(Clip_Face(&clipinfo,facej)==1)continue;
 
       if(showedit_dialog==1&&j<vent_offset){
         if(facej->show_bothsides==0)meshi->face_normals_single[n_normals_single++]=facej;
