@@ -12,7 +12,7 @@ set TIME_FILE="%BASEDIR%\fds_case_times.txt"
 
 :: default FDS location
 
-set FDSEXE=%SVNROOT%\FDS_Compilation\%intel_win_64\fds_%win_64.exe
+set FDSEXE=%SVNROOT%\FDS_Compilation\intel_win_64\fds_win_64.exe
 
 ::*** uncomment following line to define a custom FDS location - (Do not commit un-commented)
 
@@ -28,8 +28,7 @@ set FDSBASE=%file%
 
 set BACKGROUNDEXE=%SVNROOT%\Utilities\background\intel_win_32\background.exe
 set FDS=%BACKGROUNDEXE% -u 75 -d 10 %FDSEXE%
-set RUNFDS=call %SVNROOT%\Utilities\Scripts\runfds_win32.bat
-set RUNFDSMPI=call %SVNROOT%\Utilities\Scripts\runfdsmpi_win32.bat
+set QFDS=call %SVNROOT%\Utilities\Scripts\runfds.bat
 
 echo You are about to run the Verification Test Suite.
 echo Press any key to begin.
