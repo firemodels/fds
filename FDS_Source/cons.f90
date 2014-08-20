@@ -46,6 +46,11 @@ INTEGER, PARAMETER :: NO_STOP=0, INSTABILITY_STOP=1, USER_STOP=2, SETUP_STOP=3, 
 INTEGER, PARAMETER :: SPHERE_DRAG=1,CYLINDER_DRAG=2,USER_DRAG=3,NO_DRAG=4,SCREEN_DRAG=5,TREE_DRAG=6 ! Options for drag computation
 INTEGER, PARAMETER :: OLD=1,NEW=2,GUESS=3,PREVIOUS=4                                        ! Network solver indices
 
+! Hardwired bounds for certain species arrays
+
+INTEGER :: MAX_SPECIES=20
+INTEGER, PARAMETER :: MAX_SPECIES_NL=20
+
 ! Species components of the lumped species
 
 INTEGER :: FUEL_INDEX=0,O2_INDEX=0,N2_INDEX=0,H2O_INDEX=0,CO2_INDEX=0,CO_INDEX=0,&
