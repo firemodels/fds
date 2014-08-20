@@ -62,15 +62,15 @@ void _Sniff_Errors(char *whereat);
 #define CLIP_GEOMETRY   \
   {int clip_geom=0;\
     if(clip_mode==CLIP_BLOCKAGES||clip_mode==CLIP_BLOCKAGES_DATA)clip_geom=1;\
-    if( clipon==0&&clip_geom==1)CLIP;\
-    else if( clipon==1&&clip_geom==0)UNCLIP;\
+    if( clipon==0&&clip_geom==1){CLIP;}\
+    else if( clipon==1&&clip_geom==0){UNCLIP;}\
   }
 
 #define CLIP_VALS   \
   {int clip_data=0;\
   if(clip_mode==CLIP_DATA||clip_mode==CLIP_BLOCKAGES_DATA)clip_data=1;\
-  if( clipon==0&&clip_data==1)CLIP;\
-    else if( clipon==1&&clip_data==0)UNCLIP;\
+  if( clipon==0&&clip_data==1){CLIP;}\
+    else if( clipon==1&&clip_data==0){UNCLIP;}\
   }
 
 #define GAS 1
