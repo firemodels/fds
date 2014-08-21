@@ -5745,19 +5745,23 @@ void setup_device_data(void){
   for(i=0;i<ndeviceinfo;i++){
     devicedata *devi;
     int j;
+    int dup_label;
 
     devi = deviceinfo + i;
     if(devi->label==NULL||STRCMP(devi->label,"null")==0)continue;
+    dup_label=0;
     for(j=i+1;j<ndeviceinfo;j++){
       devicedata *devj;
 
       devj = deviceinfo + j;
       if(devj->label==NULL)continue;
       if(STRCMP(devi->label,devj->label)==0){
-        fprintf(stderr,"*** Warning: duplicate device label, %s, found in columns %i and %i.\n",devi->label,i+1,j+1);
+        fprintf(stderr,"*** Warning: duplicate device label, %s, found in case: %s\n",devi->label,fdsprefix);
+        dup_label=1;
         break;
       }
     }
+    if(dup_label==1)break;
   }
   for(i=0;i<nvdeviceinfo;i++){
     vdevicedata *vdevi;
