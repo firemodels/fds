@@ -108,9 +108,7 @@ extern "C" void glui_clip_setup(int main_window){
   RADIOBUTTON_clip_1a=glui_clip->add_radiobutton_to_group(radio_clip,_("Clipping disabled"));
   RADIOBUTTON_clip_1b=glui_clip->add_radiobutton_to_group(radio_clip,_("Clip blockages and data"));
   RADIOBUTTON_clip_1c=glui_clip->add_radiobutton_to_group(radio_clip,_("Clip blockages"));
-#ifdef pp_DATACLIPPING  
   RADIOBUTTON_clip_1c=glui_clip->add_radiobutton_to_group(radio_clip,_("Clip data"));
-#endif  
 
   glui_clip->add_column_to_panel(PANEL_clip,false);
 

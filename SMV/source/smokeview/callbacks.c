@@ -1944,11 +1944,7 @@ void keyboard(unsigned char key, int flag){
       break;
     case 'W':
       clip_mode++;
-#ifdef pp_DATACLIPPING      
       if(clip_mode>3)clip_mode=0;
-#else
-      if(clip_mode>2)clip_mode=0;
-#endif
       update_clip_all();
       break;
     case 'x':
@@ -2169,9 +2165,7 @@ void update_clipplanes(void){
       if(clip_mode==CLIP_OFF)PRINTF("clipping off\n");
       if(clip_mode==CLIP_BLOCKAGES_DATA)PRINTF("clipping blockages + data\n");
       if(clip_mode==CLIP_BLOCKAGES)PRINTF("clipping blockages\n");
-#ifdef pp_DATACLIPPING      
       if(clip_mode==CLIP_DATA)PRINTF("clipping data\n");
-#endif      
       clip_mode_last=clip_mode;
     }
   }
