@@ -1418,17 +1418,17 @@ void classify_geom(geomdata *geomi){
       nfacelist=4*nvolus;
       volume_list=geomlisti->volumes;
       NewMemory((void **)&facelist,4*nfacelist*sizeof(int));
-      for(i=0;i<nfacelist;i++){
-        facelist[i]=i;
+      for(j=0;j<nfacelist;j++){
+        facelist[j]=j;
       }
       qsort(facelist,nfacelist,sizeof(int),compare_faces);
-      for(i=1;i<nfacelist;i++){
+      for(j=1;j<nfacelist;j++){
         int face1, face2;
         tetrahedron *vol1, *vol2;
         int *verts1, *verts2;
 
-        face1=facelist[i-1];
-        face2=facelist[i];
+        face1=facelist[j-1];
+        face2=facelist[j];
         vol1 = volume_list + face1/4;
         vol2 = volume_list + face2/4;
         face1 %= 4;
