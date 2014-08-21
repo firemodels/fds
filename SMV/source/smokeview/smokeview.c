@@ -715,9 +715,6 @@ void usage(char **argv){
 #ifdef _DEBUG
     strcat(label,", _DEBUG");
 #endif
-#ifdef ISO_DEBUG
-    strcat(label,", ISO_DEBUG");
-#endif
 #ifdef pp_BETA
     strcat(label,", pp_BETA");
 #endif
