@@ -772,9 +772,7 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
       {
 
         nn=0;
-#ifdef USE_ZLIB
         if(loadpatchbysteps==2)uncompress_patchdataframe(meshi,ii);
-#endif
         for(n=0;n<meshi->npatches;n++){
           mesh *meshblock;
           float dval;
@@ -3816,7 +3814,6 @@ void getpatchdata_zlib(patchdata *patchi,unsigned char *data,int ndata,
 
 /* ------------------ uncompress_patchdataframe ------------------------ */
 
-#ifdef USE_ZLIB
 void uncompress_patchdataframe(mesh *meshi,int local_iframe){
   unsigned int countin;
   uLongf countout;
@@ -3829,7 +3826,6 @@ void uncompress_patchdataframe(mesh *meshi,int local_iframe){
   uncompress(meshi->cpatchval_iframe_zlib,&countout,compressed_data,countin);
 
 }
-#endif
 
 /* ------------------ update_hidepatchsurface ------------------------ */
 

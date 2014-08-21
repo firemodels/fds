@@ -87,7 +87,6 @@
 #endif
 
 #define EGZ
-#define USE_ZLIB
 
 #undef pp_release
 #define pp_release

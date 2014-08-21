@@ -69,7 +69,6 @@
 #endif
 
 #define EGZ
-#define USE_ZLIB
 #define pp_PART
 #ifndef pp_OSX
 #define pp_THREAD

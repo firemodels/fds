@@ -3232,9 +3232,7 @@ void drawslice_frame(){
       if((showvslice==0||show_slices_and_vectors==0)&&sd->display==0)continue;
       if(sd->times[0]>global_times[itimes])continue;
       if(sd->compression_type==1||sd->compression_type==2){
-#ifdef USE_ZLIB
         uncompress_slicedataframe(sd,sd->itime);
-#endif
         sd->iqsliceframe=sd->slicecomplevel;
       }
       else{
@@ -3320,9 +3318,7 @@ void drawvslice_frame(void){
     if(sliceinfo[vd->ival].times[0]>global_times[itimes])continue;
 #define VAL val
     if(VAL->compression_type==1){
-#ifdef USE_ZLIB
       uncompress_slicedataframe(VAL,VAL->itime);
-#endif
       VAL->iqsliceframe=VAL->slicecomplevel;
     }
     else{
@@ -3333,9 +3329,7 @@ void drawvslice_frame(void){
 #define VAL u
     if(VAL!=NULL){
       if(VAL->compression_type==1){
-#ifdef USE_ZLIB
         uncompress_slicedataframe(VAL,VAL->itime);
-#endif
         VAL->iqsliceframe=VAL->slicecomplevel;
       }
       else{
@@ -3346,9 +3340,7 @@ void drawvslice_frame(void){
 #define VAL v
     if(VAL!=NULL){
       if(VAL->compression_type==1){
-#ifdef USE_ZLIB
         uncompress_slicedataframe(VAL,VAL->itime);
-#endif
         VAL->iqsliceframe=VAL->slicecomplevel;
       }
       else{
@@ -3359,9 +3351,7 @@ void drawvslice_frame(void){
 #define VAL w
     if(VAL!=NULL){
       if(VAL->compression_type==1){
-#ifdef USE_ZLIB
         uncompress_slicedataframe(VAL,VAL->itime);
-#endif
         VAL->iqsliceframe=VAL->slicecomplevel;
       }
       else{
@@ -6381,7 +6371,6 @@ int makeslicesizefile(char *file, char *sizefile, int compression_type){
 
 }
 
-#ifdef USE_ZLIB
 /* ------------------ uncompress_slicedataframe ------------------------ */
 
 void uncompress_slicedataframe(slicedata *sd,int iframe_local){
@@ -6401,7 +6390,6 @@ void uncompress_slicedataframe(slicedata *sd,int iframe_local){
   }
 
 }
-#endif
 
 /* ------------------ getsliceval ------------------------ */
 

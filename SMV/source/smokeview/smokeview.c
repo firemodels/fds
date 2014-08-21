@@ -790,9 +790,6 @@ void usage(char **argv){
 #ifdef pp_THREAD
     strcat(label,", pp_THREAD");
 #endif
-#ifdef USE_ZLIB
-    strcat(label,", USE_ZLIB");
-#endif
 #ifdef WIN32
     strcat(label,", WIN32");
 #endif

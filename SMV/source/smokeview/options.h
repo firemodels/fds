@@ -40,7 +40,6 @@
 
 #define pp_DRAWISO
 #define EGZ
-#define USE_ZLIB
 #define pp_THREAD
 #define pp_LANG
 #define pp_DEG

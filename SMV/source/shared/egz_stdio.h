@@ -7,8 +7,6 @@
 
 #ifdef EGZ
 
-#ifdef USE_ZLIB
-
 #ifdef WIN32
 
 #define _WINDOWS
@@ -20,17 +18,12 @@
 #define DEF_ZLIB
 #include <zlib.h>
 #endif
-#endif   /* end USE_ZLIB */
 
 typedef struct {
   int endianswitch;
   int compression;
-#ifdef USE_ZLIB
   gzFile *stream;
   FILE *stream2;
-#else
-  FILE *stream;
-#endif
 } EGZ_FILE;
 int EGZ_FCLOSE(EGZ_FILE *egz_stream);
 EGZ_FILE *EGZ_FOPEN(const char *file, const char *mode, int compress, int endian);

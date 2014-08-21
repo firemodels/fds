@@ -927,11 +927,7 @@ void freesmoke3d(smoke3ddata *smoke3di){
 void updatesmoke3d(smoke3ddata *smoke3di){
   int iframe_local;
   int countin;
-#ifdef USE_ZLIB
   uLongf countout;
-#else
-  int countout;
-#endif
 
   iframe_local = smoke3di->ismoke3d_time;
   countin = smoke3di->nchars_compressed_smoke[iframe_local];
@@ -941,11 +937,9 @@ void updatesmoke3d(smoke3ddata *smoke3di){
     countout = irle(smoke3di->smokeframe_comp_list[iframe_local],countin,smoke3di->smokeframe_in);
     break;
   case ZLIB:
-#ifdef USE_ZLIB
     uncompress(
       smoke3di->smokeframe_in,&countout,
       smoke3di->smokeframe_comp_list[iframe_local],countin);
-#endif
     break;
   default:
     ASSERT(FFALSE);

@@ -209,9 +209,7 @@ void Update_Framenumber(int changetime){
           meshi->cpatchval_iframe = meshi->cpatchval + meshi->patch_itime*meshi->npatchsize;
         }
         else{
-#ifdef USE_ZLIB
           uncompress_patchdataframe(meshi,meshi->patch_itime);
-#endif
         }
       }
     }
