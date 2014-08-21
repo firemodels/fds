@@ -5655,6 +5655,35 @@ void update_colordevs(void){
   }
 }
 
+/* ----------------------- is_dup_device_label ----------------------------- */
+#define BEFORE 0
+#define AFTER 1
+
+int is_dup_device_label(int index, int direction){
+  int i,i1,i2;
+  devicedata *dev_index;
+
+  if(direction==BEFORE){
+    i1=0;
+    i2=index;
+  }
+  else{
+    i1=index+1;
+    i2=ndeviceinfo;
+  }
+  dev_index = deviceinfo + index;
+  if(index<0||index>=ndeviceinfo||dev_index->label==NULL||STRCMP(dev_index->label,"null")==0)return 0;
+
+  for(i=i1;i<i2;i++){
+    devicedata *devi;
+
+    devi = deviceinfo + i;
+    if(devi->label==NULL||STRCMP(devi->label,"null")==0)continue;
+    if(STRCMP(dev_index->label,devi->label)==0)return 1;
+  }
+  return 0;
+}
+
 /* ----------------------- setup_device_data ----------------------------- */
 
 void setup_device_data(void){
@@ -5663,6 +5692,7 @@ void setup_device_data(void){
   int i;
   char **devcunits=NULL, **devclabels=NULL;
   devicedata **devices=NULL;
+  int is_dup;
 
   if(ndeviceinfo==0)return;
   FREEMEMORY(vdeviceinfo);
@@ -5742,26 +5772,31 @@ void setup_device_data(void){
 
   // look for duplicate device labels
   
+  is_dup=0;
   for(i=0;i<ndeviceinfo;i++){
     devicedata *devi;
-    int j;
-    int dup_label;
 
     devi = deviceinfo + i;
     if(devi->label==NULL||STRCMP(devi->label,"null")==0)continue;
-    dup_label=0;
-    for(j=i+1;j<ndeviceinfo;j++){
-      devicedata *devj;
+    if(is_dup_device_label(i,AFTER)==1){
+      is_dup=1;
+      break;
+    }
+  }
+  if(is_dup==1){
+    int i;
 
-      devj = deviceinfo + j;
-      if(devj->label==NULL)continue;
-      if(STRCMP(devi->label,devj->label)==0){
-        fprintf(stderr,"*** Warning: duplicate device label, %s, found in case: %s\n",devi->label,fdsprefix);
-        dup_label=1;
-        break;
+    fprintf(stderr,"*** Warning: Duplicate device labels: ");
+    for(i=0;i<ndeviceinfo;i++){
+      devicedata *devi;
+
+      devi = deviceinfo + i;
+      if(devi->label==NULL||STRCMP(devi->label,"null")==0)continue;
+      if(is_dup_device_label(i,BEFORE)==0&&is_dup_device_label(i,AFTER)==1){
+        fprintf(stderr," %s,",devi->label);
       }
     }
-    if(dup_label==1)break;
+    fprintf(stderr," found in %s\n",fds_filein);
   }
   for(i=0;i<nvdeviceinfo;i++){
     vdevicedata *vdevi;
