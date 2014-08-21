@@ -31,9 +31,6 @@
 
 //VVVVVVVVVVVVVVVVVVVVVVVVVVVVV  turn on options available on all platforms VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
 
-// pp_GEOMPRINT turns on debug print
-//#define pp_GEOMPRINT
-
 #define pp_GPU
 
 #ifdef pp_GPU

@@ -736,9 +736,6 @@ void usage(char **argv){
 #ifdef pp_DEVICE
     strcat(label,", pp_DEVICE");
 #endif
-#ifdef pp_GEOMPRINT
-    strcat(label,", pp_GEOMPRINT");
-#endif
 #ifdef pp_GEOMTEST
     strcat(label,", pp_GEOMTEST");
 #endif

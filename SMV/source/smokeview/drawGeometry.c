@@ -2460,10 +2460,6 @@ int Clip_Face(clipdata *ci, facedata *facei){
 
 void set_cull_vis(void){
   int imesh;
-#ifdef pp_GEOMPRINT
-  int nports=0;
-  int ntotal=0;
-#endif
 
   if(update_initcullgeom==1){
     initcullgeom(cullgeom);
@@ -2474,9 +2470,6 @@ void set_cull_vis(void){
     mesh *meshi;
 
     meshi = meshinfo + imesh;
-#ifdef pp_GEOMPRINT
-    ntotal+=meshi->ncullgeominfo;
-#endif    
     for(iport=0;iport<meshi->ncullgeominfo;iport++){
       culldata *culli;
       float xx[2], yy[2], zz[2];
@@ -2493,65 +2486,38 @@ void set_cull_vis(void){
       
       if(PointInFrustum(xx[0],yy[0],zz[0])==1){
         culli->vis=1;
-#ifdef pp_GEOMPRINT
-        nports++;
-#endif        
         continue;
       }
       if(PointInFrustum(xx[1],yy[0],zz[0])==1){
         culli->vis=1;
-#ifdef pp_GEOMPRINT
-        nports++;
-#endif        
         continue;
       }
       if(PointInFrustum(xx[0],yy[1],zz[0])==1){
         culli->vis=1;
-#ifdef pp_GEOMPRINT
-        nports++;
-#endif        
         continue;
       }
       if(PointInFrustum(xx[1],yy[1],zz[0])==1){
         culli->vis=1;
-#ifdef pp_GEOMPRINT
-        nports++;
-#endif        
         continue;
       }
       if(PointInFrustum(xx[0],yy[0],zz[1])==1){
         culli->vis=1;
-#ifdef pp_GEOMPRINT
-        nports++;
-#endif        
         continue;
       }
       if(PointInFrustum(xx[1],yy[0],zz[1])==1){
         culli->vis=1;
-#ifdef pp_GEOMPRINT
-        nports++;
-#endif        
         continue;
       }
       if(PointInFrustum(xx[0],yy[1],zz[1])==1){
         culli->vis=1;
-#ifdef pp_GEOMPRINT
-        nports++;
-#endif        
         continue;
       }
       if(PointInFrustum(xx[1],yy[1],zz[1])==1){
         culli->vis=1;
-#ifdef pp_GEOMPRINT
-        nports++;
-#endif        
         continue;
       }
     }
   }
-#ifdef pp_GEOMPRINT
-  PRINTF("ports=%i ports visible=%i\n",ntotal,nports); 
-#endif
 }
 
 /* ------------------ comparesinglefaces ------------------------ */
@@ -2961,9 +2927,6 @@ void UpdateFacelists(void){
         }
         meshi->nface_normals_single=n_normals_single;
       }
-#ifdef pp_GEOMPRINT
-      PRINTF("faces removed=%i\n",nhidden);
-#endif      
 
       qsort((facedata **)meshi->face_normals_single,(size_t)n_normals_single,sizeof(facedata *),comparesinglefaces);
       for(iface=0;iface<meshi->nface_normals_single;iface++){
@@ -3068,13 +3031,6 @@ void drawselect_faces(){
   return;
 }
 
-#ifdef pp_GEOMPRINT
-#define COLOR_SWAPS color_swaps++;
-#define FACES_DRAWN faces_drawn++;
-#else
-#define COLOR_SWAPS
-#define FACES_DRAWN
-#endif
 #define DRAWFACE(DEFfacetest,DEFeditcolor)    \
         float *facepos;\
         culldata *cullport;\
@@ -3108,15 +3064,13 @@ void drawselect_faces(){
         if(new_color!=old_color){\
           old_color=new_color;\
           glColor4fv(old_color);\
-          COLOR_SWAPS\
         }\
         glVertex3fv(vertices);\
         glVertex3fv(vertices+3);\
         glVertex3fv(vertices+6);\
         glVertex3fv(vertices);\
         glVertex3fv(vertices+6);\
-        glVertex3fv(vertices+9);\
-        FACES_DRAWN
+        glVertex3fv(vertices+9);
 
 /* ------------------ drawfaces ------------------------ */
 
@@ -3126,10 +3080,6 @@ void draw_faces(){
   float up_color[4]={0.9,0.9,0.9,1.0};
   float down_color[4]={0.1,0.1,0.1,1.0};
   float highlight_color[4]={1.0,0.0,0.0,1.0};
-#ifdef pp_GEOMPRINT
-  int color_swaps=0;
-  int faces_drawn=0;
-#endif
 
   if(nface_normals_single>0){
     int j;
@@ -3199,9 +3149,6 @@ void draw_faces(){
     glDisable(GL_COLOR_MATERIAL);
     glDisable(GL_LIGHTING);
   }
-#ifdef pp_GEOMPRINT
-  PRINTF("faces=%i, faces drawn=%i, color switches=%i\n",nface_normals_single,faces_drawn,color_swaps);
-#endif  
   if(nface_normals_double>0){
     int j;
 
@@ -5403,10 +5350,6 @@ void draw_facesOLD(){
   float up_color[4]={0.9,0.9,0.9,1.0};
   float down_color[4]={0.1,0.1,0.1,1.0};
   float highlight_color[4]={1.0,0.0,0.0,1.0};
-#ifdef pp_GEOMPRINT
-  int color_swaps=0;
-  int faces_drawn=0;
-#endif
 
   if(nface_normals_single>0){
     int j;
@@ -5467,9 +5410,6 @@ void draw_facesOLD(){
         if(new_color!=old_color){
           old_color=new_color;
           glColor4fv(old_color);
-#ifdef pp_GEOMPRINT
-          color_swaps++;
-#endif
         }
         glNormal3fv(facei->normal);
         glVertex3fv(vertices);
@@ -5478,18 +5418,12 @@ void draw_facesOLD(){
         glVertex3fv(vertices);
         glVertex3fv(vertices+6);
         glVertex3fv(vertices+9);
-#ifdef pp_GEOMPRINT
-        faces_drawn++;
-#endif
       }
     }
     glEnd();
     glDisable(GL_COLOR_MATERIAL);
     glDisable(GL_LIGHTING);
   }
-#ifdef pp_GEOMPRINT
-  PRINTF("faces=%i, faces drawn=%i, color switches=%i\n",nface_normals_single,faces_drawn,color_swaps);
-#endif
   if(nface_normals_double>0){
     int j;
 
