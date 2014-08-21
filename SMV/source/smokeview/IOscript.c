@@ -1384,7 +1384,7 @@ void script_settourview(scriptdata *scripti){
 
 void script_settimeval(scriptdata *scripti){
   float timeval;
-  int i;
+  int i,imin,valmin;
 
   timeval = scripti->fval;
   PRINTF("script: setting time to %f\n\n",timeval);
@@ -1403,17 +1403,23 @@ void script_settimeval(scriptdata *scripti){
       }
       timeval=global_times[nglobal_times-1]-0.0001;
     }
-    for(i=0;i<nglobal_times-1;i++){
-      if(global_times[i]<=timeval&&timeval<global_times[i+1]){
-        itimes=i;
-        script_itime=i;
-        stept=0;
-        force_redisplay=1;
-        Update_Framenumber(0);
-        UpdateTimeLabels();
-        break;
+    valmin=ABS(global_times[0]-timeval);
+    imin=0;
+    for(i=1;i<nglobal_times-1;i++){
+      float val;
+      
+      val = ABS(global_times[i]-timeval);
+      if(val<valmin){
+        valmin=val;
+        imin=i;
       }
     }
+    itimes=imin;
+    script_itime=imin;
+    stept=0;
+    force_redisplay=1;
+    Update_Framenumber(0);
+    UpdateTimeLabels();
   }
 }
 
