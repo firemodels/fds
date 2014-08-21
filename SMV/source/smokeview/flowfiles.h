@@ -836,6 +836,7 @@ typedef struct _device{
   float *times, *vals;
   int *valids;
   int ival,nvals,type2,type2vis;
+  int in_devc_csv;
   mesh *device_mesh;
   texturedata *textureinfo;
   char *texturefile;

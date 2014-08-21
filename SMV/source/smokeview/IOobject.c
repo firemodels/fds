@@ -5553,6 +5553,7 @@ void read_device_data(char *file, int filetype, int loadstatus){
 #endif
     if(devicei==NULL)continue;
     devicei->filetype=filetype;
+    if(filetype==CSV_FDS)devicei->in_devc_csv=1;
     NewMemory((void **)&devicei->vals,nrows*sizeof(float));
     NewMemory((void **)&devicei->valids,nrows*sizeof(int));
     devicei->times=times_local;
@@ -5672,7 +5673,7 @@ int is_dup_device_label(int index, int direction){
     i2=ndeviceinfo;
   }
   dev_index = deviceinfo + index;
-  if(index<0||index>=ndeviceinfo||dev_index->label==NULL||STRCMP(dev_index->label,"null")==0)return 0;
+  if(index<0||index>=ndeviceinfo||dev_index->label==NULL||STRCMP(dev_index->label,"null")==0||dev_index->in_devc_csv==0)return 0;
 
   for(i=i1;i<i2;i++){
     devicedata *devi;
@@ -6780,6 +6781,7 @@ void init_device(devicedata *devicei, float *xyz, float *xyzn, int state0, int n
   devicei->nvals=0;
   devicei->filetype=-1;
   devicei->in_zone_csv=0;
+  devicei->in_devc_csv=0;
   devicei->labelptr=devicei->label;
   devicei->color=NULL;
   devicei->line_width=1.0;
