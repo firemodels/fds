@@ -68,7 +68,6 @@
 #define pp_OSX
 #endif
 
-#define EGZ
 #define pp_PART
 #ifndef pp_OSX
 #define pp_THREAD

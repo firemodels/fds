@@ -492,22 +492,12 @@ void readsmoke3d(int ifile,int flag, int *errorcode){
 // read in data
 
   file_size=get_filesize(smoke3di->file);
-#ifdef EGZ
   if(fortran_skip==0){
     SMOKE3DFILE=EGZ_FOPEN(smoke3di->file,"rb",0,2);
   }
   else{
     SMOKE3DFILE=EGZ_FOPEN(smoke3di->file,"frb",0,2);
   }
-#endif
-#ifndef EGZ
-  if(fortran_skip==0){
-    SMOKE3DFILE=EGZ_FOPEN(smoke3di->file,"rb");
-  }
-  else{
-    SMOKE3DFILE=EGZ_FOPEN(smoke3di->file,"frb");
-  }
-#endif
   if(SMOKE3DFILE==NULL){
     readsmoke3d(ifile,UNLOAD,&error);
     *errorcode=1;
@@ -764,22 +754,12 @@ int getsmoke3d_sizes(int fortran_skip,char *smokefile, int version, float **time
       SMOKE_SIZE=fopen(smoke_sizefilename,"w");
     }
     if(SMOKE_SIZE==NULL)return 1;  // can't write size file in temp directory so give up
-#ifdef EGZ
     if(fortran_skip==0){
       SMOKE3DFILE=EGZ_FOPEN(smokefile,"rb",0,2);
     }
     else{
       SMOKE3DFILE=EGZ_FOPEN(smokefile,"frb",0,2);
     }
-#endif
-#ifndef EGZ
-    if(fortran_skip==0){
-      SMOKE3DFILE=EGZ_FOPEN(smokefile,"rb");
-    }
-    else{
-      SMOKE3DFILE=EGZ_FOPEN(smokefile,"frb");
-    }
-#endif
     if(SMOKE3DFILE==NULL){
       fclose(SMOKE_SIZE);
       return 1;

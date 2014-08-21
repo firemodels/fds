@@ -6,7 +6,6 @@
 char egz_stdio_revision[]="$Revision$";
 
 #include "options.h"
-#ifdef EGZ
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -320,4 +319,3 @@ long EGZ_FTELL( const EGZ_FILE *egz_stream ){
   }
   return return_val;
 }
-#endif

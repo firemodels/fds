@@ -30,11 +30,7 @@ void getisolevels(const char *isofile, int dataflag, float **levelsptr, float **
   int i;
   float **colorlevels=NULL;
 
-#ifdef EGZ
   isostreamptr=EGZ_FOPEN(isofile,"rb",0,2);
-#else
-  isostreamptr=EGZ_FOPEN(isofile,"rb");
-#endif
 
   EGZ_FREAD(&one,4,1,isostreamptr);
   if(dataflag!=0){
@@ -76,11 +72,7 @@ void getisosizes(const char *isofile, int dataflag, EGZ_FILE **isostreamptr, int
   int skip_local;
   float ttmin, ttmax;
 
-#ifdef EGZ
   *isostreamptr=EGZ_FOPEN(isofile,"rb",0,2);
-#else
-  *isostreamptr=EGZ_FOPEN(isofile,"rb");
-#endif
 
   *tmin_local=1000000000.;
   *tmax_local=-1000000000.;

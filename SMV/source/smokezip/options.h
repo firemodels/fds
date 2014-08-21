@@ -58,7 +58,6 @@
 #endif
 
 //#define pp_KDTEST
-#define EGZ
 #define pp_PART
 #ifndef pp_OSX
 #define pp_THREAD

@@ -86,8 +86,6 @@
 #define STAT stat
 #endif
 
-#define EGZ
-
 #undef pp_release
 #define pp_release
 

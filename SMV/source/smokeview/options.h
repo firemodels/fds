@@ -39,7 +39,6 @@
 #endif
 
 #define pp_DRAWISO
-#define EGZ
 #define pp_THREAD
 #define pp_LANG
 #define pp_DEG
