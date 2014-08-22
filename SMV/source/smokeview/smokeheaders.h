@@ -6,6 +6,7 @@
 #ifndef SMOKEHEADERS_H_DEFINED
 #define SMOKEHEADERS_H_DEFINED
 
+EXTERNCPP void  update_glui_devices(void);
 EXTERNCPP void update_colordevs(void);
 EXTERNCPP void update_visaxislabels(void);
 EXTERNCPP void update_geometry_controls(void);

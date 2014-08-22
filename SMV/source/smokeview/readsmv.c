@@ -8618,6 +8618,7 @@ int readini2(char *inifile, int localfile){
       fgets(buffer,255,stream);
       sscanf(buffer," %i %i %i %i %i %i",
         &showdeviceval,&showvdeviceval,&devicetypes_index,&colordeviceval,&vectortype,&vispilot);
+      update_glui_devices();
       continue;
     }
     if(match(buffer,"DEVICEVECTORDIMENSIONS")==1){

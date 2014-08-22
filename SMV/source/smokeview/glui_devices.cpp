@@ -78,6 +78,14 @@ GLUI_Checkbox *CHECKBOX_device_4=NULL;
 
 void Device_CB(int var);
 
+/* ------------------ update_glui_devices ------------------------ */
+
+extern "C" void update_glui_devices(void){
+  Device_CB(SHOWDEVICEVALS);
+  Device_CB(COLORDEVICEVALS);
+  Device_CB(DEVICE_devicetypes);
+}
+
 /* ------------------ glui_device_setup ------------------------ */
 
 extern "C" void glui_device_setup(int main_window){
@@ -132,9 +140,7 @@ extern "C" void glui_device_setup(int main_window){
         glui_device->add_radiobutton_to_group(RADIO_devicetypes,devicetypes[i]->quantity);
       }
 
-      Device_CB(SHOWDEVICEVALS);
-      Device_CB(COLORDEVICEVALS);
-      Device_CB(DEVICE_devicetypes);
+      update_glui_devices();
     }
   }
 
