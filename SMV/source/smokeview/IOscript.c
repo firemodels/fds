@@ -1384,7 +1384,8 @@ void script_settourview(scriptdata *scripti){
 
 void script_settimeval(scriptdata *scripti){
   float timeval;
-  int i,imin,valmin;
+  int i,imin;
+  float valmin;
 
   timeval = scripti->fval;
   PRINTF("script: setting time to %f\n\n",timeval);
