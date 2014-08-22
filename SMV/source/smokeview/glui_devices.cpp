@@ -135,6 +135,7 @@ extern "C" void glui_device_setup(int main_window){
       glui_device->add_spinner_to_panel(PANEL_devicevalues,"max",GLUI_SPINNER_FLOAT,&device_valmax);
 
       PANEL_devicevis=glui_device->add_panel_to_panel(PANEL_devicevalues,"",false);
+      devicetypes_index=CLAMP(devicetypes_index,0,ndevicetypes-1);
       RADIO_devicetypes=glui_device->add_radiogroup_to_panel(PANEL_devicevis,&devicetypes_index,DEVICE_devicetypes,Device_CB);
       for(i=0;i<ndevicetypes;i++){
         glui_device->add_radiobutton_to_group(RADIO_devicetypes,devicetypes[i]->quantity);
@@ -280,8 +281,10 @@ void Device_CB(int var){
     for(i=0;i<ndevicetypes;i++){
       devicetypes[i]->type2vis=0;
     }
-    devicetypes[devicetypes_index]->type2vis=1;
-    update_colordevs();
+    if(ndevicetypes>0){
+      devicetypes[devicetypes_index]->type2vis=1;
+      update_colordevs();
+    }
     break;
   case SHOWDEVICEVALS:
   case COLORDEVICEVALS:
