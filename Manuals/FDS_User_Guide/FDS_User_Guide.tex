@@ -1829,6 +1829,8 @@ parameter dictates that the correction be applied in 1 time step. If its value w
 A similar parameter is the {\ct PRESSURE\_RELAX\_TIME}. It controls the rate at which the pressures in adjacent compartments are brought into equilibrium following a
 breach. Its default value is 1~s, meaning that equilibrium is achieved in roughly a second.
 
+If {\ct .TRUE.}, the parameter {\ct CHECK\_POISSON} tells FDS to check that the left-hand and right-hand sides of the Poisson equation for $H$ are equivalent (see the FDS Tech Guide \cite{FDS_Math_Guide}).  The error is printed to the {\ct CHID.out} file.
+
 
 \subsubsection{Example Case: Pressure\_Solver/duct\_flow}
 
