@@ -96,11 +96,11 @@ filename{1} = '../../Validation/Heskestad_Flame_Height/FDS_Output_Files/FDS_Tama
 filename{2} = '../../Validation/Heskestad_Flame_Height/FDS_Output_Files/FDS_Tamanini_RI=10.csv';
 filename{3} = '../../Validation/Heskestad_Flame_Height/FDS_Output_Files/FDS_Tamanini_RI=20.csv';
 
-fds_line_file = {'Qs=2000_RI=05_line.csv', 'Qs=p5_RI=05_line.csv', 'Qs=p2_RI=05_line.csv'; ...
-                 'Qs=2000_RI=10_line.csv', 'Qs=p5_RI=10_line.csv', 'Qs=p2_RI=10_line.csv'; ...
-                 'Qs=2000_RI=20_line.csv', 'Qs=p5_RI=20_line.csv', 'Qs=p2_RI=20_line.csv'};
+fds_line_file = {'Qs=1500_RI=05_line.csv', 'Qs=p6_RI=05_line.csv', 'Qs=p3_RI=05_line.csv'; ...
+                 'Qs=1500_RI=10_line.csv', 'Qs=p6_RI=10_line.csv', 'Qs=p3_RI=10_line.csv'; ...
+                 'Qs=1500_RI=20_line.csv', 'Qs=p6_RI=20_line.csv', 'Qs=p3_RI=20_line.csv'};
 
-Qstar = [2000 .5 .2];
+Qstar = [1500 .6 .3];
 header = {'z/L jet','Q jet','z/L 62','Q 62','z/L 31','Q 31'};
 
 for j=1:3 % resolution loop
