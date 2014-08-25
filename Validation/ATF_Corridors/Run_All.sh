@@ -5,9 +5,9 @@
 export SVNROOT=`pwd`/../..
 source $SVNROOT/Validation/Common_Run_All.sh
 
-$QFDS $DEBUG -r $QUEUE -p 3 -d $INDIR ATF_Corridors_050_kW.fds
-$QFDS $DEBUG -r $QUEUE -p 3 -d $INDIR ATF_Corridors_100_kW.fds
-$QFDS $DEBUG -r $QUEUE -p 3 -d $INDIR ATF_Corridors_240_kW.fds
-$QFDS $DEBUG -r $QUEUE -p 3 -d $INDIR ATF_Corridors_250_kW.fds
-$QFDS $DEBUG -r $QUEUE -p 3 -d $INDIR ATF_Corridors_500_kW.fds
-$QFDS $DEBUG -r $QUEUE -p 3 -d $INDIR ATF_Corridors_Mix_kW.fds
+$QFDS  $QUEUE -p 3 -n 3 -d $INDIR ATF_Corridors_050_kW.fds
+$QFDS  $QUEUE -p 3 -n 3 -d $INDIR ATF_Corridors_100_kW.fds
+$QFDS  $QUEUE -p 3 -n 3 -d $INDIR ATF_Corridors_240_kW.fds
+$QFDS  $QUEUE -p 3 -n 3 -d $INDIR ATF_Corridors_250_kW.fds
+$QFDS  $QUEUE -p 3 -n 3 -d $INDIR ATF_Corridors_500_kW.fds
+$QFDS  $QUEUE -p 3 -n 3 -d $INDIR ATF_Corridors_Mix_kW.fds

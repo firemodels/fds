@@ -5,11 +5,11 @@
 export SVNROOT=`pwd`/../..
 source $SVNROOT/Validation/Common_Run_All.sh
 
-$QFDS $DEBUG -r $QUEUE -d $INDIR FM_Parallel_Panel_1.fds
-$QFDS $DEBUG -r $QUEUE -d $INDIR FM_Parallel_Panel_2.fds 
-$QFDS $DEBUG -r $QUEUE -d $INDIR FM_Parallel_Panel_3.fds 
-$QFDS $DEBUG -r $QUEUE -d $INDIR FM_Parallel_Panel_4.fds 
-$QFDS $DEBUG -r $QUEUE -d $INDIR FM_Parallel_Panel_5.fds 
-$QFDS $DEBUG -r $QUEUE -d $INDIR FM_Parallel_Panel_6.fds 
+$QFDS  $QUEUE -d $INDIR FM_Parallel_Panel_1.fds
+$QFDS  $QUEUE -d $INDIR FM_Parallel_Panel_2.fds 
+$QFDS  $QUEUE -d $INDIR FM_Parallel_Panel_3.fds 
+$QFDS  $QUEUE -d $INDIR FM_Parallel_Panel_4.fds 
+$QFDS  $QUEUE -d $INDIR FM_Parallel_Panel_5.fds 
+$QFDS  $QUEUE -d $INDIR FM_Parallel_Panel_6.fds 
 
 echo FDS cases submitted

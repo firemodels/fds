@@ -5,11 +5,11 @@
 export SVNROOT=`pwd`/../..
 source $SVNROOT/Validation/Common_Run_All.sh
 
-$QFDS $DEBUG -r $QUEUE -d $INDIR LEMTA_Spray_1.fds
-$QFDS $DEBUG -r $QUEUE -d $INDIR LEMTA_Spray_2.fds
-$QFDS $DEBUG -r $QUEUE -d $INDIR LEMTA_Spray_3.fds
-$QFDS $DEBUG -r $QUEUE -d $INDIR LEMTA_Spray_4.fds
-$QFDS $DEBUG -r $QUEUE -d $INDIR LEMTA_Spray_5.fds
+$QFDS  $QUEUE -d $INDIR LEMTA_Spray_1.fds
+$QFDS  $QUEUE -d $INDIR LEMTA_Spray_2.fds
+$QFDS  $QUEUE -d $INDIR LEMTA_Spray_3.fds
+$QFDS  $QUEUE -d $INDIR LEMTA_Spray_4.fds
+$QFDS  $QUEUE -d $INDIR LEMTA_Spray_5.fds
 
 echo FDS cases submitted
 
