@@ -56,4 +56,15 @@ $QFDS  $QUEUE -d $INDIR Qs=p1_RI=20.fds
 $QFDS  $QUEUE -d $INDIR Qs=p2_RI=20.fds    
 $QFDS  $QUEUE -d $INDIR Qs=p5_RI=20.fds    
 
+# Tamanini cases
+$QFDS  $QUEUE -d $INDIR Qs=1500_RI=05.fds
+$QFDS  $QUEUE -d $INDIR Qs=1500_RI=10.fds
+$QFDS  $QUEUE -d $INDIR Qs=1500_RI=20.fds
+$QFDS  $QUEUE -d $INDIR Qs=p6_RI=05.fds
+$QFDS  $QUEUE -d $INDIR Qs=p6_RI=10.fds
+$QFDS  $QUEUE -d $INDIR Qs=p6_RI=20.fds
+$QFDS  $QUEUE -d $INDIR Qs=p3_RI=05.fds
+$QFDS  $QUEUE -d $INDIR Qs=p3_RI=10.fds
+$QFDS  $QUEUE -d $INDIR Qs=p3_RI=20.fds
+
 echo FDS cases submitted
