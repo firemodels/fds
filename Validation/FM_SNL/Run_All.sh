@@ -5,22 +5,22 @@
 export SVNROOT=`pwd`/../..
 source $SVNROOT/Validation/Common_Run_All.sh
 
-$QFDS $DEBUG -r -p 5 $QUEUE -d $INDIR FM_SNL_01.fds
-$QFDS $DEBUG -r -p 5 $QUEUE -d $INDIR FM_SNL_02.fds
-$QFDS $DEBUG -r -p 5 $QUEUE -d $INDIR FM_SNL_03.fds
-$QFDS $DEBUG -r -p 5 $QUEUE -d $INDIR FM_SNL_04.fds
-$QFDS $DEBUG -r -p 5 $QUEUE -d $INDIR FM_SNL_05.fds
-$QFDS $DEBUG -r -p 5 $QUEUE -d $INDIR FM_SNL_06.fds
-$QFDS $DEBUG -r -p 5 $QUEUE -d $INDIR FM_SNL_07.fds
-$QFDS $DEBUG -r -p 5 $QUEUE -d $INDIR FM_SNL_08.fds
-$QFDS $DEBUG -r -p 5 $QUEUE -d $INDIR FM_SNL_09.fds
-$QFDS $DEBUG -r -p 5 $QUEUE -d $INDIR FM_SNL_10.fds
-$QFDS $DEBUG -r -p 5 $QUEUE -d $INDIR FM_SNL_11.fds
-$QFDS $DEBUG -r -p 5 $QUEUE -d $INDIR FM_SNL_12.fds
-$QFDS $DEBUG -r -p 5 $QUEUE -d $INDIR FM_SNL_13.fds
-$QFDS $DEBUG -r -p 5 $QUEUE -d $INDIR FM_SNL_14.fds
-$QFDS $DEBUG -r -p 5 $QUEUE -d $INDIR FM_SNL_15.fds
-$QFDS $DEBUG -r -p 4 $QUEUE -d $INDIR FM_SNL_16.fds
-$QFDS $DEBUG -r -p 4 $QUEUE -d $INDIR FM_SNL_17.fds
-$QFDS $DEBUG -r -p 5 $QUEUE -d $INDIR FM_SNL_21.fds
-$QFDS $DEBUG -r -p 5 $QUEUE -d $INDIR FM_SNL_22.fds
+$QFDS  -p 5 $QUEUE -d $INDIR FM_SNL_01.fds
+$QFDS  -p 5 $QUEUE -d $INDIR FM_SNL_02.fds
+$QFDS  -p 5 $QUEUE -d $INDIR FM_SNL_03.fds
+$QFDS  -p 5 $QUEUE -d $INDIR FM_SNL_04.fds
+$QFDS  -p 5 $QUEUE -d $INDIR FM_SNL_05.fds
+$QFDS  -p 5 $QUEUE -d $INDIR FM_SNL_06.fds
+$QFDS  -p 5 $QUEUE -d $INDIR FM_SNL_07.fds
+$QFDS  -p 5 $QUEUE -d $INDIR FM_SNL_08.fds
+$QFDS  -p 5 $QUEUE -d $INDIR FM_SNL_09.fds
+$QFDS  -p 5 $QUEUE -d $INDIR FM_SNL_10.fds
+$QFDS  -p 5 $QUEUE -d $INDIR FM_SNL_11.fds
+$QFDS  -p 5 $QUEUE -d $INDIR FM_SNL_12.fds
+$QFDS  -p 5 $QUEUE -d $INDIR FM_SNL_13.fds
+$QFDS  -p 5 $QUEUE -d $INDIR FM_SNL_14.fds
+$QFDS  -p 5 $QUEUE -d $INDIR FM_SNL_15.fds
+$QFDS  -p 4 $QUEUE -d $INDIR FM_SNL_16.fds
+$QFDS  -p 4 $QUEUE -d $INDIR FM_SNL_17.fds
+$QFDS  -p 5 $QUEUE -d $INDIR FM_SNL_21.fds
+$QFDS  -p 5 $QUEUE -d $INDIR FM_SNL_22.fds

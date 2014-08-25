@@ -5,13 +5,13 @@
 export SVNROOT=`pwd`/../..
 source $SVNROOT/Validation/Common_Run_All.sh
 
-$QFDS $DEBUG -r -p 4 $QUEUE -d $INDIR Cup_C7H16_Ar.fds
-$QFDS $DEBUG -r -p 4 $QUEUE -d $INDIR Cup_C7H16_CO2.fds
-$QFDS $DEBUG -r -p 4 $QUEUE -d $INDIR Cup_C7H16_He.fds
-$QFDS $DEBUG -r -p 4 $QUEUE -d $INDIR Cup_C7H16_N2.fds
-$QFDS $DEBUG -r -p 4 $QUEUE -d $INDIR Cup_CH4_Ar.fds
-$QFDS $DEBUG -r -p 4 $QUEUE -d $INDIR Cup_CH4_CO2.fds
-$QFDS $DEBUG -r -p 4 $QUEUE -d $INDIR Cup_CH4_He.fds
-$QFDS $DEBUG -r -p 4 $QUEUE -d $INDIR Cup_CH4_N2.fds
+$QFDS  -p 4 $QUEUE -d $INDIR Cup_C7H16_Ar.fds
+$QFDS  -p 4 $QUEUE -d $INDIR Cup_C7H16_CO2.fds
+$QFDS  -p 4 $QUEUE -d $INDIR Cup_C7H16_He.fds
+$QFDS  -p 4 $QUEUE -d $INDIR Cup_C7H16_N2.fds
+$QFDS  -p 4 $QUEUE -d $INDIR Cup_CH4_Ar.fds
+$QFDS  -p 4 $QUEUE -d $INDIR Cup_CH4_CO2.fds
+$QFDS  -p 4 $QUEUE -d $INDIR Cup_CH4_He.fds
+$QFDS  -p 4 $QUEUE -d $INDIR Cup_CH4_N2.fds
 
 echo FDS cases submitted

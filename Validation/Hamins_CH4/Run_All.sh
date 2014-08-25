@@ -5,11 +5,11 @@
 export SVNROOT=`pwd`/../..
 source $SVNROOT/Validation/Common_Run_All.sh
 
-$QFDS $DEBUG -r $QUEUE -d $INDIR Hamins_CH4_01.fds
-$QFDS $DEBUG -r $QUEUE -d $INDIR Hamins_CH4_05.fds 
-$QFDS $DEBUG -r $QUEUE -d $INDIR Hamins_CH4_07.fds 
-$QFDS $DEBUG -r $QUEUE -d $INDIR Hamins_CH4_19.fds 
-$QFDS $DEBUG -r $QUEUE -d $INDIR Hamins_CH4_21.fds 
-$QFDS $DEBUG -r $QUEUE -d $INDIR Hamins_CH4_23.fds 
+$QFDS  $QUEUE -d $INDIR Hamins_CH4_01.fds
+$QFDS  $QUEUE -d $INDIR Hamins_CH4_05.fds 
+$QFDS  $QUEUE -d $INDIR Hamins_CH4_07.fds 
+$QFDS  $QUEUE -d $INDIR Hamins_CH4_19.fds 
+$QFDS  $QUEUE -d $INDIR Hamins_CH4_21.fds 
+$QFDS  $QUEUE -d $INDIR Hamins_CH4_23.fds 
 
 echo FDS cases submitted
