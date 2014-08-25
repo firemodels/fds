@@ -325,7 +325,7 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
       DO K=1,KBAR
          DO J=1,JBAR
             DO I=1,IBAR
-               CALL INTERPOLATE1D_UNIFORM(D_Z_N,TMP(I,J,K),D_Z_TEMP)
+               CALL INTERPOLATE1D_UNIFORM(LBOUND(D_Z_N,1),D_Z_N,TMP(I,J,K),D_Z_TEMP)
                RHO_D(I,J,K) = RHOP(I,J,K)*D_Z_TEMP
             ENDDO
          ENDDO
