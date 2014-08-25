@@ -5,6 +5,6 @@
 export SVNROOT=`pwd`/../..
 source $SVNROOT/Validation/Common_Run_All.sh
 
-$QFDS $DEBUG -r $QUEUE -d $INDIR Restivo.fds
+$QFDS  $QUEUE -d $INDIR Restivo.fds
 
 echo FDS cases submitted

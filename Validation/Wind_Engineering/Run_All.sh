@@ -5,11 +5,11 @@
 export SVNROOT=`pwd`/../..
 source $SVNROOT/Validation/Common_Run_All.sh
 
-$QFDS $DEBUG -r $QUEUE -p 8 -d $INDIR UWO_test7_case1_180_32.fds
-$QFDS $DEBUG -r $QUEUE -p 8 -d $INDIR UWO_test7_case1_180_64.fds
-$QFDS $DEBUG -r $QUEUE -p 8 -d $INDIR UWO_test7_case1_270_32.fds
-$QFDS $DEBUG -r $QUEUE -p 8 -d $INDIR UWO_test7_case1_270_64.fds
-#$QFDS $DEBUG -r $QUEUE -p 8 -d $INDIR UWO_test7_case1_32_spectral.fds
-#$QFDS $DEBUG -r $QUEUE -p 8 -d $INDIR UWO_test7_case1_64_spectral.fds
+$QFDS  $QUEUE -p 8 -d $INDIR UWO_test7_case1_180_32.fds
+$QFDS  $QUEUE -p 8 -d $INDIR UWO_test7_case1_180_64.fds
+$QFDS  $QUEUE -p 8 -d $INDIR UWO_test7_case1_270_32.fds
+$QFDS  $QUEUE -p 8 -d $INDIR UWO_test7_case1_270_64.fds
+#$QFDS  $QUEUE -p 8 -d $INDIR UWO_test7_case1_32_spectral.fds
+#$QFDS  $QUEUE -p 8 -d $INDIR UWO_test7_case1_64_spectral.fds
 
 echo FDS cases submitted

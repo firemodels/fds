@@ -5,6 +5,6 @@
 export SVNROOT=`pwd`/../..
 source $SVNROOT/Validation/Common_Run_All.sh
 
-$QFDS $DEBUG -r -p 8 $QUEUE -d $INDIR Smyth_Slot_Burner.fds
+$QFDS  -p 8 $QUEUE -d $INDIR Smyth_Slot_Burner.fds
 
 echo FDS cases submitted

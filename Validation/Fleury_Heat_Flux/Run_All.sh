@@ -5,20 +5,20 @@
 export SVNROOT=`pwd`/../..
 source $SVNROOT/Validation/Common_Run_All.sh
 
-$QFDS $DEBUG -r $QUEUE -d $INDIR Fleury_1t1_100_kW.fds
-$QFDS $DEBUG -r $QUEUE -d $INDIR Fleury_1t1_150_kW.fds
-$QFDS $DEBUG -r $QUEUE -d $INDIR Fleury_1t1_200_kW.fds
-$QFDS $DEBUG -r $QUEUE -d $INDIR Fleury_1t1_250_kW.fds
-$QFDS $DEBUG -r $QUEUE -d $INDIR Fleury_1t1_300_kW.fds
-$QFDS $DEBUG -r $QUEUE -d $INDIR Fleury_2t1_100_kW.fds
-$QFDS $DEBUG -r $QUEUE -d $INDIR Fleury_2t1_150_kW.fds
-$QFDS $DEBUG -r $QUEUE -d $INDIR Fleury_2t1_200_kW.fds
-$QFDS $DEBUG -r $QUEUE -d $INDIR Fleury_2t1_250_kW.fds
-$QFDS $DEBUG -r $QUEUE -d $INDIR Fleury_2t1_300_kW.fds
-$QFDS $DEBUG -r $QUEUE -d $INDIR Fleury_3t1_100_kW.fds
-$QFDS $DEBUG -r $QUEUE -d $INDIR Fleury_3t1_150_kW.fds
-$QFDS $DEBUG -r $QUEUE -d $INDIR Fleury_3t1_200_kW.fds
-$QFDS $DEBUG -r $QUEUE -d $INDIR Fleury_3t1_250_kW.fds
-$QFDS $DEBUG -r $QUEUE -d $INDIR Fleury_3t1_300_kW.fds
+$QFDS  $QUEUE -d $INDIR Fleury_1t1_100_kW.fds
+$QFDS  $QUEUE -d $INDIR Fleury_1t1_150_kW.fds
+$QFDS  $QUEUE -d $INDIR Fleury_1t1_200_kW.fds
+$QFDS  $QUEUE -d $INDIR Fleury_1t1_250_kW.fds
+$QFDS  $QUEUE -d $INDIR Fleury_1t1_300_kW.fds
+$QFDS  $QUEUE -d $INDIR Fleury_2t1_100_kW.fds
+$QFDS  $QUEUE -d $INDIR Fleury_2t1_150_kW.fds
+$QFDS  $QUEUE -d $INDIR Fleury_2t1_200_kW.fds
+$QFDS  $QUEUE -d $INDIR Fleury_2t1_250_kW.fds
+$QFDS  $QUEUE -d $INDIR Fleury_2t1_300_kW.fds
+$QFDS  $QUEUE -d $INDIR Fleury_3t1_100_kW.fds
+$QFDS  $QUEUE -d $INDIR Fleury_3t1_150_kW.fds
+$QFDS  $QUEUE -d $INDIR Fleury_3t1_200_kW.fds
+$QFDS  $QUEUE -d $INDIR Fleury_3t1_250_kW.fds
+$QFDS  $QUEUE -d $INDIR Fleury_3t1_300_kW.fds
 
 echo FDS cases submitted
