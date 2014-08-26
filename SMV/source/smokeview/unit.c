@@ -363,10 +363,10 @@ void InitUnits(void){
   units[2].scale[0]=1.0;
 #ifdef pp_SMOKEDIFF
   if(smokediff==1){
-    units[2].scale[1]=273.15;
+    units[2].scale[1]=0.0;
   }
   else{
-    units[2].scale[1]=0.0;
+    units[2].scale[1]=273.15;
   }
   if(smokediff==1){
     strcpy(units[3].unit,"% diff");
@@ -375,7 +375,7 @@ void InitUnits(void){
     units[3].rel_defined=0;
   }
 #else
-  units[2].scale[1]=0.0;
+  units[2].scale[1]=273.15;
 #endif
 
   // velocity units

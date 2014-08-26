@@ -680,7 +680,21 @@ void output_device_val(devicedata *devicei){
   if(fontindex==SCALED_FONT)scale_3dfont();
   val=get_device_val(global_times[itimes],devicei,&valid);
   if(valid==1){
-    sprintf(label,"%s: %.1f %s",devicei->quantity,val,devicei->unit);
+    f_units *unitclass;
+    char *unit;
+
+    unitclass = get_unit_class(devicei->unit);
+    unit=devicei->unit;
+    if(unitclass!=NULL){
+      char *unit_type;
+      f_unit *funit;
+
+      funit = unitclass->units+unitclass->unit_index;
+      unit = funit->unit;
+      unit_type = unitclass->unitclass;
+      val = getunitval(unit_type, val);
+    }
+    sprintf(label,"%s: %.1f %s",devicei->quantity,val,unit);
     output3Text(foregroundcolor,0.0,0.0,0.0,label);
   }
   else{
@@ -5557,7 +5571,16 @@ void read_device_data(char *file, int filetype, int loadstatus){
     NewMemory((void **)&devicei->vals,nrows*sizeof(float));
     NewMemory((void **)&devicei->valids,nrows*sizeof(int));
     devicei->times=times_local;
+#ifdef pp_DEG
+    if(strcmp(devcunits[i],"C")==0){
+      strcpy(devicei->unit,degC);
+    }
+    else{
+      strcpy(devicei->unit,devcunits[i]);
+    }
+#else
     strcpy(devicei->unit,devcunits[i]);
+#endif
     devicei->nvals=nrows-2;
   }
 

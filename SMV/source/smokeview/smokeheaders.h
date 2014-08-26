@@ -782,6 +782,8 @@ EXTERNCPP void freecadinfo(void);
 
 EXTERNCPP void init_unit_defs(void);
 EXTERNCPP void InitUnits(void);
+EXTERNCPP f_units *get_unit_class(char *unit);
+
 EXTERNCPP void readcad2geom(cadgeom *cd);
 EXTERNCPP void readcadgeom(cadgeom *cd);
 EXTERNCPP void drawcadgeom(const cadgeom *cd);
