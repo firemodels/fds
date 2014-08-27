@@ -776,6 +776,10 @@ ENDDO
 
 IF (ANY(MEAN_FORCING)) CALL MOMENTUM_NUDGING()
 
+! Coriolis force
+
+IF (ANY(ABS(OVEC)>TWO_EPSILON_EB)) CALL CORIOLIS_FORCE()
+
 ! Surface vegetation drag 
 
 WFDS_BNDRYFUEL_IF: IF (WFDS_BNDRYFUEL) THEN
@@ -988,6 +992,81 @@ MEAN_FORCING_Z: IF (MEAN_FORCING(3)) THEN
 ENDIF MEAN_FORCING_Z
 
 END SUBROUTINE MOMENTUM_NUDGING
+
+SUBROUTINE CORIOLIS_FORCE()
+
+REAL(EB), POINTER, DIMENSION(:,:,:) :: UP=>NULL(),VP=>NULL(),WP=>NULL()
+REAL(EB) :: UBAR,VBAR,WBAR
+INTEGER :: II,JJ,KK,IW
+TYPE(WALL_TYPE), POINTER :: WC=>NULL()
+
+! Velocities relative to the p-cell center (same work done in Deardorff eddy viscosity)
+
+UP => WORK7
+VP => WORK8
+WP => WORK9
+UP=0._EB
+VP=0._EB
+WP=0._EB
+
+DO K=1,KBAR
+   DO J=1,JBAR
+      DO I=1,IBAR
+         IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
+         UP(I,J,K) = 0.5_EB*(UU(I,J,K) + UU(I-1,J,K))
+         VP(I,J,K) = 0.5_EB*(VV(I,J,K) + VV(I,J-1,K))
+         WP(I,J,K) = 0.5_EB*(WW(I,J,K) + WW(I,J,K-1))
+      ENDDO
+   ENDDO
+ENDDO
+
+DO IW=1,N_EXTERNAL_WALL_CELLS
+   WC=>WALL(IW)
+   II = WC%ONE_D%II
+   JJ = WC%ONE_D%JJ
+   KK = WC%ONE_D%KK
+   UP(II,JJ,KK) = U_GHOST(IW)
+   VP(II,JJ,KK) = V_GHOST(IW)
+   WP(II,JJ,KK) = W_GHOST(IW)
+ENDDO
+
+! x momentum
+
+DO K=1,KBAR
+   DO J=1,JBAR
+      DO I=0,IBAR
+         VBAR = 0.5_EB*(VP(I,J,K)+VP(I+1,J,K))
+         WBAR = 0.5_EB*(WP(I,J,K)+WP(I+1,J,K))
+         FVX(I,J,K) = FVX(I,J,K) + 2._EB*(OVEC(2)*WBAR-OVEC(3)*VBAR)
+      ENDDO
+   ENDDO
+ENDDO
+
+! y momentum
+
+DO K=1,KBAR
+   DO J=0,JBAR
+      DO I=1,IBAR
+         UBAR = 0.5_EB*(UP(I,J,K)+UP(I,J+1,K))
+         WBAR = 0.5_EB*(WP(I,J,K)+WP(I,J+1,K))
+         FVY(I,J,K) = FVY(I,J,K) + 2._EB*(OVEC(3)*UBAR - OVEC(1)*WBAR)
+      ENDDO
+   ENDDO
+ENDDO
+
+! z momentum
+
+DO K=0,KBAR
+   DO J=1,JBAR
+      DO I=1,IBAR
+         UBAR = 0.5_EB*(UP(I,J,K)+UP(I,J,K+1))
+         VBAR = 0.5_EB*(VP(I,J,K)+VP(I,J,K+1))
+         FVZ(I,J,K) = FVZ(I,J,K) + 2._EB*(OVEC(1)*VBAR - OVEC(2)*UBAR)
+      ENDDO
+   ENDDO
+ENDDO
+
+END SUBROUTINE CORIOLIS_FORCE
 
 END SUBROUTINE VELOCITY_FLUX
 
