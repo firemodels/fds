@@ -566,9 +566,9 @@ UNLOADTOUR
 
 // render velocity devices
 
+UNLOADALL
 LOADINIFILE
  thouse5_device.ini
-UNLOADALL
 SETTIMEVAL
  5.000000
 RENDERONCE
