@@ -1,4 +1,4 @@
-set intelbin="%IFORT_COMPILER14%\bin"
+set intelbin="%IFORT_COMPILER15%\bin"
 
 call %intelbin%\compilervars intel64
 
