@@ -77,28 +77,28 @@ main.obj: FFLAGS += $(FOPENMPFLAGS)
 #*** note: the following scripts (located in ..\Scripts directory) must be run before running make with this target
 #    ..\Scripts\ifortvars intel64
 
-intel_win_64_ps : FFLAGS = -O2 /Qipo /Qvec_report0  
+intel_win_64_ps : FFLAGS = -O2 /Qipo
 intel_win_64_ps : FCOMPL = ifort
 intel_win_64_ps : FOPENMPFLAGS = /Qopenmp
 intel_win_64_ps : obj = fds_win_64_ps
 intel_win_64_ps : setup_win $(objwin_serial)
 	$(FCOMPL) -o $(obj) $(FFLAGS) $(FOPENMPFLAGS) /F1000000000 $(objwin_serial) /link /SUBSYSTEM:CONSOLE,5.02
 
-intel_win_64 : FFLAGS = /O2 /Qvec_report0 /Qipo
+intel_win_64 : FFLAGS = /O2 /Qipo
 intel_win_64 : FCOMPL = ifort
 intel_win_64 : FOPENMPFLAGS = /Qopenmp
 intel_win_64 : obj = fds_win_64
 intel_win_64 : setup_win $(objwin_serial)
 	$(FCOMPL) -o $(obj) $(FFLAGS) $(FOPENMPFLAGS) /F1000000000 $(objwin_serial)
 
-intel_win_64_dv : FFLAGS = /O2 /Qvec_report0
+intel_win_64_dv : FFLAGS = /O2 
 intel_win_64_dv : FCOMPL = ifort
 intel_win_64_dv : FOPENMPFLAGS = /Qopenmp
 intel_win_64_dv : obj = fds_win_64_dv
 intel_win_64_dv : setup_win $(objwin_serial)
 	$(FCOMPL) -o $(obj) $(FFLAGS) $(FOPENMPFLAGS) /F1000000000 $(objwin_serial)
 
-intel_win_64_db : FFLAGS = /Od /Qvec_report0 /nologo /debug:full /extend_source:132 /traceback /stand:f03 /Zi /MDd
+intel_win_64_db : FFLAGS = /Od /nologo /debug:full /extend_source:132 /traceback /stand:f03 /Zi /MDd
 intel_win_64_db : FCOMPL = ifort
 intel_win_64_db : FOPENMPFLAGS = /Qopenmp
 intel_win_64_db : obj = fds_win_64_db
@@ -107,7 +107,7 @@ intel_win_64_db : setup_win $(objwin_serial)
 
 mpi_intel_win_64 : MPILIB = "$(I_MPI_ROOT)\intel64\lib\impi.lib"
 mpi_intel_win_64 : MPIINCLUDE = "$(I_MPI_ROOT)\intel64\include"
-mpi_intel_win_64 : FFLAGS = /Qipo /O2 /Qvec_report0 /I$(MPIINCLUDE)
+mpi_intel_win_64 : FFLAGS = /Qipo /O2 /I$(MPIINCLUDE)
 mpi_intel_win_64 : FOPENMPFLAGS = /Qopenmp
 mpi_intel_win_64 : FCOMPL = mpiifort
 mpi_intel_win_64 : obj = fds_mpi_win_64
@@ -116,7 +116,7 @@ mpi_intel_win_64 : setup_win $(objwin_mpi)
 
 mpi_intel_win_64_db : MPILIB = "$(I_MPI_ROOT)\intel64\lib\impi.lib"
 mpi_intel_win_64_db : MPIINCLUDE = "$(I_MPI_ROOT)\intel64\include"
-mpi_intel_win_64_db : FFLAGS = /Od /Qvec_report0 /nologo /debug:all /I$(MPIINCLUDE) /extend_source:132 /warn:unused /warn:nointerfaces /Qtrapuv /fp:strict /fp:except /traceback /check:all /stand:f03
+mpi_intel_win_64_db : FFLAGS = /Od /nologo /debug:all /I$(MPIINCLUDE) /extend_source:132 /warn:unused /warn:nointerfaces /Qtrapuv /fp:strict /fp:except /traceback /check:all /stand:f03
 mpi_intel_win_64_db : FOPENMPFLAGS = /Qopenmp
 mpi_intel_win_64_db : FCOMPL = mpiifort
 mpi_intel_win_64_db : obj = fds_mpi_win_64_db
