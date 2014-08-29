@@ -1202,7 +1202,8 @@ ENDIF
 
 !$OMP PARALLEL DEFAULT(SHARED) PRIVATE(THREAD_ID)
 
-THREAD_ID = OMP_GET_THREAD_NUM()  
+THREAD_ID = 0
+!$THREAD_ID = OMP_GET_THREAD_NUM()  
 
 ! Time to say hello, the master process performs all output. Within the master process, each thread will handle its own
 ! output, the master thread will handle output from all threads of all other processes.
