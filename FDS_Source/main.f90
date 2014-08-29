@@ -118,10 +118,6 @@ IF (INDEX(mainrev,':',BACK=.TRUE.)>0) THEN
    10 IF (IOS>0) COMPILE_DATE = 'null'
 ENDIF
 
-! Set some constants
-
-CALL SET_OFTEN_USED
-
 ! Read input from CHID.fds file and stop the code if any errors are found
  
 CALL READ_DATA
