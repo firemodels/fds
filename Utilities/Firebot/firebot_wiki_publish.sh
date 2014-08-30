@@ -24,6 +24,7 @@ FIREBOT_DIR="/home2/smokevis2/firebot/firebot"
 #  ============================
 
 cd $SVNROOT_WIKI
+svn cleanup
 svn update
 
 # Compare two wiki files, check for changes in Firebot status
