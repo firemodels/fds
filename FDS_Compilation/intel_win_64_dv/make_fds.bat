@@ -1,13 +1,8 @@
 @echo off
-set intelbin="%IFORT_COMPILER15%\bin"
+:: setup compiler environment
+call ..\..\Utilities\Scripts\setup_intel_compilers.bat
 
-IF "%SETUP_IFORT_COMPILER_64%"=="1" GOTO envexist
+Title Building dv FDS for 64 bit Windows
 
-set SETUP_IFORT_COMPILER_64=1
-
-echo Setting up compiler environment
-call %intelbin%\ifortvars intel64
-
-:envexist
 make VPATH="../../FDS_Source" -f ..\makefile intel_win_64_dv
 pause
