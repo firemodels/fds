@@ -92,6 +92,13 @@
   (y)[2]=(x)[2]
 #endif
 
+#ifndef VECEQCONS
+#define VECEQCONS(y,x)\
+  (y)[0]=(x);\
+  (y)[1]=(x);\
+  (y)[2]=(x)
+#endif
+
 #ifndef VECADD3
 #define VECADD3(ypx,x,y)\
   (ypx)[0]=(y)[0]+(x)[0];\

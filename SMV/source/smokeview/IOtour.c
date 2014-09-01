@@ -21,7 +21,25 @@ void hermiteother(float f1, keyframe *kf1, keyframe *kf2, pathdata *pj);
 void hermiteview(float t, keyframe *kf1, keyframe *kf2, float *view);
 void draw_SVOBJECT(sv_object *object, int frame_index_local,propdata *prop,int recurse_level,float *rgbval,int vis_override);
 
-/* ------------------ freetour ------------------------ */
+
+/* ------------------ freetours ------------------------ */
+
+void freetours(void){
+  int i;
+
+  if(ntours>0){
+    for(i=0;i<ntours;i++){
+      tourdata *touri;
+
+      touri = tourinfo + i;
+      freetour(touri);
+    }
+    FREEMEMORY(tourinfo);
+  }
+  ntours=0;
+}
+
+  /* ------------------ freetour ------------------------ */
 
 void freetour(tourdata *touri){
   int i;

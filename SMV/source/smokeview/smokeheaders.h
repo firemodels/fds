@@ -595,6 +595,7 @@ EXTERNCPP void drawtours(void);
 EXTERNCPP void set_glui_keyframe(void);
 EXTERNCPP void drawselect_tours(void);
 EXTERNCPP void freetour(tourdata *touri);
+EXTERNCPP void freetours(void);
 EXTERNCPP void inittour(tourdata *touri);
 EXTERNCPP void updatetourmenulabels(void);
 EXTERNCPP void update_globaltension(void);
