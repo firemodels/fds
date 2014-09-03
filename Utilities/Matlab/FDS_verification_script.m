@@ -36,6 +36,7 @@ cutcell_area
 cat_propane_depo
 burke_schumann
 convective_cooling_convergence
+random_walk_soln
 
 % Dataplot and scatplot options
 
