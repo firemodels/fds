@@ -173,16 +173,16 @@ print(gcf,'-dpdf','../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/shunn_mms
 
 % check errors
 if e_r(length(e_r)) > 4.96e-06
-   display(['Matlab Warning: Density in shunn3 is are out of tolerance.'])
+   display(['Matlab Warning: Density in shunn3 is out of tolerance.'])
 end
 if e_z(length(e_z)) > 9.57e-07
-   display(['Matlab Warning: Mixture fraction in shunn3 is are out of tolerance.'])
+   display(['Matlab Warning: Mixture fraction in shunn3 is out of tolerance.'])
 end
 if e_u(length(e_u)) > 3.34e-06
-   display(['Matlab Warning: Velocity in shunn3 is are out of tolerance.'])
+   display(['Matlab Warning: Velocity in shunn3 is out of tolerance.'])
 end
 if e_H(length(e_H)) > 7.63e-04
-   display(['Matlab Warning: Pressure in shunn3 is are out of tolerance.'])
+   display(['Matlab Warning: Pressure in shunn3 is out of tolerance.'])
 end
 
 
