@@ -1477,9 +1477,13 @@ You may read in the 3-D velocity field using a {\ct CSVF} line.  For example:
 \begin{lstlisting}
 &CSVF UVWFILE='my_velocity_field.csv' /
 \end{lstlisting}
-If multiple meshes are involved, it is assumed that the {\ct CSVF} lines are provided in the input file in the same order as the meshes.
-
-%It is recommended that you also specify {\ct PROJECTION=.TRUE.} on {\ct MISC} if the specified velocity field does not satisfy the divergence constraint to machine precision on a staggered grid (this may not even be true if an analytical solution to the Navier-Stokes equations is sampled at the staggered velocity component locations).
+If multiple meshes are involved, it is assumed that the {\ct CSVF} lines are provided in the input file in the same order as the meshes. For two meshes you might have the following:
+\begin{lstlisting}
+&CSVF UVWFILE='CHID_t001_m001.csv' /
+&CSVF UVWFILE='CHID_t001_m002.csv' /
+&MISC PROJECTION=.TRUE. /
+\end{lstlisting}
+It is recommended that you also specify {\ct PROJECTION=.TRUE.} on {\ct MISC} if the specified velocity field does not satisfy the divergence constraint to machine precision on a staggered grid (this may not even be true if an analytical solution to the Navier-Stokes equations is sampled at the staggered velocity component locations).
 
 
 \subsection{Special Topic: Defying Gravity}
@@ -9420,7 +9424,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 %{\ct PERIODIC\_TEST}                            & Integer       & Initial condition for verification test               &               & 0                 \\ \hline
 {\ct POROUS\_FLOOR}                             & Logical       & Section~\ref{info:sprinklers}                         &               & {\ct .TRUE.}      \\ \hline
 {\ct PR}                                        & Real          & Section~\ref{info:LES}                                &               & 0.5               \\ \hline
-%{\ct PROJECTION}                                & Logical       & Use formal projection method                          &               & {\ct .FALSE.}     \\ \hline
+{\ct PROJECTION}                                & Logical       & Formal projection                                     &               & {\ct .FALSE.}     \\ \hline
 {\ct P\_INF}                                    & Real          & Section~\ref{info:MISC_Basics}                        & Pa            & 101325            \\ \hline
 {\ct RAMP\_GX}                                  & Character     & Section~\ref{info:GVEC}                               &               &                   \\ \hline
 {\ct RAMP\_GY}                                  & Character     & Section~\ref{info:GVEC}                               &               &                   \\ \hline
