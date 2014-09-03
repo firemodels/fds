@@ -39,8 +39,8 @@ setup_win:
 
 #Compiler Rules
 
-impi_intel_win: MPILIB = "C:\Program Files (x86)\Intel\MPI\5.0.0.028\intel64\lib\impi.lib"
-impi_intel_win: MPIINCLUDE = "C:\Program Files (x86)\Intel\MPI\5.0.0.028\intel64\include"
+impi_intel_win: MPILIB = "C:\Program Files (x86)\Intel\MPI\5.0.1.037\intel64\lib\impi.lib"
+impi_intel_win: MPIINCLUDE = "C:\Program Files (x86)\Intel\MPI\5.0.1.037\intel64\include"
 impi_intel_win: FFLAGS = /Qipo /O2 /Qvec_report0 /I$(MPIINCLUDE)
 impi_intel_win: FCOMPL = mpiifort
 impi_intel_win: obj = test_mpi
