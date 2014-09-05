@@ -2521,7 +2521,7 @@ materials are often listed as in the following example:
 \end{lstlisting}
 Without arguments, the parameter {\ct MATL\_ID} is assumed to be a list of the materials in multiple layers, with each layer consisting of only a single material component.
 
-When a set of {\ct SURF} parameters is applied to the face of an {\ct OBST}, the first {\ct MATL\_ID} defines the first layer of solid material. The other {\ct MATL\_ID}s are applied in succession. If {\ct BACKING='EXPOSED'}, the last {\ct MATL\_ID} is applied to the opposite face of the {\ct OBST}, assuming that the {\ct OBST} is zero or one grid cells thick. If the {\ct OBST} is thicker than one grid cell, then {\ct BACKING='EXPOSED'} is undefined. If in the example above, {\ct BRICK WALL} was applied to the entire {\ct OBST} using {\ct SURF\_ID}, then when doing a heat transfer calculation from the $+x$ face to the $-x$ face, FDS would consider the {\ct OBST} to be {\ct BRICK} followed by {\ct INSULATOR} and the same for a heat transfer
+When a set of {\ct SURF} parameters is applied to the face of an {\ct OBST}, the first {\ct MATL\_ID} defines the first layer of solid material. The other {\ct MATL\_ID}s are applied in succession. If {\ct BACKING='EXPOSED'}, the last {\ct MATL\_ID} is applied to the opposite face of the {\ct OBST}, assuming that the {\ct OBST} is zero or one grid cells thick. If the {\ct OBST} is thicker than one grid cell, then {\ct BACKING='EXPOSED'} is undefined and it will be treated as if the condition {\ct BACKING='VOID'} was set. If in the example above, {\ct BRICK WALL} was applied to the entire {\ct OBST} using {\ct SURF\_ID}, then when doing a heat transfer calculation from the $+x$ face to the $-x$ face, FDS would consider the {\ct OBST} to be {\ct BRICK} followed by {\ct INSULATOR} and the same for a heat transfer
 calculation from the $-x$ face to the $+x$ face.  To avoid this, specify a second {\ct SURF} that has the reverse {\ct MATL\_ID} and use {\ct SURF\_ID6} to apply the two {\ct SURF} definitions to opposite faces of the {\ct OBST}.
 
 Mixtures of solid materials within the same layer can be defined using
@@ -2610,11 +2610,8 @@ not just the surface.
 \label{info:BACKING}
 
 The layers of a solid boundary are listed in order from the surface. By default,
-this innermost layer is assumed to back up to an air gap at ambient
-temperature. This is true even if the obstruction forms a wall in the model that backs up to another
-compartment. A good example of the default back side boundary condition is a sheet of gypsum board attached to wood studs.
-It is assumed that the back side of the gypsum board is an ambient temperature void space within the wall. It does not
-matter if the obstruction on which the boundary condition is applied is thick or thin.
+if the obstruction is less than or equal to one cell thick, then the innermost layer will be exposed to the air temperature on the back side.  If the obstruction is on the boundary of the domain or is more than one cell thick, it is assumed to back up to an air gap at ambient
+temperature. For example a thin steel plate (i.e. thickness less than or equal to the grid) would use the FDS predicted temperatures on either side of the plate for predicting heat transfer.   
 
 There are other back side boundary conditions that can be applied. One is to assume that the wall
 backs up to an insulated material in which case no heat is lost to
@@ -2630,7 +2627,9 @@ through the wall into the space behind the wall, the attribute
 if the wall is less than or equal to one mesh cell thick, and if there is a non-zero volume
 of computational domain on the other side of the wall. Obviously, if
 the wall is an external boundary of the domain, the heat is lost to an ambient temperature void. The same happens if the back side
-gas cell cannot be found (in which case, the wall would not be one cell thick).
+gas cell cannot be found (in which case, the wall would not be one cell thick).  This is the default boundary conditions.
+
+If the wall is assumed to always back up to the ambient, then the attribute {\ct BACKING='VOID'} should be set.
 
 The back side emissivity of the surface can be controlled by specifying {\ct EMISSIVITY\_BACK} on the {\ct SURF} line. If not specified, the back side
 emissivity will be calculated during the simulations as a mass-weighted sum of the {\ct MATL} emissivities.
