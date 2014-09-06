@@ -21,11 +21,11 @@ export BASEDIR=`pwd`
 export INDIR=Current_Results
 
 function usage {
-echo "Run_All.sh [ -d -h -o output_dir -q queue_name -s -x ]"
+echo "Run_All.sh [ -b -h -o output_dir -q queue_name -s -x ]"
 echo "Runs FDS validation set"
 echo ""
 echo "Options"
-echo "-d - use debug version of FDS"
+echo "-b - use debug version of FDS"
 echo "-h - display this message"
 echo "-o output_dir - specify output directory"
 echo "     default: Current_Results"
@@ -42,7 +42,7 @@ DEBUG=$OPENMP
 while getopts 'dho:q:sxy' OPTION
 do
 case $OPTION in
-  d)
+  b)
    DEBUG="-b $OPENMP"
    ;;
   h)
