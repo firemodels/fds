@@ -548,7 +548,7 @@ run_validation_cases_debug()
       # Submit FDS validation cases and wait for them to start
       echo "Running FDS validation cases for ${SET}:" >> $FIREBOT_DIR/output/stage3
       echo "" >> $FIREBOT_DIR/output/stage3 2>&1
-      ./Run_All.sh -d -q $QUEUE >> $FIREBOT_DIR/output/stage3 2>&1
+      ./Run_All.sh -b -q $QUEUE >> $FIREBOT_DIR/output/stage3 2>&1
 
       CURRENT_VALIDATION_SETS+=($SET)
 
@@ -566,7 +566,7 @@ run_validation_cases_debug()
    for SET in ${CURRENT_VALIDATION_SETS[*]}
    do
       cd $FDS_SVNROOT/Validation/"$SET"
-      ./Run_All.sh -d -s >> $FIREBOT_DIR/output/stage3 2>&1
+      ./Run_All.sh -b -s >> $FIREBOT_DIR/output/stage3 2>&1
       echo "" >> $FIREBOT_DIR/output/stage3 2>&1
    done
 
