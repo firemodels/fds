@@ -3655,8 +3655,8 @@ void drawgslice_dataGPU(slicedata *slicei){
 
 
   sb=slicebounds+islicetype;
-  valmin = sb->levels256[0];
-  valmax = sb->levels256[255];
+  valmin = sb->levels256[0]*sb->fscale;
+  valmax = sb->levels256[255]*sb->fscale;
   boxmin=meshi->boxmin;
   boxmax=meshi->boxmax;
 
@@ -3711,8 +3711,8 @@ void drawgslice_data(slicedata *slicei){
   if(use_transparency_data==1)transparenton();
 
   sb=slicebounds+islicetype;
-  valmin = sb->levels256[0];
-  valmax = sb->levels256[255];
+  valmin = sb->levels256[0]*sb->fscale;
+  valmax = sb->levels256[255]*sb->fscale;
   dval = (valmax-valmin)/255.0;
   
   gslicedata=slicei->qsliceframe;
