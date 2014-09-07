@@ -1115,14 +1115,14 @@ Virtual measurement devices are placed throughout the channel to collect data re
 
 \begin{figure}
     \centering
-    \includegraphics[width=\textwidth]{FIGURES/backward_facing_step_computational_domain.JPG}
+    \includegraphics[width=\textwidth]{FIGURES/backward_facing_step_computational_domain}
     \caption[Schematic of the channel computational domain]{Schematic of the channel computational domain.  Virtual measurement devices are denoted by dotted green lines.}
     \label{fig:computational_domain}
 \end{figure}
 
 \begin{figure}
     \centering
-    \includegraphics[width=\textwidth]{FIGURES/backward_facing_step_vel_slice.png}
+    \includegraphics[width=\textwidth]{FIGURES/backward_facing_step_vel_slice}
     \caption[Instantaneous contours of velocity magnitude]{Instantaneous contours of velocity magnitude.}
     \label{fig:vel_slice}
 \end{figure}
@@ -1141,19 +1141,19 @@ Fig.~\ref{fig:flow_profiles} shows the inlet ($x/h=-3$) and downstream mean and 
 
 \begin{figure}
     \centering
-    \includegraphics[scale=.49]{SCRIPT_FIGURES/backward_facing_step_Cf.pdf}
-    \includegraphics[scale=.49]{SCRIPT_FIGURES/backward_facing_step_Cp.pdf}
+    \includegraphics[scale=.49]{SCRIPT_FIGURES/backward_facing_step_Cf}
+    \includegraphics[scale=.49]{SCRIPT_FIGURES/backward_facing_step_Cp}
     \caption[Friction coefficient and pressure coefficient]{Longitudinal profiles of (left) friction coefficient and (right) pressure coefficient.}
     \label{fig:friction_pressure_coefficients}
 \end{figure}
 
 \begin{figure}
     \centering
-    \includegraphics[scale=.47]{SCRIPT_FIGURES/backward_facing_step_U.pdf}
-    \includegraphics[scale=.47]{SCRIPT_FIGURES/backward_facing_step_W.pdf}\\
-    \includegraphics[scale=.47]{SCRIPT_FIGURES/backward_facing_step_uu.pdf}
-    \includegraphics[scale=.47]{SCRIPT_FIGURES/backward_facing_step_ww.pdf}\\
-    \includegraphics[scale=.47]{SCRIPT_FIGURES/backward_facing_step_uw.pdf}
+    \includegraphics[scale=.47]{SCRIPT_FIGURES/backward_facing_step_U}
+    \includegraphics[scale=.47]{SCRIPT_FIGURES/backward_facing_step_W}\\
+    \includegraphics[scale=.47]{SCRIPT_FIGURES/backward_facing_step_uu}
+    \includegraphics[scale=.47]{SCRIPT_FIGURES/backward_facing_step_ww}\\
+    \includegraphics[scale=.47]{SCRIPT_FIGURES/backward_facing_step_uw}
     \caption[Flow profiles]{Flow profiles for various grid resolutions.  Symbols: --$\mathlarger{\mathlarger{\star}}$--, $h/\delta z$=5; --$\Box$--, $h/\delta z$=10; --$\Diamond$--, $h/\delta z$=20; $\mathlarger{\mathlarger{\boldsymbol\circ}}$, J\&D experimental data.}
     \label{fig:flow_profiles}
 \end{figure}
@@ -1516,10 +1516,10 @@ Simulations were performed for $N = \{32, 64, 128, 256, 512\}$, where $N$ is the
         /tikz/.cd  % Change back to the normal key directory
     }
     	]
-	\addplot graphics [xmin=0.00, xmax=1.00, ymin=0, ymax=1] {SCRIPT_FIGURES/shunn3_256_density_p000.png};
-	\addplot graphics [xmin=1.10, xmax=2.10, ymin=0, ymax=1] {SCRIPT_FIGURES/shunn3_256_density_p125.png};
-	\addplot graphics [xmin=2.20, xmax=3.20, ymin=0, ymax=1] {SCRIPT_FIGURES/shunn3_256_density_p250.png};
-	\addplot graphics [xmin=3.30, xmax=4.30, ymin=0, ymax=1] {SCRIPT_FIGURES/shunn3_256_density_p375.png};
+	\addplot graphics [xmin=0.00, xmax=1.00, ymin=0, ymax=1] {SCRIPT_FIGURES/shunn3_256_density_p000};
+	\addplot graphics [xmin=1.10, xmax=2.10, ymin=0, ymax=1] {SCRIPT_FIGURES/shunn3_256_density_p125};
+	\addplot graphics [xmin=2.20, xmax=3.20, ymin=0, ymax=1] {SCRIPT_FIGURES/shunn3_256_density_p250};
+	\addplot graphics [xmin=3.30, xmax=4.30, ymin=0, ymax=1] {SCRIPT_FIGURES/shunn3_256_density_p375};
 \end{axis}
 \draw (1.75,3.78) node {$t=0$ s};
 \draw (5.25,3.78) node {$t=0.125$ s};
@@ -1549,10 +1549,10 @@ Simulations were performed for $N = \{32, 64, 128, 256, 512\}$, where $N$ is the
         /tikz/.cd  % Change back to the normal key directory
     }
     	]
-	\addplot graphics [xmin=0.00, xmax=1.00, ymin=0, ymax=1] {SCRIPT_FIGURES/shunn3_256_scalar_p000.png};
-	\addplot graphics [xmin=1.10, xmax=2.10, ymin=0, ymax=1] {SCRIPT_FIGURES/shunn3_256_scalar_p125.png};
-	\addplot graphics [xmin=2.20, xmax=3.20, ymin=0, ymax=1] {SCRIPT_FIGURES/shunn3_256_scalar_p250.png};
-	\addplot graphics [xmin=3.30, xmax=4.30, ymin=0, ymax=1] {SCRIPT_FIGURES/shunn3_256_scalar_p375.png};
+	\addplot graphics [xmin=0.00, xmax=1.00, ymin=0, ymax=1] {SCRIPT_FIGURES/shunn3_256_scalar_p000};
+	\addplot graphics [xmin=1.10, xmax=2.10, ymin=0, ymax=1] {SCRIPT_FIGURES/shunn3_256_scalar_p125};
+	\addplot graphics [xmin=2.20, xmax=3.20, ymin=0, ymax=1] {SCRIPT_FIGURES/shunn3_256_scalar_p250};
+	\addplot graphics [xmin=3.30, xmax=4.30, ymin=0, ymax=1] {SCRIPT_FIGURES/shunn3_256_scalar_p375};
 \end{axis}
 \end{tikzpicture}
 
@@ -1578,10 +1578,10 @@ Simulations were performed for $N = \{32, 64, 128, 256, 512\}$, where $N$ is the
         /tikz/.cd  % Change back to the normal key directory
     }
     	]
-	\addplot graphics [xmin=0.00, xmax=1.00, ymin=0, ymax=1] {SCRIPT_FIGURES/shunn3_256_uvelocity_p000.png};
-	\addplot graphics [xmin=1.10, xmax=2.10, ymin=0, ymax=1] {SCRIPT_FIGURES/shunn3_256_uvelocity_p125.png};
-	\addplot graphics [xmin=2.20, xmax=3.20, ymin=0, ymax=1] {SCRIPT_FIGURES/shunn3_256_uvelocity_p250.png};
-	\addplot graphics [xmin=3.30, xmax=4.30, ymin=0, ymax=1] {SCRIPT_FIGURES/shunn3_256_uvelocity_p375.png};
+	\addplot graphics [xmin=0.00, xmax=1.00, ymin=0, ymax=1] {SCRIPT_FIGURES/shunn3_256_uvelocity_p000};
+	\addplot graphics [xmin=1.10, xmax=2.10, ymin=0, ymax=1] {SCRIPT_FIGURES/shunn3_256_uvelocity_p125};
+	\addplot graphics [xmin=2.20, xmax=3.20, ymin=0, ymax=1] {SCRIPT_FIGURES/shunn3_256_uvelocity_p250};
+	\addplot graphics [xmin=3.30, xmax=4.30, ymin=0, ymax=1] {SCRIPT_FIGURES/shunn3_256_uvelocity_p375};
 \end{axis}
 \end{tikzpicture}
 
@@ -1592,7 +1592,7 @@ Simulations were performed for $N = \{32, 64, 128, 256, 512\}$, where $N$ is the
 
 \begin{figure}
 \centering
-\includegraphics[width=.8\textwidth]{SCRIPT_FIGURES/shunn_mms_convergence.pdf}
+\includegraphics[width=.8\textwidth]{SCRIPT_FIGURES/shunn_mms_convergence}
 \caption[Convergence of the manufactured solution]{\label{fig_mms_convergence} Convergence for the manufactured solution.  The L2 error at time $t = 1$ s is plotted as a function of grid spacing for $N=\{32,64,128,256,512\}$ points in each direction.  The grid spacing is $\Delta x = L/N$, where $L=2$ m.  Calculations were performed with an adaptive time step satisfying both convective and diffusive CFL (Von Neumann) limits of 0.5. These results confirm second-order accuracy of the flow solver for density, mixture fraction, and velocity. As is known for projection schemes like ours, the pressure solution (represented by $H$) is first-order accurate \cite{Armfield:2002}.}
 \end{figure}
 
