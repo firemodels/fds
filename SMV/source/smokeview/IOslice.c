@@ -3768,8 +3768,8 @@ void drawvgslice_data(vslicedata *vslicei){
   if(use_transparency_data==1)transparenton();
 
   sb=slicebounds+islicetype;
-  valmin = sb->levels256[0];
-  valmax = sb->levels256[255];
+  valmin = sb->levels256[0]*sb->fscale;
+  valmax = sb->levels256[255]*sb->fscale;
   dval = (valmax-valmin)/255.0;
 
   gslicedata=slicei->qsliceframe;
