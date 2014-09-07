@@ -185,8 +185,8 @@ OSX_INTEL_LIBS = $(IFORT_COMPILER_LIB)/libifcoremt.a $(IFORT_COMPILER_LIB)/libim
 
 # ------------- intel_osx_64 ----------------
 
-intel_osx_64 : FFLAGS    = -O0 -m64 -static-intel -vec_report0 -fpp -D pp_OSX64 -mmacosx-version-min=10.4
-intel_osx_64 : CFLAGS    = -O0 -m64 -static-intel -vec_report0 -D pp_OSX64  -D pp_INTEL -mmacosx-version-min=10.4 $(SMV_TESTFLAG) $(SMV_PROFILEFLAG)
+intel_osx_64 : FFLAGS    = -O0 -m64 -static-intel -fpp -D pp_OSX64 -mmacosx-version-min=10.4
+intel_osx_64 : CFLAGS    = -O0 -m64 -static-intel -D pp_OSX64  -D pp_INTEL -mmacosx-version-min=10.4 $(SMV_TESTFLAG) $(SMV_PROFILEFLAG)
 intel_osx_64 : LFLAGS    = -m64 -static-intel -framework OpenGL -framework GLUT -mmacosx-version-min=10.4
 intel_osx_64 : CC        = icc 
 intel_osx_64 : CPP       = icpc
@@ -198,8 +198,8 @@ intel_osx_64 : $(obj)
 
 # ------------- intel_osx_64_db ----------------
 
-intel_osx_64_db : FFLAGS    = -O0 -m64 -static-intel -vec_report0 -fpp -D pp_OSX64 -mmacosx-version-min=10.4
-intel_osx_64_db : CFLAGS    = -O0 -m64 -static-intel -vec_report0 -D pp_OSX64  -D pp_INTEL -mmacosx-version-min=10.4 $(SMV_TESTFLAG) $(SMV_PROFILEFLAG)
+intel_osx_64_db : FFLAGS    = -O0 -m64 -static-intel -fpp -D pp_OSX64 -mmacosx-version-min=10.4
+intel_osx_64_db : CFLAGS    = -O0 -m64 -static-intel -D pp_OSX64  -D pp_INTEL -mmacosx-version-min=10.4 $(SMV_TESTFLAG) $(SMV_PROFILEFLAG)
 intel_osx_64_db : LFLAGS    = -m64 -static-intel -framework OpenGL -framework GLUT -mmacosx-version-min=10.4
 intel_osx_64_db : CC        = icc 
 intel_osx_64_db : CPP       = icpc
