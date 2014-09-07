@@ -140,8 +140,8 @@
 //*** turn off features on the Mac that don't work there
 
 #ifdef pp_OSX
-#undef pp_LANG (alternate languages)
-#undef pp_DEG  (degree symbol)
+#undef pp_LANG
+#undef pp_DEG
 #endif
 
 // VVVVVVVVVVVVVVVVVVVVVVVVV  set defines used by various headers VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
