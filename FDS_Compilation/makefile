@@ -161,6 +161,14 @@ impi_intel_linux_64 : FOPENMPFLAGS = -openmp -openmp-link static -liomp5
 impi_intel_linux_64 : obj = fds_impi_intel_linux_64
 impi_intel_linux_64 : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi)
+
+mpi1p4_intel_linux_64ib : FFLAGS = -m64 -O2 -vec_report0 -ipo
+mpi1p4_intel_linux_64ib : LFLAGS = -static-intel
+mpi1p4_intel_linux_64ib : FCOMPL = mpif90
+mpi1p4_intel_linux_64ib : FOPENMPFLAGS = -openmp -openmp-link static -liomp5
+mpi1p4_intel_linux_64ib : obj = fds_mpi1p4_intel_linux_64ib
+mpi1p4_intel_linux_64ib : setup $(obj_mpi)
+	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi)
 	
 mpi_intel_linux_64 : FFLAGS = -m64 -O2 -vec_report0 -ipo
 mpi_intel_linux_64 : LFLAGS = -static-intel
