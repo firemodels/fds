@@ -5,47 +5,47 @@
 export SVNROOT=`pwd`/../..
 source $SVNROOT/Validation/Common_Run_All.sh
 
-$QFDS  $QUEUE -d $INDIR USCG_HAI_250_kW_Closed_Grinnell.fds
-$QFDS  $QUEUE -d $INDIR USCG_HAI_500_kW_Closed_Grinnell.fds
-$QFDS  $QUEUE -d $INDIR USCG_HAI_1000_kW_Closed_Grinnell.fds
-$QFDS  $QUEUE -d $INDIR USCG_HAI_250_kW_Natural_Grinnell.fds
-$QFDS  $QUEUE -d $INDIR USCG_HAI_500_kW_Natural_Grinnell.fds
-$QFDS  $QUEUE -d $INDIR USCG_HAI_1000_kW_Natural_Grinnell.fds
-$QFDS  $QUEUE -d $INDIR USCG_HAI_250_kW_Forced_Grinnell.fds
-$QFDS  $QUEUE -d $INDIR USCG_HAI_500_kW_Forced_Grinnell.fds
-$QFDS  $QUEUE -d $INDIR USCG_HAI_1000_kW_Forced_Grinnell.fds
+$QFDS $DEBUG $QUEUE -d $INDIR USCG_HAI_250_kW_Closed_Grinnell.fds
+$QFDS $DEBUG $QUEUE -d $INDIR USCG_HAI_500_kW_Closed_Grinnell.fds
+$QFDS $DEBUG $QUEUE -d $INDIR USCG_HAI_1000_kW_Closed_Grinnell.fds
+$QFDS $DEBUG $QUEUE -d $INDIR USCG_HAI_250_kW_Natural_Grinnell.fds
+$QFDS $DEBUG $QUEUE -d $INDIR USCG_HAI_500_kW_Natural_Grinnell.fds
+$QFDS $DEBUG $QUEUE -d $INDIR USCG_HAI_1000_kW_Natural_Grinnell.fds
+$QFDS $DEBUG $QUEUE -d $INDIR USCG_HAI_250_kW_Forced_Grinnell.fds
+$QFDS $DEBUG $QUEUE -d $INDIR USCG_HAI_500_kW_Forced_Grinnell.fds
+$QFDS $DEBUG $QUEUE -d $INDIR USCG_HAI_1000_kW_Forced_Grinnell.fds
 
-$QFDS  $QUEUE -d $INDIR USCG_HAI_250_kW_Closed_Navy.fds
-$QFDS  $QUEUE -d $INDIR USCG_HAI_500_kW_Closed_Navy.fds
-$QFDS  $QUEUE -d $INDIR USCG_HAI_1000_kW_Closed_Navy.fds
-$QFDS  $QUEUE -d $INDIR USCG_HAI_250_kW_Natural_Navy.fds
-$QFDS  $QUEUE -d $INDIR USCG_HAI_500_kW_Natural_Navy.fds
-$QFDS  $QUEUE -d $INDIR USCG_HAI_1000_kW_Natural_Navy.fds
-$QFDS  $QUEUE -d $INDIR USCG_HAI_250_kW_Forced_Navy.fds
-$QFDS  $QUEUE -d $INDIR USCG_HAI_500_kW_Forced_Navy.fds
-$QFDS  $QUEUE -d $INDIR USCG_HAI_1000_kW_Forced_Navy.fds
+$QFDS $DEBUG $QUEUE -d $INDIR USCG_HAI_250_kW_Closed_Navy.fds
+$QFDS $DEBUG $QUEUE -d $INDIR USCG_HAI_500_kW_Closed_Navy.fds
+$QFDS $DEBUG $QUEUE -d $INDIR USCG_HAI_1000_kW_Closed_Navy.fds
+$QFDS $DEBUG $QUEUE -d $INDIR USCG_HAI_250_kW_Natural_Navy.fds
+$QFDS $DEBUG $QUEUE -d $INDIR USCG_HAI_500_kW_Natural_Navy.fds
+$QFDS $DEBUG $QUEUE -d $INDIR USCG_HAI_1000_kW_Natural_Navy.fds
+$QFDS $DEBUG $QUEUE -d $INDIR USCG_HAI_250_kW_Forced_Navy.fds
+$QFDS $DEBUG $QUEUE -d $INDIR USCG_HAI_500_kW_Forced_Navy.fds
+$QFDS $DEBUG $QUEUE -d $INDIR USCG_HAI_1000_kW_Forced_Navy.fds
 
-$QFDS  $QUEUE -d $INDIR USCG_HAI_250_kW_Closed_Fike.fds
-$QFDS  $QUEUE -d $INDIR USCG_HAI_500_kW_Closed_Fike.fds
-$QFDS  $QUEUE -d $INDIR USCG_HAI_1000_kW_Closed_Fike.fds
-$QFDS  $QUEUE -d $INDIR USCG_HAI_250_kW_Natural_Fike.fds
-$QFDS  $QUEUE -d $INDIR USCG_HAI_500_kW_Natural_Fike.fds
-$QFDS  $QUEUE -d $INDIR USCG_HAI_1000_kW_Natural_Fike.fds
-$QFDS  $QUEUE -d $INDIR USCG_HAI_250_kW_Forced_Fike.fds
-$QFDS  $QUEUE -d $INDIR USCG_HAI_500_kW_Forced_Fike.fds
-$QFDS  $QUEUE -d $INDIR USCG_HAI_1000_kW_Forced_Fike.fds
+$QFDS $DEBUG $QUEUE -d $INDIR USCG_HAI_250_kW_Closed_Fike.fds
+$QFDS $DEBUG $QUEUE -d $INDIR USCG_HAI_500_kW_Closed_Fike.fds
+$QFDS $DEBUG $QUEUE -d $INDIR USCG_HAI_1000_kW_Closed_Fike.fds
+$QFDS $DEBUG $QUEUE -d $INDIR USCG_HAI_250_kW_Natural_Fike.fds
+$QFDS $DEBUG $QUEUE -d $INDIR USCG_HAI_500_kW_Natural_Fike.fds
+$QFDS $DEBUG $QUEUE -d $INDIR USCG_HAI_1000_kW_Natural_Fike.fds
+$QFDS $DEBUG $QUEUE -d $INDIR USCG_HAI_250_kW_Forced_Fike.fds
+$QFDS $DEBUG $QUEUE -d $INDIR USCG_HAI_500_kW_Forced_Fike.fds
+$QFDS $DEBUG $QUEUE -d $INDIR USCG_HAI_1000_kW_Forced_Fike.fds
 
-$QFDS  $QUEUE -d $INDIR USCG_HAI_250_kW_Closed_Fogtec.fds
-$QFDS  $QUEUE -d $INDIR USCG_HAI_500_kW_Closed_Fogtec.fds
-$QFDS  $QUEUE -d $INDIR USCG_HAI_1000_kW_Closed_Fogtec.fds
-$QFDS  $QUEUE -d $INDIR USCG_HAI_250_kW_Natural_Fogtec.fds
-$QFDS  $QUEUE -d $INDIR USCG_HAI_500_kW_Natural_Fogtec.fds
-$QFDS  $QUEUE -d $INDIR USCG_HAI_1000_kW_Natural_Fogtec.fds
-$QFDS  $QUEUE -d $INDIR USCG_HAI_250_kW_Forced_Fogtec.fds
-$QFDS  $QUEUE -d $INDIR USCG_HAI_500_kW_Forced_Fogtec.fds
-$QFDS  $QUEUE -d $INDIR USCG_HAI_1000_kW_Forced_Fogtec.fds
+$QFDS $DEBUG $QUEUE -d $INDIR USCG_HAI_250_kW_Closed_Fogtec.fds
+$QFDS $DEBUG $QUEUE -d $INDIR USCG_HAI_500_kW_Closed_Fogtec.fds
+$QFDS $DEBUG $QUEUE -d $INDIR USCG_HAI_1000_kW_Closed_Fogtec.fds
+$QFDS $DEBUG $QUEUE -d $INDIR USCG_HAI_250_kW_Natural_Fogtec.fds
+$QFDS $DEBUG $QUEUE -d $INDIR USCG_HAI_500_kW_Natural_Fogtec.fds
+$QFDS $DEBUG $QUEUE -d $INDIR USCG_HAI_1000_kW_Natural_Fogtec.fds
+$QFDS $DEBUG $QUEUE -d $INDIR USCG_HAI_250_kW_Forced_Fogtec.fds
+$QFDS $DEBUG $QUEUE -d $INDIR USCG_HAI_500_kW_Forced_Fogtec.fds
+$QFDS $DEBUG $QUEUE -d $INDIR USCG_HAI_1000_kW_Forced_Fogtec.fds
 
-$QFDS  $QUEUE -d $INDIR USCG_HAI_WS_29.fds
-$QFDS  $QUEUE -d $INDIR USCG_HAI_WS_45.fds
-$QFDS  $QUEUE -d $INDIR USCG_HAI_WS_50.fds
+$QFDS $DEBUG $QUEUE -d $INDIR USCG_HAI_WS_29.fds
+$QFDS $DEBUG $QUEUE -d $INDIR USCG_HAI_WS_45.fds
+$QFDS $DEBUG $QUEUE -d $INDIR USCG_HAI_WS_50.fds
 

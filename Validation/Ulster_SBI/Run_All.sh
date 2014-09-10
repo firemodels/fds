@@ -5,8 +5,8 @@
 export SVNROOT=`pwd`/../..
 source $SVNROOT/Validation/Common_Run_All.sh
 
-$QFDS  $QUEUE -d $INDIR Ulster_SBI_30_kW.fds
-$QFDS  $QUEUE -d $INDIR Ulster_SBI_45_kW.fds
-$QFDS  $QUEUE -d $INDIR Ulster_SBI_60_kW.fds 
+$QFDS $DEBUG $QUEUE -d $INDIR Ulster_SBI_30_kW.fds
+$QFDS $DEBUG $QUEUE -d $INDIR Ulster_SBI_45_kW.fds
+$QFDS $DEBUG $QUEUE -d $INDIR Ulster_SBI_60_kW.fds 
 
 echo FDS cases submitted
