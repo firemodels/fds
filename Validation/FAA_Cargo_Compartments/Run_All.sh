@@ -5,6 +5,6 @@
 export SVNROOT=`pwd`/../..
 source $SVNROOT/Validation/Common_Run_All.sh
 
-$QFDS  -p 5 $QUEUE -d $INDIR  FAA_B707_Test_1.fds
-$QFDS  -p 5 $QUEUE -d $INDIR  FAA_B707_Test_2.fds
-$QFDS  -p 5 $QUEUE -d $INDIR  FAA_B707_Test_3.fds
+$QFDS $DEBUG -p 5 $QUEUE -d $INDIR  FAA_B707_Test_1.fds
+$QFDS $DEBUG -p 5 $QUEUE -d $INDIR  FAA_B707_Test_2.fds
+$QFDS $DEBUG -p 5 $QUEUE -d $INDIR  FAA_B707_Test_3.fds

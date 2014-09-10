@@ -5,22 +5,22 @@
 export SVNROOT=`pwd`/../..
 source $SVNROOT/Validation/Common_Run_All.sh
 
-$QFDS   $QUEUE -d $INDIR McCaffrey_14_kW.fds 
-$QFDS   $QUEUE -d $INDIR McCaffrey_22_kW.fds 
-$QFDS   $QUEUE -d $INDIR McCaffrey_33_kW.fds 
-$QFDS   $QUEUE -d $INDIR McCaffrey_45_kW.fds 
-$QFDS   $QUEUE -d $INDIR McCaffrey_57_kW.fds 
+$QFDS $DEBUG $QUEUE -d $INDIR McCaffrey_14_kW.fds 
+$QFDS $DEBUG $QUEUE -d $INDIR McCaffrey_22_kW.fds 
+$QFDS $DEBUG $QUEUE -d $INDIR McCaffrey_33_kW.fds 
+$QFDS $DEBUG $QUEUE -d $INDIR McCaffrey_45_kW.fds 
+$QFDS $DEBUG $QUEUE -d $INDIR McCaffrey_57_kW.fds 
 
-$QFDS   $QUEUE -d $INDIR McCaffrey_14_kW_coarse.fds
-$QFDS   $QUEUE -d $INDIR McCaffrey_22_kW_coarse.fds
-$QFDS   $QUEUE -d $INDIR McCaffrey_33_kW_coarse.fds
-$QFDS   $QUEUE -d $INDIR McCaffrey_45_kW_coarse.fds
-$QFDS   $QUEUE -d $INDIR McCaffrey_57_kW_coarse.fds
+$QFDS $DEBUG $QUEUE -d $INDIR McCaffrey_14_kW_coarse.fds
+$QFDS $DEBUG $QUEUE -d $INDIR McCaffrey_22_kW_coarse.fds
+$QFDS $DEBUG $QUEUE -d $INDIR McCaffrey_33_kW_coarse.fds
+$QFDS $DEBUG $QUEUE -d $INDIR McCaffrey_45_kW_coarse.fds
+$QFDS $DEBUG $QUEUE -d $INDIR McCaffrey_57_kW_coarse.fds
 
-$QFDS  -p 4  $QUEUE -d $INDIR McCaffrey_14_kW_fine.fds
-$QFDS  -p 4  $QUEUE -d $INDIR McCaffrey_22_kW_fine.fds
-$QFDS  -p 4  $QUEUE -d $INDIR McCaffrey_33_kW_fine.fds
-$QFDS  -p 4  $QUEUE -d $INDIR McCaffrey_45_kW_fine.fds
-$QFDS  -p 4  $QUEUE -d $INDIR McCaffrey_57_kW_fine.fds
+$QFDS $DEBUG -p 4 $QUEUE -d $INDIR McCaffrey_14_kW_fine.fds
+$QFDS $DEBUG -p 4 $QUEUE -d $INDIR McCaffrey_22_kW_fine.fds
+$QFDS $DEBUG -p 4 $QUEUE -d $INDIR McCaffrey_33_kW_fine.fds
+$QFDS $DEBUG -p 4 $QUEUE -d $INDIR McCaffrey_45_kW_fine.fds
+$QFDS $DEBUG -p 4 $QUEUE -d $INDIR McCaffrey_57_kW_fine.fds
 
 echo FDS cases submitted
