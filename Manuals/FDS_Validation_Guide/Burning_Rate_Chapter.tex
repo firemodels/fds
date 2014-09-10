@@ -804,7 +804,9 @@ In this section, a series of liquid pool fires with different fuels is considere
 \begin{equation}
 \dot{m}''= 0.001 \; \frac{\Delta h_c}{\Delta h_g} \quad ; \quad \Delta h_g = \Delta h_v + \int_{T_0}^{T_b} c_p \; dT
 \end{equation}
-where $\Delta h_v$ is the latent heat of vaporization, $T_0$ is the initial temperature, $T_b$ is the boiling temperature, and $c_p$ is the specific heat of the liquid fuel. The heat of gasification, $\Delta h_g$, is the amount of energy required to raise the fuel from its initial temperature to its boiling temperature and evaporate it. Figure~\ref{POOL_MLR} shows a comparison of predicted burning rates with data taken from Ref.~\cite{SFPE}.
+where $\Delta h_v$ is the latent heat of vaporization, $T_0$ is the initial temperature, $T_b$ is the boiling temperature, and $c_p$ is the specific heat of the liquid fuel. The heat of gasification, $\Delta h_g$, is the amount of energy required to raise the fuel from its initial temperature to its boiling temperature and evaporate it. Figure~\ref{POOL_MLR} shows a comparison of predicted burning rates with data taken from Ref.~\cite{SFPE}. 
+
+The absorption coefficients for benzene and ethanol are based on curve fits to experimental data as explained in Appendix K of the FDS Technical Reference Guide. The absorption coefficient for methanol presented in Appendix K is calculated with the aasumption that the incoming radiation is approximately blackbody radiation. The absorption coefficient for ethanol is calculated based on experimentally determined spectrum of an ethanol flame. Since both methanol and ethanol flames are low sooting, the blackbody radiation assumption is not correct. Instead it is assumed that the absorption coefficient for methanol should be of similar magnitude as that for ethanol. For heptane, butane and acetone the absorption coefficients are simple order of magnitude estimates.
 
 \begin{table}[h!]
 \begin{center}
@@ -812,10 +814,10 @@ where $\Delta h_v$ is the latent heat of vaporization, $T_0$ is the initial temp
 \begin{tabular}{|l|c|c|c|c|c|} \hline
 Fuel & $\rho$ (kg/m$^3$) & $c_p$ (kJ/kg/K)  & $\Delta h_c$ (kJ/kg) & $\Delta h_v$ (kJ/kg) & $\chi_r$ (-) \\ \hline \hline
 Acetone &  792.5   &  1.6529    &   30,510  &  501.03   & 0.27  \\ \hline
-Benzene &  876.5   &  1.7372    &   39,900  &   393.29  & 0.32  \\ \hline
-Butane  &  584.0   &  2.2784    &   45,700  &   385.22  & 0.20  \\ \hline
-Ethanol &  789.0   &  2.4398    &   26,780  &    836.98 & 0.18  \\ \hline
-Heptane &  684.0   &  2.2464    &   44,400  &    364.9  & 0.35  \\ \hline
+Benzene &  876.5   &  1.7372    &   39,900  &  393.29  & 0.32  \\ \hline
+Butane  &  584.0   &  2.2784    &   45,700  &  385.22  & 0.20  \\ \hline
+Ethanol &  789.0   &  2.4398    &   26,780  &  836.98 & 0.18  \\ \hline
+Heptane &  684.0   &  2.2464    &   44,400  &  364.9  & 0.35  \\ \hline
 Methanol & 791.8   &  2.4813    &   19,800  &  1,098.94 & 0.18  \\ \hline
 \end{tabular}
 \end{center}
