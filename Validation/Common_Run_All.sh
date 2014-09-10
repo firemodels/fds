@@ -39,7 +39,7 @@ exit
 }
 
 DEBUG=$OPENMP
-while getopts 'dho:q:sxy' OPTION
+while getopts 'bho:q:sxy' OPTION
 do
 case $OPTION in
   b)
