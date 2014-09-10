@@ -5,9 +5,9 @@
 export SVNROOT=`pwd`/../..
 source $SVNROOT/Validation/Common_Run_All.sh
 
-$QFDS  $QUEUE -d $INDIR UL_NIST_Vents_Test_1.fds
-$QFDS  $QUEUE -d $INDIR UL_NIST_Vents_Test_2.fds
-$QFDS  $QUEUE -d $INDIR UL_NIST_Vents_Test_3.fds
-$QFDS  $QUEUE -d $INDIR UL_NIST_Vents_Test_4.fds
+$QFDS $DEBUG $QUEUE -d $INDIR UL_NIST_Vents_Test_1.fds
+$QFDS $DEBUG $QUEUE -d $INDIR UL_NIST_Vents_Test_2.fds
+$QFDS $DEBUG $QUEUE -d $INDIR UL_NIST_Vents_Test_3.fds
+$QFDS $DEBUG $QUEUE -d $INDIR UL_NIST_Vents_Test_4.fds
 
 echo FDS cases submitted

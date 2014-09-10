@@ -5,12 +5,12 @@
 export SVNROOT=`pwd`/../..
 source $SVNROOT/Validation/Common_Run_All.sh
 
-$QFDS  $QUEUE -d $INDIR Bryant_034_kW.fds
-$QFDS  $QUEUE -d $INDIR Bryant_065_kW.fds
-$QFDS  $QUEUE -d $INDIR Bryant_096_kW.fds
-$QFDS  $QUEUE -d $INDIR Bryant_128_kW.fds
-$QFDS  $QUEUE -d $INDIR Bryant_160_kW.fds
-$QFDS  $QUEUE -d $INDIR Bryant_320_kW.fds
-$QFDS  $QUEUE -d $INDIR Bryant_511_kW.fds
+$QFDS $DEBUG $QUEUE -d $INDIR Bryant_034_kW.fds
+$QFDS $DEBUG $QUEUE -d $INDIR Bryant_065_kW.fds
+$QFDS $DEBUG $QUEUE -d $INDIR Bryant_096_kW.fds
+$QFDS $DEBUG $QUEUE -d $INDIR Bryant_128_kW.fds
+$QFDS $DEBUG $QUEUE -d $INDIR Bryant_160_kW.fds
+$QFDS $DEBUG $QUEUE -d $INDIR Bryant_320_kW.fds
+$QFDS $DEBUG $QUEUE -d $INDIR Bryant_511_kW.fds
  
 echo FDS cases submitted
