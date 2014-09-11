@@ -169,18 +169,18 @@ if test $ppn -le $max_processes_per_node ; then
   ppn=$max_processes_per_node
 fi
 
+# in benchmark mode run a case "alone" on one node
+
+if [ "$benchmark" == "yes" ]; then
+  nodes=1
+  ppn=$ncores
+fi
+
 # bind to sockets if OpenMP is being used (number of threads > 1)
 
 SOCKET_OPTION=" "
 if test $nopenmp_threads -gt 1 ; then
   SOCKET_OPTION="--bind-to socket --map-by ppr:1:socket"
-fi
-
-# in benchmark mode run a case "alone" on one node
-
-if [ "$benchmark" == "yes" ]; then
-  nodes=1
-  nmpi_processes_per_node=$ncores
 fi
 
 # use mpirun if there is more than 1 process
@@ -317,7 +317,7 @@ if [ "$queue" != "none" ] ; then
   echo "              Nodes:$nodes"
   echo "          Processes:$nmpi_processes"
   echo " Processes per node:$nmpi_processes_per_node"
-  if test $nmpi_processes -gt 1 ; then
+  if test $nopenmp_threads -gt 1 ; then
     echo "Threads per process:$nopenmp_threads"
   fi
 fi
