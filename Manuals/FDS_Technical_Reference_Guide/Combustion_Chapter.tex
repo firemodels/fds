@@ -464,6 +464,14 @@ Last, the rate of change in composition for species $\alpha$ in the mixed reacto
 \end{equation}
 See Section \ref{boundedness} for a discussion on the algorithm used to ensure species remain realizable.
 
+\subsubsection{Third Body Reactions}
+
+At low pressures, it is common to see so-called \emph{third body} reactions.  These reactions require the presence of some other molecule, M, for heat dissipation \cite{Turns:1996}.  The reaction scheme is usually written as
+\begin{equation}\label{eq:third_body}
+\mathrm{A} + \mathrm{B} + \mathrm{M} \rightarrow \mathrm{C} + \mathrm{M}
+\end{equation}
+The Arrhenius rate law has a first-order dependence on the concentration of M.  Since M may be \emph{any} other molecule, we take $C_{\si{M}} = \bar{p}/(R T) = \rho/(\overline{W} \times 1000) \;[=]\;\si{mol/cm^3}$.
+
 \subsubsection{Time Integration for Finite-Rate Chemistry}
 
 For reactions other than single step, mixing controlled chemistry, a fourth-order explicit integrator with error control is used. The time integration follows the procedure outlined in Eqs.~(\ref{eq:dmdt_1}) and (\ref{eq:dmdt_2}), but multiple subiterations are generally needed and the change in composition over the subinterval in the mixed reactor zone, $\Delta \hat{Y}_\alpha^*$, is usually obtained by integrating an Arrhenius rate law (we say ``usually'' because a combination of fast and finite-rate chemistry is permissible). More detail on the numerical methods of the integrator, including a method to combat stiff chemistry, can be found in Appendix~\ref{chemistry_integration}.
