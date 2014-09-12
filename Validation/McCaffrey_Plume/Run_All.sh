@@ -23,4 +23,16 @@ $QFDS $DEBUG -p 4 $QUEUE -d $INDIR McCaffrey_33_kW_fine.fds
 $QFDS $DEBUG -p 4 $QUEUE -d $INDIR McCaffrey_45_kW_fine.fds
 $QFDS $DEBUG -p 4 $QUEUE -d $INDIR McCaffrey_57_kW_fine.fds
 
+#$QFDS $DEBUG $QUEUE -d $INDIR McCaffrey_14_kW_5.fds 
+#$QFDS $DEBUG $QUEUE -d $INDIR McCaffrey_22_kW_5.fds 
+#$QFDS $DEBUG $QUEUE -d $INDIR McCaffrey_33_kW_5.fds 
+#$QFDS $DEBUG $QUEUE -d $INDIR McCaffrey_45_kW_5.fds 
+#$QFDS $DEBUG $QUEUE -d $INDIR McCaffrey_57_kW_5.fds
+
+#$QFDS $DEBUG -p 12 $QUEUE -d $INDIR McCaffrey_14_kW_10.fds
+#$QFDS $DEBUG -p 12 $QUEUE -d $INDIR McCaffrey_22_kW_10.fds
+#$QFDS $DEBUG -p 12 $QUEUE -d $INDIR McCaffrey_33_kW_10.fds
+#$QFDS $DEBUG -p 12 $QUEUE -d $INDIR McCaffrey_45_kW_10.fds
+#$QFDS $DEBUG -p 12 $QUEUE -d $INDIR McCaffrey_57_kW_10.fds
+
 echo FDS cases submitted
