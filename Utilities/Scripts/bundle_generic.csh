@@ -48,7 +48,7 @@ set backgroundroot=$scp_fds_smvroot/Utilities/background
 set smokediffroot=$scp_fds_smvroot/Utilities/smokediff
 set smokeziproot=$scp_fds_smvroot/Utilities/smokezip
 set wind2fdsroot=$scp_fds_smvroot/Utilities/wind2fds
-set googledir=$fds_smvroot/Utilities/uploads
+set uploaddir=$fds_smvroot/Utilities/uploads
 set bundledir=$bundlebase
 set bundle_setup=$fds_smvroot/Utilities/Scripts/bundle_setup
 set mandir=~/FIRE-LOCAL/reports/fds_manuals
@@ -57,19 +57,17 @@ set forbundle=$fds_smvroot/SMV/for_bundle
 set texturedir=$forbundle/textures
 set fds2asciiroot=$scp_fds_smvroot/Utilities/fds2ascii
 set wikify=$fds_smvroot/Utilities/Scripts/wikify.py
-set fullmanifest=$googledir/$bundledir/bin/$manifest
+set fullmanifest=$uploaddir/$bundledir/bin/$manifest
 set makeinstaller=$fds_smvroot/Utilities/Scripts/make_installer.sh
 
 set fds_cases=$fds_smvroot/Verification/FDS_Cases.sh
 set fdsmpi_cases=$fds_smvroot/Verification/FDS_MPI_Cases.sh
 set smv_cases=$fds_smvroot/Verification/scripts/SMV_Cases.sh
-set copycase=$fds_smvroot/Utilities/Scripts/copycase.sh
-set copycase2=$fds_smvroot/Utilities/Scripts/copycase2.sh
-set copycase3=$fds_smvroot/Utilities/Scripts/copycase3.sh
-set copycase4=$fds_smvroot/Utilities/Scripts/copycase4.sh
+set copyfdscase=$fds_smvroot/Utilities/Scripts/copyfdscase.sh
+set copycfastcase=$fds_smvroot/Utilities/Scripts/copycfastcase.sh
 set example_tmpdir=/tmp/examples.$$
 
-cd $googledir
+cd $uploaddir
 rm -rf $bundlebase
 mkdir $bundledir
 mkdir $bundledir/bin
@@ -213,23 +211,20 @@ cp $bundle_setup/readme_examples.html $bundledir/Examples/.
 svn export -q --force https://fds-smv.googlecode.com/svn/trunk/FDS/trunk/Verification $example_tmpdir
 
 cd $example_tmpdir
-setenv OUTDIR $googledir/$bundledir/Examples
-setenv RUNFDS $copycase
-setenv RUNWFDS $copycase
-setenv RUNTFDS $copycase
-setenv RUNCFAST $copycase3
-setenv RUNFDSBENCHMARK $copycase4
+setenv OUTDIR $uploaddir/$bundledir/Examples
+setenv QFDS $copyfdscase
+setenv RUNTFDS $copyfdscase
+setenv RUNCFAST $copycfastcase
 echo Copying example files to bundle directory
 $fds_cases
 $smv_cases
-setenv RUNFDSMPI $copycase2
 $fdsmpi_cases
 rm -rf $OUTDIR/Immersed_Boundary_Method
 
 echo >> $fullmanifest
 echo ------file listing---------------------------------- >> $fullmanifest
 set curdir=`pwd`
-cd $googledir/$bundledir
+cd $uploaddir/$bundledir
 find . -print >> $fullmanifest
 cd $curdir
 
@@ -240,13 +235,13 @@ cat <<EOF>>$fullmanifest
 EOF
 
 cp $fullmanifest ~/$manifest
-cp $fullmanifest $googledir/$manifest
+cp $fullmanifest $uploaddir/$manifest
 cat $fullmanifest | Mail -s " $PLATFORM" `whoami`
 
 echo Building archive
-rm -rf $googledir/$bundlebase.tar
-rm -rf $googledir/$bundlebase.tar.gz
-cd $googledir/$bundlebase
+rm -rf $uploaddir/$bundlebase.tar
+rm -rf $uploaddir/$bundlebase.tar.gz
+cd $uploaddir/$bundlebase
 tar cf ../$bundlebase.tar --exclude='*.csv' .
 echo Compressing archive
 gzip    ../$bundlebase.tar

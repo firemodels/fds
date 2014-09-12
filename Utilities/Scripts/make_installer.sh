@@ -160,7 +160,7 @@ MKDIR()
 THISSCRIPT=\`ABSPATH \$0\`
 THISDIR=\`pwd\`
 
-#--- record temporary start up file names
+#--- record temporary startup file names
 
 CSHFDS=/tmp/cshrc_fds.\$\$
 BASHFDS=/tmp/bashrc_fds.\$\$
@@ -333,12 +333,6 @@ if ( "\\\$platform" == "intel64" ) then
 setenv MPIDIST /shared/openmpi_64
 endif
 
-# environment for 32 bit gigabit ethernet
-
-if ( "\\\$platform" == "ia32" ) then
-setenv MPIDIST /shared/openmpi_32
-endif
-
 # Update LD_LIBRARY_PATH and PATH variables
 
 setenv $LDLIBPATH \\\$MPIDIST/lib:\\\$$LDLIBPATH
@@ -378,30 +372,20 @@ SHORTCUTDIR=\$SHORTCUTDIR
 case "\\\$platform" in
   "intel64ib" )
     export MPIDIST=/shared/openmpi_64ib
-    RUNTIMELIBDIR=\\\$FDSBINDIR/LIB64
     export FDSNETWORK=infiniband
   ;;
   "intel64" )
     export MPIDIST=/shared/openmpi_64
-    RUNTIMELIBDIR=\\\$FDSBINDIR/LIB64
-  ;;
-  "ia32" )
-    export MPIDIST=/shared/openmpi_32
-    RUNTIMELIBDIR=\\\$FDSBINDIR/LIB32
   ;;
 esac
+RUNTIMELIBDIR=\\\$FDSBINDIR/LIB64
 
 # environment for compilers
 
 if [ "\\\$IFORT_COMPILER" != "" ]; then
-case "\\\$platform" in
-  "intel64ib"|"intel64" )
+  if [[ "\\\$platform" == "intel64ib" || "\\\$platform" == "intel64" ]]; then
     source \\\$IFORT_COMPILER/bin/compilervars.sh intel64
-  ;;
-  "ia32" )
-    source \\\$IFORT_COMPILER/bin/compilervars.sh ia32
-  ;;
-esac
+  fi
 fi
 
 # Update LD_LIBRARY_PATH and PATH variables
