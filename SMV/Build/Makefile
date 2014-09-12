@@ -90,7 +90,7 @@ SMV_LIBS_64 = $(WIN_LIBDIR_64)\glui.lib $(WIN_LIBDIR_64)\glut32.lib $(WIN_LIBDIR
 # ------------- intel_win_64_db ----------------
 
 intel_win_64_db : INC = -I ../../source/include -I ../../source/shared -I ../../source/smokeview -I ../../source/glew
-intel_win_64_db : FFLAGS    = /Od /iface:stdref /fpp /Qvec_report0 /nologo /debug:full /extend_source:132 /warn:unused /warn:nointerfaces /Qtrapuv /fp:strict /fp:except /traceback /check:all /stand:f03
+intel_win_64_db : FFLAGS    = /Od /iface:stdref /fpp /nologo /debug:full /extend_source:132 /warn:unused /warn:nointerfaces /Qtrapuv /fp:strict /fp:except /traceback /check:all /stand:f03
 intel_win_64_db : CFLAGS    = /Od -Wall /ZI -D WIN32 -D pp_INTEL -D _CONSOLE -D X64 -D GLEW_STATIC -D PTW32_STATIC_LIB $(SMV_TESTFLAG)
 intel_win_64_db : LFLAGS    = /F32768000 /DEBUG
 intel_win_64_db : CC        = icl
@@ -126,8 +126,8 @@ LINUX_INTEL_LIBS_64 = $(IFORT_COMPILER_LIB)/intel64/libifcore.a  $(IFORT_COMPILE
 
 # ------------- intel_linux_64 ----------------
 
-intel_linux_64 : FFLAGS    = -O0 -traceback -m64 -static-intel -vec_report0 -fpp -D pp_noappend
-intel_linux_64 : CFLAGS    = -O0 -traceback -m64 -static-intel -vec_report0 -D pp_LINUX64 -D pp_INTEL $(SMV_TESTFLAG) $(SMV_PROFILEFLAG)
+intel_linux_64 : FFLAGS    = -O0 -traceback -m64 -static-intel -fpp -D pp_noappend
+intel_linux_64 : CFLAGS    = -O0 -traceback -m64 -static-intel -D pp_LINUX64 -D pp_INTEL $(SMV_TESTFLAG) $(SMV_PROFILEFLAG)
 intel_linux_64 : LFLAGS    = -m64 -static-intel
 intel_linux_64 : CC        = icc 
 intel_linux_64 : CPP       = icpc
@@ -139,8 +139,8 @@ intel_linux_64 : $(obj)
 
 # ------------- intel_linux_64_db ----------------
 
-intel_linux_64_db : FFLAGS    = -O0 -m64 -static-intel -traceback -g -fpe0 -fltconsistency -WB -vec_report0 -fpp -D pp_noappend
-intel_linux_64_db : CFLAGS    = -O0 -g -m64 -static-intel -vec_report0 -D pp_LINUX64 -D pp_INTEL $(SMV_PROFILEFLAG) -Wall -Wextra
+intel_linux_64_db : FFLAGS    = -O0 -m64 -static-intel -traceback -g -fpe0 -fltconsistency -WB -fpp -D pp_noappend
+intel_linux_64_db : CFLAGS    = -O0 -g -m64 -static-intel -D pp_LINUX64 -D pp_INTEL $(SMV_PROFILEFLAG) -Wall -Wextra
 intel_linux_64_db : LFLAGS    = -m64 -static-intel
 intel_linux_64_db : CC        = icc
 intel_linux_64_db : CPP       = icpc
@@ -153,8 +153,8 @@ intel_linux_64_db : $(obj)
 
 # ------------- intel_linux_64_profile ----------------
 
-intel_linux_64_profile : FFLAGS    = -O0 -m64 -static-intel -vec_report0 -fpp -D pp_noappend -p
-intel_linux_64_profile : CFLAGS    = -O0 -m64 -static-intel -vec_report0 -D pp_LINUX64 -D pp_INTEL -p
+intel_linux_64_profile : FFLAGS    = -O0 -m64 -static-intel -fpp -D pp_noappend -p
+intel_linux_64_profile : CFLAGS    = -O0 -m64 -static-intel -D pp_LINUX64 -D pp_INTEL -p
 intel_linux_64_profile : LFLAGS    = -m64 -static-intel
 intel_linux_64_profile : CC        = icc 
 intel_linux_64_profile : CPP       = icpc
