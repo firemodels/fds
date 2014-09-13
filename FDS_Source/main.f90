@@ -1191,6 +1191,8 @@ SUBROUTINE CHECK_MPI_OPENMP
 INTEGER :: THREAD_ID,IP,dThread,dRank,dNamelen,sNthreads,IT
 CHARACTER(LEN=MPI_MAX_PROCESSOR_NAME) :: dName  
 
+IF (.NOT.USE_OPENMP .AND. .NOT.USE_MPI) RETURN
+
 ! Check the threading support level
 
 IF (USE_MPI .AND. PROVIDED<REQUIRED) THEN
@@ -1203,7 +1205,7 @@ ENDIF
 !$OMP PARALLEL DEFAULT(SHARED) PRIVATE(THREAD_ID)
 
 THREAD_ID = 0
-!$THREAD_ID = OMP_GET_THREAD_NUM()  
+!$ THREAD_ID = OMP_GET_THREAD_NUM()  
 
 ! Time to say hello, the master process performs all output. Within the master process, each thread will handle its own
 ! output, the master thread will handle output from all threads of all other processes.
@@ -1213,8 +1215,11 @@ IF (MYID==0) THEN
    ! The master process outputs from its own threads.
 
    !$OMP CRITICAL
-   WRITE(LU_ERR,91) " OpenMP thread ",THREAD_ID+1," of ",OPENMP_AVAILABLE_THREADS," is running on MPI process ",&
-                    MYID+1," of ",NUMPROCS," (",PNAME(1:PNAMELEN),")"
+   IF (USE_OPENMP .AND. USE_MPI) WRITE(LU_ERR,91) " OpenMP thread ",THREAD_ID+1," of ",OPENMP_AVAILABLE_THREADS,&
+      " assigned to MPI process ",MYID+1," of ",NUMPROCS," is running on ",PNAME(1:PNAMELEN)
+   IF (.NOT.USE_OPENMP .AND. USE_MPI) WRITE(LU_ERR,92) " MPI process ",MYID+1," of ",NUMPROCS," is running on ",PNAME(1:PNAMELEN)
+   IF (USE_OPENMP .AND. .NOT.USE_MPI) WRITE(LU_ERR,93) " OpenMP thread ",THREAD_ID+1," of ",OPENMP_AVAILABLE_THREADS,&
+      " is running"
    !$OMP END CRITICAL
 
    !$OMP BARRIER
@@ -1230,8 +1235,10 @@ IF (MYID==0) THEN
          call MPI_RECV(dThread,  1, MPI_INTEGER, IP, 10*IP+2,            MPI_COMM_WORLD, STATUS, IERR)
          call MPI_RECV(dNamelen, 1, MPI_INTEGER, IP, 1000*IP+10*dThread, MPI_COMM_WORLD, STATUS, IERR)
          call MPI_RECV(dName, dNamelen, MPI_CHARACTER, IP, 1000*IP+10*dThread+1, MPI_COMM_WORLD, STATUS, IERR)
-         WRITE(LU_ERR,91) " OpenMP thread ",dThread+1," of ", sNthreads," is running on MPI process ",dRank+1," of ",NUMPROCS,&
-                          " (",dName(1:dNamelen),")"
+         IF (USE_OPENMP .AND. USE_MPI) WRITE(LU_ERR,91) " OpenMP thread ",dThread+1," of ", sNthreads,&
+            " assigned to MPI process ",dRank+1," of ",NUMPROCS," is running on ",dName(1:dNamelen)
+         IF (.NOT.USE_OPENMP .AND. USE_MPI) WRITE(LU_ERR,92) " MPI process ",dRank+1," of ",NUMPROCS," is running on ",&
+            dName(1:dNamelen)
       ENDDO 
    ENDDO 
    !$OMP END MASTER
@@ -1257,7 +1264,9 @@ ENDIF
 
 !$OMP END PARALLEL
 
-91 FORMAT(A,I3,A,I3,A,I3,A,I3,A,A,A)
+91 FORMAT(A,I3,A,I3,A,I3,A,I3,A,A)
+92 FORMAT(A,I3,A,I3,A,A)
+93 FORMAT(A,I3,A,I3,A)
 
 END SUBROUTINE CHECK_MPI_OPENMP
 
