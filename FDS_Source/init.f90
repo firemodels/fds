@@ -1965,7 +1965,7 @@ CHECK_MESHES: IF (IW<=M%N_EXTERNAL_WALL_CELLS .AND. .NOT.EVACUATION_ONLY(NM)) TH
       ! NOM_IB = "Number of the Other Mesh _ Index of the Boundary"
       !
       !     Mesh 1       Mesh 2
-      !      3x6          2x1
+      !      3x6          1x2
       !  -------------------------
       !  |   |   |   |           |
       !  |---|---|---|           |
