@@ -412,15 +412,12 @@ METHOD_OF_HEAT_TRANSFER: SELECT CASE(SF%THERMAL_BC_INDEX)
       ! Density
 
       RHO_G = RHOP(IIG,JJG,KKG)
-      IF (SECOND_ORDER_INTERPOLATED_BOUNDARY) THEN
-         RHO_OTHER_2 = 2._EB*RHO_OTHER-RHO_G ! second-order extrapolation of scalar data
-      ELSE
-         RHO_OTHER_2 = RHO_OTHER ! first-order extrapolation of scalar data (default)
-         RHO_G_2 = RHO_G
-      ENDIF
+      RHO_G_2 = RHO_G ! first-order (default)
       RHOP(II,JJ,KK) = RHO_OTHER
-
-      IF (ANY(FISHPAK_BC==FISHPAK_BC_PERIODIC)) THEN
+      RHO_OTHER_2 = RHO_OTHER
+      
+      IF (SECOND_ORDER_INTERPOLATED_BOUNDARY) THEN
+         ! currently assumes no refinement
          IIO = WC%NOM_IB(1)
          JJO = WC%NOM_IB(2)
          KKO = WC%NOM_IB(3)
@@ -428,34 +425,58 @@ METHOD_OF_HEAT_TRANSFER: SELECT CASE(SF%THERMAL_BC_INDEX)
 
       SELECT CASE(IOR)
          CASE( 1)
-            IF (SECOND_ORDER_INTERPOLATED_BOUNDARY) RHO_G_2 = RHOP(IIG+1,JJG,KKG)
-            ! for true periodic bcs, grab second ghost cell value from other mesh
-            IF (FISHPAK_BC(1)==FISHPAK_BC_PERIODIC) RHO_OTHER_2 = OM_RHOP(IIO-1,JJO,KKO)
+            IF (SECOND_ORDER_INTERPOLATED_BOUNDARY) THEN
+               ! here RHO_G and RHO_OTHER are being recomputed, at the moment just for code clarity
+               RHO_G = RHOP(IIG,JJG,KKG)
+               RHO_G_2 = RHOP(IIG+1,JJG,KKG)
+               RHO_OTHER = OM_RHOP(IIO,JJO,KKO)
+               RHO_OTHER_2 = OM_RHOP(IIO-1,JJO,KKO)
+            ENDIF 
             ZZZ(1:4) = (/RHO_OTHER_2,RHO_OTHER,RHO_G,RHO_G_2/)
             WC%RHO_F = SCALAR_FACE_VALUE(UU(II,JJ,KK),ZZZ,FLUX_LIMITER)
          CASE(-1)
-            IF (SECOND_ORDER_INTERPOLATED_BOUNDARY) RHO_G_2 = RHOP(IIG-1,JJG,KKG)
-            IF (FISHPAK_BC(1)==FISHPAK_BC_PERIODIC) RHO_OTHER_2 = OM_RHOP(IIO+1,JJO,KKO)
+            IF (SECOND_ORDER_INTERPOLATED_BOUNDARY) THEN
+               RHO_G = RHOP(IIG,JJG,KKG)
+               RHO_G_2 = RHOP(IIG-1,JJG,KKG)
+               RHO_OTHER = OM_RHOP(IIO,JJO,KKO)
+               RHO_OTHER_2 = OM_RHOP(IIO+1,JJO,KKO)
+            ENDIF
             ZZZ(1:4) = (/RHO_G_2,RHO_G,RHO_OTHER,RHO_OTHER_2/)
             WC%RHO_F = SCALAR_FACE_VALUE(UU(II-1,JJ,KK),ZZZ,FLUX_LIMITER)
          CASE( 2)
-            IF (SECOND_ORDER_INTERPOLATED_BOUNDARY) RHO_G_2 = RHOP(IIG,JJG+1,KKG)
-            IF (FISHPAK_BC(2)==FISHPAK_BC_PERIODIC) RHO_OTHER_2 = OM_RHOP(IIO,JJO-1,KKO)
+            IF (SECOND_ORDER_INTERPOLATED_BOUNDARY) THEN
+               RHO_G = RHOP(IIG,JJG,KKG)
+               RHO_G_2 = RHOP(IIG,JJG+1,KKG)
+               RHO_OTHER = OM_RHOP(IIO,JJO,KKO)
+               RHO_OTHER_2 = OM_RHOP(IIO,JJO-1,KKO)
+            ENDIF
             ZZZ(1:4) = (/RHO_OTHER_2,RHO_OTHER,RHO_G,RHO_G_2/)
             WC%RHO_F = SCALAR_FACE_VALUE(VV(II,JJ,KK),ZZZ,FLUX_LIMITER)
          CASE(-2)
-            IF (SECOND_ORDER_INTERPOLATED_BOUNDARY) RHO_G_2 = RHOP(IIG,JJG-1,KKG)
-            IF (FISHPAK_BC(2)==FISHPAK_BC_PERIODIC) RHO_OTHER_2 = OM_RHOP(IIO,JJO+1,KKO)
+            IF (SECOND_ORDER_INTERPOLATED_BOUNDARY) THEN
+               RHO_G = RHOP(IIG,JJG,KKG)
+               RHO_G_2 = RHOP(IIG,JJG-1,KKG)
+               RHO_OTHER = OM_RHOP(IIO,JJO,KKO)
+               RHO_OTHER_2 = OM_RHOP(IIO,JJO+1,KKO)
+            ENDIF
             ZZZ(1:4) = (/RHO_G_2,RHO_G,RHO_OTHER,RHO_OTHER_2/)
             WC%RHO_F = SCALAR_FACE_VALUE(VV(II,JJ-1,KK),ZZZ,FLUX_LIMITER)
          CASE( 3)
-            IF (SECOND_ORDER_INTERPOLATED_BOUNDARY) RHO_G_2 = RHOP(IIG,JJG,KKG+1)
-            IF (FISHPAK_BC(3)==FISHPAK_BC_PERIODIC) RHO_OTHER_2 = OM_RHOP(IIO,JJO,KKO-1)
+            IF (SECOND_ORDER_INTERPOLATED_BOUNDARY) THEN
+               RHO_G = RHOP(IIG,JJG,KKG)
+               RHO_G_2 = RHOP(IIG,JJG,KKG+1)
+               RHO_OTHER = OM_RHOP(IIO,JJO,KKO)
+               RHO_OTHER_2 = OM_RHOP(IIO,JJO,KKO-1)
+            ENDIF
             ZZZ(1:4) = (/RHO_OTHER_2,RHO_OTHER,RHO_G,RHO_G_2/)
             WC%RHO_F = SCALAR_FACE_VALUE(WW(II,JJ,KK),ZZZ,FLUX_LIMITER)
          CASE(-3)
-            IF (SECOND_ORDER_INTERPOLATED_BOUNDARY) RHO_G_2 = RHOP(IIG,JJG,KKG-1)
-            IF (FISHPAK_BC(3)==FISHPAK_BC_PERIODIC) RHO_OTHER_2 = OM_RHOP(IIO,JJO,KKO+1)
+            IF (SECOND_ORDER_INTERPOLATED_BOUNDARY) THEN
+               RHO_G = RHOP(IIG,JJG,KKG)
+               RHO_G_2 = RHOP(IIG,JJG,KKG-1)
+               RHO_OTHER = OM_RHOP(IIO,JJO,KKO)
+               RHO_OTHER_2 = OM_RHOP(IIO,JJO,KKO+1)
+            ENDIF
             ZZZ(1:4) = (/RHO_G_2,RHO_G,RHO_OTHER,RHO_OTHER_2/)
             WC%RHO_F = SCALAR_FACE_VALUE(WW(II,JJ,KK-1),ZZZ,FLUX_LIMITER)
       END SELECT
@@ -470,42 +491,50 @@ METHOD_OF_HEAT_TRANSFER: SELECT CASE(SF%THERMAL_BC_INDEX)
          SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
 
             RHO_ZZ_G = RHO_G*ZZP(IIG,JJG,KKG,N)
-            IF (SECOND_ORDER_INTERPOLATED_BOUNDARY) THEN
-               RHO_ZZ_OTHER_2 = 2._EB*RHO_ZZ_OTHER(N) - RHO_ZZ_G ! second-order
-            ELSE
-               RHO_ZZ_OTHER_2 = RHO_ZZ_OTHER(N) ! first-order (default)
-               RHO_ZZ_G_2 = RHO_ZZ_G
-            ENDIF
-
+            RHO_ZZ_G_2 = RHO_ZZ_G ! first-order (default)
+            RHO_ZZ_OTHER_2 = RHO_ZZ_OTHER(N)
+            
             SELECT CASE(IOR)
                CASE( 1)
-                  IF (SECOND_ORDER_INTERPOLATED_BOUNDARY) RHO_ZZ_G_2 = RHOP(IIG+1,JJG,KKG)*ZZP(IIG+1,JJG,KKG,N)
-                  IF (FISHPAK_BC(1)==FISHPAK_BC_PERIODIC) RHO_ZZ_OTHER_2 = OM_RHOP(IIO-1,JJO,KKO)*OM_ZZP(IIO-1,JJO,KKO,N)
+                  IF (SECOND_ORDER_INTERPOLATED_BOUNDARY) THEN
+                     RHO_ZZ_G_2 = RHOP(IIG+1,JJG,KKG)*ZZP(IIG+1,JJG,KKG,N)
+                     RHO_ZZ_OTHER_2 = OM_RHOP(IIO-1,JJO,KKO)*OM_ZZP(IIO-1,JJO,KKO,N)
+                  ENDIF
                   ZZZ(1:4) = (/RHO_ZZ_OTHER_2,RHO_ZZ_OTHER(N),RHO_ZZ_G,RHO_ZZ_G_2/)
                   RHO_ZZ_F(N) = SCALAR_FACE_VALUE(UU(II,JJ,KK),ZZZ,FLUX_LIMITER)
                CASE(-1)
-                  IF (SECOND_ORDER_INTERPOLATED_BOUNDARY) RHO_ZZ_G_2 = RHOP(IIG-1,JJG,KKG)*ZZP(IIG-1,JJG,KKG,N)
-                  IF (FISHPAK_BC(1)==FISHPAK_BC_PERIODIC) RHO_ZZ_OTHER_2 = OM_RHOP(IIO+1,JJO,KKO)*OM_ZZP(IIO+1,JJO,KKO,N)
+                  IF (SECOND_ORDER_INTERPOLATED_BOUNDARY) THEN
+                     RHO_ZZ_G_2 = RHOP(IIG-1,JJG,KKG)*ZZP(IIG-1,JJG,KKG,N)
+                     RHO_ZZ_OTHER_2 = OM_RHOP(IIO+1,JJO,KKO)*OM_ZZP(IIO+1,JJO,KKO,N)
+                  ENDIF
                   ZZZ(1:4) = (/RHO_ZZ_G_2,RHO_ZZ_G,RHO_ZZ_OTHER(N),RHO_ZZ_OTHER_2/)
                   RHO_ZZ_F(N) = SCALAR_FACE_VALUE(UU(II-1,JJ,KK),ZZZ,FLUX_LIMITER)
                CASE( 2)
-                  IF (SECOND_ORDER_INTERPOLATED_BOUNDARY) RHO_ZZ_G_2 = RHOP(IIG,JJG+1,KKG)*ZZP(IIG,JJG+1,KKG,N)
-                  IF (FISHPAK_BC(2)==FISHPAK_BC_PERIODIC) RHO_ZZ_OTHER_2 = OM_RHOP(IIO,JJO-1,KKO)*OM_ZZP(IIO,JJO-1,KKO,N)
+                  IF (SECOND_ORDER_INTERPOLATED_BOUNDARY) THEN
+                     RHO_ZZ_G_2 = RHOP(IIG,JJG+1,KKG)*ZZP(IIG,JJG+1,KKG,N)
+                     RHO_ZZ_OTHER_2 = OM_RHOP(IIO,JJO-1,KKO)*OM_ZZP(IIO,JJO-1,KKO,N)
+                  ENDIF
                   ZZZ(1:4) = (/RHO_ZZ_OTHER_2,RHO_ZZ_OTHER(N),RHO_ZZ_G,RHO_ZZ_G_2/)
                   RHO_ZZ_F(N) = SCALAR_FACE_VALUE(VV(II,JJ,KK),ZZZ,FLUX_LIMITER)
                CASE(-2)
-                  IF (SECOND_ORDER_INTERPOLATED_BOUNDARY) RHO_ZZ_G_2 = RHOP(IIG,JJG-1,KKG)*ZZP(IIG,JJG-1,KKG,N)
-                  IF (FISHPAK_BC(2)==FISHPAK_BC_PERIODIC) RHO_ZZ_OTHER_2 = OM_RHOP(IIO,JJO+1,KKO)*OM_ZZP(IIO,JJO+1,KKO,N)
+                  IF (SECOND_ORDER_INTERPOLATED_BOUNDARY) THEN
+                     RHO_ZZ_G_2 = RHOP(IIG,JJG-1,KKG)*ZZP(IIG,JJG-1,KKG,N)
+                     RHO_ZZ_OTHER_2 = OM_RHOP(IIO,JJO+1,KKO)*OM_ZZP(IIO,JJO+1,KKO,N)
+                  ENDIF
                   ZZZ(1:4) = (/RHO_ZZ_G_2,RHO_ZZ_G,RHO_ZZ_OTHER(N),RHO_ZZ_OTHER_2/)
                   RHO_ZZ_F(N) = SCALAR_FACE_VALUE(VV(II,JJ-1,KK),ZZZ,FLUX_LIMITER)
                CASE( 3)
-                  IF (SECOND_ORDER_INTERPOLATED_BOUNDARY) RHO_ZZ_G_2 = RHOP(IIG,JJG,KKG+1)*ZZP(IIG,JJG,KKG+1,N)
-                  IF (FISHPAK_BC(3)==FISHPAK_BC_PERIODIC) RHO_ZZ_OTHER_2 = OM_RHOP(IIO,JJO,KKO-1)*OM_ZZP(IIO,JJO,KKO-1,N)
+                  IF (SECOND_ORDER_INTERPOLATED_BOUNDARY) THEN
+                     RHO_ZZ_G_2 = RHOP(IIG,JJG,KKG+1)*ZZP(IIG,JJG,KKG+1,N)
+                     RHO_ZZ_OTHER_2 = OM_RHOP(IIO,JJO,KKO-1)*OM_ZZP(IIO,JJO,KKO-1,N)
+                  ENDIF
                   ZZZ(1:4) = (/RHO_ZZ_OTHER_2,RHO_ZZ_OTHER(N),RHO_ZZ_G,RHO_ZZ_G_2/)
                   RHO_ZZ_F(N) = SCALAR_FACE_VALUE(WW(II,JJ,KK),ZZZ,FLUX_LIMITER)
                CASE(-3)
-                  IF (SECOND_ORDER_INTERPOLATED_BOUNDARY) RHO_ZZ_G_2 = RHOP(IIG,JJG,KKG-1)*ZZP(IIG,JJG,KKG-1,N)
-                  IF (FISHPAK_BC(3)==FISHPAK_BC_PERIODIC) RHO_ZZ_OTHER_2 = OM_RHOP(IIO,JJO,KKO+1)*OM_ZZP(IIO,JJO,KKO+1,N)
+                  IF (SECOND_ORDER_INTERPOLATED_BOUNDARY) THEN
+                     RHO_ZZ_G_2 = RHOP(IIG,JJG,KKG-1)*ZZP(IIG,JJG,KKG-1,N)
+                     RHO_ZZ_OTHER_2 = OM_RHOP(IIO,JJO,KKO+1)*OM_ZZP(IIO,JJO,KKO+1,N)
+                  ENDIF
                   ZZZ(1:4) = (/RHO_ZZ_G_2,RHO_ZZ_G,RHO_ZZ_OTHER(N),RHO_ZZ_OTHER_2/)
                   RHO_ZZ_F(N) = SCALAR_FACE_VALUE(WW(II,JJ,KK-1),ZZZ,FLUX_LIMITER)
             END SELECT
