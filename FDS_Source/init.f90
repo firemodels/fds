@@ -1989,6 +1989,13 @@ CHECK_MESHES: IF (IW<=M%N_EXTERNAL_WALL_CELLS .AND. .NOT.EVACUATION_ONLY(NM)) TH
       NOM_IB(4) = IIO_MAX !     IIO_MAX=1              IIO_MAX=3
       NOM_IB(5) = JJO_MAX !     JJO_MAX=1 (2D)         JJO_MAX=1
       NOM_IB(6) = KKO_MAX !     KK0_MAX=2              KK0_MAX=6
+
+      ! Currently, mesh refinement is not allowed with SECOND_ORDER_INTERPOATED_BOUNDARY
+
+      IF ( SECOND_ORDER_INTERPOLATED_BOUNDARY .AND. &
+           ABS(REAL((NOM_IB(4)-NOM_IB(1))*(NOM_IB(5)-NOM_IB(2))*(NOM_IB(6)-NOM_IB(3)),EB))>TWO_EPSILON_EB ) THEN
+         CALL SHUTDOWN('ERROR: Currently mesh refinement not allowed with SECOND_ORDER_INTERPOLATED_BOUNDARY')
+      ENDIF
       
       IF (OBST_INDEX==0) THEN
          IF (.NOT.M%SOLID(ICG)) BOUNDARY_TYPE = INTERPOLATED_BOUNDARY
