@@ -41,7 +41,6 @@ then
 ostype2=Linux
 fi
 
-
 cat << EOF > $INSTALLER
 #!/bin/bash
 
@@ -162,7 +161,6 @@ THISDIR=\`pwd\`
 
 #--- record temporary startup file names
 
-CSHFDS=/tmp/cshrc_fds.\$\$
 BASHFDS=/tmp/bashrc_fds.\$\$
 
 #--- Find the beginning of the included FDS tar file so that it can be
@@ -300,50 +298,6 @@ cd \$FDS_root
 tail -n +\$SKIP \$THISSCRIPT | tar -xz
 echo "Copy complete."
 
-#--- create CSH startup file
-
-cat << CSHRC > \$CSHFDS
-#/bin/csh -f
-set platform=\\\$1
-
-# unalias application names used by FDS
-
-unalias fds >& /dev/null
-unalias smokeview >& /dev/null
-unalias smokezip >& /dev/null
-unalias smokediff >& /dev/null
-unalias fds6 >& /dev/null
-unalias smokeview6 >& /dev/null
-unalias smokezip6 >& /dev/null
-unalias smokediff6 >& /dev/null
-
-# define FDS bin directory location
-
-setenv FDSBINDIR \`pwd\`/bin
-
-# environment for 64 bit Infiniband
-
-if ( "\\\$platform" == "intel64ib" ) then
-setenv MPIDIST /shared/openmpi_64ib
-endif
-
-# environment for 64 bit gigabit ethernet
-
-if ( "\\\$platform" == "intel64" ) then
-setenv MPIDIST /shared/openmpi_64
-endif
-
-# Update LD_LIBRARY_PATH and PATH variables
-
-setenv $LDLIBPATH \\\$MPIDIST/lib:\\\$$LDLIBPATH
-set path=(\\\$FDSBINDIR \\\$MPIDIST/bin ~/bin \\\$path)
-
-# Set number of OMP threads
-
-setenv OMP_NUM_THREADS 4
-
-CSHRC
-
 #--- create BASH startup file
 
 cat << BASH > \$BASHFDS
@@ -393,20 +347,6 @@ fi
 
 export OMP_NUM_THREADS=4
 BASH
-
-#--- create .cshrc_fds startup file
-
-echo
-
-BACKUP_FILE ~/.cshrc_fds
-
-if [ -e ~/.cshrc_fds ] ; then
-  echo Updating .cshrc_fds
-else
-  echo Creating .cshrc_fds
-fi
-cp \$CSHFDS ~/.cshrc_fds
-rm \$CSHFDS
 
 #--- create .bash_fds startup file
 
@@ -458,18 +398,6 @@ EOF
 fi
 
 cat << EOF >> $INSTALLER
-#--- update .cshrc
-
-BACKUP_FILE ~/.cshrc
-
-CSHTEMP=/tmp/.cshrc_temp_\$\$
-echo "Updating .cshrc"
-grep -v cshrc_fds ~/.cshrc | grep -v "#FDS" > \$CSHTEMP
-echo "#FDS Setting environment for FDS and Smokeview.  The original version" >> \$CSHTEMP
-echo "#FDS of .cshrc is saved in ~/.cshrc\$BAK" >> \$CSHTEMP
-echo source \~/.cshrc_fds $ossize >> \$CSHTEMP
-cp \$CSHTEMP ~/.cshrc
-rm \$CSHTEMP
 
 echo ""
 echo "Installation complete."
