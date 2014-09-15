@@ -1962,13 +1962,33 @@ CHECK_MESHES: IF (IW<=M%N_EXTERNAL_WALL_CELLS .AND. .NOT.EVACUATION_ONLY(NM)) TH
          RETURN
       ENDIF
 
+      ! NOM_IB = "Number of the Other Mesh _ Index of the Boundary"
+      !
+      !     Mesh 1       Mesh 2
+      !      3x6          2x1
+      !  -------------------------
+      !  |   |   |   |           |
+      !  |---|---|---|           |
+      !  |   |   |   #->         |
+      !  |---|---|---|           |
+      !  |   |   | <-*           |
+      !  |---|---|---|-----------|
+      !  |   |   |   |           |
+      !  |---|---|---|           |
+      !  |   |   |   |           |
+      !  |---|---|---|           |
+      !  |   |   |   |           |
+      !  -------------------------
+      !
+      !                         NM=1,NOM=2,IW=*        NM=2,NOM=1,IW=#
+
       NOM_FOUND = NOM
-      NOM_IB(1) = IIO_MIN
-      NOM_IB(2) = JJO_MIN
-      NOM_IB(3) = KKO_MIN
-      NOM_IB(4) = IIO_MAX
-      NOM_IB(5) = JJO_MAX
-      NOM_IB(6) = KKO_MAX
+      NOM_IB(1) = IIO_MIN !     IIO_MIN=1              IIO_MIN=3
+      NOM_IB(2) = JJO_MIN !     JJO_MIN=1 (2D)         JJO_MIN=1
+      NOM_IB(3) = KKO_MIN !     KKO_MIN=2              KKO_MIN=4
+      NOM_IB(4) = IIO_MAX !     IIO_MAX=1              IIO_MAX=3
+      NOM_IB(5) = JJO_MAX !     JJO_MAX=1 (2D)         JJO_MAX=1
+      NOM_IB(6) = KKO_MAX !     KK0_MAX=2              KK0_MAX=6
       
       IF (OBST_INDEX==0) THEN
          IF (.NOT.M%SOLID(ICG)) BOUNDARY_TYPE = INTERPOLATED_BOUNDARY
