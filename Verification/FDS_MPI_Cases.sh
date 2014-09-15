@@ -11,6 +11,12 @@ $QFDS -p 8 -d Pressure_Solver scarc2d_fft_8mesh.fds
 $QFDS -p 8 -d Pressure_Solver scarc2d_cg_8mesh.fds
 $QFDS -p 8 -d Pressure_Solver scarc2d_gmg_8mesh.fds
 
+$QFDS -p 4 -d Scalar_Analytical_Solution shunn3_4mesh_32.fds
+$QFDS -p 4 -d Scalar_Analytical_Solution shunn3_4mesh_64.fds
+$QFDS -p 4 -d Scalar_Analytical_Solution shunn3_4mesh_128.fds
+$QFDS -p 4 -d Scalar_Analytical_Solution shunn3_4mesh_256.fds
+$QFDS -p 4 -d Scalar_Analytical_Solution shunn3_4mesh_512.fds
+
 $QFDS -p 4 -d WRF wrf_time_ramp.fds
 $QFDS -p 4 -d WRF wrf_prof_ramp.fds
 $QFDS -p 4 -d WRF wrf_time_prof_ramp.fds
