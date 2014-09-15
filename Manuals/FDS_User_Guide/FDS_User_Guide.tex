@@ -1715,7 +1715,7 @@ At the end of the first part of the explicit predictor-corrector time update, th
 \subsection{Special Topic: Flux Limiters}
 \label{info:flux_limiters}
 
-FDS employs \emph{total variation diminishing} (TVD) schemes for scalar transport.  The default for LES is Superbee \cite{Roe:1986}, so chosen because this scheme does the best job preserving the scalar variance in highly turbulent flows with coarse grid resolution.  The default scheme for DNS is CHARM \cite{Zhou:1995} because the gradient steepening used in Superbee forces a stair step pattern at high resolution, while Charm is convergent.   A few other schemes (including Godunov and central differencing) are included for completeness; more details can be found in the Tech Guide \cite{FDS_Tech_Guide}.  Table \ref{tab:flux_limiters} below shows the integer codes which may be used to invoke the various limiter schemes.
+FDS employs \emph{total variation diminishing} (TVD) schemes for scalar transport.  The default for LES is Superbee \cite{Roe:1986}, so chosen because this scheme does the best job preserving the scalar variance in highly turbulent flows with coarse grid resolution.  The default scheme for DNS is CHARM \cite{Zhou:1995} because the gradient steepening used in Superbee forces a stair step pattern at high resolution, while CHARM is convergent.   A few other schemes (including Godunov and central differencing) are included for completeness; more details can be found in the Tech Guide \cite{FDS_Tech_Guide}.  Table \ref{tab:flux_limiters} below shows the integer codes which may be used to invoke the various limiter schemes.
 
 \begin{lstlisting}
 &MISC FLUX_LIMITER=1 / ! invoke Godunov (first-order upwind scheme)
@@ -1738,7 +1738,9 @@ MP5                    & {\ct 5}  \\ \hline
 \end{tabular}
 \end{table}
 
+\subsubsection{Multi-Mesh Calculations}
 
+Currently, the default behavior in FDS is to revert to first-order upwinding at interpolated boundaries (mesh interfaces) for scalar transport.  The reason for this is that no information is passed via MPI for flow obstructions and therefore we cannot make the assumption that two upwind scalar values will be available to compute a second-order limiter.  If there is no mesh refinement at mesh interfaces and you have avoided placing obstructions within two cells of the interface, then you may invoke a conservative second-order flux limiter by including {\ct SECOND\_ORDER\_INTERPOLATED\_BOUNDARY=.TRUE.} on {\ct MISC}.
 
 
 
@@ -9441,7 +9443,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct RICHARDSON\_ERROR\_TOLERANCE}              & Real          & Section~\ref{info:REAC}                               &               & 1.0 E-3           \\ \hline
 {\ct RUN\_AVG\_FAC}                             & Real          & Section~\ref{radiative_part_props}                    &               & 0.5               \\ \hline
 {\ct SC}                                        & Real          & Section~\ref{info:LES}                                &               & 0.5               \\ \hline
-%{\ct SECOND\_ORDER\_INTERPOLATED\_BOUNDARY}     & Logical       & apply O(dx^2) extrapolation at interp bcs (not conservative) &        & {\ct .FALSE.}     \\ \hline
+{\ct SECOND\_ORDER\_INTERPOLATED\_BOUNDARY}     & Logical       & Section~\ref{info:flux_limiters}                      &               & {\ct .FALSE.}     \\ \hline
 %{\ct SECOND\_ORDER\_PARTICLE\_TRANSPORT}        & Logical       & Section~\ref{info:PART}                               &               & {\ct .FALSE.}     \\ \hline
 {\ct SHARED\_FILE\_SYSTEM}                      & Logical       & Section~\ref{info:multimesh}                          &               & {\ct .TRUE.}      \\ \hline
 {\ct SMOKE\_ALBEDO}                             & Real          & Reference~\cite{Smokeview_Users_Guide}                &               & 0.3               \\ \hline
