@@ -366,32 +366,28 @@ unalias smokediff6 >& /dev/null
 
 export FDSBINDIR=\`pwd\`/bin
 SHORTCUTDIR=\$SHORTCUTDIR
-
-# environment for MPI
-
-case "\\\$platform" in
-  "intel64ib" )
-    export MPIDIST=/shared/openmpi_64ib
-    export FDSNETWORK=infiniband
-  ;;
-  "intel64" )
-    export MPIDIST=/shared/openmpi_64
-  ;;
-esac
 RUNTIMELIBDIR=\\\$FDSBINDIR/LIB64
 
 # environment for compilers
 
 if [ "\\\$IFORT_COMPILER" != "" ]; then
-  if [[ "\\\$platform" == "intel64ib" || "\\\$platform" == "intel64" ]]; then
-    source \\\$IFORT_COMPILER/bin/compilervars.sh intel64
-  fi
+  source \\\$IFORT_COMPILER/bin/compilervars.sh intel64
 fi
 
 # Update LD_LIBRARY_PATH and PATH variables
 
-export $LDLIBPATH=\\\$MPIDIST/lib:\\\$RUNTIMELIBDIR:\\\$$LDLIBPATH
-export PATH=\\\$FDSBINDIR:\\\$SHORTCUTDIR:\\\$MPIDIST/bin:\\\$PATH
+export $LDLIBPATH=\\\$RUNTIMELIBDIR:\\\$$LDLIBPATH
+export PATH=\\\$FDSBINDIR:\\\$SHORTCUTDIR:\\\$PATH
+if [ "\\\$MPIDIST" != "" ]; then
+  export $LDLIBPATH=\\\$MPIDIST/lib:\\\$$LDLIBPATH
+  export PATH=\\\$MPIDIST/bin:\\\$PATH
+fi
+
+# identify network type
+
+if [ "\\\$MPITYPE" == "infiniband" ]; then
+  export FDSNETWORK=infiniband
+fi
 
 # Set number of OMP threads
 
