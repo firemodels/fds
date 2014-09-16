@@ -35,7 +35,7 @@ More details on the Firebot build stages can be found in the FDS Configuration M
 
     Intel compilers and Intel Inspector
     Python
-    LaTeX (TeX Live distribution)
+    LaTeX (TeX Live distribution), be sure to make this the default LaTeX in the system-wide PATH
     Matlab (test the command 'matlab')
 
 3. Add the following lines to firebot's ~/.bashrc file:
