@@ -27,7 +27,7 @@ echo pausing for 8 seconds
 sleep 8
 
 export DISPLAY=:$disp
-source ~/.bashrc_fds intel64
+source ~/.bashrc_fds
 cd $fulldir
 echo fulldir=$fulldir
 echo 
