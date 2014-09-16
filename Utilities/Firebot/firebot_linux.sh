@@ -53,8 +53,8 @@ echo ""
 echo "-r - revision_number - run cases using a specific SVN revision number"
 echo "     default: (none, latest SVN HEAD)"
 echo ""
-echo "-s - skip fixing SVN properties"
-echo "     default: SKIP_SVN_PROPS is undefined (false)"
+echo "-s - skip fixing SVN properties and SVN bump of manuals"
+echo "     default: SKIP_SVN_PROPS_AND_SVN_BUMP is undefined (false)"
 echo ""
 echo "-u - specify SVN username to use"
 echo "     default: fds.firebot"
@@ -82,7 +82,7 @@ case $OPTION in
    SVN_REVISION="$OPTARG"
    ;;
   s)
-   SKIP_SVN_PROPS=true
+   SKIP_SVN_PROPS_AND_SVN_BUMP=true
    ;;
   u)
    SVN_USERNAME="$OPTARG"
@@ -281,8 +281,8 @@ do_svn_checkout()
       echo "Checking out latest revision." >> $FIREBOT_DIR/output/stage1 2>&1
       svn update >> $FIREBOT_DIR/output/stage1 2>&1
 
-      # Only run if firebot is in "verification" mode
-      if [ $FIREBOT_MODE == "verification" ] ; then
+      # Only run if firebot is in "verification" mode and SKIP_SVN_PROPS_AND_SVN_BUMP is not set
+      if [[ $FIREBOT_MODE == "verification" && ! $SKIP_SVN_PROPS_AND_SVN_BUMP ]] ; then
          # Bump SVN revision number of all guides (so that the SVN revision keyword gets updated)
          echo "Bump SVN revision number of all guides." >> $FIREBOT_DIR/output/stage1 2>&1
          CURRENT_TIMESTAMP=`date`
@@ -1427,7 +1427,7 @@ clean_svn_repo
 do_svn_checkout
 check_svn_checkout
 # Only run if -s option (skip SVN properties) is not used
-if [[ ! $SKIP_SVN_PROPS ]] ; then
+if [[ ! $SKIP_SVN_PROPS_AND_SVN_BUMP ]] ; then
    fix_svn_properties
 fi
 archive_compiler_version
