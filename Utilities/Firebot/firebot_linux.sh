@@ -721,12 +721,6 @@ compile_smv_utilities()
    echo 'Compiling smokediff:' >> $FIREBOT_DIR/output/stage5pre 2>&1
    ./make_diff.sh >> $FIREBOT_DIR/output/stage5pre 2>&1
    echo "" >> $FIREBOT_DIR/output/stage5pre 2>&1
-   
-   # background:
-   cd $FDS_SVNROOT/Utilities/background/intel_linux_32
-   echo 'Compiling background:' >> $FIREBOT_DIR/output/stage5pre 2>&1
-   ./make_background.sh >> $FIREBOT_DIR/output/stage5pre 2>&1
-   echo "" >> $FIREBOT_DIR/output/stage5pre 2>&1
 
    # wind2fds:
    cd $FDS_SVNROOT/Utilities/wind2fds/intel_linux_64
@@ -741,8 +735,7 @@ check_smv_utilities()
    cd $FDS_SVNROOT
    if [ -e "$FDS_SVNROOT/Utilities/smokezip/intel_linux_64/smokezip_linux_64" ]  && \
       [ -e "$FDS_SVNROOT/Utilities/smokediff/intel_linux_64/smokediff_linux_64" ]  && \
-      [ -e "$FDS_SVNROOT/Utilities/wind2fds/intel_linux_64/wind2fds_linux_64" ]  && \
-      [ -e "$FDS_SVNROOT/Utilities/background/intel_linux_32/background" ]
+      [ -e "$FDS_SVNROOT/Utilities/wind2fds/intel_linux_64/wind2fds_linux_64" ]
    then
       stage5pre_success=true
    else
