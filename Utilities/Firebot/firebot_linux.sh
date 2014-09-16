@@ -283,8 +283,8 @@ do_svn_checkout()
 
       # Only run if firebot is in "verification" mode
       if [ $FIREBOT_MODE == "verification" ] ; then
-         # Bump SVN revision number for all guides (so that the SVN revision keyword gets updated)
-         echo "Bump SVN revision number for all guides." >> $FIREBOT_DIR/output/stage1 2>&1
+         # Bump SVN revision number of all guides (so that the SVN revision keyword gets updated)
+         echo "Bump SVN revision number of all guides." >> $FIREBOT_DIR/output/stage1 2>&1
          CURRENT_TIMESTAMP=`date`
          sed -i "s/.*% dummy comment to force svn change.*/% dummy comment to force svn change - ${CURRENT_TIMESTAMP}/" $FDS_SVNROOT/Manuals/FDS_User_Guide/FDS_User_Guide.tex
          sed -i "s/.*% dummy comment to force svn change.*/% dummy comment to force svn change - ${CURRENT_TIMESTAMP}/" $FDS_SVNROOT/Manuals/FDS_Technical_Reference_Guide/FDS_Technical_Reference_Guide.tex
@@ -293,7 +293,7 @@ do_svn_checkout()
          sed -i "s/.*% dummy comment to force svn change.*/% dummy comment to force svn change - ${CURRENT_TIMESTAMP}/" $FDS_SVNROOT/Manuals/FDS_Configuration_Management_Plan/FDS_Configuration_Management_Plan.tex
 
          # Commit back results
-         svn commit -m 'Firebot: Bump SVN revision number for all guides' &> /dev/null
+         svn commit -m 'Firebot: Bump SVN revision number of all guides' &> /dev/null
       fi
       
       echo "Re-checking out latest revision." >> $FIREBOT_DIR/output/stage1 2>&1
@@ -334,11 +334,11 @@ fix_svn_properties()
    # Delete all svn:executable properties
    svn propdel svn:executable --recursive &> /dev/null
 
-   # Restore local executable property to svn-fix-props.pl
-   chmod +x Utilities/Subversion/svn-fix-props.pl &> /dev/null
+   # Restore local executable property to svn-fix-props.py
+   chmod +x Utilities/Subversion/svn-fix-props.py &> /dev/null
 
-   # Run svn-fix-props.pl script (fixes all SVN properties)
-   Utilities/Subversion/svn-fix-props.pl ./ &> /dev/null
+   # Run svn-fix-props.py script (fixes all SVN properties)
+   Utilities/Subversion/svn-fix-props.py --config $FDS_SVNROOT/Utilities/Subversion/config ./ &> /dev/null
 
    # Commit back results
    svn commit -m 'Firebot: Fix SVN properties throughout repository' &> /dev/null
