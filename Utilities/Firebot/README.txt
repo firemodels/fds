@@ -14,11 +14,19 @@
 Firebot is an automatic verification and validation test bot that is run at a regular interval (nightly).
 More details on the Firebot build stages can be found in the FDS Configuration Management Plan.
 
+===================
+= Running Firebot =
+===================
+
+1. cd to the ~/firebot directory of firebot's account
+2. Do an 'svn update'
+3. Run firebot using the command ./firebot_linux_wrapper.sh or ./firebot_mac_wrapper.sh
+
 ======================
 = Installing Firebot =
 ======================
 
-1. Create an account for Firebot on your machine. This account should be named "firebot" if possible.
+1. Create an account for Firebot on your machine. This account should be named 'firebot' if possible.
    The use of a separate account is recommended so that Firebot has a clean and undisturbed copy of
    the repositories to work with. Note that the account name should be a domain or functional account name
    for Matlab to work.
@@ -27,15 +35,13 @@ More details on the Firebot build stages can be found in the FDS Configuration M
 
     Intel compilers and Intel Inspector
     Python
-    LaTeX (texlive distribution)
+    LaTeX (TeX Live distribution)
+    Matlab (test the command 'matlab')
 
-3. Setup passwordless SSH on the firebot account. Generate SSH keys and ensure that the head node can SSH into all of the compute nodes. Also, make sure that firebot's account information is propagated across all compute nodes (e.g., with the passsync or authcopy command).
+3. Add the following lines to firebot's ~/.bashrc file:
 
-4. Ensure that a queue named 'firebot' is created, enabled, and started in the torque queueing system and that nodes are defined for this queue. Test the 'qstat' command on firebot's account.
-
-5. Ensure that Matlab is installed system-wide and can be started with the command 'matlab'.
-
-6. Add the following lines to firebot's ~/.bashrc file:
+    . /usr/local/Modules/3.2.10/init/bash
+    module load null modules torque-maui mpi/openmpi-1.8.1-gnu-ib
 
     export IFORT_COMPILER=/opt/intel/composerxe
     export IFORT_COMPILER_LIB=/opt/intel/composerxe/lib
@@ -46,29 +52,31 @@ More details on the Firebot build stages can be found in the FDS Configuration M
     # Set unlimited stack size
     ulimit -s unlimited
 
-7. In Firebot's home directory, perform an SVN checkout on the Firebot portion of the FDS-SMV repository using the below command.
+4. Setup passwordless SSH on the firebot account. Generate SSH keys and ensure that the head node can SSH into all of the compute nodes. Also, make sure that firebot's account information is propagated across all compute nodes (e.g., with the passsync or authcopy command).
+
+5. Ensure that a queue named 'firebot' is created, enabled, and started in the torque queueing system and that nodes are defined for this queue. Test the 'qstat' command on firebot's account.
+
+6. In Firebot's home directory, perform an SVN checkout on the Firebot portion of the FDS-SMV repository using the below command.
 
     svn checkout https://fds-smv.googlecode.com/svn/trunk/FDS/trunk/Utilities/Firebot/ firebot --username fds.firebot
 
-8. In Firebot's home directory, perform an SVN checkout of the entire FDS-SMV repository using the below command. You should perform a test commit from the FDS-SMV repository to ensure that firebot's SVN password has been stored locally so it can commit changes.
+7. In Firebot's home directory, perform an SVN checkout of the entire FDS-SMV repository using the below command. You should perform a test commit to the FDS-SMV repository to ensure that firebot's SVN password has been stored locally and that it can commit changes.
 
     svn checkout https://fds-smv.googlecode.com/svn/trunk/FDS/trunk/ FDS-SMV --username fds.firebot
 
-9. cd to the newly created ~/firebot directory
+8. cd to the newly created ~/firebot directory
 
-10. Run the ./firebot_linux_wrapper.sh or ./firebot_mac_wrapper.sh command, then the automated Firebot build process
+9. Run the ./firebot_linux_wrapper.sh or ./firebot_mac_wrapper.sh command, then the automated Firebot build process
    will begin and will create directories and check out repositories as needed.
-
-(Note) The *_wrapper script uses a semaphore file that ensures multiple instances of Firebot do not run, which would cause file conflicts.
 
 =========================
 = Firebot files/scripts =
 =========================
 
-# run_firebot_linux.sh
+# firebot_linux_wrapper.sh or firebot_mac_wrapper.sh
 
-    This script can be used to start Firebot manually. First, the script performs an "svn update".
-    Then, the script runs Firebot using the firebot_linux_wrapper script.
+    The _wrapper script uses a semaphore file that ensures multiple instances of Firebot do not run, which would cause file conflicts.
+    This script should be called from crontab to start firebot.
 
 # firebot_linux.sh
 
