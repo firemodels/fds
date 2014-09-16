@@ -40,15 +40,18 @@ More details on the Firebot build stages can be found in the FDS Configuration M
     # Set unlimited stack size
     ulimit -s unlimited
 
-6. In Firebot's newly created home directory, perform an SVN checkout on the Firebot portion of the FDS-SMV repository using:
+6. In Firebot's home directory, perform an SVN checkout on the Firebot portion of the FDS-SMV repository using the below command.
 
-      svn checkout https://fds-smv.googlecode.com/svn/trunk/FDS/trunk/Utilities/Firebot firebot --username fds.firebot
+    svn checkout https://fds-smv.googlecode.com/svn/trunk/FDS/trunk/Utilities/Firebot/ firebot --username fds.firebot
 
-7. cd to the newly created ~/firebot directory
+7. In Firebot's home directory, perform an SVN checkout of the entire FDS-SMV repository using the below command. You should perform a test commit from the FDS-SMV repository to ensure that firebot's SVN password has been stored locally so it can commit changes.
 
-8. Run the ./firebot_linux_wrapper.sh or ./firebot_mac_wrapper.sh command, then the automated Firebot build process
-   will begin and will create directories and check out repositories as needed. You might need to perform a test commit
-   from the FDS-SMV repository to ensure that firebot's SVN password has been stored locally so it can commit changes.
+    svn checkout https://fds-smv.googlecode.com/svn/trunk/FDS/trunk/ FDS-SMV --username fds.firebot
+
+8. cd to the newly created ~/firebot directory
+
+9. Run the ./firebot_linux_wrapper.sh or ./firebot_mac_wrapper.sh command, then the automated Firebot build process
+   will begin and will create directories and check out repositories as needed.
 
 (Note) The *_wrapper script uses a semaphore file that ensures multiple instances of Firebot do not run, which would cause file conflicts.
 
