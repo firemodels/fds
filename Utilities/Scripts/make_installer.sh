@@ -28,12 +28,7 @@ then
 LDLIBPATH=DYLD_LIBRARY_PATH
 fi
 
-if [ "$ossize" == "intel64" ]
-then
 size2=64
-else
-size2=32
-fi
 
 ostype2=$ostype
 if [ "$ostype" == "LINUX" ]
@@ -303,8 +298,6 @@ echo "Copy complete."
 cat << BASH > \$BASHFDS
 #/bin/bash
 
-platform=\\\$1
-
 # unalias application names used by FDS
 
 unalias fds >& /dev/null
@@ -322,25 +315,37 @@ export FDSBINDIR=\`pwd\`/bin
 SHORTCUTDIR=\$SHORTCUTDIR
 RUNTIMELIBDIR=\\\$FDSBINDIR/LIB64
 
-# environment for compilers
+# define compiler environment
 
-if [ "\\\$IFORT_COMPILER" != "" ]; then
-  source \\\$IFORT_COMPILER/bin/compilervars.sh intel64
+if [[ "\\\$IFORT_COMPILER" != "" && -e \\\$IFORT_COMPILER/bin/compilervars.sh ]]; then
+  source $IFORT_COMPILER/bin/compilervars.sh intel64
 fi
+
+# define MPI environment
+
+if [[ "\\\$MPIDIST" == "" && -d /shared/openmpi_64ib ]]; then
+  MPIDIST=/shared/openmpi_64ib
+fi
+if [[ "\\\$MPIDIST" == "" && -d /shared/openmpi_64 ]]; then
+  MPIDIST=/shared/openmpi_64
+fi
+if [[ "\\\$MPIDIST" != "" && ! -d \\\$MPIDIST ]]; then
+  echo "*** Warning: the OpenMPI distribution, \\\$MPIDIST, does not exist"
+  MPIDIST=
+fi
+FDSNETWORK=
+if [[ "\\\$MPIDIST" == *ib ]]; then
+  export FDSNETWORK=infiniband
+fi
+export FDSNETWORK
 
 # Update LD_LIBRARY_PATH and PATH variables
 
-export $LDLIBPATH=\\\$RUNTIMELIBDIR:\\\$$LDLIBPATH
+export LD_LIBRARY_PATH=\\\$RUNTIMELIBDIR:\\\$LD_LIBRARY_PATH
 export PATH=\\\$FDSBINDIR:\\\$SHORTCUTDIR:\\\$PATH
 if [ "\\\$MPIDIST" != "" ]; then
-  export $LDLIBPATH=\\\$MPIDIST/lib:\\\$$LDLIBPATH
+  export LD_LIBRARY_PATH=\\\$MPIDIST/lib:\\\$LD_LIBRARY_PATH
   export PATH=\\\$MPIDIST/bin:\\\$PATH
-fi
-
-# identify network type
-
-if [ "\\\$MPITYPE" == "infiniband" ]; then
-  export FDSNETWORK=infiniband
 fi
 
 # Set number of OMP threads
@@ -373,7 +378,7 @@ cat << EOF >> $INSTALLER
   echo "#FDS " >> \$BASHPROFILETEMP
   echo "#FDS Setting environment for FDS and Smokeview.  The original version" >> \$BASHPROFILETEMP
   echo "#FDS of .bash_profile is saved in ~/.bash_profile\$BAK" >> \$BASHPROFILETEMP
-  echo source \~/.bashrc_fds $ossize >> \$BASHPROFILETEMP
+  echo source \~/.bashrc_fds >> \$BASHPROFILETEMP
   cp \$BASHPROFILETEMP ~/.bash_profile
   rm \$BASHPROFILETEMP
 EOF
@@ -391,7 +396,7 @@ cat << EOF >> $INSTALLER
   echo "#FDS " >> \$BASHRCTEMP
   echo "#FDS Setting environment for FDS and Smokeview.  The original version" >> \$BASHRCTEMP
   echo "#FDS of .bashrc is saved in ~/.bashrc\$BAK" >> \$BASHRCTEMP
-  echo source \~/.bashrc_fds $ossize >> \$BASHRCTEMP
+  echo source \~/.bashrc_fds >> \$BASHRCTEMP
   cp \$BASHRCTEMP ~/.bashrc
   rm \$BASHRCTEMP
 EOF
