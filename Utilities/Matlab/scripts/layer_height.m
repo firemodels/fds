@@ -11,13 +11,16 @@ clear all
 list_dir = dir('../../Validation/*');
 k = 0;
 for i=1:length(list_dir)
-    list_files = dir(['../../Validation/',list_dir(i).name,'/FDS_Output_Files/*HGL.input']);
-    if size(list_files)>0
-        for j=1:length(list_files)
-            if ~strcmp(list_files(j).name(1),'.') % ignore hidden files
-                k=k+1;
-                output_dir{k} = ['../../Validation/',list_dir(i).name,'/FDS_Output_Files/'];
-                input_file{k} = list_files(j).name;
+    Output_Directory = (['../../Validation/',list_dir(i).name,'/FDS_Output_Files']);
+    if exist(Output_Directory)
+        list_files = dir([Output_Directory,'/*HGL.input']);
+        if size(list_files)>0
+            for j=1:length(list_files)
+                if ~strcmp(list_files(j).name(1),'.') % ignore hidden files
+                    k=k+1;
+                    output_dir{k} = ['../../Validation/',list_dir(i).name,'/FDS_Output_Files/'];
+                    input_file{k} = list_files(j).name;
+                end
             end
         end
     end
