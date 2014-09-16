@@ -20,17 +20,35 @@ More details on the Firebot build stages can be found in the FDS Configuration M
 
 1. Create an account for Firebot on your machine. This account should be named "firebot" if possible.
    The use of a separate account is recommended so that Firebot has a clean and undisturbed copy of
-   the repositories to work with.
+   the repositories to work with. Note that the account name should be a domain or functional account name
+   for Matlab to work.
 
-2. In Firebot's newly created home directory, perform an SVN checkout on the Firebot portion of the
-   FDS-SMV repository using:
+2. Ensure that Python is installed.
 
-      svn checkout http://fds-smv.googlecode.com/svn/trunk/FDS/trunk/Utilities/Firebot firebot
+3. Ensure that a queue named 'firebot' is created, enabled, and started in the torque queueing system and that nodes are defined for this queue.
 
-3. cd to the newly created ~/firebot directory
+4. Ensure that Matlab is installed system-wide and can be started with the command 'matlab'.
 
-4. Run the ./firebot_linux_wrapper.sh or ./firebot_mac_wrapper.sh command, then the automated Firebot build process
-   will begin and will create directories and check out repositories as needed.
+5. Add the following lines to firebot's ~/.bashrc file:
+
+    export IFORT_COMPILER=/opt/intel/composerxe
+    export IFORT_COMPILER_LIB=/opt/intel/composerxe/lib
+
+    #FDS
+    source ~/.bashrc_fds intel64
+
+    # Set unlimited stack size
+    ulimit -s unlimited
+
+6. In Firebot's newly created home directory, perform an SVN checkout on the Firebot portion of the FDS-SMV repository using:
+
+      svn checkout https://fds-smv.googlecode.com/svn/trunk/FDS/trunk/Utilities/Firebot firebot --username fds.firebot
+
+7. cd to the newly created ~/firebot directory
+
+8. Run the ./firebot_linux_wrapper.sh or ./firebot_mac_wrapper.sh command, then the automated Firebot build process
+   will begin and will create directories and check out repositories as needed. You might need to perform a test commit
+   from the FDS-SMV repository to ensure that firebot's SVN password has been stored locally so it can commit changes.
 
 (Note) The *_wrapper script uses a semaphore file that ensures multiple instances of Firebot do not run, which would cause file conflicts.
 
