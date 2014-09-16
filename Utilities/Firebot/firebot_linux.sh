@@ -338,7 +338,7 @@ fix_svn_properties()
    chmod +x Utilities/Subversion/svn-fix-props.py &> /dev/null
 
    # Run svn-fix-props.py script (fixes all SVN properties)
-   Utilities/Subversion/svn-fix-props.py --config $FDS_SVNROOT/Utilities/Subversion/config ./ &> /dev/null
+   Utilities/Subversion/svn-fix-props.py --config $FDS_SVNROOT/Utilities/Subversion/config &> /dev/null
 
    # Commit back results
    svn commit -m 'Firebot: Fix SVN properties throughout repository' &> /dev/null
