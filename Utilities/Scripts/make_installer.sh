@@ -317,26 +317,21 @@ RUNTIMELIBDIR=\\\$FDSBINDIR/LIB64
 
 # define compiler environment
 
-if [[ "\\\$IFORT_COMPILER" != "" && -e \\\$IFORT_COMPILER/bin/compilervars.sh ]]; then
-  source $IFORT_COMPILER/bin/compilervars.sh intel64
-fi
+CVARS=\\\$IFORT_COMPILER/bin/compilervars.sh
+if [[ "\\\$IFORT_COMPILER" != "" && -e \\\$CVARS ]]; then source \\\$CVARS intel64 ; fi
 
 # define MPI environment
 
-if [[ "\\\$MPIDIST" == "" && -d /shared/openmpi_64ib ]]; then
-  MPIDIST=/shared/openmpi_64ib
-fi
-if [[ "\\\$MPIDIST" == "" && -d /shared/openmpi_64 ]]; then
-  MPIDIST=/shared/openmpi_64
-fi
+MPILIB=/shared/openmpi_64
+MPILIBIB=/shared/openmpi_64ib
+
+if [[ "\\\$MPIDIST" == "" && -d \\\$MPILIBIB ]] ; then MPIDIST=\\\$MPILIBIB ; fi
+if [[ "\\\$MPIDIST" == "" && -d \\\$MPILIB ]] ; then MPIDIST=\\\$MPILIB ; fi
 if [[ "\\\$MPIDIST" != "" && ! -d \\\$MPIDIST ]]; then
   echo "*** Warning: the OpenMPI distribution, \\\$MPIDIST, does not exist"
   MPIDIST=
 fi
-FDSNETWORK=
-if [[ "\\\$MPIDIST" == *ib ]]; then
-  export FDSNETWORK=infiniband
-fi
+if [[ "\\\$MPIDIST" == *ib ]] ; then FDSNETWORK=infiniband ; fi
 export FDSNETWORK
 
 # Update LD_LIBRARY_PATH and PATH variables
@@ -376,8 +371,12 @@ cat << EOF >> $INSTALLER
   echo "Updating .bash_profile"
   grep -v bashrc_fds ~/.bash_profile | grep -v "#FDS" > \$BASHPROFILETEMP
   echo "#FDS " >> \$BASHPROFILETEMP
-  echo "#FDS Setting environment for FDS and Smokeview.  The original version" >> \$BASHPROFILETEMP
-  echo "#FDS of .bash_profile is saved in ~/.bash_profile\$BAK" >> \$BASHPROFILETEMP
+  echo "#FDS Setting the environment for FDS and Smokeview. Use:" >> \$BASHPROFILETEMP  
+  echo "#FDS export MPIDIST=path_to_openmpi_library "   >> \$BASHPROFILETEMP
+  echo "#FDS to define the openmpi library location "   >> \$BASHPROFILETEMP
+  echo "#FDS (if not /shared/openmpi_64 or /shared/openmpi_64ib)"   >> \$BASHPROFILETEMP
+  echo "#FDS" >> \$BASHPROFILETEMP 
+  echo "#FDS The original version of .bash_profile is saved in ~/.bash_profile\$BAK" >> \$BASHPROFILETEMP
   echo source \~/.bashrc_fds >> \$BASHPROFILETEMP
   cp \$BASHPROFILETEMP ~/.bash_profile
   rm \$BASHPROFILETEMP
@@ -394,8 +393,13 @@ cat << EOF >> $INSTALLER
   echo "Updating .bashrc"
   grep -v bashrc_fds ~/.bashrc | grep -v "#FDS" > \$BASHRCTEMP
   echo "#FDS " >> \$BASHRCTEMP
-  echo "#FDS Setting environment for FDS and Smokeview.  The original version" >> \$BASHRCTEMP
-  echo "#FDS of .bashrc is saved in ~/.bashrc\$BAK" >> \$BASHRCTEMP
+  echo "#FDS Setting the environment for FDS and Smokeview. Use:"   >> \$BASHRCTEMP
+  echo "#FDS export MPIDIST=path_to_openmpi_library "   >> \$BASHRCTEMP
+  echo "#FDS to define the openmpi library location "   >> \$BASHRCTEMP
+  echo "#FDS (if not /shared/openmpi_64 or /shared/openmpi_64ib)"   >> \$BASHRCTEMP
+  echo "#FDS"   >> \$BASHRCTEMP 
+  echo "#FDS The original version of .bashrc" >> \$BASHRCTEMP
+  echo "#FDS is saved in ~/.bashrc\$BAK" >> \$BASHRCTEMP
   echo source \~/.bashrc_fds >> \$BASHRCTEMP
   cp \$BASHRCTEMP ~/.bashrc
   rm \$BASHRCTEMP
