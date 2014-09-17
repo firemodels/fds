@@ -375,8 +375,6 @@ cat << EOF >> $INSTALLER
   echo "#FDS export MPIDIST=path_to_openmpi_library "   >> \$BASHPROFILETEMP
   echo "#FDS to define the openmpi library location "   >> \$BASHPROFILETEMP
   echo "#FDS (if not /shared/openmpi_64 or /shared/openmpi_64ib)"   >> \$BASHPROFILETEMP
-  echo "#FDS" >> \$BASHPROFILETEMP 
-  echo "#FDS The original version of .bash_profile is saved in ~/.bash_profile\$BAK" >> \$BASHPROFILETEMP
   echo source \~/.bashrc_fds >> \$BASHPROFILETEMP
   cp \$BASHPROFILETEMP ~/.bash_profile
   rm \$BASHPROFILETEMP
@@ -397,9 +395,6 @@ cat << EOF >> $INSTALLER
   echo "#FDS export MPIDIST=path_to_openmpi_library "   >> \$BASHRCTEMP
   echo "#FDS to define the openmpi library location "   >> \$BASHRCTEMP
   echo "#FDS (if not /shared/openmpi_64 or /shared/openmpi_64ib)"   >> \$BASHRCTEMP
-  echo "#FDS"   >> \$BASHRCTEMP 
-  echo "#FDS The original version of .bashrc" >> \$BASHRCTEMP
-  echo "#FDS is saved in ~/.bashrc\$BAK" >> \$BASHRCTEMP
   echo source \~/.bashrc_fds >> \$BASHRCTEMP
   cp \$BASHRCTEMP ~/.bashrc
   rm \$BASHRCTEMP
