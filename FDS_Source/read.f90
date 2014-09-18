@@ -8200,7 +8200,7 @@ END SUBROUTINE RE_ALLOCATE_OBST
 
 SUBROUTINE READ_VENT
 
-USE GEOMETRY_FUNCTIONS, ONLY : BLOCK_CELL
+USE GEOMETRY_FUNCTIONS, ONLY : BLOCK_CELL,CIRCLE_CELL_INTERSECTION_AREA
 USE DEVICE_VARIABLES, ONLY : DEVICE, N_DEVC
 USE CONTROL_VARIABLES, ONLY : CONTROL, N_CTRL
 USE MATH_FUNCTIONS, ONLY: GET_RAMP_INDEX
@@ -8430,10 +8430,6 @@ MESH_LOOP_1: DO NM=1,NMESHES
 
                VT=>VENTS(N)
 
-               IF (ABS(XB1-XB2)<=SPACING(XB2) ) VT%TOTAL_INPUT_AREA = (XB4-XB3)*(XB6-XB5)
-               IF (ABS(XB3-XB4)<=SPACING(XB4) ) VT%TOTAL_INPUT_AREA = (XB2-XB1)*(XB6-XB5)
-               IF (ABS(XB5-XB6)<=SPACING(XB6) ) VT%TOTAL_INPUT_AREA = (XB2-XB1)*(XB4-XB3)
-             
                XB1 = MAX(XB1,XS)
                XB2 = MIN(XB2,XF)
                XB3 = MAX(XB3,YS)
@@ -8590,7 +8586,6 @@ MESH_LOOP_1: DO NM=1,NMESHES
                      CALL SHUTDOWN(MESSAGE) ; RETURN
                   ENDIF
                   VT%RADIUS = RADIUS
-                  VT%INPUT_AREA = PI*VT%RADIUS**2
                ENDIF
 
                ! Dynamic Pressure
@@ -8803,6 +8798,8 @@ MESH_LOOP_2: DO NM=1,NMESHES
       ENDIF
       
       VT%FDS_AREA = 0._EB
+      IF (VT%RADIUS>0._EB) VT%INPUT_AREA = 0._EB
+
       I1 = VT%I1
       I2 = VT%I2
       J1 = VT%J1
@@ -8817,7 +8814,10 @@ MESH_LOOP_2: DO NM=1,NMESHES
             DO K=K1+1,K2
                DO J=J1+1,J2
                   IF (J>=1 .AND. J<=JBAR .AND. K>=1 .AND. K<=KBAR) VT%GHOST_CELLS_ONLY = .FALSE.
-                  IF ( VT%RADIUS>0._EB .AND. ((YC(J)-VT%Y0)**2 + (ZC(K)-VT%Z0)**2)>(VT%RADIUS**2) ) CYCLE
+                  IF ( VT%RADIUS>0._EB) THEN
+                     VT%INPUT_AREA = VT%INPUT_AREA + CIRCLE_CELL_INTERSECTION_AREA(VT%Y0,VT%Z0,VT%RADIUS,Y(J-1),Y(J),Z(K-1),Z(K))
+                     IF (((YC(J)-VT%Y0)**2+(ZC(K)-VT%Z0)**2)>VT%RADIUS**2) CYCLE
+                  ENDIF
                   VT%FDS_AREA = VT%FDS_AREA + DY(J)*DZ(K)
                ENDDO
             ENDDO
@@ -8825,7 +8825,10 @@ MESH_LOOP_2: DO NM=1,NMESHES
             DO K=K1+1,K2
                DO I=I1+1,I2
                   IF (I>=1 .AND. I<=IBAR .AND. K>=1 .AND. K<=KBAR) VT%GHOST_CELLS_ONLY = .FALSE.
-                  IF ( VT%RADIUS>0._EB .AND. ((XC(I)-VT%X0)**2 + (ZC(K)-VT%Z0)**2)>(VT%RADIUS**2) ) CYCLE
+                  IF ( VT%RADIUS>0._EB) THEN
+                     VT%INPUT_AREA = VT%INPUT_AREA + CIRCLE_CELL_INTERSECTION_AREA(VT%X0,VT%Z0,VT%RADIUS,X(I-1),X(I),Z(K-1),Z(K))
+                     IF (((XC(I)-VT%X0)**2+(ZC(K)-VT%Z0)**2)>VT%RADIUS**2) CYCLE
+                  ENDIF
                   VT%FDS_AREA = VT%FDS_AREA + DX(I)*DZ(K)
                ENDDO
             ENDDO
@@ -8833,7 +8836,10 @@ MESH_LOOP_2: DO NM=1,NMESHES
             DO J=J1+1,J2
                DO I=I1+1,I2
                   IF (I>=1 .AND. I<=IBAR .AND. J>=1 .AND. J<=JBAR) VT%GHOST_CELLS_ONLY = .FALSE.
-                  IF ( VT%RADIUS>0._EB .AND. ((XC(I)-VT%X0)**2 + (YC(J)-VT%Y0)**2)>(VT%RADIUS**2) ) CYCLE
+                  IF ( VT%RADIUS>0._EB) THEN
+                     VT%INPUT_AREA = VT%INPUT_AREA + CIRCLE_CELL_INTERSECTION_AREA(VT%X0,VT%Y0,VT%RADIUS,X(I-1),X(I),Y(J-1),Y(J))
+                     IF (((XC(I)-VT%X0)**2+(YC(J)-VT%Y0)**2)>VT%RADIUS**2) CYCLE
+                  ENDIF
                   VT%FDS_AREA = VT%FDS_AREA + DX(I)*DY(J)
                ENDDO
             ENDDO
