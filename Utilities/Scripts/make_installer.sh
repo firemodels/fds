@@ -346,6 +346,7 @@ if [[ "\\\$MPIDIST" != "" && ! -d \\\$MPIDIST ]]; then
 fi
 if [[ "\\\$MPIDIST" == *ib ]] ; then FDSNETWORK=infiniband ; fi
 export FDSNETWORK
+export MPIDIST
 
 # Update LD_LIBRARY_PATH and PATH variables
 
