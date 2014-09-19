@@ -2143,15 +2143,19 @@ Periodic vents may not be used to connect offset vents or vents in different coo
 \subsubsection{Circular Vents}
 \label{sec:circvents}
 
-Circular vents may be specified by an intersection of an {\ct XB} and a circle with center {\ct XYZ} and radius {\ct RADIUS}.  The rectangular surface cells assigned the corresponding {\ct SURF\_ID} will be those whose centroid falls within the {\ct XB}/circle intersection. As discussed below in Section \ref{info:spread}, the addition of {\ct RADIUS} on a {\ct VENT} line also triggers a radially spreading fire.  If this behavior is unwanted, it is necessary to specify a large value for the {\ct SPREAD\_RATE} so the mass flux through the vent will happen instantly.  It is also possible to stack circular vents, as shown in the following example:
-
+Circular or semi-circular vents may be specified as the intersection of a rectangle with coordinates {\ct XB} and a circle with center {\ct XYZ} and radius {\ct RADIUS}.  The rectangular surface cells that are assigned the corresponding {\ct SURF\_ID} will be those whose centroid falls within the intersection. As discussed in Section~\ref{info:spread}, the coordinates {\ct XYZ} on a {\ct VENT} line also triggers a radially spreading fire.  If this behavior is unwanted, specify a large value for the {\ct SPREAD\_RATE}. In the example case called {\ct Fires/circular\_burner.fds}, the following two lines create a circular vent that is 1~m in diameter and flows propane gas at a rate of 0.02~kg/m$^2$/s:
 \begin{lstlisting}
-&SURF ID='pool', MASS_FLUX(1)=0.04, SPEC_ID(1)='METHANE' /
-&SURF ID='plate', COLOR='GRAY' /
-&VENT XB=-0.5,0.5,-0.5,0.5,0,0, XYZ=0,0,0.0001, RADIUS=0.5, COLOR='BLUE', SURF_ID= 'pool', SPREAD_RATE=1000. /
-&VENT XB=-1,1,-1,1,0,0, XYZ=0,0,0, RADIUS=1, SURF_ID='plate'/
-&VENT MB='ZMIN',SURF_ID='OPEN'/
+&SURF ID='BURNER', MASS_FLUX(1)=0.02, SPEC_ID(1)='PROPANE', TAU_MF(1)=0.01 /
+&VENT XB=-0.6,0.6,-0.6,0.6,0,0, XYZ=0,0,0, RADIUS=0.5, SURF_ID='BURNER' /
 \end{lstlisting}
+The {\ct XB} coordinates designate the orientation of the vent. In this case, the extent of the area specified by {\ct XB} is large enough to contain the entire circle. Note also in this example that the coordinates of the center of the circle, {\ct XYZ}, automatically trigger a radially spreading fire whose default spread rate is 0.05~m/s. The mass flux of propane through the vent is plotted in Fig.~\ref{circ_burn}. Notice that the mass flux increases following a ``t-squared'' profile. This is what is expected of a fire which spreads radially at a linear rate. In this case, the fire reaches the {\ct RADIUS} of the circle in 10~s, as expected. Note also that the parameter {\ct TAU\_MF} indicates that the fuel should ramp up quickly once the flame front reaches a given grid cell. In other words, {\ct TAU\_MF} controls the local ramp-up of fuel; the {\ct SPREAD\_RATE} controls the global ramp-up. Following the ramp-up, the fuel flows at a rate equal to the area of the circle times the mass flux of fuel per unit area. Even if the circle is crudely resolved on a coarse grid, the fuel flow rate will be adjusted to produce the desired value governed by the circular vent.
+\begin{figure}[h]
+\begin{center}
+\includegraphics[width=3in]{SCRIPT_FIGURES/circular_burner}
+\caption[Results of the {\ct circular\_burner} test case]{Results of the {\ct circular\_burner} test case.}
+\label{circ_burn}
+\end{center}
+\end{figure}
 
 
 \subsection{Controlling Vents}
@@ -2613,7 +2617,7 @@ not just the surface.
 
 The layers of a solid boundary are listed in order from the surface. By default,
 if the obstruction is less than or equal to one cell thick, then the innermost layer will be exposed to the air temperature on the back side.  If the obstruction is on the boundary of the domain or is more than one cell thick, it is assumed to back up to an air gap at ambient
-temperature. For example a thin steel plate (i.e. thickness less than or equal to the grid) would use the FDS predicted temperatures on either side of the plate for predicting heat transfer.   
+temperature. For example a thin steel plate (i.e. thickness less than or equal to the grid) would use the FDS predicted temperatures on either side of the plate for predicting heat transfer.
 
 There are other back side boundary conditions that can be applied. One is to assume that the wall
 backs up to an insulated material in which case no heat is lost to
@@ -2649,7 +2653,7 @@ but rather the gas temperature to which the back side surface is exposed. This
 parameter has no meaning for surfaces with {\ct BACKING='EXPOSED'} or
 {\ct BACKING='INSULATED'}.
 
-As an alternative to {\ct TMP\_INNER} one can also use {\ct RAMP\_T\_I} to specify the name of a {\ct RAMP} containing a depth vs. temperature profile for the surface.  
+As an alternative to {\ct TMP\_INNER} one can also use {\ct RAMP\_T\_I} to specify the name of a {\ct RAMP} containing a depth vs. temperature profile for the surface.
 
 Note that the parameters {\ct TMP\_INNER} and {\ct TMP\_BACK} are only meaningful for solids with specified {\ct THICKNESS} and material
 properties (via the {\ct MATL\_ID} keyword).
@@ -4444,7 +4448,7 @@ The {\ct SPEC} input is used to define a gas species in FDS. Once defined the sp
 
 If a species is only to be used as part of one or more lumped species, {\ct LUMPED\_COMPONENT\_ONLY=.TRUE.} must be added to the {\ct SPEC} line.  This tells FDS not to allocate space for the species in the array of tracked gases. If a species is to be used as the background species, the parameter {\ct BACKGROUND=.TRUE.} should be set on the {\ct SPEC} line. This also tells FDS not to allocate space for the species in the array of tracked gases. A species with {\ct LUMPED\_COMPONENT\_ONLY=.TRUE.} cannot be used as an individual species, and it cannot be used as the background species.  However, a primitive species with {\ct BACKGROUND=.TRUE.} can also be used as part of a lumped species definition.  Note that the default background species is {\ct AIR} which is defined as a lumped species consisting of N$_2$, O$_2$, CO$_2$, and H$_2$O.  If no background species is defined in the input file, then FDS will create the background species of {\ct AIR} by internally creating the input lines shown in Example 2 in Section~\ref{info:lumped}.
 
-Note that while you can define as many species using {\ct SPEC} as you wish in an input file, any namelist input tied to a list of species, such as any {\ct SPEC\_ID} input or {\ct MASS\_FRACTION} input, is limited to using no more than 20 species. 
+Note that while you can define as many species using {\ct SPEC} as you wish in an input file, any namelist input tied to a list of species, such as any {\ct SPEC\_ID} input or {\ct MASS\_FRACTION} input, is limited to using no more than 20 species.
 
 \subsection{Basics}
 
