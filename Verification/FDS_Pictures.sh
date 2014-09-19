@@ -3,6 +3,7 @@ $RUNSMV -d Detectors beam_detector
 $RUNSMV -d Fires room_fire
 $RUNSMV -d Flowfields helium_2d_isothermal
 $RUNSMV -d Flowfields symmetry_test
+$RUNSMV -d Flowfields symmetry_test_mpi
 $RUNSMV -d Flowfields jet_fan
 $RUNSMV -d Flowfields velocity_bc_test
 $RUNSMV -d HVAC HVAC_mass_conservation
