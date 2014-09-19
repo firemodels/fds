@@ -1101,7 +1101,7 @@ As seen in the left side of Fig.~\ref{fig_heated_channel}, the velocity profile 
 
 \textbf{Benjamin A.~Toms, NIST SURF student}\\
 
-\noindent Large-eddy simulation (LES) of turbulent flow over a backward facing step is studied using the Fire Dynamics Simulator (FDS).  A set of cases is designed to test the influence of grid resolution, inlet turbulence, wall boundary treatments, and eddy viscosity models.  The computational results are validated with experimental data.  A grid resolution of $h/ \delta z=10$ adequately modeled the flow, although a doubling of resolution resulted in the realization of smaller scale kinematic features.  The inlet turbulence conditions are determined to be the most significant contributor to downstream flow evolution.  Reattachment length is found to be strongly dependent on the magnitude of the inlet RMS velocity.  The choice of eddy viscosity model is found to have negligible influence, while the no-slip condition and an LES log-law-based wall function performed similarly for the given flow. 
+\noindent Large-eddy simulation (LES) of turbulent flow over a backward facing step is studied using the Fire Dynamics Simulator (FDS).  A set of cases is designed to test the influence of grid resolution, inlet turbulence, wall boundary treatments, and eddy viscosity models.  The computational results are validated with experimental data.  A grid resolution of $h/ \delta z=10$ adequately modeled the flow, although a doubling of resolution resulted in the realization of smaller scale kinematic features.  The inlet turbulence conditions are determined to be the most significant contributor to downstream flow evolution.  Reattachment length is found to be strongly dependent on the magnitude of the inlet RMS velocity.  The choice of eddy viscosity model is found to have negligible influence, while the no-slip condition and an LES log-law-based wall function performed similarly for the given flow.
 
 FDS has recently been applied to urban canopy modeling \cite{Moon:2014} and wind engineering.  As such, it is important to study geometrically complex flows, including the appropriate specification of boundary conditions and resultant downstream flow evolution. Le et al.~\cite{Le:1997} first modeled flow over a backward facing step using DNS with a Reynolds number of 5,100.  To verify the results, Jovic and Driver (J\&D) \cite{JD:1994} supplemented the DNS simulation with an identically proportioned wind tunnel experiment.  Together, the data sets from these two studies have provided the baseline for analysis of recent simulations of flow over a backward facing step.
 
@@ -1805,17 +1805,15 @@ This section presents a number of cases that are designed to check whether or no
 
 \subsection{Finite difference errors (\texorpdfstring{\textct{symmetry\_test}}{symmetry\_test})}
 
-This example is a very simple test to determine if there are coding errors in the basic flow solver. A closed box, 1~m on a side, has 6 injection vents, one centered on each face.
-Air is pumped into the box at a rate of 0.5~m/s. Anything that might lead to an asymmetry in the flow field is turned off, for example, gravity, atmospheric stratification,
-natural convection, and random noise. The resulting flow field is shown at the left in Fig.~\ref{symmetry_test}. On the right are plots of the three components of velocity
-at equidistant corners of the enclosure. Ideally, there should be two equal and opposite time histories of the three components. Even the slightest error in coding will throw
-this off almost immediately.
+These examples are very simple tests to determine if there are coding errors in the basic flow solver. A closed box, 1~m on a side, has 6 injection vents, one centered on each face. Air is pumped into the box at a rate of 0.5~m/s. Anything that might lead to an asymmetry in the flow field is turned off, for example, gravity, atmospheric stratification, natural convection, and random noise. One case is performed on a single mesh; the other on multiple meshes. The resulting flow fields are shown at the left in Fig.~\ref{symmetry_test}. On the right are plots of the three components of velocity at equidistant corners of the enclosure. Ideally, there should be two equal and opposite time histories of the three components. Even the slightest error in coding will throw this off almost immediately.
 \begin{figure}[h!]
 \begin{tabular*}{\textwidth}{lr}
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/symmetry_test} &
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/symmetry_test_plot}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/symmetry_test_plot} \\
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/symmetry_test_mpi} &
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/symmetry_test_mpi_plot}
 \end{tabular*}
-\caption[The \textct{symmetry\_test} test case]{Flow field (left) and velocity component plot (right) for the \textct{symmetry\_test} case.}
+\caption[The \textct{symmetry\_test} cases]{Flow field (left) and velocity component plots (right) for the \textct{symmetry\_test} cases.}
 \label{symmetry_test}
 \end{figure}
 
@@ -4229,7 +4227,7 @@ A cut-cell algorithm is developed for calculating the intersection area between 
 
 \section{Statistical Quantities (\texorpdfstring\textct{rms\_cov\_corr}{rms\_cov\_corr})}
 
-FDS can output the root mean square (RMS), co-variance, and cross-correlation for both point and line {\ct DEVC} outputs.  To test these outputs a 1 m$^3$ box with open sides and a 10 cm grid size is defined with two inlet vents centered on adjacent faces.  This results in two orthogonal flow streams that collide at the center of the box and exit diagonally.  Within the diagonal portion of the flow, are placed point measurements for the FDS outputs of the u-velocity RMS, the u-velocity/w-velocity co-variance, and the u-velocity/w-velocity cross-correlation.   
+FDS can output the root mean square (RMS), co-variance, and cross-correlation for both point and line {\ct DEVC} outputs.  To test these outputs a 1 m$^3$ box with open sides and a 10 cm grid size is defined with two inlet vents centered on adjacent faces.  This results in two orthogonal flow streams that collide at the center of the box and exit diagonally.  Within the diagonal portion of the flow, are placed point measurements for the FDS outputs of the u-velocity RMS, the u-velocity/w-velocity co-variance, and the u-velocity/w-velocity cross-correlation.
 
 Computation of the these quantities by their typical statistical definition would require having the entire time history for the velocities.  This is obviously not possible during run-time.  Instead FDS computes the values using logarithmic averaging and a user-defined averaging window.  One would expect, once steady-state conditions are reached, that the FDS predicted values should approach the analytic values.  Results are shown in Fig.~\ref{rms_cov_corr_plots}.  In each figure the red line represents the value computed using the entire time history after steady-state is reached.  As seen, the FDS predicted values approach the analytic values.
 
