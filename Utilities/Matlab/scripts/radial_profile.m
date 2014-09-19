@@ -129,12 +129,12 @@ if nfds>=1
         vrange = devc_col(3):devc_col(4);
         u = M(T,urange)-ones(length(T),1)*mean(M(T,urange),1);
         v = M(T,vrange)-ones(length(T),1)*mean(M(T,vrange),1);
-        W = mean(0.5*u.*u+v.*v,1);
+        W = mean(0.5*(u.*u+v.*v),1);
     elseif strcmp(data_format,'col_tke')
         R = M(:,1);
         u = M(:,devc_col(1));
         v = M(:,devc_col(2));
-        W = 0.5*u.*u + v.*v;
+        W = 0.5*(u.*u + v.*v);
     end
     H(2)=plot(R,W,fds_format1,'LineWidth',1);
     hold off
@@ -166,12 +166,12 @@ if nfds>=2
         vrange = devc_col(3):devc_col(4);
         u = M(T,urange)-ones(length(T),1)*mean(M(T,urange),1);
         v = M(T,vrange)-ones(length(T),1)*mean(M(T,vrange),1);
-        W = mean(0.5*u.*u+v.*v,1);
+        W = mean(0.5*(u.*u+v.*v),1);
     elseif strcmp(data_format,'col_tke')
         R = M(:,1);
         u = M(:,devc_col(1));
         v = M(:,devc_col(2));
-        W = 0.5*u.*u + v.*v;
+        W = 0.5*(u.*u + v.*v);
     end
     H(3)=plot(R,W,fds_format2,'LineWidth',1);
     hold off
@@ -203,12 +203,12 @@ if nfds>=3
         vrange = devc_col(3):devc_col(4);
         u = M(T,urange)-ones(length(T),1)*mean(M(T,urange),1);
         v = M(T,vrange)-ones(length(T),1)*mean(M(T,vrange),1); 
-        W = mean(0.5*u.*u+v.*v,1);
+        W = mean(0.5*(u.*u+v.*v),1);
     elseif strcmp(data_format,'col_tke')
         R = M(:,1);
         u = M(:,devc_col(1));
         v = M(:,devc_col(2));
-        W = 0.5*u.*u + v.*v;
+        W = 0.5*(u.*u + v.*v);
     end
     H(4)=plot(R,W,fds_format3,'LineWidth',1);
     hold off
@@ -240,12 +240,12 @@ if nfds>=4
         vrange = devc_col(3):devc_col(4);
         u = M(T,urange)-ones(length(T),1)*mean(M(T,urange),1);
         v = M(T,vrange)-ones(length(T),1)*mean(M(T,vrange),1);
-        W = mean(0.5*u.*u+v.*v,1);
+        W = mean(0.5*(u.*u+v.*v),1);
     elseif strcmp(data_format,'col_tke')
         R = M(:,1);
         u = M(:,devc_col(1));
         v = M(:,devc_col(2));
-        W = 0.5*u.*u + v.*v;
+        W = 0.5*(u.*u + v.*v);
     end
     H(5)=plot(R,W,fds_format4,'LineWidth',1);
     hold off
@@ -277,12 +277,12 @@ if nfds>=5
         vrange = devc_col(3):devc_col(4);
         u = M(T,urange)-ones(length(T),1)*mean(M(T,urange),1);
         v = M(T,vrange)-ones(length(T),1)*mean(M(T,vrange),1); 
-        W = mean(0.5*u.*u+v.*v,1);
+        W = mean(0.5*(u.*u+v.*v),1);
     elseif strcmp(data_format,'col_tke')
         R = M(:,1);
         u = M(:,devc_col(1));
         v = M(:,devc_col(2));
-        W = 0.5*u.*u + v.*v;
+        W = 0.5*(u.*u + v.*v);
     end
     H(6)=plot(R,W,fds_format5,'LineWidth',1);
     hold off
