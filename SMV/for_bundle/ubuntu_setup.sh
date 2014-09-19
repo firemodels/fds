@@ -127,11 +127,9 @@ echo set default server in /var/spool/torque/server_name
 
 # install openmpi libraries
 
-wget https://bintray.com/nist-fire-research/releases/Open_MPI/view/files/openmpi_1.6.5_linux_32.tar.gz
-wget https://bintray.com/nist-fire-research/releases/Open_MPI/view/files/openmpi_1.6.5_linux_64.tar.gz
+wget https://dl.bintray.com/nist-fire-research/releases/openmpi_1.8.1_linux_64.tar.gz
 mkdir /shared
 cd /shared
-tar xvf ~/openmpi_1.6.5_linux_32.tar.gz
-tar xvf ~/openmpi_1.6.5_linux_64.tar.gz
+tar xvf ~/openmpi_1.8.1_linux_64.tar.gz
 
 echo setup complete
