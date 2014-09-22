@@ -86,17 +86,17 @@ plot_style
 
 % experimental data
 M = csvread(exp_file,1,0);
-r = M(:,1);
-w = M(:,2);
+r = M(1:3:end,1);
+w = M(1:3:end,2);
 if (error>0)
     if strcmp(error_type,'relative')
         e = error*abs(w); % percent error matches DesJardin paper
     else
         e = error*ones(1,length(w)/length(error));
-    end 
-    
-    e(2:2:length(e)) = 0; % remove every other error bar for clarity
-    H(1)=errorbar(r,w,-e,+e,exp_format);
+    end
+    % put error bars on every other data point for readability
+    plot(r(1:2:end),w(1:2:end),exp_format); hold on
+    H(1)=errorbar(r(2:2:end),w(2:2:end),-e(2:2:end),+e(2:2:end),exp_format);
 else
     H(1)=plot(r,w,exp_format);
 end
