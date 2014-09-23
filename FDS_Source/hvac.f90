@@ -1523,7 +1523,7 @@ DO ND = 1, N_DUCTS
                   DU%VEL  = 0._EB
                ENDIF
          ENDIF
-      ELSE
+      ELSEIF(DU%CTRL_INDEX > 0) THEN
          IF (CONTROL(DU%CTRL_INDEX)%CURRENT_STATE .NEQV. DU%DAMPER_OPEN) THEN
                DU%DAMPER_OPEN = CONTROL(DU%CTRL_INDEX)%CURRENT_STATE
                CHANGE = .TRUE.
