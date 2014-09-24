@@ -5445,39 +5445,6 @@ SOLID_PHASE_SELECT: SELECT CASE(INDX)
          SOLID_PHASE_OUTPUT = 0._EB
       ENDIF
       IF (INDX==16) SOLID_PHASE_OUTPUT = SOLID_PHASE_OUTPUT/SURFACE(SURF_INDEX)%SURFACE_DENSITY
-   CASE(17:19) ! VOLUME FLOW WALL, MASS FLOW WALL, HEAT FLOW WALL
-      SOLID_PHASE_OUTPUT = 0._EB
-      DV_K_LOOP: DO K=DV%K1,DV%K2
-         DV_J_LOOP: DO J=DV%J1,DV%J2
-            DV_I_LOOP: DO I=DV%I1,DV%I2
-               IIG=I
-               JJG=J
-               KKG=K
-               SELECT CASE(DV%IOR)
-                  ! convention here is: inflow is positive (adds mass to domain), outflow is negative (subtracts mass)
-                  CASE( 1); UN =  U(I,J,K); IIG=IIG+1
-                  CASE(-1); UN = -U(I,J,K)
-                  CASE( 2); UN =  V(I,J,K); JJG=JJG+1
-                  CASE(-2); UN = -V(I,J,K)
-                  CASE( 3); UN =  W(I,J,K); KKG=KKG+1
-                  CASE(-3); UN = -W(I,J,K)
-               END SELECT
-               IW = WALL_INDEX(CELL_INDEX(IIG,JJG,KKG),-DV%IOR)
-               IF (IW==0) CYCLE DV_I_LOOP
-               WC => WALL(IW)
-               SELECT CASE(INDX)
-                  CASE(17)
-                     SOLID_PHASE_OUTPUT = SOLID_PHASE_OUTPUT + UN*WC%AW
-                  CASE(18)
-                     SOLID_PHASE_OUTPUT = SOLID_PHASE_OUTPUT + WC%RHO_F*UN*WC%AW
-                  CASE(19)
-                     IF (N_TRACKED_SPECIES>0) ZZ_GET(1:N_TRACKED_SPECIES) = WC%ZZ_F(1:N_TRACKED_SPECIES)
-                     CALL GET_SENSIBLE_ENTHALPY(ZZ_GET,H_S,WC%ONE_D%TMP_F)
-                     SOLID_PHASE_OUTPUT = SOLID_PHASE_OUTPUT + WC%RHO_F*H_S*UN*WC%AW*0.001_EB
-               END SELECT
-            ENDDO DV_I_LOOP
-         ENDDO DV_J_LOOP
-      ENDDO DV_K_LOOP
    CASE(20) ! INCIDENT HEAT FLUX
       SOLID_PHASE_OUTPUT = ( ONE_D%QRADIN/(ONE_D%EMISSIVITY+1.0E-10_EB) + ONE_D%QCONF )*0.001_EB
    CASE(21) ! HEAT TRANSFER COEFFICENT
@@ -5690,6 +5657,47 @@ SOLID_PHASE_SELECT: SELECT CASE(INDX)
    CASE(46) ! WALL CELL THERMAL BOUNDARY TYPE (debug)
       SF => SURFACE(SURF_INDEX)
       SOLID_PHASE_OUTPUT = REAL(SF%THERMAL_BC_INDEX,EB)
+
+   CASE(50:58) ! VOLUME FLOW WALL, MASS FLOW WALL, HEAT FLOW WALL
+      SOLID_PHASE_OUTPUT = 0._EB
+      DV_K_LOOP: DO K=DV%K1,DV%K2
+         DV_J_LOOP: DO J=DV%J1,DV%J2
+            DV_I_LOOP: DO I=DV%I1,DV%I2
+               IIG=I
+               JJG=J
+               KKG=K
+               SELECT CASE(DV%IOR)
+                  ! convention here is: inflow is positive (adds mass to domain), outflow is negative (subtracts mass)
+                  CASE( 1); UN =  U(I,J,K); IIG=IIG+1
+                  CASE(-1); UN = -U(I,J,K)
+                  CASE( 2); UN =  V(I,J,K); JJG=JJG+1
+                  CASE(-2); UN = -V(I,J,K)
+                  CASE( 3); UN =  W(I,J,K); KKG=KKG+1
+                  CASE(-3); UN = -W(I,J,K)
+               END SELECT
+               IW = WALL_INDEX(CELL_INDEX(IIG,JJG,KKG),-DV%IOR)
+               IF (IW==0) CYCLE DV_I_LOOP
+               WC => WALL(IW)
+               SELECT CASE(INDX)
+                  CASE DEFAULT
+                  CASE (51,54,57)
+                     UN = MAX(0._EB,UN) ! +
+                  CASE (52,55,58)
+                     UN = MIN(0._EB,UN) ! -
+               END SELECT
+               SELECT CASE(INDX)
+                  CASE(50,51,52) ! VOLUME FLOW WALL (+,-)
+                     SOLID_PHASE_OUTPUT = SOLID_PHASE_OUTPUT + UN*WC%AW
+                  CASE(53,54,55) ! MASS FLOW WALL (+,-)
+                     SOLID_PHASE_OUTPUT = SOLID_PHASE_OUTPUT + WC%RHO_F*UN*WC%AW
+                  CASE(56,57,58) ! HEAT FLOW WALL (+,-)
+                     IF (N_TRACKED_SPECIES>0) ZZ_GET(1:N_TRACKED_SPECIES) = WC%ZZ_F(1:N_TRACKED_SPECIES)
+                     CALL GET_SENSIBLE_ENTHALPY(ZZ_GET,H_S,WC%ONE_D%TMP_F)
+                     SOLID_PHASE_OUTPUT = SOLID_PHASE_OUTPUT + WC%RHO_F*H_S*UN*WC%AW*0.001_EB
+               END SELECT
+            ENDDO DV_I_LOOP
+         ENDDO DV_J_LOOP
+      ENDDO DV_K_LOOP
 
 END SELECT SOLID_PHASE_SELECT
 
