@@ -3809,6 +3809,8 @@ If the node is connected to the FDS domain, then do not specify {\ct XYZ}.  FDS 
 \noindent
 A duct node must either have two or more ducts attached to it or it must have either {\ct AMBIENT=.TRUE.} or a specified {\ct VENT\_ID}.  When defining a {\ct VENT} as a component of an HVAC system you must set {\ct SURF\_ID} to {\ct 'HVAC'} and you must set the {\ct VENT\_ID}.
 
+Note, do not split an HVAC {\ct VENT} over multiple-meshes. It is permissible to have individual {\ct VENT} lines for an HVAC system in different meshes, but any single HVAC {\ct VENT} needs to be contained within a single mesh. This restriction does not apply to surfaces with leakage flows.
+
 \subsection{HVAC Fan Parameters}
 \label{info:HVACfan}
 
