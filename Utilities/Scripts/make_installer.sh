@@ -306,10 +306,25 @@ cd \$FDS_root
 tail -n +\$SKIP \$THISSCRIPT | tar -xz
 echo "Copy complete."
 
+#--- define MPI library locations
+
+if [ -d /shared/openmpi_64ib ] ; then
+  MPIIB="export MPI_IB=/shared/openmpi_64ib"
+else
+  MPIIB="export MPI_IB="
+fi
+if [ -d /shared/openmpi_64 ] ; then
+  MPIETH="export MPI_ETH=/shared/openmpi_64"
+else
+  MPIETH="export MPI_ETH="
+fi
+
 #--- create BASH startup file
 
 cat << BASH > \$BASHFDS
 #/bin/bash
+
+platform=\\\$1
 
 # unalias application names used by FDS
 
@@ -322,40 +337,46 @@ unalias smokeview6 >& /dev/null
 unalias smokezip6 >& /dev/null
 unalias smokediff6 >& /dev/null
 
-# define FDS bin directory location
+# FDS location
 
-export FDSBINDIR=\`pwd\`/bin
+FDSBINDIR=\`pwd\`/bin
 SHORTCUTDIR=\$SHORTCUTDIR
-RUNTIMELIBDIR=\\\$FDSBINDIR/LIB64
 
-# define compiler environment
+#  infiniband (MPI_IB) and ethernet (MPI_ETH) MPI library locaton
 
-CVARS=\\\$IFORT_COMPILER/bin/compilervars.sh
-if [[ "\\\$IFORT_COMPILER" != "" && -e \\\$CVARS ]]; then source \\\$CVARS intel64 ; fi
+\$MPIIB
+\$MPIETH
 
-# define MPI environment
+# setup MPI environment
 
-MPILIB=/shared/openmpi_64
-MPILIBIB=/shared/openmpi_64ib
-
-if [[ "\\\$MPIDIST" == "" && -d \\\$MPILIBIB ]] ; then MPIDIST=\\\$MPILIBIB ; fi
-if [[ "\\\$MPIDIST" == "" && -d \\\$MPILIB ]] ; then MPIDIST=\\\$MPILIB ; fi
+if [ "\\\$QMPIDIST" == "" ] ; then
+  if [[ "\\\$platform" == "intel64ib" ]] ; then
+    MPIDIST=\\\$MPI_IB
+  fi
+  if [[ "\\\$platform" == "intel64" ]] ; then
+    MPIDIST=\\\$MPI_ETH
+  fi
+else
+  MPIDIST=\\\$QMPIDIST
+fi
 if [[ "\\\$MPIDIST" != "" && ! -d \\\$MPIDIST ]]; then
-  echo "*** Warning: the OpenMPI distribution, \\\$MPIDIST, does not exist"
+  echo "*** Warning: the MPI distribution, \\\$MPIDIST, does not exist"
   MPIDIST=
 fi
-if [[ "\\\$MPIDIST" == *ib ]] ; then FDSNETWORK=infiniband ; fi
-export FDSNETWORK
-export MPIDIST
-
-# Update LD_LIBRARY_PATH and PATH variables
-
-export LD_LIBRARY_PATH=\\\$RUNTIMELIBDIR:\\\$LD_LIBRARY_PATH
-export PATH=\\\$FDSBINDIR:\\\$SHORTCUTDIR:\\\$PATH
-if [ "\\\$MPIDIST" != "" ]; then
-  export LD_LIBRARY_PATH=\\\$MPIDIST/lib:\\\$LD_LIBRARY_PATH
-  export PATH=\\\$MPIDIST/bin:\\\$PATH
+if [[ "\\\$MPIDIST" == *ib ]] ; then
+  FDSNETWORK=infiniband
 fi
+export MPIDIST FDSNETWORK
+
+# Update LD_LIBRARY_PATH and PATH
+
+LD_LIBRARY_PATH=\\\$FDSBINDIR/LIB64:\\\$LD_LIBRARY_PATH
+PATH=\\\$FDSBINDIR:\\\$SHORTCUTDIR:\\\$PATH
+if [ "\\\$MPIDIST" != "" ]; then
+  LD_LIBRARY_PATH=\\\$MPIDIST/lib:\\\$LD_LIBRARY_PATH
+  PATH=\\\$MPIDIST/bin:\\\$PATH
+fi
+export LD_LIBRARY_PATH PATH
 
 # Set number of OMP threads
 
@@ -374,24 +395,27 @@ fi
 cp \$BASHFDS ~/.bashrc_fds
 rm \$BASHFDS
 
+if [ -d /shared/openmpi_64ib ] ; then
+  SOURCEFDS="source ~/.bashrc_fds intel64ib"
+else
+  SOURCEFDS="source ~/.bashrc_fds intel64"
+fi
+
 #--- update .bash_profile
 EOF
 if [ "$ostype" == "OSX" ]; then
 cat << EOF >> $INSTALLER
   BACKUP_FILE ~/.bash_profile
 
-  BASHPROFILETEMP=/tmp/.bash_profile_temp_\$\$
+  BASHSTARTUP=/tmp/.bash_profile_temp_\$\$
   cd \$THISDIR
   echo "Updating .bash_profile"
-  grep -v bashrc_fds ~/.bash_profile | grep -v "#FDS" > \$BASHPROFILETEMP
-  echo "#FDS " >> \$BASHPROFILETEMP
-  echo "#FDS Setting the environment for FDS and Smokeview. Use:" >> \$BASHPROFILETEMP  
-  echo "#FDS export MPIDIST=path_to_openmpi_library "   >> \$BASHPROFILETEMP
-  echo "#FDS to define the openmpi library location "   >> \$BASHPROFILETEMP
-  echo "#FDS (if not /shared/openmpi_64 or /shared/openmpi_64ib)"   >> \$BASHPROFILETEMP
-  echo source \~/.bashrc_fds >> \$BASHPROFILETEMP
-  cp \$BASHPROFILETEMP ~/.bash_profile
-  rm \$BASHPROFILETEMP
+  grep -v bashrc_fds ~/.bash_profile | grep -v "#FDS" > \$BASHSTARTUP
+  echo "#FDS " >> \$BASHSTARTUP
+  echo "#FDS Setting the environment for FDS and Smokeview. "   >> \$BASHSTARTUP
+  echo \$SOURCEFDS >> \$BASHSTARTUP
+  cp \$BASHSTARTUP ~/.bash_profile
+  rm \$BASHSTARTUP
 EOF
 fi
 
@@ -400,18 +424,15 @@ cat << EOF >> $INSTALLER
 #--- update .bashrc
   BACKUP_FILE ~/.bashrc
 
-  BASHRCTEMP=/tmp/.bashrc_temp_\$\$
+  BASHSTARTUP=/tmp/.bashrc_temp_\$\$
   cd \$THISDIR
   echo "Updating .bashrc"
-  grep -v bashrc_fds ~/.bashrc | grep -v "#FDS" > \$BASHRCTEMP
-  echo "#FDS " >> \$BASHRCTEMP
-  echo "#FDS Setting the environment for FDS and Smokeview. Use:"   >> \$BASHRCTEMP
-  echo "#FDS export MPIDIST=path_to_openmpi_library "   >> \$BASHRCTEMP
-  echo "#FDS to define the openmpi library location "   >> \$BASHRCTEMP
-  echo "#FDS (if not /shared/openmpi_64 or /shared/openmpi_64ib)"   >> \$BASHRCTEMP
-  echo source \~/.bashrc_fds >> \$BASHRCTEMP
-  cp \$BASHRCTEMP ~/.bashrc
-  rm \$BASHRCTEMP
+  grep -v bashrc_fds ~/.bashrc | grep -v MPI_ETH | grep -v MPI_IB | grep -v "#FDS" > \$BASHSTARTUP
+  echo "#FDS " >> \$BASHSTARTUP
+  echo "#FDS Setting the environment for FDS and Smokeview. "   >> \$BASHSTARTUP
+  echo \$SOURCEFDS >> \$BASHSTARTUP
+  cp \$BASHSTARTUP ~/.bashrc
+  rm \$BASHSTARTUP
 EOF
 fi
 
