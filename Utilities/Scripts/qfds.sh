@@ -214,6 +214,11 @@ fi
 if [ "$strip_extension" == "1" ] ; then
   in=$infile
 fi
+if [ $STOPFDS ]; then
+ echo "stopping case: $in"
+ touch $stopfile
+ exit
+fi
 if ! [ -e $exe ]; then
   if [ "$showinput" == "0" ] ; then
     echo "The program, $exe, does not exist. Run aborted."
@@ -228,11 +233,6 @@ if [ "$ABORTRUN" == "y" ] ; then
   if [ "$showinput" == "0" ] ; then
     exit
   fi
-fi
-if [ $STOPFDS ]; then
- echo "stopping case: $in"
- touch $stopfile
- exit
 fi
 if [ "$STOPFDSMAXITER" != "" ]; then
   echo "creating delayed stop file: $infile"
