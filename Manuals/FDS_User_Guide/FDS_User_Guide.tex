@@ -3746,7 +3746,7 @@ where:
 \item[{\ct DEVC\_ID}]  is the {\ct ID} of a {\ct DEVC} for a damper, fan, or aircoil in the duct. An alternative is {\ct CTRL\_ID}.
 \item[{\ct FAN\_ID}] is the {\ct ID} of a fan located in the duct. Instead of specifying a {\ct FAN\_ID}, you could specify the {\ct VOLUME\_FLOW} rate (m$^3$/s) through the duct. The operation of the fan can be controlled by either a device or a control function.
 \item[{\ct LENGTH}] is the {\ct LENGTH} of the duct in m.  Note that {\ct LENGTH} is not computed automatically as the difference between the {\ct XYZ} of the duct's endpoints.
-\item[{\ct LOSS}] is a pair of real numbers giving the forward and reverse flow loss in the duct.  Forward is flow from the first node listed in {\ct NODE\_ID} to the second node listed in {\ct NODE\_ID}.
+\item[{\ct LOSS}] is a pair of real numbers giving the forward and reverse dimensionless loss coefficient in the duct.  The forward direction is defined as flow from the first node listed in {\ct NODE\_ID} to the second node listed in {\ct NODE\_ID}.
 \item[{\ct MASS\_FLOW}] is a fixed mass flow rate (kg/s) through the duct.  Only specify one of {\ct MASS\_FLOW} or {\ct VOLUME\_FLOW}.  You can change its value in time either using the characteristic time, {\ct TAU\_VF},  to define a tanh ({\ct TAU\_VF}>0) or t$^2$ ramp ({\ct TAU\_VF}<0); or you can specify a {\ct RAMP\_ID}.  {\ct MASS\_FLOW} should only be specified for conditions where the upstream node density will not change during the solution process.
 \item[{\ct NODE\_ID}] gives the {\ct ID}s of the nodes on either end of the duct segment.  Positive velocity in a duct is defined as flow from the first node to second node.
 \item[{\ct PERIMETER}] is used along with {\ct AREA} to specify a duct with non-circular cross-section.  The {\ct DIAMETER} will be computed as the hydraulic diameter.
@@ -3800,7 +3800,7 @@ Below are three example duct node inputs representing a typical tee-type connect
 \item[{\ct AMBIENT}] is a logical value.  If {\ct .TRUE.}, then the node is connected to the ambient (i.e., it is equivalent to the {\ct OPEN} boundary condition on a {\ct SURF} line).
 \item[{\ct DUCT\_ID}] gives the {\ct ID}s of the ducts connected to the node.  Up to 10 ducts can be connected to a node.
 \item[{\ct FILTER\_ID}] gives the {\ct ID} a filter located at the node.  A node with a filter can only have two connected ducts.
-\item[{\ct LOSS}] is an $n$ by $n$ array of real numbers giving the flow losses for the node.  {\ct LOSS(I,J)} is the loss for flow from duct {\ct I} to duct {\ct J} expressed in terms of the downstream duct area (see discussion in ~\ref{info:HVACduct} on how to adjust losses for area changes).  For a terminal node (e.g., a node connected to the ambient or to a {\ct VENT}) the {\ct LOSS} is entered as a pair of numbers representing loss for flow entering the HVAC system and for flow exiting the HVAC system.
+\item[{\ct LOSS}] is an $n$ by $n$ array of real numbers giving the dimensionless loss coefficients for the node.  {\ct LOSS(I,J)} is the loss coefficient for flow from duct {\ct I} to duct {\ct J} expressed in terms of the downstream duct area (see discussion in ~\ref{info:HVACduct} on how to adjust losses for area changes).  For a terminal node (e.g., a node connected to the ambient or to a {\ct VENT}) the {\ct LOSS} is entered as a pair of numbers representing loss coefficient for flow entering the HVAC system and for flow exiting the HVAC system.
 \item[{\ct VENT\_ID}] is the name of the {\ct VENT} where the node connects to the FDS computational domain.  No two {\ct VENTs} should be defined with the same {\ct VENT\_ID}.
 \item[{\ct XYZ}] is a triplet of real numbers giving the coordinates of the node.  This location is used to compute buoyancy heads.
 If the node is connected to the FDS domain, then do not specify {\ct XYZ}.  FDS will compute it as the centroid of the {\ct VENT}. Note that if you do not specify an {\ct XYZ} for an interior node, then FDS will use the default value of 0,0,0.
@@ -3826,7 +3826,7 @@ Below are given sample inputs for the three types of fans supported by FDS.
 \noindent where:
 
 \begin{description}
-\item[{\ct LOSS}] is the flow loss through the fan when it is not operational.
+\item[{\ct LOSS}] is the loss coefficient for flow through the fan when it is not operational.
 \item[{\ct MAX\_FLOW}] is the maximum volumetric flow of the fan in m$^3$/s.  This input activates a quadratic fan model.
 \item[{\ct MAX\_PRESSURE}] is the stall pressure of the fan in units of Pa.  This input activates a quadratic fan model.
 \item[{\ct RAMP\_ID}] identifies the {\ct RAMP} that contains a table of pressure drop across the fan (Pa) versus the volumetric flow rates (m$^3$/s) for a user-defined fan curve.
@@ -3918,15 +3918,15 @@ A sample input for a filter is given by:
 \end{lstlisting}
 where:
 \begin{description}
-\item[{\ct CLEAN\_LOSS}] is the flow loss through the filter when it is new (zero loading).
+\item[{\ct CLEAN\_LOSS}] is the dimensionless loss coefficient for flow through the filter when it is clean (zero loading).
 \item[{\ct EFFICIENCY}] is an array of the species removal efficiency from 0 to 1 where 0 is no removal of that species and 1 is complete filtration of the species.  The species are identified using {\ct SPEC\_ID}.
 \item[{\ct LOADING}] is an array of the initial loading (kg) of the filter for each species being filtered.
-\item[{\ct LOADING\_MULTIPLIER}] is an array of the species multiplier, $M_i$, used in computing the total filter loading when computing loss.
-\item[{\ct LOSS}] invokes a linear flow loss model where the flow loss, $K$, is given as a linear function of the total loading, $K_{\si{FILTER}}=K_{\si{CLEAN\_LOSS}}+K_{\si{LOSS}} \sum \left( L_i M_i \right)$, where $L_i$ is the species loading and $M_i$ is a multiplier.  Only one of {\ct LOSS} or {\ct RAMP\_ID} should be specified.
+\item[{\ct LOADING\_MULTIPLIER}] is an array of the species multiplier, $M_i$, used in computing the total filter loading when computing the loss coefficient of the filter.
+\item[{\ct LOSS}] invokes a linear loss coefficient model where the dimensionless loss coefficient, $K$, is given as a linear function of the total loading, $K_{\si{FILTER}}=K_{\si{CLEAN\_LOSS}}+K_{\si{LOSS}} \sum \left( L_i M_i \right)$, where $L_i$ is the species loading and $M_i$ is a multiplier.  Only one of {\ct LOSS} or {\ct RAMP\_ID} should be specified.
 \item[{\ct RAMP\_ID}] identifies the {\ct RAMP} that contains a table of pressure drop across the filter as a function of total loading (the summation term given in the definition of {\ct LOSS} above).   Only one of {\ct LOSS} or {\ct RAMP\_ID} should be specified.
 \item[{\ct SPEC\_ID}] identifies the tracked species for the inputs of {\ct LOADING\_MULTIPLIER} and {\ct LOADING}.
 \end{description}
-A sample set of filter inputs is shown below.  These lines define a filter that removes the species {\ct PARTICULATE} with 100~\% efficiency.  The filter has an initial flow loss of 1 and that loss increases by a factor of 7332 for each kg of {\ct PARTICULATE} captured by the filter.  For further details see the sample case {\ct HVAC\_filter}, which is documented in the Verification Guide.
+A sample set of filter inputs is shown below.  These lines define a filter that removes the species {\ct PARTICULATE} with 100~\% efficiency.  The filter has an initial loss coefficient of 1 and that loss increases by a factor of 7332 for each kg of {\ct PARTICULATE} captured by the filter.  For further details see the sample case {\ct HVAC\_filter}, which is documented in the Verification Guide.
 
 \begin{lstlisting}
 &SPEC ID='PARTICULATE',MW=28.,MASS_FRACTION_0=0.001,SPECIFIC_HEAT=1./
@@ -4154,7 +4154,7 @@ For the case where the stack flow is through small leakage paths, divide the bui
 
 The {\em stack\_effect} test case is a two-dimensional simulation of a 100~m tall building whose interior air temperature is slightly warmer than its exterior. The building has leakage paths at the top and ground floors only.  Since the inside air temperature is slightly warmer, the inside air pressure is slightly higher as well, and it drives air out of the building and in turn draws air into the building at the ground level.
 The interior air temperature, $T_{\rm b}$, is initially 20~$^\circ$C (293~K), and the exterior air temperature, $T_\infty$, is
-10~$^\circ$C (283~K). The {\ct LAPSE\_RATE} is set to 0~$^\circ$C/m; thus, $T_0(z)=T_\infty$ outside the building and $T_0(z)=T_{\rm b}$ inside the building. Two small leakage openings are defined 2.5~m above the ground floor and 2.5~m below the roof using the HVAC solver.  Each opening is given an area of 0.01~m$^2$ and a flow loss of 2 (e.g., an entrance loss into the leak path of 1 and and exit loss out of the leak path of 1 both of which represent a sharp edge opening).
+10~$^\circ$C (283~K). The {\ct LAPSE\_RATE} is set to 0~$^\circ$C/m; thus, $T_0(z)=T_\infty$ outside the building and $T_0(z)=T_{\rm b}$ inside the building. Two small leakage openings are defined 2.5~m above the ground floor and 2.5~m below the roof using the HVAC solver.  Each opening is given an area of 0.01~m$^2$ and a loss coefficient of 2 (e.g., an entrance loss into the leak path of 1 and and exit loss out of the leak path of 1 both of which represent a sharp edge opening).
 
 The initial density stratification inside and outside the building can be calculated using the relation:
 \be
