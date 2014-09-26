@@ -4708,14 +4708,14 @@ READ_MATL_LOOP: DO N=1,N_MATL
          ENDIF
       ENDDO
       
-      IF (HEAT_OF_COMBUSTION(1) > 0._EB .AND. N_REACTIONS <=0) N_REACTIONS = 1
-      
    ELSE NOT_BOILING ! Is liquid
+
       N_REACTIONS = 1
       IF (ABS(HEAT_OF_REACTION(1))<=TWO_EPSILON_EB) THEN
          WRITE(MESSAGE,'(A,A)') 'ERROR: HEAT_OF_REACTION should be greater than zero for liquid MATL ',TRIM(ID)
          CALL SHUTDOWN(MESSAGE) ; RETURN
       ENDIF
+
    ENDIF NOT_BOILING
 
    ! Error checking for thermal properties
@@ -4748,7 +4748,7 @@ READ_MATL_LOOP: DO N=1,N_MATL
 
    ML%A(:)                 = A(:)
 
-   ALLOCATE(ML%ADJUST_BURN_RATE(N_TRACKED_SPECIES,N_REACTIONS),STAT=IZERO)
+   ALLOCATE(ML%ADJUST_BURN_RATE(N_TRACKED_SPECIES,MAX(1,N_REACTIONS)),STAT=IZERO)
    CALL ChkMemErr('READ','MATERIAL',IZERO)
    ML%ADJUST_BURN_RATE     = 1._EB
    ML%ALLOW_SHRINKING      = ALLOW_SHRINKING
@@ -4921,7 +4921,7 @@ SUBROUTINE PROC_MATL
 
 ! Process Materials -- do some additional set-up work with materials
 
-INTEGER :: N,J,NS,NS2,NR,Z_INDEX(N_TRACKED_SPECIES,MAX_REACTIONS)
+INTEGER :: N,J,JJ,NS,NS2,NR,Z_INDEX(N_TRACKED_SPECIES,MAX_REACTIONS)
 
 PROC_MATL_LOOP: DO N=1,N_MATL
 
@@ -4960,15 +4960,16 @@ PROC_MATL_LOOP: DO N=1,N_MATL
 
    ! Adjust burn rate if heat of combustion is different from the gas phase reaction value
 
-   DO J=1,MAX(1,ML%N_REACTIONS)
-      IF (N_REACTIONS>0) THEN
-         RN => REACTION(1)
-         DO NS = 1,N_TRACKED_SPECIES
-            IF (ML%HEAT_OF_COMBUSTION(J)>0._EB .AND. RN%HEAT_OF_COMBUSTION>0._EB)  &
-                ML%ADJUST_BURN_RATE(NS,J) = ML%HEAT_OF_COMBUSTION(J)/RN%HEAT_OF_COMBUSTION
+   IF (N_REACTIONS>0) THEN
+      RN => REACTION(1)
+      DO NS = 1,N_TRACKED_SPECIES
+         DO J=0,MAX(1,ML%N_REACTIONS)
+            JJ = MAX(J,1)
+            IF (ML%HEAT_OF_COMBUSTION(JJ)>0._EB .AND. RN%HEAT_OF_COMBUSTION>0._EB)  &
+                ML%ADJUST_BURN_RATE(NS,JJ) = ML%HEAT_OF_COMBUSTION(JJ)/RN%HEAT_OF_COMBUSTION
          ENDDO
-      ENDIF
-   ENDDO
+      ENDDO
+   ENDIF
 
    ! Check units of specific heat
 
@@ -6072,11 +6073,10 @@ PROCESS_SURF_LOOP: DO N=0,N_SURF
          RN => REACTION(1)
          SF%MASS_FLUX(RN%FUEL_SMIX_INDEX) = SF%MLRPUA
       ENDIF
-      ! Adjust burning rate according to the difference of heats of combustion
       I_FUEL = REACTION(1)%FUEL_SMIX_INDEX
       IF (SF%N_LAYERS > 0) THEN
-         IF (ML%N_REACTIONS > 0) SF%ADJUST_BURN_RATE(I_FUEL) = MATERIAL(SF%MATL_INDEX(1))%ADJUST_BURN_RATE(I_FUEL,1)
-         SF%MASS_FLUX(I_FUEL)        = SF%MASS_FLUX(I_FUEL)/SF%ADJUST_BURN_RATE(I_FUEL)
+         SF%ADJUST_BURN_RATE(I_FUEL) = MATERIAL(SF%MATL_INDEX(1))%ADJUST_BURN_RATE(I_FUEL,1)
+         SF%MASS_FLUX(I_FUEL) = SF%MASS_FLUX(I_FUEL)/SF%ADJUST_BURN_RATE(I_FUEL) ! This is the true burning rate of the fuel.
       ENDIF
       SF%TAU(I_FUEL)        = SF%TAU(TIME_HEAT)
       SF%RAMP_MF(I_FUEL)    = SF%RAMP_Q
