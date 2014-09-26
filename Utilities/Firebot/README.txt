@@ -40,9 +40,9 @@ More details on the Firebot build stages can be found in the FDS Configuration M
 
 3. Firebot uses email notifications for build status updates. Ensure that outbound emails can be sent using the 'mail' command.
 
-4. Install libraries for Smokeview compilation. On CentOS, you can use the following command:
+4. Install libraries for Smokeview. On CentOS, you can use the following command:
 
-    yum install mesa-libGL-devel mesa-libGLU-devel libXmu-devel libXi-devel
+    yum install mesa-libGL-devel mesa-libGLU-devel libXmu-devel libXi-devel xorg-x11-server-Xvfb
 
 5. Add the following lines to firebot's ~/.bashrc file:
 
