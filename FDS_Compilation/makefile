@@ -162,6 +162,14 @@ impi_intel_linux_64 : obj = fds_impi_intel_linux_64
 impi_intel_linux_64 : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi)
 
+impi_intel_linux_64_db : FFLAGS = -m64 -mt_mpi -check -warn unused -O0 -auto -WB -traceback -g -fpe0 -fltconsistency
+impi_intel_linux_64_db : LFLAGS = -static-intel
+impi_intel_linux_64_db : FCOMPL = mpiifort
+impi_intel_linux_64_db : FOPENMPFLAGS = -openmp -openmp-link static -liomp5
+impi_intel_linux_64_db : obj = fds_impi_intel_linux_64_db
+impi_intel_linux_64_db : setup $(obj_mpi)
+	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi)
+
 mpi1p4_intel_linux_64ib : FFLAGS = -m64 -O2 -ipo
 mpi1p4_intel_linux_64ib : LFLAGS = -static-intel
 mpi1p4_intel_linux_64ib : FCOMPL = mpif90
