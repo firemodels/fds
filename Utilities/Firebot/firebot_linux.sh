@@ -509,14 +509,14 @@ run_verification_cases_debug()
    cd $FDS_SVNROOT/Verification
    # Run FDS with delayed stop files (with 1 OpenMP thread and a maximum of 10 iterations)
    echo 'Running FDS verification cases:' >> $FIREBOT_DIR/output/stage3
-   ./Run_FDS_Cases.sh -o 1 -d -m 10 -q $QUEUE >> $FIREBOT_DIR/output/stage3 2>&1
+   ./Run_FDS_Cases.sh -o 2 -d -m 10 -q $QUEUE >> $FIREBOT_DIR/output/stage3 2>&1
    echo "" >> $FIREBOT_DIR/output/stage3 2>&1
 
    # Start running all SMV verification cases in delayed stop debug mode
    cd $FDS_SVNROOT/Verification/scripts
    # Run FDS with delayed stop files (with 1 OpenMP thread and a maximum of 10 iterations)
    echo 'Running SMV verification cases:' >> $FIREBOT_DIR/output/stage3 2>&1
-   ./Run_SMV_Cases.sh -o 1 -d -m 10 -q $QUEUE >> $FIREBOT_DIR/output/stage3 2>&1
+   ./Run_SMV_Cases.sh -o 2 -d -m 10 -q $QUEUE >> $FIREBOT_DIR/output/stage3 2>&1
    echo "" >> $FIREBOT_DIR/output/stage3 2>&1
 
    # Wait for all verification cases to end
@@ -805,14 +805,14 @@ run_verification_cases_release()
    cd $FDS_SVNROOT/Verification
    # Run FDS with 1 OpenMP thread
    echo 'Running FDS verification cases:' >> $FIREBOT_DIR/output/stage5
-   ./Run_FDS_Cases.sh -o 1 -q $QUEUE >> $FIREBOT_DIR/output/stage5 2>&1
+   ./Run_FDS_Cases.sh -o 2 -q $QUEUE >> $FIREBOT_DIR/output/stage5 2>&1
    echo "" >> $FIREBOT_DIR/output/stage5 2>&1
 
    # Start running all SMV verification cases
    cd $FDS_SVNROOT/Verification/scripts
    # Run FDS with 1 OpenMP thread
    echo 'Running SMV verification cases:' >> $FIREBOT_DIR/output/stage5 2>&1
-   ./Run_SMV_Cases.sh -o 1 -q $QUEUE >> $FIREBOT_DIR/output/stage5 2>&1
+   ./Run_SMV_Cases.sh -o 2 -q $QUEUE >> $FIREBOT_DIR/output/stage5 2>&1
    echo "" >> $FIREBOT_DIR/output/stage5 2>&1
 
    # Wait for all verification cases to end
