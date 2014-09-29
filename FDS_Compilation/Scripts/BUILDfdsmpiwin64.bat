@@ -23,6 +23,6 @@ cd %svn_root%\FDS_Compilation\mpi_intel_win_64
 
 erase *.obj 
 erase *.mod
-.\make_fds_from_webpage
+.\make_fds
 
 pause
