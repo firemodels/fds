@@ -12,7 +12,7 @@ obj =    get_time.o
 objwin = $(obj:.o=.obj)
 
 # main has to be compiled without optimization (on a Windows PC) otherwise errors occcur
-main.obj: CFLAGS = -Od /Qvec_report0 /nologo -D WIN32
+main.obj: CFLAGS = -Od /nologo -D WIN32
 
 #*** General Purpose Rules ***
 
@@ -40,8 +40,8 @@ no_target:
 # ------------- Win 32 ----------------
 #  32 bit windows
 
-intel_win_32 : CFLAGS    = -O2 /Qvec_report0 /nologo -D WIN32 -D PTW32_STATIC_LIB
-intel_win_32 : FFLAGS    = -O2 /Qvec_report0 /nologo -fpp -D pp_cvf /iface:stdref
+intel_win_32 : CFLAGS    = -O2 /nologo -D WIN32 -D PTW32_STATIC_LIB
+intel_win_32 : FFLAGS    = -O2 /nologo -fpp -D pp_cvf /iface:stdref
 intel_win_32 : CC        = icl
 intel_win_32 : CPP       = icl
 intel_win_32 : FC        = ifort
@@ -51,7 +51,7 @@ intel_win_32 : $(objwin)
 	$(CPP) -o $(bin)/$(exe) $(objwin) $(LIB_DIR)/lib_win_intel_32/pthreads.lib $(LIB_DIR)/lib_win_intel_32/zlib.lib
 
 
-intel_win_64 : CFLAGS    = -Od /Qvec_report0 /nologo -D WIN32 -D X64
+intel_win_64 : CFLAGS    = -Od /nologo -D WIN32 -D X64
 intel_win_64 : CC        = icl
 intel_win_64 : CPP       = icl
 intel_win_64 : FC        = ifort
@@ -63,8 +63,8 @@ intel_win_64 : $(objwin)
 # ------------- Linux 32 profile ----------------
 #  32 bit linux
 
-intel_linux_32p : FFLAGS    = -O2 -m32 -vec_report0 -fpp -D pp_noappend
-intel_linux_32p : CFLAGS    = -O2 -m32 -vec_report0 -D pp_LINUX -p
+intel_linux_32p : FFLAGS    = -O2 -m32 -fpp -D pp_noappend
+intel_linux_32p : CFLAGS    = -O2 -m32 -D pp_LINUX -p
 intel_linux_32p : CC        = icc
 intel_linux_32p : CPP       = icc
 intel_linux_32p : FC        = ifort
@@ -79,8 +79,8 @@ LINUXFORTLIBS_64=$(FORTLIBDIR)/intel64/libifcore.a
 # ------------- Linux 32 ----------------
 #  32 bit linux
 
-intel_linux_32 : FFLAGS    = -O2 -m32 -vec_report0 -fpp -D pp_noappend
-intel_linux_32 : CFLAGS    = -O2 -m32 -vec_report0 -D pp_LINUX 
+intel_linux_32 : FFLAGS    = -O2 -m32 -fpp -D pp_noappend
+intel_linux_32 : CFLAGS    = -O2 -m32 -D pp_LINUX 
 intel_linux_32 : CC        = icc
 intel_linux_32 : CPP       = icc
 intel_linux_32 : FC        = ifort
@@ -92,8 +92,8 @@ intel_linux_32 : $(obj)
 # ------------- Linux 64 ----------------
 #  64 bit linux
 
-intel_linux_64 : FFLAGS    = -O2 -m64 -vec_report0 -fpp -D pp_noappend -D pp_LINUX64
-intel_linux_64 : CFLAGS    = -O2 -m64 -vec_report0 -D pp_LINUX64
+intel_linux_64 : FFLAGS    = -O2 -m64 -fpp -D pp_noappend -D pp_LINUX64
+intel_linux_64 : CFLAGS    = -O2 -m64 -D pp_LINUX64
 intel_linux_64 : CC        = icc
 intel_linux_64 : CPP       = icc
 intel_linux_64 : FC        = ifort
@@ -107,8 +107,8 @@ OSXFORTLIBS=$(FORTLIBDIR)/libifcoremt.a $(FORTLIBDIR)/libimf.a $(FORTLIBDIR)/lib
 # ------------- OSX 32 ----------------
 #  32 bit OSX
 
-intel_osx_32 : FFLAGS    = -O2 -m32 -vec_report0 -fpp -D pp_OSX
-intel_osx_32 : CFLAGS    = -O2 -m32 -vec_report0 -D pp_OSX
+intel_osx_32 : FFLAGS    = -O2 -m32 -fpp -D pp_OSX
+intel_osx_32 : CFLAGS    = -O2 -m32 -D pp_OSX
 intel_osx_32 : CC        = icc
 intel_osx_32 : CPP       = icc
 intel_osx_32 : FC        = ifort
@@ -120,8 +120,8 @@ intel_osx_32 : $(obj)
 # ------------- OSX 64 ----------------
 #  64 bit OSX
 
-intel_osx_64 : FFLAGS    = -O2 -m64 -vec_report0 -fpp -D pp_OSX64
-intel_osx_64 : CFLAGS    = -O2 -m64 -vec_report0 -D pp_OSX64
+intel_osx_64 : FFLAGS    = -O2 -m64 -fpp -D pp_OSX64
+intel_osx_64 : CFLAGS    = -O2 -m64 -D pp_OSX64
 intel_osx_64 : CC        = icc
 intel_osx_64 : CPP       = icc
 intel_osx_64 : FC        = ifort

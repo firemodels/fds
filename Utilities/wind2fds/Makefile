@@ -15,7 +15,7 @@ obj =    main.o assert.o dmalloc.o string_util.o file_util.o
 objwin = $(obj:.o=.obj)
 
 # main has to be compiled without optimization (on a Windows PC) otherwise errors occcur
-main.obj: CFLAGS = -Od /Qvec_report0 /nologo -D WIN32 -D pp_WIN_INTEL
+main.obj: CFLAGS = -Od /nologo -D WIN32 -D pp_WIN_INTEL
 
 #*** General Purpose Rules ***
 
@@ -44,8 +44,8 @@ no_target:
 # ------------- Win 64 ----------------
 #  64 bit windows
 
-intel_win_64 : CFLAGS    = -Od /Qvec_report0 /nologo -D WIN32 -D X64 -D pp_WIN_INTEL
-intel_win_64 : FFLAGS    = -Od /Qvec_report0 /nologo -fpp -D pp_cvf -D X64 /iface:stdref
+intel_win_64 : CFLAGS    = -Od /nologo -D WIN32 -D X64 -D pp_WIN_INTEL
+intel_win_64 : FFLAGS    = -Od /nologo -fpp -D pp_cvf -D X64 /iface:stdref
 intel_win_64 : CC        = icl
 intel_win_64 : CPP       = icl
 intel_win_64 : FC        = ifort
@@ -68,7 +68,7 @@ gcc_linux_64 : $(obj)
 # ------------- Linux 64 ----------------
 #  64 bit linux
 
-intel_linux_64 : CFLAGS    = -O2 -m64 -vec_report0 -D pp_LINUX64
+intel_linux_64 : CFLAGS    = -O2 -m64 -D pp_LINUX64
 intel_linux_64 : CC        = icc
 intel_linux_64 : CPP       = icc
 intel_linux_64 : exe       = wind2fds_linux_64
@@ -79,7 +79,7 @@ intel_linux_64 : $(obj)
 # ------------- OSX 64 ----------------
 #  64 bit OSX
 
-intel_osx_64 : CFLAGS    = -O2 -m64 -vec_report0 -D pp_OSX64
+intel_osx_64 : CFLAGS    = -O2 -m64 -D pp_OSX64
 intel_osx_64 : CC        = icc
 intel_osx_64 : CPP       = icc
 intel_osx_64 : exe       = wind2fds_osx_64
