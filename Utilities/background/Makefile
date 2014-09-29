@@ -29,7 +29,7 @@ no_target:
 # ------------- Win 32 ----------------
 #  32 bit windows
 
-intel_win_32 : CFLAGS    = -O1 /Qvec_report0 /nologo -D WIN32 -I $(SOURCE_DIR)/shared
+intel_win_32 : CFLAGS    = -O1 /nologo -D WIN32 -I $(SOURCE_DIR)/shared
 intel_win_32 : CC        = icl
 intel_win_32 : exe       = background.exe
 
@@ -39,7 +39,7 @@ intel_win_32 : $(objwin)
 # ------------- Linux 32 ----------------
 #  32 bit linux
 
-intel_linux_32 : CFLAGS    = -O2 -m32 -vec_report0 -D pp_LINUX
+intel_linux_32 : CFLAGS    = -O2 -m32 -D pp_LINUX
 intel_linux_32 : CC        = icc
 intel_linux_32 : exe       = background
 
@@ -59,7 +59,7 @@ gcc_linux_32 : $(obj)
 # ------------- OSX 32 ----------------
 #  32 bit osx
 
-intel_osx_32 : CFLAGS    = -O2 -m32 -vec_report0 -D pp_OSX
+intel_osx_32 : CFLAGS    = -O2 -m32 -D pp_OSX
 intel_osx_32 : CC        = icc
 intel_osx_32 : exe       = background
 

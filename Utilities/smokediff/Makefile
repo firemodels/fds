@@ -37,8 +37,8 @@ no_target:
 # ------------- Win 64 debug ----------------
 #  64 bit debug windows
 
-intel_win_64_db : CFLAGS    =  -D X64 -D WIN32 /Qvec_report0 /nologo /debug:full /Od /Qtrapuv /fp:strict /fp:except 
-intel_win_64_db : FFLAGS    =  -fpp -D pp_cvf -D X64 /iface:stdref /Qvec_report0 /nologo /debug:full /Od /extend_source:132 /warn:unused /warn:nointerfaces /Qtrapuv /fp:strict /fp:except
+intel_win_64_db : CFLAGS    =  -D X64 -D WIN32 /nologo /debug:full /Od /Qtrapuv /fp:strict /fp:except 
+intel_win_64_db : FFLAGS    =  -fpp -D pp_cvf -D X64 /iface:stdref /nologo /debug:full /Od /extend_source:132 /warn:unused /warn:nointerfaces /Qtrapuv /fp:strict /fp:except
 intel_win_64_db : CC        = icl
 intel_win_64_db : CPP       = icl
 intel_win_64_db : FC        = ifort
@@ -50,8 +50,8 @@ intel_win_64_db : $(objwin)
 # ------------- Win 64 ----------------
 #  64 bit windows
 
-intel_win_64 : CFLAGS    = -O2 /Qvec_report0 /nologo -D X64 -D WIN32
-intel_win_64 : FFLAGS    = -O2 /Qvec_report0 /nologo -fpp -D pp_cvf -D X64 /iface:stdref
+intel_win_64 : CFLAGS    = -O2 /nologo -D X64 -D WIN32
+intel_win_64 : FFLAGS    = -O2 /nologo -fpp -D pp_cvf -D X64 /iface:stdref
 intel_win_64 : CC        = icl
 intel_win_64 : CPP       = icl
 intel_win_64 : FC        = ifort
@@ -80,8 +80,8 @@ gcc_linux_64 : $(obj)
 # ------------- Linux 64 ----------------
 #  64 bit linux
 
-intel_linux_64 : FFLAGS    = -O2 -m64 -vec_report0 -fpp -D pp_noappend -D pp_LINUX64
-intel_linux_64 : CFLAGS    = -O2 -m64 -vec_report0 -D pp_LINUX64
+intel_linux_64 : FFLAGS    = -O2 -m64 -fpp -D pp_noappend -D pp_LINUX64
+intel_linux_64 : CFLAGS    = -O2 -m64 -D pp_LINUX64
 intel_linux_64 : CC        = icc
 intel_linux_64 : CPP       = icc
 intel_linux_64 : FC        = ifort
@@ -96,8 +96,8 @@ MACFORTLIBS=$(FORTLIBDIR)/libifcoremt.a $(FORTLIBDIR)/libimf.a $(FORTLIBDIR)/lib
 # ------------- OSX 64 ----------------
 #  64 bit OSX
 
-intel_osx_64 : FFLAGS    = -O2 -m64 -vec_report0 -fpp -D pp_OSX64
-intel_osx_64 : CFLAGS    = -O2 -m64 -vec_report0 -D pp_OSX64
+intel_osx_64 : FFLAGS    = -O2 -m64 -fpp -D pp_OSX64
+intel_osx_64 : CFLAGS    = -O2 -m64 -D pp_OSX64
 intel_osx_64 : CC        = icc
 intel_osx_64 : CPP       = icc
 intel_osx_64 : FC        = ifort

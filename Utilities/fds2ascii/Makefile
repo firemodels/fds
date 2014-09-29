@@ -28,7 +28,7 @@ no_target:
 # ------------- Win 64 ----------------
 #  64 bit windows
 
-intel_win_64 : FFLAGS    = -O2 /Qvec_report0 /nologo 
+intel_win_64 : FFLAGS    = -O2 /nologo 
 intel_win_64 : FC        = ifort
 intel_win_64 : exe       = fds2ascii_win_64.exe
 
@@ -49,7 +49,7 @@ gcc_linux_64 : $(obj)
 # ------------- Linux 64 ----------------
 #  64 bit linux
 
-intel_linux_64 : FFLAGS    = -O2 -m64 -vec_report0 
+intel_linux_64 : FFLAGS    = -O2 -m64
 intel_linux_64 : FC        = ifort
 intel_linux_64 : exe       = fds2ascii_linux_64
 
@@ -59,7 +59,7 @@ intel_linux_64 : $(obj)
 # ------------- OSX 64 ----------------
 #  64 bit OSX
 
-intel_osx_64 : FFLAGS    = -O2 -m64 -vec_report0 
+intel_osx_64 : FFLAGS    = -O2 -m64
 intel_osx_64 : FC        = ifort
 intel_osx_64 : exe       = fds2ascii_osx_64
 
