@@ -179,6 +179,14 @@ if [ "$RUN_SMV" == "1" ] ; then
   $QFDS -d Visualization thouse5delta
   source $STOPX
 
+# for debugging
+ 
+if [ -d Visualization/THOUSE5 ] ; then
+  rm -f -r Visualization/THOUSE5
+fi
+mkdir Visualization/THOUSE5
+cp Visualization/thouse5* Visualization/THOUSE5/.
+
 # difference plume5c and thouse5
 
   cd $SVNROOT/Verification/Visualization
