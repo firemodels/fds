@@ -218,6 +218,14 @@ mpi_intel_linux_64_db : obj = fds_mpi_intel_linux_64_db
 mpi_intel_linux_64_db : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi)
 
+mpi_intel_linux_64_inspect : FFLAGS = -g -O0
+mpi_intel_linux_64_inspect : LFLAGS = -static-intel
+mpi_intel_linux_64_inspect : FCOMPL = mpifort
+mpi_intel_linux_64_inspect : FOPENMPFLAGS = 
+mpi_intel_linux_64_inspect : obj = fds_mpi_intel_linux_64_inspect
+mpi_intel_linux_64_inspect : setup $(obj_mpi)
+	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi)
+
 mpi_intel_linux_64ib_db : FFLAGS = -m64 -check -warn unused -O0 -auto -WB -traceback -g -fpe0 -fltconsistency
 mpi_intel_linux_64ib_db : LFLAGS = -static-intel
 mpi_intel_linux_64ib_db : FCOMPL = mpifort
