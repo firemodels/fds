@@ -7,6 +7,9 @@ case $OPTION  in
   b)
    dummy=1
    ;;
+  d)
+   DIR="$OPTARG"
+   ;;
 esac
 done
 shift $(($OPTIND-1))
