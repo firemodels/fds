@@ -2,9 +2,9 @@
 
 set fdsversion=%fds_edition%
 
+set SVNROOT=%svn_root%
 set fdsdir=%svn_root%\FDS_Compilation\intel_win_%platform%
 set fdsmpidir=%svn_root%\FDS_Compilation\mpi_intel_win_%platform%
-set fdsimpidir=%svn_root%\FDS_Compilation\impi_intel_win_%platform%
 set basename=FDS_%fds_version%-SMV_%smv_version%_win%platform%
 
 set in_pdf=%svn_root%\..\FIRE-LOCAL\reports\fds_manuals\
@@ -39,11 +39,9 @@ set fdsmpi_casesbat=%svn_root%\Verification\FDS_MPI_Cases.bat
 set smv_casessh=%svn_root%\Verification\scripts\SMV_Cases.sh
 set smv_casesbat=%svn_root%\Verification\scripts\SMV_Cases.bat
 
-set copycases=%svn_root%\Utilities\Scripts\copycases.bat
-set copycases2=%svn_root%\Utilities\Scripts\copycases2.bat
-set copycases3=%svn_root%\Utilities\Scripts\copycases3.bat
+set copyFDScases=%svn_root%\Utilities\Scripts\copyFDScases.bat
+set copyCFASTcases=%svn_root%\Utilities\Scripts\copyCFASTcases.bat
 
-set manifest=%out_bin%\manifest.html
 set bundleinfo=%svn_root%\Utilities\Scripts\bundle_setup
 
 Rem erase the temporary bundle directory if it already exists
@@ -77,10 +75,8 @@ CALL :COPY %in_for_bundle%\fds_openmp.bat %out_bin%\fds_openmp.bat
 
 CALL :COPY %fdsdir%\fds_win_%platform%.exe         %out_bin%\fds%release_version%.exe
 
-:: CALL :COPY  %fdsmpidir%\fds_mpi_win_%platform%.exe      %out_bin%\fds_mpi.exe
-
-if "%platform%"=="64" CALL :COPY  %fdsimpidir%\fds_impi_win_%platform%.exe  %out_bin%\fds_mpi.exe
-if "%platform%"=="64" CALL :COPY  %in_testmpi%\test_mpi.exe  %out_bin%\test_mpi.exe
+CALL :COPY  %fdsmpidir%\fds_mpi_win_%platform%.exe  %out_bin%\fds_mpi.exe
+CALL :COPY  %in_testmpi%\test_mpi.exe  %out_bin%\test_mpi.exe
 
 CALL :COPY  %in_smv%\smokeview_win_%platform%.exe   %out_bin%\smokeview.exe
 
@@ -94,54 +90,11 @@ CALL :COPY  %in_fds2ascii%\intel_win_%platform%\fds2ascii_win_%platform%.exe    
 
 CALL :COPY  %in_background%\intel_win_32\background.exe %out_bin%\background.exe
 
-if "%platform%"=="64" CALL :COPY %in_impi%\impi.dll         %out_bin%\impi.dll
-if "%platform%"=="64" CALL :COPY %in_impi%\mpiexec.smpd.exe %out_bin%\mpiexec.exe
-if "%platform%"=="64" CALL :COPY %in_impi%\smpd.exe         %out_bin%\smpd2.exe
+CALL :COPY %in_impi%\impi.dll         %out_bin%\impi.dll
+CALL :COPY %in_impi%\mpiexec.smpd.exe %out_bin%\mpiexec.exe
+CALL :COPY %in_impi%\smpd.exe         %out_bin%\smpd2.exe
 
 CALL :COPY  %in_sh2bat%\sh2bat.exe %out_bin%\sh2bat.exe
-
-echo.
-echo ***Creating Manifiest
-echo.
-
-echo ^<html^>                      > %manifest%
-echo ^<head^>                     >> %manifest%
-echo ^<TITLE^>Build FDS^</TITLE^> >> %manifest%
-echo ^</HEAD^>                    >> %manifest%
-echo ^<BODY BGCOLOR="#FFFFFF" ^>  >> %manifest%
-echo ^<pre^>                      >> %manifest%
-echo FDS-Smokeview bundle created >> %manifest%
-date /t                           >> %manifest%
-time /t                           >> %manifest%
-echo.                             >> %manifest%
-echo Versions:                    >> %manifest%
-echo.                             >> %manifest%
-
-echo --------------------------   >> %manifest%
-echo | %out_bin%\fds%release_version%.exe 2>> %manifest%
-echo. >> %manifest%
-echo -------------------------- >> %manifest%
-
-echo. >> %manifest%
-echo -------------------------- >> %manifest%
-%out_bin%\fds2ascii%release_version%.exe -v >>%manifest%
-
-echo. >> %manifest%
-echo -------------------------- >> %manifest%
-%out_bin%\smokeview%release_version%.exe -v >> %manifest%
-echo. >> %manifest%
-echo -------------------------- >> %manifest%
-%out_bin%\smokediff%release_version%.exe -v >> %manifest%
-echo. >> %manifest%
-echo -------------------------- >> %manifest%
-%out_bin%\smokezip%release_version%.exe -v >> %manifest%
-
-echo. >> %manifest%
-echo -------------------------- >> %manifest%
-%out_bin%\background.exe -v >> %manifest%
-
-echo ^</body^> >> %manifest%
-echo ^</html^> >> %manifest%
 
 echo.
 echo *** Copying auxillary files to the bin directory
@@ -149,13 +102,9 @@ echo.
 CALL :COPY  %in_for_bundle%\objects.svo             %out_bin%\.
 CALL :COPY  %in_for_bundle%\volrender.ssf           %out_bin%\.
 
-if "%platform%"=="32" CALL :COPY %in_intel_dll%\LIB32\libiomp5md.dll     %out_bin%\.
-if "%platform%"=="32" CALL :COPY %in_for_bundle%\pthreadVC.dll           %out_bin%\.
-if "%platform%"=="32" CALL :COPY  %in_for_bundle%\glew32.dll             %out_bin%\.
-
-if "%platform%"=="64" CALL :COPY %in_intel_dll%\LIB64\libiomp5md.dll     %out_bin%\.
-if "%platform%"=="64" CALL :COPY  %in_for_bundle%\pthreadVC2_x64.dll     %out_bin%\.
-if "%platform%"=="64" CALL :COPY  %in_for_bundle%\glew32_x64.dll         %out_bin%\.
+CALL :COPY %in_intel_dll%\LIB64\libiomp5md.dll     %out_bin%\.
+CALL :COPY  %in_for_bundle%\pthreadVC2_x64.dll     %out_bin%\.
+CALL :COPY  %in_for_bundle%\glew32_x64.dll         %out_bin%\.
 
 CALL :COPY  %in_for_bundle%\smokeview.ini           %out_bin%\.
 
@@ -229,11 +178,9 @@ echo.
 svn export --quiet --force https://fds-smv.googlecode.com/svn/trunk/FDS/trunk/Verification %out_examples2%
 
 set outdir=%out_examples%
-set RUNFDS=call %copycases%
-set RUNWFDS=call %copycases%
-set RUNTFDS=call %copycases%
-set RUNFDSMPI=call %copycases2%
-set RUNCFAST=call %copycases3%
+set QFDS=call %copyFDScases%
+set RUNTFDS=call %copyFDScases%
+set RUNCFAST=call %copyCFASTcases%
 
 cd %out_examples2%
 %svn_root%\Utilities\Data_processing\sh2bat %fds_casessh% %fds_casesbat%
@@ -288,8 +235,6 @@ wzipse32 %basename%.zip -runasadmin -a %bundleinfo%\about.txt -st"FDS %fds_versi
 IF EXIST "%gupload%" CALL :COPY %basename%.exe "%gupload%"
 
 rmdir /q /s %out_examples2%
-
-start explorer %manifest%
 
 echo.
 echo ***FDS/Smokeview win%platform% bundle built
