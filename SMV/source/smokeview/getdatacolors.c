@@ -1152,6 +1152,7 @@ void getSliceColors(const float *t, int nt, unsigned char *it,
   STRCPY(*scale,"");
   frexp10(local_tmax, &expmax);
   frexp10(local_tmin, &expmin);
+  *fscale=1.0;
   if(expmin!=0&&expmax!=0&&expmax-expmin<=2&&(expmin<EXPMIN||expmin>EXPMAX)){
     local_tmin *= pow((double)10.0,(double)-expmin);
     local_tmax *= pow((double)10.0,(double)-expmin);
