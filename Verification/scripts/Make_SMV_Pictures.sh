@@ -180,12 +180,13 @@ if [ "$RUN_SMV" == "1" ] ; then
   source $STOPX
 
 # for debugging
- 
-if [ -d Visualization/THOUSE5 ] ; then
-  rm -f -r Visualization/THOUSE5
+
+VISDIR=$SVNROOT/Verification/Visualization/
+if [ -d $VISDIR/THOUSE5 ] ; then
+  rm -f -r $VISDIR/THOUSE5
 fi
-mkdir Visualization/THOUSE5
-cp Visualization/thouse5* Visualization/THOUSE5/.
+mkdir $VISDIR/THOUSE5
+cp $VISDIR/thouse5* $VISDIR/THOUSE5/.
 
 # difference plume5c and thouse5
 
