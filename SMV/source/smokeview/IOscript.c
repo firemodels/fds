@@ -761,6 +761,8 @@ void script_loadparticles(scriptdata *scripti){
   int errorcode;
   int count=0;
 
+  FREEMEMORY(loaded_file);
+
   PRINTF("script: loading particles files\n\n");
 
   npartframes_max=get_min_partframes();
@@ -781,6 +783,11 @@ void script_loadparticles(scriptdata *scripti){
     if(parti->evac==1)continue;
     if(parti->version==1){
       readpart(parti->file,i,LOAD,&errorcode);
+      if(scripti->cval!=NULL&&strlen(scripti->cval)>0){
+        FREEMEMORY(loaded_file);
+        NewMemory((void **)&loaded_file,strlen(scripti->cval)+1);
+        strcpy(loaded_file,scripti->cval);
+      }
       count++;
     }
   }
@@ -796,6 +803,7 @@ void script_loadiso(scriptdata *scripti){
   int i;
   int count=0;
 
+  FREEMEMORY(loaded_file);
   PRINTF("script: loading isosurface files of type: %s\n\n",scripti->cval);
 
   for(i=0;i<nisoinfo;i++){
@@ -805,6 +813,11 @@ void script_loadiso(scriptdata *scripti){
     isoi = isoinfo + i;
     if(STRCMP(isoi->surface_label.longlabel,scripti->cval)==0){
       readiso(isoi->file,i,LOAD,&errorcode);
+      if(scripti->cval!=NULL&&strlen(scripti->cval)>0){
+        FREEMEMORY(loaded_file);
+        NewMemory((void **)&loaded_file,strlen(scripti->cval)+1);
+        strcpy(loaded_file,scripti->cval);
+      }
       count++;
     }
   }
@@ -894,6 +907,7 @@ void script_load3dsmoke(scriptdata *scripti){
   int errorcode;
   int count=0;
 
+  FREEMEMORY(loaded_file);
   PRINTF("script: loading smoke3d files of type: %s\n\n",scripti->cval);
 
   for(i=0;i<nsmoke3dinfo;i++){
@@ -902,6 +916,11 @@ void script_load3dsmoke(scriptdata *scripti){
     smoke3di = smoke3dinfo + i;
     if(match_upper(smoke3di->label.longlabel,scripti->cval)==1){
       readsmoke3d(i,LOAD,&errorcode);
+      if(scripti->cval!=NULL&&strlen(scripti->cval)>0){
+        FREEMEMORY(loaded_file);
+        NewMemory((void **)&loaded_file,strlen(scripti->cval)+1);
+        strcpy(loaded_file,scripti->cval);
+      }
       count++;
     }
   }
@@ -1008,6 +1027,7 @@ void script_loadboundary(scriptdata *scripti){
   int errorcode;
   int count=0;
 
+  FREEMEMORY(loaded_file);
   PRINTF("Script: loading boundary files of type: %s\n\n",scripti->cval);
 
   for(i=0;i<npatchinfo;i++){
@@ -1017,6 +1037,11 @@ void script_loadboundary(scriptdata *scripti){
     if(strcmp(patchi->label.longlabel,scripti->cval)==0){
       LOCK_COMPRESS
       readpatch(i,LOAD,&errorcode);
+      if(scripti->cval!=NULL&&strlen(scripti->cval)>0){
+        FREEMEMORY(loaded_file);
+        NewMemory((void **)&loaded_file,strlen(scripti->cval)+1);
+        strcpy(loaded_file,scripti->cval);
+      }
       count++;
       UNLOCK_COMPRESS
     }
@@ -1194,7 +1219,12 @@ void script_loadfile(scriptdata *scripti){
   int i;
   int errorcode;
 
+  FREEMEMORY(loaded_file);
   PRINTF("script: loading file %s\n\n",scripti->cval);
+  if(scripti->cval!=NULL&&strlen(scripti->cval)>0){
+    NewMemory((void **)&loaded_file,strlen(scripti->cval)+1);
+    strcpy(loaded_file,scripti->cval);
+  }
   for(i=0;i<nsliceinfo;i++){
     slicedata *sd;
 
@@ -1303,6 +1333,7 @@ void script_loadplot3d(scriptdata *scripti){
 void script_loadvfile(scriptdata *scripti){
   int i;
 
+  FREEMEMORY(loaded_file);
   PRINTF("script: loading vector slice file %s\n\n",scripti->cval);
   for(i=0;i<nvsliceinfo;i++){
     slicedata *val;
@@ -1313,6 +1344,10 @@ void script_loadvfile(scriptdata *scripti){
     if(val==NULL)continue;
     if(strcmp(val->reg_file,scripti->cval)==0){
       LoadVSliceMenu(i);
+      if(scripti->cval!=NULL&&strlen(scripti->cval)>0){
+        NewMemory((void **)&loaded_file,strlen(scripti->cval)+1);
+        strcpy(loaded_file,scripti->cval);
+      }
       return;
     }
   }
@@ -1401,6 +1436,7 @@ void script_settimeval(scriptdata *scripti){
         fprintf(stderr,"*** Error: data not available at time requested\n");
         fprintf(stderr,"           time requested: %f s, max time available: %f s\n",
           timeval,global_times[nglobal_times-1]);
+        if(loaded_file!=NULL)fprintf(stderr,"           loaded file: %s\n",loaded_file);
       }
       timeval=global_times[nglobal_times-1]-0.0001;
     }
