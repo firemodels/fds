@@ -1,11 +1,17 @@
 
 // put rendered files in specified directory
 
+LABEL
+  put rendered files in specified directory
+
 RENDERDIR
  ..\..\Manuals\SMV_User_Guide\SCRIPT_FIGURES
 
 
 // render 3D smoke
+
+LABEL
+  render 3D smoke
 
 LOADINIFILE
  thouse5_part.ini
@@ -33,6 +39,9 @@ RENDERONCE
 
 // render slice files
 
+LABEL
+  render slice files
+
 UNLOADALL
 LOADFILE
  thouse5_01.sf
@@ -58,6 +67,9 @@ RENDERONCE
  thouse5_slice_060
 
 // render general slices
+
+LABEL
+  render general slices
 
 UNLOADALL
 LOADINIFILE
@@ -98,8 +110,10 @@ GSLICEORIEN
 RENDERONCE
  thouse5_gslice4
 
-
 // render general vector slices
+
+LABEL
+  render general vector slices
 
 UNLOADALL
 LOADINIFILE
@@ -142,6 +156,9 @@ RENDERONCE
 
 // render vector slice file
 
+LABEL
+  render vector slice file
+
 UNLOADALL
 LOADVSLICE
  TEMPERATURE
@@ -165,6 +182,9 @@ RENDERONCE
 
 // render iso-surface
 
+LABEL
+  render iso-surface
+
 UNLOADALL
 LOADFILE
  thouse5_01.iso
@@ -186,6 +206,9 @@ RENDERONCE
  thouse5_iso_060
 
 // render boundary file (cell averaged)
+
+LABEL
+  render boundary file (cell averaged)
 
 UNLOADALL
 LOADFILE
@@ -209,6 +232,9 @@ RENDERONCE
 
 // render boundary file (cell centered)
 
+LABEL
+  render boundary file (cell centered)
+
 LOADFILE
  thouse5_06.bf
 SETTIMEVAL
@@ -229,6 +255,9 @@ RENDERONCE
  thouse5_bound_cell_060
 
 // render boundary file (cell averaged, truncated)
+
+LABEL
+  render boundary file (cell averaged, truncated)
 
 UNLOADALL
 LOADINIFILE
@@ -253,6 +282,9 @@ RENDERONCE
  thouse5_bound_trunc_060
 
 // render particles
+
+LABEL
+  render particles
 
 UNLOADALL
 LOADPARTICLES
@@ -283,6 +315,9 @@ RENDERONCE
 
 // render particles using streaks
 
+LABEL
+  render particles using streaks
+
 LOADINIFILE
  thouse5_streak.ini
 SETTIMEVAL
@@ -292,9 +327,15 @@ RENDERONCE
 
 // render OBSTs using solid view
 
+LABEL
+  render OBSTs using solid view
+
 UNLOADALL
 
 // render 3D smoke with no clipping
+
+LABEL
+  render 3D smoke with no clipping
 
 UNLOADALL
 LOAD3DSMOKE
@@ -310,6 +351,9 @@ RENDERONCE
 
 // render 3D smoke while clipping blockages (but not smoke)
 
+LABEL
+  render 3D smoke while clipping blockages (but not smoke)
+
 LOADINIFILE
  thouse5_clip_blockages.ini
 SETTIMEVAL
@@ -319,6 +363,9 @@ RENDERONCE
 
 // render 3D smoke, clipping blockages and smoke
 
+LABEL
+  render 3D smoke, clipping blockages and smoke
+
 LOADINIFILE
  thouse5_clip_blockages_data.ini
 SETTIMEVAL
@@ -327,6 +374,9 @@ RENDERONCE
  thouse5_smoke_clip_blockages_data
 
 // render geometry with ticks
+
+LABEL
+  render geometry with ticks
 
 UNLOADALL
 LOADINIFILE
@@ -396,6 +446,9 @@ thouse5_plot3d_iso2
 
 // render two left/right stereo images
 
+LABEL
+  render two left/right stereo images
+
 UNLOADALL
 LOADFILE
  thouse5_01.iso
@@ -408,6 +461,9 @@ RENDERONCE
 
 // render two stereo images
 
+LABEL
+  render two stereo images
+
 LOADINIFILE
  thouse5_rc_stereo.ini 
 SETTIMEVAL
@@ -417,6 +473,9 @@ RENDERONCE
 
 // render two stereo images
 
+LABEL
+  render two stereo images
+
 LOADINIFILE
  thouse5_rb_stereo.ini 
 SETTIMEVAL
@@ -425,6 +484,9 @@ RENDERONCE
  thouse5_iso_rb_stereo
 
 // render fed iso file
+
+LABEL
+  render fed iso file
 
 LOADINIFILE
  thouse5.ini
@@ -453,6 +515,9 @@ LOADINIFILE
  thouse5.ini
 
  // render fed slice file
+
+LABEL
+  render fed slice file
 
 UNLOADALL
 LOADINIFILE
@@ -484,6 +549,9 @@ RENDERONCE
 
 // render chopped slice file (ceiling jet)
 
+LABEL
+  render chopped slice file (ceiling jet)
+  
 LOADINIFILE
  thouse5_cjet.ini
 UNLOADALL
@@ -509,6 +577,9 @@ RENDERONCE
 
 // render circular tour
 
+LABEL
+  render circular tour
+
 UNLOADTOUR
 LOADTOUR
  Circular
@@ -523,6 +594,9 @@ RENDERONCE
 
 // render start tour
 
+LABEL
+  render start tour
+
 UNLOADTOUR
 LOADTOUR
  start_tour
@@ -534,6 +608,9 @@ RENDERONCE
  thouse5_start_tour
 
 // render example tour 1
+
+LABEL
+  render example tour 1
 
 UNLOADTOUR
 LOADTOUR
@@ -548,12 +625,18 @@ RENDERONCE
 
 // render example tour 2
 
+LABEL
+  render example tour 2
+
 SETVIEWPOINT
  tour_view2
 RENDERONCE
  thouse5_example_tour2
 
 // render example tour 1
+
+LABEL
+  render example tour 1
 
 SETTOURVIEW
   1   0 0 0.75
@@ -565,6 +648,9 @@ RENDERONCE
 UNLOADTOUR
 
 // render velocity devices
+
+LABEL
+  render velocity devices
 
 UNLOADALL
 LOADINIFILE
@@ -588,12 +674,3 @@ SETTIMEVAL
 RENDERONCE
  thouse5_device_060
 UNLOADTOUR
-
- 
-
-
-
-
-
-
-
