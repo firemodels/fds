@@ -1910,6 +1910,10 @@ void draw_geomdata(patchdata *patchi, int geomtype){
     float *color;
 
     geomi = geominfoptrs[i];
+#ifdef pp_GEOM_FORCE_DYNAMIC    
+    if(geomi->display==0||geomi->loaded==0)continue;
+    geomlisti = geomi->geomlistinfo+geomi->itime;
+#else
     if(geomi->display==0||geomi->loaded==0)continue;
     if(geomtype==GEOM_STATIC){
       geomlisti = geomi->geomlistinfo-1;
@@ -1917,6 +1921,7 @@ void draw_geomdata(patchdata *patchi, int geomtype){
     else{
       geomlisti = geomi->geomlistinfo+geomi->itime;
     }
+#endif
 
     ntris = geomlisti->ntriangles;
     if(ntris==0)continue;
