@@ -186,6 +186,7 @@ void _Sniff_Errors(char *whereat);
 #define SCRIPT_SETTOURVIEW 308
 #define SCRIPT_SETTOURKEYFRAME 39
 #define SCRIPT_EXIT 310
+#define SCRIPT_LABEL 311
 
 #define SCRIPT_SLICE_FILE 0
 #define SCRIPT_BOUNDARY_FILE 1

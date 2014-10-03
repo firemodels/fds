@@ -135,6 +135,9 @@ void update_menu(void);
 
 // EXIT
 
+// LABEL
+//   text 
+
 /* ------------------ insert_scriptfile ------------------------ */
 
 void get_newscriptfilename(char *newscriptfilename){
@@ -353,6 +356,7 @@ int get_script_keyword_index(char *keyword){
   if(match_upper(keyword,"LOAD3DSMOKE") == 1)return SCRIPT_LOAD3DSMOKE;
   if(match_upper(keyword,"LOADBOUNDARY") == 1)return SCRIPT_LOADBOUNDARY;
   if(match_upper(keyword,"LOADFILE") == 1)return SCRIPT_LOADFILE;
+  if(match_upper(keyword,"LABEL") == 1)return SCRIPT_LABEL;
   if(match_upper(keyword,"LOADINIFILE") == 1)return SCRIPT_LOADINIFILE;
   if(match_upper(keyword,"LOADISO") == 1)return SCRIPT_LOADISO;
   if(match_upper(keyword,"LOADPARTICLES") == 1)return SCRIPT_LOADPARTICLES;
@@ -606,6 +610,7 @@ int compile_script(char *scriptfile){
       case SCRIPT_LOAD3DSMOKE:
       case SCRIPT_LOADISO:
       case SCRIPT_SETVIEWPOINT:
+      case SCRIPT_LABEL:
         SETcval;
         break;
 
@@ -1300,6 +1305,19 @@ void script_loadfile(scriptdata *scripti){
   fprintf(stderr,"*** Error: file %s failed to load\n",scripti->cval);
 }
 
+/* ------------------ script_label ------------------------ */
+
+void script_label(scriptdata *scripti){
+
+  FREEMEMORY(script_labelstring);
+  if(scripti->cval!=NULL&&strlen(scripti->cval)>0){
+    NewMemory((void **)&script_labelstring,strlen(scripti->cval)+1);
+    strcpy(script_labelstring,scripti->cval);
+    PRINTF("*******************************\n");
+    PRINTF("*** %s ***\n",script_labelstring);
+    PRINTF("*******************************\n");
+  }
+}
 
 /* ------------------ script_loadplot3d ------------------------ */
 
@@ -1437,6 +1455,7 @@ void script_settimeval(scriptdata *scripti){
         fprintf(stderr,"           time requested: %f s, max time available: %f s\n",
           timeval,global_times[nglobal_times-1]);
         if(loaded_file!=NULL)fprintf(stderr,"           loaded file: %s\n",loaded_file);
+        if(script_labelstring!=NULL)PRINTF("label: %s\n",script_labelstring);
       }
       timeval=global_times[nglobal_times-1]-0.0001;
     }
@@ -1654,6 +1673,9 @@ int run_script(void){
       break;
     case SCRIPT_LOADFILE:
       script_loadfile(scripti);
+      break;
+    case SCRIPT_LABEL:
+      script_label(scripti);
       break;
     case SCRIPT_LOADINIFILE:
       script_loadinifile(scripti);

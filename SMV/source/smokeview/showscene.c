@@ -309,7 +309,7 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
   if(showtours==1){
     CLIP_GEOMETRY;
     drawtours();
-    SNIFF_ERRORS("after drawTours");
+    SNIFF_ERRORS("after drawtours");
   }
 
   /* ++++++++++++++++++++++++ draw stereo parallax indicator +++++++++++++++++++++++++ */
