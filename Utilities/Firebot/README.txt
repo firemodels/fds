@@ -89,6 +89,8 @@ More details on the Firebot build stages can be found in the FDS Configuration M
     This is the primary Firebot automated test script used on Linux with a queueing system (e.g., TORQUE).
     This script is invoked via crontab (details below).
     By default, Firebot is run in verification mode, but the -v option can be used to run Firebot in validation mode.
+    Note: In validation mode, the file /FDS-SMV/Validation/Process_All_Output.sh is used to obtain a list of
+    active (uncommended) validation cases.
 
 # firebot_mac.sh
 
