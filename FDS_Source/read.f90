@@ -570,19 +570,19 @@ MESH_LOOP: DO N=1,NMESHES_READ
             ! Process Physical Coordinates
 
             IF (XB1 > XB2) THEN
-               WRITE(MESSAGE,'(A,I2)') 'ERROR: XMIN > XMAX on MESH ', NM
+               WRITE(MESSAGE,'(A,I3)') 'ERROR: XMIN > XMAX on MESH ', NM
                CALL SHUTDOWN(MESSAGE) ; RETURN
             ENDIF
             IF (XB3 > XB4) THEN
-               WRITE(MESSAGE,'(A,I2)') 'ERROR: YMIN > YMAX on MESH ', NM
+               WRITE(MESSAGE,'(A,I3)') 'ERROR: YMIN > YMAX on MESH ', NM
                CALL SHUTDOWN(MESSAGE) ; RETURN
             ENDIF
             IF (XB5 > XB6) THEN
-               WRITE(MESSAGE,'(A,I2)') 'ERROR: ZMIN > ZMAX on MESH ', NM
+               WRITE(MESSAGE,'(A,I3)') 'ERROR: ZMIN > ZMAX on MESH ', NM
                CALL SHUTDOWN(MESSAGE) ; RETURN
             ENDIF
             IF (EVACUATION .AND. ABS(XB5 - XB6) <= SPACING(XB(6))) THEN
-               WRITE(MESSAGE,'(A,I2)') 'ERROR: ZMIN = ZMAX on evacuation MESH ', NM
+               WRITE(MESSAGE,'(A,I3)') 'ERROR: ZMIN = ZMAX on evacuation MESH ', NM
                CALL SHUTDOWN(MESSAGE) ; RETURN
             ENDIF
 
@@ -618,6 +618,17 @@ MESH_LOOP: DO N=1,NMESHES_READ
    ENDDO K_MULT_LOOP
 
 ENDDO MESH_LOOP
+
+! Check for bad mesh ordering if MPI_PROCESS used
+IF (USE_MPI) THEN
+   DO NM=1,NMESHES
+      IF (NM==1) CYCLE
+      IF (PROCESS(NM) < PROCESS(NM-1)) THEN
+         WRITE(MESSAGE,'(A,I3,A,I3,A)') 'ERROR: MPI_PROCESS for MESH ', NM, 'is less than MPI_PROCESS for MESH ',NM-1,'. Reorder MESH lines.'
+         CALL SHUTDOWN(MESSAGE) ; RETURN         
+      ENDIF
+   ENDDO
+ENDIF
 
 ! Min and Max values of temperature
 
