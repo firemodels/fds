@@ -957,9 +957,8 @@ check_smv_movies()
 generate_timing_stats()
 {
    cd $FDS_SVNROOT/Verification/scripts/
+   export QFDS="$FDS_SVNROOT/Verification/scripts/copyout.sh"
    export RUNCFAST="$FDS_SVNROOT/Verification/scripts/copyout.sh"
-   export RUNFDS="$FDS_SVNROOT/Verification/scripts/copyout.sh"
-   export RUNWFDS="$FDS_SVNROOT/Verification/scripts/copyout.sh"
    export RUNTFDS="$FDS_SVNROOT/Verification/scripts/copyout.sh"
 
    cd $FDS_SVNROOT/Verification
