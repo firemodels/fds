@@ -19,7 +19,7 @@ shift $(($OPTIND-1))
 outdir=$FDS_SVNROOT/Verification/scripts/Outfiles
 infile=$1
 
-fulldir=$FDS_SVNROOT/Verification/$dDIR
+fulldir=$FDS_SVNROOT/Verification/$DIR
 outfile=$infile.out
 
 # ensure that various files and directories exist
