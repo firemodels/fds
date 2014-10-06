@@ -67,7 +67,7 @@ FDS Version \fdsversion \\
 \vfill
 
 \begin{flushright}
-\includegraphics[width=1.2in]{../Bibliography/doc} 
+\includegraphics[width=1.2in]{../Bibliography/doc}
 \end{flushright}
 
 \titlesigs
@@ -448,13 +448,19 @@ The decision to change versions of the software is made by consensus of the deve
 
 \subsection{Version Number}
 
-New versions of FDS and Smokeview are identified using a specific numbering convention, for example, FDS 5.2.5. The version number consists of three integers separated by periods, where the first number is the {\em major} release, the second is the {\em minor} release, and the third is the {\em maintenance} release.  Major releases occur every few years, and as the name implies, significantly change the functionality of the model. Minor releases occur every few months, and may cause minor changes in functionality. Release notes indicate whether the changes affect a particular model feature. Maintenance releases are either just bug fixes or the addition of minor enhancements (such as a new output quantity), and should not affect code functionality.
+New versions of FDS and Smokeview are identified using a specific numbering convention, for example, FDS~5.2.5. The version number consists of three integers separated by periods, where the first number is the {\em major} release, the second is the {\em minor} release, and the third is the {\em maintenance} release.  Major releases occur every few years, and as the name implies, significantly change the functionality of the model. Minor releases occur every few months, and may cause minor changes in functionality. Release notes indicate whether the changes affect a particular model feature. Maintenance releases are either just bug fixes or the addition of minor enhancements (such as a new output quantity), and should not affect code functionality.
 
 For each release of FDS there is a unique Subversion (SVN) repository revision number associated with it. For example, FDS version 5.3.0 was built from files in the repository at SVN revision number 3193. The wiki, ``FDS Release Notes,'' indicates the SVN revision number of each release. The SVN revision number allows users to checkout or update their local copy of the project files from the repository to the same state as any previous release of the software.
 
 \subsection{Testing a New Release}
 
-Each proposed release undergoes testing. There are two sets of input files that are used to test new releases -- a verification suite and a validation suite. The verification suite consists of a range of calculations, from ones that just test a feature to ones that compare FDS results with analytical solutions of the governing equations. The validation suite consists of simulations of a wide range of experiments. The level of testing depends upon the type of baseline release: maintenance, minor, or major. A maintenance release occurs every few weeks. Each maintenance release is tested with the verification suite during the nightly Firebot testing. A minor release occurs every three to six months. Each minor release is tested with both the verification and validation suites. The validation cases take considerably longer to run, but the procedure is similar -- the results are plotted and compared to the experimental measurements using an automated plotting package that essentially redraws all of the plots and graphs in the FDS Validation Guide. The old and new guides are compared to assess whether or not the new version of the model has become noticeably less accurate than the old. Work is underway to better quantify the results. A major release of FDS occurs every few years. As the name implies, major changes are made to the algorithm, requiring months of beta testing, and several runs through the verification and validation suites.
+Each proposed release undergoes testing. There are two sets of input files that are used to test new releases -- a verification suite and a validation suite. The verification suite consists of a range of calculations, from ones that just test a feature to ones that compare FDS results with analytical solutions of the governing equations. The validation suite consists of simulations of a wide range of experiments. The level of testing depends upon the type of baseline release: maintenance, minor, or major. 
+
+A maintenance release occurs every few weeks. Each maintenance release is tested with the verification suite during the nightly Firebot testing. Maintenance releases are intended for routine bug fixes, documentation clarification, and usability issues. There should be no changes in code functionality with a maintenance release, although the bug fixes might changes results slightly.
+
+A minor release occurs every three to six months. Each minor release is tested with both the verification and validation suites. The validation cases take considerably longer to run, but the procedure is similar -- the results are plotted and compared to the experimental measurements using an automated plotting package that essentially redraws all of the plots and graphs in the FDS Validation Guide~\cite{FDS_Validation_Guide}. The old and new guides are compared to assess whether or not the new version of the model has become noticeably less accurate than the old. The FDS~Validation Guide contains a table in the Summary chapter that lists the bias and relative standard deviation values for all of the predicted quantities. These are the uncertainty metrics that ought to be cited by anyone using this particular minor release. In essence, for a minor release, the assessment procedure outlined in ASTM~E~1355 is repeated. The verification and validation studies are redone by the automated continuous integration scripts. 
+
+A major release of FDS occurs every few years. As the name implies, major changes are made to the algorithm, requiring months of beta testing, and several runs through the verification and validation suites. It is expected that a major release will introduce, and potentially remove, major algorithms and functionality.
 
 
 \subsection{Announcing a New Version}
