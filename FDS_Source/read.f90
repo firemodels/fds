@@ -625,7 +625,7 @@ IF (USE_MPI) THEN
       IF (NM==1) CYCLE
       IF (PROCESS(NM) < PROCESS(NM-1)) THEN
          WRITE(MESSAGE,'(A,I3,A,I3,A)') 'ERROR: MPI_PROCESS for MESH ', NM, 'is less than MPI_PROCESS for MESH ',NM-1,&
-	                                             '. Reorder MESH lines.'
+                                        '. Reorder MESH lines.'
          CALL SHUTDOWN(MESSAGE) ; RETURN         
       ENDIF
    ENDDO
