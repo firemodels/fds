@@ -6,6 +6,8 @@ $QFDS -p 5 -d Flowfields simple_duct.fds
 $QFDS -p 5 -d Flowfields simple_duct_2.fds
 $QFDS -p 8 -d Flowfields symmetry_test_mpi.fds
 
+$QFDS -p 4 -d Heat_Transfer back_wall_test.fds
+
 $QFDS -p 4 -d Pressure_Solver dancing_eddies_tight.fds
 $QFDS -p 4 -d Pressure_Solver dancing_eddies_default.fds
 $QFDS -p 8 -d Pressure_Solver duct_flow.fds
