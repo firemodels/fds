@@ -1,7 +1,8 @@
 set intelbin="%IFORT_COMPILER14%\bin"
 
-call %intelbin%\ifortvars ia32
+call %intelbin%\ifortvars intel64
 
 ifort -o fds2ascii fds2ascii.f90
 ifort -o layer_height layer_height.f
+ifort -o coupling_emulator coupling_emulator.f90
 pause
