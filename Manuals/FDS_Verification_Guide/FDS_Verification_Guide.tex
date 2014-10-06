@@ -2988,6 +2988,21 @@ where $T_{s,i}$ is the surface temperature corresponding to radial coordinates 1
 \end{figure}
 
 
+\clearpage
+
+\section{Heat Conduction across Mesh Boundaries (\texorpdfstring{\textct{back\_wall\_test}}{back\_wall\_test})}
+
+In this example, a unit cube made of 0.5~cm thick steel has several of its sides aligned with mesh interfaces. There is a solid cube centered inside the box with a fixed temperature of 500~$^\circ$C. The objective of the test is to ensure that the heat conduction through the steel and across the mesh boundaries is computed properly. In the left hand plot of Fig.~\ref{back_wall_test}, the net radiative heat flux to the interior surface of the box matches the net radiative heat flux from the external surface in steady state. In the right hand plot, the external surface temperature of two sides of the box are compared. One side is a zero cell thick obstruction; the other side is a one cell thick obstruction. Since the sides are all assumed to be 0.5~cm thick, the fact that the obstruction is either zero or one cell thick should not matter and the temperatures should match exactly.
+
+\begin{figure}[ht]
+\noindent
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/back_wall_test_flux} &
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/back_wall_test_temp}
+\end{tabular*}
+\caption[The \textct{back\_wall\_test} test case]{(Left) The heat flux into and out of a steel plate. (Right) The external temperature of a steel box whose sides are either zero or one cell thick.}
+\label{back_wall_test}
+\end{figure}
 
 
 
