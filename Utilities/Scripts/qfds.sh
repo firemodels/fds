@@ -184,7 +184,7 @@ fi
 # Or, bind processs to and map processes by socket if
 # OpenMP is being used (number of OpenMP threads > 1).
 
-SOCKET_OPTION="--bind-to none"
+SOCKET_OPTION="--bind-to socket"
 if test $nopenmp_threads -gt 1 ; then
   SOCKET_OPTION="--map-by socket:PE=$nopenmp_threads"
  #SOCKET_OPTION="--bind-to socket --map-by socket:PE=$nopenmp_threads"
