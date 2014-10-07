@@ -1,4 +1,4 @@
 @echo off
-set coupler=..\..\utilities\data_processing\coupling_emulator.exe
-set fds=..\..\fds_compilation\intel_win_64\fds_win_64.exe
+set coupler=..\..\Utilities\Data_Processing\coupling_emulator.exe
+set fds=..\..\FDS_Compilation\intel_win_64\fds_win_64.exe
 %coupler% %fds%
