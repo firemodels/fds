@@ -180,7 +180,7 @@ if [ "$benchmark" == "yes" ]; then
   ppn=$ncores
 fi
 
-# default: Do not bind processes to anything when using mpirun with MPI only.
+# default: Use mpirun option to bind processes to socket (for MPI).
 # Or, bind processs to and map processes by socket if
 # OpenMP is being used (number of OpenMP threads > 1).
 
