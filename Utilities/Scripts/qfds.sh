@@ -70,7 +70,7 @@ benchmark=no
 showinput=0
 use_repository=1
 strip_extension=0
-REPORT_BINDINGS=
+REPORT_BINDINGS="--report-bindings"
 
 # read in parameters from command line
 
@@ -157,6 +157,10 @@ TITLE="$infile"
 
 # define number of nodes
 
+if test $nopenmp_threads -gt 1 ; then
+  nmpi_processes_per_node=2
+fi
+
 let "nodes=($nmpi_processes-1)/$nmpi_processes_per_node+1"
 if test $nodes -lt 1 ; then
   nodes=1
@@ -182,7 +186,8 @@ fi
 
 SOCKET_OPTION="--bind-to none"
 if test $nopenmp_threads -gt 1 ; then
-  SOCKET_OPTION="--bind-to socket --map-by ppr:1:socket"
+  SOCKET_OPTION="--map-by socket:PE=$nopenmp_threads"
+ #SOCKET_OPTION="--bind-to socket --map-by socket:PE=$nopenmp_threads"
 fi
 
 # use mpirun if there is more than 1 process
