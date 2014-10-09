@@ -2598,18 +2598,25 @@ USE GEOMETRY_FUNCTIONS, ONLY : BLOCK_CELL
 INTEGER :: I1,I2,J1,J2,K1,K2,I,J,K,IW,ICG,IC
 INTEGER, INTENT(IN) :: NM,CR_INDEX,OBST_INDEX
 REAL(EB) :: T
-LOGICAL :: CREATE,REMOVE
+LOGICAL :: CREATE,REMOVE,THIN_OBSTRUCTION
  
 CALL POINT_TO_MESH(NM)
+
+! Indicate whether to create or remove the obstruction.
 
 REMOVE = .FALSE.
 CREATE = .FALSE.
 IF (CR_INDEX==0) REMOVE = .TRUE.
 IF (CR_INDEX==1) CREATE = .TRUE.
+
+! Indicate if the obstruction is thin, i.e. zero cells thick. This matters in a few instances below.
+
+THIN_OBSTRUCTION = .FALSE.
+IF (I1==I2 .OR. J1==J2 .OR. K1==K2) THIN_OBSTRUCTION = .TRUE.
  
 ! Blank or unblank cells that make up the OBSTruction
  
-CALL BLOCK_CELL(NM,I1+1,I2,J1+1,J2,K1+1,K2,CR_INDEX,OBST_INDEX)
+IF (.NOT.THIN_OBSTRUCTION) CALL BLOCK_CELL(NM,I1+1,I2,J1+1,J2,K1+1,K2,CR_INDEX,OBST_INDEX)
  
 ! If the OBSTruction is to be removed, set density and mass fractions to ambient value
 
@@ -2778,7 +2785,7 @@ ENDIF
 ! Initialize solid properties included in the WALL derived type variable
  
 IF (WC%BOUNDARY_TYPE/=NULL_BOUNDARY) THEN
-   IF (IW<=N_EXTERNAL_WALL_CELLS) WC%OBST_INDEX = 0
+   IF (IW<=N_EXTERNAL_WALL_CELLS .AND. THIN_OBSTRUCTION) WC%OBST_INDEX = 0  ! If a flat plate is removed from external wall.
    IF (OBST_INDEX_C(IC)>0) THEN
       WC%OBST_INDEX = OBST_INDEX_C(IC)
    ELSEIF (CREATE .AND. OBST_INDEX>0) THEN
