@@ -133,6 +133,7 @@ The following individuals contributed to the verification process of FDS.
 \item Bryan Klein, now at Thunderhead Engineering, developed the source code version control system that is an essential part of the verification process.
 \item Joonas Ryyn\"{a}nen of VTT, Finland, designed and documented the FED/FIC test cases.
 \item Max Gould, Summer Undergraduate Research Fellow, helped develop and produce the ``2D Vortex'' test case.
+\item Howard Baum, NIST Fellow Emeritus, contributed the analytical solution ``Collapse of a Hot Layer in a Micro-gravity Environment''.
 \end{itemize}
 
 
@@ -1592,10 +1593,71 @@ Simulations were performed for $N = \{32, 64, 128, 256, 512\}$, where $N$ is the
 
 \begin{figure}
 \centering
-\includegraphics[width=.8\textwidth]{SCRIPT_FIGURES/shunn_mms_convergence}
+\includegraphics[width=.75\textwidth]{SCRIPT_FIGURES/shunn_mms_convergence}
 \caption[Convergence of the manufactured solution]{\label{fig_mms_convergence} Convergence for the manufactured solution.  The L2 error at time $t = 1$ s is plotted as a function of grid spacing for $N=\{32,64,128,256,512\}$ points in each direction.  The grid spacing is $\Delta x = L/N$, where $L=2$ m.  Calculations were performed with an adaptive time step satisfying both convective and diffusive CFL (Von Neumann) limits of 0.5. These results confirm second-order accuracy of the flow solver for density, mixture fraction, and velocity. As is known for projection schemes like ours, the pressure solution (represented by $H$) is first-order accurate \cite{Armfield:2002}.}
 \end{figure}
 
+\clearpage
+
+\section{Collapse of a Hot Layer in a Micro-gravity Environment (\texorpdfstring\textct{hot\_layer\_360}{hot\_layer\_360})}
+\label{sec:baum_hot_layer}
+
+\textbf{Howard R. Baum, NIST Fellow Emeritus}\\
+
+This problem describes the collapse of a hot layer of depth $d$ adjacent to a wall at plane $y=0$ in zero gravity.  The wall is presumed to remain cool at the ambient temperature $T_0$ while the hot layer is initially $T_h$.  The initial velocity field is quiescent.  Starting at time $t=0$ the hot layer begins to diffuse into the upper cool ambient atmosphere and to expand due to dilitation.  There is also heat transfer to the wall.  The problem is 1D in the spatial coordinate $y$ and time dependent.  We are interested in the evolution of the temperature $T(y,t)$ and the velocity $v(y,t)$.
+
+For the present problem the governing equations are
+\begin{gather}
+\frac{\partial \rho}{\partial t} + \frac{\partial}{\partial y}(\rho v) = 0 \\
+\rho C_p \left( \frac{\partial T}{\partial t} + v \frac{\partial T}{\partial y} \right) = \frac{\partial}{\partial y} \left( k \frac{\partial T}{\partial y} \right) \\
+\rho T = \rho_0 T_0
+\end{gather}
+Here, $\rho(y,t)$ is the mass density, $C_p$ is the heat capacity (assumed constant), and $k$ is the thermal conductivity of the gas, which we assume obeys $\rho k = \rho_0 k_0$.
+
+The initial conditions are
+\begin{align}
+v(y,0) &= 0 \\
+T(y,0) &= \left\{ \begin{array}{ll} T_h & \mbox{for} \quad 0 < y \le d \\ T_0 & \mbox{for} \quad y > d \end{array} \right.
+\end{align}
+
+The boundary conditions are
+\begin{align}
+v(0,t) &= 0 \\
+T(0,t) &= T_0 \\
+T(y,t) &\rightarrow T_0 \;\mbox{as}\; y\rightarrow\infty
+\end{align}
+Note that no boundary condition can be imposed on $v$ far from the boundary.  In FDS, an {\ct OPEN} boundary is applied.
+
+\paragraph{Solution}
+
+Introducing the dimensionless coordinate $\lambda$ and dimensionless time $\tau$, the dimensionless physical coordinate $Y(\lambda,\tau)$, velocity $V(\lambda,\tau)$, and temperature $\theta(\lambda,\tau)$ are related to dimensional quanities as follows:
+\begin{align}
+t &= \rho_0 C_p d^2/k_0 \, \tau  \\
+y &= d \, Y(\lambda,\tau) \\
+v &= k_0/(\rho_0 C_p d) \, V(\lambda,\tau) \\
+T &= T_0 \, \theta(\lambda,\tau)
+\end{align}
+The solution is then given by the following (for coding details see {\ct hot\_layer\_collapse.m}):
+\begin{gather}
+f(\lambda,\tau,a) = -2\sqrt{\tau/\pi}\;\exp(-(a-\lambda)^2/(4\tau)) + (a+\lambda)\;\erfc((a+\lambda)/(2\sqrt{\tau})) \\
+F(\lambda,\tau,a) = f(\lambda,\tau,a) - f(0,\tau,a) \\
+Y(\lambda,\tau,T_h,T_0) = \lambda + (T_h-T_0)/T_0( -F(\lambda,\tau,0) + \mbox{$\frac{1}{2}$}( F(\lambda,\tau,T_0/T_h) + F(\lambda,\tau,-T_0/T_h) ) ) \\
+U(\lambda,\tau,T_h,T_0) = -\erfc(\lambda/(2\sqrt{\tau})) + \mbox{$\frac{1}{2}$}( \erfc( (\lambda - T_0/T_h)/(2\sqrt{\tau}) ) + \erfc( (\lambda + T_0/T_h)/(2\sqrt{\tau}) ) ) \\
+\theta(\lambda,\tau,T_h,T_0) = 1 + ( (T_h - T_0)/T_0 ) \, U(\lambda,\tau,T_h,T_0) \\
+G(\lambda,\tau,a) = 1/\sqrt{\pi\tau} \, ( -\exp(-(a+\lambda)^2/(4\tau)) + \exp(-a^2/(4\tau)) ) \\
+V(\lambda,\tau,T_h,T_0) = (T_h-T_0)/T_0 \, ( -G(\lambda,\tau,0) + \mbox{$\frac{1}{2}$}(G(\lambda,\tau,T_0/T_h) + G(\lambda,\tau,-T_0/T_h)) )
+\end{gather}
+
+Fig.~\ref{fig_hot_layer} shows the analytical solution (solid lines) plotted together with the FDS (DNS) numerical results (open symbols).  The plots on the left are of temperature profiles at several times (different colors demarcate different nondimensional times $\tau$).  The plots on the right are velocity.  As can be seen, the agreement is excellent.
+
+\begin{figure}
+\centering
+\includegraphics[width=.49\textwidth]{SCRIPT_FIGURES/hot_layer_temp_1}
+\includegraphics[width=.49\textwidth]{SCRIPT_FIGURES/hot_layer_vel_1}
+\includegraphics[width=.49\textwidth]{SCRIPT_FIGURES/hot_layer_temp_2}
+\includegraphics[width=.49\textwidth]{SCRIPT_FIGURES/hot_layer_vel_2}
+\caption[Baum hot layer solution]{\label{fig_hot_layer} Hot layer solution. Lines are the analytical solution.  Symbols are the FDS results.}
+\end{figure}
 
 \clearpage
 
