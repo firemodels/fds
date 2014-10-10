@@ -313,6 +313,10 @@ USE PRECISION_PARAMETERS, ONLY : DPC, EB
      module procedure mpi_waitall_int0, mpi_waitall_int1, mpi_waitall_int1b
   end interface mpi_waitall
 
+  interface mpi_testall
+     module procedure mpi_testall
+  end interface mpi_testall
+
   contains
 
 subroutine mpi_scatter_real2 ( data1, nsend, sendtype, data2, nrecv, recvtype, recvnode, comm, ierror )
@@ -1535,6 +1539,16 @@ subroutine mpi_waitall_int1b ( icount, irequest, istatus, ierror )
   integer:: ierror
   integer, dimension(:)   :: irequest
   integer :: istatus
+  dummy = icount + irequest(1) + istatus + ierror
+end subroutine
+
+subroutine mpi_testall ( icount, irequest, flag, istatus, ierror )
+  integer:: icount
+  integer:: ierror
+  logical:: flag
+  integer, dimension(:)   :: irequest
+  integer :: istatus
+  flag=.true.
   dummy = icount + irequest(1) + istatus + ierror
 end subroutine
 
