@@ -577,7 +577,7 @@ There are different implementations of MPI, much like there are different Fortra
 
 \subsubsection{Intel MPI for Windows}
 
-The files needed to run an MPI calculation across a Windows domain network are bundled in with the FDS download. There is no need to install Intel MPI or its redistributable libraries. The following procedure is intended for a Windows domain network; that is, a network where user accounts are centrally managed such that any user can log in to any machine using the same credentials. 
+The files needed to run an MPI calculation across a Windows domain network are bundled in with the FDS download. There is no need to install Intel MPI or its redistributable libraries. The following procedure is intended for a Windows domain network; that is, a network where user accounts are centrally managed such that any user can log in to any machine using the same credentials.
 
 To run the MPI version of FDS, you need to have administrator privileges on the machine that launches the job, but not necessarily on the machines that run the job. We have designed the FDS installation script to set up the necessary firewall exceptions and system environment variables automatically so that you need only install FDS as you normally would to make this work. You do not have to download and install the MPI software separately. Everything you need is in the FDS installation package.
 \begin{enumerate}
@@ -587,10 +587,10 @@ To run the MPI version of FDS, you need to have administrator privileges on the 
 
 {\ct mpiexec -hosts 2 <my\_machine> 1 <other\_machine> 1 test\_mpi}
 
-\item If this command returns a ``Hello World'' message from your machine and the other machine on your network, proceed to the next step. If this command fails, check that you can ``see'' the other machine by pinging it, and check that the other machine can ``see'' your machine as well. 
+\item If this command returns a ``Hello World'' message from your machine and the other machine on your network, proceed to the next step. If this command fails, check that you can ``see'' the other machine by pinging it, and check that the other machine can ``see'' your machine as well.
 \item Share (with both read and write privilege) a working directory on your machine. Do not put this directory within the Program Files path. Share the working directory with everybody so that all other machines can see it. Note how this directory is defined on the other machines. Sometimes it is {\ct \textbackslash\textbackslash<my\_machine>\textbackslash<my\_shared\_directory>\textbackslash} and sometimes it is defined via the numerical IP address, like {\ct \textbackslash\textbackslash129.6.129.87\textbackslash<my\_shared\_directory>\textbackslash}. The definition depends on the way your domain name server (DNS) works. In any case, do not leave blank spaces within any directory or file names. We have found that blanks create all sorts of trouble. Unless you are a DOS/Windows expert, avoid them.
 \item Within the command prompt, {\ct cd} to the working directory. Find or create within the working directory a relatively small, simple, two mesh FDS input file that you know runs with the serial version of FDS. At the command prompt, type:
-  
+
    {\ct mpiexec -hosts 2 <my\_machine> 1 <other\_machine> 1 -wdir ... fds\_mpi case\_name.fds}
 
 \item If successful, you should see the usual FDS printout indicating the processes being assigned to the machines. If unsuccessful, let us know what kind of error you are getting.
@@ -8352,6 +8352,7 @@ In addition, the following flags can be useful in monitoring the performance of 
 \item[{\ct DEBUG}]  If set to {\ct .TRUE.} on the {\ct DUMP} line, this parameter will cause FDS to print out debugging information concerning the progress of an MPI calculation.
 \item[{\ct TIMING}] If set to {\ct .TRUE.} on the {\ct DUMP} line, this parameter will cause FDS to print out timing information concerning the data exchanges in an MPI calculation.
 \item[{\ct VELOCITY\_ERROR\_FILE}] If set to {\ct .TRUE.} on the {\ct DUMP} line, this parameter will cause FDS to create a file with a time history of the maximum error associated with the normal component of velocity at solid or interpolated boundaries.
+\item[{\ct MPI\_TIMEOUT}] The amount of time, in seconds, to wait for messages sent via MPI (Message Passing Interface) before timing out. This parameter is set on the {\ct MISC} line. The default value is 10~s. This parameter is only useful in forcing a job with deadlocked messages to finish and print out information about the lost message.
 \end{description}
 
 
@@ -9426,6 +9427,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct MAX\_LEAK\_PATHS}                          & Integer       & Section~\ref{info:Leaks}                             &               &  200              \\ \hline
 {\ct MAXIMUM\_VISIBILITY}                       & Real          & Section~\ref{info:visibility}                         &  m            &  30               \\ \hline
 {\ct MEAN\_FORCING(3)}                          & Logical       & Section~\ref{info:mean_forcing}                       &               & {\ct .FALSE.}     \\ \hline
+{\ct MPI\_TIMEOUT}                              & Real          & Section~\ref{info:TIMING}                             &  s            & 10.               \\ \hline
 {\ct NOISE}                                     & Logical       & Section~\ref{info:MISC_Basics}                        &               & {\ct .TRUE.}      \\ \hline
 {\ct NOISE\_VELOCITY}                           & Real          & Section~\ref{info:MISC_Basics}                        &  m/s          & 0.005             \\ \hline
 {\ct NO\_EVACUATION}                            & Logical       & Reference~\cite{FDS_Evac_Users_Guide}                 &               & {\ct .FALSE.}     \\ \hline
