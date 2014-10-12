@@ -1,5 +1,7 @@
 #!/bin/bash
 
+$QFDS -p 4 -d Adaptive_Mesh_Refinement random_meshes.fds
+
 $QFDS -p 8 -d Fires circular_burner.fds
 
 $QFDS -p 5 -d Flowfields simple_duct.fds

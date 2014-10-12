@@ -1,3 +1,4 @@
+$RUNSMV -d Adaptive_Mesh_Refinement random_meshes
 $RUNSMV -d Controls activate_vents
 $RUNSMV -d Detectors beam_detector
 $RUNSMV -d Fires room_fire
