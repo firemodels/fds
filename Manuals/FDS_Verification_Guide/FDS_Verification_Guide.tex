@@ -1936,6 +1936,21 @@ A 10 m x 10 m x 40 m volume is initialized with {\ct LAPSE\_RATE=-0.01}.  The vo
 \end{figure}
 
 
+\subsection{Randomly Overlapping Meshes (\texorpdfstring{\textct{random\_meshes}}{random\_meshes})}
+
+In most FDS simulations, multiple meshes are positioned adjacent to each other to allow two-way communication. However, in some instances, meshes need to overlap, and this case verifies the functionality of meshes that overlap in a variety of ways. It is a 2-D case that runs fast and is easy to visualize. There are five overlapping meshes shown at left in Fig.~\ref{random_meshes}. Air is blown in at the bottom and exhausted via an open vent at the top. The volume flow rate is fixed at 0.012~m$^3$/s, and the plot at right in Fig.~\ref{random_meshes} verifies that the simulation matches to within a few percent. The case uses the default normal velocity tolerance at solid and interpolated boundaries; thus, there is some error expected in the volume flow due to the solution of the Poisson equation. As a further check that the mesh allocations are being properly handled, there is a fine mesh embedded within the coarse, and the case is run with four MPI processes rather than five. 
+
+\begin{figure}[ht]
+\begin{tabular*}{\textwidth}{lr}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/random_meshes.png} &
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/random_meshes.pdf}
+\end{tabular*}
+\caption[The \textct{random\_meshes} test case]{Five overlapping meshes (left) and the net volume flow through the domain (right).}
+\label{random_meshes}
+\end{figure}
+
+
+
 \chapter{Thermal Radiation}
 
 The Radiative Transport Equation (RTE) for an absorbing/emitting
