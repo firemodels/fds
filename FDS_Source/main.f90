@@ -65,7 +65,7 @@ TYPE (OMESH_TYPE), POINTER :: M2,M3,M5
 INTEGER :: N,I,IERR=0,STATUS(MPI_STATUS_SIZE)
 INTEGER :: PNAMELEN=0,DISP,TAG_EVAC
 INTEGER :: PROVIDED
-INTEGER, PARAMETER :: REQUIRED=MPI_THREAD_SERIALIZED   
+INTEGER, PARAMETER :: REQUIRED=MPI_THREAD_FUNNELED
 INTEGER, ALLOCATABLE, DIMENSION(:) :: REQ,REQ1,REQ2,REQ3,REQ4,REQ5,REQ6,REQ7,REQ8,REQ9,COUNTS,DISPLS,&
                                       COUNTS2D,DISPLS2D,COUNTS_TIMERS,DISPLS_TIMERS, &
                                       COUNTS_MASS,DISPLS_MASS,COUNTS_HVAC,DISPLS_HVAC,COUNTS_Q_DOT,DISPLS_Q_DOT, &
@@ -1249,8 +1249,7 @@ CONTAINS
 
 SUBROUTINE CHECK_MPI_OPENMP
 
-INTEGER :: THREAD_ID,IP,dThread,dRank,dNamelen,sNthreads,IT
-CHARACTER(LEN=MPI_MAX_PROCESSOR_NAME) :: dName  
+INTEGER :: THREAD_ID
 
 IF (.NOT.USE_OPENMP .AND. .NOT.USE_MPI) RETURN
 
@@ -1261,67 +1260,20 @@ IF (USE_MPI .AND. PROVIDED<REQUIRED) THEN
    !$ CALL OMP_SET_NUM_THREADS(1)
 ENDIF
 
-! The multithreaded section where all threads will say hello
+! The multi-threaded section where all threads will say hello
 
 !$OMP PARALLEL DEFAULT(SHARED) PRIVATE(THREAD_ID)
 
 THREAD_ID = 0
 !$ THREAD_ID = OMP_GET_THREAD_NUM()  
 
-! Time to say hello, the master process performs all output. Within the master process, each thread will handle its own
-! output, the master thread will handle output from all threads of all other processes.
-
-IF (MYID==0) THEN
-
-   ! The master process outputs from its own threads.
-
-   !$OMP CRITICAL
-   IF (USE_OPENMP .AND. USE_MPI) WRITE(LU_ERR,91) " OpenMP thread ",THREAD_ID+1," of ",OPENMP_AVAILABLE_THREADS,&
-      " assigned to MPI process ",MYID+1," of ",NUMPROCS," is running on ",PNAME(1:PNAMELEN)
-   IF (.NOT.USE_OPENMP .AND. USE_MPI) WRITE(LU_ERR,92) " MPI process ",MYID+1," of ",NUMPROCS," is running on ",PNAME(1:PNAMELEN)
-   IF (USE_OPENMP .AND. .NOT.USE_MPI) WRITE(LU_ERR,93) " OpenMP thread ",THREAD_ID+1," of ",OPENMP_AVAILABLE_THREADS,&
+!$OMP CRITICAL
+IF (USE_OPENMP .AND. USE_MPI) WRITE(LU_ERR,91) " OpenMP thread ",THREAD_ID+1," of ",OPENMP_AVAILABLE_THREADS,&
+   " assigned to MPI process ",MYID+1," of ",NUMPROCS," is running on ",PNAME(1:PNAMELEN)
+IF (.NOT.USE_OPENMP .AND. USE_MPI) WRITE(LU_ERR,92) " MPI process ",MYID+1," of ",NUMPROCS," is running on ",PNAME(1:PNAMELEN)
+IF (USE_OPENMP .AND. .NOT.USE_MPI) WRITE(LU_ERR,93) " OpenMP thread ",THREAD_ID+1," of ",OPENMP_AVAILABLE_THREADS,&
       " is running"
-   !$OMP END CRITICAL
-
-   !$OMP BARRIER
-
-   ! Now, receive data from each of the other processes and give an appropriate greeting. Only the master thread should do this.
-
-   !$OMP MASTER
-   DO IP=1,NUMPROCS-1
-      CALL MPI_RECV(sNthreads, 1, MPI_INTEGER, IP, 10*IP,MPI_COMM_WORLD, STATUS, IERR)
-      DO IT=0,sNthreads-1
-         ! For each thread, get the rank ID, thread ID, and name
-         call MPI_RECV(dRank,    1, MPI_INTEGER, IP, 10*IP+1,            MPI_COMM_WORLD, STATUS, IERR)
-         call MPI_RECV(dThread,  1, MPI_INTEGER, IP, 10*IP+2,            MPI_COMM_WORLD, STATUS, IERR)
-         call MPI_RECV(dNamelen, 1, MPI_INTEGER, IP, 1000*IP+10*dThread, MPI_COMM_WORLD, STATUS, IERR)
-         call MPI_RECV(dName, dNamelen, MPI_CHARACTER, IP, 1000*IP+10*dThread+1, MPI_COMM_WORLD, STATUS, IERR)
-         IF (USE_OPENMP .AND. USE_MPI) WRITE(LU_ERR,91) " OpenMP thread ",dThread+1," of ", sNthreads,&
-            " assigned to MPI process ",dRank+1," of ",NUMPROCS," is running on ",dName(1:dNamelen)
-         IF (.NOT.USE_OPENMP .AND. USE_MPI) WRITE(LU_ERR,92) " MPI process ",dRank+1," of ",NUMPROCS," is running on ",&
-            dName(1:dNamelen)
-      ENDDO 
-   ENDDO 
-   !$OMP END MASTER
-
-ELSE  ! All other processes will send their data to the master
-
-   ! Only the master send the number of threads.
-
-   !$OMP MASTER
-   call MPI_SEND(OPENMP_AVAILABLE_THREADS, 1, MPI_INTEGER, 0, 10*MYID, MPI_COMM_WORLD, IERR);
-   !$OMP END MASTER
-
-   ! Each thread will send its own data, but there is no particular order required.
-
-   !$OMP CRITICAL
-   call MPI_SEND(MYID,         1, MPI_INTEGER,   0,   10*MYID+1,              MPI_COMM_WORLD, IERR)
-   call MPI_SEND(THREAD_ID,    1, MPI_INTEGER,   0,   10*MYID+2,              MPI_COMM_WORLD, IERR)
-   call MPI_SEND(PNAMELEN,     1, MPI_INTEGER,   0, 1000*MYID+10*THREAD_ID,   MPI_COMM_WORLD, IERR)
-   call MPI_SEND(PNAME, PNAMELEN, MPI_CHARACTER, 0, 1000*MYID+10*THREAD_ID+1, MPI_COMM_WORLD, IERR)
-   !$OMP END CRITICAL
-
-ENDIF
+!$OMP END CRITICAL
 
 !$OMP END PARALLEL
 
