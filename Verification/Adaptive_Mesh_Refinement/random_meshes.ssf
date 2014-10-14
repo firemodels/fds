@@ -1,5 +1,6 @@
 RENDERDIR
  ../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES
+SETVIEWPOINT
+ view 1
 RENDERONCE
  random_meshes
-
