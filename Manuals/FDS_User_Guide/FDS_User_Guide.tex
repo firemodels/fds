@@ -1874,6 +1874,15 @@ of {\ct VELOCITY\_TOLERANCE}, the default value on the left and a tighter tolera
 \label{dancing_eddies}
 \end{figure}
 
+One strategy for reducing the computational cost associated with a tightened tolerance on the normal velocity at mesh boundaries is to overlap the meshes. The idea is described in detail for a non-structured mesh in Ref.~\cite{Grinberg:JCP2010}. The basic idea is that a slight overlap of meshes can lead to faster convergence of the pressure solver towards the desired level of accuracy. In the {\ct dancing\_eddies} test case, the case called {\ct dancing\_eddies\_tight} is rerun as {\ct dancing\_eddies\_tight\_overlap} where each mesh is extended an additional 10 grid cells in the longitudinal direction. This increases the work by approximately a factor of 85/75, but it reduces the number of iterations. Figure~\ref{dancing_eddies_overlap} shows the reduction in the number of pressure iterations (left) and the overall reduction in CPU time (right).
+
+\begin{figure}[ht]
+\includegraphics[width=3in]{SCRIPT_FIGURES/dancing_eddies_iterations}
+\includegraphics[width=3in]{SCRIPT_FIGURES/dancing_eddies_tight_overlap}
+\caption[Reduction of pressure iterations in the {\ct dancing\_eddies} test cases]{The number of pressure iterations (left) and the total CPU time (right) for overlapped and non-overlapped meshes.}
+\label{dancing_eddies_overlap}
+\end{figure}
+
 \subsubsection{Special Case: True Periodic Boundaries}
 
 In Section \ref{sec:periodic}, we discuss how to set periodic boundaries.  By default, in order to handle the most general case of a periodic domain with multiple meshes (imagine a periodic channel divided into several meshes), FDS treats the pressure boundary condition as what we call an ``interpolated boundary.''  This means that the matrix for the pressure Poisson equation is arranged for Dirichlet boundary conditions (the value of the solution is specified at the boundary).  This can lead to small errors in the solution and sometimes it is desirable to use the true periodic matrix for the Poisson equation.  But with the current solver (Fishpak) this is only possible for a single mesh.  If you want to implement true periodic boundaries for a single mesh case, set the appropriate \verb=FISHPAK_BC= value to zero on the \verb=PRES= line.  For example,
@@ -1883,6 +1892,7 @@ In Section \ref{sec:periodic}, we discuss how to set periodic boundaries.  By de
 \end{lstlisting}
 
 
+\clearpage
 
 \section{Setting Limits: The \texorpdfstring{{\tt CLIP}}{CLIP} Namelist Group (Table \ref{tbl:CLIP})}
 \label{info:CLIP}
