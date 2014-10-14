@@ -1,7 +1,9 @@
-&HEAD CHID='dancing_eddies_tight', TITLE='Simple 2D Tunnel'/ 
+&HEAD CHID='dancing_eddies_tight_overlap', TITLE='Simple 2D Tunnel'/ 
 
-&MULT ID='mesh',DX=0.075,I_UPPER=3 /
-&MESH IJK=75,1,40, XB=0.0,0.075,-0.001,0.001,-0.02,0.020, MULT_ID='mesh' /
+&MESH IJK=85,1,40, XB=0.000,0.085,-0.001,0.001,-0.02,0.020 /
+&MESH IJK=85,1,40, XB=0.070,0.155,-0.001,0.001,-0.02,0.020 /
+&MESH IJK=85,1,40, XB=0.145,0.230,-0.001,0.001,-0.02,0.020 /
+&MESH IJK=85,1,40, XB=0.215,0.300,-0.001,0.001,-0.02,0.020 /
 
 &TIME T_END=2.0 /
 
