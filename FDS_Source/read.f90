@@ -9586,9 +9586,28 @@ READ_DEVC_LOOP: DO NN=1,N_DEVC_READ
       ORIENTATION_INDEX = N_ORIENTATION_VECTOR
    ENDIF
 
-   ! Reorder XB coordinates if necessary
+   ! Check if there are any devices with specified XB that do not fall within a mesh.
 
-   IF (POINTS==1) CALL CHECK_XB(XB)
+   IF (POINTS==1 .AND. XB(1)>-1.E5_EB) THEN
+
+      CALL CHECK_XB(XB)
+
+      BAD = .TRUE.
+      CHECK_MESH_LOOP: DO NM=1,NMESHES
+         IF (EVACUATION_ONLY(NM)) CYCLE CHECK_MESH_LOOP
+         M=>MESHES(NM)
+         IF (XB(1)>=M%XS .AND. XB(2)<=M%XF .AND. XB(3)>=M%YS .AND.  XB(4)<=M%YF .AND. XB(5)>=M%ZS .AND. XB(6)<=M%ZF) THEN
+            BAD = .FALSE.
+            EXIT CHECK_MESH_LOOP
+         ENDIF
+      ENDDO CHECK_MESH_LOOP
+
+      IF (BAD) THEN
+         WRITE(MESSAGE,'(A,A,A)')  'ERROR: XB for DEVC ',TRIM(ID),' must be completely within a mesh.'
+         CALL SHUTDOWN(MESSAGE) ; RETURN
+      ENDIF
+
+   ENDIF
 
    ! Process the point devices along a line, if necessary
 
