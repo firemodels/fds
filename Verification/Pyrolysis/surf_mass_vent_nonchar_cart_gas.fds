@@ -1,7 +1,6 @@
 &HEAD CHID='surf_mass_vent_nonchar_cart_gas',TITLE='Surface mass, vent, nonchar, cartesian, gas' /
 
-&MESH 	IJK= 6,6,6,
-	XB = -1.5,1.5,-1.5,1.5,0.0,3.0 /
+&MESH IJK= 6,6,6, XB=-1.5,1.5,-1.5,1.5,0.0,3.0 /
 
 &TIME T_END=200., DT = 0.01, WALL_INCREMENT = 1 /  
 &DUMP DT_HRR = 0.1, DT_DEVC = 0.1  /
@@ -32,7 +31,7 @@
 
 &VENT ID = 'Sample', SURF_ID = 'Wood', XB = -0.5,0.5,-0.5,0.5,0,0.0 /
 
-&DEVC 	XB = -1.5,1.5,-1.5,1.5,0.0,4.0, 
+&DEVC 	XB = -1.5,1.5,-1.5,1.5,0.0,3.0, 
 	QUANTITY = 'DENSITY', 
 	ID = 'density', 
 	STATISTICS = 'VOLUME INTEGRAL', 
