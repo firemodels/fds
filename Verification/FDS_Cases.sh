@@ -429,4 +429,5 @@ $QFDS -d Visualization objects_static.fds
 $QFDS -d WUI pine_needles.fds
 $QFDS -d WUI random_walk_1.fds
 $QFDS -d WUI random_walk_2.fds
+$QFDS -d WUI sphere_drag.fds
 
