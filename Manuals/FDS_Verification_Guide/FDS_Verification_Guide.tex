@@ -1938,7 +1938,7 @@ A 10 m x 10 m x 40 m volume is initialized with {\ct LAPSE\_RATE=-0.01}.  The vo
 
 \subsection{Randomly Overlapping Meshes (\texorpdfstring{\textct{random\_meshes}}{random\_meshes})}
 
-In most FDS simulations, multiple meshes are positioned adjacent to each other to allow two-way communication. However, in some instances, meshes need to overlap, and this case verifies the functionality of meshes that overlap in a variety of ways. It is a 2-D case that runs fast and is easy to visualize. There are five overlapping meshes shown at left in Fig.~\ref{random_meshes}. Air is blown in at the bottom and exhausted via an open vent at the top. The volume flow rate is fixed at 0.012~m$^3$/s, and the plot at right in Fig.~\ref{random_meshes} verifies that the simulation matches to within a few percent. The case uses the default normal velocity tolerance at solid and interpolated boundaries; thus, there is some error expected in the volume flow due to the solution of the Poisson equation. As a further check that the mesh allocations are being properly handled, there is a fine mesh embedded within the coarse, and the case is run with four MPI processes rather than five. 
+In most FDS simulations, multiple meshes are positioned adjacent to each other to allow two-way communication. However, in some instances, meshes need to overlap, and this case verifies the functionality of meshes that overlap in a variety of ways. It is a 2-D case that runs fast and is easy to visualize. There are five overlapping meshes shown at left in Fig.~\ref{random_meshes}. Air is blown in at the bottom and exhausted via an open vent at the top. The volume flow rate is fixed at 0.012~m$^3$/s, and the plot at right in Fig.~\ref{random_meshes} verifies that the simulation matches to within a few percent. The case uses the default normal velocity tolerance at solid and interpolated boundaries; thus, there is some error expected in the volume flow due to the solution of the Poisson equation. As a further check that the mesh allocations are being properly handled, there is a fine mesh embedded within the coarse, and the case is run with four MPI processes rather than five.
 
 \begin{figure}[ht]
 \begin{tabular*}{\textwidth}{lr}
@@ -3663,13 +3663,14 @@ Fig.~\ref{fig_birch_tga} near the temperature of 100~\si{\degree C}.
 
 This chapter contains verification cases that test all aspects of particles, droplets, sprays, and so on. Note that in FDS, Lagrangian particles are used for a variety of purposes, not just water droplets.
 
-\section{Fluid-Particle Momentum Transfer (\texorpdfstring\textct{fluid\_part\_mom\_x, \_y, \_z}{fluid\_part\_mom\_x, \_y, \_z})}
+\section{Particle and Droplet Drag}
 
-The \textct{fluid\_part\_mom} cases test accuracy, stability, and momentum conservation for the general case of momentum transfer between fluid and particles via drag.  Examples include sprinkler and mist nozzles as well as ember transport.  For sprinkler nozzle applications, it is impossible to resolve the details of the nozzle and the fluid flow and particle transport near the nozzle presents challenges to accuracy and stability of integrating the particle drag laws, which are a coupled set of ordinary differential equations for each component of momentum for each particle and the fluid.  Details of the FDS scheme are given in the Technical Reference Guide~\cite{FDS_Tech_Guide}.  In short, we find an analytical solution for the case of binary fluid-particle interaction and apply this solution to the case of multiple particles by enforcing total momentum conservation within a fluid cell.  The resulting scheme is guaranteed to be stable because the fluid velocity cannot overshoot the cell equilibrium velocity (total momentum of fluid and particles divided by the total mass).
+The cases in this section test accuracy, stability, and momentum conservation for the general case of momentum transfer between fluid and particles via drag. Examples include sprinkler and mist nozzles as well as ember transport.  For sprinkler nozzle applications, it is impossible to resolve the details of the nozzle and the fluid flow and particle transport near the nozzle presents challenges to accuracy and stability of integrating the particle drag laws, which are a coupled set of ordinary differential equations for each component of momentum for each particle and the fluid.  Details of the FDS scheme are given in the Technical Reference Guide~\cite{FDS_Tech_Guide}.  In short, we find an analytical solution for the case of binary fluid-particle interaction and apply this solution to the case of multiple particles by enforcing total momentum conservation within a fluid cell.  The resulting scheme is guaranteed to be stable because the fluid velocity cannot overshoot the cell equilibrium velocity (total momentum of fluid and particles divided by the total mass).
 
-We set up three separate tests, one for each coordinate direction.  These are labeled \_x, \_y, and \_z in the verification directory.  We consider a duct 1 m $\times$ 1 m in the vertical and spanwise directions and 10 m in the streamwise direction.  The boundary conditions are periodic in the streamwise direction and free slip walls along the inside of the duct. The fluid grid is 40 $\times$ 4 $\times$ 4 for the x case; the y and z cases use analogous grids.  The fluid velocity is initialized to be 10 m/s in the streamwise direction.  A monodisperse distribution of 1,000 particles is initialized with zero velocity and random positions in the first cubic meter of the duct.  Gravity is set to zero.
 
-As the case proceeds momentum is exchanged between the fluid and the particles.  The momenta relax toward equilibrium.  The results for all three tests are shown in Fig.~\ref{fig_fluid_part_mom}.  On the top, the green symbols represent the total momentum of the system, which, as can be seen, is conserved.  The fluid (blue) and the particle (red) momenta are closely following the analytical solution (solid lines) which is the basis of the scheme.  The plot on the bottom shows the fluid (blue) and particle (red) velocities compared to the system equilibrium velocity (green dashed line).  By construction of the method, both the fluid and the particle velocities are approaching the equilibrium velocity at long times.
+\subsection{Particles Swept Up in a Free Stream (\texorpdfstring\textct{fluid\_part\_mom}{fluid\_part\_mom})}
+
+Consider a 1~m square duct that is 10~m long.  The boundary conditions are periodic in the streamwise direction and free slip along the inside walls. The fluid velocity is initialized to be 10~m/s. A monodisperse distribution of 1000 particles is initialized with zero velocity and random positions in the first cubic meter of the duct. Gravity is set to zero. As the case proceeds momentum is exchanged between the fluid and the particles. The results for all three tests are shown in Fig.~\ref{fig_fluid_part_mom}.  On the top, the green symbols represent the total momentum of the system, which, as can be seen, is conserved.  The fluid (blue) and the particle (red) momenta are closely following the analytical solution (solid lines) which is the basis of the scheme.  The plot on the bottom shows the fluid (blue) and particle (red) velocities compared to the system equilibrium velocity (green dashed line).  By construction of the method, both the fluid and the particle velocities are approaching the equilibrium velocity at long times.
 
 \begin{figure}[h]
 \begin{center}
@@ -3680,57 +3681,16 @@ As the case proceeds momentum is exchanged between the fluid and the particles. 
 \end{center}
 \end{figure}
 
-\clearpage
 
-\newpage
-
-\section{Stationary Particles (\texorpdfstring{\textct{particle\_drag}}{particle\_drag})}
+\subsection{Particles Slowing Down a Gas Flow (\texorpdfstring{\textct{particle\_drag}}{particle\_drag})}
 \label{particle_drag}
 
-The particle drag test cases consider a 1~m by 1~m by 1~m
-channel with periodic boundary conditions on the $x$-faces and \textct{FREE\_SLIP}
-walls on $y$- and $z$-faces. Static droplets are placed in the center
-of the channel, one particle per computational cell, so that they form a surface
-perpendicular to the flow direction. Gravity is set to zero. Due to the symmetry of the problem, the flow is one
-dimensional. Assuming that the droplets are of uniform diameter  and
-the drag coefficient and gas density are constant, the velocity in
-the channel decays according to
+The particle drag test cases consider a 1~m by 1~m by 1~m channel with periodic boundary conditions on the $x$-faces and \textct{FREE\_SLIP} walls on $y$- and $z$-faces. Static droplets are placed in the center of the channel, one particle per computational cell, so that they form a surface perpendicular to the flow direction. Gravity is set to zero. Due to the symmetry of the problem, the flow is one dimensional. Assuming that the droplets are of uniform diameter  and the drag coefficient and gas density are constant, the velocity in the channel decays according to
 \be u=\frac{u_{0}}{1 + B \, u_{0} \, t}  \quad ; \quad B=\frac{1}{2}\frac{\sum \, C_{D} \, \pi \, r_{d}^{2}}{V} \ee
-In the above, $V$ is the volume of the channel, $r_{d}$ is the droplet radius, $C_{D}$
-is the droplet drag coefficient, and $u$ is the gas velocity in the $x$-direction. The summation is
-over all $N$ particles.
-The common parameters used in all the simulations are
-\[
-    C_D=10, \quad r_d=0.005\mbox{ m}
-\]
-The initial velocity, $u_0$, for each case is listed in Table~\ref{particle_drag_parameters}.
-Comparisons of computed and analytical results are shown in Fig.~\ref{particle_drag_plots}.
-\begin{table}[ht]
-\begin{center}
-\caption[Parameters for \textct{particle\_drag} cases]{Parameters used in the \textct{particle\_drag} cases.}
-\label{particle_drag_parameters}
-\begin{tabular}{|c|c|c|}
-\hline
-Case & $u_{0}$ & $N$\tabularnewline
-\hline
-\hline
-A & 10 & 16 \tabularnewline
-\hline
-B & 50 & 16\tabularnewline
-\hline
-C & 100 & 16\tabularnewline
-\hline
-D & 50  & 1600\tabularnewline
-\hline
-E & 100 & 1600\tabularnewline
-\hline
-F & 150 & 1600 \tabularnewline
-\hline
-\end{tabular}
-\end{center}
-\end{table}
+In the above, $V$ is the volume of the channel, $r_{d}$ is the droplet radius, $C_{D}$ is the droplet drag coefficient, and $u$ is the gas velocity in the $x$-direction. The summation is over all $N$ particles.
+The common parameters used in all the simulations are: $C_{\rm d}=10$, $r_{\rm d}=0.005$~m. The initial velocity, $u_0$, for Cases~A-F are 10, 50, 100, 50, 100, and 150~m/s, respectively. Comparisons of computed and analytical results are shown in Fig.~\ref{particle_drag_plots}.
 
-\begin{figure}[ht]
+\begin{figure}[p]
 \noindent
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/particle_drag_A} &
@@ -3746,9 +3706,9 @@ F & 150 & 1600 \tabularnewline
 
 \clearpage
 
-\newpage
 
-\section{Pressure Drop through Stationary Particles (\texorpdfstring\textct{drag\_dt}{drag\_dt})}
+
+\subsection{Planar Stationary Particles in a Duct (\texorpdfstring\textct{drag\_dt}{drag\_dt})}
 
 Consider a 1~m wide by 1~m tall by 2~m long channel with a specified velocity of $u_0=2$~m/s on one end, an \textct{OPEN} boundary condition on the other end, and \textct{FREE\_SLIP} on the side walls.  Three channels are stacked vertically (each with its own \textct{MESH}, and a plane of particles is placed across each channel at 1 m).  The particles are $r_{\rm p}=0.01$~m in diameter and 10 particles are placed per cell.  A \textct{USER\_DRAG\_COEFFICIENT} of 5, 10, and 20 is set for the particles in the channels.  According to
 \be \Delta P=\frac{1}{2} \rho \frac{\sum \, C_{\rm D} \, \pi \, r_{\rm p}^{2} \, u_0^2} {A} \ee
@@ -3765,12 +3725,12 @@ where $A$ is the 1~m$^2$ cross-sectional area, the pressure drops in each sub ch
 \label{pressure_drop_plots}
 \end{figure}
 
-\clearpage
 
-\section{Mesh Screens (\texorpdfstring\textct{screen\_drag}{screen\_drag})}
+
+\subsection{Mesh Screen in a Duct (\texorpdfstring\textct{screen\_drag}{screen\_drag})}
 
 These two test cases consider a 1 m wide by 1 m tall by 2 m long channel with either a 2 m/s or a 20 m/s fixed velocity boundary condition fixed velocity boundary condition on one end, an \textct{OPEN} boundary condition on the other end, and \textct{FREE\_SLIP} on the y- and z-faces.  Three channels are stacked vertically (each with its own \textct{MESH}, and a plane of particles is placed across each channel at 1 m.  The plane of particles are defined as a screen with a wire diameter of 0.0003 m.  A \textct{FREE\_AREA\_FRACTION} of 0.1, 0.4, and 0.8 is set for the particles in the channels.  According to the screen drag formula
-\be  \Delta \hbox{P} \;= \; \left( \frac{\mu}{\hbox{K}} u \; + \; \rho \frac{\hbox{Y}}{\sqrt{\hbox{K}}} u^2 \right) \Delta x_{screen} \ee
+\be  \Delta \hbox{P} \;= \; \left( \frac{\mu}{\hbox{K}} u \; + \; \rho \frac{\hbox{Y}}{\sqrt{\hbox{K}}} u^2 \right) \Delta x_{\rm screen} \ee
 where K and Y are empirical constants defined in the User's Guide, the pressure drops for the 2 m/s inlet should be 126 Pa, 14 Pa, and 5.3 Pa, and for the 20 m/s inlet should be 1260 Pa, 168 Pa, and 124 Pa.   Comparisons of computed and analytical results are shown in Fig.~\ref{screen_drag_plots}.
 
 \begin{figure}[ht]
@@ -3780,7 +3740,7 @@ where K and Y are empirical constants defined in the User's Guide, the pressure 
 \label{screen_drag_plots}
 \end{figure}
 
-\section{Particles in 1D (\texorpdfstring\textct{terminal\_velocity}{terminal\_velocity})}
+\subsection{Particle Terminal Velocity (\texorpdfstring\textct{terminal\_velocity}{terminal\_velocity})}
 
 If a single droplet having a constant drag coefficient falls through a stationary fluid, its velocity and trajectory can be found analytically.
 This is the ``terminal velocity'' case. The particle starts from rest and falls under the influence of gravity and drag in 1D.
@@ -3857,11 +3817,9 @@ As shown in Fig.~\ref{fig_terminal_velocity_convergence}, FDS exhibits second-or
 %
 %Due to this error, the $\Delta t^3$ term of the position equation is dropped because it offers no improvements in accuracy but requires more computation.
 
-\clearpage
 
-\newpage
 
-\section{2D Flat Fire Trajectory (\texorpdfstring\textct{flat\_fire}{flat\_fire})}
+\subsection{Particle Trajectory (\texorpdfstring\textct{flat\_fire}{flat\_fire})}
 
 There are no known solutions of the drag equations in multiple dimensions. However, ballisticians have developed an approximate solution useful for computing trajectories of projectiles when guns are shot within a certain range of angles. This solution makes use of the ``flat fire'' assumption. In short, if a particle is launched with its velocity in only the horizontal direction and its vertical velocity is never very significant compared to the horizontal velocity, then throughout the entire trajectory the horizontal velocity component, $u$, is a good approximation for the velocity magnitude, $|\mathbf{u}|$.
 
@@ -3908,7 +3866,7 @@ As can be seen in Fig.~\ref{flat_fire_plots}, FDS agrees well with this approxim
 
 \clearpage
 
-\newpage
+
 
 \section{Water Droplet Evaporation (\texorpdfstring{{\textct{water\_evaporation}}}{water\_evaporation}) }
 \label{water_evaporation}
