@@ -3665,7 +3665,7 @@ This chapter contains verification cases that test all aspects of particles, dro
 
 \section{Particle and Droplet Drag}
 
-The cases in this section test accuracy, stability, and momentum conservation for the general case of momentum transfer between fluid and particles via drag. Examples include sprinkler and mist nozzles as well as ember transport.  For sprinkler nozzle applications, it is impossible to resolve the details of the nozzle and the fluid flow and particle transport near the nozzle presents challenges to accuracy and stability of integrating the particle drag laws, which are a coupled set of ordinary differential equations for each component of momentum for each particle and the fluid.  Details of the FDS scheme are given in the Technical Reference Guide~\cite{FDS_Tech_Guide}.  In short, we find an analytical solution for the case of binary fluid-particle interaction and apply this solution to the case of multiple particles by enforcing total momentum conservation within a fluid cell.  The resulting scheme is guaranteed to be stable because the fluid velocity cannot overshoot the cell equilibrium velocity (total momentum of fluid and particles divided by the total mass).
+The cases in this section test accuracy, stability, and momentum conservation for the general case of momentum transfer between solid particles or liquid droplets and air. Details of the FDS integration scheme are given in the Technical Reference Guide~\cite{FDS_Tech_Guide}.  In short, we find an analytical solution for the case of binary fluid-particle interaction and apply this solution to the case of multiple particles by enforcing total momentum conservation within a fluid cell.  The resulting scheme is guaranteed to be stable because the fluid velocity cannot overshoot the cell equilibrium velocity (total momentum of fluid and particles divided by the total mass).
 
 
 \subsection{Particles Swept Up in a Free Stream (\texorpdfstring\textct{fluid\_part\_mom}{fluid\_part\_mom})}
@@ -3708,21 +3708,22 @@ The common parameters used in all the simulations are: $C_{\rm d}=10$, $r_{\rm d
 
 
 
-\subsection{Planar Stationary Particles in a Duct (\texorpdfstring\textct{drag\_dt}{drag\_dt})}
+\subsection{Stationary Spherical Particles in a Duct (\texorpdfstring\textct{sphere\_drag}{sphere\_drag})}
 
-Consider a 1~m wide by 1~m tall by 2~m long channel with a specified velocity of $u_0=2$~m/s on one end, an \textct{OPEN} boundary condition on the other end, and \textct{FREE\_SLIP} on the side walls.  Three channels are stacked vertically (each with its own \textct{MESH}, and a plane of particles is placed across each channel at 1 m).  The particles are $r_{\rm p}=0.01$~m in diameter and 10 particles are placed per cell.  A \textct{USER\_DRAG\_COEFFICIENT} of 5, 10, and 20 is set for the particles in the channels.  According to
-\be \Delta P=\frac{1}{2} \rho \frac{\sum \, C_{\rm D} \, \pi \, r_{\rm p}^{2} \, u_0^2} {A} \ee
-where $A$ is the 1~m$^2$ cross-sectional area, the pressure drops in each sub channel are 3.77~Pa, 7.54~Pa, and 15.1~Pa.  Comparisons of computed and analytical results are shown in Fig.~\ref{pressure_drop_plots}. The pressure drop converges to the analytical solution as the time step decreases.
+Consider a 2~m long duct with a 1~m square cross section, fixed air velocity of $u_0=2$~m/s, and free-slip walls. Three ducts are stacked vertically, each with its own mesh and a plane of particles spanning the duct at its center point. The particles are 1~cm in diameter and 10~particles are specified in each grid cell. The expected pressure drop is given by the formula:
+\be \Delta p=\frac{1}{2} \rho \frac{\sum \, C_{\rm d} \, \pi \, r_{\rm p}^{2} \, u_0^2} {A} \ee
+where $A$ is the 1~m$^2$ cross-sectional area, $\rho=1.2$~kg/m$^3$ is the density of air, and the summation is over 4000 particles. For specified drag coefficients of 5, 10, and 20 in the three ducts, the pressure drops are expected to be 3.77~Pa, 7.54~Pa, and 15.1~Pa.  Comparisons of computed and analytical results are shown in the left hand plot of Fig.~\ref{sphere_drag}. 
+
+In a second test case, consider a single 10~m long, 1~m square duct. Spherical particles 2~mm in diameter with a density of 514~kg/m$^3$ are randomly distributed in the section of the duct between 4~m and 5~m from the upstream end. The particle mass per unit volume is set to 1.66~kg/m$^3$. The number of particles included in the simulation is 10000, which means that each particle actually represents 77.1 real particles. The drag coefficient is approximately 1.6, based on the local Reynolds number, which is about 40. The free stream velocity in the duct is 0.3~m/s, but the speed varies slightly within the cloud of particles. The pressure is expected to drop linearly from approximately 0.21~Pa to 0~Pa over the 1~m of duct filled by particles, as shown in the right hand plot of Fig.~\ref{sphere_drag}.
 
 \begin{figure}[ht]
 \noindent
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/pressure_drop_p1} &
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/pressure_drop_p01} \\
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/pressure_drop_p001} &
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/sphere_drag_1} &
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/sphere_drag_2} 
 \end{tabular*}
-\caption[Sample cases {\ct drag\_dt}]{Outputs of the {\ct drag\_dt} test cases compared with analytical solutions.}
-\label{pressure_drop_plots}
+\caption[The {\ct sphere\_drag} cases]{Outputs of the {\ct sphere\_drag} test cases compared with analytical solutions.}
+\label{sphere_drag}
 \end{figure}
 
 
@@ -3742,36 +3743,17 @@ where K and Y are empirical constants defined in the User's Guide, the pressure 
 
 \subsection{Particle Terminal Velocity (\texorpdfstring\textct{terminal\_velocity}{terminal\_velocity})}
 
-If a single droplet having a constant drag coefficient falls through a stationary fluid, its velocity and trajectory can be found analytically.
-This is the ``terminal velocity'' case. The particle starts from rest and falls under the influence of gravity and drag in 1D.
-FDS runs until a steady-state solution is reached. The equation governing this motion is
-\[
-    \dot{u} = K u^2 - g \quad ; \quad K \equiv \frac{\rho_a C_d A}{2 m}
-\]
-$\rho_a$ is the ambient air density, $C_d$ is the drag coefficient of the droplet, $A$ is the cross-sectional area of the droplet, and $m$ is the mass of the droplet.
-Defining $\rho_d$ as the density of the droplet and $D_d$ as the diameter of the droplet and solving this ODE with zero ICs,
-the solution below and equivalent definition of $K$ for a droplet is found.
-% D = 10 mm
-% Cd = 1.0
-% g = -9.8 m/s^2
+If a single particle with a constant drag coefficient falls through a stationary fluid, its terminal velocity can be found analytically. The equation governing this motion is
 \be
-    u = \frac{\d x}{\d t} = - \sqrt{\frac{g}{K}} \text{tanh}\left(\sqrt{g K} t\right) \quad ; \quad
-    x = - \frac{\text{ln}\left[\text{cosh}\left(\sqrt{g K} t \right)\right]}{K} \quad ; \quad
-    K \equiv \frac{3 \rho_a C_d}{4 \rho_d D_d}
+    \frac{\d u}{\d t} = K u^2 - g \quad ; \quad K \equiv \frac{\rho_{\rm a} C_{\rm d} A}{2 m}
 \ee
-The terminal velocity case is run over several time steps. The precise configuration of the scenario is detailed in the table below.
-The $L_\infty$ (maximum) error of the terminal velocity and position are computed and plotted for each time step.
-\begin{center}
-\begin{tabular}{|r|c|l|}
-\hline
-Drag coefficient of droplet & $C_d$ & 1 \\
-Diameter of droplet & $D_d$ & 10~mm \\
-Gravitational acceleration & $g$ & 9.8~m/s$^2$ \\
-Droplet fluid density & $\rho_d$ & 1000~\si{kg/m^3} \\
-\hline
-\end{tabular}
-\end{center}
-As shown in Fig.~\ref{fig_terminal_velocity_convergence}, FDS exhibits second-order convergence in the \textct{terminal\_velocity} case for both the velocities and the positions.
+where $\rho_{\rm a}$ is the air density, $C_{\rm d}=1$ is the drag coefficient, $A$ is the cross-sectional area of the particle, and $m$ is the mass. Defining $\rho_{\rm d}=1000$~kg/m$^3$ as the particle density and $D=0.01$~m as the particle diameter, the solution of the ODE is:
+\be
+    u = \frac{\d x}{\d t} = - \sqrt{\frac{g}{K}} \; \text{tanh}\left(\sqrt{g K} t\right) \quad ; \quad
+    x = - \frac{\text{ln}\left[\text{cosh}\left(\sqrt{g K} t \right)\right]}{K} \quad ; \quad
+    K \equiv \frac{3 \rho_{\rm a} C_{\rm d}}{4 \rho_{\rm d} D}
+\ee
+The $L_\infty$ (maximum) error of the FDS computed terminal velocity and position are computed and plotted for each time step. As shown in Fig.~\ref{fig_terminal_velocity_convergence}, FDS exhibits second-order convergence for both the velocity and position.
 
 \begin{figure}[h]
 \noindent
