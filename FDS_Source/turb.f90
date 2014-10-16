@@ -795,8 +795,8 @@ SUBROUTINE TEST_FILTER(HAT,ORIG)
 REAL(EB), INTENT(IN) :: ORIG(0:IBP1,0:JBP1,0:KBP1)
 REAL(EB), INTENT(OUT) :: HAT(0:IBP1,0:JBP1,0:KBP1)
 INTEGER :: I, J, K, L, M, N
-REAL(EB), PARAMETER :: K1D(3) = (/1.0, 2.0, 1.0/)
-REAL(EB), PARAMETER :: K3D(-1:1, -1:1, -1:1) = RESHAPE( (/ (((K1D(I)*K1D(J)*K1D(K)/64.0,I=1,3),J=1,3),K=1,3) /), (/ 3,3,3 /) )
+REAL(EB), PARAMETER :: K1D(3) = (/1.0_EB, 2.0_EB, 1.0_EB/)
+REAL(EB), PARAMETER :: K3D(-1:1, -1:1, -1:1) = RESHAPE( (/ (((K1D(I)*K1D(J)*K1D(K)/64._EB,I=1,3),J=1,3),K=1,3) /), (/ 3,3,3 /) )
 
 ! Traverse bulk of mesh
 
