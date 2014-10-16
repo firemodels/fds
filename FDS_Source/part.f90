@@ -1806,10 +1806,9 @@ ELSE PARTICLE_NON_STATIC_IF ! Drag calculation for stationary, airborne particle
    SELECT CASE (LPC%DRAG_LAW)
       CASE DEFAULT
          BETA = 0.5_EB*LP%PWT*RVC*C_DRAG*A_DRAG*QREL
-         OBDT = 1._EB+BETA*DT
-         LP%ACCEL_X = UBAR*(1._EB/OBDT-1._EB)*RDT
-         LP%ACCEL_Y = VBAR*(1._EB/OBDT-1._EB)*RDT
-         LP%ACCEL_Z = WBAR*(1._EB/OBDT-1._EB)*RDT
+         LP%ACCEL_X = -UBAR*BETA
+         LP%ACCEL_Y = -VBAR*BETA
+         LP%ACCEL_Z = -WBAR*BETA
       CASE (SCREEN_DRAG)
          IF (QREL > 0.015_EB .AND. LPC%FREE_AREA_FRACTION < 1.0_EB ) THEN ! Testing shows below this can have instability  
             TMP_G  = MAX(TMPMIN,TMP(IIG,JJG,KKG))
