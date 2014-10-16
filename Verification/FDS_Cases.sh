@@ -329,11 +329,10 @@ $QFDS -d Sprinklers_and_Sprays particle_drag_U100_N16.fds
 $QFDS -d Sprinklers_and_Sprays particle_drag_U50_N1600.fds
 $QFDS -d Sprinklers_and_Sprays particle_drag_U100_N1600.fds
 $QFDS -d Sprinklers_and_Sprays particle_drag_U150_N1600.fds
-$QFDS -d Sprinklers_and_Sprays drag_dtp1.fds
-$QFDS -d Sprinklers_and_Sprays drag_dtp01.fds
-$QFDS -d Sprinklers_and_Sprays drag_dtp001.fds
 $QFDS -d Sprinklers_and_Sprays e_coefficient.fds
 $QFDS -d Sprinklers_and_Sprays particle_flux.fds
+$QFDS -d Sprinklers_and_Sprays sphere_drag_1.fds
+$QFDS -d Sprinklers_and_Sprays sphere_drag_2.fds
 $QFDS -d Sprinklers_and_Sprays terminal_velocity_dt_1_0.fds
 $QFDS -d Sprinklers_and_Sprays terminal_velocity_dt_0_1.fds
 $QFDS -d Sprinklers_and_Sprays terminal_velocity_dt_0_01.fds
@@ -429,5 +428,4 @@ $QFDS -d Visualization objects_static.fds
 $QFDS -d WUI pine_needles.fds
 $QFDS -d WUI random_walk_1.fds
 $QFDS -d WUI random_walk_2.fds
-$QFDS -d WUI sphere_drag.fds
 

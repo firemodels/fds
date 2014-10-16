@@ -1,4 +1,4 @@
-&HEAD CHID='sphere_drag', TITLE='Pressure drop in a duct filled with spheres' /
+&HEAD CHID='sphere_drag_2', TITLE='Pressure drop in a duct filled with spheres' /
 
 &MESH IJK=100,10,10, XB=0.0,10.0,0.0,1.0,0.0,1.0 /
 &TIME T_END=100. / 
@@ -30,6 +30,5 @@
 
 &SLCF PBY=0.5, QUANTITY='VELOCITY' /
 &SLCF PBY=0.5, QUANTITY='PRESSURE' /
-
 
 &TAIL /
