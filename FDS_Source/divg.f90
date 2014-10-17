@@ -410,45 +410,33 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
          CASE( 1) 
             !$OMP ATOMIC WRITE
             RHO_D_DZDX(IIG-1,JJG,KKG)   =  RHO_D_DZDN
-            !$OMP END ATOMIC
             !$OMP ATOMIC WRITE
             H_RHO_D_DZDX(IIG-1,JJG,KKG) =  HDIFF*RHO_D_DZDN
-            !$OMP END ATOMIC
          CASE(-1) 
             !$OMP ATOMIC WRITE
             RHO_D_DZDX(IIG,JJG,KKG)     = -RHO_D_DZDN
-            !$OMP END ATOMIC
             !$OMP ATOMIC WRITE
             H_RHO_D_DZDX(IIG,JJG,KKG)   = -HDIFF*RHO_D_DZDN
-            !$OMP END ATOMIC
          CASE( 2) 
             !$OMP ATOMIC WRITE
             RHO_D_DZDY(IIG,JJG-1,KKG)   =  RHO_D_DZDN
-            !$OMP END ATOMIC
             !$OMP ATOMIC WRITE
             H_RHO_D_DZDY(IIG,JJG-1,KKG) =  HDIFF*RHO_D_DZDN
-            !$OMP END ATOMIC
          CASE(-2) 
             !$OMP ATOMIC WRITE
             RHO_D_DZDY(IIG,JJG,KKG)     = -RHO_D_DZDN
-            !$OMP END ATOMIC
             !$OMP ATOMIC WRITE
             H_RHO_D_DZDY(IIG,JJG,KKG)   = -HDIFF*RHO_D_DZDN
-            !$OMP END ATOMIC
          CASE( 3) 
             !$OMP ATOMIC WRITE
             RHO_D_DZDZ(IIG,JJG,KKG-1)   =  RHO_D_DZDN
-            !$OMP END ATOMIC
             !$OMP ATOMIC WRITE
             H_RHO_D_DZDZ(IIG,JJG,KKG-1) =  HDIFF*RHO_D_DZDN
-            !$OMP END ATOMIC
          CASE(-3) 
             !$OMP ATOMIC WRITE
             RHO_D_DZDZ(IIG,JJG,KKG)     = -RHO_D_DZDN
-            !$OMP END ATOMIC
             !$OMP ATOMIC WRITE
             H_RHO_D_DZDZ(IIG,JJG,KKG)   = -HDIFF*RHO_D_DZDN
-            !$OMP END ATOMIC
       END SELECT
    ENDDO WALL_LOOP2
    !$OMP END PARALLEL DO
@@ -632,31 +620,24 @@ CORRECTION_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
       CASE( 1)
          !$OMP ATOMIC WRITE
          KDTDX(II,JJ,KK)   = 0._EB
-         !$OMP END ATOMIC
       CASE(-1)
          !$OMP ATOMIC WRITE
          KDTDX(II-1,JJ,KK) = 0._EB
-         !$OMP END ATOMIC
       CASE( 2)
          !$OMP ATOMIC WRITE
          KDTDY(II,JJ,KK)   = 0._EB
-         !$OMP END ATOMIC
       CASE(-2)
          !$OMP ATOMIC WRITE
          KDTDY(II,JJ-1,KK) = 0._EB
-         !$OMP END ATOMIC
       CASE( 3)
          !$OMP ATOMIC WRITE
          KDTDZ(II,JJ,KK)   = 0._EB
-         !$OMP END ATOMIC
       CASE(-3)
          !$OMP ATOMIC WRITE
          KDTDZ(II,JJ,KK-1) = 0._EB
-         !$OMP END ATOMIC
    END SELECT
    !$OMP ATOMIC UPDATE
    DP(IIG,JJG,KKG) = DP(IIG,JJG,KKG) - WC%ONE_D%QCONF*WC%RDN
-   !$OMP END ATOMIC
 ENDDO CORRECTION_LOOP
 !$OMP END PARALLEL DO
 
