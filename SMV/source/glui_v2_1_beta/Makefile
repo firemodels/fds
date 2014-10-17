@@ -3,6 +3,7 @@
 SIZE=-m64
 
 PLATFORM=
+CFLAGOPT=
 
 GLUT_INC_LOCATION=../include2
 
@@ -13,7 +14,7 @@ COMPILER=icc
 COMPILER2=icc
 CC=${COMPILER}
 CPP=${COMPILER2}
-CPPFLAGS=$(PLATFORM) -fpermissive -I${GLUT_INC_LOCATION} -I ../include2/glut ${SIZE}
+CPPFLAGS=$(PLATFORM) ${CFLAGOPT} -fpermissive -I${GLUT_INC_LOCATION} -I ../include2/glut ${SIZE}
 LPATH=${GLUTPATH} 
 INCS= 
 

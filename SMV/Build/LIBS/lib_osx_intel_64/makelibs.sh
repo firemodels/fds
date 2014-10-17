@@ -12,7 +12,7 @@ cp libgd.a $LIBDIR/.
 
 # GLUI
 cd $SRCDIR/glui_v2_1_beta
-./makelib.sh $OPTS
+./makelib.sh $OPTS -c "-mmacosx-version-min=10.4"
 cp libglui.a $LIBDIR/.
 
 # GLUT
