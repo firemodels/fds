@@ -3,22 +3,22 @@
 &MESH IJK=32,32,96, XB=-0.8,0.8,-0.8,0.8,0.0,4.8 /
 
 
-&TIME T_END=600. / 
-&RADI RADIATIVE_FRACTION =0.18/
+&TIME T_END=300. / 
+&RADI RADIATIVE_FRACTION=0.18/
 &REAC FUEL               = 'METHANOL'
-      FYI                = 'Methanol, C_1 H_4 O_1'
+      FYI                = 'Methanol C_1 H_4 O_1'
       SOOT_YIELD         = 0.001 /
 
 &MATL ID                     = 'METHANOL LIQUID'
       EMISSIVITY             = 1.
       NU_SPEC                = 1.
       SPEC_ID                = 'METHANOL'
-      HEAT_OF_REACTION       = 1098.94
-      CONDUCTIVITY           = 0.21
-      SPECIFIC_HEAT          = 2.4813
-      BOILING_TEMPERATURE    = 64.8       
-      DENSITY                = 791.8
-      ABSORPTION_COEFFICIENT = 1520. /
+      HEAT_OF_REACTION       = 1099
+      CONDUCTIVITY           = 0.20
+      SPECIFIC_HEAT          = 2.48
+      DENSITY                = 796
+      ABSORPTION_COEFFICIENT = 1500
+      BOILING_TEMPERATURE    = 64.8 /
 	  
 &MATL ID            = 'STEEL'
       EMISSIVITY    = 1.0
