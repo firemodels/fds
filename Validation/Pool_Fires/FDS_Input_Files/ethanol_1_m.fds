@@ -3,22 +3,22 @@
 &MESH IJK=32,32,96, XB=-0.8,0.8,-0.8,0.8,0.0,4.8 /
 
 
-&TIME T_END=600. / 
+&TIME T_END=300. / 
 &RADI RADIATIVE_FRACTION=0.18/
 &REAC FUEL               = 'ETHANOL'
-      FYI                = 'Ethanol, C_2 H_6 O_1'
+      FYI                = 'Ethanol C_2 H_6 O_1'
       SOOT_YIELD         = 0.008 /
 
 &MATL ID                     = 'ETHANOL LIQUID'
       EMISSIVITY             = 1.
       NU_SPEC                = 1.
       SPEC_ID                = 'ETHANOL'
-      HEAT_OF_REACTION       = 836.98
+      HEAT_OF_REACTION       = 837
       CONDUCTIVITY           = 0.17
-      SPECIFIC_HEAT          = 2.4398
-      DENSITY                = 789.
-      BOILING_TEMPERATURE    = 78.5            
-      ABSORPTION_COEFFICIENT = 1534.3 /
+      SPECIFIC_HEAT          = 2.44
+      DENSITY                = 794
+      ABSORPTION_COEFFICIENT = 1534.3
+      BOILING_TEMPERATURE    = 78.5 /
 	  
 &MATL ID            = 'STEEL'
       EMISSIVITY    = 1.0

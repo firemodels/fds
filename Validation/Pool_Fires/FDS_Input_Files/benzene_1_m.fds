@@ -4,21 +4,21 @@
 
 
 &TIME T_END=300. / 
-
+&RADI RADIATIVE_FRACTION=0.35/
 &REAC FUEL               = 'BENZENE'
-      FYI                = 'Benzene, C_6 H_6'
+      FYI                = 'Benzene C_6 H_6'
       SOOT_YIELD         = 0.181 /
 
 &MATL ID                     = 'BENZENE LIQUID'
       EMISSIVITY             = 1.
       NU_SPEC                = 1.
       SPEC_ID                = 'BENZENE'
-      HEAT_OF_REACTION       = 393.29
-      CONDUCTIVITY           = 0.167
-      SPECIFIC_HEAT          = 1.7372
-      DENSITY                = 876.5
-      BOILING_TEMPERATURE    = 80.3         
-      ABSORPTION_COEFFICIENT = 123. /
+      HEAT_OF_REACTION       = 393
+      CONDUCTIVITY           = 0.14
+      SPECIFIC_HEAT          = 1.74
+      DENSITY                = 874
+      ABSORPTION_COEFFICIENT = 123
+      BOILING_TEMPERATURE    = 80.3 /
 	  
 &MATL ID            = 'STEEL'
       EMISSIVITY    = 1.0
