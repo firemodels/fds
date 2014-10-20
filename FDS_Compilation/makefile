@@ -13,16 +13,16 @@ VPATH = ../FDS_Source
 
 # Definition of the non-MPI object variables
 
-obj_serial = prec.o mpis.o cons.o devc.o data.o type.o mesh.o func.o smvv.o irad.o soot.o\
-             ieva.o pois.o scrc.o radi.o evac.o gsmv.o geom.o part.o vege.o ctrl.o turb.o samr.o dump.o hvac.o mass.o \
+obj_serial = prec.o mpis.o cons.o devc.o data.o type.o mesh.o func.o smvv.o irad.o turb.o soot.o\
+             ieva.o pois.o scrc.o radi.o evac.o gsmv.o geom.o part.o vege.o ctrl.o samr.o dump.o hvac.o mass.o \
              read.o wall.o fire.o divg.o init.o velo.o pres.o main.o
 
 objwin_serial = $(obj_serial:.o=.obj)
 
 # Definition of the MPI object variables
 
-obj_mpi = prec.o cons.o devc.o data.o type.o mesh.o func.o smvv.o irad.o soot.o\
-          ieva.o pois.o scrc.o radi.o evac.o gsmv.o geom.o part.o vege.o ctrl.o turb.o samr.o dump.o hvac.o mass.o \
+obj_mpi = prec.o cons.o devc.o data.o type.o mesh.o func.o smvv.o irad.o turb.o soot.o\
+          ieva.o pois.o scrc.o radi.o evac.o gsmv.o geom.o part.o vege.o ctrl.o samr.o dump.o hvac.o mass.o \
           read.o wall.o fire.o divg.o init.o velo.o pres.o main.o
 
 objwin_mpi = $(obj_mpi:.o=.obj)
@@ -189,7 +189,7 @@ mpi_intel_linux_64 : setup $(obj_mpi)
 mpi_intel_linux_64ib : FFLAGS = -m64 -O2 -ipo
 mpi_intel_linux_64ib : LFLAGS = -static-intel
 mpi_intel_linux_64ib : FCOMPL = mpifort
-mpi_intel_linux_64ib : FOPENMPFLAGS = 
+mpi_intel_linux_64ib : FOPENMPFLAGS =
 mpi_intel_linux_64ib : obj = fds_mpi_intel_linux_64ib
 mpi_intel_linux_64ib : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi)
@@ -229,7 +229,7 @@ mpi_intel_linux_64_inspect : setup $(obj_mpi)
 mpi_intel_linux_64ib_db : FFLAGS = -m64 -check -warn unused -O0 -auto -WB -traceback -g -fpe0 -fltconsistency
 mpi_intel_linux_64ib_db : LFLAGS = -static-intel
 mpi_intel_linux_64ib_db : FCOMPL = mpifort
-mpi_intel_linux_64ib_db : FOPENMPFLAGS = 
+mpi_intel_linux_64ib_db : FOPENMPFLAGS =
 mpi_intel_linux_64ib_db : obj = fds_mpi_intel_linux_64ib_db
 mpi_intel_linux_64ib_db : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi)
@@ -438,10 +438,10 @@ pois.o : prec.o cons.o
 mesh.o : prec.o type.o
 data.o : prec.o func.o cons.o
 func.o : prec.o cons.o type.o mesh.o devc.o
-soot.o : prec.o mesh.o cons.o func.o
+turb.o : func.o prec.o cons.o mesh.o
+soot.o : prec.o mesh.o cons.o func.o turb.o
 smvv.o : prec.o func.o
 ctrl.o : prec.o cons.o type.o mesh.o func.o
-turb.o : func.o prec.o cons.o mesh.o
 samr.o : prec.o cons.o mesh.o turb.o
 gsmv.o : func.o prec.o cons.o mesh.o
 geom.o : gsmv.o func.o prec.o cons.o mesh.o
@@ -472,10 +472,10 @@ pois.obj : prec.obj cons.obj
 mesh.obj : prec.obj type.obj
 data.obj : prec.obj func.obj cons.obj
 func.obj : prec.obj cons.obj type.obj mesh.obj devc.obj
-soot.obj : prec.obj mesh.obj cons.obj func.obj
+turb.obj : func.obj prec.obj cons.obj mesh.obj
+soot.obj : prec.obj mesh.obj cons.obj func.obj turb.obj
 smvv.obj : prec.obj func.obj
 ctrl.obj : prec.obj cons.obj type.obj mesh.obj func.obj
-turb.obj : func.obj prec.obj cons.obj mesh.obj
 samr.obj : prec.obj cons.obj mesh.obj turb.obj
 gsmv.obj : func.obj prec.obj cons.obj mesh.obj
 geom.obj : func.obj prec.obj cons.obj mesh.obj
