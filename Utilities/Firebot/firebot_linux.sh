@@ -507,14 +507,14 @@ run_verification_cases_debug()
 {
    # Start running all FDS verification cases in delayed stop debug mode
    cd $FDS_SVNROOT/Verification
-   # Run FDS with delayed stop files (with 1 OpenMP thread and a maximum of 1 iteration)
+   # Run FDS with delayed stop files (with 1 OpenMP thread and 1 iteration)
    echo 'Running FDS verification cases:' >> $FIREBOT_DIR/output/stage3
    ./Run_FDS_Cases.sh -o 1 -d -m 1 -q $QUEUE >> $FIREBOT_DIR/output/stage3 2>&1
    echo "" >> $FIREBOT_DIR/output/stage3 2>&1
 
    # Start running all SMV verification cases in delayed stop debug mode
    cd $FDS_SVNROOT/Verification/scripts
-   # Run FDS with delayed stop files (with 1 OpenMP thread and a maximum of 1 iteration)
+   # Run FDS with delayed stop files (with 1 OpenMP thread and 1 iteration)
    echo 'Running SMV verification cases:' >> $FIREBOT_DIR/output/stage3 2>&1
    ./Run_SMV_Cases.sh -o 1 -d -m 1 -q $QUEUE >> $FIREBOT_DIR/output/stage3 2>&1
    echo "" >> $FIREBOT_DIR/output/stage3 2>&1
