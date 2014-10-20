@@ -3,22 +3,22 @@
 &MESH IJK=32,32,96, XB=-0.8,0.8,-0.8,0.8,0.0,4.8 /
 
 
-&TIME T_END=600. / 
-
+&TIME T_END=300. / 
+&RADI RADIATIVE_FRACTION=0.35/
 &REAC FUEL               = 'N-HEPTANE'
-      FYI                = 'Heptane, C_7 H_16'
+      FYI                = 'Heptane C_7 H_16'
       SOOT_YIELD         = 0.037 /
 
 &MATL ID                     = 'N-HEPTANE LIQUID'
       EMISSIVITY             = 1.
       NU_SPEC                = 1.
       SPEC_ID                = 'N-HEPTANE'
-      HEAT_OF_REACTION       = 364.9
+      HEAT_OF_REACTION       = 317
       CONDUCTIVITY           = 0.14
-      SPECIFIC_HEAT          = 2.2464
-      BOILING_TEMPERATURE    = 98.5       
-      DENSITY                = 684.
-      ABSORPTION_COEFFICIENT = 100. / 
+      SPECIFIC_HEAT          = 2.24
+      DENSITY                = 675
+      ABSORPTION_COEFFICIENT = 187.5
+      BOILING_TEMPERATURE    = 98.5 /
 	  
 &MATL ID            = 'STEEL'
       EMISSIVITY    = 1.0

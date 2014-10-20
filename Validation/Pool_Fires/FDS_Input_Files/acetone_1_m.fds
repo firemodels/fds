@@ -4,20 +4,20 @@
 
 
 &TIME T_END=300. / 
-&RADI RADIATIVE_FRACTION=0.27/
+&RADI RADIATIVE_FRACTION=0.20/
 &REAC FUEL               = 'ACETONE'
-      FYI                = 'Acetone, C_3 H_6 O_1'
+      FYI                = 'Acetone C_3 H_6 O_1'
       SOOT_YIELD         = 0.014 /
 
 &MATL ID                     = 'ACETONE LIQUID'
       EMISSIVITY             = 1.
       NU_SPEC                = 1.
       SPEC_ID                = 'ACETONE'
-      HEAT_OF_REACTION       = 501.03
-      CONDUCTIVITY           = 0.18
-      SPECIFIC_HEAT          = 1.6529
-      DENSITY                = 792.5
-      ABSORPTION_COEFFICIENT = 100.
+      HEAT_OF_REACTION       = 501
+      CONDUCTIVITY           = 0.20
+      SPECIFIC_HEAT          = 2.13
+      DENSITY                = 791
+      ABSORPTION_COEFFICIENT = 100
       BOILING_TEMPERATURE    = 56.3 /
 	  
 &MATL ID            = 'STEEL'

@@ -2,24 +2,23 @@
 
 &MESH IJK=32,32,96, XB=-0.8,0.8,-0.8,0.8,0.0,4.8 /
 
-&MISC  TMPA=-100 /
 
 &TIME T_END=300. / 
-&RADI RADIATIVE_FRACTION=0.20/
+&RADI RADIATIVE_FRACTION=0.35/
 &REAC FUEL               = 'BUTANE'
-      FYI                = 'Butane, C_4 H_10'
+      FYI                = 'Butane  C_4 H_10'
       SOOT_YIELD         = 0.029 /
 
 &MATL ID                     = 'BUTANE LIQUID'
       EMISSIVITY             = 1.
       NU_SPEC                = 1.
       SPEC_ID                = 'BUTANE'
-      HEAT_OF_REACTION       = 385.22
-      CONDUCTIVITY           = 0.124
-      SPECIFIC_HEAT          = 2.2784
-      DENSITY                = 584.
-      ABSORPTION_COEFFICIENT = 100.
-      BOILING_TEMPERATURE    = 0. /
+      HEAT_OF_REACTION       = 385
+      CONDUCTIVITY           = 0.12
+      SPECIFIC_HEAT          = 2.28
+      DENSITY                = 573
+      ABSORPTION_COEFFICIENT = 100
+      BOILING_TEMPERATURE    = 0 /
 	  
 &MATL ID            = 'STEEL'
       EMISSIVITY    = 1.0
@@ -54,7 +53,6 @@
 
 &SLCF PBY=0.0, QUANTITY='TEMPERATURE', VECTOR=.TRUE. /
 &SLCF PBY=0.0, QUANTITY='HRRPUV' /
-&SLCF PBY=0.0, QUANTITY='MASS FRACTION', SPEC_ID='BUTANE'/
 
 &BNDF QUANTITY='BURNING RATE' /
 &BNDF QUANTITY='GAUGE HEAT FLUX' /
