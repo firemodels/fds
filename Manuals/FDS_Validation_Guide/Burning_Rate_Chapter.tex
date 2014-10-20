@@ -808,7 +808,7 @@ where $\Delta h_v$ is the latent heat of vaporization, $T_0$ is the initial temp
 
 The absorption coefficients for benzene and ethanol are based on curve fits to experimental data as explained in Appendix K of the FDS Technical Reference Guide. The absorption coefficient for methanol presented in Appendix K is calculated with the aasumption that the incoming radiation is approximately blackbody radiation. The absorption coefficient for ethanol is calculated based on experimentally determined spectrum of an ethanol flame. Since both methanol and ethanol flames are low sooting, the blackbody radiation assumption is not correct. Instead it is assumed that the absorption coefficient for methanol should be of similar magnitude as that for ethanol. For heptane, butane and acetone the absorption coefficients are simple order of magnitude estimates.
 
-The thermophysical data is based on several sources. Density, heat of vaporization, specific heat, and boiling temperature are found fron NIST Chemistry Webbook. The radiative fractions and soot yields are from DFPE Webbook.
+The thermophysical data is based on several sources. Density values are based on data listed in \cite{Babrauskas:1}. Heat of vaporization, specific heat, and boiling temperature are found fron NIST Chemistry Webbook. Heat of vaporization is evalueated at the liquid boiling point. The radiative fractions and soot yields are from \cite{SFPE:Tewarson}.  Thermal conductivies are based on \cite{CRCHandbook}, except for butane. For butane the thermal conductivity is found from \cite{Webbook:FluidThermo}.
 
 \begin{table}[h!]
 \begin{center}
@@ -816,14 +816,14 @@ The thermophysical data is based on several sources. Density, heat of vaporizati
 \scriptsize
 \begin{tabular}{|l|c|c|c|c|c|c|c|} \hline
 %Fuel & $\rho$ (\si{\kg/\m^3}) \cite{Webbook:FluidThermo}& $c_p$ (\si{\kJ/\kg.\K}) \cite{Webbook:FluidThermo} & k (\si{\W/\m\K}) \cite{Webbook:FluidThermo} & $\Delta h_c$ (\si{\kJ/\kg}) \cite{Webbook:Thermo} & $\Delta h_v$ (\si{\kJ/\kg}) \cite{Webbook:Thermo} & $\chi_r$ (-) \cite{SFPE} &  $Y_s$ (\si{\g/\g})  \cite{SFPE} \\ 
-Fuel     & $\rho$ \cite{Webbook:FluidThermo}  & $c_p$ \cite{Webbook:HeatCapacity}  & k \cite{CRCHAndbook} &  $\Delta h_v$  \cite{Webbook:FluidThermo} & $\chi_r$ \cite{Beyler2:SFPE} &  \cite{SFPE:Tewarson}  $Y_s$ \cite{SFPE:Tewarson} & $T_b$ \cite{Webbook:BoilingPoint} \\
+Fuel     & $\rho$ \cite{Babrauskas:1}  & $c_p$ \cite{Webbook:HeatCapacity}  & k \cite{CRCHandbook,Webbook:FluidThermo} &  $\Delta h_v$  \cite{Webbook:FluidThermo} & $\chi_r$ \cite{Beyler2:SFPE} &  \cite{SFPE:Tewarson}  $Y_s$ \cite{SFPE:Tewarson} & $T_b$ \cite{Webbook:BoilingPoint} \\
 \hline \hline 
-Acetone &  792  &  2.13   & 0.20  &   501   & 0.27 & 0.014 & 56.3\\ \hline
-Benzene &  876  &  1.74   & 0.14  &   393   & 0.35 & 0.181 & 80.3\\ \hline
-Butane  &  584  &  2.28   & 0.124 &   361   & 0.30 & 0.029 & 0\\ \hline
-Ethanol &  789  &  2.44   & 0.17  &   836   & 0.18 & 0.008 & 78.5\\ \hline
-Heptane &  684  &  2.25   & 0.14  &   364   & 0.35 & 0.037 & 98.5\\ \hline
-Methanol & 791  &  2.48   & 0.20  &   1,098 & 0.18 & 0.001 & 64.8\\ \hline
+Acetone &  791  &  2.13   & 0.20  &   501   & 0.27 & 0.014 & 56.3\\ \hline
+Benzene &  874  &  1.74   & 0.14  &   393   & 0.35 & 0.181 & 80.3\\ \hline
+Butane  &  573  &  2.28   & 0.12 &    385   & 0.30 & 0.029 & 0   \\ \hline
+Ethanol &  794  &  2.44   & 0.17  &   837   & 0.18 & 0.008 & 78.5\\ \hline
+Heptane &  675  &  2.24   & 0.14  &   317   & 0.35 & 0.037 & 98.5\\ \hline
+Methanol & 796  &  2.48   & 0.20  &   1,099 & 0.18 & 0.001 & 64.8\\ \hline
 \end{tabular}
 \end{center}
 \end{table}
