@@ -12,6 +12,7 @@ USE MESH_POINTERS
 USE DEVICE_VARIABLES
 USE CONTROL_VARIABLES
 USE OUTPUT_DATA
+USE SOOT_ROUTINES
 USE COMPLEX_GEOMETRY, ONLY : WRITE_GEOM, WRITE_GEOM_ALL
 USE TYPES
 
@@ -2571,6 +2572,22 @@ REACTION_LOOP: DO N=1,N_REACTIONS
    ENDIF
 
 ENDDO REACTION_LOOP
+
+! Print out information about agglomeration
+
+IF (AGGLOMERATION) THEN
+   WRITE(LU_OUTPUT,'(//A)')    ' Agglomeration Information'   
+   WRITE(LU_OUTPUT,'(/A,A)')   '     Agglomerating Species:         ',&
+                                     TRIM(SPECIES(SPECIES_MIXTURE(AGGLOMERATION_INDEX)%SINGLE_SPEC_INDEX)%ID)
+   WRITE(LU_OUTPUT,'(A,I0)')   '     Number of Particle Bins:       ',N_PARTICLE_BINS
+   WRITE(LU_OUTPUT,'(A,F9.3)') '     Particle Density (kg/m^3):     ',SPECIES_MIXTURE(AGGLOMERATION_INDEX)%DENSITY_SOLID
+   WRITE(LU_OUTPUT,'(A,F8.3)') '     Minimum Particle Diameter (um):',MIN_PARTICLE_DIAMETER*1.E6_EB
+   WRITE(LU_OUTPUT,'(A,F8.3)') '     Maximum Particle Diameter (um):',MAX_PARTICLE_DIAMETER*1.E6_EB
+   WRITE(LU_OUTPUT,'(A)')      '     Bin #  Bin Diameter (um)'
+   DO N=1,N_PARTICLE_BINS
+      WRITE(LU_OUTPUT,'(A,I3,A,F8.3)') '     ',N,'        ',2._EB*PARTICLE_RADIUS(N)*1.E6_EB
+   ENDDO
+ENDIF
 
 ! Print out information about materials
  
