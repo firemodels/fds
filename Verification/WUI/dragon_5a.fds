@@ -1,13 +1,13 @@
 &HEAD CHID='dragon_5a', TITLE='Manzello et al., FSJ (2008), Fig 5a' /
 
-&MESH IJK=80,20,60, XB=10,14,-.5,.5,0,3 /
+&MESH IJK=40,10,30, XB=10,14,-.5,.5,0,3 /
   
 &TIME T_END=130./
 
 &DEVC ID='t2', XYZ=11,0,2.15, QUANTITY='TIME', SETPOINT=120., INITIAL_STATE=.TRUE./ ! needed to count the embers in the air at t=120
 
 &SURF ID='neck', COLOR='BLACK' /
-&SURF ID='mouth', COLOR='RED', TMP_FRONT=1000., VEL=-2., PART_ID='embers', PARTICLE_MASS_FLUX=0.0119 /
+&SURF ID='mouth', COLOR='RED', TMP_FRONT=300., VEL=-2., PART_ID='embers', PARTICLE_MASS_FLUX=0.0119 /
 
 &OBST XB=10.8,11,-.1,.1,2.05,2.25, SURF_ID6='neck','mouth','neck','neck','neck','neck'/
 &OBST XB=10.8,11,-.1,.1,0.0,2.05, SURF_ID='neck'/
@@ -21,7 +21,18 @@
 
 &SLCF PBY=0., QUANTITY='VELOCITY', VECTOR=.TRUE. /
 
-! effective density from mean mass (0.0331 g) and spherical volume from diameter of collected ember (L=13.5 mm, D=5.6 mm)
-&PART ID='embers', DENSITY=360, DIAMETER=5600, MONODISPERSE=.TRUE., DRAG_LAW='CYLINDER', SAMPLING_FACTOR=1, COLOR='ORANGE', EVAPORATE=.FALSE., INITIAL_TEMPERATURE=1000., QUANTITIES(1:3)='PARTICLE DIAMETER','PARTICLE VELOCITY','PARTICLE TEMPERATURE' /
+&SURF ID         = 'brand'
+      MATL_ID    = 'wood'
+      THICKNESS  = 0.0028
+      LENGTH     = 0.0135
+      TMP_INNER  = 500.
+      GEOMETRY   = 'CYLINDRICAL' /
+
+&MATL ID = 'wood'
+      DENSITY = 75.
+      CONDUCTIVITY = 0.1
+      SPECIFIC_HEAT= 1.0 /
+
+&PART ID='embers', SURF_ID='brand', DRAG_LAW='CYLINDER', COLOR='ORANGE', QUANTITIES(1:3)='PARTICLE DIAMETER','PARTICLE VELOCITY','PARTICLE TEMPERATURE' /
 
 &TAIL /
