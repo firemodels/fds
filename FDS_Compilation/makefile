@@ -13,7 +13,7 @@ VPATH = ../FDS_Source
 
 # Definition of the non-MPI object variables
 
-obj_serial = prec.o mpis.o cons.o devc.o data.o type.o mesh.o func.o smvv.o irad.o \
+obj_serial = prec.o mpis.o cons.o devc.o data.o type.o mesh.o func.o smvv.o irad.o soot.o\
              ieva.o pois.o scrc.o radi.o evac.o gsmv.o geom.o part.o vege.o ctrl.o turb.o samr.o dump.o hvac.o mass.o \
              read.o wall.o fire.o divg.o init.o velo.o pres.o main.o
 
@@ -21,7 +21,7 @@ objwin_serial = $(obj_serial:.o=.obj)
 
 # Definition of the MPI object variables
 
-obj_mpi = prec.o cons.o devc.o data.o type.o mesh.o func.o smvv.o irad.o \
+obj_mpi = prec.o cons.o devc.o data.o type.o mesh.o func.o smvv.o irad.o soot.o\
           ieva.o pois.o scrc.o radi.o evac.o gsmv.o geom.o part.o vege.o ctrl.o turb.o samr.o dump.o hvac.o mass.o \
           read.o wall.o fire.o divg.o init.o velo.o pres.o main.o
 
@@ -438,6 +438,7 @@ pois.o : prec.o cons.o
 mesh.o : prec.o type.o
 data.o : prec.o func.o cons.o
 func.o : prec.o cons.o type.o mesh.o devc.o
+soot.o : prec.o mesh.o cons.o func.o
 smvv.o : prec.o func.o
 ctrl.o : prec.o cons.o type.o mesh.o func.o
 turb.o : func.o prec.o cons.o mesh.o
@@ -449,19 +450,19 @@ irad.o : func.o prec.o cons.o type.o mesh.o
 ieva.o : func.o prec.o cons.o type.o mesh.o
 fire.o : func.o prec.o cons.o type.o mesh.o
 hvac.o : func.o prec.o cons.o type.o mesh.o ctrl.o
-wall.o : func.o prec.o cons.o type.o mesh.o hvac.o mass.o
+wall.o : func.o prec.o cons.o type.o mesh.o hvac.o mass.o soot.o
 velo.o : func.o prec.o cons.o type.o mesh.o turb.o geom.o
 evac.o : func.o prec.o cons.o type.o mesh.o ieva.o data.o
 divg.o : func.o prec.o cons.o type.o mesh.o scrc.o evac.o mass.o
-mass.o : func.o prec.o cons.o type.o mesh.o turb.o
+mass.o : func.o prec.o cons.o type.o mesh.o turb.o soot.o
 radi.o : func.o prec.o cons.o type.o mesh.o irad.o
 pres.o : func.o prec.o cons.o type.o mesh.o pois.o velo.o scrc.o
 part.o : func.o prec.o cons.o type.o mesh.o devc.o data.o geom.o
 vege.o : func.o prec.o cons.o type.o mesh.o devc.o part.o
-read.o : func.o prec.o cons.o type.o mesh.o devc.o ctrl.o irad.o evac.o hvac.o scrc.o data.o geom.o mass.o
+read.o : func.o prec.o cons.o type.o mesh.o devc.o ctrl.o irad.o evac.o hvac.o scrc.o data.o geom.o mass.o soot.o
 init.o : func.o prec.o cons.o type.o mesh.o devc.o irad.o pois.o data.o evac.o
-dump.o : func.o prec.o cons.o type.o mesh.o devc.o evac.o smvv.o turb.o scrc.o data.o radi.o
-main.o : func.o prec.o cons.o type.o mesh.o devc.o smvv.o mass.o divg.o velo.o wall.o fire.o irad.o ieva.o radi.o evac.o part.o vege.o dump.o read.o init.o pres.o pois.o ctrl.o turb.o hvac.o scrc.o data.o geom.o
+dump.o : func.o prec.o cons.o type.o mesh.o devc.o evac.o smvv.o turb.o scrc.o data.o radi.o soot.o
+main.o : func.o prec.o cons.o type.o mesh.o devc.o smvv.o mass.o divg.o velo.o wall.o fire.o irad.o ieva.o radi.o evac.o part.o vege.o dump.o read.o init.o pres.o pois.o ctrl.o turb.o hvac.o scrc.o data.o geom.o soot.o
 
 cons.obj : prec.obj
 mpis.obj : prec.obj
@@ -471,6 +472,7 @@ pois.obj : prec.obj cons.obj
 mesh.obj : prec.obj type.obj
 data.obj : prec.obj func.obj cons.obj
 func.obj : prec.obj cons.obj type.obj mesh.obj devc.obj
+soot.obj : prec.obj mesh.obj cons.obj func.obj
 smvv.obj : prec.obj func.obj
 ctrl.obj : prec.obj cons.obj type.obj mesh.obj func.obj
 turb.obj : func.obj prec.obj cons.obj mesh.obj
@@ -482,20 +484,19 @@ irad.obj : func.obj prec.obj cons.obj type.obj mesh.obj
 ieva.obj : func.obj prec.obj cons.obj type.obj mesh.obj
 fire.obj : func.obj prec.obj cons.obj type.obj mesh.obj
 hvac.obj : func.obj prec.obj cons.obj type.obj mesh.obj ctrl.obj
-wall.obj : func.obj prec.obj cons.obj type.obj mesh.obj hvac.obj mass.obj
+wall.obj : func.obj prec.obj cons.obj type.obj mesh.obj hvac.obj mass.obj soot.obj
 velo.obj : func.obj prec.obj cons.obj type.obj mesh.obj turb.obj geom.obj
 evac.obj : func.obj prec.obj cons.obj type.obj mesh.obj ieva.obj data.obj 
 divg.obj : func.obj prec.obj cons.obj type.obj mesh.obj scrc.obj evac.obj mass.obj
-mass.obj : func.obj prec.obj cons.obj type.obj mesh.obj turb.obj
+mass.obj : func.obj prec.obj cons.obj type.obj mesh.obj turb.obj soot.obj
 radi.obj : func.obj prec.obj cons.obj type.obj mesh.obj irad.obj
 pres.obj : func.obj prec.obj cons.obj type.obj mesh.obj pois.obj velo.obj scrc.obj
 part.obj : func.obj prec.obj cons.obj type.obj mesh.obj devc.obj data.obj geom.obj
 vege.obj : func.obj prec.obj cons.obj type.obj mesh.obj devc.obj part.obj
-read.obj : func.obj prec.obj cons.obj type.obj mesh.obj devc.obj ctrl.obj irad.obj evac.obj hvac.obj scrc.obj data.obj geom.obj mass.obj
+read.obj : func.obj prec.obj cons.obj type.obj mesh.obj devc.obj ctrl.obj irad.obj evac.obj hvac.obj scrc.obj data.obj geom.obj mass.obj soot.obj
 init.obj : func.obj prec.obj cons.obj type.obj mesh.obj devc.obj irad.obj pois.obj data.obj evac.obj
-dump.obj : func.obj prec.obj cons.obj type.obj mesh.obj devc.obj evac.obj smvv.obj turb.obj scrc.obj data.obj radi.obj
-main.obj : func.obj prec.obj cons.obj type.obj mesh.obj devc.obj smvv.obj mass.obj divg.obj velo.obj wall.obj fire.obj irad.obj ieva.obj radi.obj evac.obj part.obj vege.obj dump.obj read.obj init.obj pres.obj pois.obj ctrl.obj turb.obj hvac.obj scrc.obj data.obj geom.obj
-
+dump.obj : func.obj prec.obj cons.obj type.obj mesh.obj devc.obj evac.obj smvv.obj turb.obj scrc.obj data.obj radi.obj soot.obj
+main.obj : func.obj prec.obj cons.obj type.obj mesh.obj devc.obj smvv.obj mass.obj divg.obj velo.obj wall.obj fire.obj irad.obj ieva.obj radi.obj evac.obj part.obj vege.obj dump.obj read.obj init.obj pres.obj pois.obj ctrl.obj turb.obj hvac.obj scrc.obj data.obj geom.obj soot.obj
 
 #*** Clean Target to remove Object and Module files ***
 
