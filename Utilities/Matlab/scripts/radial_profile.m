@@ -9,7 +9,7 @@
 % function []=radial_profile(plot_file,data_format,devc_col,error,error_type,tmin, ...
 %                            xaxis_label,yaxis_label,title_label,text_label,legend_pos, ...
 %                            rmin,rmax,dr,xmin,xmax,dx,ymin,ymax,dy,svn_file, ...
-%                            exp_file,exp_format,exp_label, ...
+%                            exp_file,exp_format,exp_label,exp_stride, ...
 %                            fds_file1,fds_format1,fds_label1, ...
 %                            fds_file2,fds_format2,fds_label2, ...
 %                            fds_file3,fds_format3,fds_label3, ...
@@ -48,6 +48,7 @@ if nargin>=1
     exp_file    = varargin{iarg}; iarg=iarg+1;
     exp_format  = varargin{iarg}; iarg=iarg+1;
     exp_label   = varargin{iarg}; iarg=iarg+1;
+    exp_stride  = varargin{iarg}; iarg=iarg+1;
     nfds        = 0;
     if nargin>iarg
         fds_file1   = varargin{iarg}; iarg=iarg+1;
@@ -86,8 +87,8 @@ plot_style
 
 % experimental data
 M = csvread(exp_file,1,0);
-r = M(1:3:end,1);
-w = M(1:3:end,2);
+r = M(1:exp_stride:end,1);
+w = M(1:exp_stride:end,2);
 if (error>0)
     if strcmp(error_type,'relative')
         e = error*abs(w); % percent error matches DesJardin paper
@@ -95,8 +96,8 @@ if (error>0)
         e = error*ones(1,length(w)/length(error));
     end
     % put error bars on every other data point for readability
-    plot(r(1:2:end),w(1:2:end),exp_format); hold on
-    H(1)=errorbar(r(2:2:end),w(2:2:end),-e(2:2:end),+e(2:2:end),exp_format);
+    plot(r,w,exp_format); hold on
+    H(1)=errorbar(r,w,-e,+e,exp_format);
 else
     H(1)=plot(r,w,exp_format);
 end
