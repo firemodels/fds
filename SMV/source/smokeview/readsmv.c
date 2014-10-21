@@ -3449,13 +3449,13 @@ int readsmv(char *file, char *file2){
 
       init_geom(geomi);
 
-      if(ngeomobjinfo>0){
-        fgets(buffer,255,stream);
-        trim(buffer);
-        buff2 = trim_front(buffer);
-        NewMemory((void **)&geomi->file,strlen(buff2)+1);
-        strcpy(geomi->file,buff2);
+      fgets(buffer,255,stream);
+      trim(buffer);
+      buff2 = trim_front(buffer);
+      NewMemory((void **)&geomi->file,strlen(buff2)+1);
+      strcpy(geomi->file,buff2);
 
+      if(ngeomobjinfo>0){
         NewMemory((void **)&geomi->geomobjinfo,ngeomobjinfo*sizeof(geomobjdata));
         for(i=0;i<ngeomobjinfo;i++){
           geomobjdata *geomobji;
@@ -8632,6 +8632,13 @@ int readini2(char *inifile, int localfile){
       sscanf(buffer,"%f %f",&device_valmin,&device_valmax);
       continue;
     }
+    if(match(buffer,"DEVICEORIENTATION")==1){
+      fgets(buffer,255,stream);
+      sscanf(buffer,"%i %f",&show_device_orientation,&orientation_scale);
+      show_device_orientation=CLAMP(show_device_orientation,0,1);
+      orientation_scale=CLAMP(orientation_scale,0.1,10.0);
+      continue;
+    }
     if(match(buffer,"GVERSION")==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i",&gversion);
@@ -11524,6 +11531,8 @@ void writeini(int flag,char *filename){
     fprintf(fileout,"%f %f %f %f\n",vector_baseheight,vector_basediameter,vector_headheight,vector_headdiameter);
     fprintf(fileout,"DEVICEBOUNDS\n");
     fprintf(fileout," %f %f\n",device_valmin,device_valmax);
+    fprintf(fileout,"DEVICEORIENTATION\n");
+    fprintf(fileout," %i %f\n",show_device_orientation,orientation_scale);
 
     put_startup_smoke3d(fileout);
     fprintf(fileout,"LOADFILESATSTARTUP\n");

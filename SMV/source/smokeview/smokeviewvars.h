@@ -23,6 +23,8 @@
 #include "smokeheaders.h"
 #include "threader.h"
 
+SVEXTERN int SVDECL(show_device_orientation,0);
+SVEXTERN float SVDECL(orientation_scale,1.0);
 SVEXTERN char SVDECL(*script_labelstring,NULL);
 SVEXTERN char SVDECL(*loaded_file,NULL);
 SVEXTERN int SVDECL(clipon,0);

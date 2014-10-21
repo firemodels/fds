@@ -961,6 +961,18 @@ void draw_devices(void){
     glPushMatrix();
     glTranslatef(xyz[0],xyz[1],xyz[2]);
 
+    if(show_device_orientation==1){
+      float *xyznorm;
+
+      xyznorm=devicei->xyznorm;
+      glPushMatrix();
+      glScalef(orientation_scale/5.0,orientation_scale/5.0,orientation_scale/5.0);
+      glBegin(GL_LINES);
+      glVertex3f(0.0,0.0,0.0);
+      glVertex3f(xyznorm[0],xyznorm[1],xyznorm[2]);
+      glEnd();
+      glPopMatrix();
+    }
     dpsi=0.0;
     if((active_smokesensors==1&&show_smokesensors!=0&&STRCMP(devicei->object->label,"smokesensor")==0)||
        STRCMP(devicei->object->label,"thermocouple")==0

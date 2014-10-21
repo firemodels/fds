@@ -22,6 +22,7 @@ char glui_devices_revision[]="$Revision$";
 #define DEVICE_devicetypes 28
 #define SAVE_SETTINGS 99
 #define DEVICE_close 3
+#define DEVICE_show_orientation 4
 
 #define OPEN_UP 0
 #define OPEN_DOWN 1
@@ -67,6 +68,7 @@ GLUI_Listbox *LIST_open=NULL;
 GLUI_EditText *EDIT_filter=NULL;
 
 GLUI_Spinner *SPINNER_sensorrelsize=NULL;
+GLUI_Spinner *SPINNER_orientation_scale=NULL;
 
 GLUI_RadioGroup *RADIO_devicetypes=NULL;
 GLUI_RadioGroup *RADIO_vectortype=NULL;
@@ -75,8 +77,15 @@ GLUI_Checkbox *CHECKBOX_device_1=NULL;
 GLUI_Checkbox *CHECKBOX_device_2=NULL;
 GLUI_Checkbox *CHECKBOX_device_3=NULL;
 GLUI_Checkbox *CHECKBOX_device_4=NULL;
+GLUI_Checkbox *CHECKBOX_device_orientation=NULL;
 
 void Device_CB(int var);
+
+/* ------------------ update_device_orientation ------------------------ */
+
+extern "C" void update_device_orientation(void){
+  if(CHECKBOX_device_orientation!=NULL)CHECKBOX_device_orientation->set_int_val(show_device_orientation);
+}
 
 /* ------------------ update_glui_devices ------------------------ */
 
@@ -105,8 +114,11 @@ extern "C" void glui_device_setup(int main_window){
     if(ndevicetypes>0){
 
       PANEL_smvobjects = glui_device->add_panel_to_panel(PANEL_objects,"Objects",true);
-      SPINNER_sensorrelsize=glui_device->add_spinner_to_panel(PANEL_smvobjects,_("Scaling"),GLUI_SPINNER_FLOAT,&sensorrelsize,DEVICE_sensorsize,Device_CB);
+      SPINNER_sensorrelsize=glui_device->add_spinner_to_panel(PANEL_smvobjects,_("Scale"),GLUI_SPINNER_FLOAT,&sensorrelsize,DEVICE_sensorsize,Device_CB);
       CHECKBOX_device_3=glui_device->add_checkbox_to_panel(PANEL_smvobjects,_("Outline"),&object_outlines);
+      CHECKBOX_device_orientation=glui_device->add_checkbox_to_panel(PANEL_smvobjects,_("Orientation"),&show_device_orientation,DEVICE_show_orientation,Device_CB);
+      SPINNER_orientation_scale=glui_device->add_spinner_to_panel(PANEL_smvobjects,_("Orientation scale"),GLUI_SPINNER_FLOAT,&orientation_scale);
+      SPINNER_orientation_scale->set_float_limits(0.1,10.0);
 
       PANEL_velocityvectors = glui_device->add_panel_to_panel(PANEL_objects,"Flow Vectors",true);
       if(nvdeviceinfo==0)PANEL_velocityvectors->disable();
@@ -277,6 +289,9 @@ void Device_CB(int var){
 
   updatemenu=1;
   switch (var){
+  case DEVICE_show_orientation:
+    updatemenu=1;
+    break;
   case DEVICE_devicetypes:
     for(i=0;i<ndevicetypes;i++){
       devicetypes[i]->type2vis=0;
