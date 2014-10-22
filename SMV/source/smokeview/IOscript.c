@@ -1443,14 +1443,8 @@ void script_settimeval(scriptdata *scripti){
   timeval = scripti->fval;
   PRINTF("script: setting time to %f\n\n",timeval);
   if(global_times!=NULL&&nglobal_times>0){
-    float dt=1.0;
-
-    if(nglobal_times>1)dt=global_times[nglobal_times-1]-global_times[nglobal_times-2];
-    if(timeval-dt>global_times[nglobal_times-1]){
-      fprintf(stderr,"*** Error: data not available at time requested\n");
-      fprintf(stderr,"           time: %f s, min time: %f s max time: %f\n",timeval,global_times[0],global_times[nglobal_times-1]);
-    }
-    if(timeval>global_times[nglobal_times-1])timeval=global_times[nglobal_times-1];
+    if(timeval<global_times[0])timeval=global_times[0]+0.0001;
+    if(timeval>global_times[nglobal_times-1])timeval=global_times[nglobal_times-1]-0.0001;
     valmin=ABS(global_times[0]-timeval);
     imin=0;
     for(i=1;i<nglobal_times-1;i++){
