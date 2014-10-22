@@ -52,10 +52,10 @@
 
 &OBST XB= 8.7, 9.5, 7.4,8.2,0.0,0.2,SURF_IDS='burner','WALL BOARD','WALL BOARD' /sand burner 
 
-&OBST XB= 8.5, 9.7, 8.8,8.8,0.0,2.4,SURF_ID='STEEL SHEET' / cabinet back panel
-&OBST XB= 8.5, 8.5, 6.8,8.8,0.0,2.4,SURF_ID='STEEL SHEET' / cabinet side panel
-&OBST XB= 9.7, 9.7, 6.8,8.8,0.0,2.4,SURF_ID='STEEL SHEET' / cabinet side panel
-&OBST XB= 8.5, 9.7, 6.8,8.8,2.4,2.4,SURF_ID='STEEL SHEET' / cabinet top  panel
+&OBST XB= 8.5, 9.7, 8.6,8.6,0.0,2.4,SURF_ID='STEEL SHEET' / cabinet back panel
+&OBST XB= 8.5, 8.5, 6.8,8.6,0.0,2.4,SURF_ID='STEEL SHEET' / cabinet side panel
+&OBST XB= 9.7, 9.7, 6.8,8.6,0.0,2.4,SURF_ID='STEEL SHEET' / cabinet side panel
+&OBST XB= 8.5, 9.7, 6.8,8.6,2.4,2.4,SURF_ID='STEEL SHEET' / cabinet top  panel
 
 &OBST XB= 2.8, 3.4, 2.8, 3.4, 4.9, 6.1, SURF_IDS='WALL BOARD','WALL BOARD','duct' /#1 injection duct 
 &OBST XB= 2.8, 3.4, 2.8, 3.4, 4.6, 4.6 /  deflector plate

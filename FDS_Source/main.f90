@@ -402,6 +402,8 @@ ENDDO
 
 CALL INITIALIZE_BACK_WALL_EXCHANGE
 
+CALL STOP_CHECK
+
 ! Initialize ScaRC solver
 
 IF (PRES_METHOD == 'SCARC') CALL SCARC_SETUP
@@ -1775,8 +1777,9 @@ DO NM=1,NMESHES
                ENDIF
             ENDDO BACK_WALL_LOOP
             IF (.NOT.FOUND) THEN
-               WRITE(0,'(A,I2,A,I2,A,I5,A)') 'MESH ',NM,', Other MESH ',NOM,', WALL CELL ',IW,': Backing index not found.'
-               STOP
+               WRITE(0,'(A,I2,A,I2)') 'ERROR: Misalignment of obstruction between MESH ',NM,', and MESH ',NOM
+               PROCESS_STOP_STATUS = SETUP_STOP
+               EXIT WALL_LOOP
             ENDIF
          ENDDO WALL_LOOP
       ENDIF
