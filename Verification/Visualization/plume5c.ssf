@@ -32,11 +32,11 @@ SETTIMEVAL
 RENDERONCE
  plume5c_slice_00
 SETTIMEVAL
- 10.05
+ 10.0
 RENDERONCE
  plume5c_slice_10
 SETTIMEVAL
- 30.05
+ 30.0
 RENDERONCE
  plume5c_slice_30
 
@@ -56,11 +56,11 @@ SETTIMEVAL
 RENDERONCE
  plume5c_gslice_00
 SETTIMEVAL
- 10.05
+ 10.0
 RENDERONCE
  plume5c_gslice_10
 SETTIMEVAL
- 30.05
+ 30.0
 RENDERONCE
  plume5c_gslice_30
 
@@ -80,11 +80,11 @@ SETTIMEVAL
 RENDERONCE
  plume5c_gslice2_00
 SETTIMEVAL
- 10.05
+ 10.0
 RENDERONCE
  plume5c_gslice2_10
 SETTIMEVAL
- 30.05
+ 30.0
 RENDERONCE
  plume5c_gslice2_30
 
@@ -104,11 +104,11 @@ SETTIMEVAL
 RENDERONCE
  plume5c_vgslice_00
 SETTIMEVAL
- 10.05
+ 10.0
 RENDERONCE
  plume5c_vgslice_10
 SETTIMEVAL
- 30.05
+ 30.0
 RENDERONCE
  plume5c_vgslice_30
 
@@ -128,11 +128,11 @@ SETTIMEVAL
 RENDERONCE
  plume5c_vgslice2_00
 SETTIMEVAL
- 10.05
+ 10.0
 RENDERONCE
  plume5c_vgslice2_10
 SETTIMEVAL
- 30.05
+ 30.0
 RENDERONCE
  plume5c_vgslice2_30
 
@@ -148,11 +148,11 @@ SETTIMEVAL
 RENDERONCE
  plume5c_slice_cell_00
 SETTIMEVAL
- 10.05
+ 10.0
 RENDERONCE
  plume5c_slice_cell_10
 SETTIMEVAL
- 30.05
+ 30.0
 RENDERONCE
  plume5c_slice_cell_30
 
@@ -168,11 +168,11 @@ SETTIMEVAL
 RENDERONCE
  plume5c_slice_cellchop_00
 SETTIMEVAL
- 10.05
+ 10.0
 RENDERONCE
  plume5c_slice_cellchop_10
 SETTIMEVAL
- 30.05
+ 30.0
 RENDERONCE
  plume5c_slice_cellchop_30
 
@@ -188,11 +188,11 @@ SETTIMEVAL
 RENDERONCE
  plume5c_slice_chop_00
 SETTIMEVAL
- 10.05
+ 10.0
 RENDERONCE
  plume5c_slice_chop_10
 SETTIMEVAL
- 30.05
+ 30.0
 RENDERONCE
  plume5c_slice_chop_30
 
@@ -208,11 +208,11 @@ SETTIMEVAL
 RENDERONCE
  plume5c_vslice_00
 SETTIMEVAL
- 10.05
+ 10.0
 RENDERONCE
  plume5c_vslice_10
 SETTIMEVAL
- 30.05
+ 30.0
 RENDERONCE
  plume5c_vslice_30
 
@@ -228,11 +228,11 @@ SETTIMEVAL
 RENDERONCE
  plume5c_vslicechop_00
 SETTIMEVAL
- 10.05
+ 10.0
 RENDERONCE
  plume5c_vslicechop_10
 SETTIMEVAL
- 30.05
+ 30.0
 RENDERONCE
  plume5c_vslicechop_30
 
@@ -249,11 +249,11 @@ SETTIMEVAL
 RENDERONCE
  plume5c_iso_solid_00
 SETTIMEVAL
- 10.05
+ 10.0
 RENDERONCE
  plume5c_iso_solid_10
 SETTIMEVAL
- 30.05
+ 30.0
 RENDERONCE
  plume5c_iso_solid_30
 
@@ -262,7 +262,7 @@ LOADINIFILE
 LOADFILE
  plume5c_01.iso
 SETTIMEVAL
- 30.05
+ 30.0
 RENDERONCE
  plume5c_iso2_solid_30
 
@@ -278,11 +278,11 @@ SETTIMEVAL
 RENDERONCE
  plume5c_iso_outline_00
 SETTIMEVAL
- 10.05
+ 10.0
 RENDERONCE
  plume5c_iso_outline_10
 SETTIMEVAL
- 30.05
+ 30.0
 RENDERONCE
  plume5c_iso_outline_30
 
@@ -298,11 +298,11 @@ SETTIMEVAL
 RENDERONCE
  plume5c_iso_points_00
 SETTIMEVAL
- 10.05
+ 10.0
 RENDERONCE
  plume5c_iso_points_10
 SETTIMEVAL
- 30.05
+ 30.0
 RENDERONCE
  plume5c_iso_points_30
 
@@ -320,11 +320,11 @@ SETTIMEVAL
 RENDERONCE
  plume5c_part_01
 SETTIMEVAL
- 10.05
+ 10.0
 RENDERONCE
  plume5c_part_10
 SETTIMEVAL
- 30.05
+ 30.0
 RENDERONCE
  plume5c_part_30
 RENDERONCE
@@ -344,11 +344,11 @@ SETTIMEVAL
 RENDERONCE
  plume5c_part_streak_01
 SETTIMEVAL
- 10.05
+ 10.0
 RENDERONCE
  plume5c_part_streak_10
 SETTIMEVAL
- 30.05
+ 30.0
 RENDERONCE
  plume5c_part_streak_30
 RENDERONCE
@@ -368,11 +368,11 @@ SETTIMEVAL
 RENDERONCE
  plume5c_part_streak2_01
 SETTIMEVAL
- 10.05
+ 10.0
 RENDERONCE
  plume5c_part_streak2_10
 SETTIMEVAL
- 30.05
+ 30.0
 RENDERONCE
  plume5c_part_streak2_30
 
@@ -388,11 +388,11 @@ SETTIMEVAL
 RENDERONCE
  plume5c_bound_00
 SETTIMEVAL
- 10.05
+ 10.0
 RENDERONCE
  plume5c_bound_10
 SETTIMEVAL
- 30.05
+ 30.0
 RENDERONCE
  plume5c_bound_30
 
@@ -408,11 +408,11 @@ SETTIMEVAL
 RENDERONCE
  plume5c_bound_cell_00
 SETTIMEVAL
- 10.05
+ 10.0
 RENDERONCE
  plume5c_bound_cell_10
 SETTIMEVAL
- 30.05
+ 30.0
 RENDERONCE
  plume5c_bound_cell_30
 
@@ -428,11 +428,11 @@ SETTIMEVAL
 RENDERONCE
  plume5c_bound_chop_00
 SETTIMEVAL
- 10.05
+ 10.0
 RENDERONCE
  plume5c_bound_chop_10
 SETTIMEVAL
- 30.05
+ 30.0
 RENDERONCE
  plume5c_bound_chop_30
 
@@ -448,11 +448,11 @@ SETTIMEVAL
 RENDERONCE
  plume5c_smoke_01
 SETTIMEVAL
- 10.05
+ 10.0
 RENDERONCE
  plume5c_smoke_10
 SETTIMEVAL
- 30.05
+ 30.0
 RENDERONCE
  plume5c_smoke_30
 
@@ -550,11 +550,11 @@ SETTIMEVAL
 RENDERONCE
  plume5c_smoke_nongpu_05
 SETTIMEVAL
- 10.05
+ 10.0
 RENDERONCE
  plume5c_smoke_nongpu_10
 SETTIMEVAL
- 30.05
+ 30.0
 RENDERONCE
  plume5c_smoke_nongpu_30
 
@@ -572,11 +572,11 @@ SETTIMEVAL
 RENDERONCE
  plume5c_smoke_gpu_05
 SETTIMEVAL
- 10.05
+ 10.0
 RENDERONCE
  plume5c_smoke_gpu_10
 SETTIMEVAL
- 30.05
+ 30.0
 RENDERONCE
  plume5c_smoke_gpu_30
 
@@ -586,7 +586,7 @@ UNLOADALL
 LOADINIFILE
  plume5c_plot3d.ini
 LOADPLOT3D
- 1 40.009998
+ 1 40.0
 SHOWPLOT3DDATA
  1 1 1 0 0.800000
 SHOWPLOT3DDATA
@@ -641,7 +641,7 @@ plume5c_plot3d_y4
 LOADINIFILE
  plume5c_plot3dvector.ini
 LOADPLOT3D
- 1 40.009998
+ 1 40.0
 SHOWPLOT3DDATA
  1 1 1 0 0.800000
 SHOWPLOT3DDATA
