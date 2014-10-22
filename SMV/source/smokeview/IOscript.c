@@ -1443,8 +1443,20 @@ void script_settimeval(scriptdata *scripti){
   timeval = scripti->fval;
   PRINTF("script: setting time to %f\n\n",timeval);
   if(global_times!=NULL&&nglobal_times>0){
-    if(timeval<global_times[0])timeval=global_times[0]+0.0001;
-    if(timeval>global_times[nglobal_times-1])timeval=global_times[nglobal_times-1]-0.0001;
+    if(timeval<global_times[0])timeval=global_times[0];
+    if(timeval>global_times[nglobal_times-1]-0.0001){
+      float dt;
+
+      dt = timeval-global_times[nglobal_times-1]-0.0001;
+      if(nglobal_times>1&&dt>global_times[1]-global_times[0]){
+        fprintf(stderr,"*** Error: data not available at time requested\n");
+        fprintf(stderr,"           time: %f s, min time: %f, max time: %f s\n",
+          timeval,global_times[0],global_times[nglobal_times-1]);
+        if(loaded_file!=NULL)fprintf(stderr,"           loaded file: %s\n",loaded_file);
+        if(script_labelstring!=NULL)fprintf(stderr,"                 label: %s\n",script_labelstring);
+      }
+      timeval=global_times[nglobal_times-1]-0.0001;
+    }
     valmin=ABS(global_times[0]-timeval);
     imin=0;
     for(i=1;i<nglobal_times-1;i++){
