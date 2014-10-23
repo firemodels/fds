@@ -50,6 +50,7 @@
 //VVVVVVVVVVVVVVVVVVVVVVVVVVVVV  turn on options that are being tested VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
 
 #ifdef pp_BETA
+#define pp_SETTIME // do error checking for SETTTIME command
 #define pp_PILOT
 #define pp_GEOMTEST
 //#define pp_GEOM_FORCE_DYNAMIC // set until we get time dependent geometry and coupled geometries to coexist
