@@ -18,6 +18,7 @@ BUILDBUNDLE=
 RUNDEBUG="1"
 OPENMP=
 RUN_OPENMP=
+TESTFLAG=
 
 WEBHOSTNAME=blaze.nist.gov
 if [ "$SMOKEBOT_HOSTNAME" != "" ] ; then
@@ -57,6 +58,9 @@ case $OPTION in
    ;;
   s)
    RUNDEBUG="0"
+   ;;
+  t)
+   TESTFLAG="-t"
    ;;
 esac
 done
@@ -853,7 +857,7 @@ compile_smv()
    # Clean and compile SMV
    cd $FDS_SVNROOT/SMV/Build/intel_${platform}_64
    rm -f smokeview_${platform}_64
-   ./make_smv.sh &> $OUTPUT_DIR/stage6c
+   ./make_smv.sh $TESTFLAG &> $OUTPUT_DIR/stage6c
    fi
 }
 
@@ -893,7 +897,7 @@ make_smv_pictures()
 {
    # Run Make SMV Pictures script (release mode)
    cd $FDS_SVNROOT/Verification/scripts
-   ./Make_SMV_Pictures.sh $USEINSTALL 2>&1 | grep -v FreeFontPath &> $OUTPUT_DIR/stage6d
+   ./Make_SMV_Pictures.sh $TESTFLAG $USEINSTALL 2>&1 | grep -v FreeFontPath &> $OUTPUT_DIR/stage6d
 }
 
 check_smv_pictures()
