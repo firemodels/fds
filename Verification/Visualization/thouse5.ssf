@@ -325,6 +325,42 @@ SETTIMEVAL
 RENDERONCE
  thouse5_streak_010
 
+// render two left/right stereo images
+
+LABEL
+  render two left/right stereo images
+
+LOADINIFILE
+ thouse5_lr_stereo.ini 
+SETTIMEVAL
+ 30.000000
+RENDERONCE
+ thouse5_iso_lr_stereo
+
+// render two stereo images
+
+LABEL
+  render two stereo images
+
+LOADINIFILE
+ thouse5_rc_stereo.ini 
+SETTIMEVAL
+ 30.000000
+RENDERONCE
+ thouse5_iso_rc_stereo
+
+// render two stereo images
+
+LABEL
+  render two stereo images
+
+LOADINIFILE
+ thouse5_rb_stereo.ini 
+SETTIMEVAL
+ 30.000000
+RENDERONCE
+ thouse5_iso_rb_stereo
+
 // render OBSTs using solid view
 
 LABEL
@@ -443,45 +479,6 @@ PLOT3DPROPS
  1 0 4 1
 RENDERONCE
 thouse5_plot3d_iso2
-
-// render two left/right stereo images
-
-LABEL
-  render two left/right stereo images
-
-UNLOADALL
-LOADFILE
- thouse5_01.iso
-LOADINIFILE
- thouse5_lr_stereo.ini 
-SETTIMEVAL
- 30.000000
-RENDERONCE
- thouse5_iso_lr_stereo
-
-// render two stereo images
-
-LABEL
-  render two stereo images
-
-LOADINIFILE
- thouse5_rc_stereo.ini 
-SETTIMEVAL
- 30.000000
-RENDERONCE
- thouse5_iso_rc_stereo
-
-// render two stereo images
-
-LABEL
-  render two stereo images
-
-LOADINIFILE
- thouse5_rb_stereo.ini 
-SETTIMEVAL
- 30.000000
-RENDERONCE
- thouse5_iso_rb_stereo
 
 // render fed iso file
 
