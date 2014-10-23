@@ -95,7 +95,8 @@ TIME_LOG=$OUTPUT_DIR/timings
 WARNING_LOG=$OUTPUT_DIR/warnings
 GUIDE_DIR=$SMOKEBOT_DIR/guides
 STAGE_STATUS=$OUTPUT_DIR/stage_status
-SMV_VV_GUIDE=$FDS_SVNROOT/Manuals/SMV_Verification_Guide/SMV_Verification_Guide.pdf
+SMV_VG_GUIDE=$FDS_SVNROOT/Manuals/SMV_Verification_Guide/SMV_Verification_Guide.pdf
+SMV_UG_GUIDE=$FDS_SVNROOT/Manuals/SMV_User_Guide/SMV_User_Guide.pdf
 
 THIS_FDS_AUTHOR=
 THIS_FDS_FAILED=0
@@ -1122,7 +1123,7 @@ email_build_status()
       if [ "$MUTT_MISSING" == "1" ] ; then
         mail -s "smokebot build success on ${hostname}! Revision ${SVN_REVISION}." $mailTo < $TIME_LOG > /dev/null
       else
-        mutt -a $SMV_VV_GUIDE -s "smokebot build success on ${hostname}! Revision ${SVN_REVISION}." $mailTo < $TIME_LOG > /dev/null
+        mutt -a $SMV_VG_GUIDE -a $SMV_UG_GUIDE -s "smokebot build success on ${hostname}! Revision ${SVN_REVISION}." $mailTo < $TIME_LOG > /dev/null
       fi
    fi
 }
