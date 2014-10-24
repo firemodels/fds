@@ -241,7 +241,7 @@ void adjustpart5bounds(partdata *parti){
       time_t modtime;
 
       modtime=file_modtime(parti->file);
-      if(modtime>parti->modtime){
+      if(difftime(modtime,parti->modtime)>0.0){
         parti->modtime=modtime;
         propi->set_global_bounds=0;
       }
@@ -282,6 +282,7 @@ void adjustpart5bounds(partdata *parti){
       ASSERT(FFALSE);
       break;
     }
+    printf("i=%i valmin=%f valmax=%f\n",i,propi->valmin,propi->valmax);
   }
   adjustpart5chops(parti);
 #ifdef _DEBUG

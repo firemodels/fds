@@ -6371,7 +6371,7 @@ typedef struct {
           parti->file=NULL;
         }
       }
-      parti->modtime=0;
+      parti->modtime=file_modtime(parti->file);
       parti->compression_type=0;
       parti->sort_tags_loaded=0;
       parti->loaded=0;

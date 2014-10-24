@@ -442,10 +442,7 @@ void init_part5prop(void){
     npart5prop+=(partclassi->ntypes-1);
   }
 
-
-
   // 2. now count the exact amount and put labels into array just allocated
-
 
   if(npart5prop>0){
     NewMemory((void **)&part5propinfo,npart5prop*sizeof(part5prop));
