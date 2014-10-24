@@ -196,6 +196,19 @@ intel_osx_64 : exe       = smokeview_osx_$(SMV_TESTSTRING)64 $(SMV_PROFILESTRING
 intel_osx_64 : $(obj)
 	icpc -o $(bin)/$(exe) $(LFLAGS) $(obj)  -L $(LIB_DIR)/lib_osx_intel_64 $(SMV_LIBS) $(OSX_INTEL_LIBS)
 
+# ------------- intel_osx_64_fg ----------------
+
+intel_osx_64_fg : FFLAGS    = -O0 -m64 -static-intel -fpp -D pp_OSX64 -mmacosx-version-min=10.4
+intel_osx_64_fg : CFLAGS    = -O0 -m64 -I /shared/freeglut/include -static-intel -D pp_OSX64  -D pp_INTEL -mmacosx-version-min=10.4 $(SMV_TESTFLAG) $(SMV_PROFILEFLAG)
+intel_osx_64_fg : LFLAGS    = -m64 -static-intel -framework OpenGL -L/shared/freeglut/lib -lglut -mmacosx-version-min=10.4
+intel_osx_64_fg : CC        = icc 
+intel_osx_64_fg : CPP       = icpc
+intel_osx_64_fg : FC        = ifort
+intel_osx_64_fg : exe       = smokeview_osx_$(SMV_TESTSTRING)64_fg $(SMV_PROFILESTRING)
+
+intel_osx_64_fg : $(obj)
+	icpc -o $(bin)/$(exe) $(LFLAGS) $(obj)  -L $(LIB_DIR)/lib_osx_intel_64 $(SMV_LIBS) $(OSX_INTEL_LIBS)
+
 # ------------- intel_osx_64_db ----------------
 
 intel_osx_64_db : FFLAGS    = -O0 -m64 -static-intel -fpp -D pp_OSX64 -mmacosx-version-min=10.4
