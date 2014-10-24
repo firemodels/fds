@@ -371,16 +371,16 @@ mpi_pgi_linux_64 : obj = fds_mpi_pgi_Opteron64
 mpi_pgi_linux_64 : $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_mpi)
 
-#XLF-Compiler, IBM Power6 Core, OpenMP, full optimized settings
-xlf_openmp : FFLAGS  = -O2 -qhot -q64 -qtune=pwr6 -qarch=pwr6 -qmaxmem=-1 -bdatapsize:64K -bstackpsize:64K -btextpsize:64K -qsmp=omp
-xlf_openmp : FCOMPL  = xlf90_r
+#XLF-Compiler, IBM Power7 Core, OpenMP, full optimized settings
+xlf_openmp : FFLAGS  = -O2 -qhot -q64 -qtune=pwr7 -qarch=pwr7 -qmaxmem=-1 -qsmp=omp
+xlf_openmp : FCOMPL  = xlf2008_r
 xlf_openmp : obj     = fds_xlf_openmp
 xlf_openmp : $(obj_serial)
 	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_serial) 
 
-#XLF-Compiler, IBM Power6 Core, OpenMP, non-optimized setting
+#XLF-Compiler, IBM Power7 Core, OpenMP, non-optimized setting
 xlf_openmp_nooptimization : FFLAGS  = -O0 -q64 -qsmp=omp
-xlf_openmp_nooptimization : FCOMPL  = xlf90_r
+xlf_openmp_nooptimization : FCOMPL  = xlf2008_r
 xlf_openmp_nooptimization : obj     = fds_xlf_openmp_nooptimization
 xlf_openmp_nooptimization : $(obj_serial)
 	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_serial) 
