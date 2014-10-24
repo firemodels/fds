@@ -1045,7 +1045,6 @@ typedef struct {
   char menulabel[128];
   int version;
   int nclasses;
-  time_t modtime;
   part5class **partclassptr;
   part5data *data5;
 } partdata;
