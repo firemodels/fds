@@ -854,7 +854,7 @@ commit_validation_results()
    cd $FDS_SVNROOT
 
    # Commit new validation results
-   svn commit -m "Validationbot: Updated validation results for: ${CURRENT_VALIDATION_SETS[*]}" &> /dev/null
+   svn commit -m "Validationbot: Update validation results for: ${CURRENT_VALIDATION_SETS[*]}" &> /dev/null
 }
 
 #  ================================
