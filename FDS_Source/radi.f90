@@ -544,7 +544,7 @@ ENDDO
 
 ! Determine angle factors for Lagrangian particles with ORIENTATION
 
-IF (VIRTUAL_PARTICLES) THEN
+IF (SOLID_PARTICLES) THEN
    ALLOCATE(ORIENTATION_FACTOR(NRA,N_ORIENTATION_VECTOR))
    ORIENTATION_FACTOR = 0._EB
    PARTICLE_CLASS_LOOP: DO IPC=1,N_LAGRANGIAN_CLASSES
@@ -729,7 +729,7 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
 
    ! Virtual particles
   
-   IF (NLP>0 .AND. VIRTUAL_PARTICLES) THEN
+   IF (NLP>0 .AND. SOLID_PARTICLES) THEN
       DO IP = 1,NLP
          LP => LAGRANGIAN_PARTICLE(IP)
          LPC => LAGRANGIAN_PARTICLE_CLASS(LP%CLASS_INDEX)
@@ -1038,7 +1038,7 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                      RAP = 1._EB/(A_SUM + EXTCOE(I,J,K)*VC*RSA(N))
                      IL(I,J,K) = MAX(0._EB, RAP * (AIU_SUM + VC*RSA(N)*RFPI* &
                                  ( KFST4(I,J,K)+KFST4W(I,J,K) +RSA_RAT*SCAEFF(I,J,K)*UIIOLD(I,J,K) ) ) )
-                     IF (VIRTUAL_PARTICLES) IL_UP(I,J,K) = MAX(0._EB,AIU_SUM/A_SUM)
+                     IF (SOLID_PARTICLES) IL_UP(I,J,K) = MAX(0._EB,AIU_SUM/A_SUM)
                   ENDDO CILOOP
                ENDDO CKLOOP
 
@@ -1064,7 +1064,7 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                      RAP = 1._EB/(A_SUM + EXTCOE(I,J,K)*VC*RSA(N))
                      IL(I,J,K) = MAX(0._EB, RAP * (AIU_SUM + VC*RSA(N)*RFPI* &
                                     (KFST4(I,J,K)+KFST4W(I,J,K) +  RSA_RAT*SCAEFF(I,J,K)*UIIOLD(I,J,K) ) ) ) 
-                     IF (VIRTUAL_PARTICLES) IL_UP(I,J,K) = MAX(0._EB,AIU_SUM/A_SUM)
+                     IF (SOLID_PARTICLES) IL_UP(I,J,K) = MAX(0._EB,AIU_SUM/A_SUM)
                   ENDDO I2LOOP
                ENDDO K2LOOP
 
@@ -1121,7 +1121,7 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                    ENDIF
                    A_SUM = AX + AY + AZ
                    AIU_SUM = AX*ILXU + AY*ILYU + AZ*ILZU
-                   IF (VIRTUAL_PARTICLES) IL_UP(I,J,K) = MAX(0._EB,AIU_SUM/A_SUM)
+                   IF (SOLID_PARTICLES) IL_UP(I,J,K) = MAX(0._EB,AIU_SUM/A_SUM)
                    RAP = 1._EB/(A_SUM + EXTCOE(I,J,K)*VC*RSA(N))
                    IL(I,J,K) = MAX(0._EB, RAP * (AIU_SUM + VC*RSA(N)*RFPI* &
                                    ( KFST4(I,J,K)+KFST4W(I,J,K) + RSA_RAT*SCAEFF(I,J,K)*UIIOLD(I,J,K) ) ) )
@@ -1211,7 +1211,7 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
 
             ! Compute projected intensity on particles
 
-            IF (VIRTUAL_PARTICLES) THEN
+            IF (SOLID_PARTICLES) THEN
                PARTICLE_RADIATION_LOOP: DO IP=1,NLP
                   LP => LAGRANGIAN_PARTICLE(IP)
                   LPC => LAGRANGIAN_PARTICLE_CLASS(LP%CLASS_INDEX)
@@ -1278,7 +1278,7 @@ ENDIF
 
 ! Calculate the incoming radiative flux onto the solid particles
 
-IF (VIRTUAL_PARTICLES) THEN
+IF (SOLID_PARTICLES) THEN
    PARTICLE_LOOP: DO IP=1,NLP
       LP => LAGRANGIAN_PARTICLE(IP)
       LPC => LAGRANGIAN_PARTICLE_CLASS(LP%CLASS_INDEX)

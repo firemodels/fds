@@ -587,9 +587,8 @@ LP%FACE_INDEX          => OS%INTEGERS( 7,STORAGE_INDEX) ; IF (NEW) LP%FACE_INDEX
 
 ! Assign logical pointers and values
 
-LP%SHOW              => OS%LOGICALS( 1,STORAGE_INDEX) ; IF (NEW) LP%SHOW              = .FALSE.
-LP%SPLAT             => OS%LOGICALS( 2,STORAGE_INDEX) ; IF (NEW) LP%SPLAT             = .FALSE.
-LP%IGNITOR           => OS%LOGICALS( 3,STORAGE_INDEX) ; IF (NEW) LP%IGNITOR           = .FALSE.
+LP%SHOW              => OS%LOGICALS( 1,STORAGE_INDEX) ; IF (NEW) LP%SHOW  = .FALSE.
+LP%SPLAT             => OS%LOGICALS( 2,STORAGE_INDEX) ; IF (NEW) LP%SPLAT = .FALSE.
 
 ! Assign real pointers and values
 

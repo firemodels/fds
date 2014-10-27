@@ -425,6 +425,7 @@ $QFDS -d Turbulence ramp_prof_u_z.fds
 $QFDS -d Visualization objects_dynamic.fds
 $QFDS -d Visualization objects_static.fds
 
+$QFDS -d WUI dragon_5a.fds
 $QFDS -d WUI pine_needles.fds
 $QFDS -d WUI random_walk_1.fds
 $QFDS -d WUI random_walk_2.fds
