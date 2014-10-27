@@ -1884,6 +1884,7 @@ One strategy for reducing the computational cost associated with a tightened tol
 \end{figure}
 
 \subsubsection{Special Case: True Periodic Boundaries}
+\label{sec:true_periodic_boundaries}
 
 In Section \ref{sec:periodic}, we discuss how to set periodic boundaries.  By default, in order to handle the most general case of a periodic domain with multiple meshes (imagine a periodic channel divided into several meshes), FDS treats the pressure boundary condition as what we call an ``interpolated boundary.''  This means that the matrix for the pressure Poisson equation is arranged for Dirichlet boundary conditions (the value of the solution is specified at the boundary).  This can lead to small errors in the solution and sometimes it is desirable to use the true periodic matrix for the Poisson equation.  But with the current solver (Fishpak) this is only possible for a single mesh.  If you want to implement true periodic boundaries for a single mesh case, set the appropriate \verb=FISHPAK_BC= value to zero on the \verb=PRES= line.  For example,
 
@@ -2145,13 +2146,20 @@ In conventional RANS (Reynolds-Averaged Navier-Stokes) models, symmetry boundari
 \subsubsection{Periodic Vents}
 \label{sec:periodic}
 
-A {\ct VENT} with {\ct SURF\_ID='PERIODIC'} may be used in combination with another periodic vent on the boundary of the domain in any of the three coordinate directions.  As an example, consider the following:
+A {\ct VENT} with {\ct SURF\_ID='PERIODIC'} may be used in combination with another periodic vent on the boundary of the domain in any of the three coordinate directions.  As an example, consider the following (valid for a single mesh case):
 
 \begin{lstlisting}
 &VENT MB='XMIN', SURF_ID='PERIODIC' /
 &VENT MB='XMAX', SURF_ID='PERIODIC' /
 \end{lstlisting}
 In this example, the entire {\ct XMIN} boundary is periodic with the {\ct XMAX} boundary.
+
+For multi-mesh cases with {\ct PERIODIC} boundaries the {\ct VENT} planes must be specified using {\ct PBX}, {\ct PBY}, or {\ct PBZ}.  If $x_{\si{min}}=0$ and $x_{\si{max}}=1$, for example, use
+\begin{lstlisting}
+&VENT PBX=0, SURF_ID='PERIODIC' /
+&VENT PBX=1, SURF_ID='PERIODIC' /
+\end{lstlisting}
+For additional information related to periodic boundaries and the pressure solver see Section~\ref{sec:true_periodic_boundaries}.
 
 Periodic vents may not be used to connect offset vents or vents in different coordinate directions.  For such cases, you must employ HVAC capabilities (see Section~\ref{info:HVAC}).
 
@@ -9533,7 +9541,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct SIGMA\_D}                      & Real            & Section~\ref{info:particle_size}        &           &               \\ \hline
 {\ct SPEC\_ID}                      & Character       & Section~\ref{thermal_part_props}        &           &               \\ \hline
 {\ct STATIC}                        & Logical         & Section~\ref{info:PART_SURF}            &           & {\ct .FALSE.} \\ \hline
-{\ct SURFACE\_TENSION}              & Real            & Section~\ref{info:secondary_breakup}    &   N/m     & $7.28 \times 10^4$  \\ \hline
+{\ct SURFACE\_TENSION}              & Real            & Section~\ref{info:secondary_breakup}    & N/m       & $7.28 \times 10^4$  \\ \hline
 {\ct SURF\_ID}                      & Character       & Section~\ref{info:PART_SURF}            &           &               \\ \hline
 {\ct TURBULENT\_DISPERSION}         & Logical         & Section~\ref{info:MASSLESS}             &           & {\ct .FALSE.} \\ \hline
 {\ct VERTICAL\_VELOCITY}            & Real            & Section~\ref{info:surface_droplets}     & m/s       &  0.5          \\ \hline
@@ -9556,11 +9564,11 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \hline \hline
 \endhead
 {\ct CHECK\_POISSON}                & Logical       & Section~\ref{info:PRES}           &               & {\ct .FALSE.}             \\ \hline
-{\ct FISHPAK\_BC(3)}                 & Integer       & Section~\ref{info:PRES}           &               & -1                        \\ \hline
-{\ct MAX\_PRESSURE\_ITERATIONS}     & Integer       & Section~\ref{info:PRES}           &               &   10                      \\ \hline
+{\ct FISHPAK\_BC(3)}                & Integer       & Section~\ref{info:PRES}           &               &                           \\ \hline
+{\ct MAX\_PRESSURE\_ITERATIONS}     & Integer       & Section~\ref{info:PRES}           &               & 10                        \\ \hline
 {\ct PRESSURE\_RELAX\_TIME}         & Real          & Section~\ref{info:PRES}           & s             & 1.                        \\ \hline
-{\ct RELAXATION\_FACTOR}            & Real          & Section~\ref{info:PRES}           &               & 1.0                       \\ \hline
-{\ct VELOCITY\_TOLERANCE}           & Real          & Section~\ref{info:PRES}           &  m/s          &                           \\ \hline
+{\ct RELAXATION\_FACTOR}            & Real          & Section~\ref{info:PRES}           &               & 1.                        \\ \hline
+{\ct VELOCITY\_TOLERANCE}           & Real          & Section~\ref{info:PRES}           & m/s           &                           \\ \hline
 \end{longtable}
 
 % Undocumented: SCARC_METHOD , SCARC_KRYLOV , SCARC_MULTIGRID, SCARC_SMOOTH  , SCARC_PRECON,
