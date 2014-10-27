@@ -5913,12 +5913,29 @@ In the example, 1~kg of pine needles occupy 1~m$^3$. The number of particles use
 \end{figure}
 
 
+\subsection{Firebrands}
+\label{info:firebrands}
+
+Firebrands are small pieces of burning wood and vegetation that can be lofted into the air and blown by the wind ahead of a wildland fire front. Manzello et~al.~\cite{Manzello:FSJ2008a} have developed a variety of experimental apparatus designed to generate firebrands in a laboratory setting. The example input file called {\ct dragon\_5a} in the {\ct WUI} (Wildland-Urban Interface) folder is a very simple mock-up of one of these experiments. The word ``dragon'' is based on the nickname of the apparatus; 5a is the figure number in Ref.~\cite{Manzello:FSJ2008a} on which this example case is loosely based. In the experiment, 700~g of small dowels (length 50~mm, diameter 8~mm) made of Ponderosa Pine wood were poured into a small steel chamber equipped with several propane burners. The dowels were left to burn for roughly a minute subject to a slow induced air flow after which time the air flow was increased and firebrands were propelled horizontally out of a 15~cm duct 2.25~m above the lab floor. It is reported that after several replicate experiments, the average mass of the firebrands collected from pans on the floor was 57~g. The average diameter of the collected dowels was 5.6~mm, and the average length was 13.5~mm. 
+
+It is not possible to simulate the experiment in FDS exactly as it was performed. The reason is that in the experiment, all 700~g of the wooden dowels were poured into the heating chamber at once. FDS cannot handle such a dense packing of Lagrangian particles. Instead, the simulated dowels are introduced at a rate of 10 per second. FDS also does not have a mechanism to break-up the dowels, reducing their length from 50~mm to 13.5~mm. Thus, the initial cylindrical particles are 13.5~mm and remain that length throughout the simulation. The diameter of the cylindrical particles is reduced, however, from 8~mm to 5.6~mm, which takes the initial density of 440~kg/m$^3$ down to 71~kg/m$^3$ because the mass of the firebrands is assumed to be 8~\% of the original. The plot in Fig.~\ref{dragon_5a} shows the increasing mass of firebrands thrown to the floor in the simulation after 100~s of particle insertion. The total mass of particles inserted into the apparatus is:
+\be \pi \, (0.004 \; {\rm m})^2 \times (0.0135 \; {\rm m}) \times (440 \; {\rm kg/m}^3) \times (10 \; {\rm part/s}) \times (100 \; {\rm s}) \approx 0.3 \; {\rm kg} \ee
+The amount expected on the floor is approximately 0.024~kg. 
+
+\begin{figure}[ht]
+\begin{center}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/dragon_5a}
+\end{center}
+\caption[Mass generation of firebrands in the {\ct dragon\_5a} test case]{Mass generation of firebrands in the {\ct dragon\_5a} test case.}
+\label{dragon_5a}
+\end{figure}
+
+
 
 \subsection{Screens}
 \label{info:particle_screen}
 
 A 2-D array of particles can be used to represent the drag exerted by a window screen, as in the following example:
-
 \begin{lstlisting}
 &INIT N_PARTICLES_PER_CELL=1, CELL_CENTERED=.TRUE., PART_ID='SCREEN',
       XB=1.01,1.02,0.0,1.0,0.0,1.0/
@@ -5928,8 +5945,7 @@ A 2-D array of particles can be used to represent the drag exerted by a window s
       MATL_ID='ALUMINUM' /
 &MATL ID='ALUMINUM', DENSITY=2700., CONDUCTIVITY=200., SPECIFIC_HEAT=0.9 /
 \end{lstlisting}
-
-\noindent The {\ct INIT} line designates the plane of the screen using the sextuplet {\ct XB}. A single particle is inserted into each cell by specifying the parameter {\ct N\_PARTICLES\_PER\_CELL=1}.  The particles are be defined with a {\ct SURF\_ID} containing the material properties of the screen.  A special drag law for screens is specified via the {\ct DRAG\_LAW}.  {\ct ORIENTATION} is the direction normal to the screen, and {\ct FREE\_AREA\_FRACTION} is the fraction of the screen's surface area that is open. In the example, an aluminum screen with a 40~\% free area and an 0.0003~m wire diameter is placed normal to the $x$-axis.  Note that the {\ct LENGTH} parameter on the {\ct SURF} line will be computed automatically so the fraction of the grid cell flow area occupied by the screen matches be given by 1 - {\ct FREE\_AREA\_FRACTION}. The pressure drop across the screen is given by
+The {\ct INIT} line designates the plane of the screen using the sextuplet {\ct XB}. A single particle is inserted into each cell by specifying the parameter {\ct N\_PARTICLES\_PER\_CELL=1}.  The particles are be defined with a {\ct SURF\_ID} containing the material properties of the screen.  A special drag law for screens is specified via the {\ct DRAG\_LAW}.  {\ct ORIENTATION} is the direction normal to the screen, and {\ct FREE\_AREA\_FRACTION} is the fraction of the screen's surface area that is open. In the example, an aluminum screen with a 40~\% free area and an 0.0003~m wire diameter is placed normal to the $x$-axis.  Note that the {\ct LENGTH} parameter on the {\ct SURF} line will be computed automatically so the fraction of the grid cell flow area occupied by the screen matches be given by 1 - {\ct FREE\_AREA\_FRACTION}. The pressure drop across the screen is given by
 \be
    \Delta p =  l \; \left(\frac{\mu}{K} u + \rho \frac{Y}{\sqrt{K}} u^2 \right)
 \ee
@@ -5943,53 +5959,17 @@ where $l$ is the screen thickness (equal to the wire diameter), $\mu$ is the vis
 \subsection{Electrical Cable Failure}
 \label{info:THIEF}
 
-Petra Andersson and Patrick Van Hees of the Swedish National Testing and Research Institute
-(SP) have proposed that the thermally-induced electrical failure (THIEF) of a cable can be predicted
-via a simple one-dimensional heat transfer calculation, under the assumption that the cable can
-be treated as a homogeneous cylinder~\cite{Andersson:2005}. Their results for PVC
-cables were encouraging and suggested that the simplification of the analysis is reasonable and
-that it should extend to other types of cables. The assumptions underlying the THIEF model are as follows:
+Petra Andersson and Patrick Van Hees of the Swedish National Testing and Research Institute (SP) have proposed that the thermally-induced electrical failure (THIEF) of a cable can be predicted via a simple one-dimensional heat transfer calculation, under the assumption that the cable can be treated as a homogeneous cylinder~\cite{Andersson:2005}. Their results for PVC cables were encouraging and suggested that the simplification of the analysis is reasonable and that it should extend to other types of cables. The assumptions underlying the THIEF model are as follows:
 \begin{enumerate}
-\item The heat penetration into a cable of circular cross section is largely in the radial direction.
-This greatly simplifies the analysis, and it is also conservative because it is assumed that
-the cable is completely surrounded by the heat source.
-\item The cable is homogeneous in composition. In reality, a cable is constructed of several
-different types of polymeric materials, cellulosic fillers, and a conducting metal, most
-often copper.
-\item The thermal properties -- conductivity, specific heat, and density -- of the assumed
-homogeneous cable are independent of temperature. In reality, both the thermal
-conductivity and specific heat of polymers are temperature-dependent, but this
-information is very difficult to obtain from manufacturers.
-\item It is assumed that no decomposition reactions occur within the cable during its heating,
-and ignition and burning are not considered in the model. In fact, thermoplastic cables
-melt, thermosets form a char layer, and both off-gas volatiles up to and beyond the point
-of electrical failure.
-\item Electrical failure occurs when the temperature just inside the cable jacket reaches an
-experimentally determined value.
+\item The heat penetration into a cable of circular cross section is largely in the radial direction. This greatly simplifies the analysis, and it is also conservative because it is assumed that the cable is completely surrounded by the heat source.
+\item The cable is homogeneous in composition. In reality, a cable is constructed of several different types of polymeric materials, cellulosic fillers, and a conducting metal, most often copper.
+\item The thermal properties -- conductivity, specific heat, and density -- of the assumed homogeneous cable are independent of temperature. In reality, both the thermal conductivity and specific heat of polymers are temperature-dependent, but this information is very difficult to obtain from manufacturers.
+\item It is assumed that no decomposition reactions occur within the cable during its heating, and ignition and burning are not considered in the model. In fact, thermoplastic cables melt, thermosets form a char layer, and both off-gas volatiles up to and beyond the point of electrical failure.
+\item Electrical failure occurs when the temperature just inside the cable jacket reaches an experimentally determined value.
 \end{enumerate}
-Obviously, there are considerable assumptions inherent in the Andersson and Van Hees THIEF
-model, but their results for various polyvinyl chloride (PVC) cables suggested that it may be
-sufficient for engineering analyses of a wider variety of cables. The U.S. Nuclear Regulatory
-Commission sponsored a study of cable failure known as CAROLFIRE~\cite{CAROLFIRE}. The primary project objective of CAROLFIRE was to
-characterize the various modes of electrical
-failure (e.g., hot shorts, shorts to ground) within bundles of power, control and instrument cables.
-A secondary objective of the project was to develop a simple model to predict thermally-induced
-electrical failure when a given interior region of the cable reaches an empirically
-determined threshold temperature. The measurements used for these purposes are described in
-Volume II of the CAROLFIRE test report. Volume III describes the modeling.
+Obviously, there are considerable assumptions inherent in the Andersson and Van Hees THIEF model, but their results for various polyvinyl chloride (PVC) cables suggested that it may be sufficient for engineering analyses of a wider variety of cables. The U.S. Nuclear Regulatory Commission sponsored a study of cable failure known as CAROLFIRE~\cite{CAROLFIRE}. The primary project objective of CAROLFIRE was to characterize the various modes of electrical failure (e.g., hot shorts, shorts to ground) within bundles of power, control and instrument cables. A secondary objective of the project was to develop a simple model to predict thermally-induced electrical failure when a given interior region of the cable reaches an empirically determined threshold temperature. The measurements used for these purposes are described in Volume II of the CAROLFIRE test report. Volume III describes the modeling.
 
-The THIEF model can only predict the temperature profile within the cable as a function of time,
-given a time-dependent exposing temperature or heat flux. The model does not predict at what
-temperature the cable fails electrically. This information is gathered from experiment. The
-CAROLFIRE experimental program included bench-scale, single cable experiments in which
-temperature measurements were made on the surface of, and at various points within, cables
-subjected to a uniform heat flux. These experiments provided the link between internal cable
-temperature and electrical failure. The model can only predict the interior temperature and infer
-electrical failure when a given temperature is reached. It is presumed that the
-temperature of the centermost point in the cable is not necessarily the indicator of electrical
-failure. This analysis method uses the temperature just inside the cable jacket rather than the
-centermost temperature, as that is where electrical shorts in a multi-conductor cable are most
-likely to occur first.
+The THIEF model can only predict the temperature profile within the cable as a function of time, given a time-dependent exposing temperature or heat flux. The model does not predict at what temperature the cable fails electrically. This information is gathered from experiment. The CAROLFIRE experimental program included bench-scale, single cable experiments in which temperature measurements were made on the surface of, and at various points within, cables subjected to a uniform heat flux. These experiments provided the link between internal cable temperature and electrical failure. The model can only predict the interior temperature and infer electrical failure when a given temperature is reached. It is presumed that the temperature of the centermost point in the cable is not necessarily the indicator of electrical failure. This analysis method uses the temperature just inside the cable jacket rather than the centermost temperature, as that is where electrical shorts in a multi-conductor cable are most likely to occur first.
 
 To use the THIEF model in FDS, add lines similar to the following to the input file:
 \begin{lstlisting}
@@ -6022,21 +6002,13 @@ It is not unusual to include hundreds of thousands of particles in a simulation.
 \subsection{Particles Introduced at a Solid Surface}
 \label{info:particle_flux}
 
-If the particles have mass and are introduced from a solid surface, specify {\ct PARTICLE\_MASS\_FLUX} on the {\ct SURF} line. The number of particles inserted at each solid cell every
-{\ct DT\_INSERT} seconds is specified by {\ct NPPC} (Number of Particles Per Cell) on the {\ct SURF} line defining the solid surface. The default value of {\ct DT\_INSERT} is 0.01~s and {\ct NPPC} is 1. As an example, the following set of input lines:
+If the particles have mass and are introduced from a solid surface, specify {\ct PARTICLE\_MASS\_FLUX} on the {\ct SURF} line. The number of particles inserted at each solid cell every {\ct DT\_INSERT} seconds is specified by {\ct NPPC} (Number of Particles Per Cell) on the {\ct SURF} line defining the solid surface. The default value of {\ct DT\_INSERT} is 0.01~s and {\ct NPPC} is 1. As an example, the following set of input lines:
 \begin{lstlisting}
 &PART ID='particles', ... /
 &SURF ID='SLOT', PART_ID='particles', VEL=-5., PARTICLE_MASS_FLUX=0.1 /
 &OBST XB=-0.2,0.2,-0.2,0.2,4.0,4.4, SURF_IDS='INERT','SLOT','INERT' /
 \end{lstlisting}
-creates an obstruction that ejects particles out of its sides at a rate
-of 0.1~\si{kg/(m$^2$.s)} and a velocity of 5~m/s (the minus sign indicates the particles are ejected from the surface).
-FDS will adjust the mass flux if the obstruction or vent dimensions are changed to conform to the numerical grid. The
-{\ct ID}s have no meaning other than as identifiers. The surface on which particles are specified must have a non-zero normal velocity directed into the
-computational domain. This happens automatically if the surface is burning, but must be specified
-if it is not. There is a simple input file called {\ct particle\_flux.fds} that demonstrates how the above input lines can produce a stream of
-particles from a block. The total mass flux from the block is the product of the {\ct PARTICLE\_MASS\_FLUX} times the total area of the sides of the block,
-0.4~m $\times$ 0.4~m $\times$ 4. The expected accumulated mass of particles on the ground after 10~s is expected to be 0.64~kg, as shown in Fig.~\ref{particle_flux}.
+creates an obstruction that ejects particles out of its sides at a rate of 0.1~\si{kg/(m$^2$.s)} and a velocity of 5~m/s (the minus sign indicates the particles are ejected from the surface). FDS will adjust the mass flux if the obstruction or vent dimensions are changed to conform to the numerical grid. The {\ct ID}s have no meaning other than as identifiers. The surface on which particles are specified must have a non-zero normal velocity directed into the computational domain. This happens automatically if the surface is burning, but must be specified if it is not. There is a simple input file called {\ct particle\_flux.fds} that demonstrates how the above input lines can produce a stream of particles from a block. The total mass flux from the block is the product of the {\ct PARTICLE\_MASS\_FLUX} times the total area of the sides of the block, 0.4~m $\times$ 0.4~m $\times$ 4. The expected accumulated mass of particles on the ground after 10~s is expected to be 0.64~kg, as shown in Fig.~\ref{particle_flux}.
 
 \begin{figure}[ht]
 \begin{center}
@@ -6046,29 +6018,15 @@ particles from a block. The total mass flux from the block is the product of the
 \label{particle_flux}
 \end{figure}
 
-Note also that you can independently control particles that emanate from a solid surface. For example, a device might control the
-activation of a fan, but you can over-ride the device and control the particles separately. To do this, specify either
-a device or controller via a {\ct DEVC\_ID} or {\ct CTRL\_ID} on the {\ct PART} line that defines the particles. For more
-information on devices and controls, see Sections~\ref{info:basic_control}~and~\ref{info:CTRL}.
-
+Note also that you can independently control particles that emanate from a solid surface. For example, a device might control the activation of a fan, but you can over-ride the device and control the particles separately. To do this, specify either a device or controller via a {\ct DEVC\_ID} or {\ct CTRL\_ID} on the {\ct PART} line that defines the particles. For more information on devices and controls, see Sections~\ref{info:basic_control}~and~\ref{info:CTRL}.
 
 
 \subsection{Particles or Droplets Introduced at a Sprinkler or Nozzle}
 \label{info:sprinkler_droplets}
 
-A sprinkler or nozzle is added to the simulation using a {\ct PROP} line to describe the features of the device and a {\ct DEVC} line to position and orient the
-device within the computational domain.
-{\ct PARTICLES\_PER\_SECOND} is the  number of droplets inserted every
-second per active sprinkler or nozzle (Default 5000). It is listed on the {\ct PROP} line that includes other properties of
-the sprinkler or nozzle. Note that this parameter only affects sprinklers and nozzles.
-Changing this parameter does {\em not} change the flow rate, but rather the number
-of droplets used to represent the flow.
+A sprinkler or nozzle is added to the simulation using a {\ct PROP} line to describe the features of the device and a {\ct DEVC} line to position and orient the device within the computational domain. {\ct PARTICLES\_PER\_SECOND} is the  number of droplets inserted every second per active sprinkler or nozzle (Default 5000). It is listed on the {\ct PROP} line that includes other properties of the sprinkler or nozzle. Note that this parameter only affects sprinklers and nozzles. Changing this parameter does {\em not} change the flow rate, but rather the number of droplets used to represent the flow. 
 
-Note that {\ct PARTICLES\_PER\_SECOND} can be a very important parameter. In some simulations, it is a good idea to increase this number so that the
-liquid mass is distributed more uniformly over the droplets. If this parameter is too small, it can lead to a non-physical evaporation pattern, sometimes even to the
-point of causing a numerical instability. If you encounter a numerical instability shortly after the activation of a sprinkler or nozzle, consider increasing
-{\ct PARTICLES\_PER\_SECOND} to produce a smoother evaporation pattern that is more realistic. Keep in mind that for a real sprinkler or nozzle, there are many more
-droplets created per second than the number that can be simulated.
+Note that {\ct PARTICLES\_PER\_SECOND} can be a very important parameter. In some simulations, it is a good idea to increase this number so that the liquid mass is distributed more uniformly over the droplets. If this parameter is too small, it can lead to a non-physical evaporation pattern, sometimes even to the point of causing a numerical instability. If you encounter a numerical instability shortly after the activation of a sprinkler or nozzle, consider increasing {\ct PARTICLES\_PER\_SECOND} to produce a smoother evaporation pattern that is more realistic. Keep in mind that for a real sprinkler or nozzle, there are many more droplets created per second than the number that can be simulated.
 
 Note that by default the parameter {\ct PARTICLE\_CFL} is set to {\ct .FALSE.} (see Section \ref{info:PART_Stability}).  Thus, particles inserted with a velocity faster than the local fluid entrainment velocity may traverse more than one cell.  If the particles represent a fuel spray or sprinkler droplets that are to be collected in a pan, it may be necessary to set {\ct PARTICLE\_CFL=.TRUE.} on {\ct MISC} to precisely account for particle mass.  For example, the particles may represent liquid fuel being sprayed into a pan burner made from a zero thickness obstruction.  In this case, if the particle position overshoots the cell face representing the boundary of the pan then either spurious burning of the particle will occur underneath the pan or, if the particle does not burn, the heat release rate will be diminished.
 
@@ -6076,8 +6034,7 @@ Note that by default the parameter {\ct PARTICLE\_CFL} is set to {\ct .FALSE.} (
 \subsection{Particles or Droplets Introduced within a Volume}
 \label{info:initial_droplets}
 
-Sometimes it is convenient to introduce Lagrangian particles within a particular region of the domain. To do this, use an {\ct INIT} line which contains the {\ct PART\_ID} for the type of particle to be inserted. Particles specified via an {\ct INIT} line can represent a number of different kinds of subgrid-scale objects. The particles can be massless tracers or they can be solid or liquid particles with mass. If not massless, specify {\ct MASS\_PER\_VOLUME} in units of kg/m$^3$. Do not confuse this parameter with {\ct DENSITY}, explained in the next section.
-For example, water has a {\ct DENSITY} of 1000~kg/m$^3$, whereas a liter of water broken up into droplets and spread over a cubic meter has a {\ct MASS\_PER\_VOLUME} of 1~kg/m$^3$. The number of Lagrangian particles inserted is controlled by the parameter {\ct N\_PARTICLES}.
+Sometimes it is convenient to introduce Lagrangian particles within a particular region of the domain. To do this, use an {\ct INIT} line which contains the {\ct PART\_ID} for the type of particle to be inserted. Particles specified via an {\ct INIT} line can represent a number of different kinds of subgrid-scale objects. The particles can be massless tracers or they can be solid or liquid particles with mass. If not massless, specify {\ct MASS\_PER\_VOLUME} in units of kg/m$^3$. Do not confuse this parameter with {\ct DENSITY}, explained in the next section. For example, water has a {\ct DENSITY} of 1000~kg/m$^3$, whereas a liter of water broken up into droplets and spread over a cubic meter has a {\ct MASS\_PER\_VOLUME} of 1~kg/m$^3$. The number of Lagrangian particles inserted is controlled by the parameter {\ct N\_PARTICLES}.
 
 \subsubsection{Randomly Distributed Particles within a Specified Volume}
 
@@ -6092,8 +6049,7 @@ Note that the volume of the specified region is calculated according to the {\ct
 
 \subsubsection{Specifying a Fixed Number of Particles per Grid Cell}
 
-There are special applications where you might want to specify {\ct N\_PARTICLES\_PER\_CELL} to indicate the number of particles within each grid cell of a specified region.
-When using {\ct N\_PARTICLES\_PER\_CELL}, the particles will be randomly placed within each cell.  If you set {\ct CELL\_CENTERED=.TRUE.}, the particles will be placed at the center of each cell.
+There are special applications where you might want to specify {\ct N\_PARTICLES\_PER\_CELL} to indicate the number of particles within each grid cell of a specified region. When using {\ct N\_PARTICLES\_PER\_CELL}, the particles will be randomly placed within each cell.  If you set {\ct CELL\_CENTERED=.TRUE.}, the particles will be placed at the center of each cell.
 
 \subsubsection{Specifying a Weight Factor for Particles}
 
@@ -6124,13 +6080,9 @@ Note that the {\ct DIAMETER} ($\mu$m) on the {\ct INIT} line is only valid for l
 
 \subsubsection{Periodic Insertion of Particles within a Specified Volume}
 
-If you want to introduce particles within a given region periodically in time and not just initially, set {\ct DT\_INSERT} on
-the {\ct INIT} line to a positive value indicating the time increment (s) for insertion. The parameter {\ct N\_PARTICLES} now indicates the
-number of droplets/particles inserted every {\ct DT\_INSERT} seconds. If the droplets/particles have mass, use {\ct MASS\_PER\_TIME} (kg/s) instead of {\ct MASS\_PER\_VOLUME} to
-indicate how much mass is to be introduced per second.
+If you want to introduce particles within a given region periodically in time and not just initially, set {\ct DT\_INSERT} on the {\ct INIT} line to a positive value indicating the time increment (s) for insertion. The parameter {\ct N\_PARTICLES} now indicates the number of droplets/particles inserted every {\ct DT\_INSERT} seconds. If the droplets/particles have mass, use {\ct MASS\_PER\_TIME} (kg/s) instead of {\ct MASS\_PER\_VOLUME} to indicate how much mass is to be introduced per second.
 
-If you want to delay the insertion of droplets, you can use either a {\ct DEVC\_ID} or a {\ct CTRL\_ID} on the {\ct INIT} line to name the controlling device.
-See Section~\ref{info:basic_control} for more information on controlling devices.
+If you want to delay the insertion of droplets, you can use either a {\ct DEVC\_ID} or a {\ct CTRL\_ID} on the {\ct INIT} line to name the controlling device. See Section~\ref{info:basic_control} for more information on controlling devices.
 
 
 
@@ -6143,21 +6095,11 @@ Modeling fire suppression by water has three principal components: transporting 
 \subsection{Velocity on Solid Surfaces}
 \label{info:surface_droplets}
 
-When a droplet strikes a solid surface\footnote{If you do not want droplets to accumulate on solid surfaces, set {\ct ALLOW\_SURFACE\_PARTICLES=.FALSE.} on the
-{\ct MISC} line. It is normally {\ct .TRUE.}}, it sticks and is reassigned a new speed and direction. If the surface is
-horizontal, the direction is randomly chosen. If vertical, the direction is downwards.
-The rate at which the droplets move over the horizontal and vertical surfaces is difficult to
-quantify. The parameters {\ct HORIZONTAL\_VELOCITY} and {\ct VERTICAL\_VELOCITY} on the {\ct PART} line
-allow you to control the rate at which droplets move horizontally or vertically (downward). The defaults are
-0.2~m/s and 0.5~m/s, respectively.
+When a droplet strikes a solid surface\footnote{If you do not want droplets to accumulate on solid surfaces, set {\ct ALLOW\_SURFACE\_PARTICLES=.FALSE.} on the {\ct MISC} line. It is normally {\ct .TRUE.}}, it sticks and is reassigned a new speed and direction. If the surface is horizontal, the direction is randomly chosen. If vertical, the direction is downwards. The rate at which the droplets move over the horizontal and vertical surfaces is difficult to quantify. The parameters {\ct HORIZONTAL\_VELOCITY} and {\ct VERTICAL\_VELOCITY} on the {\ct PART} line allow you to control the rate at which droplets move horizontally or vertically (downward). The defaults are 0.2~m/s and 0.5~m/s, respectively.
 
-There are some applications, like the suppression of racked storage commodities, where it is useful to allow water droplets to move horizontally
-along the underside of a solid object. It is difficult to model this phenomenon precisely because it involves surface tension, surface porosity and
-absorption, and complicated geometry. However, a way to capture some of the effect is to set {\ct ALLOW\_UNDERSIDE\_PARTICLES=.TRUE.} on the
-{\ct MISC} line. It is normally false. Also, note that when droplets hit obstructions, the vertical direction is assumed to coincide with the $z$ axis, regardless of any change to the gravity vector, {\ct GVEC}.
+There are some applications, like the suppression of racked storage commodities, where it is useful to allow water droplets to move horizontally along the underside of a solid object. It is difficult to model this phenomenon precisely because it involves surface tension, surface porosity and absorption, and complicated geometry. However, a way to capture some of the effect is to set {\ct ALLOW\_UNDERSIDE\_PARTICLES=.TRUE.} on the {\ct MISC} line. It is normally false. Also, note that when droplets hit obstructions, the vertical direction is assumed to coincide with the $z$ axis, regardless of any change to the gravity vector, {\ct GVEC}.
 
-A useful sample case to demonstrate various features of droplet motion on solid obstructions is the test case called {\ct cascade.fds}. Figure~\ref{cascade} shows a stream
-of water droplets impinging on the top of a box followed by the cascading of water droplets over the top edge.
+A useful sample case to demonstrate various features of droplet motion on solid obstructions is the test case called {\ct cascade.fds}. Figure~\ref{cascade} shows a stream of water droplets impinging on the top of a box followed by the cascading of water droplets over the top edge.
 
 \begin{figure}[ht]
 \begin{center}
@@ -6176,30 +6118,15 @@ of water droplets impinging on the top of a box followed by the cascading of wat
 
 \subsection{Reduction of the Burning Rate}
 
-Water reduces the fuel pyrolysis rate by cooling the fuel surface and also
-changing the chemical reactions that liberate fuel gases from the solid.
-If the solid or liquid fuel has been given reaction parameters via the {\ct MATL} line, there is no
-need to set any additional suppression parameters. It is assumed that
-water impinging on the fuel surface takes energy away from the
-pyrolysis process and thereby reduces the burning rate of the fuel.
-If the surface has been assigned a {\ct HRRPUA} (Heat Release Rate Per Unit Area),
-a parameter needs to be specified that governs the suppression of the fire by water because this type of simulated
-fire essentially acts like a gas burner whose flow rate is explicitly specified.
-An empirical way to account for fire suppression by water
-is to characterize the reduction of the pyrolysis rate in terms
-of an exponential function. The local mass loss rate of the
-fuel is expressed in the form
+Water reduces the fuel pyrolysis rate by cooling the fuel surface and also changing the chemical reactions that liberate fuel gases from the solid. If the solid or liquid fuel has been given reaction parameters via the {\ct MATL} line, there is no need to set any additional suppression parameters. It is assumed that water impinging on the fuel surface takes energy away from the pyrolysis process and thereby reduces the burning rate of the fuel. If the surface has been assigned a {\ct HRRPUA} (Heat Release Rate Per Unit Area), a parameter needs to be specified that governs the suppression of the fire by water because this type of simulated fire essentially acts like a gas burner whose flow rate is explicitly specified. An empirical way to account for fire suppression by water is to characterize the reduction of the pyrolysis rate in terms of an exponential function. The local mass loss rate of the fuel is expressed in the form
 \be
    \dm_{\rm f}''(t) = \dm_{\rm f,0}''(t) \; {\rm e}^{-\int k(t) \; dt} \label{nistexting}
 \ee
-Here $\dm_{\rm f,0}''(t)$ is the user-specified burning rate per unit
-area when no water is applied and $k$ is a function of the local water
-mass per unit area, $m_{\rm w}''$, expressed in units of kg/m$^2$.
+Here $\dm_{\rm f,0}''(t)$ is the user-specified burning rate per unit area when no water is applied and $k$ is a function of the local water mass per unit area, $m_{\rm w}''$, expressed in units of kg/m$^2$.
 \be
 k(t) = \hbox{\ct E\_COEFFICIENT} \; m_{\rm w}''(t) \quad          \si{1/s}
 \ee
 The parameter {\ct E\_COEFFICIENT} must be obtained experimentally, and it is expressed in units of \si{m$^2$/(kg.s)}. Usually, this type of suppression algorithm is invoked when the fuel is complicated, like a cartoned commodity.  The example case {\ct e\_coefficient} demonstrates the use of this parameter.  A sprinkler is placed over a burner defined with an {\ct E\_COEFFICIENT} as shown below.  The sprinkler is set to operate at 5~s.  Figure~\ref{e_coef_fig} shows the heat release rate and burning rate.
-
 \begin{lstlisting}
 &SURF ID='FUEL', HRRPUA=100., E_COEFFICIENT=4. /
 \end{lstlisting}
@@ -6221,19 +6148,9 @@ The parameter {\ct E\_COEFFICIENT} must be obtained experimentally, and it is ex
 
 \chapter{Devices and Control Logic}
 
-Sprinklers, smoke detectors, heat flux gauges, and thermocouples
-may seem to be completely unrelated, but from the point of view
-of FDS, they are simply devices that operate in specific ways depending
-on the properties assigned to them. They can be used to record some
-quantity of the simulated environment, like a thermocouple, or they can represent a mathematical model
-of a complex sensor, like a smoke detector,
-and in some cases they can trigger events to happen, like a timer.
+Sprinklers, smoke detectors, heat flux gauges, and thermocouples may seem to be completely unrelated, but from the point of view of FDS, they are simply devices that operate in specific ways depending on the properties assigned to them. They can be used to record some quantity of the simulated environment, like a thermocouple, or they can represent a mathematical model of a complex sensor, like a smoke detector, and in some cases they can trigger events to happen, like a timer.
 
-All devices, in the broadest sense of the word,
-are designated via the namelist group {\ct DEVC}.
-In addition, advanced functionality and properties are accommodated
-via additional namelist groups called {\ct CTRL} (Control) and
-{\ct PROP} (Properties).
+All devices, in the broadest sense of the word, are designated via the namelist group {\ct DEVC}. In addition, advanced functionality and properties are accommodated via additional namelist groups called {\ct CTRL} (Control) and {\ct PROP} (Properties).
 
 
 
@@ -6266,21 +6183,11 @@ The delivered density to the floor from a sprinkler depends upon where the sprin
 \section{Device Output}
 \label{info:out:DEVC}
 
-Each device has a {\ct QUANTITY} associated with it.
-The time history of each {\ct DEVC} quantity is output to a comma-delimited
-ASCII file called {\ct CHID\_devc.csv}
-(see Section~\ref{out:DEVC} for output file format).
-This file can be imported into most spread sheet software packages.  Most spreadsheet programs limit the number of columns to some number (for example the 2003 version Microsoft Excel had a 256 column limit).  As a default, FDS places no limit on the amount of columns in a comma-separated value (.csv) file.  If your spreadsheet application allows fewer columns than the number of {\ct DEVC} or {\ct CTRL} in your input file then set {\ct COLUMN\_DUMP\_LIMIT} equal to {\ct .TRUE.} on the {\ct DUMP} line.
-Use {\ct DEVC\_COLUMN\_LIMIT} and {\ct CTRL\_COLUMN\_LIMIT} to indicate the limit of columns in the
-device and control output files. Their default values are 254.
+Each device has a {\ct QUANTITY} associated with it. The time history of each {\ct DEVC} quantity is output to a comma-delimited ASCII file called {\ct CHID\_devc.csv} (see Section~\ref{out:DEVC} for output file format). This file can be imported into most spread sheet software packages.  Most spreadsheet programs limit the number of columns to some number (for example the 2003 version Microsoft Excel had a 256 column limit).  As a default, FDS places no limit on the amount of columns in a comma-separated value (.csv) file.  If your spreadsheet application allows fewer columns than the number of {\ct DEVC} or {\ct CTRL} in your input file then set {\ct COLUMN\_DUMP\_LIMIT} equal to {\ct .TRUE.} on the {\ct DUMP} line. Use {\ct DEVC\_COLUMN\_LIMIT} and {\ct CTRL\_COLUMN\_LIMIT} to indicate the limit of columns in the device and control output files. Their default values are 254.
 
-By default, the {\ct DEVC} output is written to a file every {\ct DT\_DEVC} seconds.
-This time increment is specified on the {\ct DUMP} line. Also, by default,
-a time-averaged value is written out for each quantity of interest. To prevent FDS from time-averaging the {\ct DEVC} output, add
-{\ct TIME\_AVERAGED=.FALSE.} to the {\ct DEVC} line.
+By default, the {\ct DEVC} output is written to a file every {\ct DT\_DEVC} seconds. This time increment is specified on the {\ct DUMP} line. Also, by default, a time-averaged value is written out for each quantity of interest. To prevent FDS from time-averaging the {\ct DEVC} output, add {\ct TIME\_AVERAGED=.FALSE.} to the {\ct DEVC} line.
 
-A useful option for the {\ct DEVC} line is to add {\ct RELATIVE=.TRUE.}, which will indicate that only the change in
-the initial value of the {\ct QUANTITY} is to be output. This can be useful for verification and validation studies.
+A useful option for the {\ct DEVC} line is to add {\ct RELATIVE=.TRUE.}, which will indicate that only the change in the initial value of the {\ct QUANTITY} is to be output. This can be useful for verification and validation studies.
 
 You can change the values of the output by multiplying by {\ct CONVERSION\_FACTOR} and changing the character string {\ct UNITS}.
 
@@ -6288,10 +6195,7 @@ If you do not want the {\ct DEVC} {\ct QUANTITY} to be included in the output fi
 
 
 
-All devices must have a specified {\ct QUANTITY}.  Some special devices (Section~\ref{info:PROP}) have their {\ct QUANTITY}
-specified on a {\ct PROP} line.
-A {\ct QUANTITY} specified on a {\ct PROP} line associated with a {\ct DEVC} line will override a {\ct QUANTITY}
-specified on the {\ct DEVC} line.
+All devices must have a specified {\ct QUANTITY}.  Some special devices (Section~\ref{info:PROP}) have their {\ct QUANTITY} specified on a {\ct PROP} line. A {\ct QUANTITY} specified on a {\ct PROP} line associated with a {\ct DEVC} line will override a {\ct QUANTITY} specified on the {\ct DEVC} line.
 
 
 
@@ -6300,12 +6204,7 @@ specified on the {\ct DEVC} line.
 \section{Special Device Properties: The \texorpdfstring{{\tt PROP}}{PROP} Namelist Group (Table \ref{tbl:PROP})}
 \label{info:PROP}
 
-Many devices are fairly easy to describe, like a point measurement, with only a few parameters which can be included on the
-{\ct DEVC} line. However, for more complicated devices, it is inconvenient to list all of the properties on each and every
-{\ct DEVC} line. For example, a simulation might include hundreds of sprinklers, but it is tedious to list the properties of the
-sprinkler each time the sprinkler is sited. For these devices, use a separate namelist group called {\ct PROP} to store the relevant parameters.
-Each {\ct PROP} line is identified by a unique {\ct ID}, and invoked by a {\ct DEVC} line by the string {\ct PROP\_ID}.
-The best way to describe the {\ct PROP} group is to list the various special devices and their properties.
+Many devices are fairly easy to describe, like a point measurement, with only a few parameters which can be included on the {\ct DEVC} line. However, for more complicated devices, it is inconvenient to list all of the properties on each and every {\ct DEVC} line. For example, a simulation might include hundreds of sprinklers, but it is tedious to list the properties of the sprinkler each time the sprinkler is sited. For these devices, use a separate namelist group called {\ct PROP} to store the relevant parameters. Each {\ct PROP} line is identified by a unique {\ct ID}, and invoked by a {\ct DEVC} line by the string {\ct PROP\_ID}. The best way to describe the {\ct PROP} group is to list the various special devices and their properties.
 
 
 \subsection{Sprinklers}
@@ -6324,48 +6223,18 @@ A sprinkler, known as {\ct 'Spr\_60'}, is located at a point in space given by {
 \item[{\ct C\_FACTOR}] Conduction Factor in units of $\si{m^\ha/s^\ha}$. (Default 0. $\si{m^\ha/s^\ha}$)
 \item[{\ct ACTIVATION\_TEMPERATURE}] in units of $^\circ$C. (Default 74~$^\circ$C)
 \item[{\ct INITIAL\_TEMPERATURE}] of the link in units of $^\circ$C. (Default {\ct TMPA})
-\item[{\ct FLOW\_RATE} or {\ct MASS\_FLOW\_RATE}] in units of L/min or kg/s.
-An alternative is to provide the {\ct K\_FACTOR} in units of $\si{L/(min.bar^{\ha})}$ and the
-{\ct OPERATING\_PRESSURE}, the gauge pressure at the sprinkler, in units of bar.
-The flow rate is then given by $K \sqrt{p}$. Note that 1 bar is equivalent to
-14.5~psi, 1 gpm is equivalent to 3.785~L/min, 1~gpm/psi$^\ha$ is
-equivalent to 14.41~L/min/bar$^\ha$.  If {\ct MASS\_FLOW\_RATE} is given then {\ct PARTICLE\_VELOCITY} must also be defined.
-Note that {\ct FLOW\_RATE} is only appropriate for liquid droplets; solid particles should use {\ct MASS\_FLOW\_RATE}
-\item[{\ct OFFSET}] Radius (m) of a sphere surrounding the
-sprinkler where the water droplets are initially placed in the simulation. It is assumed that beyond the {\ct OFFSET} the droplets have completely broken
-up and are transported independently of each other. (Default 0.05~m)
+\item[{\ct FLOW\_RATE} or {\ct MASS\_FLOW\_RATE}] in units of L/min or kg/s. An alternative is to provide the {\ct K\_FACTOR} in units of $\si{L/(min.bar^{\ha})}$ and the {\ct OPERATING\_PRESSURE}, the gauge pressure at the sprinkler, in units of bar. The flow rate is then given by $K \sqrt{p}$. Note that 1 bar is equivalent to 14.5~psi, 1 gpm is equivalent to 3.785~L/min, 1~gpm/psi$^\ha$ is equivalent to 14.41~L/min/bar$^\ha$.  If {\ct MASS\_FLOW\_RATE} is given then {\ct PARTICLE\_VELOCITY} must also be defined. Note that {\ct FLOW\_RATE} is only appropriate for liquid droplets; solid particles should use {\ct MASS\_FLOW\_RATE}
+\item[{\ct OFFSET}] Radius (m) of a sphere surrounding the sprinkler where the water droplets are initially placed in the simulation. It is assumed that beyond the {\ct OFFSET} the droplets have completely broken up and are transported independently of each other. (Default 0.05~m)
 \item[{\ct PARTICLE\_VELOCITY}]  Initial droplet velocity. (Default 0~m/s)
-\item[{\ct ORIFICE\_DIAMETER}] Diameter of the nozzle orifice in m (default 0~m). This input provides an alternative way to set droplet velocity
-by giving values for {\ct FLOW\_RATE} and {\ct ORIFICE\_DIAMETER}, in which case the droplet velocity is computed by dividing the
-flow rate by the orifice area. Use this method if you do not have any information about droplet velocity. However, quite often
-you must fine-tune the {\ct PARTICLE\_VELOCITY} in order to reproduce a particular spray profile.
-The {\ct ORIFICE\_DIAMETER} is not used if either {\ct PARTICLE\_VELOCITY} or {\ct SPRAY\_PATTERN\_TABLE} is specified.
-\item[{\ct SPRAY\_ANGLE}] A pair of angles (in degrees) through which the droplets are sprayed.
-The angles outline a conical spray pattern relative to the
-south pole of the sphere centered at the sprinkler with radius {\ct OFFSET}.
-For example, {\ct SPRAY\_ANGLE=30.,80.} directs the water droplets to leave
-the sprinkler through a band between 60$^\circ$ and 10$^\circ$ south latitude, assuming the orientation of
-the sprinkler is (0,0,-1), the default. Elliptical spray patterns can be defined by giving a pair of spray angles. For example, {\ct SPRAY\_ANGLE(1,1:2)=0.,60.}  and {\ct SPRAY\_ANGLE(2,1:2)=0.,30.}, defines a spray pattern with 60 degree angle in the direction of $x$ axis and a 30 degree angle in the direction of $y$ axis.
-{\ct SPRAY\_PATTERN\_SHAPE} determines how the droplets are distributed within the specified {\ct SPRAY\_ANGLE}.
-Choices are {\ct 'UNIFORM'} for uniform distribution and {\ct 'GAUSSIAN'}. The default distribution is {\ct 'GAUSSIAN'}. The parameter {\ct SPRAY\_PATTERN\_MU} controls the latitude of
-the maximum density of droplets for the {\ct 'GAUSSIAN'} distribution. The width of the distribution is controlled by the parameter {\ct SPRAY\_PATTERN\_BETA}.
+\item[{\ct ORIFICE\_DIAMETER}] Diameter of the nozzle orifice in m (default 0~m). This input provides an alternative way to set droplet velocity by giving values for {\ct FLOW\_RATE} and {\ct ORIFICE\_DIAMETER}, in which case the droplet velocity is computed by dividing the flow rate by the orifice area. Use this method if you do not have any information about droplet velocity. However, quite often you must fine-tune the {\ct PARTICLE\_VELOCITY} in order to reproduce a particular spray profile. The {\ct ORIFICE\_DIAMETER} is not used if either {\ct PARTICLE\_VELOCITY} or {\ct SPRAY\_PATTERN\_TABLE} is specified.
+\item[{\ct SPRAY\_ANGLE}] A pair of angles (in degrees) through which the droplets are sprayed. The angles outline a conical spray pattern relative to the south pole of the sphere centered at the sprinkler with radius {\ct OFFSET}. For example, {\ct SPRAY\_ANGLE=30.,80.} directs the water droplets to leave the sprinkler through a band between 60$^\circ$ and 10$^\circ$ south latitude, assuming the orientation of the sprinkler is (0,0,-1), the default. Elliptical spray patterns can be defined by giving a pair of spray angles. For example, {\ct SPRAY\_ANGLE(1,1:2)=0.,60.}  and {\ct SPRAY\_ANGLE(2,1:2)=0.,30.}, defines a spray pattern with 60 degree angle in the direction of $x$ axis and a 30 degree angle in the direction of $y$ axis. {\ct SPRAY\_PATTERN\_SHAPE} determines how the droplets are distributed within the specified {\ct SPRAY\_ANGLE}. Choices are {\ct 'UNIFORM'} for uniform distribution and {\ct 'GAUSSIAN'}. The default distribution is {\ct 'GAUSSIAN'}. The parameter {\ct SPRAY\_PATTERN\_MU} controls the latitude of the maximum density of droplets for the {\ct 'GAUSSIAN'} distribution. The width of the distribution is controlled by the parameter {\ct SPRAY\_PATTERN\_BETA}.
 \item[{\ct SPRAY\_PATTERN\_TABLE}] Name of a set of {\ct TABL} lines containing the description of the spray pattern.
-\item[{\ct PART\_ID}] The name of the {\ct PART} line containing properties of the droplets.
-See Chapter~\ref{info:PART} for additional details.
-\item[{\ct PRESSURE\_RAMP}] The name of the {\ct RAMP} lines specifying the dependence of pipe pressure on the
-number of active sprinklers and nozzles.
+\item[{\ct PART\_ID}] The name of the {\ct PART} line containing properties of the droplets. See Chapter~\ref{info:PART} for additional details.
+\item[{\ct PRESSURE\_RAMP}] The name of the {\ct RAMP} lines specifying the dependence of pipe pressure on the number of active sprinklers and nozzles.
 \end{description}
+Be aware that sprinklers can produce many droplets. To limit the computational cost, sprinkler droplets disappear when they hit the lower boundary of the computational domain, regardless of whether it is solid or not. To stop FDS from removing sprinkler droplets from the lower boundary of the computational domain, add the phrase {\ct POROUS\_FLOOR=.FALSE.} to the {\ct MISC} line. Be aware, however, that droplets that land on the floor continue to move horizontally in randomly selected directions; bouncing off obstructions, and consuming CPU time.
 
-\noindent
-Be aware that sprinklers can produce many droplets. To limit the computational cost, sprinkler droplets disappear when they hit the
-lower boundary of the computational domain, regardless of whether it is solid
-or not. To stop FDS from removing sprinkler droplets from the lower boundary of the computational domain,
-add the phrase {\ct POROUS\_FLOOR=.FALSE.} to the {\ct MISC} line. Be aware, however, that
-droplets that land on the floor continue to move horizontally in randomly selected
-directions; bouncing off obstructions, and consuming CPU time.
-
-For more information about sprinklers, their activation and spray dynamics, read the FDS
-Technical Reference Guide~\cite{FDS_Math_Guide}.
+For more information about sprinklers, their activation and spray dynamics, read the FDS Technical Reference Guide~\cite{FDS_Math_Guide}.
 
 
 \subsubsection{Special Topic: Specifying Complex Spray Patterns}
@@ -6391,15 +6260,7 @@ If a more complex spray pattern is desired than one characterized by a {\ct SPRA
 \begin{lstlisting}
 &TABL ID='table_id', TABLE_DATA=LAT1,LAT2,LON1,LON2,VELO,FRAC /
 \end{lstlisting}
-where each {\ct TABL} line for a given {\ct 'table\_id'} provides information about the spherical distribution of the spray pattern
-for a specified solid angle. {\ct LAT1} and {\ct LAT2} are the bounds of the solid angle measured in degrees from
-the south pole (0 is the south pole and 90 is the equator, 180 is the north pole).  Note that this is not the conventional way of
-specifying a latitude, but rather a convenient system based on the fact that a typical sprinkler sprays water downwards, which is
-why 0 degrees is assigned to the ``south pole,'' or the $-z$ direction. The parameters {\ct LON1} and {\ct LON2} are the
-bounds of the solid angle (also in degrees),
-where 0 (or 360) is aligned with the $-x$ axis and 90 is aligned with the $-y$ axis.  {\ct VELO} is the velocity (m/s) of the droplets at their
-point of insertion.
-{\ct FRAC} the fraction of the total flow rate of liquid that should emerge from that particular solid angle.
+where each {\ct TABL} line for a given {\ct 'table\_id'} provides information about the spherical distribution of the spray pattern for a specified solid angle. {\ct LAT1} and {\ct LAT2} are the bounds of the solid angle measured in degrees from the south pole (0 is the south pole and 90 is the equator, 180 is the north pole).  Note that this is not the conventional way of specifying a latitude, but rather a convenient system based on the fact that a typical sprinkler sprays water downwards, which is why 0 degrees is assigned to the ``south pole,'' or the $-z$ direction. The parameters {\ct LON1} and {\ct LON2} are the bounds of the solid angle (also in degrees), where 0 (or 360) is aligned with the $-x$ axis and 90 is aligned with the $-y$ axis.  {\ct VELO} is the velocity (m/s) of the droplets at their point of insertion. {\ct FRAC} the fraction of the total flow rate of liquid that should emerge from that particular solid angle.
 
 In the test case called {\ct bucket\_test\_2}, the spray pattern is defined as two jets, each with a velocity of 5~m/s and a total flow rate of 60~L/min. The sprinkler is set to operate for only 5~s. The first jet contains 0.2 of the total flow, the second, 0.8 of the total. The jets are centered at points 30$^\circ$ below the ``equator,'' and are separated by 180$^\circ$.
 \begin{lstlisting}
@@ -6424,11 +6285,7 @@ Note that each set of {\ct TABL} lines must have a unique {\ct ID}.  Also note t
 \subsubsection{Special Topic: Varying Pipe Pressure}
 \label{info:pressureramp}
 
-In real sprinkler systems, the pipe pressure is affected by the number of actuated sprinklers. Typically,
-the pressure is higher than the design value when the first sprinkler activates, and decreases as more and more sprinklers are activated. The pipe pressure has an effect on flow rate,
-droplet velocity and droplet size distribution. In FDS, the varying pipe pressure can be specified on a {\ct PROP} line using {\ct PRESSURE\_RAMP}. On each {\ct RAMP} line,
-the number of open sprinklers or nozzles is associated with certain pipe pressure (bar). For example:
-
+In real sprinkler systems, the pipe pressure is affected by the number of actuated sprinklers. Typically, the pressure is higher than the design value when the first sprinkler activates, and decreases as more and more sprinklers are activated. The pipe pressure has an effect on flow rate, droplet velocity and droplet size distribution. In FDS, the varying pipe pressure can be specified on a {\ct PROP} line using {\ct PRESSURE\_RAMP}. On each {\ct RAMP} line, the number of open sprinklers or nozzles is associated with certain pipe pressure (bar). For example:
 \begin{lstlisting}
 &PROP ID='My nozzle'
       OFFSET=0.1
@@ -6443,16 +6300,9 @@ the number of open sprinklers or nozzles is associated with certain pipe pressur
 &RAMP ID = 'PR1' T = 2, F = 10. /
 &RAMP ID = 'PR1' T = 3, F = 8. /
 \end{lstlisting}
-\noindent
 These lines would indicate that the pressure is 16~bar when the first sprinkler activates, 10~bar when two sprinklers are active, and 8~bar when three or more sprinklers are active. When counting the number of active sprinklers, FDS accounts for all active sprinklers or nozzles with a given {\ct PART\_ID}.
 
-When pressure ramps are used, both {\ct FLOW\_RATE} and {\ct PARTICLE\_VELOCITY} are dependent on the
-{\ct OPERATING\_PRESSURE}. Specify either the {\ct FLOW\_RATE}, or the
-{\ct K\_FACTOR} and {\ct OPERATING\_PRESSURE}. In the latter case, the flow rate is given by $K \sqrt{p}$ and the droplet velocity
-by using the liquid density and the {\ct ORIFICE\_DIAMETER}.  If spray pattern table is used, the droplet velocity is determined separately for each line of the
-table by applying $K\sqrt{p}$ and the {\ct ORIFICE\_DIAMETER}. The median diameter of the particle size distribution is scaled as
-$d_m(p) = d_m(p_o)(p_o/p)^{1/3}$, where $p_o$ is the {\ct OPERATING\_PRESSURE}
-and $d_m(p_o)$ is specified by parameter {\ct DIAMETER} on the corresponding {\ct PART} line.
+When pressure ramps are used, both {\ct FLOW\_RATE} and {\ct PARTICLE\_VELOCITY} are dependent on the {\ct OPERATING\_PRESSURE}. Specify either the {\ct FLOW\_RATE}, or the {\ct K\_FACTOR} and {\ct OPERATING\_PRESSURE}. In the latter case, the flow rate is given by $K \sqrt{p}$ and the droplet velocity by using the liquid density and the {\ct ORIFICE\_DIAMETER}.  If spray pattern table is used, the droplet velocity is determined separately for each line of the table by applying $K\sqrt{p}$ and the {\ct ORIFICE\_DIAMETER}. The median diameter of the particle size distribution is scaled as $d_m(p) = d_m(p_o)(p_o/p)^{1/3}$, where $p_o$ is the {\ct OPERATING\_PRESSURE} and $d_m(p_o)$ is specified by parameter {\ct DIAMETER} on the corresponding {\ct PART} line.
 
 For some simulations there may be groups of independent sprinklers or nozzles.  For example one might have one set of nozzles for a fuel spray and a second set for water spray.  In this case the flow of water would not be impacted by how many fuel spray nozzles are open.  To have the {\ct PRESSURE\_RAMP} only count a subset of sprinklers or nozzles, the keyword {\ct PIPE\_INDEX} can be used on the {\ct DEVC} line. For example:
 \begin{lstlisting}
@@ -6461,9 +6311,7 @@ For some simulations there may be groups of independent sprinklers or nozzles.  
 &DEVC ID='Fuel_1', XYZ=2.00,2.00,1.00, PROP_ID='Fuel Spray', PIPE_INDEX=2 /
 &DEVC ID='Fuel_2', XYZ=1.00,1.00,1.00, PROP_ID='Fuel Spray', PIPE_INDEX=2 /
 \end{lstlisting}
-These lines indicate that the fuel spray nozzles are a separate pipe network from the water sprinklers.  With these
-inputs, a {\ct PRESSURE\_RAMP} for the water sprinklers would not count any active fuel spray nozzles.  See the example case
-{\ct flow\_rate\_2} in the Verification Guide for further details on the use of {\ct PIPE\_INDEX}.
+These lines indicate that the fuel spray nozzles are a separate pipe network from the water sprinklers.  With these inputs, a {\ct PRESSURE\_RAMP} for the water sprinklers would not count any active fuel spray nozzles.  See the example case {\ct flow\_rate\_2} in the Verification Guide for further details on the use of {\ct PIPE\_INDEX}.
 
 \subsection{Nozzles}
 \label{info:nozzles}
@@ -6482,17 +6330,12 @@ designate two nozzles of the same type, one which activates at time zero, the ot
 
 \subsubsection{Example Case: Setting the Flow Rate of a Nozzle}
 
-This example demonstrates the use of pressure ramps and control logic for opening and closing nozzles. It also serves as a verification test for
-the water flow rate. There are four nozzles that open at designated times: 0 s, 15 s, 30 s and 45 s. At time 60 s, all the nozzles are closed.
-The number of open nozzles is measured using a device with quantity {\ct 'OPEN NOZZLES'}. A comparison of the FDS result and the exact, intended values
-is shown in Fig.~\ref{flow_rate}.  Note that {\ct 'OPEN NOZZLES'} counts only nozzles belonging to the specified {\ct PIPE\_INDEX}.
-The pressure ramp has been designed to deliver a total flow rate of 10~L/min at all values of open nozzles. Mathematically this means that
+This example demonstrates the use of pressure ramps and control logic for opening and closing nozzles. It also serves as a verification test for the water flow rate. There are four nozzles that open at designated times: 0 s, 15 s, 30 s and 45 s. At time 60 s, all the nozzles are closed. The number of open nozzles is measured using a device with quantity {\ct 'OPEN NOZZLES'}. A comparison of the FDS result and the exact, intended values is shown in Fig.~\ref{flow_rate}.  Note that {\ct 'OPEN NOZZLES'} counts only nozzles belonging to the specified {\ct PIPE\_INDEX}. The pressure ramp has been designed to deliver a total flow rate of 10~L/min at all values of open nozzles. Mathematically this means that
 \be
 n K \sqrt{p} = 10 \;\hbox{L/min} \quad \Rightarrow \quad
 p = \left( \frac{10 \;\hbox{L/min}}{n K}\right)^2
 \ee
 where $n$ is the number of open nozzles. The corresponding nozzle and pressure ramp definitions are
-
 \begin{lstlisting}
 &PROP ID='Head', OFFSET=0.10, PART_ID='water drops', K_FACTOR=2.5, OPERATING_PRESSURE=1.,
       PRESSURE_RAMP='PR', PARTICLE_VELOCITY=2., SPRAY_ANGLE= 0.,60. /
@@ -6502,8 +6345,7 @@ where $n$ is the number of open nozzles. The corresponding nozzle and pressure r
 &RAMP ID='PR',   T= 3., F=1.778 /
 &RAMP ID='PR',   T= 4., F=1. /
 \end{lstlisting}
-
-\noindent The water is tracked using a device measuring the accumulated mass per unit area, integrated over the total floor area. The total mass of water should increase from zero to 10~kg in 60~s. A comparison of the FDS prediction and this analytical result is shown in Fig.~\ref{flow_rate}. The slight delay of the FDS result is caused by the time it takes from the droplets to fall down on the floor.
+The water is tracked using a device measuring the accumulated mass per unit area, integrated over the total floor area. The total mass of water should increase from zero to 10~kg in 60~s. A comparison of the FDS prediction and this analytical result is shown in Fig.~\ref{flow_rate}. The slight delay of the FDS result is caused by the time it takes from the droplets to fall down on the floor.
 
 \begin{figure}[ht]
 \begin{tabular*}{\textwidth}{lr}
@@ -6522,14 +6364,11 @@ The details of the sprinkler head geometry and spray atomization are practically
 u_k(\mathbf{r}) = \underbrace{(u_k)_0}_{\mbox{\ct P0}} \,\,+\,\, r_i \underbrace{\left( \frac{\partial u_k}{\partial x_i} \right)_{\!\!\!0}}_{\mbox{\ct PX(1\!:\!3)}} \,\,+\,\,\frac{ r_i r_j}{2} \underbrace{\left(\frac{\partial^2 u_k}{\partial x_i \partial x_j}\right)_{\!\!\!0}}_{\mbox{\ct PXX(1\!:\!3,1\!:\!3)}}
 \end{equation}
 The vector $\mathbf{r}$ is the position of the velocity storage location relative to the point {\ct XYZ}.  The specific velocity component is specified on {\ct PROP} by the integer {\ct VELOCITY\_COMPONENT}.  Below we provide an example set of {\ct PROP} and {\ct DEVC} lines to specify a parabolic profile for the vertical component of velocity.
-
 \begin{lstlisting}
 &PROP ID='p1', VELOCITY_COMPONENT=3, P0=-1,PXX(1,1)=5,PXX(2,2)=5 /
 &DEVC XB=-.1,.1,-.1,.1,.9,.95, QUANTITY='VELOCITY PATCH',PROP_ID='p1', DEVC_ID='t1'/
 &DEVC ID='t1', XYZ=0,0,.9, QUANTITY='TIME', SETPOINT=10/
 \end{lstlisting}
-
-\noindent
 In this example, a velocity patch is activated at 10 s in the simulation.  Any $w$ components of velocity with staggered storage locations within the box {\ct XB=-.1,.1,-.1,.1,.9,.95} will be driven toward the value specified by the polynomial profile {\ct 'p1'}.  You must ensure that the device box encompasses the staggered storage locations (see the theory manual \cite{FDS_Math_Guide} for a discussion on the face-centered velocity storage locations).
 
 \subsection{Heat Detectors}
@@ -6563,13 +6402,7 @@ where the two characteristic filling or ``lag'' times are of the form:
 \be
    \delta t_e = \alpha_e u^{\beta_e} \quad ; \quad \delta t_c = \alpha_c u^{\beta_c}
 \ee
-The default detector parameters are for the Heskestad model with a characteristic {\ct LENGTH} of
-1.8~m. For the Cleary model, the {\ct ALPHA}s and {\ct BETA}s must all be listed explicitly.
-Suggested constants for unidentified ionization and photoelectric detectors
-presented in Table~\ref{tab:sdvalues}.
-{\ct ACTIVATION\_OBSCURATION} is the threshold value in units of \%/m.
-The threshold can be set according to the setting commonly provided by the manufacturer.
-The default setting\footnote{Note that the conversion of obscuration from units of \%/ft to \%/m is given by:
+The default detector parameters are for the Heskestad model with a characteristic {\ct LENGTH} of 1.8~m. For the Cleary model, the {\ct ALPHA}s and {\ct BETA}s must all be listed explicitly. Suggested constants for unidentified ionization and photoelectric detectors presented in Table~\ref{tab:sdvalues}. {\ct ACTIVATION\_OBSCURATION} is the threshold value in units of \%/m. The threshold can be set according to the setting commonly provided by the manufacturer. The default setting\footnote{Note that the conversion of obscuration from units of \%/ft to \%/m is given by:
 \be
    O[\text{\%/m}] = \left[ 1 - \left( 1 - \frac{O[\text{\%/ft}]}{100} \right)^{3.28} \right] \times 100
 \ee
@@ -6640,23 +6473,7 @@ where $O_i$ is the FDS output for the beam detector of the $i$th path (note that
 
 \subsubsection{Example Case: A Beam Detector}
 
-A 10~m by 10~m by 4~m compartment is filled with smoke from burning propane, represented as 0.006~kg/kg of
-the lumped species variable, {\ct PRODUCTS}. The soot yield is specified as
-0.01~kg/kg, resulting in a uniform soot density of 71.9~mg/m$^3$.
-Using the default mass extinction coefficient of
-8700~m$^2$/kg, the optical depth is calculated to be 0.626~\si{1/m}.  The
-compartment has a series of obstructions located at increasing distance from the front in increments of
-1~m.  The correlation for the output quantity
-{\ct VISIBILITY}, Eq.~(\ref{vis}), produces a visibility distance of 4.8~m.
-When viewing the smoke levels with Smokeview, you should just barely see
-the fifth obstacle which is at a distance of 5~m from the front of the compartment.
-If this is the case, Smokeview is properly displaying the obscuration of the
-smoke.  Three beam detectors are also
-placed in the compartment.  These all have a path length of 10~m,
-but are at different orientations within the compartment.
-Using the optical depth of 0.626~\si{1/m} and the path length of
-10~m, the expected total obscuration is 99.81~\%, which is the
-result computed by FDS for each of the three detectors.
+A 10~m by 10~m by 4~m compartment is filled with smoke from burning propane, represented as 0.006~kg/kg of the lumped species variable, {\ct PRODUCTS}. The soot yield is specified as 0.01~kg/kg, resulting in a uniform soot density of 71.9~mg/m$^3$. Using the default mass extinction coefficient of 8700~m$^2$/kg, the optical depth is calculated to be 0.626~\si{1/m}.  The compartment has a series of obstructions located at increasing distance from the front in increments of 1~m.  The correlation for the output quantity {\ct VISIBILITY}, Eq.~(\ref{vis}), produces a visibility distance of 4.8~m. When viewing the smoke levels with Smokeview, you should just barely see the fifth obstacle which is at a distance of 5~m from the front of the compartment. If this is the case, Smokeview is properly displaying the obscuration of the smoke.  Three beam detectors are also placed in the compartment.  These all have a path length of 10~m, but are at different orientations within the compartment. Using the optical depth of 0.626~\si{1/m} and the path length of 10~m, the expected total obscuration is 99.81~\%, which is the result computed by FDS for each of the three detectors.
 
 \begin{figure}[ht]
 \begin{tabular*}{\textwidth}{lr}
@@ -6694,19 +6511,7 @@ where $\dm_i$ is the mass {\ct FLOWRATE} at sampling location $i$, $\rho_{{\rm s
 
 \subsubsection{Example Case: aspiration\_detector}
 
-A cubical compartment, 2~m on a side has a three
-sampling location aspiration system.  The three locations
-have equal flow rates of 0.3~kg/s, and
-transport times of 50, 100, and 150~s, respectively.  No bypass flow rate is
-specified for the aspiration detector.  Combustion products are forced into the bottom of the compartment at a rate of 1~kg/s. The {\ct SOOT\_YIELD=0.001}.
-Mass is removed from the top of the compartment at a rate of 1~kg/s.
-The aspiration detector shows an increasing obscuration over time.  There is a delay of slightly over 50~s in
-the initial increase which results from the 50~s transport time for the first sampling location plus a short
-period of time to transport the combustion products to the sampling location.  The detector response has three plateaus
-that result from the delay times of the sampling locations.  The sampling points are co-located, so each plateau represents
-an additional one third of the soot being transported to the detector.  The soot density at the sampling point is
-$7.1 \times 10^{-5}$~kg/m$^3$.  Using this value the plateaus are computed as 18~\%, 33.2~\%, and 45.7~\%, as seen
-in Fig.~\ref{aspiration_detector}.
+A cubical compartment, 2~m on a side has a three sampling location aspiration system.  The three locations have equal flow rates of 0.3~kg/s, and transport times of 50, 100, and 150~s, respectively.  No bypass flow rate is specified for the aspiration detector.  Combustion products are forced into the bottom of the compartment at a rate of 1~kg/s. The {\ct SOOT\_YIELD=0.001}. Mass is removed from the top of the compartment at a rate of 1~kg/s. The aspiration detector shows an increasing obscuration over time.  There is a delay of slightly over 50~s in the initial increase which results from the 50~s transport time for the first sampling location plus a short period of time to transport the combustion products to the sampling location.  The detector response has three plateaus that result from the delay times of the sampling locations.  The sampling points are co-located, so each plateau represents an additional one third of the soot being transported to the detector.  The soot density at the sampling point is $7.1 \times 10^{-5}$~kg/m$^3$.  Using this value the plateaus are computed as 18~\%, 33.2~\%, and 45.7~\%, as seen in Fig.~\ref{aspiration_detector}.
 
 \begin{figure}[ht]
 \begin{center}
@@ -6715,10 +6520,6 @@ in Fig.~\ref{aspiration_detector}.
 \caption[Results of the {\ct aspiration\_detector} test case]{Output of {\ct aspiration\_detector} test case.}
 \label{aspiration_detector}
 \end{figure}
-
-
-
-
 
 
 
@@ -6731,37 +6532,24 @@ indirectly on the optional {\ct PROP} line. Using the {\ct DEVC} parameter {\ct 
 occur when the {\ct QUANTITY} value passes above, or below, the given {\ct SETPOINT}.
 The following parameters dictate how a device will control something:
 \begin{description}
-\item[{\ct SETPOINT}] The value of the device at which its state changes.  For a detection type of device
-(e.g., heat or smoke) this value is taken from the device's {\ct PROP} inputs and need not be specified on the {\ct DEVC} line.
-\item[{\ct TRIP\_DIRECTION}] A positive integer means the device will change state when its value increases
-past the setpoint and a negative integer means the device will change state
-when its value decreases past the setpoint.  The default value is +1.
-\item[{\ct LATCH}] If this logical value is set to {\ct .TRUE.} the device will only change state once.
-The default value is {\ct .TRUE.}.
-\item[{\ct INITIAL\_STATE}] This logical value is the initial state of the device. The default value
-is {\ct .FALSE.} For example, if an obstruction associated with the device is to disappear, set {\ct INITIAL\_STATE=.TRUE.}
+\item[{\ct SETPOINT}] The value of the device at which its state changes.  For a detection type of device (e.g., heat or smoke) this value is taken from the device's {\ct PROP} inputs and need not be specified on the {\ct DEVC} line.
+\item[{\ct TRIP\_DIRECTION}] A positive integer means the device will change state when its value increases past the setpoint and a negative integer means the device will change state when its value decreases past the setpoint.  The default value is +1.
+\item[{\ct LATCH}] If this logical value is set to {\ct .TRUE.} the device will only change state once. The default value is {\ct .TRUE.}.
+\item[{\ct INITIAL\_STATE}] This logical value is the initial state of the device. The default value is {\ct .FALSE.} For example, if an obstruction associated with the device is to disappear, set {\ct INITIAL\_STATE=.TRUE.}
 \end{description}
 If you desire to control FDS using more complex logic than can be provided
 by the use of a single device and its setpoint, control functions can be specified using the {\ct CTRL} input.
 See Section \ref{info:CTRL} for more on {\ct CTRL} functions.
 The simplest example of a device is just a timer:
-
 \begin{lstlisting}
 &DEVC XYZ=1.2,3.4,5.6, ID='my clock', QUANTITY='TIME', SETPOINT=30. /
 \end{lstlisting}
-
-\noindent
-Anything associated with the device via the parameter, {\ct DEVC\_ID='my clock'}, will change its state at 30~s. For example,
-if the text were added to an {\ct OBST} line, that obstruction would change from its {\ct INITIAL\_STATE} of {\ct .FALSE.} to {\ct .TRUE.} after
-30~s. In other words, it would be created at 30~s instead of at the start of the simulation. This is a simple way to open a door or window.
+Anything associated with the device via the parameter, {\ct DEVC\_ID='my clock'}, will change its state at 30~s. For example, if the text were added to an {\ct OBST} line, that obstruction would change from its {\ct INITIAL\_STATE} of {\ct .FALSE.} to {\ct .TRUE.} after 30~s. In other words, it would be created at 30~s instead of at the start of the simulation. This is a simple way to open a door or window.
 
 When using a {\ct DEVC} output to control FDS, the instantaneous value of the the {\ct DEVC} is used.  For some {\ct QUANTITY} types, such as {\ct TEMPERATURE}, this output can be very noisy.  To prevent a spurious spike from causing a state change of the {\ct DEVC} you can specify the parameter {\ct SMOOTHING\_FACTOR}.  This is a parameter that can vary between 0 and 1.  It performs an exponential smoothing of the {\ct DEVC} output as follows:
-
 \be
 \bar{x}^n=\bar{x}^{n-1} \; \mbox{\ct SMOOTHING\_FACTOR} + x^n \; (1-\mbox{\ct SMOOTHING\_FACTOR})
 \ee
-
-\noindent
 where n is the time step, $x$ is the instantaneous device output and $\bar{x}$ is the smoothed output.  The \linebreak[4]{\ct SMOOTHING\_FACTOR} defaults to 0 which means no smoothing is performed.  Note that {\ct SMOOTHING\_FACTOR} only changes the value passed to control functions; it has no effect on the value of the {\ct DEVC} written to the {\ct CHID\_devc.csv} file.
 
 \subsection{Creating and Removing Obstructions}
@@ -6804,40 +6592,22 @@ To learn how to create and remove obstructions multiple times, see Section~\ref{
 \subsection{Activating and Deactivating Vents}
 \label{info:activate_deactivate}
 
-When a device or control function is applied to a {\ct VENT}, the purpose is to either activate or deactivate any time ramp associated with
-the {\ct VENT} via its {\ct DEVC\_ID}. For example, to control a fan, do the following:
+When a device or control function is applied to a {\ct VENT}, the purpose is to either activate or deactivate any time ramp associated with the {\ct VENT} via its {\ct DEVC\_ID}. For example, to control a fan, do the following:
 \begin{lstlisting}
 &SURF ID='FAN', VOLUME_FLOW=5. /
 &VENT XB=..., SURF_ID='FAN', DEVC_ID='det2' /
 &DEVC ID='det2', XYZ=..., QUANTITY='TIME', SETPOINT=30., INITIAL_STATE=.FALSE. /
 \end{lstlisting}
-Note that at 30~s, the ``state'' of the {\ct 'FAN'} changes from {\ct .FALSE.} to {\ct .TRUE.}, or more simply, the {\ct 'FAN'} turns on. Since there
-is no explicit time function associated with the {\ct 'FAN'}, the default 1~s ramp-up will begin at 30~s instead of at 0~s. If {\ct INITIAL\_STATE=.TRUE.}, then the fan should turn off at 30~s. Essentially, ``activation'' of a {\ct VENT} causes all associated
-time functions to be delayed until the device {\ct SETPOINT} is reached. ``Deactivation'' of a {\ct VENT} turns off all time functions. Usually this means
-that the parameters on the {\ct SURF} line are all nullified, so it is a good idea to check the functionality with a simple example.
+Note that at 30~s, the ``state'' of the {\ct 'FAN'} changes from {\ct .FALSE.} to {\ct .TRUE.}, or more simply, the {\ct 'FAN'} turns on. Since there is no explicit time function associated with the {\ct 'FAN'}, the default 1~s ramp-up will begin at 30~s instead of at 0~s. If {\ct INITIAL\_STATE=.TRUE.}, then the fan should turn off at 30~s. Essentially, ``activation'' of a {\ct VENT} causes all associated time functions to be delayed until the device {\ct SETPOINT} is reached. ``Deactivation'' of a {\ct VENT} turns off all time functions. Usually this means that the parameters on the {\ct SURF} line are all nullified, so it is a good idea to check the functionality with a simple example.
 
-
-
-A {\ct 'MIRROR'} or {\ct 'OPEN'} {\ct VENT} should not be activated or deactivated.
-You can, however, place an obstruction in front of an {\ct 'OPEN'} {\ct VENT} and then create it or remove it to model the closing or opening of a door or
-window.
-
-
-
+A {\ct 'MIRROR'} or {\ct 'OPEN'} {\ct VENT} should not be activated or deactivated. You can, however, place an obstruction in front of an {\ct 'OPEN'} {\ct VENT} and then create it or remove it to model the closing or opening of a door or window.
 
 
 
 \section{Advanced Control Functions: The \texorpdfstring{{\tt CTRL}}{CTRL} Namelist Group}
 \label{info:CTRL}
 
-There are many systems whose functionality cannot be described by a simple device with a single ``setpoint.''
-Consider for example, a typical HVAC system.  It is controlled by a thermostat that is given a temperature setpoint.
-The system turns on when the temperature goes below the setpoint by some
-amount and then turns off when the temperature rises above that same setpoint by some amount.
-This behavior cannot be defined by merely specifying a single setpoint.
-You must also define the range or ``deadband'' around the setpoint, and whether an
-increasing or decreasing temperature activates the system.  For the HVAC example, crossing the
-lower edge of the deadband activates heating; crossing the upper edge activates cooling.  These more complicated behaviors can be modeled in FDS using {\ct CTRL}s.  The following parameters dictate how a control function will behave:
+There are many systems whose functionality cannot be described by a simple device with a single ``setpoint.'' Consider for example, a typical HVAC system.  It is controlled by a thermostat that is given a temperature setpoint. The system turns on when the temperature goes below the setpoint by some amount and then turns off when the temperature rises above that same setpoint by some amount. This behavior cannot be defined by merely specifying a single setpoint. You must also define the range or ``deadband'' around the setpoint, and whether an increasing or decreasing temperature activates the system.  For the HVAC example, crossing the lower edge of the deadband activates heating; crossing the upper edge activates cooling.  These more complicated behaviors can be modeled in FDS using {\ct CTRL}s.  The following parameters dictate how a control function will behave:
 \begin{description}
 \item[{\ct ID}] A name for the control function that is unique over all control functions.
 \item[{\ct FUNCTION\_TYPE}] The type of control function.  The possible types are shown in Table~\ref{tab:funcvalues}.
@@ -6851,7 +6621,6 @@ The default value is {\ct .TRUE.}.
 \item[{\ct INITIAL\_STATE}] This logical value is the initial state of the control function. The default value
 is {\ct .FALSE.} For example, if an obstruction associated with the control function is to disappear, set {\ct INITIAL\_STATE} to {\ct .TRUE.}
 \end{description}
-
 For any object for which a {\ct DEVC\_ID} can be specified (such as {\ct OBST} or {\ct VENT}), a {\ct CTRL\_ID} can be
 specified instead.
 
@@ -6882,23 +6651,19 @@ specified instead.
 \end{center}
 \end{table}
 
-If you want to design a system of controls and devices that involves multiple changes of state,
-include the attribute {\ct LATCH=.FALSE.} on the relevant {\ct DEVC} or {\ct CTRL} input lines.
-By default, devices and controls may only change state once, like a sprinkler activating or
-smoke detector alarming. {\ct LATCH} is {\ct .TRUE.} by default for both devices and controls.
+If you want to design a system of controls and devices that involves multiple changes of state, include the attribute {\ct LATCH=.FALSE.} on the relevant {\ct DEVC} or {\ct CTRL} input lines. By default, devices and controls may only change state once, like a sprinkler activating or smoke detector alarming. {\ct LATCH} is {\ct .TRUE.} by default for both devices and controls.
 
 If you want a {\ct DEVC} to operate based on the logical state of a {\ct CTRL}, set {\ct QUANTITY} equal to {\ct 'CONTROL'} and set the {\ct CTRL\_ID} on the {\ct DEVC} input to the {\ct ID} of the control function.
 
 The output value of numerical control function is defined by a {\ct DEVC} line with {\ct QUANTITY} set equal to {\ct 'CONTROL VALUE'} and {\ct CTRL\_ID} set equal to the {\ct ID} of the control function.  You can then use {\ct SETPOINT} to have the {\ct DEVC} operate a particular output value of the control function.
+
 
 \subsection{Control Functions: \texorpdfstring{{\tt ANY}}{ANY}, \texorpdfstring{{\tt ALL}}{ALL}, \texorpdfstring{{\tt ONLY}}{ONLY}, and
 \texorpdfstring{{\tt AT\_LEAST}}{AT\_LEAST}}
 
 \label{info:FUNCTION_TYPE}
 
-Suppose you want an obstruction to be removed (a door is opened, for example) after any
-of four smoke detectors in a room has activated. Use input lines of the form:
-
+Suppose you want an obstruction to be removed (a door is opened, for example) after any of four smoke detectors in a room has activated. Use input lines of the form:
 \begin{lstlisting}
 &OBST XB=..., SURF_ID='...', CTRL_ID='SD' /
 
@@ -6909,40 +6674,21 @@ of four smoke detectors in a room has activated. Use input lines of the form:
 &CTRL ID='SD', FUNCTION_TYPE='ANY', INPUT_ID='SD_1','SD_2','SD_3','SD_4',
       INITIAL_STATE=.TRUE. /
 \end{lstlisting}
+The {\ct INITIAL\_STATE} of the control function {\ct SD} is {\ct .TRUE.}, meaning that the obstruction exists initially. The ``change of state'' means that the obstruction is removed when \underline{any} smoke detector alarms.  By default, the {\ct INITIAL\_STATE} of the control function {\ct SD} is {\ct .FALSE.}, meaning that the obstruction does not exist initially.
 
-\noindent
-The {\ct INITIAL\_STATE} of the control function {\ct SD} is {\ct .TRUE.},
-meaning that the obstruction exists initially. The ``change of state'' means that the obstruction is
-removed when \underline{any} smoke detector alarms.  By default, the {\ct INITIAL\_STATE}
-of the control function {\ct SD} is {\ct .FALSE.}, meaning that the obstruction does not exist initially.
-
-Suppose that now you want the obstruction to be created (a door is closed, for example) after all
-four smoke detectors in a room have activated. Use a control line of the form:
-
+Suppose that now you want the obstruction to be created (a door is closed, for example) after all four smoke detectors in a room have activated. Use a control line of the form:
 \begin{lstlisting}
 &CTRL ID='SD', FUNCTION_TYPE='ALL', INPUT_ID='SD_1','SD_2','SD_3','SD_4' /
 \end{lstlisting}
-
-\noindent
 The control functions {\ct AT\_LEAST} and {\ct ONLY} are generalizations of {\ct ANY} and {\ct ALL}. For example,
-
 \begin{lstlisting}
 &CTRL ID='SD', FUNCTION_TYPE='AT_LEAST', N=3, INPUT_ID='SD_1','SD_2','SD_3','SD_4' /
 \end{lstlisting}
-
-\noindent
-changes the state from {\ct .FALSE.} to {\ct .TRUE.} when \underline{at least}
-3 detectors activate. Note that in this example, and the example below, the parameter {\ct N} is used to
-specify the number of activated devices required for the conditions
-of the control function to be satisfied. The control function,
-
+changes the state from {\ct .FALSE.} to {\ct .TRUE.} when \underline{at least} 3 detectors activate. Note that in this example, and the example below, the parameter {\ct N} is used to specify the number of activated devices required for the conditions of the control function to be satisfied. The control function,
 \begin{lstlisting}
 &CTRL ID='SD', FUNCTION_TYPE='ONLY', N=3, INPUT_ID='SD_1','SD_2','SD_3','SD_4' /
 \end{lstlisting}
-
-\noindent
-changes the state from {\ct .FALSE.} to {\ct .TRUE.} when 3,
-and \underline{only} 3, detectors activate.
+changes the state from {\ct .FALSE.} to {\ct .TRUE.} when 3, and \underline{only} 3, detectors activate.
 
 
 \subsection{Control Function: \texorpdfstring{{\tt TIME\_DELAY}}{TIME\_DELAY}}
@@ -6950,7 +6696,6 @@ and \underline{only} 3, detectors activate.
 \label{info:TIME_DELAY}
 
 There is often a time delay between when a device activates and when some other action occurs, like in a dry pipe sprinkler system.
-
 \begin{lstlisting}
 &DEVC XYZ=2,2,3, PROP_ID='Acme Sprinkler_link', QUANTITY='LINK TEMPERATURE',
       ID='Spk_29_link' /
@@ -6958,25 +6703,15 @@ There is often a time delay between when a device activates and when some other 
       CTRL_ID='dry pipe' /
 &CTRL ID='dry pipe', FUNCTION_TYPE='TIME_DELAY', INPUT_ID='Spk_29_link', DELAY=30. /
 \end{lstlisting}
-
-\noindent
-This relationship between a sprinkler and its pipes means that the sprinkler spray is controlled (in this case delayed) by the
-{\ct 'dry pipe'}, which adds 30~s to the activation time of {\ct Spk\_29}, measured by  {\ct Spk\_29\_link},
-before water can flow out of the head.
+This relationship between a sprinkler and its pipes means that the sprinkler spray is controlled (in this case delayed) by the {\ct 'dry pipe'}, which adds 30~s to the activation time of {\ct Spk\_29}, measured by  {\ct Spk\_29\_link}, before water can flow out of the head.
 
 
 \subsection{Control Function: \texorpdfstring{{\tt DEADBAND}}{DEADBAND}}
 \label{info:DEADBAND}
 
-This control function behaves like an HVAC thermostat.  It can operate in one of two modes analogous to heating or cooling.
-The function is provided with an {\ct INPUT\_ID} which is the {\ct DEVC} whose value is used by the function,
-an upper and lower {\ct SETPOINT}, and the mode of operation by {\ct ON\_BOUND}.  If  {\ct ON\_BOUND='LOWER'},
-the function changes state from its {\ct INITIAL\_VALUE} when the value of the {\ct INPUT\_ID} drops
-below the lower value in {\ct SETPOINT} and reverts when it increases past the upper value, i.e., like a heating system.
-The reverse will occur if {\ct ON\_BOUND='UPPER'}, i.e., a cooling system.
+This control function behaves like an HVAC thermostat.  It can operate in one of two modes analogous to heating or cooling. The function is provided with an {\ct INPUT\_ID} which is the {\ct DEVC} whose value is used by the function, an upper and lower {\ct SETPOINT}, and the mode of operation by {\ct ON\_BOUND}.  If  {\ct ON\_BOUND='LOWER'}, the function changes state from its {\ct INITIAL\_VALUE} when the value of the {\ct INPUT\_ID} drops below the lower value in {\ct SETPOINT} and reverts when it increases past the upper value, i.e., like a heating system. The reverse will occur if {\ct ON\_BOUND='UPPER'}, i.e., a cooling system.
 
 For an HVAC system, the following lines of input would set up a simple thermostat:
-
 \begin{lstlisting}
 &SURF ID='FAN', TMP_FRONT=40., VOLUME_FLOW=-1. /
 &VENT XB=-0.3,0.3,-0.3,0.3,0.0,0.0, SURF_ID='FAN', CTRL_ID='thermostat' /
@@ -6984,33 +6719,14 @@ For an HVAC system, the following lines of input would set up a simple thermosta
 &CTRL ID='thermostat', FUNCTION_TYPE='DEADBAND', INPUT_ID='TC',
       ON_BOUND='LOWER', SETPOINT=23.,27., LATCH=.FALSE./
 \end{lstlisting}
-
-\noindent
-Here, we want to control the {\ct VENT} that simulates the {\ct FAN}, which blows hot air
-into the room. A {\ct DEVC} called {\ct TC} is positioned in the room to measure the {\ct TEMPERATURE}.
-The {\ct thermostat} uses a {\ct SETPOINT} to turn on the
-{\ct FAN} when the temperature falls below 23~$^\circ$C ({\ct ON\_BOUND='LOWER'})
-and it turns off when the temperature rises above 27~$^\circ$C.
-
+Here, we want to control the {\ct VENT} that simulates the {\ct FAN}, which blows hot air into the room. A {\ct DEVC} called {\ct TC} is positioned in the room to measure the {\ct TEMPERATURE}. The {\ct thermostat} uses a {\ct SETPOINT} to turn on the {\ct FAN} when the temperature falls below 23~$^\circ$C ({\ct ON\_BOUND='LOWER'}) and it turns off when the temperature rises above 27~$^\circ$C.
 
 Note that a deadband controller needs to have {\ct LATCH} set to {\ct .FALSE.}
 
 
 \subsection{Control Function: \texorpdfstring{{\tt RESTART} and {\tt KILL}} {RESTARTKILL} }
 
-There are times when you might only want to run a simulation until some
-goal is reached, or you might want to create some
-baseline condition and then run multiple permutations of that baseline.
-For example, you might want to run a series of simulations where
-different mitigation strategies are tested once a detector alarms.
-Using the {\ct RESTART}
-control function, you can cause a restart file
-to be created once a desired condition is met.  The simulation can
-continue and the restart files can be copied to have the job identifying string, {\ct CHID}, of
-the various permutations (providing of course that the usual
-restrictions on the use of restart files are followed).
-For example, the lines
-
+There are times when you might only want to run a simulation until some goal is reached, or you might want to create some baseline condition and then run multiple permutations of that baseline. For example, you might want to run a series of simulations where different mitigation strategies are tested once a detector alarms. Using the {\ct RESTART} control function, you can cause a restart file to be created once a desired condition is met.  The simulation can continue and the restart files can be copied to have the job identifying string, {\ct CHID}, of the various permutations (providing of course that the usual restrictions on the use of restart files are followed). For example, the lines
 \begin{lstlisting}
 &DEVC ID='temp', QUANTITY='TEMPERATURE', SETPOINT=1000., XYZ=4.5,6.7,3.6 /
 &DEVC ID='velo', QUANTITY='VELOCITY', SETPOINT=10., XYZ=4.5,6.7,3.6 /
@@ -7018,37 +6734,17 @@ For example, the lines
 &CTRL ID='kill', FUNCTION_TYPE='KILL', INPUT_ID='temp' /
 &CTRL ID='restart', FUNCTION_TYPE='RESTART', INPUT_ID='velo' /
 \end{lstlisting}
-
-\noindent
-will kill the job and output restart files when the temperature at the given point rises above
-1000~$^\circ$C; or just force restart files to be output when the velocity at a given point exceeds 10~m/s.
+will kill the job and output restart files when the temperature at the given point rises above 1000~$^\circ$C; or just force restart files to be output when the velocity at a given point exceeds 10~m/s.
 
 
 
 \subsection{Control Function: \texorpdfstring{{\tt CUSTOM}}{CUSTOM} }
 \label{info:CUSTOM}
 
-For most of the control function types, the logical (true/false) output of
-the devices and control functions and the time they last changed
-state are taken as inputs.  A {\ct CUSTOM} function uses the numerical output of a {\ct DEVC} along with
-a {\ct RAMP} to determine the output of the function.  When the {\ct RAMP} output for the {\ct DEVC} value is negative, the
-{\ct CTRL} will have the value of its {\ct INITIAL\_STATE}.  When the {\ct RAMP} output for the {\ct DEVC} value is positive, the
-{\ct CTRL} will have the opposite value of its {\ct INITIAL\_STATE}. In the case below, the {\ct CUSTOM}
-control function uses the numerical output of a timer device as its input.  The function returns true (the default value for
-{\ct INITIAL\_STATE} is {\ct .FALSE.}) when the {\ct F} parameter
-in the ramp specified with {\ct RAMP\_ID} is a positive value and
-false when the {\ct RAMP} {\ct F} value is negative.
-In this case, the control would start false and would switch to
-true when the timer reaches 60~s.  It would then stay in a true
-state until the timer reaches 120~s and would then change back to false.
+For most of the control function types, the logical (true/false) output of the devices and control functions and the time they last changed state are taken as inputs.  A {\ct CUSTOM} function uses the numerical output of a {\ct DEVC} along with a {\ct RAMP} to determine the output of the function.  When the {\ct RAMP} output for the {\ct DEVC} value is negative, the {\ct CTRL} will have the value of its {\ct INITIAL\_STATE}.  When the {\ct RAMP} output for the {\ct DEVC} value is positive, the {\ct CTRL} will have the opposite value of its {\ct INITIAL\_STATE}. In the case below, the {\ct CUSTOM} control function uses the numerical output of a timer device as its input.  The function returns true (the default value for {\ct INITIAL\_STATE} is {\ct .FALSE.}) when the {\ct F} parameter in the ramp specified with {\ct RAMP\_ID} is a positive value and false when the {\ct RAMP} {\ct F} value is negative. In this case, the control would start false and would switch to true when the timer reaches 60~s.  It would then stay in a true state until the timer reaches 120~s and would then change back to false.
 
 
-Note that when using control functions the {\ct ID}s assigned to both the
-{\ct CTRL} and the {\ct DEVC} inputs must be unique across both sets of inputs, i.e., you cannot use the
-same {\ct ID} for both a control function and a device.
-
-You can make a fan operate on a fixed cycle by using a {\ct CUSTOM} control function based on time:
-
+Note that when using control functions the {\ct ID}s assigned to both the {\ct CTRL} and the {\ct DEVC} inputs must be unique across both sets of inputs, i.e., you cannot use the same {\ct ID} for both a control function and a device. You can make a fan operate on a fixed cycle by using a {\ct CUSTOM} control function based on time:
 \begin{lstlisting}
 &SURF ID='FAN', TMP_FRONT=40., VOLUME_FLOW=-1. /
 &VENT XB=-0.3,0.3,-0.3,0.3,0.0,0.0, SURF_ID='FAN', CTRL_ID='cycling timer' /
@@ -7059,12 +6755,9 @@ You can make a fan operate on a fixed cycle by using a {\ct CUSTOM} control func
 &RAMP ID='cycle', T=119, F= 1 /
 &RAMP ID='cycle', T=121, F=-1 /
 \end{lstlisting}
-
-\noindent
 In the above example the fan will be off initially, turn on at 60~s and then turn off at 120~s.
 
 You can make an obstruction appear and disappear multiple times by using the following lines
-
 \begin{lstlisting}
 &OBST XB=..., SURF_ID='whatever', CTRL_ID='cycling timer' /
 &DEVC ID='TIMER', XYZ=..., QUANTITY='TIME' /
@@ -7075,12 +6768,9 @@ You can make an obstruction appear and disappear multiple times by using the fol
 &RAMP ID='cycle', T=119, F= 1 /
 &RAMP ID='cycle', T=121, F=-1 /
 \end{lstlisting}
-
-\noindent
 The above will have the obstacle initially removed, then added at 60 s, and removed again at 120 s.
 
-Experiment with these combinations using a simple
-case before trying a case to make sure that FDS indeed is doing what is intended.
+Experiment with these combinations using a simple case before trying a case to make sure that FDS indeed is doing what is intended.
 
 \subsection{Control Function: Math Operations }
 \label{info:CONTROL_MATH}
