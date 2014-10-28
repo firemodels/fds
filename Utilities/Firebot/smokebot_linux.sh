@@ -1085,8 +1085,7 @@ email_build_status()
    echo ".    run cases: $DIFF_RUNCASES" >> $TIME_LOG
    echo ".make pictures: $DIFF_MAKEPICTURES" >> $TIME_LOG
    echo ".        total: $DIFF_SCRIPT_TIME" >> $TIME_LOG
-   echo ".   results (local): http://$WEBHOSTNAME/VV/SMV2" >> $TIME_LOG
-   echo ". results (public) : https://googledrive.com/host/0B-W-dkXwdHWNN3N2eG92X2taRFk/index.html" >> $TIME_LOG
+   echo ".      results: http://$WEBHOSTNAME/VV/SMV2" >> $TIME_LOG
   if [[ $THIS_SMVSVN != $LAST_SMVSVN ]] ; then
     cat $SVN_SMVLOG >> $TIME_LOG
   fi
