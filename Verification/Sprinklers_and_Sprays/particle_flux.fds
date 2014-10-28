@@ -4,6 +4,8 @@ A test of the insertion of solid, non-evaporating particles.
 
 &MESH IJK=50,50,25, XB=-5.0,5.0,-5.0,5.0,0.0,5.0 /
 
+&MISC PARTICLE_CFL=.TRUE. /
+
 &TIME DT=0.1, T_END=20. /
 
 &MATL ID='STUFF', DENSITY=1000., CONDUCTIVITY=0.1, SPECIFIC_HEAT=1. /
@@ -22,7 +24,6 @@ A test of the insertion of solid, non-evaporating particles.
 &VENT MB='YMIN', SURF_ID='OPEN' /
 &VENT MB='YMAX', SURF_ID='OPEN' /
 
-&BNDF QUANTITY='AMPUA', PART_ID='particles'  /  Accumulated Mass Per Unit Area, i.e., the Buckets
-&DEVC QUANTITY='AMPUA', PART_ID='particles', STATISTICS='SURFACE INTEGRAL', ID='mass', XB=-5.0,5.0,-5.0,5.0,0.0,0.0  / 
+&DEVC QUANTITY='MPUV', PART_ID='particles', STATISTICS='VOLUME INTEGRAL', ID='mass', XB=-5.0,5.0,-5.0,5.0,0.0,0.2  / 
 
 &TAIL /
