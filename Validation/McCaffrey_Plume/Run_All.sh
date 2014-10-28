@@ -23,22 +23,22 @@ $QFDS $DEBUG -p 4 $QUEUE -d $INDIR McCaffrey_33_kW_fine.fds
 $QFDS $DEBUG -p 4 $QUEUE -d $INDIR McCaffrey_45_kW_fine.fds
 $QFDS $DEBUG -p 4 $QUEUE -d $INDIR McCaffrey_57_kW_fine.fds
 
-#$QFDS $DEBUG $QUEUE -d $INDIR McCaffrey_14_kW_10.fds 
-#$QFDS $DEBUG $QUEUE -d $INDIR McCaffrey_22_kW_10.fds 
-#$QFDS $DEBUG $QUEUE -d $INDIR McCaffrey_33_kW_10.fds 
-#$QFDS $DEBUG $QUEUE -d $INDIR McCaffrey_45_kW_10.fds 
-#$QFDS $DEBUG $QUEUE -d $INDIR McCaffrey_57_kW_10.fds
+# $QFDS $DEBUG $QUEUE -d $INDIR McCaffrey_14_kW_11.fds 
+# $QFDS $DEBUG $QUEUE -d $INDIR McCaffrey_22_kW_11.fds 
+# $QFDS $DEBUG $QUEUE -d $INDIR McCaffrey_33_kW_11.fds 
+# $QFDS $DEBUG $QUEUE -d $INDIR McCaffrey_45_kW_11.fds 
+# $QFDS $DEBUG $QUEUE -d $INDIR McCaffrey_57_kW_11.fds
 
-#$QFDS $DEBUG -p 12 $QUEUE -d $INDIR McCaffrey_14_kW_20.fds
-#$QFDS $DEBUG -p 12 $QUEUE -d $INDIR McCaffrey_22_kW_20.fds
-#$QFDS $DEBUG -p 12 $QUEUE -d $INDIR McCaffrey_33_kW_20.fds
-#$QFDS $DEBUG -p 12 $QUEUE -d $INDIR McCaffrey_45_kW_20.fds
-#$QFDS $DEBUG -p 12 $QUEUE -d $INDIR McCaffrey_57_kW_20.fds
+# $QFDS $DEBUG -p 27 $QUEUE -d $INDIR McCaffrey_14_kW_21.fds
+# $QFDS $DEBUG -p 27 $QUEUE -d $INDIR McCaffrey_22_kW_21.fds
+# $QFDS $DEBUG -p 27 $QUEUE -d $INDIR McCaffrey_33_kW_21.fds
+# $QFDS $DEBUG -p 27 $QUEUE -d $INDIR McCaffrey_45_kW_21.fds
+# $QFDS $DEBUG -p 27 $QUEUE -d $INDIR McCaffrey_57_kW_21.fds
 
-#$QFDS $DEBUG -p 16 $QUEUE -d $INDIR McCaffrey_14_kW_40.fds
-#$QFDS $DEBUG -p 16 $QUEUE -d $INDIR McCaffrey_22_kW_40.fds
-#$QFDS $DEBUG -p 16 $QUEUE -d $INDIR McCaffrey_33_kW_40.fds
-#$QFDS $DEBUG -p 16 $QUEUE -d $INDIR McCaffrey_45_kW_40.fds
-#$QFDS $DEBUG -p 16 $QUEUE -d $INDIR McCaffrey_57_kW_40.fds
+# $QFDS $DEBUG -p 27 $QUEUE -d $INDIR McCaffrey_14_kW_45.fds
+# $QFDS $DEBUG -p 27 $QUEUE -d $INDIR McCaffrey_22_kW_45.fds
+# $QFDS $DEBUG -p 27 $QUEUE -d $INDIR McCaffrey_33_kW_45.fds
+# $QFDS $DEBUG -p 27 $QUEUE -d $INDIR McCaffrey_45_kW_45.fds
+# $QFDS $DEBUG -p 27 $QUEUE -d $INDIR McCaffrey_57_kW_45.fds
 
 echo FDS cases submitted
