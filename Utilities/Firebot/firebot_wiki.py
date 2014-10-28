@@ -34,8 +34,6 @@ This page displays the build status for up to 100 of the most recent build/test 
 
 For additional information on Firebot, please refer to the FDS Configuration Management Plan.
 
-The latest nightly versions of the documentation/manuals from Firebot [https://drive.google.com/folderview?id=0B_wB1pJL2bFQaDJaOFNnUDR4LXM#list can be viewed here].
-
 ===Build stages:===
 
   * Stage 1:  SVN operations
