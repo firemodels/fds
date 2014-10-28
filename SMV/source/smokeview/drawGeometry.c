@@ -2990,6 +2990,13 @@ void UpdateFacelists(void){
       qsort((facedata **)meshi->face_outlines,(size_t)n_outlines,sizeof(facedata *),comparecolorfaces);
     }
   }
+  n_geom_triangles=0;
+  for(i=0;i<nmeshes;i++){
+    mesh *meshi;
+
+    meshi = meshinfo  + i;
+    n_geom_triangles += meshi->nface_textures+meshi->nface_normals_single+meshi->nface_normals_double;
+  }
 }
 
 /* ------------------ drawselect_faces ------------------------ */
@@ -5219,6 +5226,8 @@ void drawBlockages(int mode, int trans_flag){
   }
 
   if(blocklocation==BLOCKlocation_cad||(ncadgeom!=0&&show_cad_and_grid==1)){
+    int ntriangles=0;
+
     for(i=0;i<ncadgeom;i++){
       cd=cadgeominfo+i;
       if(cd->version==1){
@@ -5232,7 +5241,9 @@ void drawBlockages(int mode, int trans_flag){
         drawcad2geom(cd,trans_flag);
         if(clip_mode==CLIP_BLOCKAGES)setClipPlanes(NULL,CLIP_OFF);
       }
+      ntriangles+=2*cd->nquads;
     }
+    if(show_geom_triangles==1)printf("cad triangles: %i\n",ntriangles);
   }
 }
 /* ------------------ level_scene ------------------------ */
@@ -5616,6 +5627,7 @@ void draw_facesOLD(){
     glDisable(GL_TEXTURE_2D);
     glDisable(GL_LIGHTING);
   }
+  if(show_geom_triangles==1)printf("obst/vent triangles: %i\n",n_geom_triangles);
 }
 
 
