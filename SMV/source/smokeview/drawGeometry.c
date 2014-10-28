@@ -5243,7 +5243,7 @@ void drawBlockages(int mode, int trans_flag){
       }
       ntriangles+=2*cd->nquads;
     }
-    if(show_geom_triangles==1)printf("cad triangles: %i\n",ntriangles);
+    if(show_triangle_count==1)printf("cad triangles: %i\n",ntriangles);
   }
 }
 /* ------------------ level_scene ------------------------ */
@@ -5627,7 +5627,7 @@ void draw_facesOLD(){
     glDisable(GL_TEXTURE_2D);
     glDisable(GL_LIGHTING);
   }
-  if(show_geom_triangles==1)printf("obst/vent triangles: %i\n",n_geom_triangles);
+  if(show_triangle_count==1)printf("obst/vent triangles: %i\n",n_geom_triangles);
 }
 
 

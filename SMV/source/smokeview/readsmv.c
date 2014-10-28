@@ -8613,6 +8613,11 @@ int readini2(char *inifile, int localfile){
         continue;
       }
     }
+    if(match(buffer,"SHOWTRIANGLECOUNT")==1){
+      fgets(buffer,255,stream);
+      sscanf(buffer," %i",&show_triangle_count);
+      continue;
+    }
     if(match(buffer,"SHOWDEVICEVALS")==1){
       fgets(buffer,255,stream);
       sscanf(buffer," %i %i %i %i %i %i",
@@ -11680,6 +11685,8 @@ void writeini(int flag,char *filename){
   fprintf(fileout,"SHOWMEMLOAD\n");
   fprintf(fileout," %i\n",visAvailmemory);
 #endif
+  fprintf(fileout,"SHOWTRIANGLECOUNT\n");
+  fprintf(fileout," %i\n",show_triangle_count);
   fprintf(fileout,"SHOWBLOCKLABEL\n");
   fprintf(fileout," %i\n",visBlocklabel);
   fprintf(fileout,"SHOWAXISLABELS\n");

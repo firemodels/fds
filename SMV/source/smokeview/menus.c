@@ -4524,7 +4524,7 @@ void GeometryMenu(int value){
 
   switch (value){
   case 14:
-    show_geom_triangles=1-show_geom_triangles;
+    show_triangle_count=1-show_triangle_count;
     break;
   case 3:
     if(isZoneFireModel==0)visFrame=1-visFrame;
@@ -5715,8 +5715,8 @@ updatemenu=0;
   else{
     visFrame=0;
   }
-  if(show_geom_triangles==1)glutAddMenuEntry(_("*Triangle count"),14);
-  if(show_geom_triangles==0)glutAddMenuEntry(_("Triangle count"),14);
+  if(show_triangle_count==1)glutAddMenuEntry(_("*Triangle count"),14);
+  if(show_triangle_count==0)glutAddMenuEntry(_("Triangle count"),14);
   glutAddMenuEntry(_("Show all"),11);
   glutAddMenuEntry(_("Hide all"),13);
 
