@@ -670,8 +670,13 @@ ELSE
    OPEN(LU_HRR,FILE=FN_HRR,FORM='FORMATTED',STATUS='REPLACE')
    WRITE(TCFORM,'(A,I4.4,A)') "(",11+N_ZONE_TMP,"(A,','),A)"
    WRITE(LU_HRR,TCFORM) 's','kW','kW','kW','kW','kW','kW','kW','kW','kW','kW','kg/s',('Pa',N=1,N_ZONE_TMP) 
-   WRITE(LU_HRR,TCFORM) 'Time','HRR','Q_RADI','Q_CONV','Q_COND','Q_DIFF','Q_PRES','Q_PART','Q_GEOM','Q_ENTH','Q_TOTAL',&
-                        'BURN_RATE',(TRIM(P_ZONE(N)%ID),N=1,N_ZONE_TMP) 
+   IF (N_ZONE_TMP>0) THEN
+      WRITE(LU_HRR,TCFORM) 'Time','HRR','Q_RADI','Q_CONV','Q_COND','Q_DIFF','Q_PRES','Q_PART','Q_GEOM','Q_ENTH','Q_TOTAL',&
+                           'BURN_RATE',(TRIM(P_ZONE(N)%ID),N=1,N_ZONE_TMP) 
+   ELSE
+      WRITE(LU_HRR,TCFORM) 'Time','HRR','Q_RADI','Q_CONV','Q_COND','Q_DIFF','Q_PRES','Q_PART','Q_GEOM','Q_ENTH','Q_TOTAL',&
+                           'BURN_RATE'
+   ENDIF
 ENDIF
 IF (N_ZONE>0) DEALLOCATE(P_ZONE_ID)
 
