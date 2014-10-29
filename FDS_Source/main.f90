@@ -67,7 +67,7 @@ TYPE (OMESH_TYPE), POINTER :: M2,M3,M5
 INTEGER :: N,I,IERR=0,STATUS(MPI_STATUS_SIZE)
 INTEGER :: PNAMELEN=0,DISP,TAG_EVAC
 INTEGER :: PROVIDED
-INTEGER, PARAMETER :: REQUIRED=MPI_THREAD_FUNNELED
+INTEGER, PARAMETER :: REQUIRED=MPI_THREAD_SINGLE
 INTEGER, ALLOCATABLE, DIMENSION(:) :: REQ,REQ1,REQ2,REQ3,REQ4,REQ5,REQ6,REQ7,REQ8,REQ9,COUNTS,DISPLS,&
                                       COUNTS2D,DISPLS2D,COUNTS_TIMERS,DISPLS_TIMERS, &
                                       COUNTS_MASS,DISPLS_MASS,COUNTS_HVAC,DISPLS_HVAC,COUNTS_Q_DOT,DISPLS_Q_DOT, &
@@ -439,9 +439,7 @@ DO NM=1,NMESHES
    IF (UVW_RESTART)      CALL UVW_INIT(NM,CSVFINFO(NM)%UVWFILE)
    CALL COMPUTE_VISCOSITY(T_BEGIN,NM)
 ENDDO
-CALL POST_RECEIVES(1)
 CALL MESH_EXCHANGE(1)
-CALL POST_RECEIVES(4)
 CALL MESH_EXCHANGE(4)
 CALL POST_RECEIVES(6)
 CALL MESH_EXCHANGE(6)
@@ -758,8 +756,6 @@ MAIN_LOOP: DO
  
    CHANGE_TIME_STEP_LOOP: DO
 
-      IF (FIRST_PASS .OR. SYNCHRONIZE) CALL POST_RECEIVES(1)  
-
       ! Predict density and mass fractions at next time step, and then start the divergence calculation
  
       COMPUTE_DENSITY_LOOP: DO NM=1,NMESHES
@@ -916,7 +912,6 @@ MAIN_LOOP: DO
  
    ! Exchange velocity and pressures at interpolated boundaries
 
-   CALL POST_RECEIVES(3)
    CALL MESH_EXCHANGE(3)
 
    ! Force normal components of velocity to match at interpolated boundaries
@@ -981,8 +976,6 @@ MAIN_LOOP: DO
  
    CORRECTOR = .TRUE.
    PREDICTOR = .FALSE.
-
-   CALL POST_RECEIVES(4)
 
 !    ! Retrict scalar flux from fine mesh to coarse mesh
 
@@ -1111,7 +1104,6 @@ MAIN_LOOP: DO
 
    ! Exchange the number of particles sent from mesh to mesh
 
-   CALL POST_RECEIVES(7) 
    CALL MESH_EXCHANGE(7)
 
    ! Exchange velocity, pressure at interpolated boundaries
@@ -2495,6 +2487,8 @@ IF (USE_MPI .AND. CODE==6 .AND. EXCHANGE_RADIATION .AND. N_REQ9>0) THEN
 !  CALL MPI_WAITALL(N_REQ9,REQ9(1:N_REQ9),MPI_STATUSES_IGNORE,IERR)
 ENDIF
 
+IF (USE_MPI .AND. CODE==6) CALL MPI_BARRIER(MPI_COMM_WORLD,IERR)  ! Add a barrier here to prevent possible timeouts.
+
 
 ! Receive the information sent above into the appropriate arrays.
 
@@ -2723,7 +2717,7 @@ DO WHILE(.NOT.FLAG)
    CALL MPI_TESTALL(NR,RR(1:NR),FLAG,MPI_STATUSES_IGNORE,IERR)
    WAIT_TIME = MPI_WTIME() - START_TIME
    IF (WAIT_TIME>MPI_TIMEOUT) THEN
-      WRITE(LU_ERR,'(A,A,I3)') TRIM(RNAME),' timed out for MPI process ',MYID+1
+      WRITE(LU_ERR,'(A,A,I3,A,I3)') TRIM(RNAME),' timed out for MPI process ',MYID+1,', Error Code=',IERR
       CALL MPI_ABORT(MPI_COMM_WORLD,0,IERR)
    ENDIF
 ENDDO
