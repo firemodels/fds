@@ -439,22 +439,42 @@ DO NM=1,NMESHES
    IF (UVW_RESTART)      CALL UVW_INIT(NM,CSVFINFO(NM)%UVWFILE)
    CALL COMPUTE_VISCOSITY(T_BEGIN,NM)
 ENDDO
+
+! Exchange information at mesh boundaries related to the various initialization routines just completed
+
 CALL MESH_EXCHANGE(1)
 CALL MESH_EXCHANGE(4)
 CALL POST_RECEIVES(6)
 CALL MESH_EXCHANGE(6)
+
+! Ensure normal components of velocity match at mesh boundaries and do velocity BCs just in case the flow is not initialized to zero
+
 PREDICTOR = .FALSE.
 CORRECTOR = .TRUE.
+
 DO NM=1,NMESHES
    IF (PROCESS(NM)/=MYID) CYCLE
    CALL MATCH_VELOCITY(NM)
    CALL SYNTHETIC_EDDY_SETUP(NM)
    CALL VELOCITY_BC(T_BEGIN,NM)
    CALL VISCOSITY_BC(NM)
-   DO I=1,NUMBER_INITIAL_ITERATIONS
+ENDDO
+
+! Iterate surface BCs and radiation in case temperatures are not initialized to ambient
+
+DO I=1,NUMBER_INITIAL_ITERATIONS
+   DO NM=1,NMESHES
+      IF (PROCESS(NM)/=MYID) CYCLE
       CALL WALL_BC(T_BEGIN,NM)
       IF (RADIATION) CALL COMPUTE_RADIATION(T_BEGIN,NM)
    ENDDO
+   CALL MESH_EXCHANGE(2) ! Exchange radiation intensity at interpolated boundaries
+ENDDO
+
+! Compute divergence just in case the flow field is not initialized to ambient
+
+DO NM=1,NMESHES
+   IF (PROCESS(NM)/=MYID) CYCLE
    CALL DIVERGENCE_PART_1(T_BEGIN,NM)
 ENDDO
 
@@ -1106,10 +1126,11 @@ MAIN_LOOP: DO
 
    CALL MESH_EXCHANGE(7)
 
-   ! Exchange velocity, pressure at interpolated boundaries
+   ! Exchange velocity, pressure, particles, radiation at interpolated boundaries
 
    CALL POST_RECEIVES(6) 
    CALL MESH_EXCHANGE(6)
+   CALL MESH_EXCHANGE(2)
 
    ! Force normal components of velocity to match at interpolated boundaries
 
@@ -2315,7 +2336,7 @@ SENDING_MESH_LOOP: DO NM=1,NMESHES
 
       ! Send out radiation info
 
-      SEND_RADIATION: IF ( CODE==6 .AND. M3%NIC_R>0 .AND. EXCHANGE_RADIATION) THEN
+      SEND_RADIATION: IF ( CODE==2 .AND. M3%NIC_R>0 .AND. EXCHANGE_RADIATION) THEN
          NRA = NUMBER_RADIATION_ANGLES
          NSB = NUMBER_SPECTRAL_BANDS         
          IF (RNODE/=SNODE) THEN
@@ -2480,15 +2501,11 @@ IF (USE_MPI .AND. (CODE==0 .OR. CODE==6) .AND. N_REQ8>0) THEN
 !  CALL MPI_WAITALL(N_REQ8,REQ8(1:N_REQ8),MPI_STATUSES_IGNORE,IERR)
 ENDIF
 
-IF (USE_MPI .AND. CODE==6) CALL MPI_BARRIER(MPI_COMM_WORLD,IERR)  ! Add a barrier here to prevent possible timeouts.
-
-IF (USE_MPI .AND. CODE==6 .AND. EXCHANGE_RADIATION .AND. N_REQ9>0) THEN
+IF (USE_MPI .AND. CODE==2 .AND. EXCHANGE_RADIATION .AND. N_REQ9>0) THEN
    CALL MPI_STARTALL(N_REQ9,REQ9(1:N_REQ9),IERR)
    CALL TIMEOUT('REQ9',N_REQ9,REQ9(1:N_REQ9))
 !  CALL MPI_WAITALL(N_REQ9,REQ9(1:N_REQ9),MPI_STATUSES_IGNORE,IERR)
 ENDIF
-
-IF (USE_MPI .AND. CODE==6) CALL MPI_BARRIER(MPI_COMM_WORLD,IERR)  ! Add a barrier here to prevent possible timeouts.
 
 
 ! Receive the information sent above into the appropriate arrays.
@@ -2626,7 +2643,7 @@ IF (SNODE/=MYID) CYCLE SEND_MESH_LOOP
    
       ! Unpack radiation information at the end of the CORRECTOR stage of the time step
    
-      RECEIVE_RADIATION: IF ( CODE==6 .AND. M2%NIC_S>0 .AND. EXCHANGE_RADIATION .AND. RNODE/=SNODE) THEN
+      RECEIVE_RADIATION: IF ( CODE==2 .AND. M2%NIC_S>0 .AND. EXCHANGE_RADIATION .AND. RNODE/=SNODE) THEN
          NRA = NUMBER_RADIATION_ANGLES
          NSB = NUMBER_SPECTRAL_BANDS
          ANG_INC_COUNTER = NINT(M2%REAL_RECV_PKG5(1))
