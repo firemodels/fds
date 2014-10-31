@@ -410,31 +410,49 @@ ENDIF
 \section{Some Geometry Implementation Notes}
 These implementation notes will not appear as is in an FDS or Smokeview technical manual. They are written down here to help verify various geometric algorithms coded in FDS and Smokeview.
 
+\newcommand{\tetra}{\mbox{tetra\_bounds}}
+\newcommand{\bbox}{\mbox{box\_bounds}}
+\newcommand{\txtmin}{\mbox{min}}
+\newcommand{\txtmax}{\mbox{max}}
 \subsection{Tetrahedron Box Volume Intersection}
+\subsubsection{Overview}
+The region formed by intersecting a box and a tetrahedron may have up to 10 faces, up to four faces from the tetrahedron and up to another six faces from the box.  The problem then is to determine the volume of this intersection region.  A general algorithm for computing the intersection volume is given below with more details detailed in the following sections.
 \begin{enumerate}
-\item Compute bounding boxes for a box and a tetrahedron.  
+\item If the bounding boxes of the box and tetrahedron do not overlap then the intersection volume is zero.  Note, if the bounding boxes do overlap the intersection volume may still be zero.
+
+\item Determine the vertices for each face of the intersection volume by intersecting each box face with each tetrahedron face.
+
+\item Form a vertex interior to the intersection volume (by averaging all intersection volume vertices).
+
+\item For each face of the intersection volume, compute the volume of the region formed from this face and the interior vertex computed in the previous step.
+
+\item Sum all volume computed in previous step.
+\end{enumerate}
+
+\subsubsection{Determine Bounding Boxes}
 \begin{enumerate}
 \item Bounding box for a tetrahedron (see Figure \ref{figure:tetrahedron_setup} for box vertex definitions):
 \begin{eqnarray*}
-\mbox{tetra\_bounds}(0)&=x_{min}=\min(v0_x,v1_x,v2_x,v3_x)\\
-\mbox{tetra\_bounds}(1)&=x_{max}=\max(v0_x,v1_x,v2_x,v3_x)\\
-\mbox{tetra\_bounds}(2)&=y_{min}=\min(v0_y,v1_y,v2_y,v3_y)\\
-\mbox{tetra\_bounds}(3)&=y_{max}=\max(v0_y,v1_y,v2_y,v3_y)\\
-\mbox{tetra\_bounds}(4)&=z_{min}=\min(v0_z,v1_z,v2_z,v3_z)\\
-\mbox{tetra\_bounds}(5)&=z_{max}=\max(v0_z,v1_z,v2_z,v3_z)
+\tetra(0)&=x_{\txtmin}=\min(v0_x,v1_x,v2_x,v3_x)\\
+\tetra(1)&=x_{\txtmax}=\max(v0_x,v1_x,v2_x,v3_x)\\
+\tetra(2)&=y_{\txtmin}=\min(v0_y,v1_y,v2_y,v3_y)\\
+\tetra(3)&=y_{\txtmax}=\max(v0_y,v1_y,v2_y,v3_y)\\
+\tetra(4)&=z_{\txtmin}=\min(v0_z,v1_z,v2_z,v3_z)\\
+\tetra(5)&=z_{\txtmax}=\max(v0_z,v1_z,v2_z,v3_z)
 \end{eqnarray*}
 
 \item Bounding box for for an axis aligned box (see Figure \ref{figure:box_setup} for tetrahedron vertex definitions):
 \begin{eqnarray*}
-\mbox{box\_bounds}(0)&=x_{min}=v0_x\\
-\mbox{box\_bounds}(1)&=x_{max}=v1_x\\
-\mbox{box\_bounds}(2)&=y_{min}=v0_y\\
-\mbox{box\_bounds}(3)&=y_{max}=v2_y\\
-\mbox{box\_bounds}(4)&=z_{min}=v0_z\\
-\mbox{box\_bounds}(5)&=z_{max}=v4_z
+\bbox(0)&=x_{\txtmin}=v0_x\\
+\bbox(1)&=x_{\txtmax}=v1_x\\
+\bbox(2)&=y_{\txtmin}=v0_y\\
+\bbox(3)&=y_{\txtmax}=v2_y\\
+\bbox(4)&=z_{\txtmin}=v0_z\\
+\bbox(5)&=z_{\txtmax}=v4_z
 \end{eqnarray*}
 \end{enumerate}
-\item The intersection volume is zero if bounding boxes for the tetrahedron and box do not overlap.
+
+\noindent The intersection volume is zero if bounding boxes for the tetrahedron and box do not overlap.
 These bounding boxes do not over lap if any of the following are true:
 \begin{eqnarray*}
 \mbox{box\_bounds}(0)>\mbox{tetra\_bounds}(1) \\
@@ -442,8 +460,12 @@ These bounding boxes do not over lap if any of the following are true:
 \mbox{box\_bounds}(2)>\mbox{tetra\_bounds}(3) \\
 \mbox{box\_bounds}(3)<\mbox{tetra\_bounds}(2) \\
 \mbox{box\_bounds}(4)>\mbox{tetra\_bounds}(5) \\
-\mbox{box\_bounds}(5)<\mbox{tetra\_bounds}(4) 
+\mbox{box\_bounds}(5)<\mbox{tetra\_bounds}(4)
 \end{eqnarray*}
+
+\subsubsection{Finding Intersection Vertices - 2D}
+\subsubsection{Finding Intersection Vertices - 3D}
+\begin{enumerate}
 
 \item For each box plane:
 \begin{enumerate}
@@ -475,6 +497,8 @@ These bounding boxes do not over lap if any of the following are true:
 \caption{Schematic of vertex and edge notation for a box}
 \label{figure:box_setup}
 \end{figure}
+
+\subsubsection{Computing Volume}
 
 \subsection{Spheres}
 \subsubsection{Latitude/Longitude Discretization}
