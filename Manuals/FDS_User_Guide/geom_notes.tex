@@ -410,7 +410,57 @@ ENDIF
 \section{Some Geometry Implementation Notes}
 These implementation notes will not appear as is in an FDS or Smokeview technical manual. They are written down here to help verify various geometric algorithms coded in FDS and Smokeview.
 
-\subsection{Tetrahedron Box Intersection}
+\subsection{Tetrahedron Box Volume Intersection}
+\begin{enumerate}
+\item Compute bounding boxes for a box and a tetrahedron.  
+\begin{enumerate}
+\item Bounding box for a tetrahedron (see Figure \ref{figure:tetrahedron_setup} for box vertex definitions):
+\begin{eqnarray*}
+\mbox{tetra\_bounds}(0)&=x_{min}=\min(v0_x,v1_x,v2_x,v3_x)\\
+\mbox{tetra\_bounds}(1)&=x_{max}=\max(v0_x,v1_x,v2_x,v3_x)\\
+\mbox{tetra\_bounds}(2)&=y_{min}=\min(v0_y,v1_y,v2_y,v3_y)\\
+\mbox{tetra\_bounds}(3)&=y_{max}=\max(v0_y,v1_y,v2_y,v3_y)\\
+\mbox{tetra\_bounds}(4)&=z_{min}=\min(v0_z,v1_z,v2_z,v3_z)\\
+\mbox{tetra\_bounds}(5)&=z_{max}=\max(v0_z,v1_z,v2_z,v3_z)
+\end{eqnarray*}
+
+\item Bounding box for for an axis aligned box (see Figure \ref{figure:box_setup} for tetrahedron vertex definitions):
+\begin{eqnarray*}
+\mbox{box\_bounds}(0)&=x_{min}=v0_x\\
+\mbox{box\_bounds}(1)&=x_{max}=v1_x\\
+\mbox{box\_bounds}(2)&=y_{min}=v0_y\\
+\mbox{box\_bounds}(3)&=y_{max}=v2_y\\
+\mbox{box\_bounds}(4)&=z_{min}=v0_z\\
+\mbox{box\_bounds}(5)&=z_{max}=v4_z
+\end{eqnarray*}
+\end{enumerate}
+\item The intersection volume is zero if bounding boxes for the tetrahedron and box do not overlap.
+These bounding boxes do not over lap if any of the following are true:
+\begin{eqnarray*}
+\mbox{box\_bounds}(0)>\mbox{tetra\_bounds}(1) \\
+\mbox{box\_bounds}(1)<\mbox{tetra\_bounds}(0) \\
+\mbox{box\_bounds}(2)>\mbox{tetra\_bounds}(3) \\
+\mbox{box\_bounds}(3)<\mbox{tetra\_bounds}(2) \\
+\mbox{box\_bounds}(4)>\mbox{tetra\_bounds}(5) \\
+\mbox{box\_bounds}(5)<\mbox{tetra\_bounds}(4) 
+\end{eqnarray*}
+
+\item For each box plane:
+\begin{enumerate}
+\item add intersection of tetrahedron edges and box plane
+\item add intersection of box plane edge and tetrahedron plane (if on tetrahedron)
+\item add box plane vertices if inside tetrahedron
+\end{enumerate}
+
+\item For each tetrahedron plane:
+\begin{enumerate}
+\item add intersection of box edge and tetrahedron plane (if on tetrahedron)
+\item add intersection of tetrahedron plane edge and box plane (if on box)
+\item add tetrahedron plane vertices if inside box
+\end{enumerate}
+
+\end{enumerate}
+
 \begin{figure}[\figoptions]
 \begin{center}
 \includegraphics[width=4.0in]{../SMV_Technical_Reference_Guide/FIGURES/tetrahedron_setup}
@@ -423,7 +473,7 @@ These implementation notes will not appear as is in an FDS or Smokeview technica
 \includegraphics[width=4.0in]{../SMV_Technical_Reference_Guide/FIGURES/box_setup}
 \end{center}
 \caption{Schematic of vertex and edge notation for a box}
-\label{figure:tetrahedron_setup}
+\label{figure:box_setup}
 \end{figure}
 
 \subsection{Spheres}
