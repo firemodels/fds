@@ -20,6 +20,7 @@ then
   echo " -e exe - full path of FDS used to run case"
   echo " -f repository root - name and location of repository where FDS is located"
   echo "    [default: ~/FDS-SMV]"
+  echo " -l node1+node2+...+noden - specify which nodes to run job on"
   echo " -m m - reserve m processes per node [default: 1]"
   echo " -n n - number of MPI processes per node [default: 1]"
   echo " -o o - number of OpenMP threads per process [default: 1]"
@@ -71,10 +72,11 @@ showinput=0
 use_repository=1
 strip_extension=0
 REPORT_BINDINGS="--report-bindings"
+nodelist=
 
 # read in parameters from command line
 
-while getopts 'bcd:e:f:j:m:n:o:p:q:rstv' OPTION
+while getopts 'bcd:e:f:j:l:m:n:o:p:q:rstv' OPTION
 do
 case $OPTION  in
   b)
@@ -95,6 +97,9 @@ case $OPTION  in
    ;;
   j)
    JOBPREFIX="$OPTARG"
+   ;;
+  l)
+   nodelist="$OPTARG"
    ;;
   m)
    max_processes_per_node="$OPTARG"
@@ -129,6 +134,9 @@ shift $(($OPTIND-1))
 
 # ^^^^^^^^^^^^^^^^^^^^^^^^parse options^^^^^^^^^^^^^^^^^^^^^^^^^
 
+if [ "$nodelist" != "" ] ; then
+  nodelist="-l nodes=$nodelist"
+fi 
 if [ "$use_debug" == "1" ] ; then
   DB=_db
 fi
@@ -256,7 +264,7 @@ if [ "$STOPFDSMAXITER" == "" ]; then
   fi
 fi
 
-QSUB="qsub -q $queue"
+QSUB="qsub -q $queue $nodelist"
 
 if [ "$queue" == "terminal" ] ; then
   QSUB=
@@ -312,6 +320,7 @@ EOF
 
 if [ "$showinput" == "1" ] ; then
   cat $scriptfile
+  echo QSUB=$QSUB
   exit
 fi
 
