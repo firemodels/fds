@@ -1,10 +1,8 @@
 % !TEX root = FDS_Validation_Guide.tex
 
-\chapter{Burning Rate}
+\chapter{Burning Rate and Fire Spread}
 
-This chapter contains a series of validation exercises where the aim is to {\em predict} the burning rate of the fuel. Most of the simulations included in the previous chapters involved
-a {\em specified} burning or heat release rate. Here, the objective is to apply measured thermophysical properties of the material and predict its burning rate, either with a
-specified heat flux or as a free burn.
+This chapter contains a series of validation exercises where the aim is to {\em predict} the burning and spread rate of the fire. Most of the simulations included in the previous chapters involved a {\em specified} burning or heat release rate. Here, the objective is to apply measured thermophysical properties of the material and predict its burning rate, either with a specified heat flux or as a free burn.
 
 
 
@@ -12,13 +10,7 @@ specified heat flux or as a free burn.
 
 The U.S.~Federal Aviation Administration (FAA) has studied various plastics that are commonly used aboard commercial aircraft.
 
-This section presents measured properties of various polymers and the numerical predictions of their mass loss and/or burning rates under constant heat heating.
-Two types of experiments are considered. First, the NIST Gasification Apparatus is used to measure the mass loss rate of non-burning samples in a nitrogen atmosphere.
-Second, the standard Cone Calorimeter~\cite{conecal} is used to measure the heat release rate of materials in a normal atmosphere.
-When just the mass loss rate of a non-burning sample has been measured, FDS is run in ``solid phase only'' mode; that is, a 1-D heat conduction calculation is performed in a
-single grid cell. The result is the predicted mass loss rate as a function of time. To simulate a cone calorimeter experiment, FDS simulates the burning of a 10~cm by 10~cm sample with
-a specified heat flux to represent the effect of the cone heater. The cone itself is not included in the simulation. As the sample burns, FDS predicts the additional radiative and
-convective heating of the sample as a result of the fire.
+This section presents measured properties of various polymers and the numerical predictions of their mass loss and/or burning rates under constant heat heating. Two types of experiments are considered. First, the NIST Gasification Apparatus is used to measure the mass loss rate of non-burning samples in a nitrogen atmosphere. Second, the standard Cone Calorimeter~\cite{conecal} is used to measure the heat release rate of materials in a normal atmosphere. When just the mass loss rate of a non-burning sample has been measured, FDS is run in ``solid phase only'' mode; that is, a 1-D heat conduction calculation is performed in a single grid cell. The result is the predicted mass loss rate as a function of time. To simulate a cone calorimeter experiment, FDS simulates the burning of a 10~cm by 10~cm sample with a specified heat flux to represent the effect of the cone heater. The cone itself is not included in the simulation. As the sample burns, FDS predicts the additional radiative and convective heating of the sample as a result of the fire.
 
 In general, the burning/gasification rate of a charring polymer is more difficult to predict than a non-charring one because there are more parameters that need to be measured and
 more complicated behavior, like intumescence, need to be considered.
@@ -52,12 +44,7 @@ more complicated behavior, like intumescence, need to be considered.
 
 \subsection{Non-Charring Polymers, HDPE, HIPS, and PMMA}
 
-A non-charring polymer is considered one of the easier solids to model because it typically involves only a single, first order reaction that converts solid plastic to fuel vapor.
-No residue is formed and the plastic is completely pyrolyzed. Table~\ref{FAA_Properties}
-lists nine parameters for each polymer studied. These values have been input directly into FDS, and the predicted mass loss rates are compared with measured values from the NIST
-Gasification Apparatus, a device that pyrolyzes the solid in a nitrogen environment to prevent combustion of fuel gases. The results are shown in Fig.~\ref{FAA_Polymers}. The exposing
-heat flux was 52~kW/m$^2$. A 1~cm layer of insulation was placed under the sample. Its properties are given in Ref.~\cite{Stoliarov:CF2009}.
-
+A non-charring polymer is considered one of the easier solids to model because it typically involves only a single, first order reaction that converts solid plastic to fuel vapor. No residue is formed and the plastic is completely pyrolyzed. Table~\ref{FAA_Properties} lists nine parameters for each polymer studied. These values have been input directly into FDS, and the predicted mass loss rates are compared with measured values from the NIST Gasification Apparatus, a device that pyrolyzes the solid in a nitrogen environment to prevent combustion of fuel gases. The results are shown in Fig.~\ref{FAA_Polymers}. The exposing heat flux was 52~kW/m$^2$. A 1~cm layer of insulation was placed under the sample. Its properties are given in Ref.~\cite{Stoliarov:CF2009}.
 
 \begin{table}[h!]
 \caption[FAA non-charring polymer properties.]{Input parameters for FAA Polymers non-charring samples. Courtesy S.~Stoliarov, M.~McKinnon and J.~Li, University of Maryland.
@@ -141,14 +128,7 @@ nitrogen environment.}
 
 \subsection{Polycarbonate (PC)}
 
-Table~\ref{Properties_PC} lists the measured properties of polycarbonate. These values have been input directly into FDS, and the predicted heat release rates
-are compared with measured values from the Cone
-Calorimeter. The results for samples of various thicknesses and imposed heat fluxes are shown in Fig.~\ref{HRR_PC}.
-A 1~cm layer of Kaowool insulation was placed under the sample. Its properties are given in Ref.~\cite{Stoliarov:CF2010}.
-It is assumed that the polymer undergoes a single step reaction
-that forms fuel gas and char.
-
-
+Table~\ref{Properties_PC} lists the measured properties of polycarbonate. These values have been input directly into FDS, and the predicted heat release rates are compared with measured values from the Cone Calorimeter. The results for samples of various thicknesses and imposed heat fluxes are shown in Fig.~\ref{HRR_PC}. A 1~cm layer of Kaowool insulation was placed under the sample. Its properties are given in Ref.~\cite{Stoliarov:CF2010}. It is assumed that the polymer undergoes a single step reaction that forms fuel gas and char.
 
 \begin{table}[h!]
 \caption[Properties of polycarbonate (PC).]{Properties of polycarbonate (PC). Courtesy S.~Stoliarov, University of Maryland. See Section~\ref{glossary} for an explanation of terms.}
@@ -193,10 +173,7 @@ Combustion Efficiency       &               & 0.84 $\pm$ 0.03                   
 
 \subsection{Poly(vinyl chloride) (PVC)}
 
-Table~\ref{Properties_PVC} lists the measured properties of poly(vinyl chloride). These values have been input directly into FDS, and the predicted heat release rates
-are compared with measured values from the Cone
-Calorimeter. The results for samples of various thicknesses and imposed heat fluxes are shown in Fig.~\ref{HRR_PVC}.
-A 1~cm layer of Kaowool insulation was placed under the sample. Its properties are given in Ref.~\cite{Stoliarov:CF2010}.
+Table~\ref{Properties_PVC} lists the measured properties of poly(vinyl chloride). These values have been input directly into FDS, and the predicted heat release rates are compared with measured values from the Cone Calorimeter. The results for samples of various thicknesses and imposed heat fluxes are shown in Fig.~\ref{HRR_PVC}. A 1~cm layer of Kaowool insulation was placed under the sample. Its properties are given in Ref.~\cite{Stoliarov:CF2010}.
 
 It is assumed that the polymer decomposes via a two-step reaction:
 \begin{eqnarray}
@@ -261,21 +238,16 @@ Gas 2 Combustion Efficiency &               & 0.75 $\pm$ 0.03                   
 
 \subsection{Poly(aryl ether ether ketone)) (PEEK)}
 
-Table~\ref{Properties_PEEK} lists the measured properties of poly(aryl ether ether ketone)\footnote{Trade name VICTREX PEEK 450G.
-The sample has been thoroughly dried.}. Its property values have been input directly into FDS, and the predicted heat release rates
-are compared with measured values from the Cone Calorimeter. It is assumed that the polymer decomposes via a four-step reaction:
+Table~\ref{Properties_PEEK} lists the measured properties of poly(aryl ether ether ketone)\footnote{Trade name VICTREX PEEK 450G. The sample has been thoroughly dried.}. Its property values have been input directly into FDS, and the predicted heat release rates are compared with measured values from the Cone Calorimeter. It is assumed that the polymer decomposes via a four-step reaction:
 \begin{eqnarray}
    \hbox{Polymer} &\to& \hbox{Char 1} + \hbox{Gas 1}  \\
    \hbox{Char 1}  &\to& \hbox{Char 2} + \hbox{Gas 2}  \\
    \hbox{Char 2}  &\to& \hbox{Char 3} + \hbox{Gas 2}  \\
    \hbox{Char 3}  &\to& \hbox{Gas 2}
 \end{eqnarray}
-It is also assumed that the gaseous fuel molecule is C$_{19}$H$_{12}$O$_3$.
-A 1~cm layer of Kaowool insulation was placed under the sample. Its properties are given in Ref.~\cite{Stoliarov:CF2010}.
+It is also assumed that the gaseous fuel molecule is C$_{19}$H$_{12}$O$_3$. A 1~cm layer of Kaowool insulation was placed under the sample. Its properties are given in Ref.~\cite{Stoliarov:CF2010}.
 
-The results for 3.9~mm samples at imposed heat fluxes of 50~kW/m$^2$, 70~kW/m$^2$, and 90~kW/m$^2$ are shown in Fig.~\ref{HRR_PEEK}. Note that the plots on the left
-are the results of simulations of the solid phase only, where the heat feedback from the fire is assumed to be 15~kW/m$^2$ and it is applied at the time of ignition. The
-plots on the right are from 3-D simulations of the solid sample and the fire. In these cases, the radiative feedback is not specified but rather calculated.
+The results for 3.9~mm samples at imposed heat fluxes of 50~kW/m$^2$, 70~kW/m$^2$, and 90~kW/m$^2$ are shown in Fig.~\ref{HRR_PEEK}. Note that the plots on the left are the results of simulations of the solid phase only, where the heat feedback from the fire is assumed to be 15~kW/m$^2$ and it is applied at the time of ignition. The plots on the right are from 3-D simulations of the solid sample and the fire. In these cases, the radiative feedback is not specified but rather calculated.
 
 \begin{table}[p]
 \caption[Properties of poly(aryl ether ether ketone) (PEEK).]{Properties of poly(aryl ether ether ketone) (PEEK). Courtesy E.~Oztekin, U.S.~FAA and S.~Stoliarov,
@@ -333,9 +305,7 @@ Reac 4 Heat of Reaction     & kJ/kg         & 0                                 
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/FAA_Polymers/FAA_Polymers_PEEK_90_solid_only} &
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/FAA_Polymers/FAA_Polymers_PEEK_90}
 \end{tabular*}
-\caption[Heat release rate of poly(aryl ether ether ketone) (PEEK).]{Comparison of predicted and measured heat release rates for poly(aryl ether ether ketone) (PEEK). The plots on the left
-include only a simulation of the solid phase with an added heat flux of 15~kW/m$^2$ to account for the radiative feedback from the flame. The plots on the right are 3-D simulations of the
-solid sample and the fire.}
+\caption[Heat release rate of poly(aryl ether ether ketone) (PEEK).]{Comparison of predicted and measured heat release rates for poly(aryl ether ether ketone) (PEEK). The plots on the left include only a simulation of the solid phase with an added heat flux of 15~kW/m$^2$ to account for the radiative feedback from the flame. The plots on the right are 3-D simulations of the solid sample and the fire.}
 \label{HRR_PEEK}
 \end{figure}
 
@@ -344,12 +314,9 @@ solid sample and the fire.}
 
 \subsection{Poly(butylene terephtalate) (PBT)}
 
-Samples of poly(butylene terephtalate) (PBT)\footnote{Tradename Arnite T06-200, DSM Engineering Plastics} have been burned without oxygen in the Gasification Apparatus and
-with oxygen in the Cone Calorimeter. The properties of PBT are listed in Table~\ref{Properties_PBT}. It is assumed that the polymer undergoes a single step reaction
-that forms fuel gas and no char.
+Samples of poly(butylene terephtalate) (PBT)\footnote{Tradename Arnite T06-200, DSM Engineering Plastics} have been burned without oxygen in the Gasification Apparatus and with oxygen in the Cone Calorimeter. The properties of PBT are listed in Table~\ref{Properties_PBT}. It is assumed that the polymer undergoes a single step reaction that forms fuel gas and no char.
 
-The results of the simulations are shown in Fig.~\ref{HRR_PBT}. Note that the effect of the flame radiation heat feedback to the sample surface is accounted for
-by increasing the imposed heat fluxes of 35~kW/m$^2$ by 39~\%, 50~kW/m$^2$ by 22~\%, and 70~kW/m$^2$ by 6~\%~\cite{Kempel:1}.
+The results of the simulations are shown in Fig.~\ref{HRR_PBT}. Note that the effect of the flame radiation heat feedback to the sample surface is accounted for by increasing the imposed heat fluxes of 35~kW/m$^2$ by 39~\%, 50~kW/m$^2$ by 22~\%, and 70~kW/m$^2$ by 6~\%~\cite{Kempel:1}.
 
 
 \begin{table}[h!]
@@ -398,13 +365,9 @@ in both the Gasification Apparatus and Cone Calorimeter.}
 
 \subsection{PBT with Glass Fibers (PBT-GF)}
 
-Samples of poly(butylene terephtalate) (PBT), blended with 30~\% by mass glass fibers\footnote{Tradename Arnite TV4-261, DSM Engineering Plastics},
-have been burned without oxygen in the Gasification Apparatus and
-with oxygen in the Cone Calorimeter. The properties of PBT-GF are listed in Table~\ref{Properties_PBT-GF}. It is assumed that the polymer undergoes a single step reaction
-that forms fuel gas and char.
+Samples of poly(butylene terephtalate) (PBT), blended with 30~\% by mass glass fibers\footnote{Tradename Arnite TV4-261, DSM Engineering Plastics}, have been burned without oxygen in the Gasification Apparatus and with oxygen in the Cone Calorimeter. The properties of PBT-GF are listed in Table~\ref{Properties_PBT-GF}. It is assumed that the polymer undergoes a single step reaction that forms fuel gas and char.
 
-The results of the simulations are shown in Fig.~\ref{HRR_PBTGF}. Note that the effect of the flame radiation heat feedback to the sample surface is accounted for
-by increasing the imposed heat fluxes of 35~kW/m$^2$ by 33~\%, 50~kW/m$^2$ by 16~\%, and 70~kW/m$^2$ by 5~\%~\cite{Kempel:1}.
+The results of the simulations are shown in Fig.~\ref{HRR_PBTGF}. Note that the effect of the flame radiation heat feedback to the sample surface is accounted for by increasing the imposed heat fluxes of 35~kW/m$^2$ by 33~\%, 50~kW/m$^2$ by 16~\%, and 70~kW/m$^2$ by 5~\%~\cite{Kempel:1}.
 
 \begin{table}[h!]
 \caption[Properties of poly(butylene terephtalate) with glass fibers (PBT-GF).]{Properties of poly(butylene terephtalate) with glass fibers (PBT-GF).
@@ -465,7 +428,6 @@ The reaction mechanism for the cardboard material includes one reaction to descr
    \hbox{Intermediary Solid}  &\to& \hbox{Char 1} + \hbox{Fuel Gas 3}  \\
    \hbox{Char 1}  &\to& \hbox{Char 2} + \hbox{Fuel Gas 4}
 \end{eqnarray}
-
 
 \begin{longtable}{@{\extracolsep{\fill}}|l|c|c|l|l|}
 \caption[Properties of corrugated cardboard.]{Properties of corrugated cardboard. Courtesy M. McKinnon, University of Maryland. See Section~\ref{glossary} for an explanation of terms.}
@@ -585,13 +547,13 @@ The gasification experiments were conducted in a modified cone calorimeter refer
 \clearpage
 
 
-\section{Electrical cables (CHRISTIFIRE)}
+\section{Electrical Cables (CHRISTIFIRE)}
 
 The U.S.~Nuclear Regulatory Commission has sponsored a study of the burning behavior of electrical cables typically found in nuclear power plants~\cite{CHRISTIFIRE}. The project has been given the acronym CHRISTIFIRE (\underline{C}able \underline{H}eat \underline{R}elease, \underline{I}gnition, and \underline{S}pread in \underline{T}ray \underline{I}nstallations). In this section, the modeling of a particular type of cable is presented. The sample cable (referred to as 701 in the report) has seven conductors and is 14~mm in diameter. The jacket material is polyvinyl chloride (PVC) and the insulation is polyethylene (PE). The mass fractions are 0.24 and 0.18, respectively, and the remaining mass is copper.
 
 Thermo-gravimetric analysis (TGA) with a heating rate of 10~K/min and micro-combustion calorimetry (MCC) with a heating rate of 60~K/min were performed for the jacket and insulation materials separately. Cone calorimeter experiments were performed for sample of seven 10~cm cable segments at exposing heat fluxes of 25~kW/m$^2$, 50~kW/m$^2$, and 75~kW/m$^2$. The experimental methods are explained in Section~\ref{sec_FAA_Polymers}.
 
-\subsection{Estimation of pyrolysis kinetics}
+\subsection{Estimation of Pyrolysis Kinetics}
 
 The pyrolysis kinetics were estimated from the TGA results. The kinetic parameters depend on the choice of the reaction path, and for this example two different reaction paths are used. The first one (v1) consists of several parallel, independent reactions that each yield both fuel (combustible) and inert (incombustible) gas. The last reaction also yields residue. The second reaction path (v2) is more complex. For the PVC jacket, the model consists of three components: pure PVC, plasticizer and CaCO$_3$. Pure PVC degrades in two steps, first yielding inert gas and small amounts of fuel gas and residue, and second yielding larger amounts of fuel gas and residue. In air, the residual char is also oxidized, which contributes to the greater mass loss and release of fuel at high temperatures. The plasticizer degrades simultaneously with the first reaction of PVC yielding fuel gas. CaCO$_3$ degrades at high temperatures yielding only inert gas and residue. The initial mass fraction of these three components, the reaction yields and the heats of combustion are determined by comparing the mass loss results of the TGA analysis to the heat release results of the MCC.
 
@@ -683,7 +645,7 @@ The experimental and FDS results are shown in Fig.~\ref{christifire_small_scale_
 \label{christifire_small_scale_results}
 \end{figure}
 
-\subsection{Estimation of thermal parameters and validation}
+\subsection{Estimation of Thermal Parameters and Validation}
 
 The remaining pyrolysis model parameters were estimated by fitting the calculated cone calorimeter results to the experimental ones at 50~kW/m$^2$ heat flux.
 The cone calorimeter sample consisting of seven cables is modeled as a rectangular solid. The layer structure of the cable sample is assumed to be
@@ -844,6 +806,73 @@ Methanol & 796  &  2.48   & 0.20  &   1,099 & 0.18 & 0.001 & 64.8\\ \hline
 \end{figure}
 
 \clearpage
+
+\section{Wildland Fire Spread (CSIRO Grassland Fires)}
+\label{WUI}
+
+This section contains a description and results for simulations of two of the CSIRO Grassland Fire experiments. The first experiment, C064, was conducted on a 100~m by 100~m plot; the second, F19, was conducted on a 200~m by 200~m plot. Measured properties for the specific types of grasses burned in the two experiments are listed in Table~\ref{Properties_Grasses}. Properties that were not measured are listed in Table~\ref{Assumed_Properties_Grasses}. These assumed properties are typically for wood or cellulosic fuels. The moisture is modeled as water, and the soil is assumed to have a density of 1000~kg/m$^3$, thermal conductivity of 0.1~W/(m$\cdot$K), and specific heat of 1~kJ/(kg$\cdot$K). The grass is assumed to be composed primarily of cellulose.
+
+\begin{figure}[ht]
+\includegraphics[width=\textwidth]{FIGURES/Case_F19_0358.png}
+\caption[Snapshot of the simulation of CSIRO Grassland Fire F19]{Snapshot of the simulation of CSIRO Grassland Fire F19.}
+\label{F19}
+\end{figure}
+
+A snapshot of the simulation of Experiment~F19 is shown in Fig.~\ref{F19}. The computational domain in this case is 240~m by 240~m by 20~m. The grid cells are 0.5~m cubes. The domain is subdivided into 36 individual meshes and run in parallel. The grass is represented by 800,000 Lagrangian particles with a cylindrical geometry, or about 5 simulated blades per grid cell. The radius of the cylinder is derived from the measured surface area to volume ratio. Each simulated blade of grass represents many more actual blades of grass. The weighting factor is determined from the measured bulk mass per unit area. The fires in the experiments were ignited by two men carrying drip torches walking in opposite directions along the upwind boundary of the plot (the red strip in Fig.~\ref{F19}). In FDS, this action was modeled using a specified spread rate along the strip.
+
+
+
+\begin{table}[ht]
+\begin{center}
+\caption[Measured properties for the CSIRO Grassland Fire cases]{Measured properties for the CSIRO Grassland Fire cases~\cite{Cheney:IJWF1993}.}
+\label{Properties_Grasses}
+\begin{tabular}{|l|c|c|c|}
+\hline
+Property                        & Units         & Case F19      & Case C064     \\ \hline \hline
+Wind Speed                      & m/s           & 4.8           & 4.6           \\ \hline
+Ambient Temperature             & $^\circ$C     & 34            & 32            \\ \hline
+Surface Area to Volume Ratio    & m$^{-1}$      & 12240         & 9770          \\ \hline
+Grass Height                    & m             & 0.51          & 0.21          \\ \hline
+Bulk Mass per Unit Area         & kg/m$^3$      & 0.313         & 0.283         \\ \hline
+Moisture Fraction               & \%            & 5.8           & 6.3           \\ \hline
+\end{tabular}
+\end{center}
+\end{table}
+
+\begin{table}
+\begin{center}
+\caption[Assumed properties for various dried grasses]{Assumed properties for various types of dried grass. Note that the Pyrolysis Temperature is taken to be the temperature at which the mass loss rate peaks in the TGA experiments of Morvan and Dupuy~\cite{Morvan:CF2004}.}
+\label{Assumed_Properties_Grasses}
+\begin{tabular}{|l|c|c|c|}
+\hline
+Property                        & Units                 & Value                     & Reference                             \\ \hline \hline
+Chemical Composition            & --                    & C$_6$H$_{10}$O$_5$        & Assumption                            \\ \hline
+Heat of Combustion              & kJ/kg                 & 15600                     & \cite{Susott:FS1982}                  \\ \hline
+Soot Yield                      & kg/kg                 & 0.015                     & \cite{SFPE:Tewarson}                  \\ \hline
+Char Yield                      & kg/kg                 & 0.2                       & \cite{Susott:FS1982}                  \\ \hline
+Specific Heat                   & kJ/(kg$\cdot$K)       & 1.5                       & Various sources                       \\ \hline
+Conductivity                    & W/(m$\cdot$K)         & 0.1                       & Assumption                            \\ \hline
+Density                         & kg/m$^3$              & 512                       & \cite{Rothermel:1972}                 \\ \hline
+Heat of Pyrolysis               & kJ/kg                 & 418                       & \cite{Morvan:CF2004}                  \\ \hline
+Pyrolyis Temperature            & $^\circ$C             & 250                       & \cite{Morvan:CF2004}                  \\ \hline
+\end{tabular}
+\end{center}
+\end{table}
+
+The results of the simulations are shown in Fig.~\ref{CSIRO}. The fire front in the FDS simulations is defined as the location of the maximum gas temperature in a 1~m wide, 1~m tall strip along the centerline of the grass field. The experimental points were determined from aerial photography.
+
+\begin{figure}[ht]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/CSIRO_Grassland_Fires/Case_C064} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/CSIRO_Grassland_Fires/Case_F19} 
+\end{tabular*}
+\caption[Comparison measured and predicted fire front position for the CSIRO Grassland Fires]{Comparison measured and predicted fire front position for the CSIRO Grassland Fires.}
+\label{CSIRO}
+\end{figure}
+
+
+\clearpage
+
 
 \section{Summary of Burning Rates}
 \label{Burning Rate}
