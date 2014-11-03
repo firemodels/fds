@@ -3901,7 +3901,7 @@ USE MEMORY_FUNCTIONS, ONLY : RE_ALLOCATE_STRINGS,GET_LAGRANGIAN_PARTICLE_INDEX
 USE EVAC, ONLY: N_DOORS, N_EXITS, N_ENTRYS, EVAC_DOORS, EVAC_EXITS, EVAC_ENTRYS, EVAC_EXIT_TYPE, EVAC_DOOR_TYPE, EVAC_ENTR_TYPE
 REAL(EB), INTENT(IN) :: T
 REAL(EB) :: VALUE,VALUE2,STAT_VALUE,SUM_VALUE,VOL,WGT_LINE,T_TMP,DVAL,DVAL2,DEV2,WGT_UNBIASED_LINE,WGT,WGT_UNBIASED
-INTEGER :: NM,N,I,J,K,STAT_COUNT,IW,SURF_INDEX,I_STATE,IND,LP_INDEX
+INTEGER :: NM,N,I,J,K,STAT_COUNT,IW,SURF_INDEX,I_STATE,IND,LP_INDEX,LOCATION_INDICES(3)
 LOGICAL :: NOT_FOUND
  
 CALL POINT_TO_MESH(NM)
@@ -4013,8 +4013,10 @@ DEVICE_LOOP: DO N=1,N_DEVC
                      VALUE = SOLID_PHASE_OUTPUT(NM,ABS(DV%OUTPUT_INDEX),DV%Y_INDEX,DV%Z_INDEX,DV%PART_INDEX,OPT_WALL_INDEX=IW)
                      SELECT CASE(DV%STATISTICS)
                         CASE('MAX')
+                           IF (VALUE>STAT_VALUE) LOCATION_INDICES(1:3) = (/WALL(IW)%ONE_D%II,WALL(IW)%ONE_D%JJ,WALL(IW)%ONE_D%KK/)
                            STAT_VALUE = MAX(STAT_VALUE,VALUE)
                         CASE('MIN')
+                           IF (VALUE<STAT_VALUE) LOCATION_INDICES(1:3) = (/WALL(IW)%ONE_D%II,WALL(IW)%ONE_D%JJ,WALL(IW)%ONE_D%KK/)
                            STAT_VALUE = MIN(STAT_VALUE,VALUE)
                         CASE('MEAN')
                            STAT_VALUE = STAT_VALUE + VALUE
@@ -4062,40 +4064,29 @@ DEVICE_LOOP: DO N=1,N_DEVC
                         IF (SOLID(CELL_INDEX(I,J,K))) CYCLE I_DEVICE_CELL_LOOP
                         VOL = DX(I)*RC(I)*DY(J)*DZ(K)
                         NOT_FOUND = .FALSE.
+                        VALUE = GAS_PHASE_OUTPUT(I,J,K,DV%OUTPUT_INDEX,0,DV%Y_INDEX,DV%Z_INDEX,& 
+                                                 DV%PART_INDEX,DV%VELO_INDEX,DV%PIPE_INDEX,DV%PROP_INDEX,T,NM)
                         STATISTICS_SELECT: SELECT CASE(DV%STATISTICS)
                            CASE('MAX')
-                              STAT_VALUE = MAX(STAT_VALUE, &
-                                               GAS_PHASE_OUTPUT(I,J,K,DV%OUTPUT_INDEX,0,DV%Y_INDEX,DV%Z_INDEX,&
-                                                                DV%PART_INDEX,DV%VELO_INDEX,DV%PIPE_INDEX,DV%PROP_INDEX,T,NM))
+                              IF (VALUE>STAT_VALUE) LOCATION_INDICES(1:3) = (/I,J,K/)
+                              STAT_VALUE = MAX(STAT_VALUE,VALUE)
                            CASE('MIN')
-                              STAT_VALUE = MIN(STAT_VALUE, &
-                                               GAS_PHASE_OUTPUT(I,J,K,DV%OUTPUT_INDEX,0,DV%Y_INDEX,DV%Z_INDEX,&
-                                                                DV%PART_INDEX,DV%VELO_INDEX,DV%PIPE_INDEX,DV%PROP_INDEX,T,NM))
+                              IF (VALUE<STAT_VALUE) LOCATION_INDICES(1:3) = (/I,J,K/)
+                              STAT_VALUE = MIN(STAT_VALUE,VALUE)
                            CASE('MEAN')
-                              STAT_VALUE = STAT_VALUE + GAS_PHASE_OUTPUT(I,J,K,DV%OUTPUT_INDEX,0,DV%Y_INDEX,DV%Z_INDEX,&
-                                                                         DV%PART_INDEX,DV%VELO_INDEX,DV%PIPE_INDEX,&
-                                                                         DV%PROP_INDEX,T,NM)
+                              STAT_VALUE = STAT_VALUE + VALUE
                               STAT_COUNT = STAT_COUNT + 1
                            CASE('VOLUME INTEGRAL')
-                              VALUE = GAS_PHASE_OUTPUT(I,J,K,DV%OUTPUT_INDEX,0,DV%Y_INDEX,DV%Z_INDEX,&
-                                                                         DV%PART_INDEX,DV%VELO_INDEX,DV%PIPE_INDEX,&
-                                                                         DV%PROP_INDEX,T,NM)
                               IF (VALUE <= DV%QUANTITY_RANGE(2) .AND. VALUE >=DV%QUANTITY_RANGE(1)) &
                                  STAT_VALUE = STAT_VALUE + VALUE*VOL
                            CASE('MASS INTEGRAL')
-                              VALUE = GAS_PHASE_OUTPUT(I,J,K,DV%OUTPUT_INDEX,0,DV%Y_INDEX,DV%Z_INDEX,&
-                                                                         DV%PART_INDEX,DV%VELO_INDEX,DV%PIPE_INDEX,&
-                                                                         DV%PROP_INDEX,T,NM)
                               IF (VALUE <= DV%QUANTITY_RANGE(2) .AND. VALUE >=DV%QUANTITY_RANGE(1)) &
                                  STAT_VALUE = STAT_VALUE + VALUE*VOL*RHO(I,J,K)
                            CASE('AREA INTEGRAL')
-                              VALUE = GAS_PHASE_OUTPUT(I,J,K,DV%OUTPUT_INDEX,0,DV%Y_INDEX,DV%Z_INDEX,&
-                                                                  DV%PART_INDEX,DV%VELO_INDEX,DV%PIPE_INDEX,DV%PROP_INDEX,T,NM)
                               IF (VALUE <= DV%QUANTITY_RANGE(2) .AND. VALUE >=DV%QUANTITY_RANGE(1)) THEN
                                  SELECT CASE (ABS(DV%IOR))
                                     CASE(1)
                                        STAT_VALUE = STAT_VALUE + RC(I)*DY(J)*DZ(K)*VALUE
-                                                 
                                     CASE(2)
                                        STAT_VALUE = STAT_VALUE + DX(I)*DZ(K)*VALUE
                                     CASE(3)
@@ -4103,16 +4094,10 @@ DEVICE_LOOP: DO N=1,N_DEVC
                                     END SELECT
                               ENDIF
                            CASE('VOLUME')
-                              VALUE = GAS_PHASE_OUTPUT(I,J,K,DV%OUTPUT_INDEX,0,DV%Y_INDEX,DV%Z_INDEX,&
-                                                                         DV%PART_INDEX,DV%VELO_INDEX,DV%PIPE_INDEX,&
-                                                                         DV%PROP_INDEX,T,NM)
                               IF (VALUE <= DV%QUANTITY_RANGE(2) .AND. VALUE >=DV%QUANTITY_RANGE(1)) STAT_VALUE = STAT_VALUE + VOL
                            CASE('MASS')
-                              VALUE = GAS_PHASE_OUTPUT(I,J,K,DV%OUTPUT_INDEX,0,DV%Y_INDEX,DV%Z_INDEX,&
-                                                                         DV%PART_INDEX,DV%VELO_INDEX,DV%PIPE_INDEX,&
-                                                                         DV%PROP_INDEX,T,NM)
-                              IF (VALUE <= DV%QUANTITY_RANGE(2) .AND. VALUE >=DV%QUANTITY_RANGE(1)) &
-                                 STAT_VALUE = STAT_VALUE + VOL*RHO(I,J,K)
+                              IF (VALUE <= DV%QUANTITY_RANGE(2) .AND. VALUE >=DV%QUANTITY_RANGE(1)) STAT_VALUE = STAT_VALUE + &
+                                                                                                                    VOL*RHO(I,J,K)
                            CASE('TENSOR SURFACE INTEGRAL')
                               ! similar to 'AREA INTEGRAL' but multiplies by outward unit normal and sums along outside of XB
                               IND=0
@@ -4132,14 +4117,10 @@ DEVICE_LOOP: DO N=1,N_DEVC
                                  IF (K==DV%K2) STAT_VALUE = STAT_VALUE + DX(I)*DY(J)*TENSOR_OUTPUT(I,J,K,IND,+3,NM)
                               ENDIF
                            CASE('VOLUME MEAN')
-                              STAT_VALUE = STAT_VALUE + &
-                                           GAS_PHASE_OUTPUT(I,J,K,DV%OUTPUT_INDEX,0,DV%Y_INDEX,DV%Z_INDEX,&
-                                                            DV%PART_INDEX,DV%VELO_INDEX,DV%PIPE_INDEX,DV%PROP_INDEX,T,NM)*VOL
+                              STAT_VALUE = STAT_VALUE + VALUE*VOL
                               SUM_VALUE = SUM_VALUE + VOL
                            CASE('MASS MEAN')
-                              STAT_VALUE = STAT_VALUE + VOL*RHO(I,J,K)* &
-                                           GAS_PHASE_OUTPUT(I,J,K,DV%OUTPUT_INDEX,0,DV%Y_INDEX,&
-                                                            DV%Z_INDEX,DV%PART_INDEX,DV%VELO_INDEX,DV%PIPE_INDEX,DV%PROP_INDEX,T,NM)
+                              STAT_VALUE = STAT_VALUE + VALUE*RHO(I,J,K)*VOL
                               SUM_VALUE = SUM_VALUE + VOL*RHO(I,J,K)
                      END SELECT STATISTICS_SELECT
                   ENDDO I_DEVICE_CELL_LOOP
@@ -4170,7 +4151,18 @@ DEVICE_LOOP: DO N=1,N_DEVC
          IF (NOT_FOUND) STAT_VALUE = 0._EB
          STAT_COUNT = MAX(STAT_COUNT,1)
          VALUE = STAT_VALUE/REAL(STAT_COUNT,EB)
-      END SELECT
+   END SELECT
+
+   ! For the special case of MAXLOC MINLOC, put the max/min location in VALUE
+
+   SELECT CASE(DV%STATISTICS_LOCATION_INDEX)
+      CASE(1)
+         VALUE = XC(LOCATION_INDICES(1))
+      CASE(2)
+         VALUE = YC(LOCATION_INDICES(2))
+      CASE(3)
+         VALUE = ZC(LOCATION_INDICES(3))
+   END SELECT
 
    ! Convert units of device quantity
 
@@ -4199,11 +4191,14 @@ DEVICE_LOOP: DO N=1,N_DEVC
       T_TMP = T
    END IF
 
-   ! Update the running average and/or instantaneous device value
+   ! Update instantaneous device value
 
    DV%INSTANT_VALUE = VALUE
       
+   ! Keep a running tally of VALUEs
+
    DV_LINE_IF: IF (DV%LINE==0) THEN
+
       SELECT CASE (DV%STATISTICS)
          CASE('RMS')
             WGT = DT/MAX(DT,T-(T_END-DV%STATISTICS_DT))
@@ -4263,7 +4258,9 @@ DEVICE_LOOP: DO N=1,N_DEVC
                DV%VALUE = VALUE            
             ENDIF
       END SELECT
+
    ELSE DV_LINE_IF ! DV%LINE > 0
+
       DV%TIME_INTERVAL = 1._EB
       DV%AVERAGE_VALUE = (1._EB-WGT_LINE)*DV%AVERAGE_VALUE + WGT_LINE*VALUE
       IF (T>(T_END-DT_DEVC_LINE)) THEN
@@ -4300,6 +4297,7 @@ DEVICE_LOOP: DO N=1,N_DEVC
          CASE DEFAULT
             DV%VALUE = DV%AVERAGE_VALUE
       END SELECT
+
    ENDIF DV_LINE_IF
 
    DV%SMOOTHED_VALUE = DV%SMOOTHED_VALUE*DV%SMOOTHING_FACTOR+VALUE*(1._EB-DV%SMOOTHING_FACTOR)
