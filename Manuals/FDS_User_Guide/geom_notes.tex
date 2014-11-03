@@ -416,30 +416,37 @@ The notes written in this section are intended to provide details for various co
 \newcommand{\txtmax}{\mbox{max}}
 \subsection{Tetrahedron Box Volume Intersection}
 \subsubsection{Overview}
-The region formed by intersecting a box and a tetrahedron has up to 10 faces, up to four faces from the tetrahedron and up to another six faces from the box.  The problem then is to determine the volume of this intersection region and the area of its surface.  A general algorithm for computing the intersection volume is given below with more details detailed in the following sections.
+The region formed by intersecting a box and a tetrahedron may have up to 10 faces, up to four faces from the tetrahedron and up to another six faces from the box.  Each box (or tetrahedron) face is a part of the intersection region if it intersects with the tetrahedron (or box).  The problem then is to determine the volume and surface area of this intersection region.  A general algorithm for computing the intersection volume is given below with more details given in subsequent sections.
 \begin{enumerate}
 \item If the bounding boxes of the box and tetrahedron do not overlap then the volume of the intersection region is zero.  Note, if the bounding boxes do overlap the intersection volume may still be zero.
 
 \item Determine vertices for each face of the intersection region.
 \begin{enumerate}
-\item For each box face (a rectangle) not in same plane as any tetrahedron face (a triangle):
+\item Some or all of a box face is in the intersection region if it intersects with the tetrahedron.
+\\ \\For each box face:
 \begin{enumerate}
-\item Intersect the rectangle with each tetrahedron edge using a 3D algorithm.
+\item For each tetrahedron face (a triangle) not in same plane as the box face (a rectangle):
+\begin{enumerate}
+\item Intersect the rectangle with each triangle edge using a 3D algorithm.
 \item Add any rectangle vertices that are on or inside the tetrahedron.
 \item If two or fewer vertices are found then ignore the face since
 the volume of this portion of the intersection region is zero.
-\item If three or more vertices are found then order them clockwise. 
+\item If three or more vertices are found then order them clockwise.
 \end{enumerate}
- 
-\item For each box face (a rectangle) in the same plane of one tetrahedron face (a triangle):
+
+\item For each tetrahedron face (a triangle) in same plane as the box face (a rectangle):
 \begin{enumerate}
 \item Intersect the rectangle with the triangle using a 2D algorithm.
 \item If two or fewer vertices are found then ignore the face since
 the volume of this portion of the intersection region is zero.
 \item If three or more vertices are found then order them clockwise.
 \end{enumerate}
+\end{enumerate}
 
-\item For each tetrahedron face ( a triangle) not in the same plane as any box face (a rectangle).
+\item Some or all of a tetrahedron face is in the intersection region if it intersects with the box. 
+Assume that none of the tetrahedron faces and box faces lie in the same plane as this case has been handled earlier.
+\\
+\\For each tetrahedron face ( a triangle) not in the same plane as any box face (a rectangle).
 \begin{enumerate}
 \item Intersect the triangle with each box edge.
 \item Add any triangle vertices that are on or inside the box.
@@ -447,7 +454,7 @@ the volume of this portion of the intersection region is zero.
 \item If three or more vertices are found then order them clockwise.
 \end{enumerate}
 \end{enumerate}
- 
+
 \item Form a vertex interior to the intersection region by averaging all vertices in the intersection region.
 
 \item For each face of the intersection region, compute the volume formed from this face and the interior vertex computed in the previous step.
