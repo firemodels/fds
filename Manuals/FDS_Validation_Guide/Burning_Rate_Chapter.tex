@@ -762,13 +762,13 @@ The results are shown in Fig.~\ref{christifire_cone_results_other_fluxes}.
 
 \section{Liquid Pool Fires}
 
-In this section, a series of liquid pool fires with different fuels is considered. The pool fires are assumed to burn in a 1~m by 1~m square tray, and the fuel layer is 10~cm thick. The burning rate of liquid hydrocarbon fuels has been found to correlate well with the ratio of the heat of combustion, $\Delta h_c$, and the heat of gasification, $\Delta h_g$:
+In this section, the predicted burning rates of a variety of liquid pool fires are compared with an empirical correlation. The pool fires are assumed to burn in a 1~m by 1~m square tray, and the pool is 10~cm deep. The burning rate of liquid hydrocarbon fuels has been found to correlate well with the ratio of the heat of combustion, $\Delta h_{\rm c}$, and the heat of gasification, $\Delta h_{\rm g}$:
 \begin{equation}
-\dot{m}''= 0.001 \; \frac{\Delta h_c}{\Delta h_g} \quad ; \quad \Delta h_g = \Delta h_v + \int_{T_0}^{T_b} c_p \; dT
+\dot{m}''= 0.001 \; \frac{\Delta h_{\rm c}}{\Delta h_{\rm g}} \quad ; \quad \Delta h_{\rm g} = \Delta h_{\rm v} + \int_{T_0}^{T_{\rm b}} c_p \; dT
 \end{equation}
-where $\Delta h_v$ is the latent heat of vaporization, $T_0$ is the initial temperature, $T_b$ is the boiling temperature, and $c_p$ is the specific heat of the liquid fuel. The heat of gasification, $\Delta h_g$, is the amount of energy required to raise the fuel from its initial temperature to its boiling temperature and evaporate it. Figure~\ref{POOL_MLR} shows a comparison of predicted burning rates with data taken from Ref.~\cite{SFPE}.
+where $\Delta h_{\rm v}$ is the latent heat of vaporization, $T_0$ is the initial temperature, $T_{\rm b}$ is the boiling temperature, and $c_p$ is the specific heat of the liquid fuel. The heat of gasification is the amount of energy required to raise the fuel from its initial temperature to its boiling temperature and evaporate it. Figure~\ref{POOL_MLR} shows a comparison of predicted burning rates with data taken from Ref.~\cite{SFPE}.
 
-The absorption coefficients for benzene and ethanol are based on curve fits to experimental data as explained in Appendix K of the FDS Technical Reference Guide. The absorption coefficient for methanol presented in Appendix K is calculated with the aasumption that the incoming radiation is approximately blackbody radiation. The absorption coefficient for ethanol is calculated based on experimentally determined spectrum of an ethanol flame. Since both methanol and ethanol flames are low sooting, the blackbody radiation assumption is not correct. Instead it is assumed that the absorption coefficient for methanol should be of similar magnitude as that for ethanol. For heptane, butane and acetone the absorption coefficients are simple order of magnitude estimates.
+The absorption coefficients for benzene and ethanol are based on curve fits to experimental data as explained in Appendix~K of the FDS Technical Reference Guide. The absorption coefficient for methanol presented in Appendix~K is calculated with the assumption that the incoming radiation is approximately blackbody radiation. The absorption coefficient for ethanol is calculated based on experimentally determined spectrum of an ethanol flame. Since both methanol and ethanol flames are low sooting, the blackbody radiation assumption is not correct. Instead it is assumed that the absorption coefficient for methanol should be of similar magnitude as that for ethanol. For heptane, butane and acetone the absorption coefficients are simple order of magnitude estimates.
 
 Table~\ref{fuelprops} lists the liquid fuel properties used in the simulations. Note that the heats of vaporization are evaluated at the liquid boiling points. The thermal conductivities are listed in Ref.~\cite{CRCHandbook}, except for butane, which is found in Ref.~\cite{Webbook:FluidThermo}.
 
@@ -776,16 +776,16 @@ Table~\ref{fuelprops} lists the liquid fuel properties used in the simulations. 
 \begin{center}
 \caption{Liquid fuel properties.} \label{fuelprops}
 \begin{tabular}{|l|c|c|c|c|c|c|c|} \hline
-        & $\rho$               & $c_p$                        & k                  &  $\Delta h_v$               & $\chi_r$             & $Y_s$                & $T_b$  \\
-Fuel    & \si{\kg/\m^3}        & \si{\kJ/(\kg.\K)}            & \si{\W/(\m.\K)}    & \si{\kJ/\kg}                &                      &  \si{\g/\g}          & $^\circ$C  \\
+        & $\rho$               & $c_p$                        & $k$                &  $\Delta h_{\rm v}$         & $\chi_{\rm r}$       & $y_{\rm s}$          & $T_{\rm b}$  \\
+Fuel    & \si{\kg/\m^3}        & \si{\kJ/(\kg.\K)}            & \si{\W/(\m.\K)}    & \si{\kJ/\kg}                &                      &  \si{\g/\g}          & $^\circ$C    \\
         & \cite{Babrauskas:1}  & \cite{Webbook:HeatCapacity}  & \cite{CRCHandbook} &  \cite{Webbook:FluidThermo} & \cite{SFPE:Tewarson} & \cite{SFPE:Tewarson} & \cite{Webbook:BoilingPoint} \\
 \hline \hline
-Acetone &  791  &  2.13   & 0.20  &   501   & 0.27 & 0.014 & 56.3\\ \hline
-Benzene &  874  &  1.74   & 0.14  &   393   & 0.35 & 0.181 & 80.3\\ \hline
-Butane  &  573  &  2.28   & 0.12 &    385   & 0.30 & 0.029 & 0   \\ \hline
-Ethanol &  794  &  2.44   & 0.17  &   837   & 0.18 & 0.008 & 78.5\\ \hline
-Heptane &  675  &  2.24   & 0.14  &   317   & 0.35 & 0.037 & 98.5\\ \hline
-Methanol & 796  &  2.48   & 0.20  &   1,099 & 0.18 & 0.001 & 64.8\\ \hline
+Acetone  &  791  &  2.13   & 0.20  &   501   & 0.27 & 0.014 & 56.3 \\ \hline
+Benzene  &  874  &  1.74   & 0.14  &   393   & 0.60 & 0.181 & 80.3 \\ \hline
+Butane   &  573  &  2.28   & 0.12  &   385   & 0.31 & 0.029 & 0    \\ \hline
+Ethanol  &  794  &  2.44   & 0.17  &   837   & 0.25 & 0.008 & 78.5 \\ \hline
+Heptane  &  675  &  2.24   & 0.14  &   317   & 0.33 & 0.037 & 98.5 \\ \hline
+Methanol &  796  &  2.48   & 0.20  &   1099  & 0.16 & 0.001 & 64.8 \\ \hline
 \end{tabular}
 \end{center}
 \end{table}
@@ -864,7 +864,7 @@ The results of the simulations are shown in Fig.~\ref{CSIRO}. The fire front in 
 \begin{figure}[ht]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/CSIRO_Grassland_Fires/Case_C064} &
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/CSIRO_Grassland_Fires/Case_F19} 
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/CSIRO_Grassland_Fires/Case_F19}
 \end{tabular*}
 \caption[Comparison measured and predicted fire front position for the CSIRO Grassland Fires]{Comparison measured and predicted fire front position for the CSIRO Grassland Fires.}
 \label{CSIRO}
