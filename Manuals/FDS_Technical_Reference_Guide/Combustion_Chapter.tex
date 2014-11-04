@@ -142,7 +142,7 @@ Here, $Z_{\si{F}}$ and $Z_{\si{A}}$ are the lumped mass fractions of Fuel and Ai
 
 The heat release per unit volume is found by summing the species mass production rates times the respective heats of formation:
 \begin{equation}\label{eq:vol_heat_gen}
-\dot{q}''' \equiv -\displaystyle \sum_{\alpha} \dot{m}_{\alpha}''' \, \Delta h_{{\rm f},\alpha}
+\dot{q}''' \equiv -\displaystyle \sum_{\alpha} \dot{m}_{\alpha}''' \, \Delta h_{{\rm f},\alpha}^0
 \end{equation}
 To maintain code stability, it is sometimes necessary to put an upper bound on the local heat release rate per unit volume. A scaling analysis of pool fires by Orloff and de Ris~\cite{Orloff:19th_Symposium} suggests that the spatial average of the heat release rate of a fire is approximately \SI{1200}{kW/m^3}. FDS uses a less restrictive upper bound on the local heat release rate per unit volume:
 \begin{equation}
@@ -166,7 +166,7 @@ FDS uses simple empirical rules---which ignore strain---to predict local extinct
 \item If the potential combustion heat release from a \emph{local pocket of stoichiometric fuel-air-product (hereafter ``reactant'') mixture} cannot raise the temperature of that mixture above an empirically determined critical flame temperature, $T_{\rm CFT}$, then combustion is suppressed.  Consider the simple reaction $\mbox{Fuel} + \mbox{Air} \rightarrow \mbox{Products}$. The local mass fractions of lumped species Fuel, Air, and Products in the cell at the beginning of the combustion time step are $[Z_{\rm F}, Z_{\rm A}, Z_{\rm P}]$ and $s$ is the mass stoichiometric coefficient for Air (mass of Air required per mass of Fuel consumed). Based on the limiting reactant, the masses in the local reactant mixture are defined as follows (take 1 kg as a basis; the hat $\hat{\;}$ indicates a reactant mixture value):
 \begin{align}
 \label{eq:dzf} \hat{Z}_{\rm F} &= \min(Z_{\rm F},Z_{\rm A}/s) \\
-\label{eq:dza} \hat{Z}_{\rm A} &= s \, \hat{Z}_{\rm F}         
+\label{eq:dza} \hat{Z}_{\rm A} &= s \, \hat{Z}_{\rm F}
 \end{align}
 The stoichiometric mixture value for the product diluents is defined such that the following ratio holds:
 \begin{align}
@@ -179,7 +179,7 @@ Another way to say this is that excess fuel acts as a diluent, but excess air do
 Once the local reactant mixture has been determined, the extinction criterion is given by
 \begin{align}
 \label{eq:extinction}
-\hat{Z}_{\rm F} \, (h_{\rm F}(T) + \Delta h_{\rm c,F}) + \hat{Z}_{\rm A} \, h_{\rm A}(T) + \hat{Z}_{\rm P} \, h_{\rm P}(T) < 
+\hat{Z}_{\rm F} \, (h_{\rm F}(T) + \Delta h_{\rm c,F}) + \hat{Z}_{\rm A} \, h_{\rm A}(T) + \hat{Z}_{\rm P} \, h_{\rm P}(T) <
 \hat{Z}_{\rm F} \, h_{\rm F}(T_{\rm CFT}) + \hat{Z}_{\rm A} \, h_{\rm A}(T_{\rm CFT}) + \hat{Z}_{\rm P} \, h_{\rm P}(T_{\rm CFT})
 \end{align}
 where $T$ is the initial mean cell temperature and $T_{\rm CFT}$ is the critical flame temperature. If the inequality Eq.~(\ref{eq:extinction}) is true, then combustion is suppressed---the heat of combustion is not sufficient to raise the product mixture above its critical flame temperature.
@@ -253,7 +253,7 @@ To this end, we have developed a simple mixing environment method to close the m
 
 At the start of the integration of the reactor model, the species transport equations have been solved and we know the mean cell concentrations of all reactants in our chemical system.  In this section, for simplicity we will work in terms of primitive species mass fractions.
 
-\subsection{A Simple Subgrid Mixing Environment} 
+\subsection{A Simple Subgrid Mixing Environment}
 \label{sec:subgrid_evironment}
 
 The cell mean mass fraction of $\alpha$, a function of time, is denoted $\widetilde{Y}_\alpha(t)$. The local concentration at any point within the cell exists in one of two states: completely unmixed or completely mixed.  Let $\hat{Y}_\alpha(t)$ denote the mass fraction of $\alpha$ in the mixed reactor zone, initially equal to the cell mean, $\hat{Y}_\alpha(0) = \widetilde{Y}_{\alpha}^0 \equiv \widetilde{Y}_{\alpha}(0)$.  With $\psi_\alpha \in [0,1]$ representing the sample space for the composition, the subgrid probability density function (PDF) may be written as
@@ -301,7 +301,7 @@ For convenience, we define the \emph{unmixed fraction}, $\zeta(t)$, as the fract
 \begin{align}
 w_1 &= \zeta \, (1 - \widetilde{Y}_\alpha^0) \\
 w_2 &= \zeta \, \widetilde{Y}_\alpha^0 \\
-w_3 &= 1-\zeta 
+w_3 &= 1-\zeta
 \end{align}
 As shown in Appendix~\ref{app:unmixed_fraction}, the unmixed fraction evolves by the following simple ODE
 \begin{equation}
@@ -326,8 +326,8 @@ At any point in time, the composition of the computational cell may be determine
 \end{equation}
 Differentiating (\ref{eq:final_comp}) in time and using (\ref{eq:zeta}) we see that our model for the chemical source term needed in (\ref{species}) is given by
 \begin{equation}
-\label{mass_prod_rate} 
-\dot{m}^{\prime\prime\prime}_{\alpha} = \rho \frac{\mbox{d}\widetilde{Y}_{\alpha}}{\mbox{d}t} 
+\label{mass_prod_rate}
+\dot{m}^{\prime\prime\prime}_{\alpha} = \rho \frac{\mbox{d}\widetilde{Y}_{\alpha}}{\mbox{d}t}
 = \rho \left[ \frac{\zeta}{\tau_{\rm{mix}}} (\hat{Y}_\alpha - \widetilde{Y}_{\alpha}^0)  + (1-\zeta) \frac{\mbox{d}\hat{Y}_\alpha}{\mbox{d}t} \right]
 \end{equation}
 Note that the unmixed fraction is comparable to the \emph{complement} of the fraction of ``reacting fine structures'' in other EDC formulations \cite{Chen:1,Panjwani:2010}, but in our model this fraction evolves in time.  A comparison between our model and that of Panjwani et al.~\cite{Panjwani:2010} is developed further in Appendix~\ref{app:eddy_dissipation_concept}.
@@ -357,18 +357,18 @@ The ODE governing the mixed species mass is
 \label{eq:mixmass}
 \frac{\d m_{\alpha}}{\d t} &= \hat{Y}_\alpha \frac{\d M}{\d t} + M \frac{\d \hat{Y}_\alpha}{\d t} \notag\\
 &= - \widetilde{Y}_{\alpha}^0 \frac{\d U}{\d t} + M \frac{\d \hat{Y}_\alpha}{\d t} \notag\\
-&= \rho V_{\rm c} \left[ \frac{\zeta \, \widetilde{Y}_{\alpha}^0 }{\tau_{\rm mix}} + (1-\zeta) \frac{\d \hat{Y}_\alpha}{\d t} \right] 
+&= \rho V_{\rm c} \left[ \frac{\zeta \, \widetilde{Y}_{\alpha}^0 }{\tau_{\rm mix}} + (1-\zeta) \frac{\d \hat{Y}_\alpha}{\d t} \right]
 \end{align}
 The first term  on the RHS accounts for mixing.  The second term represents chemical kinetics. Note that in the second step we have utilized the fact that the unmixed composition remains constant (at the initial cell mean) throughout the time step. The third step follows from (\ref{eq:zeta}), (\ref{eq:mixunmix_2}), and (\ref{eq:mixunmix_3}).
 
 \subsection{Time Integration for Mixing and Reaction}
-\label{sec:reac_time_integration} 
+\label{sec:reac_time_integration}
 
 In this section, we discuss the numerical solution of (\ref{eq:mixmass}). Let $\Delta t^k$ represent the $k$th sub-time step in the integration (less than or equal to the LES time step $\delta t$); $t^k=0$ at the start of the reactor integration.  The integration is time split such that \emph{mixing is done first, followed by reaction}. A simple explicit update of (\ref{eq:mixmass}) over the sub-time interval $t^k$ to $t^k + \Delta t^k$ is given by
 \begin{align}
 \label{eq:dmdt_1} m_\alpha^* &= m_{\alpha}(t^k) - [ \zeta(t^k+\Delta t^k) - \zeta(t^k) ] \, \widetilde{Y}_{\alpha}^0 \, \rho V_{\rm c} \\
 \label{eq:ystar}  \hat{Y}_\alpha^* &= m_\alpha^*/M^* \\
-\label{eq:dmdt_2} \hat{Y}_\alpha(t^k + \Delta t^k) &= \hat{Y}_\alpha^* + \Delta \hat{Y}_\alpha^* 
+\label{eq:dmdt_2} \hat{Y}_\alpha(t^k + \Delta t^k) &= \hat{Y}_\alpha^* + \Delta \hat{Y}_\alpha^*
 \end{align}
 The superscript $^*$ indicates a post-mixing value.  The first step, (\ref{eq:dmdt_1}), is an analytical solution for the mixing step (first term in (\ref{eq:mixmass})), obtained using (\ref{eq:zeta_soln}).  The mixing time scale $\tau_{\rm mix}$, needed in (\ref{eq:zeta_soln}), is computed once per LES time step using (\ref{eqn_tau_mix}) and held constant during the reactor integration. The mixed mass, $M^* = M(t^k + \Delta t^k)$, is evaluated at the end of the subinterval using (\ref{eq:mixunmix_3}). For fast chemistry, we take only one sub-step ($\Delta t^{k=1} = \delta t$).
 
@@ -406,12 +406,12 @@ For a single reaction, the change in fuel is based on the limiting reactant \cit
 \begin{equation}\label{eq:stoich_fuel_single}
 \Delta \hat{Y}_{\rm F} = -\min \left( \hat{Y}_{\rm F}, \hat{Y}_{\alpha} \,\frac{\nu_{\rm F}\,W_{\rm F}}{\nu_{\alpha}\,W_{\alpha}}\right) \quad ; \quad \mbox{for all reactants, $\alpha$}
 \end{equation}
-The minimum is taken in Eq.~(\ref{eq:stoich_fuel_single}) to ensure that the reactant species mass fractions remain realizable. 
+The minimum is taken in Eq.~(\ref{eq:stoich_fuel_single}) to ensure that the reactant species mass fractions remain realizable.
 \subsubsection{Multiple Reactions}
 
 For multiple reactions with infinitely fast chemistry, a more general boundedness correction algorithm is used. In this formulation, the change in fuel is simply the amount of the fuel present
 \begin{equation}\label{eq:fuel_mult_reac}
-\Delta \hat{Y}_{\rm F} = -\hat{Y}_{\rm F} 
+\Delta \hat{Y}_{\rm F} = -\hat{Y}_{\rm F}
 \end{equation}
 Discussion of how this algorithm is used to maintain realizability is in Section \ref{boundedness}.
 
@@ -532,12 +532,12 @@ Consider the case where there are two, single step hydrocarbon oxidization react
 &\mbox{Reaction 1}& \mathrm{CH_4 + 2 \, O_2} &\rightarrow  \mathrm{CO_2 + 2 \, H_2O}       && && \label{eq:two_fuel_ox_limit1} \\
 &\mbox{Reaction 2}& \mathrm{C_3H_8 + 5 \, O_2} &\rightarrow \mathrm{3 \,CO_2 + 4 \, H_2O}  && && \label{eq:two_fuel_ox_limit2}
 \end{align}
-The initial composition of a premixed reactor is 30\% methane, 40\% propane, and 30\% oxygen by mass. 
+The initial composition of a premixed reactor is 30\% methane, 40\% propane, and 30\% oxygen by mass.
 \subsubsection{Lumped Species Approach}
 One way to solve this problem is to use a lumped species approach; combine the methane and propane into a new fuel known as `My Fuel.' In this example, the initial volume fractions of methane and propane are 0.673 and 0.327, respectively. `My Fuel' can then be defined as
 \begin{equation}\label{eq:my_fuel}
 \rm{My\;Fuel} = \left( 0.673\, \mathrm{CH_4} + 0.327\, \mathrm{C_3H_8} \right) = C_{1.65}H_{5.31}
-\end{equation} 
+\end{equation}
 The molecular weight of this lumped fuel is 25.21 g/mol. Based on the lumped fuel composition, a single reaction can be constructed
 \begin{equation}\label{eq:lumped_reac}
 \mathrm{C_{1.65}H_{5.31} + 2.98 \, O_2} \rightarrow  \mathrm{1.65 \, CO_2 + 2.66 \, H_2O}
