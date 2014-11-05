@@ -6,6 +6,7 @@
 &RADI RADIATIVE_FRACTION=0.27/
 &REAC FUEL               = 'ACETONE'
       FYI                = 'Acetone C_3 H_6 O_1'
+      CO_YIELD           = 0.003
       SOOT_YIELD         = 0.014 /
 
 &MATL ID                     = 'ACETONE LIQUID'

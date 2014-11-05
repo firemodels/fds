@@ -6,6 +6,7 @@
 &RADI RADIATIVE_FRACTION=0.33/
 &REAC FUEL               = 'N-HEPTANE'
       FYI                = 'Heptane C_7 H_16'
+      CO_YIELD           = 0.010
       SOOT_YIELD         = 0.037 /
 
 &MATL ID                     = 'N-HEPTANE LIQUID'

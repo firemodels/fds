@@ -6,6 +6,7 @@
 &RADI RADIATIVE_FRACTION=0.60/
 &REAC FUEL               = 'BENZENE'
       FYI                = 'Benzene C_6 H_6'
+      CO_YIELD           = 0.067
       SOOT_YIELD         = 0.181 /
 
 &MATL ID                     = 'BENZENE LIQUID'
