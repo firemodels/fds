@@ -272,7 +272,6 @@ void adjustpart5bounds(partdata *parti){
       ASSERT(FFALSE);
       break;
     }
-    printf("i=%i valmin=%f valmax=%f\n",i,propi->valmin,propi->valmax);
   }
   adjustpart5chops(parti);
 #ifdef _DEBUG
