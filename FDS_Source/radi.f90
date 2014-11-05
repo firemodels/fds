@@ -794,47 +794,72 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
    RAD_Q_SUM = 0._EB
    KFST4_SUM = 0._EB
 
-   IF (WIDE_BAND_MODEL) THEN
+   WIDE_BAND_MODEL_IF: IF (WIDE_BAND_MODEL) THEN
+
+      ! Wide band model
+
       DO K=1,KBAR
          DO J=1,JBAR
             DO I=1,IBAR
                IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
                BBF = BLACKBODY_FRACTION(WL_LOW(IBND),WL_HIGH(IBND),TMP(I,J,K))
                KFST4(I,J,K) = BBF*KAPPA(I,J,K)*FOUR_SIGMA*TMP(I,J,K)**4
-               ENDDO
             ENDDO
          ENDDO
-      ENDIF
+      ENDDO
 
-      IF (.NOT.WIDE_BAND_MODEL) THEN ! Only apply the correction to KFST4 for gray gas model
+   ELSE WIDE_BAND_MODEL_IF
+
+      ! Gray gas model
+
+      RTE_SOURCE_CORRECTION_IF: IF (RTE_SOURCE_CORRECTION) THEN ! default RTE_SOURCE_CORRECTION=.TRUE.
+
+         ! Only apply the correction to KFST4 for gray gas model
+         
          DO K=1,KBAR
             DO J=1,JBAR
                DO I=1,IBAR
                   IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
                   KFST4(I,J,K) = KAPPA(I,J,K)*FOUR_SIGMA*TMP(I,J,K)**4
                   IF (RADIATIVE_FRACTION*Q(I,J,K)>Q_MINIMUM) THEN
-                     VOL  = R(I)*DX(I)*DY(J)*DZ(K)
+                     VOL = R(I)*DX(I)*DY(J)*DZ(K)
                      RAD_Q_SUM = RAD_Q_SUM + (RADIATIVE_FRACTION*Q(I,J,K)+KAPPA(I,J,K)*UII(I,J,K))*VOL
                      KFST4_SUM = KFST4_SUM + KFST4(I,J,K)*VOL
                   ENDIF
+               ENDDO
             ENDDO
          ENDDO
-      ENDDO
-   ENDIF
 
-   ! Correct the source term in the RTE based on user-specified RADIATIVE_FRACTION
+         ! Correct the source term in the RTE based on user-specified RADIATIVE_FRACTION
 
-   IF (KFST4_SUM>0._EB) THEN
-      RTE_SOURCE_CORRECTION_FACTOR = MAX(1._EB,RAD_Q_SUM/KFST4_SUM)
-      DO K=1,KBAR
-         DO J=1,JBAR
-            DO I=1,IBAR
-               IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-               IF (RADIATIVE_FRACTION*Q(I,J,K)>Q_MINIMUM) KFST4(I,J,K) = KFST4(I,J,K)*RTE_SOURCE_CORRECTION_FACTOR
+         IF (KFST4_SUM>TWO_EPSILON_EB) THEN
+            RTE_SOURCE_CORRECTION_FACTOR = MAX(1._EB,RAD_Q_SUM/KFST4_SUM)
+            DO K=1,KBAR
+               DO J=1,JBAR
+                  DO I=1,IBAR
+                     IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
+                     IF (RADIATIVE_FRACTION*Q(I,J,K)>Q_MINIMUM) KFST4(I,J,K) = KFST4(I,J,K)*RTE_SOURCE_CORRECTION_FACTOR
+                  ENDDO
+               ENDDO
+            ENDDO
+         ENDIF
+
+      ELSE RTE_SOURCE_CORRECTION_IF
+
+         ! Use specified radiative fraction
+         
+         DO K=1,KBAR
+            DO J=1,JBAR
+               DO I=1,IBAR
+                  IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
+                  KFST4(I,J,K) = RADIATIVE_FRACTION*Q(I,J,K)+KAPPA(I,J,K)*UII(I,J,K)
+               ENDDO
             ENDDO
          ENDDO
-      ENDDO
-   ENDIF
+
+      ENDIF RTE_SOURCE_CORRECTION_IF
+
+   ENDIF WIDE_BAND_MODEL_IF
 
    ! Calculate extinction coefficient
    
