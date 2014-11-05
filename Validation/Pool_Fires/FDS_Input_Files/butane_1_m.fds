@@ -6,6 +6,7 @@
 &RADI RADIATIVE_FRACTION=0.31/
 &REAC FUEL               = 'BUTANE'
       FYI                = 'Butane  C_4 H_10'
+      CO_YIELD           = 0.007
       SOOT_YIELD         = 0.029 /
 
 &MATL ID                     = 'BUTANE LIQUID'

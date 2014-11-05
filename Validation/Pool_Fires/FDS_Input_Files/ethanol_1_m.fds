@@ -6,6 +6,7 @@
 &RADI RADIATIVE_FRACTION=0.25/
 &REAC FUEL               = 'ETHANOL'
       FYI                = 'Ethanol C_2 H_6 O_1'
+      CO_YIELD           = 0.001
       SOOT_YIELD         = 0.008 /
 
 &MATL ID                     = 'ETHANOL LIQUID'
