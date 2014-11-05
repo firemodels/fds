@@ -9076,13 +9076,14 @@ INIT_LOOP: DO N=1,N_INIT_READ+N_INIT_RESERVED
 
    ! Create a box around a CONE
 
-   IF (SHAPE=='CONE') THEN
+   IF (SHAPE=='CONE' .OR. SHAPE=='RING') THEN
       XB(1) = XYZ(1) - RADIUS
       XB(2) = XYZ(1) + RADIUS
       XB(3) = XYZ(2) - RADIUS
       XB(4) = XYZ(2) + RADIUS
       XB(5) = XYZ(3)
       XB(6) = XYZ(3) + HEIGHT
+      IF (SHAPE=='RING') XB(6) = XB(5)
    ENDIF
 
    ! Reorder XB coordinates if necessary
