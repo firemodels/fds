@@ -6,6 +6,7 @@
 &RADI RADIATIVE_FRACTION=0.16/
 &REAC FUEL               = 'METHANOL'
       FYI                = 'Methanol C_1 H_4 O_1'
+      CO_YIELD           = 0.001
       SOOT_YIELD         = 0.001 /
 
 &MATL ID                     = 'METHANOL LIQUID'
