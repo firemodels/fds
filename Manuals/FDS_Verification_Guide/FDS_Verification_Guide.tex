@@ -3481,145 +3481,162 @@ The analytical and  numerical solution for the parameters $K_{ab} = 0.389$ and $
 \section{Interpreting Bench-Scale Measurements}
 \label{solid_kinetics}
 
-This section describes a method of deriving and applying the values of the kinetic parameters for the thermal
-decomposition of a solid, following the methodology described by Lyon~\cite{Lyon:FM2000}.
+This section describes a method of deriving and applying the values of the kinetic parameters for the thermal decomposition of a solid, following the methodology described by Lyon~\cite{Lyon:FM2000}. This is the basic theory that underlies measurement methods like Thermo-Gravimetric Analysis (TGA) and Micro-Combustion Calorimetry (MCC).
 
 
 \subsection{General Theory}
 
-Consider a small sample of solid material that is heated at a relatively slow, constant rate. An example of this process is
-thermal gravimetric analysis (TGA). Assume that the solid consists of $N$ material components, with each component mass fraction denoted by
-$Y_i(t)$. As the solid is heated, each component undergoes a reaction to form undetermined gases or a single solid residue whose
-mass fraction is denoted $Y_r(t)$ and whose yield is denoted by $\nu_r$. The governing equations for the component mass fractions is then:
+Consider a small sample of solid material that is heated at a relatively slow, constant rate. Assume that the solid consists of $N$ material components, with each component mass fraction denoted by $Y_\alpha(t)$. As the solid is heated, each component undergoes a reaction to form undetermined gases or a single solid residue whose mass fraction is denoted $Y_{\rm r}(t)$ and whose yield is denoted by $\nu_{\rm r}$. The governing equations for the component mass fractions are:
 \begin{eqnarray}
-   \frac{\d Y_i}{\d t} &=& -A_i \, Y_i \, \exp \left( -\frac{E_i}{RT} \right)    \quad ; \quad Y_i(0) = Y_{0,i} \quad ; \quad i=1,N  \label{dYdt} \\
-   \frac{\d Y_r}{\d t} &=& -\nu_r  \sum_i \frac{\d Y_i}{\d t}                        \quad ; \quad Y_r(0) = 0  \label{dYrdt}
+   \frac{\d Y_\alpha}{\d t} &=& -A_\alpha \, Y_\alpha \, \exp \left( -\frac{E_\alpha}{RT} \right)    \quad ; \quad Y_\alpha(0) = Y_{\alpha,0} \quad ; \quad \alpha=1,N  \label{dYdt} \\
+   \frac{\d Y_{\rm r}}{\d t} &=& -\nu_{\rm r}  \sum_\alpha \frac{\d Y_\alpha}{\d t}                                   \quad ; \quad Y_{\rm r}(0) = 0  \label{dYrdt}
 \end{eqnarray}
-In the TGA apparatus, the temperature of the sample is increased linearly in time, $dT/dt=\beta$. Because TGA results are usually expressed as a function of
-temperature rather than time, it is convenient to rewrite Eq.~(\ref{dYdt}) as:
+In standard test apparatus, the temperature of the sample is increased linearly in time, $dT/dt=\beta$. Because the test results are usually expressed as a function of temperature rather than time, it is convenient to rewrite Eq.~(\ref{dYdt}) as:
 \be
-   \frac{\d Y_i}{\d T} = -\frac{A_i}{\beta} \, Y_i \, \exp \left( -\frac{E_i}{RT} \right)    \quad ; \quad Y(T=T_0) = Y_{0,i}  \label{dYdT}
+   \frac{\d Y_\alpha}{\d T} = -\frac{A_\alpha}{\beta} \, Y_\alpha \, \exp \left( -\frac{E_\alpha}{RT} \right)    \quad ; \quad Y(T=T_0) = Y_{\alpha,0}  \label{dYdT}
 \ee
-The decomposition rate, $-dY_i/dt$, peaks at a temperature denoted by $T_{p,i}$ with a value denoted by $r_{p,i}$.
-At this temperature, the second derivative of $Y_i$ is zero:
+The decomposition rate for each material component, $-dY_\alpha/dt$, peaks at a temperature denoted by $T_{\alpha,{\rm p}}$ with a value denoted by $r_{\alpha,{\rm p}}$. At this temperature, the second derivative of $Y_\alpha$ is zero:
+\begin{eqnarray}
+   \frac{\d^2 Y_\alpha}{\d T^2} &=& -\frac{A_\alpha}{\beta} \, \frac{\d Y_\alpha}{\d T} \, \exp \left( -\frac{E_\alpha}{R T_{\alpha,{\rm p}} } \right) -
+   \frac{A_\alpha}{\beta} \, Y_\alpha \, \exp \left( -\frac{E_\alpha}{R T_{\alpha,{\rm p}} } \right) \, \frac{E_\alpha}{R T_{\alpha,{\rm p}}^2} \nonumber \\[.1in]
+   &=& -\frac{\d Y_\alpha}{\d T} \left[ \frac{A_\alpha}{\beta} \, \exp \left( -\frac{E_\alpha}{R T_{\alpha,{\rm p}} } \right) - \frac{E_\alpha}{R T_{\alpha,{\rm p}}^2} \right] = 0  \label{d2YdT2}
+\end{eqnarray}
+Equation~(\ref{dYdT}) can be integrated from $Y_{\alpha,0}$ to $Y_{\alpha,{\rm p}}$ (the value of $Y_\alpha$ at the peak), and $T_0$ to $T_{\alpha,{\rm p}}$:
 \be
-   \frac{\d^2 Y_i}{\d T^2} = -\frac{A_i}{\beta} \, \frac{\d Y_i}{\d T} \, \exp \left( -\frac{E_i}{RT_{p,i}} \right) -
-   \frac{A_i}{\beta} \, Y_i \, \exp \left( -\frac{E_i}{RT_{p,i}} \right) \, \frac{E_i}{R T_{p,i}^2}
-   = -\frac{\d Y_i}{\d T} \left[ \frac{A_i}{\beta} \, \exp \left( -\frac{E_i}{RT_{p,i}} \right) - \frac{E_i}{R T_{p,i}^2} \right] = 0  \label{d2YdT2}
+   \int_{Y_{\alpha,0}}^{Y_{\alpha,{\rm p}}} \left( \frac{\d Y_\alpha'}{Y_\alpha'} \right) = - \frac{A_\alpha}{\beta} \int_{T_0}^{T_{\alpha,{\rm p}}} \exp \left( -\frac{E_\alpha}{RT'} \right) \; dT'
+   \approx - \frac{A_\alpha R T_{\alpha,{\rm p}}^2}{ \beta \, (E_\alpha+2 R T_{\alpha,{\rm p}}) } \; \exp \left( -\frac{E_\alpha}{RT_{\alpha,{\rm p}}} \right)
 \ee
-Next, Eq.~(\ref{dYdT}) can be integrated from $Y_{0,i}$ to $Y_{p,i}$ (the value of $Y_i$ at the peak), and $T_0$ to $T_{p,i}$:
+Using Eq.~(\ref{d2YdT2}) to eliminate $A_\alpha$ yields:
 \be
-   \int_{Y_{0,i}}^{Y_{p,i}} \left( \frac{\d Y_i'}{Y_i'} \right) = - \frac{A_i}{\beta} \int_{T_0}^{T_{p,i}} \exp \left( -\frac{E_i}{RT'} \right) \; dT'
-   \approx - \frac{A_i R T_{p,i}^2}{ \beta \, (E_i+2 R T_{p,i}) } \; \exp \left( -\frac{E_i}{RT_{p,i}} \right)
+   \ln \left( \frac{Y_{\alpha,{\rm p}}}{Y_{\alpha,0}} \right) = - \frac{E_\alpha}{E_\alpha+2 R T_{\alpha,{\rm p}}} \approx -1  \quad \quad (E_\alpha \gg 2 R T_{\alpha,{\rm p}})
 \ee
-Using Eq.~(\ref{d2YdT2}) to eliminate $A_i$ yields:
+or more simply, $Y_{\alpha,{\rm p}} \approx Y_{\alpha,0}/e$. Now, the activation energy can be evaluated using Eqs.~(\ref{dYdt}) and (\ref{d2YdT2}):
 \be
-   \ln \left( \frac{Y_{p,i}}{Y_{0,i}} \right) = - \frac{E_i}{E_i+2 R T_{p,i}} \approx -1  \quad \quad (E_i \gg 2 R T_{p,i})
+   E_\alpha = RT_{\alpha,{\rm p}}^2 \, \frac{A_\alpha}{\beta} \, \exp \left( -\frac{E_\alpha}{RT_{\alpha,{\rm p}}} \right) = \frac{RT_{\alpha,{\rm p}}^2}{\beta} \frac{r_{\alpha,{\rm p}}}{Y_{\alpha,{\rm p}}}
+   \approx \frac{RT_{\alpha,{\rm p}}^2}{\beta} \frac{e \, r_{\alpha,{\rm p}}}{Y_{\alpha,0}}  \label{E_formula}
 \ee
-or more simply, $Y_{p,i} \approx Y_{0,i}/e$. Now, the activation energy can be evaluated using Eqs.~(\ref{dYdt}) and (\ref{d2YdT2}):
+Then $A_\alpha$ can be evaluated directly from Eq.~(\ref{dYdt}):
 \be
-   E_i = RT_{p,i}^2 \, \frac{A_i}{\beta} \, \exp \left( -\frac{E_i}{RT_{p,i}} \right) = \frac{RT_{p,i}^2}{\beta} \frac{r_{p,i}}{Y_{p,i}}
-   \approx \frac{RT_{p,i}^2}{\beta} \frac{e \, r_{p,i}}{Y_{0,i}}  \label{E_formula}
+   A_\alpha = \frac{r_{\alpha,{\rm p}}}{Y_{\alpha,{\rm p}}} \, \exp \left( \frac{E_\alpha}{RT_{\alpha,{\rm p}}} \right) \approx \frac{e \, r_{\alpha,{\rm p}}}{Y_{\alpha,0}} \, \exp \left( \frac{E_\alpha}{RT_{\alpha,{\rm p}}} \right) \label{A_formula}
 \ee
-Then $A_i$ can be evaluated directly from Eq.~(\ref{dYdt}):
+Note that the formulae for $A_\alpha$ and $E_\alpha$ can be evaluated with parameters that are obtained directly by inspection of the plot of mass loss rate versus temperature. For each peak, the values of $T_{\alpha,{\rm p}}$ are easy to obtain by inspection. The initial mass fractions, $Y_{\alpha,0}$, can be estimated based on the relative area underneath each peak. The values of $Y_{\alpha,0}$ should sum to 1.
+
+The reaction rates, $r_{\alpha,{\rm p}}$, require a slight interpretation. Typically, tests like TGA produce plots of the normalized sample mass, $m/m_0$, and its first derivative with time, $-\d (m/m_0) /\d t$. However, the reaction rate in the analysis above is interpreted as the change in the component mass fraction with time:
 \be
-   A_i = \frac{r_{p,i}}{Y_{p,i}} \, \exp \left( \frac{E_i}{RT_{p,i}} \right) \approx \frac{e \, r_{p,i}}{Y_{0,i}} \, \exp \left( \frac{E_i}{RT_{p,i}} \right) \label{A_formula}
+   r_\alpha = - \frac{\d Y_\alpha}{\d t}
 \ee
-Note that the formulae for $A_i$ and $E_i$ can be evaluated with parameters that are obtained directly by
-inspection of the plot of mass loss rate versus temperature.
-For each peak, the values of $T_{p,i}$ and $r_{p,i}$ are obvious.
-The values of $Y_{0,i}$ can be estimated based on the relative area underneath each peak. The values of $Y_{0,i}$ should sum to 1.
+The relationship between these two rates is
+\be
+   \sum_\alpha \frac{\d Y_\alpha}{\d t} = \frac{1}{1-\nu_{\rm r}} \frac{\d (m/m_0)}{\d t}
+\ee
+Thus, the reaction rates we need for Eqs.~(\ref{E_formula}) and (\ref{A_formula}), $r_{\alpha,{\rm p}}$, are related to the normalized mass loss rate curve as follows:
+\be
+   r_{\alpha,{\rm p}} = - \frac{1}{1-\nu_{\rm r}} \left. \frac{\d (m/m_0)}{\d t} \right|_{T=T_{\alpha,{\rm p}}}
+   \label{rr_calc}
+\ee
+The examples in the following section describe how to interpret output from bench-scale material tests.
+
+\subsection{Interpreting TGA Data (\texorpdfstring{\textct{tga\_sample}}{tga\_sample})}
+\label{tga_sample}
+
+The solid curve of the left hand plot of Fig.~\ref{tga_sample_plot} shows the measured normalized mass of a small solid sample undergoing heating at a rate of 5~$^\circ$C/min in the TGA apparatus. The solid curve of the right hand plot is the mass loss rate, or minus the first derivative of the plot on the left. The goal of this example is to obtain the kinetic parameters, $E_\alpha$ and $A_\alpha$, from Eqs.~(\ref{E_formula}) and (\ref{A_formula}) to solve numerically the ODE, Eqs.~(\ref{dYdt}) and (\ref{dYrdt}).
+\begin{figure}[ht]
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/tga_sample_mass}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/tga_sample_mlr}
+\caption[Results of a TGA analysis]{Results of a TGA analysis. At left is the normalized sample mass as a function of the temperature. At right is the corresponding mass loss rate.}
+\label{tga_sample_plot}
+\end{figure}
+The first decision to make is the number of reactions. Usually, this corresponds to the number of peaks in the mass loss rate curve, but for realistic cases, some judgment is needed. In this example, it is assumed that there are two material components, each of which is undergoing a single reaction in the neighborhood of a certain temperature. By inspection, $T_{1,{\rm p}}=300 \; ^\circ$C and $T_{2,{\rm p}}=500 \; ^\circ$C. The next piece of information from the measurement is the residue fraction, which is obtained from the plot on the left, $\nu_{\rm r}=0.53$. From Eq.~(\ref{rr_calc}), the reaction rates are obtained by converting the peak mass loss rates from the plot on the right: $r_{1,{\rm p}}=0.00045/0.47$~s$^{-1}$ and $r_{2,{\rm p}}=0.0001/0.47$~s$^{-1}$.  Finally, the initial mass fractions of the two components are estimated from the relative areas under the peaks in the right hand plot. In this case, $Y_{1,{\rm p}}=0.6$ and $Y_{2,{\rm p}}=0.4$.
+
+In the FDS input file, {\ct tga\_sample.fds}, this information is conveyed via the following lines:
+\begin{lstlisting}
+&SURF ID             = 'SAMPLE'
+      ...
+      MATL_ID(1,1) = 'component 1'
+      MATL_ID(1,2) = 'component 2'
+      MATL_MASS_FRACTION(1,1) = 0.6
+      MATL_MASS_FRACTION(1,2) = 0.4 /
+
+&MATL ID                    = 'component 1'
+      ...
+      N_REACTIONS           = 1
+      REFERENCE_TEMPERATURE = 300.
+      REFERENCE_RATE        = 0.0016
+      HEATING_RATE          = 5.
+      NU_SPEC               = 0.47
+      SPEC_ID               = 'OFF-GAS'
+      NU_MATL               = 0.53
+      MATL_ID               = 'residue' /
+
+&MATL ID                    = 'component 2'
+      ...
+      N_REACTIONS           = 1
+      REFERENCE_TEMPERATURE = 500.
+      REFERENCE_RATE        = 0.0005
+      HEATING_RATE          = 5.
+      NU_SPEC               = 0.47
+      SPEC_ID               = 'OFF-GAS'
+      NU_MATL               = 0.53
+      MATL_ID               = 'residue' /
+\end{lstlisting}
+Note that {\ct REFERENCE\_RATE} is actually $r_{\alpha,{\rm p}}/Y_{\alpha,{\rm p}}$. Note also that both material components have the same residue yield, {\ct NU\_MATL}. Solely from TGA data, it is not possible to determine how many unique material components there are, or what the reaction sequence is. The point of this exercise is simply to get FDS to mimic the total mass loss rate curve.
+
+
+\subsection{Effect of the TGA Heating Rata (\texorpdfstring{\textct{birch\_tga}}{birch\_tga})}
+\label{birch_tga}
+
+This is an example of a comparison of a candidate solid phase model with TGA data that shows the effect of the sample heating rate. The sample cases called \textct{birch\_tga\_1step\_2} and \textct{birch\_tga\_1step\_20} simulate two standard TGA experiments in which small samples of birch wood are heated up slowly at constant rates of 2~\si{\degree C}/min and 20~\si{\degree C}/min, respectively. The model of the wood consists of only one reaction that converts virgin wood to char and fuel gases. There is also a reaction in the simulation that does nothing more than evaporate the small amount of moisture in the wood. This evaporation is evident in Fig.~\ref{fig_birch_tga} near the temperature of 100~\si{\degree C}.
+\begin{figure}[ht]
+\begin{center}
+\includegraphics[width=3.5in]{SCRIPT_FIGURES/birch_tga}
+\caption[An example of TGA data]{\label{fig_birch_tga} Comparison of a solid phase model of birch wood with TGA data.}
+\end{center}
+\end{figure}
 
 
 
-\subsection{Using Micro-Calorimetry Data (\texorpdfstring{\textct{cable\_11\_mcc}}{cable\_11\_mcc})}
+\subsection{Interpreting MCC Data (\texorpdfstring{\textct{cable\_11\_mcc}}{cable\_11\_mcc})}
 \label{cable_11_mcc}
 
-This section describes a method for interpreting micro-combustion calorimeter (MCC) measurements.
-The pyrolysis combustion flow calorimeter (PCFC), developed
-by Lyon and Walters~\cite{Lyon:JAAP2004} at the U.S. Federal Aviation Administration (FAA), is a device
-used to measure the heat generated from the combustion of small (4~mg to 6~mg) material samples by oxygen depletion calorimetry.
-Samples are pyrolyzed at a specified heating rate in an anaerobic atmosphere (typically N$_2$) and the resulting gases are mixed with
-excess oxygen and combusted in a separate chamber. The heat release rate from the specimen is obtained from measurements of the
-concentration of oxygen in the effluent exiting the combustor as a function of time. The methodology is the basis for
-the standard test ASTM~D~7309~\cite{microcc}.
+This section describes a method for interpreting micro-combustion calorimeter (MCC) measurements. The pyrolysis combustion flow calorimeter (PCFC), developed by Lyon and Walters~\cite{Lyon:JAAP2004} at the U.S. Federal Aviation Administration (FAA), is a device used to measure the heat generated from the combustion of small (4~mg to 6~mg) material samples by oxygen depletion calorimetry. Samples are pyrolyzed at a specified heating rate in an anaerobic atmosphere (typically N$_2$) and the resulting gases are mixed with excess oxygen and combusted in a separate chamber. The heat release rate from the specimen is obtained from measurements of the concentration of oxygen in the effluent exiting the combustor as a function of time. The methodology is the basis for the standard test ASTM~D~7309~\cite{microcc}.
 
-The results of PCFC measurements for several multi-conductor control cables are shown in Fig.~\ref{mcc_plots}.
-For each cable, the insulation and jacket material were tested separately, and at least three replicates were performed for each
-(only one replicate is shown for each sample). The samples, weighing approximately 5~mg, were cut from the cable jackets and conductor
-insulation material of each of the cables. These samples were pyrolyzed in the PCFC at a rate of 1~K/s
-from 100~\si{\degree C} to 600~\si{\degree C} in a nitrogen atmosphere and the effluent combusted at 900~\si{\degree C} in a mixture consisting of 20~\% O$_2$
-and 80~\% N$_2$. The resulting curve shows the heat release rate of the sample as it was heated, normalized by the mass of the original sample.
-There are usually one, two or three noticeable peaks in the curve, corresponding to temperatures where a significant decomposition reaction occurs.
-Each peak can be characterized by the maximum value of the heat release rate~($\dot{q}_{p,i}$), the temperature ($T_{p,i}$), and the relative fraction of the original sample mass that undergoes this particular reaction ($Y_{0,i}$). The area under the curve
-\be \int_0^\infty \dot{q}(T) \, dT = \beta \, \Delta H' \ee
-is the sample heating rate ($\beta$) times the energy released per unit mass of the original sample ($\Delta H'$). This latter quantity is
-related to the more conventional heat of combustion via the relation
-\be \Delta H = \frac{\Delta H'}{1-\nu_r} \ee
-where $\nu_r$ is the fraction of the original mass that remains as residue. Sometimes this is referred to as the ``char yield.'' Note that it is
-assumed to be the same for all reactions.
+The results of PCFC measurements for the jacket and insulation materials of an electrical cable are shown in Fig.~\ref{mcc_plots}. These samples were pyrolyzed in the PCFC at a rate of 1~\si{\degree C}/s from 100~\si{\degree C} to 600~\si{\degree C} in a nitrogen atmosphere and the effluent combusted at 900~\si{\degree C} in a mixture consisting of 20~\% O$_2$ and 80~\% N$_2$. The resulting curve shows the heat release rate of the sample as it was heated, normalized by the mass of the original sample. There are usually one, two or three noticeable peaks in the curve, corresponding to temperatures where a significant decomposition reaction occurs. Each peak can be characterized by the maximum value of the heat release rate, $\dot{q}_{\alpha,{\rm p}}$, the temperature, $T_{\alpha,{\rm p}}$, and the relative fraction of the original sample mass that undergoes this particular reaction ($Y_{\alpha,0}$). The area under the curve
+\be 
+   \int_0^\infty \dot{q}(T) \, dT = \beta \, \Delta H' 
+\ee
+is the sample heating rate, $\beta$, multiplied by the energy released per unit mass of the original sample, $\Delta H'$. This latter quantity is related to the more conventional heat of combustion via the relation
+\be 
+   \Delta h = \frac{\Delta h'}{1-\nu_{\rm r}} 
+\ee
+where $\nu_{\rm r}$ is the fraction of the original mass that remains as residue. Sometimes this is referred to as the ``char yield.'' Note that it is assumed to be the same for all reactions.
 
-The MCC measurement is similar to TGA in that it is possible to derive the kinetic parameters, $A_i$ and $E_i$, for the various reactions from
-the heat release rate curve. As an example of how to work with MCC data, consider the two plots shown in Fig.~\ref{mcc_plots}. The solid curves in the figures
-display the results of micro-calorimetry measurements for the insulation and jacket material of a multi-conductor control
-cable (the number 11 has no particular meaning other than to distinguish it from other cables being studied).
+The MCC measurement is similar to TGA in that it is possible to derive the kinetic parameters, $A_\alpha$ and $E_\alpha$, for the various reactions from the heat release rate curve. As an example of how to work with MCC data, consider the two plots shown in Fig.~\ref{mcc_plots}. The solid curves in the figures display the results of micro-calorimetry measurements for the insulation and jacket material of a multi-conductor control cable (the number 11 has no particular meaning other than to distinguish it from other cables being studied).
 \begin{figure}[ht]
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/cable_11_insulation_mcc}
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/cable_11_jacket_mcc}
 \caption[Results of a micro-calorimetry analysis of cable materials]{Results of a micro-calorimetry analysis of a sample of cable insulation (left) and jacket material (right).}
 \label{mcc_plots}
 \end{figure}
-The insulation material exhibits two fairly well-defined peaks, whereas the jacket material exhibits three. Thus, the insulation
-material is modeled using two solid components, each undergoing a single-step reaction that produces fuel gas and a solid residue. The jacket
-material is modeled using three solid components. The residue yield for the insulation material is
-6~\%; for the jacket 49~\%, obtained simply by weighing the sample before and after the micro-calorimetry measurement. It is
-not known which reaction produces what fraction of the residue. Rather, it is assumed that each reaction yields the same
-residue in the same relative amount.
-The dashed curves in Fig.~\ref{mcc_plots} are the results of FDS simulations of the MCC measurements. To mimic the
-sample heating, a very thin sheet comprised of a mixture of the solid components with an insulated backing is heated at the
-rate specified in the experiment (1~K/s or 60~K/min, the units needed in FDS).
-For each reaction,
-the kinetic parameters are calculated using the formulae (\ref{E_formula}) and (\ref{A_formula}). The values of
-$T_{p,i}$ are obtained directly from the figures. The value of $r_{p,i}/Y_{0,i}$ for the $i$th reaction can be found from:
+The insulation material exhibits two fairly well-defined peaks, whereas the jacket material exhibits three. Thus, the insulation material is modeled using two solid components, each undergoing a single-step reaction that produces fuel gas and a solid residue. The jacket material is modeled using three solid components. The residue yield for the insulation material is 6~\%; for the jacket 49~\%, obtained simply by weighing the sample before and after the measurement. It is not known which reaction produces what fraction of the residue. Rather, it is assumed that each reaction yields the same residue in the same relative amount. The dashed curves in Fig.~\ref{mcc_plots} are the results of FDS simulations of the MCC measurements. To mimic the sample heating, a very thin sheet comprised of a mixture of the solid components with an insulated backing is heated at the rate specified in the experiment (1~\si{\degree C}/s or 60~\si{\degree C}/min, the units needed in FDS). For each reaction, the kinetic parameters are calculated using the formulae (\ref{E_formula}) and (\ref{A_formula}). The values of $T_{\alpha,{\rm p}}$ are obtained directly from the figures. The value of $r_{\alpha,{\rm p}}/Y_{\alpha,0}$ for reaction $\alpha$ can be found from:
 \be
-   r_{p,i} = \beta \, \frac{\dot{q}_{p,i}}{ \Delta H'}   \quad ; \quad
-   \Delta H'=\int_0^\infty \dot{q}(T) \, dT   \label{r_formula}
+   r_{\alpha,{\rm p}} = \beta \, \frac{\dot{q}_{\alpha,{\rm p}}}{ \Delta H'}   \quad ; \quad
+   \Delta H'=\int_0^\infty \dot{q}(T) \, \d T   \label{r_formula}
 \ee
-where $\dot{q}_{p,i}$ is the value of the $i$th heat release rate peak. The values, $Y_{0,i}$, can be estimated from the
-relative area under the curve. Their sum ought to be 1.
-It is important to check the units of all of these quantities because the
-results of these experiments are often presented in different ways depending on the particular application. A mistake
-in units can result in values of $A_i$ and/or $E_i$ that will invariably cause spurious results.
+where $\dot{q}_{\alpha,{\rm p}}$ is the peak heat release rate corresponding to reaction $\alpha$. The values, $Y_{\alpha,0}$, can be estimated from the relative area under the curve. Their sum ought to be 1. It is important to check the units of all of these quantities because the results of these experiments are often presented in different ways depending on the particular application. A mistake in units can result in values of $A_\alpha$ and/or $E_\alpha$ that will invariably cause spurious results. For this reason, the direct calculation of the kinetic parameters is avoided by inputting the reaction parameters instead.
 
-The dashed curves in Fig.~\ref{mcc_plots} are the results of numerically integrating Eq.~(\ref{dYdt}) within FDS for each
-material component. A typical input line for FDS that describes a single material component undergoing a single
-reaction is given by:
-
+The dashed curves in Fig.~\ref{mcc_plots} are the results of numerically integrating Eq.~(\ref{dYdt}) within FDS for each material component. A typical input line for FDS that describes a single material component undergoing a single reaction is given by:
 \begin{lstlisting}
 &MATL ID                    = 'Cable 11 Jacket Component A'
-      EMISSIVITY            = ...
-      DENSITY               = ...
-      CONDUCTIVITY          = ...
-      SPECIFIC_HEAT         = ...
+      ...
       N_REACTIONS           = 1
       REFERENCE_TEMPERATURE = 300.
       REFERENCE_RATE        = 0.0064
       HEATING_RATE          = 60.
-      NU_RESIDUE            = 0.49
-      RESIDUE               = 'char'
-      NU_FUEL               = 0.51
-      HEAT_OF_REACTION      = ... /
+      NU_MATL               = 0.49
+      MATL_ID               = 'char' 
+      NU_SPEC               = 0.51 /
 \end{lstlisting}
-
-\noindent Only the relevant parameters are shown. The other parameters are not relevant in this
-exercise. Note that \textct{REFERENCE\_TEMPERATURE} is $T_{p,i}$, but in units of \si{\degree C}. \textct{REFERENCE\_RATE} is actually
-$r_{p,i}/Y_{0,i}$, in units of s$^{-1}$. \textct{HEATING\_RATE} is $\beta$ in units of K/min.
-\textct{NU\_RESIDUE} is $\nu_r$ and \textct{NU\_FUEL} is ($1-\nu_r$).
-Table~\ref{cable_parameters} lists all of the kinetic parameters for the cable insulation and jacket
-materials. The peak temperatures are easy to estimate, and the values of $r_{p,i}/Y_{0,i}$ can be fine-tuned to closely match
-the data. Note that it is possible to compute values of $A_i$ and $E_i$ and input them directly into FDS, rather
-than inputting those listed in the table. However, the values of $A_i$ and $E_i$ are fairly large numbers and have little
-meaning in their own.
+Only the relevant parameters are shown. The other parameters are not relevant in this exercise. Note that \textct{REFERENCE\_TEMPERATURE} is $T_{\alpha,{\rm p}}$ in units of \si{\degree C}. \textct{REFERENCE\_RATE} is actually $r_{\alpha,{\rm p}}/Y_{\alpha,0}$, in units of s$^{-1}$. \textct{HEATING\_RATE} is $\beta$ in units of \si{\degree C}/min. \textct{NU\_MATL} is $\nu_{\rm r}$ and \textct{NU\_SPEC} is ($1-\nu_{\rm r}$). Table~\ref{cable_parameters} lists all of the kinetic parameters for the cable insulation and jacket materials. The peak temperatures are easy to estimate, and the values of $r_{p,i}/Y_{0,i}$ can be fine-tuned to closely match the data. Note that it is possible to compute values of $A_i$ and $E_i$ and input them directly into FDS, rather than inputting those listed in the table. However, the values of $A_i$ and $E_i$ are fairly large numbers and have little meaning in their own.
 
 
 \begin{table}[ht]
@@ -3629,31 +3646,16 @@ meaning in their own.
 \label{cable_parameters}
 \begin{tabular}{|l||c|c||c|c|c|}
 \hline
-Parameter                       & \multicolumn{2}{|c|}{Insulation, $\nu_r$=0.06 }  &  \multicolumn{3}{|c|}{Jacket, $\nu_r$=0.49} \\ \cline{2-6}
-                                & 1             & 2                 &  1        & 2         & 3              \\ \hline \hline
-$T_{p,i}$ (\si{\degree C})           & 355           & 485               &  300      & 345       & 450            \\ \hline
-$r_{p,i}/Y_{0,i}$ (s$^{-1}$)    & 0.0384        & 0.2426            &  0.0064   & 0.3500    & 0.0156         \\ \hline
+Parameter                                       & \multicolumn{2}{|c||}{Insulation, $\nu_{\rm r}=0.06$ } &  \multicolumn{3}{|c|}{Jacket, $\nu_{\rm r}=0.49$}     \\ \cline{2-6}
+                                                & $\alpha=1$    & $\alpha=2$                             &  $\alpha=1$  & $\alpha=2$   & $\alpha=3$              \\ \hline \hline
+$T_{\alpha,{\rm p}}$ (\si{\degree C})           & 355           & 485                                    &  300         & 345          & 450                     \\ \hline
+$r_{\alpha,{\rm p}}/Y_{\alpha,0}$ (s$^{-1}$)    & 0.0384        & 0.2426                                 &  0.0064      & 0.3500       & 0.0156                  \\ \hline
 \end{tabular}
 \end{center}
 \end{table}
 
 
-\subsection{Using TGA Data (\texorpdfstring{\textct{birch\_tga}}{birch\_tga})}
-\label{birch_tga}
 
-This is an example of a comparison of a candidate solid phase model with thermogravimetric analysis (TGA) data. The sample cases
-called \textct{birch\_tga\_1step\_2} and \textct{birch\_tga\_1step\_20} simulate two standard TGA experiments in which small samples of birch wood are heated up slowly at constant
-rates of 2~\si{\degree C}/min and 20~\si{\degree C}/min, respectively. The model of the wood only involves one reaction that converts virgin wood to char and fuel gases. There is
-also a reaction in the simulation that does nothing more than evaporate the small amount of moisture in the wood. This evaporation is evident in
-Fig.~\ref{fig_birch_tga} near the temperature of 100~\si{\degree C}.
-
-\begin{figure}[ht]
-   \begin{center}
-      \includegraphics[width=3.5in]{SCRIPT_FIGURES/birch_tga}
-      \caption[An example of TGA data]{\label{fig_birch_tga}
-    Comparison of a solid phase model of birch wood with TGA data.}
-   \end{center}
-   \end{figure}
 
 
 
@@ -3712,7 +3714,7 @@ The common parameters used in all the simulations are: $C_{\rm d}=10$, $r_{\rm d
 
 Consider a 2~m long duct with a 1~m square cross section, fixed air velocity of $u_0=2$~m/s, and free-slip walls. Three ducts are stacked vertically, each with its own mesh and a plane of particles spanning the duct at its center point. The particles are 1~cm in diameter and 10~particles are specified in each grid cell. The expected pressure drop is given by the formula:
 \be \Delta p=\frac{1}{2} \rho \frac{\sum \, C_{\rm d} \, \pi \, r_{\rm p}^{2} \, u_0^2} {A} \ee
-where $A$ is the 1~m$^2$ cross-sectional area, $\rho=1.2$~kg/m$^3$ is the density of air, and the summation is over 4000 particles. For specified drag coefficients of 5, 10, and 20 in the three ducts, the pressure drops are expected to be 3.77~Pa, 7.54~Pa, and 15.1~Pa.  Comparisons of computed and analytical results are shown in the left hand plot of Fig.~\ref{sphere_drag}. 
+where $A$ is the 1~m$^2$ cross-sectional area, $\rho=1.2$~kg/m$^3$ is the density of air, and the summation is over 4000 particles. For specified drag coefficients of 5, 10, and 20 in the three ducts, the pressure drops are expected to be 3.77~Pa, 7.54~Pa, and 15.1~Pa.  Comparisons of computed and analytical results are shown in the left hand plot of Fig.~\ref{sphere_drag}.
 
 In a second test case, consider a single 10~m long, 1~m square duct. Spherical particles 2~mm in diameter with a density of 514~kg/m$^3$ are randomly distributed in the section of the duct between 4~m and 5~m from the upstream end. The particle mass per unit volume is set to 1.66~kg/m$^3$. The number of particles included in the simulation is 10000, which means that each particle actually represents 77.1 real particles. The drag coefficient is approximately 1.6, based on the local Reynolds number, which is about 40. The free stream velocity in the duct is 0.3~m/s, but the speed varies slightly within the cloud of particles. The pressure is expected to drop linearly from approximately 0.21~Pa to 0~Pa over the 1~m of duct filled by particles, as shown in the right hand plot of Fig.~\ref{sphere_drag}.
 
@@ -3720,7 +3722,7 @@ In a second test case, consider a single 10~m long, 1~m square duct. Spherical p
 \noindent
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/sphere_drag_1} &
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/sphere_drag_2} 
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/sphere_drag_2}
 \end{tabular*}
 \caption[The {\ct sphere\_drag} cases]{Outputs of the {\ct sphere\_drag} test cases compared with analytical solutions.}
 \label{sphere_drag}
