@@ -3722,9 +3722,20 @@ In Chapter 7 of Jarrin's thesis \cite{Jarrin:2008}, he introduces the Modified S
 \end{lstlisting}
 
 
+\section{Random Mass Flux Variation}
+\label{info:MASS_FLUX_VAR}
 
+The current implementation of the Synthetic Eddy Method does not allow variation in mass flux defined on a {\ct SURF} line.  For example, {\ct HRRPUA} and {\ct MASS\_FLUX} boundary conditions are by default taken as constant for a given {\ct SURF}.  In reality, of course, this is rarely the case---generally there is some level of random variation in the mass flux on the surface.  In an attempt to accommodate this effect, we have implemented an experimental feature where the user may specify a mass flux variation as a fractional value with the parameter {\ct MASS\_FLUX\_VAR}.  For example, if you want a 10 \% variation in a heat release rate per unit area of 100 \si{kW/m^2} then use
 
+\begin{lstlisting}
+&SURF ID='burner', HRRPUA=100., MASS_FLUX_VAR=0.1 /
+\end{lstlisting}
 
+It may be helpful to use the boundary file output quantity {\ct MASS FLUX WALL CELL} to visualize the variation.  For example,
+
+\begin{lstlisting}
+&BNDF QUANTITY='MASS FLUX WALL CELL', CELL_CENTERED=.TRUE. /
+\end{lstlisting}
 
 \section{HVAC Systems: The \texorpdfstring{{\tt HVAC}}{HVAC} Namelist Group (Table \ref{tbl:HVAC})}
 \label{info:HVAC}
@@ -8370,12 +8381,13 @@ be found in Volume~1 of the FDS Technical Reference Guide~\cite{FDS_Math_Guide}.
 %{\ct FLAME TEMPERATURE}                         & Section \ref{info:finite}                         & $^\circ$C      & D,I,P,S      \\ \hline
 {\ct F\_X, F\_Y, F\_Z}                          & Momentum terms, $F_x$, $F_y$, $F_z$               & m/s$^2$        & D,I,P,S      \\ \hline
 {\ct GAS TEMPERATURE}                           & Gas Temperature near wall                         & $^\circ$C      & B,D          \\ \hline
-{\ct H}                                         & $\cH=|\bu|^2/2 + \tp/\rho    $                    & (m/s)$^2$      & D,I,P,S        \\ \hline
+{\ct H}                                         & $\cH=|\bu|^2/2 + \tp/\rho    $                    & (m/s)$^2$      & D,I,P,S      \\ \hline
 {\ct HEAT TRANSFER COEFFICIENT}                 & Convective heat transfer                          & \si{W/(m$^2$.K)} & B,D        \\ \hline
 {\ct HRRPUL}                                    & $\int \dq''' \, \d x \, \d y$                     & kW/m           & D            \\ \hline
 {\ct INTEGRATED INTENSITY}                      & $U=\int I \, \d \bs$                              & kW/m$^2$       & D,I,P,S      \\ \hline
 {\ct KINETIC ENERGY}                            & $(u^2+v^2+w^2)/2$                                 & (m/s)$^2$      & D,I,P,S      \\ \hline
 {\ct KOLMOGOROV LENGTH SCALE}                   & Section \ref{info:meshquality}                    & m              & D,I,P,S      \\ \hline
+{\ct MASS FLUX WALL CELL}                       & $\rho u_n$ at a wall cell face                    & \si{kg/(m$^2$.s)} & B,D       \\ \hline
 {\ct MAXIMUM VELOCITY ERROR}                    & Section \ref{info:PRES}                           &                & D            \\ \hline
 {\ct MIXING TIME}                               & Combustion mixing time                            & s              & D,I,P,S      \\ \hline
 {\ct NORMALIZED HEATING RATE}                   & Section \ref{info:material_components}            & W/g            & B,D          \\ \hline
@@ -9629,6 +9641,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct LENGTH}                          & Real            & Section~\ref{info:PART_GEOMETRY}          & m                   &                         \\ \hline
 {\ct MASS\_FLUX(:)}                   & Real Array      & Section~\ref{info:MASS_FLUX}              & \si{kg/(m^2.s)}     & 0.                      \\ \hline
 {\ct MASS\_FLUX\_TOTAL}               & Real            & Section~\ref{info:MASS_FLUX_TOTAL}        & \si{kg/(m^2.s)}     &                         \\ \hline
+{\ct MASS\_FLUX\_VAR}                 & Real            & Section~\ref{info:MASS_FLUX_VAR}          &                     &                         \\ \hline
 {\ct MASS\_FRACTION(:)}               & Real Array      & Section~\ref{info:MASS_FLUX}              &                     &                         \\ \hline
 {\ct MASS\_TRANSFER\_COEFFICIENT}     & Real            & Section~\ref{info:liquid_fuels}           & m/s                 &                         \\ \hline
 {\ct MATL\_ID(NL,NC)}                 & Char.~Array     & Section~\ref{info:solid_pyrolysis}        &                     &                         \\ \hline
