@@ -11,11 +11,11 @@
 
 &SPEC ID='WATER VAPOR' /
 
-&SURF ID='IGNITION', HRRPUA=1500., COLOR='RED', TMP_FRONT=100., RAMP_Q='ignitor' /
+&SURF ID='IGNITION', HRRPUA=1460., COLOR='RED', TMP_FRONT=100., RAMP_Q='ignitor' /
 &RAMP ID='ignitor', T= 0., F=0. /
 &RAMP ID='ignitor', T= 1., F=1. /
-&RAMP ID='ignitor', T= 5., F=1. /
-&RAMP ID='ignitor', T= 6., F=0. /
+&RAMP ID='ignitor', T=11., F=1. /
+&RAMP ID='ignitor', T=12., F=0. /
 
 &VENT XB=0.0,3.3,-87.,87.,0.,0., SURF_ID='IGNITION', XYZ=0,0,0, SPREAD_RATE=1.56 /
 
@@ -47,7 +47,7 @@
       CONDUCTIVITY = 0.1
       SPECIFIC_HEAT= 1.5
       N_REACTIONS = 1
-      REFERENCE_TEMPERATURE = 250.
+      REFERENCE_TEMPERATURE = 220.
       NU_MATL = 0.2
       NU_SPEC = 0.8
       SPEC_ID = 'CELLULOSE'
