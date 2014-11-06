@@ -36,18 +36,18 @@
       THICKNESS=0.2 /
 
 &SURF ID                        = 'wet vegetation'
-      MATL_ID(1,1:2)            = 'ERIACHNE GRASS','MOISTURE'
+      MATL_ID(1,1:2)            = 'KEROSENE GRASS','MOISTURE'
       MATL_MASS_FRACTION(1,1:2) = 0.937,0.063
       THICKNESS                 = 0.0002
       LENGTH                    = 0.21
       GEOMETRY                  = 'CYLINDRICAL' /
       
-&MATL ID = 'ERIACHNE GRASS'
+&MATL ID = 'KEROSENE GRASS'
       DENSITY = 512.
       CONDUCTIVITY = 0.1
       SPECIFIC_HEAT= 1.5
       N_REACTIONS = 1
-      REFERENCE_TEMPERATURE = 250.
+      REFERENCE_TEMPERATURE = 220.
       NU_MATL = 0.2
       NU_SPEC = 0.8
       SPEC_ID = 'CELLULOSE'
