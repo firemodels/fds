@@ -1503,7 +1503,7 @@ NAMELIST /MISC/ AL2O3,ALLOW_SURFACE_PARTICLES,ALLOW_UNDERSIDE_PARTICLES,ASSUMED_
                 RAMP_GX,RAMP_GY,RAMP_GZ,RAMP_U0,RAMP_V0,RAMP_W0,RAMP_U0_Z,RAMP_V0_Z,RAMP_W0_Z,&
                 RADIATION,RESEARCH_MODE,RESTART,RESTART_CHID,RFAC_FORCING,RICHARDSON_ERROR_TOLERANCE,RUN_AVG_FAC,SC,&
                 SECOND_ORDER_INTERPOLATED_BOUNDARY,SECOND_ORDER_PARTICLE_TRANSPORT,&
-                SHARED_FILE_SYSTEM,SLIP_CONDITION,SMOKE_ALBEDO,SOLID_PHASE_ONLY,&
+                SHARED_FILE_SYSTEM,SLIP_CONDITION,SMOKE_ALBEDO,SOLID_PHASE_ONLY,SOOT_OXIDATION,&
                 STRATIFICATION,SUPPRESSION,SURF_DEFAULT,&
                 TENSOR_DIFFUSIVITY,TERRAIN_CASE,TERRAIN_IMAGE,TEXTURE_ORIGIN,&
                 THERMOPHORETIC_DEPOSITION,THICKEN_OBSTRUCTIONS,TMPA,TURBULENCE_MODEL,TURBULENT_DEPOSITION,U0,UVW_FILE,V0,&
@@ -11480,20 +11480,39 @@ QUANTITY_INDEX_LOOP: DO ND=-N_OUTPUT_QUANTITIES,N_OUTPUT_QUANTITIES
             ENDIF
          ENDDO
          IF (Z_INDEX < 0) THEN
-            WRITE(MESSAGE,'(A,A,A,A)')'ERROR: SURFACE DEPOSITION for ',TRIM(SPEC_ID),' is invalid as species', &
-                                    ' is not a tracked species'
-            CALL SHUTDOWN(MESSAGE) ; RETURN
+            DO NS=1,N_SPECIES
+               IF (TRIM(SPEC_ID)==TRIM(SPECIES(NS)%ID)) THEN
+                  Y_INDEX = NS
+                  EXIT
+               ENDIF
+            ENDDO  
+            IF (Y_INDEX < 0) THEN
+               WRITE(MESSAGE,'(A,A,A,A)')'ERROR: SURFACE DEPOSITION for ',TRIM(SPEC_ID),' is invalid as species', &
+                                       ' is not a tracked species'
+               CALL SHUTDOWN(MESSAGE) ; RETURN
+            ELSE
+               IF (SPECIES(Y_INDEX)%MODE /= AEROSOL_SPECIES) THEN
+                  WRITE(MESSAGE,'(A,A,A,A)')'ERROR: SURFACE DEPOSITION for ',TRIM(SPEC_ID),' is invalid as species', &
+                                          ' is not an aerosol species'
+                  CALL SHUTDOWN(MESSAGE) ; RETURN
+               ENDIF
+               IF (SPECIES(Y_INDEX)%AWM_INDEX < 0) THEN
+                  N_SURFACE_DENSITY_SPECIES = N_SURFACE_DENSITY_SPECIES + 1
+                  SPECIES(Y_INDEX)%AWM_INDEX = N_SURFACE_DENSITY_SPECIES
+               ENDIF                  
+            ENDIF
          ELSEIF (Z_INDEX==0) THEN
             WRITE(MESSAGE,'(A)')  'ERROR: Cannot select background species for deposition'
             CALL SHUTDOWN(MESSAGE) ; RETURN
-         ENDIF
-         IF(.NOT. SPECIES_MIXTURE(Z_INDEX)%DEPOSITING) THEN
-            WRITE(MESSAGE,'(A,A,A)')'ERROR: SURFACE DEPOSITION for ',TRIM(SPEC_ID),' is not an aerosol tracked species'
-            CALL SHUTDOWN(MESSAGE) ; RETURN
-         ENDIF
-         IF (SPECIES_MIXTURE(Z_INDEX)%AWM_INDEX < 0) THEN
-            N_SURFACE_DENSITY_SPECIES = N_SURFACE_DENSITY_SPECIES + 1
-            SPECIES_MIXTURE(Z_INDEX)%AWM_INDEX = N_SURFACE_DENSITY_SPECIES
+         ELSE
+            IF(.NOT. SPECIES_MIXTURE(Z_INDEX)%DEPOSITING) THEN
+               WRITE(MESSAGE,'(A,A,A)')'ERROR: SURFACE DEPOSITION for ',TRIM(SPEC_ID),' is not an aerosol tracked species'
+               CALL SHUTDOWN(MESSAGE) ; RETURN
+            ENDIF
+            IF (SPECIES_MIXTURE(Z_INDEX)%AWM_INDEX < 0) THEN
+               N_SURFACE_DENSITY_SPECIES = N_SURFACE_DENSITY_SPECIES + 1
+               SPECIES_MIXTURE(Z_INDEX)%AWM_INDEX = N_SURFACE_DENSITY_SPECIES
+            ENDIF            
          ENDIF
       ENDIF
 
