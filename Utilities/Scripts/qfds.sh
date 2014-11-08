@@ -286,6 +286,11 @@ if [ "$queue" == "none" ]; then
   fi
 fi
 
+if [ "$RESOURCE_MANAGER" == "SLURM" ] ; then
+  MPIRUN="srun"
+  QSUB="sbatch -p $queue"
+fi
+
 # create a random script file for submitting jobs
 scriptfile=`mktemp /tmp/script.$$.XXXXXX`
 
@@ -300,9 +305,14 @@ cat << EOF >> $scriptfile
 #PBS -o $outlog
 #PBS -l nodes=$nodes:ppn=$ppn
 #SBATCH -J $JOBPREFIX$infile
+#SBATCH -t 24:00:00
+#SBATCH --mem-per-cpu=1000
 #SBATCH -e $outerr
 #SBATCH -o $outlog
 #SBATCH -p $queue
+#SBATCH -n 1
+#SBATCH --nodes=$nodes
+#SBATCH --cpus-per-task=$nopenmp_threads
 EOF
 fi
 
