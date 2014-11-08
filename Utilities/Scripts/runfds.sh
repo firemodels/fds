@@ -129,6 +129,9 @@ cat << EOF > $scriptfile
 #PBS -l pvmem=1GB
 #SBATCH -J $JOBPREFIX$infile
 #SBATCH --mem-per-cpu=1000
+#SBATCH -n 1
+#SBATCH --nodes=1
+#SBATCH --cpus-per-task=$nthreads
 #SBATCH -t 04:00:00
 #SBATCH -e $outerr
 #SBATCH -o $outlog
