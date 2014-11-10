@@ -1412,15 +1412,96 @@ ENDIF
 ON_BOX_PLANE=-1
 END FUNCTION ON_BOX_PLANE
 
-!  ------------------ MAKE_EDGELIST ------------------------ 
+!  ------------------ RANK3 ------------------------ 
 
-SUBROUTINE MAKE_EDGELIST(FACES,NFACES,EDGES,NEDGES)
+SUBROUTINE RANK3(V1,V2,V3,I1,I2,I3)
+INTEGER, INTENT(IN) :: V1, V2, V3
+INTEGER, INTENT(OUT) :: I1, I2, I3
+
+I1 = MIN(V1,V2,V3)
+I3 = MAX(V1,V2,V3)
+I2 = V1+V2+V3-I1-I3
+
+END SUBROUTINE RANK3
+
+!  ------------------ VOLS2FACES ------------------------ 
+
+SUBROUTINE VOLS2SURFACE(VOLS,NVOLS,FACES,NFACES)
+
+! find the exterior surface formed from a collection of volumes
+
+INTEGER, INTENT(IN) :: NVOLS
+INTEGER, INTENT(IN) :: VOLS(NVOLS,4)
+INTEGER, INTENT(OUT) :: NFACES
+INTEGER, INTENT(OUT), DIMENSION(4*NVOLS,3) :: FACES
+
+INTEGER :: I, ML, MM, MU
+INTEGER :: FACEDUP(4*NVOLS)
+
+INTEGER :: ITO, IFROM
+
+NFACES = 4*NVOLS
+DO I = 1, NVOLS
+   CALL RANK3(VOLS(I,4),VOLS(I,1),VOLS(I,2),ML,MM,MU)
+   FACES(4*I-3,1) = ML
+   FACES(4*I-3,2) = MM
+   FACES(4*I-3,3) = MU
+   
+   CALL RANK3(VOLS(I,4),VOLS(I,2),VOLS(I,3),ML,MM,MU)
+   FACES(4*I-2,1) = ML
+   FACES(4*I-2,2) = MM
+   FACES(4*I-2,3) = MU
+   
+   CALL RANK3(VOLS(I,4),VOLS(I,3),VOLS(I,1),ML,MM,MU)
+   FACES(4*I-1,1) = ML
+   FACES(4*I-1,2) = MM
+   FACES(4*I-1,3) = MU
+   
+   CALL RANK3(VOLS(I,1),VOLS(I,3),VOLS(I,2),ML,MM,MU)
+   FACES(4*I  ,1) = ML
+   FACES(4*I  ,2) = MM
+   FACES(4*I  ,3) = MU
+END DO
+
+! tag interior faces (faces connected to more than one volume)
+
+FACEDUP(1:NFACES)=0
+DO I = 1, NFACES
+   IF(FACEDUP(I).EQ.1)CYCLE
+   DO J = I+1, NFACES
+      IF(FACEDUP(J).EQ.1)CYCLE
+      IF(FACES(I,1).EQ.FACES(J,1).AND.FACES(I,2).EQ.FACES(J,2).AND.FACES(I,3).EQ.FACES(J,3))FACEDUP(J)=1
+   END DO
+END DO
+
+! remove duplicate (ie interior) faces
+
+ITO=1
+DO IFROM = 2, NFACES
+   IF(FACEDUP(IFROM).EQ.1)CYCLE
+   ITO = ITO + 1
+   IF (ITO.NE.I) THEN
+     FACES(ITO,1) = FACES(IFROM,1)
+     FACES(ITO,2) = FACES(IFROM,2)
+     FACES(ITO,3) = FACES(IFROM,3)
+   ENDIF
+END DO
+NFACES=ITO
+
+END SUBROUTINE VOLS2SURFACE
+
+!  ------------------ FACES2EDGES ------------------------ 
+
+SUBROUTINE FACES2EDGES(FACES,NFACES,EDGES,NEDGES)
+
+! determine edges from faces, eliminate all duplicate edges
+
 INTEGER, INTENT(IN) :: NFACES
 INTEGER, INTENT(IN), DIMENSION(NFACES,3) :: FACES
 INTEGER, INTENT(OUT), DIMENSION(3*NFACES,2) :: EDGES
 INTEGER, INTENT(OUT) :: NEDGES
 
-INTEGER :: I, TEMP1, TEMP2, FINISHED, ITO
+INTEGER :: I, TEMP1, TEMP2, FINISHED, IFROM, ITO
 
 NEDGES=3*NFACES
 DO I = 1, NFACES
@@ -1432,7 +1513,7 @@ DO I = 1, NFACES
    EDGES(3*I  ,2) = MAX(FACES(I,2),FACES(I,3))
 END DO   
 
-! this sort is o(n**2) replace with an o(n*log(n)) sort once n is "large"
+! this sort is o(n**2), replace with an o(n*log(n)) sort once n is "large"
 
 FINISHED=1
 DO WHILE (FINISHED.EQ.1) 
@@ -1451,16 +1532,94 @@ END DO
 
 ! remove duplicates
 
-ITO=0
-DO I = 1, NEDGES-1
-   IF(EDGES(I,1).EQ.EDGES(I+1,1).AND.EDGES(I+1,1).EQ.EDGES(I+1,2)) CYCLE
+ITO=1
+DO IFROM = 2, NEDGES
+   IF(EDGES(IFROM,1).EQ.EDGES(IFROM-1,1).AND.EDGES(IFROM,1).EQ.EDGES(IFROM-1,2)) CYCLE
    ITO = ITO + 1
-   EDGES(ITO,1) = EDGES(I,1)
-   EDGES(ITO,2) = EDGES(I,2)
+   IF (ITO.NE.I) THEN
+     EDGES(ITO,1) = EDGES(IFROM,1)
+     EDGES(ITO,2) = EDGES(IFROM,2)
+   ENDIF
 END DO
 NEDGES = ITO
 
-END SUBROUTINE MAKE_EDGELIST
+END SUBROUTINE FACES2EDGES
+
+!  ------------------ IN_BOX2 ------------------------ 
+
+INTEGER FUNCTION IN_BOX2(XB,V)
+REAL(EB) :: XB(6), V(3)
+
+IF(XB(1).LT.V(1).AND.V(1).LT.XB(2).AND.&
+   XB(3).LT.V(2).AND.V(2).LT.XB(4).AND.&
+   XB(5).LT.V(3).AND.V(3).LT.XB(6)) THEN
+   IN_BOX2=1
+   RETURN
+ENDIF
+IN_BOX2=0
+END FUNCTION
+
+!  ------------------ BOXTRIANGLE ------------------------ 
+
+INTEGER FUNCTION BOXTRIANGLE(XB,V1,V2,V3)
+
+! determine if a box XB intersects with a triangle (V1, V2, V3)
+
+REAL(EB), INTENT(IN) :: XB(6), V1(3), V2(3), V3(3)
+
+REAL(EB) :: EPS
+
+EPS=0.001_EB
+IF(ON_BOX_PLANE(XB,V1,V2,V3,EPS).EQ.-1)THEN
+   BOXTRIANGLE=0
+   RETURN
+ENDIF
+IF(IN_BOX2(XB,V1).EQ.1.OR.IN_BOX2(XB,V2).EQ.1.OR.IN_BOX2(XB,V3).EQ.1)THEN
+   BOXTRIANGLE=1
+   RETURN
+ENDIF
+
+BOXTRIANGLE=0
+
+END FUNCTION BOXTRIANGLE
+
+!  ------------------ CLASSIFY_GEOM ------------------------ 
+
+SUBROUTINE CLASSIFY_GEOM(XGRID,NX,YGRID,NY,ZGRID,NZ,FACES,NFACES,VERTS,NVERTS,GEOM_STATE)
+
+! identify which grid cells are cut cells 
+! a grid cell is a cut cell if at least on triangle in FACES intersects with the grid cell
+
+INTEGER, INTENT(IN) :: NX, NY, NZ
+REAL(EB), INTENT(IN) :: XGRID(NX), YGRID(NY), ZGRID(NZ)
+INTEGER, INTENT(IN) :: NFACES, NVERTS
+INTEGER, INTENT(IN), DIMENSION(NFACES) :: FACES(NFACES,3)
+REAL(EB), INTENT(IN), DIMENSION(NVERTS,3) :: VERTS
+INTEGER, INTENT(OUT), DIMENSION(NX-1,NY-1,NZ-1) :: GEOM_STATE
+
+INTEGER :: I,J,K,L
+REAL(EB) :: XB(6),V1(3),V2(3),V3(3)
+INTEGER :: STATE
+
+DO I = 1, NX-1
+   XB(1:2) = XGRID(I:I+1)
+   DO J = 1, NY-1
+     XB(3:4) = YGRID(J:J+1)
+      DO K = 1, NZ-1
+         XB(5:6) = ZGRID(K:K+1)
+         DO L = 1, NFACES
+            V1(1:3)=VERTS(FACES(I,1),1:3)
+            V2(1:3)=VERTS(FACES(I,2),1:3)
+            V3(1:3)=VERTS(FACES(I,3),1:3)
+            STATE = BOXTRIANGLE(XB,V1,V2,V3)
+            IF(STATE.EQ.1)EXIT
+         END DO
+         GEOM_STATE(I,J,K)=STATE
+      END DO
+   END DO
+END DO
+
+END SUBROUTINE CLASSIFY_GEOM
 
 !  ------------------ GET_REV_gsmv ------------------------ 
 
