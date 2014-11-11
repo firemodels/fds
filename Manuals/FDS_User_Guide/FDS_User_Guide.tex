@@ -3232,17 +3232,7 @@ The system of ordinary differential equations that governs the transformation of
 
 \subsection{The Heat of Reaction}
 
-Equation~(\ref{rr}) describes the rate of the reaction as a function
-of temperature.  Most solid phase reactions require energy; that is,
-they are {\em endothermic}. The amount of energy consumed, per unit
-mass of reactant that is converted into reaction products, is specified
-by the {\ct HEAT\_OF\_REACTION(j)}. Technically, this is the enthalpy
-difference between the products and the reactant. A positive value
-indicates that the reaction is {\em endothermic}; that is, the
-reaction takes energy out of the system. Usually the {\ct
-HEAT\_OF\_REACTION} is accurately known only for simple phase change
-reactions like the vaporization of water. For other reactions, it must
-be determined empirically (e.g., by thermo-gravimetric analysis).
+Equation~(\ref{rr}) describes the rate of the reaction as a function of temperature.  Most solid phase reactions require energy; that is, they are {\em endothermic}. The amount of energy consumed, per unit mass of reactant that is converted into reaction products, is specified by the {\ct HEAT\_OF\_REACTION(j)}. Technically, this is the enthalpy difference between the products and the reactant. A positive value indicates that the reaction is {\em endothermic}; that is, the reaction takes energy out of the system. Usually the {\ct HEAT\_OF\_REACTION} is accurately known only for simple phase change reactions like the vaporization of water. For other reactions, it must be determined empirically (e.g., by thermo-gravimetric analysis).
 
 
 \subsection{Special Topic: The ``Threshold'' Temperature}
@@ -3279,10 +3269,7 @@ The input file {\ct water\_ice\_water.fds} demonstrates the use of the ``thresho
 \subsection{Liquid Fuels}
 \label{info:liquid_fuels}
 
-For a liquid fuel, the thermal properties are similar to those of a solid
-material, with a few exceptions. The evaporation rate of the fuel
-is governed by the mass transfer number (see FDS Technical Reference
-Guide for details). The properties of a liquid fuel are given on the {\ct MATL} line:
+For a liquid fuel, the thermal properties are similar to those of a solid material, with a few exceptions. The evaporation rate of the fuel is governed by the mass transfer number (see FDS Technical Reference Guide for details). The properties of a liquid fuel are given on the {\ct MATL} line:
 \begin{lstlisting}
 &MATL ID                     = 'ETHANOL LIQUID'
       EMISSIVITY             = 1.
@@ -3295,22 +3282,11 @@ Guide for details). The properties of a liquid fuel are given on the {\ct MATL} 
       BOILING_TEMPERATURE    = 78.5
       ABSORPTION_COEFFICIENT = 1534.3 /
 \end{lstlisting}
-The inclusion of {\ct BOILING\_TEMPERATURE} on the {\ct MATL} line tells FDS to use its liquid
-pyrolysis model. It also automatically sets {\ct N\_REACTIONS=1}, that is, the only ``reaction'' is the
-phase change from liquid to gaseous fuel. Thus, {\ct HEAT\_OF\_REACTION} in this case is the latent
-heat of vaporization. The gaseous fuel yield, {\ct NU\_SPEC}, is 0.97 instead of 1 to account for
-impurities in the liquid that do not take part in the combustion process.
+The inclusion of {\ct BOILING\_TEMPERATURE} on the {\ct MATL} line tells FDS to use its liquid pyrolysis model. It also automatically sets {\ct N\_REACTIONS=1}, that is, the only ``reaction'' is the phase change from liquid to gaseous fuel. Thus, {\ct HEAT\_OF\_REACTION} in this case is the latent heat of vaporization. The gaseous fuel yield, {\ct NU\_SPEC}, is 0.97 instead of 1 to account for impurities in the liquid that do not take part in the combustion process.
 
-The thermal conductivity, density and specific heat are used to
-compute the loss of heat into the liquid via conduction using the
-same one-dimensional heat transfer equation that is used for solids. Obviously,
-the convection of the liquid is important, but is not considered in
-the model.
+The thermal conductivity, density and specific heat are used to compute the loss of heat into the liquid via conduction using the same one-dimensional heat transfer equation that is used for solids. Obviously, the convection of the liquid is important, but is not considered in the model.
 
-Note also the {\ct ABSORPTION\_COEFFICIENT} for the liquid. This
-denotes the absorption in depth of thermal radiation. Liquids do not
-just absorb radiation at the surface, but rather over a thin layer
-near the surface. Its effect on the burning rate is significant.
+Note also the {\ct ABSORPTION\_COEFFICIENT} for the liquid. This denotes the absorption in depth of thermal radiation. Liquids do not just absorb radiation at the surface, but rather over a thin layer near the surface. Its effect on the burning rate is significant.
 
 \subsection{Fuel Burnout}
 
@@ -3323,15 +3299,13 @@ highlighted in the individual sections below.
 
 \subsubsection{Solid Fuel Burnout}
 
-If a heat release rate {\ct RAMP} function is not included for a solid fuel that burns at a specified rate, the surface will continue to
-burn at the specified rate indefinitely with no fuel burnout.  If detailed heat release rate versus time data is not available, you
-can estimate the burnout time for a surface using the heat of combustion, $\Delta H$,
-material density, $\rho_{\rm s}$, material thickness, $\delta_{\rm s}$, and {\ct HRRPUA}, $\dq_{\rm f}''$:
-\be t_{\rm b} = \frac{\rho_{\rm s} \, \delta_{\rm s} \, \Delta H}{\dq''_{\rm f}} \ee
+If a heat release rate {\ct RAMP} function is not included for a solid fuel that burns at a specified rate, the surface will continue to burn at the specified rate indefinitely with no fuel burnout.  If detailed heat release rate versus time data is not available, you can estimate the burnout time for a surface using the heat of combustion, $\Delta H$, material density, $\rho_{\rm s}$, material thickness, $\delta_{\rm s}$, and {\ct HRRPUA}, $\dq_{\rm f}''$:
+\be 
+   t_{\rm b} = \frac{\rho_{\rm s} \, \delta_{\rm s} \, \Delta H}{\dq''_{\rm f}} 
+\ee
 Use the {\ct RAMP} function to stop the burning once the calculated burnout time is reached.
 
-The burnout time of a reacting solid fuel is calculated automatically by FDS based on the
-layer {\ct THICKNESS}, component {\ct DENSITY}, and the calculated burning rate.
+The burnout time of a reacting solid fuel is calculated automatically by FDS based on the layer {\ct THICKNESS}, component {\ct DENSITY}, and the calculated burning rate.
 
 
 \subsubsection{Liquid Fuel Burnout}
@@ -3363,7 +3337,7 @@ except for the fourth case, where the amount of released gas is affected by the 
 0.75 \times 1.28 \; \hbox{kg}\; = 0.96 \; \hbox{kg}
 \ee
 The same case is tested in two dimensions ({\ct box\_burn\_away\_2D} and {\ct box\_burn\_away\_2D\_residue}). In the latter case, only half of the mass is converted to fuel, leaving behind a residue that is 50~\% of the original mass. The box is forced to burn away by setting the {\ct BULK\_DENSITY} to 10~kg/m$^3$. This is the {\em combustible} mass. These two cases exhibit a fictitious increase in solid mass when new unburned surfaces are exposed as entire mesh cells disappear. The increased mass is just an artifact of reporting the residual solid mass as the product of surface density and surface area. Both the final solid mass and the gaseous degradation products should match the expected values at the end of the simulation.
-\begin{figure}[ht]
+\begin{figure}[p]
 \begin{tabular*}{\textwidth}{lr}
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/box_burn_away1} &
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/box_burn_away2} \\
@@ -3385,72 +3359,28 @@ The same case is tested in two dimensions ({\ct box\_burn\_away\_2D} and {\ct bo
 \section{Testing Your Pyrolysis Model}
 \label{solid_phase_verification}
 
-Modeling the burning of real materials can be very complicated. Undoubtedly, the {\ct SURF} and {\ct MATL} lines in the
-input file will consist of a combination of empirical and fundamental properties, often originating from different sources. How do you know
-that the various property values and the associated thermo-physical model in FDS
-constitute an appropriate description of the solid? For a full-scale simulation, it is hard to untangle the uncertainties associated with the gas and solid
-phase routines. However, it is easy to perform a simple check of any set of solid phase model by essentially turning off the gas phase.  In the following sections, guidance is provided on how to perform a quick simulation of the cone calorimeter and bench-scale measurements like thermal gravimetric analysis (TGA), differential scanning calorimetry (DSC), and micro-combustion calorimetry (MCC).
+Modeling the burning of real materials can be very complicated. Undoubtedly, the {\ct SURF} and {\ct MATL} lines in the input file will consist of a combination of empirical and fundamental properties, often originating from different sources. How do you know that the various property values and the associated thermo-physical model in FDS constitute an appropriate description of the solid? For a full-scale simulation, it is hard to untangle the uncertainties associated with the gas and solid phase routines. However, it is easy to perform a simple check of any set of solid phase model by essentially turning off the gas phase.  In the following sections, guidance is provided on how to perform a quick simulation of the cone calorimeter and bench-scale measurements like thermal gravimetric analysis (TGA), differential scanning calorimetry (DSC), and micro-combustion calorimetry (MCC).
 
 \subsection{Simulating the Cone Calorimeter}
 
 This section describes how to set up a simple model of the cone calorimeter or other similar apparatus. This is not a full 3-D simulation of the apparatus, but rather a 1-D simulation of the solid phase degradation under an imposed external heat flux. You can literally create a model of the cone heater and sample holder in FDS to simulate the coupling of gas and solid phase phenomena, but before even attempting this, it is worthwhile to perform a quick simulation like the one described here to test the solid phase model only.
-
 \begin{enumerate}
-\item Create a trivially small mesh, just to let FDS run. Since the
-gas phase calculation is essentially being shut off, you just need 4
-cells in each direction ({\ct IJK=4,4,4}) for the pressure solver to
-function properly.
-\item On the {\ct TIME} line, set {\ct WALL\_INCREMENT=1} to force FDS
-to update the solid phase every time step (normally it does this every
-other time step), and set {\ct DT} to whatever value appropriate for
-the solid phase calculation. Since there is no gas phase calculation
-that will limit the time step, it is best to control this yourself.
-\item Set {\ct HEAT\_TRANSFER\_COEFFICIENT=0} on the {\ct SURF} line. This turns off the
-convective heat flux from gas to surface and vice versa. The heat flux
-to the solid is specified via {\ct EXTERNAL\_FLUX}\footnote{You can control {\ct EXTERNAL\_FLUX} using
-either {\ct TAU\_EF} or {\ct RAMP\_EF}. This is useful if you want to ramp up the heat flux following ignition to account for the additional radiation from the flame. See Section~\ref{info:RAMP_Time} for more details about ramps.} (kW/m$^2$) on the
-{\ct SURF} line that is assigned to the solid surface.
-\item Turn off all the gas phase computations by setting {\ct SOLID\_PHASE\_ONLY=.TRUE.}
-on the {\ct MISC} line. This will also speed
-up the computations significantly. If a {\ct REAC} line is needed to define a fuel gas, you may turn off combustion by setting {\ct Y\_O2\_INFTY=0.01} on the {\ct MISC} line. This sets the background oxygen mass fraction to 0.01, too low to support any burning.
-\item Generate {\ct MATL} lines, plus a single {\ct SURF} line, as you
-normally would, except add {\ct EXTERNAL\_FLUX} to the {\ct SURF}
-line. This is simply a ``virtual'' source that heats the solid. Think
-of this as a perfect radiant panel or conical heating unit.
-\item Assign the {\ct SURF\_ID} to a {\ct VENT} that spans the bottom
-of the computational domain. Create {\ct OPEN} vents on all other
-faces.
-\item Finally, add solid phase output devices to the solid surface,
-like {\ct 'WALL TEMPERATURE'}, {\ct 'NET HEAT FLUX'}, {\ct 'BURNING RATE'},
-{\ct 'GAUGE HEAT FLUX'}, and {\ct 'WALL THICKNESS'} (assuming the solid
-is to burn away). Use these to track the condition of the solid as a
-function of time. In particular, make sure that the {\ct 'BURNING RATE'} is appropriate for the particular external heat flux
-applied. Make sure that the {\ct 'WALL TEMPERATURE'} is
-appropriate. Compare your results to measurements made in a
-bench-scale device, like the cone calorimeter. Keep in mind, however,
-that the calculation and the experiment are not necessarily perfectly
-matched. The calculation is designed to eliminate uncertainties
-related to convection, combustion, and apparatus-specific phenomena.
+\item Create a trivially small mesh, just to let FDS run. Since the gas phase calculation is essentially being shut off, you just need 4 cells in each direction ({\ct IJK=4,4,4}) for the pressure solver to function properly.
+\item On the {\ct TIME} line, set {\ct WALL\_INCREMENT=1} to force FDS to update the solid phase every time step (normally it does this every other time step), and set {\ct DT} to whatever value appropriate for the solid phase calculation. Since there is no gas phase calculation that will limit the time step, it is best to control this yourself.
+\item Set {\ct HEAT\_TRANSFER\_COEFFICIENT=0} on the {\ct SURF} line. This turns off the convective heat flux from gas to surface and vice versa. The heat flux to the solid is specified via {\ct EXTERNAL\_FLUX}\footnote{You can control {\ct EXTERNAL\_FLUX} using either {\ct TAU\_EF} or {\ct RAMP\_EF}. This is useful if you want to ramp up the heat flux following ignition to account for the additional radiation from the flame. See Section~\ref{info:RAMP_Time} for more details about ramps.} (kW/m$^2$) on the {\ct SURF} line that is assigned to the solid surface.
+\item Turn off all the gas phase computations by setting {\ct SOLID\_PHASE\_ONLY=.TRUE.} on the {\ct MISC} line. This will also speed up the computations significantly. If a {\ct REAC} line is needed to define a fuel gas, you may turn off combustion by setting {\ct Y\_O2\_INFTY=0.01} on the {\ct MISC} line. This sets the background oxygen mass fraction to 0.01, too low to support any burning.
+\item Generate {\ct MATL} lines, plus a single {\ct SURF} line, as you normally would, except add {\ct EXTERNAL\_FLUX} to the {\ct SURF} line. This is simply a ``virtual'' source that heats the solid. Think of this as a perfect radiant panel or conical heating unit.
+\item Assign the {\ct SURF\_ID} to a {\ct VENT} that spans the bottom of the computational domain. Create {\ct OPEN} vents on all other faces.
+\item Finally, add solid phase output devices to the solid surface, like {\ct 'WALL TEMPERATURE'}, {\ct 'NET HEAT FLUX'}, {\ct 'BURNING RATE'}, {\ct 'GAUGE HEAT FLUX'}, and {\ct 'WALL THICKNESS'} (assuming the solid is to burn away). Use these to track the condition of the solid as a function of time. In particular, make sure that the {\ct 'BURNING RATE'} is appropriate for the particular external heat flux applied. Make sure that the {\ct 'WALL TEMPERATURE'} is appropriate. Compare your results to measurements made in a bench-scale device, like the cone calorimeter. Keep in mind, however, that the calculation and the experiment are not necessarily perfectly matched. The calculation is designed to eliminate uncertainties related to convection, combustion, and apparatus-specific phenomena.
 \end{enumerate}
+Below is an FDS input file that demonstrates how you can test a candidate pyrolysis model by running very short calculations. The simulation only involves the solid phase model. Essentially, the gas phase calculation is shut off except for the imposition of a 52~kW/m$^2$ ``external'' heat flux. The solid in this example is a 8.5~mm thick slab of PMMA. For more details, see the FDS Validation Guide under the heading ``FAA Polymers.''
 
-
-\noindent Below is an FDS input file that demonstrates how you can test a candidate pyrolysis model by running very short calculations. The simulation only
-involves the solid phase model. Essentially, the gas phase calculation is
-shut off except for the imposition of a 52~kW/m$^2$ ``external'' heat flux. The solid in this example is a 8.5~mm thick slab of PMMA. For more
-details, see the FDS Validation Guide under the heading ``FAA Polymers.''
-
-
-\begin{lstlisting}[basicstyle=\scriptsize\ttfamily]
-&HEAD CHID='FAA_Polymers_PMMA', TITLE='Black PMMA at 50 kW/m2, No Gas Phase Reaction' /
-
+\begin{lstlisting}
+&HEAD CHID='FAA_Polymers_PMMA', TITLE='Black PMMA at 50 kW/m2' /
 &MESH IJK=3,3,4, XB=-0.15,0.15,-0.15,0.15,0.0,0.4 /
-
 &TIME T_END=600., WALL_INCREMENT=1, DT=0.01 /
-
 &MISC Y_O2_INFTY=0.01, SOLID_PHASE_ONLY=.TRUE. /
-
 &REAC FUEL='METHANE' /
-
 &MATL ID='BLACKPMMA'
       ABSORPTION_COEFFICIENT=2700.
       N_REACTIONS=1
@@ -3464,52 +3394,54 @@ details, see the FDS Validation Guide under the heading ``FAA Polymers.''
       HEAT_OF_COMBUSTION=25200.
       CONDUCTIVITY = 0.20
       SPECIFIC_HEAT = 2.2
-
 &SURF ID='PMMA SLAB'
       COLOR='BLACK'
       BACKING='INSULATED'
       MATL_ID='BLACKPMMA'
       THICKNESS=0.0085
       HEAT_TRANSFER_COEFFICIENT=0.
-      EXTERNAL_FLUX=52 /  External Flux is ONLY for this simple demo exercise
-
+      EXTERNAL_FLUX=52 /  
 &VENT XB=-0.05,0.05,-0.05,0.05,0.0,0.0, SURF_ID = 'PMMA SLAB' /
-
 &DUMP DT_DEVC=5. /
-
-&DEVC XYZ=0.0,0.0,0.0, IOR=3, QUANTITY='WALL TEMPERATURE',     ID='temp' /
-&DEVC XYZ=0.0,0.0,0.0, IOR=3, QUANTITY='BURNING RATE',         ID='MLR' /
-&DEVC XYZ=0.0,0.0,0.0, IOR=3, QUANTITY='WALL THICKNESS',       ID='thick' /
-
+&DEVC XYZ=0.0,0.0,0.0, IOR=3, QUANTITY='WALL TEMPERATURE', ID='temp' /
+&DEVC XYZ=0.0,0.0,0.0, IOR=3, QUANTITY='BURNING RATE',     ID='MLR' /
+&DEVC XYZ=0.0,0.0,0.0, IOR=3, QUANTITY='WALL THICKNESS',   ID='thick' /
 &TAIL /
 \end{lstlisting}
 
 
 \subsection{Simulating Bench-scale Measurements like the TGA, DSC, and MCC}
-
 \label{info:TGA_DSC_MCC}
 
-There are a number of techniques to measure the thermo-physical properties of a solid material. Most of these involve heating a very small sample at a relatively slow, linear rate. In this way, thermal conduction is minimized and the sample can be considered thermally-thin. There is a way to mimic this process in FDS. It is similar to the approach taken in the preceding section, except now you create a very thin (like 0.01~mm) solid surface with an insulated back boundary condition ({\ct BACKING='INSULATED'}), linearly ramp up the gas temperature, and set a relatively large, constant convective heat transfer coefficient. In effect, what you are doing is simulating the heating of a tiny sample undergoing thermal-gravimetric analysis (TGA), differential scanning calorimetry (DSC), micro-combustion calorimetry (MCC), or similar measurements.
+There are a number of techniques to measure the thermo-physical properties of a solid material. Most of these involve heating a very small sample at a relatively slow, linear rate. In this way, thermal conduction is minimized and the sample can be considered thermally-thin. FDS has a special feature that mimics thermal-gravimetric analysis (TGA), differential scanning calorimetry (DSC), and micro-combustion calorimetry (MCC) measurements. To use it, set up your input file as you normally would. Then, add the flag {\ct TGA\_ANALYSIS=.TRUE.} to the {\ct SURF} line you want to analyze. You can only analyze one {\ct SURF} line at a time. Optionally, you can specify {\ct TGA\_HEATING\_RATE} (K/min) and {\ct TGA\_FINAL\_TEMPERATURE} ($^\circ$C) to indicate the linear heating rate and the final temperature of the sample. The default values are 5~K/min and 800~$^\circ$C. The initial temperature is {\ct TMPA}. Note that this feature is only appropriate for a {\ct SURF} line that describes a thermally-thick sample consisting of a single layer with multiple reacting components. For example, the following {\ct SURF} line describes a material that consists of three components:
+\begin{lstlisting}
+&SURF ID = 'Cable Insulation'
+      TGA_ANALYSIS = .TRUE.
+      TGA_HEATING_RATE = 60.
+      THICKNESS = 0.005
+      MATL_ID(1,1) = 'Component A',
+      MATL_ID(1,2) = 'Component B',
+      MATL_ID(1,3) = 'Component C',
+      MATL_MASS_FRACTION(1,1:3) = 0.26,0.33,0.41 /
+\end{lstlisting}
+The two {\ct TGA} entries will force FDS to perform a numerical version of the TGA, DSC and MCC measurements. The {\ct THICKNESS} and other boundary conditions on the {\ct SURF} line will be ignored. After running the analysis, which only takes a second or two, FDS will then shut down without running the actual simulation. To run the simulation, either remove the {\ct TGA} entries or set {\ct TGA\_ANALYSIS} to {\ct .FALSE.}
 
-\begin{enumerate}
-\item Create a trivially small mesh, just to let FDS run. Since the
-gas phase calculation is essentially being shut off, you just need 4
-cells in each direction ({\ct IJK=4,4,4}) for the pressure solver to
-function properly.
-\item On the {\ct TIME} line, set {\ct WALL\_INCREMENT=1} to force FDS
-to update the solid phase every time step (normally it does this every
-other time step), and set {\ct DT} to whatever value appropriate for
-the solid phase calculation. Since there is no gas phase calculation
-that will limit the time step, it is best to control this yourself.
-\item Set {\ct RADIATION=.FALSE.} on the {\ct RADI} line. This simply eliminates the radiation transport calculation in the gas phase which might conflict with some of the assumptions being made.
-\item Set {\ct HEAT\_TRANSFER\_COEFFICIENT=1000} (\si{W/(m^2.K)}) on the {\ct SURF} line. There is nothing special about the value of 1000 -- the point is to force the sample temperature to follow the specified linear ramp closely.
-\item Ramp up the {\ct ASSUMED\_GAS\_TEMPERATURE} ($^\circ$C) on the {\ct MISC} line using the ramp function \\ {\ct ASSUMED\_GAS\_TEMPERATURE\_RAMP}. See Section~\ref{info:RAMP_Time} for more details.
-\item Turn off all the gas phase computations by setting {\ct SOLID\_PHASE\_ONLY=.TRUE.} on the {\ct MISC} line. This will also speed up the computations significantly. If the {\ct REAC} line is needed to define a fuel gas, you may turn off combustion by setting {\ct Y\_O2\_INFTY=0.01} on the {\ct MISC} line. This sets the background oxygen mass fraction to 0.01, too low to support any burning.
-\item Assign the {\ct SURF\_ID} to a {\ct VENT} that spans the bottom
-of the computational domain. Create {\ct OPEN} vents on all other
-faces.
-\item Finally, add solid phase output devices to the solid surface. Specialized output quantities appropriate for TGA, MCC, and DSC are listed in Section~\ref{info:material_components}.
-\end{enumerate}
+The result of the {\ct TGA\_ANALYSIS} is a single comma-delimited file called {\ct CHID\_tga.csv}. The first and second columns of the file consist of the time and sample temperature. The third column is the normalized sample mass; that is, the sample mass divided by its initial mass. The fourth column is the mass loss rate, in units of s$^{-1}$. The fifth column is the heat release rate per unit mass of the sample in units of W/g, typical of an MCC measurement. The sixth column is the heat absorbed by the sample normalized by its mass, also in units of W/g, typical of a DSC measurement. Results for a typical analysis of wood are shown in Fig.~\ref{tga_results}. In this case, a sample of wood containing about 10~\% water by mass heats up and undergoes three reactions, including the evaporation of water. Note that the TGA plots include both fuel and water vapor, while the MCC results only show fuel.
+
+Details of the output quantities are discussed in Section~\ref{info:material_components}. Further details on these measurement techniques and how to interpret them are found in the FDS Verification Guide~\cite{FDS_Verification_Guide}.
+
+\begin{figure}[ht]
+\begin{tabular*}{\textwidth}{lr}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/tga_analysis_mass} &
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/tga_analysis_mlr} \\
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/tga_analysis_mcc} &
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/tga_analysis_dsc} 
+\end{tabular*}
+\caption[Sample results of a {\ct tga\_analysis}]{Sample results of a {\ct tga\_analysis}.}
+\label{tga_results}
+\end{figure}
+
+
 
 
 
@@ -6055,7 +5987,7 @@ The parameter {\ct N\_PARTICLES} on the {\ct INIT} line indicates the number of 
 &INIT PART_ID='leaves', XYZ=..., RADIUS=..., HEIGHT=..., SHAPE='CONE',
       N_PARTICLES=..., MASS_PER_VOLUME=... /
 \end{lstlisting}
-Note that the volume of the specified region is calculated according to the {\ct SHAPE} dimensions, regardless of whether there are solid obstructions within this region. Note also that in most applications, the number of particles, {\ct N\_PARTICLES}, is somewhat arbitrary but should be chosen to provide at least a few particles per grid cell. FDS will then automatically assign a weighting factor to each particle to ensure that the {\ct MASS\_PER\_VOLUME} is achieved. In some applications, on the other hand, it may be important to specify the number of particles. For example, if using particles to model the burning of electrical cables, you may want to specify how many cables are actually burning. 
+Note that the volume of the specified region is calculated according to the {\ct SHAPE} dimensions, regardless of whether there are solid obstructions within this region. Note also that in most applications, the number of particles, {\ct N\_PARTICLES}, is somewhat arbitrary but should be chosen to provide at least a few particles per grid cell. FDS will then automatically assign a weighting factor to each particle to ensure that the {\ct MASS\_PER\_VOLUME} is achieved. In some applications, on the other hand, it may be important to specify the number of particles. For example, if using particles to model the burning of electrical cables, you may want to specify how many cables are actually burning.
 
 If the volume specified by the sextuplet {\ct XB} crosses mesh boundaries, be aware that {\ct N\_PARTICLES} refers to the entire volume, not just the volume within a particular mesh. FDS will automatically compute the necessary number of particles to assign to each mesh.
 
@@ -6244,7 +6176,7 @@ A sprinkler, known as {\ct 'Spr\_60'}, is located at a point in space given by {
 \item[{\ct PART\_ID}] The name of the {\ct PART} line containing properties of the droplets. See Chapter~\ref{info:PART} for additional details.
 \item[{\ct PRESSURE\_RAMP}] The name of the {\ct RAMP} lines specifying the dependence of pipe pressure on the number of active sprinklers and nozzles.
 \end{description}
-Be aware that sprinklers can produce many droplets. To limit the computational cost, liquid droplets disappear when they hit the ``floor'' of the computational domain, regardless of whether it is solid or not. This feature mimics the presence of floor drains. To stop FDS from removing liquid droplets from the floor of the domain, add the phrase {\ct POROUS\_FLOOR=.FALSE.} to the {\ct MISC} line. Be aware, however, that droplets that land on the floor continue to move horizontally in randomly selected directions; bouncing off obstructions, and consuming CPU time. Note also that solid particles do not disappear from the floor the domain like liquid droplets. 
+Be aware that sprinklers can produce many droplets. To limit the computational cost, liquid droplets disappear when they hit the ``floor'' of the computational domain, regardless of whether it is solid or not. This feature mimics the presence of floor drains. To stop FDS from removing liquid droplets from the floor of the domain, add the phrase {\ct POROUS\_FLOOR=.FALSE.} to the {\ct MISC} line. Be aware, however, that droplets that land on the floor continue to move horizontally in randomly selected directions; bouncing off obstructions, and consuming CPU time. Note also that solid particles do not disappear from the floor the domain like liquid droplets.
 
 For more information about sprinklers, their activation and spray dynamics, read the FDS Technical Reference Guide~\cite{FDS_Math_Guide}.
 
@@ -9680,6 +9612,9 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct TEXTURE\_HEIGHT}                 & Real            & Section~\ref{info:texture_map}            & m                   & 1.                      \\ \hline
 {\ct TEXTURE\_MAP}                    & Character       & Section~\ref{info:texture_map}            &                     &                         \\ \hline
 {\ct TEXTURE\_WIDTH}                  & Real            & Section~\ref{info:texture_map}            & m                   & 1.                      \\ \hline
+{\ct TGA\_ANALYSIS}                   & Logical         & Section~\ref{info:TGA_DSC_MCC}            &                     & {\ct .FALSE.}           \\ \hline
+{\ct TGA\_FINAL\_TEMPERATURE}         & Real            & Section~\ref{info:TGA_DSC_MCC}            & $^\circ$C           & 800.                    \\ \hline
+{\ct TGA\_HEATING\_RATE}              & Real            & Section~\ref{info:TGA_DSC_MCC}            & $^\circ$C/min       & 5.                      \\ \hline
 {\ct THICKNESS(NL)}                   & Real Array      & Section~\ref{info:SURF_MATL_Basics}       & m                   & 0.                      \\ \hline
 {\ct TMP\_BACK}                       & Real            & Section~\ref{info:TMP_INNER}              & $^\circ$C           & 20.                     \\ \hline
 {\ct TMP\_FRONT}                      & Real            & Section~\ref{info:specified_temperature}  & $^\circ$C           & 20.                     \\ \hline
