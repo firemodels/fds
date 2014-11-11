@@ -166,7 +166,9 @@ TITLE="$infile"
 # define number of nodes
 
 if test $nopenmp_threads -gt 1 ; then
-  nmpi_processes_per_node=2
+  if test $nmpi_processes -gt 1 ; then
+    nmpi_processes_per_node=2
+  fi
 fi
 
 let "nodes=($nmpi_processes-1)/$nmpi_processes_per_node+1"
