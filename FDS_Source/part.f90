@@ -948,9 +948,14 @@ ONE_D => LP%ONE_D
 
 IF (LPC%SOLID_PARTICLE) THEN
 
+   IF (LPC%SURF_INDEX==TGA_SURF_INDEX) TGA_PARTICLE_INDEX = NLP
+
    LP%MASS = 0._EB
+
    SCREEN_LPC: IF (LPC%DRAG_LAW==SCREEN_DRAG) THEN
-      ! Compute cross-sectional area of particle
+
+      ! Compute special cross-sectional area of screen particle
+
       AREA = (ABS(ORIENTATION_VECTOR(1,LPC%ORIENTATION_INDEX))*DY(ONE_D%JJG)*DZ(ONE_D%KKG) + &
               ABS(ORIENTATION_VECTOR(2,LPC%ORIENTATION_INDEX))*DX(ONE_D%IIG)*DZ(ONE_D%KKG) + &
               ABS(ORIENTATION_VECTOR(3,LPC%ORIENTATION_INDEX))*DX(ONE_D%IIG)*DY(ONE_D%JJG)) * &
