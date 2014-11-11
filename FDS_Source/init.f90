@@ -2126,6 +2126,10 @@ WC%ONE_D%UWS    = UW
 WC%NOM       = NOM_FOUND
 WC%NOM_IB(:) = NOM_IB(:)
 
+! If the simulation is only a TGA analysis, get the wall index
+
+IF (WC%SURF_INDEX==TGA_SURF_INDEX) TGA_WALL_INDEX = IW
+
 ! Assign the ZONE number to all boundary cells
 
 IF (.NOT.EVACUATION_ONLY(NM)) WC%PRESSURE_ZONE = M%PRESSURE_ZONE(IIG,JJG,KKG)
