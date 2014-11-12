@@ -552,7 +552,7 @@ MESH_LOOP: DO N=1,NMESHES_READ
             ! Associate the MESH with the PROCESS
 
             PROCESS(NM) = CURRENT_MPI_PROCESS
-            IF (MYID==0 .AND. USE_MPI) WRITE(LU_ERR,'(A,I3,A,I3)') ' Mesh ',NM,' is assigned to MPI Process ',PROCESS(NM)+1
+            IF (MYID==0 .AND. USE_MPI) WRITE(LU_ERR,'(A,I3,A,I3)') ' Mesh ',NM,' is assigned to MPI Process ',PROCESS(NM)
             IF (EVACUATION_ONLY(NM) .AND. USE_MPI) EVAC_PROCESS = NUMPROCS-1
 
             ! Mesh boundary colors
@@ -620,12 +620,13 @@ MESH_LOOP: DO N=1,NMESHES_READ
 ENDDO MESH_LOOP
 
 ! Check for bad mesh ordering if MPI_PROCESS used
+
 IF (USE_MPI) THEN
    DO NM=1,NMESHES
       IF (NM==1) CYCLE
       IF (PROCESS(NM) < PROCESS(NM-1)) THEN
-         WRITE(MESSAGE,'(A,I3,A,I3,A)') 'ERROR: MPI_PROCESS for MESH ', NM, 'is less than MPI_PROCESS for MESH ',NM-1,&
-                                        '. Reorder MESH lines.'
+         WRITE(MESSAGE,'(A,I3,A,I3,A)') 'ERROR: MPI_PROCESS for MESH ', NM, ' is less than MPI_PROCESS for MESH ',NM-1,&
+                                        '. Reorder MESH lines or MPI_PROCESS assignments.'
          CALL SHUTDOWN(MESSAGE) ; RETURN         
       ENDIF
    ENDDO
@@ -711,7 +712,7 @@ CONTAINS
        ! Associate the MESH with the PROCESS
 
        PROCESS(NM) = CURRENT_MPI_PROCESS
-       IF (MYID==0 .AND. USE_MPI) WRITE(LU_ERR,'(A,I3,A,I3)') ' Mesh ',NM,' is assigned to MPI Process ',PROCESS(NM)+1
+       IF (MYID==0 .AND. USE_MPI) WRITE(LU_ERR,'(A,I3,A,I3)') ' Mesh ',NM,' is assigned to MPI Process ',PROCESS(NM)
        IF (EVACUATION_ONLY(NM) .AND. USE_MPI) EVAC_PROCESS = NUMPROCS-1
 
        ! Mesh boundary colors
@@ -843,7 +844,7 @@ CONTAINS
        ! Associate the MESH with the PROCESS
 
        PROCESS(NM) = CURRENT_MPI_PROCESS
-       IF (MYID==0 .AND. USE_MPI) WRITE(LU_ERR,'(A,I3,A,I3)') ' Mesh ',NM,' is assigned to MPI Process ',PROCESS(NM)+1
+       IF (MYID==0 .AND. USE_MPI) WRITE(LU_ERR,'(A,I3,A,I3)') ' Mesh ',NM,' is assigned to MPI Process ',PROCESS(NM)
        IF (EVACUATION_ONLY(NM) .AND. USE_MPI) EVAC_PROCESS = NUMPROCS-1
 
        ! Mesh boundary colors
