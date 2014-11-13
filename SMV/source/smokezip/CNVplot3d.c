@@ -117,12 +117,10 @@ int convert_plot3d(plot3d *plot3di){
   {
     int nx, ny, nz;
     FILE_SIZE len;
-    int error, endian, isotest;
+    int error, isotest;
     int j;
     int framesize;
     int k,kk;
-
-    endian=getendian();
 
     len=strlen(plot3d_file);
     CheckMemory;

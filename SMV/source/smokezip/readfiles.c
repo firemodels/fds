@@ -617,12 +617,11 @@ int readsmv(char *smvfile){
         }
         patchi->filesize=filesize;
         if(GLOBget_boundary_bounds==1){
-          int endian, npatches, error, boundaryunitnumber;
+          int npatches, error, boundaryunitnumber;
           FILE_SIZE lenfile;
 
           NewMemory((void **)&patchi->histogram,sizeof(histogramdata));
           lenfile=strlen(patchi->file);
-          endian=getendian();
           boundaryunitnumber=15;
           FORTgetboundaryheader1(patchi->file,&boundaryunitnumber, &npatches, &error, lenfile);
           if(npatches>0){

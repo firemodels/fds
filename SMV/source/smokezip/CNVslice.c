@@ -877,9 +877,6 @@ int slicedup(slice *slicej, int islice){
 void update_slice_hist(void){
   int i;
 
-  int endiandata;
-
-  endiandata=getendian();
   for(i=0;i<nsliceinfo;i++){
     slice *slicei;
     int unit1;

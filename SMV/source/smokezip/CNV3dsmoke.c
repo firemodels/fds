@@ -8,7 +8,6 @@
 #include <string.h>
 #include <math.h>
 #include "zlib.h"
-#include "egz_stdio.h"
 #include "svzip.h"
 #include "lightsmoke.h"
 #include "file_util.h"
@@ -22,7 +21,7 @@ char CNV3dsmoke_revision[]="$Revision$";
 void convert_3dsmoke(smoke3d *smoke3di, int *thread_index){
   unsigned char *full_alphabuffer=NULL, *compressed_alphabuffer=NULL;
   FILE *smoke3dstream=NULL,*smoke3dsizestream=NULL;
-  EGZ_FILE *SMOKE3DFILE=NULL;
+  FILE *SMOKE3DFILE=NULL;
   char smoke3dfile_svz[1024], smoke3dsizefile_svz[1024];
   int nxyz[9];
   int nx, ny, nz;
@@ -65,7 +64,7 @@ void convert_3dsmoke(smoke3d *smoke3di, int *thread_index){
     fprintf(stderr,"*** Warning:  %s does not exist\n",smoke3dfile);
     return;
   }
-  SMOKE3DFILE=EGZ_FOPEN(smoke3dfile,"rb",0,2);
+  SMOKE3DFILE=fopen(smoke3dfile,"rb");
   if(SMOKE3DFILE==NULL){
     fprintf(stderr,"*** Warning:  %s could not be opened\n",smoke3dfile);
     return;
@@ -139,17 +138,17 @@ void convert_3dsmoke(smoke3d *smoke3di, int *thread_index){
     }
     if(smoke3dsizestream!=NULL)fclose(smoke3dsizestream);
     if(smoke3dstream!=NULL)fclose(smoke3dstream);
-    EGZ_FCLOSE(SMOKE3DFILE);
+    fclose(SMOKE3DFILE);
     return;
   }
 
-  EGZ_FREAD(nxyz,4,8,SMOKE3DFILE);
+  fread(nxyz,4,8,SMOKE3DFILE);
 
   nxyz[0] = 1;
   version_local = nxyz[1];
   if(version_local==1){
     PRINTF("  already compressed\n");
-    EGZ_FCLOSE(SMOKE3DFILE);
+    fclose(SMOKE3DFILE);
     fclose(smoke3dstream);
     fclose(smoke3dsizestream);
     return;
@@ -202,16 +201,16 @@ void convert_3dsmoke(smoke3d *smoke3di, int *thread_index){
   for(;;){
     int nlight_data;
     
-    EGZ_FREAD(&time_local,4,1,SMOKE3DFILE);
-    if(EGZ_FEOF(SMOKE3DFILE)!=0)break;
+    fread(&time_local,4,1,SMOKE3DFILE);
+    if(feof(SMOKE3DFILE)!=0)break;
 
-    EGZ_FREAD(nchars,4,2,SMOKE3DFILE);
+    fread(nchars,4,2,SMOKE3DFILE);
     nfull_file=nchars[0];
     ncompressed_rle=nchars[1];
 
     // read compressed frame
 
-    EGZ_FREAD(compressed_alphabuffer,ncompressed_rle,1,SMOKE3DFILE);
+    fread(compressed_alphabuffer,ncompressed_rle,1,SMOKE3DFILE);
 
     if(time_local<time_max)continue;
     count++;
@@ -243,7 +242,7 @@ void convert_3dsmoke(smoke3d *smoke3di, int *thread_index){
       fprintf(stderr,"*** Warning zlib compressor failed - frame %f\n",time_local);
     }
 
-    data_loc=EGZ_FTELL(SMOKE3DFILE);
+    data_loc=FTELL(SMOKE3DFILE);
     percent_done=100.0*(float)data_loc/(float)smoke3di->filesize;
 #ifdef pp_THREAD
     threadinfo[*thread_index].stat=percent_done;
@@ -309,7 +308,7 @@ void convert_3dsmoke(smoke3d *smoke3di, int *thread_index){
 
   // close files and free buffers
 
-  EGZ_FCLOSE(SMOKE3DFILE);
+  fclose(SMOKE3DFILE);
 
   fclose(smoke3dstream);
   fclose(smoke3dsizestream);
