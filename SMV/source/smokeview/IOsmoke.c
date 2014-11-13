@@ -492,10 +492,6 @@ void readsmoke3d(int ifile,int flag, int *errorcode){
 
   file_size=get_filesize(smoke3di->file);
   SMOKE3DFILE=fopen(smoke3di->file,"rb");
-  SKIP;
-  if(fortran_skip!=0){
-    SKIP;SKIP;
-  }
   if(SMOKE3DFILE==NULL){
     readsmoke3d(ifile,UNLOAD,&error);
     *errorcode=1;
@@ -753,10 +749,6 @@ int getsmoke3d_sizes(int fortran_skip,char *smokefile, int version, float **time
     }
     if(SMOKE_SIZE==NULL)return 1;  // can't write size file in temp directory so give up
     SMOKE3DFILE=fopen(smokefile,"rb");
-    SKIP;
-    if(fortran_skip!=0){
-      SKIP;SKIP;
-    }
     if(SMOKE3DFILE==NULL){
       fclose(SMOKE_SIZE);
       return 1;
@@ -5047,21 +5039,17 @@ void makeiblank_smoke3d(void){
 
    FILE *SMOKE3DFILE=NULL,*SMOKE3D_REGFILE=NULL, *SMOKE3D_COMPFILE=NULL;
    int nxyz[8];
-   char *file,mode[16];
+   char *file;
    int fortran_skip=0;
 
    if(smoke3di->filetype==FORTRAN_GENERATED)fortran_skip=4;
 
-   strcpy(mode,"");
-   if(fortran_skip!=0)strcat(mode,"f");
-   strcat(mode,"rb");
-
    smoke3di->have_light=0;
    file=smoke3di->comp_file;
-   SMOKE3D_COMPFILE=fopen(file,mode);
+   SMOKE3D_COMPFILE=fopen(file,"rb");
    if(SMOKE3D_COMPFILE==NULL){
      file=smoke3di->reg_file;
-     SMOKE3D_REGFILE=fopen(file,mode);
+     SMOKE3D_REGFILE=fopen(file,"rb");
    }
    if(SMOKE3D_REGFILE==NULL&&SMOKE3D_COMPFILE==NULL)return -1;
    if(SMOKE3D_COMPFILE!=NULL)SMOKE3DFILE=SMOKE3D_COMPFILE;
