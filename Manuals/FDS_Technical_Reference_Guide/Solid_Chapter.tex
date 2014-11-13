@@ -100,13 +100,13 @@ where $k$ is the thermal conductivity of the gas, $n$ is the spatial coordinate 
 
 In an LES calculation, the convective heat transfer coefficient, $h$, is based on a combination of natural and forced convection correlations:
 \be \dq_{\rm c}'' = h \, (T_{\rm g} - T_{\rm w}) \quad \hbox{W/m}^2 \quad ; \quad h =
-    \max \, \left[ \; C\, |T_{\rm g}-T_{\rm w}|^\ot \; , \;  \frac{k}{L} \, \NU \right]  \quad  \si{W/(m^2.K)} 
+    \max \, \left[ \; C\, |T_{\rm g}-T_{\rm w}|^\ot \; , \;  \frac{k}{L} \, \NU \right]  \quad  \si{W/(m^2.K)}
 \ee
 where $C$ is a empirical coefficient for natural convection (1.52 for a horizontal plate and 1.31 for a vertical plane or cylinder)~\cite{Holman:1}, $L$ is a characteristic length related to the size of the physical obstruction, and $k$ is the thermal conductivity of the gas. The Nusselt number (Nu) depends on the geometric and flow characteristics. For many flow regimes, it has the form:
-\be 
-   \NU = C_1 + C_2 \, \RE^n \, \PR^m  \quad ; \quad \RE = \frac{\rho |\bu| L}{\mu} \quad ; \quad \PR \approx 0.7
+\be
+   \NU = C_1 + C_2 \, \RE^n \, \PR^m  \quad ; \quad \RE = \frac{\rho |\bu| L}{\mu} \quad ; \quad \PR = 0.7
 \ee
-For planar and cylindrical surfaces, the default values are $C_1=0$, $C_2=0.037$, $n=0.8$, $m=0.33$, and $L=1$~m. For spherical surfaces, the default values are $C_1=2$, $C_2=0.6$, $n=0.5$, $m=0.33$, and $L=D$, the diameter of the sphere. Note that for a sphere, the coefficient for natural convection, $C$, is assumed to be zero. It is possible to change these values for a particular application, but it is not possible to find a set of parameters that is appropriate for the wide variety of scenarios considered. Various correlations for planes, cylinders, and spheres can be found in Refs.~\cite{Holman:1,Incropera:1}.
+For planar surfaces, the default values are $C_1=0$, $C_2=0.037$, $n=0.8$, $m=0.33$, and $L=1$~m. For cylindrical surfaces, the default values are $C_1=0$, $C_2=0.683$, $n=0.466$, $m=0.33$, and $L=D$, the diameter of the cylinder. For spherical surfaces, the default values are $C_1=2$, $C_2=0.6$, $n=0.5$, $m=0.33$, and $L=D$, the diameter of the sphere. Note that for a sphere, the coefficient for natural convection, $C$, is assumed to be zero. It is possible to change these values for a particular application, but it is not possible to find a set of parameters that is appropriate for the wide variety of scenarios considered. Various correlations for planes, cylinders, and spheres can be found in Refs.~\cite{Holman:1,Incropera:1}.
 
 
 \subsubsection{Optional Near-Wall Model}
@@ -225,21 +225,21 @@ r_{\alpha \beta} =
     \underbrace{\max \big[0,S_{\rm thr,\alpha,\beta}(T_{\rm s}-T_{\rm thr,\alpha \beta}) \big]^{n_{\rm t,\alpha\beta}}}_\textrm{Power function}
    \label{Arrhenius}
 \ee
-The first term describes the dependence of the reaction rate on the concentration of the reactant itself, with $n_{\rm s,\alpha\beta}$ being the partial 
-reaction order. The second term is the Arrhenius function which is commonly used to describe the reaction kinetics, i.e. the dependence of the reaction 
-rate on the material temperature. The chapter on pyrolysis in the FDS Verification Guide describes methods for determining the kinetic parameters 
-$A_{\alpha \beta}$ and $E_{\alpha\beta}$ using bench-scale measurement techniques. 
+The first term describes the dependence of the reaction rate on the concentration of the reactant itself, with $n_{\rm s,\alpha\beta}$ being the partial
+reaction order. The second term is the Arrhenius function which is commonly used to describe the reaction kinetics, i.e. the dependence of the reaction
+rate on the material temperature. The chapter on pyrolysis in the FDS Verification Guide describes methods for determining the kinetic parameters
+$A_{\alpha \beta}$ and $E_{\alpha\beta}$ using bench-scale measurement techniques.
 
-The third term can be used to describe the dependence on the 
-local oxygen concentration $X_{\rm O_2}(x)$ and the heterogeneous reaction order, $n_{\rm O_2,\alpha\beta}$. 
-The oxygen concentration profile within practical materials depends on the competetion between diffusion and reactive consumption. 
-As FDS does not solve for the transport of gaseous species within concensed phase materials, a simple exponential profile is assumed and the 
-user is expected to specify the characteristic depth at which oxygen would be present. 
+The third term can be used to describe the dependence on the
+local oxygen concentration $X_{\rm O_2}(x)$ and the heterogeneous reaction order, $n_{\rm O_2,\alpha\beta}$.
+The oxygen concentration profile within practical materials depends on the competetion between diffusion and reactive consumption.
+As FDS does not solve for the transport of gaseous species within concensed phase materials, a simple exponential profile is assumed and the
+user is expected to specify the characteristic depth at which oxygen would be present.
 The local oxygen volume fraction at depth $x$ is calculated from the gas phase (first grid cell) oxygen volume fraction $X_{\rm O_2,g}$ as
 \be
 X_{\rm O_2}(x) = X_{\rm O_2,g}\exp(-x/L_{\rm g,\alpha\beta})
 \ee
-where $L_{\rm g,\alpha\beta}$ is the characteristic depth of oxygen diffusion. Specifying $L_{\rm g,\alpha\beta}=0$ means that the reaction takes place 
+where $L_{\rm g,\alpha\beta}$ is the characteristic depth of oxygen diffusion. Specifying $L_{\rm g,\alpha\beta}=0$ means that the reaction takes place
 only at the surface of the material.
 
 The fourth term is the power function where $T_{\rm thr,\alpha \beta}$ is a threshold temperature that can be used to dictate that the reaction must not occur below ($S_{\rm thr,\alpha,\beta}=+1$)  or above ($S_{\rm thr,\alpha,\beta}=-1$) a user-specified temperature. By default, the fourth term is deactivated ($S_{\rm thr,\alpha,\beta}=+1, T_{\rm thr,\alpha\beta}=0$ K).
