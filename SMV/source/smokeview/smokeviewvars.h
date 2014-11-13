@@ -18,7 +18,7 @@
 #include "histogram.h"
 #include "flowfiles.h"
 #ifndef CPP
-#include "egz_stdio.h"
+#include <zlib.h>
 #endif
 #include "smokeheaders.h"
 #include "threader.h"

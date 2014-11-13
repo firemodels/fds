@@ -8,7 +8,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-#include "egz_stdio.h"
+#include <zlib.h>
 #include "svzip.h"
 #include "MALLOC.h"
 
