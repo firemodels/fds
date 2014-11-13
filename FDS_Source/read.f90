@@ -5749,11 +5749,11 @@ READ_SURF_LOOP: DO N=0,N_SURF
    ! Set convection length scale automatically for spheres. Set to 1 m for everything else.
 
    IF (SF%CONV_LENGTH<0._EB) THEN
-      IF (SF%GEOMETRY==SURF_SPHERICAL) THEN
-         SF%CONV_LENGTH = 2._EB*(SF%INNER_RADIUS+SF%THICKNESS)
-      ELSE
-         SF%CONV_LENGTH = 1._EB
-      ENDIF
+      SELECT CASE(SF%GEOMETRY)
+         CASE(SURF_SPHERICAL)   ; SF%CONV_LENGTH = 2._EB*(SF%INNER_RADIUS+SF%THICKNESS)
+         CASE(SURF_CYLINDRICAL) ; SF%CONV_LENGTH = 2._EB*SF%THICKNESS
+         CASE DEFAULT           ; SF%CONV_LENGTH = 1._EB
+      END SELECT
    ENDIF
 
    ! Ramps
