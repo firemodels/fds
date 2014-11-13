@@ -16,13 +16,12 @@ char IOsmoke_revision[]="$Revision$";
 #include GLUT_H
 #include <float.h>
 
-#include "egz_stdio.h"
 #include "update.h"
 #include "smokeviewvars.h"
 #include "IOvolsmoke.h"
 #include "compress.h"
 
-#define SKIP EGZ_FSEEK( SMOKE3DFILE, fortran_skip, SEEK_CUR)
+#define SKIP FSEEK( SMOKE3DFILE, fortran_skip, SEEK_CUR)
 
 int cull_count=0;
 
@@ -356,7 +355,7 @@ void drawsmoke_frame(void){
 
 void readsmoke3d(int ifile,int flag, int *errorcode){
   smoke3ddata *smoke3di,*smoke3dj;
-  EGZ_FILE *SMOKE3DFILE;
+  FILE *SMOKE3DFILE;
   int error;
   int ncomp_smoke_total;
   int ncomp_smoke_total_skipped;
@@ -493,10 +492,10 @@ void readsmoke3d(int ifile,int flag, int *errorcode){
 
   file_size=get_filesize(smoke3di->file);
   if(fortran_skip==0){
-    SMOKE3DFILE=EGZ_FOPEN(smoke3di->file,"rb",0,2);
+    SMOKE3DFILE=fopen(smoke3di->file,"rb");
   }
   else{
-    SMOKE3DFILE=EGZ_FOPEN(smoke3di->file,"frb",0,2);
+    SMOKE3DFILE=fopen(smoke3di->file,"frb");
   }
   if(SMOKE3DFILE==NULL){
     readsmoke3d(ifile,UNLOAD,&error);
@@ -504,7 +503,7 @@ void readsmoke3d(int ifile,int flag, int *errorcode){
     return;
   }
 
-  SKIP;EGZ_FREAD(nxyz,4,8,SMOKE3DFILE);SKIP;
+  SKIP;fread(nxyz,4,8,SMOKE3DFILE);SKIP;
   smoke3di->is1=nxyz[2];
   smoke3di->is2=nxyz[3];
   smoke3di->js1=nxyz[4];
@@ -519,8 +518,8 @@ void readsmoke3d(int ifile,int flag, int *errorcode){
   nframes_found=0;
   local_starttime = glutGet(GLUT_ELAPSED_TIME);
   for(i=0;i<smoke3di->ntimes_full;i++){
-	  SKIP;EGZ_FREAD(&time_local,4,1,SMOKE3DFILE);SKIP;
-    if(EGZ_FEOF(SMOKE3DFILE)!=0||(use_tload_end==1&&time_local>tload_end)){
+	  SKIP;fread(&time_local,4,1,SMOKE3DFILE);SKIP;
+    if(feof(SMOKE3DFILE)!=0||(use_tload_end==1&&time_local>tload_end)){
       smoke3di->ntimes_full=i;
       smoke3di->ntimes=nframes_found;
       break;
@@ -529,8 +528,8 @@ void readsmoke3d(int ifile,int flag, int *errorcode){
     if(smoke3di->use_smokeframe[i]==1){
       PRINTF("3D smoke/fire time=%.2f",time_local);
     }
-    SKIP;EGZ_FREAD(nchars,4,2,SMOKE3DFILE);SKIP;
-    if(EGZ_FEOF(SMOKE3DFILE)!=0){
+    SKIP;fread(nchars,4,2,SMOKE3DFILE);SKIP;
+    if(feof(SMOKE3DFILE)!=0){
       smoke3di->ntimes_full=i;
       smoke3di->ntimes=nframes_found;
       break;
@@ -539,10 +538,10 @@ void readsmoke3d(int ifile,int flag, int *errorcode){
       float complevel;
 
       nframes_found++;
-      SKIP;EGZ_FREAD(smoke3di->smokeframe_comp_list[iii],1,smoke3di->nchars_compressed_smoke[iii],SMOKE3DFILE);SKIP;
+      SKIP;fread(smoke3di->smokeframe_comp_list[iii],1,smoke3di->nchars_compressed_smoke[iii],SMOKE3DFILE);SKIP;
       iii++;
       CheckMemory;
-      if(EGZ_FEOF(SMOKE3DFILE)!=0){
+      if(feof(SMOKE3DFILE)!=0){
         smoke3di->ntimes_full=i;
         smoke3di->ntimes=nframes_found;
         break;
@@ -558,8 +557,8 @@ void readsmoke3d(int ifile,int flag, int *errorcode){
       PRINTF("%s\n",compstring);
     }
     else{
-      SKIP;EGZ_FSEEK(SMOKE3DFILE,smoke3di->nchars_compressed_smoke_full[i],SEEK_CUR);SKIP;
-      if(EGZ_FEOF(SMOKE3DFILE)!=0){
+      SKIP;FSEEK(SMOKE3DFILE,smoke3di->nchars_compressed_smoke_full[i],SEEK_CUR);SKIP;
+      if(feof(SMOKE3DFILE)!=0){
         smoke3di->ntimes_full=i;
         smoke3di->ntimes=nframes_found;
         break;
@@ -570,7 +569,7 @@ void readsmoke3d(int ifile,int flag, int *errorcode){
   delta_time = (local_stoptime-local_starttime)/1000.0;
 
   if(SMOKE3DFILE!=NULL){
-    EGZ_FCLOSE(SMOKE3DFILE);
+    fclose(SMOKE3DFILE);
   }
 
   smoke3di->loaded=1;
@@ -706,7 +705,7 @@ int getsmoke3d_sizes(int fortran_skip,char *smokefile, int version, float **time
   char smoke_sizefilename[1024],smoke_sizefilename2[1024],buffer[255];
   char *textptr;
   FILE *SMOKE_SIZE=NULL;
-  EGZ_FILE *SMOKE3DFILE;
+  FILE *SMOKE3DFILE;
   int nframes_found;
   float time_local,time_max,*time_found=NULL;
   int *use_smokeframe_full;
@@ -755,17 +754,17 @@ int getsmoke3d_sizes(int fortran_skip,char *smokefile, int version, float **time
     }
     if(SMOKE_SIZE==NULL)return 1;  // can't write size file in temp directory so give up
     if(fortran_skip==0){
-      SMOKE3DFILE=EGZ_FOPEN(smokefile,"rb",0,2);
+      SMOKE3DFILE=fopen(smokefile,"rb");
     }
     else{
-      SMOKE3DFILE=EGZ_FOPEN(smokefile,"frb",0,2);
+      SMOKE3DFILE=fopen(smokefile,"frb");
     }
     if(SMOKE3DFILE==NULL){
       fclose(SMOKE_SIZE);
       return 1;
     }
 
-    SKIP;EGZ_FREAD(nxyz,4,8,SMOKE3DFILE);SKIP;
+    SKIP;fread(nxyz,4,8,SMOKE3DFILE);SKIP;
 
     if(version!=1)version=0;
     fprintf(SMOKE_SIZE,"%i\n",version);
@@ -774,9 +773,9 @@ int getsmoke3d_sizes(int fortran_skip,char *smokefile, int version, float **time
     for(;;){
       int nframeboth;
       
-      SKIP;EGZ_FREAD(&time_local,4,1,SMOKE3DFILE);SKIP;
-      if(EGZ_FEOF(SMOKE3DFILE)!=0)break;
-      SKIP;EGZ_FREAD(nchars,4,2,SMOKE3DFILE);SKIP;
+      SKIP;fread(&time_local,4,1,SMOKE3DFILE);SKIP;
+      if(feof(SMOKE3DFILE)!=0)break;
+      SKIP;fread(nchars,4,2,SMOKE3DFILE);SKIP;
       if(version==0){ // uncompressed data
         fprintf(SMOKE_SIZE,"%f %i %i\n",time_local,nchars[0],nchars[1]);
       }
@@ -798,10 +797,10 @@ int getsmoke3d_sizes(int fortran_skip,char *smokefile, int version, float **time
         }
       }
       skip_local = ABS(nchars[1]);
-      SKIP;EGZ_FSEEK(SMOKE3DFILE,skip_local,SEEK_CUR);SKIP;
+      SKIP;FSEEK(SMOKE3DFILE,skip_local,SEEK_CUR);SKIP;
     }
 
-    EGZ_FCLOSE(SMOKE3DFILE);
+    fclose(SMOKE3DFILE);
     fclose(SMOKE_SIZE);
     SMOKE_SIZE=fopen(smoke_sizefilename,"r");
   }
@@ -5048,7 +5047,7 @@ void makeiblank_smoke3d(void){
 
  int getsmoke3d_version(smoke3ddata *smoke3di){
 
-   EGZ_FILE *SMOKE3DFILE=NULL,*SMOKE3D_REGFILE=NULL, *SMOKE3D_COMPFILE=NULL;
+   FILE *SMOKE3DFILE=NULL,*SMOKE3D_REGFILE=NULL, *SMOKE3D_COMPFILE=NULL;
    int nxyz[8];
    char *file,mode[16];
    int fortran_skip=0;
@@ -5061,25 +5060,25 @@ void makeiblank_smoke3d(void){
 
    smoke3di->have_light=0;
    file=smoke3di->comp_file;
-   SMOKE3D_COMPFILE=EGZ_FOPEN(file,mode,0,2);
+   SMOKE3D_COMPFILE=fopen(file,mode);
    if(SMOKE3D_COMPFILE==NULL){
      file=smoke3di->reg_file;
-     SMOKE3D_REGFILE=EGZ_FOPEN(file,mode,0,2);
+     SMOKE3D_REGFILE=fopen(file,mode);
    }
    if(SMOKE3D_REGFILE==NULL&&SMOKE3D_COMPFILE==NULL)return -1;
    if(SMOKE3D_COMPFILE!=NULL)SMOKE3DFILE=SMOKE3D_COMPFILE;
    if(SMOKE3D_REGFILE!=NULL)SMOKE3DFILE=SMOKE3D_REGFILE;
    smoke3di->file=file;
   
-   SKIP;EGZ_FREAD(nxyz,4,8,SMOKE3DFILE);SKIP;
+   SKIP;fread(nxyz,4,8,SMOKE3DFILE);SKIP;
    {
      float time_local;
      int nchars[2];
 
-     SKIP;EGZ_FREAD(&time_local,4,1,SMOKE3DFILE);SKIP;
-     if(EGZ_FEOF(SMOKE3DFILE)==0){
-       SKIP;EGZ_FREAD(nchars,4,2,SMOKE3DFILE);SKIP;
-       if(EGZ_FEOF(SMOKE3DFILE)==0){
+     SKIP;fread(&time_local,4,1,SMOKE3DFILE);SKIP;
+     if(feof(SMOKE3DFILE)==0){
+       SKIP;fread(nchars,4,2,SMOKE3DFILE);SKIP;
+       if(feof(SMOKE3DFILE)==0){
          if(nchars[1]<0){
            smoke3di->have_light=1;
          }
@@ -5087,7 +5086,7 @@ void makeiblank_smoke3d(void){
      }
    }
 
-   EGZ_FCLOSE(SMOKE3DFILE);
+   fclose(SMOKE3DFILE);
 
 
    return nxyz[1];

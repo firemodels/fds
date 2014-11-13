@@ -1104,13 +1104,12 @@ char *STRCHRR(char *strbeg, char *searchbeg, int c){
 
 unsigned int date2sec2(char *tokenorig){
   char token[256];
-  char *slash, *colen;
+  char *colen;
   char *tim=NULL,*timend=NULL;
   int secs=0;
   int local_time;
 
   strcpy(token,tokenorig);
-  slash=strchr(token,'/');
   colen=strchr(token,':');
   if(colen!=NULL)tim=STRCHRR(token,colen,' ');
 

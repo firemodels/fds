@@ -12,7 +12,6 @@ char IOboundary_revision[]="$Revision$";
 #include <string.h>
 #include GLUT_H
 
-#include "egz_stdio.h"
 #include "smv_endian.h"
 #include "update.h"
 #include "smokeviewvars.h"
@@ -3533,10 +3532,10 @@ void updatepatchmenulabels(void){
 /* ------------------ getpatchheader ------------------------ */
 
 void getpatchheader(char *file,int *npatches, float *ppatchmin, float *ppatchmax){
-  EGZ_FILE *stream;
+  FILE *stream;
   float minmax[2];
 
-  stream=EGZ_FOPEN(file,"rb",0,2);
+  stream=fopen(file,"rb");
 
   if(stream==NULL)return;
 
@@ -3552,14 +3551,14 @@ void getpatchheader(char *file,int *npatches, float *ppatchmin, float *ppatchmax
   // compressed size of frame
   // compressed buffer
 
-  EGZ_FSEEK(stream,16,SEEK_CUR);
+  FSEEK(stream,16,SEEK_CUR);
 
-  EGZ_FREAD(minmax,4,2,stream);
-  EGZ_FSEEK(stream,8,SEEK_CUR);
-  EGZ_FREAD(npatches,4,1,stream);
+  fread(minmax,4,2,stream);
+  FSEEK(stream,8,SEEK_CUR);
+  fread(npatches,4,1,stream);
   *ppatchmin=minmax[0];
   *ppatchmax=minmax[1];
-  EGZ_FCLOSE(stream);
+  fclose(stream);
 }
 
 /* ------------------ getpatchheader2 ------------------------ */
@@ -3572,7 +3571,7 @@ void getpatchheader2(char *file,
       int *patchdir){
   int i;
   int buffer[9];
-  EGZ_FILE *stream;
+  FILE *stream;
   int npatches;
 
   // endian
@@ -3587,21 +3586,21 @@ void getpatchheader2(char *file,
   // compressed size of frame
   // compressed buffer
 
-  stream=EGZ_FOPEN(file,"rb",0,2);
+  stream=fopen(file,"rb");
 
   if(stream==NULL)return;
 
-  EGZ_FSEEK(stream,12,SEEK_CUR);
-  EGZ_FREAD(version,4,1,stream);
-  EGZ_FSEEK(stream,16,SEEK_CUR);
-  EGZ_FREAD(&npatches,4,1,stream);
+  FSEEK(stream,12,SEEK_CUR);
+  fread(version,4,1,stream);
+  FSEEK(stream,16,SEEK_CUR);
+  fread(&npatches,4,1,stream);
   for(i=0;i<npatches;i++){
     buffer[6]=0;
     if(*version==0){
-      EGZ_FREAD(buffer,4,6,stream);
+      fread(buffer,4,6,stream);
     }
     else{
-      EGZ_FREAD(buffer,4,9,stream);
+      fread(buffer,4,9,stream);
     }
     pi1[i]=buffer[0];
     pi2[i]=buffer[1];
@@ -3611,14 +3610,14 @@ void getpatchheader2(char *file,
     pk2[i]=buffer[5];
     patchdir[i]=buffer[6];
   }
-  EGZ_FCLOSE(stream);
+  fclose(stream);
 }
 
 /* ------------------ getpatchsizeinfo ------------------------ */
 
 void getpatchsizeinfo(patchdata *patchi, int *nframes, int *buffersize){
   FILE *streamsize;
-  EGZ_FILE *stream;
+  FILE *stream;
   int nf=0, bsize=0;
   float local_time;
   char buffer[255];
@@ -3656,46 +3655,46 @@ void getpatchsizeinfo(patchdata *patchi, int *nframes, int *buffersize){
     strcat(sizefile,".sz");
     streamsize=fopen(sizefile,"r");
 
-    stream=EGZ_FOPEN(patchi->file,"rb",0,2);
+    stream=fopen(patchi->file,"rb");
     if(stream==NULL)return;
 
     streamsize=fopen(sizefile,"w");
     if(streamsize==NULL){
-      EGZ_FCLOSE(stream);
+      fclose(stream);
       return;
     }
 
-    EGZ_FSEEK(stream,12,SEEK_CUR);
-    EGZ_FREAD(&version,4,1,stream);
-    EGZ_FSEEK(stream,16,SEEK_CUR);
-    EGZ_FREAD(&npatches,4,1,stream);
+    FSEEK(stream,12,SEEK_CUR);
+    fread(&version,4,1,stream);
+    FSEEK(stream,16,SEEK_CUR);
+    fread(&npatches,4,1,stream);
     size=0;
     return_code=0;
     for(i=0;i<npatches;i++){
       if(version==0){
-        return_code=EGZ_FREAD(buff,4,6,stream);
+        return_code=fread(buff,4,6,stream);
       }
       else{
-        return_code=EGZ_FREAD(buff,4,9,stream);
+        return_code=fread(buff,4,9,stream);
       }
       if(return_code==0)break;
       size+=(buff[1]+1-buff[0])*(buff[3]+1-buff[2])*(buff[5]+1-buff[4]);
     }
     if(return_code==0){
-      EGZ_FCLOSE(stream);
+      fclose(stream);
       fclose(streamsize);
       return;
     }
     for(;;){
-      return_code=EGZ_FREAD(&local_time,4,1,stream);
+      return_code=fread(&local_time,4,1,stream);
       if(return_code==0)break;
-      return_code=EGZ_FREAD(&compressed_size,4,1,stream);
+      return_code=fread(&compressed_size,4,1,stream);
       if(return_code==0)break;
-      return_code=EGZ_FSEEK(stream,compressed_size,SEEK_CUR);
+      return_code=FSEEK(stream,compressed_size,SEEK_CUR);
       if(return_code!=0)break;
       fprintf(streamsize,"%f %i %i\n",local_time,size,compressed_size);
     }
-    EGZ_FCLOSE(stream);
+    fclose(stream);
     fclose(streamsize);
     streamsize=fopen(sizefile,"r");
     if(streamsize==NULL)return;
@@ -3731,7 +3730,7 @@ void getpatchsizeinfo(patchdata *patchi, int *nframes, int *buffersize){
 
 void getpatchdata_zlib(patchdata *patchi,unsigned char *data,int ndata, 
                        float *local_times, unsigned int *zipoffset, unsigned int *zipsize, int ntimes_local){
-  EGZ_FILE *stream;
+  FILE *stream;
   float local_time;
   unsigned int compressed_size;
   int npatches;
@@ -3756,22 +3755,22 @@ void getpatchdata_zlib(patchdata *patchi,unsigned char *data,int ndata,
   // compressed size of frame
   // compressed buffer
 
-  stream=EGZ_FOPEN(patchi->file,"rb",0,2);
+  stream=fopen(patchi->file,"rb");
   if(stream==NULL)return;
 
-  EGZ_FSEEK(stream,12,SEEK_CUR);
-  EGZ_FREAD(&version,4,1,stream);
-  EGZ_FSEEK(stream,16,SEEK_CUR);
-  EGZ_FREAD(&npatches,4,1,stream);
+  FSEEK(stream,12,SEEK_CUR);
+  fread(&version,4,1,stream);
+  FSEEK(stream,16,SEEK_CUR);
+  fread(&npatches,4,1,stream);
   if(version==0){
     local_skip = 6*npatches*4;
   }
   else{
     local_skip = 9*npatches*4;
   }
-  return_code=EGZ_FSEEK(stream,local_skip,SEEK_CUR);
+  return_code=FSEEK(stream,local_skip,SEEK_CUR);
   if(return_code!=0){
-    EGZ_FCLOSE(stream);
+    fclose(stream);
     return;
   }
   datacopy=data;
@@ -3783,19 +3782,19 @@ void getpatchdata_zlib(patchdata *patchi,unsigned char *data,int ndata,
   for(;;){
     int skip_frame;
 
-    if(EGZ_FREAD(&local_time,4,1,stream)==0)break;
+    if(fread(&local_time,4,1,stream)==0)break;
     skip_frame=1;
     if(local_time>time_max){
       time_max=local_time;
       skip_frame=0;
       local_count++;
     }
-    if(EGZ_FREAD(&compressed_size,4,1,stream)==0)break;
+    if(fread(&compressed_size,4,1,stream)==0)break;
     if(skip_frame==0&&local_count%boundframestep==0){
-      if(EGZ_FREAD(datacopy,1,compressed_size,stream)==0)break;
+      if(fread(datacopy,1,compressed_size,stream)==0)break;
     }
     else{
-      EGZ_FSEEK(stream,compressed_size,SEEK_CUR);
+      FSEEK(stream,compressed_size,SEEK_CUR);
     }
                
     if(skip_frame==1||local_count%boundframestep!=0)continue;
@@ -3809,7 +3808,7 @@ void getpatchdata_zlib(patchdata *patchi,unsigned char *data,int ndata,
     datacopy+=compressed_size;
     offset+=compressed_size;
   }
-  EGZ_FCLOSE(stream);
+  fclose(stream);
 }
 
 /* ------------------ uncompress_patchdataframe ------------------------ */

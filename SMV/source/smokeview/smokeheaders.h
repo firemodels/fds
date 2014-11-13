@@ -554,7 +554,7 @@ EXTERNCPP void drawstaticiso(const isosurface *asurface,int surfacetype,
 EXTERNCPP int getplot3dtime(float *time);
 EXTERNCPP void normalize(float *xyz, int n);
 #ifndef CPP
-EXTERNCPP void getisosizes(const char *isofile, int dataflag, EGZ_FILE **isostreamptr,
+EXTERNCPP void getisosizes(const char *isofile, int dataflag, FILE **isostreamptr,
                            int *nvertices, int *ntriangles, float **levels, int *nisolevels,
                            int *niso_times, float *tmin, float *tmax, int endian);
 #endif

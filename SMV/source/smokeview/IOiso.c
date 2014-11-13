@@ -12,7 +12,6 @@ char IOiso_revision[]="$Revision$";
 #include GLUT_H
 #include <math.h>
 
-#include "egz_stdio.h"
 #include "update.h"
 #include "smokeviewvars.h"
 
@@ -26,28 +25,28 @@ void getisolevels(const char *isofile, int dataflag, float **levelsptr, float **
   int version;
   int len[3],labellengths=0;
   int nlevels;
-  EGZ_FILE *isostreamptr;
+  FILE *isostreamptr;
   int i;
   float **colorlevels=NULL;
 
-  isostreamptr=EGZ_FOPEN(isofile,"rb",0,2);
+  isostreamptr=fopen(isofile,"rb");
 
-  EGZ_FREAD(&one,4,1,isostreamptr);
+  fread(&one,4,1,isostreamptr);
   if(dataflag!=0){
-    EGZ_FREAD(&version,4,1,isostreamptr);
+    fread(&version,4,1,isostreamptr);
   }
   else{
     version=1;
   }
-  EGZ_FREAD(len,4,3,isostreamptr);
+  fread(len,4,3,isostreamptr);
   labellengths=len[0]+len[1]+len[2];
-  EGZ_FSEEK(isostreamptr,labellengths+4,SEEK_CUR);
-  EGZ_FREAD(&nlevels,4,1,isostreamptr);
+  FSEEK(isostreamptr,labellengths+4,SEEK_CUR);
+  fread(&nlevels,4,1,isostreamptr);
   *nisolevels=nlevels;
   FREEMEMORY(*levelsptr);
   NewMemory((void **)levelsptr,nlevels*sizeof(float));
-  EGZ_FREAD(*levelsptr,4,(unsigned int)(nlevels),isostreamptr);
-  EGZ_FCLOSE(isostreamptr);
+  fread(*levelsptr,4,(unsigned int)(nlevels),isostreamptr);
+  fclose(isostreamptr);
   NewMemory((void **)&colorlevels,nlevels*sizeof(float *));
   for(i=0;i<nlevels;i++){
     colorlevels[i]=NULL;
@@ -58,7 +57,7 @@ void getisolevels(const char *isofile, int dataflag, float **levelsptr, float **
 
 /* ------------------ getisosizes ------------------------ */
 
-void getisosizes(const char *isofile, int dataflag, EGZ_FILE **isostreamptr, int *nvertices, int *ntriangles, 
+void getisosizes(const char *isofile, int dataflag, FILE **isostreamptr, int *nvertices, int *ntriangles, 
                  float **levelsptr, int *nisolevels, int *niso_times, 
                  float *tmin_local, float *tmax_local, int endian_local){
   int len[3],labellengths=0;
@@ -72,21 +71,21 @@ void getisosizes(const char *isofile, int dataflag, EGZ_FILE **isostreamptr, int
   int skip_local;
   float ttmin, ttmax;
 
-  *isostreamptr=EGZ_FOPEN(isofile,"rb",0,2);
+  *isostreamptr=fopen(isofile,"rb");
 
   *tmin_local=1000000000.;
   *tmax_local=-1000000000.;
-  EGZ_FREAD(&one,4,1,*isostreamptr);
+  fread(&one,4,1,*isostreamptr);
   if(dataflag!=0){
-    EGZ_FREAD(&version,4,1,*isostreamptr);
+    fread(&version,4,1,*isostreamptr);
   }
   else{
     version=1;
   }
-  EGZ_FREAD(len,4,3,*isostreamptr);
+  fread(len,4,3,*isostreamptr);
   labellengths=len[0]+len[1]+len[2];
-  EGZ_FSEEK(*isostreamptr,labellengths+4,SEEK_CUR);
-  EGZ_FREAD(&nlevels,4,1,*isostreamptr);
+  FSEEK(*isostreamptr,labellengths+4,SEEK_CUR);
+  fread(&nlevels,4,1,*isostreamptr);
   *nisolevels=nlevels;
   if(*levelsptr==NULL){
     if(NewMemory((void **)levelsptr,*nisolevels*sizeof(float))==0)return;
@@ -94,15 +93,15 @@ void getisosizes(const char *isofile, int dataflag, EGZ_FILE **isostreamptr, int
   else{
     if(ResizeMemory((void **)levelsptr,*nisolevels*sizeof(float))==0)return;
   }
-  EGZ_FREAD(*levelsptr,4,(unsigned int)(nlevels),*isostreamptr);
+  fread(*levelsptr,4,(unsigned int)(nlevels),*isostreamptr);
   *niso_times=0; *nvertices=0; *ntriangles=0;
-  beg=EGZ_FTELL(*isostreamptr);
+  beg=FTELL(*isostreamptr);
   i=0;
   time_max=-1000000.0;
   for(;;){
     int skip_frame;
 
-    {EGZ_FREAD(&time_local,4,1,*isostreamptr);}
+    {fread(&time_local,4,1,*isostreamptr);}
     skip_frame=1;
     if(time_local>time_max){
       skip_frame=0;
@@ -110,21 +109,21 @@ void getisosizes(const char *isofile, int dataflag, EGZ_FILE **isostreamptr, int
     }
     nvertices_i=0;
     ntriangles_i=0;
-    if(EGZ_FEOF(*isostreamptr)!=0)break;
+    if(feof(*isostreamptr)!=0)break;
     for(n=0;n<nlevels;n++){
-      {EGZ_FREAD(&nvertices_i,4,1,*isostreamptr);}
-      if(EGZ_FEOF(*isostreamptr)!=0)break;
-      {EGZ_FREAD(&ntriangles_i,4,1,*isostreamptr);}
-      if(EGZ_FEOF(*isostreamptr)!=0)break;
+      {fread(&nvertices_i,4,1,*isostreamptr);}
+      if(feof(*isostreamptr)!=0)break;
+      {fread(&ntriangles_i,4,1,*isostreamptr);}
+      if(feof(*isostreamptr)!=0)break;
       skip_local=0;
       if(nvertices_i>0){
         skip_local += 6*nvertices_i;
-        EGZ_FSEEK(*isostreamptr,skip_local,SEEK_CUR);
+        FSEEK(*isostreamptr,skip_local,SEEK_CUR);
         skip_local=0;
         if(dataflag==1){
-          EGZ_FREAD(&ttmin,4,1,*isostreamptr);
+          fread(&ttmin,4,1,*isostreamptr);
           if(ttmin<*tmin_local)*tmin_local=ttmin;
-          EGZ_FREAD(&ttmax,4,1,*isostreamptr);
+          fread(&ttmax,4,1,*isostreamptr);
           if(ttmax>*tmax_local)*tmax_local=ttmax;
           skip_local += 2*nvertices_i;
         }
@@ -138,7 +137,7 @@ void getisosizes(const char *isofile, int dataflag, EGZ_FILE **isostreamptr, int
       else{
         skip_local+=ntriangles_i*4;
       }
-      {EGZ_FSEEK(*isostreamptr,skip_local,SEEK_CUR);}
+      {FSEEK(*isostreamptr,skip_local,SEEK_CUR);}
     }
     if(skip_frame==1)continue;
     i++;
@@ -150,7 +149,7 @@ void getisosizes(const char *isofile, int dataflag, EGZ_FILE **isostreamptr, int
     *ntriangles += ntriangles_i;
     *niso_times += 1;
   }
-  EGZ_FSEEK(*isostreamptr,beg,SEEK_SET);
+  FSEEK(*isostreamptr,beg,SEEK_SET);
   if(dataflag==1&&axislabels_smooth==1){
     smoothlabel(tmin_local,tmax_local,nrgb);
   }
@@ -247,7 +246,7 @@ void readiso_orig(const char *file, int ifile, int flag, int *errorcode){
   int ntotal_isotris=0, ntotal_isoverts=0;
 #endif
   float time_local, time_max;
-  EGZ_FILE *isostream;
+  FILE *isostream;
   int break_frame;
   int skip_local;
   float *fed_colors[3];
@@ -383,8 +382,8 @@ void readiso_orig(const char *file, int ifile, int flag, int *errorcode){
     skip_frame=0;
     iitime++;
 
-    EGZ_FREAD(&time_local,4,1,isostream);
-    if(EGZ_FEOF(isostream)!=0)break;
+    fread(&time_local,4,1,isostream);
+    if(feof(isostream)!=0)break;
     skip_frame=1;
     if(time_local>time_max){
       skip_frame=0;
@@ -402,16 +401,16 @@ void readiso_orig(const char *file, int ifile, int flag, int *errorcode){
           
       asurface->dataflag=ib->dataflag;
         
-      EGZ_FREAD(&nvertices_i,4,1,isostream);
+      fread(&nvertices_i,4,1,isostream);
 #ifdef _DEBUG
       ntotal_isoverts+=nvertices_i;
 #endif
-      if(EGZ_FEOF(isostream)!=0)break;
-      EGZ_FREAD(&ntriangles_i,4,1,isostream);
+      if(feof(isostream)!=0)break;
+      fread(&ntriangles_i,4,1,isostream);
 #ifdef _DEBUG
       ntotal_isotris+=ntriangles_i;
 #endif
-      if(EGZ_FEOF(isostream)!=0)break;
+      if(feof(isostream)!=0)break;
       asurface->niso_triangles=ntriangles_i/3;
       asurface->niso_vertices=nvertices_i;
         
@@ -429,7 +428,7 @@ void readiso_orig(const char *file, int ifile, int flag, int *errorcode){
         else{
           skip_local += (ntriangles_i*4);
         }
-        EGZ_FSEEK(isostream,skip_local,SEEK_CUR);
+        FSEEK(isostream,skip_local,SEEK_CUR);
         continue;
       }
       
@@ -448,7 +447,7 @@ void readiso_orig(const char *file, int ifile, int flag, int *errorcode){
           break;
         }
         verti = vertices_i;
-        EGZ_FREAD(vertices_i,2,(unsigned int)(3*nvertices_i),isostream);
+        fread(vertices_i,2,(unsigned int)(3*nvertices_i),isostream);
         for(ivert=0;ivert<nvertices_i;ivert++){
           isovert *isoverti;
           float *xyz;
@@ -476,14 +475,14 @@ void readiso_orig(const char *file, int ifile, int flag, int *errorcode){
           unsigned short *tvertices_i;
           float tcolorfactor, tcolorfactor2;
           
-          EGZ_FREAD(&asurface->tmin,4,1,isostream);
-          EGZ_FREAD(&asurface->tmax,4,1,isostream);
+          fread(&asurface->tmin,4,1,isostream);
+          fread(&asurface->tmax,4,1,isostream);
           //printf("amin=%f amax=%f imin=%f imax=%f\n",asurface->tmin,asurface->tmax,ib->tmin,ib->tmax);;
           if(NewMemory((void **)&tvertices_i,nvertices_i*sizeof(unsigned short))==0){
             break_frame=1;
             break;
           }
-          EGZ_FREAD(tvertices_i,2,(unsigned int)nvertices_i,isostream);
+          fread(tvertices_i,2,(unsigned int)nvertices_i,isostream);
           tcolorfactor = (asurface->tmax-asurface->tmin)/65535.;
           if(ib->tmax>ib->tmin){
             tcolorfactor2 = 255.0/(ib->tmax-ib->tmin);
@@ -506,7 +505,7 @@ void readiso_orig(const char *file, int ifile, int flag, int *errorcode){
           FREEMEMORY(tvertices_i);
         }
       }
-      if(EGZ_FEOF(isostream)!=0)break;
+      if(feof(isostream)!=0)break;
       if(ntriangles_i>0){
         unsigned char *triangles1_i;
         unsigned short *triangles2_i;
@@ -521,7 +520,7 @@ void readiso_orig(const char *file, int ifile, int flag, int *errorcode){
             break_frame=1;
             break;
           }
-          EGZ_FREAD(triangles1_i,1,(unsigned int)ntriangles_i,isostream);
+          fread(triangles1_i,1,(unsigned int)ntriangles_i,isostream);
           for(itri=0;itri<ntriangles_i;itri++){
             triangles_i[itri]=triangles1_i[itri];
           }
@@ -532,14 +531,14 @@ void readiso_orig(const char *file, int ifile, int flag, int *errorcode){
             break_frame=1;
             break;
           }
-          EGZ_FREAD(triangles2_i,2,(unsigned int)ntriangles_i,isostream);
+          fread(triangles2_i,2,(unsigned int)ntriangles_i,isostream);
           for(itri=0;itri<ntriangles_i;itri++){
             triangles_i[itri]=triangles2_i[itri];
           }
           FREEMEMORY(triangles2_i);
         }
         else{
-          EGZ_FREAD(triangles_i,4,(unsigned int)ntriangles_i,isostream);
+          fread(triangles_i,4,(unsigned int)ntriangles_i,isostream);
         } 
         if(NewMemory((void **)&asurface->iso_triangles,(ntriangles_i/3)*sizeof(isotri))==0){
           break_frame=1;
@@ -572,7 +571,7 @@ void readiso_orig(const char *file, int ifile, int flag, int *errorcode){
         FREEMEMORY(triangles_i);
       }
         
-      if(EGZ_FEOF(isostream)!=0)break;
+      if(feof(isostream)!=0)break;
 
       if(nvertices_i>0){
         float *vertnorms=NULL;
@@ -645,7 +644,7 @@ void readiso_orig(const char *file, int ifile, int flag, int *errorcode){
 
   local_stoptime = glutGet(GLUT_ELAPSED_TIME);
   delta_time = (local_stoptime-local_starttime)/1000.0;
-  EGZ_FCLOSE(isostream);
+  fclose(isostream);
   if(*errorcode!=0){
     unloadiso(meshi);
     readiso("",ifile,UNLOAD,&error);
