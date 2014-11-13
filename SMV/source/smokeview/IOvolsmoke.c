@@ -1709,7 +1709,7 @@ void get_volsmoke_all_times(volrenderdata *vr){
       int ncompressed;
       float *time_local;
 
-      vr->smokepos[ii]=ftell(volstream);
+      vr->smokepos[ii]=FTELL(volstream);
       if(fread(buffer,1,32,volstream)!=32)break;
       ncompressed=*(int *)(buffer+8)-32;
       time_local=(float *)(buffer+20);
@@ -1724,7 +1724,7 @@ void get_volsmoke_all_times(volrenderdata *vr){
       for(ii=0;ii<vr->ntimes;ii++){
         int ncompressed;
 
-        vr->firepos[ii]=ftell(volstream);
+        vr->firepos[ii]=FTELL(volstream);
         if(fread(buffer,1,32,volstream)!=32)break;
         ncompressed=*(int *)(buffer+8)-32;
         if(FSEEK(volstream,ncompressed,SEEK_CUR)!=0)break;

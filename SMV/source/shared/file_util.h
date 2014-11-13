@@ -15,11 +15,14 @@ typedef struct {
 #ifdef BIT64
 #ifdef X64
 #define FSEEK(a,b,c) _fseeki64(a,b,c)
+#define FTELL(a) _ftelli64(a)
 #else
 #define FSEEK(a,b,c) fseeko(a,b,c)
+#define FTELL(a) ftello(a)
 #endif
 #else
 #define FSEEK(a,b,c) fseek(a,b,c)
+#define FTELL(a) ftell(a)
 #endif
 
 EXTERNCPP int FFLUSH(void);
