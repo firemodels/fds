@@ -18,10 +18,10 @@ char CNVboundary_revision[]="$Revision$";
 pdfdata pdfmerge,pdfframe;
 
 
-#define FORTREAD(var,size) fseek(BOUNDARYFILE,4,SEEK_CUR);\
+#define FORTREAD(var,size) FSEEK(BOUNDARYFILE,4,SEEK_CUR);\
                            returncode=fread(var,4,size,BOUNDARYFILE);\
                            if(endianswitch==1)endian_switch(var,size);\
-                           fseek(BOUNDARYFILE,4,SEEK_CUR)
+                           FSEEK(BOUNDARYFILE,4,SEEK_CUR)
 
 /* ------------------ clean_boundary ------------------------ */
 
@@ -118,7 +118,7 @@ int convert_boundary(patch *patchi, int *thread_index){
   char cval[256];
   int percent_done;
   int percent_next=10;
-  long data_loc;
+  LINT data_loc;
   int zero=0;
   float time_max;
 
@@ -250,7 +250,7 @@ int convert_boundary(patch *patchi, int *thread_index){
     int skip;
 
     skip = 3*(4+30+4);  // skip over 3 records each containing a 30 byte FORTRAN character string
-    returncode=fseek(BOUNDARYFILE,skip,SEEK_CUR);
+    returncode=FSEEK(BOUNDARYFILE,skip,SEEK_CUR);
     sizebefore=skip;
   }
 
@@ -263,7 +263,7 @@ int convert_boundary(patch *patchi, int *thread_index){
     minmax[0]=patchi->valmin;
     minmax[1]=patchi->valmax;
     fwrite(minmax,4,2,boundarystream);    // conversion min max vals
-    fseek(boundarystream,8,SEEK_CUR);       // skip over local min max vals (we're set in pass 1);
+    FSEEK(boundarystream,8,SEEK_CUR);       // skip over local min max vals (we're set in pass 1);
     fwrite(&npatch,4,1,boundarystream);   // write out npatch
     sizeafter+=20;
   }
@@ -374,7 +374,7 @@ int convert_boundary(patch *patchi, int *thread_index){
       fwrite(compressed_boundarybuffer,1,ncompressed_zlib,boundarystream);    // write out compressed buffer
       sizeafter+=ncompressed_zlib+8;
 
-      data_loc=ftell(BOUNDARYFILE);
+      data_loc=FTELL(BOUNDARYFILE);
       percent_done=100.0*(float)data_loc/(float)patchi->filesize;
 #ifdef pp_THREAD
       threadinfo[*thread_index].stat=percent_done;
@@ -403,7 +403,7 @@ wrapup:
   }
 
   fclose(BOUNDARYFILE);
-  fseek(boundarystream,8,SEEK_SET);
+  FSEEK(boundarystream,8,SEEK_SET);
   fwrite(&one,4,1,boundarystream);  // write completion code
   fclose(boundarystream);
   fclose(boundarysizestream);

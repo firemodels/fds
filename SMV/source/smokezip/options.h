@@ -111,6 +111,16 @@
 #define FILE_SIZE unsigned int
 #endif
 
+#define LINT long int
+#ifdef X64
+#undef LINT
+#ifdef WIN32
+#define LINT __int64
+#else
+#define LINT long long int
+#endif
+#endif
+
 #ifdef X64
 #define STRUCTSTAT struct __stat64
 #define STAT _stat64

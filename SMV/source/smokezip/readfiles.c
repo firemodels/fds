@@ -306,7 +306,7 @@ int readsmv(char *smvfile){
       }
       endianstream=fopen(GLOBendianfile,"rb");
       if(endianstream!=NULL){
-        fseek(endianstream,4,SEEK_CUR);
+        FSEEK(endianstream,4,SEEK_CUR);
         fread(&one,4,1,endianstream);
         if(one==1){
           endianswitch=0;

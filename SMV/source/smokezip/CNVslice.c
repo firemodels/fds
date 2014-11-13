@@ -35,7 +35,7 @@ int convert_volslice(slice *slicei, int *thread_index){
   float *sliceframe_data=NULL;
   int sizebefore, sizeafter;
   int returncode;
-  long data_loc;
+  LINT data_loc;
   int percent_done;
   int percent_next=10;
 #ifndef pp_THREAD
@@ -200,7 +200,7 @@ int convert_volslice(slice *slicei, int *thread_index){
       count++;
 #endif
    
-      data_loc=ftell(SLICEFILE);
+      data_loc=FTELL(SLICEFILE);
       percent_done=100.0*(float)data_loc/(float)slicei->filesize;
 #ifdef pp_THREAD
       threadinfo[*thread_index].stat=percent_done;
@@ -294,7 +294,7 @@ int convert_slice(slice *slicei, int *thread_index){
   int ncol, nrow, idir;
   float time_max;
   int itime;
-  long fileloc;
+  LINT fileloc;
 
   FILE *SLICEFILE;
   FILE *slicestream,*slicesizestream;
@@ -602,7 +602,7 @@ int convert_slice(slice *slicei, int *thread_index){
       count++;
 #endif
    
-      data_loc=ftell(SLICEFILE);
+      data_loc=FTELL(SLICEFILE);
       percent_done=100.0*(float)data_loc/(float)slicei->filesize;
 #ifdef pp_THREAD
       threadinfo[*thread_index].stat=percent_done;
@@ -668,12 +668,12 @@ int convert_slice(slice *slicei, int *thread_index){
       ncompressed_zlib=ncompressed_save;
       returncode=compress(sliceframe_compressed,&ncompressed_zlib,sliceframe_uncompressed,framesize);
 
-      fileloc=ftell(slicestream);
+      fileloc=FTELL(slicestream);
       fwrite(&time_local,4,1,slicestream);
       fwrite(&ncompressed_zlib,4,1,slicestream);
       fwrite(sliceframe_compressed,1,ncompressed_zlib,slicestream);
       sizeafter+=(8+ncompressed_zlib);
-      fprintf(slicesizestream,"%f %i, %li\n",time_local,(int)ncompressed_zlib,fileloc);
+      fprintf(slicesizestream,"%f %i, %li\n",time_local,(int)ncompressed_zlib,(long)fileloc);
     }
     if(returncode!=0){
       fprintf(stderr,"*** Error: compress returncode=%i\n",returncode);
