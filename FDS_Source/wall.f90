@@ -2096,9 +2096,12 @@ HTC_MODEL_SELECT: SELECT CASE(HT_MODEL)
    CASE DEFAULT
       RE = RHO_G*VELCON*CONV_LENGTH/MU_Z(ITMP,0)
       SELECT CASE(GEOMETRY)
-         CASE (SURF_CARTESIAN,SURF_CYLINDRICAL)
+         CASE (SURF_CARTESIAN)
             ! Incropera and DeWitt, 3rd, 1990, Eq. 7.44
             NUSSELT = 0.037_EB*RE**0.8_EB*PR_ONTH
+         CASE (SURF_CYLINDRICAL)
+            ! Incropera and DeWitt, 3rd, 1990, Eq. 7.55, 40 < Re < 4000
+            NUSSELT = 0.683_EB*RE**0.466_EB*PR_ONTH
          CASE (SURF_SPHERICAL)
             ! Incropera and DeWitt, 3rd, 1990, Eq. 7.59
             NUSSELT = 2._EB + 0.6_EB*SQRT(RE)*PR_ONTH

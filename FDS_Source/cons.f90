@@ -43,7 +43,7 @@ INTEGER, PARAMETER :: ATMOSPHERIC_PROFILE=1, PARABOLIC_PROFILE=2, RAMP_PROFILE=4
 INTEGER, PARAMETER :: CELL_CENTER=1, CELL_FACE=2, CELL_EDGE=3                               ! Cell position for output quantities
 INTEGER, PARAMETER :: NO_STOP=0, INSTABILITY_STOP=1, USER_STOP=2, SETUP_STOP=3, &
                       SETUP_ONLY_STOP=4, CTRL_STOP=5, TGA_ANALYSIS_STOP=6                   ! Program Stop Status
-INTEGER, PARAMETER :: SPHERE_DRAG=1,CYLINDER_DRAG=2,USER_DRAG=3,NO_DRAG=4,SCREEN_DRAG=5,TREE_DRAG=6 ! Options for drag computation
+INTEGER, PARAMETER :: SPHERE_DRAG=1,CYLINDER_DRAG=2,USER_DRAG=3,SCREEN_DRAG=5               ! Options for drag computation
 INTEGER, PARAMETER :: OLD=1,NEW=2,GUESS=3,PREVIOUS=4                                        ! Network solver indices
 
 INTEGER :: MINT_SPECIES=20
