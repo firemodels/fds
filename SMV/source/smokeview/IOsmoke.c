@@ -491,11 +491,10 @@ void readsmoke3d(int ifile,int flag, int *errorcode){
 // read in data
 
   file_size=get_filesize(smoke3di->file);
-  if(fortran_skip==0){
-    SMOKE3DFILE=fopen(smoke3di->file,"rb");
-  }
-  else{
-    SMOKE3DFILE=fopen(smoke3di->file,"frb");
+  SMOKE3DFILE=fopen(smoke3di->file,"rb");
+  SKIP;
+  if(fortran_skip!=0){
+    SKIP;SKIP;
   }
   if(SMOKE3DFILE==NULL){
     readsmoke3d(ifile,UNLOAD,&error);
@@ -753,11 +752,10 @@ int getsmoke3d_sizes(int fortran_skip,char *smokefile, int version, float **time
       SMOKE_SIZE=fopen(smoke_sizefilename,"w");
     }
     if(SMOKE_SIZE==NULL)return 1;  // can't write size file in temp directory so give up
-    if(fortran_skip==0){
-      SMOKE3DFILE=fopen(smokefile,"rb");
-    }
-    else{
-      SMOKE3DFILE=fopen(smokefile,"frb");
+    SMOKE3DFILE=fopen(smokefile,"rb");
+    SKIP;
+    if(fortran_skip!=0){
+      SKIP;SKIP;
     }
     if(SMOKE3DFILE==NULL){
       fclose(SMOKE_SIZE);
