@@ -1648,44 +1648,20 @@ WREL   = LP%W - WBAR
 QREL   = SQRT(UREL*UREL + VREL*VREL + WREL*WREL)
 
 DRAG_LAW_SELECT: SELECT CASE (LPC%DRAG_LAW)
-   CASE (NO_DRAG)
-      C_DRAG = 0._EB
+
    CASE (USER_DRAG)
+
       C_DRAG = LPC%DRAG_COEFFICIENT
-      IF (LPC%LIQUID_DROPLET) THEN
-         A_DRAG = PI*RDS
-      ELSE
-         IW = LP%WALL_INDEX
-         SELECT CASE(SF%GEOMETRY)
-            CASE(SURF_CARTESIAN)
-               A_DRAG = SF%LENGTH*SF%WIDTH
-            CASE(SURF_CYLINDRICAL)
-               A_DRAG = 2._EB*RD*SF%LENGTH
-            CASE(SURF_SPHERICAL)                  
-               A_DRAG = PI*RDS
-         END SELECT
-      ENDIF
-   CASE (SCREEN_DRAG)
-   CASE (TREE_DRAG)      
+
+   CASE (SCREEN_DRAG)  ! Calculate this elsewhere
+
    CASE DEFAULT
+
       TMP_G  = MAX(TMPMIN,TMP(IIG,JJG,KKG))
       IF (N_TRACKED_SPECIES>0) ZZ_GET(1:N_TRACKED_SPECIES) = ZZ(IIG,JJG,KKG,1:N_TRACKED_SPECIES)
       CALL GET_VISCOSITY(ZZ_GET,MU_AIR,TMP_G)
       LP%RE  = RHO_G*QREL*2._EB*RD/MU_AIR
       C_DRAG = DRAG(LP%RE,LPC%DRAG_LAW)
-      IF (LPC%LIQUID_DROPLET) THEN
-         A_DRAG = PI*RDS
-      ELSE
-         IW = LP%WALL_INDEX
-         SELECT CASE(SF%GEOMETRY)
-            CASE(SURF_CARTESIAN)
-               A_DRAG = SF%LENGTH*SF%WIDTH
-            CASE(SURF_CYLINDRICAL)
-               A_DRAG = 2._EB*RD*SF%LENGTH
-            CASE(SURF_SPHERICAL)                  
-               A_DRAG = PI*RDS
-         END SELECT
-      ENDIF
 
       ! Drag reduction model for liquid droplets
 
@@ -1728,7 +1704,6 @@ DRAG_LAW_SELECT: SELECT CASE (LPC%DRAG_LAW)
             LP%ONE_D%X(1) = RD
             RDS      = RD*RD
             RDC      = RD*RDS
-            A_DRAG = PI*RDS
             ! Redo wake reduction and shape deformation for the new drop
             ! Drag reduction, except for particles associated with a SURF line
             WAKE_VEL = 1.0_EB
@@ -1745,9 +1720,30 @@ DRAG_LAW_SELECT: SELECT CASE (LPC%DRAG_LAW)
             C_DRAG   = SHAPE_DEFORMATION(RE_WAKE,WE_G,C_DRAG)
          ENDIF AGE_IF
       ENDIF BREAKUP
+
 END SELECT DRAG_LAW_SELECT
 
+! Calculate the cross-sectional area of the droplet or particle
+
+IF (LPC%DRAG_LAW/=SCREEN_DRAG) THEN
+   IF (LPC%LIQUID_DROPLET) THEN
+      A_DRAG = PI*RDS
+   ELSE
+      SELECT CASE(SF%GEOMETRY)
+         CASE(SURF_CARTESIAN)
+            A_DRAG = SF%LENGTH*SF%WIDTH
+         CASE(SURF_CYLINDRICAL)
+            A_DRAG = 2._EB*RD*SF%LENGTH
+         CASE(SURF_SPHERICAL)
+            A_DRAG = PI*RDS
+      END SELECT
+   ENDIF
+ENDIF
+
+! Move the particles unless they are STATIC
+
 PARTICLE_NON_STATIC_IF: IF (.NOT.LPC%STATIC) THEN ! Move airborne, non-stationary particles
+
    FP_MASS = (RHO_G/RVC)/NDPC(IIG,JJG,KKG) ! fluid parcel mass
    IF (FREEZE_VELOCITY) FP_MASS = 1.E10_EB
    
