@@ -118,7 +118,6 @@ int getmaxrevision(void){
   MAXREV(CNVslice_revision);
   MAXREV(csphere_revision);
   MAXREV(dmalloc_revision);
-  MAXREV(egz_stdio_revision);
   MAXREV(histogram_revision); //
   MAXREV(isobox_revision); //
   MAXREV(kdtree_revision); //

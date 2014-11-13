@@ -2105,7 +2105,6 @@ int getmaxrevision(void){
   MAXREV(csphere_revision);
   MAXREV(dmalloc_revision);
   MAXREV(drawGeometry_revision);
-  MAXREV(egz_stdio_revision);
   MAXREV(file_util_revision);
   MAXREV(geometry_revision);
   MAXREV(getdatabounds_revision);
