@@ -64,7 +64,10 @@ nmpi_processes=1
 nmpi_processes_per_node=1
 max_processes_per_node=1
 nopenmp_threads=1
-walltime=99:99:99
+walltime=99:99:99:99
+if [ "$RESOURCE_MANAGER" == "SLURM" ] ; then
+  walltime=99-99:99:99
+fi
 use_repository=0
 use_debug=0
 dir=.
