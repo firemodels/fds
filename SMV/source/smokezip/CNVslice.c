@@ -281,7 +281,7 @@ int convert_slice(slice *slicei, int *thread_index){
   int returncode;
   float minmax[2];
   float time_local;
-  long data_loc;
+  LINT data_loc;
   int percent_done;
   int percent_next=10;
   float valmin, valmax, denom;
@@ -294,7 +294,7 @@ int convert_slice(slice *slicei, int *thread_index){
   int ncol, nrow, idir;
   float time_max;
   int itime;
-  LINT fileloc;
+  LINT file_loc;
 
   FILE *SLICEFILE;
   FILE *slicestream,*slicesizestream;
@@ -668,12 +668,12 @@ int convert_slice(slice *slicei, int *thread_index){
       ncompressed_zlib=ncompressed_save;
       returncode=compress(sliceframe_compressed,&ncompressed_zlib,sliceframe_uncompressed,framesize);
 
-      fileloc=FTELL(slicestream);
+      file_loc=FTELL(slicestream);
       fwrite(&time_local,4,1,slicestream);
       fwrite(&ncompressed_zlib,4,1,slicestream);
       fwrite(sliceframe_compressed,1,ncompressed_zlib,slicestream);
       sizeafter+=(8+ncompressed_zlib);
-      fprintf(slicesizestream,"%f %i, %li\n",time_local,(int)ncompressed_zlib,(long)fileloc);
+      fprintf(slicesizestream,"%f %i, %li\n",time_local,(int)ncompressed_zlib,(long)file_loc);
     }
     if(returncode!=0){
       fprintf(stderr,"*** Error: compress returncode=%i\n",returncode);

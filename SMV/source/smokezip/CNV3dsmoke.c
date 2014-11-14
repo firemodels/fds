@@ -37,7 +37,7 @@ void convert_3dsmoke(smoke3d *smoke3di, int *thread_index){
   int returncode;
   int percent_done;
   int percent_next=10;
-  long data_loc;
+  LINT data_loc;
   char *smoke3dfile;
   float time_max;
   radiancedata radianceinfo;
