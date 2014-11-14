@@ -2623,7 +2623,7 @@ MATL_LOOP: DO N=1,N_MATL
       NR = -NINT(ML%K_S)
       WRITE(LU_OUTPUT,'(A,F8.4)') '     Conductivity (W/m/K)         ',EVALUATE_RAMP(TMPA,0._EB,NR)
    ENDIF
-   IF (ML%KAPPA_S<1.0E4_EB) THEN
+   IF (ML%KAPPA_S<5.0E4_EB) THEN
       WRITE(LU_OUTPUT,'(A,F8.2)') '     Absorption coefficient (1/m) ',ML%KAPPA_S
    ENDIF
    IF (ML%PYROLYSIS_MODEL==PYROLYSIS_SOLID) THEN
