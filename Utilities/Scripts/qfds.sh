@@ -30,6 +30,7 @@ then
   echo " -r   - report bindings"
   echo " -s   - stop job"
   echo " -t   - used for timing studies, run a job alone on a node"
+  echo " -w time - walltime, where time is dd:hh:mm:ss for PBS and dd-hh:mm:ss for SLURM."
   echo " -v   - list script used to run case to standard output"
   echo "input_file - input file"
   echo ""
@@ -63,7 +64,7 @@ nmpi_processes=1
 nmpi_processes_per_node=1
 max_processes_per_node=1
 nopenmp_threads=1
-
+walltime=99:99:99
 use_repository=0
 use_debug=0
 dir=.
@@ -76,7 +77,7 @@ nodelist=
 
 # read in parameters from command line
 
-while getopts 'bcd:e:f:j:l:m:n:o:p:q:rstv' OPTION
+while getopts 'bcd:e:f:j:l:m:n:o:p:q:rstw:v' OPTION
 do
 case $OPTION  in
   b)
@@ -125,6 +126,9 @@ case $OPTION  in
   t)
    benchmark="yes"
    ;;
+  w)
+   walltime="$OPTARG"
+   ;;
   v)
    showinput=1
    ;;
@@ -164,12 +168,6 @@ infile=${in%.*}
 TITLE="$infile"
 
 # define number of nodes
-
-if test $nopenmp_threads -gt 1 ; then
-  if test $nmpi_processes -gt 1 ; then
-    nmpi_processes_per_node=2
-  fi
-fi
 
 let "nodes=($nmpi_processes-1)/$nmpi_processes_per_node+1"
 if test $nodes -lt 1 ; then
@@ -290,7 +288,7 @@ fi
 
 if [ "$RESOURCE_MANAGER" == "SLURM" ] ; then
   MPIRUN="srun"
-  QSUB="sbatch -p $queue"
+  QSUB="sbatch -p $queue --ignore-pbs"
 fi
 
 # create a random script file for submitting jobs
@@ -306,13 +304,14 @@ cat << EOF >> $scriptfile
 #PBS -e $outerr
 #PBS -o $outlog
 #PBS -l nodes=$nodes:ppn=$ppn
+#PBS -l walltime=$walltime
 #SBATCH -J $JOBPREFIX$infile
-#SBATCH -t 24:00:00
-#SBATCH --mem-per-cpu=1000
+#SBATCH -t $walltime
+#SBATCH --mem-per-cpu=2000
 #SBATCH -e $outerr
 #SBATCH -o $outlog
 #SBATCH -p $queue
-#SBATCH -n 1
+# SBATCH -n 1
 #SBATCH --nodes=$nodes
 #SBATCH --cpus-per-task=$nopenmp_threads
 EOF
