@@ -1788,7 +1788,7 @@ void draw_geomtestclip(void){
   glScalef(SCALE2SMV(1.0),SCALE2SMV(1.0),SCALE2SMV(1.0));
   glTranslatef(-xbar0,-ybar0,-zbar0);
   setClipPlanes(&box_clipinfo,CLIP_ON_DENORMAL);
-  drawfilled2tetra(v1,v2,v3,v4,tetra0color,tetra1color,tetra2color,tetra3color,tetrabox_vis+6);
+  drawfilled2tetra(v1,v3,v2,v4,tetra0color,tetra1color,tetra2color,tetra3color,tetrabox_vis+6);
 
   glPopMatrix();
   // tetrahedron

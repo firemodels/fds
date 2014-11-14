@@ -345,9 +345,9 @@ extern "C" void glui_geometry_setup(int main_window){
   CHECKBOX_tetrabox_showhide[3]=glui_geometry->add_checkbox_to_panel(PANEL_geom3b,"ymax",tetrabox_vis+3);
   CHECKBOX_tetrabox_showhide[4]=glui_geometry->add_checkbox_to_panel(PANEL_geom3a,"zmin",tetrabox_vis+4);
   CHECKBOX_tetrabox_showhide[5]=glui_geometry->add_checkbox_to_panel(PANEL_geom3b,"zmax",tetrabox_vis+5);
-  CHECKBOX_tetrabox_showhide[6]=glui_geometry->add_checkbox_to_panel(PANEL_geom3c,"v1 v2 v4",tetrabox_vis+6);
+  CHECKBOX_tetrabox_showhide[8]=glui_geometry->add_checkbox_to_panel(PANEL_geom3c,"v1 v3 v4",tetrabox_vis+6);
   CHECKBOX_tetrabox_showhide[7]=glui_geometry->add_checkbox_to_panel(PANEL_geom3c,"v2 v3 v4",tetrabox_vis+7);
-  CHECKBOX_tetrabox_showhide[8]=glui_geometry->add_checkbox_to_panel(PANEL_geom3c,"v1 v3 v4",tetrabox_vis+8);
+  CHECKBOX_tetrabox_showhide[6]=glui_geometry->add_checkbox_to_panel(PANEL_geom3c,"v1 v2 v4",tetrabox_vis+8);
   CHECKBOX_tetrabox_showhide[9]=glui_geometry->add_checkbox_to_panel(PANEL_geom3c,"v1 v2 v3",tetrabox_vis+9);
 #endif
 
