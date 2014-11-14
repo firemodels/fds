@@ -9,6 +9,7 @@ DEBUG=
 IB=
 nthreads=1
 resource_manager=
+walltime=""
 
 if [ "$FDSNETWORK" == "infiniband" ] ; then
   IB=ib
@@ -35,12 +36,13 @@ echo "-r resource_manager - run cases using the resource manager"
 echo "     default: PBS"
 echo "     other options: SLURM"
 echo "-s - stop FDS runs"
+echo "-w time - walltime, where time is dd:hh:mm:ss with PBS and dd-hh:mm:ss with SLURM. Default is 99:99:99:99."
 exit
 }
 
 export SVNROOT=`pwd`/..
 
-while getopts 'c:dhm:o:q:r:s' OPTION
+while getopts 'c:dhm:o:q:r:sw:' OPTION
 do
 case $OPTION in
   c)
@@ -66,6 +68,9 @@ case $OPTION in
    ;;
   s)
    export STOPFDS=1
+   ;;
+  w)
+   walltime="-w $OPTARG"
    ;;
 esac
 done
@@ -105,17 +110,17 @@ export BASEDIR=`pwd`
 # Run appropriate set of cases depending on user specified set (-c option)
 case "$cases" in
   all)
-export QFDS="$QFDSSH -n $nthreads -e $FDSMPI $queue" 
+export QFDS="$QFDSSH $walltime -n $nthreads -e $FDSMPI $queue" 
     ./FDS_MPI_Cases.sh
-export QFDS="$QFDSSH -n $nthreads -e $FDS $queue" 
+export QFDS="$QFDSSH $walltime -n $nthreads -e $FDS $queue" 
     ./FDS_Cases.sh
     ;;
   serial)
-export QFDS="$QFDSSH -n $nthreads -e $FDS $queue" 
+export QFDS="$QFDSSH $walltime -n $nthreads -e $FDS $queue" 
     ./FDS_Cases.sh
     ;;
   mpi)
-export QFDS="$QFDSSH -n $nthreads -e $FDSMPI $queue" 
+export QFDS="$QFDSSH $walltime -n $nthreads -e $FDSMPI $queue"
     ./FDS_MPI_Cases.sh
     ;;
 esac
