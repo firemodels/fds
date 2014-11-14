@@ -245,10 +245,10 @@ END SUBROUTINE DUMP_MESH_OUTPUTS
 SUBROUTINE ASSIGN_FILE_NAMES
  
 ! Assign names and logical units for all output files
+
 USE COMP_FUNCTIONS
 INTEGER :: NM,I,N
 CHARACTER(LABEL_LENGTH) :: CFORM
-!CHARACTER(100) :: MESSAGE
 
 ! Set up file number counter
 
