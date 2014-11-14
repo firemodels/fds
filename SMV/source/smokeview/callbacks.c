@@ -1712,7 +1712,7 @@ void keyboard(unsigned char key, int flag){
          blocklocation>BLOCKlocation_exact&&ncadgeom==0){
          blocklocation=BLOCKlocation_grid;
       }
-      if(showedit_dialog==1){
+      if(showedit_dialog==1&&show_geomtest==0){
         if(blocklocation==BLOCKlocation_exact){
           blockage_as_input=1;
         }

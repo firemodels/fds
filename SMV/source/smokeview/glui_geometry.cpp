@@ -584,7 +584,7 @@ extern "C" void OBJECT_CB(int var){
         }
         blockages_dirty=1;
         updateusetextures();
-        update_faces();
+        UpdateFaces();
       }
       break;
     case RADIO_WALL:

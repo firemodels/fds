@@ -749,7 +749,7 @@ EXTERNCPP void draw_facesOLD(void);
 EXTERNCPP void drawselect_faces(void);
 EXTERNCPP void allocate_faces(void);
 EXTERNCPP void UpdateFacelists(void);
-EXTERNCPP void update_faces(void);
+EXTERNCPP void UpdateFaces(void);
 EXTERNCPP void drawticks(void);
 EXTERNCPP void set_startup_view(void);
 EXTERNCPP void add_list_view(char *label_in);

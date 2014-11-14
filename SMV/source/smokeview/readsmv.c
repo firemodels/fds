@@ -7448,7 +7448,7 @@ typedef struct {
   makeiblank_smoke3d();
   SetVentDirs();
   SetCVentDirs();
-  update_faces();
+  UpdateFaces();
 
   xcenGLOBAL=xbar/2.0;  ycenGLOBAL=ybar/2.0; zcenGLOBAL=zbar/2.0;
   xcenCUSTOM=xbar/2.0;  ycenCUSTOM=ybar/2.0; zcenCUSTOM=zbar/2.0;

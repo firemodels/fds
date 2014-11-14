@@ -5681,7 +5681,7 @@ updatemenu=0;
 /* --------------------------------geometry menu -------------------------- */
 
   CREATEMENU(geometrymenu,GeometryMenu);
-  if(showedit_dialog==0&&ntotal_blockages>0)glutAddSubMenu(_("Obstacles"),blockagemenu);
+  if(ntotal_blockages>0)glutAddSubMenu(_("Obstacles"),blockagemenu);
   if(ngeominfo>0)glutAddSubMenu(_("Immersed Solids"),immersedmenu);
   if(nobject_defs>0||ncvents>0){
     int num_activedevices=0;
