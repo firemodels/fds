@@ -811,10 +811,10 @@ Methanol &  796  &  2.48   & 0.20  &   1099  & 20934  & 0.16 & 0.001 & 0.001 & 6
 \section{Wildland Fire Spread (CSIRO Grassland Fires)}
 \label{WUI}
 
-This section contains a description and results for simulations of two of the CSIRO Grassland Fire experiments. The first experiment, C064, was conducted on a 100~m by 100~m plot; the second, F19, was conducted on a 200~m by 200~m plot. Measured properties for the specific types of grasses burned in the two experiments are listed in Table~\ref{Properties_Grasses}. Properties that were not measured are listed in Table~\ref{Assumed_Properties_Grasses}. These assumed properties are typically for wood or cellulosic fuels. The moisture is modeled as water, and the soil is assumed to have a density of 1000~kg/m$^3$, thermal conductivity of 0.1~W/(m$\cdot$K), and specific heat of 1~kJ/(kg$\cdot$K). The grass is assumed to be composed primarily of cellulose.
+This section contains a description and results for simulations of two of the CSIRO Grassland Fire experiments. The first experiment, C064, was conducted on a 100~m by 100~m plot; the second, F19, was conducted on a 200~m by 200~m plot. Measured properties for the specific types of grasses burned in the two experiments are listed in Table~\ref{Properties_Grasses}. Properties that were not measured are listed in Table~\ref{Assumed_Properties_Grasses}. These assumed properties are typically for wood or cellulosic fuels. The moisture is modeled as water. The grass is assumed to be composed primarily of cellulose.
 
 \begin{figure}[ht]
-\includegraphics[width=\textwidth]{FIGURES/Case_F19_0358.png}
+\includegraphics[width=\textwidth]{FIGURES/CSIRO_Grassland_Fires/Case_F19_0358.png}
 \caption[Snapshot of the simulation of CSIRO Grassland Fire F19]{Snapshot of the simulation of CSIRO Grassland Fire F19.}
 \label{F19}
 \end{figure}
@@ -834,7 +834,7 @@ Wind Speed                      & m/s           & 4.8           & 4.6           
 Ambient Temperature             & $^\circ$C     & 34            & 32            \\ \hline
 Surface Area to Volume Ratio    & m$^{-1}$      & 12240         & 9770          \\ \hline
 Grass Height                    & m             & 0.51          & 0.21          \\ \hline
-Bulk Mass per Unit Area         & kg/m$^3$      & 0.313         & 0.283         \\ \hline
+Bulk Mass per Unit Area         & kg/m$^2$      & 0.313         & 0.283         \\ \hline
 Moisture Fraction               & \%            & 5.8           & 6.3           \\ \hline
 \end{tabular}
 \end{center}
@@ -855,7 +855,7 @@ Specific Heat                   & kJ/(kg$\cdot$K)       & 1.5                   
 Conductivity                    & W/(m$\cdot$K)         & 0.1                       & Assumption                            \\ \hline
 Density                         & kg/m$^3$              & 512                       & \cite{Rothermel:1972}                 \\ \hline
 Heat of Pyrolysis               & kJ/kg                 & 418                       & \cite{Morvan:CF2004}                  \\ \hline
-Pyrolyis Temperature            & $^\circ$C             & 250                       & \cite{Morvan:CF2004}                  \\ \hline \hline
+Pyrolyis Temperature            & $^\circ$C             & 200                       & \cite{Morvan:CF2004}                  \\ \hline \hline
 Soil Specific Heat              & kJ/(kg$\cdot$K)       & 2.0                       & \cite{Farouki:1981}                   \\ \hline
 Soil Conductivity               & W/(m$\cdot$K)         & 0.25                      & \cite{Farouki:1981}                   \\ \hline
 Soil Density                    & kg/m$^3$              & 1300                      & \cite{Farouki:1981}                   \\ \hline
@@ -873,6 +873,76 @@ The results of the simulations are shown in Fig.~\ref{CSIRO}. The fire front in 
 \end{tabular*}
 \caption[Comparison measured and predicted fire front position for the CSIRO Grassland Fires]{Comparison measured and predicted fire front position for the CSIRO Grassland Fires.}
 \label{CSIRO}
+\end{figure}
+
+
+\clearpage
+
+\section{Burning Trees (NIST Douglas Firs)}
+\label{Douglas_Firs}
+
+This section contains a description and results for simulations of three Douglas fir tree fires. Measured properties for the specific types of grasses burned in the two experiments are listed in Table~\ref{Properties_Trees}. Properties that were not measured are listed in Table~\ref{Assumed_Properties_Trees}. These assumed properties are typically for wood or cellulosic fuels. The moisture is modeled as water. The vegetation is assumed to be composed primarily of cellulose.
+
+Snapshots of the simulation of the 2~m, 14~\% case are shown in Fig.~\ref{tree_snaps}. The computational domain in this case is 2~m by 2~m by 4~m. The grid cells are 5~cm cubes. The pine needles are represented by 100,000 Lagrangian particles with a cylindrical geometry, or about 25 simulated needles per grid cell. The radius of the cylinder is derived from the measured surface area to volume ratio. Each simulated pine needle represents many more actual needles. The weighting factor is determined from the estimated bulk mass per unit volume.
+
+The results of the simulations are shown in Fig.~\ref{NIST_Douglas_Fir_MLR}. 
+
+\begin{figure}[ht]
+\includegraphics[width=2in]{FIGURES/NIST_Douglas_Firs/tree_2_m_14_pc_0290}
+\includegraphics[width=2in]{FIGURES/NIST_Douglas_Firs/tree_2_m_14_pc_0544}
+\includegraphics[width=2in]{FIGURES/NIST_Douglas_Firs/tree_2_m_14_pc_0879}
+\caption[Snapshots of a 2~m Douglas fir fire simulation]{Snapshots of the simulation of the 2~m tall Douglas fir tree, 14~\% moisture.}
+\label{tree_snaps}
+\end{figure}
+
+\begin{table}[ht]
+\begin{center}
+\caption[Measured properties for the NIST Douglas fir trees]{Measured properties for the NIST Douglas fir trees~\cite{Mell:2009}.}
+\label{Properties_Trees}
+\begin{tabular}{|l|c|c|c|c|}
+\hline
+Property                        & Units         & Case 1        & Case 2        & Case 3     \\ \hline \hline
+Crown Height                    & m             & 1.9           & 1.9           & 4.2        \\ \hline
+Base Height                     & m             & 0.15          & 0.15          & 0.3        \\ \hline
+Base Width                      & m             & 1.7           & 1.7           & 2.9        \\ \hline
+Surface Area to Volume Ratio    & m$^{-1}$      & 3940          & 3940          & 3940       \\ \hline
+Initial Mass                    & kg            & 9.7           & 13.5          & 57.9       \\ \hline
+Bulk Mass per Unit Volume       & kg/m$^3$      & 4.45          & 6.2           & 6.2        \\ \hline
+Moisture Fraction               & \%            & 14            & 49            & 26         \\ \hline
+\end{tabular}
+\end{center}
+\end{table}
+
+\begin{table}
+\begin{center}
+\caption[Assumed properties for the vegetation]{Assumed properties for the vegetation. Note that the Pyrolysis Temperature is taken to be the temperature at which the mass loss rate peaks in the TGA experiments of Morvan and Dupuy~\cite{Morvan:CF2004}.}
+\label{Assumed_Properties_Trees}
+\begin{tabular}{|l|c|c|c|}
+\hline
+Property                        & Units                 & Value                     & Reference                             \\ \hline \hline
+Chemical Composition            & --                    & C$_6$H$_{10}$O$_5$        & Assumption                            \\ \hline
+Heat of Combustion              & kJ/kg                 & 17700                     & \cite{Susott:FS1982}                  \\ \hline
+Soot Yield                      & kg/kg                 & 0.015                     & \cite{SFPE:Tewarson}                  \\ \hline
+Char Yield                      & kg/kg                 & 0.26                      & \cite{Susott:FS1982}                  \\ \hline
+Specific Heat                   & kJ/(kg$\cdot$K)       & 1.2                       & Various sources                       \\ \hline
+Conductivity                    & W/(m$\cdot$K)         & 2                         & Assumption                            \\ \hline
+Density                         & kg/m$^3$              & 514                       & \cite{Rothermel:1972}                 \\ \hline
+Heat of Pyrolysis               & kJ/kg                 & 418                       & \cite{Morvan:CF2004}                  \\ \hline
+Pyrolyis Temperature            & $^\circ$C             & 200                       & \cite{Morvan:CF2004}                  \\ \hline 
+\end{tabular}
+\end{center}
+\end{table}
+
+\newpage
+
+\begin{figure}[h]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/NIST_Douglas_Firs/tree_2_m_14_pc} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/NIST_Douglas_Firs/tree_2_m_49_pc} \\
+\multicolumn{2}{c}{\includegraphics[height=2.2in]{SCRIPT_FIGURES/NIST_Douglas_Firs/tree_5_m_26_pc} }
+\end{tabular*}
+\caption[Comparison measured and predicted mass loss rate for the Douglas fir tree experiments]{Comparison measured and predicted mass loss rate for the Douglas fir tree experiments.}
+\label{NIST_Douglas_Fir_MLR}
 \end{figure}
 
 
