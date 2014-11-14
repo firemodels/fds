@@ -314,9 +314,9 @@ void drawtours(void){
   if(show_tourlocus==1){
     switch (tourlocus_type){
       case 0:
-        glColor3fv(tourcol_avatar);
         antialias(ON);
         glBegin(GL_LINES);
+        glColor3fv(tourcol_avatar);
         for(i=0;i<ntours;i++){
           tourdata *touri;
           pathdata *pj;
@@ -331,10 +331,7 @@ void drawtours(void){
           if(keyframe_snap==1)pj = pj->keysnap;
 
           glVertex3fv(pj->eye);
-          glPushMatrix();
-          glTranslatef(0.0,0.0,0.1);
-          glVertex3fv(pj->eye);
-          glPopMatrix();
+          glVertex3f(pj->eye[0],pj->eye[1],pj->eye[2]+0.1);
 
           glVertex3fv(pj->eye);
           glVertex3fv(pj->tour_view);
