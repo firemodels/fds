@@ -10442,8 +10442,8 @@ int readini2(char *inifile, int localfile){
     }
     if(match(buffer,"USER_ROTATE") == 1){
       if(fgets(buffer,255,stream)==NULL)break;
-      sscanf(buffer,"%i %i %f %f %f",&glui_rotation_index,&show_rotation_center,&xcenCUSTOM,&ycenCUSTOM,&zcenCUSTOM);
-      update_rotation_center=1;
+      sscanf(buffer,"%i %i %f %f %f",&glui_rotation_index_ini,&show_rotation_center,&xcenCUSTOM,&ycenCUSTOM,&zcenCUSTOM);
+      update_rotation_center_ini=1;
       continue;
     }
     if(match(buffer,"INPUT_FILE") == 1){

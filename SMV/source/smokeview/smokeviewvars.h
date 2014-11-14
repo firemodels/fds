@@ -514,6 +514,7 @@ SVEXTERN float SVDECL(xcenGLOBAL,0.5), SVDECL(ycenGLOBAL,0.5), SVDECL(zcenGLOBAL
 SVEXTERN float SVDECL(xcenCUSTOM,0.5), SVDECL(ycenCUSTOM,0.5), SVDECL(zcenCUSTOM,0.5);
 SVEXTERN float SVDECL(xcenCUSTOMsmv,0.5), SVDECL(ycenCUSTOMsmv,0.5), SVDECL(zcenCUSTOMsmv,0.5);
 SVEXTERN int glui_rotation_index,SVDECL(update_rotation_center,0);
+SVEXTERN int glui_rotation_index_ini,SVDECL(update_rotation_center_ini,0);
 
 SVEXTERN float xbar, ybar, zbar;
 SVEXTERN float xbar0, ybar0, zbar0;

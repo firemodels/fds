@@ -57,12 +57,16 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
   if(update_gslice==1){
     update_gslice_parms();
   }
-  if(update_rotation_center==1){
 #define MESH_LIST 4
-    
+  if(update_rotation_center==1){
     camera_current->rotation_index=glui_rotation_index;
     Motion_CB(MESH_LIST);
     update_rotation_center=0;
+  }
+  if(update_rotation_center_ini==1){
+    camera_current->rotation_index=glui_rotation_index_ini;
+    Motion_CB(MESH_LIST);
+    update_rotation_center_ini=0;
   }
   if(camera_current->dirty==1){
     update_camera(camera_current);

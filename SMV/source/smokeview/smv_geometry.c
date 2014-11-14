@@ -1828,28 +1828,28 @@ void initTetraClipInfo(clipdata *ci,float *v1, float *v2, float *v3, float *v4){
   ci->option=TETRA_CLIPPLANES;
   VECDIFF3(v1d,v2,v1);
   VECDIFF3(v2d,v4,v1);
-  CROSS(clipvals,v2d,v1d);
+  CROSS(clipvals,v1d,v2d);
   NORMALIZE3(clipvals);
   clipvals[3]=-DOT3(clipvals,v1);
 
   clipvals+=4;
   VECDIFF3(v1d,v3,v2);
   VECDIFF3(v2d,v4,v2);
-  CROSS(clipvals,v2d,v1d);
+  CROSS(clipvals,v1d,v2d);
   NORMALIZE3(clipvals);
   clipvals[3]=-DOT3(clipvals,v2);
 
   clipvals+=4;
   VECDIFF3(v1d,v1,v3);
   VECDIFF3(v2d,v4,v3);
-  CROSS(clipvals,v2d,v1d);
+  CROSS(clipvals,v1d,v2d);
   NORMALIZE3(clipvals);
   clipvals[3]=-DOT3(clipvals,v3);
 
   clipvals+=4;
   VECDIFF3(v1d,v3,v1);
   VECDIFF3(v2d,v2,v1);
-  CROSS(clipvals,v2d,v1d);
+  CROSS(clipvals,v1d,v2d);
   NORMALIZE3(clipvals);
   clipvals[3]=-DOT3(clipvals,v1);
 }

@@ -1587,11 +1587,16 @@ void read_geomdata(int ifile, int load_flag, int *errorcode){
 
 void draw_geomtestclip(void){
   float *xmin, *xmax, *ymin, *ymax, *zmin, *zmax;
-  unsigned char cubecolor[4]={0,255,255,255};
-  unsigned char tetra0color[4]={255,0,0,255};
-  unsigned char tetra1color[4]={0,255,0,255};
-  unsigned char tetra2color[4]={0,0,255,255};
-  unsigned char tetra3color[4]={255,255,0,255};
+  unsigned char cube0color[4] ={255,  0,  0,255};
+  unsigned char cube1color[4] ={128,  0,  0,255};
+  unsigned char cube2color[4] ={  0,255,  0,255};
+  unsigned char cube3color[4] ={  0,128,  0,255};
+  unsigned char cube4color[4] ={  0,  0,255,255};
+  unsigned char cube5color[4] ={  0,  0,128,255};
+  unsigned char tetra0color[4]={  0,255,255,255};
+  unsigned char tetra1color[4]={255,  0,255,255};
+  unsigned char tetra2color[4]={255,255,  0,255};
+  unsigned char tetra3color[4]={ 64, 64, 64,255};
   unsigned char tetracoloroutline[4]={255,0,255,255};
   clipdata tetra_clipinfo, box_clipinfo;
   float *v1, *v2, *v3, *v4;
@@ -1687,54 +1692,89 @@ void draw_geomtestclip(void){
     double err;
 
     glBegin(GL_QUADS);
-    glColor3ubv(cubecolor);
 
     if(box_state[4]==-1&&tetrabox_vis[4]==1){
       glNormal3f( 0.0, 0.0,-1.0);
+      glColor3ubv(cube4color);
       glVertex3f( 0.0,0.0,0.0);  // 1
       glVertex3f( 0.0,1.0,0.0);  // 4
       glVertex3f( 1.0,1.0,0.0);  // 3
       glVertex3f( 1.0,0.0,0.0);  // 2
+
+      glVertex3f( 0.0,0.0,0.0);  // 1
+      glVertex3f( 1.0,0.0,0.0);  // 2
+      glVertex3f( 1.0,1.0,0.0);  // 3
+      glVertex3f( 0.0,1.0,0.0);  // 4
     }
 
     if(box_state[5]==-1&&tetrabox_vis[5]==1){
       glNormal3f(0.0,0.0,1.0);
+      glColor3ubv(cube5color);
       glVertex3f(0.0,0.0,1.0);  // 5
       glVertex3f(1.0,0.0,1.0);  // 6
       glVertex3f(1.0,1.0,1.0);  // 7
       glVertex3f(0.0,1.0,1.0);  // 8
+
+      glVertex3f(0.0,0.0,1.0);  // 5
+      glVertex3f(0.0,1.0,1.0);  // 8
+      glVertex3f(1.0,1.0,1.0);  // 7
+      glVertex3f(1.0,0.0,1.0);  // 6
     }
 
     if(box_state[2]==-1&&tetrabox_vis[2]==1){
       glNormal3f(0.0,-1.0,0.0);
+      glColor3ubv(cube2color);
       glVertex3f(0.0,0.0,0.0);  // 1
       glVertex3f(1.0,0.0,0.0);  // 2
       glVertex3f(1.0,0.0,1.0);  // 6
       glVertex3f(0.0,0.0,1.0);  // 5
+
+      glVertex3f(0.0,0.0,0.0);  // 1
+      glVertex3f(0.0,0.0,1.0);  // 5
+      glVertex3f(1.0,0.0,1.0);  // 6
+      glVertex3f(1.0,0.0,0.0);  // 2
     }
 
     if(box_state[3]==-1&&tetrabox_vis[3]==1){
       glNormal3f(0.0,1.0,0.0);
+      glColor3ubv(cube3color);
       glVertex3f(1.0,1.0,0.0);  // 3
       glVertex3f(0.0,1.0,0.0);  // 4
       glVertex3f(0.0,1.0,1.0);  // 8
       glVertex3f(1.0,1.0,1.0);  // 7
+
+      glVertex3f(1.0,1.0,0.0);  // 3
+      glVertex3f(1.0,1.0,1.0);  // 7
+      glVertex3f(0.0,1.0,1.0);  // 8
+      glVertex3f(0.0,1.0,0.0);  // 4
     }
 
     if(box_state[0]==-1&&tetrabox_vis[0]==1){
       glNormal3f(-1.0,0.0,0.0);
+      glColor3ubv(cube0color);
       glVertex3f(0.0,0.0,0.0);  // 1
       glVertex3f(0.0,0.0,1.0);  // 5
       glVertex3f(0.0,1.0,1.0);  // 8
       glVertex3f(0.0,1.0,0.0);  // 4
+
+      glVertex3f(0.0,0.0,0.0);  // 1
+      glVertex3f(0.0,1.0,0.0);  // 4
+      glVertex3f(0.0,1.0,1.0);  // 8
+      glVertex3f(0.0,0.0,1.0);  // 5
     }
 
     if(box_state[1]==-1&&tetrabox_vis[1]==1){
       glNormal3f(1.0,0.0,0.0);
+      glColor3ubv(cube1color);
       glVertex3f(1.0,0.0,0.0);  // 2
       glVertex3f(1.0,1.0,0.0);  // 3
       glVertex3f(1.0,1.0,1.0);  // 7
       glVertex3f(1.0,0.0,1.0);  // 6
+
+      glVertex3f(1.0,0.0,0.0);  // 2
+      glVertex3f(1.0,0.0,1.0);  // 6
+      glVertex3f(1.0,1.0,1.0);  // 7
+      glVertex3f(1.0,1.0,0.0);  // 3
     }
     glEnd();
   }

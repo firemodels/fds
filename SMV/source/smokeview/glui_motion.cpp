@@ -212,7 +212,7 @@ extern "C" void gluiIdle(void){
   GLUI_Master.set_glutIdleFunc(Idle_CB);
 }
 
-/* ------------------ gluiIdelNULL ------------------------ */
+/* ------------------ gluiIdleNULL ------------------------ */
 
 extern "C" void gluiIdleNULL(void){
   GLUI_Master.set_glutIdleFunc(NULL);
@@ -347,7 +347,7 @@ extern "C" void glui_motion_setup(int main_window){
   rotation_type_CB(rotation_type);
 
   rotation_index=&camera_current->rotation_index;
-  *rotation_index=glui_rotation_index;
+  *rotation_index=glui_rotation_index_ini;
 
   LIST_mesh2 = glui_motion->add_listbox_to_panel(ROLLOUT_motion,_("Rotate about:"),rotation_index,MESH_LIST,Motion_CB);
   LIST_mesh2->add_item(-1,_("user specified center"));
@@ -665,6 +665,7 @@ void update_rotation_index(int val){
   rotation_index = &camera_current->rotation_index;
 
   *rotation_index=val;
+  camera_current->rotation_index=val;
   if(*rotation_index>=0&&*rotation_index<nmeshes){
     mesh *meshi;
 
@@ -1021,6 +1022,7 @@ extern "C" void Motion_CB(int var){
         update_current_mesh(meshinfo);
         update_rotation_index(nmeshes);
       }
+      update_rotation_center=1;
       return;
     case ZOOM:
       zoomindex=-1;
