@@ -8602,6 +8602,32 @@ int readini2(char *inifile, int localfile){
         update_gslice=1;
         continue;
       }
+      if(match(buffer,"CUBETETRATEST")==1){
+        int *v,i;
+        float *b1,*b2,*b3;
+
+        v=tetrabox_vis;
+        fgets(buffer,255,stream);
+        sscanf(buffer,"%i %i %i %i %i %i ",&show_geomtest,v,v+1,v+2,v+3,v+4);
+        fgets(buffer,255,stream);
+        sscanf(buffer,"%i %i %i %i %i ",v+5,v+6,v+7,v+8,v+9);
+        ONEORZERO(show_geomtest);
+        for(i=0;i<10;i++){
+          ONEORZERO(v[i]);
+        }
+        b1=box_bounds2;
+        b2=tetra_vertices;
+        b3=box_translate;
+        fgets(buffer,255,stream);
+        sscanf(buffer,"%f %f %f %f %f %f",b1,b1+1,b1+2,b1+3,b1+4,b1+5);
+        fgets(buffer,255,stream);
+        sscanf(buffer,"%f %f %f %f %f %f",b2,b2+1,b2+2,b2+3,b2+4,b2+5);
+        fgets(buffer,255,stream);
+        sscanf(buffer,"%f %f %f %f %f %f",b2+6,b2+7,b2+8,b2+9,b2+10,b2+11);
+        fgets(buffer,255,stream);
+        sscanf(buffer,"%f %f %f",b3,b3+1,b3+2);
+        continue;
+      }
       if(match(buffer,"GRIDPARMS")==1){
         fgets(buffer,255,stream);
         sscanf(buffer,"%i %i %i",&visx_all, &visy_all, &visz_all);
@@ -11495,6 +11521,23 @@ void writeini(int flag,char *filename){
   fprintf(fileout," %f %f %f\n",direction_color[0],direction_color[1],direction_color[2]);
   fprintf(fileout,"USER_ROTATE\n");
   fprintf(fileout,"%i %i %f %f %f\n",glui_rotation_index,show_rotation_center,xcenCUSTOM,ycenCUSTOM,zcenCUSTOM);
+  {
+    int *v;
+    float *b1,*b2,*b3;
+
+    fprintf(fileout,"CUBETETRATEST\n");
+    v=tetrabox_vis;
+    fprintf(fileout,"%i %i %i %i %i %i\n",show_geomtest,v[0],v[1],v[2],v[3],v[4]);
+    fprintf(fileout,"%i %i %i %i %i\n",v[5],v[6],v[7],v[8],v[9]);
+    b1=box_bounds2;
+    b2=tetra_vertices;
+    b3=box_translate;
+    fprintf(fileout,"%f %f %f %f %f %f\n",b1[0],b1[1],b1[2],b1[3],b1[4],b1[5]);
+    fprintf(fileout,"%f %f %f %f %f %f\n",b2[0],b2[1],b2[2],b2[3],b2[4],b2[5]);
+    fprintf(fileout,"%f %f %f %f %f %f\n",b2[6],b2[7],b2[8],b2[9],b2[10],b2[11]);
+    fprintf(fileout,"%f %f %f\n",b3[0],b3[1],b3[2]);
+  }
+
  
   if(flag==LOCAL_INI){
     fprintf(fileout,"AVATAREVAC\n");
