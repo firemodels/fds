@@ -12,7 +12,7 @@
 #include "svzip.h"
 #include "MALLOC.h"
 
-//dummy change to bump version number to 1.4.6
+//dummy change to bump version number to 1.4.8
 //dummy change to force revision update
 
 // svn revision character string
