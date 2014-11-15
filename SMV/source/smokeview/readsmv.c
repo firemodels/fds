@@ -12175,8 +12175,7 @@ void writeini(int flag,char *filename){
           tourdata *touri;
 
           touri = tourinfo + i;
-          if(ii==1&&touri->startup==0)continue;
-          if(ii==0&&touri->startup==1)continue;
+          if(touri->startup==1)continue;
 
           trim(touri->label);
           fprintf(fileout," %s\n",touri->label);
