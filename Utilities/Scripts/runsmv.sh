@@ -7,7 +7,7 @@ ssffile=
 WFDSCASE="no"
 TIMEOPTION=
 
-while getopts 'd:fmtw' OPTION
+while getopts 'd:fmTw' OPTION
 do
 case $OPTION in
   d)
@@ -19,7 +19,7 @@ case $OPTION in
   m)
    MOVIE="y"
    ;;
-  t)
+  T)
    TIMEOPTION=-time
    ;;
   w)
