@@ -1819,6 +1819,12 @@ DO I=1,NWP-1
    K_S(I)  = 1._EB / ( DX_WGT_S(I)/K_S(I) + (1._EB-DX_WGT_S(I))/K_S(I+1) )
 ENDDO
 
+! Add specified source term
+
+DO I=1,NWP
+   Q_S(I) = Q_S(I)+SF%SPECIFIED_SOURCE_TERM(LAYER_INDEX(I))
+ENDDO
+
 ! Calculate internal radiation
 
 IF (SF%INTERNAL_RADIATION) THEN
