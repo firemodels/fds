@@ -1811,45 +1811,74 @@ void init_clip(void){
   stepclip_xmax=0,stepclip_ymax=0,stepclip_zmax=0;
 }
 
+
+/* ------------------ volume_tetrahedron ------------------------ */
+
+float volume_tetrahedron(float *v1, float *v2, float *v3, float *v4){
+  float v2d[3], v3d[3], v4d[3], vcross[3];
+
+  VECDIFF3(v2d,v2,v1);
+  VECDIFF3(v3d,v3,v1);
+  VECDIFF3(v4d,v4,v1);
+  CROSS(vcross,v2d,v3d);
+  return DOT3(v4d,vcross)/6.0;
+}
+
 /* ----------------------- initTetraClipInfo ----------------------------- */
 
 void initTetraClipInfo(clipdata *ci,float *v1, float *v2, float *v3, float *v4){
   float v1d[3], v2d[3];
   GLdouble *clipvals;
+  float vol;
 
   //     v4
   //     .  .
-  //     .   v3
-  //     .  /  \         v4           v4          v4             v2
+  //     .   v2
+  //     .  /  \         v4           v4          v4             v3
   //     ./     \       /  \         /  \        /  \          /   \
-  //    v1-------v2    v1---v2      v2---v3     v3---v1       v1---v3
+  //    v1-------v3    v1---v3      v3---v2     v2---v1       v1---v2
 
+  vol = volume_tetrahedron(v1,v2,v3,v4);
+  
   clipvals = ci->clipvals;
   ci->option=TETRA_CLIPPLANES;
-  VECDIFF3(v1d,v2,v1);
-  VECDIFF3(v2d,v4,v1);
-  CROSS(clipvals,v1d,v2d);
-  NORMALIZE3(clipvals);
-  clipvals[3]=-DOT3(clipvals,v1);
 
-  clipvals+=4;
-  VECDIFF3(v1d,v3,v2);
-  VECDIFF3(v2d,v4,v2);
-  CROSS(clipvals,v1d,v2d);
-  NORMALIZE3(clipvals);
-  clipvals[3]=-DOT3(clipvals,v2);
-
-  clipvals+=4;
   VECDIFF3(v1d,v1,v3);
   VECDIFF3(v2d,v4,v3);
   CROSS(clipvals,v1d,v2d);
+  if(vol>0.0){
+    VEC3MA(clipvals,-1.0);
+  }
   NORMALIZE3(clipvals);
   clipvals[3]=-DOT3(clipvals,v3);
-
   clipvals+=4;
+
+  VECDIFF3(v1d,v3,v2);
+  VECDIFF3(v2d,v4,v2);
+  CROSS(clipvals,v1d,v2d);
+  if(vol>0.0){
+    VEC3MA(clipvals,-1.0);
+  }
+  NORMALIZE3(clipvals);
+  clipvals[3]=-DOT3(clipvals,v2);
+  clipvals+=4;
+
+  VECDIFF3(v1d,v2,v1);
+  VECDIFF3(v2d,v4,v1);
+  CROSS(clipvals,v1d,v2d);
+  if(vol>0.0){
+    VEC3MA(clipvals,-1.0);
+  }
+  NORMALIZE3(clipvals);
+  clipvals[3]=-DOT3(clipvals,v1);
+  clipvals+=4;
+
   VECDIFF3(v1d,v3,v1);
   VECDIFF3(v2d,v2,v1);
   CROSS(clipvals,v1d,v2d);
+  if(vol>0.0){
+    VEC3MA(clipvals,-1.0);
+  }
   NORMALIZE3(clipvals);
   clipvals[3]=-DOT3(clipvals,v1);
 }
