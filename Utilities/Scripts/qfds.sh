@@ -30,7 +30,7 @@ then
   echo " -r   - report bindings"
   echo " -s   - stop job"
   echo " -t   - used for timing studies, run a job alone on a node"
-  echo " -w time - walltime, where time is dd:hh:mm:ss for PBS and dd-hh:mm:ss for SLURM."
+  echo " -w time - walltime, where time is hh:mm for PBS and dd-hh:mm:ss for SLURM."
   echo " -v   - list script used to run case to standard output"
   echo "input_file - input file"
   echo ""
@@ -64,7 +64,7 @@ nmpi_processes=1
 nmpi_processes_per_node=1
 max_processes_per_node=1
 nopenmp_threads=1
-walltime=99:99:99:99
+walltime=99:99:99
 if [ "$RESOURCE_MANAGER" == "SLURM" ] ; then
   walltime=99-99:99:99
 fi
