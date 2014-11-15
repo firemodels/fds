@@ -1,0 +1,9 @@
+&HEAD CHID='geom_intersection' /
+
+&TIME T_END=0.0 /
+&MESH IJK=10,10,10,XB=0.0,1.0,0.0,1.0,0.0,1.0 /
+
+&TAIL /
+
+
+
