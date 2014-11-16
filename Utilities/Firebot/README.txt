@@ -130,6 +130,14 @@ More details on the Firebot build stages can be found in the FDS Configuration M
 PATH=/bin:/usr/bin:/usr/local/bin:/home2/smokevis2/firebot/firebot:$PATH
 MAILTO=""
 
+#  ========================
+#  = Firebot build script =
+#  ========================
+
+# Update and run Firebot at 9:56 PM every night
+# If no SVN argument is specified, then the latest SVN revision is used
+56 21 * * * cd ~/firebot ; svn revert * ; svn up ; bash -lc "./firebot_linux_wrapper.sh"
+
 #  ==========================
 #  = Firebot status outputs =
 #  ==========================
@@ -143,14 +151,6 @@ MAILTO=""
 # Check every 10 minutes (XX:05, XX:15, and so on) for changes to Firebot status page
 # If it has changed, upload Firebot build status wiki page to Google Code
 5,15,25,35,45,55 * * * * firebot_wiki_publish.sh
-
-#  ========================
-#  = Firebot build script =
-#  ========================
-
-# Update and run Firebot at 9:56 PM every night
-# If no SVN argument is specified, then the latest SVN revision is used
-56 21 * * * cd ~/firebot ; svn revert * ; svn up ; bash -lc "./firebot_linux_wrapper.sh"
 
 # ============================
 # = DiskHog disk space alert =
