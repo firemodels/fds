@@ -14,9 +14,9 @@
 Firebot is an automatic verification and validation test bot that is run at a regular interval (nightly).
 More details on the Firebot build stages can be found in the FDS Configuration Management Plan.
 
-===================
-= Running Firebot =
-===================
+============================
+= Running Firebot Manually =
+============================
 
 1. cd to the ~/firebot directory of firebot's account
 2. Do an 'svn update'
@@ -123,11 +123,9 @@ More details on the Firebot build stages can be found in the FDS Configuration M
 = Crontab =
 ===========
 
-------------------------------------------------------------------------------------
-
+---------------------------------------------------------------------------
 #### The following information is in the Linux firebot user's crontab: ####
-
-------------------------------------------------------------------------------------
+---------------------------------------------------------------------------
 
 PATH=/bin:/usr/bin:/usr/local/bin:/home2/smokevis2/firebot/firebot:$PATH
 MAILTO=""
@@ -150,12 +148,9 @@ MAILTO=""
 #  = Firebot build script =
 #  ========================
 
-# Run svn update at 9:50 PM to get latest version of Firebot
-50 21 * * * cd ~/firebot ; svn revert * ; svn up
-
-# Run Firebot at 9:56 PM every night
+# Update and run Firebot at 9:56 PM every night
 # If no SVN argument is specified, then the latest SVN revision is used
-56 21 * * * cd ~/firebot ; bash -lc "./firebot_linux_wrapper.sh"
+56 21 * * * cd ~/firebot ; svn revert * ; svn up ; bash -lc "./firebot_linux_wrapper.sh"
 
 # ============================
 # = DiskHog disk space alert =
@@ -175,11 +170,9 @@ MAILTO=""
 # are found in the daily torque log.
 55 23 * * * chktorque.sh
 
-------------------------------------------------------------------------------------
-
+---------------------------------------------------------------------------------
 #### The following information is in the Linux Validationbot user's crontab: ####
-
-------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
 
 PATH=/bin:/usr/bin:/usr/local/bin:/home2/smokevis2/validationbot/firebot:$PATH
 MAILTO=""
@@ -188,10 +181,7 @@ MAILTO=""
 #  = Validationbot script =
 #  ========================
 
-# Run svn update at 9:50 PM to get latest version of Firebot
-50 21 * * * cd ~/firebot ; svn revert * ; svn up
-
-# Run Validationbot at 9:56 PM every night
+# Update and run Validationbot at 9:56 PM every night
 #
 # You can change the argument for -v <num>, where <num> is the maximum number
 # of cores to use for Validationbot running validation cases.
@@ -199,13 +189,11 @@ MAILTO=""
 # Recommended settings for <num>:
 #     1 for passive mode (run 1 validation set at a time)
 #     150 for aggressive mode (run up to 150 cores at a time)
-56 21 * * * cd ~/firebot ; bash -lc "./firebot_linux_wrapper.sh -s -v 1 -y"
+56 21 * * * cd ~/firebot ; svn revert * ; svn up ; bash -lc "./firebot_linux_wrapper.sh -s -v 1 -y"
 
-------------------------------------------------------------------------------------
-
+-------------------------------------------------------------------------
 #### The following information is in the Mac firebot user's crontab: ####
-
-------------------------------------------------------------------------------------
+-------------------------------------------------------------------------
 
 PATH=/bin:/usr/bin:/usr/local/bin:/usr/sbin:/Users/firebot/firebot:$PATH
 MAILTO=""
@@ -214,11 +202,8 @@ MAILTO=""
 #  = Firebot build script =
 #  ========================
 
-# Run svn update at 9:50 PM to get latest version of Firebot
-50 21 * * * cd ~/firebot ; svn revert * ; svn up
-
-# Run Firebot at 9:56 PM every night
+# Update and run Firebot at 9:56 PM every night
 # If no SVN argument is specified, then the latest SVN revision is used
-56 21 * * * cd ~/firebot ; bash -lc "./firebot_mac_wrapper.sh"
+56 21 * * * cd ~/firebot ; svn revert * ; svn up ; bash -lc "./firebot_mac_wrapper.sh"
 
-------------------------------------------------------------------------------------
+-------------------------------------------------------------------------
