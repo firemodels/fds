@@ -2787,6 +2787,7 @@ one of the following methods:
 \item[Make the mesh density more uniform ] inside the material by setting {\ct STRETCH\_FACTOR(NL)=1.} on the {\ct SURF} line. This will generate a perfectly uniform mesh for layer number {\ct NL}. (This happens automatically if the layer contains one or more reacting materials.) Values between 1 and 2 give different levels of stretching. Note that {\ct STRETCH\_FACTOR} needs to be specified for all the layers.
 \item[Make the mesh cells smaller] by setting {\ct CELL\_SIZE\_FACTOR} less than 1.0. For example, a value of 0.5 makes the mesh cells half the size. The scaling always applies to all layers.
 \item[Improve the time resolution] by setting {\ct WALL\_INCREMENT=1} on the {\ct TIME} line. This forces the solid phase temperatures to be solved on every time step.
+\item[Limit the number of cells in a layer] by setting {\ct N\_LAYER\_CELLS\_MAX}. This array input has a default of 1000. 
 \end{description}
 If all the material components of the surface are reacting, and the pyrolysis reactions have no solid residue, the thickness of
 the surface is going to shrink when the surface reacts. Each of the shrinking layers will vanish from the computation when its thickness gets
@@ -9543,9 +9544,9 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct BURN\_AWAY}                      & Logical         & Section~\ref{info:BURN_AWAY}              &                     & {\ct .FALSE.}           \\ \hline
 {\ct CELL\_SIZE\_FACTOR}              & Real            & Section~\ref{info:solid_phase_stability}  &                     & 1.0                     \\ \hline
 {\ct C\_FORCED\_CONSTANT}             & Real            & Section~\ref{info:convection}             &                     & 0.0                     \\ \hline
+{\ct C\_FORCED\_PR\_EXP}              & Real            & Section~\ref{info:convection}             &                     & 0.0                     \\ \hline
 {\ct C\_FORCED\_RE}                   & Real            & Section~\ref{info:convection}             &                     & 0.0                     \\ \hline
 {\ct C\_FORCED\_RE\_EXP}              & Real            & Section~\ref{info:convection}             &                     & 0.0                     \\ \hline
-{\ct C\_FORCED\_PR\_EXP}              & Real            & Section~\ref{info:convection}             &                     & 0.0                     \\ \hline
 {\ct C\_HORIZONTAL}                   & Real            & Section~\ref{info:convection}             &                     & 1.52                    \\ \hline
 {\ct C\_VERTICAL}                     & Real            & Section~\ref{info:convection}             &                     & 1.31                    \\ \hline
 {\ct COLOR    }                       & Character       & Section~\ref{info:colors}                 &                     &                         \\ \hline
@@ -9580,6 +9581,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct MATL\_MASS\_FRACTION(NL,NC)}     & Real Array      & Section~\ref{info:solid_pyrolysis}        &                     &                         \\ \hline
 {\ct MINIMUM\_LAYER\_THICKNESS}       & Real            & Section~\ref{info:solid_phase_stability}  & m                   & 1.E-6                   \\ \hline
 {\ct MLRPUA }                         & Real            & Section~\ref{info:gas_burner}             & \si{kg/(m^2.s)}     & 0.                      \\ \hline
+{\ct N\_LAYER\_CELLS\_MAX}          & Integer Array    & Section~\ref{info:solid_phase_stability}          &                     & 1000                    \\ \hline
 {\ct NET\_HEAT\_FLUX}                 & Real            & Section~\ref{info:convection}             & kW/m$^2$            & 0.                      \\ \hline
 {\ct NO\_SLIP}                        & Logical         & Section~\ref{info:WALL_MODEL}             &                     & {\ct .FALSE.}           \\ \hline
 {\ct NPPC}                            & Integer         & Section~\ref{info:particle_flux}          &                     & 1                       \\ \hline
@@ -9629,7 +9631,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct Z0 }                             & Real            & Section~\ref{info:stratification}         & m                   & 10.                     \\ \hline
 \end{longtable}
 
-% Undocumented: FIRELINE_MLR_MAX,
+% Undocumented: FIRELINE_MLR_MAX,N_CELLS_MAX
 % VEGETATION, VEGETATION_ARRHENIUS_DEGRAD, VEGETATION_CDRAG, VEGETATION_CHAR_FRACTION,
 % VEGETATION_ELEMENT_DENSITY, VEGETATION_GROUND_TEMP, VEGETATION_HEIGHT,
 % VEGETATION_INITIAL_TEMP, VEGETATION_LAYERS, VEGETATION_LINEAR_DEGRAD, VEGETATION_LOAD,
