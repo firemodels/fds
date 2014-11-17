@@ -776,7 +776,7 @@ void usage(char **argv){
     strcat(label,", pp_PILOT");
 #endif
 #ifdef pp_release
-    strcat(label," pp_release");
+    strcat(label,", pp_release");
 #endif
 #ifdef pp_SMOKEDIFF
     strcat(label,", pp_SMOKEDIFF");
