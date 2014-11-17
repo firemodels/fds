@@ -96,14 +96,13 @@ intel_win_64_db : LFLAGS    = /F32768000 /DEBUG
 intel_win_64_db : CC        = icl
 intel_win_64_db : CPP       = icl
 intel_win_64_db : FC        = ifort
-intel_win_64_db : exe       = smokeview_win_64_db
+intel_win_64_db : exe       = smokeview_win_$(SMV_TESTSTRING)64_db
 
 intel_win_64_db : $(objwin)
 	$(CPP) -o $(bin)/$(exe) $(LFLAGS) $(objwin) $(WIN_LIBS) $(SMV_LIBS_64)
 
 # ------------- intel_win_64 ----------------
 
-# intel_win_64 : INC = -I ../../source/include3 -I ../../source/shared -I ../../source/smokeview -I ../../source/glew
 intel_win_64 : INC = -I ../../source/include -I ../../source/shared -I ../../source/smokeview -I ../../source/glew
 intel_win_64 : FFLAGS    = -O2 /iface:stdref /fpp
 intel_win_64 : CFLAGS    = -O1 -D WIN32 -D pp_INTEL -D _CONSOLE -D X64 -D GLEW_STATIC -D PTW32_STATIC_LIB $(SMV_TESTFLAG)
@@ -140,7 +139,7 @@ intel_linux_64 : $(obj)
 # ------------- intel_linux_64_db ----------------
 
 intel_linux_64_db : FFLAGS    = -O0 -m64 -static-intel -traceback -g -fpe0 -fltconsistency -WB -fpp -D pp_noappend
-intel_linux_64_db : CFLAGS    = -O0 -g -m64 -static-intel -D pp_LINUX64 -D pp_INTEL $(SMV_PROFILEFLAG) -Wall -Wextra
+intel_linux_64_db : CFLAGS    = -O0 -g -m64 -static-intel -D _DEBUG -D pp_LINUX64 -D pp_INTEL $(SMV_PROFILEFLAG) -Wall -Wextra
 intel_linux_64_db : LFLAGS    = -m64 -static-intel
 intel_linux_64_db : CC        = icc
 intel_linux_64_db : CPP       = icpc
@@ -212,7 +211,7 @@ intel_osx_64_fg : $(obj)
 # ------------- intel_osx_64_db ----------------
 
 intel_osx_64_db : FFLAGS    = -O0 -m64 -static-intel -fpp -D pp_OSX64 -mmacosx-version-min=10.4
-intel_osx_64_db : CFLAGS    = -O0 -m64 -static-intel -D pp_OSX64  -D pp_INTEL -mmacosx-version-min=10.4 $(SMV_TESTFLAG) $(SMV_PROFILEFLAG)
+intel_osx_64_db : CFLAGS    = -O0 -m64 -static-intel -D _DEBUG -D pp_OSX64  -D pp_INTEL -mmacosx-version-min=10.4 $(SMV_TESTFLAG) $(SMV_PROFILEFLAG)
 intel_osx_64_db : LFLAGS    = -m64 -static-intel -framework OpenGL -framework GLUT -mmacosx-version-min=10.4
 intel_osx_64_db : CC        = icc 
 intel_osx_64_db : CPP       = icpc
