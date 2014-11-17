@@ -410,6 +410,36 @@ ENDIF
 \section{Some Geometry Implementation Notes}
 The notes written in this section are intended to provide details for various computational geometric algorithms as implemented in FDS and Smokeview.
 
+\subsection{Geometry Properties}
+\subsubsection{Triangle,Polyigon}
+Consider the triangle with vertices $v_1$,$v_2$ and $v_3$ as illustrated in Figure \ref{figure:triangle_setup}.
+
+\noindent Triangle area: $||(v_3-v_1)\times (v_2-v_1)||/2$ . \\
+Triangle Median: $(v_1+v_2+v_3)$/3 .
+
+\begin{figure}[\figoptions]
+\begin{center}
+\includegraphics[width=4.0in]{../SMV_Technical_Reference_Guide/FIGURES/triangle_setup}
+\end{center}
+\caption{Schematic of vertex notation for a triangle}
+\label{figure:triangle_setup}
+\end{figure}
+
+\subsubsection{Tetrahedron,Polyhedron}
+Consider the tetrahedron T with vertices $v_1$,$v_2$,$v_3$ and $v_4$ as illustrated in Figure \ref{figure:tetrahedron_setup}.
+
+\noindent Tetrahedron volume: $||((v_3-v_1)\times (v_2-v_1))\cdot (v_4-v_1)||/6$ .\\
+Tetrahedron median: $(v_1+v_2+v_3+v_4)$/4.
+
+\begin{figure}[\figoptions]
+\begin{center}
+\includegraphics[width=4.0in]{../SMV_Technical_Reference_Guide/FIGURES/tetrahedron_setup}
+\end{center}
+\caption{Schematic of vertex and edge notation for a tetrahedron}
+\label{figure:tetrahedron_setup}
+\end{figure}
+
+
 \newcommand{\tetra}{\mbox{tetra\_bounds}}
 \newcommand{\bbox}{\mbox{box\_bounds}}
 \newcommand{\txtmin}{\mbox{min}}
@@ -493,13 +523,6 @@ These bounding boxes do not over lap if any of the following are true:
 \mbox{box\_bounds}(5)<\mbox{tetra\_bounds}(4)
 \end{eqnarray*}
 
-\begin{figure}[\figoptions]
-\begin{center}
-\includegraphics[width=4.0in]{../SMV_Technical_Reference_Guide/FIGURES/tetrahedron_setup}
-\end{center}
-\caption{Schematic of vertex and edge notation for a tetrahedron}
-\label{figure:tetrahedron_setup}
-\end{figure}
 \begin{figure}[\figoptions]
 \begin{center}
 \includegraphics[width=4.0in]{../SMV_Technical_Reference_Guide/FIGURES/box_setup}
