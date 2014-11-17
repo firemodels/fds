@@ -1600,6 +1600,7 @@ void draw_geomtestclip(void){
   unsigned char tetracoloroutline[4]={255,0,255,255};
   clipdata tetra_clipinfo, box_clipinfo;
   float *v1, *v2, *v3, *v4;
+  float areas[6];
   int nverts;
   int faces[600], npolys, nfaces;
   int which_poly[200];
@@ -1633,7 +1634,7 @@ void draw_geomtestclip(void){
     float volume,volume2,box_volume;
     int i;
 
-    FORTgetverts(box_bounds, v1, v2, v3, v4, verts, &nverts, faces, face_id, which_poly, &nfaces, &npolys, &volume, b_state);
+    FORTgetverts(box_bounds, v1, v2, v3, v4, verts, &nverts, faces, face_id, which_poly, &nfaces, &npolys, &volume, b_state,areas);
     if(update_volbox_controls==1){
       for(i=0;i<10;i++){
         face_vis[i]=0;
@@ -1809,6 +1810,7 @@ void draw_geomtestoutline(void){
   unsigned char tetra3color[4]={255,255,0,255};
   unsigned char tetracoloroutline[4]={255,0,255,255};
   float *v1, *v2, *v3, *v4;
+  float areas[6];
   int nverts;
   int faces[600], npolys, nfaces;
   int which_poly[200];
@@ -1827,26 +1829,8 @@ void draw_geomtestoutline(void){
   zmin = box_bounds+4;
   zmax = box_bounds+5;
 
-  glPushMatrix();
-  glScalef(SCALE2SMV(1.0),SCALE2SMV(1.0),SCALE2SMV(1.0));
-  glTranslatef(-xbar0,-ybar0,-zbar0);
-
-  glPushMatrix();
-  glTranslatef(*xmin,*ymin,*zmin);
-  glScalef(ABS(*xmax-*xmin),ABS(*ymax-*ymin),ABS(*zmax-*zmin));
-#define EPS 0.02
-  output3Text(foregroundcolor, -EPS, 0.5, 0.5, "xmin");
-  output3Text(foregroundcolor, 1.0+EPS, 0.5, 0.5, "xmax");
-  output3Text(foregroundcolor, 0.5, -EPS, 0.5, "ymin");
-  output3Text(foregroundcolor, 0.5, 1.0+EPS, 0.5, "ymax");
-  output3Text(foregroundcolor, 0.5, 0.5, -EPS, "zmin");
-  output3Text(foregroundcolor, 0.5, 0.5, 1.0+EPS, "zmax");
-  glLineWidth(gridlinewidth);
-  drawcubec_outline(1.0,cubecolor);
-  glPopMatrix();
-  glPopMatrix();
-
   // tetrahedron
+#define EPS 0.02
 
   glPushMatrix();
   glScalef(SCALE2SMV(1.0),SCALE2SMV(1.0),SCALE2SMV(1.0));
@@ -1865,7 +1849,7 @@ void draw_geomtestoutline(void){
     float volume;
     int i;
 
-    FORTgetverts(box_bounds, v1, v2, v3, v4, verts, &nverts, faces, face_id, which_poly, &nfaces, &npolys, &volume, b_state);
+    FORTgetverts(box_bounds, v1, v2, v3, v4, verts, &nverts, faces, face_id, which_poly, &nfaces, &npolys, &volume, b_state,areas);
     if(npolys>10){
       printf("***error: nface=%i should not be bigger than 10\n",npolys);
     }
@@ -1899,6 +1883,40 @@ void draw_geomtestoutline(void){
       glPopMatrix();
     }
   }
+
+  glPushMatrix();
+  glScalef(SCALE2SMV(1.0),SCALE2SMV(1.0),SCALE2SMV(1.0));
+  glTranslatef(-xbar0,-ybar0,-zbar0);
+
+  glPushMatrix();
+  glTranslatef(*xmin,*ymin,*zmin);
+  glScalef(ABS(*xmax-*xmin),ABS(*ymax-*ymin),ABS(*zmax-*zmin));
+  {
+    char label[30];
+
+    sprintf(label,"xmin area=%f",areas[0]);
+    output3Text(foregroundcolor, -EPS, 0.5, 0.5, label);
+
+    sprintf(label,"xmax area=%f",areas[1]);
+    output3Text(foregroundcolor, 1.0+EPS, 0.5, 0.5, label);
+
+    sprintf(label,"ymin area=%f",areas[2]);
+    output3Text(foregroundcolor, 0.5, -EPS, 0.5, label);
+
+    sprintf(label,"ymax area=%f",areas[3]);
+    output3Text(foregroundcolor, 0.5, 1.0+EPS, 0.5, label);
+
+    sprintf(label,"zmin area=%f",areas[4]);
+    output3Text(foregroundcolor, 0.5, 0.5, -EPS, label);
+
+    sprintf(label,"zmax area=%f",areas[5]);
+    output3Text(foregroundcolor, 0.5, 0.5, 1.0+EPS, label);
+  }
+  glLineWidth(gridlinewidth);
+  drawcubec_outline(1.0,cubecolor);
+  glPopMatrix();
+  glPopMatrix();
+
 }
 
 /* ------------------ draw_geom_cutcells ------------------------ */
