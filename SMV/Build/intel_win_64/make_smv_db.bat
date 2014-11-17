@@ -10,14 +10,9 @@ echo Setting up compiler environment
 call "%IFORT_COMPILER14%\bin\compilervars" intel64
 :envexist
 
-set SMV_TESTFLAG=
-set SMV_TESTSTRING=
-
-if "%1" NEQ "-t" goto endif
-  set SMV_TESTFLAG=-D pp_BETA
-  set SMV_TESTSTRING=test_
-:endif
+set SMV_TESTFLAG=-D pp_BETA
+set SMV_TESTSTRING=test_
 
 erase *.obj *.mod
-make -f ..\Makefile intel_win_64_db
+make SMV_TESTFLAG="%SMV_TESTFLAG%" SMV_TESTSTRING="%SMV_TESTSTRING%" -f ..\Makefile intel_win_64_db
 pause
