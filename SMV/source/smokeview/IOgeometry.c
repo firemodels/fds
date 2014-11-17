@@ -1600,7 +1600,7 @@ void draw_geomtestclip(void){
   unsigned char tetracoloroutline[4]={255,0,255,255};
   clipdata tetra_clipinfo, box_clipinfo;
   float *v1, *v2, *v3, *v4;
-  float areas[6];
+  float areas[6],centroid[3];
   int nverts;
   int faces[600], npolys, nfaces;
   int which_poly[200];
@@ -1634,7 +1634,7 @@ void draw_geomtestclip(void){
     float volume,volume2,box_volume;
     int i;
 
-    FORTgetverts(box_bounds, v1, v2, v3, v4, verts, &nverts, faces, face_id, which_poly, &nfaces, &npolys, &volume, b_state,areas);
+    FORTgetverts(box_bounds, v1, v2, v3, v4, verts, &nverts, faces, face_id, which_poly, &nfaces, &npolys, &volume, b_state,areas,centroid);
     if(update_volbox_controls==1){
       for(i=0;i<10;i++){
         face_vis[i]=0;
@@ -1810,7 +1810,7 @@ void draw_geomtestoutline(void){
   unsigned char tetra3color[4]={255,255,0,255};
   unsigned char tetracoloroutline[4]={255,0,255,255};
   float *v1, *v2, *v3, *v4;
-  float areas[6];
+  float areas[6],centroid[3];
   int nverts;
   int faces[600], npolys, nfaces;
   int which_poly[200];
@@ -1849,7 +1849,7 @@ void draw_geomtestoutline(void){
     float volume;
     int i;
 
-    FORTgetverts(box_bounds, v1, v2, v3, v4, verts, &nverts, faces, face_id, which_poly, &nfaces, &npolys, &volume, b_state,areas);
+    FORTgetverts(box_bounds, v1, v2, v3, v4, verts, &nverts, faces, face_id, which_poly, &nfaces, &npolys, &volume, b_state,areas,centroid);
     if(npolys>10){
       printf("***error: nface=%i should not be bigger than 10\n",npolys);
     }
@@ -1895,21 +1895,27 @@ void draw_geomtestoutline(void){
     char label[30];
 
     sprintf(label,"xmin area=%f",areas[0]);
+    trimzeros(label);
     output3Text(foregroundcolor, -EPS, 0.5, 0.5, label);
 
     sprintf(label,"xmax area=%f",areas[1]);
+    trimzeros(label);
     output3Text(foregroundcolor, 1.0+EPS, 0.5, 0.5, label);
 
     sprintf(label,"ymin area=%f",areas[2]);
+    trimzeros(label);
     output3Text(foregroundcolor, 0.5, -EPS, 0.5, label);
 
     sprintf(label,"ymax area=%f",areas[3]);
+    trimzeros(label);
     output3Text(foregroundcolor, 0.5, 1.0+EPS, 0.5, label);
 
     sprintf(label,"zmin area=%f",areas[4]);
+    trimzeros(label);
     output3Text(foregroundcolor, 0.5, 0.5, -EPS, label);
 
     sprintf(label,"zmax area=%f",areas[5]);
+    trimzeros(label);
     output3Text(foregroundcolor, 0.5, 0.5, 1.0+EPS, label);
   }
   glLineWidth(gridlinewidth);
