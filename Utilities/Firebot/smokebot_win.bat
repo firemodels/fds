@@ -246,7 +246,7 @@ if %reduced% == 1 goto skip_fds2ascii
 echo             fds2ascii
 cd %svnroot%\Utilities\fds2ascii\intel_win_%size%
 erase *.obj *.mod *.exe 1> %OUTDIR%\stage3c.txt 2>&1
-make -f ..\Makefile intel_win_%size% 1>> %OUTDIR%\stage3.txt 2>&1
+ifort -o fds2ascii_win_%size%.exe /nologo ..\..\Data_processing\fds2ascii.f90  1>> %OUTDIR%\stage3.txt 2>&1
 call :does_file_exist fds2ascii_win_%size%.exe %OUTDIR%\stage3.txt|| exit /b 1
 
 :skip_fds2ascii
