@@ -9,7 +9,7 @@ echo "-d - use debug version of smokeview"
 echo "-g - only generate geometry case images"
 echo "-h - display this message"
 echo "-i - use installed version of smokeview"
-echo "-t - use test version of smokeview"
+echo "-T - use test version of smokeview"
 echo "-s size - use 32 or 64 bit (default) version of smokeview"
 exit
 }
@@ -107,7 +107,7 @@ echo
 
 RUNSMV=$SVNROOT/Utilities/Scripts/runsmv.sh
 export QFDS=$RUNSMV
-export RUNTFDS="$RUNSMV -t"
+export RUNTFDS="$RUNSMV -T"
 export RUNWFDS="$RUNSMV -w"
 export RUNCFAST=$RUNSMV
 export BASEDIR=`pwd`
