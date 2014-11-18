@@ -2723,6 +2723,28 @@ vapors are to driven into the interior of the column. In fact, values from 0.0 t
 By default, {\ct LAYER\_DIVIDE} is 0.5 times the number of layers for surfaces with {\ct EXPOSED} backing, and equal to the number of
 layers for other surfaces.
 
+\subsection{Special Topic: Specified Internal Heat Source}
+
+\label{info:INTERNAL_HEAT_SOURCE}
+
+The condensed phase heat conduction equation has a source term that describes the internal sources and sinks of energy. 
+There are three types of sources that contribute: heats of reaction for the pyrolysis (see Section~\ref{info:solid_pyrolysis}), 
+internal absorption and emission of radiation (see Section~\ref{info:liquid_fuels}), and the source specified by the user. 
+An example of the case where specified heat source could be needed is the heating of electrical cables due to internal current.
+
+You can specify the internal source term for each layer of the surface using {\ct INTERNAL\_HEAT\_SOURCE} on the {\ct SURF} line. 
+Its units are {\si kW/m$^3$} and the default value is zero.
+In the example below, the cylindrical surface describing a cable consists of an outer plastic layer and inner core of metal. 
+The metal core is heated with a power of 300 {\si kW/m$^3$}.
+\begin{lstlisting}
+&SURF ID                     = 'Cable'
+      THICKNESS              = 0.002,0.008
+      MATL_ID(1,1)           = 'PLASTIC'
+      MATL_ID(2,1)           = 'METAL'
+      GEOMETRY               = 'CYLINDRICAL'
+      LENGTH                 = 0.1
+      SPECIFIED_SOURCE_TERM  = 0.,300. /
+\end{lstlisting}
 
 \subsection{Special Topic: Non-Planar Walls and Targets}
 
@@ -9554,6 +9576,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct ID}                              & Character       & Section~\ref{info:SURF}                   &                     &                         \\ \hline
 {\ct IGNITION\_TEMPERATURE}           & Real            & Section~\ref{info:specified_burning}      & $^\circ$C           & 5000.                   \\ \hline
 {\ct INNER\_RADIUS}                   & Real            & Section~\ref{info:PART_GEOMETRY}          & m                   & 0.                      \\ \hline
+{\ct INTERNAL\_HEAT\_SOURCE}          & Real Array      & Section~\ref{info:INTERNAL_HEAT_SOURCE}   & kW/m$^3$            & 0.                      \\ \hline
 {\ct LAYER\_DIVIDE}                   & Real            & Section~\ref{info:EXPOSED}                &                     & {\ct N\_LAYERS}/2       \\ \hline
 {\ct LEAK\_PATH}                      & Int.~Pair       & Section~\ref{info:Leaks}                  &                     &                         \\ \hline
 {\ct LENGTH}                          & Real            & Section~\ref{info:PART_GEOMETRY}          & m                   &                         \\ \hline
