@@ -1600,7 +1600,6 @@ void draw_geomtestclip(void){
   unsigned char tetracoloroutline[4]={255,0,255,255};
   clipdata tetra_clipinfo, box_clipinfo;
   float *v1, *v2, *v3, *v4;
-  float areas[6],centroid[3];
   int nverts;
   int faces[600], npolys, nfaces;
   int which_poly[200];
@@ -1634,7 +1633,7 @@ void draw_geomtestclip(void){
     float volume,volume2,box_volume;
     int i;
 
-    FORTgetverts(box_bounds, v1, v2, v3, v4, verts, &nverts, faces, face_id, which_poly, &nfaces, &npolys, &volume, b_state,areas,centroid);
+    FORTgetverts(box_bounds, v1, v2, v3, v4, verts, &nverts, faces, face_id, which_poly, &nfaces, &npolys, b_state);
     if(update_volbox_controls==1){
       for(i=0;i<10;i++){
         face_vis[i]=0;
@@ -1810,7 +1809,7 @@ void draw_geomtestoutline(void){
   unsigned char tetra3color[4]={255,255,0,255};
   unsigned char tetracoloroutline[4]={255,0,255,255};
   float *v1, *v2, *v3, *v4;
-  float areas[6],centroid[3];
+  float areas[6],cent_solid[3];
   int nverts;
   int faces[600], npolys, nfaces;
   int which_poly[200];
@@ -1846,14 +1845,42 @@ void draw_geomtestoutline(void){
   // tetrahedron
 
   {
-    float volume;
     int i;
+    float vsolid;
 
-    FORTgetverts(box_bounds, v1, v2, v3, v4, verts, &nverts, faces, face_id, which_poly, &nfaces, &npolys, &volume, b_state,areas,centroid);
+    FORTgetverts(box_bounds, v1, v2, v3, v4, verts, &nverts, faces, face_id, which_poly, &nfaces, &npolys, b_state);
+    FORTgettetravol(box_bounds,v1,v2,v3,v4,&vsolid,areas,cent_solid);
+    printf("volume=%f\n",vsolid);
+    printf("centroid (solid)=%f %f %f\n",cent_solid[0],cent_solid[1],cent_solid[2]);
+    {
+      float vcell,vgas,cent_cell[3],cent_gas[3],*cc,*cs,*cg;
+
+      cs=cent_solid;
+      cg=cent_gas;
+      cc=cent_cell;
+      cc[0]=(box_bounds[0]+box_bounds[1])/2.0;
+      cc[1]=(box_bounds[2]+box_bounds[3])/2.0;
+      cc[2]=(box_bounds[4]+box_bounds[5])/2.0;
+      vcell = box_bounds[1]-box_bounds[0];
+      vcell *= (box_bounds[3]-box_bounds[2]);
+      vcell *= (box_bounds[5]-box_bounds[4]);
+      vcell = ABS(vcell);
+      vgas = vcell - vsolid;
+      if(vgas>0.0){
+        cg[0] = (cc[0]*vcell-cs[0]*vsolid)/vgas;
+        cg[1] = (cc[1]*vcell-cs[1]*vsolid)/vgas;
+        cg[2] = (cc[2]*vcell-cs[2]*vsolid)/vgas;
+      }
+      else{
+        cg[0]=-1.0;
+        cg[0]=-1.0;
+        cg[0]=-1.0;
+      }
+      printf("centroid (gas)  =%f %f %f\n",cg[0],cg[1],cg[2]);
+    }
     if(npolys>10){
       printf("***error: nface=%i should not be bigger than 10\n",npolys);
     }
-    printf("volume=%f\n\n",volume);
     if(nverts>0){
       int j;
 

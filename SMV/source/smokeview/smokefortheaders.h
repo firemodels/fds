@@ -13,6 +13,7 @@
 
 #define FORTtest_in_tetra _F(test_in_tetra)
 #define FORTgetverts _F(getverts2)
+#define FORTgettetravol _F(get_tetrabox_volume_fb)
 #define FORTgeomout _F(geomout)
 #define FORTgetembeddatasize _F(getembeddatasize)
 #define FORTgetembeddata _F(getembeddata)
@@ -41,8 +42,9 @@
 #define FORTgetboundaryheader2 _F(getboundaryheader2)
 
 STDCALLF FORTtest_in_tetra(float *xyz, int *in_tetra, int *tetra_state);
+STDCALLF FORTgettetravol(float *box_bounds,float *v0,float *v1,float *v2,float *v3,float *tetra_vol,float *areas,float *centroid);
 STDCALLF FORTgetverts(float *box_bounds, float *v0, float *v1, float *v2, float *v3, float *out_verts, 
-                      int *nverts, int *faces, int *face_id, int *which_poly, int *nfaces, int *npolys, float *volume, int *box_state, float *areas, float *centroid);
+                      int *nverts, int *faces, int *face_id, int *which_poly, int *nfaces, int *npolys, int *box_state);
 STDCALLF FORTgeomout(float *verts, int *nverts, int *faces, int *nfaces);
 STDCALLF FORTgetembeddatasize(char *filename, int *ntimes, int *nvars, int *error, FILE_SIZE lenfile);
 STDCALLF FORTgetembeddata(char *filename, int *ntimes, int *nvals, float *times, int *nstatics, int *ndynamics,
