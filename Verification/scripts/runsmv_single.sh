@@ -10,7 +10,7 @@ echo "-d - use debug version of smokeview"
 echo "-h - display this message"
 echo "-m script - run smokeview using the script named script"
 echo "-r - smokeview bin directory"
-echo "-t - use test version of smokeview"
+echo "-T - use test version of smokeview"
 echo "-s size - 32 or 64"
 echo "-x - invoke -volrender option in smokeview"
 echo "-y startframe - invoke -startframe option in smokeview"
@@ -53,7 +53,7 @@ case $OPTION  in
   b)
    TIME="-time"
    ;;
-  t)
+  T)
    TEST=_test
    ;;
   s)
