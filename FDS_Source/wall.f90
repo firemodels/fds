@@ -1819,11 +1819,13 @@ DO I=1,NWP-1
    K_S(I)  = 1._EB / ( DX_WGT_S(I)/K_S(I) + (1._EB-DX_WGT_S(I))/K_S(I+1) )
 ENDDO
 
-! Add specified source term
+! Add internal heat source specified by user
 
-DO I=1,NWP
-   Q_S(I) = Q_S(I)+SF%SPECIFIED_SOURCE_TERM(LAYER_INDEX(I))
-ENDDO
+IF (SF%SPECIFIED_HEAT_SOURCE) THEN
+   DO I=1,NWP
+      Q_S(I) = Q_S(I)+SF%INTERNAL_HEAT_SOURCE(LAYER_INDEX(I))
+   ENDDO
+ENDIF
 
 ! Calculate internal radiation
 
