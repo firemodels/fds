@@ -152,12 +152,12 @@ Jason Floyd \\
 Craig Weinschenk \\
 Kristopher Overholt
 \end{flushright}
+}
 
-\vfill
-
+\newcommand{\logosigs}{
 \begin{minipage}[b]{6.5in}
 \parbox[b]{3.5in}{
-\includegraphics[width=1.3in]{../Bibliography/VTT_BLACK_L} \\ 
+\includegraphics[width=1.3in]{../Bibliography/VTT_BLACK_L} \\
 VTT Technical Research Centre of Finland}
 \hfill
 \parbox[b]{3in}{\flushright{\includegraphics[width=2.in]{../Bibliography/nistident_flright_vec}}}
@@ -173,12 +173,10 @@ Craig Weinschenk \\
 Kristopher Overholt \\
 {\em Fire Research Division \\
 Engineering Laboratory \\
-Gaithersburg, Maryland, USA} \\
-\hspace{1.in} \\
+Gaithersburg, Maryland, USA} \\[.1in]
 Simo Hostikka \\
 {\em Aalto University \\
-Espoo, Finland} \\
-\hspace{1.in} \\
+Espoo, Finland} \\[.1in]
 Jason Floyd \\
 {\em Hughes Associates, Inc. \\
 Baltimore, Maryland, USA}
@@ -196,6 +194,32 @@ National Institute of Standards and Technology \\
 {\em Willie May, Under Secretary of Commerce for Standards and Technology and Director}
 \end{flushright}
 }
+
+
+\newcommand{\disclaimer}[1]{
+\begin{minipage}[t][8in][s]{6.5in}
+\fontsize{10}{12}\selectfont
+\flushright{Certain commercial entities, equipment, or materials may be identified in this \\
+document in order to describe an experimental procedure or concept adequately. \\
+Such identification is not intended to imply recommendation or endorsement by the \\
+National Institute of Standards and Technology, nor is it intended to imply that the \\
+entities, materials, or equipment are necessarily the best available for the purpose.\\
+}
+
+\vspace{3in}
+
+\large
+\flushright{\bf National Institute of Standards and Technology Special Publication #1 \\
+Natl.~Inst.~Stand.~Technol.~Spec.~Publ.~#1, \pageref{LastPage} pages (October 2013) \\
+CODEN: NSPUE2 }
+
+\vfill
+
+\hspace{1in}
+
+\end{minipage}
+}
+
 
 
 \newcommand{\gforneybio}
@@ -235,12 +259,21 @@ respectively.
 }
 
 \newcommand{\headerC}[1]{
-\vspace{.5in}
+\vspace{.15in}
 \begin{flushright}
-\fontsize{14}{16.8}\selectfont
+\fontsize{12}{14}\selectfont
 #1
 \end{flushright}
 }
+
+\newcommand{\headerD}[1]{
+\begin{flushright}
+\fontsize{12}{14}\selectfont
+http://dx.doi.org/10.6028/NIST.SP.#1
+\end{flushright}
+}
+
+
 
 \newcommand{\dod}[2]{\frac{\partial #1}{\partial #2}}
 \newcommand{\DoD}[2]{\frac{\mathrm{D} #1}{\mathrm{D} #2}}

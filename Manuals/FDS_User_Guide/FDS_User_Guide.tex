@@ -40,10 +40,20 @@ User's Guide\\
 \authortitlesigs
 }
 
+\vfill
+
+\headerD{1019}
+
+\vfill
+
+\logosigs
+
 \end{minipage}
 
 \newpage
+
 \hspace{5in}
+
 \newpage
 
 \begin{minipage}[t][9in][s]{6.25in}
@@ -61,11 +71,12 @@ User's Guide\\
 \authorsigs
 }
 
-\begin{flushright}
+\headerD{1019}
+
+\headerC{
 \today \\
 FDS Version \fdsversion \\
-\emph{SVN Repository}~$Revision$
-\end{flushright}
+\emph{SVN Repository}~$Revision$}
 % dummy comment to force svn change - Mon Nov 17 21:57:26 EST 2014
 
 
@@ -81,33 +92,7 @@ FDS Version \fdsversion \\
 
 \newpage
 
-\begin{minipage}[t][9in][s]{6.25in}
-
-\begin{flushright}
-Certain commercial entities, equipment, or materials may be identified in this \\
-document in order to describe an experimental procedure or concept adequately. \\
-Such identification is not intended to imply recommendation or endorsement by the \\
-National Institute of Standards and Technology, nor is it intended to imply that the \\
-entities, materials, or equipment are necessarily the best available for the purpose.
-\end{flushright}
-
-\vspace{3in}
-
-\large
-\begin{flushright}
-{\bf National Institute of Standards and Technology Special Publication 1019 \\
-Natl.~Inst.~Stand.~Technol.~Spec.~Publ.~1019, \pageref{LastPage} pages (April 2013) \\
-%http://dx.doi.org/10.6028/NIST.SP.1019 \\
-CODEN: NSPUE2 }
-\end{flushright}
-
-\vfill
-
-\hspace{1in}
-
-\end{minipage}
-
-\clearpage
+\disclaimer{1019}
 
 \frontmatter
 
@@ -2787,7 +2772,7 @@ one of the following methods:
 \item[Make the mesh density more uniform ] inside the material by setting {\ct STRETCH\_FACTOR(NL)=1.} on the {\ct SURF} line. This will generate a perfectly uniform mesh for layer number {\ct NL}. (This happens automatically if the layer contains one or more reacting materials.) Values between 1 and 2 give different levels of stretching. Note that {\ct STRETCH\_FACTOR} needs to be specified for all the layers.
 \item[Make the mesh cells smaller] by setting {\ct CELL\_SIZE\_FACTOR} less than 1.0. For example, a value of 0.5 makes the mesh cells half the size. The scaling always applies to all layers.
 \item[Improve the time resolution] by setting {\ct WALL\_INCREMENT=1} on the {\ct TIME} line. This forces the solid phase temperatures to be solved on every time step.
-\item[Limit the number of cells in a layer] by setting {\ct N\_LAYER\_CELLS\_MAX}. This array input has a default of 1000. 
+\item[Limit the number of cells in a layer] by setting {\ct N\_LAYER\_CELLS\_MAX}. This array input has a default of 1000.
 \end{description}
 If all the material components of the surface are reacting, and the pyrolysis reactions have no solid residue, the thickness of
 the surface is going to shrink when the surface reacts. Each of the shrinking layers will vanish from the computation when its thickness gets

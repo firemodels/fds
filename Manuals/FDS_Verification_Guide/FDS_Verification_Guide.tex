@@ -24,7 +24,7 @@
 
 \begin{minipage}[t][9in][s]{6.5in}
 
-\headerA{1018\\
+\headerA{1018-2\\
 Sixth Edition\\
 }
 
@@ -38,6 +38,14 @@ Volume 2: Verification\\
 \authortitlesigs
 }
 
+\vfill
+
+\headerD{1018-2}
+
+\vfill
+
+\logosigs
+
 \end{minipage}
 
 \newpage
@@ -48,7 +56,7 @@ Volume 2: Verification\\
 
 \begin{minipage}[t][9in][s]{6.5in}
 
-\headerA{1018\\
+\headerA{1018-2\\
 Sixth Edition\\
 }
 
@@ -62,11 +70,12 @@ Volume 2: Verification\\
 \authorsigs
 }
 
-\begin{flushright}
+\headerD{1018-2}
+
+\headerC{
 \today \\
 FDS Version \fdsversion \\
-\emph{SVN Repository}~$Revision$
-\end{flushright}
+\emph{SVN Repository}~$Revision$}
 % dummy comment to force svn change - Mon Nov 17 21:57:26 EST 2014
 
 
@@ -79,6 +88,11 @@ FDS Version \fdsversion \\
 \titlesigs
 
 \end{minipage}
+
+\newpage
+
+\disclaimer{1018-2}
+
 
 
 
@@ -3601,12 +3615,12 @@ This is an example of a comparison of a candidate solid phase model with TGA dat
 This section describes a method for interpreting micro-combustion calorimeter (MCC) measurements. The pyrolysis combustion flow calorimeter (PCFC), developed by Lyon and Walters~\cite{Lyon:JAAP2004} at the U.S. Federal Aviation Administration (FAA), is a device used to measure the heat generated from the combustion of small (4~mg to 6~mg) material samples by oxygen depletion calorimetry. Samples are pyrolyzed at a specified heating rate in an anaerobic atmosphere (typically N$_2$) and the resulting gases are mixed with excess oxygen and combusted in a separate chamber. The heat release rate from the specimen is obtained from measurements of the concentration of oxygen in the effluent exiting the combustor as a function of time. The methodology is the basis for the standard test ASTM~D~7309~\cite{microcc}.
 
 The results of PCFC measurements for the jacket and insulation materials of an electrical cable are shown in Fig.~\ref{mcc_plots}. These samples were pyrolyzed in the PCFC at a rate of 1~\si{\degree C}/s from 100~\si{\degree C} to 600~\si{\degree C} in a nitrogen atmosphere and the effluent combusted at 900~\si{\degree C} in a mixture consisting of 20~\% O$_2$ and 80~\% N$_2$. The resulting curve shows the heat release rate of the sample as it was heated, normalized by the mass of the original sample. There are usually one, two or three noticeable peaks in the curve, corresponding to temperatures where a significant decomposition reaction occurs. Each peak can be characterized by the maximum value of the heat release rate, $\dot{q}_{\alpha,{\rm p}}$, the temperature, $T_{\alpha,{\rm p}}$, and the relative fraction of the original sample mass that undergoes this particular reaction ($Y_{\alpha,0}$). The area under the curve
-\be 
-   \int_0^\infty \dot{q}(T) \, dT = \beta \, \Delta H' 
+\be
+   \int_0^\infty \dot{q}(T) \, dT = \beta \, \Delta H'
 \ee
 is the sample heating rate, $\beta$, multiplied by the energy released per unit mass of the original sample, $\Delta H'$. This latter quantity is related to the more conventional heat of combustion via the relation
-\be 
-   \Delta h = \frac{\Delta h'}{1-\nu_{\rm r}} 
+\be
+   \Delta h = \frac{\Delta h'}{1-\nu_{\rm r}}
 \ee
 where $\nu_{\rm r}$ is the fraction of the original mass that remains as residue. Sometimes this is referred to as the ``char yield.'' Note that it is assumed to be the same for all reactions.
 
@@ -3633,7 +3647,7 @@ The dashed curves in Fig.~\ref{mcc_plots} are the results of numerically integra
       REFERENCE_RATE        = 0.0064
       HEATING_RATE          = 60.
       NU_MATL               = 0.49
-      MATL_ID               = 'char' 
+      MATL_ID               = 'char'
       NU_SPEC               = 0.51 /
 \end{lstlisting}
 Only the relevant parameters are shown. The other parameters are not relevant in this exercise. Note that \textct{REFERENCE\_TEMPERATURE} is $T_{\alpha,{\rm p}}$ in units of \si{\degree C}. \textct{REFERENCE\_RATE} is actually $r_{\alpha,{\rm p}}/Y_{\alpha,0}$, in units of s$^{-1}$. \textct{HEATING\_RATE} is $\beta$ in units of \si{\degree C}/min. \textct{NU\_MATL} is $\nu_{\rm r}$ and \textct{NU\_SPEC} is ($1-\nu_{\rm r}$). Table~\ref{cable_parameters} lists all of the kinetic parameters for the cable insulation and jacket materials. The peak temperatures are easy to estimate, and the values of $r_{p,i}/Y_{0,i}$ can be fine-tuned to closely match the data. Note that it is possible to compute values of $A_i$ and $E_i$ and input them directly into FDS, rather than inputting those listed in the table. However, the values of $A_i$ and $E_i$ are fairly large numbers and have little meaning in their own.
