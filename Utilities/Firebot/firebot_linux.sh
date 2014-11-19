@@ -509,14 +509,14 @@ run_verification_cases_debug()
    cd $FDS_SVNROOT/Verification
    # Run FDS with delayed stop files (with 1 OpenMP thread and 1 iteration)
    echo 'Running FDS verification cases:' >> $FIREBOT_DIR/output/stage3
-   ./Run_FDS_Cases.sh -o 1 -d -m 1 -q $QUEUE >> $FIREBOT_DIR/output/stage3 2>&1
+   ./Run_FDS_Cases.sh -t 1 -g -m 1 -q $QUEUE >> $FIREBOT_DIR/output/stage3 2>&1
    echo "" >> $FIREBOT_DIR/output/stage3 2>&1
 
    # Start running all SMV verification cases in delayed stop debug mode
    cd $FDS_SVNROOT/Verification/scripts
    # Run FDS with delayed stop files (with 1 OpenMP thread and 1 iteration)
    echo 'Running SMV verification cases:' >> $FIREBOT_DIR/output/stage3 2>&1
-   ./Run_SMV_Cases.sh -o 1 -d -m 1 -q $QUEUE >> $FIREBOT_DIR/output/stage3 2>&1
+   ./Run_SMV_Cases.sh -t 1 -g -m 1 -q $QUEUE >> $FIREBOT_DIR/output/stage3 2>&1
    echo "" >> $FIREBOT_DIR/output/stage3 2>&1
 
    # Wait for all verification cases to end
@@ -805,14 +805,14 @@ run_verification_cases_release()
    cd $FDS_SVNROOT/Verification
    # Run FDS with 1 OpenMP thread
    echo 'Running FDS verification cases:' >> $FIREBOT_DIR/output/stage5
-   ./Run_FDS_Cases.sh -o 1 -q $QUEUE >> $FIREBOT_DIR/output/stage5 2>&1
+   ./Run_FDS_Cases.sh -t 1 -q $QUEUE >> $FIREBOT_DIR/output/stage5 2>&1
    echo "" >> $FIREBOT_DIR/output/stage5 2>&1
 
    # Start running all SMV verification cases
    cd $FDS_SVNROOT/Verification/scripts
    # Run FDS with 1 OpenMP thread
    echo 'Running SMV verification cases:' >> $FIREBOT_DIR/output/stage5 2>&1
-   ./Run_SMV_Cases.sh -o 1 -q $QUEUE >> $FIREBOT_DIR/output/stage5 2>&1
+   ./Run_SMV_Cases.sh -t 1 -q $QUEUE >> $FIREBOT_DIR/output/stage5 2>&1
    echo "" >> $FIREBOT_DIR/output/stage5 2>&1
 
    # Wait for all verification cases to end
@@ -902,7 +902,7 @@ make_smv_pictures_db()
 {
    # Run Make SMV Pictures script (debug mode)
    cd $FDS_SVNROOT/Verification/scripts
-   ./Make_SMV_Pictures.sh -d 2>&1 | grep -v FreeFontPath &> $FIREBOT_DIR/output/stage6b
+   ./Make_SMV_Pictures.sh -g 2>&1 | grep -v FreeFontPath &> $FIREBOT_DIR/output/stage6b
 }
 
 check_smv_pictures_db()
