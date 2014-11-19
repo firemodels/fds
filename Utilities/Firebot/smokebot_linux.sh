@@ -1222,8 +1222,10 @@ echo "Build SMV: $DIFF_BUILDSMV" >> $STAGE_STATUS
 ### Stage 6b ###
 MAKEPICTURES_beg=`GET_TIME`
 if [[ $stage4a_success && $stage4b_success && $stage6a_success && "$RUNDEBUG" == "1" ]] ; then
-  make_smv_pictures_db
-  check_smv_pictures_db
+# for now skip image generation in debug mode
+DUMMY=
+#  make_smv_pictures_db
+#  check_smv_pictures_db
 fi
 
 ### Stage 6d ###
