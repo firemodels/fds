@@ -2728,7 +2728,8 @@ layers for other surfaces.
 \label{info:INTERNAL_HEAT_SOURCE}
 
 The condensed phase heat conduction equation has a source term that describes the internal sources and sinks of energy. 
-There are three types of sources that contribute: heats of reaction for the pyrolysis (see Section~\ref{info:solid_pyrolysis}), 
+There are three types of sources that contribute to this term: 
+heats of reaction for the pyrolysis (see Section~\ref{info:solid_pyrolysis}), 
 internal absorption and emission of radiation (see Section~\ref{info:liquid_fuels}), and the source specified by the user. 
 An example of the case where specified heat source could be needed is the heating of electrical cables due to internal current.
 
@@ -2743,7 +2744,7 @@ The metal core is heated with a power of 300 {\si kW/m$^3$}.
       MATL_ID(2,1)           = 'METAL'
       GEOMETRY               = 'CYLINDRICAL'
       LENGTH                 = 0.1
-      SPECIFIED_SOURCE_TERM  = 0.,300. /
+      INTERNAL_HEAT_SOURCE   = 0.,300. /
 \end{lstlisting}
 
 \subsection{Special Topic: Non-Planar Walls and Targets}
