@@ -1,8 +1,8 @@
 @echo off
 
-IF "%SETUP_IFORT_COMPILER_64%"=="1" GOTO envexist
+IF "%SETUP_IFORT_COMPILER_32%"=="1" GOTO envexist
 
-  set SETUP_IFORT_COMPILER_64=1
+  set SETUP_IFORT_COMPILER_32=1
 
   IF DEFINED IFORT_COMPILER14 set IFORT_COMPILER=%IFORT_COMPILER14%
   IF DEFINED IFORT_COMPILER15 set IFORT_COMPILER=%IFORT_COMPILER15%
@@ -13,6 +13,6 @@ IF "%SETUP_IFORT_COMPILER_64%"=="1" GOTO envexist
   )
   IF DEFINED IFORT_COMPILER (
     echo Setting up compiler environment
-    call "%IFORT_COMPILER%\bin\compilervars" intel64
+    call "%IFORT_COMPILER%\bin\compilervars" ia32
   )
 :envexist

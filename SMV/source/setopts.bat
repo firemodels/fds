@@ -1,7 +1,4 @@
 @echo off
-set SIZE=-m32
-set SIZE2=ia32
-
 set COMPILER=gcc
 set COMPILER2=g++
 
@@ -13,10 +10,9 @@ IF "%1" NEQ "g" SET COMPILER2=icl
 IF "%1" EQU "m" SET COMPILER=cl
 IF "%1" EQU "m" SET COMPILER2=cl
 
-IF "%2" NEQ "3" SET SIZE=-m64
-IF "%2" NEQ "3" SET SIZE2=intel64
-
-IF "%2" NEQ "3" SET MSCOMPILER=x86_amd64
+SET SIZE=-m64
+SET SIZE2=intel64
+SET MSCOMPILER=x86_amd64
 
 IF "%COMPILER%" == "icl" SET SIZE=
 IF "%COMPILER%" == "cl" SET SIZE=
@@ -29,6 +25,7 @@ echo "           to the Visual Studio C compiler, cl, is not defined"
 echo "*** compilation aborted
 exit
 :VS_COMPILER_DEFINED
+
 IF "%MSCOMPILERS_DEFINED%" EQU "1" GOTO MSenvexist
 echo Setting up Visual Studio compiler environment
 set MSCOMPILERS_DEFINED=1
@@ -37,8 +34,5 @@ GOTO Ienvexist
 :MSenvexist
 
 IF "%COMPILER%" NEQ "icl" GOTO Ienvexist
-IF "%ICOMPILERS_DEFINED%" EQU "1" GOTO Ienvexist
-echo Setting up Intel compiler environment
-set ICOMPILERS_DEFINED=1
-call "%IFORT_COMPILER14%\bin\compilervars" %SIZE2%
+call ..\..\..\Utilities\Scripts\setup_intel_compilers.bat
 :Ienvexist

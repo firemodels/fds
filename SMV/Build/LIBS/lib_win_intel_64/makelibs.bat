@@ -1,41 +1,41 @@
 @echo off
-set OPTS=i 6
+set OPTS=i
 
 set LIBDIR=%CD%
 set SRCDIR=%LIBDIR%\..\..\..\source
 
-Rem GD
+:: GD
 cd %SRCDIR%\gd-2.0.15
 call makelib %OPTS%
 copy libgd.lib %LIBDIR%\gd.lib
 
-Rem GLUI
+:: GLUI
 cd %SRCDIR%\glui_v2_1_beta
 ::cd %SRCDIR%\glui_v2_36
 call makelib %OPTS%
 copy  libglui.lib %LIBDIR%\glui.lib
 
-Rem GLUT
+:: GLUT
 cd %SRCDIR%\glut-3.7.6
 call makelib %OPTS%
 copy libglutwin.lib %LIBDIR%\glut32.lib
 
-Rem JPEG
+:: JPEG
 cd %SRCDIR%\jpeg-6b
 call makelib %OPTS%
 copy libjpeg.lib %LIBDIR%\jpeg.lib
 
-Rem PNG
+:: PNG
 cd %SRCDIR%\png125
 call makelib %OPTS%
 copy libpng.lib %LIBDIR%\png.lib
 
-Rem ZLIB
+:: ZLIB
 cd %SRCDIR%\zlib114
 call makelib %OPTS%
 copy libz.lib %LIBDIR%\zlib.lib
 
-Rem pthreads
+:: pthreads
 cd %SRCDIR%\pthreads
 call makelib %OPTS%
 copy libpthreads.lib %LIBDIR%\pthreads.lib
