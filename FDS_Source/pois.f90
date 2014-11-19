@@ -6,8 +6,7 @@ MODULE POIS
 ! POISSON SOLVER ROUTINES
 
 USE PRECISION_PARAMETERS
-IMPLICIT REAL(EB) (A-H,O-Z)
-IMPLICIT INTEGER (I-N)
+IMPLICIT NONE
 PRIVATE
 REAL(EB) SCALE
 INTEGER :: KAPPA,NMAX,IKPWR
@@ -34,6 +33,9 @@ SUBROUTINE H3CZIS(XS,XF,L,LBDCND,YS,YF,M,MBDCND,ZS,ZF,N,NBDCND,  &
 REAL(EB)::  XS, XF, YS, YF, ZS, ZF, ELMBDA, DLZSQR
 INTEGER:: L, LBDCND, M, MBDCND, N, NBDCND, LDIMF, MDIMF, IERROR, LPEROD
 REAL(EB) SAVE(-3:*),H(0:*)
+
+REAL(EB) :: DX, DY, DZ, DLXSQR, DLYSQR, HM, HP
+INTEGER :: LP, MP, NP, IA, IB, IC, ID, IS, I, IR
 
 !                               CHECK FOR INVALID INPUT
 
@@ -200,9 +202,11 @@ SUBROUTINE H3CZSS(BDXS,BDXF,BDYS,BDYF,BDZS,BDZF,LDIMF,MDIMF,F,  &
 
 
 USE GLOBAL_CONSTANTS, ONLY: PRES_METHOD
+INTEGER:: LDIMF, MDIMF
+INTEGER :: L, LP, M, MP, N, NP, IA, IB, IC, ID, IS, K, J, I, ISING
 REAL(EB):: BDXS(MDIMF,*), BDXF(MDIMF,*), BDYS(LDIMF,*), BDYF(LDIMF,*), BDZS(LDIMF,*), BDZF(LDIMF,*), &
            F(LDIMF,MDIMF,*),SAVE(-3:*),W(*),H(0:*), PERTRB
-INTEGER:: LDIMF, MDIMF
+REAL(EB) :: DX, DY, DZ, ELMBDA, DLYRCP, TWDYSQ, DLZRCP, TWDZSQ, PERT, S1, S3, PRTSAV
  
 
 !                               CHECK VALUE OF IERROR (=SAVE(1)).
@@ -463,6 +467,7 @@ INTEGER:: LPEROD, L, MPEROD, M, NPEROD, N
 REAL(EB):: SCAL
 REAL(EB):: A(L), B(L), C(L), D(L), SAVE(-3:*)
 INTEGER:: LDIMF, MDIMF, IERROR
+INTEGER :: I, LDIMFC, IGRID
 !                               CHECK FOR INVALID INPUT
 
 IERROR = 0
@@ -576,8 +581,9 @@ SUBROUTINE FSH00S(IGRID,LPEROD,L,MPEROD,M,NPEROD,N,LDIMFC,C2, A,B,C,D,SAVE)
 ! |                        ALL RIGHTS RESERVED                         |
 ! |                                                                    |
 ! +--------------------------------------------------------------------+
-REAL(EB)   a(l),b(l),c(l),d(l),save(-3:*), C2
 INTEGER:: IGRID, LPEROD, L,  MPEROD,  M, NPEROD, N, LDIMFC
+REAL(EB)   a(l),b(l),c(l),d(l),save(-3:*), C2
+INTEGER :: IA, IB, IC, ICFY, ICFZ, IFCTRD, IWSY, IWSZ, IZRT, I, LP, MP, NP
 !                               THIS SUBROUTINE INITIALIZES FFT SOLVER
 
 !                               ALLOCATE SAVE ARRAY
@@ -646,9 +652,11 @@ SUBROUTINE FSH01S(IGRID,L,LP,M,MP,D,N,NP,LDIMFC,C2,A,B,C,CFY,CFZ,  &
 ! |                                                                    |
 ! +--------------------------------------------------------------------+
 
-REAL(EB) a(l),b(l),c(l),d(l),cfy(4*m),cfz(4*n),fctrd(ldimfc,n,m),wsavey(m+16),wsavez(n+16),zrt(n)
 INTEGER:: IGRID, L, LP, M, MP, N, NP, LDIMFC, K, I
+REAL(EB) a(l),b(l),c(l),d(l),cfy(4*m),cfz(4*n),fctrd(ldimfc,n,m),wsavey(m+16),wsavez(n+16),zrt(n)
 REAL(EB):: C2
+REAL(EB) :: EPS, DEL, DEN, BMAX
+INTEGER :: LH, LODD, MRDEL, J, NRDEL
 
 
 !                               INITIALIZATION ROUTINE FOR FFT SOLVERS
@@ -969,6 +977,7 @@ SUBROUTINE FSH02S(LDIMF,MDIMF,F,SAVE,W)
 
 INTEGER:: LDIMF, MDIMF
 REAL(EB)   F(LDIMF,MDIMF,*), W(*), SAVE(-3:*)
+INTEGER :: L, LP, M, MP, N, NP, IGRID, IA, IC, ICFY, ICFZ, IFCTRD, LDIMFC, IWSY, IWSZ, LDIMFT
 
 !                               RETRIEVE CONSTANTS FROM SAVE ARRAY
 
@@ -1049,6 +1058,8 @@ REAL(EB)   FCTRD(LDIMFC,M,N)
 REAL(EB)   WSAVEY(M+16)
 REAL(EB)   WSAVEZ(N+16)
 REAL(EB)   A(L),C(L),F(LDIMFT,M,N)
+INTEGER :: K, J, IFWRD, I
+
     
 LOGICAL :: DATARY,DATASW
 !                               ZERO OUT BOTTOM PLANE OF ARRAY FT
@@ -1175,6 +1186,7 @@ INTEGER                   :: LDIMF
 INTEGER                   :: MDIMF
 INTEGER                   :: LDIMG
 REAL(EB)   F(LDIMF,MDIMF, N), G(LDIMG,M,N)
+INTEGER :: K, J, I
 
 !                              THIS SUBROUTINE PACKS THE SUB-ARRAY
 !                              F(I,J,K), I=1,...,L, J=1,...,M, K=1,...,N
@@ -1218,6 +1230,7 @@ INTEGER                   :: MDIMF
 INTEGER                   :: LDIMG
 REAL(EB)   G(LDIMG,M,N)
 REAL(EB)   F(LDIMF,MDIMF,N)
+INTEGER :: K, J, I
 
 !                               THIS SUBROUTINE EXPANDS THE ARRAY G OF
 !                               DIMENSION L X M X N INTO THE ARRAY F OF
@@ -1255,6 +1268,7 @@ REAL(EB) :: SCALE
 REAL(EB)   FT(LDIMFT,M)
 REAL(EB)  FCTRD(LDIMFC,M)
 REAL(EB)   A(L),C(L),F(LDIMFT,M)
+INTEGER :: LH, LQ, I, J
 
 !                               THIS SUBROUTINE SOLVES M TRIDIAGONAL
 !                               SYSTEMS OF ORDER L THAT HAVE
@@ -1479,6 +1493,7 @@ REAL(EB) XT(LDIMX*N,M)
 REAL(EB) C(M)
 REAL(EB) WSAVE(M+15)
 REAL(EB) X(LDIMX*N,M)
+INTEGER :: MM1, MS2, I, J, JC
 
 !     TPOSE = .TRUE. IF TRANSFORMING SECOND INDEX (SO TRANSPOSE)
 !           = .FALSE. IF TRANSFORMING THIRD INDEX
@@ -1551,6 +1566,8 @@ INTEGER                   :: MS2
 REAL(EB)   C(*)
 REAL(EB)  XT(LDIMX,N,M)
 REAL(EB)   X(LDIMX,M,N)
+INTEGER :: K, I, J, JC
+
 DO  K=1,N
   DO  I=1,L
     XT(I,K,M)=X(I,1,K)-X(I,M,K)
@@ -1596,6 +1613,7 @@ INTEGER                       :: M
 INTEGER                       :: LDIMX
 INTEGER                   :: MM1
 REAL(EB)   X(LDIMX,M), PL(LDIMX),XT(LDIMX,M)
+INTEGER :: I, J
 
 DO  I=1,LDIMX
   X(I,1) = XT(I,1)
@@ -1643,6 +1661,9 @@ SUBROUTINE VCOSTI(N,C,WSAVE)
 
 INTEGER                       :: N
 REAL(EB)    C(N), WSAVE(N+15)
+INTEGER :: NP1, NS2, K, KC
+REAL(EB) :: DT
+
 
 !                               INITIALIZE NOCOPY AND TPOSE TO DEFAULT
 !                               VALUES
@@ -1741,6 +1762,7 @@ REAL(EB)    CH(M,N)
 REAL(EB)   WA(N)
 REAL(EB)  FAC(15)
 REAL(EB)         C(MDIMC,N)
+INTEGER :: NF, NA, L2, IW, K1, KH, IP, L1, IDO, IDL1, IX2, IX3, IX4, J, I
 
 NF = FAC(2)
 NA = 1
@@ -1834,6 +1856,8 @@ SUBROUTINE VRFTI1 (N,WA,FAC)
 INTEGER                       :: N
 REAL(EB)   FAC(15)
 REAL(EB)         WA(N)      , NTRYH(4)
+INTEGER :: NL, NF, J, NTRY, NQ, NR, I, IB, IS, NFM1, L1, K1, IP, LD, L2, IDO, IPM, II
+REAL(EB) :: ARGH, TPI, ARGLD, FI, ARG
 DATA NTRYH(1),NTRYH(2),NTRYH(3),NTRYH(4)/4,2,3,5/
 
 NL = N
@@ -1917,6 +1941,7 @@ REAL(EB)  C1(M)
 REAL(EB)    C2(M)
 REAL(EB)   WORK(M+15)
 REAL(EB)   F(LDIMF*N,M)
+INTEGER :: I, J
 
 !     TPOSE = .TRUE. IF TRANSFORMING SECOND INDEX (SO TRANSPOSE)
 !           = .FALSE. IF TRANSFORMING THIRD INDEX
@@ -1975,6 +2000,7 @@ REAL(EB)  C1(M)
 REAL(EB)   C2(M)
 REAL(EB)   WORK(M+15)
 REAL(EB)   F(LDIMF*N,M)
+INTEGER :: I, J
 
 !     TPOSE = .TRUE. IF TRANSFORMING SECOND INDEX (SO TRANSPOSE)
 !           = .FALSE. IF TRANSFORMING THIRD INDEX
@@ -2036,6 +2062,8 @@ SUBROUTINE VSCOSI(N,C1,C2,WSAVE)
 INTEGER                       :: N
 REAL(EB)    WSAVE(N+15)
 REAL(EB)   C1(N),C2(N)
+INTEGER :: I
+REAL(EB) :: DX, C, S
 
 DX=PI/(2*N)
 
@@ -2079,6 +2107,7 @@ REAL(EB)  C3(M)
 REAL(EB)  C4(M)
 REAL(EB)  WORK(M+15)
 REAL(EB)   F(LDIMF*N,M)
+INTEGER :: I, J, JBY2
 
 !     TPOSE = .TRUE. IF TRANSFORMING SECOND INDEX (SO TRANSPOSE)
 !           = .FALSE. IF TRANSFORMING THIRD INDEX
@@ -2151,6 +2180,8 @@ REAL(EB)  FT(LDIMF,N,M)
 REAL(EB)  C1(M)
 REAL(EB)  C2(M)
 REAL(EB)   F(LDIMF,M,N)
+INTEGER :: K, I, J
+
 DO  K=1,N
   DO  I=1,L
     FT(I,K,1)=.5_EB*F(I,1,K)
@@ -2184,6 +2215,7 @@ SUBROUTINE VSCSBA(M,LDIMF,FT,F)
 INTEGER                       :: M
 INTEGER                       :: LDIMF
 REAL(EB)   F(LDIMF,M), FT(LDIMF,M)
+INTEGER :: I, J
 
 DO  I=1,LDIMF
   F(I,1) = FT(I,1)
@@ -2223,6 +2255,7 @@ INTEGER                       :: N
 INTEGER                   :: LDIMF
 REAL(EB)   FT(LDIMF,N,M)
 REAL(EB)   F(LDIMF,M,N)
+INTEGER :: K, I, J
 DO  K=1,N
   DO  I=1,L
     FT(I,K,1)=F(I,1,K)
@@ -2266,6 +2299,7 @@ INTEGER                       :: LDIMF
 REAL(EB)    FT(LDIMF,M)
 REAL(EB)    C1(M)
 REAL(EB)   F(LDIMF,M),  C2(M)
+INTEGER :: J, I
 
 DO  J=2,M
   DO  I=1,LDIMF
@@ -2301,6 +2335,8 @@ REAL(EB)  FT(LDIMF,N,M)
 REAL(EB)  C1(M)
 REAL(EB)    C2(M)
 REAL(EB)   F(LDIMF,M,N)
+INTEGER :: K, I, J, JBY2
+
 DO  K=1,N
   DO  I=1,L
     FT(I,K,1)=F(I,1,K)
@@ -2346,6 +2382,8 @@ REAL(EB)  C3(N)
 REAL(EB)   C4(N)
 REAL(EB)   WSAVE(N+15)
 REAL(EB)   C1(N),C2(N)
+INTEGER :: I
+REAL(EB) :: DX,C,S
 
 DX=PI/N
 SCALE=SQRT(.5_EB)
@@ -2395,6 +2433,8 @@ REAL(EB)  XT(LDIMX*N,M+1)
 REAL(EB)  C(M/2)
 REAL(EB)  WSAVE(M+16)
 REAL(EB)  X(LDIMX*N,M)
+INTEGER MODM,MP1,MS2,I,J,JC
+REAL(EB) :: SQRT2I
 
 !     TPOSE = .TRUE. IF TRANSFORMING SECOND INDEX (SO TRANSPOSE)
 !           = .FALSE. IF TRANSFORMING THIRD INDEX
@@ -2459,6 +2499,8 @@ INTEGER                   :: MS2
 REAL(EB)   C(*)
 REAL(EB)   X(LDIMX,M,N)
 REAL(EB)   XT(LDIMX,N,M+1)
+INTEGER J, JC, K, I
+
 DO  J=1,MS2
   JC = M+1-J
   DO  K=1,N
@@ -2497,6 +2539,7 @@ INTEGER                       :: M
 INTEGER                       :: LDIMX
 INTEGER                   :: MODM
 REAL(EB)   X(LDIMX,M),  XT(LDIMX,M+1)
+INTEGER :: I,J
 
 DO  I=1,LDIMX
   X(I,1) = 0.5_EB*XT(I,1)
@@ -2542,6 +2585,8 @@ SUBROUTINE VSINTI(N,C,WSAVE)
 
 INTEGER                       :: N
 REAL(EB)   C(N/2),WSAVE (N+16)
+INTEGER :: NP1,NS2,K
+REAL(EB) :: DT
 
 !                               INITIALIZE NOCOPY AND TPOSE TO DEFAULT
 !                               VALUES
@@ -2595,6 +2640,7 @@ INTEGER                   :: LDIMF
 REAL(EB)   FT(LDIMF,N,M)
 REAL(EB)   WSAVE(M+15)
 REAL(EB)   F(LDIMF,M,N)
+INTEGER :: I,K,J
 
 !     TPOSE = .TRUE. IF TRANSFORMING SECOND INDEX (SO TRANSPOSE)
 !           = .FALSE. IF TRANSFORMING THIRD INDEX
@@ -2720,6 +2766,7 @@ SUBROUTINE VSRTB1(M,LDIMF,F,FT)
 INTEGER                       :: M
 INTEGER                       :: LDIMF
 REAL(EB)   F(LDIMF,M),  FT(LDIMF,M)
+INTEGER :: I,J
 
 DO  J=1,M
   DO  I=1,LDIMF
@@ -2750,6 +2797,8 @@ INTEGER                       :: N
 INTEGER                   :: LDIMF
 REAL(EB)   FT(LDIMF,N,M)
 REAL(EB)   F(LDIMF,M,N)
+INTEGER :: I,K,J
+
 DO  K=1,N
   DO  J=1,M
     DO  I=1,L
@@ -2782,6 +2831,7 @@ REAL(EB) C1(M)
 REAL(EB)  C2(M)
 REAL(EB)  WORK(M+15)
 REAL(EB)   F(LDIMF*N,M)
+INTEGER :: I,J
 
 !     TPOSE = .TRUE. IF TRANSFORMING SECOND INDEX (SO TRANSPOSE)
 !           = .FALSE. IF TRANSFORMING THIRD INDEX
@@ -2841,6 +2891,7 @@ REAL(EB) C1(M)
 REAL(EB) C2(M)
 REAL(EB)  WORK(M+15)
 REAL(EB)   F(LDIMF*N,M)
+INTEGER :: I,J
 
 !     TPOSE = .TRUE. IF TRANSFORMING SECOND INDEX (SO TRANSPOSE)
 !           = .FALSE. IF TRANSFORMING THIRD INDEX
@@ -2906,6 +2957,7 @@ REAL(EB)  C3(M)
 REAL(EB)  C4(M)
 REAL(EB) WORK(M+15)
 REAL(EB)   F(LDIMF*N,M)
+INTEGER :: I,J,JBY2
 
 !     TPOSE = .TRUE. IF TRANSFORMING SECOND INDEX (SO TRANSPOSE)
 !           = .FALSE. IF TRANSFORMING THIRD INDEX
@@ -2978,6 +3030,8 @@ REAL(EB)  FT(LDIMF,N,M)
 REAL(EB)  C1(M)
 REAL(EB) C2(M)
 REAL(EB)   F(LDIMF,M,N)
+INTEGER :: I,J,K
+
 DO  J=2,M
   DO  K=1,N
     DO  I=1,L
@@ -3007,6 +3061,7 @@ SUBROUTINE VSSNBA(M,LDIMF,F,FT)
 
 INTEGER                       :: M
 INTEGER                       :: LDIMF
+INTEGER :: I,J
 
 REAL(EB)   F(LDIMF,M),  FT(LDIMF,M)
 
@@ -3049,6 +3104,8 @@ INTEGER                       :: N
 INTEGER                   :: LDIMF
 REAL(EB)   FT(LDIMF,N,M)
 REAL(EB)   F(LDIMF,M,N)
+INTEGER :: I,K,J
+
 DO  K=1,N
   DO  I=1,L
     FT(I,K,1)=F(I,1,K)
@@ -3092,6 +3149,7 @@ INTEGER                       :: LDIMF
 REAL(EB)   FT(LDIMF,M)
 REAL(EB)    C1(M)
 REAL(EB)   F(LDIMF,M), C2(M)
+INTEGER :: I, J
 
 DO  J=2,M
   DO  I=1,LDIMF
@@ -3127,6 +3185,8 @@ REAL(EB) FT(LDIMF,N,M)
 REAL(EB)  C1(M)
 REAL(EB)  C2(M)
 REAL(EB)   F(LDIMF,M,N)
+INTEGER :: I,K,J,JBY2
+
 DO  K=1,N
   DO  I=1,L
     FT(I,K,1)=F(I,1,K)
@@ -3164,10 +3224,11 @@ SUBROUTINE VRADF2 (MP,IDO,L1,CC,MDIMC,CH,MDIMCH,WA1)
 
 !     PACKAGE VFFTPAK, VERSION 1, JUNE 1989
 
-REAL(EB) CH(MDIMCH,IDO,2,L1), CC(MDIMC,IDO,L1,2),  WA1(IDO)
+INTEGER :: MDIMCH
 INTEGER  :: MP, IDO, L1
 INTEGER  :: MDIMC
-INTEGER :: MDIMCH
+REAL(EB) CH(MDIMCH,IDO,2,L1), CC(MDIMC,IDO,L1,2),  WA1(IDO)
+INTEGER :: I,K,M,IDP2,IC
 
 DO  K=1,L1
   DO  M=1,MP
@@ -3218,11 +3279,13 @@ SUBROUTINE VRADF3 (MP,IDO,L1,CC,MDIMC,CH,MDIMCH,WA1,WA2)
 
 
 INTEGER                       :: MP, IDO, L1
-REAL(EB)    CH(MDIMCh,IDO,3,L1)  ,CC(MDIMC,IDO,L1,3) 
 INTEGER                   :: MDIMC
 INTEGER                   :: MDIMCH
+REAL(EB)    CH(MDIMCh,IDO,3,L1)  ,CC(MDIMC,IDO,L1,3) 
 REAL(EB)  WA1(IDO)
 REAL(EB)   WA2(IDO)
+INTEGER :: I,M,K,IDP2,IC
+REAL(EB) :: ARG,TAUR,TAUI
 
 ARG=2._EB*PI/3._EB 
 TAUR=COS(ARG)
@@ -3286,11 +3349,13 @@ SUBROUTINE VRADF4 (MP,IDO,L1,CC,MDIMC,CH,MDIMCH,WA1,WA2,WA3)
 
 INTEGER                       :: MP, IDO, L1
 INTEGER                   :: MDIMC
-REAL(EB)  CC(MDIMC,IDO,L1,4)   ,CH(MDIMCH,IDO,4,L1)
 INTEGER                   :: MDIMCH
+REAL(EB)  CC(MDIMC,IDO,L1,4)   ,CH(MDIMCH,IDO,4,L1)
 REAL(EB)    WA1(IDO)
 REAL(EB)   WA2(IDO)
 REAL(EB)   WA3(IDO)
+INTEGER :: I,M,K,IDP2,IC
+REAL(EB) :: HSQT2
 
 HSQT2=SQRT(2.0_EB)*0.5_EB
 DO  M=1,MP
@@ -3373,12 +3438,14 @@ SUBROUTINE VRADF5 (MP,IDO,L1,CC,MDIMC,CH,MDIMCH,WA1,WA2,WA3,WA4)
 INTEGER                       :: MP
 INTEGER                      :: IDO,L1
 INTEGER                   :: MDIMC
-REAL(EB)   CC(MDIMC,IDO,L1,5)    ,CH(MDIMCH,IDO,5,L1)
 INTEGER                   :: MDIMCH
+REAL(EB)   CC(MDIMC,IDO,L1,5)    ,CH(MDIMCH,IDO,5,L1)
 REAL(EB)   WA1(IDO)
 REAL(EB)   WA2(IDO)
 REAL(EB)   WA3(IDO)
 REAL(EB)    WA4(IDO)
+INTEGER :: K,M,IDP2,I,IC
+REAL(EB) :: ARG,TR11,TI11,TR12,TI12
 
 ARG=2._EB*PI/5._EB 
 TR11=COS(ARG)
@@ -3502,14 +3569,16 @@ SUBROUTINE VRADFG(MP,IDO,IP,L1,IDL1,CC,C1,C2,MDIMC, CH,CH2,MDIMCH,WA)
 INTEGER                       :: MP, IDO
 INTEGER                       :: IP, L1
 INTEGER                       :: IDL1
+INTEGER                   :: MDIMC
+INTEGER                   :: MDIMCH
 REAL(EB)   CC(MDIMC,IDO,IP,L1)
 REAL(EB)   C1(MDIMC,IDO,L1,IP)
 REAL(EB)    C2(MDIMC,IDL1,IP)
-INTEGER                   :: MDIMC
 REAL(EB)   CH2(MDIMCH,IDL1,IP)
-INTEGER                   :: MDIMCH
 REAL(EB)    WA(IDO)
 REAL(EB)    CH(MDIMCH,IDO,L1,IP) 
+INTEGER :: IPPH, IPP2, IDP2, NBD, IK, M, J, K, IS, IDIJ, I, JC, L, LC, J2, IC
+REAL(EB) :: TPI, ARG, DCP, DSP, AR1, AI1, AR1H, DC2, DS2, AR2, AI2, AR2H
     
 
 TPI=2._EB*PI
@@ -3750,11 +3819,13 @@ SUBROUTINE VRFTB1 (M,N,C,MDIMC,CH,WA,FAC)
 
 INTEGER                       :: M
 INTEGER                       :: N
-REAL(EB)  C(MDIMC,N)
 INTEGER   :: MDIMC
+REAL(EB)  C(MDIMC,N)
 REAL(EB)    WA(N)
 REAL(EB)    FAC(15)
 REAL(EB)    CH(M,N)
+INTEGER :: I, NF, NA, L1, IW, K1, IP, L2, IDO, IDL1, IX2, IX3, IX4, J
+
 NF = FAC(2)
 NA = 0
 L1 = 1
@@ -3848,10 +3919,11 @@ INTEGER                       :: MP
 INTEGER                   :: IDO
 INTEGER                       :: L1
 INTEGER                   :: MDIMC
-REAL(EB)   CH(MDIMCH,IDO,L1,2)
 INTEGER                   :: MDIMCH
+REAL(EB)   CH(MDIMCH,IDO,L1,2)
 REAL(EB) WA1(IDO)
 REAL(EB)    CC(MDIMC,IDO,2,L1) 
+INTEGER :: I, K, M, IDP2, IC
 
 DO  K=1,L1
   DO  M=1,MP
@@ -3904,11 +3976,13 @@ INTEGER                       :: MP
 INTEGER                       :: IDO
 INTEGER                       :: L1
 INTEGER                   :: MDIMC
-REAL(EB)   CH(MDIMCH,IDO,L1,3)
 INTEGER                   :: MDIMCH
+REAL(EB)   CH(MDIMCH,IDO,L1,3)
 REAL(EB)   WA1(IDO)
 REAL(EB)    WA2(IDO)
-REAL(EB)    CC(MDIMC,IDO,3,L1)   
+REAL(EB)    CC(MDIMC,IDO,3,L1) 
+INTEGER :: I, M, K, IDP2, IC
+REAL(EB) :: ARG, TAUR, TAUI
 
 ARG=2._EB*PI/3._EB 
 TAUR=COS(ARG)
@@ -3972,12 +4046,14 @@ INTEGER                       :: MP
 INTEGER                   :: IDO
 INTEGER                       :: L1
 INTEGER                   :: MDIMC
-REAL(EB)     CH(MDIMCH,IDO,L1,4)
 INTEGER                   :: MDIMCH
+REAL(EB)     CH(MDIMCH,IDO,L1,4)
 REAL(EB)   WA1(IDO)
 REAL(EB)    WA2(IDO)
 REAL(EB)   WA3(IDO)
 REAL(EB)    CC(MDIMC,IDO,4,L1) 
+INTEGER :: I, M, K, IDP2, IC
+REAL(EB) :: SQRT2
 
 SQRT2=SQRT(2.0_EB)
 DO  M=1,MP
@@ -4054,13 +4130,15 @@ INTEGER                       :: MP
 INTEGER                       :: IDO
 INTEGER                       :: L1
 INTEGER                   :: MDIMC
-REAL(EB)   CH(MDIMCH,IDO,L1,5)
 INTEGER                   :: MDIMCH
+REAL(EB)   CH(MDIMCH,IDO,L1,5)
 REAL(EB)   WA1(IDO)
 REAL(EB)  WA2(IDO)
 REAL(EB)   WA3(IDO)
 REAL(EB)   WA4(IDO)
 REAL(EB)    CC(MDIMC,IDO,5,L1) 
+INTEGER :: I, K, M, IDP2, IC
+REAL(EB) :: ARG, TR11, TI11, TR12, TI12
 
 ARG=2._EB*PI/5._EB 
 TR11=COS(ARG)
@@ -4165,15 +4243,17 @@ SUBROUTINE VRADBG (MP,IDO,IP,L1,IDL1,CC,C1,C2,MDIMC, CH,CH2,MDIMCH,WA)
 ! +--------------------------------------------------------------------+
 
 !     PACKAGE VFFTPAK, VERSION 1, JUNE 1989
-REAL(EB)      CH(MDIMCH,IDO,L1,IP)    ,CC(MDIMC,IDO,IP,L1) ,C1(MDIMC,IDO,L1,IP)     ,C2(MDIMC,IDL1,IP), &
-               CH2(MDIMCH,IDL1,IP)       ,WA(IDO)
-
 INTEGER                       :: MP
 INTEGER      :: IDO, L1
 INTEGER                       :: IP
 INTEGER                       :: IDL1
 INTEGER                   :: MDIMC
 INTEGER                   :: MDIMCH
+REAL(EB)      CH(MDIMCH,IDO,L1,IP)    ,CC(MDIMC,IDO,IP,L1) ,C1(MDIMC,IDO,L1,IP)     ,C2(MDIMC,IDL1,IP), &
+               CH2(MDIMCH,IDL1,IP)       ,WA(IDO)
+INTEGER :: I, IDP2, NBD, IPP2, IPPH, K, M, J, JC, J2, IC, L, LC, IK, IS, IDIJ
+REAL(EB) :: TPI, ARG, DCP, DSP, AR1, AI1, AR1H, DC2, DS2, AR2, AI2, AR2H
+
 
 TPI=2._EB*PI
 ARG = TPI/REAL(IP,EB)
@@ -4407,6 +4487,8 @@ INTEGER                       :: N
 INTEGER                       :: INCX
 INTEGER                       :: INCY
 REAL(EB) SX(1),SY(1),STEMP1,STEMP2,STEMP3
+INTEGER :: I, IX, IY, M,  MP1, NS
+
 !***FIRST EXECUTABLE STATEMENT  SSWAP
 IF(N<=0)RETURN
 IF(INCX==INCY) THEN
@@ -4494,6 +4576,8 @@ INTEGER                       :: NBDCND
 INTEGER                   :: LDIMF
 INTEGER                   :: MDIMF
 INTEGER                      :: IERROR
+INTEGER :: I, IAL, IBL, ICL, IDL, ISL, IAM, IBM, ICM, IDM, ISM, ISVPS, J, IERR1
+REAL(EB) :: DR, DRBY2, DRSQR, DT, DTBY2, DTSQR, DP, DPSQR, HXM, HXP, HYM, HYP, SUM, S3
 
 !                               CHECK FOR INVALID INPUT
 
@@ -4803,15 +4887,17 @@ SUBROUTINE H3CSSS(BDRS,BDRF,BDTS,BDTF,BDPS,BDPF,LDIMF,MDIMF,F,  &
 ! |                                                                    |
 ! +--------------------------------------------------------------------+
 
-REAL(EB) BDRS(MDIMF,*), BDRF(MDIMF,*), BDTS(LDIMF,*),BDTF(LDIMF,*),BDPS(LDIMF,*),BDPF(LDIMF,*)
 INTEGER                   :: LDIMF
 INTEGER                   :: MDIMF
+REAL(EB) BDRS(MDIMF,*), BDRF(MDIMF,*), BDTS(LDIMF,*),BDTF(LDIMF,*),BDPS(LDIMF,*),BDPF(LDIMF,*)
 REAL(EB) F(LDIMF,MDIMF,*)
 REAL(EB) PERTRB
 REAL(EB) SAVE(-3:*)
 REAL(EB) W(*)
 REAL(EB) HX(0:*)
 REAL(EB) HY(0:*)
+INTEGER :: I, L, LBDCND, M, MBDCND, N, NBDCND, IAL, IBL, ICL, IDL, ISL, IAM, IBM, ICM, IDM, ISM, ISVPS, K, J, ISING
+REAL(EB) :: DR, DT, DP, DPR, DPSQR, ELMBDA, SUM, PERT, PRTSAV, SCAL
  
 !                               CHECK VALUE OF IERROR (=SAVE(1)).
 !                               IF NON-ZERO, RETURN.
@@ -5144,13 +5230,14 @@ SUBROUTINE S3CCIS(L,AL,BL,CL,M,AM,BM,CM,DM,NPEROD,N,LDIMF,MDIMF,  &
 
 
 
-REAL(EB) AL(L),BL(L),CL(L),AM(M),BM(M),CM(M),DM(M),SAVE(-3:*),W(*)
 INTEGER                       :: M
 INTEGER                       :: NPEROD
 INTEGER                   :: N
 INTEGER                   :: LDIMF
 INTEGER                   :: MDIMF
 INTEGER                      :: IERROR
+INTEGER :: L, J, IGRID
+REAL(EB) AL(L),BL(L),CL(L),AM(M),BM(M),CM(M),DM(M),SAVE(-3:*),W(*)
 
 !                               CHECK FOR INVALID INPUT
 
@@ -5260,6 +5347,7 @@ INTEGER                       :: MDIMY
 REAL(EB)    SAVE(-3:*)
 REAL(EB)    W(*)
 REAL(EB)   Y(*)
+INTEGER :: L, M, N, NP, IGRID, IAL, IBL, ICL, IAM, ICM, ICFZ, IWSZ, IB, ICF, LENY
 
 !                               SOLVER BASED ON CYCLIC REDUCTION AND
 !                               FAST FOURIER TRANSFORMS
@@ -5349,6 +5437,8 @@ REAL(EB)    F(L,M,N)
 REAL(EB)    W1(M)
 REAL(EB)    W2(L*M)
 REAL(EB)   FT(L,M,N)
+INTEGER :: K,J,I
+INTEGER :: IFWRD, LDIMFT, IB, ICF
 
 LOGICAL :: DATARY
 
@@ -5434,6 +5524,8 @@ REAL(EB)   RT(NMAX)
 REAL(EB)    WS(NMAX,M)
 REAL(EB)    D(NMAX,M)
 REAL(EB)   AN(NMAX),CN(NMAX)
+INTEGER :: I, KDO, IF, IC, IR, IRM1, I2, I3, I4, IS, IM2, NM2, IP, J, IPI2, IMI2, IP2, NP2, I1, IMI1, IPI1, IM1, NM1
+INTEGER :: IP1, NP1, IZ, NZ
 
 !                               LET KAPPA = LOG2(NMAX) + 1, THEN
 ! LENGTH OF B ARRAY = (KAPPA-2)*2**(KAPPA+1) + KAPPA + 5
@@ -5628,6 +5720,7 @@ REAL(EB)   XL(IDEG)
 REAL(EB)   Y(NMAX,M)
 REAL(EB)   D(NMAX,M)
 REAL(EB)   A(M),B(M),C(M)
+INTEGER :: I, MM1, K
 
 !                              FSH18S IS A VECTORIZED TRIDIAGONAL SOLVER
 !                              THAT ALSO DOES FACTORIZATION
@@ -5672,6 +5765,8 @@ REAL(EB)  CM(M)
 REAL(EB)  DM(M)
 REAL(EB) SAVE(-3:*)
 REAL(EB)  W(*)
+INTEGER :: I, ML, NP, IAL, IBL, ICL, IAM, ICM, ICFZ, IWSZ, IB, ICF, NRDEL, K, J, IERR1
+REAL(EB) :: DEL
 
 
 ! +--------------------------------------------------------------------+
@@ -5919,6 +6014,8 @@ REAL(EB) B(*)
 REAL(EB) AH(*)
 REAL(EB) BH(*)
 REAL(EB) AN(*)
+INTEGER :: IF, KDO, L, IR, I2, I4, IPL, IFD, I, IB, NB, JS, JF, LS, LH
+REAL(EB) :: ARG
 
 IERROR = 0
 DO  J = 2,NMAX
@@ -5989,6 +6086,8 @@ REAL(EB) B(*)
 REAL(EB) COEF(*)
 REAL(EB) T(NMAX,4)
 REAL(EB) AN(NMAX),CN(NMAX), DUM(0:0)
+INTEGER :: I, IF, KDO, IS, IR, IRM1, I2, I3, I4, IMI2, IMI3, IDXA, NA, IM2, NM2, IM3
+INTEGER :: NM3, IPI2, IPI3, IDXC, NC, IP2, NP2, IP3, NP3, I1, IMI1, IM1, NM1, IPI1, IP1, NP1, IZ, NZ
 
 IF = 2**KAPPA
 KDO = KAPPA - 1
@@ -6079,7 +6178,7 @@ SUBROUTINE FSH09S(I,IR,IDXA,NA)
 ! |                        ALL RIGHTS RESERVED                         |
 ! |                                                                    |
 ! +--------------------------------------------------------------------+
-
+INTEGER :: I, IR, IDXA, NA
 
 NA = 2**IR
 IDXA = I - NA + 1
@@ -6107,6 +6206,8 @@ SUBROUTINE FSH10S(I,IR,IDX,IDP)
 !                               B(IDX) IS THE LOCATION OF THE FIRST ROOT
 !                               OF THE B(I,IR) POLYNOMIAL
 
+INTEGER :: I, IR, IDX, IDP
+INTEGER :: IZH, ID, IPL
 
 IDP = 0
 IDX = 0
@@ -6155,6 +6256,7 @@ SUBROUTINE FSH11S(I,IR,IDXC,NC)
 ! |                                                                    |
 ! +--------------------------------------------------------------------+
 
+INTEGER :: I, IR, IDXC, NC
 
 NC = 2**IR
 IDXC = I
@@ -6194,6 +6296,8 @@ REAL(EB) W2(*)
 REAL(EB) W3(*)
 REAL(EB) W4(*)
 REAL(EB) A(NA),C(NC),B1(NB1)
+INTEGER :: NB, IP, M, I, K
+REAL(EB) :: SIGN
 !                               MAXIMUM LENGTH OF W1, W2, W3, W4 IS NM.
 
 
@@ -6260,6 +6364,8 @@ INTEGER                   :: I2
 INTEGER                       :: M2
 INTEGER                       :: I3
 REAL(EB)   TCOS(*)
+INTEGER :: J1, J2, J, K
+REAL(EB) :: X, Y
 
 !                               THIS SUBROUTINE MERGES TWO ASCENDING
 !                               STRINGS OF NUMBERS IN THE ARRAY TCOS.
@@ -6330,6 +6436,8 @@ SUBROUTINE FSH14S(N,D,E2,IERR)
 INTEGER                       :: N
 INTEGER                      :: IERR
 REAL(EB)   D(N),E2(N)
+INTEGER :: I, L, J, M, L1, MML, II, NHALF, NTOP
+REAL(EB) :: EPS, F, B, H, C, S, G, P, R, DHOLD
 
 !                               THIS SUBROUTINE IS A MODIFICATION OF THE
 !                               EISPACK SUBROUTINE TQLRAT ALGORITHM 464,
@@ -6521,6 +6629,9 @@ INTEGER                   :: LDIMF
 INTEGER                      :: IERROR
 REAL(EB) H(0:*)
 REAL(EB) SAVE(-3:*)
+INTEGER :: I
+INTEGER :: LP, MP, IA, IB, IC, ID, IS, LPEROD, IR
+REAL(EB) :: DX, DY, DLXSQR, DLYSQR, HM, HP
 
 
 
@@ -6671,6 +6782,8 @@ REAL(EB) PERTRB
 REAL(EB)  SAVE(-3:*)
 REAL(EB)  W(*)
 REAL(EB) H(*)
+INTEGER :: I, L, LP, M, MP, IA, IB, IC, ID, IS, J, ISING
+REAL(EB) :: DX, DY, ELMBDA, DLYRCP, TWDYSQ, PERT, S1, S3, PRTSAV
 
 !                               CHECK VALUE OF IERROR (=SAVE(1)).
 !                               IF NON-ZERO, RETURN.
@@ -6864,6 +6977,7 @@ INTEGER                   :: LDIMF, LDIMFC
 INTEGER                      :: IERROR
 REAL(EB) SAVE(-3:*),SCAL
 REAL(EB) A(L),B(L),C(L), D(L)
+INTEGER :: I, IGRID, N, NPEROD
 
 
 !                               CHECK FOR INVALID INPUT
@@ -6949,6 +7063,7 @@ INTEGER                   :: LDIMF
 REAL(EB) SAVE(-3:*)
 REAL(EB) W(*)
 REAL(EB) F(LDIMF,*)
+INTEGER :: M
 
 
 !                               CHECK VALUE OF IERROR (=SAVE(1)).
@@ -6992,6 +7107,8 @@ REAL(EB) XMU
 INTEGER                   :: LDIMF
 INTEGER                      :: IERROR
 REAL(EB) SAVE(-3:*)
+INTEGER :: NP, IA, IB, IC, ID, IS, ISVPS, I, IR
+REAL(EB) :: DZ, DZSQR, DR, DRBY2, DRSQR, RI
 
 
 
@@ -7172,6 +7289,8 @@ REAL(EB)F(LDIMF,*)
 REAL(EB)PERTRB
 REAL(EB) SAVE(-3:*)
 REAL(EB) W(*)
+INTEGER :: I, L, LBDCND, N, NP, IA, IB, IC, ID, IS, ISVPS, K, ISING
+REAL(EB) :: DR, DZSQR, DZR, ELMBDA, XMU, S3, S1, PERT, PRTSAV
 
 
 
