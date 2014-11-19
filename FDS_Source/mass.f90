@@ -73,6 +73,12 @@ ELSE
    ALLOW_TRANSPORT_CYCLE=.FALSE. ! because fluxes not yet computed in divg
 ENDIF
 
+! Special case for RESTARTs
+
+IF (ICYC-ICYC_RESTART < 2) ALLOW_TRANSPORT_CYCLE = .FALSE.
+
+! Compute mass fluxes at cell faces, FX, FY, FZ
+
 !$OMP PARALLEL PRIVATE(ZZZ)
 !$OMP DO SCHEDULE(STATIC)
 DO K=1,KBAR
