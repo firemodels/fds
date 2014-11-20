@@ -2795,6 +2795,10 @@ SELECT CASE(N)
       RN%NU_SOOT         = (SPECIES_MIXTURE(FUEL_SMIX_INDEX)%MW/RN%MW_SOOT)*RN%SOOT_YIELD
       RN%NU_H2O          = 0.5_EB*RN%H - 0.5_EB*RN%NU_SOOT*RN%SOOT_H_FRACTION
       RN%NU_CO2          = RN%C - RN%NU_CO - RN%NU_SOOT*(1._EB-RN%SOOT_H_FRACTION)
+      IF (RN%NU_CO2 <0._EB) THEN
+         WRITE(MESSAGE,'(A)') 'ERROR: REAC, Not enough carbon in the fuel for the specified CO_YIELD and/or SOOT_YIELD'
+         CALL SHUTDOWN(MESSAGE) ; RETURN
+      ENDIF      
       RN%NU_O2           = RN%NU_CO2 + 0.5_EB*(RN%NU_CO+RN%NU_H2O-RN%O)
       RN%NU_N2           = RN%N*0.5_EB
       VOLUME_FRACTION(1) = RN%NU_CO
