@@ -1,3 +1,3 @@
 #!/bin/bash
-rm *.o *.mod
+rm -f *.o *.mod
 make -f ../Makefile gcc_linux
