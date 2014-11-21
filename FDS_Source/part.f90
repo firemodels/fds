@@ -433,7 +433,8 @@ SPRINKLER_INSERT_LOOP: DO KS=1,N_DEVC
       ! Adjust particle size to account for pressure dependence of nozzle
 
       IF (LPC%LIQUID_DROPLET) THEN
-         LP%ONE_D%X(0:SF%N_CELLS_INI) = LP%ONE_D%X(0:SF%N_CELLS_INI)*D_PRES_FACTOR
+         LP%ONE_D%X(1) = LP%ONE_D%X(1)*D_PRES_FACTOR
+         LP%ONE_D%LAYER_THICKNESS(1) = LP%ONE_D%X(1)
          LP%MASS = LP%MASS*D_PRES_FACTOR**3
       ENDIF
 
@@ -1429,6 +1430,8 @@ PARTICLE_LOOP: DO IP=1,NLP
          IF (LPC%LIQUID_DROPLET) THEN
             LP%ONE_D%X(1) = MIN(0.5_EB*SURFACE_PARTICLE_DIAMETER,(LP%PWT*RDC)**ONTH)
             LP%PWT = LP%PWT*RDC/LP%ONE_D%X(1)**3
+            LP%ONE_D%LAYER_THICKNESS(1) = LP%ONE_D%X(1)
+            LP%MASS = FOTHPI*LP%ONE_D%RHO(1,1)*LP%ONE_D%X(1)**3
          ENDIF
          
          ! Move particle to where it almost hits solid
@@ -1702,6 +1705,8 @@ DRAG_LAW_SELECT: SELECT CASE (LPC%DRAG_LAW)
             LP%PWT   = LP%PWT*RDC/RD**3
             LP%T_INSERT = T
             LP%ONE_D%X(1) = RD
+            LP%ONE_D%LAYER_THICKNESS(1) = LP%ONE_D%X(1)
+            LP%MASS = FOTHPI*LP%ONE_D%RHO(1,1)*LP%ONE_D%X(1)**3
             RDS      = RD*RD
             RDC      = RD*RDS
             ! Redo wake reduction and shape deformation for the new drop
@@ -2519,6 +2524,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
          ! Update PARTICLE quantities
 
          LP%ONE_D%X(1)   = (M_DROP/FTPR)**ONTH
+         LP%ONE_D%LAYER_THICKNESS(1) = LP%ONE_D%X(1)
          LP%ONE_D%TMP(1) = TMP_DROP_NEW
          LP%ONE_D%TMP_F  = TMP_DROP_NEW
          LP%MASS = M_DROP
