@@ -590,8 +590,10 @@ TNOW=SECOND()
 CALL POINT_TO_MESH(NM)
 
 IF (RADIATION) THEN
+   RADIATION_COMPLETED = .FALSE.
    CALL RADIATION_FVM(T,NM)
 ELSE
+   RADIATION_COMPLETED = .TRUE.
    IF (N_REACTIONS>0) QR = -RADIATIVE_FRACTION*Q
 ENDIF
 
@@ -919,6 +921,13 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
          ! Update counters inside the radiation routine
  
          ANGLE_INC_COUNTER = MOD(ANGLE_INC_COUNTER,ANGLE_INCREMENT) + 1
+
+         ! If this is the last set of angles to update, indicate that the radiation routine has finished a full update
+
+         IF (ANGLE_INC_COUNTER==ANGLE_INCREMENT) RADIATION_COMPLETED = .TRUE.
+
+         ! Zero out UIID, the integrated intensity
+
          IF (WIDE_BAND_MODEL) THEN
             UIID(:,:,:,IBND) = 0._EB
          ELSE
