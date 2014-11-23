@@ -89,6 +89,16 @@ intel_linux_64 : exe       = smokediff_linux_64
 
 intel_linux_64 : $(obj)
 	$(CPP) -o $(bin)/$(exe) -static-intel $(obj) $(LINUXFORTLIBS_64)
+
+intel_linux_64_db : FFLAGS    = -O0 -m64 -fpp -D pp_noappend -D pp_LINUX64
+intel_linux_64_db : CFLAGS    = -O0 -m64 -D pp_LINUX64 -g -check=stack,uninit -fp-stack-check -fp-trap-all=divzero,invalid,overflow -ftrapuv -Wuninitialized -Wunused-function -Wunused-variable
+intel_linux_64_db : CC        = icc
+intel_linux_64_db : CPP       = icc
+intel_linux_64_db : FC        = ifort
+intel_linux_64_db : exe       = smokediff_linux_64_db
+
+intel_linux_64_db : $(obj)
+	$(CPP) -o $(bin)/$(exe) -static-intel $(obj) $(LINUXFORTLIBS_64)
 	
 
 MACFORTLIBS=$(FORTLIBDIR)/libifcoremt.a $(FORTLIBDIR)/libimf.a $(FORTLIBDIR)/libirc.a $(FORTLIBDIR)/libsvml.a
