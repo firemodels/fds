@@ -816,7 +816,6 @@ void draw_devices(void){
         type=devicei->type2;
         if(type>=0&&type<ndevicetypes)vistype=devicetypes[type]->type2vis;
         if(vistype==1){
-          float valcolor[4], *valcolorptr;
           unsigned char color[4], *colorptr;
 
           colorptr=get_device_color(devicei,color,device_valmin,device_valmax);
@@ -5680,8 +5679,6 @@ void update_colordevs(void){
   for(i=0;i<ndeviceinfo;i++){
     devicedata *devi;
     vdevicedata *vdevi;
-    int j;
-
     devi = deviceinfo + i;
     vdevi = devi->vdevice;
     if(vdevi==NULL)continue;
@@ -5740,7 +5737,6 @@ void setup_device_data(void){
     vdevicedata *vdevi;
     devicedata *devi,*devj;
     float *xyzval;
-    int j;
 
     devi = deviceinfo + i;
     xyzval=devi->xyz;
@@ -5905,7 +5901,6 @@ void setup_device_data(void){
   if(ndeviceinfo>0){
     for(i=0;i<ndeviceinfo;i++){
       devicedata *devi;
-      int j;
       float *xyzi;
       vdevicedata *vdevj;
 

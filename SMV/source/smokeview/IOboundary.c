@@ -3877,7 +3877,7 @@ int update_patch_hist(patchdata *patchj){
   endiandata=getendian();
 
   for(i=0;i<npatchinfo;i++){
-    int endian_local, npatches, error;
+    int npatches, error;
     patchdata *patchi;
     int unit1;
     FILE_SIZE lenfile;

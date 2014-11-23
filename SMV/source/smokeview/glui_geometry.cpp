@@ -135,8 +135,6 @@ extern "C" void glui_geometry_setup(int main_window){
   glui_geometry->add_column_to_panel(PANEL_surface,false);
 
   if(nsurfinfo>0){
-    int not_used=0;
-
     glui_geometry->add_statictext_to_panel(PANEL_surface,"");
 
     LIST_surface[DOWN_X] = glui_geometry->add_listbox_to_panel(PANEL_surface,_("Left"),surface_indices+DOWN_X,UPDATE_LIST,OBJECT_CB);

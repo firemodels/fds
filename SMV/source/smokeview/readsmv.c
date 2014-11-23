@@ -3459,7 +3459,6 @@ int readsmv(char *file, char *file2){
         NewMemory((void **)&geomi->geomobjinfo,ngeomobjinfo*sizeof(geomobjdata));
         for(i=0;i<ngeomobjinfo;i++){
           geomobjdata *geomobji;
-          int len_name;
           float *center;
           char *texture_mapping=NULL, *texture_vals=NULL;
 
@@ -12140,7 +12139,7 @@ void writeini(int flag,char *filename){
     keyframe *framei;
     float *col;
     int startup_count=0;
-    int ii,uselocalspeed=0;
+    int uselocalspeed=0;
 
     fprintf(fileout,"TOURCOLORS\n");
     col=tourcol_selectedpathline;

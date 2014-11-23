@@ -24,7 +24,7 @@ int get_canopy_info(FILE *stream, float **center, float **radh){
   *center=NULL;
   *radh=NULL;
   while(1){
-    char buffer[255],buffer2[255];
+    char buffer[255];
 
     if(fgets(buffer,255,stream)==NULL)break;
     if(match(buffer,"DEVICE")==0){
@@ -52,7 +52,7 @@ int get_canopy_info(FILE *stream, float **center, float **radh){
   count=0;
   rewind(stream);
   while(1){
-    char buffer[255],buffer2[255];
+    char buffer[255];
 
     if(match(buffer,"DEVICE")==0){
       char *front,*percen;

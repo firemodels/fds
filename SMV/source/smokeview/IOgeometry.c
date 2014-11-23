@@ -777,7 +777,6 @@ void read_geom_header0(geomdata *geomi, int *ntimes_local){
   int *int_vals;
   float *float_vals;
   int nverts=0, ntris=0;
-  int first_frame_static;
 
   stream = fopen(geomi->file,"rb");
   if(stream==NULL){
@@ -859,14 +858,9 @@ void read_geom_header2(geomdata *geomi, int *ntimes_local){
   FILE *stream;
   int one=0,endianswitch=0;
   int nvertfacesvolus[3];
-  float times_local[2];
-  int nheaders[3];
   int nt;
   int returncode;
   int version;
-  int nfloat_vals, nint_vals;
-  int *int_vals;
-  float *float_vals;
   int nverts=0, ntris=0, nvolus=0;
   int first_frame_static;
   int header[3];
@@ -1362,9 +1356,8 @@ void classify_geom(geomdata *geomi){
   
   ntimes = geomi->ntimes;
   for(i=-1;i<ntimes;i++){
-    float time_local;
     geomlistdata *geomlisti;
-    int nverts, ntris, nvolus;
+    int nverts, nvolus;
     int j;
     point *pointbase;
 
@@ -1597,7 +1590,6 @@ void draw_geomtestclip(void){
   unsigned char tetra1color[4]={255,  0,255,255};
   unsigned char tetra2color[4]={255,255,  0,255};
   unsigned char tetra3color[4]={ 64, 64, 64,255};
-  unsigned char tetracoloroutline[4]={255,0,255,255};
   clipdata tetra_clipinfo, box_clipinfo;
   float *v1, *v2, *v3, *v4;
   int nverts;
@@ -1630,7 +1622,6 @@ void draw_geomtestclip(void){
   zmin = box_bounds+4;
   zmax = box_bounds+5;
   {
-    float volume,volume2,box_volume;
     int i;
 
     FORTgetverts(box_bounds, v1, v2, v3, v4, verts, &nverts, faces, face_id, which_poly, &nfaces, &npolys, b_state);
@@ -1687,10 +1678,6 @@ void draw_geomtestclip(void){
   glTranslatef(*xmin,*ymin,*zmin);
   glScalef(ABS(*xmax-*xmin),ABS(*ymax-*ymin),ABS(*zmax-*zmin));
   {
-    float volume;
-    int flag=0,error;
-    double err;
-
     glBegin(GL_QUADS);
 
     if(box_state[4]==-1&&tetrabox_vis[4]==1){
@@ -1803,10 +1790,6 @@ void draw_geomtestclip(void){
 void draw_geomtestoutline(void){
   float *xmin, *xmax, *ymin, *ymax, *zmin, *zmax;
   unsigned char cubecolor[4]={0,255,255,255};
-  unsigned char tetra0color[4]={255,0,0,255};
-  unsigned char tetra1color[4]={0,255,0,255};
-  unsigned char tetra2color[4]={0,0,255,255};
-  unsigned char tetra3color[4]={255,255,0,255};
   unsigned char tetracoloroutline[4]={255,0,255,255};
   float *v1, *v2, *v3, *v4;
   float areas[6],cent_solid[3];
@@ -1845,7 +1828,6 @@ void draw_geomtestoutline(void){
   // tetrahedron
 
   {
-    int i;
     float vsolid;
 
     FORTgetverts(box_bounds, v1, v2, v3, v4, verts, &nverts, faces, face_id, which_poly, &nfaces, &npolys, b_state);
@@ -1976,7 +1958,6 @@ void draw_geom_cutcells(void){
     if(meshi->ncutcells==0)continue;
     for(j=0;j<meshi->ncutcells;j++){
       int ijk, ii, jj, kk;
-      float x1, x2, y1, y2, z1, z2;
 
       ijk = meshi->cutcells[j];
       kk = ijk/nxy;

@@ -429,7 +429,6 @@ void getzonesmokedir(float *mm){
 /* ------------------ readzone ------------------------ */
 
 void readzone(int ifile, int flag, int *errorcode){
-  int n;
   int error,ntotal,i,j,ii;
   int nrooms2,nfires2,nzhvents2,nzvvents2;
   size_t zonefilelen;

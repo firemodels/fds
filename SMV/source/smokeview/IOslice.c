@@ -938,7 +938,7 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
   int ii;
   float qmin, qmax;
   int headersize, framesize;
-  char slicelonglabels[31], sliceshortlabels[31], sliceunits[31];
+  char sliceshortlabels[31];
   slicedata *sd;
   vslicedata *vd;
   int flag2=0;
@@ -6659,7 +6659,6 @@ float get_texture_index(float *xyz){
 
 float get_3dslice_val(slicedata *sd, float *xyz){
   int i, j, k;
-  float *vv;
   float *xplt, *yplt, *zplt;
   float dxbar, dybar, dzbar;
   int ibar, jbar, kbar;
@@ -6670,7 +6669,7 @@ float get_3dslice_val(slicedata *sd, float *xyz){
   float val001,val101,val011,val111;
   float val00,val10,val01,val11;
   float val0, val1;
-  float val, val_fraction;
+  float val;
   int ijk;
 
   mesh *valmesh;

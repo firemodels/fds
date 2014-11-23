@@ -703,9 +703,8 @@ char *which(char *progname){
   */
   char *pathlistptr, fullpath[4096], pathlist[4096], prog[4096];
   char *dir,*returndir;
-  const char *ext;
   char pathsep[2], dirsep[2];
-  int lendir,lenprog;
+  int lendir;
 
 #ifdef WIN32
   strcpy(pathsep,";");
