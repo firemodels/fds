@@ -705,6 +705,10 @@ char *which(char *progname){
   char *dir,*returndir;
   char pathsep[2], dirsep[2];
   int lendir;
+#ifdef WIN32
+  int lenprog;
+  const char *ext;
+#endif
 
 #ifdef WIN32
   strcpy(pathsep,";");
