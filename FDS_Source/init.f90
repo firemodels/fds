@@ -288,13 +288,6 @@ ENDIF
 ALLOCATE(M%INC(-3:3,0:M%N_OBST),STAT=IZERO)
 CALL ChkMemErr('INIT','INC',IZERO)
 
-! Array for storage of equilibrium vapor fraction
-IF (DO_Y_EQ .AND. N_LP_ARRAY_INDICES>0) THEN
-   ALLOCATE(M%EQ_VAP_FRAC(0:IBP1,0:JBP1,0:KBP1,N_TRACKED_SPECIES),STAT=IZERO)
-   CALL ChkMemErr('INIT','EQ_VAP_FRAC',IZERO) 
-   M%EQ_VAP_FRAC=0._EB  
-ENDIF
-
 ! Initialize background pressure, temperature and density
 
 M%D_PBAR_DT   = 0._EB
