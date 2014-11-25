@@ -185,7 +185,7 @@ MAILTO=""
 #
 # You can change the argument for -v <num>, where <num> is the maximum number
 # of cores to use for Validationbot running validation cases.
-# NOTE: Only change this line when Validationbot is *NOT* running.
+#
 # Recommended settings for <num>:
 #     1 for passive mode (run 1 validation set at a time)
 #     150 for aggressive mode (run up to 150 cores at a time)
