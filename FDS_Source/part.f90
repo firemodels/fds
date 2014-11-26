@@ -1205,6 +1205,10 @@ PARTICLE_LOOP: DO IP=1,NLP
 
    IC = CELL_INDEX(IIG,JJG,KKG)
 
+   X_OLD = LP%X
+   Y_OLD = LP%Y
+   Z_OLD = LP%Z
+
    ! Throw out particles that are inside a solid obstruction
 
    IF (SOLID(IC)) THEN
@@ -1567,9 +1571,6 @@ ZZ_GET = 0._EB
 
 CALL GET_IJK(LP%X,LP%Y,LP%Z,NM,XI,YJ,ZK,LP%ONE_D%IIG,LP%ONE_D%JJG,LP%ONE_D%KKG)
 
-X_OLD = LP%X
-Y_OLD = LP%Y
-Z_OLD = LP%Z
 U_OLD = LP%U
 V_OLD = LP%V
 W_OLD = LP%W
