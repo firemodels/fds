@@ -9663,13 +9663,12 @@ READ_DEVC_LOOP: DO NN=1,N_DEVC_READ
       WRITE(MESSAGE,'(A,A,A)')  'ERROR: DEVC ',TRIM(ID),' must have coordinates given in terms of XB'
       CALL SHUTDOWN(MESSAGE) ; RETURN
    ENDIF
-   IF (POINTS>1                     .AND. &
-       TRIM(STATISTICS)/='null'     .AND. &
-       TRIM(STATISTICS)/='RMS'      .AND. &
-       TRIM(STATISTICS)/='COV'      .AND. &
-       TRIM(STATISTICS)/='CORRCOEF' .AND. &
-       TRIM(STATISTICS)/='TIME MIN' .AND. &
-       TRIM(STATISTICS)/='TIME MAX') THEN
+   IF (POINTS>1 .AND. TRIM(STATISTICS)/='null'     .AND. &
+                      TRIM(STATISTICS)/='RMS'      .AND. &
+                      TRIM(STATISTICS)/='COV'      .AND. &
+                      TRIM(STATISTICS)/='CORRCOEF' .AND. &
+                      TRIM(STATISTICS)/='TIME MIN' .AND. &
+                      TRIM(STATISTICS)/='TIME MAX') THEN
       WRITE(MESSAGE,'(A,A,A)')  'ERROR: DEVC ',TRIM(ID),' cannot use POINTS>1 and STATISTICS at the same time'
       CALL SHUTDOWN(MESSAGE) ; RETURN
    ENDIF
@@ -10379,7 +10378,7 @@ PROC_DEVC_LOOP: DO N=1,N_DEVC
          CALL SHUTDOWN(MESSAGE) ; RETURN
       ENDIF
 
-      IF (QUANTITY_INDEX<0 .AND. DV%IOR==0 .AND. DV%STATISTICS=='null' .AND. DV%INIT_ID=='null') THEN
+      IF (QUANTITY_INDEX<0 .AND. DV%IOR==0 .AND. (DV%STATISTICS=='null'.OR.DV%LINE>0) .AND. DV%INIT_ID=='null') THEN
          WRITE(MESSAGE,'(A,A,A)') 'ERROR: Specify orientation of DEVC ',TRIM(DV%ID),' using the parameter IOR'
          CALL SHUTDOWN(MESSAGE) ; RETURN
       ENDIF
