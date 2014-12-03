@@ -173,7 +173,7 @@ mpi1p4_intel_linux_64ib : FOPENMPFLAGS =
 mpi1p4_intel_linux_64ib : obj = fds_mpi1p4_intel_linux_64ib
 mpi1p4_intel_linux_64ib : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi)
-	
+
 mpi_intel_linux_64 : FFLAGS = -m64 -O2 -ipo
 mpi_intel_linux_64 : LFLAGS = -static-intel
 mpi_intel_linux_64 : FCOMPL = mpifort
@@ -456,7 +456,7 @@ pres.o : func.o prec.o cons.o type.o mesh.o pois.o velo.o scrc.o
 part.o : func.o prec.o cons.o type.o mesh.o devc.o data.o geom.o
 vege.o : func.o prec.o cons.o type.o mesh.o devc.o part.o
 read.o : func.o prec.o cons.o type.o mesh.o devc.o ctrl.o irad.o evac.o hvac.o scrc.o data.o geom.o mass.o soot.o
-init.o : func.o prec.o cons.o type.o mesh.o devc.o irad.o pois.o data.o evac.o
+init.o : func.o prec.o cons.o type.o mesh.o devc.o irad.o pois.o data.o evac.o pres.o
 dump.o : func.o prec.o cons.o type.o mesh.o devc.o evac.o smvv.o turb.o scrc.o data.o radi.o soot.o
 main.o : func.o prec.o cons.o type.o mesh.o devc.o smvv.o mass.o divg.o velo.o wall.o fire.o irad.o ieva.o radi.o evac.o part.o vege.o dump.o read.o init.o pres.o pois.o ctrl.o turb.o hvac.o scrc.o data.o geom.o soot.o
 
@@ -490,7 +490,7 @@ pres.obj : func.obj prec.obj cons.obj type.obj mesh.obj pois.obj velo.obj scrc.o
 part.obj : func.obj prec.obj cons.obj type.obj mesh.obj devc.obj data.obj geom.obj
 vege.obj : func.obj prec.obj cons.obj type.obj mesh.obj devc.obj part.obj
 read.obj : func.obj prec.obj cons.obj type.obj mesh.obj devc.obj ctrl.obj irad.obj evac.obj hvac.obj scrc.obj data.obj geom.obj mass.obj soot.obj
-init.obj : func.obj prec.obj cons.obj type.obj mesh.obj devc.obj irad.obj pois.obj data.obj evac.obj
+init.obj : func.obj prec.obj cons.obj type.obj mesh.obj devc.obj irad.obj pois.obj data.obj evac.obj pres.obj
 dump.obj : func.obj prec.obj cons.obj type.obj mesh.obj devc.obj evac.obj smvv.obj turb.obj scrc.obj data.obj radi.obj soot.obj
 main.obj : func.obj prec.obj cons.obj type.obj mesh.obj devc.obj smvv.obj mass.obj divg.obj velo.obj wall.obj fire.obj irad.obj ieva.obj radi.obj evac.obj part.obj vege.obj dump.obj read.obj init.obj pres.obj pois.obj ctrl.obj turb.obj hvac.obj scrc.obj data.obj geom.obj soot.obj
 
