@@ -2,6 +2,9 @@
 ! $Revision$
 ! $Author$
 
+#ifdef WIN32
+#define pp_SHARED
+#endif
 !  ------------------ getembeddatasize ------------------------ 
 
 subroutine getembeddatasize(filename,ntimes,nvars,error)
@@ -21,7 +24,7 @@ inquire(unit=lu20,opened=isopen)
 if(isopen)close(lu20)
 inquire(file=trim(filename),exist=exists)
 if(exists)then
-#ifdef WIN32
+#ifdef pp_SHARED
   open(unit=lu20,file=trim(filename),form="unformatted",shared,action="read")
 #else
   open(unit=lu20,file=trim(filename),form="unformatted",action="read")
@@ -48,6 +51,7 @@ do
   nvars = nvars + nvert_s + nvert_d + nface_s + nface_d
   ntimes = ntimes + 1
 end do
+close(lu20)
 
 end subroutine getembeddatasize
 
@@ -70,7 +74,7 @@ if(.not.exists)then
   endian_open=1
   return
 endif
-#ifdef WIN32
+#ifdef pp_SHARED
 open(unit=lunit,file=trim(file),form="unformatted",shared,action="read")
 #else
 open(unit=lunit,file=trim(file),form="unformatted",action="read")
@@ -207,7 +211,7 @@ inquire(unit=lu26,opened=isopen)
 if(isopen)close(lu26)
 inquire(file=trim(zonefilename),exist=exists)
 if(exists)then
-#ifdef WIN32
+#ifdef pp_SHARED
   open(unit=lu26,file=trim(zonefilename),form="unformatted",shared,action="read")
 #else
   open(unit=lu26,file=trim(zonefilename),form="unformatted",action="read")
@@ -278,7 +282,7 @@ inquire(unit=lu15,opened=isopen)
 if(isopen)close(lu15)
 inquire(file=trim(patchfilename),exist=exists)
 if(exists)then
-#ifdef WIN32
+#ifdef pp_SHARED
   open(unit=lu15,file=trim(patchfilename),form="unformatted",shared,action="read")
 #else
   open(unit=lu15,file=trim(patchfilename),form="unformatted",action="read")
@@ -367,7 +371,7 @@ if(connected)close(lu10)
 
 inquire(file=trim(partfilename),exist=exists)
 if(exists)then
-#ifdef WIN32
+#ifdef pp_SHARED
   open(unit=lu10,file=trim(partfilename),form="formatted",shared,action="read")
 #else
   open(unit=lu10,file=trim(partfilename),form="formatted",action="read")
@@ -415,7 +419,7 @@ if(connected)close(lu10)
 
 inquire(file=trim(partfilename),exist=exists)
 if(exists)then
-#ifdef WIN32
+#ifdef pp_SHARED
   open(unit=lu10,file=trim(partfilename),form="unformatted",shared,action="read")
 #else
   open(unit=lu10,file=trim(partfilename),form="unformatted",action="read")
@@ -564,7 +568,7 @@ if(ip1.eq.-1.or.ip2.eq.-1.or.jp1.eq.-1.or.jp2.eq.-1.or.kp1.eq.-1.or.kp2.eq.-1)th
 
   inquire(file=trim(slicefilename),exist=exists)
   if(exists)then
-#ifdef WIN32
+#ifdef pp_SHARED
     open(unit=lu11,file=trim(slicefilename),form="unformatted",shared,action="read")
 #else
     open(unit=lu11,file=trim(slicefilename),form="unformatted",action="read")
@@ -629,7 +633,7 @@ if(connected)close(lu11)
 
 inquire(file=trim(slicefilename),exist=exists)
 if(exists)then
-#ifdef WIN32
+#ifdef pp_SHARED
   open(unit=lu11,file=trim(slicefilename),form="unformatted",shared,action="read")
 #else
   open(unit=lu11,file=trim(slicefilename),form="unformatted",action="read")
@@ -712,7 +716,7 @@ if(connected)close(lu11)
 
 inquire(file=partfilename,exist=exists)
 if(exists)then
-#ifdef WIN32
+#ifdef pp_SHARED
   open(unit=lu11,file=partfilename,form="unformatted",shared,action="read")
 #else
   open(unit=lu11,file=partfilename,form="unformatted",action="read")
@@ -746,7 +750,7 @@ exists=.true.
 
 inquire(file=slicefilename,exist=exists)
 if(exists)then
-#ifdef WIN32
+#ifdef pp_SHARED
   open(unit=lu11,file=slicefilename,form="unformatted",shared,action="read")
 #else
   open(unit=lu11,file=slicefilename,form="unformatted",action="read")
@@ -799,7 +803,7 @@ inquire(unit=lu15,opened=isopen)
 if(isopen)close(lu15)
 inquire(file=trim(boundaryfilename),exist=exists)
 if(exists)then
-#ifdef WIN32
+#ifdef pp_SHARED
   open(unit=lu15,file=trim(boundaryfilename),form="unformatted",shared,action="read")
 #else
   open(unit=lu15,file=trim(boundaryfilename),form="unformatted",action="read")
@@ -872,7 +876,7 @@ inquire(unit=lu15,opened=isopen)
 if(isopen)close(lu15)
 inquire(file=boundaryfilename,exist=exists)
 if(exists)then
-#ifdef WIN32
+#ifdef pp_SHARED
   open(unit=lu15,file=boundaryfilename,form="unformatted",shared,action="read")
 #else
   open(unit=lu15,file=boundaryfilename,form="unformatted",action="read")

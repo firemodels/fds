@@ -2,6 +2,10 @@
 ! $Revision$
 ! $Author$
 
+#ifdef WIN32
+#define pp_SHARED
+#endif
+
 
 !  WRITE(LU_GEOM) ONE
 !  WRITE(LU_GEOM) VERSION
@@ -69,7 +73,7 @@ inquire(unit=lu20,opened=isopen)
 if(isopen)close(lu20)
 inquire(file=trim(filename),exist=exists)
 if(exists)then
-#ifdef WIN32
+#ifdef pp_SHARED
   open(unit=lu20,file=trim(filename),form="unformatted",shared,action="read")
 #else
   open(unit=lu20,file=trim(filename),form="unformatted",action="read")
@@ -108,6 +112,7 @@ do itime=1, ntimes
   nvars = nvars + ntri_s + ntri_d
 end do
 if(redirect_flag.eq.0)write(6,*)"nvars=",nvars,"valmin=",valmin," valmax=",valmax
+close(lu20)
 
 end subroutine getembeddata
 
@@ -136,7 +141,7 @@ inquire(unit=lu26,opened=isopen)
 if(isopen)close(lu26)
 inquire(file=trim(zonefilename),exist=exists)
 if(exists)then
-#ifdef WIN32
+#ifdef pp_SHARED
   open(unit=lu26,file=trim(zonefilename),form="unformatted",shared,action="read")
 #else
   open(unit=lu26,file=trim(zonefilename),form="unformatted",action="read")
@@ -613,7 +618,7 @@ if(connected)close(lu11)
 
 inquire(file=trim(slicefilename),exist=exists)
 if(exists)then
-#ifdef WIN32
+#ifdef pp_SHARED
   open(unit=lu11,file=trim(slicefilename),form="unformatted",shared,action="read")
 #else
   open(unit=lu11,file=trim(slicefilename),form="unformatted",action="read")
@@ -947,7 +952,7 @@ if(isotest.eq.0)then
   error=0
   inquire(file=qfilename,exist=exists)
   if(exists)then
-#ifdef WIN32
+#ifdef pp_SHARED
     open(unit=u_in,file=qfilename,form="unformatted",shared,action="read",iostat=error2)
 #else
     open(unit=u_in,file=qfilename,form="unformatted",action="read",iostat=error2)
@@ -991,6 +996,7 @@ if(isotest.eq.0)then
   end do
   error = 0
 endif
+close(u_in)
 return
 end subroutine getplot3dq
 
