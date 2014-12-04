@@ -2155,7 +2155,11 @@ SUBROUTINE WRITE_GEOM(TIME)
       OPEN(LU_GEOM(1),FILE=TRIM(FN_GEOM(1)),FORM='UNFORMATTED',STATUS='REPLACE')
       WRITE(LU_GEOM(1)) ONE
       WRITE(LU_GEOM(1)) VERSION
-      WRITE(LU_GEOM(1)) ZERO, ZERO, ZERO ! n floats, n ints, first frame static
+      IF (GEOMETRY(1)%GEOC_FILENAME=='null') THEN
+        WRITE(LU_GEOM(1)) ZERO, ZERO, ONE ! n floats, n ints, first frame static
+      ELSE
+        WRITE(LU_GEOM(1)) ZERO, ZERO, ZERO ! n floats, n ints, first frame not static
+      ENDIF
       
       CALL OUTGEOM(LU_GEOM(1),.FALSE.,TIME) ! write out static data
    ELSE
@@ -2164,7 +2168,7 @@ SUBROUTINE WRITE_GEOM(TIME)
    IF (GEOMETRY(1)%GEOC_FILENAME=='null') THEN
       CALL OUTGEOM(LU_GEOM(1),.TRUE.,TIME) ! write out dynamic data
    ELSE
-      CALL OUTGEOM(LU_GEOM(1),.FALSE.,TIME) ! write out dynamic data
+      CALL OUTGEOM(LU_GEOM(1),.FALSE.,TIME) ! write out static data
    ENDIF
    CLOSE(LU_GEOM(1))
    
