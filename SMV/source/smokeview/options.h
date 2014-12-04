@@ -19,7 +19,7 @@
 #endif
 
 // comment the following line when building an unofficial release
-#define pp_OFFICIAL_RELEASE
+//#define pp_OFFICIAL_RELEASE
 
 #ifdef pp_release
 #ifdef pp_OFFICIAL_RELEASE
@@ -54,7 +54,7 @@
 #define pp_PILOT
 #define pp_GEOMTEST
 //#define pp_GEOM_FORCE_DYNAMIC // set to force static geometry - use until time dependent geometry and coupled geometries to coexist
-#define pp_GEOM_FORCE_STATIC0 // set to force static geometry 
+//#define pp_GEOM_FORCE_STATIC0 // set to force static geometry 
 //#define pp_GPUDEPTH
 #endif
 
