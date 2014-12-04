@@ -1,6 +1,6 @@
 @echo off
 
-Rem Windows batch file for creating Smokeview User guide figures
+:: Windows batch file for creating Smokeview User guide figures
 
 set envfile="%userprofile%"\fds_smv_env.bat
 IF EXIST %envfile% GOTO endif_envexist

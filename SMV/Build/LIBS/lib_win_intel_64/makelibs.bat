@@ -11,7 +11,6 @@ copy libgd.lib %LIBDIR%\gd.lib
 
 :: GLUI
 cd %SRCDIR%\glui_v2_1_beta
-::cd %SRCDIR%\glui_v2_36
 call makelib %OPTS%
 copy  libglui.lib %LIBDIR%\glui.lib
 
