@@ -26,7 +26,7 @@ echo Building 64 bit Windows versions of wind2fds
 echo --------------------------------------------
 
 cd %svn_root%\Utilities\wind2fds\intel_win_64
-call "%IFORT_COMPILER14%\bin\compilervars" intel64
+call %svn_root%\Utilities\Scripts\setup_intel_compilers.bat
 erase *.obj *.mod
 make -f ..\Makefile intel_win_64
 
