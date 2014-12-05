@@ -487,7 +487,7 @@ Using the change in fuel concentration for each of the $i$ reactions, the change
 \subsection{Maintaining Species Boundedness}
 \label{boundedness}
 
-To maintain realizable species mass fractions ($ 0 \leq \hat{Y}_{\alpha} \leq 1$), a predictor-corrector scheme is used
+To maintain realizable species mass fractions ($\hat{Y}_{\alpha}\ge0$ and $\sum\hat{Y}_{\alpha}=1$), a predictor-corrector scheme is used
 \begin{align}
 \hat{Y}_\alpha^p &= \hat{Y}_\alpha^k + \Delta \hat{Y}_\alpha \label{eq:bc_predict} \\
 \hat{Y}_\alpha^{k+1} &= \hat{Y}_\alpha^k + \Delta \hat{Y}_\alpha \beta \label{eq:bc_correct}
@@ -495,7 +495,7 @@ To maintain realizable species mass fractions ($ 0 \leq \hat{Y}_{\alpha} \leq 1$
 After computing the predicted values, a boundedness correction, $\beta$, is applied to the change in species vector, $\Delta \hat{Y}_{\alpha}$, to determine the corrected values. Here $\beta$ is defined as
 \begin{equation} \label{eq:bc_beta}
 \beta = \left\{ \begin{array}{ll} \displaystyle
-          \displaystyle \frac{\hat{Y}_{\alpha}^k}{\lvert \hat{Y}_{\alpha}^p\rvert + \hat{Y}_{\alpha}^k}  & \quad {\hat{Y}_\alpha^p \le 0} \\ [0.2in]
+          \displaystyle \frac{0-\hat{Y}_{\alpha}^k}{\lvert \hat{Y}_{\alpha}^p\rvert + \hat{Y}_{\alpha}^k}  & \quad {\hat{Y}_\alpha^p \le 0} \\ [0.2in]
           \displaystyle \frac{1-\hat{Y}_{\alpha}^k}{\hat{Y}_{\alpha}^p - \hat{Y}_{\alpha}^k}  & \quad {\hat{Y}_\alpha^p > 1} \end{array}\right. \quad ; \quad \mbox{take minimum value over all $\alpha$ species}
 \end{equation}
 
