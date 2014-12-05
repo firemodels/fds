@@ -2237,7 +2237,7 @@ extern "C" void Slice_CB(int var){
 
   updatemenu=1;
   if(var==DATA_transparent){
-    CHECKBOX_transparentflag2->set_int_val(use_transparency_data);
+    if(CHECKBOX_transparentflag2!=NULL)CHECKBOX_transparentflag2->set_int_val(use_transparency_data);
     updatechopcolors();
     return;
   }
@@ -2378,7 +2378,7 @@ extern "C" void Slice_CB(int var){
         surfi->transparent_level=transparent_level;
       }
       UpdateRGBColors(COLORBAR_INDEX_NONE);
-      SPINNER_transparent_level->set_float_val(transparent_level);
+      if(SPINNER_transparent_level!=NULL)SPINNER_transparent_level->set_float_val(transparent_level);
       if(SPINNER_labels_transparency_data2!=NULL)SPINNER_labels_transparency_data2->set_float_val(transparent_level);
       break;
     case LINE_CONTOUR_VALUE:
