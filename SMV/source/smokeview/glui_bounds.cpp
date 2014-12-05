@@ -2446,26 +2446,23 @@ extern "C" void Slice_CB(int var){
     }
     break;
   case CHOPVALMIN:
-    ASSERT(EDIT_slice_min!=NULL);
-    EDIT_slice_min->set_float_val(slicemin);
+    if(EDIT_slice_min!=NULL)EDIT_slice_min->set_float_val(slicemin);
     SETslicemin(setslicemin,slicemin,setslicechopmin,slicechopmin);
     updatechopcolors();
     break;
   case CHOPVALMAX:
-    ASSERT(EDIT_slice_max!=NULL);
-    EDIT_slice_max->set_float_val(slicemax);
+    if(EDIT_slice_max!=NULL)EDIT_slice_max->set_float_val(slicemax);
     SETslicemax(setslicemax,slicemax,setslicechopmax,slicechopmax);
     updatechopcolors();
     break;
   case SETVALMIN:
-    ASSERT(EDIT_slice_min!=NULL);
     switch (setslicemin){
     case PERCENTILE_MIN:
     case GLOBAL_MIN:
-      EDIT_slice_min->disable();
+      if(EDIT_slice_min!=NULL)EDIT_slice_min->disable();
       break;
     case SET_MIN:
-      EDIT_slice_min->enable();
+      if(EDIT_slice_min!=NULL)EDIT_slice_min->enable();
       break;
     default:
       ASSERT(FFALSE);
@@ -2475,14 +2472,13 @@ extern "C" void Slice_CB(int var){
     SETslicemin(setslicemin,slicemin,setslicechopmin,slicechopmin);
     break;
   case SETVALMAX:
-    ASSERT(EDIT_slice_max!=NULL);
     switch (setslicemax){
       case PERCENTILE_MAX:
       case GLOBAL_MAX:
-        EDIT_slice_max->disable();
+        if(EDIT_slice_max!=NULL)EDIT_slice_max->disable();
         break;
       case SET_MAX:
-        EDIT_slice_max->enable();
+        if(EDIT_slice_max!=NULL)EDIT_slice_max->enable();
         break;
       default:
         ASSERT(FFALSE);
@@ -2492,13 +2488,11 @@ extern "C" void Slice_CB(int var){
     SETslicemax(setslicemax,slicemax,setslicechopmax,slicechopmax);
     break;
   case VALMIN:
-    ASSERT(EDIT_slice_min!=NULL);
-    EDIT_slice_min->set_float_val(slicemin);
+    if(EDIT_slice_min!=NULL)EDIT_slice_min->set_float_val(slicemin);
     SETslicemin(setslicemin,slicemin,setslicechopmin,slicechopmin);
     break;
   case VALMAX:
-    ASSERT(EDIT_slice_max!=NULL);
-    EDIT_slice_max->set_float_val(slicemax);
+    if(EDIT_slice_max!=NULL)EDIT_slice_max->set_float_val(slicemax);
     SETslicemax(setslicemax,slicemax,setslicechopmax,slicechopmax);
     break;
   case FILETYPEINDEX:
@@ -2523,29 +2517,27 @@ extern "C" void Slice_CB(int var){
       }
     }
     setslicebounds(list_slice_index);
-    ASSERT(EDIT_slice_min!=NULL);
-    EDIT_slice_min->set_float_val(slicemin);
+    if(EDIT_slice_min!=NULL)EDIT_slice_min->set_float_val(slicemin);
     switch (setslicemin){
     case PERCENTILE_MIN:
     case GLOBAL_MIN:
-      EDIT_slice_min->disable();
+      if(EDIT_slice_min!=NULL)EDIT_slice_min->disable();
       break;
     case SET_MIN:
-      EDIT_slice_min->enable();
+      if(EDIT_slice_min!=NULL)EDIT_slice_min->enable();
       break;
     default:
       ASSERT(FFALSE);
       break;
     }
-    ASSERT(EDIT_slice_max!=NULL);
-    EDIT_slice_max->set_float_val(slicemax);
+    if(EDIT_slice_max!=NULL)EDIT_slice_max->set_float_val(slicemax);
     switch (setslicemax){
     case PERCENTILE_MIN:
     case GLOBAL_MAX:
-      EDIT_slice_max->disable();
+      if(EDIT_slice_max!=NULL)EDIT_slice_max->disable();
       break;
     case SET_MAX:
-      EDIT_slice_max->enable();
+      if(EDIT_slice_max!=NULL)EDIT_slice_max->enable();
       break;
     default:
       ASSERT(FFALSE);
@@ -2603,6 +2595,7 @@ extern "C" void Slice_CB(int var){
 /* ------------------ SETslicemin ------------------------ */
 
 void SETslicemin(int setslicemin_local, float slicemin_local,int setslicechopmin_local, float slicechopmin_local){
+  if(slicebounds==NULL)return;
   slicebounds[list_slice_index].setvalmin=setslicemin_local;
   slicebounds[list_slice_index].valmin=slicemin_local;
   slicebounds[list_slice_index].setchopmin=setslicechopmin_local;
@@ -2612,6 +2605,7 @@ void SETslicemin(int setslicemin_local, float slicemin_local,int setslicechopmin
 /* ------------------ SETslicemax ------------------------ */
 
 void SETslicemax(int setslicemax_local, float slicemax_local,int setslicechopmax_local, float slicechopmax_local){
+  if(slicebounds==NULL)return;
   slicebounds[list_slice_index].setvalmax=setslicemax_local;
   slicebounds[list_slice_index].valmax=slicemax_local;
   slicebounds[list_slice_index].setchopmax=setslicechopmax_local;
