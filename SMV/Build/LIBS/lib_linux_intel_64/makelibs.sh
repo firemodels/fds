@@ -1,5 +1,9 @@
 #!/bin/bash
+
+# build using 64 bit intel compilers
 OPTS="-i -6"
+source $IFORT_COMPILER/bin/compilervars.sh intel64
+
 LIBDIR=`pwd`
 SRCDIR=$LIBDIR/../../../source
 cd $SRCDIR
