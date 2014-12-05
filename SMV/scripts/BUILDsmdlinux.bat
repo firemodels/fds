@@ -1,7 +1,7 @@
 @echo off
 Title Building Smokediff for Linux
 
-Rem setup environment variables (defining where repository resides etc) 
+:: setup environment variables (defining where repository resides etc) 
 
 set envfile="%userprofile%"\fds_smv_env.bat
 IF EXIST %envfile% GOTO endif_envexist
@@ -21,7 +21,7 @@ call %envfile%
 cd %svn_root%\smv\scripts
 
 set scriptdir=FDS-SMV/SMV/scripts
-echo Building 32 and 64 bit Linux versions of smokediff
+echo Building Linux versions of smokediff
 
 
 plink %svn_logon% %scriptdir%/ssh_command.csh %linux_hostname% %scriptdir% MAKEsmdlinux.csh

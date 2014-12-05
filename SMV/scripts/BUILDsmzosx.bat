@@ -1,9 +1,9 @@
 @echo off
 Title Building Smokezip for OSX
 
-Rem  Windows batch file to build 32 and 64 bit OSX versions of smokezip
+::  Windows batch file to build OSX version of smokezip
 
-Rem setup environment variables (defining where repository resides etc) 
+:: setup environment variables (defining where repository resides etc) 
 
 set envfile="%userprofile%"\fds_smv_env.bat
 IF EXIST %envfile% GOTO endif_envexist
@@ -18,7 +18,7 @@ goto:eof
 :endif_envexist
 
 call %envfile%
-echo Building 32 and 64 bit OSX versions of smokezip
+echo Building OSX version of smokezip
 
 %svn_drive%
 cd %svn_root%\smv\scripts

@@ -1,8 +1,8 @@
 @echo off
 
-Rem  Windows batch file to build a release Smokeview for Linux 32.
+::  Windows batch file to build a 32 bit Linux version of background
 
-Rem setup environment variables (defining where repository resides etc) 
+:: setup environment variables (defining where repository resides etc) 
 
 set envfile="%userprofile%"\fds_smv_env.bat
 IF EXIST %envfile% GOTO endif_envexist
@@ -19,7 +19,7 @@ goto:eof
 call %envfile%
 echo Using the environment variables:
 echo.
-echo Using SVN revision %smv_revision% to build a 32 bit test Linux Smokeview
+echo Using SVN revision %smv_revision% to build a 32 bit Linux version of background
 
 %svn_drive%
 cd %svn_root%\smv\scripts

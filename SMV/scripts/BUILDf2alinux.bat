@@ -1,8 +1,8 @@
 @echo off
 
-Rem  Windows batch file to build linux 32 and 64 bit versions of smokezip
+::  Windows batch file to build Linux version of smokezip
 
-Rem setup environment variables (defining where repository resides etc) 
+:: setup environment variables (defining where repository resides etc) 
 
 set envfile="%userprofile%"\fds_smv_env.bat
 IF EXIST %envfile% GOTO endif_envexist
@@ -17,7 +17,7 @@ goto:eof
 :endif_envexist
 
 call %envfile%
-echo Building 32 and 64 bit Linux versions of fds2ascii
+echo Building Linux version of fds2ascii
 
 %svn_drive%
 cd %svn_root%\smv\scripts

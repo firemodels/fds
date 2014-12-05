@@ -1,10 +1,10 @@
 @echo off
-Title Packaging test Smokeview for 32 bit Linux
+Title Run Linux smokebot
 
 
-Rem  Windows batch file to package a test Linux Smokeview
+::  Windows batch file to run Linux smokebot
 
-Rem setup environment variables (defining where repository resides etc) 
+:: setup environment variables (defining where repository resides etc) 
 
 set envfile="%userprofile%"\fds_smv_env.bat
 IF EXIST %envfile% GOTO endif_envexist

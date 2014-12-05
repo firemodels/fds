@@ -1,9 +1,9 @@
 @echo off
 Title Building Smokediff for OSX
 
-Rem  Windows batch file to build 32 and 64 bit OSX versions of smokediff
+::  Windows batch file to build OSX version of smokediff
 
-Rem setup environment variables (defining where repository resides etc) 
+:: setup environment variables (defining where repository resides etc) 
 
 set envfile="%userprofile%"\fds_smv_env.bat
 IF EXIST %envfile% GOTO endif_envexist
@@ -23,7 +23,7 @@ call %envfile%
 cd %svn_root%\smv\scripts
 
 set scriptdir=FDS-SMV/SMV/scripts
-echo Building 32 and 64 bit OSX versions of smokediff
+echo Building OSX version of smokediff
 
 plink %svn_logon% %scriptdir%/ssh_command.csh %osx_hostname% %scriptdir% MAKEsmdosx.csh
 
