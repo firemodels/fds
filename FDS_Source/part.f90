@@ -1897,7 +1897,7 @@ REAL(EB) :: R_DROP,NUSSELT,K_AIR,H_V,H_V_REF, H_L,&
             H_L_REF,TMP_G_NEW,DT_SUM,DCPDT,TMP_WGT,X_EQUIL,Y_EQUIL,Y_ALL(1:N_SPECIES),H_S_B,H_S,C_DROP2,&
             T_BOIL_EFF,P_RATIO,K_LIQUID,CP_LIQUID,MU_LIQUID,NU_LIQUID,BETA_LIQUID,PR_LIQUID,RAYLEIGH,GR
             
-INTEGER :: IP,II,JJ,KK,IW,N_LPC,NS,N_SUBSTEPS,ITMP,ITMP2,ITCOUNT,Y_INDEX,Z_INDEX,I_BOIL,I_MELT
+INTEGER :: IP,II,JJ,KK,IW,N_LPC,NS,N_SUBSTEPS,ITMP,ITMP2,ITCOUNT,Y_INDEX,Z_INDEX,I_BOIL,I_MELT,I_FUEL
 REAL(EB), INTENT(IN) :: T
 INTEGER, INTENT(IN) :: NM
 LOGICAL :: TEMPITER
@@ -1912,7 +1912,8 @@ CALL POINT_TO_MESH(NM)
 ! Initializations
 
 OMRAF  = 1._EB - RUN_AVG_FAC
-M_DOT(2,NM) = 0._EB ! Mass loss rate of fuel particles
+M_DOT(2,NM) = 0._EB ! Fuel mass loss rate of droplets
+M_DOT(4,NM) = 0._EB ! Total mass loss rate of droplets
 
 ! Rough estimates
 
@@ -2213,12 +2214,15 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
          ! Add fuel evaporation rate to running counter and adjust mass of evaporated fuel to account for different 
          ! Heat of Combustion between fuel PARTICLE and gas
 
-         IF (N_REACTIONS>0) THEN
-            IF (LPC%Z_INDEX==REACTION(1)%FUEL_SMIX_INDEX) THEN
-               M_DOT(2,NM) = M_DOT(2,NM) + WGT*M_VAP/DT_SUBSTEP
-               M_VAP = LPC%ADJUST_EVAPORATION*M_VAP
-            ENDIF
+         I_FUEL = 0
+         IF (N_REACTIONS>0) I_FUEL = REACTION(1)%FUEL_SMIX_INDEX
+
+         IF (LPC%Z_INDEX==I_FUEL .AND. I_FUEL>0) THEN
+            M_DOT(2,NM) = M_DOT(2,NM) + WGT*M_VAP/DT_SUBSTEP  ! Fuel mass loss rate
+            M_VAP = LPC%ADJUST_EVAPORATION*M_VAP
          ENDIF
+
+         M_DOT(4,NM) = M_DOT(4,NM) + WGT*M_VAP/DT_SUBSTEP  ! Total mass loss rate
 
          ! Update gas temperature and determine new subtimestep
 
