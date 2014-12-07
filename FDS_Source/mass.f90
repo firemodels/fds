@@ -910,19 +910,24 @@ DO K=1,KBAR
          ZZ_GET(0) = 1._EB - SUM(ZZ_GET(1:N_TRACKED_SPECIES))
          IF (IS_REALIZABLE(ZZ_GET)) CYCLE
 
-         ! first, clip any negative mass fractions to zero
-         ZZ_GET = MAX(0._EB,ZZ_GET)
-         ! absorb all error in most abundant species
+         ! first, clip mass fractions
+         ZZ_GET = MIN(1._EB,MAX(0._EB,ZZ_GET))
+
+         ! absorb all error in most abundant tracked species
          N_ZZ_MAX = 1
          DO N=2,N_TRACKED_SPECIES
             IF (ZZ_GET(N)>ZZ_GET(N_ZZ_MAX)) N_ZZ_MAX=N
-         ENDDO 
+         ENDDO
+
          SUM_OTHER_SPECIES = SUM(ZZ_GET) - ZZ_GET(N_ZZ_MAX)
          ZZ_GET(N_ZZ_MAX) = 1._EB - SUM_OTHER_SPECIES
 
          ! double check realizability
          ZZ_GET(0) = 1._EB - SUM(ZZ_GET(1:N_TRACKED_SPECIES))
-         IF (.NOT.IS_REALIZABLE(ZZ_GET)) CALL SHUTDOWN('ERROR: Unrealizable mass fractions in NEW_CHECK_MASS_FRACTION')
+         IF (.NOT.IS_REALIZABLE(ZZ_GET)) THEN
+            WRITE(LU_ERR,*) ZZ_GET
+            CALL SHUTDOWN('ERROR: Unrealizable mass fractions in NEW_CHECK_MASS_FRACTION')
+         ENDIF
 
          ZZP(I,J,K,1:N_TRACKED_SPECIES) = ZZ_GET(1:N_TRACKED_SPECIES)
 
