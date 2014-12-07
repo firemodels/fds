@@ -913,9 +913,9 @@ DO K=1,KBAR
          ! first, clip mass fractions
          ZZ_GET = MIN(1._EB,MAX(0._EB,ZZ_GET))
 
-         ! absorb all error in most abundant tracked species
-         N_ZZ_MAX = 1
-         DO N=2,N_TRACKED_SPECIES
+         ! absorb all error in most abundant species
+         N_ZZ_MAX = 0
+         DO N=1,N_TRACKED_SPECIES
             IF (ZZ_GET(N)>ZZ_GET(N_ZZ_MAX)) N_ZZ_MAX=N
          ENDDO
 
