@@ -2222,6 +2222,15 @@ void obst_or_vent2faces(const mesh *meshi,blockagedata *bc,
       faceptr->jmax=bc->ijk[JMAX];
       faceptr->kmin=bc->ijk[KMIN];
       faceptr->kmax=bc->ijk[KMAX];
+      if(faceptr->imin==faceptr->imax){
+        if(faceptr->imin>0&&faceptr->imin<meshi->ibar)faceptr->is_interior=1;
+      }
+      if(faceptr->jmin==faceptr->jmax){
+        if(faceptr->jmin>0&&faceptr->jmin<meshi->jbar)faceptr->is_interior=1;
+      }
+      if(faceptr->kmin==faceptr->kmax){
+        if(faceptr->kmin>0&&faceptr->kmin<meshi->kbar)faceptr->is_interior=1;
+      }
     }
     if(vi!=NULL){
       faceptr->imin=vi->imin;
@@ -2714,6 +2723,7 @@ void UpdateFacelists(void){
           int patch_dir[6]={2,1,3,0,4,5};
 
           facej->patchpresent=1-bc->patchvis[patch_dir[k]];
+          if(facej->is_interior==0&&showpatch_both==1)facej->hidden=1;
           facej++;
         }
       }

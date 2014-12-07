@@ -1327,7 +1327,7 @@ void drawpatch_texture(const mesh *meshi){
   float *patch_times;
   int *visPatches;
   float *xyzpatch;
-  int *patchdir, *patchrow, *patchcol;
+  int *patchdir, *patchrow, *patchcol, *patchtype;
   int *blockstart;
   int *patchblank;
   unsigned char *cpatchval_iframe;
@@ -1354,6 +1354,7 @@ void drawpatch_texture(const mesh *meshi){
   visPatches=meshi->visPatches;
   xyzpatch=meshi->xyzpatch;
   patchdir=meshi->patchdir;
+  patchtype=meshi->patchtype;
   patchrow=meshi->patchrow;
   patchcol=meshi->patchcol;
   blockstart=meshi->blockstart;
@@ -1385,6 +1386,8 @@ void drawpatch_texture(const mesh *meshi){
 
   glBegin(GL_TRIANGLES);
   for(n=0;n<meshi->npatches;n++){
+    int drawit;
+
     iblock = meshi->blockonpatch[n];
     meshblock = meshi->meshonpatch[n];
     ASSERT((iblock!=-1&&meshblock!=NULL)||(iblock==-1&&meshblock==NULL));
@@ -1394,7 +1397,10 @@ void drawpatch_texture(const mesh *meshi){
         continue;
       }
     }
-    if(visPatches[n]==1&&patchdir[n]==0){
+    drawit=0;
+    if(visPatches[n]==1&&patchdir[n]==0)drawit=1;
+    if(patchtype[n]!=INTERIORwall&&showpatch_both==1)drawit=1;
+    if(drawit==1){
       nrow=patchrow[n];
       ncol=patchcol[n];
       xyzpatchcopy = xyzpatch + 3*blockstart[n];
@@ -1453,6 +1459,8 @@ void drawpatch_texture(const mesh *meshi){
     glBegin(GL_TRIANGLES);
   }
   for(n=0;n<meshi->npatches;n++){
+    int drawit;
+
     iblock = meshi->blockonpatch[n];
     meshblock=meshi->meshonpatch[n];
     if(iblock!=-1){
@@ -1461,7 +1469,13 @@ void drawpatch_texture(const mesh *meshi){
         continue;
       }
     }
+    drawit=0;
     if(meshi->visPatches[n]==1&&meshi->patchdir[n]>0){
+      if(patchtype[n]==INTERIORwall||showpatch_both==0){
+        drawit=1;
+      }
+    }
+    if(drawit==1){
       nrow=patchrow[n];
       ncol=patchcol[n];
       xyzpatchcopy = xyzpatch + 3*blockstart[n];
@@ -1535,6 +1549,8 @@ void drawpatch_texture(const mesh *meshi){
 
   /* if a contour boundary DOES match a blockage face then draw "one sides" of boundary */
   for(n=0;n<meshi->npatches;n++){
+    int drawit;
+
     iblock = meshi->blockonpatch[n];
     meshblock = meshi->meshonpatch[n];
     ASSERT((iblock!=-1&&meshblock!=NULL)||(iblock==-1&&meshblock==NULL));
@@ -1544,7 +1560,13 @@ void drawpatch_texture(const mesh *meshi){
         continue;
       }
     }
+    drawit=0;
     if(visPatches[n]==1&&patchdir[n]<0){
+      if(patchtype[n]==INTERIORwall||showpatch_both==0){
+        drawit=1;
+      }
+    }
+    if(drawit==1){
       nrow=patchrow[n];
       ncol=patchcol[n];
       xyzpatchcopy = xyzpatch + 3*blockstart[n];
@@ -2217,7 +2239,7 @@ void drawpatch(const mesh *meshi){
   float *patch_times;
   int *visPatches;
   float *xyzpatch;
-  int *patchdir, *patchrow, *patchcol;
+  int *patchdir, *patchrow, *patchcol, *patchtype;
   int *blockstart;
   int *patchblank;
   unsigned char *cpatchval_iframe;
@@ -2245,6 +2267,7 @@ void drawpatch(const mesh *meshi){
   visPatches=meshi->visPatches;
   xyzpatch=meshi->xyzpatch;
   patchdir=meshi->patchdir;
+  patchtype=meshi->patchtype;
   patchrow=meshi->patchrow;
   patchcol=meshi->patchcol;
   blockstart=meshi->blockstart;
@@ -2273,6 +2296,8 @@ void drawpatch(const mesh *meshi){
   nn =0;
   glBegin(GL_TRIANGLES);
   for(n=0;n<meshi->npatches;n++){
+    int drawit;
+  
     iblock = meshi->blockonpatch[n];
     meshblock = meshi->meshonpatch[n];
     ASSERT((iblock!=-1&&meshblock!=NULL)||(iblock==-1&&meshblock==NULL));
@@ -2283,7 +2308,10 @@ void drawpatch(const mesh *meshi){
         continue;
       }
     }
-    if(visPatches[n]==1&&patchdir[n]==0){
+    drawit=0;
+    if(visPatches[n]==1&&patchdir[n]==0)drawit=1;
+    if(patchtype[n]!=INTERIORwall&&showpatch_both==1)drawit=1;
+    if(drawit==1){
       nrow=patchrow[n];
       ncol=patchcol[n];
       xyzpatchcopy = xyzpatch + 3*blockstart[n];
@@ -2371,6 +2399,8 @@ void drawpatch(const mesh *meshi){
     glBegin(GL_TRIANGLES);
   }
   for(n=0;n<meshi->npatches;n++){
+    int drawit;
+    
     iblock = meshi->blockonpatch[n];
     meshblock=meshi->meshonpatch[n];
     if(iblock!=-1){
@@ -2380,7 +2410,13 @@ void drawpatch(const mesh *meshi){
         continue;
       }
     }
+    drawit=0;
     if(meshi->visPatches[n]==1&&meshi->patchdir[n]>0){
+      if(patchtype[n]==INTERIORwall||showpatch_both==0){
+        drawit=1;
+      }
+    }
+    if(drawit==1){
       nrow=patchrow[n];
       ncol=patchcol[n];
       xyzpatchcopy = xyzpatch + 3*blockstart[n];
@@ -2485,6 +2521,8 @@ void drawpatch(const mesh *meshi){
   /* if a contour boundary DOES match a blockage face then draw "one sides" of boundary */
   nn=0;
   for(n=0;n<meshi->npatches;n++){
+    int drawit;
+    
     iblock = meshi->blockonpatch[n];
     meshblock = meshi->meshonpatch[n];
     ASSERT((iblock!=-1&&meshblock!=NULL)||(iblock==-1&&meshblock==NULL));
@@ -2495,7 +2533,13 @@ void drawpatch(const mesh *meshi){
         continue;
       }
     }
+    drawit=0;
     if(visPatches[n]==1&&patchdir[n]<0){
+      if(patchtype[n]==INTERIORwall||showpatch_both==0){
+        drawit=1;
+      }
+    }
+    if(drawit==1){
       nrow=patchrow[n];
       ncol=patchcol[n];
       xyzpatchcopy = xyzpatch + 3*blockstart[n];
@@ -2610,7 +2654,7 @@ void drawpatch_cellcenter(const mesh *meshi){
   unsigned char *cpatchval_iframe_copy;
   float *patch_times;
   int *visPatches;
-  int *patchdir, *patchrow, *patchcol;
+  int *patchdir, *patchrow, *patchcol, *patchtype;
   int *blockstart;
   unsigned char *cpatchval_iframe;
   int iblock;
@@ -2638,6 +2682,7 @@ void drawpatch_cellcenter(const mesh *meshi){
   patch_times=meshi->patch_times;
   visPatches=meshi->visPatches;
   patchdir=meshi->patchdir;
+  patchtype=meshi->patchtype;
   patchrow=meshi->patchrow;
   patchcol=meshi->patchcol;
   blockstart=meshi->blockstart;
@@ -2667,6 +2712,8 @@ void drawpatch_cellcenter(const mesh *meshi){
   nn =0;
   glBegin(GL_TRIANGLES);
   for(n=0;n<meshi->npatches;n++){
+    int drawit;
+
     iblock = meshi->blockonpatch[n];
     meshblock = meshi->meshonpatch[n];
     ASSERT((iblock!=-1&&meshblock!=NULL)||(iblock==-1&&meshblock==NULL));
@@ -2677,7 +2724,10 @@ void drawpatch_cellcenter(const mesh *meshi){
         continue;
       }
     }
-    if(visPatches[n]==1&&patchdir[n]==0){
+    drawit=0;
+    if(visPatches[n]==1&&patchdir[n]==0)drawit=1;
+    if(patchtype[n]!=INTERIORwall&&showpatch_both==1)drawit=1;
+    if(drawit==1){
       nrow=patchrow[n];
       ncol=patchcol[n];
       cpatchval_iframe_copy = cpatchval_iframe + blockstart[n];
@@ -2732,6 +2782,8 @@ void drawpatch_cellcenter(const mesh *meshi){
     glBegin(GL_TRIANGLES);
   }
   for(n=0;n<meshi->npatches;n++){
+    int drawit;
+    
     iblock = meshi->blockonpatch[n];
     meshblock=meshi->meshonpatch[n];
     if(iblock!=-1){
@@ -2741,7 +2793,13 @@ void drawpatch_cellcenter(const mesh *meshi){
         continue;
       }
     }
+    drawit=0;
     if(meshi->visPatches[n]==1&&meshi->patchdir[n]>0){
+      if(patchtype[n]==INTERIORwall||showpatch_both==0){
+        drawit=1;
+      }
+    }
+    if(drawit==1){
       nrow=patchrow[n];
       ncol=patchcol[n];
       cpatchval_iframe_copy = cpatchval_iframe + blockstart[n];
@@ -2813,6 +2871,8 @@ void drawpatch_cellcenter(const mesh *meshi){
   /* if a contour boundary DOES match a blockage face then draw "one sides" of boundary */
   nn=0;
   for(n=0;n<meshi->npatches;n++){
+    int drawit;
+    
     iblock = meshi->blockonpatch[n];
     meshblock = meshi->meshonpatch[n];
     ASSERT((iblock!=-1&&meshblock!=NULL)||(iblock==-1&&meshblock==NULL));
@@ -2823,7 +2883,13 @@ void drawpatch_cellcenter(const mesh *meshi){
         continue;
       }
     }
+    drawit=0;
     if(visPatches[n]==1&&patchdir[n]<0){
+      if(patchtype[n]==INTERIORwall||showpatch_both==0){
+        drawit=1;
+      }
+    }
+    if(drawit==1){
       nrow=patchrow[n];
       ncol=patchcol[n];
       cpatchval_iframe_copy = cpatchval_iframe + blockstart[n];

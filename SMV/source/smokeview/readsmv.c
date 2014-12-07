@@ -8725,6 +8725,13 @@ int readini2(char *inifile, int localfile){
       init_volrender_surface(NOT_FIRSTCALL);
       continue;
     }
+    if(match(buffer,"BOUNDARYTWOSIDE")==1){
+      int meshnum;
+
+      fgets(buffer,255,stream);
+      sscanf(buffer,"%i",&showpatch_both);
+      ONEORZERO(showpatch_both);
+    }
     if(match(buffer,"MESHOFFSET")==1){
       int meshnum;
 
@@ -11773,6 +11780,8 @@ void writeini(int flag,char *filename){
   fprintf(fileout," %f %f %f %f %f %f %f\n",
         temperature_min,temperature_cutoff,temperature_max,fire_opacity_factor,mass_extinct,gpu_vol_factor,nongpu_vol_factor
         );
+  fprintf(fileout,"BOUNDARYTWOSIDE\n");
+  fprintf(fileout," %i\n",showpatch_both);
 
   fprintf(fileout,"\nMISC\n");
   fprintf(fileout,"----\n\n");

@@ -23,6 +23,7 @@
 #include "smokeheaders.h"
 #include "threader.h"
 
+SVEXTERN int SVDECL(showpatch_both,0);
 SVEXTERN int SVDECL(show_triangle_count,0);
 SVEXTERN int SVDECL(n_geom_triangles,0);
 SVEXTERN int SVDECL(show_device_orientation,0);

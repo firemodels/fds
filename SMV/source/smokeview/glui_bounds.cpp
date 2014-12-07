@@ -84,6 +84,7 @@ GLUI_Rollout *ROLLOUT_zone_bound=NULL;
 #define TRACERS 21
 #define PLOTISOTYPE 22
 #define CACHE_BOUNDARYDATA 23
+#define SHOWPATCH_BOTH 24
 #define HIDEPATCHSURFACE 25
 #define DATA_transparent 26
 #define UNLOAD_QDATA 203
@@ -245,6 +246,7 @@ GLUI_EditText *EDIT_p3_chopmin=NULL, *EDIT_p3_chopmax=NULL;
 
 GLUI_Checkbox *CHECKBOX_show_slices_and_vectors=NULL;
 GLUI_Checkbox *CHECKBOX_cache_boundarydata=NULL;
+GLUI_Checkbox *CHECKBOX_showpatch_both=NULL;
 GLUI_Checkbox *CHECKBOX_showchar=NULL, *CHECKBOX_showonlychar;
 GLUI_Checkbox *CHECKBOX_showtrisurface=NULL;
 GLUI_Checkbox *CHECKBOX_showtrioutline=NULL;
@@ -550,6 +552,7 @@ extern "C" void glui_bounds_setup(int main_window){
       if(patchi->firstshort==1)nradio++;
     }
     CHECKBOX_cache_boundarydata=glui_bounds->add_checkbox_to_panel(ROLLOUT_bound,_("Cache boundary data"),&cache_boundarydata,CACHE_BOUNDARYDATA,Bound_CB);
+    CHECKBOX_showpatch_both=glui_bounds->add_checkbox_to_panel(ROLLOUT_bound,_("Display exterior data"),&showpatch_both,SHOWPATCH_BOTH,Bound_CB);
     if(nradio>1){
       for(i=0;i<npatchinfo;i++){
         patchdata *patchi;
@@ -1702,6 +1705,10 @@ void Bound_CB(int var){
   int i;
 
   switch (var) {
+  case SHOWPATCH_BOTH:
+    updatefacelists=1;
+    updatehiddenfaces=1;
+    break;
   case CACHE_BOUNDARYDATA:
     if(cache_boundarydata==0){
       BUTTON_updatebound->disable();
