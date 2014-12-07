@@ -8726,8 +8726,6 @@ int readini2(char *inifile, int localfile){
       continue;
     }
     if(match(buffer,"BOUNDARYTWOSIDE")==1){
-      int meshnum;
-
       fgets(buffer,255,stream);
       sscanf(buffer,"%i",&showpatch_both);
       ONEORZERO(showpatch_both);
