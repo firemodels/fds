@@ -37,7 +37,7 @@ INTEGER, PARAMETER :: LABEL_LENGTH=60
 ! Special numbers
 
 REAL(EB), PARAMETER :: EPSILON_EB=EPSILON(1._EB),ALMOST_ONE=1._EB-EPSILON(1._EB),MICRON=1.E-6_EB,&
-                       TWO_EPSILON_EB=2._EB*EPSILON(1._EB)
+                       TWO_EPSILON_EB=2._EB*EPSILON(1._EB),TINY_EB=TINY(1._EB)
 
 ! Often used numbers
 

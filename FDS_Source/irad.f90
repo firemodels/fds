@@ -1,9 +1,10 @@
 !------------------------------------------------------------------------------
-! This file contains 4 modules
+! This file contains 5 modules
 ! 1 - RADCONS
-! 2 - RADCALV
-! 3 - SPECDATA
-! 4 - MIEV
+! 2 - RADCAL_VAR
+! 3 - RADACL   
+! 4 - SPECDATA
+! 5 - MIEV
 !------------------------------------------------------------------------------
 
 
@@ -32,10 +33,10 @@ INTEGER :: NRT,NCO,UIIDIM,NLAMBDAT,NKAPPAT,NKAPPAZ
 
 LOGICAL :: WIDE_BAND_MODEL
 
-INTEGER :: N_RADCAL_SPECIES,RADCAL_SPECIES_INDEX(11),N_KAPPA_T=44,N_KAPPA_Y=50
+INTEGER :: N_RADCAL_ARRAY_SIZE,RADCAL_SPECIES_INDEX(16),N_KAPPA_T=44,N_KAPPA_Y=50
 REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: Z2RADCAL_SPECIES
 REAL(EB), ALLOCATABLE, DIMENSION(:,:,:,:) :: RADCAL_SPECIES2KAPPA
-CHARACTER(LABEL_LENGTH) :: RADCAL_SPECIES(11)='null'
+CHARACTER(LABEL_LENGTH) :: RADCAL_SPECIES_ID(16)='null'
 
 
 !------------------------------------------------------------------------------
@@ -95,8 +96,7 @@ CHARACTER(LABEL_LENGTH) :: RADCAL_SPECIES(11)='null'
 END MODULE RADCONS
 
 
-
-MODULE RADCALV
+MODULE RADCAL_VAR
 
 !------------------------------------------------------------------------------
 ! VARIABLES
@@ -112,7293 +112,9007 @@ USE PRECISION_PARAMETERS
 USE GLOBAL_CONSTANTS, ONLY: AL2O3
 IMPLICIT NONE
 
-PRIVATE
+CHARACTER(255) :: MESSAGE
+INTEGER, PARAMETER :: n_radcal_species = 16      ! number of radcal species (including soot) plus nitrogen and oxygen
+INTEGER, PARAMETER :: n_radcal_species_gas=n_radcal_species-1 ! number of radcal species (including soot) plus nitrogen and oxygen
+
+TYPE elements
+   CHARACTER(32)           :: radcal_id
+   CHARACTER(32)           :: id
+   CHARACTER(2048)         :: comments
+   REAL(EB), POINTER, DIMENSION(:) :: bands
+   REAL(EB), POINTER, DIMENSION(:) :: temp_EXP
+END TYPE elements
+
+TYPE(elements), DIMENSION(n_radcal_species) :: radcal_species
+
+REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: partial_pressures_atm
+REAL(EB), ALLOCATABLE, DIMENSION(:)   :: temp_gas
+REAL(EB), ALLOCATABLE, DIMENSION(:)   :: segment_length_m
+REAL(EB), ALLOCATABLE, DIMENSION(:)   :: total_pressure_atm
+
+CHARACTER(255) :: CHID_RADCAL  ! radcal CASE id
+CHARACTER(255) :: TITLE_RADCAL ! radcal CASE title
+
+REAL(EB) :: ommin, ommax, lambdamin, lambdamax
+REAL(EB) :: twall, tau, xtot, fv
+
+INTEGER:: npt
+
+REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: gamma, sd15, sd, sd7, sd3
+
+INTEGER, PARAMETER :: n_temp_c3h6=7,  n_band_c3h6=3, &
+                      n_temp_c3h8=7,  n_band_c3h8=2, &
+                      n_temp_c7h16=7, n_band_c7h16=2, &
+                      n_temp_c7h8=7,  n_band_c7h8=5, &
+                      n_temp_ch4=23,  n_band_ch4=3, &
+                      n_temp_ch3oh=7, n_band_ch3oh=4, &
+                      n_temp_c5h8o2=7,n_band_c5h8o2=6, &
+                      n_temp_c2h6=7,  n_band_c2h6=3, &
+                      n_temp_c2h4=7,  n_band_c2h4=4
+
+! 1: goody, 2: malkmus, 3: elsasser 
+INTEGER, PARAMETER :: i_model_c3h6=2,i_model_c3h8=2,i_model_c7h16=2,i_model_c7h8=2,i_model_ch3oh=2,i_model_c5h8o2=2, &
+                      i_model_c2h6=2,i_model_c2h4=2,i_model_co2=1,i_model_h2o=1,i_model_co=1,i_model_ch4=3
+
+REAL(EB), ALLOCATABLE, DIMENSION(:)    :: sd_c3h6_temp
+REAL(EB), ALLOCATABLE, DIMENSION(:)    :: sd_c3h8_temp
+REAL(EB), ALLOCATABLE, DIMENSION(:)    :: sd_c7h16_temp
+REAL(EB), ALLOCATABLE, DIMENSION(:)    :: sd_c7h8_temp
+REAL(EB), ALLOCATABLE, DIMENSION(:)    :: sd_ch3oh_temp
+REAL(EB), ALLOCATABLE, DIMENSION(:)    :: sd_c5h8o2_temp
+REAL(EB), ALLOCATABLE, DIMENSION(:)    :: sd_c2h6_temp
+REAL(EB), ALLOCATABLE, DIMENSION(:)    :: sd_ch4_temp
+REAL(EB), ALLOCATABLE, DIMENSION(:)    :: sd_c2h4_temp
+
+REAL(EB), ALLOCATABLE, DIMENSION(:)    :: be_c3h6
+REAL(EB), ALLOCATABLE, DIMENSION(:)    :: be_c3h8
+REAL(EB), ALLOCATABLE, DIMENSION(:)    :: be_c7h16
+REAL(EB), ALLOCATABLE, DIMENSION(:)    :: be_c7h8
+REAL(EB), ALLOCATABLE, DIMENSION(:)    :: be_ch3oh
+REAL(EB), ALLOCATABLE, DIMENSION(:)    :: be_c5h8o2
+REAL(EB), ALLOCATABLE, DIMENSION(:)    :: be_c2h6
+REAL(EB), ALLOCATABLE, DIMENSION(:)    :: be_c2h4
+
+REAL(EB), ALLOCATABLE, DIMENSION(:,:)  :: om_bnd_ch4
+REAL(EB), ALLOCATABLE, DIMENSION(:,:)  :: om_bnd_c3h6
+REAL(EB), ALLOCATABLE, DIMENSION(:,:)  :: om_bnd_c3h8
+REAL(EB), ALLOCATABLE, DIMENSION(:,:)  :: om_bnd_c7h16
+REAL(EB), ALLOCATABLE, DIMENSION(:,:)  :: om_bnd_c7h8
+REAL(EB), ALLOCATABLE, DIMENSION(:,:)  :: om_bnd_ch3oh
+REAL(EB), ALLOCATABLE, DIMENSION(:,:)  :: om_bnd_c5h8o2
+REAL(EB), ALLOCATABLE, DIMENSION(:,:)  :: om_bnd_c2h6
+REAL(EB), ALLOCATABLE, DIMENSION(:,:)  :: om_bnd_c2h4
+
+REAL(EB), ALLOCATABLE, DIMENSION(:,:)  :: sd1_ch4
+REAL(EB), ALLOCATABLE, DIMENSION(:,:)  :: sd2_ch4
+
+REAL(EB), ALLOCATABLE, DIMENSION(:,:)  :: sd1_c3h6
+REAL(EB), ALLOCATABLE, DIMENSION(:,:)  :: sd2_c3h6
+REAL(EB), ALLOCATABLE, DIMENSION(:,:)  :: sd3_c3h6
+
+REAL(EB), ALLOCATABLE, DIMENSION(:,:)  :: sd1_c3h8
+REAL(EB), ALLOCATABLE, DIMENSION(:,:)  :: sd2_c3h8
+
+REAL(EB), ALLOCATABLE, DIMENSION(:,:)  :: sd1_c7h16
+REAL(EB), ALLOCATABLE, DIMENSION(:,:)  :: sd2_c7h16
+
+REAL(EB), ALLOCATABLE, DIMENSION(:,:)  :: sd1_c7h8
+REAL(EB), ALLOCATABLE, DIMENSION(:,:)  :: sd2_c7h8
+REAL(EB), ALLOCATABLE, DIMENSION(:,:)  :: sd3_c7h8
+REAL(EB), ALLOCATABLE, DIMENSION(:,:)  :: sd4_c7h8
+REAL(EB), ALLOCATABLE, DIMENSION(:,:)  :: sd5_c7h8
+
+REAL(EB), ALLOCATABLE, DIMENSION(:,:)  :: sd1_ch3oh
+REAL(EB), ALLOCATABLE, DIMENSION(:,:)  :: sd2_ch3oh
+REAL(EB), ALLOCATABLE, DIMENSION(:,:)  :: sd3_ch3oh
+REAL(EB), ALLOCATABLE, DIMENSION(:,:)  :: sd4_ch3oh
+
+REAL(EB), ALLOCATABLE, DIMENSION(:,:)  :: sd1_c5h8o2
+REAL(EB), ALLOCATABLE, DIMENSION(:,:)  :: sd2_c5h8o2
+REAL(EB), ALLOCATABLE, DIMENSION(:,:)  :: sd3_c5h8o2
+REAL(EB), ALLOCATABLE, DIMENSION(:,:)  :: sd4_c5h8o2
+REAL(EB), ALLOCATABLE, DIMENSION(:,:)  :: sd5_c5h8o2
+REAL(EB), ALLOCATABLE, DIMENSION(:,:)  :: sd6_c5h8o2
+
+REAL(EB), ALLOCATABLE, DIMENSION(:,:)  :: sd1_c2h6
+REAL(EB), ALLOCATABLE, DIMENSION(:,:)  :: sd2_c2h6
+REAL(EB), ALLOCATABLE, DIMENSION(:,:)  :: sd3_c2h6
+
+REAL(EB), ALLOCATABLE, DIMENSION(:,:)  :: sd1_c2h4
+REAL(EB), ALLOCATABLE, DIMENSION(:,:)  :: sd2_c2h4
+REAL(EB), ALLOCATABLE, DIMENSION(:,:)  :: sd3_c2h4
+REAL(EB), ALLOCATABLE, DIMENSION(:,:)  :: sd4_c2h4
+
+REAL(EB), ALLOCATABLE, DIMENSION(:,:)  :: gammad1_c3h6
+REAL(EB), ALLOCATABLE, DIMENSION(:,:)  :: gammad2_c3h6
+REAL(EB), ALLOCATABLE, DIMENSION(:,:)  :: gammad3_c3h6
+
+REAL(EB), ALLOCATABLE, DIMENSION(:,:)  :: gammad1_c3h8
+REAL(EB), ALLOCATABLE, DIMENSION(:,:)  :: gammad2_c3h8
+
+REAL(EB), ALLOCATABLE, DIMENSION(:,:)  :: gammad1_c7h16
+REAL(EB), ALLOCATABLE, DIMENSION(:,:)  :: gammad2_c7h16
+
+REAL(EB), ALLOCATABLE, DIMENSION(:,:)  :: gammad1_c7h8
+REAL(EB), ALLOCATABLE, DIMENSION(:,:)  :: gammad2_c7h8
+REAL(EB), ALLOCATABLE, DIMENSION(:,:)  :: gammad3_c7h8
+REAL(EB), ALLOCATABLE, DIMENSION(:,:)  :: gammad4_c7h8
+REAL(EB), ALLOCATABLE, DIMENSION(:,:)  :: gammad5_c7h8
+
+REAL(EB), ALLOCATABLE, DIMENSION(:,:)  :: gammad1_ch3oh
+REAL(EB), ALLOCATABLE, DIMENSION(:,:)  :: gammad2_ch3oh
+REAL(EB), ALLOCATABLE, DIMENSION(:,:)  :: gammad3_ch3oh
+REAL(EB), ALLOCATABLE, DIMENSION(:,:)  :: gammad4_ch3oh
+
+REAL(EB), ALLOCATABLE, DIMENSION(:,:)  :: gammad1_c5h8o2
+REAL(EB), ALLOCATABLE, DIMENSION(:,:)  :: gammad2_c5h8o2
+REAL(EB), ALLOCATABLE, DIMENSION(:,:)  :: gammad3_c5h8o2
+REAL(EB), ALLOCATABLE, DIMENSION(:,:)  :: gammad4_c5h8o2
+REAL(EB), ALLOCATABLE, DIMENSION(:,:)  :: gammad5_c5h8o2
+REAL(EB), ALLOCATABLE, DIMENSION(:,:)  :: gammad6_c5h8o2
+
+REAL(EB), ALLOCATABLE, DIMENSION(:,:)  :: gammad1_c2h6
+REAL(EB), ALLOCATABLE, DIMENSION(:,:)  :: gammad2_c2h6
+REAL(EB), ALLOCATABLE, DIMENSION(:,:)  :: gammad3_c2h6
+
+REAL(EB), ALLOCATABLE, DIMENSION(:,:)  :: gammad1_c2h4
+REAL(EB), ALLOCATABLE, DIMENSION(:,:)  :: gammad2_c2h4
+REAL(EB), ALLOCATABLE, DIMENSION(:,:)  :: gammad3_c2h4
+REAL(EB), ALLOCATABLE, DIMENSION(:,:)  :: gammad4_c2h4
+
+REAL(EB), ALLOCATABLE, DIMENSION(:)  :: ab, wave_number, lambda
+REAL(EB), ALLOCATABLE, DIMENSION(:)  :: incident_radiance
+
+REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: ttau
+
+INTEGER :: nom
+
+REAL(EB), PARAMETER :: m_to_cm = 100.0_EB  ! convertion factor meters -> centimeters
+REAL(EB), PARAMETER :: cm_to_m = 0.01_EB   ! convertion factor centimeters -> meters
+
+CHARACTER(30) :: radcal_id
+REAL(EB) :: pfuel
+
+INTEGER, PARAMETER :: i_co=3, i_co2=1, i_h2o=2, i_n2=14, i_o2=15, i_fv=16, i_c2h4=5, i_c2h6=6, i_c3h6=7, i_c3h8=8, &
+                      i_c7h8=9, i_c7h16=10, i_ch3oh=11, i_ch4=4, i_ch4_old=13, i_mma=12
+
 CHARACTER(255), PARAMETER :: iradid='$Id$'
 CHARACTER(255), PARAMETER :: iradrev='$Revision$'
 CHARACTER(255), PARAMETER :: iraddate='$Date$'
-
-! RADCAL MODULE PUBLIC VARIABLES
-PUBLIC OMMAX, OMMIN, DD, SPECIE, SVF, P, RCT
-
-! RADCAL MODULE PUBLIC PROCEDURES
-PUBLIC RCALLOC, INIT_RADCAL, RADCAL, PLANCK, RCDEALLOC, GET_REV_irad
-
-! RADCAL MODULE PUBLIC VARIABLES DEFINITION
-REAL(EB), ALLOCATABLE, DIMENSION(:)   :: SPECIE, P
-
-REAL(EB) :: OMMIN, OMMAX, RCT, DD, SVF
-!-------------------------------------------------
-
-REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: GAMMA, SD15, SD, SD7, SD3,    &
-                                         SD1_CH4, SD2_CH4, OM_BND_CH4  ! FOR METHANE NEW DATA 
-
-INTEGER :: N_TEMP_C3H6,   N_BAND_C3H6
-INTEGER :: N_TEMP_C3H8,   N_BAND_C3H8
-INTEGER :: N_TEMP_C7H16,  N_BAND_C7H16
-INTEGER :: N_TEMP_C7H8,   N_BAND_C7H8
-INTEGER :: N_TEMP_CH4,    N_BAND_CH4
-INTEGER :: N_TEMP_CH3OH,  N_BAND_CH3OH
-INTEGER :: N_TEMP_C5H8O2, N_BAND_C5H8O2
-INTEGER :: N_TEMP_C2H6,   N_BAND_C2H6
-INTEGER :: N_TEMP_C2H4,   N_BAND_C2H4
-
-INTEGER :: I_MODEL_C3H6   ! 1: GOODY, 2: MALKMUS, 3: ELSASSER 
-INTEGER :: I_MODEL_C3H8   ! 1: GOODY, 2: MALKMUS, 3: ELSASSER 
-INTEGER :: I_MODEL_C7H16  ! 1: GOODY, 2: MALKMUS, 3: ELSASSER 
-INTEGER :: I_MODEL_C7H8   ! 1: GOODY, 2: MALKMUS, 3: ELSASSER 
-INTEGER :: I_MODEL_CH3OH  ! 1: GOODY, 2: MALKMUS, 3: ELSASSER 
-INTEGER :: I_MODEL_C5H8O2 ! 1: GOODY, 2: MALKMUS, 3: ELSASSER 
-INTEGER :: I_MODEL_C2H6   ! 1: GOODY, 2: MALKMUS, 3: ELSASSER 
-INTEGER :: I_MODEL_C2H4   ! 1: GOODY, 2: MALKMUS, 3: ELSASSER 
-
-INTEGER :: I_MODEL_CO2   ! 1: GOODY, 2: MALKMUS, 3: ELSASSER 
-INTEGER :: I_MODEL_H2O   ! 1: GOODY, 2: MALKMUS, 3: ELSASSER 
-INTEGER :: I_MODEL_CO    ! 1: GOODY, 2: MALKMUS, 3: ELSASSER 
-INTEGER :: I_MODEL_CH4   ! 1: GOODY, 2: MALKMUS, 3: ELSASSER 
-
-REAL(EB), ALLOCATABLE, DIMENSION(:)    :: SD_C3H6_TEMP
-REAL(EB), ALLOCATABLE, DIMENSION(:)    :: SD_C3H8_TEMP
-REAL(EB), ALLOCATABLE, DIMENSION(:)    :: SD_C7H16_TEMP
-REAL(EB), ALLOCATABLE, DIMENSION(:)    :: SD_C7H8_TEMP
-REAL(EB), ALLOCATABLE, DIMENSION(:)    :: SD_CH3OH_TEMP
-REAL(EB), ALLOCATABLE, DIMENSION(:)    :: SD_C5H8O2_TEMP
-REAL(EB), ALLOCATABLE, DIMENSION(:)    :: SD_C2H6_TEMP
-REAL(EB), ALLOCATABLE, DIMENSION(:)    :: SD_C2H4_TEMP
-REAL(EB), ALLOCATABLE, DIMENSION(:)    :: SD_CH4_TEMP
-
-REAL(EB), ALLOCATABLE, DIMENSION(:)    :: Be_C3H6
-REAL(EB), ALLOCATABLE, DIMENSION(:)    :: Be_C3H8
-REAL(EB), ALLOCATABLE, DIMENSION(:)    :: Be_C7H16
-REAL(EB), ALLOCATABLE, DIMENSION(:)    :: Be_C7H8
-REAL(EB), ALLOCATABLE, DIMENSION(:)    :: Be_CH3OH
-REAL(EB), ALLOCATABLE, DIMENSION(:)    :: Be_C5H8O2
-REAL(EB), ALLOCATABLE, DIMENSION(:)    :: Be_C2H6
-REAL(EB), ALLOCATABLE, DIMENSION(:)    :: Be_C2H4
-
-REAL(EB), ALLOCATABLE, TARGET, DIMENSION(:,:)  :: OM_BND_C3H6
-REAL(EB), ALLOCATABLE, TARGET, DIMENSION(:,:)  :: OM_BND_C3H8
-REAL(EB), ALLOCATABLE, TARGET, DIMENSION(:,:)  :: OM_BND_C7H16
-REAL(EB), ALLOCATABLE, TARGET, DIMENSION(:,:)  :: OM_BND_C7H8
-REAL(EB), ALLOCATABLE, TARGET, DIMENSION(:,:)  :: OM_BND_CH3OH
-REAL(EB), ALLOCATABLE, TARGET, DIMENSION(:,:)  :: OM_BND_C5H8O2
-REAL(EB), ALLOCATABLE, TARGET, DIMENSION(:,:)  :: OM_BND_C2H6
-REAL(EB), ALLOCATABLE, TARGET, DIMENSION(:,:)  :: OM_BND_C2H4
-
-REAL(EB), ALLOCATABLE, TARGET, DIMENSION(:,:)  :: SD1_C3H6
-REAL(EB), ALLOCATABLE, TARGET, DIMENSION(:,:)  :: SD2_C3H6
-REAL(EB), ALLOCATABLE, TARGET, DIMENSION(:,:)  :: SD3_C3H6
-
-REAL(EB), ALLOCATABLE, TARGET, DIMENSION(:,:)  :: SD1_C3H8
-REAL(EB), ALLOCATABLE, TARGET, DIMENSION(:,:)  :: SD2_C3H8
-
-REAL(EB), ALLOCATABLE, TARGET, DIMENSION(:,:)  :: SD1_C7H16
-REAL(EB), ALLOCATABLE, TARGET, DIMENSION(:,:)  :: SD2_C7H16
-
-REAL(EB), ALLOCATABLE, TARGET, DIMENSION(:,:)  :: SD1_C7H8
-REAL(EB), ALLOCATABLE, TARGET, DIMENSION(:,:)  :: SD2_C7H8
-REAL(EB), ALLOCATABLE, TARGET, DIMENSION(:,:)  :: SD3_C7H8
-REAL(EB), ALLOCATABLE, TARGET, DIMENSION(:,:)  :: SD4_C7H8
-REAL(EB), ALLOCATABLE, TARGET, DIMENSION(:,:)  :: SD5_C7H8
-
-REAL(EB), ALLOCATABLE, TARGET, DIMENSION(:,:)  :: SD1_CH3OH
-REAL(EB), ALLOCATABLE, TARGET, DIMENSION(:,:)  :: SD2_CH3OH
-REAL(EB), ALLOCATABLE, TARGET, DIMENSION(:,:)  :: SD3_CH3OH
-REAL(EB), ALLOCATABLE, TARGET, DIMENSION(:,:)  :: SD4_CH3OH
-
-REAL(EB), ALLOCATABLE, TARGET, DIMENSION(:,:)  :: SD1_C5H8O2
-REAL(EB), ALLOCATABLE, TARGET, DIMENSION(:,:)  :: SD2_C5H8O2
-REAL(EB), ALLOCATABLE, TARGET, DIMENSION(:,:)  :: SD3_C5H8O2
-REAL(EB), ALLOCATABLE, TARGET, DIMENSION(:,:)  :: SD4_C5H8O2
-REAL(EB), ALLOCATABLE, TARGET, DIMENSION(:,:)  :: SD5_C5H8O2
-REAL(EB), ALLOCATABLE, TARGET, DIMENSION(:,:)  :: SD6_C5H8O2
-
-REAL(EB), ALLOCATABLE, TARGET, DIMENSION(:,:)  :: SD1_C2H6
-REAL(EB), ALLOCATABLE, TARGET, DIMENSION(:,:)  :: SD2_C2H6
-REAL(EB), ALLOCATABLE, TARGET, DIMENSION(:,:)  :: SD3_C2H6
-
-REAL(EB), ALLOCATABLE, TARGET, DIMENSION(:,:)  :: SD1_C2H4
-REAL(EB), ALLOCATABLE, TARGET, DIMENSION(:,:)  :: SD2_C2H4
-REAL(EB), ALLOCATABLE, TARGET, DIMENSION(:,:)  :: SD3_C2H4
-REAL(EB), ALLOCATABLE, TARGET, DIMENSION(:,:)  :: SD4_C2H4
-
-REAL(EB), ALLOCATABLE, TARGET, DIMENSION(:,:)  :: GAMMAD1_C3H6
-REAL(EB), ALLOCATABLE, TARGET, DIMENSION(:,:)  :: GAMMAD2_C3H6
-REAL(EB), ALLOCATABLE, TARGET, DIMENSION(:,:)  :: GAMMAD3_C3H6
-
-REAL(EB), ALLOCATABLE, TARGET, DIMENSION(:,:)  :: GAMMAD1_C3H8
-REAL(EB), ALLOCATABLE, TARGET, DIMENSION(:,:)  :: GAMMAD2_C3H8
-
-REAL(EB), ALLOCATABLE, TARGET, DIMENSION(:,:)  :: GAMMAD1_C7H16
-REAL(EB), ALLOCATABLE, TARGET, DIMENSION(:,:)  :: GAMMAD2_C7H16
-
-REAL(EB), ALLOCATABLE, TARGET, DIMENSION(:,:)  :: GAMMAD1_C7H8
-REAL(EB), ALLOCATABLE, TARGET, DIMENSION(:,:)  :: GAMMAD2_C7H8
-REAL(EB), ALLOCATABLE, TARGET, DIMENSION(:,:)  :: GAMMAD3_C7H8
-REAL(EB), ALLOCATABLE, TARGET, DIMENSION(:,:)  :: GAMMAD4_C7H8
-REAL(EB), ALLOCATABLE, TARGET, DIMENSION(:,:)  :: GAMMAD5_C7H8
-
-REAL(EB), ALLOCATABLE, TARGET, DIMENSION(:,:)  :: GAMMAD1_CH3OH
-REAL(EB), ALLOCATABLE, TARGET, DIMENSION(:,:)  :: GAMMAD2_CH3OH
-REAL(EB), ALLOCATABLE, TARGET, DIMENSION(:,:)  :: GAMMAD3_CH3OH
-REAL(EB), ALLOCATABLE, TARGET, DIMENSION(:,:)  :: GAMMAD4_CH3OH
-
-REAL(EB), ALLOCATABLE, TARGET, DIMENSION(:,:)  :: GAMMAD1_C5H8O2
-REAL(EB), ALLOCATABLE, TARGET, DIMENSION(:,:)  :: GAMMAD2_C5H8O2
-REAL(EB), ALLOCATABLE, TARGET, DIMENSION(:,:)  :: GAMMAD3_C5H8O2
-REAL(EB), ALLOCATABLE, TARGET, DIMENSION(:,:)  :: GAMMAD4_C5H8O2
-REAL(EB), ALLOCATABLE, TARGET, DIMENSION(:,:)  :: GAMMAD5_C5H8O2
-REAL(EB), ALLOCATABLE, TARGET, DIMENSION(:,:)  :: GAMMAD6_C5H8O2
-
-REAL(EB), ALLOCATABLE, TARGET, DIMENSION(:,:)  :: GAMMAD1_C2H6
-REAL(EB), ALLOCATABLE, TARGET, DIMENSION(:,:)  :: GAMMAD2_C2H6
-REAL(EB), ALLOCATABLE, TARGET, DIMENSION(:,:)  :: GAMMAD3_C2H6
-
-REAL(EB), ALLOCATABLE, TARGET, DIMENSION(:,:)  :: GAMMAD1_C2H4
-REAL(EB), ALLOCATABLE, TARGET, DIMENSION(:,:)  :: GAMMAD2_C2H4
-REAL(EB), ALLOCATABLE, TARGET, DIMENSION(:,:)  :: GAMMAD3_C2H4
-REAL(EB), ALLOCATABLE, TARGET, DIMENSION(:,:)  :: GAMMAD4_C2H4
-
-REAL(EB), DIMENSION(:,:), POINTER, PRIVATE :: KAPPA_D, GAMMA_D
-REAL(EB), DIMENSION(:),   POINTER, PRIVATE :: BAND_OMEGA
-
-REAL(EB), ALLOCATABLE, DIMENSION(:) :: QW, TTAU, XT, AB, LAMBDA, ATOT, BCNT, &
-                                       OPTICAL_THICKNESS, GC, X
-
-REAL(EB) :: TWALL
-INTEGER :: NOM
-
+   
 CONTAINS
-
+ 
 !==============================================================================
 SUBROUTINE GET_REV_irad(MODULE_REV,MODULE_DATE)
 !==============================================================================
 ! Variables passed in
 
- INTEGER, INTENT(INOUT) :: MODULE_REV
- CHARACTER(255),INTENT(INOUT) :: MODULE_DATE
+INTEGER, INTENT(INOUT) :: MODULE_REV
+CHARACTER(255),INTENT(INOUT) :: MODULE_DATE
 !------------------------------------------------------------------------------
 
- WRITE(MODULE_DATE,'(A)') iradrev(INDEX(iradrev,':')+2:LEN_TRIM(iradrev)-2)
- READ (MODULE_DATE,'(I5)') MODULE_REV
- WRITE(MODULE_DATE,'(A)') iraddate
+WRITE(MODULE_DATE,'(A)') iradrev(INDEX(iradrev,':')+2:LEN_TRIM(iradrev)-2)
+READ (MODULE_DATE,'(I5)') MODULE_REV
+WRITE(MODULE_DATE,'(A)') iraddate
 
 !------------------------------------------------------------------------------
-END SUBROUTINE GET_REV_irad
+END SUBROUTINE GET_REV_irad   
 
+END MODULE RADCAL_VAR
 
-!==============================================================================
-SUBROUTINE INIT_RADCAL
-!==============================================================================
-! 
-!------------------------------------------------------------------------------
-
- IF(OMMAX<1100._EB) THEN 
-    NOM=INT((OMMAX-OMMIN)/5._EB)
- ELSEIF(OMMIN>5000._EB) THEN
-    NOM=INT((OMMAX-OMMIN)/50._EB)
- ELSEIF(OMMIN<1100._EB.AND.OMMAX>5000._EB) THEN
-    NOM=INT((1100._EB-OMMIN)/5._EB)+INT((5000._EB-1100._EB)/25._EB) +INT((OMMAX-5000._EB)/50._EB)
- ELSEIF(OMMIN<1100._EB) THEN
-    NOM=INT((1100._EB-OMMIN)/5._EB)+INT((OMMAX-1100._EB)/25._EB)
- ELSEIF(OMMAX>5000._EB) THEN
-    NOM=INT((5000._EB-OMMIN)/25._EB)+INT((OMMAX-5000._EB)/50._EB)
- ELSE
-    NOM=INT((OMMAX-OMMIN)/25._EB)
- ENDIF
-!------------------------------------------------------------------------------
-END SUBROUTINE INIT_RADCAL
-
-
-!==============================================================================
-SUBROUTINE RADCAL(AMEAN,AP0,RADCAL_ID)
-!==============================================================================
-!
-! VARIABLES PASSED IN
-!-------- 
-! RADCAL_ID: CHARACTER(LABEL_LENGTH): RADCAL FUEL PROPERTIES
-!
-! VARIABLES PASSED OUT
-!-------
-! AMEAN : (REAL) EFFECTIVE ABSORPTION COEFFICIENT IN UNIFORM MEDIUM
-! AP0   : (REAL) PLANCK MEAN ABSORPTION COEFFCIENT IN UNIFORM MEDIUM
-!
-! LOCAL
-!------
-! A_COLLISION : (REAL) Collision broadened fine structure parameter
-!               (line_half_width/line_spacing)
-! A_DOPPLER :   (REAL) Doppler broadened fine structure parameter
-!               (line_half_width/line_spacing)
-! AZOTEMP   : (REAL) RATIO REFERENCE TEMPERATURE (273K) OVER LOCAL TEMPERATURE
-! DOM   : (REAL) INCREMENT OF WAVENUMBER
-! OMEGA : (REAL) WAVENUMBER
-! OPTICAL_THICKNESS: (REAL) OPTICAL THICKNESS OF THE ith SPECIES,  UNITS: cmSTP
-! PTOT  : (REAL) TOTAL PRESSURE IN ATM
-! TEMP4 : (REAL) LOCAL TEMPERATURE RAISED TO THE POWER 4
-! 
-! X_COLLISION: (REAL) ! OPTICAL DEPTH FOR A PURE COLLISION CURVE OF GROWTH
-! X_DOPPLER  : (REAL) ! OPTICAL DEPTH FOR A PURE DOPPLER CURVE OF GROWTH
-! X_PARTICLE : (REAL) ! OPTICAL DEPTH FOR PARTICLE
-! 
-! SPECIES: CO2: 5 BANDS (4 Modeled, 1 Tabulated)
-!          H2O: 5 BANDS (5 Tabulated)
-!          CO: 1 BANDS (Modeled)
-!          old CH4: 3 BANDS (1 Modeled, 2 Tabulated)
-!          New CH4: 3 BANDS (1 Modeled, 2 Tabulated)
-!          C3H8:    2 BANDS (2 Tabulated)
-!          C3H6:    
-!          C7H16:
-!          C7H8:
-!          MMA:
-!          CH3OH:
-!------------------------------------------------------------------------------
-USE RADCONS, ONLY:RPI_SIGMA,RADTMP
-
-! VARIABLES PASSED IN
-CHARACTER(LABEL_LENGTH),INTENT(IN):: RADCAL_ID
-
-! VARIABLES PASSED OUT
-REAL (EB), INTENT(OUT) :: AMEAN, AP0
-
-! LOCALS
-
-REAL(EB) :: AZORCT, RCT4, PTOT, TEMP
-
-REAL(EB) :: X_PARTICLE, X_DOPPLER, X_COLLISION
- 
-REAL(EB) :: DOM, ABGAS, RSL, RSS,                  &
-            OMEGA, WAVE_LENGTH, Q, LTERM,          & 
-            DAMBDA, SDWEAK, A_COLLISION, A_DOPPLER
-
- REAL(EB) :: TAU, TAUS, XTOT, XSTAR
-             
-! REAL(EB) :: AIWALL
-
- INTEGER :: I_MODEL ! MODEL USED FOR SNB FITTING: 1: GOODY, 2 MALKMUS, 3 ELSASSER
-
- INTEGER :: I, II, KK, NM, KMAX, KMIN
-
-! [NOTE: THE TOTAL INTENSITY CALCULATED IS THAT WHICH LEAVES INTERVAL J=1.
-! P(I,J) IS PARTIAL PRESSURE, ATM, OF SPECIES I IN  INTERVAL J.
-! I=1,2,3,4,5, OR 6 IMPLIES SPECIES IS CO2, H2O, FUEL, CO, O2, OR N2, RESP.]
-
-AZORCT = 273._EB/RCT
-RCT4   = RCT**4
-
-TWALL = RADTMP
-
-! COMPUTE TOTAL PRESSURE
-PTOT   = SUM(P(1:6))
-
-!---------------------------------------------------------------------------------------
-! COMPUTE SPECIES OPTICAL THICKNESS AND COLLISION BROADENING
-! (CALCULATION PROCEEDS IN ACCORDANCE WITH THE SLG MODEL, TABLE 5-18, IN NASA SP-3080._EB)
-
-DO I = 1, 4  ! LOOP OVER CO2(I=1), H2O(I=2), FUEL(I=3), CO(I=4) 
-   OPTICAL_THICKNESS(I) = AZORCT*P(I)*100._EB*DD ! COMPUTE OPTICAL THICKNESS FOR THE ith SPECIES
-
-! Compute collisional broadening half-width at half height, EQ 5-34 NASA REPORT SP-3080
-   GC(I) = 0.0_EB
-
-! INCLUDE NON-RESONANT FOREIGN AND SELF-BROADENING COLLISIONS
-   DO II=1,6
-      GC(I)=GC(I)+GAMMA(I,II)*P(II)*SQRT(AZORCT)
-   ENDDO
-
-! INCLUDE RESONANT SELF-BROADENING COLLISIONS
-   GC(I)=GC(I)+GAMMA(I,7)*P(I)*AZORCT          
-ENDDO
-
-! LOOP SPECTRUM COMPUTES EACH SPECTRAL CONTRIBUTION, LOOP OVER EACH WAVE NUMBER INTERVALS
-DOM    = 5.0_EB
-OMEGA  = OMMIN-DOM
-NM     = NOM-1
-
-LSPECTRUM: DO KK = 1, NOM
-
-   OMEGA=OMEGA+DOM
-   IF(OMEGA>1100._EB) OMEGA = OMEGA+20._EB
-   IF(OMEGA>5000._EB) OMEGA = OMEGA+25._EB
-
-   LAMBDA(KK) = 10000._EB/OMEGA  ! COMPUTE LAMBDA (WAVELENGTH) IN microMETER
-   ABGAS      = 0._EB
- 
-! LOOP SPECIES COMPUTES THE CONTRIBUTION OF EACH SPECIES TO TAU
-! IF SPECIE(I) IS SET TO 0., THAT PARTICULAR RADIATING SPECIES IS NOT PRESENT.  THE SPECIES CONSIDERED ARE
-!          I   SPECIES
-!          1     CO2
-!          2     H2O
-!          3     FUEL (CH4, C3H8, C7H16, CH3OH, ...)
-!          4     CO
-!          5     PARTICULATES
-
-   LSPECIES: DO I=1,4
-
-      I_MODEL = 1 ! ENFORCE GOODY MODEL WHEN NOT SPECIFIED  
-
-      IF(SPECIE(I) <= TWO_EPSILON_EB) THEN
-         A_COLLISION = 1.0_EB
-         A_DOPPLER   = 1.0_EB
-         X(I)        = TWO_EPSILON_EB
-         CYCLE LSPECIES
-      ELSE
-         TEMP  = RCT
-         SELECT CASE (I)
-            CASE (1)
-               CALL CO2(OMEGA,TEMP,GC(1),SDWEAK,A_COLLISION,A_DOPPLER,I_MODEL)
-            CASE (2)
-               CALL H2O(OMEGA,TEMP,GC(2),SDWEAK,A_COLLISION,A_DOPPLER,I_MODEL)
-            CASE (3)
-               SELECT CASE(RADCAL_ID)
-                  CASE('METHANE_OLD') ; CALL CH4_OLD(OMEGA,TEMP,P(3),PTOT,GC(3),SDWEAK,A_COLLISION,A_DOPPLER,I_MODEL)
-                  CASE('METHANE')     ; CALL CH4(    OMEGA,TEMP,P(3),PTOT,GC(3),SDWEAK,A_COLLISION,A_DOPPLER,I_MODEL)
-                  CASE('PROPANE')     ; CALL C3H8(   OMEGA,TEMP,P(3),PTOT,SDWEAK,A_COLLISION,A_DOPPLER,I_MODEL)
-                  CASE('N-HEPTANE')   ; CALL C7H16(  OMEGA,TEMP,P(3),PTOT,SDWEAK,A_COLLISION,A_DOPPLER,I_MODEL)
-                  CASE('METHANOL')    ; CALL CH3OH(  OMEGA,TEMP,P(3),PTOT,SDWEAK,A_COLLISION,A_DOPPLER,I_MODEL)
-                  CASE('TOLUENE')     ; CALL C7H8(   OMEGA,TEMP,P(3),PTOT,SDWEAK,A_COLLISION,A_DOPPLER,I_MODEL)
-                  CASE('PROPYLENE')   ; CALL C3H6(   OMEGA,TEMP,P(3),PTOT,SDWEAK,A_COLLISION,A_DOPPLER,I_MODEL)
-                  CASE('MMA')         ; CALL C5H8O2( OMEGA,TEMP,P(3),PTOT,SDWEAK,A_COLLISION,A_DOPPLER,I_MODEL)
-                  CASE('ETHANE')      ; CALL C2H6(   OMEGA,TEMP,P(3),PTOT,SDWEAK,A_COLLISION,A_DOPPLER,I_MODEL)
-                  CASE('ETHYLENE')    ; CALL C2H4(   OMEGA,TEMP,P(3),PTOT,SDWEAK,A_COLLISION,A_DOPPLER,I_MODEL)
-                  CASE DEFAULT        ; CALL CH4(    OMEGA,TEMP,P(3),PTOT,GC(3),SDWEAK,A_COLLISION,A_DOPPLER,I_MODEL)
-               END SELECT                 
-            CASE (4)
-               CALL CO(OMEGA,TEMP,GC(4),SDWEAK,A_COLLISION,A_DOPPLER,I_MODEL)
-         END SELECT
-
-         XSTAR = SDWEAK*OPTICAL_THICKNESS(I) ! OPTICAL DEPTH FOR THE WEAK LINE LIMIT.  SP-3080 EQ. 5-27
-         ABGAS = XSTAR/DD+ABGAS
-
-         IF (XSTAR >= 1.E-10_EB) THEN
-!------------------------------------------------------------------------------
-! COMPUTE THE OPTICAL DEPTH FOR THE Ith SPECIES USING RANDOM BAND MODEL
-! COMPOSED OF LINES OF DOPPLER-LORENTZ SHAPE WITH:
-! RANDOM DISTRIBUTION OF EITHER EQUAL STRENGTH LINES FOR DOPPLER OR DECAYING
-! USE APPROPRIATE MODEL FOR LORENTZ LINE (ELSASSER,GOODY,MALKMUS)
-! COMPUTE OPTICAL DEPTH FOR PURE DOPPLER CURVE OF GROWTH 
-
-            X_DOPPLER = GROWTH_DOPPLER(XSTAR,A_DOPPLER,I_MODEL)
- 
-! LORENTZ OPTICAL DEPTH 
-! COMPUTE OPTICAL DEPTH FOR PURE COLLISION CURVE OF GROWTH 
-            SELECT CASE (I_MODEL)
-                CASE(1)  ! GOODY MODEL
-                    X_COLLISION = GOODY(XSTAR,A_COLLISION)
-                CASE(2)  ! MALKMUS MODEL
-                    X_COLLISION = MALKMUS(XSTAR,A_COLLISION)
-                CASE(3)  ! ELSASSER MODEL
-                    X_COLLISION = ELSASSER(XSTAR,A_COLLISION)
-                CASE DEFAULT
-                    X_COLLISION = GOODY(XSTAR,A_COLLISION)
-            END SELECT
-
-! COMPUTE OPTICAL DEPTH
-            X(I) = COMBINED_LINES(X_COLLISION, X_DOPPLER, XSTAR)
-
-         ELSE ! XSTAR < 1.E-10_EB very weak line
-            X(I) = XSTAR
-         ENDIF ! CONDITION (XSTAR >= 1.E-10_EB)
-
-      ENDIF ! CONDITION (P(I)<=TWO_EPSILON_EB)
-
-   END DO LSPECIES
-
-! DETERMINE OPTICAL DEPTH OF SOOT
-
-   IF (SPECIE(5)<=TWO_EPSILON_EB) THEN
-      X_PARTICLE = 0._EB
-   ELSE
-      CALL POD(OMEGA, X_PARTICLE)
-   ENDIF
-
-   AB(KK) = ABGAS+X_PARTICLE/DD
-
-! Evaluate the combined spectral transmissivity and radiance
-
-   XTOT = SUM(X(1:4))+X_PARTICLE
-
-   TAU  = EXP(-XTOT)
    
-   XT(KK)  = XTOT
-   TTAU(KK)= TAU
-   QW(KK)  = (1.0_EB-TAU)*PLANCK(RCT,LAMBDA(KK))+TTAU(KK)*PLANCK(TWALL,LAMBDA(KK))
+MODULE RADCAL_CALC
+   
+USE PRECISION_PARAMETERS
+USE GLOBAL_CONSTANTS, ONLY: SIGMA
+USE COMP_FUNCTIONS, ONLY: SHUTDOWN
+USE RADCONS, ONLY: RPI_SIGMA
+USE RADCAL_VAR
 
-ENDDO LSPECTRUM
-     
-! INTEGRATE THE RADIANCE OVER THE SPECTRUM
+PUBLIC INIT_RADCAL,RCALLOC,RCDEALLOC,PLANCK,SUB_RADCAL
 
-Q = QW(1)*(LAMBDA(1)-LAMBDA(2))
+CONTAINS
 
-DO KK = 2,NM
-   Q = Q+QW(KK)*0.5_EB*(LAMBDA(KK-1)-LAMBDA(KK+1))
+!==============================================================================
+SUBROUTINE init_radcal
+!==============================================================================
+IMPLICIT NONE
+!------------------------------------------------------------------------------
+! local variables
+
+REAL(EB) :: DOM, omega
+
+INTEGER :: i_wavenumb
+
+IF((ommax<1100._EB).and.(ommin<ommax)) THEN 
+   nom = INT((ommax-ommin)/5._EB)
+ELSEIF(ommin>5000._EB) THEN
+   nom = INT((ommax-ommin)/50._EB)
+ELSEIF(ommin<1100._EB.and.ommax>5000._EB) THEN
+   nom = INT((1100._EB-ommin)/5._EB)+INT((5000._EB-1100._EB)/25._EB) +INT((ommax-5000._EB)/50._EB)
+ELSEIF(ommin<1100._EB) THEN
+   nom = INT((1100._EB-ommin)/5._EB)+INT((ommax-1100._EB)/25._EB)
+ELSEIF(ommax>5000._EB) THEN
+   nom = INT((5000._EB-ommin)/25._EB)+INT((ommax-5000._EB)/50._EB)
+ELSE
+   nom = INT((ommax-ommin)/25._EB)
+ENDIF
+
+ALLOCATE(incident_radiance(nom)); incident_radiance   = 0.0_EB
+ALLOCATE(ttau(0:npt,nom))       ; ttau                = 1.0_EB
+
+ALLOCATE(lambda(nom))      ; lambda      = 0.0_EB
+ALLOCATE(ab(nom))          ; ab          = 0.0_EB
+ALLOCATE(wave_number(nom)) ; wave_number = 0.0_EB
+
+! populate vector wave_number and lambda 
+
+DOM    = 5.0_EB
+omega  = ommin-DOM
+
+DO i_wavenumb = 1, nom
+   omega=omega+DOM
+   IF(omega > 1100._EB) omega = omega + 20._EB
+   IF(omega > 5000._EB) omega = omega + 25._EB
+
+   wave_number(i_wavenumb) = omega            ! wavenumber in cm^-1
+   lambda(i_wavenumb)      = 10000.0_EB/omega ! wavelength in micron
 ENDDO
 
-Q = Q+QW(NOM)*(LAMBDA(NOM-1)-LAMBDA(NOM))
-
 !------------------------------------------------------------------------------
-! SOOT CONTRIBUTION
-! DETERMINE SOOT RADIANCE FOR SHORT AND LONG WAVELENGTHS.
-     
-RSL    = 0._EB
-RSS    = 0._EB
+END SUBROUTINE init_radcal
 
-IF(.NOT.(SPECIE(5)<=TWO_EPSILON_EB .AND. TWALL<=TWO_EPSILON_EB)) THEN
-
-   KMAX = INT(OMMIN)
-   KMIN = INT(OMMAX)
-
-   SHORT: DO KK = 5, KMAX, 5 ! LOOP OVER LONG WAVELENGTHS
-
-      OMEGA       = REAL(KK,EB)
-      WAVE_LENGTH = 10000._EB/OMEGA
-      DAMBDA      = 10000._EB/(OMEGA-2.5_EB)-10000._EB/(OMEGA+2.5_EB)
-
-      CALL POD(OMEGA,X_PARTICLE)  
-      TAUS = EXP(-X_PARTICLE)
-      RSL  = RSL + TAUS*PLANCK(TWALL,WAVE_LENGTH)*DAMBDA-(TAUS-1._EB)*PLANCK(RCT,WAVE_LENGTH)*DAMBDA
-
-   ENDDO SHORT
-
-   LONG: DO KK = KMIN, 25000, 100 ! LOOP OVER SHORT WAVELENGTHS
-      OMEGA       = REAL(KK,EB)
-      WAVE_LENGTH = 10000._EB/OMEGA
-      DAMBDA      = 10000._EB/(OMEGA-50._EB)-10000._EB/(OMEGA+50._EB)
-
-      CALL POD(OMEGA,X_PARTICLE)
-      TAUS = DEXP(-X_PARTICLE)
-      RSS  = RSS + TAUS*PLANCK(TWALL,WAVE_LENGTH)*DAMBDA-(TAUS-1._EB)*PLANCK(RCT,WAVE_LENGTH)*DAMBDA
-   ENDDO LONG
-
-ENDIF
-
-! ADD THE CONTRIBUTION OF SOOT OVER LARGER WAVE LENGTH DOMAIN
-
-Q = Q + RSS + RSL
-
-! COMPUTE AMEAN
-IF (ABS(TWALL-RCT)<=SPACING(TWALL)) THEN
-   LTERM = 1._EB
-ELSE
-   LTERM  = MIN(1._EB,MAX(TWO_EPSILON_EB,(Q/RPI_SIGMA-RCT4)/(TWALL**4-RCT4)))
-ENDIF
-AMEAN  = -1._EB/DD*DLOG(LTERM)
-
-! THE FOLLOWING SECTION COMPUTES THE MEAN ABSORPTION COEFFICIENTS IF THE SYSTEM IS HOMOGENEOUS (IE., NPT=1).
-! INTEGRATE AP0*PLANCK OVER LAMBDA
-
-AP0 = AB(1)*0.5_EB*(LAMBDA(1)-LAMBDA(2))*PLANCK(RCT,LAMBDA(1))
-
-DO KK = 2, NM
-   AP0 = AP0 + AB(KK)*0.5_EB*(LAMBDA(KK-1)-LAMBDA(KK+1))*PLANCK(RCT,LAMBDA(KK))
-ENDDO
-
-AP0 = AP0 + AB(NOM)*0.5_EB*(LAMBDA(NM)-LAMBDA(NOM))*PLANCK(RCT,LAMBDA(NOM))
-
-! DIVIDE BY SIGMA*PI*TEMP**4 TO GET FINAL COEFFICIENT AP0 
-
-AP0 = AP0/(RPI_SIGMA*RCT4)
-
-!------------------------------------------------------------------------------
-END SUBROUTINE RADCAL
 
 !==============================================================================
-FUNCTION GROWTH_DOPPLER(XSTAR,A_DOPPLER,I_MODEL) RESULT(X_DOPPLER)
+SUBROUTINE sub_radcal(effective_absorption,planck_mean_absorption,radiance,    &
+                     total_transmissivity)
 !==============================================================================
-! THIS FUNCTION COMPUTES THE DOPPLER CURVE OF GROWTH.
-! TWO CASES
-! 1) EQUALLY INTENSE, RANDOMLY SPACED DOPPLER LINE (I_MODEL =1 or 3)
-! 2) GEOMETRICALLY DECAYING STRENGTH, RANDOMLY SPACED DOPPLER LINE (I_MODEL=2)
 !
-! VARIABLES IN:
-! XSTAR: OPTICAL PATHLENGTH * LINE STRENGTH
-! A_DOPPLER: DOPPLER FINE STRUCTURE PARAMETER
-! I_MODEL: MODEL USED FOR SNB FITTING: 1: GOODY, 2 MALKMUS, 3 ELSASSER
+! input
+!------
+! io   : (INTEGER) ouput file unit
+
+! output
+!-------
+! effective_absorption   : (REAL) effective absorption coefficient,   units: 1/cm
+! planck_mean_absorption : (REAL) planck mean absorption coefficient, units: 1/cm
+! radiance               : (REAL) total incident power per unit of area per 
+!                                 unit of solid angle, units: w/m2/str
+! total_transmissivity   : (REAL) total transmissivity, computed ONLY when twall 
+!                                 (blackbody source) is strictly greater than 0
+!                                 DIMENSIONless number
 !
-! VARIABLE OUT
-! X_DOPPLER
-
-! VARIABLES IN:
-REAL(EB), INTENT(IN) :: XSTAR
-REAL(EB), INTENT(IN) :: A_DOPPLER
-INTEGER, INTENT(IN)  :: I_MODEL
-
-! VARIABLE OUT
-REAL :: X_DOPPLER
-
-! SOURCE: ! SP-3080, CHAP 3.2.5 e and f. SEE page 105.
-
-SELECT CASE(I_MODEL)
-   CASE(1) ! GOODY MODEL: EQUALLY INTENSE, RANDOMLY SPACED DOPPLER LINE 
-       X_DOPPLER = 1.7_EB*A_DOPPLER*SQRT(DLOG(1._EB+(0.58824_EB*XSTAR/A_DOPPLER)**2)) 
-   CASE(2) ! MALKMUS: GEOMETRICALLY DECAYING STRENGTH, RANDOMLY SPACED DOPPLER LINE
-       X_DOPPLER = 0.937_EB*A_DOPPLER*(DLOG(1.0_EB+(1.07_EB*XSTAR/A_DOPPLER)**(0.6666_EB)))* &
-                                  SQRT(DLOG(1.0_EB+(1.07_EB*XSTAR/A_DOPPLER)**(0.6666_EB)))
-   CASE(3)
-       X_DOPPLER = 1.7_EB*A_DOPPLER*SQRT(DLOG(1._EB+(0.58824_EB*XSTAR/A_DOPPLER)**2)) 
-   CASE DEFAULT
-       X_DOPPLER = 1.7_EB*A_DOPPLER*SQRT(DLOG(1._EB+(0.58824_EB*XSTAR/A_DOPPLER)**2)) 
-END SELECT
-!------------------------------------------------------------------------------
-END FUNCTION GROWTH_DOPPLER
-
-!==============================================================================
-FUNCTION COMBINED_LINES(X_COLLISION, X_DOPPLER, XSTAR) RESULT(OPTICAL_DEPTH)
-!==============================================================================
-! COMPUTE THE COMBINED COLLISION AND DOPPLER OPTICAL DEPTHS AND 
-! THE OPTICAL DEPTH BASED ON EXPRESSION GIVEN IN SP-3080 EQ 5-26 (p220)
-!
-! VARIABLES IN:
-! X_COLLISION : LORENZ CURVE OF GROWTH
-! X_DOPPLER: DOPPLER CURVE OF GROWTH
-! XSTAR: OPTICAL PATHLENGTH * LINE STRENGTH
-!
-! VARIABLE OUT
-! OPTICAL_DEPTH
-
-! VARIABLES PASSED IN
-REAL(EB), INTENT(IN) :: X_COLLISION
-REAL(EB), INTENT(IN) :: X_DOPPLER
-REAL(EB), INTENT(IN) :: XSTAR
-
-! VARIABLE PASSED OUTPUT
-REAL(EB) :: OPTICAL_DEPTH
-
-! LOCAL VARIABLES
-REAL(EB) :: Y_DOPPLER, Y_COLLISION, Y_COMBINED
-
-! COMPUTE THE COMBINED COLLISION AND DOPPLER OPTICAL DEPTHS Y_COMBINED
-
-Y_DOPPLER   = 1._EB-(X_DOPPLER/XSTAR)**2
-Y_COLLISION = 1._EB-(X_COLLISION/XSTAR)**2
- 
-! SP-3080 EQ. 5-26
-Y_COMBINED = MAX(1._EB/Y_COLLISION**2+1._EB/Y_DOPPLER**2-1._EB,1._EB)
-
-! FINALLY COMPUTE OPTICAL DEPTH
-! SP-3080 EQ. 5-25
- OPTICAL_DEPTH = XSTAR*SQRT(1._EB-(Y_COMBINED**(-0.5_EB))) 
-
-!------------------------------------------------------------------------------
-END FUNCTION COMBINED_LINES
-
-!==============================================================================
-FUNCTION GOODY(XSTAR,A_COLLISION) RESULT(X_GOODY)
-!==============================================================================
-
-! FUNCTION COMPUTES THE EQUIVALENT LINE WIDTH OVER THE AVERAGE LINE SPACING
-! USING THE GOODY STATISTICAL MODEL
+! local
+!------
+! a_collision : (REAL) collision broadened fine structure PARAMETER
+!               (line_half_width/line_spacing)
+! a_doppler   : (REAL) DOppler broadened fine structure PARAMETER
+!               (line_half_width/line_spacing)
+! azotemp     : (REAL) ratio reference temperature (273k) over local temperature
+! omega       : (REAL) wavenumber
+! optical_thickness: (REAL) optical thickness of the ith species,  units: cmstp
+! ptot        : (REAL) total pressure in atm
+! temp4       : (REAL) local temperature raised to the power 4
 ! 
-! VARIABLES IN:
-! XSTAR       : OPTICAL PATHLENGTH * LINE STRENGTH
-! A_COLLISION : FINE STRUCTURE PARAMETER
-!
-! RETURNS X_GOODY
+! x_collision : (REAL) ! optical depth for a pure collision curve of growth
+! x_doppler   : (REAL) ! optical depth for a pure DOppler curve of growth
+! x_particle  : (REAL) ! optical depth for particle
+!------------------------------------------------------------------------------
+
+IMPLICIT NONE
+
+! variables passed output
+REAL(EB), INTENT(OUT) :: effective_absorption, planck_mean_absorption,       &
+                        radiance, total_transmissivity
+
+! local variables
+
+REAL(EB), ALLOCATABLE, DIMENSION(:)   :: path_length_cm, azotemp
+
+REAL(EB), ALLOCATABLE, DIMENSION(:)   :: taus, taul, x_particle, ab_planck,  &
+                                       ab_tau, bb_spect, bb_gas, bb_wall
+
+REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: curtis_xstar, curtis_acollision,    &
+                                       curtis_aDOppler, gc,                &
+                                       optical_thickness, optical_depth
+ 
+REAL(EB) :: rsl, rss, omega, wave_length,  dambda, lterm, temp4, & 
+            avg_temp, total_length_cm, int_bb_gas, int_bb_wall
+
+INTEGER :: i_wavenumb, kmax, kmin, i_path
+
+! initialization
+
+int_bb_gas            = 0.0_EB
+int_bb_wall           = 0.0_EB
+incident_radiance     = 0.0_EB
+radiance              = 0.0_EB
+total_transmissivity  = 1.0_EB  ! initialization values to arbitrary 
+                                 ! large number so that user knows when it 
+                                 ! has not been calculated
+!------------------------------------------------------------------------------
+! ALLOCATE arrays needed for calculation of radiation properties at a given 
+! wavenumber: gc, species_pressure_atm, optical_thickness
+
+IF(ALLOCATED(curtis_xstar))         DEALLOCATE(curtis_xstar)
+ALLOCATE(curtis_xstar(1:n_radcal_species,0:npt));      curtis_xstar      = 0.0_EB
+
+IF(ALLOCATED(curtis_acollision))    DEALLOCATE(curtis_acollision)
+ALLOCATE(curtis_acollision(1:n_radcal_species,0:npt)); curtis_acollision = 0.0_EB
+
+IF(ALLOCATED(curtis_aDOppler))      DEALLOCATE(curtis_aDOppler)
+ALLOCATE(curtis_aDOppler(1:n_radcal_species,0:npt));   curtis_aDOppler   = 0.0_EB
+
+IF(ALLOCATED(optical_thickness))    DEALLOCATE(optical_thickness)
+ALLOCATE(optical_thickness(1:n_radcal_species,1:npt)); optical_thickness = 0.0_EB
+
+IF(ALLOCATED(optical_depth))         DEALLOCATE(optical_depth)
+ALLOCATE(optical_depth(1:n_radcal_species,0:npt));      optical_depth    = 0.0_EB
   
-IMPLICIT NONE
+IF(ALLOCATED(gc))                   DEALLOCATE(gc)
+ALLOCATE(gc(1:n_radcal_species,1:npt));                 gc               = 0.0_EB
 
-REAL(EB), INTENT(IN) :: XSTAR
-REAL(EB), INTENT(IN) :: A_COLLISION
+IF(ALLOCATED(path_length_cm))       DEALLOCATE(path_length_cm)
+ALLOCATE(path_length_cm(1:npt))
 
-REAL(EB)  :: X_GOODY
+! To compute the effective absorption coefficient
+IF (ALLOCATED(bb_wall)) DEALLOCATE(bb_wall)
+ALLOCATE(bb_wall(nom)); bb_wall = 0.0_EB
 
-IF (XSTAR<1.0E-10_EB) THEN ! WEAK LINE LIMIT
-   X_GOODY = XSTAR
-ELSEIF(XSTAR>1.0E+5_EB) THEN ! STRONG LINE LIMIT
-   X_GOODY = SQRT(4.0_EB*XSTAR*A_COLLISION)
-ELSE             ! FORMULATION TO AVOID DIVISION BY ZERO
-                 !X_GOODY = XSTAR/SQRT(1._EB+0.25_EB*XSTAR/A_COLLISION)
-   X_GOODY = SQRT(A_COLLISION)*XSTAR/SQRT(A_COLLISION+0.25_EB*XSTAR)
-ENDIF
+IF (ALLOCATED(bb_gas)) DEALLOCATE(bb_gas)
+ALLOCATE(bb_gas(nom));  bb_gas  = 0.0_EB
 
-RETURN
+! convert path length from meters to cm
+path_length_cm = m_to_cm*segment_length_m
+
+! compute ratio standard temperature over considered temperature
+IF(ALLOCATED(azotemp))              DEALLOCATE(azotemp)
+ALLOCATE(azotemp(1:npt))
+azotemp = 273._EB/temp_gas
+
 !------------------------------------------------------------------------------
-END FUNCTION GOODY
+! compute the segments properties that are indepENDent of the frequency
+! store them in arrays with DIMENSIONs (npt,n_radcal_species)
 
-!==============================================================================
-FUNCTION MALKMUS(XSTAR,A_COLLISION) RESULT(X_MALKMUS)
-!==============================================================================
-!
-! FUNCTION COMPUTES THE EQUIVALENT LINE WIDTH OVER THE AVERAGE LINE SPACING
-! USING THE MALKMUS STATISTICAL MODEL
-! 
-! VARIABLES IN:
-! XSTAR       : OPTICAL PATHLENGTH * LINE STRENGTH
-! A_COLLISION : FINE STRUCTURE PARAMETER
-!
-! RETURNS X_MALKMUS
-  
-IMPLICIT NONE
+init_path: DO i_path = 1, npt  ! loop over elements of the path length. 
 
-REAL(EB), INTENT(IN) :: XSTAR
-REAL(EB), INTENT(IN) :: A_COLLISION
-
-REAL(EB)  :: X_MALKMUS
-
-IF (XSTAR<1.0E-10_EB) THEN ! WEAK LINE LIMIT
-   X_MALKMUS = XSTAR
-ELSEIF(XSTAR>1.0E+5_EB) THEN ! STRONG LINE LIMIT
-   X_MALKMUS = SQRT(4.0_EB*XSTAR*A_COLLISION)
-ELSE             ! FORMULATION TO AVOID DIVISION BY ZERO
-                 !X_GOODY = XSTAR/SQRT(1._EB+0.25_EB*XSTAR/A_COLLISION)
-   X_MALKMUS = SQRT(4.0_EB*A_COLLISION**2+4.0_EB*A_COLLISION*XSTAR)-2.0_EB*A_COLLISION
-ENDIF
-
-RETURN
 !------------------------------------------------------------------------------
-END FUNCTION MALKMUS
+! test. IF path_length_cm set to zero (bad segment), CYCLE
+! ELSE, proceed with calculation
 
-!==============================================================================
-FUNCTION ELSASSER(XSTAR,A_COLLISION) RESULT(X_ELSASSER)
-!==============================================================================
-! FUNCTION COMPUTES THE EQUIVALENT LINE WIDTH OVER THE AVERAGE LINE SPACING
-! USING THE ELSASSER STATISTICAL MODEL
-! 
-! VARIABLES IN:
-! XSTAR       : OPTICAL PATHLENGTH * LINE STRENGTH
-! A_COLLISION : FINE STRUCTURE PARAMETER
-!
-! RETURNS X_ELSASSER
-!
-IMPLICIT NONE
+   IF (path_length_cm(i_path)<=TWO_EPSILON_EB) CYCLE
 
-REAL(EB), INTENT(IN) :: XSTAR
-REAL(EB), INTENT(IN) :: A_COLLISION
-
-REAL(EB)  :: X_ELSASSER
-
-! LOCAL VARIABLES
-
-REAL(EB) :: SPECTRAL_ABSORPTIVITY
-REAL(EB) :: XX
-REAL(EB) :: ENN
-REAL(EB) :: ARG 
-REAL(EB) :: ARGNEW
-REAL(EB) :: X_COLLISION
-
-INTEGER :: MM
-INTEGER :: N
-! THE FOLLOWING LOOP COMPUTES THE OPTICAL DEPTH, X_COLLISION, FOR METHANE USING 
-! THE GODSON EQUATION AND AN APPROXIMATION TO THE LADENBERG-REICHE
-! FUNCTION AS RECOMMENDED BY BROSMER AND TIEN (JQSRT 33,P 521), EQ. 2, PAGE 523 
-! THIS ASSUMES THE ELSASSER MODEL
-! THE ERROR FUNCTION IS FOUND FROM ITS SERIES EXPANSION.
-! 
-
-X_COLLISION = SQRT(4.0_EB*A_COLLISION)*XSTAR/SQRT(16.0_EB/PI*A_COLLISION+XSTAR)
-
-IF (XSTAR<1.0E-10_EB) THEN ! WEAK LINE LIMIT
-   X_ELSASSER = X_COLLISION
-ELSE
-    SPECTRAL_ABSORPTIVITY = X_COLLISION
-    XX  = .5_EB*SQRTPI*X_COLLISION
-
-    IF(XX<=3._EB) THEN
-        ENN = 1._EB
-        DO N = 1,30
-            ENN = ENN*REAL(N,EB)  ! ENN = N!
-            MM  = 2*N+1
-            ARG = 1.128379_EB*(-1._EB)**N*((.88622693_EB*X_COLLISION)**MM)/(REAL(MM,EB)*ENN)
-! THIS CORRESPONDS TO ERR(SQRT(PI)/2*X_COLLISION) = ERR(XX)
-            ARGNEW=ARG+SPECTRAL_ABSORPTIVITY
-! IF(ABS(ARG/ARGNEW)<.000001)N=30
-            SPECTRAL_ABSORPTIVITY=ARGNEW
-        ENDDO
-
-    ELSE
-        SPECTRAL_ABSORPTIVITY=1._EB-DEXP(-XX**2)/(SQRTPI*XX)
-    ENDIF
-
-    IF (SPECTRAL_ABSORPTIVITY>=1._EB) SPECTRAL_ABSORPTIVITY=.9999999_EB
-! GET METHANE OPTICAL DEPTH
-! BROSMER AND TIEN ASSUME SPECTRAL_ABSORPTIVITY = ERF(0.5*SQRTPI*X_STAR)
- 
-    X_ELSASSER=-DLOG(1.0_EB-SPECTRAL_ABSORPTIVITY)
-ENDIF
-
-RETURN
 !------------------------------------------------------------------------------
-END FUNCTION ELSASSER
+! compute species optical thickness and collision broadening
 
-!==============================================================================
-SUBROUTINE CO2(OMEGA,TEMP,GC1,SDWEAK,GDINV,GDDINV,I_MODEL)
-!==============================================================================
-! I_MODEL: (INTEGER) MODEL USED FOR SNB FITTING: 1: GOODY, 2 MALKMUS, 3 ELSASSER
+   optical_thickness(:,i_path) = azotemp(i_path)*path_length_cm(i_path)*               &
+                                                partial_pressures_atm(:,i_path)
 
-INTEGER I,J,K,L
-REAL(EB) OMEGA,TEMP,GC1,SDWEAK,GDINV,GDDINV,AA,BB,CC,QQ,EE,FF,GG, &
-         SMINUS,SPLUS,SDSTRG,GD,OM1,OM2,OM3,T0,Q2,BE,COM1, &
-         COM2,COM3,X13,X23,X33,XBAR,OM12,ALPHA,OMPRIM,V3,GAM, &
-         OMVV3,DELTA,V,OMVBAR,F1,F2,UNFLO1,UNFLO2,UNFLO3,TEST, &
-         VBAR1,OMA,OMB,TTEMP,TT,T1,TW,WW,TEMP1,TEMP2,TEMP3,WM, &
-         DINV,A,B,D,G,W1,DINV1,DINV2,DINV3,Q2OT,T0OT,Q2OT0
+   gc(:,i_path)                = collision_broadening( partial_pressures_atm(:,i_path), &
+                                                      total_pressure_atm(i_path),      &
+                                                      azotemp(i_path)                )
 
-INTEGER, INTENT(OUT) :: I_MODEL
+ENDDO init_path
 
-I_MODEL = I_MODEL_CO2 
+! compute total length of the line of sight
+total_length_cm = SUM(path_length_cm)
 
-IF(OMEGA>5725._EB) THEN
-   SDWEAK = 0._EB
-   GDINV  = 1._EB
-   GDDINV = 1._EB
-ELSE
-   WM = 44._EB
-! COMPUTE DOPPLER BROADENING HALF-WIDTHS SP-3080 EQ: 5-35
-   GD = 5.94E-6_EB*OMEGA*SQRT(TEMP/(273._EB*WM))
+! compute length weighted average temp4 and avg_temp along line of sight
 
-   IF(OMEGA>4550._EB) THEN
-! CONTRIBUTION TO 2.0 MICRON BAND FROM:
-! (000)-(041)
-! (000)-(121),
-! (000)-(201) TRANSITIONS.
+temp4    = SUM(temp_gas**4*path_length_cm)/total_length_cm
+avg_temp = SUM(temp_gas*path_length_cm)/total_length_cm
 
-      OM1 = 1354.91_EB ! (100)
-      OM2 = 673.0_EB   ! (010)
-      OM3 = 2396.49_EB ! (001)
+!------------------------------------------------------------------------------
+! loop spectrum computes each spectral contribution,
+! loop over each wave number intervals
+! this loop can be parallized with OPENmp
 
-! BAND CENTER 
+!!                   below are OPENmp instructions
+!$OMP PARALLEL PRIVATE (i_wavenumb, i_path) &
+!$ firstPRIVATE(curtis_xstar,curtis_acollision,curtis_aDOppler,optical_depth,xtot)
 
-      BCNT(1) = 4860.5_EB ! (000)-(041)
-      BCNT(2) = 4983.5_EB ! (000)-(121)
-      BCNT(3) = 5109.0_EB ! (000)-(201)
+!$OMP DO
+lspectrum: DO i_wavenumb = 1, nom
+   curtis_xstar      = 0.0_EB
+   curtis_aDOppler   = 0.0_EB
+   optical_depth     = 0.0_EB
+   curtis_acollision = 0.0_EB
+!------------------------------------------------------------------------------
+! loop over the dIFferent segments of the line of sight
 
-      T0   = 300._EB
-      Q2   = 1.4388_EB
-      T0OT = T0/TEMP
-      Q2OT = -Q2/TEMP
+   path: DO i_path = 1,npt  ! loop over elements of the path length. 
+! evaluate the combined spectral transmissivity and radiance
+! arguments out: x (vector)
+      CALL species_optical_depth(path_length_cm(i_path), partial_pressures_atm(:,i_path),   & 
+                                 total_pressure_atm(i_path), gc(:,i_path), temp_gas(i_path),&
+                                 wave_number(i_wavenumb), optical_thickness(:,i_path),      &
+                                 curtis_xstar(:,i_path-1:i_path),                           &
+                                 curtis_acollision(:,i_path-1:i_path),                      &
+                                 curtis_aDOppler(:,i_path-1:i_path),                        &
+                                 optical_depth(:,i_path-1:i_path))
+      xtot = SUM(optical_depth(:,i_path))   
+      ttau(i_path,i_wavenumb) = EXP(-xtot)
+   ENDDO path
 
-      BE   = 0.391635_EB ! ROTATIONAL CONSTANT
-
-! COMPUTE THE ASSOCIATED TRANSITION WAVENUMBERS
-
-      COM1 = 4._EB*OM2+OM3      ! (000)-(041)
-      COM2 = OM1+2._EB*OM2+OM3  ! (000)-(121)
-      COM3 = 2._EB*OM1+OM3      ! (000)-(201)
-
-
-! COMPUTE THE INTEGRATED INTENSITY OF THE BAND
-! 0.272: INTEGRATED INTENSITY (IN CM-2-ATM-1) OF BAND BCNT(1) = 4860.5_EB ((041)-(000)) AT T=300K
-! 1.01 : INTEGRATED INTENSITY (IN CM-2-ATM-1) OF BAND BCNT(2) = 4983.5_EB ((121)-(000)) AT T=300K
-! 0.426: INTEGRATED INTENSITY (IN CM-2-ATM-1) OF BAND BCNT(3) = 5109  _EB ((201)-(000)) AT T=300K
-! VALUES FROM PENNER AND VARANASI JQSRT VOL 4 pp 799-806
-
-
-      ATOT(1) = 0.272_EB*T0OT*(1._EB-EXP(Q2OT*COM1))/(1._EB-EXP(Q2OT*OM2))**4/(1._EB-EXP(Q2OT*OM3))
-!  NOTE: [(1._EB-EXP(Q2OT*OM2))**4*(1._EB-EXP(Q2OT*OM3))] IS THE ROVIBRATIONAL PARTITION FUNCTION
-!  EQ 2 IN PENNER AND VARANASI JQSRT VOL 4 pp 799-806
-
-      ATOT(2) = 1.01_EB*T0OT*(1._EB-EXP(Q2OT*COM2))/(1._EB-EXP(Q2OT*OM1))/(1._EB-EXP(Q2OT*OM2))**2/ &
-              (1._EB-EXP(Q2OT*OM3))
-
-      ATOT(3) = 0.426_EB*T0OT*(1._EB-EXP(Q2OT*COM3))/(1._EB-EXP(Q2OT*OM1))**2/(1._EB-EXP(Q2OT*OM3))
-
-      SDWEAK  = 0.0_EB
-
-! COMPUTE THE LINE STRENGTH USING EQ 11-44 FROM PENNER IN QUANTITATIVE MOLECULAR SPECTROMETRY, 1955
-! SDWEAK = SUM(ATOT*PROPABILITY) 
-! JUST OVERLAPPING SPECTRAL LINE
-      DO K=1,3
-         SDWEAK = SDWEAK+ATOT(K)*(-Q2OT)/(4._EB*BE)*ABS(OMEGA-BCNT(K))*EXP(Q2OT/(4._EB*BE)*(OMEGA-BCNT(K))**2)
-      ENDDO
-
-      DINV   = 1._EB/(4._EB*BE)
-      GDINV  = GC1*DINV
-      GDDINV = GD*DINV
-!***EXPRESS S/D AT STP, AS IS IN NASA SP-3080
-      SDWEAK=SDWEAK*TEMP/273._EB
-   ELSEIF((OMEGA<=4550._EB).AND.(OMEGA>3800._EB)) THEN
-      SDWEAK=0._EB
-      GDINV=1._EB
-      GDDINV=1._EB
-   ELSEIF((OMEGA<=3800._EB).AND.(OMEGA>3050._EB)) THEN
-      B=.391635_EB
-      A=.0030875_EB
-      X13=-19.37_EB
-      X23=-12.53_EB
-      X33=-12.63_EB
-      OM1=1354.91_EB
-      OM2=673._EB
-      OM3=2396.49_EB
-      T0=300._EB
-      T0OT = T0/TEMP
-      Q2=1.4388_EB
-      Q2OT = -Q2/TEMP
-      Q2OT0 = -Q2/T0
-      XBAR=.5_EB*(.5_EB*X13+X23)
-      OM12=.5_EB*(.5_EB*OM1+OM2)
-      SDWEAK=0._EB
-      SDSTRG=0._EB
-      IF(OMEGA<=2395._EB) THEN
-         ALPHA=2700._EB
-         OMPRIM=OM3
-         AA=ALPHA*B*Q2/(A*(1._EB-EXP(OM3*Q2OT0))*(1._EB-EXP(OM12*Q2OT0))**3*(1._EB+EXP(OM12*Q2OT0))*(1._EB-EXP(OMPRIM*Q2OT0)))
-         BB=(1._EB-EXP(Q2OT*OMEGA))*(1._EB-EXP(Q2OT*OM3))*(1._EB-EXP(OM12*Q2OT))**3*(1._EB+EXP(OM12*Q2OT)) &
-           *(1._EB-EXP(Q2OT*OMPRIM))
-         CC=AA*BB*OMEGA*T0/TEMP**2
-         L202: DO J=1,20
-            V=FLOAT(J-1)
-            IF(J/2*2==J)G=(V+1._EB)*(V+3._EB)/4._EB
-            IF(J/2*2/=J)G=(V+2._EB)*(V+2._EB)/4._EB
-            L201: DO K=1,10
-               V3=FLOAT(K-1)
-               QQ=(V3+1._EB)*G*EXP(-(V3*OM3+V*OM12)*Q2OT)
-               GAM=B-A*(V3+1._EB)
-               OMVV3=OM3+.5_EB*X13+X23+2._EB*X33+XBAR*V+2._EB*X33*V3
-               DELTA=A*(OMEGA-OMVV3)
-               IF(GAM*GAM<=DELTA) CYCLE L202
-               D=2._EB*SQRT(GAM*GAM-DELTA)
-               OMVBAR=OMVV3*(1._EB-EXP(-OMVV3*Q2OT))
-               F1=GAM-D/2
-               F2=GAM+D/2._EB
-               EE=Q2*GAM/(A*A*TEMP)
-               UNFLO1=EE*DELTA*(1._EB+.5_EB*A/GAM)
-               IF(UNFLO1<=-78.) CYCLE L202
-               UNFLO2=EE*2._EB*GAM*F1
-               IF(UNFLO2>=78.) CYCLE L202
-               FF=EXP(EE*DELTA*(1._EB+.5_EB*A/GAM))
-               SMINUS=CC*QQ/OMVBAR*ABS(F1)*FF*EXP(-EE*2._EB*GAM*F1)
-               UNFLO3=EE*2._EB*GAM*F2
-               IF(UNFLO3>=78.) THEN
-                  SPLUS=0.
-               ELSE
-                  SPLUS=CC*QQ/OMVBAR*ABS(F2)*FF*EXP(-EE*2._EB*GAM*F2)
-               ENDIF
-               GG=SDWEAK
-               SDWEAK=(SMINUS+SPLUS)/D+SDWEAK
-               TEST=(SDWEAK-GG)/SDWEAK
-               IF(TEST<.0001) CYCLE L202
-               SDSTRG=SQRT(.5_EB*G)*(SQRT(SMINUS)+SQRT(SPLUS))/D+SDSTRG
-            ENDDO L201
-         ENDDO L202
-         IF(SDWEAK<=TWO_EPSILON_EB) THEN
-            SDWEAK=0._EB
-            GDINV=1._EB
-            GDDINV=1._EB
-         ELSE
-            DINV=SDSTRG*SDSTRG/SDWEAK
-            GDINV=GC1*DINV
-            GDDINV=GD*DINV
-!***  EXPRESS S/D AT STP, AS IS K IN NASA SP-3080
-            SDWEAK=SDWEAK*TEMP/273.
-         ENDIF
-      ELSE
-!CALCULATE ABSORPTION COEF. AND LINE SPACING PARAMETER FOR 2.7 MICRON BAND
-         L=1
-!CONTRIBUTION TO 2.7 MICRON BAND FROM (000)-(021) AND (010)-(031) TRANS.
-         ALPHA=28.5_EB
-         OMPRIM=2._EB*OM2+OM3
-         L120: DO
-         AA=ALPHA*B*Q2/(A*(1._EB-EXP(OM3*Q2OT0))*(1._EB-EXP(OM12*Q2OT0))**3*(1._EB+EXP(OM12*Q2OT0))*(1._EB-EXP(OMPRIM*Q2OT0)))
-         BB=(1._EB-EXP(Q2OT*OMEGA))*(1._EB-EXP(Q2OT*OM3))* (1._EB-EXP(OM12*Q2OT))**3*(1._EB+EXP(OM12*Q2OT)) &
-           *(1._EB-EXP(Q2OT*OMPRIM))
-         CC=AA*BB*OMEGA*T0/TEMP**2
-         L102: DO J=1,20
-         V=FLOAT(J-1)
-         IF(J/2*2==J)G=(V+1._EB)*(V+3._EB)/4._EB
-         IF(J/2*2/=J)G=(V+2._EB)*(V+2._EB)/4._EB
-         VBAR1=-1._EB+(V+3._EB)*(V+4._EB)/(V+2.)/6._EB
-         IF(J/2*2==J)VBAR1=-1._EB+(V+5._EB)/6._EB
-         L101: DO K=1,10
-         V3=FLOAT(K-1)
-         QQ=(V3+1)*G*EXP((V3*OM3+V*OM12)*Q2OT)*(VBAR1+1._EB)
-         GAM=B-A*(V3+1._EB)
-         IF(L==2) THEN
-            OMVV3=3728._EB-5._EB*V-47._EB*V3
-            IF(V<=TWO_EPSILON_EB) OMVV3=3715._EB-47._EB*V3
-         ELSE
-            OMVV3=3598._EB-18._EB*V-47._EB*V3
-            IF(V<=TWO_EPSILON_EB) OMVV3=3613._EB-47._EB*V3
-         ENDIF
-         DELTA=A*(OMEGA-OMVV3)
-         IF(GAM*GAM<=DELTA) CYCLE L102
-         D=2._EB*SQRT(GAM*GAM-DELTA)
-         OMVBAR=OMVV3*(1._EB-EXP(OMVV3*Q2OT))
-         F1=GAM-D/2._EB
-         F2=GAM+D/2._EB
-         EE=Q2*GAM/(A*A*TEMP)
-         UNFLO1=EE*DELTA*(1._EB+.5_EB*A/GAM)
-         IF(UNFLO1<=-78._EB) CYCLE L102
-         UNFLO2=EE*2._EB*GAM*F1
-         IF(UNFLO2>=78._EB) CYCLE L102
-         FF=EXP(EE*DELTA*(1._EB+.5_EB*A/GAM))
-         SMINUS=CC*QQ/OMVBAR*ABS(F1)*FF*EXP(-EE*2._EB*GAM*F1)
-         UNFLO3=EE*2._EB*GAM*F2
-         IF(UNFLO3>=78._EB) THEN
-            SPLUS=0._EB
-         ELSE
-            SPLUS=CC*QQ/OMVBAR*ABS(F2)*FF*EXP(-EE*2._EB*GAM*F2)
-         ENDIF
-         GG=SDWEAK
-         SDWEAK=(SMINUS+SPLUS)/D+SDWEAK
-         TEST=(SDWEAK-GG)/SDWEAK
-         IF(TEST<.0001_EB) CYCLE L102
-         SDSTRG=SQRT(.5_EB*G)*(SQRT(SMINUS)+SQRT(SPLUS))/D+SDSTRG
-         ENDDO L101
-         ENDDO L102
-         IF(L==2) EXIT L120
-!CONTRIBUTION TO 2.7 MICRON BAND FROM (000)-(101) AND (010)-(111) TRANS.
-         ALPHA=42.3_EB
-         OMPRIM=OM1+OM3
-         L=2
-      ENDDO L120
-!CALCULATE ABSORPTION COEF AND LINE SPACING PARAMETER FOR 4.3 MICRON BAND
-      IF(SDWEAK<=TWO_EPSILON_EB) THEN
-         SDWEAK=0._EB
-         GDINV=1._EB
-         GDDINV=1._EB
-      ELSE
-         DINV=SDSTRG*SDSTRG/SDWEAK
-         GDINV=GC1*DINV
-         GDDINV=GD*DINV
-!***EXPRESS S/D AT STP, AS IS K IN NASA SP-3080
-         SDWEAK=SDWEAK*TEMP/273.
-      ENDIF
-   ENDIF
-ELSEIF((OMEGA<=3050._EB).AND.(OMEGA>2474.)) THEN
-   SDWEAK=0._EB
-   GDINV=1._EB
-   GDDINV=1._EB
-ELSEIF((OMEGA<=2474.).AND.(OMEGA>1975.)) THEN
-   B=.391635_EB
-   A=.0030875_EB
-   X13=-19.37_EB
-   X23=-12.53_EB
-   X33=-12.63_EB
-   OM1=1354.91_EB
-   OM2=673._EB
-   OM3=2396.49_EB
-   T0=300._EB
-   Q2=1.4388_EB
-   XBAR=.5_EB*(.5_EB*X13+X23)
-   OM12=.5_EB*(.5_EB*OM1+OM2)
-   SDWEAK=0._EB
-   SDSTRG=0._EB
-   IF(OMEGA<=2395._EB) THEN
-         ALPHA=2700._EB
-         OMPRIM=OM3
-         AA=ALPHA*B*Q2/(A*(1._EB-EXP(-OM3*Q2/T0))*(1._EB-EXP(-OM12*Q2 /T0))**3*(1._EB+EXP(-OM12*Q2/T0))*(1._EB-EXP(-OMPRIM*Q2/T0)))
-         BB=(1._EB-EXP(-Q2*OMEGA/TEMP))*(1._EB-EXP(-Q2*OM3/TEMP))*(1._EB-EXP(-OM12*Q2/TEMP))**3*(1._EB+EXP(-OM12*Q2/TEMP)) &
-           *(1._EB-EXP(-Q2*OMPRIM/TEMP))
-         CC=AA*BB*OMEGA/TEMP*T0/TEMP
-         L202A: DO J=1,20
-            V=FLOAT(J-1)
-            IF(J/2*2==J)G=(V+1._EB)*(V+3._EB)/4._EB
-            IF(J/2*2/=J)G=(V+2._EB)*(V+2._EB)/4._EB
-            L201A: DO K=1,10
-               V3=FLOAT(K-1)
-               QQ=(V3+1._EB)*G*EXP(-(V3*OM3+V*OM12)*Q2/TEMP)
-               GAM=B-A*(V3+1._EB)
-               OMVV3=OM3+.5_EB*X13+X23+2._EB*X33+XBAR*V+2._EB*X33*V3
-               DELTA=A*(OMEGA-OMVV3)
-               IF(GAM*GAM<=DELTA) CYCLE L202A
-               D=2._EB*SQRT(GAM*GAM-DELTA)
-               OMVBAR=OMVV3*(1._EB-EXP(-OMVV3*Q2/TEMP))
-               F1=GAM-D/2._EB
-               F2=GAM+D/2._EB
-               EE=Q2*GAM/(A*A*TEMP)
-               UNFLO1=EE*DELTA*(1._EB+.5_EB*A/GAM)
-               IF(UNFLO1<=-78.) CYCLE L202A
-               UNFLO2=EE*2._EB*GAM*F1
-               IF(UNFLO2>=78.) CYCLE L202A
-               FF=EXP(EE*DELTA*(1._EB+.5_EB*A/GAM))
-               SMINUS=CC*QQ/OMVBAR*ABS(F1)*FF*EXP(-EE*2._EB*GAM*F1)
-               UNFLO3=EE*2._EB*GAM*F2
-               IF(UNFLO3>=78._EB) THEN
-                  SPLUS=0._EB
-                  ELSE
-                  SPLUS=CC*QQ/OMVBAR*ABS(F2)*FF*EXP(-EE*2._EB*GAM*F2)
-                  ENDIF
-               GG=SDWEAK
-               SDWEAK=(SMINUS+SPLUS)/D+SDWEAK
-               TEST=(SDWEAK-GG)/SDWEAK
-               IF(TEST<.0001_EB) CYCLE L202A
-               SDSTRG=SQRT(0.5_EB*G)*(SQRT(SMINUS)+SQRT(SPLUS))/D+SDSTRG
-            ENDDO L201A
-         ENDDO L202A
-         IF(SDWEAK<=TWO_EPSILON_EB) THEN
-            SDWEAK=0._EB
-            GDINV=1._EB
-            GDDINV=1._EB
-         ELSE
-            DINV=SDSTRG*SDSTRG/SDWEAK
-            GDINV=GC1*DINV
-            GDDINV=GD*DINV
-!***  EXPRESS S/D AT STP, AS IS K IN NASA SP-3080
-            SDWEAK=SDWEAK*TEMP/273._EB
-         ENDIF
-      ELSE
-!CALCULATE ABSORPTION COEF. AND LINE SPACING PARAMETER FOR 2.7 MICRON BAND
-         L=1
-!CONTRIBUTION TO 2.7 MICRON BAND FROM (000)-(021) AND (010)-(031) TRANS.
-         ALPHA=28.5_EB
-         OMPRIM=2._EB*OM2+OM3
-         L120A: DO
-         AA=ALPHA*B*Q2/(A*(1._EB-EXP(-OM3*Q2/T0))*(1._EB-EXP(-OM12*Q2 /T0))**3*(1._EB+EXP(-OM12*Q2/T0))*(1._EB-EXP(-OMPRIM*Q2/T0)))
-         BB=(1._EB-EXP(-Q2*OMEGA/TEMP))*(1._EB-EXP(-Q2*OM3/TEMP))* (1._EB-EXP(-OM12*Q2/TEMP))**3*(1._EB+EXP(-OM12*Q2/TEMP)) &
-           *(1._EB-EXP(-Q2*OMPRIM/TEMP))
-         CC=AA*BB*OMEGA/TEMP*T0/TEMP
-         L102A: DO J=1,20
-            V=FLOAT(J-1)
-            IF(J/2*2==J)G=(V+1._EB)*(V+3._EB)/4._EB
-            IF(J/2*2/=J)G=(V+2._EB)*(V+2._EB)/4._EB
-            VBAR1=-1._EB+(V+3._EB)*(V+4._EB)/(V+2._EB)/6._EB
-            IF(J/2*2==J)VBAR1=-1._EB+(V+5._EB)/6._EB
-            L101A: DO K=1,10
-               V3=FLOAT(K-1)
-               QQ=(V3+1)*G*EXP(-(V3*OM3+V*OM12)*Q2/TEMP)*(VBAR1+1._EB)
-               GAM=B-A*(V3+1._EB)
-               IF(L==2) THEN
-                  OMVV3=3728._EB-5._EB*V-47._EB*V3
-                  IF(V<=TWO_EPSILON_EB)OMVV3=3715._EB-47._EB*V3
-                  ELSE
-                  OMVV3=3598._EB-18._EB*V-47._EB*V3
-                  IF(V<=TWO_EPSILON_EB)OMVV3=3613._EB-47._EB*V3
-               ENDIF
-               DELTA=A*(OMEGA-OMVV3)
-               IF(GAM*GAM<=DELTA) CYCLE L102A
-               D=2._EB*SQRT(GAM*GAM-DELTA)
-               OMVBAR=OMVV3*(1._EB-EXP(-OMVV3*Q2/TEMP))
-               F1=GAM-D/2._EB
-               F2=GAM+D/2._EB
-               EE=Q2*GAM/(A*A*TEMP)
-               UNFLO1=EE*DELTA*(1._EB+.5_EB*A/GAM)
-               IF(UNFLO1<=-78._EB) CYCLE L102A
-               UNFLO2=EE*2._EB*GAM*F1
-               IF(UNFLO2>=78._EB) CYCLE L102A
-               FF=EXP(EE*DELTA*(1._EB+.5_EB*A/GAM))
-               SMINUS=CC*QQ/OMVBAR*ABS(F1)*FF*EXP(-EE*2._EB*GAM*F1)
-               UNFLO3=EE*2._EB*GAM*F2
-               IF(UNFLO3>=78._EB) THEN
-                  SPLUS=0._EB
-                  ELSE
-                  SPLUS=CC*QQ/OMVBAR*ABS(F2)*FF*EXP(-EE*2._EB*GAM*F2)
-               ENDIF
-               GG=SDWEAK
-               SDWEAK=(SMINUS+SPLUS)/D+SDWEAK
-               TEST=(SDWEAK-GG)/SDWEAK
-               IF(TEST<.0001) CYCLE L102A
-               SDSTRG=SQRT(.5_EB*G)*(SQRT(SMINUS)+SQRT(SPLUS))/D+SDSTRG
-            ENDDO L101A
-         ENDDO L102A
-         IF(L==2) EXIT L120A
-!CONTRIBUTION TO 2.7 MICRON BAND FROM (000)-(101) AND (010)-(111) TRANS.
-         ALPHA=42.3_EB
-         OMPRIM=OM1+OM3
-         L=2
-      ENDDO L120A
-!CALCULATE ABSORPTION COEF AND LINE SPACING PARAMETER FOR 4.3 MICRON BAND
-      IF(SDWEAK<=TWO_EPSILON_EB) THEN
-         SDWEAK=0._EB
-         GDINV=1._EB
-         GDDINV=1._EB
-         ELSE
-         DINV=SDSTRG*SDSTRG/SDWEAK
-         GDINV=GC1*DINV
-         GDDINV=GD*DINV
-!***EXPRESS S/D AT STP, AS IS K IN NASA SP-3080
-         SDWEAK=SDWEAK*TEMP/273._EB
-         ENDIF
-      ENDIF
-   ELSEIF((OMEGA<=1975._EB).AND.(OMEGA>1100._EB)) THEN
-      SDWEAK=0._EB
-      GDINV=1._EB
-      GDDINV=1._EB
-   ELSEIF((OMEGA<=1100._EB).AND.(OMEGA>880._EB)) THEN
-!CONTRIBUTION TO 10.0 MICRON BAND FROM (100)-(001) AND (020)-(001) TRANS.
-      OM1=1354.91_EB
-      OM2=673._EB
-      OM3=2396.49_EB
-      Q2=1.4388_EB
-      BCNT(1)=960.8_EB
-      BCNT(2)=1063.6_EB
-      OMA=OM3
-      OMB=(OM1+2._EB*OM2)/2._EB
-      T0=300._EB
-      ATOT(1)=0.0219_EB
-      ATOT(2)=0.0532_EB
-      BE=0.391635_EB
-      DO K=1,2
-         ATOT(K)=T0/TEMP*ATOT(K)*EXP(Q2*OMB*(1._EB/T0-1._EB/TEMP)) *(1._EB-EXP(-Q2*(OMA-OMB)/TEMP))/(1._EB-EXP(-Q2*OMA/TEMP)) &
-                   /(1._EB-EXP(-OMB*Q2/TEMP))
-      ENDDO
-      SDWEAK=0._EB
-      DO I=1,2
-         SDWEAK=SDWEAK+ATOT(I)*Q2/(4._EB*BE*TEMP)*ABS(OMEGA-BCNT(I))  *EXP(-Q2/(4._EB*BE*TEMP)*(OMEGA-BCNT(I))**2)
-      ENDDO
-      DINV=1._EB/4._EB/BE
-      GDINV=GC1*DINV
-      GDDINV=GD*DINV
-!***EXPRESS S/D AT STP, AS IS IN NASA SP-3080
-      SDWEAK=SDWEAK*TEMP/273.
-   ELSEIF((OMEGA<=880._EB).AND.(OMEGA>500._EB))  THEN
-!CONTRIBUTION TO 15.0 MICRON BAND FROM (000)-(010) TRANS.
-      TTEMP=TEMP
-      J=(OMEGA-495._EB)/5._EB
-      W1=495._EB+5._EB*REAL(J,EB)
-      WW=(OMEGA-W1)/5
-      IF(TEMP>=2400._EB) TEMP = 2399.99_EB
-      IF(TEMP < 300._EB) TEMP =  300.00_EB
-      I = TEMP/300._EB
-      SELECT CASE(I)
-         CASE(3)
-            I=2
-            TT=(TEMP-600._EB)/600._EB
-         CASE(6:7) 
-            I=5
-            TT=(TEMP-1800._EB)/600._EB
-         CASE DEFAULT
-            T1=REAL(I,EB)*300._EB
-            TT=(TEMP-T1)/300._EB
-            IF (I>=4) I=I-1     
-      END SELECT
-      TW=TT*WW
-      SDWEAK=SD15(I,J)*(1._EB-TT-WW+TW)+SD15(I+1,J)*(TT-TW)  +SD15(I,J+1)*(WW-TW)+SD15(I+1,J+1)*TW
-      IF(SDWEAK<=TWO_EPSILON_EB) THEN
-         SDWEAK=0._EB
-         GDINV=1._EB
-         GDDINV=1._EB
-         ELSE
-!CALCULATE LINE SPACING PARAMETER FOR 15.0 MICRON BAND
-         DINV1=1.2_EB
-         DINV2=8.0_EB
-         DINV3=30.0_EB
-         TEMP1=300.0_EB
-         TEMP2=550.0_EB
-         TEMP3=830.0_EB
-         DINV=DINV1*(TEMP-TEMP2)*(TEMP-TEMP3)/(TEMP1-TEMP2)  /(TEMP1-TEMP3)+DINV2*(TEMP-TEMP1)*(TEMP-TEMP3)&
-                  /(TEMP2-TEMP1)/(TEMP2-TEMP3)+DINV3*(TEMP-TEMP1)  *(TEMP-TEMP2)/(TEMP3-TEMP1)/(TEMP3-TEMP2)
-         GDINV=GC1*DINV
-         GDDINV=GD*DINV
-         ENDIF
-         TEMP = TTEMP  ! Line added by Jason Floyd, Aug 30, 2002
+   ! ab : weakline limits optical depth per unit length, units in cm-1
+   IF (total_length_cm.gt.0.0_EB) THEN
+      ab(i_wavenumb) = SUM(curtis_xstar(:,npt))/total_length_cm
    ELSE
-      SDWEAK=0._EB
-      GDINV=1._EB
-      GDDINV=1._EB
-      ENDIF
-   ENDIF
-!------------------------------------------------------------------------------
-END SUBROUTINE CO2
-
-!==============================================================================
-SUBROUTINE H2O(OMEGA,TEMP,GC2,SDWEAK,GDINV,GDDINV,I_MODEL)
-!==============================================================================
-! I_MODEL: (INTEGER) MODEL USED FOR SNB FITTING: 1: GOODY, 2 MALKMUS, 3 ELSASSER
-
-INTEGER, INTENT(OUT) :: I_MODEL
-
-INTEGER I,J
-REAL(EB) OMEGA,TEMP,GC2,SDWEAK,GDINV,GDDINV,WM,W1,WW,T1,TT,TW, D,B,DINV,TTEMP,GD
-
-I_MODEL = I_MODEL_H2O
-
-IF (OMEGA>=9300..OR.OMEGA<50._EB) THEN
-   SDWEAK=0._EB
-   GDINV=1._EB
-   GDDINV=1._EB
-ELSE
-   WM   = 18._EB
-   GD   = 5.94E-6_EB*OMEGA*SQRT(TEMP/(273._EB*WM))
-   J    = (OMEGA-25._EB)/25._EB
-   TTEMP= TEMP
-
-   IF(TEMP>=2500._EB) TEMP = 2499.99_EB
-   IF(TEMP<300._EB)   TEMP = 300._EB
-
-   I = TEMP/500._EB +1
-
-   IF(I==2.AND.TEMP<600._EB) I=1
-
-   W1 = 25._EB+25._EB*FLOAT(J)
-   WW = (OMEGA-W1)/25._EB
-
-   IF(I>2) THEN
-      T1=FLOAT(I-1)*500._EB
-      TT=(TEMP-T1)/500._EB
-   ELSE
-      IF(I==1) TT=(TEMP-300._EB)/300._EB
-      IF(I==2) TT=(TEMP-600._EB)/400._EB
+      ab(i_wavenumb) = 0.0_EB
    ENDIF
 
-   TW     = TT*WW
-   SDWEAK = SD(I,J)*(1._EB-TT-WW+TW)+SD(I+1,J)*(TT-TW)+SD(I,J+1) *(WW-TW)+SD(I+1,J+1)*TW
-   D      = -2.294_EB+.3004E-02_EB*TEMP-.366E-06_EB*TEMP**2
-   B      = SIN(.0036_EB*OMEGA-8.043_EB)
-   DINV   = EXP(.7941_EB*B+D)
-!     DINV=EXP(0.00106*TEMP-1.21)
-   GDINV  = GC2*DINV
-   GDDINV = GD*DINV
-   TEMP   = TTEMP
-ENDIF
-!------------------------------------------------------------------------------
-END SUBROUTINE H2O
-
-
-!==============================================================================
-SUBROUTINE CO(OMEGA,TEMP,GC4,SDWEAK,GDINV,GDDINV,I_MODEL)
-!==============================================================================
-! I_MODEL: (INTEGER) MODEL USED FOR SNB FITTING: 1: GOODY, 2 MALKMUS, 3 ELSASSER
-
-INTEGER J
-REAL(EB) OMEGA,TEMP,GC4,SDWEAK,GDINV,GDDINV,AA,BB,CC,QQ,EE,FF,GG, &
-         SMINUS,SPLUS,SDSTRG,B,ALPHA,A,OME,WX,WY,OMPRIM,T0, &
-         Q2,WM,GD,V,GAM,OMV,DELTA,D,OMVBAR,F1,F2,TEST,DINV,Q2OT,TOAZ
-
-INTEGER, INTENT(OUT) :: I_MODEL
-
-I_MODEL = I_MODEL_CO
-
-IF(OMEGA<1600._EB .OR. OMEGA>2400._EB) THEN
-   SDWEAK = 0._EB
-   GDINV  = 1._EB
-   GDDINV = 1._EB
-ELSE
-   B     = 1.93139_EB
-   ALPHA = 260._EB
-   A     = .017485_EB
-   OME   = 2170.21_EB
-   WX    = 13.461_EB
-   WY    = .0308_EB
-   OMPRIM= OME-2._EB*WX+3.25_EB*WY
-
-   T0 = 300._EB
-   Q2 = 1.4388_EB
-
-   TOAZ = TEMP/273._EB
-   Q2OT = Q2/TEMP
-
-   WM     = 28._EB
-! DOPPLER BROADENING HALF-WIDTH
-   GD     = 5.94E-6_EB*OMEGA*SQRT(TOAZ/WM)
-   SDWEAK = 1.E-99_EB
-   SDSTRG = 1.E-99_EB
-
-   AA = ALPHA*B*Q2/(A*(1._EB-EXP(-OMPRIM*Q2/T0))**2)
-   BB = (1._EB-EXP(-OMEGA*Q2OT))*(1._EB-EXP(-OMPRIM*Q2OT))**2
-   CC = AA*BB*OMEGA*T0/TEMP**2
-
-   L101: DO J=1,20
-      V    = FLOAT(J-1)
-      QQ   = (V+1._EB)*EXP(-V*OME*Q2OT)
-      GAM  = B-A*(V+1._EB)
-      OMV  = OME-2._EB*(V+1._EB)*WX+(3._EB*(V+1._EB)*(V+1._EB)+.25_EB)*WY
-      DELTA= A*(OMEGA-OMV)
-
-      IF(GAM**2<=DELTA) EXIT L101
-
-      D      = 2._EB*SQRT(GAM*GAM-DELTA)
-      OMVBAR = OMV*(1._EB-EXP(-OMV*Q2OT))
-      F1     = GAM-0.5_EB*D
-      F2     = GAM+0.5_EB*D
-      EE     = Q2*GAM/(A*A*TEMP)
-      
-      FF     = EXP(EE*DELTA*(1._EB+.5_EB*A/GAM))
-      SMINUS = CC*QQ/OMVBAR*ABS(F1)*FF*EXP(-EE*2._EB*GAM*F1)
-      SPLUS  = CC*QQ/OMVBAR*ABS(F2)*FF*EXP(-EE*2._EB*GAM*F2)
-      GG     = SDWEAK
-      SDWEAK = (SMINUS+SPLUS)/D+SDWEAK
-      TEST   = (SDWEAK-GG)/SDWEAK
-      
-      IF(TEST<.0001_EB) EXIT L101
-
-      SDSTRG=(SQRT(SMINUS)+SQRT(SPLUS))/D+SDSTRG
-   ENDDO L101
-
-   DINV   = SDSTRG*SDSTRG/SDWEAK
-   GDINV  = GC4*DINV
-   GDDINV = GD*DINV
-!***EXPRESS S/D AT STP, AS IS K IN NASA SP-3080
-   SDWEAK = SDWEAK*TOAZ
-ENDIF
-!------------------------------------------------------------------------------
-END SUBROUTINE CO
-
-
-!==============================================================================
-SUBROUTINE POD(OMEGA,X_PARTICLE)
-!==============================================================================
-! POD CALCULATES PARTICLE OPTICAL DEPTH, X_PARTICLE, OF THE VOLUME FRACTION OF 
-! SOOT PARTICLES IN GAS CLOUD.  
-! RIN AND RIK ARE THE REAL AND IMAGINARY PARTS OF THE INDEX OF REFRACTION.
-! THE PARTICLES ARE ASSUMED TO BE IN THE RAYLEIGH LIMIT.
-! VARIABLES PASSED IN:
-
-REAL(EB), INTENT(IN) :: OMEGA
-
-! VARIBLES PASSED OUT: X_PARTICLE: PARTICLE OPTICAL DEPTH
-
-REAL(EB), INTENT(OUT) :: X_PARTICLE
-
-! LOCALS
-
-REAL(EB) ABCO,FF_FAC,FF,LAMBDA!,RIN,RIK
-
-LAMBDA=10000._EB/OMEGA
- 
-! ABSORPTION COEF. IS BASED UPON MEASUREMENTS OF WIDMANN AND MULHOLLAND
-
-IF (AL2O3) THEN
-   IF (RCT > 2570._EB) THEN
-      FF_FAC = 0.017_EB
-   ELSEIF (RCT < 500._EB) THEN
-      FF_FAC = 5.E-6_EB
-   ELSE
-      FF_FAC = 0.00073_EB     
-   ENDIF
-ELSE
-   FF_FAC = 8.9_EB
-ENDIF
-
-FF         = FF_FAC/LAMBDA
-ABCO       = FF*SVF*1.E6_EB
-X_PARTICLE = ABCO*DD
-!------------------------------------------------------------------------------
-END SUBROUTINE POD
-
-
-!==============================================================================
-SUBROUTINE CH4_OLD(OMEGA,TEMP,PCH4,PTOT,GC3,SDWEAK,GDINV,GDDINV,I_MODEL)
-!==============================================================================
-! I_MODEL: (INTEGER) MODEL USED FOR SNB FITTING: 1: GOODY, 2 MALKMUS, 3 ELSASSER
-INTEGER I,J
-REAL(EB) OMEGA,TEMP,PCH4,PTOT,GC3,SDWEAK,GDINV,GDDINV,BE,Q2, &
-      WM,GD,OM1,OM2,OM3,OM4,COM1,COM2,COM3,COM4,DINV,PE,W1,SDB, &
-      SDA,SDC,Q2OT,AZOT,TOAZ
-
-INTEGER, INTENT(OUT) :: I_MODEL
-
-I_MODEL = I_MODEL_CH4
-
-IF(OMEGA>5000._EB .OR. OMEGA<1125._EB) THEN
-
-   SDWEAK=0.0_EB
-   GDINV=1._EB
-   GDDINV=1._EB
-
-ELSE
-
-   BE=5.2412_EB
-   Q2=1.4388_EB
-   WM=16._EB
-   Q2OT = -Q2/TEMP
-   AZOT = 273._EB/TEMP
-   TOAZ = TEMP/273._EB
-
-   GD=5.94E-6_EB*OMEGA*SQRT(TOAZ)/4._EB
-
-   IF(OMEGA>=3400._EB) THEN
-
-! CONTRIBUTION TO 2.4 MICRON BAND FROM (0000)-(0110), (0000)-(0011),
-! (0000)-(1001), AND (0000)-(0102) TRANS.  THE INTEGRATED BAND INTENSITIES
-! OF VINCENT-GEISSE (ANNALES DE PHYSIQUE SER.12, V. 10, 1955) HAVE
-! BEEN MULTIPLIED BY A FACTOR OF 4 AND THE LINE SPACING IS THAT
-! OF V4 FROM GRAY AND PENNER (JQSRT V. 5, 1965).
-
-      OM1=2914.2_EB
-      OM2=1526.0_EB
-      OM3=3020.3_EB
-      OM4=1306.2_EB
-
-      BCNT(1)=4123.0_EB
-      BCNT(2)=4216.3_EB
-      BCNT(3)=4313.2_EB
-      BCNT(4)=4546.0_EB
-
-      COM1=OM2+2._EB*OM4
-      COM2=OM1+OM4
-      COM3=OM3+OM4
-      COM4=OM2+OM3
-
-      ATOT(1)=0.64_EB*AZOT*(1._EB-EXP(Q2OT*COM1))/((1._EB-EXP(Q2OT*OM2))*(1._EB-EXP(Q2OT*OM4))**2)
-      ATOT(2)=17.6_EB*AZOT*(1._EB-EXP(Q2OT*COM2))/((1._EB-EXP(Q2OT*OM1))*(1._EB-EXP(Q2OT*OM4)))
-      ATOT(3)=14.8_EB*AZOT*(1._EB-EXP(Q2OT*COM3))/((1._EB-EXP(Q2OT*OM3))*(1._EB-EXP(Q2OT*OM4)))
-      ATOT(4)=5.04_EB*AZOT*(1._EB-EXP(Q2OT*COM4))/((1._EB-EXP(Q2OT*OM2))*(1._EB-EXP(Q2OT*OM3)))
-
-      DINV=1._EB/5.74_EB
-      GDINV=GC3*DINV
-      GDDINV=GD*DINV
-      SDWEAK=0.0_EB
-
-      DO I=1,4
-         SDWEAK=SDWEAK+2._EB*(OMEGA-BCNT(I))**2*(-Q2OT*BE)*SQRT(-Q2OT*BE)*ATOT(I)/SQRTPI*DINV**3*EXP(Q2OT*BE*DINV**2 &
-         *(OMEGA-BCNT(I))**2)
-      ENDDO
-      SDWEAK=SDWEAK*TOAZ
-   ELSE
-      PE=PTOT+.3_EB*PCH4
-
-      IF(OMEGA>=2625._EB) THEN
-! CONTRIBUTION TO 3.3 MICRON BAND FROM (0000)-(0010) TRANS.
-! REFER TO BROSMER AND TIEN, JQSRT V. 33, P. 521
-
-         GDINV  = .00734_EB*PE*SQRT(AZOT)*EXP(1.02_EB*(TOAZ-1._EB))
-         GDDINV = GD/9.4_EB
-
-         J  = (OMEGA-2600._EB)/25._EB
-         W1 = 2600._EB+25._EB*FLOAT(J)
-         SDB= SD3(2,J)+(OMEGA-W1)/25._EB*(SD3(2,J+1)-SD3(2,J))
-
-         IF(TEMP>600._EB) THEN
-            SDC=SD3(3,J)+(OMEGA-W1)/25._EB*(SD3(3,J+1)-SD3(3,J))
-            SDWEAK=SDB+(TEMP-600._EB)/250._EB*(SDC-SDB)
-            IF(SDWEAK<0._EB)SDWEAK=0._EB
-         ELSE
-            SDA=SD3(1,J)+(OMEGA-W1)/25._EB*(SD3(1,J+1)-SD3(1,J))
-            SDWEAK=SDA+(TEMP-290._EB)/310._EB*(SDB-SDA)
-            IF(SDWEAK<0._EB)SDWEAK=0._EB
-         ENDIF
-
-      ELSEIF(OMEGA>1450._EB) THEN
-
-         SDWEAK=0.0_EB
-         GDINV=1._EB
-         GDDINV=1._EB
-
-      ELSE
-! CONTRIBUTION TO 7.7 MICRON BAND FROM (0000)-(0001) TRANS.
-! REFER TO BROSMER AND TIEN, JQSRT V. 33, P. 521.
-         GDINV  = .0243_EB*PE*(TOAZ)**.8_EB
-         GDDINV = GD/5.1_EB
-
-         J   = (OMEGA-1100._EB)/25._EB
-         W1  = 1100._EB+25._EB*FLOAT(J)
-         SDB = SD7(2,J)+(OMEGA-W1)/25._EB*(SD7(2,J+1)-SD7(2,J))
-
-         IF(TEMP>600._EB) THEN
-            SDC = SD7(3,J)+(OMEGA-W1)/25._EB*(SD7(3,J+1)-SD7(3,J))
-            SDWEAK = SDB+(TEMP-600._EB)/250._EB*(SDC-SDB)
-            IF(SDWEAK<0._EB)SDWEAK=0._EB
-         ELSE
-            SDA = SD7(1,J)+(OMEGA-W1)/25._EB*(SD7(1,J+1)-SD7(1,J))
-            SDWEAK = SDA+(TEMP-290._EB)/310._EB*(SDB-SDA)
-            IF(SDWEAK<0._EB)SDWEAK=0._EB
-         ENDIF
-      ENDIF
-   ENDIF
-ENDIF
-!------------------------------------------------------------------------------
-END SUBROUTINE CH4_OLD
-
-
-!==============================================================================
-SUBROUTINE CH4(OMEGA,TEMP,PCH4,PTOT,GC3,SDWEAK,GDINV,GDDINV,I_MODEL)
-!==============================================================================
-! COMPUTE METHANE OPTICAL PROPERTIES USING SINGLE LINE GROUP
-!
-! BAND #1: 1150 cm-1 - 1600 cm-1 
-! BAND #2: 2700 cm-1 - 3250 cm-1 
-! BAND #3: 3400 cm-1 - 5000 cm-1
-! 
-! VARIABLES PASSED IN
-! OMEGA: (REAL) WAVENUMBER IN CM-1
-! TEMP : (REAL) TEMPERATURE IN K
-! PCH4 : (REAL) PARTIAL PRESSURE OF METHANE IN ATM
-! PTOT : (REAL) TOTAL PRESSURE IN ATM
-! GC3  : (REAL) collisional broadening half-width at half heigh
-! 
-! VRAIBLES PASSED OUT
-! SDWEAK : (REAL) SPECTRAL ABSORPTION COEFFICIENT
-! GDINV  : (REAL) LINE WIDTH TO LINE SPACING RATIO
-! GDDINV : (REAL) LINE WIDTH TO LINE SPACING RATIO FOR DOPPLER BORADENING
-! I_MODEL: (INTEGER) MODEL USED FOR SNB FITTING: 1: GOODY, 2 MALKMUS, 3 ELSASSER
-! LOCALS
-! PRESSURE_EFFECTIVE : (REAL) EFFECTIVE PRESSURE, (FORMELY PE)
-! BE_CH4             : (REAL) ROTATIONAL CONSTANT FOR CH4 [CM^-1]
-! DINV_CH4           : INVERSE LINE SPACING [CM]
-
-REAL(EB), INTENT(IN)  :: OMEGA, TEMP, PCH4, PTOT, GC3
-REAL(EB), INTENT(OUT) :: SDWEAK, GDINV, GDDINV
-
-INTEGER, INTENT(OUT)  :: I_MODEL
-
-REAL(EB) :: GD, PRESSURE_EFFECTIVE, Q2OT, AZOT, TOAZ, FACT1
-REAL(EB) :: DINV_CH4
-
-REAL(EB), PARAMETER :: Q2     = 1.4388_EB ! Q2 = SPEED_OF_LIGHT*PLANCK_CNS/BOLTZMANN
-REAL(EB), PARAMETER :: WM_CH4 = 16.0425_EB
-
-!LINE SPACING D2_CH4=5.74 CM^-1 FOR THE V4 FUNDAMENTAL OF METHANE GRAY & PENNER,612
-!FOOTNOTE AT BOTTOM
-REAL(EB), PARAMETER :: BE_CH4 = 5.248_EB   ! ROTATIONAL CONSTANTS [CM^-1]
-
-REAL(EB), DIMENSION(4), PARAMETER :: &
-                 OM_CH4  = (/2914.2_EB, 1526.0_EB, 3020.3_EB, 1306.2_EB/),                                               &
-                 COM_CH4 = (/1526.0_EB+2._EB*1306.2_EB, 2914.2_EB+1306.2_EB, 3020.3_EB+1306.2_EB, 1526.0_EB+3020.3_EB/), &
-                 S2_CH4  = (/0.64_EB,17.6_EB,14.8_EB,5.04_EB/)
-
-INTEGER I
-
-I_MODEL = I_MODEL_CH4
-
-! INITIALIZE OUTPUT
-
-SDWEAK = 0.0_EB  !SPECTRAL ABSORPTION COEFFICIENT. 
-GDINV  = 1._EB   !LINE WIDTH TO LINE SPACING RATIO: FINE STRUCTURE PARAMETER
-GDDINV = 1._EB   !LINE WIDTH TO LINE SPACING RATIO FOR DOPPLER BORADENING FINE STRUCTURE PARAMETER
-
-! INITIALIZE SOME COEFFICIENTS
-Q2OT = -Q2/TEMP       
-AZOT = 273._EB/TEMP
-TOAZ = TEMP/273._EB
-
-! COMPUTE DOPLLER HALF-WIDTH. EQ 5-35
-GD   = 5.94E-6_EB*OMEGA*SQRT(TOAZ/WM_CH4) !DOPPLER HALF WIDTH [CM^-1]. NASA,222
-
-! COMPUTE EFFECTIVE PRESSURE. BROSMER & TIEN,524 EQ. 7 (SPECIFIC TO METHANE)
-PRESSURE_EFFECTIVE = PTOT+.3_EB*PCH4
-
-!------------------------------------------------------------------------------
-! COMPUTED PROPERTIES 2.4 MICRON BAND, BAND #3: 3400 cm-1 - 5000 cm-1
-IF((OM_BND_CH4(N_BAND_CH4,1)<=OMEGA).AND.(OMEGA<=OM_BND_CH4(N_BAND_CH4,2))) THEN
-
-! CONTRIBUTION OF THE V1+V4 COMBINAISON BAND (2.4 MICRON)
-! CONTRIBUTION TO 2.4 MICRON BAND FROM
-! (0000)-(0102)
-! (0000)-(1001)
-! (0000)-(0011)
-! (0000)-(0110) TRANSITIONS
-! THE INTEGRATED BAND INTENSITIES (S2_CH4)
-! OF VINCENT-GEISSE (ANNALES DE PHYSIQUE SER.12, V. 10, 1955) HAVE
-! BEEN MULTIPLIED BY A FACTOR OF 4 
-! THE LINE SPACING (1/DINV_CH4) IS THAT
-! OF V4 FROM GRAY AND PENNER (JQSRT V. 5, 1965).                 
-
-   ATOT(1) = S2_CH4(1)*AZOT*(1._EB-EXP(Q2OT*COM_CH4(1)))/((1._EB-EXP(Q2OT*OM_CH4(2)))*(1._EB-EXP(Q2OT*OM_CH4(4)))**2)
-   ATOT(2) = S2_CH4(2)*AZOT*(1._EB-EXP(Q2OT*COM_CH4(2)))/((1._EB-EXP(Q2OT*OM_CH4(1)))*(1._EB-EXP(Q2OT*OM_CH4(4))))
-   ATOT(3) = S2_CH4(3)*AZOT*(1._EB-EXP(Q2OT*COM_CH4(3)))/((1._EB-EXP(Q2OT*OM_CH4(3)))*(1._EB-EXP(Q2OT*OM_CH4(4))))
-   ATOT(4) = S2_CH4(4)*AZOT*(1._EB-EXP(Q2OT*COM_CH4(4)))/((1._EB-EXP(Q2OT*OM_CH4(2)))*(1._EB-EXP(Q2OT*OM_CH4(3))))
-
-   DINV_CH4 = 1._EB/5.74_EB
-   FACT1  = Q2OT*BE_CH4*DINV_CH4**2
-
-   DO I=1,4
-      SDWEAK = SDWEAK+(OMEGA-COM_CH4(I))**2*ATOT(I)*EXP(FACT1*(OMEGA-COM_CH4(I))**2)
+! integrate the incident radiance over the whole line of sight
+   incident_radiance(i_wavenumb) = 0.0_EB
+
+   DO i_path = 1, npt
+      ! reCALL: ttau(0,i_wavenumb) = 1.0_EB
+
+      incident_radiance(i_wavenumb) = incident_radiance(i_wavenumb) +                       &
+                                    (ttau(i_path-1,i_wavenumb)-ttau(i_path,i_wavenumb))*  &
+                                    planck_wn(temp_gas(i_path),wave_number(i_wavenumb))
    ENDDO
 
-! EQ 6 IN GRAY AND PENNER JQSRT, VOL 5, PAGE 611-620, 1965
-   SDWEAK=SDWEAK*2._EB*(-Q2OT*BE_CH4)*SQRT(-Q2OT*BE_CH4)/SQRTPI*DINV_CH4**3
+   incident_radiance(i_wavenumb) = incident_radiance(i_wavenumb) +  &
+                                 ttau(npt,i_wavenumb)*planck_wn(twall,wave_number(i_wavenumb))
+ 
+   bb_gas(i_wavenumb)  = planck_wn(avg_temp,wave_number(i_wavenumb))
+   bb_wall(i_wavenumb) = planck_wn(twall,   wave_number(i_wavenumb))
+ENDDO lspectrum
+!$OMP END DO
+!$OMP END PARALLEL
 
-!***EXPRESS S/D AT STANDARD TEMPERATURE AND PRESSURE, AS IS IN NASA SP-3080
-   SDWEAK = SDWEAK*TOAZ
-   GDINV  = GC3*DINV_CH4
-   GDDINV = GD*DINV_CH4 
+!------------------------------------------------------------------------------   
+! integrate the radiance over the spectrum
+
+radiance    = integration(wave_number,incident_radiance)
+int_bb_gas  = integration(wave_number,bb_gas)
+int_bb_wall = integration(wave_number,bb_wall)
 
 !------------------------------------------------------------------------------
-! TABULATED PROPERTIES
-ELSE IF((OM_BND_CH4(2,1)<=OMEGA).AND.(OMEGA<OM_BND_CH4(2,2))) THEN
-      
+! soot contribution
+! determine soot radiance for short (between ommax and 25000) and 
+! long wavelengths (between 5 and ommin)
+! this corresponds to the ranges between 400 nm (visible) to ommax (user depENDent)
+! and ommin (user depENDent) and 2000 microns
+     
+rsl  = 0._EB
+rss  = 0._EB
+
+kmax = INT(ommin)
+kmin = INT(ommax)
+
 !------------------------------------------------------------------------------
-! CONTRIBUTION TO 3.3 MICRON BAND, BAND #2: 2700 cm-1 - 3250 cm-1
-! (0000)-(0010) TRANSITION (V3 FUNDAMENTAL)
-! 9.4 IS THE AVERAGE LINE POSITION FOR THE 3.3 MICRON BAND (CM^-1)
-! SOURCE: BROSMER & TIEN, JQSRT V. 33, P. 525 (SPECIFIC TO METHANE)
+long: DO i_wavenumb = 5, kmax, 5 ! loop over long wavelengths
 
-   DINV_CH4 = 1._EB/9.4_EB
+   omega       = REAL(i_wavenumb,EB)
+   wave_length = 10000._EB/omega
+   dambda      = 10000._EB/(omega-2.5_EB)-10000._EB/(omega+2.5_EB)
 
-   SDWEAK = GET_SPECTRAL_ABSORPTION(OMEGA,TEMP,SD_CH4_TEMP,OM_BND_CH4(2,:),SD2_CH4)
-! LINE SHAPE PARAMETER BROSMER & TIEN, JQSRT V. 33, P. 525 EQ. 10 (SPECIFIC TO METHANE)
-   GDINV  = .00734_EB*PRESSURE_EFFECTIVE*SQRT(AZOT)*EXP(1.02_EB*(TOAZ-1._EB)) 
-   GDDINV = GD*DINV_CH4
-!***EXPRESS S/D AT STP, AS IS K IN NASA SP-3080
-   SDWEAK = SDWEAK*TOAZ 
-ELSE IF((OM_BND_CH4(1,1)<=OMEGA).AND.(OMEGA<OM_BND_CH4(1,2))) THEN
+! initialize taul: transmissivity for long wavelengths
+
+   IF (ALLOCATED(taul)) DEALLOCATE(taul)
+   ALLOCATE(taul(0:npt));     taul       = 1.0_EB
+ 
+   IF (ALLOCATED(x_particle)) DEALLOCATE(x_particle)
+   ALLOCATE(x_particle(npt)); x_particle = 0.0_EB
+
+   ! loop over the line of sight elements
+   DO i_path = 1, npt
+    
+      CALL pod(omega,partial_pressures_atm(i_fv,i_path),path_length_cm(i_path), x_particle(i_path))  
+
+      taul(i_path) = EXP(-SUM(x_particle(1:i_path)))      
+      rsl = rsl + (taul(i_path-1)-taul(i_path))*planck(temp_gas(i_path),wave_length)*dambda
+
+   ENDDO   
+
+! add contribution of the incident radiance from the wall
+   rsl = rsl + taul(npt)*planck(twall,wave_length)*dambda
+
+! calculate contribution to int_bb_wall & int_bb_gas
+   int_bb_wall = int_bb_wall + planck(twall,    wave_length)*dambda
+   int_bb_gas  = int_bb_gas  + planck(avg_temp, wave_length)*dambda
+
+ENDDO long
+
 !------------------------------------------------------------------------------
-! CONTRIBUTION TO 7.7 MICRON BAND, BAND #1: 1150 cm-1 - 1600 cm-1 
-! (0000)-(0001) TRANSITION (V4 FUNDAMENTAL)
-! 5.1 (CM-1) IS THE AVERAGE LINE POSITION FOR THE 7.7 MICRON BAND 
-! SOURCE: BROSMER & TIEN, JQSRT V. 33, P. 525 (SPECIFIC TO METHANE)
+short: DO i_wavenumb = kmin, 25000, 100 ! loop over short wavelengths
 
-   DINV_CH4 = 1._EB/5.1_EB
+   omega       = REAL(i_wavenumb,EB)
+   wave_length = 10000._EB/omega
+   dambda      = 10000._EB/(omega-50._EB)-10000._EB/(omega+50._EB)
 
-   SDWEAK = GET_SPECTRAL_ABSORPTION(OMEGA,TEMP,SD_CH4_TEMP,OM_BND_CH4(1,:),SD1_CH4)
-! LINE SHAPE PARAMETER BROSMER & TIEN, JQSRT V. 33, 525 EQ. 11 (SPECIFIC TO METHANE)
-   GDINV  = .0243_EB*PRESSURE_EFFECTIVE*(TOAZ)**.8_EB
-   GDDINV = GD*DINV_CH4
-!***EXPRESS S/D AT STP, AS IS K IN NASA SP-3080
-   SDWEAK = SDWEAK*TOAZ 
+! initialize taus: transmissivity for short wavelengths
+
+   IF (ALLOCATED(taus)) DEALLOCATE(taus)
+   ALLOCATE(taus(0:npt));     taus       = 1.0_EB
+ 
+   IF (ALLOCATED(x_particle)) DEALLOCATE(x_particle)
+   ALLOCATE(x_particle(npt)); x_particle = 0.0_EB
+
+   ! loop over the line of sight elements
+
+   DO i_path = 1, npt
+    
+      CALL pod(omega,partial_pressures_atm(i_fv,i_path),path_length_cm(i_path), x_particle(i_path))  
+
+      taus(i_path) = EXP(-SUM(x_particle(1:i_path)))      
+      rss = rss + (taus(i_path-1)-taus(i_path))*planck(temp_gas(i_path),wave_length)*dambda
+
+   ENDDO   
+
+! add contribution of the incident radiance from the wall
+   rss = rss + taus(npt)*planck(twall,wave_length)*dambda
+
+! calculate contribution to int_bb_wall & int_bb_gas
+   int_bb_wall = int_bb_wall + planck(twall,    wave_length)*dambda
+   int_bb_gas  = int_bb_gas  + planck(avg_temp, wave_length)*dambda
+
+ENDDO short
+
+! END loop over species
+!------------------------------------------------------------------------------
+
+! add the contribution of soot over larger wave length DOMain
+radiance = radiance + rss + rsl
+
+!------------------------------------------------------------------------------
+! DEALLOCATE some variables (gc,x,optical_thickness)
+
+IF(ALLOCATED(bb_gas))            DEALLOCATE(bb_gas)
+IF(ALLOCATED(bb_wall))           DEALLOCATE(bb_wall)
+IF(ALLOCATED(gc))                DEALLOCATE(gc)
+IF(ALLOCATED(optical_depth))     DEALLOCATE(optical_depth)
+IF(ALLOCATED(optical_thickness)) DEALLOCATE(optical_thickness)
+IF(ALLOCATED(curtis_xstar))      DEALLOCATE(curtis_xstar)
+IF(ALLOCATED(curtis_acollision)) DEALLOCATE(curtis_acollision)
+IF(ALLOCATED(curtis_aDOppler))   DEALLOCATE(curtis_aDOppler)
+IF(ALLOCATED(x_particle))        DEALLOCATE(x_particle)
+IF(ALLOCATED(taus))              DEALLOCATE(taus)
+IF(ALLOCATED(taul))              DEALLOCATE(taul)
+!------------------------------------------------------------------------------
+
+IF (total_length_cm > 0.0_EB) THEN
+
+   IF(ABS(twall-avg_temp)<=spacing(twall)) THEN 
+      lterm = 1.0_EB
+   ELSE
+      lterm = MIN(1.0_EB,MAX(1e-30_EB,(radiance-int_bb_gas)/(int_bb_wall-int_bb_gas)))
+   ENDIF
+   !IF (lterm.gt.1.0_EB) THEN
+   !   WRITE(*,*) "lterm: ", lterm
+   !   WRITE(*,*) "radiance/rpi_sigma ", radiance/rpi_sigma
+   !   WRITE(*,*) "twall**4 ", twall**4
+   !   WRITE(*,*) "temp**4  ", temp4
+   !ENDIF
+   
+   effective_absorption = -1._EB/total_length_cm*LOG(lterm)
+ELSE
+   effective_absorption = 0.0_EB
 ENDIF 
 
 !------------------------------------------------------------------------------
-END SUBROUTINE CH4
-
-!==============================================================================
-SUBROUTINE C3H6(OMEGA,TEMP,PC3H6,PTOT,SDWEAK,GDINV,GDDINV,I_MODEL)
-!==============================================================================
-! COMPUTE PROPYLENE OPTICAL PROPERTIES USING SINGLE LINE GROUP
-! 
-! ABSORPTION BANDS: 
-! THERE ARE 3 BANDS FOR Propylene
-!
-! BAND #1: 1250 cm-1 - 1950 cm-1 
-! BAND #2: 2700 cm-1 - 3200 cm-1 
-! BAND #3: 700 cm-1 - 1150 cm-1 
-!
-! VARIABLES PASSED IN
-! OMEGA  : (REAL) WAVENUMBER IN CM-1
-! TEMP   : (REAL) TEMPERATURE IN K
-! PC3H6 : (REAL) PARTIAL PRESSURE OF PROPYLENE
-! PTOT   : (REAL) TOTAL PRESSURE
-! GC3    : (REAL) collisional broadening half-width at half heigh
-! 
-! VRAIBLES PASSED OUT
-! SDWEAK : (REAL) SPECTRAL ABSORPTION COEFFICIENT
-! GDINV  : (REAL) LINE WIDTH TO LINE SPACING RATIO, FINE STRUCTURE PARAMETER
-! GDDINV : (REAL) LINE WIDTH TO LINE SPACING RATIO FOR DOPPLER BORADENING,
-!                 FINE STRUCTURE PARAMETER
-! I_MODEL: (INTEGER) MODEL USED FOR SNB FITTING: 1: GOODY, 2 MALKMUS, 3 ELSASSER
-
-! LOCALS
-! PRESSURE_EFFECTIVE : (REAL) EFFECTIVE PRESSURE, (FORMELY PE)
-! DINV_C3H6         : INVERSE LINE SPACING [CM] FOR PROPYLENE
-
-REAL(EB), INTENT(IN)  :: OMEGA, TEMP, PC3H6, PTOT
-REAL(EB), INTENT(OUT) :: SDWEAK, GDINV, GDDINV
-
-INTEGER, INTENT(OUT) :: I_MODEL
-
-REAL(EB) :: Q2OT, AZOT, TOAZ
-REAL(EB) :: GD, PRESSURE_EFFECTIVE
-REAL(EB) :: DINV_C3H6 
-
-REAL(EB), PARAMETER :: Q2       = 1.4388_EB  ! Q2 = SPEED_OF_LIGHT*PLANCK_CNS/BOLTZMANN
-REAL(EB), PARAMETER :: WM_C3H6  = 42.0797_EB ! NIST WEBBOOK DATA
-
-INTEGER :: I_BAND, I
-
-LOGICAL :: IN_BAND ! TRUE IF OMEGA IS WITHIN SOME TABULATED BAND, FALSE OTHERWISE
-
-! GET MODEL FOR SNB FITTING
-
-I_MODEL = I_MODEL_C3H6
-I_BAND  = 0
-IN_BAND = .FALSE.
-
-! NULLIFY POINTERS IF ASSOCIATED
-IF (ASSOCIATED(BAND_OMEGA))  NULLIFY(BAND_OMEGA)
-IF (ASSOCIATED(KAPPA_D))     NULLIFY(KAPPA_D)
-IF (ASSOCIATED(GAMMA_D))     NULLIFY(GAMMA_D)
-
-! SET INITIAL VALUES TO SDWEAK, GDINV, GDDINV - VALUES ARE RETURNED IF OMEGA IS NOT
-! WITHIN ABSOPRTION BANDS
-SDWEAK = 0.0_EB
-GDINV  = 1._EB 
-GDDINV = 1._EB 
-
-! COMPUTE THERMAL COEFFICIENTS
-Q2OT = -Q2/TEMP       
-AZOT = 273._EB/TEMP
-TOAZ = TEMP/273._EB
-
-! COMPUTE DOPPLER BROADENING HALF WIDTH GD
-GD   = 5.94E-6_EB*OMEGA*SQRT(TOAZ/WM_C3H6) !DOPPLER HALF WIDTH [CM^-1]. NASA,222
-
-! COMPUTE AVERAGE LINE SPACING
-! MODEL PROPYLENE AS A PROLATE SYMMETRIC TOP. THE LINE SPACING IS APPROXIMATED TO
-! 2*ROTATIONAL_CONSTANT B. RECALL THAT ROTATIONAL_CONSTANT B = ROTATIONAL_CONSTANT C
-! ROTATIONAL_CONSTANT_B OBTAINED FROM CCCBDV WEBSITE, USING EXPERIMENTAL VALUES  
-! PROPYLENE BELONGS TO GROUP Cs
-DINV_C3H6 = 1._EB/(2._EB*0.312_EB)
-
-! IF OMEGA IS WITHIN ABSOPRTION BAND, THEN COMPUTE SDWEAK FROM TABULATED DATA
-! PROPYLENE HAS THREE BANDS
-! BAND #1: 775 cm-1 - 1150 cm-1 
-! BAND #2: 1225 cm-1 - 1975 cm-1 
-! BAND #3: 2650 cm-1 - 3275 cm-1  
-
-! GET THE INDEX OF THE BAND
-BAND: DO I = 1, N_BAND_C3H6
-   IF ((OM_BND_C3H6(I,1)<=OMEGA).AND.(OMEGA<OM_BND_C3H6(I,2))) THEN
-     IN_BAND = .TRUE.
-     I_BAND  = I
-     BAND_OMEGA => OM_BND_C3H6(I_BAND,:) 
-     EXIT BAND
-   ENDIF
-ENDDO BAND
-
-IF (IN_BAND.AND.(I_BAND==1)) THEN   ! BAND #1: 775 cm-1 - 1150 cm-1 
-   KAPPA_D => SD1_C3H6
-   GAMMA_D => GAMMAD1_C3H6
-ELSEIF(IN_BAND.AND.(I_BAND==2)) THEN ! BAND #2: 1225 cm-1 - 1975 cm-1 
-   KAPPA_D => SD2_C3H6
-   GAMMA_D => GAMMAD2_C3H6
-ELSEIF(IN_BAND.AND.(I_BAND==3)) THEN ! BAND #3: 2650 cm-1 - 3275 cm-1 
-   KAPPA_D => SD3_C3H6
-   GAMMA_D => GAMMAD3_C3H6
-ENDIF
-
-! COMPUTE PROPERTIES
-IF (IN_BAND) THEN
-   PRESSURE_EFFECTIVE = PTOT+(Be_C3H6(I_BAND)-1.0_EB)*PC3H6 
-   SDWEAK = GET_SPECTRAL_ABSORPTION(OMEGA,TEMP,SD_C3H6_TEMP,BAND_OMEGA,KAPPA_D)
-   GDINV  = GET_SPECTRAL_ABSORPTION(OMEGA,TEMP,SD_C3H6_TEMP,BAND_OMEGA,GAMMA_D)
-   GDINV  = GDINV*PRESSURE_EFFECTIVE
-   GDDINV = GD*DINV_C3H6
-!***EXPRESS S/D AT STP, AS IS K IN NASA SP-3080
-   SDWEAK = SDWEAK*TOAZ
-ENDIF
-
-! NULLIFY POINTERS
-IF (ASSOCIATED(BAND_OMEGA))  NULLIFY(BAND_OMEGA)
-IF (ASSOCIATED(KAPPA_D))     NULLIFY(KAPPA_D)
-IF (ASSOCIATED(GAMMA_D))     NULLIFY(GAMMA_D)
-
-RETURN
-!------------------------------------------------------------------------------
-END SUBROUTINE C3H6
-
-!==============================================================================
-SUBROUTINE C3H8(OMEGA,TEMP,PC3H8,PTOT,SDWEAK,GDINV,GDDINV,I_MODEL)
-!==============================================================================
-! COMPUTE PROPANE OPTICAL PROPERTIES USING SINGLE LINE GROUP
-! 
-! ABSORPTION BANDS: 
-! THERE ARE 2 BANDS FOR Propane
-
-! BAND #1: 1175 cm-1 - 1675 cm-1 
-! BAND #2: 2550 cm-1 - 3375 cm-1 
-!
-! VARIABLES PASSED IN
-! OMEGA  : (REAL) WAVENUMBER IN CM-1
-! TEMP   : (REAL) TEMPERATURE IN K
-! PC3H8 : (REAL) PARTIAL PRESSURE OF PROPANE
-! PTOT   : (REAL) TOTAL PRESSURE
-! GC3    : (REAL) collisional broadening half-width at half heigh
-! 
-! VRAIBLES PASSED OUT
-! SDWEAK : (REAL) SPECTRAL ABSORPTION COEFFICIENT
-! GDINV  : (REAL) LINE WIDTH TO LINE SPACING RATIO, FINE STRUCTURE PARAMETER
-! GDDINV : (REAL) LINE WIDTH TO LINE SPACING RATIO FOR DOPPLER BORADENING,
-!                 FINE STRUCTURE PARAMETER
-! I_MODEL: (INTEGER) MODEL USED FOR SNB FITTING: 1: GOODY, 2 MALKMUS, 3 ELSASSER
-
-! LOCALS
-! PRESSURE_EFFECTIVE : (REAL) EFFECTIVE PRESSURE, (FORMELY PE)
-! DINV_C3H8         : INVERSE LINE SPACING [CM] FOR PROPANE
-
-REAL(EB), INTENT(IN)  :: OMEGA, TEMP, PC3H8, PTOT
-REAL(EB), INTENT(OUT) :: SDWEAK, GDINV, GDDINV
-
-INTEGER, INTENT(OUT) :: I_MODEL
-
-REAL(EB) :: Q2OT, AZOT, TOAZ
-REAL(EB) :: GD, PRESSURE_EFFECTIVE
-REAL(EB) :: DINV_C3H8 
-
-REAL(EB), PARAMETER :: Q2       = 1.4388_EB  ! Q2 = SPEED_OF_LIGHT*PLANCK_CNS/BOLTZMANN
-REAL(EB), PARAMETER :: WM_C3H8  = 44.0956_EB ! NIST WEBBOOK DATA
-
-INTEGER :: I_BAND, I
-
-LOGICAL :: IN_BAND ! TRUE IF OMEGA IS WITHIN SOME TABULATED BAND, FALSE OTHERWISE
-
-! GET MODEL FOR SNB FITTING
-
-I_MODEL = I_MODEL_C3H8
-I_BAND  = 0
-IN_BAND = .FALSE.
-
-! NULLIFY POINTERS IF ASSOCIATED
-IF (ASSOCIATED(BAND_OMEGA))  NULLIFY(BAND_OMEGA)
-IF (ASSOCIATED(KAPPA_D))     NULLIFY(KAPPA_D)
-IF (ASSOCIATED(GAMMA_D))     NULLIFY(GAMMA_D)
-
-! SET INITIAL VALUES TO SDWEAK, GDINV, GDDINV - VALUES ARE RETURNED IF OMEGA IS NOT
-! WITHIN ABSOPRTION BANDS
-SDWEAK = 0.0_EB
-GDINV  = 1._EB 
-GDDINV = 1._EB 
-
-! COMPUTE THERMAL COEFFICIENTS
-Q2OT = -Q2/TEMP       
-AZOT = 273._EB/TEMP
-TOAZ = TEMP/273._EB
-
-! COMPUTE DOPPLER BROADENING HALF WIDTH GD
-GD   = 5.94E-6_EB*OMEGA*SQRT(TOAZ/WM_C3H8) !DOPPLER HALF WIDTH [CM^-1]. NASA,222
-
-! COMPUTE AVERAGE LINE SPACING
-! PROPANE IS A PROLATE SYMMETRIC TOP. THE LINE SPACING IS APPROXIMATED TO
-! 2*ROTATIONAL_CONSTANT B. RECALL THAT ROTATIONAL_CONSTANT B = ROTATIONAL_CONSTANT C
-! ROTATIONAL_CONSTANT_B OBTAINED FROM CCCBDV WEBSITE, USING EXPERIMENTAL VALUES  
-! PROPANE BELONGS TO GROUP C2v
-DINV_C3H8 = 1._EB/(2._EB*0.28173_EB)
-
-! IF OMEGA IS WITHIN ABSOPRTION BAND, THEN COMPUTE SDWEAK FROM TABULATED DATA
-! PROPANE HAS THREE BANDS
-! BAND #1: 1175 cm-1 - 1675 cm-1 
-! BAND #2: 2550 cm-1 - 3375 cm-1 
-
-! GET THE INDEX OF THE BAND
-BAND: DO I = 1, N_BAND_C3H8
-   IF ((OM_BND_C3H8(I,1)<=OMEGA).AND.(OMEGA<OM_BND_C3H8(I,2))) THEN
-     IN_BAND = .TRUE.
-     I_BAND  = I
-     BAND_OMEGA => OM_BND_C3H8(I_BAND,:) 
-     EXIT BAND
-   ENDIF
-ENDDO BAND
-
-IF (IN_BAND.AND.(I_BAND==1)) THEN   ! BAND #1: 1175 cm-1 - 1675 cm-1 
-   KAPPA_D => SD1_C3H8
-   GAMMA_D => GAMMAD1_C3H8
-ELSEIF(IN_BAND.AND.(I_BAND==2)) THEN ! BAND #2: 2550 cm-1 - 3375 cm-1 
-   KAPPA_D => SD2_C3H8
-   GAMMA_D => GAMMAD2_C3H8
-ENDIF
-
-! COMPUTE PROPERTIES
-IF (IN_BAND) THEN
-   PRESSURE_EFFECTIVE = PTOT+(Be_C3H8(I_BAND)-1.0_EB)*PC3H8 
-   SDWEAK = GET_SPECTRAL_ABSORPTION(OMEGA,TEMP,SD_C3H8_TEMP,BAND_OMEGA,KAPPA_D)
-   GDINV  = GET_SPECTRAL_ABSORPTION(OMEGA,TEMP,SD_C3H8_TEMP,BAND_OMEGA,GAMMA_D)
-   GDINV  = GDINV*PRESSURE_EFFECTIVE
-   GDDINV = GD*DINV_C3H8
-!***EXPRESS S/D AT STP, AS IS K IN NASA SP-3080
-   SDWEAK = SDWEAK*TOAZ
-ENDIF
-
-! NULLIFY POINTERS
-IF (ASSOCIATED(BAND_OMEGA))  NULLIFY(BAND_OMEGA)
-IF (ASSOCIATED(KAPPA_D))     NULLIFY(KAPPA_D)
-IF (ASSOCIATED(GAMMA_D))     NULLIFY(GAMMA_D)
-
-RETURN
-!------------------------------------------------------------------------------
-END SUBROUTINE C3H8
-
-!==============================================================================
-SUBROUTINE C7H16(OMEGA,TEMP,PC7H16,PTOT,SDWEAK,GDINV,GDDINV,I_MODEL)
-!==============================================================================
-! COMPUTE HEPTANE OPTICAL PROPERTIES USING SINGLE LINE GROUP
-! 
-! ABSORPTION BANDS: 
-! THERE ARE 2 BANDS FOR HEPTANE
-
-! BAND #1: 1100 cm-1 - 1800 cm-1 
-! BAND #2: 2550 cm-1 - 3275 cm-1 
-!
-! VARIABLES PASSED IN
-! OMEGA  : (REAL) WAVENUMBER IN CM-1
-! TEMP   : (REAL) TEMPERATURE IN K
-! PC7H16 : (REAL) PARTIAL PRESSURE OF HEPTANE
-! PTOT   : (REAL) TOTAL PRESSURE
-! GC3    : (REAL) collisional broadening half-width at half heigh
-! 
-! VRAIBLES PASSED OUT
-! SDWEAK : (REAL) SPECTRAL ABSORPTION COEFFICIENT
-! GDINV  : (REAL) LINE WIDTH TO LINE SPACING RATIO, FINE STRUCTURE PARAMETER
-! GDDINV : (REAL) LINE WIDTH TO LINE SPACING RATIO FOR DOPPLER BORADENING,
-!                 FINE STRUCTURE PARAMETER
-! I_MODEL: (INTEGER) MODEL USED FOR SNB FITTING: 1: GOODY, 2 MALKMUS, 3 ELSASSER
-
-! LOCALS
-! PRESSURE_EFFECTIVE : (REAL) EFFECTIVE PRESSURE, (FORMELY PE)
-! DINV_C7H16         : INVERSE LINE SPACING [CM] FOR HEPTANE
-
-REAL(EB), INTENT(IN)  :: OMEGA, TEMP, PC7H16, PTOT
-REAL(EB), INTENT(OUT) :: SDWEAK, GDINV, GDDINV
-
-INTEGER, INTENT(OUT) :: I_MODEL
-
-REAL(EB) :: Q2OT, AZOT, TOAZ
-REAL(EB) :: GD, PRESSURE_EFFECTIVE
-REAL(EB) :: DINV_C7H16 
-
-REAL(EB), PARAMETER :: Q2       = 1.4388_EB  ! Q2 = SPEED_OF_LIGHT*PLANCK_CNS/BOLTZMANN
-REAL(EB), PARAMETER :: WM_C7H16 = 100.2019_EB ! NIST WEBBOOK DATA
-
-INTEGER :: I_BAND, I
-
-LOGICAL :: IN_BAND ! TRUE IF OMEGA IS WITHIN SOME TABULATED BAND, FALSE OTHERWISE
-
-! GET MODEL FOR SNB FITTING
-
-I_MODEL = I_MODEL_C7H16
-I_BAND  = 0
-IN_BAND = .FALSE.
-
-! NULLIFY POINTERS IF ASSOCIATED
-IF (ASSOCIATED(BAND_OMEGA))  NULLIFY(BAND_OMEGA)
-IF (ASSOCIATED(KAPPA_D))     NULLIFY(KAPPA_D)
-IF (ASSOCIATED(GAMMA_D))     NULLIFY(GAMMA_D)
-
-! SET INITIAL VALUES TO SDWEAK, GDINV, GDDINV - VALUES ARE RETURNED IF OMEGA IS NOT
-! WITHIN ABSOPRTION BANDS
-SDWEAK = 0.0_EB
-GDINV  = 1._EB 
-GDDINV = 1._EB 
-
-! COMPUTE THERMAL COEFFICIENTS
-Q2OT = -Q2/TEMP       
-AZOT = 273._EB/TEMP
-TOAZ = TEMP/273._EB
-
-! COMPUTE DOPPLER BROADENING HALF WIDTH GD
-GD   = 5.94E-6_EB*OMEGA*SQRT(TOAZ/WM_C7H16) !DOPPLER HALF WIDTH [CM^-1]. NASA,222
-
-! COMPUTE AVERAGE LINE SPACING
-! n_HEPTANE IS A PROLATE SYMMETRIC TOP. THE LINE SPACING IS APPROXIMATED TO
-! 2*ROTATIONAL_CONSTANT B. RECALL THAT ROTATIONAL_CONSTANT B = ROTATIONAL_CONSTANT C
-! ROTATIONAL_CONSTANT_B OBTAINED FROM CCCBDV WEBSITE, USING EXPERIMENTAL VALUES  
-! n-Heptane BELONGS TO GROUP C2v
-DINV_C7H16=1._EB/(2.0_EB*0.024_EB)
-
-! IF OMEGA IS WITHIN ABSOPRTION BAND, THEN COMPUTE SDWEAK FROM TABULATED DATA
-! HEPTANE HAS THREE BANDS
-! BAND #1: 1100 cm-1 - 1800 cm-1 
-! BAND #2: 2550 cm-1 - 3275 cm-1 
-
-! GET THE INDEX OF THE BAND
-BAND: DO I = 1, N_BAND_C7H16
-   IF ((OM_BND_C7H16(I,1)<=OMEGA).AND.(OMEGA<OM_BND_C7H16(I,2))) THEN
-     IN_BAND = .TRUE.
-     I_BAND  = I
-     BAND_OMEGA => OM_BND_C7H16(I_BAND,:) 
-     EXIT BAND
-   ENDIF
-ENDDO BAND
-
-IF (IN_BAND.AND.(I_BAND==1)) THEN   ! BAND #1: 1175 cm-1 - 1675 cm-1 
-   KAPPA_D => SD1_C7H16
-   GAMMA_D => GAMMAD1_C7H16
-ELSEIF(IN_BAND.AND.(I_BAND==2)) THEN ! BAND #2: 2550 cm-1 - 3375 cm-1 
-   KAPPA_D => SD2_C7H16
-   GAMMA_D => GAMMAD2_C7H16
-ENDIF
-
-! COMPUTE PROPERTIES
-IF (IN_BAND) THEN
-   PRESSURE_EFFECTIVE = PTOT+(Be_C7H16(I_BAND)-1.0_EB)*PC7H16 
-   SDWEAK = GET_SPECTRAL_ABSORPTION(OMEGA,TEMP,SD_C7H16_TEMP,BAND_OMEGA,KAPPA_D)
-   GDINV  = GET_SPECTRAL_ABSORPTION(OMEGA,TEMP,SD_C7H16_TEMP,BAND_OMEGA,GAMMA_D)
-   GDINV  = GDINV*PRESSURE_EFFECTIVE
-   GDDINV = GD*DINV_C7H16
-!***EXPRESS S/D AT STP, AS IS K IN NASA SP-3080
-   SDWEAK = SDWEAK*TOAZ
-ENDIF
-
-! NULLIFY POINTERS
-IF (ASSOCIATED(BAND_OMEGA))  NULLIFY(BAND_OMEGA)
-IF (ASSOCIATED(KAPPA_D))     NULLIFY(KAPPA_D)
-IF (ASSOCIATED(GAMMA_D))     NULLIFY(GAMMA_D)
-
-RETURN
-!------------------------------------------------------------------------------
-END SUBROUTINE C7H16
-
-!==============================================================================
-SUBROUTINE C7H8(OMEGA,TEMP,PC7H8,PTOT,SDWEAK,GDINV,GDDINV,I_MODEL)
-!==============================================================================
-! COMPUTE TOLUENE OPTICAL PROPERTIES USING SINGLE LINE GROUP
-! 
-! ABSORPTION BANDS: 
-! THERE ARE 5 BANDS FOR TOLUENE
-
-! BAND #1: 700 cm-1 - 825 cm-1 
-! BAND #2: 975 cm-1 - 1175 cm-1 
-! BAND #3: 1275 cm-1 - 1675 cm-1 
-! BAND #4: 1650 cm-1 - 2075 cm-1 
-! BAND #5: 2675 cm-1 - 3225 cm-1 
-!
-! VARIABLES PASSED IN
-! OMEGA  : (REAL) WAVENUMBER IN CM-1
-! TEMP   : (REAL) TEMPERATURE IN K
-! PC7H8 : (REAL) PARTIAL PRESSURE OF TOLUENE
-! PTOT   : (REAL) TOTAL PRESSURE
-! GC3    : (REAL) collisional broadening half-width at half heigh
-! 
-! VRAIBLES PASSED OUT
-! SDWEAK : (REAL) SPECTRAL ABSORPTION COEFFICIENT
-! GDINV  : (REAL) LINE WIDTH TO LINE SPACING RATIO, FINE STRUCTURE PARAMETER
-! GDDINV : (REAL) LINE WIDTH TO LINE SPACING RATIO FOR DOPPLER BORADENING,
-!                 FINE STRUCTURE PARAMETER
-! I_MODEL: (INTEGER) MODEL USED FOR SNB FITTING: 1: GOODY, 2 MALKMUS, 3 ELSASSER
-
-! LOCALS
-! PRESSURE_EFFECTIVE : (REAL) EFFECTIVE PRESSURE, (FORMELY PE)
-! DINV_C7H8         : INVERSE LINE SPACING [CM] FOR TOLUENE
-
-REAL(EB), INTENT(IN)  :: OMEGA, TEMP, PC7H8, PTOT
-REAL(EB), INTENT(OUT) :: SDWEAK, GDINV, GDDINV
-
-INTEGER, INTENT(OUT) :: I_MODEL
-
-REAL(EB) :: Q2OT, AZOT, TOAZ
-REAL(EB) :: GD, PRESSURE_EFFECTIVE
-REAL(EB) :: DINV_C7H8 
-
-REAL(EB), PARAMETER :: Q2       = 1.4388_EB  ! Q2 = SPEED_OF_LIGHT*PLANCK_CNS/BOLTZMANN
-REAL(EB), PARAMETER :: WM_C7H8  = 92.1384_EB ! NIST WEBBOOK DATA
-
-INTEGER :: I_BAND, I
-
-LOGICAL :: IN_BAND ! TRUE IF OMEGA IS WITHIN SOME TABULATED BAND, FALSE OTHERWISE
-
-! GET MODEL FOR SNB FITTING
-
-I_MODEL = I_MODEL_C7H8
-I_BAND  = 0
-IN_BAND = .FALSE.
-
-! NULLIFY POINTERS IF ASSOCIATED
-IF (ASSOCIATED(BAND_OMEGA))  NULLIFY(BAND_OMEGA)
-IF (ASSOCIATED(KAPPA_D))     NULLIFY(KAPPA_D)
-IF (ASSOCIATED(GAMMA_D))     NULLIFY(GAMMA_D)
-
-! SET INITIAL VALUES TO SDWEAK, GDINV, GDDINV - VALUES ARE RETURNED IF OMEGA IS NOT
-! WITHIN ABSOPRTION BANDS
-SDWEAK = 0.0_EB
-GDINV  = 1._EB 
-GDDINV = 1._EB 
-
-! COMPUTE THERMAL COEFFICIENTS
-Q2OT = -Q2/TEMP       
-AZOT = 273._EB/TEMP
-TOAZ = TEMP/273._EB
-
-! COMPUTE DOPPLER BROADENING HALF WIDTH GD
-GD   = 5.94E-6_EB*OMEGA*SQRT(TOAZ/WM_C7H8) !DOPPLER HALF WIDTH [CM^-1]. NASA,222
-
-! TOLUENE BELONGS TO GROUP CS 
-! TOLUENE IS MODEL AS A PROLATE SYMMETRIC TOP. THE LINE SPACING IS APPROXIMATED TO
-! 2*ROTATIONAL_CONSTANT B. RECALL THAT ROTATIONAL_CONSTANT B = ROTATIONAL_CONSTANT C
-! ROTATIONAL_CONSTANT_B OBTAINED FROM CCCBDV WEBSITE.  USING EXPERIMENTAL VALUES  
-
-DINV_C7H8=1._EB/(2.0_EB*0.084_EB)
-
-
-! IF OMEGA IS WITHIN ABSOPRTION BAND, THEN COMPUTE SDWEAK FROM TABULATED DATA
-! TOLUENE HAS 5 BANDS
-! BAND #1: 700 cm-1 - 825 cm-1 
-! BAND #2: 975 cm-1 - 1175 cm-1 
-! BAND #3: 1275 cm-1 - 1675 cm-1 
-! BAND #4: 1650 cm-1 - 2075 cm-1 
-! BAND #5: 2675 cm-1 - 3225 cm-1 
-
-! GET THE INDEX OF THE BAND
-BAND: DO I = 1, N_BAND_C7H8
-   IF ((OM_BND_C7H8(I,1)<=OMEGA).AND.(OMEGA<OM_BND_C7H8(I,2))) THEN
-     IN_BAND = .TRUE.
-     I_BAND  = I
-     BAND_OMEGA => OM_BND_C7H8(I_BAND,:) 
-     EXIT BAND
-   ENDIF
-ENDDO BAND
-
-IF (IN_BAND.AND.(I_BAND==1)) THEN   ! BAND #1: 700 cm-1 - 825 cm-1 
-   KAPPA_D => SD1_C7H8
-   GAMMA_D => GAMMAD1_C7H8
-ELSEIF(IN_BAND.AND.(I_BAND==2)) THEN ! BAND #2: 975 cm-1 - 1175 cm-1 
-   KAPPA_D => SD2_C7H8
-   GAMMA_D => GAMMAD2_C7H8
-ELSEIF(IN_BAND.AND.(I_BAND==3)) THEN ! BAND #3: 1275 cm-1 - 1675 cm-1 
-   KAPPA_D => SD3_C7H8
-   GAMMA_D => GAMMAD3_C7H8
-ELSEIF(IN_BAND.AND.(I_BAND==4)) THEN ! BAND #4: 1650 cm-1 - 2075 cm-1 
-   KAPPA_D => SD4_C7H8
-   GAMMA_D => GAMMAD4_C7H8
-ELSEIF(IN_BAND.AND.(I_BAND==5)) THEN ! BAND #5: 2675 cm-1 - 3225 cm-1 
-   KAPPA_D => SD5_C7H8
-   GAMMA_D => GAMMAD5_C7H8
-ENDIF
-
-! COMPUTE PROPERTIES
-IF (IN_BAND) THEN
-   PRESSURE_EFFECTIVE = PTOT+(Be_C7H8(I_BAND)-1.0_EB)*PC7H8 
-   SDWEAK = GET_SPECTRAL_ABSORPTION(OMEGA,TEMP,SD_C7H8_TEMP,BAND_OMEGA,KAPPA_D)
-   GDINV  = GET_SPECTRAL_ABSORPTION(OMEGA,TEMP,SD_C7H8_TEMP,BAND_OMEGA,GAMMA_D)
-   GDINV  = GDINV*PRESSURE_EFFECTIVE
-   GDDINV = GD*DINV_C7H8
-!***EXPRESS S/D AT STP, AS IS K IN NASA SP-3080
-   SDWEAK = SDWEAK*TOAZ
-ENDIF
-
-! NULLIFY POINTERS
-IF (ASSOCIATED(BAND_OMEGA))  NULLIFY(BAND_OMEGA)
-IF (ASSOCIATED(KAPPA_D))     NULLIFY(KAPPA_D)
-IF (ASSOCIATED(GAMMA_D))     NULLIFY(GAMMA_D)
-
-RETURN
-!------------------------------------------------------------------------------
-END SUBROUTINE C7H8
-
-
-!==============================================================================
-SUBROUTINE CH3OH(OMEGA,TEMP,PCH3OH,PTOT,SDWEAK,GDINV,GDDINV,I_MODEL)
-!==============================================================================
-! COMPUTE Methanol OPTICAL PROPERTIES USING SINGLE LINE GROUP
-! 
-! ABSORPTION BANDS: 
-! THERE ARE 4 BANDS FOR Methanol
-
-! BAND #1: 825 cm-1 - 1150 cm-1 
-! BAND #2: 1125 cm-1 - 1700 cm-1 
-! BAND #3: 2600 cm-1 - 3225 cm-1 
-! BAND #4: 3525 cm-1 - 3850 cm-1
-!
-! VARIABLES PASSED IN
-! OMEGA  : (REAL) WAVENUMBER IN CM-1
-! TEMP   : (REAL) TEMPERATURE IN K
-! PCH3OH : (REAL) PARTIAL PRESSURE OF Methanol
-! PTOT   : (REAL) TOTAL PRESSURE
-! 
-! VARIABLES PASSED OUT
-! SDWEAK : (REAL) SPECTRAL ABSORPTION COEFFICIENT
-! GDINV  : (REAL) LINE WIDTH TO LINE SPACING RATIO, FINE STRUCTURE PARAMETER
-! GDDINV : (REAL) LINE WIDTH TO LINE SPACING RATIO FOR DOPPLER BORADENING,
-!                 FINE STRUCTURE PARAMETER
-! I_MODEL: (INTEGER) MODEL USED FOR SNB FITTING: 1: GOODY, 2 MALKMUS, 3 ELSASSER
-
-! LOCALS
-! PRESSURE_EFFECTIVE : (REAL) EFFECTIVE PRESSURE, (FORMELY PE)
-! DINV_CH3OH         : INVERSE LINE SPACING [CM] FOR Methanol
-
-REAL(EB), INTENT(IN)  :: OMEGA, TEMP, PCH3OH, PTOT
-REAL(EB), INTENT(OUT) :: SDWEAK, GDINV, GDDINV
-
-INTEGER, INTENT(OUT) :: I_MODEL
-
-REAL(EB) :: Q2OT, AZOT, TOAZ
-REAL(EB) :: GD, PRESSURE_EFFECTIVE
-REAL(EB) :: DINV_CH3OH 
-
-REAL(EB), PARAMETER :: Q2       = 1.4388_EB  ! Q2 = SPEED_OF_LIGHT*PLANCK_CNS/BOLTZMANN
-REAL(EB), PARAMETER :: WM_CH3OH = 32.0419_EB ! NIST WEBBOOK DATA
-INTEGER :: I_BAND, I
-
-LOGICAL :: IN_BAND ! TRUE IF OMEGA IS WITHIN SOME TABULATED BAND, FALSE OTHERWISE
-
-! GET MODEL FOR SNB FITTING
-
-I_MODEL = I_MODEL_CH3OH
-I_BAND  = 0
-IN_BAND = .FALSE.
-
-! NULLIFY POINTERS IF ASSOCIATED
-IF (ASSOCIATED(BAND_OMEGA))  NULLIFY(BAND_OMEGA)
-IF (ASSOCIATED(KAPPA_D))     NULLIFY(KAPPA_D)
-IF (ASSOCIATED(GAMMA_D))     NULLIFY(GAMMA_D)
-
-! SET INITIAL VALUES TO SDWEAK, GDINV, GDDINV - VALUES ARE RETURNED IF OMEGA IS NOT
-! WITHIN ABSOPRTION BANDS
-SDWEAK = 0.0_EB
-GDINV  = 1._EB 
-GDDINV = 1._EB 
-
-! COMPUTE THERMAL COEFFICIENTS
-Q2OT = -Q2/TEMP       
-AZOT = 273._EB/TEMP
-TOAZ = TEMP/273._EB
-
-! COMPUTE DOPPLER BROADENING HALF WIDTH GD
-GD   = 5.94E-6_EB*OMEGA*SQRT(TOAZ/WM_CH3OH) !DOPPLER HALF WIDTH [CM^-1]. NASA,222
-
-! COMPUTE AVERAGE LINE SPACING
-! Methanol Belongs to point group Cs. For now THE LINE SPACING IS APPROXIMATED TO
-! 2*ROTATIONAL_CONSTANT B SINCE ROTATIONAL_CONSTANT B ~ ROTATIONAL_CONSTANT C
-! ROTATIONAL_CONSTANT_B OBTAINED FROM CCCBDV WEBSITE, USING EXPERIMENTAL VALUES  
-DINV_CH3OH=1._EB/(2.0_EB*0.82338_EB)
-
-! IF OMEGA IS WITHIN ABSOPRTION BAND, THEN COMPUTE SDWEAK FROM TABULATED DATA
-! Methanol HAS 4 BANDS
-! BAND #1: 825 cm-1 - 1150 cm-1 
-! BAND #2: 1125 cm-1 - 1700 cm-1 
-! BAND #3: 2600 cm-1 - 3225 cm-1 
-! BAND #4: 3525 cm-1 - 3850 cm-1 
-
-! GET THE INDEX OF THE BAND
-BAND: DO I = 1, N_BAND_CH3OH
-   IF ((OM_BND_CH3OH(I,1)<=OMEGA).AND.(OMEGA<OM_BND_CH3OH(I,2))) THEN
-     IN_BAND = .TRUE.
-     I_BAND  = I
-     BAND_OMEGA => OM_BND_CH3OH(I_BAND,:) 
-     EXIT BAND
-   ENDIF
-ENDDO BAND
-
-IF (IN_BAND.AND.(I_BAND==1)) THEN   ! BAND #1: 825 cm-1 - 1150 cm-1 
-   KAPPA_D => SD1_CH3OH
-   GAMMA_D => GAMMAD1_CH3OH
-ELSEIF(IN_BAND.AND.(I_BAND==2)) THEN ! BAND #2: 1125 cm-1 - 1700 cm-1 
-   KAPPA_D => SD2_CH3OH
-   GAMMA_D => GAMMAD2_CH3OH
-ELSEIF(IN_BAND.AND.(I_BAND==3)) THEN ! BAND #3: 2600 cm-1 - 3225 cm-1 
-   KAPPA_D => SD3_CH3OH
-   GAMMA_D => GAMMAD3_CH3OH
-ELSEIF(IN_BAND.AND.(I_BAND==4)) THEN ! BAND #4: 3525 cm-1 - 3850 cm-1 
-   KAPPA_D => SD4_CH3OH
-   GAMMA_D => GAMMAD4_CH3OH
-ENDIF
-
-! COMPUTE PROPERTIES
-IF (IN_BAND) THEN
-   PRESSURE_EFFECTIVE = PTOT+(Be_CH3OH(I_BAND)-1.0_EB)*PCH3OH 
-   SDWEAK = GET_SPECTRAL_ABSORPTION(OMEGA,TEMP,SD_CH3OH_TEMP,BAND_OMEGA,KAPPA_D)
-   GDINV  = GET_SPECTRAL_ABSORPTION(OMEGA,TEMP,SD_CH3OH_TEMP,BAND_OMEGA,GAMMA_D)
-   GDINV  = GDINV*PRESSURE_EFFECTIVE
-   GDDINV = GD*DINV_CH3OH
-!***EXPRESS S/D AT STP, AS IS K IN NASA SP-3080
-   SDWEAK = SDWEAK*TOAZ
-ENDIF
-
-! NULLIFY POINTERS
-IF (ASSOCIATED(BAND_OMEGA))  NULLIFY(BAND_OMEGA)
-IF (ASSOCIATED(KAPPA_D))     NULLIFY(KAPPA_D)
-IF (ASSOCIATED(GAMMA_D))     NULLIFY(GAMMA_D)
-
-RETURN
-!------------------------------------------------------------------------------
-END SUBROUTINE CH3OH
-
-!==============================================================================
-SUBROUTINE C5H8O2(OMEGA,TEMP,PC5H8O2,PTOT,SDWEAK,GDINV,GDDINV,I_MODEL)
-!==============================================================================
-! COMPUTE MMA OPTICAL PROPERTIES USING SINGLE LINE GROUP
-! 
-! ABSORPTION BANDS: 
-! THERE ARE 6 BANDS FOR MMA
-! BAND #1: 750 cm-1 - 900 cm-1 
-! BAND #2: 875 cm-1 - 1075 cm-1 
-! BAND #3: 1050 cm-1 - 1275 cm-1 
-! BAND #4: 1250 cm-1 - 1575 cm-1 
-! BAND #5: 1550 cm-1 - 1975 cm-1 
-! BAND #6: 2650 cm-1 - 3275 cm-1
-!
-! VARIABLES PASSED IN
-! OMEGA   : (REAL) WAVENUMBER IN CM-1
-! TEMP    : (REAL) TEMPERATURE IN K
-! PC5H8O2 : (REAL) PARTIAL PRESSURE OF MMA
-! PTOT    : (REAL) TOTAL PRESSURE
-! 
-! VARIABLES PASSED OUT
-! SDWEAK : (REAL) SPECTRAL ABSORPTION COEFFICIENT
-! GDINV  : (REAL) LINE WIDTH TO LINE SPACING RATIO, FINE STRUCTURE PARAMETER
-! GDDINV : (REAL) LINE WIDTH TO LINE SPACING RATIO FOR DOPPLER BORADENING,
-!                 FINE STRUCTURE PARAMETER
-! I_MODEL: (INTEGER) MODEL USED FOR SNB FITTING: 1: GOODY, 2 MALKMUS, 3 ELSASSER
-
-! LOCALS
-! PRESSURE_EFFECTIVE : (REAL) EFFECTIVE PRESSURE, (FORMELY PE)
-! DINV_C5H8O2         : INVERSE LINE SPACING [CM] FOR MMA
-
-REAL(EB), INTENT(IN)  :: OMEGA, TEMP, PC5H8O2, PTOT
-REAL(EB), INTENT(OUT) :: SDWEAK, GDINV, GDDINV
-
-INTEGER, INTENT(OUT) :: I_MODEL
-
-REAL(EB) :: Q2OT, AZOT, TOAZ
-REAL(EB) :: GD, PRESSURE_EFFECTIVE
-REAL(EB) :: DINV_C5H8O2 
-
-REAL(EB), PARAMETER :: Q2        = 1.4388_EB   ! Q2 = SPEED_OF_LIGHT*PLANCK_CNS/BOLTZMANN
-REAL(EB), PARAMETER :: WM_C5H8O2 = 100.1158_EB ! NIST WEBBOOK DATA
-INTEGER :: I_BAND, I
-
-LOGICAL :: IN_BAND ! TRUE IF OMEGA IS WITHIN SOME TABULATED BAND, FALSE OTHERWISE
-
-! GET MODEL FOR SNB FITTING
-
-I_MODEL = I_MODEL_C5H8O2
-I_BAND  = 0
-IN_BAND = .FALSE.
-
-! NULLIFY POINTERS IF ASSOCIATED
-IF (ASSOCIATED(BAND_OMEGA))  NULLIFY(BAND_OMEGA)
-IF (ASSOCIATED(KAPPA_D))     NULLIFY(KAPPA_D)
-IF (ASSOCIATED(GAMMA_D))     NULLIFY(GAMMA_D)
-
-! SET INITIAL VALUES TO SDWEAK, GDINV, GDDINV - VALUES ARE RETURNED IF OMEGA IS NOT
-! WITHIN ABSOPRTION BANDS
-SDWEAK = 0.0_EB
-GDINV  = 1._EB 
-GDDINV = 1._EB 
-
-! COMPUTE THERMAL COEFFICIENTS
-Q2OT = -Q2/TEMP       
-AZOT = 273._EB/TEMP
-TOAZ = TEMP/273._EB
-
-! COMPUTE DOPPLER BROADENING HALF WIDTH GD
-GD   = 5.94E-6_EB*OMEGA*SQRT(TOAZ/WM_C5H8O2) !DOPPLER HALF WIDTH [CM^-1]. NASA,222
-
-! COMPUTE AVERAGE LINE SPACING
-! MMA Belongs to point group ? FOR NOW USING DATA FROM Acetylacetone (C5H8O2)
-DINV_C5H8O2=1._EB/(2.0_EB*0.067_EB)
-
-! IF OMEGA IS WITHIN ABSOPRTION BAND, THEN COMPUTE SDWEAK FROM TABULATED DATA
-! THERE ARE 6 BANDS FOR MMA
-! BAND #1: 750 cm-1 - 900 cm-1 
-! BAND #2: 875 cm-1 - 1075 cm-1 
-! BAND #3: 1050 cm-1 - 1275 cm-1 
-! BAND #4: 1250 cm-1 - 1575 cm-1 
-! BAND #5: 1550 cm-1 - 1975 cm-1 
-! BAND #6: 2650 cm-1 - 3275 cm-1 
-
-! GET THE INDEX OF THE BAND
-BAND: DO I = 1, N_BAND_C5H8O2
-   IF ((OM_BND_C5H8O2(I,1)<=OMEGA).AND.(OMEGA<OM_BND_C5H8O2(I,2))) THEN
-     IN_BAND = .TRUE.
-     I_BAND  = I
-     BAND_OMEGA => OM_BND_C5H8O2(I_BAND,:) 
-     EXIT BAND
-   ENDIF
-ENDDO BAND
-
-IF (IN_BAND.AND.(I_BAND==1)) THEN    ! BAND #1: 750 cm-1 - 900 cm-1
-   KAPPA_D => SD1_C5H8O2
-   GAMMA_D => GAMMAD1_C5H8O2
-ELSEIF(IN_BAND.AND.(I_BAND==2)) THEN ! BAND #2: 875 cm-1 - 1075 cm-1
-   KAPPA_D => SD2_C5H8O2
-   GAMMA_D => GAMMAD2_C5H8O2
-ELSEIF(IN_BAND.AND.(I_BAND==3)) THEN ! BAND #3: 1050 cm-1 - 1275 cm-1
-   KAPPA_D => SD3_C5H8O2
-   GAMMA_D => GAMMAD3_C5H8O2
-ELSEIF(IN_BAND.AND.(I_BAND==4)) THEN ! BAND #4: 1250 cm-1 - 1575 cm-1 
-   KAPPA_D => SD4_C5H8O2
-   GAMMA_D => GAMMAD4_C5H8O2
-ELSEIF(IN_BAND.AND.(I_BAND==5)) THEN ! BAND #5: 1550 cm-1 - 1975 cm-1 
-   KAPPA_D => SD5_C5H8O2
-   GAMMA_D => GAMMAD5_C5H8O2
-ELSEIF(IN_BAND.AND.(I_BAND==6)) THEN ! BAND #6: 2650 cm-1 - 3275 cm-1 
-   KAPPA_D => SD6_C5H8O2
-   GAMMA_D => GAMMAD6_C5H8O2
-ENDIF
-
-! COMPUTE PROPERTIES
-IF (IN_BAND) THEN
-   PRESSURE_EFFECTIVE = PTOT+(Be_C5H8O2(I_BAND)-1.0_EB)*PC5H8O2 
-   SDWEAK = GET_SPECTRAL_ABSORPTION(OMEGA,TEMP,SD_C5H8O2_TEMP,BAND_OMEGA,KAPPA_D)
-   GDINV  = GET_SPECTRAL_ABSORPTION(OMEGA,TEMP,SD_C5H8O2_TEMP,BAND_OMEGA,GAMMA_D)
-   GDINV  = GDINV*PRESSURE_EFFECTIVE
-   GDDINV = GD*DINV_C5H8O2
-!***EXPRESS S/D AT STP, AS IS K IN NASA SP-3080
-   SDWEAK = SDWEAK*TOAZ
-ENDIF
-
-! NULLIFY POINTERS
-IF (ASSOCIATED(BAND_OMEGA))  NULLIFY(BAND_OMEGA)
-IF (ASSOCIATED(KAPPA_D))     NULLIFY(KAPPA_D)
-IF (ASSOCIATED(GAMMA_D))     NULLIFY(GAMMA_D)
-
-RETURN
-!------------------------------------------------------------------------------
-END SUBROUTINE C5H8O2
-
-!==============================================================================
-SUBROUTINE C2H6(OMEGA,TEMP,PC2H6,PTOT,SDWEAK,GDINV,GDDINV,I_MODEL)
-!==============================================================================
-! COMPUTE ETHANE OPTICAL PROPERTIES USING SINGLE LINE GROUP
-! 
-! ABSORPTION BANDS: 
-! THERE ARE 3 BANDS FOR Ethane
-! BAND #1: 750 cm-1 - 1100 cm-1 
-! BAND #2: 1250 cm-1 - 1700 cm-1 
-! BAND #3: 2550 cm-1 - 3375 cm-1 
-
-!
-! VARIABLES PASSED IN
-! OMEGA   : (REAL) WAVENUMBER IN CM-1
-! TEMP    : (REAL) TEMPERATURE IN K
-! PC2H6   : (REAL) PARTIAL PRESSURE OF ETHANE
-! PTOT    : (REAL) TOTAL PRESSURE
-! 
-! VARIABLES PASSED OUT
-! SDWEAK : (REAL) SPECTRAL ABSORPTION COEFFICIENT
-! GDINV  : (REAL) LINE WIDTH TO LINE SPACING RATIO, FINE STRUCTURE PARAMETER
-! GDDINV : (REAL) LINE WIDTH TO LINE SPACING RATIO FOR DOPPLER BORADENING,
-!                 FINE STRUCTURE PARAMETER
-! I_MODEL: (INTEGER) MODEL USED FOR SNB FITTING: 1: GOODY, 2 MALKMUS, 3 ELSASSER
-
-! LOCALS
-! PRESSURE_EFFECTIVE : (REAL) EFFECTIVE PRESSURE, (FORMELY PE)
-! DINV_C2H6         : INVERSE LINE SPACING [CM] FOR ETHANE
-
-REAL(EB), INTENT(IN)  :: OMEGA, TEMP, PC2H6, PTOT
-REAL(EB), INTENT(OUT) :: SDWEAK, GDINV, GDDINV
-
-INTEGER, INTENT(OUT) :: I_MODEL
-
-REAL(EB) :: Q2OT, AZOT, TOAZ
-REAL(EB) :: GD, PRESSURE_EFFECTIVE
-REAL(EB) :: DINV_C2H6 
-
-REAL(EB), PARAMETER :: Q2      = 1.4388_EB  ! Q2 = SPEED_OF_LIGHT*PLANCK_CNS/BOLTZMANN
-REAL(EB), PARAMETER :: WM_C2H6 = 30.0690_EB ! NIST WEBBOOK DATA
-INTEGER :: I_BAND, I
-
-LOGICAL :: IN_BAND ! TRUE IF OMEGA IS WITHIN SOME TABULATED BAND, FALSE OTHERWISE
-
-! GET MODEL FOR SNB FITTING
-
-I_MODEL = I_MODEL_C2H6
-I_BAND  = 0
-IN_BAND = .FALSE.
-
-! NULLIFY POINTERS IF ASSOCIATED
-IF (ASSOCIATED(BAND_OMEGA))  NULLIFY(BAND_OMEGA)
-IF (ASSOCIATED(KAPPA_D))     NULLIFY(KAPPA_D)
-IF (ASSOCIATED(GAMMA_D))     NULLIFY(GAMMA_D)
-
-! SET INITIAL VALUES TO SDWEAK, GDINV, GDDINV - VALUES ARE RETURNED IF OMEGA IS NOT
-! WITHIN ABSOPRTION BANDS
-SDWEAK = 0.0_EB
-GDINV  = 1._EB 
-GDDINV = 1._EB 
-
-! COMPUTE THERMAL COEFFICIENTS
-Q2OT = -Q2/TEMP       
-AZOT = 273._EB/TEMP
-TOAZ = TEMP/273._EB
-
-! COMPUTE DOPPLER BROADENING HALF WIDTH GD
-GD   = 5.94E-6_EB*OMEGA*SQRT(TOAZ/WM_C2H6) !DOPPLER HALF WIDTH [CM^-1]. NASA,222
-
-! COMPUTE AVERAGE LINE SPACING
-! ETHANE Belongs to point group D3d with Rotational Constant A = 2.51967 cm-1
-! B = 0.68341 cm-1, and C = 0.68341 cm-1.
-DINV_C2H6=1._EB/(2.0_EB*0.68341_EB)
-
-! IF OMEGA IS WITHIN ABSOPRTION BAND, THEN COMPUTE SDWEAK FROM TABULATED DATA
-! THERE ARE 3 BANDS FOR Ethane
-! BAND #1: 750 cm-1 - 1100 cm-1 
-! BAND #2: 1250 cm-1 - 1700 cm-1 
-! BAND #3: 2550 cm-1 - 3375 cm-1 
-
-! GET THE INDEX OF THE BAND
-BAND: DO I = 1, N_BAND_C2H6
-   IF ((OM_BND_C2H6(I,1)<=OMEGA).AND.(OMEGA<OM_BND_C2H6(I,2))) THEN
-     IN_BAND = .TRUE.
-     I_BAND  = I
-     BAND_OMEGA => OM_BND_C2H6(I_BAND,:) 
-     EXIT BAND
-   ENDIF
-ENDDO BAND
-
-IF (IN_BAND.AND.(I_BAND==1)) THEN    ! BAND #1:  750 cm-1 - 1100 cm-1
-   KAPPA_D => SD1_C2H6
-   GAMMA_D => GAMMAD1_C2H6
-ELSEIF(IN_BAND.AND.(I_BAND==2)) THEN ! BAND #2: 1250 cm-1 - 1700 cm-1 
-   KAPPA_D => SD2_C2H6
-   GAMMA_D => GAMMAD2_C2H6
-ELSEIF(IN_BAND.AND.(I_BAND==3)) THEN ! BAND #3: 2550 cm-1 - 3375 cm-1
-   KAPPA_D => SD3_C2H6
-   GAMMA_D => GAMMAD3_C2H6
-ENDIF
-
-! COMPUTE PROPERTIES
-IF (IN_BAND) THEN
-   PRESSURE_EFFECTIVE = PTOT+(Be_C2H6(I_BAND)-1.0_EB)*PC2H6 
-   SDWEAK = GET_SPECTRAL_ABSORPTION(OMEGA,TEMP,SD_C2H6_TEMP,BAND_OMEGA,KAPPA_D)
-   GDINV  = GET_SPECTRAL_ABSORPTION(OMEGA,TEMP,SD_C2H6_TEMP,BAND_OMEGA,GAMMA_D)
-   GDINV  = GDINV*PRESSURE_EFFECTIVE
-   GDDINV = GD*DINV_C2H6
-!***EXPRESS S/D AT STP, AS IS K IN NASA SP-3080
-   SDWEAK = SDWEAK*TOAZ
-ENDIF
-
-! NULLIFY POINTERS
-IF (ASSOCIATED(BAND_OMEGA))  NULLIFY(BAND_OMEGA)
-IF (ASSOCIATED(KAPPA_D))     NULLIFY(KAPPA_D)
-IF (ASSOCIATED(GAMMA_D))     NULLIFY(GAMMA_D)
-
-RETURN
-!------------------------------------------------------------------------------
-END SUBROUTINE C2H6
-
-!==============================================================================
-SUBROUTINE C2H4(OMEGA,TEMP,PC2H4,PTOT,SDWEAK,GDINV,GDDINV,I_MODEL)
-!==============================================================================
-! COMPUTE ETHYLENE OPTICAL PROPERTIES USING SINGLE LINE GROUP
-! 
-! ABSORPTION BANDS: 
-! THERE ARE 4 BANDS FOR Ethylene
-! BAND #1: 800 cm-1  - 1250 cm-1 
-! BAND #2: 1325 cm-1 - 1575 cm-1 
-! BAND #3: 1775 cm-1 - 2050 cm-1 
-! BAND #4: 2825 cm-1 - 3350 cm-1 
-!
-! VARIABLES PASSED IN
-! OMEGA   : (REAL) WAVENUMBER IN CM-1
-! TEMP    : (REAL) TEMPERATURE IN K
-! PC2H4 : (REAL) PARTIAL PRESSURE OF ETHYLENE
-! PTOT    : (REAL) TOTAL PRESSURE
-! 
-! VARIABLES PASSED OUT
-! SDWEAK : (REAL) SPECTRAL ABSORPTION COEFFICIENT
-! GDINV  : (REAL) LINE WIDTH TO LINE SPACING RATIO, FINE STRUCTURE PARAMETER
-! GDDINV : (REAL) LINE WIDTH TO LINE SPACING RATIO FOR DOPPLER BORADENING,
-!                 FINE STRUCTURE PARAMETER
-! I_MODEL: (INTEGER) MODEL USED FOR SNB FITTING: 1: GOODY, 2 MALKMUS, 3 ELSASSER
-
-! LOCALS
-! PRESSURE_EFFECTIVE : (REAL) EFFECTIVE PRESSURE, (FORMELY PE)
-! DINV_C2H4          : INVERSE LINE SPACING [CM] FOR ETHYLENE
-
-REAL(EB), INTENT(IN)  :: OMEGA, TEMP, PC2H4, PTOT
-REAL(EB), INTENT(OUT) :: SDWEAK, GDINV, GDDINV
-
-INTEGER, INTENT(OUT) :: I_MODEL
-
-REAL(EB) :: Q2OT, AZOT, TOAZ
-REAL(EB) :: GD, PRESSURE_EFFECTIVE
-REAL(EB) :: DINV_C2H4 
-
-REAL(EB), PARAMETER :: Q2      = 1.4388_EB  ! Q2 = SPEED_OF_LIGHT*PLANCK_CNS/BOLTZMANN
-REAL(EB), PARAMETER :: WM_C2H4 = 28.0532_EB ! NIST WEBBOOK DATA
-INTEGER :: I_BAND, I
-
-LOGICAL :: IN_BAND ! TRUE IF OMEGA IS WITHIN SOME TABULATED BAND, FALSE OTHERWISE
-
-! GET MODEL FOR SNB FITTING
-
-I_MODEL = I_MODEL_C2H4
-I_BAND  = 0
-IN_BAND = .FALSE.
-
-! NULLIFY POINTERS IF ASSOCIATED
-IF (ASSOCIATED(BAND_OMEGA))  NULLIFY(BAND_OMEGA)
-IF (ASSOCIATED(KAPPA_D))     NULLIFY(KAPPA_D)
-IF (ASSOCIATED(GAMMA_D))     NULLIFY(GAMMA_D)
-
-! SET INITIAL VALUES TO SDWEAK, GDINV, GDDINV - VALUES ARE RETURNED IF OMEGA IS NOT
-! WITHIN ABSOPRTION BANDS
-SDWEAK = 0.0_EB
-GDINV  = 1._EB 
-GDDINV = 1._EB 
-
-! COMPUTE THERMAL COEFFICIENTS
-Q2OT = -Q2/TEMP       
-AZOT = 273._EB/TEMP
-TOAZ = TEMP/273._EB
-
-! COMPUTE DOPPLER BROADENING HALF WIDTH GD
-GD   = 5.94E-6_EB*OMEGA*SQRT(TOAZ/WM_C2H4) !DOPPLER HALF WIDTH [CM^-1]. NASA,222
-
-! COMPUTE AVERAGE LINE SPACING
-! ETHYLENE Belongs to point group D2h with Rotational Constant A = 4.828 cm-1
-! B = 1.0012 cm-1, and C = 0.8282 cm-1. We make the assumption B ~ C
-DINV_C2H4 = 1._EB/(2.0_EB*1.0012_EB)
-
-! IF OMEGA IS WITHIN ABSOPRTION BAND, THEN COMPUTE SDWEAK FROM TABULATED DATA
-! THERE ARE 4 BANDS FOR Ethylene
-! BAND #1: 800 cm-1  - 1250 cm-1 
-! BAND #2: 1325 cm-1 - 1575 cm-1 
-! BAND #3: 1775 cm-1 - 2050 cm-1 
-! BAND #4: 2825 cm-1 - 3350 cm-1 
-
-! GET THE INDEX OF THE BAND
-BAND: DO I = 1, N_BAND_C2H4
-   IF ((OM_BND_C2H4(I,1)<=OMEGA).AND.(OMEGA<OM_BND_C2H4(I,2))) THEN
-     IN_BAND = .TRUE.
-     I_BAND  = I
-     BAND_OMEGA => OM_BND_C2H4(I_BAND,:) 
-     EXIT BAND
-   ENDIF
-ENDDO BAND
-
-IF (IN_BAND.AND.(I_BAND==1)) THEN    ! BAND #1: 800 cm-1  - 1250 cm-1 
-   KAPPA_D => SD1_C2H4
-   GAMMA_D => GAMMAD1_C2H4
-ELSEIF(IN_BAND.AND.(I_BAND==2)) THEN ! BAND #2: 1325 cm-1 - 1575 cm-1 
-   KAPPA_D => SD2_C2H4
-   GAMMA_D => GAMMAD2_C2H4
-ELSEIF(IN_BAND.AND.(I_BAND==3)) THEN ! BAND #3: 1775 cm-1 - 2050 cm-1
-   KAPPA_D => SD3_C2H4
-   GAMMA_D => GAMMAD3_C2H4
-ELSEIF(IN_BAND.AND.(I_BAND==4)) THEN ! BAND #4: 2825 cm-1 - 3350 cm-1
-   KAPPA_D => SD4_C2H4
-   GAMMA_D => GAMMAD4_C2H4
-ENDIF
-
-! COMPUTE PROPERTIES
-IF (IN_BAND) THEN
-   PRESSURE_EFFECTIVE = PTOT+(Be_C2H4(I_BAND)-1.0_EB)*PC2H4 
-   SDWEAK = GET_SPECTRAL_ABSORPTION(OMEGA,TEMP,SD_C2H4_TEMP,BAND_OMEGA,KAPPA_D)
-   GDINV  = GET_SPECTRAL_ABSORPTION(OMEGA,TEMP,SD_C2H4_TEMP,BAND_OMEGA,GAMMA_D)
-   GDINV  = GDINV*PRESSURE_EFFECTIVE
-   GDDINV = GD*DINV_C2H4
-!***EXPRESS S/D AT STP, AS IS K IN NASA SP-3080
-   SDWEAK = SDWEAK*TOAZ
-ENDIF
-
-! NULLIFY POINTERS
-IF (ASSOCIATED(BAND_OMEGA))  NULLIFY(BAND_OMEGA)
-IF (ASSOCIATED(KAPPA_D))     NULLIFY(KAPPA_D)
-IF (ASSOCIATED(GAMMA_D))     NULLIFY(GAMMA_D)
-
-RETURN
-!------------------------------------------------------------------------------
-END SUBROUTINE C2H4
-
-!==============================================================================
-REAL(EB) FUNCTION GET_SPECTRAL_ABSORPTION(OMEGA,TEMP,SD_TEMP,BOUNDS,ABSORPTION_DATA)
-!==============================================================================
-! RETURNS INTERPOLATED VALUES OF SPECTRAL ABSORPTION
-! NOTE ASSUMED SHAPE
-!
-! Input:
-! OMEGA  : WAVENUMBER, UNIT = 1/cm
-! TEMP   : GAS TEMPERATURE, UNIT = KELVIN
-! SD_TEMP: VECTOR OF TEMPERATURE MEASUREMENTS, DIMENSION(*) UNIT = KELVIN
-! BOUNDS : VECTOR OF WAVENUMBER BOUNDS AND SPACING FOR A GIVEN BAND, DIMENSIONS(3)
-! ABSORPTION_DATA: ARRAY OF SPECIES SPECTRAL MEASUREMENTS, DIMENSIONS(*,*)
-!                 NOTE = FIRST DIMENSION EQUALS TO DIMENSION OF SD_TEMP
-!
-! ACTION PERFORMED: BILINEAR INTERPOLATION OF ABSORPTION_DATA
-!------------------------------------------------------------------------------
-! Variables passed in
-
- REAL(EB), INTENT(IN) :: OMEGA
- REAL(EB), INTENT(IN) :: TEMP
- REAL(EB), DIMENSION(:), INTENT(IN)   :: SD_TEMP, BOUNDS
- REAL(EB), DIMENSION(:,:), INTENT(IN) :: ABSORPTION_DATA 
-
- REAL(EB) :: DELTA_T
- REAL(EB) :: DELTA_W
- REAL(EB) :: W1
- REAL(EB) :: OMEGA_MIN, OMEGA_MAX, DELTA_OMEGA
- REAL(EB) :: TTEMP
- REAL(EB) :: INTERPOLATED_VALUE
-
- INTEGER :: N_TEMP, N_BOUNDS, N_ABS_DATA1, N_ABS_DATA2
- INTEGER :: I_OMEGA, I_TEMP, I_OMEGA1, I_OMEGA2
-
- LOGICAL :: CROSS
-
- CROSS = .FALSE.
-
-! CVL NEED TO LINK MODULE THAT DEFINES ERRMSG
-! PART OF THE CODE COMMENTED FOR NOW
-!  CHARACTER(255) MESSAG
-!  LOGICAL FATAL
-
- N_TEMP      = UBOUND(SD_TEMP,1)  ! GET NUMBER OF TEMPERATURE MEASUREMENTS
- N_BOUNDS    = UBOUND(BOUNDS,1)   ! GET NUMBER OF ELEMENTS IN BOUNDS. SHOULD BE 3
- N_ABS_DATA1 = UBOUND(ABSORPTION_DATA,1) ! GET NUMBER OF TEMPERATURE DATA
- N_ABS_DATA2 = UBOUND(ABSORPTION_DATA,2) ! GET NUMBER OF WAVENUMBER DATA
-
-
-! ! CVL NEED TO LINK MODULE THAT DEFINES ERRMSG
-! ! PART OF THE CODE COMMENTED FOR NOW
-! !-----------------------------TEST DIMENSIONS OF BOUNDS AND ABSORPTION_DATA----
-! ! N_BOUNDS SHOULD BE 3
-! 
-!  IF (N_BOUNDS/=3) THEN 
-!     MESSAG='ERROR IN RADCAL. N_BOUNDS SHOULD BE EQUAL TO 3'
-!     FATAL = .TRUE.
-!     CALL ERRMSG( trim(MESSAG), FATAL )
-!  ENDIF
-! 
-! ! N_ABS_DATA1 SHOULD BE EQUAL TO N_TEMP
-! 
-!  IF (N_ABS_DATA1/=N_TEMP) THEN 
-!     MESSAG='ERROR IN RADCAL. FIRST DIMENSION OF ABSORPTION_DATA SHOULD BE EQUAL TO N_TEMP'
-!     FATAL = .TRUE.
-!     CALL ERRMSG( trim(MESSAG), FATAL )
-!  ENDIF
-
-!------------------------------------------------------------------------------
- OMEGA_MIN   = BOUNDS(1)
- OMEGA_MAX   = BOUNDS(2)
- DELTA_OMEGA = BOUNDS(3)
+! computes the mean absorption coefficients over the whole pathlength
+! integrate planck_mean_absorption*planck over lambda
+
+IF (ALLOCATED(ab_planck)) DEALLOCATE(ab_planck)
+ALLOCATE(ab_planck(nom))
  
-! TREAT SPECIAL CASE WHEN BAND CROSSES THE 1100 CM-1 MARK.
-! CHANGES OF STRIDE
-! BELOW 1100 CM-1, DELTA_OMEGA = 5 CM-1
-! ABOVE 1100 CM-1, DELTA_OMEGA = 25 CM-1
+DO i_wavenumb = 1, nom
+   ab_planck(i_wavenumb) = ab(i_wavenumb)*planck(avg_temp,lambda(i_wavenumb))
+ENDDO
 
- IF ((OMEGA_MIN<=1100.0_EB).and.(OMEGA_MAX>1100.0_EB)) THEN
-   CROSS = .TRUE.
-   IF (OMEGA>1100._EB) DELTA_OMEGA = 25.0_EB
- ENDIF
+planck_mean_absorption = integration(lambda,ab_planck)
 
-! BOUNDS TTEMP SO THAT MIN(SD_TEMP) <= TTEMP <= MAX(SD_TEMP)
-! IF TTEMP < MIN(SD_TEMP) THEN TTEMP := MIN(SD_TEMP)
-! IF MAX(SD_TEMP) < TTEMP THEN TTEMP := MAX(SD_TEMP)
- TTEMP       = MIN(MAXVAL(SD_TEMP),MAX(TEMP,MINVAL(SD_TEMP)))  
+! divide by sigma*pi*temp**4 to get final coefficient planck_mean_absorption 
 
- IF (TTEMP <= MINVAL(SD_TEMP)) THEN
-    I_TEMP  = 1
-    DELTA_T = 0._EB
- ELSE IF (TTEMP >= MAXVAL(SD_TEMP)) THEN
-    I_TEMP  = N_TEMP-1
-    DELTA_T = 1.0_EB
- ELSE
-! FIND INDEX I_TEMP SUCH THAT SD_TEMP(I_TEMP)<TTEMP<=SD_TEMP(I_TEMP+1)
-    DO I_TEMP = 1, N_TEMP-1
-       IF ((SD_TEMP(I_TEMP)<TTEMP).AND.(TTEMP<=SD_TEMP(I_TEMP+1))) EXIT
-    ENDDO
+IF (temp4 > TWO_EPSILON_EB) THEN
+   planck_mean_absorption = planck_mean_absorption/(rpi_sigma*temp4)
+ELSE
+   planck_mean_absorption = 0.0_EB
+ENDIF
 
-    DELTA_T = (TTEMP-SD_TEMP(I_TEMP))/(SD_TEMP(I_TEMP+1)-SD_TEMP(I_TEMP))
- ENDIF
-
- IF ((OMEGA_MIN<=OMEGA).AND.(OMEGA<=OMEGA_MAX)) THEN 
-
-    IF(.NOT.(CROSS)) THEN ! THE BAND IS ON EITHER SIDE OF THE 1100 CM-1 MARK
-
-       IF(OMEGA<OMEGA_MAX) THEN
-! FIND I_OMEGA SUCH THAT OMEGA(I_OMEGA)<=OMEGA<OMEGA(I_OMEGA+1)
-          I_OMEGA = FLOOR((OMEGA-OMEGA_MIN)/DELTA_OMEGA)+1
-          I_OMEGA = MIN(I_OMEGA,N_ABS_DATA2-1)
-          W1      = OMEGA_MIN+DELTA_OMEGA*(REAL(I_OMEGA-1,EB))
-          DELTA_W = (OMEGA-W1)/DELTA_OMEGA
-       ELSE
-! CASE I_OMEGA = OMEGA_MAX => ASSUME THEN THAT I_OMEGA = N_ABS_DATA2 -1 
-          I_OMEGA = N_ABS_DATA2 - 1
-          W1      = OMEGA_MIN+DELTA_OMEGA*(REAL(I_OMEGA-1,EB))
-          DELTA_W = (OMEGA-W1)/DELTA_OMEGA
-       ENDIF
-
-    ELSE ! THE BAND IS ON BOTH SIDE OF 1100 CM-1
-         ! TEST IF OMEGA <= 1100
-       IF(OMEGA<=1100) THEN
-! FIND I_OMEGA SUCH THAT OMEGA(I_OMEGA)<=OMEGA<OMEGA(I_OMEGA+1)
-          I_OMEGA = FLOOR((OMEGA-OMEGA_MIN)/DELTA_OMEGA)+1
-          I_OMEGA = MIN(I_OMEGA,N_ABS_DATA2-1)
-          W1      = OMEGA_MIN+DELTA_OMEGA*(REAL(I_OMEGA-1,EB))
-          DELTA_W = (OMEGA-W1)/DELTA_OMEGA
-       ELSE
-! CASE OMEGA > 1100 CM-1
-          I_OMEGA1 = FLOOR((1100-OMEGA_MIN)/5.0_EB)+1
-          I_OMEGA2 = FLOOR((OMEGA-1100)/DELTA_OMEGA)
-          I_OMEGA  = MIN(I_OMEGA1+I_OMEGA2-1,N_ABS_DATA2-1)
-          W1      = OMEGA_MIN+5.0_EB*(REAL(I_OMEGA1,EB))+DELTA_OMEGA*(REAL(I_OMEGA2-1,EB))
-          DELTA_W = (OMEGA-W1)/DELTA_OMEGA
-       ENDIF
-
-    ENDIF
-
-! PERFORM BILINEAR INTERPOLATION TO OBTAIN VALUES OF SDWEAK
-    INTERPOLATED_VALUE = (1._EB-DELTA_W)*((1._EB-DELTA_T)*ABSORPTION_DATA(I_TEMP,I_OMEGA)+ & 
-                         ABSORPTION_DATA(I_TEMP+1,I_OMEGA)*DELTA_T) +                      &
-                         DELTA_W*(ABSORPTION_DATA(I_TEMP,I_OMEGA+1)*(1._EB-DELTA_T)+       &
-                         ABSORPTION_DATA(I_TEMP+1,I_OMEGA+1)*DELTA_T)
-
- ELSE
-    INTERPOLATED_VALUE = 0._EB
- ENDIF
-
-! ENSURE POSITIVITY
- GET_SPECTRAL_ABSORPTION = MAX(0._EB,INTERPOLATED_VALUE)
 !------------------------------------------------------------------------------
- END FUNCTION GET_SPECTRAL_ABSORPTION
+! computes the total transmissivity over the whole pathlength. it is calculated 
+! ONLY IF twall is strictly greater than 0
+! integrate tau*planck over lambda
+
+IF (twall**4 > TWO_EPSILON_EB) THEN
+
+   IF (ALLOCATED(ab_tau)) DEALLOCATE(ab_tau)
+   ALLOCATE(ab_tau(nom))
+ 
+   IF (ALLOCATED(bb_spect)) DEALLOCATE(bb_spect)
+   ALLOCATE(bb_spect(nom))
+
+
+   DO i_wavenumb = 1, nom
+      bb_spect(i_wavenumb) = planck_wn(twall,wave_number(i_wavenumb))
+      ab_tau(i_wavenumb)   = ttau(npt,i_wavenumb)*bb_spect(i_wavenumb)
+   ENDDO
+
+   total_transmissivity = integration(wave_number,ab_tau)/integration(wave_number,bb_spect)
+
+ENDIF
+
+!------------------------------------------------------------------------------
+! DEALLOCATE ab_planck & ab_tau
+IF (ALLOCATED(ab_planck)) DEALLOCATE(ab_planck)
+IF (ALLOCATED(ab_tau))    DEALLOCATE(ab_tau)
+IF (ALLOCATED(bb_spect))  DEALLOCATE(bb_spect)
+
+RETURN
+!------------------------------------------------------------------------------
+END SUBROUTINE sub_radcal
+
 
 !==============================================================================
-REAL(EB) FUNCTION PLANCK(TEMP,LAMBDA)
+FUNCTION collision_broadening(species_pressure_atm,ptot,azotemp) RESULT(gc)
 !==============================================================================
-! COMPUTES BLACKBODY FUNCTION IN UNITS OF W/M-2/MICRON/SR
-! Input:
-! TEMP: TEMPERATURE, UNIT = KELVIN
-! LAMBDA: WAVELENGTH, UNIT = MicroMETERS
+!! this FUNCTION computes the collision broadening half-width at half-height. 
+!! (calculation proceeds in accordance with the slg model, table 5-18, in nasa sp-3080._EB)
+!! based on eq 5-34 from nasa report sp-3080
+!! RETURNs vector gc that CONTAINS the collision broadening half-width at 
+!! half-height including foreign and self-broadening collision coefficients.
+!! gc units in cm-1
+! checked on 02/11/13
 !------------------------------------------------------------------------------
-! Variables passed in
- REAL (EB), INTENT(IN):: TEMP, LAMBDA
+
+! arguments in
+REAL(EB), DIMENSION(:), INTENT(IN) :: species_pressure_atm ! species partial pressure, units: atm
+REAL(EB), INTENT(IN) :: ptot         ! total pressure, units: atm  
+REAL(EB), INTENT(IN) :: azotemp      ! reCALL azotemp = 273/t, units: NONE
+
+! argument out
+REAL(EB), ALLOCATABLE, DIMENSION(:) :: gc ! units in cm-1
 
 ! local variables
- REAL (EB), PARAMETER :: Q1 = 1.19088E8_EB ! Q1 = 2*SPEED_OF_LIGHT^2*PLANCK_CNST
- REAL (EB), PARAMETER :: Q2 = 14388._EB    ! Q2 = SPEED_OF_LIGHT*PLANCK_CNS/BOLTZMANN
- REAL (EB) :: C   ! C = LAMBDA * TEMP
+REAL(EB) :: p_fuel
 
- IF(ABS(TEMP)<TWO_EPSILON_EB) THEN
-    PLANCK = 0._EB
- ELSE
-    C = TEMP * LAMBDA
-    IF (Q2/C > 38._EB) THEN
-       PLANCK = 0._EB
-    ELSE
-       PLANCK=Q1*(LAMBDA**(-5))/(EXP(Q2/C)-1._EB)
-   END IF
- ENDIF
+INTEGER, DIMENSION(6) :: i_indices
+INTEGER :: i, ii, i_fuel
+
+i_fuel = i_c2h4
+
+! populate i_indices used for computations of gc
+! [note: the total intensity calculated is that which leaves interval j=1.
+! p(i,j) is partial pressure, atm, of species i in  interval j.
+! i=1,2,3,4,5, or 6 implies species is co2, h2o, fuel, co, o2, or n2, resp.]
+
+i_indices(1) = i_co2
+i_indices(2) = i_h2o 
+i_indices(3) = i_fuel     ! fuel
+i_indices(4) = i_co
+i_indices(5) = i_o2
+i_indices(6) = i_n2
+
+! [note: the total intensity calculated is that which leaves interval j=1.
+! p(i,j) is partial pressure, atm, of species i in  interval j.
+! i=1,2,3,4,5, or 6 implies species is co2, h2o, ch4, co, o2, or n2, resp.]
+
+IF(ALLOCATED(gc)) DEALLOCATE(gc)
+ALLOCATE(gc(n_radcal_species))
+gc = 0.0_EB
+
+! compute fuel pressure. remove contribution of non fuel species: 
+! co2, co, h2o, o2, n2
+
+p_fuel = ptot - (species_pressure_atm(i_co2)+species_pressure_atm(i_co)+      &
+               species_pressure_atm(i_h2o)+species_pressure_atm(i_n2)+      &
+               species_pressure_atm(i_o2))
+
+! compute collisional broadening half-width at half height, eq 5-34 nasa report sp-3080
+! initialization
+
+! co2(ii=1), h2o(ii=2), fuel(ii=3), co(ii=4), o2 (ii=5), n2 (ii=6) 
+DO i = 1, 4
+
+! IF the species is not present, i.e. species_pressure_atm(i_indices(i))==0.0_EB
+! THEN set gc to zero and CYCLE. ELSE proceed with calculation
+
+   IF (species_pressure_atm(i_indices(i))==0.0_EB.and.i/=3) CYCLE
+
+! include non-resonant foreign and self-broadening collisions
+   DO ii = 1, 6
+      IF (i_indices(ii) == i_fuel) THEN
+         gc(i_indices(i)) = gc(i_indices(i))+gamma(i,ii)*p_fuel*SQRT(azotemp)
+      ELSE
+         gc(i_indices(i)) = gc(i_indices(i))+gamma(i,ii)*species_pressure_atm(i_indices(ii))*SQRT(azotemp)
+      ENDIF
+   ENDDO
+! include resonant self-broadening collisions
+   IF (i_indices(i) /= i_fuel) THEN
+      gc(i_indices(i))=gc(i_indices(i))+gamma(i,7)*species_pressure_atm(i_indices(i))*azotemp     
+   ELSE
+      gc(i_indices(i))=gc(i_indices(i))+gamma(i,7)*p_fuel*azotemp
+   ENDIF
+ENDDO
+
+! compute the collision broadening coefficient for the fuel
+
+DO i = 1, n_radcal_species
+   IF (i/=i_co2.and.i/=i_o2.and.i/=i_co.and.i/=i_h2o.and.i/=i_n2.and.i/=i_fv) &
+      gc(i) = gc(i_fuel)
+ENDDO
+
 !------------------------------------------------------------------------------
-END FUNCTION PLANCK
+END FUNCTION collision_broadening
+
+!==============================================================================
+SUBROUTINE species_optical_depth(path_length_cm,p_atm,ptot,gc,temp,omega,          &
+                              optical_thickness, curtis_xstar,                  &
+                              curtis_acollision, curtis_aDOppler,optical_depth)
+!==============================================================================
+!! this SUBROUTINE computes the species optical_depth for all the species 
+!! given a wavenumber omega and species optical_thickness.
+!! RETURNs the optical depth for each species using the curtis godson approximation 
+! 
+! 
+! arguments in:
+! ------------
+! path_length_cm   : scalar, physical length, in cm
+! p_atm            : vector, (nradcal_species) species partial pressure, in atm
+! ptot             : scalar, total pressure, in atm
+! gc               : vector, collision-broadened half-width values, in cm-1
+! temp             : scalar, local temperature, in k
+! omega            : scalar, wavenumber, in cm-1
+! optical_thickness: vector (nradcal_species) elements, units in stp.cm.atm
+!
+! arguments inout:
+!-----------------
+! varibles used to compute the curtis-godson approximation PARAMETERs
+! the first values (i.e.) (nradcal_species,1) was either computed previously
+! or is equal to 0 (for the first point)
+! 
+! curtis_xstar      : array of values of xstart.     DIMENSION: (nradcal_species,2).
+! curtis_acollision : array of values of acollision. DIMENSION: (nradcal_species,2).
+! curtis_aDOppler   : array of values of aDOppler.   DIMENSION: (nradcal_species,2).
+! optical_depth     : array of values of elements optical depth, DIMENSIONless
+!                     DIMENSION: (nradcal_species,2).
+!
+!------------------------------------------------------------------------------
+
+IMPLICIT NONE
+
+! variables passed in
+REAL(EB), DIMENSION(:), INTENT(IN) :: p_atm, optical_thickness, gc
+REAL(EB), INTENT(IN) :: ptot, temp, omega, path_length_cm
+
+! variables passed inout
+REAL(EB), DIMENSION(:,:), INTENT(INOUT) :: curtis_xstar, curtis_acollision,   &
+                                          curtis_aDOppler, optical_depth
+
+! local
+REAL(EB) :: x_doppler, x_collision, xstar
+REAL(EB) :: sdweak,    a_collision, a_doppler
+
+INTEGER  :: i_model ! model used for snb fitting: 1: goody, 2 malkmus, 3 elsasser
+INTEGER  :: i
+
+! initialize x_doppler, x_collision
+x_doppler   = 0.0_EB
+x_collision = 0.0_EB
+
+! initialize curtis_xstar(:,2), curtis_acollision(:,2), 
+!            curtis_aDOppler(:,2), optical_depth(:,2)
+! these values will be updated IF sdweak of a given species is greater than TINY_EB
+
+curtis_xstar(:,2)      = curtis_xstar(:,1)
+curtis_acollision(:,2) = curtis_acollision(:,1)  
+curtis_aDOppler(:,2)   = curtis_aDOppler(:,1)
+optical_depth(:,2)     = optical_depth(:,1)
+
+! loop species computes the contribution of each species to tau
+
+lspecies: DO i = 1, n_radcal_species
+   IF (p_atm(i) <= TWO_EPSILON_EB) CYCLE lspecies
+
+   i_model = 1 ! enforce goody model when not specIFied  
+
+   sdweak      = TINY_EB  ! average spectral absorption  coefficient. units: (atm^-1.cm^-1)
+   a_collision = 1.0_EB  ! fine structure PARAMETER. DIMENSIONless
+   a_doppler   = 1.0_EB
+
+   ! IF the species is present in this segment, get sdweak, a_collision, a_doppler.
+   ! otherwise USE 0.0_EB, 1.0_EB, 1.0_EB
+ 
+   SELECT CASE (i)
+      CASE (i_co2)
+         CALL co2(    omega,temp,gc(i_co2), sdweak,a_collision,a_doppler,i_model)
+      CASE (i_h2o)
+         CALL h2o(    omega,temp,gc(i_h2o), sdweak,a_collision,a_doppler,i_model)
+      CASE (i_co)
+         CALL co(     omega,temp,gc(i_co),  sdweak,a_collision,a_doppler,i_model)
+      CASE (i_ch4_old)
+         CALL ch4_old(omega,temp,p_atm(i_ch4_old),  ptot,gc(i_ch4_old),sdweak,a_collision,a_doppler,i_model)
+      CASE (i_ch4)
+         CALL ch4(    omega,temp,p_atm(i_ch4),  ptot,gc(i_ch4),sdweak,a_collision,a_doppler,i_model)
+      CASE (i_c3h8)
+         CALL c3h8(   omega,temp,p_atm(i_c3h8), ptot,sdweak,a_collision,a_doppler,i_model)
+      CASE (i_c7h16)
+         CALL c7h16(  omega,temp,p_atm(i_c7h16),ptot,sdweak,a_collision,a_doppler,i_model)
+      CASE (i_ch3oh)
+         CALL ch3oh(  omega,temp,p_atm(i_ch3oh),ptot,sdweak,a_collision,a_doppler,i_model)
+      CASE (i_c7h8)
+         CALL c7h8(   omega,temp,p_atm(i_c7h8), ptot,sdweak,a_collision,a_doppler,i_model)
+      CASE (i_c3h6)
+         CALL c3h6(   omega,temp,p_atm(i_c3h6), ptot,sdweak,a_collision,a_doppler,i_model)
+      CASE (i_mma)
+         CALL c5h8o2( omega,temp,p_atm(i_mma),  ptot,sdweak,a_collision,a_doppler,i_model)
+      CASE (i_c2h6)
+         CALL c2h6(   omega,temp,p_atm(i_c2h6), ptot,sdweak,a_collision,a_doppler,i_model)
+      CASE (i_c2h4)
+         CALL c2h4(   omega,temp,p_atm(i_c2h4), ptot,sdweak,a_collision,a_doppler,i_model)
+      CASE (i_fv)
+      CASE DEFAULT
+         CYCLE lspecies
+      END SELECT
+
+   ! IF (sdweak <= TINY_EB) THEN the species DOes not participate on this segments. skip the calculation of 
+   ! optical_depth(:,2). IF not, proceed with calculation of x_collision, x_doppler, etc...
+
+   IF (i/=i_fv) THEN
+
+      IF(sdweak <= TINY_EB) CYCLE lspecies
+
+      xstar             = sdweak*optical_thickness(i) ! optical depth for the weak line limit.  sp-3080 eq. 5-27
+      curtis_xstar(i,2) = curtis_xstar(i,1) + xstar
+      IF (curtis_xstar(i,2)>=TINY_EB) THEN
+      ! collision broadening
+         curtis_acollision(i,2) = 1.0_EB/curtis_xstar(i,2)*(curtis_acollision(i,1)*curtis_xstar(i,1)+ &
+         a_collision*xstar)
+      ! DOppler broadening
+         curtis_aDOppler(i,2) = 1.0_EB/curtis_xstar(i,2)*(curtis_aDOppler(i,1)*curtis_xstar(i,1)+ &
+         a_doppler*xstar)
+      ELSE
+         curtis_acollision(i,2) = 1.0_EB
+         curtis_aDOppler(i,2)   = 1.0_EB
+      ENDIF
+
+      IF (curtis_xstar(i,2) >= 1.e-20_EB .AND. curtis_acollision(i,2)>0._EB) THEN
+!------------------------------------------------------------------------------
+! compute the optical depth for the ith species using ranDOM band model
+! composed of lines of DOppler-lorentz shape with:
+! ranDOM distribution of either equal strength lines for DOppler or decaying
+! USE appropriate model for lorentz line (elsasser,goody,malkmus)
+! compute optical depth for pure DOppler curve of growth 
+         x_doppler = growth_doppler(curtis_xstar(i,2),curtis_aDOppler(i,2),i_model)
+ 
+! lorentz optical depth 
+! compute optical depth for pure collision curve of growth 
+         SELECT CASE (i_model)
+            CASE(1)  ! goody model
+               x_collision = goody(curtis_xstar(i,2),curtis_acollision(i,2))
+            CASE(2)  ! malkmus model
+               x_collision = malkmus(curtis_xstar(i,2),curtis_acollision(i,2))
+            CASE(3)  ! elsasser model
+               x_collision = elsasser(curtis_xstar(i,2),curtis_acollision(i,2))
+            CASE DEFAULT
+               x_collision = goody(curtis_xstar(i,2),curtis_acollision(i,2))
+         END SELECT
+
+      ! compute optical depth
+         optical_depth(i,2) = combined_lines(x_collision, x_doppler, curtis_xstar(i,2))
+
+      ELSE ! xstar < 1.e-20_EB very weak line
+         optical_depth(i,2) = curtis_xstar(i,2)
+      ENDIF ! condition (xstar >= 1.e-20_EB)
+
+   ! determine optical depth of soot
+   ELSE ! treatment for soot volume fraction
+      CALL pod(omega, p_atm(i),path_length_cm,xstar)
+      curtis_xstar(i,2)  = curtis_xstar(i,1) + xstar
+      optical_depth(i,2) = curtis_xstar(i,2)
+
+   ENDIF
+
+END DO lspecies
+
+RETURN
+!------------------------------------------------------------------------------
+END SUBROUTINE species_optical_depth
+
+!==============================================================================
+ELEMENTAL FUNCTION growth_doppler(xstar,a_doppler,i_model) RESULT(x_doppler)
+!==============================================================================
+!! this FUNCTION computes the DOppler curve of growth.
+!! two CASEs
+!! 1) equally intense, ranDOMly spaced DOppler line (i_model =1 or 3)
+!! 2) geometriCALLy decaying strength, ranDOMly spaced DOppler line (i_model=2)
+!
+! variables in:
+! xstar: optical pathlength * mean absorption coefficient
+! a_doppler: DOppler fine structure PARAMETER
+! i_model: model used for snb fitting: 1: goody, 2 malkmus, 3 elsasser
+!
+! variable out
+! x_doppler
+
+! variables in:
+REAL(EB), INTENT(IN) :: xstar
+REAL(EB), INTENT(IN) :: a_doppler
+INTEGER,  INTENT(IN) :: i_model
+
+! variable out
+REAL(EB) :: x_doppler
+
+! source: ! sp-3080, chap 3.2.5 e and f. see page 105.
+
+SELECT CASE(i_model)
+CASE(1) ! goody model: equally intense, ranDOMly spaced DOppler line 
+      x_doppler = 1.7_EB*a_doppler*SQRT(LOG(1._EB+(0.58824_EB*xstar/a_doppler)**2)) 
+CASE(2) ! malkmus: geometriCALLy decaying strength, ranDOMly spaced DOppler line
+      x_doppler = 0.937_EB*a_doppler*(LOG(1.0_EB+(1.07_EB*xstar/a_doppler)**(0.6666_EB)))* &
+                                 SQRT(LOG(1.0_EB+(1.07_EB*xstar/a_doppler)**(0.6666_EB)))
+CASE(3)
+      x_doppler = 1.7_EB*a_doppler*SQRT(LOG(1._EB+(0.58824_EB*xstar/a_doppler)**2)) 
+CASE DEFAULT
+      x_doppler = 1.7_EB*a_doppler*SQRT(LOG(1._EB+(0.58824_EB*xstar/a_doppler)**2)) 
+END SELECT
+!------------------------------------------------------------------------------
+END FUNCTION growth_doppler
+
+!==============================================================================
+ELEMENTAL FUNCTION combined_lines(x_collision, x_doppler, xstar) RESULT(optical_depth)
+!==============================================================================
+!! compute the combined collision and DOppler optical depths and 
+! the optical depth based on EXPression given in sp-3080 eq 5-26 & eq 5-25 (p220)
+!
+! variables in:
+! x_collision : lorenz curve of growth
+! x_doppler: DOppler curve of growth
+! xstar: optical pathlength * mean absorption coefficient
+!
+! variable out
+! optical_depth
+
+! variables passed in
+REAL(EB), INTENT(IN) :: x_collision
+REAL(EB), INTENT(IN) :: x_doppler
+REAL(EB), INTENT(IN) :: xstar
+
+! variable passed output
+REAL(EB) :: optical_depth
+
+! local variables
+REAL(EB) :: y_doppler, y_collision, y_combined
+
+! compute the combined collision and DOppler optical depths y_combined
+
+y_doppler   = MAX(1._EB-(x_doppler/xstar)**2,TWO_EPSILON_EB)
+y_collision = MAX(1._EB-(x_collision/xstar)**2,TWO_EPSILON_EB)
+! sp-3080 eq. 5-26
+y_combined = MAX(1._EB/y_collision**2+1._EB/y_doppler**2-1._EB,1._EB)
+! finally compute optical depth
+! sp-3080 eq. 5-25
+optical_depth = xstar*SQRT(1._EB-(y_combined**(-0.5_EB))) 
+
+!------------------------------------------------------------------------------
+END FUNCTION combined_lines
+
+
+!==============================================================================
+ELEMENTAL FUNCTION goody(xstar,a_collision) RESULT(x_goody)
+!==============================================================================
+!! FUNCTION computes the equivalent line width over the average line spacing
+!! using the goody statistical model
+! 
+! variables in:
+! xstar       : optical pathlength * mean absorption coefficient
+! a_collision : fine structure PARAMETER
+!
+! RETURNs x_goody
+  
+IMPLICIT NONE
+
+REAL(EB), INTENT(IN) :: xstar
+REAL(EB), INTENT(IN) :: a_collision
+
+REAL(EB)  :: x_goody
+
+IF (xstar<1.0e-15_EB) THEN ! weak line limit
+x_goody = xstar
+ELSEIF(xstar>1.0e+5_EB) THEN ! strong line limit
+x_goody = SQRT(4.0_EB*xstar*a_collision)
+ELSE                        ! formulation to avoid division by zero
+x_goody = SQRT(a_collision)*xstar/SQRT(a_collision+0.25_EB*xstar)
+ENDIF
+
+RETURN
+!------------------------------------------------------------------------------
+END FUNCTION goody
+
+!==============================================================================
+ELEMENTAL FUNCTION malkmus(xstar,a_collision) RESULT(x_malkmus)
+!==============================================================================
+!
+!! FUNCTION computes the equivalent line width over the average line spacing
+!! using the malkmus statistical model
+! 
+! variables in:
+! xstar       : optical pathlength * mean absorption coefficient
+! a_collision : fine structure PARAMETER
+!
+! RETURNs x_malkmus (optical depth for a pure collision curve)
+  
+IMPLICIT NONE
+
+! variables passed in
+REAL(EB), INTENT(IN) :: xstar
+REAL(EB), INTENT(IN) :: a_collision
+
+REAL(EB)  :: x_malkmus
+
+IF    (xstar < 1.0e-15_EB) THEN ! weak line limit
+x_malkmus = xstar
+ELSEIF(xstar > 1.0e+5_EB ) THEN ! strong line limit
+x_malkmus = SQRT(4.0_EB*xstar*a_collision)
+ELSE             ! formulation to avoid division by a_collision IF equal to zero
+x_malkmus = SQRT(4.0_EB*a_collision**2+4.0_EB*a_collision*xstar)-2.0_EB*a_collision
+ENDIF
+
+RETURN
+!------------------------------------------------------------------------------
+END FUNCTION malkmus
+
+!==============================================================================
+FUNCTION elsasser(xstar,a_collision) RESULT(x_elsasser)
+USE MATH_FUNCTIONS, ONLY : ERF
+!==============================================================================
+!! FUNCTION computes the equivalent line width over the average line spacing
+!! using the elsasser statistical model
+! 
+! variables in:
+! xstar       : optical pathlength * mean absorption coefficient
+! a_collision : fine structure PARAMETER
+!
+! RETURNs x_elsasser
+!------------------------------------------------------------------------------
+
+IMPLICIT NONE
+
+! variables passed in
+REAL(EB), INTENT(IN) :: xstar
+REAL(EB), INTENT(IN) :: a_collision
+
+! variables passed out
+REAL(EB)  :: x_elsasser
+
+! local variables
+
+REAL(EB) :: x_collision
+
+! the following computes the optical depth, x_collision, for any species represented 
+! by the elsasser model using the godson equation and an approximation to the ladenberg-reiche
+! FUNCTION as recommENDed by brosmer and tien (jqsrt 33,p 521), eq. 2, page 523 
+
+x_collision = SQRT(4.0_EB*a_collision)*xstar/SQRT(16.0_EB/pi*a_collision+xstar)
+
+x_elsasser  = -LOG(1.0_EB-ERF(x_collision)+TWO_EPSILON_EB)
+
+!------------------------------------------------------------------------------
+RETURN
+END FUNCTION elsasser
+
+!==============================================================================
+pure FUNCTION partition_FUNCTION(transition_wn,degeneracy,temp)
+!==============================================================================
+!! This FUNCTION calculate the partition_FUNCTION of an harmonic 
+!! quantum oscillator knowing the dIFferent frequencies and degeneracies
+!------------------------------------------------------------------------------
+
+IMPLICIT NONE
+
+! Variable passed in 
+REAL(EB), DIMENSION(:), INTENT(IN) :: transition_wn ! Wavenumber associated with
+                                                   ! a vibration mode
+
+INTEGER, DIMENSION(:), INTENT(IN) :: degeneracy  ! Denegeracy of energy level
+                                                ! associated with a vibration
+                                                ! mode
+
+REAL(EB), INTENT(IN) :: temp                     ! Temperature in Kelvin
+
+! Variable passed out
+REAL(EB) :: partition_FUNCTION
+
+! Local variables
+REAL(EB), PARAMETER :: q2 = 1.4388_EB   ! speed_of_light*planck_cns/boltzmann
+REAL(EB) :: q2_over_T
+INTEGER  :: n_mode
+INTEGER  :: i_mode
+
+q2_over_T = q2/temp 
+n_mode    = SIZE(transition_wn)
+
+partition_FUNCTION = 1.0_EB
+
+DO i_mode = 1, n_mode
+partition_FUNCTION = partition_FUNCTION* &
+         (1.0_EB-EXP(-q2_over_T*transition_wn(i_mode)))**(degeneracy(i_mode))
+ENDDO
+
+!------------------------------------------------------------------------------
+RETURN
+END FUNCTION partition_FUNCTION
+
+
+!==============================================================================
+pure SUBROUTINE approx_vib_rot(transition_matrix,line_strength,om,temp,omega,  &
+                              bcnt,be,gc1, gd, gdinv,gddinv,sdweak,line_spacing)
+!==============================================================================
+!! just overlapping spectral lines
+! 
+! 
+!------------------------------------------------------------------------------
+
+IMPLICIT NONE
+
+! Variable passed in
+INTEGER, DIMENSION(:,:), INTENT(IN) :: transition_matrix ! Square matrix
+REAL(EB), DIMENSION(:),   INTENT(IN) :: bcnt ! Band center in wavenumbers (cm-1)
+REAL(EB), DIMENSION(:),   INTENT(IN) :: om
+REAL(EB), DIMENSION(:),   INTENT(IN) :: line_strength
+
+REAL(EB), INTENT(IN) :: omega ! Wavenumber of sought properties
+REAL(EB), INTENT(IN) :: be    ! Rotational constant
+REAL(EB), INTENT(IN) :: temp  ! Temperature in Kelvin
+REAL(EB), INTENT(IN) :: gc1
+REAL(EB), INTENT(IN) :: gd
+REAL(EB), INTENT(IN), optional :: line_spacing ! Optional
+
+! Variables passed out
+REAL(EB), INTENT(OUT) :: sdweak
+REAL(EB), INTENT(OUT) :: gdinv
+REAL(EB), INTENT(OUT) :: gddinv
+
+! local Variables
+REAL(EB), DIMENSION(:), ALLOCATABLE :: transition_wn, atot
+REAL(EB), PARAMETER :: q2 = 1.4388_EB   ! speed_of_light*planck_cns/boltzmann
+REAL(EB), PARAMETER :: t0 = 300._EB     ! reference temperature, in kelvin
+
+REAL(EB) :: t0ot
+REAL(EB) :: q2ot
+REAL(EB) :: dinv
+
+INTEGER  :: n_transitions
+INTEGER  :: n_vibrations
+
+INTEGER :: i_transition
+
+sdweak  =  0.0_EB
+t0ot    =  t0/temp
+q2ot    = -q2/temp
+
+n_transitions = SIZE(transition_matrix,2)
+n_vibrations  = SIZE(transition_matrix,1)
+
+IF (.not.present(line_spacing)) THEN 
+dinv = 1.0_EB/(4.0_EB*be)
+ELSE
+dinv = line_spacing
+ENDIF
+
+! compute the associated transition wavenumbers
+! ALLOCATE variable transition_wn
+
+IF (ALLOCATED(transition_wn)) DEALLOCATE(transition_wn)
+ALLOCATE(transition_wn(n_vibrations))
+
+! ALLOCATE variable atot
+
+IF (ALLOCATED(atot)) DEALLOCATE(atot)
+ALLOCATE(atot(n_vibrations))
+
+! Calculate the vector of tranistion wavenumbers
+transition_wn = MATMUL(transition_matrix,om)
+
+! Compute the dIFferent line intensities at temperature temp
+
+DO i_transition = 1, n_transitions
+atot(i_transition) = line_strength(i_transition)*t0ot*(1.0_EB-EXP(q2ot*transition_wn(i_transition)))/ & 
+partition_FUNCTION(om,transition_matrix(i_transition,:),temp)
+ENDDO
+
+! compute the mean absorption coefficient using eq 11-44 from penner in quantitative molecular spectrometry, 1955
+! sdweak = SUM(atot*propability) 
+! just overlapping spectral line
+
+DO i_transition = 1, n_transitions
+sdweak = sdweak + atot(i_transition)*(-q2ot/(4._EB*be))*ABS(omega-bcnt(i_transition))* & 
+                  EXP(q2ot/(4._EB*be)*(omega-bcnt(i_transition))**2)
+ENDDO
+
+gdinv  = gc1*dinv
+gddinv = gd*dinv
+!EXPress s/d at stp, as is in nasa sp-3080
+sdweak = sdweak*temp/273._EB
+
+!------------------------------------------------------------------------------
+RETURN 
+END SUBROUTINE Approx_Vib_Rot
+
+!==============================================================================
+ELEMENTAL SUBROUTINE co2(omega,temp,gc1,sdweak,gdinv,gddinv,i_model)
+!==============================================================================
+! i_model: (INTEGER) model used for snb fitting: 1: goody, 2 malkmus, 3 elsasser
+IMPLICIT NONE
+
+! variables passed in
+REAL(EB), INTENT(IN) :: omega ! wavenumber, units in cm-1
+REAL(EB), INTENT(IN) :: temp  ! temperature, units in kelvin
+REAL(EB), INTENT(IN) :: gc1   ! half width at half height for lorentz line, units in cm-1
+
+! variables passed out
+REAL(EB), INTENT(OUT):: sdweak  ! narrow band mean ABS(ortion coefficient, units in cm-1
+REAL(EB), INTENT(OUT):: gdinv   ! line width to line spacing ration for lorentz lines
+REAL(EB), INTENT(OUT):: gddinv  ! line width to line spacing ration for DOppler
+INTEGER,  INTENT(OUT):: i_model ! model used for snb fitting: 1: goody, 2 malkmus, 3 elsasser
+
+! local variables
+INTEGER  :: i,j,k,l
+
+REAL(EB), PARAMETER :: wm_co2 = 44._EB      ! molar mass (in gram) of co2
+REAL(EB), PARAMETER :: be     = 0.391635_EB ! rotational constant co2
+REAL(EB), PARAMETER :: q2     = 1.4388_EB   ! speed_of_light*planck_cns/boltzmann
+REAL(EB), PARAMETER :: t0     = 300._EB     ! reference temperature, in kelvin
+
+REAL(EB), PARAMETER :: om1 = 1354.91_EB  ! fundamental frequency for transition (000)->(100), units cm-1
+REAL(EB), PARAMETER :: om2 =  673.0_EB   ! fundamental frequency for transition (000)->(010), units cm-1
+REAL(EB), PARAMETER :: om3 = 2396.49_EB  ! fundamental frequency for transition (000)->(001), units cm-1
+
+REAL(EB), DIMENSION(3) :: atot, bcnt
+REAL(EB), DIMENSION(:), ALLOCATABLE  :: om, line_strength
+INTEGER, DIMENSION(:,:), ALLOCATABLE :: transition_matrix
+
+REAL(EB) :: aa,bb,cc,qq,ee,ff,gg, &
+         sminus,splus,sdstrg,gd, &
+         x13,x23,x33,xbar,om12,alpha,omprim,v3,gam,  &
+         omvv3,delta,v,omvbar,f1,f2,unflo1,unflo2,unflo3,test, &
+         vbar1,oma,omb,ttemp,tt,t1,tw,ww,temp1,temp2,temp3,    &
+         dinv,a,b,d,g,w1,dinv1,dinv2,dinv3,q2ot,t0ot,q2ot0
+
+i_model = i_model_co2 
+
+! initialize sdweak, gdinv, gddinv
+
+sdweak = 0._EB
+gdinv  = 1._EB
+gddinv = 1._EB
+
+IF (omega > 5725.0_EB) THEN
+sdweak = 0.0_EB
+gdinv  = 1.0_EB
+gddinv = 1.0_EB
+ELSE
+  
+! compute DOppler broadening half-widths sp-3080 eq: 5-35
+gd = 5.94e-6_EB*omega*SQRT(temp/(273.0_EB*wm_co2))
+
+IF(omega>4550.0_EB) THEN
+! contribution to 2.0 micron band from:
+! (000)-(041)
+! (000)-(121),
+! (000)-(201) transitions.
+
+! band center 
+
+   bcnt(1) = 4860.5_EB ! (000)-(041)
+   bcnt(2) = 4983.5_EB ! (000)-(121)
+   bcnt(3) = 5109.0_EB ! (000)-(201)
+      
+   IF(ALLOCATED(transition_matrix)) DEALLOCATE(transition_matrix)
+   ALLOCATE(transition_matrix(3,3))
+
+   IF(ALLOCATED(line_strength)) DEALLOCATE(line_strength)
+   ALLOCATE(line_strength(3))
+
+   IF(ALLOCATED(om)) DEALLOCATE(om)
+   ALLOCATE(om(3))
+
+   ! ! compute the associated transition wavenumbers
+     
+   transition_matrix(1,1:3) = [0,4,1] ! (000)-(041)
+   transition_matrix(2,1:3) = [1,2,1] ! (000)-(121)
+   transition_matrix(3,1:3) = [2,0,1] ! (000)-(201)
+
+   om(1) = om1
+   om(2) = om2
+   om(3) = om3
+
+!! compute the integrated intensity of the band
+!! 0.272: integrated intensity (in cm-2-atm-1) of band bcnt(1) = 4860.5_EB ((041)-(000)) at t=300k
+!! 1.01 : integrated intensity (in cm-2-atm-1) of band bcnt(2) = 4983.5_EB ((121)-(000)) at t=300k
+!! 0.426: integrated intensity (in cm-2-atm-1) of band bcnt(3) = 5109  _EB ((201)-(000)) at t=300k
+!! values from penner and varanasi jqsrt vol 4 pp 799-806, 1964
+      
+   line_strength = [0.272_EB,1.01_EB,0.426_EB]
+
+   CALL approx_vib_rot(transition_matrix,line_strength,om,temp,omega,bcnt,be,gc1, &
+                        gd,gdinv,gddinv,sdweak)
+ 
+ELSEIF((omega<=4550._EB).and.(omega>3800._EB)) THEN
+   sdweak = 0.0_EB
+   gdinv  = 1.0_EB
+   gddinv = 1.0_EB
+
+ELSEIF((omega<=3800._EB).and.(omega>3050._EB)) THEN
+   b   = 0.391635_EB
+   a   = 0.0030875_EB
+
+   x13 = -19.37_EB
+   x23 = -12.53_EB
+   x33 = -12.63_EB
+
+   t0ot = t0/temp
+
+   q2ot  = -q2/temp
+   q2ot0 = -q2/t0
+
+   xbar  = 0.5_EB*(.5_EB*x13+x23)
+   om12  = 0.5_EB*(.5_EB*om1+om2)
+
+   sdweak = 0._EB
+   sdstrg = 0._EB
+
+!calculate absorption coef. and line spacing PARAMETER for 2.7 micron band
+   l = 1
+!contribution to 2.7 micron band from (000)-(021) and (010)-(031) trans.
+   alpha  = 28.5_EB
+   omprim = 2.0_EB*om2+om3
+
+   l120: DO
+      aa = alpha*b*q2/(a*(1._EB-EXP(om3*q2ot0))*(1._EB-EXP(om12*q2ot0))**3*(1._EB+EXP(om12*q2ot0))*(1._EB-EXP(omprim*q2ot0)))
+      bb = (1._EB-EXP(q2ot*omega))*(1._EB-EXP(q2ot*om3))* (1._EB-EXP(om12*q2ot))**3*(1._EB+EXP(om12*q2ot)) &
+            *(1._EB-EXP(q2ot*omprim))
+      cc = aa*bb*omega*t0/temp**2
+
+      l102: DO j = 1, 20
+         v = REAL(j-1,EB)
+         IF ((j/2*2)==j) g = (v+1.0_EB)*(v+3.0_EB)/4.0_EB ! replace with modulo 2
+         IF ((j/2*2)/=j) g = (v+2.0_EB)*(v+2.0_EB)/4.0_EB ! replace with modulo 2
+
+         vbar1 = -1.0_EB+(v+3.0_EB)*(v+4.0_EB)/(v+2.0_EB)/6.0_EB
+
+         IF(j/2*2==j) vbar1 = -1.0_EB+(v+5.0_EB)/6.0_EB ! replace with modulo 2
+
+         l101: DO k = 1, 10
+            v3  = REAL(k-1,EB)
+            qq  = (v3+1)*g*EXP((v3*om3+v*om12)*q2ot)*(vbar1+1.0_EB)
+            gam = b-a*(v3+1._EB)
+
+            IF(l==2) THEN
+               omvv3 = 3728.0_EB-5.0_EB*v-47._EB*v3
+               IF (v<=TWO_EPSILON_EB) omvv3 = 3715._EB-47._EB*v3
+            ELSE
+               omvv3 = 3598.0_EB-18.0_EB*v-47.0_EB*v3
+               IF (v<=TWO_EPSILON_EB) omvv3 = 3613.0_EB-47.0_EB*v3
+            ENDIF
+ 
+            delta = a*(omega-omvv3)
+
+            IF ((gam**2)<=delta) CYCLE l102
+
+            d      = 2.0_EB*SQRT(gam**2-delta)
+            omvbar = omvv3*(1.0_EB-EXP(omvv3*q2ot))
+            f1     = gam - 0.5_EB*d
+            f2     = gam + 0.5_EB*d
+            ee     = q2*gam/(a**2*temp)
+            unflo1 = ee*delta*(1.0_EB + 0.5_EB*a/gam)
+
+            IF(unflo1<=-78.0_EB) CYCLE l102
+
+            unflo2 = ee*2.0_EB*gam*f1
+
+            IF(unflo2>=78.0_EB) CYCLE l102
+
+            ff     = EXP(ee*delta*(1.0_EB+0.5_EB*a/gam))
+            sminus = cc*qq/omvbar*ABS(f1)*ff*EXP(-ee*2.0_EB*gam*f1)
+            unflo3 = ee*2.0_EB*gam*f2
+
+            IF(unflo3>=78.0_EB) THEN
+               splus = 0.0_EB
+            ELSE
+               splus = cc*qq/omvbar*ABS(f2)*ff*EXP(-ee*2.0_EB*gam*f2)
+            ENDIF
+
+            gg     = sdweak
+            sdweak = (sminus+splus)/d+sdweak
+            test   = (sdweak-gg)/sdweak
+            IF(test<.0001_EB) CYCLE l102
+            sdstrg = SQRT(0.5_EB*g)*(SQRT(sminus)+SQRT(splus))/d+sdstrg
+         ENDDO l101
+      ENDDO l102
+
+      IF(l==2) exit l120
+!contribution to 2.7 micron band from (000)-(101) and (010)-(111) trans.
+      alpha  = 42.3_EB
+      omprim = om1+om3
+      l      = 2
+   ENDDO l120
+!calculate absorption coef and line spacing PARAMETER for 4.3 micron band
+   IF(sdweak<=TINY_EB) THEN
+      sdweak = 0.0_EB
+      gdinv  = 1.0_EB
+      gddinv = 1.0_EB
+   ELSE
+      dinv   = sdstrg*sdstrg/sdweak
+      gdinv  = gc1*dinv
+      gddinv = gd*dinv
+!***EXPress s/d at stp, as is k in nasa sp-3080
+      sdweak = sdweak*temp/273.0_EB
+!         ENDIF
+   ENDIF
+
+ELSEIF((omega<=3050.0_EB).and.(omega>2474.0_EB)) THEN
+   sdweak = 0.0_EB
+   gdinv  = 1.0_EB
+   gddinv = 1.0_EB
+
+ELSEIF((omega<=2474.0_EB).and.(omega>1975.0_EB)) THEN
+
+b = .391635_EB
+a = .0030875_EB
+
+x13 = -19.37_EB
+x23 = -12.53_EB
+x33 = -12.63_EB
+
+xbar = 0.5_EB*(0.5_EB*x13+x23)
+om12 = 0.5_EB*(0.5_EB*om1+om2)
+
+sdweak=0.0_EB
+sdstrg=0.0_EB
+
+! dipole approximation
+
+IF(omega<=2395.0_EB) THEN
+      alpha  = 2700.0_EB
+      omprim = om3
+      aa     = alpha*b*q2/(a*(1.0_EB-EXP(-om3*q2/t0))*(1.0_EB-EXP(-om12*q2 /t0))**3* & 
+                              (1.0_EB+EXP(-om12*q2/t0))*(1.0_EB-EXP(-omprim*q2/t0)))
+      bb     = (1._EB-EXP(-q2*omega/temp))*(1.0_EB-EXP(-q2*om3/temp))*(1.0_EB-EXP(-om12*q2/temp))**3*&
+               (1._EB+EXP(-om12*q2/temp))*(1.0_EB-EXP(-q2*omprim/temp))
+      cc     = aa*bb*omega*t0/temp**2
+
+      l202a: DO j = 1, 20
+         v  = REAL(j-1,EB)
+
+         IF(j/2*2==j) g = 0.25_EB*(v+1.0_EB)*(v+3.0_EB) ! replace with modulo
+         IF(j/2*2/=j) g = 0.25_EB*(v+2.0_EB)*(v+2.0_EB) ! replace with modulo
+
+         l201a: DO k=1,10
+
+            v3    = REAL(k-1,EB)
+            qq    = (v3+1.0_EB)*g*EXP(-(v3*om3+v*om12)*q2/temp)
+            gam   = b-a*(v3+1.0_EB)
+            omvv3 = om3 + 0.5_EB*x13 + x23 + 2.0_EB*x33 + xbar*v + 2.0_EB*x33*v3
+            delta = a*(omega-omvv3)
+
+            IF(gam*gam<=delta) CYCLE l202a
+
+            d      = 2.0_EB*SQRT(gam**2-delta)
+            omvbar = omvv3*(1._EB-EXP(-omvv3*q2/temp))
+
+            f1     = gam-0.5_EB*d
+            f2     = gam+0.5_EB*d
+            ee     = q2*gam/(a*a*temp)
+            unflo1 = ee*delta*(1.0_EB + 0.5_EB*a/gam)
+
+            IF(unflo1<=-78.0_EB) CYCLE l202a
+            unflo2 = ee*2.0_EB*gam*f1
+
+            IF(unflo2>=78.0_EB) CYCLE l202a
+
+            ff     = EXP(ee*delta*(1.0_EB + 0.5_EB*a/gam))
+            sminus = cc*qq/omvbar*ABS(f1)*ff*EXP(-ee*2.0_EB*gam*f1)
+            unflo3 = ee*2.0_EB*gam*f2
+
+            IF (unflo3 >= 78.0_EB) THEN
+               splus=0.0_EB
+            ELSE
+               splus=cc*qq/omvbar*ABS(f2)*ff*EXP(-ee*2.0_EB*gam*f2)
+            ENDIF
+
+            gg     = sdweak
+            sdweak = (sminus+splus)/d+sdweak
+            test   = (sdweak-gg)/sdweak
+
+            IF(test<1.0e-4_EB) CYCLE l202a
+
+            sdstrg=SQRT(0.5_EB*g)*(SQRT(sminus)+SQRT(splus))/d+sdstrg
+
+         ENDDO l201a
+      ENDDO l202a
+
+      IF(sdweak<=TINY_EB) THEN
+         sdweak = 0.0_EB
+         gdinv  = 1.0_EB
+         gddinv = 1.0_EB
+      ELSE
+         dinv   = sdstrg**2/sdweak
+         gdinv  = gc1*dinv
+         gddinv = gd*dinv
+!***  EXPress s/d at stp, as is k in nasa sp-3080
+         sdweak = sdweak*temp/273.0_EB
+      ENDIF
+   ELSE
+!calculate absorption coef. and line spacing PARAMETER for 2.7 micron band
+      l=1
+!contribution to 2.7 micron band from (000)-(021) and (010)-(031) trans.
+      alpha  = 28.5_EB
+      omprim = 2.0_EB*om2+om3
+
+      l120a: DO
+         aa = alpha*b*q2/(a*(1.0_EB-EXP(-om3*q2/t0))*(1.0_EB-EXP(-om12*q2 /t0))**3* & 
+                              (1.0_EB+EXP(-om12*q2/t0))*(1.0_EB-EXP(-omprim*q2/t0)))
+         bb = (1._EB-EXP(-q2*omega/temp))*(1.0_EB-EXP(-q2*om3/temp))*    & 
+               (1._EB-EXP(-om12*q2/temp))**3*(1.0_EB+EXP(-om12*q2/temp))* &
+               (1._EB-EXP(-q2*omprim/temp))
+
+         cc = aa*bb*omega/temp*t0/temp
+
+         l102a: DO j = 1, 20
+            v=REAL(j-1,EB)
+
+            IF(j/2*2==j) g = 0.25_EB*(v+1.0_EB)*(v+3.0_EB) ! USE modulo
+            IF(j/2*2/=j) g = 0.25_EB*(v+2.0_EB)*(v+2.0_EB) ! USE modulo
+
+            vbar1 = -1.0_EB + (v+3.0_EB)*(v+4.0_EB)/(6.0_EB*(v+2.0_EB))
+            IF(j/2*2==j) vbar1 = -1.0_EB+(v+5.0_EB)/6.0_EB ! USE modulo
+
+            l101a: DO k = 1, 10
+
+               v3  = REAL(k-1,EB)
+               qq  = (v3+1)*g*EXP( -(v3*om3 + v*om12)*q2/temp )*(vbar1+1.0_EB)
+               gam = b-a*(v3+1.0_EB)
+
+               IF(l==2) THEN
+                  omvv3 = 3728.0_EB - 5.0_EB*v - 47.0_EB*v3
+                  IF(v<=TWO_EPSILON_EB) omvv3 = 3715.0_EB - 47.0_EB*v3
+               ELSE
+                  omvv3 = 3598.0_EB - 18.0_EB*v - 47.0_EB*v3
+                  IF(v<=TWO_EPSILON_EB) omvv3 = 3613.0_EB - 47.0_EB*v3
+               ENDIF
+
+               delta = a*(omega-omvv3)
+               IF((gam**2)<=delta) CYCLE l102a
+
+               d      = 2.0_EB*SQRT(gam**2-delta)
+               omvbar = omvv3*(1.0_EB-EXP(-omvv3*q2/temp))
+               f1     = gam-0.5_EB*d
+               f2     = gam+0.5_EB*d
+
+               ee     = q2*gam/(a**2*temp)
+               unflo1 = ee*delta*(1.0_EB+0.5_EB*a/gam)
+
+               IF(unflo1<= -78.0_EB) CYCLE l102a
+
+               unflo2 = ee*2.0_EB*gam*f1
+
+               IF(unflo2>= 78._EB) CYCLE l102a
+
+               ff     = EXP(ee*delta*(1.0_EB+0.5_EB*a/gam))
+               sminus = cc*qq/omvbar*ABS(f1)*ff*EXP(-ee*2.0_EB*gam*f1)
+               unflo3 = ee*2.0_EB*gam*f2
+
+               IF(unflo3>=78._EB) THEN
+                  splus = 0._EB
+               ELSE
+                  splus = cc*qq/omvbar*ABS(f2)*ff*EXP(-ee*2.0_EB*gam*f2)
+               ENDIF
+
+               gg     = sdweak
+               sdweak = (sminus+splus)/d+sdweak
+               test   = (sdweak-gg)/sdweak
+
+               IF(test<1.0e-4_EB) CYCLE l102a
+
+               sdstrg = SQRT(0.5_EB*g)*(SQRT(sminus)+SQRT(splus))/d+sdstrg
+
+            ENDDO l101a
+         ENDDO l102a
+
+         IF(l==2) exit l120a
+!contribution to 2.7 micron band from (000)-(101) and (010)-(111) trans.
+         alpha  = 42.3_EB
+         omprim = om1+om3
+         l      = 2
+      ENDDO l120a
+!calculate absorption coef and line spacing PARAMETER for 4.3 micron band
+      IF(sdweak<=TINY_EB) THEN
+         sdweak = 0.0_EB
+         gdinv  = 1.0_EB
+         gddinv = 1.0_EB
+      ELSE
+         dinv   = sdstrg**2/sdweak
+         gdinv  = gc1*dinv
+         gddinv = gd*dinv
+!***EXPress s/d at stp, as is k in nasa sp-3080
+         sdweak = sdweak*temp/273.0_EB
+      ENDIF
+   ENDIF
+
+ELSEIF((omega<=1975.0_EB).and.(omega>1100.0_EB)) THEN
+   sdweak = 0.0_EB
+   gdinv  = 1.0_EB
+   gddinv = 1.0_EB
+
+! band 10 microns_
+ELSEIF((omega<=1100.0_EB).and.(omega>880.0_EB)) THEN
+!contribution to 10.0 micron band from (100)-(001) and (020)-(001) trans.
+   bcnt(1) = 960.8_EB
+   bcnt(2) = 1063.6_EB
+
+   oma = om3
+   omb = (om1+2.0_EB*om2)/2.0_EB
+
+   atot(1)= 0.0219_EB
+   atot(2)= 0.0532_EB
+
+   DO k=1,2
+      atot(k)=t0/temp*atot(k)*EXP(q2*omb*(1.0_EB/t0-1.0_EB/temp))*(1.0_EB-EXP(-q2*(oma-omb)/temp)) &
+                  /( (1.0_EB-EXP(-q2*oma/temp))*(1.0_EB-EXP(-omb*q2/temp)) )
+   ENDDO
+   sdweak = 0.0_EB
+
+   DO i = 1, 2
+      sdweak = sdweak + atot(i)*q2/(4.0_EB*be*temp)*ABS(omega-bcnt(i))*EXP(-q2/(4.0_EB*be*temp)*(omega-bcnt(i))**2)
+   ENDDO
+
+   dinv   = 1.0_EB/(4.0_EB*be)
+   gdinv  = gc1*dinv
+   gddinv = gd*dinv
+!***EXPress s/d at stp, as is in nasa sp-3080
+   sdweak = sdweak*temp/273.0_EB
+
+! tablulated band: 15 micron
+   ELSEIF((omega<=880.0_EB).and.(omega>500.0_EB))  THEN
+!contribution to 15.0 micron band from (000)-(010) trans.
+   ttemp = temp
+   j  = (floor(omega)-495)/5
+   w1 = 495.0_EB + 5.0_EB*REAL(j,EB)
+   ww = (omega-w1)/5
+
+   IF(temp>=2400._EB) ttemp = 2399.99_EB
+   IF(temp < 300._EB) ttemp =  300.00_EB
+
+   i = ttemp/300._EB
+ 
+   SELECT CASE(i)
+      CASE(3)
+         i=2
+         tt=(ttemp-600._EB)/600._EB
+      CASE(6:7) 
+         i=5
+         tt=(ttemp-1800._EB)/600._EB
+      CASE DEFAULT
+         t1=REAL(i,EB)*300._EB
+         tt=(ttemp-t1)/300._EB
+         IF (i>=4) i=i-1     
+   END SELECT
+
+   tw=tt*ww
+   sdweak=sd15(i,j)*(1._EB-tt-ww+tw)+sd15(i+1,j)*(tt-tw)  +sd15(i,j+1)*(ww-tw)+sd15(i+1,j+1)*tw
+
+   IF(sdweak<=TINY_EB) THEN
+      sdweak = 0.0_EB
+      gdinv  = 1.0_EB
+      gddinv = 1.0_EB
+   ELSE
+!calculate line spacing PARAMETER for 15.0 micron band
+      dinv1 =  1.2_EB
+      dinv2 =  8.0_EB
+      dinv3 = 30.0_EB
+
+      temp1 = 300.0_EB
+      temp2 = 550.0_EB
+      temp3 = 830.0_EB
+
+      dinv   = dinv1*(ttemp-temp2)*(ttemp-temp3)/(temp1-temp2)  /(temp1-temp3)+dinv2*(ttemp-temp1)*(ttemp-temp3)&
+               /(temp2-temp1)/(temp2-temp3)+dinv3*(ttemp-temp1)  *(ttemp-temp2)/(temp3-temp1)/(temp3-temp2)
+      gdinv  = gc1*dinv
+      gddinv = gd*dinv
+   ENDIF
+
+ELSE
+   sdweak = 0.0_EB
+   gdinv  = 1.0_EB
+   gddinv = 1.0_EB
+ENDIF
+ENDIF
+
+!------------------------------------------------------------------------------
+RETURN
+END SUBROUTINE co2
+
+!==============================================================================
+ELEMENTAL SUBROUTINE h2o(omega,temp,gc2,sdweak,gdinv,gddinv,i_model)
+!==============================================================================
+!! this SUBROUTINE RETURNs the mean spectral absorption coefficient (sdweak),
+!! the collision broadening fine structure PARAMETER (gdinv),
+!! the DOppler broadening fine structure PARAMETER (gddinv), and the 
+!! narrow band model to be used (i_model)
+! i_model: (INTEGER) model used for snb fitting: 1: goody, 2 malkmus, 3 elsasser
+!------------------------------------------------------------------------------
+
+IMPLICIT NONE
+
+! variables passed in
+
+REAL(EB), INTENT(IN) :: omega ! wavenumber,  in cm-1
+REAL(EB), INTENT(IN) :: temp  ! temperature, in kelvin
+REAL(EB), INTENT(IN) :: gc2   ! half width at half height, in cm-1
+
+! variables passed out
+
+REAL(EB), INTENT(OUT) :: sdweak  ! spectral absorption coefficient, in cm-1
+REAL(EB), INTENT(OUT) :: gddinv  ! line width to line spacing ration for DOppler
+REAL(EB), INTENT(OUT) :: gdinv   ! line width to line spacing ratio for lorentz boradening
+INTEGER,  INTENT(OUT) :: i_model ! model used for snb fitting: 1: goody, 2 malkmus, 3 elsasser
+
+! local variables
+
+INTEGER  :: i,j
+REAL(EB) :: w1, ww, t1, tt, tw, d, b, dinv, ttemp, gd
+REAL(EB), PARAMETER :: wm_h2o = 18._EB
+
+i_model = i_model_h2o
+
+sdweak = 0._EB
+gdinv  = 1._EB
+gddinv = 1._EB
+
+IF (omega>=50._EB.and.omega<9300) THEN
+! compute DOpller half-width. eq 5-35
+gd   = 5.94e-6_EB*omega*SQRT(temp/(273._EB*wm_h2o))
+
+j    = (omega-25._EB)/25._EB
+ttemp= temp
+
+IF(temp>=2500._EB) ttemp = 2499.99_EB
+IF(temp<300._EB)   ttemp = 300._EB
+
+i = floor(ttemp/500._EB) + 1
+
+IF (i==2.and.ttemp<600._EB) i = 1
+
+w1 = 25._EB+25._EB*REAL(j,EB)
+ww = (omega-w1)/25._EB
+
+IF(i>2) THEN
+   t1=REAL(i-1,EB)*500._EB
+   tt=(ttemp-t1)/500._EB
+ELSE
+   IF(i==1) tt = (ttemp-300._EB)/300._EB
+   IF(i==2) tt = (ttemp-600._EB)/400._EB
+ENDIF
+
+tw     = tt*ww
+! perform interpolation
+sdweak = sd(i,j)*(1._EB-tt-ww+tw)+sd(i+1,j)*(tt-tw)+sd(i,j+1) *(ww-tw)+sd(i+1,j+1)*tw
+
+d      = -2.294_EB+.3004e-02_EB*ttemp-.366e-06_EB*temp**2
+b      = dsin(.0036_EB*omega-8.043_EB)
+dinv   = EXP(.7941_EB*b+d) ! from nasa ir handbook)
+
+!     dinv=EXP(0.00106*temp-1.21)
+
+! update argument out variables
+gdinv  = gc2*dinv
+gddinv = gd*dinv
+
+ENDIF
+
+!------------------------------------------------------------------------------
+RETURN
+END SUBROUTINE h2o
+
+
+!==============================================================================
+SUBROUTINE co(omega,temp,gc4,sdweak,gdinv,gddinv,i_model)
+!==============================================================================
+! i_model: (INTEGER) model used for snb fitting: 1: goody, 2 malkmus, 3 elsasser
+INTEGER j
+REAL(EB) omega,temp,gc4,sdweak,gdinv,gddinv,aa,bb,cc,qq,ee,ff,gg, &
+      sminus,splus,sdstrg,b,alpha,a,ome,wx,wy,omprim,t0, &
+      q2,wm,gd,v,gam,omv,delta,d,omvbar,f1,f2,test,dinv,q2ot,toaz
+
+INTEGER, INTENT(OUT) :: i_model
+
+i_model = i_model_co
+
+IF(omega<1600._EB .or. omega>2400._EB) THEN
+sdweak = 0._EB
+gdinv  = 1._EB
+gddinv = 1._EB
+ELSE
+b     = 1.93139_EB
+alpha = 260._EB
+a     = .017485_EB
+ome   = 2170.21_EB
+wx    = 13.461_EB
+wy    = .0308_EB
+omprim= ome-2._EB*wx+3.25_EB*wy
+
+t0 = 300._EB
+q2 = 1.4388_EB
+
+toaz = temp/273._EB
+q2ot = q2/temp
+
+wm     = 28._EB
+! DOppler broadening half-width
+gd     = 5.94e-6_EB*omega*SQRT(toaz/wm)
+sdweak = 1.e-99_EB
+sdstrg = 1.e-99_EB
+
+aa = alpha*b*q2/(a*(1._EB-EXP(-omprim*q2/t0))**2)
+bb = (1._EB-EXP(-omega*q2ot))*(1._EB-EXP(-omprim*q2ot))**2
+cc = aa*bb*omega*t0/temp**2
+
+l101: DO j=1,20
+   v    = REAL(j-1,EB)
+   qq   = (v+1._EB)*EXP(-v*ome*q2ot)
+   gam  = b-a*(v+1._EB)
+   omv  = ome-2._EB*(v+1._EB)*wx+(3._EB*(v+1._EB)*(v+1._EB)+.25_EB)*wy
+   delta= a*(omega-omv)
+
+   IF(gam**2<=delta) exit l101
+
+   d      = 2._EB*SQRT(gam*gam-delta)
+   omvbar = omv*(1._EB-EXP(-omv*q2ot))
+   f1     = gam-0.5_EB*d
+   f2     = gam+0.5_EB*d
+   ee     = q2*gam/(a*a*temp)
+      
+   ff     = EXP(ee*delta*(1._EB+.5_EB*a/gam))
+   sminus = cc*qq/omvbar*ABS(f1)*ff*EXP(-ee*2._EB*gam*f1)
+   splus  = cc*qq/omvbar*ABS(f2)*ff*EXP(-ee*2._EB*gam*f2)
+   gg     = sdweak
+   sdweak = (sminus+splus)/d+sdweak
+   test   = (sdweak-gg)/sdweak
+      
+   IF(test<.0001_EB) exit l101
+
+   sdstrg=(SQRT(sminus)+SQRT(splus))/d+sdstrg
+ENDDO l101
+
+dinv   = sdstrg*sdstrg/sdweak
+gdinv  = gc4*dinv
+gddinv = gd*dinv
+!***EXPress s/d at stp, as is k in nasa sp-3080
+sdweak = sdweak*toaz
+ENDIF
+!------------------------------------------------------------------------------
+END SUBROUTINE co
+
+
+!==============================================================================
+!ELEMENTAL SUBROUTINE pod(omega,soot_volume_frac,path_length_cm,x_particle)
+SUBROUTINE pod(omega,soot_volume_frac,path_length_cm,x_particle)
+!==============================================================================
+!! pod calculates particle optical depth, x_particle, of the volume fraction of 
+!! soot particles in gas cloud.  rin and rik are
+!! the REAL and imaginary parts of the index of refraction. the particles are 
+!! assumed to be in the rayleigh limit.
+! 
+! argument in:
+! omega: wavenumber, units: cm-1
+! soot_volume_frac: soot volume fraction. no units
+! path_length_cm: physical path length. units in cm
+! temp: temperature in kelvin
+!
+! argument out:
+! x_particle: opticle depth due to the presence of soot particle. no units.
+!*-----------------------------------------------------------------------------
+
+IMPLICIT NONE
+
+! variables passed in:
+
+REAL(EB), INTENT(IN) :: omega, path_length_cm, soot_volume_frac
+
+! varibles passed out: x_particle: particle optical depth
+
+REAL(EB), INTENT(OUT) :: x_particle
+
+! locals
+
+REAL(EB) :: abco,ff,lambda,rin,rik
+
+lambda = 10000._EB/omega
+ 
+rin = 1.6_EB
+rik = 0.5_EB
+
+!ff = 36.0_EB*pi*rin*rik/lambda/((rin**2-rik**2+2.0_EB)**2+(2.0_EB*rin*rik)**2)
+
+! absorption coef. is based upon measurements of dalzell and 
+! sarofim
+
+ff         = 7.0_EB/lambda
+abco       = ff*soot_volume_frac*1.e6_EB
+x_particle = abco*path_length_cm*cm_to_m
+
+!------------------------------------------------------------------------------
+RETURN
+END SUBROUTINE pod
+
+
+!==============================================================================
+SUBROUTINE ch4_old(omega,temp,pch4,ptot,gc3,sdweak,gdinv,gddinv,i_model)
+!==============================================================================
+! i_model: (INTEGER) model used for snb fitting: 1: goody, 2 malkmus, 3 elsasser
+INTEGER i,j
+REAL(EB) omega,temp,pch4,ptot,gc3,sdweak,gdinv,gddinv,be,q2, &
+   wm,gd,om1,om2,om3,om4,com1,com2,com3,com4,dinv,pe,w1,sdb, &
+   sda,sdc,q2ot,azot,toaz
+
+INTEGER, INTENT(OUT) :: i_model
+
+REAL(EB), DIMENSION(4) :: atot, bcnt
+
+i_model = i_model_ch4
+
+IF(omega>5000._EB .or. omega<1125._EB) THEN
+
+sdweak=0.0_EB
+gdinv=1._EB
+gddinv=1._EB
+
+ELSE
+
+be=5.2412_EB
+q2=1.4388_EB
+wm=16._EB
+q2ot = -q2/temp
+azot = 273._EB/temp
+toaz = temp/273._EB
+
+gd=5.94e-6_EB*omega*SQRT(toaz)/4._EB
+
+IF(omega>=3400._EB) THEN
+
+! contribution to 2.4 micron band from (0000)-(0110), (0000)-(0011),
+! (0000)-(1001), and (0000)-(0102) trans.  the integrated band intensities
+! of vincent-geisse (annales de physique ser.12, v. 10, 1955) have
+! been multiplied by a factor of 4 and the line spacing is that
+! of v4 from gray and penner (jqsrt v. 5, 1965).
+
+   om1=2914.2_EB
+   om2=1526.0_EB
+   om3=3020.3_EB
+   om4=1306.2_EB
+
+   bcnt(1) = 4123.0_EB
+   bcnt(2) = 4216.3_EB
+   bcnt(3) = 4313.2_EB
+   bcnt(4) = 4546.0_EB
+
+   com1=om2+2._EB*om4
+   com2=om1+om4
+   com3=om3+om4
+   com4=om2+om3
+
+   atot(1)=0.64_EB*azot*(1._EB-EXP(q2ot*com1))/((1._EB-EXP(q2ot*om2))*(1._EB-EXP(q2ot*om4))**2)
+   atot(2)=17.6_EB*azot*(1._EB-EXP(q2ot*com2))/((1._EB-EXP(q2ot*om1))*(1._EB-EXP(q2ot*om4)))
+   atot(3)=14.8_EB*azot*(1._EB-EXP(q2ot*com3))/((1._EB-EXP(q2ot*om3))*(1._EB-EXP(q2ot*om4)))
+   atot(4)=5.04_EB*azot*(1._EB-EXP(q2ot*com4))/((1._EB-EXP(q2ot*om2))*(1._EB-EXP(q2ot*om3)))
+
+   dinv=1._EB/5.74_EB
+   gdinv=gc3*dinv
+   gddinv=gd*dinv
+   sdweak=0.0_EB
+
+   DO i=1,4
+      sdweak=sdweak+2._EB*(omega-bcnt(i))**2*(-q2ot*be)**1.5_EB*atot(i)/sqrtpi*dinv**3*EXP(q2ot*be*dinv**2 &
+      *(omega-bcnt(i))**2)
+   ENDDO
+   sdweak=sdweak*toaz
+ELSE
+   pe=ptot+.3_EB*pch4
+
+   IF(omega>=2625._EB) THEN
+! contribution to 3.3 micron band from (0000)-(0010) trans.
+! refer to brosmer and tien, jqsrt v. 33, p. 521
+
+      gdinv  = .00734_EB*pe*SQRT(azot)*EXP(1.02_EB*(toaz-1._EB))
+      gddinv = gd/9.4_EB
+
+      j  = (omega-2600._EB)/25._EB
+      w1 = 2600._EB+25._EB*REAL(j,EB)
+      sdb= sd3(2,j)+(omega-w1)/25._EB*(sd3(2,j+1)-sd3(2,j))
+
+      IF(temp>600._EB) THEN
+         sdc=sd3(3,j)+(omega-w1)/25._EB*(sd3(3,j+1)-sd3(3,j))
+         sdweak=sdb+(temp-600._EB)/250._EB*(sdc-sdb)
+         IF(sdweak<0._EB)sdweak=0._EB
+      ELSE
+         sda=sd3(1,j)+(omega-w1)/25._EB*(sd3(1,j+1)-sd3(1,j))
+         sdweak=sda+(temp-290._EB)/310._EB*(sdb-sda)
+         IF(sdweak<0._EB)sdweak=0._EB
+      ENDIF
+
+   ELSEIF(omega>1450._EB) THEN
+
+      sdweak=0.0_EB
+      gdinv=1._EB
+      gddinv=1._EB
+
+   ELSE
+! contribution to 7.7 micron band from (0000)-(0001) trans.
+! refer to brosmer and tien, jqsrt v. 33, p. 521.
+      gdinv  = .0243_EB*pe*(toaz)**.8_EB
+      gddinv = gd/5.1_EB
+
+      j   = (omega-1100._EB)/25._EB
+      w1  = 1100._EB+25._EB*REAL(j,EB)
+      sdb = sd7(2,j)+(omega-w1)/25._EB*(sd7(2,j+1)-sd7(2,j))
+
+      IF(temp>600._EB) THEN
+         sdc = sd7(3,j)+(omega-w1)/25._EB*(sd7(3,j+1)-sd7(3,j))
+         sdweak = sdb+(temp-600._EB)/250._EB*(sdc-sdb)
+         IF(sdweak<0._EB)sdweak=0._EB
+      ELSE
+         sda = sd7(1,j)+(omega-w1)/25._EB*(sd7(1,j+1)-sd7(1,j))
+         sdweak = sda+(temp-290._EB)/310._EB*(sdb-sda)
+         IF(sdweak<0._EB)sdweak=0._EB
+      ENDIF
+   ENDIF
+ENDIF
+ENDIF
+!------------------------------------------------------------------------------
+END SUBROUTINE ch4_old
+
+
+!==============================================================================
+SUBROUTINE ch4(omega,temp,pch4,ptot,gc3,sdweak,gdinv,gddinv,i_model)
+!==============================================================================
+!! compute methane optical properties using single line group
+!!
+!! band #1: 1150 cm-1 - 1600 cm-1 
+!! band #2: 2700 cm-1 - 3250 cm-1 
+!! band #3: 3400 cm-1 - 5000 cm-1
+! 
+! variables passed in
+! omega: (REAL) wavenumber in cm-1
+! temp : (REAL) temperature in k
+! pch4 : (REAL) partial pressure of methane in atm
+! ptot : (REAL) total pressure in atm
+! gc3  : (REAL) collisional broadening half-width at half heigh
+! 
+! vraibles passed out
+! sdweak : (REAL) spectral absorption coefficient
+! gdinv  : (REAL) line width to line spacing ratio
+! gddinv : (REAL) line width to line spacing ratio for DOppler boradening
+! i_model: (INTEGER) model used for snb fitting: 1: goody, 2 malkmus, 3 elsasser
+! locals
+! pressure_effective : (REAL) effective pressure, (formely pe)
+! be_ch4             : (REAL) rotational constant for ch4 [cm^-1]
+! dinv_ch4           : inverse line spacing [cm]
+
+REAL(EB), INTENT(IN)  :: omega, temp, pch4, ptot, gc3
+REAL(EB), INTENT(OUT) :: sdweak, gdinv, gddinv
+
+INTEGER, INTENT(OUT)  :: i_model
+
+REAL(EB) :: gd, pressure_effective, q2ot, azot, toaz, fact1
+
+REAL(EB), PARAMETER :: q2     = 1.4388_EB ! q2 = speed_of_light*planck_cns/boltzmann
+REAL(EB), PARAMETER :: wm_ch4 = 16.0425_EB
+
+!line spacing d2_ch4=5.74 cm^-1 for the v4 fundamental of methane gray & penner,612
+!footnote at bottom
+REAL(EB), PARAMETER :: be_ch4 = 5.248_EB   ! rotational constants [cm^-1]
+REAL(EB), DIMENSION(3), PARAMETER :: dinv_ch4 = (/1._EB/5.1_EB,1._EB/9.4_EB,1._EB/5.74_EB/)
+
+REAL(EB), DIMENSION(4), PARAMETER :: &
+               om_ch4  = (/2914.2_EB, 1526.0_EB, 3020.3_EB, 1306.2_EB/),                                               &
+               com_ch4 = (/1526.0_EB+2._EB*1306.2_EB, 2914.2_EB+1306.2_EB, 3020.3_EB+1306.2_EB, 1526.0_EB+3020.3_EB/), &
+               s2_ch4  = (/0.64_EB,17.6_EB,14.8_EB,5.04_EB/)
+
+REAL(EB), DIMENSION(4) :: atot
+
+INTEGER i
+
+i_model = i_model_ch4
+
+! initialize output
+
+sdweak = 0.0_EB  !spectral absorption coefficient. 
+gdinv  = 1._EB   !line width to line spacing ratio: fine structure PARAMETER
+gddinv = 1._EB   !line width to line spacing ratio for DOppler boradening fine structure PARAMETER
+
+! initialize some coefficients
+q2ot = -q2/temp       
+azot = 273._EB/temp
+toaz = temp/273._EB
+
+! compute DOpller half-width. eq 5-35
+gd   = 5.94e-6_EB*omega*SQRT(toaz/wm_ch4) !DOppler half width [cm^-1]. nasa,222
+
+! compute effective pressure. brosmer & tien,524 eq. 7 (specIFic to methane)
+pressure_effective = ptot+.3_EB*pch4
+
+!------------------------------------------------------------------------------
+! computed properties 2.4 micron band, band #3: 3400 cm-1 - 5000 cm-1
+IF((om_bnd_ch4(n_band_ch4,1)<=omega).and.(omega<=om_bnd_ch4(n_band_ch4,2))) THEN
+
+   ! contribution of the v1+v4 combinaison band (2.4 micron)
+   ! contribution to 2.4 micron band from
+   ! (0000)-(0102)
+   ! (0000)-(1001)
+   ! (0000)-(0011)
+   ! (0000)-(0110) transitions
+   ! the integrated band intensities (s2_ch4)
+   ! of vincent-geisse (annales de physique ser.12, v. 10, 1955) have
+   ! been multiplied by a factor of 4 
+   ! the line spacing (1/dinv_ch4) is that
+   ! of v4 from gray and penner (jqsrt v. 5, 1965).                 
+
+   atot(1) = s2_ch4(1)*azot*(1._EB-EXP(q2ot*com_ch4(1)))/((1._EB-EXP(q2ot*om_ch4(2)))*(1._EB-EXP(q2ot*om_ch4(4)))**2)
+   atot(2) = s2_ch4(2)*azot*(1._EB-EXP(q2ot*com_ch4(2)))/((1._EB-EXP(q2ot*om_ch4(1)))*(1._EB-EXP(q2ot*om_ch4(4))))
+   atot(3) = s2_ch4(3)*azot*(1._EB-EXP(q2ot*com_ch4(3)))/((1._EB-EXP(q2ot*om_ch4(3)))*(1._EB-EXP(q2ot*om_ch4(4))))
+   atot(4) = s2_ch4(4)*azot*(1._EB-EXP(q2ot*com_ch4(4)))/((1._EB-EXP(q2ot*om_ch4(2)))*(1._EB-EXP(q2ot*om_ch4(3))))
+
+   
+   fact1  = q2ot*be_ch4*dinv_ch4(3)**2
+
+   DO i=1,4
+      sdweak = sdweak+(omega-com_ch4(i))**2*atot(i)*EXP(fact1*(omega-com_ch4(i))**2)
+   ENDDO
+
+   ! eq 6 in gray and penner jqsrt, vol 5, page 611-620, 1965
+   sdweak=sdweak*2._EB*(-q2ot*be_ch4)**1.5_EB/sqrtpi*dinv_ch4(3)**3
+
+   !***EXPress s/d at standard temperature and pressure, as is in nasa sp-3080
+   sdweak = sdweak*toaz
+
+   gdinv  = gc3*dinv_ch4(3)
+   gddinv = gd*dinv_ch4(3) 
+
+!------------------------------------------------------------------------------
+! tabulated properties
+ELSE IF((om_bnd_ch4(2,1)<=omega).and.(omega<om_bnd_ch4(2,2))) THEN
+      
+   !------------------------------------------------------------------------------
+   ! contribution to 3.3 micron band, band #2: 2700 cm-1 - 3250 cm-1
+   ! (0000)-(0010) transition (v3 fundamental)
+   ! 9.4 is the average line position for the 3.3 micron band (cm^-1)
+   ! source: brosmer & tien, jqsrt v. 33, p. 525 (specIFic to methane)
+
+   sdweak = GET_SPECTRAL_ABSORPTION(omega,temp,sd_ch4_temp,om_bnd_ch4(2,:),sd2_ch4)
+   ! line shape PARAMETER brosmer & tien, jqsrt v. 33, p. 525 eq. 10 (specIFic to methane)
+   gdinv  = .00734_EB*pressure_effective*SQRT(azot)*EXP(1.02_EB*(toaz-1._EB)) 
+   gddinv = gd*dinv_ch4(2)
+   !***EXPress s/d at stp, as is k in nasa sp-3080
+   sdweak = sdweak*toaz
+   
+ELSE IF((om_bnd_ch4(1,1)<=omega).and.(omega<om_bnd_ch4(1,2))) THEN
+   !------------------------------------------------------------------------------
+   ! contribution to 7.7 micron band, band #1: 1150 cm-1 - 1600 cm-1 
+   ! (0000)-(0001) transition (v4 fundamental)
+   ! 5.1 (cm-1) is the average line position for the 7.7 micron band 
+   ! source: brosmer & tien, jqsrt v. 33, p. 525 (specIFic to methane)
+
+   sdweak = GET_SPECTRAL_ABSORPTION(omega,temp,sd_ch4_temp,om_bnd_ch4(1,:),sd1_ch4)
+   ! line shape PARAMETER brosmer & tien, jqsrt v. 33, 525 eq. 11 (specIFic to methane)
+   gdinv  = .0243_EB*pressure_effective*(toaz)**.8_EB
+   gddinv = gd*dinv_ch4(1)
+   !***EXPress s/d at stp, as is k in nasa sp-3080
+   sdweak = sdweak*toaz
+ENDIF 
+
+!------------------------------------------------------------------------------
+END SUBROUTINE ch4
+
+!==============================================================================
+SUBROUTINE c3h6(omega,temp,pc3h6,ptot,sdweak,gdinv,gddinv,i_model)
+!==============================================================================
+!! compute propylene optical properties using single line group
+!! 
+!! absorption bands: 
+!! there are 3 bands for propylene
+!!
+!! band #1: 1250 cm-1 - 1950 cm-1 
+!! band #2: 2700 cm-1 - 3200 cm-1 
+!! band #3: 700 cm-1 - 1150 cm-1 
+!
+! variables passed in
+! omega  : (REAL) wavenumber in cm-1
+! temp   : (REAL) temperature in k
+! pc3h6 : (REAL) partial pressure of propylene
+! ptot   : (REAL) total pressure
+! gc3    : (REAL) collisional broadening half-width at half heigh
+! 
+! vraibles passed out
+! sdweak : (REAL) spectral absorption coefficient
+! gdinv  : (REAL) line width to line spacing ratio, fine structure PARAMETER
+! gddinv : (REAL) line width to line spacing ratio for DOppler boradening,
+!                 fine structure PARAMETER
+! i_model: (INTEGER) model used for snb fitting: 1: goody, 2 malkmus, 3 elsasser
+
+! locals
+! pressure_effective : (REAL) effective pressure, (formely pe)
+! dinv_c3h6         : inverse line spacing [cm] for propylene
+
+REAL(EB), INTENT(IN)  :: omega, temp, pc3h6, ptot
+REAL(EB), INTENT(OUT) :: sdweak, gdinv, gddinv
+
+INTEGER, INTENT(OUT) :: i_model
+
+REAL(EB) :: q2ot, azot, toaz
+REAL(EB) :: gd, pressure_effective
+REAL(EB) :: dinv_c3h6 
+
+REAL(EB), PARAMETER :: q2       = 1.4388_EB  ! q2 = speed_of_light*planck_cns/boltzmann
+REAL(EB), PARAMETER :: wm_c3h6  = 42.0797_EB ! nist wEBbook data
+
+INTEGER :: i_band, i
+
+LOGICAL :: in_band ! true IF omega is within some tabulated band, false otherwise
+
+! get model for snb fitting
+
+i_model = i_model_c3h6
+i_band  = 0
+in_band = .false.
+
+! set initial values to sdweak, gdinv, gddinv - values are RETURNed IF omega is not
+! within absorption bands
+sdweak = 0.0_EB
+gdinv  = 1._EB 
+gddinv = 1._EB 
+
+! compute thermal coefficients
+q2ot = -q2/temp       
+azot = 273._EB/temp
+toaz = temp/273._EB
+
+! compute DOppler broadening half width gd
+gd   = 5.94e-6_EB*omega*SQRT(toaz/wm_c3h6) !DOppler half width [cm^-1]. nasa,222
+
+! compute average line spacing
+! model propylene as a prolate symmetric top. the line spacing is approximated to
+! 2*rotational_constant b. reCALL that rotational_constant b = rotational_constant c
+! rotational_constant_b obtained from cccbdv wEBsite, using EXPerimental values  
+! propylene belongs to group cs
+dinv_c3h6 = 1._EB/(2._EB*0.312_EB)
+
+! IF omega is within absorption band, THEN compute sdweak from tabulated data
+! propylene has three bands
+! band #1: 775 cm-1 - 1150 cm-1 
+! band #2: 1225 cm-1 - 1975 cm-1 
+! band #3: 2650 cm-1 - 3275 cm-1  
+
+! get the index of the band
+band: DO i = 1, n_band_c3h6
+   IF ((om_bnd_c3h6(i,1)<=omega).and.(omega<om_bnd_c3h6(i,2))) THEN
+      in_band = .true.
+      i_band  = i      
+      exit band
+   ENDIF
+ENDDO band
+
+IF (in_band) THEN
+   
+   pressure_effective = ptot+(be_c3h6(i_band)-1.0_EB)*pc3h6 
+   
+   SELECT CASE (i_band)
+      CASE (1) ! band #1: 775 cm-1 - 1150 cm-1 
+         sdweak = GET_SPECTRAL_ABSORPTION(omega,temp,sd_c3h6_temp,om_bnd_c3h6(i_band,:) ,sd1_c3h6)
+         gdinv  = GET_SPECTRAL_ABSORPTION(omega,temp,sd_c3h6_temp,om_bnd_c3h6(i_band,:) ,gammad1_c3h6)
+      CASE (2) ! band #2: 1225 cm-1 - 1975 cm-1 
+         sdweak = GET_SPECTRAL_ABSORPTION(omega,temp,sd_c3h6_temp,om_bnd_c3h6(i_band,:) ,sd2_c3h6)
+         gdinv  = GET_SPECTRAL_ABSORPTION(omega,temp,sd_c3h6_temp,om_bnd_c3h6(i_band,:) ,gammad2_c3h6)
+      CASE (3) ! band #3: 2650 cm-1 - 3275 cm-1 
+         sdweak = GET_SPECTRAL_ABSORPTION(omega,temp,sd_c3h6_temp,om_bnd_c3h6(i_band,:) ,sd3_c3h6)
+         gdinv  = GET_SPECTRAL_ABSORPTION(omega,temp,sd_c3h6_temp,om_bnd_c3h6(i_band,:) ,gammad3_c3h6)
+   END SELECT
+
+   ! compute properties
+   gdinv  = gdinv*pressure_effective
+   gddinv = gd*dinv_c3h6
+   !***EXPress s/d at stp, as is k in nasa sp-3080
+   sdweak = sdweak*toaz
+ENDIF
+
+RETURN
+!------------------------------------------------------------------------------
+END SUBROUTINE c3h6
+
+!==============================================================================
+SUBROUTINE c3h8(omega,temp,pc3h8,ptot,sdweak,gdinv,gddinv,i_model)
+!==============================================================================
+! compute propane optical properties using single line group
+! 
+! absorption bands: 
+! there are 2 bands for propane
+
+! band #1: 1175 cm-1 - 1675 cm-1 
+! band #2: 2550 cm-1 - 3375 cm-1 
+!
+! variables passed in
+! omega  : (REAL) wavenumber in cm-1
+! temp   : (REAL) temperature in k
+! pc3h8 : (REAL) partial pressure of propane
+! ptot   : (REAL) total pressure
+! gc3    : (REAL) collisional broadening half-width at half heigh
+! 
+! vraibles passed out
+! sdweak : (REAL) spectral absorption coefficient
+! gdinv  : (REAL) line width to line spacing ratio, fine structure PARAMETER
+! gddinv : (REAL) line width to line spacing ratio for DOppler boradening,
+!                 fine structure PARAMETER
+! i_model: (INTEGER) model used for snb fitting: 1: goody, 2 malkmus, 3 elsasser
+
+! locals
+! pressure_effective : (REAL) effective pressure, (formely pe)
+! dinv_c3h8         : inverse line spacing [cm] for propane
+
+REAL(EB), INTENT(IN)  :: omega, temp, pc3h8, ptot
+REAL(EB), INTENT(OUT) :: sdweak, gdinv, gddinv
+
+INTEGER, INTENT(OUT) :: i_model
+
+REAL(EB) :: q2ot, azot, toaz
+REAL(EB) :: gd, pressure_effective
+REAL(EB) :: dinv_c3h8 
+
+REAL(EB), PARAMETER :: q2       = 1.4388_EB  ! q2 = speed_of_light*planck_cns/boltzmann
+REAL(EB), PARAMETER :: wm_c3h8  = 44.0956_EB ! nist wEBbook data
+
+INTEGER :: i_band, i
+
+LOGICAL :: in_band ! true IF omega is within some tabulated band, false otherwise
+
+! get model for snb fitting
+
+i_model = i_model_c3h8
+i_band  = 0
+in_band = .false.
+
+! set initial values to sdweak, gdinv, gddinv - values are RETURNed IF omega is not
+! within absorption bands
+sdweak = 0.0_EB
+gdinv  = 1._EB 
+gddinv = 1._EB 
+
+! compute thermal coefficients
+q2ot = -q2/temp       
+azot = 273._EB/temp
+toaz = temp/273._EB
+
+! compute DOppler broadening half width gd
+gd   = 5.94e-6_EB*omega*SQRT(toaz/wm_c3h8) !DOppler half width [cm^-1]. nasa,222
+
+! compute average line spacing
+! propane is a prolate symmetric top. the line spacing is approximated to
+! 2*rotational_constant b. reCALL that rotational_constant b = rotational_constant c
+! rotational_constant_b obtained from cccbdv wEBsite, using EXPerimental values  
+! propane belongs to group c2v
+dinv_c3h8 = 1._EB/(2._EB*0.28173_EB)
+
+! IF omega is within absorption band, THEN compute sdweak from tabulated data
+! propane has three bands
+! band #1: 1175 cm-1 - 1675 cm-1 
+! band #2: 2550 cm-1 - 3375 cm-1 
+
+! get the index of the band
+band: DO i = 1, n_band_c3h8
+   IF ((om_bnd_c3h8(i,1)<=omega).and.(omega<om_bnd_c3h8(i,2))) THEN
+      in_band = .true.
+      i_band  = i
+      exit band
+   ENDIF
+ENDDO band
+
+IF (in_band) THEN
+
+   pressure_effective = ptot+(be_c3h8(i_band)-1.0_EB)*pc3h8 
+
+   SELECT CASE (i_band)
+      CASE (1) ! band #1: 1175 cm-1 - 1675 cm-1 
+         sdweak = GET_SPECTRAL_ABSORPTION(omega,temp,sd_c3h8_temp,om_bnd_c3h8(i_band,:) ,sd1_c3h8)
+         gdinv  = GET_SPECTRAL_ABSORPTION(omega,temp,sd_c3h8_temp,om_bnd_c3h8(i_band,:) ,gammad1_c3h8)
+      CASE (2) ! band #2: 2550 cm-1 - 3375 cm-1 
+         sdweak = GET_SPECTRAL_ABSORPTION(omega,temp,sd_c3h8_temp,om_bnd_c3h8(i_band,:) ,sd2_c3h8)
+         gdinv  = GET_SPECTRAL_ABSORPTION(omega,temp,sd_c3h8_temp,om_bnd_c3h8(i_band,:) ,gammad2_c3h8)
+   END SELECT
+
+   ! compute properties  
+   gdinv  = gdinv*pressure_effective
+   gddinv = gd*dinv_c3h8
+   !***EXPress s/d at stp, as is k in nasa sp-3080
+   sdweak = sdweak*toaz
+ENDIF
+
+RETURN
+!------------------------------------------------------------------------------
+END SUBROUTINE c3h8
+
+!==============================================================================
+SUBROUTINE c7h16(omega,temp,pc7h16,ptot,sdweak,gdinv,gddinv,i_model)
+!==============================================================================
+! compute heptane optical properties using single line group
+! 
+! absorption bands: 
+! there are 2 bands for heptane
+
+! band #1: 1100 cm-1 - 1800 cm-1 
+! band #2: 2550 cm-1 - 3275 cm-1 
+!
+! variables passed in
+! omega  : (REAL) wavenumber in cm-1
+! temp   : (REAL) temperature in k
+! pc7h16 : (REAL) partial pressure of heptane
+! ptot   : (REAL) total pressure
+! gc3    : (REAL) collisional broadening half-width at half heigh
+! 
+! vraibles passed out
+! sdweak : (REAL) spectral absorption coefficient
+! gdinv  : (REAL) line width to line spacing ratio, fine structure PARAMETER
+! gddinv : (REAL) line width to line spacing ratio for DOppler boradening,
+!                 fine structure PARAMETER
+! i_model: (INTEGER) model used for snb fitting: 1: goody, 2 malkmus, 3 elsasser
+
+! locals
+! pressure_effective : (REAL) effective pressure, (formely pe)
+! dinv_c7h16         : inverse line spacing [cm] for heptane
+
+REAL(EB), INTENT(IN)  :: omega, temp, pc7h16, ptot
+REAL(EB), INTENT(OUT) :: sdweak, gdinv, gddinv
+
+INTEGER, INTENT(OUT) :: i_model
+
+REAL(EB) :: q2ot, azot, toaz
+REAL(EB) :: gd, pressure_effective
+REAL(EB) :: dinv_c7h16 
+
+REAL(EB), PARAMETER :: q2       = 1.4388_EB  ! q2 = speed_of_light*planck_cns/boltzmann
+REAL(EB), PARAMETER :: wm_c7h16 = 100.2019_EB ! nist wEBbook data
+
+INTEGER :: i_band, i
+
+LOGICAL :: in_band ! true IF omega is within some tabulated band, false otherwise
+
+! get model for snb fitting
+
+i_model = i_model_c7h16
+i_band  = 0
+in_band = .false.
+
+! set initial values to sdweak, gdinv, gddinv - values are RETURNed IF omega is not
+! within absorption bands
+sdweak = 0.0_EB
+gdinv  = 1._EB 
+gddinv = 1._EB 
+
+! compute thermal coefficients
+q2ot = -q2/temp       
+azot = 273._EB/temp
+toaz = temp/273._EB
+
+! compute DOppler broadening half width gd
+gd   = 5.94e-6_EB*omega*SQRT(toaz/wm_c7h16) !DOppler half width [cm^-1]. nasa,222
+
+! compute average line spacing
+! n_heptane is a prolate symmetric top. the line spacing is approximated to
+! 2*rotational_constant b. reCALL that rotational_constant b = rotational_constant c
+! rotational_constant_b obtained from cccbdv wEBsite, using EXPerimental values  
+! n-heptane belongs to group c2v
+dinv_c7h16=1._EB/(2.0_EB*0.024_EB)
+
+! IF omega is within absorption band, THEN compute sdweak from tabulated data
+! heptane has three bands
+! band #1: 1100 cm-1 - 1800 cm-1 
+! band #2: 2550 cm-1 - 3275 cm-1 
+
+! get the index of the band
+band: DO i = 1, n_band_c7h16
+   IF ((om_bnd_c7h16(i,1)<=omega).and.(omega<om_bnd_c7h16(i,2))) THEN
+      in_band = .true.
+      i_band  = i
+      exit band
+   ENDIF
+ENDDO band
+
+IF (in_band) THEN
+
+   pressure_effective = ptot+(be_c7h16(i_band)-1.0_EB)*pc7h16 
+
+   SELECT CASE (i_band)
+      CASE (1) ! band #1: 1175 cm-1 - 1675 cm-1
+         sdweak = GET_SPECTRAL_ABSORPTION(omega,temp,sd_c7h16_temp,om_bnd_c7h16(i_band,:),sd1_c7h16)
+         gdinv  = GET_SPECTRAL_ABSORPTION(omega,temp,sd_c7h16_temp,om_bnd_c7h16(i_band,:),gammad1_c7h16)
+      CASE (2) ! band #2: 2550 cm-1 - 3375 cm-1 
+         sdweak = GET_SPECTRAL_ABSORPTION(omega,temp,sd_c7h16_temp,om_bnd_c7h16(i_band,:),sd2_c7h16)
+         gdinv  = GET_SPECTRAL_ABSORPTION(omega,temp,sd_c7h16_temp,om_bnd_c7h16(i_band,:),gammad2_c7h16)
+   END SELECT
+
+   ! compute properties  
+   gdinv  = gdinv*pressure_effective
+   gddinv = gd*dinv_c7h16
+   !***EXPress s/d at stp, as is k in nasa sp-3080
+   sdweak = sdweak*toaz
+ENDIF
+
+RETURN
+!------------------------------------------------------------------------------
+END SUBROUTINE c7h16
+
+!==============================================================================
+SUBROUTINE c7h8(omega,temp,pc7h8,ptot,sdweak,gdinv,gddinv,i_model)
+!==============================================================================
+! compute toluene optical properties using single line group
+! 
+! absorption bands: 
+! there are 5 bands for toluene
+
+! band #1: 700 cm-1 - 825 cm-1 
+! band #2: 975 cm-1 - 1175 cm-1 
+! band #3: 1275 cm-1 - 1675 cm-1 
+! band #4: 1650 cm-1 - 2075 cm-1 
+! band #5: 2675 cm-1 - 3225 cm-1 
+!
+! variables passed in
+! omega  : (REAL) wavenumber in cm-1
+! temp   : (REAL) temperature in k
+! pc7h8 : (REAL) partial pressure of toluene
+! ptot   : (REAL) total pressure
+! gc3    : (REAL) collisional broadening half-width at half heigh
+! 
+! vraibles passed out
+! sdweak : (REAL) spectral absorption coefficient
+! gdinv  : (REAL) line width to line spacing ratio, fine structure PARAMETER
+! gddinv : (REAL) line width to line spacing ratio for DOppler boradening,
+!                 fine structure PARAMETER
+! i_model: (INTEGER) model used for snb fitting: 1: goody, 2 malkmus, 3 elsasser
+
+! locals
+! pressure_effective : (REAL) effective pressure, (formely pe)
+! dinv_c7h8         : inverse line spacing [cm] for toluene
+
+REAL(EB), INTENT(IN)  :: omega, temp, pc7h8, ptot
+REAL(EB), INTENT(OUT) :: sdweak, gdinv, gddinv
+
+INTEGER, INTENT(OUT) :: i_model
+
+REAL(EB) :: q2ot, azot, toaz
+REAL(EB) :: gd, pressure_effective
+REAL(EB) :: dinv_c7h8 
+
+REAL(EB), PARAMETER :: q2       = 1.4388_EB  ! q2 = speed_of_light*planck_cns/boltzmann
+REAL(EB), PARAMETER :: wm_c7h8  = 92.1384_EB ! nist wEBbook data
+
+INTEGER :: i_band, i
+
+LOGICAL :: in_band ! true IF omega is within some tabulated band, false otherwise
+
+! get model for snb fitting
+
+i_model = i_model_c7h8
+i_band  = 0
+in_band = .false.
+
+! set initial values to sdweak, gdinv, gddinv - values are RETURNed IF omega is not
+! within absorption bands
+sdweak = 0.0_EB
+gdinv  = 1._EB 
+gddinv = 1._EB 
+
+! compute thermal coefficients
+q2ot = -q2/temp       
+azot = 273._EB/temp
+toaz = temp/273._EB
+
+! compute DOppler broadening half width gd
+gd   = 5.94e-6_EB*omega*SQRT(toaz/wm_c7h8) !DOppler half width [cm^-1]. nasa,222
+
+! toluene belongs to group cs 
+! toluene is model as a prolate symmetric top. the line spacing is approximated to
+! 2*rotational_constant b. reCALL that rotational_constant b = rotational_constant c
+! rotational_constant_b obtained from cccbdv wEBsite.  using EXPerimental values  
+
+dinv_c7h8=1._EB/(2.0_EB*0.084_EB)
+
+
+! IF omega is within absorption band, THEN compute sdweak from tabulated data
+! toluene has 5 bands
+! band #1: 700 cm-1 - 825 cm-1 
+! band #2: 975 cm-1 - 1175 cm-1 
+! band #3: 1275 cm-1 - 1675 cm-1 
+! band #4: 1650 cm-1 - 2075 cm-1 
+! band #5: 2675 cm-1 - 3225 cm-1 
+
+! get the index of the band
+band: DO i = 1, n_band_c7h8
+   IF ((om_bnd_c7h8(i,1)<=omega).and.(omega<om_bnd_c7h8(i,2))) THEN
+      in_band = .true.
+      i_band  = i
+      exit band
+   ENDIF
+ENDDO band
+
+
+IF (in_band) THEN
+
+   pressure_effective = ptot+(be_c7h8(i_band)-1.0_EB)*pc7h8 
+
+   SELECT CASE (i_band)
+      CASE (1) ! band #1: 700 cm-1 - 825 cm-1 
+         sdweak = GET_SPECTRAL_ABSORPTION(omega,temp,sd_c7h8_temp,om_bnd_c7h8(i_band,:),sd1_c7h8)
+         gdinv  = GET_SPECTRAL_ABSORPTION(omega,temp,sd_c7h8_temp,om_bnd_c7h8(i_band,:),gammad1_c7h8)
+      CASE (2) ! band #2: 975 cm-1 - 1175 cm-1 
+         sdweak = GET_SPECTRAL_ABSORPTION(omega,temp,sd_c7h8_temp,om_bnd_c7h8(i_band,:),sd2_c7h8)
+         gdinv  = GET_SPECTRAL_ABSORPTION(omega,temp,sd_c7h8_temp,om_bnd_c7h8(i_band,:),gammad2_c7h8)
+      CASE (3) ! band #3: 1275 cm-1 - 1675 cm-1 
+         sdweak = GET_SPECTRAL_ABSORPTION(omega,temp,sd_c7h8_temp,om_bnd_c7h8(i_band,:),sd3_c7h8)
+         gdinv  = GET_SPECTRAL_ABSORPTION(omega,temp,sd_c7h8_temp,om_bnd_c7h8(i_band,:),gammad3_c7h8)
+      CASE (4) ! band #4: 1650 cm-1 - 2075 cm-1
+         sdweak = GET_SPECTRAL_ABSORPTION(omega,temp,sd_c7h8_temp,om_bnd_c7h8(i_band,:),sd4_c7h8)
+         gdinv  = GET_SPECTRAL_ABSORPTION(omega,temp,sd_c7h8_temp,om_bnd_c7h8(i_band,:),gammad4_c7h8)
+      CASE (5) ! band #5: 2675 cm-1 - 3225 cm-1 
+         sdweak = GET_SPECTRAL_ABSORPTION(omega,temp,sd_c7h8_temp,om_bnd_c7h8(i_band,:),sd5_c7h8)
+         gdinv  = GET_SPECTRAL_ABSORPTION(omega,temp,sd_c7h8_temp,om_bnd_c7h8(i_band,:),gammad5_c7h8)
+   END SELECT
+
+   ! compute properties  
+   gdinv  = gdinv*pressure_effective
+   gddinv = gd*dinv_c7h8
+   !***EXPress s/d at stp, as is k in nasa sp-3080
+   sdweak = sdweak*toaz
+ENDIF
+
+RETURN
+!------------------------------------------------------------------------------
+END SUBROUTINE c7h8
+
+
+!==============================================================================
+SUBROUTINE ch3oh(omega,temp,pch3oh,ptot,sdweak,gdinv,gddinv,i_model)
+!==============================================================================
+! compute methanol optical properties using single line group
+! 
+! absorption bands: 
+! there are 4 bands for methanol
+
+! band #1: 825 cm-1 - 1150 cm-1 
+! band #2: 1125 cm-1 - 1700 cm-1 
+! band #3: 2600 cm-1 - 3225 cm-1 
+! band #4: 3525 cm-1 - 3850 cm-1
+!
+! variables passed in
+! omega  : (REAL) wavenumber in cm-1
+! temp   : (REAL) temperature in k
+! pch3oh : (REAL) partial pressure of methanol
+! ptot   : (REAL) total pressure
+! 
+! variables passed out
+! sdweak : (REAL) spectral absorption coefficient
+! gdinv  : (REAL) line width to line spacing ratio, fine structure PARAMETER
+! gddinv : (REAL) line width to line spacing ratio for DOppler boradening,
+!                 fine structure PARAMETER
+! i_model: (INTEGER) model used for snb fitting: 1: goody, 2 malkmus, 3 elsasser
+
+! locals
+! pressure_effective : (REAL) effective pressure, (formely pe)
+! dinv_ch3oh         : inverse line spacing [cm] for methanol
+
+REAL(EB), INTENT(IN)  :: omega, temp, pch3oh, ptot
+REAL(EB), INTENT(OUT) :: sdweak, gdinv, gddinv
+
+INTEGER, INTENT(OUT) :: i_model
+
+REAL(EB) :: q2ot, azot, toaz
+REAL(EB) :: gd, pressure_effective
+REAL(EB) :: dinv_ch3oh 
+
+REAL(EB), PARAMETER :: q2       = 1.4388_EB  ! q2 = speed_of_light*planck_cns/boltzmann
+REAL(EB), PARAMETER :: wm_ch3oh = 32.0419_EB ! nist wEBbook data
+INTEGER :: i_band, i
+
+LOGICAL :: in_band ! true IF omega is within some tabulated band, false otherwise
+
+! get model for snb fitting
+
+i_model = i_model_ch3oh
+i_band  = 0
+in_band = .false.
+
+! set initial values to sdweak, gdinv, gddinv - values are RETURNed IF omega is not
+! within absorption bands
+sdweak = 0.0_EB
+gdinv  = 1._EB 
+gddinv = 1._EB 
+
+! compute thermal coefficients
+q2ot = -q2/temp       
+azot = 273._EB/temp
+toaz = temp/273._EB
+
+! compute DOppler broadening half width gd
+gd   = 5.94e-6_EB*omega*SQRT(toaz/wm_ch3oh) !DOppler half width [cm^-1]. nasa,222
+
+! compute average line spacing
+! methanol belongs to point group cs. for now the line spacing is approximated to
+! 2*rotational_constant b since rotational_constant b ~ rotational_constant c
+! rotational_constant_b obtained from cccbdv wEBsite, using EXPerimental values  
+dinv_ch3oh=1._EB/(2.0_EB*0.82338_EB)
+
+! IF omega is within absorption band, THEN compute sdweak from tabulated data
+! methanol has 4 bands
+! band #1: 825 cm-1 - 1150 cm-1 
+! band #2: 1125 cm-1 - 1700 cm-1 
+! band #3: 2600 cm-1 - 3225 cm-1 
+! band #4: 3525 cm-1 - 3850 cm-1 
+
+! get the index of the band
+band: DO i = 1, n_band_ch3oh
+   IF ((om_bnd_ch3oh(i,1)<=omega).and.(omega<om_bnd_ch3oh(i,2))) THEN
+      in_band = .true.
+      i_band  = i
+      exit band
+   ENDIF
+ENDDO band
+
+
+IF (in_band) THEN
+
+   pressure_effective = ptot+(be_ch3oh(i_band)-1.0_EB)*pch3oh 
+
+   SELECT CASE (i_band)
+      CASE (1) ! band #1: 825 cm-1 - 1150 cm-1 
+         sdweak = GET_SPECTRAL_ABSORPTION(omega,temp,sd_ch3oh_temp,om_bnd_ch3oh(i_band,:) ,sd1_ch3oh)
+         gdinv  = GET_SPECTRAL_ABSORPTION(omega,temp,sd_ch3oh_temp,om_bnd_ch3oh(i_band,:) ,gammad1_ch3oh)
+      CASE (2) ! band #2: 1125 cm-1 - 1700 cm-1 
+         sdweak = GET_SPECTRAL_ABSORPTION(omega,temp,sd_ch3oh_temp,om_bnd_ch3oh(i_band,:) ,sd2_ch3oh)
+         gdinv  = GET_SPECTRAL_ABSORPTION(omega,temp,sd_ch3oh_temp,om_bnd_ch3oh(i_band,:) ,gammad2_ch3oh)
+      CASE (3) ! band #3: 2600 cm-1 - 3225 cm-1  
+         sdweak = GET_SPECTRAL_ABSORPTION(omega,temp,sd_ch3oh_temp,om_bnd_ch3oh(i_band,:) ,sd3_ch3oh)
+         gdinv  = GET_SPECTRAL_ABSORPTION(omega,temp,sd_ch3oh_temp,om_bnd_ch3oh(i_band,:) ,gammad3_ch3oh)
+      CASE (4) ! band #4: 3525 cm-1 - 3850 cm-1 
+         sdweak = GET_SPECTRAL_ABSORPTION(omega,temp,sd_ch3oh_temp,om_bnd_ch3oh(i_band,:) ,sd4_ch3oh)
+         gdinv  = GET_SPECTRAL_ABSORPTION(omega,temp,sd_ch3oh_temp,om_bnd_ch3oh(i_band,:) ,gammad4_ch3oh)
+   END SELECT
+
+   ! compute properties  
+   gdinv  = gdinv*pressure_effective
+   gddinv = gd*dinv_ch3oh
+   !***EXPress s/d at stp, as is k in nasa sp-3080
+   sdweak = sdweak*toaz
+ENDIF
+
+RETURN
+!------------------------------------------------------------------------------
+END SUBROUTINE ch3oh
+
+!==============================================================================
+SUBROUTINE c5h8o2(omega,temp,pc5h8o2,ptot,sdweak,gdinv,gddinv,i_model)
+!==============================================================================
+! compute mma optical properties using single line group
+! 
+! absorption bands: 
+! there are 6 bands for mma
+! band #1: 750 cm-1 - 900 cm-1 
+! band #2: 875 cm-1 - 1075 cm-1 
+! band #3: 1050 cm-1 - 1275 cm-1 
+! band #4: 1250 cm-1 - 1575 cm-1 
+! band #5: 1550 cm-1 - 1975 cm-1 
+! band #6: 2650 cm-1 - 3275 cm-1
+!
+! variables passed in
+! omega   : (REAL) wavenumber in cm-1
+! temp    : (REAL) temperature in k
+! pc5h8o2 : (REAL) partial pressure of mma
+! ptot    : (REAL) total pressure
+! 
+! variables passed out
+! sdweak : (REAL) spectral absorption coefficient
+! gdinv  : (REAL) line width to line spacing ratio, fine structure PARAMETER
+! gddinv : (REAL) line width to line spacing ratio for DOppler boradening,
+!                 fine structure PARAMETER
+! i_model: (INTEGER) model used for snb fitting: 1: goody, 2 malkmus, 3 elsasser
+
+! locals
+! pressure_effective : (REAL) effective pressure, (formely pe)
+! dinv_c5h8o2         : inverse line spacing [cm] for mma
+
+REAL(EB), INTENT(IN)  :: omega, temp, pc5h8o2, ptot
+REAL(EB), INTENT(OUT) :: sdweak, gdinv, gddinv
+
+INTEGER, INTENT(OUT) :: i_model
+
+REAL(EB) :: q2ot, azot, toaz
+REAL(EB) :: gd, pressure_effective
+REAL(EB) :: dinv_c5h8o2 
+
+REAL(EB), PARAMETER :: q2        = 1.4388_EB   ! q2 = speed_of_light*planck_cns/boltzmann
+REAL(EB), PARAMETER :: wm_c5h8o2 = 100.1158_EB ! nist wEBbook data
+INTEGER :: i_band, i
+
+LOGICAL :: in_band ! true IF omega is within some tabulated band, false otherwise
+
+! get model for snb fitting
+
+i_model = i_model_c5h8o2
+i_band  = 0
+in_band = .false.
+
+! set initial values to sdweak, gdinv, gddinv - values are RETURNed IF omega is not
+! within absorption bands
+sdweak = 0.0_EB
+gdinv  = 1._EB 
+gddinv = 1._EB 
+
+! compute thermal coefficients
+q2ot = -q2/temp       
+azot = 273._EB/temp
+toaz = temp/273._EB
+
+! compute DOppler broadening half width gd
+gd   = 5.94e-6_EB*omega*SQRT(toaz/wm_c5h8o2) !DOppler half width [cm^-1]. nasa,222
+
+! compute average line spacing
+! mma belongs to point group ? for now using data from acetylacetone (c5h8o2)
+dinv_c5h8o2=1._EB/(2.0_EB*0.067_EB)
+
+! IF omega is within absorption band, THEN compute sdweak from tabulated data
+! there are 6 bands for mma
+! band #1: 750 cm-1 - 900 cm-1 
+! band #2: 875 cm-1 - 1075 cm-1 
+! band #3: 1050 cm-1 - 1275 cm-1 
+! band #4: 1250 cm-1 - 1575 cm-1 
+! band #5: 1550 cm-1 - 1975 cm-1 
+! band #6: 2650 cm-1 - 3275 cm-1 
+
+! get the index of the band
+band: DO i = 1, n_band_c5h8o2
+   IF ((om_bnd_c5h8o2(i,1)<=omega).and.(omega<om_bnd_c5h8o2(i,2))) THEN
+      in_band = .true.
+      i_band  = i
+      exit band
+   ENDIF
+ENDDO band
+
+IF (in_band) THEN
+
+   pressure_effective = ptot+(be_c5h8o2(i_band)-1.0_EB)*pc5h8o2 
+
+   SELECT CASE (i_band)
+      CASE (1) ! band #1: 750 cm-1 - 900 cm-1
+         sdweak = GET_SPECTRAL_ABSORPTION(omega,temp,sd_c5h8o2_temp,om_bnd_c5h8o2(i_band,:),sd1_c5h8o2)
+         gdinv  = GET_SPECTRAL_ABSORPTION(omega,temp,sd_c5h8o2_temp,om_bnd_c5h8o2(i_band,:),gammad1_c5h8o2)
+      CASE (2) ! band #2: 875 cm-1 - 1075 cm-1
+         sdweak = GET_SPECTRAL_ABSORPTION(omega,temp,sd_c5h8o2_temp,om_bnd_c5h8o2(i_band,:),sd2_c5h8o2)
+         gdinv  = GET_SPECTRAL_ABSORPTION(omega,temp,sd_c5h8o2_temp,om_bnd_c5h8o2(i_band,:),gammad2_c5h8o2)
+      CASE (3) ! band #3: 1050 cm-1 - 1275 cm-1
+         sdweak = GET_SPECTRAL_ABSORPTION(omega,temp,sd_c5h8o2_temp,om_bnd_c5h8o2(i_band,:),sd3_c5h8o2)
+         gdinv  = GET_SPECTRAL_ABSORPTION(omega,temp,sd_c5h8o2_temp,om_bnd_c5h8o2(i_band,:),gammad3_c5h8o2)
+      CASE (4) ! band #4: 1250 cm-1 - 1575 cm-1 
+         sdweak = GET_SPECTRAL_ABSORPTION(omega,temp,sd_c5h8o2_temp,om_bnd_c5h8o2(i_band,:),sd4_c5h8o2)
+         gdinv  = GET_SPECTRAL_ABSORPTION(omega,temp,sd_c5h8o2_temp,om_bnd_c5h8o2(i_band,:),gammad4_c5h8o2)
+      CASE (5) ! band #5: 1550 cm-1 - 1975 cm-1 
+         sdweak = GET_SPECTRAL_ABSORPTION(omega,temp,sd_c5h8o2_temp,om_bnd_c5h8o2(i_band,:),sd5_c5h8o2)
+         gdinv  = GET_SPECTRAL_ABSORPTION(omega,temp,sd_c5h8o2_temp,om_bnd_c5h8o2(i_band,:),gammad5_c5h8o2)
+      CASE (6) ! band #6: 2650 cm-1 - 3275 cm-1 
+         sdweak = GET_SPECTRAL_ABSORPTION(omega,temp,sd_c5h8o2_temp,om_bnd_c5h8o2(i_band,:),sd6_c5h8o2)
+         gdinv  = GET_SPECTRAL_ABSORPTION(omega,temp,sd_c5h8o2_temp,om_bnd_c5h8o2(i_band,:),gammad6_c5h8o2)
+   END SELECT
+
+   ! compute properties  
+   gdinv  = gdinv*pressure_effective
+   gddinv = gd*dinv_c5h8o2
+   !***EXPress s/d at stp, as is k in nasa sp-3080
+   sdweak = sdweak*toaz
+ENDIF
+
+RETURN
+!------------------------------------------------------------------------------
+END SUBROUTINE c5h8o2
+
+
+!==============================================================================
+SUBROUTINE c2h6(omega,temp,pc2h6,ptot,sdweak,gdinv,gddinv,i_model)
+!==============================================================================
+! compute ethane optical properties using single line group
+! 
+! absorption bands: 
+! there are 3 bands for ethane
+! band #1: 750 cm-1 - 1100 cm-1 
+! band #2: 1250 cm-1 - 1700 cm-1 
+! band #3: 2550 cm-1 - 3375 cm-1 
+
+!
+! variables passed in
+! omega   : (REAL) wavenumber in cm-1
+! temp    : (REAL) temperature in k
+! pc2h6 : (REAL) partial pressure of ethane
+! ptot    : (REAL) total pressure
+! 
+! variables passed out
+! sdweak : (REAL) spectral absorption coefficient
+! gdinv  : (REAL) line width to line spacing ratio, fine structure PARAMETER
+! gddinv : (REAL) line width to line spacing ratio for DOppler boradening,
+!                 fine structure PARAMETER
+! i_model: (INTEGER) model used for snb fitting: 1: goody, 2 malkmus, 3 elsasser
+
+! locals
+! pressure_effective : (REAL) effective pressure, (formely pe)
+! dinv_c2h6         : inverse line spacing [cm] for ethane
+
+REAL(EB), INTENT(IN)  :: omega, temp, pc2h6, ptot
+REAL(EB), INTENT(OUT) :: sdweak, gdinv, gddinv
+
+INTEGER, INTENT(OUT) :: i_model
+
+REAL(EB) :: q2ot, azot, toaz
+REAL(EB) :: gd, pressure_effective
+REAL(EB) :: dinv_c2h6 
+
+REAL(EB), PARAMETER :: q2      = 1.4388_EB  ! q2 = speed_of_light*planck_cns/boltzmann
+REAL(EB), PARAMETER :: wm_c2h6 = 30.0690_EB ! nist wEBbook data
+INTEGER :: i_band, i
+
+LOGICAL :: in_band ! true IF omega is within some tabulated band, false otherwise
+
+! get model for snb fitting
+
+i_model = i_model_c2h6
+i_band  = 0
+in_band = .false.
+
+! set initial values to sdweak, gdinv, gddinv - values are RETURNed IF omega is not
+! within absorption bands
+sdweak = 0.0_EB
+gdinv  = 1._EB 
+gddinv = 1._EB 
+
+! compute thermal coefficients
+q2ot = -q2/temp       
+azot = 273._EB/temp
+toaz = temp/273._EB
+
+! compute DOppler broadening half width gd
+gd   = 5.94e-6_EB*omega*SQRT(toaz/wm_c2h6) !DOppler half width [cm^-1]. nasa,222
+
+! compute average line spacing
+! ethane belongs to point group d3d with rotational constant a = 2.51967 cm-1
+! b = 0.68341 cm-1, and c = 0.68341 cm-1.
+dinv_c2h6=1._EB/(2.0_EB*0.68341_EB)
+
+! IF omega is within absorption band, THEN compute sdweak from tabulated data
+! there are 3 bands for ethane
+! band #1: 750 cm-1 - 1100 cm-1 
+! band #2: 1250 cm-1 - 1700 cm-1 
+! band #3: 2550 cm-1 - 3375 cm-1 
+
+! get the index of the band
+band: DO i = 1, n_band_c2h6
+   IF ((om_bnd_c2h6(i,1)<=omega).and.(omega<om_bnd_c2h6(i,2))) THEN
+      in_band = .true.
+      i_band  = i
+      exit band
+   ENDIF
+ENDDO band
+
+IF (in_band) THEN
+
+   pressure_effective = ptot+(be_c2h6(i_band)-1.0_EB)*pc2h6 
+
+   SELECT CASE (i_band)
+      CASE (1)  ! band #1:  750 cm-1 - 1100 cm-1
+         sdweak = GET_SPECTRAL_ABSORPTION(omega,temp,sd_c2h6_temp,om_bnd_c2h6(i_band,:),sd1_c2h6)
+         gdinv  = GET_SPECTRAL_ABSORPTION(omega,temp,sd_c2h6_temp,om_bnd_c2h6(i_band,:),gammad1_c2h6)
+      CASE (2) ! band #2: 1250 cm-1 - 1700 cm-1 
+         sdweak = GET_SPECTRAL_ABSORPTION(omega,temp,sd_c2h6_temp,om_bnd_c2h6(i_band,:),sd2_c2h6)
+         gdinv  = GET_SPECTRAL_ABSORPTION(omega,temp,sd_c2h6_temp,om_bnd_c2h6(i_band,:),gammad2_c2h6)
+      CASE (3) ! band #3: 2550 cm-1 - 3375 cm-1
+         sdweak = GET_SPECTRAL_ABSORPTION(omega,temp,sd_c2h6_temp,om_bnd_c2h6(i_band,:),sd3_c2h6)
+         gdinv  = GET_SPECTRAL_ABSORPTION(omega,temp,sd_c2h6_temp,om_bnd_c2h6(i_band,:),gammad3_c2h6)
+   END SELECT
+
+   ! compute properties  
+   gdinv  = gdinv*pressure_effective
+   gddinv = gd*dinv_c2h6
+   !***EXPress s/d at stp, as is k in nasa sp-3080
+   sdweak = sdweak*toaz
+ENDIF
+
+RETURN
+!------------------------------------------------------------------------------
+END SUBROUTINE c2h6
+
+
+!==============================================================================
+SUBROUTINE c2h4(omega,temp,pc2h4,ptot,sdweak,gdinv,gddinv,i_model)
+!==============================================================================
+! compute ethylene optical properties using single line group
+! 
+! absorption bands: 
+! there are 4 bands for ethylene
+! band #1: 800 cm-1  - 1250 cm-1 
+! band #2: 1325 cm-1 - 1575 cm-1 
+! band #3: 1775 cm-1 - 2050 cm-1 
+! band #4: 2825 cm-1 - 3350 cm-1 
+!
+! variables passed in
+! omega   : (REAL) wavenumber in cm-1
+! temp    : (REAL) temperature in k
+! pc2h4 : (REAL) partial pressure of ethylene
+! ptot    : (REAL) total pressure
+! 
+! variables passed out
+! sdweak : (REAL) spectral absorption coefficient
+! gdinv  : (REAL) line width to line spacing ratio, fine structure PARAMETER
+! gddinv : (REAL) line width to line spacing ratio for DOppler boradening,
+!                 fine structure PARAMETER
+! i_model: (INTEGER) model used for snb fitting: 1: goody, 2 malkmus, 3 elsasser
+
+! locals
+! pressure_effective : (REAL) effective pressure, (formely pe)
+! dinv_c2h4          : inverse line spacing [cm] for ethylene
+
+REAL(EB), INTENT(IN)  :: omega, temp, pc2h4, ptot
+REAL(EB), INTENT(OUT) :: sdweak, gdinv, gddinv
+
+INTEGER, INTENT(OUT) :: i_model
+
+REAL(EB) :: q2ot, azot, toaz
+REAL(EB) :: gd, pressure_effective
+REAL(EB) :: dinv_c2h4 
+
+REAL(EB), PARAMETER :: q2      = 1.4388_EB  ! q2 = speed_of_light*planck_cns/boltzmann
+REAL(EB), PARAMETER :: wm_c2h4 = 28.0532_EB ! nist wEBbook data
+INTEGER :: i_band, i
+
+LOGICAL :: in_band ! true IF omega is within some tabulated band, false otherwise
+
+! get model for snb fitting
+
+i_model = i_model_c2h4
+i_band  = 0
+in_band = .false.
+
+! set initial values to sdweak, gdinv, gddinv - values are RETURNed IF omega is not
+! within absorption bands
+sdweak = 0.0_EB
+gdinv  = 1._EB 
+gddinv = 1._EB 
+
+! compute thermal coefficients
+q2ot = -q2/temp       
+azot = 273._EB/temp
+toaz = temp/273._EB
+
+! compute DOppler broadening half width gd
+gd   = 5.94e-6_EB*omega*SQRT(toaz/wm_c2h4) !DOppler half width [cm^-1]. nasa,222
+
+! compute average line spacing
+! ethylene belongs to point group d2h with rotational constant a = 4.828 cm-1
+! b = 1.0012 cm-1, and c = 0.8282 cm-1. we make the assumption b ~ c
+dinv_c2h4=1._EB/(2.0_EB*1.0012_EB)
+
+! IF omega is within absorption band, THEN compute sdweak from tabulated data
+! there are 4 bands for ethylene
+! band #1: 800 cm-1  - 1250 cm-1 
+! band #2: 1325 cm-1 - 1575 cm-1 
+! band #3: 1775 cm-1 - 2050 cm-1 
+! band #4: 2825 cm-1 - 3350 cm-1 
+
+! get the index of the band
+band: DO i = 1, n_band_c2h4
+   IF ((om_bnd_c2h4(i,1)<=omega).and.(omega<om_bnd_c2h4(i,2))) THEN
+      in_band = .true.
+      i_band  = i
+      exit band
+   ENDIF
+ENDDO band
+
+IF (in_band) THEN
+
+   pressure_effective = ptot+(be_c2h4(i_band)-1.0_EB)*pc2h4 
+
+   SELECT CASE (i_band)
+      CASE (1)  ! band #1: 800 cm-1  - 1250 cm-1 
+         sdweak = GET_SPECTRAL_ABSORPTION(omega,temp,sd_c2h4_temp,om_bnd_c2h4(i_band,:),sd1_c2h4)
+         gdinv  = GET_SPECTRAL_ABSORPTION(omega,temp,sd_c2h4_temp,om_bnd_c2h4(i_band,:),gammad1_c2h4)
+      CASE (2) ! band #2: 1325 cm-1 - 1575 cm-1  
+         sdweak = GET_SPECTRAL_ABSORPTION(omega,temp,sd_c2h4_temp,om_bnd_c2h4(i_band,:),sd2_c2h4)
+         gdinv  = GET_SPECTRAL_ABSORPTION(omega,temp,sd_c2h4_temp,om_bnd_c2h4(i_band,:),gammad2_c2h4)
+      CASE (3) ! band #3: 1775 cm-1 - 2050 cm-1
+         sdweak = GET_SPECTRAL_ABSORPTION(omega,temp,sd_c2h4_temp,om_bnd_c2h4(i_band,:),sd3_c2h4)
+         gdinv  = GET_SPECTRAL_ABSORPTION(omega,temp,sd_c2h4_temp,om_bnd_c2h4(i_band,:),gammad3_c2h4)
+      CASE (4) ! band #4: 2825 cm-1 - 3350 cm-1
+         sdweak = GET_SPECTRAL_ABSORPTION(omega,temp,sd_c2h4_temp,om_bnd_c2h4(i_band,:),sd4_c2h4)
+         gdinv  = GET_SPECTRAL_ABSORPTION(omega,temp,sd_c2h4_temp,om_bnd_c2h4(i_band,:),gammad4_c2h4)
+   END SELECT
+
+   ! compute properties  
+   gdinv  = gdinv*pressure_effective
+   gddinv = gd*dinv_c2h4
+   !***EXPress s/d at stp, as is k in nasa sp-3080
+   sdweak = sdweak*toaz
+ENDIF
+
+RETURN
+!------------------------------------------------------------------------------
+END SUBROUTINE c2h4
+
+!==============================================================================
+pure REAL(EB) FUNCTION GET_SPECTRAL_ABSORPTION(omega,temp,sd_temp,bounds,absorption_data)
+!==============================================================================
+! RETURNs interpolated values of spectral absorption
+! note assumed shape
+!
+! input:
+! omega  : wavenumber, unit = 1/cm
+! temp   : gas temperature, unit = kelvin
+! sd_temp: vector of temperature measurements, DIMENSION(*) unit = kelvin
+! bounds : vector of wavenumber bounds and spacing for a given band, DIMENSIONs(3)
+! absorption_data: array of species spectral measurements, DIMENSIONs(*,*)
+!                 note = first DIMENSION equals to DIMENSION of sd_temp
+!
+! action performed: bilinear interpolation of absorption_data
+!------------------------------------------------------------------------------
+! variables passed in
+
+REAL(EB), INTENT(IN) :: omega
+REAL(EB), INTENT(IN) :: temp
+REAL(EB), DIMENSION(:), INTENT(IN)   :: sd_temp, bounds
+REAL(EB), DIMENSION(:,:), INTENT(IN) :: absorption_data 
+
+REAL(EB) :: delta_t
+REAL(EB) :: delta_w
+REAL(EB) :: w1
+REAL(EB) :: omega_min, omega_max, delta_omega
+REAL(EB) :: ttemp
+REAL(EB) :: interpolated_value
+
+INTEGER :: n_temp, n_bounds, n_abs_data1, n_abs_data2
+INTEGER :: i_omega, i_temp, i_omega1, i_omega2
+
+LOGICAL :: cross
+
+cross = .false.
+
+! cvl need to link MODULE that defines errmsg
+! part of the code commented for now
+!  CHARACTER(255) messag
+!  LOGICAL fatal
+
+n_temp      = ubound(sd_temp,1)  ! get number of temperature measurements
+n_bounds    = ubound(bounds,1)   ! get number of elements in bounds. should be 3
+n_abs_data1 = ubound(absorption_data,1) ! get number of temperature data
+n_abs_data2 = ubound(absorption_data,2) ! get number of wavenumber data
+
+! ! cvl need to link MODULE that defines errmsg
+! ! part of the code commented for now
+! !-----------------------------test DIMENSIONs of bounds and absorption_data----
+! ! n_bounds should be 3
+! 
+!  IF (n_bounds/=3) THEN 
+!     messag='error in radcal. n_bounds should be equal to 3'
+!     fatal = .true.
+!     CALL errmsg( TRIM(messag), fatal )
+!  ENDIF
+! 
+! ! n_abs_data1 should be equal to n_temp
+! 
+!  IF (n_abs_data1/=n_temp) THEN 
+!     messag='error in radcal. first DIMENSION of absorption_data should be equal to n_temp'
+!     fatal = .true.
+!     CALL errmsg( TRIM(messag), fatal )
+!  ENDIF
+
+!------------------------------------------------------------------------------
+omega_min   = bounds(1)
+omega_max   = bounds(2)
+delta_omega = bounds(3)
+ 
+! treat special CASE when band crosses the 1100 cm-1 mark.
+! changes of stride
+! below 1100 cm-1, delta_omega = 5 cm-1
+! above 1100 cm-1, delta_omega = 25 cm-1
+
+IF ((omega_min<=1100.0_EB).and.(omega_max>1100.0_EB)) THEN
+cross = .true.
+IF (omega>1100._EB) delta_omega = 25.0_EB
+ENDIF
+
+! bounds ttemp so that MIN(sd_temp) <= ttemp <= MAX(sd_temp)
+! IF ttemp < MIN(sd_temp) THEN ttemp := MIN(sd_temp)
+! IF MAX(sd_temp) < ttemp THEN ttemp := MAX(sd_temp)
+ttemp       = MIN(maxval(sd_temp),MAX(temp,minval(sd_temp)))  
+
+IF (ttemp <= minval(sd_temp)) THEN
+   i_temp  = 1
+   delta_t = 0._EB
+ELSE IF (ttemp >= maxval(sd_temp)) THEN
+   i_temp  = n_temp-1
+   delta_t = 1.0_EB
+ELSE
+! find index i_temp such that sd_temp(i_temp)<ttemp<=sd_temp(i_temp+1)
+   DO i_temp = 1, n_temp-1
+      IF ((sd_temp(i_temp)<ttemp).and.(ttemp<=sd_temp(i_temp+1))) exit
+   ENDDO
+
+   delta_t = (ttemp-sd_temp(i_temp))/(sd_temp(i_temp+1)-sd_temp(i_temp))
+ENDIF
+
+IF ((omega_min<=omega).and.(omega<=omega_max)) THEN 
+
+   IF(.not.(cross)) THEN ! the band is on either side of the 1100 cm-1 mark
+
+      IF(omega<omega_max) THEN
+! find i_omega such that omega(i_omega)<=omega<omega(i_omega+1)
+         i_omega = floor((omega-omega_min)/delta_omega)+1
+         i_omega = MIN(i_omega,n_abs_data2-1)
+         w1      = omega_min+delta_omega*(REAL(i_omega-1,EB))
+         delta_w = (omega-w1)/delta_omega
+      ELSE
+! CASE i_omega = omega_max => assume THEN that i_omega = n_abs_data2 -1 
+         i_omega = n_abs_data2 - 1
+         w1      = omega_min+delta_omega*(REAL(i_omega-1,EB))
+         delta_w = (omega-w1)/delta_omega
+      ENDIF
+
+   ELSE ! the band is on both side of 1100 cm-1
+      ! test IF omega <= 1100
+      IF(omega<=1100) THEN
+! find i_omega such that omega(i_omega)<=omega<omega(i_omega+1)
+         i_omega = floor((omega-omega_min)/delta_omega)+1
+         i_omega = MIN(i_omega,n_abs_data2-1)
+         w1      = omega_min+delta_omega*(REAL(i_omega-1,EB))
+         delta_w = (omega-w1)/delta_omega
+      ELSE
+! CASE omega > 1100 cm-1
+         i_omega1 = floor((1100-omega_min)/5.0_EB)+1
+         i_omega2 = floor((omega-1100)/delta_omega)
+         i_omega  = MIN(i_omega1+i_omega2-1,n_abs_data2-1)
+         w1      = omega_min+5.0_EB*(REAL(i_omega1,EB))+delta_omega*(REAL(i_omega2-1,EB))
+         delta_w = (omega-w1)/delta_omega
+      ENDIF
+
+   ENDIF
+
+! perform bilinear interpolation to obtain values of sdweak
+   interpolated_value = (1._EB-delta_w)*((1._EB-delta_t)*absorption_data(i_temp,i_omega)+ & 
+                        absorption_data(i_temp+1,i_omega)*delta_t) +                      &
+                        delta_w*(absorption_data(i_temp,i_omega+1)*(1._EB-delta_t)+       &
+                        absorption_data(i_temp+1,i_omega+1)*delta_t)
+
+ELSE
+   interpolated_value = 0._EB
+ENDIF
+
+! ensure positivity
+GET_SPECTRAL_ABSORPTION = MAX(0._EB,interpolated_value)
+!------------------------------------------------------------------------------
+END FUNCTION GET_SPECTRAL_ABSORPTION
+
+
+!==============================================================================
+ELEMENTAL REAL(EB) FUNCTION planck(temp,lambda)
+!==============================================================================
+! computes blackbody FUNCTION in units of w/m^2/micron/sr
+! input:
+! temp: temperature, unit = kelvin
+! lambda: wavelength, unit = micrometers
+!------------------------------------------------------------------------------
+! variables passed in
+REAL (EB), INTENT(IN):: temp, lambda
+
+! local variables
+REAL (EB), PARAMETER :: q1 = 1.19088e8_EB ! q1 = 2*speed_of_light^2*planck_cnst
+REAL (EB), PARAMETER :: q2 = 14388._EB    ! q2 = speed_of_light*planck_cns/boltzmann
+REAL (EB) :: c   ! c = lambda * temp
+
+IF(ABS(temp)<TWO_EPSILON_EB) THEN
+   planck = 0._EB
+ELSE
+   c = temp * lambda
+   IF (q2/c > 38._EB) THEN
+      planck = 0._EB
+   ELSE
+      planck=q1*(lambda**(-5))/(EXP(q2/c)-1._EB)
+END IF
+ENDIF
+!------------------------------------------------------------------------------
+END FUNCTION planck
+
+!==============================================================================
+ELEMENTAL REAL(EB) FUNCTION planck_wn(temp,omega)
+!==============================================================================
+! computes blackbody FUNCTION in units of w/m^2/cm^-1/sr
+! input:
+! temp : temperature, unit = kelvin
+! omega: wavenumber,  unit = cm-1
+! checked by vlecous1 on april 15th 2013
+!------------------------------------------------------------------------------
+! variables passed in
+REAL (EB), INTENT(IN):: temp, omega
+
+! local variables
+REAL (EB), PARAMETER :: q1 = 1.19088e-8_EB ! q1 = 2*speed_of_light^2*planck_cnst 
+REAL (EB), PARAMETER :: q2 = 1.4388_EB     
+! q2 = speed_of_light*planck_cns/boltzmann
+REAL (EB) :: c   ! c = temp/omega
+
+IF(ABS(temp)<TWO_EPSILON_EB) THEN
+   planck_wn = 0._EB
+ELSE
+   c = temp/omega
+   IF (q2/c > 38._EB) THEN
+      planck_wn = 0._EB
+   ELSE
+      planck_wn=q1*(omega**3)/(EXP(q2/c)-1._EB)
+END IF
+ENDIF
+!------------------------------------------------------------------------------
+END FUNCTION planck_wn
+
+
+!==============================================================================
+REAL(EB) FUNCTION integration(x,y)
+!==============================================================================
+! numerical integration of the vector y over the range given by vector x
+! DOes not assume any regularity of x
+! integration based on Simpson rule over non regular ABS(cissa
+! based on lagrangian interpolation using 3 point (quadratic interpolation)
+! note: io is unit of output file. needed for printing error message
+!------------------------------------------------------------------------------
+! variables passed in 
+REAL(EB), INTENT(IN), DIMENSION(:) :: x,y
+
+! local variable
+REAL(EB) :: alpha, beta, gamma, b, a, segment_int
+ 
+INTEGER  :: i_point, n_points, i, j ,k
+
+! get number of elements CONTAINS in x and y
+ 
+n_points = SIZE(y)
+
+! test whether SIZE(x) = SIZE(y). STOP IF condition not met
+IF (SIZE(x)/=n_points) THEN
+   WRITE(MESSAGE, '(A)') 'Error 2: (internal) vector x and y for integration should have same SIZE(.'
+   CALL SHUTDOWN(MESSAGE)
+ENDIF
+
+! test whether n_points is greater or equal to 3. IF not, print error msg and STOP radcal 
+IF (n_points.lt.2) THEN
+   WRITE(MESSAGE, '(A)') 'Error 3: (internal) not enough points for integration.' 
+   CALL SHUTDOWN(MESSAGE)
+ENDIF
+! starts integration
+integration = 0.0_EB
+
+! treat first and last segment in the loop 
+DO i_point = 1,n_points
+ 
+   IF (i_point == 1) THEN
+      i = i_point
+      j = i_point+1
+      k = i_point+2
+
+      a = x(i)
+      b = 0.5_EB*(x(i)+x(j))
+   ELSEIF(i_point == n_points) THEN
+      i = i_point-2
+      j = i_point-1
+      k = i_point
+
+      a = 0.5_EB*(x(j)+x(k))
+      b = x(k)
+   ELSE
+      i = i_point-1
+      j = i_point
+      k = i_point+1
+
+      a = 0.5_EB*(x(i)+x(j))
+      b = 0.5_EB*(x(j)+x(k))
+   ENDIF
+
+   alpha = y(i)/((x(i)-x(j))*(x(i)-x(k)))
+   beta  = y(j)/((x(j)-x(i))*(x(j)-x(k)))
+   gamma = y(k)/((x(k)-x(i))*(x(k)-x(j)))
+
+   segment_int = 1.0_EB/3.0_EB*(b**3-a**3)*(alpha+beta+gamma)
+   segment_int = segment_int - 0.5_EB*(b**2-a**2)*((x(j)+x(k))*alpha+beta*(x(i)+x(k))+gamma*(x(i)+x(j)))
+   segment_int = segment_int + (b-a)*(alpha*x(j)*x(k)+beta*x(k)*x(i)+gamma*x(j)*x(i))
+
+   integration = integration + segment_int
+
+END DO 
+
+! Finally integration = sign(b-a)*integration. This accounts for 
+! descENDing order vector x.
+ 
+integration = sign(1.0_EB,b-a)*integration
+
+RETURN
+
+!------------------------------------------------------------------------------
+END FUNCTION integration
+
 
 !==============================================================================
 SUBROUTINE RCALLOC
 !==============================================================================
 
-ALLOCATE(P(6))
-ALLOCATE(SPECIE(5))
-ALLOCATE(QW(600))
-ALLOCATE(TTAU(600))
-ALLOCATE(XT(600))
-ALLOCATE(X(4))
-ALLOCATE(GC(4))
-ALLOCATE(LAMBDA(600))
-ALLOCATE(OPTICAL_THICKNESS(4))
-ALLOCATE(AB(600))
-ALLOCATE(ATOT(4))
-ALLOCATE(BCNT(4))
-ALLOCATE(GAMMA(4,7))
-ALLOCATE(SD15(6,80))
-ALLOCATE(SD(6,376))
-ALLOCATE(SD7(3,16))
-ALLOCATE(SD3(3,32))
+! Old Radcal variables
+ALLOCATE(gamma(4,7))
+ALLOCATE(sd15(6,80))
+ALLOCATE(sd(6,376))
+ALLOCATE(sd7(3,16))
+ALLOCATE(sd3(3,32))
+
+!-------------------------methane data-------------------
 
 
-I_MODEL_CO2 = 1 ! GOODY MODEL
-I_MODEL_CO  = 1 ! GOODY MODEL
-I_MODEL_H2O = 1 ! GOODY MODEL
+! there are 3 bands for methane
 
-!-------------------------Methane DATA-------------------
+! band #1: 1150 cm-1 - 1600 cm-1 
+! band #2: 2700 cm-1 - 3250 cm-1 
+! band #3: 3400 cm-1 - 5000 cm-1
 
+ALLOCATE(sd_ch4_temp(n_temp_ch4)) 
 
-! THERE ARE 2 BANDS FOR Methane
+! initialize bands wavenumber bounds for methane ABS(option coefficients.
+! bands are organized by row: 
+! 1st column is the lower bound band limit in cm-1. 
+! 2nd column is the upper bound band limit in cm-1. 
+! 3rd column is the stride between wavenumbers in band.
+! IF 3rd column = 0., THEN the band is calculated and not tabulated.
 
-! BAND #1: 1150 cm-1 - 1600 cm-1 
-! BAND #2: 2700 cm-1 - 3250 cm-1 
-! BAND #3: 3400 cm-1 - 5000 cm-1
+ALLOCATE(om_bnd_ch4(n_band_ch4,3)) 
 
-N_TEMP_CH4 = 23
-N_BAND_CH4 = 3
+om_bnd_ch4 = RESHAPE((/ &
+   1150._EB, 2700._EB, 3400._EB,&
+   1600._EB, 3250._EB, 5000._EB,&
+   25._EB,   25._EB,    0._EB/),(/n_band_ch4,3/)) 
 
-I_MODEL_CH4 = 3 ! ELSASSER MODEL
+sd_ch4_temp = (/ &
+   300._EB, 350._EB, 400._EB, 450._EB, 500._EB, 550._EB,&
+   600._EB, 650._EB, 700._EB, 750._EB, 800._EB, 850._EB,&
+   900._EB, 950._EB, 1000._EB, 1050._EB, 1100._EB, 1150._EB,&
+   1200._EB, 1250._EB, 1300._EB, 1350._EB, 1400._EB/)
 
-ALLOCATE(SD_CH4_TEMP(N_TEMP_CH4)) 
+ALLOCATE(sd1_ch4(n_temp_ch4,19)) 
 
-! INITIALIZE BANDS WAVENUMBER BOUNDS FOR Methane ABSOPTION COEFFICIENTS.
-! BANDS ARE ORGANIZED BY ROW: 
-! 1ST COLUMN IS THE LOWER BOUND BAND LIMIT IN cm-1. 
-! 2ND COLUMN IS THE UPPER BOUND BAND LIMIT IN cm-1. 
-! 3RD COLUMN IS THE STRIDE BETWEEN WAVENUMBERS IN BAND.
-! IF 3RD COLUMN = 0., THEN THE BAND IS CALCULATED AND NOT TABULATED.
+! band #1: 1150 cm-1 - 1600 cm-1 
 
-ALLOCATE(OM_BND_CH4(N_BAND_CH4,3)) 
+sd1_ch4(1:23,1:8) = RESHAPE((/ &  ! 1150-1325 cm-1
+   2.674955e-03_EB, 4.122616e-03_EB, 6.116504e-03_EB, 8.394889e-03_EB, 1.066588e-02_EB, 1.270929e-02_EB, &
+   1.431368e-02_EB, 1.543500e-02_EB, 1.607798e-02_EB, 1.623394e-02_EB, 1.594103e-02_EB, 1.537005e-02_EB, &
+   1.456109e-02_EB, 1.356591e-02_EB, 1.253062e-02_EB, 1.145338e-02_EB, 1.037156e-02_EB, 9.319748e-03_EB, &
+   8.296535e-03_EB, 7.359273e-03_EB, 6.512254e-03_EB, 5.764075e-03_EB, 5.034367e-03_EB,  &
+   1.056047e-02_EB, 1.689522e-02_EB, 2.382293e-02_EB, 3.013931e-02_EB, 3.518013e-02_EB, 3.873081e-02_EB, &
+   4.056505e-02_EB, 4.099451e-02_EB, 4.031689e-02_EB, 3.867720e-02_EB, 3.630281e-02_EB, 3.360423e-02_EB, &
+   3.072697e-02_EB, 2.769650e-02_EB, 2.480529e-02_EB, 2.203561e-02_EB, 1.945492e-02_EB, 1.710571e-02_EB, &
+   1.490918e-02_EB, 1.297063e-02_EB, 1.127359e-02_EB, 9.806206e-03_EB, 8.433200e-03_EB,  &
+   6.535368e-02_EB, 8.634735e-02_EB, 1.035285e-01_EB, 1.149338e-01_EB, 1.211259e-01_EB, 1.231160e-01_EB, &
+   1.212403e-01_EB, 1.167139e-01_EB, 1.104665e-01_EB, 1.027695e-01_EB, 9.409726e-02_EB, 8.537322e-02_EB, &
+   7.679556e-02_EB, 6.836183e-02_EB, 6.060003e-02_EB, 5.339354e-02_EB, 4.679438e-02_EB, 4.089038e-02_EB, &
+   3.545789e-02_EB, 3.072468e-02_EB, 2.660506e-02_EB, 2.306236e-02_EB, 1.979016e-02_EB,  &
+   2.797310e-01_EB, 2.878774e-01_EB, 2.844637e-01_EB, 2.718418e-01_EB, 2.544158e-01_EB, 2.351542e-01_EB, &
+   2.144282e-01_EB, 1.940107e-01_EB, 1.744123e-01_EB, 1.554283e-01_EB, 1.374171e-01_EB, 1.210226e-01_EB, &
+   1.060935e-01_EB, 9.238361e-02_EB, 8.033186e-02_EB, 6.960028e-02_EB, 6.015950e-02_EB, 5.186871e-02_EB, &
+   4.448682e-02_EB, 3.815557e-02_EB, 3.272683e-02_EB, 2.816055e-02_EB, 2.399102e-02_EB,  &
+   6.055294e-01_EB, 5.085203e-01_EB, 4.314546e-01_EB, 3.661128e-01_EB, 3.120083e-01_EB, 2.675996e-01_EB, &
+   2.295433e-01_EB, 1.976798e-01_EB, 1.706085e-01_EB, 1.470613e-01_EB, 1.263463e-01_EB, 1.086762e-01_EB, &
+   9.339644e-02_EB, 7.991483e-02_EB, 6.850499e-02_EB, 5.859531e-02_EB, 5.007218e-02_EB, 4.275497e-02_EB, &
+   3.636644e-02_EB, 3.094626e-02_EB, 2.637845e-02_EB, 2.255529e-02_EB, 1.911152e-02_EB,  &
+   7.291248e-01_EB, 6.247580e-01_EB, 5.567927e-01_EB, 5.047634e-01_EB, 4.622435e-01_EB, 4.253591e-01_EB, &
+   3.901550e-01_EB, 3.566718e-01_EB, 3.248608e-01_EB, 2.936112e-01_EB, 2.628808e-01_EB, 2.344160e-01_EB, &
+   2.078641e-01_EB, 1.829068e-01_EB, 1.606407e-01_EB, 1.403181e-01_EB, 1.221762e-01_EB, 1.060864e-01_EB, &
+   9.154534e-02_EB, 7.892764e-02_EB, 6.808643e-02_EB, 5.882322e-02_EB, 5.031768e-02_EB,  &
+   1.503577e+00_EB, 1.216438e+00_EB, 1.009787e+00_EB, 8.445781e-01_EB, 7.110515e-01_EB, 6.021463e-01_EB, &
+   5.099874e-01_EB, 4.327438e-01_EB, 3.680691e-01_EB, 3.125303e-01_EB, 2.644163e-01_EB, 2.242054e-01_EB, &
+   1.897708e-01_EB, 1.602130e-01_EB, 1.354708e-01_EB, 1.143770e-01_EB, 9.654761e-02_EB, 8.152145e-02_EB, &
+   6.854917e-02_EB, 5.774320e-02_EB, 4.875464e-02_EB, 4.129146e-02_EB, 3.467888e-02_EB,  &
+   1.113787e+00_EB, 8.666106e-01_EB, 6.937600e-01_EB, 5.636603e-01_EB, 4.651973e-01_EB, 3.899245e-01_EB, &
+   3.293625e-01_EB, 2.804438e-01_EB, 2.403481e-01_EB, 2.062563e-01_EB, 1.767199e-01_EB, 1.518103e-01_EB, &
+   1.304026e-01_EB, 1.116263e-01_EB, 9.571162e-02_EB, 8.192030e-02_EB, 7.003835e-02_EB, 5.986022e-02_EB, &
+   5.092725e-02_EB, 4.337782e-02_EB, 3.700459e-02_EB, 3.164349e-02_EB, 2.682395e-02_EB/),(/23,8/))
 
-OM_BND_CH4 = RESHAPE((/ &
-    1150._EB, 2700._EB, 3400._EB,&
-    1600._EB, 3250._EB, 5000._EB,&
-      25._EB,   25._EB,    0._EB/),(/N_BAND_CH4,3/)) 
+sd1_ch4(1:23,9:16) = RESHAPE((/ &  ! 1350-1525 cm-1
+   5.859637e-01_EB, 5.741640e-01_EB, 5.446284e-01_EB, 5.016955e-01_EB, 4.533548e-01_EB, 4.052375e-01_EB, &
+   3.578427e-01_EB, 3.138042e-01_EB, 2.741405e-01_EB, 2.379703e-01_EB, 2.050667e-01_EB, 1.765003e-01_EB, &
+   1.515652e-01_EB, 1.294551e-01_EB, 1.106049e-01_EB, 9.430003e-02_EB, 8.028460e-02_EB, 6.831086e-02_EB, &
+   5.788843e-02_EB, 4.905327e-02_EB, 4.167658e-02_EB, 3.549325e-02_EB, 2.997796e-02_EB,  &
+   5.143640e-02_EB, 7.394302e-02_EB, 9.480931e-02_EB, 1.108135e-01_EB, 1.211319e-01_EB, 1.262273e-01_EB, &
+   1.262909e-01_EB, 1.227527e-01_EB, 1.167145e-01_EB, 1.087709e-01_EB, 9.943737e-02_EB, 9.002538e-02_EB, &
+   8.060527e-02_EB, 7.137067e-02_EB, 6.299760e-02_EB, 5.512164e-02_EB, 4.801455e-02_EB, 4.169764e-02_EB, &
+   3.593587e-02_EB, 3.095498e-02_EB, 2.664278e-02_EB, 2.295572e-02_EB, 1.959682e-02_EB,  &
+   7.616134e-03_EB, 9.957002e-03_EB, 1.281279e-02_EB, 1.589717e-02_EB, 1.894916e-02_EB, 2.174268e-02_EB, &
+   2.395920e-02_EB, 2.555557e-02_EB, 2.648904e-02_EB, 2.671274e-02_EB, 2.629477e-02_EB, 2.540283e-02_EB, &
+   2.418621e-02_EB, 2.265546e-02_EB, 2.101542e-02_EB, 1.928221e-02_EB, 1.752831e-02_EB, 1.582992e-02_EB, &
+   1.416926e-02_EB, 1.261250e-02_EB, 1.121041e-02_EB, 9.951538e-03_EB, 8.728757e-03_EB,  &
+   1.277402e-02_EB, 1.327177e-02_EB, 1.322108e-02_EB, 1.267471e-02_EB, 1.186190e-02_EB, 1.093562e-02_EB, &
+   9.920972e-03_EB, 8.920419e-03_EB, 7.971129e-03_EB, 7.057028e-03_EB, 6.197372e-03_EB, 5.429023e-03_EB, &
+   4.732635e-03_EB, 4.092017e-03_EB, 3.548360e-03_EB, 3.062048e-03_EB, 2.633809e-03_EB, 2.263255e-03_EB, &
+   1.935254e-03_EB, 1.656795e-03_EB, 1.416023e-03_EB, 1.215289e-03_EB, 1.031774e-03_EB,  &
+   8.014464e-03_EB, 7.194752e-03_EB, 6.553713e-03_EB, 6.000398e-03_EB, 5.531684e-03_EB, 5.121393e-03_EB, &
+   4.722456e-03_EB, 4.343916e-03_EB, 3.983544e-03_EB, 3.621247e-03_EB, 3.268422e-03_EB, 2.936068e-03_EB, &
+   2.617151e-03_EB, 2.322363e-03_EB, 2.051315e-03_EB, 1.804840e-03_EB, 1.578471e-03_EB, 1.378963e-03_EB, &
+   1.197596e-03_EB, 1.036958e-03_EB, 9.007021e-04_EB, 7.820103e-04_EB, 6.693842e-04_EB,  &
+   2.792665e-03_EB, 2.575454e-03_EB, 2.537125e-03_EB, 2.578233e-03_EB, 2.648059e-03_EB, 2.713453e-03_EB, &
+   2.741224e-03_EB, 2.722787e-03_EB, 2.662395e-03_EB, 2.559402e-03_EB, 2.415338e-03_EB, 2.254521e-03_EB, &
+   2.077537e-03_EB, 1.891657e-03_EB, 1.708933e-03_EB, 1.533948e-03_EB, 1.367874e-03_EB, 1.212162e-03_EB, &
+   1.064882e-03_EB, 9.339250e-04_EB, 8.169687e-04_EB, 7.180516e-04_EB, 6.220503e-04_EB,  &
+   8.239408e-04_EB, 8.207289e-04_EB, 8.769232e-04_EB, 9.471812e-04_EB, 1.013068e-03_EB, 1.072041e-03_EB, &
+   1.109555e-03_EB, 1.125480e-03_EB, 1.120373e-03_EB, 1.094883e-03_EB, 1.043855e-03_EB, 9.887558e-04_EB, &
+   9.221581e-04_EB, 8.517148e-04_EB, 7.786200e-04_EB, 7.086512e-04_EB, 6.363394e-04_EB, 5.709486e-04_EB, &
+   5.037963e-04_EB, 4.478632e-04_EB, 3.933607e-04_EB, 3.461225e-04_EB, 3.036065e-04_EB,  &
+   1.787674e-02_EB, 1.651301e-02_EB, 1.538618e-02_EB, 1.427021e-02_EB, 1.321135e-02_EB, 1.220556e-02_EB, &
+   1.120017e-02_EB, 1.022271e-02_EB, 9.293408e-03_EB, 8.381487e-03_EB, 7.491250e-03_EB, 6.673691e-03_EB, &
+   5.914957e-03_EB, 5.201979e-03_EB, 4.566356e-03_EB, 3.988961e-03_EB, 3.472458e-03_EB, 3.017625e-03_EB, &
+   2.605493e-03_EB, 2.248445e-03_EB, 1.941774e-03_EB, 1.676885e-03_EB, 1.438512e-03_EB/),(/23,8/))
 
-SD_CH4_TEMP = (/ &
-    300._EB, 350._EB, 400._EB, 450._EB, 500._EB, 550._EB,&
-    600._EB, 650._EB, 700._EB, 750._EB, 800._EB, 850._EB,&
-    900._EB, 950._EB, 1000._EB, 1050._EB, 1100._EB, 1150._EB,&
-    1200._EB, 1250._EB, 1300._EB, 1350._EB, 1400._EB/)
+sd1_ch4(1:23,17:19) = RESHAPE((/ &  ! 1550-1600 cm-1
+   3.842192e-03_EB, 4.909077e-03_EB, 5.876585e-03_EB, 6.637230e-03_EB, 7.159498e-03_EB, 7.449619e-03_EB, &
+   7.502474e-03_EB, 7.374704e-03_EB, 7.105819e-03_EB, 6.720456e-03_EB, 6.241450e-03_EB, 5.729337e-03_EB, &
+   5.213056e-03_EB, 4.685851e-03_EB, 4.183214e-03_EB, 3.714659e-03_EB, 3.276286e-03_EB, 2.879051e-03_EB, &
+   2.508044e-03_EB, 2.182116e-03_EB, 1.899894e-03_EB, 1.653926e-03_EB, 1.423668e-03_EB,  &
+   1.587677e-03_EB, 1.446538e-03_EB, 1.552901e-03_EB, 1.804439e-03_EB, 2.128742e-03_EB, 2.458565e-03_EB, &
+   2.743898e-03_EB, 2.955974e-03_EB, 3.088835e-03_EB, 3.134690e-03_EB, 3.095698e-03_EB, 3.002805e-03_EB, &
+   2.862955e-03_EB, 2.683299e-03_EB, 2.486550e-03_EB, 2.282038e-03_EB, 2.073847e-03_EB, 1.873143e-03_EB, &
+   1.674361e-03_EB, 1.489429e-03_EB, 1.321804e-03_EB, 1.173554e-03_EB, 1.026702e-03_EB,  &
+   0.000000e+00_EB, 0.000000e+00_EB, 0.000000e+00_EB, 0.000000e+00_EB, 0.000000e+00_EB, 0.000000e+00_EB, &
+   0.000000e+00_EB, 0.000000e+00_EB, 0.000000e+00_EB, 0.000000e+00_EB, 0.000000e+00_EB, 0.000000e+00_EB, &
+   0.000000e+00_EB, 0.000000e+00_EB, 0.000000e+00_EB, 0.000000e+00_EB, 0.000000e+00_EB, 0.000000e+00_EB, &
+   0.000000e+00_EB, 0.000000e+00_EB, 0.000000e+00_EB, 0.000000e+00_EB, 0.000000e+00_EB/),(/23,3/))
 
-ALLOCATE(SD1_CH4(N_TEMP_CH4,19)) 
+ALLOCATE(sd2_ch4(n_temp_ch4,23)) 
 
-! BAND #1: 1150 cm-1 - 1600 cm-1 
+! band #2: 2700 cm-1 - 3250 cm-1 
 
-SD1_CH4(1:23,1:8) = RESHAPE((/ &  ! 1150-1325 cm-1
-    2.674955E-03_EB, 4.122616E-03_EB, 6.116504E-03_EB, 8.394889E-03_EB, 1.066588E-02_EB, 1.270929E-02_EB, &
-    1.431368E-02_EB, 1.543500E-02_EB, 1.607798E-02_EB, 1.623394E-02_EB, 1.594103E-02_EB, 1.537005E-02_EB, &
-    1.456109E-02_EB, 1.356591E-02_EB, 1.253062E-02_EB, 1.145338E-02_EB, 1.037156E-02_EB, 9.319748E-03_EB, &
-    8.296535E-03_EB, 7.359273E-03_EB, 6.512254E-03_EB, 5.764075E-03_EB, 5.034367E-03_EB,  &
-    1.056047E-02_EB, 1.689522E-02_EB, 2.382293E-02_EB, 3.013931E-02_EB, 3.518013E-02_EB, 3.873081E-02_EB, &
-    4.056505E-02_EB, 4.099451E-02_EB, 4.031689E-02_EB, 3.867720E-02_EB, 3.630281E-02_EB, 3.360423E-02_EB, &
-    3.072697E-02_EB, 2.769650E-02_EB, 2.480529E-02_EB, 2.203561E-02_EB, 1.945492E-02_EB, 1.710571E-02_EB, &
-    1.490918E-02_EB, 1.297063E-02_EB, 1.127359E-02_EB, 9.806206E-03_EB, 8.433200E-03_EB,  &
-    6.535368E-02_EB, 8.634735E-02_EB, 1.035285E-01_EB, 1.149338E-01_EB, 1.211259E-01_EB, 1.231160E-01_EB, &
-    1.212403E-01_EB, 1.167139E-01_EB, 1.104665E-01_EB, 1.027695E-01_EB, 9.409726E-02_EB, 8.537322E-02_EB, &
-    7.679556E-02_EB, 6.836183E-02_EB, 6.060003E-02_EB, 5.339354E-02_EB, 4.679438E-02_EB, 4.089038E-02_EB, &
-    3.545789E-02_EB, 3.072468E-02_EB, 2.660506E-02_EB, 2.306236E-02_EB, 1.979016E-02_EB,  &
-    2.797310E-01_EB, 2.878774E-01_EB, 2.844637E-01_EB, 2.718418E-01_EB, 2.544158E-01_EB, 2.351542E-01_EB, &
-    2.144282E-01_EB, 1.940107E-01_EB, 1.744123E-01_EB, 1.554283E-01_EB, 1.374171E-01_EB, 1.210226E-01_EB, &
-    1.060935E-01_EB, 9.238361E-02_EB, 8.033186E-02_EB, 6.960028E-02_EB, 6.015950E-02_EB, 5.186871E-02_EB, &
-    4.448682E-02_EB, 3.815557E-02_EB, 3.272683E-02_EB, 2.816055E-02_EB, 2.399102E-02_EB,  &
-    6.055294E-01_EB, 5.085203E-01_EB, 4.314546E-01_EB, 3.661128E-01_EB, 3.120083E-01_EB, 2.675996E-01_EB, &
-    2.295433E-01_EB, 1.976798E-01_EB, 1.706085E-01_EB, 1.470613E-01_EB, 1.263463E-01_EB, 1.086762E-01_EB, &
-    9.339644E-02_EB, 7.991483E-02_EB, 6.850499E-02_EB, 5.859531E-02_EB, 5.007218E-02_EB, 4.275497E-02_EB, &
-    3.636644E-02_EB, 3.094626E-02_EB, 2.637845E-02_EB, 2.255529E-02_EB, 1.911152E-02_EB,  &
-    7.291248E-01_EB, 6.247580E-01_EB, 5.567927E-01_EB, 5.047634E-01_EB, 4.622435E-01_EB, 4.253591E-01_EB, &
-    3.901550E-01_EB, 3.566718E-01_EB, 3.248608E-01_EB, 2.936112E-01_EB, 2.628808E-01_EB, 2.344160E-01_EB, &
-    2.078641E-01_EB, 1.829068E-01_EB, 1.606407E-01_EB, 1.403181E-01_EB, 1.221762E-01_EB, 1.060864E-01_EB, &
-    9.154534E-02_EB, 7.892764E-02_EB, 6.808643E-02_EB, 5.882322E-02_EB, 5.031768E-02_EB,  &
-    1.503577E+00_EB, 1.216438E+00_EB, 1.009787E+00_EB, 8.445781E-01_EB, 7.110515E-01_EB, 6.021463E-01_EB, &
-    5.099874E-01_EB, 4.327438E-01_EB, 3.680691E-01_EB, 3.125303E-01_EB, 2.644163E-01_EB, 2.242054E-01_EB, &
-    1.897708E-01_EB, 1.602130E-01_EB, 1.354708E-01_EB, 1.143770E-01_EB, 9.654761E-02_EB, 8.152145E-02_EB, &
-    6.854917E-02_EB, 5.774320E-02_EB, 4.875464E-02_EB, 4.129146E-02_EB, 3.467888E-02_EB,  &
-    1.113787E+00_EB, 8.666106E-01_EB, 6.937600E-01_EB, 5.636603E-01_EB, 4.651973E-01_EB, 3.899245E-01_EB, &
-    3.293625E-01_EB, 2.804438E-01_EB, 2.403481E-01_EB, 2.062563E-01_EB, 1.767199E-01_EB, 1.518103E-01_EB, &
-    1.304026E-01_EB, 1.116263E-01_EB, 9.571162E-02_EB, 8.192030E-02_EB, 7.003835E-02_EB, 5.986022E-02_EB, &
-    5.092725E-02_EB, 4.337782E-02_EB, 3.700459E-02_EB, 3.164349E-02_EB, 2.682395E-02_EB/),(/23,8/))
+sd2_ch4(1:23,1:8) = RESHAPE((/ &  ! 2700-2875 cm-1
+   1.217530e-02_EB, 1.117112e-02_EB, 1.018335e-02_EB, 9.113159e-03_EB, 8.069237e-03_EB, 7.089143e-03_EB, &
+   6.164984e-03_EB, 5.339743e-03_EB, 4.605161e-03_EB, 3.952813e-03_EB, 3.369126e-03_EB, 2.873535e-03_EB, &
+   2.442004e-03_EB, 2.069306e-03_EB, 1.752468e-03_EB, 1.483929e-03_EB, 1.255931e-03_EB, 1.056565e-03_EB, &
+   8.920522e-04_EB, 7.508758e-04_EB, 6.317838e-04_EB, 5.352971e-04_EB, 4.530464e-04_EB,  &
+   2.513916e-02_EB, 2.114376e-02_EB, 1.780513e-02_EB, 1.491293e-02_EB, 1.247243e-02_EB, 1.043356e-02_EB, &
+   8.698933e-03_EB, 7.256269e-03_EB, 6.066735e-03_EB, 5.057876e-03_EB, 4.209670e-03_EB, 3.508303e-03_EB, &
+   2.922322e-03_EB, 2.428483e-03_EB, 2.028794e-03_EB, 1.689558e-03_EB, 1.409261e-03_EB, 1.176715e-03_EB, &
+   9.788265e-04_EB, 8.167162e-04_EB, 6.823326e-04_EB, 5.730157e-04_EB, 4.786727e-04_EB,  &
+   2.557782e-02_EB, 2.133345e-02_EB, 1.832454e-02_EB, 1.586992e-02_EB, 1.378920e-02_EB, 1.202910e-02_EB, &
+   1.045539e-02_EB, 9.073223e-03_EB, 7.878108e-03_EB, 6.813401e-03_EB, 5.858711e-03_EB, 5.036798e-03_EB, &
+   4.322566e-03_EB, 3.689893e-03_EB, 3.157259e-03_EB, 2.690401e-03_EB, 2.292743e-03_EB, 1.951361e-03_EB, &
+   1.658405e-03_EB, 1.405787e-03_EB, 1.195120e-03_EB, 1.018165e-03_EB, 8.624014e-04_EB,  &
+   3.267234e-02_EB, 2.794974e-02_EB, 2.414894e-02_EB, 2.075791e-02_EB, 1.780983e-02_EB, 1.531517e-02_EB, &
+   1.312860e-02_EB, 1.127375e-02_EB, 9.704346e-03_EB, 8.352011e-03_EB, 7.159191e-03_EB, 6.165400e-03_EB, &
+   5.304681e-03_EB, 4.552437e-03_EB, 3.918329e-03_EB, 3.371374e-03_EB, 2.897155e-03_EB, 2.490584e-03_EB, &
+   2.139129e-03_EB, 1.834560e-03_EB, 1.579448e-03_EB, 1.362473e-03_EB, 1.164728e-03_EB,  &
+   4.729257e-02_EB, 4.020146e-02_EB, 3.655117e-02_EB, 3.486375e-02_EB, 3.451183e-02_EB, 3.486976e-02_EB, &
+   3.526911e-02_EB, 3.549943e-02_EB, 3.539419e-02_EB, 3.477334e-02_EB, 3.359574e-02_EB, 3.209631e-02_EB, &
+   3.033091e-02_EB, 2.826035e-02_EB, 2.617425e-02_EB, 2.398793e-02_EB, 2.182750e-02_EB, 1.975692e-02_EB, &
+   1.770980e-02_EB, 1.581216e-02_EB, 1.409330e-02_EB, 1.256203e-02_EB, 1.106706e-02_EB,  &
+   3.967221e-02_EB, 3.764359e-02_EB, 3.949747e-02_EB, 4.277841e-02_EB, 4.623172e-02_EB, 4.903094e-02_EB, &
+   5.058120e-02_EB, 5.097742e-02_EB, 5.029388e-02_EB, 4.863988e-02_EB, 4.605751e-02_EB, 4.308689e-02_EB, &
+   3.983596e-02_EB, 3.638363e-02_EB, 3.298206e-02_EB, 2.967115e-02_EB, 2.650179e-02_EB, 2.356866e-02_EB, &
+   2.077236e-02_EB, 1.827032e-02_EB, 1.605444e-02_EB, 1.411180e-02_EB, 1.226114e-02_EB,  &
+   7.223868e-02_EB, 8.544183e-02_EB, 9.962661e-02_EB, 1.104863e-01_EB, 1.171420e-01_EB, 1.196787e-01_EB, &
+   1.182118e-01_EB, 1.139658e-01_EB, 1.078438e-01_EB, 1.002471e-01_EB, 9.161471e-02_EB, 8.298437e-02_EB, &
+   7.452297e-02_EB, 6.622584e-02_EB, 5.857678e-02_EB, 5.147962e-02_EB, 4.505849e-02_EB, 3.932179e-02_EB, &
+   3.408714e-02_EB, 2.948172e-02_EB, 2.551286e-02_EB, 2.211846e-02_EB, 1.897647e-02_EB,  &
+   1.759866e-01_EB, 2.015363e-01_EB, 2.180490e-01_EB, 2.232613e-01_EB, 2.203020e-01_EB, 2.118597e-01_EB, &
+   1.990075e-01_EB, 1.841205e-01_EB, 1.683887e-01_EB, 1.521963e-01_EB, 1.360646e-01_EB, 1.209307e-01_EB, &
+   1.069128e-01_EB, 9.382435e-02_EB, 8.206146e-02_EB, 7.155641e-02_EB, 6.219310e-02_EB, 5.392479e-02_EB, &
+   4.648837e-02_EB, 4.008493e-02_EB, 3.458414e-02_EB, 2.988156e-02_EB, 2.558176e-02_EB/),(/23,8/))
 
-SD1_CH4(1:23,9:16) = RESHAPE((/ &  ! 1350-1525 cm-1
-    5.859637E-01_EB, 5.741640E-01_EB, 5.446284E-01_EB, 5.016955E-01_EB, 4.533548E-01_EB, 4.052375E-01_EB, &
-    3.578427E-01_EB, 3.138042E-01_EB, 2.741405E-01_EB, 2.379703E-01_EB, 2.050667E-01_EB, 1.765003E-01_EB, &
-    1.515652E-01_EB, 1.294551E-01_EB, 1.106049E-01_EB, 9.430003E-02_EB, 8.028460E-02_EB, 6.831086E-02_EB, &
-    5.788843E-02_EB, 4.905327E-02_EB, 4.167658E-02_EB, 3.549325E-02_EB, 2.997796E-02_EB,  &
-    5.143640E-02_EB, 7.394302E-02_EB, 9.480931E-02_EB, 1.108135E-01_EB, 1.211319E-01_EB, 1.262273E-01_EB, &
-    1.262909E-01_EB, 1.227527E-01_EB, 1.167145E-01_EB, 1.087709E-01_EB, 9.943737E-02_EB, 9.002538E-02_EB, &
-    8.060527E-02_EB, 7.137067E-02_EB, 6.299760E-02_EB, 5.512164E-02_EB, 4.801455E-02_EB, 4.169764E-02_EB, &
-    3.593587E-02_EB, 3.095498E-02_EB, 2.664278E-02_EB, 2.295572E-02_EB, 1.959682E-02_EB,  &
-    7.616134E-03_EB, 9.957002E-03_EB, 1.281279E-02_EB, 1.589717E-02_EB, 1.894916E-02_EB, 2.174268E-02_EB, &
-    2.395920E-02_EB, 2.555557E-02_EB, 2.648904E-02_EB, 2.671274E-02_EB, 2.629477E-02_EB, 2.540283E-02_EB, &
-    2.418621E-02_EB, 2.265546E-02_EB, 2.101542E-02_EB, 1.928221E-02_EB, 1.752831E-02_EB, 1.582992E-02_EB, &
-    1.416926E-02_EB, 1.261250E-02_EB, 1.121041E-02_EB, 9.951538E-03_EB, 8.728757E-03_EB,  &
-    1.277402E-02_EB, 1.327177E-02_EB, 1.322108E-02_EB, 1.267471E-02_EB, 1.186190E-02_EB, 1.093562E-02_EB, &
-    9.920972E-03_EB, 8.920419E-03_EB, 7.971129E-03_EB, 7.057028E-03_EB, 6.197372E-03_EB, 5.429023E-03_EB, &
-    4.732635E-03_EB, 4.092017E-03_EB, 3.548360E-03_EB, 3.062048E-03_EB, 2.633809E-03_EB, 2.263255E-03_EB, &
-    1.935254E-03_EB, 1.656795E-03_EB, 1.416023E-03_EB, 1.215289E-03_EB, 1.031774E-03_EB,  &
-    8.014464E-03_EB, 7.194752E-03_EB, 6.553713E-03_EB, 6.000398E-03_EB, 5.531684E-03_EB, 5.121393E-03_EB, &
-    4.722456E-03_EB, 4.343916E-03_EB, 3.983544E-03_EB, 3.621247E-03_EB, 3.268422E-03_EB, 2.936068E-03_EB, &
-    2.617151E-03_EB, 2.322363E-03_EB, 2.051315E-03_EB, 1.804840E-03_EB, 1.578471E-03_EB, 1.378963E-03_EB, &
-    1.197596E-03_EB, 1.036958E-03_EB, 9.007021E-04_EB, 7.820103E-04_EB, 6.693842E-04_EB,  &
-    2.792665E-03_EB, 2.575454E-03_EB, 2.537125E-03_EB, 2.578233E-03_EB, 2.648059E-03_EB, 2.713453E-03_EB, &
-    2.741224E-03_EB, 2.722787E-03_EB, 2.662395E-03_EB, 2.559402E-03_EB, 2.415338E-03_EB, 2.254521E-03_EB, &
-    2.077537E-03_EB, 1.891657E-03_EB, 1.708933E-03_EB, 1.533948E-03_EB, 1.367874E-03_EB, 1.212162E-03_EB, &
-    1.064882E-03_EB, 9.339250E-04_EB, 8.169687E-04_EB, 7.180516E-04_EB, 6.220503E-04_EB,  &
-    8.239408E-04_EB, 8.207289E-04_EB, 8.769232E-04_EB, 9.471812E-04_EB, 1.013068E-03_EB, 1.072041E-03_EB, &
-    1.109555E-03_EB, 1.125480E-03_EB, 1.120373E-03_EB, 1.094883E-03_EB, 1.043855E-03_EB, 9.887558E-04_EB, &
-    9.221581E-04_EB, 8.517148E-04_EB, 7.786200E-04_EB, 7.086512E-04_EB, 6.363394E-04_EB, 5.709486E-04_EB, &
-    5.037963E-04_EB, 4.478632E-04_EB, 3.933607E-04_EB, 3.461225E-04_EB, 3.036065E-04_EB,  &
-    1.787674E-02_EB, 1.651301E-02_EB, 1.538618E-02_EB, 1.427021E-02_EB, 1.321135E-02_EB, 1.220556E-02_EB, &
-    1.120017E-02_EB, 1.022271E-02_EB, 9.293408E-03_EB, 8.381487E-03_EB, 7.491250E-03_EB, 6.673691E-03_EB, &
-    5.914957E-03_EB, 5.201979E-03_EB, 4.566356E-03_EB, 3.988961E-03_EB, 3.472458E-03_EB, 3.017625E-03_EB, &
-    2.605493E-03_EB, 2.248445E-03_EB, 1.941774E-03_EB, 1.676885E-03_EB, 1.438512E-03_EB/),(/23,8/))
+sd2_ch4(1:23,9:16) = RESHAPE((/ &  ! 2900-3075 cm-1
+   3.311709e-01_EB, 3.344762e-01_EB, 3.267663e-01_EB, 3.099531e-01_EB, 2.886161e-01_EB, 2.659881e-01_EB, &
+   2.423456e-01_EB, 2.191913e-01_EB, 1.973904e-01_EB, 1.764196e-01_EB, 1.564157e-01_EB, 1.382986e-01_EB, &
+   1.218590e-01_EB, 1.067421e-01_EB, 9.331013e-02_EB, 8.132822e-02_EB, 7.068471e-02_EB, 6.139407e-02_EB, &
+   5.297295e-02_EB, 4.571219e-02_EB, 3.948284e-02_EB, 3.416733e-02_EB, 2.931231e-02_EB,  &
+   8.235613e-01_EB, 7.238968e-01_EB, 6.324968e-01_EB, 5.466365e-01_EB, 4.712117e-01_EB, 4.058971e-01_EB, &
+   3.486088e-01_EB, 2.993153e-01_EB, 2.575278e-01_EB, 2.209771e-01_EB, 1.890168e-01_EB, 1.618217e-01_EB, &
+   1.384064e-01_EB, 1.180022e-01_EB, 1.008139e-01_EB, 8.601549e-02_EB, 7.332027e-02_EB, 6.253544e-02_EB, &
+   5.308446e-02_EB, 4.515135e-02_EB, 3.847721e-02_EB, 3.288247e-02_EB, 2.786602e-02_EB,  &
+   6.821008e-01_EB, 5.401363e-01_EB, 4.353503e-01_EB, 3.533680e-01_EB, 2.892836e-01_EB, 2.389427e-01_EB, &
+   1.981961e-01_EB, 1.653239e-01_EB, 1.387030e-01_EB, 1.163771e-01_EB, 9.777404e-02_EB, 8.236369e-02_EB, &
+   6.949908e-02_EB, 5.853014e-02_EB, 4.942064e-02_EB, 4.176497e-02_EB, 3.531768e-02_EB, 2.985698e-02_EB, &
+   2.516886e-02_EB, 2.128060e-02_EB, 1.802439e-02_EB, 1.532867e-02_EB, 1.292454e-02_EB,  &
+   5.823907e-01_EB, 4.331161e-01_EB, 3.353248e-01_EB, 2.655224e-01_EB, 2.144294e-01_EB, 1.761169e-01_EB, &
+   1.472744e-01_EB, 1.241615e-01_EB, 1.057407e-01_EB, 9.045740e-02_EB, 7.745806e-02_EB, 6.667193e-02_EB, &
+   5.744892e-02_EB, 4.942743e-02_EB, 4.263289e-02_EB, 3.676096e-02_EB, 3.166692e-02_EB, 2.731256e-02_EB, &
+   2.343114e-02_EB, 2.014747e-02_EB, 1.734533e-02_EB, 1.497211e-02_EB, 1.281431e-02_EB,  &
+   3.210821e+00_EB, 2.793045e+00_EB, 2.475891e+00_EB, 2.198508e+00_EB, 1.954455e+00_EB, 1.740419e+00_EB, &
+   1.543274e+00_EB, 1.366589e+00_EB, 1.208668e+00_EB, 1.063917e+00_EB, 9.309610e-01_EB, 8.135837e-01_EB, &
+   7.091172e-01_EB, 6.150707e-01_EB, 5.334009e-01_EB, 4.611724e-01_EB, 3.980142e-01_EB, 3.431784e-01_EB, &
+   2.944666e-01_EB, 2.526486e-01_EB, 2.171496e-01_EB, 1.870189e-01_EB, 1.596229e-01_EB,  &
+   3.517151e-01_EB, 2.541996e-01_EB, 1.936159e-01_EB, 1.517283e-01_EB, 1.221750e-01_EB, 1.004308e-01_EB, &
+   8.351777e-02_EB, 7.016371e-02_EB, 5.949379e-02_EB, 5.053966e-02_EB, 4.298934e-02_EB, 3.667062e-02_EB, &
+   3.130112e-02_EB, 2.669085e-02_EB, 2.279490e-02_EB, 1.946235e-02_EB, 1.660600e-02_EB, 1.417075e-02_EB, &
+   1.204697e-02_EB, 1.025668e-02_EB, 8.756988e-03_EB, 7.490243e-03_EB, 6.351877e-03_EB,  &
+   7.921358e-01_EB, 6.055366e-01_EB, 4.798618e-01_EB, 3.867414e-01_EB, 3.174199e-01_EB, 2.642038e-01_EB, &
+   2.216893e-01_EB, 1.874171e-01_EB, 1.594862e-01_EB, 1.359448e-01_EB, 1.159382e-01_EB, 9.908354e-02_EB, &
+   8.473452e-02_EB, 7.233655e-02_EB, 6.187191e-02_EB, 5.286391e-02_EB, 4.518233e-02_EB, 3.863453e-02_EB, &
+   3.288079e-02_EB, 2.803528e-02_EB, 2.394608e-02_EB, 2.051761e-02_EB, 1.743587e-02_EB,  &
+   1.334409e+00_EB, 1.095178e+00_EB, 9.120448e-01_EB, 7.631562e-01_EB, 6.425576e-01_EB, 5.444728e-01_EB, &
+   4.621443e-01_EB, 3.938260e-01_EB, 3.368579e-01_EB, 2.880892e-01_EB, 2.459378e-01_EB, 2.104005e-01_EB, &
+   1.799327e-01_EB, 1.535802e-01_EB, 1.314063e-01_EB, 1.121907e-01_EB, 9.581696e-02_EB, 8.185813e-02_EB, &
+   6.964125e-02_EB, 5.934825e-02_EB, 5.067442e-02_EB, 4.339843e-02_EB, 3.686411e-02_EB/),(/23,8/))
 
-SD1_CH4(1:23,17:19) = RESHAPE((/ &  ! 1550-1600 cm-1
-    3.842192E-03_EB, 4.909077E-03_EB, 5.876585E-03_EB, 6.637230E-03_EB, 7.159498E-03_EB, 7.449619E-03_EB, &
-    7.502474E-03_EB, 7.374704E-03_EB, 7.105819E-03_EB, 6.720456E-03_EB, 6.241450E-03_EB, 5.729337E-03_EB, &
-    5.213056E-03_EB, 4.685851E-03_EB, 4.183214E-03_EB, 3.714659E-03_EB, 3.276286E-03_EB, 2.879051E-03_EB, &
-    2.508044E-03_EB, 2.182116E-03_EB, 1.899894E-03_EB, 1.653926E-03_EB, 1.423668E-03_EB,  &
-    1.587677E-03_EB, 1.446538E-03_EB, 1.552901E-03_EB, 1.804439E-03_EB, 2.128742E-03_EB, 2.458565E-03_EB, &
-    2.743898E-03_EB, 2.955974E-03_EB, 3.088835E-03_EB, 3.134690E-03_EB, 3.095698E-03_EB, 3.002805E-03_EB, &
-    2.862955E-03_EB, 2.683299E-03_EB, 2.486550E-03_EB, 2.282038E-03_EB, 2.073847E-03_EB, 1.873143E-03_EB, &
-    1.674361E-03_EB, 1.489429E-03_EB, 1.321804E-03_EB, 1.173554E-03_EB, 1.026702E-03_EB,  &
-    0.000000E+00_EB, 0.000000E+00_EB, 0.000000E+00_EB, 0.000000E+00_EB, 0.000000E+00_EB, 0.000000E+00_EB, &
-    0.000000E+00_EB, 0.000000E+00_EB, 0.000000E+00_EB, 0.000000E+00_EB, 0.000000E+00_EB, 0.000000E+00_EB, &
-    0.000000E+00_EB, 0.000000E+00_EB, 0.000000E+00_EB, 0.000000E+00_EB, 0.000000E+00_EB, 0.000000E+00_EB, &
-    0.000000E+00_EB, 0.000000E+00_EB, 0.000000E+00_EB, 0.000000E+00_EB, 0.000000E+00_EB/),(/23,3/))
+sd2_ch4(1:23,17:23) = RESHAPE((/ &  ! 3100-3250 cm-1
+   9.674073e-01_EB, 9.013091e-01_EB, 8.256467e-01_EB, 7.423397e-01_EB, 6.619262e-01_EB, 5.879801e-01_EB, &
+   5.191373e-01_EB, 4.573467e-01_EB, 4.022801e-01_EB, 3.523929e-01_EB, 3.072101e-01_EB, 2.674592e-01_EB, &
+   2.326179e-01_EB, 2.012004e-01_EB, 1.742107e-01_EB, 1.505433e-01_EB, 1.298551e-01_EB, 1.119451e-01_EB, &
+   9.604141e-02_EB, 8.242372e-02_EB, 7.089244e-02_EB, 6.110245e-02_EB, 5.221546e-02_EB,  &
+   3.658653e-01_EB, 4.184364e-01_EB, 4.441884e-01_EB, 4.457809e-01_EB, 4.319013e-01_EB, 4.088715e-01_EB, &
+   3.793819e-01_EB, 3.474065e-01_EB, 3.151904e-01_EB, 2.830904e-01_EB, 2.516607e-01_EB, 2.228145e-01_EB, &
+   1.964195e-01_EB, 1.718178e-01_EB, 1.502324e-01_EB, 1.307846e-01_EB, 1.135071e-01_EB, 9.842138e-02_EB, &
+   8.481592e-02_EB, 7.309981e-02_EB, 6.307130e-02_EB, 5.451710e-02_EB, 4.669207e-02_EB,  &
+   8.373191e-02_EB, 1.229238e-01_EB, 1.573970e-01_EB, 1.825905e-01_EB, 1.975753e-01_EB, 2.040052e-01_EB, &
+   2.024706e-01_EB, 1.957505e-01_EB, 1.855755e-01_EB, 1.726368e-01_EB, 1.580202e-01_EB, 1.433211e-01_EB, &
+   1.287520e-01_EB, 1.144879e-01_EB, 1.013973e-01_EB, 8.925648e-02_EB, 7.818868e-02_EB, 6.826146e-02_EB, &
+   5.920229e-02_EB, 5.129713e-02_EB, 4.441206e-02_EB, 3.851923e-02_EB, 3.306979e-02_EB,  &
+   1.457007e-02_EB, 2.736439e-02_EB, 4.340085e-02_EB, 6.002981e-02_EB, 7.506875e-02_EB, 8.727601e-02_EB, &
+   9.581284e-02_EB, 1.007875e-01_EB, 1.027285e-01_EB, 1.017913e-01_EB, 9.839048e-02_EB, 9.365514e-02_EB, &
+   8.789001e-02_EB, 8.123320e-02_EB, 7.449732e-02_EB, 6.766345e-02_EB, 6.100922e-02_EB, 5.470686e-02_EB, &
+   4.865358e-02_EB, 4.309088e-02_EB, 3.810993e-02_EB, 3.369467e-02_EB, 2.945916e-02_EB,  &
+   1.191095e-03_EB, 1.552045e-03_EB, 2.059789e-03_EB, 2.649547e-03_EB, 3.236595e-03_EB, 3.762561e-03_EB, &
+   4.165025e-03_EB, 4.448429e-03_EB, 4.600555e-03_EB, 4.628224e-03_EB, 4.534948e-03_EB, 4.374710e-03_EB, &
+   4.151710e-03_EB, 3.880527e-03_EB, 3.599880e-03_EB, 3.300161e-03_EB, 2.998249e-03_EB, 2.715486e-03_EB, &
+   2.425276e-03_EB, 2.164309e-03_EB, 1.929373e-03_EB, 1.713087e-03_EB, 1.506010e-03_EB,  &
+   4.538291e-04_EB, 4.599393e-04_EB, 4.587246e-04_EB, 4.526653e-04_EB, 4.375098e-04_EB, 4.167315e-04_EB, &
+   3.918634e-04_EB, 3.644121e-04_EB, 3.335314e-04_EB, 3.072189e-04_EB, 2.753771e-04_EB, 2.453914e-04_EB, &
+   2.183408e-04_EB, 1.968316e-04_EB, 1.704817e-04_EB, 1.507858e-04_EB, 1.319531e-04_EB, 1.134243e-04_EB, &
+   9.801919e-05_EB, 8.900765e-05_EB, 7.481087e-05_EB, 6.511635e-05_EB, 5.390619e-05_EB,  &
+   0.000000e+00_EB, 0.000000e+00_EB, 0.000000e+00_EB, 0.000000e+00_EB, 0.000000e+00_EB, 0.000000e+00_EB, &
+   0.000000e+00_EB, 0.000000e+00_EB, 0.000000e+00_EB, 0.000000e+00_EB, 0.000000e+00_EB, 0.000000e+00_EB, &
+   0.000000e+00_EB, 0.000000e+00_EB, 0.000000e+00_EB, 0.000000e+00_EB, 0.000000e+00_EB, 0.000000e+00_EB, &
+   0.000000e+00_EB, 0.000000e+00_EB, 0.000000e+00_EB, 0.000000e+00_EB, 0.000000e+00_EB/),(/23,7/))
 
-ALLOCATE(SD2_CH4(N_TEMP_CH4,23)) 
-
-! BAND #2: 2700 cm-1 - 3250 cm-1 
-
-SD2_CH4(1:23,1:8) = RESHAPE((/ &  ! 2700-2875 cm-1
-    1.217530E-02_EB, 1.117112E-02_EB, 1.018335E-02_EB, 9.113159E-03_EB, 8.069237E-03_EB, 7.089143E-03_EB, &
-    6.164984E-03_EB, 5.339743E-03_EB, 4.605161E-03_EB, 3.952813E-03_EB, 3.369126E-03_EB, 2.873535E-03_EB, &
-    2.442004E-03_EB, 2.069306E-03_EB, 1.752468E-03_EB, 1.483929E-03_EB, 1.255931E-03_EB, 1.056565E-03_EB, &
-    8.920522E-04_EB, 7.508758E-04_EB, 6.317838E-04_EB, 5.352971E-04_EB, 4.530464E-04_EB,  &
-    2.513916E-02_EB, 2.114376E-02_EB, 1.780513E-02_EB, 1.491293E-02_EB, 1.247243E-02_EB, 1.043356E-02_EB, &
-    8.698933E-03_EB, 7.256269E-03_EB, 6.066735E-03_EB, 5.057876E-03_EB, 4.209670E-03_EB, 3.508303E-03_EB, &
-    2.922322E-03_EB, 2.428483E-03_EB, 2.028794E-03_EB, 1.689558E-03_EB, 1.409261E-03_EB, 1.176715E-03_EB, &
-    9.788265E-04_EB, 8.167162E-04_EB, 6.823326E-04_EB, 5.730157E-04_EB, 4.786727E-04_EB,  &
-    2.557782E-02_EB, 2.133345E-02_EB, 1.832454E-02_EB, 1.586992E-02_EB, 1.378920E-02_EB, 1.202910E-02_EB, &
-    1.045539E-02_EB, 9.073223E-03_EB, 7.878108E-03_EB, 6.813401E-03_EB, 5.858711E-03_EB, 5.036798E-03_EB, &
-    4.322566E-03_EB, 3.689893E-03_EB, 3.157259E-03_EB, 2.690401E-03_EB, 2.292743E-03_EB, 1.951361E-03_EB, &
-    1.658405E-03_EB, 1.405787E-03_EB, 1.195120E-03_EB, 1.018165E-03_EB, 8.624014E-04_EB,  &
-    3.267234E-02_EB, 2.794974E-02_EB, 2.414894E-02_EB, 2.075791E-02_EB, 1.780983E-02_EB, 1.531517E-02_EB, &
-    1.312860E-02_EB, 1.127375E-02_EB, 9.704346E-03_EB, 8.352011E-03_EB, 7.159191E-03_EB, 6.165400E-03_EB, &
-    5.304681E-03_EB, 4.552437E-03_EB, 3.918329E-03_EB, 3.371374E-03_EB, 2.897155E-03_EB, 2.490584E-03_EB, &
-    2.139129E-03_EB, 1.834560E-03_EB, 1.579448E-03_EB, 1.362473E-03_EB, 1.164728E-03_EB,  &
-    4.729257E-02_EB, 4.020146E-02_EB, 3.655117E-02_EB, 3.486375E-02_EB, 3.451183E-02_EB, 3.486976E-02_EB, &
-    3.526911E-02_EB, 3.549943E-02_EB, 3.539419E-02_EB, 3.477334E-02_EB, 3.359574E-02_EB, 3.209631E-02_EB, &
-    3.033091E-02_EB, 2.826035E-02_EB, 2.617425E-02_EB, 2.398793E-02_EB, 2.182750E-02_EB, 1.975692E-02_EB, &
-    1.770980E-02_EB, 1.581216E-02_EB, 1.409330E-02_EB, 1.256203E-02_EB, 1.106706E-02_EB,  &
-    3.967221E-02_EB, 3.764359E-02_EB, 3.949747E-02_EB, 4.277841E-02_EB, 4.623172E-02_EB, 4.903094E-02_EB, &
-    5.058120E-02_EB, 5.097742E-02_EB, 5.029388E-02_EB, 4.863988E-02_EB, 4.605751E-02_EB, 4.308689E-02_EB, &
-    3.983596E-02_EB, 3.638363E-02_EB, 3.298206E-02_EB, 2.967115E-02_EB, 2.650179E-02_EB, 2.356866E-02_EB, &
-    2.077236E-02_EB, 1.827032E-02_EB, 1.605444E-02_EB, 1.411180E-02_EB, 1.226114E-02_EB,  &
-    7.223868E-02_EB, 8.544183E-02_EB, 9.962661E-02_EB, 1.104863E-01_EB, 1.171420E-01_EB, 1.196787E-01_EB, &
-    1.182118E-01_EB, 1.139658E-01_EB, 1.078438E-01_EB, 1.002471E-01_EB, 9.161471E-02_EB, 8.298437E-02_EB, &
-    7.452297E-02_EB, 6.622584E-02_EB, 5.857678E-02_EB, 5.147962E-02_EB, 4.505849E-02_EB, 3.932179E-02_EB, &
-    3.408714E-02_EB, 2.948172E-02_EB, 2.551286E-02_EB, 2.211846E-02_EB, 1.897647E-02_EB,  &
-    1.759866E-01_EB, 2.015363E-01_EB, 2.180490E-01_EB, 2.232613E-01_EB, 2.203020E-01_EB, 2.118597E-01_EB, &
-    1.990075E-01_EB, 1.841205E-01_EB, 1.683887E-01_EB, 1.521963E-01_EB, 1.360646E-01_EB, 1.209307E-01_EB, &
-    1.069128E-01_EB, 9.382435E-02_EB, 8.206146E-02_EB, 7.155641E-02_EB, 6.219310E-02_EB, 5.392479E-02_EB, &
-    4.648837E-02_EB, 4.008493E-02_EB, 3.458414E-02_EB, 2.988156E-02_EB, 2.558176E-02_EB/),(/23,8/))
-
-SD2_CH4(1:23,9:16) = RESHAPE((/ &  ! 2900-3075 cm-1
-    3.311709E-01_EB, 3.344762E-01_EB, 3.267663E-01_EB, 3.099531E-01_EB, 2.886161E-01_EB, 2.659881E-01_EB, &
-    2.423456E-01_EB, 2.191913E-01_EB, 1.973904E-01_EB, 1.764196E-01_EB, 1.564157E-01_EB, 1.382986E-01_EB, &
-    1.218590E-01_EB, 1.067421E-01_EB, 9.331013E-02_EB, 8.132822E-02_EB, 7.068471E-02_EB, 6.139407E-02_EB, &
-    5.297295E-02_EB, 4.571219E-02_EB, 3.948284E-02_EB, 3.416733E-02_EB, 2.931231E-02_EB,  &
-    8.235613E-01_EB, 7.238968E-01_EB, 6.324968E-01_EB, 5.466365E-01_EB, 4.712117E-01_EB, 4.058971E-01_EB, &
-    3.486088E-01_EB, 2.993153E-01_EB, 2.575278E-01_EB, 2.209771E-01_EB, 1.890168E-01_EB, 1.618217E-01_EB, &
-    1.384064E-01_EB, 1.180022E-01_EB, 1.008139E-01_EB, 8.601549E-02_EB, 7.332027E-02_EB, 6.253544E-02_EB, &
-    5.308446E-02_EB, 4.515135E-02_EB, 3.847721E-02_EB, 3.288247E-02_EB, 2.786602E-02_EB,  &
-    6.821008E-01_EB, 5.401363E-01_EB, 4.353503E-01_EB, 3.533680E-01_EB, 2.892836E-01_EB, 2.389427E-01_EB, &
-    1.981961E-01_EB, 1.653239E-01_EB, 1.387030E-01_EB, 1.163771E-01_EB, 9.777404E-02_EB, 8.236369E-02_EB, &
-    6.949908E-02_EB, 5.853014E-02_EB, 4.942064E-02_EB, 4.176497E-02_EB, 3.531768E-02_EB, 2.985698E-02_EB, &
-    2.516886E-02_EB, 2.128060E-02_EB, 1.802439E-02_EB, 1.532867E-02_EB, 1.292454E-02_EB,  &
-    5.823907E-01_EB, 4.331161E-01_EB, 3.353248E-01_EB, 2.655224E-01_EB, 2.144294E-01_EB, 1.761169E-01_EB, &
-    1.472744E-01_EB, 1.241615E-01_EB, 1.057407E-01_EB, 9.045740E-02_EB, 7.745806E-02_EB, 6.667193E-02_EB, &
-    5.744892E-02_EB, 4.942743E-02_EB, 4.263289E-02_EB, 3.676096E-02_EB, 3.166692E-02_EB, 2.731256E-02_EB, &
-    2.343114E-02_EB, 2.014747E-02_EB, 1.734533E-02_EB, 1.497211E-02_EB, 1.281431E-02_EB,  &
-    3.210821E+00_EB, 2.793045E+00_EB, 2.475891E+00_EB, 2.198508E+00_EB, 1.954455E+00_EB, 1.740419E+00_EB, &
-    1.543274E+00_EB, 1.366589E+00_EB, 1.208668E+00_EB, 1.063917E+00_EB, 9.309610E-01_EB, 8.135837E-01_EB, &
-    7.091172E-01_EB, 6.150707E-01_EB, 5.334009E-01_EB, 4.611724E-01_EB, 3.980142E-01_EB, 3.431784E-01_EB, &
-    2.944666E-01_EB, 2.526486E-01_EB, 2.171496E-01_EB, 1.870189E-01_EB, 1.596229E-01_EB,  &
-    3.517151E-01_EB, 2.541996E-01_EB, 1.936159E-01_EB, 1.517283E-01_EB, 1.221750E-01_EB, 1.004308E-01_EB, &
-    8.351777E-02_EB, 7.016371E-02_EB, 5.949379E-02_EB, 5.053966E-02_EB, 4.298934E-02_EB, 3.667062E-02_EB, &
-    3.130112E-02_EB, 2.669085E-02_EB, 2.279490E-02_EB, 1.946235E-02_EB, 1.660600E-02_EB, 1.417075E-02_EB, &
-    1.204697E-02_EB, 1.025668E-02_EB, 8.756988E-03_EB, 7.490243E-03_EB, 6.351877E-03_EB,  &
-    7.921358E-01_EB, 6.055366E-01_EB, 4.798618E-01_EB, 3.867414E-01_EB, 3.174199E-01_EB, 2.642038E-01_EB, &
-    2.216893E-01_EB, 1.874171E-01_EB, 1.594862E-01_EB, 1.359448E-01_EB, 1.159382E-01_EB, 9.908354E-02_EB, &
-    8.473452E-02_EB, 7.233655E-02_EB, 6.187191E-02_EB, 5.286391E-02_EB, 4.518233E-02_EB, 3.863453E-02_EB, &
-    3.288079E-02_EB, 2.803528E-02_EB, 2.394608E-02_EB, 2.051761E-02_EB, 1.743587E-02_EB,  &
-    1.334409E+00_EB, 1.095178E+00_EB, 9.120448E-01_EB, 7.631562E-01_EB, 6.425576E-01_EB, 5.444728E-01_EB, &
-    4.621443E-01_EB, 3.938260E-01_EB, 3.368579E-01_EB, 2.880892E-01_EB, 2.459378E-01_EB, 2.104005E-01_EB, &
-    1.799327E-01_EB, 1.535802E-01_EB, 1.314063E-01_EB, 1.121907E-01_EB, 9.581696E-02_EB, 8.185813E-02_EB, &
-    6.964125E-02_EB, 5.934825E-02_EB, 5.067442E-02_EB, 4.339843E-02_EB, 3.686411E-02_EB/),(/23,8/))
-
-SD2_CH4(1:23,17:23) = RESHAPE((/ &  ! 3100-3250 cm-1
-    9.674073E-01_EB, 9.013091E-01_EB, 8.256467E-01_EB, 7.423397E-01_EB, 6.619262E-01_EB, 5.879801E-01_EB, &
-    5.191373E-01_EB, 4.573467E-01_EB, 4.022801E-01_EB, 3.523929E-01_EB, 3.072101E-01_EB, 2.674592E-01_EB, &
-    2.326179E-01_EB, 2.012004E-01_EB, 1.742107E-01_EB, 1.505433E-01_EB, 1.298551E-01_EB, 1.119451E-01_EB, &
-    9.604141E-02_EB, 8.242372E-02_EB, 7.089244E-02_EB, 6.110245E-02_EB, 5.221546E-02_EB,  &
-    3.658653E-01_EB, 4.184364E-01_EB, 4.441884E-01_EB, 4.457809E-01_EB, 4.319013E-01_EB, 4.088715E-01_EB, &
-    3.793819E-01_EB, 3.474065E-01_EB, 3.151904E-01_EB, 2.830904E-01_EB, 2.516607E-01_EB, 2.228145E-01_EB, &
-    1.964195E-01_EB, 1.718178E-01_EB, 1.502324E-01_EB, 1.307846E-01_EB, 1.135071E-01_EB, 9.842138E-02_EB, &
-    8.481592E-02_EB, 7.309981E-02_EB, 6.307130E-02_EB, 5.451710E-02_EB, 4.669207E-02_EB,  &
-    8.373191E-02_EB, 1.229238E-01_EB, 1.573970E-01_EB, 1.825905E-01_EB, 1.975753E-01_EB, 2.040052E-01_EB, &
-    2.024706E-01_EB, 1.957505E-01_EB, 1.855755E-01_EB, 1.726368E-01_EB, 1.580202E-01_EB, 1.433211E-01_EB, &
-    1.287520E-01_EB, 1.144879E-01_EB, 1.013973E-01_EB, 8.925648E-02_EB, 7.818868E-02_EB, 6.826146E-02_EB, &
-    5.920229E-02_EB, 5.129713E-02_EB, 4.441206E-02_EB, 3.851923E-02_EB, 3.306979E-02_EB,  &
-    1.457007E-02_EB, 2.736439E-02_EB, 4.340085E-02_EB, 6.002981E-02_EB, 7.506875E-02_EB, 8.727601E-02_EB, &
-    9.581284E-02_EB, 1.007875E-01_EB, 1.027285E-01_EB, 1.017913E-01_EB, 9.839048E-02_EB, 9.365514E-02_EB, &
-    8.789001E-02_EB, 8.123320E-02_EB, 7.449732E-02_EB, 6.766345E-02_EB, 6.100922E-02_EB, 5.470686E-02_EB, &
-    4.865358E-02_EB, 4.309088E-02_EB, 3.810993E-02_EB, 3.369467E-02_EB, 2.945916E-02_EB,  &
-    1.191095E-03_EB, 1.552045E-03_EB, 2.059789E-03_EB, 2.649547E-03_EB, 3.236595E-03_EB, 3.762561E-03_EB, &
-    4.165025E-03_EB, 4.448429E-03_EB, 4.600555E-03_EB, 4.628224E-03_EB, 4.534948E-03_EB, 4.374710E-03_EB, &
-    4.151710E-03_EB, 3.880527E-03_EB, 3.599880E-03_EB, 3.300161E-03_EB, 2.998249E-03_EB, 2.715486E-03_EB, &
-    2.425276E-03_EB, 2.164309E-03_EB, 1.929373E-03_EB, 1.713087E-03_EB, 1.506010E-03_EB,  &
-    4.538291E-04_EB, 4.599393E-04_EB, 4.587246E-04_EB, 4.526653E-04_EB, 4.375098E-04_EB, 4.167315E-04_EB, &
-    3.918634E-04_EB, 3.644121E-04_EB, 3.335314E-04_EB, 3.072189E-04_EB, 2.753771E-04_EB, 2.453914E-04_EB, &
-    2.183408E-04_EB, 1.968316E-04_EB, 1.704817E-04_EB, 1.507858E-04_EB, 1.319531E-04_EB, 1.134243E-04_EB, &
-    9.801919E-05_EB, 8.900765E-05_EB, 7.481087E-05_EB, 6.511635E-05_EB, 5.390619E-05_EB,  &
-    0.000000E+00_EB, 0.000000E+00_EB, 0.000000E+00_EB, 0.000000E+00_EB, 0.000000E+00_EB, 0.000000E+00_EB, &
-    0.000000E+00_EB, 0.000000E+00_EB, 0.000000E+00_EB, 0.000000E+00_EB, 0.000000E+00_EB, 0.000000E+00_EB, &
-    0.000000E+00_EB, 0.000000E+00_EB, 0.000000E+00_EB, 0.000000E+00_EB, 0.000000E+00_EB, 0.000000E+00_EB, &
-    0.000000E+00_EB, 0.000000E+00_EB, 0.000000E+00_EB, 0.000000E+00_EB, 0.000000E+00_EB/),(/23,7/))
-
-!-------------------------Ethane DATA-------------------
+!-------------------------ethane data-------------------
 
 
-! THERE ARE 3 BANDS FOR Ethane
+! there are 3 bands for ethane
 
-! BAND #1: 730 cm-1 - 1095 cm-1 
-! BAND #2: 1250 cm-1 - 1700 cm-1 
-! BAND #3: 2550 cm-1 - 3375 cm-1 
+! band #1: 730 cm-1 - 1095 cm-1 
+! band #2: 1250 cm-1 - 1700 cm-1 
+! band #3: 2550 cm-1 - 3375 cm-1 
 
-N_TEMP_C2H6 = 7
-N_BAND_C2H6 = 3
-I_MODEL_C2H6 = 3 ! 1: GOODY, 2: MALKMUS, 3: ELSASSER 
+ALLOCATE(sd_c2h6_temp(n_temp_c2h6)) 
 
-ALLOCATE(SD_C2H6_TEMP(N_TEMP_C2H6)) 
+! initialize bands wavenumber bounds for ethane ABS(option coefficients.
+! bands are organized by row: 
+! 1st column is the lower bound band limit in cm-1. 
+! 2nd column is the upper bound band limit in cm-1. 
+! 3rd column is the stride between wavenumbers in band.
+! IF 3rd column = 0., band is calculated, not tabulated.
 
-! INITIALIZE BANDS WAVENUMBER BOUNDS FOR Ethane ABSOPTION COEFFICIENTS.
-! BANDS ARE ORGANIZED BY ROW: 
-! 1ST COLUMN IS THE LOWER BOUND BAND LIMIT IN cm-1. 
-! 2ND COLUMN IS THE UPPER BOUND BAND LIMIT IN cm-1. 
-! 3RD COLUMN IS THE STRIDE BETWEEN WAVENUMBERS IN BAND.
-! IF 3RD COLUMN = 0., BAND IS CALCULATED, NOT TABULATED.
+ALLOCATE(om_bnd_c2h6(n_band_c2h6,3)) 
+ALLOCATE(be_c2h6(n_band_c2h6)) 
 
-ALLOCATE(OM_BND_C2H6(N_BAND_C2H6,3)) 
-ALLOCATE(Be_C2H6(N_BAND_C2H6)) 
+om_bnd_c2h6 = RESHAPE((/ &
+   730._EB, 1250._EB, 2550._EB, &
+   1095._EB, 1700._EB, 3375._EB, &
+   5._EB, 25._EB, 25._EB/),(/n_band_c2h6,3/)) 
 
-OM_BND_C2H6 = RESHAPE((/ &
-    730._EB, 1250._EB, 2550._EB, &
-    1095._EB, 1700._EB, 3375._EB, &
-     5._EB, 25._EB, 25._EB/),(/N_BAND_C2H6,3/)) 
+sd_c2h6_temp = (/ &
+   296._EB, 400._EB, 450._EB, 500._EB, 600._EB, 800._EB,&
+   1000._EB/)
 
-SD_C2H6_TEMP = (/ &
-    296._EB, 400._EB, 450._EB, 500._EB, 600._EB, 800._EB,&
-    1000._EB/)
-
-Be_C2H6 = (/ &
-    1.000_EB, 1.000_EB, 1.000_EB/)
+be_c2h6 = (/ &
+   1.000_EB, 1.000_EB, 1.000_EB/)
 
 !---------------------------------------------------------------------------
-ALLOCATE(SD1_C2H6(N_TEMP_C2H6,74)) 
+ALLOCATE(sd1_c2h6(n_temp_c2h6,74)) 
 
-! BAND #1: 730 cm-1 - 1095 cm-1 
+! band #1: 730 cm-1 - 1095 cm-1 
 
-! SNB FIT WITH ELSASSER MODEL 
+! snb fit with malkmus model 
 
-! ERROR ASSOCIATED WITH ELSASSER FIT: 
-! On Transmissivity: 0.64336 % 
+! error associated with malkmus fit: 
+! on transmissivity: 0.69096 % 
 
-SD1_C2H6(1:7,1:8) = RESHAPE((/ &  ! 730-765 cm-1
-    5.319833E-04_EB, 5.524270E-04_EB, 5.561577E-04_EB, 5.296775E-04_EB, 5.132282E-04_EB, 5.718893E-04_EB, &
-    6.010457E-04_EB, &
-    6.171494E-04_EB, 5.540205E-04_EB, 6.390563E-04_EB, 6.025128E-04_EB, 6.046230E-04_EB, 6.130432E-04_EB, &
-    5.849173E-04_EB, &
-    6.282343E-04_EB, 6.234860E-04_EB, 6.212319E-04_EB, 3.614254E-03_EB, 5.957890E-04_EB, 6.133817E-04_EB, &
-    6.010768E-04_EB, &
-    8.795690E-04_EB, 5.857270E-04_EB, 3.763069E-03_EB, 9.942508E-03_EB, 2.666025E-03_EB, 6.185041E-03_EB, &
-    5.598960E-04_EB, &
-    1.202162E-02_EB, 5.687777E-04_EB, 5.698906E-03_EB, 1.152163E-02_EB, 3.962219E-01_EB, 1.572434E-02_EB, &
-    5.795495E-04_EB, &
-    1.420080E-02_EB, 5.994648E-04_EB, 1.083825E-02_EB, 7.458630E-03_EB, 4.160288E-01_EB, 1.475139E-02_EB, &
-    5.443872E-04_EB, &
-    3.551298E-02_EB, 6.548404E-04_EB, 1.095785E-01_EB, 2.657551E-02_EB, 3.608872E-01_EB, 5.693510E-03_EB, &
-    6.441772E-04_EB, &
-    4.549972E-02_EB, 3.578113E-03_EB, 3.095685E-02_EB, 2.380737E-02_EB, 2.193371E-01_EB, 1.156986E-02_EB, &
-    6.052612E-04_EB/),(/7,8/))
+sd1_c2h6(1:7,1:8) = RESHAPE((/ &  ! 730-765 cm-1
+   2.794554e-04_EB, 3.019036e-04_EB, 3.080672e-04_EB, 2.762484e-04_EB, 2.579677e-04_EB, 3.235741e-04_EB, &
+   3.596358e-04_EB, &
+   3.869441e-04_EB, 3.054332e-04_EB, 4.065149e-04_EB, 3.649137e-04_EB, 3.706177e-04_EB, 3.794478e-04_EB, &
+   3.418980e-04_EB, &
+   3.961398e-04_EB, 3.859808e-04_EB, 4.060006e-04_EB, 3.536294e-03_EB, 3.591171e-04_EB, 3.754312e-04_EB, &
+   3.669844e-04_EB, &
+   7.822607e-04_EB, 3.453771e-04_EB, 2.262803e-02_EB, 1.021724e-02_EB, 1.653952e-02_EB, 6.505243e-03_EB, &
+   3.164663e-04_EB, &
+   1.410615e-02_EB, 3.210967e-04_EB, 6.360977e-02_EB, 1.166115e-02_EB, 1.932412e+00_EB, 1.575805e-02_EB, &
+   3.405423e-04_EB, &
+   1.497481e-02_EB, 3.592094e-04_EB, 1.309596e-02_EB, 7.475906e-03_EB, 1.892167e+00_EB, 1.483042e-02_EB, &
+   2.983060e-04_EB, &
+   4.020853e-02_EB, 4.386772e-04_EB, 7.714318e-01_EB, 2.671185e-02_EB, 1.498279e+00_EB, 5.703491e-03_EB, &
+   4.203063e-04_EB, &
+   5.124663e-02_EB, 1.551881e-01_EB, 3.195236e-01_EB, 2.525727e-02_EB, 1.027149e+00_EB, 1.160139e-02_EB, &
+   3.688548e-04_EB/),(/7,8/))
 
-SD1_C2H6(1:7,9:16) = RESHAPE((/ &  ! 770-805 cm-1
-    6.171765E-02_EB, 3.922959E-02_EB, 3.545034E-02_EB, 5.296246E-02_EB, 8.951859E-02_EB, 1.898175E-02_EB, &
-    5.650821E-04_EB, &
-    9.823560E-02_EB, 2.946855E-02_EB, 1.350283E-01_EB, 5.866060E-02_EB, 1.325778E-01_EB, 3.185471E-02_EB, &
-    5.662273E-04_EB, &
-    1.065964E-01_EB, 1.605440E-01_EB, 1.183346E-01_EB, 5.788968E-02_EB, 3.425310E-01_EB, 3.202639E-01_EB, &
-    5.934977E-04_EB, &
-    1.481100E-01_EB, 1.342694E-01_EB, 1.196904E-01_EB, 3.372994E-01_EB, 1.453745E+00_EB, 2.821845E-01_EB, &
-    5.520024E-04_EB, &
-    1.662929E-01_EB, 3.361723E-01_EB, 8.779113E-02_EB, 9.018922E-02_EB, 1.164875E+00_EB, 4.276325E-01_EB, &
-    6.295005E-04_EB, &
-    2.046754E-01_EB, 2.548918E-01_EB, 1.239851E-01_EB, 2.037337E-01_EB, 5.164023E-01_EB, 3.471646E-01_EB, &
-    6.359141E-04_EB, &
-    2.449159E-01_EB, 2.517359E-01_EB, 1.357618E-01_EB, 2.008523E-01_EB, 4.792980E-01_EB, 5.713775E-01_EB, &
-    5.983028E-04_EB, &
-    2.924815E-01_EB, 2.401628E-01_EB, 1.358390E-01_EB, 1.279982E-01_EB, 3.201976E-01_EB, 8.184323E-01_EB, &
-    5.917868E-04_EB/),(/7,8/))
+sd1_c2h6(1:7,9:16) = RESHAPE((/ &  ! 770-805 cm-1
+   6.559937e-02_EB, 3.631953e-01_EB, 1.309011e-01_EB, 5.307552e-02_EB, 1.606841e-01_EB, 1.891214e-02_EB, &
+   3.202870e-04_EB, &
+   1.060830e-01_EB, 2.002917e-01_EB, 3.031810e-01_EB, 6.540746e-02_EB, 2.598325e-01_EB, 3.968316e-01_EB, &
+   3.244087e-04_EB, &
+   1.068733e-01_EB, 2.931690e-01_EB, 1.405611e-01_EB, 5.788228e-02_EB, 8.277802e-01_EB, 9.351959e-01_EB, &
+   3.515174e-04_EB, &
+   1.515345e-01_EB, 2.276208e-01_EB, 1.256607e-01_EB, 4.591616e-01_EB, 2.628483e+00_EB, 8.399321e-01_EB, &
+   3.078236e-04_EB, &
+   1.710208e-01_EB, 7.250193e-01_EB, 9.620347e-02_EB, 1.004229e-01_EB, 1.608952e+00_EB, 9.263801e-01_EB, &
+   4.007032e-04_EB, &
+   2.129896e-01_EB, 3.313998e-01_EB, 1.381292e-01_EB, 2.290180e-01_EB, 1.075200e+00_EB, 7.619251e-01_EB, &
+   4.125753e-04_EB, &
+   2.536966e-01_EB, 2.974149e-01_EB, 1.376301e-01_EB, 2.140445e-01_EB, 1.112248e+00_EB, 1.347530e+00_EB, &
+   3.626265e-04_EB, &
+   2.932385e-01_EB, 2.623213e-01_EB, 1.391961e-01_EB, 1.394845e-01_EB, 4.998654e-01_EB, 1.363158e+00_EB, &
+   3.577957e-04_EB/),(/7,8/))
 
-SD1_C2H6(1:7,17:24) = RESHAPE((/ &  ! 810-845 cm-1
-    3.173410E-01_EB, 2.693151E-01_EB, 1.884264E-01_EB, 1.891123E-01_EB, 1.945594E-01_EB, 7.448775E-01_EB, &
-    6.340674E-04_EB, &
-    3.553568E-01_EB, 2.412262E-01_EB, 1.899983E-01_EB, 2.195643E-01_EB, 4.179722E-01_EB, 8.583966E-01_EB, &
-    5.735696E-04_EB, &
-    3.453595E-01_EB, 2.276013E-01_EB, 1.862231E-01_EB, 2.879227E-01_EB, 3.982856E-01_EB, 1.671700E-01_EB, &
-    5.897709E-04_EB, &
-    3.720678E-01_EB, 2.304722E-01_EB, 2.026237E-01_EB, 1.631514E-01_EB, 5.101839E-01_EB, 6.698259E-02_EB, &
-    5.985207E-04_EB, &
-    3.528590E-01_EB, 2.669341E-01_EB, 2.013443E-01_EB, 1.964266E-01_EB, 4.694253E-01_EB, 6.041982E-02_EB, &
-    5.838403E-04_EB, &
-    3.343870E-01_EB, 2.342383E-01_EB, 2.344769E-01_EB, 2.185627E-01_EB, 1.388486E-01_EB, 6.719809E-02_EB, &
-    5.408822E-04_EB, &
-    3.063170E-01_EB, 2.200670E-01_EB, 1.828050E-01_EB, 2.008038E-01_EB, 3.045402E-01_EB, 7.835795E-02_EB, &
-    3.562297E-03_EB, &
-    2.812280E-01_EB, 2.289402E-01_EB, 1.997630E-01_EB, 1.791041E-01_EB, 3.363038E-01_EB, 1.008254E-01_EB, &
-    1.293736E-02_EB/),(/7,8/))
+sd1_c2h6(1:7,17:24) = RESHAPE((/ &  ! 810-845 cm-1
+   3.183925e-01_EB, 2.940497e-01_EB, 1.942798e-01_EB, 1.955972e-01_EB, 2.139000e-01_EB, 1.687942e+00_EB, &
+   4.048250e-04_EB, &
+   3.562908e-01_EB, 2.514123e-01_EB, 1.948319e-01_EB, 2.290250e-01_EB, 6.104920e-01_EB, 1.456760e+00_EB, &
+   3.298797e-04_EB, &
+   3.457713e-01_EB, 2.350119e-01_EB, 2.001751e-01_EB, 3.161435e-01_EB, 5.531987e-01_EB, 1.962497e-01_EB, &
+   3.488040e-04_EB, &
+   3.720387e-01_EB, 2.431526e-01_EB, 2.192578e-01_EB, 1.640348e-01_EB, 9.663389e-01_EB, 6.727370e-02_EB, &
+   3.578073e-04_EB, &
+   3.527769e-01_EB, 2.743749e-01_EB, 2.170241e-01_EB, 1.992689e-01_EB, 6.608995e-01_EB, 6.062421e-02_EB, &
+   3.421209e-04_EB, &
+   3.345994e-01_EB, 2.376781e-01_EB, 2.379620e-01_EB, 2.238005e-01_EB, 1.419365e-01_EB, 6.753641e-02_EB, &
+   2.941644e-04_EB, &
+   3.110441e-01_EB, 2.342208e-01_EB, 1.884871e-01_EB, 2.033274e-01_EB, 3.626503e-01_EB, 7.846996e-02_EB, &
+   3.468572e-03_EB, &
+   2.854259e-01_EB, 2.338848e-01_EB, 2.014852e-01_EB, 1.903667e-01_EB, 4.180199e-01_EB, 1.112186e-01_EB, &
+   1.298106e-02_EB/),(/7,8/))
 
-SD1_C2H6(1:7,25:32) = RESHAPE((/ &  ! 850-885 cm-1
-    2.687106E-01_EB, 2.264784E-01_EB, 1.683403E-01_EB, 1.401847E-01_EB, 2.005502E-01_EB, 1.271458E-01_EB, &
-    2.173495E-02_EB, &
-    2.581132E-01_EB, 2.374174E-01_EB, 1.679686E-01_EB, 1.547840E-01_EB, 1.243172E-01_EB, 1.077690E-01_EB, &
-    4.536273E-02_EB, &
-    2.144653E-01_EB, 1.721268E-01_EB, 1.514047E-01_EB, 1.306781E-01_EB, 1.314296E-01_EB, 1.339296E-01_EB, &
-    3.552789E-02_EB, &
-    1.917514E-01_EB, 1.387818E-01_EB, 2.034830E-01_EB, 1.515406E-01_EB, 1.066841E-01_EB, 7.662416E-02_EB, &
-    2.133219E-02_EB, &
-    1.782454E-01_EB, 1.306427E-01_EB, 1.520394E-01_EB, 2.390702E-01_EB, 2.481847E-01_EB, 6.844551E-02_EB, &
-    2.418700E-02_EB, &
-    1.322811E-01_EB, 1.207419E-01_EB, 1.466211E-01_EB, 1.319462E-01_EB, 1.939948E-01_EB, 6.030128E-02_EB, &
-    5.442659E-02_EB, &
-    1.021649E-01_EB, 9.558043E-02_EB, 1.447107E-01_EB, 1.003881E-01_EB, 2.851953E-01_EB, 5.587387E-02_EB, &
-    7.616255E-02_EB, &
-    7.374191E-02_EB, 9.820006E-02_EB, 8.581426E-02_EB, 8.911912E-02_EB, 7.307138E-02_EB, 7.078009E-02_EB, &
-    1.050887E-01_EB/),(/7,8/))
+sd1_c2h6(1:7,25:32) = RESHAPE((/ &  ! 850-885 cm-1
+   2.751807e-01_EB, 2.333134e-01_EB, 1.748430e-01_EB, 1.437778e-01_EB, 2.133839e-01_EB, 1.309889e-01_EB, &
+   2.178703e-02_EB, &
+   2.593350e-01_EB, 2.501009e-01_EB, 1.770492e-01_EB, 1.695213e-01_EB, 1.244732e-01_EB, 1.113414e-01_EB, &
+   4.564412e-02_EB, &
+   2.216701e-01_EB, 1.761779e-01_EB, 1.650476e-01_EB, 1.312825e-01_EB, 1.553354e-01_EB, 1.429574e-01_EB, &
+   3.560235e-02_EB, &
+   2.022044e-01_EB, 1.510443e-01_EB, 2.176619e-01_EB, 1.572246e-01_EB, 1.135620e-01_EB, 7.703252e-02_EB, &
+   2.142633e-02_EB, &
+   1.812600e-01_EB, 1.353210e-01_EB, 1.613117e-01_EB, 2.734768e-01_EB, 3.022567e-01_EB, 6.876571e-02_EB, &
+   2.406288e-02_EB, &
+   1.343889e-01_EB, 1.259396e-01_EB, 1.578672e-01_EB, 1.373682e-01_EB, 2.232547e-01_EB, 6.066181e-02_EB, &
+   5.509858e-02_EB, &
+   1.095603e-01_EB, 8.840111e-02_EB, 1.614927e-01_EB, 1.024326e-01_EB, 4.054561e-01_EB, 5.622874e-02_EB, &
+   8.081915e-02_EB, &
+   8.280573e-02_EB, 1.072322e-01_EB, 1.083568e-01_EB, 8.976527e-02_EB, 7.891590e-02_EB, 8.667161e-02_EB, &
+   1.032621e-01_EB/),(/7,8/))
 
-SD1_C2H6(1:7,33:40) = RESHAPE((/ &  ! 890-925 cm-1
-    6.223545E-02_EB, 1.186228E-01_EB, 6.756543E-02_EB, 1.345128E-01_EB, 9.761671E-02_EB, 2.189558E-01_EB, &
-    1.799222E-01_EB, &
-    3.554481E-02_EB, 6.673277E-02_EB, 4.525255E-02_EB, 9.370209E-02_EB, 1.295935E-01_EB, 2.511817E-01_EB, &
-    6.888169E-02_EB, &
-    3.124601E-02_EB, 1.124927E-01_EB, 3.565474E-02_EB, 2.187292E-01_EB, 9.112041E-02_EB, 2.228029E-01_EB, &
-    1.718372E-01_EB, &
-    2.914416E-02_EB, 1.378759E-02_EB, 2.647511E-02_EB, 3.448989E-02_EB, 3.381094E-02_EB, 3.019710E-01_EB, &
-    1.723772E-01_EB, &
-    1.841287E-02_EB, 2.569587E-03_EB, 1.982945E-02_EB, 2.027052E-02_EB, 2.718229E-01_EB, 3.654593E-01_EB, &
-    1.667247E-01_EB, &
-    1.660634E-02_EB, 5.077481E-04_EB, 1.272418E-02_EB, 9.173964E-03_EB, 2.365171E-02_EB, 3.827072E-01_EB, &
-    3.145632E-01_EB, &
-    1.157587E-02_EB, 4.761761E-04_EB, 4.793425E-03_EB, 4.710794E-02_EB, 3.493316E-02_EB, 3.471312E-01_EB, &
-    8.809550E-02_EB, &
-    9.363775E-03_EB, 5.856366E-04_EB, 2.317166E-03_EB, 6.779664E-03_EB, 1.754510E-02_EB, 2.575806E-01_EB, &
-    9.941753E-02_EB/),(/7,8/))
+sd1_c2h6(1:7,33:40) = RESHAPE((/ &  ! 890-925 cm-1
+   6.315700e-02_EB, 1.839109e-01_EB, 9.563206e-02_EB, 1.558355e-01_EB, 1.009801e-01_EB, 4.350811e-01_EB, &
+   2.056632e-01_EB, &
+   4.243703e-02_EB, 1.021804e-01_EB, 5.212402e-02_EB, 1.014279e-01_EB, 1.625632e-01_EB, 6.953883e-01_EB, &
+   7.419429e-02_EB, &
+   3.637108e-02_EB, 3.530674e-01_EB, 3.834881e-02_EB, 4.227429e-01_EB, 1.077391e-01_EB, 6.239971e-01_EB, &
+   2.133274e-01_EB, &
+   2.862217e-02_EB, 6.251917e-02_EB, 2.879530e-02_EB, 3.363107e-02_EB, 3.988006e-02_EB, 8.289923e-01_EB, &
+   2.326386e-01_EB, &
+   5.105750e-02_EB, 2.945599e-03_EB, 2.656328e-02_EB, 2.709003e-01_EB, 7.963168e-01_EB, 9.731125e-01_EB, &
+   2.237348e-01_EB, &
+   2.094406e-02_EB, 2.532325e-04_EB, 8.603313e-02_EB, 1.258408e-01_EB, 6.987088e-02_EB, 9.704437e-01_EB, &
+   7.049559e-01_EB, &
+   1.382001e-02_EB, 2.164374e-04_EB, 5.300388e-03_EB, 4.040185e-01_EB, 5.065259e-01_EB, 1.779278e+00_EB, &
+   9.229669e-02_EB, &
+   1.013101e-02_EB, 3.460394e-04_EB, 2.566832e-03_EB, 6.388567e-02_EB, 2.147372e-01_EB, 1.237580e+00_EB, &
+   1.062539e-01_EB/),(/7,8/))
 
-SD1_C2H6(1:7,41:48) = RESHAPE((/ &  ! 930-965 cm-1
-    2.703421E-03_EB, 6.011707E-04_EB, 2.550427E-03_EB, 1.612241E-03_EB, 1.169821E-02_EB, 2.415979E-01_EB, &
-    1.249651E-01_EB, &
-    2.651084E-03_EB, 5.917545E-04_EB, 5.042010E-04_EB, 2.199438E-02_EB, 3.565980E-03_EB, 2.365838E-01_EB, &
-    5.184717E-02_EB, &
-    7.296492E-04_EB, 6.179157E-04_EB, 4.743617E-04_EB, 3.812040E-03_EB, 8.725047E-04_EB, 2.078430E-01_EB, &
-    8.530157E-02_EB, &
-    5.480666E-04_EB, 6.114444E-04_EB, 5.217829E-04_EB, 1.862243E-03_EB, 4.761592E-04_EB, 2.588919E-01_EB, &
-    1.103370E-01_EB, &
-    6.292630E-04_EB, 6.056321E-04_EB, 6.189602E-04_EB, 5.406959E-04_EB, 5.073793E-04_EB, 1.776039E-01_EB, &
-    1.162293E-01_EB, &
-    6.147534E-04_EB, 6.316755E-04_EB, 6.494943E-04_EB, 6.349597E-04_EB, 1.021949E-03_EB, 1.706159E-01_EB, &
-    1.253603E-01_EB, &
-    5.295787E-04_EB, 6.155257E-04_EB, 5.738537E-04_EB, 5.889213E-04_EB, 6.123715E-04_EB, 8.076437E-02_EB, &
-    1.333291E-01_EB, &
-    5.939687E-04_EB, 5.705938E-04_EB, 5.433798E-04_EB, 5.595604E-04_EB, 6.032303E-04_EB, 1.440339E-02_EB, &
-    1.209042E-01_EB/),(/7,8/))
+sd1_c2h6(1:7,41:48) = RESHAPE((/ &  ! 930-965 cm-1
+   2.805218e-03_EB, 3.631322e-04_EB, 2.361065e-03_EB, 2.853649e-03_EB, 1.391981e-02_EB, 1.135302e+00_EB, &
+   1.345327e-01_EB, &
+   2.616753e-03_EB, 3.519962e-04_EB, 2.459903e-04_EB, 2.436123e-01_EB, 3.966290e-03_EB, 1.048639e+00_EB, &
+   5.178554e-02_EB, &
+   5.158410e-04_EB, 3.832391e-04_EB, 2.145139e-04_EB, 4.559609e-02_EB, 7.809468e-04_EB, 1.207831e+00_EB, &
+   8.442327e-02_EB, &
+   2.986755e-04_EB, 3.753807e-04_EB, 2.668659e-04_EB, 2.070056e-02_EB, 2.165559e-04_EB, 1.341963e+00_EB, &
+   1.118404e-01_EB, &
+   4.009616e-04_EB, 3.667449e-04_EB, 3.857376e-04_EB, 2.884928e-04_EB, 2.499297e-04_EB, 1.164307e+00_EB, &
+   1.179168e-01_EB, &
+   3.855251e-04_EB, 4.011809e-04_EB, 4.248678e-04_EB, 4.035946e-04_EB, 9.176744e-04_EB, 1.155933e+00_EB, &
+   1.250155e-01_EB, &
+   2.767518e-04_EB, 3.807194e-04_EB, 3.312430e-04_EB, 3.468054e-04_EB, 3.815901e-04_EB, 5.697397e-01_EB, &
+   1.342966e-01_EB, &
+   3.522300e-04_EB, 3.241922e-04_EB, 2.938979e-04_EB, 3.128230e-04_EB, 3.702311e-04_EB, 1.288695e-01_EB, &
+   1.274616e-01_EB/),(/7,8/))
 
-SD1_C2H6(1:7,49:56) = RESHAPE((/ &  ! 970-1005 cm-1
-    6.076011E-04_EB, 6.247931E-04_EB, 6.210977E-04_EB, 5.906424E-04_EB, 5.605877E-04_EB, 1.304106E-03_EB, &
-    1.038211E-01_EB, &
-    5.568001E-04_EB, 5.631578E-04_EB, 5.690637E-04_EB, 6.286270E-04_EB, 5.560269E-04_EB, 5.674964E-04_EB, &
-    1.490422E-01_EB, &
-    6.031718E-04_EB, 5.835255E-04_EB, 6.224477E-04_EB, 6.512348E-04_EB, 6.893931E-04_EB, 5.545678E-04_EB, &
-    1.044452E-01_EB, &
-    5.859556E-04_EB, 6.208885E-04_EB, 6.427015E-04_EB, 5.953784E-04_EB, 5.954965E-04_EB, 5.721422E-04_EB, &
-    1.803091E-01_EB, &
-    5.771365E-04_EB, 6.769549E-04_EB, 5.350124E-04_EB, 5.845623E-04_EB, 5.988053E-04_EB, 5.655932E-04_EB, &
-    6.973313E-02_EB, &
-    6.104291E-04_EB, 5.940867E-04_EB, 5.570016E-04_EB, 6.296483E-04_EB, 5.528823E-04_EB, 6.260908E-04_EB, &
-    3.248840E-02_EB, &
-    5.477759E-04_EB, 5.588435E-04_EB, 6.238415E-04_EB, 6.122790E-04_EB, 5.561536E-04_EB, 5.397771E-04_EB, &
-    3.043585E-02_EB, &
-    5.758325E-04_EB, 5.599324E-04_EB, 6.440217E-04_EB, 5.600414E-04_EB, 6.094887E-04_EB, 6.090445E-04_EB, &
-    3.697414E-02_EB/),(/7,8/))
+sd1_c2h6(1:7,49:56) = RESHAPE((/ &  ! 970-1005 cm-1
+   3.734602e-04_EB, 3.927916e-04_EB, 3.867028e-04_EB, 3.488727e-04_EB, 3.129810e-04_EB, 5.653561e-03_EB, &
+   1.114115e-01_EB, &
+   3.090640e-04_EB, 3.182551e-04_EB, 3.234946e-04_EB, 3.977928e-04_EB, 3.092056e-04_EB, 3.223704e-04_EB, &
+   2.110842e-01_EB, &
+   3.694516e-04_EB, 3.386979e-04_EB, 3.942745e-04_EB, 4.268219e-04_EB, 4.823033e-04_EB, 3.062293e-04_EB, &
+   1.371742e-01_EB, &
+   3.449803e-04_EB, 3.878879e-04_EB, 4.122692e-04_EB, 3.550996e-04_EB, 3.586092e-04_EB, 3.305017e-04_EB, &
+   4.857086e-01_EB, &
+   3.341938e-04_EB, 4.611333e-04_EB, 2.824504e-04_EB, 3.440987e-04_EB, 3.632731e-04_EB, 3.190974e-04_EB, &
+   1.036874e-01_EB, &
+   3.732784e-04_EB, 3.561815e-04_EB, 3.078580e-04_EB, 4.006334e-04_EB, 3.049231e-04_EB, 3.978448e-04_EB, &
+   4.974197e-02_EB, &
+   2.979406e-04_EB, 3.116971e-04_EB, 3.889874e-04_EB, 3.786843e-04_EB, 3.072701e-04_EB, 2.867540e-04_EB, &
+   4.862621e-02_EB, &
+   3.325163e-04_EB, 3.138932e-04_EB, 4.250213e-04_EB, 3.119730e-04_EB, 3.732476e-04_EB, 3.717123e-04_EB, &
+   4.454824e-02_EB/),(/7,8/))
 
-SD1_C2H6(1:7,57:64) = RESHAPE((/ &  ! 1010-1045 cm-1
-    5.771611E-04_EB, 5.952499E-04_EB, 6.684843E-04_EB, 5.895284E-04_EB, 6.224352E-04_EB, 5.923383E-04_EB, &
-    6.153913E-02_EB, &
-    5.655646E-04_EB, 6.192065E-04_EB, 5.611474E-04_EB, 5.556904E-04_EB, 6.309032E-04_EB, 5.633688E-04_EB, &
-    6.148906E-02_EB, &
-    5.903213E-04_EB, 6.245301E-04_EB, 5.706255E-04_EB, 6.325202E-04_EB, 5.806419E-04_EB, 5.449552E-04_EB, &
-    1.495286E-01_EB, &
-    5.775728E-04_EB, 5.941511E-04_EB, 5.429387E-04_EB, 6.363537E-04_EB, 5.814826E-04_EB, 5.741843E-04_EB, &
-    2.111578E-01_EB, &
-    5.712454E-04_EB, 6.798137E-04_EB, 5.690925E-04_EB, 5.862564E-04_EB, 5.746134E-04_EB, 5.743120E-04_EB, &
-    3.659751E-01_EB, &
-    6.791103E-04_EB, 5.661152E-04_EB, 6.833618E-04_EB, 6.120201E-04_EB, 6.017759E-04_EB, 5.523163E-04_EB, &
-    2.764061E-01_EB, &
-    6.082420E-04_EB, 5.853773E-04_EB, 5.892656E-04_EB, 5.504792E-04_EB, 6.030549E-04_EB, 5.571454E-04_EB, &
-    1.055773E-01_EB, &
-    5.821916E-04_EB, 5.998309E-04_EB, 6.027881E-04_EB, 5.686535E-04_EB, 5.419230E-04_EB, 5.645053E-04_EB, &
-    1.120062E-01_EB/),(/7,8/))
+sd1_c2h6(1:7,57:64) = RESHAPE((/ &  ! 1010-1045 cm-1
+   3.350681e-04_EB, 3.530821e-04_EB, 4.528042e-04_EB, 3.516044e-04_EB, 3.923830e-04_EB, 3.532259e-04_EB, &
+   6.542840e-02_EB, &
+   3.204957e-04_EB, 3.836292e-04_EB, 3.138970e-04_EB, 3.100875e-04_EB, 3.990551e-04_EB, 3.191793e-04_EB, &
+   7.406912e-02_EB, &
+   3.472691e-04_EB, 3.920082e-04_EB, 3.234488e-04_EB, 4.026391e-04_EB, 3.384464e-04_EB, 2.968447e-04_EB, &
+   2.322588e-01_EB, &
+   3.347127e-04_EB, 3.546956e-04_EB, 2.920812e-04_EB, 4.081782e-04_EB, 3.386853e-04_EB, 3.307871e-04_EB, &
+   4.463887e-01_EB, &
+   3.248741e-04_EB, 4.609033e-04_EB, 3.231879e-04_EB, 3.456361e-04_EB, 3.298612e-04_EB, 3.329381e-04_EB, &
+   1.035782e+00_EB, &
+   4.690522e-04_EB, 3.215237e-04_EB, 4.686739e-04_EB, 3.787632e-04_EB, 3.650086e-04_EB, 3.038461e-04_EB, &
+   6.376563e-01_EB, &
+   3.712414e-04_EB, 3.428482e-04_EB, 3.459720e-04_EB, 3.001890e-04_EB, 3.653620e-04_EB, 3.093595e-04_EB, &
+   1.783476e-01_EB, &
+   3.413817e-04_EB, 3.624958e-04_EB, 3.637267e-04_EB, 3.228750e-04_EB, 2.920456e-04_EB, 3.181545e-04_EB, &
+   2.620076e-01_EB/),(/7,8/))
 
-SD1_C2H6(1:7,65:72) = RESHAPE((/ &  ! 1050-1085 cm-1
-    5.742524E-04_EB, 5.758224E-04_EB, 6.015966E-04_EB, 5.880442E-04_EB, 6.156445E-04_EB, 6.154221E-04_EB, &
-    2.166512E-01_EB, &
-    5.757372E-04_EB, 5.818479E-04_EB, 5.422953E-04_EB, 5.422969E-04_EB, 5.828935E-04_EB, 5.464803E-04_EB, &
-    1.169102E-01_EB, &
-    5.885987E-04_EB, 6.011767E-04_EB, 5.696307E-04_EB, 5.653754E-04_EB, 5.622029E-04_EB, 5.857177E-04_EB, &
-    2.348611E-02_EB, &
-    5.661538E-04_EB, 6.266748E-04_EB, 5.331363E-04_EB, 5.609109E-04_EB, 5.397012E-04_EB, 6.112279E-04_EB, &
-    1.688024E-02_EB, &
-    6.048814E-04_EB, 5.831322E-04_EB, 6.001442E-04_EB, 5.838624E-04_EB, 5.770951E-04_EB, 5.708753E-04_EB, &
-    8.412044E-03_EB, &
-    6.198694E-04_EB, 5.521161E-04_EB, 6.267105E-04_EB, 5.503612E-04_EB, 5.156425E-04_EB, 5.273586E-04_EB, &
-    2.679004E-03_EB, &
-    6.039607E-04_EB, 5.510536E-04_EB, 5.928776E-04_EB, 5.739141E-04_EB, 6.310402E-04_EB, 5.784724E-04_EB, &
-    5.654607E-04_EB, &
-    5.707152E-04_EB, 6.004682E-04_EB, 5.594182E-04_EB, 5.721055E-04_EB, 6.433943E-04_EB, 5.879097E-04_EB, &
-    5.665859E-04_EB/),(/7,8/))
+sd1_c2h6(1:7,65:72) = RESHAPE((/ &  ! 1050-1085 cm-1
+   3.325905e-04_EB, 3.330314e-04_EB, 3.617122e-04_EB, 3.505622e-04_EB, 3.869601e-04_EB, 3.838024e-04_EB, &
+   5.425202e-01_EB, &
+   3.314643e-04_EB, 3.409742e-04_EB, 2.922515e-04_EB, 2.908445e-04_EB, 3.423906e-04_EB, 2.970385e-04_EB, &
+   6.238502e-01_EB, &
+   3.492482e-04_EB, 3.606574e-04_EB, 3.274995e-04_EB, 3.213303e-04_EB, 3.179339e-04_EB, 3.480095e-04_EB, &
+   4.163639e-02_EB, &
+   3.199232e-04_EB, 3.955618e-04_EB, 2.798966e-04_EB, 3.155772e-04_EB, 2.916205e-04_EB, 3.756559e-04_EB, &
+   1.227547e-02_EB, &
+   3.705657e-04_EB, 3.404134e-04_EB, 3.590301e-04_EB, 3.440815e-04_EB, 3.347934e-04_EB, 3.248160e-04_EB, &
+   1.130962e-02_EB, &
+   3.884066e-04_EB, 3.017404e-04_EB, 3.954654e-04_EB, 3.017435e-04_EB, 2.609871e-04_EB, 2.759450e-04_EB, &
+   2.756706e-03_EB, &
+   3.676700e-04_EB, 3.019733e-04_EB, 3.533386e-04_EB, 3.287691e-04_EB, 4.033519e-04_EB, 3.370772e-04_EB, &
+   3.213983e-04_EB, &
+   3.262600e-04_EB, 3.615855e-04_EB, 3.142415e-04_EB, 3.309319e-04_EB, 4.228572e-04_EB, 3.478703e-04_EB, &
+   3.234945e-04_EB/),(/7,8/))
 
-SD1_C2H6(1:7,73:74) = RESHAPE((/ &  ! 1090-1095 cm-1
-    5.239685E-04_EB, 5.064051E-04_EB, 5.629911E-04_EB, 5.157217E-04_EB, 5.480959E-04_EB, 5.994907E-04_EB, &
-    5.216709E-04_EB, &
-    4.743617E-04_EB, 4.743617E-04_EB, 4.743617E-04_EB, 4.743617E-04_EB, 4.743617E-04_EB, 4.743617E-04_EB, &
-    4.743617E-04_EB/),(/7,2/))
-
-!---------------------------------------------------------------------------
-ALLOCATE(GAMMAD1_C2H6(N_TEMP_C2H6,74)) 
-
-! BAND #1: 730 cm-1 - 1095 cm-1 
-
-! SNB FIT WITH ELSASSER MODEL 
-
-! ERROR ASSOCIATED WITH ELSASSER FIT: 
-! On Transmissivity: 0.64336 % 
-
-! PRINT FINE STRUCTURE ARRAY GAMMA_D 
-
-GAMMAD1_C2H6(1:7,1:8) = RESHAPE((/ &  ! 730-765 cm-1
-    4.065575E-04_EB, 4.355558E-04_EB, 4.228863E-04_EB, 4.106255E-04_EB, 3.942893E-04_EB, 4.671604E-04_EB, &
-    4.827316E-04_EB, &
-    4.364459E-04_EB, 4.213089E-04_EB, 5.168558E-04_EB, 4.553271E-04_EB, 4.329784E-04_EB, 4.523539E-04_EB, &
-    4.545475E-04_EB, &
-    4.823483E-04_EB, 5.132247E-04_EB, 3.766468E-04_EB, 6.201220E-03_EB, 4.302422E-04_EB, 4.876724E-04_EB, &
-    4.254955E-04_EB, &
-    4.999074E-04_EB, 4.316368E-04_EB, 1.101103E-03_EB, 3.106174E-02_EB, 9.593911E-04_EB, 1.262551E-02_EB, &
-    3.931345E-04_EB, &
-    4.742162E-03_EB, 4.518823E-04_EB, 1.044055E-03_EB, 1.949221E-02_EB, 5.988492E-05_EB, 1.136777E-01_EB, &
-    4.083926E-04_EB, &
-    8.543059E-03_EB, 4.694681E-04_EB, 2.243946E-03_EB, 5.109109E-02_EB, 7.926472E-05_EB, 9.577946E-02_EB, &
-    3.816743E-04_EB, &
-    6.667501E-03_EB, 4.476922E-04_EB, 1.379459E-04_EB, 2.388976E-02_EB, 1.153491E-04_EB, 9.057109E-02_EB, &
-    4.714226E-04_EB, &
-    2.589991E-02_EB, 2.701020E-04_EB, 4.725373E-03_EB, 1.558914E-02_EB, 1.786304E-04_EB, 1.441625E-01_EB, &
-    4.554240E-04_EB/),(/7,8/))
-
-GAMMAD1_C2H6(1:7,9:16) = RESHAPE((/ &  ! 770-805 cm-1
-    2.856124E-02_EB, 1.318576E-04_EB, 5.053706E-03_EB, 1.016653E-01_EB, 8.551605E-04_EB, 2.306278E-02_EB, &
-    4.187159E-04_EB, &
-    1.740593E-02_EB, 2.114282E-03_EB, 9.990637E-04_EB, 1.999957E-02_EB, 8.639734E-04_EB, 5.078021E-03_EB, &
-    3.992225E-04_EB, &
-    6.882291E-02_EB, 5.398417E-04_EB, 2.156292E-03_EB, 1.516361E-01_EB, 5.448851E-04_EB, 2.375035E-04_EB, &
-    4.666743E-04_EB, &
-    3.748741E-02_EB, 1.347061E-03_EB, 4.561516E-03_EB, 1.403395E-03_EB, 3.228862E-04_EB, 2.408338E-04_EB, &
-    3.844600E-04_EB, &
-    4.589468E-02_EB, 1.075882E-03_EB, 5.317133E-02_EB, 5.251399E-02_EB, 4.526403E-04_EB, 3.428031E-04_EB, &
-    4.655344E-04_EB, &
-    3.987347E-02_EB, 1.983889E-03_EB, 1.413881E-02_EB, 3.979607E-03_EB, 1.005338E-03_EB, 5.463778E-04_EB, &
-    4.469478E-04_EB, &
-    4.177949E-02_EB, 3.152471E-03_EB, 1.650987E-02_EB, 6.102480E-03_EB, 1.392942E-03_EB, 4.454008E-04_EB, &
-    4.308386E-04_EB, &
-    3.974218E-02_EB, 5.220746E-03_EB, 4.658894E-02_EB, 2.153448E-02_EB, 1.812465E-03_EB, 3.731443E-04_EB, &
-    4.043599E-04_EB/),(/7,8/))
-
-GAMMAD1_C2H6(1:7,17:24) = RESHAPE((/ &  ! 810-845 cm-1
-    4.076737E-02_EB, 5.759155E-03_EB, 1.183766E-02_EB, 9.112279E-03_EB, 4.089621E-03_EB, 3.592726E-04_EB, &
-    4.776292E-04_EB, &
-    4.485933E-02_EB, 9.946384E-03_EB, 1.548699E-02_EB, 8.770862E-03_EB, 1.899643E-03_EB, 2.885768E-04_EB, &
-    4.275469E-04_EB, &
-    5.041022E-02_EB, 1.095930E-02_EB, 1.866814E-02_EB, 6.000103E-03_EB, 1.860806E-03_EB, 1.779764E-03_EB, &
-    4.504013E-04_EB, &
-    7.308433E-02_EB, 2.279485E-02_EB, 2.844745E-02_EB, 1.187097E-01_EB, 1.828189E-03_EB, 2.668424E-01_EB, &
-    4.708647E-04_EB, &
-    8.338976E-02_EB, 1.425949E-02_EB, 2.832640E-02_EB, 2.272038E-02_EB, 2.506043E-03_EB, 2.538443E-01_EB, &
-    4.411002E-04_EB, &
-    8.428290E-02_EB, 1.876864E-02_EB, 1.628061E-02_EB, 1.279179E-02_EB, 1.707471E-02_EB, 2.853855E-01_EB, &
-    3.802594E-04_EB, &
-    1.333288E-01_EB, 1.994788E-02_EB, 4.071684E-02_EB, 1.492538E-02_EB, 3.505731E-03_EB, 1.564566E-01_EB, &
-    4.759925E-03_EB, &
-    1.391878E-01_EB, 1.507363E-02_EB, 2.196387E-02_EB, 2.409600E-02_EB, 2.902077E-03_EB, 1.354516E-02_EB, &
-    1.079194E-01_EB/),(/7,8/))
-
-GAMMAD1_C2H6(1:7,25:32) = RESHAPE((/ &  ! 850-885 cm-1
-    7.528749E-02_EB, 1.217793E-02_EB, 3.889715E-02_EB, 5.772348E-02_EB, 6.215872E-03_EB, 6.967528E-03_EB, &
-    1.483152E-01_EB, &
-    3.591791E-02_EB, 8.092085E-03_EB, 2.143969E-02_EB, 1.518013E-02_EB, 3.151289E-02_EB, 1.416365E-02_EB, &
-    1.025578E+00_EB, &
-    4.422868E-02_EB, 1.057217E-02_EB, 1.656500E-02_EB, 2.706264E-02_EB, 1.465974E-02_EB, 4.788098E-03_EB, &
-    1.300530E-01_EB, &
-    3.312658E-02_EB, 1.415742E-02_EB, 6.469016E-03_EB, 8.592658E-03_EB, 2.441114E-02_EB, 5.916498E-02_EB, &
-    3.082106E-01_EB, &
-    1.614554E-02_EB, 7.520189E-03_EB, 6.276428E-03_EB, 3.509355E-03_EB, 2.726573E-03_EB, 2.346823E-01_EB, &
-    1.513687E-02_EB, &
-    1.621958E-02_EB, 5.911032E-03_EB, 4.265330E-03_EB, 5.334278E-03_EB, 2.855891E-03_EB, 3.055740E-01_EB, &
-    4.443058E-03_EB, &
-    1.606695E-02_EB, 5.394283E-03_EB, 2.837413E-03_EB, 1.030847E-02_EB, 1.656611E-03_EB, 3.211414E-01_EB, &
-    1.224770E-02_EB, &
-    1.825113E-02_EB, 2.685010E-03_EB, 5.680955E-03_EB, 1.001663E-02_EB, 1.844295E-02_EB, 7.051788E-03_EB, &
-    6.573867E-03_EB/),(/7,8/))
-
-GAMMAD1_C2H6(1:7,33:40) = RESHAPE((/ &  ! 890-925 cm-1
-    7.404341E-03_EB, 1.028350E-03_EB, 6.748338E-03_EB, 2.216039E-03_EB, 3.783286E-03_EB, 8.400736E-04_EB, &
-    2.755981E-03_EB, &
-    1.203785E-02_EB, 1.131203E-03_EB, 2.460014E-02_EB, 2.348161E-03_EB, 1.220089E-03_EB, 5.505897E-04_EB, &
-    1.980155E-02_EB, &
-    6.056935E-03_EB, 3.201097E-04_EB, 1.868968E-02_EB, 5.609370E-04_EB, 1.538518E-03_EB, 4.038749E-04_EB, &
-    1.835181E-03_EB, &
-    2.568612E-03_EB, 2.396294E-03_EB, 1.376406E-02_EB, 2.621325E-03_EB, 1.322831E-02_EB, 2.282331E-04_EB, &
-    1.452851E-03_EB, &
-    6.462906E-03_EB, 1.566999E-03_EB, 8.873733E-03_EB, 6.470563E-03_EB, 2.579524E-04_EB, 1.862423E-04_EB, &
-    1.540511E-03_EB, &
-    3.039269E-03_EB, 3.761014E-04_EB, 2.265789E-03_EB, 2.575640E-03_EB, 8.630786E-03_EB, 1.836066E-04_EB, &
-    9.394442E-04_EB, &
-    4.193605E-03_EB, 3.785135E-04_EB, 2.729951E-03_EB, 9.845533E-05_EB, 2.185055E-03_EB, 1.849371E-04_EB, &
-    2.188939E-03_EB, &
-    5.364879E-03_EB, 4.284782E-04_EB, 1.400545E-03_EB, 6.405858E-04_EB, 7.240081E-03_EB, 1.581594E-04_EB, &
-    2.672593E-03_EB/),(/7,8/))
-
-GAMMAD1_C2H6(1:7,41:48) = RESHAPE((/ &  ! 930-965 cm-1
-    1.722587E-03_EB, 4.542534E-04_EB, 2.259724E-03_EB, 4.073858E-04_EB, 3.039512E-03_EB, 8.716326E-05_EB, &
-    2.965197E-03_EB, &
-    1.945004E-03_EB, 4.426679E-04_EB, 4.090160E-04_EB, 3.691019E-05_EB, 1.713772E-03_EB, 8.238204E-05_EB, &
-    9.669855E-02_EB, &
-    6.386875E-04_EB, 4.741196E-04_EB, 3.773490E-04_EB, 3.341163E-04_EB, 4.625415E-04_EB, 1.169249E-04_EB, &
-    8.471653E-02_EB, &
-    4.152211E-04_EB, 4.649281E-04_EB, 4.090191E-04_EB, 6.981832E-04_EB, 3.769026E-04_EB, 9.763637E-05_EB, &
-    1.048370E+00_EB, &
-    4.595069E-04_EB, 4.719666E-04_EB, 4.661009E-04_EB, 4.246292E-04_EB, 4.062256E-04_EB, 1.205473E-04_EB, &
-    1.111446E+00_EB, &
-    4.261372E-04_EB, 4.801092E-04_EB, 4.875336E-04_EB, 4.966089E-04_EB, 7.913657E-04_EB, 1.144280E-04_EB, &
-    1.402395E-01_EB, &
-    4.042500E-04_EB, 4.674334E-04_EB, 4.195668E-04_EB, 4.578474E-04_EB, 4.297564E-04_EB, 8.942797E-05_EB, &
-    1.506895E-02_EB, &
-    4.655065E-04_EB, 4.440281E-04_EB, 4.040655E-04_EB, 4.192518E-04_EB, 4.229453E-04_EB, 1.500183E-04_EB, &
-    3.802567E-03_EB/),(/7,8/))
-
-GAMMAD1_C2H6(1:7,49:56) = RESHAPE((/ &  ! 970-1005 cm-1
-    4.428162E-04_EB, 4.702223E-04_EB, 4.811994E-04_EB, 4.570333E-04_EB, 4.305955E-04_EB, 2.858868E-04_EB, &
-    2.287959E-03_EB, &
-    4.207792E-04_EB, 4.139409E-04_EB, 4.331308E-04_EB, 4.742665E-04_EB, 4.114105E-04_EB, 4.248428E-04_EB, &
-    9.734912E-04_EB, &
-    4.269730E-04_EB, 4.650857E-04_EB, 4.379320E-04_EB, 4.877286E-04_EB, 4.818705E-04_EB, 4.211942E-04_EB, &
-    1.182784E-03_EB, &
-    4.381611E-04_EB, 4.684275E-04_EB, 5.103428E-04_EB, 4.585259E-04_EB, 4.292931E-04_EB, 4.069094E-04_EB, &
-    5.130052E-04_EB, &
-    4.315161E-04_EB, 5.007011E-04_EB, 4.146885E-04_EB, 4.295870E-04_EB, 4.308357E-04_EB, 4.315919E-04_EB, &
-    7.393255E-04_EB, &
-    4.734151E-04_EB, 4.350865E-04_EB, 4.350654E-04_EB, 4.630863E-04_EB, 4.155547E-04_EB, 4.471774E-04_EB, &
-    3.779056E-03_EB, &
-    4.185621E-04_EB, 4.223976E-04_EB, 4.935876E-04_EB, 4.507534E-04_EB, 4.301265E-04_EB, 4.302431E-04_EB, &
-    4.147488E-03_EB, &
-    4.309314E-04_EB, 4.140175E-04_EB, 4.370239E-04_EB, 4.340690E-04_EB, 4.619978E-04_EB, 4.700917E-04_EB, &
-    1.831102E-02_EB/),(/7,8/))
-
-GAMMAD1_C2H6(1:7,57:64) = RESHAPE((/ &  ! 1010-1045 cm-1
-    4.247732E-04_EB, 4.745267E-04_EB, 4.780062E-04_EB, 4.240080E-04_EB, 4.500584E-04_EB, 4.376887E-04_EB, &
-    2.567885E-03_EB, &
-    4.203798E-04_EB, 4.864561E-04_EB, 4.297637E-04_EB, 4.010516E-04_EB, 4.883058E-04_EB, 4.055410E-04_EB, &
-    4.217873E-03_EB, &
-    4.672317E-04_EB, 4.751018E-04_EB, 4.522128E-04_EB, 4.760784E-04_EB, 4.344004E-04_EB, 3.971270E-04_EB, &
-    1.176762E-03_EB, &
-    4.298698E-04_EB, 4.471510E-04_EB, 4.163814E-04_EB, 4.771232E-04_EB, 4.417736E-04_EB, 4.268879E-04_EB, &
-    7.321252E-04_EB, &
-    4.457782E-04_EB, 5.315365E-04_EB, 4.355246E-04_EB, 4.365137E-04_EB, 4.385816E-04_EB, 4.105184E-04_EB, &
-    4.753067E-04_EB, &
-    4.748123E-04_EB, 4.174766E-04_EB, 5.116190E-04_EB, 4.461869E-04_EB, 4.473408E-04_EB, 4.164358E-04_EB, &
-    5.363681E-04_EB, &
-    4.663594E-04_EB, 4.481892E-04_EB, 4.677916E-04_EB, 4.300452E-04_EB, 4.572812E-04_EB, 4.221320E-04_EB, &
-    1.020616E-03_EB, &
-    4.273961E-04_EB, 4.448011E-04_EB, 4.677969E-04_EB, 4.334582E-04_EB, 4.038217E-04_EB, 4.286692E-04_EB, &
-    1.009687E-03_EB/),(/7,8/))
-
-GAMMAD1_C2H6(1:7,65:72) = RESHAPE((/ &  ! 1050-1085 cm-1
-    4.133460E-04_EB, 4.264153E-04_EB, 4.706217E-04_EB, 4.153495E-04_EB, 4.282576E-04_EB, 4.435459E-04_EB, &
-    3.049954E-04_EB, &
-    4.392871E-04_EB, 4.286852E-04_EB, 4.064771E-04_EB, 4.206134E-04_EB, 4.267351E-04_EB, 4.131956E-04_EB, &
-    4.077901E-04_EB, &
-    4.341453E-04_EB, 4.754603E-04_EB, 4.045311E-04_EB, 4.122859E-04_EB, 4.039747E-04_EB, 4.140579E-04_EB, &
-    1.967494E-03_EB, &
-    4.321753E-04_EB, 4.693335E-04_EB, 4.171935E-04_EB, 4.104922E-04_EB, 3.849807E-04_EB, 4.618845E-04_EB, &
-    3.180481E-04_EB, &
-    4.352910E-04_EB, 4.446729E-04_EB, 4.776830E-04_EB, 4.227150E-04_EB, 4.255088E-04_EB, 4.426307E-04_EB, &
-    4.026746E-03_EB, &
-    4.532445E-04_EB, 4.337078E-04_EB, 4.730406E-04_EB, 4.133673E-04_EB, 3.929524E-04_EB, 3.856039E-04_EB, &
-    1.683698E-03_EB, &
-    4.475384E-04_EB, 4.197029E-04_EB, 4.465486E-04_EB, 4.412465E-04_EB, 4.551924E-04_EB, 4.223691E-04_EB, &
-    4.126406E-04_EB, &
-    4.263874E-04_EB, 4.606209E-04_EB, 4.054779E-04_EB, 4.062386E-04_EB, 4.437677E-04_EB, 4.345062E-04_EB, &
-    4.061153E-04_EB/),(/7,8/))
-
-GAMMAD1_C2H6(1:7,73:74) = RESHAPE((/ &  ! 1090-1095 cm-1
-    3.915790E-04_EB, 3.972229E-04_EB, 4.391904E-04_EB, 3.993964E-04_EB, 4.100616E-04_EB, 4.704976E-04_EB, &
-    4.210897E-04_EB, &
-    3.773490E-04_EB, 3.773490E-04_EB, 3.773490E-04_EB, 3.773490E-04_EB, 3.773490E-04_EB, 3.773490E-04_EB, &
-    3.773490E-04_EB/),(/7,2/))
+sd1_c2h6(1:7,73:74) = RESHAPE((/ &  ! 1090-1095 cm-1
+   2.711945e-04_EB, 2.496329e-04_EB, 3.150593e-04_EB, 2.603387e-04_EB, 2.992890e-04_EB, 3.589836e-04_EB, &
+   2.656451e-04_EB, &
+   2.145139e-04_EB, 2.145139e-04_EB, 2.145139e-04_EB, 2.145139e-04_EB, 2.145139e-04_EB, 2.145139e-04_EB, &
+   2.145139e-04_EB/),(/7,2/))
 
 !---------------------------------------------------------------------------
-ALLOCATE(SD2_C2H6(N_TEMP_C2H6,19)) 
+ALLOCATE(gammad1_c2h6(n_temp_c2h6,74)) 
 
-! BAND #2: 1250 cm-1 - 1700 cm-1 
+! band #1: 730 cm-1 - 1095 cm-1 
 
-! SNB FIT WITH ELSASSER MODEL 
+! snb fit with malkmus model 
 
-! ERROR ASSOCIATED WITH ELSASSER FIT: 
-! On Transmissivity: 1.4079 % 
+! error associated with malkmus fit: 
+! on transmissivity: 0.69096 % 
 
-SD2_C2H6(1:7,1:8) = RESHAPE((/ &  ! 1250-1425 cm-1
-    5.406154E-04_EB, 5.359836E-04_EB, 5.068710E-04_EB, 5.290541E-04_EB, 5.846661E-04_EB, 9.790007E-04_EB, &
-    1.033382E-03_EB, &
-    5.635285E-04_EB, 5.931464E-04_EB, 5.996161E-04_EB, 5.919406E-04_EB, 3.215772E-03_EB, 8.001527E-02_EB, &
-    1.689879E-02_EB, &
-    7.597373E-03_EB, 6.220529E-04_EB, 5.855704E-04_EB, 5.776749E-04_EB, 9.769176E-03_EB, 2.147420E-02_EB, &
-    2.051290E-01_EB, &
-    5.665394E-03_EB, 2.871094E-03_EB, 3.058827E-03_EB, 6.243937E-03_EB, 2.148619E-02_EB, 3.795392E-02_EB, &
-    1.403007E-01_EB, &
-    2.718010E-02_EB, 3.781331E-02_EB, 3.673178E-02_EB, 4.065980E-02_EB, 5.300384E-02_EB, 6.975728E-02_EB, &
-    4.497725E-02_EB, &
-    1.104006E-01_EB, 1.168480E-01_EB, 1.043664E-01_EB, 1.115175E-01_EB, 9.487101E-02_EB, 9.180434E-02_EB, &
-    6.476559E-02_EB, &
-    2.357004E-01_EB, 2.177341E-01_EB, 1.911829E-01_EB, 1.640602E-01_EB, 1.432644E-01_EB, 1.622884E-01_EB, &
-    1.042990E-01_EB, &
-    2.962360E-01_EB, 2.585360E-01_EB, 2.245752E-01_EB, 1.816093E-01_EB, 1.653938E-01_EB, 1.384864E-01_EB, &
-    9.054463E-02_EB/),(/7,8/))
+! print fine structure array gamma_d 
 
-SD2_C2H6(1:7,9:16) = RESHAPE((/ &  ! 1450-1625 cm-1
-    4.455755E-01_EB, 3.620878E-01_EB, 2.864854E-01_EB, 2.366804E-01_EB, 1.967883E-01_EB, 1.587402E-01_EB, &
-    1.649379E-01_EB, &
-    5.007041E-01_EB, 3.788713E-01_EB, 3.024415E-01_EB, 2.441476E-01_EB, 1.965719E-01_EB, 1.379278E-01_EB, &
-    2.764153E-01_EB, &
-    4.002584E-01_EB, 3.171792E-01_EB, 2.770663E-01_EB, 1.849208E-01_EB, 1.758798E-01_EB, 1.383502E-01_EB, &
-    9.984220E-02_EB, &
-    2.662911E-01_EB, 2.579530E-01_EB, 2.244504E-01_EB, 1.485266E-01_EB, 1.386995E-01_EB, 1.152807E-01_EB, &
-    7.406491E-02_EB, &
-    1.095962E-01_EB, 1.529279E-01_EB, 1.604770E-01_EB, 8.431699E-02_EB, 1.015281E-01_EB, 9.741162E-02_EB, &
-    6.113480E-02_EB, &
-    3.530781E-02_EB, 8.873062E-02_EB, 5.636380E-02_EB, 7.095729E-02_EB, 5.541741E-02_EB, 6.446964E-02_EB, &
-    5.682161E-02_EB, &
-    4.853975E-03_EB, 9.449521E-03_EB, 1.369312E-02_EB, 1.786119E-01_EB, 2.919823E-02_EB, 5.009505E-02_EB, &
-    3.633541E-02_EB, &
-    5.911553E-04_EB, 5.554787E-04_EB, 8.076306E-04_EB, 5.662847E-03_EB, 1.074946E-02_EB, 2.631678E-02_EB, &
-    1.461045E-02_EB/),(/7,8/))
+gammad1_c2h6(1:7,1:8) = RESHAPE((/ &  ! 730-765 cm-1
+   2.006565e-04_EB, 2.337401e-04_EB, 2.177856e-04_EB, 2.048546e-04_EB, 1.869983e-04_EB, 2.713666e-04_EB, &
+   2.905961e-04_EB, &
+   2.306868e-04_EB, 2.167323e-04_EB, 3.350447e-04_EB, 2.526474e-04_EB, 2.261799e-04_EB, 2.480626e-04_EB, &
+   2.521419e-04_EB, &
+   2.854020e-04_EB, 3.329316e-04_EB, 1.598485e-04_EB, 3.267121e-02_EB, 2.234431e-04_EB, 2.957501e-04_EB, &
+   2.173206e-04_EB, &
+   2.137117e-04_EB, 2.266418e-04_EB, 4.728511e-05_EB, 2.245423e-01_EB, 3.064851e-05_EB, 8.222848e-03_EB, &
+   1.859738e-04_EB, &
+   3.462857e-03_EB, 2.519057e-04_EB, 3.480152e-05_EB, 3.925807e-02_EB, 1.572683e-05_EB, 3.101866e-01_EB, &
+   1.995997e-04_EB, &
+   9.741100e-03_EB, 2.710087e-04_EB, 2.101240e-03_EB, 7.469797e-02_EB, 2.264929e-05_EB, 1.275440e-01_EB, &
+   1.730011e-04_EB, &
+   7.831446e-03_EB, 2.356564e-04_EB, 2.537222e-05_EB, 5.290921e-02_EB, 3.544110e-05_EB, 1.081723e-01_EB, &
+   2.635023e-04_EB, &
+   1.830629e-02_EB, 5.427184e-06_EB, 1.638831e-04_EB, 1.590424e-02_EB, 4.986288e-05_EB, 2.169141e-01_EB, &
+   2.505642e-04_EB/),(/7,8/))
 
-SD2_C2H6(1:7,17:19) = RESHAPE((/ &  ! 1650-1700 cm-1
-    5.861991E-04_EB, 5.902278E-04_EB, 5.730461E-04_EB, 5.782324E-04_EB, 1.516772E-03_EB, 2.256041E-02_EB, &
-    1.925866E-02_EB, &
-    5.206242E-04_EB, 5.536321E-04_EB, 5.368849E-04_EB, 5.204248E-04_EB, 5.609159E-04_EB, 2.859073E-03_EB, &
-    6.484770E-03_EB, &
-    4.743617E-04_EB, 4.743617E-04_EB, 4.743617E-04_EB, 4.743617E-04_EB, 4.743617E-04_EB, 4.743617E-04_EB, &
-    4.743617E-04_EB/),(/7,3/))
+gammad1_c2h6(1:7,9:16) = RESHAPE((/ &  ! 770-805 cm-1
+   3.746173e-02_EB, 1.736644e-05_EB, 6.085991e-04_EB, 4.704301e-01_EB, 6.606423e-04_EB, 7.502293e-02_EB, &
+   2.108317e-04_EB, &
+   2.746203e-02_EB, 1.840834e-04_EB, 5.921780e-04_EB, 2.043773e-02_EB, 6.107989e-04_EB, 1.388557e-04_EB, &
+   1.893995e-04_EB, &
+   2.420680e-01_EB, 4.191667e-04_EB, 3.132099e-03_EB, 1.886145e+00_EB, 3.070676e-04_EB, 1.079068e-04_EB, &
+   2.691653e-04_EB, &
+   8.925252e-02_EB, 1.124913e-03_EB, 8.738915e-03_EB, 1.559750e-03_EB, 2.395539e-04_EB, 1.072791e-04_EB, &
+   1.752395e-04_EB, &
+   1.067081e-01_EB, 6.895830e-04_EB, 4.690182e-02_EB, 4.174376e-02_EB, 4.527850e-04_EB, 2.137964e-04_EB, &
+   2.588101e-04_EB, &
+   8.746003e-02_EB, 2.440063e-03_EB, 2.130236e-02_EB, 6.354666e-03_EB, 6.671299e-04_EB, 3.378605e-04_EB, &
+   2.343097e-04_EB, &
+   9.852102e-02_EB, 4.561646e-03_EB, 3.949280e-02_EB, 1.123806e-02_EB, 8.233218e-04_EB, 2.522466e-04_EB, &
+   2.226954e-04_EB, &
+   1.207618e-01_EB, 8.941124e-03_EB, 1.085484e-01_EB, 3.349804e-02_EB, 1.725479e-03_EB, 3.076476e-04_EB, &
+   1.938371e-04_EB/),(/7,8/))
 
-!---------------------------------------------------------------------------
-ALLOCATE(GAMMAD2_C2H6(N_TEMP_C2H6,19)) 
+gammad1_c2h6(1:7,17:24) = RESHAPE((/ &  ! 810-845 cm-1
+   1.241365e-01_EB, 9.920833e-03_EB, 2.540899e-02_EB, 1.887039e-02_EB, 6.826400e-03_EB, 2.126909e-04_EB, &
+   2.773335e-04_EB, &
+   1.417207e-01_EB, 2.020016e-02_EB, 3.589721e-02_EB, 1.758195e-02_EB, 1.968415e-03_EB, 2.289210e-04_EB, &
+   2.228792e-04_EB, &
+   1.684374e-01_EB, 2.315876e-02_EB, 3.432510e-02_EB, 1.023915e-02_EB, 2.040480e-03_EB, 2.528208e-03_EB, &
+   2.461503e-04_EB, &
+   2.993636e-01_EB, 4.679863e-02_EB, 4.993611e-02_EB, 5.799012e-01_EB, 1.375382e-03_EB, 5.540907e+00_EB, &
+   2.729510e-04_EB, &
+   3.763363e-01_EB, 3.147273e-02_EB, 5.066712e-02_EB, 5.649368e-02_EB, 2.734156e-03_EB, 8.088974e+00_EB, &
+   2.352079e-04_EB, &
+   3.923696e-01_EB, 4.535395e-02_EB, 3.848111e-02_EB, 2.837120e-02_EB, 3.903926e-02_EB, 4.193583e+00_EB, &
+   1.708561e-04_EB, &
+   6.116601e-01_EB, 3.911633e-02_EB, 9.404679e-02_EB, 3.598464e-02_EB, 4.985811e-03_EB, 2.536374e+00_EB, &
+   1.671554e-02_EB, &
+   6.488105e-01_EB, 3.434365e-02_EB, 5.620492e-02_EB, 4.579674e-02_EB, 3.831981e-03_EB, 2.040147e-02_EB, &
+   1.535947e-01_EB/),(/7,8/))
 
-! BAND #2: 1250 cm-1 - 1700 cm-1 
+gammad1_c2h6(1:7,25:32) = RESHAPE((/ &  ! 850-885 cm-1
+   2.185282e-01_EB, 2.624089e-02_EB, 8.281180e-02_EB, 1.337021e-01_EB, 1.164389e-02_EB, 1.441667e-02_EB, &
+   1.326192e+00_EB, &
+   1.054436e-01_EB, 1.564415e-02_EB, 4.232910e-02_EB, 2.542335e-02_EB, 9.182689e-02_EB, 2.979608e-02_EB, &
+   3.412059e+00_EB, &
+   1.037085e-01_EB, 2.307616e-02_EB, 2.791608e-02_EB, 7.390912e-02_EB, 1.792121e-02_EB, 8.709794e-03_EB, &
+   9.123564e-01_EB, &
+   6.557347e-02_EB, 2.400623e-02_EB, 1.184967e-02_EB, 1.759675e-02_EB, 4.025549e-02_EB, 1.650755e-01_EB, &
+   4.126380e-01_EB, &
+   3.854672e-02_EB, 1.545381e-02_EB, 1.176956e-02_EB, 5.353178e-03_EB, 3.790587e-03_EB, 2.857260e+00_EB, &
+   4.896543e-02_EB, &
+   3.823510e-02_EB, 1.163165e-02_EB, 7.527145e-03_EB, 1.044536e-02_EB, 4.277846e-03_EB, 2.782661e+00_EB, &
+   9.862962e-03_EB, &
+   2.698248e-02_EB, 1.682716e-02_EB, 4.532103e-03_EB, 2.286498e-02_EB, 1.772522e-03_EB, 2.075720e+00_EB, &
+   2.124687e-02_EB, &
+   2.066380e-02_EB, 4.723103e-03_EB, 6.343220e-03_EB, 2.397806e-02_EB, 2.607826e-02_EB, 7.702274e-03_EB, &
+   1.637205e-02_EB/),(/7,8/))
 
-! SNB FIT WITH ELSASSER MODEL 
+gammad1_c2h6(1:7,33:40) = RESHAPE((/ &  ! 890-925 cm-1
+   1.658402e-02_EB, 9.717357e-04_EB, 4.999287e-03_EB, 3.360172e-03_EB, 7.640958e-03_EB, 5.866049e-04_EB, &
+   4.203039e-03_EB, &
+   9.306719e-03_EB, 1.059841e-03_EB, 1.554113e-02_EB, 4.017085e-03_EB, 1.562439e-03_EB, 2.629554e-04_EB, &
+   2.723941e-02_EB, &
+   6.324845e-03_EB, 1.323745e-04_EB, 2.015294e-02_EB, 4.021824e-04_EB, 2.200845e-03_EB, 1.909660e-04_EB, &
+   2.384092e-03_EB, &
+   6.442116e-03_EB, 1.976663e-04_EB, 1.301740e-02_EB, 7.108478e-03_EB, 9.667620e-03_EB, 1.093856e-04_EB, &
+   1.651473e-03_EB, &
+   6.177417e-04_EB, 5.252625e-04_EB, 3.292456e-03_EB, 9.638064e-05_EB, 1.157061e-04_EB, 9.272832e-05_EB, &
+   1.772000e-03_EB, &
+   3.119150e-03_EB, 1.688032e-04_EB, 1.157769e-04_EB, 4.344200e-05_EB, 6.951343e-04_EB, 9.547409e-05_EB, &
+   5.716592e-04_EB, &
+   3.033519e-03_EB, 1.700977e-04_EB, 1.923551e-03_EB, 1.441479e-05_EB, 9.010921e-05_EB, 4.649518e-05_EB, &
+   3.993180e-03_EB, &
+   4.505246e-03_EB, 2.206088e-04_EB, 4.709851e-04_EB, 4.044407e-05_EB, 9.427052e-05_EB, 4.271051e-05_EB, &
+   4.728030e-03_EB/),(/7,8/))
 
-! ERROR ASSOCIATED WITH ELSASSER FIT: 
-! On Transmissivity: 1.4079 % 
+gammad1_c2h6(1:7,41:48) = RESHAPE((/ &  ! 930-965 cm-1
+   8.515529e-04_EB, 2.523157e-04_EB, 3.215017e-03_EB, 8.896712e-05_EB, 2.653323e-03_EB, 2.395564e-05_EB, &
+   5.128282e-03_EB, &
+   1.598460e-03_EB, 2.391773e-04_EB, 2.024249e-04_EB, 4.570502e-06_EB, 1.197295e-03_EB, 2.420553e-05_EB, &
+   7.176382e-01_EB, &
+   5.405162e-04_EB, 2.754095e-04_EB, 1.688326e-04_EB, 1.901197e-05_EB, 1.882451e-04_EB, 2.561929e-05_EB, &
+   1.225580e+00_EB, &
+   2.092858e-04_EB, 2.662552e-04_EB, 2.026153e-04_EB, 1.070822e-05_EB, 1.684702e-04_EB, 2.442314e-05_EB, &
+   2.444828e+01_EB, &
+   2.529925e-04_EB, 2.765314e-04_EB, 2.642207e-04_EB, 2.200703e-04_EB, 1.995939e-04_EB, 2.380865e-05_EB, &
+   2.685955e+01_EB, &
+   2.173973e-04_EB, 2.813395e-04_EB, 2.874743e-04_EB, 3.035869e-04_EB, 6.183918e-04_EB, 2.202463e-05_EB, &
+   2.519809e+00_EB, &
+   1.980501e-04_EB, 2.678571e-04_EB, 2.137226e-04_EB, 2.556760e-04_EB, 2.222342e-04_EB, 1.634015e-05_EB, &
+   3.727180e-02_EB, &
+   2.678728e-04_EB, 2.424340e-04_EB, 1.979944e-04_EB, 2.135470e-04_EB, 2.146239e-04_EB, 1.781477e-05_EB, &
+   7.049181e-03_EB/),(/7,8/))
 
-! PRINT FINE STRUCTURE ARRAY GAMMA_D 
+gammad1_c2h6(1:7,49:56) = RESHAPE((/ &  ! 970-1005 cm-1
+   2.364062e-04_EB, 2.712640e-04_EB, 2.842134e-04_EB, 2.567382e-04_EB, 2.256683e-04_EB, 2.498984e-05_EB, &
+   4.004321e-03_EB, &
+   2.157659e-04_EB, 2.064345e-04_EB, 2.288569e-04_EB, 2.738793e-04_EB, 2.050141e-04_EB, 2.197032e-04_EB, &
+   1.028210e-03_EB, &
+   2.197468e-04_EB, 2.679068e-04_EB, 2.304862e-04_EB, 2.905492e-04_EB, 2.725375e-04_EB, 2.159399e-04_EB, &
+   1.419923e-03_EB, &
+   2.335319e-04_EB, 2.681889e-04_EB, 3.239557e-04_EB, 2.569741e-04_EB, 2.238526e-04_EB, 2.007748e-04_EB, &
+   2.537471e-04_EB, &
+   2.263569e-04_EB, 3.026600e-04_EB, 2.089141e-04_EB, 2.243273e-04_EB, 2.228419e-04_EB, 2.279698e-04_EB, &
+   7.317457e-04_EB, &
+   2.753690e-04_EB, 2.292202e-04_EB, 2.318102e-04_EB, 2.597276e-04_EB, 2.082393e-04_EB, 2.415048e-04_EB, &
+   2.144539e-03_EB, &
+   2.130814e-04_EB, 2.160667e-04_EB, 3.005135e-04_EB, 2.457929e-04_EB, 2.262402e-04_EB, 2.271924e-04_EB, &
+   1.982460e-03_EB, &
+   2.260545e-04_EB, 2.078552e-04_EB, 2.252198e-04_EB, 2.292910e-04_EB, 2.617146e-04_EB, 2.719938e-04_EB, &
+   9.539658e-03_EB/),(/7,8/))
 
-GAMMAD2_C2H6(1:7,1:8) = RESHAPE((/ &  ! 1250-1425 cm-1
-    4.168686E-04_EB, 4.193011E-04_EB, 3.973225E-04_EB, 4.080912E-04_EB, 4.602965E-04_EB, 6.755249E-04_EB, &
-    6.105086E-04_EB, &
-    4.255656E-04_EB, 4.664546E-04_EB, 4.505149E-04_EB, 4.365847E-04_EB, 2.825570E-03_EB, 8.950031E-05_EB, &
-    5.621501E-03_EB, &
-    1.175000E-02_EB, 4.753084E-04_EB, 4.360673E-04_EB, 4.337838E-04_EB, 1.015752E-02_EB, 1.801456E-03_EB, &
-    1.629120E-04_EB, &
-    1.319318E-02_EB, 1.975533E-03_EB, 3.099937E-03_EB, 1.191199E-03_EB, 4.143252E-02_EB, 3.540688E-03_EB, &
-    5.712190E-04_EB, &
-    1.882424E-01_EB, 7.238728E-03_EB, 1.503563E-02_EB, 2.044939E-02_EB, 1.202757E-01_EB, 7.734500E-03_EB, &
-    8.373198E-02_EB, &
-    4.947535E-01_EB, 2.816282E-02_EB, 6.125682E-02_EB, 1.847091E-02_EB, 1.295650E-01_EB, 1.222813E-02_EB, &
-    1.176239E-01_EB, &
-    2.215115E+00_EB, 4.610771E-02_EB, 4.515215E-02_EB, 8.434374E-02_EB, 1.460741E-01_EB, 7.869235E-03_EB, &
-    9.018339E-02_EB, &
-    3.020966E+00_EB, 4.951337E-02_EB, 5.062744E-02_EB, 1.703253E-01_EB, 8.812923E-02_EB, 2.055588E-02_EB, &
-    5.461461E-02_EB/),(/7,8/))
+gammad1_c2h6(1:7,57:64) = RESHAPE((/ &  ! 1010-1045 cm-1
+   2.185131e-04_EB, 2.784174e-04_EB, 2.724240e-04_EB, 2.166217e-04_EB, 2.454826e-04_EB, 2.343101e-04_EB, &
+   4.681303e-03_EB, &
+   2.140851e-04_EB, 2.908903e-04_EB, 2.238573e-04_EB, 1.936346e-04_EB, 2.929472e-04_EB, 1.997998e-04_EB, &
+   5.199463e-03_EB, &
+   2.704701e-04_EB, 2.762782e-04_EB, 2.520038e-04_EB, 2.774566e-04_EB, 2.294524e-04_EB, 1.897369e-04_EB, &
+   1.101146e-03_EB, &
+   2.261254e-04_EB, 2.439262e-04_EB, 2.109405e-04_EB, 2.752945e-04_EB, 2.380712e-04_EB, 2.219084e-04_EB, &
+   4.729845e-04_EB, &
+   2.442952e-04_EB, 3.469938e-04_EB, 2.322461e-04_EB, 2.311834e-04_EB, 2.364839e-04_EB, 2.042171e-04_EB, &
+   2.219015e-04_EB, &
+   2.634592e-04_EB, 2.110525e-04_EB, 3.161689e-04_EB, 2.414846e-04_EB, 2.423626e-04_EB, 2.110280e-04_EB, &
+   3.145896e-04_EB, &
+   2.659955e-04_EB, 2.470635e-04_EB, 2.700914e-04_EB, 2.258166e-04_EB, 2.553061e-04_EB, 2.172449e-04_EB, &
+   8.521657e-04_EB, &
+   2.210763e-04_EB, 2.410264e-04_EB, 2.690630e-04_EB, 2.296574e-04_EB, 1.980775e-04_EB, 2.236759e-04_EB, &
+   5.582951e-04_EB/),(/7,8/))
 
-GAMMAD2_C2H6(1:7,9:16) = RESHAPE((/ &  ! 1450-1625 cm-1
-    3.763581E+00_EB, 4.719559E-02_EB, 6.925556E-02_EB, 8.350589E-02_EB, 8.135235E-02_EB, 1.584768E-02_EB, &
-    5.945540E-03_EB, &
-    4.890614E-01_EB, 5.402605E-02_EB, 6.600501E-02_EB, 8.285687E-02_EB, 8.014067E-02_EB, 2.426052E-02_EB, &
-    2.045892E-03_EB, &
-    4.999904E+00_EB, 4.971126E-02_EB, 4.141819E-02_EB, 1.621852E+00_EB, 5.311885E-02_EB, 1.264323E-02_EB, &
-    1.598556E-02_EB, &
-    4.999992E+00_EB, 2.835277E-02_EB, 2.748536E-02_EB, 1.777896E+00_EB, 9.313783E-02_EB, 1.486528E-02_EB, &
-    2.147066E-02_EB, &
-    2.954394E+00_EB, 1.560508E-02_EB, 1.464228E-02_EB, 3.035885E+00_EB, 6.012919E-02_EB, 1.056863E-02_EB, &
-    3.429682E-02_EB, &
-    2.582778E-01_EB, 2.470741E-03_EB, 3.160532E-02_EB, 7.760927E-03_EB, 3.744577E-01_EB, 7.210304E-03_EB, &
-    6.394452E-03_EB, &
-    6.347568E-03_EB, 5.009947E-03_EB, 2.436328E-02_EB, 3.662700E-04_EB, 1.085137E-01_EB, 2.913259E-03_EB, &
-    1.781443E-02_EB, &
-    4.411139E-04_EB, 4.165601E-04_EB, 6.313412E-04_EB, 1.761540E-03_EB, 2.148896E-01_EB, 1.915213E-03_EB, &
-    9.605494E-03_EB/),(/7,8/))
+gammad1_c2h6(1:7,65:72) = RESHAPE((/ &  ! 1050-1085 cm-1
+   2.066800e-04_EB, 2.209692e-04_EB, 2.738395e-04_EB, 2.085763e-04_EB, 2.168987e-04_EB, 2.377505e-04_EB, &
+   1.629293e-04_EB, &
+   2.355869e-04_EB, 2.212229e-04_EB, 2.006984e-04_EB, 2.157291e-04_EB, 2.203006e-04_EB, 2.060948e-04_EB, &
+   9.639746e-05_EB, &
+   2.268691e-04_EB, 2.800409e-04_EB, 1.984453e-04_EB, 2.045951e-04_EB, 1.977593e-04_EB, 2.051878e-04_EB, &
+   9.621759e-04_EB, &
+   2.273679e-04_EB, 2.692054e-04_EB, 2.117256e-04_EB, 2.039894e-04_EB, 1.777981e-04_EB, 2.609597e-04_EB, &
+   1.607451e-03_EB, &
+   2.293047e-04_EB, 2.421597e-04_EB, 2.833909e-04_EB, 2.164108e-04_EB, 2.199777e-04_EB, 2.398280e-04_EB, &
+   1.282936e-03_EB, &
+   2.497990e-04_EB, 2.311811e-04_EB, 2.716080e-04_EB, 2.074448e-04_EB, 1.857482e-04_EB, 1.792751e-04_EB, &
+   9.092886e-04_EB, &
+   2.440601e-04_EB, 2.141159e-04_EB, 2.414717e-04_EB, 2.388990e-04_EB, 2.516826e-04_EB, 2.158533e-04_EB, &
+   2.049667e-04_EB, &
+   2.220025e-04_EB, 2.592544e-04_EB, 1.988151e-04_EB, 1.978750e-04_EB, 2.337158e-04_EB, 2.300715e-04_EB, &
+   1.991380e-04_EB/),(/7,8/))
 
-GAMMAD2_C2H6(1:7,17:19) = RESHAPE((/ &  ! 1650-1700 cm-1
-    4.512156E-04_EB, 4.374742E-04_EB, 4.370735E-04_EB, 4.393807E-04_EB, 1.199839E-03_EB, 4.305244E-04_EB, &
-    1.649998E-03_EB, &
-    4.031956E-04_EB, 4.224620E-04_EB, 4.171755E-04_EB, 3.973632E-04_EB, 4.242091E-04_EB, 1.323277E-03_EB, &
-    2.599087E-03_EB, &
-    3.773490E-04_EB, 3.773490E-04_EB, 3.773490E-04_EB, 3.773490E-04_EB, 3.773490E-04_EB, 3.773490E-04_EB, &
-    3.773490E-04_EB/),(/7,3/))
-
-!---------------------------------------------------------------------------
-ALLOCATE(SD3_C2H6(N_TEMP_C2H6,34)) 
-
-! BAND #3: 2550 cm-1 - 3375 cm-1 
-
-! SNB FIT WITH ELSASSER MODEL 
-
-! ERROR ASSOCIATED WITH ELSASSER FIT: 
-! On Transmissivity: 1.2792 % 
-
-SD3_C2H6(1:7,1:8) = RESHAPE((/ &  ! 2550-2725 cm-1
-    1.278631E-03_EB, 5.346182E-04_EB, 5.430166E-04_EB, 5.267664E-04_EB, 5.706555E-04_EB, 1.503218E-03_EB, &
-    6.626536E-03_EB, &
-    6.867023E-03_EB, 2.645379E-03_EB, 8.200217E-04_EB, 1.441211E-03_EB, 2.412511E-03_EB, 5.641695E-03_EB, &
-    6.028765E-02_EB, &
-    1.330293E-02_EB, 7.028078E-03_EB, 6.202133E-03_EB, 6.880801E-03_EB, 7.400560E-03_EB, 9.037836E-03_EB, &
-    1.583349E-02_EB, &
-    2.677183E-02_EB, 1.730813E-02_EB, 1.434674E-02_EB, 1.294128E-02_EB, 1.090652E-02_EB, 1.207559E-02_EB, &
-    2.213233E-02_EB, &
-    3.987599E-02_EB, 2.287674E-02_EB, 1.754802E-02_EB, 1.194543E-02_EB, 1.298163E-02_EB, 1.469952E-02_EB, &
-    1.024135E-02_EB, &
-    4.232113E-02_EB, 2.857075E-02_EB, 2.259893E-02_EB, 1.573626E-02_EB, 1.714592E-02_EB, 2.033346E-02_EB, &
-    2.256246E-02_EB, &
-    3.589681E-02_EB, 2.858390E-02_EB, 2.566367E-02_EB, 2.177878E-02_EB, 2.343653E-02_EB, 2.950501E-02_EB, &
-    3.346439E-02_EB, &
-    5.485484E-02_EB, 4.663213E-02_EB, 4.245721E-02_EB, 4.090042E-02_EB, 3.781863E-02_EB, 4.791877E-02_EB, &
-    5.133626E-02_EB/),(/7,8/))
-
-SD3_C2H6(1:7,9:16) = RESHAPE((/ &  ! 2750-2925 cm-1
-    8.916930E-02_EB, 7.433571E-02_EB, 6.405993E-02_EB, 6.479051E-02_EB, 6.033745E-02_EB, 7.495031E-02_EB, &
-    8.995821E-02_EB, &
-    1.412477E-01_EB, 1.057995E-01_EB, 9.517684E-02_EB, 9.989220E-02_EB, 8.583366E-02_EB, 1.000089E-01_EB, &
-    1.267526E-01_EB, &
-    9.064747E-02_EB, 8.717246E-02_EB, 8.559792E-02_EB, 1.015725E-01_EB, 9.826976E-02_EB, 1.477215E-01_EB, &
-    2.124189E-01_EB, &
-    1.737614E-01_EB, 1.555318E-01_EB, 1.650781E-01_EB, 1.829590E-01_EB, 1.982934E-01_EB, 2.777126E-01_EB, &
-    3.317495E-01_EB, &
-    4.521292E-01_EB, 4.726512E-01_EB, 5.006276E-01_EB, 5.180828E-01_EB, 5.264906E-01_EB, 5.587770E-01_EB, &
-    5.221364E-01_EB, &
-    1.960417E+00_EB, 1.488009E+00_EB, 1.325819E+00_EB, 1.193948E+00_EB, 1.023142E+00_EB, 8.706423E-01_EB, &
-    7.614067E-01_EB, &
-    2.619829E+00_EB, 1.938962E+00_EB, 1.736941E+00_EB, 1.598513E+00_EB, 1.380086E+00_EB, 1.156576E+00_EB, &
-    9.358645E-01_EB, &
-    4.387797E+00_EB, 3.345549E+00_EB, 2.910776E+00_EB, 2.586735E+00_EB, 2.087763E+00_EB, 1.532386E+00_EB, &
-    1.133749E+00_EB/),(/7,8/))
-
-SD3_C2H6(1:7,17:24) = RESHAPE((/ &  ! 2950-3125 cm-1
-    4.760136E+00_EB, 3.502455E+00_EB, 3.015336E+00_EB, 2.673966E+00_EB, 2.167642E+00_EB, 1.592935E+00_EB, &
-    1.171784E+00_EB, &
-    5.991591E+00_EB, 4.160592E+00_EB, 3.491255E+00_EB, 3.023591E+00_EB, 2.402963E+00_EB, 1.700855E+00_EB, &
-    1.248091E+00_EB, &
-    5.189753E+00_EB, 3.545092E+00_EB, 2.959661E+00_EB, 2.560262E+00_EB, 2.030599E+00_EB, 1.436739E+00_EB, &
-    1.057780E+00_EB, &
-    3.399205E+00_EB, 2.458139E+00_EB, 2.085537E+00_EB, 1.800846E+00_EB, 1.459347E+00_EB, 1.044487E+00_EB, &
-    8.043099E-01_EB, &
-    1.304899E+00_EB, 1.261802E+00_EB, 1.164708E+00_EB, 1.050827E+00_EB, 9.350992E-01_EB, 7.458636E-01_EB, &
-    5.809439E-01_EB, &
-    2.848068E-01_EB, 4.496074E-01_EB, 4.816560E-01_EB, 4.686610E-01_EB, 5.016620E-01_EB, 4.682443E-01_EB, &
-    4.005416E-01_EB, &
-    5.440868E-02_EB, 1.209876E-01_EB, 1.568322E-01_EB, 1.667785E-01_EB, 2.195699E-01_EB, 2.620493E-01_EB, &
-    2.381302E-01_EB, &
-    3.295548E-02_EB, 4.721377E-02_EB, 6.241951E-02_EB, 6.540635E-02_EB, 1.063108E-01_EB, 1.394730E-01_EB, &
-    1.543657E-01_EB/),(/7,8/))
-
-SD3_C2H6(1:7,25:32) = RESHAPE((/ &  ! 3150-3325 cm-1
-    3.092152E-02_EB, 8.184958E-02_EB, 3.505012E-02_EB, 3.624909E-02_EB, 6.834664E-02_EB, 8.734229E-02_EB, &
-    1.216039E-01_EB, &
-    3.775074E-02_EB, 1.357337E-01_EB, 3.735317E-02_EB, 3.269957E-02_EB, 9.913746E-02_EB, 9.035808E-02_EB, &
-    2.845517E-01_EB, &
-    9.286505E-02_EB, 2.482742E-01_EB, 3.859544E-02_EB, 3.157177E-02_EB, 1.764883E-01_EB, 3.788249E-02_EB, &
-    5.090983E-01_EB, &
-    4.762418E-02_EB, 2.189367E-01_EB, 7.767972E-02_EB, 3.289977E-02_EB, 2.088517E-01_EB, 3.141762E-02_EB, &
-    3.194004E-01_EB, &
-    5.466099E-02_EB, 3.299725E-01_EB, 4.598537E-02_EB, 2.883009E-02_EB, 2.465241E-01_EB, 2.674555E-02_EB, &
-    5.702925E-02_EB, &
-    3.859932E-02_EB, 1.747511E-01_EB, 3.500425E-02_EB, 1.547130E-02_EB, 1.888657E-01_EB, 3.819709E-02_EB, &
-    1.532549E-02_EB, &
-    1.828067E-02_EB, 2.645383E-02_EB, 1.789789E-02_EB, 9.149377E-03_EB, 6.920950E-02_EB, 9.335489E-03_EB, &
-    8.913597E-03_EB, &
-    2.876205E-03_EB, 2.983736E-02_EB, 7.391573E-03_EB, 1.332503E-03_EB, 3.196601E-02_EB, 7.041496E-03_EB, &
-    1.103675E-03_EB/),(/7,8/))
-
-SD3_C2H6(1:7,33:34) = RESHAPE((/ &  ! 3350-3375 cm-1
-    5.193269E-04_EB, 3.806620E-03_EB, 2.745974E-03_EB, 5.563600E-04_EB, 3.720380E-03_EB, 1.198592E-03_EB, &
-    5.465900E-04_EB, &
-    4.743617E-04_EB, 4.743617E-04_EB, 4.743617E-04_EB, 4.743617E-04_EB, 4.743617E-04_EB, 4.743617E-04_EB, &
-    4.743617E-04_EB/),(/7,2/))
+gammad1_c2h6(1:7,73:74) = RESHAPE((/ &  ! 1090-1095 cm-1
+   1.847719e-04_EB, 1.895118e-04_EB, 2.362824e-04_EB, 1.933361e-04_EB, 2.035927e-04_EB, 2.735696e-04_EB, &
+   2.160458e-04_EB, &
+   1.688326e-04_EB, 1.688326e-04_EB, 1.688326e-04_EB, 1.688326e-04_EB, 1.688326e-04_EB, 1.688326e-04_EB, &
+   1.688326e-04_EB/),(/7,2/))
 
 !---------------------------------------------------------------------------
-ALLOCATE(GAMMAD3_C2H6(N_TEMP_C2H6,34)) 
+ALLOCATE(sd2_c2h6(n_temp_c2h6,19)) 
 
-! BAND #3: 2550 cm-1 - 3375 cm-1 
+! band #2: 1250 cm-1 - 1700 cm-1 
 
-! SNB FIT WITH ELSASSER MODEL 
+! snb fit with malkmus model 
 
-! ERROR ASSOCIATED WITH ELSASSER FIT: 
-! On Transmissivity: 1.2792 % 
+! error associated with malkmus fit: 
+! on transmissivity: 1.536 % 
 
-! PRINT FINE STRUCTURE ARRAY GAMMA_D 
+sd2_c2h6(1:7,1:8) = RESHAPE((/ &  ! 1250-1425 cm-1
+   2.890736e-04_EB, 2.831224e-04_EB, 2.500860e-04_EB, 2.757140e-04_EB, 3.408382e-04_EB, 8.798483e-04_EB, &
+   9.996940e-04_EB, &
+   3.173085e-04_EB, 3.511457e-04_EB, 3.615941e-04_EB, 3.532323e-04_EB, 3.063903e-03_EB, 5.665886e-01_EB, &
+   6.009682e-01_EB, &
+   7.762194e-03_EB, 3.886970e-04_EB, 3.445713e-04_EB, 3.346007e-04_EB, 9.791971e-03_EB, 3.101724e-01_EB, &
+   3.854181e-01_EB, &
+   5.755406e-03_EB, 2.965005e-03_EB, 3.003864e-03_EB, 2.921568e-02_EB, 2.167033e-02_EB, 2.481666e-01_EB, &
+   4.975186e-01_EB, &
+   2.729491e-02_EB, 4.272374e-02_EB, 4.078658e-02_EB, 5.957540e-02_EB, 5.312857e-02_EB, 7.121161e-02_EB, &
+   4.478193e-02_EB, &
+   1.116554e-01_EB, 1.211306e-01_EB, 1.109669e-01_EB, 1.148103e-01_EB, 9.457225e-02_EB, 9.397124e-02_EB, &
+   6.487302e-02_EB, &
+   2.433578e-01_EB, 2.251434e-01_EB, 1.980541e-01_EB, 1.663919e-01_EB, 1.429235e-01_EB, 1.679094e-01_EB, &
+   1.043870e-01_EB, &
+   3.085264e-01_EB, 2.668615e-01_EB, 2.316373e-01_EB, 1.816814e-01_EB, 1.675634e-01_EB, 1.397869e-01_EB, &
+   9.888312e-02_EB/),(/7,8/))
 
-GAMMAD3_C2H6(1:7,1:8) = RESHAPE((/ &  ! 2550-2725 cm-1
-    8.987123E-04_EB, 4.156271E-04_EB, 4.185431E-04_EB, 4.125143E-04_EB, 4.629171E-04_EB, 8.429269E-04_EB, &
-    5.093847E-04_EB, &
-    1.636167E-03_EB, 2.288425E-03_EB, 6.056796E-04_EB, 1.006410E-03_EB, 2.496917E-03_EB, 1.665380E-03_EB, &
-    1.667081E-04_EB, &
-    5.947699E-03_EB, 3.938343E-02_EB, 4.587519E-03_EB, 2.909699E-03_EB, 2.283257E-02_EB, 5.648316E-03_EB, &
-    1.385594E-03_EB, &
-    2.075328E-02_EB, 1.657261E-02_EB, 1.636629E-02_EB, 5.934638E-03_EB, 1.694260E-02_EB, 5.454026E-03_EB, &
-    1.967477E-03_EB, &
-    2.729024E-02_EB, 1.221631E-02_EB, 1.403428E-02_EB, 6.205497E-03_EB, 1.637883E-02_EB, 6.042106E-03_EB, &
-    1.220761E-02_EB, &
-    2.678922E-02_EB, 9.857640E-03_EB, 1.190676E-02_EB, 6.885989E-03_EB, 1.939217E-02_EB, 1.029156E-02_EB, &
-    4.134482E-02_EB, &
-    2.490657E-02_EB, 1.092657E-02_EB, 1.140549E-02_EB, 1.199349E-02_EB, 2.988502E-02_EB, 3.382431E-02_EB, &
-    4.632037E-02_EB, &
-    3.399308E-02_EB, 2.395784E-02_EB, 1.982461E-02_EB, 2.314924E-02_EB, 8.248086E-02_EB, 2.932734E-02_EB, &
-    9.850899E-02_EB/),(/7,8/))
+sd2_c2h6(1:7,9:16) = RESHAPE((/ &  ! 1450-1625 cm-1
+   4.739873e-01_EB, 3.630012e-01_EB, 2.939668e-01_EB, 2.366840e-01_EB, 2.000756e-01_EB, 1.538908e-01_EB, &
+   1.749130e-01_EB, &
+   5.226241e-01_EB, 3.793992e-01_EB, 3.109342e-01_EB, 2.476162e-01_EB, 1.999044e-01_EB, 1.438092e-01_EB, &
+   3.486559e-01_EB, &
+   4.230308e-01_EB, 3.178107e-01_EB, 2.777402e-01_EB, 1.894468e-01_EB, 1.805602e-01_EB, 1.554106e-01_EB, &
+   1.422521e-01_EB, &
+   2.761096e-01_EB, 2.597293e-01_EB, 2.257682e-01_EB, 1.514748e-01_EB, 1.401495e-01_EB, 1.253687e-01_EB, &
+   7.720757e-02_EB, &
+   1.111228e-01_EB, 1.672047e-01_EB, 1.760444e-01_EB, 8.528705e-02_EB, 1.082694e-01_EB, 9.903350e-02_EB, &
+   6.563257e-02_EB, &
+   3.538374e-02_EB, 1.038124e-01_EB, 5.979240e-02_EB, 7.230511e-02_EB, 5.579668e-02_EB, 6.549601e-02_EB, &
+   1.002546e-01_EB, &
+   4.798824e-03_EB, 1.584507e-02_EB, 1.391213e-02_EB, 7.436389e-01_EB, 2.920638e-02_EB, 1.145160e-01_EB, &
+   1.008028e-01_EB, &
+   3.514365e-04_EB, 3.078667e-04_EB, 6.289715e-04_EB, 7.024049e-03_EB, 1.079463e-02_EB, 2.595491e-01_EB, &
+   1.608240e-02_EB/),(/7,8/))
 
-GAMMAD3_C2H6(1:7,9:16) = RESHAPE((/ &  ! 2750-2925 cm-1
-    5.834996E-02_EB, 2.187817E-02_EB, 4.966391E-02_EB, 2.042000E-02_EB, 5.551388E-02_EB, 1.985863E-02_EB, &
-    9.547659E-03_EB, &
-    4.393761E-02_EB, 6.419055E-02_EB, 5.857240E-02_EB, 1.684324E-02_EB, 6.115140E-02_EB, 6.390415E-02_EB, &
-    1.611348E-02_EB, &
-    5.408265E-02_EB, 4.939645E-02_EB, 4.310356E-02_EB, 1.600602E-02_EB, 9.209742E-02_EB, 5.121932E-02_EB, &
-    1.818012E-02_EB, &
-    4.138901E-02_EB, 8.840999E-02_EB, 5.881691E-02_EB, 4.688817E-02_EB, 1.302829E-01_EB, 7.118456E-02_EB, &
-    4.189509E-02_EB, &
-    7.496009E-02_EB, 1.000755E-01_EB, 8.518565E-02_EB, 8.569542E-02_EB, 1.068026E-01_EB, 9.299683E-02_EB, &
-    8.280234E-02_EB, &
-    1.266170E-01_EB, 1.308858E-01_EB, 1.289707E-01_EB, 1.277401E-01_EB, 1.348358E-01_EB, 1.115338E-01_EB, &
-    9.063402E-02_EB, &
-    1.379772E-01_EB, 1.376555E-01_EB, 1.371133E-01_EB, 1.358079E-01_EB, 1.410473E-01_EB, 1.241029E-01_EB, &
-    1.152637E-01_EB, &
-    1.732567E-01_EB, 1.624515E-01_EB, 1.622765E-01_EB, 1.566939E-01_EB, 1.580995E-01_EB, 1.325756E-01_EB, &
-    1.190296E-01_EB/),(/7,8/))
-
-GAMMAD3_C2H6(1:7,17:24) = RESHAPE((/ &  ! 2950-3125 cm-1
-    1.629801E-01_EB, 1.572228E-01_EB, 1.607573E-01_EB, 1.602147E-01_EB, 1.597308E-01_EB, 1.366177E-01_EB, &
-    1.239638E-01_EB, &
-    1.218347E-01_EB, 1.206940E-01_EB, 1.292850E-01_EB, 1.359550E-01_EB, 1.436259E-01_EB, 1.346691E-01_EB, &
-    1.189694E-01_EB, &
-    1.113544E-01_EB, 1.150246E-01_EB, 1.252190E-01_EB, 1.310165E-01_EB, 1.388671E-01_EB, 1.283522E-01_EB, &
-    1.115651E-01_EB, &
-    1.415286E-01_EB, 1.358904E-01_EB, 1.421489E-01_EB, 1.470904E-01_EB, 1.408633E-01_EB, 1.254801E-01_EB, &
-    9.382854E-02_EB, &
-    1.159798E-01_EB, 1.137767E-01_EB, 1.224513E-01_EB, 1.400724E-01_EB, 1.302837E-01_EB, 1.107673E-01_EB, &
-    9.703324E-02_EB, &
-    7.026348E-02_EB, 7.360412E-02_EB, 8.535299E-02_EB, 1.407620E-01_EB, 1.041217E-01_EB, 1.061057E-01_EB, &
-    9.713410E-02_EB, &
-    2.473346E-02_EB, 5.408856E-02_EB, 5.255453E-02_EB, 1.619457E-01_EB, 7.898190E-02_EB, 8.049525E-02_EB, &
-    1.319821E-01_EB, &
-    9.561800E-03_EB, 2.204258E-02_EB, 2.505458E-02_EB, 5.085320E-02_EB, 1.886887E-02_EB, 4.106895E-02_EB, &
-    8.506675E-02_EB/),(/7,8/))
-
-GAMMAD3_C2H6(1:7,25:32) = RESHAPE((/ &  ! 3150-3325 cm-1
-    6.199429E-03_EB, 7.700301E-04_EB, 1.304441E-02_EB, 1.165089E-02_EB, 6.121760E-03_EB, 7.723699E-03_EB, &
-    9.247247E-03_EB, &
-    5.512754E-03_EB, 4.348947E-04_EB, 5.061116E-03_EB, 2.872862E-03_EB, 9.799525E-04_EB, 1.261306E-03_EB, &
-    6.167608E-04_EB, &
-    1.315285E-03_EB, 3.102725E-04_EB, 4.531921E-03_EB, 4.540719E-03_EB, 3.410968E-04_EB, 3.719216E-03_EB, &
-    1.977959E-04_EB, &
-    2.308578E-02_EB, 4.062146E-04_EB, 9.853401E-04_EB, 2.324190E-03_EB, 3.590737E-04_EB, 3.375483E-03_EB, &
-    1.342035E-04_EB, &
-    5.862407E-03_EB, 2.425860E-04_EB, 2.261722E-03_EB, 1.865524E-03_EB, 2.261636E-04_EB, 1.695130E-03_EB, &
-    1.916471E-04_EB, &
-    6.366272E-03_EB, 2.388410E-04_EB, 2.017685E-03_EB, 5.781345E-03_EB, 1.767858E-04_EB, 2.162570E-04_EB, &
-    4.946303E-03_EB, &
-    5.806760E-03_EB, 1.582040E-03_EB, 2.077387E-03_EB, 1.995684E-03_EB, 2.141755E-04_EB, 2.371606E-03_EB, &
-    1.976485E-03_EB, &
-    1.430859E-03_EB, 2.212544E-04_EB, 1.485309E-03_EB, 7.258822E-04_EB, 2.027707E-04_EB, 2.759567E-03_EB, &
-    1.142740E-03_EB/),(/7,8/))
-
-GAMMAD3_C2H6(1:7,33:34) = RESHAPE((/ &  ! 3350-3375 cm-1
-    4.030704E-04_EB, 1.572503E-03_EB, 1.634529E-03_EB, 4.324501E-04_EB, 1.481407E-03_EB, 6.590681E-04_EB, &
-    4.173498E-04_EB, &
-    3.773490E-04_EB, 3.773490E-04_EB, 3.773490E-04_EB, 3.773490E-04_EB, 3.773490E-04_EB, 3.773490E-04_EB, &
-    3.773490E-04_EB/),(/7,2/))
-
-!-------------------------Ethylene DATA-------------------
-
-
-! THERE ARE 4 BANDS FOR Ethylene
-
-! BAND #1: 780 cm-1 - 1250 cm-1 
-! BAND #2: 1300 cm-1 - 1600 cm-1 
-! BAND #3: 1750 cm-1 - 2075 cm-1 
-! BAND #4: 2800 cm-1 - 3400 cm-1 
-
-N_TEMP_C2H4 = 6
-N_BAND_C2H4 = 4
-I_MODEL_C2H4 = 1 ! 1: GOODY, 2: MALKMUS, 3: ELSASSER 
-
-ALLOCATE(SD_C2H4_TEMP(N_TEMP_C2H4)) 
-
-! INITIALIZE BANDS WAVENUMBER BOUNDS FOR Ethylene ABSOPTION COEFFICIENTS.
-! BANDS ARE ORGANIZED BY ROW: 
-! 1ST COLUMN IS THE LOWER BOUND BAND LIMIT IN cm-1. 
-! 2ND COLUMN IS THE UPPER BOUND BAND LIMIT IN cm-1. 
-! 3RD COLUMN IS THE STRIDE BETWEEN WAVENUMBERS IN BAND.
-! IF 3RD COLUMN = 0., BAND IS CALCULATED, NOT TABULATED.
-
-ALLOCATE(OM_BND_C2H4(N_BAND_C2H4,3)) 
-ALLOCATE(Be_C2H4(N_BAND_C2H4)) 
-
-OM_BND_C2H4 = RESHAPE((/ &
-    780._EB, 1300._EB, 1750._EB, 2800._EB, &
-    1250._EB, 1600._EB, 2075._EB, 3400._EB, &
-     5._EB, 25._EB, 25._EB, 25._EB/),(/N_BAND_C2H4,3/)) 
-
-SD_C2H4_TEMP = (/ &
-    296._EB, 400._EB, 450._EB, 500._EB, 601._EB, 801._EB/)
-
-Be_C2H4 = (/ &
-    1.000_EB, 1.000_EB, 1.000_EB, 1.000_EB/)
+sd2_c2h6(1:7,17:19) = RESHAPE((/ &  ! 1650-1700 cm-1
+   3.438068e-04_EB, 3.506371e-04_EB, 3.282171e-04_EB, 3.346269e-04_EB, 1.558845e-03_EB, 6.506371e-02_EB, &
+   2.338883e-01_EB, &
+   2.659394e-04_EB, 3.048186e-04_EB, 2.844540e-04_EB, 2.662972e-04_EB, 3.138724e-04_EB, 3.077023e-03_EB, &
+   7.859120e-03_EB, &
+   2.145139e-04_EB, 2.145139e-04_EB, 2.145139e-04_EB, 2.145139e-04_EB, 2.145139e-04_EB, 2.145139e-04_EB, &
+   2.145139e-04_EB/),(/7,3/))
 
 !---------------------------------------------------------------------------
-ALLOCATE(SD1_C2H4(N_TEMP_C2H4,71)) 
+ALLOCATE(gammad2_c2h6(n_temp_c2h6,19)) 
 
-! BAND #1: 780 cm-1 - 1250 cm-1 
+! band #2: 1250 cm-1 - 1700 cm-1 
 
-! SNB FIT WITH GOODY MODEL 
+! snb fit with malkmus model 
 
-! ERROR ASSOCIATED WITH GOODY FIT: 
-! On Transmissivity: 1.2676 % 
+! error associated with malkmus fit: 
+! on transmissivity: 1.536 % 
 
-SD1_C2H4(1:6,1:8) = RESHAPE((/ &  ! 780-815 cm-1
-    9.081397E-04_EB, 9.294745E-04_EB, 9.263855E-04_EB, 9.303465E-04_EB, 2.489601E-03_EB, 3.096436E-02_EB, &
-    1.021622E-03_EB, 9.383125E-04_EB, 9.778017E-04_EB, 1.032672E-03_EB, 9.730522E-03_EB, 4.105429E-01_EB, &
-    9.647763E-04_EB, 9.726821E-04_EB, 2.919888E-03_EB, 2.276596E-03_EB, 1.007896E-01_EB, 9.364302E-01_EB, &
-    9.307193E-04_EB, 2.710576E-03_EB, 1.332585E-01_EB, 6.020185E-03_EB, 1.692835E-01_EB, 9.700237E-01_EB, &
-    1.079222E-03_EB, 8.794916E-03_EB, 1.605082E-02_EB, 1.495929E-02_EB, 2.086100E-01_EB, 9.955457E-01_EB, &
-    1.013353E-03_EB, 1.590194E-02_EB, 9.497457E-03_EB, 2.209908E-02_EB, 1.744247E-01_EB, 6.405481E-02_EB, &
-    1.689300E-03_EB, 3.205549E-02_EB, 1.446142E-02_EB, 2.850301E-02_EB, 7.466983E-02_EB, 4.515018E-02_EB, &
-    3.308019E-02_EB, 3.104853E-02_EB, 3.303361E-02_EB, 4.823456E-02_EB, 1.567817E-01_EB, 1.331768E-01_EB/),(/6,8/))
+! print fine structure array gamma_d 
 
-SD1_C2H4(1:6,9:16) = RESHAPE((/ &  ! 820-855 cm-1
-    2.713869E-02_EB, 4.138280E-02_EB, 5.507994E-02_EB, 1.784996E-01_EB, 1.160585E-01_EB, 1.241207E+00_EB, &
-    2.687836E-02_EB, 7.104927E-02_EB, 8.133647E-02_EB, 1.082138E-01_EB, 1.325524E-01_EB, 2.355525E-01_EB, &
-    7.593733E-02_EB, 1.217589E-01_EB, 1.085256E-01_EB, 1.734007E-01_EB, 1.439789E-01_EB, 1.811115E-01_EB, &
-    8.210985E-02_EB, 1.685703E-01_EB, 1.683916E-01_EB, 1.871888E-01_EB, 1.760504E-01_EB, 2.331361E-01_EB, &
-    1.371072E-01_EB, 2.143576E-01_EB, 2.134052E-01_EB, 2.481057E-01_EB, 2.148015E-01_EB, 2.794853E-01_EB, &
-    1.956334E-01_EB, 2.667818E-01_EB, 2.634399E-01_EB, 3.846976E-01_EB, 3.214448E-01_EB, 3.020669E-01_EB, &
-    2.918050E-01_EB, 3.385805E-01_EB, 3.562974E-01_EB, 3.787789E-01_EB, 4.056414E-01_EB, 3.394445E-01_EB, &
-    3.849871E-01_EB, 4.212268E-01_EB, 4.065791E-01_EB, 4.217874E-01_EB, 5.160131E-01_EB, 5.019707E-01_EB/),(/6,8/))
+gammad2_c2h6(1:7,1:8) = RESHAPE((/ &  ! 1250-1425 cm-1
+   2.119975e-04_EB, 2.146327e-04_EB, 1.903252e-04_EB, 2.022541e-04_EB, 2.602782e-04_EB, 4.275791e-04_EB, &
+   2.592334e-04_EB, &
+   2.197390e-04_EB, 2.683644e-04_EB, 2.472885e-04_EB, 2.304333e-04_EB, 8.267459e-03_EB, 1.628893e-05_EB, &
+   3.112078e-05_EB, &
+   1.421119e-02_EB, 2.763312e-04_EB, 2.321580e-04_EB, 2.291520e-04_EB, 1.958198e-02_EB, 6.419678e-05_EB, &
+   1.177209e-04_EB, &
+   5.134518e-02_EB, 1.180015e-03_EB, 5.665049e-03_EB, 9.959465e-05_EB, 7.884425e-02_EB, 2.789112e-04_EB, &
+   2.062441e-04_EB, &
+   6.493055e-01_EB, 8.533910e-03_EB, 1.523050e-02_EB, 5.127453e-03_EB, 6.635840e-01_EB, 1.697909e-02_EB, &
+   1.007998e+00_EB, &
+   6.644469e+00_EB, 5.703315e-02_EB, 7.526340e-02_EB, 3.982739e-02_EB, 2.373472e+00_EB, 2.681325e-02_EB, &
+   6.481877e-01_EB, &
+   4.838580e+01_EB, 1.082873e-01_EB, 1.011916e-01_EB, 2.605553e-01_EB, 2.237840e+00_EB, 1.611963e-02_EB, &
+   3.893042e-01_EB, &
+   7.997133e+01_EB, 1.230787e-01_EB, 1.231629e-01_EB, 3.381738e+00_EB, 2.828329e-01_EB, 5.186004e-02_EB, &
+   4.989001e-02_EB/),(/7,8/))
 
-SD1_C2H4(1:6,17:24) = RESHAPE((/ &  ! 860-895 cm-1
-    4.634382E-01_EB, 4.635243E-01_EB, 4.888543E-01_EB, 5.388030E-01_EB, 5.190807E-01_EB, 3.928065E-01_EB, &
-    6.013120E-01_EB, 5.987909E-01_EB, 5.584424E-01_EB, 6.177917E-01_EB, 6.278992E-01_EB, 4.476505E-01_EB, &
-    7.031073E-01_EB, 6.615380E-01_EB, 6.251273E-01_EB, 6.355987E-01_EB, 6.100862E-01_EB, 5.487234E-01_EB, &
-    8.711894E-01_EB, 7.942263E-01_EB, 7.584193E-01_EB, 7.554499E-01_EB, 6.297300E-01_EB, 5.263466E-01_EB, &
-    1.074915E+00_EB, 9.465021E-01_EB, 8.601755E-01_EB, 8.798344E-01_EB, 7.139527E-01_EB, 6.364076E-01_EB, &
-    1.147363E+00_EB, 9.156059E-01_EB, 8.396757E-01_EB, 7.798749E-01_EB, 7.328137E-01_EB, 4.892931E-01_EB, &
-    1.283269E+00_EB, 1.000781E+00_EB, 9.084331E-01_EB, 8.644973E-01_EB, 7.060873E-01_EB, 5.761302E-01_EB, &
-    1.651841E+00_EB, 1.241598E+00_EB, 1.129451E+00_EB, 1.003677E+00_EB, 8.561921E-01_EB, 6.692158E-01_EB/),(/6,8/))
+gammad2_c2h6(1:7,9:16) = RESHAPE((/ &  ! 1450-1625 cm-1
+   7.999999e+01_EB, 1.520030e-01_EB, 1.960215e-01_EB, 3.752618e-01_EB, 2.469986e-01_EB, 4.882190e-02_EB, &
+   1.110526e-02_EB, &
+   7.998354e+01_EB, 1.855013e-01_EB, 1.836005e-01_EB, 2.792553e-01_EB, 2.412743e-01_EB, 4.914911e-02_EB, &
+   2.585712e-03_EB, &
+   8.000000e+01_EB, 1.653039e-01_EB, 1.276875e-01_EB, 4.450008e+01_EB, 1.282813e-01_EB, 1.923521e-02_EB, &
+   9.527892e-03_EB, &
+   8.000000e+01_EB, 7.676701e-02_EB, 7.528859e-02_EB, 3.303007e+01_EB, 3.079957e-01_EB, 2.422473e-02_EB, &
+   3.925627e-02_EB, &
+   7.999946e+01_EB, 2.618451e-02_EB, 2.459894e-02_EB, 1.811547e+01_EB, 7.028942e-02_EB, 2.413638e-02_EB, &
+   3.482649e-02_EB, &
+   3.034575e+00_EB, 3.670718e-03_EB, 3.712350e-02_EB, 1.721291e-02_EB, 2.149261e+00_EB, 1.626810e-02_EB, &
+   2.799184e-03_EB, &
+   2.512595e-02_EB, 8.026413e-04_EB, 5.409205e-02_EB, 1.139540e-04_EB, 7.373019e-01_EB, 1.105238e-03_EB, &
+   1.244382e-03_EB, &
+   2.370622e-04_EB, 2.109883e-04_EB, 4.709529e-04_EB, 1.239090e-03_EB, 2.096932e-01_EB, 1.101878e-04_EB, &
+   6.601257e-03_EB/),(/7,8/))
 
-SD1_C2H4(1:6,25:32) = RESHAPE((/ &  ! 900-935 cm-1
-    1.506997E+00_EB, 1.061346E+00_EB, 9.511259E-01_EB, 8.607393E-01_EB, 7.328887E-01_EB, 5.623156E-01_EB, &
-    1.499127E+00_EB, 1.044651E+00_EB, 9.246873E-01_EB, 8.210147E-01_EB, 7.208529E-01_EB, 4.943186E-01_EB, &
-    2.116718E+00_EB, 1.434322E+00_EB, 1.259118E+00_EB, 1.127278E+00_EB, 8.623463E-01_EB, 5.975001E-01_EB, &
-    1.916461E+00_EB, 1.285983E+00_EB, 1.113217E+00_EB, 9.936391E-01_EB, 7.938319E-01_EB, 6.776147E-01_EB, &
-    1.834026E+00_EB, 1.149206E+00_EB, 9.813661E-01_EB, 9.140666E-01_EB, 6.990761E-01_EB, 5.850342E-01_EB, &
-    1.812867E+00_EB, 1.162976E+00_EB, 1.004963E+00_EB, 9.261925E-01_EB, 7.867516E-01_EB, 5.233223E-01_EB, &
-    1.755238E+00_EB, 1.134957E+00_EB, 9.842444E-01_EB, 9.015184E-01_EB, 7.075624E-01_EB, 6.153110E-01_EB, &
-    1.473409E+00_EB, 1.022807E+00_EB, 9.325511E-01_EB, 8.765379E-01_EB, 8.108575E-01_EB, 6.620778E-01_EB/),(/6,8/))
-
-SD1_C2H4(1:6,33:40) = RESHAPE((/ &  ! 940-975 cm-1
-    2.286209E+00_EB, 1.605524E+00_EB, 1.438314E+00_EB, 1.344957E+00_EB, 1.236417E+00_EB, 1.037909E+00_EB, &
-    3.663536E+00_EB, 2.408096E+00_EB, 2.133479E+00_EB, 1.957412E+00_EB, 1.741177E+00_EB, 1.494317E+00_EB, &
-    9.505953E+00_EB, 7.202869E+00_EB, 6.507080E+00_EB, 5.920821E+00_EB, 4.767461E+00_EB, 3.226504E+00_EB, &
-    2.741593E+00_EB, 2.180021E+00_EB, 2.103918E+00_EB, 2.095984E+00_EB, 1.963123E+00_EB, 1.882054E+00_EB, &
-    1.875240E+00_EB, 1.337190E+00_EB, 1.208299E+00_EB, 1.178251E+00_EB, 1.062700E+00_EB, 1.040810E+00_EB, &
-    1.842931E+00_EB, 1.231681E+00_EB, 1.077116E+00_EB, 1.008715E+00_EB, 7.893430E-01_EB, 7.196698E-01_EB, &
-    2.129020E+00_EB, 1.272329E+00_EB, 1.071162E+00_EB, 9.558836E-01_EB, 7.270824E-01_EB, 5.987513E-01_EB, &
-    1.595364E+00_EB, 1.039071E+00_EB, 9.051195E-01_EB, 8.448724E-01_EB, 6.654965E-01_EB, 5.564605E-01_EB/),(/6,8/))
-
-SD1_C2H4(1:6,41:48) = RESHAPE((/ &  ! 980-1015 cm-1
-    2.088728E+00_EB, 1.297716E+00_EB, 1.109158E+00_EB, 9.829116E-01_EB, 7.742439E-01_EB, 5.708989E-01_EB, &
-    2.247430E+00_EB, 1.450558E+00_EB, 1.240021E+00_EB, 1.091117E+00_EB, 8.304258E-01_EB, 6.721174E-01_EB, &
-    2.057826E+00_EB, 1.259647E+00_EB, 1.073551E+00_EB, 9.576748E-01_EB, 7.477572E-01_EB, 5.873691E-01_EB, &
-    1.955972E+00_EB, 1.321577E+00_EB, 1.146044E+00_EB, 1.027902E+00_EB, 8.277006E-01_EB, 6.024195E-01_EB, &
-    1.697282E+00_EB, 1.134500E+00_EB, 1.026408E+00_EB, 9.360421E-01_EB, 7.693571E-01_EB, 6.389523E-01_EB, &
-    2.093169E+00_EB, 1.477797E+00_EB, 1.277591E+00_EB, 1.148558E+00_EB, 8.958392E-01_EB, 6.142225E-01_EB, &
-    1.526812E+00_EB, 1.070373E+00_EB, 9.571589E-01_EB, 8.727550E-01_EB, 7.405111E-01_EB, 5.491446E-01_EB, &
-    1.447630E+00_EB, 1.129075E+00_EB, 1.009346E+00_EB, 9.304204E-01_EB, 8.034822E-01_EB, 5.763927E-01_EB/),(/6,8/))
-
-SD1_C2H4(1:6,49:56) = RESHAPE((/ &  ! 1020-1055 cm-1
-    1.357903E+00_EB, 1.046490E+00_EB, 9.471644E-01_EB, 8.861470E-01_EB, 7.576271E-01_EB, 6.195161E-01_EB, &
-    1.213027E+00_EB, 9.544952E-01_EB, 8.665314E-01_EB, 8.200370E-01_EB, 6.761676E-01_EB, 5.328910E-01_EB, &
-    1.131909E+00_EB, 9.461339E-01_EB, 8.747069E-01_EB, 8.179827E-01_EB, 7.077055E-01_EB, 5.735536E-01_EB, &
-    8.933950E-01_EB, 7.761882E-01_EB, 7.247479E-01_EB, 7.233341E-01_EB, 6.203758E-01_EB, 5.628734E-01_EB, &
-    6.836812E-01_EB, 6.487627E-01_EB, 6.223903E-01_EB, 6.215930E-01_EB, 5.387480E-01_EB, 4.970792E-01_EB, &
-    7.539583E-01_EB, 7.039909E-01_EB, 6.720419E-01_EB, 6.588724E-01_EB, 5.885222E-01_EB, 5.398632E-01_EB, &
-    6.278837E-01_EB, 6.063466E-01_EB, 6.005371E-01_EB, 5.768196E-01_EB, 5.325246E-01_EB, 4.745537E-01_EB, &
-    4.735592E-01_EB, 4.625928E-01_EB, 4.798031E-01_EB, 4.863119E-01_EB, 4.588044E-01_EB, 3.898180E-01_EB/),(/6,8/))
-
-SD1_C2H4(1:6,57:64) = RESHAPE((/ &  ! 1060-1095 cm-1
-    4.238331E-01_EB, 4.441920E-01_EB, 4.518744E-01_EB, 4.518290E-01_EB, 4.520872E-01_EB, 3.766904E-01_EB, &
-    2.901678E-01_EB, 3.549697E-01_EB, 3.601021E-01_EB, 3.799372E-01_EB, 4.059633E-01_EB, 4.100620E-01_EB, &
-    3.632655E-01_EB, 4.082100E-01_EB, 4.095498E-01_EB, 4.073670E-01_EB, 4.331533E-01_EB, 3.656300E-01_EB, &
-    2.283134E-01_EB, 2.713832E-01_EB, 2.837361E-01_EB, 3.073153E-01_EB, 3.411520E-01_EB, 2.865416E-01_EB, &
-    2.065442E-01_EB, 2.507574E-01_EB, 2.690658E-01_EB, 3.056553E-01_EB, 3.123214E-01_EB, 3.272049E-01_EB, &
-    1.491536E-01_EB, 1.992898E-01_EB, 2.160777E-01_EB, 2.352851E-01_EB, 2.663945E-01_EB, 2.686283E-01_EB, &
-    1.178182E-01_EB, 1.736286E-01_EB, 2.025423E-01_EB, 2.257922E-01_EB, 2.403188E-01_EB, 2.812438E-01_EB, &
-    1.207280E-01_EB, 1.635425E-01_EB, 1.886065E-01_EB, 1.981471E-01_EB, 2.144610E-01_EB, 2.477632E-01_EB/),(/6,8/))
-
-SD1_C2H4(1:6,65:71) = RESHAPE((/ &  ! 1100-1250 cm-1
-    8.736792E-02_EB, 1.303813E-01_EB, 1.559106E-01_EB, 1.727829E-01_EB, 2.019083E-01_EB, 2.216068E-01_EB, &
-    2.691504E-02_EB, 4.702015E-02_EB, 6.479204E-02_EB, 7.921719E-02_EB, 1.007445E-01_EB, 1.349298E-01_EB, &
-    6.724736E-03_EB, 8.087484E-03_EB, 2.538650E-02_EB, 3.184813E-02_EB, 4.000375E-02_EB, 6.656667E-02_EB, &
-    9.712817E-04_EB, 9.920275E-04_EB, 5.370016E-03_EB, 8.835828E-03_EB, 1.441383E-02_EB, 3.389820E-02_EB, &
-    1.002657E-03_EB, 1.018574E-03_EB, 1.092714E-03_EB, 9.894464E-04_EB, 1.441511E-03_EB, 8.988051E-03_EB, &
-    9.256368E-04_EB, 9.121904E-04_EB, 9.088852E-04_EB, 9.248692E-04_EB, 9.218354E-04_EB, 1.052470E-03_EB, &
-    8.645026E-04_EB, 8.645026E-04_EB, 8.645026E-04_EB, 8.645026E-04_EB, 8.645026E-04_EB, 8.645026E-04_EB/),(/6,7/))
+gammad2_c2h6(1:7,17:19) = RESHAPE((/ &  ! 1650-1700 cm-1
+   2.490089e-04_EB, 2.329594e-04_EB, 2.331607e-04_EB, 2.360833e-04_EB, 1.239584e-03_EB, 1.730171e-04_EB, &
+   6.965657e-05_EB, &
+   1.969514e-04_EB, 2.180366e-04_EB, 2.121351e-04_EB, 1.905845e-04_EB, 2.199848e-04_EB, 9.700224e-04_EB, &
+   1.623935e-03_EB, &
+   1.688326e-04_EB, 1.688326e-04_EB, 1.688326e-04_EB, 1.688326e-04_EB, 1.688326e-04_EB, 1.688326e-04_EB, &
+   1.688326e-04_EB/),(/7,3/))
 
 !---------------------------------------------------------------------------
-ALLOCATE(GAMMAD1_C2H4(N_TEMP_C2H4,71)) 
+ALLOCATE(sd3_c2h6(n_temp_c2h6,34)) 
 
-! BAND #1: 780 cm-1 - 1250 cm-1 
+! band #3: 2550 cm-1 - 3375 cm-1 
 
-! SNB FIT WITH GOODY MODEL 
+! snb fit with malkmus model 
 
-! ERROR ASSOCIATED WITH GOODY FIT: 
-! On Transmissivity: 1.2676 % 
+! error associated with malkmus fit: 
+! on transmissivity: 2.3765 % 
 
-! PRINT FINE STRUCTURE ARRAY GAMMA_D 
+sd3_c2h6(1:7,1:8) = RESHAPE((/ &  ! 2550-2725 cm-1
+   1.273212e-03_EB, 2.818357e-04_EB, 2.919712e-04_EB, 2.725676e-04_EB, 3.224456e-04_EB, 1.576641e-03_EB, &
+   7.098264e-02_EB, &
+   1.760425e-02_EB, 2.470202e-03_EB, 6.517460e-04_EB, 1.488758e-03_EB, 2.133431e-03_EB, 7.058130e-03_EB, &
+   5.189907e-01_EB, &
+   1.544358e-02_EB, 7.033132e-03_EB, 6.497614e-03_EB, 7.444432e-03_EB, 7.481133e-03_EB, 9.709862e-03_EB, &
+   1.866477e-01_EB, &
+   2.776353e-02_EB, 1.788161e-02_EB, 1.440452e-02_EB, 1.497498e-02_EB, 1.098338e-02_EB, 1.398847e-02_EB, &
+   1.830505e-01_EB, &
+   4.053879e-02_EB, 2.592830e-02_EB, 1.797176e-02_EB, 1.619226e-02_EB, 1.327884e-02_EB, 1.766187e-02_EB, &
+   1.018847e-02_EB, &
+   4.388545e-02_EB, 3.290936e-02_EB, 2.841386e-02_EB, 1.850778e-02_EB, 1.703843e-02_EB, 2.108276e-02_EB, &
+   2.254688e-02_EB, &
+   3.693893e-02_EB, 3.278040e-02_EB, 3.020784e-02_EB, 2.524477e-02_EB, 2.353619e-02_EB, 2.930089e-02_EB, &
+   3.312656e-02_EB, &
+   5.710175e-02_EB, 5.583766e-02_EB, 4.445106e-02_EB, 4.789108e-02_EB, 3.783170e-02_EB, 4.950327e-02_EB, &
+   5.137114e-02_EB/),(/7,8/))
 
-GAMMAD1_C2H4(1:6,1:8) = RESHAPE((/ &  ! 780-815 cm-1
-    7.062403E-04_EB, 7.263537E-04_EB, 7.141706E-04_EB, 6.946657E-04_EB, 2.117436E-03_EB, 2.673936E-03_EB, &
-    7.829822E-04_EB, 6.968520E-04_EB, 7.762935E-04_EB, 7.889788E-04_EB, 3.773739E-03_EB, 3.072659E-04_EB, &
-    7.126389E-04_EB, 7.380503E-04_EB, 1.770544E-03_EB, 1.719706E-03_EB, 2.031603E-04_EB, 3.639554E-04_EB, &
-    7.032328E-04_EB, 1.869845E-03_EB, 1.498960E-04_EB, 5.325394E-02_EB, 2.960889E-04_EB, 4.748853E-04_EB, &
-    8.344212E-04_EB, 5.098264E-03_EB, 2.145029E-02_EB, 7.216909E-02_EB, 4.840206E-04_EB, 6.620958E-04_EB, &
-    7.559428E-04_EB, 3.756929E-03_EB, 9.943127E-02_EB, 1.680608E-02_EB, 1.037315E-03_EB, 3.817557E-01_EB, &
-    1.555427E-03_EB, 1.763383E-03_EB, 6.153972E-01_EB, 1.832317E-01_EB, 9.857844E-03_EB, 9.068103E-01_EB, &
-    3.238503E-04_EB, 9.940762E-03_EB, 1.394320E-01_EB, 4.226877E-01_EB, 5.718989E-03_EB, 5.239927E-01_EB/),(/6,8/))
+sd3_c2h6(1:7,9:16) = RESHAPE((/ &  ! 2750-2925 cm-1
+   9.437750e-02_EB, 7.826799e-02_EB, 6.481721e-02_EB, 7.020402e-02_EB, 6.017769e-02_EB, 7.963757e-02_EB, &
+   9.068663e-02_EB, &
+   1.449953e-01_EB, 1.110552e-01_EB, 9.612305e-02_EB, 1.060636e-01_EB, 8.633211e-02_EB, 1.043293e-01_EB, &
+   1.280871e-01_EB, &
+   1.001382e-01_EB, 8.904423e-02_EB, 8.899341e-02_EB, 1.080298e-01_EB, 9.748937e-02_EB, 1.507712e-01_EB, &
+   2.152193e-01_EB, &
+   1.789013e-01_EB, 1.576201e-01_EB, 1.688876e-01_EB, 1.893222e-01_EB, 2.046234e-01_EB, 2.778477e-01_EB, &
+   3.326868e-01_EB, &
+   4.519875e-01_EB, 4.722980e-01_EB, 5.002552e-01_EB, 5.176398e-01_EB, 5.259894e-01_EB, 5.581873e-01_EB, &
+   5.217227e-01_EB, &
+   1.942344e+00_EB, 1.479985e+00_EB, 1.319915e+00_EB, 1.189402e+00_EB, 1.020515e+00_EB, 8.684235e-01_EB, &
+   7.596269e-01_EB, &
+   2.588837e+00_EB, 1.924667e+00_EB, 1.726463e+00_EB, 1.589788e+00_EB, 1.374889e+00_EB, 1.152320e+00_EB, &
+   9.331464e-01_EB, &
+   4.349487e+00_EB, 3.315472e+00_EB, 2.890903e+00_EB, 2.568487e+00_EB, 2.077789e+00_EB, 1.524372e+00_EB, &
+   1.129152e+00_EB/),(/7,8/))
 
-GAMMAD1_C2H4(1:6,9:16) = RESHAPE((/ &  ! 820-855 cm-1
-    1.894976E-03_EB, 5.533689E-02_EB, 3.352730E-01_EB, 4.156049E-03_EB, 1.268044E-02_EB, 1.440936E-03_EB, &
-    3.989260E-02_EB, 6.123628E-02_EB, 1.748288E-01_EB, 1.136762E-01_EB, 7.566101E-02_EB, 1.578217E-02_EB, &
-    3.748686E-03_EB, 2.063795E-02_EB, 6.395232E-01_EB, 2.161032E-02_EB, 1.539493E+00_EB, 1.870803E+00_EB, &
-    1.731991E-01_EB, 3.606573E-02_EB, 1.711801E-01_EB, 1.182287E-01_EB, 2.156522E+00_EB, 7.297318E-02_EB, &
-    3.718925E-02_EB, 5.802284E-02_EB, 2.385187E-01_EB, 1.163380E-01_EB, 3.508874E+00_EB, 3.028175E+00_EB, &
-    1.250535E-01_EB, 1.555201E-01_EB, 1.353272E+00_EB, 4.653273E-02_EB, 9.757819E-02_EB, 1.945752E+00_EB, &
-    1.073707E-01_EB, 3.064466E-01_EB, 3.033844E-01_EB, 1.832711E-01_EB, 7.193977E-02_EB, 2.580269E-01_EB, &
-    1.403899E-01_EB, 2.970624E-01_EB, 3.173063E+00_EB, 1.036765E+00_EB, 6.928431E-02_EB, 5.163464E-02_EB/),(/6,8/))
+sd3_c2h6(1:7,17:24) = RESHAPE((/ &  ! 2950-3125 cm-1
+   4.686779e+00_EB, 3.462217e+00_EB, 2.991646e+00_EB, 2.656886e+00_EB, 2.157561e+00_EB, 1.584726e+00_EB, &
+   1.167425e+00_EB, &
+   5.661792e+00_EB, 4.018616e+00_EB, 3.411886e+00_EB, 2.975545e+00_EB, 2.380752e+00_EB, 1.690561e+00_EB, &
+   1.242062e+00_EB, &
+   4.918064e+00_EB, 3.441837e+00_EB, 2.903757e+00_EB, 2.525786e+00_EB, 2.015014e+00_EB, 1.429458e+00_EB, &
+   1.053831e+00_EB, &
+   3.342233e+00_EB, 2.430853e+00_EB, 2.070409e+00_EB, 1.791861e+00_EB, 1.453571e+00_EB, 1.041375e+00_EB, &
+   8.022528e-01_EB, &
+   1.298165e+00_EB, 1.255308e+00_EB, 1.160176e+00_EB, 1.048498e+00_EB, 9.329619e-01_EB, 7.444407e-01_EB, &
+   5.802852e-01_EB, &
+   2.926016e-01_EB, 4.494914e-01_EB, 4.813448e-01_EB, 4.684675e-01_EB, 5.012802e-01_EB, 4.679462e-01_EB, &
+   4.003903e-01_EB, &
+   6.131343e-02_EB, 1.274991e-01_EB, 1.601441e-01_EB, 1.663262e-01_EB, 2.229073e-01_EB, 2.672821e-01_EB, &
+   2.381398e-01_EB, &
+   4.322732e-02_EB, 6.015505e-02_EB, 6.743728e-02_EB, 6.674353e-02_EB, 1.110929e-01_EB, 1.464795e-01_EB, &
+   1.569146e-01_EB/),(/7,8/))
 
-GAMMAD1_C2H4(1:6,17:24) = RESHAPE((/ &  ! 860-895 cm-1
-    1.700209E-01_EB, 6.005349E-01_EB, 3.355907E-01_EB, 1.391500E-01_EB, 9.866157E-02_EB, 3.526835E-01_EB, &
-    3.114422E-01_EB, 5.536291E-01_EB, 1.536790E+00_EB, 2.262736E-01_EB, 1.125813E-01_EB, 2.715292E+00_EB, &
-    3.531868E-01_EB, 4.682108E-01_EB, 5.586927E-01_EB, 3.630199E-01_EB, 3.052033E-01_EB, 4.215026E-01_EB, &
-    3.792054E-01_EB, 4.869108E-01_EB, 3.686363E-01_EB, 2.804414E-01_EB, 2.147201E+00_EB, 3.034741E+00_EB, &
-    5.485905E-01_EB, 4.024693E-01_EB, 4.482705E-01_EB, 2.706961E-01_EB, 4.123206E-01_EB, 1.571677E-01_EB, &
-    5.203928E-01_EB, 5.763570E-01_EB, 4.014208E-01_EB, 4.025810E-01_EB, 1.798309E-01_EB, 1.215076E+00_EB, &
-    6.313988E-01_EB, 5.645700E-01_EB, 3.931925E-01_EB, 3.216380E-01_EB, 4.733183E-01_EB, 1.939021E-01_EB, &
-    5.299200E-01_EB, 5.367177E-01_EB, 3.609363E-01_EB, 4.993058E-01_EB, 4.268917E-01_EB, 2.147109E-01_EB/),(/6,8/))
+sd3_c2h6(1:7,25:32) = RESHAPE((/ &  ! 3150-3325 cm-1
+   3.604160e-02_EB, 1.194845e-01_EB, 4.058106e-02_EB, 4.315323e-02_EB, 9.519510e-02_EB, 8.917098e-02_EB, &
+   1.405300e-01_EB, &
+   4.315334e-02_EB, 4.712174e-01_EB, 4.312845e-02_EB, 3.219296e-02_EB, 3.525944e-01_EB, 1.060124e-01_EB, &
+   5.046058e-01_EB, &
+   1.257731e-01_EB, 8.432473e-01_EB, 9.486353e-02_EB, 2.860309e-01_EB, 4.209545e-01_EB, 1.897258e-01_EB, &
+   1.586487e+00_EB, &
+   5.478996e-02_EB, 5.751983e-01_EB, 1.238009e-01_EB, 1.250768e-01_EB, 9.468278e-01_EB, 3.490872e-01_EB, &
+   1.256817e+00_EB, &
+   7.050923e-02_EB, 6.595339e-01_EB, 1.143623e-01_EB, 3.234956e-01_EB, 7.050330e-01_EB, 3.260248e-01_EB, &
+   5.549485e-01_EB, &
+   4.360067e-02_EB, 5.450163e-01_EB, 1.152844e-01_EB, 2.285287e-01_EB, 6.637506e-01_EB, 2.501009e-01_EB, &
+   3.535923e-01_EB, &
+   1.872369e-01_EB, 3.564558e-01_EB, 4.090535e-02_EB, 1.306462e-01_EB, 4.246963e-01_EB, 7.148910e-02_EB, &
+   1.438647e-01_EB, &
+   5.015709e-03_EB, 1.912379e-01_EB, 9.285764e-03_EB, 1.392927e-03_EB, 2.040005e-01_EB, 9.061367e-02_EB, &
+   9.395617e-04_EB/),(/7,8/))
 
-GAMMAD1_C2H4(1:6,25:32) = RESHAPE((/ &  ! 900-935 cm-1
-    4.164019E-01_EB, 4.155156E-01_EB, 3.088547E-01_EB, 3.370571E-01_EB, 3.115683E-01_EB, 2.364094E-01_EB, &
-    4.852264E-01_EB, 4.702245E-01_EB, 3.710357E-01_EB, 5.757705E-01_EB, 3.709130E-01_EB, 3.012928E+00_EB, &
-    3.296288E-01_EB, 3.222475E-01_EB, 2.817825E-01_EB, 2.739514E-01_EB, 4.622214E-01_EB, 1.797155E+00_EB, &
-    2.666494E-01_EB, 2.989870E-01_EB, 2.884852E-01_EB, 3.307280E-01_EB, 4.836295E-01_EB, 1.067013E-01_EB, &
-    2.611043E-01_EB, 3.231005E-01_EB, 3.188877E-01_EB, 2.302749E-01_EB, 4.571463E-01_EB, 1.236148E-01_EB, &
-    3.741347E-01_EB, 4.086729E-01_EB, 3.307067E-01_EB, 2.710804E-01_EB, 2.064931E-01_EB, 3.038071E+00_EB, &
-    8.296697E-01_EB, 7.811136E-01_EB, 5.368860E-01_EB, 4.169795E-01_EB, 1.163365E+00_EB, 2.239407E-01_EB, &
-    9.576878E-01_EB, 7.825809E-01_EB, 5.067524E-01_EB, 4.014722E-01_EB, 2.836955E-01_EB, 9.777381E-01_EB/),(/6,8/))
-
-GAMMAD1_C2H4(1:6,33:40) = RESHAPE((/ &  ! 940-975 cm-1
-    1.236444E+00_EB, 7.716515E-01_EB, 6.212984E-01_EB, 5.587597E-01_EB, 4.412419E-01_EB, 8.131811E-01_EB, &
-    7.575712E-01_EB, 5.576862E-01_EB, 4.744233E-01_EB, 5.068279E-01_EB, 4.632095E-01_EB, 6.117277E-01_EB, &
-    6.674555E-01_EB, 4.904283E-01_EB, 4.448525E-01_EB, 4.579310E-01_EB, 5.310072E-01_EB, 8.412202E-01_EB, &
-    1.029197E+00_EB, 7.724724E-01_EB, 5.997770E-01_EB, 5.638372E-01_EB, 7.135595E-01_EB, 6.212118E-01_EB, &
-    8.513704E-01_EB, 6.301684E-01_EB, 5.809610E-01_EB, 4.669093E-01_EB, 6.014768E-01_EB, 3.696563E-01_EB, &
-    7.372271E-01_EB, 6.703787E-01_EB, 5.734891E-01_EB, 3.907031E-01_EB, 3.376349E+00_EB, 2.414251E-01_EB, &
-    6.444788E-01_EB, 6.105449E-01_EB, 5.069273E-01_EB, 4.206551E-01_EB, 2.885879E+00_EB, 3.572059E-01_EB, &
-    6.611267E-01_EB, 7.002017E-01_EB, 6.074161E-01_EB, 3.895216E-01_EB, 3.116630E+00_EB, 4.269833E-01_EB/),(/6,8/))
-
-GAMMAD1_C2H4(1:6,41:48) = RESHAPE((/ &  ! 980-1015 cm-1
-    3.903231E-01_EB, 4.242010E-01_EB, 3.960915E-01_EB, 3.804742E-01_EB, 7.642768E-01_EB, 4.458324E-01_EB, &
-    4.439846E-01_EB, 4.570568E-01_EB, 4.145909E-01_EB, 3.910664E-01_EB, 8.589025E-01_EB, 1.727536E-01_EB, &
-    2.962497E-01_EB, 3.512410E-01_EB, 3.314379E-01_EB, 3.130824E-01_EB, 7.342311E-01_EB, 2.137822E-01_EB, &
-    4.244665E-01_EB, 4.356641E-01_EB, 4.041886E-01_EB, 3.517882E-01_EB, 4.487084E-01_EB, 6.516853E-01_EB, &
-    4.460149E-01_EB, 4.969807E-01_EB, 3.690169E-01_EB, 3.580932E-01_EB, 7.328633E-01_EB, 2.515972E-01_EB, &
-    6.807508E-01_EB, 6.284289E-01_EB, 5.552235E-01_EB, 4.763301E-01_EB, 6.514922E-01_EB, 3.033034E+00_EB, &
-    4.380945E-01_EB, 4.589720E-01_EB, 4.172781E-01_EB, 4.060941E-01_EB, 5.406652E-01_EB, 2.939433E+00_EB, &
-    7.147951E-01_EB, 5.677334E-01_EB, 5.406667E-01_EB, 5.396952E-01_EB, 4.328888E-01_EB, 2.112509E+00_EB/),(/6,8/))
-
-GAMMAD1_C2H4(1:6,49:56) = RESHAPE((/ &  ! 1020-1055 cm-1
-    4.532844E-01_EB, 4.475268E-01_EB, 4.445984E-01_EB, 4.020068E-01_EB, 4.858181E-01_EB, 1.603249E-01_EB, &
-    4.959578E-01_EB, 4.538826E-01_EB, 4.049977E-01_EB, 3.105613E-01_EB, 7.521067E-01_EB, 4.018211E-01_EB, &
-    4.590588E-01_EB, 4.707185E-01_EB, 4.102188E-01_EB, 3.497129E-01_EB, 3.549335E-01_EB, 1.506293E-01_EB, &
-    3.912242E-01_EB, 4.190358E-01_EB, 5.166711E-01_EB, 2.831777E-01_EB, 9.036223E-01_EB, 1.537971E-01_EB, &
-    4.064895E-01_EB, 3.817382E-01_EB, 4.519899E-01_EB, 3.094252E-01_EB, 3.094293E+00_EB, 4.371191E-01_EB, &
-    2.911889E-01_EB, 3.286802E-01_EB, 3.856792E-01_EB, 2.932473E-01_EB, 4.861265E-01_EB, 1.734921E-01_EB, &
-    2.726799E-01_EB, 3.432745E-01_EB, 3.088589E-01_EB, 4.118285E-01_EB, 4.282344E-01_EB, 3.337220E-01_EB, &
-    1.942269E-01_EB, 4.402853E-01_EB, 2.726554E-01_EB, 2.648462E-01_EB, 2.951458E-01_EB, 9.532120E-01_EB/),(/6,8/))
-
-GAMMAD1_C2H4(1:6,57:64) = RESHAPE((/ &  ! 1060-1095 cm-1
-    2.445925E-01_EB, 3.635560E-01_EB, 3.549222E-01_EB, 3.136583E-01_EB, 1.957082E-01_EB, 8.829384E-01_EB, &
-    1.709271E-01_EB, 1.656483E-01_EB, 5.388146E-01_EB, 3.430729E-01_EB, 1.873446E-01_EB, 1.452306E-01_EB, &
-    1.500161E-01_EB, 1.990900E-01_EB, 2.784229E-01_EB, 3.014937E-01_EB, 1.383912E-01_EB, 2.338286E+00_EB, &
-    1.764343E-01_EB, 2.243447E-01_EB, 5.326273E-01_EB, 2.175158E-01_EB, 8.899940E-02_EB, 3.033742E+00_EB, &
-    7.309827E-02_EB, 2.261722E-01_EB, 5.697571E-01_EB, 1.252185E-01_EB, 1.509198E-01_EB, 2.274981E-01_EB, &
-    1.349498E-01_EB, 1.523886E-01_EB, 4.601865E-01_EB, 2.780082E-01_EB, 1.695873E-01_EB, 3.037100E+00_EB, &
-    5.912413E-02_EB, 1.274394E-01_EB, 1.862443E-01_EB, 1.358552E-01_EB, 4.670319E-01_EB, 1.340571E-01_EB, &
-    8.869365E-02_EB, 1.601770E-01_EB, 1.850212E-01_EB, 1.906310E-01_EB, 3.210075E-01_EB, 2.139164E-01_EB/),(/6,8/))
-
-GAMMAD1_C2H4(1:6,65:71) = RESHAPE((/ &  ! 1100-1250 cm-1
-    5.067213E-02_EB, 1.079354E-01_EB, 2.246982E-01_EB, 2.183319E-01_EB, 1.322625E-01_EB, 2.149497E-01_EB, &
-    1.551811E-02_EB, 4.555635E-02_EB, 1.806742E-01_EB, 1.437815E-01_EB, 8.484912E-02_EB, 1.273987E-01_EB, &
-    3.728632E-03_EB, 7.700617E-03_EB, 1.875163E-02_EB, 3.155935E-02_EB, 2.481050E-01_EB, 6.204931E-02_EB, &
-    7.406237E-04_EB, 7.390717E-04_EB, 5.438991E-03_EB, 4.881870E-03_EB, 1.750757E-02_EB, 1.529768E-02_EB, &
-    7.575049E-04_EB, 7.645573E-04_EB, 8.297787E-04_EB, 7.480000E-04_EB, 1.143039E-03_EB, 4.345575E-03_EB, &
-    7.083170E-04_EB, 7.101645E-04_EB, 7.015211E-04_EB, 7.171853E-04_EB, 7.100724E-04_EB, 8.221738E-04_EB, &
-    6.792025E-04_EB, 6.792025E-04_EB, 6.792025E-04_EB, 6.792025E-04_EB, 6.792025E-04_EB, 6.792025E-04_EB/),(/6,7/))
+sd3_c2h6(1:7,33:34) = RESHAPE((/ &  ! 3350-3375 cm-1
+   2.644024e-04_EB, 1.032051e-02_EB, 3.153028e-03_EB, 3.073098e-04_EB, 1.028061e-02_EB, 1.242207e-03_EB, &
+   2.965961e-04_EB, &
+   2.145139e-04_EB, 2.145139e-04_EB, 2.145139e-04_EB, 2.145139e-04_EB, 2.145139e-04_EB, 2.145139e-04_EB, &
+   2.145139e-04_EB/),(/7,2/))
 
 !---------------------------------------------------------------------------
-ALLOCATE(SD2_C2H4(N_TEMP_C2H4,13)) 
+ALLOCATE(gammad3_c2h6(n_temp_c2h6,34)) 
 
-! BAND #2: 1300 cm-1 - 1600 cm-1 
+! band #3: 2550 cm-1 - 3375 cm-1 
 
-! SNB FIT WITH GOODY MODEL 
+! snb fit with malkmus model 
 
-! ERROR ASSOCIATED WITH GOODY FIT: 
-! On Transmissivity: 0.12869 % 
+! error associated with malkmus fit: 
+! on transmissivity: 2.3765 % 
 
-SD2_C2H4(1:6,1:8) = RESHAPE((/ &  ! 1300-1475 cm-1
-    9.279132E-04_EB, 9.273153E-04_EB, 9.244215E-04_EB, 9.229850E-04_EB, 9.261249E-04_EB, 9.299717E-04_EB, &
-    9.890082E-04_EB, 9.683979E-04_EB, 9.860091E-04_EB, 9.911061E-04_EB, 1.013284E-03_EB, 1.137667E-03_EB, &
-    1.004697E-03_EB, 1.001927E-03_EB, 4.032751E-03_EB, 2.894454E-03_EB, 9.684741E-03_EB, 1.870185E-02_EB, &
-    1.290541E-02_EB, 2.689333E-02_EB, 4.626629E-02_EB, 5.603366E-02_EB, 7.507327E-02_EB, 1.084342E-01_EB, &
-    2.571078E-01_EB, 2.609724E-01_EB, 2.727583E-01_EB, 2.566965E-01_EB, 2.520705E-01_EB, 2.202201E-01_EB, &
-    5.162268E-01_EB, 3.186527E-01_EB, 2.710843E-01_EB, 2.246839E-01_EB, 1.761416E-01_EB, 1.146317E-01_EB, &
-    4.604216E-01_EB, 3.011969E-01_EB, 2.667829E-01_EB, 2.381242E-01_EB, 2.016474E-01_EB, 1.710949E-01_EB, &
-    3.853358E-01_EB, 2.647966E-01_EB, 2.373879E-01_EB, 2.121097E-01_EB, 1.779084E-01_EB, 1.275462E-01_EB/),(/6,8/))
+! print fine structure array gamma_d 
 
-SD2_C2H4(1:6,9:13) = RESHAPE((/ &  ! 1500-1600 cm-1
-    6.040274E-02_EB, 7.375084E-02_EB, 8.039317E-02_EB, 7.955780E-02_EB, 9.080910E-02_EB, 8.251395E-02_EB, &
-    1.602308E-03_EB, 2.473928E-03_EB, 6.878076E-03_EB, 7.290972E-03_EB, 1.847984E-02_EB, 2.574535E-02_EB, &
-    1.011920E-03_EB, 9.881040E-04_EB, 1.003247E-03_EB, 1.005131E-03_EB, 9.998191E-04_EB, 1.412467E-03_EB, &
-    9.644050E-04_EB, 9.391514E-04_EB, 9.104046E-04_EB, 9.369362E-04_EB, 9.196709E-04_EB, 9.392138E-04_EB, &
-    8.645026E-04_EB, 8.645026E-04_EB, 8.645026E-04_EB, 8.645026E-04_EB, 8.645026E-04_EB, 8.645026E-04_EB/),(/6,5/))
+gammad3_c2h6(1:7,1:8) = RESHAPE((/ &  ! 2550-2725 cm-1
+   5.906363e-04_EB, 2.102426e-04_EB, 2.132346e-04_EB, 2.065179e-04_EB, 2.655299e-04_EB, 8.306361e-04_EB, &
+   3.355503e-05_EB, &
+   2.516050e-04_EB, 3.355121e-03_EB, 4.172370e-04_EB, 1.011463e-03_EB, 2.596114e-02_EB, 1.182928e-03_EB, &
+   2.503340e-05_EB, &
+   4.163269e-03_EB, 1.125552e-01_EB, 4.980295e-03_EB, 2.696283e-03_EB, 3.105873e-02_EB, 4.712694e-03_EB, &
+   6.033084e-05_EB, &
+   2.623691e-02_EB, 1.923864e-02_EB, 3.655389e-02_EB, 4.141023e-03_EB, 3.609314e-02_EB, 3.824795e-03_EB, &
+   1.219453e-04_EB, &
+   5.265718e-02_EB, 8.436915e-03_EB, 1.960254e-02_EB, 1.875421e-03_EB, 2.111866e-02_EB, 3.776296e-03_EB, &
+   3.441962e-02_EB, &
+   3.937315e-02_EB, 8.289911e-03_EB, 4.840661e-03_EB, 4.421232e-03_EB, 7.814993e-02_EB, 1.662021e-02_EB, &
+   1.455835e-01_EB, &
+   3.720731e-02_EB, 8.723819e-03_EB, 7.153107e-03_EB, 7.013544e-03_EB, 7.319968e-02_EB, 1.767570e-01_EB, &
+   8.122963e-01_EB, &
+   4.868277e-02_EB, 1.269629e-02_EB, 3.095084e-02_EB, 1.285202e-02_EB, 3.311119e-01_EB, 4.745323e-02_EB, &
+   5.448600e-01_EB/),(/7,8/))
 
-!---------------------------------------------------------------------------
-ALLOCATE(GAMMAD2_C2H4(N_TEMP_C2H4,13)) 
+gammad3_c2h6(1:7,9:16) = RESHAPE((/ &  ! 2750-2925 cm-1
+   7.027332e-02_EB, 3.651191e-02_EB, 1.128884e-01_EB, 2.630950e-02_EB, 2.289043e-01_EB, 3.168499e-02_EB, &
+   2.263308e-02_EB, &
+   1.007340e-01_EB, 9.210111e-02_EB, 1.687337e-01_EB, 2.959829e-02_EB, 1.810977e-01_EB, 9.553982e-02_EB, &
+   3.918733e-02_EB, &
+   4.509352e-02_EB, 1.086112e-01_EB, 7.647679e-02_EB, 2.814778e-02_EB, 8.981709e-01_EB, 1.273344e-01_EB, &
+   4.408137e-02_EB, &
+   9.590449e-02_EB, 2.770484e-01_EB, 1.477733e-01_EB, 1.049910e-01_EB, 3.105849e-01_EB, 2.918868e-01_EB, &
+   1.291524e-01_EB, &
+   3.138946e-01_EB, 5.413508e-01_EB, 3.949461e-01_EB, 3.999787e-01_EB, 6.266594e-01_EB, 4.691785e-01_EB, &
+   3.754321e-01_EB, &
+   1.106384e+00_EB, 1.162295e+00_EB, 1.094260e+00_EB, 1.051491e+00_EB, 1.215748e+00_EB, 7.154832e-01_EB, &
+   4.545049e-01_EB, &
+   1.517339e+00_EB, 1.415673e+00_EB, 1.368748e+00_EB, 1.312400e+00_EB, 1.453900e+00_EB, 9.649236e-01_EB, &
+   7.807490e-01_EB, &
+   4.303118e+00_EB, 2.952375e+00_EB, 2.831306e+00_EB, 2.384206e+00_EB, 2.387748e+00_EB, 1.208513e+00_EB, &
+   8.645917e-01_EB/),(/7,8/))
 
-! BAND #2: 1300 cm-1 - 1600 cm-1 
+gammad3_c2h6(1:7,17:24) = RESHAPE((/ &  ! 2950-3125 cm-1
+   3.315145e+00_EB, 2.599752e+00_EB, 2.743646e+00_EB, 2.629391e+00_EB, 2.506127e+00_EB, 1.333128e+00_EB, &
+   9.626906e-01_EB, &
+   1.456169e+00_EB, 1.207547e+00_EB, 1.363886e+00_EB, 1.509996e+00_EB, 1.699983e+00_EB, 1.288544e+00_EB, &
+   8.734672e-01_EB, &
+   1.081840e+00_EB, 1.007445e+00_EB, 1.186416e+00_EB, 1.295045e+00_EB, 1.467006e+00_EB, 1.089437e+00_EB, &
+   7.294066e-01_EB, &
+   1.769766e+00_EB, 1.424872e+00_EB, 1.588295e+00_EB, 1.745279e+00_EB, 1.453194e+00_EB, 9.836635e-01_EB, &
+   4.884795e-01_EB, &
+   8.210794e-01_EB, 7.811090e-01_EB, 9.322482e-01_EB, 1.373898e+00_EB, 1.084482e+00_EB, 6.956616e-01_EB, &
+   5.118669e-01_EB, &
+   1.964022e-01_EB, 3.039042e-01_EB, 3.956607e-01_EB, 1.328063e+00_EB, 5.899273e-01_EB, 6.132437e-01_EB, &
+   5.047836e-01_EB, &
+   2.041406e-02_EB, 8.312137e-02_EB, 1.318700e-01_EB, 7.573599e+00_EB, 2.512530e-01_EB, 2.496958e-01_EB, &
+   1.051791e+00_EB, &
+   5.023107e-03_EB, 9.491129e-03_EB, 3.053563e-02_EB, 9.379598e-02_EB, 3.673982e-02_EB, 7.455316e-02_EB, &
+   2.454365e-01_EB/),(/7,8/))
 
-! SNB FIT WITH GOODY MODEL 
+gammad3_c2h6(1:7,25:32) = RESHAPE((/ &  ! 3150-3325 cm-1
+   6.352743e-03_EB, 7.943354e-04_EB, 1.083748e-02_EB, 9.588981e-03_EB, 4.904702e-03_EB, 1.679226e-02_EB, &
+   1.304495e-02_EB, &
+   6.766775e-03_EB, 1.596208e-04_EB, 6.130026e-03_EB, 7.152650e-03_EB, 3.279571e-04_EB, 1.794526e-03_EB, &
+   4.823723e-04_EB, &
+   1.510899e-03_EB, 1.196785e-04_EB, 1.094313e-03_EB, 1.868976e-04_EB, 1.950517e-04_EB, 3.851491e-04_EB, &
+   8.135632e-05_EB, &
+   1.592258e-02_EB, 2.062254e-04_EB, 8.766044e-04_EB, 4.062596e-04_EB, 1.031744e-04_EB, 1.363841e-04_EB, &
+   4.489251e-05_EB, &
+   5.336883e-03_EB, 1.621021e-04_EB, 8.122952e-04_EB, 9.938396e-05_EB, 1.057126e-04_EB, 8.283648e-05_EB, &
+   2.421683e-05_EB, &
+   7.894809e-03_EB, 1.025986e-04_EB, 4.657427e-04_EB, 6.874881e-05_EB, 6.535834e-05_EB, 3.906150e-05_EB, &
+   4.299378e-05_EB, &
+   1.168996e-04_EB, 6.996908e-05_EB, 5.712580e-04_EB, 3.973347e-05_EB, 4.446145e-05_EB, 8.103887e-05_EB, &
+   3.469019e-05_EB, &
+   1.835174e-04_EB, 4.182929e-05_EB, 1.449024e-03_EB, 6.981809e-04_EB, 3.965878e-05_EB, 3.732167e-05_EB, &
+   1.777260e-02_EB/),(/7,8/))
 
-! ERROR ASSOCIATED WITH GOODY FIT: 
-! On Transmissivity: 0.12869 % 
+gammad3_c2h6(1:7,33:34) = RESHAPE((/ &  ! 3350-3375 cm-1
+   1.966771e-04_EB, 1.267047e-04_EB, 5.949690e-04_EB, 2.287935e-04_EB, 1.200025e-04_EB, 2.518698e-04_EB, &
+   2.116261e-04_EB, &
+   1.688326e-04_EB, 1.688326e-04_EB, 1.688326e-04_EB, 1.688326e-04_EB, 1.688326e-04_EB, 1.688326e-04_EB, &
+   1.688326e-04_EB/),(/7,2/))
 
-! PRINT FINE STRUCTURE ARRAY GAMMA_D 
+!-------------------------ethylene data-------------------
 
-GAMMAD2_C2H4(1:6,1:8) = RESHAPE((/ &  ! 1300-1475 cm-1
-    7.204600E-04_EB, 7.235461E-04_EB, 7.136643E-04_EB, 7.089708E-04_EB, 7.084399E-04_EB, 7.165571E-04_EB, &
-    7.594734E-04_EB, 7.434589E-04_EB, 7.424998E-04_EB, 7.481608E-04_EB, 7.756310E-04_EB, 8.687294E-04_EB, &
-    7.660533E-04_EB, 7.659200E-04_EB, 1.831062E-03_EB, 2.268359E-03_EB, 3.449460E-03_EB, 1.248015E-02_EB, &
-    1.396120E-02_EB, 2.815807E-02_EB, 2.750300E-02_EB, 2.848507E-02_EB, 6.454111E-02_EB, 1.085965E-01_EB, &
-    2.389312E-01_EB, 2.937900E-01_EB, 1.441234E-01_EB, 2.541463E-01_EB, 1.720353E-01_EB, 1.812790E-01_EB, &
-    4.755596E-01_EB, 2.973970E-01_EB, 1.624394E-01_EB, 2.634443E-01_EB, 1.673237E-01_EB, 2.004237E-01_EB, &
-    2.558697E-01_EB, 2.383813E-01_EB, 1.646664E-01_EB, 1.688364E-01_EB, 1.826411E-01_EB, 6.308910E-02_EB, &
-    2.898946E-01_EB, 2.760012E-01_EB, 1.576121E-01_EB, 1.331925E-01_EB, 1.084082E-01_EB, 1.791748E-01_EB/),(/6,8/))
 
-GAMMAD2_C2H4(1:6,9:13) = RESHAPE((/ &  ! 1500-1600 cm-1
-    6.475277E-02_EB, 1.203005E-01_EB, 6.422857E-02_EB, 1.447939E-01_EB, 5.098841E-02_EB, 5.248047E-02_EB, &
-    1.346456E-03_EB, 2.405781E-03_EB, 2.193237E-03_EB, 1.155254E-02_EB, 9.161078E-03_EB, 8.719563E-03_EB, &
-    7.593505E-04_EB, 7.515284E-04_EB, 7.580799E-04_EB, 7.524118E-04_EB, 7.642180E-04_EB, 9.105729E-04_EB, &
-    7.372788E-04_EB, 7.240530E-04_EB, 7.075171E-04_EB, 7.259431E-04_EB, 7.130592E-04_EB, 7.287962E-04_EB, &
-    6.792025E-04_EB, 6.792025E-04_EB, 6.792025E-04_EB, 6.792025E-04_EB, 6.792025E-04_EB, 6.792025E-04_EB/),(/6,5/))
+! there are 4 bands for ethylene
 
-!---------------------------------------------------------------------------
-ALLOCATE(SD3_C2H4(N_TEMP_C2H4,14)) 
+! band #1: 750 cm-1 - 1250 cm-1 
+! band #2: 1300 cm-1 - 1600 cm-1 
+! band #3: 1750 cm-1 - 2075 cm-1 
+! band #4: 2800 cm-1 - 3400 cm-1 
 
-! BAND #3: 1750 cm-1 - 2075 cm-1 
+ALLOCATE(sd_c2h4_temp(n_temp_c2h4)) 
 
-! SNB FIT WITH GOODY MODEL 
+! initialize bands wavenumber bounds for ethylene ABS(option coefficients.
+! bands are organized by row: 
+! 1st column is the lower bound band limit in cm-1. 
+! 2nd column is the upper bound band limit in cm-1. 
+! 3rd column is the stride between wavenumbers in band.
+! IF 3rd column = 0., band is calculated, not tabulated.
 
-! ERROR ASSOCIATED WITH GOODY FIT: 
-! On Transmissivity: 0.058286 % 
+ALLOCATE(om_bnd_c2h4(n_band_c2h4,3)) 
+ALLOCATE(be_c2h4(n_band_c2h4)) 
 
-SD3_C2H4(1:6,1:8) = RESHAPE((/ &  ! 1750-1925 cm-1
-    9.219960E-04_EB, 9.442990E-04_EB, 9.380623E-04_EB, 8.954726E-04_EB, 9.610973E-04_EB, 9.223484E-04_EB, &
-    9.837058E-04_EB, 9.785945E-04_EB, 9.961935E-04_EB, 9.737754E-04_EB, 1.163611E-03_EB, 3.225953E-03_EB, &
-    9.931049E-04_EB, 9.789213E-04_EB, 1.138709E-03_EB, 1.314482E-03_EB, 7.743642E-03_EB, 1.602555E-02_EB, &
-    1.496375E-02_EB, 1.436467E-02_EB, 2.520063E-02_EB, 2.681706E-02_EB, 3.791051E-02_EB, 4.370876E-02_EB, &
-    1.371582E-01_EB, 1.038223E-01_EB, 1.047024E-01_EB, 9.504272E-02_EB, 9.197623E-02_EB, 7.279284E-02_EB, &
-    1.857426E-01_EB, 1.045369E-01_EB, 9.744940E-02_EB, 8.375678E-02_EB, 7.099587E-02_EB, 5.559665E-02_EB, &
-    2.497841E-01_EB, 1.428721E-01_EB, 1.267706E-01_EB, 1.089405E-01_EB, 9.015803E-02_EB, 7.435155E-02_EB, &
-    1.934042E-01_EB, 1.541005E-01_EB, 1.474939E-01_EB, 1.342866E-01_EB, 1.207719E-01_EB, 9.801867E-02_EB/),(/6,8/))
+om_bnd_c2h4 = RESHAPE((/ &
+   750._EB, 1300._EB, 1750._EB, 2800._EB, &
+   1250._EB, 1600._EB, 2075._EB, 3400._EB, &
+   5._EB, 25._EB, 25._EB, 25._EB/),(/n_band_c2h4,3/)) 
 
-SD3_C2H4(1:6,9:14) = RESHAPE((/ &  ! 1950-2075 cm-1
-    1.521335E-02_EB, 2.148825E-02_EB, 3.024248E-02_EB, 3.219083E-02_EB, 4.108111E-02_EB, 5.266575E-02_EB, &
-    1.015830E-03_EB, 9.761270E-04_EB, 1.077989E-03_EB, 1.053420E-03_EB, 2.407919E-03_EB, 6.421848E-03_EB, &
-    1.000840E-03_EB, 1.006056E-03_EB, 9.594673E-04_EB, 9.921120E-04_EB, 9.835180E-04_EB, 9.797444E-04_EB, &
-    1.004178E-03_EB, 9.832405E-04_EB, 9.867926E-04_EB, 1.004442E-03_EB, 9.858709E-04_EB, 9.653783E-04_EB, &
-    9.092695E-04_EB, 9.271931E-04_EB, 9.357547E-04_EB, 9.281649E-04_EB, 9.390760E-04_EB, 9.317025E-04_EB, &
-    8.645026E-04_EB, 8.645026E-04_EB, 8.645026E-04_EB, 8.645026E-04_EB, 8.645026E-04_EB, 8.645026E-04_EB/),(/6,6/))
+sd_c2h4_temp = (/ &
+   296._EB, 400._EB, 450._EB, 500._EB, 601._EB, 801._EB,&
+   1000._EB/)
 
-!---------------------------------------------------------------------------
-ALLOCATE(GAMMAD3_C2H4(N_TEMP_C2H4,14)) 
-
-! BAND #3: 1750 cm-1 - 2075 cm-1 
-
-! SNB FIT WITH GOODY MODEL 
-
-! ERROR ASSOCIATED WITH GOODY FIT: 
-! On Transmissivity: 0.058286 % 
-
-! PRINT FINE STRUCTURE ARRAY GAMMA_D 
-
-GAMMAD3_C2H4(1:6,1:8) = RESHAPE((/ &  ! 1750-1925 cm-1
-    7.121480E-04_EB, 7.262154E-04_EB, 7.180518E-04_EB, 6.992712E-04_EB, 7.298344E-04_EB, 7.065556E-04_EB, &
-    7.543992E-04_EB, 7.365769E-04_EB, 7.588834E-04_EB, 7.421876E-04_EB, 8.730687E-04_EB, 1.801460E-03_EB, &
-    7.554629E-04_EB, 7.507014E-04_EB, 8.738316E-04_EB, 1.033889E-03_EB, 3.499036E-03_EB, 8.677167E-03_EB, &
-    8.227847E-03_EB, 3.531288E-02_EB, 1.877540E-02_EB, 2.917302E-02_EB, 2.282468E-02_EB, 9.710123E-02_EB, &
-    1.027164E-01_EB, 1.902058E-01_EB, 7.584584E-02_EB, 9.673877E-02_EB, 5.677529E-02_EB, 1.313532E-01_EB, &
-    1.251371E-01_EB, 1.568075E-01_EB, 5.748433E-02_EB, 5.799735E-02_EB, 6.575178E-02_EB, 1.892414E-01_EB, &
-    1.258243E-01_EB, 1.610282E-01_EB, 8.120469E-02_EB, 7.951463E-02_EB, 8.183984E-02_EB, 7.575063E-02_EB, &
-    1.363982E-01_EB, 1.407116E-01_EB, 8.836505E-02_EB, 1.085263E-01_EB, 9.636277E-02_EB, 1.386479E-01_EB/),(/6,8/))
-
-GAMMAD3_C2H4(1:6,9:14) = RESHAPE((/ &  ! 1950-2075 cm-1
-    1.329009E-02_EB, 1.386426E-02_EB, 1.989346E-02_EB, 3.607434E-02_EB, 3.430325E-02_EB, 3.299565E-02_EB, &
-    7.715392E-04_EB, 7.434870E-04_EB, 8.273537E-04_EB, 8.232965E-04_EB, 1.841268E-03_EB, 1.811223E-03_EB, &
-    7.550436E-04_EB, 7.663353E-04_EB, 7.318042E-04_EB, 7.340964E-04_EB, 7.502689E-04_EB, 7.422655E-04_EB, &
-    7.624676E-04_EB, 7.532816E-04_EB, 7.559871E-04_EB, 7.577967E-04_EB, 7.561721E-04_EB, 7.415111E-04_EB, &
-    7.039615E-04_EB, 7.130211E-04_EB, 7.227245E-04_EB, 7.131451E-04_EB, 7.254599E-04_EB, 7.219594E-04_EB, &
-    6.792025E-04_EB, 6.792025E-04_EB, 6.792025E-04_EB, 6.792025E-04_EB, 6.792025E-04_EB, 6.792025E-04_EB/),(/6,6/))
-
-!---------------------------------------------------------------------------
-ALLOCATE(SD4_C2H4(N_TEMP_C2H4,25)) 
-
-! BAND #4: 2800 cm-1 - 3400 cm-1 
-
-! SNB FIT WITH GOODY MODEL 
-
-! ERROR ASSOCIATED WITH GOODY FIT: 
-! On Transmissivity: 0.18751 % 
-
-SD4_C2H4(1:6,1:8) = RESHAPE((/ &  ! 2800-2975 cm-1
-    9.196477E-04_EB, 9.205852E-04_EB, 9.415609E-04_EB, 9.339349E-04_EB, 9.377939E-04_EB, 9.253138E-04_EB, &
-    1.948939E-03_EB, 9.820598E-04_EB, 9.878370E-04_EB, 9.931514E-04_EB, 1.015483E-03_EB, 9.936779E-04_EB, &
-    4.225155E-03_EB, 9.979423E-04_EB, 1.429399E-03_EB, 1.101717E-03_EB, 3.387675E-03_EB, 3.848119E-03_EB, &
-    1.541922E-02_EB, 1.018209E-03_EB, 9.828165E-03_EB, 4.197580E-03_EB, 1.098259E-02_EB, 1.506187E-02_EB, &
-    1.839106E-02_EB, 7.931326E-03_EB, 2.112251E-02_EB, 1.685292E-02_EB, 3.591308E-02_EB, 5.813693E-02_EB, &
-    7.051064E-02_EB, 8.693279E-02_EB, 1.151141E-01_EB, 1.080337E-01_EB, 1.296447E-01_EB, 1.360124E-01_EB, &
-    4.292817E-01_EB, 3.442013E-01_EB, 3.239004E-01_EB, 2.817132E-01_EB, 2.431369E-01_EB, 1.862490E-01_EB, &
-    6.012597E-01_EB, 3.809796E-01_EB, 3.430196E-01_EB, 2.893388E-01_EB, 2.636428E-01_EB, 2.144012E-01_EB/),(/6,8/))
-
-SD4_C2H4(1:6,9:16) = RESHAPE((/ &  ! 3000-3175 cm-1
-    7.762048E-01_EB, 4.753439E-01_EB, 3.984269E-01_EB, 3.402300E-01_EB, 2.983538E-01_EB, 2.411789E-01_EB, &
-    7.170253E-01_EB, 5.836932E-01_EB, 5.334409E-01_EB, 4.818310E-01_EB, 4.382019E-01_EB, 3.612855E-01_EB, &
-    5.313393E-01_EB, 4.669143E-01_EB, 4.452130E-01_EB, 4.101060E-01_EB, 3.943946E-01_EB, 3.352109E-01_EB, &
-    8.638005E-01_EB, 5.868537E-01_EB, 4.933968E-01_EB, 4.184901E-01_EB, 3.515578E-01_EB, 2.372120E-01_EB, &
-    7.473396E-01_EB, 4.634941E-01_EB, 3.773536E-01_EB, 3.204169E-01_EB, 2.691308E-01_EB, 1.973209E-01_EB, &
-    1.075793E+00_EB, 6.901856E-01_EB, 5.863264E-01_EB, 4.953799E-01_EB, 4.099045E-01_EB, 3.087271E-01_EB, &
-    7.618639E-01_EB, 5.710744E-01_EB, 5.119297E-01_EB, 4.355606E-01_EB, 3.816839E-01_EB, 2.986601E-01_EB, &
-    3.829364E-01_EB, 2.996640E-01_EB, 2.758161E-01_EB, 2.360499E-01_EB, 2.322954E-01_EB, 1.869090E-01_EB/),(/6,8/))
-
-SD4_C2H4(1:6,17:24) = RESHAPE((/ &  ! 3200-3375 cm-1
-    1.995666E-01_EB, 1.773581E-01_EB, 1.698712E-01_EB, 1.453373E-01_EB, 1.528033E-01_EB, 1.313525E-01_EB, &
-    1.008892E-01_EB, 8.849091E-02_EB, 9.058647E-02_EB, 7.397812E-02_EB, 1.099472E-01_EB, 1.281385E-01_EB, &
-    2.554020E-02_EB, 3.191807E-02_EB, 5.917530E-02_EB, 2.447424E-02_EB, 8.973102E-02_EB, 5.369162E-02_EB, &
-    7.475495E-03_EB, 4.939349E-03_EB, 6.848337E-03_EB, 3.684887E-03_EB, 3.195268E-02_EB, 1.771297E-02_EB, &
-    5.997130E-03_EB, 1.007704E-03_EB, 9.556394E-04_EB, 9.608511E-04_EB, 1.485928E-02_EB, 6.626993E-03_EB, &
-    2.282455E-03_EB, 9.656547E-04_EB, 9.765097E-04_EB, 1.015094E-03_EB, 9.909849E-04_EB, 9.771359E-04_EB, &
-    9.621108E-04_EB, 9.799641E-04_EB, 9.821167E-04_EB, 9.838631E-04_EB, 9.909490E-04_EB, 9.874240E-04_EB, &
-    9.424083E-04_EB, 9.068570E-04_EB, 9.317848E-04_EB, 9.359110E-04_EB, 9.232241E-04_EB, 9.161307E-04_EB/),(/6,8/))
-
-SD4_C2H4(1:6,25:25) = RESHAPE((/ &  ! 3400-3400 cm-1
-    8.645026E-04_EB, 8.645026E-04_EB, 8.645026E-04_EB, 8.645026E-04_EB, 8.645026E-04_EB, 8.645026E-04_EB/),(/6,1/))
+be_c2h4 = (/ &
+   1.000_EB, 1.000_EB, 1.000_EB, 1.000_EB/)
 
 !---------------------------------------------------------------------------
-ALLOCATE(GAMMAD4_C2H4(N_TEMP_C2H4,25)) 
+ALLOCATE(sd1_c2h4(n_temp_c2h4,77)) 
 
-! BAND #4: 2800 cm-1 - 3400 cm-1 
+! band #1: 750 cm-1 - 1250 cm-1 
 
-! SNB FIT WITH GOODY MODEL 
+! snb fit with malkmus model 
 
-! ERROR ASSOCIATED WITH GOODY FIT: 
-! On Transmissivity: 0.18751 % 
+! error associated with malkmus fit: 
+! on transmissivity: 2.6588 % 
 
-! PRINT FINE STRUCTURE ARRAY GAMMA_D 
+sd1_c2h4(1:7,1:8) = RESHAPE((/ &  ! 750-785 cm-1
+   3.061616e-04_EB, 2.767365e-04_EB, 2.573770e-04_EB, 3.123088e-04_EB, 2.802708e-04_EB, 3.214089e-04_EB, &
+   1.645179e-04_EB, &
+   3.863930e-04_EB, 3.214740e-04_EB, 3.599651e-04_EB, 2.875226e-04_EB, 3.220027e-04_EB, 3.442021e-04_EB, &
+   3.429771e-04_EB, &
+   3.479571e-04_EB, 3.988382e-04_EB, 5.410044e-04_EB, 3.711756e-04_EB, 4.049933e-04_EB, 3.780624e-04_EB, &
+   1.581304e-04_EB, &
+   3.363011e-04_EB, 4.180798e-04_EB, 3.197069e-04_EB, 3.653986e-04_EB, 4.187833e-04_EB, 7.101448e-03_EB, &
+   3.809923e-04_EB, &
+   3.533603e-04_EB, 3.413308e-04_EB, 3.254621e-04_EB, 4.091800e-04_EB, 3.812469e-04_EB, 2.897062e-01_EB, &
+   2.857766e-04_EB, &
+   3.471021e-04_EB, 3.981441e-04_EB, 3.391170e-04_EB, 3.788735e-04_EB, 3.733369e-04_EB, 7.154619e-01_EB, &
+   2.973615e-04_EB, &
+   3.515529e-04_EB, 3.867219e-04_EB, 3.372267e-04_EB, 4.293329e-04_EB, 3.549482e-03_EB, 2.273679e+00_EB, &
+   2.916009e-04_EB, &
+   4.086122e-04_EB, 3.034723e-04_EB, 3.481328e-04_EB, 4.240499e-04_EB, 2.168522e-02_EB, 8.658210e-01_EB, &
+   2.764510e-04_EB/),(/7,8/))
 
-GAMMAD4_C2H4(1:6,1:8) = RESHAPE((/ &  ! 2800-2975 cm-1
-    7.112603E-04_EB, 7.114654E-04_EB, 7.289473E-04_EB, 7.261743E-04_EB, 7.194537E-04_EB, 7.144383E-04_EB, &
-    1.076586E-03_EB, 7.403376E-04_EB, 7.326974E-04_EB, 7.505928E-04_EB, 7.750715E-04_EB, 7.542379E-04_EB, &
-    1.563220E-03_EB, 7.642951E-04_EB, 1.111717E-03_EB, 8.311487E-04_EB, 2.748361E-03_EB, 2.322678E-03_EB, &
-    1.125483E-02_EB, 7.841542E-04_EB, 6.357404E-02_EB, 3.091055E-03_EB, 8.313047E-03_EB, 6.396653E-03_EB, &
-    4.385346E-02_EB, 6.665216E-03_EB, 1.401162E-01_EB, 6.667880E-02_EB, 2.339770E-02_EB, 4.843494E-02_EB, &
-    5.572982E-02_EB, 2.366442E-01_EB, 8.577598E-01_EB, 8.431427E-01_EB, 1.562732E-01_EB, 2.701328E-01_EB, &
-    2.537313E-01_EB, 8.639170E-01_EB, 4.049970E+00_EB, 1.370226E+00_EB, 4.693701E-01_EB, 1.681940E-01_EB, &
-    2.566421E-01_EB, 5.613758E-01_EB, 4.050459E+00_EB, 3.268285E+00_EB, 2.979237E-01_EB, 2.258563E-01_EB/),(/6,8/))
+sd1_c2h4(1:7,9:16) = RESHAPE((/ &  ! 790-825 cm-1
+   3.370619e-04_EB, 3.449516e-04_EB, 3.068753e-03_EB, 2.166061e-03_EB, 3.067872e-01_EB, 2.126871e+00_EB, &
+   3.160891e-04_EB, &
+   2.931244e-04_EB, 2.735279e-03_EB, 6.531861e-01_EB, 6.019424e-03_EB, 5.639027e-01_EB, 1.299202e+00_EB, &
+   3.396657e-04_EB, &
+   4.877063e-04_EB, 9.280827e-03_EB, 1.579979e-02_EB, 1.496897e-02_EB, 4.992397e-01_EB, 1.406058e+00_EB, &
+   3.043444e-04_EB, &
+   4.001483e-04_EB, 1.891644e-02_EB, 9.491147e-03_EB, 2.267553e-02_EB, 3.421534e-01_EB, 6.382093e-02_EB, &
+   1.852766e-04_EB, &
+   1.290823e-03_EB, 2.799153e-02_EB, 1.446431e-02_EB, 2.843022e-02_EB, 8.398144e-02_EB, 4.512817e-02_EB, &
+   1.294866e-02_EB, &
+   2.070200e-01_EB, 3.632895e-02_EB, 3.296335e-02_EB, 4.820045e-02_EB, 1.668313e-01_EB, 1.323383e-01_EB, &
+   3.901722e+00_EB, &
+   2.001955e-01_EB, 4.074161e-02_EB, 5.504791e-02_EB, 2.033738e-01_EB, 1.370229e-01_EB, 1.403502e+00_EB, &
+   9.703462e-01_EB, &
+   2.718536e-02_EB, 7.068372e-02_EB, 8.035231e-02_EB, 1.066961e-01_EB, 1.330522e-01_EB, 2.467964e-01_EB, &
+   4.709421e+00_EB/),(/7,8/))
 
-GAMMAD4_C2H4(1:6,9:16) = RESHAPE((/ &  ! 3000-3175 cm-1
-    1.847591E-01_EB, 2.746024E-01_EB, 4.043030E+00_EB, 1.368760E+00_EB, 3.232859E-01_EB, 2.711939E-01_EB, &
-    7.954318E-01_EB, 1.125877E+00_EB, 3.875057E+00_EB, 3.441776E+00_EB, 7.105988E-01_EB, 4.981249E-01_EB, &
-    4.477357E-01_EB, 5.183503E-01_EB, 7.222029E-01_EB, 2.369014E+00_EB, 5.607387E-01_EB, 2.437247E-01_EB, &
-    6.355275E-01_EB, 3.891620E-01_EB, 4.830097E-01_EB, 1.242821E+00_EB, 8.108797E-01_EB, 2.742511E-01_EB, &
-    6.138993E-01_EB, 2.766311E-01_EB, 3.752238E-01_EB, 4.640894E-01_EB, 6.490255E-01_EB, 1.534504E-01_EB, &
-    5.622288E-01_EB, 3.720395E-01_EB, 2.872879E-01_EB, 3.900929E-01_EB, 4.021110E-01_EB, 1.299057E-01_EB, &
-    2.750640E-01_EB, 2.353369E-01_EB, 1.914636E-01_EB, 3.327059E-01_EB, 2.817036E-01_EB, 1.088329E-01_EB, &
-    1.190635E-01_EB, 1.060178E-01_EB, 8.387637E-02_EB, 1.484284E-01_EB, 7.402726E-02_EB, 4.282846E-02_EB/),(/6,8/))
+sd1_c2h4(1:7,17:24) = RESHAPE((/ &  ! 830-865 cm-1
+   8.016587e-02_EB, 1.232301e-01_EB, 1.080896e-01_EB, 1.876693e-01_EB, 1.436722e-01_EB, 1.806775e-01_EB, &
+   1.955761e-01_EB, &
+   8.134800e-02_EB, 1.769076e-01_EB, 1.680321e-01_EB, 1.930321e-01_EB, 1.757502e-01_EB, 2.398550e-01_EB, &
+   2.039868e-01_EB, &
+   1.441756e-01_EB, 2.209548e-01_EB, 2.092624e-01_EB, 2.537575e-01_EB, 2.144884e-01_EB, 2.788351e-01_EB, &
+   7.848435e-01_EB, &
+   1.963952e-01_EB, 2.703514e-01_EB, 2.622330e-01_EB, 3.903483e-01_EB, 3.265592e-01_EB, 3.009724e-01_EB, &
+   6.260775e+00_EB, &
+   2.991975e-01_EB, 3.352004e-01_EB, 3.564035e-01_EB, 3.796975e-01_EB, 4.082076e-01_EB, 3.402704e-01_EB, &
+   2.111753e+00_EB, &
+   3.860882e-01_EB, 4.216740e-01_EB, 4.053700e-01_EB, 4.209808e-01_EB, 5.214527e-01_EB, 5.131750e-01_EB, &
+   3.472334e-01_EB, &
+   4.648316e-01_EB, 4.632385e-01_EB, 4.893760e-01_EB, 5.410936e-01_EB, 5.227714e-01_EB, 3.928599e-01_EB, &
+   3.841886e-01_EB, &
+   6.022275e-01_EB, 5.990898e-01_EB, 5.570012e-01_EB, 6.192645e-01_EB, 6.317220e-01_EB, 4.457061e-01_EB, &
+   4.504311e-01_EB/),(/7,8/))
 
-GAMMAD4_C2H4(1:6,17:24) = RESHAPE((/ &  ! 3200-3375 cm-1
-    3.949202E-02_EB, 4.546226E-02_EB, 3.784049E-02_EB, 5.864944E-02_EB, 4.264405E-02_EB, 1.631238E-02_EB, &
-    3.438038E-03_EB, 1.308622E-02_EB, 1.368345E-02_EB, 4.331880E-02_EB, 1.303476E-02_EB, 4.005084E-03_EB, &
-    1.536943E-03_EB, 4.178781E-03_EB, 1.301337E-03_EB, 1.247217E-02_EB, 2.514407E-03_EB, 4.628642E-03_EB, &
-    1.436265E-03_EB, 1.433498E-03_EB, 2.920760E-03_EB, 1.642393E-03_EB, 3.221106E-03_EB, 9.960303E-03_EB, &
-    2.547261E-03_EB, 7.688175E-04_EB, 7.296401E-04_EB, 7.260751E-04_EB, 1.452626E-03_EB, 2.322270E-03_EB, &
-    1.088525E-03_EB, 7.320774E-04_EB, 7.514290E-04_EB, 7.598369E-04_EB, 7.482434E-04_EB, 7.471218E-04_EB, &
-    7.272770E-04_EB, 7.461192E-04_EB, 7.294186E-04_EB, 7.452995E-04_EB, 7.374534E-04_EB, 7.422225E-04_EB, &
-    7.251778E-04_EB, 6.992918E-04_EB, 7.195863E-04_EB, 7.173893E-04_EB, 7.161041E-04_EB, 7.151194E-04_EB/),(/6,8/))
+sd1_c2h4(1:7,25:32) = RESHAPE((/ &  ! 870-905 cm-1
+   7.041966e-01_EB, 6.621798e-01_EB, 6.254956e-01_EB, 6.363171e-01_EB, 6.107430e-01_EB, 5.497340e-01_EB, &
+   5.235314e-01_EB, &
+   8.729129e-01_EB, 7.949380e-01_EB, 7.594193e-01_EB, 7.573864e-01_EB, 6.279590e-01_EB, 5.238851e-01_EB, &
+   6.195839e-01_EB, &
+   1.076407e+00_EB, 9.480760e-01_EB, 8.612630e-01_EB, 8.823757e-01_EB, 7.150564e-01_EB, 6.412975e-01_EB, &
+   5.713233e-01_EB, &
+   1.149326e+00_EB, 9.164652e-01_EB, 8.407015e-01_EB, 7.805755e-01_EB, 7.361358e-01_EB, 4.885371e-01_EB, &
+   6.246788e-01_EB, &
+   1.285145e+00_EB, 1.001830e+00_EB, 9.098842e-01_EB, 8.665704e-01_EB, 7.069087e-01_EB, 5.784402e-01_EB, &
+   5.420318e-01_EB, &
+   1.656594e+00_EB, 1.243694e+00_EB, 1.132558e+00_EB, 1.004866e+00_EB, 8.573835e-01_EB, 6.721572e-01_EB, &
+   5.651920e-01_EB, &
+   1.512695e+00_EB, 1.063450e+00_EB, 9.534704e-01_EB, 8.623387e-01_EB, 7.340704e-01_EB, 5.647638e-01_EB, &
+   5.138506e-01_EB, &
+   1.503391e+00_EB, 1.046223e+00_EB, 9.264262e-01_EB, 8.216305e-01_EB, 7.214293e-01_EB, 4.921282e-01_EB, &
+   9.505467e-01_EB/),(/7,8/))
 
-GAMMAD4_C2H4(1:6,25:25) = RESHAPE((/ &  ! 3400-3400 cm-1
-    6.792025E-04_EB, 6.792025E-04_EB, 6.792025E-04_EB, 6.792025E-04_EB, 6.792025E-04_EB, 6.792025E-04_EB/),(/6,1/))
+sd1_c2h4(1:7,33:40) = RESHAPE((/ &  ! 910-945 cm-1
+   2.136589e+00_EB, 1.441371e+00_EB, 1.265404e+00_EB, 1.131971e+00_EB, 8.629746e-01_EB, 5.974312e-01_EB, &
+   6.931755e-01_EB, &
+   1.937708e+00_EB, 1.292014e+00_EB, 1.117250e+00_EB, 9.960421e-01_EB, 7.945183e-01_EB, 6.856903e-01_EB, &
+   6.607081e-01_EB, &
+   1.854239e+00_EB, 1.153175e+00_EB, 9.838961e-01_EB, 9.179450e-01_EB, 6.997797e-01_EB, 5.900011e-01_EB, &
+   1.136208e+00_EB, &
+   1.823799e+00_EB, 1.165735e+00_EB, 1.007681e+00_EB, 9.292605e-01_EB, 7.896203e-01_EB, 5.208819e-01_EB, &
+   1.763502e+00_EB, &
+   1.757932e+00_EB, 1.135853e+00_EB, 9.853861e-01_EB, 9.026759e-01_EB, 7.075480e-01_EB, 6.179452e-01_EB, &
+   6.802571e-01_EB, &
+   1.474799e+00_EB, 1.023497e+00_EB, 9.336669e-01_EB, 8.778123e-01_EB, 8.131435e-01_EB, 6.616974e-01_EB, &
+   7.567051e-01_EB, &
+   2.289039e+00_EB, 1.607837e+00_EB, 1.440647e+00_EB, 1.347166e+00_EB, 1.239509e+00_EB, 1.038545e+00_EB, &
+   1.100592e+00_EB, &
+   3.685332e+00_EB, 2.419819e+00_EB, 2.144192e+00_EB, 1.965314e+00_EB, 1.747995e+00_EB, 1.497634e+00_EB, &
+   1.667794e+00_EB/),(/7,8/))
 
-!-------------------------Heptane DATA-------------------
+sd1_c2h4(1:7,41:48) = RESHAPE((/ &  ! 950-985 cm-1
+   9.810246e+00_EB, 7.439967e+00_EB, 6.716823e+00_EB, 6.081792e+00_EB, 4.841636e+00_EB, 3.239145e+00_EB, &
+   2.178622e+00_EB, &
+   2.747963e+00_EB, 2.185259e+00_EB, 2.110959e+00_EB, 2.104012e+00_EB, 1.967093e+00_EB, 1.887167e+00_EB, &
+   1.592410e+00_EB, &
+   1.878302e+00_EB, 1.339111e+00_EB, 1.209909e+00_EB, 1.180489e+00_EB, 1.063613e+00_EB, 1.043418e+00_EB, &
+   9.802449e-01_EB, &
+   1.846689e+00_EB, 1.233103e+00_EB, 1.078269e+00_EB, 1.010819e+00_EB, 7.843025e-01_EB, 7.220401e-01_EB, &
+   6.485561e-01_EB, &
+   2.135746e+00_EB, 1.274099e+00_EB, 1.072632e+00_EB, 9.574284e-01_EB, 7.244360e-01_EB, 6.000363e-01_EB, &
+   5.922618e-01_EB, &
+   1.598509e+00_EB, 1.039908e+00_EB, 9.058024e-01_EB, 8.461204e-01_EB, 6.619076e-01_EB, 5.572688e-01_EB, &
+   6.188948e-01_EB, &
+   2.103202e+00_EB, 1.300976e+00_EB, 1.111634e+00_EB, 9.847661e-01_EB, 7.744278e-01_EB, 5.718997e-01_EB, &
+   6.346134e-01_EB, &
+   2.261675e+00_EB, 1.454471e+00_EB, 1.243161e+00_EB, 1.093485e+00_EB, 8.306949e-01_EB, 6.753502e-01_EB, &
+   5.723775e-01_EB/),(/7,8/))
 
+sd1_c2h4(1:7,49:56) = RESHAPE((/ &  ! 990-1025 cm-1
+   2.079467e+00_EB, 1.263897e+00_EB, 1.076642e+00_EB, 9.600844e-01_EB, 7.479525e-01_EB, 5.904677e-01_EB, &
+   5.384319e-01_EB, &
+   1.966589e+00_EB, 1.324982e+00_EB, 1.148642e+00_EB, 1.030295e+00_EB, 8.285130e-01_EB, 6.028164e-01_EB, &
+   5.615524e-01_EB, &
+   1.704129e+00_EB, 1.136312e+00_EB, 1.028789e+00_EB, 9.378779e-01_EB, 7.696240e-01_EB, 6.407307e-01_EB, &
+   5.740712e-01_EB, &
+   2.099061e+00_EB, 1.480171e+00_EB, 1.279590e+00_EB, 1.150617e+00_EB, 8.965259e-01_EB, 6.108346e-01_EB, &
+   5.651648e-01_EB, &
+   1.532195e+00_EB, 1.072161e+00_EB, 9.586967e-01_EB, 8.739703e-01_EB, 7.409633e-01_EB, 5.463573e-01_EB, &
+   5.543106e-01_EB, &
+   1.449718e+00_EB, 1.130569e+00_EB, 1.010466e+00_EB, 9.314315e-01_EB, 8.044840e-01_EB, 5.741548e-01_EB, &
+   5.103097e-01_EB, &
+   1.361629e+00_EB, 1.048216e+00_EB, 9.484550e-01_EB, 8.875882e-01_EB, 7.583217e-01_EB, 6.224803e-01_EB, &
+   5.104751e-01_EB, &
+   1.215443e+00_EB, 9.557761e-01_EB, 8.676531e-01_EB, 8.218519e-01_EB, 6.763815e-01_EB, 5.340442e-01_EB, &
+   4.917932e-01_EB/),(/7,8/))
 
-! THERE ARE 2 BANDS FOR Heptane
+sd1_c2h4(1:7,57:64) = RESHAPE((/ &  ! 1030-1065 cm-1
+   1.134122e+00_EB, 9.472716e-01_EB, 8.758677e-01_EB, 8.193195e-01_EB, 7.086094e-01_EB, 5.766945e-01_EB, &
+   6.808968e-01_EB, &
+   8.950378e-01_EB, 7.770052e-01_EB, 7.253665e-01_EB, 7.245858e-01_EB, 6.204068e-01_EB, 5.655605e-01_EB, &
+   6.332963e-01_EB, &
+   6.844087e-01_EB, 6.493525e-01_EB, 6.230393e-01_EB, 6.224226e-01_EB, 5.363550e-01_EB, 4.974590e-01_EB, &
+   7.583943e-01_EB, &
+   7.556324e-01_EB, 7.049278e-01_EB, 6.726842e-01_EB, 6.598185e-01_EB, 5.886987e-01_EB, 5.424892e-01_EB, &
+   5.990280e-01_EB, &
+   6.289721e-01_EB, 6.069297e-01_EB, 6.011876e-01_EB, 5.779180e-01_EB, 5.326335e-01_EB, 4.750991e-01_EB, &
+   4.588251e-01_EB, &
+   4.745725e-01_EB, 4.627839e-01_EB, 4.803008e-01_EB, 4.911406e-01_EB, 4.593009e-01_EB, 3.894394e-01_EB, &
+   4.927539e-01_EB, &
+   4.243657e-01_EB, 4.444157e-01_EB, 4.520903e-01_EB, 4.522320e-01_EB, 4.526266e-01_EB, 3.758722e-01_EB, &
+   4.237227e-01_EB, &
+   2.905835e-01_EB, 3.554843e-01_EB, 3.584158e-01_EB, 3.801254e-01_EB, 4.065901e-01_EB, 4.115057e-01_EB, &
+   5.026136e-01_EB/),(/7,8/))
 
-! BAND #1: 1100 cm-1 - 1800 cm-1 
-! BAND #2: 2550 cm-1 - 3275 cm-1 
+sd1_c2h4(1:7,65:72) = RESHAPE((/ &  ! 1070-1125 cm-1
+   3.642080e-01_EB, 4.087106e-01_EB, 4.100121e-01_EB, 4.077213e-01_EB, 4.343523e-01_EB, 3.642286e-01_EB, &
+   4.076571e-01_EB, &
+   2.285227e-01_EB, 2.715118e-01_EB, 2.835998e-01_EB, 3.085575e-01_EB, 3.428083e-01_EB, 2.858531e-01_EB, &
+   3.538602e-01_EB, &
+   2.072180e-01_EB, 2.508628e-01_EB, 2.687615e-01_EB, 3.061642e-01_EB, 3.126805e-01_EB, 3.288883e-01_EB, &
+   3.309101e-01_EB, &
+   1.485077e-01_EB, 1.994016e-01_EB, 2.138919e-01_EB, 2.352105e-01_EB, 2.665822e-01_EB, 2.680282e-01_EB, &
+   4.173662e-01_EB, &
+   1.233539e-01_EB, 1.739268e-01_EB, 2.005570e-01_EB, 2.264850e-01_EB, 2.387994e-01_EB, 2.855644e-01_EB, &
+   3.039316e-01_EB, &
+   1.208930e-01_EB, 1.604253e-01_EB, 1.886652e-01_EB, 1.954718e-01_EB, 2.106737e-01_EB, 2.480406e-01_EB, &
+   2.674441e-01_EB, &
+   9.300476e-02_EB, 1.298575e-01_EB, 1.529873e-01_EB, 1.727849e-01_EB, 2.062593e-01_EB, 2.191541e-01_EB, &
+   2.754971e-01_EB, &
+   2.843120e-02_EB, 4.750139e-02_EB, 6.454680e-02_EB, 7.833683e-02_EB, 1.007079e-01_EB, 1.334723e-01_EB, &
+   1.952035e-01_EB/),(/7,8/))
 
-N_TEMP_C7H16 = 6
-N_BAND_C7H16 = 2
-I_MODEL_C7H16 = 1 ! 1: GOODY, 2: MALKMUS, 3: ELSASSER 
-
-ALLOCATE(SD_C7H16_TEMP(N_TEMP_C7H16)) 
-
-! INITIALIZE BANDS WAVENUMBER BOUNDS FOR Heptane ABSOPTION COEFFICIENTS.
-! BANDS ARE ORGANIZED BY ROW: 
-! 1ST COLUMN IS THE LOWER BOUND BAND LIMIT IN cm-1. 
-! 2ND COLUMN IS THE UPPER BOUND BAND LIMIT IN cm-1. 
-! 3RD COLUMN IS THE STRIDE BETWEEN WAVENUMBERS IN BAND.
-! IF 3RD COLUMN = 0., BAND IS CALCULATED, NOT TABULATED.
-
-ALLOCATE(OM_BND_C7H16(N_BAND_C7H16,3)) 
-ALLOCATE(Be_C7H16(N_BAND_C7H16)) 
-
-OM_BND_C7H16 = RESHAPE((/ &
-    1100._EB, 2550._EB, &
-    1800._EB, 3275._EB, &
-     25._EB, 25._EB/),(/N_BAND_C7H16,3/)) 
-
-SD_C7H16_TEMP = (/ &
-    293._EB, 400._EB, 450._EB, 490._EB, 593._EB, 794._EB/)
-
-Be_C7H16 = (/ &
-    1.000_EB, 1.000_EB/)
-
-!---------------------------------------------------------------------------
-ALLOCATE(SD1_C7H16(N_TEMP_C7H16,29)) 
-
-! BAND #1: 1100 cm-1 - 1800 cm-1 
-
-! SNB FIT WITH GOODY MODEL 
-
-! ERROR ASSOCIATED WITH GOODY FIT: 
-! On Transmissivity: 0.51457 % 
-
-SD1_C7H16(1:6,1:8) = RESHAPE((/ &  ! 1100-1275 cm-1
-    4.247561E-03_EB, 4.056051E-03_EB, 4.119507E-03_EB, 4.179222E-03_EB, 4.430692E-03_EB, 4.167984E-03_EB, &
-    4.550584E-03_EB, 5.072107E-03_EB, 4.593389E-03_EB, 4.469566E-03_EB, 4.637143E-03_EB, 4.667920E-03_EB, &
-    4.501318E-03_EB, 4.780836E-03_EB, 4.725253E-03_EB, 4.424367E-03_EB, 4.437726E-03_EB, 4.696414E-03_EB, &
-    4.406501E-03_EB, 4.710057E-03_EB, 6.452024E-03_EB, 4.599121E-03_EB, 4.619740E-03_EB, 4.509801E-03_EB, &
-    4.642114E-03_EB, 4.612380E-03_EB, 1.158481E-02_EB, 1.472873E-02_EB, 6.121143E-03_EB, 2.475390E-02_EB, &
-    5.821180E-02_EB, 3.980631E-02_EB, 3.891614E-02_EB, 3.077336E-02_EB, 4.666368E-02_EB, 3.988005E-02_EB, &
-    7.508059E-02_EB, 5.431453E-02_EB, 6.249603E-02_EB, 6.737849E-02_EB, 9.868079E-02_EB, 8.032731E-02_EB, &
-    1.235979E-01_EB, 1.079449E-01_EB, 1.056788E-01_EB, 1.044594E-01_EB, 1.122790E-01_EB, 1.426661E-01_EB/),(/6,8/))
-
-SD1_C7H16(1:6,9:16) = RESHAPE((/ &  ! 1300-1475 cm-1
-    1.938578E-01_EB, 1.531746E-01_EB, 1.514824E-01_EB, 1.516573E-01_EB, 1.796775E-01_EB, 1.922952E-01_EB, &
-    2.044667E-01_EB, 2.122352E-01_EB, 2.086362E-01_EB, 2.186588E-01_EB, 2.662964E-01_EB, 3.076611E-01_EB, &
-    4.871830E-01_EB, 8.131384E-01_EB, 6.199039E-01_EB, 4.394687E-01_EB, 5.839705E-01_EB, 4.825560E-01_EB, &
-    2.139305E+00_EB, 1.706080E+00_EB, 1.460304E+00_EB, 1.149433E+00_EB, 8.953985E-01_EB, 6.514106E-01_EB, &
-    1.140048E+00_EB, 1.290729E+00_EB, 9.839690E-01_EB, 8.617338E-01_EB, 7.900118E-01_EB, 5.056581E-01_EB, &
-    2.596275E-01_EB, 3.247129E-01_EB, 3.468173E-01_EB, 5.208494E-01_EB, 5.388607E-01_EB, 4.706885E-01_EB, &
-    2.490700E+00_EB, 2.242571E+00_EB, 1.861124E+00_EB, 1.569298E+00_EB, 1.327782E+00_EB, 1.061692E+00_EB, &
-    4.043823E+00_EB, 2.917512E+00_EB, 2.141105E+00_EB, 1.805739E+00_EB, 1.349781E+00_EB, 8.141011E-01_EB/),(/6,8/))
-
-SD1_C7H16(1:6,17:24) = RESHAPE((/ &  ! 1500-1675 cm-1
-    4.151979E-01_EB, 4.334100E-01_EB, 5.053577E-01_EB, 3.865430E-01_EB, 4.153210E-01_EB, 3.314910E-01_EB, &
-    1.298750E-01_EB, 1.765612E-01_EB, 1.929031E-01_EB, 1.560122E-01_EB, 1.761009E-01_EB, 1.780472E-01_EB, &
-    1.060491E-01_EB, 1.102569E-01_EB, 1.166378E-01_EB, 7.741840E-02_EB, 7.825769E-02_EB, 7.581170E-02_EB, &
-    4.383776E-03_EB, 4.159177E-02_EB, 3.823061E-02_EB, 7.347754E-02_EB, 2.642367E-02_EB, 6.239440E-02_EB, &
-    4.507876E-03_EB, 1.212112E-02_EB, 1.344686E-02_EB, 1.391961E-01_EB, 4.522150E-03_EB, 7.924193E-01_EB, &
-    4.365428E-03_EB, 4.708160E-03_EB, 4.519335E-03_EB, 3.145269E-02_EB, 4.653199E-03_EB, 4.928615E-02_EB, &
-    4.564350E-03_EB, 4.789137E-03_EB, 4.769408E-03_EB, 6.027720E-03_EB, 4.482446E-03_EB, 4.865138E-03_EB, &
-    4.661209E-03_EB, 4.750056E-03_EB, 4.493247E-03_EB, 4.674139E-03_EB, 4.436097E-03_EB, 4.542875E-03_EB/),(/6,8/))
-
-SD1_C7H16(1:6,25:29) = RESHAPE((/ &  ! 1700-1800 cm-1
-    4.413447E-03_EB, 4.956484E-03_EB, 4.665195E-03_EB, 4.569735E-03_EB, 4.545559E-03_EB, 4.721096E-03_EB, &
-    4.452650E-03_EB, 4.579053E-03_EB, 4.618445E-03_EB, 4.649409E-03_EB, 4.598376E-03_EB, 4.370588E-03_EB, &
-    4.461563E-03_EB, 4.808041E-03_EB, 4.703359E-03_EB, 4.547977E-03_EB, 4.561663E-03_EB, 4.550320E-03_EB, &
-    4.140835E-03_EB, 4.388076E-03_EB, 4.320451E-03_EB, 4.330022E-03_EB, 4.131463E-03_EB, 4.099512E-03_EB, &
-    3.825736E-03_EB, 3.828476E-03_EB, 3.825308E-03_EB, 3.825481E-03_EB, 3.824035E-03_EB, 3.834012E-03_EB/),(/6,5/))
-
-!---------------------------------------------------------------------------
-ALLOCATE(GAMMAD1_C7H16(N_TEMP_C7H16,29)) 
-
-! BAND #1: 1100 cm-1 - 1800 cm-1 
-
-! SNB FIT WITH GOODY MODEL 
-
-! ERROR ASSOCIATED WITH GOODY FIT: 
-! On Transmissivity: 0.51457 % 
-
-! PRINT FINE STRUCTURE ARRAY GAMMA_D 
-
-GAMMAD1_C7H16(1:6,1:8) = RESHAPE((/ &  ! 1100-1275 cm-1
-    3.348316E-03_EB, 3.128153E-03_EB, 3.350836E-03_EB, 3.163388E-03_EB, 3.473944E-03_EB, 3.203916E-03_EB, &
-    3.503809E-03_EB, 3.916197E-03_EB, 3.383533E-03_EB, 3.395934E-03_EB, 3.574141E-03_EB, 3.635318E-03_EB, &
-    3.425694E-03_EB, 3.570196E-03_EB, 3.596437E-03_EB, 3.368503E-03_EB, 3.437047E-03_EB, 3.698391E-03_EB, &
-    3.418465E-03_EB, 3.570045E-03_EB, 4.470005E-03_EB, 3.482776E-03_EB, 3.523937E-03_EB, 3.556204E-03_EB, &
-    3.643042E-03_EB, 3.383937E-03_EB, 4.083379E-03_EB, 7.704347E-03_EB, 3.151450E-03_EB, 2.617044E-02_EB, &
-    1.702221E-02_EB, 2.112530E-02_EB, 1.635168E-02_EB, 1.852123E-02_EB, 5.867479E-03_EB, 2.932739E-02_EB, &
-    1.314327E-02_EB, 2.083361E-02_EB, 4.231875E-03_EB, 5.200613E-03_EB, 1.452560E-02_EB, 1.105714E-01_EB, &
-    3.599324E-02_EB, 2.513783E-02_EB, 2.433018E-02_EB, 3.410640E-02_EB, 1.335309E-02_EB, 4.423630E-01_EB/),(/6,8/))
-
-GAMMAD1_C7H16(1:6,9:16) = RESHAPE((/ &  ! 1300-1475 cm-1
-    1.198842E-01_EB, 5.418471E-02_EB, 5.149290E-02_EB, 5.646346E-02_EB, 3.913464E-02_EB, 3.107520E-01_EB, &
-    7.844312E-02_EB, 3.874217E-02_EB, 4.306812E-02_EB, 4.220300E-02_EB, 8.905774E-03_EB, 3.986277E-02_EB, &
-    1.057944E-01_EB, 2.925701E-03_EB, 4.831521E-03_EB, 2.622111E-02_EB, 7.891941E-03_EB, 2.736277E-02_EB, &
-    4.335379E-02_EB, 1.996058E-02_EB, 1.827433E-02_EB, 2.291732E-02_EB, 3.950473E-02_EB, 4.195071E-01_EB, &
-    2.643640E-02_EB, 7.829182E-03_EB, 1.237217E-02_EB, 1.402409E-02_EB, 1.130150E-02_EB, 1.284013E-01_EB, &
-    9.639190E-02_EB, 9.464238E-02_EB, 1.821586E-01_EB, 5.952959E-03_EB, 8.070778E-03_EB, 1.474177E-01_EB, &
-    5.540279E-02_EB, 2.364377E-02_EB, 2.742454E-02_EB, 3.028452E-02_EB, 2.975814E-02_EB, 2.813045E-02_EB, &
-    8.479643E-02_EB, 3.678012E-02_EB, 4.548722E-02_EB, 3.821395E-02_EB, 3.431344E-02_EB, 4.234303E-01_EB/),(/6,8/))
-
-GAMMAD1_C7H16(1:6,17:24) = RESHAPE((/ &  ! 1500-1675 cm-1
-    1.617338E-01_EB, 2.074253E-01_EB, 2.679310E-02_EB, 1.660069E-01_EB, 1.088006E-01_EB, 3.755665E-01_EB, &
-    6.429646E-02_EB, 7.868427E-01_EB, 2.160519E-01_EB, 9.343794E-01_EB, 4.745356E-02_EB, 8.346457E-02_EB, &
-    9.190561E-02_EB, 1.113220E+00_EB, 1.059461E+00_EB, 3.424980E-01_EB, 2.985428E-02_EB, 1.059920E-01_EB, &
-    3.412289E-03_EB, 6.851192E-03_EB, 1.064505E-01_EB, 1.255083E-02_EB, 6.671297E-03_EB, 3.405029E-03_EB, &
-    3.504072E-03_EB, 1.181929E-03_EB, 1.675827E-03_EB, 2.437687E-04_EB, 3.439624E-03_EB, 9.621344E-05_EB, &
-    3.315091E-03_EB, 3.468544E-03_EB, 3.448970E-03_EB, 5.898791E-03_EB, 3.589500E-03_EB, 5.810129E-03_EB, &
-    3.585081E-03_EB, 3.623910E-03_EB, 3.577118E-03_EB, 3.959468E-03_EB, 3.447623E-03_EB, 3.650695E-03_EB, &
-    3.649620E-03_EB, 3.621536E-03_EB, 3.389093E-03_EB, 3.575870E-03_EB, 3.285780E-03_EB, 3.478695E-03_EB/),(/6,8/))
-
-GAMMAD1_C7H16(1:6,25:29) = RESHAPE((/ &  ! 1700-1800 cm-1
-    3.342671E-03_EB, 3.799850E-03_EB, 3.516234E-03_EB, 3.455451E-03_EB, 3.506473E-03_EB, 3.723501E-03_EB, &
-    3.375590E-03_EB, 3.525205E-03_EB, 3.453308E-03_EB, 3.430725E-03_EB, 3.416845E-03_EB, 3.384057E-03_EB, &
-    3.509967E-03_EB, 3.712778E-03_EB, 3.580448E-03_EB, 3.397112E-03_EB, 3.551791E-03_EB, 3.566513E-03_EB, &
-    3.236424E-03_EB, 3.381189E-03_EB, 3.315315E-03_EB, 3.330451E-03_EB, 3.230674E-03_EB, 3.201291E-03_EB, &
-    3.052487E-03_EB, 3.054957E-03_EB, 3.051950E-03_EB, 3.051909E-03_EB, 3.050779E-03_EB, 3.060754E-03_EB/),(/6,5/))
-
-!---------------------------------------------------------------------------
-ALLOCATE(SD2_C7H16(N_TEMP_C7H16,30)) 
-
-! BAND #2: 2550 cm-1 - 3275 cm-1 
-
-! SNB FIT WITH GOODY MODEL 
-
-! ERROR ASSOCIATED WITH GOODY FIT: 
-! On Transmissivity: 3.7861 % 
-
-SD2_C7H16(1:6,1:8) = RESHAPE((/ &  ! 2550-2725 cm-1
-    4.080204E-03_EB, 1.123603E-02_EB, 6.711301E-03_EB, 9.802853E-03_EB, 1.124791E-02_EB, 4.121361E-03_EB, &
-    1.731344E-02_EB, 4.684160E-02_EB, 3.796471E-02_EB, 4.427666E-02_EB, 4.958869E-02_EB, 1.708389E-02_EB, &
-    9.875757E-02_EB, 1.029056E-01_EB, 8.408956E-02_EB, 8.208976E-02_EB, 6.200320E-02_EB, 3.054689E-02_EB, &
-    1.192361E-01_EB, 1.171238E-01_EB, 8.490684E-02_EB, 8.654542E-02_EB, 6.720643E-02_EB, 4.763998E-02_EB, &
-    1.281871E-01_EB, 1.439468E-01_EB, 9.835237E-02_EB, 9.911327E-02_EB, 7.758740E-02_EB, 6.374023E-02_EB, &
-    1.565389E-01_EB, 1.699404E-01_EB, 1.190596E-01_EB, 1.237052E-01_EB, 8.224248E-02_EB, 7.484796E-02_EB, &
-    1.546301E-01_EB, 1.935034E-01_EB, 1.275741E-01_EB, 1.350121E-01_EB, 1.050690E-01_EB, 1.079705E-01_EB, &
-    2.797492E-01_EB, 2.864845E-01_EB, 1.957940E-01_EB, 1.998535E-01_EB, 1.534373E-01_EB, 1.623210E-01_EB/),(/6,8/))
-
-SD2_C7H16(1:6,9:16) = RESHAPE((/ &  ! 2750-2925 cm-1
-    3.007562E-01_EB, 3.229197E-01_EB, 2.505629E-01_EB, 2.533393E-01_EB, 2.079978E-01_EB, 2.387369E-01_EB, &
-    2.208750E-01_EB, 3.058176E-01_EB, 2.479657E-01_EB, 2.661380E-01_EB, 2.402915E-01_EB, 3.462509E-01_EB, &
-    6.180679E-01_EB, 6.837362E-01_EB, 4.174983E-01_EB, 4.364177E-01_EB, 4.218298E-01_EB, 5.674293E-01_EB, &
-    1.204349E+00_EB, 1.229324E+00_EB, 9.817776E-01_EB, 8.506271E-01_EB, 9.113731E-01_EB, 1.109039E+00_EB, &
-    5.776649E+00_EB, 4.492173E+00_EB, 3.900577E+00_EB, 3.336657E+00_EB, 2.721262E+00_EB, 2.598481E+00_EB, &
-    1.510148E+01_EB, 1.083236E+01_EB, 9.069701E+00_EB, 7.792882E+00_EB, 5.573190E+00_EB, 4.580990E+00_EB, &
-    1.297664E+01_EB, 1.027162E+01_EB, 9.142010E+00_EB, 8.154463E+00_EB, 6.417261E+00_EB, 6.006057E+00_EB, &
-    2.389360E+01_EB, 1.816540E+01_EB, 1.582531E+01_EB, 1.387161E+01_EB, 1.035691E+01_EB, 9.109852E+00_EB/),(/6,8/))
-
-SD2_C7H16(1:6,17:24) = RESHAPE((/ &  ! 2950-3125 cm-1
-    2.631147E+01_EB, 2.047520E+01_EB, 1.781444E+01_EB, 1.583729E+01_EB, 1.154530E+01_EB, 9.501802E+00_EB, &
-    3.000000E+01_EB, 2.021182E+01_EB, 1.622772E+01_EB, 1.401884E+01_EB, 8.979534E+00_EB, 6.291894E+00_EB, &
-    2.528195E+00_EB, 2.847775E+00_EB, 2.405703E+00_EB, 2.360813E+00_EB, 1.918715E+00_EB, 1.831897E+00_EB, &
-    8.804096E-01_EB, 1.184010E+00_EB, 8.414152E-01_EB, 7.586141E-01_EB, 7.930473E-01_EB, 7.216683E-01_EB, &
-    3.958386E-01_EB, 9.180016E-01_EB, 4.289760E-01_EB, 4.574418E-01_EB, 5.250566E-01_EB, 4.507457E-01_EB, &
-    2.073441E-01_EB, 6.599118E-01_EB, 2.858318E-01_EB, 3.257800E-01_EB, 2.748349E-01_EB, 3.269363E-01_EB, &
-    1.483885E-01_EB, 2.881908E-01_EB, 2.139705E-01_EB, 2.524391E-01_EB, 1.894929E-01_EB, 2.773311E-01_EB, &
-    1.046385E-01_EB, 2.582019E-01_EB, 1.748083E-01_EB, 2.040799E-01_EB, 1.423168E-01_EB, 2.103325E-01_EB/),(/6,8/))
-
-SD2_C7H16(1:6,25:30) = RESHAPE((/ &  ! 3150-3275 cm-1
-    1.533015E-01_EB, 2.167935E-01_EB, 1.515403E-01_EB, 1.696136E-01_EB, 1.109316E-01_EB, 1.534639E-01_EB, &
-    1.962369E-01_EB, 2.229444E-01_EB, 1.460371E-01_EB, 1.520507E-01_EB, 8.260536E-02_EB, 1.016102E-01_EB, &
-    1.679871E-01_EB, 1.687087E-01_EB, 9.799173E-02_EB, 1.088772E-01_EB, 5.058788E-02_EB, 5.309083E-02_EB, &
-    5.480884E-02_EB, 8.457431E-02_EB, 4.941003E-02_EB, 5.921846E-02_EB, 1.569223E-02_EB, 2.294352E-02_EB, &
-    6.444302E-03_EB, 1.503465E-02_EB, 8.996011E-03_EB, 1.181338E-02_EB, 6.970140E-03_EB, 4.276828E-03_EB, &
-    3.825736E-03_EB, 3.828476E-03_EB, 3.825308E-03_EB, 3.825481E-03_EB, 3.824035E-03_EB, 3.834012E-03_EB/),(/6,6/))
+sd1_c2h4(1:7,73:77) = RESHAPE((/ &  ! 1150-1250 cm-1
+   1.746127e-02_EB, 7.841172e-03_EB, 2.585562e-02_EB, 3.153723e-02_EB, 3.990568e-02_EB, 6.617133e-02_EB, &
+   2.077741e-01_EB, &
+   3.428479e-04_EB, 3.716895e-04_EB, 5.481270e-03_EB, 9.380871e-03_EB, 1.423446e-02_EB, 3.592881e-02_EB, &
+   5.844943e-01_EB, &
+   3.844693e-04_EB, 4.065786e-04_EB, 5.088321e-04_EB, 3.670823e-04_EB, 1.012681e-03_EB, 1.177143e-02_EB, &
+   1.441741e+00_EB, &
+   2.863454e-04_EB, 2.697429e-04_EB, 2.663683e-04_EB, 2.847322e-04_EB, 2.814940e-04_EB, 4.490652e-04_EB, &
+   2.765929e-03_EB, &
+   2.172015e-04_EB, 2.172015e-04_EB, 2.172015e-04_EB, 2.172015e-04_EB, 2.172015e-04_EB, 2.172015e-04_EB, &
+   1.035699e-04_EB/),(/7,5/))
 
 !---------------------------------------------------------------------------
-ALLOCATE(GAMMAD2_C7H16(N_TEMP_C7H16,30)) 
+ALLOCATE(gammad1_c2h4(n_temp_c2h4,77)) 
 
-! BAND #2: 2550 cm-1 - 3275 cm-1 
+! band #1: 750 cm-1 - 1250 cm-1 
 
-! SNB FIT WITH GOODY MODEL 
+! snb fit with malkmus model 
 
-! ERROR ASSOCIATED WITH GOODY FIT: 
-! On Transmissivity: 3.7861 % 
+! error associated with malkmus fit: 
+! on transmissivity: 2.6588 % 
 
-! PRINT FINE STRUCTURE ARRAY GAMMA_D 
+! print fine structure array gamma_d 
 
-GAMMAD2_C7H16(1:6,1:8) = RESHAPE((/ &  ! 2550-2725 cm-1
-    3.201622E-03_EB, 9.701632E-03_EB, 5.222720E-03_EB, 7.816287E-03_EB, 7.859451E-03_EB, 3.228154E-03_EB, &
-    9.779021E-03_EB, 6.000437E-02_EB, 3.739470E-02_EB, 3.039173E-02_EB, 2.899610E-02_EB, 9.391948E-03_EB, &
-    3.701843E-02_EB, 8.625752E-02_EB, 5.728938E-02_EB, 6.367337E-02_EB, 2.334395E-02_EB, 1.428421E-02_EB, &
-    3.594630E-02_EB, 6.623346E-02_EB, 6.696662E-02_EB, 8.145541E-02_EB, 1.079044E-02_EB, 1.320671E-02_EB, &
-    2.191533E-02_EB, 2.866743E-02_EB, 5.452113E-02_EB, 7.219253E-02_EB, 3.981684E-02_EB, 6.443265E-03_EB, &
-    1.529943E-02_EB, 7.434979E-02_EB, 6.245866E-02_EB, 1.124476E-01_EB, 2.908365E-02_EB, 3.327005E-02_EB, &
-    1.163270E-02_EB, 5.595200E-02_EB, 8.478818E-02_EB, 2.160508E-01_EB, 2.734813E-02_EB, 4.740613E-02_EB, &
-    1.284105E-02_EB, 2.993142E-02_EB, 1.290806E-01_EB, 1.075272E+00_EB, 9.183182E-03_EB, 1.711266E-02_EB/),(/6,8/))
+gammad1_c2h4(1:7,1:8) = RESHAPE((/ &  ! 750-785 cm-1
+   2.416099e-04_EB, 1.972502e-04_EB, 2.014288e-04_EB, 2.567319e-04_EB, 2.171052e-04_EB, 2.409977e-04_EB, &
+   1.211331e-04_EB, &
+   2.468780e-04_EB, 2.281487e-04_EB, 2.453616e-04_EB, 1.924299e-04_EB, 2.048382e-04_EB, 2.401308e-04_EB, &
+   2.496562e-04_EB, &
+   2.424362e-04_EB, 2.577800e-04_EB, 3.990244e-04_EB, 2.948000e-04_EB, 2.703709e-04_EB, 2.386217e-04_EB, &
+   1.097937e-04_EB, &
+   2.310838e-04_EB, 3.105661e-04_EB, 2.545394e-04_EB, 2.425587e-04_EB, 2.350566e-04_EB, 5.850300e-04_EB, &
+   2.717545e-04_EB, &
+   2.188209e-04_EB, 2.694507e-04_EB, 2.395597e-04_EB, 2.852713e-04_EB, 3.015723e-04_EB, 1.785307e-05_EB, &
+   1.970987e-04_EB, &
+   2.681455e-04_EB, 3.065002e-04_EB, 2.277458e-04_EB, 2.640085e-04_EB, 2.242100e-04_EB, 5.823579e-05_EB, &
+   2.107112e-04_EB, &
+   2.864384e-04_EB, 2.901989e-04_EB, 2.177055e-04_EB, 2.318611e-04_EB, 8.020695e-03_EB, 6.053782e-05_EB, &
+   1.973837e-04_EB, &
+   2.864942e-04_EB, 1.888603e-04_EB, 2.876981e-04_EB, 2.918797e-04_EB, 4.025819e-04_EB, 1.500744e-04_EB, &
+   1.850902e-04_EB/),(/7,8/))
 
-GAMMAD2_C7H16(1:6,9:16) = RESHAPE((/ &  ! 2750-2925 cm-1
-    1.289006E-01_EB, 1.296124E-01_EB, 8.382441E-02_EB, 2.869739E-01_EB, 4.780892E-02_EB, 7.166080E-02_EB, &
-    4.413583E-02_EB, 1.297887E-01_EB, 6.684964E-02_EB, 3.584631E-01_EB, 4.581656E-02_EB, 1.468559E-01_EB, &
-    6.214840E-03_EB, 6.604110E-03_EB, 1.095428E-01_EB, 2.419407E-01_EB, 3.035310E-02_EB, 2.458836E-01_EB, &
-    1.591309E-02_EB, 1.439033E-02_EB, 2.449424E-02_EB, 4.362116E-01_EB, 2.687288E-02_EB, 4.837061E-02_EB, &
-    9.780557E-02_EB, 6.742930E-02_EB, 6.623405E-02_EB, 9.774085E-02_EB, 1.202347E-01_EB, 9.692069E-02_EB, &
-    3.063007E-01_EB, 1.957275E-01_EB, 1.767060E-01_EB, 1.952529E-01_EB, 3.359806E-01_EB, 1.740037E-01_EB, &
-    2.506931E-01_EB, 1.992184E-01_EB, 1.870646E-01_EB, 2.101962E-01_EB, 3.604422E-01_EB, 2.171672E-01_EB, &
-    4.793108E-01_EB, 3.017116E-01_EB, 2.821994E-01_EB, 3.055967E-01_EB, 5.576104E-01_EB, 2.948749E-01_EB/),(/6,8/))
+gammad1_c2h4(1:7,9:16) = RESHAPE((/ &  ! 790-825 cm-1
+   2.028540e-04_EB, 2.332145e-04_EB, 8.835388e-04_EB, 1.557804e-03_EB, 6.921471e-05_EB, 1.608572e-04_EB, &
+   2.284767e-04_EB, &
+   1.964413e-04_EB, 1.354319e-03_EB, 3.099296e-05_EB, 1.230936e-01_EB, 9.177521e-05_EB, 3.735015e-04_EB, &
+   2.567094e-04_EB, &
+   3.523993e-04_EB, 4.495628e-03_EB, 1.170244e-01_EB, 1.834956e-01_EB, 2.119215e-04_EB, 4.987881e-04_EB, &
+   2.324660e-04_EB, &
+   2.481552e-04_EB, 3.297622e-03_EB, 3.408731e-01_EB, 1.941870e-02_EB, 5.655524e-04_EB, 6.632397e+00_EB, &
+   1.455497e-04_EB, &
+   6.200957e-02_EB, 5.552681e-03_EB, 1.304796e+00_EB, 9.167035e-01_EB, 1.036969e-02_EB, 4.543832e+00_EB, &
+   4.663762e-02_EB, &
+   4.857487e-05_EB, 7.312172e-03_EB, 6.397405e-01_EB, 1.805633e+00_EB, 7.876697e-03_EB, 1.052298e+01_EB, &
+   2.200552e-04_EB, &
+   1.266088e-04_EB, 3.671828e-01_EB, 1.052101e+00_EB, 4.874822e-03_EB, 1.186820e-02_EB, 1.436321e-03_EB, &
+   2.304645e-03_EB, &
+   7.234540e-02_EB, 1.423099e-01_EB, 4.250396e+00_EB, 4.471836e-01_EB, 1.394765e-01_EB, 2.304974e-02_EB, &
+   9.320014e-04_EB/),(/7,8/))
 
-GAMMAD2_C7H16(1:6,17:24) = RESHAPE((/ &  ! 2950-3125 cm-1
-    5.470999E-01_EB, 3.674155E-01_EB, 3.455917E-01_EB, 3.468284E-01_EB, 6.830669E-01_EB, 3.321369E-01_EB, &
-    3.849429E-01_EB, 3.087347E-01_EB, 2.829796E-01_EB, 2.573698E-01_EB, 5.589670E-01_EB, 2.635544E-01_EB, &
-    3.263784E-02_EB, 3.325031E-02_EB, 4.984527E-02_EB, 5.019273E-02_EB, 1.083155E-01_EB, 1.032347E-01_EB, &
-    1.016821E-02_EB, 8.789790E-03_EB, 1.552443E-02_EB, 5.247201E-02_EB, 1.475360E-02_EB, 4.321949E-01_EB, &
-    1.083765E-01_EB, 4.130947E-03_EB, 1.135605E-01_EB, 5.041175E-01_EB, 5.832393E-03_EB, 4.662279E-01_EB, &
-    5.053333E-02_EB, 2.871959E-03_EB, 6.841283E-02_EB, 1.305780E+00_EB, 2.234411E-02_EB, 5.509204E-01_EB, &
-    1.023209E-02_EB, 1.088800E-01_EB, 1.259095E-01_EB, 9.098327E-01_EB, 3.896344E-02_EB, 1.577482E-01_EB, &
-    3.176947E-02_EB, 1.075890E-02_EB, 8.894385E-02_EB, 2.725855E-01_EB, 7.776503E-03_EB, 1.260074E-01_EB/),(/6,8/))
+gammad1_c2h4(1:7,17:24) = RESHAPE((/ &  ! 830-865 cm-1
+   5.320200e-03_EB, 3.524362e-02_EB, 1.338375e+01_EB, 2.690068e-02_EB, 2.237749e+01_EB, 3.550085e+01_EB, &
+   4.352470e+01_EB, &
+   1.362377e+00_EB, 4.799018e-02_EB, 3.645279e-01_EB, 1.401350e-01_EB, 2.192962e+01_EB, 1.052708e-01_EB, &
+   4.352470e+01_EB, &
+   4.653039e-02_EB, 8.421067e-02_EB, 1.759985e+00_EB, 1.658517e-01_EB, 5.613535e+01_EB, 4.860610e+01_EB, &
+   9.812101e-03_EB, &
+   2.321729e-01_EB, 2.414939e-01_EB, 1.567072e+01_EB, 7.788555e-02_EB, 1.585202e-01_EB, 2.057238e+01_EB, &
+   2.123765e-03_EB, &
+   1.555629e-01_EB, 8.669673e-01_EB, 5.965418e-01_EB, 3.491496e-01_EB, 1.276794e-01_EB, 4.796946e-01_EB, &
+   7.827500e-03_EB, &
+   2.604872e-01_EB, 5.734264e-01_EB, 3.245414e+01_EB, 2.473726e+00_EB, 1.188363e-01_EB, 8.314367e-02_EB, &
+   4.352145e+01_EB, &
+   3.170365e-01_EB, 1.356303e+00_EB, 6.470392e-01_EB, 2.532365e-01_EB, 1.744398e-01_EB, 7.021255e-01_EB, &
+   4.352322e+01_EB, &
+   5.909101e-01_EB, 1.099398e+00_EB, 4.090840e+00_EB, 4.223559e-01_EB, 2.001671e-01_EB, 4.828266e+01_EB, &
+   4.352310e+01_EB/),(/7,8/))
 
-GAMMAD2_C7H16(1:6,25:30) = RESHAPE((/ &  ! 3150-3275 cm-1
-    1.485244E-02_EB, 3.892775E-02_EB, 2.498053E-02_EB, 2.697280E-01_EB, 1.410130E-02_EB, 9.202896E-02_EB, &
-    6.071468E-02_EB, 3.880222E-02_EB, 3.624861E-02_EB, 8.389092E-01_EB, 1.756590E-02_EB, 8.543312E-02_EB, &
-    7.124937E-02_EB, 7.686745E-02_EB, 4.378207E-02_EB, 1.500404E+00_EB, 5.827841E-03_EB, 3.837508E-02_EB, &
-    1.227911E-02_EB, 3.291310E-02_EB, 1.246109E-02_EB, 3.990291E-01_EB, 3.385579E-03_EB, 1.304394E-02_EB, &
-    4.660820E-03_EB, 6.632973E-03_EB, 6.133476E-03_EB, 1.061576E-02_EB, 4.544655E-03_EB, 3.285631E-03_EB, &
-    3.052487E-03_EB, 3.054957E-03_EB, 3.051950E-03_EB, 3.051909E-03_EB, 3.050779E-03_EB, 3.060754E-03_EB/),(/6,6/))
+gammad1_c2h4(1:7,25:32) = RESHAPE((/ &  ! 870-905 cm-1
+   6.696240e-01_EB, 9.061473e-01_EB, 1.096877e+00_EB, 6.942716e-01_EB, 5.833627e-01_EB, 7.942786e-01_EB, &
+   3.236155e-01_EB, &
+   7.130009e-01_EB, 9.362301e-01_EB, 7.015500e-01_EB, 5.223698e-01_EB, 6.248457e+00_EB, 4.863162e+01_EB, &
+   1.544108e-01_EB, &
+   1.043070e+00_EB, 7.601537e-01_EB, 8.543522e-01_EB, 5.009053e-01_EB, 8.115324e-01_EB, 2.773377e-01_EB, &
+   1.734668e+00_EB, &
+   9.830346e-01_EB, 1.107606e+00_EB, 7.646673e-01_EB, 7.719984e-01_EB, 3.261238e-01_EB, 2.851084e+00_EB, &
+   2.517361e-01_EB, &
+   1.198560e+00_EB, 1.081208e+00_EB, 7.434343e-01_EB, 6.010115e-01_EB, 9.163865e-01_EB, 3.554812e-01_EB, &
+   2.317131e-01_EB, &
+   9.814423e-01_EB, 1.013604e+00_EB, 6.693517e-01_EB, 9.522875e-01_EB, 8.114383e-01_EB, 3.910559e-01_EB, &
+   3.337523e+01_EB, &
+   7.620617e-01_EB, 7.803621e-01_EB, 5.747705e-01_EB, 6.345028e-01_EB, 5.888869e-01_EB, 4.300627e-01_EB, &
+   4.310793e+01_EB, &
+   8.991018e-01_EB, 8.909633e-01_EB, 6.980425e-01_EB, 1.113145e+00_EB, 7.124349e-01_EB, 4.862871e+01_EB, &
+   6.096945e-02_EB/),(/7,8/))
 
-!-------------------------Methanol DATA-------------------
+gammad1_c2h4(1:7,33:40) = RESHAPE((/ &  ! 910-945 cm-1
+   5.715478e-01_EB, 5.814464e-01_EB, 5.080659e-01_EB, 4.983276e-01_EB, 8.896438e-01_EB, 3.707252e+00_EB, &
+   2.418005e-01_EB, &
+   4.564794e-01_EB, 5.408890e-01_EB, 5.281411e-01_EB, 6.161207e-01_EB, 9.304299e-01_EB, 1.822560e-01_EB, &
+   1.433739e-01_EB, &
+   4.474194e-01_EB, 5.933999e-01_EB, 5.926916e-01_EB, 4.188992e-01_EB, 8.916726e-01_EB, 2.166682e-01_EB, &
+   3.172885e-02_EB, &
+   6.679241e-01_EB, 7.624342e-01_EB, 6.139160e-01_EB, 4.989378e-01_EB, 3.780157e-01_EB, 4.858759e+01_EB, &
+   2.070389e-02_EB, &
+   1.572323e+00_EB, 1.507380e+00_EB, 1.025688e+00_EB, 7.931157e-01_EB, 2.355979e+00_EB, 4.083523e-01_EB, &
+   4.042678e-01_EB, &
+   1.840928e+00_EB, 1.516332e+00_EB, 9.674401e-01_EB, 7.614660e-01_EB, 5.264076e-01_EB, 2.038597e+00_EB, &
+   6.604494e-01_EB, &
+   2.359084e+00_EB, 1.464881e+00_EB, 1.174436e+00_EB, 1.055262e+00_EB, 8.221130e-01_EB, 1.578212e+00_EB, &
+   5.803317e-01_EB, &
+   1.353327e+00_EB, 1.007304e+00_EB, 8.550921e-01_EB, 9.242096e-01_EB, 8.460605e-01_EB, 1.145876e+00_EB, &
+   3.951015e-01_EB/),(/7,8/))
 
+gammad1_c2h4(1:7,41:48) = RESHAPE((/ &  ! 950-985 cm-1
+   1.026068e+00_EB, 7.509719e-01_EB, 6.828323e-01_EB, 7.181245e-01_EB, 8.830267e-01_EB, 1.535879e+00_EB, &
+   3.739161e+00_EB, &
+   1.923367e+00_EB, 1.440812e+00_EB, 1.103009e+00_EB, 1.030902e+00_EB, 1.337752e+00_EB, 1.153093e+00_EB, &
+   2.040631e+00_EB, &
+   1.610198e+00_EB, 1.196060e+00_EB, 1.104793e+00_EB, 8.780307e-01_EB, 1.156102e+00_EB, 6.886495e-01_EB, &
+   2.238055e+00_EB, &
+   1.383929e+00_EB, 1.280808e+00_EB, 1.097115e+00_EB, 7.326487e-01_EB, 5.498608e+01_EB, 4.452870e-01_EB, &
+   4.352469e+01_EB, &
+   1.188786e+00_EB, 1.159934e+00_EB, 9.631713e-01_EB, 7.953825e-01_EB, 1.129330e+01_EB, 6.701708e-01_EB, &
+   5.733374e-01_EB, &
+   1.242802e+00_EB, 1.350551e+00_EB, 1.172729e+00_EB, 7.385986e-01_EB, 3.096362e+01_EB, 8.122837e-01_EB, &
+   2.708279e-01_EB, &
+   6.907316e-01_EB, 7.891104e-01_EB, 7.404165e-01_EB, 7.153440e-01_EB, 1.513590e+00_EB, 8.412093e-01_EB, &
+   2.566696e-01_EB, &
+   7.900363e-01_EB, 8.478862e-01_EB, 7.713692e-01_EB, 7.316301e-01_EB, 1.686388e+00_EB, 3.127574e-01_EB, &
+   9.749592e-01_EB/),(/7,8/))
 
-! THERE ARE 4 BANDS FOR Methanol
+gammad1_c2h4(1:7,49:56) = RESHAPE((/ &  ! 990-1025 cm-1
+   5.092459e-01_EB, 6.454904e-01_EB, 6.133995e-01_EB, 5.823764e-01_EB, 1.459319e+00_EB, 3.862803e-01_EB, &
+   4.351923e+01_EB, &
+   7.621436e-01_EB, 8.099637e-01_EB, 7.550770e-01_EB, 6.563547e-01_EB, 8.599084e-01_EB, 1.265807e+00_EB, &
+   4.352461e+01_EB, &
+   8.135765e-01_EB, 9.399794e-01_EB, 6.891443e-01_EB, 6.724564e-01_EB, 1.443782e+00_EB, 4.675502e-01_EB, &
+   6.832951e+00_EB, &
+   1.261934e+00_EB, 1.187896e+00_EB, 1.050548e+00_EB, 8.976709e-01_EB, 1.264652e+00_EB, 4.862525e+01_EB, &
+   8.286417e+00_EB, &
+   8.043161e-01_EB, 8.668835e-01_EB, 7.890285e-01_EB, 7.711386e-01_EB, 1.050733e+00_EB, 4.856478e+01_EB, &
+   4.350007e+01_EB, &
+   1.357377e+00_EB, 1.080455e+00_EB, 1.033605e+00_EB, 1.033196e+00_EB, 8.256082e-01_EB, 8.647109e+00_EB, &
+   4.350847e+01_EB, &
+   8.412833e-01_EB, 8.456811e-01_EB, 8.447705e-01_EB, 7.603788e-01_EB, 9.443837e-01_EB, 2.903532e-01_EB, &
+   4.352240e+01_EB, &
+   9.318939e-01_EB, 8.628581e-01_EB, 7.702967e-01_EB, 5.812089e-01_EB, 1.478510e+00_EB, 7.524972e-01_EB, &
+   4.352454e+01_EB/),(/7,8/))
 
-! BAND #1: 825 cm-1 - 1150 cm-1 
-! BAND #2: 1125 cm-1 - 1700 cm-1 
-! BAND #3: 2600 cm-1 - 3225 cm-1 
-! BAND #4: 3525 cm-1 - 3850 cm-1 
+gammad1_c2h4(1:7,57:64) = RESHAPE((/ &  ! 1030-1065 cm-1
+   8.629044e-01_EB, 8.975496e-01_EB, 7.798708e-01_EB, 6.608358e-01_EB, 6.759715e-01_EB, 2.711107e-01_EB, &
+   1.220647e-01_EB, &
+   7.370489e-01_EB, 8.019656e-01_EB, 1.000196e+00_EB, 5.336084e-01_EB, 1.804552e+00_EB, 2.787416e-01_EB, &
+   1.281215e-01_EB, &
+   7.787285e-01_EB, 7.334174e-01_EB, 8.721264e-01_EB, 5.887939e-01_EB, 3.552536e+01_EB, 8.474746e-01_EB, &
+   8.392367e-02_EB, &
+   5.450501e-01_EB, 6.247731e-01_EB, 7.400770e-01_EB, 5.561437e-01_EB, 9.526879e-01_EB, 3.143742e-01_EB, &
+   1.138369e-01_EB, &
+   5.144688e-01_EB, 6.585084e-01_EB, 5.903669e-01_EB, 7.810567e-01_EB, 8.401970e-01_EB, 6.417739e-01_EB, &
+   4.420604e-01_EB, &
+   3.665531e-01_EB, 8.719562e-01_EB, 5.223315e-01_EB, 4.375375e-01_EB, 5.743448e-01_EB, 2.121049e+00_EB, &
+   2.496608e-01_EB, &
+   4.667181e-01_EB, 7.081388e-01_EB, 6.911857e-01_EB, 6.081257e-01_EB, 3.737837e-01_EB, 2.130304e+00_EB, &
+   6.904458e-01_EB, &
+   3.306129e-01_EB, 3.244247e-01_EB, 1.436316e+00_EB, 6.770932e-01_EB, 3.549036e-01_EB, 2.672621e-01_EB, &
+   1.358031e-01_EB/),(/7,8/))
 
-N_TEMP_CH3OH = 6
-N_BAND_CH3OH = 4
-I_MODEL_CH3OH = 1 ! 1: GOODY, 2: MALKMUS, 3: ELSASSER 
+gammad1_c2h4(1:7,65:72) = RESHAPE((/ &  ! 1070-1125 cm-1
+   2.919422e-01_EB, 3.828297e-01_EB, 5.395788e-01_EB, 5.826860e-01_EB, 2.566111e-01_EB, 2.715471e+01_EB, &
+   2.745597e-01_EB, &
+   3.398729e-01_EB, 4.374885e-01_EB, 1.141266e+00_EB, 3.939052e-01_EB, 1.637264e-01_EB, 4.863163e+01_EB, &
+   4.352422e+01_EB, &
+   1.420571e-01_EB, 4.454635e-01_EB, 1.365866e+00_EB, 2.363442e-01_EB, 2.876851e-01_EB, 4.033493e-01_EB, &
+   4.352427e+01_EB, &
+   2.987867e-01_EB, 2.946281e-01_EB, 3.722689e+00_EB, 5.611341e-01_EB, 3.323989e-01_EB, 4.184566e+01_EB, &
+   8.215267e-02_EB, &
+   6.464375e-02_EB, 2.415560e-01_EB, 5.270835e-01_EB, 2.591978e-01_EB, 1.623247e+00_EB, 2.083192e-01_EB, &
+   2.703531e+00_EB, &
+   1.652449e-01_EB, 7.624040e-01_EB, 3.783911e-01_EB, 6.227587e-01_EB, 4.813467e+00_EB, 4.088673e-01_EB, &
+   4.352470e+01_EB, &
+   4.426509e-02_EB, 2.377002e-01_EB, 5.194564e+00_EB, 4.416648e-01_EB, 1.768354e-01_EB, 6.614723e-01_EB, &
+   8.659489e-01_EB, &
+   1.448604e-02_EB, 6.642067e-02_EB, 6.463703e-01_EB, 1.052108e+00_EB, 1.675080e-01_EB, 3.912344e-01_EB, &
+   3.760628e-01_EB/),(/7,8/))
 
-ALLOCATE(SD_CH3OH_TEMP(N_TEMP_CH3OH)) 
-
-! INITIALIZE BANDS WAVENUMBER BOUNDS FOR Methanol ABSOPTION COEFFICIENTS.
-! BANDS ARE ORGANIZED BY ROW: 
-! 1ST COLUMN IS THE LOWER BOUND BAND LIMIT IN cm-1. 
-! 2ND COLUMN IS THE UPPER BOUND BAND LIMIT IN cm-1. 
-! 3RD COLUMN IS THE STRIDE BETWEEN WAVENUMBERS IN BAND.
-! IF 3RD COLUMN = 0., BAND IS CALCULATED, NOT TABULATED.
-
-ALLOCATE(OM_BND_CH3OH(N_BAND_CH3OH,3)) 
-ALLOCATE(Be_CH3OH(N_BAND_CH3OH)) 
-
-OM_BND_CH3OH = RESHAPE((/ &
-    825._EB, 1125._EB, 2600._EB, 3525._EB, &
-    1150._EB, 1700._EB, 3225._EB, 3850._EB, &
-     5._EB, 25._EB, 25._EB, 25._EB/),(/N_BAND_CH3OH,3/)) 
-
-SD_CH3OH_TEMP = (/ &
-    293._EB, 396._EB, 443._EB, 483._EB, 570._EB, 804._EB/)
-
-Be_CH3OH = (/ &
-    1.000_EB, 1.000_EB, 1.000_EB, 1.000_EB/)
-
-!---------------------------------------------------------------------------
-ALLOCATE(SD1_CH3OH(N_TEMP_CH3OH,58)) 
-
-! BAND #1: 825 cm-1 - 1150 cm-1 
-
-! SNB FIT WITH GOODY MODEL 
-
-! ERROR ASSOCIATED WITH GOODY FIT: 
-! On Transmissivity: 3.5293 % 
-
-SD1_CH3OH(1:6,1:8) = RESHAPE((/ &  ! 825-860 cm-1
-    2.092058E-03_EB, 2.177561E-03_EB, 2.025372E-03_EB, 2.066580E-03_EB, 2.032570E-03_EB, 2.055490E-03_EB, &
-    2.332369E-03_EB, 2.146353E-03_EB, 2.292441E-03_EB, 2.190905E-03_EB, 2.328545E-03_EB, 2.315297E-03_EB, &
-    2.309160E-03_EB, 2.144663E-03_EB, 2.212745E-03_EB, 2.417766E-03_EB, 2.238096E-03_EB, 2.351140E-03_EB, &
-    2.297992E-03_EB, 2.376640E-03_EB, 2.305185E-03_EB, 2.245090E-03_EB, 2.304365E-03_EB, 2.070614E-03_EB, &
-    2.319978E-03_EB, 2.259332E-03_EB, 2.234532E-03_EB, 2.274525E-03_EB, 2.148807E-03_EB, 2.334803E-03_EB, &
-    2.507306E-03_EB, 2.261417E-03_EB, 2.415070E-03_EB, 2.347081E-03_EB, 2.202668E-03_EB, 2.326296E-03_EB, &
-    2.266346E-03_EB, 2.293200E-03_EB, 2.351988E-03_EB, 2.395979E-03_EB, 2.119769E-03_EB, 7.505970E-03_EB, &
-    2.254628E-03_EB, 2.309387E-03_EB, 2.418908E-03_EB, 2.321693E-03_EB, 2.283795E-03_EB, 2.468735E-02_EB/),(/6,8/))
-
-SD1_CH3OH(1:6,9:16) = RESHAPE((/ &  ! 865-900 cm-1
-    2.232540E-03_EB, 2.326400E-03_EB, 2.238340E-03_EB, 2.216995E-03_EB, 2.185376E-03_EB, 3.949919E-02_EB, &
-    2.267890E-03_EB, 2.372947E-03_EB, 2.225062E-03_EB, 2.036361E-03_EB, 2.193652E-03_EB, 5.087191E-02_EB, &
-    2.255361E-03_EB, 2.020189E-03_EB, 2.198415E-03_EB, 2.322238E-03_EB, 2.224281E-03_EB, 5.915394E-02_EB, &
-    1.967092E-03_EB, 2.243285E-03_EB, 2.127487E-03_EB, 1.389794E-02_EB, 4.455241E-03_EB, 6.523861E-02_EB, &
-    1.930456E-03_EB, 2.242109E-03_EB, 2.239039E-03_EB, 2.944577E-02_EB, 3.535619E-03_EB, 7.495336E-02_EB, &
-    4.650410E-03_EB, 2.524410E-03_EB, 2.395452E-03_EB, 3.316131E-02_EB, 3.209037E-03_EB, 2.296929E-01_EB, &
-    7.357214E-03_EB, 2.423850E-03_EB, 4.522750E-03_EB, 3.030167E-02_EB, 1.272098E-02_EB, 1.501605E-01_EB, &
-    1.720964E-02_EB, 2.432993E-03_EB, 1.051484E-02_EB, 3.256885E-02_EB, 2.698715E-02_EB, 1.714594E-01_EB/),(/6,8/))
-
-SD1_CH3OH(1:6,17:24) = RESHAPE((/ &  ! 905-940 cm-1
-    1.035239E-02_EB, 1.094240E-02_EB, 1.359306E-02_EB, 4.054608E-02_EB, 7.246753E-02_EB, 2.420389E-01_EB, &
-    2.058373E-02_EB, 1.591070E-02_EB, 3.234765E-02_EB, 5.490992E-02_EB, 7.483093E-02_EB, 1.703241E-01_EB, &
-    2.111524E-02_EB, 1.202985E-02_EB, 4.649524E-02_EB, 8.535592E-02_EB, 1.057174E-01_EB, 5.261237E-01_EB, &
-    3.732914E-02_EB, 8.864338E-03_EB, 6.438526E-02_EB, 7.561307E-02_EB, 1.507534E-01_EB, 2.480501E-01_EB, &
-    5.801613E-02_EB, 2.611014E-02_EB, 8.860118E-02_EB, 1.403744E-01_EB, 1.775613E-01_EB, 3.665757E-01_EB, &
-    6.609547E-02_EB, 5.722284E-02_EB, 9.780364E-02_EB, 1.684845E-01_EB, 2.229380E-01_EB, 1.007671E+00_EB, &
-    7.856453E-02_EB, 9.252646E-02_EB, 1.360573E-01_EB, 1.950949E-01_EB, 2.737773E-01_EB, 6.302370E-01_EB, &
-    9.733329E-02_EB, 1.302791E-01_EB, 1.796222E-01_EB, 2.586117E-01_EB, 3.483606E-01_EB, 5.573404E-01_EB/),(/6,8/))
-
-SD1_CH3OH(1:6,25:32) = RESHAPE((/ &  ! 945-980 cm-1
-    1.001070E-01_EB, 1.728978E-01_EB, 2.268592E-01_EB, 3.327517E-01_EB, 4.585786E-01_EB, 6.720650E-01_EB, &
-    1.194413E-01_EB, 2.372982E-01_EB, 3.121431E-01_EB, 4.280557E-01_EB, 5.725477E-01_EB, 7.946447E-01_EB, &
-    1.736000E-01_EB, 3.355108E-01_EB, 4.271257E-01_EB, 5.540051E-01_EB, 7.586346E-01_EB, 9.626672E-01_EB, &
-    2.604986E-01_EB, 4.708403E-01_EB, 5.847564E-01_EB, 7.323546E-01_EB, 9.252720E-01_EB, 1.074038E+00_EB, &
-    3.684381E-01_EB, 6.498069E-01_EB, 7.881784E-01_EB, 9.405731E-01_EB, 1.129310E+00_EB, 1.176751E+00_EB, &
-    5.751321E-01_EB, 9.182602E-01_EB, 1.055555E+00_EB, 1.226753E+00_EB, 1.367871E+00_EB, 1.361814E+00_EB, &
-    8.861587E-01_EB, 1.264956E+00_EB, 1.374331E+00_EB, 1.549975E+00_EB, 1.618492E+00_EB, 1.455958E+00_EB, &
-    1.383922E+00_EB, 1.734533E+00_EB, 1.783409E+00_EB, 1.960052E+00_EB, 1.911433E+00_EB, 1.567399E+00_EB/),(/6,8/))
-
-SD1_CH3OH(1:6,33:40) = RESHAPE((/ &  ! 985-1020 cm-1
-    1.996122E+00_EB, 2.225891E+00_EB, 2.182916E+00_EB, 2.313860E+00_EB, 2.164787E+00_EB, 1.622948E+00_EB, &
-    2.915470E+00_EB, 2.822832E+00_EB, 2.653037E+00_EB, 2.706394E+00_EB, 2.438423E+00_EB, 1.741545E+00_EB, &
-    3.961681E+00_EB, 3.385768E+00_EB, 3.068917E+00_EB, 3.019512E+00_EB, 2.583706E+00_EB, 1.754143E+00_EB, &
-    5.193407E+00_EB, 3.926280E+00_EB, 3.388423E+00_EB, 3.261312E+00_EB, 2.699121E+00_EB, 1.757617E+00_EB, &
-    6.234834E+00_EB, 4.225103E+00_EB, 3.501529E+00_EB, 3.330742E+00_EB, 2.689982E+00_EB, 1.699072E+00_EB, &
-    6.986537E+00_EB, 4.249630E+00_EB, 3.466744E+00_EB, 3.201694E+00_EB, 2.532100E+00_EB, 1.604345E+00_EB, &
-    7.022463E+00_EB, 3.987419E+00_EB, 3.269779E+00_EB, 3.012958E+00_EB, 2.459265E+00_EB, 1.681524E+00_EB, &
-    6.018656E+00_EB, 3.478293E+00_EB, 2.966517E+00_EB, 2.824377E+00_EB, 2.449004E+00_EB, 1.873353E+00_EB/),(/6,8/))
-
-SD1_CH3OH(1:6,41:48) = RESHAPE((/ &  ! 1025-1060 cm-1
-    4.230756E+00_EB, 2.715157E+00_EB, 2.471624E+00_EB, 2.442135E+00_EB, 2.282246E+00_EB, 1.785911E+00_EB, &
-    6.082768E+00_EB, 4.674600E+00_EB, 4.198382E+00_EB, 4.036379E+00_EB, 3.434983E+00_EB, 2.281931E+00_EB, &
-    9.013047E+00_EB, 5.216322E+00_EB, 4.886268E+00_EB, 4.184170E+00_EB, 3.346732E+00_EB, 1.952844E+00_EB, &
-    3.571488E+00_EB, 2.266291E+00_EB, 2.085962E+00_EB, 2.005385E+00_EB, 1.838914E+00_EB, 1.556493E+00_EB, &
-    6.476392E+00_EB, 3.578085E+00_EB, 3.000279E+00_EB, 2.835434E+00_EB, 2.406457E+00_EB, 1.855604E+00_EB, &
-    9.262277E+00_EB, 5.183215E+00_EB, 4.208440E+00_EB, 3.931063E+00_EB, 3.206750E+00_EB, 2.187826E+00_EB, &
-    1.018701E+01_EB, 6.177841E+00_EB, 4.984062E+00_EB, 4.700722E+00_EB, 3.756180E+00_EB, 2.448381E+00_EB, &
-    9.082132E+00_EB, 6.186164E+00_EB, 5.144968E+00_EB, 4.900566E+00_EB, 3.963769E+00_EB, 2.530591E+00_EB/),(/6,8/))
-
-SD1_CH3OH(1:6,49:56) = RESHAPE((/ &  ! 1065-1100 cm-1
-    6.620610E+00_EB, 5.288865E+00_EB, 4.638265E+00_EB, 4.498958E+00_EB, 3.792425E+00_EB, 2.406785E+00_EB, &
-    4.042827E+00_EB, 3.909816E+00_EB, 3.617644E+00_EB, 3.631105E+00_EB, 3.204183E+00_EB, 2.137581E+00_EB, &
-    2.046297E+00_EB, 2.449651E+00_EB, 2.449642E+00_EB, 2.541393E+00_EB, 2.403556E+00_EB, 1.735955E+00_EB, &
-    8.905360E-01_EB, 1.310038E+00_EB, 1.445531E+00_EB, 1.578338E+00_EB, 1.588356E+00_EB, 1.330593E+00_EB, &
-    4.298317E-01_EB, 6.188262E-01_EB, 7.449557E-01_EB, 8.370797E-01_EB, 9.498843E-01_EB, 8.542704E-01_EB, &
-    3.092650E-01_EB, 3.183528E-01_EB, 3.754965E-01_EB, 4.360273E-01_EB, 4.956396E-01_EB, 8.645293E-01_EB, &
-    3.089754E-01_EB, 2.312936E-01_EB, 2.482608E-01_EB, 2.697129E-01_EB, 2.646085E-01_EB, 6.168094E-01_EB, &
-    2.625718E-01_EB, 1.842062E-01_EB, 1.841237E-01_EB, 2.031920E-01_EB, 2.024757E-01_EB, 3.760870E-01_EB/),(/6,8/))
-
-SD1_CH3OH(1:6,57:58) = RESHAPE((/ &  ! 1125-1150 cm-1
-    1.055811E-01_EB, 8.237733E-02_EB, 7.535970E-02_EB, 7.739180E-02_EB, 8.628242E-02_EB, 9.250815E-02_EB, &
-    1.878821E-03_EB, 1.877877E-03_EB, 1.877905E-03_EB, 1.880174E-03_EB, 1.878741E-03_EB, 1.871949E-03_EB/),(/6,2/))
-
-!---------------------------------------------------------------------------
-ALLOCATE(GAMMAD1_CH3OH(N_TEMP_CH3OH,58)) 
-
-! BAND #1: 825 cm-1 - 1150 cm-1 
-
-! SNB FIT WITH GOODY MODEL 
-
-! ERROR ASSOCIATED WITH GOODY FIT: 
-! On Transmissivity: 3.5293 % 
-
-! PRINT FINE STRUCTURE ARRAY GAMMA_D 
-
-GAMMAD1_CH3OH(1:6,1:8) = RESHAPE((/ &  ! 825-860 cm-1
-    1.710835E-03_EB, 1.756456E-03_EB, 1.610567E-03_EB, 1.634777E-03_EB, 1.610361E-03_EB, 1.590749E-03_EB, &
-    1.735092E-03_EB, 1.628944E-03_EB, 1.801017E-03_EB, 1.709333E-03_EB, 1.871176E-03_EB, 1.786946E-03_EB, &
-    1.779330E-03_EB, 1.675239E-03_EB, 1.742486E-03_EB, 1.925162E-03_EB, 1.844256E-03_EB, 1.904458E-03_EB, &
-    1.795215E-03_EB, 1.890259E-03_EB, 1.780477E-03_EB, 1.785604E-03_EB, 1.898177E-03_EB, 1.613934E-03_EB, &
-    1.793465E-03_EB, 1.772037E-03_EB, 1.721289E-03_EB, 1.813837E-03_EB, 1.701828E-03_EB, 1.852461E-03_EB, &
-    2.034676E-03_EB, 1.732708E-03_EB, 1.958937E-03_EB, 1.835905E-03_EB, 1.695861E-03_EB, 1.774073E-03_EB, &
-    1.811188E-03_EB, 1.766977E-03_EB, 1.842126E-03_EB, 1.890326E-03_EB, 1.681456E-03_EB, 1.058912E-02_EB, &
-    1.786621E-03_EB, 1.761281E-03_EB, 1.908939E-03_EB, 1.861507E-03_EB, 1.778551E-03_EB, 4.668802E-02_EB/),(/6,8/))
-
-GAMMAD1_CH3OH(1:6,9:16) = RESHAPE((/ &  ! 865-900 cm-1
-    1.770163E-03_EB, 1.833276E-03_EB, 1.788454E-03_EB, 1.749349E-03_EB, 1.719229E-03_EB, 1.300157E-01_EB, &
-    1.849905E-03_EB, 1.828470E-03_EB, 1.778496E-03_EB, 1.599179E-03_EB, 1.709292E-03_EB, 4.123274E-02_EB, &
-    1.792587E-03_EB, 1.603567E-03_EB, 1.793584E-03_EB, 1.906228E-03_EB, 1.806824E-03_EB, 1.707085E-02_EB, &
-    1.566440E-03_EB, 1.786745E-03_EB, 1.688414E-03_EB, 9.819022E-03_EB, 1.940335E-03_EB, 6.805250E-03_EB, &
-    1.533932E-03_EB, 1.757015E-03_EB, 1.762042E-03_EB, 1.576448E-02_EB, 1.758146E-03_EB, 2.327789E-02_EB, &
-    3.240558E-03_EB, 2.091314E-03_EB, 2.036876E-03_EB, 1.856586E-02_EB, 3.284926E-03_EB, 1.099773E-03_EB, &
-    5.031669E-03_EB, 1.923459E-03_EB, 4.151732E-03_EB, 4.927751E-02_EB, 4.267998E-02_EB, 1.309486E-02_EB, &
-    1.028583E-02_EB, 1.922450E-03_EB, 3.528419E-03_EB, 1.674904E-01_EB, 9.098065E-01_EB, 7.343414E-02_EB/),(/6,8/))
-
-GAMMAD1_CH3OH(1:6,17:24) = RESHAPE((/ &  ! 905-940 cm-1
-    1.273352E-02_EB, 4.972243E-03_EB, 1.533741E-02_EB, 1.836188E-01_EB, 2.990609E-01_EB, 2.012801E-01_EB, &
-    1.677619E-02_EB, 1.225147E-02_EB, 1.331438E-02_EB, 1.183400E-01_EB, 8.582058E-01_EB, 7.234776E-02_EB, &
-    4.081360E-02_EB, 6.211673E-03_EB, 3.196312E-02_EB, 2.329370E-01_EB, 2.471335E-01_EB, 2.436443E-03_EB, &
-    2.831170E-02_EB, 7.090938E-03_EB, 9.040249E-02_EB, 1.608100E-01_EB, 8.226418E-02_EB, 7.065666E-02_EB, &
-    4.216513E-02_EB, 1.241919E+00_EB, 9.482108E-02_EB, 1.204072E-01_EB, 2.930426E-01_EB, 2.452063E-01_EB, &
-    7.046835E-02_EB, 5.289961E-01_EB, 5.510716E-01_EB, 2.653669E-01_EB, 3.525914E-01_EB, 7.259111E-03_EB, &
-    4.438930E-01_EB, 8.725678E-01_EB, 1.604203E-01_EB, 6.744376E-01_EB, 3.049135E-01_EB, 2.154979E-02_EB, &
-    1.907888E-01_EB, 4.786949E-01_EB, 1.704217E-01_EB, 3.447117E-01_EB, 5.894523E-01_EB, 2.037830E+00_EB/),(/6,8/))
-
-GAMMAD1_CH3OH(1:6,25:32) = RESHAPE((/ &  ! 945-980 cm-1
-    2.460351E-01_EB, 6.898202E-01_EB, 2.864252E+00_EB, 6.207472E-01_EB, 1.130649E+00_EB, 2.838739E+00_EB, &
-    1.502283E-01_EB, 7.226004E-01_EB, 3.328886E-01_EB, 1.373872E+00_EB, 1.502191E+00_EB, 2.979122E+00_EB, &
-    3.550569E-01_EB, 7.492522E-01_EB, 7.116601E-01_EB, 1.671190E+00_EB, 1.862187E+00_EB, 3.016292E+00_EB, &
-    7.369757E-01_EB, 1.795348E+00_EB, 9.905021E-01_EB, 1.980476E+00_EB, 3.534556E+00_EB, 3.018212E+00_EB, &
-    7.032863E-01_EB, 4.300730E+00_EB, 1.685681E+00_EB, 3.845864E+00_EB, 3.577965E+00_EB, 3.012415E+00_EB, &
-    1.898530E+00_EB, 4.260000E+00_EB, 2.663086E+00_EB, 3.893042E+00_EB, 3.584735E+00_EB, 3.017466E+00_EB, &
-    4.106122E+00_EB, 4.300400E+00_EB, 4.013691E+00_EB, 3.894278E+00_EB, 3.584634E+00_EB, 3.017203E+00_EB, &
-    4.999789E+00_EB, 4.300816E+00_EB, 3.998276E+00_EB, 3.894282E+00_EB, 3.584805E+00_EB, 3.017959E+00_EB/),(/6,8/))
-
-GAMMAD1_CH3OH(1:6,33:40) = RESHAPE((/ &  ! 985-1020 cm-1
-    4.991678E+00_EB, 4.300865E+00_EB, 4.059389E+00_EB, 3.893977E+00_EB, 3.584621E+00_EB, 3.018382E+00_EB, &
-    4.999999E+00_EB, 4.300589E+00_EB, 4.066053E+00_EB, 3.893347E+00_EB, 3.584242E+00_EB, 2.970990E+00_EB, &
-    4.999995E+00_EB, 4.300869E+00_EB, 4.066271E+00_EB, 3.894307E+00_EB, 3.584257E+00_EB, 2.267644E+00_EB, &
-    4.999999E+00_EB, 4.300869E+00_EB, 4.066186E+00_EB, 3.894306E+00_EB, 3.584526E+00_EB, 3.002150E+00_EB, &
-    5.000000E+00_EB, 4.300869E+00_EB, 4.066280E+00_EB, 3.894303E+00_EB, 3.584285E+00_EB, 3.018301E+00_EB, &
-    5.000000E+00_EB, 4.300869E+00_EB, 4.066071E+00_EB, 3.894305E+00_EB, 3.584645E+00_EB, 3.018304E+00_EB, &
-    5.000000E+00_EB, 4.300869E+00_EB, 4.063349E+00_EB, 3.894307E+00_EB, 3.584642E+00_EB, 3.018380E+00_EB, &
-    5.000000E+00_EB, 4.300869E+00_EB, 4.063438E+00_EB, 3.894307E+00_EB, 3.584711E+00_EB, 1.298616E+00_EB/),(/6,8/))
-
-GAMMAD1_CH3OH(1:6,41:48) = RESHAPE((/ &  ! 1025-1060 cm-1
-    4.999999E+00_EB, 4.300667E+00_EB, 4.055843E+00_EB, 3.893734E+00_EB, 3.584648E+00_EB, 3.003341E+00_EB, &
-    4.999827E+00_EB, 4.300869E+00_EB, 1.282374E+00_EB, 3.894305E+00_EB, 3.584812E+00_EB, 3.014221E+00_EB, &
-    3.215868E-01_EB, 4.300866E+00_EB, 4.308000E-01_EB, 3.893922E+00_EB, 3.584812E+00_EB, 3.018393E+00_EB, &
-    4.999999E+00_EB, 4.300866E+00_EB, 4.024893E+00_EB, 3.893724E+00_EB, 3.584796E+00_EB, 3.018102E+00_EB, &
-    5.000000E+00_EB, 4.300869E+00_EB, 4.064073E+00_EB, 3.893162E+00_EB, 3.584257E+00_EB, 3.010630E+00_EB, &
-    5.000000E+00_EB, 4.300869E+00_EB, 4.066303E+00_EB, 3.894305E+00_EB, 3.584811E+00_EB, 3.017454E+00_EB, &
-    5.000000E+00_EB, 4.300811E+00_EB, 4.066305E+00_EB, 3.894307E+00_EB, 3.584812E+00_EB, 3.018277E+00_EB, &
-    5.000000E+00_EB, 4.300815E+00_EB, 4.066319E+00_EB, 3.894307E+00_EB, 3.584811E+00_EB, 3.018013E+00_EB/),(/6,8/))
-
-GAMMAD1_CH3OH(1:6,49:56) = RESHAPE((/ &  ! 1065-1100 cm-1
-    5.000000E+00_EB, 4.300869E+00_EB, 4.066228E+00_EB, 3.894306E+00_EB, 3.584811E+00_EB, 3.018285E+00_EB, &
-    4.999993E+00_EB, 4.300869E+00_EB, 4.066270E+00_EB, 3.894308E+00_EB, 3.584811E+00_EB, 3.018260E+00_EB, &
-    4.998042E+00_EB, 4.300693E+00_EB, 4.052794E+00_EB, 3.893734E+00_EB, 3.584611E+00_EB, 3.018370E+00_EB, &
-    3.986178E+00_EB, 4.300023E+00_EB, 2.734521E+00_EB, 3.894039E+00_EB, 3.584786E+00_EB, 2.989137E+00_EB, &
-    8.174707E-01_EB, 3.929100E+00_EB, 9.638388E-01_EB, 3.888258E+00_EB, 3.542763E+00_EB, 5.689943E-01_EB, &
-    2.535035E-01_EB, 1.739008E+00_EB, 4.546054E-01_EB, 1.143907E+00_EB, 8.223386E-01_EB, 1.346765E-02_EB, &
-    4.437384E-01_EB, 7.213379E-01_EB, 1.956188E-01_EB, 2.204748E-01_EB, 6.113907E-01_EB, 7.529073E-03_EB, &
-    2.276879E-01_EB, 1.198190E+00_EB, 3.590163E-01_EB, 8.969601E-02_EB, 3.647211E-01_EB, 3.619413E-03_EB/),(/6,8/))
-
-GAMMAD1_CH3OH(1:6,57:58) = RESHAPE((/ &  ! 1125-1150 cm-1
-    1.007401E-01_EB, 3.371335E-01_EB, 2.279241E-01_EB, 2.447139E-01_EB, 3.673499E-01_EB, 2.646242E-02_EB, &
-    1.498523E-03_EB, 1.497953E-03_EB, 1.497022E-03_EB, 1.499683E-03_EB, 1.498643E-03_EB, 1.492511E-03_EB/),(/6,2/))
+gammad1_c2h4(1:7,73:77) = RESHAPE((/ &  ! 1150-1250 cm-1
+   2.129075e-04_EB, 2.822799e-02_EB, 2.461798e-02_EB, 8.986262e-02_EB, 1.247997e+00_EB, 1.467934e-01_EB, &
+   1.669303e-02_EB, &
+   2.363189e-04_EB, 2.307838e-04_EB, 6.030981e-03_EB, 4.177046e-03_EB, 8.698422e-02_EB, 1.673678e-02_EB, &
+   1.814471e-03_EB, &
+   2.536687e-04_EB, 2.591352e-04_EB, 3.402664e-04_EB, 2.425216e-04_EB, 8.814904e-04_EB, 1.309772e-03_EB, &
+   1.809337e-04_EB, &
+   2.020888e-04_EB, 2.044892e-04_EB, 1.950677e-04_EB, 2.120114e-04_EB, 2.042227e-04_EB, 3.416414e-04_EB, &
+   5.953816e-02_EB, &
+   1.709157e-04_EB, 1.709157e-04_EB, 1.709157e-04_EB, 1.709157e-04_EB, 1.709157e-04_EB, 1.709157e-04_EB, &
+   8.125358e-05_EB/),(/7,5/))
 
 !---------------------------------------------------------------------------
-ALLOCATE(SD2_CH3OH(N_TEMP_CH3OH,24)) 
+ALLOCATE(sd2_c2h4(n_temp_c2h4,13)) 
 
-! BAND #2: 1125 cm-1 - 1700 cm-1 
+! band #2: 1300 cm-1 - 1600 cm-1 
 
-! SNB FIT WITH GOODY MODEL 
+! snb fit with malkmus model 
 
-! ERROR ASSOCIATED WITH GOODY FIT: 
-! On Transmissivity: 0.4125 % 
+! error associated with malkmus fit: 
+! on transmissivity: 0.84783 % 
 
-SD2_CH3OH(1:6,1:8) = RESHAPE((/ &  ! 1125-1300 cm-1
-    8.450611E-02_EB, 6.418183E-02_EB, 6.310468E-02_EB, 7.660905E-02_EB, 7.706424E-02_EB, 9.437901E-02_EB, &
-    1.371028E-01_EB, 1.079723E-01_EB, 1.204347E-01_EB, 1.390379E-01_EB, 1.433370E-01_EB, 7.710077E-01_EB, &
-    1.290982E-01_EB, 1.414367E-01_EB, 1.560075E-01_EB, 1.748835E-01_EB, 2.030998E-01_EB, 4.532359E-01_EB, &
-    2.291613E-01_EB, 2.459506E-01_EB, 2.544302E-01_EB, 2.644402E-01_EB, 2.908354E-01_EB, 4.030926E-01_EB, &
-    2.985497E-01_EB, 2.975485E-01_EB, 2.931653E-01_EB, 3.025454E-01_EB, 3.299110E-01_EB, 4.271199E-01_EB, &
-    3.780124E-01_EB, 3.650159E-01_EB, 3.598875E-01_EB, 3.653630E-01_EB, 3.853645E-01_EB, 4.931383E-01_EB, &
-    4.291205E-01_EB, 4.110541E-01_EB, 4.018726E-01_EB, 4.158169E-01_EB, 4.404402E-01_EB, 4.822382E-01_EB, &
-    6.531570E-01_EB, 4.774917E-01_EB, 4.280704E-01_EB, 4.120357E-01_EB, 4.196151E-01_EB, 4.644855E-01_EB/),(/6,8/))
+sd2_c2h4(1:7,1:8) = RESHAPE((/ &  ! 1300-1475 cm-1
+   2.882468e-04_EB, 2.872390e-04_EB, 2.844740e-04_EB, 2.830853e-04_EB, 2.869806e-04_EB, 2.911547e-04_EB, &
+   1.572859e-04_EB, &
+   3.652126e-04_EB, 3.386829e-04_EB, 3.628235e-04_EB, 3.693377e-04_EB, 3.974359e-04_EB, 5.740813e-04_EB, &
+   1.406431e+00_EB, &
+   3.864016e-04_EB, 3.824772e-04_EB, 4.379786e-03_EB, 2.882465e-03_EB, 2.712238e-02_EB, 1.918484e-02_EB, &
+   7.860096e-01_EB, &
+   1.282101e-02_EB, 2.679804e-02_EB, 4.946063e-02_EB, 5.785843e-02_EB, 7.524531e-02_EB, 1.070631e-01_EB, &
+   1.846526e-01_EB, &
+   2.572462e-01_EB, 2.610537e-01_EB, 2.762334e-01_EB, 2.568286e-01_EB, 2.524152e-01_EB, 2.204080e-01_EB, &
+   1.917598e-01_EB, &
+   5.165021e-01_EB, 3.183373e-01_EB, 2.741011e-01_EB, 2.245903e-01_EB, 1.734576e-01_EB, 1.131539e-01_EB, &
+   1.085824e-01_EB, &
+   4.620901e-01_EB, 3.014428e-01_EB, 2.695816e-01_EB, 2.383870e-01_EB, 1.998293e-01_EB, 1.716093e-01_EB, &
+   1.585133e-01_EB, &
+   3.857202e-01_EB, 2.649185e-01_EB, 2.402621e-01_EB, 2.174361e-01_EB, 1.792406e-01_EB, 1.252422e-01_EB, &
+   1.649973e-01_EB/),(/7,8/))
 
-SD2_CH3OH(1:6,9:16) = RESHAPE((/ &  ! 1325-1500 cm-1
-    8.939686E-01_EB, 5.729563E-01_EB, 4.966461E-01_EB, 4.470764E-01_EB, 4.224176E-01_EB, 4.179472E-01_EB, &
-    9.818632E-01_EB, 6.476066E-01_EB, 5.518080E-01_EB, 4.956905E-01_EB, 4.589459E-01_EB, 4.047537E-01_EB, &
-    7.934918E-01_EB, 5.798297E-01_EB, 5.078331E-01_EB, 4.598626E-01_EB, 4.302476E-01_EB, 3.123068E-01_EB, &
-    6.085155E-01_EB, 4.738775E-01_EB, 4.248828E-01_EB, 3.800189E-01_EB, 3.732390E-01_EB, 3.565107E-01_EB, &
-    5.093975E-01_EB, 3.603909E-01_EB, 3.097235E-01_EB, 2.780573E-01_EB, 2.805735E-01_EB, 2.978990E-01_EB, &
-    4.549118E-01_EB, 3.347414E-01_EB, 2.980123E-01_EB, 2.659373E-01_EB, 2.773117E-01_EB, 3.196630E-01_EB, &
-    4.623975E-01_EB, 3.269118E-01_EB, 2.765642E-01_EB, 2.455172E-01_EB, 2.525615E-01_EB, 1.855525E-01_EB, &
-    3.255200E-01_EB, 2.040086E-01_EB, 1.743401E-01_EB, 1.597684E-01_EB, 1.792900E-01_EB, 1.396319E-01_EB/),(/6,8/))
-
-SD2_CH3OH(1:6,17:24) = RESHAPE((/ &  ! 1525-1700 cm-1
-    2.520907E-01_EB, 1.713915E-01_EB, 1.460993E-01_EB, 1.328205E-01_EB, 1.496750E-01_EB, 2.941672E-01_EB, &
-    1.495161E-01_EB, 9.992014E-02_EB, 8.673606E-02_EB, 9.166448E-02_EB, 1.035687E-01_EB, 3.429671E-02_EB, &
-    8.876261E-02_EB, 1.212061E-01_EB, 1.004804E-01_EB, 8.464696E-02_EB, 1.060019E-01_EB, 5.158956E-02_EB, &
-    5.010532E-02_EB, 1.054022E-01_EB, 8.698803E-02_EB, 5.531148E-02_EB, 8.518388E-02_EB, 6.856675E-02_EB, &
-    1.158760E-02_EB, 5.631481E-02_EB, 4.538851E-02_EB, 2.947560E-02_EB, 5.263443E-02_EB, 1.413806E-02_EB, &
-    2.316983E-03_EB, 6.543856E-03_EB, 5.980406E-03_EB, 3.945329E-03_EB, 2.428749E-02_EB, 1.902847E-03_EB, &
-    2.042728E-03_EB, 2.020924E-03_EB, 2.065135E-03_EB, 1.985574E-03_EB, 1.311723E-02_EB, 2.046333E-03_EB, &
-    1.878821E-03_EB, 1.877877E-03_EB, 1.877905E-03_EB, 1.880174E-03_EB, 1.878741E-03_EB, 1.871949E-03_EB/),(/6,8/))
-
-!---------------------------------------------------------------------------
-ALLOCATE(GAMMAD2_CH3OH(N_TEMP_CH3OH,24)) 
-
-! BAND #2: 1125 cm-1 - 1700 cm-1 
-
-! SNB FIT WITH GOODY MODEL 
-
-! ERROR ASSOCIATED WITH GOODY FIT: 
-! On Transmissivity: 0.4125 % 
-
-! PRINT FINE STRUCTURE ARRAY GAMMA_D 
-
-GAMMAD2_CH3OH(1:6,1:8) = RESHAPE((/ &  ! 1125-1300 cm-1
-    2.839810E-02_EB, 2.382154E-01_EB, 5.050253E-01_EB, 3.415996E-02_EB, 2.622562E-01_EB, 2.544872E-02_EB, &
-    5.503036E-02_EB, 1.254472E+00_EB, 1.310579E-01_EB, 7.982417E-02_EB, 4.974697E-01_EB, 1.377263E-03_EB, &
-    6.904929E-02_EB, 4.656750E-01_EB, 2.893366E-01_EB, 1.320435E-01_EB, 5.248210E-01_EB, 3.714388E-03_EB, &
-    4.070553E-01_EB, 7.332375E-01_EB, 3.930809E-01_EB, 4.120696E-01_EB, 6.044447E-01_EB, 1.073477E-02_EB, &
-    3.822412E-01_EB, 8.896827E-01_EB, 7.713721E-01_EB, 4.642629E-01_EB, 6.452212E-01_EB, 1.507169E-02_EB, &
-    4.416356E-01_EB, 1.769715E+00_EB, 6.773441E-01_EB, 5.917155E-01_EB, 1.880027E+00_EB, 1.160920E-02_EB, &
-    1.503534E+00_EB, 1.667740E+00_EB, 8.478454E-01_EB, 1.389905E+00_EB, 1.679316E+00_EB, 3.047742E-02_EB, &
-    4.422364E+00_EB, 1.801232E+00_EB, 1.200044E+00_EB, 1.820801E+00_EB, 1.791415E+00_EB, 2.729084E-02_EB/),(/6,8/))
-
-GAMMAD2_CH3OH(1:6,9:16) = RESHAPE((/ &  ! 1325-1500 cm-1
-    4.042339E+00_EB, 4.298022E+00_EB, 5.329873E-01_EB, 1.459935E+00_EB, 1.888920E+00_EB, 2.377378E-02_EB, &
-    4.355025E+00_EB, 4.300470E+00_EB, 1.222991E+00_EB, 8.749741E-01_EB, 1.691725E+00_EB, 2.518145E-02_EB, &
-    2.153033E+00_EB, 4.297378E+00_EB, 5.856320E-01_EB, 1.840781E+00_EB, 2.990627E+00_EB, 1.820199E-01_EB, &
-    1.762410E+00_EB, 1.794982E+00_EB, 1.218619E+00_EB, 1.062382E+00_EB, 1.101899E+00_EB, 9.679437E-03_EB, &
-    8.075686E-01_EB, 1.338339E+00_EB, 4.994659E-01_EB, 1.362670E+00_EB, 6.017519E-01_EB, 6.101605E-03_EB, &
-    1.395801E+00_EB, 7.203459E-01_EB, 4.898508E-01_EB, 1.136198E+00_EB, 6.082554E-01_EB, 6.425200E-03_EB, &
-    1.318069E+00_EB, 7.008699E-01_EB, 4.579288E-01_EB, 1.066632E+00_EB, 1.238513E+00_EB, 8.481371E-02_EB, &
-    6.055957E-02_EB, 5.562031E-01_EB, 2.905837E-01_EB, 1.546591E-01_EB, 3.735574E-01_EB, 7.536593E-03_EB/),(/6,8/))
-
-GAMMAD2_CH3OH(1:6,17:24) = RESHAPE((/ &  ! 1525-1700 cm-1
-    1.535814E-01_EB, 4.670332E-01_EB, 1.742382E-01_EB, 1.027607E-01_EB, 3.634900E-01_EB, 6.475884E-04_EB, &
-    3.475006E-02_EB, 3.105628E-01_EB, 1.991867E-01_EB, 4.512895E-02_EB, 1.900806E-01_EB, 1.229069E-02_EB, &
-    4.333565E-02_EB, 1.256265E-01_EB, 7.507422E-02_EB, 1.588681E-01_EB, 6.609587E-01_EB, 3.150519E-02_EB, &
-    2.236980E-02_EB, 1.714019E-01_EB, 5.179932E-02_EB, 4.435785E-01_EB, 7.817483E-01_EB, 2.576489E-01_EB, &
-    2.311193E-03_EB, 4.995529E-02_EB, 3.148076E-02_EB, 5.358945E-02_EB, 5.546834E-01_EB, 1.237662E-02_EB, &
-    1.853090E-03_EB, 5.372400E-03_EB, 4.467193E-03_EB, 3.286290E-03_EB, 7.349456E-02_EB, 1.523253E-03_EB, &
-    1.609057E-03_EB, 1.593462E-03_EB, 1.633348E-03_EB, 1.573745E-03_EB, 1.356902E-02_EB, 1.613453E-03_EB, &
-    1.498523E-03_EB, 1.497953E-03_EB, 1.497022E-03_EB, 1.499683E-03_EB, 1.498643E-03_EB, 1.492511E-03_EB/),(/6,8/))
+sd2_c2h4(1:7,9:13) = RESHAPE((/ &  ! 1500-1600 cm-1
+   5.926638e-02_EB, 7.277371e-02_EB, 8.111314e-02_EB, 7.867862e-02_EB, 9.699567e-02_EB, 8.865234e-02_EB, &
+   7.947370e-02_EB, &
+   1.150376e-03_EB, 2.245129e-03_EB, 7.274074e-03_EB, 7.462653e-03_EB, 2.221317e-02_EB, 4.638888e-02_EB, &
+   2.712345e-02_EB, &
+   3.976051e-04_EB, 3.647587e-04_EB, 3.852124e-04_EB, 3.887963e-04_EB, 3.797778e-04_EB, 1.070583e-03_EB, &
+   3.011592e-04_EB, &
+   3.339180e-04_EB, 3.021121e-04_EB, 2.677955e-04_EB, 2.991550e-04_EB, 2.786140e-04_EB, 3.017892e-04_EB, &
+   1.540746e-04_EB, &
+   2.172015e-04_EB, 2.172015e-04_EB, 2.172015e-04_EB, 2.172015e-04_EB, 2.172015e-04_EB, 2.172015e-04_EB, &
+   1.035699e-04_EB/),(/7,5/))
 
 !---------------------------------------------------------------------------
-ALLOCATE(SD3_CH3OH(N_TEMP_CH3OH,26)) 
+ALLOCATE(gammad2_c2h4(n_temp_c2h4,13)) 
 
-! BAND #3: 2600 cm-1 - 3225 cm-1 
+! band #2: 1300 cm-1 - 1600 cm-1 
 
-! SNB FIT WITH GOODY MODEL 
+! snb fit with malkmus model 
 
-! ERROR ASSOCIATED WITH GOODY FIT: 
-! On Transmissivity: 1.6822 % 
+! error associated with malkmus fit: 
+! on transmissivity: 0.84783 % 
 
-SD3_CH3OH(1:6,1:8) = RESHAPE((/ &  ! 2600-2775 cm-1
-    2.070921E-03_EB, 2.043784E-03_EB, 2.023843E-03_EB, 2.134607E-03_EB, 2.066460E-03_EB, 1.953845E-03_EB, &
-    2.269396E-03_EB, 2.250784E-03_EB, 2.269292E-03_EB, 2.278080E-03_EB, 2.294423E-03_EB, 2.199901E-03_EB, &
-    2.218171E-03_EB, 2.238041E-03_EB, 2.274147E-03_EB, 2.144414E-03_EB, 2.314731E-03_EB, 4.419967E-03_EB, &
-    2.247801E-03_EB, 2.208915E-03_EB, 2.360135E-03_EB, 2.256752E-03_EB, 2.148026E-03_EB, 2.120227E-02_EB, &
-    2.301519E-03_EB, 2.108644E-03_EB, 3.845106E-03_EB, 2.839818E-03_EB, 5.195677E-03_EB, 6.702702E-02_EB, &
-    9.602698E-03_EB, 8.931457E-03_EB, 2.038455E-02_EB, 1.557715E-02_EB, 2.212765E-02_EB, 1.272490E-01_EB, &
-    7.031940E-02_EB, 5.086752E-02_EB, 6.236728E-02_EB, 6.241221E-02_EB, 7.937387E-02_EB, 2.013048E-01_EB, &
-    1.833057E-01_EB, 1.686986E-01_EB, 1.770402E-01_EB, 1.933230E-01_EB, 2.187904E-01_EB, 3.388255E-01_EB/),(/6,8/))
+! print fine structure array gamma_d 
 
-SD3_CH3OH(1:6,9:16) = RESHAPE((/ &  ! 2800-2975 cm-1
-    6.437440E-01_EB, 5.831717E-01_EB, 5.596233E-01_EB, 5.722922E-01_EB, 5.437377E-01_EB, 5.407176E-01_EB, &
-    1.620698E+00_EB, 1.109159E+00_EB, 9.590591E-01_EB, 9.016919E-01_EB, 7.647151E-01_EB, 6.283780E-01_EB, &
-    2.060845E+00_EB, 1.366525E+00_EB, 1.174981E+00_EB, 1.106730E+00_EB, 9.371376E-01_EB, 7.073181E-01_EB, &
-    2.382126E+00_EB, 1.752573E+00_EB, 1.533840E+00_EB, 1.477491E+00_EB, 1.257851E+00_EB, 9.347538E-01_EB, &
-    2.380425E+00_EB, 1.775818E+00_EB, 1.588506E+00_EB, 1.557372E+00_EB, 1.374490E+00_EB, 1.040405E+00_EB, &
-    3.815934E+00_EB, 2.528397E+00_EB, 2.147361E+00_EB, 2.030769E+00_EB, 1.672901E+00_EB, 1.110733E+00_EB, &
-    4.185916E+00_EB, 2.657765E+00_EB, 2.230924E+00_EB, 2.083998E+00_EB, 1.698295E+00_EB, 1.090146E+00_EB, &
-    4.374182E+00_EB, 2.838260E+00_EB, 2.387548E+00_EB, 2.231780E+00_EB, 1.810253E+00_EB, 1.142638E+00_EB/),(/6,8/))
+gammad2_c2h4(1:7,1:8) = RESHAPE((/ &  ! 1300-1475 cm-1
+   2.158499e-04_EB, 2.198834e-04_EB, 2.077167e-04_EB, 2.022446e-04_EB, 2.019156e-04_EB, 2.108599e-04_EB, &
+   1.180395e-04_EB, &
+   2.584797e-04_EB, 2.404707e-04_EB, 2.365446e-04_EB, 2.427590e-04_EB, 2.779223e-04_EB, 3.857109e-04_EB, &
+   4.413016e-05_EB, &
+   2.651063e-04_EB, 2.657195e-04_EB, 1.443449e-03_EB, 2.228190e-03_EB, 2.843764e-04_EB, 1.574315e-02_EB, &
+   3.976791e-04_EB, &
+   3.442081e-02_EB, 6.159804e-02_EB, 2.276418e-02_EB, 3.598936e-02_EB, 1.165571e-01_EB, 3.704352e-01_EB, &
+   3.636410e-02_EB, &
+   4.705384e-01_EB, 6.099726e-01_EB, 2.288867e-01_EB, 5.066479e-01_EB, 3.305657e-01_EB, 3.501155e-01_EB, &
+   1.491325e-01_EB, &
+   9.295562e-01_EB, 6.218514e-01_EB, 2.607721e-01_EB, 5.342728e-01_EB, 6.235127e-01_EB, 1.582834e+00_EB, &
+   1.082596e-01_EB, &
+   4.753247e-01_EB, 4.602367e-01_EB, 2.660304e-01_EB, 3.252024e-01_EB, 4.963318e-01_EB, 1.168146e-01_EB, &
+   1.189208e-01_EB, &
+   5.580701e-01_EB, 5.558061e-01_EB, 2.447941e-01_EB, 1.720602e-01_EB, 1.909313e-01_EB, 2.351203e+00_EB, &
+   2.093321e-02_EB/),(/7,8/))
 
-SD3_CH3OH(1:6,17:24) = RESHAPE((/ &  ! 3000-3175 cm-1
-    2.752216E+00_EB, 1.938287E+00_EB, 1.708916E+00_EB, 1.629397E+00_EB, 1.385291E+00_EB, 9.282823E-01_EB, &
-    1.661865E+00_EB, 1.230652E+00_EB, 1.093519E+00_EB, 1.052390E+00_EB, 9.174375E-01_EB, 6.360043E-01_EB, &
-    7.812840E-01_EB, 6.785784E-01_EB, 6.388467E-01_EB, 6.332864E-01_EB, 5.733846E-01_EB, 4.154880E-01_EB, &
-    2.999779E-01_EB, 3.101992E-01_EB, 3.201589E-01_EB, 3.278764E-01_EB, 3.272730E-01_EB, 2.500958E-01_EB, &
-    7.542943E-02_EB, 1.009178E-01_EB, 1.262845E-01_EB, 1.310634E-01_EB, 1.509550E-01_EB, 1.340160E-01_EB, &
-    2.498997E-02_EB, 1.501317E-02_EB, 4.474250E-02_EB, 3.860068E-02_EB, 5.479609E-02_EB, 5.710606E-02_EB, &
-    4.922524E-03_EB, 2.787254E-03_EB, 7.460162E-03_EB, 3.004660E-03_EB, 1.179334E-02_EB, 1.308730E-02_EB, &
-    2.240225E-03_EB, 2.157881E-03_EB, 2.530522E-03_EB, 2.229342E-03_EB, 3.739633E-03_EB, 2.858715E-03_EB/),(/6,8/))
-
-SD3_CH3OH(1:6,25:26) = RESHAPE((/ &  ! 3200-3225 cm-1
-    2.078655E-03_EB, 2.013440E-03_EB, 2.048449E-03_EB, 2.124377E-03_EB, 2.028600E-03_EB, 1.944696E-03_EB, &
-    1.878821E-03_EB, 1.877877E-03_EB, 1.877905E-03_EB, 1.880174E-03_EB, 1.878741E-03_EB, 1.871949E-03_EB/),(/6,2/))
+gammad2_c2h4(1:7,9:13) = RESHAPE((/ &  ! 1500-1600 cm-1
+   4.272966e-01_EB, 1.013776e+00_EB, 9.918181e-02_EB, 1.052649e+00_EB, 4.393797e-02_EB, 3.996882e-02_EB, &
+   9.062687e-02_EB, &
+   2.701330e-03_EB, 2.355961e-02_EB, 2.364569e-03_EB, 1.244040e-02_EB, 4.075644e-03_EB, 1.508431e-03_EB, &
+   3.184016e-01_EB, &
+   2.534164e-04_EB, 2.480212e-04_EB, 2.545401e-04_EB, 2.448742e-04_EB, 2.630816e-04_EB, 2.165252e-04_EB, &
+   2.247869e-04_EB, &
+   2.330947e-04_EB, 2.194445e-04_EB, 2.014090e-04_EB, 2.218115e-04_EB, 2.076602e-04_EB, 2.253786e-04_EB, &
+   1.141333e-04_EB, &
+   1.709157e-04_EB, 1.709157e-04_EB, 1.709157e-04_EB, 1.709157e-04_EB, 1.709157e-04_EB, 1.709157e-04_EB, &
+   8.125358e-05_EB/),(/7,5/))
 
 !---------------------------------------------------------------------------
-ALLOCATE(GAMMAD3_CH3OH(N_TEMP_CH3OH,26)) 
+ALLOCATE(sd3_c2h4(n_temp_c2h4,14)) 
 
-! BAND #3: 2600 cm-1 - 3225 cm-1 
+! band #3: 1750 cm-1 - 2075 cm-1 
 
-! SNB FIT WITH GOODY MODEL 
+! snb fit with malkmus model 
 
-! ERROR ASSOCIATED WITH GOODY FIT: 
-! On Transmissivity: 1.6822 % 
+! error associated with malkmus fit: 
+! on transmissivity: 0.45198 % 
 
-! PRINT FINE STRUCTURE ARRAY GAMMA_D 
+sd3_c2h4(1:7,1:8) = RESHAPE((/ &  ! 1750-1925 cm-1
+   2.815672e-04_EB, 3.085650e-04_EB, 3.011997e-04_EB, 2.507052e-04_EB, 3.301713e-04_EB, 2.824203e-04_EB, &
+   1.401316e-04_EB, &
+   3.584064e-04_EB, 3.532685e-04_EB, 3.752903e-04_EB, 3.459819e-04_EB, 6.155777e-04_EB, 3.497840e-03_EB, &
+   1.410505e-01_EB, &
+   3.713646e-04_EB, 3.521998e-04_EB, 5.743608e-04_EB, 8.300439e-04_EB, 2.211093e-02_EB, 1.662667e-02_EB, &
+   7.102650e-01_EB, &
+   1.552528e-02_EB, 1.444417e-02_EB, 2.574225e-02_EB, 2.639928e-02_EB, 4.136403e-02_EB, 4.346707e-02_EB, &
+   8.056475e-01_EB, &
+   1.377934e-01_EB, 1.025802e-01_EB, 1.048520e-01_EB, 9.315740e-02_EB, 9.685325e-02_EB, 7.199117e-02_EB, &
+   6.245123e-01_EB, &
+   1.901714e-01_EB, 1.029944e-01_EB, 9.811801e-02_EB, 8.417027e-02_EB, 7.035037e-02_EB, 5.536099e-02_EB, &
+   4.099564e-01_EB, &
+   2.542475e-01_EB, 1.411985e-01_EB, 1.285533e-01_EB, 1.090056e-01_EB, 9.009588e-02_EB, 7.442026e-02_EB, &
+   1.611310e-01_EB, &
+   1.937759e-01_EB, 1.535567e-01_EB, 1.503998e-01_EB, 1.340973e-01_EB, 1.208789e-01_EB, 9.651057e-02_EB, &
+   1.654443e-01_EB/),(/7,8/))
 
-GAMMAD3_CH3OH(1:6,1:8) = RESHAPE((/ &  ! 2600-2775 cm-1
-    1.646954E-03_EB, 1.626512E-03_EB, 1.589617E-03_EB, 1.690513E-03_EB, 1.642167E-03_EB, 1.566522E-03_EB, &
-    1.755908E-03_EB, 1.740668E-03_EB, 1.740469E-03_EB, 1.739053E-03_EB, 1.798664E-03_EB, 1.705582E-03_EB, &
-    1.723842E-03_EB, 1.757339E-03_EB, 1.751737E-03_EB, 1.660147E-03_EB, 1.786732E-03_EB, 3.774246E-03_EB, &
-    1.755171E-03_EB, 1.726372E-03_EB, 1.847957E-03_EB, 1.742154E-03_EB, 1.684185E-03_EB, 2.125879E-02_EB, &
-    1.828214E-03_EB, 1.672045E-03_EB, 3.454654E-03_EB, 2.364010E-03_EB, 4.371479E-03_EB, 5.350869E-02_EB, &
-    8.986744E-03_EB, 1.029509E-02_EB, 1.680797E-02_EB, 1.180595E-02_EB, 1.878043E-02_EB, 1.810472E-01_EB, &
-    9.924176E-02_EB, 9.068064E-02_EB, 3.627353E-01_EB, 5.527610E-02_EB, 2.191723E-01_EB, 3.310520E-01_EB, &
-    7.221028E-01_EB, 5.123951E-01_EB, 3.090250E-01_EB, 4.388020E-01_EB, 4.944594E-01_EB, 5.382263E-01_EB/),(/6,8/))
-
-GAMMAD3_CH3OH(1:6,9:16) = RESHAPE((/ &  ! 2800-2975 cm-1
-    4.154210E+00_EB, 2.633252E+00_EB, 1.344844E+00_EB, 1.733568E+00_EB, 1.657050E+00_EB, 3.017780E+00_EB, &
-    4.999928E+00_EB, 4.300694E+00_EB, 4.037630E+00_EB, 3.893700E+00_EB, 3.544685E+00_EB, 3.013316E+00_EB, &
-    4.999924E+00_EB, 4.300387E+00_EB, 4.061044E+00_EB, 3.888285E+00_EB, 3.545291E+00_EB, 2.987323E+00_EB, &
-    4.999427E+00_EB, 4.300838E+00_EB, 4.040951E+00_EB, 3.893896E+00_EB, 3.584120E+00_EB, 3.017460E+00_EB, &
-    4.999336E+00_EB, 4.300830E+00_EB, 4.046630E+00_EB, 3.894284E+00_EB, 3.583946E+00_EB, 3.017831E+00_EB, &
-    5.000000E+00_EB, 4.300727E+00_EB, 4.028554E+00_EB, 3.894300E+00_EB, 3.584789E+00_EB, 3.015628E+00_EB, &
-    5.000000E+00_EB, 4.300725E+00_EB, 4.065888E+00_EB, 3.894303E+00_EB, 3.584780E+00_EB, 3.017679E+00_EB, &
-    5.000000E+00_EB, 4.300680E+00_EB, 4.065902E+00_EB, 3.894130E+00_EB, 3.584801E+00_EB, 3.018381E+00_EB/),(/6,8/))
-
-GAMMAD3_CH3OH(1:6,17:24) = RESHAPE((/ &  ! 3000-3175 cm-1
-    4.999311E+00_EB, 4.300852E+00_EB, 3.992535E+00_EB, 3.894274E+00_EB, 3.583878E+00_EB, 3.017513E+00_EB, &
-    4.999844E+00_EB, 4.299092E+00_EB, 2.609512E+00_EB, 3.889682E+00_EB, 3.545735E+00_EB, 3.012283E+00_EB, &
-    2.367107E+00_EB, 3.563169E+00_EB, 9.990040E-01_EB, 3.540835E+00_EB, 3.583828E+00_EB, 2.057097E+00_EB, &
-    6.887380E-01_EB, 6.189095E-01_EB, 3.563729E-01_EB, 6.413272E-01_EB, 6.545665E-01_EB, 1.475859E+00_EB, &
-    2.703718E-01_EB, 2.170842E-01_EB, 8.206047E-02_EB, 1.764398E-01_EB, 4.234455E-01_EB, 4.390812E-01_EB, &
-    1.886385E-01_EB, 1.088833E-02_EB, 2.628568E-02_EB, 1.720233E-02_EB, 8.075002E-01_EB, 6.229979E-02_EB, &
-    4.492918E-03_EB, 2.019823E-03_EB, 2.748006E-03_EB, 2.388409E-03_EB, 1.285325E-01_EB, 6.240008E-03_EB, &
-    1.741592E-03_EB, 1.696223E-03_EB, 1.913923E-03_EB, 1.748956E-03_EB, 3.821094E-03_EB, 1.965348E-03_EB/),(/6,8/))
-
-GAMMAD3_CH3OH(1:6,25:26) = RESHAPE((/ &  ! 3200-3225 cm-1
-    1.643856E-03_EB, 1.603047E-03_EB, 1.609477E-03_EB, 1.697852E-03_EB, 1.641911E-03_EB, 1.539826E-03_EB, &
-    1.498523E-03_EB, 1.497953E-03_EB, 1.497022E-03_EB, 1.499683E-03_EB, 1.498643E-03_EB, 1.492511E-03_EB/),(/6,2/))
+sd3_c2h4(1:7,9:14) = RESHAPE((/ &  ! 1950-2075 cm-1
+   1.548981e-02_EB, 2.175487e-02_EB, 3.117281e-02_EB, 3.251084e-02_EB, 4.215815e-02_EB, 5.301204e-02_EB, &
+   1.143451e-01_EB, &
+   4.016633e-04_EB, 3.491488e-04_EB, 4.867031e-04_EB, 4.500772e-04_EB, 2.320822e-03_EB, 7.486336e-03_EB, &
+   2.340736e-01_EB, &
+   3.822381e-04_EB, 3.883093e-04_EB, 3.278614e-04_EB, 3.723909e-04_EB, 3.584776e-04_EB, 3.541946e-04_EB, &
+   2.753666e-01_EB, &
+   3.861390e-04_EB, 3.578653e-04_EB, 3.623971e-04_EB, 3.869958e-04_EB, 3.611574e-04_EB, 3.348041e-04_EB, &
+   5.612807e-03_EB, &
+   2.666887e-04_EB, 2.879471e-04_EB, 2.979300e-04_EB, 2.891663e-04_EB, 3.019136e-04_EB, 2.928543e-04_EB, &
+   1.433099e-04_EB, &
+   2.172015e-04_EB, 2.172015e-04_EB, 2.172015e-04_EB, 2.172015e-04_EB, 2.172015e-04_EB, 2.172015e-04_EB, &
+   1.035699e-04_EB/),(/7,6/))
 
 !---------------------------------------------------------------------------
-ALLOCATE(SD4_CH3OH(N_TEMP_CH3OH,14)) 
+ALLOCATE(gammad3_c2h4(n_temp_c2h4,14)) 
 
-! BAND #4: 3525 cm-1 - 3850 cm-1 
+! band #3: 1750 cm-1 - 2075 cm-1 
 
-! SNB FIT WITH GOODY MODEL 
+! snb fit with malkmus model 
 
-! ERROR ASSOCIATED WITH GOODY FIT: 
-! On Transmissivity: 0.43646 % 
+! error associated with malkmus fit: 
+! on transmissivity: 0.45198 % 
 
-SD4_CH3OH(1:6,1:8) = RESHAPE((/ &  ! 3525-3700 cm-1
-    2.060416E-03_EB, 2.016850E-03_EB, 2.060649E-03_EB, 2.043358E-03_EB, 2.042491E-03_EB, 2.068244E-03_EB, &
-    2.215092E-03_EB, 7.327218E-03_EB, 3.166782E-03_EB, 5.988766E-03_EB, 2.419201E-03_EB, 2.190864E-03_EB, &
-    1.352557E-02_EB, 3.188085E-02_EB, 2.721869E-02_EB, 2.755339E-02_EB, 2.327344E-02_EB, 1.744092E-02_EB, &
-    4.828772E-02_EB, 5.777175E-02_EB, 5.871255E-02_EB, 5.983036E-02_EB, 6.119809E-02_EB, 5.561364E-02_EB, &
-    2.395985E-01_EB, 2.244556E-01_EB, 2.034701E-01_EB, 2.229951E-01_EB, 2.016785E-01_EB, 1.529798E-01_EB, &
-    8.401838E-01_EB, 5.938696E-01_EB, 4.994377E-01_EB, 4.763772E-01_EB, 3.787511E-01_EB, 2.229440E-01_EB, &
-    1.158964E+00_EB, 6.742879E-01_EB, 5.397059E-01_EB, 4.799737E-01_EB, 3.592326E-01_EB, 1.948051E-01_EB, &
-    1.216575E+00_EB, 7.033415E-01_EB, 5.403969E-01_EB, 4.894709E-01_EB, 3.659367E-01_EB, 2.101812E-01_EB/),(/6,8/))
+! print fine structure array gamma_d 
 
-SD4_CH3OH(1:6,9:14) = RESHAPE((/ &  ! 3725-3850 cm-1
-    7.404599E-01_EB, 5.609796E-01_EB, 4.654430E-01_EB, 4.385557E-01_EB, 3.564117E-01_EB, 2.355846E-01_EB, &
-    1.629919E-01_EB, 1.281019E-01_EB, 1.199806E-01_EB, 1.268044E-01_EB, 1.078585E-01_EB, 5.912902E-02_EB, &
-    4.865894E-02_EB, 6.976140E-02_EB, 5.563887E-02_EB, 2.753925E-02_EB, 2.928424E-02_EB, 4.711971E-02_EB, &
-    5.741675E-03_EB, 2.982846E-02_EB, 1.581692E-02_EB, 2.676572E-03_EB, 3.669527E-03_EB, 1.652751E-02_EB, &
-    2.082014E-03_EB, 3.722879E-03_EB, 3.235500E-03_EB, 2.011524E-03_EB, 2.043556E-03_EB, 2.034177E-03_EB, &
-    1.878821E-03_EB, 1.877877E-03_EB, 1.877905E-03_EB, 1.880174E-03_EB, 1.878741E-03_EB, 1.871949E-03_EB/),(/6,6/))
+gammad3_c2h4(1:7,1:8) = RESHAPE((/ &  ! 1750-1925 cm-1
+   2.062935e-04_EB, 2.213095e-04_EB, 2.125965e-04_EB, 1.924384e-04_EB, 2.245648e-04_EB, 2.001139e-04_EB, &
+   1.052265e-04_EB, &
+   2.525656e-04_EB, 2.298492e-04_EB, 2.561819e-04_EB, 2.386624e-04_EB, 3.763751e-04_EB, 6.701805e-04_EB, &
+   3.650678e-05_EB, &
+   2.518994e-04_EB, 2.486015e-04_EB, 3.999398e-04_EB, 6.636791e-04_EB, 2.149851e-04_EB, 1.018456e-02_EB, &
+   1.523459e-04_EB, &
+   9.583444e-03_EB, 5.252649e-02_EB, 2.359414e-02_EB, 1.373517e-01_EB, 1.580336e-02_EB, 3.863765e-01_EB, &
+   4.400337e-04_EB, &
+   1.817495e-01_EB, 1.535393e+00_EB, 1.403613e-01_EB, 5.133053e-01_EB, 5.338970e-02_EB, 9.422243e-01_EB, &
+   8.608663e-04_EB, &
+   1.604957e-01_EB, 1.152431e+00_EB, 9.900652e-02_EB, 1.034304e-01_EB, 1.658726e-01_EB, 9.190427e-01_EB, &
+   1.104201e-03_EB, &
+   1.875157e-01_EB, 6.534721e-01_EB, 1.215243e-01_EB, 1.499339e-01_EB, 1.669372e-01_EB, 1.540611e-01_EB, &
+   5.452210e-03_EB, &
+   2.586428e-01_EB, 3.173253e-01_EB, 1.281338e-01_EB, 2.222569e-01_EB, 1.791652e-01_EB, 9.692458e-01_EB, &
+   1.136010e-02_EB/),(/7,8/))
 
-!---------------------------------------------------------------------------
-ALLOCATE(GAMMAD4_CH3OH(N_TEMP_CH3OH,14)) 
-
-! BAND #4: 3525 cm-1 - 3850 cm-1 
-
-! SNB FIT WITH GOODY MODEL 
-
-! ERROR ASSOCIATED WITH GOODY FIT: 
-! On Transmissivity: 0.43646 % 
-
-! PRINT FINE STRUCTURE ARRAY GAMMA_D 
-
-GAMMAD4_CH3OH(1:6,1:8) = RESHAPE((/ &  ! 3525-3700 cm-1
-    1.626654E-03_EB, 1.602535E-03_EB, 1.631445E-03_EB, 1.605232E-03_EB, 1.607256E-03_EB, 1.631459E-03_EB, &
-    1.723078E-03_EB, 7.768143E-03_EB, 2.499620E-03_EB, 7.076177E-03_EB, 1.971971E-03_EB, 1.705727E-03_EB, &
-    1.180889E-01_EB, 4.055410E-02_EB, 2.034008E-02_EB, 3.381172E-01_EB, 2.336132E-02_EB, 6.639625E-03_EB, &
-    8.550832E-01_EB, 1.406939E-01_EB, 5.940930E-02_EB, 4.699214E-02_EB, 4.021641E-02_EB, 1.807614E-02_EB, &
-    7.812778E-01_EB, 3.139543E+00_EB, 4.126477E-01_EB, 4.372779E-01_EB, 4.725590E-01_EB, 1.149817E-01_EB, &
-    4.805381E+00_EB, 2.583554E+00_EB, 1.000172E+00_EB, 8.519776E-01_EB, 1.923003E+00_EB, 2.597800E-01_EB, &
-    4.845148E+00_EB, 4.083731E+00_EB, 5.932271E-01_EB, 8.547149E-01_EB, 1.176133E+00_EB, 1.605869E-01_EB, &
-    4.993867E+00_EB, 3.422447E+00_EB, 6.243680E-01_EB, 8.794022E-01_EB, 1.994778E+00_EB, 3.561227E-01_EB/),(/6,8/))
-
-GAMMAD4_CH3OH(1:6,9:14) = RESHAPE((/ &  ! 3725-3850 cm-1
-    3.783701E+00_EB, 4.300257E+00_EB, 1.419573E+00_EB, 1.801651E+00_EB, 1.169163E+00_EB, 6.333207E-01_EB, &
-    1.810755E-01_EB, 6.426424E-01_EB, 1.438808E-01_EB, 1.544789E-01_EB, 4.821333E-01_EB, 1.995849E-02_EB, &
-    2.454278E-02_EB, 2.254048E-01_EB, 5.446141E-02_EB, 3.444090E-01_EB, 1.854418E-01_EB, 6.348029E-02_EB, &
-    4.574510E-03_EB, 6.585079E-02_EB, 1.847167E-02_EB, 2.120399E-03_EB, 2.873519E-03_EB, 1.182680E-02_EB, &
-    1.641036E-03_EB, 2.953831E-03_EB, 2.683454E-03_EB, 1.592042E-03_EB, 1.629044E-03_EB, 1.594709E-03_EB, &
-    1.498523E-03_EB, 1.497953E-03_EB, 1.497022E-03_EB, 1.499683E-03_EB, 1.498643E-03_EB, 1.492511E-03_EB/),(/6,6/))
-
-!-------------------------MMA DATA-------------------
-
-
-! THERE ARE 6 BANDS FOR MMA
-
-! BAND #1: 750 cm-1 - 880 cm-1 
-! BAND #2: 875 cm-1 - 1055 cm-1 
-! BAND #3: 1050 cm-1 - 1275 cm-1 
-! BAND #4: 1250 cm-1 - 1575 cm-1 
-! BAND #5: 1550 cm-1 - 1975 cm-1 
-! BAND #6: 2650 cm-1 - 3275 cm-1 
-
-N_TEMP_C5H8O2 = 5
-N_BAND_C5H8O2 = 6
-I_MODEL_C5H8O2 = 1 ! 1: GOODY, 2: MALKMUS, 3: ELSASSER 
-
-ALLOCATE(SD_C5H8O2_TEMP(N_TEMP_C5H8O2)) 
-
-! INITIALIZE BANDS WAVENUMBER BOUNDS FOR MMA ABSOPTION COEFFICIENTS.
-! BANDS ARE ORGANIZED BY ROW: 
-! 1ST COLUMN IS THE LOWER BOUND BAND LIMIT IN cm-1. 
-! 2ND COLUMN IS THE UPPER BOUND BAND LIMIT IN cm-1. 
-! 3RD COLUMN IS THE STRIDE BETWEEN WAVENUMBERS IN BAND.
-! IF 3RD COLUMN = 0., BAND IS CALCULATED, NOT TABULATED.
-
-ALLOCATE(OM_BND_C5H8O2(N_BAND_C5H8O2,3)) 
-ALLOCATE(Be_C5H8O2(N_BAND_C5H8O2)) 
-
-OM_BND_C5H8O2 = RESHAPE((/ &
-    750._EB,  875._EB, 1050._EB, 1250._EB, 1550._EB, 2650._EB, &
-    880._EB, 1055._EB, 1275._EB, 1575._EB, 1975._EB, 3275._EB, &
-     5._EB, 5._EB, 5._EB, 25._EB, 25._EB, 25._EB/),(/N_BAND_C5H8O2,3/)) 
-
-SD_C5H8O2_TEMP = (/ &
-    396._EB, 441._EB, 483._EB, 597._EB, 803._EB/)
-
-Be_C5H8O2 = (/ &
-    1.000_EB, 1.000_EB, 1.000_EB, 1.000_EB, 1.000_EB, 1.000_EB/)
+gammad3_c2h4(1:7,9:14) = RESHAPE((/ &  ! 1950-2075 cm-1
+   1.624541e-02_EB, 2.116364e-02_EB, 2.358393e-02_EB, 5.479449e-02_EB, 3.978462e-02_EB, 5.533594e-02_EB, &
+   7.054981e-03_EB, &
+   2.704645e-04_EB, 2.392112e-04_EB, 3.409077e-04_EB, 3.457806e-04_EB, 1.714364e-03_EB, 1.531894e-03_EB, &
+   1.624673e-04_EB, &
+   2.502376e-04_EB, 2.651107e-04_EB, 2.268500e-04_EB, 2.246834e-04_EB, 2.477431e-04_EB, 2.372743e-04_EB, &
+   1.590970e-05_EB, &
+   2.596193e-04_EB, 2.512472e-04_EB, 2.549796e-04_EB, 2.535211e-04_EB, 2.549967e-04_EB, 2.385259e-04_EB, &
+   1.055504e-04_EB, &
+   1.974440e-04_EB, 2.070414e-04_EB, 2.178990e-04_EB, 2.070114e-04_EB, 2.210429e-04_EB, 2.175134e-04_EB, &
+   1.061814e-04_EB, &
+   1.709157e-04_EB, 1.709157e-04_EB, 1.709157e-04_EB, 1.709157e-04_EB, 1.709157e-04_EB, 1.709157e-04_EB, &
+   8.125358e-05_EB/),(/7,6/))
 
 !---------------------------------------------------------------------------
-ALLOCATE(SD1_C5H8O2(N_TEMP_C5H8O2,27)) 
+ALLOCATE(sd4_c2h4(n_temp_c2h4,25)) 
 
-! BAND #1: 750 cm-1 - 880 cm-1 
+! band #4: 2800 cm-1 - 3400 cm-1 
 
-! SNB FIT WITH GOODY MODEL 
+! snb fit with malkmus model 
 
-! ERROR ASSOCIATED WITH GOODY FIT: 
-! On Transmissivity: 0.70103 % 
+! error associated with malkmus fit: 
+! on transmissivity: 0.39903 % 
 
-SD1_C5H8O2(1:5,1:8) = RESHAPE((/ &  ! 750-785 cm-1
-    1.977968E-03_EB, 2.156480E-03_EB, 2.043154E-03_EB, 2.032996E-03_EB, 1.998580E-03_EB, &
-    2.278828E-03_EB, 2.161466E-03_EB, 2.379096E-03_EB, 2.380908E-03_EB, 2.134351E-03_EB, &
-    2.092760E-03_EB, 2.163484E-03_EB, 2.362076E-03_EB, 2.315581E-03_EB, 2.047509E-03_EB, &
-    2.260017E-03_EB, 2.184251E-03_EB, 2.159842E-03_EB, 2.233054E-03_EB, 2.065305E-03_EB, &
-    2.338610E-03_EB, 2.230286E-03_EB, 2.216772E-03_EB, 2.264400E-03_EB, 2.290279E-03_EB, &
-    2.095256E-03_EB, 2.329624E-03_EB, 2.137686E-03_EB, 2.937296E-02_EB, 4.350639E-02_EB, &
-    2.179934E-03_EB, 2.150314E-03_EB, 2.122989E-03_EB, 1.004382E+00_EB, 1.367564E-01_EB, &
-    2.798449E-03_EB, 9.925160E-03_EB, 1.823038E-02_EB, 2.844367E+00_EB, 7.056756E-01_EB/),(/5,8/))
+sd4_c2h4(1:7,1:8) = RESHAPE((/ &  ! 2800-2975 cm-1
+   2.787454e-04_EB, 2.798900e-04_EB, 3.048047e-04_EB, 2.953254e-04_EB, 3.008118e-04_EB, 2.854943e-04_EB, &
+   1.499675e-04_EB, &
+   1.974546e-03_EB, 3.576021e-04_EB, 3.665839e-04_EB, 3.719708e-04_EB, 4.008233e-04_EB, 3.722047e-04_EB, &
+   3.066454e-04_EB, &
+   4.675051e-03_EB, 3.770033e-04_EB, 1.005255e-03_EB, 5.231568e-04_EB, 3.365147e-03_EB, 4.031952e-03_EB, &
+   1.001045e-02_EB, &
+   1.579559e-02_EB, 4.036503e-04_EB, 9.793374e-03_EB, 4.364856e-03_EB, 1.125997e-02_EB, 1.687883e-02_EB, &
+   4.109982e-02_EB, &
+   1.901642e-02_EB, 7.948388e-03_EB, 2.110029e-02_EB, 1.680041e-02_EB, 3.681206e-02_EB, 5.911015e-02_EB, &
+   9.045692e-02_EB, &
+   7.057398e-02_EB, 8.615787e-02_EB, 1.147527e-01_EB, 1.077993e-01_EB, 1.296121e-01_EB, 1.341954e-01_EB, &
+   1.504629e-01_EB, &
+   4.303610e-01_EB, 3.433046e-01_EB, 3.232359e-01_EB, 2.803463e-01_EB, 2.416656e-01_EB, 1.843691e-01_EB, &
+   1.701492e-01_EB, &
+   6.023500e-01_EB, 3.794196e-01_EB, 3.422745e-01_EB, 2.887488e-01_EB, 2.637113e-01_EB, 2.107903e-01_EB, &
+   2.126134e-01_EB/),(/7,8/))
 
-SD1_C5H8O2(1:5,9:16) = RESHAPE((/ &  ! 790-825 cm-1
-    6.655494E-02_EB, 6.911521E-02_EB, 1.659808E-01_EB, 5.491844E+00_EB, 1.065872E+00_EB, &
-    2.032964E-01_EB, 1.787689E-01_EB, 2.661095E-01_EB, 9.187026E+00_EB, 8.859010E-01_EB, &
-    3.953030E-01_EB, 3.453332E-01_EB, 4.400895E-01_EB, 5.379512E+00_EB, 7.364314E-01_EB, &
-    6.543583E-01_EB, 6.113190E-01_EB, 6.462599E-01_EB, 1.652931E+00_EB, 7.669053E-01_EB, &
-    1.110150E+00_EB, 1.041891E+00_EB, 1.039608E+00_EB, 1.058753E+00_EB, 7.333727E-01_EB, &
-    1.437098E+00_EB, 1.245273E+00_EB, 1.214748E+00_EB, 8.073228E-01_EB, 6.763148E-01_EB, &
-    1.274080E+00_EB, 1.134532E+00_EB, 1.057303E+00_EB, 7.049093E-01_EB, 8.405894E-01_EB, &
-    1.209532E+00_EB, 1.097683E+00_EB, 9.818507E-01_EB, 6.282549E-01_EB, 1.121762E+00_EB/),(/5,8/))
+sd4_c2h4(1:7,9:16) = RESHAPE((/ &  ! 3000-3175 cm-1
+   7.798028e-01_EB, 4.757862e-01_EB, 3.974023e-01_EB, 3.382752e-01_EB, 2.973165e-01_EB, 2.380506e-01_EB, &
+   2.451699e-01_EB, &
+   7.172871e-01_EB, 5.831037e-01_EB, 5.314972e-01_EB, 4.800679e-01_EB, 4.358886e-01_EB, 3.600701e-01_EB, &
+   3.346981e-01_EB, &
+   5.311509e-01_EB, 4.669769e-01_EB, 4.432862e-01_EB, 4.085659e-01_EB, 3.930117e-01_EB, 3.358462e-01_EB, &
+   2.929137e-01_EB, &
+   8.649072e-01_EB, 5.873164e-01_EB, 4.935644e-01_EB, 4.177742e-01_EB, 3.508014e-01_EB, 2.332914e-01_EB, &
+   2.128007e-01_EB, &
+   7.478903e-01_EB, 4.640090e-01_EB, 3.775139e-01_EB, 3.190243e-01_EB, 2.690863e-01_EB, 1.975084e-01_EB, &
+   1.921879e-01_EB, &
+   1.077261e+00_EB, 6.909648e-01_EB, 5.870020e-01_EB, 4.958355e-01_EB, 4.101225e-01_EB, 3.093396e-01_EB, &
+   2.599685e-01_EB, &
+   7.637944e-01_EB, 5.720239e-01_EB, 5.128777e-01_EB, 4.357737e-01_EB, 3.822630e-01_EB, 3.059218e-01_EB, &
+   2.471299e-01_EB, &
+   3.843373e-01_EB, 3.060968e-01_EB, 2.831408e-01_EB, 2.396863e-01_EB, 2.332271e-01_EB, 1.957615e-01_EB, &
+   1.637279e-01_EB/),(/7,8/))
 
-SD1_C5H8O2(1:5,17:24) = RESHAPE((/ &  ! 830-865 cm-1
-    9.428976E-01_EB, 8.666572E-01_EB, 8.158085E-01_EB, 6.825674E-01_EB, 1.028508E+00_EB, &
-    6.421852E-01_EB, 6.363373E-01_EB, 5.768994E-01_EB, 2.853390E+00_EB, 6.538786E-01_EB, &
-    3.616812E-01_EB, 3.540135E-01_EB, 3.699415E-01_EB, 6.810458E+00_EB, 1.005925E+00_EB, &
-    1.201674E-01_EB, 1.219608E-01_EB, 2.020640E-01_EB, 4.483012E+00_EB, 8.928660E-01_EB, &
-    2.275904E-03_EB, 2.134816E-03_EB, 4.674742E-02_EB, 3.557090E+00_EB, 1.276134E-01_EB, &
-    2.305928E-03_EB, 2.627990E-03_EB, 2.230247E-03_EB, 2.619126E+00_EB, 5.567757E-02_EB, &
-    2.056231E-03_EB, 2.413242E-03_EB, 2.137246E-03_EB, 9.957676E-01_EB, 1.187661E-02_EB, &
-    2.275221E-03_EB, 2.151820E-03_EB, 2.347560E-03_EB, 2.183802E-03_EB, 2.266907E-03_EB/),(/5,8/))
+sd4_c2h4(1:7,17:24) = RESHAPE((/ &  ! 3200-3375 cm-1
+   2.099610e-01_EB, 1.791031e-01_EB, 1.774091e-01_EB, 1.486224e-01_EB, 1.585195e-01_EB, 1.392503e-01_EB, &
+   1.207946e-01_EB, &
+   1.199548e-01_EB, 1.020644e-01_EB, 9.502921e-02_EB, 8.145885e-02_EB, 1.125359e-01_EB, 1.424681e-01_EB, &
+   8.669709e-02_EB, &
+   4.616169e-01_EB, 7.858449e-02_EB, 7.272250e-02_EB, 2.867532e-02_EB, 1.168091e-01_EB, 1.330542e-01_EB, &
+   5.570436e-02_EB, &
+   8.691472e-02_EB, 9.220433e-03_EB, 1.896226e-02_EB, 3.974691e-03_EB, 3.169841e-01_EB, 2.218115e-02_EB, &
+   5.082209e-02_EB, &
+   2.867450e-02_EB, 3.903775e-04_EB, 3.229916e-04_EB, 3.302777e-04_EB, 1.149402e-01_EB, 6.959691e-02_EB, &
+   1.770145e-02_EB, &
+   3.690812e-03_EB, 3.360817e-04_EB, 3.487733e-04_EB, 4.020878e-04_EB, 3.692208e-04_EB, 3.501982e-04_EB, &
+   8.401837e-03_EB, &
+   3.318610e-04_EB, 3.541529e-04_EB, 3.588894e-04_EB, 3.595732e-04_EB, 3.703241e-04_EB, 3.649087e-04_EB, &
+   2.903059e-04_EB, &
+   3.061877e-04_EB, 2.641235e-04_EB, 2.931529e-04_EB, 2.985364e-04_EB, 2.827758e-04_EB, 2.741559e-04_EB, &
+   1.355576e-04_EB/),(/7,8/))
 
-SD1_C5H8O2(1:5,25:27) = RESHAPE((/ &  ! 870-880 cm-1
-    2.232094E-03_EB, 2.259397E-03_EB, 2.317550E-03_EB, 2.301286E-03_EB, 2.232390E-03_EB, &
-    2.134763E-03_EB, 2.033134E-03_EB, 1.972608E-03_EB, 2.278035E-03_EB, 2.001979E-03_EB, &
-    1.871896E-03_EB, 1.877025E-03_EB, 1.876358E-03_EB, 1.875642E-03_EB, 1.868920E-03_EB/),(/5,3/))
-
-!---------------------------------------------------------------------------
-ALLOCATE(GAMMAD1_C5H8O2(N_TEMP_C5H8O2,27)) 
-
-! BAND #1: 750 cm-1 - 880 cm-1 
-
-! SNB FIT WITH GOODY MODEL 
-
-! ERROR ASSOCIATED WITH GOODY FIT: 
-! On Transmissivity: 0.70103 % 
-
-! PRINT FINE STRUCTURE ARRAY GAMMA_D 
-
-GAMMAD1_C5H8O2(1:5,1:8) = RESHAPE((/ &  ! 750-785 cm-1
-    1.551689E-03_EB, 1.698117E-03_EB, 1.579669E-03_EB, 1.598404E-03_EB, 1.567051E-03_EB, &
-    1.742191E-03_EB, 1.666911E-03_EB, 1.850384E-03_EB, 1.974728E-03_EB, 1.658407E-03_EB, &
-    1.626790E-03_EB, 1.691094E-03_EB, 1.903957E-03_EB, 1.868088E-03_EB, 1.614908E-03_EB, &
-    1.801155E-03_EB, 1.675165E-03_EB, 1.691994E-03_EB, 1.779115E-03_EB, 1.674044E-03_EB, &
-    1.773964E-03_EB, 1.751951E-03_EB, 1.760646E-03_EB, 1.804233E-03_EB, 1.799463E-03_EB, &
-    1.642251E-03_EB, 1.849014E-03_EB, 1.618065E-03_EB, 2.101093E-03_EB, 1.005992E-02_EB, &
-    1.690683E-03_EB, 1.663245E-03_EB, 1.639628E-03_EB, 2.931088E-04_EB, 8.181108E-03_EB, &
-    2.233529E-03_EB, 7.019098E-03_EB, 2.867751E-02_EB, 4.233861E-04_EB, 1.610482E-03_EB/),(/5,8/))
-
-GAMMAD1_C5H8O2(1:5,9:16) = RESHAPE((/ &  ! 790-825 cm-1
-    2.922973E-02_EB, 5.611577E-01_EB, 2.858483E-01_EB, 5.176977E-04_EB, 1.729277E-03_EB, &
-    1.323514E-01_EB, 3.703907E-01_EB, 5.695217E-01_EB, 5.065591E-04_EB, 3.636395E-03_EB, &
-    3.199403E-01_EB, 6.170498E-01_EB, 2.136953E-01_EB, 1.213386E-03_EB, 1.041759E-02_EB, &
-    1.268486E+00_EB, 9.932617E-01_EB, 3.880884E+00_EB, 7.314081E-03_EB, 2.043421E-02_EB, &
-    6.689486E-01_EB, 1.299707E+00_EB, 6.503384E-01_EB, 3.154350E-02_EB, 3.303614E-02_EB, &
-    7.853134E-01_EB, 2.505057E+00_EB, 2.310651E-01_EB, 4.084265E-01_EB, 4.002361E-02_EB, &
-    7.782643E-01_EB, 9.847684E-01_EB, 6.737131E-01_EB, 1.433807E+00_EB, 1.513224E-02_EB, &
-    6.484456E-01_EB, 5.907665E-01_EB, 1.086945E+00_EB, 1.171722E+00_EB, 6.035843E-03_EB/),(/5,8/))
-
-GAMMAD1_C5H8O2(1:5,17:24) = RESHAPE((/ &  ! 830-865 cm-1
-    4.868697E-01_EB, 6.191252E-01_EB, 4.203555E-01_EB, 2.553604E-02_EB, 4.022685E-03_EB, &
-    4.458417E-01_EB, 1.111598E-01_EB, 4.852338E-01_EB, 1.567366E-03_EB, 5.304934E-03_EB, &
-    6.221067E-01_EB, 1.798369E-01_EB, 2.361277E-01_EB, 4.525827E-04_EB, 1.517584E-03_EB, &
-    1.112787E-01_EB, 5.206197E-02_EB, 7.938379E-02_EB, 5.353996E-04_EB, 7.693915E-04_EB, &
-    1.826771E-03_EB, 1.725244E-03_EB, 2.126881E-02_EB, 4.819182E-04_EB, 9.312656E-03_EB, &
-    1.789451E-03_EB, 1.979768E-03_EB, 1.732042E-03_EB, 4.206314E-04_EB, 3.692964E-01_EB, &
-    1.667890E-03_EB, 1.933493E-03_EB, 1.705560E-03_EB, 2.607572E-04_EB, 4.162565E-03_EB, &
-    1.783029E-03_EB, 1.732143E-03_EB, 1.777470E-03_EB, 1.723687E-03_EB, 1.752582E-03_EB/),(/5,8/))
-
-GAMMAD1_C5H8O2(1:5,25:27) = RESHAPE((/ &  ! 870-880 cm-1
-    1.729111E-03_EB, 1.755530E-03_EB, 1.830232E-03_EB, 1.838747E-03_EB, 1.810246E-03_EB, &
-    1.702949E-03_EB, 1.605941E-03_EB, 1.557853E-03_EB, 1.841938E-03_EB, 1.607413E-03_EB, &
-    1.491981E-03_EB, 1.497063E-03_EB, 1.496390E-03_EB, 1.495702E-03_EB, 1.489750E-03_EB/),(/5,3/))
+sd4_c2h4(1:7,25:25) = RESHAPE((/ &  ! 3400-3400 cm-1
+   2.172015e-04_EB, 2.172015e-04_EB, 2.172015e-04_EB, 2.172015e-04_EB, 2.172015e-04_EB, 2.172015e-04_EB, &
+   1.035699e-04_EB/),(/7,1/))
 
 !---------------------------------------------------------------------------
-ALLOCATE(SD2_C5H8O2(N_TEMP_C5H8O2,37)) 
+ALLOCATE(gammad4_c2h4(n_temp_c2h4,25)) 
 
-! BAND #2: 875 cm-1 - 1055 cm-1 
+! band #4: 2800 cm-1 - 3400 cm-1 
 
-! SNB FIT WITH GOODY MODEL 
+! snb fit with malkmus model 
 
-! ERROR ASSOCIATED WITH GOODY FIT: 
-! On Transmissivity: 0.6152 % 
+! error associated with malkmus fit: 
+! on transmissivity: 0.39903 % 
 
-SD2_C5H8O2(1:5,1:8) = RESHAPE((/ &  ! 875-910 cm-1
-    2.042466E-03_EB, 2.110197E-03_EB, 2.115530E-03_EB, 2.021717E-03_EB, 2.002696E-03_EB, &
-    2.306623E-03_EB, 2.281435E-03_EB, 2.284688E-03_EB, 2.101845E-03_EB, 2.242374E-03_EB, &
-    2.217570E-03_EB, 2.140589E-03_EB, 2.412758E-03_EB, 2.362165E-02_EB, 3.549615E-01_EB, &
-    2.212678E-03_EB, 2.180013E-03_EB, 2.606677E-02_EB, 7.688687E-02_EB, 6.830155E-01_EB, &
-    2.191413E-03_EB, 7.472758E-03_EB, 7.613374E-02_EB, 7.168518E-01_EB, 2.144276E-01_EB, &
-    4.268654E-03_EB, 6.128858E-02_EB, 1.380447E-01_EB, 2.682910E+00_EB, 2.970594E-01_EB, &
-    7.314869E-02_EB, 1.447346E-01_EB, 2.055059E-01_EB, 2.637256E+00_EB, 4.791219E-01_EB, &
-    2.442803E-01_EB, 3.187050E-01_EB, 4.649318E-01_EB, 4.734934E+00_EB, 6.818840E-01_EB/),(/5,8/))
+! print fine structure array gamma_d 
 
-SD2_C5H8O2(1:5,9:16) = RESHAPE((/ &  ! 915-950 cm-1
-    5.548001E-01_EB, 5.763900E-01_EB, 6.453431E-01_EB, 7.343137E+00_EB, 9.521638E-01_EB, &
-    1.037663E+00_EB, 9.598699E-01_EB, 9.694419E-01_EB, 2.661087E+00_EB, 9.558380E-01_EB, &
-    1.587533E+00_EB, 1.364251E+00_EB, 1.282871E+00_EB, 1.912233E+00_EB, 8.171322E-01_EB, &
-    1.997673E+00_EB, 1.694393E+00_EB, 1.592114E+00_EB, 1.623632E+00_EB, 9.286486E-01_EB, &
-    2.511490E+00_EB, 2.097555E+00_EB, 1.945708E+00_EB, 1.658392E+00_EB, 1.090108E+00_EB, &
-    2.912512E+00_EB, 2.358381E+00_EB, 2.060326E+00_EB, 1.452723E+00_EB, 9.276094E-01_EB, &
-    2.195118E+00_EB, 1.756372E+00_EB, 1.578649E+00_EB, 9.766806E-01_EB, 7.563211E-01_EB, &
-    1.494157E+00_EB, 1.202115E+00_EB, 1.114469E+00_EB, 7.278390E-01_EB, 5.498164E-01_EB/),(/5,8/))
+gammad4_c2h4(1:7,1:8) = RESHAPE((/ &  ! 2800-2975 cm-1
+   2.053802e-04_EB, 2.055037e-04_EB, 2.250544e-04_EB, 2.225113e-04_EB, 2.136803e-04_EB, 2.087893e-04_EB, &
+   1.105053e-04_EB, &
+   4.253229e-04_EB, 2.343264e-04_EB, 2.233710e-04_EB, 2.452992e-04_EB, 2.751557e-04_EB, 2.508501e-04_EB, &
+   2.222309e-04_EB, &
+   1.276922e-03_EB, 2.646545e-04_EB, 7.364197e-04_EB, 3.348640e-04_EB, 3.561604e-03_EB, 2.031177e-03_EB, &
+   2.949697e-01_EB, &
+   1.385628e-02_EB, 2.885267e-04_EB, 9.042876e-01_EB, 2.692734e-03_EB, 9.713740e-03_EB, 4.653156e-03_EB, &
+   2.653808e+00_EB, &
+   2.397896e-02_EB, 8.918801e-03_EB, 4.080122e-01_EB, 2.625635e-01_EB, 3.017722e-02_EB, 6.429571e-02_EB, &
+   6.032175e+00_EB, &
+   9.755870e-02_EB, 2.422956e+00_EB, 1.631270e+01_EB, 6.661998e+00_EB, 3.034249e-01_EB, 5.074180e+00_EB, &
+   6.298484e+00_EB, &
+   4.898871e-01_EB, 2.215583e+00_EB, 6.480333e+01_EB, 1.549944e+01_EB, 1.573448e+00_EB, 4.766076e-01_EB, &
+   4.349295e+01_EB, &
+   4.836954e-01_EB, 1.451915e+00_EB, 6.485194e+01_EB, 3.798161e+01_EB, 6.188424e-01_EB, 1.109668e+00_EB, &
+   4.352421e+01_EB/),(/7,8/))
 
-SD2_C5H8O2(1:5,17:24) = RESHAPE((/ &  ! 955-990 cm-1
-    1.027413E+00_EB, 8.456956E-01_EB, 7.519810E-01_EB, 5.626895E-01_EB, 3.894647E-01_EB, &
-    6.696120E-01_EB, 5.473343E-01_EB, 5.061671E-01_EB, 8.270640E-01_EB, 2.881169E-01_EB, &
-    3.483895E-01_EB, 3.058405E-01_EB, 3.004113E-01_EB, 1.500322E+00_EB, 2.544801E-01_EB, &
-    1.577174E-01_EB, 1.832271E-01_EB, 1.868893E-01_EB, 2.239869E+00_EB, 2.466930E-01_EB, &
-    1.472487E-01_EB, 1.737696E-01_EB, 1.622712E-01_EB, 2.436176E+00_EB, 2.298132E-01_EB, &
-    2.228549E-01_EB, 2.280001E-01_EB, 2.246147E-01_EB, 2.530489E+00_EB, 2.565302E-01_EB, &
-    2.937766E-01_EB, 2.966041E-01_EB, 2.839553E-01_EB, 9.404273E-01_EB, 3.182601E-01_EB, &
-    3.786927E-01_EB, 3.882557E-01_EB, 4.068266E-01_EB, 5.961964E-01_EB, 3.550976E-01_EB/),(/5,8/))
+gammad4_c2h4(1:7,9:16) = RESHAPE((/ &  ! 3000-3175 cm-1
+   3.345606e-01_EB, 5.278129e-01_EB, 6.469998e+01_EB, 1.288707e+01_EB, 8.242915e-01_EB, 1.035867e+00_EB, &
+   4.352463e+01_EB, &
+   1.563175e+00_EB, 2.625564e+00_EB, 6.454977e+01_EB, 6.093823e+01_EB, 2.035803e+00_EB, 1.210794e+00_EB, &
+   4.352445e+01_EB, &
+   8.952736e-01_EB, 1.070318e+00_EB, 1.932614e+00_EB, 1.478721e+01_EB, 1.380362e+00_EB, 4.608167e-01_EB, &
+   4.352008e+01_EB, &
+   1.218284e+00_EB, 7.511695e-01_EB, 9.571422e-01_EB, 3.171139e+00_EB, 1.952744e+00_EB, 1.419092e+00_EB, &
+   4.351690e+01_EB, &
+   1.188336e+00_EB, 5.437254e-01_EB, 7.645704e-01_EB, 1.220082e+00_EB, 1.364237e+00_EB, 2.953192e-01_EB, &
+   3.944037e+01_EB, &
+   1.069749e+00_EB, 7.136400e-01_EB, 5.480781e-01_EB, 7.511426e-01_EB, 8.072618e-01_EB, 2.442109e-01_EB, &
+   1.336082e+01_EB, &
+   5.123621e-01_EB, 4.456214e-01_EB, 3.621148e-01_EB, 6.473524e-01_EB, 5.364253e-01_EB, 1.595842e-01_EB, &
+   2.523820e+01_EB, &
+   2.185443e-01_EB, 1.605263e-01_EB, 1.238794e-01_EB, 2.209229e-01_EB, 1.353909e-01_EB, 5.702117e-02_EB, &
+   3.092779e+01_EB/),(/7,8/))
 
-SD2_C5H8O2(1:5,25:32) = RESHAPE((/ &  ! 995-1030 cm-1
-    4.992607E-01_EB, 5.057721E-01_EB, 5.000547E-01_EB, 5.493983E-01_EB, 4.051127E-01_EB, &
-    6.153877E-01_EB, 6.411622E-01_EB, 6.419988E-01_EB, 5.548979E-01_EB, 4.367635E-01_EB, &
-    7.938793E-01_EB, 7.921292E-01_EB, 7.915949E-01_EB, 7.073447E-01_EB, 4.522043E-01_EB, &
-    1.014579E+00_EB, 9.517353E-01_EB, 8.818405E-01_EB, 6.764847E-01_EB, 5.558685E-01_EB, &
-    1.259219E+00_EB, 1.063505E+00_EB, 9.620857E-01_EB, 7.090212E-01_EB, 3.318695E-01_EB, &
-    1.239865E+00_EB, 1.024465E+00_EB, 8.758508E-01_EB, 6.539741E-01_EB, 2.370590E-01_EB, &
-    1.237456E+00_EB, 9.477991E-01_EB, 7.995255E-01_EB, 7.547196E-01_EB, 1.865461E-01_EB, &
-    8.738919E-01_EB, 6.794780E-01_EB, 5.614905E-01_EB, 5.925989E-01_EB, 1.154811E-01_EB/),(/5,8/))
+gammad4_c2h4(1:7,17:24) = RESHAPE((/ &  ! 3200-3375 cm-1
+   5.244654e-02_EB, 7.872155e-02_EB, 5.156657e-02_EB, 8.595139e-02_EB, 5.856846e-02_EB, 2.220866e-02_EB, &
+   1.517203e-01_EB, &
+   3.762586e-03_EB, 1.216532e-02_EB, 1.917467e-02_EB, 2.846263e-02_EB, 2.089697e-02_EB, 4.969412e-03_EB, &
+   1.387417e-01_EB, &
+   4.291422e-05_EB, 7.807504e-04_EB, 1.341258e-03_EB, 6.152627e-03_EB, 2.309479e-03_EB, 1.073258e-03_EB, &
+   3.311750e-01_EB, &
+   3.584912e-05_EB, 2.671120e-04_EB, 1.957471e-04_EB, 1.342098e-03_EB, 1.278685e-04_EB, 3.324302e-03_EB, &
+   3.684340e-03_EB, &
+   8.216113e-05_EB, 2.682532e-04_EB, 2.247056e-04_EB, 2.195120e-04_EB, 7.774207e-05_EB, 3.815559e-05_EB, &
+   2.872761e-03_EB, &
+   1.294855e-04_EB, 2.265159e-04_EB, 2.506069e-04_EB, 2.536762e-04_EB, 2.424375e-04_EB, 2.435020e-04_EB, &
+   1.033795e-04_EB, &
+   2.206754e-04_EB, 2.418204e-04_EB, 2.208317e-04_EB, 2.403401e-04_EB, 2.291933e-04_EB, 2.353414e-04_EB, &
+   2.133339e-04_EB, &
+   2.205017e-04_EB, 1.924693e-04_EB, 2.146102e-04_EB, 2.118201e-04_EB, 2.108670e-04_EB, 2.100997e-04_EB, &
+   9.661135e-05_EB/),(/7,8/))
 
-SD2_C5H8O2(1:5,33:37) = RESHAPE((/ &  ! 1035-1055 cm-1
-    5.899034E-01_EB, 4.482240E-01_EB, 3.631824E-01_EB, 3.638478E-01_EB, 2.653137E-02_EB, &
-    2.244445E-01_EB, 1.926598E-01_EB, 1.587526E-01_EB, 6.140493E-01_EB, 2.070650E-03_EB, &
-    4.975979E-02_EB, 7.061794E-02_EB, 4.211112E-02_EB, 3.820360E-02_EB, 2.212095E-03_EB, &
-    6.187544E-03_EB, 1.186914E-02_EB, 8.635441E-03_EB, 2.102035E-03_EB, 2.121236E-03_EB, &
-    1.871896E-03_EB, 1.877025E-03_EB, 1.876358E-03_EB, 1.875642E-03_EB, 1.868920E-03_EB/),(/5,5/))
+gammad4_c2h4(1:7,25:25) = RESHAPE((/ &  ! 3400-3400 cm-1
+   1.709157e-04_EB, 1.709157e-04_EB, 1.709157e-04_EB, 1.709157e-04_EB, 1.709157e-04_EB, 1.709157e-04_EB, &
+   8.125358e-05_EB/),(/7,1/))
 
-!---------------------------------------------------------------------------
-ALLOCATE(GAMMAD2_C5H8O2(N_TEMP_C5H8O2,37)) 
+!-------------------------heptane data-------------------
 
-! BAND #2: 875 cm-1 - 1055 cm-1 
 
-! SNB FIT WITH GOODY MODEL 
+! there are 2 bands for heptane
 
-! ERROR ASSOCIATED WITH GOODY FIT: 
-! On Transmissivity: 0.6152 % 
+! band #1: 1100 cm-1 - 1800 cm-1 
+! band #2: 2550 cm-1 - 3275 cm-1 
 
-! PRINT FINE STRUCTURE ARRAY GAMMA_D 
+ALLOCATE(sd_c7h16_temp(n_temp_c7h16)) 
 
-GAMMAD2_C5H8O2(1:5,1:8) = RESHAPE((/ &  ! 875-910 cm-1
-    1.579660E-03_EB, 1.615956E-03_EB, 1.653954E-03_EB, 1.627417E-03_EB, 1.574813E-03_EB, &
-    1.797209E-03_EB, 1.781109E-03_EB, 1.785701E-03_EB, 1.666523E-03_EB, 1.768634E-03_EB, &
-    1.756356E-03_EB, 1.681279E-03_EB, 1.890300E-03_EB, 6.189191E-03_EB, 3.735195E-04_EB, &
-    1.761680E-03_EB, 1.764987E-03_EB, 5.321193E-03_EB, 2.123044E-02_EB, 1.018968E-03_EB, &
-    1.728184E-03_EB, 4.475240E-03_EB, 4.951284E-03_EB, 3.608489E-04_EB, 1.450845E-01_EB, &
-    3.779303E-03_EB, 1.277594E-02_EB, 2.721333E-02_EB, 4.374101E-04_EB, 5.638164E-02_EB, &
-    6.052500E-02_EB, 6.381217E-02_EB, 9.954849E-02_EB, 7.424570E-04_EB, 1.424072E-02_EB, &
-    1.033139E-01_EB, 6.848747E-02_EB, 1.656140E-02_EB, 1.126102E-03_EB, 1.547125E-02_EB/),(/5,8/))
+! initialize bands wavenumber bounds for heptane ABS(option coefficients.
+! bands are organized by row: 
+! 1st column is the lower bound band limit in cm-1. 
+! 2nd column is the upper bound band limit in cm-1. 
+! 3rd column is the stride between wavenumbers in band.
+! IF 3rd column = 0., band is calculated, not tabulated.
 
-GAMMAD2_C5H8O2(1:5,9:16) = RESHAPE((/ &  ! 915-950 cm-1
-    1.032265E-01_EB, 5.466025E-01_EB, 3.637505E-01_EB, 1.346042E-03_EB, 1.542351E-02_EB, &
-    1.144796E-01_EB, 1.010217E+00_EB, 4.886716E-01_EB, 6.927441E-03_EB, 2.619457E-02_EB, &
-    1.432006E-01_EB, 1.109353E+00_EB, 8.614672E-01_EB, 1.763253E-02_EB, 1.291572E-01_EB, &
-    2.297552E-01_EB, 3.744077E+00_EB, 9.858933E-01_EB, 4.607361E-02_EB, 1.143793E-01_EB, &
-    2.778708E-01_EB, 4.355627E+00_EB, 7.930428E-01_EB, 7.972619E-02_EB, 5.966540E-02_EB, &
-    3.238868E-01_EB, 4.616573E+00_EB, 1.210304E+00_EB, 1.331642E-01_EB, 1.222994E-01_EB, &
-    2.451266E-01_EB, 4.340063E+00_EB, 5.877976E-01_EB, 5.725607E-01_EB, 9.993448E-02_EB, &
-    1.795875E-01_EB, 3.576010E+00_EB, 3.146389E-01_EB, 1.098739E-01_EB, 1.559953E-01_EB/),(/5,8/))
+ALLOCATE(om_bnd_c7h16(n_band_c7h16,3)) 
+ALLOCATE(be_c7h16(n_band_c7h16)) 
 
-GAMMAD2_C5H8O2(1:5,17:24) = RESHAPE((/ &  ! 955-990 cm-1
-    1.239784E-01_EB, 1.569455E+00_EB, 8.026391E-01_EB, 4.868124E-02_EB, 6.868346E-01_EB, &
-    4.572953E-02_EB, 6.085217E-01_EB, 5.667581E-01_EB, 5.232557E-03_EB, 6.215409E-01_EB, &
-    2.515002E-02_EB, 4.859401E-01_EB, 5.596246E-01_EB, 1.374426E-03_EB, 6.404047E-01_EB, &
-    8.030806E-02_EB, 2.745545E-01_EB, 4.968927E-01_EB, 7.247877E-04_EB, 1.921368E+00_EB, &
-    4.290260E-02_EB, 1.202307E-01_EB, 7.789141E-01_EB, 5.988401E-04_EB, 9.332347E-01_EB, &
-    9.710587E-02_EB, 2.641851E-01_EB, 1.349045E+00_EB, 7.224204E-04_EB, 2.052309E-01_EB, &
-    1.055385E-01_EB, 2.510475E-01_EB, 5.468846E-01_EB, 2.712445E-03_EB, 1.858132E-01_EB, &
-    2.193369E-01_EB, 2.609800E-01_EB, 2.125920E-01_EB, 9.608815E-03_EB, 4.845461E-01_EB/),(/5,8/))
+om_bnd_c7h16 = RESHAPE((/ &
+   1100._EB, 2550._EB, &
+   1800._EB, 3275._EB, &
+   25._EB, 25._EB/),(/n_band_c7h16,3/)) 
 
-GAMMAD2_C5H8O2(1:5,25:32) = RESHAPE((/ &  ! 995-1030 cm-1
-    2.145844E-01_EB, 3.481229E-01_EB, 3.403510E-01_EB, 2.837016E-02_EB, 7.414174E-01_EB, &
-    3.783368E-01_EB, 4.218983E-01_EB, 4.473844E-01_EB, 3.493477E-01_EB, 3.056384E-01_EB, &
-    1.364610E-01_EB, 5.952926E-01_EB, 2.501817E-01_EB, 4.690452E-02_EB, 5.975616E-02_EB, &
-    1.514847E-01_EB, 6.154576E-01_EB, 5.248340E-01_EB, 8.472757E-02_EB, 1.404748E-02_EB, &
-    1.367876E-01_EB, 1.370025E+00_EB, 3.024798E-01_EB, 4.717083E-02_EB, 1.888060E-01_EB, &
-    1.951830E-01_EB, 1.252616E+00_EB, 6.210271E-01_EB, 3.024455E-02_EB, 1.439676E+00_EB, &
-    1.111612E-01_EB, 1.159598E+00_EB, 6.967457E-01_EB, 1.218077E-02_EB, 2.562049E+00_EB, &
-    1.014253E-01_EB, 1.642295E+00_EB, 8.671713E-01_EB, 7.447326E-03_EB, 5.429616E-01_EB/),(/5,8/))
+sd_c7h16_temp = (/ &
+   293._EB, 400._EB, 450._EB, 490._EB, 593._EB, 794._EB,&
+   1000._EB/)
 
-GAMMAD2_C5H8O2(1:5,33:37) = RESHAPE((/ &  ! 1035-1055 cm-1
-    6.752262E-02_EB, 9.605534E-01_EB, 3.926567E-01_EB, 3.947463E-03_EB, 5.168906E-02_EB, &
-    1.176035E-01_EB, 3.420822E-01_EB, 3.009257E-01_EB, 6.398171E-04_EB, 1.660897E-03_EB, &
-    4.834788E-02_EB, 4.497404E-02_EB, 3.351079E-01_EB, 1.495479E-02_EB, 1.706261E-03_EB, &
-    5.986851E-03_EB, 8.614835E-03_EB, 6.722316E-03_EB, 1.664198E-03_EB, 1.661604E-03_EB, &
-    1.491981E-03_EB, 1.497063E-03_EB, 1.496390E-03_EB, 1.495702E-03_EB, 1.489750E-03_EB/),(/5,5/))
+be_c7h16 = (/ &
+   1.000_EB, 1.000_EB/)
 
 !---------------------------------------------------------------------------
-ALLOCATE(SD3_C5H8O2(N_TEMP_C5H8O2,18)) 
+ALLOCATE(sd1_c7h16(n_temp_c7h16,29)) 
 
-! BAND #3: 1050 cm-1 - 1275 cm-1 
+! band #1: 1100 cm-1 - 1800 cm-1 
 
-! SNB FIT WITH GOODY MODEL 
+! snb fit with malkmus model 
 
-! ERROR ASSOCIATED WITH GOODY FIT: 
-! On Transmissivity: 2.3356 % 
+! error associated with malkmus fit: 
+! on transmissivity: 0.72543 % 
 
-SD3_C5H8O2(1:5,1:8) = RESHAPE((/ &  ! 1050-1085 cm-1
-    1.895316E-03_EB, 3.266740E-03_EB, 4.262770E-03_EB, 1.968277E-03_EB, 1.987200E-03_EB, &
-    1.871896E-03_EB, 6.462260E-03_EB, 1.179414E-02_EB, 2.426734E-03_EB, 2.159215E-03_EB, &
-    1.871896E-03_EB, 4.004899E-03_EB, 5.048405E-03_EB, 2.544188E-03_EB, 2.296985E-03_EB, &
-    1.938284E-03_EB, 1.522413E-02_EB, 2.479717E-03_EB, 2.215632E-03_EB, 2.114329E-02_EB, &
-    5.514975E-03_EB, 2.276508E-02_EB, 1.744594E-02_EB, 2.302676E-03_EB, 5.879148E-02_EB, &
-    1.821065E-02_EB, 4.230168E-02_EB, 3.224741E-02_EB, 2.213755E-03_EB, 1.277977E-01_EB, &
-    3.600080E-02_EB, 6.975337E-02_EB, 6.887688E-02_EB, 1.804451E-02_EB, 1.772755E-01_EB, &
-    5.987390E-02_EB, 1.133137E-01_EB, 1.032082E-01_EB, 9.044261E-02_EB, 2.680671E-01_EB/),(/5,8/))
+sd1_c7h16(1:7,1:8) = RESHAPE((/ &  ! 1100-1275 cm-1
+   1.426744e-03_EB, 1.201770e-03_EB, 1.274320e-03_EB, 1.347928e-03_EB, 1.656416e-03_EB, 1.325255e-03_EB, &
+   2.057861e-03_EB, &
+   1.811130e-03_EB, 2.521922e-03_EB, 1.872758e-03_EB, 1.707256e-03_EB, 1.927722e-03_EB, 1.955475e-03_EB, &
+   2.516760e-01_EB, &
+   1.747928e-03_EB, 2.120166e-03_EB, 2.046218e-03_EB, 1.649154e-03_EB, 1.666396e-03_EB, 1.992630e-03_EB, &
+   2.005874e+00_EB, &
+   1.624614e-03_EB, 2.021985e-03_EB, 4.956340e-03_EB, 1.877145e-03_EB, 1.905600e-03_EB, 1.746241e-03_EB, &
+   3.502611e-01_EB, &
+   1.930396e-03_EB, 1.894347e-03_EB, 1.299287e-02_EB, 1.476436e-02_EB, 4.597890e-03_EB, 2.359195e-02_EB, &
+   4.013873e+00_EB, &
+   6.004547e-02_EB, 4.017701e-02_EB, 3.934126e-02_EB, 3.083190e-02_EB, 2.179721e-01_EB, 4.014522e-02_EB, &
+   2.600484e+00_EB, &
+   7.613398e-02_EB, 5.549015e-02_EB, 3.003541e-01_EB, 1.344358e-01_EB, 4.411584e-01_EB, 7.993576e-02_EB, &
+   4.665685e+00_EB, &
+   1.373972e-01_EB, 1.249248e-01_EB, 1.230316e-01_EB, 1.155939e-01_EB, 3.749324e-01_EB, 1.429788e-01_EB, &
+   2.876741e+00_EB/),(/7,8/))
 
-SD3_C5H8O2(1:5,9:16) = RESHAPE((/ &  ! 1090-1225 cm-1
-    9.373223E-02_EB, 1.441543E-01_EB, 1.465131E-01_EB, 1.675262E-01_EB, 3.359493E-01_EB, &
-    1.392028E-01_EB, 1.818684E-01_EB, 1.799138E-01_EB, 3.664029E-01_EB, 3.872205E-01_EB, &
-    1.885373E-01_EB, 2.235879E-01_EB, 2.372975E-01_EB, 5.399505E-01_EB, 5.535676E-01_EB, &
-    7.165421E-01_EB, 9.177639E-01_EB, 1.091727E+00_EB, 1.638425E+00_EB, 2.652301E+00_EB, &
-    8.443639E+00_EB, 7.915300E+00_EB, 8.313690E+00_EB, 7.601797E+00_EB, 6.540142E+00_EB, &
-    1.301316E+01_EB, 1.100675E+01_EB, 1.043425E+01_EB, 7.989538E+00_EB, 4.865054E+00_EB, &
-    7.209517E+00_EB, 5.933006E+00_EB, 5.289987E+00_EB, 3.611772E+00_EB, 2.004953E+00_EB, &
-    2.132598E+00_EB, 1.838141E+00_EB, 1.653118E+00_EB, 1.459786E+00_EB, 7.051564E-01_EB/),(/5,8/))
+sd1_c7h16(1:7,9:16) = RESHAPE((/ &  ! 1300-1475 cm-1
+   1.960350e-01_EB, 7.251248e-01_EB, 4.660543e-01_EB, 2.468984e-01_EB, 3.746538e-01_EB, 1.932187e-01_EB, &
+   1.906827e+00_EB, &
+   2.182462e-01_EB, 1.037076e+00_EB, 4.532828e-01_EB, 3.341447e-01_EB, 4.124866e-01_EB, 3.832806e-01_EB, &
+   1.538802e+00_EB, &
+   5.511687e-01_EB, 9.486430e-01_EB, 6.841490e-01_EB, 5.497692e-01_EB, 5.893967e-01_EB, 6.049837e-01_EB, &
+   6.095137e+00_EB, &
+   2.169296e+00_EB, 1.762238e+00_EB, 1.496288e+00_EB, 1.153363e+00_EB, 9.332138e-01_EB, 6.553914e-01_EB, &
+   1.559757e+00_EB, &
+   1.152586e+00_EB, 1.398012e+00_EB, 1.008290e+00_EB, 8.691367e-01_EB, 7.857883e-01_EB, 5.751618e-01_EB, &
+   3.554067e+00_EB, &
+   2.809542e-01_EB, 2.417925e+00_EB, 4.381657e-01_EB, 5.312573e-01_EB, 5.715073e-01_EB, 5.154692e-01_EB, &
+   1.149283e+00_EB, &
+   2.520765e+00_EB, 2.328593e+00_EB, 1.895157e+00_EB, 1.577062e+00_EB, 1.328041e+00_EB, 1.069522e+00_EB, &
+   2.814896e+00_EB, &
+   4.096478e+00_EB, 3.000085e+00_EB, 2.158821e+00_EB, 1.809690e+00_EB, 1.347468e+00_EB, 8.991423e-01_EB, &
+   2.342350e+00_EB/),(/7,8/))
 
-SD3_C5H8O2(1:5,17:18) = RESHAPE((/ &  ! 1250-1275 cm-1
-    2.800021E-01_EB, 2.902226E-01_EB, 2.657141E-01_EB, 4.152738E-01_EB, 1.731737E-01_EB, &
-    1.871896E-03_EB, 1.877025E-03_EB, 1.876358E-03_EB, 1.875642E-03_EB, 1.868920E-03_EB/),(/5,2/))
+sd1_c7h16(1:7,17:24) = RESHAPE((/ &  ! 1500-1675 cm-1
+   4.388670e-01_EB, 4.751103e-01_EB, 5.711364e-01_EB, 4.125599e-01_EB, 4.895056e-01_EB, 3.320026e-01_EB, &
+   2.177032e+00_EB, &
+   1.319705e-01_EB, 1.769183e-01_EB, 1.924812e-01_EB, 1.563493e-01_EB, 2.730796e-01_EB, 1.797482e-01_EB, &
+   1.084963e+00_EB, &
+   1.057772e-01_EB, 1.102722e-01_EB, 1.166527e-01_EB, 7.750779e-02_EB, 1.371680e-01_EB, 7.530555e-02_EB, &
+   4.673835e+00_EB, &
+   1.595659e-03_EB, 8.558479e-01_EB, 3.816360e-02_EB, 1.698589e-01_EB, 3.558832e-02_EB, 1.126854e+00_EB, &
+   6.274235e+00_EB, &
+   1.754518e-03_EB, 3.490672e-01_EB, 1.460628e-01_EB, 3.092481e-01_EB, 1.777143e-03_EB, 5.457342e+00_EB, &
+   4.901413e+00_EB, &
+   1.574552e-03_EB, 2.022684e-03_EB, 1.771614e-03_EB, 8.573879e-02_EB, 1.949107e-03_EB, 8.452931e-01_EB, &
+   6.243195e+00_EB, &
+   1.827339e-03_EB, 2.129922e-03_EB, 2.108249e-03_EB, 4.442893e-03_EB, 1.724490e-03_EB, 3.038490e-03_EB, &
+   3.195029e+00_EB, &
+   1.956178e-03_EB, 2.075598e-03_EB, 1.738792e-03_EB, 1.976314e-03_EB, 1.668323e-03_EB, 1.791602e-03_EB, &
+   4.975893e+00_EB/),(/7,8/))
 
-!---------------------------------------------------------------------------
-ALLOCATE(GAMMAD3_C5H8O2(N_TEMP_C5H8O2,18)) 
-
-! BAND #3: 1050 cm-1 - 1275 cm-1 
-
-! SNB FIT WITH GOODY MODEL 
-
-! ERROR ASSOCIATED WITH GOODY FIT: 
-! On Transmissivity: 2.3356 % 
-
-! PRINT FINE STRUCTURE ARRAY GAMMA_D 
-
-GAMMAD3_C5H8O2(1:5,1:8) = RESHAPE((/ &  ! 1050-1085 cm-1
-    1.514606E-03_EB, 2.500625E-03_EB, 4.192393E-03_EB, 1.558087E-03_EB, 1.586345E-03_EB, &
-    1.491981E-03_EB, 4.019258E-03_EB, 3.418916E-03_EB, 1.881187E-03_EB, 1.715737E-03_EB, &
-    1.491981E-03_EB, 3.175612E-03_EB, 3.002413E-03_EB, 1.978384E-03_EB, 1.809577E-03_EB, &
-    1.528214E-03_EB, 9.963739E-03_EB, 2.170956E-03_EB, 1.707429E-03_EB, 2.163017E-02_EB, &
-    3.338923E-03_EB, 1.101571E-02_EB, 1.341983E-02_EB, 1.750739E-03_EB, 2.961511E-01_EB, &
-    1.383497E-02_EB, 2.872454E-02_EB, 1.993915E-01_EB, 1.710922E-03_EB, 9.751578E-01_EB, &
-    1.320110E-01_EB, 6.864001E-02_EB, 2.826173E-01_EB, 3.711643E-01_EB, 3.077456E-01_EB, &
-    7.228539E-02_EB, 1.091734E-01_EB, 1.230627E+00_EB, 5.901011E-01_EB, 8.122831E-01_EB/),(/5,8/))
-
-GAMMAD3_C5H8O2(1:5,9:16) = RESHAPE((/ &  ! 1090-1225 cm-1
-    1.928799E-01_EB, 5.752051E-01_EB, 3.997556E-01_EB, 1.029453E-01_EB, 1.400010E+00_EB, &
-    1.737974E-01_EB, 2.658130E-01_EB, 6.680288E-01_EB, 5.428473E-03_EB, 3.481589E+00_EB, &
-    1.901908E-01_EB, 5.145295E-01_EB, 1.189850E+00_EB, 6.206942E-03_EB, 1.461545E+00_EB, &
-    3.043708E-01_EB, 1.337188E+00_EB, 1.263786E+00_EB, 1.502601E-01_EB, 6.014760E-01_EB, &
-    3.867466E-01_EB, 1.044279E+00_EB, 8.044520E-01_EB, 5.905918E-01_EB, 1.410594E+00_EB, &
-    1.043504E+00_EB, 4.526802E+00_EB, 1.594858E+00_EB, 4.780708E-01_EB, 9.633754E-01_EB, &
-    8.426404E-01_EB, 4.737972E+00_EB, 1.412341E+00_EB, 3.587971E-01_EB, 2.961172E+00_EB, &
-    1.999723E-01_EB, 1.096874E+00_EB, 8.113204E-01_EB, 4.734446E-02_EB, 2.262340E+00_EB/),(/5,8/))
-
-GAMMAD3_C5H8O2(1:5,17:18) = RESHAPE((/ &  ! 1250-1275 cm-1
-    1.467329E-01_EB, 2.194264E-01_EB, 2.570358E-01_EB, 3.988524E-03_EB, 3.146867E-01_EB, &
-    1.491981E-03_EB, 1.497063E-03_EB, 1.496390E-03_EB, 1.495702E-03_EB, 1.489750E-03_EB/),(/5,2/))
-
-!---------------------------------------------------------------------------
-ALLOCATE(SD4_C5H8O2(N_TEMP_C5H8O2,14)) 
-
-! BAND #4: 1250 cm-1 - 1575 cm-1 
-
-! SNB FIT WITH GOODY MODEL 
-
-! ERROR ASSOCIATED WITH GOODY FIT: 
-! On Transmissivity: 1.0284 % 
-
-SD4_C5H8O2(1:5,1:8) = RESHAPE((/ &  ! 1250-1425 cm-1
-    1.660042E-01_EB, 1.748046E-01_EB, 1.697290E-01_EB, 1.882528E-01_EB, 2.343081E-01_EB, &
-    9.377115E-01_EB, 1.023593E+00_EB, 1.129948E+00_EB, 1.467469E+00_EB, 1.470851E+00_EB, &
-    4.805875E+00_EB, 4.338865E+00_EB, 4.163034E+00_EB, 3.788932E+00_EB, 2.318440E+00_EB, &
-    5.225927E+00_EB, 4.286669E+00_EB, 3.734348E+00_EB, 2.703044E+00_EB, 1.259059E+00_EB, &
-    1.287300E+00_EB, 1.045692E+00_EB, 8.492504E-01_EB, 1.538004E+00_EB, 2.248091E-01_EB, &
-    5.468497E-01_EB, 5.142111E-01_EB, 4.380176E-01_EB, 3.291388E+00_EB, 2.197872E-01_EB, &
-    8.848562E-01_EB, 8.281071E-01_EB, 7.415253E-01_EB, 1.712767E+00_EB, 5.886051E-01_EB, &
-    1.352467E+00_EB, 1.258988E+00_EB, 1.190252E+00_EB, 1.353289E+00_EB, 7.982821E-01_EB/),(/5,8/))
-
-SD4_C5H8O2(1:5,9:14) = RESHAPE((/ &  ! 1450-1575 cm-1
-    2.800381E+00_EB, 2.309955E+00_EB, 2.018710E+00_EB, 1.701056E+00_EB, 8.400276E-01_EB, &
-    1.266718E+00_EB, 1.075154E+00_EB, 9.044431E-01_EB, 1.353373E+00_EB, 4.168368E-01_EB, &
-    2.277952E-01_EB, 2.289581E-01_EB, 1.796876E-01_EB, 6.112118E-01_EB, 6.865687E-02_EB, &
-    1.359860E-01_EB, 1.277648E-01_EB, 9.147878E-02_EB, 2.438037E-02_EB, 3.675435E-03_EB, &
-    5.961036E-02_EB, 5.060249E-02_EB, 3.528034E-02_EB, 4.755783E-03_EB, 3.830530E-03_EB, &
-    1.871896E-03_EB, 1.877025E-03_EB, 1.876358E-03_EB, 1.875642E-03_EB, 1.868920E-03_EB/),(/5,6/))
+sd1_c7h16(1:7,25:29) = RESHAPE((/ &  ! 1700-1800 cm-1
+   1.635422e-03_EB, 2.360211e-03_EB, 1.966190e-03_EB, 1.838431e-03_EB, 1.806395e-03_EB, 2.025722e-03_EB, &
+   3.595214e+00_EB, &
+   1.685412e-03_EB, 1.845260e-03_EB, 1.904451e-03_EB, 1.947180e-03_EB, 1.880024e-03_EB, 1.570401e-03_EB, &
+   4.352547e+00_EB, &
+   1.693693e-03_EB, 2.153411e-03_EB, 2.016532e-03_EB, 1.811016e-03_EB, 1.826653e-03_EB, 1.799395e-03_EB, &
+   1.496407e+00_EB, &
+   1.300712e-03_EB, 1.598790e-03_EB, 1.518162e-03_EB, 1.529646e-03_EB, 1.291412e-03_EB, 1.245281e-03_EB, &
+   1.384262e-01_EB, &
+   9.565465e-04_EB, 9.572222e-04_EB, 9.564413e-04_EB, 9.564850e-04_EB, 9.561277e-04_EB, 9.585852e-04_EB, &
+   1.922450e-03_EB/),(/7,5/))
 
 !---------------------------------------------------------------------------
-ALLOCATE(GAMMAD4_C5H8O2(N_TEMP_C5H8O2,14)) 
+ALLOCATE(gammad1_c7h16(n_temp_c7h16,29)) 
 
-! BAND #4: 1250 cm-1 - 1575 cm-1 
+! band #1: 1100 cm-1 - 1800 cm-1 
 
-! SNB FIT WITH GOODY MODEL 
+! snb fit with malkmus model 
 
-! ERROR ASSOCIATED WITH GOODY FIT: 
-! On Transmissivity: 1.0284 % 
+! error associated with malkmus fit: 
+! on transmissivity: 0.72543 % 
 
-! PRINT FINE STRUCTURE ARRAY GAMMA_D 
+! print fine structure array gamma_d 
 
-GAMMAD4_C5H8O2(1:5,1:8) = RESHAPE((/ &  ! 1250-1425 cm-1
-    1.000227E-01_EB, 1.925749E-01_EB, 1.876160E-01_EB, 9.711695E-02_EB, 6.435815E-01_EB, &
-    1.003636E-01_EB, 1.396838E+00_EB, 9.956486E-01_EB, 6.399946E-02_EB, 2.863372E-01_EB, &
-    5.552385E-01_EB, 4.732894E+00_EB, 1.563780E+00_EB, 1.580531E-01_EB, 5.212981E-01_EB, &
-    6.193887E-01_EB, 4.728369E+00_EB, 1.638045E+00_EB, 1.246175E-01_EB, 1.444806E-01_EB, &
-    1.503227E-01_EB, 6.007908E-01_EB, 1.026038E+00_EB, 4.397791E-03_EB, 1.428625E-01_EB, &
-    1.531302E-01_EB, 4.607107E-01_EB, 1.310725E+00_EB, 8.695787E-04_EB, 9.438721E-02_EB, &
-    1.891924E-01_EB, 1.354402E+00_EB, 1.099985E+00_EB, 4.571853E-03_EB, 1.548350E-02_EB, &
-    1.920713E-01_EB, 1.695036E+00_EB, 6.655762E-01_EB, 2.445910E-02_EB, 5.249217E-02_EB/),(/5,8/))
+gammad1_c7h16(1:7,1:8) = RESHAPE((/ &  ! 1100-1275 cm-1
+   1.079377e-03_EB, 8.321757e-04_EB, 1.106526e-03_EB, 8.589890e-04_EB, 1.218045e-03_EB, 9.003631e-04_EB, &
+   1.652303e-03_EB, &
+   1.219534e-03_EB, 1.678161e-03_EB, 1.027749e-03_EB, 1.087240e-03_EB, 1.300295e-03_EB, 1.381191e-03_EB, &
+   2.766162e-01_EB, &
+   1.117750e-03_EB, 1.217712e-03_EB, 1.293043e-03_EB, 1.061960e-03_EB, 1.158654e-03_EB, 1.485883e-03_EB, &
+   6.838761e-04_EB, &
+   1.138939e-03_EB, 1.252798e-03_EB, 2.807650e-03_EB, 1.167864e-03_EB, 1.225067e-03_EB, 1.314096e-03_EB, &
+   2.282961e-02_EB, &
+   1.420120e-03_EB, 1.020475e-03_EB, 6.385377e-04_EB, 2.240175e-03_EB, 1.390330e-03_EB, 3.503565e-01_EB, &
+   2.532075e-04_EB, &
+   1.303079e-02_EB, 1.684651e-02_EB, 1.656972e-02_EB, 6.785015e-03_EB, 1.293076e-04_EB, 1.692435e-02_EB, &
+   9.530208e-04_EB, &
+   1.370385e-02_EB, 1.586469e-02_EB, 1.596226e-04_EB, 6.447976e-04_EB, 2.699714e-04_EB, 4.064881e-01_EB, &
+   7.587172e-04_EB, &
+   1.038621e-02_EB, 6.544712e-03_EB, 6.378851e-03_EB, 9.284895e-03_EB, 4.414444e-04_EB, 4.010176e-01_EB, &
+   1.276912e-03_EB/),(/7,8/))
 
-GAMMAD4_C5H8O2(1:5,9:14) = RESHAPE((/ &  ! 1450-1575 cm-1
-    3.770440E-01_EB, 4.569252E+00_EB, 1.115790E+00_EB, 4.530247E-02_EB, 7.877098E-02_EB, &
-    1.762895E-01_EB, 8.978709E-01_EB, 6.233793E-01_EB, 6.587037E-03_EB, 1.381483E-02_EB, &
-    3.119500E-01_EB, 3.950605E-01_EB, 3.089391E-01_EB, 6.357531E-04_EB, 3.191263E-02_EB, &
-    1.116972E-01_EB, 6.467394E-01_EB, 3.313760E-01_EB, 4.231392E-03_EB, 3.135888E-03_EB, &
-    4.275879E-02_EB, 6.526666E-02_EB, 1.717928E-01_EB, 2.346504E-03_EB, 2.410054E-03_EB, &
-    1.491981E-03_EB, 1.497063E-03_EB, 1.496390E-03_EB, 1.495702E-03_EB, 1.489750E-03_EB/),(/5,6/))
+gammad1_c7h16(1:7,9:16) = RESHAPE((/ &  ! 1300-1475 cm-1
+   9.663644e-02_EB, 3.809049e-04_EB, 7.060483e-04_EB, 2.346751e-03_EB, 1.601612e-03_EB, 2.284259e-01_EB, &
+   3.174484e-03_EB, &
+   2.648317e-02_EB, 4.915970e-04_EB, 1.642486e-03_EB, 3.803913e-03_EB, 3.050190e-03_EB, 1.055777e-02_EB, &
+   4.320127e-03_EB, &
+   3.165256e-02_EB, 3.335451e-03_EB, 6.233122e-03_EB, 1.162381e-02_EB, 1.333659e-02_EB, 1.163372e-02_EB, &
+   8.774580e-04_EB, &
+   7.316298e-02_EB, 3.067612e-02_EB, 2.893574e-02_EB, 4.067615e-02_EB, 5.248547e-02_EB, 4.649271e-01_EB, &
+   1.044691e-02_EB, &
+   4.533824e-02_EB, 1.035218e-02_EB, 1.958798e-02_EB, 2.401292e-02_EB, 2.064596e-02_EB, 3.122001e-02_EB, &
+   3.284470e-03_EB, &
+   2.887489e-02_EB, 4.618211e-04_EB, 1.291555e-02_EB, 9.570390e-03_EB, 1.139081e-02_EB, 4.131392e-02_EB, &
+   2.376013e-02_EB, &
+   9.435371e-02_EB, 3.559624e-02_EB, 4.477145e-02_EB, 5.321919e-02_EB, 5.410966e-02_EB, 4.965735e-02_EB, &
+   3.060972e-03_EB, &
+   1.434765e-01_EB, 5.756528e-02_EB, 7.898010e-02_EB, 6.856662e-02_EB, 6.369824e-02_EB, 6.660056e-02_EB, &
+   3.552779e-03_EB/),(/7,8/))
 
-!---------------------------------------------------------------------------
-ALLOCATE(SD5_C5H8O2(N_TEMP_C5H8O2,18)) 
+gammad1_c7h16(1:7,17:24) = RESHAPE((/ &  ! 1500-1675 cm-1
+   6.164439e-02_EB, 4.097206e-02_EB, 2.017864e-02_EB, 5.078487e-02_EB, 2.150953e-02_EB, 6.143261e-01_EB, &
+   2.140967e-03_EB, &
+   4.999099e-02_EB, 6.175675e-01_EB, 5.926015e-01_EB, 5.735879e-01_EB, 3.127071e-03_EB, 8.449651e-02_EB, &
+   4.359548e-03_EB, &
+   2.308160e-01_EB, 2.876922e+00_EB, 2.678573e+00_EB, 3.088436e-01_EB, 1.022662e-03_EB, 4.348389e-01_EB, &
+   5.138371e-04_EB, &
+   1.136554e-03_EB, 2.312863e-05_EB, 1.191809e+00_EB, 5.400494e-04_EB, 8.452069e-04_EB, 3.414922e-05_EB, &
+   2.732241e-04_EB, &
+   1.236428e-03_EB, 7.575429e-06_EB, 1.804662e-05_EB, 1.168575e-04_EB, 1.132712e-03_EB, 1.348325e-05_EB, &
+   2.605356e-04_EB, &
+   1.005482e-03_EB, 1.099106e-03_EB, 1.146793e-03_EB, 1.793408e-04_EB, 1.319446e-03_EB, 2.932722e-05_EB, &
+   2.217645e-04_EB, &
+   1.351400e-03_EB, 1.302077e-03_EB, 1.237548e-03_EB, 2.270156e-03_EB, 1.159496e-03_EB, 2.121847e-03_EB, &
+   2.405564e-04_EB, &
+   1.421491e-03_EB, 1.320464e-03_EB, 1.069063e-03_EB, 1.283897e-03_EB, 9.514195e-04_EB, 1.174814e-03_EB, &
+   1.274543e-04_EB/),(/7,8/))
 
-! BAND #5: 1550 cm-1 - 1975 cm-1 
-
-! SNB FIT WITH GOODY MODEL 
-
-! ERROR ASSOCIATED WITH GOODY FIT: 
-! On Transmissivity: 2.0191 % 
-
-SD5_C5H8O2(1:5,1:8) = RESHAPE((/ &  ! 1550-1725 cm-1
-    5.578430E-02_EB, 4.566782E-02_EB, 3.214958E-02_EB, 3.567863E-03_EB, 5.904830E-03_EB, &
-    1.317600E-01_EB, 1.379142E-01_EB, 1.004524E-01_EB, 1.212591E+00_EB, 3.333504E-01_EB, &
-    2.100755E-01_EB, 3.325442E-01_EB, 2.058401E-01_EB, 3.320935E+00_EB, 7.032044E-01_EB, &
-    7.837361E-01_EB, 7.305416E-01_EB, 6.634816E-01_EB, 1.791806E+00_EB, 3.041382E-01_EB, &
-    9.733299E-01_EB, 8.015791E-01_EB, 6.713429E-01_EB, 3.655976E-01_EB, 1.926133E-01_EB, &
-    2.543714E-01_EB, 2.759312E-01_EB, 2.533050E-01_EB, 3.538908E-01_EB, 2.239544E-01_EB, &
-    6.200902E-01_EB, 6.600095E-01_EB, 7.040509E-01_EB, 7.462940E-01_EB, 9.714592E-01_EB, &
-    5.709150E+00_EB, 5.139891E+00_EB, 5.207722E+00_EB, 4.355082E+00_EB, 3.406176E+00_EB/),(/5,8/))
-
-SD5_C5H8O2(1:5,9:16) = RESHAPE((/ &  ! 1750-1925 cm-1
-    1.090605E+01_EB, 8.986536E+00_EB, 8.305682E+00_EB, 5.769772E+00_EB, 3.563561E+00_EB, &
-    1.301555E+00_EB, 1.223192E+00_EB, 1.222292E+00_EB, 1.054646E+00_EB, 8.492508E-01_EB, &
-    3.062321E-01_EB, 3.205413E-01_EB, 2.975804E-01_EB, 2.409595E-01_EB, 1.607568E-01_EB, &
-    5.127312E-02_EB, 4.634454E-02_EB, 4.015137E-02_EB, 4.063746E-02_EB, 1.599017E-02_EB, &
-    1.928620E-02_EB, 2.460577E-02_EB, 2.235812E-02_EB, 2.775717E-02_EB, 4.194304E-03_EB, &
-    1.314133E-01_EB, 1.211079E-01_EB, 1.050035E-01_EB, 6.243796E-02_EB, 1.333471E-02_EB, &
-    6.851162E-02_EB, 6.295588E-02_EB, 5.244711E-02_EB, 2.384970E-02_EB, 2.270203E-03_EB, &
-    4.785334E-03_EB, 2.127718E-03_EB, 2.993004E-03_EB, 2.108022E-03_EB, 2.145673E-03_EB/),(/5,8/))
-
-SD5_C5H8O2(1:5,17:18) = RESHAPE((/ &  ! 1950-1975 cm-1
-    2.041170E-03_EB, 2.081980E-03_EB, 2.068610E-03_EB, 2.090939E-03_EB, 2.029261E-03_EB, &
-    1.871896E-03_EB, 1.877025E-03_EB, 1.876358E-03_EB, 1.875642E-03_EB, 1.868920E-03_EB/),(/5,2/))
-
-!---------------------------------------------------------------------------
-ALLOCATE(GAMMAD5_C5H8O2(N_TEMP_C5H8O2,18)) 
-
-! BAND #5: 1550 cm-1 - 1975 cm-1 
-
-! SNB FIT WITH GOODY MODEL 
-
-! ERROR ASSOCIATED WITH GOODY FIT: 
-! On Transmissivity: 2.0191 % 
-
-! PRINT FINE STRUCTURE ARRAY GAMMA_D 
-
-GAMMAD5_C5H8O2(1:5,1:8) = RESHAPE((/ &  ! 1550-1725 cm-1
-    4.625020E-02_EB, 5.743999E-02_EB, 1.250741E-01_EB, 2.283009E-03_EB, 4.054401E-03_EB, &
-    1.003172E-01_EB, 7.003088E-02_EB, 2.383113E-01_EB, 3.129461E-04_EB, 5.866136E-04_EB, &
-    1.267319E-01_EB, 7.215189E-03_EB, 1.286866E-01_EB, 5.678760E-04_EB, 1.663931E-03_EB, &
-    2.198852E-01_EB, 7.805502E-01_EB, 6.597722E-01_EB, 2.992888E-03_EB, 4.494161E-01_EB, &
-    2.485270E-01_EB, 8.221271E-01_EB, 8.610334E-01_EB, 1.991289E-01_EB, 3.274007E+00_EB, &
-    2.494447E-01_EB, 2.024321E-01_EB, 2.064188E-01_EB, 4.505978E-03_EB, 1.031386E+00_EB, &
-    3.695726E-01_EB, 1.007059E+00_EB, 4.186969E-01_EB, 9.197797E-02_EB, 3.102112E+00_EB, &
-    2.866716E-01_EB, 7.958919E-01_EB, 5.612843E-01_EB, 3.338158E-01_EB, 3.499645E+00_EB/),(/5,8/))
-
-GAMMAD5_C5H8O2(1:5,9:16) = RESHAPE((/ &  ! 1750-1925 cm-1
-    9.320643E-01_EB, 4.441684E+00_EB, 1.420863E+00_EB, 5.088807E-01_EB, 3.508776E+00_EB, &
-    9.602140E-02_EB, 5.800404E-01_EB, 4.474404E-01_EB, 1.373700E-01_EB, 3.491679E+00_EB, &
-    1.094478E-01_EB, 6.720713E-02_EB, 2.189761E-01_EB, 9.491070E-02_EB, 7.076412E-01_EB, &
-    2.109593E-02_EB, 2.024572E-02_EB, 1.470252E-02_EB, 3.215945E-03_EB, 1.702800E-02_EB, &
-    8.902892E-03_EB, 6.394130E-03_EB, 1.548294E-02_EB, 1.043673E-02_EB, 4.969734E-03_EB, &
-    5.738655E-02_EB, 5.654567E-02_EB, 6.587783E-02_EB, 1.061542E-01_EB, 2.690706E-01_EB, &
-    4.378490E-02_EB, 1.662891E-02_EB, 4.066752E-02_EB, 2.293556E-02_EB, 1.933921E-03_EB, &
-    3.735976E-03_EB, 1.566580E-03_EB, 2.285848E-03_EB, 1.643824E-03_EB, 1.697660E-03_EB/),(/5,8/))
-
-GAMMAD5_C5H8O2(1:5,17:18) = RESHAPE((/ &  ! 1950-1975 cm-1
-    1.611017E-03_EB, 1.604233E-03_EB, 1.646504E-03_EB, 1.654250E-03_EB, 1.598756E-03_EB, &
-    1.491981E-03_EB, 1.497063E-03_EB, 1.496390E-03_EB, 1.495702E-03_EB, 1.489750E-03_EB/),(/5,2/))
+gammad1_c7h16(1:7,25:29) = RESHAPE((/ &  ! 1700-1800 cm-1
+   1.029018e-03_EB, 1.522013e-03_EB, 1.190609e-03_EB, 1.137355e-03_EB, 1.227873e-03_EB, 1.521396e-03_EB, &
+   4.984208e-05_EB, &
+   1.062872e-03_EB, 1.240560e-03_EB, 1.115838e-03_EB, 1.071608e-03_EB, 1.073014e-03_EB, 1.091421e-03_EB, &
+   1.043998e-04_EB, &
+   1.264467e-03_EB, 1.452995e-03_EB, 1.276660e-03_EB, 1.062100e-03_EB, 1.296189e-03_EB, 1.314713e-03_EB, &
+   1.161390e-04_EB, &
+   9.490158e-04_EB, 1.088570e-03_EB, 1.017566e-03_EB, 1.036075e-03_EB, 9.453163e-04_EB, 9.054199e-04_EB, &
+   1.849978e-04_EB, &
+   7.632406e-04_EB, 7.638486e-04_EB, 7.631088e-04_EB, 7.630990e-04_EB, 7.628205e-04_EB, 7.652755e-04_EB, &
+   1.536272e-03_EB/),(/7,5/))
 
 !---------------------------------------------------------------------------
-ALLOCATE(SD6_C5H8O2(N_TEMP_C5H8O2,26)) 
+ALLOCATE(sd2_c7h16(n_temp_c7h16,30)) 
 
-! BAND #6: 2650 cm-1 - 3275 cm-1 
+! band #2: 2550 cm-1 - 3275 cm-1 
 
-! SNB FIT WITH GOODY MODEL 
+! snb fit with malkmus model 
 
-! ERROR ASSOCIATED WITH GOODY FIT: 
-! On Transmissivity: 0.4742 % 
+! error associated with malkmus fit: 
+! on transmissivity: 5.5204 % 
 
-SD6_C5H8O2(1:5,1:8) = RESHAPE((/ &  ! 2650-2825 cm-1
-    2.081932E-03_EB, 1.982133E-03_EB, 2.040393E-03_EB, 2.023451E-03_EB, 2.051222E-03_EB, &
-    2.255082E-03_EB, 2.268971E-03_EB, 2.192404E-03_EB, 2.235045E-03_EB, 2.175948E-03_EB, &
-    4.261135E-03_EB, 5.494653E-03_EB, 3.997249E-03_EB, 2.208341E-03_EB, 6.438021E-03_EB, &
-    1.031064E-02_EB, 1.596989E-02_EB, 1.397345E-02_EB, 7.672350E-03_EB, 2.209382E-02_EB, &
-    2.872721E-02_EB, 3.370298E-02_EB, 3.235753E-02_EB, 1.192225E-02_EB, 2.360358E-02_EB, &
-    2.051906E-02_EB, 3.078535E-02_EB, 2.651935E-02_EB, 6.895835E-03_EB, 2.196169E-02_EB, &
-    5.031565E-02_EB, 4.319529E-02_EB, 4.818224E-02_EB, 3.115285E-02_EB, 6.609277E-02_EB, &
-    1.314844E-01_EB, 1.256268E-01_EB, 1.272179E-01_EB, 1.125973E-01_EB, 1.516652E-01_EB/),(/5,8/))
+sd2_c7h16(1:7,1:8) = RESHAPE((/ &  ! 2550-2725 cm-1
+   1.230745e-03_EB, 1.059249e-02_EB, 5.258556e-03_EB, 8.983219e-03_EB, 1.071517e-02_EB, 1.270153e-03_EB, &
+   2.238178e-03_EB, &
+   1.746456e-02_EB, 4.672224e-02_EB, 3.759388e-02_EB, 4.616045e-02_EB, 5.001133e-02_EB, 1.722111e-02_EB, &
+   2.491507e-02_EB, &
+   1.081581e-01_EB, 1.027192e-01_EB, 8.800407e-02_EB, 8.251442e-02_EB, 6.268006e-02_EB, 4.814096e-02_EB, &
+   7.543431e-02_EB, &
+   1.324171e-01_EB, 1.186396e-01_EB, 8.522107e-02_EB, 8.615581e-02_EB, 7.161614e-02_EB, 4.907251e-02_EB, &
+   4.189169e-02_EB, &
+   1.360592e-01_EB, 1.511535e-01_EB, 9.963712e-02_EB, 9.989906e-02_EB, 7.841100e-02_EB, 6.989163e-02_EB, &
+   1.135539e-01_EB, &
+   1.798230e-01_EB, 2.192535e-01_EB, 1.208341e-01_EB, 1.243637e-01_EB, 2.183718e-01_EB, 7.565057e-02_EB, &
+   8.186008e-02_EB, &
+   2.869951e-01_EB, 2.102309e-01_EB, 1.285038e-01_EB, 1.353365e-01_EB, 1.198975e-01_EB, 1.097888e-01_EB, &
+   8.920775e-02_EB, &
+   4.131559e-01_EB, 3.718172e-01_EB, 1.977670e-01_EB, 1.999998e-01_EB, 2.661506e-01_EB, 1.630822e-01_EB, &
+   1.430789e-01_EB/),(/7,8/))
 
-SD6_C5H8O2(1:5,9:16) = RESHAPE((/ &  ! 2850-3025 cm-1
-    4.749097E-01_EB, 4.254665E-01_EB, 3.852665E-01_EB, 2.871139E-01_EB, 2.319276E-01_EB, &
-    4.041978E-01_EB, 3.742492E-01_EB, 3.493278E-01_EB, 2.521537E-01_EB, 2.699664E-01_EB, &
-    5.337257E-01_EB, 5.087670E-01_EB, 4.807665E-01_EB, 3.627792E-01_EB, 3.758793E-01_EB, &
-    9.904276E-01_EB, 9.047023E-01_EB, 8.602469E-01_EB, 6.609571E-01_EB, 6.472902E-01_EB, &
-    2.242995E+00_EB, 2.037571E+00_EB, 1.943232E+00_EB, 1.520726E+00_EB, 1.183715E+00_EB, &
-    2.469747E+00_EB, 2.144578E+00_EB, 1.938515E+00_EB, 1.419982E+00_EB, 1.003075E+00_EB, &
-    1.768913E+00_EB, 1.529405E+00_EB, 1.350974E+00_EB, 9.212917E-01_EB, 6.420021E-01_EB, &
-    1.093911E+00_EB, 9.795332E-01_EB, 8.647345E-01_EB, 5.636678E-01_EB, 4.438437E-01_EB/),(/5,8/))
+sd2_c7h16(1:7,9:16) = RESHAPE((/ &  ! 2750-2925 cm-1
+   4.814798e-01_EB, 4.371742e-01_EB, 2.946385e-01_EB, 2.539099e-01_EB, 3.004489e-01_EB, 2.639523e-01_EB, &
+   2.106653e-01_EB, &
+   4.711680e-01_EB, 4.231342e-01_EB, 2.816821e-01_EB, 2.662044e-01_EB, 2.714629e-01_EB, 4.380265e-01_EB, &
+   2.595817e-01_EB, &
+   6.539776e-01_EB, 7.016029e-01_EB, 5.178696e-01_EB, 4.535956e-01_EB, 5.002499e-01_EB, 7.197349e-01_EB, &
+   3.199467e-01_EB, &
+   1.241588e+00_EB, 1.255753e+00_EB, 9.891572e-01_EB, 8.923575e-01_EB, 8.902290e-01_EB, 1.114933e+00_EB, &
+   4.631429e-01_EB, &
+   5.884384e+00_EB, 4.563318e+00_EB, 3.951471e+00_EB, 3.339596e+00_EB, 2.714647e+00_EB, 2.641774e+00_EB, &
+   7.520423e-01_EB, &
+   1.531155e+01_EB, 1.096024e+01_EB, 9.162135e+00_EB, 7.803908e+00_EB, 5.562181e+00_EB, 4.589694e+00_EB, &
+   1.056916e+00_EB, &
+   1.317309e+01_EB, 1.037752e+01_EB, 9.226521e+00_EB, 8.166911e+00_EB, 6.406625e+00_EB, 6.017800e+00_EB, &
+   1.580795e+00_EB, &
+   2.423199e+01_EB, 1.841550e+01_EB, 1.601599e+01_EB, 1.391139e+01_EB, 1.034058e+01_EB, 9.135221e+00_EB, &
+   2.166977e+00_EB/),(/7,8/))
 
-SD6_C5H8O2(1:5,17:24) = RESHAPE((/ &  ! 3050-3225 cm-1
-    5.401477E-01_EB, 4.949412E-01_EB, 4.472823E-01_EB, 3.213942E-01_EB, 2.822414E-01_EB, &
-    2.490181E-01_EB, 2.536501E-01_EB, 2.411155E-01_EB, 1.922658E-01_EB, 2.280309E-01_EB, &
-    3.395895E-01_EB, 3.297513E-01_EB, 3.140281E-01_EB, 2.510681E-01_EB, 2.525567E-01_EB, &
-    2.435342E-01_EB, 2.358109E-01_EB, 2.075308E-01_EB, 1.646314E-01_EB, 1.686143E-01_EB, &
-    7.281135E-02_EB, 8.146266E-02_EB, 6.592988E-02_EB, 4.842733E-02_EB, 8.856507E-02_EB, &
-    4.358956E-02_EB, 4.775850E-02_EB, 2.878433E-02_EB, 1.291386E-02_EB, 6.146989E-02_EB, &
-    1.881450E-02_EB, 1.830895E-02_EB, 8.415980E-03_EB, 2.279752E-03_EB, 2.718747E-02_EB, &
-    7.857377E-03_EB, 2.667131E-03_EB, 3.129626E-03_EB, 2.139223E-03_EB, 5.201765E-03_EB/),(/5,8/))
+sd2_c7h16(1:7,17:24) = RESHAPE((/ &  ! 2950-3125 cm-1
+   2.666381e+01_EB, 2.072769e+01_EB, 1.799865e+01_EB, 1.588750e+01_EB, 1.152743e+01_EB, 9.524580e+00_EB, &
+   2.012903e+00_EB, &
+   3.139322e+01_EB, 2.055468e+01_EB, 1.643220e+01_EB, 1.409534e+01_EB, 8.965984e+00_EB, 6.302236e+00_EB, &
+   1.518462e+00_EB, &
+   2.594752e+00_EB, 2.921881e+00_EB, 2.424761e+00_EB, 2.367343e+00_EB, 1.941979e+00_EB, 1.810548e+00_EB, &
+   1.163951e+00_EB, &
+   9.124058e-01_EB, 1.242167e+00_EB, 8.462169e-01_EB, 7.637253e-01_EB, 7.930042e-01_EB, 7.315673e-01_EB, &
+   9.222189e-01_EB, &
+   5.694335e-01_EB, 1.040431e+00_EB, 4.731323e-01_EB, 4.570560e-01_EB, 5.207545e-01_EB, 4.518627e-01_EB, &
+   7.258027e-01_EB, &
+   4.615311e-01_EB, 7.262374e-01_EB, 2.975859e-01_EB, 3.257008e-01_EB, 3.595477e-01_EB, 3.278019e-01_EB, &
+   5.488059e-01_EB, &
+   4.537172e-01_EB, 5.187525e-01_EB, 2.166416e-01_EB, 2.523836e-01_EB, 3.336731e-01_EB, 2.793265e-01_EB, &
+   4.844761e-01_EB, &
+   1.173983e-01_EB, 4.043441e-01_EB, 1.764942e-01_EB, 2.034332e-01_EB, 2.260464e-01_EB, 2.126733e-01_EB, &
+   5.112998e-01_EB/),(/7,8/))
 
-SD6_C5H8O2(1:5,25:26) = RESHAPE((/ &  ! 3250-3275 cm-1
-    2.899233E-03_EB, 2.145510E-03_EB, 2.056357E-03_EB, 2.044772E-03_EB, 2.014970E-03_EB, &
-    1.871896E-03_EB, 1.877025E-03_EB, 1.876358E-03_EB, 1.875642E-03_EB, 1.868920E-03_EB/),(/5,2/))
-
-!---------------------------------------------------------------------------
-ALLOCATE(GAMMAD6_C5H8O2(N_TEMP_C5H8O2,26)) 
-
-! BAND #6: 2650 cm-1 - 3275 cm-1 
-
-! SNB FIT WITH GOODY MODEL 
-
-! ERROR ASSOCIATED WITH GOODY FIT: 
-! On Transmissivity: 0.4742 % 
-
-! PRINT FINE STRUCTURE ARRAY GAMMA_D 
-
-GAMMAD6_C5H8O2(1:5,1:8) = RESHAPE((/ &  ! 2650-2825 cm-1
-    1.653443E-03_EB, 1.563188E-03_EB, 1.613262E-03_EB, 1.606584E-03_EB, 1.614679E-03_EB, &
-    1.725296E-03_EB, 1.789139E-03_EB, 1.710164E-03_EB, 1.734651E-03_EB, 1.719502E-03_EB, &
-    2.798622E-03_EB, 4.027395E-03_EB, 3.564159E-03_EB, 1.736242E-03_EB, 4.099907E-03_EB, &
-    5.482159E-03_EB, 1.592426E-02_EB, 1.514155E-02_EB, 4.769190E-03_EB, 6.893143E-03_EB, &
-    1.950234E-02_EB, 1.234098E-01_EB, 3.934805E-02_EB, 1.441185E-02_EB, 7.754860E-03_EB, &
-    9.848170E-03_EB, 1.738095E-01_EB, 5.657632E-02_EB, 6.355497E-03_EB, 1.389976E-02_EB, &
-    2.792109E-02_EB, 4.937794E-02_EB, 3.956566E-02_EB, 3.065321E-02_EB, 7.394530E-02_EB, &
-    7.871749E-02_EB, 4.988171E-01_EB, 1.803420E-01_EB, 4.637719E-02_EB, 4.331286E-01_EB/),(/5,8/))
-
-GAMMAD6_C5H8O2(1:5,9:16) = RESHAPE((/ &  ! 2850-3025 cm-1
-    3.173689E-01_EB, 1.520960E+00_EB, 4.841228E-01_EB, 6.200687E-02_EB, 3.997890E-01_EB, &
-    2.169080E-01_EB, 6.574878E-01_EB, 5.027094E-01_EB, 9.772614E-02_EB, 1.914074E-01_EB, &
-    5.150202E-01_EB, 8.099970E-01_EB, 2.222449E+00_EB, 2.068439E-01_EB, 2.402609E-01_EB, &
-    2.494255E-01_EB, 3.579547E+00_EB, 1.444015E+00_EB, 1.510472E-01_EB, 1.052679E+00_EB, &
-    4.072276E-01_EB, 4.719683E+00_EB, 1.060402E+00_EB, 1.840233E-01_EB, 2.770912E+00_EB, &
-    3.812094E-01_EB, 4.736921E+00_EB, 3.801489E+00_EB, 1.760368E-01_EB, 2.727431E+00_EB, &
-    4.441031E-01_EB, 4.670353E+00_EB, 3.848767E+00_EB, 1.529392E-01_EB, 1.107268E+00_EB, &
-    3.999652E-01_EB, 3.695515E+00_EB, 3.232650E+00_EB, 2.792403E-01_EB, 5.778686E-01_EB/),(/5,8/))
-
-GAMMAD6_C5H8O2(1:5,17:24) = RESHAPE((/ &  ! 3050-3225 cm-1
-    3.419296E-01_EB, 9.041296E-01_EB, 3.464140E+00_EB, 2.041363E-01_EB, 4.773478E-01_EB, &
-    7.136302E-01_EB, 1.728182E+00_EB, 8.904388E-01_EB, 1.296691E-01_EB, 1.026860E+00_EB, &
-    1.147956E-01_EB, 4.801801E-01_EB, 6.023784E-01_EB, 1.107934E-01_EB, 1.953534E+00_EB, &
-    3.114162E-01_EB, 4.049442E-01_EB, 5.596892E-01_EB, 2.281719E-02_EB, 2.965819E-01_EB, &
-    1.784945E-01_EB, 2.113487E-02_EB, 4.283632E-01_EB, 2.379521E-02_EB, 4.065917E-02_EB, &
-    2.042321E-01_EB, 2.711101E-02_EB, 5.250488E-01_EB, 8.786799E-03_EB, 5.323350E-02_EB, &
-    2.490314E-02_EB, 1.465991E-02_EB, 6.829601E-03_EB, 1.773685E-03_EB, 1.454823E-01_EB, &
-    3.756466E-03_EB, 1.998761E-03_EB, 2.215703E-03_EB, 1.669368E-03_EB, 4.682016E-03_EB/),(/5,8/))
-
-GAMMAD6_C5H8O2(1:5,25:26) = RESHAPE((/ &  ! 3250-3275 cm-1
-    1.942576E-03_EB, 1.655661E-03_EB, 1.623892E-03_EB, 1.618670E-03_EB, 1.588874E-03_EB, &
-    1.491981E-03_EB, 1.497063E-03_EB, 1.496390E-03_EB, 1.495702E-03_EB, 1.489750E-03_EB/),(/5,2/))
-
-!-------------------------Propane DATA-------------------
-
-
-! THERE ARE 2 BANDS FOR Propane
-
-! BAND #1: 1175 cm-1 - 1675 cm-1 
-! BAND #2: 2550 cm-1 - 3375 cm-1 
-
-N_TEMP_C3H8 = 7
-N_BAND_C3H8 = 2
-I_MODEL_C3H8 = 1 ! 1: GOODY, 2: MALKMUS, 3: ELSASSER 
-
-ALLOCATE(SD_C3H8_TEMP(N_TEMP_C3H8)) 
-
-! INITIALIZE BANDS WAVENUMBER BOUNDS FOR Propane ABSOPTION COEFFICIENTS.
-! BANDS ARE ORGANIZED BY ROW: 
-! 1ST COLUMN IS THE LOWER BOUND BAND LIMIT IN cm-1. 
-! 2ND COLUMN IS THE UPPER BOUND BAND LIMIT IN cm-1. 
-! 3RD COLUMN IS THE STRIDE BETWEEN WAVENUMBERS IN BAND.
-! IF 3RD COLUMN = 0., BAND IS CALCULATED, NOT TABULATED.
-
-ALLOCATE(OM_BND_C3H8(N_BAND_C3H8,3)) 
-ALLOCATE(Be_C3H8(N_BAND_C3H8)) 
-
-OM_BND_C3H8 = RESHAPE((/ &
-    1175._EB, 2550._EB, &
-    1675._EB, 3375._EB, &
-     25._EB, 25._EB/),(/N_BAND_C3H8,3/)) 
-
-SD_C3H8_TEMP = (/ &
-    295._EB, 396._EB, 435._EB, 513._EB, 578._EB, 790._EB,&
-    1009._EB/)
-
-Be_C3H8 = (/ &
-    1.000_EB, 1.000_EB/)
+sd2_c7h16(1:7,25:30) = RESHAPE((/ &  ! 3150-3275 cm-1
+   1.745347e-01_EB, 3.869948e-01_EB, 1.606330e-01_EB, 1.691991e-01_EB, 1.773258e-01_EB, 1.545312e-01_EB, &
+   3.754934e-01_EB, &
+   2.125656e-01_EB, 3.845411e-01_EB, 1.519506e-01_EB, 1.522530e-01_EB, 1.848037e-01_EB, 1.013866e-01_EB, &
+   2.632396e-01_EB, &
+   2.543277e-01_EB, 2.891570e-01_EB, 9.975616e-02_EB, 1.088793e-01_EB, 1.322502e-01_EB, 5.343256e-02_EB, &
+   1.951975e-01_EB, &
+   6.412029e-02_EB, 2.180048e-01_EB, 9.631661e-02_EB, 5.927599e-02_EB, 1.626811e-02_EB, 2.207700e-02_EB, &
+   1.199629e-01_EB, &
+   4.940691e-03_EB, 1.520018e-02_EB, 8.071023e-03_EB, 1.120400e-02_EB, 5.605272e-03_EB, 1.455284e-03_EB, &
+   4.956089e-02_EB, &
+   9.565465e-04_EB, 9.572222e-04_EB, 9.564413e-04_EB, 9.564850e-04_EB, 9.561277e-04_EB, 9.585852e-04_EB, &
+   1.922450e-03_EB/),(/7,6/))
 
 !---------------------------------------------------------------------------
-ALLOCATE(SD1_C3H8(N_TEMP_C3H8,21)) 
+ALLOCATE(gammad2_c7h16(n_temp_c7h16,30)) 
 
-! BAND #1: 1175 cm-1 - 1675 cm-1 
+! band #2: 2550 cm-1 - 3275 cm-1 
 
-! SNB FIT WITH GOODY MODEL 
+! snb fit with malkmus model 
 
-! ERROR ASSOCIATED WITH GOODY FIT: 
-! On Transmissivity: 0.61556 % 
+! error associated with malkmus fit: 
+! on transmissivity: 5.5204 % 
 
-SD1_C3H8(1:7,1:8) = RESHAPE((/ &  ! 1175-1350 cm-1
-    2.807532E-02_EB, 1.941412E-02_EB, 1.736790E-02_EB, 1.765869E-02_EB, 1.975785E-03_EB, 1.985715E-03_EB, &
-    2.005278E-03_EB, &
-    1.477174E-02_EB, 1.333025E-02_EB, 1.473275E-02_EB, 7.125861E-02_EB, 2.988908E-03_EB, 2.693155E-03_EB, &
-    4.534358E-03_EB, &
-    2.056046E-03_EB, 2.177646E-03_EB, 1.106298E-02_EB, 3.081074E-02_EB, 2.425334E-03_EB, 3.096857E-03_EB, &
-    1.076691E-02_EB, &
-    2.079291E-03_EB, 2.220571E-03_EB, 1.124562E-02_EB, 4.527308E-01_EB, 3.658854E-03_EB, 6.638144E-03_EB, &
-    8.495990E-03_EB, &
-    2.074139E-03_EB, 3.366310E-03_EB, 1.471029E-02_EB, 1.138321E-01_EB, 5.450811E-03_EB, 5.811568E-02_EB, &
-    4.721770E-02_EB, &
-    1.951993E-02_EB, 3.101658E-02_EB, 4.657291E-02_EB, 7.873333E-02_EB, 5.029496E-02_EB, 1.809751E-01_EB, &
-    7.376484E-01_EB, &
-    1.666774E-01_EB, 1.248723E-01_EB, 1.216181E-01_EB, 3.361518E-01_EB, 8.446061E-02_EB, 9.490239E-02_EB, &
-    5.636226E-01_EB, &
-    3.018940E-01_EB, 2.213919E-01_EB, 2.171539E-01_EB, 2.358028E-01_EB, 1.600575E-01_EB, 2.839406E-01_EB, &
-    2.356342E-01_EB/),(/7,8/))
+! print fine structure array gamma_d 
 
-SD1_C3H8(1:7,9:16) = RESHAPE((/ &  ! 1375-1550 cm-1
-    5.308926E-01_EB, 3.223839E-01_EB, 2.914391E-01_EB, 4.100167E-01_EB, 1.960547E-01_EB, 2.296875E-01_EB, &
-    8.550874E-01_EB, &
-    4.931572E-01_EB, 3.648375E-01_EB, 3.475520E-01_EB, 3.612059E-01_EB, 2.627054E-01_EB, 2.686324E-01_EB, &
-    1.653662E-01_EB, &
-    3.597452E-01_EB, 3.036583E-01_EB, 3.048711E-01_EB, 7.580500E-01_EB, 2.507773E-01_EB, 2.459167E-01_EB, &
-    2.966357E-01_EB, &
-    8.768985E-01_EB, 5.686631E-01_EB, 5.141669E-01_EB, 6.043568E-01_EB, 3.362020E-01_EB, 2.307445E-01_EB, &
-    1.084082E+00_EB, &
-    1.194832E+00_EB, 6.979711E-01_EB, 5.914913E-01_EB, 8.014039E-01_EB, 3.630513E-01_EB, 2.260164E-01_EB, &
-    1.533703E-01_EB, &
-    6.645102E-01_EB, 3.825983E-01_EB, 3.703471E-01_EB, 7.364319E-01_EB, 2.377629E-01_EB, 1.528349E-01_EB, &
-    5.723740E-01_EB, &
-    1.799018E-01_EB, 1.243084E-01_EB, 1.390905E-01_EB, 9.140307E-01_EB, 1.092046E-01_EB, 8.616384E-02_EB, &
-    6.218926E-02_EB, &
-    1.689867E-02_EB, 9.879771E-03_EB, 3.282082E-02_EB, 8.374363E-01_EB, 3.270333E-02_EB, 3.191721E-02_EB, &
-    4.274275E-02_EB/),(/7,8/))
+gammad2_c7h16(1:7,1:8) = RESHAPE((/ &  ! 2550-2725 cm-1
+   9.146079e-04_EB, 1.220358e-02_EB, 3.937261e-03_EB, 7.187786e-03_EB, 5.227505e-03_EB, 9.355109e-04_EB, &
+   1.819838e-03_EB, &
+   9.874420e-03_EB, 2.084439e-01_EB, 2.173266e-01_EB, 8.182000e-03_EB, 2.973184e-02_EB, 9.482167e-03_EB, &
+   5.745211e-01_EB, &
+   9.786100e-03_EB, 1.858210e-01_EB, 1.533293e-02_EB, 5.349239e-02_EB, 2.414250e-02_EB, 4.205505e-04_EB, &
+   3.283538e-02_EB, &
+   1.016087e-02_EB, 5.218556e-02_EB, 6.697325e-02_EB, 2.379606e-01_EB, 8.937135e-03_EB, 9.990945e-03_EB, &
+   5.966306e-01_EB, &
+   1.783704e-02_EB, 2.299629e-02_EB, 4.295102e-02_EB, 6.377060e-02_EB, 3.169911e-02_EB, 5.529323e-03_EB, &
+   7.456241e-01_EB, &
+   9.757832e-03_EB, 5.468131e-03_EB, 4.867751e-02_EB, 1.172578e-01_EB, 4.899078e-04_EB, 2.599541e-02_EB, &
+   1.519840e+00_EB, &
+   1.701122e-03_EB, 1.906085e-02_EB, 8.916232e-02_EB, 3.655990e-01_EB, 7.351637e-03_EB, 3.626665e-02_EB, &
+   1.919410e+00_EB, &
+   3.999808e-03_EB, 7.531740e-03_EB, 1.072796e-01_EB, 1.003155e+00_EB, 1.614637e-03_EB, 7.721701e-02_EB, &
+   1.224303e+00_EB/),(/7,8/))
 
-SD1_C3H8(1:7,17:21) = RESHAPE((/ &  ! 1575-1675 cm-1
-    4.736410E-03_EB, 1.635064E-02_EB, 9.505252E-03_EB, 2.989885E-02_EB, 1.098054E-02_EB, 1.734710E-02_EB, &
-    4.441981E-01_EB, &
-    2.270061E-03_EB, 1.052246E-01_EB, 1.014733E-02_EB, 3.818443E-03_EB, 7.422981E-03_EB, 1.964536E-02_EB, &
-    4.264141E-02_EB, &
-    2.057224E-03_EB, 3.439032E-03_EB, 2.056532E-03_EB, 2.151250E-03_EB, 2.393808E-03_EB, 4.824597E-03_EB, &
-    6.766463E-03_EB, &
-    1.918898E-03_EB, 2.018742E-03_EB, 1.973611E-03_EB, 1.954819E-03_EB, 1.939240E-03_EB, 2.042574E-03_EB, &
-    2.028859E-03_EB, &
-    1.851911E-03_EB, 1.851911E-03_EB, 1.851911E-03_EB, 1.851911E-03_EB, 1.851911E-03_EB, 1.851911E-03_EB, &
-    1.851911E-03_EB/),(/7,5/))
+gammad2_c7h16(1:7,9:16) = RESHAPE((/ &  ! 2750-2925 cm-1
+   4.880113e-03_EB, 8.565604e-03_EB, 1.367064e-02_EB, 3.997591e-01_EB, 4.442547e-03_EB, 1.915330e-02_EB, &
+   5.051128e+00_EB, &
+   1.825295e-03_EB, 7.512748e-03_EB, 1.729303e-02_EB, 1.104825e+00_EB, 1.586989e-02_EB, 1.138387e-02_EB, &
+   1.724797e+00_EB, &
+   8.938939e-03_EB, 1.035703e-02_EB, 1.615494e-02_EB, 9.389559e-02_EB, 1.525842e-02_EB, 1.850825e-02_EB, &
+   3.698894e+00_EB, &
+   2.478387e-02_EB, 2.301877e-02_EB, 4.297098e-02_EB, 1.503277e-01_EB, 6.014925e-02_EB, 8.742386e-02_EB, &
+   2.622943e+00_EB, &
+   1.601922e-01_EB, 1.114843e-01_EB, 1.112220e-01_EB, 1.804939e-01_EB, 2.339949e-01_EB, 1.584145e-01_EB, &
+   9.606857e+00_EB, &
+   5.154427e-01_EB, 3.320188e-01_EB, 3.025580e-01_EB, 3.557579e-01_EB, 6.640807e-01_EB, 3.241466e-01_EB, &
+   2.268534e+01_EB, &
+   4.187811e-01_EB, 3.414132e-01_EB, 3.225035e-01_EB, 3.833688e-01_EB, 7.058557e-01_EB, 4.035161e-01_EB, &
+   4.330011e+01_EB, &
+   8.053331e-01_EB, 5.054746e-01_EB, 4.771400e-01_EB, 5.477855e-01_EB, 1.088287e+00_EB, 5.418580e-01_EB, &
+   4.326237e+01_EB/),(/7,8/))
 
-!---------------------------------------------------------------------------
-ALLOCATE(GAMMAD1_C3H8(N_TEMP_C3H8,21)) 
+gammad2_c7h16(1:7,17:24) = RESHAPE((/ &  ! 2950-3125 cm-1
+   9.236854e-01_EB, 6.215496e-01_EB, 5.912471e-01_EB, 6.204509e-01_EB, 1.340069e+00_EB, 6.140174e-01_EB, &
+   4.330342e+01_EB, &
+   5.662789e-01_EB, 5.083725e-01_EB, 4.767821e-01_EB, 4.500428e-01_EB, 1.099144e+00_EB, 4.936755e-01_EB, &
+   2.497692e+01_EB, &
+   5.143360e-02_EB, 5.233965e-02_EB, 8.660531e-02_EB, 8.976548e-02_EB, 1.810249e-01_EB, 2.371358e-01_EB, &
+   4.306803e+01_EB, &
+   1.542965e-02_EB, 1.268218e-02_EB, 2.772033e-02_EB, 9.250133e-02_EB, 2.649493e-02_EB, 3.172831e-01_EB, &
+   8.950148e+00_EB, &
+   8.562522e-03_EB, 4.977221e-03_EB, 3.610411e-02_EB, 1.439318e+00_EB, 1.049615e-02_EB, 6.108043e-01_EB, &
+   4.534910e+00_EB, &
+   1.597126e-03_EB, 3.635349e-03_EB, 5.555783e-02_EB, 3.967871e+00_EB, 6.887030e-03_EB, 5.613768e-01_EB, &
+   3.059256e+00_EB, &
+   6.799236e-04_EB, 3.384843e-03_EB, 1.010555e-01_EB, 2.884777e+00_EB, 2.380478e-03_EB, 1.681744e-01_EB, &
+   2.528805e+00_EB, &
+   8.299446e-03_EB, 2.940292e-03_EB, 9.141446e-02_EB, 3.099637e+00_EB, 1.826256e-03_EB, 9.931857e-02_EB, &
+   3.001536e+00_EB/),(/7,8/))
 
-! BAND #1: 1175 cm-1 - 1675 cm-1 
+gammad2_c7h16(1:7,25:30) = RESHAPE((/ &  ! 3150-3275 cm-1
+   1.022601e-02_EB, 2.439564e-03_EB, 2.129847e-02_EB, 1.571134e+00_EB, 1.678148e-03_EB, 9.784188e-02_EB, &
+   7.913187e+00_EB, &
+   2.072404e-02_EB, 2.738722e-03_EB, 2.883252e-02_EB, 5.459085e-01_EB, 6.513406e-04_EB, 1.967974e-01_EB, &
+   1.236417e+00_EB, &
+   3.185761e-03_EB, 2.226331e-03_EB, 3.340747e-02_EB, 2.954516e+00_EB, 3.127038e-04_EB, 3.897705e-02_EB, &
+   5.973433e-01_EB, &
+   3.201661e-03_EB, 5.002671e-04_EB, 5.027477e-04_EB, 5.059749e-01_EB, 2.581852e-03_EB, 5.653921e-03_EB, &
+   4.902323e-01_EB, &
+   3.091588e-03_EB, 1.287212e-03_EB, 4.025758e-03_EB, 1.683050e-02_EB, 2.725481e-03_EB, 9.810405e-04_EB, &
+   1.476595e-02_EB, &
+   7.632406e-04_EB, 7.638486e-04_EB, 7.631088e-04_EB, 7.630990e-04_EB, 7.628205e-04_EB, 7.652755e-04_EB, &
+   1.536272e-03_EB/),(/7,6/))
 
-! SNB FIT WITH GOODY MODEL 
+!-------------------------methanol data-------------------
 
-! ERROR ASSOCIATED WITH GOODY FIT: 
-! On Transmissivity: 0.61556 % 
 
-! PRINT FINE STRUCTURE ARRAY GAMMA_D 
+! there are 4 bands for methanol
 
-GAMMAD1_C3H8(1:7,1:8) = RESHAPE((/ &  ! 1175-1350 cm-1
-    1.882113E-02_EB, 1.474096E-02_EB, 1.933697E-02_EB, 1.464254E-02_EB, 1.528556E-03_EB, 1.537446E-03_EB, &
-    1.549670E-03_EB, &
-    1.102047E-02_EB, 6.100707E-03_EB, 2.060620E-01_EB, 6.203700E-03_EB, 2.602478E-03_EB, 1.398273E-03_EB, &
-    2.110205E-03_EB, &
-    1.555576E-03_EB, 1.667725E-03_EB, 2.647167E-01_EB, 9.660959E-03_EB, 1.397655E-03_EB, 1.267440E-03_EB, &
-    2.049549E-03_EB, &
-    1.621438E-03_EB, 1.693444E-03_EB, 2.821198E-01_EB, 1.637114E-04_EB, 1.449551E-03_EB, 1.923851E-03_EB, &
-    9.924894E-03_EB, &
-    1.607288E-03_EB, 2.711217E-03_EB, 4.631113E-01_EB, 2.280979E-04_EB, 4.796461E-03_EB, 2.179294E-04_EB, &
-    7.944411E-02_EB, &
-    1.524901E-02_EB, 2.192657E-02_EB, 2.791077E-01_EB, 7.206349E-03_EB, 1.399975E-02_EB, 6.562472E-04_EB, &
-    2.856461E-04_EB, &
-    8.569799E-02_EB, 5.964123E-02_EB, 2.989339E-01_EB, 1.404058E-03_EB, 9.114857E-02_EB, 3.180397E-02_EB, &
-    3.706610E-04_EB, &
-    1.517924E-01_EB, 9.686259E-02_EB, 1.121884E+00_EB, 1.308399E-02_EB, 8.711828E-02_EB, 2.498552E-03_EB, &
-    3.262653E-03_EB/),(/7,8/))
+! band #1: 825 cm-1 - 1150 cm-1 
+! band #2: 1125 cm-1 - 1700 cm-1 
+! band #3: 2600 cm-1 - 3225 cm-1 
+! band #4: 3525 cm-1 - 3850 cm-1 
 
-GAMMAD1_C3H8(1:7,9:16) = RESHAPE((/ &  ! 1375-1550 cm-1
-    1.548701E-01_EB, 1.903829E-01_EB, 3.141992E-01_EB, 6.613422E-03_EB, 1.312048E-01_EB, 7.543849E-03_EB, &
-    8.668488E-04_EB, &
-    2.087283E-01_EB, 2.306862E-01_EB, 1.057583E+00_EB, 2.357875E-02_EB, 1.636995E-01_EB, 9.837639E-03_EB, &
-    6.698341E-02_EB, &
-    2.283900E-01_EB, 3.300749E-01_EB, 3.774782E-01_EB, 3.947095E-03_EB, 9.777909E-02_EB, 7.636174E-03_EB, &
-    3.550836E-03_EB, &
-    2.732414E-01_EB, 2.034951E-01_EB, 2.231112E+00_EB, 1.588921E-02_EB, 5.706704E-01_EB, 1.256673E-01_EB, &
-    6.888018E-04_EB, &
-    2.292222E-01_EB, 1.666604E-01_EB, 3.972836E-01_EB, 1.131766E-02_EB, 1.963842E-01_EB, 1.152868E-01_EB, &
-    2.794360E-02_EB, &
-    2.195911E-01_EB, 3.458146E+00_EB, 1.911489E+00_EB, 4.621672E-03_EB, 1.800471E-01_EB, 7.193850E-02_EB, &
-    5.169037E-04_EB, &
-    1.697146E-01_EB, 1.026327E+00_EB, 5.265678E-01_EB, 6.464526E-04_EB, 4.766640E-01_EB, 3.853589E-02_EB, &
-    1.629443E-02_EB, &
-    1.665885E-02_EB, 1.670520E-01_EB, 1.134411E+00_EB, 1.536773E-04_EB, 1.434389E-01_EB, 2.434211E-03_EB, &
-    8.219656E-03_EB/),(/7,8/))
+ALLOCATE(sd_ch3oh_temp(n_temp_ch3oh)) 
 
-GAMMAD1_C3H8(1:7,17:21) = RESHAPE((/ &  ! 1575-1675 cm-1
-    2.609840E-03_EB, 8.472556E-03_EB, 1.935804E-01_EB, 5.685735E-03_EB, 1.415272E-02_EB, 3.731969E-03_EB, &
-    1.278843E-04_EB, &
-    1.707776E-03_EB, 1.606099E-04_EB, 6.442595E-03_EB, 2.742956E-03_EB, 5.413608E-03_EB, 4.847028E-03_EB, &
-    2.214520E-02_EB, &
-    1.597814E-03_EB, 1.907255E-03_EB, 1.578770E-03_EB, 1.655036E-03_EB, 1.930011E-03_EB, 2.985594E-03_EB, &
-    2.620878E-03_EB, &
-    1.506536E-03_EB, 1.575192E-03_EB, 1.540180E-03_EB, 1.522683E-03_EB, 1.510396E-03_EB, 1.572048E-03_EB, &
-    1.562457E-03_EB, &
-    1.471783E-03_EB, 1.471784E-03_EB, 1.471784E-03_EB, 1.471784E-03_EB, 1.471784E-03_EB, 1.471784E-03_EB, &
-    1.471784E-03_EB/),(/7,5/))
+! initialize bands wavenumber bounds for methanol ABS(option coefficients.
+! bands are organized by row: 
+! 1st column is the lower bound band limit in cm-1. 
+! 2nd column is the upper bound band limit in cm-1. 
+! 3rd column is the stride between wavenumbers in band.
+! IF 3rd column = 0., band is calculated, not tabulated.
+
+ALLOCATE(om_bnd_ch3oh(n_band_ch3oh,3)) 
+ALLOCATE(be_ch3oh(n_band_ch3oh)) 
+
+om_bnd_ch3oh = RESHAPE((/ &
+   825._EB, 1125._EB, 2600._EB, 3525._EB, &
+   1150._EB, 1700._EB, 3225._EB, 3850._EB, &
+   5._EB, 25._EB, 25._EB, 25._EB/),(/n_band_ch3oh,3/)) 
+
+sd_ch3oh_temp = (/ &
+   293._EB, 396._EB, 443._EB, 483._EB, 570._EB, 804._EB,&
+   1000._EB/)
+
+be_ch3oh = (/ &
+   1.000_EB, 1.000_EB, 1.000_EB, 1.000_EB/)
 
 !---------------------------------------------------------------------------
-ALLOCATE(SD2_C3H8(N_TEMP_C3H8,34)) 
+ALLOCATE(sd1_ch3oh(n_temp_ch3oh,58)) 
 
-! BAND #2: 2550 cm-1 - 3375 cm-1 
+! band #1: 825 cm-1 - 1150 cm-1 
 
-! SNB FIT WITH GOODY MODEL 
+! snb fit with malkmus model 
 
-! ERROR ASSOCIATED WITH GOODY FIT: 
-! On Transmissivity: 2.8443 % 
+! error associated with malkmus fit: 
+! on transmissivity: 3.9209 % 
 
-SD2_C3H8(1:7,1:8) = RESHAPE((/ &  ! 2550-2725 cm-1
-    1.933138E-03_EB, 1.976283E-03_EB, 2.194989E-03_EB, 1.978140E-03_EB, 1.933219E-03_EB, 1.982445E-03_EB, &
-    2.259545E-03_EB, &
-    8.889190E-03_EB, 6.765294E-03_EB, 5.884308E-03_EB, 3.467345E-03_EB, 4.718816E-03_EB, 3.878206E-03_EB, &
-    1.405160E-02_EB, &
-    3.729510E-02_EB, 2.412470E-02_EB, 2.276127E-02_EB, 1.126585E-02_EB, 1.259502E-02_EB, 9.645531E-03_EB, &
-    1.219759E-01_EB, &
-    6.236863E-02_EB, 3.982428E-02_EB, 3.278951E-02_EB, 2.785946E-02_EB, 1.809875E-02_EB, 1.052557E-02_EB, &
-    1.594348E-02_EB, &
-    7.832950E-02_EB, 4.630525E-02_EB, 3.917210E-02_EB, 2.762095E-02_EB, 1.735965E-02_EB, 1.123608E-02_EB, &
-    2.292493E-02_EB, &
-    6.152482E-02_EB, 3.367008E-02_EB, 3.019058E-02_EB, 2.941766E-02_EB, 2.043441E-02_EB, 1.823829E-02_EB, &
-    9.725952E-02_EB, &
-    3.265299E-02_EB, 2.490020E-02_EB, 2.773659E-02_EB, 2.777141E-02_EB, 2.568551E-02_EB, 3.140407E-02_EB, &
-    4.964458E-02_EB, &
-    8.523156E-02_EB, 6.094231E-02_EB, 6.332829E-02_EB, 6.734729E-02_EB, 6.053273E-02_EB, 6.251007E-02_EB, &
-    8.735488E-01_EB/),(/7,8/))
+sd1_ch3oh(1:7,1:8) = RESHAPE((/ &  ! 825-860 cm-1
+   7.075310e-04_EB, 8.159230e-04_EB, 6.305365e-04_EB, 6.771661e-04_EB, 6.382997e-04_EB, 6.733725e-04_EB, &
+   5.317197e-04_EB, &
+   1.027754e-03_EB, 7.803944e-04_EB, 9.690581e-04_EB, 8.327490e-04_EB, 1.014832e-03_EB, 1.009424e-03_EB, &
+   4.548089e-02_EB, &
+   9.923660e-04_EB, 7.762778e-04_EB, 8.630137e-04_EB, 1.137131e-03_EB, 8.918616e-04_EB, 1.053434e-03_EB, &
+   2.195153e+00_EB, &
+   9.759840e-04_EB, 1.083038e-03_EB, 9.878635e-04_EB, 9.020455e-04_EB, 9.799016e-04_EB, 6.911637e-04_EB, &
+   6.514857e-01_EB, &
+   1.006816e-03_EB, 9.248700e-04_EB, 8.933603e-04_EB, 9.409542e-04_EB, 7.796524e-04_EB, 1.033193e-03_EB, &
+   3.104940e-01_EB, &
+   1.262552e-03_EB, 9.296738e-04_EB, 1.134121e-03_EB, 1.041003e-03_EB, 8.506538e-04_EB, 1.025871e-03_EB, &
+   4.257321e-01_EB, &
+   9.314553e-04_EB, 9.719139e-04_EB, 1.050566e-03_EB, 1.107681e-03_EB, 7.432552e-04_EB, 7.341790e-03_EB, &
+   2.976279e-01_EB, &
+   9.166184e-04_EB, 9.949250e-04_EB, 1.142691e-03_EB, 1.003991e-03_EB, 9.570837e-04_EB, 2.474105e-02_EB, &
+   3.966025e-02_EB/),(/7,8/))
 
-SD2_C3H8(1:7,9:16) = RESHAPE((/ &  ! 2750-2925 cm-1
-    1.649003E-01_EB, 1.218817E-01_EB, 1.188709E-01_EB, 1.109183E-01_EB, 1.012013E-01_EB, 1.000376E-01_EB, &
-    1.209959E-01_EB, &
-    1.640175E-01_EB, 1.399406E-01_EB, 1.371501E-01_EB, 1.368714E-01_EB, 1.310225E-01_EB, 1.381156E-01_EB, &
-    1.894847E-01_EB, &
-    1.994267E-01_EB, 1.611532E-01_EB, 1.601932E-01_EB, 1.648523E-01_EB, 1.662487E-01_EB, 2.029414E-01_EB, &
-    2.720218E-01_EB, &
-    3.436492E-01_EB, 3.089277E-01_EB, 3.255758E-01_EB, 3.194768E-01_EB, 3.154287E-01_EB, 3.580074E-01_EB, &
-    5.036525E-01_EB, &
-    9.986329E-01_EB, 9.192921E-01_EB, 9.103570E-01_EB, 8.988432E-01_EB, 8.868185E-01_EB, 7.832163E-01_EB, &
-    9.307987E-01_EB, &
-    3.745645E+00_EB, 2.668252E+00_EB, 2.472562E+00_EB, 2.030386E+00_EB, 1.802049E+00_EB, 1.245523E+00_EB, &
-    1.169125E+00_EB, &
-    5.225197E+00_EB, 3.751661E+00_EB, 3.498643E+00_EB, 2.923959E+00_EB, 2.613690E+00_EB, 1.839938E+00_EB, &
-    1.776560E+00_EB, &
-    5.562511E+00_EB, 4.658686E+00_EB, 4.466355E+00_EB, 3.922363E+00_EB, 3.547489E+00_EB, 2.473488E+00_EB, &
-    2.078821E+00_EB/),(/7,8/))
+sd1_ch3oh(1:7,9:16) = RESHAPE((/ &  ! 865-900 cm-1
+   8.873778e-04_EB, 1.014874e-03_EB, 8.954091e-04_EB, 8.658071e-04_EB, 8.266735e-04_EB, 3.960677e-02_EB, &
+   4.795769e-01_EB, &
+   9.318468e-04_EB, 1.081375e-03_EB, 8.779975e-04_EB, 6.417478e-04_EB, 8.380587e-04_EB, 5.064673e-02_EB, &
+   2.069845e+00_EB, &
+   9.172948e-04_EB, 6.246642e-04_EB, 8.418469e-04_EB, 1.002610e-03_EB, 8.748320e-04_EB, 6.309985e-02_EB, &
+   2.535762e+00_EB, &
+   5.635661e-04_EB, 9.022735e-04_EB, 7.536768e-04_EB, 1.384075e-02_EB, 4.169450e-03_EB, 6.860592e-02_EB, &
+   4.255594e+00_EB, &
+   5.238187e-04_EB, 9.020580e-04_EB, 8.975650e-04_EB, 2.989369e-02_EB, 2.964629e-03_EB, 5.639540e-01_EB, &
+   4.081000e+00_EB, &
+   4.272194e-03_EB, 1.285085e-03_EB, 1.101707e-03_EB, 3.363383e-02_EB, 2.223112e-03_EB, 7.068202e-01_EB, &
+   5.035905e+00_EB, &
+   7.391996e-03_EB, 1.149033e-03_EB, 4.043676e-03_EB, 3.024886e-02_EB, 1.237039e-02_EB, 2.917510e-01_EB, &
+   5.127708e+00_EB, &
+   1.769445e-02_EB, 1.162378e-03_EB, 1.101607e-02_EB, 3.265720e-02_EB, 2.700163e-02_EB, 2.303736e-01_EB, &
+   7.211748e+00_EB/),(/7,8/))
 
-SD2_C3H8(1:7,17:24) = RESHAPE((/ &  ! 2950-3125 cm-1
-    1.053041E+01_EB, 7.568084E+00_EB, 6.981484E+00_EB, 5.621361E+00_EB, 4.901422E+00_EB, 3.021770E+00_EB, &
-    2.460445E+00_EB, &
-    1.307930E+01_EB, 8.571509E+00_EB, 7.693437E+00_EB, 5.921827E+00_EB, 4.990404E+00_EB, 2.780420E+00_EB, &
-    2.149958E+00_EB, &
-    5.632264E+00_EB, 4.266018E+00_EB, 3.960546E+00_EB, 3.365842E+00_EB, 2.915102E+00_EB, 1.758837E+00_EB, &
-    1.578442E+00_EB, &
-    7.275858E-01_EB, 8.759216E-01_EB, 8.946312E-01_EB, 1.003194E+00_EB, 9.658789E-01_EB, 7.741225E-01_EB, &
-    9.048076E-01_EB, &
-    6.654036E-02_EB, 1.468430E-01_EB, 1.726638E-01_EB, 2.383638E-01_EB, 2.586558E-01_EB, 3.163978E-01_EB, &
-    5.387948E-01_EB, &
-    3.847787E-02_EB, 7.994660E-02_EB, 1.003264E-01_EB, 1.376914E-01_EB, 1.413569E-01_EB, 1.781475E-01_EB, &
-    6.728271E-01_EB, &
-    4.638732E-02_EB, 7.823963E-02_EB, 9.325056E-02_EB, 1.216433E-01_EB, 1.207524E-01_EB, 1.401238E-01_EB, &
-    8.090223E-01_EB, &
-    7.556908E-02_EB, 7.785607E-02_EB, 9.018981E-02_EB, 1.081423E-01_EB, 1.027188E-01_EB, 1.067561E-01_EB, &
-    1.596085E+00_EB/),(/7,8/))
+sd1_ch3oh(1:7,17:24) = RESHAPE((/ &  ! 905-940 cm-1
+   1.041542e-02_EB, 1.114301e-02_EB, 1.311655e-02_EB, 4.064275e-02_EB, 7.266914e-02_EB, 2.423119e-01_EB, &
+   4.957147e+00_EB, &
+   2.050418e-02_EB, 1.592394e-02_EB, 3.294495e-02_EB, 5.520246e-02_EB, 7.496393e-02_EB, 2.368645e-01_EB, &
+   1.130981e+01_EB, &
+   2.109122e-02_EB, 1.222826e-02_EB, 4.727193e-02_EB, 8.561265e-02_EB, 1.062168e-01_EB, 1.049801e+00_EB, &
+   7.996949e+00_EB, &
+   3.772088e-02_EB, 8.854601e-03_EB, 6.435677e-02_EB, 7.648012e-02_EB, 1.545208e-01_EB, 2.887097e-01_EB, &
+   3.363412e+00_EB, &
+   5.889149e-02_EB, 2.614746e-02_EB, 8.847350e-02_EB, 1.405710e-01_EB, 1.772912e-01_EB, 3.718949e-01_EB, &
+   9.837331e+00_EB, &
+   6.654570e-02_EB, 5.749401e-02_EB, 9.802181e-02_EB, 1.688979e-01_EB, 2.243950e-01_EB, 1.220047e+00_EB, &
+   1.655983e+01_EB, &
+   7.945784e-02_EB, 9.272308e-02_EB, 1.367127e-01_EB, 1.949308e-01_EB, 2.725708e-01_EB, 6.381513e-01_EB, &
+   1.228651e+01_EB, &
+   9.776093e-02_EB, 1.303068e-01_EB, 1.815588e-01_EB, 2.578179e-01_EB, 3.469963e-01_EB, 5.560945e-01_EB, &
+   1.183943e+01_EB/),(/7,8/))
 
-SD2_C3H8(1:7,25:32) = RESHAPE((/ &  ! 3150-3325 cm-1
-    1.020482E-01_EB, 9.528808E-02_EB, 1.000798E-01_EB, 1.004546E-01_EB, 9.290392E-02_EB, 7.841011E-02_EB, &
-    9.318127E-01_EB, &
-    1.452647E-01_EB, 1.036644E-01_EB, 1.032274E-01_EB, 9.374593E-02_EB, 8.299275E-02_EB, 5.692665E-02_EB, &
-    1.515308E+00_EB, &
-    1.175916E-01_EB, 8.610554E-02_EB, 8.053559E-02_EB, 8.057774E-02_EB, 6.774736E-02_EB, 3.828982E-02_EB, &
-    1.393599E+00_EB, &
-    7.093004E-02_EB, 4.486408E-02_EB, 4.557955E-02_EB, 4.791673E-02_EB, 3.995717E-02_EB, 1.872254E-02_EB, &
-    7.946954E-01_EB, &
-    2.111472E-02_EB, 1.655889E-02_EB, 1.578715E-02_EB, 2.832291E-02_EB, 1.194095E-02_EB, 3.796746E-03_EB, &
-    7.065775E-01_EB, &
-    2.109050E-03_EB, 3.485655E-03_EB, 2.681335E-03_EB, 5.921068E-03_EB, 2.919065E-03_EB, 2.530664E-03_EB, &
-    3.693217E-01_EB, &
-    2.041225E-03_EB, 2.081746E-03_EB, 2.050917E-03_EB, 2.115858E-03_EB, 2.124828E-03_EB, 3.356252E-03_EB, &
-    2.881310E-01_EB, &
-    2.040221E-03_EB, 2.145810E-03_EB, 2.170779E-03_EB, 2.179252E-03_EB, 2.086062E-03_EB, 3.310962E-03_EB, &
-    1.402499E-02_EB/),(/7,8/))
+sd1_ch3oh(1:7,25:32) = RESHAPE((/ &  ! 945-980 cm-1
+   1.006010e-01_EB, 1.730636e-01_EB, 2.270729e-01_EB, 3.315982e-01_EB, 4.573468e-01_EB, 6.708389e-01_EB, &
+   1.024291e+01_EB, &
+   1.194413e-01_EB, 2.369771e-01_EB, 3.106016e-01_EB, 4.274250e-01_EB, 5.708632e-01_EB, 7.929006e-01_EB, &
+   1.330083e+01_EB, &
+   1.736727e-01_EB, 3.344439e-01_EB, 4.261052e-01_EB, 5.527598e-01_EB, 7.561373e-01_EB, 9.600217e-01_EB, &
+   1.114027e+01_EB, &
+   2.600298e-01_EB, 4.700460e-01_EB, 5.820182e-01_EB, 7.302241e-01_EB, 9.234681e-01_EB, 1.070772e+00_EB, &
+   1.188692e+01_EB, &
+   3.671640e-01_EB, 6.491391e-01_EB, 7.852073e-01_EB, 9.389176e-01_EB, 1.126578e+00_EB, 1.172724e+00_EB, &
+   6.310257e+00_EB, &
+   5.738182e-01_EB, 9.168206e-01_EB, 1.052392e+00_EB, 1.223815e+00_EB, 1.363750e+00_EB, 1.356380e+00_EB, &
+   1.276687e+01_EB, &
+   8.847952e-01_EB, 1.262063e+00_EB, 1.370575e+00_EB, 1.545198e+00_EB, 1.612648e+00_EB, 1.449724e+00_EB, &
+   1.203918e+01_EB, &
+   1.380983e+00_EB, 1.728933e+00_EB, 1.776913e+00_EB, 1.952279e+00_EB, 1.903225e+00_EB, 1.560147e+00_EB, &
+   1.409457e+01_EB/),(/7,8/))
 
-SD2_C3H8(1:7,33:34) = RESHAPE((/ &  ! 3350-3375 cm-1
-    1.972848E-03_EB, 2.032362E-03_EB, 2.001075E-03_EB, 2.000610E-03_EB, 1.942112E-03_EB, 2.286053E-03_EB, &
-    1.976761E-03_EB, &
-    1.851911E-03_EB, 1.851911E-03_EB, 1.851911E-03_EB, 1.851911E-03_EB, 1.851911E-03_EB, 1.851911E-03_EB, &
-    1.851911E-03_EB/),(/7,2/))
+sd1_ch3oh(1:7,33:40) = RESHAPE((/ &  ! 985-1020 cm-1
+   1.989792e+00_EB, 2.216523e+00_EB, 2.173252e+00_EB, 2.302944e+00_EB, 2.154186e+00_EB, 1.615229e+00_EB, &
+   1.614576e+01_EB, &
+   2.901685e+00_EB, 2.807597e+00_EB, 2.638654e+00_EB, 2.691349e+00_EB, 2.424882e+00_EB, 1.732381e+00_EB, &
+   1.516364e+01_EB, &
+   3.935938e+00_EB, 3.363705e+00_EB, 3.049578e+00_EB, 3.000715e+00_EB, 2.568481e+00_EB, 1.745273e+00_EB, &
+   2.252866e+01_EB, &
+   5.148871e+00_EB, 3.896474e+00_EB, 3.364794e+00_EB, 3.239344e+00_EB, 2.682511e+00_EB, 1.748386e+00_EB, &
+   2.390649e+01_EB, &
+   6.170452e+00_EB, 4.190528e+00_EB, 3.476275e+00_EB, 3.307799e+00_EB, 2.673466e+00_EB, 1.690532e+00_EB, &
+   2.170835e+01_EB, &
+   6.905606e+00_EB, 4.214646e+00_EB, 3.441984e+00_EB, 3.180517e+00_EB, 2.517520e+00_EB, 1.596762e+00_EB, &
+   1.932637e+01_EB, &
+   6.940706e+00_EB, 3.956671e+00_EB, 3.247771e+00_EB, 2.994245e+00_EB, 2.445520e+00_EB, 1.673228e+00_EB, &
+   1.306371e+01_EB, &
+   5.958695e+00_EB, 3.454990e+00_EB, 2.948441e+00_EB, 2.807961e+00_EB, 2.435395e+00_EB, 1.873623e+00_EB, &
+   1.081489e+01_EB/),(/7,8/))
 
-!---------------------------------------------------------------------------
-ALLOCATE(GAMMAD2_C3H8(N_TEMP_C3H8,34)) 
+sd1_ch3oh(1:7,41:48) = RESHAPE((/ &  ! 1025-1060 cm-1
+   4.201331e+00_EB, 2.701090e+00_EB, 2.459137e+00_EB, 2.429934e+00_EB, 2.270440e+00_EB, 1.776380e+00_EB, &
+   1.211452e+01_EB, &
+   6.021324e+00_EB, 4.632103e+00_EB, 4.201019e+00_EB, 4.002494e+00_EB, 3.407819e+00_EB, 2.266345e+00_EB, &
+   1.495652e+01_EB, &
+   9.188156e+00_EB, 5.163112e+00_EB, 4.909468e+00_EB, 4.147644e+00_EB, 3.320954e+00_EB, 1.941572e+00_EB, &
+   1.668271e+01_EB, &
+   3.550622e+00_EB, 2.256569e+00_EB, 2.077046e+00_EB, 1.997234e+00_EB, 1.831325e+00_EB, 1.549349e+00_EB, &
+   1.016637e+01_EB, &
+   6.406905e+00_EB, 3.553412e+00_EB, 2.981786e+00_EB, 2.818896e+00_EB, 2.393274e+00_EB, 1.845333e+00_EB, &
+   1.267998e+01_EB, &
+   9.119940e+00_EB, 5.130999e+00_EB, 4.171838e+00_EB, 3.898993e+00_EB, 3.183156e+00_EB, 2.173550e+00_EB, &
+   1.068448e+01_EB, &
+   1.001487e+01_EB, 6.103507e+00_EB, 4.932645e+00_EB, 4.654735e+00_EB, 3.723719e+00_EB, 2.430534e+00_EB, &
+   1.889930e+01_EB, &
+   8.945286e+00_EB, 6.111634e+00_EB, 5.090176e+00_EB, 4.850566e+00_EB, 3.927607e+00_EB, 2.511476e+00_EB, &
+   2.721090e+01_EB/),(/7,8/))
 
-! BAND #2: 2550 cm-1 - 3375 cm-1 
+sd1_ch3oh(1:7,49:56) = RESHAPE((/ &  ! 1065-1100 cm-1
+   6.548008e+00_EB, 5.234485e+00_EB, 4.593759e+00_EB, 4.456866e+00_EB, 3.759323e+00_EB, 2.389545e+00_EB, &
+   1.930330e+01_EB, &
+   4.016006e+00_EB, 3.880275e+00_EB, 3.590672e+00_EB, 3.603798e+00_EB, 3.180636e+00_EB, 2.124012e+00_EB, &
+   7.098842e+00_EB, &
+   2.039641e+00_EB, 2.438251e+00_EB, 2.437403e+00_EB, 2.528162e+00_EB, 2.390431e+00_EB, 1.727051e+00_EB, &
+   1.564504e+01_EB, &
+   8.890902e-01_EB, 1.306925e+00_EB, 1.439104e+00_EB, 1.573364e+00_EB, 1.582749e+00_EB, 1.325349e+00_EB, &
+   1.309975e+01_EB, &
+   4.289045e-01_EB, 6.181922e-01_EB, 7.402675e-01_EB, 8.358344e-01_EB, 9.479778e-01_EB, 8.718487e-01_EB, &
+   8.578315e+00_EB, &
+   3.110189e-01_EB, 3.181081e-01_EB, 3.757707e-01_EB, 4.355864e-01_EB, 4.933576e-01_EB, 9.265380e-01_EB, &
+   5.124942e+00_EB, &
+   3.078577e-01_EB, 2.309721e-01_EB, 2.504640e-01_EB, 2.713709e-01_EB, 2.640710e-01_EB, 6.768124e-01_EB, &
+   7.096896e+00_EB, &
+   2.629835e-01_EB, 1.842053e-01_EB, 1.854752e-01_EB, 2.041121e-01_EB, 2.026328e-01_EB, 4.463207e-01_EB, &
+   1.030077e+01_EB/),(/7,8/))
 
-! SNB FIT WITH GOODY MODEL 
-
-! ERROR ASSOCIATED WITH GOODY FIT: 
-! On Transmissivity: 2.8443 % 
-
-! PRINT FINE STRUCTURE ARRAY GAMMA_D 
-
-GAMMAD2_C3H8(1:7,1:8) = RESHAPE((/ &  ! 2550-2725 cm-1
-    1.515523E-03_EB, 1.538015E-03_EB, 1.796088E-03_EB, 1.563089E-03_EB, 1.503790E-03_EB, 1.551082E-03_EB, &
-    1.711035E-03_EB, &
-    6.000229E-03_EB, 7.419600E-03_EB, 5.515396E-03_EB, 2.917170E-03_EB, 3.793756E-03_EB, 2.739117E-03_EB, &
-    5.959097E-03_EB, &
-    1.405142E-02_EB, 5.199086E-02_EB, 5.918616E-02_EB, 1.656503E-02_EB, 5.619514E-03_EB, 1.345450E-02_EB, &
-    7.509335E-05_EB, &
-    5.883261E-02_EB, 1.782406E-01_EB, 1.054825E-01_EB, 2.649569E-02_EB, 1.370244E-02_EB, 2.893217E-01_EB, &
-    7.433371E-03_EB, &
-    3.120888E-02_EB, 4.204781E-02_EB, 7.713085E-02_EB, 2.203710E-02_EB, 1.449613E-02_EB, 3.444467E-02_EB, &
-    5.149322E-03_EB, &
-    2.588281E-02_EB, 1.355357E-01_EB, 1.719534E-01_EB, 2.564173E-02_EB, 1.245475E-02_EB, 1.486743E-02_EB, &
-    2.826732E-04_EB, &
-    1.403601E-02_EB, 4.040717E-01_EB, 1.807703E-01_EB, 2.257120E-02_EB, 8.566584E-03_EB, 1.007295E-01_EB, &
-    9.302631E-03_EB, &
-    5.134834E-02_EB, 8.369722E-02_EB, 2.824852E-02_EB, 3.003423E-02_EB, 1.741192E-02_EB, 8.623081E-02_EB, &
-    2.645267E-04_EB/),(/7,8/))
-
-GAMMAD2_C3H8(1:7,9:16) = RESHAPE((/ &  ! 2750-2925 cm-1
-    6.722149E-02_EB, 1.262949E-01_EB, 1.299249E-01_EB, 7.594602E-02_EB, 3.797132E-02_EB, 9.202211E-01_EB, &
-    3.926387E-02_EB, &
-    8.331437E-02_EB, 3.761042E-01_EB, 1.836122E-01_EB, 9.144938E-02_EB, 2.855513E-02_EB, 3.000943E-01_EB, &
-    2.699089E-02_EB, &
-    1.326419E-01_EB, 1.063207E-01_EB, 2.496077E-01_EB, 7.181163E-02_EB, 8.958140E-02_EB, 1.072344E+00_EB, &
-    8.374055E-02_EB, &
-    2.251611E-01_EB, 1.920765E-01_EB, 8.468114E-02_EB, 1.832667E-01_EB, 1.823739E-01_EB, 3.054401E+00_EB, &
-    2.909294E-02_EB, &
-    1.974642E-01_EB, 7.714302E-02_EB, 1.379424E-01_EB, 1.067254E-01_EB, 1.095362E-01_EB, 3.055049E+00_EB, &
-    4.263077E-02_EB, &
-    6.448974E-01_EB, 2.498951E-01_EB, 2.660747E-01_EB, 2.174830E-01_EB, 2.015537E-01_EB, 3.055391E+00_EB, &
-    1.005480E-01_EB, &
-    1.010131E+00_EB, 3.856648E-01_EB, 3.690334E-01_EB, 2.989598E-01_EB, 2.979756E-01_EB, 3.055393E+00_EB, &
-    1.045675E-01_EB, &
-    1.078522E+00_EB, 4.461561E-01_EB, 4.800357E-01_EB, 3.867069E-01_EB, 4.238238E-01_EB, 3.055354E+00_EB, &
-    2.028953E-01_EB/),(/7,8/))
-
-GAMMAD2_C3H8(1:7,17:24) = RESHAPE((/ &  ! 2950-3125 cm-1
-    1.876916E+00_EB, 6.577901E-01_EB, 6.930650E-01_EB, 5.521851E-01_EB, 5.405090E-01_EB, 3.055389E+00_EB, &
-    1.643568E-01_EB, &
-    4.262535E+00_EB, 9.485173E-01_EB, 7.819798E-01_EB, 5.840097E-01_EB, 5.165435E-01_EB, 3.055394E+00_EB, &
-    1.602365E-01_EB, &
-    5.078109E-01_EB, 5.233227E-01_EB, 3.759560E-01_EB, 2.893035E-01_EB, 2.700615E-01_EB, 3.055390E+00_EB, &
-    1.231999E-01_EB, &
-    1.168641E-01_EB, 6.182349E-01_EB, 2.068583E-01_EB, 9.929227E-02_EB, 9.556393E-02_EB, 3.048740E+00_EB, &
-    5.953302E-02_EB, &
-    1.866184E-02_EB, 1.702166E-01_EB, 2.846136E-01_EB, 1.083263E-01_EB, 7.670916E-02_EB, 1.145002E+00_EB, &
-    2.234615E-02_EB, &
-    1.821036E-02_EB, 1.474304E-01_EB, 9.330159E-02_EB, 5.143735E-02_EB, 8.264873E-02_EB, 8.064490E-01_EB, &
-    4.294042E-03_EB, &
-    1.779764E-02_EB, 8.897916E-02_EB, 2.056694E-01_EB, 6.846888E-02_EB, 6.989486E-02_EB, 3.168833E-01_EB, &
-    2.250518E-03_EB, &
-    3.741051E-02_EB, 9.681927E-02_EB, 2.324478E-02_EB, 4.395891E-02_EB, 4.243202E-02_EB, 2.312789E+00_EB, &
-    8.120084E-04_EB/),(/7,8/))
-
-GAMMAD2_C3H8(1:7,25:32) = RESHAPE((/ &  ! 3150-3325 cm-1
-    6.533903E-02_EB, 5.482700E-02_EB, 6.169652E-02_EB, 4.574510E-02_EB, 3.389545E-02_EB, 2.834306E-01_EB, &
-    8.696773E-04_EB, &
-    6.416463E-02_EB, 2.018626E-01_EB, 1.322680E-01_EB, 5.357373E-02_EB, 3.737963E-02_EB, 6.735982E-02_EB, &
-    3.187662E-04_EB, &
-    3.832010E-02_EB, 8.492767E-02_EB, 5.860104E-02_EB, 3.921119E-02_EB, 9.656580E-03_EB, 9.945935E-02_EB, &
-    1.675882E-04_EB, &
-    1.695480E-02_EB, 2.214333E-01_EB, 1.848519E-02_EB, 3.873563E-02_EB, 4.342961E-03_EB, 7.074202E-02_EB, &
-    1.773679E-04_EB, &
-    1.019689E-02_EB, 1.377063E-02_EB, 7.854795E-03_EB, 1.812384E-02_EB, 2.181683E-03_EB, 2.315823E-03_EB, &
-    9.619261E-05_EB, &
-    1.627724E-03_EB, 2.617168E-03_EB, 2.016667E-03_EB, 5.905281E-03_EB, 1.457948E-03_EB, 1.455439E-03_EB, &
-    1.273381E-04_EB, &
-    1.576400E-03_EB, 1.604403E-03_EB, 1.559450E-03_EB, 1.614497E-03_EB, 1.580698E-03_EB, 2.772633E-03_EB, &
-    1.286796E-04_EB, &
-    1.578361E-03_EB, 1.648631E-03_EB, 1.647666E-03_EB, 1.700157E-03_EB, 1.582437E-03_EB, 1.978209E-03_EB, &
-    3.549987E-03_EB/),(/7,8/))
-
-GAMMAD2_C3H8(1:7,33:34) = RESHAPE((/ &  ! 3350-3375 cm-1
-    1.540909E-03_EB, 1.598127E-03_EB, 1.528073E-03_EB, 1.574253E-03_EB, 1.515260E-03_EB, 1.648496E-03_EB, &
-    1.545025E-03_EB, &
-    1.471783E-03_EB, 1.471784E-03_EB, 1.471784E-03_EB, 1.471784E-03_EB, 1.471784E-03_EB, 1.471784E-03_EB, &
-    1.471784E-03_EB/),(/7,2/))
-
-!-------------------------Propylene DATA-------------------
-
-
-! THERE ARE 3 BANDS FOR Propylene
-
-! BAND #1: 775 cm-1 - 1150 cm-1 
-! BAND #2: 1225 cm-1 - 1975 cm-1 
-! BAND #3: 2650 cm-1 - 3275 cm-1 
-
-N_TEMP_C3H6 = 7
-N_BAND_C3H6 = 3
-I_MODEL_C3H6 = 1 ! 1: GOODY, 2: MALKMUS, 3: ELSASSER 
-
-ALLOCATE(SD_C3H6_TEMP(N_TEMP_C3H6)) 
-
-! INITIALIZE BANDS WAVENUMBER BOUNDS FOR Propylene ABSOPTION COEFFICIENTS.
-! BANDS ARE ORGANIZED BY ROW: 
-! 1ST COLUMN IS THE LOWER BOUND BAND LIMIT IN cm-1. 
-! 2ND COLUMN IS THE UPPER BOUND BAND LIMIT IN cm-1. 
-! 3RD COLUMN IS THE STRIDE BETWEEN WAVENUMBERS IN BAND.
-! IF 3RD COLUMN = 0., BAND IS CALCULATED, NOT TABULATED.
-
-ALLOCATE(OM_BND_C3H6(N_BAND_C3H6,3)) 
-ALLOCATE(Be_C3H6(N_BAND_C3H6)) 
-
-OM_BND_C3H6 = RESHAPE((/ &
-    775._EB, 1225._EB, 2650._EB, &
-    1150._EB, 1975._EB, 3275._EB, &
-     5._EB, 25._EB, 25._EB/),(/N_BAND_C3H6,3/)) 
-
-SD_C3H6_TEMP = (/ &
-    296._EB, 390._EB, 444._EB, 491._EB, 594._EB, 793._EB,&
-    1003._EB/)
-
-Be_C3H6 = (/ &
-    1.000_EB, 1.000_EB, 1.000_EB/)
+sd1_ch3oh(1:7,57:58) = RESHAPE((/ &  ! 1125-1150 cm-1
+   1.066160e-01_EB, 8.237972e-02_EB, 7.650034e-02_EB, 7.750927e-02_EB, 8.650473e-02_EB, 5.002688e-01_EB, &
+   2.961022e+00_EB, &
+   4.699306e-04_EB, 4.696984e-04_EB, 4.697130e-04_EB, 4.702606e-04_EB, 4.699096e-04_EB, 4.682572e-04_EB, &
+   4.691749e-04_EB/),(/7,2/))
 
 !---------------------------------------------------------------------------
-ALLOCATE(SD1_C3H6(N_TEMP_C3H6,68)) 
+ALLOCATE(gammad1_ch3oh(n_temp_ch3oh,58)) 
 
-! BAND #1: 775 cm-1 - 1150 cm-1 
+! band #1: 825 cm-1 - 1150 cm-1 
 
-! SNB FIT WITH GOODY MODEL 
+! snb fit with malkmus model 
 
-! ERROR ASSOCIATED WITH GOODY FIT: 
-! On Transmissivity: 1.8948 % 
+! error associated with malkmus fit: 
+! on transmissivity: 3.9209 % 
 
-SD1_C3H6(1:7,1:8) = RESHAPE((/ &  ! 775-810 cm-1
-    4.818884E-04_EB, 4.775934E-04_EB, 4.535031E-04_EB, 4.218721E-04_EB, 4.428165E-04_EB, 4.628460E-04_EB, &
-    5.330391E-04_EB, &
-    6.999387E-04_EB, 6.212567E-04_EB, 5.303341E-04_EB, 5.191474E-04_EB, 4.517616E-04_EB, 4.957013E-04_EB, &
-    6.407369E-04_EB, &
-    6.616061E-04_EB, 5.907736E-04_EB, 5.690086E-04_EB, 5.387688E-04_EB, 5.293374E-04_EB, 4.980604E-04_EB, &
-    6.699905E-04_EB, &
-    1.069433E-03_EB, 5.471289E-04_EB, 5.579524E-04_EB, 5.215811E-04_EB, 2.557454E-03_EB, 4.833100E-04_EB, &
-    6.441945E-04_EB, &
-    7.347790E-04_EB, 5.871612E-04_EB, 4.956149E-04_EB, 1.385682E-03_EB, 1.348290E-02_EB, 4.790223E-03_EB, &
-    5.770348E-04_EB, &
-    6.189989E-03_EB, 2.150236E-02_EB, 8.910133E-03_EB, 1.638991E-02_EB, 7.883080E-02_EB, 1.277873E-02_EB, &
-    5.587035E-04_EB, &
-    9.113268E-03_EB, 2.147360E-02_EB, 1.760993E-02_EB, 1.524259E-02_EB, 1.343539E-01_EB, 1.353371E-02_EB, &
-    6.064849E-04_EB, &
-    6.110952E-02_EB, 3.918949E-02_EB, 1.815066E-02_EB, 2.024890E-02_EB, 2.543117E-01_EB, 2.377977E-02_EB, &
-    5.996494E-04_EB/),(/7,8/))
+! print fine structure array gamma_d 
 
-SD1_C3H6(1:7,9:16) = RESHAPE((/ &  ! 815-850 cm-1
-    1.397124E-01_EB, 3.077514E-02_EB, 2.138680E-02_EB, 3.933231E-02_EB, 2.200071E-01_EB, 3.809062E-02_EB, &
-    1.686780E-03_EB, &
-    1.705873E-01_EB, 3.768035E-02_EB, 3.812648E-02_EB, 5.156898E-02_EB, 2.423556E-01_EB, 6.538697E-02_EB, &
-    4.562715E-04_EB, &
-    1.258390E-01_EB, 5.600789E-02_EB, 5.496832E-02_EB, 6.966623E-02_EB, 1.197677E-01_EB, 6.322172E-02_EB, &
-    4.185044E-03_EB, &
-    7.186079E-02_EB, 7.865522E-02_EB, 7.935802E-02_EB, 1.064189E-01_EB, 1.320026E-01_EB, 9.709582E-02_EB, &
-    2.548098E-02_EB, &
-    9.406617E-02_EB, 1.081501E-01_EB, 1.044191E-01_EB, 1.113506E-01_EB, 1.855635E-01_EB, 1.333879E-01_EB, &
-    5.853355E-02_EB, &
-    1.456986E-01_EB, 1.687523E-01_EB, 1.521434E-01_EB, 1.498789E-01_EB, 2.146857E-01_EB, 1.637471E-01_EB, &
-    9.221016E-02_EB, &
-    2.015859E-01_EB, 2.353070E-01_EB, 1.948293E-01_EB, 2.025535E-01_EB, 2.521235E-01_EB, 1.853248E-01_EB, &
-    1.159362E-01_EB, &
-    2.790623E-01_EB, 3.047905E-01_EB, 2.552215E-01_EB, 3.054988E-01_EB, 3.088517E-01_EB, 2.124805E-01_EB, &
-    1.370357E-01_EB/),(/7,8/))
+gammad1_ch3oh(1:7,1:8) = RESHAPE((/ &  ! 825-860 cm-1
+   6.320478e-04_EB, 6.861763e-04_EB, 4.976022e-04_EB, 5.212687e-04_EB, 4.951307e-04_EB, 4.722485e-04_EB, &
+   4.126358e-04_EB, &
+   5.857091e-04_EB, 4.986862e-04_EB, 7.181338e-04_EB, 6.000370e-04_EB, 8.426048e-04_EB, 6.854139e-04_EB, &
+   9.797634e-05_EB, &
+   6.687840e-04_EB, 5.631883e-04_EB, 6.493401e-04_EB, 8.974743e-04_EB, 8.364450e-04_EB, 9.128100e-04_EB, &
+   2.228170e-05_EB, &
+   7.015973e-04_EB, 8.509882e-04_EB, 6.749386e-04_EB, 7.104894e-04_EB, 9.244817e-04_EB, 4.993607e-04_EB, &
+   3.618598e-05_EB, &
+   6.879541e-04_EB, 6.793889e-04_EB, 6.064846e-04_EB, 7.494890e-04_EB, 6.021521e-04_EB, 8.041830e-04_EB, &
+   4.227068e-05_EB, &
+   1.115437e-03_EB, 6.123108e-04_EB, 9.950372e-04_EB, 7.526989e-04_EB, 5.762193e-04_EB, 6.564205e-04_EB, &
+   4.006551e-05_EB, &
+   7.510632e-04_EB, 6.557116e-04_EB, 7.646716e-04_EB, 8.360125e-04_EB, 5.785516e-04_EB, 7.166127e-02_EB, &
+   3.307520e-05_EB, &
+   7.077134e-04_EB, 6.379859e-04_EB, 8.630039e-04_EB, 8.226252e-04_EB, 6.815535e-04_EB, 2.157192e-01_EB, &
+   1.186508e-04_EB/),(/7,8/))
 
-SD1_C3H6(1:7,17:24) = RESHAPE((/ &  ! 855-890 cm-1
-    3.893391E-01_EB, 3.883084E-01_EB, 3.322061E-01_EB, 3.631993E-01_EB, 4.672099E-01_EB, 2.285498E-01_EB, &
-    1.421035E-01_EB, &
-    5.050301E-01_EB, 4.692129E-01_EB, 3.969447E-01_EB, 4.112687E-01_EB, 4.901643E-01_EB, 3.092180E-01_EB, &
-    2.179292E-01_EB, &
-    6.806225E-01_EB, 5.860365E-01_EB, 4.848718E-01_EB, 4.917432E-01_EB, 5.062814E-01_EB, 3.110966E-01_EB, &
-    1.951580E-01_EB, &
-    8.560665E-01_EB, 7.050724E-01_EB, 5.659625E-01_EB, 5.759850E-01_EB, 6.133756E-01_EB, 4.481766E-01_EB, &
-    1.367051E-01_EB, &
-    1.111389E+00_EB, 8.575076E-01_EB, 6.709804E-01_EB, 6.800058E-01_EB, 6.619646E-01_EB, 4.202347E-01_EB, &
-    2.345276E-01_EB, &
-    1.290724E+00_EB, 9.631418E-01_EB, 7.508108E-01_EB, 7.623652E-01_EB, 6.646431E-01_EB, 4.174551E-01_EB, &
-    2.925311E-01_EB, &
-    1.603203E+00_EB, 1.127986E+00_EB, 8.814175E-01_EB, 8.410159E-01_EB, 7.253394E-01_EB, 4.520960E-01_EB, &
-    2.596079E-01_EB, &
-    1.760031E+00_EB, 1.233673E+00_EB, 9.801342E-01_EB, 9.085151E-01_EB, 7.842073E-01_EB, 4.961241E-01_EB, &
-    2.989344E-01_EB/),(/7,8/))
+gammad1_ch3oh(1:7,9:16) = RESHAPE((/ &  ! 865-900 cm-1
+   6.878550e-04_EB, 7.626337e-04_EB, 7.231979e-04_EB, 6.559557e-04_EB, 6.188317e-04_EB, 1.528514e-01_EB, &
+   3.379362e-05_EB, &
+   8.329430e-04_EB, 7.234964e-04_EB, 7.086063e-04_EB, 4.799785e-04_EB, 5.996684e-04_EB, 1.058608e-01_EB, &
+   2.576308e-05_EB, &
+   7.201976e-04_EB, 4.879678e-04_EB, 7.514895e-04_EB, 9.296249e-04_EB, 7.627646e-04_EB, 1.357754e-02_EB, &
+   4.112898e-05_EB, &
+   4.468231e-04_EB, 7.152109e-04_EB, 5.892145e-04_EB, 6.268495e-03_EB, 6.890662e-04_EB, 8.344058e-03_EB, &
+   3.782398e-05_EB, &
+   4.115617e-04_EB, 6.608084e-04_EB, 6.730864e-04_EB, 1.653705e-02_EB, 7.764525e-04_EB, 2.258557e-04_EB, &
+   7.122008e-05_EB, &
+   2.243172e-03_EB, 1.292195e-03_EB, 1.270788e-03_EB, 1.990852e-02_EB, 5.353682e-02_EB, 3.379605e-04_EB, &
+   1.094851e-04_EB, &
+   2.795631e-03_EB, 8.919100e-04_EB, 5.452501e-03_EB, 5.460032e-02_EB, 4.954888e-01_EB, 2.416852e-03_EB, &
+   8.087006e-05_EB, &
+   3.021916e-03_EB, 8.815026e-04_EB, 2.682624e-03_EB, 1.363428e-01_EB, 7.040860e-01_EB, 9.532477e-03_EB, &
+   4.720845e-05_EB/),(/7,8/))
 
-SD1_C3H6(1:7,25:32) = RESHAPE((/ &  ! 895-930 cm-1
-    2.023296E+00_EB, 1.364999E+00_EB, 1.081492E+00_EB, 9.722940E-01_EB, 8.595886E-01_EB, 5.509029E-01_EB, &
-    4.944221E-01_EB, &
-    2.100620E+00_EB, 1.404832E+00_EB, 1.105029E+00_EB, 1.027387E+00_EB, 8.828880E-01_EB, 6.591108E-01_EB, &
-    4.132906E-01_EB, &
-    2.232661E+00_EB, 1.502628E+00_EB, 1.222899E+00_EB, 1.116396E+00_EB, 1.011855E+00_EB, 7.029337E-01_EB, &
-    6.178590E-01_EB, &
-    4.505724E+00_EB, 3.207800E+00_EB, 2.570857E+00_EB, 2.239800E+00_EB, 1.841537E+00_EB, 1.102134E+00_EB, &
-    6.789808E-01_EB, &
-    3.462369E+00_EB, 2.546336E+00_EB, 2.124493E+00_EB, 1.957229E+00_EB, 1.653661E+00_EB, 1.116637E+00_EB, &
-    6.383051E-01_EB, &
-    2.522005E+00_EB, 1.683423E+00_EB, 1.368031E+00_EB, 1.263423E+00_EB, 1.114885E+00_EB, 7.530199E-01_EB, &
-    5.037800E-01_EB, &
-    2.434619E+00_EB, 1.615984E+00_EB, 1.289574E+00_EB, 1.181928E+00_EB, 1.036128E+00_EB, 6.576284E-01_EB, &
-    4.380091E-01_EB, &
-    2.351798E+00_EB, 1.568888E+00_EB, 1.252988E+00_EB, 1.144719E+00_EB, 9.981796E-01_EB, 6.737712E-01_EB, &
-    4.057907E-01_EB/),(/7,8/))
+gammad1_ch3oh(1:7,17:24) = RESHAPE((/ &  ! 905-940 cm-1
+   1.302330e-02_EB, 5.102234e-03_EB, 2.422490e-01_EB, 1.768788e-01_EB, 2.586447e-01_EB, 3.526812e-01_EB, &
+   4.129581e-04_EB, &
+   2.544888e-02_EB, 1.060450e-02_EB, 1.381583e-02_EB, 4.518627e-01_EB, 5.206079e-01_EB, 8.391062e-03_EB, &
+   2.632629e-04_EB, &
+   2.533298e-01_EB, 6.433475e-03_EB, 2.725983e-02_EB, 2.678852e-01_EB, 2.275531e-01_EB, 1.261497e-03_EB, &
+   2.704299e-04_EB, &
+   3.122114e-02_EB, 8.346136e-03_EB, 2.487987e-01_EB, 9.374202e-02_EB, 6.604262e-02_EB, 2.488402e-02_EB, &
+   2.562359e-04_EB, &
+   3.870602e-02_EB, 2.158011e-01_EB, 1.910186e-01_EB, 2.065914e-01_EB, 8.461225e-01_EB, 2.529266e-01_EB, &
+   3.603466e-04_EB, &
+   7.517862e-02_EB, 2.869129e-01_EB, 5.031265e-01_EB, 3.707385e-01_EB, 3.378211e-01_EB, 7.697419e-03_EB, &
+   3.347542e-04_EB, &
+   1.159008e-01_EB, 5.649415e-01_EB, 2.185566e-01_EB, 2.313598e+00_EB, 1.481866e+00_EB, 3.664479e-02_EB, &
+   3.612492e-04_EB, &
+   2.101148e-01_EB, 1.362737e+00_EB, 1.681817e-01_EB, 2.403762e+00_EB, 5.052362e+00_EB, 4.829425e+01_EB, &
+   7.256697e-04_EB/),(/7,8/))
 
-SD1_C3H6(1:7,33:40) = RESHAPE((/ &  ! 935-970 cm-1
-    2.284666E+00_EB, 1.566711E+00_EB, 1.254907E+00_EB, 1.144440E+00_EB, 9.763623E-01_EB, 6.779294E-01_EB, &
-    4.011645E-01_EB, &
-    2.247977E+00_EB, 1.605916E+00_EB, 1.303617E+00_EB, 1.166449E+00_EB, 9.982459E-01_EB, 6.608140E-01_EB, &
-    3.846611E-01_EB, &
-    2.120714E+00_EB, 1.571739E+00_EB, 1.307915E+00_EB, 1.161610E+00_EB, 1.005959E+00_EB, 6.743056E-01_EB, &
-    4.507055E-01_EB, &
-    1.995439E+00_EB, 1.563325E+00_EB, 1.332440E+00_EB, 1.196841E+00_EB, 1.052472E+00_EB, 6.652023E-01_EB, &
-    5.493086E-01_EB, &
-    1.763001E+00_EB, 1.470290E+00_EB, 1.276756E+00_EB, 1.163883E+00_EB, 1.050489E+00_EB, 6.611791E-01_EB, &
-    4.645264E-01_EB, &
-    1.507715E+00_EB, 1.309514E+00_EB, 1.150601E+00_EB, 1.074743E+00_EB, 9.648161E-01_EB, 7.900440E-01_EB, &
-    4.121242E-01_EB, &
-    1.296035E+00_EB, 1.108502E+00_EB, 9.707340E-01_EB, 9.275159E-01_EB, 9.027085E-01_EB, 6.793653E-01_EB, &
-    3.892277E-01_EB, &
-    1.118487E+00_EB, 9.211315E-01_EB, 7.988790E-01_EB, 8.016262E-01_EB, 8.132495E-01_EB, 5.928353E-01_EB, &
-    4.102519E-01_EB/),(/7,8/))
+gammad1_ch3oh(1:7,25:32) = RESHAPE((/ &  ! 945-980 cm-1
+   2.154223e-01_EB, 1.063134e+00_EB, 2.745270e+00_EB, 6.048114e+00_EB, 1.191546e+01_EB, 3.613074e+01_EB, &
+   9.758013e-04_EB, &
+   3.415582e-01_EB, 5.670554e+00_EB, 1.626968e+00_EB, 8.377516e+00_EB, 2.646977e+01_EB, 4.827207e+01_EB, &
+   6.374449e-04_EB, &
+   7.233287e-01_EB, 1.170538e+01_EB, 2.699023e+00_EB, 1.811784e+01_EB, 4.833090e+01_EB, 4.829379e+01_EB, &
+   6.697140e-04_EB, &
+   4.410713e+00_EB, 2.163944e+01_EB, 1.204215e+01_EB, 6.230210e+01_EB, 5.735624e+01_EB, 4.829428e+01_EB, &
+   6.621854e-04_EB, &
+   6.410135e+00_EB, 5.657130e+01_EB, 3.102339e+01_EB, 6.230874e+01_EB, 5.735677e+01_EB, 4.829401e+01_EB, &
+   1.509172e-03_EB, &
+   3.756246e+01_EB, 6.880041e+01_EB, 4.129381e+01_EB, 6.230370e+01_EB, 5.735689e+01_EB, 4.829405e+01_EB, &
+   8.487264e-04_EB, &
+   6.111221e+01_EB, 6.881385e+01_EB, 6.471263e+01_EB, 6.230875e+01_EB, 5.735697e+01_EB, 4.829401e+01_EB, &
+   1.318189e-03_EB, &
+   7.999989e+01_EB, 6.881377e+01_EB, 6.495080e+01_EB, 6.230820e+01_EB, 5.735697e+01_EB, 4.828988e+01_EB, &
+   1.354435e-03_EB/),(/7,8/))
 
-SD1_C3H6(1:7,41:48) = RESHAPE((/ &  ! 975-1010 cm-1
-    1.086570E+00_EB, 8.675587E-01_EB, 7.383333E-01_EB, 7.335069E-01_EB, 7.489447E-01_EB, 5.926594E-01_EB, &
-    3.874552E-01_EB, &
-    1.092392E+00_EB, 8.465895E-01_EB, 7.136522E-01_EB, 7.028557E-01_EB, 7.222337E-01_EB, 5.854703E-01_EB, &
-    4.218779E-01_EB, &
-    1.168888E+00_EB, 9.506999E-01_EB, 8.102676E-01_EB, 7.933108E-01_EB, 7.610771E-01_EB, 5.932497E-01_EB, &
-    4.748461E-01_EB, &
-    2.169625E+00_EB, 1.477186E+00_EB, 1.183852E+00_EB, 1.041073E+00_EB, 8.819922E-01_EB, 6.318582E-01_EB, &
-    3.752706E-01_EB, &
-    1.021363E+00_EB, 8.095250E-01_EB, 7.053713E-01_EB, 6.467141E-01_EB, 5.926002E-01_EB, 4.364454E-01_EB, &
-    3.160274E-01_EB, &
-    8.516865E-01_EB, 6.479941E-01_EB, 5.785139E-01_EB, 5.215198E-01_EB, 5.030067E-01_EB, 3.605308E-01_EB, &
-    2.545028E-01_EB, &
-    8.151796E-01_EB, 6.005579E-01_EB, 5.258081E-01_EB, 4.829748E-01_EB, 4.714507E-01_EB, 3.636355E-01_EB, &
-    2.470243E-01_EB, &
-    7.833900E-01_EB, 5.616312E-01_EB, 4.850365E-01_EB, 4.515769E-01_EB, 4.336068E-01_EB, 3.012032E-01_EB, &
-    2.202777E-01_EB/),(/7,8/))
+gammad1_ch3oh(1:7,33:40) = RESHAPE((/ &  ! 985-1020 cm-1
+   7.999998e+01_EB, 6.881384e+01_EB, 6.494110e+01_EB, 6.230890e+01_EB, 5.735615e+01_EB, 4.829425e+01_EB, &
+   1.479087e-03_EB, &
+   7.999920e+01_EB, 6.881390e+01_EB, 6.506107e+01_EB, 6.230863e+01_EB, 5.735699e+01_EB, 4.829154e+01_EB, &
+   1.456376e-03_EB, &
+   7.999917e+01_EB, 6.881386e+01_EB, 6.499928e+01_EB, 6.230892e+01_EB, 5.735688e+01_EB, 1.272502e+01_EB, &
+   7.723150e-04_EB, &
+   7.999980e+01_EB, 6.881301e+01_EB, 6.505184e+01_EB, 6.230892e+01_EB, 5.735698e+01_EB, 4.828738e+01_EB, &
+   6.758482e-04_EB, &
+   8.000000e+01_EB, 6.881338e+01_EB, 6.504268e+01_EB, 6.230892e+01_EB, 5.735686e+01_EB, 4.829415e+01_EB, &
+   7.919076e-04_EB, &
+   8.000000e+01_EB, 6.881339e+01_EB, 6.506098e+01_EB, 6.230892e+01_EB, 5.735694e+01_EB, 4.829379e+01_EB, &
+   1.044482e-03_EB, &
+   8.000000e+01_EB, 6.881323e+01_EB, 6.503974e+01_EB, 6.230732e+01_EB, 5.735696e+01_EB, 4.829424e+01_EB, &
+   1.883098e-03_EB, &
+   8.000000e+01_EB, 6.881386e+01_EB, 6.498651e+01_EB, 6.230722e+01_EB, 5.735624e+01_EB, 2.615034e+00_EB, &
+   1.731620e-03_EB/),(/7,8/))
 
-SD1_C3H6(1:7,49:56) = RESHAPE((/ &  ! 1015-1050 cm-1
-    7.334395E-01_EB, 5.249921E-01_EB, 4.362439E-01_EB, 4.184092E-01_EB, 3.777229E-01_EB, 3.090995E-01_EB, &
-    2.299511E-01_EB, &
-    6.512502E-01_EB, 4.740756E-01_EB, 3.878005E-01_EB, 3.671105E-01_EB, 3.467124E-01_EB, 2.541005E-01_EB, &
-    2.175792E-01_EB, &
-    5.604628E-01_EB, 4.205422E-01_EB, 3.384537E-01_EB, 3.288250E-01_EB, 3.428866E-01_EB, 2.285296E-01_EB, &
-    1.438594E-01_EB, &
-    4.764812E-01_EB, 3.700585E-01_EB, 2.990451E-01_EB, 2.913167E-01_EB, 2.830803E-01_EB, 2.097052E-01_EB, &
-    1.088138E-01_EB, &
-    3.958085E-01_EB, 3.254281E-01_EB, 2.701850E-01_EB, 2.486863E-01_EB, 2.756256E-01_EB, 1.941627E-01_EB, &
-    1.320909E-01_EB, &
-    3.597536E-01_EB, 3.030674E-01_EB, 2.739503E-01_EB, 2.346761E-01_EB, 2.436165E-01_EB, 1.845310E-01_EB, &
-    1.373604E-01_EB, &
-    4.297146E-01_EB, 3.104860E-01_EB, 2.799546E-01_EB, 2.281778E-01_EB, 2.273168E-01_EB, 1.667692E-01_EB, &
-    6.782537E-02_EB, &
-    2.146376E-01_EB, 1.707075E-01_EB, 1.804829E-01_EB, 1.505491E-01_EB, 1.681917E-01_EB, 1.193132E-01_EB, &
-    2.545305E-01_EB/),(/7,8/))
+gammad1_ch3oh(1:7,41:48) = RESHAPE((/ &  ! 1025-1060 cm-1
+   7.999918e+01_EB, 6.881390e+01_EB, 6.501143e+01_EB, 6.230770e+01_EB, 5.735573e+01_EB, 4.828762e+01_EB, &
+   1.844304e-03_EB, &
+   7.999986e+01_EB, 6.881374e+01_EB, 2.509078e+00_EB, 6.230892e+01_EB, 5.735699e+01_EB, 4.829418e+01_EB, &
+   2.140274e-03_EB, &
+   5.272622e-01_EB, 6.881390e+01_EB, 7.822208e-01_EB, 6.230892e+01_EB, 5.735699e+01_EB, 4.829426e+01_EB, &
+   1.608061e-03_EB, &
+   7.999988e+01_EB, 6.881380e+01_EB, 6.416330e+01_EB, 6.230736e+01_EB, 5.735695e+01_EB, 4.829395e+01_EB, &
+   1.715694e-03_EB, &
+   8.000000e+01_EB, 6.881387e+01_EB, 6.501663e+01_EB, 6.230833e+01_EB, 5.735699e+01_EB, 4.829374e+01_EB, &
+   1.856662e-03_EB, &
+   8.000000e+01_EB, 6.881386e+01_EB, 6.506116e+01_EB, 6.230710e+01_EB, 5.735699e+01_EB, 4.829358e+01_EB, &
+   2.738523e-03_EB, &
+   8.000000e+01_EB, 6.881391e+01_EB, 6.506116e+01_EB, 6.230892e+01_EB, 5.735699e+01_EB, 4.829418e+01_EB, &
+   1.589317e-03_EB, &
+   7.999991e+01_EB, 6.881391e+01_EB, 6.506118e+01_EB, 6.230892e+01_EB, 5.735618e+01_EB, 4.829397e+01_EB, &
+   1.507561e-03_EB/),(/7,8/))
 
-SD1_C3H6(1:7,57:64) = RESHAPE((/ &  ! 1055-1090 cm-1
-    1.741268E-01_EB, 1.284830E-01_EB, 1.336107E-01_EB, 1.157873E-01_EB, 1.261020E-01_EB, 9.831758E-02_EB, &
-    4.398613E-02_EB, &
-    1.666351E-01_EB, 1.098270E-01_EB, 9.955346E-02_EB, 9.805474E-02_EB, 1.114702E-01_EB, 1.030214E-01_EB, &
-    3.058840E-02_EB, &
-    1.419506E-01_EB, 9.538939E-02_EB, 8.210686E-02_EB, 7.570115E-02_EB, 7.962109E-02_EB, 6.698911E-02_EB, &
-    4.740955E-01_EB, &
-    1.177085E-01_EB, 8.166022E-02_EB, 6.517681E-02_EB, 5.767508E-02_EB, 7.353478E-02_EB, 4.812671E-02_EB, &
-    4.945858E-02_EB, &
-    9.710934E-02_EB, 7.171137E-02_EB, 5.262393E-02_EB, 4.916112E-02_EB, 7.898114E-02_EB, 3.910710E-02_EB, &
-    4.272014E-01_EB, &
-    7.715193E-02_EB, 5.618039E-02_EB, 4.271806E-02_EB, 3.394970E-02_EB, 4.566476E-02_EB, 3.720262E-02_EB, &
-    5.490680E-02_EB, &
-    5.781083E-02_EB, 4.659058E-02_EB, 3.457878E-02_EB, 2.506088E-02_EB, 8.768415E-02_EB, 3.236252E-02_EB, &
-    4.264257E-01_EB, &
-    4.667355E-02_EB, 3.133257E-02_EB, 3.318321E-02_EB, 1.708158E-02_EB, 2.443622E-02_EB, 3.573900E-02_EB, &
-    3.171516E-03_EB/),(/7,8/))
+gammad1_ch3oh(1:7,49:56) = RESHAPE((/ &  ! 1065-1100 cm-1
+   8.000000e+01_EB, 6.881387e+01_EB, 6.506116e+01_EB, 6.230827e+01_EB, 5.735699e+01_EB, 4.829427e+01_EB, &
+   2.253348e-03_EB, &
+   7.999938e+01_EB, 6.881318e+01_EB, 6.505314e+01_EB, 6.230887e+01_EB, 5.735699e+01_EB, 4.829173e+01_EB, &
+   3.424844e-03_EB, &
+   7.999997e+01_EB, 6.881353e+01_EB, 6.505405e+01_EB, 6.230890e+01_EB, 5.735697e+01_EB, 4.828966e+01_EB, &
+   1.125303e-03_EB, &
+   6.451623e+01_EB, 6.881383e+01_EB, 6.492757e+01_EB, 6.230886e+01_EB, 5.735691e+01_EB, 4.823782e+01_EB, &
+   9.265505e-04_EB, &
+   2.835561e+00_EB, 4.814647e+01_EB, 1.930069e+01_EB, 4.670295e+01_EB, 5.733661e+01_EB, 4.981992e-01_EB, &
+   1.101043e-03_EB, &
+   3.405886e-01_EB, 8.624550e+00_EB, 8.265512e-01_EB, 4.097800e+00_EB, 1.789592e+01_EB, 1.840689e-02_EB, &
+   1.204450e-03_EB, &
+   2.136135e+00_EB, 6.560155e+00_EB, 2.276106e-01_EB, 2.826746e-01_EB, 4.031936e+00_EB, 9.675596e-03_EB, &
+   8.693678e-04_EB, &
+   3.865526e-01_EB, 2.663625e+00_EB, 2.801253e-01_EB, 1.479540e-01_EB, 6.549643e-01_EB, 4.007539e-03_EB, &
+   2.400175e-04_EB/),(/7,8/))
 
-SD1_C3H6(1:7,65:68) = RESHAPE((/ &  ! 1095-1150 cm-1
-    3.253917E-02_EB, 1.805401E-02_EB, 2.675427E-02_EB, 1.175778E-02_EB, 1.113453E-02_EB, 1.994312E-02_EB, &
-    4.883927E-04_EB, &
-    1.529752E-02_EB, 9.510834E-03_EB, 7.192125E-02_EB, 5.543192E-03_EB, 5.917892E-03_EB, 6.628937E-03_EB, &
-    6.587929E-04_EB, &
-    5.706293E-04_EB, 4.853376E-04_EB, 5.181158E-04_EB, 4.668262E-04_EB, 4.448894E-04_EB, 4.388254E-04_EB, &
-    5.309773E-04_EB, &
-    4.069875E-04_EB, 4.069875E-04_EB, 4.069875E-04_EB, 4.069875E-04_EB, 4.069875E-04_EB, 4.069875E-04_EB, &
-    4.069875E-04_EB/),(/7,4/))
+gammad1_ch3oh(1:7,57:58) = RESHAPE((/ &  ! 1125-1150 cm-1
+   1.031691e-01_EB, 1.063157e+00_EB, 8.796742e-02_EB, 3.121383e-01_EB, 3.923037e-01_EB, 4.063955e-04_EB, &
+   1.096427e-04_EB, &
+   3.748583e-04_EB, 3.747168e-04_EB, 3.744971e-04_EB, 3.751403e-04_EB, 3.748851e-04_EB, 3.734005e-04_EB, &
+   3.740585e-04_EB/),(/7,2/))
 
 !---------------------------------------------------------------------------
-ALLOCATE(GAMMAD1_C3H6(N_TEMP_C3H6,68)) 
+ALLOCATE(sd2_ch3oh(n_temp_ch3oh,24)) 
 
-! BAND #1: 775 cm-1 - 1150 cm-1 
+! band #2: 1125 cm-1 - 1700 cm-1 
 
-! SNB FIT WITH GOODY MODEL 
+! snb fit with malkmus model 
 
-! ERROR ASSOCIATED WITH GOODY FIT: 
-! On Transmissivity: 1.8948 % 
+! error associated with malkmus fit: 
+! on transmissivity: 1.5713 % 
 
-! PRINT FINE STRUCTURE ARRAY GAMMA_D 
+sd2_ch3oh(1:7,1:8) = RESHAPE((/ &  ! 1125-1300 cm-1
+   8.927831e-02_EB, 6.438189e-02_EB, 6.336484e-02_EB, 7.782879e-02_EB, 7.726760e-02_EB, 3.430637e-01_EB, &
+   2.111028e+00_EB, &
+   1.428237e-01_EB, 1.080083e-01_EB, 1.208600e-01_EB, 1.421780e-01_EB, 1.436580e-01_EB, 1.355584e+00_EB, &
+   5.627932e+00_EB, &
+   1.431595e-01_EB, 1.414695e-01_EB, 1.558110e-01_EB, 1.760891e-01_EB, 2.027903e-01_EB, 5.295318e-01_EB, &
+   8.429621e+00_EB, &
+   2.293295e-01_EB, 2.455796e-01_EB, 2.542758e-01_EB, 2.648440e-01_EB, 2.899987e-01_EB, 4.124789e-01_EB, &
+   7.705341e+00_EB, &
+   2.983198e-01_EB, 2.968924e-01_EB, 2.931528e-01_EB, 3.015322e-01_EB, 3.289150e-01_EB, 4.332046e-01_EB, &
+   1.274789e+01_EB, &
+   3.760820e-01_EB, 3.648052e-01_EB, 3.591136e-01_EB, 3.639314e-01_EB, 3.850232e-01_EB, 5.091509e-01_EB, &
+   9.900445e+00_EB, &
+   4.286786e-01_EB, 4.103485e-01_EB, 4.009699e-01_EB, 4.152912e-01_EB, 4.397207e-01_EB, 4.994214e-01_EB, &
+   1.080146e+01_EB, &
+   6.526914e-01_EB, 4.766714e-01_EB, 4.276416e-01_EB, 4.115988e-01_EB, 4.189427e-01_EB, 4.846849e-01_EB, &
+   8.381233e+00_EB/),(/7,8/))
 
-GAMMAD1_C3H6(1:7,1:8) = RESHAPE((/ &  ! 775-810 cm-1
-    3.394630E-04_EB, 3.731137E-04_EB, 3.454326E-04_EB, 3.225712E-04_EB, 3.342413E-04_EB, 3.548770E-04_EB, &
-    4.036087E-04_EB, &
-    4.380285E-04_EB, 4.175482E-04_EB, 4.064549E-04_EB, 3.686819E-04_EB, 3.406261E-04_EB, 3.785180E-04_EB, &
-    4.721401E-04_EB, &
-    4.900864E-04_EB, 4.081404E-04_EB, 4.357570E-04_EB, 3.835816E-04_EB, 4.108044E-04_EB, 3.642445E-04_EB, &
-    4.304487E-04_EB, &
-    8.829577E-04_EB, 3.618215E-04_EB, 4.093852E-04_EB, 3.690100E-04_EB, 1.259640E-03_EB, 3.655781E-04_EB, &
-    4.315437E-04_EB, &
-    6.119833E-04_EB, 4.396173E-04_EB, 3.757813E-04_EB, 5.596268E-04_EB, 1.802284E-03_EB, 6.698260E-02_EB, &
-    4.347025E-04_EB, &
-    7.979689E-04_EB, 3.681883E-04_EB, 9.102606E-02_EB, 8.700861E-04_EB, 8.256847E-04_EB, 2.678549E-01_EB, &
-    3.894134E-04_EB, &
-    2.918796E-03_EB, 4.734143E-04_EB, 2.627379E-01_EB, 2.717688E-03_EB, 1.272179E-03_EB, 2.691989E-01_EB, &
-    3.766117E-04_EB, &
-    3.957675E-04_EB, 7.240266E-04_EB, 1.248094E-01_EB, 9.895767E-03_EB, 1.077035E-03_EB, 4.770402E-01_EB, &
-    4.214816E-04_EB/),(/7,8/))
+sd2_ch3oh(1:7,9:16) = RESHAPE((/ &  ! 1325-1500 cm-1
+   8.926014e-01_EB, 5.725096e-01_EB, 4.936350e-01_EB, 4.461230e-01_EB, 4.220260e-01_EB, 4.240504e-01_EB, &
+   6.735177e+00_EB, &
+   9.802829e-01_EB, 6.469535e-01_EB, 5.500127e-01_EB, 4.937137e-01_EB, 4.581570e-01_EB, 4.189329e-01_EB, &
+   5.750931e+00_EB, &
+   7.911468e-01_EB, 5.793679e-01_EB, 5.044808e-01_EB, 4.592149e-01_EB, 4.299574e-01_EB, 3.354935e-01_EB, &
+   5.762184e+00_EB, &
+   6.069133e-01_EB, 4.730774e-01_EB, 4.244640e-01_EB, 3.791906e-01_EB, 3.723725e-01_EB, 3.634556e-01_EB, &
+   5.212994e+00_EB, &
+   5.069178e-01_EB, 3.597810e-01_EB, 3.086202e-01_EB, 2.782571e-01_EB, 2.798365e-01_EB, 3.419783e-01_EB, &
+   5.269252e+00_EB, &
+   4.541349e-01_EB, 3.336580e-01_EB, 2.970106e-01_EB, 2.657370e-01_EB, 2.766112e-01_EB, 3.361569e-01_EB, &
+   5.737162e+00_EB, &
+   4.615691e-01_EB, 3.258696e-01_EB, 2.757947e-01_EB, 2.454101e-01_EB, 2.523896e-01_EB, 2.077158e-01_EB, &
+   3.866394e+00_EB, &
+   3.328678e-01_EB, 2.037433e-01_EB, 1.740683e-01_EB, 1.606349e-01_EB, 1.789734e-01_EB, 3.064642e-01_EB, &
+   2.819085e+00_EB/),(/7,8/))
 
-GAMMAD1_C3H6(1:7,9:16) = RESHAPE((/ &  ! 815-850 cm-1
-    3.367650E-04_EB, 7.489059E-03_EB, 2.995808E-01_EB, 6.370793E-03_EB, 2.059817E-03_EB, 6.036107E-01_EB, &
-    2.546491E-02_EB, &
-    5.682712E-04_EB, 5.175286E-02_EB, 5.822760E-01_EB, 4.845771E-02_EB, 3.210351E-03_EB, 6.121724E-01_EB, &
-    3.714073E-04_EB, &
-    1.751089E-03_EB, 3.204364E-01_EB, 9.847070E-01_EB, 2.295535E-01_EB, 1.546033E-02_EB, 2.663601E-01_EB, &
-    9.367120E-02_EB, &
-    1.503101E-02_EB, 3.011702E-01_EB, 2.957969E+00_EB, 6.821055E-02_EB, 4.958575E-02_EB, 8.062724E-01_EB, &
-    7.222394E-01_EB, &
-    2.746131E-02_EB, 7.117119E-01_EB, 4.081900E+00_EB, 2.197207E+00_EB, 4.449399E-02_EB, 1.501466E+00_EB, &
-    1.325580E+00_EB, &
-    3.441515E-02_EB, 8.135771E-02_EB, 4.073501E+00_EB, 3.216710E+00_EB, 6.542580E-02_EB, 1.517836E+00_EB, &
-    2.716196E+00_EB, &
-    4.091750E-02_EB, 6.672430E-02_EB, 4.054977E+00_EB, 3.891261E-01_EB, 7.389938E-02_EB, 3.051278E+00_EB, &
-    2.716177E+00_EB, &
-    6.051434E-02_EB, 9.277364E-02_EB, 3.957640E+00_EB, 9.062278E-02_EB, 8.250768E-02_EB, 3.054748E+00_EB, &
-    2.712876E+00_EB/),(/7,8/))
-
-GAMMAD1_C3H6(1:7,17:24) = RESHAPE((/ &  ! 855-890 cm-1
-    9.022894E-02_EB, 1.366018E-01_EB, 7.982027E-01_EB, 1.394413E-01_EB, 4.770458E-02_EB, 3.051702E+00_EB, &
-    2.710363E+00_EB, &
-    1.277628E-01_EB, 2.124406E-01_EB, 4.052509E+00_EB, 2.603159E-01_EB, 6.645127E-02_EB, 4.021000E-01_EB, &
-    2.708678E+00_EB, &
-    1.905908E-01_EB, 3.183825E-01_EB, 3.998226E+00_EB, 3.050157E-01_EB, 1.243977E-01_EB, 3.030234E+00_EB, &
-    2.714039E+00_EB, &
-    2.578764E-01_EB, 3.521773E-01_EB, 4.082231E+00_EB, 3.058962E-01_EB, 9.827767E-02_EB, 1.235191E-01_EB, &
-    2.716222E+00_EB, &
-    3.885071E-01_EB, 4.525603E-01_EB, 2.931215E+00_EB, 3.365984E-01_EB, 1.308288E-01_EB, 5.274859E-01_EB, &
-    2.715651E+00_EB, &
-    5.062915E-01_EB, 4.703365E-01_EB, 2.101069E+00_EB, 3.263178E-01_EB, 2.008678E-01_EB, 3.050148E+00_EB, &
-    2.716212E+00_EB, &
-    5.702606E-01_EB, 4.875195E-01_EB, 9.983432E-01_EB, 4.170436E-01_EB, 2.289008E-01_EB, 3.041906E+00_EB, &
-    2.716206E+00_EB, &
-    6.332974E-01_EB, 4.469504E-01_EB, 6.790574E-01_EB, 3.987114E-01_EB, 2.444743E-01_EB, 1.361543E+00_EB, &
-    2.716195E+00_EB/),(/7,8/))
-
-GAMMAD1_C3H6(1:7,25:32) = RESHAPE((/ &  ! 895-930 cm-1
-    7.027987E-01_EB, 4.929064E-01_EB, 6.402471E-01_EB, 4.743636E-01_EB, 2.287887E-01_EB, 5.258960E-01_EB, &
-    9.078702E-02_EB, &
-    8.234450E-01_EB, 5.229815E-01_EB, 7.319872E-01_EB, 4.196357E-01_EB, 2.649686E-01_EB, 2.980547E-01_EB, &
-    2.335262E+00_EB, &
-    9.809355E-01_EB, 5.891760E-01_EB, 7.265010E-01_EB, 5.575574E-01_EB, 3.144922E-01_EB, 3.053526E+00_EB, &
-    1.142144E-01_EB, &
-    4.416396E-01_EB, 3.942752E-01_EB, 4.451993E-01_EB, 4.555784E-01_EB, 3.572107E-01_EB, 6.674302E-01_EB, &
-    7.693316E-01_EB, &
-    5.270505E-01_EB, 4.076891E-01_EB, 4.784219E-01_EB, 4.128916E-01_EB, 3.683438E-01_EB, 4.334093E-01_EB, &
-    2.716223E+00_EB, &
-    1.393165E+00_EB, 7.187042E-01_EB, 8.943792E-01_EB, 5.504996E-01_EB, 3.135510E-01_EB, 8.572271E-01_EB, &
-    2.713117E+00_EB, &
-    1.247700E+00_EB, 7.287635E-01_EB, 1.011225E+00_EB, 5.862371E-01_EB, 2.739991E-01_EB, 3.054746E+00_EB, &
-    2.693224E+00_EB, &
-    1.234745E+00_EB, 6.842441E-01_EB, 9.374940E-01_EB, 5.861482E-01_EB, 2.908252E-01_EB, 4.913508E-01_EB, &
-    2.716170E+00_EB/),(/7,8/))
-
-GAMMAD1_C3H6(1:7,33:40) = RESHAPE((/ &  ! 935-970 cm-1
-    1.094801E+00_EB, 6.377435E-01_EB, 8.594007E-01_EB, 5.677260E-01_EB, 3.436799E-01_EB, 4.480297E-01_EB, &
-    2.716222E+00_EB, &
-    1.063639E+00_EB, 5.965083E-01_EB, 7.269071E-01_EB, 5.475283E-01_EB, 3.033831E-01_EB, 9.406333E-01_EB, &
-    2.716219E+00_EB, &
-    1.014011E+00_EB, 6.126512E-01_EB, 6.681710E-01_EB, 5.470526E-01_EB, 3.176384E-01_EB, 6.576830E-01_EB, &
-    2.516084E+00_EB, &
-    9.447857E-01_EB, 6.338665E-01_EB, 6.736740E-01_EB, 5.604851E-01_EB, 3.017796E-01_EB, 1.667237E+00_EB, &
-    2.264311E-01_EB, &
-    8.254328E-01_EB, 6.022861E-01_EB, 6.495487E-01_EB, 5.306610E-01_EB, 2.852422E-01_EB, 3.026771E+00_EB, &
-    2.716221E+00_EB, &
-    7.197869E-01_EB, 5.584117E-01_EB, 6.897105E-01_EB, 5.101314E-01_EB, 3.167146E-01_EB, 1.931781E-01_EB, &
-    2.716217E+00_EB, &
-    5.942749E-01_EB, 4.666096E-01_EB, 7.385247E-01_EB, 4.714916E-01_EB, 2.286994E-01_EB, 3.339971E-01_EB, &
-    2.715201E+00_EB, &
-    5.210728E-01_EB, 4.318874E-01_EB, 1.075410E+00_EB, 3.776693E-01_EB, 1.861029E-01_EB, 5.452610E-01_EB, &
-    2.716215E+00_EB/),(/7,8/))
-
-GAMMAD1_C3H6(1:7,41:48) = RESHAPE((/ &  ! 975-1010 cm-1
-    4.798054E-01_EB, 3.902874E-01_EB, 9.402154E-01_EB, 3.882760E-01_EB, 1.811196E-01_EB, 2.903406E-01_EB, &
-    3.197209E-01_EB, &
-    4.244873E-01_EB, 3.658932E-01_EB, 8.219536E-01_EB, 3.735714E-01_EB, 1.668177E-01_EB, 3.264816E-01_EB, &
-    2.868836E-01_EB, &
-    4.284099E-01_EB, 3.688961E-01_EB, 6.980741E-01_EB, 3.985847E-01_EB, 2.246880E-01_EB, 3.761024E-01_EB, &
-    1.765513E-01_EB, &
-    4.259514E-01_EB, 4.093741E-01_EB, 5.117670E-01_EB, 4.391553E-01_EB, 2.542867E-01_EB, 2.421158E-01_EB, &
-    7.183406E-01_EB, &
-    3.984957E-01_EB, 2.900698E-01_EB, 3.841716E-01_EB, 3.223574E-01_EB, 1.992312E-01_EB, 2.098513E+00_EB, &
-    2.706901E+00_EB, &
-    4.079526E-01_EB, 3.008284E-01_EB, 3.279547E-01_EB, 3.122041E-01_EB, 1.430283E-01_EB, 3.021343E+00_EB, &
-    2.703691E+00_EB, &
-    3.632099E-01_EB, 3.174576E-01_EB, 3.859517E-01_EB, 2.794578E-01_EB, 1.228730E-01_EB, 2.266968E-01_EB, &
-    1.075809E+00_EB, &
-    3.259163E-01_EB, 3.259052E-01_EB, 4.393994E-01_EB, 2.437095E-01_EB, 1.240616E-01_EB, 2.924400E+00_EB, &
-    2.716072E+00_EB/),(/7,8/))
-
-GAMMAD1_C3H6(1:7,49:56) = RESHAPE((/ &  ! 1015-1050 cm-1
-    2.825611E-01_EB, 2.915529E-01_EB, 7.510441E-01_EB, 2.253869E-01_EB, 1.544184E-01_EB, 1.517855E-01_EB, &
-    6.950904E-02_EB, &
-    2.436687E-01_EB, 2.269100E-01_EB, 1.013899E+00_EB, 2.585318E-01_EB, 1.113880E-01_EB, 1.475703E+00_EB, &
-    6.781810E-02_EB, &
-    1.961885E-01_EB, 1.861983E-01_EB, 2.022911E+00_EB, 2.098004E-01_EB, 6.500465E-02_EB, 3.013196E+00_EB, &
-    2.715653E+00_EB, &
-    1.584160E-01_EB, 1.427991E-01_EB, 7.894695E-01_EB, 1.776560E-01_EB, 8.477210E-02_EB, 9.782084E-01_EB, &
-    2.716167E+00_EB, &
-    1.191024E-01_EB, 1.072075E-01_EB, 2.712733E-01_EB, 2.764286E-01_EB, 5.280852E-02_EB, 4.802650E-01_EB, &
-    2.716137E+00_EB, &
-    1.224123E-01_EB, 1.189629E-01_EB, 1.527926E-01_EB, 3.485418E-01_EB, 7.796533E-02_EB, 3.052885E+00_EB, &
-    8.779680E-01_EB, &
-    1.338510E-01_EB, 1.156906E-01_EB, 9.685327E-02_EB, 1.781488E-01_EB, 5.247137E-02_EB, 2.337404E-01_EB, &
-    2.212581E+00_EB, &
-    7.464619E-02_EB, 1.213094E-01_EB, 6.461525E-02_EB, 1.185296E-01_EB, 2.955999E-02_EB, 1.391105E+00_EB, &
-    3.325019E-03_EB/),(/7,8/))
-
-GAMMAD1_C3H6(1:7,57:64) = RESHAPE((/ &  ! 1055-1090 cm-1
-    6.078364E-02_EB, 1.447071E-01_EB, 7.377991E-02_EB, 1.171087E-01_EB, 3.013961E-02_EB, 1.309380E+00_EB, &
-    4.775127E-01_EB, &
-    3.418611E-02_EB, 9.838683E-02_EB, 3.803859E-01_EB, 6.507413E-02_EB, 1.746541E-02_EB, 1.315834E-02_EB, &
-    2.713416E-01_EB, &
-    3.500693E-02_EB, 6.316545E-02_EB, 2.883898E-01_EB, 1.046009E-01_EB, 1.675071E-02_EB, 1.693424E-01_EB, &
-    5.624173E-04_EB, &
-    3.953543E-02_EB, 3.258825E-02_EB, 2.622403E-01_EB, 2.448714E-01_EB, 1.064266E-02_EB, 3.994949E-01_EB, &
-    9.333500E-03_EB, &
-    3.149142E-02_EB, 1.731624E-02_EB, 4.844516E-01_EB, 4.404086E-02_EB, 4.211264E-03_EB, 8.701586E-02_EB, &
-    2.100987E-04_EB, &
-    2.235962E-02_EB, 1.467614E-02_EB, 8.480268E-02_EB, 6.922474E-02_EB, 5.004359E-03_EB, 1.120593E-02_EB, &
-    1.176943E-04_EB, &
-    1.657669E-02_EB, 7.244909E-03_EB, 4.680041E-02_EB, 1.116710E-01_EB, 7.344214E-04_EB, 1.795426E-02_EB, &
-    2.574471E-04_EB, &
-    9.402877E-03_EB, 8.123332E-03_EB, 5.789732E-03_EB, 6.039791E-02_EB, 2.228671E-03_EB, 6.760326E-03_EB, &
-    7.033244E-04_EB/),(/7,8/))
-
-GAMMAD1_C3H6(1:7,65:68) = RESHAPE((/ &  ! 1095-1150 cm-1
-    5.496511E-03_EB, 1.962852E-02_EB, 4.324339E-03_EB, 1.720966E-02_EB, 6.286435E-03_EB, 1.309093E-02_EB, &
-    3.066188E-04_EB, &
-    2.037331E-03_EB, 1.211050E-02_EB, 2.978296E-04_EB, 3.685014E-02_EB, 2.012738E-02_EB, 3.093791E-03_EB, &
-    5.449442E-04_EB, &
-    4.039806E-04_EB, 3.754738E-04_EB, 3.878077E-04_EB, 3.460337E-04_EB, 3.413308E-04_EB, 3.382249E-04_EB, &
-    3.916160E-04_EB, &
-    3.176583E-04_EB, 3.176583E-04_EB, 3.176583E-04_EB, 3.176583E-04_EB, 3.176583E-04_EB, 3.176583E-04_EB, &
-    3.176583E-04_EB/),(/7,4/))
+sd2_ch3oh(1:7,17:24) = RESHAPE((/ &  ! 1525-1700 cm-1
+   2.653588e-01_EB, 1.712954e-01_EB, 1.458324e-01_EB, 1.336402e-01_EB, 1.497627e-01_EB, 6.752522e-01_EB, &
+   1.211105e+00_EB, &
+   1.719421e-01_EB, 9.991170e-02_EB, 8.707576e-02_EB, 9.851840e-02_EB, 1.045626e-01_EB, 1.257519e-01_EB, &
+   1.729420e-01_EB, &
+   9.561175e-02_EB, 1.214100e-01_EB, 1.009499e-01_EB, 8.557814e-02_EB, 1.061461e-01_EB, 5.279653e-02_EB, &
+   1.371839e+00_EB, &
+   5.679817e-02_EB, 1.064996e-01_EB, 8.829344e-02_EB, 5.535303e-02_EB, 8.540729e-02_EB, 6.869857e-02_EB, &
+   2.390774e+00_EB, &
+   2.299715e-02_EB, 5.668754e-02_EB, 4.611447e-02_EB, 2.942043e-02_EB, 5.283754e-02_EB, 1.368461e-02_EB, &
+   8.704598e-02_EB, &
+   9.994737e-04_EB, 6.379671e-03_EB, 5.806672e-03_EB, 3.377512e-03_EB, 2.456039e-02_EB, 4.999823e-04_EB, &
+   1.518390e-02_EB, &
+   6.504118e-04_EB, 6.258215e-04_EB, 6.777009e-04_EB, 5.831397e-04_EB, 1.258943e-02_EB, 6.613745e-04_EB, &
+   3.926253e-03_EB, &
+   4.699306e-04_EB, 4.696984e-04_EB, 4.697130e-04_EB, 4.702606e-04_EB, 4.699096e-04_EB, 4.682572e-04_EB, &
+   4.691749e-04_EB/),(/7,8/))
 
 !---------------------------------------------------------------------------
-ALLOCATE(SD2_C3H6(N_TEMP_C3H6,31)) 
+ALLOCATE(gammad2_ch3oh(n_temp_ch3oh,24)) 
 
-! BAND #2: 1225 cm-1 - 1975 cm-1 
+! band #2: 1125 cm-1 - 1700 cm-1 
 
-! SNB FIT WITH GOODY MODEL 
+! snb fit with malkmus model 
 
-! ERROR ASSOCIATED WITH GOODY FIT: 
-! On Transmissivity: 0.71804 % 
+! error associated with malkmus fit: 
+! on transmissivity: 1.5713 % 
 
-SD2_C3H6(1:7,1:8) = RESHAPE((/ &  ! 1225-1400 cm-1
-    5.371358E-04_EB, 5.106087E-04_EB, 5.151777E-04_EB, 4.588800E-04_EB, 4.343886E-04_EB, 4.487517E-04_EB, &
-    4.819345E-04_EB, &
-    7.875943E-04_EB, 5.538461E-04_EB, 6.128437E-04_EB, 5.242800E-04_EB, 4.943504E-04_EB, 4.994889E-04_EB, &
-    3.408801E-03_EB, &
-    9.210981E-04_EB, 5.899698E-03_EB, 1.766929E-02_EB, 5.552612E-03_EB, 5.202514E-03_EB, 1.485897E-02_EB, &
-    5.530005E-02_EB, &
-    7.951689E-04_EB, 1.757199E-02_EB, 2.682924E-02_EB, 1.852410E-02_EB, 1.665389E-02_EB, 1.189745E-01_EB, &
-    5.453036E-02_EB, &
-    4.277157E-03_EB, 3.108371E-02_EB, 4.649207E-02_EB, 3.749401E-02_EB, 3.851261E-02_EB, 1.130065E-01_EB, &
-    4.358540E-02_EB, &
-    1.199917E-01_EB, 7.328895E-02_EB, 9.222138E-02_EB, 8.095132E-02_EB, 8.348335E-02_EB, 1.013688E-01_EB, &
-    9.055050E-02_EB, &
-    2.698797E-01_EB, 2.007594E-01_EB, 2.157895E-01_EB, 1.894810E-01_EB, 1.706483E-01_EB, 1.717348E-01_EB, &
-    1.308641E-01_EB, &
-    5.421860E-01_EB, 3.931486E-01_EB, 3.591157E-01_EB, 3.169622E-01_EB, 2.628424E-01_EB, 2.192079E-01_EB, &
-    1.540610E-01_EB/),(/7,8/))
+! print fine structure array gamma_d 
 
-SD2_C3H6(1:7,9:16) = RESHAPE((/ &  ! 1425-1600 cm-1
-    7.267959E-01_EB, 4.823878E-01_EB, 4.325191E-01_EB, 3.795944E-01_EB, 3.196341E-01_EB, 2.459087E-01_EB, &
-    1.761103E-01_EB, &
-    1.217311E+00_EB, 7.143221E-01_EB, 5.740964E-01_EB, 4.842953E-01_EB, 3.522185E-01_EB, 2.400135E-01_EB, &
-    1.667799E-01_EB, &
-    1.066191E+00_EB, 6.216855E-01_EB, 5.141892E-01_EB, 4.226006E-01_EB, 3.136087E-01_EB, 2.356521E-01_EB, &
-    1.550589E-01_EB, &
-    4.903725E-01_EB, 3.249395E-01_EB, 2.649127E-01_EB, 2.502942E-01_EB, 2.105298E-01_EB, 1.666857E-01_EB, &
-    1.270891E-01_EB, &
-    2.666029E-01_EB, 1.539996E-01_EB, 1.436365E-01_EB, 1.418584E-01_EB, 1.283814E-01_EB, 1.172524E-01_EB, &
-    1.193711E-01_EB, &
-    2.112478E-01_EB, 1.033995E-01_EB, 8.850454E-02_EB, 1.015494E-01_EB, 1.012777E-01_EB, 9.403151E-02_EB, &
-    1.112459E-01_EB, &
-    6.154680E-01_EB, 1.068368E-01_EB, 1.066378E-01_EB, 9.788033E-02_EB, 1.007785E-01_EB, 1.303908E-01_EB, &
-    1.436765E-01_EB, &
-    2.020388E+00_EB, 1.314824E-01_EB, 1.663817E-01_EB, 1.646570E-01_EB, 1.903679E-01_EB, 2.405626E-01_EB, &
-    1.999871E-01_EB/),(/7,8/))
+gammad2_ch3oh(1:7,1:8) = RESHAPE((/ &  ! 1125-1300 cm-1
+   2.036126e-02_EB, 2.341570e-01_EB, 2.115157e-01_EB, 3.745991e-02_EB, 2.969993e-01_EB, 6.950924e-04_EB, &
+   1.090294e-04_EB, &
+   4.318091e-02_EB, 3.213276e+00_EB, 1.818315e-01_EB, 6.478423e-02_EB, 7.314703e-01_EB, 8.584914e-04_EB, &
+   1.822575e-04_EB, &
+   1.945666e-02_EB, 1.155771e+00_EB, 8.508445e-01_EB, 1.670850e-01_EB, 2.280568e+00_EB, 4.205261e-03_EB, &
+   3.102895e-04_EB, &
+   7.511583e-01_EB, 6.453461e+00_EB, 3.392847e+00_EB, 1.506522e+00_EB, 5.522265e+00_EB, 1.714255e-02_EB, &
+   3.985647e-04_EB, &
+   1.205702e+00_EB, 9.217844e+00_EB, 2.021655e+00_EB, 2.387126e+00_EB, 4.807045e+00_EB, 2.526665e-02_EB, &
+   3.559097e-04_EB, &
+   2.746003e+00_EB, 9.503086e+00_EB, 2.328040e+00_EB, 4.485330e+00_EB, 9.413318e+00_EB, 1.788133e-02_EB, &
+   4.729684e-04_EB, &
+   7.531540e+00_EB, 1.737151e+01_EB, 3.326148e+00_EB, 8.198222e+00_EB, 1.532668e+01_EB, 4.522148e-02_EB, &
+   4.549597e-04_EB, &
+   2.576303e+01_EB, 2.203775e+01_EB, 4.437035e+00_EB, 9.898502e+00_EB, 1.872281e+01_EB, 3.906498e-02_EB, &
+   4.821874e-04_EB/),(/7,8/))
 
-SD2_C3H6(1:7,17:24) = RESHAPE((/ &  ! 1625-1800 cm-1
-    7.266781E-01_EB, 5.235759E-01_EB, 4.845024E-01_EB, 4.406769E-01_EB, 3.743746E-01_EB, 2.866654E-01_EB, &
-    2.165776E-01_EB, &
-    1.158670E+00_EB, 6.687397E-01_EB, 5.367869E-01_EB, 4.750755E-01_EB, 3.790532E-01_EB, 2.633253E-01_EB, &
-    1.890695E-01_EB, &
-    7.359108E-01_EB, 4.624098E-01_EB, 4.143563E-01_EB, 3.267419E-01_EB, 2.427211E-01_EB, 1.554714E-01_EB, &
-    1.033768E-01_EB, &
-    1.616064E-02_EB, 1.241128E-02_EB, 1.100924E-02_EB, 1.207945E-02_EB, 7.431117E-03_EB, 1.442282E-02_EB, &
-    1.263532E-02_EB, &
-    7.859711E-04_EB, 6.089692E-04_EB, 5.738631E-04_EB, 2.582023E-03_EB, 4.924534E-04_EB, 4.771685E-04_EB, &
-    5.976946E-04_EB, &
-    7.855927E-04_EB, 5.582022E-04_EB, 6.012881E-04_EB, 9.968765E-04_EB, 5.079255E-04_EB, 1.478359E-03_EB, &
-    1.478968E-03_EB, &
-    3.761084E-03_EB, 8.693166E-03_EB, 9.000696E-03_EB, 1.198023E-02_EB, 1.436101E-02_EB, 1.791215E-02_EB, &
-    2.161788E-02_EB, &
-    1.400808E-01_EB, 1.050241E-01_EB, 9.798400E-02_EB, 8.450494E-02_EB, 7.204515E-02_EB, 5.614724E-02_EB, &
-    4.008139E-02_EB/),(/7,8/))
+gammad2_ch3oh(1:7,9:16) = RESHAPE((/ &  ! 1325-1500 cm-1
+   6.250399e+01_EB, 3.711813e+01_EB, 4.149099e+00_EB, 1.502754e+01_EB, 1.389076e+01_EB, 4.031216e-02_EB, &
+   5.674173e-04_EB, &
+   7.999962e+01_EB, 5.252798e+01_EB, 1.230226e+01_EB, 1.351493e+01_EB, 1.576973e+01_EB, 3.751308e-02_EB, &
+   4.823587e-04_EB, &
+   6.092331e+01_EB, 3.805490e+01_EB, 1.271376e+01_EB, 1.115539e+01_EB, 1.762731e+01_EB, 7.120929e-02_EB, &
+   2.295392e-04_EB, &
+   3.106485e+01_EB, 2.102259e+01_EB, 4.586676e+00_EB, 6.831440e+00_EB, 9.421920e+00_EB, 1.574921e-02_EB, &
+   2.188143e-04_EB, &
+   1.678441e+01_EB, 9.704951e+00_EB, 2.972980e+00_EB, 2.004021e+00_EB, 5.086223e+00_EB, 6.963213e-03_EB, &
+   1.950359e-04_EB, &
+   9.295170e+00_EB, 9.919157e+00_EB, 2.792442e+00_EB, 3.932078e+00_EB, 5.121134e+00_EB, 9.304463e-03_EB, &
+   2.472872e-04_EB, &
+   8.180857e+00_EB, 9.293708e+00_EB, 2.066943e+00_EB, 4.076114e+00_EB, 4.294751e+00_EB, 2.727838e-02_EB, &
+   4.265301e-04_EB, &
+   8.289335e-02_EB, 2.291116e+00_EB, 8.466376e-01_EB, 1.801527e-01_EB, 1.505300e+00_EB, 1.548374e-03_EB, &
+   2.852002e-04_EB/),(/7,8/))
 
-SD2_C3H6(1:7,25:31) = RESHAPE((/ &  ! 1825-1975 cm-1
-    2.598323E-01_EB, 1.510729E-01_EB, 1.262306E-01_EB, 1.086780E-01_EB, 8.795577E-02_EB, 7.109326E-02_EB, &
-    4.835911E-02_EB, &
-    1.759201E-01_EB, 1.292754E-01_EB, 1.214272E-01_EB, 9.830493E-02_EB, 8.062465E-02_EB, 6.814797E-02_EB, &
-    4.485466E-02_EB, &
-    4.613168E-02_EB, 2.964876E-02_EB, 3.049536E-02_EB, 2.689093E-02_EB, 2.367193E-02_EB, 3.135636E-02_EB, &
-    1.966905E-02_EB, &
-    1.399654E-02_EB, 7.363816E-03_EB, 1.845686E-02_EB, 5.055719E-03_EB, 3.429260E-03_EB, 1.644171E-03_EB, &
-    2.674718E-03_EB, &
-    1.580369E-03_EB, 8.012104E-04_EB, 9.738929E-04_EB, 5.732225E-04_EB, 4.706468E-04_EB, 4.877841E-04_EB, &
-    5.612786E-04_EB, &
-    6.458280E-04_EB, 4.685864E-04_EB, 5.153428E-04_EB, 4.688756E-04_EB, 4.380288E-04_EB, 4.535362E-04_EB, &
-    4.962565E-04_EB, &
-    4.069875E-04_EB, 4.069875E-04_EB, 4.069875E-04_EB, 4.069875E-04_EB, 4.069875E-04_EB, 4.069875E-04_EB, &
-    4.069875E-04_EB/),(/7,7/))
+gammad2_ch3oh(1:7,17:24) = RESHAPE((/ &  ! 1525-1700 cm-1
+   7.067783e-02_EB, 1.479749e+00_EB, 5.187742e-01_EB, 1.372559e-01_EB, 7.400371e-01_EB, 2.949015e-04_EB, &
+   4.953459e-04_EB, &
+   1.628627e-02_EB, 8.476648e-01_EB, 2.184428e-01_EB, 1.854959e-02_EB, 1.335169e-01_EB, 2.574359e-04_EB, &
+   6.601786e-04_EB, &
+   1.778534e-02_EB, 2.130514e-01_EB, 1.040976e-01_EB, 1.031289e-01_EB, 1.600152e+00_EB, 2.537685e-02_EB, &
+   1.933608e-05_EB, &
+   6.344549e-03_EB, 1.274538e-01_EB, 5.382005e-02_EB, 6.261896e-01_EB, 4.338573e-01_EB, 3.757499e-01_EB, &
+   6.947226e-05_EB, &
+   2.030029e-04_EB, 6.186341e-02_EB, 2.709645e-02_EB, 5.640946e-02_EB, 3.663756e-01_EB, 2.286239e-02_EB, &
+   1.077139e-04_EB, &
+   8.095102e-04_EB, 6.039758e-03_EB, 3.546569e-03_EB, 3.077717e-03_EB, 3.777927e-01_EB, 4.051839e-04_EB, &
+   8.507547e-03_EB, &
+   4.920711e-04_EB, 4.753092e-04_EB, 5.221505e-04_EB, 4.531404e-04_EB, 1.775124e-01_EB, 5.028014e-04_EB, &
+   4.011702e-03_EB, &
+   3.748583e-04_EB, 3.747168e-04_EB, 3.744971e-04_EB, 3.751403e-04_EB, 3.748851e-04_EB, 3.734005e-04_EB, &
+   3.740585e-04_EB/),(/7,8/))
 
 !---------------------------------------------------------------------------
-ALLOCATE(GAMMAD2_C3H6(N_TEMP_C3H6,31)) 
+ALLOCATE(sd3_ch3oh(n_temp_ch3oh,26)) 
 
-! BAND #2: 1225 cm-1 - 1975 cm-1 
+! band #3: 2600 cm-1 - 3225 cm-1 
 
-! SNB FIT WITH GOODY MODEL 
+! snb fit with malkmus model 
 
-! ERROR ASSOCIATED WITH GOODY FIT: 
-! On Transmissivity: 0.71804 % 
+! error associated with malkmus fit: 
+! on transmissivity: 2.0044 % 
 
-! PRINT FINE STRUCTURE ARRAY GAMMA_D 
+sd3_ch3oh(1:7,1:8) = RESHAPE((/ &  ! 2600-2775 cm-1
+   6.834504e-04_EB, 6.520912e-04_EB, 6.293446e-04_EB, 7.602714e-04_EB, 6.782192e-04_EB, 5.546971e-04_EB, &
+   4.991362e-04_EB, &
+   9.382971e-04_EB, 9.146731e-04_EB, 9.400615e-04_EB, 9.494733e-04_EB, 9.709058e-04_EB, 8.544557e-04_EB, &
+   1.012754e-01_EB, &
+   8.700561e-04_EB, 8.964927e-04_EB, 9.462079e-04_EB, 7.740041e-04_EB, 9.999124e-04_EB, 3.951283e-03_EB, &
+   5.295951e-02_EB, &
+   9.087410e-04_EB, 8.586469e-04_EB, 1.061772e-03_EB, 9.199452e-04_EB, 7.793155e-04_EB, 2.101256e-02_EB, &
+   1.014346e-01_EB, &
+   9.791713e-04_EB, 7.304428e-04_EB, 3.244007e-03_EB, 2.026606e-03_EB, 4.855695e-03_EB, 6.777374e-02_EB, &
+   6.074970e-01_EB, &
+   9.694186e-03_EB, 8.820685e-03_EB, 2.014998e-02_EB, 1.559350e-02_EB, 2.203169e-02_EB, 1.271102e-01_EB, &
+   1.115356e+00_EB, &
+   7.029245e-02_EB, 5.091559e-02_EB, 6.271267e-02_EB, 6.250553e-02_EB, 7.985290e-02_EB, 2.008186e-01_EB, &
+   7.823174e-01_EB, &
+   1.832465e-01_EB, 1.685849e-01_EB, 1.767557e-01_EB, 1.929714e-01_EB, 2.182618e-01_EB, 3.370225e-01_EB, &
+   9.170478e-01_EB/),(/7,8/))
 
-GAMMAD2_C3H6(1:7,1:8) = RESHAPE((/ &  ! 1225-1400 cm-1
-    4.069459E-04_EB, 3.895117E-04_EB, 3.790129E-04_EB, 3.474468E-04_EB, 3.372216E-04_EB, 3.487807E-04_EB, &
-    3.477174E-04_EB, &
-    6.029608E-04_EB, 4.126780E-04_EB, 4.505192E-04_EB, 3.602740E-04_EB, 3.673125E-04_EB, 3.695774E-04_EB, &
-    2.843129E-03_EB, &
-    6.735906E-04_EB, 2.218392E-02_EB, 4.458966E-04_EB, 3.219060E-03_EB, 3.202154E-03_EB, 7.707429E-05_EB, &
-    1.693955E-03_EB, &
-    5.764361E-04_EB, 3.882275E-02_EB, 4.676826E-03_EB, 6.501005E-03_EB, 1.247140E-02_EB, 3.320735E-04_EB, &
-    5.708415E-03_EB, &
-    1.488120E-03_EB, 3.013991E-02_EB, 5.134607E-03_EB, 1.158541E-02_EB, 2.384481E-02_EB, 2.717011E-03_EB, &
-    8.593684E-01_EB, &
-    3.373765E-03_EB, 6.758005E-02_EB, 1.726775E-02_EB, 5.258981E-02_EB, 7.569248E-02_EB, 2.966049E-02_EB, &
-    1.961833E+00_EB, &
-    3.542925E-02_EB, 1.507459E-01_EB, 5.010813E-02_EB, 8.847995E-02_EB, 1.359316E-01_EB, 4.951711E-02_EB, &
-    2.497788E+00_EB, &
-    1.065729E-01_EB, 1.975744E-01_EB, 1.274975E-01_EB, 1.589009E-01_EB, 1.458819E-01_EB, 7.035332E-02_EB, &
-    2.715476E+00_EB/),(/7,8/))
+sd3_ch3oh(1:7,9:16) = RESHAPE((/ &  ! 2800-2975 cm-1
+   6.431025e-01_EB, 5.822856e-01_EB, 5.579032e-01_EB, 5.709313e-01_EB, 5.423547e-01_EB, 5.399764e-01_EB, &
+   1.804940e+00_EB, &
+   1.616617e+00_EB, 1.106968e+00_EB, 9.574460e-01_EB, 9.001676e-01_EB, 7.635145e-01_EB, 6.273449e-01_EB, &
+   2.500203e+00_EB, &
+   2.054107e+00_EB, 1.363124e+00_EB, 1.172320e+00_EB, 1.104390e+00_EB, 9.352928e-01_EB, 7.059677e-01_EB, &
+   1.705210e+00_EB, &
+   2.373043e+00_EB, 1.746858e+00_EB, 1.529178e+00_EB, 1.473170e+00_EB, 1.254399e+00_EB, 9.322847e-01_EB, &
+   2.050430e+00_EB, &
+   2.371351e+00_EB, 1.769945e+00_EB, 1.583483e+00_EB, 1.552549e+00_EB, 1.370339e+00_EB, 1.037337e+00_EB, &
+   2.789724e+00_EB, &
+   3.792115e+00_EB, 2.516241e+00_EB, 2.137945e+00_EB, 2.022427e+00_EB, 1.666670e+00_EB, 1.107211e+00_EB, &
+   3.100678e+00_EB, &
+   4.157174e+00_EB, 2.644308e+00_EB, 2.220834e+00_EB, 2.075201e+00_EB, 1.691865e+00_EB, 1.086754e+00_EB, &
+   2.915371e+00_EB, &
+   4.342764e+00_EB, 2.822870e+00_EB, 2.375959e+00_EB, 2.221659e+00_EB, 1.802922e+00_EB, 1.138893e+00_EB, &
+   2.903207e+00_EB/),(/7,8/))
 
-GAMMAD2_C3H6(1:7,9:16) = RESHAPE((/ &  ! 1425-1600 cm-1
-    1.528760E-01_EB, 2.517031E-01_EB, 1.591622E-01_EB, 1.910433E-01_EB, 1.583343E-01_EB, 1.442361E-01_EB, &
-    2.713958E+00_EB, &
-    2.751805E-01_EB, 2.841683E-01_EB, 2.349198E-01_EB, 2.154800E-01_EB, 2.021491E-01_EB, 1.013137E-01_EB, &
-    2.714253E+00_EB, &
-    2.553942E-01_EB, 2.747333E-01_EB, 1.962111E-01_EB, 2.175545E-01_EB, 1.960764E-01_EB, 8.149258E-02_EB, &
-    2.709584E+00_EB, &
-    7.381629E-02_EB, 1.713007E-01_EB, 5.508050E-01_EB, 1.908078E-01_EB, 1.313698E-01_EB, 1.475775E-01_EB, &
-    2.716051E+00_EB, &
-    9.298979E-03_EB, 1.083578E-01_EB, 1.979138E-01_EB, 1.137512E-01_EB, 1.598959E-01_EB, 6.318486E-01_EB, &
-    4.386794E-01_EB, &
-    4.077934E-03_EB, 1.118942E-01_EB, 2.421074E+00_EB, 1.087511E-01_EB, 9.989253E-02_EB, 1.458297E+00_EB, &
-    1.408020E+00_EB, &
-    1.261493E-03_EB, 3.056722E-02_EB, 2.914515E-02_EB, 6.245480E-02_EB, 9.987304E-02_EB, 6.123777E-02_EB, &
-    2.599539E+00_EB, &
-    4.894122E-04_EB, 7.673872E-02_EB, 3.339858E-02_EB, 7.648348E-02_EB, 1.124484E-01_EB, 6.698038E-02_EB, &
-    2.715309E+00_EB/),(/7,8/))
+sd3_ch3oh(1:7,17:24) = RESHAPE((/ &  ! 3000-3175 cm-1
+   2.739997e+00_EB, 1.931251e+00_EB, 1.703000e+00_EB, 1.624103e+00_EB, 1.381073e+00_EB, 9.258508e-01_EB, &
+   2.377676e+00_EB, &
+   1.657562e+00_EB, 1.227931e+00_EB, 1.089977e+00_EB, 1.050288e+00_EB, 9.156831e-01_EB, 6.349324e-01_EB, &
+   1.478204e+00_EB, &
+   7.792319e-01_EB, 6.776318e-01_EB, 6.362424e-01_EB, 6.325745e-01_EB, 5.728339e-01_EB, 4.149136e-01_EB, &
+   8.597464e-01_EB, &
+   2.993662e-01_EB, 3.092377e-01_EB, 3.217485e-01_EB, 3.267839e-01_EB, 3.261281e-01_EB, 2.499769e-01_EB, &
+   5.435448e-01_EB, &
+   7.556116e-02_EB, 1.013165e-01_EB, 1.286472e-01_EB, 1.311502e-01_EB, 1.509531e-01_EB, 1.344009e-01_EB, &
+   4.354789e-01_EB, &
+   2.499115e-02_EB, 1.505850e-02_EB, 4.570610e-02_EB, 3.921605e-02_EB, 5.480372e-02_EB, 5.712297e-02_EB, &
+   9.435909e-01_EB, &
+   4.505936e-03_EB, 1.692846e-03_EB, 7.624509e-03_EB, 2.230769e-03_EB, 1.179331e-02_EB, 1.334128e-02_EB, &
+   4.731345e-01_EB, &
+   8.990606e-04_EB, 7.925739e-04_EB, 1.307211e-03_EB, 8.823890e-04_EB, 3.090415e-03_EB, 1.825819e-03_EB, &
+   5.903177e-03_EB/),(/7,8/))
 
-GAMMAD2_C3H6(1:7,17:24) = RESHAPE((/ &  ! 1625-1800 cm-1
-    6.948155E-02_EB, 2.236131E-01_EB, 1.813586E-01_EB, 2.267188E-01_EB, 2.235488E-01_EB, 1.860064E-01_EB, &
-    2.706104E+00_EB, &
-    2.296230E-01_EB, 2.901094E-01_EB, 3.103661E-01_EB, 2.518771E-01_EB, 1.921871E-01_EB, 2.628291E-01_EB, &
-    1.607715E+00_EB, &
-    8.453631E-02_EB, 1.275392E-01_EB, 9.599000E-02_EB, 1.545414E-01_EB, 1.564341E-01_EB, 2.162337E-01_EB, &
-    2.894109E-01_EB, &
-    4.944783E-04_EB, 1.663089E-04_EB, 1.190907E-02_EB, 2.781585E-02_EB, 2.421093E-03_EB, 6.546793E-02_EB, &
-    3.322643E-02_EB, &
-    5.687164E-04_EB, 4.469615E-04_EB, 4.439781E-04_EB, 2.591319E-03_EB, 3.719154E-04_EB, 3.597131E-04_EB, &
-    4.353449E-04_EB, &
-    5.470678E-04_EB, 4.049474E-04_EB, 4.275184E-04_EB, 7.739759E-04_EB, 3.753511E-04_EB, 9.902487E-04_EB, &
-    1.459139E-03_EB, &
-    1.738222E-03_EB, 1.858962E-03_EB, 6.107450E-03_EB, 1.630960E-02_EB, 6.356633E-03_EB, 4.621663E-02_EB, &
-    5.419508E-02_EB, &
-    2.406984E-02_EB, 3.460164E-02_EB, 2.821232E-02_EB, 6.073769E-02_EB, 6.418059E-02_EB, 6.815047E-02_EB, &
-    4.424753E-01_EB/),(/7,8/))
-
-GAMMAD2_C3H6(1:7,25:31) = RESHAPE((/ &  ! 1825-1975 cm-1
-    7.155267E-02_EB, 7.004680E-02_EB, 6.376639E-02_EB, 7.183908E-02_EB, 5.620135E-02_EB, 2.772873E-02_EB, &
-    3.565166E-01_EB, &
-    6.512678E-02_EB, 4.755030E-02_EB, 3.298563E-02_EB, 5.902057E-02_EB, 5.466058E-02_EB, 2.199150E-02_EB, &
-    8.243532E-01_EB, &
-    6.903396E-03_EB, 1.465301E-02_EB, 1.484291E-02_EB, 2.149630E-02_EB, 1.757375E-02_EB, 3.235867E-03_EB, &
-    1.735086E-01_EB, &
-    2.597579E-03_EB, 3.940632E-03_EB, 4.409047E-04_EB, 4.452051E-03_EB, 2.415952E-03_EB, 1.161838E-03_EB, &
-    1.836274E-03_EB, &
-    9.049090E-04_EB, 6.187485E-04_EB, 5.655264E-04_EB, 3.980090E-04_EB, 3.554606E-04_EB, 3.667998E-04_EB, &
-    4.233603E-04_EB, &
-    4.793724E-04_EB, 3.513820E-04_EB, 3.816107E-04_EB, 3.407330E-04_EB, 3.388878E-04_EB, 3.454325E-04_EB, &
-    3.758847E-04_EB, &
-    3.176583E-04_EB, 3.176583E-04_EB, 3.176583E-04_EB, 3.176583E-04_EB, 3.176583E-04_EB, 3.176583E-04_EB, &
-    3.176583E-04_EB/),(/7,7/))
+sd3_ch3oh(1:7,25:26) = RESHAPE((/ &  ! 3200-3225 cm-1
+   6.930486e-04_EB, 6.167383e-04_EB, 6.581892e-04_EB, 7.470153e-04_EB, 6.327299e-04_EB, 5.451720e-04_EB, &
+   6.008264e-04_EB, &
+   4.699306e-04_EB, 4.696984e-04_EB, 4.697130e-04_EB, 4.702606e-04_EB, 4.699096e-04_EB, 4.682572e-04_EB, &
+   4.691749e-04_EB/),(/7,2/))
 
 !---------------------------------------------------------------------------
-ALLOCATE(SD3_C3H6(N_TEMP_C3H6,26)) 
+ALLOCATE(gammad3_ch3oh(n_temp_ch3oh,26)) 
 
-! BAND #3: 2650 cm-1 - 3275 cm-1 
+! band #3: 2600 cm-1 - 3225 cm-1 
 
-! SNB FIT WITH GOODY MODEL 
+! snb fit with malkmus model 
 
-! ERROR ASSOCIATED WITH GOODY FIT: 
-! On Transmissivity: 0.62248 % 
+! error associated with malkmus fit: 
+! on transmissivity: 2.0044 % 
 
-SD3_C3H6(1:7,1:8) = RESHAPE((/ &  ! 2650-2825 cm-1
-    9.823606E-04_EB, 1.047116E-03_EB, 6.339279E-04_EB, 4.646369E-04_EB, 4.581637E-04_EB, 4.453153E-04_EB, &
-    4.765197E-04_EB, &
-    1.790446E-03_EB, 1.213798E-03_EB, 9.801787E-04_EB, 1.652768E-03_EB, 7.551362E-04_EB, 1.780132E-03_EB, &
-    1.322880E-02_EB, &
-    1.156738E-02_EB, 8.840293E-03_EB, 1.053937E-02_EB, 1.273243E-02_EB, 7.821961E-03_EB, 9.966967E-03_EB, &
-    3.101635E-02_EB, &
-    6.054263E-02_EB, 3.799331E-02_EB, 3.448608E-02_EB, 3.283665E-02_EB, 2.275614E-02_EB, 2.583522E-02_EB, &
-    4.587110E-02_EB, &
-    7.538062E-02_EB, 5.476296E-02_EB, 5.194914E-02_EB, 4.998438E-02_EB, 3.798801E-02_EB, 4.377561E-02_EB, &
-    5.601207E-02_EB, &
-    5.623486E-02_EB, 4.578094E-02_EB, 4.797817E-02_EB, 5.487067E-02_EB, 4.385279E-02_EB, 5.851594E-02_EB, &
-    8.825224E-02_EB, &
-    9.541978E-02_EB, 7.588989E-02_EB, 7.953675E-02_EB, 8.105257E-02_EB, 7.178028E-02_EB, 8.733592E-02_EB, &
-    1.365780E-01_EB, &
-    1.162809E-01_EB, 1.122422E-01_EB, 1.259132E-01_EB, 1.365741E-01_EB, 1.321748E-01_EB, 1.536630E-01_EB, &
-    1.752584E-01_EB/),(/7,8/))
+! print fine structure array gamma_d 
 
-SD3_C3H6(1:7,9:16) = RESHAPE((/ &  ! 2850-3025 cm-1
-    4.894494E-01_EB, 3.702887E-01_EB, 3.576070E-01_EB, 3.385695E-01_EB, 2.897336E-01_EB, 2.677832E-01_EB, &
-    2.630918E-01_EB, &
-    9.478468E-01_EB, 6.986744E-01_EB, 6.414268E-01_EB, 5.902386E-01_EB, 5.030005E-01_EB, 4.339924E-01_EB, &
-    4.212834E-01_EB, &
-    1.382625E+00_EB, 1.079199E+00_EB, 1.001262E+00_EB, 9.263539E-01_EB, 8.030256E-01_EB, 6.604462E-01_EB, &
-    5.854730E-01_EB, &
-    2.155177E+00_EB, 1.551999E+00_EB, 1.371319E+00_EB, 1.229860E+00_EB, 1.009895E+00_EB, 7.859340E-01_EB, &
-    6.619388E-01_EB, &
-    2.941990E+00_EB, 2.072725E+00_EB, 1.809995E+00_EB, 1.592028E+00_EB, 1.281956E+00_EB, 9.610622E-01_EB, &
-    7.587408E-01_EB, &
-    2.742255E+00_EB, 1.804637E+00_EB, 1.539244E+00_EB, 1.329847E+00_EB, 1.042322E+00_EB, 7.995784E-01_EB, &
-    6.304867E-01_EB, &
-    2.475823E+00_EB, 1.754264E+00_EB, 1.520076E+00_EB, 1.322722E+00_EB, 1.046514E+00_EB, 7.909785E-01_EB, &
-    6.265450E-01_EB, &
-    1.471532E+00_EB, 1.165830E+00_EB, 1.090020E+00_EB, 9.854131E-01_EB, 8.471639E-01_EB, 7.172103E-01_EB, &
-    6.190659E-01_EB/),(/7,8/))
+gammad3_ch3oh(1:7,1:8) = RESHAPE((/ &  ! 2600-2775 cm-1
+   5.383708e-04_EB, 5.150011e-04_EB, 4.711666e-04_EB, 5.877341e-04_EB, 5.325580e-04_EB, 4.526624e-04_EB, &
+   3.953361e-04_EB, &
+   6.469173e-04_EB, 6.295204e-04_EB, 6.229213e-04_EB, 6.140709e-04_EB, 7.108644e-04_EB, 5.982461e-04_EB, &
+   3.920520e-04_EB, &
+   6.148513e-04_EB, 6.637986e-04_EB, 6.390155e-04_EB, 5.400884e-04_EB, 6.784448e-04_EB, 3.991532e-03_EB, &
+   4.998359e-03_EB, &
+   6.548999e-04_EB, 6.227472e-04_EB, 7.730036e-04_EB, 6.279630e-04_EB, 5.750964e-04_EB, 8.889816e-02_EB, &
+   4.610782e-03_EB, &
+   7.658461e-04_EB, 5.677730e-04_EB, 3.744908e-03_EB, 1.790178e-03_EB, 4.848659e-03_EB, 5.816371e-02_EB, &
+   7.773551e-04_EB, &
+   9.155583e-03_EB, 4.468866e-02_EB, 7.356051e-02_EB, 9.249021e-03_EB, 4.330986e-02_EB, 7.759327e-01_EB, &
+   1.031984e-03_EB, &
+   3.240618e-01_EB, 4.813829e-01_EB, 2.376949e-01_EB, 9.693334e-02_EB, 1.522188e-01_EB, 1.138999e+00_EB, &
+   2.244386e-03_EB, &
+   1.958993e+00_EB, 1.883288e+00_EB, 9.427313e-01_EB, 2.032231e+00_EB, 2.865213e+00_EB, 8.627391e+00_EB, &
+   2.968586e-03_EB/),(/7,8/))
 
-SD3_C3H6(1:7,17:24) = RESHAPE((/ &  ! 3050-3225 cm-1
-    1.153386E+00_EB, 9.939091E-01_EB, 9.675353E-01_EB, 8.984828E-01_EB, 8.064276E-01_EB, 6.943803E-01_EB, &
-    5.752264E-01_EB, &
-    1.610514E+00_EB, 1.157571E+00_EB, 1.051685E+00_EB, 9.330023E-01_EB, 7.764487E-01_EB, 6.191821E-01_EB, &
-    4.975246E-01_EB, &
-    1.662881E+00_EB, 1.149993E+00_EB, 1.023865E+00_EB, 8.861354E-01_EB, 7.177391E-01_EB, 5.601541E-01_EB, &
-    4.199159E-01_EB, &
-    6.606572E-01_EB, 5.485138E-01_EB, 5.377449E-01_EB, 4.716206E-01_EB, 4.046733E-01_EB, 3.483560E-01_EB, &
-    2.613788E-01_EB, &
-    1.931578E-01_EB, 1.766015E-01_EB, 1.986674E-01_EB, 1.686244E-01_EB, 1.577751E-01_EB, 1.652678E-01_EB, &
-    1.243299E-01_EB, &
-    3.630390E-02_EB, 4.104319E-02_EB, 8.625607E-02_EB, 6.317587E-02_EB, 6.364564E-02_EB, 6.930467E-02_EB, &
-    5.986582E-02_EB, &
-    4.421454E-03_EB, 5.927923E-03_EB, 2.615871E-02_EB, 2.573185E-02_EB, 2.372599E-02_EB, 2.807027E-02_EB, &
-    1.903581E-02_EB, &
-    7.799207E-04_EB, 5.613548E-04_EB, 1.855855E-02_EB, 9.545204E-03_EB, 1.026900E-02_EB, 1.105055E-02_EB, &
-    4.422276E-03_EB/),(/7,8/))
+gammad3_ch3oh(1:7,9:16) = RESHAPE((/ &  ! 2800-2975 cm-1
+   5.408634e+01_EB, 4.260803e+01_EB, 1.570059e+01_EB, 2.520800e+01_EB, 3.812191e+01_EB, 3.643507e+01_EB, &
+   1.949224e-03_EB, &
+   8.000000e+01_EB, 6.880853e+01_EB, 4.378312e+01_EB, 6.230866e+01_EB, 5.732026e+01_EB, 3.975357e+01_EB, &
+   1.722003e-03_EB, &
+   7.999962e+01_EB, 6.881387e+01_EB, 6.160988e+01_EB, 6.230878e+01_EB, 5.734000e+01_EB, 4.829424e+01_EB, &
+   3.362841e-03_EB, &
+   7.999999e+01_EB, 6.881386e+01_EB, 6.505766e+01_EB, 6.230889e+01_EB, 5.735690e+01_EB, 4.829419e+01_EB, &
+   3.574523e-03_EB, &
+   7.999997e+01_EB, 6.881383e+01_EB, 6.505113e+01_EB, 6.230881e+01_EB, 5.735699e+01_EB, 4.829428e+01_EB, &
+   2.799128e-03_EB, &
+   7.999848e+01_EB, 6.881323e+01_EB, 6.505412e+01_EB, 6.230885e+01_EB, 5.735695e+01_EB, 4.829421e+01_EB, &
+   2.167350e-03_EB, &
+   7.999924e+01_EB, 6.881280e+01_EB, 6.505343e+01_EB, 6.230882e+01_EB, 5.735689e+01_EB, 4.829429e+01_EB, &
+   2.206560e-03_EB, &
+   7.999955e+01_EB, 6.881390e+01_EB, 6.505410e+01_EB, 6.230862e+01_EB, 5.735674e+01_EB, 4.829421e+01_EB, &
+   2.226025e-03_EB/),(/7,8/))
 
-SD3_C3H6(1:7,25:26) = RESHAPE((/ &  ! 3250-3275 cm-1
-    6.392406E-04_EB, 5.165657E-04_EB, 3.996901E-03_EB, 2.997854E-03_EB, 3.117944E-03_EB, 2.589997E-03_EB, &
-    4.319721E-04_EB, &
-    4.069875E-04_EB, 4.069875E-04_EB, 4.069875E-04_EB, 4.069875E-04_EB, 4.069875E-04_EB, 4.069875E-04_EB, &
-    4.069875E-04_EB/),(/7,2/))
+gammad3_ch3oh(1:7,17:24) = RESHAPE((/ &  ! 3000-3175 cm-1
+   8.000000e+01_EB, 6.881380e+01_EB, 6.505082e+01_EB, 6.230881e+01_EB, 5.735619e+01_EB, 4.829420e+01_EB, &
+   2.316390e-03_EB, &
+   7.999999e+01_EB, 6.881373e+01_EB, 4.658312e+01_EB, 6.230870e+01_EB, 5.735696e+01_EB, 4.160676e+01_EB, &
+   1.752164e-03_EB, &
+   7.996301e+01_EB, 6.881042e+01_EB, 7.394547e+00_EB, 3.799419e+01_EB, 2.909775e+01_EB, 1.888125e+01_EB, &
+   1.732017e-03_EB, &
+   4.261947e+00_EB, 5.499787e+00_EB, 4.853050e-01_EB, 6.858640e+00_EB, 8.915265e+00_EB, 4.488725e+00_EB, &
+   1.039419e-03_EB, &
+   3.182069e-01_EB, 2.435677e-01_EB, 7.167320e-02_EB, 3.943245e-01_EB, 1.078816e+00_EB, 5.812817e-01_EB, &
+   5.867531e-04_EB, &
+   4.059798e-01_EB, 7.132746e-03_EB, 2.110640e-02_EB, 1.885784e-02_EB, 1.959525e+00_EB, 1.180753e-01_EB, &
+   1.052399e-04_EB, &
+   6.304409e-03_EB, 7.479753e-04_EB, 2.811545e-03_EB, 1.771085e-03_EB, 3.653146e-01_EB, 6.263784e-03_EB, &
+   5.856904e-05_EB, &
+   6.352137e-04_EB, 5.913538e-04_EB, 7.804488e-04_EB, 6.507595e-04_EB, 5.533275e-03_EB, 5.897126e-04_EB, &
+   1.359107e-03_EB/),(/7,8/))
 
-
-!---------------------------------------------------------------------------
-ALLOCATE(GAMMAD3_C3H6(N_TEMP_C3H6,26)) 
-
-! BAND #3: 2650 cm-1 - 3275 cm-1 
-
-! SNB FIT WITH GOODY MODEL 
-
-! ERROR ASSOCIATED WITH GOODY FIT: 
-! On Transmissivity: 0.62248 % 
-
-! PRINT FINE STRUCTURE ARRAY GAMMA_D 
-
-GAMMAD3_C3H6(1:7,1:8) = RESHAPE((/ &  ! 2650-2825 cm-1
-    5.403541E-04_EB, 8.792945E-04_EB, 5.056375E-04_EB, 3.496117E-04_EB, 3.518674E-04_EB, 3.438277E-04_EB, &
-    3.495719E-04_EB, &
-    7.122538E-04_EB, 9.654091E-04_EB, 7.123981E-04_EB, 7.997035E-04_EB, 6.221027E-04_EB, 6.478821E-04_EB, &
-    1.886022E-03_EB, &
-    6.055248E-03_EB, 2.810157E-02_EB, 7.205805E-03_EB, 5.135720E-03_EB, 1.148251E-02_EB, 3.479804E-03_EB, &
-    4.642567E-03_EB, &
-    1.802129E-02_EB, 3.111348E-02_EB, 1.652664E-02_EB, 1.262308E-02_EB, 4.156066E-02_EB, 7.064161E-03_EB, &
-    7.064147E-03_EB, &
-    3.950703E-02_EB, 4.511920E-02_EB, 2.940389E-02_EB, 2.136928E-02_EB, 2.924862E-02_EB, 6.853830E-03_EB, &
-    2.155653E-02_EB, &
-    2.696670E-02_EB, 4.150944E-02_EB, 2.661925E-02_EB, 1.199161E-02_EB, 3.045917E-02_EB, 1.275222E-02_EB, &
-    1.882532E-02_EB, &
-    3.843866E-02_EB, 5.924414E-02_EB, 2.750526E-02_EB, 2.824108E-02_EB, 5.479622E-02_EB, 3.487536E-02_EB, &
-    3.014406E-02_EB, &
-    4.267090E-02_EB, 8.903448E-02_EB, 4.314219E-02_EB, 4.798991E-02_EB, 1.150675E-01_EB, 6.448018E-02_EB, &
-    1.985851E-01_EB/),(/7,8/))
-
-GAMMAD3_C3H6(1:7,9:16) = RESHAPE((/ &  ! 2850-3025 cm-1
-    1.360974E-01_EB, 1.878816E-01_EB, 1.009398E-01_EB, 1.211061E-01_EB, 1.943889E-01_EB, 1.344776E-01_EB, &
-    4.550171E-01_EB, &
-    2.997042E-01_EB, 3.261537E-01_EB, 2.127525E-01_EB, 2.482599E-01_EB, 2.968594E-01_EB, 2.203126E-01_EB, &
-    3.135037E-01_EB, &
-    4.858595E-01_EB, 5.065914E-01_EB, 3.519248E-01_EB, 3.956430E-01_EB, 4.087118E-01_EB, 3.323798E-01_EB, &
-    4.364924E-01_EB, &
-    8.295040E-01_EB, 7.608021E-01_EB, 5.445346E-01_EB, 5.604645E-01_EB, 5.183071E-01_EB, 3.854799E-01_EB, &
-    5.783205E-01_EB, &
-    1.189035E+00_EB, 8.983699E-01_EB, 6.879399E-01_EB, 7.011190E-01_EB, 6.183493E-01_EB, 4.573149E-01_EB, &
-    7.247696E-01_EB, &
-    1.613731E+00_EB, 9.279943E-01_EB, 6.877675E-01_EB, 6.379556E-01_EB, 5.548252E-01_EB, 3.574696E-01_EB, &
-    1.069424E+00_EB, &
-    1.470423E+00_EB, 8.306409E-01_EB, 6.721568E-01_EB, 6.132407E-01_EB, 5.471048E-01_EB, 3.567919E-01_EB, &
-    9.190327E-01_EB, &
-    7.550487E-01_EB, 5.649773E-01_EB, 4.721665E-01_EB, 4.657506E-01_EB, 4.544038E-01_EB, 3.393934E-01_EB, &
-    5.769258E-01_EB/),(/7,8/))
-
-GAMMAD3_C3H6(1:7,17:24) = RESHAPE((/ &  ! 3050-3225 cm-1
-    4.764985E-01_EB, 5.071092E-01_EB, 4.093288E-01_EB, 4.183789E-01_EB, 4.129356E-01_EB, 3.190134E-01_EB, &
-    7.652687E-01_EB, &
-    6.768093E-01_EB, 5.678219E-01_EB, 4.160289E-01_EB, 4.110529E-01_EB, 3.804961E-01_EB, 2.887677E-01_EB, &
-    6.907067E-01_EB, &
-    8.606003E-01_EB, 5.212424E-01_EB, 4.059243E-01_EB, 3.776303E-01_EB, 3.264591E-01_EB, 2.357814E-01_EB, &
-    2.013184E+00_EB, &
-    3.754852E-01_EB, 2.153618E-01_EB, 1.929420E-01_EB, 1.825438E-01_EB, 1.584548E-01_EB, 1.192581E-01_EB, &
-    2.685672E+00_EB, &
-    8.653925E-02_EB, 7.279170E-02_EB, 7.311958E-02_EB, 7.967030E-02_EB, 6.259732E-02_EB, 3.450672E-02_EB, &
-    1.451927E+00_EB, &
-    1.900654E-02_EB, 2.480232E-02_EB, 8.520497E-03_EB, 1.508821E-02_EB, 2.984931E-02_EB, 1.767486E-02_EB, &
-    2.517844E-01_EB, &
-    1.459582E-03_EB, 2.273309E-03_EB, 5.243089E-03_EB, 2.245596E-03_EB, 1.447928E-02_EB, 7.429006E-03_EB, &
-    2.491091E-01_EB, &
-    5.565694E-04_EB, 4.018610E-04_EB, 1.839321E-03_EB, 2.389757E-03_EB, 6.139953E-03_EB, 2.803719E-03_EB, &
-    6.166058E-02_EB/),(/7,8/))
-
-GAMMAD3_C3H6(1:7,25:26) = RESHAPE((/ &  ! 3250-3275 cm-1
-    4.839528E-04_EB, 3.870932E-04_EB, 1.787058E-03_EB, 1.565363E-03_EB, 2.160706E-03_EB, 1.586268E-03_EB, &
-    3.409650E-04_EB, &
-    3.176583E-04_EB, 3.176583E-04_EB, 3.176583E-04_EB, 3.176583E-04_EB, 3.176583E-04_EB, 3.176583E-04_EB, &
-    3.176583E-04_EB/),(/7,2/))
-
-!-------------------------Toluene DATA-------------------
-
-
-! THERE ARE 5 BANDS FOR Toluene
-
-! BAND #1: 700 cm-1 - 805 cm-1 
-! BAND #2: 975 cm-1 - 1175 cm-1 
-! BAND #3: 1275 cm-1 - 1675 cm-1 
-! BAND #4: 1650 cm-1 - 2075 cm-1 
-! BAND #5: 2675 cm-1 - 3225 cm-1 
-
-N_TEMP_C7H8 = 6
-N_BAND_C7H8 = 5
-I_MODEL_C7H8 = 1 ! 1: GOODY, 2: MALKMUS, 3: ELSASSER 
-
-ALLOCATE(SD_C7H8_TEMP(N_TEMP_C7H8)) 
-
-! INITIALIZE BANDS WAVENUMBER BOUNDS FOR Toluene ABSOPTION COEFFICIENTS.
-! BANDS ARE ORGANIZED BY ROW: 
-! 1ST COLUMN IS THE LOWER BOUND BAND LIMIT IN cm-1. 
-! 2ND COLUMN IS THE UPPER BOUND BAND LIMIT IN cm-1. 
-! 3RD COLUMN IS THE STRIDE BETWEEN WAVENUMBERS IN BAND.
-! IF 3RD COLUMN = 0., BAND IS CALCULATED, NOT TABULATED.
-
-ALLOCATE(OM_BND_C7H8(N_BAND_C7H8,3)) 
-ALLOCATE(Be_C7H8(N_BAND_C7H8)) 
-
-OM_BND_C7H8 = RESHAPE((/ &
-    700._EB,  975._EB, 1275._EB, 1650._EB, 2675._EB, &
-    805._EB, 1175._EB, 1675._EB, 2075._EB, 3225._EB, &
-     5._EB, 5._EB, 25._EB, 25._EB, 25._EB/),(/N_BAND_C7H8,3/)) 
-
-SD_C7H8_TEMP = (/ &
-    300._EB, 396._EB, 440._EB, 477._EB, 587._EB, 795._EB/)
-
-Be_C7H8 = (/ &
-    1.000_EB, 1.000_EB, 1.000_EB, 1.000_EB, 1.000_EB/)
+gammad3_ch3oh(1:7,25:26) = RESHAPE((/ &  ! 3200-3225 cm-1
+   5.327466e-04_EB, 4.880598e-04_EB, 4.928840e-04_EB, 6.016314e-04_EB, 5.375037e-04_EB, 4.225641e-04_EB, &
+   4.726310e-04_EB, &
+   3.748583e-04_EB, 3.747168e-04_EB, 3.744971e-04_EB, 3.751403e-04_EB, 3.748851e-04_EB, 3.734005e-04_EB, &
+   3.740585e-04_EB/),(/7,2/))
 
 !---------------------------------------------------------------------------
-ALLOCATE(SD1_C7H8(N_TEMP_C7H8,22)) 
+ALLOCATE(sd4_ch3oh(n_temp_ch3oh,14)) 
 
-! BAND #1: 700 cm-1 - 805 cm-1 
+! band #4: 3525 cm-1 - 3850 cm-1 
 
-! SNB FIT WITH GOODY MODEL 
+! snb fit with malkmus model 
 
-! ERROR ASSOCIATED WITH GOODY FIT: 
-! On Transmissivity: 5.0157 % 
+! error associated with malkmus fit: 
+! on transmissivity: 0.52389 % 
 
-SD1_C7H8(1:6,1:8) = RESHAPE((/ &  ! 700-735 cm-1
-    1.115277E+00_EB, 9.064487E-01_EB, 9.114340E-01_EB, 8.960143E-01_EB, 9.108314E-01_EB, 1.321915E+00_EB, &
-    2.860325E+00_EB, 2.498343E+00_EB, 2.373842E+00_EB, 2.291232E+00_EB, 2.135973E+00_EB, 1.926214E+00_EB, &
-    3.484324E+00_EB, 3.192570E+00_EB, 2.864259E+00_EB, 2.640477E+00_EB, 2.486178E+00_EB, 1.926262E+00_EB, &
-    4.333473E+00_EB, 3.595912E+00_EB, 2.985116E+00_EB, 2.812329E+00_EB, 2.419191E+00_EB, 1.906946E+00_EB, &
-    4.720288E+00_EB, 3.755670E+00_EB, 3.279737E+00_EB, 3.085614E+00_EB, 2.900784E+00_EB, 2.474091E+00_EB, &
-    7.499689E+00_EB, 6.222745E+00_EB, 5.475099E+00_EB, 5.339125E+00_EB, 4.708196E+00_EB, 3.464929E+00_EB, &
-    9.819465E+00_EB, 6.863940E+00_EB, 5.678034E+00_EB, 5.357774E+00_EB, 4.115956E+00_EB, 2.531953E+00_EB, &
-    4.770778E+00_EB, 3.134058E+00_EB, 2.771841E+00_EB, 2.670464E+00_EB, 2.265161E+00_EB, 1.919217E+00_EB/),(/6,8/))
+sd4_ch3oh(1:7,1:8) = RESHAPE((/ &  ! 3525-3700 cm-1
+   6.712614e-04_EB, 6.207569e-04_EB, 6.722895e-04_EB, 6.499733e-04_EB, 6.502738e-04_EB, 6.875865e-04_EB, &
+   5.963773e-04_EB, &
+   8.659465e-04_EB, 7.116916e-03_EB, 2.432786e-03_EB, 5.672617e-03_EB, 1.138304e-03_EB, 8.423409e-04_EB, &
+   3.290015e-02_EB, &
+   1.352414e-02_EB, 3.203665e-02_EB, 2.755663e-02_EB, 2.769632e-02_EB, 2.312063e-02_EB, 5.525230e-02_EB, &
+   2.986065e-02_EB, &
+   4.836204e-02_EB, 5.823870e-02_EB, 5.880972e-02_EB, 6.018123e-02_EB, 6.237734e-02_EB, 6.647353e-02_EB, &
+   7.540357e-02_EB, &
+   2.393220e-01_EB, 2.245383e-01_EB, 2.030768e-01_EB, 2.229738e-01_EB, 2.012059e-01_EB, 1.546924e-01_EB, &
+   9.432293e-02_EB, &
+   8.391763e-01_EB, 5.928915e-01_EB, 4.976034e-01_EB, 4.745560e-01_EB, 3.784750e-01_EB, 2.223088e-01_EB, &
+   1.157200e-01_EB, &
+   1.156927e+00_EB, 6.735305e-01_EB, 5.357276e-01_EB, 4.781313e-01_EB, 3.584284e-01_EB, 1.968791e-01_EB, &
+   6.758499e-02_EB, &
+   1.214378e+00_EB, 7.022996e-01_EB, 5.366277e-01_EB, 4.875065e-01_EB, 3.656436e-01_EB, 2.096662e-01_EB, &
+   6.457647e-01_EB/),(/7,8/))
 
-SD1_C7H8(1:6,9:16) = RESHAPE((/ &  ! 740-775 cm-1
-    4.233918E+00_EB, 2.785962E+00_EB, 2.553246E+00_EB, 2.403379E+00_EB, 2.097930E+00_EB, 1.350915E+00_EB, &
-    2.858402E+00_EB, 2.230312E+00_EB, 2.091368E+00_EB, 1.998043E+00_EB, 1.819950E+00_EB, 1.535500E+00_EB, &
-    1.331963E+00_EB, 1.446134E+00_EB, 1.395384E+00_EB, 1.427066E+00_EB, 1.333588E+00_EB, 1.290415E+00_EB, &
-    4.539777E-01_EB, 7.996155E-01_EB, 7.614217E-01_EB, 7.995680E-01_EB, 8.205333E-01_EB, 8.414433E-01_EB, &
-    1.132036E-01_EB, 6.874098E-01_EB, 3.263682E-01_EB, 3.549264E-01_EB, 4.385666E-01_EB, 5.629917E-01_EB, &
-    3.785165E-02_EB, 5.834066E-01_EB, 1.748823E-01_EB, 1.495116E-01_EB, 2.106436E-01_EB, 3.300545E-01_EB, &
-    4.206835E-02_EB, 7.400053E-02_EB, 1.106324E-01_EB, 7.435615E-02_EB, 9.035603E-02_EB, 1.524856E-01_EB, &
-    6.724334E-02_EB, 1.272956E-03_EB, 6.436374E-02_EB, 5.382572E-02_EB, 5.652076E-02_EB, 5.045055E-02_EB/),(/6,8/))
-
-SD1_C7H8(1:6,17:22) = RESHAPE((/ &  ! 780-805 cm-1
-    6.279361E-02_EB, 1.139930E-03_EB, 4.318806E-02_EB, 2.932693E-02_EB, 3.125667E-02_EB, 1.252956E-02_EB, &
-    5.183976E-02_EB, 1.175051E-03_EB, 1.916625E-02_EB, 1.671218E-02_EB, 2.263446E-02_EB, 1.679786E-03_EB, &
-    3.526041E-02_EB, 1.278873E-03_EB, 2.846670E-03_EB, 1.470988E-02_EB, 1.167797E-02_EB, 9.830046E-04_EB, &
-    6.337277E-03_EB, 1.171620E-03_EB, 2.166429E-03_EB, 6.319178E-03_EB, 3.931505E-03_EB, 1.050672E-03_EB, &
-    1.082950E-03_EB, 1.108759E-03_EB, 1.944758E-03_EB, 9.715975E-04_EB, 1.893371E-03_EB, 1.031392E-03_EB, &
-    9.233037E-04_EB, 9.269044E-04_EB, 1.865152E-03_EB, 9.264789E-04_EB, 1.857160E-03_EB, 9.259403E-04_EB/),(/6,6/))
-
-!---------------------------------------------------------------------------
-ALLOCATE(GAMMAD1_C7H8(N_TEMP_C7H8,22)) 
-
-! BAND #1: 700 cm-1 - 805 cm-1 
-
-! SNB FIT WITH GOODY MODEL 
-
-! ERROR ASSOCIATED WITH GOODY FIT: 
-! On Transmissivity: 5.0157 % 
-
-! PRINT FINE STRUCTURE ARRAY GAMMA_D 
-
-GAMMAD1_C7H8(1:6,1:8) = RESHAPE((/ &  ! 700-735 cm-1
-    4.997333E+00_EB, 4.295584E+00_EB, 1.481681E+00_EB, 3.965139E+00_EB, 3.550717E+00_EB, 2.717676E-02_EB, &
-    5.000000E+00_EB, 4.351750E+00_EB, 4.128579E+00_EB, 3.965258E+00_EB, 3.573542E+00_EB, 1.888351E-01_EB, &
-    5.000000E+00_EB, 4.322994E+00_EB, 2.131994E+00_EB, 3.965222E+00_EB, 3.574469E+00_EB, 6.492432E-02_EB, &
-    5.000000E+00_EB, 4.285913E+00_EB, 4.126659E+00_EB, 3.965226E+00_EB, 3.574464E+00_EB, 3.636259E-01_EB, &
-    5.000000E+00_EB, 2.700818E+00_EB, 4.128609E+00_EB, 3.965254E+00_EB, 3.574446E+00_EB, 3.071311E+00_EB, &
-    5.000000E+00_EB, 4.351940E+00_EB, 4.128611E+00_EB, 3.888235E+00_EB, 3.574469E+00_EB, 1.157600E+00_EB, &
-    5.000000E+00_EB, 4.351940E+00_EB, 4.128612E+00_EB, 1.618868E+00_EB, 3.574464E+00_EB, 3.071371E+00_EB, &
-    4.999999E+00_EB, 4.351825E+00_EB, 4.128540E+00_EB, 3.965020E+00_EB, 3.574448E+00_EB, 1.035856E-01_EB/),(/6,8/))
-
-GAMMAD1_C7H8(1:6,9:16) = RESHAPE((/ &  ! 740-775 cm-1
-    5.000000E+00_EB, 4.351918E+00_EB, 4.128010E+00_EB, 3.942192E+00_EB, 3.572446E+00_EB, 3.064808E+00_EB, &
-    4.999998E+00_EB, 4.351939E+00_EB, 4.126848E+00_EB, 3.965239E+00_EB, 3.562160E+00_EB, 1.151729E-01_EB, &
-    4.997066E+00_EB, 4.348323E+00_EB, 3.816962E+00_EB, 3.897876E+00_EB, 3.557603E+00_EB, 1.782920E-01_EB, &
-    3.327768E+00_EB, 1.907450E-01_EB, 1.941949E+00_EB, 2.087414E+00_EB, 3.571989E+00_EB, 7.642862E-01_EB, &
-    6.209655E-01_EB, 7.573622E-03_EB, 1.117290E-01_EB, 5.471591E-01_EB, 8.849112E-01_EB, 1.020274E+00_EB, &
-    3.118993E-01_EB, 2.047036E-03_EB, 7.823538E-02_EB, 5.426851E-01_EB, 8.958391E-01_EB, 3.073679E-01_EB, &
-    1.427902E+00_EB, 4.479483E-02_EB, 5.025683E-02_EB, 2.526941E-01_EB, 7.184991E-02_EB, 1.464098E-01_EB, &
-    2.593216E-01_EB, 9.945700E-04_EB, 3.155324E-02_EB, 1.128797E-01_EB, 2.661918E-02_EB, 2.711249E-02_EB/),(/6,8/))
-
-GAMMAD1_C7H8(1:6,17:22) = RESHAPE((/ &  ! 780-805 cm-1
-    2.781363E-01_EB, 8.721781E-04_EB, 9.487288E-03_EB, 5.055562E-02_EB, 1.923327E-02_EB, 1.894720E-03_EB, &
-    3.164064E-01_EB, 9.026308E-04_EB, 1.494655E-02_EB, 1.129990E-02_EB, 1.932504E-02_EB, 1.636419E-03_EB, &
-    2.429947E-01_EB, 1.003226E-03_EB, 2.343296E-03_EB, 1.417139E-02_EB, 3.331706E-02_EB, 7.998148E-04_EB, &
-    6.549588E-03_EB, 9.247472E-04_EB, 1.695476E-03_EB, 5.500035E-03_EB, 3.368747E-03_EB, 7.980915E-04_EB, &
-    8.719439E-04_EB, 8.729150E-04_EB, 1.545207E-03_EB, 7.670839E-04_EB, 1.504329E-03_EB, 7.824870E-04_EB, &
-    7.355779E-04_EB, 7.393154E-04_EB, 1.488682E-03_EB, 7.390167E-04_EB, 1.482552E-03_EB, 7.384415E-04_EB/),(/6,6/))
+sd4_ch3oh(1:7,9:14) = RESHAPE((/ &  ! 3725-3850 cm-1
+   7.394573e-01_EB, 5.605469e-01_EB, 4.645577e-01_EB, 4.379377e-01_EB, 3.556244e-01_EB, 2.353483e-01_EB, &
+   1.093933e+00_EB, &
+   1.627441e-01_EB, 1.282880e-01_EB, 1.200820e-01_EB, 1.269546e-01_EB, 1.078069e-01_EB, 1.197911e-01_EB, &
+   5.594711e-02_EB, &
+   5.446422e-02_EB, 6.975799e-02_EB, 5.570485e-02_EB, 2.768076e-02_EB, 2.935100e-02_EB, 4.703585e-02_EB, &
+   5.054507e-01_EB, &
+   5.503798e-03_EB, 3.001374e-02_EB, 1.548540e-02_EB, 1.507541e-03_EB, 3.052107e-03_EB, 1.675834e-02_EB, &
+   3.138134e-02_EB, &
+   6.972876e-04_EB, 3.117091e-03_EB, 2.511646e-03_EB, 6.126449e-04_EB, 6.508959e-04_EB, 6.472961e-04_EB, &
+   6.127914e-04_EB, &
+   4.699306e-04_EB, 4.696984e-04_EB, 4.697130e-04_EB, 4.702606e-04_EB, 4.699096e-04_EB, 4.682572e-04_EB, &
+   4.691749e-04_EB/),(/7,6/))
 
 !---------------------------------------------------------------------------
-ALLOCATE(SD2_C7H8(N_TEMP_C7H8,29)) 
+ALLOCATE(gammad4_ch3oh(n_temp_ch3oh,14)) 
 
-! BAND #2: 975 cm-1 - 1175 cm-1 
+! band #4: 3525 cm-1 - 3850 cm-1 
 
-! SNB FIT WITH GOODY MODEL 
+! snb fit with malkmus model 
 
-! ERROR ASSOCIATED WITH GOODY FIT: 
-! On Transmissivity: 0.56956 % 
+! error associated with malkmus fit: 
+! on transmissivity: 0.52389 % 
 
-SD2_C7H8(1:6,1:8) = RESHAPE((/ &  ! 975-1010 cm-1
-    1.034632E-03_EB, 1.049900E-03_EB, 2.050487E-03_EB, 1.148148E-03_EB, 2.040707E-03_EB, 9.765901E-04_EB, &
-    1.122679E-03_EB, 1.235435E-03_EB, 2.188126E-03_EB, 1.173493E-03_EB, 2.109625E-03_EB, 1.075063E-03_EB, &
-    1.194097E-03_EB, 4.906372E-02_EB, 2.177762E-03_EB, 1.147826E-03_EB, 2.090287E-03_EB, 2.969093E-03_EB, &
-    4.488651E-02_EB, 8.690214E-02_EB, 1.968275E-03_EB, 1.253949E-03_EB, 2.330817E-03_EB, 2.857406E-02_EB, &
-    4.184895E-02_EB, 5.813898E-02_EB, 6.141136E-03_EB, 5.172732E-03_EB, 1.370475E-02_EB, 1.699294E-02_EB, &
-    2.338695E-02_EB, 1.674305E-02_EB, 2.363978E-02_EB, 2.751699E-02_EB, 1.128329E-02_EB, 2.345377E-02_EB, &
-    1.377996E-02_EB, 1.331161E-03_EB, 3.678107E-02_EB, 2.278175E-02_EB, 2.434238E-02_EB, 4.251685E-02_EB, &
-    2.627855E-02_EB, 3.336344E-03_EB, 7.435328E-02_EB, 7.299144E-02_EB, 8.073743E-02_EB, 8.520512E-02_EB/),(/6,8/))
+! print fine structure array gamma_d 
 
-SD2_C7H8(1:6,9:16) = RESHAPE((/ &  ! 1015-1050 cm-1
-    8.636487E-02_EB, 8.394031E-02_EB, 1.637850E-01_EB, 1.750384E-01_EB, 1.718331E-01_EB, 1.480802E-01_EB, &
-    3.009511E-01_EB, 2.806748E-01_EB, 2.898305E-01_EB, 2.823082E-01_EB, 2.472842E-01_EB, 1.464400E-01_EB, &
-    5.284352E-01_EB, 3.730246E-01_EB, 2.986370E-01_EB, 2.725747E-01_EB, 2.442423E-01_EB, 1.381949E-01_EB, &
-    5.853563E-01_EB, 4.757127E-01_EB, 3.603343E-01_EB, 3.461394E-01_EB, 2.790166E-01_EB, 1.227668E-01_EB, &
-    4.736166E-01_EB, 3.773869E-01_EB, 2.671360E-01_EB, 2.575362E-01_EB, 2.269498E-01_EB, 1.538097E-01_EB, &
-    5.537088E-01_EB, 4.507385E-01_EB, 3.326090E-01_EB, 3.311390E-01_EB, 3.036026E-01_EB, 2.043985E-01_EB, &
-    4.136599E-01_EB, 3.258368E-01_EB, 2.722028E-01_EB, 2.684519E-01_EB, 2.490297E-01_EB, 1.862948E-01_EB, &
-    2.617106E-01_EB, 1.802808E-01_EB, 1.980298E-01_EB, 1.895395E-01_EB, 2.193744E-01_EB, 1.350301E-01_EB/),(/6,8/))
+gammad4_ch3oh(1:7,1:8) = RESHAPE((/ &  ! 3525-3700 cm-1
+   5.122880e-04_EB, 4.870888e-04_EB, 5.202731e-04_EB, 4.858325e-04_EB, 4.894141e-04_EB, 5.234560e-04_EB, &
+   4.739454e-04_EB, &
+   6.149338e-04_EB, 1.383613e-01_EB, 1.894640e-03_EB, 1.652906e-01_EB, 1.023597e-03_EB, 6.016220e-04_EB, &
+   4.058911e-03_EB, &
+   3.510951e-01_EB, 4.231322e-02_EB, 2.094183e-02_EB, 1.756637e-01_EB, 8.897080e-02_EB, 1.613316e-04_EB, &
+   2.603264e-03_EB, &
+   4.348848e-01_EB, 1.997004e+00_EB, 9.906747e-02_EB, 6.264650e-02_EB, 3.368153e-02_EB, 5.344243e-03_EB, &
+   1.024940e-02_EB, &
+   6.050885e+00_EB, 5.037136e+00_EB, 1.610741e+00_EB, 9.196821e-01_EB, 3.334769e+00_EB, 1.286001e-01_EB, &
+   1.852205e-02_EB, &
+   7.999493e+01_EB, 4.970642e+01_EB, 1.283805e+01_EB, 1.192477e+01_EB, 8.469410e+00_EB, 7.793742e-01_EB, &
+   2.887610e-03_EB, &
+   7.999963e+01_EB, 6.880115e+01_EB, 1.309018e+01_EB, 1.179133e+01_EB, 1.455179e+01_EB, 1.751987e-01_EB, &
+   5.542345e-03_EB, &
+   7.999935e+01_EB, 6.881382e+01_EB, 1.685368e+01_EB, 1.646915e+01_EB, 1.087273e+01_EB, 1.258692e+00_EB, &
+   2.305314e-04_EB/),(/7,8/))
 
-SD2_C7H8(1:6,17:24) = RESHAPE((/ &  ! 1055-1090 cm-1
-    2.738466E-01_EB, 1.767469E-01_EB, 2.225122E-01_EB, 2.166852E-01_EB, 2.231000E-01_EB, 1.470641E-01_EB, &
-    2.820001E-01_EB, 2.052839E-01_EB, 2.527294E-01_EB, 2.344097E-01_EB, 2.284998E-01_EB, 2.547503E-01_EB, &
-    3.266204E-01_EB, 2.891812E-01_EB, 2.919988E-01_EB, 2.815199E-01_EB, 2.790406E-01_EB, 2.776012E-01_EB, &
-    4.244508E-01_EB, 3.880752E-01_EB, 3.452768E-01_EB, 3.166048E-01_EB, 2.886578E-01_EB, 2.030225E-01_EB, &
-    5.537399E-01_EB, 4.365326E-01_EB, 3.327742E-01_EB, 3.063188E-01_EB, 2.623075E-01_EB, 1.520590E-01_EB, &
-    4.373412E-01_EB, 3.571425E-01_EB, 2.738070E-01_EB, 2.412283E-01_EB, 2.238149E-01_EB, 2.011193E-01_EB, &
-    4.689702E-01_EB, 3.738704E-01_EB, 2.871318E-01_EB, 2.540734E-01_EB, 2.501572E-01_EB, 2.069856E-01_EB, &
-    4.704753E-01_EB, 3.537423E-01_EB, 2.833734E-01_EB, 2.632639E-01_EB, 2.218036E-01_EB, 1.632007E-01_EB/),(/6,8/))
+gammad4_ch3oh(1:7,9:14) = RESHAPE((/ &  ! 3725-3850 cm-1
+   6.925146e+01_EB, 3.835584e+01_EB, 7.883505e+00_EB, 1.488897e+01_EB, 1.369263e+01_EB, 1.664808e+00_EB, &
+   3.295444e-04_EB, &
+   5.002891e-01_EB, 7.416100e-01_EB, 2.838529e-01_EB, 3.020566e-01_EB, 1.523043e+00_EB, 1.133794e-03_EB, &
+   4.486303e-03_EB, &
+   6.823303e-03_EB, 4.678797e-01_EB, 9.198815e-02_EB, 1.770170e-01_EB, 1.483378e-01_EB, 1.869665e-01_EB, &
+   2.436489e-05_EB, &
+   4.419159e-03_EB, 3.220528e-01_EB, 2.310260e-01_EB, 1.151947e-03_EB, 2.324707e-03_EB, 6.947554e-03_EB, &
+   1.285540e-04_EB, &
+   5.281954e-04_EB, 2.447127e-03_EB, 2.223998e-03_EB, 4.730215e-04_EB, 5.179966e-04_EB, 4.804723e-04_EB, &
+   4.227659e-04_EB, &
+   3.748583e-04_EB, 3.747168e-04_EB, 3.744971e-04_EB, 3.751403e-04_EB, 3.748851e-04_EB, 3.734005e-04_EB, &
+   3.740585e-04_EB/),(/7,6/))
 
-SD2_C7H8(1:6,25:29) = RESHAPE((/ &  ! 1095-1175 cm-1
-    3.653179E-01_EB, 2.739321E-01_EB, 2.411873E-01_EB, 2.292279E-01_EB, 1.883729E-01_EB, 1.226381E-01_EB, &
-    2.689138E-01_EB, 1.704843E-01_EB, 1.676705E-01_EB, 1.514745E-01_EB, 1.165836E-01_EB, 7.284228E-02_EB, &
-    4.980468E-02_EB, 6.295430E-02_EB, 4.645419E-02_EB, 3.373359E-02_EB, 2.675533E-02_EB, 9.862022E-03_EB, &
-    1.064992E-03_EB, 2.785955E-03_EB, 5.534785E-03_EB, 1.075858E-03_EB, 2.013082E-03_EB, 1.086934E-03_EB, &
-    9.233037E-04_EB, 9.269044E-04_EB, 1.865152E-03_EB, 9.264789E-04_EB, 1.857160E-03_EB, 9.259403E-04_EB/),(/6,5/))
+!-------------------------mma data-------------------
 
-!---------------------------------------------------------------------------
-ALLOCATE(GAMMAD2_C7H8(N_TEMP_C7H8,29)) 
 
-! BAND #2: 975 cm-1 - 1175 cm-1 
+! there are 6 bands for mma
 
-! SNB FIT WITH GOODY MODEL 
+! band #1: 750 cm-1 - 880 cm-1 
+! band #2: 875 cm-1 - 1055 cm-1 
+! band #3: 1050 cm-1 - 1275 cm-1 
+! band #4: 1250 cm-1 - 1575 cm-1 
+! band #5: 1550 cm-1 - 1975 cm-1 
+! band #6: 2650 cm-1 - 3275 cm-1 
 
-! ERROR ASSOCIATED WITH GOODY FIT: 
-! On Transmissivity: 0.56956 % 
+ALLOCATE(sd_c5h8o2_temp(n_temp_c5h8o2)) 
 
-! PRINT FINE STRUCTURE ARRAY GAMMA_D 
+! initialize bands wavenumber bounds for mma ABS(option coefficients.
+! bands are organized by row: 
+! 1st column is the lower bound band limit in cm-1. 
+! 2nd column is the upper bound band limit in cm-1. 
+! 3rd column is the stride between wavenumbers in band.
+! IF 3rd column = 0., band is calculated, not tabulated.
 
-GAMMAD2_C7H8(1:6,1:8) = RESHAPE((/ &  ! 975-1010 cm-1
-    7.953644E-04_EB, 8.304906E-04_EB, 1.630953E-03_EB, 8.979058E-04_EB, 1.605583E-03_EB, 7.744304E-04_EB, &
-    8.778370E-04_EB, 9.878483E-04_EB, 1.729643E-03_EB, 9.293189E-04_EB, 1.666472E-03_EB, 8.368870E-04_EB, &
-    9.366512E-04_EB, 1.801635E-02_EB, 1.699594E-03_EB, 8.925264E-04_EB, 1.693787E-03_EB, 2.932669E-03_EB, &
-    3.342545E+00_EB, 3.952421E-02_EB, 1.570035E-03_EB, 9.348913E-04_EB, 1.830973E-03_EB, 1.073752E-02_EB, &
-    1.059385E+00_EB, 7.503390E-02_EB, 7.577251E-03_EB, 5.019341E-03_EB, 1.045618E-01_EB, 1.297997E-02_EB, &
-    1.801174E-01_EB, 5.001496E-01_EB, 4.482872E-02_EB, 1.056397E-02_EB, 1.204186E-01_EB, 2.418524E-01_EB, &
-    2.768309E-01_EB, 1.232991E-03_EB, 1.097419E-01_EB, 3.497525E-02_EB, 1.384708E-01_EB, 1.305341E-01_EB, &
-    3.099755E-01_EB, 3.562212E-03_EB, 1.866215E-01_EB, 2.021930E-01_EB, 7.746078E-02_EB, 1.886219E+00_EB/),(/6,8/))
+ALLOCATE(om_bnd_c5h8o2(n_band_c5h8o2,3)) 
+ALLOCATE(be_c5h8o2(n_band_c5h8o2)) 
 
-GAMMAD2_C7H8(1:6,9:16) = RESHAPE((/ &  ! 1015-1050 cm-1
-    3.198617E+00_EB, 9.169389E-01_EB, 3.588399E-01_EB, 2.889031E-01_EB, 4.592746E-01_EB, 1.299407E+00_EB, &
-    1.845628E+00_EB, 5.353485E-01_EB, 3.267932E-01_EB, 1.477488E+00_EB, 3.141091E-01_EB, 1.309145E+00_EB, &
-    4.992004E+00_EB, 3.809011E-01_EB, 5.567131E-01_EB, 6.321892E-01_EB, 9.570165E-01_EB, 6.830364E-01_EB, &
-    4.457917E+00_EB, 3.144746E-01_EB, 6.465005E-01_EB, 3.548138E-01_EB, 1.756047E+00_EB, 6.957288E-01_EB, &
-    3.475027E+00_EB, 3.488655E-01_EB, 6.648675E-01_EB, 5.615573E-01_EB, 8.145950E-01_EB, 6.648922E-01_EB, &
-    4.999937E+00_EB, 1.075274E+00_EB, 6.408375E-01_EB, 4.900735E-01_EB, 5.012133E-01_EB, 2.440501E+00_EB, &
-    2.468116E+00_EB, 1.401950E+00_EB, 6.357307E-01_EB, 2.478059E-01_EB, 1.232354E+00_EB, 2.669585E+00_EB, &
-    1.967402E+00_EB, 3.776356E+00_EB, 4.042848E-01_EB, 4.229093E-01_EB, 8.362265E-01_EB, 6.739183E-01_EB/),(/6,8/))
+om_bnd_c5h8o2 = RESHAPE((/ &
+   750._EB,  875._EB, 1050._EB, 1250._EB, 1550._EB, 2650._EB, &
+   880._EB, 1055._EB, 1275._EB, 1575._EB, 1975._EB, 3275._EB, &
+   5._EB, 5._EB, 5._EB, 25._EB, 25._EB, 25._EB/),(/n_band_c5h8o2,3/)) 
 
-GAMMAD2_C7H8(1:6,17:24) = RESHAPE((/ &  ! 1055-1090 cm-1
-    9.850818E-01_EB, 3.804397E+00_EB, 4.978725E-01_EB, 3.502723E-01_EB, 4.801633E-01_EB, 1.302693E+00_EB, &
-    1.860999E+00_EB, 3.037654E+00_EB, 6.502408E-01_EB, 1.727920E+00_EB, 7.886479E-01_EB, 1.510159E+00_EB, &
-    1.820274E+00_EB, 1.648433E+00_EB, 5.889326E-01_EB, 5.459876E-01_EB, 2.684612E-01_EB, 5.249360E-01_EB, &
-    4.023538E+00_EB, 5.084315E-01_EB, 5.599393E-01_EB, 5.315030E-01_EB, 5.347815E-01_EB, 9.533184E-01_EB, &
-    4.993522E+00_EB, 6.954744E-01_EB, 6.322409E-01_EB, 5.166785E-01_EB, 1.739963E+00_EB, 1.277813E+00_EB, &
-    2.486163E+00_EB, 3.850261E-01_EB, 6.740432E-01_EB, 3.542026E-01_EB, 3.730206E-01_EB, 1.102249E+00_EB, &
-    3.527235E+00_EB, 6.055559E-01_EB, 6.600369E-01_EB, 1.599454E+00_EB, 3.547345E-01_EB, 4.566775E-01_EB, &
-    3.491336E+00_EB, 7.173797E-01_EB, 6.896040E-01_EB, 3.778014E-01_EB, 8.247503E-01_EB, 2.724760E-01_EB/),(/6,8/))
+sd_c5h8o2_temp = (/ &
+   297._EB, 396._EB, 441._EB, 483._EB, 597._EB, 803._EB,&
+   1014._EB/)
 
-GAMMAD2_C7H8(1:6,25:29) = RESHAPE((/ &  ! 1095-1175 cm-1
-    3.782606E+00_EB, 1.885894E+00_EB, 1.007227E+00_EB, 2.176024E-01_EB, 4.934887E-01_EB, 8.605999E-02_EB, &
-    9.863064E-01_EB, 8.375179E-01_EB, 5.285793E-01_EB, 3.659406E-01_EB, 2.654634E-01_EB, 9.393051E-01_EB, &
-    2.937353E-01_EB, 2.607173E-01_EB, 5.761068E-01_EB, 1.524875E-01_EB, 3.895640E-01_EB, 3.308805E-02_EB, &
-    8.498874E-04_EB, 2.626634E-03_EB, 7.813529E-03_EB, 8.390301E-04_EB, 1.609410E-03_EB, 8.634216E-04_EB, &
-    7.355779E-04_EB, 7.393154E-04_EB, 1.488682E-03_EB, 7.390167E-04_EB, 1.482552E-03_EB, 7.384415E-04_EB/),(/6,5/))
+be_c5h8o2 = (/ &
+   1.000_EB, 1.000_EB, 1.000_EB, 1.000_EB, 1.000_EB, 1.000_EB/)
 
 !---------------------------------------------------------------------------
-ALLOCATE(SD3_C7H8(N_TEMP_C7H8,17)) 
+ALLOCATE(sd1_c5h8o2(n_temp_c5h8o2,27)) 
 
-! BAND #3: 1275 cm-1 - 1675 cm-1 
+! band #1: 750 cm-1 - 880 cm-1 
 
-! SNB FIT WITH GOODY MODEL 
+! snb fit with malkmus model 
 
-! ERROR ASSOCIATED WITH GOODY FIT: 
-! On Transmissivity: 1.4397 % 
+! error associated with malkmus fit: 
+! on transmissivity: 8.0046 % 
 
-SD3_C7H8(1:6,1:8) = RESHAPE((/ &  ! 1275-1450 cm-1
-    1.062005E-03_EB, 7.598167E-03_EB, 2.404327E-03_EB, 1.292698E-03_EB, 6.220543E-03_EB, 4.506206E-03_EB, &
-    1.176419E-03_EB, 3.467740E-02_EB, 2.846407E-02_EB, 1.505359E-02_EB, 2.800752E-02_EB, 1.191268E-02_EB, &
-    3.826015E-03_EB, 3.630517E-02_EB, 4.212714E-02_EB, 2.421863E-02_EB, 4.333555E-02_EB, 3.186140E-02_EB, &
-    5.571416E-02_EB, 6.837515E-02_EB, 8.182510E-02_EB, 6.363461E-02_EB, 6.993668E-02_EB, 5.899239E-02_EB, &
-    2.342374E-01_EB, 2.090661E-01_EB, 1.890934E-01_EB, 1.668369E-01_EB, 1.532424E-01_EB, 1.144887E-01_EB, &
-    2.298859E-01_EB, 1.959762E-01_EB, 1.873649E-01_EB, 1.557448E-01_EB, 1.474642E-01_EB, 9.999243E-02_EB, &
-    2.468532E-01_EB, 2.254116E-01_EB, 2.151254E-01_EB, 1.850743E-01_EB, 1.918668E-01_EB, 1.699306E-01_EB, &
-    6.346606E-01_EB, 4.869849E-01_EB, 4.485960E-01_EB, 3.958280E-01_EB, 3.396720E-01_EB, 2.533752E-01_EB/),(/6,8/))
+sd1_c5h8o2(1:7,1:8) = RESHAPE((/ &  ! 750-785 cm-1
+   6.713660e-04_EB, 5.825251e-04_EB, 7.916094e-04_EB, 6.543173e-04_EB, 6.421674e-04_EB, 6.087532e-04_EB, &
+   7.107910e-04_EB, &
+   9.848065e-04_EB, 9.607899e-04_EB, 7.994027e-04_EB, 1.090851e-03_EB, 1.087202e-03_EB, 7.734671e-04_EB, &
+   9.284135e-04_EB, &
+   9.110967e-04_EB, 7.183894e-04_EB, 8.010414e-04_EB, 1.063396e-03_EB, 1.000702e-03_EB, 6.657414e-04_EB, &
+   6.127113e-04_EB, &
+   8.267669e-04_EB, 9.315188e-04_EB, 8.290909e-04_EB, 7.969467e-04_EB, 8.913743e-04_EB, 6.855529e-04_EB, &
+   7.046623e-04_EB, &
+   1.042663e-03_EB, 1.043538e-03_EB, 8.872311e-04_EB, 8.694322e-04_EB, 9.329158e-04_EB, 9.772556e-04_EB, &
+   7.458198e-04_EB, &
+   1.006578e-03_EB, 7.209128e-04_EB, 1.019682e-03_EB, 7.712991e-04_EB, 3.187441e-02_EB, 5.248309e-02_EB, &
+   8.138133e-04_EB, &
+   7.585006e-04_EB, 8.285426e-04_EB, 7.850058e-04_EB, 7.514949e-04_EB, 2.435151e+00_EB, 2.382451e-01_EB, &
+   7.995357e-04_EB, &
+   5.346436e-03_EB, 1.695093e-03_EB, 1.005551e-02_EB, 1.807196e-02_EB, 4.893034e+00_EB, 1.072109e+00_EB, &
+   8.263934e-04_EB/),(/7,8/))
 
-SD3_C7H8(1:6,9:16) = RESHAPE((/ &  ! 1475-1650 cm-1
-    8.106021E-01_EB, 6.861535E-01_EB, 6.363570E-01_EB, 6.077620E-01_EB, 5.853518E-01_EB, 4.901586E-01_EB, &
-    1.994754E+00_EB, 1.439347E+00_EB, 1.200622E+00_EB, 1.093848E+00_EB, 8.769635E-01_EB, 5.742516E-01_EB, &
-    5.176617E-01_EB, 4.492315E-01_EB, 4.342196E-01_EB, 3.556532E-01_EB, 3.148816E-01_EB, 2.349145E-01_EB, &
-    2.374710E-01_EB, 2.201665E-01_EB, 2.374197E-01_EB, 1.856509E-01_EB, 1.760616E-01_EB, 1.697913E-01_EB, &
-    2.320405E-01_EB, 2.237291E-01_EB, 2.129523E-01_EB, 2.116101E-01_EB, 2.288491E-01_EB, 2.536384E-01_EB, &
-    8.302692E-01_EB, 1.373962E+00_EB, 9.593470E-01_EB, 7.035542E-01_EB, 4.624247E-01_EB, 3.254581E-01_EB, &
-    5.574947E-01_EB, 4.345387E-01_EB, 3.226913E-01_EB, 3.021458E-01_EB, 1.705109E-01_EB, 8.936322E-02_EB, &
-    2.548442E-02_EB, 4.882681E-03_EB, 1.656181E-02_EB, 8.783028E-03_EB, 1.976697E-03_EB, 1.115219E-03_EB/),(/6,8/))
+sd1_c5h8o2(1:7,9:16) = RESHAPE((/ &  ! 790-825 cm-1
+   7.889654e-02_EB, 6.932866e-02_EB, 6.943889e-02_EB, 1.657322e-01_EB, 4.820655e+00_EB, 1.595563e+00_EB, &
+   6.604864e-04_EB, &
+   2.859272e-01_EB, 2.060379e-01_EB, 1.784774e-01_EB, 2.655142e-01_EB, 5.069557e+00_EB, 1.587178e+00_EB, &
+   8.491025e-04_EB, &
+   6.960576e-01_EB, 3.989489e-01_EB, 3.440851e-01_EB, 4.569709e-01_EB, 4.118131e+00_EB, 7.958553e-01_EB, &
+   7.688756e-04_EB, &
+   1.250951e+00_EB, 6.520021e-01_EB, 6.089583e-01_EB, 6.456713e-01_EB, 2.261652e+00_EB, 7.908891e-01_EB, &
+   8.388555e-04_EB, &
+   2.208710e+00_EB, 1.110849e+00_EB, 1.035737e+00_EB, 1.049217e+00_EB, 1.084162e+00_EB, 7.448165e-01_EB, &
+   1.121289e-03_EB, &
+   3.745705e+00_EB, 1.437198e+00_EB, 1.241512e+00_EB, 1.206161e+00_EB, 8.198992e-01_EB, 7.316076e-01_EB, &
+   7.825346e-04_EB, &
+   3.469611e+00_EB, 1.274191e+00_EB, 1.123297e+00_EB, 1.063600e+00_EB, 7.020966e-01_EB, 8.989672e-01_EB, &
+   7.836122e-04_EB, &
+   3.387588e+00_EB, 1.219143e+00_EB, 1.110425e+00_EB, 9.818704e-01_EB, 6.253886e-01_EB, 1.450947e+00_EB, &
+   8.923055e-04_EB/),(/7,8/))
 
-SD3_C7H8(1:6,17:17) = RESHAPE((/ &  ! 1675-1675 cm-1
-    9.233037E-04_EB, 9.269044E-04_EB, 1.865152E-03_EB, 9.264789E-04_EB, 1.857160E-03_EB, 9.259403E-04_EB/),(/6,1/))
+sd1_c5h8o2(1:7,17:24) = RESHAPE((/ &  ! 830-865 cm-1
+   2.650263e+00_EB, 9.577831e-01_EB, 8.753717e-01_EB, 8.295316e-01_EB, 6.934556e-01_EB, 1.431367e+00_EB, &
+   8.664361e-04_EB, &
+   1.730390e+00_EB, 6.490013e-01_EB, 6.546973e-01_EB, 5.810689e-01_EB, 2.534337e+00_EB, 7.747536e-01_EB, &
+   7.994517e-04_EB, &
+   1.002821e+00_EB, 3.608083e-01_EB, 3.892233e-01_EB, 3.747237e-01_EB, 6.259059e+00_EB, 1.624771e+00_EB, &
+   7.025073e-04_EB, &
+   4.114065e-01_EB, 1.202763e-01_EB, 1.380148e-01_EB, 2.829570e-01_EB, 7.146988e+00_EB, 1.774384e+00_EB, &
+   9.127284e-04_EB, &
+   1.274057e-01_EB, 9.521312e-04_EB, 7.626901e-04_EB, 5.309748e-02_EB, 6.530803e+00_EB, 3.950028e-01_EB, &
+   8.260701e-04_EB, &
+   3.101890e-02_EB, 9.960440e-04_EB, 1.450745e-03_EB, 8.889566e-04_EB, 4.823124e+00_EB, 5.607234e-02_EB, &
+   1.289121e-03_EB, &
+   1.815363e-02_EB, 6.716907e-04_EB, 1.134173e-03_EB, 7.672105e-04_EB, 2.305115e+00_EB, 1.215781e-02_EB, &
+   9.963103e-03_EB, &
+   1.671588e-02_EB, 9.534992e-04_EB, 7.842672e-04_EB, 1.050185e-03_EB, 8.279107e-04_EB, 9.473562e-04_EB, &
+   1.520855e-02_EB/),(/7,8/))
 
-!---------------------------------------------------------------------------
-ALLOCATE(GAMMAD3_C7H8(N_TEMP_C7H8,17)) 
-
-! BAND #3: 1275 cm-1 - 1675 cm-1 
-
-! SNB FIT WITH GOODY MODEL 
-
-! ERROR ASSOCIATED WITH GOODY FIT: 
-! On Transmissivity: 1.4397 % 
-
-! PRINT FINE STRUCTURE ARRAY GAMMA_D 
-
-GAMMAD3_C7H8(1:6,1:8) = RESHAPE((/ &  ! 1275-1450 cm-1
-    8.403990E-04_EB, 4.882315E-03_EB, 1.962226E-03_EB, 1.039514E-03_EB, 5.217651E-03_EB, 3.194750E-03_EB, &
-    9.217771E-04_EB, 1.600478E-02_EB, 1.117939E-02_EB, 1.074178E-01_EB, 5.540868E-02_EB, 2.503607E-03_EB, &
-    3.046278E-03_EB, 5.273450E-02_EB, 6.589606E-03_EB, 7.216902E-01_EB, 1.072235E-01_EB, 1.355432E-01_EB, &
-    5.469603E-02_EB, 3.266205E-01_EB, 1.373959E-02_EB, 2.215699E-01_EB, 2.024983E-01_EB, 1.079261E-01_EB, &
-    7.230174E-01_EB, 3.084006E-01_EB, 1.189080E-01_EB, 4.000928E-01_EB, 4.250364E-01_EB, 2.141772E-01_EB, &
-    1.865284E+00_EB, 4.677921E-01_EB, 1.169895E-01_EB, 5.042163E-01_EB, 4.674422E-01_EB, 3.021245E-01_EB, &
-    2.114475E+00_EB, 2.833302E+00_EB, 3.298511E-01_EB, 7.317477E-01_EB, 1.227053E+00_EB, 4.151732E-01_EB, &
-    4.998342E+00_EB, 3.066710E+00_EB, 6.333725E-01_EB, 3.313537E+00_EB, 6.873515E-01_EB, 6.556912E-01_EB/),(/6,8/))
-
-GAMMAD3_C7H8(1:6,9:16) = RESHAPE((/ &  ! 1475-1650 cm-1
-    4.991174E+00_EB, 2.606623E+00_EB, 4.699752E-01_EB, 1.261479E+00_EB, 1.562480E+00_EB, 1.627266E+00_EB, &
-    4.999853E+00_EB, 4.348563E+00_EB, 4.093131E+00_EB, 3.963494E+00_EB, 3.559566E+00_EB, 2.114072E+00_EB, &
-    4.999975E+00_EB, 3.255310E+00_EB, 2.314826E+00_EB, 3.794960E+00_EB, 1.538554E+00_EB, 1.761121E+00_EB, &
-    2.319535E+00_EB, 9.901741E-01_EB, 1.980977E+00_EB, 2.452492E+00_EB, 3.280997E+00_EB, 6.465125E-01_EB, &
-    1.685294E-01_EB, 2.206855E-02_EB, 2.531160E-02_EB, 7.778066E-02_EB, 2.482244E-01_EB, 1.155942E-01_EB, &
-    1.042855E-01_EB, 8.622274E-03_EB, 9.285619E-03_EB, 2.471090E-02_EB, 1.219237E-01_EB, 2.754584E-02_EB, &
-    4.233407E+00_EB, 2.790950E-02_EB, 3.000446E-02_EB, 2.255016E-02_EB, 1.740175E-01_EB, 5.331902E-02_EB, &
-    1.613119E-02_EB, 2.421347E-03_EB, 8.060934E-03_EB, 3.812276E-03_EB, 1.575925E-03_EB, 8.714612E-04_EB/),(/6,8/))
-
-GAMMAD3_C7H8(1:6,17:17) = RESHAPE((/ &  ! 1675-1675 cm-1
-    7.355779E-04_EB, 7.393154E-04_EB, 1.488682E-03_EB, 7.390167E-04_EB, 1.482552E-03_EB, 7.384415E-04_EB/),(/6,1/))
-
-!---------------------------------------------------------------------------
-ALLOCATE(SD4_C7H8(N_TEMP_C7H8,18)) 
-
-! BAND #4: 1650 cm-1 - 2075 cm-1 
-
-! SNB FIT WITH GOODY MODEL 
-
-! ERROR ASSOCIATED WITH GOODY FIT: 
-! On Transmissivity: 0.34996 % 
-
-SD4_C7H8(1:6,1:8) = RESHAPE((/ &  ! 1650-1825 cm-1
-    1.607388E-02_EB, 1.276761E-03_EB, 3.671311E-03_EB, 1.259532E-03_EB, 1.983422E-03_EB, 9.570047E-04_EB, &
-    4.846418E-02_EB, 8.736357E-03_EB, 1.809071E-02_EB, 1.446177E-02_EB, 2.105683E-03_EB, 1.026872E-03_EB, &
-    3.744609E-02_EB, 1.615485E-02_EB, 2.566976E-02_EB, 1.641904E-02_EB, 1.017383E-02_EB, 3.051346E-03_EB, &
-    1.002633E-01_EB, 4.951832E-02_EB, 5.608323E-02_EB, 4.803435E-02_EB, 3.126588E-02_EB, 1.258169E-02_EB, &
-    6.347046E-02_EB, 4.029275E-02_EB, 4.073767E-02_EB, 4.270702E-02_EB, 3.297945E-02_EB, 3.027872E-02_EB, &
-    4.298909E-01_EB, 3.153382E-01_EB, 8.879303E-02_EB, 1.007476E-01_EB, 9.288538E-02_EB, 9.428744E-02_EB, &
-    4.806549E-01_EB, 8.471411E-01_EB, 1.568230E-01_EB, 1.567358E-01_EB, 1.195061E-01_EB, 9.579418E-02_EB, &
-    6.025041E-01_EB, 2.770965E-01_EB, 7.542958E-02_EB, 8.089050E-02_EB, 8.057888E-02_EB, 8.730313E-02_EB/),(/6,8/))
-
-SD4_C7H8(1:6,9:16) = RESHAPE((/ &  ! 1850-2025 cm-1
-    6.012163E-01_EB, 5.964223E-01_EB, 1.512738E-01_EB, 1.472022E-01_EB, 1.224581E-01_EB, 1.196653E-01_EB, &
-    6.006986E-01_EB, 4.345743E-01_EB, 1.090142E-01_EB, 1.168026E-01_EB, 7.618608E-02_EB, 5.169675E-02_EB, &
-    2.689299E-01_EB, 3.172213E-02_EB, 1.877107E-02_EB, 3.918623E-02_EB, 4.009945E-02_EB, 5.364820E-02_EB, &
-    4.041662E-01_EB, 3.086099E-01_EB, 1.255077E-01_EB, 1.314917E-01_EB, 1.243512E-01_EB, 1.156554E-01_EB, &
-    2.784135E-01_EB, 2.879121E-01_EB, 1.615320E-01_EB, 1.650307E-01_EB, 1.223631E-01_EB, 8.413521E-02_EB, &
-    7.149065E-02_EB, 2.554608E-02_EB, 3.284575E-02_EB, 3.199253E-02_EB, 1.894216E-02_EB, 1.602093E-02_EB, &
-    2.985724E-02_EB, 1.033994E-02_EB, 1.130765E-02_EB, 1.538741E-02_EB, 1.161064E-02_EB, 2.931882E-03_EB, &
-    1.328166E-02_EB, 1.256753E-03_EB, 4.743058E-03_EB, 4.951792E-03_EB, 5.124635E-03_EB, 1.257266E-03_EB/),(/6,8/))
-
-SD4_C7H8(1:6,17:18) = RESHAPE((/ &  ! 2050-2075 cm-1
-    1.040423E-03_EB, 1.049141E-03_EB, 2.051953E-03_EB, 1.050237E-03_EB, 1.985675E-03_EB, 1.061126E-03_EB, &
-    9.233037E-04_EB, 9.269044E-04_EB, 1.865152E-03_EB, 9.264789E-04_EB, 1.857160E-03_EB, 9.259403E-04_EB/),(/6,2/))
+sd1_c5h8o2(1:7,25:27) = RESHAPE((/ &  ! 870-880 cm-1
+   3.388305e-02_EB, 8.968940e-04_EB, 9.267088e-04_EB, 1.004537e-03_EB, 9.822602e-04_EB, 8.968929e-04_EB, &
+   3.122362e-02_EB, &
+   2.663964e-02_EB, 7.688918e-04_EB, 6.407620e-04_EB, 5.722080e-04_EB, 9.499110e-04_EB, 6.115005e-04_EB, &
+   3.351275e-02_EB, &
+   4.683959e-04_EB, 4.682485e-04_EB, 4.694920e-04_EB, 4.693301e-04_EB, 4.691565e-04_EB, 4.675221e-04_EB, &
+   4.659141e-04_EB/),(/7,3/))
 
 !---------------------------------------------------------------------------
-ALLOCATE(GAMMAD4_C7H8(N_TEMP_C7H8,18)) 
+ALLOCATE(gammad1_c5h8o2(n_temp_c5h8o2,27)) 
 
-! BAND #4: 1650 cm-1 - 2075 cm-1 
+! band #1: 750 cm-1 - 880 cm-1 
 
-! SNB FIT WITH GOODY MODEL 
+! snb fit with malkmus model 
 
-! ERROR ASSOCIATED WITH GOODY FIT: 
-! On Transmissivity: 0.34996 % 
+! error associated with malkmus fit: 
+! on transmissivity: 8.0046 % 
 
-! PRINT FINE STRUCTURE ARRAY GAMMA_D 
+! print fine structure array gamma_d 
 
-GAMMAD4_C7H8(1:6,1:8) = RESHAPE((/ &  ! 1650-1825 cm-1
-    2.496706E-01_EB, 1.040935E-03_EB, 3.395651E-03_EB, 1.018554E-03_EB, 1.580735E-03_EB, 7.642523E-04_EB, &
-    2.070191E-01_EB, 2.864416E-03_EB, 6.948674E-03_EB, 3.771246E-03_EB, 1.679742E-03_EB, 8.067892E-04_EB, &
-    4.678302E-01_EB, 2.284430E-01_EB, 4.687372E-01_EB, 2.165363E-01_EB, 1.290439E-01_EB, 2.834816E-03_EB, &
-    4.341037E-02_EB, 1.393304E-02_EB, 1.742751E-02_EB, 1.712027E-02_EB, 4.709744E-02_EB, 7.977971E-03_EB, &
-    8.286606E-03_EB, 1.270621E-02_EB, 2.049040E-02_EB, 2.293953E-02_EB, 1.117927E-01_EB, 9.864035E-03_EB, &
-    8.163724E-04_EB, 4.245300E-04_EB, 3.027280E-02_EB, 3.523384E-02_EB, 5.373142E-02_EB, 5.744076E-02_EB, &
-    5.519416E-03_EB, 1.036416E-03_EB, 7.529227E-02_EB, 8.412704E-02_EB, 8.604982E-02_EB, 3.859562E-02_EB, &
-    4.912771E-04_EB, 3.461673E-04_EB, 2.490526E-02_EB, 2.912078E-02_EB, 1.149004E-02_EB, 3.309678E-02_EB/),(/6,8/))
+gammad1_c5h8o2(1:7,1:8) = RESHAPE((/ &  ! 750-785 cm-1
+   4.881844e-04_EB, 4.346454e-04_EB, 5.958338e-04_EB, 4.571093e-04_EB, 4.822105e-04_EB, 4.530250e-04_EB, &
+   5.750719e-04_EB, &
+   6.727325e-04_EB, 6.267647e-04_EB, 5.477130e-04_EB, 7.657452e-04_EB, 1.077214e-03_EB, 5.499367e-04_EB, &
+   6.460319e-04_EB, &
+   5.864217e-04_EB, 5.127786e-04_EB, 5.824402e-04_EB, 8.990885e-04_EB, 8.469550e-04_EB, 5.075038e-04_EB, &
+   5.043115e-04_EB, &
+   6.108399e-04_EB, 7.428392e-04_EB, 5.525420e-04_EB, 5.867387e-04_EB, 7.082636e-04_EB, 5.889027e-04_EB, &
+   4.893654e-04_EB, &
+   7.434780e-04_EB, 6.504896e-04_EB, 6.589451e-04_EB, 6.802512e-04_EB, 7.417022e-04_EB, 7.262805e-04_EB, &
+   5.511207e-04_EB, &
+   6.356817e-04_EB, 5.339199e-04_EB, 7.935459e-04_EB, 4.886757e-04_EB, 2.583559e-03_EB, 3.792064e-03_EB, &
+   6.024047e-04_EB, &
+   5.106586e-04_EB, 5.822074e-04_EB, 5.456352e-04_EB, 5.195168e-04_EB, 1.249121e-04_EB, 2.441600e-03_EB, &
+   6.419995e-04_EB, &
+   8.911013e-04_EB, 1.366487e-03_EB, 7.184717e-03_EB, 1.764827e-01_EB, 2.574464e-04_EB, 1.205059e-03_EB, &
+   5.689721e-04_EB/),(/7,8/))
 
-GAMMAD4_C7H8(1:6,9:16) = RESHAPE((/ &  ! 1850-2025 cm-1
-    2.350959E-03_EB, 1.139295E-03_EB, 1.672691E-02_EB, 7.867110E-02_EB, 7.245583E-02_EB, 1.112776E-02_EB, &
-    1.974130E-03_EB, 6.863236E-04_EB, 9.038861E-03_EB, 9.706118E-03_EB, 2.065325E-02_EB, 1.315245E-02_EB, &
-    2.620171E-04_EB, 1.370626E-03_EB, 3.664955E-03_EB, 1.239577E-02_EB, 3.911631E-03_EB, 1.472174E-02_EB, &
-    1.745495E-03_EB, 1.108797E-03_EB, 1.021527E-02_EB, 2.792718E-02_EB, 8.357283E-02_EB, 4.009886E-02_EB, &
-    7.517409E-02_EB, 5.163990E-03_EB, 2.586329E-02_EB, 3.109004E-02_EB, 8.829114E-02_EB, 1.491041E-02_EB, &
-    7.805253E-03_EB, 4.792063E-03_EB, 4.280297E-03_EB, 6.170754E-03_EB, 1.116148E-02_EB, 8.352453E-03_EB, &
-    4.706225E-03_EB, 3.670066E-03_EB, 3.553553E-03_EB, 5.325529E-03_EB, 6.440955E-03_EB, 2.188709E-03_EB, &
-    4.020419E-03_EB, 9.018852E-04_EB, 3.289713E-03_EB, 3.033640E-03_EB, 3.584390E-03_EB, 9.814831E-04_EB/),(/6,8/))
+gammad1_c5h8o2(1:7,9:16) = RESHAPE((/ &  ! 790-825 cm-1
+   4.218735e-01_EB, 2.260530e-02_EB, 2.192833e-01_EB, 8.393035e-01_EB, 6.309253e-04_EB, 1.299978e-03_EB, &
+   4.943829e-04_EB, &
+   2.011501e+01_EB, 1.452133e-01_EB, 1.379684e+00_EB, 3.290149e+00_EB, 1.006802e-03_EB, 2.196075e-03_EB, &
+   6.147171e-04_EB, &
+   7.999647e+01_EB, 3.727151e-01_EB, 4.909546e+00_EB, 1.504204e-01_EB, 1.827877e-03_EB, 1.390294e-02_EB, &
+   5.960009e-04_EB, &
+   8.000000e+01_EB, 1.192733e+01_EB, 7.335305e+00_EB, 2.477027e+01_EB, 6.343012e-03_EB, 3.167933e-02_EB, &
+   6.338454e-04_EB, &
+   8.000000e+01_EB, 1.337438e+00_EB, 1.200630e+01_EB, 8.358805e-01_EB, 5.050388e-02_EB, 5.528025e-02_EB, &
+   6.645315e-04_EB, &
+   8.000000e+01_EB, 1.575943e+00_EB, 2.254763e+01_EB, 5.284652e-01_EB, 4.899995e-01_EB, 4.748211e-02_EB, &
+   5.682371e-04_EB, &
+   8.000000e+01_EB, 1.559461e+00_EB, 2.060048e+01_EB, 9.864427e-01_EB, 2.822989e+01_EB, 2.089522e-02_EB, &
+   5.933048e-04_EB, &
+   8.000000e+01_EB, 9.294253e-01_EB, 7.518592e-01_EB, 2.225028e+00_EB, 1.882489e+01_EB, 5.697081e-03_EB, &
+   6.342437e-04_EB/),(/7,8/))
 
-GAMMAD4_C7H8(1:6,17:18) = RESHAPE((/ &  ! 2050-2075 cm-1
-    8.212450E-04_EB, 8.179942E-04_EB, 1.622313E-03_EB, 8.319414E-04_EB, 1.584783E-03_EB, 8.313481E-04_EB, &
-    7.355779E-04_EB, 7.393154E-04_EB, 1.488682E-03_EB, 7.390167E-04_EB, 1.482552E-03_EB, 7.384415E-04_EB/),(/6,2/))
+gammad1_c5h8o2(1:7,17:24) = RESHAPE((/ &  ! 830-865 cm-1
+   8.000000e+01_EB, 5.595499e-01_EB, 7.229848e-01_EB, 4.663622e-01_EB, 4.280954e-02_EB, 3.407433e-03_EB, &
+   7.293662e-04_EB, &
+   7.999678e+01_EB, 5.297318e-01_EB, 1.408882e-01_EB, 5.990214e-01_EB, 2.104101e-03_EB, 5.806669e-03_EB, &
+   5.977527e-04_EB, &
+   8.000000e+01_EB, 2.382664e+00_EB, 5.857715e-02_EB, 2.596665e-01_EB, 5.172312e-04_EB, 1.035222e-03_EB, &
+   5.002373e-04_EB, &
+   5.199739e+01_EB, 2.075323e-01_EB, 1.580424e-02_EB, 9.101537e-03_EB, 3.465216e-04_EB, 4.105029e-04_EB, &
+   6.238247e-04_EB, &
+   2.523145e+00_EB, 7.869446e-04_EB, 6.466080e-04_EB, 5.984897e-03_EB, 2.719400e-04_EB, 9.547889e-04_EB, &
+   6.744617e-04_EB, &
+   3.144180e-01_EB, 6.967438e-04_EB, 8.338212e-04_EB, 6.247549e-04_EB, 2.369812e-04_EB, 2.160043e-01_EB, &
+   1.146982e-03_EB, &
+   3.556347e-01_EB, 5.790029e-04_EB, 9.280773e-04_EB, 6.140435e-04_EB, 1.166505e-04_EB, 4.285636e-03_EB, &
+   1.647599e-01_EB, &
+   9.611149e-01_EB, 6.993787e-04_EB, 6.536778e-04_EB, 6.470283e-04_EB, 6.300754e-04_EB, 6.508677e-04_EB, &
+   8.394488e-01_EB/),(/7,8/))
+
+gammad1_c5h8o2(1:7,25:27) = RESHAPE((/ &  ! 870-880 cm-1
+   8.980663e-01_EB, 6.254884e-04_EB, 6.536611e-04_EB, 7.628907e-04_EB, 7.906692e-04_EB, 7.774676e-04_EB, &
+   3.406991e+00_EB, &
+   1.692425e-01_EB, 6.157700e-04_EB, 4.905940e-04_EB, 4.383728e-04_EB, 8.114566e-04_EB, 5.029333e-04_EB, &
+   3.441873e-01_EB, &
+   3.735791e-04_EB, 3.732776e-04_EB, 3.745026e-04_EB, 3.743404e-04_EB, 3.741743e-04_EB, 3.727339e-04_EB, &
+   3.713571e-04_EB/),(/7,3/))
 
 !---------------------------------------------------------------------------
-ALLOCATE(SD5_C7H8(N_TEMP_C7H8,23)) 
+ALLOCATE(sd2_c5h8o2(n_temp_c5h8o2,37)) 
 
-! BAND #5: 2675 cm-1 - 3225 cm-1 
+! band #2: 875 cm-1 - 1055 cm-1 
 
-! SNB FIT WITH GOODY MODEL 
+! snb fit with malkmus model 
 
-! ERROR ASSOCIATED WITH GOODY FIT: 
-! On Transmissivity: 1.9882 % 
+! error associated with malkmus fit: 
+! on transmissivity: 16.2578 % 
 
-SD5_C7H8(1:6,1:8) = RESHAPE((/ &  ! 2675-2850 cm-1
-    1.044976E-03_EB, 1.099851E-03_EB, 2.077211E-03_EB, 1.109101E-03_EB, 2.039815E-03_EB, 1.016781E-03_EB, &
-    1.184702E-03_EB, 1.150926E-03_EB, 2.236635E-03_EB, 1.192032E-03_EB, 2.721191E-03_EB, 9.995167E-03_EB, &
-    1.144291E-03_EB, 1.270278E-03_EB, 2.232317E-03_EB, 1.239971E-03_EB, 2.331069E-02_EB, 2.974739E-02_EB, &
-    1.249634E-03_EB, 1.297152E-03_EB, 3.564740E-03_EB, 2.974301E-03_EB, 4.642796E-02_EB, 4.367080E-02_EB, &
-    1.240352E-03_EB, 2.640793E-03_EB, 6.785723E-03_EB, 4.151419E-03_EB, 2.582413E-02_EB, 3.978670E-02_EB, &
-    9.722240E-03_EB, 1.338012E-02_EB, 2.449457E-02_EB, 1.529454E-02_EB, 4.706864E-02_EB, 6.689340E-02_EB, &
-    5.837316E-02_EB, 6.591992E-02_EB, 7.324766E-02_EB, 6.626278E-02_EB, 1.018196E-01_EB, 1.260772E-01_EB, &
-    2.668238E-01_EB, 2.686899E-01_EB, 2.786223E-01_EB, 2.548030E-01_EB, 2.785268E-01_EB, 2.514942E-01_EB/),(/6,8/))
+sd2_c5h8o2(1:7,1:8) = RESHAPE((/ &  ! 875-910 cm-1
+   2.556429e-02_EB, 6.579116e-04_EB, 7.354099e-04_EB, 7.413989e-04_EB, 6.278952e-04_EB, 6.133453e-04_EB, &
+   4.127227e-02_EB, &
+   4.274772e-02_EB, 9.965553e-04_EB, 9.559177e-04_EB, 9.609587e-04_EB, 7.244017e-04_EB, 9.125642e-04_EB, &
+   1.253746e-01_EB, &
+   4.062606e-02_EB, 8.758771e-04_EB, 7.717414e-04_EB, 1.136983e-03_EB, 8.565555e-02_EB, 8.384111e-01_EB, &
+   8.119652e-01_EB, &
+   1.969402e-02_EB, 8.690397e-04_EB, 8.197383e-04_EB, 1.021204e-01_EB, 7.942200e-01_EB, 1.336575e+00_EB, &
+   1.034711e+00_EB, &
+   6.150252e-03_EB, 8.420963e-04_EB, 7.601258e-03_EB, 5.822673e-01_EB, 1.849210e+00_EB, 2.267047e-01_EB, &
+   6.054709e-01_EB, &
+   5.255431e-03_EB, 3.759946e-03_EB, 6.674130e-02_EB, 1.933685e-01_EB, 4.747476e+00_EB, 3.382479e-01_EB, &
+   2.717558e-01_EB, &
+   6.508425e-02_EB, 7.385905e-02_EB, 1.516138e-01_EB, 2.231123e-01_EB, 3.585642e+00_EB, 4.915855e-01_EB, &
+   2.578738e-01_EB, &
+   2.660815e-01_EB, 2.584587e-01_EB, 3.361944e-01_EB, 4.729659e-01_EB, 4.590394e+00_EB, 7.118124e-01_EB, &
+   2.680924e-01_EB/),(/7,8/))
 
-SD5_C7H8(1:6,9:16) = RESHAPE((/ &  ! 2875-3050 cm-1
-    1.195574E+00_EB, 9.248040E-01_EB, 8.318667E-01_EB, 7.404250E-01_EB, 6.302484E-01_EB, 4.590100E-01_EB, &
-    1.114009E+00_EB, 9.416306E-01_EB, 8.669533E-01_EB, 8.074763E-01_EB, 7.473116E-01_EB, 6.180415E-01_EB, &
-    2.029815E+00_EB, 1.638525E+00_EB, 1.555931E+00_EB, 1.367907E+00_EB, 1.171682E+00_EB, 8.552603E-01_EB, &
-    1.941623E+00_EB, 1.408191E+00_EB, 1.305545E+00_EB, 1.085556E+00_EB, 8.900512E-01_EB, 6.006005E-01_EB, &
-    9.827046E-01_EB, 7.124183E-01_EB, 6.790377E-01_EB, 5.510380E-01_EB, 4.818843E-01_EB, 3.939638E-01_EB, &
-    1.230302E+00_EB, 9.523176E-01_EB, 8.279963E-01_EB, 8.331705E-01_EB, 8.342897E-01_EB, 7.838367E-01_EB, &
-    3.288751E+00_EB, 2.742988E+00_EB, 2.314616E+00_EB, 2.283915E+00_EB, 1.947276E+00_EB, 1.376393E+00_EB, &
-    3.587259E+00_EB, 2.837358E+00_EB, 2.404658E+00_EB, 2.297969E+00_EB, 1.959505E+00_EB, 1.469484E+00_EB/),(/6,8/))
+sd2_c5h8o2(1:7,9:16) = RESHAPE((/ &  ! 915-950 cm-1
+   7.131926e-01_EB, 5.670265e-01_EB, 5.731113e-01_EB, 6.713483e-01_EB, 5.036802e+00_EB, 1.022991e+00_EB, &
+   2.779647e-01_EB, &
+   1.616994e+00_EB, 1.062612e+00_EB, 9.571218e-01_EB, 9.882622e-01_EB, 4.253259e+00_EB, 9.880129e-01_EB, &
+   3.040041e-01_EB, &
+   3.093637e+00_EB, 1.592723e+00_EB, 1.358023e+00_EB, 1.283095e+00_EB, 2.191786e+00_EB, 8.168738e-01_EB, &
+   3.592899e-01_EB, &
+   4.490720e+00_EB, 2.020538e+00_EB, 1.689196e+00_EB, 1.592450e+00_EB, 1.670002e+00_EB, 9.479666e-01_EB, &
+   4.149322e-01_EB, &
+   5.933235e+00_EB, 2.516838e+00_EB, 2.089816e+00_EB, 1.959977e+00_EB, 1.677729e+00_EB, 1.102576e+00_EB, &
+   4.329370e-01_EB, &
+   7.889794e+00_EB, 2.918784e+00_EB, 2.348617e+00_EB, 2.059360e+00_EB, 1.457291e+00_EB, 9.460046e-01_EB, &
+   4.177430e-01_EB, &
+   5.687576e+00_EB, 2.199276e+00_EB, 1.750801e+00_EB, 1.589524e+00_EB, 9.841957e-01_EB, 7.638453e-01_EB, &
+   4.276039e-01_EB, &
+   3.912971e+00_EB, 1.521382e+00_EB, 1.199146e+00_EB, 1.132591e+00_EB, 7.312452e-01_EB, 5.627116e-01_EB, &
+   4.340964e-01_EB/),(/7,8/))
 
-SD5_C7H8(1:6,17:23) = RESHAPE((/ &  ! 3075-3225 cm-1
-    2.711783E+00_EB, 2.229871E+00_EB, 1.969116E+00_EB, 1.880398E+00_EB, 1.652984E+00_EB, 1.231443E+00_EB, &
-    1.510657E+00_EB, 1.183474E+00_EB, 1.049503E+00_EB, 9.595928E-01_EB, 8.176629E-01_EB, 5.623793E-01_EB, &
-    3.957752E-01_EB, 3.089913E-01_EB, 2.808929E-01_EB, 2.350058E-01_EB, 1.992946E-01_EB, 1.346263E-01_EB, &
-    2.641122E-02_EB, 3.375059E-02_EB, 3.912942E-02_EB, 2.153990E-02_EB, 3.753137E-02_EB, 3.284597E-02_EB, &
-    2.061190E-02_EB, 1.343173E-02_EB, 1.929005E-02_EB, 6.023065E-03_EB, 1.866458E-02_EB, 1.109563E-02_EB, &
-    2.247600E-03_EB, 2.881597E-03_EB, 4.404862E-03_EB, 1.065931E-03_EB, 2.908462E-03_EB, 3.294728E-03_EB, &
-    9.233037E-04_EB, 9.269044E-04_EB, 1.865152E-03_EB, 9.264789E-04_EB, 1.857160E-03_EB, 9.259403E-04_EB/),(/6,7/))
+sd2_c5h8o2(1:7,17:24) = RESHAPE((/ &  ! 955-990 cm-1
+   2.475675e+00_EB, 1.047082e+00_EB, 8.418699e-01_EB, 7.489753e-01_EB, 5.673221e-01_EB, 3.884845e-01_EB, &
+   4.323566e-01_EB, &
+   1.320393e+00_EB, 6.735843e-01_EB, 5.433291e-01_EB, 5.032234e-01_EB, 1.017197e+00_EB, 2.871344e-01_EB, &
+   4.412980e-01_EB, &
+   5.592797e-01_EB, 4.019616e-01_EB, 3.047795e-01_EB, 3.003325e-01_EB, 2.137201e+00_EB, 2.538634e-01_EB, &
+   4.343141e-01_EB, &
+   2.669833e-01_EB, 2.361810e-01_EB, 1.839138e-01_EB, 1.867551e-01_EB, 2.802026e+00_EB, 2.467341e-01_EB, &
+   8.431414e-01_EB, &
+   3.073555e-01_EB, 1.587138e-01_EB, 1.753897e-01_EB, 1.623549e-01_EB, 2.391695e+00_EB, 2.295551e-01_EB, &
+   1.916065e+00_EB, &
+   5.710281e-01_EB, 2.449444e-01_EB, 2.284392e-01_EB, 2.247888e-01_EB, 2.482041e+00_EB, 2.586464e-01_EB, &
+   2.918096e+00_EB, &
+   8.249745e-01_EB, 3.134360e-01_EB, 2.982082e-01_EB, 2.831453e-01_EB, 1.314234e+00_EB, 3.428023e-01_EB, &
+   2.320833e+00_EB, &
+   9.299117e-01_EB, 3.934637e-01_EB, 3.941485e-01_EB, 4.276205e-01_EB, 6.380472e-01_EB, 3.539805e-01_EB, &
+   1.717216e+00_EB/),(/7,8/))
+
+sd2_c5h8o2(1:7,25:32) = RESHAPE((/ &  ! 995-1030 cm-1
+   1.174651e+00_EB, 5.076500e-01_EB, 5.123310e-01_EB, 5.072349e-01_EB, 6.017282e-01_EB, 4.040867e-01_EB, &
+   9.071058e-01_EB, &
+   1.220989e+00_EB, 6.322818e-01_EB, 6.487477e-01_EB, 6.488986e-01_EB, 5.856188e-01_EB, 4.402415e-01_EB, &
+   6.313728e-01_EB, &
+   1.342002e+00_EB, 7.952593e-01_EB, 7.945733e-01_EB, 8.003597e-01_EB, 7.389281e-01_EB, 4.724643e-01_EB, &
+   1.867048e-01_EB, &
+   2.059673e+00_EB, 1.016101e+00_EB, 9.573528e-01_EB, 9.061740e-01_EB, 6.905226e-01_EB, 5.789912e-01_EB, &
+   1.181913e-01_EB, &
+   2.708834e+00_EB, 1.261292e+00_EB, 1.056622e+00_EB, 9.704385e-01_EB, 7.470068e-01_EB, 3.592001e-01_EB, &
+   1.004398e-01_EB, &
+   3.415071e+00_EB, 1.258792e+00_EB, 1.017232e+00_EB, 8.840290e-01_EB, 7.155771e-01_EB, 2.368274e-01_EB, &
+   1.095937e-01_EB, &
+   3.371272e+00_EB, 1.241748e+00_EB, 9.412804e-01_EB, 7.974575e-01_EB, 8.067485e-01_EB, 1.865056e-01_EB, &
+   1.178328e-01_EB, &
+   2.426657e+00_EB, 8.931409e-01_EB, 6.775266e-01_EB, 5.586942e-01_EB, 6.967074e-01_EB, 1.154895e-01_EB, &
+   1.127254e-01_EB/),(/7,8/))
+
+sd2_c5h8o2(1:7,33:37) = RESHAPE((/ &  ! 1035-1055 cm-1
+   1.800189e+00_EB, 5.884496e-01_EB, 4.478842e-01_EB, 3.611785e-01_EB, 6.015273e-01_EB, 2.659912e-02_EB, &
+   1.137885e-01_EB, &
+   6.470612e-01_EB, 2.347793e-01_EB, 1.941059e-01_EB, 1.585485e-01_EB, 1.218801e+00_EB, 6.925778e-04_EB, &
+   6.825179e-01_EB, &
+   1.671523e-01_EB, 4.958688e-02_EB, 7.155642e-02_EB, 4.212993e-02_EB, 4.481255e-02_EB, 8.744158e-04_EB, &
+   6.166493e-01_EB, &
+   4.210092e-02_EB, 5.872012e-03_EB, 1.202013e-02_EB, 8.673460e-03_EB, 7.247323e-04_EB, 7.563806e-04_EB, &
+   1.496397e-01_EB, &
+   4.683959e-04_EB, 4.682485e-04_EB, 4.694920e-04_EB, 4.693301e-04_EB, 4.691565e-04_EB, 4.675221e-04_EB, &
+   4.659141e-04_EB/),(/7,5/))
 
 !---------------------------------------------------------------------------
-ALLOCATE(GAMMAD5_C7H8(N_TEMP_C7H8,23)) 
+ALLOCATE(gammad2_c5h8o2(n_temp_c5h8o2,37)) 
 
-! BAND #5: 2675 cm-1 - 3225 cm-1 
+! band #2: 875 cm-1 - 1055 cm-1 
 
-! SNB FIT WITH GOODY MODEL 
+! snb fit with malkmus model 
 
-! ERROR ASSOCIATED WITH GOODY FIT: 
-! On Transmissivity: 1.9882 % 
+! error associated with malkmus fit: 
+! on transmissivity: 16.2578 % 
 
-! PRINT FINE STRUCTURE ARRAY GAMMA_D 
+! print fine structure array gamma_d 
 
-GAMMAD5_C7H8(1:6,1:8) = RESHAPE((/ &  ! 2675-2850 cm-1
-    8.134269E-04_EB, 8.791858E-04_EB, 1.635934E-03_EB, 8.810737E-04_EB, 1.632043E-03_EB, 8.012732E-04_EB, &
-    9.255151E-04_EB, 9.195346E-04_EB, 1.758389E-03_EB, 9.271998E-04_EB, 2.153707E-03_EB, 6.555238E-03_EB, &
-    9.036198E-04_EB, 9.892650E-04_EB, 1.756905E-03_EB, 9.667189E-04_EB, 1.979441E-02_EB, 2.810361E-02_EB, &
-    9.701094E-04_EB, 1.008228E-03_EB, 2.777387E-03_EB, 2.313487E-03_EB, 1.199662E-01_EB, 8.716498E-02_EB, &
-    9.647636E-04_EB, 1.989313E-03_EB, 5.120309E-03_EB, 2.565845E-03_EB, 3.351359E-02_EB, 1.387132E-01_EB, &
-    2.855203E-02_EB, 2.458194E-02_EB, 1.917879E-02_EB, 4.735540E-03_EB, 1.323825E-01_EB, 3.072685E-01_EB, &
-    2.401306E-01_EB, 2.736097E-01_EB, 4.909293E-02_EB, 5.045153E-02_EB, 2.876118E-01_EB, 1.635999E+00_EB, &
-    1.600847E+00_EB, 3.186908E-01_EB, 1.783169E-01_EB, 3.041834E-01_EB, 5.943319E-01_EB, 1.509504E+00_EB/),(/6,8/))
+gammad2_c5h8o2(1:7,1:8) = RESHAPE((/ &  ! 875-910 cm-1
+   2.823227e-01_EB, 4.610224e-04_EB, 4.906774e-04_EB, 5.417213e-04_EB, 5.214023e-04_EB, 4.619138e-04_EB, &
+   2.996879e-01_EB, &
+   1.589262e+01_EB, 7.112738e-04_EB, 6.863480e-04_EB, 6.954244e-04_EB, 5.636836e-04_EB, 6.909238e-04_EB, &
+   1.362275e+00_EB, &
+   1.255210e+01_EB, 6.773562e-04_EB, 5.735201e-04_EB, 8.272739e-04_EB, 1.724787e-04_EB, 1.661576e-04_EB, &
+   1.138271e-03_EB, &
+   7.051283e-01_EB, 6.891085e-04_EB, 7.024554e-04_EB, 1.678129e-04_EB, 1.524293e-04_EB, 5.547075e-04_EB, &
+   1.418645e-03_EB, &
+   7.121508e-02_EB, 6.384517e-04_EB, 1.642701e-03_EB, 1.694248e-04_EB, 1.470911e-04_EB, 6.320090e-02_EB, &
+   4.163931e-03_EB, &
+   2.508564e-03_EB, 4.326233e-03_EB, 1.052820e-02_EB, 5.592027e-03_EB, 2.571364e-04_EB, 3.075452e-02_EB, &
+   7.237307e-02_EB, &
+   3.527481e-01_EB, 6.803584e-02_EB, 4.286749e-02_EB, 3.844453e-02_EB, 5.858598e-04_EB, 2.259184e-02_EB, &
+   3.898073e+00_EB, &
+   1.571067e+01_EB, 6.225180e-02_EB, 6.038369e-02_EB, 2.741791e-02_EB, 1.292359e-03_EB, 2.289985e-02_EB, &
+   1.760940e+01_EB/),(/7,8/))
 
-GAMMAD5_C7H8(1:6,9:16) = RESHAPE((/ &  ! 2875-3050 cm-1
-    4.998196E+00_EB, 2.173066E+00_EB, 8.391151E-01_EB, 1.069247E+00_EB, 3.442730E+00_EB, 3.061746E+00_EB, &
-    4.999803E+00_EB, 4.324200E+00_EB, 1.024595E+00_EB, 1.803800E+00_EB, 3.569261E+00_EB, 2.490015E+00_EB, &
-    4.999994E+00_EB, 4.290257E+00_EB, 9.576503E-01_EB, 1.094685E+00_EB, 3.554776E+00_EB, 3.027816E+00_EB, &
-    4.999437E+00_EB, 4.305385E+00_EB, 2.348049E+00_EB, 1.901662E+00_EB, 2.937810E+00_EB, 3.049648E+00_EB, &
-    4.999103E+00_EB, 3.071377E+00_EB, 2.799817E+00_EB, 1.066124E+00_EB, 1.530405E+00_EB, 2.690290E+00_EB, &
-    4.998475E+00_EB, 4.295113E+00_EB, 7.950271E-01_EB, 1.432251E+00_EB, 3.568463E+00_EB, 3.070086E+00_EB, &
-    4.999994E+00_EB, 4.343828E+00_EB, 2.666528E+00_EB, 3.387625E+00_EB, 3.569510E+00_EB, 3.070845E+00_EB, &
-    5.000000E+00_EB, 4.351466E+00_EB, 4.124114E+00_EB, 3.835530E+00_EB, 3.569316E+00_EB, 3.070721E+00_EB/),(/6,8/))
+gammad2_c5h8o2(1:7,9:16) = RESHAPE((/ &  ! 915-950 cm-1
+   8.000000e+01_EB, 1.428430e-01_EB, 2.419731e+00_EB, 2.230224e-01_EB, 2.255022e-03_EB, 2.094570e-02_EB, &
+   2.051410e+01_EB, &
+   8.000000e+01_EB, 1.709830e-01_EB, 3.380268e+00_EB, 5.240909e-01_EB, 4.853055e-03_EB, 4.030274e-02_EB, &
+   2.349415e+01_EB, &
+   8.000000e+01_EB, 2.636763e-01_EB, 3.653768e+00_EB, 1.717666e+00_EB, 2.060690e-02_EB, 2.522187e-01_EB, &
+   2.863894e+01_EB, &
+   8.000000e+01_EB, 3.872301e-01_EB, 3.145524e+01_EB, 1.984056e+00_EB, 7.238493e-02_EB, 1.744457e-01_EB, &
+   1.234446e+01_EB, &
+   8.000000e+01_EB, 5.199554e-01_EB, 5.201416e+01_EB, 1.219270e+00_EB, 1.366230e-01_EB, 1.024375e-01_EB, &
+   6.859851e+00_EB, &
+   8.000000e+01_EB, 6.059595e-01_EB, 6.357106e+01_EB, 2.510435e+00_EB, 2.483816e-01_EB, 1.870400e-01_EB, &
+   6.030901e+00_EB, &
+   8.000000e+01_EB, 4.613948e-01_EB, 6.558012e+01_EB, 9.318435e-01_EB, 8.280329e-01_EB, 1.702565e-01_EB, &
+   3.671889e+00_EB, &
+   8.000000e+01_EB, 2.805617e-01_EB, 4.753473e+01_EB, 4.243871e-01_EB, 1.998842e-01_EB, 1.897322e-01_EB, &
+   3.182135e-01_EB/),(/7,8/))
 
-GAMMAD5_C7H8(1:6,17:23) = RESHAPE((/ &  ! 3075-3225 cm-1
-    4.999999E+00_EB, 4.349327E+00_EB, 4.126832E+00_EB, 2.866225E+00_EB, 3.574407E+00_EB, 3.069896E+00_EB, &
-    4.999799E+00_EB, 4.330469E+00_EB, 4.023387E+00_EB, 2.769143E+00_EB, 3.564252E+00_EB, 1.255506E+00_EB, &
-    2.807994E+00_EB, 5.343292E-01_EB, 3.231685E-01_EB, 2.554001E-01_EB, 4.957148E-01_EB, 3.624123E-01_EB, &
-    1.938701E-01_EB, 1.485515E-01_EB, 9.836844E-02_EB, 1.481913E-02_EB, 7.182972E-02_EB, 1.247236E-01_EB, &
-    5.463393E-01_EB, 1.315628E-01_EB, 1.712222E-02_EB, 3.611177E-03_EB, 1.385160E-02_EB, 3.899412E-01_EB, &
-    2.357898E-03_EB, 2.407989E-03_EB, 3.316407E-03_EB, 8.326216E-04_EB, 2.221199E-03_EB, 2.850718E-03_EB, &
-    7.355779E-04_EB, 7.393154E-04_EB, 1.488682E-03_EB, 7.390167E-04_EB, 1.482552E-03_EB, 7.384415E-04_EB/),(/6,7/))
+gammad2_c5h8o2(1:7,17:24) = RESHAPE((/ &  ! 955-990 cm-1
+   8.000000e+01_EB, 1.917580e-01_EB, 3.160507e+01_EB, 3.013932e+00_EB, 8.610150e-02_EB, 2.680998e+00_EB, &
+   1.225672e-01_EB, &
+   8.000000e+01_EB, 8.181705e-02_EB, 1.393264e+01_EB, 4.846622e+00_EB, 5.364990e-03_EB, 7.410589e+00_EB, &
+   7.715299e-02_EB, &
+   7.999744e+01_EB, 2.071421e-02_EB, 2.646321e+00_EB, 1.308531e+00_EB, 1.066053e-03_EB, 5.993038e+00_EB, &
+   7.459897e-02_EB, &
+   1.600979e+01_EB, 6.164883e-03_EB, 3.149166e-01_EB, 1.578432e+00_EB, 6.172180e-04_EB, 3.880878e+00_EB, &
+   7.684969e-03_EB, &
+   2.587709e+01_EB, 3.007808e-02_EB, 1.472547e-01_EB, 1.384504e+00_EB, 6.759922e-04_EB, 4.013279e+00_EB, &
+   2.292324e-03_EB, &
+   7.999663e+01_EB, 3.784955e-02_EB, 4.354468e-01_EB, 2.323880e+00_EB, 8.249666e-04_EB, 2.529707e-01_EB, &
+   1.448969e-03_EB, &
+   8.000000e+01_EB, 6.887494e-02_EB, 3.383023e-01_EB, 3.534843e+00_EB, 2.269583e-03_EB, 7.251788e-02_EB, &
+   1.620063e-03_EB, &
+   8.000000e+01_EB, 1.396664e-01_EB, 2.500157e-01_EB, 1.154998e-01_EB, 1.324480e-02_EB, 1.665776e+00_EB, &
+   1.569506e-03_EB/),(/7,8/))
 
-!--------------------------------OLD RADCAL DATA----------------------------------------
+gammad2_c5h8o2(1:7,25:32) = RESHAPE((/ &  ! 995-1030 cm-1
+   7.999999e+01_EB, 2.622383e-01_EB, 3.680714e-01_EB, 3.431326e-01_EB, 3.214335e-02_EB, 3.028902e+00_EB, &
+   2.505970e-03_EB, &
+   8.000000e+01_EB, 2.931223e-01_EB, 4.763129e-01_EB, 5.158658e-01_EB, 1.564583e-01_EB, 4.068234e-01_EB, &
+   3.470044e-03_EB, &
+   8.000000e+01_EB, 2.591539e-01_EB, 9.760853e-01_EB, 3.725883e-01_EB, 6.472451e-02_EB, 7.215647e-02_EB, &
+   3.438220e+00_EB, &
+   8.000000e+01_EB, 2.874591e-01_EB, 8.902719e-01_EB, 3.997568e-01_EB, 1.273205e-01_EB, 2.106275e-02_EB, &
+   1.404359e+00_EB, &
+   8.000000e+01_EB, 2.627488e-01_EB, 2.860341e+01_EB, 4.718599e-01_EB, 6.177797e-02_EB, 7.129412e-02_EB, &
+   1.080505e+00_EB, &
+   8.000000e+01_EB, 3.044334e-01_EB, 1.893461e+01_EB, 7.512970e-01_EB, 3.525571e-02_EB, 8.428393e+00_EB, &
+   1.655302e+00_EB, &
+   8.000000e+01_EB, 2.042339e-01_EB, 2.401079e+01_EB, 1.842385e+00_EB, 1.678758e-02_EB, 1.160390e+01_EB, &
+   7.709535e-02_EB, &
+   8.000000e+01_EB, 1.532358e-01_EB, 2.398691e+01_EB, 7.959409e+00_EB, 8.237636e-03_EB, 1.840439e+00_EB, &
+   1.574438e-01_EB/),(/7,8/))
 
-!  Initialize SD Array
+gammad2_c5h8o2(1:7,33:37) = RESHAPE((/ &  ! 1035-1055 cm-1
+   8.000000e+01_EB, 1.344383e-01_EB, 2.700694e+00_EB, 2.144500e+00_EB, 2.397408e-03_EB, 2.813670e-01_EB, &
+   5.280750e-02_EB, &
+   7.999478e+01_EB, 7.115998e-02_EB, 2.822221e-01_EB, 9.009493e-01_EB, 3.364759e-04_EB, 5.682134e-04_EB, &
+   7.024865e-04_EB, &
+   1.748846e+01_EB, 1.217636e-01_EB, 4.857488e-02_EB, 5.398096e-01_EB, 4.000099e-03_EB, 5.990465e-04_EB, &
+   6.551947e-04_EB, &
+   1.394167e+01_EB, 2.046399e-01_EB, 8.910555e-03_EB, 6.157030e-03_EB, 5.599763e-04_EB, 5.579403e-04_EB, &
+   9.116727e-04_EB, &
+   3.735791e-04_EB, 3.732776e-04_EB, 3.745026e-04_EB, 3.743404e-04_EB, 3.741743e-04_EB, 3.727339e-04_EB, &
+   3.713571e-04_EB/),(/7,5/))
 
-! TEMP,K= 300     600      1000      1500      2000      2500       
+!---------------------------------------------------------------------------
+ALLOCATE(sd3_c5h8o2(n_temp_c5h8o2,18)) 
 
-SD(1:6,1:8) = RESHAPE ((/  & ! 50-225
-.950E+00_EB, .103E+00_EB, .420E-01_EB, .114E-01_EB, .450E-02_EB, .300E-02_EB, &
-.208E+01_EB, .365E+00_EB, .113E+00_EB, .375E-01_EB, .195E-01_EB, .134E-01_EB, &
-.368E+01_EB, .990E+00_EB, .300E+00_EB, .104E+00_EB, .577E-01_EB, .365E-01_EB,  & 
-.650E+01_EB, .201E+01_EB, .650E+00_EB, .214E+00_EB, .128E+00_EB, .845E-01_EB, &   
-.825E+01_EB, .325E+01_EB, .121E+01_EB, .415E+00_EB, .260E+00_EB, .168E+00_EB, &  
-.870E+01_EB, .452E+01_EB, .189E+01_EB, .765E+00_EB, .450E+00_EB, .289E+00_EB, &  
-.810E+01_EB, .540E+01_EB, .261E+01_EB, .126E+01_EB, .695E+00_EB, .460E+00_EB, &  
-.682E+01_EB, .600E+01_EB, .337E+01_EB, .179E+01_EB, .101E+01_EB, .679E+00_EB/), &
+! band #3: 1050 cm-1 - 1275 cm-1 
+
+! snb fit with malkmus model 
+
+! error associated with malkmus fit: 
+! on transmissivity: 38.3736 % 
+
+sd3_c5h8o2(1:7,1:8) = RESHAPE((/ &  ! 1050-1085 cm-1
+   2.283540e-02_EB, 4.922172e-04_EB, 2.560169e-03_EB, 3.717395e-03_EB, 5.679232e-04_EB, 5.948702e-04_EB, &
+   9.070861e-02_EB, &
+   1.330120e-02_EB, 4.682485e-04_EB, 6.438257e-03_EB, 1.249445e-02_EB, 1.158898e-03_EB, 8.034057e-04_EB, &
+   3.528869e-01_EB, &
+   5.312158e-04_EB, 4.682485e-04_EB, 3.462862e-03_EB, 4.802455e-03_EB, 1.325886e-03_EB, 9.860835e-04_EB, &
+   5.966300e-01_EB, &
+   6.730728e-04_EB, 5.383842e-04_EB, 1.541199e-02_EB, 1.216344e-03_EB, 8.711834e-04_EB, 2.095446e-02_EB, &
+   2.344768e-01_EB, &
+   4.842466e-03_EB, 5.362735e-03_EB, 2.344159e-02_EB, 1.759081e-02_EB, 9.888946e-04_EB, 5.883826e-02_EB, &
+   1.524721e+00_EB, &
+   1.962391e-02_EB, 1.842385e-02_EB, 4.296535e-02_EB, 3.232193e-02_EB, 8.684561e-04_EB, 1.277349e-01_EB, &
+   1.441831e+00_EB, &
+   3.957410e-02_EB, 3.609774e-02_EB, 7.027800e-02_EB, 6.897527e-02_EB, 1.805630e-02_EB, 1.769389e-01_EB, &
+   2.219797e+00_EB, &
+   6.033916e-02_EB, 5.989100e-02_EB, 1.135187e-01_EB, 1.032544e-01_EB, 9.054237e-02_EB, 2.674346e-01_EB, &
+   1.717514e+00_EB/),(/7,8/))
+
+sd3_c5h8o2(1:7,9:16) = RESHAPE((/ &  ! 1090-1225 cm-1
+   1.000494e-01_EB, 9.414817e-02_EB, 1.444499e-01_EB, 1.465825e-01_EB, 1.695405e-01_EB, 3.353830e-01_EB, &
+   6.307295e-01_EB, &
+   1.689087e-01_EB, 1.393048e-01_EB, 1.815843e-01_EB, 1.798559e-01_EB, 3.961284e-01_EB, 3.870093e-01_EB, &
+   5.212840e-01_EB, &
+   2.316504e-01_EB, 1.905944e-01_EB, 2.231146e-01_EB, 2.373041e-01_EB, 6.108176e-01_EB, 5.517315e-01_EB, &
+   5.514970e-01_EB, &
+   7.470458e-01_EB, 7.308402e-01_EB, 9.133596e-01_EB, 1.083670e+00_EB, 1.643403e+00_EB, 2.654844e+00_EB, &
+   2.192364e+00_EB, &
+   9.479777e+00_EB, 8.554789e+00_EB, 7.931693e+00_EB, 8.343454e+00_EB, 7.636411e+00_EB, 6.546753e+00_EB, &
+   3.098983e+00_EB, &
+   2.594269e+01_EB, 1.307137e+01_EB, 1.100488e+01_EB, 1.045080e+01_EB, 8.049716e+00_EB, 4.871530e+00_EB, &
+   1.930570e+00_EB, &
+   1.934931e+01_EB, 7.224029e+00_EB, 5.871145e+00_EB, 5.292871e+00_EB, 3.621708e+00_EB, 1.992252e+00_EB, &
+   7.777877e-01_EB, &
+   4.140490e+00_EB, 2.139609e+00_EB, 1.821476e+00_EB, 1.658745e+00_EB, 1.493490e+00_EB, 7.032707e-01_EB, &
+   2.294717e+00_EB/),(/7,8/))
+
+sd3_c5h8o2(1:7,17:18) = RESHAPE((/ &  ! 1250-1275 cm-1
+   5.271264e-01_EB, 2.912938e-01_EB, 2.917520e-01_EB, 2.643227e-01_EB, 5.514219e-01_EB, 1.728159e-01_EB, &
+   9.935754e-01_EB, &
+   4.683959e-04_EB, 4.682485e-04_EB, 4.694920e-04_EB, 4.693301e-04_EB, 4.691565e-04_EB, 4.675221e-04_EB, &
+   4.659141e-04_EB/),(/7,2/))
+
+!---------------------------------------------------------------------------
+ALLOCATE(gammad3_c5h8o2(n_temp_c5h8o2,18)) 
+
+! band #3: 1050 cm-1 - 1275 cm-1 
+
+! snb fit with malkmus model 
+
+! error associated with malkmus fit: 
+! on transmissivity: 38.3736 % 
+
+! print fine structure array gamma_d 
+
+gammad3_c5h8o2(1:7,1:8) = RESHAPE((/ &  ! 1050-1085 cm-1
+   6.752973e-01_EB, 3.965369e-04_EB, 1.852648e-03_EB, 6.404227e-03_EB, 4.395271e-04_EB, 4.775384e-04_EB, &
+   2.331620e-03_EB, &
+   2.308916e-01_EB, 3.732776e-04_EB, 1.932620e-03_EB, 2.619408e-03_EB, 7.975806e-04_EB, 6.318845e-04_EB, &
+   1.556634e-03_EB, &
+   4.424232e-04_EB, 3.732776e-04_EB, 2.729364e-03_EB, 1.540902e-03_EB, 9.180318e-04_EB, 7.423991e-04_EB, &
+   8.482000e-04_EB, &
+   5.798906e-04_EB, 4.109335e-04_EB, 4.684962e-03_EB, 1.748840e-03_EB, 5.924212e-04_EB, 8.917151e-02_EB, &
+   3.547868e-03_EB, &
+   2.445999e-01_EB, 1.709414e-03_EB, 8.476824e-03_EB, 1.070389e-02_EB, 6.275957e-04_EB, 4.118998e-01_EB, &
+   5.365592e-04_EB, &
+   2.903925e+00_EB, 1.089566e-02_EB, 2.453372e-02_EB, 1.655663e-01_EB, 5.991526e-04_EB, 4.446612e+00_EB, &
+   5.688486e-04_EB, &
+   1.701839e+01_EB, 1.480657e-01_EB, 7.478547e-02_EB, 3.425426e-01_EB, 6.291144e-01_EB, 9.461117e-01_EB, &
+   4.469811e-04_EB, &
+   6.073385e-01_EB, 1.511806e-01_EB, 1.786293e-01_EB, 1.777844e+00_EB, 9.776316e-01_EB, 7.402583e+00_EB, &
+   1.041732e-03_EB/),(/7,8/))
+
+gammad3_c5h8o2(1:7,9:16) = RESHAPE((/ &  ! 1090-1225 cm-1
+   1.122342e+00_EB, 2.158159e-01_EB, 6.598921e-01_EB, 8.611218e-01_EB, 1.210188e-01_EB, 1.184061e+01_EB, &
+   8.335214e-03_EB, &
+   5.162273e+00_EB, 3.637833e-01_EB, 7.101749e-01_EB, 1.752143e+00_EB, 7.256519e-03_EB, 3.453023e+01_EB, &
+   6.017312e-02_EB, &
+   1.631154e+01_EB, 1.875513e-01_EB, 2.486087e+00_EB, 3.547150e+00_EB, 7.521178e-03_EB, 2.393089e+01_EB, &
+   3.039081e+01_EB, &
+   8.000000e+01_EB, 3.366139e-01_EB, 1.096627e+01_EB, 2.588432e+01_EB, 2.813109e-01_EB, 1.156638e+00_EB, &
+   1.806175e-01_EB, &
+   8.000000e+01_EB, 6.558841e-01_EB, 1.962907e+00_EB, 1.479647e+00_EB, 1.072565e+00_EB, 2.709515e+00_EB, &
+   3.334761e-01_EB, &
+   8.000000e+01_EB, 1.895544e+00_EB, 9.110170e+00_EB, 3.023831e+00_EB, 8.442824e-01_EB, 1.836944e+00_EB, &
+   1.622069e-01_EB, &
+   8.000000e+01_EB, 1.580597e+00_EB, 6.536920e+01_EB, 2.757392e+00_EB, 6.660127e-01_EB, 4.829505e+01_EB, &
+   1.550614e-01_EB, &
+   7.999934e+01_EB, 3.683494e-01_EB, 5.153029e+00_EB, 1.387986e+00_EB, 7.620403e-02_EB, 3.958904e+01_EB, &
+   1.950315e-03_EB/),(/7,8/))
+
+gammad3_c5h8o2(1:7,17:18) = RESHAPE((/ &  ! 1250-1275 cm-1
+   7.999908e+01_EB, 9.980022e-02_EB, 3.152017e-01_EB, 1.039694e+00_EB, 3.550883e-03_EB, 1.085236e+00_EB, &
+   8.696632e-04_EB, &
+   3.735791e-04_EB, 3.732776e-04_EB, 3.745026e-04_EB, 3.743404e-04_EB, 3.741743e-04_EB, 3.727339e-04_EB, &
+   3.713571e-04_EB/),(/7,2/))
+
+!---------------------------------------------------------------------------
+ALLOCATE(sd4_c5h8o2(n_temp_c5h8o2,14)) 
+
+! band #4: 1250 cm-1 - 1575 cm-1 
+
+! snb fit with malkmus model 
+
+! error associated with malkmus fit: 
+! on transmissivity: 26.5551 % 
+
+sd4_c5h8o2(1:7,1:8) = RESHAPE((/ &  ! 1250-1425 cm-1
+   2.651267e-01_EB, 1.759638e-01_EB, 1.769296e-01_EB, 1.699091e-01_EB, 2.046845e-01_EB, 2.341468e-01_EB, &
+   1.105642e+00_EB, &
+   1.022795e+00_EB, 9.266422e-01_EB, 1.017170e+00_EB, 1.118834e+00_EB, 1.488453e+00_EB, 1.472991e+00_EB, &
+   1.015529e+00_EB, &
+   9.008874e+00_EB, 4.815679e+00_EB, 4.305873e+00_EB, 4.164932e+00_EB, 3.844447e+00_EB, 2.320999e+00_EB, &
+   1.064962e+00_EB, &
+   1.317933e+01_EB, 5.235972e+00_EB, 4.254435e+00_EB, 3.735700e+00_EB, 2.736514e+00_EB, 1.279456e+00_EB, &
+   5.251123e-01_EB, &
+   3.335495e+00_EB, 1.313429e+00_EB, 1.062255e+00_EB, 8.454394e-01_EB, 1.978232e+00_EB, 2.277879e-01_EB, &
+   3.643094e-02_EB, &
+   1.208610e+00_EB, 5.576549e-01_EB, 5.119243e-01_EB, 4.375281e-01_EB, 2.260111e+00_EB, 2.451094e-01_EB, &
+   9.103457e-02_EB, &
+   1.929443e+00_EB, 8.888330e-01_EB, 8.250508e-01_EB, 7.384043e-01_EB, 2.462957e+00_EB, 6.121275e-01_EB, &
+   1.297550e-01_EB, &
+   2.558288e+00_EB, 1.354005e+00_EB, 1.257364e+00_EB, 1.190951e+00_EB, 1.431084e+00_EB, 8.234527e-01_EB, &
+   1.945175e-01_EB/),(/7,8/))
+
+sd4_c5h8o2(1:7,9:14) = RESHAPE((/ &  ! 1450-1575 cm-1
+   7.269681e+00_EB, 2.804495e+00_EB, 2.300589e+00_EB, 2.018439e+00_EB, 1.754481e+00_EB, 8.665175e-01_EB, &
+   1.851434e-01_EB, &
+   3.164709e+00_EB, 1.268072e+00_EB, 1.073237e+00_EB, 9.062173e-01_EB, 1.779966e+00_EB, 4.279472e-01_EB, &
+   6.749668e-02_EB, &
+   4.203220e-01_EB, 2.293462e-01_EB, 2.285557e-01_EB, 1.794185e-01_EB, 1.212331e+00_EB, 7.133443e-02_EB, &
+   9.727769e-04_EB, &
+   3.205661e-01_EB, 1.369195e-01_EB, 1.279659e-01_EB, 9.148681e-02_EB, 2.184744e-01_EB, 3.056242e-03_EB, &
+   9.133049e-04_EB, &
+   1.379741e-01_EB, 6.041193e-02_EB, 5.056159e-02_EB, 3.540082e-02_EB, 4.510264e-03_EB, 3.305673e-03_EB, &
+   6.976907e-04_EB, &
+   4.683959e-04_EB, 4.682485e-04_EB, 4.694920e-04_EB, 4.693301e-04_EB, 4.691565e-04_EB, 4.675221e-04_EB, &
+   4.659141e-04_EB/),(/7,6/))
+
+!---------------------------------------------------------------------------
+ALLOCATE(gammad4_c5h8o2(n_temp_c5h8o2,14)) 
+
+! band #4: 1250 cm-1 - 1575 cm-1 
+
+! snb fit with malkmus model 
+
+! error associated with malkmus fit: 
+! on transmissivity: 26.5551 % 
+
+! print fine structure array gamma_d 
+
+gammad4_c5h8o2(1:7,1:8) = RESHAPE((/ &  ! 1250-1425 cm-1
+   1.900794e+01_EB, 4.523774e-02_EB, 1.704620e-01_EB, 3.550652e-01_EB, 3.540509e-02_EB, 1.516513e+00_EB, &
+   1.492599e-03_EB, &
+   8.000000e+01_EB, 2.226090e-01_EB, 4.037264e+01_EB, 2.183364e+01_EB, 1.078975e-01_EB, 5.536881e-01_EB, &
+   4.287697e-02_EB, &
+   8.000000e+01_EB, 1.040937e+00_EB, 6.528460e+01_EB, 3.062031e+00_EB, 2.657658e-01_EB, 1.018869e+00_EB, &
+   4.868239e-02_EB, &
+   8.000000e+01_EB, 1.163412e+00_EB, 6.557988e+01_EB, 3.224408e+00_EB, 2.125073e-01_EB, 2.326661e-01_EB, &
+   7.389632e-03_EB, &
+   8.000000e+01_EB, 2.308729e-01_EB, 6.363109e-01_EB, 5.086314e+00_EB, 4.111352e-03_EB, 1.626691e-01_EB, &
+   1.308121e+00_EB, &
+   8.000000e+01_EB, 1.969078e-01_EB, 1.609102e+00_EB, 5.383790e+00_EB, 1.498115e-03_EB, 3.386863e-02_EB, &
+   5.998714e-02_EB, &
+   8.000000e+01_EB, 3.410180e-01_EB, 6.907342e+00_EB, 7.887927e+00_EB, 3.683657e-03_EB, 2.330242e-02_EB, &
+   2.134694e+00_EB, &
+   8.000000e+01_EB, 3.694747e-01_EB, 4.202343e+00_EB, 1.302414e+00_EB, 3.479140e-02_EB, 7.927698e-02_EB, &
+   7.049147e+00_EB/),(/7,8/))
+
+gammad4_c5h8o2(1:7,9:14) = RESHAPE((/ &  ! 1450-1575 cm-1
+   8.000000e+01_EB, 7.141208e-01_EB, 6.536640e+01_EB, 2.342027e+00_EB, 7.034590e-02_EB, 1.139549e-01_EB, &
+   5.068590e+00_EB, &
+   8.000000e+01_EB, 3.439583e-01_EB, 2.158187e+00_EB, 1.101709e+00_EB, 6.060588e-03_EB, 2.185348e-02_EB, &
+   3.183783e+00_EB, &
+   5.006561e+01_EB, 3.299422e-01_EB, 1.190294e+00_EB, 8.974212e-01_EB, 3.345373e-04_EB, 2.520096e-02_EB, &
+   1.139827e-03_EB, &
+   2.293095e+01_EB, 1.421608e-01_EB, 7.208656e-01_EB, 9.099123e-01_EB, 6.014407e-05_EB, 2.971282e-03_EB, &
+   6.193551e-04_EB, &
+   2.442962e+00_EB, 4.484537e-02_EB, 1.690359e-01_EB, 1.259316e-01_EB, 9.393127e-04_EB, 1.423587e-03_EB, &
+   5.673518e-04_EB, &
+   3.735791e-04_EB, 3.732776e-04_EB, 3.745026e-04_EB, 3.743404e-04_EB, 3.741743e-04_EB, 3.727339e-04_EB, &
+   3.713571e-04_EB/),(/7,6/))
+
+!---------------------------------------------------------------------------
+ALLOCATE(sd5_c5h8o2(n_temp_c5h8o2,18)) 
+
+! band #5: 1550 cm-1 - 1975 cm-1 
+
+! snb fit with malkmus model 
+
+! error associated with malkmus fit: 
+! on transmissivity: 33.9665 % 
+
+sd5_c5h8o2(1:7,1:8) = RESHAPE((/ &  ! 1550-1725 cm-1
+   1.283781e-01_EB, 5.564827e-02_EB, 4.552881e-02_EB, 3.248586e-02_EB, 2.962603e-03_EB, 5.775666e-03_EB, &
+   6.549796e-04_EB, &
+   3.228302e-01_EB, 1.330461e-01_EB, 1.436585e-01_EB, 1.010144e-01_EB, 3.539658e+00_EB, 7.633235e-01_EB, &
+   3.006478e-03_EB, &
+   4.297863e-01_EB, 2.130911e-01_EB, 3.958264e-01_EB, 2.086835e-01_EB, 5.228719e+00_EB, 1.073793e+00_EB, &
+   5.259787e-02_EB, &
+   1.636030e+00_EB, 7.901740e-01_EB, 7.307309e-01_EB, 6.594717e-01_EB, 1.967717e+00_EB, 3.028161e-01_EB, &
+   7.555184e-02_EB, &
+   2.786162e+00_EB, 9.811787e-01_EB, 7.947490e-01_EB, 6.679210e-01_EB, 3.937599e-01_EB, 1.926412e-01_EB, &
+   4.895888e-02_EB, &
+   5.371774e-01_EB, 2.528496e-01_EB, 2.792431e-01_EB, 2.552566e-01_EB, 4.163329e-01_EB, 2.237360e-01_EB, &
+   1.885545e-01_EB, &
+   1.178231e+00_EB, 6.416768e-01_EB, 6.572166e-01_EB, 7.189543e-01_EB, 7.686419e-01_EB, 9.688893e-01_EB, &
+   6.754928e-01_EB, &
+   7.583351e+00_EB, 5.772869e+00_EB, 5.148166e+00_EB, 5.223398e+00_EB, 4.376104e+00_EB, 3.382685e+00_EB, &
+   1.483712e+00_EB/),(/7,8/))
+
+sd5_c5h8o2(1:7,9:16) = RESHAPE((/ &  ! 1750-1925 cm-1
+   2.394789e+01_EB, 1.094859e+01_EB, 8.981291e+00_EB, 8.316621e+00_EB, 5.789605e+00_EB, 3.531464e+00_EB, &
+   1.436978e+00_EB, &
+   1.830194e+00_EB, 1.308594e+00_EB, 1.243723e+00_EB, 1.234798e+00_EB, 1.062593e+00_EB, 8.475205e-01_EB, &
+   4.802389e-01_EB, &
+   6.055532e-01_EB, 3.245427e-01_EB, 3.283205e-01_EB, 2.996324e-01_EB, 2.752568e-01_EB, 1.605966e-01_EB, &
+   1.734273e-01_EB, &
+   1.185795e-01_EB, 5.910661e-02_EB, 5.293524e-02_EB, 4.089505e-02_EB, 8.894114e-02_EB, 1.564737e-02_EB, &
+   4.355749e-02_EB, &
+   4.355125e-02_EB, 1.987367e-02_EB, 8.799089e-02_EB, 2.271459e-02_EB, 2.895065e-02_EB, 3.488458e-03_EB, &
+   2.838444e-02_EB, &
+   3.376642e-01_EB, 1.368154e-01_EB, 1.357689e-01_EB, 1.064263e-01_EB, 6.258461e-02_EB, 1.334385e-02_EB, &
+   8.818944e-03_EB, &
+   2.105506e-01_EB, 6.949000e-02_EB, 6.742734e-02_EB, 5.316113e-02_EB, 2.371958e-02_EB, 9.426557e-04_EB, &
+   1.609069e-03_EB, &
+   1.850030e-02_EB, 4.412077e-03_EB, 7.600489e-04_EB, 2.224295e-03_EB, 7.330402e-04_EB, 7.865066e-04_EB, &
+   7.116352e-04_EB/),(/7,8/))
+
+sd5_c5h8o2(1:7,17:18) = RESHAPE((/ &  ! 1950-1975 cm-1
+   9.010576e-04_EB, 6.552187e-04_EB, 7.003811e-04_EB, 6.830920e-04_EB, 7.111960e-04_EB, 6.441936e-04_EB, &
+   6.424584e-04_EB, &
+   4.683959e-04_EB, 4.682485e-04_EB, 4.694920e-04_EB, 4.693301e-04_EB, 4.691565e-04_EB, 4.675221e-04_EB, &
+   4.659141e-04_EB/),(/7,2/))
+
+!---------------------------------------------------------------------------
+ALLOCATE(gammad5_c5h8o2(n_temp_c5h8o2,18)) 
+
+! band #5: 1550 cm-1 - 1975 cm-1 
+
+! snb fit with malkmus model 
+
+! error associated with malkmus fit: 
+! on transmissivity: 33.9665 % 
+
+! print fine structure array gamma_d 
+
+gammad5_c5h8o2(1:7,1:8) = RESHAPE((/ &  ! 1550-1725 cm-1
+   2.001538e+00_EB, 1.043359e-01_EB, 1.744313e-01_EB, 5.342194e-02_EB, 1.360786e-03_EB, 2.592801e-03_EB, &
+   5.075444e-04_EB, &
+   1.725159e+01_EB, 1.172078e-01_EB, 4.594855e-02_EB, 2.031343e-01_EB, 1.111304e-04_EB, 2.683498e-04_EB, &
+   1.034216e-01_EB, &
+   4.985857e+01_EB, 1.394095e-01_EB, 7.496345e-03_EB, 1.380074e-01_EB, 3.724253e-04_EB, 1.238566e-03_EB, &
+   7.511094e-01_EB, &
+   7.999340e+01_EB, 3.572097e-01_EB, 1.449507e+00_EB, 3.819534e+00_EB, 3.386923e-03_EB, 2.420339e+00_EB, &
+   1.689780e+00_EB, &
+   8.000000e+01_EB, 4.078442e-01_EB, 2.746087e+01_EB, 5.496911e+00_EB, 7.681082e-02_EB, 9.142768e+00_EB, &
+   9.256224e-01_EB, &
+   8.000000e+01_EB, 1.120101e+00_EB, 2.154457e-01_EB, 2.496980e-01_EB, 5.035481e-03_EB, 4.567797e+00_EB, &
+   1.613476e+01_EB, &
+   8.000000e+01_EB, 2.505163e-01_EB, 7.289726e+00_EB, 3.688168e-01_EB, 1.262311e-01_EB, 4.852373e+01_EB, &
+   4.327932e+01_EB, &
+   8.000000e+01_EB, 4.925207e-01_EB, 1.508704e+00_EB, 1.040179e+00_EB, 6.046273e-01_EB, 2.007314e+01_EB, &
+   3.883409e+01_EB/),(/7,8/))
+
+gammad5_c5h8o2(1:7,9:16) = RESHAPE((/ &  ! 1750-1925 cm-1
+   8.000000e+01_EB, 1.703895e+00_EB, 9.191951e+00_EB, 2.709061e+00_EB, 9.359203e-01_EB, 3.834274e+01_EB, &
+   7.078759e-01_EB, &
+   7.999983e+01_EB, 1.728338e-01_EB, 6.428302e-01_EB, 6.480871e-01_EB, 2.403467e-01_EB, 4.865268e+01_EB, &
+   1.451594e+01_EB, &
+   7.999999e+01_EB, 7.815232e-02_EB, 8.730432e-02_EB, 2.873412e-01_EB, 2.837574e-02_EB, 3.159028e+00_EB, &
+   3.214034e+00_EB, &
+   6.362515e-02_EB, 6.189950e-03_EB, 5.670266e-03_EB, 1.609798e-02_EB, 4.919947e-04_EB, 1.569334e-01_EB, &
+   1.400792e-01_EB, &
+   4.873130e-03_EB, 6.913205e-03_EB, 1.797921e-04_EB, 1.336251e-02_EB, 8.086060e-03_EB, 1.891584e-02_EB, &
+   2.687108e-02_EB, &
+   2.972716e+01_EB, 4.496649e-02_EB, 1.698626e-02_EB, 7.124485e-02_EB, 3.445376e-01_EB, 2.327743e-01_EB, &
+   6.610266e-01_EB, &
+   7.398272e+00_EB, 4.698677e-02_EB, 1.308793e-02_EB, 3.824701e-02_EB, 6.967306e-02_EB, 1.066862e-03_EB, &
+   8.184279e-04_EB, &
+   9.082357e-03_EB, 3.297959e-03_EB, 4.284375e-04_EB, 1.604779e-03_EB, 5.294588e-04_EB, 6.058801e-04_EB, &
+   5.178529e-04_EB/),(/7,8/))
+
+gammad5_c5h8o2(1:7,17:18) = RESHAPE((/ &  ! 1950-1975 cm-1
+   7.219679e-04_EB, 5.013825e-04_EB, 4.812947e-04_EB, 5.404546e-04_EB, 5.475653e-04_EB, 4.887417e-04_EB, &
+   4.941073e-04_EB, &
+   3.735791e-04_EB, 3.732776e-04_EB, 3.745026e-04_EB, 3.743404e-04_EB, 3.741743e-04_EB, 3.727339e-04_EB, &
+   3.713571e-04_EB/),(/7,2/))
+
+!---------------------------------------------------------------------------
+ALLOCATE(sd6_c5h8o2(n_temp_c5h8o2,26)) 
+
+! band #6: 2650 cm-1 - 3275 cm-1 
+
+! snb fit with malkmus model 
+
+! error associated with malkmus fit: 
+! on transmissivity: 11.3243 % 
+
+sd6_c5h8o2(1:7,1:8) = RESHAPE((/ &  ! 2650-2825 cm-1
+   6.617679e-04_EB, 7.038166e-04_EB, 5.823242e-04_EB, 6.498762e-04_EB, 6.305493e-04_EB, 6.702982e-04_EB, &
+   2.492250e-02_EB, &
+   8.413829e-04_EB, 9.287068e-04_EB, 9.382552e-04_EB, 8.391021e-04_EB, 8.961598e-04_EB, 8.253163e-04_EB, &
+   5.284118e-02_EB, &
+   9.964645e-03_EB, 3.825227e-03_EB, 5.258108e-03_EB, 3.430243e-03_EB, 8.600200e-04_EB, 6.425559e-03_EB, &
+   7.468932e-02_EB, &
+   4.273055e-02_EB, 1.049000e-02_EB, 1.562321e-02_EB, 1.351817e-02_EB, 7.806216e-03_EB, 2.714191e-02_EB, &
+   1.221449e-01_EB, &
+   8.007875e-02_EB, 2.912543e-02_EB, 3.379663e-02_EB, 3.252406e-02_EB, 1.200427e-02_EB, 2.850065e-02_EB, &
+   1.385424e-01_EB, &
+   9.973924e-02_EB, 2.113446e-02_EB, 3.076355e-02_EB, 2.639593e-02_EB, 6.644964e-03_EB, 2.242511e-02_EB, &
+   1.660444e-01_EB, &
+   1.028910e-01_EB, 5.220431e-02_EB, 4.300251e-02_EB, 4.795173e-02_EB, 3.143119e-02_EB, 6.642097e-02_EB, &
+   1.979488e-01_EB, &
+   2.202342e-01_EB, 1.345745e-01_EB, 1.259318e-01_EB, 1.271074e-01_EB, 1.238737e-01_EB, 1.520918e-01_EB, &
+   2.525918e-01_EB/),(/7,8/))
+
+sd6_c5h8o2(1:7,9:16) = RESHAPE((/ &  ! 2850-3025 cm-1
+   1.136213e+00_EB, 4.781891e-01_EB, 4.249774e-01_EB, 3.828941e-01_EB, 3.367838e-01_EB, 2.329863e-01_EB, &
+   2.717789e-01_EB, &
+   8.634086e-01_EB, 4.219181e-01_EB, 3.728310e-01_EB, 3.478836e-01_EB, 2.675079e-01_EB, 2.733947e-01_EB, &
+   3.309081e-01_EB, &
+   1.146984e+00_EB, 5.316939e-01_EB, 5.062337e-01_EB, 4.805370e-01_EB, 3.860685e-01_EB, 3.811075e-01_EB, &
+   4.090385e-01_EB, &
+   2.056434e+00_EB, 9.985803e-01_EB, 9.030141e-01_EB, 8.563341e-01_EB, 6.732570e-01_EB, 6.443301e-01_EB, &
+   5.434919e-01_EB, &
+   4.615588e+00_EB, 2.244759e+00_EB, 2.030504e+00_EB, 1.928204e+00_EB, 1.523456e+00_EB, 1.179250e+00_EB, &
+   7.021791e-01_EB, &
+   5.650492e+00_EB, 2.472471e+00_EB, 2.136749e+00_EB, 1.930516e+00_EB, 1.442591e+00_EB, 9.997534e-01_EB, &
+   5.978827e-01_EB, &
+   4.609191e+00_EB, 1.782318e+00_EB, 1.525555e+00_EB, 1.347833e+00_EB, 9.229266e-01_EB, 6.392344e-01_EB, &
+   4.770802e-01_EB, &
+   2.820790e+00_EB, 1.104460e+00_EB, 9.776057e-01_EB, 8.631595e-01_EB, 5.721892e-01_EB, 4.422352e-01_EB, &
+   3.522752e-01_EB/),(/7,8/))
+
+sd6_c5h8o2(1:7,17:24) = RESHAPE((/ &  ! 3050-3225 cm-1
+   1.187353e+00_EB, 5.460448e-01_EB, 4.928400e-01_EB, 4.472267e-01_EB, 3.395637e-01_EB, 2.809475e-01_EB, &
+   2.653517e-01_EB, &
+   4.704535e-01_EB, 2.491073e-01_EB, 2.537560e-01_EB, 2.409873e-01_EB, 1.982473e-01_EB, 2.279718e-01_EB, &
+   2.611720e-01_EB, &
+   6.039772e-01_EB, 3.431934e-01_EB, 3.284617e-01_EB, 3.129996e-01_EB, 2.653921e-01_EB, 2.526170e-01_EB, &
+   2.011828e-01_EB, &
+   5.920773e-01_EB, 2.451875e-01_EB, 2.368206e-01_EB, 2.072703e-01_EB, 2.138315e-01_EB, 1.682738e-01_EB, &
+   1.552495e-01_EB, &
+   1.700742e-01_EB, 7.290921e-02_EB, 8.217440e-02_EB, 6.629481e-02_EB, 5.469629e-02_EB, 8.994315e-02_EB, &
+   9.732156e-02_EB, &
+   1.118992e-01_EB, 4.366084e-02_EB, 4.890966e-02_EB, 2.885185e-02_EB, 1.279711e-02_EB, 6.143421e-02_EB, &
+   5.932504e-02_EB, &
+   5.320012e-02_EB, 1.864948e-02_EB, 1.833215e-02_EB, 8.372681e-03_EB, 9.556242e-04_EB, 2.724051e-02_EB, &
+   4.060600e-02_EB, &
+   1.562049e-02_EB, 9.377158e-03_EB, 1.509016e-03_EB, 2.400877e-03_EB, 7.719203e-04_EB, 4.833588e-03_EB, &
+   3.145233e-03_EB/),(/7,8/))
+
+sd6_c5h8o2(1:7,25:26) = RESHAPE((/ &  ! 3250-3275 cm-1
+   1.234745e-03_EB, 1.894526e-03_EB, 7.790315e-04_EB, 6.688577e-04_EB, 6.556824e-04_EB, 6.274349e-04_EB, &
+   6.008281e-04_EB, &
+   4.683959e-04_EB, 4.682485e-04_EB, 4.694920e-04_EB, 4.693301e-04_EB, 4.691565e-04_EB, 4.675221e-04_EB, &
+   4.659141e-04_EB/),(/7,2/))
+
+!---------------------------------------------------------------------------
+ALLOCATE(gammad6_c5h8o2(n_temp_c5h8o2,26)) 
+
+! band #6: 2650 cm-1 - 3275 cm-1 
+
+! snb fit with malkmus model 
+
+! error associated with malkmus fit: 
+! on transmissivity: 11.3243 % 
+
+! print fine structure array gamma_d 
+
+gammad6_c5h8o2(1:7,1:8) = RESHAPE((/ &  ! 2650-2825 cm-1
+   5.202784e-04_EB, 5.525656e-04_EB, 4.434412e-04_EB, 4.998255e-04_EB, 4.935419e-04_EB, 5.063850e-04_EB, &
+   1.092982e-02_EB, &
+   5.613238e-04_EB, 6.098207e-04_EB, 7.086604e-04_EB, 6.039142e-04_EB, 6.289973e-04_EB, 6.322323e-04_EB, &
+   1.194772e+00_EB, &
+   2.420843e-03_EB, 1.761218e-03_EB, 3.068546e-03_EB, 3.918268e-03_EB, 6.421563e-04_EB, 2.061317e-03_EB, &
+   4.004519e-01_EB, &
+   8.686816e-04_EB, 5.690975e-03_EB, 1.368498e-01_EB, 2.276203e-01_EB, 1.896994e-03_EB, 1.942151e-03_EB, &
+   1.781156e+00_EB, &
+   8.775885e-02_EB, 2.065817e-02_EB, 1.307324e-01_EB, 4.176628e-02_EB, 1.462109e-02_EB, 2.246227e-03_EB, &
+   1.423947e+00_EB, &
+   1.400226e-03_EB, 7.669502e-03_EB, 2.007661e-01_EB, 5.908664e-02_EB, 9.431682e-02_EB, 1.143177e-02_EB, &
+   1.718195e+00_EB, &
+   1.151669e-01_EB, 1.850972e-02_EB, 1.407721e-01_EB, 1.023565e-01_EB, 3.200614e-02_EB, 1.001680e-01_EB, &
+   2.390609e+00_EB, &
+   6.151837e+00_EB, 6.526566e-02_EB, 8.225336e-01_EB, 7.234620e-01_EB, 1.810297e-02_EB, 6.092961e-01_EB, &
+   6.507145e+00_EB/),(/7,8/))
+
+gammad6_c5h8o2(1:7,9:16) = RESHAPE((/ &  ! 2850-3025 cm-1
+   7.999998e+01_EB, 4.402301e-01_EB, 8.184655e+00_EB, 7.049003e+00_EB, 2.465981e-02_EB, 4.666996e-01_EB, &
+   1.050980e+01_EB, &
+   8.000000e+01_EB, 1.344989e-01_EB, 5.238427e+00_EB, 2.779348e+00_EB, 5.844913e-02_EB, 2.117354e-01_EB, &
+   4.746041e+00_EB, &
+   7.999999e+01_EB, 1.706723e+00_EB, 1.717115e+01_EB, 7.059894e+00_EB, 8.912304e-02_EB, 2.663843e-01_EB, &
+   1.132361e+01_EB, &
+   7.999995e+01_EB, 4.086512e-01_EB, 4.839686e+01_EB, 2.308238e+01_EB, 2.068307e-01_EB, 8.659772e+00_EB, &
+   1.089381e+00_EB, &
+   8.000000e+01_EB, 7.844302e-01_EB, 6.546691e+01_EB, 3.816010e+00_EB, 3.501117e-01_EB, 4.860275e+01_EB, &
+   2.192674e+01_EB, &
+   8.000000e+01_EB, 7.277374e-01_EB, 6.563413e+01_EB, 6.128970e+01_EB, 2.795272e-01_EB, 4.863825e+01_EB, &
+   1.715815e+01_EB, &
+   8.000000e+01_EB, 7.372699e-01_EB, 6.564590e+01_EB, 5.533248e+01_EB, 2.910770e-01_EB, 9.688164e+00_EB, &
+   2.950219e+01_EB, &
+   8.000000e+01_EB, 5.982188e-01_EB, 6.554359e+01_EB, 3.587869e+01_EB, 3.437982e-01_EB, 2.068358e+00_EB, &
+   2.249578e+01_EB/),(/7,8/))
+
+gammad6_c5h8o2(1:7,17:24) = RESHAPE((/ &  ! 3050-3225 cm-1
+   8.000000e+01_EB, 4.235551e-01_EB, 2.497231e+01_EB, 9.302322e+00_EB, 8.931722e-02_EB, 5.150630e+00_EB, &
+   1.414719e+01_EB, &
+   6.010851e+01_EB, 1.879884e+00_EB, 2.783897e+00_EB, 3.173126e+00_EB, 8.402729e-02_EB, 3.467785e+00_EB, &
+   1.176859e+01_EB, &
+   7.499988e+01_EB, 1.744287e-01_EB, 2.563845e+00_EB, 4.952657e+00_EB, 6.326135e-02_EB, 3.738165e+00_EB, &
+   8.586505e+00_EB, &
+   7.999518e+01_EB, 3.410346e-01_EB, 4.666935e-01_EB, 2.152000e+00_EB, 7.943992e-03_EB, 9.823071e-01_EB, &
+   3.227657e+00_EB, &
+   6.470047e-01_EB, 2.696803e-01_EB, 4.931105e-02_EB, 1.777548e-01_EB, 6.548798e-03_EB, 4.997383e-02_EB, &
+   2.368120e+00_EB, &
+   1.850193e-02_EB, 2.343943e-01_EB, 2.130779e-02_EB, 1.645282e-01_EB, 5.228779e-03_EB, 1.024445e-01_EB, &
+   3.884470e-01_EB, &
+   7.638521e-03_EB, 1.078876e-01_EB, 1.679201e-02_EB, 8.467687e-03_EB, 6.767255e-04_EB, 1.893862e-01_EB, &
+   1.745921e-01_EB, &
+   9.543385e-03_EB, 5.137643e-04_EB, 8.369605e-04_EB, 1.442443e-03_EB, 5.585763e-04_EB, 6.679236e-03_EB, &
+   1.904481e-03_EB/),(/7,8/))
+
+gammad6_c5h8o2(1:7,25:26) = RESHAPE((/ &  ! 3250-3275 cm-1
+   4.938200e-04_EB, 5.333619e-04_EB, 5.374406e-04_EB, 5.112562e-04_EB, 5.068363e-04_EB, 4.776250e-04_EB, &
+   4.658301e-04_EB, &
+   3.735791e-04_EB, 3.732776e-04_EB, 3.745026e-04_EB, 3.743404e-04_EB, 3.741743e-04_EB, 3.727339e-04_EB, &
+   3.713571e-04_EB/),(/7,2/))
+
+!-------------------------propane data-------------------
+
+
+! there are 2 bands for propane
+
+! band #1: 1175 cm-1 - 1675 cm-1 
+! band #2: 2550 cm-1 - 3375 cm-1 
+
+ALLOCATE(sd_c3h8_temp(n_temp_c3h8)) 
+
+! initialize bands wavenumber bounds for propane ABS(option coefficients.
+! bands are organized by row: 
+! 1st column is the lower bound band limit in cm-1. 
+! 2nd column is the upper bound band limit in cm-1. 
+! 3rd column is the stride between wavenumbers in band.
+! IF 3rd column = 0., band is calculated, not tabulated.
+
+ALLOCATE(om_bnd_c3h8(n_band_c3h8,3)) 
+ALLOCATE(be_c3h8(n_band_c3h8)) 
+
+om_bnd_c3h8 = RESHAPE((/ &
+   1175._EB, 2550._EB, &
+   1675._EB, 3375._EB, &
+   25._EB, 25._EB/),(/n_band_c3h8,3/)) 
+
+sd_c3h8_temp = (/ &
+   295._EB, 396._EB, 435._EB, 513._EB, 578._EB, 790._EB,&
+   1009._EB/)
+
+be_c3h8 = (/ &
+   1.000_EB, 1.000_EB/)
+
+!---------------------------------------------------------------------------
+ALLOCATE(sd1_c3h8(n_temp_c3h8,21)) 
+
+! band #1: 1175 cm-1 - 1675 cm-1 
+
+! snb fit with malkmus model 
+
+! error associated with malkmus fit: 
+! on transmissivity: 0.76397 % 
+
+sd1_c3h8(1:7,1:8) = RESHAPE((/ &  ! 1175-1350 cm-1
+   2.856475e-02_EB, 1.979289e-02_EB, 1.707802e-02_EB, 1.759506e-02_EB, 5.992940e-04_EB, 6.107200e-04_EB, &
+   6.336991e-04_EB, &
+   1.484719e-02_EB, 1.365281e-02_EB, 1.474969e-02_EB, 1.061569e+00_EB, 1.945253e-03_EB, 1.757434e-03_EB, &
+   4.662084e-03_EB, &
+   6.963764e-04_EB, 8.500329e-04_EB, 1.107148e-02_EB, 4.507160e-01_EB, 1.264992e-03_EB, 2.619320e-03_EB, &
+   7.816939e-01_EB, &
+   7.226016e-04_EB, 9.075238e-04_EB, 1.125338e-02_EB, 2.194527e+00_EB, 3.638673e-03_EB, 7.038039e-03_EB, &
+   8.347445e-03_EB, &
+   7.167376e-04_EB, 2.529382e-03_EB, 1.471445e-02_EB, 5.689394e-01_EB, 5.129735e-03_EB, 3.199170e-01_EB, &
+   4.714861e-02_EB, &
+   1.973741e-02_EB, 3.150872e-02_EB, 4.659984e-02_EB, 9.243516e-01_EB, 5.980704e-02_EB, 5.046688e-01_EB, &
+   2.447019e+00_EB, &
+   1.692269e-01_EB, 1.375209e-01_EB, 1.214367e-01_EB, 4.508625e-01_EB, 8.448186e-02_EB, 1.539041e-01_EB, &
+   2.379877e+00_EB, &
+   3.080345e-01_EB, 2.355289e-01_EB, 2.170087e-01_EB, 2.766257e-01_EB, 1.745191e-01_EB, 3.225558e-01_EB, &
+   2.527352e-01_EB/),(/7,8/))
+
+sd1_c3h8(1:7,9:16) = RESHAPE((/ &  ! 1375-1550 cm-1
+   5.345587e-01_EB, 3.413403e-01_EB, 2.898386e-01_EB, 4.388584e-01_EB, 1.966052e-01_EB, 2.312638e-01_EB, &
+   1.022691e+00_EB, &
+   4.993827e-01_EB, 3.759253e-01_EB, 3.463795e-01_EB, 4.015651e-01_EB, 2.676596e-01_EB, 2.708667e-01_EB, &
+   5.754884e-01_EB, &
+   3.709223e-01_EB, 3.014857e-01_EB, 3.021999e-01_EB, 9.358461e-01_EB, 2.624617e-01_EB, 2.519600e-01_EB, &
+   3.362995e-01_EB, &
+   8.886871e-01_EB, 5.747695e-01_EB, 5.132261e-01_EB, 6.330728e-01_EB, 3.344818e-01_EB, 2.389406e-01_EB, &
+   1.497565e+00_EB, &
+   1.197095e+00_EB, 6.989701e-01_EB, 6.042183e-01_EB, 8.699088e-01_EB, 3.814121e-01_EB, 2.349714e-01_EB, &
+   2.153495e-01_EB, &
+   6.712891e-01_EB, 3.823312e-01_EB, 3.697114e-01_EB, 8.758687e-01_EB, 2.396388e-01_EB, 1.894728e-01_EB, &
+   1.039864e+00_EB, &
+   1.822239e-01_EB, 1.242199e-01_EB, 1.389102e-01_EB, 1.652805e+00_EB, 1.094348e-01_EB, 9.737249e-02_EB, &
+   6.800781e-02_EB, &
+   1.683063e-02_EB, 9.880390e-03_EB, 3.283471e-02_EB, 4.035590e+00_EB, 3.286196e-02_EB, 7.512521e-02_EB, &
+   1.698967e+00_EB/),(/7,8/))
+
+sd1_c3h8(1:7,17:21) = RESHAPE((/ &  ! 1575-1675 cm-1
+   4.515698e-03_EB, 1.676975e-02_EB, 9.512287e-03_EB, 1.896304e+00_EB, 1.105889e-02_EB, 3.093088e-01_EB, &
+   1.288482e+00_EB, &
+   9.765260e-04_EB, 6.840034e-01_EB, 1.034854e-02_EB, 3.287022e-03_EB, 7.493779e-03_EB, 2.811245e-01_EB, &
+   4.924827e-02_EB, &
+   6.957537e-04_EB, 2.871557e-03_EB, 6.957746e-04_EB, 8.150887e-04_EB, 1.138683e-03_EB, 4.575742e-03_EB, &
+   1.445285e-02_EB, &
+   5.346547e-04_EB, 6.489883e-04_EB, 5.962380e-04_EB, 5.749846e-04_EB, 5.575030e-04_EB, 6.786480e-04_EB, &
+   6.619676e-04_EB, &
+   4.634348e-04_EB, 4.634348e-04_EB, 4.634348e-04_EB, 4.634348e-04_EB, 4.634348e-04_EB, 4.634348e-04_EB, &
+   4.634348e-04_EB/),(/7,5/))
+
+!---------------------------------------------------------------------------
+ALLOCATE(gammad1_c3h8(n_temp_c3h8,21)) 
+
+! band #1: 1175 cm-1 - 1675 cm-1 
+
+! snb fit with malkmus model 
+
+! error associated with malkmus fit: 
+! on transmissivity: 0.76397 % 
+
+! print fine structure array gamma_d 
+
+gammad1_c3h8(1:7,1:8) = RESHAPE((/ &  ! 1175-1350 cm-1
+   1.992031e-02_EB, 1.141762e-02_EB, 1.366155e-01_EB, 1.973038e-02_EB, 4.249794e-04_EB, 4.342393e-04_EB, &
+   4.468799e-04_EB, &
+   8.577876e-03_EB, 6.212098e-03_EB, 1.781483e-01_EB, 9.603555e-05_EB, 4.057086e-03_EB, 1.500925e-04_EB, &
+   6.183171e-04_EB, &
+   4.465589e-04_EB, 5.682785e-04_EB, 2.127940e-01_EB, 5.658019e-05_EB, 2.225962e-04_EB, 3.326833e-04_EB, &
+   5.709512e-06_EB, &
+   5.278412e-04_EB, 5.926586e-04_EB, 2.442104e-01_EB, 3.443200e-05_EB, 3.645364e-04_EB, 1.452036e-03_EB, &
+   7.864828e-02_EB, &
+   5.090058e-04_EB, 2.365350e-03_EB, 6.569843e-01_EB, 4.564938e-05_EB, 6.851756e-03_EB, 3.833493e-05_EB, &
+   6.658254e-01_EB, &
+   1.552597e-02_EB, 2.378523e-02_EB, 8.041370e-01_EB, 1.425241e-04_EB, 5.497853e-03_EB, 2.341884e-04_EB, &
+   8.855023e-05_EB, &
+   1.117621e-01_EB, 2.577861e-02_EB, 1.116130e+00_EB, 1.259624e-03_EB, 1.821509e-01_EB, 3.535192e-03_EB, &
+   8.671143e-05_EB, &
+   1.808233e-01_EB, 6.199510e-02_EB, 4.856790e+00_EB, 1.205230e-02_EB, 3.669786e-02_EB, 2.932383e-03_EB, &
+   4.381239e-03_EB/),(/7,8/))
+
+gammad1_c3h8(1:7,9:16) = RESHAPE((/ &  ! 1375-1550 cm-1
+   2.669661e-01_EB, 1.045895e-01_EB, 1.300781e+00_EB, 9.033578e-03_EB, 2.323335e-01_EB, 1.276771e-02_EB, &
+   8.417636e-04_EB, &
+   3.073214e-01_EB, 1.882989e-01_EB, 1.392323e+01_EB, 2.514566e-02_EB, 1.753049e-01_EB, 1.668277e-02_EB, &
+   1.564119e-03_EB, &
+   1.834951e-01_EB, 1.904052e+00_EB, 1.048436e+01_EB, 3.971260e-03_EB, 8.256188e-02_EB, 1.231218e-02_EB, &
+   4.278796e-03_EB, &
+   4.067671e-01_EB, 3.098373e-01_EB, 1.683329e+01_EB, 2.321737e-02_EB, 4.469660e+00_EB, 9.982721e-02_EB, &
+   5.564305e-04_EB, &
+   4.351927e-01_EB, 3.169913e-01_EB, 3.797676e-01_EB, 1.482328e-02_EB, 1.277859e-01_EB, 9.112234e-02_EB, &
+   7.464685e-03_EB, &
+   3.429172e-01_EB, 1.903809e+01_EB, 1.993602e+01_EB, 4.962290e-03_EB, 2.386361e-01_EB, 1.458725e-02_EB, &
+   3.066693e-04_EB, &
+   1.761592e-01_EB, 6.137305e+00_EB, 2.041270e+00_EB, 3.861036e-04_EB, 1.018629e+00_EB, 1.406376e-02_EB, &
+   1.289657e-02_EB, &
+   2.874081e-02_EB, 4.620945e-01_EB, 1.299484e+00_EB, 3.273246e-05_EB, 8.688233e-02_EB, 4.030533e-04_EB, &
+   2.700077e-05_EB/),(/7,8/))
+
+gammad1_c3h8(1:7,17:21) = RESHAPE((/ &  ! 1575-1675 cm-1
+   1.208990e-03_EB, 6.799487e-03_EB, 3.701547e-01_EB, 1.237888e-05_EB, 1.464532e-02_EB, 2.595773e-05_EB, &
+   4.545433e-05_EB, &
+   5.930652e-04_EB, 2.514086e-05_EB, 6.469106e-03_EB, 2.000295e-03_EB, 3.669583e-03_EB, 3.705261e-05_EB, &
+   6.244904e-03_EB, &
+   4.994954e-04_EB, 9.490064e-04_EB, 4.754384e-04_EB, 5.579883e-04_EB, 9.783514e-04_EB, 1.672579e-03_EB, &
+   1.298467e-04_EB, &
+   4.041578e-04_EB, 4.765211e-04_EB, 4.390729e-04_EB, 4.199440e-04_EB, 4.075633e-04_EB, 4.679761e-04_EB, &
+   4.596989e-04_EB, &
+   3.684034e-04_EB, 3.684034e-04_EB, 3.684034e-04_EB, 3.684034e-04_EB, 3.684034e-04_EB, 3.684034e-04_EB, &
+   3.684034e-04_EB/),(/7,5/))
+
+!---------------------------------------------------------------------------
+ALLOCATE(sd2_c3h8(n_temp_c3h8,34)) 
+
+! band #2: 2550 cm-1 - 3375 cm-1 
+
+! snb fit with malkmus model 
+
+! error associated with malkmus fit: 
+! on transmissivity: 2.8902 % 
+
+sd2_c3h8(1:7,1:8) = RESHAPE((/ &  ! 2550-2725 cm-1
+   5.503672e-04_EB, 5.994891e-04_EB, 8.662153e-04_EB, 6.007139e-04_EB, 5.508955e-04_EB, 6.062568e-04_EB, &
+   9.609866e-04_EB, &
+   9.165832e-03_EB, 6.514927e-03_EB, 5.498817e-03_EB, 2.820723e-03_EB, 4.346969e-03_EB, 3.366148e-03_EB, &
+   1.036676e-01_EB, &
+   3.816653e-02_EB, 2.423984e-02_EB, 2.297132e-02_EB, 1.131018e-02_EB, 1.290251e-02_EB, 9.585606e-03_EB, &
+   7.230381e-01_EB, &
+   6.229937e-02_EB, 3.989116e-02_EB, 3.343177e-02_EB, 2.820251e-02_EB, 1.841367e-02_EB, 1.058259e-02_EB, &
+   1.643570e-02_EB, &
+   8.226034e-02_EB, 4.582033e-02_EB, 3.980542e-02_EB, 2.801891e-02_EB, 1.700839e-02_EB, 1.139598e-02_EB, &
+   2.021613e-01_EB, &
+   7.640614e-02_EB, 3.373610e-02_EB, 3.023935e-02_EB, 2.980953e-02_EB, 2.095503e-02_EB, 1.799163e-02_EB, &
+   3.412770e-01_EB, &
+   3.340838e-02_EB, 2.504949e-02_EB, 2.777922e-02_EB, 2.817541e-02_EB, 3.213869e-02_EB, 3.140060e-02_EB, &
+   1.470802e+00_EB, &
+   8.685682e-02_EB, 6.091073e-02_EB, 7.104290e-02_EB, 7.142576e-02_EB, 6.557492e-02_EB, 6.248472e-02_EB, &
+   2.113951e+00_EB/),(/7,8/))
+
+sd2_c3h8(1:7,9:16) = RESHAPE((/ &  ! 2750-2925 cm-1
+   1.699556e-01_EB, 1.209358e-01_EB, 1.186218e-01_EB, 1.132869e-01_EB, 1.150490e-01_EB, 1.001152e-01_EB, &
+   1.402520e-01_EB, &
+   1.666365e-01_EB, 1.410150e-01_EB, 1.367199e-01_EB, 1.403357e-01_EB, 1.627667e-01_EB, 1.378065e-01_EB, &
+   3.019538e-01_EB, &
+   2.031290e-01_EB, 1.630134e-01_EB, 1.593693e-01_EB, 1.694187e-01_EB, 1.815236e-01_EB, 2.026379e-01_EB, &
+   2.932861e-01_EB, &
+   3.542177e-01_EB, 3.249511e-01_EB, 3.280019e-01_EB, 3.450738e-01_EB, 3.407162e-01_EB, 3.576253e-01_EB, &
+   5.198445e-01_EB, &
+   1.000630e+00_EB, 9.246602e-01_EB, 9.305942e-01_EB, 9.189938e-01_EB, 8.909863e-01_EB, 7.810609e-01_EB, &
+   9.521582e-01_EB, &
+   3.753627e+00_EB, 2.683351e+00_EB, 2.484390e+00_EB, 2.041213e+00_EB, 1.810422e+00_EB, 1.239899e+00_EB, &
+   1.183325e+00_EB, &
+   5.234499e+00_EB, 3.770775e+00_EB, 3.516223e+00_EB, 2.940932e+00_EB, 2.625379e+00_EB, 1.827482e+00_EB, &
+   1.807152e+00_EB, &
+   5.572566e+00_EB, 4.685164e+00_EB, 4.488098e+00_EB, 3.945955e+00_EB, 3.562082e+00_EB, 2.450846e+00_EB, &
+   2.095864e+00_EB/),(/7,8/))
+
+sd2_c3h8(1:7,17:24) = RESHAPE((/ &  ! 2950-3125 cm-1
+   1.055304e+01_EB, 7.617962e+00_EB, 7.020237e+00_EB, 5.655513e+00_EB, 4.924307e+00_EB, 2.987908e+00_EB, &
+   2.490259e+00_EB, &
+   1.309229e+01_EB, 8.614162e+00_EB, 7.735378e+00_EB, 5.958736e+00_EB, 5.015764e+00_EB, 2.751758e+00_EB, &
+   2.176924e+00_EB, &
+   5.664769e+00_EB, 4.285205e+00_EB, 3.984661e+00_EB, 3.391957e+00_EB, 2.931808e+00_EB, 1.747475e+00_EB, &
+   1.598403e+00_EB, &
+   7.428057e-01_EB, 8.846817e-01_EB, 9.107382e-01_EB, 1.009605e+00_EB, 9.708428e-01_EB, 7.720345e-01_EB, &
+   9.265547e-01_EB, &
+   7.186847e-02_EB, 1.458443e-01_EB, 1.735809e-01_EB, 2.489900e-01_EB, 2.701093e-01_EB, 3.154699e-01_EB, &
+   6.322075e-01_EB, &
+   4.223055e-02_EB, 7.998122e-02_EB, 1.014124e-01_EB, 1.476562e-01_EB, 1.444812e-01_EB, 1.778681e-01_EB, &
+   7.948678e-01_EB, &
+   5.301805e-02_EB, 7.789503e-02_EB, 9.507427e-02_EB, 1.304625e-01_EB, 1.288331e-01_EB, 1.398066e-01_EB, &
+   9.260605e-01_EB, &
+   8.229182e-02_EB, 7.916035e-02_EB, 9.156865e-02_EB, 1.229671e-01_EB, 1.154257e-01_EB, 1.069746e-01_EB, &
+   1.474222e+00_EB/),(/7,8/))
+
+sd2_c3h8(1:7,25:32) = RESHAPE((/ &  ! 3150-3325 cm-1
+   1.097023e-01_EB, 9.711792e-02_EB, 1.018166e-01_EB, 1.145716e-01_EB, 1.629561e-01_EB, 7.870503e-02_EB, &
+   1.054101e+00_EB, &
+   1.528366e-01_EB, 1.042414e-01_EB, 1.045964e-01_EB, 9.557668e-02_EB, 9.257045e-02_EB, 5.716098e-02_EB, &
+   2.230393e+00_EB, &
+   1.448776e-01_EB, 8.693362e-02_EB, 8.143001e-02_EB, 8.822165e-02_EB, 7.154741e-02_EB, 3.844782e-02_EB, &
+   5.459571e+00_EB, &
+   7.739671e-02_EB, 4.498684e-02_EB, 5.166537e-02_EB, 4.834891e-02_EB, 4.653514e-02_EB, 1.900636e-02_EB, &
+   3.668670e+00_EB, &
+   2.193118e-02_EB, 1.636816e-02_EB, 1.616765e-02_EB, 2.883862e-02_EB, 6.071064e-02_EB, 3.305292e-03_EB, &
+   4.440979e+00_EB, &
+   7.607103e-04_EB, 2.864772e-03_EB, 1.569824e-03_EB, 5.600370e-03_EB, 2.231541e-03_EB, 1.431965e-03_EB, &
+   4.371189e+00_EB, &
+   6.767298e-04_EB, 7.265903e-04_EB, 6.896754e-04_EB, 7.704584e-04_EB, 7.843659e-04_EB, 2.492767e-03_EB, &
+   3.017731e+00_EB, &
+   6.753685e-04_EB, 8.082467e-04_EB, 8.419705e-04_EB, 8.502049e-04_EB, 7.333137e-04_EB, 2.689703e-03_EB, &
+   2.546579e-01_EB/),(/7,8/))
+
+sd2_c3h8(1:7,33:34) = RESHAPE((/ &  ! 3350-3375 cm-1
+   5.953124e-04_EB, 6.647555e-04_EB, 6.295086e-04_EB, 6.270639e-04_EB, 5.605951e-04_EB, 1.004627e-03_EB, &
+   5.997674e-04_EB, &
+   4.634348e-04_EB, 4.634348e-04_EB, 4.634348e-04_EB, 4.634348e-04_EB, 4.634348e-04_EB, 4.634348e-04_EB, &
+   4.634348e-04_EB/),(/7,2/))
+
+!---------------------------------------------------------------------------
+ALLOCATE(gammad2_c3h8(n_temp_c3h8,34)) 
+
+! band #2: 2550 cm-1 - 3375 cm-1 
+
+! snb fit with malkmus model 
+
+! error associated with malkmus fit: 
+! on transmissivity: 2.8902 % 
+
+! print fine structure array gamma_d 
+
+gammad2_c3h8(1:7,1:8) = RESHAPE((/ &  ! 2550-2725 cm-1
+   4.136492e-04_EB, 4.360494e-04_EB, 7.953702e-04_EB, 4.660382e-04_EB, 4.005291e-04_EB, 4.511091e-04_EB, &
+   6.072020e-04_EB, &
+   2.759961e-03_EB, 1.062067e-01_EB, 1.215285e-02_EB, 2.640006e-03_EB, 3.656880e-03_EB, 1.938678e-03_EB, &
+   5.487963e-05_EB, &
+   1.584875e-02_EB, 2.833951e-01_EB, 3.264932e-01_EB, 1.739356e-02_EB, 5.773845e-03_EB, 4.395147e-02_EB, &
+   1.322632e-05_EB, &
+   1.193671e-01_EB, 2.854658e-01_EB, 4.644661e-02_EB, 2.765612e-02_EB, 1.053011e-02_EB, 2.667963e-01_EB, &
+   5.817185e-03_EB, &
+   2.623899e-02_EB, 1.875377e-01_EB, 5.240968e-02_EB, 2.355271e-02_EB, 7.559665e-02_EB, 2.293658e-01_EB, &
+   7.216244e-05_EB, &
+   5.846743e-03_EB, 2.105678e-01_EB, 2.701368e-01_EB, 2.713083e-02_EB, 1.035818e-02_EB, 3.749967e-02_EB, &
+   8.197520e-05_EB, &
+   1.507777e-02_EB, 2.373195e-01_EB, 2.803885e-01_EB, 2.381271e-02_EB, 2.374969e-03_EB, 3.007283e-01_EB, &
+   3.941570e-05_EB, &
+   5.460024e-02_EB, 2.148020e-01_EB, 1.102276e-02_EB, 2.048424e-02_EB, 1.381473e-02_EB, 2.265009e-01_EB, &
+   1.113763e-04_EB/),(/7,8/))
+
+gammad2_c3h8(1:7,9:16) = RESHAPE((/ &  ! 2750-2925 cm-1
+   7.609446e-02_EB, 6.650037e-01_EB, 3.402647e-01_EB, 7.088071e-02_EB, 1.528056e-02_EB, 1.623423e+00_EB, &
+   1.555020e-02_EB, &
+   1.068152e-01_EB, 3.599354e-01_EB, 9.327433e-01_EB, 8.061623e-02_EB, 1.044707e-02_EB, 1.207247e+00_EB, &
+   6.148015e-03_EB, &
+   1.347777e-01_EB, 1.366370e-01_EB, 1.464407e+00_EB, 8.162167e-02_EB, 3.748354e-02_EB, 6.697765e+00_EB, &
+   5.715348e-02_EB, &
+   1.784972e-01_EB, 1.113695e-01_EB, 1.456847e-01_EB, 8.124496e-02_EB, 8.031435e-02_EB, 3.755111e+01_EB, &
+   4.466462e-02_EB, &
+   3.769734e-01_EB, 1.378926e-01_EB, 2.066963e-01_EB, 1.647811e-01_EB, 1.988552e-01_EB, 4.888631e+01_EB, &
+   6.856421e-02_EB, &
+   1.209828e+00_EB, 4.483110e-01_EB, 4.819971e-01_EB, 3.919982e-01_EB, 3.657716e-01_EB, 4.888633e+01_EB, &
+   1.716140e-01_EB, &
+   1.907010e+00_EB, 6.962287e-01_EB, 6.668651e-01_EB, 5.363387e-01_EB, 5.417758e-01_EB, 4.888614e+01_EB, &
+   1.732383e-01_EB, &
+   2.035309e+00_EB, 8.005331e-01_EB, 8.689003e-01_EB, 6.922331e-01_EB, 7.737400e-01_EB, 4.888562e+01_EB, &
+   3.566562e-01_EB/),(/7,8/))
+
+gammad2_c3h8(1:7,17:24) = RESHAPE((/ &  ! 2950-3125 cm-1
+   3.521357e+00_EB, 1.169922e+00_EB, 1.245608e+00_EB, 9.879083e-01_EB, 9.805019e-01_EB, 4.888630e+01_EB, &
+   2.805866e-01_EB, &
+   8.194584e+00_EB, 1.715767e+00_EB, 1.407065e+00_EB, 1.043498e+00_EB, 9.327292e-01_EB, 4.888633e+01_EB, &
+   2.729909e-01_EB, &
+   9.096142e-01_EB, 9.519580e-01_EB, 6.722470e-01_EB, 5.099619e-01_EB, 4.841140e-01_EB, 4.888628e+01_EB, &
+   2.097093e-01_EB, &
+   1.758692e-01_EB, 8.005995e-01_EB, 3.028875e-01_EB, 1.771971e-01_EB, 1.723475e-01_EB, 4.888622e+01_EB, &
+   9.485115e-02_EB, &
+   1.552016e-02_EB, 1.106460e+00_EB, 3.508781e-01_EB, 8.578778e-02_EB, 7.481873e-02_EB, 2.362585e+01_EB, &
+   2.190639e-02_EB, &
+   8.141419e-03_EB, 2.936549e-01_EB, 1.051647e-01_EB, 3.583341e-02_EB, 8.451454e-02_EB, 4.015433e+00_EB, &
+   4.672611e-03_EB, &
+   6.825195e-03_EB, 2.860617e-01_EB, 9.805913e-02_EB, 3.356674e-02_EB, 3.562043e-02_EB, 1.354576e+00_EB, &
+   2.504862e-03_EB, &
+   1.731937e-02_EB, 8.103158e-02_EB, 3.656235e-02_EB, 1.650823e-02_EB, 1.716846e-02_EB, 1.104930e+00_EB, &
+   1.025944e-03_EB/),(/7,8/))
+
+gammad2_c3h8(1:7,25:32) = RESHAPE((/ &  ! 3150-3325 cm-1
+   2.761892e-02_EB, 5.927558e-02_EB, 6.812671e-02_EB, 1.536547e-02_EB, 2.866389e-03_EB, 2.743296e-01_EB, &
+   8.973476e-04_EB, &
+   4.898929e-02_EB, 2.217375e-01_EB, 1.147533e-01_EB, 5.759265e-02_EB, 1.511087e-02_EB, 9.820712e-02_EB, &
+   2.297806e-04_EB, &
+   1.075239e-02_EB, 9.660209e-02_EB, 7.236142e-02_EB, 1.745200e-02_EB, 1.115524e-02_EB, 1.145421e-01_EB, &
+   4.285123e-05_EB, &
+   1.476159e-02_EB, 2.024331e-01_EB, 7.181537e-03_EB, 4.721618e-02_EB, 3.344976e-03_EB, 1.461756e+00_EB, &
+   3.907613e-05_EB, &
+   7.912117e-03_EB, 2.082529e-02_EB, 6.432685e-03_EB, 1.913236e-02_EB, 7.216503e-05_EB, 1.281409e-03_EB, &
+   1.568408e-05_EB, &
+   5.304482e-04_EB, 1.965226e-03_EB, 8.885309e-04_EB, 1.080202e-02_EB, 6.214399e-04_EB, 2.290412e-04_EB, &
+   1.111330e-05_EB, &
+   4.741388e-04_EB, 5.040738e-04_EB, 4.522965e-04_EB, 5.090295e-04_EB, 4.634938e-04_EB, 3.121426e-03_EB, &
+   1.265450e-05_EB, &
+   4.771043e-04_EB, 5.489571e-04_EB, 5.406306e-04_EB, 6.198226e-04_EB, 4.746614e-04_EB, 1.079570e-03_EB, &
+   2.377068e-05_EB/),(/7,8/))
+
+gammad2_c3h8(1:7,33:34) = RESHAPE((/ &  ! 3350-3375 cm-1
+   4.399730e-04_EB, 5.039732e-04_EB, 4.232400e-04_EB, 4.772033e-04_EB, 4.129961e-04_EB, 5.016760e-04_EB, &
+   4.444099e-04_EB, &
+   3.684034e-04_EB, 3.684034e-04_EB, 3.684034e-04_EB, 3.684034e-04_EB, 3.684034e-04_EB, 3.684034e-04_EB, &
+   3.684034e-04_EB/),(/7,2/))
+
+!-------------------------propylene data-------------------
+
+
+! there are 3 bands for propylene
+
+! band #1: 775 cm-1 - 1150 cm-1 
+! band #2: 1225 cm-1 - 1975 cm-1 
+! band #3: 2650 cm-1 - 3275 cm-1 
+
+ALLOCATE(sd_c3h6_temp(n_temp_c3h6)) 
+
+! initialize bands wavenumber bounds for propylene ABS(option coefficients.
+! bands are organized by row: 
+! 1st column is the lower bound band limit in cm-1. 
+! 2nd column is the upper bound band limit in cm-1. 
+! 3rd column is the stride between wavenumbers in band.
+! IF 3rd column = 0., band is calculated, not tabulated.
+
+ALLOCATE(om_bnd_c3h6(n_band_c3h6,3)) 
+ALLOCATE(be_c3h6(n_band_c3h6)) 
+
+om_bnd_c3h6 = RESHAPE((/ &
+   775._EB, 1225._EB, 2650._EB, &
+   1150._EB, 1975._EB, 3275._EB, &
+   5._EB, 25._EB, 25._EB/),(/n_band_c3h6,3/)) 
+
+sd_c3h6_temp = (/ &
+   296._EB, 390._EB, 444._EB, 491._EB, 594._EB, 793._EB,&
+   1003._EB/)
+
+be_c3h6 = (/ &
+   1.000_EB, 1.000_EB, 1.000_EB/)
+
+!---------------------------------------------------------------------------
+ALLOCATE(sd1_c3h6(n_temp_c3h6,68)) 
+
+! band #1: 775 cm-1 - 1150 cm-1 
+
+! snb fit with malkmus model 
+
+! error associated with malkmus fit: 
+! on transmissivity: 2.3448 % 
+
+sd1_c3h6(1:7,1:8) = RESHAPE((/ &  ! 775-810 cm-1
+   2.921820e-04_EB, 1.885331e-04_EB, 1.578479e-04_EB, 1.195361e-04_EB, 1.447279e-04_EB, 1.698242e-04_EB, &
+   3.510553e-04_EB, &
+   5.786383e-04_EB, 4.698237e-04_EB, 3.471753e-04_EB, 3.368251e-04_EB, 1.561044e-04_EB, 2.151079e-04_EB, &
+   4.880960e-04_EB, &
+   5.146434e-04_EB, 4.282047e-04_EB, 3.953252e-04_EB, 3.606827e-04_EB, 3.453987e-04_EB, 3.100075e-04_EB, &
+   5.373971e-04_EB, &
+   1.002033e-03_EB, 3.754947e-04_EB, 3.830171e-04_EB, 3.397481e-04_EB, 4.382293e-03_EB, 1.980601e-04_EB, &
+   4.996406e-04_EB, &
+   5.974180e-04_EB, 4.192863e-04_EB, 2.153249e-04_EB, 1.486372e-03_EB, 3.085406e-02_EB, 4.786688e-03_EB, &
+   4.055803e-04_EB, &
+   3.186779e-02_EB, 1.217059e-02_EB, 8.908478e-03_EB, 1.366154e-02_EB, 1.604611e-01_EB, 1.277554e-02_EB, &
+   3.868758e-04_EB, &
+   2.287860e-02_EB, 1.347562e-02_EB, 1.761538e-02_EB, 1.670141e-02_EB, 3.006989e-01_EB, 1.352943e-02_EB, &
+   4.562671e-04_EB, &
+   3.847401e-01_EB, 1.311464e-01_EB, 1.806964e-02_EB, 2.138006e-02_EB, 6.075345e-01_EB, 2.375582e-02_EB, &
+   4.382283e-04_EB/),(/7,8/))
+
+sd1_c3h6(1:7,9:16) = RESHAPE((/ &  ! 815-850 cm-1
+   3.612608e-01_EB, 3.310333e-02_EB, 2.135533e-02_EB, 6.703345e-02_EB, 3.383135e-01_EB, 3.802107e-02_EB, &
+   1.684642e-03_EB, &
+   4.242283e-01_EB, 3.658435e-02_EB, 3.805267e-02_EB, 5.077876e-02_EB, 3.413346e-01_EB, 6.513409e-02_EB, &
+   1.587704e-04_EB, &
+   1.644787e-01_EB, 5.568292e-02_EB, 5.486572e-02_EB, 6.891789e-02_EB, 1.332364e-01_EB, 6.265865e-02_EB, &
+   4.187924e-03_EB, &
+   7.882443e-02_EB, 7.779061e-02_EB, 7.929456e-02_EB, 1.096667e-01_EB, 1.347277e-01_EB, 9.669708e-02_EB, &
+   2.546892e-02_EB, &
+   9.754850e-02_EB, 1.076154e-01_EB, 1.043330e-01_EB, 1.111524e-01_EB, 1.883759e-01_EB, 1.329948e-01_EB, &
+   5.845340e-02_EB, &
+   1.538045e-01_EB, 1.691789e-01_EB, 1.519359e-01_EB, 1.496250e-01_EB, 2.160998e-01_EB, 1.631159e-01_EB, &
+   9.210403e-02_EB, &
+   2.041607e-01_EB, 2.369334e-01_EB, 1.944714e-01_EB, 2.025469e-01_EB, 2.541597e-01_EB, 1.848773e-01_EB, &
+   1.157566e-01_EB, &
+   2.823440e-01_EB, 3.067145e-01_EB, 2.545703e-01_EB, 3.082214e-01_EB, 3.115871e-01_EB, 2.118905e-01_EB, &
+   1.367771e-01_EB/),(/7,8/))
+
+sd1_c3h6(1:7,17:24) = RESHAPE((/ &  ! 855-890 cm-1
+   3.934069e-01_EB, 3.902770e-01_EB, 3.324288e-01_EB, 3.655227e-01_EB, 4.852182e-01_EB, 2.278497e-01_EB, &
+   1.418258e-01_EB, &
+   5.098671e-01_EB, 4.707600e-01_EB, 3.953366e-01_EB, 4.123636e-01_EB, 5.023609e-01_EB, 3.093041e-01_EB, &
+   2.172109e-01_EB, &
+   6.861408e-01_EB, 5.874598e-01_EB, 4.823945e-01_EB, 4.930154e-01_EB, 5.112207e-01_EB, 3.097694e-01_EB, &
+   1.945893e-01_EB, &
+   8.621571e-01_EB, 7.069132e-01_EB, 5.626431e-01_EB, 5.778790e-01_EB, 6.253640e-01_EB, 4.501915e-01_EB, &
+   1.364634e-01_EB, &
+   1.117672e+00_EB, 8.597340e-01_EB, 6.702957e-01_EB, 6.824590e-01_EB, 6.721777e-01_EB, 4.204596e-01_EB, &
+   2.336953e-01_EB, &
+   1.296785e+00_EB, 9.660400e-01_EB, 7.508644e-01_EB, 7.657156e-01_EB, 6.694906e-01_EB, 4.150445e-01_EB, &
+   2.912663e-01_EB, &
+   1.612024e+00_EB, 1.132199e+00_EB, 8.825466e-01_EB, 8.439805e-01_EB, 7.306116e-01_EB, 4.492608e-01_EB, &
+   2.586394e-01_EB, &
+   1.769679e+00_EB, 1.240089e+00_EB, 9.826761e-01_EB, 9.126471e-01_EB, 7.901846e-01_EB, 4.958428e-01_EB, &
+   2.975731e-01_EB/),(/7,8/))
+
+sd1_c3h6(1:7,25:32) = RESHAPE((/ &  ! 895-930 cm-1
+   2.035152e+00_EB, 1.372164e+00_EB, 1.084943e+00_EB, 9.759957e-01_EB, 8.670922e-01_EB, 5.511628e-01_EB, &
+   5.051868e-01_EB, &
+   2.110903e+00_EB, 1.411810e+00_EB, 1.107883e+00_EB, 1.032360e+00_EB, 8.891386e-01_EB, 6.607676e-01_EB, &
+   4.105057e-01_EB, &
+   2.241734e+00_EB, 1.509671e+00_EB, 1.226689e+00_EB, 1.120333e+00_EB, 1.019009e+00_EB, 6.960237e-01_EB, &
+   6.300682e-01_EB, &
+   4.690927e+00_EB, 3.301112e+00_EB, 2.617543e+00_EB, 2.271022e+00_EB, 1.868783e+00_EB, 1.104123e+00_EB, &
+   6.791524e-01_EB, &
+   3.538563e+00_EB, 2.596313e+00_EB, 2.151089e+00_EB, 1.982625e+00_EB, 1.674390e+00_EB, 1.121363e+00_EB, &
+   6.319589e-01_EB, &
+   2.529174e+00_EB, 1.690171e+00_EB, 1.371477e+00_EB, 1.268574e+00_EB, 1.124475e+00_EB, 7.538665e-01_EB, &
+   4.997968e-01_EB, &
+   2.442382e+00_EB, 1.621890e+00_EB, 1.292151e+00_EB, 1.185851e+00_EB, 1.045526e+00_EB, 6.515910e-01_EB, &
+   4.350142e-01_EB, &
+   2.359003e+00_EB, 1.574882e+00_EB, 1.255634e+00_EB, 1.148501e+00_EB, 1.005751e+00_EB, 6.742696e-01_EB, &
+   4.032512e-01_EB/),(/7,8/))
+
+sd1_c3h6(1:7,33:40) = RESHAPE((/ &  ! 935-970 cm-1
+   2.292826e+00_EB, 1.573504e+00_EB, 1.257992e+00_EB, 1.148404e+00_EB, 9.819016e-01_EB, 6.786328e-01_EB, &
+   3.987199e-01_EB, &
+   2.256277e+00_EB, 1.614009e+00_EB, 1.308043e+00_EB, 1.170636e+00_EB, 1.005170e+00_EB, 6.614059e-01_EB, &
+   3.824164e-01_EB, &
+   2.128388e+00_EB, 1.579098e+00_EB, 1.312822e+00_EB, 1.165846e+00_EB, 1.012764e+00_EB, 6.750425e-01_EB, &
+   4.478263e-01_EB, &
+   2.002676e+00_EB, 1.570187e+00_EB, 1.337531e+00_EB, 1.201187e+00_EB, 1.060851e+00_EB, 6.651784e-01_EB, &
+   5.518473e-01_EB, &
+   1.769536e+00_EB, 1.476601e+00_EB, 1.281675e+00_EB, 1.168120e+00_EB, 1.059359e+00_EB, 6.557750e-01_EB, &
+   4.612030e-01_EB, &
+   1.513007e+00_EB, 1.314704e+00_EB, 1.154175e+00_EB, 1.078702e+00_EB, 9.708818e-01_EB, 7.985200e-01_EB, &
+   4.095132e-01_EB, &
+   1.300819e+00_EB, 1.112939e+00_EB, 9.729632e-01_EB, 9.305722e-01_EB, 9.107075e-01_EB, 6.817647e-01_EB, &
+   3.869006e-01_EB, &
+   1.122524e+00_EB, 9.240820e-01_EB, 7.997622e-01_EB, 8.045075e-01_EB, 8.225817e-01_EB, 5.935068e-01_EB, &
+   4.076619e-01_EB/),(/7,8/))
+
+sd1_c3h6(1:7,41:48) = RESHAPE((/ &  ! 975-1010 cm-1
+   1.090787e+00_EB, 8.705917e-01_EB, 7.392297e-01_EB, 7.356904e-01_EB, 7.567491e-01_EB, 5.944416e-01_EB, &
+   3.882052e-01_EB, &
+   1.097680e+00_EB, 8.498178e-01_EB, 7.146480e-01_EB, 7.049228e-01_EB, 7.300468e-01_EB, 5.868185e-01_EB, &
+   4.235053e-01_EB, &
+   1.175184e+00_EB, 9.551431e-01_EB, 8.117959e-01_EB, 7.958744e-01_EB, 7.668238e-01_EB, 5.942202e-01_EB, &
+   4.784101e-01_EB, &
+   2.200917e+00_EB, 1.489225e+00_EB, 1.189617e+00_EB, 1.045546e+00_EB, 8.888219e-01_EB, 6.345618e-01_EB, &
+   3.753116e-01_EB, &
+   1.026273e+00_EB, 8.138120e-01_EB, 7.081956e-01_EB, 6.489008e-01_EB, 5.962778e-01_EB, 4.346981e-01_EB, &
+   3.144834e-01_EB, &
+   8.545948e-01_EB, 6.501326e-01_EB, 5.807415e-01_EB, 5.228005e-01_EB, 5.069268e-01_EB, 3.587344e-01_EB, &
+   2.535124e-01_EB, &
+   8.182404e-01_EB, 6.020895e-01_EB, 5.272828e-01_EB, 4.843306e-01_EB, 4.757196e-01_EB, 3.642910e-01_EB, &
+   2.463011e-01_EB, &
+   7.867336e-01_EB, 5.627888e-01_EB, 4.859257e-01_EB, 4.529062e-01_EB, 4.373186e-01_EB, 2.999539e-01_EB, &
+   2.195520e-01_EB/),(/7,8/))
+
+sd1_c3h6(1:7,49:56) = RESHAPE((/ &  ! 1015-1050 cm-1
+   7.370735e-01_EB, 5.261814e-01_EB, 4.365308e-01_EB, 4.196529e-01_EB, 3.794978e-01_EB, 3.100276e-01_EB, &
+   2.316864e-01_EB, &
+   6.545905e-01_EB, 4.754812e-01_EB, 3.879959e-01_EB, 3.680691e-01_EB, 3.486950e-01_EB, 2.537942e-01_EB, &
+   2.192666e-01_EB, &
+   5.636151e-01_EB, 4.220184e-01_EB, 3.368352e-01_EB, 3.294973e-01_EB, 3.480874e-01_EB, 2.278502e-01_EB, &
+   1.435619e-01_EB, &
+   4.794628e-01_EB, 3.716607e-01_EB, 2.986875e-01_EB, 2.920226e-01_EB, 2.849022e-01_EB, 2.098157e-01_EB, &
+   1.086582e-01_EB, &
+   3.987250e-01_EB, 3.273405e-01_EB, 2.706509e-01_EB, 2.488392e-01_EB, 2.796603e-01_EB, 1.937969e-01_EB, &
+   1.318512e-01_EB, &
+   3.618884e-01_EB, 3.043278e-01_EB, 2.752540e-01_EB, 2.348242e-01_EB, 2.449431e-01_EB, 1.840862e-01_EB, &
+   1.365370e-01_EB, &
+   4.327196e-01_EB, 3.118666e-01_EB, 2.824791e-01_EB, 2.285493e-01_EB, 2.297279e-01_EB, 1.660089e-01_EB, &
+   6.776279e-02_EB, &
+   2.158610e-01_EB, 1.711786e-01_EB, 1.890422e-01_EB, 1.508251e-01_EB, 1.710093e-01_EB, 1.189088e-01_EB, &
+   3.722276e-01_EB/),(/7,8/))
+
+sd1_c3h6(1:7,57:64) = RESHAPE((/ &  ! 1055-1090 cm-1
+   1.808366e-01_EB, 1.285694e-01_EB, 1.347601e-01_EB, 1.159091e-01_EB, 1.328783e-01_EB, 9.806016e-02_EB, &
+   4.385238e-02_EB, &
+   1.688521e-01_EB, 1.098959e-01_EB, 9.863147e-02_EB, 1.007307e-01_EB, 1.218736e-01_EB, 1.096671e-01_EB, &
+   3.048481e-02_EB, &
+   1.509152e-01_EB, 9.784628e-02_EB, 8.122169e-02_EB, 7.571922e-02_EB, 8.082920e-02_EB, 6.716860e-02_EB, &
+   6.805299e-01_EB, &
+   1.236023e-01_EB, 8.420975e-02_EB, 6.449748e-02_EB, 5.721581e-02_EB, 8.699266e-02_EB, 4.794369e-02_EB, &
+   5.275249e-02_EB, &
+   1.005482e-01_EB, 7.333190e-02_EB, 5.246391e-02_EB, 4.854230e-02_EB, 8.581595e-02_EB, 3.857051e-02_EB, &
+   1.047535e+00_EB, &
+   8.140574e-02_EB, 6.139425e-02_EB, 4.191643e-02_EB, 3.330029e-02_EB, 6.128860e-02_EB, 3.771955e-02_EB, &
+   5.547067e-01_EB, &
+   5.876207e-02_EB, 4.748412e-02_EB, 3.403509e-02_EB, 2.491123e-02_EB, 1.741583e-01_EB, 3.685622e-02_EB, &
+   1.173988e+00_EB, &
+   5.067589e-02_EB, 3.249100e-02_EB, 3.614176e-02_EB, 1.695154e-02_EB, 5.607839e-02_EB, 4.126856e-02_EB, &
+   4.414252e-02_EB/),(/7,8/))
+
+sd1_c3h6(1:7,65:68) = RESHAPE((/ &  ! 1095-1150 cm-1
+   3.475507e-02_EB, 1.803126e-02_EB, 2.233876e-01_EB, 1.137397e-02_EB, 1.233139e-02_EB, 2.244437e-02_EB, &
+   3.055494e-04_EB, &
+   8.633613e-02_EB, 9.384641e-03_EB, 3.751848e-01_EB, 5.532895e-03_EB, 6.183470e-03_EB, 7.005080e-03_EB, &
+   5.030021e-04_EB, &
+   4.004646e-04_EB, 1.996236e-04_EB, 3.332406e-04_EB, 1.767862e-04_EB, 1.467998e-04_EB, 1.391831e-04_EB, &
+   3.497050e-04_EB, &
+   1.027560e-04_EB, 1.027560e-04_EB, 1.027560e-04_EB, 1.027560e-04_EB, 1.027560e-04_EB, 1.027560e-04_EB, &
+   1.027560e-04_EB/),(/7,4/))
+
+!---------------------------------------------------------------------------
+ALLOCATE(gammad1_c3h6(n_temp_c3h6,68)) 
+
+! band #1: 775 cm-1 - 1150 cm-1 
+
+! snb fit with malkmus model 
+
+! error associated with malkmus fit: 
+! on transmissivity: 2.3448 % 
+
+! print fine structure array gamma_d 
+
+gammad1_c3h6(1:7,1:8) = RESHAPE((/ &  ! 775-810 cm-1
+   1.865203e-04_EB, 1.481280e-04_EB, 1.121426e-04_EB, 8.618315e-05_EB, 9.939553e-05_EB, 1.228308e-04_EB, &
+   2.571832e-04_EB, &
+   2.784672e-04_EB, 2.629293e-04_EB, 2.613280e-04_EB, 2.166322e-04_EB, 1.060275e-04_EB, 1.512432e-04_EB, &
+   3.364746e-04_EB, &
+   3.584490e-04_EB, 2.571836e-04_EB, 2.937264e-04_EB, 2.336679e-04_EB, 2.672244e-04_EB, 2.128761e-04_EB, &
+   2.711168e-04_EB, &
+   1.050069e-03_EB, 2.060006e-04_EB, 2.640878e-04_EB, 2.179849e-04_EB, 2.169826e-04_EB, 1.354118e-04_EB, &
+   2.786454e-04_EB, &
+   5.631752e-04_EB, 2.967683e-04_EB, 1.474684e-04_EB, 6.104105e-04_EB, 4.865310e-04_EB, 1.882053e-01_EB, &
+   2.951885e-04_EB, &
+   8.382309e-05_EB, 1.999192e-03_EB, 2.110707e-01_EB, 2.657106e-03_EB, 4.279171e-04_EB, 8.580741e-01_EB, &
+   2.380492e-04_EB, &
+   4.133686e-04_EB, 2.280390e-03_EB, 8.751086e-01_EB, 3.295157e-03_EB, 5.879263e-04_EB, 8.275870e-01_EB, &
+   2.164440e-04_EB, &
+   6.177217e-05_EB, 2.052275e-04_EB, 1.783767e+00_EB, 1.180004e-02_EB, 4.686960e-04_EB, 2.654668e+00_EB, &
+   2.743441e-04_EB/),(/7,8/))
+
+gammad1_c3h6(1:7,9:16) = RESHAPE((/ &  ! 815-850 cm-1
+   1.362853e-04_EB, 9.486143e-03_EB, 2.766580e+00_EB, 2.523733e-03_EB, 1.516289e-03_EB, 8.166695e+00_EB, &
+   1.693790e-01_EB, &
+   2.370331e-04_EB, 1.279314e+00_EB, 1.307893e+01_EB, 1.368493e-01_EB, 2.662950e-03_EB, 9.028076e+00_EB, &
+   1.501266e-04_EB, &
+   1.605909e-03_EB, 3.888338e+00_EB, 3.291564e+01_EB, 2.430327e+00_EB, 1.840118e-02_EB, 4.830532e+00_EB, &
+   1.460557e-01_EB, &
+   1.751757e-02_EB, 7.388926e+00_EB, 6.531922e+01_EB, 9.190465e-02_EB, 7.887271e-02_EB, 7.702450e+00_EB, &
+   3.065075e+00_EB, &
+   4.005618e-02_EB, 5.793342e+00_EB, 6.531359e+01_EB, 3.481985e+01_EB, 7.477765e-02_EB, 1.306801e+01_EB, &
+   3.031110e+01_EB, &
+   4.670461e-02_EB, 1.511945e-01_EB, 6.531029e+01_EB, 5.058553e+01_EB, 1.162566e-01_EB, 1.593096e+01_EB, &
+   4.345904e+01_EB, &
+   6.963672e-02_EB, 1.180935e-01_EB, 6.530489e+01_EB, 8.198354e-01_EB, 1.298311e-01_EB, 4.887623e+01_EB, &
+   4.345787e+01_EB, &
+   1.032951e-01_EB, 1.651780e-01_EB, 6.527527e+01_EB, 1.583085e-01_EB, 1.439537e-01_EB, 4.887639e+01_EB, &
+   4.345745e+01_EB/),(/7,8/))
+
+gammad1_c3h6(1:7,17:24) = RESHAPE((/ &  ! 855-890 cm-1
+   1.554114e-01_EB, 2.463349e-01_EB, 1.552737e+00_EB, 2.489268e-01_EB, 7.175075e-02_EB, 4.877618e+01_EB, &
+   4.344856e+01_EB, &
+   2.216480e-01_EB, 3.911085e-01_EB, 6.528132e+01_EB, 4.847826e-01_EB, 1.055938e-01_EB, 7.890568e-01_EB, &
+   4.345834e+01_EB, &
+   3.344937e-01_EB, 5.937512e-01_EB, 6.440865e+01_EB, 5.685496e-01_EB, 2.154384e-01_EB, 4.887601e+01_EB, &
+   4.345865e+01_EB, &
+   4.563788e-01_EB, 6.544545e-01_EB, 6.527427e+01_EB, 5.645359e-01_EB, 1.603139e-01_EB, 2.220849e-01_EB, &
+   4.345957e+01_EB, &
+   6.971662e-01_EB, 8.419195e-01_EB, 6.602209e+00_EB, 6.185587e-01_EB, 2.185881e-01_EB, 1.026546e+00_EB, &
+   4.345911e+01_EB, &
+   9.177302e-01_EB, 8.698788e-01_EB, 4.219718e+00_EB, 5.938638e-01_EB, 3.550496e-01_EB, 4.887400e+01_EB, &
+   4.345951e+01_EB, &
+   1.024886e+00_EB, 8.931182e-01_EB, 1.906388e+00_EB, 7.671322e-01_EB, 4.049625e-01_EB, 4.886302e+01_EB, &
+   4.345956e+01_EB, &
+   1.138590e+00_EB, 8.055441e-01_EB, 1.266173e+00_EB, 7.247405e-01_EB, 4.313090e-01_EB, 2.888925e+00_EB, &
+   4.345947e+01_EB/),(/7,8/))
+
+gammad1_c3h6(1:7,25:32) = RESHAPE((/ &  ! 895-930 cm-1
+   1.258896e+00_EB, 8.879635e-01_EB, 1.183716e+00_EB, 8.697144e-01_EB, 3.994743e-01_EB, 1.020734e+00_EB, &
+   1.469295e-01_EB, &
+   1.489911e+00_EB, 9.449031e-01_EB, 1.364975e+00_EB, 7.600728e-01_EB, 4.690280e-01_EB, 5.532825e-01_EB, &
+   2.320330e+01_EB, &
+   1.791634e+00_EB, 1.068040e+00_EB, 1.344772e+00_EB, 1.025605e+00_EB, 5.570787e-01_EB, 4.887568e+01_EB, &
+   1.866191e-01_EB, &
+   6.582008e-01_EB, 6.151496e-01_EB, 7.320593e-01_EB, 7.674633e-01_EB, 5.984986e-01_EB, 1.256776e+00_EB, &
+   1.505021e+00_EB, &
+   8.496429e-01_EB, 6.647729e-01_EB, 8.138054e-01_EB, 6.996761e-01_EB, 6.263920e-01_EB, 7.887495e-01_EB, &
+   4.345957e+01_EB, &
+   2.585850e+00_EB, 1.312862e+00_EB, 1.669178e+00_EB, 1.005278e+00_EB, 5.484994e-01_EB, 1.645085e+00_EB, &
+   4.301288e+01_EB, &
+   2.304432e+00_EB, 1.337031e+00_EB, 1.903523e+00_EB, 1.080752e+00_EB, 4.772959e-01_EB, 4.887638e+01_EB, &
+   3.954397e+01_EB, &
+   2.284405e+00_EB, 1.252628e+00_EB, 1.761317e+00_EB, 1.081162e+00_EB, 5.126407e-01_EB, 9.460859e-01_EB, &
+   4.345934e+01_EB/),(/7,8/))
+
+gammad1_c3h6(1:7,33:40) = RESHAPE((/ &  ! 935-970 cm-1
+   2.011991e+00_EB, 1.160491e+00_EB, 1.606206e+00_EB, 1.044964e+00_EB, 6.166918e-01_EB, 8.541470e-01_EB, &
+   4.345947e+01_EB, &
+   1.951894e+00_EB, 1.077050e+00_EB, 1.340221e+00_EB, 1.005762e+00_EB, 5.377001e-01_EB, 1.813695e+00_EB, &
+   4.345915e+01_EB, &
+   1.862497e+00_EB, 1.110545e+00_EB, 1.226215e+00_EB, 1.004332e+00_EB, 5.640741e-01_EB, 1.260546e+00_EB, &
+   2.061631e+01_EB, &
+   1.735085e+00_EB, 1.152792e+00_EB, 1.235271e+00_EB, 1.029092e+00_EB, 5.304049e-01_EB, 3.364825e+00_EB, &
+   4.109795e-01_EB, &
+   1.514333e+00_EB, 1.096526e+00_EB, 1.190673e+00_EB, 9.738878e-01_EB, 4.991815e-01_EB, 2.598609e+01_EB, &
+   4.345955e+01_EB, &
+   1.323596e+00_EB, 1.020536e+00_EB, 1.276590e+00_EB, 9.362680e-01_EB, 5.648663e-01_EB, 3.325554e-01_EB, &
+   4.345900e+01_EB, &
+   1.090160e+00_EB, 8.522171e-01_EB, 1.383531e+00_EB, 8.696999e-01_EB, 3.985636e-01_EB, 6.142456e-01_EB, &
+   4.345952e+01_EB, &
+   9.568718e-01_EB, 7.965634e-01_EB, 2.061656e+00_EB, 6.937459e-01_EB, 3.185588e-01_EB, 1.043529e+00_EB, &
+   4.345956e+01_EB/),(/7,8/))
+
+gammad1_c3h6(1:7,41:48) = RESHAPE((/ &  ! 975-1010 cm-1
+   8.780028e-01_EB, 7.171719e-01_EB, 1.797413e+00_EB, 7.191605e-01_EB, 3.123087e-01_EB, 5.370041e-01_EB, &
+   6.031057e-01_EB, &
+   7.683322e-01_EB, 6.697888e-01_EB, 1.564974e+00_EB, 6.922381e-01_EB, 2.866901e-01_EB, 6.100381e-01_EB, &
+   5.296325e-01_EB, &
+   7.710645e-01_EB, 6.686977e-01_EB, 1.316990e+00_EB, 7.356423e-01_EB, 3.962548e-01_EB, 7.103715e-01_EB, &
+   3.121685e-01_EB, &
+   7.152139e-01_EB, 7.181107e-01_EB, 9.272079e-01_EB, 7.998523e-01_EB, 4.476511e-01_EB, 4.403214e-01_EB, &
+   1.432304e+00_EB, &
+   7.215480e-01_EB, 5.222809e-01_EB, 7.034660e-01_EB, 5.939143e-01_EB, 3.557110e-01_EB, 7.369583e+00_EB, &
+   4.343647e+01_EB, &
+   7.509675e-01_EB, 5.541920e-01_EB, 6.013325e-01_EB, 5.827632e-01_EB, 2.516345e-01_EB, 4.887235e+01_EB, &
+   4.345657e+01_EB, &
+   6.655689e-01_EB, 5.909646e-01_EB, 7.175681e-01_EB, 5.191324e-01_EB, 2.139999e-01_EB, 4.270810e-01_EB, &
+   3.186474e+00_EB, &
+   5.936443e-01_EB, 6.111940e-01_EB, 8.318915e-01_EB, 4.526249e-01_EB, 2.171504e-01_EB, 4.874889e+01_EB, &
+   4.345936e+01_EB/),(/7,8/))
+
+gammad1_c3h6(1:7,49:56) = RESHAPE((/ &  ! 1015-1050 cm-1
+   5.108597e-01_EB, 5.449935e-01_EB, 1.467166e+00_EB, 4.175570e-01_EB, 2.800624e-01_EB, 2.807650e-01_EB, &
+   1.226529e-01_EB, &
+   4.396741e-01_EB, 4.212443e-01_EB, 1.991238e+00_EB, 4.853656e-01_EB, 1.994488e-01_EB, 3.606763e+00_EB, &
+   1.195304e-01_EB, &
+   3.521564e-01_EB, 3.419630e-01_EB, 9.696171e+00_EB, 3.944128e-01_EB, 1.086559e-01_EB, 4.887097e+01_EB, &
+   4.345940e+01_EB, &
+   2.826655e-01_EB, 2.596188e-01_EB, 1.720670e+00_EB, 3.339207e-01_EB, 1.507599e-01_EB, 1.947669e+00_EB, &
+   4.345956e+01_EB, &
+   2.103926e-01_EB, 1.918390e-01_EB, 5.187904e-01_EB, 5.571757e-01_EB, 8.852491e-02_EB, 1.040530e+00_EB, &
+   4.345956e+01_EB, &
+   2.190684e-01_EB, 2.166025e-01_EB, 2.770976e-01_EB, 6.790640e-01_EB, 1.398958e-01_EB, 4.887609e+01_EB, &
+   1.273985e+01_EB, &
+   2.372381e-01_EB, 2.099844e-01_EB, 1.691730e-01_EB, 3.370993e-01_EB, 9.039351e-02_EB, 5.560844e-01_EB, &
+   3.729305e+01_EB, &
+   1.338894e-01_EB, 2.270514e-01_EB, 8.598819e-02_EB, 2.237195e-01_EB, 4.915478e-02_EB, 3.404705e+01_EB, &
+   2.634276e-03_EB/),(/7,8/))
+
+gammad1_c3h6(1:7,57:64) = RESHAPE((/ &  ! 1055-1090 cm-1
+   8.590987e-02_EB, 2.939130e-01_EB, 1.322061e-01_EB, 2.325564e-01_EB, 4.121415e-02_EB, 1.890644e+01_EB, &
+   6.653137e+00_EB, &
+   5.828702e-02_EB, 1.919845e-01_EB, 3.558396e+00_EB, 8.935135e-02_EB, 2.151974e-02_EB, 1.813839e-02_EB, &
+   5.291639e+00_EB, &
+   4.560095e-02_EB, 8.801874e-02_EB, 4.240838e+00_EB, 1.971226e-01_EB, 2.805033e-02_EB, 3.159379e-01_EB, &
+   4.231868e-04_EB, &
+   5.236543e-02_EB, 4.750499e-02_EB, 7.719299e+00_EB, 2.230632e+00_EB, 1.029862e-02_EB, 3.970081e+00_EB, &
+   1.254647e-02_EB, &
+   4.584112e-02_EB, 2.781221e-02_EB, 3.521327e+00_EB, 1.069332e-01_EB, 5.513817e-03_EB, 7.390687e-01_EB, &
+   8.785510e-05_EB, &
+   2.952585e-02_EB, 1.659069e-02_EB, 1.232312e+00_EB, 1.610279e+00_EB, 3.746132e-03_EB, 1.888989e-02_EB, &
+   1.172808e-05_EB, &
+   2.783898e-02_EB, 1.191524e-02_EB, 1.737513e-01_EB, 6.337914e-01_EB, 3.927326e-04_EB, 1.256543e-02_EB, &
+   9.593758e-05_EB, &
+   1.161773e-02_EB, 1.234249e-02_EB, 7.173288e-03_EB, 4.651250e-01_EB, 6.905694e-04_EB, 6.625808e-03_EB, &
+   1.875822e-05_EB/),(/7,8/))
+
+gammad1_c3h6(1:7,65:68) = RESHAPE((/ &  ! 1095-1150 cm-1
+   7.371375e-03_EB, 3.892307e-02_EB, 2.066948e-04_EB, 2.148055e-01_EB, 5.123043e-03_EB, 8.826795e-03_EB, &
+   1.519386e-04_EB, &
+   1.685293e-04_EB, 4.052437e-02_EB, 5.766893e-05_EB, 1.099394e-01_EB, 1.056916e-02_EB, 3.703491e-03_EB, &
+   4.534644e-04_EB, &
+   2.576720e-04_EB, 1.502775e-04_EB, 2.394291e-04_EB, 1.106949e-04_EB, 1.070129e-04_EB, 1.035473e-04_EB, &
+   2.424308e-04_EB, &
+   8.047518e-05_EB, 8.047518e-05_EB, 8.047518e-05_EB, 8.047518e-05_EB, 8.047518e-05_EB, 8.047518e-05_EB, &
+   8.047518e-05_EB/),(/7,4/))
+
+!---------------------------------------------------------------------------
+ALLOCATE(sd2_c3h6(n_temp_c3h6,31)) 
+
+! band #2: 1225 cm-1 - 1975 cm-1 
+
+! snb fit with malkmus model 
+
+! error associated with malkmus fit: 
+! on transmissivity: 0.89939 % 
+
+sd2_c3h6(1:7,1:8) = RESHAPE((/ &  ! 1225-1400 cm-1
+   3.558545e-04_EB, 3.234771e-04_EB, 3.304950e-04_EB, 1.651299e-04_EB, 1.336215e-04_EB, 1.510735e-04_EB, &
+   1.993574e-04_EB, &
+   6.741050e-04_EB, 3.773009e-04_EB, 4.527377e-04_EB, 3.445857e-04_EB, 2.150432e-04_EB, 3.112911e-04_EB, &
+   3.405452e-03_EB, &
+   8.500802e-04_EB, 5.928536e-03_EB, 5.109505e-02_EB, 5.939970e-03_EB, 5.544562e-03_EB, 4.216340e-02_EB, &
+   7.821472e-02_EB, &
+   6.900284e-04_EB, 1.754929e-02_EB, 1.351477e-01_EB, 1.875618e-02_EB, 1.689271e-02_EB, 5.437608e-01_EB, &
+   8.042160e-02_EB, &
+   6.597844e-03_EB, 3.076774e-02_EB, 7.267186e-02_EB, 3.875256e-02_EB, 4.198566e-02_EB, 1.377841e-01_EB, &
+   4.353146e-02_EB, &
+   1.425388e-01_EB, 7.292994e-02_EB, 1.006956e-01_EB, 8.530846e-02_EB, 8.207286e-02_EB, 1.024217e-01_EB, &
+   9.040341e-02_EB, &
+   2.757070e-01_EB, 2.011514e-01_EB, 2.183300e-01_EB, 1.901067e-01_EB, 1.708424e-01_EB, 1.802992e-01_EB, &
+   1.306124e-01_EB, &
+   5.487648e-01_EB, 3.944423e-01_EB, 3.612309e-01_EB, 3.179025e-01_EB, 2.635343e-01_EB, 2.207712e-01_EB, &
+   1.537228e-01_EB/),(/7,8/))
+
+sd2_c3h6(1:7,9:16) = RESHAPE((/ &  ! 1425-1600 cm-1
+   7.347914e-01_EB, 4.838524e-01_EB, 4.349597e-01_EB, 3.807440e-01_EB, 3.206784e-01_EB, 2.496395e-01_EB, &
+   1.756546e-01_EB, &
+   1.230079e+00_EB, 7.176913e-01_EB, 5.767768e-01_EB, 4.861231e-01_EB, 3.530715e-01_EB, 2.411707e-01_EB, &
+   1.663700e-01_EB, &
+   1.076204e+00_EB, 6.242017e-01_EB, 5.169408e-01_EB, 4.238453e-01_EB, 3.142849e-01_EB, 2.371514e-01_EB, &
+   1.547102e-01_EB, &
+   4.989020e-01_EB, 3.259007e-01_EB, 2.647985e-01_EB, 2.506597e-01_EB, 2.113725e-01_EB, 1.667162e-01_EB, &
+   1.268622e-01_EB, &
+   3.050060e-01_EB, 1.549283e-01_EB, 1.437705e-01_EB, 1.418842e-01_EB, 1.284408e-01_EB, 1.165257e-01_EB, &
+   1.181179e-01_EB, &
+   2.901797e-01_EB, 1.013263e-01_EB, 8.839726e-02_EB, 9.945842e-02_EB, 9.936424e-02_EB, 9.382087e-02_EB, &
+   1.109026e-01_EB, &
+   9.170595e-01_EB, 1.077723e-01_EB, 1.126792e-01_EB, 1.012963e-01_EB, 1.008830e-01_EB, 1.343878e-01_EB, &
+   1.433742e-01_EB, &
+   1.723540e+00_EB, 1.340775e-01_EB, 1.803447e-01_EB, 1.684967e-01_EB, 1.917971e-01_EB, 2.426751e-01_EB, &
+   1.993900e-01_EB/),(/7,8/))
+
+sd2_c3h6(1:7,17:24) = RESHAPE((/ &  ! 1625-1800 cm-1
+   7.534624e-01_EB, 5.257745e-01_EB, 4.873627e-01_EB, 4.420277e-01_EB, 3.752945e-01_EB, 2.872981e-01_EB, &
+   2.158678e-01_EB, &
+   1.173360e+00_EB, 6.714563e-01_EB, 5.383806e-01_EB, 4.764335e-01_EB, 3.802518e-01_EB, 2.635373e-01_EB, &
+   1.882440e-01_EB, &
+   7.574636e-01_EB, 4.662984e-01_EB, 4.191013e-01_EB, 3.278277e-01_EB, 2.460639e-01_EB, 1.547873e-01_EB, &
+   1.018707e-01_EB, &
+   3.622467e-02_EB, 3.135298e-02_EB, 1.070575e-02_EB, 1.197498e-02_EB, 2.172120e-02_EB, 1.437764e-02_EB, &
+   1.246169e-02_EB, &
+   6.790247e-04_EB, 4.477004e-04_EB, 4.003496e-04_EB, 2.372342e-03_EB, 2.112353e-04_EB, 1.899291e-04_EB, &
+   4.337606e-04_EB, &
+   6.821738e-04_EB, 3.841181e-04_EB, 4.398296e-04_EB, 9.336168e-04_EB, 3.215112e-04_EB, 1.577836e-03_EB, &
+   1.387750e-03_EB, &
+   5.357513e-03_EB, 9.513971e-03_EB, 9.586573e-03_EB, 1.177708e-02_EB, 1.894358e-02_EB, 1.778693e-02_EB, &
+   2.131572e-02_EB, &
+   1.558459e-01_EB, 1.086936e-01_EB, 1.035246e-01_EB, 8.484628e-02_EB, 7.171917e-02_EB, 5.505700e-02_EB, &
+   3.996848e-02_EB/),(/7,8/))
+
+sd2_c3h6(1:7,25:31) = RESHAPE((/ &  ! 1825-1975 cm-1
+   2.622036e-01_EB, 1.516085e-01_EB, 1.303312e-01_EB, 1.109721e-01_EB, 9.231520e-02_EB, 7.419268e-02_EB, &
+   4.811877e-02_EB, &
+   1.824093e-01_EB, 1.314846e-01_EB, 1.287875e-01_EB, 9.898525e-02_EB, 8.120577e-02_EB, 6.960379e-02_EB, &
+   4.479529e-02_EB, &
+   4.747023e-02_EB, 3.221598e-02_EB, 3.332202e-02_EB, 2.756103e-02_EB, 2.423984e-02_EB, 2.922304e-02_EB, &
+   1.964140e-02_EB, &
+   1.531867e-02_EB, 9.915829e-03_EB, 3.275042e-02_EB, 4.962254e-03_EB, 3.664153e-03_EB, 1.736865e-03_EB, &
+   2.806612e-03_EB, &
+   1.672196e-03_EB, 6.907827e-04_EB, 9.686969e-04_EB, 4.056228e-04_EB, 1.810253e-04_EB, 2.048415e-04_EB, &
+   3.860056e-04_EB, &
+   4.937814e-04_EB, 1.785822e-04_EB, 3.303675e-04_EB, 1.807431e-04_EB, 1.381312e-04_EB, 1.579684e-04_EB, &
+   2.163472e-04_EB, &
+   1.027560e-04_EB, 1.027560e-04_EB, 1.027560e-04_EB, 1.027560e-04_EB, 1.027560e-04_EB, 1.027560e-04_EB, &
+   1.027560e-04_EB/),(/7,7/))
+
+!---------------------------------------------------------------------------
+ALLOCATE(gammad2_c3h6(n_temp_c3h6,31)) 
+
+! band #2: 1225 cm-1 - 1975 cm-1 
+
+! snb fit with malkmus model 
+
+! error associated with malkmus fit: 
+! on transmissivity: 0.89939 % 
+
+! print fine structure array gamma_d 
+
+gammad2_c3h6(1:7,1:8) = RESHAPE((/ &  ! 1225-1400 cm-1
+   2.622715e-04_EB, 2.415333e-04_EB, 2.285633e-04_EB, 1.138182e-04_EB, 1.023912e-04_EB, 1.165998e-04_EB, &
+   1.100001e-04_EB, &
+   5.083865e-04_EB, 2.678443e-04_EB, 3.093172e-04_EB, 2.072846e-04_EB, 1.338274e-04_EB, 2.187271e-04_EB, &
+   3.932176e-03_EB, &
+   5.760161e-04_EB, 3.452147e-02_EB, 1.478839e-04_EB, 3.228596e-03_EB, 3.197521e-03_EB, 2.939038e-05_EB, &
+   1.383337e-03_EB, &
+   4.544833e-04_EB, 8.199799e-02_EB, 3.788188e-04_EB, 1.070417e-02_EB, 1.812632e-02_EB, 7.216282e-05_EB, &
+   3.552942e-03_EB, &
+   4.941401e-04_EB, 7.477210e-02_EB, 2.805114e-03_EB, 1.723863e-02_EB, 2.045615e-02_EB, 2.807456e-03_EB, &
+   4.838154e+00_EB, &
+   3.708619e-03_EB, 1.501171e-01_EB, 2.088233e-02_EB, 5.723047e-02_EB, 2.236513e-01_EB, 5.128140e-02_EB, &
+   4.345874e+01_EB, &
+   5.695155e-02_EB, 2.842757e-01_EB, 8.565045e-02_EB, 1.664632e-01_EB, 2.596688e-01_EB, 6.733220e-02_EB, &
+   4.345955e+01_EB, &
+   1.810625e-01_EB, 3.644158e-01_EB, 2.284041e-01_EB, 2.941351e-01_EB, 2.787627e-01_EB, 1.246260e-01_EB, &
+   4.345946e+01_EB/),(/7,8/))
+
+gammad2_c3h6(1:7,9:16) = RESHAPE((/ &  ! 1425-1600 cm-1
+   2.618227e-01_EB, 4.657918e-01_EB, 2.858630e-01_EB, 3.534168e-01_EB, 2.920606e-01_EB, 2.314596e-01_EB, &
+   4.345293e+01_EB, &
+   4.735753e-01_EB, 5.151092e-01_EB, 4.261774e-01_EB, 3.947653e-01_EB, 3.773149e-01_EB, 1.853547e-01_EB, &
+   4.343606e+01_EB, &
+   4.430151e-01_EB, 5.018903e-01_EB, 3.534603e-01_EB, 4.029514e-01_EB, 3.684172e-01_EB, 1.453836e-01_EB, &
+   4.345940e+01_EB, &
+   1.212938e-01_EB, 3.173309e-01_EB, 1.209401e+00_EB, 3.624133e-01_EB, 2.461181e-01_EB, 2.905692e-01_EB, &
+   4.345952e+01_EB, &
+   1.084288e-02_EB, 1.935743e-01_EB, 3.826811e-01_EB, 2.209504e-01_EB, 3.384784e-01_EB, 5.030323e+00_EB, &
+   4.314517e+00_EB, &
+   3.502530e-03_EB, 4.235158e-01_EB, 4.492198e+01_EB, 4.178424e-01_EB, 3.215097e-01_EB, 1.976012e+01_EB, &
+   3.306259e+01_EB, &
+   9.195743e-04_EB, 5.344729e-02_EB, 3.856228e-02_EB, 8.090926e-02_EB, 1.993074e-01_EB, 8.752817e-02_EB, &
+   4.345936e+01_EB, &
+   5.991440e-04_EB, 1.174575e-01_EB, 4.116301e-02_EB, 1.163800e-01_EB, 2.048843e-01_EB, 1.170091e-01_EB, &
+   4.345936e+01_EB/),(/7,8/))
+
+gammad2_c3h6(1:7,17:24) = RESHAPE((/ &  ! 1625-1800 cm-1
+   1.048318e-01_EB, 4.077170e-01_EB, 3.250763e-01_EB, 4.204265e-01_EB, 4.172624e-01_EB, 3.501140e-01_EB, &
+   4.345754e+01_EB, &
+   3.891245e-01_EB, 5.297782e-01_EB, 5.753653e-01_EB, 4.671660e-01_EB, 3.550334e-01_EB, 5.129497e-01_EB, &
+   1.852430e+01_EB, &
+   1.315391e-01_EB, 2.233168e-01_EB, 1.643737e-01_EB, 2.846889e-01_EB, 2.529524e-01_EB, 5.109478e-01_EB, &
+   5.217994e+00_EB, &
+   2.202200e-04_EB, 6.992095e-05_EB, 6.651429e-02_EB, 1.261036e-01_EB, 2.793432e-04_EB, 3.400065e-01_EB, &
+   2.976967e-01_EB, &
+   4.407006e-04_EB, 3.060631e-04_EB, 3.078173e-04_EB, 1.997468e-02_EB, 1.414429e-04_EB, 1.272939e-04_EB, &
+   2.920596e-04_EB, &
+   4.075042e-04_EB, 2.572692e-04_EB, 2.809507e-04_EB, 7.570268e-04_EB, 2.248097e-04_EB, 6.557878e-04_EB, &
+   1.214879e-02_EB, &
+   5.533543e-04_EB, 2.280793e-03_EB, 5.727351e-03_EB, 1.258039e-01_EB, 2.877495e-03_EB, 1.528211e-01_EB, &
+   3.641746e-01_EB, &
+   2.750324e-02_EB, 5.042429e-02_EB, 3.703191e-02_EB, 1.112856e-01_EB, 1.394191e-01_EB, 2.852003e-01_EB, &
+   5.289596e+00_EB/),(/7,8/))
+
+gammad2_c3h6(1:7,25:31) = RESHAPE((/ &  ! 1825-1975 cm-1
+   1.249123e-01_EB, 1.287617e-01_EB, 8.856076e-02_EB, 1.063268e-01_EB, 6.381303e-02_EB, 3.721067e-02_EB, &
+   1.078497e+01_EB, &
+   9.224931e-02_EB, 7.783664e-02_EB, 4.282341e-02_EB, 1.077656e-01_EB, 9.668966e-02_EB, 3.557773e-02_EB, &
+   4.459730e+00_EB, &
+   1.094300e-02_EB, 1.484660e-02_EB, 1.474169e-02_EB, 2.868794e-02_EB, 2.363462e-02_EB, 7.563694e-03_EB, &
+   9.480691e-01_EB, &
+   3.143676e-03_EB, 1.423552e-03_EB, 2.803890e-04_EB, 1.197387e-02_EB, 1.810420e-03_EB, 9.517693e-04_EB, &
+   1.253779e-03_EB, &
+   9.700043e-04_EB, 5.310996e-04_EB, 3.238508e-04_EB, 2.462185e-04_EB, 1.221073e-04_EB, 1.352439e-04_EB, &
+   2.806980e-04_EB, &
+   3.482794e-04_EB, 1.171460e-04_EB, 2.319252e-04_EB, 1.036437e-04_EB, 1.041061e-04_EB, 1.117176e-04_EB, &
+   1.472074e-04_EB, &
+   8.047518e-05_EB, 8.047518e-05_EB, 8.047518e-05_EB, 8.047518e-05_EB, 8.047518e-05_EB, 8.047518e-05_EB, &
+   8.047518e-05_EB/),(/7,7/))
+
+!---------------------------------------------------------------------------
+ALLOCATE(sd3_c3h6(n_temp_c3h6,26)) 
+
+! band #3: 2650 cm-1 - 3275 cm-1 
+
+! snb fit with malkmus model 
+
+! error associated with malkmus fit: 
+! on transmissivity: 0.84732 % 
+
+sd3_c3h6(1:7,1:8) = RESHAPE((/ &  ! 2650-2825 cm-1
+   9.842396e-04_EB, 9.773581e-04_EB, 4.737803e-04_EB, 1.731125e-04_EB, 1.636141e-04_EB, 1.470685e-04_EB, &
+   1.906099e-04_EB, &
+   2.026987e-03_EB, 1.186057e-03_EB, 9.296802e-04_EB, 1.762232e-03_EB, 6.242290e-04_EB, 2.052893e-03_EB, &
+   1.454807e-02_EB, &
+   1.375163e-02_EB, 8.857038e-03_EB, 1.157316e-02_EB, 1.514073e-02_EB, 7.647375e-03_EB, 2.028955e-02_EB, &
+   7.263667e-02_EB, &
+   6.091687e-02_EB, 3.794720e-02_EB, 3.692778e-02_EB, 3.669497e-02_EB, 2.246508e-02_EB, 2.837078e-02_EB, &
+   4.660372e-02_EB, &
+   7.796068e-02_EB, 5.480320e-02_EB, 5.466178e-02_EB, 5.561425e-02_EB, 3.895555e-02_EB, 4.987873e-02_EB, &
+   5.885558e-02_EB, &
+   5.994425e-02_EB, 4.512610e-02_EB, 5.182436e-02_EB, 5.600091e-02_EB, 4.405629e-02_EB, 5.968023e-02_EB, &
+   9.479119e-02_EB, &
+   9.789297e-02_EB, 7.603902e-02_EB, 8.316338e-02_EB, 8.497910e-02_EB, 7.201492e-02_EB, 9.033387e-02_EB, &
+   1.461816e-01_EB, &
+   1.180654e-01_EB, 1.124261e-01_EB, 1.279063e-01_EB, 1.423319e-01_EB, 1.323416e-01_EB, 1.543846e-01_EB, &
+   1.754013e-01_EB/),(/7,8/))
+
+sd3_c3h6(1:7,9:16) = RESHAPE((/ &  ! 2850-3025 cm-1
+   4.934323e-01_EB, 3.715076e-01_EB, 3.606179e-01_EB, 3.406474e-01_EB, 2.903159e-01_EB, 2.686381e-01_EB, &
+   2.632060e-01_EB, &
+   9.542159e-01_EB, 7.012988e-01_EB, 6.454962e-01_EB, 5.929394e-01_EB, 5.042463e-01_EB, 4.353109e-01_EB, &
+   4.219635e-01_EB, &
+   1.390515e+00_EB, 1.083207e+00_EB, 1.007094e+00_EB, 9.304473e-01_EB, 8.055580e-01_EB, 6.623870e-01_EB, &
+   5.866959e-01_EB, &
+   2.165889e+00_EB, 1.557403e+00_EB, 1.377848e+00_EB, 1.234664e+00_EB, 1.013037e+00_EB, 7.883431e-01_EB, &
+   6.628056e-01_EB, &
+   2.955798e+00_EB, 2.081509e+00_EB, 1.819270e+00_EB, 1.598535e+00_EB, 1.286353e+00_EB, 9.640864e-01_EB, &
+   7.596691e-01_EB, &
+   2.749633e+00_EB, 1.810398e+00_EB, 1.545370e+00_EB, 1.334588e+00_EB, 1.045362e+00_EB, 8.023541e-01_EB, &
+   6.307507e-01_EB, &
+   2.482580e+00_EB, 1.760628e+00_EB, 1.526249e+00_EB, 1.327667e+00_EB, 1.049659e+00_EB, 7.936791e-01_EB, &
+   6.269325e-01_EB, &
+   1.476540e+00_EB, 1.169856e+00_EB, 1.094611e+00_EB, 9.890179e-01_EB, 8.496338e-01_EB, 7.194488e-01_EB, &
+   6.198264e-01_EB/),(/7,8/))
+
+sd3_c3h6(1:7,17:24) = RESHAPE((/ &  ! 3050-3225 cm-1
+   1.158768e+00_EB, 9.970946e-01_EB, 9.717818e-01_EB, 9.018919e-01_EB, 8.089673e-01_EB, 6.965923e-01_EB, &
+   5.756752e-01_EB, &
+   1.617699e+00_EB, 1.161452e+00_EB, 1.056867e+00_EB, 9.368936e-01_EB, 7.790857e-01_EB, 6.211223e-01_EB, &
+   4.978033e-01_EB, &
+   1.668409e+00_EB, 1.154363e+00_EB, 1.028890e+00_EB, 8.900880e-01_EB, 7.204607e-01_EB, 5.621992e-01_EB, &
+   4.193038e-01_EB, &
+   6.627374e-01_EB, 5.511257e-01_EB, 5.408762e-01_EB, 4.741726e-01_EB, 4.065990e-01_EB, 3.500514e-01_EB, &
+   2.603275e-01_EB, &
+   1.943149e-01_EB, 1.812675e-01_EB, 1.997641e-01_EB, 1.725390e-01_EB, 1.584383e-01_EB, 1.668560e-01_EB, &
+   1.239099e-01_EB, &
+   3.848101e-02_EB, 4.502827e-02_EB, 8.182965e-02_EB, 6.478508e-02_EB, 6.632017e-02_EB, 7.060523e-02_EB, &
+   5.939407e-02_EB, &
+   1.823763e-02_EB, 6.889882e-03_EB, 9.139773e-02_EB, 8.162446e-02_EB, 2.475465e-02_EB, 3.168406e-02_EB, &
+   1.903134e-02_EB, &
+   6.725369e-04_EB, 3.888602e-04_EB, 1.980271e-01_EB, 3.039167e-02_EB, 1.104407e-02_EB, 1.220321e-02_EB, &
+   4.484167e-03_EB/),(/7,8/))
+
+sd3_c3h6(1:7,25:26) = RESHAPE((/ &  ! 3250-3275 cm-1
+   4.840794e-04_EB, 3.312870e-04_EB, 5.789111e-03_EB, 3.214095e-03_EB, 3.311342e-03_EB, 2.947009e-03_EB, &
+   1.302455e-04_EB, &
+   1.027560e-04_EB, 1.027560e-04_EB, 1.027560e-04_EB, 1.027560e-04_EB, 1.027560e-04_EB, 1.027560e-04_EB, &
+   1.027560e-04_EB/),(/7,2/))
+
+!---------------------------------------------------------------------------
+ALLOCATE(gammad3_c3h6(n_temp_c3h6,26)) 
+
+! band #3: 2650 cm-1 - 3275 cm-1 
+
+! snb fit with malkmus model 
+
+! error associated with malkmus fit: 
+! on transmissivity: 0.84732 % 
+
+! print fine structure array gamma_d 
+
+gammad3_c3h6(1:7,1:8) = RESHAPE((/ &  ! 2650-2825 cm-1
+   3.045289e-04_EB, 1.015641e-03_EB, 3.935463e-04_EB, 1.154192e-04_EB, 1.194489e-04_EB, 1.102285e-04_EB, &
+   1.137523e-04_EB, &
+   5.888900e-04_EB, 1.065118e-03_EB, 5.931355e-04_EB, 8.588542e-04_EB, 5.730959e-04_EB, 5.277001e-04_EB, &
+   2.327868e-03_EB, &
+   3.553832e-03_EB, 5.225375e-02_EB, 5.508119e-03_EB, 3.764204e-03_EB, 6.360672e-02_EB, 6.490060e-04_EB, &
+   1.126737e-03_EB, &
+   3.234273e-02_EB, 6.202832e-02_EB, 1.838655e-02_EB, 1.292609e-02_EB, 1.730868e-01_EB, 7.897375e-03_EB, &
+   1.175871e-02_EB, &
+   5.722213e-02_EB, 8.665120e-02_EB, 3.332681e-02_EB, 1.901355e-02_EB, 3.938769e-02_EB, 7.412539e-03_EB, &
+   2.819413e-02_EB, &
+   3.022697e-02_EB, 1.129809e-01_EB, 2.531468e-02_EB, 1.970225e-02_EB, 5.471032e-02_EB, 2.097209e-02_EB, &
+   2.390018e-02_EB, &
+   5.826107e-02_EB, 1.114796e-01_EB, 3.749457e-02_EB, 3.774872e-02_EB, 1.009734e-01_EB, 4.970945e-02_EB, &
+   3.868475e-02_EB, &
+   7.083218e-02_EB, 1.686291e-01_EB, 7.156561e-02_EB, 6.619537e-02_EB, 2.202441e-01_EB, 1.169745e-01_EB, &
+   3.834597e-01_EB/),(/7,8/))
+
+gammad3_c3h6(1:7,9:16) = RESHAPE((/ &  ! 2850-3025 cm-1
+   2.387749e-01_EB, 3.465833e-01_EB, 1.768091e-01_EB, 2.165351e-01_EB, 3.664688e-01_EB, 2.483037e-01_EB, &
+   8.926665e-01_EB, &
+   5.324178e-01_EB, 5.980304e-01_EB, 3.793473e-01_EB, 4.509406e-01_EB, 5.538922e-01_EB, 4.079465e-01_EB, &
+   5.945021e-01_EB, &
+   8.715520e-01_EB, 9.293503e-01_EB, 6.306967e-01_EB, 7.198743e-01_EB, 7.551117e-01_EB, 6.154785e-01_EB, &
+   8.223511e-01_EB, &
+   1.499464e+00_EB, 1.399873e+00_EB, 9.866448e-01_EB, 1.025786e+00_EB, 9.581477e-01_EB, 7.125299e-01_EB, &
+   1.107012e+00_EB, &
+   2.156257e+00_EB, 1.637737e+00_EB, 1.241655e+00_EB, 1.280306e+00_EB, 1.138186e+00_EB, 8.441688e-01_EB, &
+   1.384899e+00_EB, &
+   3.002594e+00_EB, 1.714061e+00_EB, 1.257507e+00_EB, 1.172490e+00_EB, 1.028409e+00_EB, 6.569541e-01_EB, &
+   2.100100e+00_EB, &
+   2.734771e+00_EB, 1.525371e+00_EB, 1.227801e+00_EB, 1.124537e+00_EB, 1.012834e+00_EB, 6.561761e-01_EB, &
+   1.786964e+00_EB, &
+   1.391166e+00_EB, 1.039743e+00_EB, 8.609837e-01_EB, 8.549996e-01_EB, 8.423802e-01_EB, 6.266077e-01_EB, &
+   1.102257e+00_EB/),(/7,8/))
+
+gammad3_c3h6(1:7,17:24) = RESHAPE((/ &  ! 3050-3225 cm-1
+   8.645946e-01_EB, 9.364314e-01_EB, 7.448637e-01_EB, 7.668057e-01_EB, 7.630071e-01_EB, 5.882839e-01_EB, &
+   1.479949e+00_EB, &
+   1.230685e+00_EB, 1.046279e+00_EB, 7.526449e-01_EB, 7.500084e-01_EB, 7.007694e-01_EB, 5.329368e-01_EB, &
+   1.354177e+00_EB, &
+   1.587192e+00_EB, 9.549637e-01_EB, 7.345138e-01_EB, 6.867975e-01_EB, 5.981748e-01_EB, 4.326344e-01_EB, &
+   4.822820e+00_EB, &
+   6.944559e-01_EB, 3.901526e-01_EB, 3.458891e-01_EB, 3.287273e-01_EB, 2.870524e-01_EB, 2.152839e-01_EB, &
+   4.345222e+01_EB, &
+   1.550994e-01_EB, 1.096247e-01_EB, 1.314631e-01_EB, 1.210936e-01_EB, 1.139491e-01_EB, 5.956151e-02_EB, &
+   3.313368e+01_EB, &
+   2.202410e-02_EB, 2.065956e-02_EB, 1.775205e-02_EB, 2.386698e-02_EB, 3.888119e-02_EB, 2.898450e-02_EB, &
+   2.058336e+00_EB, &
+   1.065388e-04_EB, 1.920534e-03_EB, 6.158394e-04_EB, 4.540651e-04_EB, 1.753716e-02_EB, 7.274816e-03_EB, &
+   1.007187e+00_EB, &
+   4.230956e-04_EB, 2.525852e-04_EB, 8.709782e-05_EB, 2.954917e-04_EB, 5.762183e-03_EB, 3.267777e-03_EB, &
+   1.887507e-02_EB/),(/7,8/))
+
+gammad3_c3h6(1:7,25:26) = RESHAPE((/ &  ! 3250-3275 cm-1
+   3.563014e-04_EB, 2.388188e-04_EB, 5.650871e-04_EB, 1.353722e-03_EB, 1.592126e-03_EB, 7.501643e-04_EB, &
+   1.070038e-04_EB, &
+   8.047518e-05_EB, 8.047518e-05_EB, 8.047518e-05_EB, 8.047518e-05_EB, 8.047518e-05_EB, 8.047518e-05_EB, &
+   8.047518e-05_EB/),(/7,2/))
+
+
+!-------------------------toluene data-------------------
+
+
+! there are 5 bands for toluene
+
+! band #1: 700 cm-1 - 805 cm-1 
+! band #2: 975 cm-1 - 1175 cm-1 
+! band #3: 1275 cm-1 - 1675 cm-1 
+! band #4: 1650 cm-1 - 2075 cm-1 
+! band #5: 2675 cm-1 - 3225 cm-1 
+
+ALLOCATE(sd_c7h8_temp(n_temp_c7h8)) 
+
+! initialize bands wavenumber bounds for toluene ABS(option coefficients.
+! bands are organized by row: 
+! 1st column is the lower bound band limit in cm-1. 
+! 2nd column is the upper bound band limit in cm-1. 
+! 3rd column is the stride between wavenumbers in band.
+! IF 3rd column = 0., band is calculated, not tabulated.
+
+ALLOCATE(om_bnd_c7h8(n_band_c7h8,3)) 
+ALLOCATE(be_c7h8(n_band_c7h8)) 
+
+om_bnd_c7h8 = RESHAPE((/ &
+   700._EB,  975._EB, 1275._EB, 1650._EB, 2675._EB, &
+   805._EB, 1175._EB, 1675._EB, 2075._EB, 3225._EB, &
+   5._EB, 5._EB, 25._EB, 25._EB, 25._EB/),(/n_band_c7h8,3/)) 
+
+sd_c7h8_temp = (/ &
+   300._EB, 396._EB, 440._EB, 477._EB, 587._EB, 795._EB,&
+   999._EB/)
+
+be_c7h8 = (/ &
+   1.000_EB, 1.000_EB, 1.000_EB, 1.000_EB, 1.000_EB/)
+
+!---------------------------------------------------------------------------
+ALLOCATE(sd1_c7h8(n_temp_c7h8,22)) 
+
+! band #1: 700 cm-1 - 805 cm-1 
+
+! snb fit with malkmus model 
+
+! error associated with malkmus fit: 
+! on transmissivity: 5.5814 % 
+
+sd1_c7h8(1:7,1:8) = RESHAPE((/ &  ! 700-735 cm-1
+   1.112466e+00_EB, 9.044923e-01_EB, 9.061370e-01_EB, 8.938794e-01_EB, 9.084825e-01_EB, 1.435389e+00_EB, &
+   1.297156e+01_EB, &
+   2.840815e+00_EB, 2.482407e+00_EB, 2.360535e+00_EB, 2.276458e+00_EB, 2.122272e+00_EB, 1.940697e+00_EB, &
+   5.112554e+00_EB, &
+   3.455206e+00_EB, 3.166147e+00_EB, 2.863080e+00_EB, 2.620674e+00_EB, 2.467633e+00_EB, 2.005290e+00_EB, &
+   7.244894e-01_EB, &
+   4.288216e+00_EB, 3.577673e+00_EB, 2.963877e+00_EB, 2.789847e+00_EB, 2.401611e+00_EB, 1.912466e+00_EB, &
+   2.024019e+00_EB, &
+   4.666515e+00_EB, 3.754488e+00_EB, 3.254065e+00_EB, 3.058494e+00_EB, 2.875391e+00_EB, 2.451298e+00_EB, &
+   4.223163e+00_EB, &
+   7.363590e+00_EB, 6.122925e+00_EB, 5.403265e+00_EB, 5.328257e+00_EB, 4.641149e+00_EB, 3.466727e+00_EB, &
+   1.373953e+01_EB, &
+   9.587057e+00_EB, 6.742653e+00_EB, 5.600793e+00_EB, 5.363171e+00_EB, 4.064656e+00_EB, 2.508085e+00_EB, &
+   1.195299e+00_EB, &
+   4.715829e+00_EB, 3.108857e+00_EB, 2.753587e+00_EB, 2.650163e+00_EB, 2.249724e+00_EB, 1.963447e+00_EB, &
+   7.262488e+00_EB/),(/7,8/))
+
+sd1_c7h8(1:7,9:16) = RESHAPE((/ &  ! 740-775 cm-1
+   4.190702e+00_EB, 2.766122e+00_EB, 2.537781e+00_EB, 2.386878e+00_EB, 2.084718e+00_EB, 1.344226e+00_EB, &
+   3.448390e+00_EB, &
+   2.838874e+00_EB, 2.217681e+00_EB, 2.081071e+00_EB, 1.986804e+00_EB, 1.810042e+00_EB, 1.549486e+00_EB, &
+   7.126841e-01_EB, &
+   1.327883e+00_EB, 1.440906e+00_EB, 1.390571e+00_EB, 1.421333e+00_EB, 1.328347e+00_EB, 1.296316e+00_EB, &
+   1.254896e+00_EB, &
+   4.533944e-01_EB, 8.351739e-01_EB, 7.591511e-01_EB, 7.962784e-01_EB, 8.186310e-01_EB, 8.370456e-01_EB, &
+   2.685634e+00_EB, &
+   1.131517e-01_EB, 7.896344e-01_EB, 3.378503e-01_EB, 3.523472e-01_EB, 4.364146e-01_EB, 5.594990e-01_EB, &
+   3.259981e+00_EB, &
+   3.791615e-02_EB, 8.912653e-01_EB, 4.878342e-01_EB, 1.492598e-01_EB, 2.103530e-01_EB, 3.269232e-01_EB, &
+   2.144533e+00_EB, &
+   4.206761e-02_EB, 7.530056e-02_EB, 1.233550e-01_EB, 7.429326e-02_EB, 9.115926e-02_EB, 1.525590e-01_EB, &
+   1.109247e+00_EB, &
+   6.711521e-02_EB, 8.510326e-04_EB, 6.739778e-02_EB, 5.411094e-02_EB, 6.504658e-02_EB, 5.754676e-02_EB, &
+   5.875940e-01_EB/),(/7,8/))
+
+sd1_c7h8(1:7,17:22) = RESHAPE((/ &  ! 780-805 cm-1
+   6.275862e-02_EB, 6.962504e-04_EB, 4.265822e-02_EB, 2.937821e-02_EB, 3.183374e-02_EB, 1.453078e-02_EB, &
+   8.515825e-02_EB, &
+   5.193232e-02_EB, 7.365615e-04_EB, 1.939785e-02_EB, 1.719349e-02_EB, 2.278960e-02_EB, 1.331369e-03_EB, &
+   5.520836e-02_EB, &
+   3.535671e-02_EB, 8.579228e-04_EB, 1.765940e-03_EB, 1.491081e-02_EB, 1.181497e-02_EB, 5.221427e-04_EB, &
+   2.334611e-03_EB, &
+   6.188348e-03_EB, 7.316561e-04_EB, 8.181678e-04_EB, 6.095900e-03_EB, 3.380075e-03_EB, 5.968569e-04_EB, &
+   7.411591e-04_EB, &
+   6.328121e-04_EB, 6.599274e-04_EB, 5.510258e-04_EB, 5.104659e-04_EB, 5.023646e-04_EB, 5.757667e-04_EB, &
+   6.209242e-04_EB, &
+   4.621323e-04_EB, 4.638592e-04_EB, 4.665860e-04_EB, 4.636519e-04_EB, 4.646393e-04_EB, 4.633936e-04_EB, &
+   4.615859e-04_EB/),(/7,6/))
+
+!---------------------------------------------------------------------------
+ALLOCATE(gammad1_c7h8(n_temp_c7h8,22)) 
+
+! band #1: 700 cm-1 - 805 cm-1 
+
+! snb fit with malkmus model 
+
+! error associated with malkmus fit: 
+! on transmissivity: 5.5814 % 
+
+! print fine structure array gamma_d 
+
+gammad1_c7h8(1:7,1:8) = RESHAPE((/ &  ! 700-735 cm-1
+   7.999461e+01_EB, 6.960752e+01_EB, 3.022045e+01_EB, 6.344408e+01_EB, 5.719128e+01_EB, 3.598038e-02_EB, &
+   1.819109e-03_EB, &
+   7.999993e+01_EB, 6.962945e+01_EB, 6.605713e+01_EB, 6.344357e+01_EB, 5.719074e+01_EB, 3.344331e-01_EB, &
+   1.001242e-02_EB, &
+   8.000000e+01_EB, 6.922109e+01_EB, 4.454022e+00_EB, 6.344038e+01_EB, 5.719013e+01_EB, 9.751497e-02_EB, &
+   4.383971e+01_EB, &
+   8.000000e+01_EB, 1.649903e+01_EB, 6.605768e+01_EB, 6.344412e+01_EB, 5.719149e+01_EB, 6.787669e-01_EB, &
+   1.717471e-01_EB, &
+   8.000000e+01_EB, 5.534136e+00_EB, 6.605782e+01_EB, 6.344412e+01_EB, 5.719151e+01_EB, 4.914284e+01_EB, &
+   6.407876e-02_EB, &
+   8.000000e+01_EB, 6.962930e+01_EB, 6.605773e+01_EB, 8.838043e+00_EB, 5.719150e+01_EB, 2.254685e+00_EB, &
+   1.178609e-02_EB, &
+   8.000000e+01_EB, 6.963055e+01_EB, 6.605773e+01_EB, 3.115435e+00_EB, 5.719151e+01_EB, 4.914358e+01_EB, &
+   4.383966e+01_EB, &
+   8.000000e+01_EB, 6.963104e+01_EB, 6.605612e+01_EB, 6.343942e+01_EB, 5.719109e+01_EB, 1.671127e-01_EB, &
+   6.618119e-03_EB/),(/7,8/))
+
+gammad1_c7h8(1:7,9:16) = RESHAPE((/ &  ! 740-775 cm-1
+   8.000000e+01_EB, 6.963105e+01_EB, 6.605690e+01_EB, 6.333100e+01_EB, 5.718653e+01_EB, 4.913467e+01_EB, &
+   1.209833e-02_EB, &
+   8.000000e+01_EB, 6.962982e+01_EB, 6.605767e+01_EB, 6.342460e+01_EB, 5.718540e+01_EB, 2.011652e-01_EB, &
+   4.383963e+01_EB, &
+   7.999980e+01_EB, 6.960747e+01_EB, 6.602987e+01_EB, 6.326339e+01_EB, 5.714448e+01_EB, 3.303355e-01_EB, &
+   2.494003e-02_EB, &
+   4.634778e+01_EB, 1.999423e-01_EB, 1.445536e+01_EB, 3.851197e+01_EB, 5.716296e+01_EB, 2.419503e+00_EB, &
+   4.403455e-03_EB, &
+   1.788269e+00_EB, 8.781616e-03_EB, 1.079139e-01_EB, 1.421403e+01_EB, 9.057111e+00_EB, 1.781522e+01_EB, &
+   1.669472e-03_EB, &
+   2.864129e-01_EB, 1.515581e-03_EB, 2.119890e-03_EB, 5.013687e+00_EB, 3.747774e+00_EB, 1.844443e+00_EB, &
+   1.069786e-03_EB, &
+   1.102908e+01_EB, 4.896633e-02_EB, 1.798393e-02_EB, 6.492346e-01_EB, 8.863603e-02_EB, 2.773305e-01_EB, &
+   5.841296e-04_EB, &
+   1.251724e+00_EB, 6.490441e-04_EB, 2.113061e-02_EB, 1.326897e+00_EB, 8.049318e-03_EB, 8.055391e-03_EB, &
+   2.478640e-04_EB/),(/7,8/))
+
+gammad1_c7h8(1:7,17:22) = RESHAPE((/ &  ! 780-805 cm-1
+   6.819808e-01_EB, 5.093301e-04_EB, 2.666337e-02_EB, 2.101043e-01_EB, 1.980342e-02_EB, 1.679664e-03_EB, &
+   1.906432e-02_EB, &
+   4.691940e-01_EB, 5.429738e-04_EB, 1.319467e-02_EB, 4.975402e-03_EB, 2.433969e-02_EB, 1.884068e-03_EB, &
+   5.887236e-03_EB, &
+   1.875981e-01_EB, 6.598198e-04_EB, 1.786636e-03_EB, 1.408548e-02_EB, 2.119727e-01_EB, 4.335098e-04_EB, &
+   1.937100e-03_EB, &
+   1.442921e-02_EB, 5.711043e-04_EB, 5.971323e-04_EB, 7.973510e-03_EB, 3.341200e-03_EB, 4.314868e-04_EB, &
+   5.200300e-04_EB, &
+   5.156874e-04_EB, 5.125082e-04_EB, 4.318513e-04_EB, 3.992184e-04_EB, 3.936730e-04_EB, 4.154189e-04_EB, &
+   4.736124e-04_EB, &
+   3.682775e-04_EB, 3.700575e-04_EB, 3.724614e-04_EB, 3.699127e-04_EB, 3.709688e-04_EB, 3.696394e-04_EB, &
+   3.680801e-04_EB/),(/7,6/))
+
+!---------------------------------------------------------------------------
+ALLOCATE(sd2_c7h8(n_temp_c7h8,29)) 
+
+! band #2: 975 cm-1 - 1175 cm-1 
+
+! snb fit with malkmus model 
+
+! error associated with malkmus fit: 
+! on transmissivity: 0.91355 % 
+
+sd2_c7h8(1:7,1:8) = RESHAPE((/ &  ! 975-1010 cm-1
+   5.806929e-04_EB, 5.942617e-04_EB, 6.726459e-04_EB, 7.052569e-04_EB, 6.695985e-04_EB, 5.159322e-04_EB, &
+   5.551144e-04_EB, &
+   6.785508e-04_EB, 8.056701e-04_EB, 8.454611e-04_EB, 7.340346e-04_EB, 7.540252e-04_EB, 6.231487e-04_EB, &
+   1.161712e-02_EB, &
+   7.608293e-04_EB, 5.613980e-02_EB, 8.330584e-04_EB, 7.050990e-04_EB, 7.281009e-04_EB, 1.902747e-03_EB, &
+   2.699830e-02_EB, &
+   4.497896e-02_EB, 9.748044e-02_EB, 5.769989e-04_EB, 8.307786e-04_EB, 1.048030e-03_EB, 3.071367e-02_EB, &
+   5.746590e-02_EB, &
+   4.185662e-02_EB, 5.807183e-02_EB, 5.845956e-03_EB, 4.738381e-03_EB, 1.373288e-02_EB, 1.722897e-02_EB, &
+   6.537832e-02_EB, &
+   2.338216e-02_EB, 1.675285e-02_EB, 2.368298e-02_EB, 3.338373e-02_EB, 1.128221e-02_EB, 2.346587e-02_EB, &
+   3.565197e-02_EB, &
+   1.379198e-02_EB, 9.132916e-04_EB, 3.690042e-02_EB, 2.275924e-02_EB, 2.434022e-02_EB, 4.242178e-02_EB, &
+   6.940845e-02_EB, &
+   2.629167e-02_EB, 2.433785e-03_EB, 7.441229e-02_EB, 7.329327e-02_EB, 8.154865e-02_EB, 8.520170e-02_EB, &
+   8.926539e-02_EB/),(/7,8/))
+
+sd2_c7h8(1:7,9:16) = RESHAPE((/ &  ! 1015-1050 cm-1
+   8.643728e-02_EB, 8.397464e-02_EB, 1.634758e-01_EB, 1.741891e-01_EB, 1.714205e-01_EB, 1.480038e-01_EB, &
+   1.360983e-01_EB, &
+   3.004729e-01_EB, 2.793190e-01_EB, 2.877798e-01_EB, 2.821584e-01_EB, 2.456569e-01_EB, 1.463510e-01_EB, &
+   1.826942e-01_EB, &
+   5.278878e-01_EB, 3.693913e-01_EB, 2.973200e-01_EB, 2.717632e-01_EB, 2.438624e-01_EB, 1.379726e-01_EB, &
+   2.050903e-01_EB, &
+   5.845808e-01_EB, 4.794762e-01_EB, 3.584954e-01_EB, 3.427664e-01_EB, 2.786454e-01_EB, 1.226379e-01_EB, &
+   2.097466e-01_EB, &
+   4.729738e-01_EB, 3.788669e-01_EB, 2.664993e-01_EB, 2.564802e-01_EB, 2.264334e-01_EB, 1.535049e-01_EB, &
+   1.682791e-01_EB, &
+   5.530868e-01_EB, 4.490113e-01_EB, 3.310727e-01_EB, 3.288768e-01_EB, 3.019277e-01_EB, 2.043861e-01_EB, &
+   1.497158e-01_EB, &
+   4.129235e-01_EB, 3.251444e-01_EB, 2.714955e-01_EB, 2.657956e-01_EB, 2.487687e-01_EB, 1.862679e-01_EB, &
+   1.223084e-01_EB, &
+   2.614169e-01_EB, 1.802809e-01_EB, 1.975745e-01_EB, 1.888234e-01_EB, 2.189458e-01_EB, 1.348280e-01_EB, &
+   9.276862e-02_EB/),(/7,8/))
+
+sd2_c7h8(1:7,17:24) = RESHAPE((/ &  ! 1055-1090 cm-1
+   2.730370e-01_EB, 1.767450e-01_EB, 2.218796e-01_EB, 2.155878e-01_EB, 2.223112e-01_EB, 1.469945e-01_EB, &
+   1.150109e-01_EB, &
+   2.816011e-01_EB, 2.052777e-01_EB, 2.522512e-01_EB, 2.342314e-01_EB, 2.280630e-01_EB, 2.544731e-01_EB, &
+   1.975636e-01_EB, &
+   3.260058e-01_EB, 2.887673e-01_EB, 2.910159e-01_EB, 2.801621e-01_EB, 2.791987e-01_EB, 2.761989e-01_EB, &
+   6.486488e-01_EB, &
+   4.240289e-01_EB, 3.848016e-01_EB, 3.433772e-01_EB, 3.147066e-01_EB, 2.873021e-01_EB, 2.027784e-01_EB, &
+   6.801384e-01_EB, &
+   5.531291e-01_EB, 4.341564e-01_EB, 3.312172e-01_EB, 3.045238e-01_EB, 2.620640e-01_EB, 1.519635e-01_EB, &
+   9.321833e-01_EB, &
+   4.365089e-01_EB, 3.538039e-01_EB, 2.730701e-01_EB, 2.397118e-01_EB, 2.227185e-01_EB, 2.009481e-01_EB, &
+   1.174461e+00_EB, &
+   4.683512e-01_EB, 3.712916e-01_EB, 2.862375e-01_EB, 2.540628e-01_EB, 2.485619e-01_EB, 2.060439e-01_EB, &
+   9.951951e-01_EB, &
+   4.698469e-01_EB, 3.518932e-01_EB, 2.825430e-01_EB, 2.624504e-01_EB, 2.213420e-01_EB, 1.625252e-01_EB, &
+   5.760843e-01_EB/),(/7,8/))
+
+sd2_c7h8(1:7,25:29) = RESHAPE((/ &  ! 1095-1175 cm-1
+   3.649981e-01_EB, 2.736054e-01_EB, 2.408070e-01_EB, 2.323294e-01_EB, 1.878487e-01_EB, 1.252916e-01_EB, &
+   4.029469e-02_EB, &
+   2.681413e-01_EB, 1.701855e-01_EB, 1.674993e-01_EB, 1.511744e-01_EB, 1.166087e-01_EB, 7.290456e-02_EB, &
+   1.474340e-01_EB, &
+   4.990165e-02_EB, 6.292687e-02_EB, 4.665808e-02_EB, 3.377088e-02_EB, 2.693981e-02_EB, 9.990414e-03_EB, &
+   9.979516e-03_EB, &
+   6.130796e-04_EB, 1.597828e-03_EB, 5.178852e-03_EB, 6.236302e-04_EB, 6.358216e-04_EB, 6.358332e-04_EB, &
+   5.729829e-04_EB, &
+   4.621323e-04_EB, 4.638592e-04_EB, 4.665860e-04_EB, 4.636519e-04_EB, 4.646393e-04_EB, 4.633936e-04_EB, &
+   4.615859e-04_EB/),(/7,5/))
+
+!---------------------------------------------------------------------------
+ALLOCATE(gammad2_c7h8(n_temp_c7h8,29)) 
+
+! band #2: 975 cm-1 - 1175 cm-1 
+
+! snb fit with malkmus model 
+
+! error associated with malkmus fit: 
+! on transmissivity: 0.91355 % 
+
+! print fine structure array gamma_d 
+
+gammad2_c7h8(1:7,1:8) = RESHAPE((/ &  ! 975-1010 cm-1
+   4.305850e-04_EB, 4.663364e-04_EB, 5.289580e-04_EB, 5.402269e-04_EB, 5.024478e-04_EB, 4.070836e-04_EB, &
+   4.471953e-04_EB, &
+   5.202785e-04_EB, 6.465361e-04_EB, 6.452178e-04_EB, 5.771613e-04_EB, 5.746126e-04_EB, 4.735889e-04_EB, &
+   1.573544e-04_EB, &
+   5.872521e-04_EB, 7.042066e-03_EB, 5.999286e-04_EB, 5.331992e-04_EB, 6.220132e-04_EB, 6.364420e-02_EB, &
+   1.528351e-04_EB, &
+   5.511126e-01_EB, 1.497331e-02_EB, 4.594486e-04_EB, 5.729761e-04_EB, 7.713361e-04_EB, 7.130935e-03_EB, &
+   1.427152e-04_EB, &
+   2.212250e+00_EB, 1.945735e-01_EB, 2.212567e-01_EB, 9.922155e-03_EB, 9.234920e-02_EB, 1.013608e-02_EB, &
+   4.272371e-04_EB, &
+   4.405486e-01_EB, 7.436540e-01_EB, 1.920483e-01_EB, 2.962863e-03_EB, 3.448915e-01_EB, 3.486423e-01_EB, &
+   1.313079e-01_EB, &
+   2.410517e-01_EB, 1.039535e-03_EB, 1.254824e-01_EB, 1.067258e-01_EB, 2.942350e-01_EB, 5.806212e-01_EB, &
+   1.774699e+00_EB, &
+   4.514842e-01_EB, 1.759071e-01_EB, 2.902656e-01_EB, 2.267366e-01_EB, 8.401946e-02_EB, 7.681227e+00_EB, &
+   1.330635e+00_EB/),(/7,8/))
+
+gammad2_c7h8(1:7,9:16) = RESHAPE((/ &  ! 1015-1050 cm-1
+   2.224412e+00_EB, 1.484769e+00_EB, 1.494944e+00_EB, 1.832759e+00_EB, 3.314911e+00_EB, 5.865543e+00_EB, &
+   6.106454e-01_EB, &
+   2.999242e+01_EB, 7.193297e+00_EB, 3.422464e+00_EB, 4.614503e+00_EB, 2.188441e+00_EB, 7.394814e+00_EB, &
+   3.908543e-02_EB, &
+   7.999990e+01_EB, 3.581705e+00_EB, 7.707850e+00_EB, 3.420693e+00_EB, 6.146487e+00_EB, 7.025651e+00_EB, &
+   3.617788e-02_EB, &
+   7.998352e+01_EB, 4.444656e-01_EB, 1.228523e+01_EB, 3.433637e+00_EB, 2.072175e+01_EB, 4.335871e+00_EB, &
+   7.248922e-02_EB, &
+   7.410363e+01_EB, 5.532136e-01_EB, 5.267901e+00_EB, 5.384235e+00_EB, 5.570719e+00_EB, 7.078253e+00_EB, &
+   7.681535e+00_EB, &
+   7.999988e+01_EB, 1.364684e+01_EB, 1.337888e+01_EB, 5.824947e+00_EB, 5.724261e+00_EB, 6.510348e+00_EB, &
+   2.593089e+00_EB, &
+   5.835221e+01_EB, 2.086568e+01_EB, 4.818524e+00_EB, 1.625989e+00_EB, 4.963013e+00_EB, 9.091313e+00_EB, &
+   2.862616e+00_EB, &
+   1.807887e+01_EB, 1.240441e+01_EB, 1.649639e+00_EB, 3.870645e+00_EB, 4.710413e+00_EB, 5.816990e+00_EB, &
+   2.011503e-01_EB/),(/7,8/))
+
+gammad2_c7h8(1:7,17:24) = RESHAPE((/ &  ! 1055-1090 cm-1
+   2.242814e+01_EB, 1.324109e+01_EB, 2.772538e+00_EB, 2.132624e+00_EB, 2.967247e+00_EB, 5.544644e+00_EB, &
+   1.492977e-02_EB, &
+   2.726543e+01_EB, 8.755811e+00_EB, 4.268738e+00_EB, 8.268829e+00_EB, 3.471302e+00_EB, 7.655547e+00_EB, &
+   4.678557e-03_EB, &
+   3.856386e+01_EB, 1.415885e+01_EB, 4.621129e+00_EB, 7.774568e+00_EB, 5.265771e-01_EB, 7.296652e+00_EB, &
+   8.956780e-04_EB, &
+   6.779154e+01_EB, 1.689515e+01_EB, 8.227216e+00_EB, 7.685408e+00_EB, 6.275187e+00_EB, 4.111618e+00_EB, &
+   1.120381e-03_EB, &
+   7.998412e+01_EB, 5.217367e+00_EB, 1.270480e+01_EB, 7.011278e+00_EB, 9.533137e+00_EB, 6.557224e+00_EB, &
+   7.187912e-04_EB, &
+   6.476932e+01_EB, 4.324490e+00_EB, 7.006941e+00_EB, 3.059077e+00_EB, 2.551623e+00_EB, 6.781168e+00_EB, &
+   4.850850e-04_EB, &
+   7.999697e+01_EB, 1.683983e+01_EB, 7.523811e+00_EB, 3.934915e+00_EB, 3.190601e+00_EB, 5.987392e+00_EB, &
+   4.640575e-04_EB, &
+   7.298422e+01_EB, 1.746059e+01_EB, 8.445975e+00_EB, 4.651083e+00_EB, 5.086497e+00_EB, 1.446891e+00_EB, &
+   2.261182e-04_EB/),(/7,8/))
+
+gammad2_c7h8(1:7,25:29) = RESHAPE((/ &  ! 1095-1175 cm-1
+   5.656308e+01_EB, 1.932458e+01_EB, 5.566997e+00_EB, 2.210155e-01_EB, 4.019081e+00_EB, 7.861722e-02_EB, &
+   3.404900e-03_EB, &
+   2.190597e+01_EB, 1.019795e+01_EB, 2.244564e+00_EB, 1.625625e+00_EB, 5.393117e-01_EB, 1.054102e+00_EB, &
+   7.309670e-05_EB, &
+   4.172119e-01_EB, 6.066095e-01_EB, 3.794528e-01_EB, 2.201505e-01_EB, 8.146470e-02_EB, 1.686354e-01_EB, &
+   2.521455e-03_EB, &
+   4.904118e-04_EB, 8.240680e-03_EB, 2.319123e-01_EB, 4.751613e-04_EB, 5.109468e-04_EB, 5.032463e-04_EB, &
+   4.422597e-04_EB, &
+   3.682775e-04_EB, 3.700575e-04_EB, 3.724614e-04_EB, 3.699127e-04_EB, 3.709688e-04_EB, 3.696394e-04_EB, &
+   3.680801e-04_EB/),(/7,5/))
+
+!---------------------------------------------------------------------------
+ALLOCATE(sd3_c7h8(n_temp_c7h8,17)) 
+
+! band #3: 1275 cm-1 - 1675 cm-1 
+
+! snb fit with malkmus model 
+
+! error associated with malkmus fit: 
+! on transmissivity: 1.8457 % 
+
+sd3_c7h8(1:7,1:8) = RESHAPE((/ &  ! 1275-1450 cm-1
+   6.100102e-04_EB, 7.780830e-03_EB, 1.134938e-03_EB, 8.737574e-04_EB, 6.027841e-03_EB, 4.138198e-03_EB, &
+   9.056224e-04_EB, &
+   7.403110e-04_EB, 3.544033e-02_EB, 3.023568e-02_EB, 1.508266e-02_EB, 2.813528e-02_EB, 2.043206e-02_EB, &
+   4.350956e-01_EB, &
+   3.178283e-03_EB, 3.702754e-02_EB, 4.100162e-02_EB, 2.423149e-02_EB, 4.352025e-02_EB, 3.192771e-02_EB, &
+   9.676683e-01_EB, &
+   5.605844e-02_EB, 6.834484e-02_EB, 8.335619e-02_EB, 6.360984e-02_EB, 6.991888e-02_EB, 5.926399e-02_EB, &
+   6.248318e-02_EB, &
+   2.335707e-01_EB, 2.104431e-01_EB, 2.014754e-01_EB, 1.664392e-01_EB, 1.529464e-01_EB, 1.145999e-01_EB, &
+   4.880863e-02_EB, &
+   2.297034e-01_EB, 1.952774e-01_EB, 2.009723e-01_EB, 1.554485e-01_EB, 1.472329e-01_EB, 9.989047e-02_EB, &
+   5.114395e-02_EB, &
+   2.466205e-01_EB, 2.254143e-01_EB, 2.146406e-01_EB, 1.846656e-01_EB, 1.917496e-01_EB, 1.694292e-01_EB, &
+   9.885420e-02_EB, &
+   6.338228e-01_EB, 4.862753e-01_EB, 4.470592e-01_EB, 3.954809e-01_EB, 3.379362e-01_EB, 2.524978e-01_EB, &
+   2.245216e-01_EB/),(/7,8/))
+
+sd3_c7h8(1:7,9:16) = RESHAPE((/ &  ! 1475-1650 cm-1
+   8.091914e-01_EB, 6.844493e-01_EB, 6.417303e-01_EB, 6.044514e-01_EB, 5.830416e-01_EB, 4.886091e-01_EB, &
+   3.460225e-01_EB, &
+   1.985404e+00_EB, 1.434197e+00_EB, 1.197360e+00_EB, 1.090591e+00_EB, 8.747838e-01_EB, 5.725550e-01_EB, &
+   3.573484e-01_EB, &
+   5.171385e-01_EB, 4.486683e-01_EB, 4.336080e-01_EB, 3.554049e-01_EB, 3.143224e-01_EB, 2.347278e-01_EB, &
+   1.742309e-01_EB, &
+   2.372746e-01_EB, 2.197212e-01_EB, 2.373528e-01_EB, 1.855960e-01_EB, 1.760600e-01_EB, 1.693906e-01_EB, &
+   1.742322e-01_EB, &
+   2.366393e-01_EB, 3.786876e-01_EB, 4.105672e-01_EB, 2.381817e-01_EB, 2.272899e-01_EB, 2.664032e-01_EB, &
+   3.863583e-01_EB, &
+   8.572620e-01_EB, 1.527668e+00_EB, 1.063149e+00_EB, 7.295884e-01_EB, 4.745380e-01_EB, 3.602757e-01_EB, &
+   2.354867e-01_EB, &
+   5.567486e-01_EB, 5.472333e-01_EB, 5.016325e-01_EB, 3.512578e-01_EB, 1.717825e-01_EB, 9.711190e-02_EB, &
+   2.718347e-02_EB, &
+   2.625054e-02_EB, 5.072059e-03_EB, 1.694459e-02_EB, 9.001577e-03_EB, 5.938464e-04_EB, 6.681563e-04_EB, &
+   5.196216e-04_EB/),(/7,8/))
+
+sd3_c7h8(1:7,17:17) = RESHAPE((/ &  ! 1675-1675 cm-1
+   4.621323e-04_EB, 4.638592e-04_EB, 4.665860e-04_EB, 4.636519e-04_EB, 4.646393e-04_EB, 4.633936e-04_EB, &
+   4.615859e-04_EB/),(/7,1/))
+
+!---------------------------------------------------------------------------
+ALLOCATE(gammad3_c7h8(n_temp_c7h8,17)) 
+
+! band #3: 1275 cm-1 - 1675 cm-1 
+
+! snb fit with malkmus model 
+
+! error associated with malkmus fit: 
+! on transmissivity: 1.8457 % 
+
+! print fine structure array gamma_d 
+
+gammad3_c7h8(1:7,1:8) = RESHAPE((/ &  ! 1275-1450 cm-1
+   4.795815e-04_EB, 2.124259e-03_EB, 1.024725e-03_EB, 7.095131e-04_EB, 6.311264e-03_EB, 2.305633e-03_EB, &
+   5.045893e-04_EB, &
+   5.695615e-04_EB, 1.692360e-02_EB, 7.400058e-03_EB, 1.063887e-01_EB, 2.392876e-01_EB, 3.837883e-04_EB, &
+   3.113013e-05_EB, &
+   2.535772e-03_EB, 3.802603e-02_EB, 2.314277e-02_EB, 4.430523e-01_EB, 1.112554e-01_EB, 1.504970e-01_EB, &
+   4.347453e-05_EB, &
+   7.174141e-02_EB, 1.160640e+00_EB, 2.191895e-02_EB, 4.952819e-01_EB, 4.273983e-01_EB, 3.451409e-01_EB, &
+   2.592647e-01_EB, &
+   8.276943e+00_EB, 3.502859e-01_EB, 5.113046e-02_EB, 2.027660e+00_EB, 2.707192e+00_EB, 3.833564e-01_EB, &
+   3.464319e-01_EB, &
+   1.015475e+01_EB, 4.674500e+00_EB, 4.689087e-02_EB, 3.954451e+00_EB, 3.031215e+00_EB, 1.038644e+00_EB, &
+   6.356775e-02_EB, &
+   1.948113e+01_EB, 7.058967e+00_EB, 9.857392e-01_EB, 6.992797e+00_EB, 4.529865e+00_EB, 2.876236e+00_EB, &
+   1.523489e+00_EB, &
+   7.999993e+01_EB, 4.801475e+01_EB, 2.297044e+00_EB, 2.307491e+01_EB, 2.255518e+01_EB, 6.921021e+00_EB, &
+   3.793481e+00_EB/),(/7,8/))
+
+gammad3_c7h8(1:7,9:16) = RESHAPE((/ &  ! 1475-1650 cm-1
+   7.999994e+01_EB, 3.335220e+01_EB, 5.984703e-01_EB, 2.853393e+01_EB, 3.626523e+01_EB, 2.277723e+01_EB, &
+   2.603661e+01_EB, &
+   7.999988e+01_EB, 6.963104e+01_EB, 6.603136e+01_EB, 6.344400e+01_EB, 5.716242e+01_EB, 4.913311e+01_EB, &
+   1.650821e+01_EB, &
+   7.999998e+01_EB, 6.963102e+01_EB, 2.177188e+01_EB, 3.299642e+01_EB, 1.878956e+01_EB, 8.669014e+00_EB, &
+   7.333480e+00_EB, &
+   5.251899e+01_EB, 2.739552e+01_EB, 6.379395e+00_EB, 1.192897e+01_EB, 1.481504e+01_EB, 6.745394e+00_EB, &
+   2.823356e+00_EB, &
+   1.643612e-01_EB, 5.735340e-03_EB, 4.062201e-03_EB, 3.334872e-02_EB, 1.282097e+00_EB, 8.493361e-02_EB, &
+   6.376486e-03_EB, &
+   1.487048e-01_EB, 1.035601e-02_EB, 1.158524e-02_EB, 3.774427e-02_EB, 1.523506e-01_EB, 2.811809e-02_EB, &
+   7.547214e-03_EB, &
+   7.999361e+01_EB, 1.936478e-02_EB, 9.051617e-03_EB, 1.944160e-02_EB, 2.206877e-01_EB, 2.134674e-02_EB, &
+   3.778034e-01_EB, &
+   1.287431e-02_EB, 7.240508e-04_EB, 6.507482e-03_EB, 3.950013e-03_EB, 4.716179e-04_EB, 5.110565e-04_EB, &
+   4.179497e-04_EB/),(/7,8/))
+
+gammad3_c7h8(1:7,17:17) = RESHAPE((/ &  ! 1675-1675 cm-1
+   3.682775e-04_EB, 3.700575e-04_EB, 3.724614e-04_EB, 3.699127e-04_EB, 3.709688e-04_EB, 3.696394e-04_EB, &
+   3.680801e-04_EB/),(/7,1/))
+
+!---------------------------------------------------------------------------
+ALLOCATE(sd4_c7h8(n_temp_c7h8,18)) 
+
+! band #4: 1650 cm-1 - 2075 cm-1 
+
+! snb fit with malkmus model 
+
+! error associated with malkmus fit: 
+! on transmissivity: 0.43921 % 
+
+sd4_c7h8(1:7,1:8) = RESHAPE((/ &  ! 1650-1825 cm-1
+   1.608510e-02_EB, 8.538057e-04_EB, 2.868555e-03_EB, 8.340494e-04_EB, 6.015596e-04_EB, 4.952974e-04_EB, &
+   5.998542e-04_EB, &
+   4.848768e-02_EB, 9.249328e-03_EB, 2.165734e-02_EB, 1.578699e-02_EB, 7.483581e-04_EB, 5.699315e-04_EB, &
+   7.083490e-04_EB, &
+   3.748462e-02_EB, 1.617457e-02_EB, 2.578284e-02_EB, 1.643850e-02_EB, 1.017398e-02_EB, 2.017300e-03_EB, &
+   7.500522e-03_EB, &
+   1.132410e-01_EB, 2.967893e-01_EB, 6.916754e-02_EB, 5.538010e-02_EB, 3.122037e-02_EB, 1.282020e-02_EB, &
+   6.409946e-02_EB, &
+   4.946037e-01_EB, 4.749997e-02_EB, 4.638123e-02_EB, 4.364247e-02_EB, 3.296949e-02_EB, 3.250858e-02_EB, &
+   6.216037e-02_EB, &
+   9.754174e-01_EB, 6.827422e-01_EB, 5.097573e-01_EB, 4.113609e-01_EB, 9.436322e-02_EB, 1.578733e-01_EB, &
+   1.005549e-01_EB, &
+   5.760301e-01_EB, 1.058899e+00_EB, 5.428139e-01_EB, 2.925165e-01_EB, 1.220623e-01_EB, 2.559121e-01_EB, &
+   8.881943e-02_EB, &
+   1.187295e+00_EB, 1.013370e+00_EB, 7.226648e-01_EB, 5.498312e-01_EB, 8.139112e-02_EB, 4.364089e-01_EB, &
+   8.132406e-02_EB/),(/7,8/))
+
+sd4_c7h8(1:7,9:16) = RESHAPE((/ &  ! 1850-2025 cm-1
+   8.856836e-01_EB, 9.186222e-01_EB, 4.794847e-01_EB, 4.024356e-01_EB, 1.306238e-01_EB, 3.063448e-01_EB, &
+   9.935498e-02_EB, &
+   1.034528e+00_EB, 7.215443e-01_EB, 5.929663e-01_EB, 4.319927e-01_EB, 8.863470e-02_EB, 3.544881e-01_EB, &
+   5.660195e-02_EB, &
+   1.495500e+00_EB, 3.838684e-01_EB, 1.268890e-01_EB, 4.632815e-02_EB, 1.148509e-01_EB, 6.472883e-02_EB, &
+   8.665695e-02_EB, &
+   5.568983e-01_EB, 5.685082e-01_EB, 5.071619e-01_EB, 3.647283e-01_EB, 1.319697e-01_EB, 1.328525e-01_EB, &
+   8.945221e-02_EB, &
+   2.939080e-01_EB, 3.996266e-01_EB, 2.679096e-01_EB, 1.696599e-01_EB, 1.249259e-01_EB, 8.650031e-02_EB, &
+   7.539025e-02_EB, &
+   4.677446e-01_EB, 2.881514e-02_EB, 6.793664e-02_EB, 3.565764e-02_EB, 1.939151e-02_EB, 1.637475e-02_EB, &
+   3.310412e-02_EB, &
+   3.406776e-02_EB, 1.092503e-02_EB, 1.198880e-02_EB, 1.579425e-02_EB, 1.184388e-02_EB, 1.945188e-03_EB, &
+   2.385167e-02_EB, &
+   1.429157e-02_EB, 8.354021e-04_EB, 4.409521e-03_EB, 4.730578e-03_EB, 4.878561e-03_EB, 8.332528e-04_EB, &
+   2.664558e-02_EB/),(/7,8/))
+
+sd4_c7h8(1:7,17:18) = RESHAPE((/ &  ! 2050-2075 cm-1
+   5.862965e-04_EB, 5.938092e-04_EB, 6.747537e-04_EB, 5.948772e-04_EB, 6.040692e-04_EB, 6.075352e-04_EB, &
+   3.980874e-03_EB, &
+   4.621323e-04_EB, 4.638592e-04_EB, 4.665860e-04_EB, 4.636519e-04_EB, 4.646393e-04_EB, 4.633936e-04_EB, &
+   4.615859e-04_EB/),(/7,2/))
+
+!---------------------------------------------------------------------------
+ALLOCATE(gammad4_c7h8(n_temp_c7h8,18)) 
+
+! band #4: 1650 cm-1 - 2075 cm-1 
+
+! snb fit with malkmus model 
+
+! error associated with malkmus fit: 
+! on transmissivity: 0.43921 % 
+
+! print fine structure array gamma_d 
+
+gammad4_c7h8(1:7,1:8) = RESHAPE((/ &  ! 1650-1825 cm-1
+   9.073750e-01_EB, 7.155535e-04_EB, 1.417709e-01_EB, 6.862278e-04_EB, 4.770609e-04_EB, 3.962002e-04_EB, &
+   4.599493e-04_EB, &
+   4.897835e-01_EB, 2.228040e-03_EB, 1.889228e-03_EB, 3.037127e-03_EB, 5.957388e-04_EB, 4.412357e-04_EB, &
+   5.439496e-04_EB, &
+   8.222146e-01_EB, 1.967261e-01_EB, 1.176890e-01_EB, 1.993414e-01_EB, 3.392040e-01_EB, 1.285307e+00_EB, &
+   7.330343e-02_EB, &
+   1.711715e-02_EB, 2.387489e-04_EB, 4.930892e-03_EB, 6.589700e-03_EB, 1.627007e-01_EB, 8.239901e-03_EB, &
+   5.086131e-03_EB, &
+   2.105689e-04_EB, 4.813970e-03_EB, 5.785146e-03_EB, 2.367207e-02_EB, 2.418442e-01_EB, 7.693889e-03_EB, &
+   3.096368e-02_EB, &
+   3.797437e-04_EB, 2.010270e-04_EB, 4.063113e-04_EB, 7.930910e-04_EB, 6.260656e-02_EB, 3.447434e-03_EB, &
+   2.052893e+00_EB, &
+   5.974715e-03_EB, 9.625448e-04_EB, 1.385440e-03_EB, 4.460370e-03_EB, 7.510642e-02_EB, 1.409188e-03_EB, &
+   5.077965e-01_EB, &
+   2.598721e-04_EB, 9.700799e-05_EB, 1.875798e-04_EB, 3.395949e-04_EB, 1.967132e-02_EB, 5.386934e-04_EB, &
+   7.215293e-01_EB/),(/7,8/))
+
+gammad4_c7h8(1:7,9:16) = RESHAPE((/ &  ! 1850-2025 cm-1
+   1.840578e-03_EB, 8.312411e-04_EB, 1.279188e-03_EB, 2.105186e-03_EB, 3.505265e-02_EB, 1.459376e-03_EB, &
+   1.277784e+00_EB, &
+   1.258299e-03_EB, 4.510848e-04_EB, 4.294071e-04_EB, 8.136257e-04_EB, 9.696057e-03_EB, 2.146063e-04_EB, &
+   6.860048e-01_EB, &
+   4.671598e-05_EB, 4.670991e-05_EB, 7.143144e-05_EB, 4.655956e-03_EB, 4.081375e-04_EB, 5.438877e-03_EB, &
+   8.906804e-02_EB, &
+   1.496812e-03_EB, 6.530123e-04_EB, 7.078867e-04_EB, 1.683327e-03_EB, 3.846642e-02_EB, 1.605013e-02_EB, &
+   5.460498e-01_EB, &
+   6.920106e-02_EB, 4.084630e-03_EB, 4.488361e-03_EB, 4.217654e-02_EB, 7.816064e-02_EB, 2.053699e-02_EB, &
+   9.131605e-03_EB, &
+   2.787181e-04_EB, 4.069568e-03_EB, 6.638116e-04_EB, 5.502709e-03_EB, 9.104577e-03_EB, 6.898146e-03_EB, &
+   1.209388e-01_EB, &
+   4.515662e-03_EB, 2.851322e-03_EB, 2.748099e-03_EB, 5.552875e-03_EB, 6.615247e-03_EB, 9.856806e-04_EB, &
+   1.115308e-02_EB, &
+   3.124492e-03_EB, 5.314268e-04_EB, 2.263215e-03_EB, 1.662162e-03_EB, 2.480485e-03_EB, 6.346151e-04_EB, &
+   2.031025e-03_EB/),(/7,8/))
+
+gammad4_c7h8(1:7,17:18) = RESHAPE((/ &  ! 2050-2075 cm-1
+   4.587128e-04_EB, 4.524884e-04_EB, 5.170999e-04_EB, 4.681410e-04_EB, 4.819639e-04_EB, 4.673877e-04_EB, &
+   8.021840e-04_EB, &
+   3.682775e-04_EB, 3.700575e-04_EB, 3.724614e-04_EB, 3.699127e-04_EB, 3.709688e-04_EB, 3.696394e-04_EB, &
+   3.680801e-04_EB/),(/7,2/))
+
+!---------------------------------------------------------------------------
+ALLOCATE(sd5_c7h8(n_temp_c7h8,23)) 
+
+! band #5: 2675 cm-1 - 3225 cm-1 
+
+! snb fit with malkmus model 
+
+! error associated with malkmus fit: 
+! on transmissivity: 2.2868 % 
+
+sd5_c7h8(1:7,1:8) = RESHAPE((/ &  ! 2675-2850 cm-1
+   5.916860e-04_EB, 6.494496e-04_EB, 7.055877e-04_EB, 6.603478e-04_EB, 6.674805e-04_EB, 5.589319e-04_EB, &
+   6.137597e-04_EB, &
+   7.500569e-04_EB, 7.074450e-04_EB, 9.098169e-04_EB, 7.561953e-04_EB, 1.607193e-03_EB, 1.018018e-02_EB, &
+   7.780318e-03_EB, &
+   7.029259e-04_EB, 8.479757e-04_EB, 9.039741e-04_EB, 8.123582e-04_EB, 2.347565e-02_EB, 3.011753e-02_EB, &
+   2.717306e-02_EB, &
+   8.267165e-04_EB, 8.801454e-04_EB, 2.940361e-03_EB, 1.990166e-03_EB, 4.660083e-02_EB, 4.429277e-02_EB, &
+   3.863177e-02_EB, &
+   8.156025e-04_EB, 1.506400e-03_EB, 6.730104e-03_EB, 3.740574e-03_EB, 2.586356e-02_EB, 3.987065e-02_EB, &
+   4.205663e-02_EB, &
+   9.809286e-03_EB, 1.335514e-02_EB, 2.488364e-02_EB, 1.572642e-02_EB, 4.731877e-02_EB, 6.718605e-02_EB, &
+   6.938131e-02_EB, &
+   5.850971e-02_EB, 6.588341e-02_EB, 7.434265e-02_EB, 6.744072e-02_EB, 1.018290e-01_EB, 1.263017e-01_EB, &
+   1.302993e-01_EB, &
+   2.663902e-01_EB, 2.671000e-01_EB, 2.879771e-01_EB, 2.569076e-01_EB, 2.774278e-01_EB, 2.512113e-01_EB, &
+   2.305380e-01_EB/),(/7,8/))
+
+sd5_c7h8(1:7,9:16) = RESHAPE((/ &  ! 2875-3050 cm-1
+   1.192316e+00_EB, 9.205767e-01_EB, 8.299791e-01_EB, 7.348094e-01_EB, 6.292028e-01_EB, 4.584459e-01_EB, &
+   3.314507e-01_EB, &
+   1.111204e+00_EB, 9.394978e-01_EB, 8.641911e-01_EB, 8.038659e-01_EB, 7.457709e-01_EB, 6.165272e-01_EB, &
+   4.772364e-01_EB, &
+   2.020089e+00_EB, 1.631718e+00_EB, 1.548727e+00_EB, 1.354242e+00_EB, 1.167657e+00_EB, 8.526752e-01_EB, &
+   6.021600e-01_EB, &
+   1.932741e+00_EB, 1.403246e+00_EB, 1.298233e+00_EB, 1.078566e+00_EB, 8.872613e-01_EB, 5.993978e-01_EB, &
+   4.326418e-01_EB, &
+   9.805520e-01_EB, 7.107386e-01_EB, 6.778887e-01_EB, 5.479328e-01_EB, 4.804311e-01_EB, 3.935294e-01_EB, &
+   3.642029e-01_EB, &
+   1.226852e+00_EB, 9.501327e-01_EB, 8.230054e-01_EB, 8.274332e-01_EB, 8.323208e-01_EB, 7.816587e-01_EB, &
+   6.650895e-01_EB, &
+   3.262768e+00_EB, 2.723650e+00_EB, 2.296188e+00_EB, 2.270140e+00_EB, 1.935929e+00_EB, 1.369446e+00_EB, &
+   9.666500e-01_EB, &
+   3.556303e+00_EB, 2.816675e+00_EB, 2.390948e+00_EB, 2.282893e+00_EB, 1.948012e+00_EB, 1.461546e+00_EB, &
+   1.092304e+00_EB/),(/7,8/))
+
+sd5_c7h8(1:7,17:23) = RESHAPE((/ &  ! 3075-3225 cm-1
+   2.694239e+00_EB, 2.217181e+00_EB, 1.960010e+00_EB, 1.867801e+00_EB, 1.644870e+00_EB, 1.225906e+00_EB, &
+   8.559281e-01_EB, &
+   1.505365e+00_EB, 1.180006e+00_EB, 1.047132e+00_EB, 9.563041e-01_EB, 8.157730e-01_EB, 5.594937e-01_EB, &
+   3.588645e-01_EB, &
+   3.952204e-01_EB, 3.072414e-01_EB, 2.787226e-01_EB, 2.333774e-01_EB, 1.986791e-01_EB, 1.344281e-01_EB, &
+   8.253592e-02_EB, &
+   2.640387e-02_EB, 3.373476e-02_EB, 3.927558e-02_EB, 2.200042e-02_EB, 3.743437e-02_EB, 3.283105e-02_EB, &
+   1.723376e-02_EB, &
+   2.071719e-02_EB, 1.345537e-02_EB, 1.924395e-02_EB, 6.019999e-03_EB, 1.908321e-02_EB, 1.111107e-02_EB, &
+   6.304850e-04_EB, &
+   1.966078e-03_EB, 1.825102e-03_EB, 3.977009e-03_EB, 6.125614e-04_EB, 1.893366e-03_EB, 2.342482e-03_EB, &
+   5.793976e-04_EB, &
+   4.621323e-04_EB, 4.638592e-04_EB, 4.665860e-04_EB, 4.636519e-04_EB, 4.646393e-04_EB, 4.633936e-04_EB, &
+   4.615859e-04_EB/),(/7,7/))
+
+!---------------------------------------------------------------------------
+ALLOCATE(gammad5_c7h8(n_temp_c7h8,23)) 
+
+! band #5: 2675 cm-1 - 3225 cm-1 
+
+! snb fit with malkmus model 
+
+! error associated with malkmus fit: 
+! on transmissivity: 2.2868 % 
+
+! print fine structure array gamma_d 
+
+gammad5_c7h8(1:7,1:8) = RESHAPE((/ &  ! 2675-2850 cm-1
+   4.498679e-04_EB, 5.206905e-04_EB, 5.314804e-04_EB, 5.225909e-04_EB, 5.382880e-04_EB, 4.354686e-04_EB, &
+   4.954396e-04_EB, &
+   5.733660e-04_EB, 5.664218e-04_EB, 6.760255e-04_EB, 5.720172e-04_EB, 1.214045e-03_EB, 6.728005e-03_EB, &
+   6.901498e-02_EB, &
+   5.501549e-04_EB, 6.422611e-04_EB, 6.751496e-04_EB, 6.170879e-04_EB, 2.505333e-02_EB, 2.929665e-02_EB, &
+   2.183072e-01_EB, &
+   6.226316e-04_EB, 6.634878e-04_EB, 2.204441e-03_EB, 1.315450e-03_EB, 1.427511e-01_EB, 5.684139e-02_EB, &
+   1.991618e-01_EB, &
+   6.173941e-04_EB, 8.607660e-04_EB, 4.084909e-03_EB, 1.485988e-03_EB, 6.217446e-02_EB, 1.696125e-01_EB, &
+   6.362403e-01_EB, &
+   2.271432e-01_EB, 2.575315e-02_EB, 1.742774e-02_EB, 4.872962e-03_EB, 1.222993e-01_EB, 2.494679e-01_EB, &
+   4.960213e-01_EB, &
+   3.499358e-01_EB, 9.426016e-01_EB, 5.241002e-02_EB, 4.920380e-02_EB, 6.407093e-01_EB, 1.208700e+00_EB, &
+   3.229169e+00_EB, &
+   2.056851e+01_EB, 2.155787e+00_EB, 1.241796e-01_EB, 3.443147e-01_EB, 8.158180e+00_EB, 8.235706e+00_EB, &
+   4.544885e+00_EB/),(/7,8/))
+
+gammad5_c7h8(1:7,9:16) = RESHAPE((/ &  ! 2875-3050 cm-1
+   7.999651e+01_EB, 4.892463e+01_EB, 2.269762e+00_EB, 1.699238e+01_EB, 3.883167e+01_EB, 2.126359e+01_EB, &
+   1.128396e+01_EB, &
+   7.999972e+01_EB, 6.309208e+01_EB, 3.234965e+00_EB, 1.718937e+01_EB, 4.942497e+01_EB, 3.563188e+01_EB, &
+   2.569318e+01_EB, &
+   7.999990e+01_EB, 6.940301e+01_EB, 2.588169e+00_EB, 6.006982e+00_EB, 5.718259e+01_EB, 4.914102e+01_EB, &
+   3.825054e+01_EB, &
+   7.999998e+01_EB, 6.945636e+01_EB, 5.656023e+01_EB, 4.602265e+01_EB, 5.718979e+01_EB, 4.365360e+01_EB, &
+   2.767624e+01_EB, &
+   7.999997e+01_EB, 6.310533e+01_EB, 2.112740e+01_EB, 2.715276e+01_EB, 2.826351e+01_EB, 1.692961e+01_EB, &
+   1.913465e+01_EB, &
+   7.999883e+01_EB, 6.945732e+01_EB, 3.458543e+00_EB, 4.892432e+01_EB, 5.719058e+01_EB, 4.910638e+01_EB, &
+   3.932336e+01_EB, &
+   7.999636e+01_EB, 6.932335e+01_EB, 2.959489e+01_EB, 2.214939e+01_EB, 5.718273e+01_EB, 4.914071e+01_EB, &
+   4.383529e+01_EB, &
+   7.999930e+01_EB, 6.963014e+01_EB, 6.599550e+01_EB, 5.266039e+01_EB, 5.718071e+01_EB, 4.910109e+01_EB, &
+   4.383604e+01_EB/),(/7,8/))
+
+gammad5_c7h8(1:7,17:23) = RESHAPE((/ &  ! 3075-3225 cm-1
+   7.999949e+01_EB, 6.961299e+01_EB, 6.604063e+01_EB, 2.849107e+01_EB, 5.719148e+01_EB, 4.914326e+01_EB, &
+   4.383622e+01_EB, &
+   7.999993e+01_EB, 6.944137e+01_EB, 6.603883e+01_EB, 3.834261e+01_EB, 5.713287e+01_EB, 3.198295e+01_EB, &
+   1.533847e+01_EB, &
+   5.103942e+01_EB, 7.534768e+00_EB, 6.064864e+00_EB, 1.229512e+00_EB, 4.034341e+00_EB, 1.526492e+00_EB, &
+   9.982477e-01_EB, &
+   4.966937e-01_EB, 3.630636e-01_EB, 1.127309e-01_EB, 1.271562e-02_EB, 2.831161e-01_EB, 2.892147e-01_EB, &
+   8.723984e-02_EB, &
+   2.678214e-01_EB, 1.122623e-01_EB, 2.684864e-02_EB, 1.687467e-03_EB, 8.582904e-03_EB, 1.126356e-01_EB, &
+   4.870184e-04_EB, &
+   5.319443e-03_EB, 2.133031e-03_EB, 2.657648e-03_EB, 4.684001e-04_EB, 1.112851e-03_EB, 5.919668e-03_EB, &
+   4.552670e-04_EB, &
+   3.682775e-04_EB, 3.700575e-04_EB, 3.724614e-04_EB, 3.699127e-04_EB, 3.709688e-04_EB, 3.696394e-04_EB, &
+   3.680801e-04_EB/),(/7,7/))
+
+!--------------------------------old radcal data----------------------------------------
+!  initialize sd array
+
+! temp,k= 300     600      1000      1500      2000      2500       
+
+sd(1:6,1:8) = RESHAPE ((/  & ! 50-225
+.950e+00_EB, .103e+00_EB, .420e-01_EB, .114e-01_EB, .450e-02_EB, .300e-02_EB, &
+.208e+01_EB, .365e+00_EB, .113e+00_EB, .375e-01_EB, .195e-01_EB, .134e-01_EB, &
+.368e+01_EB, .990e+00_EB, .300e+00_EB, .104e+00_EB, .577e-01_EB, .365e-01_EB,  & 
+.650e+01_EB, .201e+01_EB, .650e+00_EB, .214e+00_EB, .128e+00_EB, .845e-01_EB, &   
+.825e+01_EB, .325e+01_EB, .121e+01_EB, .415e+00_EB, .260e+00_EB, .168e+00_EB, &  
+.870e+01_EB, .452e+01_EB, .189e+01_EB, .765e+00_EB, .450e+00_EB, .289e+00_EB, &  
+.810e+01_EB, .540e+01_EB, .261e+01_EB, .126e+01_EB, .695e+00_EB, .460e+00_EB, &  
+.682e+01_EB, .600e+01_EB, .337e+01_EB, .179e+01_EB, .101e+01_EB, .679e+00_EB/), &
 (/6,8/))
-SD(1:6,9:16) = RESHAPE ((/ &  ! 250-425
-.493E+01_EB, .622E+01_EB, .407E+01_EB, .230E+01_EB, .135E+01_EB, .935E+00_EB,  &   
-.316E+01_EB, .592E+01_EB, .456E+01_EB, .281E+01_EB, .172E+01_EB, .122E+01_EB,  &  
-.199E+01_EB, .528E+01_EB, .479E+01_EB, .328E+01_EB, .213E+01_EB, .149E+01_EB,  &   
-.113E+01_EB, .450E+01_EB, .484E+01_EB, .361E+01_EB, .249E+01_EB, .179E+01_EB,  &   
-.585E+00_EB, .370E+01_EB, .471E+01_EB, .383E+01_EB, .284E+01_EB, .208E+01_EB, &    
-.293E+00_EB, .289E+01_EB, .443E+01_EB, .394E+01_EB, .312E+01_EB, .237E+01_EB, &    
-.138E+00_EB, .205E+01_EB, .400E+01_EB, .396E+01_EB, .330E+01_EB, .260E+01_EB, &    
-.620E-01_EB, .143E+01_EB, .347E+01_EB, .388E+01_EB, .341E+01_EB, .280E+01_EB/), &  
+sd(1:6,9:16) = RESHAPE ((/ &  ! 250-425
+.493e+01_EB, .622e+01_EB, .407e+01_EB, .230e+01_EB, .135e+01_EB, .935e+00_EB,  &   
+.316e+01_EB, .592e+01_EB, .456e+01_EB, .281e+01_EB, .172e+01_EB, .122e+01_EB,  &  
+.199e+01_EB, .528e+01_EB, .479e+01_EB, .328e+01_EB, .213e+01_EB, .149e+01_EB,  &   
+.113e+01_EB, .450e+01_EB, .484e+01_EB, .361e+01_EB, .249e+01_EB, .179e+01_EB,  &   
+.585e+00_EB, .370e+01_EB, .471e+01_EB, .383e+01_EB, .284e+01_EB, .208e+01_EB, &    
+.293e+00_EB, .289e+01_EB, .443e+01_EB, .394e+01_EB, .312e+01_EB, .237e+01_EB, &    
+.138e+00_EB, .205e+01_EB, .400e+01_EB, .396e+01_EB, .330e+01_EB, .260e+01_EB, &    
+.620e-01_EB, .143e+01_EB, .347e+01_EB, .388e+01_EB, .341e+01_EB, .280e+01_EB/), &  
 (/6,8/))
-SD(1:6,17:24) = RESHAPE ((/ & ! 450-625
-.255E-01_EB, .950E+00_EB, .292E+01_EB, .370E+01_EB, .345E+01_EB, .295E+01_EB,   &  
-.940E-02_EB, .610E+00_EB, .236E+01_EB, .343E+01_EB, .342E+01_EB, .304E+01_EB,  &   
-.340E-02_EB, .386E+00_EB, .188E+01_EB, .310E+01_EB, .334E+01_EB, .309E+01_EB,   &  
-.105E-02_EB, .236E+00_EB, .145E+01_EB, .274E+01_EB, .319E+01_EB, .307E+01_EB,   &  
-.350E-03_EB, .144E+00_EB, .110E+01_EB, .238E+01_EB, .300E+01_EB, .301E+01_EB,   & 
-.126E-03_EB, .820E-01_EB, .818E+00_EB, .204E+01_EB, .276E+01_EB, .289E+01_EB,   &  
-.430E-04_EB, .445E-01_EB, .598E+00_EB, .174E+01_EB, .248E+01_EB, .275E+01_EB,  &  
-.150E-04_EB, .242E-01_EB, .427E+00_EB, .145E+01_EB, .222E+01_EB, .260E+01_EB/), & 
+sd(1:6,17:24) = RESHAPE ((/ & ! 450-625
+.255e-01_EB, .950e+00_EB, .292e+01_EB, .370e+01_EB, .345e+01_EB, .295e+01_EB,   &  
+.940e-02_EB, .610e+00_EB, .236e+01_EB, .343e+01_EB, .342e+01_EB, .304e+01_EB,  &   
+.340e-02_EB, .386e+00_EB, .188e+01_EB, .310e+01_EB, .334e+01_EB, .309e+01_EB,   &  
+.105e-02_EB, .236e+00_EB, .145e+01_EB, .274e+01_EB, .319e+01_EB, .307e+01_EB,   &  
+.350e-03_EB, .144e+00_EB, .110e+01_EB, .238e+01_EB, .300e+01_EB, .301e+01_EB,   & 
+.126e-03_EB, .820e-01_EB, .818e+00_EB, .204e+01_EB, .276e+01_EB, .289e+01_EB,   &  
+.430e-04_EB, .445e-01_EB, .598e+00_EB, .174e+01_EB, .248e+01_EB, .275e+01_EB,  &  
+.150e-04_EB, .242e-01_EB, .427e+00_EB, .145e+01_EB, .222e+01_EB, .260e+01_EB/), & 
 (/6,8/))
-SD(1:6,25:32) = RESHAPE ((/  &! 650-825
-.510E-05_EB, .127E-01_EB, .294E+00_EB, .118E+01_EB, .195E+01_EB, .241E+01_EB,   &  
-.170E-05_EB, .630E-02_EB, .200E+00_EB, .950E+00_EB, .169E+01_EB, .221E+01_EB,   &  
-.570E-06_EB, .300E-02_EB, .134E+00_EB, .748E+00_EB, .146E+01_EB, .200E+01_EB,   &  
-.195E-06_EB, .140E-02_EB, .902E-01_EB, .580E+00_EB, .124E+01_EB, .178E+01_EB,   &  
-.680E-07_EB, .620E-03_EB, .590E-01_EB, .443E+00_EB, .103E+01_EB, .156E+01_EB,   &  
-.385E-07_EB, .275E-03_EB, .450E-01_EB, .330E+00_EB, .845E+00_EB, .136E+01_EB,   &  
-.670E-07_EB, .113E-03_EB, .355E-01_EB, .242E+00_EB, .695E+00_EB, .117E+01_EB,   &  
-.113E-06_EB, .500E-04_EB, .289E-01_EB, .174E+00_EB, .560E+00_EB, .100E+01_EB/),  & 
+sd(1:6,25:32) = RESHAPE ((/  &! 650-825
+.510e-05_EB, .127e-01_EB, .294e+00_EB, .118e+01_EB, .195e+01_EB, .241e+01_EB,   &  
+.170e-05_EB, .630e-02_EB, .200e+00_EB, .950e+00_EB, .169e+01_EB, .221e+01_EB,   &  
+.570e-06_EB, .300e-02_EB, .134e+00_EB, .748e+00_EB, .146e+01_EB, .200e+01_EB,   &  
+.195e-06_EB, .140e-02_EB, .902e-01_EB, .580e+00_EB, .124e+01_EB, .178e+01_EB,   &  
+.680e-07_EB, .620e-03_EB, .590e-01_EB, .443e+00_EB, .103e+01_EB, .156e+01_EB,   &  
+.385e-07_EB, .275e-03_EB, .450e-01_EB, .330e+00_EB, .845e+00_EB, .136e+01_EB,   &  
+.670e-07_EB, .113e-03_EB, .355e-01_EB, .242e+00_EB, .695e+00_EB, .117e+01_EB,   &  
+.113e-06_EB, .500e-04_EB, .289e-01_EB, .174e+00_EB, .560e+00_EB, .100e+01_EB/),  & 
 (/6,8/))
-SD(1:6,33:40) = RESHAPE ((/ & ! 850-1025
-.195E-06_EB, .230E-04_EB, .245E-01_EB, .123E+00_EB, .450E+00_EB, .855E+00_EB,   &  
-.328E-06_EB, .103E-04_EB, .214E-01_EB, .100E+00_EB, .357E+00_EB, .718E+00_EB,  &   
-.560E-06_EB, .460E-05_EB, .189E-01_EB, .830E-01_EB, .278E+00_EB, .595E+00_EB,  &   
-.950E-06_EB, .205E-05_EB, .174E-01_EB, .730E-01_EB, .239E+00_EB, .492E+00_EB,  &   
-.160E-05_EB, .140E-05_EB, .166E-01_EB, .665E-01_EB, .211E+00_EB, .405E+00_EB, &    
-.275E-05_EB, .350E-05_EB, .165E-01_EB, .630E-01_EB, .195E+00_EB, .352E+00_EB, &    
-.470E-05_EB, .850E-05_EB, .167E-01_EB, .620E-01_EB, .190E+00_EB, .312E+00_EB, &   
-.810E-05_EB, .215E-04_EB, .175E-01_EB, .630E-01_EB, .191E+00_EB, .289E+00_EB/), &  
+sd(1:6,33:40) = RESHAPE ((/ & ! 850-1025
+.195e-06_EB, .230e-04_EB, .245e-01_EB, .123e+00_EB, .450e+00_EB, .855e+00_EB,   &  
+.328e-06_EB, .103e-04_EB, .214e-01_EB, .100e+00_EB, .357e+00_EB, .718e+00_EB,  &   
+.560e-06_EB, .460e-05_EB, .189e-01_EB, .830e-01_EB, .278e+00_EB, .595e+00_EB,  &   
+.950e-06_EB, .205e-05_EB, .174e-01_EB, .730e-01_EB, .239e+00_EB, .492e+00_EB,  &   
+.160e-05_EB, .140e-05_EB, .166e-01_EB, .665e-01_EB, .211e+00_EB, .405e+00_EB, &    
+.275e-05_EB, .350e-05_EB, .165e-01_EB, .630e-01_EB, .195e+00_EB, .352e+00_EB, &    
+.470e-05_EB, .850e-05_EB, .167e-01_EB, .620e-01_EB, .190e+00_EB, .312e+00_EB, &   
+.810e-05_EB, .215e-04_EB, .175e-01_EB, .630e-01_EB, .191e+00_EB, .289e+00_EB/), &  
 (/6,8/))
-SD(1:6,41:48) = RESHAPE ((/ & ! 1050-1225
-.136E-04_EB, .570E-04_EB, .188E-01_EB, .675E-01_EB, .194E+00_EB, .281E+00_EB,   &  
-.235E-04_EB, .150E-03_EB, .208E-01_EB, .745E-01_EB, .202E+00_EB, .283E+00_EB,   &  
-.400E-04_EB, .380E-03_EB, .233E-01_EB, .865E-01_EB, .223E+00_EB, .314E+00_EB,  &   
-.680E-04_EB, .950E-03_EB, .268E-01_EB, .122E+00_EB, .260E+00_EB, .380E+00_EB,  &   
-.120E-03_EB, .245E-02_EB, .343E-01_EB, .176E+00_EB, .328E+00_EB, .461E+00_EB,  &   
-.200E-03_EB, .620E-02_EB, .638E-01_EB, .251E+00_EB, .411E+00_EB, .511E+00_EB,  &   
-.365E-03_EB, .140E-01_EB, .107E+00_EB, .330E+00_EB, .458E+00_EB, .542E+00_EB,  &   
-.680E-03_EB, .330E-01_EB, .166E+00_EB, .405E+00_EB, .487E+00_EB, .571E+00_EB/),&   
+sd(1:6,41:48) = RESHAPE ((/ & ! 1050-1225
+.136e-04_EB, .570e-04_EB, .188e-01_EB, .675e-01_EB, .194e+00_EB, .281e+00_EB,   &  
+.235e-04_EB, .150e-03_EB, .208e-01_EB, .745e-01_EB, .202e+00_EB, .283e+00_EB,   &  
+.400e-04_EB, .380e-03_EB, .233e-01_EB, .865e-01_EB, .223e+00_EB, .314e+00_EB,  &   
+.680e-04_EB, .950e-03_EB, .268e-01_EB, .122e+00_EB, .260e+00_EB, .380e+00_EB,  &   
+.120e-03_EB, .245e-02_EB, .343e-01_EB, .176e+00_EB, .328e+00_EB, .461e+00_EB,  &   
+.200e-03_EB, .620e-02_EB, .638e-01_EB, .251e+00_EB, .411e+00_EB, .511e+00_EB,  &   
+.365e-03_EB, .140e-01_EB, .107e+00_EB, .330e+00_EB, .458e+00_EB, .542e+00_EB,  &   
+.680e-03_EB, .330e-01_EB, .166e+00_EB, .405e+00_EB, .487e+00_EB, .571e+00_EB/),&   
 (/6,8/))
-SD(1:6,49:56) = RESHAPE ((/ & ! 1250-1425
-.130E-02_EB, .635E-01_EB, .244E+00_EB, .459E+00_EB, .535E+00_EB, .557E+00_EB,  &   
-.250E-02_EB, .123E+00_EB, .341E+00_EB, .477E+00_EB, .502E+00_EB, .562E+00_EB,  &   
-.500E-02_EB, .212E+00_EB, .407E+00_EB, .547E+00_EB, .531E+00_EB, .514E+00_EB,  &   
-.103E-01_EB, .285E+00_EB, .489E+00_EB, .592E+00_EB, .497E+00_EB, .486E+00_EB,  &   
-.219E-01_EB, .328E+00_EB, .491E+00_EB, .558E+00_EB, .489E+00_EB, .485E+00_EB,  &   
-.485E-01_EB, .345E+00_EB, .505E+00_EB, .521E+00_EB, .477E+00_EB, .484E+00_EB,  &   
-.114E+00_EB, .361E+00_EB, .538E+00_EB, .563E+00_EB, .503E+00_EB, .502E+00_EB,  &   
-.249E+00_EB, .460E+00_EB, .621E+00_EB, .624E+00_EB, .538E+00_EB, .538E+00_EB/), &  
+sd(1:6,49:56) = RESHAPE ((/ & ! 1250-1425
+.130e-02_EB, .635e-01_EB, .244e+00_EB, .459e+00_EB, .535e+00_EB, .557e+00_EB,  &   
+.250e-02_EB, .123e+00_EB, .341e+00_EB, .477e+00_EB, .502e+00_EB, .562e+00_EB,  &   
+.500e-02_EB, .212e+00_EB, .407e+00_EB, .547e+00_EB, .531e+00_EB, .514e+00_EB,  &   
+.103e-01_EB, .285e+00_EB, .489e+00_EB, .592e+00_EB, .497e+00_EB, .486e+00_EB,  &   
+.219e-01_EB, .328e+00_EB, .491e+00_EB, .558e+00_EB, .489e+00_EB, .485e+00_EB,  &   
+.485e-01_EB, .345e+00_EB, .505e+00_EB, .521e+00_EB, .477e+00_EB, .484e+00_EB,  &   
+.114e+00_EB, .361e+00_EB, .538e+00_EB, .563e+00_EB, .503e+00_EB, .502e+00_EB,  &   
+.249e+00_EB, .460e+00_EB, .621e+00_EB, .624e+00_EB, .538e+00_EB, .538e+00_EB/), &  
 (/6,8/))
-SD(1:6,57:64) = RESHAPE ((/ & ! 1450-1625
-.397E+00_EB, .569E+00_EB, .749E+00_EB, .768E+00_EB, .581E+00_EB, .565E+00_EB,  &   
-.418E+00_EB, .627E+00_EB, .824E+00_EB, .849E+00_EB, .640E+00_EB, .594E+00_EB,  &   
-.108E+01_EB, .125E+01_EB, .113E+01_EB, .940E+00_EB, .807E+00_EB, .663E+00_EB,  &   
-.165E+01_EB, .155E+01_EB, .118E+01_EB, .670E+00_EB, .562E+00_EB, .483E+00_EB,  &   
-.142E+01_EB, .675E+00_EB, .557E+00_EB, .349E+00_EB, .276E+00_EB, .263E+00_EB,  &   
-.451E+00_EB, .202E+00_EB, .132E+00_EB, .118E+00_EB, .134E+00_EB, .156E+00_EB,  &   
-.603E-01_EB, .538E-01_EB, .863E-01_EB, .112E+00_EB, .120E+00_EB, .125E+00_EB,  &   
-.501E+00_EB, .252E+00_EB, .118E+00_EB, .112E+00_EB, .131E+00_EB, .140E+00_EB/), &  
+sd(1:6,57:64) = RESHAPE ((/ & ! 1450-1625
+.397e+00_EB, .569e+00_EB, .749e+00_EB, .768e+00_EB, .581e+00_EB, .565e+00_EB,  &   
+.418e+00_EB, .627e+00_EB, .824e+00_EB, .849e+00_EB, .640e+00_EB, .594e+00_EB,  &   
+.108e+01_EB, .125e+01_EB, .113e+01_EB, .940e+00_EB, .807e+00_EB, .663e+00_EB,  &   
+.165e+01_EB, .155e+01_EB, .118e+01_EB, .670e+00_EB, .562e+00_EB, .483e+00_EB,  &   
+.142e+01_EB, .675e+00_EB, .557e+00_EB, .349e+00_EB, .276e+00_EB, .263e+00_EB,  &   
+.451e+00_EB, .202e+00_EB, .132e+00_EB, .118e+00_EB, .134e+00_EB, .156e+00_EB,  &   
+.603e-01_EB, .538e-01_EB, .863e-01_EB, .112e+00_EB, .120e+00_EB, .125e+00_EB,  &   
+.501e+00_EB, .252e+00_EB, .118e+00_EB, .112e+00_EB, .131e+00_EB, .140e+00_EB/), &  
 (/6,8/))
-SD(1:6,65:72) = RESHAPE ((/ & ! 1650-1825
-.730E+00_EB, .430E+00_EB, .237E+00_EB, .191E+00_EB, .171E+00_EB, .170E+00_EB,   &  
-.149E+01_EB, .506E+00_EB, .294E+00_EB, .238E+00_EB, .210E+00_EB, .201E+00_EB,  &   
-.100E+01_EB, .553E+00_EB, .434E+00_EB, .340E+00_EB, .260E+00_EB, .220E+00_EB,   &  
-.802E+00_EB, .658E+00_EB, .528E+00_EB, .411E+00_EB, .300E+00_EB, .240E+00_EB,    & 
-.580E+00_EB, .527E+00_EB, .460E+00_EB, .378E+00_EB, .322E+00_EB, .283E+00_EB,  &   
-.330E+00_EB, .403E+00_EB, .430E+00_EB, .356E+00_EB, .318E+00_EB, .270E+00_EB,  &   
-.250E+00_EB, .393E+00_EB, .405E+00_EB, .342E+00_EB, .301E+00_EB, .275E+00_EB,  &   
-.147E+00_EB, .249E+00_EB, .313E+00_EB, .318E+00_EB, .291E+00_EB, .268E+00_EB/), &  
+sd(1:6,65:72) = RESHAPE ((/ & ! 1650-1825
+.730e+00_EB, .430e+00_EB, .237e+00_EB, .191e+00_EB, .171e+00_EB, .170e+00_EB,   &  
+.149e+01_EB, .506e+00_EB, .294e+00_EB, .238e+00_EB, .210e+00_EB, .201e+00_EB,  &   
+.100e+01_EB, .553e+00_EB, .434e+00_EB, .340e+00_EB, .260e+00_EB, .220e+00_EB,   &  
+.802e+00_EB, .658e+00_EB, .528e+00_EB, .411e+00_EB, .300e+00_EB, .240e+00_EB,    & 
+.580e+00_EB, .527e+00_EB, .460e+00_EB, .378e+00_EB, .322e+00_EB, .283e+00_EB,  &   
+.330e+00_EB, .403e+00_EB, .430e+00_EB, .356e+00_EB, .318e+00_EB, .270e+00_EB,  &   
+.250e+00_EB, .393e+00_EB, .405e+00_EB, .342e+00_EB, .301e+00_EB, .275e+00_EB,  &   
+.147e+00_EB, .249e+00_EB, .313e+00_EB, .318e+00_EB, .291e+00_EB, .268e+00_EB/), &  
 (/6,8/))
-SD(1:6,73:80) = RESHAPE ((/ & ! 1850-2025
-.910E-01_EB, .252E+00_EB, .298E+00_EB, .295E+00_EB, .269E+00_EB, .253E+00_EB,   &  
-.580E-01_EB, .158E+00_EB, .214E+00_EB, .244E+00_EB, .244E+00_EB, .245E+00_EB,   &  
-.370E-01_EB, .113E+00_EB, .184E+00_EB, .218E+00_EB, .214E+00_EB, .218E+00_EB,   &  
-.244E-01_EB, .118E+00_EB, .156E+00_EB, .188E+00_EB, .195E+00_EB, .200E+00_EB,   & 
-.162E-01_EB, .606E-01_EB, .976E-01_EB, .141E+00_EB, .166E+00_EB, .179E+00_EB,   & 
-.112E-01_EB, .425E-01_EB, .903E-01_EB, .133E+00_EB, .148E+00_EB, .156E+00_EB,   & 
-.780E-02_EB, .400E-01_EB, .765E-01_EB, .112E+00_EB, .129E+00_EB, .137E+00_EB,   & 
-.540E-02_EB, .352E-01_EB, .647E-01_EB, .876E-01_EB, .110E+00_EB, .118E+00_EB/),  &
+sd(1:6,73:80) = RESHAPE ((/ & ! 1850-2025
+.910e-01_EB, .252e+00_EB, .298e+00_EB, .295e+00_EB, .269e+00_EB, .253e+00_EB,   &  
+.580e-01_EB, .158e+00_EB, .214e+00_EB, .244e+00_EB, .244e+00_EB, .245e+00_EB,   &  
+.370e-01_EB, .113e+00_EB, .184e+00_EB, .218e+00_EB, .214e+00_EB, .218e+00_EB,   &  
+.244e-01_EB, .118e+00_EB, .156e+00_EB, .188e+00_EB, .195e+00_EB, .200e+00_EB,   & 
+.162e-01_EB, .606e-01_EB, .976e-01_EB, .141e+00_EB, .166e+00_EB, .179e+00_EB,   & 
+.112e-01_EB, .425e-01_EB, .903e-01_EB, .133e+00_EB, .148e+00_EB, .156e+00_EB,   & 
+.780e-02_EB, .400e-01_EB, .765e-01_EB, .112e+00_EB, .129e+00_EB, .137e+00_EB,   & 
+.540e-02_EB, .352e-01_EB, .647e-01_EB, .876e-01_EB, .110e+00_EB, .118e+00_EB/),  &
 (/6,8/))
-SD(1:6,81:88) = RESHAPE ((/ & ! 2050-2225
-.380E-02_EB, .252E-01_EB, .507E-01_EB, .705E-01_EB, .888E-01_EB, .100E+00_EB,  &   
-.260E-02_EB, .179E-01_EB, .377E-01_EB, .546E-01_EB, .724E-01_EB, .828E-01_EB,  &   
-.180E-02_EB, .123E-01_EB, .294E-01_EB, .443E-01_EB, .608E-01_EB, .686E-01_EB,  &   
-.127E-02_EB, .850E-02_EB, .212E-01_EB, .378E-01_EB, .579E-01_EB, .640E-01_EB,   &  
-.880E-03_EB, .680E-02_EB, .152E-01_EB, .275E-01_EB, .449E-01_EB, .521E-01_EB,  &   
-.620E-02_EB, .400E-02_EB, .107E-01_EB, .214E-01_EB, .374E-01_EB, .453E-01_EB,  &   
-.480E-03_EB, .298E-02_EB, .931E-02_EB, .189E-01_EB, .329E-01_EB, .403E-01_EB,  &   
-.405E-03_EB, .175E-02_EB, .696E-02_EB, .152E-01_EB, .295E-01_EB, .365E-01_EB/), &  
+sd(1:6,81:88) = RESHAPE ((/ & ! 2050-2225
+.380e-02_EB, .252e-01_EB, .507e-01_EB, .705e-01_EB, .888e-01_EB, .100e+00_EB,  &   
+.260e-02_EB, .179e-01_EB, .377e-01_EB, .546e-01_EB, .724e-01_EB, .828e-01_EB,  &   
+.180e-02_EB, .123e-01_EB, .294e-01_EB, .443e-01_EB, .608e-01_EB, .686e-01_EB,  &   
+.127e-02_EB, .850e-02_EB, .212e-01_EB, .378e-01_EB, .579e-01_EB, .640e-01_EB,   &  
+.880e-03_EB, .680e-02_EB, .152e-01_EB, .275e-01_EB, .449e-01_EB, .521e-01_EB,  &   
+.620e-02_EB, .400e-02_EB, .107e-01_EB, .214e-01_EB, .374e-01_EB, .453e-01_EB,  &   
+.480e-03_EB, .298e-02_EB, .931e-02_EB, .189e-01_EB, .329e-01_EB, .403e-01_EB,  &   
+.405e-03_EB, .175e-02_EB, .696e-02_EB, .152e-01_EB, .295e-01_EB, .365e-01_EB/), &  
 (/6,8/))
-SD(1:6,89:96) = RESHAPE ((/ & ! 2250-2425 
-.321E-03_EB, .120E-02_EB, .452E-02_EB, .101E-01_EB, .252E-01_EB, .331E-01_EB, &    
-.229E-03_EB, .721E-03_EB, .364E-02_EB, .930E-02_EB, .225E-01_EB, .305E-01_EB,  &   
-.195E-03_EB, .544E-03_EB, .318E-02_EB, .750E-02_EB, .202E-01_EB, .284E-01_EB, &    
-.154E-03_EB, .375E-03_EB, .185E-02_EB, .603E-02_EB, .175E-01_EB, .269E-01_EB, &    
-.101E-03_EB, .263E-03_EB, .119E-02_EB, .480E-02_EB, .156E-01_EB, .253E-01_EB, &    
-.852E-04_EB, .185E-03_EB, .909E-03_EB, .360E-02_EB, .133E-01_EB, .241E-01_EB,  &   
-.763E-04_EB, .137E-03_EB, .711E-03_EB, .316E-02_EB, .122E-01_EB, .237E-01_EB,  &   
-.615E-04_EB, .126E-03_EB, .610E-03_EB, .257E-02_EB, .101E-01_EB, .218E-01_EB/), &  
+sd(1:6,89:96) = RESHAPE ((/ & ! 2250-2425 
+.321e-03_EB, .120e-02_EB, .452e-02_EB, .101e-01_EB, .252e-01_EB, .331e-01_EB, &    
+.229e-03_EB, .721e-03_EB, .364e-02_EB, .930e-02_EB, .225e-01_EB, .305e-01_EB,  &   
+.195e-03_EB, .544e-03_EB, .318e-02_EB, .750e-02_EB, .202e-01_EB, .284e-01_EB, &    
+.154e-03_EB, .375e-03_EB, .185e-02_EB, .603e-02_EB, .175e-01_EB, .269e-01_EB, &    
+.101e-03_EB, .263e-03_EB, .119e-02_EB, .480e-02_EB, .156e-01_EB, .253e-01_EB, &    
+.852e-04_EB, .185e-03_EB, .909e-03_EB, .360e-02_EB, .133e-01_EB, .241e-01_EB,  &   
+.763e-04_EB, .137e-03_EB, .711e-03_EB, .316e-02_EB, .122e-01_EB, .237e-01_EB,  &   
+.615e-04_EB, .126e-03_EB, .610e-03_EB, .257e-02_EB, .101e-01_EB, .218e-01_EB/), &  
 (/6,8/))
-SD(1:6,97:104) = RESHAPE ((/ & ! 2450-2625 
-.480E-04_EB, .113E-03_EB, .518E-03_EB, .201E-02_EB, .920E-02_EB, .200E-01_EB, &    
-.372E-04_EB, .106E-03_EB, .435E-03_EB, .168E-02_EB, .785E-02_EB, .183E-01_EB,  &   
-.355E-04_EB, .101E-03_EB, .376E-03_EB, .168E-02_EB, .669E-02_EB, .166E-01_EB, &    
-.358E-04_EB, .990E-04_EB, .366E-03_EB, .167E-02_EB, .651E-02_EB, .156E-01_EB,  &   
-.389E-04_EB, .102E-03_EB, .376E-03_EB, .167E-02_EB, .641E-02_EB, .152E-01_EB,  &   
-.422E-04_EB, .106E-03_EB, .373E-03_EB, .168E-02_EB, .656E-02_EB, .150E-01_EB,  &   
-.521E-04_EB, .111E-03_EB, .371E-03_EB, .170E-02_EB, .673E-02_EB, .152E-01_EB,  &   
-.646E-04_EB, .121E-03_EB, .384E-03_EB, .179E-02_EB, .798E-02_EB, .179E-01_EB/), &  
+sd(1:6,97:104) = RESHAPE ((/ & ! 2450-2625 
+.480e-04_EB, .113e-03_EB, .518e-03_EB, .201e-02_EB, .920e-02_EB, .200e-01_EB, &    
+.372e-04_EB, .106e-03_EB, .435e-03_EB, .168e-02_EB, .785e-02_EB, .183e-01_EB,  &   
+.355e-04_EB, .101e-03_EB, .376e-03_EB, .168e-02_EB, .669e-02_EB, .166e-01_EB, &    
+.358e-04_EB, .990e-04_EB, .366e-03_EB, .167e-02_EB, .651e-02_EB, .156e-01_EB,  &   
+.389e-04_EB, .102e-03_EB, .376e-03_EB, .167e-02_EB, .641e-02_EB, .152e-01_EB,  &   
+.422e-04_EB, .106e-03_EB, .373e-03_EB, .168e-02_EB, .656e-02_EB, .150e-01_EB,  &   
+.521e-04_EB, .111e-03_EB, .371e-03_EB, .170e-02_EB, .673e-02_EB, .152e-01_EB,  &   
+.646e-04_EB, .121e-03_EB, .384e-03_EB, .179e-02_EB, .798e-02_EB, .179e-01_EB/), &  
 (/6,8/)) 
-SD(1:6,105:112) = RESHAPE ((/ & ! 2650-2825 
-.742E-04_EB, .129E-03_EB, .479E-03_EB, .201E-02_EB, .788E-02_EB, .175E-01_EB,   &  
-.953E-04_EB, .165E-03_EB, .544E-03_EB, .249E-02_EB, .945E-02_EB, .204E-01_EB,   &  
-.101E-03_EB, .190E-03_EB, .761E-03_EB, .324E-02_EB, .106E-01_EB, .231E-01_EB,   &  
-.147E-03_EB, .272E-03_EB, .892E-03_EB, .441E-02_EB, .125E-01_EB, .257E-01_EB,    & 
-.195E-03_EB, .326E-03_EB, .100E-02_EB, .499E-02_EB, .147E-01_EB, .295E-01_EB,    & 
-.261E-03_EB, .421E-03_EB, .145E-02_EB, .568E-02_EB, .161E-01_EB, .306E-01_EB,   &  
-.305E-03_EB, .515E-03_EB, .195E-02_EB, .754E-02_EB, .185E-01_EB, .363E-01_EB,   &  
-.362E-03_EB, .645E-03_EB, .237E-02_EB, .830E-02_EB, .205E-01_EB, .373E-01_EB/), &  
+sd(1:6,105:112) = RESHAPE ((/ & ! 2650-2825 
+.742e-04_EB, .129e-03_EB, .479e-03_EB, .201e-02_EB, .788e-02_EB, .175e-01_EB,   &  
+.953e-04_EB, .165e-03_EB, .544e-03_EB, .249e-02_EB, .945e-02_EB, .204e-01_EB,   &  
+.101e-03_EB, .190e-03_EB, .761e-03_EB, .324e-02_EB, .106e-01_EB, .231e-01_EB,   &  
+.147e-03_EB, .272e-03_EB, .892e-03_EB, .441e-02_EB, .125e-01_EB, .257e-01_EB,    & 
+.195e-03_EB, .326e-03_EB, .100e-02_EB, .499e-02_EB, .147e-01_EB, .295e-01_EB,    & 
+.261e-03_EB, .421e-03_EB, .145e-02_EB, .568e-02_EB, .161e-01_EB, .306e-01_EB,   &  
+.305e-03_EB, .515e-03_EB, .195e-02_EB, .754e-02_EB, .185e-01_EB, .363e-01_EB,   &  
+.362e-03_EB, .645e-03_EB, .237e-02_EB, .830e-02_EB, .205e-01_EB, .373e-01_EB/), &  
 (/6,8/))
-SD(1:6,113:120) = RESHAPE ((/ & ! 2850-3025 
-.507E-03_EB, .850E-03_EB, .274E-02_EB, .888E-02_EB, .234E-01_EB, .431E-01_EB,     &
-.799E-03_EB, .118E-02_EB, .322E-02_EB, .110E-01_EB, .262E-01_EB, .451E-01_EB,     &
-.935E-03_EB, .160E-02_EB, .386E-02_EB, .126E-01_EB, .292E-01_EB, .530E-01_EB,     &
-.108E-02_EB, .231E-02_EB, .451E-02_EB, .140E-01_EB, .306E-01_EB, .536E-01_EB,     &
-.192E-02_EB, .271E-02_EB, .563E-02_EB, .159E-01_EB, .357E-01_EB, .629E-01_EB,     &
-.263E-02_EB, .300E-02_EB, .625E-02_EB, .179E-01_EB, .385E-01_EB, .666E-01_EB,    & 
-.295E-02_EB, .330E-02_EB, .701E-02_EB, .203E-01_EB, .460E-01_EB, .782E-01_EB,   &  
-.310E-02_EB, .370E-02_EB, .846E-02_EB, .220E-01_EB, .519E-01_EB, .889E-01_EB/),  & 
+sd(1:6,113:120) = RESHAPE ((/ & ! 2850-3025 
+.507e-03_EB, .850e-03_EB, .274e-02_EB, .888e-02_EB, .234e-01_EB, .431e-01_EB,     &
+.799e-03_EB, .118e-02_EB, .322e-02_EB, .110e-01_EB, .262e-01_EB, .451e-01_EB,     &
+.935e-03_EB, .160e-02_EB, .386e-02_EB, .126e-01_EB, .292e-01_EB, .530e-01_EB,     &
+.108e-02_EB, .231e-02_EB, .451e-02_EB, .140e-01_EB, .306e-01_EB, .536e-01_EB,     &
+.192e-02_EB, .271e-02_EB, .563e-02_EB, .159e-01_EB, .357e-01_EB, .629e-01_EB,     &
+.263e-02_EB, .300e-02_EB, .625e-02_EB, .179e-01_EB, .385e-01_EB, .666e-01_EB,    & 
+.295e-02_EB, .330e-02_EB, .701e-02_EB, .203e-01_EB, .460e-01_EB, .782e-01_EB,   &  
+.310e-02_EB, .370e-02_EB, .846e-02_EB, .220e-01_EB, .519e-01_EB, .889e-01_EB/),  & 
 (/6,8/))
-SD(1:6,121:128) = RESHAPE ((/ & ! 3050-3225
-.340E-02_EB, .400E-02_EB, .969E-02_EB, .279E-01_EB, .662E-01_EB, .109E+00_EB,     &
-.730E-02_EB, .450E-02_EB, .111E-01_EB, .272E-01_EB, .676E-01_EB, .109E+00_EB,     &
-.900E-02_EB, .480E-02_EB, .137E-01_EB, .372E-01_EB, .864E-01_EB, .133E+00_EB,     &
-.100E-02_EB, .510E-02_EB, .162E-01_EB, .471E-01_EB, .100E+00_EB, .142E+00_EB,     &
-.640E-03_EB, .550E-02_EB, .205E-01_EB, .530E-01_EB, .122E+00_EB, .168E+00_EB,     &
-.160E-02_EB, .600E-02_EB, .247E-01_EB, .633E-01_EB, .135E+00_EB, .177E+00_EB,    & 
-.330E-02_EB, .700E-02_EB, .283E-01_EB, .770E-01_EB, .153E+00_EB, .185E+00_EB,   &  
-.410E-02_EB, .860E-02_EB, .376E-01_EB, .914E-01_EB, .166E+00_EB, .206E+00_EB/),&   
+sd(1:6,121:128) = RESHAPE ((/ & ! 3050-3225
+.340e-02_EB, .400e-02_EB, .969e-02_EB, .279e-01_EB, .662e-01_EB, .109e+00_EB,     &
+.730e-02_EB, .450e-02_EB, .111e-01_EB, .272e-01_EB, .676e-01_EB, .109e+00_EB,     &
+.900e-02_EB, .480e-02_EB, .137e-01_EB, .372e-01_EB, .864e-01_EB, .133e+00_EB,     &
+.100e-02_EB, .510e-02_EB, .162e-01_EB, .471e-01_EB, .100e+00_EB, .142e+00_EB,     &
+.640e-03_EB, .550e-02_EB, .205e-01_EB, .530e-01_EB, .122e+00_EB, .168e+00_EB,     &
+.160e-02_EB, .600e-02_EB, .247e-01_EB, .633e-01_EB, .135e+00_EB, .177e+00_EB,    & 
+.330e-02_EB, .700e-02_EB, .283e-01_EB, .770e-01_EB, .153e+00_EB, .185e+00_EB,   &  
+.410e-02_EB, .860e-02_EB, .376e-01_EB, .914e-01_EB, .166e+00_EB, .206e+00_EB/),&   
 (/6,8/))
-SD(1:6,129:136) = RESHAPE ((/ & ! 3250-3425
-.410E-02_EB, .103E-01_EB, .514E-01_EB, .117E+00_EB, .194E+00_EB, .228E+00_EB,     &
-.290E-02_EB, .129E-01_EB, .664E-01_EB, .147E+00_EB, .220E+00_EB, .254E+00_EB,     &
-.220E-02_EB, .161E-01_EB, .834E-01_EB, .171E+00_EB, .237E+00_EB, .263E+00_EB,     &
-.220E-02_EB, .212E-01_EB, .103E+00_EB, .201E+00_EB, .268E+00_EB, .283E+00_EB,     &
-.250E-02_EB, .285E-01_EB, .135E+00_EB, .240E+00_EB, .295E+00_EB, .295E+00_EB,     &
-.310E-02_EB, .385E-01_EB, .169E+00_EB, .272E+00_EB, .312E+00_EB, .301E+00_EB,     &
-.420E-02_EB, .540E-01_EB, .214E+00_EB, .309E+00_EB, .329E+00_EB, .307E+00_EB,     &
-.600E-02_EB, .770E-01_EB, .267E+00_EB, .343E+00_EB, .332E+00_EB, .314E+00_EB/),  & 
+sd(1:6,129:136) = RESHAPE ((/ & ! 3250-3425
+.410e-02_EB, .103e-01_EB, .514e-01_EB, .117e+00_EB, .194e+00_EB, .228e+00_EB,     &
+.290e-02_EB, .129e-01_EB, .664e-01_EB, .147e+00_EB, .220e+00_EB, .254e+00_EB,     &
+.220e-02_EB, .161e-01_EB, .834e-01_EB, .171e+00_EB, .237e+00_EB, .263e+00_EB,     &
+.220e-02_EB, .212e-01_EB, .103e+00_EB, .201e+00_EB, .268e+00_EB, .283e+00_EB,     &
+.250e-02_EB, .285e-01_EB, .135e+00_EB, .240e+00_EB, .295e+00_EB, .295e+00_EB,     &
+.310e-02_EB, .385e-01_EB, .169e+00_EB, .272e+00_EB, .312e+00_EB, .301e+00_EB,     &
+.420e-02_EB, .540e-01_EB, .214e+00_EB, .309e+00_EB, .329e+00_EB, .307e+00_EB,     &
+.600e-02_EB, .770e-01_EB, .267e+00_EB, .343e+00_EB, .332e+00_EB, .314e+00_EB/),  & 
 (/6,8/))
-SD(1:6,137:144) = RESHAPE ((/ & ! 3450-3625
-.940E-02_EB, .117E+00_EB, .333E+00_EB, .372E+00_EB, .344E+00_EB, .303E+00_EB,     &
-.165E-01_EB, .173E+00_EB, .365E+00_EB, .385E+00_EB, .353E+00_EB, .300E+00_EB,     &
-.360E-01_EB, .258E+00_EB, .438E+00_EB, .393E+00_EB, .315E+00_EB, .288E+00_EB,     &
-.720E-01_EB, .375E+00_EB, .510E+00_EB, .409E+00_EB, .294E+00_EB, .271E+00_EB,     &
-.133E+00_EB, .401E+00_EB, .499E+00_EB, .390E+00_EB, .281E+00_EB, .257E+00_EB,     &
-.215E+00_EB, .500E+00_EB, .443E+00_EB, .341E+00_EB, .254E+00_EB, .230E+00_EB,     &
-.318E+00_EB, .450E+00_EB, .346E+00_EB, .286E+00_EB, .245E+00_EB, .219E+00_EB,     &
-.442E+00_EB, .400E+00_EB, .354E+00_EB, .279E+00_EB, .233E+00_EB, .216E+00_EB/),   &
+sd(1:6,137:144) = RESHAPE ((/ & ! 3450-3625
+.940e-02_EB, .117e+00_EB, .333e+00_EB, .372e+00_EB, .344e+00_EB, .303e+00_EB,     &
+.165e-01_EB, .173e+00_EB, .365e+00_EB, .385e+00_EB, .353e+00_EB, .300e+00_EB,     &
+.360e-01_EB, .258e+00_EB, .438e+00_EB, .393e+00_EB, .315e+00_EB, .288e+00_EB,     &
+.720e-01_EB, .375e+00_EB, .510e+00_EB, .409e+00_EB, .294e+00_EB, .271e+00_EB,     &
+.133e+00_EB, .401e+00_EB, .499e+00_EB, .390e+00_EB, .281e+00_EB, .257e+00_EB,     &
+.215e+00_EB, .500e+00_EB, .443e+00_EB, .341e+00_EB, .254e+00_EB, .230e+00_EB,     &
+.318e+00_EB, .450e+00_EB, .346e+00_EB, .286e+00_EB, .245e+00_EB, .219e+00_EB,     &
+.442e+00_EB, .400e+00_EB, .354e+00_EB, .279e+00_EB, .233e+00_EB, .216e+00_EB/),   &
 (/6,8/))
-SD(1:6,145:152) = RESHAPE ((/ & ! 3650-3825
-.473E+00_EB, .405E+00_EB, .347E+00_EB, .281E+00_EB, .238E+00_EB, .219E+00_EB,     &
-.568E+00_EB, .501E+00_EB, .423E+00_EB, .315E+00_EB, .243E+00_EB, .218E+00_EB,     &
-.690E+00_EB, .708E+00_EB, .673E+00_EB, .432E+00_EB, .268E+00_EB, .189E+00_EB,     &
-.617E+00_EB, .831E+00_EB, .566E+00_EB, .320E+00_EB, .194E+00_EB, .123E+00_EB,     &
-.181E+01_EB, .520E+00_EB, .200E+00_EB, .131E+00_EB, .124E+00_EB, .107E+00_EB,     &
-.136E+00_EB, .124E+00_EB, .120E+00_EB, .119E+00_EB, .115E+00_EB, .115E+00_EB,     &
-.455E+00_EB, .298E+00_EB, .167E+00_EB, .129E+00_EB, .123E+00_EB, .112E+00_EB,     &
-.760E+00_EB, .503E+00_EB, .242E+00_EB, .154E+00_EB, .129E+00_EB, .127E+00_EB/),   &
+sd(1:6,145:152) = RESHAPE ((/ & ! 3650-3825
+.473e+00_EB, .405e+00_EB, .347e+00_EB, .281e+00_EB, .238e+00_EB, .219e+00_EB,     &
+.568e+00_EB, .501e+00_EB, .423e+00_EB, .315e+00_EB, .243e+00_EB, .218e+00_EB,     &
+.690e+00_EB, .708e+00_EB, .673e+00_EB, .432e+00_EB, .268e+00_EB, .189e+00_EB,     &
+.617e+00_EB, .831e+00_EB, .566e+00_EB, .320e+00_EB, .194e+00_EB, .123e+00_EB,     &
+.181e+01_EB, .520e+00_EB, .200e+00_EB, .131e+00_EB, .124e+00_EB, .107e+00_EB,     &
+.136e+00_EB, .124e+00_EB, .120e+00_EB, .119e+00_EB, .115e+00_EB, .115e+00_EB,     &
+.455e+00_EB, .298e+00_EB, .167e+00_EB, .129e+00_EB, .123e+00_EB, .112e+00_EB,     &
+.760e+00_EB, .503e+00_EB, .242e+00_EB, .154e+00_EB, .129e+00_EB, .127e+00_EB/),   &
 (/6,8/))
-SD(1:6,153:160) = RESHAPE ((/ & ! 3850-4025
-.836E+00_EB, .584E+00_EB, .277E+00_EB, .184E+00_EB, .161E+00_EB, .145E+00_EB,     &
-.840E+00_EB, .728E+00_EB, .422E+00_EB, .236E+00_EB, .197E+00_EB, .167E+00_EB,     &
-.505E+00_EB, .500E+00_EB, .379E+00_EB, .276E+00_EB, .227E+00_EB, .192E+00_EB,     &
-.117E+00_EB, .400E+00_EB, .423E+00_EB, .315E+00_EB, .243E+00_EB, .202E+00_EB,     &
-.460E-01_EB, .300E+00_EB, .358E+00_EB, .290E+00_EB, .230E+00_EB, .202E+00_EB,     &
-.183E-01_EB, .205E+00_EB, .269E+00_EB, .235E+00_EB, .195E+00_EB, .192E+00_EB,     &
-.730E-02_EB, .135E+00_EB, .186E+00_EB, .179E+00_EB, .159E+00_EB, .168E+00_EB,     &
-.557E-02_EB, .790E-01_EB, .113E+00_EB, .124E+00_EB, .124E+00_EB, .134E+00_EB/),  & 
+sd(1:6,153:160) = RESHAPE ((/ & ! 3850-4025
+.836e+00_EB, .584e+00_EB, .277e+00_EB, .184e+00_EB, .161e+00_EB, .145e+00_EB,     &
+.840e+00_EB, .728e+00_EB, .422e+00_EB, .236e+00_EB, .197e+00_EB, .167e+00_EB,     &
+.505e+00_EB, .500e+00_EB, .379e+00_EB, .276e+00_EB, .227e+00_EB, .192e+00_EB,     &
+.117e+00_EB, .400e+00_EB, .423e+00_EB, .315e+00_EB, .243e+00_EB, .202e+00_EB,     &
+.460e-01_EB, .300e+00_EB, .358e+00_EB, .290e+00_EB, .230e+00_EB, .202e+00_EB,     &
+.183e-01_EB, .205e+00_EB, .269e+00_EB, .235e+00_EB, .195e+00_EB, .192e+00_EB,     &
+.730e-02_EB, .135e+00_EB, .186e+00_EB, .179e+00_EB, .159e+00_EB, .168e+00_EB,     &
+.557e-02_EB, .790e-01_EB, .113e+00_EB, .124e+00_EB, .124e+00_EB, .134e+00_EB/),  & 
 (/6,8/))
-SD(1:6,161:168) = RESHAPE ((/ & ! 4050-4225
-.283E-02_EB, .415E-01_EB, .662E-01_EB, .886E-01_EB, .103E+00_EB, .106E+00_EB,     &
-.226E-02_EB, .197E-01_EB, .367E-01_EB, .594E-01_EB, .801E-01_EB, .879E-01_EB,     &
-.155E-02_EB, .860E-02_EB, .211E-01_EB, .395E-01_EB, .503E-01_EB, .610E-01_EB,     &
-.103E-02_EB, .521E-02_EB, .119E-01_EB, .246E-01_EB, .354E-01_EB, .480E-01_EB,     &
-.821E-03_EB, .365E-02_EB, .759E-02_EB, .166E-01_EB, .258E-01_EB, .370E-01_EB,     &
-.752E-03_EB, .183E-02_EB, .445E-02_EB, .100E-01_EB, .179E-01_EB, .268E-01_EB,     &
-.429E-03_EB, .141E-02_EB, .354E-02_EB, .821E-02_EB, .142E-01_EB, .212E-01_EB,     &
-.327E-03_EB, .902E-03_EB, .209E-02_EB, .588E-02_EB, .112E-01_EB, .172E-01_EB/),   &
+sd(1:6,161:168) = RESHAPE ((/ & ! 4050-4225
+.283e-02_EB, .415e-01_EB, .662e-01_EB, .886e-01_EB, .103e+00_EB, .106e+00_EB,     &
+.226e-02_EB, .197e-01_EB, .367e-01_EB, .594e-01_EB, .801e-01_EB, .879e-01_EB,     &
+.155e-02_EB, .860e-02_EB, .211e-01_EB, .395e-01_EB, .503e-01_EB, .610e-01_EB,     &
+.103e-02_EB, .521e-02_EB, .119e-01_EB, .246e-01_EB, .354e-01_EB, .480e-01_EB,     &
+.821e-03_EB, .365e-02_EB, .759e-02_EB, .166e-01_EB, .258e-01_EB, .370e-01_EB,     &
+.752e-03_EB, .183e-02_EB, .445e-02_EB, .100e-01_EB, .179e-01_EB, .268e-01_EB,     &
+.429e-03_EB, .141e-02_EB, .354e-02_EB, .821e-02_EB, .142e-01_EB, .212e-01_EB,     &
+.327e-03_EB, .902e-03_EB, .209e-02_EB, .588e-02_EB, .112e-01_EB, .172e-01_EB/),   &
 (/6,8/))
-SD(1:6,169:176) = RESHAPE ((/ & ! 4250-4425
-.225E-03_EB, .685E-03_EB, .189E-02_EB, .512E-02_EB, .101E-01_EB, .164E-01_EB,     &
-.186E-03_EB, .551E-03_EB, .156E-02_EB, .366E-02_EB, .812E-02_EB, .136E-01_EB,     &
-.173E-03_EB, .472E-03_EB, .139E-02_EB, .306E-02_EB, .661E-02_EB, .115E-01_EB,     &
-.138E-03_EB, .395E-03_EB, .110E-02_EB, .272E-02_EB, .587E-02_EB, .104E-01_EB,     &
-.900E-04_EB, .270E-03_EB, .968E-03_EB, .222E-02_EB, .497E-02_EB, .921E-02_EB,     &
-.752E-04_EB, .233E-03_EB, .744E-03_EB, .208E-02_EB, .466E-02_EB, .876E-02_EB,     &
-.618E-04_EB, .175E-03_EB, .638E-03_EB, .185E-02_EB, .465E-02_EB, .914E-02_EB,     &
-.504E-04_EB, .134E-03_EB, .499E-03_EB, .174E-02_EB, .455E-02_EB, .935E-02_EB/),   &
+sd(1:6,169:176) = RESHAPE ((/ & ! 4250-4425
+.225e-03_EB, .685e-03_EB, .189e-02_EB, .512e-02_EB, .101e-01_EB, .164e-01_EB,     &
+.186e-03_EB, .551e-03_EB, .156e-02_EB, .366e-02_EB, .812e-02_EB, .136e-01_EB,     &
+.173e-03_EB, .472e-03_EB, .139e-02_EB, .306e-02_EB, .661e-02_EB, .115e-01_EB,     &
+.138e-03_EB, .395e-03_EB, .110e-02_EB, .272e-02_EB, .587e-02_EB, .104e-01_EB,     &
+.900e-04_EB, .270e-03_EB, .968e-03_EB, .222e-02_EB, .497e-02_EB, .921e-02_EB,     &
+.752e-04_EB, .233e-03_EB, .744e-03_EB, .208e-02_EB, .466e-02_EB, .876e-02_EB,     &
+.618e-04_EB, .175e-03_EB, .638e-03_EB, .185e-02_EB, .465e-02_EB, .914e-02_EB,     &
+.504e-04_EB, .134e-03_EB, .499e-03_EB, .174e-02_EB, .455e-02_EB, .935e-02_EB/),   &
 (/6,8/))
-SD(1:6,177:184) = RESHAPE ((/ & ! 4450-4625
-.375E-04_EB, .123E-03_EB, .485E-03_EB, .182E-02_EB, .456E-02_EB, .971E-02_EB,     &
-.305E-04_EB, .892E-04_EB, .338E-03_EB, .134E-02_EB, .460E-02_EB, .104E-01_EB,     &
-.257E-04_EB, .790E-04_EB, .329E-03_EB, .154E-02_EB, .477E-02_EB, .112E-01_EB,     &
-.242E-04_EB, .740E-04_EB, .308E-03_EB, .135E-02_EB, .497E-02_EB, .122E-01_EB,     &
-.215E-04_EB, .653E-04_EB, .282E-03_EB, .131E-02_EB, .521E-02_EB, .133E-01_EB,     &
-.218E-04_EB, .660E-04_EB, .272E-03_EB, .152E-02_EB, .573E-02_EB, .148E-01_EB,     &
-.215E-04_EB, .671E-04_EB, .268E-03_EB, .134E-02_EB, .607E-02_EB, .159E-01_EB,     &
-.217E-04_EB, .695E-04_EB, .285E-03_EB, .161E-02_EB, .677E-02_EB, .173E-01_EB/),  & 
+sd(1:6,177:184) = RESHAPE ((/ & ! 4450-4625
+.375e-04_EB, .123e-03_EB, .485e-03_EB, .182e-02_EB, .456e-02_EB, .971e-02_EB,     &
+.305e-04_EB, .892e-04_EB, .338e-03_EB, .134e-02_EB, .460e-02_EB, .104e-01_EB,     &
+.257e-04_EB, .790e-04_EB, .329e-03_EB, .154e-02_EB, .477e-02_EB, .112e-01_EB,     &
+.242e-04_EB, .740e-04_EB, .308e-03_EB, .135e-02_EB, .497e-02_EB, .122e-01_EB,     &
+.215e-04_EB, .653e-04_EB, .282e-03_EB, .131e-02_EB, .521e-02_EB, .133e-01_EB,     &
+.218e-04_EB, .660e-04_EB, .272e-03_EB, .152e-02_EB, .573e-02_EB, .148e-01_EB,     &
+.215e-04_EB, .671e-04_EB, .268e-03_EB, .134e-02_EB, .607e-02_EB, .159e-01_EB,     &
+.217e-04_EB, .695e-04_EB, .285e-03_EB, .161e-02_EB, .677e-02_EB, .173e-01_EB/),  & 
 (/6,8/))
-SD(1:6,185:192) = RESHAPE ((/ & ! 4650-4825
-.219E-04_EB, .722E-04_EB, .297E-03_EB, .169E-02_EB, .783E-02_EB, .197E-01_EB,     &
-.226E-04_EB, .771E-04_EB, .341E-03_EB, .236E-02_EB, .925E-02_EB, .226E-01_EB,     &
-.250E-04_EB, .815E-04_EB, .387E-03_EB, .286E-02_EB, .106E-01_EB, .250E-01_EB,    &
-.280E-04_EB, .845E-04_EB, .420E-03_EB, .357E-02_EB, .124E-01_EB, .276E-01_EB,     &
-.351E-04_EB, .192E-03_EB, .470E-03_EB, .467E-02_EB, .166E-01_EB, .313E-01_EB,     &
-.435E-04_EB, .200E-03_EB, .105E-02_EB, .566E-02_EB, .185E-01_EB, .341E-01_EB,     &
-.522E-04_EB, .233E-03_EB, .129E-02_EB, .736E-02_EB, .229E-01_EB, .378E-01_EB,     &
-.673E-04_EB, .306E-03_EB, .183E-02_EB, .982E-02_EB, .258E-01_EB, .404E-01_EB/),   &
+sd(1:6,185:192) = RESHAPE ((/ & ! 4650-4825
+.219e-04_EB, .722e-04_EB, .297e-03_EB, .169e-02_EB, .783e-02_EB, .197e-01_EB,     &
+.226e-04_EB, .771e-04_EB, .341e-03_EB, .236e-02_EB, .925e-02_EB, .226e-01_EB,     &
+.250e-04_EB, .815e-04_EB, .387e-03_EB, .286e-02_EB, .106e-01_EB, .250e-01_EB,    &
+.280e-04_EB, .845e-04_EB, .420e-03_EB, .357e-02_EB, .124e-01_EB, .276e-01_EB,     &
+.351e-04_EB, .192e-03_EB, .470e-03_EB, .467e-02_EB, .166e-01_EB, .313e-01_EB,     &
+.435e-04_EB, .200e-03_EB, .105e-02_EB, .566e-02_EB, .185e-01_EB, .341e-01_EB,     &
+.522e-04_EB, .233e-03_EB, .129e-02_EB, .736e-02_EB, .229e-01_EB, .378e-01_EB,     &
+.673e-04_EB, .306e-03_EB, .183e-02_EB, .982e-02_EB, .258e-01_EB, .404e-01_EB/),   &
 (/6,8/))
-SD(1:6,193:200) = RESHAPE ((/ & ! 4850-5025
-.886E-04_EB, .399E-03_EB, .246E-02_EB, .128E-01_EB, .302E-01_EB, .430E-01_EB,     &
-.113E-03_EB, .618E-03_EB, .346E-02_EB, .161E-01_EB, .358E-01_EB, .459E-01_EB,     &
-.174E-03_EB, .825E-03_EB, .441E-02_EB, .200E-01_EB, .417E-01_EB, .493E-01_EB,     &
-.265E-03_EB, .163E-02_EB, .777E-02_EB, .245E-01_EB, .450E-01_EB, .507E-01_EB,     &
-.355E-03_EB, .200E-02_EB, .978E-02_EB, .317E-01_EB, .492E-01_EB, .527E-01_EB,     &
-.538E-03_EB, .271E-02_EB, .167E-01_EB, .401E-01_EB, .503E-01_EB, .523E-01_EB,     &
-.651E-03_EB, .301E-02_EB, .264E-01_EB, .467E-01_EB, .520E-01_EB, .526E-01_EB,     &
-.987E-03_EB, .530E-02_EB, .321E-01_EB, .499E-01_EB, .523E-01_EB, .510E-01_EB/),   &
+sd(1:6,193:200) = RESHAPE ((/ & ! 4850-5025
+.886e-04_EB, .399e-03_EB, .246e-02_EB, .128e-01_EB, .302e-01_EB, .430e-01_EB,     &
+.113e-03_EB, .618e-03_EB, .346e-02_EB, .161e-01_EB, .358e-01_EB, .459e-01_EB,     &
+.174e-03_EB, .825e-03_EB, .441e-02_EB, .200e-01_EB, .417e-01_EB, .493e-01_EB,     &
+.265e-03_EB, .163e-02_EB, .777e-02_EB, .245e-01_EB, .450e-01_EB, .507e-01_EB,     &
+.355e-03_EB, .200e-02_EB, .978e-02_EB, .317e-01_EB, .492e-01_EB, .527e-01_EB,     &
+.538e-03_EB, .271e-02_EB, .167e-01_EB, .401e-01_EB, .503e-01_EB, .523e-01_EB,     &
+.651e-03_EB, .301e-02_EB, .264e-01_EB, .467e-01_EB, .520e-01_EB, .526e-01_EB,     &
+.987e-03_EB, .530e-02_EB, .321e-01_EB, .499e-01_EB, .523e-01_EB, .510e-01_EB/),   &
 (/6,8/))
-SD(1:6,201:208) = RESHAPE ((/ & ! 5050-5225
-.135E-02_EB, .860E-02_EB, .389E-01_EB, .528E-01_EB, .513E-01_EB, .492E-01_EB,    &
-.226E-02_EB, .130E-01_EB, .472E-01_EB, .559E-01_EB, .500E-01_EB, .469E-01_EB,     &
-.431E-02_EB, .198E-01_EB, .526E-01_EB, .557E-01_EB, .480E-01_EB, .452E-01_EB,     &
-.628E-02_EB, .282E-01_EB, .488E-01_EB, .495E-01_EB, .451E-01_EB, .430E-01_EB,     &
-.900E-02_EB, .390E-01_EB, .471E-01_EB, .449E-01_EB, .430E-01_EB, .423E-01_EB,     &
-.180E-01_EB, .462E-01_EB, .412E-01_EB, .391E-01_EB, .403E-01_EB, .415E-01_EB,     &
-.348E-01_EB, .710E-01_EB, .402E-01_EB, .360E-01_EB, .384E-01_EB, .414E-01_EB,     &
-.718E-01_EB, .590E-01_EB, .399E-01_EB, .360E-01_EB, .376E-01_EB, .420E-01_EB/),   &
+sd(1:6,201:208) = RESHAPE ((/ & ! 5050-5225
+.135e-02_EB, .860e-02_EB, .389e-01_EB, .528e-01_EB, .513e-01_EB, .492e-01_EB,    &
+.226e-02_EB, .130e-01_EB, .472e-01_EB, .559e-01_EB, .500e-01_EB, .469e-01_EB,     &
+.431e-02_EB, .198e-01_EB, .526e-01_EB, .557e-01_EB, .480e-01_EB, .452e-01_EB,     &
+.628e-02_EB, .282e-01_EB, .488e-01_EB, .495e-01_EB, .451e-01_EB, .430e-01_EB,     &
+.900e-02_EB, .390e-01_EB, .471e-01_EB, .449e-01_EB, .430e-01_EB, .423e-01_EB,     &
+.180e-01_EB, .462e-01_EB, .412e-01_EB, .391e-01_EB, .403e-01_EB, .415e-01_EB,     &
+.348e-01_EB, .710e-01_EB, .402e-01_EB, .360e-01_EB, .384e-01_EB, .414e-01_EB,     &
+.718e-01_EB, .590e-01_EB, .399e-01_EB, .360e-01_EB, .376e-01_EB, .420e-01_EB/),   &
 (/6,8/))
-SD(1:6,209:216) = RESHAPE ((/ & ! 5250-5425
-.111E+00_EB, .368E-01_EB, .340E-01_EB, .369E-01_EB, .409E-01_EB, .454E-01_EB,     &
-.329E-01_EB, .285E-01_EB, .365E-01_EB, .423E-01_EB, .461E-01_EB, .482E-01_EB,     &
-.281E-01_EB, .270E-01_EB, .432E-01_EB, .505E-01_EB, .529E-01_EB, .511E-01_EB,     &
-.121E+00_EB, .422E-01_EB, .589E-01_EB, .598E-01_EB, .572E-01_EB, .544E-01_EB,     &
-.139E+00_EB, .105E+00_EB, .844E-01_EB, .687E-01_EB, .593E-01_EB, .560E-01_EB,     &
-.774E-01_EB, .710E-01_EB, .683E-01_EB, .618E-01_EB, .556E-01_EB, .534E-01_EB,     &
-.858E-01_EB, .483E-01_EB, .579E-01_EB, .547E-01_EB, .503E-01_EB, .495E-01_EB,     &
-.985E-01_EB, .575E-01_EB, .589E-01_EB, .510E-01_EB, .451E-01_EB, .449E-01_EB/),   &
+sd(1:6,209:216) = RESHAPE ((/ & ! 5250-5425
+.111e+00_EB, .368e-01_EB, .340e-01_EB, .369e-01_EB, .409e-01_EB, .454e-01_EB,     &
+.329e-01_EB, .285e-01_EB, .365e-01_EB, .423e-01_EB, .461e-01_EB, .482e-01_EB,     &
+.281e-01_EB, .270e-01_EB, .432e-01_EB, .505e-01_EB, .529e-01_EB, .511e-01_EB,     &
+.121e+00_EB, .422e-01_EB, .589e-01_EB, .598e-01_EB, .572e-01_EB, .544e-01_EB,     &
+.139e+00_EB, .105e+00_EB, .844e-01_EB, .687e-01_EB, .593e-01_EB, .560e-01_EB,     &
+.774e-01_EB, .710e-01_EB, .683e-01_EB, .618e-01_EB, .556e-01_EB, .534e-01_EB,     &
+.858e-01_EB, .483e-01_EB, .579e-01_EB, .547e-01_EB, .503e-01_EB, .495e-01_EB,     &
+.985e-01_EB, .575e-01_EB, .589e-01_EB, .510e-01_EB, .451e-01_EB, .449e-01_EB/),   &
 (/6,8/))
-SD(1:6,217:224) = RESHAPE ((/ & ! 5450-5625
-.996E-01_EB, .682E-01_EB, .539E-01_EB, .489E-01_EB, .454E-01_EB, .446E-01_EB,     &
-.680E-01_EB, .680E-01_EB, .548E-01_EB, .495E-01_EB, .460E-01_EB, .458E-01_EB,     &
-.325E-01_EB, .520E-01_EB, .515E-01_EB, .483E-01_EB, .449E-01_EB, .454E-01_EB,     &
-.150E-01_EB, .350E-01_EB, .451E-01_EB, .464E-01_EB, .452E-01_EB, .449E-01_EB,     &
-.620E-02_EB, .238E-01_EB, .369E-01_EB, .408E-01_EB, .414E-01_EB, .417E-01_EB,     &
-.270E-02_EB, .158E-01_EB, .282E-01_EB, .339E-01_EB, .366E-01_EB, .384E-01_EB,     &
-.113E-02_EB, .101E-01_EB, .203E-01_EB, .263E-01_EB, .303E-01_EB, .333E-01_EB,     &
-.829E-03_EB, .590E-02_EB, .148E-01_EB, .206E-01_EB, .247E-01_EB, .295E-01_EB/),  & 
+sd(1:6,217:224) = RESHAPE ((/ & ! 5450-5625
+.996e-01_EB, .682e-01_EB, .539e-01_EB, .489e-01_EB, .454e-01_EB, .446e-01_EB,     &
+.680e-01_EB, .680e-01_EB, .548e-01_EB, .495e-01_EB, .460e-01_EB, .458e-01_EB,     &
+.325e-01_EB, .520e-01_EB, .515e-01_EB, .483e-01_EB, .449e-01_EB, .454e-01_EB,     &
+.150e-01_EB, .350e-01_EB, .451e-01_EB, .464e-01_EB, .452e-01_EB, .449e-01_EB,     &
+.620e-02_EB, .238e-01_EB, .369e-01_EB, .408e-01_EB, .414e-01_EB, .417e-01_EB,     &
+.270e-02_EB, .158e-01_EB, .282e-01_EB, .339e-01_EB, .366e-01_EB, .384e-01_EB,     &
+.113e-02_EB, .101e-01_EB, .203e-01_EB, .263e-01_EB, .303e-01_EB, .333e-01_EB,     &
+.829e-03_EB, .590e-02_EB, .148e-01_EB, .206e-01_EB, .247e-01_EB, .295e-01_EB/),  & 
 (/6,8/))
-SD(1:6,225:232) = RESHAPE ((/ & ! 5650-5825
-.365E-03_EB, .310E-02_EB, .969E-02_EB, .154E-01_EB, .203E-01_EB, .258E-01_EB,     &
-.240E-03_EB, .130E-02_EB, .589E-02_EB, .112E-01_EB, .164E-01_EB, .222E-01_EB,     &
-.158E-03_EB, .400E-03_EB, .417E-02_EB, .850E-02_EB, .134E-01_EB, .190E-01_EB,     &
-.103E-03_EB, .262E-03_EB, .208E-02_EB, .594E-02_EB, .109E-01_EB, .162E-01_EB,     &
-.741E-04_EB, .181E-03_EB, .142E-02_EB, .455E-02_EB, .907E-02_EB, .141E-01_EB,     &
-.625E-04_EB, .135E-03_EB, .816E-03_EB, .316E-02_EB, .698E-02_EB, .121E-01_EB,     &
-.499E-04_EB, .111E-03_EB, .624E-03_EB, .230E-02_EB, .551E-02_EB, .102E-01_EB,     &
-.325E-04_EB, .677E-04_EB, .425E-03_EB, .124E-02_EB, .385E-02_EB, .818E-02_EB/),   &
+sd(1:6,225:232) = RESHAPE ((/ & ! 5650-5825
+.365e-03_EB, .310e-02_EB, .969e-02_EB, .154e-01_EB, .203e-01_EB, .258e-01_EB,     &
+.240e-03_EB, .130e-02_EB, .589e-02_EB, .112e-01_EB, .164e-01_EB, .222e-01_EB,     &
+.158e-03_EB, .400e-03_EB, .417e-02_EB, .850e-02_EB, .134e-01_EB, .190e-01_EB,     &
+.103e-03_EB, .262e-03_EB, .208e-02_EB, .594e-02_EB, .109e-01_EB, .162e-01_EB,     &
+.741e-04_EB, .181e-03_EB, .142e-02_EB, .455e-02_EB, .907e-02_EB, .141e-01_EB,     &
+.625e-04_EB, .135e-03_EB, .816e-03_EB, .316e-02_EB, .698e-02_EB, .121e-01_EB,     &
+.499e-04_EB, .111e-03_EB, .624e-03_EB, .230e-02_EB, .551e-02_EB, .102e-01_EB,     &
+.325e-04_EB, .677e-04_EB, .425e-03_EB, .124e-02_EB, .385e-02_EB, .818e-02_EB/),   &
 (/6,8/))
-SD(1:6,233:240) = RESHAPE ((/ & ! 5850-6025
-.231E-04_EB, .563E-04_EB, .278E-03_EB, .986E-03_EB, .290E-02_EB, .672E-02_EB,    &
-.165E-04_EB, .481E-04_EB, .247E-03_EB, .944E-03_EB, .253E-02_EB, .612E-02_EB,           &
-.126E-04_EB, .432E-04_EB, .241E-03_EB, .886E-03_EB, .220E-02_EB, .582E-02_EB,          &
-.118E-04_EB, .420E-04_EB, .235E-03_EB, .847E-03_EB, .209E-02_EB, .571E-02_EB,          &
-.110E-04_EB, .408E-04_EB, .226E-03_EB, .812E-03_EB, .221E-02_EB, .604E-02_EB,         &
-.101E-04_EB, .400E-04_EB, .213E-03_EB, .805E-03_EB, .239E-02_EB, .641E-02_EB,        &
-.983E-05_EB, .395E-04_EB, .186E-03_EB, .801E-03_EB, .247E-02_EB, .691E-02_EB,       &
-.979E-05_EB, .401E-04_EB, .193E-03_EB, .805E-03_EB, .260E-02_EB, .732E-02_EB/),    &
+sd(1:6,233:240) = RESHAPE ((/ & ! 5850-6025
+.231e-04_EB, .563e-04_EB, .278e-03_EB, .986e-03_EB, .290e-02_EB, .672e-02_EB,    &
+.165e-04_EB, .481e-04_EB, .247e-03_EB, .944e-03_EB, .253e-02_EB, .612e-02_EB,           &
+.126e-04_EB, .432e-04_EB, .241e-03_EB, .886e-03_EB, .220e-02_EB, .582e-02_EB,          &
+.118e-04_EB, .420e-04_EB, .235e-03_EB, .847e-03_EB, .209e-02_EB, .571e-02_EB,          &
+.110e-04_EB, .408e-04_EB, .226e-03_EB, .812e-03_EB, .221e-02_EB, .604e-02_EB,         &
+.101e-04_EB, .400e-04_EB, .213e-03_EB, .805e-03_EB, .239e-02_EB, .641e-02_EB,        &
+.983e-05_EB, .395e-04_EB, .186e-03_EB, .801e-03_EB, .247e-02_EB, .691e-02_EB,       &
+.979e-05_EB, .401e-04_EB, .193e-03_EB, .805e-03_EB, .260e-02_EB, .732e-02_EB/),    &
 (/6,8/))
-SD(1:6,241:248) = RESHAPE ((/ & ! 6050-6225
-.976E-05_EB, .410E-04_EB, .201E-03_EB, .814E-03_EB, .285E-02_EB, .776E-02_EB,     &
-.988E-05_EB, .420E-04_EB, .210E-03_EB, .832E-03_EB, .317E-02_EB, .842E-02_EB,    &
-.991E-05_EB, .425E-04_EB, .219E-03_EB, .877E-03_EB, .340E-02_EB, .888E-02_EB,        &
-.102E-04_EB, .435E-04_EB, .231E-03_EB, .937E-03_EB, .361E-02_EB, .929E-02_EB,       &
-.110E-04_EB, .486E-04_EB, .244E-03_EB, .971E-03_EB, .402E-02_EB, .994E-02_EB,      &
-.127E-04_EB, .579E-04_EB, .257E-03_EB, .111E-02_EB, .437E-02_EB, .104E-01_EB,     &
-.131E-04_EB, .612E-04_EB, .277E-03_EB, .113E-02_EB, .465E-02_EB, .110E-01_EB,        &
-.150E-04_EB, .783E-04_EB, .353E-03_EB, .116E-02_EB, .510E-02_EB, .116E-01_EB/),     &
+sd(1:6,241:248) = RESHAPE ((/ & ! 6050-6225
+.976e-05_EB, .410e-04_EB, .201e-03_EB, .814e-03_EB, .285e-02_EB, .776e-02_EB,     &
+.988e-05_EB, .420e-04_EB, .210e-03_EB, .832e-03_EB, .317e-02_EB, .842e-02_EB,    &
+.991e-05_EB, .425e-04_EB, .219e-03_EB, .877e-03_EB, .340e-02_EB, .888e-02_EB,        &
+.102e-04_EB, .435e-04_EB, .231e-03_EB, .937e-03_EB, .361e-02_EB, .929e-02_EB,       &
+.110e-04_EB, .486e-04_EB, .244e-03_EB, .971e-03_EB, .402e-02_EB, .994e-02_EB,      &
+.127e-04_EB, .579e-04_EB, .257e-03_EB, .111e-02_EB, .437e-02_EB, .104e-01_EB,     &
+.131e-04_EB, .612e-04_EB, .277e-03_EB, .113e-02_EB, .465e-02_EB, .110e-01_EB,        &
+.150e-04_EB, .783e-04_EB, .353e-03_EB, .116e-02_EB, .510e-02_EB, .116e-01_EB/),     &
 (/6,8/))
-SD(1:6,249:256) = RESHAPE ((/ & ! 6250-6425
-.178E-04_EB, .922E-04_EB, .394E-03_EB, .157E-02_EB, .555E-02_EB, .123E-01_EB,      &
-.203E-04_EB, .115E-03_EB, .481E-03_EB, .188E-02_EB, .601E-02_EB, .131E-01_EB,     &
-.230E-04_EB, .145E-03_EB, .617E-03_EB, .183E-02_EB, .644E-02_EB, .139E-01_EB,      & 
-.280E-04_EB, .187E-03_EB, .723E-03_EB, .202E-02_EB, .686E-02_EB, .146E-01_EB,     & 
-.305E-04_EB, .209E-03_EB, .811E-03_EB, .243E-02_EB, .779E-02_EB, .157E-01_EB,     &
-.455E-04_EB, .244E-03_EB, .935E-03_EB, .243E-02_EB, .844E-02_EB, .166E-01_EB,    &
-.661E-04_EB, .320E-03_EB, .989E-03_EB, .288E-02_EB, .902E-02_EB, .173E-01_EB,       & 
-.723E-04_EB, .397E-03_EB, .122E-02_EB, .359E-02_EB, .100E-01_EB, .184E-01_EB/),    &
+sd(1:6,249:256) = RESHAPE ((/ & ! 6250-6425
+.178e-04_EB, .922e-04_EB, .394e-03_EB, .157e-02_EB, .555e-02_EB, .123e-01_EB,      &
+.203e-04_EB, .115e-03_EB, .481e-03_EB, .188e-02_EB, .601e-02_EB, .131e-01_EB,     &
+.230e-04_EB, .145e-03_EB, .617e-03_EB, .183e-02_EB, .644e-02_EB, .139e-01_EB,      & 
+.280e-04_EB, .187e-03_EB, .723e-03_EB, .202e-02_EB, .686e-02_EB, .146e-01_EB,     & 
+.305e-04_EB, .209e-03_EB, .811e-03_EB, .243e-02_EB, .779e-02_EB, .157e-01_EB,     &
+.455e-04_EB, .244e-03_EB, .935e-03_EB, .243e-02_EB, .844e-02_EB, .166e-01_EB,    &
+.661e-04_EB, .320e-03_EB, .989e-03_EB, .288e-02_EB, .902e-02_EB, .173e-01_EB,       & 
+.723e-04_EB, .397e-03_EB, .122e-02_EB, .359e-02_EB, .100e-01_EB, .184e-01_EB/),    &
 (/6,8/))
-SD(1:6,257:264) = RESHAPE ((/ & ! 6450-6625
-.847E-04_EB, .481E-03_EB, .143E-02_EB, .429E-02_EB, .108E-01_EB, .192E-01_EB,     &
-.103E-03_EB, .591E-03_EB, .174E-02_EB, .488E-02_EB, .116E-01_EB, .200E-01_EB,           &
-.131E-03_EB, .703E-03_EB, .247E-02_EB, .549E-02_EB, .124E-01_EB, .205E-01_EB,          &
-.165E-03_EB, .872E-03_EB, .265E-02_EB, .641E-02_EB, .131E-01_EB, .211E-01_EB,         &
-.205E-03_EB, .110E-02_EB, .298E-02_EB, .749E-02_EB, .140E-01_EB, .218E-01_EB,         &
-.253E-03_EB, .130E-02_EB, .346E-02_EB, .811E-02_EB, .150E-01_EB, .230E-01_EB,         &
-.338E-03_EB, .150E-02_EB, .445E-02_EB, .890E-02_EB, .159E-01_EB, .237E-01_EB,        &
-.437E-03_EB, .170E-02_EB, .491E-02_EB, .107E-01_EB, .170E-01_EB, .245E-01_EB/),     &
+sd(1:6,257:264) = RESHAPE ((/ & ! 6450-6625
+.847e-04_EB, .481e-03_EB, .143e-02_EB, .429e-02_EB, .108e-01_EB, .192e-01_EB,     &
+.103e-03_EB, .591e-03_EB, .174e-02_EB, .488e-02_EB, .116e-01_EB, .200e-01_EB,           &
+.131e-03_EB, .703e-03_EB, .247e-02_EB, .549e-02_EB, .124e-01_EB, .205e-01_EB,          &
+.165e-03_EB, .872e-03_EB, .265e-02_EB, .641e-02_EB, .131e-01_EB, .211e-01_EB,         &
+.205e-03_EB, .110e-02_EB, .298e-02_EB, .749e-02_EB, .140e-01_EB, .218e-01_EB,         &
+.253e-03_EB, .130e-02_EB, .346e-02_EB, .811e-02_EB, .150e-01_EB, .230e-01_EB,         &
+.338e-03_EB, .150e-02_EB, .445e-02_EB, .890e-02_EB, .159e-01_EB, .237e-01_EB,        &
+.437e-03_EB, .170e-02_EB, .491e-02_EB, .107e-01_EB, .170e-01_EB, .245e-01_EB/),     &
 (/6,8/))
-SD(1:6,265:272) = RESHAPE ((/ & ! 6650-6825
-.581E-03_EB, .190E-02_EB, .537E-02_EB, .116E-01_EB, .179E-01_EB, .254E-01_EB,         &
-.685E-03_EB, .220E-02_EB, .578E-02_EB, .128E-01_EB, .189E-01_EB, .263E-01_EB,        &
-.900E-03_EB, .250E-02_EB, .649E-02_EB, .134E-01_EB, .195E-01_EB, .275E-01_EB,       &
-.121E-02_EB, .280E-02_EB, .722E-02_EB, .142E-01_EB, .202E-01_EB, .281E-01_EB,      &
-.152E-02_EB, .330E-02_EB, .813E-02_EB, .161E-01_EB, .212E-01_EB, .288E-01_EB,     &
-.185E-02_EB, .370E-02_EB, .907E-02_EB, .168E-01_EB, .222E-01_EB, .292E-01_EB,    &
-.220E-02_EB, .430E-02_EB, .929E-02_EB, .183E-01_EB, .233E-01_EB, .294E-01_EB,       &
-.255E-02_EB, .500E-02_EB, .114E-01_EB, .195E-01_EB, .245E-01_EB, .289E-01_EB/),       &
+sd(1:6,265:272) = RESHAPE ((/ & ! 6650-6825
+.581e-03_EB, .190e-02_EB, .537e-02_EB, .116e-01_EB, .179e-01_EB, .254e-01_EB,         &
+.685e-03_EB, .220e-02_EB, .578e-02_EB, .128e-01_EB, .189e-01_EB, .263e-01_EB,        &
+.900e-03_EB, .250e-02_EB, .649e-02_EB, .134e-01_EB, .195e-01_EB, .275e-01_EB,       &
+.121e-02_EB, .280e-02_EB, .722e-02_EB, .142e-01_EB, .202e-01_EB, .281e-01_EB,      &
+.152e-02_EB, .330e-02_EB, .813e-02_EB, .161e-01_EB, .212e-01_EB, .288e-01_EB,     &
+.185e-02_EB, .370e-02_EB, .907e-02_EB, .168e-01_EB, .222e-01_EB, .292e-01_EB,    &
+.220e-02_EB, .430e-02_EB, .929e-02_EB, .183e-01_EB, .233e-01_EB, .294e-01_EB,       &
+.255e-02_EB, .500e-02_EB, .114e-01_EB, .195e-01_EB, .245e-01_EB, .289e-01_EB/),       &
 (/6,8/))
-SD(1:6,273:280) = RESHAPE ((/ & ! 6850-7025
-.290E-02_EB, .580E-02_EB, .167E-01_EB, .215E-01_EB, .260E-01_EB, .291E-01_EB,        &
-.320E-02_EB, .670E-02_EB, .208E-01_EB, .237E-01_EB, .274E-01_EB, .293E-01_EB,        &
-.360E-02_EB, .880E-02_EB, .220E-01_EB, .253E-01_EB, .282E-01_EB, .300E-01_EB,       &
-.400E-02_EB, .920E-02_EB, .238E-01_EB, .273E-01_EB, .290E-01_EB, .304E-01_EB,        &
-.460E-02_EB, .108E-01_EB, .272E-01_EB, .279E-01_EB, .298E-01_EB, .310E-01_EB,       &
-.530E-02_EB, .128E-01_EB, .304E-01_EB, .292E-01_EB, .297E-01_EB, .312E-01_EB,        &
-.620E-02_EB, .152E-01_EB, .344E-01_EB, .303E-01_EB, .293E-01_EB, .310E-01_EB,       &
-.760E-02_EB, .182E-01_EB, .341E-01_EB, .297E-01_EB, .290E-01_EB, .300E-01_EB/),    &
+sd(1:6,273:280) = RESHAPE ((/ & ! 6850-7025
+.290e-02_EB, .580e-02_EB, .167e-01_EB, .215e-01_EB, .260e-01_EB, .291e-01_EB,        &
+.320e-02_EB, .670e-02_EB, .208e-01_EB, .237e-01_EB, .274e-01_EB, .293e-01_EB,        &
+.360e-02_EB, .880e-02_EB, .220e-01_EB, .253e-01_EB, .282e-01_EB, .300e-01_EB,       &
+.400e-02_EB, .920e-02_EB, .238e-01_EB, .273e-01_EB, .290e-01_EB, .304e-01_EB,        &
+.460e-02_EB, .108e-01_EB, .272e-01_EB, .279e-01_EB, .298e-01_EB, .310e-01_EB,       &
+.530e-02_EB, .128e-01_EB, .304e-01_EB, .292e-01_EB, .297e-01_EB, .312e-01_EB,        &
+.620e-02_EB, .152e-01_EB, .344e-01_EB, .303e-01_EB, .293e-01_EB, .310e-01_EB,       &
+.760e-02_EB, .182e-01_EB, .341e-01_EB, .297e-01_EB, .290e-01_EB, .300e-01_EB/),    &
 (/6,8/))
-SD(1:6,281:288) = RESHAPE ((/ & ! 7050-7225
-.980E-02_EB, .222E-01_EB, .398E-01_EB, .318E-01_EB, .291E-01_EB, .294E-01_EB,       & 
-.132E-01_EB, .271E-01_EB, .402E-01_EB, .294E-01_EB, .274E-01_EB, .282E-01_EB,      & 
-.190E-01_EB, .335E-01_EB, .421E-01_EB, .286E-01_EB, .262E-01_EB, .269E-01_EB,     & 
-.240E-01_EB, .432E-01_EB, .431E-01_EB, .276E-01_EB, .245E-01_EB, .257E-01_EB,    & 
-.288E-01_EB, .570E-01_EB, .458E-01_EB, .270E-01_EB, .228E-01_EB, .243E-01_EB,   &
-.323E-01_EB, .740E-01_EB, .449E-01_EB, .261E-01_EB, .214E-01_EB, .221E-01_EB,        &
-.570E-01_EB, .890E-01_EB, .435E-01_EB, .225E-01_EB, .199E-01_EB, .196E-01_EB,       &
-.216E-01_EB, .680E-01_EB, .378E-01_EB, .239E-01_EB, .195E-01_EB, .192E-01_EB/),    &
+sd(1:6,281:288) = RESHAPE ((/ & ! 7050-7225
+.980e-02_EB, .222e-01_EB, .398e-01_EB, .318e-01_EB, .291e-01_EB, .294e-01_EB,       & 
+.132e-01_EB, .271e-01_EB, .402e-01_EB, .294e-01_EB, .274e-01_EB, .282e-01_EB,      & 
+.190e-01_EB, .335e-01_EB, .421e-01_EB, .286e-01_EB, .262e-01_EB, .269e-01_EB,     & 
+.240e-01_EB, .432e-01_EB, .431e-01_EB, .276e-01_EB, .245e-01_EB, .257e-01_EB,    & 
+.288e-01_EB, .570e-01_EB, .458e-01_EB, .270e-01_EB, .228e-01_EB, .243e-01_EB,   &
+.323e-01_EB, .740e-01_EB, .449e-01_EB, .261e-01_EB, .214e-01_EB, .221e-01_EB,        &
+.570e-01_EB, .890e-01_EB, .435e-01_EB, .225e-01_EB, .199e-01_EB, .196e-01_EB,       &
+.216e-01_EB, .680e-01_EB, .378e-01_EB, .239e-01_EB, .195e-01_EB, .192e-01_EB/),    &
 (/6,8/))
-SD(1:6,289:296) = RESHAPE ((/ & ! 7250-7425
-.126E-01_EB, .475E-01_EB, .364E-01_EB, .238E-01_EB, .197E-01_EB, .192E-01_EB,      & 
-.117E-01_EB, .369E-01_EB, .385E-01_EB, .249E-01_EB, .212E-01_EB, .204E-01_EB,     & 
-.140E-01_EB, .370E-01_EB, .419E-01_EB, .272E-01_EB, .228E-01_EB, .213E-01_EB,    & 
-.425E-01_EB, .418E-01_EB, .440E-01_EB, .280E-01_EB, .248E-01_EB, .229E-01_EB,   &
-.640E-01_EB, .460E-01_EB, .427E-01_EB, .290E-01_EB, .263E-01_EB, .238E-01_EB,   &
-.385E-01_EB, .385E-01_EB, .374E-01_EB, .259E-01_EB, .235E-01_EB, .224E-01_EB,        &
-.182E-01_EB, .179E-01_EB, .282E-01_EB, .231E-01_EB, .211E-01_EB, .214E-01_EB,       &
-.170E-01_EB, .810E-02_EB, .191E-01_EB, .175E-01_EB, .181E-01_EB, .194E-01_EB/),     & 
+sd(1:6,289:296) = RESHAPE ((/ & ! 7250-7425
+.126e-01_EB, .475e-01_EB, .364e-01_EB, .238e-01_EB, .197e-01_EB, .192e-01_EB,      & 
+.117e-01_EB, .369e-01_EB, .385e-01_EB, .249e-01_EB, .212e-01_EB, .204e-01_EB,     & 
+.140e-01_EB, .370e-01_EB, .419e-01_EB, .272e-01_EB, .228e-01_EB, .213e-01_EB,    & 
+.425e-01_EB, .418e-01_EB, .440e-01_EB, .280e-01_EB, .248e-01_EB, .229e-01_EB,   &
+.640e-01_EB, .460e-01_EB, .427e-01_EB, .290e-01_EB, .263e-01_EB, .238e-01_EB,   &
+.385e-01_EB, .385e-01_EB, .374e-01_EB, .259e-01_EB, .235e-01_EB, .224e-01_EB,        &
+.182e-01_EB, .179e-01_EB, .282e-01_EB, .231e-01_EB, .211e-01_EB, .214e-01_EB,       &
+.170e-01_EB, .810e-02_EB, .191e-01_EB, .175e-01_EB, .181e-01_EB, .194e-01_EB/),     & 
 (/6,8/))
-SD(1:6,297:304) = RESHAPE ((/ & ! 7450-7625
-.161E-01_EB, .370E-02_EB, .105E-01_EB, .127E-01_EB, .152E-01_EB, .171E-01_EB,      & 
-.145E-01_EB, .170E-02_EB, .554E-02_EB, .855E-02_EB, .113E-01_EB, .131E-01_EB,     & 
-.175E-02_EB, .140E-02_EB, .385E-02_EB, .595E-02_EB, .803E-02_EB, .945E-02_EB,    &
-.772E-03_EB, .751E-03_EB, .384E-02_EB, .575E-02_EB, .537E-02_EB, .594E-02_EB,       &
-.491E-03_EB, .600E-03_EB, .301E-02_EB, .453E-02_EB, .380E-02_EB, .434E-02_EB,      &
-.275E-03_EB, .410E-03_EB, .193E-02_EB, .366E-02_EB, .319E-02_EB, .332E-02_EB,     &
-.185E-01_EB, .280E-03_EB, .131E-02_EB, .232E-02_EB, .247E-02_EB, .256E-02_EB,      &
-.101E-03_EB, .160E-03_EB, .915E-03_EB, .150E-02_EB, .186E-02_EB, .197E-02_EB/),   &
+sd(1:6,297:304) = RESHAPE ((/ & ! 7450-7625
+.161e-01_EB, .370e-02_EB, .105e-01_EB, .127e-01_EB, .152e-01_EB, .171e-01_EB,      & 
+.145e-01_EB, .170e-02_EB, .554e-02_EB, .855e-02_EB, .113e-01_EB, .131e-01_EB,     & 
+.175e-02_EB, .140e-02_EB, .385e-02_EB, .595e-02_EB, .803e-02_EB, .945e-02_EB,    &
+.772e-03_EB, .751e-03_EB, .384e-02_EB, .575e-02_EB, .537e-02_EB, .594e-02_EB,       &
+.491e-03_EB, .600e-03_EB, .301e-02_EB, .453e-02_EB, .380e-02_EB, .434e-02_EB,      &
+.275e-03_EB, .410e-03_EB, .193e-02_EB, .366e-02_EB, .319e-02_EB, .332e-02_EB,     &
+.185e-01_EB, .280e-03_EB, .131e-02_EB, .232e-02_EB, .247e-02_EB, .256e-02_EB,      &
+.101e-03_EB, .160e-03_EB, .915e-03_EB, .150e-02_EB, .186e-02_EB, .197e-02_EB/),   &
 (/6,8/))
-SD(1:6,305:312) = RESHAPE ((/ & ! 7650-7825
-.691E-04_EB, .110E-03_EB, .565E-03_EB, .114E-02_EB, .205E-02_EB, .192E-02_EB,        &  
-.476E-04_EB, .750E-04_EB, .114E-02_EB, .124E-02_EB, .175E-02_EB, .187E-02_EB,         &
-.305E-04_EB, .590E-04_EB, .529E-03_EB, .114E-02_EB, .160E-02_EB, .185E-02_EB,       &
-.240E-04_EB, .480E-04_EB, .293E-03_EB, .842E-03_EB, .141E-02_EB, .184E-02_EB,       &
-.170E-04_EB, .360E-04_EB, .122E-03_EB, .435E-03_EB, .124E-02_EB, .182E-02_EB,      &
-.120E-04_EB, .240E-04_EB, .121E-03_EB, .435E-03_EB, .118E-02_EB, .187E-02_EB,     &
-.810E-05_EB, .170E-04_EB, .103E-03_EB, .439E-03_EB, .126E-02_EB, .192E-02_EB,    &
-.550E-05_EB, .120E-04_EB, .866E-04_EB, .367E-03_EB, .119E-02_EB, .193E-02_EB/),    &
+sd(1:6,305:312) = RESHAPE ((/ & ! 7650-7825
+.691e-04_EB, .110e-03_EB, .565e-03_EB, .114e-02_EB, .205e-02_EB, .192e-02_EB,        &  
+.476e-04_EB, .750e-04_EB, .114e-02_EB, .124e-02_EB, .175e-02_EB, .187e-02_EB,         &
+.305e-04_EB, .590e-04_EB, .529e-03_EB, .114e-02_EB, .160e-02_EB, .185e-02_EB,       &
+.240e-04_EB, .480e-04_EB, .293e-03_EB, .842e-03_EB, .141e-02_EB, .184e-02_EB,       &
+.170e-04_EB, .360e-04_EB, .122e-03_EB, .435e-03_EB, .124e-02_EB, .182e-02_EB,      &
+.120e-04_EB, .240e-04_EB, .121e-03_EB, .435e-03_EB, .118e-02_EB, .187e-02_EB,     &
+.810e-05_EB, .170e-04_EB, .103e-03_EB, .439e-03_EB, .126e-02_EB, .192e-02_EB,    &
+.550e-05_EB, .120e-04_EB, .866e-04_EB, .367e-03_EB, .119e-02_EB, .193e-02_EB/),    &
 (/6,8/))
-SD(1:6,313:320) = RESHAPE ((/&  ! 7850-8025
-.390E-05_EB, .900E-05_EB, .716E-04_EB, .351E-03_EB, .116E-02_EB, .194E-02_EB,        & 
-.295E-05_EB, .830E-05_EB, .373E-04_EB, .254E-03_EB, .114E-02_EB, .196E-02_EB,       & 
-.230E-05_EB, .800E-05_EB, .465E-04_EB, .298E-03_EB, .117E-02_EB, .201E-02_EB,      & 
-.225E-05_EB, .820E-05_EB, .367E-04_EB, .252E-03_EB, .116E-02_EB, .205E-02_EB,     & 
-.220E-05_EB, .840E-05_EB, .371E-04_EB, .268E-03_EB, .127E-02_EB, .211E-02_EB,    & 
-.223E-05_EB, .920E-05_EB, .396E-04_EB, .273E-03_EB, .128E-02_EB, .216E-02_EB,   &
-.235E-05_EB, .103E-04_EB, .415E-04_EB, .263E-03_EB, .121E-02_EB, .221E-02_EB,      &
-.280E-05_EB, .125E-04_EB, .633E-04_EB, .363E-03_EB, .136E-02_EB, .231E-02_EB/),   &
+sd(1:6,313:320) = RESHAPE ((/&  ! 7850-8025
+.390e-05_EB, .900e-05_EB, .716e-04_EB, .351e-03_EB, .116e-02_EB, .194e-02_EB,        & 
+.295e-05_EB, .830e-05_EB, .373e-04_EB, .254e-03_EB, .114e-02_EB, .196e-02_EB,       & 
+.230e-05_EB, .800e-05_EB, .465e-04_EB, .298e-03_EB, .117e-02_EB, .201e-02_EB,      & 
+.225e-05_EB, .820e-05_EB, .367e-04_EB, .252e-03_EB, .116e-02_EB, .205e-02_EB,     & 
+.220e-05_EB, .840e-05_EB, .371e-04_EB, .268e-03_EB, .127e-02_EB, .211e-02_EB,    & 
+.223e-05_EB, .920e-05_EB, .396e-04_EB, .273e-03_EB, .128e-02_EB, .216e-02_EB,   &
+.235e-05_EB, .103e-04_EB, .415e-04_EB, .263e-03_EB, .121e-02_EB, .221e-02_EB,      &
+.280e-05_EB, .125e-04_EB, .633e-04_EB, .363e-03_EB, .136e-02_EB, .231e-02_EB/),   &
 (/6,8/))
-SD(1:6,321:328) = RESHAPE ((/ & ! 8050-8225
-.310E-05_EB, .150E-04_EB, .979E-04_EB, .492E-03_EB, .150E-02_EB, .241E-02_EB,           &
-.370E-05_EB, .180E-04_EB, .120E-03_EB, .580E-03_EB, .167E-02_EB, .251E-02_EB,           &
-.420E-05_EB, .200E-04_EB, .987E-04_EB, .509E-03_EB, .171E-02_EB, .257E-02_EB,           &
-.510E-05_EB, .240E-04_EB, .134E-03_EB, .547E-03_EB, .173E-02_EB, .267E-02_EB,           &
-.600E-05_EB, .270E-04_EB, .121E-03_EB, .534E-03_EB, .172E-02_EB, .274E-02_EB,           &
-.720E-05_EB, .300E-04_EB, .204E-03_EB, .684E-03_EB, .184E-02_EB, .285E-02_EB,           &
-.820E-05_EB, .330E-04_EB, .276E-03_EB, .819E-03_EB, .199E-02_EB, .297E-02_EB,           &
-.100E-04_EB, .380E-04_EB, .317E-03_EB, .859E-03_EB, .214E-02_EB, .308E-02_EB/),         &
+sd(1:6,321:328) = RESHAPE ((/ & ! 8050-8225
+.310e-05_EB, .150e-04_EB, .979e-04_EB, .492e-03_EB, .150e-02_EB, .241e-02_EB,           &
+.370e-05_EB, .180e-04_EB, .120e-03_EB, .580e-03_EB, .167e-02_EB, .251e-02_EB,           &
+.420e-05_EB, .200e-04_EB, .987e-04_EB, .509e-03_EB, .171e-02_EB, .257e-02_EB,           &
+.510e-05_EB, .240e-04_EB, .134e-03_EB, .547e-03_EB, .173e-02_EB, .267e-02_EB,           &
+.600e-05_EB, .270e-04_EB, .121e-03_EB, .534e-03_EB, .172e-02_EB, .274e-02_EB,           &
+.720e-05_EB, .300e-04_EB, .204e-03_EB, .684e-03_EB, .184e-02_EB, .285e-02_EB,           &
+.820e-05_EB, .330e-04_EB, .276e-03_EB, .819e-03_EB, .199e-02_EB, .297e-02_EB,           &
+.100e-04_EB, .380e-04_EB, .317e-03_EB, .859e-03_EB, .214e-02_EB, .308e-02_EB/),         &
 (/6,8/))
-SD(1:6,329:336) = RESHAPE ((/ & ! 8250-8425
-.125E-04_EB, .420E-04_EB, .240E-03_EB, .818E-03_EB, .220E-02_EB, .317E-02_EB,           &
-.145E-04_EB, .500E-04_EB, .452E-03_EB, .109E-02_EB, .238E-02_EB, .293E-02_EB,           &
-.175E-04_EB, .560E-04_EB, .301E-03_EB, .941E-03_EB, .243E-02_EB, .342E-02_EB,           &
-.198E-04_EB, .630E-04_EB, .280E-03_EB, .107E-02_EB, .260E-02_EB, .353E-02_EB,           &
-.230E-04_EB, .710E-04_EB, .276E-03_EB, .109E-02_EB, .272E-02_EB, .365E-02_EB,           &
-.280E-04_EB, .830E-04_EB, .369E-03_EB, .127E-02_EB, .295E-02_EB, .377E-02_EB,           &
-.330E-04_EB, .890E-04_EB, .430E-03_EB, .139E-02_EB, .306E-02_EB, .385E-02_EB,           &
-.360E-04_EB, .950E-04_EB, .371E-03_EB, .135E-02_EB, .306E-02_EB, .384E-02_EB/),         &
+sd(1:6,329:336) = RESHAPE ((/ & ! 8250-8425
+.125e-04_EB, .420e-04_EB, .240e-03_EB, .818e-03_EB, .220e-02_EB, .317e-02_EB,           &
+.145e-04_EB, .500e-04_EB, .452e-03_EB, .109e-02_EB, .238e-02_EB, .293e-02_EB,           &
+.175e-04_EB, .560e-04_EB, .301e-03_EB, .941e-03_EB, .243e-02_EB, .342e-02_EB,           &
+.198e-04_EB, .630e-04_EB, .280e-03_EB, .107e-02_EB, .260e-02_EB, .353e-02_EB,           &
+.230e-04_EB, .710e-04_EB, .276e-03_EB, .109e-02_EB, .272e-02_EB, .365e-02_EB,           &
+.280e-04_EB, .830e-04_EB, .369e-03_EB, .127e-02_EB, .295e-02_EB, .377e-02_EB,           &
+.330e-04_EB, .890e-04_EB, .430e-03_EB, .139e-02_EB, .306e-02_EB, .385e-02_EB,           &
+.360e-04_EB, .950e-04_EB, .371e-03_EB, .135e-02_EB, .306e-02_EB, .384e-02_EB/),         &
 (/6,8/))
-SD(1:6,337:344) = RESHAPE ((/ & ! 8450-8625
-.390E-04_EB, .980E-04_EB, .434E-03_EB, .147E-02_EB, .316E-02_EB, .385E-02_EB,           &
-.400E-04_EB, .990E-04_EB, .397E-03_EB, .143E-02_EB, .318E-02_EB, .384E-02_EB,           &
-.400E-04_EB, .980E-04_EB, .364E-03_EB, .141E-02_EB, .317E-02_EB, .381E-02_EB,           &
-.390E-04_EB, .940E-04_EB, .390E-03_EB, .142E-02_EB, .314E-02_EB, .376E-02_EB,          &
-.380E-04_EB, .900E-04_EB, .380E-03_EB, .145E-02_EB, .318E-02_EB, .375E-02_EB,         &
-.380E-04_EB, .900E-04_EB, .380E-03_EB, .145E-02_EB, .318E-02_EB, .375E-02_EB,        &
-.330E-04_EB, .750E-04_EB, .358E-03_EB, .138E-02_EB, .310E-02_EB, .372E-02_EB,       &
-.270E-04_EB, .580E-04_EB, .382E-03_EB, .143E-02_EB, .315E-02_EB, .369E-02_EB/),    &
+sd(1:6,337:344) = RESHAPE ((/ & ! 8450-8625
+.390e-04_EB, .980e-04_EB, .434e-03_EB, .147e-02_EB, .316e-02_EB, .385e-02_EB,           &
+.400e-04_EB, .990e-04_EB, .397e-03_EB, .143e-02_EB, .318e-02_EB, .384e-02_EB,           &
+.400e-04_EB, .980e-04_EB, .364e-03_EB, .141e-02_EB, .317e-02_EB, .381e-02_EB,           &
+.390e-04_EB, .940e-04_EB, .390e-03_EB, .142e-02_EB, .314e-02_EB, .376e-02_EB,          &
+.380e-04_EB, .900e-04_EB, .380e-03_EB, .145e-02_EB, .318e-02_EB, .375e-02_EB,         &
+.380e-04_EB, .900e-04_EB, .380e-03_EB, .145e-02_EB, .318e-02_EB, .375e-02_EB,        &
+.330e-04_EB, .750e-04_EB, .358e-03_EB, .138e-02_EB, .310e-02_EB, .372e-02_EB,       &
+.270e-04_EB, .580e-04_EB, .382e-03_EB, .143e-02_EB, .315e-02_EB, .369e-02_EB/),    &
 (/6,8/))
-SD(1:6,345:352) = RESHAPE ((/ & ! 8650-8825
-.240E-04_EB, .500E-04_EB, .343E-03_EB, .136E-02_EB, .306E-02_EB, .363E-02_EB,          &
-.200E-04_EB, .450E-04_EB, .309E-03_EB, .134E-02_EB, .306E-02_EB, .359E-02_EB,         & 
-.180E-04_EB, .400E-04_EB, .281E-03_EB, .127E-02_EB, .294E-02_EB, .341E-02_EB,        &
-.170E-04_EB, .360E-04_EB, .276E-03_EB, .124E-02_EB, .290E-02_EB, .336E-02_EB,       & 
-.160E-04_EB, .310E-04_EB, .272E-03_EB, .122E-02_EB, .283E-02_EB, .323E-02_EB,      &  
-.140E-04_EB, .280E-04_EB, .241E-03_EB, .117E-02_EB, .273E-02_EB, .309E-02_EB,       &
-.120E-04_EB, .250E-04_EB, .237E-03_EB, .115E-02_EB, .269E-02_EB, .297E-02_EB,      &
-.100E-04_EB, .220E-04_EB, .218E-03_EB, .111E-02_EB, .259E-02_EB, .284E-02_EB/),   &
+sd(1:6,345:352) = RESHAPE ((/ & ! 8650-8825
+.240e-04_EB, .500e-04_EB, .343e-03_EB, .136e-02_EB, .306e-02_EB, .363e-02_EB,          &
+.200e-04_EB, .450e-04_EB, .309e-03_EB, .134e-02_EB, .306e-02_EB, .359e-02_EB,         & 
+.180e-04_EB, .400e-04_EB, .281e-03_EB, .127e-02_EB, .294e-02_EB, .341e-02_EB,        &
+.170e-04_EB, .360e-04_EB, .276e-03_EB, .124e-02_EB, .290e-02_EB, .336e-02_EB,       & 
+.160e-04_EB, .310e-04_EB, .272e-03_EB, .122e-02_EB, .283e-02_EB, .323e-02_EB,      &  
+.140e-04_EB, .280e-04_EB, .241e-03_EB, .117e-02_EB, .273e-02_EB, .309e-02_EB,       &
+.120e-04_EB, .250e-04_EB, .237e-03_EB, .115e-02_EB, .269e-02_EB, .297e-02_EB,      &
+.100e-04_EB, .220e-04_EB, .218e-03_EB, .111e-02_EB, .259e-02_EB, .284e-02_EB/),   &
 (/6,8/))
-SD(1:6,353:360) = RESHAPE ((/ & ! 8850-9025
-.920E-05_EB, .198E-04_EB, .206E-03_EB, .105E-02_EB, .246E-02_EB, .269E-02_EB,       &
-.810E-05_EB, .170E-04_EB, .205E-03_EB, .100E-02_EB, .235E-02_EB, .257E-02_EB,       & 
-.720E-05_EB, .160E-04_EB, .177E-03_EB, .921E-03_EB, .220E-02_EB, .245E-02_EB,      &
-.650E-05_EB, .150E-04_EB, .172E-03_EB, .834E-03_EB, .205E-02_EB, .232E-02_EB,     &
-.590E-05_EB, .130E-04_EB, .147E-03_EB, .735E-03_EB, .194E-02_EB, .218E-02_EB,    &
-.510E-05_EB, .110E-04_EB, .120E-03_EB, .629E-03_EB, .177E-02_EB, .203E-02_EB,     &
-.460E-05_EB, .950E-05_EB, .960E-04_EB, .513E-03_EB, .154E-02_EB, .180E-02_EB,      &
-.420E-05_EB, .800E-05_EB, .578E-04_EB, .314E-03_EB, .123E-02_EB, .154E-02_EB/),     &
+sd(1:6,353:360) = RESHAPE ((/ & ! 8850-9025
+.920e-05_EB, .198e-04_EB, .206e-03_EB, .105e-02_EB, .246e-02_EB, .269e-02_EB,       &
+.810e-05_EB, .170e-04_EB, .205e-03_EB, .100e-02_EB, .235e-02_EB, .257e-02_EB,       & 
+.720e-05_EB, .160e-04_EB, .177e-03_EB, .921e-03_EB, .220e-02_EB, .245e-02_EB,      &
+.650e-05_EB, .150e-04_EB, .172e-03_EB, .834e-03_EB, .205e-02_EB, .232e-02_EB,     &
+.590e-05_EB, .130e-04_EB, .147e-03_EB, .735e-03_EB, .194e-02_EB, .218e-02_EB,    &
+.510e-05_EB, .110e-04_EB, .120e-03_EB, .629e-03_EB, .177e-02_EB, .203e-02_EB,     &
+.460e-05_EB, .950e-05_EB, .960e-04_EB, .513e-03_EB, .154e-02_EB, .180e-02_EB,      &
+.420e-05_EB, .800e-05_EB, .578e-04_EB, .314e-03_EB, .123e-02_EB, .154e-02_EB/),     &
 (/6,8/))
-SD(1:6,361:368) = RESHAPE ((/ & ! 9050-9225
-.380E-05_EB, .720E-05_EB, .529E-04_EB, .292E-03_EB, .114E-02_EB, .137E-02_EB,      &
-.330E-05_EB, .660E-05_EB, .485E-04_EB, .269E-03_EB, .102E-02_EB, .122E-02_EB,      &
-.290E-05_EB, .580E-05_EB, .430E-04_EB, .239E-03_EB, .896E-03_EB, .107E-02_EB,      &
-.270E-05_EB, .520E-05_EB, .259E-04_EB, .193E-03_EB, .748E-03_EB, .944E-03_EB,     &
-.240E-05_EB, .450E-05_EB, .316E-04_EB, .207E-03_EB, .671E-02_EB, .848E-03_EB,      &
-.220E-05_EB, .400E-05_EB, .444E-05_EB, .602E-04_EB, .516E-03_EB, .750E-03_EB,     &
-.190E-05_EB, .360E-05_EB, .324E-05_EB, .460E-04_EB, .439E-03_EB, .688E-03_EB,     & 
-.170E-05_EB, .320E-05_EB, .180E-05_EB, .321E-04_EB, .384E-03_EB, .653E-03_EB/),  & 
+sd(1:6,361:368) = RESHAPE ((/ & ! 9050-9225
+.380e-05_EB, .720e-05_EB, .529e-04_EB, .292e-03_EB, .114e-02_EB, .137e-02_EB,      &
+.330e-05_EB, .660e-05_EB, .485e-04_EB, .269e-03_EB, .102e-02_EB, .122e-02_EB,      &
+.290e-05_EB, .580e-05_EB, .430e-04_EB, .239e-03_EB, .896e-03_EB, .107e-02_EB,      &
+.270e-05_EB, .520e-05_EB, .259e-04_EB, .193e-03_EB, .748e-03_EB, .944e-03_EB,     &
+.240e-05_EB, .450e-05_EB, .316e-04_EB, .207e-03_EB, .671e-02_EB, .848e-03_EB,      &
+.220e-05_EB, .400e-05_EB, .444e-05_EB, .602e-04_EB, .516e-03_EB, .750e-03_EB,     &
+.190e-05_EB, .360e-05_EB, .324e-05_EB, .460e-04_EB, .439e-03_EB, .688e-03_EB,     & 
+.170e-05_EB, .320e-05_EB, .180e-05_EB, .321e-04_EB, .384e-03_EB, .653e-03_EB/),  & 
 (/6,8/))
-SD(1:6,369:376) = RESHAPE ((/ & ! 9250-9300
-.140E-05_EB, .280E-05_EB, .171E-05_EB, .344E-04_EB, .340E-03_EB, .616E-03_EB,   & 
-.130E-05_EB, .250E-05_EB, .299E-05_EB, .600E-04_EB, .343E-03_EB, .619E-03_EB,  &  
-.120E-05_EB, .220E-05_EB, .299E-05_EB, .600E-04_EB, .343E-03_EB, .619E-03_EB, &  
+sd(1:6,369:376) = RESHAPE ((/ & ! 9250-9300
+.140e-05_EB, .280e-05_EB, .171e-05_EB, .344e-04_EB, .340e-03_EB, .616e-03_EB,   & 
+.130e-05_EB, .250e-05_EB, .299e-05_EB, .600e-04_EB, .343e-03_EB, .619e-03_EB,  &  
+.120e-05_EB, .220e-05_EB, .299e-05_EB, .600e-04_EB, .343e-03_EB, .619e-03_EB, &  
 1._EB, 1._EB, 1._EB, 1._EB, 1._EB, 1._EB, 1._EB, 1._EB, 1._EB, 1._EB, 1._EB, 1._EB, 1._EB, 1._EB, 1._EB,&
 1._EB, 1._EB, 1._EB, 1._EB, 1._EB, 1._EB, 1._EB, 1._EB, 1._EB, 1._EB, 1._EB, 1._EB, 1._EB, 1._EB, 1._EB/),&
 (/6,8/))
 
-! Intialize GAMMA Array
+! intialize gamma array
 
-GAMMA = RESHAPE((/ &
-!     LINE BROADENING PARAMETERS,GAMMA(I,J),
-!     J=CO2,H2O,CH4,CO,O2,N2,SELF RESONANT.
-!   I=     CO2  H2O  CH4   CO
-!    J
+gamma = RESHAPE((/ &
+!     line broadening PARAMETERs,gamma(i,j),
+!     j=co2,h2o,ch4,co,o2,n2,self resonant.
+!   i=     co2  h2o  ch4   co
+!    j
 .09_EB , .12_EB, .0_EB , .07_EB,&
 .07_EB , .09_EB, .0_EB , .06_EB,&
 !.0_EB  , .0_EB , .16_EB, .0_EB ,&
@@ -7408,118 +9122,118 @@ GAMMA = RESHAPE((/ &
 .07_EB , .09_EB, .0_EB , .06_EB, &
 .01_EB , .44_EB, .0_EB , .0_EB /),(/4,7/))
 
-! Initialize SD15 Array
+! initialize sd15 array
 
-!  THE FOLLOWING ARE DATA FOR THE 15.0 MICRON BAND OF CO2
-!  TEMP, K=300     600      1200      1500  1800    2400    
+!  the following are data for the 15.0 micron band of co2
+!  temp, k=300     600      1200      1500  1800    2400    
 
-SD15(1:6,1:8) = RESHAPE ((/  &! 500-535
-.000E+00_EB, .000E+00_EB, .000E+00_EB, .105E-01_EB, .300E-01_EB, .880E-01_EB,          &
-.000E+00_EB, .000E+00_EB, .000E+00_EB, .180E-01_EB, .490E-01_EB, .880E-01_EB,         & 
-.000E+00_EB, .000E+00_EB, .000E+00_EB, .300E-01_EB, .540E-01_EB, .740E-01_EB,        &  
-.000E+00_EB, .000E+00_EB, .000E+00_EB, .300E-01_EB, .560E-01_EB, .890E-01_EB,       &   
-.000E+00_EB, .000E+00_EB, .000E+00_EB, .330E-01_EB, .690E-01_EB, .990E-01_EB,      &    
-.000E+00_EB, .000E+00_EB, .880E-02_EB, .380E-01_EB, .720E-01_EB, .970E-01_EB,     &     
-.000E+00_EB, .000E+00_EB, .110E-01_EB, .530E-01_EB, .950E-01_EB, .124E+00_EB,    &      
-.000E+00_EB, .000E+00_EB, .285E-01_EB, .630E-01_EB, .990E-01_EB, .140E+00_EB/), &       
+sd15(1:6,1:8) = RESHAPE ((/  &! 500-535
+.000e+00_EB, .000e+00_EB, .000e+00_EB, .105e-01_EB, .300e-01_EB, .880e-01_EB,          &
+.000e+00_EB, .000e+00_EB, .000e+00_EB, .180e-01_EB, .490e-01_EB, .880e-01_EB,         & 
+.000e+00_EB, .000e+00_EB, .000e+00_EB, .300e-01_EB, .540e-01_EB, .740e-01_EB,        &  
+.000e+00_EB, .000e+00_EB, .000e+00_EB, .300e-01_EB, .560e-01_EB, .890e-01_EB,       &   
+.000e+00_EB, .000e+00_EB, .000e+00_EB, .330e-01_EB, .690e-01_EB, .990e-01_EB,      &    
+.000e+00_EB, .000e+00_EB, .880e-02_EB, .380e-01_EB, .720e-01_EB, .970e-01_EB,     &     
+.000e+00_EB, .000e+00_EB, .110e-01_EB, .530e-01_EB, .950e-01_EB, .124e+00_EB,    &      
+.000e+00_EB, .000e+00_EB, .285e-01_EB, .630e-01_EB, .990e-01_EB, .140e+00_EB/), &       
 (/6,8/))
-SD15(1:6,9:16) = RESHAPE ((/  &! 540-575
-.000E+00_EB, .000E+00_EB, .330E-01_EB, .680E-01_EB, .103E+00_EB, .134E+00_EB,          &
-.000E+00_EB, .000E+00_EB, .450E-01_EB, .920E-01_EB, .138E+00_EB, .176E+00_EB,          &
-.000E+00_EB, .000E+00_EB, .490E-01_EB, .970E-01_EB, .148E+00_EB, .191E+00_EB,         & 
-.000E+00_EB, .000E+00_EB, .490E-01_EB, .120E-01_EB, .188E+00_EB, .247E+00_EB,        &  
-.000E+00_EB, .000E+00_EB, .480E-01_EB, .126E+00_EB, .201E+00_EB, .241E+00_EB,       &   
-.000E+00_EB, .000E+00_EB, .820E-01_EB, .198E+00_EB, .270E+00_EB, .265E+00_EB,      &    
-.000E+00_EB, .750E-02_EB, .690E-01_EB, .140E+00_EB, .225E+00_EB, .340E+00_EB,     &     
-.000E+00_EB, .205E-01_EB, .820E-01_EB, .145E+00_EB, .236E+00_EB, .530E+00_EB/),  &      
+sd15(1:6,9:16) = RESHAPE ((/  &! 540-575
+.000e+00_EB, .000e+00_EB, .330e-01_EB, .680e-01_EB, .103e+00_EB, .134e+00_EB,          &
+.000e+00_EB, .000e+00_EB, .450e-01_EB, .920e-01_EB, .138e+00_EB, .176e+00_EB,          &
+.000e+00_EB, .000e+00_EB, .490e-01_EB, .970e-01_EB, .148e+00_EB, .191e+00_EB,         & 
+.000e+00_EB, .000e+00_EB, .490e-01_EB, .120e-01_EB, .188e+00_EB, .247e+00_EB,        &  
+.000e+00_EB, .000e+00_EB, .480e-01_EB, .126e+00_EB, .201e+00_EB, .241e+00_EB,       &   
+.000e+00_EB, .000e+00_EB, .820e-01_EB, .198e+00_EB, .270e+00_EB, .265e+00_EB,      &    
+.000e+00_EB, .750e-02_EB, .690e-01_EB, .140e+00_EB, .225e+00_EB, .340e+00_EB,     &     
+.000e+00_EB, .205e-01_EB, .820e-01_EB, .145e+00_EB, .236e+00_EB, .530e+00_EB/),  &      
 (/6,8/))
-SD15(1:6,17:24) = RESHAPE ((/ & ! 580-615
-.000E+00_EB, .355E-01_EB, .117E+00_EB, .193E+00_EB, .295E+00_EB, .550E+00_EB,          &
-.157E-01_EB, .520E-01_EB, .170E+00_EB, .235E+00_EB, .305E+00_EB, .410E+00_EB,          &
-.150E-01_EB, .880E-01_EB, .270E+00_EB, .330E+00_EB, .440E+00_EB, .520E+00_EB,          &
-.510E-01_EB, .130E+00_EB, .400E+00_EB, .530E+00_EB, .560E+00_EB, .540E+00_EB,         & 
-.120E+00_EB, .165E+00_EB, .275E+00_EB, .320E+00_EB, .420E+00_EB, .560E+00_EB,        &  
-.880E-01_EB, .190E+00_EB, .430E+00_EB, .540E+00_EB, .620E+00_EB, .680E+00_EB,       &   
-.110E+00_EB, .350E+00_EB, .710E+00_EB, .760E+00_EB, .760E+00_EB, .690E+00_EB,      &    
-.180E+00_EB, .470E+00_EB, .920E+00_EB, .970E+00_EB, .910E+00_EB, .670E+00_EB/),   &     
+sd15(1:6,17:24) = RESHAPE ((/ & ! 580-615
+.000e+00_EB, .355e-01_EB, .117e+00_EB, .193e+00_EB, .295e+00_EB, .550e+00_EB,          &
+.157e-01_EB, .520e-01_EB, .170e+00_EB, .235e+00_EB, .305e+00_EB, .410e+00_EB,          &
+.150e-01_EB, .880e-01_EB, .270e+00_EB, .330e+00_EB, .440e+00_EB, .520e+00_EB,          &
+.510e-01_EB, .130e+00_EB, .400e+00_EB, .530e+00_EB, .560e+00_EB, .540e+00_EB,         & 
+.120e+00_EB, .165e+00_EB, .275e+00_EB, .320e+00_EB, .420e+00_EB, .560e+00_EB,        &  
+.880e-01_EB, .190e+00_EB, .430e+00_EB, .540e+00_EB, .620e+00_EB, .680e+00_EB,       &   
+.110e+00_EB, .350e+00_EB, .710e+00_EB, .760e+00_EB, .760e+00_EB, .690e+00_EB,      &    
+.180e+00_EB, .470e+00_EB, .920e+00_EB, .970e+00_EB, .910e+00_EB, .670e+00_EB/),   &     
 (/6,8/))
-SD15(1:6,25:32) = RESHAPE ((/ & ! 620-655
-.970E-01_EB, .265E+00_EB, .610E+00_EB, .720E+00_EB, .780E+00_EB, .730E+00_EB,          &
-.175E+00_EB, .380E+00_EB, .720E+00_EB, .790E+00_EB, .830E+00_EB, .840E+00_EB,          &
-.370E+00_EB, .640E+00_EB, .920E+00_EB, .960E+00_EB, .980E+00_EB, .940E+00_EB,          &
-.590E+00_EB, .840E+00_EB, .107E+01_EB, .110E+01_EB, .111E+01_EB, .106E+01_EB,         & 
-.940E+00_EB, .103E+01_EB, .115E+01_EB, .115E+01_EB, .115E+01_EB, .118E+01_EB,        &  
-.196E+01_EB, .177E+01_EB, .146E+01_EB, .136E+01_EB, .132E+01_EB, .139E+01_EB,       &   
-.345E+01_EB, .282E+01_EB, .198E+01_EB, .172E+01_EB, .156E+01_EB, .148E+01_EB,      &    
-.282E+01_EB, .248E+01_EB, .200E+01_EB, .190E+01_EB, .186E+01_EB, .205E+01_EB/),   &     
+sd15(1:6,25:32) = RESHAPE ((/ & ! 620-655
+.970e-01_EB, .265e+00_EB, .610e+00_EB, .720e+00_EB, .780e+00_EB, .730e+00_EB,          &
+.175e+00_EB, .380e+00_EB, .720e+00_EB, .790e+00_EB, .830e+00_EB, .840e+00_EB,          &
+.370e+00_EB, .640e+00_EB, .920e+00_EB, .960e+00_EB, .980e+00_EB, .940e+00_EB,          &
+.590e+00_EB, .840e+00_EB, .107e+01_EB, .110e+01_EB, .111e+01_EB, .106e+01_EB,         & 
+.940e+00_EB, .103e+01_EB, .115e+01_EB, .115e+01_EB, .115e+01_EB, .118e+01_EB,        &  
+.196e+01_EB, .177e+01_EB, .146e+01_EB, .136e+01_EB, .132e+01_EB, .139e+01_EB,       &   
+.345e+01_EB, .282e+01_EB, .198e+01_EB, .172e+01_EB, .156e+01_EB, .148e+01_EB,      &    
+.282e+01_EB, .248e+01_EB, .200e+01_EB, .190e+01_EB, .186e+01_EB, .205e+01_EB/),   &     
 (/6,8/))
-SD15(1:6,33:40) = RESHAPE ((/  &! 660-695
-.254E+01_EB, .234E+01_EB, .184E+01_EB, .176E+01_EB, .174E+01_EB, .203E+01_EB,          &
-.142E+02_EB, .860E+01_EB, .370E+01_EB, .260E+01_EB, .196E+01_EB, .142E+01_EB,          &
-.450E+01_EB, .570E+01_EB, .580E+01_EB, .520E+01_EB, .350E+01_EB, .420E+01_EB,         & 
-.360E+01_EB, .310E+01_EB, .330E+01_EB, .290E+01_EB, .205E+01_EB, .200E+01_EB,        &  
-.310E+01_EB, .260E+01_EB, .200E+01_EB, .196E+01_EB, .180E+01_EB, .210E+01_EB,       &   
-.240E+01_EB, .250E+01_EB, .230E+01_EB, .220E+01_EB, .170E+01_EB, .194E+01_EB,      &    
-.182E+01_EB, .200E+01_EB, .218E+01_EB, .205E+01_EB, .184E+01_EB, .130E+01_EB,     &     
-.104E+01_EB, .135E+01_EB, .172E+01_EB, .172E+01_EB, .165E+01_EB, .130E+01_EB/),  &      
+sd15(1:6,33:40) = RESHAPE ((/  &! 660-695
+.254e+01_EB, .234e+01_EB, .184e+01_EB, .176e+01_EB, .174e+01_EB, .203e+01_EB,          &
+.142e+02_EB, .860e+01_EB, .370e+01_EB, .260e+01_EB, .196e+01_EB, .142e+01_EB,          &
+.450e+01_EB, .570e+01_EB, .580e+01_EB, .520e+01_EB, .350e+01_EB, .420e+01_EB,         & 
+.360e+01_EB, .310e+01_EB, .330e+01_EB, .290e+01_EB, .205e+01_EB, .200e+01_EB,        &  
+.310e+01_EB, .260e+01_EB, .200e+01_EB, .196e+01_EB, .180e+01_EB, .210e+01_EB,       &   
+.240e+01_EB, .250e+01_EB, .230e+01_EB, .220e+01_EB, .170e+01_EB, .194e+01_EB,      &    
+.182e+01_EB, .200e+01_EB, .218e+01_EB, .205e+01_EB, .184e+01_EB, .130e+01_EB,     &     
+.104e+01_EB, .135e+01_EB, .172e+01_EB, .172e+01_EB, .165e+01_EB, .130e+01_EB/),  &      
 (/6,8/))
-SD15(1:6,41:48) = RESHAPE ((/  &! 700-735
-.550E+00_EB, .120E+01_EB, .143E+01_EB, .147E+01_EB, .148E+01_EB, .125E+01_EB,          &
-.136E+01_EB, .128E+01_EB, .128E+01_EB, .135E+01_EB, .138E+01_EB, .134E+01_EB,          &
-.210E+00_EB, .780E+00_EB, .127E+01_EB, .133E+01_EB, .137E+01_EB, .132E+01_EB,          &
-.190E+00_EB, .780E+00_EB, .140E+01_EB, .146E+01_EB, .147E+01_EB, .142E+01_EB,         & 
-.900E+00_EB, .106E+01_EB, .140E+01_EB, .150E+01_EB, .155E+01_EB, .134E+01_EB,        &  
-.720E-01_EB, .300E+00_EB, .800E+00_EB, .100E+01_EB, .115E+01_EB, .126E+01_EB,       &   
-.640E-01_EB, .210E+00_EB, .560E+00_EB, .720E+00_EB, .860E+00_EB, .102E+01_EB,      &    
-.680E-01_EB, .210E+00_EB, .530E+00_EB, .670E+00_EB, .790E+00_EB, .101E+01_EB/),   &     
+sd15(1:6,41:48) = RESHAPE ((/  &! 700-735
+.550e+00_EB, .120e+01_EB, .143e+01_EB, .147e+01_EB, .148e+01_EB, .125e+01_EB,          &
+.136e+01_EB, .128e+01_EB, .128e+01_EB, .135e+01_EB, .138e+01_EB, .134e+01_EB,          &
+.210e+00_EB, .780e+00_EB, .127e+01_EB, .133e+01_EB, .137e+01_EB, .132e+01_EB,          &
+.190e+00_EB, .780e+00_EB, .140e+01_EB, .146e+01_EB, .147e+01_EB, .142e+01_EB,         & 
+.900e+00_EB, .106e+01_EB, .140e+01_EB, .150e+01_EB, .155e+01_EB, .134e+01_EB,        &  
+.720e-01_EB, .300e+00_EB, .800e+00_EB, .100e+01_EB, .115e+01_EB, .126e+01_EB,       &   
+.640e-01_EB, .210e+00_EB, .560e+00_EB, .720e+00_EB, .860e+00_EB, .102e+01_EB,      &    
+.680e-01_EB, .210e+00_EB, .530e+00_EB, .670e+00_EB, .790e+00_EB, .101e+01_EB/),   &     
 (/6,8/))
-SD15(1:6,49:56) = RESHAPE ((/ & ! 740-775
-.690E-01_EB, .210E+00_EB, .540E+00_EB, .690E+00_EB, .820E+00_EB, .910E+00_EB,          &
-.330E-01_EB, .140E+00_EB, .390E+00_EB, .530E+00_EB, .690E+00_EB, .770E+00_EB,          &
-.230E-01_EB, .780E-01_EB, .270E+00_EB, .410E+00_EB, .560E+00_EB, .890E+00_EB,          &
-.300E-01_EB, .860E-01_EB, .280E+00_EB, .400E+00_EB, .520E+00_EB, .710E+00_EB,         & 
-.175E-01_EB, .620E-01_EB, .225E+00_EB, .335E+00_EB, .450E+00_EB, .660E+00_EB,       &   
-.105E-01_EB, .450E-01_EB, .180E+00_EB, .280E+00_EB, .380E+00_EB, .600E+00_EB,      &    
-.450E-02_EB, .300E-01_EB, .148E+00_EB, .240E+00_EB, .345E+00_EB, .570E+00_EB,     &     
-.000E+00_EB, .140E-01_EB, .124E+00_EB, .205E+00_EB, .285E+00_EB, .430E+00_EB/),  &      
+sd15(1:6,49:56) = RESHAPE ((/ & ! 740-775
+.690e-01_EB, .210e+00_EB, .540e+00_EB, .690e+00_EB, .820e+00_EB, .910e+00_EB,          &
+.330e-01_EB, .140e+00_EB, .390e+00_EB, .530e+00_EB, .690e+00_EB, .770e+00_EB,          &
+.230e-01_EB, .780e-01_EB, .270e+00_EB, .410e+00_EB, .560e+00_EB, .890e+00_EB,          &
+.300e-01_EB, .860e-01_EB, .280e+00_EB, .400e+00_EB, .520e+00_EB, .710e+00_EB,         & 
+.175e-01_EB, .620e-01_EB, .225e+00_EB, .335e+00_EB, .450e+00_EB, .660e+00_EB,       &   
+.105e-01_EB, .450e-01_EB, .180e+00_EB, .280e+00_EB, .380e+00_EB, .600e+00_EB,      &    
+.450e-02_EB, .300e-01_EB, .148e+00_EB, .240e+00_EB, .345e+00_EB, .570e+00_EB,     &     
+.000e+00_EB, .140e-01_EB, .124e+00_EB, .205e+00_EB, .285e+00_EB, .430e+00_EB/),  &      
 (/6,8/))
-SD15(1:6,57:64) = RESHAPE ((/ & ! 780-815
-.000E+00_EB, .115E-01_EB, .110E+00_EB, .185E+00_EB, .260E+00_EB, .375E+00_EB,          &
-.000E+00_EB, .135E-01_EB, .840E-01_EB, .140E+00_EB, .205E+00_EB, .335E+00_EB,         & 
-.000E+00_EB, .430E-02_EB, .650E-01_EB, .120E+00_EB, .185E+00_EB, .325E+00_EB,        &  
-.000E+00_EB, .000E+00_EB, .540E-01_EB, .115E+00_EB, .180E+00_EB, .315E+00_EB,       &   
-.000E+00_EB, .000E+00_EB, .440E-01_EB, .950E-01_EB, .150E+00_EB, .270E+00_EB,      &    
-.000E+00_EB, .000E+00_EB, .360E-01_EB, .790E-01_EB, .125E+00_EB, .205E+00_EB,     &     
-.000E+00_EB, .000E+00_EB, .250E-01_EB, .650E-01_EB, .110E+00_EB, .178E+00_EB,    &      
-.000E+00_EB, .000E+00_EB, .180E-01_EB, .620E-01_EB, .103E+00_EB, .153E+00_EB/), &       
+sd15(1:6,57:64) = RESHAPE ((/ & ! 780-815
+.000e+00_EB, .115e-01_EB, .110e+00_EB, .185e+00_EB, .260e+00_EB, .375e+00_EB,          &
+.000e+00_EB, .135e-01_EB, .840e-01_EB, .140e+00_EB, .205e+00_EB, .335e+00_EB,         & 
+.000e+00_EB, .430e-02_EB, .650e-01_EB, .120e+00_EB, .185e+00_EB, .325e+00_EB,        &  
+.000e+00_EB, .000e+00_EB, .540e-01_EB, .115e+00_EB, .180e+00_EB, .315e+00_EB,       &   
+.000e+00_EB, .000e+00_EB, .440e-01_EB, .950e-01_EB, .150e+00_EB, .270e+00_EB,      &    
+.000e+00_EB, .000e+00_EB, .360e-01_EB, .790e-01_EB, .125e+00_EB, .205e+00_EB,     &     
+.000e+00_EB, .000e+00_EB, .250e-01_EB, .650e-01_EB, .110e+00_EB, .178e+00_EB,    &      
+.000e+00_EB, .000e+00_EB, .180e-01_EB, .620e-01_EB, .103e+00_EB, .153e+00_EB/), &       
 (/6,8/))
-SD15(1:6,65:72) = RESHAPE ((/ & ! 820-855
-.000E+00_EB, .000E+00_EB, .320E-01_EB, .580E-01_EB, .860E-01_EB, .147E+00_EB,          &
-.000E+00_EB, .000E+00_EB, .800E-02_EB, .510E-01_EB, .870E-01_EB, .134E+00_EB,          &
-.000E+00_EB, .000E+00_EB, .600E-02_EB, .480E-01_EB, .830E-01_EB, .133E+00_EB,          &
-.000E+00_EB, .000E+00_EB, .000E+00_EB, .430E-01_EB, .780E-01_EB, .118E+00_EB,          &
-.000E+00_EB, .000E+00_EB, .000E+00_EB, .420E-01_EB, .700E-01_EB, .108E+00_EB,         & 
-.000E+00_EB, .000E+00_EB, .000E+00_EB, .360E-01_EB, .640E-01_EB, .980E-01_EB,        &  
-.000E+00_EB, .000E+00_EB, .000E+00_EB, .350E-01_EB, .610E-01_EB, .870E-01_EB,       &   
-.000E+00_EB, .000E+00_EB, .000E+00_EB, .320E-01_EB, .580E-01_EB, .860E-01_EB/),    &    
+sd15(1:6,65:72) = RESHAPE ((/ & ! 820-855
+.000e+00_EB, .000e+00_EB, .320e-01_EB, .580e-01_EB, .860e-01_EB, .147e+00_EB,          &
+.000e+00_EB, .000e+00_EB, .800e-02_EB, .510e-01_EB, .870e-01_EB, .134e+00_EB,          &
+.000e+00_EB, .000e+00_EB, .600e-02_EB, .480e-01_EB, .830e-01_EB, .133e+00_EB,          &
+.000e+00_EB, .000e+00_EB, .000e+00_EB, .430e-01_EB, .780e-01_EB, .118e+00_EB,          &
+.000e+00_EB, .000e+00_EB, .000e+00_EB, .420e-01_EB, .700e-01_EB, .108e+00_EB,         & 
+.000e+00_EB, .000e+00_EB, .000e+00_EB, .360e-01_EB, .640e-01_EB, .980e-01_EB,        &  
+.000e+00_EB, .000e+00_EB, .000e+00_EB, .350e-01_EB, .610e-01_EB, .870e-01_EB,       &   
+.000e+00_EB, .000e+00_EB, .000e+00_EB, .320e-01_EB, .580e-01_EB, .860e-01_EB/),    &    
 (/6,8/))
-SD15(1:6,73:80) = RESHAPE ((/ & ! 860-880
-.000E+00_EB, .000E+00_EB, .000E+00_EB, .330E-01_EB, .560E-01_EB, .750E-01_EB,     &     
-.000E+00_EB, .000E+00_EB, .000E+00_EB, .300E-01_EB, .530E-01_EB, .750E-01_EB,    &      
-.000E+00_EB, .000E+00_EB, .000E+00_EB, .290E-01_EB, .530E-01_EB, .850E-01_EB,   &       
-.000E+00_EB, .000E+00_EB, .000E+00_EB, .240E-01_EB, .470E-01_EB, .900E-01_EB,  &        
-.000E+00_EB, .000E+00_EB, .000E+00_EB, .220E-01_EB, .450E-01_EB, .860E-01_EB, &         
-.000E+00_EB, .000E+00_EB, .000E+00_EB, .000E+00_EB, .000E+00_EB, .000E+00_EB,&
-.000E+00_EB, .000E+00_EB, .000E+00_EB, .000E+00_EB, .000E+00_EB, .000E+00_EB,&
-.000E+00_EB, .000E+00_EB, .000E+00_EB, .000E+00_EB, .000E+00_EB, .000E+00_EB/), &
+sd15(1:6,73:80) = RESHAPE ((/ & ! 860-880
+.000e+00_EB, .000e+00_EB, .000e+00_EB, .330e-01_EB, .560e-01_EB, .750e-01_EB,     &     
+.000e+00_EB, .000e+00_EB, .000e+00_EB, .300e-01_EB, .530e-01_EB, .750e-01_EB,    &      
+.000e+00_EB, .000e+00_EB, .000e+00_EB, .290e-01_EB, .530e-01_EB, .850e-01_EB,   &       
+.000e+00_EB, .000e+00_EB, .000e+00_EB, .240e-01_EB, .470e-01_EB, .900e-01_EB,  &        
+.000e+00_EB, .000e+00_EB, .000e+00_EB, .220e-01_EB, .450e-01_EB, .860e-01_EB, &         
+.000e+00_EB, .000e+00_EB, .000e+00_EB, .000e+00_EB, .000e+00_EB, .000e+00_EB,&
+.000e+00_EB, .000e+00_EB, .000e+00_EB, .000e+00_EB, .000e+00_EB, .000e+00_EB,&
+.000e+00_EB, .000e+00_EB, .000e+00_EB, .000e+00_EB, .000e+00_EB, .000e+00_EB/), &
 (/6,8/))
 
-! Initialize SD7 Array
+! initialize sd7 array
 
-!   THE FOLLOWING DATA ARE FOR THE 7.7 MICRON BAND OF CH4
-! TEMP,K= 290 600   850
+!   the following data are for the 7.7 micron band of ch4
+! temp,k= 290 600   850
 
-SD7(1:3,1:8) = RESHAPE ((/ &
+sd7(1:3,1:8) = RESHAPE ((/ &
 0._EB, 0._EB, 0._EB,&
 0._EB, 0._EB, 0.03_EB,&
 0._EB, 0._EB, 0.22_EB,&
@@ -7528,7 +9242,7 @@ SD7(1:3,1:8) = RESHAPE ((/ &
 0.69_EB, 0.53_EB, 0.65_EB,&
 1.27_EB, 0.88_EB, 1.09_EB,&
 1.68_EB, 1.38_EB, 0.87_EB/),(/3,8/))
-SD7(1:3,9:16) = RESHAPE ((/&
+sd7(1:3,9:16) = RESHAPE ((/&
 0.55_EB, 0.28_EB, 0.40_EB,&
 1.25_EB, 0.86_EB, 0.93_EB,&
 0.34_EB, 0.59_EB, 0.75_EB,&
@@ -7538,11 +9252,11 @@ SD7(1:3,9:16) = RESHAPE ((/&
 0._EB, 0._EB, 0._EB,&
 0._EB, 0._EB, 0._EB/),(/3,8/))
 
-! Initialize SD3 Array
+! initialize sd3 array
 
-!  THE FOLLOWING DATA ARE FOR THE 3.3 MICRON BAND OF CH4
-! TEMP, K= 290  600   850
-SD3(1:3,1:8) = RESHAPE ((/&
+!  the following data are for the 3.3 micron band of ch4
+! temp, k= 290  600   850
+sd3(1:3,1:8) = RESHAPE ((/&
 0._EB, 0._EB, 0.03_EB,&
 0._EB, 0._EB, 0.03_EB,&
 0._EB, 0._EB, 0.03_EB,&
@@ -7551,7 +9265,7 @@ SD3(1:3,1:8) = RESHAPE ((/&
 0.07_EB, 0.07_EB, 0.12_EB,&
 0.09_EB, 0.09_EB, 0.12_EB,&
 0.14_EB, 0.15_EB, 0.22_EB/),(/3,8/))
-SD3(1:3,9:16) = RESHAPE ((/&
+sd3(1:3,9:16) = RESHAPE ((/&
 0.18_EB, 0.22_EB, 0.28_EB,&
 0.24_EB, 0.31_EB, 0.37_EB,&
 0.33_EB, 0.44_EB, 0.47_EB,&
@@ -7560,7 +9274,7 @@ SD3(1:3,9:16) = RESHAPE ((/&
 0.74_EB, 0.70_EB, 0.68_EB,&
 0.91_EB, 0.77_EB, 0.72_EB,&
 1.00_EB, 0.81_EB, 0.75_EB/),(/3,8/))
-SD3(1:3,17:24) = RESHAPE ((/&
+sd3(1:3,17:24) = RESHAPE ((/&
 1.03_EB, 0.84_EB, 0.78_EB,&
 1.03_EB, 0.84_EB, 0.78_EB,&
 1.00_EB, 0.81_EB, 0.75_EB,&
@@ -7569,7 +9283,7 @@ SD3(1:3,17:24) = RESHAPE ((/&
 0.52_EB, 0.63_EB, 0.63_EB,&
 0.33_EB, 0.50_EB, 0.56_EB,&
 0.25_EB, 0.42_EB, 0.50_EB/),(/3,8/))
-SD3(1:3,25:32) = RESHAPE ((/&
+sd3(1:3,25:32) = RESHAPE ((/&
 0.17_EB, 0.26_EB, 0.37_EB,&
 0.08_EB, 0.18_EB, 0.31_EB,&
 0.04_EB, 0.11_EB, 0.22_EB,&
@@ -7581,137 +9295,130 @@ SD3(1:3,25:32) = RESHAPE ((/&
 !------------------------------------------------------------------------------
 END SUBROUTINE RCALLOC
 
+
 !==============================================================================
 SUBROUTINE RCDEALLOC
 !==============================================================================   
-DEALLOCATE(P)
-DEALLOCATE(SPECIE)
-DEALLOCATE(QW)
-DEALLOCATE(TTAU)
-DEALLOCATE(XT)
-DEALLOCATE(X)
-DEALLOCATE(GC)
-DEALLOCATE(LAMBDA)
-DEALLOCATE(OPTICAL_THICKNESS)
-DEALLOCATE(AB)
-DEALLOCATE(ATOT)
-DEALLOCATE(BCNT)
-DEALLOCATE(GAMMA)
-DEALLOCATE(SD15)
-DEALLOCATE(SD)
-DEALLOCATE(SD7)
-DEALLOCATE(SD3)
 
-!-------------------------DEALLOCATION Methane VARIABLES-------------------
-DEALLOCATE(SD_CH4_TEMP)
-DEALLOCATE(OM_BND_CH4)
-DEALLOCATE(SD1_CH4)
-DEALLOCATE(SD2_CH4)
+DEALLOCATE(incident_radiance)
+DEALLOCATE(ttau)
+DEALLOCATE(lambda)
+DEALLOCATE(wave_number)
+DEALLOCATE(ab)
+DEALLOCATE(gamma)
+DEALLOCATE(sd15)
+DEALLOCATE(sd)
+DEALLOCATE(sd7)
+DEALLOCATE(sd3)
 
-!-------------------------DEALLOCATION Propane VARIABLES-------------------
-DEALLOCATE(SD_C3H8_TEMP)
-DEALLOCATE(Be_C3H8)
-DEALLOCATE(OM_BND_C3H8)
-DEALLOCATE(SD1_C3H8)
-DEALLOCATE(SD2_C3H8)
-DEALLOCATE(GAMMAD1_C3H8)
-DEALLOCATE(GAMMAD2_C3H8)
+!-------------------------deallocation methane variables-------------------
+DEALLOCATE(sd_ch4_temp)
+DEALLOCATE(om_bnd_ch4)
+DEALLOCATE(sd1_ch4)
+DEALLOCATE(sd2_ch4)
 
-!-------------------------DEALLOCATION Methanol VARIABLES-------------------
-DEALLOCATE(SD_CH3OH_TEMP)
-DEALLOCATE(Be_CH3OH)
-DEALLOCATE(OM_BND_CH3OH)
-DEALLOCATE(SD1_CH3OH)
-DEALLOCATE(SD2_CH3OH)
-DEALLOCATE(SD3_CH3OH)
-DEALLOCATE(SD4_CH3OH)
-DEALLOCATE(GAMMAD1_CH3OH)
-DEALLOCATE(GAMMAD2_CH3OH)
-DEALLOCATE(GAMMAD3_CH3OH)
-DEALLOCATE(GAMMAD4_CH3OH)
+!-------------------------deallocation propane variables-------------------
+DEALLOCATE(sd_c3h8_temp)
+DEALLOCATE(be_c3h8)
+DEALLOCATE(om_bnd_c3h8)
+DEALLOCATE(sd1_c3h8)
+DEALLOCATE(sd2_c3h8)
+DEALLOCATE(gammad1_c3h8)
+DEALLOCATE(gammad2_c3h8)
 
-!-------------------------DEALLOCATION Heptane VARIABLES-------------------
-DEALLOCATE(SD_C7H16_TEMP)
-DEALLOCATE(Be_C7H16)
-DEALLOCATE(OM_BND_C7H16)
-DEALLOCATE(SD1_C7H16)
-DEALLOCATE(SD2_C7H16)
-DEALLOCATE(GAMMAD1_C7H16)
-DEALLOCATE(GAMMAD2_C7H16)
+!-------------------------deallocation methanol variables-------------------
+DEALLOCATE(sd_ch3oh_temp)
+DEALLOCATE(be_ch3oh)
+DEALLOCATE(om_bnd_ch3oh)
+DEALLOCATE(sd1_ch3oh)
+DEALLOCATE(sd2_ch3oh)
+DEALLOCATE(sd3_ch3oh)
+DEALLOCATE(sd4_ch3oh)
+DEALLOCATE(gammad1_ch3oh)
+DEALLOCATE(gammad2_ch3oh)
+DEALLOCATE(gammad3_ch3oh)
+DEALLOCATE(gammad4_ch3oh)
 
-!-------------------------DEALLOCATION Toluene VARIABLES-------------------
-DEALLOCATE(SD_C7H8_TEMP)
-DEALLOCATE(Be_C7H8)
-DEALLOCATE(OM_BND_C7H8)
-DEALLOCATE(SD1_C7H8)
-DEALLOCATE(SD2_C7H8)
-DEALLOCATE(SD3_C7H8)
-DEALLOCATE(SD4_C7H8)
-DEALLOCATE(SD5_C7H8)
-DEALLOCATE(GAMMAD1_C7H8)
-DEALLOCATE(GAMMAD2_C7H8)
-DEALLOCATE(GAMMAD3_C7H8)
-DEALLOCATE(GAMMAD4_C7H8)
-DEALLOCATE(GAMMAD5_C7H8)
+!-------------------------deallocation heptane variables-------------------
+DEALLOCATE(sd_c7h16_temp)
+DEALLOCATE(be_c7h16)
+DEALLOCATE(om_bnd_c7h16)
+DEALLOCATE(sd1_c7h16)
+DEALLOCATE(sd2_c7h16)
+DEALLOCATE(gammad1_c7h16)
+DEALLOCATE(gammad2_c7h16)
 
-!-------------------------DEALLOCATION Propylene VARIABLES-------------------
-DEALLOCATE(SD_C3H6_TEMP)
-DEALLOCATE(Be_C3H6)
-DEALLOCATE(OM_BND_C3H6)
-DEALLOCATE(SD1_C3H6)
-DEALLOCATE(SD2_C3H6)
-DEALLOCATE(SD3_C3H6)
-DEALLOCATE(GAMMAD1_C3H6)
-DEALLOCATE(GAMMAD2_C3H6)
-DEALLOCATE(GAMMAD3_C3H6)
+!-------------------------deallocation toluene variables-------------------
+DEALLOCATE(sd_c7h8_temp)
+DEALLOCATE(be_c7h8)
+DEALLOCATE(om_bnd_c7h8)
+DEALLOCATE(sd1_c7h8)
+DEALLOCATE(sd2_c7h8)
+DEALLOCATE(sd3_c7h8)
+DEALLOCATE(sd4_c7h8)
+DEALLOCATE(sd5_c7h8)
+DEALLOCATE(gammad1_c7h8)
+DEALLOCATE(gammad2_c7h8)
+DEALLOCATE(gammad3_c7h8)
+DEALLOCATE(gammad4_c7h8)
+DEALLOCATE(gammad5_c7h8)
 
-!-------------------------DEALLOCATION MMA VARIABLES-------------------
-DEALLOCATE(SD_C5H8O2_TEMP)
-DEALLOCATE(Be_C5H8O2)
-DEALLOCATE(OM_BND_C5H8O2)
-DEALLOCATE(SD1_C5H8O2)
-DEALLOCATE(SD2_C5H8O2)
-DEALLOCATE(SD3_C5H8O2)
-DEALLOCATE(SD4_C5H8O2)
-DEALLOCATE(SD5_C5H8O2)
-DEALLOCATE(SD6_C5H8O2)
-DEALLOCATE(GAMMAD1_C5H8O2)
-DEALLOCATE(GAMMAD2_C5H8O2)
-DEALLOCATE(GAMMAD3_C5H8O2)
-DEALLOCATE(GAMMAD4_C5H8O2)
-DEALLOCATE(GAMMAD5_C5H8O2)
-DEALLOCATE(GAMMAD6_C5H8O2)
+!-------------------------deallocation propylene variables-------------------
+DEALLOCATE(sd_c3h6_temp)
+DEALLOCATE(be_c3h6)
+DEALLOCATE(om_bnd_c3h6)
+DEALLOCATE(sd1_c3h6)
+DEALLOCATE(sd2_c3h6)
+DEALLOCATE(sd3_c3h6)
+DEALLOCATE(gammad1_c3h6)
+DEALLOCATE(gammad2_c3h6)
+DEALLOCATE(gammad3_c3h6)
 
-!-------------------------DEALLOCATION Ethane VARIABLES-------------------
-DEALLOCATE(SD_C2H6_TEMP)
-DEALLOCATE(Be_C2H6)
-DEALLOCATE(OM_BND_C2H6)
-DEALLOCATE(SD1_C2H6)
-DEALLOCATE(SD2_C2H6)
-DEALLOCATE(SD3_C2H6)
-DEALLOCATE(GAMMAD1_C2H6)
-DEALLOCATE(GAMMAD2_C2H6)
-DEALLOCATE(GAMMAD3_C2H6)
+!-------------------------deallocation mma variables-------------------
+DEALLOCATE(sd_c5h8o2_temp)
+DEALLOCATE(be_c5h8o2)
+DEALLOCATE(om_bnd_c5h8o2)
+DEALLOCATE(sd1_c5h8o2)
+DEALLOCATE(sd2_c5h8o2)
+DEALLOCATE(sd3_c5h8o2)
+DEALLOCATE(sd4_c5h8o2)
+DEALLOCATE(sd5_c5h8o2)
+DEALLOCATE(sd6_c5h8o2)
+DEALLOCATE(gammad1_c5h8o2)
+DEALLOCATE(gammad2_c5h8o2)
+DEALLOCATE(gammad3_c5h8o2)
+DEALLOCATE(gammad4_c5h8o2)
+DEALLOCATE(gammad5_c5h8o2)
+DEALLOCATE(gammad6_c5h8o2)
 
-!-------------------------DEALLOCATION Ethylene VARIABLES-------------------
-DEALLOCATE(SD_C2H4_TEMP)
-DEALLOCATE(Be_C2H4)
-DEALLOCATE(OM_BND_C2H4)
-DEALLOCATE(SD1_C2H4)
-DEALLOCATE(SD2_C2H4)
-DEALLOCATE(SD3_C2H4)
-DEALLOCATE(SD4_C2H4)
-DEALLOCATE(GAMMAD1_C2H4)
-DEALLOCATE(GAMMAD2_C2H4)
-DEALLOCATE(GAMMAD3_C2H4)
-DEALLOCATE(GAMMAD4_C2H4)
+!-------------------------deallocation ethane variables-------------------
+DEALLOCATE(sd_c2h6_temp)
+DEALLOCATE(be_c2h6)
+DEALLOCATE(om_bnd_c2h6)
+DEALLOCATE(sd1_c2h6)
+DEALLOCATE(sd2_c2h6)
+DEALLOCATE(sd3_c2h6)
+DEALLOCATE(gammad1_c2h6)
+DEALLOCATE(gammad2_c2h6)
+DEALLOCATE(gammad3_c2h6)
+
+!-------------------------deallocation ethylene variables-------------------
+DEALLOCATE(sd_c2h4_temp)
+DEALLOCATE(be_c2h4)
+DEALLOCATE(om_bnd_c2h4)
+DEALLOCATE(sd1_c2h4)
+DEALLOCATE(sd2_c2h4)
+DEALLOCATE(sd3_c2h4)
+DEALLOCATE(sd4_c2h4)
+DEALLOCATE(gammad1_c2h4)
+DEALLOCATE(gammad2_c2h4)
+DEALLOCATE(gammad3_c2h4)
+DEALLOCATE(gammad4_c2h4)
 
 !------------------------------------------------------------------------------   
 END SUBROUTINE RCDEALLOC
 
-!------------------------------------------------------------------------------
-END MODULE RADCALV
-
+END MODULE RADCAL_CALC
 
 
 MODULE SPECDATA
@@ -8038,7 +9745,7 @@ MODULE MIEV
 USE PRECISION_PARAMETERS
 USE GLOBAL_CONSTANTS, ONLY: NUMBER_SPECTRAL_BANDS,NUMBER_RADIATION_ANGLES,LU_ERR
 USE SPECDATA, ONLY: CPLXREF_WATER, NWATERK, CPLXREF_FUEL, NFUELK
-USE RADCALV, ONLY: PLANCK
+USE RADCAL_CALC, ONLY: PLANCK
 USE RADCONS
 USE MEMORY_FUNCTIONS, ONLY : CHKMEMERR
 USE MATH_FUNCTIONS, ONLY : INTERPOLATE1D
