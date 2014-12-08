@@ -534,8 +534,8 @@ MAKE_KAPPA_ARRAYS: IF (.NOT.SOLID_PHASE_ONLY .AND. ANY(SPECIES%RADCAL_ID/='null'
             RADCAL_SPECIES2KAPPA(:,:,RCT_SKIP,IBND) = 0.5_EB*(RADCAL_SPECIES2KAPPA(:,:,RCT_SKIP-1,IBND)+ &
                                                               RADCAL_SPECIES2KAPPA(:,:,RCT_SKIP+1,IBND))
          ENDIF
+         CALL RCDEALLOC2  ! Deallocate RadCal wavelength dependent arrays         
       ENDDO BAND_LOOP_Z
-
       CALL RCDEALLOC  ! Deallocate RadCal arrays
       
    ENDIF BUILD_KAPPA_ARRAY
