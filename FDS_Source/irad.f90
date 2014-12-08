@@ -9297,14 +9297,20 @@ END SUBROUTINE RCALLOC
 
 
 !==============================================================================
-SUBROUTINE RCDEALLOC
+SUBROUTINE RCDEALLOC2
 !==============================================================================   
-
 DEALLOCATE(incident_radiance)
 DEALLOCATE(ttau)
 DEALLOCATE(lambda)
-DEALLOCATE(wave_number)
 DEALLOCATE(ab)
+DEALLOCATE(wave_number)
+   
+END SUBROUTINE RCDEALLOC2
+
+!==============================================================================
+SUBROUTINE RCDEALLOC
+!==============================================================================   
+
 DEALLOCATE(gamma)
 DEALLOCATE(sd15)
 DEALLOCATE(sd)
