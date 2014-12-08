@@ -1663,8 +1663,10 @@ PYROLYSIS_MATERIAL_IF: IF (SF%PYROLYSIS_MODEL==PYROLYSIS_MATERIAL) THEN
       R_S_NEW(I) = ( R_S_NEW(I+1)**I_GRAD + (R_S(I)**I_GRAD-R_S(I+1)**I_GRAD)*REGRID_FACTOR(I+1) )**(1./REAL(I_GRAD))
    ENDDO
 
-   DO I=0,NWP
+   X_S_NEW(0) = 0._EB
+   DO I=1,NWP
       X_S_NEW(I) = R_S_NEW(0) - R_S_NEW(I)
+      IF ((X_S_NEW(I)-X_S_NEW(I-1)) < TWO_EPSILON_EB) REMESH = .TRUE.
    ENDDO
 
    ! If the fuel or water massflux is non-zero, set the ignition time
