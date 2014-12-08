@@ -1002,11 +1002,7 @@ void readpatch(int ifile, int load_flag, int *errorcode){
 
   patchi = patchinfo + ifile;
   if(patchi->filetype==2){
-    geomdata *geomi;
-
     ASSERT(ifile>=0&&ifile<ngeominfo);
-    geomi = geominfo + ifile;
-  //  read_geom(geomi,load_flag,GEOM_NORMAL,errorcode); // do not unload geometry when unloading data
     read_geomdata(ifile,load_flag,errorcode);
   }
   else{
@@ -3953,12 +3949,10 @@ void Update_All_Patch_Bounds_st(void){
 
 int update_patch_hist(patchdata *patchj){
   int i;
-  int endiandata;
   int first=1;
   int sum=0;
 
   if(patchj->setvalmax==SET_MAX&&patchj->setvalmin==SET_MIN)return 0;
-  endiandata=getendian();
 
   for(i=0;i<npatchinfo;i++){
     int npatches, error;

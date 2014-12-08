@@ -876,7 +876,7 @@ SVEXTERN float world_eyepos[3],scaled_eyepos[3];
 SVEXTERN int tour_usecurrent;
 SVEXTERN int visVentLines, visVentSolid;
 SVEXTERN int isZoneFireModel;
-SVEXTERN int SVDECL(output_slicedata,0),SVDECL(output_patchdata,0);;
+SVEXTERN int SVDECL(output_slicedata,0),SVDECL(output_patchdata,0);
 SVEXTERN f_units SVDECL(*unitclasses,NULL),SVDECL(*unitclasses_default,NULL),SVDECL(*unitclasses_ini,NULL);
 SVEXTERN int nunitclasses,nunitclasses_default,nunitclasses_ini;
 SVEXTERN mesh SVDECL(*meshinfo,NULL),SVDECL(*current_mesh,NULL), SVDECL(*mesh_save,NULL);
