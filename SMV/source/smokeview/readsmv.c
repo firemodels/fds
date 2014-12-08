@@ -9571,25 +9571,23 @@ int readini2(char *inifile, int localfile){
       continue;
     }
     if(match(buffer,"OUTLINEMODE")==1){
-	    fgets(buffer,255,stream);
-	    sscanf(buffer,"%i %i",&highlight_flag,&outline_color_flag);
+	  fgets(buffer,255,stream);
+	  sscanf(buffer,"%i %i",&highlight_flag,&outline_color_flag);
       if(nmeshes<2){
         ONEORZERO(highlight_flag);
       }
       continue;
     }
     if(match(buffer,"SLICEDATAOUT")==1){
-      {
-        int sliceoutflag=0;
-  	    fgets(buffer,255,stream);
-	      sscanf(buffer,"%i",&sliceoutflag);
-        if(sliceoutflag!=0){
-          output_slicedata=1;
-        }
-        else{
-          output_slicedata=0;
-        }
-      }
+      fgets(buffer,255,stream);
+      sscanf(buffer,"%i",&output_slicedata);
+      ONEORZERO(output_slicedata);
+      continue;
+    }
+    if(match(buffer,"PATCHDATAOUT")==1){
+      fgets(buffer,255,stream);
+      sscanf(buffer,"%i",&output_patchdata);
+      ONEORZERO(output_patchdata);
       continue;
     }
     if(match(buffer,"SMOKE3DZIPSTEP")==1){
@@ -11411,9 +11409,9 @@ void writeini(int flag,char *filename){
         slicebounds[i].label->shortlabel
         );
     }
-    fprintf(fileout,"SLICEDATAOUT\n");
-    fprintf(fileout," %i \n",output_slicedata);
   }
+  fprintf(fileout,"SLICEDATAOUT\n");
+  fprintf(fileout," %i \n",output_slicedata);
   if(niso_bounds>0){
     for(i=0;i<niso_bounds;i++){
       fprintf(fileout,"V_ISO\n");
@@ -11445,6 +11443,8 @@ void writeini(int flag,char *filename){
         );
     }
   }
+  fprintf(fileout,"PATCHDATAOUT\n");
+  fprintf(fileout," %i \n",output_patchdata);
   fprintf(fileout,"CACHE_BOUNDARYDATA\n");
   fprintf(fileout," %i \n",cache_boundarydata);
   for(i=0;i<npatch2;i++){

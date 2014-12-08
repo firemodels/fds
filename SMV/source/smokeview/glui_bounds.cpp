@@ -553,6 +553,8 @@ extern "C" void glui_bounds_setup(int main_window){
     }
     CHECKBOX_cache_boundarydata=glui_bounds->add_checkbox_to_panel(ROLLOUT_bound,_("Cache boundary data"),&cache_boundarydata,CACHE_BOUNDARYDATA,Bound_CB);
     CHECKBOX_showpatch_both=glui_bounds->add_checkbox_to_panel(ROLLOUT_bound,_("Display exterior data"),&showpatch_both,SHOWPATCH_BOTH,Bound_CB);
+    glui_bounds->add_checkbox_to_panel(ROLLOUT_bound,_("Output data to file"),&output_patchdata);
+
     if(nradio>1){
       for(i=0;i<npatchinfo;i++){
         patchdata *patchi;

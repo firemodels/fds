@@ -1710,7 +1710,6 @@ void initvars(void){
 
   visVentLines=0, visVentSolid=1;
   isZoneFireModel=0;
-  output_slicedata=0;
   nunitclasses=0,nunitclasses_default=0,nunitclasses_ini=0;
   callfrom_tourglui=0;
   showtours_whenediting=0;

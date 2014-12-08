@@ -22,6 +22,11 @@ int getpatchface2dir(mesh *gb, int i1, int i2, int j1, int j2, int k1, int k2, i
                     int *blockonpatch, mesh **meshonpatch);
 int getpatchindex(const patchdata *patchi);
 
+/* ------------------ output_Patchdata ------------------------ */
+
+void output_Patchdata(FILE *csvstream,mesh *meshi){
+}
+          
 /* ------------------ readpatch_bndf ------------------------ */
 
 void readpatch_bndf(int ifile, int flag, int *errorcode){
@@ -46,6 +51,7 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
   float patchmin_global, patchmax_global;
   int local_first,nsize,iblock;
   int npatchvals;
+  char patchcsvfile[1024];
 
   int nn;
   int filenum;
@@ -58,10 +64,20 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
   float delta_time, delta_time0;
   int file_unit;
   int wallcenter=0;
+  FILE *csvstream=NULL;
 
   patchi = patchinfo + ifile;
   if(patchi->loaded==0&&flag==UNLOAD)return;
   if(strcmp(patchi->label.shortlabel,"wc")==0)wallcenter=1;
+
+  if(csvstream!=NULL)fclose(csvstream);
+  if(output_patchdata==1){
+    if(flag==LOAD){
+      sprintf(patchcsvfile,"%s_bndf_%04i.csv",fdsprefix,ifile);
+      csvstream=fopen(patchcsvfile,"w");
+      if(csvstream!=NULL)fprintf(csvstream,"%s\n",patchi->file);
+    }
+  }
 
   local_first=1;
   CheckMemory;
@@ -242,11 +258,10 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
       mxpatch_frames = MAXFRAMES+51;
       statfile=STAT(file,&statbuffer);
       if(statfile==0&&framesize!=0){
-        {
-          int file_frames;
-          file_frames=(statbuffer.st_size-headersize)/framesize+51;
-          if(file_frames<mxpatch_frames)mxpatch_frames=file_frames;
-        }
+        int file_frames;
+
+        file_frames=(statbuffer.st_size-headersize)/framesize+51;
+        if(file_frames<mxpatch_frames)mxpatch_frames=file_frames;
       }
       meshi->mxpatch_frames=mxpatch_frames;
 
@@ -754,6 +769,9 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
           meshi->pj1,meshi->pj2,
           meshi->pk1,meshi->pk2,
           meshi->patch_timesi,meshi->patchval_iframe,&npatchval_iframe,&error);
+        }
+        if(output_patchdata==1){
+          output_Patchdata(csvstream,meshi);
         }
       }
     }
