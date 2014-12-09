@@ -5951,14 +5951,13 @@ CONTAINS
   END SUBROUTINE INITIALIZE_EVAC_DUMPS
       
 !
-  SUBROUTINE INITIALIZE_EVACUATION(NM,ISTOP)
+  SUBROUTINE INITIALIZE_EVACUATION(NM)
     IMPLICIT NONE
     !
     ! Insert humans into the domain at the start of calculation
     !
     ! Passed variables
     INTEGER, INTENT(IN) :: NM
-    INTEGER, INTENT(OUT) :: ISTOP
     !
     ! Local variables
     REAL :: RN_REAL
@@ -6397,7 +6396,7 @@ CONTAINS
                    WRITE (LU_EVACOUT,fmt='(a)') '      x       y       z     Rd      Rt      Rs      ds  '
                    WRITE (LU_EVACOUT,fmt='(3f8.2,4f8.4)') HR%X, HR%Y, HR%Z, &
                         2.0_EB*HR%Radius, HR%r_torso, HR%r_shoulder, HR%d_shoulder
-                   ISTOP = 3  ! Stop code: FDS improperly set-up
+                   STOP_STATUS = SETUP_STOP  ! Stop code: FDS improperly set-up
                    HR%SHOW = .TRUE.    
                    HR%COLOR_INDEX = EVAC_AVATAR_NCOLOR  ! Cyan
                    EXIT INITIALIZATION_LOOP
@@ -6610,13 +6609,12 @@ CONTAINS
   END SUBROUTINE INITIALIZE_EVACUATION
 
   !
-  SUBROUTINE INIT_EVAC_GROUPS(MESH_STOP_STATUS)
+  SUBROUTINE INIT_EVAC_GROUPS
     IMPLICIT NONE
     !
     ! Initialize group lists, known doors, etc
     !
     ! Passed variables
-    INTEGER, DIMENSION(:) :: MESH_STOP_STATUS
     !
     ! Local variables
     INTEGER I,J, IZERO, nom, j1, ii, i_target_old, i_change_old, i_tmp, i_tmp2, I_MODE
@@ -6628,7 +6626,7 @@ CONTAINS
     TYPE (HUMAN_TYPE), POINTER :: HR=>NULL()
     !
     IF (.NOT.ANY(EVACUATION_GRID)) RETURN
-    IF (PROCESS_STOP_STATUS > 0) RETURN
+    IF (STOP_STATUS > 0) RETURN
 
     !
     ilh_dim = ilh           ! lonely humans dimension
@@ -6679,7 +6677,6 @@ CONTAINS
        N_CHANGE_TRIALS = 0 ! Count the initialization Nash equilibrium iterations
        I_CHANGE_OLD    = -1
        IF ( .NOT.(EVACUATION_ONLY(NOM) .AND. EVACUATION_GRID(NOM)) ) CYCLE
-       IF (MESH_STOP_STATUS(NOM)/=NO_STOP) CYCLE
        TNOW=SECOND()
        M => MESHES(NOM)
        GROUP_LIST(:)%GROUP_SIZE  = 0
