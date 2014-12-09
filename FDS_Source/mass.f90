@@ -494,14 +494,25 @@ CASE(.TRUE.) PREDICTOR_STEP
 
    ! Predict the density at the next time step (RHOS or RHO^*)
 
-   DO K=1,KBAR
-      DO J=1,JBAR
-         DO I=1,IBAR
-            IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-            RHOS(I,J,K) = RHO(I,J,K)-DT*FRHO(I,J,K)
+   IF (.NOT.TEST_FULL_TRANSPORT) THEN
+      DO K=1,KBAR
+         DO J=1,JBAR
+            DO I=1,IBAR
+               IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
+               RHOS(I,J,K) = RHO(I,J,K)-DT*FRHO(I,J,K)
+            ENDDO
          ENDDO
       ENDDO
-   ENDDO
+   ELSE
+      DO K=1,KBAR
+         DO J=1,JBAR
+            DO I=1,IBAR
+               IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
+               RHOS(I,J,K) = SUM(ZZS(I,J,K,1:N_TRACKED_SPECIES))
+            ENDDO
+         ENDDO
+      ENDDO
+   ENDIF
 
    ! Correct densities above or below clip limits
 
@@ -542,7 +553,7 @@ CASE(.TRUE.) PREDICTOR_STEP
 
    IF (CLIP_MASS_FRACTION .AND. N_TRACKED_SPECIES>0) THEN
       ZZS(1:IBAR,1:JBAR,1:KBAR,1:N_TRACKED_SPECIES) = MAX(0._EB,MIN(1._EB,ZZS(1:IBAR,1:JBAR,1:KBAR,1:N_TRACKED_SPECIES)))
-   ELSEIF (N_TRACKED_SPECIES>0) THEN
+   ELSEIF (N_TRACKED_SPECIES>0 .AND. .NOT.TEST_FULL_TRANSPORT) THEN
       IF (USE_NEW_CHECK_MASS_FRACTION) THEN
          CALL NEW_CHECK_MASS_FRACTION
       ELSE
@@ -608,14 +619,25 @@ CASE(.FALSE.) PREDICTOR_STEP
 
    ! Correct density at next time step
 
-   DO K=1,KBAR
-      DO J=1,JBAR
-         DO I=1,IBAR
-            IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-            RHO(I,J,K) = .5_EB*(RHO(I,J,K)+RHOS(I,J,K)-DT*FRHO(I,J,K))
+   IF (.NOT.TEST_FULL_TRANSPORT) THEN
+      DO K=1,KBAR
+         DO J=1,JBAR
+            DO I=1,IBAR
+               IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
+               RHO(I,J,K) = .5_EB*(RHO(I,J,K)+RHOS(I,J,K)-DT*FRHO(I,J,K))
+            ENDDO
          ENDDO
       ENDDO
-   ENDDO
+   ELSE
+      DO K=1,KBAR
+         DO J=1,JBAR
+            DO I=1,IBAR
+               IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
+               RHO(I,J,K) = SUM(ZZ(I,J,K,1:N_TRACKED_SPECIES))
+            ENDDO
+         ENDDO
+      ENDDO
+   ENDIF
 
    ! Correct densities above or below clip limits
 
@@ -656,7 +678,7 @@ CASE(.FALSE.) PREDICTOR_STEP
 
    IF (CLIP_MASS_FRACTION .AND. N_TRACKED_SPECIES>0) THEN
       ZZ(1:IBAR,1:JBAR,1:KBAR,1:N_TRACKED_SPECIES) = MAX(0._EB,MIN(1._EB,ZZ(1:IBAR,1:JBAR,1:KBAR,1:N_TRACKED_SPECIES)))
-   ELSEIF (N_TRACKED_SPECIES>0) THEN
+   ELSEIF (N_TRACKED_SPECIES>0 .AND. .NOT.TEST_FULL_TRANSPORT) THEN
       IF (USE_NEW_CHECK_MASS_FRACTION) THEN
          CALL NEW_CHECK_MASS_FRACTION
       ELSE
