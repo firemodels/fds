@@ -40,6 +40,7 @@
 #define _SCHED_H
 
 #undef PTW32_LEVEL
+#define PTW32_LEVEL 0
 
 #if defined(_POSIX_SOURCE)
 #define PTW32_LEVEL 0
@@ -66,8 +67,10 @@
 #endif
 
 
-#if __GNUC__ && ! defined (__declspec)
+#ifdef __GNUC__ 
+#ifdef ! defined (__declspec)
 # error Please upgrade your GNU compiler to one that supports __declspec.
+#endif
 #endif
 
 /*
@@ -172,7 +175,9 @@ PTW32_DLLPORT int __cdecl sched_getscheduler (pid_t pid);
 #endif                          /* __cplusplus */
 
 #undef PTW32_LEVEL
+#define PTW32_LEVEL 0
 #undef PTW32_LEVEL_MAX
+#define PTW32_LEVEL_MAX 0
 
 #endif                          /* !_SCHED_H */
 

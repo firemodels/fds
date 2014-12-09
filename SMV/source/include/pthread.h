@@ -83,7 +83,8 @@
  */
 #ifndef RC_INVOKED
 
-#undef PTW32_LEVEL
+#undef  PTW32_LEVEL
+#define PTW32_LEVEL 0
 
 #if defined(_POSIX_SOURCE)
 #define PTW32_LEVEL 0
@@ -210,7 +211,7 @@ typedef unsigned long DWORD_PTR;
  * -----------------
  */
 
-#if HAVE_CONFIG_H
+#ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif /* HAVE_CONFIG_H */
 
@@ -220,7 +221,7 @@ typedef unsigned long DWORD_PTR;
 /* use native WIN32 time API */
 #endif /* NEED_FTIME */
 
-#if HAVE_SIGNAL_H
+#ifdef HAVE_SIGNAL_H
 #include <signal.h>
 #endif /* HAVE_SIGNAL_H */
 
@@ -523,8 +524,10 @@ extern "C"
 #define SEM_VALUE_MAX                           INT_MAX
 
 
-#if __GNUC__ && ! defined (__declspec)
+#ifdef __GNUC__ 
+#ifdef ! defined (__declspec)
 # error Please upgrade your GNU compiler to one that supports __declspec.
+#endif
 #endif
 
 /*
