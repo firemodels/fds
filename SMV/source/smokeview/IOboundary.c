@@ -24,22 +24,38 @@ int getpatchindex(const patchdata *patchi);
 
 /* ------------------ output_Patchdata ------------------------ */
 
-void output_Patchdata(FILE *csvstream,mesh *meshi){
+void output_Patchdata(char *csvfile, char *patchfile, mesh *meshi){
   int i,iframe;
   float *vals;
+  float *xplt, *yplt, *zplt;
+  FILE *csvstream=NULL;
 
+  csvstream=fopen(csvfile,"w");
   if(csvstream==NULL)return;
+  fprintf(csvstream,"%s\n",patchfile);
+  fprintf(csvstream,"time interval:,%f,%f\n",patchout_tmin,patchout_tmax);
+  fprintf(csvstream,"region:,%f,%f,%f,%f,%f,%f\n\n",patchout_xmin,patchout_xmax,patchout_ymin,patchout_ymax,patchout_zmin,patchout_zmax);
+  
   vals=meshi->patchval;
+  xplt = meshi->xplt_orig;
+  yplt = meshi->yplt_orig;
+  zplt = meshi->zplt_orig;
+
   for(iframe=0;iframe<meshi->mxpatch_frames;iframe++){
     int ipatch;
+    float pt;
 
-    fprintf(csvstream,"\n");
-    fprintf(csvstream,"--------------------------\n");
-    fprintf(csvstream,"time:, %f\n",meshi->patch_times[iframe]);
-    fprintf(csvstream,"--------------------------\n");
+    pt = meshi->patch_times[iframe];
+    if(patchout_tmin<patchout_tmax&&(pt<patchout_tmin||pt>patchout_tmax)){
+      vals+=meshi->npatchsize;
+      continue;
+    }
+
     for(ipatch=0;ipatch<meshi->npatches;ipatch++){
       int i1, i2, j1, j2, k1, k2;
+      int imin, imax, jmin, jmax, kmin, kmax;
       int i, j, k;
+      float pxmin, pxmax, pymin, pymax, pzmin, pzmax;
 
       i1 = meshi->pi1[ipatch];
       i2 = meshi->pi2[ipatch];
@@ -47,35 +63,112 @@ void output_Patchdata(FILE *csvstream,mesh *meshi){
       j2 = meshi->pj2[ipatch];
       k1 = meshi->pk1[ipatch];
       k2 = meshi->pk2[ipatch];
-      fprintf(csvstream,"\n");
-      fprintf(csvstream,"patch %i of %i:,%i,%i,%i,%i,%i,%i\n",ipatch+1,meshi->npatches,i1,i2,j1,j2,k1,k2);
+      if(patchout_xmin<patchout_xmax&&(patchout_xmax<xplt[i1]||patchout_xmin>xplt[i2]))continue;
+      if(patchout_ymin<patchout_ymax&&(patchout_ymax<yplt[j1]||patchout_ymin>yplt[j2]))continue;
+      if(patchout_zmin<patchout_zmax&&(patchout_zmax<zplt[k1]||patchout_zmin>zplt[k2]))continue;
+      imin=i1;
+      imax=i2;
+      jmin=j1;
+      jmax=j2;
+      kmin=k1;
+      kmax=k2;
+      for(i=0;i<meshi->ibar;i++){
+        if(xplt[i]<=patchout_xmin&&patchout_xmin<=xplt[i+1])imin=i;
+        if(xplt[i]<=patchout_xmax&&patchout_xmax<=xplt[i+1])imax=i;
+      }
+      for(j=0;j<meshi->jbar;j++){
+        if(yplt[j]<=patchout_ymin&&patchout_ymin<=yplt[j+1])jmin=j;
+        if(yplt[j]<=patchout_ymax&&patchout_ymax<=yplt[j+1])jmax=j;
+      }
+      for(k=0;k<meshi->kbar;k++){
+        if(zplt[k]<=patchout_zmin&&patchout_zmin<=zplt[k+1])kmin=k;
+        if(zplt[k]<=patchout_zmax&&patchout_zmax<=zplt[k+1])kmax=k;
+      }
+
+      fprintf(csvstream,"time:,%f,patch %i, of, %i\n",meshi->patch_times[iframe],ipatch+1,meshi->npatches);
+      fprintf(csvstream,"region:,%i,%i,%i,%i,%i,%i\n",i1,i2,j1,j2,k1,k2);
+      fprintf(csvstream,",%f,%f,%f,%f,%f,%f\n\n",xplt[i1],xplt[i2],yplt[j1],yplt[j2],zplt[k1],zplt[k2]);
       if(i1==i2){
         for(k=k1;k<=k2;k++){
-          for(j=j1;j<j2;j++){
-            fprintf(csvstream,"%f,",*vals++);
+          int out;
+
+          if(k==k1){
+            fprintf(csvstream,"Z\\Y,");
+            for(j=jmin;j<=jmax;j++){
+              fprintf(csvstream,"%f,",yplt[j]);
+            }
+            fprintf(csvstream,"\n");
           }
-          fprintf(csvstream,"%f\n",*vals++);
+          if(k>=kmin&&k<=kmax){
+            fprintf(csvstream,"%f,",zplt[k]);
+          }
+
+          out=0;
+          for(j=j1;j<=j2;j++){
+            if(k>=kmin&&k<=kmax&&j>=jmin&&j<=jmax){
+              fprintf(csvstream,"%f,",*vals);
+              out=1;
+            }
+            vals++;
+          }
+          if(out==1)fprintf(csvstream,"\n");
         }
       }
       else if(j1==j2){
         for(k=k1;k<=k2;k++){
-          for(i=i1;i<i2;i++){
-            fprintf(csvstream,"%f,",*vals++);
+          int out;
+
+          if(k==k1){
+            fprintf(csvstream,"Z\\X,");
+            for(i=imin;i<=imax;i++){
+              fprintf(csvstream,"%f,",xplt[i]);
+            }
+            fprintf(csvstream,"\n");
           }
-          fprintf(csvstream,"%f\n",*vals++);
+          if(k>=kmin&&k<=kmax){
+            fprintf(csvstream,"%f,",zplt[k]);
+          }
+
+          out=0;
+          for(i=i1;i<=i2;i++){
+            if(k>=kmin&&k<=kmax&&i>=imin&&i<=imax){
+              fprintf(csvstream,"%f,",*vals);
+              out=1;
+            }
+            vals++;
+          }
+          if(out==1)fprintf(csvstream,"\n");
         }
       }
       else{
         for(j=j1;j<j2;j++){
-          for(i=i1;i<i2;i++){
-            fprintf(csvstream,"%f,",*vals++);
+          int out;
+
+          if(j==j1){
+            fprintf(csvstream,"Y\\X,");
+            for(i=imin;i<=imax;i++){
+              fprintf(csvstream,"%f,",xplt[i]);
+            }
+            fprintf(csvstream,"\n");
           }
-          fprintf(csvstream,"%f\n",*vals++);
+          if(j>=jmin&&j<=jmax){
+            fprintf(csvstream,"%f,",yplt[j]);
+          }
+
+          out=0;
+          for(i=i1;i<=i2;i++){
+            if(i>=imin&&i<=imax&&j>=jmin&&j<=jmax){
+              fprintf(csvstream,"%f,",*vals);
+              out=1;
+            }
+            vals++;
+          }
+          if(out==1)fprintf(csvstream,"\n");
         }
       }
     }
   }
-
+  fclose(csvstream);
 
 }
           
@@ -116,19 +209,13 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
   float delta_time, delta_time0;
   int file_unit;
   int wallcenter=0;
-  FILE *csvstream=NULL;
 
   patchi = patchinfo + ifile;
   if(patchi->loaded==0&&flag==UNLOAD)return;
   if(strcmp(patchi->label.shortlabel,"wc")==0)wallcenter=1;
 
-  if(csvstream!=NULL)fclose(csvstream);
   if(output_patchdata==1){
-    if(flag==LOAD){
       sprintf(patchcsvfile,"%s_bndf_%04i.csv",fdsprefix,ifile);
-      csvstream=fopen(patchcsvfile,"w");
-      if(csvstream!=NULL)fprintf(csvstream,"%s\n",patchi->file);
-    }
   }
 
   local_first=1;
@@ -928,7 +1015,7 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
 
   if(loadpatchbysteps==0){
     if(output_patchdata==1){
-      output_Patchdata(csvstream,meshi);
+      output_Patchdata(patchcsvfile,patchi->file,meshi);
     }
     npatchvals = meshi->npatch_times*meshi->npatchsize;
     if(npatchvals==0||NewMemory((void **)&meshi->cpatchval,sizeof(unsigned char)*npatchvals)==0){

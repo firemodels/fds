@@ -9586,7 +9586,12 @@ int readini2(char *inifile, int localfile){
     }
     if(match(buffer,"PATCHDATAOUT")==1){
       fgets(buffer,255,stream);
-      sscanf(buffer,"%i",&output_patchdata);
+      sscanf(buffer,"%i %f %f %f %f %f %f %f %f",&output_patchdata,
+        &patchout_tmin,&patchout_tmax,
+        &patchout_xmin,&patchout_xmax,
+        &patchout_ymin,&patchout_ymax,
+        &patchout_zmin,&patchout_zmax
+        );
       ONEORZERO(output_patchdata);
       continue;
     }
@@ -11444,7 +11449,12 @@ void writeini(int flag,char *filename){
     }
   }
   fprintf(fileout,"PATCHDATAOUT\n");
-  fprintf(fileout," %i \n",output_patchdata);
+  fprintf(fileout," %i %f %f %f %f %f %f %f %f\n",output_patchdata,
+    patchout_tmin,patchout_tmax,
+    patchout_xmin,patchout_xmax,
+    patchout_ymin,patchout_ymax,
+    patchout_zmin,patchout_zmax
+    );
   fprintf(fileout,"CACHE_BOUNDARYDATA\n");
   fprintf(fileout," %i \n",cache_boundarydata);
   for(i=0;i<npatch2;i++){
