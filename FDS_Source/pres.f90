@@ -12,7 +12,7 @@ CHARACTER(255), PARAMETER :: presid='$Id$'
 CHARACTER(255), PARAMETER :: presrev='$Revision$'
 CHARACTER(255), PARAMETER :: presdate='$Date$'
 
-PUBLIC PRESSURE_SOLVER,COMPUTE_VELOCITY_ERROR,BUILD_SPARSE_MATRIX_LAPLACE,GET_REV_PRES
+PUBLIC PRESSURE_SOLVER,COMPUTE_VELOCITY_ERROR,GET_REV_PRES!,BUILD_SPARSE_MATRIX_LAPLACE
  
 CONTAINS
  
@@ -679,244 +679,314 @@ TUSED(5,NM)=TUSED(5,NM)+SECOND()-TNOW
 END SUBROUTINE COMPUTE_VELOCITY_ERROR
 
 
-SUBROUTINE BUILD_SPARSE_MATRIX_LAPLACE(NM)
-USE GLOBAL_CONSTANTS, ONLY: FISHPAK_BC_NEUMANN_NEUMANN, FISHPAK_BC_NEUMANN_DIRICHLET, FISHPAK_BC_DIRICHLET_NEUMANN, &
-                            FISHPAK_BC_DIRICHLET_DIRICHLET
-USE MEMORY_FUNCTIONS, ONLY: CHKMEMERR 
-IMPLICIT NONE
+! SUBROUTINE BUILD_SPARSE_MATRIX_LAPLACE(NM)
+! USE GLOBAL_CONSTANTS, ONLY: FISHPAK_BC_NEUMANN_NEUMANN, FISHPAK_BC_NEUMANN_DIRICHLET, FISHPAK_BC_DIRICHLET_NEUMANN, &
+!                             FISHPAK_BC_DIRICHLET_DIRICHLET
+! USE MEMORY_FUNCTIONS, ONLY: CHKMEMERR 
+! IMPLICIT NONE
 
-INTEGER, INTENT(IN) :: NM
-INTEGER :: IZERO,N,N_A,I,J,K,I_R,I_S,I_R_M1_7,NX,NY,NZ,NXNY
-INTEGER, PARAMETER :: J_COEF_KM1=1,J_COEF_JM1=2,J_COEF_IM1=3,J_COEF_IJK=4,J_COEF_IP1=5,J_COEF_JP1=6,J_COEF_KP1=7
-REAL(EB) :: DXDX,DYDY,DZDZ,BC(6),BCW,BCE,BCS,BCN,BCB,BCT
-TYPE (MESH_TYPE), POINTER :: M=>NULL()
+! INTEGER, INTENT(IN) :: NM
+! INTEGER :: IZERO,I,J,K,I_R,I_S,I_S_D,NX,NY,NZ,NXNY
+! REAL(EB) :: DXDX,DYDY,DZDZ,BC(6),BCW,BCE,BCS,BCN,BCB,BCT
+! LOGICAL :: RECORD_ROW_INDEX
+! INTEGER, ALLOCATABLE, DIMENSION (:) :: A_ROWS_TMP,A_COLUMNS_TMP
+! REAL(EB), ALLOCATABLE, DIMENSION (:) :: A_VALUES_TMP
+! REAL(EB), ALLOCATABLE, DIMENSION (:,:) :: FULL_A
+! TYPE (MESH_TYPE), POINTER :: M=>NULL()
 
-M=>MESHES(NM)
+! M=>MESHES(NM)
 
-N = M%IBAR*M%JBAR*M%KBAR
-N_A = 7*N
+! M%A_N_ROWS = M%IBAR*M%JBAR*M%KBAR
+! M%A_N_COLS = M%A_N_ROWS
+! M%A_N_ELEMENTS = 7*M%A_N_ROWS ! high estimate
 
-! Allocate memory for sparse matrix A
+! ! (debug) allocate memory for full A
 
-ALLOCATE(M%A_I(N_A),STAT=IZERO); CALL ChkMemErr('PRES','A_I',IZERO)
-ALLOCATE(M%A_J(N_A),STAT=IZERO); CALL ChkMemErr('PRES','A_J',IZERO)
-ALLOCATE(M%A_COEF(N_A),STAT=IZERO); CALL ChkMemErr('PRES','A_COEF',IZERO)
+! ALLOCATE(FULL_A(M%A_N_ROWS,M%A_N_COLS),STAT=IZERO); CALL ChkMemErr('PRES','FULL_A',IZERO)
 
-! Allocate memory for source and solution vectors
+! ! Allocate memory for compressed row format
 
-ALLOCATE(M%B_VEC(N),STAT=IZERO); CALL ChkMemErr('PRES','B_VEC',IZERO)
-ALLOCATE(M%X_VEC(N),STAT=IZERO); CALL ChkMemErr('PRES','X_VEC',IZERO)
-ALLOCATE(M%Y_VEC(N),STAT=IZERO); CALL ChkMemErr('PRES','Y_VEC',IZERO)
+! ALLOCATE(M%A_ROW_INDEX(M%A_N_ROWS+1),STAT=IZERO); CALL ChkMemErr('PRES','A_ROW_INDEX',IZERO)
 
-! Initialize vectors
+! ! Allocate temporary memory for sparse matrix A
 
-M%B_VEC=0._EB
-M%X_VEC=0._EB
-M%Y_VEC=0._EB
+! ALLOCATE(A_ROWS_TMP(M%A_N_ELEMENTS),STAT=IZERO); CALL ChkMemErr('PRES','A_ROWS_TMP',IZERO)
+! ALLOCATE(A_COLUMNS_TMP(M%A_N_ELEMENTS),STAT=IZERO); CALL ChkMemErr('PRES','A_COLUMNS_TMP',IZERO)
+! ALLOCATE(A_VALUES_TMP(M%A_N_ELEMENTS),STAT=IZERO); CALL ChkMemErr('PRES','A_VALUES_TMP',IZERO)
 
-! Set boundary conditions on exterior of domain
+! ! Set boundary conditions on exterior of domain
 
-SELECT CASE(M%LBC)
-   CASE(FISHPAK_BC_NEUMANN_NEUMANN)
-      BC(1)=0._EB
-      BC(2)=0._EB
-   CASE(FISHPAK_BC_NEUMANN_DIRICHLET)
-      BC(1)=0._EB
-      BC(2)=2._EB
-   CASE(FISHPAK_BC_DIRICHLET_NEUMANN)
-      BC(1)=2._EB
-      BC(2)=0._EB
-   CASE(FISHPAK_BC_DIRICHLET_DIRICHLET)
-      BC(1)=2._EB
-      BC(2)=2._EB
-END SELECT
+! SELECT CASE(M%LBC)
+!    CASE(FISHPAK_BC_NEUMANN_NEUMANN)
+!       BC(1)=0._EB
+!       BC(2)=0._EB
+!    CASE(FISHPAK_BC_NEUMANN_DIRICHLET)
+!       BC(1)=0._EB
+!       BC(2)=2._EB
+!    CASE(FISHPAK_BC_DIRICHLET_NEUMANN)
+!       BC(1)=2._EB
+!       BC(2)=0._EB
+!    CASE(FISHPAK_BC_DIRICHLET_DIRICHLET)
+!       BC(1)=2._EB
+!       BC(2)=2._EB
+! END SELECT
 
-SELECT CASE(M%MBC)
-   CASE(FISHPAK_BC_NEUMANN_NEUMANN)
-      BC(3)=0._EB
-      BC(4)=0._EB
-   CASE(FISHPAK_BC_NEUMANN_DIRICHLET)
-      BC(3)=0._EB
-      BC(4)=2._EB
-   CASE(FISHPAK_BC_DIRICHLET_NEUMANN)
-      BC(3)=2._EB
-      BC(4)=0._EB
-   CASE(FISHPAK_BC_DIRICHLET_DIRICHLET)
-      BC(3)=2._EB
-      BC(4)=2._EB
-END SELECT
+! SELECT CASE(M%MBC)
+!    CASE(FISHPAK_BC_NEUMANN_NEUMANN)
+!       BC(3)=0._EB
+!       BC(4)=0._EB
+!    CASE(FISHPAK_BC_NEUMANN_DIRICHLET)
+!       BC(3)=0._EB
+!       BC(4)=2._EB
+!    CASE(FISHPAK_BC_DIRICHLET_NEUMANN)
+!       BC(3)=2._EB
+!       BC(4)=0._EB
+!    CASE(FISHPAK_BC_DIRICHLET_DIRICHLET)
+!       BC(3)=2._EB
+!       BC(4)=2._EB
+! END SELECT
 
-SELECT CASE(M%NBC)
-   CASE(FISHPAK_BC_NEUMANN_NEUMANN)
-      BC(5)=0._EB
-      BC(6)=0._EB
-   CASE(FISHPAK_BC_NEUMANN_DIRICHLET)
-      BC(5)=0._EB
-      BC(6)=2._EB
-   CASE(FISHPAK_BC_DIRICHLET_NEUMANN)
-      BC(5)=2._EB
-      BC(6)=0._EB
-   CASE(FISHPAK_BC_DIRICHLET_DIRICHLET)
-      BC(5)=2._EB
-      BC(6)=2._EB
-END SELECT
+! SELECT CASE(M%NBC)
+!    CASE(FISHPAK_BC_NEUMANN_NEUMANN)
+!       BC(5)=0._EB
+!       BC(6)=0._EB
+!    CASE(FISHPAK_BC_NEUMANN_DIRICHLET)
+!       BC(5)=0._EB
+!       BC(6)=2._EB
+!    CASE(FISHPAK_BC_DIRICHLET_NEUMANN)
+!       BC(5)=2._EB
+!       BC(6)=0._EB
+!    CASE(FISHPAK_BC_DIRICHLET_DIRICHLET)
+!       BC(5)=2._EB
+!       BC(6)=2._EB
+! END SELECT
 
-! Build sparse matrix A
+! ! Build sparse matrix A
 
-! boundary condition type
-! -----------------------
-! bc(1) = west
-! bc(2) = east
-! bc(3) = south
-! bc(4) = north
-! bc(5) = bottom
-! bc(6) = top
-! values: 0 = Neumann, 1 = Dirichlet (ghost), 2 = Dirichlet (face)
-!
-! Eventually, we will allow BXS(I,J), etc., for a specific type and value of bc for each wall cell.
-!
-! Consider that we are solving the following discrete equation in 2D:
-!
-! (p(i+1,j)-2*p(i,j)+p(i-1,j))/dx^2 + (p(i,j+1)-2*p(i,j)+p(i,j-1))^2 = b(i,j)
-!
-! Example of Neumann bc:
-! Suppose we have dp/dx = Fx on the right-side bc.  The we have
-! p(i+1)-p(i,j)= Fx*dx, and the eqn is rewritten as
-!
-! ( Fx*dx - p(i,j)+p(i-1,j) )/dx^2 + ... = b(i,j).
-!
-! In this case, the coefficient for p(i+1,j) is 0, and the coefficient
-! for p(i,j) is -1.  And the source is augmented to be
-! b(i,j) - Fx/dx.
+! ! boundary condition type
+! ! -----------------------
+! ! bc(1) = west
+! ! bc(2) = east
+! ! bc(3) = south
+! ! bc(4) = north
+! ! bc(5) = bottom
+! ! bc(6) = top
+! ! values: 0 = Neumann, 1 = Dirichlet (ghost), 2 = Dirichlet (face)
+! !
+! ! Eventually, we will allow BXS(I,J), etc., for a specific type and value of bc for each wall cell.
+! !
+! ! Consider that we are solving the following discrete equation in 2D:
+! !
+! ! (p(i+1,j)-2*p(i,j)+p(i-1,j))/dx^2 + (p(i,j+1)-2*p(i,j)+p(i,j-1))^2 = b(i,j)
+! !
+! ! Example of Neumann bc:
+! ! Suppose we have dp/dx = Fx on the right-side bc.  The we have
+! ! p(i+1)-p(i,j)= Fx*dx, and the eqn is rewritten as
+! !
+! ! ( Fx*dx - p(i,j)+p(i-1,j) )/dx^2 + ... = b(i,j).
+! !
+! ! In this case, the coefficient for p(i+1,j) is 0, and the coefficient
+! ! for p(i,j) is -1.  And the source is augmented to be
+! ! b(i,j) - Fx/dx.
 
-DXDX = M%DX(1)**2 ! this setup assumes uniform grid spacing in each direction
-DYDY = M%DY(1)**2
-DZDZ = M%DZ(1)**2
+! DXDX = M%DX(1)**2 ! this setup assumes uniform grid spacing in each direction
+! DYDY = M%DY(1)**2
+! DZDZ = M%DZ(1)**2
 
-NX = M%IBAR
-NY = M%JBAR
-NZ = M%KBAR
-NXNY = NX*NY
+! NX = M%IBAR
+! NY = M%JBAR
+! NZ = M%KBAR
+! NXNY = NX*NY
 
-! Build A
+! ! Build A
 
-I_R = 0 ! row index, lexicographical ordering, I_R(I,J,K) = (K-1)*NXNY+(J-1)*NX+I
-I_S = 0 ! sparse element index, I_S(I_R,J_COEF) = (I_R-1)*7 + J_COEF=[1:7]
+! I_R = 0 ! row index, lexicographical ordering, I_R(I,J,K) = (K-1)*NXNY+(J-1)*NX+I
+! I_S = 0 ! sparse element index
 
-! note the ordering of the coefficients for the discrete Laplacian
-!
-!     phi(i,j,k-1)/dz^2 + phi(i,j-1,k)/dy^2 + phi(i-1,j,k)/dx^2
-!  - (2*phi(i,j,k)/dx^2 + 2*phi(i,j,k)/dy^2 + 2*phi(i,j,k)/dz^2)
-!     phi(i+1,j,k)/dx^2 + phi(i,j+1,k)/dy^2 + phi(i,j,k+1)/dz^2
-!
-! k-1 => J_COEF=1
-! j-1 => J_COEF=2
-! i-1 => J_COEF=3
-! ijk => J_COEF=4 (diagonal coefficient)
-! i+1 => J_COEF=5
-! j+1 => J_COEF=6
-! k+1 => J_COEF=7
+! ! note the ordering of the coefficients for the discrete Laplacian
+! !
+! !     phi(i,j,k-1)/dz^2 + phi(i,j-1,k)/dy^2 + phi(i-1,j,k)/dx^2
+! !  - (2*phi(i,j,k)/dx^2 + 2*phi(i,j,k)/dy^2 + 2*phi(i,j,k)/dz^2)
+! !     phi(i+1,j,k)/dx^2 + phi(i,j+1,k)/dy^2 + phi(i,j,k+1)/dz^2
+! !
+! ! within a row the order is always
+! !
+! !    (k-1) (j-1) (i-1) ijk (i+1) (j+1) (k+1)
+! !
+! ! the matrix is symmetric, so we only store ijk, i+1, j+1, k+1
+! ! that is, we store the upper triangular part of A
 
-DO K=1,NZ
-   DO J=1,NY
-      DO I=1,NX
+! DO K=1,NZ
+!    DO J=1,NY
+!       DO I=1,NX
 
-         I_R = (K-1)*NXNY+(J-1)*NX+I
-         I_R_M1_7 = (I_R-1)*7
+!          I_R = (K-1)*NXNY+(J-1)*NX+I
 
-         IF (I>1) THEN
-            I_S = I_R_M1_7 + J_COEF_IM1
-            M%A_I(I_S) = I_R
-            M%A_J(I_S) = I_R-1
-            BCW = 1._EB
-            M%A_COEF(I_S) = BCW/DXDX
-         ELSE
-            BCW = BC(1)
-         ENDIF
+!          RECORD_ROW_INDEX = .TRUE.
 
-         IF (I<NX) THEN
-            I_S = I_R_M1_7 + J_COEF_IP1
-            M%A_I(I_S) = I_R
-            M%A_J(I_S) = I_R+1
-            BCE = 1._EB
-            M%A_COEF(I_S) = BCE/DXDX
-         ELSE
-            BCE = BC(2)
-         ENDIF
+!          IF (K>1) THEN
+!             !I_S = I_S + 1
+!             !IF (RECORD_ROW_INDEX) THEN
+!             !   M%A_ROW_INDEX(I_R) = I_S
+!             !   RECORD_ROW_INDEX = .FALSE.
+!             !ENDIF
+!             !A_COLUMNS_TMP(I_S) = I_R-NXNY
+!             BCB = 1._EB
+!             !A_VALUES_TMP(I_S) = BCB/DZDZ
+!          ELSE
+!             BCB = BC(5)
+!          ENDIF
 
-         IF (J>1) THEN
-            I_S = I_R_M1_7 + J_COEF_JM1
-            M%A_I(I_S) = I_R
-            M%A_J(I_S) = I_R-NX
-            BCS = 1._EB
-            M%A_COEF(I_S) = BCS/DYDY
-         ELSE
-            BCS = BC(3)
-         ENDIF
+!          IF (J>1) THEN
+!             !I_S = I_S + 1
+!             !IF (RECORD_ROW_INDEX) THEN
+!             !   M%A_ROW_INDEX(I_R) = I_S
+!             !   RECORD_ROW_INDEX = .FALSE.
+!             !ENDIF
+!             !A_COLUMNS_TMP(I_S) = I_R-NX
+!             BCS = 1._EB
+!             !A_VALUES_TMP(I_S) = BCS/DYDY
+!          ELSE
+!             BCS = BC(3)
+!          ENDIF
 
-         IF (J<NY) THEN
-            I_S = I_R_M1_7 + J_COEF_JP1
-            M%A_I(I_S) = I_R
-            M%A_J(I_S) = I_R+NX
-            BCN = 1._EB
-            M%A_COEF(I_S) = BCN/DYDY
-         ELSE
-            BCN = BC(4)
-         ENDIF
+!          IF (I>1) THEN
+!             !I_S = I_S + 1
+!             !IF (RECORD_ROW_INDEX) THEN
+!             !   M%A_ROW_INDEX(I_R) = I_S
+!             !   RECORD_ROW_INDEX = .FALSE.
+!             !ENDIF
+!             !A_COLUMNS_TMP(I_S) = I_R-1
+!             BCW = 1._EB
+!             !A_VALUES_TMP(I_S) = BCW/DXDX
+!          ELSE
+!             BCW = BC(1)
+!          ENDIF
 
-         IF (K>1) THEN
-            I_S = I_R_M1_7 + J_COEF_KM1
-            M%A_I(I_S) = I_R
-            M%A_J(I_S) = I_R-NXNY
-            BCB = 1._EB
-            M%A_COEF(I_S) = BCB/DZDZ
-         ELSE
-            BCB = BC(5)
-         ENDIF
+!          ! increment I_S for diagonal coefficient, but wait to compute until bcs are known
+!          I_S = I_S + 1
+!          IF (RECORD_ROW_INDEX) THEN
+!             M%A_ROW_INDEX(I_R) = I_S
+!             RECORD_ROW_INDEX = .FALSE.
+!          ENDIF
+!          I_S_D = I_S
 
-         IF (K<NZ) THEN
-            I_S = I_R_M1_7 + J_COEF_KP1
-            M%A_I(I_S) = I_R
-            M%A_J(I_S) = I_R+NXNY
-            BCT = 1._EB
-            M%A_COEF(I_S) = BCT/DZDZ
-         ELSE
-            BCT = BC(6)
-         ENDIF
+!          IF (I<NX) THEN
+!             I_S = I_S + 1
+!             IF (RECORD_ROW_INDEX) THEN
+!                M%A_ROW_INDEX(I_R) = I_S
+!                RECORD_ROW_INDEX = .FALSE.
+!             ENDIF
+!             A_COLUMNS_TMP(I_S) = I_R+1
+!             BCE = 1._EB
+!             A_VALUES_TMP(I_S) = BCE/DXDX
+!          ELSE
+!             BCE = BC(2)
+!          ENDIF
 
-         I_S = I_R_M1_7 + J_COEF_IJK
-         M%A_I(I_S) = I_R
-         M%A_J(I_S) = I_R
-         M%A_COEF(I_S) = -( (BCW+BCE)/DXDX + (BCS+BCN)/DYDY + (BCB+BCT)/DZDZ )
+!          IF (J<NY) THEN
+!             I_S = I_S + 1
+!             IF (RECORD_ROW_INDEX) THEN
+!                M%A_ROW_INDEX(I_R) = I_S
+!                RECORD_ROW_INDEX = .FALSE.
+!             ENDIF
+!             A_COLUMNS_TMP(I_S) = I_R+NX
+!             BCN = 1._EB
+!             A_VALUES_TMP(I_S) = BCN/DYDY
+!          ELSE
+!             BCN = BC(4)
+!          ENDIF
 
-      ENDDO
-   ENDDO
-ENDDO
+!          IF (K<NZ) THEN
+!             I_S = I_S + 1
+!             IF (RECORD_ROW_INDEX) THEN
+!                M%A_ROW_INDEX(I_R) = I_S
+!                RECORD_ROW_INDEX = .FALSE.
+!             ENDIF
+!             A_COLUMNS_TMP(I_S) = I_R+NXNY
+!             BCT = 1._EB
+!             A_VALUES_TMP(I_S) = BCT/DZDZ
+!          ELSE
+!             BCT = BC(6)
+!          ENDIF
 
-END SUBROUTINE BUILD_SPARSE_MATRIX_LAPLACE
+!          ! fill in I_S for diagonal
+!          A_COLUMNS_TMP(I_S_D) = I_R
+!          A_VALUES_TMP(I_S_D) = -( (BCW+BCE)/DXDX + (BCS+BCN)/DYDY + (BCB+BCT)/DZDZ )
+
+!       ENDDO
+!    ENDDO
+! ENDDO
+
+! ! Allocate final storage arrays
+
+! M%A_N_ELEMENTS = I_S ! exact element count
+
+! ALLOCATE(M%A_COLUMNS(M%A_N_ELEMENTS),STAT=IZERO); CALL ChkMemErr('PRES','A_COLUMNS',IZERO)
+! ALLOCATE(M%A_VALUES(M%A_N_ELEMENTS),STAT=IZERO); CALL ChkMemErr('PRES','A_VALUES',IZERO)
+
+! ! Copy temporary values for final arrays
+
+! M%A_COLUMNS = A_COLUMNS_TMP(1:M%A_N_ELEMENTS)
+! M%A_VALUES = A_VALUES_TMP(1:M%A_N_ELEMENTS)
+
+! ! Deallocate temporary arrays
+
+! ! DEALLOCATE(A_COLUMNS_TMP)
+! ! DEALLOCATE(A_VALUES_TMP)
+
+! ! Fill in final row index
+
+! M%A_ROW_INDEX(M%A_N_ROWS+1) = M%A_N_ELEMENTS+1
+
+! ! print *,M%A_VALUES
+! ! print *,M%A_COLUMNS
+! ! print *,M%A_ROW_INDEX
+! ! print *,M%A_N_ROWS,M%A_N_ELEMENTS,I_S
+! DO I_R=1,M%A_N_ROWS
+!    I_S = M%A_ROW_INDEX(I_R)
+!    print *,M%A_VALUES(I_S)
+! ENDDO
+
+! END SUBROUTINE BUILD_SPARSE_MATRIX_LAPLACE
 
 
-SUBROUTINE SPARSE_LU_FACTORIZATION(NM)
-IMPLICIT NONE
+! SUBROUTINE SPARSE_LU_FACTORIZATION(NM)
+! USE GLOBAL_CONSTANTS, ONLY: SCI_KM1, SCI_JM1, SCI_IM1, SCI_IJK, SCI_IP1,SCI_JP1,SCI_KP1, NDIAG
+! IMPLICIT NONE
 
-INTEGER, INTENT(IN) :: NM
-!INTEGER :: IZERO,N_L,I,J,K
-TYPE (MESH_TYPE), POINTER :: M=>NULL()
+! INTEGER, INTENT(IN) :: NM
+! INTEGER :: IZERO,N,N_L,I,J,K,K_S
+! TYPE (MESH_TYPE), POINTER :: M=>NULL()
 
-CALL POINT_TO_MESH(NM)
-M=>MESHES(NM)
+! M=>MESHES(NM)
+! N = M%IBAR*M%JBAR*M%KBAR
 
-! Go through algorithm once just to count nonzero entries
+! ! Go through algorithm once just to count nonzero entries
 
-! Heath, Algorithm 2.3, LU Factorization by Gaussian Elimination
+! ! Heath, Algorithm 2.3, LU Factorization by Gaussian Elimination
 
-! Allocate 1D arrays
+! DO K=1,N-1
+!    K_S_D = (K-1)*NDIAG
+!    K_S = K_S_D + SCI_IJK
+!    IF ( ABS(M%A_COEF(K_S))<TWO_EPSILON_EB ) CALL SHUTDOWN('STOP: Error in LU factorization')
+!    DO I=K+1,N
+!       I_S_D = (I-1)*NDIAG
+!       DO J=1:NDIAG
+!          I_S = I_S_D + J
+!          L_IK = A(I,K)/A(K,K)
+!       ENDDO
+!    ENDDO
 
-! ALLOCATE(M%L_I(N_L),STAT=IZERO);    CALL ChkMemErr('INIT','L_I',IZERO)
-! ALLOCATE(M%L_J(N_L),STAT=IZERO);    CALL ChkMemErr('INIT','L_J',IZERO)
-! ALLOCATE(M%L_COEF(N_L),STAT=IZERO); CALL ChkMemErr('INIT','L_COEF',IZERO)
+! ENDDO
 
-END SUBROUTINE SPARSE_LU_FACTORIZATION
+! ! Allocate 1D arrays
+
+! ! ALLOCATE(M%L_I(N_L),STAT=IZERO);    CALL ChkMemErr('INIT','L_I',IZERO)
+! ! ALLOCATE(M%L_J(N_L),STAT=IZERO);    CALL ChkMemErr('INIT','L_J',IZERO)
+! ! ALLOCATE(M%L_COEF(N_L),STAT=IZERO); CALL ChkMemErr('INIT','L_COEF',IZERO)
+
+! END SUBROUTINE SPARSE_LU_FACTORIZATION
 
 
 SUBROUTINE GET_REV_pres(MODULE_REV,MODULE_DATE)
@@ -931,4 +1001,16 @@ END SUBROUTINE GET_REV_pres
 
 
 END MODULE PRES
+
+
+
+
+
+
+
+
+
+
+
+
 
