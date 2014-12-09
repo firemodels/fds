@@ -25,6 +25,58 @@ int getpatchindex(const patchdata *patchi);
 /* ------------------ output_Patchdata ------------------------ */
 
 void output_Patchdata(FILE *csvstream,mesh *meshi){
+  int i,iframe;
+  float *vals;
+
+  if(csvstream==NULL)return;
+  vals=meshi->patchval;
+  for(iframe=0;iframe<meshi->mxpatch_frames;iframe++){
+    int ipatch;
+
+    fprintf(csvstream,"\n");
+    fprintf(csvstream,"--------------------------\n");
+    fprintf(csvstream,"time:, %f\n",meshi->patch_times[iframe]);
+    fprintf(csvstream,"--------------------------\n");
+    for(ipatch=0;ipatch<meshi->npatches;ipatch++){
+      int i1, i2, j1, j2, k1, k2;
+      int i, j, k;
+
+      i1 = meshi->pi1[ipatch];
+      i2 = meshi->pi2[ipatch];
+      j1 = meshi->pj1[ipatch];
+      j2 = meshi->pj2[ipatch];
+      k1 = meshi->pk1[ipatch];
+      k2 = meshi->pk2[ipatch];
+      fprintf(csvstream,"\n");
+      fprintf(csvstream,"patch %i of %i:,%i,%i,%i,%i,%i,%i\n",ipatch+1,meshi->npatches,i1,i2,j1,j2,k1,k2);
+      if(i1==i2){
+        for(k=k1;k<=k2;k++){
+          for(j=j1;j<j2;j++){
+            fprintf(csvstream,"%f,",*vals++);
+          }
+          fprintf(csvstream,"%f\n",*vals++);
+        }
+      }
+      else if(j1==j2){
+        for(k=k1;k<=k2;k++){
+          for(i=i1;i<i2;i++){
+            fprintf(csvstream,"%f,",*vals++);
+          }
+          fprintf(csvstream,"%f\n",*vals++);
+        }
+      }
+      else{
+        for(j=j1;j<j2;j++){
+          for(i=i1;i<i2;i++){
+            fprintf(csvstream,"%f,",*vals++);
+          }
+          fprintf(csvstream,"%f\n",*vals++);
+        }
+      }
+    }
+  }
+
+
 }
           
 /* ------------------ readpatch_bndf ------------------------ */
@@ -770,9 +822,6 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
           meshi->pk1,meshi->pk2,
           meshi->patch_timesi,meshi->patchval_iframe,&npatchval_iframe,&error);
         }
-        if(output_patchdata==1){
-          output_Patchdata(csvstream,meshi);
-        }
       }
     }
     if(do_threshold==1){
@@ -878,6 +927,9 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
   /* convert patch values into integers pointing to an rgb color table */
 
   if(loadpatchbysteps==0){
+    if(output_patchdata==1){
+      output_Patchdata(csvstream,meshi);
+    }
     npatchvals = meshi->npatch_times*meshi->npatchsize;
     if(npatchvals==0||NewMemory((void **)&meshi->cpatchval,sizeof(unsigned char)*npatchvals)==0){
       *errorcode=1;
