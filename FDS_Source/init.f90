@@ -1099,7 +1099,7 @@ ENDDO OBST_LOOP_3
 
 IF (N_EDGES>N_EDGES_DIM .AND. EVACUATION_ONLY(NM)) THEN
    WRITE(LU_ERR,'(A,I2,A,2I8)') 'ERROR: Edges memory; Mesh: ',NM,', n_edges, n_edges_dim ',N_EDGES, N_EDGES_DIM
-   PROCESS_STOP_STATUS = SETUP_STOP
+   STOP_STATUS = SETUP_STOP
    IERR = 1
 ENDIF
  
@@ -1135,7 +1135,7 @@ IF (NOC(1)==0 .AND. NOC(2)/=0 .AND. NOC(3)/=0) M%IPS=6
 IF (EVACUATION_ONLY(NM)                      ) M%IPS=7
 IF (NOC(1)/=0 .AND. NOC(2)/=0 .AND. NOC(3)/=0) THEN
    WRITE(LU_ERR,'(A,I3)') 'ERROR: Stretch at most 2 coordinate directions in MESH ',NM
-   PROCESS_STOP_STATUS = SETUP_STOP
+   STOP_STATUS = SETUP_STOP
    IERR = 1
    RETURN
 ENDIF
@@ -1443,7 +1443,7 @@ ENDDO WALL_CELL_LOOP
  
 IF (IERR/=0) THEN
    WRITE(LU_ERR,'(A,I2,A,I3)') 'ERROR: Poisson initialization error, Number=',IERR, ', Mesh=',NM
-   PROCESS_STOP_STATUS = SETUP_STOP
+   STOP_STATUS = SETUP_STOP
    RETURN
 ENDIF
  
@@ -1544,7 +1544,7 @@ DEVICE_LOOP: DO N=1,N_DEVC
 
       IF (IW==0 .AND. DV%STATISTICS=='null') THEN
          WRITE(LU_ERR,'(A,I4,A)') 'ERROR: Reposition DEVC No.',DV%ORDINAL,'. FDS cannot determine which boundary cell to assign.'
-         PROCESS_STOP_STATUS = SETUP_STOP
+         STOP_STATUS = SETUP_STOP
          RETURN
       ELSE 
          DV%WALL_INDEX = IW
@@ -1564,7 +1564,7 @@ DEVICE_LOOP: DO N=1,N_DEVC
    IF (OUTPUT_QUANTITY(DV%OUTPUT_INDEX)%INSIDE_SOLID) THEN
       IF (SURFACE(SURF_INDEX)%THERMAL_BC_INDEX /= THERMALLY_THICK) THEN
          WRITE(LU_ERR,'(A,I3,A)') 'ERROR: DEViCe ',N, ' must be associated with a heat-conducting surface'
-         PROCESS_STOP_STATUS = SETUP_STOP
+         STOP_STATUS = SETUP_STOP
          RETURN
       ENDIF
       IF (DV%DEPTH>EPSILON_EB) THEN
@@ -1608,7 +1608,7 @@ PROF_LOOP: DO N=1,N_PROF
       SF => SURFACE(M%WALL(IW)%SURF_INDEX)
       IF (.NOT.SF%THERMALLY_THICK) THEN
          WRITE(LU_ERR,'(A,I3,A)') 'ERROR: PROFile ',N, ' must be associated with a heat-conducting surface'
-         PROCESS_STOP_STATUS = SETUP_STOP
+         STOP_STATUS = SETUP_STOP
          RETURN
       ENDIF
       IF (PF%QUANTITY /= 'TEMPERATURE' .AND. PF%QUANTITY /= 'DENSITY') THEN
@@ -1618,13 +1618,13 @@ PROF_LOOP: DO N=1,N_PROF
          ENDDO
          IF (.NOT.SUCCESS) THEN
             WRITE(LU_ERR,'(A,A,A)') 'ERROR: QUANTITY ',TRIM(PF%QUANTITY), ' is not appropriate for the designated location'
-            PROCESS_STOP_STATUS = SETUP_STOP
+            STOP_STATUS = SETUP_STOP
             RETURN
          ENDIF
       ENDIF
    ELSE
       WRITE(LU_ERR,'(A,I4,A)') 'ERROR: Reposition PROF No.',PF%ORDINAL, '. FDS cannot determine which boundary cell to assign'
-      PROCESS_STOP_STATUS = SETUP_STOP
+      STOP_STATUS = SETUP_STOP
       RETURN
    ENDIF
 ENDDO PROF_LOOP
@@ -2030,7 +2030,7 @@ CHECK_MESHES: IF (IW<=M%N_EXTERNAL_WALL_CELLS .AND. .NOT.EVACUATION_ONLY(NM)) TH
 
    IF (NOM_CHECK(0)/=NOM_CHECK(1)) THEN
       WRITE(LU_ERR,'(A,I3,A,I3)') 'ERROR: MESH ',NM,' is not in alignment with MESH ',MAXVAL(NOM_CHECK)
-      PROCESS_STOP_STATUS = SETUP_STOP
+      STOP_STATUS = SETUP_STOP
       IERR = 1
       RETURN
    ENDIF
@@ -2046,7 +2046,7 @@ CHECK_MESHES: IF (IW<=M%N_EXTERNAL_WALL_CELLS .AND. .NOT.EVACUATION_ONLY(NM)) TH
             ABS( ((MM%Z(KKO_MAX)-MM%Z(KKO_MIN-1))-M%DZ(K)) / MM%DZ(KKO_MIN))>0.01 ) ALIGNED = .FALSE.
       IF (.NOT.ALIGNED) THEN
          WRITE(LU_ERR,'(A,I3,A,I3)') 'ERROR: MESH ',NM,' is out of alignment with MESH ',NOM
-         PROCESS_STOP_STATUS = SETUP_STOP
+         STOP_STATUS = SETUP_STOP
          IERR = 1
          RETURN
       ENDIF
@@ -2064,7 +2064,7 @@ CHECK_MESHES: IF (IW<=M%N_EXTERNAL_WALL_CELLS .AND. .NOT.EVACUATION_ONLY(NM)) TH
       END SELECT
       IF (.NOT.ALIGNED) THEN
          WRITE(LU_ERR,'(A,I3,A,I3)') 'ERROR: MESH ',NM,' is finer in one direction and coarser in the other than MESH ',NOM
-         PROCESS_STOP_STATUS = SETUP_STOP
+         STOP_STATUS = SETUP_STOP
          IERR = 1
          RETURN
       ENDIF
@@ -2288,7 +2288,7 @@ PROCESS_VENT: IF (WC%VENT_INDEX>0) THEN
    IF (SF%PROFILE==ATMOSPHERIC_PROFILE) THEN
       IF (M%ZC(K)<GROUND_LEVEL) THEN
          WRITE(LU_ERR,'(A,A,A)') 'ERROR: SURF ',TRIM(SF%ID),' cannot be applied below GROUND_LEVEL'
-         PROCESS_STOP_STATUS = SETUP_STOP
+         STOP_STATUS = SETUP_STOP
          IERR = 1
          RETURN
       ENDIF
@@ -2951,7 +2951,7 @@ END SELECT EDGE_DIRECTION_1
 
 IF (IW1==-1 .OR. IW2==-1) THEN
    WRITE(LU_ERR,'(A,I2,A,3I3)') 'ERROR: Edge initialization failed; Mesh: ',NM,', Cell: ',II,JJ,KK
-   PROCESS_STOP_STATUS = SETUP_STOP
+   STOP_STATUS = SETUP_STOP
    IERR = 1
    RETURN
 ENDIF
