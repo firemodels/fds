@@ -25,7 +25,7 @@ int getpatchindex(const patchdata *patchi);
 /* ------------------ output_Patchdata ------------------------ */
 
 void output_Patchdata(char *csvfile, char *patchfile, mesh *meshi){
-  int i,iframe;
+  int iframe;
   float *vals;
   float *xplt, *yplt, *zplt;
   FILE *csvstream=NULL;
@@ -55,7 +55,6 @@ void output_Patchdata(char *csvfile, char *patchfile, mesh *meshi){
       int i1, i2, j1, j2, k1, k2;
       int imin, imax, jmin, jmax, kmin, kmax;
       int i, j, k;
-      float pxmin, pxmax, pymin, pymax, pzmin, pzmax;
 
       i1 = meshi->pi1[ipatch];
       i2 = meshi->pi2[ipatch];
