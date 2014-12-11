@@ -881,11 +881,9 @@ The results of the simulations are shown in Fig.~\ref{CSIRO}. The fire front in 
 \section{Burning Trees (NIST Douglas Firs)}
 \label{Douglas_Firs}
 
-This section contains a description and results for simulations of three Douglas fir tree fires. Measured properties for the specific types of grasses burned in the two experiments are listed in Table~\ref{Properties_Trees}. Properties that were not measured are listed in Table~\ref{Assumed_Properties_Trees}. These assumed properties are typically for wood or cellulosic fuels. The moisture is modeled as water. The vegetation is assumed to be composed primarily of cellulose.
+This section contains a description and results of three Douglas fir tree fire simulations. Measured properties of the trees are listed in Table~\ref{Properties_Trees}. Generic vegetation properties are listed in Table~\ref{Assumed_Properties_Trees}. These assumed properties are typically for wood or cellulosic fuels. The moisture is modeled as water. The vegetation is assumed to be composed primarily of cellulose. Reference~\cite{Mell:2009} provides an estimate of the distribution of mass for the foliage, roundwood less than 3~mm in diameter, roundwood 3~mm to 6~mm, and roundwood 6~mm to 10~mm. For the 2~m trees, the distribution is approximately 64~\%, 11~\%, 10~\%, and 15~\%, respectively. For the 5~m trees, it is 60~\%, 17~\%, 12~\%, and 11~\%, respectively.
 
-Snapshots of the simulation of the 2~m, 14~\% case are shown in Fig.~\ref{tree_snaps}. The computational domain in this case is 2~m by 2~m by 4~m. The grid cells are 5~cm cubes. The pine needles are represented by 100,000 Lagrangian particles with a cylindrical geometry, or about 25 simulated needles per grid cell. The radius of the cylinder is derived from the measured surface area to volume ratio. Each simulated pine needle represents many more actual needles. The weighting factor is determined from the estimated bulk mass per unit volume.
-
-The results of the simulations are shown in Fig.~\ref{NIST_Douglas_Fir_MLR}. 
+Snapshots of the simulation of the 2~m tall, 14~\% moisture tree are shown in Fig.~\ref{tree_snaps}. The computational domain in this case is 2~m by 2~m by 4~m. The grid cells are 5~cm cubes. The pine needles are represented by 130,000 Lagrangian particles with a cylindrical geometry, or about 25 simulated needles per grid cell. The radius of the cylinder is derived from the measured surface area to volume ratio. Each simulated pine needle or segment of roundwood represents many more actual needles or segments. The weighting factor is determined from the estimated bulk mass per unit volume. The results of the simulations are shown in Fig.~\ref{NIST_Douglas_Fir_MLR}.
 
 \begin{figure}[ht]
 \includegraphics[width=2in]{FIGURES/NIST_Douglas_Firs/tree_2_m_14_pc_0290}
@@ -901,14 +899,15 @@ The results of the simulations are shown in Fig.~\ref{NIST_Douglas_Fir_MLR}.
 \label{Properties_Trees}
 \begin{tabular}{|l|c|c|c|c|}
 \hline
-Property                        & Units         & Case 1        & Case 2        & Case 3     \\ \hline \hline
-Crown Height                    & m             & 1.9           & 1.9           & 4.2        \\ \hline
-Base Height                     & m             & 0.15          & 0.15          & 0.3        \\ \hline
-Base Width                      & m             & 1.7           & 1.7           & 2.9        \\ \hline
-Surface Area to Volume Ratio    & m$^{-1}$      & 3940          & 3940          & 3940       \\ \hline
-Initial Mass                    & kg            & 9.7           & 13.5          & 57.9       \\ \hline
-Bulk Mass per Unit Volume       & kg/m$^3$      & 4.45          & 6.2           & 6.2        \\ \hline
-Moisture Fraction               & \%            & 14            & 49            & 26         \\ \hline
+Property                                & Units         & Case 1        & Case 2        & Case 3     \\ \hline \hline
+Replicate Experiments                   & --            & 6             & 3             & 3          \\ \hline
+Avg.~Crown Height                       & m             & 1.9           & 1.9           & 4.2        \\ \hline
+Avg.~Base Height                        & m             & 0.15          & 0.15          & 0.3        \\ \hline
+Avg.~Base Width                         & m             & 1.7           & 1.7           & 2.9        \\ \hline
+Foliage Surface Area to Volume Ratio    & m$^{-1}$      & 3940          & 3940          & 3940       \\ \hline
+Avg.~Initial Mass                       & kg            & 9.7           & 13.5          & 57.9       \\ \hline
+Avg.~Moisture Fraction                  & \%            & 14            & 49            & 26         \\ \hline
+Assumed Bulk Mass per Unit Volume       & kg/m$^3$      & 3.2           & 4.6           & 2.7        \\ \hline
 \end{tabular}
 \end{center}
 \end{table}
@@ -920,7 +919,7 @@ Moisture Fraction               & \%            & 14            & 49            
 \begin{tabular}{|l|c|c|c|}
 \hline
 Property                        & Units                 & Value                     & Reference                             \\ \hline \hline
-Chemical Composition            & --                    & C$_6$H$_{10}$O$_5$        & Assumption                            \\ \hline
+Chemical Composition            & --                    & C$_6$H$_{10}$O$_5$        & Assumption, Cellulose                 \\ \hline
 Heat of Combustion              & kJ/kg                 & 17700                     & \cite{Susott:FS1982}                  \\ \hline
 Soot Yield                      & kg/kg                 & 0.015                     & \cite{SFPE:Tewarson}                  \\ \hline
 Char Yield                      & kg/kg                 & 0.26                      & \cite{Susott:FS1982}                  \\ \hline
@@ -928,7 +927,7 @@ Specific Heat                   & kJ/(kg$\cdot$K)       & 1.2                   
 Conductivity                    & W/(m$\cdot$K)         & 2                         & Assumption                            \\ \hline
 Density                         & kg/m$^3$              & 514                       & \cite{Rothermel:1972}                 \\ \hline
 Heat of Pyrolysis               & kJ/kg                 & 418                       & \cite{Morvan:CF2004}                  \\ \hline
-Pyrolyis Temperature            & $^\circ$C             & 200                       & \cite{Morvan:CF2004}                  \\ \hline 
+Pyrolyis Temperature            & $^\circ$C             & 200                       & \cite{Morvan:CF2004}                  \\ \hline
 \end{tabular}
 \end{center}
 \end{table}
