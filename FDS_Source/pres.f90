@@ -512,7 +512,7 @@ USE GLOBAL_CONSTANTS, ONLY: PREDICTOR,VELOCITY_ERROR_MAX,SOLID_BOUNDARY,INTERPOL
                             VELOCITY_ERROR_MAX_I,VELOCITY_ERROR_MAX_J,VELOCITY_ERROR_MAX_K,TUSED
 
 INTEGER, INTENT(IN) :: NM
-INTEGER :: IW,IOR,II,JJ,KK,IIO,JJO,KKO,N_INT_CELLS
+INTEGER :: IW,IOR,II,JJ,KK,IIO,JJO,KKO,N_INT_CELLS,IIO1,IIO2,JJO1,JJO2,KKO1,KKO2
 REAL(EB) :: TNOW,UN_NEW,UN_NEW_OTHER,VELOCITY_ERROR,DUDT,DVDT,DWDT,ITERATIVE_FACTOR
 TYPE(OMESH_TYPE), POINTER :: OM
 TYPE(MESH_TYPE), POINTER :: M2
@@ -588,55 +588,80 @@ CHECK_WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
 
       UN_NEW_OTHER = 0._EB
 
-      DO KKO=WC%NOM_IB(3),WC%NOM_IB(6)
-         DO JJO=WC%NOM_IB(2),WC%NOM_IB(5)
-            DO IIO=WC%NOM_IB(1),WC%NOM_IB(4)
-               IF (PREDICTOR) THEN
-                  SELECT CASE(IOR)
-                     CASE( 1)
-                        DUDT = -OM%FVX(IIO,JJO,KKO)   - M2%RDXN(IIO)  *(OM%H(IIO+1,JJO,KKO)-OM%H(IIO,JJO,KKO))
-                        UN_NEW_OTHER = UN_NEW_OTHER + OM%U(IIO,JJO,KKO)   + DT*DUDT
-                     CASE(-1)
-                        DUDT = -OM%FVX(IIO-1,JJO,KKO) - M2%RDXN(IIO-1)*(OM%H(IIO,JJO,KKO)-OM%H(IIO-1,JJO,KKO))
-                        UN_NEW_OTHER = UN_NEW_OTHER + OM%U(IIO-1,JJO,KKO) + DT*DUDT
-                     CASE( 2)
-                        DVDT = -OM%FVY(IIO,JJO,KKO)   - M2%RDYN(JJO)  *(OM%H(IIO,JJO+1,KKO)-OM%H(IIO,JJO,KKO))
-                        UN_NEW_OTHER = UN_NEW_OTHER + OM%V(IIO,JJO,KKO)   + DT*DVDT
-                     CASE(-2)
-                        DVDT = -OM%FVY(IIO,JJO-1,KKO) - M2%RDYN(JJO-1)*(OM%H(IIO,JJO,KKO)-OM%H(IIO,JJO-1,KKO))
-                        UN_NEW_OTHER = UN_NEW_OTHER + OM%V(IIO,JJO-1,KKO) + DT*DVDT
-                     CASE( 3)
-                        DWDT = -OM%FVZ(IIO,JJO,KKO)   - M2%RDZN(KKO)  *(OM%H(IIO,JJO,KKO+1)-OM%H(IIO,JJO,KKO))
-                        UN_NEW_OTHER = UN_NEW_OTHER + OM%W(IIO,JJO,KKO)   + DT*DWDT
-                     CASE(-3)
-                        DWDT = -OM%FVZ(IIO,JJO,KKO-1) - M2%RDZN(KKO-1)*(OM%H(IIO,JJO,KKO)-OM%H(IIO,JJO,KKO-1))
-                        UN_NEW_OTHER = UN_NEW_OTHER + OM%W(IIO,JJO,KKO-1) + DT*DWDT
-                  END SELECT
-               ELSE
-                  SELECT CASE(IOR)
-                     CASE( 1)
-                        DUDT = -OM%FVX(IIO,JJO,KKO)   - M2%RDXN(IIO)  *(OM%HS(IIO+1,JJO,KKO)-OM%HS(IIO,JJO,KKO))
-                        UN_NEW_OTHER = UN_NEW_OTHER + 0.5_EB*(OM%U(IIO,JJO,KKO)+OM%US(IIO,JJO,KKO)     + DT*DUDT)
-                     CASE(-1)
-                        DUDT = -OM%FVX(IIO-1,JJO,KKO) - M2%RDXN(IIO-1)*(OM%HS(IIO,JJO,KKO)-OM%HS(IIO-1,JJO,KKO))
-                        UN_NEW_OTHER = UN_NEW_OTHER + 0.5_EB*(OM%U(IIO-1,JJO,KKO)+OM%US(IIO-1,JJO,KKO) + DT*DUDT)
-                     CASE( 2)
-                        DVDT = -OM%FVY(IIO,JJO,KKO)   - M2%RDYN(JJO)  *(OM%HS(IIO,JJO+1,KKO)-OM%HS(IIO,JJO,KKO))
-                        UN_NEW_OTHER = UN_NEW_OTHER + 0.5_EB*(OM%V(IIO,JJO,KKO)+OM%VS(IIO,JJO,KKO)     + DT*DVDT)
-                     CASE(-2)
-                        DVDT = -OM%FVY(IIO,JJO-1,KKO) - M2%RDYN(JJO-1)*(OM%HS(IIO,JJO,KKO)-OM%HS(IIO,JJO-1,KKO))
-                        UN_NEW_OTHER = UN_NEW_OTHER + 0.5_EB*(OM%V(IIO,JJO-1,KKO)+OM%VS(IIO,JJO-1,KKO) + DT*DVDT)
-                     CASE( 3)
-                        DWDT = -OM%FVZ(IIO,JJO,KKO)   - M2%RDZN(KKO)  *(OM%HS(IIO,JJO,KKO+1)-OM%HS(IIO,JJO,KKO))
-                        UN_NEW_OTHER = UN_NEW_OTHER + 0.5_EB*(OM%W(IIO,JJO,KKO)+OM%WS(IIO,JJO,KKO)     + DT*DWDT)
-                     CASE(-3)
-                        DWDT = -OM%FVZ(IIO,JJO,KKO-1) - M2%RDZN(KKO-1)*(OM%HS(IIO,JJO,KKO)-OM%HS(IIO,JJO,KKO-1))
-                        UN_NEW_OTHER = UN_NEW_OTHER + 0.5_EB*(OM%W(IIO,JJO,KKO-1)+OM%WS(IIO,JJO,KKO-1) + DT*DWDT)
-                  END SELECT
-               ENDIF
-            ENDDO
-         ENDDO
-      ENDDO
+      IIO1 = WC%NOM_IB(1)
+      JJO1 = WC%NOM_IB(2)
+      KKO1 = WC%NOM_IB(3)
+      IIO2 = WC%NOM_IB(4)
+      JJO2 = WC%NOM_IB(5)
+      KKO2 = WC%NOM_IB(6)
+
+      IF (PREDICTOR) THEN
+         SELECT CASE(IOR)
+            CASE( 1)
+               DO KKO=KKO1,KKO2 ; DO JJO=JJO1,JJO2 ; DO IIO=IIO1,IIO2
+                  DUDT = -OM%FVX(IIO,JJO,KKO)   - M2%RDXN(IIO)  *(OM%H(IIO+1,JJO,KKO)-OM%H(IIO,JJO,KKO))
+                  UN_NEW_OTHER = UN_NEW_OTHER + OM%U(IIO,JJO,KKO)   + DT*DUDT
+               ENDDO ; ENDDO ; ENDDO
+            CASE(-1)
+               DO KKO=KKO1,KKO2 ; DO JJO=JJO1,JJO2 ; DO IIO=IIO1,IIO2
+                  DUDT = -OM%FVX(IIO-1,JJO,KKO) - M2%RDXN(IIO-1)*(OM%H(IIO,JJO,KKO)-OM%H(IIO-1,JJO,KKO))
+                  UN_NEW_OTHER = UN_NEW_OTHER + OM%U(IIO-1,JJO,KKO) + DT*DUDT
+               ENDDO ; ENDDO ; ENDDO
+            CASE( 2)
+               DO KKO=KKO1,KKO2 ; DO JJO=JJO1,JJO2 ; DO IIO=IIO1,IIO2
+                  DVDT = -OM%FVY(IIO,JJO,KKO)   - M2%RDYN(JJO)  *(OM%H(IIO,JJO+1,KKO)-OM%H(IIO,JJO,KKO))
+                  UN_NEW_OTHER = UN_NEW_OTHER + OM%V(IIO,JJO,KKO)   + DT*DVDT
+               ENDDO ; ENDDO ; ENDDO
+            CASE(-2)
+               DO KKO=KKO1,KKO2 ; DO JJO=JJO1,JJO2 ; DO IIO=IIO1,IIO2
+                  DVDT = -OM%FVY(IIO,JJO-1,KKO) - M2%RDYN(JJO-1)*(OM%H(IIO,JJO,KKO)-OM%H(IIO,JJO-1,KKO))
+                  UN_NEW_OTHER = UN_NEW_OTHER + OM%V(IIO,JJO-1,KKO) + DT*DVDT
+               ENDDO ; ENDDO ; ENDDO
+            CASE( 3)
+               DO KKO=KKO1,KKO2 ; DO JJO=JJO1,JJO2 ; DO IIO=IIO1,IIO2
+                  DWDT = -OM%FVZ(IIO,JJO,KKO)   - M2%RDZN(KKO)  *(OM%H(IIO,JJO,KKO+1)-OM%H(IIO,JJO,KKO))
+                  UN_NEW_OTHER = UN_NEW_OTHER + OM%W(IIO,JJO,KKO)   + DT*DWDT
+               ENDDO ; ENDDO ; ENDDO
+            CASE(-3)
+               DO KKO=KKO1,KKO2 ; DO JJO=JJO1,JJO2 ; DO IIO=IIO1,IIO2
+                  DWDT = -OM%FVZ(IIO,JJO,KKO-1) - M2%RDZN(KKO-1)*(OM%H(IIO,JJO,KKO)-OM%H(IIO,JJO,KKO-1))
+                  UN_NEW_OTHER = UN_NEW_OTHER + OM%W(IIO,JJO,KKO-1) + DT*DWDT
+               ENDDO ; ENDDO ; ENDDO
+         END SELECT
+      ELSE
+         SELECT CASE(IOR)
+            CASE( 1)
+               DO KKO=KKO1,KKO2 ; DO JJO=JJO1,JJO2 ; DO IIO=IIO1,IIO2
+                  DUDT = -OM%FVX(IIO,JJO,KKO)   - M2%RDXN(IIO)  *(OM%HS(IIO+1,JJO,KKO)-OM%HS(IIO,JJO,KKO))
+                  UN_NEW_OTHER = UN_NEW_OTHER + 0.5_EB*(OM%U(IIO,JJO,KKO)+OM%US(IIO,JJO,KKO)     + DT*DUDT)
+               ENDDO ; ENDDO ; ENDDO
+            CASE(-1)
+               DO KKO=KKO1,KKO2 ; DO JJO=JJO1,JJO2 ; DO IIO=IIO1,IIO2
+                  DUDT = -OM%FVX(IIO-1,JJO,KKO) - M2%RDXN(IIO-1)*(OM%HS(IIO,JJO,KKO)-OM%HS(IIO-1,JJO,KKO))
+                  UN_NEW_OTHER = UN_NEW_OTHER + 0.5_EB*(OM%U(IIO-1,JJO,KKO)+OM%US(IIO-1,JJO,KKO) + DT*DUDT)
+               ENDDO ; ENDDO ; ENDDO
+            CASE( 2)
+               DO KKO=KKO1,KKO2 ; DO JJO=JJO1,JJO2 ; DO IIO=IIO1,IIO2
+                  DVDT = -OM%FVY(IIO,JJO,KKO)   - M2%RDYN(JJO)  *(OM%HS(IIO,JJO+1,KKO)-OM%HS(IIO,JJO,KKO))
+                  UN_NEW_OTHER = UN_NEW_OTHER + 0.5_EB*(OM%V(IIO,JJO,KKO)+OM%VS(IIO,JJO,KKO)     + DT*DVDT)
+               ENDDO ; ENDDO ; ENDDO
+            CASE(-2)
+               DO KKO=KKO1,KKO2 ; DO JJO=JJO1,JJO2 ; DO IIO=IIO1,IIO2
+                  DVDT = -OM%FVY(IIO,JJO-1,KKO) - M2%RDYN(JJO-1)*(OM%HS(IIO,JJO,KKO)-OM%HS(IIO,JJO-1,KKO))
+                  UN_NEW_OTHER = UN_NEW_OTHER + 0.5_EB*(OM%V(IIO,JJO-1,KKO)+OM%VS(IIO,JJO-1,KKO) + DT*DVDT)
+               ENDDO ; ENDDO ; ENDDO
+            CASE( 3)
+               DO KKO=KKO1,KKO2 ; DO JJO=JJO1,JJO2 ; DO IIO=IIO1,IIO2
+                  DWDT = -OM%FVZ(IIO,JJO,KKO)   - M2%RDZN(KKO)  *(OM%HS(IIO,JJO,KKO+1)-OM%HS(IIO,JJO,KKO))
+                  UN_NEW_OTHER = UN_NEW_OTHER + 0.5_EB*(OM%W(IIO,JJO,KKO)+OM%WS(IIO,JJO,KKO)     + DT*DWDT)
+               ENDDO ; ENDDO ; ENDDO
+            CASE(-3)
+               DO KKO=KKO1,KKO2 ; DO JJO=JJO1,JJO2 ; DO IIO=IIO1,IIO2
+                  DWDT = -OM%FVZ(IIO,JJO,KKO-1) - M2%RDZN(KKO-1)*(OM%HS(IIO,JJO,KKO)-OM%HS(IIO,JJO,KKO-1))
+                  UN_NEW_OTHER = UN_NEW_OTHER + 0.5_EB*(OM%W(IIO,JJO,KKO-1)+OM%WS(IIO,JJO,KKO-1) + DT*DWDT)
+               ENDDO ; ENDDO ; ENDDO
+         END SELECT
+      ENDIF
 
       N_INT_CELLS  = (WC%NOM_IB(4)-WC%NOM_IB(1)+1) * (WC%NOM_IB(5)-WC%NOM_IB(2)+1) * (WC%NOM_IB(6)-WC%NOM_IB(3)+1)
       UN_NEW_OTHER = UN_NEW_OTHER/REAL(N_INT_CELLS,EB)
