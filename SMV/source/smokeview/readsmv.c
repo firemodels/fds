@@ -9393,14 +9393,14 @@ int readini2(char *inifile, int localfile){
       strcpy(buffer2,"");
       sscanf(buffer,"%i %f %i %f %s",&setvalmin,&valmin,&setvalmax,&valmax,buffer2);
       {
-        char *colen;
+        char *colon;
 
-        colen=strstr(buffer,":");
+        colon=strstr(buffer,":");
         level_val=NULL;
-        if(colen!=NULL){
-          level_val=colen+1;
+        if(colon!=NULL){
+          level_val=colon+1;
           trim(level_val);
-          *colen=0;
+          *colon=0;
           if(strlen(level_val)>1){
             sscanf(level_val,"%f %f %i",&slice_line_contour_min,&slice_line_contour_max,&slice_line_contour_num);
           }

@@ -1048,29 +1048,29 @@ unsigned int time2sec(char *tokenorig){
 // hh:mm:ss --> seconds after midnight
 //  (:ss optional)
   char token[256];
-  char *colen1, *colen2;
+  char *colon1, *colon2;
   char *hour=NULL,*min=NULL,*sec=NULL;
   char *minend, *secend;
   int time_local;
 
   strcpy(token,tokenorig);
-  colen1=strchr(token,':');
-  if(colen1==NULL){
+  colon1=strchr(token,':');
+  if(colon1==NULL){
     return 0;
   }
   else{
-    colen2=strchr(colen1+1,':');
+    colon2=strchr(colon1+1,':');
   }
   hour=token;
-  *colen1=0;
-  min=colen1+1;
-  if(colen2==NULL){
+  *colon1=0;
+  min=colon1+1;
+  if(colon2==NULL){
     minend=strchr(min,' ');
     if(minend!=NULL)*minend=0;
   }
   else{
-    *colen2=0;
-    sec=colen2+1;
+    *colon2=0;
+    sec=colon2+1;
     secend=strchr(sec,' ');
     if(secend!=NULL)*secend=0;
   }
@@ -1104,14 +1104,14 @@ char *STRCHRR(char *strbeg, char *searchbeg, int c){
 
 unsigned int date2sec2(char *tokenorig){
   char token[256];
-  char *colen;
+  char *colon;
   char *tim=NULL,*timend=NULL;
   int secs=0;
   int local_time;
 
   strcpy(token,tokenorig);
-  colen=strchr(token,':');
-  if(colen!=NULL)tim=STRCHRR(token,colen,' ');
+  colon=strchr(token,':');
+  if(colon!=NULL)tim=STRCHRR(token,colon,' ');
 
   if(tim!=NULL){
     timend=strchr(tim,' ');
@@ -1126,7 +1126,7 @@ unsigned int date2sec2(char *tokenorig){
 
 unsigned int date2sec(char *tokenorig){
   char token[256];
-  char *slash, *colen;
+  char *slash, *colon;
   char *date=NULL,*dateend=NULL;
   char *tim=NULL,*timend=NULL;
   int days=0, secs=0;
@@ -1134,9 +1134,9 @@ unsigned int date2sec(char *tokenorig){
 
   strcpy(token,tokenorig);
   slash=strchr(token,'/');
-  colen=strchr(token,':');
+  colon=strchr(token,':');
   if(slash!=NULL)date=STRCHRR(token,slash,' ');
-  if(colen!=NULL)tim=STRCHRR(token,colen,' ');
+  if(colon!=NULL)tim=STRCHRR(token,colon,' ');
 
   if(date!=NULL){
     dateend=strchr(slash,' ');
