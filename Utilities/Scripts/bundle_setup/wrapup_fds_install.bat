@@ -158,7 +158,7 @@ if %ncores% GEQ 8 (
     set nthreads=1 
   )
 )
-setx OMP_NUM_THREADS %nthreads% > Nul
+setx -m OMP_NUM_THREADS %nthreads% > Nul
 
 :: ----------- setting up firewall for mpi version of FDS
 
