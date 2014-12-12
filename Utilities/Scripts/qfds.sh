@@ -173,7 +173,6 @@ TITLE="$infile"
 # define number of nodes
 
 let "nodes=($nmpi_processes-1)/$nmpi_processes_per_node+1"
-echo $nodes
 if test $nodes -lt 1 ; then
   nodes=1
 fi
