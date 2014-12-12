@@ -30,7 +30,7 @@ then
   echo " -r   - report bindings"
   echo " -s   - stop job"
   echo " -t   - used for timing studies, run a job alone on a node"
-  echo " -w time - walltime, where time is hh:mm for PBS and dd-hh:mm:ss for SLURM."
+  echo " -w time - walltime, where time is hh:mm for PBS and dd-hh:mm:ss for SLURM. [default: empty string]"
   echo " -v   - list script used to run case to standard output"
   echo "input_file - input file"
   echo ""
@@ -64,7 +64,7 @@ nmpi_processes=1
 nmpi_processes_per_node=1
 max_processes_per_node=1
 nopenmp_threads=1
-walltime=99:99:99
+walltime=
 if [ "$RESOURCE_MANAGER" == "SLURM" ] ; then
   walltime=99-99:99:99
 fi
@@ -173,6 +173,7 @@ TITLE="$infile"
 # define number of nodes
 
 let "nodes=($nmpi_processes-1)/$nmpi_processes_per_node+1"
+echo $nodes
 if test $nodes -lt 1 ; then
   nodes=1
 fi
@@ -294,6 +295,16 @@ if [ "$RESOURCE_MANAGER" == "SLURM" ] ; then
   QSUB="sbatch -p $queue --ignore-pbs"
 fi
 
+# Set walltime parameter only if walltime is specified as input argument
+walltimestring=
+if [ "$walltime" != "" ] ; then
+  if [ "$RESOURCE_MANAGER" == "SLURM" ] ; then
+    walltimestring="-t $walltime"
+  else
+    walltimestring="-l walltime=$walltime"
+  fi
+fi 
+
 # create a random script file for submitting jobs
 scriptfile=`mktemp /tmp/script.$$.XXXXXX`
 
@@ -307,14 +318,14 @@ cat << EOF >> $scriptfile
 #PBS -e $outerr
 #PBS -o $outlog
 #PBS -l nodes=$nodes:ppn=$ppn
-#PBS -l walltime=$walltime
+#PBS $walltimestring
 #SBATCH -J $JOBPREFIX$infile
-#SBATCH -t $walltime
-#SBATCH --mem-per-cpu=2000
+#SBATCH $walltimestring
+#SBATCH --mem-per-cpu=3000
 #SBATCH -e $outerr
 #SBATCH -o $outlog
 #SBATCH -p $queue
-# SBATCH -n 1
+#SBATCH -n $nmpi_processes
 #SBATCH --nodes=$nodes
 #SBATCH --cpus-per-task=$nopenmp_threads
 EOF

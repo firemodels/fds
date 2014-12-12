@@ -9,7 +9,7 @@ DEBUG=
 IB=
 nthreads=1
 resource_manager=
-walltime=""
+walltime=
 
 if [ "$FDSNETWORK" == "infiniband" ] ; then
   IB=ib
@@ -36,7 +36,9 @@ echo "-r resource_manager - run cases using the resource manager"
 echo "     default: PBS"
 echo "     other options: SLURM"
 echo "-s - stop FDS runs"
-echo "-w time - walltime, where time is dd:hh:mm:ss with PBS and dd-hh:mm:ss with SLURM. Default is 99:99:99:99."
+echo "-w time - walltime request for a batch job"
+echo "     default: empty"
+echo "     format for PBS: hh:mm:ss, format for SLURM: dd-hh:mm:ss"
 exit
 }
 
