@@ -6881,7 +6881,7 @@ typedef struct {
       }
 
       patchi->geomfile=NULL;
-      patchi->geom=NULL;
+      patchi->geominfo=NULL;
       if(patchi->filetype==2){
         int igeom;
 
@@ -6897,7 +6897,7 @@ typedef struct {
 
           geomi = geominfo + igeom;
           if(strcmp(geomi->file,patchi->geomfile)==0){
-            patchi->geom=geomi;
+            patchi->geominfo=geomi;
             break;
           }
         }

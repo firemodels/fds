@@ -1969,33 +1969,33 @@ void draw_geom_cutcells(void){
   glPopMatrix();
 }
 
-/* ------------------ draw_geomdata ------------------------ */
+/* ------------------ draw_geomdata_type ------------------------ */
 
-void draw_geomdata(patchdata *patchi, int geomtype){
+void draw_geomdata_type(patchdata *patchi, int geom_type){
   int i;
+  unsigned char *ivals;
 
-  for(i=0;i<ngeominfoptrs;i++){
+  if(geom_type==GEOM_STATIC){
+    ivals = patchi->geom_ival_static;
+  }
+  else{
+    ivals = patchi->geom_ival_dynamic;
+  }
+  for(i=0;i<1;i++){
     geomdata *geomi;
     geomlistdata *geomlisti;
     int ntris;
     int j;
     float *color;
 
-    geomi = geominfoptrs[i];
+    geomi = patchi->geominfo;
     if(geomi->display==0||geomi->loaded==0)continue;
-#ifdef pp_GEOM_FORCE_DYNAMIC    
-    geomlisti = geomi->geomlistinfo+geomi->itime;
-#else
-    if(geomtype==GEOM_STATIC){
+    if(geom_type==GEOM_STATIC){
       geomlisti = geomi->geomlistinfo-1;
     }
     else{
       geomlisti = geomi->geomlistinfo+geomi->itime;
     }
-#endif
-#ifdef pp_GEOM_FORCE_STATIC0
-    geomlisti = geomi->geomlistinfo;
-#endif    
 
     ntris = geomlisti->ntriangles;
     if(ntris==0)continue;
@@ -2024,8 +2024,7 @@ void draw_geomdata(patchdata *patchi, int geomtype){
         xyznorm=trianglei->tri_norm;
         glNormal3fv(xyznorm);
 
-        //color_index = patchi->geom_ival_static[j];
-        color_index = patchi->geom_ival_dynamic[j];
+        color_index = ivals[j];
         color=rgb_patch+4*color_index;
         glColor3fv(color);
 
@@ -2047,8 +2046,7 @@ void draw_geomdata(patchdata *patchi, int geomtype){
 
         trianglei = geomlisti->triangles+j;
        
-//        color_index = patchi->geom_ival_static[j];
-        color_index = patchi->geom_ival_dynamic[j];
+        color_index = ivals[j];
         color=rgb_patch+4*color_index;
         glColor3fv(color);
 
@@ -2076,6 +2074,13 @@ void draw_geomdata(patchdata *patchi, int geomtype){
     glDisable(GL_LIGHTING);
   }
 
+}
+
+/* ------------------ draw_geomdata ------------------------ */
+
+void draw_geomdata(patchdata *patchi){
+  draw_geomdata_type(patchi,GEOM_STATIC);
+  draw_geomdata_type(patchi,GEOM_DYNAMIC);
 }
 
 /* ------------------ compare_transparent_triangles ------------------------ */

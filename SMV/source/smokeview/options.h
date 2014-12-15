@@ -53,8 +53,6 @@
 #define pp_SETTIME // do error checking for SETTTIME command
 #define pp_PILOT
 #define pp_GEOMTEST
-//#define pp_GEOM_FORCE_DYNAMIC // set to force static geometry - use until time dependent geometry and coupled geometries to coexist
-//#define pp_GEOM_FORCE_STATIC0 // set to force static geometry 
 //#define pp_GPUDEPTH
 #endif
 

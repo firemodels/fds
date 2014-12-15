@@ -1271,7 +1271,7 @@ typedef struct {
   char *file,*size_file;
   char *comp_file, *reg_file;
   char *geomfile;
-  geomdata *geom;
+  geomdata *geominfo;
   //int *patchsize;
   int version;
   int filetype;
