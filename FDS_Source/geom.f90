@@ -389,6 +389,10 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
    G%GEOM_TYPE = GEOM_TYPE
    G%BNDC_FILENAME = BNDC_FILENAME
    G%GEOC_FILENAME = GEOC_FILENAME
+   
+   IF (GEOC_FILENAME .NE. 'null' .AND. N_GEOMETRY > 1 ) THEN
+      CALL SHUTDOWN('ERROR: only one &GEOM line permitted when defining coupled geometries (the GEOC_FILENAME keyword)')
+   ENDIF
       
    !--- setup groups
    
@@ -674,7 +678,7 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
    G%XYZ_DOT(1:3) = XYZ_DOT(1:3)
 
    IF (ABS(AZIM_DOT)>TWO_EPSILON_EB .OR. ABS(ELEV_DOT)>TWO_EPSILON_EB .OR. &
-       ANY(ABS(SCALE_DOT(1:3))>TWO_EPSILON_EB) .OR. ANY(ABS(XYZ_DOT(1:3) )>TWO_EPSILON_EB) ) THEN 
+       ANY(ABS(SCALE_DOT(1:3))>TWO_EPSILON_EB) .OR. ANY(ABS(XYZ_DOT(1:3) )>TWO_EPSILON_EB) .OR. GEOC_FILENAME .NE. 'nul' ) THEN 
       G%IS_DYNAMIC = .TRUE.
       IS_GEOMETRY_DYNAMIC = .TRUE.
    ELSE
@@ -742,7 +746,15 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
 ENDDO READ_GEOM_LOOP
 35 REWIND(LU_INPUT) ; INPUT_FILE_LINE_NUMBER = 0
 
-CALL CONVERTGEOM(.FALSE.,T_BEGIN) ! for now, only do the conversion for static geometry
+! to do
+! 1.  CONVERT_GEOM needs to work with geometries that have both static and dynamic components
+! 2.  when using dynamic geometries, CONVERT_GEOM should be called whenever these geometries change
+   
+IF (GEOC_FILENAME .NE. 'null' ) THEN
+   CALL CONVERTGEOM(.FALSE.,T_BEGIN) 
+ELSE
+   CALL CONVERTGEOM(.TRUE.,T_BEGIN)
+ENDIF
 
 CONTAINS
 
@@ -1170,9 +1182,6 @@ DO K = 0, M%KBAR - 1
          XB(1:2) = (/X(I),X(I+1)/)
          BOX_VOLUME = (XB(6)-XB(5))*(XB(4)-XB(3))*(XB(2)-XB(1))
 
-         IF (I==J.AND.I==8.AND.K.EQ.0)THEN
-            WRITE(6,*)"debug"
-         ENDIF
          INTERSECTION_VOLUME=0.0_EB
          DO IV=1,N_VOLU
             VINDEX=VOLUME(IV)%VERTEX(1)
@@ -2076,12 +2085,6 @@ SUBROUTINE OUTGEOM(LUNIT,IS_DYNAMIC,TIME)
    
    DO I = 1, N_GEOMETRY ! count vertices and faces
       G=>GEOMETRY(I)
-!      IF (TRIM(GEOMETRY(I)%GEOC_FILENAME)=='null') THEN
-!         CONTINUE
-!      ELSE
-!         RETURN
-!      ENDIF
-      
       IF (G%COMPONENT_ONLY) CYCLE
       IF (G%IS_DYNAMIC.AND..NOT.IS_DYNAMIC) CYCLE
       IF (.NOT.G%IS_DYNAMIC.AND.IS_DYNAMIC) CYCLE
@@ -2155,21 +2158,12 @@ SUBROUTINE WRITE_GEOM(TIME)
       OPEN(LU_GEOM(1),FILE=TRIM(FN_GEOM(1)),FORM='UNFORMATTED',STATUS='REPLACE')
       WRITE(LU_GEOM(1)) ONE
       WRITE(LU_GEOM(1)) VERSION
-      IF (GEOMETRY(1)%GEOC_FILENAME=='null') THEN
-        WRITE(LU_GEOM(1)) ZERO, ZERO, ONE ! n floats, n ints, first frame static
-      ELSE
-        WRITE(LU_GEOM(1)) ZERO, ZERO, ZERO ! n floats, n ints, first frame not static
-      ENDIF
-      
+      WRITE(LU_GEOM(1)) ZERO, ZERO, ONE ! n floats, n ints, first frame static
       CALL OUTGEOM(LU_GEOM(1),.FALSE.,TIME) ! write out static data
    ELSE
       OPEN(LU_GEOM(1),FILE=FN_GEOM(1),FORM='UNFORMATTED',STATUS='OLD',POSITION='APPEND')
    ENDIF
-   IF (GEOMETRY(1)%GEOC_FILENAME=='null') THEN
-      CALL OUTGEOM(LU_GEOM(1),.TRUE.,TIME) ! write out dynamic data
-   ELSE
-      CALL OUTGEOM(LU_GEOM(1),.FALSE.,TIME) ! write out static data
-   ENDIF
+   CALL OUTGEOM(LU_GEOM(1),.TRUE.,TIME) ! write out dynamic data
    CLOSE(LU_GEOM(1))
    
 END SUBROUTINE WRITE_GEOM
@@ -2460,23 +2454,21 @@ G => GEOMETRY(N)
    GEOC_CHECK_LOOP: DO I=1,30
       OPEN(LU_GEOC,FILE=FN,ACTION='READ',FORM='UNFORMATTED')
       READ(LU_GEOC) OWNER_INDEX     ! 1 - written by FEM, 0 - already read by FDS
-      IF (OWNER_INDEX/=1) THEN
-         CLOSE(LU_GEOC)
-         IF (I==1) THEN
-            WRITE (LU_ERR,'(4X,A)')  'waiting ANSYS new geometry ... '
-            LU_GEOC = GET_FILE_NUMBER()
-            OPEN(LU_GEOC,FILE=FN,ACTION='WRITE',FORM='UNFORMATTED')
-            OWNER_INDEX=2           ! 2 - .be already written
-            WRITE(LU_GEOC) OWNER_INDEX
-            CLOSE(LU_GEOC)  
-         ELSE 
-            WRITE(LU_ERR,'(4X,A,I2,A)')  'waiting ... ', I-1,' min'
-         ENDIF
-         CALL SLEEP(60)
-         IF (I==30) CALL SHUTDOWN('ERROR: BNDC FILE WAS NOT UPDATED BY STRUCTURE CODE')
-      ELSEIF (OWNER_INDEX==1) THEN
-         EXIT GEOC_CHECK_LOOP
-      ENDIF
+      IF (OWNER_INDEX == 1) EXIT GEOC_CHECK_LOOP
+
+       CLOSE(LU_GEOC)
+       IF (I==1) THEN
+          WRITE (LU_ERR,'(4X,A)')  'waiting ANSYS new geometry ... '
+          LU_GEOC = GET_FILE_NUMBER()
+          OPEN(LU_GEOC,FILE=FN,ACTION='WRITE',FORM='UNFORMATTED')
+          OWNER_INDEX=2           ! 2 - .be already written
+          WRITE(LU_GEOC) OWNER_INDEX
+          CLOSE(LU_GEOC)  
+       ELSE 
+          WRITE(LU_ERR,'(4X,A,I2,A)')  'waiting ... ', I-1,' min'
+       ENDIF
+       CALL SLEEP(60)
+       IF (I==30) CALL SHUTDOWN('ERROR: BNDC FILE WAS NOT UPDATED BY STRUCTURE CODE')
    ENDDO GEOC_CHECK_LOOP  
 
    IF (OWNER_INDEX==1) THEN
@@ -2526,6 +2518,7 @@ G => GEOMETRY(N)
 
       WRITE(LU_ERR,'(4X,A,F10.2,A,F10.2)')  'GEOM was updated at ',T,' s, GEOM Time:', TIME_STRU
       CLOSE(LU_GEOC)
+      
       OPEN(LU_GEOC,FILE=FN,FORM='UNFORMATTED',STATUS='OLD')
       OWNER_INDEX=0.0
       WRITE(LU_GEOC) OWNER_INDEX     ! 1 - written by FEM, 0 - already read by FDS
