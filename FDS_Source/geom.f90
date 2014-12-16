@@ -750,7 +750,7 @@ ENDDO READ_GEOM_LOOP
 ! 1.  CONVERT_GEOM needs to work with geometries that have both static and dynamic components
 ! 2.  when using dynamic geometries, CONVERT_GEOM should be called whenever these geometries change
    
-IF (GEOC_FILENAME .NE. 'null' ) THEN
+IF (GEOC_FILENAME .EQ. 'null' ) THEN
    CALL CONVERTGEOM(.FALSE.,T_BEGIN) 
 ELSE
    CALL CONVERTGEOM(.TRUE.,T_BEGIN)
