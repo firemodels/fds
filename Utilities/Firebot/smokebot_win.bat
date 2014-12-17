@@ -61,7 +61,7 @@ set /p startdate=<%OUTDIR%\starttime.txt
 time /t > %OUTDIR%\starttime.txt
 set /p starttime=<%OUTDIR%\starttime.txt
 
-call "%IFORT_COMPILER14%\bin\compilervars" %compile_platform% 1> Nul 2>&1
+call "%svnroot%\Utilities\Scripts\setup_intel_compilers.bat" 1> Nul 2>&1
 call %svnroot%\Utilities\Firebot\firebot_email_list.bat
 
 :: -------------------------------------------------------------
@@ -84,6 +84,7 @@ set TIME_beg=%current_time%
 
 call :GET_TIME
 set PRELIM_beg=%current_time% 
+
 
 ifort 1> %OUTDIR%\stage0a.txt 2>&1
 type %OUTDIR%\stage0a.txt | find /i /c "not recognized" > %OUTDIR%\stage_count0a.txt
