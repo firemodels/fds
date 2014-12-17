@@ -123,19 +123,6 @@ $QFDS -d HVAC HVAC_tee_loss_2.fds
 $QFDS -d HVAC leak_test_2.fds
 $QFDS -d HVAC leak_test.fds
 
-$QFDS -d Immersed_Boundary_Method tri_cube_cut_cell_test_01.fds
-$QFDS -d Immersed_Boundary_Method tri_cube_cut_cell_test_02.fds
-$QFDS -d Immersed_Boundary_Method tri_cube_cut_cell_test_03.fds
-$QFDS -d Immersed_Boundary_Method tri_cube_cut_cell_test_04.fds
-$QFDS -d Immersed_Boundary_Method tri_cube_cut_cell_test_05.fds
-$QFDS -d Immersed_Boundary_Method tri_cube_cut_cell_test_06.fds
-$QFDS -d Immersed_Boundary_Method tri_cube_cut_cell_test_07.fds
-$QFDS -d Immersed_Boundary_Method tri_cube_cut_cell_test_08.fds
-$QFDS -d Immersed_Boundary_Method tri_cube_cut_cell_test_09.fds
-$QFDS -d Immersed_Boundary_Method tri_cube_cut_cell_test_10.fds
-$QFDS -d Immersed_Boundary_Method tri_cube_cut_cell_test_11.fds
-$QFDS -d Immersed_Boundary_Method tri_cube_cut_cell_test_12.fds
-
 $QFDS -d Miscellaneous pyramid.fds
 $QFDS -d Miscellaneous mesh_transformation.fds
 
