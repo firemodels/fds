@@ -42,7 +42,8 @@ INTEGER, PARAMETER :: PYROLYSIS_NONE=0,PYROLYSIS_SOLID=1,PYROLYSIS_LIQUID=2,&
 INTEGER, PARAMETER :: ATMOSPHERIC_PROFILE=1, PARABOLIC_PROFILE=2, RAMP_PROFILE=4            ! Surface velocity profile
 INTEGER, PARAMETER :: CELL_CENTER=1, CELL_FACE=2, CELL_EDGE=3                               ! Cell position for output quantities
 INTEGER, PARAMETER :: NO_STOP=0, INSTABILITY_STOP=1, USER_STOP=2, SETUP_STOP=3, &
-                      SETUP_ONLY_STOP=4, CTRL_STOP=5, TGA_ANALYSIS_STOP=6, LEVELSET_STOP=7  ! Program Stop Status
+                      SETUP_ONLY_STOP=4, CTRL_STOP=5, TGA_ANALYSIS_STOP=6, &
+                      LEVELSET_STOP=7, REALIZABILITY_STOP=8                                 ! Program Stop Status
 INTEGER, PARAMETER :: SPHERE_DRAG=1,CYLINDER_DRAG=2,USER_DRAG=3,SCREEN_DRAG=5               ! Options for drag computation
 INTEGER, PARAMETER :: OLD=1,NEW=2,GUESS=3,PREVIOUS=4                                        ! Network solver indices
 
