@@ -32,7 +32,6 @@ wall_internal_radiation
 ashrae_7
 flame_species
 EDC_species
-cutcell_area
 cat_propane_depo
 burke_schumann
 convective_cooling_convergence
