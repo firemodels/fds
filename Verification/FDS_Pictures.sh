@@ -10,18 +10,18 @@ $RUNSMV -d Flowfields velocity_bc_test
 $RUNSMV -d HVAC HVAC_mass_conservation
 $RUNSMV -d HVAC HVAC_energy_pressure
 $RUNSMV -d HVAC leak_test_2
-$RUNSMV -d Immersed_Boundary_Method tri_cube_cut_cell_test_01
-$RUNSMV -d Immersed_Boundary_Method tri_cube_cut_cell_test_02
-$RUNSMV -d Immersed_Boundary_Method tri_cube_cut_cell_test_03
-$RUNSMV -d Immersed_Boundary_Method tri_cube_cut_cell_test_04
-$RUNSMV -d Immersed_Boundary_Method tri_cube_cut_cell_test_05
-$RUNSMV -d Immersed_Boundary_Method tri_cube_cut_cell_test_06
-$RUNSMV -d Immersed_Boundary_Method tri_cube_cut_cell_test_07
-$RUNSMV -d Immersed_Boundary_Method tri_cube_cut_cell_test_08
-$RUNSMV -d Immersed_Boundary_Method tri_cube_cut_cell_test_09
-$RUNSMV -d Immersed_Boundary_Method tri_cube_cut_cell_test_10
-$RUNSMV -d Immersed_Boundary_Method tri_cube_cut_cell_test_11
-$RUNSMV -d Immersed_Boundary_Method tri_cube_cut_cell_test_12
+# $RUNSMV -d Immersed_Boundary_Method tri_cube_cut_cell_test_01
+# $RUNSMV -d Immersed_Boundary_Method tri_cube_cut_cell_test_02
+# $RUNSMV -d Immersed_Boundary_Method tri_cube_cut_cell_test_03
+# $RUNSMV -d Immersed_Boundary_Method tri_cube_cut_cell_test_04
+# $RUNSMV -d Immersed_Boundary_Method tri_cube_cut_cell_test_05
+# $RUNSMV -d Immersed_Boundary_Method tri_cube_cut_cell_test_06
+# $RUNSMV -d Immersed_Boundary_Method tri_cube_cut_cell_test_07
+# $RUNSMV -d Immersed_Boundary_Method tri_cube_cut_cell_test_08
+# $RUNSMV -d Immersed_Boundary_Method tri_cube_cut_cell_test_09
+# $RUNSMV -d Immersed_Boundary_Method tri_cube_cut_cell_test_10
+# $RUNSMV -d Immersed_Boundary_Method tri_cube_cut_cell_test_11
+# $RUNSMV -d Immersed_Boundary_Method tri_cube_cut_cell_test_12
 $RUNSMV -d Miscellaneous pyramid
 $RUNSMV -d NS_Analytical_Solution ns2d_64
 $RUNSMV -d Pressure_Effects pressure_boundary
