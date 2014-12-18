@@ -568,7 +568,11 @@ MAIN_LOOP: DO
 
       CALL INSERT_PARTICLES(T(NM),NM)
       CALL COMPUTE_VELOCITY_FLUX(T(NM),NM,1)
-      CALL MASS_FINITE_DIFFERENCES(NM)
+      IF (.NOT.TEST_FULL_TRANSPORT) THEN
+         CALL MASS_FINITE_DIFFERENCES(NM)
+      ELSE
+         CALL MASS_FINITE_DIFFERENCES_2(NM)
+      ENDIF
    ENDDO COMPUTE_FINITE_DIFFERENCES_1
 
 !    ! Retrict scalar flux from fine mesh to coarse mesh
@@ -592,7 +596,11 @@ MAIN_LOOP: DO
  
       COMPUTE_DENSITY_LOOP: DO NM=1,NMESHES
          IF (PROCESS(NM)/=MYID .OR. .NOT.ACTIVE_MESH(NM)) CYCLE COMPUTE_DENSITY_LOOP
-         CALL DENSITY(NM)
+         IF (.NOT.TEST_FULL_TRANSPORT) THEN
+            CALL DENSITY(NM)
+         ELSE
+            CALL DENSITY_2(NM)
+         ENDIF
       ENDDO COMPUTE_DENSITY_LOOP
 
       ! Restrict mass from fine mesh to coarse mesh (redundant if SCALARF_EMB is done correctly)
@@ -815,8 +823,13 @@ MAIN_LOOP: DO
       CALL OPEN_AND_CLOSE(T(NM),NM)   
       IF (.NOT.ACTIVE_MESH(NM)) CYCLE COMPUTE_FINITE_DIFFERENCES_2
       CALL COMPUTE_VELOCITY_FLUX(T(NM),NM,1)
-      CALL MASS_FINITE_DIFFERENCES(NM)
-      CALL DENSITY(NM)
+      IF (.NOT.TEST_FULL_TRANSPORT) THEN
+         CALL MASS_FINITE_DIFFERENCES(NM)
+         CALL DENSITY(NM)
+      ELSE
+         CALL MASS_FINITE_DIFFERENCES_2(NM)
+         CALL DENSITY_2(NM)
+      ENDIF
    ENDDO COMPUTE_FINITE_DIFFERENCES_2
 
 !    ! Restrict mass from fine mesh to coarse mesh (redundant if SCALARF_EMB is done correctly)
@@ -1398,6 +1411,8 @@ IF (MYID==0) THEN
          WRITE(MESSAGE,'(A)') 'STOP: TGA analysis only'
       CASE(LEVELSET_STOP) 
          WRITE(MESSAGE,'(A)') 'STOP: Level set analysis only'
+      CASE(REALIZABILITY_STOP) 
+         WRITE(MESSAGE,'(A)') 'STOP: Unrealizable mass density'
    END SELECT
 
    WRITE(LU_ERR,'(/A,A,A,A)') TRIM(MESSAGE),' (CHID: ',TRIM(CHID),')'

@@ -29,10 +29,10 @@ USE MANUFACTURED_SOLUTIONS, ONLY: DIFF_MMS,UF_MMS,WF_MMS,VD2D_MMS_Z_SRC,RHO_0_MM
  
 INTEGER, INTENT(IN) :: NM
 REAL(EB), POINTER, DIMENSION(:,:,:) :: KDTDX,KDTDY,KDTDZ,DP,KP,CP, &
-          RHO_D_DZDX,RHO_D_DZDY,RHO_D_DZDZ,RHO_D,RHOP,H_RHO_D_DZDX,H_RHO_D_DZDY,H_RHO_D_DZDZ,RTRM, &
+          RHO_D,RHOP,H_RHO_D_DZDX,H_RHO_D_DZDY,H_RHO_D_DZDZ,RTRM, &
           U_DOT_DEL_RHO_H_S,RHO_H_S_P,UU,VV,WW,U_DOT_DEL_RHO,RHO_Z_P,U_DOT_DEL_RHO_Z,RHO_D_TURB,R_H_G
-REAL(EB), POINTER, DIMENSION(:,:,:,:) :: ZZP
-REAL(EB), POINTER, DIMENSION(:,:) :: PBAR_P            
+REAL(EB), POINTER, DIMENSION(:,:,:,:) :: ZZP,RHO_D_DZDX,RHO_D_DZDY,RHO_D_DZDZ
+REAL(EB), POINTER, DIMENSION(:,:) :: PBAR_P
 REAL(EB) :: DELKDELT,VC,VC1,DTDX,DTDY,DTDZ,TNOW, &
             HDIFF,DZDX,DZDY,DZDZ,T,RDT,RHO_D_DZDN,TSI,TIME_RAMP_FACTOR,ZONE_VOLUME,DELTA_P,PRES_RAMP_FACTOR,&
             TMP_G,DIV_DIFF_HEAT_FLUX,H_S,ZZZ(1:4),DU,DU_P,DU_M,UN,RCON_DIFF,PROFILE_FACTOR, &
@@ -287,9 +287,9 @@ ENDIF PREDICT_NORMALS
 ! Compute species-related finite difference terms
 
 IF (N_TRACKED_SPECIES > 0) THEN
-   RHO_D_DZDX  => WORK1
-   RHO_D_DZDY  => WORK2
-   RHO_D_DZDZ  => WORK3
+   RHO_D_DZDX  => FDX
+   RHO_D_DZDY  => FDY
+   RHO_D_DZDZ  => FDZ
 
    SELECT CASE(PREDICTOR)
       CASE(.TRUE.)  
@@ -348,11 +348,11 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
       DO J=0,JBAR
          DO I=0,IBAR
             DZDX = (ZZP(I+1,J,K,N)-ZZP(I,J,K,N))*RDXN(I)
-            RHO_D_DZDX(I,J,K) = .5_EB*(RHO_D(I+1,J,K)+RHO_D(I,J,K))*DZDX
+            RHO_D_DZDX(I,J,K,N) = .5_EB*(RHO_D(I+1,J,K)+RHO_D(I,J,K))*DZDX
             DZDY = (ZZP(I,J+1,K,N)-ZZP(I,J,K,N))*RDYN(J)
-            RHO_D_DZDY(I,J,K) = .5_EB*(RHO_D(I,J+1,K)+RHO_D(I,J,K))*DZDY
+            RHO_D_DZDY(I,J,K,N) = .5_EB*(RHO_D(I,J+1,K)+RHO_D(I,J,K))*DZDY
             DZDZ = (ZZP(I,J,K+1,N)-ZZP(I,J,K,N))*RDZN(K)
-            RHO_D_DZDZ(I,J,K) = .5_EB*(RHO_D(I,J,K+1)+RHO_D(I,J,K))*DZDZ
+            RHO_D_DZDZ(I,J,K,N) = .5_EB*(RHO_D(I,J,K+1)+RHO_D(I,J,K))*DZDZ
          ENDDO
       ENDDO
    ENDDO
@@ -375,17 +375,17 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
             ! H_RHO_D_DZDX
             TMP_G = 0.5_EB*(TMP(I+1,J,K)+TMP(I,J,K))
             CALL GET_SENSIBLE_ENTHALPY_DIFF(N,TMP_G,HDIFF)
-            H_RHO_D_DZDX(I,J,K) = HDIFF*RHO_D_DZDX(I,J,K)
+            H_RHO_D_DZDX(I,J,K) = HDIFF*RHO_D_DZDX(I,J,K,N)
 
             ! H_RHO_D_DZDY
             TMP_G = 0.5_EB*(TMP(I,J+1,K)+TMP(I,J,K))
             CALL GET_SENSIBLE_ENTHALPY_DIFF(N,TMP_G,HDIFF)
-            H_RHO_D_DZDY(I,J,K) = HDIFF*RHO_D_DZDY(I,J,K)
+            H_RHO_D_DZDY(I,J,K) = HDIFF*RHO_D_DZDY(I,J,K,N)
 
             ! H_RHO_D_DZDZ
             TMP_G = 0.5_EB*(TMP(I,J,K+1)+TMP(I,J,K))               
             CALL GET_SENSIBLE_ENTHALPY_DIFF(N,TMP_G,HDIFF)
-            H_RHO_D_DZDZ(I,J,K) = HDIFF*RHO_D_DZDZ(I,J,K)
+            H_RHO_D_DZDZ(I,J,K) = HDIFF*RHO_D_DZDZ(I,J,K,N)
          ENDDO
       ENDDO
    ENDDO
@@ -408,32 +408,32 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
       SELECT CASE(IOR)
          CASE( 1) 
             !$OMP ATOMIC WRITE
-            RHO_D_DZDX(IIG-1,JJG,KKG)   =  RHO_D_DZDN
+            RHO_D_DZDX(IIG-1,JJG,KKG,N)   =  RHO_D_DZDN
             !$OMP ATOMIC WRITE
             H_RHO_D_DZDX(IIG-1,JJG,KKG) =  HDIFF*RHO_D_DZDN
          CASE(-1) 
             !$OMP ATOMIC WRITE
-            RHO_D_DZDX(IIG,JJG,KKG)     = -RHO_D_DZDN
+            RHO_D_DZDX(IIG,JJG,KKG,N)     = -RHO_D_DZDN
             !$OMP ATOMIC WRITE
             H_RHO_D_DZDX(IIG,JJG,KKG)   = -HDIFF*RHO_D_DZDN
          CASE( 2) 
             !$OMP ATOMIC WRITE
-            RHO_D_DZDY(IIG,JJG-1,KKG)   =  RHO_D_DZDN
+            RHO_D_DZDY(IIG,JJG-1,KKG,N)   =  RHO_D_DZDN
             !$OMP ATOMIC WRITE
             H_RHO_D_DZDY(IIG,JJG-1,KKG) =  HDIFF*RHO_D_DZDN
          CASE(-2) 
             !$OMP ATOMIC WRITE
-            RHO_D_DZDY(IIG,JJG,KKG)     = -RHO_D_DZDN
+            RHO_D_DZDY(IIG,JJG,KKG,N)     = -RHO_D_DZDN
             !$OMP ATOMIC WRITE
             H_RHO_D_DZDY(IIG,JJG,KKG)   = -HDIFF*RHO_D_DZDN
          CASE( 3) 
             !$OMP ATOMIC WRITE
-            RHO_D_DZDZ(IIG,JJG,KKG-1)   =  RHO_D_DZDN
+            RHO_D_DZDZ(IIG,JJG,KKG-1,N)   =  RHO_D_DZDN
             !$OMP ATOMIC WRITE
             H_RHO_D_DZDZ(IIG,JJG,KKG-1) =  HDIFF*RHO_D_DZDN
          CASE(-3) 
             !$OMP ATOMIC WRITE
-            RHO_D_DZDZ(IIG,JJG,KKG)     = -RHO_D_DZDN
+            RHO_D_DZDZ(IIG,JJG,KKG,N)     = -RHO_D_DZDN
             !$OMP ATOMIC WRITE
             H_RHO_D_DZDZ(IIG,JJG,KKG)   = -HDIFF*RHO_D_DZDN
       END SELECT
@@ -479,9 +479,9 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
          DO K=1,KBAR
             DO J=1,JBAR
                DO I=1,IBAR
-                  DEL_RHO_D_DEL_Z(I,J,K,N) = (RHO_D_DZDX(I,J,K)-RHO_D_DZDX(I-1,J,K))*RDX(I) + &
-                                             (RHO_D_DZDY(I,J,K)-RHO_D_DZDY(I,J-1,K))*RDY(J) + &
-                                             (RHO_D_DZDZ(I,J,K)-RHO_D_DZDZ(I,J,K-1))*RDZ(K)
+                  DEL_RHO_D_DEL_Z(I,J,K,N) = (RHO_D_DZDX(I,J,K,N)-RHO_D_DZDX(I-1,J,K,N))*RDX(I) + &
+                                             (RHO_D_DZDY(I,J,K,N)-RHO_D_DZDY(I,J-1,K,N))*RDY(J) + &
+                                             (RHO_D_DZDZ(I,J,K,N)-RHO_D_DZDZ(I,J,K-1,N))*RDZ(K)
                ENDDO
             ENDDO
          ENDDO
@@ -490,8 +490,8 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
          J=1
          DO K=1,KBAR
             DO I=1,IBAR
-               DEL_RHO_D_DEL_Z(I,J,K,N) = (R(I)*RHO_D_DZDX(I,J,K)-R(I-1)*RHO_D_DZDX(I-1,J,K))*RDX(I)*RRN(I) + &
-                                          (     RHO_D_DZDZ(I,J,K)-       RHO_D_DZDZ(I,J,K-1))*RDZ(K)
+               DEL_RHO_D_DEL_Z(I,J,K,N) = (R(I)*RHO_D_DZDX(I,J,K,N)-R(I-1)*RHO_D_DZDX(I-1,J,K,N))*RDX(I)*RRN(I) + &
+                                          (     RHO_D_DZDZ(I,J,K,N)-       RHO_D_DZDZ(I,J,K-1,N))*RDZ(K)
             ENDDO
          ENDDO
    END SELECT CYLINDER2
