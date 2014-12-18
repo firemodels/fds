@@ -52,7 +52,6 @@ SUBROUTINE COMBUSTION_GENERAL
 
 ! Generic combustion routine for multi-step reactions
 
-USE COMP_FUNCTIONS, ONLY: SHUTDOWN
 USE PHYSICAL_FUNCTIONS, ONLY: GET_SPECIFIC_GAS_CONSTANT,GET_MASS_FRACTION_ALL,GET_SPECIFIC_HEAT,GET_MOLECULAR_WEIGHT, &
                               GET_SENSIBLE_ENTHALPY_DIFF,GET_SENSIBLE_ENTHALPY,IS_REALIZABLE
 INTEGER :: I,J,K,NS,NR,II,JJ,KK,IIG,JJG,KKG,IW,N
@@ -77,8 +76,11 @@ DO K=1,KBAR
          IF (CHECK_REALIZABILITY) THEN
             REALIZABLE=IS_REALIZABLE(ZZ_GET)
             IF (.NOT.REALIZABLE) THEN
-               WRITE(LU_ERR,*) ZZ_GET,SUM(ZZ_GET)
-               CALL SHUTDOWN('ERROR: Unrealizable mass fractions input to COMBUSTION_MODEL')
+               WRITE(LU_ERR,*) I,J,K
+               WRITE(LU_ERR,*) ZZ_GET
+               WRITE(LU_ERR,*) SUM(ZZ_GET)
+               WRITE(LU_ERR,*) 'ERROR: Unrealizable mass fractions input to COMBUSTION_MODEL'
+               STOP_STATUS=REALIZABILITY_STOP
             ENDIF
          ENDIF
          CALL CHECK_REACTION
@@ -90,7 +92,8 @@ DO K=1,KBAR
             REALIZABLE=IS_REALIZABLE(ZZ_GET)
             IF (.NOT.REALIZABLE) THEN
                WRITE(LU_ERR,*) ZZ_GET,SUM(ZZ_GET)
-               CALL SHUTDOWN('ERROR: Unrealizable mass fractions after COMBUSTION_MODEL')
+               WRITE(LU_ERR,*) 'ERROR: Unrealizable mass fractions after COMBUSTION_MODEL'
+               STOP_STATUS=REALIZABILITY_STOP
             ENDIF
          ENDIF
          DZZ(1:N_TRACKED_SPECIES) = ZZ_GET(1:N_TRACKED_SPECIES) - DZZ(1:N_TRACKED_SPECIES)
@@ -181,11 +184,11 @@ ELSE
       RN => REACTION(NR)
       TAU_D = MAX(TAU_D,D_Z(MIN(4999,NINT(TMP(I,J,K))),RN%FUEL_SMIX_INDEX))
    ENDDO
-   TAU_D = DELTA**2/TAU_D ! FDS Tech Guide (5.21)
+   TAU_D = DELTA**2/MAX(TAU_D,TWO_EPSILON_EB) ! FDS Tech Guide (5.21)
    IF (LES) THEN
-      TAU_U = C_DEARDORFF*SC*RHO(I,J,K)*DELTA**2/MU(I,J,K)            ! FDS Tech Guide (5.22)
-      TAU_G = SQRT(2._EB*DELTA/(GRAV+1.E-10_EB))                      ! FDS Tech Guide (5.23)
-      MIX_TIME(I,J,K)= MAX(TAU_CHEM,MIN(TAU_D,TAU_U,TAU_G,TAU_FLAME)) ! FDS Tech Guide (5.20)
+      TAU_U = C_DEARDORFF*SC*RHO(I,J,K)*DELTA**2/MAX(MU(I,J,K),TWO_EPSILON_EB) ! FDS Tech Guide (5.22)
+      TAU_G = SQRT(2._EB*DELTA/(GRAV+1.E-10_EB))                               ! FDS Tech Guide (5.23)
+      MIX_TIME(I,J,K)= MAX(TAU_CHEM,MIN(TAU_D,TAU_U,TAU_G,TAU_FLAME))          ! FDS Tech Guide (5.20)
    ELSE
       MIX_TIME(I,J,K)= MAX(TAU_CHEM,TAU_D)
    ENDIF
