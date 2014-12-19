@@ -1,4 +1,6 @@
- FDS+Evac version: FDS 6.0.0, Evac 2.4.0
+ FDS+Evac version: FDS 6.1.2, Evac 2.5.0
+
+ SVN Revision No. : 21192
 
  Two floor evacuation test case, the rooms have two doors.
  See the FDS+Evac Guide, Chapter "Sample Input Files"

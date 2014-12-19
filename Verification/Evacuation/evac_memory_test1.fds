@@ -1,12 +1,11 @@
- FDS+Evac version: FDS 6.0.0, Evac 2.4.0
+ FDS+Evac version: FDS 6.1.2, Evac 2.5.0
 
  A simple test case for memory usage of FDS+Evac.  Evacuation
  part is k=1 mesh ==> surface to volume ratio is large so the
  surface cells/arrays take some memory, but the surface +-u_z
  are not needed in reality, because two dimensional calculation.
 
- SVN Revision No. : 7243
- Peak Memory Usage: 158 196 K (win32 XP, single thread)
+ SVN Revision No. : 21192
 
 &HEAD CHID='evac_memory_test1',TITLE='test for RAM: fire+evac meshes' /
 
