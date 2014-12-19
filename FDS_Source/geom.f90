@@ -4092,6 +4092,7 @@ INTEGER, INTENT(INOUT):: NP
 REAL(EB), INTENT(INOUT) :: PC(60)
 INTEGER :: NP2,I,J,K
 REAL(EB) :: U(3),V(3),W(3)
+REAL(EB), PARAMETER :: EPS_DIFF=1.0E-8_EB
 
 I = 1
 DO WHILE (I <= NP-1)
@@ -4109,7 +4110,7 @@ DO WHILE (I <= NP-1)
       ! use hybrid comparison test
       !    absolute for small values
       !    relative for large values
-      IF (NORM2(W) <= MAX(1.0_EB,NORM2(U),NORM2(V))*TWO_EPSILON_EB) THEN
+      IF (NORM2(W) <= MAX(1.0_EB,NORM2(U),NORM2(V))*EPS_DIFF) THEN
          DO K=3*J+1,3*NP
             PC(K-3) = PC(K)
          ENDDO
