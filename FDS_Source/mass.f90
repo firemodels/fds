@@ -938,7 +938,7 @@ USE SOOT_ROUTINES, ONLY: SETTLING_VELOCITY
 
 INTEGER, INTENT(IN) :: NM
 REAL(EB) :: TNOW,ZZZ(1:4)
-INTEGER  :: I,J,K,N,IOR,IW,IIG,JJG,KKG,II,JJ,KK,WALL_BOUNDARY_TYPE
+INTEGER  :: I,J,K,N,IOR,IW,IIG,JJG,KKG,II,JJ,KK
 REAL(EB), POINTER, DIMENSION(:,:,:) :: RHO_ZZ_P=>NULL()
 REAL(EB), POINTER, DIMENSION(:,:,:,:) :: ZZP=>NULL()
 TYPE(WALL_TYPE), POINTER :: WC=>NULL()
@@ -952,18 +952,12 @@ IF (PREDICTOR) THEN
    UU => U
    VV => V
    WW => W
-   UP => US
-   VP => VS
-   WP => WS
    RHOP => RHO
    IF (N_TRACKED_SPECIES > 0) ZZP => ZZ
 ELSE
    UU => US
    VV => VS
    WW => WS
-   UP => U
-   VP => V
-   WP => W
    RHOP => RHOS
    IF (N_TRACKED_SPECIES > 0) ZZP => ZZS
 ENDIF
@@ -1076,9 +1070,7 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
       
       ENDIF OFF_WALL_IF_2
 
-      WALL_BOUNDARY_TYPE=WC%BOUNDARY_TYPE
-
-      BOUNDARY_SELECT: SELECT CASE(WALL_BOUNDARY_TYPE)
+      BOUNDARY_SELECT: SELECT CASE(WC%BOUNDARY_TYPE)
          CASE DEFAULT
             SELECT CASE(IOR)
                CASE( 1)
@@ -1115,9 +1107,11 @@ USE GLOBAL_CONSTANTS, ONLY: N_TRACKED_SPECIES,TMPMAX,TMPMIN,EVACUATION_ONLY, &
                             PREDICTOR,N_ZONE,GAS_SPECIES,R0,SOLID_PHASE_ONLY,TUSED
 USE MANUFACTURED_SOLUTIONS, ONLY: VD2D_MMS_Z_OF_RHO
 INTEGER, INTENT(IN) :: NM
-REAL(EB) :: TNOW,ZZ_GET(0:N_TRACKED_SPECIES),RHS
-INTEGER :: I,J,K,N
+REAL(EB) :: TNOW,ZZ_GET(0:N_TRACKED_SPECIES),RHS,UN
+INTEGER :: I,J,K,N,IW,IOR,IIG,JJG,KKG
 REAL(EB), POINTER, DIMENSION(:,:,:,:) :: RHO_ZZ_P=>NULL()
+REAL(EB), POINTER, DIMENSION(:,:,:) :: UU=>NULL(),VV=>NULL(),WW=>NULL()
+TYPE(WALL_TYPE), POINTER :: WC=>NULL()
 
 IF (EVACUATION_ONLY(NM)) RETURN
 IF (SOLID_PHASE_ONLY) RETURN
@@ -1133,10 +1127,55 @@ TNOW=SECOND()
 CALL POINT_TO_MESH(NM)
 RHO_ZZ_P=>SCALAR_WORK1
 RHO_ZZ_P=0._EB
+UU=>WORK1
+VV=>WORK2
+WW=>WORK3
 
 PREDICTOR_STEP: SELECT CASE (PREDICTOR)
 
 CASE(.TRUE.) PREDICTOR_STEP
+
+   ! Correct boundary velocity at wall cells
+
+   UU=U
+   VV=V
+   WW=W
+
+   WALL_LOOP_PREDICTOR: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
+      WC=>WALL(IW)
+      IF (WC%BOUNDARY_TYPE==NULL_BOUNDARY) CYCLE WALL_LOOP_PREDICTOR
+
+      IIG = WC%ONE_D%IIG 
+      JJG = WC%ONE_D%JJG
+      KKG = WC%ONE_D%KKG
+      IOR = WC%ONE_D%IOR
+
+      BOUNDARY_SELECT_PREDICTOR: SELECT CASE(WC%BOUNDARY_TYPE)
+         CASE DEFAULT
+         CASE(INTERPOLATED_BOUNDARY,SOLID_BOUNDARY,HVAC_BOUNDARY)
+            SELECT CASE(WC%BOUNDARY_TYPE)
+               CASE(SOLID_BOUNDARY,HVAC_BOUNDARY)
+                  IF (PREDICTOR) UN = -SIGN(1._EB,REAL(IOR,EB))*WC%ONE_D%UW
+                  IF (CORRECTOR) UN = -SIGN(1._EB,REAL(IOR,EB))*WC%ONE_D%UWS
+               CASE(INTERPOLATED_BOUNDARY)
+                  UN = UVW_SAVE(IW)
+            END SELECT
+            SELECT CASE(IOR)
+               CASE( 1)
+                  UU(IIG-1,JJG,KKG) = UN
+               CASE(-1)
+                  UU(IIG,JJG,KKG)   = UN
+               CASE( 2)
+                  VV(IIG,JJG-1,KKG) = UN
+               CASE(-2)
+                  VV(IIG,JJG,KKG)   = UN
+               CASE( 3)
+                  WW(IIG,JJG,KKG-1) = UN
+               CASE(-3)
+                  WW(IIG,JJG,KKG)   = UN
+            END SELECT
+      END SELECT BOUNDARY_SELECT_PREDICTOR
+   ENDDO WALL_LOOP_PREDICTOR
 
    ! Predictor step for mass density
 
@@ -1146,9 +1185,9 @@ CASE(.TRUE.) PREDICTOR_STEP
             DO I=1,IBAR
                IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
 
-               RHS = (FX(I,J,K,N)*U(I,J,K)*R(I)-FX(I-1,J,K,N)*U(I-1,J,K)*R(I-1))*RDX(I)*RRN(I) &
-                   + (FY(I,J,K,N)*V(I,J,K)     -FY(I,J-1,K,N)*V(I,J-1,K)       )*RDY(J)        &
-                   + (FZ(I,J,K,N)*W(I,J,K)     -FZ(I,J,K-1,N)*W(I,J,K-1)       )*RDZ(K)
+               RHS = ((FX(I,J,K,N)*UU(I,J,K)-FDX(I,J,K,N))*R(I)-(FX(I-1,J,K,N)*UU(I-1,J,K)-FDX(I-1,J,K,N))*R(I-1))*RDX(I)*RRN(I) &
+                   + ((FY(I,J,K,N)*VV(I,J,K)-FDY(I,J,K,N))     -(FY(I,J-1,K,N)*VV(I,J-1,K)-FDY(I,J-1,K,N))       )*RDY(J)        &
+                   + ((FZ(I,J,K,N)*WW(I,J,K)-FDZ(I,J,K,N))     -(FZ(I,J,K-1,N)*WW(I,J,K-1)-FDZ(I,J,K-1,N))       )*RDZ(K)
 
                RHO_ZZ_P(I,J,K,N) = RHO(I,J,K)*ZZ(I,J,K,N)
 
@@ -1235,6 +1274,48 @@ CASE(.TRUE.) PREDICTOR_STEP
 
 CASE(.FALSE.) PREDICTOR_STEP
 
+   ! Correct boundary velocity at wall cells
+
+   UU=US
+   VV=VS
+   WW=WS
+
+   WALL_LOOP_CORRECTOR: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
+      WC=>WALL(IW)
+      IF (WC%BOUNDARY_TYPE==NULL_BOUNDARY) CYCLE WALL_LOOP_CORRECTOR
+
+      IIG = WC%ONE_D%IIG 
+      JJG = WC%ONE_D%JJG
+      KKG = WC%ONE_D%KKG
+      IOR = WC%ONE_D%IOR
+
+      BOUNDARY_SELECT_CORRECTOR: SELECT CASE(WC%BOUNDARY_TYPE)
+         CASE DEFAULT
+         CASE(INTERPOLATED_BOUNDARY,SOLID_BOUNDARY,HVAC_BOUNDARY)
+            SELECT CASE(WC%BOUNDARY_TYPE)
+               CASE(SOLID_BOUNDARY,HVAC_BOUNDARY)
+                  IF (PREDICTOR) UN = -SIGN(1._EB,REAL(IOR,EB))*WC%ONE_D%UW
+                  IF (CORRECTOR) UN = -SIGN(1._EB,REAL(IOR,EB))*WC%ONE_D%UWS
+               CASE(INTERPOLATED_BOUNDARY)
+                  UN = UVW_SAVE(IW)
+            END SELECT
+            SELECT CASE(IOR)
+               CASE( 1)
+                  UU(IIG-1,JJG,KKG) = UN
+               CASE(-1)
+                  UU(IIG,JJG,KKG)   = UN
+               CASE( 2)
+                  VV(IIG,JJG-1,KKG) = UN
+               CASE(-2)
+                  VV(IIG,JJG,KKG)   = UN
+               CASE( 3)
+                  WW(IIG,JJG,KKG-1) = UN
+               CASE(-3)
+                  WW(IIG,JJG,KKG)   = UN
+            END SELECT
+      END SELECT BOUNDARY_SELECT_CORRECTOR
+   ENDDO WALL_LOOP_CORRECTOR
+
    ! Compute species mass density at next time step
 
    DO N=1,N_TRACKED_SPECIES
@@ -1243,9 +1324,9 @@ CASE(.FALSE.) PREDICTOR_STEP
             DO I=1,IBAR
                IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
 
-               RHS = (FX(I,J,K,N)*UU(I,J,K)*R(I)-FX(I-1,J,K,N)*UU(I-1,J,K)*R(I-1))*RDX(I)*RRN(I) &
-                   + (FY(I,J,K,N)*VV(I,J,K)     -FY(I,J-1,K,N)*VV(I,J-1,K)       )*RDY(J)        &
-                   + (FZ(I,J,K,N)*WW(I,J,K)     -FZ(I,J,K-1,N)*WW(I,J,K-1)       )*RDZ(K)
+               RHS = ((FX(I,J,K,N)*UU(I,J,K)-FDX(I,J,K,N))*R(I)-(FX(I-1,J,K,N)*UU(I-1,J,K)-FDX(I-1,J,K,N))*R(I-1))*RDX(I)*RRN(I) &
+                   + ((FY(I,J,K,N)*VV(I,J,K)-FDY(I,J,K,N))     -(FY(I,J-1,K,N)*VV(I,J-1,K)-FDY(I,J-1,K,N))       )*RDY(J)        &
+                   + ((FZ(I,J,K,N)*WW(I,J,K)-FDZ(I,J,K,N))     -(FZ(I,J,K-1,N)*WW(I,J,K-1)-FDZ(I,J,K-1,N))       )*RDZ(K)
 
                RHO_ZZ_P(I,J,K,N) = .5_EB*(RHO(I,J,K)*ZZ(I,J,K,N) + RHOS(I,J,K)*ZZS(I,J,K,N))
 
@@ -1348,18 +1429,15 @@ INTEGER, POINTER, DIMENSION(:,:,:) :: IOB=>NULL()
 LOGICAL :: BOUNDED
 
 IF (PREDICTOR) THEN
-   UU=>U
-   VV=>V
-   WW=>W
    ZZP=>ZZS
    DT_LOC=DT
 ELSE
-   UU=>US
-   VV=>VS
-   WW=>WS
    ZZP=>ZZ
    DT_LOC=.5_EB*DT
 ENDIF
+UU=>WORK1
+VV=>WORK2
+WW=>WORK3
 RHO_ZZ_P=>SCALAR_WORK1
 IOB=>IWORK1
 
@@ -1385,28 +1463,34 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
 
             RHO_ZZ_GAMMA = RHO_ZZ_P(I,J,K,N)*GAMMA
 
-            IF (UU(I,J,K)>0._EB) THEN
-               FX(I,J,K,N) = RHO_ZZ_GAMMA
+            IF ((FX(I,J,K,N)-FDX(I,J,K,N))>0._EB) THEN
+               FDX(I,J,K,N) = 0._EB
+               FX(I,J,K,N)  = RHO_ZZ_GAMMA
                IOB(I+1,J,K) = 1 ! right neighbor is tagged for correction
             ENDIF
-            IF (VV(I,J,K)>0._EB) THEN
-               FY(I,J,K,N) = RHO_ZZ_GAMMA
+            IF ((FY(I,J,K,N)-FDY(I,J,K,N))>0._EB) THEN
+               FDY(I,J,K,N) = 0._EB
+               FY(I,J,K,N)  = RHO_ZZ_GAMMA
                IOB(I,J+1,K) = 1
             ENDIF
-            IF (WW(I,J,K)>0._EB) THEN
-               FZ(I,J,K,N) = RHO_ZZ_GAMMA
+            IF ((FZ(I,J,K,N)-FDZ(I,J,K,N))>0._EB) THEN
+               FDZ(I,J,K,N) = 0._EB
+               FZ(I,J,K,N)  = RHO_ZZ_GAMMA
                IOB(I,J,K+1) = 1
             ENDIF
 
-            IF (UU(I-1,J,K)<0._EB) THEN
+            IF ((FX(I-1,J,K,N)-FDX(I-1,J,K,N))<0._EB) THEN
+               FDX(I-1,J,K,N) = 0._EB
                FX(I-1,J,K,N) = RHO_ZZ_GAMMA
                IOB(I-1,J,K) = 1
             ENDIF
-            IF (VV(I,J-1,K)<0._EB) THEN
+            IF ((FY(I,J-1,K,N)-FDY(I,J-1,K,N))<0._EB) THEN
+               FDY(I,J-1,K,N) = 0._EB
                FY(I,J-1,K,N) = RHO_ZZ_GAMMA
                IOB(I,J-1,K) = 1
             ENDIF
-            IF (WW(I,J,K-1)<0._EB) THEN
+            IF ((FZ(I,J,K-1,N)-FDZ(I,J,K-1,N))<0._EB) THEN
+               FDZ(I,J,K-1,N) = 0._EB
                FZ(I,J,K-1,N) = RHO_ZZ_GAMMA
                IOB(I,J,K-1) = 1
             ENDIF
@@ -1415,7 +1499,7 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
       ENDDO
    ENDDO
 
-   ! Update cells
+   ! Only update cells tagged for correction
 
    DO K=1,KBAR
       DO J=1,JBAR
@@ -1423,9 +1507,9 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
             IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
             IF (IOB(I,J,K)/=1) CYCLE
 
-            RHS = (FX(I,J,K,N)*UU(I,J,K)*R(I)-FX(I-1,J,K,N)*UU(I-1,J,K)*R(I-1))*RDX(I)*RRN(I) &
-                + (FY(I,J,K,N)*VV(I,J,K)     -FY(I,J-1,K,N)*VV(I,J-1,K)       )*RDY(J)        &
-                + (FZ(I,J,K,N)*WW(I,J,K)     -FZ(I,J,K-1,N)*WW(I,J,K-1)       )*RDZ(K)
+            RHS = ((FX(I,J,K,N)*UU(I,J,K)-FDX(I,J,K,N))*R(I)-(FX(I-1,J,K,N)*UU(I-1,J,K)-FDX(I-1,J,K,N))*R(I-1))*RDX(I)*RRN(I) &
+                + ((FY(I,J,K,N)*VV(I,J,K)-FDY(I,J,K,N))     -(FY(I,J-1,K,N)*VV(I,J-1,K)-FDY(I,J-1,K,N))       )*RDY(J)        &
+                + ((FZ(I,J,K,N)*WW(I,J,K)-FDZ(I,J,K,N))     -(FZ(I,J,K-1,N)*WW(I,J,K-1)-FDZ(I,J,K-1,N))       )*RDZ(K)
 
             ZZP(I,J,K,N) = RHO_ZZ_P(I,J,K,N) - DT_LOC*RHS
 
