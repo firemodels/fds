@@ -620,7 +620,7 @@ CONTAINS
           RETURN ! skip evacuation calculation
        END IF
 
-       CALL COUNT_EVAC_NODES(1)
+       CALL COUNT_EVAC_NODES(1) ; IF (STOP_STATUS==SETUP_STOP) RETURN
 
        ALLOCATE(EMESH_NM(     MAX(1,INPUT_EVAC_GRIDS)), STAT=IZERO)
        CALL ChkMemErr('READ_EVAC','EMESH_NM',IZERO) 
@@ -672,7 +672,7 @@ CONTAINS
 
           IF (N_LANDINGS>500) THEN
              WRITE(MESSAGE,'(A,A,A)') 'ERROR: STRS ',TRIM(ID),' N_LANDINGS > 500'
-             CALL SHUTDOWN(MESSAGE)
+             CALL SHUTDOWN(MESSAGE) ; RETURN
           END IF
           !N_LANDINGS = N_LANDINGS
           !N_NODES = 2*N_LANDINGS - 1
@@ -684,7 +684,7 @@ CONTAINS
              XB_CORES(1,6) = XB(6)
              IF (ALL(XB_CORE==0._EB)) THEN
                 WRITE(MESSAGE,'(3A)') 'ERROR: STRS object ', TRIM(ID), ' has no XB_CORE defined.'
-                CALL SHUTDOWN(MESSAGE)
+                CALL SHUTDOWN(MESSAGE) ; RETURN
              ENDIF
           ELSE
              ! For now, just the first one is used (this is under construction)
@@ -796,31 +796,31 @@ CONTAINS
 
           IF (II == 0 .AND. MYID==MAX(0,EVAC_PROCESS)) THEN
              WRITE(MESSAGE,'(A,A,A)') 'ERROR: EXIT ',TRIM(ID), ' problem with IMESH, no mesh found'
-             CALL SHUTDOWN(MESSAGE)
+             CALL SHUTDOWN(MESSAGE) ; RETURN
           END IF
           IF (II > 1 .AND. MYID==MAX(0,EVAC_PROCESS)) THEN
              WRITE(MESSAGE,'(A,A,A)') 'ERROR: EXIT ',TRIM(ID), ' not an unique mesh found '
-             CALL SHUTDOWN(MESSAGE)
+             CALL SHUTDOWN(MESSAGE) ; RETURN
           END IF
           SELECT CASE (IOR)
           CASE (-1,+1)
              IF ( (XB(2)-XB(1)) >= TWO_EPSILON_EB ) THEN
                 IF (MYID==MAX(0,EVAC_PROCESS)) THEN
                    WRITE(MESSAGE,'(A,A,A)') 'ERROR: EXIT ',TRIM(ID), ' IOR=+-1 but not a vertical plane '
-                   CALL SHUTDOWN(MESSAGE)
+                   CALL SHUTDOWN(MESSAGE) ; RETURN
                 END IF
              END IF
           CASE (-2,+2)
              IF ( (XB(4)-XB(3)) >= TWO_EPSILON_EB ) THEN
                 IF (MYID==MAX(0,EVAC_PROCESS)) THEN
                    WRITE(MESSAGE,'(A,A,A)') 'ERROR: EXIT ',TRIM(ID), ' IOR=+-2 but not a vertical plane '
-                   CALL SHUTDOWN(MESSAGE)
+                   CALL SHUTDOWN(MESSAGE) ; RETURN
                 END IF
              END IF
           CASE Default
              IF (MYID==MAX(0,EVAC_PROCESS)) THEN
                 WRITE(MESSAGE,'(A,A,A)') 'ERROR: EXIT ',TRIM(ID), ' No IOR given or not -2,-1,+1,+2 '
-                CALL SHUTDOWN(MESSAGE)
+                CALL SHUTDOWN(MESSAGE) ; RETURN
              END IF
           END SELECT
           ! Doors/Exits are always vertical
@@ -921,31 +921,31 @@ CONTAINS
 
           IF (II == 0 .AND. MYID==MAX(0,EVAC_PROCESS)) THEN
              WRITE(MESSAGE,'(A,A,A)') 'ERROR: DOOR ',TRIM(ID), ' problem with IMESH, no mesh found'
-             CALL SHUTDOWN(MESSAGE)
+             CALL SHUTDOWN(MESSAGE) ; RETURN
           END IF
           IF (II > 1 .AND. MYID==MAX(0,EVAC_PROCESS)) THEN
              WRITE(MESSAGE,'(A,A,A)') 'ERROR: DOOR ',TRIM(ID), ' not an unique mesh found '
-             CALL SHUTDOWN(MESSAGE)
+             CALL SHUTDOWN(MESSAGE) ; RETURN
           END IF
           SELECT CASE (IOR)
           CASE (-1,+1)
              IF ( (XB(2)-XB(1)) >= TWO_EPSILON_EB ) THEN
                 IF (MYID==MAX(0,EVAC_PROCESS)) THEN
                    WRITE(MESSAGE,'(A,A,A)') 'ERROR: DOOR ',TRIM(ID), ' IOR=+-1 but not a vertical plane '
-                   CALL SHUTDOWN(MESSAGE)
+                   CALL SHUTDOWN(MESSAGE) ; RETURN
                 END IF
              END IF
           CASE (-2,+2)
              IF ( (XB(4)-XB(3)) >= TWO_EPSILON_EB ) THEN
                 IF (MYID==MAX(0,EVAC_PROCESS)) THEN
                    WRITE(MESSAGE,'(A,A,A)') 'ERROR: DOOR ',TRIM(ID), ' IOR=+-2 but not a vertical plane '
-                   CALL SHUTDOWN(MESSAGE)
+                   CALL SHUTDOWN(MESSAGE) ; RETURN
                 END IF
              END IF
           CASE Default
              IF (MYID==MAX(0,EVAC_PROCESS)) THEN
                 WRITE(MESSAGE,'(A,A,A)') 'ERROR: DOOR ',TRIM(ID), ' No IOR given or not -2,-1,+1,+2 '
-                CALL SHUTDOWN(MESSAGE)
+                CALL SHUTDOWN(MESSAGE) ; RETURN
              END IF
           END SELECT
           ! Doors/Exits are always vertical
@@ -979,7 +979,7 @@ CONTAINS
        IF (MYID==MAX(0,EVAC_PROCESS)) THEN
           IF (ANY(EVACUATION_ONLY)) THEN
              WRITE(MESSAGE,'(A,A,A)') 'ERROR: No main evacuation meshes defined.'
-             CALL SHUTDOWN(MESSAGE)
+             CALL SHUTDOWN(MESSAGE) ; RETURN
           END IF
        END IF
        RETURN
@@ -999,7 +999,10 @@ CONTAINS
        ALLOCATE(Tsteps(NMESHES),STAT=IZERO)
        CALL ChkMemErr('READ_EVAC','Tsteps',IZERO) 
        Tsteps(:) = EVAC_DT_FLOWFIELD
-       IF (ABS(TIME_SHRINK_FACTOR-1.0_EB) >= TWO_EPSILON_EB ) CALL SHUTDOWN('ERROR: Evac is not ready for TIME_SHRINK_FACTOR')
+       IF (ABS(TIME_SHRINK_FACTOR-1.0_EB) >= TWO_EPSILON_EB ) THEN
+          CALL SHUTDOWN('ERROR: Evac is not ready for TIME_SHRINK_FACTOR')
+          RETURN
+       END IF
     END IF
     !
     ! I_EVAC: 'binary' index:
@@ -1044,7 +1047,7 @@ CONTAINS
     ! so next human will have an identification number, which is ILABEL_last + 1
     ILABEL_last = 0
 
-    CALL COUNT_EVAC_NODES(2)
+    CALL COUNT_EVAC_NODES(2) ; IF (STOP_STATUS==SETUP_STOP) RETURN
     N_AVATAR_TYPE = 1 ! The default type index is one and the default name is 'Human'.
     ALLOCATE(TMP_AVATAR_TYPE_NAME(N_ENTRYS+NPC_EVAC),STAT=IZERO) ! etries first then evac lines
     CALL ChkMemErr('READ_EVAC','TMP_AVATAR_TYPE_NAME',IZERO)
@@ -1052,24 +1055,24 @@ CONTAINS
     CALL ChkMemErr('READ_EVAC','TMP_AVATAR_TYPE_INDEX',IZERO)
     ALLOCATE(TMP_AVATAR_TYPE_PROP(N_ENTRYS+NPC_EVAC),STAT=IZERO) ! etries first then evac lines
     CALL ChkMemErr('READ_EVAC','TMP_AVATAR_TYPE_PROP',IZERO)
-    CALL READ_PERS
-    CALL READ_STRS
-    CALL READ_EXIT
-    CALL READ_DOOR    
-    CALL READ_CORR
-    CALL READ_ENTRIES
+    CALL READ_PERS ; IF (STOP_STATUS==SETUP_STOP) RETURN
+    CALL READ_STRS ; IF (STOP_STATUS==SETUP_STOP) RETURN
+    CALL READ_EXIT ; IF (STOP_STATUS==SETUP_STOP) RETURN
+    CALL READ_DOOR  ; IF (STOP_STATUS==SETUP_STOP) RETURN   
+    CALL READ_CORR ; IF (STOP_STATUS==SETUP_STOP) RETURN
+    CALL READ_ENTRIES ; IF (STOP_STATUS==SETUP_STOP) RETURN
     CALL COLLECT_NODE_INFO
-    CALL READ_EVAC_LINES
-    CALL READ_EVHO
-    CALL READ_EVSS
-    CALL READ_EDEV
+    CALL READ_EVAC_LINES ; IF (STOP_STATUS==SETUP_STOP) RETURN
+    CALL READ_EVHO ; IF (STOP_STATUS==SETUP_STOP) RETURN
+    CALL READ_EVSS ; IF (STOP_STATUS==SETUP_STOP) RETURN
+    CALL READ_EDEV ; IF (STOP_STATUS==SETUP_STOP) RETURN
 
     DEALLOCATE(TMP_AVATAR_TYPE_PROP)
     DEALLOCATE(TMP_AVATAR_TYPE_INDEX)
     DEALLOCATE(TMP_AVATAR_TYPE_NAME)
     IF (MYID /= MAX(0,EVAC_PROCESS)) RETURN
 
-    CALL CHECK_EVAC_NODES
+    CALL CHECK_EVAC_NODES ; IF (STOP_STATUS==SETUP_STOP) RETURN
 
   CONTAINS
 
@@ -1101,7 +1104,7 @@ CONTAINS
             NPC_PERS = NPC_PERS + 1
 222         IF (IOS > 0) THEN
                WRITE(MESSAGE,'(A,I6)') 'ERROR: Problem with PERS line number ',NPC_PERS+1
-               CALL SHUTDOWN(MESSAGE)
+               CALL SHUTDOWN(MESSAGE) ; RETURN
             END IF
          END DO COUNT_PERS_LOOP
 221      REWIND(LU_INPUT)
@@ -1125,7 +1128,7 @@ CONTAINS
             !
 220         IF (IOS > 0) THEN
                WRITE(MESSAGE,'(A,I6)') 'ERROR: Problem with EVAC line number ',NPC_EVAC+1
-               CALL SHUTDOWN(MESSAGE)
+               CALL SHUTDOWN(MESSAGE) ; RETURN
             END IF
          END DO COUNT_EVAC_LOOP
 219      REWIND(LU_INPUT)
@@ -1150,7 +1153,7 @@ CONTAINS
             IF (COUNT_ONLY) N_CO_EXITS = N_CO_EXITS + 1
 224         IF (IOS > 0) THEN
                WRITE(MESSAGE,'(A,I6)') 'ERROR: Problem with EXIT line number ',N_EXITS+1
-               CALL SHUTDOWN(MESSAGE)
+               CALL SHUTDOWN(MESSAGE) ; RETURN
             END IF
          END DO COUNT_EXITS_LOOP
 223      REWIND(LU_INPUT)
@@ -1170,7 +1173,7 @@ CONTAINS
             END IF
 226         IF (IOS > 0) THEN
                WRITE(MESSAGE,'(A,I6)') 'ERROR: Problem with DOOR line number ',N_DOORS + 1
-               CALL SHUTDOWN(MESSAGE)
+               CALL SHUTDOWN(MESSAGE) ; RETURN
             END IF
          END DO COUNT_DOORS_LOOP
 225      REWIND(LU_INPUT)
@@ -1192,7 +1195,7 @@ CONTAINS
             END IF
 228         IF (IOS > 0) THEN
                WRITE(MESSAGE,'(A,I6)') 'ERROR: Problem with ENTR line number ',N_ENTRYS + 1
-               CALL SHUTDOWN(MESSAGE)
+               CALL SHUTDOWN(MESSAGE) ; RETURN
             END IF
          END DO COUNT_ENTRYS_LOOP
 227      REWIND(LU_INPUT)
@@ -1209,7 +1212,7 @@ CONTAINS
             N_CORRS = N_CORRS + 1
 230         IF (IOS > 0) THEN
                WRITE(MESSAGE,'(A,I6)') 'ERROR: Problem with CORR line number ',N_CORRS + 1
-               CALL SHUTDOWN(MESSAGE)
+               CALL SHUTDOWN(MESSAGE) ; RETURN
             END IF
          END DO COUNT_CORRS_LOOP
 229      REWIND(LU_INPUT)
@@ -1226,7 +1229,7 @@ CONTAINS
             N_HOLES = N_HOLES + 1
 232         IF (IOS > 0) THEN
                WRITE(MESSAGE,'(A,I6)') 'ERROR: Problem with EVHO line number ',N_HOLES + 1
-               CALL SHUTDOWN(MESSAGE)
+               CALL SHUTDOWN(MESSAGE) ; RETURN
             END IF
          END DO COUNT_EVHO_LOOP
 231      REWIND(LU_INPUT)
@@ -1243,7 +1246,7 @@ CONTAINS
             N_SSTANDS = N_SSTANDS + 1
 234         IF (IOS > 0) THEN
                WRITE(MESSAGE,'(A,I6)') 'ERROR: Problem with EVSS line number ',N_SSTANDS + 1
-               CALL SHUTDOWN(MESSAGE)
+               CALL SHUTDOWN(MESSAGE) ; RETURN
             END IF
          END DO COUNT_EVSS_LOOP
 233      REWIND(LU_INPUT)
@@ -1260,7 +1263,7 @@ CONTAINS
             N_STRS = N_STRS + 1
 236         IF (IOS > 0) THEN
                WRITE(MESSAGE,'(A,I6)') 'ERROR: Problem with STRS line number ',N_STRS + 1
-               CALL SHUTDOWN(MESSAGE)
+               CALL SHUTDOWN(MESSAGE) ; RETURN
             END IF
          END DO COUNT_STRS_LOOP
 235      REWIND(LU_INPUT)
@@ -1277,7 +1280,7 @@ CONTAINS
             N_EDEV = N_EDEV + 1
 238         IF (IOS > 0) THEN
                WRITE(MESSAGE,'(A,I6)') 'ERROR: Problem with EDEV line number ',N_EDEV + 1
-               CALL SHUTDOWN(MESSAGE)
+               CALL SHUTDOWN(MESSAGE) ; RETURN
             END IF
          END DO COUNT_EDEV_LOOP
 237      REWIND(LU_INPUT)
@@ -1660,7 +1663,7 @@ CONTAINS
 
             IF (.NOT.EVAC_FDS6) THEN
                WRITE(MESSAGE,'(A,A,A)') 'ERROR: PERS ',TRIM(ID),' EVAC_FDS6=F is not anymore supported.'
-               CALL SHUTDOWN(MESSAGE)
+               CALL SHUTDOWN(MESSAGE) ; RETURN
             END IF
             ! IMO MSC.1/Circ. 1238, ANNEX 2, Table 3.4, uniform distributions for velocity
             SELECT CASE (TRIM(DEFAULT_PROPERTIES))
@@ -1927,7 +1930,7 @@ CONTAINS
             CASE Default
                IF (MYID == MAX(0,EVAC_PROCESS)) THEN
                   WRITE(MESSAGE,'(A,A,A)') 'ERROR: PERS ',TRIM(ID),' problem with DEFAULT_PROPERTIES'
-                  CALL SHUTDOWN(MESSAGE)
+                  CALL SHUTDOWN(MESSAGE) ; RETURN
                END IF
             END SELECT
 
@@ -1936,14 +1939,14 @@ CONTAINS
          IF (PRE_MEAN < 0._EB .OR. PRE_LOW < 0._EB) THEN
             IF (MYID == MAX(0,EVAC_PROCESS)) THEN
                WRITE(MESSAGE,'(A,A,A)') 'ERROR: PERS ',TRIM(ID), ' PRE-evacuation time should positive.'
-               CALL SHUTDOWN(MESSAGE)
+               CALL SHUTDOWN(MESSAGE) ; RETURN
             END IF
          END IF
 
          IF (FED_ACTIVITY < 1 .OR. FED_ACTIVITY > 3) THEN
             IF (MYID == MAX(0,EVAC_PROCESS)) THEN
                WRITE(MESSAGE,'(A,A,A,I3)') 'ERROR: PERS ',TRIM(ID), ' not a valid FED activity switch: ',FED_ACTIVITY
-               CALL SHUTDOWN(MESSAGE)
+               CALL SHUTDOWN(MESSAGE) ; RETURN
             END IF
          END IF
 
@@ -1994,7 +1997,7 @@ CONTAINS
             DO I = 1, N-1
                IF (TRIM(ID) == TRIM(EVAC_PERSON_CLASSES(I)%ID)) THEN
                   WRITE(MESSAGE,'(A,I4,A,I4,A,A)') 'ERROR: PERS lines',I,' and',N,', ID strings are not unique: ',TRIM(ID)
-                  CALL SHUTDOWN(MESSAGE)
+                  CALL SHUTDOWN(MESSAGE) ; RETURN
 
                END IF
             END DO
@@ -2107,7 +2110,7 @@ CONTAINS
       END IF
       IF(SMOKE_MIN_SPEED > -99998.0_EB .AND. SMOKE_MIN_SPEED_FACTOR > -99998.0_EB) THEN
          WRITE(MESSAGE,'(A,I3,A)') 'ERROR: READ_EVAC both SMOKE_MIN_SPEED and SMOKE_MIN_SPEED_FACTOR are given'
-         CALL SHUTDOWN(MESSAGE)
+         CALL SHUTDOWN(MESSAGE) ; RETURN
       END IF
       IF(SMOKE_MIN_SPEED_VISIBILITY < 0.01_EB) THEN
          SMOKE_MIN_SPEED_VISIBILITY = 0.01_EB  ! No divisions by zero
@@ -2122,7 +2125,7 @@ CONTAINS
               ' WARNING: COLOR_METHOD=7 is not defined anymore, the default (-1) is used.'
       CASE Default
          WRITE(MESSAGE,'(A,I3,A)') 'ERROR: READ_EVAC COLOR METHOD',COLOR_METHOD, ' is not defined'
-         CALL SHUTDOWN(MESSAGE)
+         CALL SHUTDOWN(MESSAGE) ; RETURN
       END SELECT
 
       IF (COLOR_METHOD >= 0) EVAC_N_QUANTITIES = EVAC_N_QUANTITIES + 1
@@ -2193,7 +2196,7 @@ CONTAINS
 
          IF ( n-1 /= EVAC_N_QUANTITIES ) THEN
             WRITE(MESSAGE,'(A,2I4,A)') 'ERROR: Evac output quantities ',EVAC_N_QUANTITIES,n-1, ' Some bug in the program.'
-            CALL SHUTDOWN(MESSAGE)
+            CALL SHUTDOWN(MESSAGE) ; RETURN
          END IF
       END IF
 
@@ -2288,7 +2291,7 @@ CONTAINS
             DO I = 1, N-1
                IF (TRIM(ID) == TRIM(EVAC_EXITS(I)%ID)) THEN
                   WRITE(MESSAGE,'(A,I4,A,I4,A,A)') 'ERROR: EXIT lines',I,' and',N,', ID strings are not unique: ',TRIM(ID)
-                  CALL SHUTDOWN(MESSAGE)
+                  CALL SHUTDOWN(MESSAGE) ; RETURN
                END IF
             END DO
          END IF
@@ -2329,11 +2332,11 @@ CONTAINS
          
          IF (PEX%IMESH == 0) THEN
             WRITE(MESSAGE,'(A,A,A)') 'ERROR: EXIT ',TRIM(ID), ' problem with IMESH, no mesh found'
-            CALL SHUTDOWN(MESSAGE)
+            CALL SHUTDOWN(MESSAGE) ; RETURN
          END IF
          IF (ii > 1) THEN
             WRITE(MESSAGE,'(A,A,A)') 'ERROR: EXIT ',TRIM(ID), ' not an unique mesh found '
-            CALL SHUTDOWN(MESSAGE)
+            CALL SHUTDOWN(MESSAGE) ; RETURN
          END IF
 
          IF (DEFINE_MESH) EVAC_EXITS(N)%I_EMESH_EXITS = N_TMP
@@ -2342,11 +2345,11 @@ CONTAINS
 
          IF (XB(1)/=XB(2) .AND. XB(3)/=XB(4) .AND. .NOT. ABS(IOR)==3) THEN
             WRITE(MESSAGE,'(A,A,A)') 'ERROR: EXIT ',TRIM(ID),' must be a vertical plane'
-            CALL SHUTDOWN(MESSAGE)
+            CALL SHUTDOWN(MESSAGE) ; RETURN
          ENDIF
          IF (XB(1)==XB(2) .AND. XB(3)==XB(4) .AND. ABS(IOR)==3) THEN
             WRITE(MESSAGE,'(A,A,A)') 'ERROR: Plane counter EXIT ',TRIM(ID),' must be a horizontal plane'
-            CALL SHUTDOWN(MESSAGE)
+            CALL SHUTDOWN(MESSAGE) ; RETURN
          ENDIF
 
          ! User input
@@ -2461,18 +2464,18 @@ CONTAINS
          CASE (-3,+3)
             IF ( (XB(4)-XB(3)) <= 0.0_EB .OR. (XB(2)-XB(1)) <= 0.0_EB) THEN
                WRITE(MESSAGE,'(A,A,A)') 'ERROR: EXIT ',TRIM(ID),' IOR=+-3 but not a horizontal plane'
-               CALL SHUTDOWN(MESSAGE)
+               CALL SHUTDOWN(MESSAGE) ; RETURN
             END IF
             PEX%ORIENTATION(3)=REAL(SIGN(1,IOR),EB)
             PEX%Width = ABS(XB(2)-XB(1)) * ABS(XB(4)-XB(3))  ! Area of the plane counter
          CASE (0)
             IF ( (XB(4)-XB(3)) <= 0.0_EB .OR. (XB(2)-XB(1)) <= 0.0_EB) THEN
                WRITE(MESSAGE,'(A,A,A)') 'ERROR: EXIT ',TRIM(ID),' no IOR but not a horizontal plane'
-               CALL SHUTDOWN(MESSAGE)
+               CALL SHUTDOWN(MESSAGE) ; RETURN
             END IF
          CASE Default
             WRITE(MESSAGE,'(A,A,A)') 'ERROR: EXIT ',TRIM(ID),' problem with IOR'
-            CALL SHUTDOWN(MESSAGE)
+            CALL SHUTDOWN(MESSAGE) ; RETURN
          END SELECT
 
          L_TMP=.FALSE.
@@ -2485,7 +2488,7 @@ CONTAINS
          END DO
          IF (.NOT.(TRIM(FLOW_FIELD_ID)=='null' .OR. L_TMP)) THEN
             WRITE(MESSAGE,'(A,A,A)') 'ERROR: EXIT ',TRIM(ID),' problem with FLOW_FIELD_ID'
-            CALL SHUTDOWN(MESSAGE)
+            CALL SHUTDOWN(MESSAGE) ; RETURN
          END IF
          L_TMP=.FALSE.
          DO i = 1, NMESHES
@@ -2497,7 +2500,7 @@ CONTAINS
          END DO
          IF (.NOT.(TRIM(VENT_FFIELD)=='null' .OR. L_TMP)) THEN
             WRITE(MESSAGE,'(A,A,A)') 'ERROR: EXIT ',TRIM(ID),' problem with VENT_FFIELD'
-            CALL SHUTDOWN(MESSAGE)
+            CALL SHUTDOWN(MESSAGE) ; RETURN
          END IF
          ! 
          ! Check which vent field. If VENT_FFIELD is not found, use the main evac grid.
@@ -2552,15 +2555,15 @@ CONTAINS
          END DO PEX_Mesh3Loop
          IF (ii == 0 .AND. .NOT.COUNT_ONLY .AND. SHOW) THEN
             WRITE(MESSAGE,'(A,A,A)') 'ERROR: EXIT line ',TRIM(PEX%ID), ' problem with XYZ, no mesh found'
-            CALL SHUTDOWN(MESSAGE)
+            CALL SHUTDOWN(MESSAGE) ; RETURN
          END IF
          IF (ii > 1) THEN
             WRITE(MESSAGE,'(A,A,A)') 'ERROR: EXIT line ',TRIM(PEX%ID), ' problem with XYZ, not an unique mesh found'
-            CALL SHUTDOWN(MESSAGE)
+            CALL SHUTDOWN(MESSAGE) ; RETURN
          END IF
          IF (iii /= PEX%IMESH .AND. .NOT.COUNT_ONLY .AND. SHOW) THEN
             WRITE(MESSAGE,'(A,A,A)') 'ERROR: EXIT line ',TRIM(PEX%ID), ' problem with XYZ, wrong mesh found'
-            CALL SHUTDOWN(MESSAGE)
+            CALL SHUTDOWN(MESSAGE) ; RETURN
          END IF
          M => MESHES(PEX%IMESH)
          II = FLOOR(M%CELLSI(FLOOR((PEX%X-M%XS)*M%RDXINT))+ 1.0_EB)
@@ -2568,7 +2571,7 @@ CONTAINS
          KK = FLOOR(M%CELLSK(FLOOR((PEX%Z-M%ZS)*M%RDZINT))+ 1.0_EB)
          IF (M%SOLID(M%CELL_INDEX(II,JJ,KK)) .AND. .NOT.COUNT_ONLY .AND. SHOW) THEN
             WRITE(MESSAGE,'(A,A,A)') 'ERROR: EXIT line ',TRIM(PEX%ID), ' problem with XYZ, inside solid'
-            CALL SHUTDOWN(MESSAGE)
+            CALL SHUTDOWN(MESSAGE) ; RETURN
          END IF
 
          ! PEX%Z is used to plot the door on the correct height in Smokeview.
@@ -2728,7 +2731,7 @@ CONTAINS
             DO I = 1, N-1
                IF (TRIM(ID) == TRIM(EVAC_DOORS(I)%ID)) THEN
                   WRITE(MESSAGE,'(A,I4,A,I4,A,A)') 'ERROR: DOOR lines',I,' and',N,', ID strings are not unique: ',TRIM(ID)
-                  CALL SHUTDOWN(MESSAGE)
+                  CALL SHUTDOWN(MESSAGE) ; RETURN
 
                END IF
             END DO
@@ -2790,11 +2793,11 @@ CONTAINS
          END DO PDX_StrsLoop
          IF (PDX%IMESH == 0) THEN
             WRITE(MESSAGE,'(A,A,A)') 'ERROR: DOOR ',TRIM(ID), ' problem with IMESH, no mesh found'
-            CALL SHUTDOWN(MESSAGE)
+            CALL SHUTDOWN(MESSAGE) ; RETURN
          END IF
          IF (ii > 1) THEN
             WRITE(MESSAGE,'(A,A,A)') 'ERROR: DOOR ',TRIM(ID), ' not an unique mesh found '
-            CALL SHUTDOWN(MESSAGE)
+            CALL SHUTDOWN(MESSAGE) ; RETURN
          END IF
          ! Use the main evacuation mesh flow field if none is given
          IF (TRIM(FLOW_FIELD_ID) == 'null') THEN
@@ -2806,7 +2809,7 @@ CONTAINS
 
          IF (XB(1)/=XB(2) .AND. XB(3)/=XB(4)) THEN
             WRITE(MESSAGE,'(A,A,A)') 'ERROR: DOOR ',TRIM(ID),' must be a plane'
-            CALL SHUTDOWN(MESSAGE)
+            CALL SHUTDOWN(MESSAGE) ; RETURN
          ENDIF
 
          ! User input
@@ -2924,17 +2927,17 @@ CONTAINS
          CASE (-3)
             IF ( (XB(4)-XB(3)) <= 0.0_EB .OR. (XB(2)-XB(1)) <= 0.0_EB) THEN
                WRITE(MESSAGE,'(A,A,A)') 'ERROR: DOOR ',TRIM(ID),' IOR=-3 but not 3-dim object'
-               CALL SHUTDOWN(MESSAGE)
+               CALL SHUTDOWN(MESSAGE) ; RETURN
             END IF
             PDX%ORIENTATION(3)=REAL(SIGN(1,IOR),EB)
          CASE (0)
             IF ( (XB(4)-XB(3)) <= 0.0_EB .OR. (XB(2)-XB(1)) <= 0.0_EB) THEN
                WRITE(MESSAGE,'(A,A,A)') 'ERROR: DOOR ',TRIM(ID),' no IOR but not 3-dim object'
-               CALL SHUTDOWN(MESSAGE)
+               CALL SHUTDOWN(MESSAGE) ; RETURN
             END IF
          CASE Default
             WRITE(MESSAGE,'(A,A,A)') 'ERROR: DOOR ',TRIM(ID),' problem with IOR'
-            CALL SHUTDOWN(MESSAGE)
+            CALL SHUTDOWN(MESSAGE) ; RETURN
          END SELECT
          ! 
 
@@ -2948,7 +2951,7 @@ CONTAINS
          END DO
          IF (.NOT.(TRIM(FLOW_FIELD_ID)=='null' .OR. L_TMP)) THEN
             WRITE(MESSAGE,'(A,A,A)') 'ERROR: DOOR ',TRIM(ID),' problem with FLOW_FIELD_ID'
-            CALL SHUTDOWN(MESSAGE)
+            CALL SHUTDOWN(MESSAGE) ; RETURN
          END IF
          L_TMP=.FALSE.
          DO i = 1, NMESHES
@@ -2960,7 +2963,7 @@ CONTAINS
          END DO
          IF (.NOT.(TRIM(VENT_FFIELD)=='null' .OR. L_TMP)) THEN
             WRITE(MESSAGE,'(A,A,A)') 'ERROR: DOOR ',TRIM(ID),' problem with VENT_FFIELD'
-            CALL SHUTDOWN(MESSAGE)
+            CALL SHUTDOWN(MESSAGE) ; RETURN
          END IF
 
          ! Check which vent field. If VENT_FFIELD is not found, use the main evac grid.
@@ -3015,15 +3018,15 @@ CONTAINS
          END DO PDX_Mesh3Loop
          IF (ii == 0) THEN
             WRITE(MESSAGE,'(A,A,A)') 'ERROR: DOOR line ',TRIM(PDX%ID), ' problem with XYZ, no mesh found'
-            CALL SHUTDOWN(MESSAGE)
+            CALL SHUTDOWN(MESSAGE) ; RETURN
          END IF
          IF (ii > PDX%IMESH) THEN
             WRITE(MESSAGE,'(A,A,A)') 'ERROR: DOOR line ',TRIM(PDX%ID), ' problem with XYZ, not an unique mesh found'
-            CALL SHUTDOWN(MESSAGE)
+            CALL SHUTDOWN(MESSAGE) ; RETURN
          END IF
          IF (iii /= PDX%IMESH .AND. SHOW) THEN
             WRITE(MESSAGE,'(A,A,A)') 'ERROR: DOOR line ',TRIM(PDX%ID), ' problem with XYZ, wrong mesh found'
-            CALL SHUTDOWN(MESSAGE)
+            CALL SHUTDOWN(MESSAGE) ; RETURN
          END IF
          M => MESHES(PDX%IMESH)
          II = FLOOR(M%CELLSI(FLOOR((PDX%X-M%XS)*M%RDXINT))+ 1.0_EB)
@@ -3031,7 +3034,7 @@ CONTAINS
          KK = FLOOR(M%CELLSK(FLOOR((PDX%Z-M%ZS)*M%RDZINT))+ 1.0_EB)
          IF (M%SOLID(M%CELL_INDEX(II,JJ,KK))) THEN
             WRITE(MESSAGE,'(A,A,A)') 'ERROR: DOOR line ',TRIM(PDX%ID), ' problem with XYZ, inside solid'
-            CALL SHUTDOWN(MESSAGE)
+            CALL SHUTDOWN(MESSAGE) ; RETURN
          END IF
 
          ! PDX%Z is used to plot the door on the correct height in Smokeview.
@@ -3135,7 +3138,7 @@ CONTAINS
             DO I = 1, N-1
                IF (TRIM(ID) == TRIM(EVAC_CORRS(I)%ID)) THEN
                   WRITE(MESSAGE,'(A,I4,A,I4,A,A)') 'ERROR: CORR lines',I,' and',N,', ID strings are not unique: ',TRIM(ID)
-                  CALL SHUTDOWN(MESSAGE)
+                  CALL SHUTDOWN(MESSAGE) ; RETURN
                END IF
             END DO
          END IF
@@ -3214,14 +3217,14 @@ CONTAINS
             PCX%MAX_HUMANS_INSIDE = MAX_HUMANS_INSIDE
          ELSE
             WRITE(MESSAGE,'(A,A,A)') 'ERROR: CORR ',TRIM(ID),' MAX_HUMANS_INSIDE <= 0'
-            CALL SHUTDOWN(MESSAGE)
+            CALL SHUTDOWN(MESSAGE) ; RETURN
          END IF
 
          IF (ELEVATOR) THEN
             PCX%ELEVATOR = .TRUE.
             IF (TRAVEL_TIME < 0) THEN
                WRITE(MESSAGE,'(A,A,A)') 'ERROR: CORR ',TRIM(ID),' TRAVEL_TIME < 0 for an elevator'
-               CALL SHUTDOWN(MESSAGE)
+               CALL SHUTDOWN(MESSAGE) ; RETURN
             END IF
             PCX%Travel_Time = TRAVEL_TIME  ! up-down and down-up times supposed to be the same
             PCX%Time_Wait_To_Fill = 5.0_EB ! Wait 5 s if there still empty places in the elevator
@@ -3235,7 +3238,7 @@ CONTAINS
 
          IF (FAC_SPEED < 0) THEN
             WRITE(MESSAGE,'(A,A,A)') 'ERROR: CORR ',TRIM(ID),' FAC_SPEED < 0'
-            CALL SHUTDOWN(MESSAGE)
+            CALL SHUTDOWN(MESSAGE) ; RETURN
          ELSE
             IF (FAC_SPEED == 0.0_EB) FAC_SPEED = 0.6_EB
             PCX%Fac_Speed = FAC_SPEED
@@ -3258,7 +3261,7 @@ CONTAINS
             PCX%Eff_Length = EFF_LENGTH
          ELSE
             WRITE(MESSAGE,'(A,A,A)') 'ERROR: CORR ',TRIM(PCX%ID),' EFF_LENGTH <= 0'
-            CALL SHUTDOWN(MESSAGE)
+            CALL SHUTDOWN(MESSAGE) ; RETURN
          END IF
          PCX%Eff_Area = PCX%Eff_Length*PCX%Eff_Width
 
@@ -3412,11 +3415,11 @@ CONTAINS
          END DO STRP_MeshLoop
          IF (ii == 0) THEN
             WRITE(MESSAGE,'(A,A,A,A,A)') 'ERROR: STRS ',TRIM(STRP%ID),' no mesh ',TRIM(MESH_ID),' found'
-            CALL SHUTDOWN(MESSAGE)
+            CALL SHUTDOWN(MESSAGE) ; RETURN
          END IF
          IF (ii > 1) THEN
             WRITE(MESSAGE,'(A,A,A,A,A)') 'ERROR: STRS ',TRIM(STRP%ID),' no unique mesh ',TRIM(MESH_ID),' found'
-            CALL SHUTDOWN(MESSAGE)
+            CALL SHUTDOWN(MESSAGE) ; RETURN
          END IF
 
          ! Count number of cores
@@ -3435,7 +3438,7 @@ CONTAINS
 
          IF (N_LANDINGS>500) THEN
             WRITE(MESSAGE,'(A,A,A)') 'ERROR: STRS ',TRIM(STRP%ID),' N_LANDINGS > 500'
-            CALL SHUTDOWN(MESSAGE)
+            CALL SHUTDOWN(MESSAGE) ; RETURN
          END IF
          STRP%N_LANDINGS = N_LANDINGS
          STRP%N_NODES = 2*N_LANDINGS - 1
@@ -3458,7 +3461,7 @@ CONTAINS
             STRP%XB_CORE(1,5:6) = XB(5:6)
             IF (ALL(XB_CORE==0._EB)) THEN
                WRITE(MESSAGE,'(3A)') 'ERROR: STRS object ', TRIM(ID), ' has no XB_CORE defined.'
-               CALL SHUTDOWN(MESSAGE)
+               CALL SHUTDOWN(MESSAGE) ; RETURN
             ENDIF
 
          ELSE
@@ -3667,7 +3670,7 @@ CONTAINS
                   WRITE(MESSAGE,'(8A)') 'ERROR: ', TRIM(EVAC_Node_List(n)%Node_Type), ': ', &
                        TRIM(EVAC_Node_List(n)%ID), ' has same ID as ', &
                        TRIM(EVAC_Node_List(i)%Node_Type), ': ', TRIM(EVAC_Node_List(i)%ID)
-                  CALL SHUTDOWN(MESSAGE)
+                  CALL SHUTDOWN(MESSAGE) ; RETURN
                END IF
             END DO
          END DO
@@ -3754,7 +3757,7 @@ CONTAINS
                  ((MAX_FLOW > TWO_EPSILON_EB) .OR. TRIM(MAX_HUMANS_RAMP)/='null')) THEN
                WRITE(MESSAGE,'(A,A,A)') 'ERROR: ENTR line ',TRIM(ID),&
                     ' problem with CROWBAR_INPUT_FILE and MAX_FLOW or MAX_HUMANS_RAMP'
-               CALL SHUTDOWN(MESSAGE)
+               CALL SHUTDOWN(MESSAGE) ; RETURN
             END IF
          END IF
          !
@@ -3824,7 +3827,7 @@ CONTAINS
             DO I = 1, N-1
                IF (TRIM(ID) == TRIM(EVAC_ENTRYS(I)%ID)) THEN
                   WRITE(MESSAGE,'(A,I4,A,I4,A,A)') 'ERROR: ENTR lines',I,' and',N,', ID strings are not unique: ',TRIM(ID)
-                  CALL SHUTDOWN(MESSAGE)
+                  CALL SHUTDOWN(MESSAGE) ; RETURN
 
                END IF
             END DO
@@ -3841,7 +3844,7 @@ CONTAINS
 
          IF (TRIM(KNOWN_DOOR_NAMES(51)) /= 'null') THEN
             WRITE(MESSAGE,'(A,A,A)') 'ERROR: ENTR line ',TRIM(ID), ' problem with KNOWN_DOOR_NAMES'
-            CALL SHUTDOWN(MESSAGE)
+            CALL SHUTDOWN(MESSAGE) ; RETURN
          END IF
          IF (TRIM(KNOWN_DOOR_NAMES(1)) == 'null') THEN
             i = 0 ! no doors given
@@ -3895,7 +3898,7 @@ CONTAINS
          END DO
          IF (.NOT.(TRIM(FLOW_FIELD_ID)=='null' .OR. L_TMP)) THEN
             WRITE(MESSAGE,'(A,A,A)') 'ERROR: ENTR ',TRIM(ID),' problem with FLOW_FIELD_ID'
-            CALL SHUTDOWN(MESSAGE)
+            CALL SHUTDOWN(MESSAGE) ; RETURN
          END IF
          ! 
          ! Check which evacuation floor
@@ -3917,11 +3920,11 @@ CONTAINS
          END DO PNX_MeshLoop
          IF (PNX%IMESH == 0) THEN
             WRITE(MESSAGE,'(A,A,A)') 'ERROR: ENTR ',TRIM(ID), ' problem with IMESH, no mesh found'
-            CALL SHUTDOWN(MESSAGE)
+            CALL SHUTDOWN(MESSAGE) ; RETURN
          END IF
          IF (ii > 1) THEN
             WRITE(MESSAGE,'(A,A,A)') 'ERROR: ENTR ',TRIM(ID), ' not an unique mesh found '
-            CALL SHUTDOWN(MESSAGE)
+            CALL SHUTDOWN(MESSAGE) ; RETURN
          END IF
 
          nm = PNX%IMESH
@@ -3929,11 +3932,11 @@ CONTAINS
 
          IF (ABS(IOR)<3 .AND. XB(1)/=XB(2) .AND. XB(3)/=XB(4)) THEN
             WRITE(MESSAGE,'(A,A,A)') 'ERROR: ENTR ',TRIM(ID),' must be a plane'
-            CALL SHUTDOWN(MESSAGE)
+            CALL SHUTDOWN(MESSAGE) ; RETURN
          ENDIF
          IF (ABS(IOR)==3 .AND. ABS(XB(1)-XB(2))*ABS(XB(3)-XB(4)) < TWO_EPSILON_EB) THEN
             WRITE(MESSAGE,'(A,A,A)') 'ERROR: ENTR ',TRIM(ID),' must have a positive area'
-            CALL SHUTDOWN(MESSAGE)
+            CALL SHUTDOWN(MESSAGE) ; RETURN
          ENDIF
 
          ! User input
@@ -4032,18 +4035,18 @@ CONTAINS
          CASE (3)
             IF ( (XB(4)-XB(3)) <= TWO_EPSILON_EB .OR. (XB(2)-XB(1)) <= TWO_EPSILON_EB) THEN
                WRITE(MESSAGE,'(A,A,A)') 'ERROR: ENTR',TRIM(ID),' IOR=3 but not 3-dim object'
-               CALL SHUTDOWN(MESSAGE)
+               CALL SHUTDOWN(MESSAGE) ; RETURN
             END IF
             PNX%ORIENTATION(3)=-REAL(SIGN(1,IOR),EB)
             PNX%AREA = ABS(XB(4)-XB(3))*ABS(XB(2)-XB(1))  ! XB area used for Crowbar project
          CASE (0)
             IF ( (XB(4)-XB(3)) <= 0.0_EB .OR. (XB(2)-XB(1)) <= 0.0_EB) THEN
                WRITE(MESSAGE,'(A,A,A)') 'ERROR: ENTR',TRIM(ID),' no IOR but not 3-dim object'
-               CALL SHUTDOWN(MESSAGE)
+               CALL SHUTDOWN(MESSAGE) ; RETURN
             END IF
          CASE Default
             WRITE(MESSAGE,'(A,A,A)') 'ERROR: ENTR',TRIM(ID),' problem with IOR'
-            CALL SHUTDOWN(MESSAGE)
+            CALL SHUTDOWN(MESSAGE) ; RETURN
          END SELECT
 
          ! Check if entry leads to Stairs
@@ -4076,7 +4079,7 @@ CONTAINS
             IF ( .NOT.( ABS(KNOWN_DOOR_PROBS(i)-1.0_EB) < 0.0001_EB .OR. ABS(KNOWN_DOOR_PROBS(i)) < 0.0001_EB ) )  THEN
                WRITE(MESSAGE,'(A,A,A,f12.6,A)') 'ERROR: ENTR line ',TRIM(PNX%ID), &
                     ' problem with probability, ', KNOWN_DOOR_PROBS(i),' it should be zero or one.'
-               CALL SHUTDOWN(MESSAGE)
+               CALL SHUTDOWN(MESSAGE) ; RETURN
             END IF
             PNX%P_VENT_FFIELDS(i) = MAX(0.0_EB,KNOWN_DOOR_PROBS(i))
             PNX%I_VENT_FFIELDS(i) = 0
@@ -4096,7 +4099,7 @@ CONTAINS
             IF ( PNX%I_VENT_FFIELDS(i)*PNX%I_DOOR_NODES(i) == 0 ) THEN
                WRITE(MESSAGE,'(A,A,A,A,A)') 'ERROR: ENTR line ',TRIM(PNX%ID), &
                     ' problem with door/exit names, ', TRIM(KNOWN_DOOR_NAMES(i)),' not found'
-               CALL SHUTDOWN(MESSAGE)
+               CALL SHUTDOWN(MESSAGE) ; RETURN
             END IF
          END DO
          !
@@ -4114,7 +4117,7 @@ CONTAINS
          IF ( PNX%I_VENT_FFIELDS(0) == 0 ) THEN
             WRITE(MESSAGE,'(A,A,A,A,A)') 'ERROR: ENTR line ',TRIM(PNX%ID),&
                  ' problem with flow field name, ', TRIM(PNX%GRID_NAME),' not found'
-            CALL SHUTDOWN(MESSAGE)
+            CALL SHUTDOWN(MESSAGE) ; RETURN
          END IF
          ! 
       END DO READ_ENTR_LOOP
@@ -4195,7 +4198,7 @@ CONTAINS
          IF (MYID==MAX(0,EVAC_PROCESS) .AND. TRIM(CROWBAR_INPUT_FILE)/='null' .AND. NUMBER_INITIAL_PERSONS < 1) THEN
             WRITE(MESSAGE,'(A,A,A)') 'ERROR: EVAC line ',TRIM(ID),&
                  ' problem with CROWBAR_INPUT_FILE and NUMBER_INITIAL_PERSONS'
-            CALL SHUTDOWN(MESSAGE)
+            CALL SHUTDOWN(MESSAGE) ; RETURN
          END IF
          IF (QUANTITY == 'BLACK')   AVATAR_COLOR = 'BLACK'  
          IF (QUANTITY == 'YELLOW')  AVATAR_COLOR = 'YELLOW' 
@@ -4268,14 +4271,14 @@ CONTAINS
             DO I = 1, N-1
                IF (TRIM(ID) == TRIM(EVAC_EVACS(I)%ID)) THEN
                   WRITE(MESSAGE,'(A,I4,A,I4,A,A)') 'ERROR: EVAC lines',I,' and',N,', ID strings are not unique: ',TRIM(ID)
-                  CALL SHUTDOWN(MESSAGE)
+                  CALL SHUTDOWN(MESSAGE) ; RETURN
 
                END IF
             END DO
          END IF
          IF (TRIM(PERS_ID) == 'null') THEN
             WRITE(MESSAGE,'(A,A,A)') 'ERROR: EVAC line ',TRIM(ID),' no PERS_ID given'
-            CALL SHUTDOWN(MESSAGE)
+            CALL SHUTDOWN(MESSAGE) ; RETURN
          ELSE
             ii = 1
             DO i = 1,NPC_PERS
@@ -4284,13 +4287,13 @@ CONTAINS
             END DO
             IF (ii > NPC_PERS) THEN
                WRITE(MESSAGE,'(A,A,A)') 'ERROR: EVAC line ',TRIM(ID), ' problem with PERS_ID'
-               CALL SHUTDOWN(MESSAGE)
+               CALL SHUTDOWN(MESSAGE) ; RETURN
             END IF
          END IF
 
          IF (TRIM(KNOWN_DOOR_NAMES(51)) /= 'null') THEN
             WRITE(MESSAGE,'(A,A,A)') 'ERROR: EVAC line ',TRIM(ID), ' problem with KNOWN_DOOR_NAMES'
-            CALL SHUTDOWN(MESSAGE)
+            CALL SHUTDOWN(MESSAGE) ; RETURN
          END IF
          IF (TRIM(KNOWN_DOOR_NAMES(1)) == 'null') THEN
             i = 0 ! no doors given
@@ -4396,7 +4399,7 @@ CONTAINS
          END DO
          IF (.NOT.(TRIM(FLOW_FIELD_ID)=='null' .OR. L_TMP)) THEN
             WRITE(MESSAGE,'(A,A,A)') 'ERROR: EVAC ',TRIM(ID),' problem with FLOW_FIELD_ID'
-            CALL SHUTDOWN(MESSAGE)
+            CALL SHUTDOWN(MESSAGE) ; RETURN
          END IF
 
          ! Check which evacuation floor
@@ -4414,11 +4417,11 @@ CONTAINS
          END DO HP_MeshLoop
          IF (HPT%IMESH == 0) THEN
             WRITE(MESSAGE,'(A,A,A)') 'ERROR: EVAC line ',TRIM(ID),' problem with IMESH, no mesh found'
-            CALL SHUTDOWN(MESSAGE)
+            CALL SHUTDOWN(MESSAGE) ; RETURN
          END IF
          IF (ii > 1) THEN
             WRITE(MESSAGE,'(A,A,A)') 'ERROR: EVAC line ',TRIM(ID), ' not an unique mesh found '
-            CALL SHUTDOWN(MESSAGE)
+            CALL SHUTDOWN(MESSAGE) ; RETURN
          END IF
 
          ! Use the main_evac_grid flow field if none is given
@@ -4447,7 +4450,7 @@ CONTAINS
             IF ( HPT%I_VENT_FFIELDS(i)*HPT%I_DOOR_NODES(i) == 0 ) THEN
                WRITE(MESSAGE,'(A,A,A,A,A)') 'ERROR: EVAC line ',TRIM(HPT%ID), &
                     ' problem with door/exit names, ', TRIM(KNOWN_DOOR_NAMES(i)),' not found'
-               CALL SHUTDOWN(MESSAGE)
+               CALL SHUTDOWN(MESSAGE) ; RETURN
             END IF
          END DO
          !
@@ -4465,7 +4468,7 @@ CONTAINS
          IF ( HPT%I_VENT_FFIELDS(0) == 0 ) THEN
             WRITE(MESSAGE,'(A,A,A,A,A)') 'ERROR: EVAC line ',TRIM(HPT%ID), &
                  ' problem with flow field name, ', TRIM(HPT%GRID_NAME),' not found'
-            CALL SHUTDOWN(MESSAGE)
+            CALL SHUTDOWN(MESSAGE) ; RETURN
          END IF
          !
       END DO READ_EVAC_LOOP
@@ -4569,11 +4572,11 @@ CONTAINS
             ELSE
                WRITE(MESSAGE,'(A,A,A,A,A)')  'ERROR: EDEV ',TRIM(ID),', ',TRIM(MESH_ID),' is not a main evacuation mesh'
             END IF
-            CALL SHUTDOWN(MESSAGE)
+            CALL SHUTDOWN(MESSAGE) ; RETURN
          ENDIF
          IF (TRIM(MESH_ID) == 'null' .AND. .NOT.GLOBAL) THEN
             WRITE(MESSAGE,'(A,I4,A)')  'ERROR: EDEV ',N,' is not global, it must have MESH_ID'
-            CALL SHUTDOWN(MESSAGE)
+            CALL SHUTDOWN(MESSAGE) ; RETURN
          ENDIF
 
          ! Check the INPUT_IDs
@@ -4593,7 +4596,7 @@ CONTAINS
             ELSE
                WRITE(MESSAGE,'(A,A,A)')  'ERROR: EDEV ',TRIM(ID),' must have at least one input'
             END IF
-            CALL SHUTDOWN(MESSAGE)
+            CALL SHUTDOWN(MESSAGE) ; RETURN
          ENDIF
          ALLOCATE(EDV%INPUT_ID(EDV%N_INPUTS),STAT=IZERO)
          CALL ChkMemErr('READ_EVAC','INPUT_ID',IZERO) 
@@ -4682,13 +4685,13 @@ CONTAINS
          END IF
          IF (ii > 1) THEN
             WRITE(MESSAGE,'(A,A,A)') 'ERROR: EVHO line ',TRIM(EHX%ID), ' not an unique mesh found '
-            CALL SHUTDOWN(MESSAGE)
+            CALL SHUTDOWN(MESSAGE) ; RETURN
          END IF
          IF (TRIM(ID) /= 'null') THEN
             DO I = 1, N-1
                IF (TRIM(ID) == TRIM(EVAC_HOLES(I)%ID)) THEN
                   WRITE(MESSAGE,'(A,I4,A,I4,A,A)') 'ERROR: EVHO lines',I,' and',N,', ID strings are not unique: ',TRIM(ID)
-                  CALL SHUTDOWN(MESSAGE)
+                  CALL SHUTDOWN(MESSAGE) ; RETURN
 
                END IF
             END DO
@@ -4800,17 +4803,17 @@ CONTAINS
          END DO ESS_MeshLoop
          IF (ESS%IMESH == 0) THEN
             WRITE(MESSAGE,'(A,A,A)') 'ERROR: EVSS line ',TRIM(ESS%ID), ' problem with IMESH, no mesh found'
-            CALL SHUTDOWN(MESSAGE)
+            CALL SHUTDOWN(MESSAGE) ; RETURN
          END IF
          IF (ii > 1) THEN
             WRITE(MESSAGE,'(A,A,A)') 'ERROR: EVSS line ',TRIM(ESS%ID), ' not an unique mesh found '
-            CALL SHUTDOWN(MESSAGE)
+            CALL SHUTDOWN(MESSAGE) ; RETURN
          END IF
          IF (TRIM(ID) /= 'null') THEN
             DO I = 1, N-1
                IF (TRIM(ID) == TRIM(EVAC_SSTANDS(I)%ID)) THEN
                   WRITE(MESSAGE,'(A,I4,A,I4,A,A)') 'ERROR: EVSS lines',I,' and',N,', ID strings are not unique: ',TRIM(ID)
-                  CALL SHUTDOWN(MESSAGE)
+                  CALL SHUTDOWN(MESSAGE) ; RETURN
 
                END IF
             END DO
@@ -4825,7 +4828,7 @@ CONTAINS
          END DO
          IF (.NOT.(TRIM(VENT_FFIELD)=='null' .OR. L_TMP)) THEN
             WRITE(MESSAGE,'(A,A,A)') 'ERROR: EVSS ',TRIM(ID),' problem with VENT_FFIELD'
-            CALL SHUTDOWN(MESSAGE)
+            CALL SHUTDOWN(MESSAGE) ; RETURN
          END IF
          ! Check which vent field. If VENT_FFIELD is not found, use the main evac grid.
          ESS%I_VENT_FFIELD = 0
@@ -4872,7 +4875,7 @@ CONTAINS
             ESS%ORIENTATION(3) = ESS%COS_Y
          CASE Default
             WRITE(MESSAGE,'(A,A,A)') 'ERROR: EVSS ',TRIM(ESS%ID),' problem with IOR'
-            CALL SHUTDOWN(MESSAGE)
+            CALL SHUTDOWN(MESSAGE) ; RETURN
          END SELECT
 
          ! Colors, integer RGB(3), e.g., (23,255,0)
@@ -5012,7 +5015,7 @@ CONTAINS
          IF (EVAC_CORRS(n)%INODE2 == 0 .OR. EVAC_CORRS(n)%IMESH2 == 0) THEN
             WRITE(MESSAGE,'(A,A,A,A)') 'ERROR: CORR ',Trim(EVAC_CORRS(n)%ID),' problem with TO_NODE ',&
                  Trim(EVAC_CORRS(n)%TO_NODE)
-            CALL SHUTDOWN(MESSAGE)
+            CALL SHUTDOWN(MESSAGE) ; RETURN
          END IF
       END DO
 
@@ -5051,7 +5054,7 @@ CONTAINS
          IF (EVAC_DOORS(n)%INODE2 == 0 .OR. EVAC_DOORS(n)%IMESH2 == 0) THEN
             WRITE(MESSAGE,'(A,A,A,A)') 'ERROR: DOOR ',TRIM(EVAC_DOORS(n)%ID),' problem with TO_NODE ',&
                  TRIM(EVAC_DOORS(n)%TO_NODE)
-            CALL SHUTDOWN(MESSAGE)
+            CALL SHUTDOWN(MESSAGE) ; RETURN
          END IF
       END DO
 
@@ -5063,14 +5066,14 @@ CONTAINS
                PDX => EVAC_DOORS(EVAC_Node_List(i)%Node_Index)
                IF ((EVAC_DOORS(n)%IOR /= -PDX%IOR) .OR. ABS(EVAC_DOORS(n)%Width-PDX%Width) > 0.1_EB ) THEN
                   WRITE(MESSAGE,'(A,A,A)') 'ERROR: DOOR ',TRIM(EVAC_DOORS(n)%ID),' KEEP_XY Problem'
-                  CALL SHUTDOWN(MESSAGE)
+                  CALL SHUTDOWN(MESSAGE) ; RETURN
                END IF
             END IF
             IF (TRIM(EVAC_Node_List(i)%Node_Type) == 'Entry') THEN
                PNX => EVAC_ENTRYS(EVAC_Node_List(i)%Node_Index)
                IF ((EVAC_DOORS(n)%IOR /= PNX%IOR) .OR. ABS(EVAC_DOORS(n)%Width-PNX%Width) > 0.1_EB ) THEN
                   WRITE(MESSAGE,'(A,A,A)') 'ERROR: DOOR ',TRIM(EVAC_DOORS(n)%ID),' KEEP_XY Problem'
-                  CALL SHUTDOWN(MESSAGE)
+                  CALL SHUTDOWN(MESSAGE) ; RETURN
                END IF
             END IF
          END IF
@@ -5105,7 +5108,7 @@ CONTAINS
          IF (MYID==MAX(0,EVAC_PROCESS) .AND. PDX%STR_INDX/=0 .AND. PDX%STR_SUB_INDX==0) THEN
             WRITE(MESSAGE,'(A,A,A,A,A)') 'ERROR: DOOR line ', TRIM(PDX%ID), ' is in stairs ', &
                  TRIM(EVAC_STRS(PDX%STR_INDX)%ID), ', no node found'
-            CALL SHUTDOWN(MESSAGE)
+            CALL SHUTDOWN(MESSAGE) ; RETURN
          END IF
       END DO
 
@@ -5161,7 +5164,7 @@ CONTAINS
          END DO
          IF (L_TMP .AND. .NOT.(TRIM(EVAC_EXITS(N)%PERS_ID))=='null') THEN
             WRITE(MESSAGE,'(4A)') 'ERROR: EXIT ',TRIM(EVAC_EXITS(N)%ID),' problem with PERS_ID ',TRIM(EVAC_EXITS(N)%PERS_ID)
-            CALL SHUTDOWN(MESSAGE)
+            CALL SHUTDOWN(MESSAGE) ; RETURN
          END IF
          L_TMP = .TRUE.
          DO i = 1, NPC_EVAC
@@ -5169,7 +5172,7 @@ CONTAINS
          END DO
          IF (L_TMP .AND. .NOT.(TRIM(EVAC_EXITS(N)%EVAC_ID))=='null') THEN
             WRITE(MESSAGE,'(4A)') 'ERROR: EXIT ',TRIM(EVAC_EXITS(N)%ID),' problem with EVAC_ID ',TRIM(EVAC_EXITS(n)%EVAC_ID)
-            CALL SHUTDOWN(MESSAGE)
+            CALL SHUTDOWN(MESSAGE) ; RETURN
          END IF
       END DO
 
@@ -5324,14 +5327,14 @@ CONTAINS
           IF (ios/=0) THEN
              WRITE(MESSAGE,'(A)') 'ERROR: Init Evac Dumps: FED READ ERROR'
              CLOSE (LU_EVACFED)
-             CALL SHUTDOWN(MESSAGE)
+             CALL SHUTDOWN(MESSAGE) ; RETURN
           END IF
           I_FED_FILE_FORMAT = ntmp1
           READ (LU_EVACFED,IOSTAT=IOS) n_egrids_tmp, ntmp2, ntmp3, ntmp4, ntmp5, ntmp6
           IF (ios/=0) THEN
              WRITE(MESSAGE,'(A)') 'ERROR: Init Evac Dumps: FED READ ERROR, Restart failed'
              CLOSE (LU_EVACFED)
-             CALL SHUTDOWN(MESSAGE)
+             CALL SHUTDOWN(MESSAGE) ; RETURN
           END IF
           ! Do not read old format. Do not read new format, if there the numbers are not: n_egrids, 4, n_corrs, 8 
           IF (I_FED_FILE_FORMAT==-3) THEN  ! version 2.2.2 file format, no doors and exits
@@ -5339,24 +5342,24 @@ CONTAINS
                   ntmp5 /= 0 .OR. ntmp6 /= 4) THEN
                 WRITE (MESSAGE,FMT='(a,a,a)') ' FDS+Evac Error in FED File: ', TRIM(FN_EVACFED), ', Restart failed'
                 CLOSE (LU_EVACFED)
-                CALL SHUTDOWN(MESSAGE)
+                CALL SHUTDOWN(MESSAGE) ; RETURN
              END IF
           ELSE
              WRITE (MESSAGE,FMT='(a,a,a)') ' FDS+Evac Error in FED File: ', TRIM(FN_EVACFED), ', Old FED file format'
              CLOSE (LU_EVACFED)
-             CALL SHUTDOWN(MESSAGE)
+             CALL SHUTDOWN(MESSAGE) ; RETURN
           END IF
           IF (n_egrids_tmp /= n_egrids) THEN
              WRITE(MESSAGE,'(A,2I4,A)') 'ERROR: Init Evac Dumps: FED ',n_egrids_tmp, n_egrids, ', Restart failed'
              CLOSE (LU_EVACFED)
-             CALL SHUTDOWN(MESSAGE)
+             CALL SHUTDOWN(MESSAGE) ; RETURN
           END IF
           ! Next loop is for evacuation devices (like heat detectors)
           READ (LU_EVACFED,IOSTAT=IOS) ntmp1
           IF (IOS/=0) THEN
              WRITE(MESSAGE,'(A)') 'ERROR: Init Evac Dumps, Restart: FED read error1 for DEVC'
              CLOSE (LU_EVACFED)
-             CALL SHUTDOWN(MESSAGE)
+             CALL SHUTDOWN(MESSAGE) ; RETURN
           END IF
           ALLOCATE(EVAC_DEVICES(MAX(1,ntmp1)), STAT = IZERO)
           CALL ChkMemErr('INITIALIZE_EVAC_DUMPS','EVAC_DEVICES', IZERO)                
@@ -5390,7 +5393,7 @@ CONTAINS
           IF (ntmp1 /= N_DEVC_EVAC) THEN
              WRITE(MESSAGE,'(A)') 'ERROR: Init Evac Dumps, Restart: FED read error2 for DEVC'
              CLOSE (LU_EVACFED)
-             CALL SHUTDOWN(MESSAGE)
+             CALL SHUTDOWN(MESSAGE) ; RETURN
           END IF
 
           ! Position the FED file at the correct position, i.e., at the restart point.
@@ -5417,7 +5420,7 @@ CONTAINS
              IF (IOS/=0) THEN
                 WRITE(MESSAGE,'(A)') 'ERROR: Init Evac Dumps, Restart: FED read error'
                 CLOSE (LU_EVACFED)
-                CALL SHUTDOWN(MESSAGE)
+                CALL SHUTDOWN(MESSAGE) ; RETURN
              END IF
              MESH_LOOP: DO NM=1,NMESHES
                 IF ( .NOT.(EVACUATION_GRID(NM) .AND. EVACUATION_ONLY(NM)) ) CYCLE
@@ -5426,11 +5429,11 @@ CONTAINS
                 IF (IOS/=0) THEN
                    WRITE(MESSAGE,'(A)') 'ERROR: Init Evac Dumps, Restart: FED read error'
                    CLOSE (LU_EVACFED)
-                   CALL SHUTDOWN(MESSAGE)
+                   CALL SHUTDOWN(MESSAGE) ; RETURN
                 END IF
                 IF (IBAR_TMP /= IBAR .OR. JBAR_TMP /= JBAR .OR. N_TMP < 4 ) THEN
                    CLOSE (LU_EVACFED)
-                   CALL SHUTDOWN('ERROR: Init Evac Dumps, Restart: Problems to read the FED file')
+                   CALL SHUTDOWN('ERROR: Init Evac Dumps, Restart: Problems to read the FED file') ; RETURN
                 END IF
                 DO I = 1, IBAR
                    DO J= 1, JBAR
@@ -5438,7 +5441,7 @@ CONTAINS
                       IF (IOS/=0) THEN
                          WRITE(MESSAGE,'(A)') 'ERROR: Init Evac Dumps, Restart: FED read error'
                          CLOSE (LU_EVACFED)
-                         CALL SHUTDOWN(MESSAGE)
+                         CALL SHUTDOWN(MESSAGE) ; RETURN
                       END IF
                    END DO     ! J=1,JBAR
                 END DO       ! I=1,IBAR
@@ -5448,14 +5451,14 @@ CONTAINS
                 IF (IOS/=0) THEN
                    WRITE(MESSAGE,'(A)') 'ERROR: Init Evac Dumps, Restart: FED read error'
                    CLOSE (LU_EVACFED)
-                   CALL SHUTDOWN(MESSAGE)
+                   CALL SHUTDOWN(MESSAGE) ; RETURN
                 END IF
              END DO CORR_LOOP
              READ (LU_EVACFED,IOSTAT=IOS) ntmp1
              IF (IOS/=0) THEN
                 WRITE(MESSAGE,'(A)') 'ERROR: Init Evac Dumps, Restart: FED read error3 for DEVC'
                 CLOSE (LU_EVACFED)
-                CALL SHUTDOWN(MESSAGE)
+                CALL SHUTDOWN(MESSAGE) ; RETURN
              END IF
              n_devc_read = ntmp1
              DO I = 1, n_devc_read
@@ -5463,20 +5466,20 @@ CONTAINS
                 IF (IOS/=0) THEN
                    WRITE(MESSAGE,'(A)') 'ERROR: Init Evac Dumps, Restart: FED read error4 for DEVC'
                    CLOSE (LU_EVACFED)
-                   CALL SHUTDOWN(MESSAGE)
+                   CALL SHUTDOWN(MESSAGE) ; RETURN
                 END IF
                 READ (LU_EVACFED,IOSTAT=IOS) ntmp1, ntmp2, CURRENT_STATE, PRIOR_STATE, tmpout1
                 IF (IOS /= 0 .OR. ntmp1 > N_DEVC_EVAC) THEN
                    WRITE(MESSAGE,'(A)') 'ERROR: Init Evac Dumps, Restart: FED read error5 for DEVC'
                    CLOSE (LU_EVACFED)
-                   CALL SHUTDOWN(MESSAGE)
+                   CALL SHUTDOWN(MESSAGE) ; RETURN
                 END IF
                 j = ntmp1
                 IF (ntmp2 /= EVAC_DEVICES(j)%I_Devc .OR. TRIM(DEVC_ID) /= TRIM(EVAC_DEVICES(j)%DEVC_ID) .OR. &
                      ntmp3 /= EVAC_DEVICES(j)%I_Type) THEN
                    WRITE(MESSAGE,'(A)') 'ERROR: Init Evac Dumps, Restart: FED read error6 for DEVC'
                    CLOSE (LU_EVACFED)
-                   CALL SHUTDOWN(MESSAGE)
+                   CALL SHUTDOWN(MESSAGE) ; RETURN
                 END IF
                 EVAC_DEVICES(j)%T_Change = tmpout1
                 EVAC_DEVICES(j)%CURRENT = CURRENT_STATE
@@ -5497,17 +5500,17 @@ CONTAINS
              I_EVAC = IBCLR(I_EVAC,3)  ! do not read FED
              I_EVAC = IBCLR(I_EVAC,1)  ! do not save FED
           ELSE
-             CALL SHUTDOWN('ERROR: Evac Dumps: FED, no restart yet')
+             CALL SHUTDOWN('ERROR: Evac Dumps: FED, no restart yet') ; RETURN
              OPEN (LU_EVACFED,file=FN_EVACFED,form='unformatted', status='old')
              READ (LU_EVACFED,Iostat=ios) n_egrids_tmp
              IF (ios/=0) THEN
                 WRITE(MESSAGE,'(A)') 'ERROR: Init Evac Dumps: FED READ ERROR'
                 CLOSE (LU_EVACFED)
-                CALL SHUTDOWN(MESSAGE)
+                CALL SHUTDOWN(MESSAGE) ; RETURN
              END IF
              IF (n_egrids_tmp /= n_egrids) THEN
                 WRITE(MESSAGE,'(A,2I4)') 'ERROR: Init Evac Dumps: FED ',n_egrids_tmp, n_egrids
-                CALL SHUTDOWN(MESSAGE)
+                CALL SHUTDOWN(MESSAGE) ; RETURN
              END IF
           END IF
        END IF FED_READ_RESTART
@@ -5522,16 +5525,16 @@ CONTAINS
              IF (ios/=0) THEN
                 WRITE(MESSAGE,'(A)') 'ERROR: Init Evac Dumps, Restart: EFF READ ERROR'
                 CLOSE (LU_EVACEFF)
-                CALL SHUTDOWN(MESSAGE)
+                CALL SHUTDOWN(MESSAGE) ; RETURN
              END IF
              IF (N_EGRIDS_TMP /= SUM(EMESH_NFIELDS)) THEN
                 WRITE(MESSAGE,'(A,2I4)') 'ERROR: Init Evac Dumps, Restart: EFF ',N_EGRIDS_TMP, SUM(EMESH_NFIELDS)
                 CLOSE (LU_EVACEFF)
-                CALL SHUTDOWN(MESSAGE)
+                CALL SHUTDOWN(MESSAGE) ; RETURN
              END IF
           ELSE
              WRITE(MESSAGE,'(A,2I4)') 'ERROR: Init Evac Dumps: EFF, no restart yet'
-             CALL SHUTDOWN(MESSAGE)
+             CALL SHUTDOWN(MESSAGE) ; RETURN
           END IF
        END IF EFF_READ_RESTART
        !
@@ -5562,7 +5565,7 @@ CONTAINS
        END IF
        IF (IOS /= 0) THEN
          WRITE(MESSAGE,'(A)') 'ERROR: Restart problem: EFF READ ERROR'
-         CALL SHUTDOWN(MESSAGE)
+         CALL SHUTDOWN(MESSAGE) ; RETURN
        END IF
 
     ELSE ! not a restart, rewrite files or just read in
@@ -5643,7 +5646,7 @@ CONTAINS
                    END IF
                 END DO DEVICES_LOOP
                 WRITE(MESSAGE,'(A,I5,A,A,A)')  'ERROR: EDEV ',I,' input ',TRIM(EDV%INPUT_ID(J)),' is not found'
-                CALL SHUTDOWN(MESSAGE)
+                CALL SHUTDOWN(MESSAGE) ; RETURN
              END DO INPUTS_LOOP
           END DO EDEV_LOOP
 
@@ -5664,20 +5667,20 @@ CONTAINS
              IF (ios/=0) THEN
                 WRITE(MESSAGE,'(A)') 'ERROR: Init Evac Dumps: FED READ ERROR'
                 CLOSE (LU_EVACFED)
-                CALL SHUTDOWN(MESSAGE)
+                CALL SHUTDOWN(MESSAGE) ; RETURN
              END IF
              I_FED_FILE_FORMAT = ntmp1
              IF (I_FED_FILE_FORMAT/=-3) THEN
                 WRITE(MESSAGE,'(A)') 'ERROR: Init Evac Dumps: FED READ ERROR, WRONG FORAT FOR FED FILE'
                 CLOSE (LU_EVACFED)
-                CALL SHUTDOWN(MESSAGE)
+                CALL SHUTDOWN(MESSAGE) ; RETURN
              END IF
              ! New format (version 1.11)
              READ (LU_EVACFED,Iostat=ios) n_egrids_tmp, ntmp2, ntmp3, ntmp4, ntmp5, ntmp6
              IF (ios/=0) THEN
                 WRITE(MESSAGE,'(A)') 'ERROR: Init Evac Dumps: FED READ ERROR'
                 CLOSE (LU_EVACFED)
-                CALL SHUTDOWN(MESSAGE)
+                CALL SHUTDOWN(MESSAGE) ; RETURN
              END IF
 
              ! Do not read old format. Do not read new format, if there the numbers are not: n_egrids, 4, n_corrs, 8 
@@ -5693,14 +5696,14 @@ CONTAINS
              IF (n_egrids_tmp /= n_egrids) THEN
                 WRITE(MESSAGE,'(A,2I4)') 'ERROR: Init Evac Dumps: FED ',n_egrids_tmp, n_egrids
                 CLOSE (LU_EVACFED)
-                CALL SHUTDOWN(MESSAGE)
+                CALL SHUTDOWN(MESSAGE) ; RETURN
              END IF
              ! Next is for evacuation devices (like heat detectors)
              READ (LU_EVACFED,IOSTAT=IOS) ntmp1
              IF (IOS/=0) THEN
                 WRITE(MESSAGE,'(A)') 'ERROR: Init Evac Dumps: FED read error1 for DEVC'
                 CLOSE (LU_EVACFED)
-                CALL SHUTDOWN(MESSAGE)
+                CALL SHUTDOWN(MESSAGE) ; RETURN
              END IF
              N_DEVC_EVAC = ntmp1
              WRITE(LU_EVACOUT,'(A,I4)') ' FDS+Evac Number of evacuation devices in the FED file: ',N_DEVC_EVAC
@@ -6138,14 +6141,14 @@ CONTAINS
           IF (CB_LINE_TYPE/=0 .OR. CB_N_AGENTS<0) THEN
              WRITE(MESSAGE,'(A)') 'ERROR: Initialize Evacuation:: CROWBAR INPUT FILE READ ERROR 1'
              CLOSE (LU_EVAC_CB)
-             CALL SHUTDOWN(MESSAGE)
+             CALL SHUTDOWN(MESSAGE) ; RETURN
           END IF
           WRITE(LU_EVACOUT,'(A,A)') 'EVAC: Crowbar input file is: ',TRIM(HPT%CROWBAR_INPUT_FILE)
           WRITE(LU_EVACOUT,'(I2,F8.2,I6,I16)') CB_LINE_TYPE, CB_TIME, CB_N_AGENTS, CB_ID_CAMERA
           IF (CB_N_AGENTS>HPT%N_INITIAL) THEN
              WRITE(MESSAGE,'(A)') 'ERROR: Initialize Evacuation:: CROWBAR N_AGENTS'
              CLOSE (LU_EVAC_CB)
-             CALL SHUTDOWN(MESSAGE)
+             CALL SHUTDOWN(MESSAGE) ; RETURN
           END IF
           HPT%N_INITIAL = CB_N_AGENTS ! Use the number that is going to be read in
           ALLOCATE(CB_I_AGENT(CB_N_AGENTS),STAT=IZERO)
@@ -6166,7 +6169,7 @@ CONTAINS
              IF (CB_LINE_TYPE/=1) THEN
                 WRITE(MESSAGE,'(A)') 'ERROR: Initialize Evacuation:: CROWBAR INPUT FILE READ ERROR 2'
                 CLOSE (LU_EVAC_CB)
-                CALL SHUTDOWN(MESSAGE)
+                CALL SHUTDOWN(MESSAGE) ; RETURN
              END IF
           END DO
           CB_XYZ_AGENT = CB_XYZ_AGENT/1000.0_EB ! mm to m transformation
@@ -6199,7 +6202,7 @@ CONTAINS
        END DO HP_MeshLoop
        IF (n_tmp < 1 .OR. n_tmp > n_egrids) THEN
           WRITE(MESSAGE,'(A,A,A,I4)') 'ERROR: INIT_EVAC: EVAC ',TRIM(HPT%ID),' problem evac node, INODE= ',n_tmp
-          CALL SHUTDOWN(MESSAGE)
+          CALL SHUTDOWN(MESSAGE) ; RETURN
        END IF
        !
        PCP => EVAC_PERSON_CLASSES(HPT%IPC)
@@ -6250,7 +6253,7 @@ CONTAINS
              N_HUMANS = N_HUMANS + 1
              !
              IF (N_HUMANS > N_HUMANS_DIM) THEN
-                CALL SHUTDOWN('ERROR: Init Humans: no re-allocation yet')
+                CALL SHUTDOWN('ERROR: Init Humans: no re-allocation yet') ; RETURN
                 CALL RE_ALLOCATE_HUMANS(1,NM)
                 HUMAN=>MESHES(NM)%HUMAN
              END IF
@@ -6444,6 +6447,7 @@ CONTAINS
                    IF (istat/=0) Is_Solid = .TRUE.
                    CALL Find_walls(nm, x_tmp(3), y_tmp(3), r_tmp(3), d_max, 0, d_xy, FoundWall_xy, istat)
                    IF (istat/=0) Is_Solid = .TRUE.
+                   IF (STOP_STATUS==SETUP_STOP) RETURN
                 END IF
 
                 IF (.NOT.Is_Solid) THEN
@@ -6530,7 +6534,7 @@ CONTAINS
                 HR%COLOR_INDEX = 1
              CASE Default
                 WRITE(MESSAGE,'(A,I3,A)') 'ERROR: READ_EVAC COLOR METHOD',COLOR_METHOD, ' is not defined'
-                CALL SHUTDOWN(MESSAGE)
+                CALL SHUTDOWN(MESSAGE) ; RETURN
              END SELECT
 
              HR%IMESH       = HPT%IMESH
@@ -6979,11 +6983,11 @@ CONTAINS
              IF (IOS/=0) THEN
                 WRITE(MESSAGE,'(A)') 'ERROR: EVAC_MESH_EXCHANGE: FED read error'
                 CLOSE (LU_EVACFED)
-                CALL SHUTDOWN(MESSAGE)
+                CALL SHUTDOWN(MESSAGE) ; RETURN
              END IF
              IF (IBAR_TMP /= IBAR .OR. JBAR_TMP /= JBAR .OR. N_TMP < 4 ) THEN
                 CLOSE (LU_EVACFED)
-                CALL SHUTDOWN('ERROR: Problems to read the FED file')
+                CALL SHUTDOWN('ERROR: Problems to read the FED file') ; RETURN
              END IF
 
           END IF
@@ -7014,7 +7018,7 @@ CONTAINS
                    IF (IOS/=0) THEN
                       WRITE(MESSAGE,'(A)') 'ERROR: EVAC_MESH_EXCHANGE: FED read error'
                       CLOSE (LU_EVACFED)
-                      CALL SHUTDOWN(MESSAGE)
+                      CALL SHUTDOWN(MESSAGE) ; RETURN
                    END IF
                    HUMAN_GRID(I,J)%FED_CO_CO2_O2 = TMPOUT1
                    HUMAN_GRID(I,J)%SOOT_DENS = TMPOUT2
@@ -7083,7 +7087,7 @@ CONTAINS
              IF (IOS/=0) THEN
                 WRITE(MESSAGE,'(A)') 'ERROR: EVAC_MESH_EXCHANGE: FED read error'
                 CLOSE (LU_EVACFED)
-                CALL SHUTDOWN(MESSAGE)
+                CALL SHUTDOWN(MESSAGE) ; RETURN
              END IF
              EVAC_CORRS(I)%FED_CO_CO2_O2(1) = TMPOUT1
              EVAC_CORRS(I)%SOOT_DENS(1) = TMPOUT2
@@ -7123,7 +7127,7 @@ CONTAINS
           IF (IOS/=0 .OR. N_DEVC_WRITE_TMP > N_DEVC_EVAC) THEN
              WRITE(MESSAGE,'(A)') 'ERROR: EVAC_MESH_EXCHANGE: FED read error1 for DEVC'
              CLOSE (LU_EVACFED)
-             CALL SHUTDOWN(MESSAGE)
+             CALL SHUTDOWN(MESSAGE) ; RETURN
           END IF
           N_DEVC_WRITE = N_DEVC_WRITE_TMP
           DEVC_LOOP_3: DO I = 1, N_DEVC_WRITE
@@ -7131,13 +7135,13 @@ CONTAINS
              IF (IOS/=0) THEN
                 WRITE(MESSAGE,'(A)') 'ERROR: EVAC_MESH_EXCHANGE: FED read error2 for DEVC'
                 CLOSE (LU_EVACFED)
-                CALL SHUTDOWN(MESSAGE)
+                CALL SHUTDOWN(MESSAGE) ; RETURN
              END IF
              READ (LU_EVACFED,IOSTAT=IOS) N_DEVC_WRITE_TMP, N_TMP, CURRENT_STATE, PRIOR_STATE, T_TMP
              IF (IOS /= 0 .OR. N_DEVC_WRITE_TMP > N_DEVC_EVAC) THEN
                 WRITE(MESSAGE,'(A)') 'ERROR: EVAC_MESH_EXCHANGE: FED read error3 for DEVC'
                 CLOSE (LU_EVACFED)
-                CALL SHUTDOWN(MESSAGE)
+                CALL SHUTDOWN(MESSAGE) ; RETURN
              END IF
              j = N_DEVC_WRITE_TMP
              IF (ICYC==1) THEN
@@ -7150,7 +7154,7 @@ CONTAINS
                   N_TMP2 /= EVAC_DEVICES(j)%I_Type) THEN
                 WRITE(MESSAGE,'(A)') 'ERROR: EVAC_MESH_EXCHANGE: FED read error4 for DEVC'
                 CLOSE (LU_EVACFED)
-                CALL SHUTDOWN(MESSAGE)
+                CALL SHUTDOWN(MESSAGE) ; RETURN
              END IF
              T_CHANGE = T_TMP
              EVAC_DEVICES(j)%T_Change = T_CHANGE
@@ -7171,7 +7175,7 @@ CONTAINS
                       END IF
                    END DO DEVICES_LOOP
                    WRITE(MESSAGE,'(A,I5,A,A,A)')  'ERROR: EDEV ',I,' input ',TRIM(EDV%INPUT_ID(J)),' is not found'
-                   CALL SHUTDOWN(MESSAGE)
+                   CALL SHUTDOWN(MESSAGE) ; RETURN
                 END DO INPUTS_LOOP
              END DO EDEV_LOOP
           END IF
@@ -7400,7 +7404,7 @@ CONTAINS
     END DO
     IF (I_EGRID == 0) THEN
        WRITE(MESSAGE,'(A,I6)') 'ERROR: EVACUATE_HUMANS, No mesh found ',NM
-       CALL SHUTDOWN(MESSAGE)
+       CALL SHUTDOWN(MESSAGE) ; RETURN
     END IF
     NM_STRS_MESH = .FALSE.
     NM_STRS_INDEX = 0
@@ -8193,7 +8197,7 @@ CONTAINS
                      EVAC_MASS_EXTINCTION_COEFF*1.0E-6_EB*HUMAN_GRID(II,JJ)%SOOT_DENS
              CASE DEFAULT
                 WRITE(MESSAGE,'(A,I3)') 'ERROR: PERS line has a non-valid SMOKE_KS_SPEED_FUNCTION,',SMOKE_KS_SPEED_FUNCTION
-                CALL SHUTDOWN(MESSAGE)
+                CALL SHUTDOWN(MESSAGE) ; RETURN
              END SELECT
              ! Next if is just an obsolote feature (Poland request), it is not used
              ! if default SMOKE_MIN_SPEED_VISIBILITY is given.
@@ -8221,6 +8225,7 @@ CONTAINS
                            EVAC_DEVICES(KK)%USE_NOW) THEN
                          CALL TPRE_GENERATION(EDV%i_pre_dist,EDV%Tpre_low,EDV%Tpre_high,EDV%Tpre_mean,EDV%Tpre_para, &
                               EDV%Tpre_para2,TPRE)
+                         IF (STOP_STATUS==SETUP_STOP) RETURN
                          HR%DETECT1 = IBSET(HR%DETECT1,2)  ! Detected by some device, bit 2
                          IF (T+TPRE < HR%TDET+HR%TPRE) THEN
                             WRITE(LU_EVACOUT,FMT='(A,I6,A,A,A,F8.2,A,F6.2,A)') ' Agent n:o ', HR%ILABEL, ' detection by ', &
@@ -8634,8 +8639,11 @@ CONTAINS
        ! Add persons from entrys (specified flow rates)
        ! ========================================================
        DO I = 1, N_ENTRYS
-          IF (T > T_BEGIN ) CALL ENTRY_HUMAN(I,T,NM,ISTAT)
+          IF (T > T_BEGIN ) THEN
+             CALL ENTRY_HUMAN(I,T,NM,ISTAT) ; IF (STOP_STATUS==SETUP_STOP) RETURN
+          END IF
           CALL ENTRY_CROWBAR_HUMAN(I,T,NM,ISTAT)
+          IF (STOP_STATUS==SETUP_STOP) RETURN
        END DO
 
        ! ========================================================
@@ -9059,7 +9067,7 @@ CONTAINS
           END DO
           IF (IE_MAX > BL_MAX ) THEN
              WRITE(MESSAGE,'(A,2I6)') 'ERROR: EVACUATE_HUMANS, ie_max, bl_max ', IE_MAX, BL_MAX
-             CALL SHUTDOWN(MESSAGE)
+             CALL SHUTDOWN(MESSAGE) ; RETURN
           END IF
 
           ! =======================================================
@@ -9589,7 +9597,7 @@ CONTAINS
           !
           ! Walls are looked for the body circle
           CALL FIND_WALLS(NM, X1, Y1, HR%RADIUS, P2P_DIST_MAX, HR%SKIP_WALL_FORCE_IOR, D_XY, FOUNDWALL_XY, ISTAT)
-
+          IF (STOP_STATUS==SETUP_STOP) RETURN
           ! ========================================================
           ! Collision avoidance, counterflow, etc.
           ! ========================================================
@@ -10666,7 +10674,7 @@ CONTAINS
       IF (.NOT.EVACUATION_ONLY(NM_NOW) .OR. HR%I_FFIELD < 1) THEN
          WRITE(LU_ERR,*)'*** ',I,HR%IPC,HR%IEL,HR%I_TARGET,HR%I_FFIELD,HR%ILABEL
          WRITE(MESSAGE,'(A,I6,A)') 'ERROR: EVACUATE_HUMANS, mesh ', HR%I_FFIELD, ' is not an evacuation flow field.'
-         CALL SHUTDOWN(MESSAGE)
+         CALL SHUTDOWN(MESSAGE) ; RETURN
       END IF
       IF (T <= T_BEGIN) THEN
          ! Initialization phase, i.e., flow field calculation
@@ -12060,7 +12068,7 @@ CONTAINS
                         HR%IMESH       = IMESH2
                         IF (MESHES(IMESH2)%N_HUMANS+1 > MESHES(IMESH2)%N_HUMANS_DIM) THEN
                            ! Re-allocation is not yet checked.
-                           CALL SHUTDOWN('ERROR: HUMANS: NO RE-ALLOCATION YET')
+                           CALL SHUTDOWN('ERROR: HUMANS: NO RE-ALLOCATION YET') ; RETURN
                            CALL RE_ALLOCATE_HUMANS(1,IMESH2)
                         END IF
                         MESHES(IMESH2)%N_HUMANS = MESHES(IMESH2)%N_HUMANS + 1
@@ -12272,7 +12280,7 @@ CONTAINS
 
                      IF (MESHES(IMESH2)%N_HUMANS+1 > MESHES(IMESH2)%N_HUMANS_DIM) THEN
                         ! Re-allocation is not yet checked.
-                        CALL SHUTDOWN('ERROR: HUMANS: NO RE-ALLOCATION YET')
+                        CALL SHUTDOWN('ERROR: HUMANS: NO RE-ALLOCATION YET') ; RETURN
                         CALL RE_ALLOCATE_HUMANS(1,IMESH2)
                      END IF
                      MESHES(IMESH2)%N_HUMANS = MESHES(IMESH2)%N_HUMANS + 1
@@ -12589,7 +12597,7 @@ CONTAINS
             END DO
             IF (i_tmp == 0 .OR. i_tmp > n_egrids) THEN
                WRITE(MESSAGE,'(A,I6)') 'ERROR: Check_Target_Node, no imesh2 found ',imesh2
-               CALL SHUTDOWN(MESSAGE)
+               CALL SHUTDOWN(MESSAGE) ; RETURN
             END IF
 
             IF (j > 0 .AND. Group_List(j)%GROUP_I_FFIELDS(i_tmp) > 0) THEN
@@ -12920,7 +12928,7 @@ CONTAINS
       !
       IF (N_HUMANS+1 > N_HUMANS_DIM) THEN
          ! Re-allocation is not yet checked.
-         CALL SHUTDOWN('ERROR: Insert Humans: no re-allocation yet')
+         CALL SHUTDOWN('ERROR: Insert Humans: no re-allocation yet') ; RETURN
          CALL RE_ALLOCATE_HUMANS(1,NM)
          HUMAN=>MESHES(NM)%HUMAN
       END IF
@@ -13072,7 +13080,7 @@ CONTAINS
             HR%COLOR_INDEX = 1
          CASE Default
             WRITE(MESSAGE,'(A,I3,A)') 'ERROR: ENTRY_HUMAN COLOR METHOD',COLOR_METHOD, ' is not defined'
-            CALL SHUTDOWN(MESSAGE)
+            CALL SHUTDOWN(MESSAGE) ; RETURN
          END SELECT
          HR%FFIELD_NAME = TRIM(PNX%GRID_NAME)
          HR%I_FFIELD    = 0
@@ -13085,7 +13093,7 @@ CONTAINS
          IF ( HR%I_FFIELD == 0 ) THEN
             WRITE(MESSAGE,'(A,A,A,A)') 'ERROR: ENTR line ',TRIM(PNX%ID), ' problem with flow field name, ', &
                  TRIM(PNX%GRID_NAME),' not found'
-            CALL SHUTDOWN(MESSAGE)
+            CALL SHUTDOWN(MESSAGE) ; RETURN
          END IF
          HR%IMESH       = PNX%IMESH
          HR%INODE       = PNX%TO_INODE
@@ -13171,7 +13179,7 @@ CONTAINS
       IF (CB_LINE_TYPE/=0 .OR. CB_N_AGENTS<0) THEN
          WRITE(MESSAGE,'(A)') 'ERROR, Entry_Crowbar_Human: CROWBAR INPUT FILE READ ERROR 1'
          CLOSE (LU_EVAC_CB)
-         CALL SHUTDOWN(MESSAGE)
+         CALL SHUTDOWN(MESSAGE) ; RETURN
       END IF
       IF (PNX%CB_TimeLastRead > Tin) THEN
          ! This is the first call to this cb_entry
@@ -13191,7 +13199,7 @@ CONTAINS
             IF (CB_LINE_TYPE/=1) THEN
                WRITE(MESSAGE,'(A)') 'ERROR, Entry_Crowbar_Human: CROWBAR INPUT FILE READ ERROR 2'
                CLOSE (LU_EVAC_CB)
-               CALL SHUTDOWN(MESSAGE)
+               CALL SHUTDOWN(MESSAGE) ; RETURN
             END IF
          END DO
          CB_N_AGENTS_PREV_DT = 0
@@ -13199,7 +13207,7 @@ CONTAINS
          IF (CB_LINE_TYPE/=0 .OR. CB_N_AGENTS_PREV_DT<0) THEN
             WRITE(MESSAGE,'(A)') 'ERROR, Entry_Crowbar_Human: CROWBAR INPUT FILE READ ERROR 1'
             CLOSE (LU_EVAC_CB)
-            CALL SHUTDOWN(MESSAGE)
+            CALL SHUTDOWN(MESSAGE) ; RETURN
          END IF
          CB_TIME_OLD = CB_TIME
       END DO
@@ -13219,7 +13227,7 @@ CONTAINS
             IF (CB_LINE_TYPE/=1) THEN
                WRITE(MESSAGE,'(A)') 'ERROR, Entry_Crowbar_Human: CROWBAR INPUT FILE READ ERROR 2A'
                CLOSE (LU_EVAC_CB)
-               CALL SHUTDOWN(MESSAGE)
+               CALL SHUTDOWN(MESSAGE) ; RETURN
             END IF
          END DO
          CB_XYZ_AGENT_PREV_DT = CB_XYZ_AGENT_PREV_DT/1000.0_EB ! mm to m transformation
@@ -13229,7 +13237,7 @@ CONTAINS
          IF (CB_LINE_TYPE/=0 .OR. CB_N_AGENTS<0) THEN
             WRITE(MESSAGE,'(A)') 'ERROR, Entry_Crowbar_Human: CROWBAR INPUT FILE READ ERROR 1B'
             CLOSE (LU_EVAC_CB)
-            CALL SHUTDOWN(MESSAGE)
+            CALL SHUTDOWN(MESSAGE) ; RETURN
          END IF
       END IF IfFirstPass
       
@@ -13252,7 +13260,7 @@ CONTAINS
          IF (CB_LINE_TYPE/=1) THEN
             WRITE(MESSAGE,'(A)') 'ERROR, Entry_Crowbar_Human: CROWBAR INPUT FILE READ ERROR 2'
             CLOSE (LU_EVAC_CB)
-            CALL SHUTDOWN(MESSAGE)
+            CALL SHUTDOWN(MESSAGE) ; RETURN
          END IF
       END DO
       CB_XYZ_AGENT = CB_XYZ_AGENT/1000.0_EB ! mm to m transformation
@@ -13269,7 +13277,7 @@ CONTAINS
       IF (CB_LINE_TYPE/=0) THEN
          WRITE(MESSAGE,'(A)') 'ERROR, Entry_Crowbar_Human: CROWBAR INPUT FILE READ ERROR 3'
          CLOSE (LU_EVAC_CB)
-         CALL SHUTDOWN(MESSAGE)
+         CALL SHUTDOWN(MESSAGE) ; RETURN
       END IF
       PNX%CB_TimeNextRead = CB_TIME ! Next time stamp in the camera file
 100   CONTINUE
@@ -13360,12 +13368,13 @@ CONTAINS
 
          IF (N_HUMANS+1 > N_HUMANS_DIM) THEN
             ! Re-allocation is not yet checked.
-            CALL SHUTDOWN('ERROR: Insert CB Humans: no re-allocation yet')
+            CALL SHUTDOWN('ERROR: Insert CB Humans: no re-allocation yet') ; RETURN
             CALL RE_ALLOCATE_HUMANS(1,NM)
             HUMAN=>MESHES(NM)%HUMAN
          END IF
          HR  => MESHES(NM)%HUMAN(N_HUMANS+1)
          CALL CLASS_PROPERTIES(HR,PCP,-I_entry)
+         IF (STOP_STATUS==SETUP_STOP) RETURN
          HR%Tpre = 0.0_EB   ! Start to move directly, ENTR-agents
          HR%Tdet = T_BEGIN
          HR%IPC  = PNX%IPC  ! Index of PERS namelist
@@ -13539,7 +13548,7 @@ CONTAINS
                HR%COLOR_INDEX = 1
             CASE Default
                WRITE(MESSAGE,'(A,I3,A)') 'ERROR: ENTRY_HUMAN COLOR METHOD',COLOR_METHOD, ' is not defined'
-               CALL SHUTDOWN(MESSAGE)
+               CALL SHUTDOWN(MESSAGE) ; RETURN
             END SELECT
             HR%FFIELD_NAME = TRIM(PNX%GRID_NAME)
             HR%I_FFIELD    = 0
@@ -13552,7 +13561,7 @@ CONTAINS
             IF ( HR%I_FFIELD == 0 ) THEN
                WRITE(MESSAGE,'(A,A,A,A)') 'ERROR: ENTR line ',TRIM(PNX%ID), ' problem with flow field name, ', &
                     TRIM(PNX%GRID_NAME),' not found'
-               CALL SHUTDOWN(MESSAGE)
+               CALL SHUTDOWN(MESSAGE) ; RETURN
             END IF
             HR%IMESH       = PNX%IMESH
             HR%INODE       = PNX%TO_INODE
@@ -14144,7 +14153,7 @@ CONTAINS
 
     SELECT CASE(PCP%I_VEL_DIST)
     CASE(-1)
-       CALL SHUTDOWN('ERROR: Class_Properties: -1')
+       CALL SHUTDOWN('ERROR: Class_Properties: -1') ; RETURN
     CASE(0)
        HR%Speed  = PCP%V_mean
     CASE(1)   ! Uniform
@@ -14230,12 +14239,12 @@ CONTAINS
        CALL RandomNumbers(n_rnd, n_par, RandomType, RandomPara(1:n_par), rnd_vec)
        HR%Speed = rnd_vec(1)
     CASE Default
-       CALL SHUTDOWN('ERROR: Class_Properties I_VEL_DIST')
+       CALL SHUTDOWN('ERROR: Class_Properties I_VEL_DIST') ; RETURN
     END SELECT
 
     SELECT CASE(PCP%I_DIA_DIST)
     CASE(-1)
-       CALL SHUTDOWN('ERROR: Class_Properties: -1')
+       CALL SHUTDOWN('ERROR: Class_Properties: -1') ; RETURN
     CASE(0)
        HR%Radius  = 0.5_EB*PCP%D_mean
     CASE(1)   ! Uniform
@@ -14320,13 +14329,13 @@ CONTAINS
        CALL RandomNumbers(n_rnd, n_par, RandomType, RandomPara(1:n_par), rnd_vec)
        HR%Radius = 0.5_EB*rnd_vec(1)
     CASE Default
-       CALL SHUTDOWN('ERROR: Class_Properties I_DIA_DIST')
+       CALL SHUTDOWN('ERROR: Class_Properties I_DIA_DIST') ; RETURN
     END SELECT
     HR%Mass   = 80.0_EB*(HR%Radius/0.27_EB)**2 
 
     SELECT CASE(PCP%I_TAU_DIST)
     CASE(-1)
-       CALL SHUTDOWN('ERROR: Class_Properties: -1')
+       CALL SHUTDOWN('ERROR: Class_Properties: -1') ; RETURN
     CASE(0)
        HR%Tau  = PCP%Tau_mean
     CASE(1)   ! Uniform
@@ -14413,12 +14422,12 @@ CONTAINS
        CALL RandomNumbers(n_rnd, n_par, RandomType, RandomPara(1:n_par), rnd_vec)
        HR%Tau = rnd_vec(1)
     CASE Default
-       CALL SHUTDOWN('ERROR: Class_Properties I_TAU_DIST')
+       CALL SHUTDOWN('ERROR: Class_Properties I_TAU_DIST') ; RETURN
     END SELECT
 
     SELECT CASE(I_DET_DIST)
     CASE(-1)
-       CALL SHUTDOWN('ERROR: Class_Properties: -1')
+       CALL SHUTDOWN('ERROR: Class_Properties: -1') ; RETURN
     CASE(0)
        HR%Tdet  = Tdet_mean
     CASE(1)   ! Uniform
@@ -14504,12 +14513,12 @@ CONTAINS
        CALL RandomNumbers(n_rnd, n_par, RandomType, RandomPara(1:n_par), rnd_vec)
        HR%Tdet = rnd_vec(1)
     CASE Default
-       CALL SHUTDOWN('ERROR: Class_Properties I_DET_DIST')
+       CALL SHUTDOWN('ERROR: Class_Properties I_DET_DIST') ; RETURN
     END SELECT
 
     SELECT CASE(I_PRE_DIST)
     CASE(-1)
-       CALL SHUTDOWN('ERROR: Class_Properties: -1')
+       CALL SHUTDOWN('ERROR: Class_Properties: -1') ; RETURN
     CASE(0)
        HR%Tpre  = MAX(0._EB,Tpre_mean)
     CASE(1)   ! Uniform
@@ -14595,7 +14604,7 @@ CONTAINS
        CALL RandomNumbers(n_rnd, n_par, RandomType, RandomPara(1:n_par), rnd_vec)
        HR%Tpre = MAX(0._EB,rnd_vec(1))
     CASE Default
-       CALL SHUTDOWN('ERROR: Class_Properties I_PRE_DIST')
+       CALL SHUTDOWN('ERROR: Class_Properties I_PRE_DIST') ; RETURN
     END SELECT
     !
     ! Constants for the 'psychological' potential
@@ -14651,7 +14660,7 @@ CONTAINS
 
     SELECT CASE(I_PRE_DIST)
     CASE(-1)
-       CALL SHUTDOWN('ERROR: Tpre_Generation: -1')
+       CALL SHUTDOWN('ERROR: Tpre_Generation: -1') ; RETURN
     CASE(0)
        TPRE_OUT = MAX(0._EB,Tpre_mean)
     CASE(1)   ! Uniform
@@ -14737,7 +14746,7 @@ CONTAINS
        CALL RandomNumbers(n_rnd, n_par, RandomType, RandomPara(1:n_par), rnd_vec)
        TPRE_OUT = MAX(0._EB,rnd_vec(1))
     CASE Default
-       CALL SHUTDOWN('ERROR: Tpre_Generation I_PRE_DIST')
+       CALL SHUTDOWN('ERROR: Tpre_Generation I_PRE_DIST') ; RETURN
     END SELECT
   END SUBROUTINE TPRE_GENERATION
 !
@@ -15541,7 +15550,7 @@ CONTAINS
           I_OBST = M%OBST_INDEX_C(IC)
           IF (M%Solid(ic) .AND. .NOT.M%OBSTRUCTION(I_OBST)%HIDDEN) THEN
              WRITE(MESSAGE,'(A,I4,2I6)') 'ERROR: Find_Walls ',nm, ii,jjn
-             CALL SHUTDOWN(MESSAGE)
+             CALL SHUTDOWN(MESSAGE) ; RETURN
           END IF
           IF (SURFACE(SURF_INDEX)%VEL >= TWO_EPSILON_EB .OR. M%WALL(IW)%BOUNDARY_TYPE==OPEN_BOUNDARY) THEN
              !d_mx = d_mx + is*(2.0_EB*d_cutoff)
@@ -15590,7 +15599,7 @@ CONTAINS
           I_OBST = M%OBST_INDEX_C(IC)
           IF (M%Solid(ic) .AND. .NOT.M%OBSTRUCTION(I_OBST)%HIDDEN) THEN
              WRITE(MESSAGE,'(A,I4,2I6)') 'ERROR: Find_Walls ',nm, ii,jjn
-             CALL SHUTDOWN(MESSAGE)
+             CALL SHUTDOWN(MESSAGE) ; RETURN
           END IF
           IF (SURFACE(SURF_INDEX)%VEL > TWO_EPSILON_EB .OR. M%WALL(IW)%BOUNDARY_TYPE==OPEN_BOUNDARY) THEN
              !d_px = d_px + is*(2.0_EB*d_cutoff)
@@ -15639,7 +15648,7 @@ CONTAINS
           I_OBST = M%OBST_INDEX_C(IC)
           IF (M%Solid(ic) .AND. .NOT.M%OBSTRUCTION(I_OBST)%HIDDEN) THEN
              WRITE(MESSAGE,'(A,I4,2I6)') 'ERROR: Find_Walls ',nm, ii,jjn
-             CALL SHUTDOWN(MESSAGE)
+             CALL SHUTDOWN(MESSAGE) ; RETURN
           END IF
           IF (SURFACE(SURF_INDEX)%VEL >= TWO_EPSILON_EB .OR. M%WALL(IW)%BOUNDARY_TYPE==OPEN_BOUNDARY) THEN
              !d_my = d_my + is*(2.0_EB*d_cutoff)
@@ -15688,7 +15697,7 @@ CONTAINS
           I_OBST = M%OBST_INDEX_C(IC)
           IF (M%Solid(ic) .AND. .NOT.M%OBSTRUCTION(I_OBST)%HIDDEN) THEN
              WRITE(MESSAGE,'(A,I4,2I6)') 'ERROR: Find_Walls ',nm, ii,jjn
-             CALL SHUTDOWN(MESSAGE)
+             CALL SHUTDOWN(MESSAGE) ; RETURN
           END IF
           IF (SURFACE(SURF_INDEX)%VEL > TWO_EPSILON_EB .OR. M%WALL(IW)%BOUNDARY_TYPE==OPEN_BOUNDARY) THEN
              !d_py = d_py + is*(2.0_EB*d_cutoff)
