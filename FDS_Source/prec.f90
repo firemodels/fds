@@ -19,6 +19,7 @@ INTEGER, PARAMETER :: SPC = KIND((1._FB,1._FB))
 INTEGER, PARAMETER :: DPC = KIND((1._EB,1._EB))
 
 ! Hardwired bounds for certain species arrays
+
 INTEGER, PARAMETER :: MAX_SPECIES=20
 
 ! Hardwired bounds for surface and material arrays
@@ -43,7 +44,8 @@ REAL(EB), PARAMETER :: EPSILON_EB=EPSILON(1._EB),ALMOST_ONE=1._EB-EPSILON(1._EB)
 
 REAL(EB), PARAMETER :: ONTH=1._EB/3._EB,THFO=3._EB/4._EB,FOTH=4._EB/3._EB,TWTH=2._EB/3._EB,ONSI=1._EB/6._EB
 REAL(EB), PARAMETER :: PI=4._EB*ATAN(1.0_EB), SQRTPI=SQRT(PI), RPI=1._EB/PI, TWOPI=2._EB*PI, PIO2=PI/2._EB, &
-                                  RFPI=1._EB/(4._EB*PI), FOTHPI = FOTH*PI
+                       RFPI=1._EB/(4._EB*PI), FOTHPI = FOTH*PI
+
 CONTAINS
 
 SUBROUTINE GET_REV_prec(MODULE_REV,MODULE_DATE)
