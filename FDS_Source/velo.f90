@@ -1512,7 +1512,7 @@ ENDIF FREEZE_VELOCITY_IF
 
 ! Manufactured solution (debug)
 
-IF (PERIODIC_TEST==7 .and. .false.) THEN
+IF (PERIODIC_TEST==7 .and. .FALSE.) THEN
    DO K=1,KBAR
       DO J=1,JBAR
          DO I=0,IBAR
@@ -1605,7 +1605,7 @@ ENDIF FREEZE_VELOCITY_IF
 
 ! Manufactured solution (debug)
 
-IF (PERIODIC_TEST==7 .and. .false.) THEN
+IF (PERIODIC_TEST==7 .and. .FALSE.) THEN
    DO K=1,KBAR
       DO J=1,JBAR
          DO I=0,IBAR

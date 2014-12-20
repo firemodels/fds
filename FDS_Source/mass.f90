@@ -1097,7 +1097,7 @@ TUSED(3,NM)=TUSED(3,NM)+SECOND()-TNOW
 END SUBROUTINE MASS_FINITE_DIFFERENCES_2
 
 
-SUBROUTINE DENSITY_2(NM)
+SUBROUTINE DENSITY_2(T,NM)
 
 ! Update the species mass fractions and density
 
@@ -1105,9 +1105,10 @@ USE COMP_FUNCTIONS, ONLY: SECOND,SHUTDOWN
 USE PHYSICAL_FUNCTIONS, ONLY : GET_SPECIFIC_GAS_CONSTANT,GET_SENSIBLE_ENTHALPY,GET_SPECIFIC_HEAT,GET_SENSIBLE_ENTHALPY_DIFF
 USE GLOBAL_CONSTANTS, ONLY: N_TRACKED_SPECIES,TMPMAX,TMPMIN,EVACUATION_ONLY, &
                             PREDICTOR,N_ZONE,GAS_SPECIES,R0,SOLID_PHASE_ONLY,TUSED
-USE MANUFACTURED_SOLUTIONS, ONLY: VD2D_MMS_Z_OF_RHO
+USE MANUFACTURED_SOLUTIONS, ONLY: VD2D_MMS_Z_OF_RHO,VD2D_MMS_Z_SRC,UF_MMS,WF_MMS,VD2D_MMS_RHO_OF_Z
 INTEGER, INTENT(IN) :: NM
-REAL(EB) :: TNOW,ZZ_GET(0:N_TRACKED_SPECIES),RHS,UN
+REAL(EB), INTENT(IN) :: T
+REAL(EB) :: TNOW,ZZ_GET(0:N_TRACKED_SPECIES),RHS,UN,Q_Z,XHAT,ZHAT
 INTEGER :: I,J,K,N,IW,IOR,IIG,JJG,KKG
 REAL(EB), POINTER, DIMENSION(:,:,:,:) :: RHO_ZZ_P=>NULL()
 REAL(EB), POINTER, DIMENSION(:,:,:) :: UU=>NULL(),VV=>NULL(),WW=>NULL()
@@ -1197,6 +1198,23 @@ CASE(.TRUE.) PREDICTOR_STEP
       ENDDO
    ENDDO
 
+   ! Manufactured solution source term
+
+   MMS_IF: IF (PERIODIC_TEST==7) THEN
+      DO K=1,KBAR
+         DO J=1,JBAR
+            DO I=1,IBAR
+               ! divergence from EOS
+               XHAT = XC(I) - UF_MMS*T
+               ZHAT = ZC(K) - WF_MMS*T
+               Q_Z = VD2D_MMS_Z_SRC(XHAT,ZHAT,T)
+               ZZS(I,J,K,1) = ZZS(I,J,K,1) + DT*Q_Z
+               ZZS(I,J,K,2) = ZZS(I,J,K,2) - DT*Q_Z
+            ENDDO
+         ENDDO
+      ENDDO
+   ENDIF MMS_IF
+
    ! Correct fluxes for positivity
 
    CALL WEIGHTED_AVERAGE_FLUX_CORRECTION
@@ -1225,23 +1243,24 @@ CASE(.TRUE.) PREDICTOR_STEP
       ENDDO
    ENDDO
 
-   ! Predict background pressure at next time step
-
-   DO I=1,N_ZONE
-      PBAR_S(:,I) = PBAR(:,I) + D_PBAR_DT(I)*DT
-   ENDDO
-
-   ! Manufactured solution
+   ! Force density to obey MMS equation of state
 
    IF (PERIODIC_TEST==7) THEN
       DO K=1,KBAR
          DO J=1,JBAR
             DO I=1,IBAR
-               ZZS(I,J,K,1) = VD2D_MMS_Z_OF_RHO(RHOS(I,J,K))
+               IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
+               RHOS(I,J,K) = VD2D_MMS_RHO_OF_Z(ZZS(I,J,K,1))
             ENDDO
          ENDDO
       ENDDO
    ENDIF
+
+   ! Predict background pressure at next time step
+
+   DO I=1,N_ZONE
+      PBAR_S(:,I) = PBAR(:,I) + D_PBAR_DT(I)*DT
+   ENDDO
 
    ! Compute molecular weight term RSUM=R0*SUM(Y_i/W_i)
 
@@ -1336,6 +1355,23 @@ CASE(.FALSE.) PREDICTOR_STEP
       ENDDO
    ENDDO
 
+   ! Manufactured solution source term
+
+   MMS_IF_2: IF (PERIODIC_TEST==7) THEN
+      DO K=1,KBAR
+         DO J=1,JBAR
+            DO I=1,IBAR
+               ! divergence from EOS
+               XHAT = XC(I) - UF_MMS*T
+               ZHAT = ZC(K) - WF_MMS*T
+               Q_Z = VD2D_MMS_Z_SRC(XHAT,ZHAT,T)
+               ZZ(I,J,K,1) = ZZ(I,J,K,1) + .5_EB*DT*Q_Z
+               ZZ(I,J,K,2) = ZZ(I,J,K,2) - .5_EB*DT*Q_Z
+            ENDDO
+         ENDDO
+      ENDDO
+   ENDIF MMS_IF_2
+
    ! Correct fluxes for positivity
 
    CALL WEIGHTED_AVERAGE_FLUX_CORRECTION
@@ -1364,23 +1400,24 @@ CASE(.FALSE.) PREDICTOR_STEP
       ENDDO
    ENDDO
 
-   ! Correct background pressure
-
-   DO I=1,N_ZONE
-      PBAR(:,I) = 0.5_EB*(PBAR(:,I) + PBAR_S(:,I) + D_PBAR_DT_S(I)*DT)
-   ENDDO
-
-   ! Manufactured solution
+   ! Force density to obey MMS equation of state
 
    IF (PERIODIC_TEST==7) THEN
       DO K=1,KBAR
          DO J=1,JBAR
             DO I=1,IBAR
-               ZZ(I,J,K,1) = VD2D_MMS_Z_OF_RHO(RHO(I,J,K))
+               IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
+               RHO(I,J,K) = VD2D_MMS_RHO_OF_Z(ZZ(I,J,K,1))
             ENDDO
          ENDDO
       ENDDO
    ENDIF
+
+   ! Correct background pressure
+
+   DO I=1,N_ZONE
+      PBAR(:,I) = 0.5_EB*(PBAR(:,I) + PBAR_S(:,I) + D_PBAR_DT_S(I)*DT)
+   ENDDO
 
    ! Compute molecular weight term RSUM=R0*SUM(Y_i/W_i)
 
