@@ -2581,13 +2581,14 @@ Contains
        !
     Else If ( which == 2 ) Then
 
-       Call dstzr ( 0.0D+00, 1.0D+00, atol, tol )
+       ! Call dstzr ( 0.0D+00, 1.0D+00, atol, tol )
+       Call dzror ( status, atol, tol, 0.0D+00, 1.0D+00, qleft, qhi, .TRUE. )
 
        If ( p <= q ) Then
 
           status = 0
           fx = 0.0D+00
-          Call dzror ( status, x, fx, xlo, xhi, qleft, qhi )
+          Call dzror ( status, x, fx, xlo, xhi, qleft, qhi, .FALSE. )
           y = 1.0D+00 - x
 
           Do
@@ -2598,7 +2599,7 @@ Contains
 
              Call cumbet ( x, y, a, b, cum, ccum )
              fx = cum - p
-             Call dzror ( status, x, fx, xlo, xhi, qleft, qhi )
+             Call dzror ( status, x, fx, xlo, xhi, qleft, qhi, .FALSE. )
              y = 1.0D+00 - x
 
           End Do
@@ -2607,7 +2608,7 @@ Contains
 
           status = 0
           fx = 0.0D+00
-          Call dzror ( status, y, fx, xlo, xhi, qleft, qhi )
+          Call dzror ( status, y, fx, xlo, xhi, qleft, qhi, .FALSE. )
           x = 1.0D+00 - y
 
           Do
@@ -2618,7 +2619,7 @@ Contains
 
              Call cumbet ( x, y, a, b, cum, ccum )
              fx = ccum - q
-             Call dzror ( status, y, fx, xlo, xhi, qleft, qhi )
+             Call dzror ( status, y, fx, xlo, xhi, qleft, qhi, .FALSE. )
              x = 1.0D+00 - y
 
           End Do
@@ -2648,9 +2649,10 @@ Contains
     Else If ( which == 3 ) Then
 
        a = 5.0D+00
-       Call dstinv ( 0.0D+00, inf, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol )
+       ! Call dstinv ( 0.0D+00, inf, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol )
+       Call dinvr ( status, a, fx, qleft, qhi, 0.0D+00, inf, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol, .TRUE. )
        status = 0
-       Call dinvr ( status, a, fx, qleft, qhi )
+       Call dinvr ( status, a, fx, qleft, qhi, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, .FALSE. )
 
        Do
 
@@ -2666,7 +2668,7 @@ Contains
              fx = ccum - q
           End If
 
-          Call dinvr ( status, a, fx, qleft, qhi )
+          Call dinvr ( status, a, fx, qleft, qhi, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, .FALSE. )
 
        End Do
 
@@ -2695,9 +2697,10 @@ Contains
     Else If ( which == 4 ) Then
 
        b = 5.0D+00
-       Call dstinv ( 0.0D+00, inf, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol )
+       ! Call dstinv ( 0.0D+00, inf, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol )
+       Call dinvr ( status, b, fx, qleft, qhi, 0.0D+00, inf, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol, .TRUE. )
        status = 0
-       Call dinvr ( status, b, fx, qleft, qhi )
+       Call dinvr ( status, b, fx, qleft, qhi, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, .FALSE. )
 
        Do
 
@@ -2713,7 +2716,7 @@ Contains
              fx = ccum - q
           End If
 
-          Call dinvr ( status, b, fx, qleft, qhi )
+          Call dinvr ( status, b, fx, qleft, qhi, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, .FALSE. )
 
        End Do
 
@@ -3009,11 +3012,12 @@ Contains
     Else If ( which == 2 ) Then
 
        s = 5.0D+00
-       Call dstinv ( 0.0D+00, xn, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol )
+       ! Call dstinv ( 0.0D+00, xn, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol )
+       Call dinvr ( status, s, fx, qleft, qhi, 0.0D+00, xn, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol, .TRUE. )
        status = 0
        fx = 0.0D+00
 
-       Call dinvr ( status, s, fx, qleft, qhi )
+       Call dinvr ( status, s, fx, qleft, qhi, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, .FALSE. )
 
        Do
 
@@ -3029,7 +3033,7 @@ Contains
              fx = ccum - q   
           End If
 
-          Call dinvr ( status, s, fx, qleft, qhi )
+          Call dinvr ( status, s, fx, qleft, qhi, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, .FALSE. )
 
        End Do
 
@@ -3056,9 +3060,10 @@ Contains
     Else If ( which == 3 ) Then
 
        xn = 5.0D+00
-       Call dstinv ( 0.0D+00, inf, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol )
+       ! Call dstinv ( 0.0D+00, inf, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol )
+       Call dinvr ( status, xn, fx, qleft, qhi, 0.0D+00, inf, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol, .TRUE. )
        status = 0
-       Call dinvr ( status, xn, fx, qleft, qhi )
+       Call dinvr ( status, xn, fx, qleft, qhi, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, .FALSE. )
 
        Do
 
@@ -3074,7 +3079,7 @@ Contains
              fx = ccum - q
           End If
 
-          Call dinvr ( status, xn, fx, qleft, qhi )
+          Call dinvr ( status, xn, fx, qleft, qhi, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, .FALSE. )
 
        End Do
 
@@ -3102,12 +3107,13 @@ Contains
        !
     Else If ( which == 4 ) Then
 
-       Call dstzr ( 0.0D+00, 1.0D+00, atol, tol )
+       ! Call dstzr ( 0.0D+00, 1.0D+00, atol, tol )
+       Call dzror ( status, atol, tol, 0.0D+00, 1.0D+00, qleft, qhi, .TRUE. )
 
        If ( p <= q ) Then
 
           status = 0
-          Call dzror ( status, pr, fx, xlo, xhi, qleft, qhi )
+          Call dzror ( status, pr, fx, xlo, xhi, qleft, qhi, .FALSE. )
           ompr = 1.0D+00 - pr
 
           Do
@@ -3118,7 +3124,7 @@ Contains
 
              Call cumbin ( s, xn, pr, ompr, cum, ccum )
              fx = cum - p
-             Call dzror ( status, pr, fx, xlo, xhi, qleft, qhi )
+             Call dzror ( status, pr, fx, xlo, xhi, qleft, qhi, .FALSE. )
              ompr = 1.0D+00 - pr
 
           End Do
@@ -3126,7 +3132,7 @@ Contains
        Else
 
           status = 0
-          Call dzror ( status, ompr, fx, xlo, xhi, qleft, qhi )
+          Call dzror ( status, ompr, fx, xlo, xhi, qleft, qhi, .FALSE. )
           pr = 1.0D+00 - ompr
 
           Do
@@ -3137,7 +3143,7 @@ Contains
 
              Call cumbin ( s, xn, pr, ompr, cum, ccum )
              fx = ccum - q
-             Call dzror ( status, ompr, fx, xlo, xhi, qleft, qhi )
+             Call dzror ( status, ompr, fx, xlo, xhi, qleft, qhi, .FALSE. )
              pr = 1.0D+00 - ompr
 
           End Do
@@ -3380,10 +3386,11 @@ Contains
     Else If ( which == 2 ) Then
 
        x = 5.0D+00
-       Call dstinv ( 0.0D+00, inf, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol )
+       ! Call dstinv ( 0.0D+00, inf, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol )
+       Call dinvr ( status, x, fx, qleft, qhi, 0.0D+00, inf, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol, .TRUE. )
        status = 0
        fx = 0.0D+00
-       Call dinvr ( status, x, fx, qleft, qhi )
+       Call dinvr ( status, x, fx, qleft, qhi, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, .FALSE. )
 
        Do
 
@@ -3404,7 +3411,7 @@ Contains
              Return
           End If
 
-          Call dinvr ( status, x, fx, qleft, qhi )
+          Call dinvr ( status, x, fx, qleft, qhi, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, .FALSE. )
 
        End Do
 
@@ -3432,9 +3439,10 @@ Contains
     Else If ( which == 3 ) Then
 
        df = 5.0D+00
-       Call dstinv ( 0.0D+00, inf, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol )
+       ! Call dstinv ( 0.0D+00, inf, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol )
+       Call dinvr ( status, df, fx, qleft, qhi, 0.0D+00, inf, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol, .TRUE. )
        status = 0
-       Call dinvr ( status, df, fx, qleft, qhi )
+       Call dinvr ( status, df, fx, qleft, qhi, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, .FALSE. )
 
        Do
 
@@ -3455,7 +3463,7 @@ Contains
              Return
           End If
 
-          Call dinvr ( status, df, fx, qleft, qhi )
+          Call dinvr ( status, df, fx, qleft, qhi, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, .FALSE. )
 
        End Do
 
@@ -3676,10 +3684,11 @@ Contains
     Else If ( which == 2 ) Then
 
        x = 5.0D+00
-       Call dstinv ( 0.0D+00, inf, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol )
+       ! Call dstinv ( 0.0D+00, inf, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol )
+       Call dinvr ( status, x, fx, qleft, qhi, 0.0D+00, inf, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol, .TRUE. )
        status = 0
        fx = 0.0D+00
-       Call dinvr ( status, x, fx, qleft, qhi )
+       Call dinvr ( status, x, fx, qleft, qhi, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, .FALSE. )
 
        Do
 
@@ -3688,7 +3697,7 @@ Contains
           End If
           Call cumchn ( x, df, pnonc, cum, ccum )
           fx = cum - p
-          Call dinvr ( status, x, fx, qleft, qhi )
+          Call dinvr ( status, x, fx, qleft, qhi, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, .FALSE. )
 
        End Do
 
@@ -3715,9 +3724,10 @@ Contains
     Else If ( which == 3 ) Then
 
        df = 5.0D+00
-       Call dstinv ( 0.0D+00, inf, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol )
+       ! Call dstinv ( 0.0D+00, inf, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol )
+       Call dinvr ( status, df, fx, qleft, qhi, 0.0D+00, inf, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol, .TRUE. )
        status = 0
-       Call dinvr ( status, df, fx, qleft, qhi )
+       Call dinvr ( status, df, fx, qleft, qhi, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, .FALSE. )
 
        Do
           If ( status /= 1 ) Then
@@ -3725,7 +3735,7 @@ Contains
           End If
           Call cumchn ( x, df, pnonc, cum, ccum )
           fx = cum - p
-          Call dinvr ( status, df, fx, qleft, qhi )
+          Call dinvr ( status, df, fx, qleft, qhi, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, .FALSE. )
        End Do
 
        If ( status == -1 )Then
@@ -3751,9 +3761,10 @@ Contains
     Else If ( which == 4 ) Then
 
        pnonc = 5.0D+00
-       Call dstinv ( 0.0D+00, tent4, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol )
+       !Call dstinv ( 0.0D+00, tent4, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol )
+       Call dinvr ( status, pnonc, fx, qleft, qhi, 0.0D+00, tent4, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol, .TRUE. )
        status = 0
-       Call dinvr ( status, pnonc, fx, qleft, qhi )
+       Call dinvr ( status, pnonc, fx, qleft, qhi, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, .FALSE. )
 
        Do
 
@@ -3763,7 +3774,7 @@ Contains
 
           Call cumchn ( x, df, pnonc, cum, ccum )
           fx = cum - p
-          Call dinvr ( status, pnonc, fx, qleft, qhi )
+          Call dinvr ( status, pnonc, fx, qleft, qhi, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, .FALSE. )
 
        End Do
 
@@ -4004,10 +4015,11 @@ Contains
     Else If ( which == 2 ) Then
 
        f = 5.0D+00
-       Call dstinv ( 0.0D+00, inf, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol )
+       ! Call dstinv ( 0.0D+00, inf, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol )
+       Call dinvr ( status, f, fx, qleft, qhi, 0.0D+00, inf, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol, .TRUE. )
        status = 0
        fx = 0.0D+00
-       Call dinvr ( status, f, fx, qleft, qhi )
+       Call dinvr ( status, f, fx, qleft, qhi, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, .FALSE. )
 
        Do
 
@@ -4023,7 +4035,7 @@ Contains
              fx = ccum - q
           End If
 
-          Call dinvr ( status, f, fx, qleft, qhi )
+          Call dinvr ( status, f, fx, qleft, qhi, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, .FALSE. )
 
        End Do
 
@@ -4050,9 +4062,10 @@ Contains
     Else If ( which == 3 ) Then
 
        dfn = 5.0D+00
-       Call dstinv ( 0.0D+00, inf, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol )
+       ! Call dstinv ( 0.0D+00, inf, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol )
+       Call dinvr ( status, dfn, fx, qleft, qhi, 0.0D+00, inf, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol, .TRUE. )
        status = 0
-       Call dinvr ( status, dfn, fx, qleft, qhi )
+       Call dinvr ( status, dfn, fx, qleft, qhi, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, .FALSE. )
 
        Do
 
@@ -4068,7 +4081,7 @@ Contains
              fx = ccum - q
           End If
 
-          Call dinvr ( status, dfn, fx, qleft, qhi )
+          Call dinvr ( status, dfn, fx, qleft, qhi, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, .FALSE. )
 
        End Do
 
@@ -4097,9 +4110,10 @@ Contains
     Else If ( which == 4 ) Then
 
        dfd = 5.0D+00
-       Call dstinv ( 0.0D+00, inf, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol )
+       ! Call dstinv ( 0.0D+00, inf, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol )
+       Call dinvr ( status, dfd, fx, qleft, qhi, 0.0D+00, inf, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol, .TRUE. )
        status = 0
-       Call dinvr ( status, dfd, fx, qleft, qhi )
+       Call dinvr ( status, dfd, fx, qleft, qhi, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, .FALSE. )
 
        Do
 
@@ -4115,7 +4129,7 @@ Contains
              fx = ccum - q
           End If
 
-          Call dinvr ( status, dfd, fx, qleft, qhi )
+          Call dinvr ( status, dfd, fx, qleft, qhi, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, .FALSE. )
 
        End Do
 
@@ -4373,10 +4387,11 @@ Contains
     Else If ( which == 2 ) Then
 
        f = 5.0D+00
-       Call dstinv ( 0.0D+00, inf, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol )
+       ! Call dstinv ( 0.0D+00, inf, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol )
+       Call dinvr ( status, f, fx, qleft, qhi, 0.0D+00, inf, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol, .TRUE. )
        status = 0  
        fx = 0.0D+00
-       Call dinvr ( status, f, fx, qleft, qhi )
+       Call dinvr ( status, f, fx, qleft, qhi, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, .FALSE. )
 
        Do
 
@@ -4386,7 +4401,7 @@ Contains
 
           Call cumfnc ( f, dfn, dfd, pnonc, cum, ccum )
           fx = cum - p
-          Call dinvr ( status, f, fx, qleft, qhi )
+          Call dinvr ( status, f, fx, qleft, qhi, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, .FALSE. )
 
        End Do
 
@@ -4415,9 +4430,10 @@ Contains
     Else If ( which == 3 ) Then
 
        dfn = 5.0D+00
-       Call dstinv ( 1.0D+00, inf, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol )
+       ! Call dstinv ( 1.0D+00, inf, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol )
+       Call dinvr ( status, dfn, fx, qleft, qhi, 1.0D+00, inf, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol, .TRUE. )
        status = 0
-       Call dinvr ( status, dfn, fx, qleft, qhi )
+       Call dinvr ( status, dfn, fx, qleft, qhi, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, .FALSE. )
 
        Do
 
@@ -4428,7 +4444,7 @@ Contains
           Call cumfnc ( f, dfn, dfd, pnonc, cum, ccum )
           fx = cum - p
 
-          Call dinvr ( status, dfn, fx, qleft, qhi )
+          Call dinvr ( status, dfn, fx, qleft, qhi, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, .FALSE. )
 
        End Do
 
@@ -4455,9 +4471,10 @@ Contains
     Else If ( which == 4 ) Then
 
        dfd = 5.0D+00
-       Call dstinv ( 1.0D+00, inf, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol )
+       ! Call dstinv ( 1.0D+00, inf, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol )
+       Call dinvr ( status, dfd, fx, qleft, qhi, 1.0D+00, inf, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol, .TRUE. )
        status = 0
-       Call dinvr ( status, dfd, fx, qleft, qhi )
+       Call dinvr ( status, dfd, fx, qleft, qhi, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, .FALSE. )
 
        Do
 
@@ -4467,7 +4484,7 @@ Contains
 
           Call cumfnc ( f, dfn, dfd, pnonc, cum, ccum )
           fx = cum - p
-          Call dinvr ( status, dfd, fx, qleft, qhi )
+          Call dinvr ( status, dfd, fx, qleft, qhi, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, .FALSE. )
 
        End Do
 
@@ -4494,9 +4511,10 @@ Contains
     Else If ( which == 5 ) Then
 
        pnonc = 5.0D+00
-       Call dstinv ( 0.0D+00, tent4, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol )
+       ! Call dstinv ( 0.0D+00, tent4, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol )
+       Call dinvr ( status, pnonc, fx, qleft, qhi, 0.0D+00, tent4, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol, .TRUE. )
        status = 0
-       Call dinvr ( status, pnonc, fx, qleft, qhi )
+       Call dinvr ( status, pnonc, fx, qleft, qhi, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, .FALSE. )
 
        Do
 
@@ -4507,7 +4525,7 @@ Contains
           Call cumfnc ( f, dfn, dfd, pnonc, cum, ccum )
           fx = cum - p
 
-          Call dinvr ( status, pnonc, fx, qleft, qhi )
+          Call dinvr ( status, pnonc, fx, qleft, qhi, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, .FALSE. )
 
        End Do
 
@@ -4777,10 +4795,11 @@ Contains
 
        shape = 5.0D+00
        xscale = x * scale
-       Call dstinv ( 0.0D+00, inf, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol )
+       ! Call dstinv ( 0.0D+00, inf, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol )
+       Call dinvr ( status, shape, fx, qleft, qhi, 0.0D+00, inf, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol, .TRUE. )
        status = 0
        fx = 0.0D+00
-       Call dinvr ( status, shape, fx, qleft, qhi )
+       Call dinvr ( status, shape, fx, qleft, qhi, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, .FALSE. )
 
        Do
 
@@ -4804,7 +4823,7 @@ Contains
              Return
           End If
 
-          Call dinvr ( status, shape, fx, qleft, qhi )
+          Call dinvr ( status, shape, fx, qleft, qhi, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, .FALSE. )
 
        End Do
 
@@ -5105,10 +5124,11 @@ Contains
     Else If ( which == 2 ) Then
 
        f = 5.0D+00
-       Call dstinv ( 0.0D+00, inf, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol )
+       ! Call dstinv ( 0.0D+00, inf, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol )
+       Call dinvr ( status, f, fx, qleft, qhi, 0.0D+00, inf, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol, .TRUE. )
        status = 0
        fx = 0.0D+00
-       Call dinvr ( status, f, fx, qleft, qhi )
+       Call dinvr ( status, f, fx, qleft, qhi, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, .FALSE. )
 
        Do
 
@@ -5124,7 +5144,7 @@ Contains
              fx = ccum - q
           End If
 
-          Call dinvr ( status, f, fx, qleft, qhi )
+          Call dinvr ( status, f, fx, qleft, qhi, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, .FALSE. )
 
        End Do
 
@@ -5151,9 +5171,10 @@ Contains
     Else If ( which == 3 ) Then
 
        s = 5.0D+00
-       Call dstinv ( 0.0D+00, inf, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol )
+       ! Call dstinv ( 0.0D+00, inf, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol )
+       Call dinvr ( status, s, fx, qleft, qhi, 0.0D+00, inf, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol, .TRUE. )
        status = 0
-       Call dinvr ( status, s, fx, qleft, qhi )
+       Call dinvr ( status, s, fx, qleft, qhi, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, .FALSE. )
 
        Do
 
@@ -5169,7 +5190,7 @@ Contains
              fx = ccum - q
           End If
 
-          Call dinvr ( status, s, fx, qleft, qhi )
+          Call dinvr ( status, s, fx, qleft, qhi, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, .FALSE. )
 
        End Do
 
@@ -5195,12 +5216,13 @@ Contains
        !
     Else If ( which == 4 ) Then
 
-       Call dstzr ( 0.0D+00, 1.0D+00, atol, tol )
+       ! Call dstzr ( 0.0D+00, 1.0D+00, atol, tol )
+       Call dzror ( status, atol, tol, 0.0D+00, 1.0D+00, qleft, qhi, .TRUE. )
 
        If ( p <= q ) Then
 
           status = 0
-          Call dzror ( status, pr, fx, xlo, xhi, qleft, qhi )
+          Call dzror ( status, pr, fx, xlo, xhi, qleft, qhi, .FALSE. )
           ompr = 1.0D+00 - pr
 
           Do
@@ -5209,14 +5231,14 @@ Contains
              End If
              Call cumnbn ( f, s, pr, ompr, cum, ccum )
              fx = cum - p
-             Call dzror ( status, pr, fx, xlo, xhi, qleft, qhi )
+             Call dzror ( status, pr, fx, xlo, xhi, qleft, qhi, .FALSE. )
              ompr = 1.0D+00 - pr
           End Do
 
        Else
 
           status = 0
-          Call dzror ( status, ompr, fx, xlo, xhi, qleft, qhi )
+          Call dzror ( status, ompr, fx, xlo, xhi, qleft, qhi, .FALSE. )
           pr = 1.0D+00 - ompr
 
           Do
@@ -5227,7 +5249,7 @@ Contains
 
              Call cumnbn ( f, s, pr, ompr, cum, ccum )
              fx = ccum - q
-             Call dzror ( status, ompr, fx, xlo, xhi, qleft, qhi )
+             Call dzror ( status, ompr, fx, xlo, xhi, qleft, qhi, .FALSE. )
              pr = 1.0D+00 - ompr
 
           End Do
@@ -5654,10 +5676,11 @@ Contains
     Else If ( which == 2 ) Then
 
        s = 5.0D+00
-       Call dstinv ( 0.0D+00, inf, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol )
+       ! Call dstinv ( 0.0D+00, inf, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol )
+       Call dinvr ( status, s, fx, qleft, qhi, 0.0D+00, inf, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol, .TRUE. )
        status = 0
        fx = 0.0D+00
-       Call dinvr ( status, s, fx, qleft, qhi )
+       Call dinvr ( status, s, fx, qleft, qhi, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, .FALSE. )
 
        Do
 
@@ -5673,7 +5696,7 @@ Contains
              fx = ccum - q
           End If
 
-          Call dinvr ( status, s, fx, qleft, qhi )
+          Call dinvr ( status, s, fx, qleft, qhi, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, .FALSE. )
 
        End Do
 
@@ -5700,9 +5723,10 @@ Contains
     Else If ( which == 3 ) Then
 
        xlam = 5.0D+00
-       Call dstinv ( 0.0D+00, inf, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol )
+       ! Call dstinv ( 0.0D+00, inf, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol )
+       Call dinvr ( status, xlam, fx, qleft, qhi, 0.0D+00, inf, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol, .TRUE. )
        status = 0
-       Call dinvr ( status, xlam, fx, qleft, qhi )
+       Call dinvr ( status, xlam, fx, qleft, qhi, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, .FALSE. )
 
        Do
 
@@ -5718,7 +5742,7 @@ Contains
              fx = ccum - q
           End If
 
-          Call dinvr ( status, xlam, fx, qleft, qhi )
+          Call dinvr ( status, xlam, fx, qleft, qhi, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, .FALSE. )
 
        End Do
 
@@ -5928,10 +5952,11 @@ Contains
     Else If ( which == 2 ) Then
 
        t = dt1 ( p, q, df )
-       Call dstinv ( -inf, inf, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol )
+       ! Call dstinv ( -inf, inf, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol )
+       Call dinvr ( status, t, fx, qleft, qhi, -inf, inf, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol, .TRUE. )
        status = 0
        fx = 0.0D+00
-       Call dinvr ( status, t, fx, qleft, qhi )
+       Call dinvr ( status, t, fx, qleft, qhi, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, .FALSE. )
 
        Do
 
@@ -5947,7 +5972,7 @@ Contains
              fx = ccum - q
           End If
 
-          Call dinvr ( status, t, fx, qleft, qhi )
+          Call dinvr ( status, t, fx, qleft, qhi, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, .FALSE. )
 
        End Do
 
@@ -5974,10 +5999,10 @@ Contains
     Else If ( which == 3 ) Then
 
        df = 5.0D+00
-       Call dstinv ( 1.0D+00, maxdf, 0.5D+00, 0.5D+00, &
-            5.0D+00, atol, tol )
+       ! Call dstinv ( 1.0D+00, maxdf, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol )
+       Call dinvr ( status, df, fx, qleft, qhi, 1.0D+00, maxdf, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol, .TRUE. )
        status = 0
-       Call dinvr ( status, df, fx, qleft, qhi )
+       Call dinvr ( status, df, fx, qleft, qhi, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, .FALSE. )
 
        Do
 
@@ -5993,7 +6018,7 @@ Contains
              fx = ccum - q
           End If
 
-          Call dinvr ( status, df, fx, qleft, qhi )
+          Call dinvr ( status, df, fx, qleft, qhi, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, .FALSE. )
 
        End Do
 
@@ -7470,7 +7495,8 @@ Contains
     Return
   End Function dinvnr
 
-  Subroutine dinvr ( status, x, fx, qleft, qhi )
+  ! Subroutine dinvr ( status, x, fx, qleft, qhi )
+  Subroutine dinvr ( status, x, fx, qleft, qhi, zsmall, zbig, zabsst, zrelst, zstpmu, zabsto, zrelto, is_entry )
 
     !*****************************************************************************80
     !
@@ -7518,6 +7544,9 @@ Contains
     !
     Implicit None
 
+    ! Timo Korhonen 2014: Remove the Entry dstzr
+    LOGICAL, INTENT(IN) :: is_entry
+
     Real ( kind = 8 ), Save :: absstp
     Real ( kind = 8 ), Save :: abstol
     Real ( kind = 8 ), Save :: big
@@ -7555,6 +7584,11 @@ Contains
     Real ( kind = 8 ) zsmall
     Real ( kind = 8 ) zstpmu
 !Timo:    Save
+
+    ! Timo Korhonen 2014: Remove the Entry dstzr
+    If ( is_entry ) Then
+       Go to 280 ! Entry dstinv
+    End If
 
     If ( 0 < status ) Then
        ! go to i99999
@@ -7788,7 +7822,8 @@ Contains
 230 Continue
 240 Continue
 
-    Call dstzr ( xlb, xub, abstol, reltol )
+    ! Call dstzr ( xlb, xub, abstol, reltol )
+    Call dzror ( status, abstol, reltol, xlb, xub, qleft, qhi, .TRUE. )
     !
     !  If we reach here, XLB and XUB bound the zero of F.
     !
@@ -7805,7 +7840,7 @@ Contains
 
 260 Continue
 
-    Call dzror ( status, x, fx, xlo, xhi, qdum1, qdum2 )
+    Call dzror ( status, x, fx, xlo, xhi, qdum1, qdum2, .FALSE. )
 
     If ( status /= 1 ) Then
        go to 250
@@ -7821,7 +7856,8 @@ Contains
 270 Continue
     go to 250
 
-    Entry dstinv ( zsmall, zbig, zabsst, zrelst, zstpmu, zabsto, zrelto )
+    ! Entry dstinv ( zsmall, zbig, zabsst, zrelst, zstpmu, zabsto, zrelto )
+280 Continue
     !*****************************************************************************80
     !
     !! DSTINV SeT INverse finder - Reverse Communication
@@ -8109,7 +8145,7 @@ Contains
     Return
   End Function dt1
 
-  Subroutine dzror ( status, x, fx, xlo, xhi, qleft, qhi )
+  Subroutine dzror ( status, x, fx, xlo, xhi, qleft, qhi, is_entry )
 
     !*****************************************************************************80
     !
@@ -8169,6 +8205,9 @@ Contains
     !
     Implicit None
 
+    ! Timo Korhonen 2014: Remove the Entry dstzr
+    LOGICAL, INTENT(IN) :: is_entry
+
     Real ( kind = 8 ), Save :: a
     Real ( kind = 8 ), Save :: abstol
     Real ( kind = 8 ), Save :: b ! save?
@@ -8209,6 +8248,11 @@ Contains
     ! Save ! Gnu compiler says that this Save is redundant
     !Timo: Statement function ftol converted to an internal function
     !Timo: ftol(zx) = 0.5D+00 * Max ( abstol, reltol * Abs ( zx ) )
+
+    ! Timo Korhonen 2014: Remove the Entry dstzr
+    If ( is_entry ) Then
+       Go to 250 ! Entry dstzr
+    End If
 
     If ( 0 < status ) Then
        go to 280
@@ -8426,7 +8470,12 @@ Contains
 
     Return
 
-    Entry dstzr ( zxlo, zxhi, zabstl, zreltl )
+    ! Timo Korhonen 2014: Remove the Entry dstzr
+    ! Entry dstzr ( zxlo, zxhi, zabstl, zreltl )
+    ! Subroutine dzror ( status, x, fx, xlo, xhi, qleft, qhi, is_entry )
+    ! Use (xlo=zxlo, xhi=zxhi, x=zabstl, fx=zreltl)
+250 Continue ! Entry dstzr
+
     !*****************************************************************************80
     !
     !! DSTZR - SeT ZeRo finder - Reverse communication version
@@ -8470,10 +8519,14 @@ Contains
     !    Input, real ( kind = 8 ) ABSTOL, RELTOL, two numbers that determine 
     !    the accuracy of the solution.
     !
-    xxlo = zxlo
-    xxhi = zxhi
-    abstol = zabstl
-    reltol = zreltl
+    xxlo = xlo
+    xxhi = xhi
+    abstol = x
+    reltol = fx
+    !    xxlo = zxlo
+    !    xxhi = zxhi
+    !    abstol = zabstl
+    !    reltol = zreltl
     Return
     !
     !     TO GET-function-VALUE

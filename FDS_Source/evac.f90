@@ -6261,7 +6261,7 @@ CONTAINS
              HR => HUMAN(N_HUMANS)
              HR%IPC = HPT%IPC  ! PERS-line index
              HR%IEL = IPC      ! EVAC-line index
-             CALL CLASS_PROPERTIES(HR,PCP,HR%IEL)
+             CALL CLASS_PROPERTIES(HR,PCP,HR%IEL) ; IF (STOP_STATUS>NO_STOP) RETURN
              HR%I_Target = 0
              HR%I_DoorAlgo = HPT%I_AGENT_TYPE
              CALL RANDOM_NUMBER(RN_REAL)
@@ -6735,6 +6735,7 @@ CONTAINS
                 I_TARGET_OLD = HR%I_TARGET
                 N_CHANGE_TRIALS = N_CHANGE_TRIALS + 1
                 CALL CHANGE_TARGET_DOOR(NOM, NOM, I, J, J1, I_EGRID, I_MODE, HR%X, HR%Y, I_TARGET, COLOR_INDEX, I_NEW_FFIELD, HR)
+                IF (STOP_STATUS>NO_STOP) RETURN
                 IF (ABS(I_TARGET_OLD) /= ABS(I_TARGET)) THEN
                    N_CHANGE_DOORS = N_CHANGE_DOORS + 1
                    I_TMP = I
@@ -7403,8 +7404,9 @@ CONTAINS
        END IF
     END DO
     IF (I_EGRID == 0) THEN
-       WRITE(MESSAGE,'(A,I6)') 'ERROR: EVACUATE_HUMANS, No mesh found ',NM
-       CALL SHUTDOWN(MESSAGE) ; RETURN
+       WRITE(LU_ERR,'(A,I6)') 'ERROR: EVACUATE_HUMANS, No mesh found ',NM
+       WRITE(LU_EVACOUT,'(A,I6)') 'ERROR: EVACUATE_HUMANS, No mesh found ',NM
+       STOP_STATUS = EVACUATION_STOP ; RETURN
     END IF
     NM_STRS_MESH = .FALSE.
     NM_STRS_INDEX = 0
@@ -7690,6 +7692,7 @@ CONTAINS
                    I_TARGET_OLD = HR%I_TARGET 
                    N_CHANGE_TRIALS = N_CHANGE_TRIALS + 1
                    CALL CHANGE_TARGET_DOOR(NM,NM,I,J,J1,I_EGRID,1,HR%X,HR%Y,I_TARGET,COLOR_INDEX,I_NEW_FFIELD,HR)
+                   IF (STOP_STATUS>NO_STOP) RETURN
                    IF (ABS(I_TARGET_OLD) > 0) THEN
                       IF (.NOT.Is_Visible_Door(ABS(I_TARGET_OLD)) .AND. .NOT.Is_Known_Door(ABS(I_TARGET_OLD))) THEN
                          I_TARGET_OLD = 0
@@ -8196,8 +8199,9 @@ CONTAINS
                 SMOKE_SPEED_FAC = 1.0_EB + (SMOKE_BETA/SMOKE_ALPHA)* &
                      EVAC_MASS_EXTINCTION_COEFF*1.0E-6_EB*HUMAN_GRID(II,JJ)%SOOT_DENS
              CASE DEFAULT
-                WRITE(MESSAGE,'(A,I3)') 'ERROR: PERS line has a non-valid SMOKE_KS_SPEED_FUNCTION,',SMOKE_KS_SPEED_FUNCTION
-                CALL SHUTDOWN(MESSAGE) ; RETURN
+                WRITE(LU_ERR,'(A,I3)') 'ERROR: PERS line has a non-valid SMOKE_KS_SPEED_FUNCTION,',SMOKE_KS_SPEED_FUNCTION
+                WRITE(LU_EVACOUT,'(A,I3)') 'ERROR: PERS line has a non-valid SMOKE_KS_SPEED_FUNCTION,',SMOKE_KS_SPEED_FUNCTION
+                STOP_STATUS = EVACUATION_STOP ; RETURN
              END SELECT
              ! Next if is just an obsolote feature (Poland request), it is not used
              ! if default SMOKE_MIN_SPEED_VISIBILITY is given.
@@ -8225,7 +8229,7 @@ CONTAINS
                            EVAC_DEVICES(KK)%USE_NOW) THEN
                          CALL TPRE_GENERATION(EDV%i_pre_dist,EDV%Tpre_low,EDV%Tpre_high,EDV%Tpre_mean,EDV%Tpre_para, &
                               EDV%Tpre_para2,TPRE)
-                         IF (STOP_STATUS==SETUP_STOP) RETURN
+                         IF (STOP_STATUS>NO_STOP) RETURN
                          HR%DETECT1 = IBSET(HR%DETECT1,2)  ! Detected by some device, bit 2
                          IF (T+TPRE < HR%TDET+HR%TPRE) THEN
                             WRITE(LU_EVACOUT,FMT='(A,I6,A,A,A,F8.2,A,F6.2,A)') ' Agent n:o ', HR%ILABEL, ' detection by ', &
@@ -8253,6 +8257,7 @@ CONTAINS
              IF (NM_STRS_MESH .OR. HR%CROWBAR_UPDATE_V0 .OR. HR%CROWBAR_READ_IN) &
                   CALL FIND_PREFERRED_DIRECTION(I, N, T,T_BEGIN, L_DEAD, NM_STRS_MESH, &
                   II, JJ, IIX, JJY, XI, YJ, ZK, UBAR, VBAR, HR_TAU, TPRE, NM, I_STRS_DOOR, HR_SPEED)
+             IF (STOP_STATUS>NO_STOP) RETURN
              ! Crowbar (read in camera data) needs tau and speed updates
              ! Collision avoidance (incl. counterflow), do not update v0 on every time step.
              UBAR = HR%UBAR; VBAR = HR%VBAR
@@ -8267,6 +8272,7 @@ CONTAINS
              ELSE
                 CALL FIND_PREFERRED_DIRECTION(I, N, T, T_BEGIN, L_DEAD, NM_STRS_MESH, &
                      II, JJ, IIX, JJY, XI, YJ, ZK, UBAR, VBAR, HR_TAU, TPRE, NM, I_STRS_DOOR, HR_SPEED)
+                IF (STOP_STATUS>NO_STOP) RETURN
              END IF
           END IF
           ! ========================================================
@@ -8363,6 +8369,7 @@ CONTAINS
           ! Set height and speed for an agent in stairs
           IF (NM_STRS_MESH) THEN 
              CALL GETSTAIRSPEEDANDZ(SPEED_XM, SPEED_XP, SPEED_YM, SPEED_YP, HR_SPEED, STRP, HR)
+             IF (STOP_STATUS>NO_STOP) RETURN
           END IF
 
           ! ========================================================
@@ -8628,28 +8635,31 @@ CONTAINS
        ! Check if persons are leaving this mesh via doors/exits and put these persons to the target.
        ! ========================================================
        IF (N_HUMANS > 0) CALL CHECK_EXITS(T,NM)
+       IF (STOP_STATUS>NO_STOP) RETURN
        IF (N_HUMANS > 0) CALL CHECK_DOORS(T,NM)
+       IF (STOP_STATUS>NO_STOP) RETURN
 
        ! ========================================================
        ! Check if persons are entering this mesh via a corr.
        ! ========================================================
        CALL CHECK_CORRS(T,NM,DTSP)
+       IF (STOP_STATUS>NO_STOP) RETURN
 
        ! ========================================================
        ! Add persons from entrys (specified flow rates)
        ! ========================================================
        DO I = 1, N_ENTRYS
           IF (T > T_BEGIN ) THEN
-             CALL ENTRY_HUMAN(I,T,NM,ISTAT) ; IF (STOP_STATUS==SETUP_STOP) RETURN
+             CALL ENTRY_HUMAN(I,T,NM,ISTAT) ; IF (STOP_STATUS>NO_STOP) RETURN
           END IF
-          CALL ENTRY_CROWBAR_HUMAN(I,T,NM,ISTAT)
-          IF (STOP_STATUS==SETUP_STOP) RETURN
+          CALL ENTRY_CROWBAR_HUMAN(I,T,NM,ISTAT) ; IF (STOP_STATUS>NO_STOP) RETURN
        END DO
 
        ! ========================================================
        ! Remove out-of-bounds persons (outside the grid)
        ! ========================================================
        IF (N_HUMANS > 0) CALL REMOVE_OUT_OF_GRIDS(T,NM)
+       IF (STOP_STATUS>NO_STOP) RETURN
 
        IF ( ICYC >= 0) THEN
           DTSP_NEW = EVAC_DT_STEADY_STATE
@@ -8964,6 +8974,7 @@ CONTAINS
           ELSE
              CALL FIND_PREFERRED_DIRECTION(I, N, T+DTSP_NEW, T_BEGIN, L_DEAD, NM_STRS_MESH, &
                   IIN, JJN, IIX, JJY, XI, YJ, ZK, UBAR, VBAR, HR_TAU, TPRE, NM, I_STRS_DOOR, HR_SPEED)
+             IF (STOP_STATUS>NO_STOP) RETURN
           END IF
           EVEL = UBAR**2 + VBAR**2
 
@@ -9066,8 +9077,9 @@ CONTAINS
              END DO
           END DO
           IF (IE_MAX > BL_MAX ) THEN
-             WRITE(MESSAGE,'(A,2I6)') 'ERROR: EVACUATE_HUMANS, ie_max, bl_max ', IE_MAX, BL_MAX
-             CALL SHUTDOWN(MESSAGE) ; RETURN
+             WRITE(LU_ERR,'(A,2I6)') 'ERROR: EVACUATE_HUMANS, ie_max, bl_max ', IE_MAX, BL_MAX
+             WRITE(LU_EVACOUT,'(A,2I6)') 'ERROR: EVACUATE_HUMANS, ie_max, bl_max ', IE_MAX, BL_MAX
+             STOP_STATUS = EVACUATION_STOP ; RETURN
           END IF
 
           ! =======================================================
@@ -9160,6 +9172,7 @@ CONTAINS
           ! =======================================================
           IF (NM_STRS_MESH) THEN 
             CALL GETSTAIRSPEEDANDZ(SPEED_XM, SPEED_XP, SPEED_YM, SPEED_YP, HR_SPEED, STRP, HR)
+            IF (STOP_STATUS>NO_STOP) RETURN
           END IF
 
           ! ========================================================
@@ -9597,7 +9610,10 @@ CONTAINS
           !
           ! Walls are looked for the body circle
           CALL FIND_WALLS(NM, X1, Y1, HR%RADIUS, P2P_DIST_MAX, HR%SKIP_WALL_FORCE_IOR, D_XY, FOUNDWALL_XY, ISTAT)
-          IF (STOP_STATUS==SETUP_STOP) RETURN
+          IF (STOP_STATUS>NO_STOP) THEN
+             STOP_STATUS=EVACUATION_STOP
+             RETURN
+          END IF
           ! ========================================================
           ! Collision avoidance, counterflow, etc.
           ! ========================================================
@@ -9733,10 +9749,18 @@ CONTAINS
                P2P_U, P2P_V, P2P_TORQUE, CONTACT_F, D_WALLS, FOUNDWALL_XY, CONTACT_FX, CONTACT_FY)
           CALL WALL_CONTACTFORCES(NM, X_TMP(3), Y_TMP(3), R_TMP(3), U_TMP(3), V_TMP(3), D_XY, &
                P2P_U, P2P_V, P2P_TORQUE, CONTACT_F, D_WALLS, FOUNDWALL_XY, CONTACT_FX, CONTACT_FY)
+          IF (STOP_STATUS>NO_STOP) THEN
+             STOP_STATUS=EVACUATION_STOP
+             RETURN
+          END IF
 
           ! Add forces from the door case
           CALL DOOR_FORCES(NM, X_TMP, Y_TMP, R_TMP, U_TMP, V_TMP, P2P_DIST_MAX, D_XY,&
                P2P_U, P2P_V, SOCIAL_F, CONTACT_F, P2P_TORQUE, FOUNDWALL_XY, CONTACT_FX, CONTACT_FY)
+          IF (STOP_STATUS>NO_STOP) THEN
+             STOP_STATUS=EVACUATION_STOP
+             RETURN
+          END IF
       
           IF (NM_STRS_MESH .AND. ABS(HR%SKIP_WALL_FORCE_IOR)>0 .AND. I_STRS_DOOR>0) THEN
              IF (I_STRS_DOOR > N_DOORS) THEN
@@ -9759,6 +9783,10 @@ CONTAINS
              ! x1, y1 agent,  x11, y11, coordiantes of the corner
              CALL CORNER_FORCES(X1, Y1, X11, Y11, P2P_DIST_MAX, P2P_U, P2P_V, SOCIAL_F, &
                   CONTACT_F, P2P_TORQUE, D_WALLS, X_TMP, Y_TMP, R_TMP, U_TMP, V_TMP, ISTAT, CONTACT_FX, CONTACT_FY)
+             IF (STOP_STATUS>NO_STOP) THEN
+                STOP_STATUS=EVACUATION_STOP
+                RETURN
+             END IF
           END IF
 
           ! Add wall corner - person forces
@@ -9965,6 +9993,10 @@ CONTAINS
                 END IF
              END DO LOOP_MXMY
           END DO LOOP_MY
+          IF (STOP_STATUS>NO_STOP) THEN
+             STOP_STATUS=EVACUATION_STOP
+             RETURN
+          END IF
 
           ! ========================================================
           ! The person-wall forces ends here
@@ -10188,7 +10220,7 @@ CONTAINS
     END DO HUMAN_TIME_LOOP
     DEALLOCATE(BLOCK_GRID_N)
     ! ========================================================
-    ! HUman time loop ends here (TIN ==> T = TIN + DT)
+    ! Human time loop ends here (TIN ==> T = TIN + DT)
     ! ========================================================
 
     ! ========================================================
@@ -10673,8 +10705,9 @@ CONTAINS
       NM_NOW = MAX(1,HR%I_FFIELD)
       IF (.NOT.EVACUATION_ONLY(NM_NOW) .OR. HR%I_FFIELD < 1) THEN
          WRITE(LU_ERR,*)'*** ',I,HR%IPC,HR%IEL,HR%I_TARGET,HR%I_FFIELD,HR%ILABEL
-         WRITE(MESSAGE,'(A,I6,A)') 'ERROR: EVACUATE_HUMANS, mesh ', HR%I_FFIELD, ' is not an evacuation flow field.'
-         CALL SHUTDOWN(MESSAGE) ; RETURN
+         WRITE(LU_ERR,'(A,I6,A)') 'ERROR: EVACUATE_HUMANS, mesh ', HR%I_FFIELD, ' is not an evacuation flow field.'
+         WRITE(LU_EVACOUT,'(A,I6,A)') 'ERROR: EVACUATE_HUMANS, mesh ', HR%I_FFIELD, ' is not an evacuation flow field.'
+         STOP_STATUS = EVACUATION_STOP ; RETURN
       END IF
       IF (T <= T_BEGIN) THEN
          ! Initialization phase, i.e., flow field calculation
@@ -12068,8 +12101,9 @@ CONTAINS
                         HR%IMESH       = IMESH2
                         IF (MESHES(IMESH2)%N_HUMANS+1 > MESHES(IMESH2)%N_HUMANS_DIM) THEN
                            ! Re-allocation is not yet checked.
-                           CALL SHUTDOWN('ERROR: HUMANS: NO RE-ALLOCATION YET') ; RETURN
-                           CALL RE_ALLOCATE_HUMANS(1,IMESH2)
+                           WRITE(LU_ERR,*) 'ERROR: HUMANS: NO RE-ALLOCATION YET'
+                           WRITE(LU_EVACOUT,*) 'ERROR: HUMANS: NO RE-ALLOCATION YET'
+                           STOP_STATUS = EVACUATION_STOP ; RETURN
                         END IF
                         MESHES(IMESH2)%N_HUMANS = MESHES(IMESH2)%N_HUMANS + 1
                         MESHES(IMESH2)%HUMAN(MESHES(IMESH2)%N_HUMANS) = HUMAN(I)
@@ -12280,7 +12314,9 @@ CONTAINS
 
                      IF (MESHES(IMESH2)%N_HUMANS+1 > MESHES(IMESH2)%N_HUMANS_DIM) THEN
                         ! Re-allocation is not yet checked.
-                        CALL SHUTDOWN('ERROR: HUMANS: NO RE-ALLOCATION YET') ; RETURN
+                        WRITE(LU_ERR,*) 'ERROR: HUMANS: NO RE-ALLOCATION YET'
+                        WRITE(LU_EVACOUT,*) 'ERROR: HUMANS: NO RE-ALLOCATION YET'
+                        STOP_STATUS = EVACUATION_STOP ; RETURN
                         CALL RE_ALLOCATE_HUMANS(1,IMESH2)
                      END IF
                      MESHES(IMESH2)%N_HUMANS = MESHES(IMESH2)%N_HUMANS + 1
@@ -12596,8 +12632,9 @@ CONTAINS
                END IF
             END DO
             IF (i_tmp == 0 .OR. i_tmp > n_egrids) THEN
-               WRITE(MESSAGE,'(A,I6)') 'ERROR: Check_Target_Node, no imesh2 found ',imesh2
-               CALL SHUTDOWN(MESSAGE) ; RETURN
+               WRITE(LU_ERR,'(A,I6)') 'ERROR: Check_Target_Node, no imesh2 found ',imesh2
+               WRITE(LU_EVACOUT,'(A,I6)') 'ERROR: Check_Target_Node, no imesh2 found ',imesh2
+               STOP_STATUS = EVACUATION_STOP ; RETURN
             END IF
 
             IF (j > 0 .AND. Group_List(j)%GROUP_I_FFIELDS(i_tmp) > 0) THEN
@@ -12928,8 +12965,9 @@ CONTAINS
       !
       IF (N_HUMANS+1 > N_HUMANS_DIM) THEN
          ! Re-allocation is not yet checked.
-         CALL SHUTDOWN('ERROR: Insert Humans: no re-allocation yet') ; RETURN
-         CALL RE_ALLOCATE_HUMANS(1,NM)
+         WRITE(LU_ERR,*) 'ERROR: INSERT HUMANS: NO RE-ALLOCATION YET'
+         WRITE(LU_EVACOUT,*) 'ERROR: INSERT HUMANS: NO RE-ALLOCATION YET'
+         STOP_STATUS = EVACUATION_STOP ; RETURN
          HUMAN=>MESHES(NM)%HUMAN
       END IF
       !
@@ -13091,9 +13129,11 @@ CONTAINS
             END IF
          END DO Mesh2Loop
          IF ( HR%I_FFIELD == 0 ) THEN
-            WRITE(MESSAGE,'(A,A,A,A)') 'ERROR: ENTR line ',TRIM(PNX%ID), ' problem with flow field name, ', &
+            WRITE(LU_ERR,'(A,A,A,A)') 'ERROR: ENTR line ',TRIM(PNX%ID), ' problem with flow field name, ', &
                  TRIM(PNX%GRID_NAME),' not found'
-            CALL SHUTDOWN(MESSAGE) ; RETURN
+            WRITE(LU_EVACOUT,'(A,A,A,A)') 'ERROR: ENTR line ',TRIM(PNX%ID), ' problem with flow field name, ', &
+                 TRIM(PNX%GRID_NAME),' not found'
+            STOP_STATUS = EVACUATION_STOP ; RETURN
          END IF
          HR%IMESH       = PNX%IMESH
          HR%INODE       = PNX%TO_INODE
@@ -13177,9 +13217,9 @@ CONTAINS
       CB_N_AGENTS = 0
       READ (LU_EVAC_CB,*) CB_LINE_TYPE, CB_TIME, CB_N_AGENTS, CB_ID_CAMERA
       IF (CB_LINE_TYPE/=0 .OR. CB_N_AGENTS<0) THEN
-         WRITE(MESSAGE,'(A)') 'ERROR, Entry_Crowbar_Human: CROWBAR INPUT FILE READ ERROR 1'
          CLOSE (LU_EVAC_CB)
-         CALL SHUTDOWN(MESSAGE) ; RETURN
+          WRITE(LU_ERR,'(A)') 'ERROR, Entry_Crowbar_Human: CROWBAR INPUT FILE READ ERROR 1'
+         STOP_STATUS = EVACUATION_STOP ; RETURN
       END IF
       IF (PNX%CB_TimeLastRead > Tin) THEN
          ! This is the first call to this cb_entry
@@ -13197,17 +13237,17 @@ CONTAINS
             CB_LINE_TYPE = -1
             READ (LU_EVAC_CB,*) CB_LINE_TYPE
             IF (CB_LINE_TYPE/=1) THEN
-               WRITE(MESSAGE,'(A)') 'ERROR, Entry_Crowbar_Human: CROWBAR INPUT FILE READ ERROR 2'
+               WRITE(LU_ERR,'(A)') 'ERROR, Entry_Crowbar_Human: CROWBAR INPUT FILE READ ERROR 2'
                CLOSE (LU_EVAC_CB)
-               CALL SHUTDOWN(MESSAGE) ; RETURN
+               STOP_STATUS = EVACUATION_STOP ; RETURN
             END IF
          END DO
          CB_N_AGENTS_PREV_DT = 0
          READ (LU_EVAC_CB,*) CB_LINE_TYPE, CB_TIME, CB_N_AGENTS_PREV_DT, CB_ID_CAMERA
          IF (CB_LINE_TYPE/=0 .OR. CB_N_AGENTS_PREV_DT<0) THEN
-            WRITE(MESSAGE,'(A)') 'ERROR, Entry_Crowbar_Human: CROWBAR INPUT FILE READ ERROR 1'
+            WRITE(LU_ERR,'(A)') 'ERROR, Entry_Crowbar_Human: CROWBAR INPUT FILE READ ERROR 1'
             CLOSE (LU_EVAC_CB)
-            CALL SHUTDOWN(MESSAGE) ; RETURN
+            STOP_STATUS = EVACUATION_STOP ; RETURN
          END IF
          CB_TIME_OLD = CB_TIME
       END DO
@@ -13225,9 +13265,9 @@ CONTAINS
             READ (LU_EVAC_CB,*) CB_LINE_TYPE, CB_I_AGENT_PREV_DT(I),&
                  CB_XYZ_AGENT_PREV_DT(I,1),CB_XYZ_AGENT_PREV_DT(I,2),CB_XYZ_AGENT_PREV_DT(I,3)
             IF (CB_LINE_TYPE/=1) THEN
-               WRITE(MESSAGE,'(A)') 'ERROR, Entry_Crowbar_Human: CROWBAR INPUT FILE READ ERROR 2A'
+               WRITE(LU_ERR,'(A)') 'ERROR, Entry_Crowbar_Human: CROWBAR INPUT FILE READ ERROR 2A'
                CLOSE (LU_EVAC_CB)
-               CALL SHUTDOWN(MESSAGE) ; RETURN
+               STOP_STATUS = EVACUATION_STOP ; RETURN
             END IF
          END DO
          CB_XYZ_AGENT_PREV_DT = CB_XYZ_AGENT_PREV_DT/1000.0_EB ! mm to m transformation
@@ -13235,9 +13275,9 @@ CONTAINS
          CB_N_AGENTS = 0
          READ (LU_EVAC_CB,*) CB_LINE_TYPE, CB_TIME, CB_N_AGENTS, CB_ID_CAMERA
          IF (CB_LINE_TYPE/=0 .OR. CB_N_AGENTS<0) THEN
-            WRITE(MESSAGE,'(A)') 'ERROR, Entry_Crowbar_Human: CROWBAR INPUT FILE READ ERROR 1B'
+            WRITE(LU_ERR,'(A)') 'ERROR, Entry_Crowbar_Human: CROWBAR INPUT FILE READ ERROR 1B'
             CLOSE (LU_EVAC_CB)
-            CALL SHUTDOWN(MESSAGE) ; RETURN
+            STOP_STATUS = EVACUATION_STOP ; RETURN
          END IF
       END IF IfFirstPass
       
@@ -13258,9 +13298,9 @@ CONTAINS
               CB_XYZ_AGENT(I,1),CB_XYZ_AGENT(I,2),CB_XYZ_AGENT(I,3),CB_H_AGENT(I),&
               CB_V_AGENT(I,1),CB_V_AGENT(I,2),CB_V_AGENT(I,3)
          IF (CB_LINE_TYPE/=1) THEN
-            WRITE(MESSAGE,'(A)') 'ERROR, Entry_Crowbar_Human: CROWBAR INPUT FILE READ ERROR 2'
+            WRITE(LU_ERR,'(A)') 'ERROR, Entry_Crowbar_Human: CROWBAR INPUT FILE READ ERROR 2'
             CLOSE (LU_EVAC_CB)
-            CALL SHUTDOWN(MESSAGE) ; RETURN
+            STOP_STATUS = EVACUATION_STOP ; RETURN
          END IF
       END DO
       CB_XYZ_AGENT = CB_XYZ_AGENT/1000.0_EB ! mm to m transformation
@@ -13275,9 +13315,9 @@ CONTAINS
       CB_TIME_NOW = CB_TIME
       READ (LU_EVAC_CB,*,END=100) CB_LINE_TYPE, CB_TIME
       IF (CB_LINE_TYPE/=0) THEN
-         WRITE(MESSAGE,'(A)') 'ERROR, Entry_Crowbar_Human: CROWBAR INPUT FILE READ ERROR 3'
+         WRITE(LU_ERR,'(A)') 'ERROR, Entry_Crowbar_Human: CROWBAR INPUT FILE READ ERROR 3'
          CLOSE (LU_EVAC_CB)
-         CALL SHUTDOWN(MESSAGE) ; RETURN
+         STOP_STATUS = EVACUATION_STOP ; RETURN
       END IF
       PNX%CB_TimeNextRead = CB_TIME ! Next time stamp in the camera file
 100   CONTINUE
@@ -13368,7 +13408,8 @@ CONTAINS
 
          IF (N_HUMANS+1 > N_HUMANS_DIM) THEN
             ! Re-allocation is not yet checked.
-            CALL SHUTDOWN('ERROR: Insert CB Humans: no re-allocation yet') ; RETURN
+            WRITE(LU_ERR,*) 'ERROR: Insert CB Humans: no re-allocation yet'
+            STOP_STATUS = EVACUATION_STOP ; RETURN
             CALL RE_ALLOCATE_HUMANS(1,NM)
             HUMAN=>MESHES(NM)%HUMAN
          END IF
@@ -13547,8 +13588,8 @@ CONTAINS
                ! Correct color is put, where the flow fields are chosen.
                HR%COLOR_INDEX = 1
             CASE Default
-               WRITE(MESSAGE,'(A,I3,A)') 'ERROR: ENTRY_HUMAN COLOR METHOD',COLOR_METHOD, ' is not defined'
-               CALL SHUTDOWN(MESSAGE) ; RETURN
+               WRITE(LU_ERR,'(A,I3,A)') 'ERROR: ENTRY_HUMAN COLOR METHOD',COLOR_METHOD, ' is not defined'
+               STOP_STATUS = EVACUATION_STOP ; RETURN
             END SELECT
             HR%FFIELD_NAME = TRIM(PNX%GRID_NAME)
             HR%I_FFIELD    = 0
@@ -13559,9 +13600,9 @@ CONTAINS
                END IF
             END DO Mesh2Loop
             IF ( HR%I_FFIELD == 0 ) THEN
-               WRITE(MESSAGE,'(A,A,A,A)') 'ERROR: ENTR line ',TRIM(PNX%ID), ' problem with flow field name, ', &
+               WRITE(LU_ERR,'(A,A,A,A)') 'ERROR: ENTR line ',TRIM(PNX%ID), ' problem with flow field name, ', &
                     TRIM(PNX%GRID_NAME),' not found'
-               CALL SHUTDOWN(MESSAGE) ; RETURN
+               STOP_STATUS = EVACUATION_STOP ; RETURN
             END IF
             HR%IMESH       = PNX%IMESH
             HR%INODE       = PNX%TO_INODE
