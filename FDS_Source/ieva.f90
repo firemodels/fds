@@ -8240,10 +8240,11 @@ Contains
     Real ( kind = 8 ) xlo
     Real ( kind = 8 ), Save :: xxhi = 0.0D+00
     Real ( kind = 8 ), Save :: xxlo = 0.0D+00
-    Real ( kind = 8 ) zabstl
-    Real ( kind = 8 ) zreltl
-    Real ( kind = 8 ) zxhi
-    Real ( kind = 8 ) zxlo
+    ! Timo Korhonen 2014: Remove the Entry dstzr
+    ! Real ( kind = 8 ) zabstl
+    ! Real ( kind = 8 ) zreltl
+    ! Real ( kind = 8 ) zxhi
+    ! Real ( kind = 8 ) zxlo
 
     ! Save ! Gnu compiler says that this Save is redundant
     !Timo: Statement function ftol converted to an internal function
