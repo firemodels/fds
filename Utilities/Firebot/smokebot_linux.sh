@@ -1263,6 +1263,7 @@ if [[ $stage4a_success && $stage4b_success && $stage6d_success ]] ; then
   make_guide SMV_User_Guide $FDS_SVNROOT/Manuals/SMV_User_Guide 'SMV User Guide'
   make_guide SMV_Technical_Reference_Guide $FDS_SVNROOT/Manuals/SMV_Technical_Reference_Guide 'SMV Technical Reference Guide'
   make_guide SMV_Verification_Guide $FDS_SVNROOT/Manuals/SMV_Verification_Guide 'SMV Verification Guide'
+  make_guide geom_notes $FDS_SVNROOT/Manuals/FDS_User_Guide 'geometry notes'
 fi
 MAKEGUIDES_end=`GET_TIME`
 DIFF_MAKEGUIDES=`GET_DURATION $MAKEGUIDES_beg $MAKEGUIDES_end`
