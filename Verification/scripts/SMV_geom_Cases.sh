@@ -1,6 +1,7 @@
 #!/bin/bash
 
 $QFDS -d Immersed_Boundary_Method geom_sphere_fire.fds
+$QFDS -d Immersed_Boundary_Method geom_sphere2_fire.fds
 $QFDS -d Immersed_Boundary_Method geom_arch.fds
 $QFDS -d Immersed_Boundary_Method geom_azim.fds
 $QFDS -d Immersed_Boundary_Method geom_elev.fds
