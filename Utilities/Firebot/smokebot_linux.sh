@@ -477,7 +477,7 @@ run_verification_cases_debug()
 
    # Submit SMV verification cases and wait for them to start
    echo 'Running SMV verification cases:' >> $OUTPUT_DIR/stage3 2>&1
-   ./Run_SMV_Cases.sh $USEINSTALL2 -m 5 -d -q $SMOKEBOT_QUEUE -j $JOBPREFIX >> $OUTPUT_DIR/stage3 2>&1
+   ./Run_SMV_Cases.sh $USEINSTALL2 -m 2 -d -q $SMOKEBOT_QUEUE -j $JOBPREFIX >> $OUTPUT_DIR/stage3 2>&1
 
    # Wait for SMV verification cases to end
    wait_verification_cases_debug_end
