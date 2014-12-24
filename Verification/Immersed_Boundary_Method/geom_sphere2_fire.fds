@@ -4,7 +4,7 @@
   
 &TIME T_END=10./
 
-&DUMP DT_GEOM=0.05 /
+&DUMP DT_GEOM=0.2 /
   
 &REAC FUEL='PROPANE', SOOT_YIELD=0.01/
   
@@ -29,6 +29,6 @@
         SPHERE_RADIUS=0.75,
         SPHERE_ORIGIN=-1.0,0.0,1.0,        
         XYZ_DOT=0.2,0.0,0.0,
-        DT_GEOC=0.05,
+        DT_GEOC=0.2,
         MATL_ID='matl1',SURF_ID='surf1' /
 &TAIL /
