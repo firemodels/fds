@@ -969,6 +969,7 @@ generate_timing_stats()
 
    cd $FDS_SVNROOT/Verification
    scripts/SMV_Cases.sh
+   scripts/SMV_geom_Cases.sh
 
    cd $FDS_SVNROOT/Utilities/Scripts
    ./fds_timing_stats.sh smokebot
