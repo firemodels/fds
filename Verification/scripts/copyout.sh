@@ -17,7 +17,8 @@ shift $(($OPTIND-1))
 
 
 outdir=$FDS_SVNROOT/Verification/scripts/Outfiles
-infile=$1
+in=$1
+infile=${in%.*}
 
 fulldir=$FDS_SVNROOT/Verification/$DIR
 outfile=$infile.out
