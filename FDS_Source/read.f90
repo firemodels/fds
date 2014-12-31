@@ -394,15 +394,15 @@ NMESHES_EVAC = NMESHES - NMESHES_FIRE
 ! Stop the calculation if the number of MPI processes is greater than the number of meshes
 
 IF (NO_EVACUATION) THEN
-   IF (NMESHES<NUMPROCS) THEN
+   IF (NMESHES<N_MPI_PROCESSES) THEN
       CALL MPI_FINALIZE(IERR)
-      WRITE(MESSAGE,'(A,I3,A,I3)') 'ERROR: The number of MPI processes, ',NUMPROCS,', exceeds the number of meshes, ',NMESHES
+      WRITE(MESSAGE,'(A,I3,A,I3)') 'ERROR: The number of MPI processes, ',N_MPI_PROCESSES,', exceeds the number of meshes, ',NMESHES
       CALL SHUTDOWN(MESSAGE) ; RETURN
    ENDIF
 ELSE
-   IF(NMESHES_FIRE+1<NUMPROCS) THEN
+   IF(NMESHES_FIRE+1<N_MPI_PROCESSES) THEN
       CALL MPI_FINALIZE(IERR)
-      WRITE(MESSAGE,'(A,I3,A,I3)') 'ERROR: The number of MPI processes, ',NUMPROCS,&
+      WRITE(MESSAGE,'(A,I3,A,I3)') 'ERROR: The number of MPI processes, ',N_MPI_PROCESSES,&
            ', exceeds the number of fire meshes + 1, ',NMESHES_FIRE+1
       CALL SHUTDOWN(MESSAGE) ; RETURN
    ENDIF
@@ -519,12 +519,12 @@ MESH_LOOP: DO N=1,NMESHES_READ
             IF (USE_MPI) THEN
                IF (MPI_PROCESS>-1) THEN
                   CURRENT_MPI_PROCESS = MPI_PROCESS
-                  IF (CURRENT_MPI_PROCESS>NUMPROCS-1) THEN
+                  IF (CURRENT_MPI_PROCESS>N_MPI_PROCESSES-1) THEN
                      WRITE(MESSAGE,'(A)') 'ERROR: MPI_PROCESS greater than total number of processes'
                      CALL SHUTDOWN(MESSAGE) ; RETURN
                   ENDIF
                ELSE
-                  CURRENT_MPI_PROCESS = MIN(NM-1,NUMPROCS-1)
+                  CURRENT_MPI_PROCESS = MIN(NM-1,N_MPI_PROCESSES-1)
                ENDIF
             ELSE ! .NOT. USE_MPI
                CURRENT_MPI_PROCESS=0
@@ -569,7 +569,7 @@ MESH_LOOP: DO N=1,NMESHES_READ
 
             PROCESS(NM) = CURRENT_MPI_PROCESS
             IF (MYID==0 .AND. USE_MPI) WRITE(LU_ERR,'(A,I3,A,I3)') ' Mesh ',NM,' is assigned to MPI Process ',PROCESS(NM)
-            IF (EVACUATION_ONLY(NM) .AND. USE_MPI) EVAC_PROCESS = NUMPROCS-1
+            IF (EVACUATION_ONLY(NM) .AND. USE_MPI) EVAC_PROCESS = N_MPI_PROCESSES-1
 
             ! Mesh boundary colors
 
@@ -741,7 +741,7 @@ CONTAINS
 
        PROCESS(NM) = CURRENT_MPI_PROCESS
        IF (MYID==0 .AND. USE_MPI) WRITE(LU_ERR,'(A,I3,A,I3)') ' Mesh ',NM,' is assigned to MPI Process ',PROCESS(NM)
-       IF (EVACUATION_ONLY(NM) .AND. USE_MPI) EVAC_PROCESS = NUMPROCS-1
+       IF (EVACUATION_ONLY(NM) .AND. USE_MPI) EVAC_PROCESS = N_MPI_PROCESSES-1
 
        ! Mesh boundary colors
 
@@ -873,7 +873,7 @@ CONTAINS
 
        PROCESS(NM) = CURRENT_MPI_PROCESS
        IF (MYID==0 .AND. USE_MPI) WRITE(LU_ERR,'(A,I3,A,I3)') ' Mesh ',NM,' is assigned to MPI Process ',PROCESS(NM)
-       IF (EVACUATION_ONLY(NM) .AND. USE_MPI) EVAC_PROCESS = NUMPROCS-1
+       IF (EVACUATION_ONLY(NM) .AND. USE_MPI) EVAC_PROCESS = N_MPI_PROCESSES-1
 
        ! Mesh boundary colors
 
