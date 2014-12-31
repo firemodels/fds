@@ -34,19 +34,6 @@ no_target:
 .f90.o:
 	$(FC) -c $(FFLAGS) $(FILTERF) $<
 
-# ------------- Win 64 debug ----------------
-#  64 bit debug windows
-
-intel_win_64_db : CFLAGS    =  -D X64 -D WIN32 /nologo /debug:full /Od /Qtrapuv /fp:strict /fp:except 
-intel_win_64_db : FFLAGS    =  -fpp -D pp_cvf -D X64 /iface:stdref /nologo /debug:full /Od /extend_source:132 /warn:unused /warn:nointerfaces /Qtrapuv /fp:strict /fp:except
-intel_win_64_db : CC        = icl
-intel_win_64_db : CPP       = icl
-intel_win_64_db : FC        = ifort
-intel_win_64_db : exe       = smokediff_win_64_db.exe
-
-intel_win_64_db : $(objwin)
-	$(CPP) -o $(bin)/$(exe) $(objwin)
-
 # ------------- Win 64 ----------------
 #  64 bit windows
 
