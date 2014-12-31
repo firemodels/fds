@@ -3051,7 +3051,7 @@ WRITE(LU,'(A,A)')      ' Current Date     : ',TRIM(DATE)
 WRITE(LU,'(A,A)')      ' Version          : ',TRIM(VERSION_STRING)
 WRITE(LU,'(A,I5/)')    ' SVN Revision No. : ',SVN_REVISION_NUMBER
 IF (.NOT.USE_MPI)     WRITE(LU,'(A)')     ' MPI Disabled'
-IF (USE_MPI)          WRITE(LU,'(A,I5)')  ' MPI Enabled; Number of MPI Processes: ',NUMPROCS
+IF (USE_MPI)          WRITE(LU,'(A,I5)')  ' MPI Enabled; Number of MPI Processes: ',N_MPI_PROCESSES
 IF (.NOT. USE_OPENMP) WRITE(LU,'(A)')     ' OpenMP Disabled'
 IF (USE_OPENMP)       WRITE(LU,'(A,I3)')  ' OpenMP Enabled; Number of OpenMP Threads: ',OPENMP_AVAILABLE_THREADS
 
