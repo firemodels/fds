@@ -80,16 +80,6 @@ intel_linux_64 : exe       = smokezip_linux_64
 intel_linux_64 : $(obj)
 	$(CPP) -o $(bin)/$(exe) -static-intel $(obj) $(LINUXFORTLIBS_64) -L $(LIB_DIR)/lib_linux_intel_64 -lz -lpthread
 
-intel_linux_64_db : FFLAGS    = -O2 -m64 -fpp -D pp_noappend -D pp_LINUX64
-#intel_linux_64_db : CFLAGS    = -O0 -m64 -D pp_LINUX64 -g -check=stack,uninit -fp-stack-check -fp-trap-all=divzero,invalid,overflow -ftrapuv -Wcheck -Wuninitialized -Wunused-function -Wunused-variable
-intel_linux_64_db : CFLAGS    = -O0 -m64 -D pp_LINUX64 -g -check=stack,uninit -fp-stack-check -fp-trap-all=divzero,invalid,overflow -ftrapuv -Wuninitialized -Wunused-function -Wunused-variable
-intel_linux_64_db : CC        = icc
-intel_linux_64_db : CPP       = icc
-intel_linux_64_db : FC        = ifort
-intel_linux_64_db : exe       = smokezip_linux_64_db
-
-intel_linux_64_db : $(obj)
-	$(CPP) -o $(bin)/$(exe) -static-intel $(obj) $(LINUXFORTLIBS_64) -L $(LIB_DIR)/lib_linux_intel_64 -lz -lpthread
 	
 OSXFORTLIBS=$(FORTLIBDIR)/libifcoremt.a $(FORTLIBDIR)/libimf.a $(FORTLIBDIR)/libirc.a $(FORTLIBDIR)/libsvml.a
 
