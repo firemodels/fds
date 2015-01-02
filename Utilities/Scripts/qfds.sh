@@ -295,13 +295,11 @@ if [ "$RESOURCE_MANAGER" == "SLURM" ] ; then
 fi
 
 # Set walltime parameter only if walltime is specified as input argument
-walltimestring=
+walltimestring_pbs=
+walltimestring_slurm=
 if [ "$walltime" != "" ] ; then
-  if [ "$RESOURCE_MANAGER" == "SLURM" ] ; then
-    walltimestring="-t $walltime"
-  else
-    walltimestring="-l walltime=$walltime"
-  fi
+  walltimestring_pbs="-l walltime=$walltime"
+  walltimestring_slurm="-t $walltime"
 fi 
 
 # create a random script file for submitting jobs
@@ -317,9 +315,9 @@ cat << EOF >> $scriptfile
 #PBS -e $outerr
 #PBS -o $outlog
 #PBS -l nodes=$nodes:ppn=$ppn
-#PBS $walltimestring
+#PBS $walltimestring_pbs
 #SBATCH -J $JOBPREFIX$infile
-#SBATCH $walltimestring
+#SBATCH $walltimestring_slurm
 #SBATCH --mem-per-cpu=3000
 #SBATCH -e $outerr
 #SBATCH -o $outlog
