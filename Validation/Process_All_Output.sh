@@ -17,6 +17,7 @@ $VDIR/BRE_Spray/FDS_Output_Files/Process_Output.csh
 $VDIR/Bryant_Doorway/FDS_Output_Files/Process_Output.csh
 $VDIR/CAROLFIRE/FDS_Output_Files/Process_Output.csh
 $VDIR/CHRISTIFIRE/FDS_Output_Files/Process_Output.csh
+$VDIR/CSIRO_Grassland_Fires/FDS_Output_Files/Process_Output.csh
 $VDIR/Cup_Burner/FDS_Output_Files/Process_Output.csh
 $VDIR/FAA_Cargo_Compartments/FDS_Output_Files/Process_Output.csh
 $VDIR/FAA_Polymers/FDS_Output_Files/Process_Output.csh
@@ -31,6 +32,7 @@ $VDIR/LLNL_Enclosure/FDS_Output_Files/Process_Output.csh
 $VDIR/McCaffrey_Plume/FDS_Output_Files/Process_Output.csh
 $VDIR/Moody_Chart/FDS_Output_Files/Process_Output.csh
 $VDIR/NBS_Multi-Room/FDS_Output_Files/Process_Output.csh
+$VDIR/NIST_Douglas_Firs/FDS_Output_Files/Process_Output.csh
 $VDIR/NIST_FSE_2008/FDS_Output_Files/Process_Output.csh
 $VDIR/NIST_He_2009/FDS_Output_Files/Process_Output.csh
 $VDIR/NIST_NRC/FDS_Output_Files/Process_Output.csh
