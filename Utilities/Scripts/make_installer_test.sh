@@ -1,26 +1,63 @@
 #!/bin/bash
-EXPECTED_ARGS=5
 
-if [ $# -ne $EXPECTED_ARGS ]
+if [ $# -lt 1 ]
 then
-  echo "Usage: make_installer.sh ostype ossize FDS_TAR.tar.gz INSTALLER.sh"
+  echo "Usage: make_installer.sh -o ostype -i FDS_TAR.tar.gz -d installdir INSTALLER.sh"
   echo ""
   echo "Creates an FDS/Smokeview installer sh script. "
   echo ""
-  echo "  ostype - OSX or LINUX"
-  echo "  ossize - ia32, intel64"
-  echo "  FDS.tar.gz - compressed tar file containing FDS distribution"
-  echo "  INSTALLER.sh - .sh script containing self-extracting installer"
-  echo "  installdir - default install directory"
+  echo "  -o ostype - OSX or LINUX"
+  echo "  -i FDS.tar.gz - compressed tar file containing FDS distribution"
+  echo "  -d installdir - default install directory"
+  echo "   INSTALLER.sh - bash shell script containing self-extracting FDS installer"
   echo
   exit
 fi
 
-ostype=$1
-ossize=$2
-FDS_TAR=$3
-INSTALLER=$4
-INSTALLDIR=$5
+INSTALLDIR=
+FDS_TAR=
+ostype=
+while getopts 'd:i:o:' OPTION
+do
+case $OPTION in
+  d)
+  INSTALLDIR="$OPTARG"
+  ;;
+  i)
+  FDS_TAR="$OPTARG"
+  ;;
+  o)
+  ostype="$OPTARG"
+  ;;
+esac
+done 
+shift $(($OPTIND-1))
+
+INSTALLER=$1
+
+if [ "$ostype" == "" ]
+then
+echo "*** fatal error: OS type (OSX or LINUX) not specified"
+exit 0
+fi
+
+if [ "$FDS_TAR" == "" ]
+then
+echo "*** fatal error: FDS distribution file not specified"
+exit 0
+fi
+
+if [ "$INSTALLDIR" == "" ]
+then
+echo "*** fatal error: default install directory not specified"
+exit 0
+fi
+
+if [ "$INSTALLER" == "" ]
+then
+echo "*** fatal error: installer not specified"
+exit 0
+fi
 
 LDLIBPATH=LD_LIBRARY_PATH
 if [ "$ostype" == "OSX" ]
