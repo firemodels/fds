@@ -365,12 +365,20 @@ fi
 cat << BASH > \$BASHFDS
 #/bin/bash
 
-# mpilib options:
-#      intel64   - ethernet mpi library located at /shared/openmpi_64
-#      intel64ib - infiniband mpi library located at /shared/openmpi_64ib
-#      path_to_mpi_library - mpi library located at path_to_mpi_library
+# MPIDIST contains the path of the mpi library distribution
 
-mpilib=\\\$1
+MPIDIST=\\\$1
+FDSNETWORK=
+
+if [[ "\\\$MPIDIST" != "" && ! -d \\\$MPIDIST ]]; then
+  echo "*** Warning: the MPI distribution, \\\$MPIDIST, does not exist"
+  MPIDIST=
+fi
+
+if [[ "\\\$MPIDIST" == *ib ]] ; then
+  FDSNETWORK=infiniband
+fi
+export MPIDIST FDSNETWORK
 
 # unalias application names used by FDS
 
@@ -388,32 +396,6 @@ unalias smokediff6 >& /dev/null
 FDSBINDIR=\`pwd\`/bin
 SHORTCUTDIR=\$SHORTCUTDIR
 
-#  infiniband (MPI_IB) and ethernet (MPI_ETH) MPI library locaton
-
-\$MPIIB
-\$MPIETH
-
-# setup MPI environment
-
-if [[ "\\\$mpilib" == "intel64ib" ]] ; then
-  MPIDIST=\\\$MPI_IB
-fi
-if [[ "\\\$mpilib" == "intel64" ]] ; then
-  MPIDIST=\\\$MPI_ETH
-fi
-if [[ "\\\$MPIDIST" == "" ]]; then
-  MPIDIST=\\\$mpilib
-fi
-
-if [[ "\\\$MPIDIST" != "" && ! -d \\\$MPIDIST ]]; then
-  echo "*** Warning: the MPI distribution, \\\$MPIDIST, does not exist"
-  MPIDIST=
-fi
-
-if [[ "\\\$MPIDIST" == *ib ]] ; then
-  FDSNETWORK=infiniband
-fi
-export MPIDIST FDSNETWORK
 
 # Update LD_LIBRARY_PATH and PATH
 
@@ -442,10 +424,12 @@ fi
 cp \$BASHFDS ~/.bashrc_fds
 rm \$BASHFDS
 
+SOURCEFDS="source ~/.bashrc_fds"
+if [ -d /shared/openmpi_64 ] ; then
+  SOURCEFDS="source ~/.bashrc_fds /shared/openmpi_64"
+fi
 if [ -d /shared/openmpi_64ib ] ; then
-  SOURCEFDS="source ~/.bashrc_fds intel64ib"
-else
-  SOURCEFDS="source ~/.bashrc_fds intel64"
+  SOURCEFDS="source ~/.bashrc_fds /shared/openmpi_64ib"
 fi
 
 #--- update .bash_profile
