@@ -17,6 +17,8 @@ fi
 INSTALLDIR=
 FDS_TAR=
 ostype=
+INSTALLER=
+
 while getopts 'd:i:o:' OPTION
 do
 case $OPTION in
@@ -195,8 +197,8 @@ THISDIR=\`pwd\`
 
 BASHFDS=/tmp/bashrc_fds.\$\$
 
-#--- Find the beginning of the included FDS tar file so that it can be
-# subsequently un-tar'd
+#--- Find the beginning of the included FDS tar file so that it 
+#    can be subsequently un-tar'd
  
 SKIP=\`awk '/^__TARFILE_FOLLOWS__/ { print NR + 1; exit 0; }' \$0\`
 
@@ -208,6 +210,7 @@ then
 else
   read  option
 fi
+
 if [ "\$option" == "extract" ]
 then
   name=\$0
@@ -246,7 +249,8 @@ fi
 echo ""
 echo "Where would you like to install FDS?"
 EOF
-  if [ "$ostype" == "OSX" ]
+
+if [ "$ostype" == "OSX" ]
 then
 cat << EOF >> $INSTALLER
     echo "  Press 1 to install in /Applications/$INSTALLDIR"
@@ -268,8 +272,8 @@ then
 else
   read answer
 fi
-
 EOF
+
 if [ "$ostype" == "OSX" ]
 then
 cat << EOF >> $INSTALLER
@@ -294,6 +298,7 @@ cat << EOF >> $INSTALLER
   fi
 EOF
 fi
+
 cat << EOF >> $INSTALLER
 
 #--- do we want to proceed
@@ -360,7 +365,12 @@ fi
 cat << BASH > \$BASHFDS
 #/bin/bash
 
-platform=\\\$1
+# mpilib options:
+#      intel64   - ethernet mpi library located at /shared/openmpi_64
+#      intel64ib - infiniband mpi library located at /shared/openmpi_64ib
+#      path_to_mpi_library - mpi library located at path_to_mpi_library
+
+mpilib=\\\$1
 
 # unalias application names used by FDS
 
@@ -385,20 +395,21 @@ SHORTCUTDIR=\$SHORTCUTDIR
 
 # setup MPI environment
 
-if [ "\\\$QMPIDIST" == "" ] ; then
-  if [[ "\\\$platform" == "intel64ib" ]] ; then
-    MPIDIST=\\\$MPI_IB
-  fi
-  if [[ "\\\$platform" == "intel64" ]] ; then
-    MPIDIST=\\\$MPI_ETH
-  fi
-else
-  MPIDIST=\\\$QMPIDIST
+if [[ "\\\$mpilib" == "intel64ib" ]] ; then
+  MPIDIST=\\\$MPI_IB
 fi
+if [[ "\\\$mpilib" == "intel64" ]] ; then
+  MPIDIST=\\\$MPI_ETH
+fi
+if [[ "\\\$MPIDIST" == "" ]]; then
+  MPIDIST=\\\$mpilib
+fi
+
 if [[ "\\\$MPIDIST" != "" && ! -d \\\$MPIDIST ]]; then
   echo "*** Warning: the MPI distribution, \\\$MPIDIST, does not exist"
   MPIDIST=
 fi
+
 if [[ "\\\$MPIDIST" == *ib ]] ; then
   FDSNETWORK=infiniband
 fi
@@ -453,9 +464,7 @@ cat << EOF >> $INSTALLER
   cp \$BASHSTARTUP ~/.bash_profile
   rm \$BASHSTARTUP
 EOF
-fi
-
-if [ "$ostype" != "OSX" ]; then
+else
 cat << EOF >> $INSTALLER
 #--- update .bashrc
   BACKUP_FILE ~/.bashrc
