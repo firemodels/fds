@@ -365,21 +365,6 @@ fi
 cat << BASH > \$BASHFDS
 #/bin/bash
 
-# MPIDIST contains the path of the mpi library distribution
-
-MPIDIST=\\\$1
-FDSNETWORK=
-
-if [[ "\\\$MPIDIST" != "" && ! -d \\\$MPIDIST ]]; then
-  echo "*** Warning: the MPI distribution, \\\$MPIDIST, does not exist"
-  MPIDIST=
-fi
-
-if [[ "\\\$MPIDIST" == *ib ]] ; then
-  FDSNETWORK=infiniband
-fi
-export MPIDIST FDSNETWORK
-
 # unalias application names used by FDS
 
 unalias fds >& /dev/null
@@ -396,6 +381,19 @@ unalias smokediff6 >& /dev/null
 FDSBINDIR=\`pwd\`/bin
 SHORTCUTDIR=\$SHORTCUTDIR
 
+# MPI distribution location
+
+MPIDIST=\\\$1
+if [[ "\\\$MPIDIST" != "" && ! -d \\\$MPIDIST ]]; then
+  echo "*** Warning: the MPI distribution, \\\$MPIDIST, does not exist"
+  MPIDIST=
+fi
+
+FDSNETWORK=
+if [[ "\\\$MPIDIST" == *ib ]] ; then
+  FDSNETWORK=infiniband
+fi
+export MPIDIST FDSNETWORK
 
 # Update LD_LIBRARY_PATH and PATH
 
