@@ -190,7 +190,6 @@ MKDIR()
 
 THISSCRIPT=\`ABSPATH \$0\`
 THISDIR=\`pwd\`
-OSSIZE=`getconf LONG_BIT`
 
 #--- record temporary startup file names
 
@@ -230,15 +229,15 @@ then
   exit 0
 fi
 
-OSSIZE=`getconf LONG_BIT`
-if [ "$OSSIZE" != "64" ] ; then
-  if [ "$OSSIZE" == "32" ] ; then
+OSSIZE=\`getconf LONG_BIT\`
+if [ "\$OSSIZE" != "64" ] ; then
+  if [ "\$OSSIZE" == "32" ] ; then
     echo "***Fatal error: FDS and Smokeview require a 64 bit operating system."
-    echo "   The size of the operating system found is $OSSIZE."
+    echo "   The size of the operating system found is \$OSSIZE."
     exit 0
   fi
   echo "***Warning: FDS and Smokeview require a 64 bit operating system."
-  echo "   The size of the operating system found is $OSSIZE."
+  echo "   The size of the operating system found is \$OSSIZE."
   echo "   Proceed with caution."
 fi
 
