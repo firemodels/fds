@@ -1,26 +1,65 @@
 #!/bin/bash
-EXPECTED_ARGS=5
 
-if [ $# -ne $EXPECTED_ARGS ]
+if [ $# -lt 1 ]
 then
-  echo "Usage: make_installer.sh ostype ossize FDS_TAR.tar.gz INSTALLER.sh"
+  echo "Usage: make_installer.sh -o ostype -i FDS_TAR.tar.gz -d installdir INSTALLER.sh"
   echo ""
   echo "Creates an FDS/Smokeview installer sh script. "
   echo ""
-  echo "  ostype - OSX or LINUX"
-  echo "  ossize - ia32, intel64"
-  echo "  FDS.tar.gz - compressed tar file containing FDS distribution"
-  echo "  INSTALLER.sh - .sh script containing self-extracting installer"
-  echo "  installdir - default install directory"
+  echo "  -o ostype - OSX or LINUX"
+  echo "  -i FDS.tar.gz - compressed tar file containing FDS distribution"
+  echo "  -d installdir - default install directory"
+  echo "   INSTALLER.sh - bash shell script containing self-extracting FDS installer"
   echo
   exit
 fi
 
-ostype=$1
-ossize=$2
-FDS_TAR=$3
-INSTALLER=$4
-INSTALLDIR=$5
+INSTALLDIR=
+FDS_TAR=
+ostype=
+INSTALLER=
+
+while getopts 'd:i:o:' OPTION
+do
+case $OPTION in
+  d)
+  INSTALLDIR="$OPTARG"
+  ;;
+  i)
+  FDS_TAR="$OPTARG"
+  ;;
+  o)
+  ostype="$OPTARG"
+  ;;
+esac
+done 
+shift $(($OPTIND-1))
+
+INSTALLER=$1
+
+if [ "$ostype" == "" ]
+then
+echo "*** fatal error: OS type (OSX or LINUX) not specified"
+exit 0
+fi
+
+if [ "$FDS_TAR" == "" ]
+then
+echo "*** fatal error: FDS distribution file not specified"
+exit 0
+fi
+
+if [ "$INSTALLDIR" == "" ]
+then
+echo "*** fatal error: default install directory not specified"
+exit 0
+fi
+
+if [ "$INSTALLER" == "" ]
+then
+echo "*** fatal error: installer not specified"
+exit 0
+fi
 
 LDLIBPATH=LD_LIBRARY_PATH
 if [ "$ostype" == "OSX" ]
@@ -28,19 +67,13 @@ then
 LDLIBPATH=DYLD_LIBRARY_PATH
 fi
 
-if [ "$ossize" == "intel64" ]
-then
 size2=64
-else
-size2=32
-fi
 
 ostype2=$ostype
 if [ "$ostype" == "LINUX" ]
 then
 ostype2=Linux
 fi
-
 
 cat << EOF > $INSTALLER
 #!/bin/bash
@@ -54,8 +87,6 @@ echo "  1) Press <Enter> to begin installation"
 echo "  2) Type \"extract\" to copy the installation files to $FDS_TAR"
 
 BAK=_\`date +%Y%m%d_%H%M%S\`
-
-#--- output message
 
 #--- make a backup of a file
 
@@ -155,18 +186,17 @@ MKDIR()
 }
 
 #--- record the name of this script and the name of the directory 
-# it will run in
+#    it will run in
 
 THISSCRIPT=\`ABSPATH \$0\`
 THISDIR=\`pwd\`
 
 #--- record temporary startup file names
 
-CSHFDS=/tmp/cshrc_fds.\$\$
 BASHFDS=/tmp/bashrc_fds.\$\$
 
-#--- Find the beginning of the included FDS tar file so that it can be
-# subsequently un-tar'd
+#--- Find the beginning of the included FDS tar file so that it 
+#    can be subsequently un-tar'd
  
 SKIP=\`awk '/^__TARFILE_FOLLOWS__/ { print NR + 1; exit 0; }' \$0\`
 
@@ -178,6 +208,7 @@ then
 else
   read  option
 fi
+
 if [ "\$option" == "extract" ]
 then
   name=\$0
@@ -199,12 +230,25 @@ then
   exit 0
 fi
 
+OSSIZE=\`getconf LONG_BIT\`
+if [ "\$OSSIZE" != "64" ] ; then
+  if [ "\$OSSIZE" == "32" ] ; then
+    echo "***Fatal error: FDS and Smokeview require a 64 bit operating system."
+    echo "   The size of the operating system found is \$OSSIZE."
+    exit 0
+  fi
+  echo "***Warning: FDS and Smokeview require a 64 bit operating system."
+  echo "   The size of the operating system found is \$OSSIZE."
+  echo "   Proceed with caution."
+fi
+
 #--- get FDS root directory
 
 echo ""
 echo "Where would you like to install FDS?"
 EOF
-  if [ "$ostype" == "OSX" ]
+
+if [ "$ostype" == "OSX" ]
 then
 cat << EOF >> $INSTALLER
     echo "  Press 1 to install in /Applications/$INSTALLDIR"
@@ -218,7 +262,7 @@ cat << EOF >> $INSTALLER
 EOF
   fi
 cat << EOF >> $INSTALLER
-echo "  Enter directory path to install elsewhere"
+echo "  Enter a directory path to install elsewhere"
 
 if [ "\$OVERRIDE" == "y" ] 
 then
@@ -226,8 +270,8 @@ then
 else
   read answer
 fi
-
 EOF
+
 if [ "$ostype" == "OSX" ]
 then
 cat << EOF >> $INSTALLER
@@ -252,15 +296,60 @@ cat << EOF >> $INSTALLER
   fi
 EOF
 fi
+
+#--- specify MPI location
+
 cat << EOF >> $INSTALLER
+while true; do
+   echo ""
+   echo "Specify the MPI distribution location:"
+   if [ -d /shared/openmpi_64ib ] ; then
+      echo "  Press 1 to use /shared/openmpi_64ib"
+   fi
+   if [ -d /shared/openmpi_64 ] ; then
+      echo "  Press 2 to use /shared/openmpi_64"
+   fi
+   echo "  Press 3 to not use MPI."
+   echo "  Enter a path where the MPI distribution is located."
+   echo ""
+   if [ "\$OVERRIDE" == "y" ] ; then
+      mpipath=1
+   else
+      read mpipath
+      if [ "\$mpipath" == "" ] ; then
+         mpipath=3
+      fi
+   fi
+   if [ "\$mpipath" == "3" ] ; then
+      mpipath=""
+      break
+   fi
+   if [ "\$mpipath" == "1" ] ; then
+      mpipath=/shared/openmpi_64ib
+   fi
+   if [ "\$mpipath" == "2" ] ; then
+      mpipath=/shared/openmpi_64
+   fi
+   if [ -d \$mpipath ] ; then
+      break
+   fi
+   if [ "\$OVERRIDE" == "y" ] ; then
+      break
+   fi
+   echo "The directory, \$mpipath, does not contain an MPI distribution.  Try again."
+done
 
 #--- do we want to proceed
 
 while true; do
     echo ""
     echo "Installation directory: \$FDS_root"
-    if [ "\$OVERRIDE" == "y" ] 
-    then
+    if [ "\$mpipath" == "" ] ; then
+    echo "         MPI directory: none"
+    else
+    echo "         MPI directory: \$mpipath"
+    fi
+    if [ "\$OVERRIDE" == "y" ] ; then
       yn="y"
     else
       read -p "Do you wish to begin the installation? (yes/no) " yn
@@ -300,57 +389,11 @@ cd \$FDS_root
 tail -n +\$SKIP \$THISSCRIPT | tar -xz
 echo "Copy complete."
 
-#--- create CSH startup file
-
-cat << CSHRC > \$CSHFDS
-#/bin/csh -f
-set platform=\\\$1
-
-# unalias application names used by FDS
-
-unalias fds >& /dev/null
-unalias smokeview >& /dev/null
-unalias smokezip >& /dev/null
-unalias smokediff >& /dev/null
-unalias fds6 >& /dev/null
-unalias smokeview6 >& /dev/null
-unalias smokezip6 >& /dev/null
-unalias smokediff6 >& /dev/null
-
-# define FDS bin directory location
-
-setenv FDSBINDIR \`pwd\`/bin
-
-# environment for 64 bit Infiniband
-
-if ( "\\\$platform" == "intel64ib" ) then
-setenv MPIDIST /shared/openmpi_64ib
-endif
-
-# environment for 64 bit gigabit ethernet
-
-if ( "\\\$platform" == "intel64" ) then
-setenv MPIDIST /shared/openmpi_64
-endif
-
-# Update LD_LIBRARY_PATH and PATH variables
-
-setenv $LDLIBPATH \\\$MPIDIST/lib:\\\$$LDLIBPATH
-set path=(\\\$FDSBINDIR \\\$MPIDIST/bin ~/bin \\\$path)
-
-# Set number of OMP threads
-
-setenv OMP_NUM_THREADS 4
-
-CSHRC
-
 #--- create BASH startup file
 
 cat << BASH > \$BASHFDS
 #/bin/bash
 
-platform=\\\$1
-
 # unalias application names used by FDS
 
 unalias fds >& /dev/null
@@ -362,55 +405,39 @@ unalias smokeview6 >& /dev/null
 unalias smokezip6 >& /dev/null
 unalias smokediff6 >& /dev/null
 
-# define FDS bin directory location
+# FDS location
 
-export FDSBINDIR=\`pwd\`/bin
+FDSBINDIR=\`pwd\`/bin
 SHORTCUTDIR=\$SHORTCUTDIR
 
-# environment for MPI
+# MPI distribution location
 
-case "\\\$platform" in
-  "intel64ib" )
-    export MPIDIST=/shared/openmpi_64ib
-    export FDSNETWORK=infiniband
-  ;;
-  "intel64" )
-    export MPIDIST=/shared/openmpi_64
-  ;;
-esac
-RUNTIMELIBDIR=\\\$FDSBINDIR/LIB64
-
-# environment for compilers
-
-if [ "\\\$IFORT_COMPILER" != "" ]; then
-  if [[ "\\\$platform" == "intel64ib" || "\\\$platform" == "intel64" ]]; then
-    source \\\$IFORT_COMPILER/bin/compilervars.sh intel64
-  fi
+MPIDIST=\\\$1
+if [[ "\\\$MPIDIST" != "" && ! -d \\\$MPIDIST ]]; then
+  echo "*** Warning: the MPI distribution, \\\$MPIDIST, does not exist"
+  MPIDIST=
 fi
 
-# Update LD_LIBRARY_PATH and PATH variables
+FDSNETWORK=
+if [[ "\\\$MPIDIST" == *ib ]] ; then
+  FDSNETWORK=infiniband
+fi
+export MPIDIST FDSNETWORK
 
-export $LDLIBPATH=\\\$MPIDIST/lib:\\\$RUNTIMELIBDIR:\\\$$LDLIBPATH
-export PATH=\\\$FDSBINDIR:\\\$SHORTCUTDIR:\\\$MPIDIST/bin:\\\$PATH
+# Update LD_LIBRARY_PATH and PATH
+
+LD_LIBRARY_PATH=\\\$FDSBINDIR/LIB64:\\\$LD_LIBRARY_PATH
+PATH=\\\$FDSBINDIR:\\\$SHORTCUTDIR:\\\$PATH
+if [ "\\\$MPIDIST" != "" ]; then
+  LD_LIBRARY_PATH=\\\$MPIDIST/lib:\\\$LD_LIBRARY_PATH
+  PATH=\\\$MPIDIST/bin:\\\$PATH
+fi
+export LD_LIBRARY_PATH PATH
 
 # Set number of OMP threads
 
 export OMP_NUM_THREADS=4
 BASH
-
-#--- create .cshrc_fds startup file
-
-echo
-
-BACKUP_FILE ~/.cshrc_fds
-
-if [ -e ~/.cshrc_fds ] ; then
-  echo Updating .cshrc_fds
-else
-  echo Creating .cshrc_fds
-fi
-cp \$CSHFDS ~/.cshrc_fds
-rm \$CSHFDS
 
 #--- create .bash_fds startup file
 
@@ -424,56 +451,42 @@ fi
 cp \$BASHFDS ~/.bashrc_fds
 rm \$BASHFDS
 
+SOURCEFDS="source ~/.bashrc_fds \$mpipath"
+
 #--- update .bash_profile
 EOF
 if [ "$ostype" == "OSX" ]; then
 cat << EOF >> $INSTALLER
   BACKUP_FILE ~/.bash_profile
 
-  BASHPROFILETEMP=/tmp/.bash_profile_temp_\$\$
+  BASHSTARTUP=/tmp/.bash_profile_temp_\$\$
   cd \$THISDIR
   echo "Updating .bash_profile"
-  grep -v bashrc_fds ~/.bash_profile | grep -v "#FDS" > \$BASHPROFILETEMP
-  echo "#FDS " >> \$BASHPROFILETEMP
-  echo "#FDS Setting environment for FDS and Smokeview.  The original version" >> \$BASHPROFILETEMP
-  echo "#FDS of .bash_profile is saved in ~/.bash_profile\$BAK" >> \$BASHPROFILETEMP
-  echo source \~/.bashrc_fds $ossize >> \$BASHPROFILETEMP
-  cp \$BASHPROFILETEMP ~/.bash_profile
-  rm \$BASHPROFILETEMP
+  grep -v bashrc_fds ~/.bash_profile | grep -v "#FDS" > \$BASHSTARTUP
+  echo "#FDS " >> \$BASHSTARTUP
+  echo "#FDS Setting the environment for FDS and Smokeview. "   >> \$BASHSTARTUP
+  echo \$SOURCEFDS >> \$BASHSTARTUP
+  cp \$BASHSTARTUP ~/.bash_profile
+  rm \$BASHSTARTUP
 EOF
-fi
-
-if [ "$ostype" != "OSX" ]; then
+else
 cat << EOF >> $INSTALLER
 #--- update .bashrc
   BACKUP_FILE ~/.bashrc
 
-  BASHRCTEMP=/tmp/.bashrc_temp_\$\$
+  BASHSTARTUP=/tmp/.bashrc_temp_\$\$
   cd \$THISDIR
   echo "Updating .bashrc"
-  grep -v bashrc_fds ~/.bashrc | grep -v "#FDS" > \$BASHRCTEMP
-  echo "#FDS " >> \$BASHRCTEMP
-  echo "#FDS Setting environment for FDS and Smokeview.  The original version" >> \$BASHRCTEMP
-  echo "#FDS of .bashrc is saved in ~/.bashrc\$BAK" >> \$BASHRCTEMP
-  echo source \~/.bashrc_fds $ossize >> \$BASHRCTEMP
-  cp \$BASHRCTEMP ~/.bashrc
-  rm \$BASHRCTEMP
+  grep -v bashrc_fds ~/.bashrc | grep -v "#FDS" > \$BASHSTARTUP
+  echo "#FDS " >> \$BASHSTARTUP
+  echo "#FDS Setting the environment for FDS and Smokeview. "   >> \$BASHSTARTUP
+  echo \$SOURCEFDS >> \$BASHSTARTUP
+  cp \$BASHSTARTUP ~/.bashrc
+  rm \$BASHSTARTUP
 EOF
 fi
 
 cat << EOF >> $INSTALLER
-#--- update .cshrc
-
-BACKUP_FILE ~/.cshrc
-
-CSHTEMP=/tmp/.cshrc_temp_\$\$
-echo "Updating .cshrc"
-grep -v cshrc_fds ~/.cshrc | grep -v "#FDS" > \$CSHTEMP
-echo "#FDS Setting environment for FDS and Smokeview.  The original version" >> \$CSHTEMP
-echo "#FDS of .cshrc is saved in ~/.cshrc\$BAK" >> \$CSHTEMP
-echo source \~/.cshrc_fds $ossize >> \$CSHTEMP
-cp \$CSHTEMP ~/.cshrc
-rm \$CSHTEMP
 
 echo ""
 echo "Installation complete."
