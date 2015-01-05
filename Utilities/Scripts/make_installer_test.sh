@@ -88,8 +88,6 @@ echo "  2) Type \"extract\" to copy the installation files to $FDS_TAR"
 
 BAK=_\`date +%Y%m%d_%H%M%S\`
 
-#--- output message
-
 #--- make a backup of a file
 
 BACKUP_FILE()
@@ -188,7 +186,7 @@ MKDIR()
 }
 
 #--- record the name of this script and the name of the directory 
-# it will run in
+#    it will run in
 
 THISSCRIPT=\`ABSPATH \$0\`
 THISDIR=\`pwd\`
@@ -264,7 +262,7 @@ cat << EOF >> $INSTALLER
 EOF
   fi
 cat << EOF >> $INSTALLER
-echo "  Enter directory path to install elsewhere"
+echo "  Enter a directory path to install elsewhere"
 
 if [ "\$OVERRIDE" == "y" ] 
 then
@@ -299,15 +297,55 @@ cat << EOF >> $INSTALLER
 EOF
 fi
 
+#--- specify MPI location
+
 cat << EOF >> $INSTALLER
+while true; do
+   echo ""
+   echo "Specify the MPI distribution location:"
+   if [ -d /shared/openmpi_64ib ] ; then
+      echo "  Press 1 to use /shared/openmpi_64ib"
+   fi
+   if [ -d /shared/openmpi_64 ] ; then
+      echo "  Press 2 to use /shared/openmpi_64"
+   fi
+   echo "  Press 3 to not use MPI."
+   echo "  Enter a path where the MPI distribution is located."
+   echo ""
+   if [ "\$OVERRIDE" == "y" ] ; then
+      mpipath=1
+   else
+      read mpipath
+      if [ "\$mpipath" == "" ] ; then
+         mpipath=3
+      fi
+   fi
+   if [ "\$mpipath" == "3" ] ; then
+      mpipath="none"
+      break
+   fi
+   if [ "\$mpipath" == "1" ] ; then
+      mpipath=/shared/openmpi_64ib
+   fi
+   if [ "\$mpipath" == "2" ] ; then
+      mpipath=/shared/openmpi_64
+   fi
+   if [ -d \$mpipath ] ; then
+      break
+   fi
+   if [ "\$OVERRIDE" == "y" ] ; then
+      break
+   fi
+   echo "A MPI distribution at \$mpipath does not exist.  Try again."
+done
 
 #--- do we want to proceed
 
 while true; do
     echo ""
     echo "Installation directory: \$FDS_root"
-    if [ "\$OVERRIDE" == "y" ] 
-    then
+    echo "         MPI directory: \$mpipath"
+    if [ "\$OVERRIDE" == "y" ] ; then
       yn="y"
     else
       read -p "Do you wish to begin the installation? (yes/no) " yn
@@ -346,19 +384,6 @@ echo "Copying FDS installation files to"  \$FDS_root
 cd \$FDS_root
 tail -n +\$SKIP \$THISSCRIPT | tar -xz
 echo "Copy complete."
-
-#--- define MPI library locations
-
-if [ -d /shared/openmpi_64ib ] ; then
-  MPIIB="export MPI_IB=/shared/openmpi_64ib"
-else
-  MPIIB="export MPI_IB="
-fi
-if [ -d /shared/openmpi_64 ] ; then
-  MPIETH="export MPI_ETH=/shared/openmpi_64"
-else
-  MPIETH="export MPI_ETH="
-fi
 
 #--- create BASH startup file
 
@@ -454,7 +479,7 @@ cat << EOF >> $INSTALLER
   BASHSTARTUP=/tmp/.bashrc_temp_\$\$
   cd \$THISDIR
   echo "Updating .bashrc"
-  grep -v bashrc_fds ~/.bashrc | grep -v MPI_ETH | grep -v MPI_IB | grep -v "#FDS" > \$BASHSTARTUP
+  grep -v bashrc_fds ~/.bashrc | grep -v "#FDS" > \$BASHSTARTUP
   echo "#FDS " >> \$BASHSTARTUP
   echo "#FDS Setting the environment for FDS and Smokeview. "   >> \$BASHSTARTUP
   echo \$SOURCEFDS >> \$BASHSTARTUP
