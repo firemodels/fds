@@ -321,7 +321,7 @@ while true; do
       fi
    fi
    if [ "\$mpipath" == "3" ] ; then
-      mpipath="none"
+      mpipath=""
       break
    fi
    if [ "\$mpipath" == "1" ] ; then
@@ -344,7 +344,11 @@ done
 while true; do
     echo ""
     echo "Installation directory: \$FDS_root"
+    if [ "\$mpipath" == "" ] ; then
+    echo "         MPI directory: none"
+    else
     echo "         MPI directory: \$mpipath"
+    fi
     if [ "\$OVERRIDE" == "y" ] ; then
       yn="y"
     else
@@ -447,13 +451,7 @@ fi
 cp \$BASHFDS ~/.bashrc_fds
 rm \$BASHFDS
 
-SOURCEFDS="source ~/.bashrc_fds"
-if [ -d /shared/openmpi_64 ] ; then
-  SOURCEFDS="source ~/.bashrc_fds /shared/openmpi_64"
-fi
-if [ -d /shared/openmpi_64ib ] ; then
-  SOURCEFDS="source ~/.bashrc_fds /shared/openmpi_64ib"
-fi
+SOURCEFDS="source ~/.bashrc_fds \$mpipath"
 
 #--- update .bash_profile
 EOF
