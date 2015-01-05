@@ -523,8 +523,6 @@ MAKE_KAPPA_ARRAYS: IF (.NOT.SOLID_PHASE_ONLY .AND. ANY(SPECIES%RADCAL_ID/='null'
                END DO RADCAL_SPECIES_LOOP
             ENDDO Y_LOOP_Z
          ENDDO T_LOOP_Z
-         !Adjust values from /cm to /m
-         RADCAL_SPECIES2KAPPA =  RADCAL_SPECIES2KAPPA * 100._EB
          ! Interpolate KAPPA at RADTMP
          IF (RCT_SKIP == 0) THEN
             RADCAL_SPECIES2KAPPA(:,:,0,IBND) = RADCAL_SPECIES2KAPPA(:,:,1,IBND)
@@ -536,6 +534,8 @@ MAKE_KAPPA_ARRAYS: IF (.NOT.SOLID_PHASE_ONLY .AND. ANY(SPECIES%RADCAL_ID/='null'
          ENDIF
          CALL RCDEALLOC2  ! Deallocate RadCal wavelength dependent arrays         
       ENDDO BAND_LOOP_Z
+      !Adjust values from /cm to /m
+      RADCAL_SPECIES2KAPPA =  RADCAL_SPECIES2KAPPA * 100._EB
       CALL RCDEALLOC  ! Deallocate RadCal arrays
       
    ENDIF BUILD_KAPPA_ARRAY
