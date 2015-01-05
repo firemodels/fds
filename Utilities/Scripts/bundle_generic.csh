@@ -58,8 +58,7 @@ set texturedir=$forbundle/textures
 set fds2asciiroot=$scp_fds_smvroot/Utilities/fds2ascii
 set wikify=$fds_smvroot/Utilities/Scripts/wikify.py
 set fullmanifest=$uploaddir/$bundledir/bin/$manifest
-#set makeinstaller=$fds_smvroot/Utilities/Scripts/make_installer.sh
-set makeinstaller=$fds_smvroot/Utilities/Scripts/make_installer_test.sh
+set makeinstaller=$fds_smvroot/Utilities/Scripts/make_installer.sh
 
 set fds_cases=$fds_smvroot/Verification/FDS_Cases.sh
 set fdsmpi_cases=$fds_smvroot/Verification/FDS_MPI_Cases.sh
@@ -248,5 +247,4 @@ echo Compressing archive
 gzip    ../$bundlebase.tar
 echo Creating installer
 cd ..
-#$makeinstaller $ostype $ossize $bundlebase.tar.gz $bundlebase.sh $INSTALLDIR
 $makeinstaller -o $ostype -i $bundlebase.tar.gz -d $INSTALLDIR $bundlebase.sh 
