@@ -8871,7 +8871,7 @@ MESH_LOOP_2: DO NM=1,NMESHES
                   WRITE(MESSAGE,'(A,I3,A)')  'ERROR: OPEN, MIRROR, OR PERIODIC VENT ',VT%ORDINAL, ' must be an exterior boundary.'
                   CALL SHUTDOWN(MESSAGE) ; RETURN
                ENDIF
-               VT%BOUNDARY_TYPE = SOLID_BOUNDARY
+               IF (VT%BOUNDARY_TYPE/=HVAC_BOUNDARY) VT%BOUNDARY_TYPE = SOLID_BOUNDARY
                IF (.NOT.SOLID(CELL_INDEX(I2+1,J2,K2)) .AND.  .NOT.SOLID(CELL_INDEX(I2,J2,K2))) THEN
                   WRITE(MESSAGE,'(A,I3,A)')  'ERROR: VENT ',VT%ORDINAL, ' must be attached to a solid obstruction'
                   CALL SHUTDOWN(MESSAGE) ; RETURN
@@ -8883,7 +8883,7 @@ MESH_LOOP_2: DO NM=1,NMESHES
                   WRITE(MESSAGE,'(A,I3,A)')  'ERROR: OPEN, MIRROR, OR PERIODIC VENT ',VT%ORDINAL, ' must be an exterior boundary.'
                   CALL SHUTDOWN(MESSAGE) ; RETURN
                ENDIF
-               VT%BOUNDARY_TYPE = SOLID_BOUNDARY
+               IF (VT%BOUNDARY_TYPE/=HVAC_BOUNDARY) VT%BOUNDARY_TYPE = SOLID_BOUNDARY
                IF (.NOT.SOLID(CELL_INDEX(I2,J2+1,K2)) .AND.  .NOT.SOLID(CELL_INDEX(I2,J2,K2))) THEN
                   WRITE(MESSAGE,'(A,I3,A)')  'ERROR: VENT ',VT%ORDINAL, ' must be attached to a solid obstruction'
                   CALL SHUTDOWN(MESSAGE) ; RETURN
@@ -8895,7 +8895,7 @@ MESH_LOOP_2: DO NM=1,NMESHES
                   WRITE(MESSAGE,'(A,I3,A)')  'ERROR: OPEN, MIRROR, OR PERIODIC VENT ',VT%ORDINAL, ' must be an exterior boundary.'
                   CALL SHUTDOWN(MESSAGE) ; RETURN
                ENDIF
-               VT%BOUNDARY_TYPE = SOLID_BOUNDARY
+               IF (VT%BOUNDARY_TYPE/=HVAC_BOUNDARY) VT%BOUNDARY_TYPE = SOLID_BOUNDARY
                IF (.NOT.SOLID(CELL_INDEX(I2,J2,K2+1)) .AND. .NOT.SOLID(CELL_INDEX(I2,J2,K2))) THEN
                   WRITE(MESSAGE,'(A,I3,A)')  'ERROR: VENT ',VT%ORDINAL, ' must be attached to a solid obstruction'
                   CALL SHUTDOWN(MESSAGE) ; RETURN
@@ -8996,7 +8996,6 @@ MESH_LOOP_2: DO NM=1,NMESHES
    ENDDO  VENT_LOOP_3
 
 ENDDO MESH_LOOP_2
-
 
 CONTAINS
 
