@@ -1484,12 +1484,12 @@ The divergence expression is obtained by differentiating the EOS:
 For this isothermal flow there is no alternative divergence formulation to consider. The RHS of the momentum equation is augmented as follows:
 \begin{equation}
 \label{eqn_mms_u_eqn}
-\frac{\partial \textct{u}}{\partial t} = - ( \textct{F} + \nabla H ) + \dot{Q}_\textct{u}/\rho \,\mbox{.}
+\frac{\partial \mathbf{u}}{\partial t} = - ( \mathbf{F} + \nabla H ) + \dot{Q}_u/\rho \,\mbox{.}
 \end{equation}
 And the Poisson equation for $H$ becomes
 \begin{align}
 \label{eqn_poisson_mms}
-\nabla^2 H = - \left[ \Div \left( \mathbf{F} - \dot{Q}_\textct{u}/\rho \right) + \frac{\partial}{\partial t} (\Div\mathbf{u}) \right] \,\mbox{.}
+\nabla^2 H = - \left[ \Div \left( \mathbf{F} - \dot{Q}_u/\rho \right) + \frac{\partial}{\partial t} (\Div\mathbf{u}) \right] \,\mbox{.}
 \end{align}
 
 \subsubsection*{Manufactured Solution Procedure}
