@@ -300,41 +300,13 @@ fi
 #--- specify MPI location
 
 cat << EOF >> $INSTALLER
-while true; do
-   echo "Specify the MPI location (to use the parallel version of FDS):"
-   if [ -d /shared/openmpi_64ib ] ; then
-      echo "  Press 1 to use /shared/openmpi_64ib"
-   fi
-   if [ -d /shared/openmpi_64 ] ; then
-      echo "  Press 2 to use /shared/openmpi_64"
-   fi
-   echo "  Enter a directory path to use some other location"
-   echo "  Type \"none\" to not use MPI"
-   echo ""
-   if [ "\$OVERRIDE" == "y" ] ; then
-      mpipath=1
-   else
-      read mpipath
-      if [ "\$mpipath" == "none" ] ; then
-         mpipath=""
-         break
-      fi
-   fi
-   if [ "\$mpipath" == "1" ] ; then
-      mpipath=/shared/openmpi_64ib
-   fi
-   if [ "\$mpipath" == "2" ] ; then
-      mpipath=/shared/openmpi_64
-   fi
-   if [ -d \$mpipath ] ; then
-      break
-   fi
-   if [ "\$OVERRIDE" == "y" ] ; then
-      break
-   fi
-   echo "The directory, \$mpipath, does not contain an MPI distribution."
-   echo "Try again."
-done
+mpipath=
+if [ -d /shared/openmpi_64 ] ; then
+   mpipath=/shared/openmpi_64
+fi
+if [ -d /shared/openmpi_64ib ] ; then
+   mpipath=/shared/openmpi_64ib
+fi
 
 #--- do we want to proceed
 
@@ -349,7 +321,7 @@ while true; do
    if [ "\$OVERRIDE" == "y" ] ; then
      yn="y"
    else
-     read -p "Do you wish to begin the installation? (yes/no) " yn
+     read -p "Do you wish to proceed with the installation? (yes/no) " yn
    fi
    case \$yn in
       [Yy]* ) break;;
