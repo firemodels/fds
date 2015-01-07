@@ -301,7 +301,7 @@ fi
 
 cat << EOF >> $INSTALLER
 while true; do
-   echo "Specify the MPI location:"
+   echo "Specify the MPI location (to use the parallel version of FDS):"
    if [ -d /shared/openmpi_64ib ] ; then
       echo "  Press 1 to use /shared/openmpi_64ib"
    fi
@@ -309,7 +309,7 @@ while true; do
       echo "  Press 2 to use /shared/openmpi_64"
    fi
    echo "  Enter a directory path to use some other location"
-   echo "    (or none to not use MPI)"
+   echo "  Type \"none\" to not use MPI"
    echo ""
    if [ "\$OVERRIDE" == "y" ] ; then
       mpipath=1
