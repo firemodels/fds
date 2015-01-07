@@ -301,28 +301,24 @@ fi
 
 cat << EOF >> $INSTALLER
 while true; do
-   echo ""
-   echo "Specify the MPI distribution location:"
+   echo "Specify the MPI location:"
    if [ -d /shared/openmpi_64ib ] ; then
       echo "  Press 1 to use /shared/openmpi_64ib"
    fi
    if [ -d /shared/openmpi_64 ] ; then
       echo "  Press 2 to use /shared/openmpi_64"
    fi
-   echo "  Press 3 to not use MPI."
-   echo "  Enter a path where the MPI distribution is located."
+   echo "  Enter a directory path to use some other location"
+   echo "    (or none to not use MPI)"
    echo ""
    if [ "\$OVERRIDE" == "y" ] ; then
       mpipath=1
    else
       read mpipath
-      if [ "\$mpipath" == "" ] ; then
-         mpipath=3
+      if [ "\$mpipath" == "none" ] ; then
+         mpipath=""
+         break
       fi
-   fi
-   if [ "\$mpipath" == "3" ] ; then
-      mpipath=""
-      break
    fi
    if [ "\$mpipath" == "1" ] ; then
       mpipath=/shared/openmpi_64ib
@@ -336,29 +332,30 @@ while true; do
    if [ "\$OVERRIDE" == "y" ] ; then
       break
    fi
-   echo "The directory, \$mpipath, does not contain an MPI distribution.  Try again."
+   echo "The directory, \$mpipath, does not contain an MPI distribution."
+   echo "Try again."
 done
 
 #--- do we want to proceed
 
 while true; do
-    echo ""
-    echo "Installation directory: \$FDS_root"
-    if [ "\$mpipath" == "" ] ; then
-    echo "         MPI directory: none"
-    else
-    echo "         MPI directory: \$mpipath"
-    fi
-    if [ "\$OVERRIDE" == "y" ] ; then
-      yn="y"
-    else
-      read -p "Do you wish to begin the installation? (yes/no) " yn
-    fi
-    case \$yn in
-        [Yy]* ) break;;
-        [Nn]* ) echo "Installation cancelled";exit;;
-        * ) echo "Please answer yes or no.";;
-    esac
+   echo ""
+   echo "Installation directory: \$FDS_root"
+   if [ "\$mpipath" == "" ] ; then
+     echo "         MPI directory: none"
+   else
+     echo "         MPI directory: \$mpipath"
+   fi
+   if [ "\$OVERRIDE" == "y" ] ; then
+     yn="y"
+   else
+     read -p "Do you wish to begin the installation? (yes/no) " yn
+   fi
+   case \$yn in
+      [Yy]* ) break;;
+      [Nn]* ) echo "Installation cancelled";exit;;
+      * ) echo "Please answer yes or no.";;
+   esac
 done
  
 #--- make the FDS root directory
@@ -394,6 +391,10 @@ echo "Copy complete."
 cat << BASH > \$BASHFDS
 #/bin/bash
 
+# MPI location
+
+MPIDIST=\$mpipath
+
 # unalias application names used by FDS
 
 unalias fds >& /dev/null
@@ -410,9 +411,6 @@ unalias smokediff6 >& /dev/null
 FDSBINDIR=\`pwd\`/bin
 SHORTCUTDIR=\$SHORTCUTDIR
 
-# MPI distribution location
-
-MPIDIST=\\\$1
 if [[ "\\\$MPIDIST" != "" && ! -d \\\$MPIDIST ]]; then
   echo "*** Warning: the MPI distribution, \\\$MPIDIST, does not exist"
   MPIDIST=
@@ -451,8 +449,6 @@ fi
 cp \$BASHFDS ~/.bashrc_fds
 rm \$BASHFDS
 
-SOURCEFDS="source ~/.bashrc_fds \$mpipath"
-
 #--- update .bash_profile
 EOF
 if [ "$ostype" == "OSX" ]; then
@@ -465,7 +461,7 @@ cat << EOF >> $INSTALLER
   grep -v bashrc_fds ~/.bash_profile | grep -v "#FDS" > \$BASHSTARTUP
   echo "#FDS " >> \$BASHSTARTUP
   echo "#FDS Setting the environment for FDS and Smokeview. "   >> \$BASHSTARTUP
-  echo \$SOURCEFDS >> \$BASHSTARTUP
+  echo "source ~/.bashrc_fds" >> \$BASHSTARTUP
   cp \$BASHSTARTUP ~/.bash_profile
   rm \$BASHSTARTUP
 EOF
@@ -480,7 +476,7 @@ cat << EOF >> $INSTALLER
   grep -v bashrc_fds ~/.bashrc | grep -v "#FDS" > \$BASHSTARTUP
   echo "#FDS " >> \$BASHSTARTUP
   echo "#FDS Setting the environment for FDS and Smokeview. "   >> \$BASHSTARTUP
-  echo \$SOURCEFDS >> \$BASHSTARTUP
+  echo "source ~/.bashrc_fds" >> \$BASHSTARTUP
   cp \$BASHSTARTUP ~/.bashrc
   rm \$BASHSTARTUP
 EOF
