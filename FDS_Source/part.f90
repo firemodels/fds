@@ -2051,7 +2051,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
          TMP_G  = TMP(II,JJ,KK)
          RHO_G  = RHO(II,JJ,KK)
          MU_AIR = MU_Z(MIN(5000,NINT(TMP_G)),0)*SPECIES_MIXTURE(0)%MW
-         M_GAS  = RHO_G/RVC        
+         M_GAS  = RHO_G/RVC  
          M_VAP_MAX = (0.33_EB * M_GAS - MVAP_TOT(II,JJ,KK)) / WGT ! limit to avoid diveregence errors
          K_AIR  = CPOPR*MU_AIR
          IF (Y_INDEX>=0) THEN
@@ -2217,16 +2217,12 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
          I_FUEL = 0
          IF (N_REACTIONS>0) I_FUEL = REACTION(1)%FUEL_SMIX_INDEX
 
-         IF (LPC%Z_INDEX==I_FUEL .AND. I_FUEL>0) THEN
-            M_DOT(2,NM) = M_DOT(2,NM) + WGT*M_VAP/DT_SUBSTEP  ! Fuel mass loss rate
-            M_VAP = LPC%ADJUST_EVAPORATION*M_VAP
-         ENDIF
-
-         M_DOT(4,NM) = M_DOT(4,NM) + WGT*M_VAP/DT_SUBSTEP  ! Total mass loss rate
-
+         IF (LPC%Z_INDEX==I_FUEL .AND. I_FUEL>0) M_VAP = LPC%ADJUST_EVAPORATION*M_VAP
+ 
          ! Update gas temperature and determine new subtimestep
 
-         CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET,CP,TMP_G)            
+         CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET,CP,TMP_G)       
+         
          H_G_OLD = M_GAS*CP*TMP_G         
          M_GAS_NEW = M_GAS + WGT*M_VAP
          TMP_G_NEW = TMP_G
@@ -2276,6 +2272,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
             N_SUBSTEPS = NINT(DT/DT_SUBSTEP)
             CYCLE TIME_ITERATION_LOOP
          ENDIF
+
          CALL INTERPOLATE1D_UNIFORM(LBOUND(SS%H_V,1),SS%H_V,TMP_DROP_NEW,H_V)
          DHOR     = H_V*MW_DROP/R0 
          X_EQUIL  = MIN(1._EB,P_RATIO*EXP(DHOR*(1._EB/TMP_BOIL-1._EB/TMP_DROP_NEW)))
@@ -2333,6 +2330,9 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
          Q_DOT(2,NM) = Q_DOT(2,NM) + Q_RAD*WGT/DT_SUBSTEP                             ! Q_RADI
          Q_DOT(4,NM) = Q_DOT(4,NM) + Q_CON_WALL*WGT/DT_SUBSTEP                        ! Q_COND
 
+         IF (LPC%Z_INDEX==I_FUEL .AND. I_FUEL>0) M_DOT(2,NM) = M_DOT(2,NM) + WGT*M_VAP/DT_SUBSTEP/LPC%ADJUST_EVAPORATION
+         M_DOT(4,NM) = M_DOT(4,NM) + WGT*M_VAP/DT_SUBSTEP  ! Total mass loss rate         
+         
          ! Keep track of total mass evaporated in cell
 
          MVAP_TOT(II,JJ,KK) = MVAP_TOT(II,JJ,KK) + WGT*M_VAP
@@ -2352,10 +2352,11 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                                              OMRAF*WGT*(Q_RAD+Q_CON_WALL)*WALL(IW)%RAW/DT_SUBSTEP
 
          ! Get out of the loop if the PARTICLE has evaporated completely
-
          IF (LP%ONE_D%X(1)<=0._EB) CYCLE PARTICLE_LOOP
+
          DT_SUM = DT_SUM + DT_SUBSTEP
          DT_SUBSTEP = MIN(DT-DT_SUM,DT_SUBSTEP * 1.5_EB)
+
       ENDDO TIME_ITERATION_LOOP
 
    ENDDO PARTICLE_LOOP
