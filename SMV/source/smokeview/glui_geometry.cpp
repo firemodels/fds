@@ -74,8 +74,8 @@ GLUI_Listbox *LIST_surface[7]={NULL,NULL,NULL,NULL,NULL,NULL,NULL};
 GLUI_Panel *PANEL_obj_select=NULL,*PANEL_surface=NULL,*PANEL_interior=NULL,*PANEL_geom_showhide;
 GLUI_Panel *PANEL_obj_stretch2=NULL,*PANEL_obj_stretch3=NULL, *PANEL_obj_stretch4=NULL;
 
-GLUI_Rollout *ROLLOUT_blockedit=NULL;
-GLUI_Rollout *ROLLOUT_geometry=NULL;
+GLUI_Rollout *ROLLOUT_structured=NULL;
+GLUI_Rollout *ROLLOUT_unstructured=NULL;
 
 GLUI_Spinner *SPINNER_face_factor=NULL;
 
@@ -103,6 +103,27 @@ extern "C" void update_geometry_controls(void){
   if(CHECKBOX_interior_outline!=NULL)CHECKBOX_surface_outline->set_int_val(show_geometry_interior_outline);
 }
 
+/* ------------------ get_geom_dialog_state ------------------------ */
+
+extern "C" void get_geom_dialog_state(void){
+  if(ROLLOUT_structured!=NULL){
+    if(ROLLOUT_structured->is_open){
+      structured_isopen=1;
+    }
+    else{
+      structured_isopen=0;
+    }
+  }
+  if(ROLLOUT_unstructured!=NULL){
+    if(ROLLOUT_unstructured->is_open){
+      unstructured_isopen=1;
+    }
+    else{
+      unstructured_isopen=0;
+    }
+  }
+}
+
 /* ------------------ glui_geometry_setup ------------------------ */
 
 extern "C" void glui_geometry_setup(int main_window){
@@ -127,8 +148,9 @@ extern "C" void glui_geometry_setup(int main_window){
   glui_geometry = GLUI_Master.create_glui("Geometry",0,0,0);
   if(showedit_dialog==0)glui_geometry->hide();
 
-  ROLLOUT_blockedit = glui_geometry->add_rollout("Structured",false);
-  PANEL_obj_select = glui_geometry->add_panel_to_panel(ROLLOUT_blockedit,"SURFs");
+  ROLLOUT_structured = glui_geometry->add_rollout("Structured",false);
+  if(structured_isopen==1)ROLLOUT_structured->open();
+  PANEL_obj_select = glui_geometry->add_panel_to_panel(ROLLOUT_structured,"SURFs");
 
   PANEL_surface=glui_geometry->add_panel_to_panel(PANEL_obj_select,"",GLUI_PANEL_NONE);
 
@@ -203,9 +225,9 @@ extern "C" void glui_geometry_setup(int main_window){
     }
   }
 
-  glui_geometry->add_column_to_panel(ROLLOUT_blockedit,false);
+  glui_geometry->add_column_to_panel(ROLLOUT_structured,false);
 
-  PANEL_obj_stretch4=glui_geometry->add_panel_to_panel(ROLLOUT_blockedit,"",GLUI_PANEL_NONE);
+  PANEL_obj_stretch4=glui_geometry->add_panel_to_panel(ROLLOUT_structured,"",GLUI_PANEL_NONE);
 
   {
     char meshlabel[255];
@@ -218,7 +240,7 @@ extern "C" void glui_geometry_setup(int main_window){
   STATIC_blockage_index=glui_geometry->add_statictext_to_panel(PANEL_obj_stretch4,"&OBST number: ");
   STATIC_label=glui_geometry->add_statictext_to_panel(PANEL_obj_stretch4,"&OBST label:");
 
-  PANEL_obj_stretch2 = glui_geometry->add_panel_to_panel(ROLLOUT_blockedit,"Coordinates");
+  PANEL_obj_stretch2 = glui_geometry->add_panel_to_panel(ROLLOUT_structured,"Coordinates");
 
   CHECKBOX_blockage=glui_geometry->add_checkbox_to_panel(PANEL_obj_stretch2,_("Dimensions snapped to grid"),&blockage_snapped,
     BLOCKAGE_AS_INPUT,OBJECT_CB);
@@ -250,8 +272,9 @@ extern "C" void glui_geometry_setup(int main_window){
   EDIT_zmax->set_float_limits(zplt_orig[0],zplt_orig[kbar],GLUI_LIMIT_CLAMP);
 
 #ifdef pp_GEOMTEST
-  ROLLOUT_geometry = glui_geometry->add_rollout("Unstructured",false);
-  SPINNER_face_factor=glui_geometry->add_spinner_to_panel(ROLLOUT_geometry,"face factor",GLUI_SPINNER_FLOAT,&face_factor);
+  ROLLOUT_unstructured = glui_geometry->add_rollout("Unstructured",false);
+  if(unstructured_isopen==1)ROLLOUT_unstructured->open();
+  SPINNER_face_factor=glui_geometry->add_spinner_to_panel(ROLLOUT_unstructured,"face factor",GLUI_SPINNER_FLOAT,&face_factor);
   SPINNER_face_factor->set_float_limits(0.0,0.5);
 
   for(i=0;i<nmeshes;i++){
@@ -259,11 +282,11 @@ extern "C" void glui_geometry_setup(int main_window){
 
     meshi = meshinfo + i;
     if(meshi->ncutcells>0){
-      glui_geometry->add_checkbox_to_panel(ROLLOUT_geometry,_("Show cutcells"),&show_cutcells);
+      glui_geometry->add_checkbox_to_panel(ROLLOUT_unstructured,_("Show cutcells"),&show_cutcells);
       break;
     }
   }
-  PANEL_geom_showhide = glui_geometry->add_panel_to_panel(ROLLOUT_geometry,"",GLUI_PANEL_NONE);
+  PANEL_geom_showhide = glui_geometry->add_panel_to_panel(ROLLOUT_unstructured,"",GLUI_PANEL_NONE);
   PANEL_surface = glui_geometry->add_panel_to_panel(PANEL_geom_showhide,"surface");
   CHECKBOX_surface_solid=glui_geometry->add_checkbox_to_panel(PANEL_surface,"solid",&showtrisurface,VOL_SHOWHIDE,Volume_CB);
   CHECKBOX_surface_outline=glui_geometry->add_checkbox_to_panel(PANEL_surface,"outline",&showtrioutline,VOL_SHOWHIDE,Volume_CB);
@@ -275,7 +298,7 @@ extern "C" void glui_geometry_setup(int main_window){
 
   // -------------- Cube/Tetra intersection test -------------------
 
-  ROLLOUT_geomtest = glui_geometry->add_rollout_to_panel(ROLLOUT_geometry,"Cube/Tetra intersection test",false);
+  ROLLOUT_geomtest = glui_geometry->add_rollout_to_panel(ROLLOUT_unstructured,"Cube/Tetra intersection test",false);
   glui_geometry->add_checkbox_to_panel(ROLLOUT_geomtest,"show",&show_geomtest);
   PANEL_geom1=glui_geometry->add_panel_to_panel(ROLLOUT_geomtest,"box bounding planes");
 

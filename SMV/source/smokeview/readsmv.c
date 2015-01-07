@@ -8638,6 +8638,11 @@ int readini2(char *inifile, int localfile){
         continue;
       }
     }
+    if(match(buffer,"GEOMDIAGS")==1){
+      fgets(buffer,255,stream);
+      sscanf(buffer," %i %i",&structured_isopen,&unstructured_isopen);
+      continue;
+    }
     if(match(buffer,"SHOWTRIANGLECOUNT")==1){
       fgets(buffer,255,stream);
       sscanf(buffer," %i",&show_triangle_count);
@@ -11698,6 +11703,9 @@ void writeini(int flag,char *filename){
       fprintf(fileout," %i\n",meshi->blockvis);
     }
   }
+  get_geom_dialog_state();
+  fprintf(fileout,"GEOMDIAGS\n");
+  fprintf(fileout," %i %i\n",structured_isopen,unstructured_isopen);
   fprintf(fileout,"SHOWTITLE\n");
   fprintf(fileout," %i\n",visTitle);
   fprintf(fileout,"GVERSION\n");
