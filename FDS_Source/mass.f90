@@ -939,8 +939,8 @@ USE SOOT_ROUTINES, ONLY: SETTLING_VELOCITY
 INTEGER, INTENT(IN) :: NM
 REAL(EB) :: TNOW,ZZZ(1:4)
 INTEGER  :: I,J,K,N,IOR,IW,IIG,JJG,KKG,II,JJ,KK
-REAL(EB), POINTER, DIMENSION(:,:,:) :: RHO_ZZ_P=>NULL()
 REAL(EB), POINTER, DIMENSION(:,:,:,:) :: ZZP=>NULL()
+REAL(EB), POINTER, DIMENSION(:,:,:) :: RHO_Z_P=>NULL()
 TYPE(WALL_TYPE), POINTER :: WC=>NULL()
 
 IF (EVACUATION_ONLY(NM) .OR. SOLID_PHASE_ONLY) RETURN
@@ -962,16 +962,134 @@ ELSE
    IF (N_TRACKED_SPECIES > 0) ZZP => ZZS
 ENDIF
 
+DENSITY_TRANSPORT_IF: IF (DENSITY_TRANSPORT) THEN
+
+! Compute scalar values at cell faces, FX, FY, FZ
+
+!$OMP PARALLEL PRIVATE(ZZZ)
+!$OMP DO SCHEDULE(STATIC)
+DO K=1,KBAR
+   DO J=1,JBAR
+      DO I=1,IBM1
+         ZZZ(1:4) = RHOP(I-1:I+2,J,K)
+         FX(I,J,K,0) = SCALAR_FACE_VALUE(UU(I,J,K),ZZZ,FLUX_LIMITER)
+      ENDDO
+   ENDDO
+ENDDO
+!$OMP END DO NOWAIT
+
+!$OMP DO SCHEDULE(STATIC)
+DO K=1,KBAR
+   DO J=1,JBM1
+      DO I=1,IBAR
+         ZZZ(1:4) = RHOP(I,J-1:J+2,K)
+         FY(I,J,K,0) = SCALAR_FACE_VALUE(VV(I,J,K),ZZZ,FLUX_LIMITER)
+      ENDDO
+   ENDDO
+ENDDO
+!$OMP END DO NOWAIT
+
+!$OMP DO SCHEDULE(STATIC)
+DO K=1,KBM1
+   DO J=1,JBAR
+      DO I=1,IBAR
+         ZZZ(1:4) = RHOP(I,J,K-1:K+2)
+         FZ(I,J,K,0) = SCALAR_FACE_VALUE(WW(I,J,K),ZZZ,FLUX_LIMITER)
+      ENDDO
+   ENDDO
+ENDDO
+!$OMP END DO
+!$OMP END PARALLEL
+
+WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
+
+   WC=>WALL(IW)
+   IF (WC%BOUNDARY_TYPE==NULL_BOUNDARY) CYCLE WALL_LOOP
+
+   II  = WC%ONE_D%II 
+   JJ  = WC%ONE_D%JJ
+   KK  = WC%ONE_D%KK
+   IIG = WC%ONE_D%IIG 
+   JJG = WC%ONE_D%JJG
+   KKG = WC%ONE_D%KKG
+   IOR = WC%ONE_D%IOR
+
+   SELECT CASE(IOR)
+      CASE( 1)
+         FX(IIG-1,JJG,KKG,0) = WC%RHO_F
+      CASE(-1)
+         FX(IIG,JJG,KKG,0)   = WC%RHO_F
+      CASE( 2)
+         FY(IIG,JJG-1,KKG,0) = WC%RHO_F
+      CASE(-2)
+         FY(IIG,JJG,KKG,0)   = WC%RHO_F
+      CASE( 3)
+         FZ(IIG,JJG,KKG-1,0) = WC%RHO_F
+      CASE(-3)
+         FZ(IIG,JJG,KKG,0)   = WC%RHO_F
+   END SELECT
+
+   ! Overwrite first off-wall advective flux if flow is away from the wall and if the face is not also a wall cell
+
+   OFF_WALL_IF: IF (WC%BOUNDARY_TYPE/=INTERPOLATED_BOUNDARY .AND. WC%BOUNDARY_TYPE/=OPEN_BOUNDARY) THEN
+
+      OFF_WALL_SELECT: SELECT CASE(IOR)
+         CASE( 1) OFF_WALL_SELECT
+            !      ghost          FX/UU(II+1)
+            ! ///   II   ///  II+1  |  II+2  | ...
+            !                       ^ WALL_INDEX(II+1,+1)
+            IF ((UU(II+1,JJ,KK)>0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II+1,JJ,KK),+1)>0)) THEN
+               ZZZ(1:3) = (/WC%RHO_F,RHOP(II+1:II+2,JJ,KK)/)
+               FX(II+1,JJ,KK,0) = SCALAR_FACE_VALUE(UU(II+1,JJ,KK),ZZZ,FLUX_LIMITER)
+            ENDIF
+         CASE(-1) OFF_WALL_SELECT
+            !            FX/UU(II-2)     ghost
+            ! ... |  II-2  |  II-1  ///   II   ///
+            !              ^ WALL_INDEX(II-1,-1)
+            IF ((UU(II-2,JJ,KK)<0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II-1,JJ,KK),-1)>0)) THEN
+               ZZZ(2:4) = (/RHOP(II-2:II-1,JJ,KK),WC%RHO_F/)
+               FX(II-2,JJ,KK,0) = SCALAR_FACE_VALUE(UU(II-2,JJ,KK),ZZZ,FLUX_LIMITER)
+            ENDIF
+         CASE( 2) OFF_WALL_SELECT
+            IF ((VV(II,JJ+1,KK)>0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II,JJ+1,KK),+2)>0)) THEN
+               ZZZ(1:3) = (/WC%RHO_F,RHOP(II,JJ+1:JJ+2,KK)/)
+               FY(II,JJ+1,KK,0) = SCALAR_FACE_VALUE(VV(II,JJ+1,KK),ZZZ,FLUX_LIMITER)
+            ENDIF
+         CASE(-2) OFF_WALL_SELECT
+            IF ((VV(II,JJ-2,KK)<0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II,JJ-1,KK),-2)>0)) THEN
+               ZZZ(2:4) = (/RHOP(II,JJ-2:JJ-1,KK),WC%RHO_F/)
+               FY(II,JJ-2,KK,0) = SCALAR_FACE_VALUE(VV(II,JJ-2,KK),ZZZ,FLUX_LIMITER)
+            ENDIF
+         CASE( 3) OFF_WALL_SELECT
+            IF ((WW(II,JJ,KK+1)>0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II,JJ,KK+1),+3)>0)) THEN
+               ZZZ(1:3) = (/WC%RHO_F,RHOP(II,JJ,KK+1:KK+2)/)
+               FZ(II,JJ,KK+1,0) = SCALAR_FACE_VALUE(WW(II,JJ,KK+1),ZZZ,FLUX_LIMITER)
+            ENDIF
+         CASE(-3) OFF_WALL_SELECT
+            IF ((WW(II,JJ,KK-2)<0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II,JJ,KK-1),-3)>0)) THEN
+               ZZZ(2:4) = (/RHOP(II,JJ,KK-2:KK-1),WC%RHO_F/)
+               FZ(II,JJ,KK-2,0) = SCALAR_FACE_VALUE(WW(II,JJ,KK-2),ZZZ,FLUX_LIMITER)
+            ENDIF
+      END SELECT OFF_WALL_SELECT
+   
+   ENDIF OFF_WALL_IF
+
+ENDDO WALL_LOOP
+
+ENDIF DENSITY_TRANSPORT_IF
+
+! Species face values
+
 SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
 
-   RHO_ZZ_P=>WORK1
+   RHO_Z_P=>WORK1
 
    !$OMP PARALLEL PRIVATE(ZZZ)
    !$OMP DO SCHEDULE(STATIC)
    DO K=0,KBP1
       DO J=0,JBP1
          DO I=0,IBP1
-            RHO_ZZ_P(I,J,K) = RHOP(I,J,K)*ZZP(I,J,K,N)
+            RHO_Z_P(I,J,K) = RHOP(I,J,K)*ZZP(I,J,K,N)
          ENDDO
       ENDDO
    ENDDO
@@ -983,7 +1101,7 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
    DO K=1,KBAR
       DO J=1,JBAR
          DO I=1,IBM1
-            ZZZ(1:4) = RHO_ZZ_P(I-1:I+2,J,K)
+            ZZZ(1:4) = RHO_Z_P(I-1:I+2,J,K)
             FX(I,J,K,N) = SCALAR_FACE_VALUE(UU(I,J,K),ZZZ,FLUX_LIMITER)
          ENDDO
       ENDDO
@@ -994,7 +1112,7 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
    DO K=1,KBAR
       DO J=1,JBM1
          DO I=1,IBAR
-            ZZZ(1:4) = RHO_ZZ_P(I,J-1:J+2,K)
+            ZZZ(1:4) = RHO_Z_P(I,J-1:J+2,K)
             FY(I,J,K,N) = SCALAR_FACE_VALUE(VV(I,J,K),ZZZ,FLUX_LIMITER)
          ENDDO
       ENDDO
@@ -1005,7 +1123,7 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
    DO K=1,KBM1
       DO J=1,JBAR
          DO I=1,IBAR
-            ZZZ(1:4) = RHO_ZZ_P(I,J,K-1:K+2)
+            ZZZ(1:4) = RHO_Z_P(I,J,K-1:K+2)
             FZ(I,J,K,N) = SCALAR_FACE_VALUE(WW(I,J,K),ZZZ,FLUX_LIMITER)
          ENDDO
       ENDDO
@@ -1013,9 +1131,9 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
    !$OMP END DO
    !$OMP END PARALLEL
 
-   WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
+   WALL_LOOP_2: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
       WC=>WALL(IW)
-      IF (WC%BOUNDARY_TYPE==NULL_BOUNDARY) CYCLE WALL_LOOP
+      IF (WC%BOUNDARY_TYPE==NULL_BOUNDARY) CYCLE WALL_LOOP_2
 
       II  = WC%ONE_D%II 
       JJ  = WC%ONE_D%JJ
@@ -1024,6 +1142,21 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
       JJG = WC%ONE_D%JJG
       KKG = WC%ONE_D%KKG
       IOR = WC%ONE_D%IOR
+
+      SELECT CASE(IOR)
+         CASE( 1)
+            FX(IIG-1,JJG,KKG,N) = WC%RHO_F*WC%ZZ_F(N)
+         CASE(-1)
+            FX(IIG,JJG,KKG,N)   = WC%RHO_F*WC%ZZ_F(N)
+         CASE( 2)
+            FY(IIG,JJG-1,KKG,N) = WC%RHO_F*WC%ZZ_F(N)
+         CASE(-2)
+            FY(IIG,JJG,KKG,N)   = WC%RHO_F*WC%ZZ_F(N)
+         CASE( 3)
+            FZ(IIG,JJG,KKG-1,N) = WC%RHO_F*WC%ZZ_F(N)
+         CASE(-3)
+            FZ(IIG,JJG,KKG,N)   = WC%RHO_F*WC%ZZ_F(N)
+      END SELECT
 
       ! Overwrite first off-wall advective flux if flow is away from the wall and if the face is not also a wall cell
 
@@ -1035,7 +1168,7 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
                ! ///   II   ///  II+1  |  II+2  | ...
                !                       ^ WALL_INDEX(II+1,+1)
                IF ((UU(II+1,JJ,KK)>0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II+1,JJ,KK),+1)>0)) THEN
-                  ZZZ(1:3) = (/WC%RHO_F*WC%ZZ_F(N),RHO_ZZ_P(II+1:II+2,JJ,KK)/)
+                  ZZZ(1:3) = (/WC%RHO_F*WC%ZZ_F(N),RHO_Z_P(II+1:II+2,JJ,KK)/)
                   FX(II+1,JJ,KK,N) = SCALAR_FACE_VALUE(UU(II+1,JJ,KK),ZZZ,FLUX_LIMITER)
                ENDIF
             CASE(-1) OFF_WALL_SELECT_2
@@ -1043,52 +1176,34 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
                ! ... |  II-2  |  II-1  ///   II   ///
                !              ^ WALL_INDEX(II-1,-1)
                IF ((UU(II-2,JJ,KK)<0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II-1,JJ,KK),-1)>0)) THEN
-                  ZZZ(2:4) = (/RHO_ZZ_P(II-2:II-1,JJ,KK),WC%RHO_F*WC%ZZ_F(N)/)
+                  ZZZ(2:4) = (/RHO_Z_P(II-2:II-1,JJ,KK),WC%RHO_F*WC%ZZ_F(N)/)
                   FX(II-2,JJ,KK,N) = SCALAR_FACE_VALUE(UU(II-2,JJ,KK),ZZZ,FLUX_LIMITER)
                ENDIF
             CASE( 2) OFF_WALL_SELECT_2
                IF ((VV(II,JJ+1,KK)>0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II,JJ+1,KK),+2)>0)) THEN
-                  ZZZ(1:3) = (/WC%RHO_F*WC%ZZ_F(N),RHO_ZZ_P(II,JJ+1:JJ+2,KK)/)
+                  ZZZ(1:3) = (/WC%RHO_F*WC%ZZ_F(N),RHO_Z_P(II,JJ+1:JJ+2,KK)/)
                   FY(II,JJ+1,KK,N) = SCALAR_FACE_VALUE(VV(II,JJ+1,KK),ZZZ,FLUX_LIMITER)
                ENDIF
             CASE(-2) OFF_WALL_SELECT_2
                IF ((VV(II,JJ-2,KK)<0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II,JJ-1,KK),-2)>0)) THEN
-                  ZZZ(2:4) = (/RHO_ZZ_P(II,JJ-2:JJ-1,KK),WC%RHO_F*WC%ZZ_F(N)/)
+                  ZZZ(2:4) = (/RHO_Z_P(II,JJ-2:JJ-1,KK),WC%RHO_F*WC%ZZ_F(N)/)
                   FY(II,JJ-2,KK,N) = SCALAR_FACE_VALUE(VV(II,JJ-2,KK),ZZZ,FLUX_LIMITER)
                ENDIF
             CASE( 3) OFF_WALL_SELECT_2
                IF ((WW(II,JJ,KK+1)>0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II,JJ,KK+1),+3)>0)) THEN
-                  ZZZ(1:3) = (/WC%RHO_F*WC%ZZ_F(N),RHO_ZZ_P(II,JJ,KK+1:KK+2)/)
+                  ZZZ(1:3) = (/WC%RHO_F*WC%ZZ_F(N),RHO_Z_P(II,JJ,KK+1:KK+2)/)
                   FZ(II,JJ,KK+1,N) = SCALAR_FACE_VALUE(WW(II,JJ,KK+1),ZZZ,FLUX_LIMITER)
                ENDIF
             CASE(-3) OFF_WALL_SELECT_2
                IF ((WW(II,JJ,KK-2)<0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II,JJ,KK-1),-3)>0)) THEN
-                  ZZZ(2:4) = (/RHO_ZZ_P(II,JJ,KK-2:KK-1),WC%RHO_F*WC%ZZ_F(N)/)
+                  ZZZ(2:4) = (/RHO_Z_P(II,JJ,KK-2:KK-1),WC%RHO_F*WC%ZZ_F(N)/)
                   FZ(II,JJ,KK-2,N) = SCALAR_FACE_VALUE(WW(II,JJ,KK-2),ZZZ,FLUX_LIMITER)
                ENDIF
          END SELECT OFF_WALL_SELECT_2
       
       ENDIF OFF_WALL_IF_2
 
-      BOUNDARY_SELECT: SELECT CASE(WC%BOUNDARY_TYPE)
-         CASE DEFAULT
-            SELECT CASE(IOR)
-               CASE( 1)
-                  FX(IIG-1,JJG,KKG,N) = WC%RHO_F*WC%ZZ_F(N)
-               CASE(-1)
-                  FX(IIG,JJG,KKG,N)   = WC%RHO_F*WC%ZZ_F(N)
-               CASE( 2)
-                  FY(IIG,JJG-1,KKG,N) = WC%RHO_F*WC%ZZ_F(N)
-               CASE(-2)
-                  FY(IIG,JJG,KKG,N)   = WC%RHO_F*WC%ZZ_F(N)
-               CASE( 3)
-                  FZ(IIG,JJG,KKG-1,N) = WC%RHO_F*WC%ZZ_F(N)
-               CASE(-3)
-                  FZ(IIG,JJG,KKG,N)   = WC%RHO_F*WC%ZZ_F(N)
-            END SELECT
-      END SELECT BOUNDARY_SELECT
-
-   ENDDO WALL_LOOP
+   ENDDO WALL_LOOP_2
 
 ENDDO SPECIES_LOOP
 
@@ -1102,16 +1217,17 @@ SUBROUTINE DENSITY_2(T,NM)
 ! Update the species mass fractions and density
 
 USE COMP_FUNCTIONS, ONLY: SECOND,SHUTDOWN
-USE PHYSICAL_FUNCTIONS, ONLY : GET_SPECIFIC_GAS_CONSTANT,GET_SENSIBLE_ENTHALPY,GET_SPECIFIC_HEAT,GET_SENSIBLE_ENTHALPY_DIFF
+USE PHYSICAL_FUNCTIONS, ONLY : GET_SPECIFIC_GAS_CONSTANT,GET_SENSIBLE_ENTHALPY,GET_SPECIFIC_HEAT,GET_SENSIBLE_ENTHALPY_DIFF,&
+                               GET_REALIZABLE_MF
 USE GLOBAL_CONSTANTS, ONLY: N_TRACKED_SPECIES,TMPMAX,TMPMIN,EVACUATION_ONLY, &
                             PREDICTOR,N_ZONE,GAS_SPECIES,R0,SOLID_PHASE_ONLY,TUSED
-USE MANUFACTURED_SOLUTIONS, ONLY: VD2D_MMS_Z_OF_RHO,VD2D_MMS_Z_SRC,UF_MMS,WF_MMS,VD2D_MMS_RHO_OF_Z
+USE MANUFACTURED_SOLUTIONS, ONLY: VD2D_MMS_Z_OF_RHO,VD2D_MMS_Z_SRC,UF_MMS,WF_MMS,VD2D_MMS_RHO_OF_Z,VD2D_MMS_Z_SRC
 INTEGER, INTENT(IN) :: NM
 REAL(EB), INTENT(IN) :: T
 REAL(EB) :: TNOW,ZZ_GET(0:N_TRACKED_SPECIES),RHS,UN,Q_Z,XHAT,ZHAT
 INTEGER :: I,J,K,N,IW,IOR,IIG,JJG,KKG
-REAL(EB), POINTER, DIMENSION(:,:,:,:) :: RHO_ZZ_P=>NULL()
-REAL(EB), POINTER, DIMENSION(:,:,:) :: UU=>NULL(),VV=>NULL(),WW=>NULL()
+REAL(EB), POINTER, DIMENSION(:,:,:,:) :: RHO_ZZ__0=>NULL(),JX=>NULL(),JY=>NULL(),JZ=>NULL()
+REAL(EB), POINTER, DIMENSION(:,:,:) :: UU=>NULL(),VV=>NULL(),WW=>NULL(),RHO__0=>NULL()
 TYPE(WALL_TYPE), POINTER :: WC=>NULL()
 
 IF (EVACUATION_ONLY(NM)) RETURN
@@ -1126,15 +1242,26 @@ IF (PERIODIC_TEST==8) RETURN
 
 TNOW=SECOND()
 CALL POINT_TO_MESH(NM)
-RHO_ZZ_P=>SCALAR_WORK1
-RHO_ZZ_P=0._EB
 UU=>WORK1
 VV=>WORK2
 WW=>WORK3
+RHO__0=>WORK4
+RHO_ZZ__0=>SCALAR_WORK1
 
 PREDICTOR_STEP: SELECT CASE (PREDICTOR)
 
 CASE(.TRUE.) PREDICTOR_STEP
+
+   ! Diffusive fluxes
+
+   JX=>SCALAR_SAVE1
+   JY=>SCALAR_SAVE2
+   JZ=>SCALAR_SAVE3
+   IF (.NOT.CHANGE_TIME_STEP(NM)) THEN
+      JX=FDX
+      JY=FDY
+      JZ=FDZ
+   ENDIF
 
    ! Correct boundary velocity at wall cells
 
@@ -1142,17 +1269,16 @@ CASE(.TRUE.) PREDICTOR_STEP
    VV=V
    WW=W
 
-   WALL_LOOP_PREDICTOR: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
+   WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
       WC=>WALL(IW)
-      IF (WC%BOUNDARY_TYPE==NULL_BOUNDARY) CYCLE WALL_LOOP_PREDICTOR
+      IF (WC%BOUNDARY_TYPE==NULL_BOUNDARY) CYCLE WALL_LOOP
 
       IIG = WC%ONE_D%IIG 
       JJG = WC%ONE_D%JJG
       KKG = WC%ONE_D%KKG
       IOR = WC%ONE_D%IOR
 
-      BOUNDARY_SELECT_PREDICTOR: SELECT CASE(WC%BOUNDARY_TYPE)
-         CASE DEFAULT
+      BOUNDARY_SELECT: SELECT CASE(WC%BOUNDARY_TYPE)
          CASE(INTERPOLATED_BOUNDARY,SOLID_BOUNDARY,HVAC_BOUNDARY)
             SELECT CASE(WC%BOUNDARY_TYPE)
                CASE(SOLID_BOUNDARY,HVAC_BOUNDARY)
@@ -1175,8 +1301,8 @@ CASE(.TRUE.) PREDICTOR_STEP
                CASE(-3)
                   WW(IIG,JJG,KKG)   = UN
             END SELECT
-      END SELECT BOUNDARY_SELECT_PREDICTOR
-   ENDDO WALL_LOOP_PREDICTOR
+      END SELECT BOUNDARY_SELECT
+   ENDDO WALL_LOOP
 
    ! Predictor step for mass density
 
@@ -1186,71 +1312,80 @@ CASE(.TRUE.) PREDICTOR_STEP
             DO I=1,IBAR
                IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
 
-               RHS = ((FX(I,J,K,N)*UU(I,J,K)-FDX(I,J,K,N))*R(I)-(FX(I-1,J,K,N)*UU(I-1,J,K)-FDX(I-1,J,K,N))*R(I-1))*RDX(I)*RRN(I) &
-                   + ((FY(I,J,K,N)*VV(I,J,K)-FDY(I,J,K,N))     -(FY(I,J-1,K,N)*VV(I,J-1,K)-FDY(I,J-1,K,N))       )*RDY(J)        &
-                   + ((FZ(I,J,K,N)*WW(I,J,K)-FDZ(I,J,K,N))     -(FZ(I,J,K-1,N)*WW(I,J,K-1)-FDZ(I,J,K-1,N))       )*RDZ(K)
+               RHS = ((FX(I,J,K,N)*UU(I,J,K)-JX(I,J,K,N))*R(I)-(FX(I-1,J,K,N)*UU(I-1,J,K)-JX(I-1,J,K,N))*R(I-1))*RDX(I)*RRN(I) &
+                   + ((FY(I,J,K,N)*VV(I,J,K)-JY(I,J,K,N))     -(FY(I,J-1,K,N)*VV(I,J-1,K)-JY(I,J-1,K,N))       )*RDY(J)        &
+                   + ((FZ(I,J,K,N)*WW(I,J,K)-JZ(I,J,K,N))     -(FZ(I,J,K-1,N)*WW(I,J,K-1)-JZ(I,J,K-1,N))       )*RDZ(K)
 
-               RHO_ZZ_P(I,J,K,N) = RHO(I,J,K)*ZZ(I,J,K,N)
+               RHO_ZZ__0(I,J,K,N) = RHO(I,J,K)*ZZ(I,J,K,N)
 
-               ZZS(I,J,K,N) = RHO_ZZ_P(I,J,K,N) - DT*RHS
+               ZZS(I,J,K,N) = RHO_ZZ__0(I,J,K,N) - DT*RHS
             ENDDO
          ENDDO
       ENDDO
    ENDDO
 
-   ! Manufactured solution source term
+   ! Manufactured solution
 
-   MMS_IF: IF (PERIODIC_TEST==7) THEN
+   IF (PERIODIC_TEST==7 .AND. .NOT.DENSITY_TRANSPORT) THEN
       DO K=1,KBAR
          DO J=1,JBAR
             DO I=1,IBAR
                ! divergence from EOS
-               XHAT = XC(I) - UF_MMS*T
-               ZHAT = ZC(K) - WF_MMS*T
+               XHAT = XC(I) - UF_MMS*(T)
+               ZHAT = ZC(K) - WF_MMS*(T)
                Q_Z = VD2D_MMS_Z_SRC(XHAT,ZHAT,T)
                ZZS(I,J,K,1) = ZZS(I,J,K,1) + DT*Q_Z
                ZZS(I,J,K,2) = ZZS(I,J,K,2) - DT*Q_Z
             ENDDO
          ENDDO
       ENDDO
-   ENDIF MMS_IF
+   ENDIF
+
+   IF (DENSITY_TRANSPORT) THEN
+      DO K=1,KBAR
+         DO J=1,JBAR
+            DO I=1,IBAR
+               IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
+
+               RHS = (FX(I,J,K,0)*UU(I,J,K)*R(I)-FX(I-1,J,K,0)*UU(I-1,J,K)*R(I-1))*RDX(I)*RRN(I) &
+                   + (FY(I,J,K,0)*VV(I,J,K)     -FY(I,J-1,K,0)*VV(I,J-1,K)       )*RDY(J)        &
+                   + (FZ(I,J,K,0)*WW(I,J,K)     -FZ(I,J,K-1,0)*WW(I,J,K-1)       )*RDZ(K)
+
+               RHO__0(I,J,K) = RHO(I,J,K)
+
+               RHOS(I,J,K) = RHO__0(I,J,K) - DT*RHS
+            ENDDO
+         ENDDO
+      ENDDO
+   ENDIF
 
    ! Correct fluxes for positivity
 
    CALL WEIGHTED_AVERAGE_FLUX_CORRECTION
 
-   ! Predict step the density
+   ! Get rho = sum(rho*Y_alpha)
 
-   DO K=1,KBAR
-      DO J=1,JBAR
-         DO I=1,IBAR
-            IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-            RHOS(I,J,K) = SUM(ZZS(I,J,K,1:N_TRACKED_SPECIES))
-         ENDDO
-      ENDDO
-   ENDDO
-
-   ! Extract mass fraction from RHO * ZZ
-
-   DO N=1,N_TRACKED_SPECIES
+   IF (.NOT.DENSITY_TRANSPORT) THEN
       DO K=1,KBAR
          DO J=1,JBAR
             DO I=1,IBAR
                IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-               ZZS(I,J,K,N) = ZZS(I,J,K,N)/RHOS(I,J,K)
+               RHOS(I,J,K) = SUM(ZZS(I,J,K,1:N_TRACKED_SPECIES))
             ENDDO
          ENDDO
       ENDDO
-   ENDDO
+   ENDIF
 
-   ! Force density to obey MMS equation of state
+   ! Extract mass fraction from RHO * ZZ
 
-   IF (PERIODIC_TEST==7) THEN
+   IF (N_TRACKED_SPECIES>0) THEN
       DO K=1,KBAR
          DO J=1,JBAR
             DO I=1,IBAR
                IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-               RHOS(I,J,K) = VD2D_MMS_RHO_OF_Z(ZZS(I,J,K,1))
+               ZZ_GET(1:N_TRACKED_SPECIES) = ZZS(I,J,K,1:N_TRACKED_SPECIES)/RHOS(I,J,K)
+               IF (DENSITY_TRANSPORT) CALL GET_REALIZABLE_MF(ZZ_GET)
+               ZZS(I,J,K,1:N_TRACKED_SPECIES) = ZZ_GET(1:N_TRACKED_SPECIES)
             ENDDO
          ENDDO
       ENDDO
@@ -1261,6 +1396,18 @@ CASE(.TRUE.) PREDICTOR_STEP
    DO I=1,N_ZONE
       PBAR_S(:,I) = PBAR(:,I) + D_PBAR_DT(I)*DT
    ENDDO
+
+   ! Manufactured solution
+
+   IF (PERIODIC_TEST==7 .AND. DENSITY_TRANSPORT) THEN
+      DO K=1,KBAR
+         DO J=1,JBAR
+            DO I=1,IBAR
+               ZZS(I,J,K,1) = VD2D_MMS_Z_OF_RHO(RHOS(I,J,K))
+            ENDDO
+         ENDDO
+      ENDDO
+   ENDIF
 
    ! Compute molecular weight term RSUM=R0*SUM(Y_i/W_i)
 
@@ -1278,14 +1425,25 @@ CASE(.TRUE.) PREDICTOR_STEP
 
    ! Extract predicted temperature at next time step from Equation of State
 
-   DO K=1,KBAR
-      DO J=1,JBAR
-         DO I=1,IBAR
-            IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-            TMP(I,J,K) = PBAR_S(K,PRESSURE_ZONE(I,J,K))/(RSUM(I,J,K)*RHOS(I,J,K))
+   ISOTHERMAL_IF_1: IF (ISOTHERMAL) THEN
+      DO K=1,KBAR
+         DO J=1,JBAR
+            DO I=1,IBAR
+               IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
+               RHOS(I,J,K) = PBAR_S(K,PRESSURE_ZONE(I,J,K))/(RSUM(I,J,K)*TMP(I,J,K))
+            ENDDO
          ENDDO
       ENDDO
-   ENDDO
+   ELSE ISOTHERMAL_IF_1
+      DO K=1,KBAR
+         DO J=1,JBAR
+            DO I=1,IBAR
+               IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
+               TMP(I,J,K) = PBAR_S(K,PRESSURE_ZONE(I,J,K))/(RSUM(I,J,K)*RHOS(I,J,K))
+            ENDDO
+         ENDDO
+      ENDDO
+   ENDIF ISOTHERMAL_IF_1
 
    TMP = MAX(TMPMIN,MIN(TMPMAX,TMP))
 
@@ -1299,17 +1457,16 @@ CASE(.FALSE.) PREDICTOR_STEP
    VV=VS
    WW=WS
 
-   WALL_LOOP_CORRECTOR: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
+   WALL_LOOP_2: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
       WC=>WALL(IW)
-      IF (WC%BOUNDARY_TYPE==NULL_BOUNDARY) CYCLE WALL_LOOP_CORRECTOR
+      IF (WC%BOUNDARY_TYPE==NULL_BOUNDARY) CYCLE WALL_LOOP_2
 
       IIG = WC%ONE_D%IIG 
       JJG = WC%ONE_D%JJG
       KKG = WC%ONE_D%KKG
       IOR = WC%ONE_D%IOR
 
-      BOUNDARY_SELECT_CORRECTOR: SELECT CASE(WC%BOUNDARY_TYPE)
-         CASE DEFAULT
+      BOUNDARY_SELECT_2: SELECT CASE(WC%BOUNDARY_TYPE)
          CASE(INTERPOLATED_BOUNDARY,SOLID_BOUNDARY,HVAC_BOUNDARY)
             SELECT CASE(WC%BOUNDARY_TYPE)
                CASE(SOLID_BOUNDARY,HVAC_BOUNDARY)
@@ -1332,10 +1489,19 @@ CASE(.FALSE.) PREDICTOR_STEP
                CASE(-3)
                   WW(IIG,JJG,KKG)   = UN
             END SELECT
-      END SELECT BOUNDARY_SELECT_CORRECTOR
-   ENDDO WALL_LOOP_CORRECTOR
+      END SELECT BOUNDARY_SELECT_2
+   ENDDO WALL_LOOP_2
 
-   ! Compute species mass density at next time step
+   ! Diffusive fluxes
+
+   JX=>SCALAR_SAVE1
+   JY=>SCALAR_SAVE2
+   JZ=>SCALAR_SAVE3
+   JX=FDX
+   JY=FDY
+   JZ=FDZ
+
+   ! Compute species mass density at the next time step
 
    DO N=1,N_TRACKED_SPECIES
       DO K=1,KBAR
@@ -1343,21 +1509,21 @@ CASE(.FALSE.) PREDICTOR_STEP
             DO I=1,IBAR
                IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
 
-               RHS = ((FX(I,J,K,N)*UU(I,J,K)-FDX(I,J,K,N))*R(I)-(FX(I-1,J,K,N)*UU(I-1,J,K)-FDX(I-1,J,K,N))*R(I-1))*RDX(I)*RRN(I) &
-                   + ((FY(I,J,K,N)*VV(I,J,K)-FDY(I,J,K,N))     -(FY(I,J-1,K,N)*VV(I,J-1,K)-FDY(I,J-1,K,N))       )*RDY(J)        &
-                   + ((FZ(I,J,K,N)*WW(I,J,K)-FDZ(I,J,K,N))     -(FZ(I,J,K-1,N)*WW(I,J,K-1)-FDZ(I,J,K-1,N))       )*RDZ(K)
+               RHS = ((FX(I,J,K,N)*UU(I,J,K)-JX(I,J,K,N))*R(I)-(FX(I-1,J,K,N)*UU(I-1,J,K)-JX(I-1,J,K,N))*R(I-1))*RDX(I)*RRN(I) &
+                   + ((FY(I,J,K,N)*VV(I,J,K)-JY(I,J,K,N))     -(FY(I,J-1,K,N)*VV(I,J-1,K)-JY(I,J-1,K,N))       )*RDY(J)        &
+                   + ((FZ(I,J,K,N)*WW(I,J,K)-JZ(I,J,K,N))     -(FZ(I,J,K-1,N)*WW(I,J,K-1)-JZ(I,J,K-1,N))       )*RDZ(K)
 
-               RHO_ZZ_P(I,J,K,N) = .5_EB*(RHO(I,J,K)*ZZ(I,J,K,N) + RHOS(I,J,K)*ZZS(I,J,K,N))
+               RHO_ZZ__0(I,J,K,N) = .5_EB*(RHO(I,J,K)*ZZ(I,J,K,N) + RHOS(I,J,K)*ZZS(I,J,K,N))
 
-               ZZ(I,J,K,N) = RHO_ZZ_P(I,J,K,N) - .5_EB*DT*RHS
+               ZZ(I,J,K,N) = RHO_ZZ__0(I,J,K,N) - .5_EB*DT*RHS
             ENDDO
          ENDDO
       ENDDO
    ENDDO
 
-   ! Manufactured solution source term
+   ! Manufactured solution
 
-   MMS_IF_2: IF (PERIODIC_TEST==7) THEN
+   IF (PERIODIC_TEST==7 .AND. .NOT.DENSITY_TRANSPORT) THEN
       DO K=1,KBAR
          DO J=1,JBAR
             DO I=1,IBAR
@@ -1370,44 +1536,53 @@ CASE(.FALSE.) PREDICTOR_STEP
             ENDDO
          ENDDO
       ENDDO
-   ENDIF MMS_IF_2
+   ENDIF
+
+   IF (DENSITY_TRANSPORT) THEN
+      DO K=1,KBAR
+         DO J=1,JBAR
+            DO I=1,IBAR
+               IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
+
+               RHS = (FX(I,J,K,0)*UU(I,J,K)*R(I)-FX(I-1,J,K,0)*UU(I-1,J,K)*R(I-1))*RDX(I)*RRN(I) &
+                   + (FY(I,J,K,0)*VV(I,J,K)     -FY(I,J-1,K,0)*VV(I,J-1,K)       )*RDY(J)        &
+                   + (FZ(I,J,K,0)*WW(I,J,K)     -FZ(I,J,K-1,0)*WW(I,J,K-1)       )*RDZ(K)
+
+               RHO__0(I,J,K) = .5_EB*(RHO(I,J,K)+RHOS(I,J,K))
+
+               RHO(I,J,K) = RHO__0(I,J,K) - .5_EB*DT*RHS
+            ENDDO
+         ENDDO
+      ENDDO
+   ENDIF
 
    ! Correct fluxes for positivity
 
    CALL WEIGHTED_AVERAGE_FLUX_CORRECTION
 
-   ! Compute density at next time step
+   ! Get rho = sum(rho*Y_alpha)
 
-   DO K=1,KBAR
-      DO J=1,JBAR
-         DO I=1,IBAR
-            IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-            RHO(I,J,K) = SUM(ZZ(I,J,K,1:N_TRACKED_SPECIES))
-         ENDDO
-      ENDDO
-   ENDDO
-
-   ! Extract Y_n from rho*Y_n
-
-   DO N=1,N_TRACKED_SPECIES
+   IF (.NOT.DENSITY_TRANSPORT) THEN
       DO K=1,KBAR
          DO J=1,JBAR
             DO I=1,IBAR
                IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-               ZZ(I,J,K,N) = ZZ(I,J,K,N)/RHO(I,J,K)
+               RHO(I,J,K) = SUM(ZZ(I,J,K,1:N_TRACKED_SPECIES))
             ENDDO
          ENDDO
       ENDDO
-   ENDDO
+   ENDIF
 
-   ! Force density to obey MMS equation of state
+   ! Extract Y_n from rho*Y_n
 
-   IF (PERIODIC_TEST==7) THEN
+   IF (N_TRACKED_SPECIES>0) THEN
       DO K=1,KBAR
          DO J=1,JBAR
             DO I=1,IBAR
                IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-               RHO(I,J,K) = VD2D_MMS_RHO_OF_Z(ZZ(I,J,K,1))
+               ZZ_GET(1:N_TRACKED_SPECIES) = ZZ(I,J,K,1:N_TRACKED_SPECIES)/RHO(I,J,K)
+               IF (DENSITY_TRANSPORT) CALL GET_REALIZABLE_MF(ZZ_GET)
+               ZZ(I,J,K,1:N_TRACKED_SPECIES) = ZZ_GET(1:N_TRACKED_SPECIES)
             ENDDO
          ENDDO
       ENDDO
@@ -1418,6 +1593,18 @@ CASE(.FALSE.) PREDICTOR_STEP
    DO I=1,N_ZONE
       PBAR(:,I) = 0.5_EB*(PBAR(:,I) + PBAR_S(:,I) + D_PBAR_DT_S(I)*DT)
    ENDDO
+
+   ! Manufactured solution
+
+   IF (PERIODIC_TEST==7 .AND. DENSITY_TRANSPORT) THEN
+      DO K=1,KBAR
+         DO J=1,JBAR
+            DO I=1,IBAR
+               ZZ(I,J,K,1) = VD2D_MMS_Z_OF_RHO(RHO(I,J,K))
+            ENDDO
+         ENDDO
+      ENDDO
+   ENDIF
 
    ! Compute molecular weight term RSUM=R0*SUM(Y_i/W_i)
 
@@ -1435,14 +1622,25 @@ CASE(.FALSE.) PREDICTOR_STEP
 
    ! Extract predicted temperature at next time step from Equation of State
 
-   DO K=1,KBAR
-      DO J=1,JBAR
-         DO I=1,IBAR
-            IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-            TMP(I,J,K) = PBAR(K,PRESSURE_ZONE(I,J,K))/(RSUM(I,J,K)*RHO(I,J,K))
+   ISOTHERMAL_IF_2: IF (ISOTHERMAL) THEN
+      DO K=1,KBAR
+         DO J=1,JBAR
+            DO I=1,IBAR
+               IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
+               RHO(I,J,K) = PBAR(K,PRESSURE_ZONE(I,J,K))/(RSUM(I,J,K)*TMP(I,J,K))
+            ENDDO
          ENDDO
       ENDDO
-   ENDDO
+   ELSE ISOTHERMAL_IF_2
+      DO K=1,KBAR
+         DO J=1,JBAR
+            DO I=1,IBAR
+               IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
+               TMP(I,J,K) = PBAR(K,PRESSURE_ZONE(I,J,K))/(RSUM(I,J,K)*RHO(I,J,K))
+            ENDDO
+         ENDDO
+      ENDDO
+   ENDIF ISOTHERMAL_IF_2
 
    TMP = MAX(TMPMIN,MIN(TMPMAX,TMP))
 
@@ -1456,27 +1654,33 @@ END SUBROUTINE DENSITY_2
 SUBROUTINE WEIGHTED_AVERAGE_FLUX_CORRECTION
 
 USE COMP_FUNCTIONS, ONLY: SHUTDOWN
-USE PHYSICAL_FUNCTIONS, ONLY: IS_BOUNDED
 
 INTEGER :: I,J,K,N
-REAL(EB) :: SVDT,GAMMA,RHO_ZZ_GAMMA,RHS,DT_LOC,ZZ_GET(0:N_TRACKED_SPECIES)
-REAL(EB), POINTER, DIMENSION(:,:,:) :: UU=>NULL(),VV=>NULL(),WW=>NULL()
-REAL(EB), POINTER, DIMENSION(:,:,:,:) :: ZZP=>NULL(),RHO_ZZ_P=>NULL()
+REAL(EB) :: SVDT,GAMMA,RHO_ZZ_GAMMA,RHO_GAMMA,RHS,DT_LOC
+REAL(EB), POINTER, DIMENSION(:,:,:) :: UU=>NULL(),VV=>NULL(),WW=>NULL(),RHOP=>NULL(),RHO__0=>NULL()
+REAL(EB), POINTER, DIMENSION(:,:,:,:) :: ZZP=>NULL(),RHO_ZZ__0=>NULL(),JX=>NULL(),JY=>NULL(),JZ=>NULL()
 INTEGER, POINTER, DIMENSION(:,:,:) :: IOB=>NULL()
-LOGICAL :: BOUNDED
 
 IF (PREDICTOR) THEN
    ZZP=>ZZS
+   RHOP=>RHOS
    DT_LOC=DT
 ELSE
    ZZP=>ZZ
+   RHOP=>RHO
    DT_LOC=.5_EB*DT
 ENDIF
 UU=>WORK1
 VV=>WORK2
 WW=>WORK3
-RHO_ZZ_P=>SCALAR_WORK1
+RHO__0=>WORK4
+RHO_ZZ__0=>SCALAR_WORK1
 IOB=>IWORK1
+JX=>SCALAR_SAVE1
+JY=>SCALAR_SAVE2
+JZ=>SCALAR_SAVE3
+
+! Species
 
 SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
 
@@ -1498,36 +1702,36 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
 
             GAMMA = (1._EB-EXP(-SVDT))/(SVDT)
 
-            RHO_ZZ_GAMMA = RHO_ZZ_P(I,J,K,N)*GAMMA
+            RHO_ZZ_GAMMA = RHO_ZZ__0(I,J,K,N)*GAMMA
 
-            IF ((FX(I,J,K,N)-FDX(I,J,K,N))>0._EB) THEN
-               FDX(I,J,K,N) = 0._EB
+            IF ((FX(I,J,K,N)-JX(I,J,K,N))>0._EB) THEN
+               JX(I,J,K,N) = 0._EB
                FX(I,J,K,N)  = RHO_ZZ_GAMMA
                IOB(I+1,J,K) = 1 ! right neighbor is tagged for correction
             ENDIF
-            IF ((FY(I,J,K,N)-FDY(I,J,K,N))>0._EB) THEN
-               FDY(I,J,K,N) = 0._EB
+            IF ((FY(I,J,K,N)-JY(I,J,K,N))>0._EB) THEN
+               JY(I,J,K,N) = 0._EB
                FY(I,J,K,N)  = RHO_ZZ_GAMMA
                IOB(I,J+1,K) = 1
             ENDIF
-            IF ((FZ(I,J,K,N)-FDZ(I,J,K,N))>0._EB) THEN
-               FDZ(I,J,K,N) = 0._EB
+            IF ((FZ(I,J,K,N)-JZ(I,J,K,N))>0._EB) THEN
+               JZ(I,J,K,N) = 0._EB
                FZ(I,J,K,N)  = RHO_ZZ_GAMMA
                IOB(I,J,K+1) = 1
             ENDIF
 
-            IF ((FX(I-1,J,K,N)-FDX(I-1,J,K,N))<0._EB) THEN
-               FDX(I-1,J,K,N) = 0._EB
+            IF ((FX(I-1,J,K,N)-JX(I-1,J,K,N))<0._EB) THEN
+               JX(I-1,J,K,N) = 0._EB
                FX(I-1,J,K,N) = RHO_ZZ_GAMMA
                IOB(I-1,J,K) = 1
             ENDIF
-            IF ((FY(I,J-1,K,N)-FDY(I,J-1,K,N))<0._EB) THEN
-               FDY(I,J-1,K,N) = 0._EB
+            IF ((FY(I,J-1,K,N)-JY(I,J-1,K,N))<0._EB) THEN
+               JY(I,J-1,K,N) = 0._EB
                FY(I,J-1,K,N) = RHO_ZZ_GAMMA
                IOB(I,J-1,K) = 1
             ENDIF
-            IF ((FZ(I,J,K-1,N)-FDZ(I,J,K-1,N))<0._EB) THEN
-               FDZ(I,J,K-1,N) = 0._EB
+            IF ((FZ(I,J,K-1,N)-JZ(I,J,K-1,N))<0._EB) THEN
+               JZ(I,J,K-1,N) = 0._EB
                FZ(I,J,K-1,N) = RHO_ZZ_GAMMA
                IOB(I,J,K-1) = 1
             ENDIF
@@ -1544,11 +1748,11 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
             IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
             IF (IOB(I,J,K)/=1) CYCLE
 
-            RHS = ((FX(I,J,K,N)*UU(I,J,K)-FDX(I,J,K,N))*R(I)-(FX(I-1,J,K,N)*UU(I-1,J,K)-FDX(I-1,J,K,N))*R(I-1))*RDX(I)*RRN(I) &
-                + ((FY(I,J,K,N)*VV(I,J,K)-FDY(I,J,K,N))     -(FY(I,J-1,K,N)*VV(I,J-1,K)-FDY(I,J-1,K,N))       )*RDY(J)        &
-                + ((FZ(I,J,K,N)*WW(I,J,K)-FDZ(I,J,K,N))     -(FZ(I,J,K-1,N)*WW(I,J,K-1)-FDZ(I,J,K-1,N))       )*RDZ(K)
+            RHS = ((FX(I,J,K,N)*UU(I,J,K)-JX(I,J,K,N))*R(I)-(FX(I-1,J,K,N)*UU(I-1,J,K)-JX(I-1,J,K,N))*R(I-1))*RDX(I)*RRN(I) &
+                + ((FY(I,J,K,N)*VV(I,J,K)-JY(I,J,K,N))     -(FY(I,J-1,K,N)*VV(I,J-1,K)-JY(I,J-1,K,N))       )*RDY(J)        &
+                + ((FZ(I,J,K,N)*WW(I,J,K)-JZ(I,J,K,N))     -(FZ(I,J,K-1,N)*WW(I,J,K-1)-JZ(I,J,K-1,N))       )*RDZ(K)
 
-            ZZP(I,J,K,N) = RHO_ZZ_P(I,J,K,N) - DT_LOC*RHS
+            ZZP(I,J,K,N) = RHO_ZZ__0(I,J,K,N) - DT_LOC*RHS
 
          ENDDO
       ENDDO
@@ -1556,30 +1760,79 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
 
 ENDDO SPECIES_LOOP
 
-CHECK_REALIZABILITY_IF: IF (CHECK_REALIZABILITY) THEN
-   
-   ZZ_GET = 0._EB
-   DO K=1,KBAR
-      DO J=1,JBAR
-         DO I=1,IBAR
-            IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
+DENSITY_TRANSPORT_IF: IF (DENSITY_TRANSPORT) THEN
 
-            ZZ_GET(1:N_TRACKED_SPECIES) = ZZP(I,J,K,1:N_TRACKED_SPECIES)
-            BOUNDED = IS_BOUNDED(ZZ_GET,0._EB,RHOMAX)
-            IF (.NOT.BOUNDED) THEN
-               WRITE(LU_ERR,*) 'Predictor = ',PREDICTOR
-               WRITE(LU_ERR,*) I,J,K
-               WRITE(LU_ERR,*) ZZ_GET
-               WRITE(LU_ERR,*) SUM(ZZ_GET)
-               WRITE(LU_ERR,*) 'ERROR: Unbounded mass density in DENSITY_2'
-               STOP_STATUS=REALIZABILITY_STOP
-            ENDIF
+! Density
 
-         ENDDO
+IOB=0
+
+! Compute new fluxes
+
+DO K=1,KBAR
+   DO J=1,JBAR
+      DO I=1,IBAR
+         IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
+         IF (RHOP(I,J,K)>=0._EB) CYCLE
+         
+         IOB(I,J,K)=1 ! cell is tagged for correction
+
+         SVDT = DT_LOC * ( MAX(0._EB,UU(I,J,K)) - MIN(0._EB,UU(I-1,J,K)) &
+                         + MAX(0._EB,VV(I,J,K)) - MIN(0._EB,VV(I,J-1,K)) &
+                         + MAX(0._EB,WW(I,J,K)) - MIN(0._EB,WW(I,J,K-1)) )
+
+         GAMMA = (1._EB-EXP(-SVDT))/(SVDT)
+
+         RHO_GAMMA = RHO__0(I,J,K)*GAMMA
+
+         IF (FX(I,J,K,0)>0._EB) THEN
+            FX(I,J,K,0)  = RHO_GAMMA
+            IOB(I+1,J,K) = 1 ! right neighbor is tagged for correction
+         ENDIF
+         IF (FY(I,J,K,0)>0._EB) THEN
+            FY(I,J,K,0)  = RHO_GAMMA
+            IOB(I,J+1,K) = 1
+         ENDIF
+         IF (FZ(I,J,K,0)>0._EB) THEN
+            FZ(I,J,K,0)  = RHO_GAMMA
+            IOB(I,J,K+1) = 1
+         ENDIF
+
+         IF (FX(I-1,J,K,0)<0._EB) THEN
+            FX(I-1,J,K,0) = RHO_GAMMA
+            IOB(I-1,J,K) = 1
+         ENDIF
+         IF (FY(I,J-1,K,0)<0._EB) THEN
+            FY(I,J-1,K,0) = RHO_GAMMA
+            IOB(I,J-1,K) = 1
+         ENDIF
+         IF (FZ(I,J,K-1,0)<0._EB) THEN
+            FZ(I,J,K-1,0) = RHO_GAMMA
+            IOB(I,J,K-1) = 1
+         ENDIF
+
       ENDDO
    ENDDO
+ENDDO
 
-ENDIF CHECK_REALIZABILITY_IF
+! Only update cells tagged for correction
+
+DO K=1,KBAR
+   DO J=1,JBAR
+      DO I=1,IBAR
+         IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
+         IF (IOB(I,J,K)/=1) CYCLE
+
+         RHS = (FX(I,J,K,0)*UU(I,J,K)*R(I)-FX(I-1,J,K,0)*UU(I-1,J,K)*R(I-1))*RDX(I)*RRN(I) &
+             + (FY(I,J,K,0)*VV(I,J,K)     -FY(I,J-1,K,0)*VV(I,J-1,K)       )*RDY(J)        &
+             + (FZ(I,J,K,0)*WW(I,J,K)     -FZ(I,J,K-1,0)*WW(I,J,K-1)       )*RDZ(K)
+
+         RHOP(I,J,K) = RHO__0(I,J,K) - DT_LOC*RHS
+
+      ENDDO
+   ENDDO
+ENDDO
+
+ENDIF DENSITY_TRANSPORT_IF
 
 END SUBROUTINE WEIGHTED_AVERAGE_FLUX_CORRECTION
 
