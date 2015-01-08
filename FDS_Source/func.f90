@@ -2078,27 +2078,46 @@ ENDIF
 END FUNCTION IS_REALIZABLE
 
 
-LOGICAL FUNCTION IS_BOUNDED(ZZ_IN,ZZ_MIN,ZZ_MAX)
-
-REAL(EB), INTENT(IN) :: ZZ_IN(0:N_TRACKED_SPECIES),ZZ_MIN,ZZ_MAX
-
-IF ( ANY(ZZ_IN<(ZZ_MIN-TWO_EPSILON_EB)) .OR. ANY(ZZ_IN>(ZZ_MAX+TWO_EPSILON_EB)) ) THEN
-   IS_BOUNDED=.FALSE.
-ELSE
-   IS_BOUNDED=.TRUE.
-ENDIF
-
-END FUNCTION IS_BOUNDED
-
-
 SUBROUTINE GET_REALIZABLE_MF(ZZ_GET)
 
 REAL(EB), INTENT(INOUT) :: ZZ_GET(0:N_TRACKED_SPECIES)
-REAL(EB) :: SUM_OTHER_SPECIES
-INTEGER :: N_ZZ_MAX,N
+REAL(EB) :: SUM_OTHER_SPECIES,ZZ_TMP(1:N_TRACKED_SPECIES),FIRST,TEMP
+INTEGER :: N_ZZ_MAX,N,I,J,INDEX
+REAL(EB), PARAMETER :: ZZ_EPSILON = MAX_SPECIES*TWO_EPSILON_EB
 
-! first, clip mass fractions
-ZZ_GET = MIN(1._EB,MAX(0._EB,ZZ_GET))
+SORT_IF: IF (.FALSE.) THEN
+   ! sort tracked species from high to low by straight selection
+   ZZ_TMP = ZZ_GET(1:N_TRACKED_SPECIES)
+   DO I=1,N_TRACKED_SPECIES-1
+      FIRST = ZZ_TMP(I)
+      INDEX = I
+      DO J=I+1,N_TRACKED_SPECIES
+         IF (ZZ_TMP(J)>FIRST) THEN
+            FIRST = ZZ_TMP(J)
+            INDEX = J
+         ENDIF
+      ENDDO
+      IF (INDEX/=I) THEN
+         TEMP = ZZ_TMP(I)
+         ZZ_TMP(I) = ZZ_TMP(INDEX)
+         ZZ_TMP(INDEX) = TEMP
+      ENDIF
+   ENDDO
+   ! special summation to minimize floating-point truncation error
+   ZZ_GET(0) = 1._EB
+   DO N=1,N_TRACKED_SPECIES
+      ZZ_GET(0) = ZZ_GET(0) - ZZ_TMP(N)
+   ENDDO
+ELSE
+   ! default summation
+   ZZ_GET(0) = 1._EB-SUM(ZZ_GET(1:N_TRACKED_SPECIES))
+ENDIF SORT_IF
+
+! clip mass fractions
+ZZ_GET=MAX(0._EB,MIN(1._EB,ZZ_GET))
+
+! prevent numerical garbage from creating mass
+IF (ZZ_GET(0)<ZZ_EPSILON) ZZ_GET(0)=0._EB
 
 ! absorb all error in most abundant species
 N_ZZ_MAX = 0
