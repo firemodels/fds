@@ -1466,9 +1466,9 @@ Z = \frac{(\rho_0 - \rho) \rho_1}{(\rho_0 - \rho_1) \rho} \,\mbox{.}
 
 The source terms for the manufactured solution, $\dot{Q}_\rho$, etc., are defined as the residuals of the conservative form of the transport equations:
 \begin{align}
-\label{eqn_mms_continuity} \frac{\partial \rho}{\partial t} + \Div(\rho \textct{u}) &= \dot{Q}_\rho \,\mbox{,}\\
-\frac{\partial (\rho Z)}{\partial t} + \Div(\rho Z \textct{u}) - \Div\left(\rho D \nabla Z\right) &= \dot{Q}_Z \,\mbox{,}\\
-\frac{\partial (\rho \textct{u})}{\partial t} + \Div(\rho \textct{u u}) + \nabla \tilde{p} - \Div{\sf T} &= \dot{Q}_\textct{u} \,\mbox{,}
+\label{eqn_mms_continuity} \frac{\partial \rho}{\partial t} + \Div(\rho \mathbf{u}) &= \dot{Q}_\rho \,\mbox{,}\\
+\frac{\partial (\rho Z)}{\partial t} + \Div(\rho Z \mathbf{u}) - \Div\left(\rho D \nabla Z\right) &= \dot{Q}_Z \,\mbox{,}\\
+\frac{\partial (\rho \mathbf{u})}{\partial t} + \Div(\rho \mathbf{u} \mathbf{u}) + \nabla \tilde{p} - \Div{\sf T} &= \dot{Q}_{\mathbf{u}} \,\mbox{,}
 \end{align}
 where the components of the deviatoric stress tensor, ${\sf T}$, are given by
 \begin{equation}
@@ -1484,12 +1484,12 @@ The divergence expression is obtained by differentiating the EOS:
 For this isothermal flow there is no alternative divergence formulation to consider. The RHS of the momentum equation is augmented as follows:
 \begin{equation}
 \label{eqn_mms_u_eqn}
-\frac{\partial \mathbf{u}}{\partial t} = - ( \mathbf{F} + \nabla H ) + \dot{Q}_u/\rho \,\mbox{.}
+\frac{\partial \mathbf{u}}{\partial t} = - ( \mathbf{F} + \nabla H ) + \dot{Q}_{\mathbf{u}}/\rho \,\mbox{.}
 \end{equation}
 And the Poisson equation for $H$ becomes
 \begin{align}
 \label{eqn_poisson_mms}
-\nabla^2 H = - \left[ \Div \left( \mathbf{F} - \dot{Q}_u/\rho \right) + \frac{\partial}{\partial t} (\Div\mathbf{u}) \right] \,\mbox{.}
+\nabla^2 H = - \left[ \Div \left( \mathbf{F} - \dot{Q}_{\mathbf{u}}/\rho \right) + \frac{\partial}{\partial t} (\Div\mathbf{u}) \right] \,\mbox{.}
 \end{align}
 
 \subsubsection*{Manufactured Solution Procedure}
