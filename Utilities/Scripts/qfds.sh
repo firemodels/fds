@@ -61,7 +61,7 @@ queue=batch
 stopjob=0
 
 nmpi_processes=1
-nmpi_processes_per_node=1
+nmpi_processes_per_node=-1
 max_processes_per_node=1
 nopenmp_threads=1
 walltime=
@@ -152,13 +152,13 @@ fi
 
 if [ $use_repository -eq 1 ] ; then
 # use fds from repository (-e was not specified)
- if [ $nmpi_processes -gt 1 ] ; then
+# if [ $nmpi_processes -gt 1 ] ; then
 # use mpi version of fds 
   exe=$FDSROOT/FDS_Compilation/mpi_intel_linux_64$IB$DB/fds_mpi_intel_linux_64$IB$DB
- else
+# else
 # use non-mpi version of fds 
-  exe=$FDSROOT/FDS_Compilation/intel_linux_64$DB/fds_intel_linux_64$DB
- fi
+#  exe=$FDSROOT/FDS_Compilation/intel_linux_64$DB/fds_intel_linux_64$DB
+# fi
 fi
 
 #define input file
@@ -171,6 +171,14 @@ infile=${in%.*}
 TITLE="$infile"
 
 # define number of nodes
+
+if test $nmpi_processes_per_node = -1 ; then
+  if test $nmpi_processes -gt 1 ; then
+    nmpi_processes_per_node=2
+  else
+    nmpi_processes_per_node=1
+  fi
+fi
 
 let "nodes=($nmpi_processes-1)/$nmpi_processes_per_node+1"
 if test $nodes -lt 1 ; then
@@ -195,21 +203,21 @@ fi
 # Or, bind processs to and map processes by socket if
 # OpenMP is being used (number of OpenMP threads > 1).
 
-SOCKET_OPTION="--bind-to socket"
 if test $nopenmp_threads -gt 1 ; then
-  SOCKET_OPTION="--map-by socket:PE=$nopenmp_threads"
- #SOCKET_OPTION="--bind-to socket --map-by socket:PE=$nopenmp_threads"
+ SOCKET_OPTION="--bind-to core --map-by socket:PE=$nopenmp_threads"
+else
+ SOCKET_OPTION="--bind-to socket --map-by socket"
 fi
 
 # use mpirun if there is more than 1 process
 
-if [ $nmpi_processes -gt 1 ] ; then
+#if [ $nmpi_processes -gt 1 ] ; then
   MPIRUN="$MPIDIST/bin/mpirun $REPORT_BINDINGS $SOCKET_OPTION -np $nmpi_processes"
   TITLE="$infile(MPI)"
   case $FDSNETWORK in
     "infiniband") TITLE="$infile(MPI_IB)"
   esac
-fi
+#fi
 
 cd $dir
 fulldir=`pwd`
