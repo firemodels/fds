@@ -4,7 +4,6 @@
 # a batch queuing system
 
 queue=batch
-cases=all
 DEBUG=
 IB=
 nthreads=1
@@ -16,14 +15,11 @@ if [ "$FDSNETWORK" == "infiniband" ] ; then
 fi
 
 function usage {
-echo "Run_FDS_Cases.sh [ -c cases -d -h -m max_iterations -o nthreads -q queue_name "
+echo "Run_FDS_Cases.sh [ -d -h -m max_iterations -o nthreads -q queue_name "
 echo "                   -s -r resource_manager ]"
 echo "Runs FDS verification suite"
 echo ""
 echo "Options"
-echo "-c cases - select set of cases to run"
-echo "     default: $cases"
-echo "     other options: serial, mpi"
 echo "-d - use debug version of FDS"
 echo "-h - display this message"
 echo "-m max_iterations - stop FDS runs after a specifed number of iterations (delayed stop)"
@@ -47,9 +43,6 @@ export SVNROOT=`pwd`/..
 while getopts 'c:dhm:o:q:r:sw:' OPTION
 do
 case $OPTION in
-  c)
-   cases="$OPTARG"
-   ;;
   d)
    DEBUG=_db
    ;;
@@ -109,23 +102,8 @@ fi
 
 export BASEDIR=`pwd`
 
-# Run appropriate set of cases depending on user specified set (-c option)
-case "$cases" in
-  all)
 export QFDS="$QFDSSH $walltime -n $nthreads -e $FDSMPI $queue" 
-    ./FDS_MPI_Cases.sh
-export QFDS="$QFDSSH $walltime -n $nthreads -e $FDS $queue" 
     ./FDS_Cases.sh
-    ;;
-  serial)
-export QFDS="$QFDSSH $walltime -n $nthreads -e $FDS $queue" 
-    ./FDS_Cases.sh
-    ;;
-  mpi)
-export QFDS="$QFDSSH $walltime -n $nthreads -e $FDSMPI $queue"
-    ./FDS_MPI_Cases.sh
-    ;;
-esac
 
 echo FDS cases submitted
 
