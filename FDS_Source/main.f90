@@ -385,10 +385,6 @@ IF (HVAC_SOLVE) THEN
    ENDIF
 ENDIF
 
-! Write out character strings to .smv file
- 
-CALL WRITE_STRINGS
- 
 ! Make an initial dump of ambient values
 
 IF (.NOT.RESTART) THEN
@@ -416,7 +412,7 @@ IF (.NOT.RESTART) THEN
    CALL UPDATE_CONTROLS(T,0._EB,CTRL_STOP_STATUS,.TRUE.)
    CALL DUMP_GLOBAL_OUTPUTS(T(1))
 ENDIF
- 
+
 ! Check for changes in VENT or OBSTruction control and device status at t=T_BEGIN
 
 IF (.NOT.RESTART) THEN
@@ -424,6 +420,10 @@ IF (.NOT.RESTART) THEN
       IF (PROCESS(NM)==MYID) CALL OPEN_AND_CLOSE(T(NM),NM)  
    ENDDO
 ENDIF
+
+! Write out character strings to .smv file
+ 
+CALL WRITE_STRINGS
 
 ! Check for evacuation initialization stop
  
