@@ -302,8 +302,8 @@ call :find_smokeview_warnings "forrtl: severe" %OUTDIR%\stage4a.txt "Stage 4a_2"
 
 echo             release mode
 
-cd %svnroot%\Verification\scripts
-call Run_SMV_cases %size% 0 0 1> %OUTDIR%\stage4b.txt 2>&1
+cd %svnroot%\Verification\
+call Run_FDS_cases %size% 0 0 1> %OUTDIR%\stage4b.txt 2>&1
 
 call :find_smokeview_warnings "error" %OUTDIR%\stage4b.txt "Stage 4b_1"
 call :find_smokeview_warnings "forrtl: severe" %OUTDIR%\stage4b.txt "Stage 4b_2"
@@ -321,8 +321,8 @@ call :GET_TIME
 set MAKEPICS_beg=%current_time% 
 echo Stage 5 - Making Smokeview pictures
 
-cd %svnroot%\Verification\scripts
-call MAKE_SMV_pictures %size% 1> %OUTDIR%\stage5.txt 2>&1
+cd %svnroot%\Verification\
+call MAKE_FDS_pictures %size% 1> %OUTDIR%\stage5.txt 2>&1
 
 call :find_smokeview_warnings "error" %OUTDIR%\stage5.txt "Stage 5"
 
@@ -337,19 +337,28 @@ set DIFF_MAKEPICS=%duration%
 
 call :GET_TIME
 set MAKEGUIDES_beg=%current_time% 
-echo Stage 6 - Building Smokeview guides
+echo Stage 6 - Building guides
 
-echo             Technical Reference
+echo             FDS Technical Reference
+call :build_guide FDS_Technical_Reference_Guide %svnroot%\Manuals\FDS_Technical_Reference_Guide 1>> %OUTDIR%\stage6.txt 2>&1
+
+echo             FDS User Reference
+call :build_guide FDS_User_Reference_Guide %svnroot%\Manuals\FDS_User_Reference_Guide 1>> %OUTDIR%\stage6.txt 2>&1
+
+echo             FDS Verification Reference
+call :build_guide FDS_Verification_Reference_Guide %svnroot%\Manuals\FDS_Verification_Reference_Guide 1>> %OUTDIR%\stage6.txt 2>&1
+
+echo             FDS Validation Reference
+call :build_guide FDS_Validation_Reference_Guide %svnroot%\Manuals\FDS_Validation_Reference_Guide 1>> %OUTDIR%\stage6.txt 2>&1
+
+echo             Smokeview Technical Reference
 call :build_guide SMV_Technical_Reference_Guide %svnroot%\Manuals\SMV_Technical_Reference_Guide 1>> %OUTDIR%\stage6.txt 2>&1
 
-echo             Verification
+echo             Smokeview Verification
 call :build_guide SMV_Verification_Guide %svnroot%\Manuals\SMV_Verification_Guide 1>> %OUTDIR%\stage6.txt 2>&1
 
-echo             User
+echo             Smokeview User
 call :build_guide SMV_User_Guide %svnroot%\Manuals\SMV_User_Guide 1>> %OUTDIR%\stage6.txt 2>&1
-
-echo             Geom Notes
-call :build_guide geom_notes %svnroot%\Manuals\FDS_User_Guide 1>> %OUTDIR%\stage6.txt 2>&1
 
 call :GET_TIME
 set MAKEGUIDES_end=%current_time%
