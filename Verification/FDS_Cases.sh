@@ -45,7 +45,7 @@ $QFDS -d Energy_Budget energy_budget_tmix.fds
 $QFDS -d Energy_Budget energy_budget_solid.fds
 
 $QFDS -d Evacuation evac_smv_testcase0.fds
-$QFDS -d Evacuation evac_smv_testcase1.fds
+$QFDS -p 3 -d Evacuation evac_smv_testcase1.fds
 $QFDS -d Evacuation evac_smv_testcase2.fds
 
 $QFDS -d Extinction extinction.fds
