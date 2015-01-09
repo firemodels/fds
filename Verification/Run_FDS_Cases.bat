@@ -30,10 +30,6 @@ set BACKGROUNDEXE=%SVNROOT%\Utilities\background\intel_win_32\background.exe
 set FDS=%BACKGROUNDEXE% -u 75 -d 10 %FDSEXE%
 set QFDS=call %SVNROOT%\Utilities\Scripts\runfds.bat
 
-echo You are about to run the Verification Test Suite.
-echo Press any key to begin.
-pause > Nul
-
 echo.
 echo Creating FDS case list from FDS_Cases.sh
 ..\Utilities\Data_processing\sh2bat FDS_Cases.sh FDS_Cases.bat
@@ -49,8 +45,6 @@ date /t >> %TIME_FILE%
 time /t >> %TIME_FILE%
 
 call FDS_Cases.bat
-
-call FDS_MPI_Cases.bat
 
 :: loop until all FDS cases have finished
 
@@ -76,7 +70,6 @@ date /t >> %TIME_FILE%
 time /t >> %TIME_FILE%
 
 erase FDS_Cases.bat
-erase FDS_MPI_Cases.bat
 
 :eof2
 
