@@ -80,4 +80,4 @@ erase FDS_MPI_Cases.bat
 
 :eof2
 
-pause
+
