@@ -92,7 +92,7 @@ set /p nothaveFORTRAN=<%OUTDIR%\stage_count0a.txt
 if %nothaveFORTRAN% == 1 (
   echo "***Fatal error: Fortran compiler not present"
   echo "***Fatal error: Fortran compiler not present" > %errorlog%
-  echo "smokebot run aborted"
+  echo "firebot run aborted"
   call :output_abort_message
   exit /b 1
 )
@@ -110,7 +110,7 @@ if %nothaveCC% == 1 (
 
 if NOT exist %emailexe% (
   echo ***warning: email client not found.   
-  echo             Smokebot messages will only be sent to the console.
+  echo             firebot messages will only be sent to the console.
 ) else (
   echo             found mailsend
 )
@@ -404,13 +404,13 @@ cd %CURDIR%
 if exist %emailexe% (
   if %havewarnings% == 0 (
     if %haveerrors% == 0 (
-      call %email% %mailToSMV% "smokebot build success on %COMPUTERNAME%! %revision%" %infofile%
+      call %email% %mailToSMV% "firebot build success on %COMPUTERNAME%! %revision%" %infofile%
     ) else (
       echo "start: %startdate% %starttime% " > %infofile%
       echo " stop: %stopdate% %stoptime% " >> %infofile%
       echo. >> %infofile%
       type %errorlog% >> %infofile%
-      call %email% %mailToSMV% "smokebot build failure on %COMPUTERNAME%! %revision%" %infofile%
+      call %email% %mailToSMV% "firebot build failure on %COMPUTERNAME%! %revision%" %infofile%
     )
   ) else (
     if %haveerrors% == 0 (
@@ -418,7 +418,7 @@ if exist %emailexe% (
       echo " stop: %stopdate% %stoptime% " >> %infofile%
       echo. >> %infofile%
       type %warninglog% >> %infofile%
-      %email% %mailToSMV% "smokebot build success with warnings on %COMPUTERNAME% %revision%" %infofile%
+      %email% %mailToSMV% "firebot build success with warnings on %COMPUTERNAME% %revision%" %infofile%
     ) else (
       echo "start: %startdate% %starttime% " > %infofile%
       echo " stop: %stopdate% %stoptime% " >> %infofile%
@@ -426,20 +426,20 @@ if exist %emailexe% (
       type %errorlog% >> %infofile%
       echo. >> %infofile%
       type %warninglog% >> %infofile%
-      call %email% %mailToSMV% "smokebot build failure on %COMPUTERNAME%! %revision%" %infofile%
+      call %email% %mailToSMV% "firebot build failure on %COMPUTERNAME%! %revision%" %infofile%
     )
   )
 )
 
-echo smokebot_win completed
+echo firebot_win completed
 cd %CURDIR%
 pause
 exit
 
 :output_abort_message
-  echo "***Fatal error: smokebot build failure on %COMPUTERNAME% %revision%"
+  echo "***Fatal error: firebot build failure on %COMPUTERNAME% %revision%"
   if %havemail% == 1 (
-    call %email% %mailToSMV% "smokebot build failure on %COMPUTERNAME% %revision%" %errorlog%
+    call %email% %mailToSMV% "firebot build failure on %COMPUTERNAME% %revision%" %errorlog%
   )
 exit /b
 
@@ -475,7 +475,7 @@ exit /b 0
   if %nothave% == 1 (
     echo "***Fatal error: %program% not present"
     echo "***Fatal error: %program% not present" > %errorlog%
-    echo "smokebot run aborted"
+    echo "firebot run aborted"
     call :output_abort_message
     exit /b 1
   )
@@ -489,7 +489,7 @@ set file=%1
 set outputfile=%2
 
 if NOT exist %file% (
-  echo ***fatal error: problem building %file%. Aborting smokebot
+  echo ***fatal error: problem building %file%. Aborting firebot
   type %outputfile% >> %errorlog%
   call :output_abort_message
   exit /b 1
