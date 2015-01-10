@@ -342,14 +342,14 @@ echo Stage 6 - Building guides
 echo             FDS Technical Reference
 call :build_guide FDS_Technical_Reference_Guide %svnroot%\Manuals\FDS_Technical_Reference_Guide 1>> %OUTDIR%\stage6.txt 2>&1
 
-echo             FDS User Reference
-call :build_guide FDS_User_Reference_Guide %svnroot%\Manuals\FDS_User_Reference_Guide 1>> %OUTDIR%\stage6.txt 2>&1
+echo             FDS User
+call :build_guide FDS_User_Guide %svnroot%\Manuals\FDS_User_Guide 1>> %OUTDIR%\stage6.txt 2>&1
 
-echo             FDS Verification Reference
-call :build_guide FDS_Verification_Reference_Guide %svnroot%\Manuals\FDS_Verification_Reference_Guide 1>> %OUTDIR%\stage6.txt 2>&1
+echo             FDS Verification
+call :build_guide FDS_Verification_Guide %svnroot%\Manuals\FDS_Verification_Guide 1>> %OUTDIR%\stage6.txt 2>&1
 
-echo             FDS Validation Reference
-call :build_guide FDS_Validation_Reference_Guide %svnroot%\Manuals\FDS_Validation_Reference_Guide 1>> %OUTDIR%\stage6.txt 2>&1
+echo             FDS Validation
+call :build_guide FDS_Validation_Guide %svnroot%\Manuals\FDS_Validation_Guide 1>> %OUTDIR%\stage6.txt 2>&1
 
 echo             Smokeview Technical Reference
 call :build_guide SMV_Technical_Reference_Guide %svnroot%\Manuals\SMV_Technical_Reference_Guide 1>> %OUTDIR%\stage6.txt 2>&1
