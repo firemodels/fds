@@ -209,6 +209,10 @@ else
  SOCKET_OPTION="--bind-to socket --map-by socket"
 fi
 
+if [ "$benchmark" == "yes" ]; then
+ SOCKET_OPTION="--bind-to core --map-by node:PE=$nopenmp_threads"
+fi
+
 # use mpirun if there is more than 1 process
 
 #if [ $nmpi_processes -gt 1 ] ; then
