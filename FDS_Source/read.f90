@@ -5430,7 +5430,12 @@ READ_SURF_LOOP: DO N=0,N_SURF
    SF%HRRPUA               = 1000._EB*HRRPUA
    SF%MLRPUA               = MLRPUA
    SF%LAYER_DIVIDE         = LAYER_DIVIDE
-   SF%LEAK_PATH            = LEAK_PATH
+   IF (LEAK_PATH(2) < LEAK_PATH(1)) THEN
+      SF%LEAK_PATH(2)      = LEAK_PATH(1)
+      SF%LEAK_PATH(1)      = LEAK_PATH(2)
+   ELSE
+      SF%LEAK_PATH         = LEAK_PATH
+   ENDIF
    SF%LENGTH               = LENGTH
    SF%MASS_FLUX            = 0._EB
    SF%MASS_FLUX_VAR        = MASS_FLUX_VAR
@@ -5598,7 +5603,7 @@ READ_SURF_LOOP: DO N=0,N_SURF
       ENDIF
       IF (SUM(SF%MASS_FRACTION) > 1._EB) THEN
          WRITE (MESSAGE,'(A,A,A)') 'ERROR: Problem with SURF: ',TRIM(SF%ID),'. SUM(MASS_FRACTION) > 1'
-         CALL SHUTDOWN(MESSAGE) ; RETURN
+            CALL SHUTDOWN(MESSAGE) ; RETURN
       ELSE
          IF (SF%MASS_FRACTION(0)<TWO_EPSILON_EB .AND. SUM(SF%MASS_FRACTION(1:N_TRACKED_SPECIES)) > 0._EB) &
             SF%MASS_FRACTION(0) = 1._EB - SUM(SF%MASS_FRACTION(1:N_TRACKED_SPECIES))
@@ -8648,7 +8653,8 @@ MESH_LOOP_1: DO NM=1,NMESHES
 
                CALL CHECK_SURF_NAME(SURF_ID,EX)
                IF (.NOT.EX) THEN
-                  WRITE(MESSAGE,'(A,A,A)') 'ERROR: SURF_ID ',TRIM(SURF_ID),' not found'
+                  WRITE(MESSAGE,'(A,A,A,I0,A,I0)') 'ERROR: SURF_ID ',TRIM(SURF_ID),' not found for VENT ',N_VENT,&
+                                                   ', line number ',INPUT_FILE_LINE_NUMBER
                   CALL SHUTDOWN(MESSAGE) ; RETURN
                ENDIF
 
@@ -8687,7 +8693,8 @@ MESH_LOOP_1: DO NM=1,NMESHES
 
                IF ( (VT%BOUNDARY_TYPE==OPEN_BOUNDARY .OR. VT%BOUNDARY_TYPE==MIRROR_BOUNDARY .OR. &
                      VT%BOUNDARY_TYPE==PERIODIC_BOUNDARY) .AND. (VT%DEVC_ID /= 'null' .OR. VT%CTRL_ID /= 'null') ) THEN
-                  IF (ID=='null') WRITE(MESSAGE,'(A,I4,A)') 'ERROR: VENT ',NN,      ' cannot be controlled by a device'
+                  IF (ID=='null') WRITE(MESSAGE,'(A,I0,A,I0)') 'ERROR: VENT ',NN, &
+                     ' cannot be controlled by a device, line number ',INPUT_FILE_LINE_NUMBER
                   IF (ID/='null') WRITE(MESSAGE,'(A,A,A)')  'ERROR: VENT ',TRIM(ID),' cannot be controlled by a device'
                   CALL SHUTDOWN(MESSAGE) ; RETURN
                ENDIF
