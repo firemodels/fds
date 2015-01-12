@@ -213,6 +213,13 @@ if [ "$benchmark" == "yes" ]; then
  SOCKET_OPTION="--bind-to core --map-by node:PE=$nopenmp_threads"
 fi
 
+# the "none" queue does not use the queing system, so blank out SOCKET_OPTIONS and REPORT_BINDINGS
+
+if [ "$queue" == "none" ]; then
+ SOCKET_OPTION=
+ REPORT_BINDINGS=
+fi
+
 # use mpirun if there is more than 1 process
 
 #if [ $nmpi_processes -gt 1 ] ; then
