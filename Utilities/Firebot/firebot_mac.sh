@@ -451,14 +451,14 @@ wait_verification_cases_release_end()
 run_verification_cases_release()
 {
    # Manually run one random MPI FDS verification case in the background
-   fdsmpi=$SVNROOT/FDS_Compilation/mpi_intel_osx_64/fds_mpi_intel_osx_64
-   read np basename casename <<< $(cat FDS_MPI_Cases.sh | grep RUNFDSMPI | awk 'BEGIN { srand() } rand() >= 0.5 { print; exit }' | cut -d ' ' -f 2,3,4)
-   mpirun -np $np $fdsmpi $basename/$casename.fds &
+#   fdsmpi=$SVNROOT/FDS_Compilation/mpi_intel_osx_64/fds_mpi_intel_osx_64
+#   read np basename casename <<< $(cat FDS_MPI_Cases.sh | grep RUNFDSMPI | awk 'BEGIN { srand() } rand() >= 0.5 { print; exit }' | cut -d ' ' -f 2,3,4)
+#   mpirun -np $np $fdsmpi $basename/$casename.fds &
 
    # Run serial FDS verification cases
    cd $FDS_SVNROOT/Verification
    echo 'Running FDS verification cases:' > $FIREBOT_DIR/output/stage5
-   ./Run_FDS_Cases.sh -q none -c serial >> $FIREBOT_DIR/output/stage5 2>&1
+   ./Run_FDS_Cases.sh -q none >> $FIREBOT_DIR/output/stage5 2>&1
    echo "" >> $FIREBOT_DIR/output/stage5 2>&1
 
    # Run SMV verification cases
