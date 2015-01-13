@@ -404,13 +404,13 @@ cd %CURDIR%
 if exist %emailexe% (
   if %havewarnings% == 0 (
     if %haveerrors% == 0 (
-      call %email% %mailToSMV% "firebot build success on %COMPUTERNAME%! %revision%" %infofile%
+      call %email% %mailToFDS% "firebot build success on %COMPUTERNAME%! %revision%" %infofile%
     ) else (
       echo "start: %startdate% %starttime% " > %infofile%
       echo " stop: %stopdate% %stoptime% " >> %infofile%
       echo. >> %infofile%
       type %errorlog% >> %infofile%
-      call %email% %mailToSMV% "firebot build failure on %COMPUTERNAME%! %revision%" %infofile%
+      call %email% %mailToFDS% "firebot build failure on %COMPUTERNAME%! %revision%" %infofile%
     )
   ) else (
     if %haveerrors% == 0 (
@@ -418,7 +418,7 @@ if exist %emailexe% (
       echo " stop: %stopdate% %stoptime% " >> %infofile%
       echo. >> %infofile%
       type %warninglog% >> %infofile%
-      %email% %mailToSMV% "firebot build success with warnings on %COMPUTERNAME% %revision%" %infofile%
+      %email% %mailToFDS% "firebot build success with warnings on %COMPUTERNAME% %revision%" %infofile%
     ) else (
       echo "start: %startdate% %starttime% " > %infofile%
       echo " stop: %stopdate% %stoptime% " >> %infofile%
@@ -426,7 +426,7 @@ if exist %emailexe% (
       type %errorlog% >> %infofile%
       echo. >> %infofile%
       type %warninglog% >> %infofile%
-      call %email% %mailToSMV% "firebot build failure on %COMPUTERNAME%! %revision%" %infofile%
+      call %email% %mailToFDS% "firebot build failure on %COMPUTERNAME%! %revision%" %infofile%
     )
   )
 )
@@ -439,7 +439,7 @@ exit
 :output_abort_message
   echo "***Fatal error: firebot build failure on %COMPUTERNAME% %revision%"
   if %havemail% == 1 (
-    call %email% %mailToSMV% "firebot build failure on %COMPUTERNAME% %revision%" %errorlog%
+    call %email% %mailToFDS% "firebot build failure on %COMPUTERNAME% %revision%" %errorlog%
   )
 exit /b
 
