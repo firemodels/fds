@@ -166,7 +166,7 @@ erase *.obj *.mod *.exe 1> %OUTDIR%\stage1a.txt 2>&1
 make VPATH="../../FDS_Source" -f ..\makefile intel_win_%size%_db 1>> %OUTDIR%\stage1a.txt 2>&1
 
 call :does_file_exist fds_win_%size%_db.exe %OUTDIR%\stage1a.txt|| exit /b 1
-call :find_fds_warnings "warning" %OUTDIR%\stage1a.txt "Stage 1a"
+call :find_fds_problems 0 "warning" %OUTDIR%\stage1a.txt "Stage 1a"
 
 :: echo             parallel debug
 
@@ -175,7 +175,7 @@ call :find_fds_warnings "warning" %OUTDIR%\stage1a.txt "Stage 1a"
 :: make VPATH="../../FDS_Source" -f ..\makefile mpi_intel_win_%size%_db 1>> %OUTDIR%\stage1b.txt 2>&1
 
 :: call :does_file_exist fds_mpi_win_%size%_db.exe %OUTDIR%\stage1b.txt|| exit /b 1
-:: call :find_fds_warnings "warning" %OUTDIR%\stage1b.txt "Stage 1b"
+:: call :find_fds_problems 0 "warning" %OUTDIR%\stage1b.txt "Stage 1b"
 
 :skip_fds_debug
 
@@ -186,7 +186,7 @@ erase *.obj *.mod *.exe 1> %OUTDIR%\stage1c.txt 2>&1
 make VPATH="../../FDS_Source" -f ..\makefile intel_win_%size% 1>> %OUTDIR%\stage1c.txt 2>&1
 
 call :does_file_exist fds_win_%size%.exe %OUTDIR%\stage1c.txt|| exit /b 1
-call :find_fds_warnings "warning" %OUTDIR%\stage1c.txt "Stage 1c"
+call :find_fds_problems 0 "warning" %OUTDIR%\stage1c.txt "Stage 1c"
 
 if %reduced% == 1 goto skip_fds_parallel
 
@@ -197,7 +197,7 @@ if %reduced% == 1 goto skip_fds_parallel
 :: make VPATH="../../FDS_Source" -f ..\makefile mpi_intel_win_%size%  1>> %OUTDIR%\stage1d.txt 2>&1
 
 :: call :does_file_exist fds_mpi_win_%size%.exe %OUTDIR%\stage1d.txt|| exit /b 1
-:: call :find_fds_warnings "warning" %OUTDIR%\stage1d.txt "Stage 1d"
+:: call :find_fds_problems 0 "warning" %OUTDIR%\stage1d.txt "Stage 1d"
 
 :skip_fds_parallel
 
@@ -223,7 +223,7 @@ erase *.obj *.mod *.exe smokeview_win_%size%_db.exe 1> %OUTDIR%\stage2a.txt 2>&1
 make -f ..\Makefile intel_win_%size%_db 1>> %OUTDIR%\stage2a.txt 2>&1
 
 call :does_file_exist smokeview_win_%size%_db.exe %OUTDIR%\stage2a.txt|| exit /b 1
-call :find_smokeview_warnings "warning" %OUTDIR%\stage2a.txt "Stage 2a"
+call :find_smokeview_problems 0 "warning" %OUTDIR%\stage2a.txt "Stage 2a"
 
 :skip_smokeview_debug
 
@@ -234,7 +234,7 @@ erase *.obj *.mod smokeview_win_%size%.exe 1> %OUTDIR%\stage2b.txt 2>&1
 make -f ..\Makefile intel_win_%size% 1>> %OUTDIR%\stage2b.txt 2>&1
 
 call :does_file_exist smokeview_win_%size%.exe %OUTDIR%\stage2b.txt|| aexit /b 1
-call :find_smokeview_warnings "warning" %OUTDIR%\stage2b.txt "Stage 2b"
+call :find_smokeview_problems 0 "warning" %OUTDIR%\stage2b.txt "Stage 2b"
 
 :: -------------------------------------------------------------
 ::                           stage 3
@@ -297,16 +297,16 @@ echo             debug mode
 cd %svnroot%\Verification\scripts
 call Run_SMV_cases %size% 0 1 1> %OUTDIR%\stage4a.txt 2>&1
 
-call :find_smokeview_warnings "error" %OUTDIR%\stage4a.txt "Stage 4a_1"
-call :find_smokeview_warnings "forrtl: severe" %OUTDIR%\stage4a.txt "Stage 4a_2"
+call :find_smokeview_problems 1 "error" %OUTDIR%\stage4a.txt "Stage 4a_1"
+call :find_smokeview_problems 1 "forrtl: severe" %OUTDIR%\stage4a.txt "Stage 4a_2"
 
 echo             release mode
 
 cd %svnroot%\Verification\
 call Run_FDS_cases %size% 0 0 1> %OUTDIR%\stage4b.txt 2>&1
 
-call :find_smokeview_warnings "error" %OUTDIR%\stage4b.txt "Stage 4b_1"
-call :find_smokeview_warnings "forrtl: severe" %OUTDIR%\stage4b.txt "Stage 4b_2"
+call :find_smokeview_problems 1 "error" %OUTDIR%\stage4b.txt "Stage 4b_1"
+call :find_smokeview_problems 1 "forrtl: severe" %OUTDIR%\stage4b.txt "Stage 4b_2"
 
 call :GET_TIME
 set RUNVV_end=%current_time% 
@@ -324,7 +324,7 @@ echo Stage 5 - Making Smokeview pictures
 cd %svnroot%\Verification\
 call MAKE_FDS_pictures %size% 1> %OUTDIR%\stage5.txt 2>&1
 
-call :find_smokeview_warnings "error" %OUTDIR%\stage5.txt "Stage 5"
+call :find_smokeview_problems 1 "error" %OUTDIR%\stage5.txt "Stage 5"
 
 call :GET_TIME
 set MAKEPICS_end=%current_time% 
@@ -482,7 +482,7 @@ exit /b 0
   exit /b 0
 
 :: -------------------------------------------------------------
-  :does_file_exist
+:does_file_exist
 :: -------------------------------------------------------------
 
 set file=%1
@@ -497,12 +497,13 @@ if NOT exist %file% (
 exit /b 0
 
 :: -------------------------------------------------------------
-  :find_smokeview_warnings
+:find_smokeview_problems
 :: -------------------------------------------------------------
 
-set search_string=%1
-set search_file=%2
-set stage=%3
+set flag=%1
+set search_string=%2
+set search_file=%3
+set stage=%4
 
 grep -v "commands for target" %search_file% > %OUTDIR%\stage_warning0.txt
 grep -i -A 5 -B 5 %search_string% %OUTDIR%\stage_warning0.txt > %OUTDIR%\stage_warning.txt
@@ -512,17 +513,23 @@ if %nwarnings% GTR 0 (
   echo %stage% warnings >> %warninglog%
   echo. >> %warninglog%
   type %OUTDIR%\stage_warning.txt >> %warninglog%
-  set havewarnings=1
+  if %flag% GTR 0 (
+     set haveerrors=1
+  ) else (
+     set havewarnings=1
+  )
+  
 )
 exit /b
 
 :: -------------------------------------------------------------
-  :find_fds_warnings
+:find_fds_problems
 :: -------------------------------------------------------------
 
-set search_string=%1
-set search_file=%2
-set stage=%3
+set flag=%1
+set search_string=%2
+set search_file=%3
+set stage=%4
 
 grep -v "mpif.h" %search_file% > %OUTDIR%\stage_warning0.txt
 grep -i -A 5 -B 5 %search_string% %OUTDIR%\stage_warning0.txt  > %OUTDIR%\stage_warning.txt
@@ -532,12 +539,16 @@ if %nwarnings% GTR 0 (
   echo %stage% warnings >> %warninglog%
   echo. >> %warninglog%
   type %OUTDIR%\stage_warning.txt >> %warninglog%
-  set havewarnings=1
+  if %flag% GTR 0 (
+     set haveerrors=1
+  ) else (
+     set havewarnings=1
+  )
 )
 exit /b
 
 :: -------------------------------------------------------------
- :build_guide
+:build_guide
 :: -------------------------------------------------------------
 
 set guide=%1
