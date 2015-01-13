@@ -2027,7 +2027,8 @@ PREDEFINED = .FALSE.
 PREDEFINED_SMIX = .FALSE.
 
 N_SPEC_READ = 0
-N_TRACKED_SPECIES = 0
+IF (.NOT. TEST_FULL_TRANSPORT) N_TRACKED_SPECIES = 0
+IF (      TEST_FULL_TRANSPORT) N_TRACKED_SPECIES = 1
 
 IF (SIMPLE_CHEMISTRY) THEN
    IF (.NOT. TEST_FULL_TRANSPORT) THEN
@@ -2069,15 +2070,35 @@ ELSE
    ENDDO CHECK_BACKGROUND_LOOP
 21 REWIND(LU_INPUT) ; INPUT_FILE_LINE_NUMBER = 0
    IF (BACKGROUND) THEN
-      N_SPECIES = 0
+      IF (.NOT. TEST_FULL_TRANSPORT) THEN
+         N_SPECIES = 0
+      ENDIF
+      IF (     TEST_FULL_TRANSPORT) THEN
+         N_SPECIES = 1
+         PREDEFINED(1)       = .TRUE.
+         PREDEFINED_SPEC_ID(1) = 'HELIUM'
+         PREDEFINED_SMIX(0) = .TRUE.
+      ENDIF      
    ELSE
-      N_SPECIES = 4
-      PREDEFINED(1:4)       = .TRUE.
-      PREDEFINED_SPEC_ID(1) = 'NITROGEN'
-      PREDEFINED_SPEC_ID(2) = 'OXYGEN'
-      PREDEFINED_SPEC_ID(3) = 'CARBON DIOXIDE'
-      PREDEFINED_SPEC_ID(4) = 'WATER VAPOR'
-      PREDEFINED_SMIX(0) = .TRUE.
+      IF (.NOT. TEST_FULL_TRANSPORT) THEN
+         N_SPECIES = 4
+         PREDEFINED(1:4)       = .TRUE.
+         PREDEFINED_SPEC_ID(1) = 'NITROGEN'
+         PREDEFINED_SPEC_ID(2) = 'OXYGEN'
+         PREDEFINED_SPEC_ID(3) = 'CARBON DIOXIDE'
+         PREDEFINED_SPEC_ID(4) = 'WATER VAPOR'
+         PREDEFINED_SMIX(0) = .TRUE.
+      ENDIF
+      IF (     TEST_FULL_TRANSPORT) THEN
+         N_SPECIES = 5
+         PREDEFINED(1:5)       = .TRUE.
+         PREDEFINED_SPEC_ID(1) = 'NITROGEN'
+         PREDEFINED_SPEC_ID(2) = 'OXYGEN'
+         PREDEFINED_SPEC_ID(3) = 'CARBON DIOXIDE'
+         PREDEFINED_SPEC_ID(4) = 'WATER VAPOR'
+         PREDEFINED_SPEC_ID(5) = 'HELIUM'
+         PREDEFINED_SMIX(0:1) = .TRUE.
+      ENDIF
    ENDIF
 ENDIF
 
@@ -2131,7 +2152,7 @@ COUNT_SPEC_LOOP: DO
          CALL SHUTDOWN(MESSAGE)          ; RETURN
       ENDIF
    ENDIF
-   
+
    IF (SPEC_ID(1)=='null' .OR. PRIMITIVE) THEN
       N_SPECIES = N_SPECIES+1
       IF (SIMPLE_CHEMISTRY) THEN
@@ -2150,8 +2171,8 @@ COUNT_SPEC_LOOP: DO
    ENDIF
 
    ! If predefined species, check to see if the species has already been defined.
-   
-   IF (PREDEFINED_SMIX(0)) THEN
+   IF ((.NOT. TEST_FULL_TRANSPORT .AND. PREDEFINED_SMIX(0)) .OR. &
+              TEST_FULL_TRANSPORT .AND. PREDEFINED_SMIX(1)) THEN
       DO NN=1,N_SPECIES-1
          IF (TRIM(PREDEFINED_SPEC_ID(NN))==TRIM(ID)) THEN
             IF (.NOT. SIMPLE_CHEMISTRY) THEN
@@ -2167,8 +2188,8 @@ COUNT_SPEC_LOOP: DO
                                                 '.  Lumped species has the same ID as a predefined species'
                      CALL SHUTDOWN(MESSAGE) ; RETURN
                   ELSE
-                     IF (      TEST_FULL_TRANSPORT) PREDEFINED_SMIX(1) = .FALSE.
-                     IF (.NOT. TEST_FULL_TRANSPORT) PREDEFINED_SMIX(2) = .FALSE.
+                     IF (.NOT. TEST_FULL_TRANSPORT) PREDEFINED_SMIX(1) = .FALSE.
+                     IF (      TEST_FULL_TRANSPORT) PREDEFINED_SMIX(2) = .FALSE.
                      REAC_FUEL_READ = .TRUE.
                   ENDIF
                ELSE
@@ -2181,7 +2202,6 @@ COUNT_SPEC_LOOP: DO
          ENDIF
       ENDDO
    ENDIF
-
 ENDDO COUNT_SPEC_LOOP
 
 29 REWIND(LU_INPUT) ; INPUT_FILE_LINE_NUMBER = 0
@@ -2214,8 +2234,8 @@ PRIMITIVE_SPEC_READ_LOOP: DO WHILE (N_SPEC_READ < N_SPEC_READ_2 .OR. N < N_SPECI
       READ(LU_INPUT,NML=SPEC)
       N_SPEC_READ = N_SPEC_READ + 1
       IF (SIMPLE_CHEMISTRY) THEN
-         IF(TRIM(ID)==TRIM(REACTION(1)%FUEL) .AND.       TEST_FULL_TRANSPORT) PREDEFINED_SMIX(1)=.FALSE.
-         IF(TRIM(ID)==TRIM(REACTION(1)%FUEL) .AND. .NOT. TEST_FULL_TRANSPORT) PREDEFINED_SMIX(2)=.FALSE.
+         IF(TRIM(ID)==TRIM(REACTION(1)%FUEL) .AND. .NOT. TEST_FULL_TRANSPORT) PREDEFINED_SMIX(1)=.FALSE.
+         IF(TRIM(ID)==TRIM(REACTION(1)%FUEL) .AND.       TEST_FULL_TRANSPORT) PREDEFINED_SMIX(2)=.FALSE.
       ENDIF
    ENDIF
 
@@ -2421,20 +2441,21 @@ PRIMITIVE_SPEC_READ_LOOP: DO WHILE (N_SPEC_READ < N_SPEC_READ_2 .OR. N < N_SPECI
 ENDDO PRIMITIVE_SPEC_READ_LOOP
 
 ! Pass 3: process tracked species (primitive and lumped)
-
 ALLOCATE(SPECIES_MIXTURE(0:N_TRACKED_SPECIES),STAT=IZERO)
 CALL ChkMemErr('READ','SPECIES',IZERO)
 
 ! Process non-predefined mixtures first
 REWIND(LU_INPUT) ; INPUT_FILE_LINE_NUMBER = 0
-N = 0
+IF (.NOT. TEST_FULL_TRANSPORT) N = 0
+IF (      TEST_FULL_TRANSPORT) N = 1
 DEFINED_BACKGROUND = .FALSE.
 N_SPEC_READ = 0
 
 TRACKED_SPEC_LOOP_1: DO WHILE (N <= N_TRACKED_SPECIES .OR. .NOT. DEFINED_BACKGROUND)
    IF (PREDEFINED_SMIX(N)) THEN
       CALL SET_SPEC_DEFAULT
-      IF (N==0) BACKGROUND = .TRUE.
+      IF (.NOT. TEST_FULL_TRANSPORT .AND. N==0) BACKGROUND = .TRUE.
+      IF (      TEST_FULL_TRANSPORT .AND. N==1) BACKGROUND = .TRUE.
    ELSE
       FIND_TRACKED: DO
          CALL SET_SPEC_DEFAULT
@@ -2447,6 +2468,7 @@ TRACKED_SPEC_LOOP_1: DO WHILE (N <= N_TRACKED_SPECIES .OR. .NOT. DEFINED_BACKGRO
          ENDIF
          EXIT
       ENDDO FIND_TRACKED
+
       IF (N_BINS > 0) THEN
          DO NNN=1,N_PARTICLE_BINS
             MEAN_DIAMETER = 2._EB*PARTICLE_RADIUS(NNN)
@@ -2461,6 +2483,7 @@ TRACKED_SPEC_LOOP_1: DO WHILE (N <= N_TRACKED_SPECIES .OR. .NOT. DEFINED_BACKGRO
       ELSE
          CALL DEFINE_MIXTURE
       ENDIF
+
       IF (SIMPLE_CHEMISTRY) THEN
          SM => SPECIES_MIXTURE(N)
          IF (TRIM(SM%ID)==TRIM(REACTION(1)%FUEL)) THEN
@@ -2484,7 +2507,8 @@ TRACKED_SPEC_LOOP_1: DO WHILE (N <= N_TRACKED_SPECIES .OR. .NOT. DEFINED_BACKGRO
    ENDIF
    IF (BACKGROUND) THEN
       DEFINED_BACKGROUND = .TRUE.
-      IF (N==0) N = N + 1
+      IF (.NOT. TEST_FULL_TRANSPORT .AND. N==0) N = N + 1
+      IF (      TEST_FULL_TRANSPORT .AND. N==1) N = N + 1
    ELSE
       N = N + 1
    ENDIF
@@ -2492,30 +2516,33 @@ ENDDO TRACKED_SPEC_LOOP_1
 
 ! Process predefined mixtures second
 
-
-IF (ANY(PREDEFINED_SMIX)) THEN
+IF ((.NOT. TEST_FULL_TRANSPORT .AND. ANY(PREDEFINED_SMIX)) .OR. &
+    (      TEST_FULL_TRANSPORT .AND. ANY(PREDEFINED_SMIX(1:)))) THEN
    REWIND(LU_INPUT) ; INPUT_FILE_LINE_NUMBER = 0
-   N = 0
+   IF (.NOT. TEST_FULL_TRANSPORT) N = 0
+   IF (      TEST_FULL_TRANSPORT) N = 1
    DEFINED_BACKGROUND = .FALSE.
    TRACKED_SPEC_LOOP_2: DO WHILE (N <= N_TRACKED_SPECIES .OR. .NOT. DEFINED_BACKGROUND)
       IF (PREDEFINED_SMIX(N)) THEN
          CALL SET_SPEC_DEFAULT
          CALL SETUP_PREDEFINED_SMIX(N)
-         IF (N==0) BACKGROUND=.TRUE.
+         IF (.NOT. TEST_FULL_TRANSPORT .AND. N==0) BACKGROUND=.TRUE.
+         IF (      TEST_FULL_TRANSPORT .AND. N==1) BACKGROUND=.TRUE.
          CALL DEFINE_MIXTURE
       ELSE
          BACKGROUND = .FALSE.
       ENDIF
       IF (BACKGROUND) THEN
          DEFINED_BACKGROUND = .TRUE.
-         IF (N==0) N = N + 1
+         IF (.NOT. TEST_FULL_TRANSPORT .AND. N==0) N = N + 1
+         IF (      TEST_FULL_TRANSPORT .AND. N==1) N = N + 1
       ELSE
          N = N + 1
       ENDIF
    ENDDO TRACKED_SPEC_LOOP_2
 ENDIF
 
-IF (SPECIES_MIXTURE(0)%DEPOSITING) THEN
+IF (.NOT. TEST_FULL_TRANSPORT .AND. SPECIES_MIXTURE(0)%DEPOSITING) THEN
    WRITE(MESSAGE,'(A)') 'ERROR: Cannot define the background as a depositing species'
    CALL SHUTDOWN(MESSAGE) ; RETURN
 ENDIF
@@ -2523,14 +2550,55 @@ ENDIF
 REWIND (LU_INPUT) ; INPUT_FILE_LINE_NUMBER = 0
 
 ! Normalize the initial mass fractions of the lumped species if necessary
+IF (.NOT. TEST_FULL_TRANSPORT) THEN
+   IF (SUM(SPECIES_MIXTURE(1:N_TRACKED_SPECIES)%ZZ0) > 1._EB) &
+     SPECIES_MIXTURE(1:N_TRACKED_SPECIES)%ZZ0 = SPECIES_MIXTURE(1:N_TRACKED_SPECIES)%ZZ0/ &
+                                            SUM(SPECIES_MIXTURE(1:N_TRACKED_SPECIES)%ZZ0)
 
-IF (TEST_FULL_TRANSPORT .AND. SIMPLE_CHEMISTRY) SPECIES_MIXTURE(1)%ZZ0=1._EB-SUM(SPECIES_MIXTURE(2:N_TRACKED_SPECIES)%ZZ0)
+   SPECIES_MIXTURE(0)%ZZ0 = 1._EB - SUM(SPECIES_MIXTURE(1:N_TRACKED_SPECIES)%ZZ0)
+ENDIF
+IF (TEST_FULL_TRANSPORT) THEN
+   IF (SUM(SPECIES_MIXTURE(2:N_TRACKED_SPECIES)%ZZ0) > 1._EB) &
+     SPECIES_MIXTURE(2:N_TRACKED_SPECIES)%ZZ0 = SPECIES_MIXTURE(2:N_TRACKED_SPECIES)%ZZ0/ &
+                                            SUM(SPECIES_MIXTURE(2:N_TRACKED_SPECIES)%ZZ0)
 
-IF (SUM(SPECIES_MIXTURE(1:N_TRACKED_SPECIES)%ZZ0) > 1._EB) &
-  SPECIES_MIXTURE(1:N_TRACKED_SPECIES)%ZZ0 = SPECIES_MIXTURE(1:N_TRACKED_SPECIES)%ZZ0/ &
-                                         SUM(SPECIES_MIXTURE(1:N_TRACKED_SPECIES)%ZZ0)
+   SPECIES_MIXTURE(1)%ZZ0 = 1._EB - SUM(SPECIES_MIXTURE(2:N_TRACKED_SPECIES)%ZZ0)
+ENDIF
 
-SPECIES_MIXTURE(0)%ZZ0 = 1._EB - SUM(SPECIES_MIXTURE(1:N_TRACKED_SPECIES)%ZZ0)
+!Set dummy background
+IF (TEST_FULL_TRANSPORT) THEN
+   SPEC_ID(1)       = 'HELIUM'
+   SM=>SPECIES_MIXTURE(0)
+   ALLOCATE (SM%SPEC_ID(N_SPECIES),STAT=IZERO)
+   SM%SPEC_ID='null'
+   ALLOCATE (SM%VOLUME_FRACTION(N_SPECIES),STAT=IZERO)
+   ALLOCATE (SM%MASS_FRACTION(N_SPECIES),STAT=IZERO)
+
+   SM%SPEC_ID(1)         = 'HELIUM'
+   SM%ID                 = 'Fake Background'
+   NS = 1
+   FIND_SPEC_ID: DO NS2 = 1,N_SPECIES
+      IF (TRIM(SPECIES(NS2)%ID) == TRIM(SPEC_ID(1))) THEN
+         Y_INDEX(NS)  = NS2
+         SM%VOLUME_FRACTION(NS2) = 1._EB
+         SM%MASS_FRACTION(NS2)   = 1._EB
+         SM%FORMULA = SPECIES(NS2)%FORMULA
+         SM%SINGLE_SPEC_INDEX=NS2
+         SM%MASS_EXTINCTION_COEFFICIENT = 0._EB
+         SM%MW = SPECIES(NS2)%MW !! *SM%ADJUST_NU ::term for potential non-normalized inputs
+         SM%H_F = SPECIES(NS2)%H_F ! Calculate H_F of mixtures
+         SM%ATOMS = 0
+         SM%ATOMS(2) = 1
+         IF(SM%H_F <= -1.E21_EB) THEN ! Checking if H_F is defined for all species in mixture
+            SM%H_F = SM%H_F
+         ELSE
+            SM%H_F = SM%H_F*1.E6_EB/SM%MW
+         ENDIF
+         SM%RCON = R0/SM%MW   
+         EXIT FIND_SPEC_ID
+      ENDIF
+   ENDDO FIND_SPEC_ID
+ENDIF
 
 DEPOSITION = ANY(SPECIES_MIXTURE%DEPOSITING) .AND. DEPOSITION
 
@@ -2550,9 +2618,11 @@ USE PROPERTY_DATA, ONLY:GET_FORMULA_WEIGHT
 ! Create a species mixture
 
 IF (BACKGROUND) THEN
-   NN = 0
+   IF (.NOT. TEST_FULL_TRANSPORT) NN = 0
+   IF (      TEST_FULL_TRANSPORT) NN = 1
 ELSE
-   IF (N==0) N = N + 1
+   IF (.NOT. TEST_FULL_TRANSPORT .AND. N==0) N = N + 1
+   IF (      TEST_FULL_TRANSPORT .AND. N==1) N = N + 1
    NN = N
 ENDIF
 
@@ -2874,11 +2944,6 @@ ENDIF
 IF (TEST_FULL_TRANSPORT) THEN
 
    SELECT CASE(N)
-      CASE(0)
-         ID               = 'HELIUM'
-         FORMULA          = 'He'
-         SPEC_ID(1)       = 'HELIUM'
-         MASS_FRACTION(1) = 1._EB
       CASE(1)
          ID               = 'AIR'
          FORMULA          = 'Z0'
@@ -5631,7 +5696,8 @@ READ_SURF_LOOP: DO N=0,N_SURF
       SF%MASS_FLUX_TOTAL = MASS_FLUX_TOTAL
    ELSE
       IF (TRIM(SPEC_ID(1))=='null') THEN
-         SPEC_ID(1) = SPECIES_MIXTURE(0)%ID
+         IF (.NOT. TEST_FULL_TRANSPORT) SPEC_ID(1) = SPECIES_MIXTURE(0)%ID
+         IF (      TEST_FULL_TRANSPORT) SPEC_ID(1) = SPECIES_MIXTURE(1)%ID
          MASS_FLUX(1) = -MASS_FLUX_TOTAL
       ELSE
          MASS_FLUX = -MASS_FLUX_TOTAL*MASS_FRACTION
@@ -5704,8 +5770,14 @@ READ_SURF_LOOP: DO N=0,N_SURF
          WRITE (MESSAGE,'(A,A,A)') 'ERROR: Problem with SURF: ',TRIM(SF%ID),'. SUM(MASS_FRACTION) > 1'
             CALL SHUTDOWN(MESSAGE) ; RETURN
       ELSE
-         IF (SF%MASS_FRACTION(0)<TWO_EPSILON_EB .AND. SUM(SF%MASS_FRACTION(1:N_TRACKED_SPECIES)) > 0._EB) &
-            SF%MASS_FRACTION(0) = 1._EB - SUM(SF%MASS_FRACTION(1:N_TRACKED_SPECIES))
+         IF (.NOT. TEST_FULL_TRANSPORT) THEN
+            IF (SF%MASS_FRACTION(0)<TWO_EPSILON_EB .AND. SUM(SF%MASS_FRACTION(1:N_TRACKED_SPECIES)) > 0._EB) &
+               SF%MASS_FRACTION(0) = 1._EB - SUM(SF%MASS_FRACTION(1:N_TRACKED_SPECIES))
+         ENDIF
+         IF (      TEST_FULL_TRANSPORT) THEN
+            IF (SF%MASS_FRACTION(1)<TWO_EPSILON_EB .AND. SUM(SF%MASS_FRACTION(2:N_TRACKED_SPECIES)) > 0._EB) &
+               SF%MASS_FRACTION(1) = 1._EB - SUM(SF%MASS_FRACTION(2:N_TRACKED_SPECIES))
+         ENDIF
       ENDIF
    ENDIF
 
@@ -9321,40 +9393,75 @@ INIT_LOOP: DO N=1,N_INIT_READ+N_INIT_RESERVED
             IN%HRRPUV        = HRRPUV*1000._EB
             IF (HRRPUV > TWO_EPSILON_EB) INIT_HRRPUV = .TRUE.
             IF (DENSITY > 0._EB) RHOMAX = MAX(RHOMAX,IN%DENSITY)
-
-            SPEC_INIT_IF:IF (N_TRACKED_SPECIES > 0 .AND. ANY(MASS_FRACTION > TWO_EPSILON_EB)) THEN
-               IF (SPEC_ID(1)=='null') THEN
-                  WRITE(MESSAGE,'(A,I3,A,A)') 'ERROR: Problem with INIT number ',N,'. SPEC_ID must be used with MASS_FRACTION'
-                  CALL SHUTDOWN(MESSAGE) ; RETURN
-               ELSE
-                  DO NS=1,MAX_SPECIES
-                     IF (SPEC_ID(NS)=='null') EXIT
-                     DO NS2=0,N_TRACKED_SPECIES
-                        IF (NS2>0 .AND. TRIM(SPEC_ID(NS))==TRIM(SPECIES_MIXTURE(NS2)%ID)) THEN
-                           IN%MASS_FRACTION(NS2)=MASS_FRACTION(NS)
-                           EXIT
-                        ENDIF
-                        IF (NS2==N_TRACKED_SPECIES)  THEN
-                           WRITE(MESSAGE,'(A,I3,A,A,A)') 'ERROR: Problem with INIT number ',N,' tracked species ',&
-                              TRIM(SPEC_ID(NS)),' not found'
-                              CALL SHUTDOWN(MESSAGE) ; RETURN
-                        ENDIF
-                     ENDDO
-                  ENDDO
-
-                  IF (SUM(IN%MASS_FRACTION) > 1._EB) THEN
-                     WRITE(MESSAGE,'(A,I3,A,A)') 'ERROR: Problem with INIT number ',N,'. Sum of specified mass fractions > 1'
+            IF (.NOT. TEST_FULL_TRANSPORT) THEN
+               SPEC_INIT_IF2:IF (N_TRACKED_SPECIES > 0 .AND. ANY(MASS_FRACTION > TWO_EPSILON_EB)) THEN
+                  IF (SPEC_ID(1)=='null') THEN
+                     WRITE(MESSAGE,'(A,I3,A,A)') 'ERROR: Problem with INIT number ',N,'. SPEC_ID must be used with MASS_FRACTION'
                      CALL SHUTDOWN(MESSAGE) ; RETURN
+                  ELSE
+                     DO NS=1,MAX_SPECIES
+                        IF (SPEC_ID(NS)=='null') EXIT
+                        DO NS2=0,N_TRACKED_SPECIES
+                           IF (NS2>0 .AND. TRIM(SPEC_ID(NS))==TRIM(SPECIES_MIXTURE(NS2)%ID)) THEN
+                              IN%MASS_FRACTION(NS2)=MASS_FRACTION(NS)
+                              EXIT
+                           ENDIF
+                           IF (NS2==N_TRACKED_SPECIES)  THEN
+                              WRITE(MESSAGE,'(A,I3,A,A,A)') 'ERROR: Problem with INIT number ',N,' tracked species ',&
+                                 TRIM(SPEC_ID(NS)),' not found'
+                                 CALL SHUTDOWN(MESSAGE) ; RETURN
+                           ENDIF
+                        ENDDO
+                     ENDDO
+
+                     IF (SUM(IN%MASS_FRACTION) > 1._EB) THEN
+                        WRITE(MESSAGE,'(A,I3,A,A)') 'ERROR: Problem with INIT number ',N,'. Sum of specified mass fractions > 1'
+                        CALL SHUTDOWN(MESSAGE) ; RETURN
+                     ENDIF
+
+                     ZZ_GET(1:N_TRACKED_SPECIES) = IN%MASS_FRACTION(1:N_TRACKED_SPECIES)
+                     CALL GET_SPECIFIC_GAS_CONSTANT(ZZ_GET,RR_SUM)
                   ENDIF
+               ELSE SPEC_INIT_IF2
+                   IF (N_TRACKED_SPECIES > 0) IN%MASS_FRACTION(1:N_TRACKED_SPECIES) = SPECIES_MIXTURE(1:N_TRACKED_SPECIES)%ZZ0
+                   RR_SUM = RSUM0
+               ENDIF SPEC_INIT_IF2
+            ENDIF
+            IF (      TEST_FULL_TRANSPORT) THEN
+               SPEC_INIT_IF:IF (N_TRACKED_SPECIES > 1 .AND. ANY(MASS_FRACTION > TWO_EPSILON_EB)) THEN
+                  IF (SPEC_ID(1)=='null') THEN
+                     WRITE(MESSAGE,'(A,I3,A,A)') 'ERROR: Problem with INIT number ',N,'. SPEC_ID must be used with MASS_FRACTION'
+                     CALL SHUTDOWN(MESSAGE) ; RETURN
+                  ELSE
+                     DO NS=1,MAX_SPECIES
+                        IF (SPEC_ID(NS)=='null') EXIT
+                        DO NS2=0,N_TRACKED_SPECIES
+                           IF (NS2>0 .AND. TRIM(SPEC_ID(NS))==TRIM(SPECIES_MIXTURE(NS2)%ID)) THEN
+                              IN%MASS_FRACTION(NS2)=MASS_FRACTION(NS)
+                              EXIT
+                           ENDIF
+                           IF (NS2==N_TRACKED_SPECIES)  THEN
+                              WRITE(MESSAGE,'(A,I3,A,A,A)') 'ERROR: Problem with INIT number ',N,' tracked species ',&
+                                 TRIM(SPEC_ID(NS)),' not found'
+                                 CALL SHUTDOWN(MESSAGE) ; RETURN
+                           ENDIF
+                        ENDDO
+                     ENDDO
 
-                  ZZ_GET(1:N_TRACKED_SPECIES) = IN%MASS_FRACTION(1:N_TRACKED_SPECIES)
-                  CALL GET_SPECIFIC_GAS_CONSTANT(ZZ_GET,RR_SUM)
-               ENDIF
-            ELSE SPEC_INIT_IF
-                IF (N_TRACKED_SPECIES > 0) IN%MASS_FRACTION(1:N_TRACKED_SPECIES) = SPECIES_MIXTURE(1:N_TRACKED_SPECIES)%ZZ0
-                RR_SUM = RSUM0
-            ENDIF SPEC_INIT_IF
-
+                     IF (SUM(IN%MASS_FRACTION) > 1._EB) THEN
+                        WRITE(MESSAGE,'(A,I3,A,A)') 'ERROR: Problem with INIT number ',N,'. Sum of specified mass fractions > 1'
+                        CALL SHUTDOWN(MESSAGE) ; RETURN
+                     ENDIF
+                     IN%MASS_FRACTION(1) = 1._EB-SUM(IN%MASS_FRACTION(2:N_TRACKED_SPECIES))
+                     ZZ_GET(1:N_TRACKED_SPECIES) = IN%MASS_FRACTION(1:N_TRACKED_SPECIES)
+                     CALL GET_SPECIFIC_GAS_CONSTANT(ZZ_GET,RR_SUM)
+                  ENDIF
+               ELSE SPEC_INIT_IF
+                   IN%MASS_FRACTION(1:N_TRACKED_SPECIES) = SPECIES_MIXTURE(1:N_TRACKED_SPECIES)%ZZ0
+                   RR_SUM = RSUM0
+               ENDIF SPEC_INIT_IF
+            ENDIF
+            
             IF (TEMPERATURE > 0._EB) TMPMIN = MIN(TMPMIN,IN%TEMPERATURE)
 
             IF (IN%TEMPERATURE > 0._EB .AND. IN%DENSITY < 0._EB) THEN
