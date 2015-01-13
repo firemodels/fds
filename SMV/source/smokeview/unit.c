@@ -100,9 +100,6 @@ void set_unit_vis(void){
 /* ------------------ init_unit_defs ------------------------ */
 
 void init_unit_defs(void){
-  int j;
-  f_units *unitclass;
-
   if(unitclasses_ini!=NULL){
     unitclasses=unitclasses_ini;
     nunitclasses=nunitclasses_ini;
