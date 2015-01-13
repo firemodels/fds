@@ -1696,9 +1696,9 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
             
             IOB(I,J,K)=1 ! cell is tagged for correction
 
-            SVDT = DT_LOC * ( MAX(0._EB,UU(I,J,K)) - MIN(0._EB,UU(I-1,J,K)) &
-                            + MAX(0._EB,VV(I,J,K)) - MIN(0._EB,VV(I,J-1,K)) &
-                            + MAX(0._EB,WW(I,J,K)) - MIN(0._EB,WW(I,J,K-1)) )
+            SVDT = DT_LOC * ( ( MAX(0._EB,UU(I,J,K)) - MIN(0._EB,UU(I-1,J,K)) )*RDX(I) &
+                            + ( MAX(0._EB,VV(I,J,K)) - MIN(0._EB,VV(I,J-1,K)) )*RDY(J) &
+                            + ( MAX(0._EB,WW(I,J,K)) - MIN(0._EB,WW(I,J,K-1)) )*RDZ(K) )
 
             GAMMA = (1._EB-EXP(-SVDT))/(SVDT)
 
@@ -1776,9 +1776,9 @@ DO K=1,KBAR
          
          IOB(I,J,K)=1 ! cell is tagged for correction
 
-         SVDT = DT_LOC * ( MAX(0._EB,UU(I,J,K)) - MIN(0._EB,UU(I-1,J,K)) &
-                         + MAX(0._EB,VV(I,J,K)) - MIN(0._EB,VV(I,J-1,K)) &
-                         + MAX(0._EB,WW(I,J,K)) - MIN(0._EB,WW(I,J,K-1)) )
+         SVDT = DT_LOC * ( ( MAX(0._EB,UU(I,J,K)) - MIN(0._EB,UU(I-1,J,K)) )*RDX(I) &
+                         + ( MAX(0._EB,VV(I,J,K)) - MIN(0._EB,VV(I,J-1,K)) )*RDY(J) &
+                         + ( MAX(0._EB,WW(I,J,K)) - MIN(0._EB,WW(I,J,K-1)) )*RDZ(K) )
 
          GAMMA = (1._EB-EXP(-SVDT))/(SVDT)
 
