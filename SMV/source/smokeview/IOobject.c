@@ -2191,24 +2191,6 @@ void drawsphereseg(float anglemin, float anglemax, float rmin, float rmax){
   }
   glEnd();
   }
-#ifdef xxx
-#define VECFACTOR (SCALE2FDS(0.1))
-  glColor4fv(colorwhite);
-  glBegin(GL_LINES);
-  for(i=0;i<NLAT;i++){
-    ai = anglemin + i*danglei;
-    cosi = cos(ai);
-    sini = sin(ai);
-    for(j=0;j<NLONG;j++){
-      aj = j*danglej;
-      cosj = cos(aj);
-      sinj = sin(aj);
-      glVertex3f(rmax*sini*cosj,rmax*sini*sinj,cosi*rmax);
-      glVertex3f(rmax*sini*cosj+VECFACTOR*sini*cosj,rmax*sini*sinj+VECFACTOR*sini*sinj,cosi*rmax+VECFACTOR*cosi);
-    }
-  }
-  glEnd();
-#endif
 }
 
 /* ----------------------- drawsphere ----------------------------- */
