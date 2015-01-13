@@ -238,7 +238,7 @@ The bold solid line in Fig.~\ref{fig_reaction_time_scale} is mathematically repr
 The mathematical details of the submodels are as follows:
 \begin{align}
 \label{eq:tau_diff} \tau_{\rm d} &= \frac{\Delta^2}{D_{\si{F}}} \\
-\label{eq:tau_sgs}  \tau_{\rm u} &= \frac{\Delta}{\sqrt{2k_{\rm sgs}}} \\
+\label{eq:tau_sgs}  \tau_{\rm u} &= \frac{\mbox{Sc}_t \, \Delta}{\sqrt{k_{\rm sgs}}} \\
 \label{eqn_tau_grav}\tau_{\rm g} &= \sqrt{ 2\Delta/g }
 \end{align}
 where $D_{\si{F}}$ is the diffusivity of the fuel species. Note that $k_{\rm sgs}$ is the unclosed subgrid kinetic energy per unit mass which by default is taken from the model for the turbulent viscosity (see Section \ref{section:turbulent_viscosity}). The acceleration time scale $\tau_{\rm g}$ is the time required to travel a distance $\Delta$ starting from rest under a constant acceleration, $g=\SI{9.81}{m/s^2}$.
