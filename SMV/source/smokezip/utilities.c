@@ -120,7 +120,6 @@ int getmaxrevision(void){
   MAXREV(dmalloc_revision);
   MAXREV(histogram_revision); //
   MAXREV(isobox_revision); //
-  MAXREV(kdtree_revision); //
   MAXREV(lightsmoke_revision); //
   MAXREV(main_revision);
   MAXREV(readfiles_revision);
