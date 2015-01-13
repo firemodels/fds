@@ -736,11 +736,16 @@ void script_renderall(scriptdata *scripti){
   RenderMenu(skip_local);
 }
 
-/* ------------------ run_volsmokerenderall ------------------------ */
+/* ------------------ script_volsmokerenderall ------------------------ */
 
 void script_volsmokerenderall(scriptdata *scripti){
   int skip_local;
 
+  if(nvolrenderinfo==0){
+    PRINTF("*** Error: there is no volume rendered smoke data to render\n");
+    ScriptMenu(SCRIPT_CANCEL);
+    return;
+  }
   script_loadvolsmokeframe2();
   
   if(script_startframe>0)scripti->ival3=script_startframe;
