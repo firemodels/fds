@@ -128,8 +128,10 @@ for q = 1:lnx
     %     set(xh,'Position',xh_pos)
     % end
 
-    %Pos=get(yh,'Position');
-    %set(yh,'Position',[Pos(1) Pos(2) Pos(3)])
+    if q == 1
+        Pos=get(yh,'Position');
+        set(yh,'Position',[Pos(1)*.95 Pos(2)*.5 Pos(3)])
+    end
 end
 
 axis([0 20 -4E-3 4E-3])
