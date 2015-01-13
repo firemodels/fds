@@ -727,9 +727,6 @@ void usage(char **argv){
 #ifdef pp_DEG
     strcat(label,", pp_DEG");
 #endif
-#ifdef pp_DEVICE
-    strcat(label,", pp_DEVICE");
-#endif
 #ifdef pp_GEOMTEST
     strcat(label,", pp_GEOMTEST");
 #endif
@@ -777,9 +774,6 @@ void usage(char **argv){
 #endif
 #ifdef pp_release
     strcat(label,", pp_release");
-#endif
-#ifdef pp_SMOKEDIFF
-    strcat(label,", pp_SMOKEDIFF");
 #endif
 #ifdef pp_THREAD
     strcat(label,", pp_THREAD");
