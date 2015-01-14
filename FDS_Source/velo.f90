@@ -1093,8 +1093,6 @@ ELSE
    WW=>WS
 ENDIF
 
-! Since we do not solve the momentum equations in conservative form, we must also subtract u_i/rho*Q_rho from the RHS.
-
 DO K=1,KBAR
    DO J=1,JBAR
       DO I=0,IBAR
