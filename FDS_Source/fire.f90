@@ -108,7 +108,7 @@ DO K=1,KBAR
                DO N=1,N_TRACKED_SPECIES
                   SM => SPECIES_MIXTURE(N)
                   CALL GET_SENSIBLE_ENTHALPY_Z(N,TMP(I,J,K),H_S_ALPHA)
-                  D_REACTION(I,J,K) = D_REACTION(I,J,K) + SM%RCON/RSUM(I,J,K) - H_S_ALPHA/(CP*TMP(I,J,K)) )*DZZ(N)/DT
+                  D_REACTION(I,J,K) = D_REACTION(I,J,K) + (SM%RCON/RSUM(I,J,K) - H_S_ALPHA/(CP*TMP(I,J,K)) )*DZZ(N)/DT
                ENDDO
             ENDIF CP_IF
          ENDIF DZZ_IF
