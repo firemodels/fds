@@ -132,10 +132,9 @@ else
   export BACKGROUND=$SVNROOT/Utilities/background/intel_$PLATFORM2/background
 fi
 export GEOM=$SVNROOT/SMV/source/geomtest/intel_$PLATFORM/geomtest
-export FDSEXE=$SVNROOT/FDS_Compilation/intel_$PLATFORM$DEBUG/fds_intel_$PLATFORM$DEBUG
-export WFDSEXE=~/FIRE-LOCAL/bin/wfds6_9977_intel_$PLATFORM3
+#export FDSEXE=$SVNROOT/FDS_Compilation/intel_$PLATFORM$DEBUG/fds_intel_$PLATFORM$DEBUG
+export FDSEXE=$SVNROOT/FDS_Compilation/mpi_intel_$PLATFORM$IB$DEBUG/fds_mpi_intel_$PLATFORM$IB$DEBUG
 export FDS=$FDSEXE
-export WFDS=$WFDSEXE
 export FDSMPI=$SVNROOT/FDS_Compilation/mpi_intel_$PLATFORM$IB$DEBUG/fds_mpi_intel_$PLATFORM$IB$DEBUG
 export CFAST=~/cfast/CFAST/intel_$PLATFORM/cfast6_$PLATFORM
 QFDSSH="$SVNROOT/Utilities/Scripts/qfds.sh"
@@ -160,7 +159,6 @@ if [[ ! $stop_cases ]] ; then
   export RUNCFAST="$SVNROOT/Verification/scripts/Remove_CFAST_Files.sh"
   export QFDS="$SVNROOT/Verification/scripts/Remove_FDS_Files.sh"
   export RUNTFDS="$SVNROOT/Verification/scripts/Remove_FDS_Files.sh"
-  export RUNWFDS="$SVNROOT/Verification/scripts/Remove_FDS_Files.sh"
   scripts/SMV_Cases.sh
   echo "FDS/CFAST output files removed"
 fi
@@ -170,7 +168,6 @@ fi
 export  RUNCFAST="$QFDSSH -c -e $CFAST $queue $STOPFDS $JOBPREFIX"
 export      QFDS="$QFDSSH -e $FDSEXE $OPENMPOPTS $queue $STOPFDS $JOBPREFIX"
 export   RUNTFDS="$QFDSSH -e $FDSEXE $OPENMPOPTS $queue $STOPFDS $JOBPREFIX"
-export   RUNWFDS="$QFDSSH -e $WFDSEXE $queue $STOPFDS $JOBPREFIX"
 
 echo "" | $FDSEXE 2> $SVNROOT/Manuals/SMV_User_Guide/SCRIPT_FIGURES/fds.version
 

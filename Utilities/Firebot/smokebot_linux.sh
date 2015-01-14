@@ -1160,28 +1160,28 @@ echo "Preliminary: $DIFF_PRELIM" >> $STAGE_STATUS
 
 ### Stage 2a ###
 BUILDFDS_beg=`GET_TIME`
-compile_fds_db
-check_compile_fds_db
+#compile_fds_db
+#check_compile_fds_db
+stage2a_success=true
 
 ### Stage 2b ###
-#compile_fds_mpi_db
-#check_compile_fds_mpi_db
-stage2b_success=true
+compile_fds_mpi_db
+check_compile_fds_mpi_db
 
 ### Stage 4a ###
 stage4_beg=`GET_TIME`
-if [[ $stage2a_success ]] ; then
-   compile_fds
-   check_compile_fds
-fi
+#if [[ $stage2a_success ]] ; then
+#   compile_fds
+#   check_compile_fds
+#fi
+stage4a_success=true
 
 ### Stage 4b ###
-#if [[ $stage2b_success ]] ; then
-#   compile_fds_mpi
-#   check_compile_fds_mpi
-stage4b_success=true
-#fi
-#BUILDFDS_end=`GET_TIME`
+if [[ $stage2b_success ]] ; then
+   compile_fds_mpi
+   check_compile_fds_mpi
+fi
+BUILDFDS_end=`GET_TIME`
 DIFF_BUILDFDS=`GET_DURATION $BUILDFDS_beg $BUILDFDS_end`
 echo "Build FDS: $DIFF_BUILDFDS" >> $STAGE_STATUS
 
@@ -1195,7 +1195,7 @@ echo "Build SMV Utilities: $DIFF_SMVUTILSpre" >> $STAGE_STATUS
 
 ### Stage 3 ###
 RUNCASES_beg=`GET_TIME`
-if [[ $stage2a_success && "$RUNDEBUG" == "1" ]] ; then
+if [[ $stage2a_success && $stage2b_success && "$RUNDEBUG" == "1" ]] ; then
    run_verification_cases_debug
    check_verification_cases_debug
 fi
