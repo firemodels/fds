@@ -10,1419 +10,11 @@ CHARACTER(255), PARAMETER :: divgid='$Id$'
 CHARACTER(255), PARAMETER :: divgrev='$Revision$'
 CHARACTER(255), PARAMETER :: divgdate='$Date$'
 
-PUBLIC DIVERGENCE_PART_1,DIVERGENCE_PART_1_2,DIVERGENCE_PART_2,CHECK_DIVERGENCE,GET_REV_divg
+PUBLIC DIVERGENCE_PART_1,DIVERGENCE_PART_2,CHECK_DIVERGENCE,GET_REV_divg
  
 CONTAINS
  
 SUBROUTINE DIVERGENCE_PART_1(T,NM)
-
-USE COMP_FUNCTIONS, ONLY: SECOND 
-USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP,INTERPOLATE1D_UNIFORM
-USE PHYSICAL_FUNCTIONS, ONLY: GET_CONDUCTIVITY,GET_SPECIFIC_HEAT,GET_SENSIBLE_ENTHALPY_DIFF,GET_SENSIBLE_ENTHALPY,&
-                              GET_VISCOSITY
-USE TURBULENCE, ONLY: TENSOR_DIFFUSIVITY_MODEL,WANNIER_FLOW
-USE MASS, ONLY: SCALAR_FACE_VALUE
-USE GEOMETRY_FUNCTIONS, ONLY: ASSIGN_PRESSURE_ZONE
-USE MANUFACTURED_SOLUTIONS, ONLY: DIFF_MMS,UF_MMS,WF_MMS,VD2D_MMS_Z_SRC,RHO_0_MMS,RHO_1_MMS
-
-! Compute contributions to the divergence term
- 
-INTEGER, INTENT(IN) :: NM
-REAL(EB), INTENT(IN) :: T
-REAL(EB), POINTER, DIMENSION(:,:,:) :: KDTDX,KDTDY,KDTDZ,DP,KP,CP, &
-          RHO_D,RHOP,H_RHO_D_DZDX,H_RHO_D_DZDY,H_RHO_D_DZDZ,RTRM, &
-          U_DOT_DEL_RHO_H_S,RHO_H_S_P,UU,VV,WW,U_DOT_DEL_RHO,RHO_Z_P,U_DOT_DEL_RHO_Z,RHO_D_TURB,R_H_G
-REAL(EB), POINTER, DIMENSION(:,:,:,:) :: ZZP,RHO_D_DZDX,RHO_D_DZDY,RHO_D_DZDZ
-REAL(EB), POINTER, DIMENSION(:,:) :: PBAR_P
-REAL(EB) :: DELKDELT,VC,VC1,DTDX,DTDY,DTDZ,TNOW, &
-            HDIFF,DZDX,DZDY,DZDZ,RDT,RHO_D_DZDN,TSI,TIME_RAMP_FACTOR,ZONE_VOLUME,DELTA_P,PRES_RAMP_FACTOR,&
-            TMP_G,DIV_DIFF_HEAT_FLUX,H_S,ZZZ(1:4),DU,DU_P,DU_M,UN,RCON_DIFF,PROFILE_FACTOR, &
-            XHAT,ZHAT,TT,Q_Z,D_Z_TEMP,D_Z_N(0:5000),ZZ_GET_BACKGROUND(0)
-REAL(EB), ALLOCATABLE, DIMENSION(:) :: ZZ_GET
-TYPE(SURFACE_TYPE), POINTER :: SF
-TYPE(SPECIES_MIXTURE_TYPE), POINTER :: SM,SM0
-INTEGER :: IW,N,IOR,II,JJ,KK,IIG,JJG,KKG,I,J,K,IPZ,IOPZ
-TYPE(VENTS_TYPE), POINTER :: VT=>NULL()
-TYPE(WALL_TYPE), POINTER :: WC=>NULL()
- 
-! Check whether to skip this routine
-
-IF (SOLID_PHASE_ONLY) RETURN
-
-IF (EVACUATION_ONLY(NM)) THEN
-   CALL DIVERGENCE_PART_1_EVAC(T,NM)
-   RETURN
-ENDIF
-
-! Start the clock and set the pointers
-
-TNOW=SECOND()
-CALL POINT_TO_MESH(NM)
- 
-RDT = 1._EB/DT
- 
-SELECT CASE(PREDICTOR)
-   CASE(.TRUE.)  
-      DP => DS   
-      PBAR_P => PBAR_S      
-      RHOP => RHOS
-   CASE(.FALSE.) 
-      DP => DDDT 
-      PBAR_P => PBAR
-      RHOP => RHO
-END SELECT
-
-R_PBAR = 1._EB/PBAR_P
-
-RTRM => WORK1
-
-! Zero out divergence to start
-
-DP = 0._EB
-
-! Determine if pressure ZONEs have merged
-
-CONNECTED_ZONES(:,:,NM) = .FALSE.
-
-DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
-   WC=>WALL(IW)
-   IF (WC%BOUNDARY_TYPE/=NULL_BOUNDARY .AND. WC%BOUNDARY_TYPE/=OPEN_BOUNDARY .AND. &
-      WC%BOUNDARY_TYPE/=INTERPOLATED_BOUNDARY) CYCLE   
-   II  = WC%ONE_D%II
-   JJ  = WC%ONE_D%JJ
-   KK  = WC%ONE_D%KK
-   IIG = WC%ONE_D%IIG
-   JJG = WC%ONE_D%JJG
-   KKG = WC%ONE_D%KKG
-   IF (SOLID(CELL_INDEX(IIG,JJG,KKG))) CYCLE
-   IPZ  = PRESSURE_ZONE(IIG,JJG,KKG)
-   IOPZ = PRESSURE_ZONE(II,JJ,KK)
-   IF (IW>N_EXTERNAL_WALL_CELLS .AND. IPZ/=IOPZ) THEN
-      CONNECTED_ZONES(IOPZ,IPZ,NM) = .TRUE.
-      CONNECTED_ZONES(IPZ,IOPZ,NM) = .TRUE.
-   ENDIF
-   IF (WC%BOUNDARY_TYPE==OPEN_BOUNDARY) THEN
-      CONNECTED_ZONES(0,IPZ,NM) = .TRUE.
-      CONNECTED_ZONES(IPZ,0,NM) = .TRUE.
-   ELSEIF (WC%BOUNDARY_TYPE==INTERPOLATED_BOUNDARY) THEN
-      CONNECTED_ZONES(IOPZ,IPZ,NM) = .TRUE.
-      CONNECTED_ZONES(IPZ,IOPZ,NM) = .TRUE.
-   ENDIF
-ENDDO
-
-! Compute normal component of velocity at boundaries, UWS in the PREDICTOR step, UW in the CORRECTOR.
-
-PREDICT_NORMALS: IF (PREDICTOR) THEN
- 
-   WALL_LOOP3: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
-
-      WC => WALL(IW)
-      IOR = WC%ONE_D%IOR
-      
-      WALL_CELL_TYPE: SELECT CASE (WC%BOUNDARY_TYPE)
-
-         CASE (NULL_BOUNDARY)
-
-            WC%ONE_D%UWS = 0._EB
-
-         CASE (SOLID_BOUNDARY)
-
-            SF => SURFACE(WC%SURF_INDEX)
-
-            IF (SF%SPECIES_BC_INDEX==SPECIFIED_MASS_FLUX .OR. &
-                SF%SPECIES_BC_INDEX==INTERPOLATED_BC     .OR. &
-                WC%NODE_INDEX > 0                        .OR. &
-                ANY(SF%LEAK_PATH>0._EB))                      &
-                CYCLE WALL_LOOP3
-            
-            IF (ABS(WC%ONE_D%T_IGN-T_BEGIN) < SPACING(WC%ONE_D%T_IGN) .AND. SF%RAMP_INDEX(TIME_VELO)>=1) THEN
-               TSI = T + DT
-            ELSE
-               TSI = T + DT - WC%ONE_D%T_IGN
-               IF (TSI<0._EB) THEN
-                  WC%ONE_D%UWS = 0._EB
-                  CYCLE WALL_LOOP3
-               ENDIF
-            ENDIF
-            TIME_RAMP_FACTOR = EVALUATE_RAMP(TSI,SF%TAU(TIME_VELO),SF%RAMP_INDEX(TIME_VELO))
-            KK               = WC%ONE_D%KK
-            DELTA_P          = PBAR_P(KK,SF%DUCT_PATH(1)) - PBAR_P(KK,SF%DUCT_PATH(2))
-            PRES_RAMP_FACTOR = SIGN(1._EB,SF%MAX_PRESSURE-DELTA_P)*SQRT(ABS((DELTA_P-SF%MAX_PRESSURE)/SF%MAX_PRESSURE))
-            SELECT CASE(IOR) 
-               CASE( 1)
-                  WC%ONE_D%UWS =-U0 + TIME_RAMP_FACTOR*(WC%UW0+U0)
-               CASE(-1)
-                  WC%ONE_D%UWS = U0 + TIME_RAMP_FACTOR*(WC%UW0-U0)
-               CASE( 2)
-                  WC%ONE_D%UWS =-V0 + TIME_RAMP_FACTOR*(WC%UW0+V0)
-               CASE(-2)
-                  WC%ONE_D%UWS = V0 + TIME_RAMP_FACTOR*(WC%UW0-V0)
-               CASE( 3)
-                  WC%ONE_D%UWS =-W0 + TIME_RAMP_FACTOR*(WC%UW0+W0)
-               CASE(-3)
-                  WC%ONE_D%UWS = W0 + TIME_RAMP_FACTOR*(WC%UW0-W0)
-            END SELECT
-            ! Special Cases
-            NEUMANN_IF: IF (SF%SPECIFIED_NORMAL_GRADIENT) THEN
-               IIG = WC%ONE_D%IIG
-               JJG = WC%ONE_D%JJG
-               KKG = WC%ONE_D%KKG
-               SELECT CASE(IOR) 
-                  CASE( 1)
-                     WC%ONE_D%UWS =-(U(IIG,JJG,KKG)   + SF%VEL_GRAD*WC%RDN)
-                  CASE(-1)
-                     WC%ONE_D%UWS = (U(IIG-1,JJG,KKG) + SF%VEL_GRAD*WC%RDN)
-                  CASE( 2)
-                     WC%ONE_D%UWS =-(V(IIG,JJG,KKG)   + SF%VEL_GRAD*WC%RDN)
-                  CASE(-2)
-                     WC%ONE_D%UWS = (V(IIG,JJG-1,KKG) + SF%VEL_GRAD*WC%RDN)
-                  CASE( 3)
-                     WC%ONE_D%UWS =-(W(IIG,JJG,KKG)   + SF%VEL_GRAD*WC%RDN)
-                  CASE(-3)
-                     WC%ONE_D%UWS = (W(IIG,JJG,KKG-1) + SF%VEL_GRAD*WC%RDN)
-               END SELECT
-            ENDIF NEUMANN_IF
-            IF (ABS(SURFACE(WC%SURF_INDEX)%MASS_FLUX_TOTAL)>=TWO_EPSILON_EB) WC%ONE_D%UWS = WC%ONE_D%UWS*RHOA/WC%RHO_F
-            VENT_IF: IF (WC%VENT_INDEX>0) THEN 
-               VT=>VENTS(WC%VENT_INDEX)
-               IF (VT%N_EDDY>0) THEN ! Synthetic Eddy Method
-                  II = WC%ONE_D%II
-                  JJ = WC%ONE_D%JJ
-                  KK = WC%ONE_D%KK
-                  IF (SF%PROFILE/=0 .AND. ABS(SF%VEL)>TWO_EPSILON_EB) THEN
-                     PROFILE_FACTOR = ABS(WC%UW0/SF%VEL)
-                  ELSE
-                     PROFILE_FACTOR = 1._EB
-                  ENDIF
-                  SELECT CASE(IOR)
-                     CASE( 1)
-                        WC%ONE_D%UWS = WC%ONE_D%UWS - TIME_RAMP_FACTOR*VT%U_EDDY(JJ,KK)*PROFILE_FACTOR
-                     CASE(-1)
-                        WC%ONE_D%UWS = WC%ONE_D%UWS + TIME_RAMP_FACTOR*VT%U_EDDY(JJ,KK)*PROFILE_FACTOR
-                     CASE( 2)
-                        WC%ONE_D%UWS = WC%ONE_D%UWS - TIME_RAMP_FACTOR*VT%V_EDDY(II,KK)*PROFILE_FACTOR
-                     CASE(-2)
-                        WC%ONE_D%UWS = WC%ONE_D%UWS + TIME_RAMP_FACTOR*VT%V_EDDY(II,KK)*PROFILE_FACTOR
-                     CASE( 3)
-                        WC%ONE_D%UWS = WC%ONE_D%UWS - TIME_RAMP_FACTOR*VT%W_EDDY(II,JJ)*PROFILE_FACTOR
-                     CASE(-3)
-                        WC%ONE_D%UWS = WC%ONE_D%UWS + TIME_RAMP_FACTOR*VT%W_EDDY(II,JJ)*PROFILE_FACTOR
-                  END SELECT
-               ENDIF
-               WANNIER_BC: IF (PERIODIC_TEST==5) THEN
-                  II = WC%ONE_D%II
-                  JJ = WC%ONE_D%JJ
-                  KK = WC%ONE_D%KK
-                  SELECT CASE(IOR)
-                     CASE( 1)
-                        WC%ONE_D%UWS = -WANNIER_FLOW(X(II),ZC(KK),1)
-                     CASE(-1)
-                        WC%ONE_D%UWS =  WANNIER_FLOW(X(II-1),ZC(KK),1)
-                     CASE( 3)
-                        WC%ONE_D%UWS = -WANNIER_FLOW(XC(II),Z(KK),2)
-                     CASE(-3)
-                        WC%ONE_D%UWS =  WANNIER_FLOW(XC(II),Z(KK-1),2)
-                  END SELECT
-               ENDIF WANNIER_BC
-            ENDIF VENT_IF
-
-         CASE(OPEN_BOUNDARY,INTERPOLATED_BOUNDARY)
-
-            II = WC%ONE_D%II
-            JJ = WC%ONE_D%JJ
-            KK = WC%ONE_D%KK
-            SELECT CASE(IOR)
-               CASE( 1)
-                  WC%ONE_D%UWS = -U(II,JJ,KK)
-               CASE(-1)
-                  WC%ONE_D%UWS =  U(II-1,JJ,KK)
-               CASE( 2)
-                  WC%ONE_D%UWS = -V(II,JJ,KK)
-               CASE(-2)
-                  WC%ONE_D%UWS =  V(II,JJ-1,KK)
-               CASE( 3)
-                  WC%ONE_D%UWS = -W(II,JJ,KK)
-               CASE(-3)
-                  WC%ONE_D%UWS =  W(II,JJ,KK-1)
-            END SELECT
-
-      END SELECT WALL_CELL_TYPE
-
-   ENDDO WALL_LOOP3
-
-   ! Calculate du/dt, dv/dt, dw/dt at external boundaries. DUWDT is only used for Neumann BCs.
-
-   !$OMP PARALLEL DO SCHEDULE(STATIC)
-   DO IW=1,N_EXTERNAL_WALL_CELLS
-      WALL(IW)%DUWDT = RDT*(WALL(IW)%ONE_D%UWS-WALL(IW)%ONE_D%UW)
-   ENDDO
-   !$OMP END PARALLEL DO
-   
-ELSE PREDICT_NORMALS
-
-   ! In the CORRECTOR step, the normal component of velocity, UW, is the same as the predicted value, UWS. However, for species
-   ! mass fluxes and HVAC, UW is computed elsewhere (wall.f90).
-   
-   DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
-      WC => WALL(IW)
-      IF (WC%BOUNDARY_TYPE==SOLID_BOUNDARY) THEN
-            SF => SURFACE(WC%SURF_INDEX)
-            IF (SF%SPECIES_BC_INDEX==SPECIFIED_MASS_FLUX .OR. &
-                SF%SPECIES_BC_INDEX==INTERPOLATED_BC     .OR. &
-                WC%NODE_INDEX > 0                        .OR. &
-                ANY(SF%LEAK_PATH>0._EB)) CYCLE
-      ENDIF
-      WC%ONE_D%UW = WC%ONE_D%UWS
-   ENDDO
-
-   ! Calculate du/dt, dv/dt, dw/dt at external boundaries. DUWDT is only used for Neumann BCs. Note the second-order RK formula.
-
-   !$OMP PARALLEL DO SCHEDULE(STATIC)
-   DO IW=1,N_EXTERNAL_WALL_CELLS
-      WALL(IW)%DUWDT = WALL(IW)%DUWDT + 2._EB*RDT*(WALL(IW)%ONE_D%UW-WALL(IW)%ONE_D%UWS)
-   ENDDO
-   !$OMP END PARALLEL DO
-
-ENDIF PREDICT_NORMALS
-
-! Compute species-related finite difference terms
-
-IF (N_TRACKED_SPECIES > 0) THEN
-   RHO_D_DZDX => FDX
-   RHO_D_DZDY => FDY
-   RHO_D_DZDZ => FDZ
-   SELECT CASE(PREDICTOR)
-      CASE(.TRUE.)  
-         ZZP => ZZS 
-      CASE(.FALSE.) 
-         ZZP => ZZ  
-   END SELECT
-ENDIF
-
-! Add species diffusion terms to divergence expression and compute diffusion term for species equations
-
-IF (N_TRACKED_SPECIES > 0) THEN
-   DEL_RHO_D_DEL_Z = 0._EB
-   RHO_D => WORK4
-   IF (LES) THEN
-      IF (.NOT.RESEARCH_MODE) THEN
-         RHO_D = MU*RSC
-      ELSE
-         RHO_D_TURB => WORK9
-         RHO_D_TURB = 0._EB
-         RHO_D_TURB = MAX(0._EB,MU-MU_DNS)*RSC
-      ENDIF
-   ENDIF
-   IF (CHECK_VN) D_Z_MAX = 0._EB
-ENDIF
-
-SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
-
-   IF (DNS .OR. RESEARCH_MODE) THEN
-      RHO_D = 0._EB
-      D_Z_N = D_Z(:,N)
-      DO K=1,KBAR
-         DO J=1,JBAR
-            DO I=1,IBAR
-               CALL INTERPOLATE1D_UNIFORM(LBOUND(D_Z_N,1),D_Z_N,TMP(I,J,K),D_Z_TEMP)
-               RHO_D(I,J,K) = RHOP(I,J,K)*D_Z_TEMP
-            ENDDO
-         ENDDO
-      ENDDO
-   ENDIF
-
-   IF (LES .AND. RESEARCH_MODE) RHO_D = RHO_D + RHO_D_TURB
-
-   ! Store max diffusivity for stability check
-
-   IF (CHECK_VN) D_Z_MAX = MAX(D_Z_MAX,RHO_D/RHOP)
-
-   ! Manufactured solution
-
-   IF (PERIODIC_TEST==7) RHO_D = DIFF_MMS
-
-   ! Compute rho*D del Z
-
-   !$OMP PARALLEL DO PRIVATE(DZDX, DZDY, DZDZ) SCHEDULE (STATIC)
-   DO K=0,KBAR
-      DO J=0,JBAR
-         DO I=0,IBAR
-            DZDX = (ZZP(I+1,J,K,N)-ZZP(I,J,K,N))*RDXN(I)
-            RHO_D_DZDX(I,J,K,N) = .5_EB*(RHO_D(I+1,J,K)+RHO_D(I,J,K))*DZDX
-            DZDY = (ZZP(I,J+1,K,N)-ZZP(I,J,K,N))*RDYN(J)
-            RHO_D_DZDY(I,J,K,N) = .5_EB*(RHO_D(I,J+1,K)+RHO_D(I,J,K))*DZDY
-            DZDZ = (ZZP(I,J,K+1,N)-ZZP(I,J,K,N))*RDZN(K)
-            RHO_D_DZDZ(I,J,K,N) = .5_EB*(RHO_D(I,J,K+1)+RHO_D(I,J,K))*DZDZ
-         ENDDO
-      ENDDO
-   ENDDO
-   !$OMP END PARALLEL DO
-
-   ! Tensor diffusivity model (experimental)
-
-   IF (TENSOR_DIFFUSIVITY .AND. LES) CALL TENSOR_DIFFUSIVITY_MODEL(NM,N)
-
-   ! Compute del dot h_n*rho*D del Z_n (part of del dot qdot")
-
-   H_RHO_D_DZDX => WORK5
-   H_RHO_D_DZDY => WORK6
-   H_RHO_D_DZDZ => WORK7
-
-   !$OMP PARALLEL DO PRIVATE(TMP_G, HDIFF) SCHEDULE(guided)
-   DO K=0,KBAR
-      DO J=0,JBAR
-         DO I=0,IBAR
-            ! H_RHO_D_DZDX
-            TMP_G = 0.5_EB*(TMP(I+1,J,K)+TMP(I,J,K))
-            CALL GET_SENSIBLE_ENTHALPY_DIFF(N,TMP_G,HDIFF)
-            H_RHO_D_DZDX(I,J,K) = HDIFF*RHO_D_DZDX(I,J,K,N)
-
-            ! H_RHO_D_DZDY
-            TMP_G = 0.5_EB*(TMP(I,J+1,K)+TMP(I,J,K))
-            CALL GET_SENSIBLE_ENTHALPY_DIFF(N,TMP_G,HDIFF)
-            H_RHO_D_DZDY(I,J,K) = HDIFF*RHO_D_DZDY(I,J,K,N)
-
-            ! H_RHO_D_DZDZ
-            TMP_G = 0.5_EB*(TMP(I,J,K+1)+TMP(I,J,K))               
-            CALL GET_SENSIBLE_ENTHALPY_DIFF(N,TMP_G,HDIFF)
-            H_RHO_D_DZDZ(I,J,K) = HDIFF*RHO_D_DZDZ(I,J,K,N)
-         ENDDO
-      ENDDO
-   ENDDO
-   !$OMP END PARALLEL DO
-
-   ! Correct rho*D del Z and del dot h_n*rho*D del Z_n at boundaries and store rho*D at boundaries
-
-   !$OMP PARALLEL DO SCHEDULE(GUIDED) &
-   !$OMP& PRIVATE(WC, IIG, JJG, KKG, IOR, RHO_D, HDIFF, RHO_D_DZDN)
-   WALL_LOOP2: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
-      WC => WALL(IW)
-      IF (WC%BOUNDARY_TYPE==NULL_BOUNDARY .OR. &
-          WC%BOUNDARY_TYPE==OPEN_BOUNDARY .OR. WC%BOUNDARY_TYPE==INTERPOLATED_BOUNDARY) CYCLE WALL_LOOP2
-      IIG = WC%ONE_D%IIG
-      JJG = WC%ONE_D%JJG
-      KKG = WC%ONE_D%KKG
-      IOR = WC%ONE_D%IOR
-      CALL GET_SENSIBLE_ENTHALPY_DIFF(N,WC%ONE_D%TMP_F,HDIFF)
-      RHO_D_DZDN = 2._EB*WC%RHODW(N)*(ZZP(IIG,JJG,KKG,N)-WC%ZZ_F(N))*WC%RDN
-      SELECT CASE(IOR)
-         CASE( 1) 
-            !$OMP ATOMIC WRITE
-            RHO_D_DZDX(IIG-1,JJG,KKG,N)   =  RHO_D_DZDN
-            !$OMP ATOMIC WRITE
-            H_RHO_D_DZDX(IIG-1,JJG,KKG) =  HDIFF*RHO_D_DZDN
-         CASE(-1) 
-            !$OMP ATOMIC WRITE
-            RHO_D_DZDX(IIG,JJG,KKG,N)     = -RHO_D_DZDN
-            !$OMP ATOMIC WRITE
-            H_RHO_D_DZDX(IIG,JJG,KKG)   = -HDIFF*RHO_D_DZDN
-         CASE( 2) 
-            !$OMP ATOMIC WRITE
-            RHO_D_DZDY(IIG,JJG-1,KKG,N)   =  RHO_D_DZDN
-            !$OMP ATOMIC WRITE
-            H_RHO_D_DZDY(IIG,JJG-1,KKG) =  HDIFF*RHO_D_DZDN
-         CASE(-2) 
-            !$OMP ATOMIC WRITE
-            RHO_D_DZDY(IIG,JJG,KKG,N)     = -RHO_D_DZDN
-            !$OMP ATOMIC WRITE
-            H_RHO_D_DZDY(IIG,JJG,KKG)   = -HDIFF*RHO_D_DZDN
-         CASE( 3) 
-            !$OMP ATOMIC WRITE
-            RHO_D_DZDZ(IIG,JJG,KKG-1,N)   =  RHO_D_DZDN
-            !$OMP ATOMIC WRITE
-            H_RHO_D_DZDZ(IIG,JJG,KKG-1) =  HDIFF*RHO_D_DZDN
-         CASE(-3) 
-            !$OMP ATOMIC WRITE
-            RHO_D_DZDZ(IIG,JJG,KKG,N)     = -RHO_D_DZDN
-            !$OMP ATOMIC WRITE
-            H_RHO_D_DZDZ(IIG,JJG,KKG)   = -HDIFF*RHO_D_DZDN
-      END SELECT
-   ENDDO WALL_LOOP2
-   !$OMP END PARALLEL DO
-
-   CYLINDER: SELECT CASE(CYLINDRICAL)
-      CASE(.FALSE.) CYLINDER  ! 3D or 2D Cartesian Coords
-         !$OMP PARALLEL DO PRIVATE(DIV_DIFF_HEAT_FLUX) SCHEDULE(STATIC)
-         DO K=1,KBAR
-            DO J=1,JBAR
-               DO I=1,IBAR
-
-                  DIV_DIFF_HEAT_FLUX = (H_RHO_D_DZDX(I,J,K)-H_RHO_D_DZDX(I-1,J,K))*RDX(I) + &
-                                       (H_RHO_D_DZDY(I,J,K)-H_RHO_D_DZDY(I,J-1,K))*RDY(J) + &
-                                       (H_RHO_D_DZDZ(I,J,K)-H_RHO_D_DZDZ(I,J,K-1))*RDZ(K)
-
-                  DP(I,J,K) = DP(I,J,K) + DIV_DIFF_HEAT_FLUX
-
-               ENDDO
-            ENDDO
-         ENDDO
-         !$OMP END PARALLEL DO
-      CASE(.TRUE.) CYLINDER  ! 2D Cylindrical Coords
-         J = 1
-         DO K=1,KBAR
-            DO I=1,IBAR
-
-               DIV_DIFF_HEAT_FLUX = (R(I)*H_RHO_D_DZDX(I,J,K)-R(I-1)*H_RHO_D_DZDX(I-1,J,K))*RDX(I)*RRN(I) + &
-                                    (     H_RHO_D_DZDZ(I,J,K)-       H_RHO_D_DZDZ(I,J,K-1))*RDZ(K)
-
-               DP(I,J,K) = DP(I,J,K) + DIV_DIFF_HEAT_FLUX
-
-            ENDDO
-         ENDDO
-   END SELECT CYLINDER
-
-   ! Compute del dot rho*D del Z_n
-
-   CYLINDER2: SELECT CASE(CYLINDRICAL)
-      CASE(.FALSE.) CYLINDER2  ! 3D or 2D Cartesian Coords
-         !$OMP PARALLEL DO SCHEDULE(STATIC)
-         DO K=1,KBAR
-            DO J=1,JBAR
-               DO I=1,IBAR
-                  DEL_RHO_D_DEL_Z(I,J,K,N) = (RHO_D_DZDX(I,J,K,N)-RHO_D_DZDX(I-1,J,K,N))*RDX(I) + &
-                                             (RHO_D_DZDY(I,J,K,N)-RHO_D_DZDY(I,J-1,K,N))*RDY(J) + &
-                                             (RHO_D_DZDZ(I,J,K,N)-RHO_D_DZDZ(I,J,K-1,N))*RDZ(K)
-               ENDDO
-            ENDDO
-         ENDDO
-         !$OMP END PARALLEL DO
-      CASE(.TRUE.) CYLINDER2  ! 2D Cylindrical Coords
-         J=1
-         DO K=1,KBAR
-            DO I=1,IBAR
-               DEL_RHO_D_DEL_Z(I,J,K,N) = (R(I)*RHO_D_DZDX(I,J,K,N)-R(I-1)*RHO_D_DZDX(I-1,J,K,N))*RDX(I)*RRN(I) + &
-                                          (     RHO_D_DZDZ(I,J,K,N)-       RHO_D_DZDZ(I,J,K-1,N))*RDZ(K)
-            ENDDO
-         ENDDO
-   END SELECT CYLINDER2
-
-ENDDO SPECIES_LOOP
-
-! Get the specific heat
-
-CP => WORK5
-R_H_G=> WORK9
-
-IF (N_TRACKED_SPECIES>0) THEN
-   !$OMP PARALLEL PRIVATE(ZZ_GET, H_S)
-   ALLOCATE(ZZ_GET(0:N_TRACKED_SPECIES))
-   !$OMP DO SCHEDULE(static)
-   DO K=1,KBAR
-      DO J=1,JBAR
-         DO I=1,IBAR
-            IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-            ZZ_GET(1:N_TRACKED_SPECIES) = ZZP(I,J,K,1:N_TRACKED_SPECIES)
-            CALL GET_SPECIFIC_HEAT(ZZ_GET,CP(I,J,K),TMP(I,J,K))
-            R_H_G(I,J,K) = 1._EB/(CP(I,J,K)*TMP(I,J,K))
-         ENDDO
-      ENDDO
-   ENDDO
-   !$OMP END DO
-   DEALLOCATE(ZZ_GET)
-   !$OMP END PARALLEL
-ELSE
-   DO K=1,KBAR
-      DO J=1,JBAR
-         DO I=1,IBAR
-            IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-            CALL GET_SPECIFIC_HEAT(ZZ_GET_BACKGROUND,CP(I,J,K),TMP(I,J,K))
-            R_H_G(I,J,K) = 1._EB/(CP(I,J,K)*TMP(I,J,K))
-         ENDDO
-      ENDDO
-   ENDDO
-ENDIF
-
-! Compute del dot k del T
-
-KDTDX => WORK1
-KDTDY => WORK2
-KDTDZ => WORK3
-KP    => WORK4
-
-! Compute thermal conductivity k (KP)
-
-K_DNS_OR_LES: IF (DNS .OR. RESEARCH_MODE) THEN
-
-   ALLOCATE(ZZ_GET(0:N_TRACKED_SPECIES))
-   KP = 0._EB
-   DO K=1,KBAR
-      DO J=1,JBAR
-         DO I=1,IBAR
-            IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-            IF (N_TRACKED_SPECIES > 0) ZZ_GET(1:N_TRACKED_SPECIES) = ZZP(I,J,K,1:N_TRACKED_SPECIES)
-            CALL GET_CONDUCTIVITY(ZZ_GET,KP(I,J,K),TMP(I,J,K)) 
-         ENDDO
-      ENDDO
-   ENDDO
-   DEALLOCATE(ZZ_GET)
-
-   IF (RESEARCH_MODE) THEN
-      KP = KP + MAX(0._EB,(MU-MU_DNS))*CP*RPR
-   ENDIF
-
-   BOUNDARY_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS
-      WC=>WALL(IW)
-      II  = WC%ONE_D%II
-      JJ  = WC%ONE_D%JJ
-      KK  = WC%ONE_D%KK
-      IIG = WC%ONE_D%IIG
-      JJG = WC%ONE_D%JJG
-      KKG = WC%ONE_D%KKG
-      KP(II,JJ,KK) = KP(IIG,JJG,KKG)
-   ENDDO BOUNDARY_LOOP
-
-ELSE K_DNS_OR_LES
-
-   KP = MU*CPOPR
-
-ENDIF K_DNS_OR_LES
-
-! Compute k*dT/dx, etc
-
-!$OMP PARALLEL DO PRIVATE(DTDX, DTDY, DTDZ) SCHEDULE (STATIC)
-DO K=0,KBAR
-   DO J=0,JBAR
-      DO I=0,IBAR
-         DTDX = (TMP(I+1,J,K)-TMP(I,J,K))*RDXN(I)
-         KDTDX(I,J,K) = .5_EB*(KP(I+1,J,K)+KP(I,J,K))*DTDX
-         DTDY = (TMP(I,J+1,K)-TMP(I,J,K))*RDYN(J)
-         KDTDY(I,J,K) = .5_EB*(KP(I,J+1,K)+KP(I,J,K))*DTDY
-         DTDZ = (TMP(I,J,K+1)-TMP(I,J,K))*RDZN(K)
-         KDTDZ(I,J,K) = .5_EB*(KP(I,J,K+1)+KP(I,J,K))*DTDZ
-      ENDDO
-   ENDDO
-ENDDO
-!$OMP END PARALLEL DO
-
-! Correct thermal gradient (k dT/dn) at boundaries
-
-!$OMP PARALLEL DO SCHEDULE(GUIDED) &
-!$OMP& PRIVATE(WC, II, JJ, KK, IIG, JJG, KKG, IOR)
-CORRECTION_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
-   WC => WALL(IW)
-   IF (WC%BOUNDARY_TYPE==NULL_BOUNDARY .OR. WC%BOUNDARY_TYPE==INTERPOLATED_BOUNDARY) CYCLE CORRECTION_LOOP
-   II  = WC%ONE_D%II
-   JJ  = WC%ONE_D%JJ
-   KK  = WC%ONE_D%KK
-   IIG = WC%ONE_D%IIG
-   JJG = WC%ONE_D%JJG
-   KKG = WC%ONE_D%KKG
-   IF (WC%BOUNDARY_TYPE==OPEN_BOUNDARY) THEN
-      WC%KW = 0.5_EB*(KP(IIG,JJG,KKG)+KP(II,JJ,KK))
-      CYCLE CORRECTION_LOOP
-   ELSE
-      WC%KW = KP(IIG,JJG,KKG)
-   ENDIF
-   IOR = WC%ONE_D%IOR
-   SELECT CASE(IOR)
-      CASE( 1)
-         !$OMP ATOMIC WRITE
-         KDTDX(II,JJ,KK)   = 0._EB
-      CASE(-1)
-         !$OMP ATOMIC WRITE
-         KDTDX(II-1,JJ,KK) = 0._EB
-      CASE( 2)
-         !$OMP ATOMIC WRITE
-         KDTDY(II,JJ,KK)   = 0._EB
-      CASE(-2)
-         !$OMP ATOMIC WRITE
-         KDTDY(II,JJ-1,KK) = 0._EB
-      CASE( 3)
-         !$OMP ATOMIC WRITE
-         KDTDZ(II,JJ,KK)   = 0._EB
-      CASE(-3)
-         !$OMP ATOMIC WRITE
-         KDTDZ(II,JJ,KK-1) = 0._EB
-   END SELECT
-   !$OMP ATOMIC UPDATE
-   ! Q_LEAK accounts for enthalpy moving through leakage paths    
-   DP(IIG,JJG,KKG) = DP(IIG,JJG,KKG) - WC%ONE_D%QCONF*WC%RDN + WC%Q_LEAK
-ENDDO CORRECTION_LOOP
-!$OMP END PARALLEL DO
-
-! Compute (q + del dot k del T) and add to the divergence
-
-CYLINDER3: SELECT CASE(CYLINDRICAL)
-CASE(.FALSE.) CYLINDER3   ! 3D or 2D Cartesian
-   !$OMP PARALLEL DO PRIVATE(DELKDELT) SCHEDULE(STATIC)
-   DO K=1,KBAR
-      DO J=1,JBAR
-         DO I=1,IBAR
-            DELKDELT = (KDTDX(I,J,K)-KDTDX(I-1,J,K))*RDX(I) + &
-                       (KDTDY(I,J,K)-KDTDY(I,J-1,K))*RDY(J) + &
-                       (KDTDZ(I,J,K)-KDTDZ(I,J,K-1))*RDZ(K)
-            DP(I,J,K) = DP(I,J,K) + DELKDELT + Q(I,J,K) + QR(I,J,K)
-         ENDDO
-      ENDDO
-   ENDDO
-   !$OMP END PARALLEL DO
-CASE(.TRUE.) CYLINDER3   ! 2D Cylindrical
-   DO K=1,KBAR
-      DO J=1,JBAR
-         DO I=1,IBAR
-            DELKDELT = & 
-                 (R(I)*KDTDX(I,J,K)-R(I-1)*KDTDX(I-1,J,K))*RDX(I)*RRN(I) + &
-                 (KDTDZ(I,J,K)-            KDTDZ(I,J,K-1))*RDZ(K)
-            DP(I,J,K) = DP(I,J,K) + DELKDELT + Q(I,J,K) + QR(I,J,K)
-         ENDDO
-      ENDDO
-   ENDDO
-END SELECT CYLINDER3
-
-! Point to the appropriate velocity components
-
-IF (PREDICTOR) THEN
-   UU=>U
-   VV=>V
-   WW=>W
-ELSE
-   UU=>US
-   VV=>VS
-   WW=>WS
-ENDIF
-
-! Compute U_DOT_DEL_RHO_H_S and add to other enthalpy equation source terms
-
-CONST_GAMMA_IF_1: IF (.NOT.CONSTANT_SPECIFIC_HEAT_RATIO) THEN
-
-   CALL ENTHALPY_ADVECTION ! Compute u dot grad rho h_s
-
-   DO K=1,KBAR
-      DO J=1,JBAR
-         DO I=1,IBAR
-            IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-            DP(I,J,K) = DP(I,J,K) - U_DOT_DEL_RHO_H_S(I,J,K)
-         ENDDO
-      ENDDO
-   ENDDO
-
-ENDIF CONST_GAMMA_IF_1
-
-! Compute RTRM = 1/(rho*c_p*T) and multiply it by divergence terms already summed up
-
-!$OMP PARALLEL DO SCHEDULE(STATIC)
-DO K=1,KBAR
-   DO J=1,JBAR
-      DO I=1,IBAR
-         IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-         RTRM(I,J,K) = R_H_G(I,J,K)/RHOP(I,J,K)
-         DP(I,J,K) = RTRM(I,J,K)*DP(I,J,K)
-      ENDDO
-   ENDDO
-ENDDO
-!$OMP END PARALLEL DO
-
-! Compute (1/rho) * Sum( (Wbar/W_alpha-h_s,alpha/cp*T) (del dot rho*D del Z_n - u dot del rho*Z_n)
-
-CONST_GAMMA_IF_2: IF (.NOT.CONSTANT_SPECIFIC_HEAT_RATIO) THEN
-
-   CALL DENSITY_ADVECTION ! Compute u dot grad rho
-
-   SM0 => SPECIES_MIXTURE(0)
-   !$OMP PARALLEL PRIVATE(ZZ_GET, H_S)
-   ALLOCATE(ZZ_GET(0:N_TRACKED_SPECIES))
-   !$OMP DO SCHEDULE(static)
-   DO K=1,KBAR
-      DO J=1,JBAR
-         DO I=1,IBAR
-            IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-            ZZ_GET = 0._EB
-            CALL GET_SENSIBLE_ENTHALPY(ZZ_GET,H_S,TMP(I,J,K))
-            DP(I,J,K) = DP(I,J,K) - ( SM0%RCON/RSUM(I,J,K) - H_S*R_H_G(I,J,K) )*U_DOT_DEL_RHO(I,J,K)/RHOP(I,J,K)
-         ENDDO
-      ENDDO
-   ENDDO
-   !$OMP END DO
-   DEALLOCATE(ZZ_GET)
-   !$OMP END PARALLEL
-
-   DO N=1,N_TRACKED_SPECIES
-
-      CALL SPECIES_ADVECTION ! Compute u dot grad rho Z_n
-      
-      SM  => SPECIES_MIXTURE(N)
-      RCON_DIFF = SM%RCON-SM0%RCON
-      !$OMP PARALLEL DO PRIVATE(HDIFF) SCHEDULE(guided)
-      DO K=1,KBAR
-         DO J=1,JBAR
-            DO I=1,IBAR
-               IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-               CALL GET_SENSIBLE_ENTHALPY_DIFF(N,TMP(I,J,K),HDIFF)            
-               DP(I,J,K) = DP(I,J,K) + (RCON_DIFF/RSUM(I,J,K) - HDIFF*R_H_G(I,J,K))* &
-                    ( DEL_RHO_D_DEL_Z(I,J,K,N) - U_DOT_DEL_RHO_Z(I,J,K) )/RHOP(I,J,K)
-            ENDDO
-         ENDDO
-      ENDDO
-      !$OMP END PARALLEL DO
-   ENDDO
-
-ENDIF CONST_GAMMA_IF_2
-
-! Add contribution of reactions
-
-IF (N_REACTIONS > 0 .AND. .NOT.CONSTANT_SPECIFIC_HEAT_RATIO) THEN
-   DO K=1,KBAR
-      DO J=1,JBAR
-         DO I=1,IBAR
-            DP(I,J,K) = DP(I,J,K) + D_REACTION(I,J,K)
-         ENDDO
-      ENDDO
-   ENDDO
-ENDIF
-
-! Add contribution of evaporating particles
-
-IF (CALC_D_LAGRANGIAN) THEN
-   DO K=1,KBAR
-      DO J=1,JBAR
-         DO I=1,IBAR
-            DP(I,J,K) = DP(I,J,K) + D_LAGRANGIAN(I,J,K)
-         ENDDO
-      ENDDO
-   ENDDO
-ENDIF
-
-! Atmospheric stratification term
-
-IF (STRATIFICATION) THEN
-   DO K=1,KBAR
-      DO J=1,JBAR
-         DO I=1,IBAR
-            IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-            DP(I,J,K) = DP(I,J,K) + RTRM(I,J,K)*0.5_EB*(WW(I,J,K)+WW(I,J,K-1))*RHO_0(K)*GVEC(3)
-         ENDDO
-      ENDDO
-   ENDDO
-ENDIF
-
-! Manufactured solution
-
-MMS_IF: IF (PERIODIC_TEST==7) THEN
-   IF (PREDICTOR) TT=T+DT
-   IF (CORRECTOR) TT=T
-   DT_IF: IF (DENSITY_TRANSPORT) THEN
-      DO K=1,KBAR
-         DO J=1,JBAR
-            DO I=1,IBAR
-               ! divergence from EOS
-               XHAT = XC(I) - UF_MMS*TT
-               ZHAT = ZC(K) - WF_MMS*TT
-               Q_Z = VD2D_MMS_Z_SRC(XHAT,ZHAT,TT)
-               DP(I,J,K) = (1._EB/RHO_1_MMS - 1._EB/RHO_0_MMS) * ( DEL_RHO_D_DEL_Z(I,J,K,1) + Q_Z )
-            ENDDO
-         ENDDO
-      ENDDO
-   ELSE DT_IF
-      SM0 => SPECIES_MIXTURE(0)
-      DO K=1,KBAR
-         DO J=1,JBAR
-            DO I=1,IBAR
-               ! divergence from fire
-               XHAT = XC(I) - UF_MMS*TT
-               ZHAT = ZC(K) - WF_MMS*TT
-               DO N=1,N_TRACKED_SPECIES
-                  SM => SPECIES_MIXTURE(N)
-                  SELECT CASE(N)
-                     CASE(1); Q_Z =  VD2D_MMS_Z_SRC(XHAT,ZHAT,TT)
-                     CASE(2); Q_Z = -VD2D_MMS_Z_SRC(XHAT,ZHAT,TT)
-                  END SELECT
-                  CALL GET_SENSIBLE_ENTHALPY_DIFF(N,TMP(I,J,K),HDIFF)
-                  DP(I,J,K) = DP(I,J,K) + ( (SM%RCON-SM0%RCON)/RSUM(I,J,K) - HDIFF*R_H_G(I,J,K) )*Q_Z/RHOP(I,J,K)
-               ENDDO
-            ENDDO
-         ENDDO
-      ENDDO
-   ENDIF DT_IF
-ENDIF MMS_IF
-
-! Calculate pressure rise in each of the pressure zones by summing divergence expression over each zone
-
-PRESSURE_ZONE_LOOP: DO IPZ=1,N_ZONE
-
-   USUM(IPZ,NM) = 0._EB
-   DSUM(IPZ,NM) = 0._EB
-   PSUM(IPZ,NM) = 0._EB
-   ZONE_VOLUME  = 0._EB
-
-   DO K=1,KBAR
-      DO J=1,JBAR
-         VC1 = DY(J)*DZ(K)
-         DO I=1,IBAR
-            IF (PRESSURE_ZONE(I,J,K) /= IPZ) CYCLE
-            IF (SOLID(CELL_INDEX(I,J,K)))    CYCLE
-            VC = DX(I)*RC(I)*VC1
-            ZONE_VOLUME = ZONE_VOLUME + VC
-            DSUM(IPZ,NM) = DSUM(IPZ,NM) + VC*DP(I,J,K)
-            PSUM(IPZ,NM) = PSUM(IPZ,NM) + VC*(R_PBAR(K,IPZ)-RTRM(I,J,K))
-         ENDDO
-      ENDDO
-   ENDDO
-
-   ! Calculate the volume flux to the boundary of the pressure zone (int u dot dA)
-
-   WALL_LOOP4: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
-      IF (WALL(IW)%PRESSURE_ZONE/=IPZ) CYCLE WALL_LOOP4
-      IF (WALL(IW)%BOUNDARY_TYPE/=SOLID_BOUNDARY) CYCLE WALL_LOOP4
-      IF (PREDICTOR) USUM(IPZ,NM) = USUM(IPZ,NM) + WALL(IW)%ONE_D%UWS*WALL(IW)%AW
-      IF (CORRECTOR) USUM(IPZ,NM) = USUM(IPZ,NM) + WALL(IW)%ONE_D%UW*WALL(IW)%AW
-   ENDDO WALL_LOOP4
-   
-ENDDO PRESSURE_ZONE_LOOP
-
-TUSED(2,NM)=TUSED(2,NM)+SECOND()-TNOW
-
-CONTAINS
-
-
-SUBROUTINE ENTHALPY_ADVECTION
-
-REAL(EB), POINTER, DIMENSION(:,:,:) :: FX_H_S=>NULL(),FY_H_S=>NULL(),FZ_H_S=>NULL()
-
-RHO_H_S_P=>WORK1
-FX_H_S=>WORK2
-FY_H_S=>WORK3
-FZ_H_S=>WORK4
-U_DOT_DEL_RHO_H_S=>WORK6
-U_DOT_DEL_RHO_H_S=0._EB
-
-IF (.NOT.ENTHALPY_TRANSPORT) RETURN
-
-! Compute and store rho*h_s
-
-IF (N_TRACKED_SPECIES > 0) THEN
-   !$OMP PARALLEL PRIVATE(ZZ_GET, H_S)
-   ALLOCATE(ZZ_GET(0:N_TRACKED_SPECIES))
-   !$OMP DO SCHEDULE(static)
-   DO K=0,KBP1
-      DO J=0,JBP1
-         DO I=0,IBP1
-            ZZ_GET(1:N_TRACKED_SPECIES) = ZZP(I,J,K,1:N_TRACKED_SPECIES)
-            CALL GET_SENSIBLE_ENTHALPY(ZZ_GET,H_S,TMP(I,J,K))
-            RHO_H_S_P(I,J,K) = RHOP(I,J,K)*H_S
-         ENDDO
-      ENDDO
-   ENDDO
-   !$OMP END DO
-   DEALLOCATE(ZZ_GET)
-   !$OMP END PARALLEL
-ELSE
-   DO K=0,KBP1
-      DO J=0,JBP1
-         DO I=0,IBP1
-            CALL GET_SENSIBLE_ENTHALPY(ZZ_GET_BACKGROUND,H_S,TMP(I,J,K))
-            RHO_H_S_P(I,J,K) = RHOP(I,J,K)*H_S
-         ENDDO
-      ENDDO
-   ENDDO
-ENDIF
-
-! Compute scalar face values
-
-!$OMP PARALLEL PRIVATE(ZZZ)
-!$OMP DO SCHEDULE(STATIC)
-DO K=1,KBAR
-   DO J=1,JBAR
-      DO I=1,IBM1
-         ZZZ(1:4) = RHO_H_S_P(I-1:I+2,J,K)
-         FX_H_S(I,J,K) = SCALAR_FACE_VALUE(UU(I,J,K),ZZZ,FLUX_LIMITER)
-      ENDDO
-   ENDDO
-ENDDO
-!$OMP END DO NOWAIT
-
-!$OMP DO SCHEDULE(STATIC)
-DO K=1,KBAR
-   DO J=1,JBM1
-      DO I=1,IBAR
-         ZZZ(1:4) = RHO_H_S_P(I,J-1:J+2,K)
-         FY_H_S(I,J,K) = SCALAR_FACE_VALUE(VV(I,J,K),ZZZ,FLUX_LIMITER)
-      ENDDO
-   ENDDO
-ENDDO
-!$OMP END DO NOWAIT
-
-!$OMP DO SCHEDULE(STATIC)
-DO K=1,KBM1 
-   DO J=1,JBAR
-      DO I=1,IBAR
-         ZZZ(1:4) = RHO_H_S_P(I,J,K-1:K+2)
-         FZ_H_S(I,J,K) = SCALAR_FACE_VALUE(WW(I,J,K),ZZZ,FLUX_LIMITER)
-      ENDDO
-   ENDDO
-ENDDO
-!$OMP END DO
-!$OMP END PARALLEL
-
-ALLOCATE(ZZ_GET(0:N_TRACKED_SPECIES))
-
-WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
-   WC=>WALL(IW)
-   IF (WC%BOUNDARY_TYPE==NULL_BOUNDARY) CYCLE WALL_LOOP
-
-   II  = WC%ONE_D%II 
-   JJ  = WC%ONE_D%JJ
-   KK  = WC%ONE_D%KK
-   IIG = WC%ONE_D%IIG 
-   JJG = WC%ONE_D%JJG
-   KKG = WC%ONE_D%KKG
-   IOR = WC%ONE_D%IOR
-   IF (N_TRACKED_SPECIES>0) ZZ_GET(1:N_TRACKED_SPECIES) = WC%ZZ_F(1:N_TRACKED_SPECIES)
-   CALL GET_SENSIBLE_ENTHALPY(ZZ_GET,H_S,WC%ONE_D%TMP_F)
-
-   ! overwrite first off-wall advective flux if flow is away from the wall and if the face is not also a wall cell
-
-   IF (WC%BOUNDARY_TYPE/=INTERPOLATED_BOUNDARY .AND. WC%BOUNDARY_TYPE/=OPEN_BOUNDARY) THEN
-
-      OFF_WALL_SELECT_1: SELECT CASE(IOR)
-         CASE( 1) OFF_WALL_SELECT_1
-            !      ghost          FX/UU(II+1)
-            ! ///   II   ///  II+1  |  II+2  | ...
-            !                       ^ WALL_INDEX(II+1,+1)
-            IF ((UU(II+1,JJ,KK)>0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II+1,JJ,KK),+1)>0)) THEN
-               ZZZ(1:3) = (/WC%RHO_F*H_S,RHO_H_S_P(II+1:II+2,JJ,KK)/)
-               FX_H_S(II+1,JJ,KK) = SCALAR_FACE_VALUE(UU(II+1,JJ,KK),ZZZ,FLUX_LIMITER)
-            ENDIF
-         CASE(-1) OFF_WALL_SELECT_1
-            !            FX/UU(II-2)     ghost
-            ! ... |  II-2  |  II-1  ///   II   ///
-            !              ^ WALL_INDEX(II-1,-1)
-            IF ((UU(II-2,JJ,KK)<0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II-1,JJ,KK),-1)>0)) THEN
-               ZZZ(2:4) = (/RHO_H_S_P(II-2:II-1,JJ,KK),WC%RHO_F*H_S/)
-               FX_H_S(II-2,JJ,KK) = SCALAR_FACE_VALUE(UU(II-2,JJ,KK),ZZZ,FLUX_LIMITER)
-            ENDIF
-         CASE( 2) OFF_WALL_SELECT_1
-            IF ((VV(II,JJ+1,KK)>0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II,JJ+1,KK),+2)>0)) THEN
-               ZZZ(1:3) = (/WC%RHO_F*H_S,RHO_H_S_P(II,JJ+1:JJ+2,KK)/)
-               FY_H_S(II,JJ+1,KK) = SCALAR_FACE_VALUE(VV(II,JJ+1,KK),ZZZ,FLUX_LIMITER)
-            ENDIF
-         CASE(-2) OFF_WALL_SELECT_1
-            IF ((VV(II,JJ-2,KK)<0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II,JJ-1,KK),-2)>0)) THEN
-               ZZZ(2:4) = (/RHO_H_S_P(II,JJ-2:JJ-1,KK),WC%RHO_F*H_S/)
-               FY_H_S(II,JJ-2,KK) = SCALAR_FACE_VALUE(VV(II,JJ-2,KK),ZZZ,FLUX_LIMITER)
-            ENDIF
-         CASE( 3) OFF_WALL_SELECT_1
-            IF ((WW(II,JJ,KK+1)>0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II,JJ,KK+1),+3)>0)) THEN
-               ZZZ(1:3) = (/WC%RHO_F*H_S,RHO_H_S_P(II,JJ,KK+1:KK+2)/)
-               FZ_H_S(II,JJ,KK+1) = SCALAR_FACE_VALUE(WW(II,JJ,KK+1),ZZZ,FLUX_LIMITER)
-            ENDIF
-         CASE(-3) OFF_WALL_SELECT_1
-            IF ((WW(II,JJ,KK-2)<0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II,JJ,KK-1),-3)>0)) THEN
-               ZZZ(2:4) = (/RHO_H_S_P(II,JJ,KK-2:KK-1),WC%RHO_F*H_S/)
-               FZ_H_S(II,JJ,KK-2) = SCALAR_FACE_VALUE(WW(II,JJ,KK-2),ZZZ,FLUX_LIMITER)
-            ENDIF
-      END SELECT OFF_WALL_SELECT_1
-   
-   ENDIF
-
-   SELECT CASE(IOR)
-      CASE( 1)
-         FX_H_S(II,JJ,KK)   = RHO_H_S_P(IIG,JJG,KKG) ! zero out DU at wall
-      CASE(-1)
-         FX_H_S(II-1,JJ,KK) = RHO_H_S_P(IIG,JJG,KKG)
-      CASE( 2)
-         FY_H_S(II,JJ,KK)   = RHO_H_S_P(IIG,JJG,KKG)
-      CASE(-2)
-         FY_H_S(II,JJ-1,KK) = RHO_H_S_P(IIG,JJG,KKG)
-      CASE( 3)
-         FZ_H_S(II,JJ,KK)   = RHO_H_S_P(IIG,JJG,KKG)
-      CASE(-3)
-         FZ_H_S(II,JJ,KK-1) = RHO_H_S_P(IIG,JJG,KKG)
-   END SELECT
-
-   BOUNDARY_SELECT: SELECT CASE(WC%BOUNDARY_TYPE)
-      CASE DEFAULT
-         IOR_SELECT: SELECT CASE(IOR)
-            CASE( 1); UN = UU(II,JJ,KK)
-            CASE(-1); UN = UU(II-1,JJ,KK)
-            CASE( 2); UN = VV(II,JJ,KK)
-            CASE(-2); UN = VV(II,JJ-1,KK)
-            CASE( 3); UN = WW(II,JJ,KK)
-            CASE(-3); UN = WW(II,JJ,KK-1)
-         END SELECT IOR_SELECT
-      CASE(SOLID_BOUNDARY)
-         IF (PREDICTOR) UN = -SIGN(1._EB,REAL(IOR,EB))*WC%ONE_D%UWS
-         IF (CORRECTOR) UN = -SIGN(1._EB,REAL(IOR,EB))*WC%ONE_D%UW
-      CASE(INTERPOLATED_BOUNDARY)
-         UN = UVW_SAVE(IW)
-   END SELECT BOUNDARY_SELECT
-
-   DU = (WC%RHO_F*H_S - RHO_H_S_P(IIG,JJG,KKG))*UN
-   U_DOT_DEL_RHO_H_S(IIG,JJG,KKG) = U_DOT_DEL_RHO_H_S(IIG,JJG,KKG) - SIGN(1._EB,REAL(IOR,EB))*DU*WC%RDN
-
-ENDDO WALL_LOOP
-
-DEALLOCATE(ZZ_GET)
-
-DO K=1,KBAR
-   DO J=1,JBAR
-      DO I=1,IBAR
-         IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-
-         DU_P = (FX_H_S(I,J,K)   - RHO_H_S_P(I,J,K))*UU(I,J,K)                    ! FDS Tech Guide (B.13)
-         DU_M = (FX_H_S(I-1,J,K) - RHO_H_S_P(I,J,K))*UU(I-1,J,K)                  ! FDS Tech Guide (B.14)
-         U_DOT_DEL_RHO_H_S(I,J,K) = U_DOT_DEL_RHO_H_S(I,J,K) + (DU_P-DU_M)*RDX(I) ! FDS Tech Guide (B.12)
-
-         DU_P = (FY_H_S(I,J,K)   - RHO_H_S_P(I,J,K))*VV(I,J,K)
-         DU_M = (FY_H_S(I,J-1,K) - RHO_H_S_P(I,J,K))*VV(I,J-1,K)
-         U_DOT_DEL_RHO_H_S(I,J,K) = U_DOT_DEL_RHO_H_S(I,J,K) + (DU_P-DU_M)*RDY(J)
-
-         DU_P = (FZ_H_S(I,J,K)   - RHO_H_S_P(I,J,K))*WW(I,J,K)
-         DU_M = (FZ_H_S(I,J,K-1) - RHO_H_S_P(I,J,K))*WW(I,J,K-1)
-         U_DOT_DEL_RHO_H_S(I,J,K) = U_DOT_DEL_RHO_H_S(I,J,K) + (DU_P-DU_M)*RDZ(K)
-
-      ENDDO
-   ENDDO 
-ENDDO
-
-END SUBROUTINE ENTHALPY_ADVECTION
-
-
-SUBROUTINE DENSITY_ADVECTION
-
-U_DOT_DEL_RHO=>WORK8 
-U_DOT_DEL_RHO=0._EB
-
-IF (.NOT.ENTHALPY_TRANSPORT) RETURN
-
-! Compute scalar face values
-
-!$OMP PARALLEL PRIVATE(ZZZ)
-!$OMP DO SCHEDULE(STATIC)
-DO K=1,KBAR
-   DO J=1,JBAR
-      DO I=1,IBM1
-         ZZZ(1:4) = RHOP(I-1:I+2,J,K)
-         FX(I,J,K,0) = SCALAR_FACE_VALUE(UU(I,J,K),ZZZ,FLUX_LIMITER)
-      ENDDO
-   ENDDO
-ENDDO
-!$OMP END DO NOWAIT
-
-!$OMP DO SCHEDULE(STATIC)
-DO K=1,KBAR
-   DO J=1,JBM1
-      DO I=1,IBAR
-         ZZZ(1:4) = RHOP(I,J-1:J+2,K)
-         FY(I,J,K,0) = SCALAR_FACE_VALUE(VV(I,J,K),ZZZ,FLUX_LIMITER)
-      ENDDO
-   ENDDO
-ENDDO
-!$OMP END DO NOWAIT
-
-!$OMP DO SCHEDULE(STATIC)
-DO K=1,KBM1
-   DO J=1,JBAR
-      DO I=1,IBAR
-         ZZZ(1:4) = RHOP(I,J,K-1:K+2)
-         FZ(I,J,K,0) = SCALAR_FACE_VALUE(WW(I,J,K),ZZZ,FLUX_LIMITER)
-      ENDDO
-   ENDDO
-ENDDO
-!$OMP END DO
-!$OMP END PARALLEL
-
-WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
-   WC=>WALL(IW)
-   IF (WC%BOUNDARY_TYPE==NULL_BOUNDARY) CYCLE WALL_LOOP
-       
-   II  = WC%ONE_D%II 
-   JJ  = WC%ONE_D%JJ
-   KK  = WC%ONE_D%KK
-   IIG = WC%ONE_D%IIG 
-   JJG = WC%ONE_D%JJG
-   KKG = WC%ONE_D%KKG
-   IOR = WC%ONE_D%IOR
-
-   ! Overwrite first off-wall advective flux if flow is away from the wall and if the face is not also a wall cell
-
-   OFF_WALL_IF: IF (WC%BOUNDARY_TYPE/=INTERPOLATED_BOUNDARY .AND. WC%BOUNDARY_TYPE/=OPEN_BOUNDARY) THEN
-
-      OFF_WALL_SELECT: SELECT CASE(IOR)
-         CASE( 1) OFF_WALL_SELECT
-            !      ghost          FX/UU(II+1)
-            ! ///   II   ///  II+1  |  II+2  | ...
-            !                       ^ WALL_INDEX(II+1,+1)
-            IF ((UU(II+1,JJ,KK)>0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II+1,JJ,KK),+1)>0)) THEN
-               ZZZ(1:3) = (/WC%RHO_F,RHOP(II+1:II+2,JJ,KK)/)
-               FX(II+1,JJ,KK,0) = SCALAR_FACE_VALUE(UU(II+1,JJ,KK),ZZZ,FLUX_LIMITER)
-            ENDIF
-         CASE(-1) OFF_WALL_SELECT
-            !            FX/UU(II-2)     ghost
-            ! ... |  II-2  |  II-1  ///   II   ///
-            !              ^ WALL_INDEX(II-1,-1)
-            IF ((UU(II-2,JJ,KK)<0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II-1,JJ,KK),-1)>0)) THEN
-               ZZZ(2:4) = (/RHOP(II-2:II-1,JJ,KK),WC%RHO_F/)
-               FX(II-2,JJ,KK,0) = SCALAR_FACE_VALUE(UU(II-2,JJ,KK),ZZZ,FLUX_LIMITER)
-            ENDIF
-         CASE( 2) OFF_WALL_SELECT
-            IF ((VV(II,JJ+1,KK)>0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II,JJ+1,KK),+2)>0)) THEN
-               ZZZ(1:3) = (/WC%RHO_F,RHOP(II,JJ+1:JJ+2,KK)/)
-               FY(II,JJ+1,KK,0) = SCALAR_FACE_VALUE(VV(II,JJ+1,KK),ZZZ,FLUX_LIMITER)
-            ENDIF
-         CASE(-2) OFF_WALL_SELECT
-            IF ((VV(II,JJ-2,KK)<0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II,JJ-1,KK),-2)>0)) THEN
-               ZZZ(2:4) = (/RHOP(II,JJ-2:JJ-1,KK),WC%RHO_F/)
-               FY(II,JJ-2,KK,0) = SCALAR_FACE_VALUE(VV(II,JJ-2,KK),ZZZ,FLUX_LIMITER)
-            ENDIF
-         CASE( 3) OFF_WALL_SELECT
-            IF ((WW(II,JJ,KK+1)>0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II,JJ,KK+1),+3)>0)) THEN
-               ZZZ(1:3) = (/WC%RHO_F,RHOP(II,JJ,KK+1:KK+2)/)
-               FZ(II,JJ,KK+1,0) = SCALAR_FACE_VALUE(WW(II,JJ,KK+1),ZZZ,FLUX_LIMITER)
-            ENDIF
-         CASE(-3) OFF_WALL_SELECT
-            IF ((WW(II,JJ,KK-2)<0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II,JJ,KK-1),-3)>0)) THEN
-               ZZZ(2:4) = (/RHOP(II,JJ,KK-2:KK-1),WC%RHO_F/)
-               FZ(II,JJ,KK-2,0) = SCALAR_FACE_VALUE(WW(II,JJ,KK-2),ZZZ,FLUX_LIMITER)
-            ENDIF
-      END SELECT OFF_WALL_SELECT
-   
-   ENDIF OFF_WALL_IF
-
-   SELECT CASE(IOR)
-      CASE( 1)
-         FX(II,JJ,KK,0)   = RHOP(IIG,JJG,KKG) ! zero out DU at wall
-      CASE(-1)
-         FX(II-1,JJ,KK,0) = RHOP(IIG,JJG,KKG)
-      CASE( 2)
-         FY(II,JJ,KK,0)   = RHOP(IIG,JJG,KKG)
-      CASE(-2)
-         FY(II,JJ-1,KK,0) = RHOP(IIG,JJG,KKG)
-      CASE( 3)
-         FZ(II,JJ,KK,0)   = RHOP(IIG,JJG,KKG)
-      CASE(-3)
-         FZ(II,JJ,KK-1,0) = RHOP(IIG,JJG,KKG)
-   END SELECT
-
-   ! Correct U_DOT_DEL_RHO at the boundaries
-
-   BOUNDARY_SELECT: SELECT CASE(WC%BOUNDARY_TYPE)
-      CASE DEFAULT
-         IOR_SELECT: SELECT CASE(IOR)
-            CASE( 1); UN = UU(II,JJ,KK)
-            CASE(-1); UN = UU(II-1,JJ,KK)
-            CASE( 2); UN = VV(II,JJ,KK)
-            CASE(-2); UN = VV(II,JJ-1,KK)
-            CASE( 3); UN = WW(II,JJ,KK)
-            CASE(-3); UN = WW(II,JJ,KK-1)
-         END SELECT IOR_SELECT
-      CASE(SOLID_BOUNDARY)
-         IF (PREDICTOR) UN = -SIGN(1._EB,REAL(IOR,EB))*WC%ONE_D%UWS
-         IF (CORRECTOR) UN = -SIGN(1._EB,REAL(IOR,EB))*WC%ONE_D%UW
-      CASE(INTERPOLATED_BOUNDARY)
-         UN = UVW_SAVE(IW)
-   END SELECT BOUNDARY_SELECT
-
-   DU = (WC%RHO_F - RHOP(IIG,JJG,KKG))*UN
-   U_DOT_DEL_RHO(IIG,JJG,KKG) = U_DOT_DEL_RHO(IIG,JJG,KKG) - SIGN(1._EB,REAL(IOR,EB))*DU*WC%RDN
-
-ENDDO WALL_LOOP
-
-! Compute U_DOT_DEL_RHO at internal cells
-
-DO K=1,KBAR
-   DO J=1,JBAR
-      DO I=1,IBAR
-         IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-
-         DU_P = (FX(I,J,K,0)   - RHOP(I,J,K))*UU(I,J,K)
-         DU_M = (FX(I-1,J,K,0) - RHOP(I,J,K))*UU(I-1,J,K)
-         U_DOT_DEL_RHO(I,J,K) = U_DOT_DEL_RHO(I,J,K) + (DU_P-DU_M)*RDX(I)
-
-         DU_P = (FY(I,J,K,0)   - RHOP(I,J,K))*VV(I,J,K)
-         DU_M = (FY(I,J-1,K,0) - RHOP(I,J,K))*VV(I,J-1,K)
-         U_DOT_DEL_RHO(I,J,K) = U_DOT_DEL_RHO(I,J,K) + (DU_P-DU_M)*RDY(J)
-
-         DU_P = (FZ(I,J,K,0)   - RHOP(I,J,K))*WW(I,J,K)
-         DU_M = (FZ(I,J,K-1,0) - RHOP(I,J,K))*WW(I,J,K-1)
-         U_DOT_DEL_RHO(I,J,K) = U_DOT_DEL_RHO(I,J,K) + (DU_P-DU_M)*RDZ(K)
-
-      ENDDO
-   ENDDO 
-ENDDO
-
-END SUBROUTINE DENSITY_ADVECTION
-
-
-SUBROUTINE SPECIES_ADVECTION
-
-RHO_Z_P=>WORK6
-U_DOT_DEL_RHO_Z=>WORK7 
-U_DOT_DEL_RHO_Z=0._EB
-
-IF (.NOT.ENTHALPY_TRANSPORT) RETURN
-
-!$OMP PARALLEL PRIVATE(ZZZ)
-!$OMP DO SCHEDULE(static)
-DO K=0,KBP1
-   DO J=0,JBP1
-      DO I=0,IBP1
-         RHO_Z_P(I,J,K) = RHOP(I,J,K)*ZZP(I,J,K,N)
-      ENDDO
-   ENDDO
-ENDDO
-!$OMP END DO
-
-! Compute scalar face values
-
-!$OMP DO SCHEDULE(STATIC)
-DO K=1,KBAR
-   DO J=1,JBAR
-      DO I=1,IBM1
-         ZZZ(1:4) = RHO_Z_P(I-1:I+2,J,K)
-         FX(I,J,K,N) = SCALAR_FACE_VALUE(UU(I,J,K),ZZZ,FLUX_LIMITER)
-      ENDDO
-   ENDDO
-ENDDO
-!$OMP END DO NOWAIT
-
-!$OMP DO SCHEDULE(STATIC)
-DO K=1,KBAR
-   DO J=1,JBM1
-      DO I=1,IBAR
-         ZZZ(1:4) = RHO_Z_P(I,J-1:J+2,K)
-         FY(I,J,K,N) = SCALAR_FACE_VALUE(VV(I,J,K),ZZZ,FLUX_LIMITER)
-      ENDDO
-   ENDDO
-ENDDO
-!$OMP END DO NOWAIT
-
-!$OMP DO SCHEDULE(STATIC)
-DO K=1,KBM1
-   DO J=1,JBAR
-      DO I=1,IBAR
-         ZZZ(1:4) = RHO_Z_P(I,J,K-1:K+2)
-         FZ(I,J,K,N) = SCALAR_FACE_VALUE(WW(I,J,K),ZZZ,FLUX_LIMITER)
-      ENDDO
-   ENDDO
-ENDDO
-!$OMP END DO
-!$OMP END PARALLEL
-
-WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
-   WC=>WALL(IW)
-   IF (WC%BOUNDARY_TYPE==NULL_BOUNDARY) CYCLE WALL_LOOP
-
-   II  = WC%ONE_D%II 
-   JJ  = WC%ONE_D%JJ
-   KK  = WC%ONE_D%KK
-   IIG = WC%ONE_D%IIG 
-   JJG = WC%ONE_D%JJG
-   KKG = WC%ONE_D%KKG
-   IOR = WC%ONE_D%IOR
-
-   ! Overwrite first off-wall advective flux if flow is away from the wall and if the face is not also a wall cell
-
-   OFF_WALL_IF_2: IF (WC%BOUNDARY_TYPE/=INTERPOLATED_BOUNDARY .AND. WC%BOUNDARY_TYPE/=OPEN_BOUNDARY) THEN
-
-      OFF_WALL_SELECT_2: SELECT CASE(IOR)
-         CASE( 1) OFF_WALL_SELECT_2
-            !      ghost          FX/UU(II+1)
-            ! ///   II   ///  II+1  |  II+2  | ...
-            !                       ^ WALL_INDEX(II+1,+1)
-            IF ((UU(II+1,JJ,KK)>0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II+1,JJ,KK),+1)>0)) THEN
-               ZZZ(1:3) = (/WC%RHO_F*WC%ZZ_F(N),RHO_Z_P(II+1:II+2,JJ,KK)/)
-               FX(II+1,JJ,KK,N) = SCALAR_FACE_VALUE(UU(II+1,JJ,KK),ZZZ,FLUX_LIMITER)
-            ENDIF
-         CASE(-1) OFF_WALL_SELECT_2
-            !            FX/UU(II-2)     ghost
-            ! ... |  II-2  |  II-1  ///   II   ///
-            !              ^ WALL_INDEX(II-1,-1)
-            IF ((UU(II-2,JJ,KK)<0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II-1,JJ,KK),-1)>0)) THEN
-               ZZZ(2:4) = (/RHO_Z_P(II-2:II-1,JJ,KK),WC%RHO_F*WC%ZZ_F(N)/)
-               FX(II-2,JJ,KK,N) = SCALAR_FACE_VALUE(UU(II-2,JJ,KK),ZZZ,FLUX_LIMITER)
-            ENDIF
-         CASE( 2) OFF_WALL_SELECT_2
-            IF ((VV(II,JJ+1,KK)>0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II,JJ+1,KK),+2)>0)) THEN
-               ZZZ(1:3) = (/WC%RHO_F*WC%ZZ_F(N),RHO_Z_P(II,JJ+1:JJ+2,KK)/)
-               FY(II,JJ+1,KK,N) = SCALAR_FACE_VALUE(VV(II,JJ+1,KK),ZZZ,FLUX_LIMITER)
-            ENDIF
-         CASE(-2) OFF_WALL_SELECT_2
-            IF ((VV(II,JJ-2,KK)<0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II,JJ-1,KK),-2)>0)) THEN
-               ZZZ(2:4) = (/RHO_Z_P(II,JJ-2:JJ-1,KK),WC%RHO_F*WC%ZZ_F(N)/)
-               FY(II,JJ-2,KK,N) = SCALAR_FACE_VALUE(VV(II,JJ-2,KK),ZZZ,FLUX_LIMITER)
-            ENDIF
-         CASE( 3) OFF_WALL_SELECT_2
-            IF ((WW(II,JJ,KK+1)>0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II,JJ,KK+1),+3)>0)) THEN
-               ZZZ(1:3) = (/WC%RHO_F*WC%ZZ_F(N),RHO_Z_P(II,JJ,KK+1:KK+2)/)
-               FZ(II,JJ,KK+1,N) = SCALAR_FACE_VALUE(WW(II,JJ,KK+1),ZZZ,FLUX_LIMITER)
-            ENDIF
-         CASE(-3) OFF_WALL_SELECT_2
-            IF ((WW(II,JJ,KK-2)<0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II,JJ,KK-1),-3)>0)) THEN
-               ZZZ(2:4) = (/RHO_Z_P(II,JJ,KK-2:KK-1),WC%RHO_F*WC%ZZ_F(N)/)
-               FZ(II,JJ,KK-2,N) = SCALAR_FACE_VALUE(WW(II,JJ,KK-2),ZZZ,FLUX_LIMITER)
-            ENDIF
-      END SELECT OFF_WALL_SELECT_2
-   
-   ENDIF OFF_WALL_IF_2
-
-   SELECT CASE(IOR)
-      CASE( 1)
-         FX(II,JJ,KK,N)   = RHO_Z_P(IIG,JJG,KKG) ! zero out DU at wall
-      CASE(-1)
-         FX(II-1,JJ,KK,N) = RHO_Z_P(IIG,JJG,KKG)
-      CASE( 2)
-         FY(II,JJ,KK,N)   = RHO_Z_P(IIG,JJG,KKG)
-      CASE(-2)
-         FY(II,JJ-1,KK,N) = RHO_Z_P(IIG,JJG,KKG)
-      CASE( 3)
-         FZ(II,JJ,KK,N)   = RHO_Z_P(IIG,JJG,KKG)
-      CASE(-3)
-         FZ(II,JJ,KK-1,N) = RHO_Z_P(IIG,JJG,KKG)
-   END SELECT
-
-   ! Correct U_DOT_DEL_RHO_Z at the boundary
-
-   BOUNDARY_SELECT: SELECT CASE(WC%BOUNDARY_TYPE)
-      CASE DEFAULT
-         IOR_SELECT: SELECT CASE(IOR)
-            CASE( 1); UN = UU(II,JJ,KK)
-            CASE(-1); UN = UU(II-1,JJ,KK)
-            CASE( 2); UN = VV(II,JJ,KK)
-            CASE(-2); UN = VV(II,JJ-1,KK)
-            CASE( 3); UN = WW(II,JJ,KK)
-            CASE(-3); UN = WW(II,JJ,KK-1)
-         END SELECT IOR_SELECT
-      CASE(SOLID_BOUNDARY)
-         IF (PREDICTOR) UN = -SIGN(1._EB,REAL(IOR,EB))*WC%ONE_D%UWS
-         IF (CORRECTOR) UN = -SIGN(1._EB,REAL(IOR,EB))*WC%ONE_D%UW
-      CASE(INTERPOLATED_BOUNDARY)
-         UN = UVW_SAVE(IW)
-   END SELECT BOUNDARY_SELECT
-
-   DU = (WC%RHO_F*WC%ZZ_F(N) - RHO_Z_P(IIG,JJG,KKG))*UN
-   U_DOT_DEL_RHO_Z(IIG,JJG,KKG) = U_DOT_DEL_RHO_Z(IIG,JJG,KKG) - SIGN(1._EB,REAL(IOR,EB))*DU*WC%RDN
-      
-ENDDO WALL_LOOP
-
-!$OMP PARALLEL DO PRIVATE(DU_P, DU_M) SCHEDULE(static)
-DO K=1,KBAR
-   DO J=1,JBAR
-      DO I=1,IBAR
-         IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-
-         DU_P = (FX(I,J,K,N)   - RHO_Z_P(I,J,K))*UU(I,J,K)
-         DU_M = (FX(I-1,J,K,N) - RHO_Z_P(I,J,K))*UU(I-1,J,K)
-         U_DOT_DEL_RHO_Z(I,J,K) = U_DOT_DEL_RHO_Z(I,J,K) + (DU_P-DU_M)*RDX(I)
-
-         DU_P = (FY(I,J,K,N)   - RHO_Z_P(I,J,K))*VV(I,J,K)
-         DU_M = (FY(I,J-1,K,N) - RHO_Z_P(I,J,K))*VV(I,J-1,K)
-         U_DOT_DEL_RHO_Z(I,J,K) = U_DOT_DEL_RHO_Z(I,J,K) + (DU_P-DU_M)*RDY(J)
-
-         DU_P = (FZ(I,J,K,N)   - RHO_Z_P(I,J,K))*WW(I,J,K)
-         DU_M = (FZ(I,J,K-1,N) - RHO_Z_P(I,J,K))*WW(I,J,K-1)
-         U_DOT_DEL_RHO_Z(I,J,K) = U_DOT_DEL_RHO_Z(I,J,K) + (DU_P-DU_M)*RDZ(K)
-
-      ENDDO
-   ENDDO 
-ENDDO
-!$OMP END PARALLEL DO
-
-END SUBROUTINE SPECIES_ADVECTION
-
-END SUBROUTINE DIVERGENCE_PART_1
-
-
-SUBROUTINE DIVERGENCE_PART_1_2(T,NM)
 
 USE COMP_FUNCTIONS, ONLY: SECOND 
 USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP,INTERPOLATE1D_UNIFORM
@@ -1431,7 +23,7 @@ USE PHYSICAL_FUNCTIONS, ONLY: GET_CONDUCTIVITY,GET_SPECIFIC_HEAT,GET_SENSIBLE_EN
 USE TURBULENCE, ONLY: TENSOR_DIFFUSIVITY_MODEL,WANNIER_FLOW
 USE MASS, ONLY: SCALAR_FACE_VALUE
 USE GEOMETRY_FUNCTIONS, ONLY: ASSIGN_PRESSURE_ZONE
-USE MANUFACTURED_SOLUTIONS, ONLY: DIFF_MMS,UF_MMS,WF_MMS,VD2D_MMS_Z_SRC,RHO_0_MMS,RHO_1_MMS
+USE MANUFACTURED_SOLUTIONS, ONLY: DIFF_MMS,UF_MMS,WF_MMS,VD2D_MMS_Z_SRC
 
 ! Compute contributions to the divergence term
  
@@ -1445,7 +37,7 @@ REAL(EB), POINTER, DIMENSION(:,:) :: PBAR_P
 REAL(EB) :: DELKDELT,VC,VC1,DTDX,DTDY,DTDZ,TNOW, &
             DZDX,DZDY,DZDZ,RDT,RHO_D_DZDN,TSI,TIME_RAMP_FACTOR,ZONE_VOLUME,DELTA_P,PRES_RAMP_FACTOR,&
             TMP_G,DIV_DIFF_HEAT_FLUX,H_S,ZZZ(1:4),DU,DU_P,DU_M,UN,PROFILE_FACTOR, &
-            XHAT,ZHAT,TT,Q_Z,D_Z_TEMP,D_Z_N(0:5000),ZZ_GET_BACKGROUND(0)
+            XHAT,ZHAT,TT,Q_Z,D_Z_TEMP,D_Z_N(0:5000)
 REAL(EB), ALLOCATABLE, DIMENSION(:) :: ZZ_GET
 TYPE(SURFACE_TYPE), POINTER :: SF
 TYPE(SPECIES_MIXTURE_TYPE), POINTER :: SM
@@ -1695,21 +287,20 @@ ENDIF PREDICT_NORMALS
 
 ! Compute species-related finite difference terms
 
-IF (N_TRACKED_SPECIES > 0) THEN
-   RHO_D_DZDX => FDX
-   RHO_D_DZDY => FDY
-   RHO_D_DZDZ => FDZ
-   SELECT CASE(PREDICTOR)
-      CASE(.TRUE.)  
-         ZZP => ZZS 
-      CASE(.FALSE.) 
-         ZZP => ZZ  
-   END SELECT
-ENDIF
-
+RHO_D_DZDX => FDX
+RHO_D_DZDY => FDY
+RHO_D_DZDZ => FDZ
+SELECT CASE(PREDICTOR)
+   CASE(.TRUE.)  
+      ZZP => ZZS 
+   CASE(.FALSE.) 
+      ZZP => ZZ  
+END SELECT
+   
 ! Add species diffusion terms to divergence expression and compute diffusion term for species equations
 
-IF (N_TRACKED_SPECIES > 0) THEN
+SPECIES_GT_1_IF: IF (N_TRACKED_SPECIES>1) THEN   
+   
    DEL_RHO_D_DEL_Z = 0._EB
    RHO_D => WORK4
    IF (LES) THEN
@@ -1722,223 +313,212 @@ IF (N_TRACKED_SPECIES > 0) THEN
       ENDIF
    ENDIF
    IF (CHECK_VN) D_Z_MAX = 0._EB
-ENDIF
 
-SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
+   SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
 
-   IF (DNS .OR. RESEARCH_MODE) THEN
-      RHO_D = 0._EB
-      D_Z_N = D_Z(:,N)
-      DO K=1,KBAR
-         DO J=1,JBAR
-            DO I=1,IBAR
-               CALL INTERPOLATE1D_UNIFORM(LBOUND(D_Z_N,1),D_Z_N,TMP(I,J,K),D_Z_TEMP)
-               RHO_D(I,J,K) = RHOP(I,J,K)*D_Z_TEMP
-            ENDDO
-         ENDDO
-      ENDDO
-   ENDIF
-
-   IF (LES .AND. RESEARCH_MODE) RHO_D = RHO_D + RHO_D_TURB
-
-   ! Store max diffusivity for stability check
-
-   IF (CHECK_VN) D_Z_MAX = MAX(D_Z_MAX,RHO_D/RHOP)
-
-   ! Manufactured solution
-
-   IF (PERIODIC_TEST==7) RHO_D = DIFF_MMS
-
-   ! Compute rho*D del Z
-
-   !$OMP PARALLEL DO PRIVATE(DZDX, DZDY, DZDZ) SCHEDULE (STATIC)
-   DO K=0,KBAR
-      DO J=0,JBAR
-         DO I=0,IBAR
-            DZDX = (ZZP(I+1,J,K,N)-ZZP(I,J,K,N))*RDXN(I)
-            RHO_D_DZDX(I,J,K,N) = .5_EB*(RHO_D(I+1,J,K)+RHO_D(I,J,K))*DZDX
-            DZDY = (ZZP(I,J+1,K,N)-ZZP(I,J,K,N))*RDYN(J)
-            RHO_D_DZDY(I,J,K,N) = .5_EB*(RHO_D(I,J+1,K)+RHO_D(I,J,K))*DZDY
-            DZDZ = (ZZP(I,J,K+1,N)-ZZP(I,J,K,N))*RDZN(K)
-            RHO_D_DZDZ(I,J,K,N) = .5_EB*(RHO_D(I,J,K+1)+RHO_D(I,J,K))*DZDZ
-         ENDDO
-      ENDDO
-   ENDDO
-   !$OMP END PARALLEL DO
-
-   ! Tensor diffusivity model (experimental)
-
-   IF (TENSOR_DIFFUSIVITY .AND. LES) CALL TENSOR_DIFFUSIVITY_MODEL(NM,N)
-
-   ! Compute del dot h_n*rho*D del Z_n (part of del dot qdot")
-
-   H_RHO_D_DZDX => WORK5
-   H_RHO_D_DZDY => WORK6
-   H_RHO_D_DZDZ => WORK7
-
-   !$OMP PARALLEL DO PRIVATE(TMP_G, H_S) SCHEDULE(guided)
-   DO K=0,KBAR
-      DO J=0,JBAR
-         DO I=0,IBAR
-            ! H_RHO_D_DZDX
-            TMP_G = 0.5_EB*(TMP(I+1,J,K)+TMP(I,J,K))
-            CALL GET_SENSIBLE_ENTHALPY_Z(N,TMP_G,H_S)
-            H_RHO_D_DZDX(I,J,K) = H_S*RHO_D_DZDX(I,J,K,N)
-
-            ! H_RHO_D_DZDY
-            TMP_G = 0.5_EB*(TMP(I,J+1,K)+TMP(I,J,K))
-            CALL GET_SENSIBLE_ENTHALPY_Z(N,TMP_G,H_S)
-            H_RHO_D_DZDY(I,J,K) = H_S*RHO_D_DZDY(I,J,K,N)
-
-            ! H_RHO_D_DZDZ
-            TMP_G = 0.5_EB*(TMP(I,J,K+1)+TMP(I,J,K))               
-            CALL GET_SENSIBLE_ENTHALPY_Z(N,TMP_G,H_S)
-            H_RHO_D_DZDZ(I,J,K) = H_S*RHO_D_DZDZ(I,J,K,N)
-         ENDDO
-      ENDDO
-   ENDDO
-   !$OMP END PARALLEL DO
-
-   ! Correct rho*D del Z and del dot h_n*rho*D del Z_n at boundaries and store rho*D at boundaries
-
-   !$OMP PARALLEL DO SCHEDULE(GUIDED) &
-   !$OMP& PRIVATE(WC, IIG, JJG, KKG, IOR, RHO_D, H_S, RHO_D_DZDN)
-   WALL_LOOP2: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
-      WC => WALL(IW)
-      IF (WC%BOUNDARY_TYPE==NULL_BOUNDARY .OR. &
-          WC%BOUNDARY_TYPE==OPEN_BOUNDARY .OR. WC%BOUNDARY_TYPE==INTERPOLATED_BOUNDARY) CYCLE WALL_LOOP2
-      IIG = WC%ONE_D%IIG
-      JJG = WC%ONE_D%JJG
-      KKG = WC%ONE_D%KKG
-      IOR = WC%ONE_D%IOR
-      CALL GET_SENSIBLE_ENTHALPY_Z(N,WC%ONE_D%TMP_F,H_S)
-      RHO_D_DZDN = 2._EB*WC%RHODW(N)*(ZZP(IIG,JJG,KKG,N)-WC%ZZ_F(N))*WC%RDN
-      SELECT CASE(IOR)
-         CASE( 1) 
-            !$OMP ATOMIC WRITE
-            RHO_D_DZDX(IIG-1,JJG,KKG,N)   =  RHO_D_DZDN
-            !$OMP ATOMIC WRITE
-            H_RHO_D_DZDX(IIG-1,JJG,KKG) =  H_S*RHO_D_DZDN
-         CASE(-1) 
-            !$OMP ATOMIC WRITE
-            RHO_D_DZDX(IIG,JJG,KKG,N)     = -RHO_D_DZDN
-            !$OMP ATOMIC WRITE
-            H_RHO_D_DZDX(IIG,JJG,KKG)   = -H_S*RHO_D_DZDN
-         CASE( 2) 
-            !$OMP ATOMIC WRITE
-            RHO_D_DZDY(IIG,JJG-1,KKG,N)   =  RHO_D_DZDN
-            !$OMP ATOMIC WRITE
-            H_RHO_D_DZDY(IIG,JJG-1,KKG) =  H_S*RHO_D_DZDN
-         CASE(-2) 
-            !$OMP ATOMIC WRITE
-            RHO_D_DZDY(IIG,JJG,KKG,N)     = -RHO_D_DZDN
-            !$OMP ATOMIC WRITE
-            H_RHO_D_DZDY(IIG,JJG,KKG)   = -H_S*RHO_D_DZDN
-         CASE( 3) 
-            !$OMP ATOMIC WRITE
-            RHO_D_DZDZ(IIG,JJG,KKG-1,N)   =  RHO_D_DZDN
-            !$OMP ATOMIC WRITE
-            H_RHO_D_DZDZ(IIG,JJG,KKG-1) =  H_S*RHO_D_DZDN
-         CASE(-3) 
-            !$OMP ATOMIC WRITE
-            RHO_D_DZDZ(IIG,JJG,KKG,N)     = -RHO_D_DZDN
-            !$OMP ATOMIC WRITE
-            H_RHO_D_DZDZ(IIG,JJG,KKG)   = -H_S*RHO_D_DZDN
-      END SELECT
-   ENDDO WALL_LOOP2
-   !$OMP END PARALLEL DO
-
-   CYLINDER: SELECT CASE(CYLINDRICAL)
-      CASE(.FALSE.) CYLINDER  ! 3D or 2D Cartesian Coords
-         !$OMP PARALLEL DO PRIVATE(DIV_DIFF_HEAT_FLUX) SCHEDULE(STATIC)
+      IF (DNS .OR. RESEARCH_MODE) THEN
+         RHO_D = 0._EB
+         D_Z_N = D_Z(:,N)
          DO K=1,KBAR
             DO J=1,JBAR
                DO I=1,IBAR
+                  CALL INTERPOLATE1D_UNIFORM(LBOUND(D_Z_N,1),D_Z_N,TMP(I,J,K),D_Z_TEMP)
+                  RHO_D(I,J,K) = RHOP(I,J,K)*D_Z_TEMP
+               ENDDO
+            ENDDO
+         ENDDO
+      ENDIF
 
-                  DIV_DIFF_HEAT_FLUX = (H_RHO_D_DZDX(I,J,K)-H_RHO_D_DZDX(I-1,J,K))*RDX(I) + &
-                                       (H_RHO_D_DZDY(I,J,K)-H_RHO_D_DZDY(I,J-1,K))*RDY(J) + &
-                                       (H_RHO_D_DZDZ(I,J,K)-H_RHO_D_DZDZ(I,J,K-1))*RDZ(K)
+      IF (LES .AND. RESEARCH_MODE) RHO_D = RHO_D + RHO_D_TURB
+
+      ! Store max diffusivity for stability check
+
+      IF (CHECK_VN) D_Z_MAX = MAX(D_Z_MAX,RHO_D/RHOP)
+
+      ! Manufactured solution
+
+      IF (PERIODIC_TEST==7) RHO_D = DIFF_MMS
+
+      ! Compute rho*D del Z
+
+      !$OMP PARALLEL DO PRIVATE(DZDX, DZDY, DZDZ) SCHEDULE (STATIC)
+      DO K=0,KBAR
+         DO J=0,JBAR
+            DO I=0,IBAR
+               DZDX = (ZZP(I+1,J,K,N)-ZZP(I,J,K,N))*RDXN(I)
+               RHO_D_DZDX(I,J,K,N) = .5_EB*(RHO_D(I+1,J,K)+RHO_D(I,J,K))*DZDX
+               DZDY = (ZZP(I,J+1,K,N)-ZZP(I,J,K,N))*RDYN(J)
+               RHO_D_DZDY(I,J,K,N) = .5_EB*(RHO_D(I,J+1,K)+RHO_D(I,J,K))*DZDY
+               DZDZ = (ZZP(I,J,K+1,N)-ZZP(I,J,K,N))*RDZN(K)
+               RHO_D_DZDZ(I,J,K,N) = .5_EB*(RHO_D(I,J,K+1)+RHO_D(I,J,K))*DZDZ
+            ENDDO
+         ENDDO
+      ENDDO
+      !$OMP END PARALLEL DO
+
+      ! Tensor diffusivity model (experimental)
+
+      IF (TENSOR_DIFFUSIVITY .AND. LES) CALL TENSOR_DIFFUSIVITY_MODEL(NM,N)
+
+      ! Compute del dot h_n*rho*D del Z_n (part of del dot qdot")
+
+      H_RHO_D_DZDX => WORK5
+      H_RHO_D_DZDY => WORK6
+      H_RHO_D_DZDZ => WORK7
+
+      !$OMP PARALLEL DO PRIVATE(TMP_G, H_S) SCHEDULE(guided)
+      DO K=0,KBAR
+         DO J=0,JBAR
+            DO I=0,IBAR
+               ! H_RHO_D_DZDX
+               TMP_G = 0.5_EB*(TMP(I+1,J,K)+TMP(I,J,K))
+               CALL GET_SENSIBLE_ENTHALPY_Z(N,TMP_G,H_S)
+               H_RHO_D_DZDX(I,J,K) = H_S*RHO_D_DZDX(I,J,K,N)
+
+               ! H_RHO_D_DZDY
+               TMP_G = 0.5_EB*(TMP(I,J+1,K)+TMP(I,J,K))
+               CALL GET_SENSIBLE_ENTHALPY_Z(N,TMP_G,H_S)
+               H_RHO_D_DZDY(I,J,K) = H_S*RHO_D_DZDY(I,J,K,N)
+
+               ! H_RHO_D_DZDZ
+               TMP_G = 0.5_EB*(TMP(I,J,K+1)+TMP(I,J,K))               
+               CALL GET_SENSIBLE_ENTHALPY_Z(N,TMP_G,H_S)
+               H_RHO_D_DZDZ(I,J,K) = H_S*RHO_D_DZDZ(I,J,K,N)
+            ENDDO
+         ENDDO
+      ENDDO
+      !$OMP END PARALLEL DO
+
+      ! Correct rho*D del Z and del dot h_n*rho*D del Z_n at boundaries and store rho*D at boundaries
+
+      !$OMP PARALLEL DO SCHEDULE(GUIDED) &
+      !$OMP& PRIVATE(WC, IIG, JJG, KKG, IOR, RHO_D, H_S, RHO_D_DZDN)
+      WALL_LOOP2: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
+         WC => WALL(IW)
+         IF (WC%BOUNDARY_TYPE==NULL_BOUNDARY .OR. &
+             WC%BOUNDARY_TYPE==OPEN_BOUNDARY .OR. WC%BOUNDARY_TYPE==INTERPOLATED_BOUNDARY) CYCLE WALL_LOOP2
+         IIG = WC%ONE_D%IIG
+         JJG = WC%ONE_D%JJG
+         KKG = WC%ONE_D%KKG
+         IOR = WC%ONE_D%IOR
+         CALL GET_SENSIBLE_ENTHALPY_Z(N,WC%ONE_D%TMP_F,H_S)
+         RHO_D_DZDN = 2._EB*WC%RHODW(N)*(ZZP(IIG,JJG,KKG,N)-WC%ZZ_F(N))*WC%RDN
+         SELECT CASE(IOR)
+            CASE( 1) 
+               !$OMP ATOMIC WRITE
+               RHO_D_DZDX(IIG-1,JJG,KKG,N)   =  RHO_D_DZDN
+               !$OMP ATOMIC WRITE
+               H_RHO_D_DZDX(IIG-1,JJG,KKG) =  H_S*RHO_D_DZDN
+            CASE(-1) 
+               !$OMP ATOMIC WRITE
+               RHO_D_DZDX(IIG,JJG,KKG,N)     = -RHO_D_DZDN
+               !$OMP ATOMIC WRITE
+               H_RHO_D_DZDX(IIG,JJG,KKG)   = -H_S*RHO_D_DZDN
+            CASE( 2) 
+               !$OMP ATOMIC WRITE
+               RHO_D_DZDY(IIG,JJG-1,KKG,N)   =  RHO_D_DZDN
+               !$OMP ATOMIC WRITE
+               H_RHO_D_DZDY(IIG,JJG-1,KKG) =  H_S*RHO_D_DZDN
+            CASE(-2) 
+               !$OMP ATOMIC WRITE
+               RHO_D_DZDY(IIG,JJG,KKG,N)     = -RHO_D_DZDN
+               !$OMP ATOMIC WRITE
+               H_RHO_D_DZDY(IIG,JJG,KKG)   = -H_S*RHO_D_DZDN
+            CASE( 3) 
+               !$OMP ATOMIC WRITE
+               RHO_D_DZDZ(IIG,JJG,KKG-1,N)   =  RHO_D_DZDN
+               !$OMP ATOMIC WRITE
+               H_RHO_D_DZDZ(IIG,JJG,KKG-1) =  H_S*RHO_D_DZDN
+            CASE(-3) 
+               !$OMP ATOMIC WRITE
+               RHO_D_DZDZ(IIG,JJG,KKG,N)     = -RHO_D_DZDN
+               !$OMP ATOMIC WRITE
+               H_RHO_D_DZDZ(IIG,JJG,KKG)   = -H_S*RHO_D_DZDN
+         END SELECT
+      ENDDO WALL_LOOP2
+      !$OMP END PARALLEL DO
+
+      CYLINDER: SELECT CASE(CYLINDRICAL)
+         CASE(.FALSE.) CYLINDER  ! 3D or 2D Cartesian Coords
+            !$OMP PARALLEL DO PRIVATE(DIV_DIFF_HEAT_FLUX) SCHEDULE(STATIC)
+            DO K=1,KBAR
+               DO J=1,JBAR
+                  DO I=1,IBAR
+
+                     DIV_DIFF_HEAT_FLUX = (H_RHO_D_DZDX(I,J,K)-H_RHO_D_DZDX(I-1,J,K))*RDX(I) + &
+                                          (H_RHO_D_DZDY(I,J,K)-H_RHO_D_DZDY(I,J-1,K))*RDY(J) + &
+                                          (H_RHO_D_DZDZ(I,J,K)-H_RHO_D_DZDZ(I,J,K-1))*RDZ(K)
+
+                     DP(I,J,K) = DP(I,J,K) + DIV_DIFF_HEAT_FLUX
+
+                  ENDDO
+               ENDDO
+            ENDDO
+            !$OMP END PARALLEL DO
+         CASE(.TRUE.) CYLINDER  ! 2D Cylindrical Coords
+            J = 1
+            DO K=1,KBAR
+               DO I=1,IBAR
+
+                  DIV_DIFF_HEAT_FLUX = (R(I)*H_RHO_D_DZDX(I,J,K)-R(I-1)*H_RHO_D_DZDX(I-1,J,K))*RDX(I)*RRN(I) + &
+                                       (     H_RHO_D_DZDZ(I,J,K)-       H_RHO_D_DZDZ(I,J,K-1))*RDZ(K)
 
                   DP(I,J,K) = DP(I,J,K) + DIV_DIFF_HEAT_FLUX
 
                ENDDO
             ENDDO
-         ENDDO
-         !$OMP END PARALLEL DO
-      CASE(.TRUE.) CYLINDER  ! 2D Cylindrical Coords
-         J = 1
-         DO K=1,KBAR
-            DO I=1,IBAR
+      END SELECT CYLINDER
 
-               DIV_DIFF_HEAT_FLUX = (R(I)*H_RHO_D_DZDX(I,J,K)-R(I-1)*H_RHO_D_DZDX(I-1,J,K))*RDX(I)*RRN(I) + &
-                                    (     H_RHO_D_DZDZ(I,J,K)-       H_RHO_D_DZDZ(I,J,K-1))*RDZ(K)
+      ! Compute del dot rho*D del Z_n
 
-               DP(I,J,K) = DP(I,J,K) + DIV_DIFF_HEAT_FLUX
-
-            ENDDO
-         ENDDO
-   END SELECT CYLINDER
-
-   ! Compute del dot rho*D del Z_n
-
-   CYLINDER2: SELECT CASE(CYLINDRICAL)
-      CASE(.FALSE.) CYLINDER2  ! 3D or 2D Cartesian Coords
-         !$OMP PARALLEL DO SCHEDULE(STATIC)
-         DO K=1,KBAR
-            DO J=1,JBAR
-               DO I=1,IBAR
-                  DEL_RHO_D_DEL_Z(I,J,K,N) = (RHO_D_DZDX(I,J,K,N)-RHO_D_DZDX(I-1,J,K,N))*RDX(I) + &
-                                             (RHO_D_DZDY(I,J,K,N)-RHO_D_DZDY(I,J-1,K,N))*RDY(J) + &
-                                             (RHO_D_DZDZ(I,J,K,N)-RHO_D_DZDZ(I,J,K-1,N))*RDZ(K)
+      CYLINDER2: SELECT CASE(CYLINDRICAL)
+         CASE(.FALSE.) CYLINDER2  ! 3D or 2D Cartesian Coords
+            !$OMP PARALLEL DO SCHEDULE(STATIC)
+            DO K=1,KBAR
+               DO J=1,JBAR
+                  DO I=1,IBAR
+                     DEL_RHO_D_DEL_Z(I,J,K,N) = (RHO_D_DZDX(I,J,K,N)-RHO_D_DZDX(I-1,J,K,N))*RDX(I) + &
+                                                (RHO_D_DZDY(I,J,K,N)-RHO_D_DZDY(I,J-1,K,N))*RDY(J) + &
+                                                (RHO_D_DZDZ(I,J,K,N)-RHO_D_DZDZ(I,J,K-1,N))*RDZ(K)
+                  ENDDO
                ENDDO
             ENDDO
-         ENDDO
-         !$OMP END PARALLEL DO
-      CASE(.TRUE.) CYLINDER2  ! 2D Cylindrical Coords
-         J=1
-         DO K=1,KBAR
-            DO I=1,IBAR
-               DEL_RHO_D_DEL_Z(I,J,K,N) = (R(I)*RHO_D_DZDX(I,J,K,N)-R(I-1)*RHO_D_DZDX(I-1,J,K,N))*RDX(I)*RRN(I) + &
-                                          (     RHO_D_DZDZ(I,J,K,N)-       RHO_D_DZDZ(I,J,K-1,N))*RDZ(K)
+            !$OMP END PARALLEL DO
+         CASE(.TRUE.) CYLINDER2  ! 2D Cylindrical Coords
+            J=1
+            DO K=1,KBAR
+               DO I=1,IBAR
+                  DEL_RHO_D_DEL_Z(I,J,K,N) = (R(I)*RHO_D_DZDX(I,J,K,N)-R(I-1)*RHO_D_DZDX(I-1,J,K,N))*RDX(I)*RRN(I) + &
+                                             (     RHO_D_DZDZ(I,J,K,N)-       RHO_D_DZDZ(I,J,K-1,N))*RDZ(K)
+               ENDDO
             ENDDO
-         ENDDO
-   END SELECT CYLINDER2
+      END SELECT CYLINDER2
 
-ENDDO SPECIES_LOOP
+   ENDDO SPECIES_LOOP
+
+ENDIF SPECIES_GT_1_IF
 
 ! Get the specific heat
 
 CP => WORK5
 R_H_G=> WORK9
 
-IF (N_TRACKED_SPECIES>0) THEN
-   !$OMP PARALLEL PRIVATE(ZZ_GET, H_S)
-   ALLOCATE(ZZ_GET(0:N_TRACKED_SPECIES))
-   !$OMP DO SCHEDULE(static)
-   DO K=1,KBAR
-      DO J=1,JBAR
-         DO I=1,IBAR
-            IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-            ZZ_GET(1:N_TRACKED_SPECIES) = ZZP(I,J,K,1:N_TRACKED_SPECIES)
-            CALL GET_SPECIFIC_HEAT(ZZ_GET,CP(I,J,K),TMP(I,J,K))
-            R_H_G(I,J,K) = 1._EB/(CP(I,J,K)*TMP(I,J,K))
-         ENDDO
+!$OMP PARALLEL PRIVATE(ZZ_GET, H_S)
+ALLOCATE(ZZ_GET(1:N_TRACKED_SPECIES))
+!$OMP DO SCHEDULE(static)
+DO K=1,KBAR
+   DO J=1,JBAR
+      DO I=1,IBAR
+         IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
+         ZZ_GET(1:N_TRACKED_SPECIES) = ZZP(I,J,K,1:N_TRACKED_SPECIES)
+         CALL GET_SPECIFIC_HEAT(ZZ_GET,CP(I,J,K),TMP(I,J,K))
+         R_H_G(I,J,K) = 1._EB/(CP(I,J,K)*TMP(I,J,K))
       ENDDO
    ENDDO
-   !$OMP END DO
-   DEALLOCATE(ZZ_GET)
-   !$OMP END PARALLEL
-ELSE
-   DO K=1,KBAR
-      DO J=1,JBAR
-         DO I=1,IBAR
-            IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-            CALL GET_SPECIFIC_HEAT(ZZ_GET_BACKGROUND,CP(I,J,K),TMP(I,J,K))
-            R_H_G(I,J,K) = 1._EB/(CP(I,J,K)*TMP(I,J,K))
-         ENDDO
-      ENDDO
-   ENDDO
-ENDIF
+ENDDO
+!$OMP END DO
+DEALLOCATE(ZZ_GET)
+!$OMP END PARALLEL
 
 ! Compute del dot k del T
 
@@ -1951,13 +531,13 @@ KP    => WORK4
 
 K_DNS_OR_LES: IF (DNS .OR. RESEARCH_MODE) THEN
 
-   ALLOCATE(ZZ_GET(0:N_TRACKED_SPECIES))
+   ALLOCATE(ZZ_GET(1:N_TRACKED_SPECIES))
    KP = 0._EB
    DO K=1,KBAR
       DO J=1,JBAR
          DO I=1,IBAR
             IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-            IF (N_TRACKED_SPECIES > 0) ZZ_GET(1:N_TRACKED_SPECIES) = ZZP(I,J,K,1:N_TRACKED_SPECIES)
+            ZZ_GET(1:N_TRACKED_SPECIES) = ZZP(I,J,K,1:N_TRACKED_SPECIES)
             CALL GET_CONDUCTIVITY(ZZ_GET,KP(I,J,K),TMP(I,J,K)) 
          ENDDO
       ENDDO
@@ -2093,7 +673,7 @@ ENDIF
 
 CONST_GAMMA_IF_1: IF (.NOT.CONSTANT_SPECIFIC_HEAT_RATIO) THEN
 
-   CALL ENTHALPY_ADVECTION_2 ! Compute u dot grad rho h_s
+   CALL ENTHALPY_ADVECTION ! Compute u dot grad rho h_s
 
    DO K=1,KBAR
       DO J=1,JBAR
@@ -2126,7 +706,7 @@ CONST_GAMMA_IF_2: IF (.NOT.CONSTANT_SPECIFIC_HEAT_RATIO) THEN
 
    DO N=1,N_TRACKED_SPECIES
 
-      CALL SPECIES_ADVECTION_2 ! Compute u dot grad rho Z_n
+      CALL SPECIES_ADVECTION ! Compute u dot grad rho Z_n
       
       SM  => SPECIES_MIXTURE(N)
       !$OMP PARALLEL DO PRIVATE(H_S) SCHEDULE(guided)
@@ -2187,38 +767,24 @@ ENDIF
 MMS_IF: IF (PERIODIC_TEST==7) THEN
    IF (PREDICTOR) TT=T+DT
    IF (CORRECTOR) TT=T
-   DT_IF: IF (DENSITY_TRANSPORT) THEN
-      DO K=1,KBAR
-         DO J=1,JBAR
-            DO I=1,IBAR
-               ! divergence from EOS
-               XHAT = XC(I) - UF_MMS*TT
-               ZHAT = ZC(K) - WF_MMS*TT
-               Q_Z = VD2D_MMS_Z_SRC(XHAT,ZHAT,TT)
-               DP(I,J,K) = (1._EB/RHO_1_MMS - 1._EB/RHO_0_MMS) * ( DEL_RHO_D_DEL_Z(I,J,K,1) + Q_Z )
+   DO K=1,KBAR
+      DO J=1,JBAR
+         DO I=1,IBAR
+            ! divergence from fire
+            XHAT = XC(I) - UF_MMS*TT
+            ZHAT = ZC(K) - WF_MMS*TT
+            DO N=1,N_TRACKED_SPECIES
+               SM => SPECIES_MIXTURE(N)
+               SELECT CASE(N)
+                  CASE(1); Q_Z =  VD2D_MMS_Z_SRC(XHAT,ZHAT,TT)
+                  CASE(2); Q_Z = -VD2D_MMS_Z_SRC(XHAT,ZHAT,TT)
+               END SELECT
+               CALL GET_SENSIBLE_ENTHALPY_Z(N,TMP(I,J,K),H_S)
+               DP(I,J,K) = DP(I,J,K) + ( SM%RCON/RSUM(I,J,K) - H_S*R_H_G(I,J,K) )*Q_Z/RHOP(I,J,K)
             ENDDO
          ENDDO
       ENDDO
-   ELSE DT_IF
-      DO K=1,KBAR
-         DO J=1,JBAR
-            DO I=1,IBAR
-               ! divergence from fire
-               XHAT = XC(I) - UF_MMS*TT
-               ZHAT = ZC(K) - WF_MMS*TT
-               DO N=1,N_TRACKED_SPECIES
-                  SM => SPECIES_MIXTURE(N)
-                  SELECT CASE(N)
-                     CASE(1); Q_Z =  VD2D_MMS_Z_SRC(XHAT,ZHAT,TT)
-                     CASE(2); Q_Z = -VD2D_MMS_Z_SRC(XHAT,ZHAT,TT)
-                  END SELECT
-                  CALL GET_SENSIBLE_ENTHALPY_Z(N,TMP(I,J,K),H_S)
-                  DP(I,J,K) = DP(I,J,K) + ( SM%RCON/RSUM(I,J,K) - H_S*R_H_G(I,J,K) )*Q_Z/RHOP(I,J,K)
-               ENDDO
-            ENDDO
-         ENDDO
-      ENDDO
-   ENDIF DT_IF
+   ENDDO
 ENDIF MMS_IF
 
 ! Calculate pressure rise in each of the pressure zones by summing divergence expression over each zone
@@ -2260,7 +826,7 @@ TUSED(2,NM)=TUSED(2,NM)+SECOND()-TNOW
 CONTAINS
 
 
-SUBROUTINE ENTHALPY_ADVECTION_2
+SUBROUTINE ENTHALPY_ADVECTION
 
 REAL(EB), POINTER, DIMENSION(:,:,:) :: FX_H_S=>NULL(),FY_H_S=>NULL(),FZ_H_S=>NULL()
 
@@ -2275,32 +841,21 @@ IF (.NOT.ENTHALPY_TRANSPORT) RETURN
 
 ! Compute and store rho*h_s
 
-IF (N_TRACKED_SPECIES > 0) THEN
-   !$OMP PARALLEL PRIVATE(ZZ_GET, H_S)
-   ALLOCATE(ZZ_GET(0:N_TRACKED_SPECIES))
-   !$OMP DO SCHEDULE(static)
-   DO K=0,KBP1
-      DO J=0,JBP1
-         DO I=0,IBP1
-            ZZ_GET(1:N_TRACKED_SPECIES) = ZZP(I,J,K,1:N_TRACKED_SPECIES)
-            CALL GET_SENSIBLE_ENTHALPY(ZZ_GET,H_S,TMP(I,J,K))
-            RHO_H_S_P(I,J,K) = RHOP(I,J,K)*H_S
-         ENDDO
+!$OMP PARALLEL PRIVATE(ZZ_GET, H_S)
+ALLOCATE(ZZ_GET(1:N_TRACKED_SPECIES))
+!$OMP DO SCHEDULE(static)
+DO K=0,KBP1
+   DO J=0,JBP1
+      DO I=0,IBP1
+         ZZ_GET(1:N_TRACKED_SPECIES) = ZZP(I,J,K,1:N_TRACKED_SPECIES)
+         CALL GET_SENSIBLE_ENTHALPY(ZZ_GET,H_S,TMP(I,J,K))
+         RHO_H_S_P(I,J,K) = RHOP(I,J,K)*H_S
       ENDDO
    ENDDO
-   !$OMP END DO
-   DEALLOCATE(ZZ_GET)
-   !$OMP END PARALLEL
-ELSE
-   DO K=0,KBP1
-      DO J=0,JBP1
-         DO I=0,IBP1
-            CALL GET_SENSIBLE_ENTHALPY(ZZ_GET_BACKGROUND,H_S,TMP(I,J,K))
-            RHO_H_S_P(I,J,K) = RHOP(I,J,K)*H_S
-         ENDDO
-      ENDDO
-   ENDDO
-ENDIF
+ENDDO
+!$OMP END DO
+DEALLOCATE(ZZ_GET)
+!$OMP END PARALLEL
 
 ! Compute scalar face values
 
@@ -2339,7 +894,7 @@ ENDDO
 !$OMP END DO
 !$OMP END PARALLEL
 
-ALLOCATE(ZZ_GET(0:N_TRACKED_SPECIES))
+ALLOCATE(ZZ_GET(1:N_TRACKED_SPECIES))
 
 WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
    WC=>WALL(IW)
@@ -2352,7 +907,7 @@ WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
    JJG = WC%ONE_D%JJG
    KKG = WC%ONE_D%KKG
    IOR = WC%ONE_D%IOR
-   IF (N_TRACKED_SPECIES>0) ZZ_GET(1:N_TRACKED_SPECIES) = WC%ZZ_F(1:N_TRACKED_SPECIES)
+   ZZ_GET(1:N_TRACKED_SPECIES) = WC%ZZ_F(1:N_TRACKED_SPECIES)
    CALL GET_SENSIBLE_ENTHALPY(ZZ_GET,H_S,WC%ONE_D%TMP_F)
 
    ! overwrite first off-wall advective flux if flow is away from the wall and if the face is not also a wall cell
@@ -2460,10 +1015,10 @@ DO K=1,KBAR
    ENDDO 
 ENDDO
 
-END SUBROUTINE ENTHALPY_ADVECTION_2
+END SUBROUTINE ENTHALPY_ADVECTION
 
 
-SUBROUTINE DENSITY_ADVECTION_2
+SUBROUTINE DENSITY_ADVECTION
 
 REAL(EB), POINTER, DIMENSION(:,:,:) :: FX_RHO=>NULL(),FY_RHO=>NULL(),FZ_RHO=>NULL()
 
@@ -2632,10 +1187,10 @@ DO K=1,KBAR
    ENDDO 
 ENDDO
 
-END SUBROUTINE DENSITY_ADVECTION_2
+END SUBROUTINE DENSITY_ADVECTION
 
 
-SUBROUTINE SPECIES_ADVECTION_2
+SUBROUTINE SPECIES_ADVECTION
 
 REAL(EB), POINTER, DIMENSION(:,:,:) :: FX_ZZ=>NULL(),FY_ZZ=>NULL(),FZ_ZZ=>NULL()
 
@@ -2815,9 +1370,9 @@ DO K=1,KBAR
 ENDDO
 !$OMP END PARALLEL DO
 
-END SUBROUTINE SPECIES_ADVECTION_2
+END SUBROUTINE SPECIES_ADVECTION
 
-END SUBROUTINE DIVERGENCE_PART_1_2
+END SUBROUTINE DIVERGENCE_PART_1
 
 
 SUBROUTINE DIVERGENCE_PART_2(NM)
