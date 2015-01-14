@@ -2950,8 +2950,10 @@ REAL(EB), PARAMETER :: GAS_CONSTANT=8314.472_EB
 
 ! set up problem parameters
 
-RHO_0_MMS = P_INF*SPECIES_MIXTURE(2)%MW/(GAS_CONSTANT*TMPA)
-RHO_1_MMS = P_INF*SPECIES_MIXTURE(1)%MW/(GAS_CONSTANT*TMPA)
+RHO_0_MMS = P_INF*SPECIES_MIXTURE(1)%MW/(GAS_CONSTANT*TMPA)
+RHO_1_MMS = P_INF*SPECIES_MIXTURE(2)%MW/(GAS_CONSTANT*TMPA)
+
+print *,RHO_0_MMS,RHO_1_MMS
 
 ! initialize private variables
 
@@ -2966,10 +2968,9 @@ W = WF_MMS
 DO K=0,KBP1
    DO J=0,JBP1
       DO I=0,IBP1
-         ZZ(I,J,K,1) = VD2D_MMS_Z(XC(I),ZC(K),0._EB)
-         ZZ_GET(1) = ZZ(I,J,K,1)
-         ZZ(I,J,K,2) = 1._EB - ZZ(I,J,K,1)
-         ZZ_GET(2) = ZZ(I,J,K,2)
+         ZZ(I,J,K,2) = VD2D_MMS_Z(XC(I),ZC(K),0._EB)
+         ZZ(I,J,K,1) = 1._EB - ZZ(I,J,K,2)
+         ZZ_GET(1:2) = ZZ(I,J,K,1:2)
          CALL GET_SPECIFIC_GAS_CONSTANT(ZZ_GET,RSUM(I,J,K))
          RHO(I,J,K) = P_INF/(TMPA*RSUM(I,J,K))
       ENDDO
