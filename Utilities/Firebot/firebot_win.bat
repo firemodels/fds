@@ -39,7 +39,9 @@ set cfastroot=%userprofile%\%cfastbasename%
 set email=%svnroot%\SMV\scripts\email.bat
 
 set errorlog=%OUTDIR%\stage_errors.txt
+set errorlogpc=%OUTDIR%\stage_errors_pc.txt
 set warninglog=%OUTDIR%\stage_warnings.txt
+set warninglogpc=%OUTDIR%\stage_warnings_pc.txt
 set errorwarninglog=%OUTDIR%\stage_errorswarnings.txt
 set infofile=%OUTDIR%\stage_info.txt
 set revisionfile=%OUTDIR%\revision.txt
@@ -120,6 +122,9 @@ echo             found pdflatex
 
 call :is_file_installed grep|| exit /b 1
 echo             found grep
+
+call :is_file_installed sed|| exit /b 1
+echo             found sed
 
 :: update cfast repository
 
@@ -402,6 +407,12 @@ if NOT exist %tosummarydir% goto skip_copyfiles
 cd %CURDIR%
 
 if exist %emailexe% (
+  if %havewarnings% NEQ 0 (
+     sed "s/$/\r/" < %warninglog% > %warninglogpc%
+  )
+  if %haveerrors% NEQ 0 (
+     sed "s/$/\r/" < %errorlog% > %errorlogpc%
+  )
   if %havewarnings% == 0 (
     if %haveerrors% == 0 (
       call %email% %mailToFDS% "firebot build success on %COMPUTERNAME%! %revision%" %infofile%
@@ -409,7 +420,7 @@ if exist %emailexe% (
       echo "start: %startdate% %starttime% " > %infofile%
       echo " stop: %stopdate% %stoptime% " >> %infofile%
       echo. >> %infofile%
-      type %errorlog% >> %infofile%
+      type %errorlogpc% >> %infofile%
       call %email% %mailToFDS% "firebot build failure on %COMPUTERNAME%! %revision%" %infofile%
     )
   ) else (
@@ -417,15 +428,15 @@ if exist %emailexe% (
       echo "start: %startdate% %starttime% " > %infofile%
       echo " stop: %stopdate% %stoptime% " >> %infofile%
       echo. >> %infofile%
-      type %warninglog% >> %infofile%
+      type %warninglogpc% >> %infofile%
       %email% %mailToFDS% "firebot build success with warnings on %COMPUTERNAME% %revision%" %infofile%
     ) else (
       echo "start: %startdate% %starttime% " > %infofile%
       echo " stop: %stopdate% %stoptime% " >> %infofile%
       echo. >> %infofile%
-      type %errorlog% >> %infofile%
+      type %errorlogpc% >> %infofile%
       echo. >> %infofile%
-      type %warninglog% >> %infofile%
+      type %warninglogpc% >> %infofile%
       call %email% %mailToFDS% "firebot build failure on %COMPUTERNAME%! %revision%" %infofile%
     )
   )
