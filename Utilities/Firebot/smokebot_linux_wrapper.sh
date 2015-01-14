@@ -1,7 +1,8 @@
 #!/bin/bash
-if [ -e ~/SMOKEBOT/smokebot_running ] ; then
+if [ -e smokebot_running ] ; then
   exit
 fi
-touch ~/SMOKEBOT/smokebot_running
-~/SMOKEBOT/smokebot_linux.sh "$@"
-rm ~/SMOKEBOT/smokebot_running
+touch smokebot_running
+svn update
+./smokebot_linux.sh "$@"
+rm ./smokebot_running
