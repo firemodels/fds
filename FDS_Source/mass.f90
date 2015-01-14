@@ -309,8 +309,8 @@ CASE(.TRUE.) PREDICTOR_STEP
                XHAT = XC(I) - UF_MMS*(T)
                ZHAT = ZC(K) - WF_MMS*(T)
                Q_Z = VD2D_MMS_Z_SRC(XHAT,ZHAT,T)
-               ZZS(I,J,K,1) = ZZS(I,J,K,1) + DT*Q_Z
-               ZZS(I,J,K,2) = ZZS(I,J,K,2) - DT*Q_Z
+               ZZS(I,J,K,1) = ZZS(I,J,K,1) - DT*Q_Z
+               ZZS(I,J,K,2) = ZZS(I,J,K,2) + DT*Q_Z
             ENDDO
          ENDDO
       ENDDO
@@ -468,8 +468,8 @@ CASE(.FALSE.) PREDICTOR_STEP
                XHAT = XC(I) - UF_MMS*T
                ZHAT = ZC(K) - WF_MMS*T
                Q_Z = VD2D_MMS_Z_SRC(XHAT,ZHAT,T)
-               ZZ(I,J,K,1) = ZZ(I,J,K,1) + .5_EB*DT*Q_Z
-               ZZ(I,J,K,2) = ZZ(I,J,K,2) - .5_EB*DT*Q_Z
+               ZZ(I,J,K,1) = ZZ(I,J,K,1) - .5_EB*DT*Q_Z
+               ZZ(I,J,K,2) = ZZ(I,J,K,2) + .5_EB*DT*Q_Z
             ENDDO
          ENDDO
       ENDDO
@@ -579,8 +579,6 @@ JX=>SCALAR_SAVE1
 JY=>SCALAR_SAVE2
 JZ=>SCALAR_SAVE3
 
-! Species
-
 SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
 
    IOB=0 ! integer tag for out of bounds (0=in bounds, 1=out of bounds)
@@ -599,7 +597,11 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
                             + ( MAX(0._EB,VV(I,J,K)) - MIN(0._EB,VV(I,J-1,K)) )*RDY(J) &
                             + ( MAX(0._EB,WW(I,J,K)) - MIN(0._EB,WW(I,J,K-1)) )*RDZ(K) )
 
-            GAMMA = (1._EB-EXP(-SVDT))/(SVDT)
+            IF (SVDT>TWO_EPSILON_EB) THEN
+               GAMMA = (1._EB-EXP(-SVDT))/(SVDT)
+            ELSE
+               GAMMA = 1._EB
+            ENDIF
 
             RHO_ZZ_GAMMA = RHO_ZZ__0(I,J,K,N)*GAMMA
 
