@@ -6958,7 +6958,7 @@ CONTAINS
 
     IF (L_USE_FED) THEN  ! Update at this time step (do this at DT_SAVE intervals) 
        IF (L_FED_SAVE) THEN
-          ALLOCATE(ZZ_GET(0:MAX(1,N_TRACKED_SPECIES)),STAT=IZERO)
+          ALLOCATE(ZZ_GET(1:N_TRACKED_SPECIES),STAT=IZERO)
           CALL CHKMEMERR('EVAC_MESH_EXCHANGE', 'ZZ_GET',IZERO) 
           WRITE (LU_EVACFED) REAL(T,FB), REAL(DT_SAVE,FB)
        ELSE
@@ -15760,25 +15760,23 @@ CONTAINS
     ! Passed variables
     INTEGER, INTENT(IN) :: I, J, K, NOM, FED_ACTIVITY
     REAL(EB), INTENT(OUT) :: fed_indx, soot_dens, gas_temp, rad_flux
-    REAL(EB), INTENT(INOUT) :: ZZ_GET(0:N_TRACKED_SPECIES)
+    REAL(EB), INTENT(INOUT) :: ZZ_GET(1:N_TRACKED_SPECIES)
     !
     ! Local variables
     REAL(EB) :: Y_MF_INT
 
     soot_dens = 0._EB ; fed_indx = 0._EB ; gas_temp = 0._EB ; rad_flux = 0._EB
-    IF (N_TRACKED_SPECIES > 0) THEN
-       ! Mass fraction array ==> soot density (mg/m3)
-       ! Next is for soot (mg/m3)
-       ZZ_GET(1:N_TRACKED_SPECIES) = MESHES(nom)%ZZ(I,J,K,1:N_TRACKED_SPECIES)
-       IF (SOOT_INDEX > 0) THEN
-          CALL GET_MASS_FRACTION(ZZ_GET,SOOT_INDEX,Y_MF_INT)
-          soot_dens = Y_MF_INT*MESHES(nom)%RHO(I,J,K)*1.E6_EB
-       ELSE
-          soot_dens = 0._EB
-       ENDIF
-       ! Calculate Purser's fractional effective dose (FED)
-       fed_indx = FED(ZZ_GET,MESHES(nom)%RSUM(I,J,K),FED_ACTIVITY)
-    END IF
+      ! Mass fraction array ==> soot density (mg/m3)
+      ! Next is for soot (mg/m3)
+      ZZ_GET(1:N_TRACKED_SPECIES) = MESHES(nom)%ZZ(I,J,K,1:N_TRACKED_SPECIES)
+      IF (SOOT_INDEX > 0) THEN
+         CALL GET_MASS_FRACTION(ZZ_GET,SOOT_INDEX,Y_MF_INT)
+         soot_dens = Y_MF_INT*MESHES(nom)%RHO(I,J,K)*1.E6_EB
+      ELSE
+         soot_dens = 0._EB
+      ENDIF
+      ! Calculate Purser's fractional effective dose (FED)
+      fed_indx = FED(ZZ_GET,MESHES(nom)%RSUM(I,J,K),FED_ACTIVITY)
     ! Gas temperature, ind=5, C
     gas_temp  = MESHES(nom)%TMP(I,J,K)
     ! Rad flux, ind=18, kW/m2 (no -sigma*Tamb^4 term)
