@@ -108,7 +108,6 @@ echo
 RUNSMV=$SVNROOT/Utilities/Scripts/runsmv.sh
 export QFDS=$RUNSMV
 export RUNTFDS="$RUNSMV -t"
-export RUNWFDS="$RUNSMV -w"
 export RUNCFAST=$RUNSMV
 export BASEDIR=`pwd`
 
