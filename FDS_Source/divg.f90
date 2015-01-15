@@ -113,7 +113,7 @@ SPECIES_GT_1_IF: IF (N_TRACKED_SPECIES>1) THEN
    ENDIF
    IF (CHECK_VN) D_Z_MAX = 0._EB
 
-   SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
+   DIFFUSIVE_FLUX_LOOP: DO N=2,N_TRACKED_SPECIES
 
       IF (DNS .OR. RESEARCH_MODE) THEN
          RHO_D = 0._EB
@@ -158,6 +158,18 @@ SPECIES_GT_1_IF: IF (N_TRACKED_SPECIES>1) THEN
       ! Tensor diffusivity model (experimental)
 
       IF (TENSOR_DIFFUSIVITY .AND. LES) CALL TENSOR_DIFFUSIVITY_MODEL(NM,N)
+
+   ENDDO DIFFUSIVE_FLUX_LOOP
+
+   ! Compute diffusive flux for Species 1
+
+   RHO_D_DZDX(:,:,:,1) = -SUM(RHO_D_DZDX(:,:,:,2:N_TRACKED_SPECIES),4)
+   RHO_D_DZDY(:,:,:,1) = -SUM(RHO_D_DZDY(:,:,:,2:N_TRACKED_SPECIES),4)
+   RHO_D_DZDZ(:,:,:,1) = -SUM(RHO_D_DZDZ(:,:,:,2:N_TRACKED_SPECIES),4)
+
+   ! Diffusive heat flux
+
+   SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
 
       ! Compute del dot h_n*rho*D del Z_n (part of del dot qdot")
 
@@ -205,32 +217,32 @@ SPECIES_GT_1_IF: IF (N_TRACKED_SPECIES>1) THEN
          SELECT CASE(IOR)
             CASE( 1) 
                !$OMP ATOMIC WRITE
-               RHO_D_DZDX(IIG-1,JJG,KKG,N)   =  RHO_D_DZDN
+               RHO_D_DZDX(IIG-1,JJG,KKG,N) =  RHO_D_DZDN
                !$OMP ATOMIC WRITE
                H_RHO_D_DZDX(IIG-1,JJG,KKG) =  H_S*RHO_D_DZDN
             CASE(-1) 
                !$OMP ATOMIC WRITE
-               RHO_D_DZDX(IIG,JJG,KKG,N)     = -RHO_D_DZDN
+               RHO_D_DZDX(IIG,JJG,KKG,N)   = -RHO_D_DZDN
                !$OMP ATOMIC WRITE
                H_RHO_D_DZDX(IIG,JJG,KKG)   = -H_S*RHO_D_DZDN
             CASE( 2) 
                !$OMP ATOMIC WRITE
-               RHO_D_DZDY(IIG,JJG-1,KKG,N)   =  RHO_D_DZDN
+               RHO_D_DZDY(IIG,JJG-1,KKG,N) =  RHO_D_DZDN
                !$OMP ATOMIC WRITE
                H_RHO_D_DZDY(IIG,JJG-1,KKG) =  H_S*RHO_D_DZDN
             CASE(-2) 
                !$OMP ATOMIC WRITE
-               RHO_D_DZDY(IIG,JJG,KKG,N)     = -RHO_D_DZDN
+               RHO_D_DZDY(IIG,JJG,KKG,N)   = -RHO_D_DZDN
                !$OMP ATOMIC WRITE
                H_RHO_D_DZDY(IIG,JJG,KKG)   = -H_S*RHO_D_DZDN
             CASE( 3) 
                !$OMP ATOMIC WRITE
-               RHO_D_DZDZ(IIG,JJG,KKG-1,N)   =  RHO_D_DZDN
+               RHO_D_DZDZ(IIG,JJG,KKG-1,N) =  RHO_D_DZDN
                !$OMP ATOMIC WRITE
                H_RHO_D_DZDZ(IIG,JJG,KKG-1) =  H_S*RHO_D_DZDN
             CASE(-3) 
                !$OMP ATOMIC WRITE
-               RHO_D_DZDZ(IIG,JJG,KKG,N)     = -RHO_D_DZDN
+               RHO_D_DZDZ(IIG,JJG,KKG,N)   = -RHO_D_DZDN
                !$OMP ATOMIC WRITE
                H_RHO_D_DZDZ(IIG,JJG,KKG)   = -H_S*RHO_D_DZDN
          END SELECT
