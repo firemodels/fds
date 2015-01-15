@@ -532,11 +532,13 @@ SUBROUTINE WEIGHTED_AVERAGE_FLUX_CORRECTION
 
 USE COMP_FUNCTIONS, ONLY: SHUTDOWN
 
-INTEGER :: I,J,K,N
+INTEGER :: I,J,K,N,ITER
 REAL(EB) :: SVDT,GAMMA,RHO_ZZ_GAMMA,RHS,DT_LOC
 REAL(EB), POINTER, DIMENSION(:,:,:) :: UU=>NULL(),VV=>NULL(),WW=>NULL(),RHOP=>NULL(),RHO__0=>NULL()
 REAL(EB), POINTER, DIMENSION(:,:,:,:) :: ZZP=>NULL(),RHO_ZZ__0=>NULL(),JX=>NULL(),JY=>NULL(),JZ=>NULL()
 INTEGER, POINTER, DIMENSION(:,:,:) :: IOB=>NULL()
+INTEGER, PARAMETER :: MAX_ITER=3
+LOGICAL :: REPEAT_CYCLE
 
 IF (PREDICTOR) THEN
    ZZP=>ZZS
@@ -558,6 +560,10 @@ JY=>SCALAR_SAVE2
 JZ=>SCALAR_SAVE3
 
 SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
+
+   ITER_LOOP: DO ITER=1,MAX_ITER
+
+   REPEAT_CYCLE = .FALSE.
 
    IOB=0 ! integer tag for out of bounds (0=in bounds, 1=out of bounds)
 
@@ -586,7 +592,7 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
             IF ((FX(I,J,K,N)-JX(I,J,K,N))>0._EB) THEN
                JX(I,J,K,N) = 0._EB
                FX(I,J,K,N)  = RHO_ZZ_GAMMA
-               IOB(I+1,J,K) = 1 ! right neighbor is tagged for correction
+               IOB(I+1,J,K) = 1 ! right neighbor is tagged for correction, etc.
             ENDIF
             IF ((FY(I,J,K,N)-JY(I,J,K,N))>0._EB) THEN
                JY(I,J,K,N) = 0._EB
@@ -633,9 +639,15 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
 
             ZZP(I,J,K,N) = RHO_ZZ__0(I,J,K,N) - DT_LOC*RHS
 
+            IF (ZZP(I,J,K,N)<0._EB) REPEAT_CYCLE = .TRUE.
+
          ENDDO
       ENDDO
    ENDDO
+
+   IF (.NOT.REPEAT_CYCLE) EXIT ITER_LOOP
+
+   ENDDO ITER_LOOP
 
 ENDDO SPECIES_LOOP
 
