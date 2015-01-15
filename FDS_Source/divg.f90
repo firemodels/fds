@@ -117,7 +117,7 @@ SPECIES_GT_1_IF: IF (N_TRACKED_SPECIES>1) THEN
    ENDIF
    IF (CHECK_VN) D_Z_MAX = 0._EB
 
-   DIFFUSIVE_FLUX_LOOP: DO N=2,N_TRACKED_SPECIES
+   DIFFUSIVE_FLUX_LOOP: DO N=1,N_TRACKED_SPECIES
 
       IF (DNS .OR. RESEARCH_MODE) THEN
          RHO_D = 0._EB
@@ -202,13 +202,20 @@ SPECIES_GT_1_IF: IF (N_TRACKED_SPECIES>1) THEN
 
    ENDDO DIFFUSIVE_FLUX_LOOP
 
-   ! Compute diffusive flux for Species 1
+! Ensure RHO_D terms sum to zero over all species.  Gather error into largest mass fraction present.
 
-   RHO_D_DZDX(:,:,:,1) = -SUM(RHO_D_DZDX(:,:,:,2:N_TRACKED_SPECIES),4)
-   RHO_D_DZDY(:,:,:,1) = -SUM(RHO_D_DZDY(:,:,:,2:N_TRACKED_SPECIES),4)
-   RHO_D_DZDZ(:,:,:,1) = -SUM(RHO_D_DZDZ(:,:,:,2:N_TRACKED_SPECIES),4)
+   DO K=0,KBAR
+      DO J=0,JBAR
+         DO I=0,IBAR
+            N=MAXLOC(ZZP(I,J,K,:),1)
+            RHO_D_DZDX(I,J,K,N) = -(SUM(RHO_D_DZDX(I,J,K,:))-RHO_D_DZDX(I,J,K,N))
+            RHO_D_DZDY(I,J,K,N) = -(SUM(RHO_D_DZDY(I,J,K,:))-RHO_D_DZDY(I,J,K,N))
+            RHO_D_DZDZ(I,J,K,N) = -(SUM(RHO_D_DZDZ(I,J,K,:))-RHO_D_DZDZ(I,J,K,N))
+         ENDDO
+      ENDDO
+   ENDDO
 
-   ! Diffusive heat flux
+! Diffusive heat flux
 
    SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
 
