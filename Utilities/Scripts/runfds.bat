@@ -18,12 +18,15 @@ Rem test existence of %fulldir%
 
 Rem test existence of FDS input file %fulldir%/%in%
 
-Rem if STOPFDS=1 then create %fulldir%/%stopfile% and exit
-
-Rem erase %fulldir%\%stopfile%
-
 cd %fulldir%
 echo %in% started
+
+if exist %stopfile% (
+   erase %stopfile%
+)
+if "%rundebug%" == "1" (
+   echo 5 > %stopfile%
+)
 
 %FDS% %in%  > %out%
 
