@@ -72,6 +72,10 @@ SELECT CASE(PREDICTOR)
       RHOP => RHO
 END SELECT
 
+R_PBAR = 1._EB/PBAR_P
+
+RTRM => WORK1
+
 ! Zero out divergence to start
 
 DP = 0._EB
@@ -500,8 +504,6 @@ ENDIF CONST_GAMMA_IF_1
 
 ! Compute RTRM = 1/(rho*c_p*T) and multiply it by divergence terms already summed up
 
-RTRM => WORK1
-
 !$OMP PARALLEL DO SCHEDULE(STATIC)
 DO K=1,KBAR
    DO J=1,JBAR
@@ -584,7 +586,7 @@ MMS_IF: IF (PERIODIC_TEST==7) THEN
    DO K=1,KBAR
       DO J=1,JBAR
          DO I=1,IBAR
-            ! divergence from fire
+            ! this term is similar to D_REACTION from fire
             XHAT = XC(I) - UF_MMS*TT
             ZHAT = ZC(K) - WF_MMS*TT
             DO N=1,N_TRACKED_SPECIES
@@ -596,32 +598,15 @@ MMS_IF: IF (PERIODIC_TEST==7) THEN
                CALL GET_SENSIBLE_ENTHALPY_Z(N,TMP(I,J,K),H_S)
                DP(I,J,K) = DP(I,J,K) + ( SM%RCON/RSUM(I,J,K) - H_S*R_H_G(I,J,K) )*Q_Z/RHOP(I,J,K)
             ENDDO
+            ! debug
+            !Q_Z = VD2D_MMS_Z_SRC(XHAT,ZHAT,TT)
+            !DP(I,J,K) = (1._EB/RHO_1_MMS - 1._EB/RHO_0_MMS) * ( DEL_RHO_D_DEL_Z(I,J,K,2) + Q_Z )
          ENDDO
       ENDDO
    ENDDO
 ENDIF MMS_IF
 
-! Test manufactured solution
-
-IF (PERIODIC_TEST==7 .AND. .TRUE.) THEN
-   IF (PREDICTOR) TT=T+DT
-   IF (CORRECTOR) TT=T
-   DO K=1,KBAR
-      DO J=1,JBAR
-         DO I=1,IBAR
-            ! divergence from EOS
-            XHAT = XC(I) - UF_MMS*TT
-            ZHAT = ZC(K) - WF_MMS*TT
-            Q_Z = VD2D_MMS_Z_SRC(XHAT,ZHAT,TT)
-            DP(I,J,K) = (1._EB/RHO_1_MMS - 1._EB/RHO_0_MMS) * ( DEL_RHO_D_DEL_Z(I,J,K,2) + Q_Z )
-         ENDDO
-      ENDDO
-   ENDDO
-ENDIF
-
 ! Calculate pressure rise in each of the pressure zones by summing divergence expression over each zone
-
-R_PBAR = 1._EB/PBAR_P
 
 PRESSURE_ZONE_LOOP: DO IPZ=1,N_ZONE
 
