@@ -1356,13 +1356,6 @@ and initial conditions are perfectly symmetric. To turn this off, set {\ct NOISE
 convenient to start the flow immediately, like in an outdoor simulation involving wind.
 \end{description}
 
-\subsection{Special Topic: Isothermal Flows}
-\label{info:isothermal}
-
-If you know ahead of time that the flow is isothermal, it is recommended that you set {\ct ISOTHERMAL=.TRUE.} on {\ct MISC}.  In this case the density is computed from the ideal gas law and the temperature is held constant at {\ct TMPA}.  If {\ct ISOTHERMAL=.TRUE.} is set, then FDS automatically turns off stratification, radiation, and convective heat transfer ({\ct STRATIFICATION=.FALSE.}, {\ct RADIATION=.FALSE.}, {\ct HEAT\_TRANSFER\_COEFFICIENT=0}).  Additionally, chemical reactions are not allowed.
-
-If the flow is nearly (but not perfectly) isothermal, do not set {\ct ISOTHERMAL=.TRUE.}.  Instead, it is recommended that you set {\ct CFL\_VELOCITY\_NORM=1} on {\ct MISC}.  This helps prevent spurious errors in the density and composition fields.
-
 \subsection{Special Topic: Mean Forcing and Data Assimilation}
 \label{info:mean_forcing}
 
@@ -1563,7 +1556,7 @@ An example of an axially-symmetric helium plume is shown in Fig.~\ref{helium_plu
 &HEAD CHID='helium_2d_isothermal',TITLE='Axisymmetric Helium Plume' /
 &MESH IJK=72,1,144 XB=0.00,0.08,-0.001,0.001,0.00,0.16, CYLINDRICAL=.TRUE. /
 &TIME T_END=5.0 /
-&MISC DNS=.TRUE., ISOTHERMAL=.TRUE. /
+&MISC DNS=.TRUE. /
 &RADI RADIATION=.FALSE. /
 &SPEC ID='HELIUM'  /
 &SURF ID='HELIUM', VEL=-0.673, MASS_FRACTION(1)=1.0, TAU_MF(1)=0.3 /
@@ -8980,7 +8973,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct HRRPUV\_AVERAGE}                           & Real          & Section~\ref{info:REAC_Limiters}                      & \si{kW/m^3}   & 2500.             \\ \hline
 %{\ct IMMERSED\_BOUNDARY\_METHOD}                & Logical       &                                                       &               & {\ct .FALSE.}     \\ \hline
 {\ct INITIAL\_UNMIXED\_FRACTION}                & Real          & Section~\ref{info:turbulent_combustion}               &               & 1.0               \\ \hline
-{\ct ISOTHERMAL}                                & Logical       & Section~\ref{info:isothermal}                         &               & {\ct .FALSE.}     \\ \hline
 %{\ct KINETIC\_ENERGY\_SOURCE}                   & Logical       &                                                       &               & {\ct .FALSE.}     \\ \hline
 {\ct LAPSE\_RATE}                               & Real          & Section~\ref{info:stratification}                     & \si{\degree C/m} & 0              \\ \hline
 {\ct MAX\_CHEMISTRY\_ITERATIONS}                & Integer       & Section~\ref{info:finite}                             &               &  1000             \\ \hline
