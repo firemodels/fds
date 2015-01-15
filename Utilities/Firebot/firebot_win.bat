@@ -277,7 +277,7 @@ set RUNVV_beg=%current_time%
 echo Stage 4 - Running verification cases
 echo             debug mode
 
-cd %svnroot%\Verification\scripts
+cd %svnroot%\Verification\
 call Run_FDS_cases 1 1> %OUTDIR%\stage4a.txt 2>&1
 
 call :find_errors "error" %OUTDIR%\stage4a.txt "Stage 4a"
