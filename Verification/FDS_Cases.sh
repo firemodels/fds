@@ -98,7 +98,6 @@ $QFDS -d Flowfields cyl_test_2.fds
 $QFDS -d Flowfields cyl_test_3.fds
 $QFDS -d Flowfields cyl_test_4.fds
 $QFDS -d Flowfields gas_filling.fds
-$QFDS -d Flowfields helium_2d.fds
 $QFDS -d Flowfields helium_2d_isothermal.fds
 $QFDS -d Flowfields helium_air_jet_floor.fds
 $QFDS -d Flowfields hole.fds
@@ -110,7 +109,6 @@ $QFDS -d Flowfields velocity_bc_test.fds
 $QFDS -d Flowfields blasius_16.fds
 $QFDS -d Flowfields blasius_32.fds
 $QFDS -d Flowfields blasius_64.fds
-$QFDS -d Flowfields mwtest_isothermal.fds
 $QFDS -d Flowfields mwtest_cfl.fds
 $QFDS -d Flowfields mass_heat_wall_device_test.fds
 $QFDS -d Flowfields mass_heat_wall_device_test_2.fds
