@@ -168,7 +168,7 @@ echo Stage 1 - Building FDS
 echo             parallel debug
 
 cd %svnroot%\FDS_Compilation\mpi_intel_win_64_db
-erase *.obj *.mod *.exe 1> %OUTDIR%\stage1b.txt 2>&1
+erase *.obj *.mod *.exe *.pdb 1> %OUTDIR%\stage1b.txt 2>&1
 make VPATH="../../FDS_Source" -f ..\makefile mpi_intel_win_64_db 1>> %OUTDIR%\stage1b.txt 2>&1
 
 call :does_file_exist fds_mpi_win_64_db.exe %OUTDIR%\stage1b.txt|| exit /b 1
@@ -186,7 +186,7 @@ call :find_warnings "warning" %OUTDIR%\stage1b.txt "Stage 1b"
 echo             parallel release
 
 cd %svnroot%\FDS_Compilation\mpi_intel_win_64
-erase *.obj *.mod *.exe 1> %OUTDIR%\stage1d.txt 2>&1
+erase *.obj *.mod *.exe *.pdb 1> %OUTDIR%\stage1d.txt 2>&1
 make VPATH="../../FDS_Source" -f ..\makefile mpi_intel_win_64  1>> %OUTDIR%\stage1d.txt 2>&1
 
 call :does_file_exist fds_mpi_win_64.exe %OUTDIR%\stage1d.txt|| exit /b 1
