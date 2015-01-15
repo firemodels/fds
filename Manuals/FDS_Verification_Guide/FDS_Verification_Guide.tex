@@ -1458,11 +1458,11 @@ $\rho D = \mu$ & 0.001 & \si{kg/(m.s)}\\
 \label{eqn_mms_p} \tilde{p}(x,y,t) &= \frac{1}{2} \rho(x,y,t) u(x,y,t) v(x,y,t)
 \end{align}
 
-Note that (\ref{eqn_mms_rho}) is the equation of state (EOS) and may be rearranged for this simple problem to give $Z$ in terms of $\rho$,
-\begin{equation}
-\label{eqn_mms_eos}
-Z = \frac{(\rho_0 - \rho) \rho_1}{(\rho_0 - \rho_1) \rho} \,\mbox{.}
-\end{equation}
+%Note that (\ref{eqn_mms_rho}) is the equation of state (EOS) and may be rearranged for this simple problem to give $Z$ in terms of $\rho$,
+%\begin{equation}
+%\label{eqn_mms_eos}
+%Z = \frac{(\rho_0 - \rho) \rho_1}{(\rho_0 - \rho_1) \rho} \,\mbox{.}
+%\end{equation}
 
 The source terms for the manufactured solution, $\dot{Q}_\rho$, etc., are defined as the residuals of the conservative form of the transport equations:
 \begin{align}
@@ -1476,33 +1476,42 @@ T_{ij} = 2\mu \left( S_{ij} -  \frac{1}{3} S_{kk} \delta_{ij} \right) \quad\mbox
 \end{equation}
 The source terms (which are complex sinusoidal functions) may be obtained from \cite{Shunn:2012}, by looking at the source code in the FDS repository \cite{FDS-SMV_repository} (see module {\ct MANUFACTURED\_SOLUTIONS} in {\ct turb.f90}), or by running the sympy (Symbolic Python) script provided under {\ct FDS-SMV/Utilities/Python/shunn\_mms\_sym.py}.  A feature of this particular solution is that the mass source is zero, $\dot{Q}_\rho = 0$, which provides a more realistic test case and simplifies the MMS implementation.
 
-The divergence expression is obtained by differentiating the EOS:
-\begin{equation}
-\label{eqn_mms_div}
-\Div\mathbf{u} = \left[ \frac{1}{\rho_1} - \frac{1}{\rho_0} \right] \bigg( \Div(\rho D \nabla Z) + \dot{Q}_Z \bigg) \,\mbox{.}
-\end{equation}
-For this isothermal flow there is no alternative divergence formulation to consider. The RHS of the momentum equation is augmented as follows:
+\subsubsection*{Manufactured Solution Procedure}
+
+Two species transport equations are solved.  The mixture fraction in the manufactured solution is set at component 2 while the background species is set to component 1:
+\begin{align}
+\label{eqn_mms_species_1} \frac{\partial (\rho Z_1)}{\partial t} + \Div(\rho Z_1 \mathbf{u}) - \Div\left(\rho D \nabla Z_1\right) &= - \dot{Q}_Z \,\mbox{,}\\
+\label{eqn_mms_species_1} \frac{\partial (\rho Z_2)}{\partial t} + \Div(\rho Z_2 \mathbf{u}) - \Div\left(\rho D \nabla Z_1\right) &= + \dot{Q}_Z \,\mbox{.}
+\end{align}
+The density is obtained via $\rho = (\rho Z)_1 + (\rho Z)_2$.
+
+%The divergence expression is obtained by differentiating the EOS:
+%\begin{equation}
+%\label{eqn_mms_div}
+%\Div\mathbf{u} = \left[ \frac{1}{\rho_1} - \frac{1}{\rho_0} \right] \bigg( \Div(\rho D \nabla Z) + \dot{Q}_Z \bigg) \,\mbox{.}
+%\end{equation}
+%For this isothermal flow there is no alternative divergence formulation to consider.
+
+The RHS of the momentum equation is augmented as follows:
 \begin{equation}
 \label{eqn_mms_u_eqn}
 \frac{\partial \mathbf{u}}{\partial t} = - ( \mathbf{F} + \nabla H ) + \dot{Q}_{\mathbf{u}}/\rho \,\mbox{.}
 \end{equation}
-And the Poisson equation for $H$ becomes
+The Poisson equation for $H$ becomes
 \begin{align}
 \label{eqn_poisson_mms}
 \nabla^2 H = - \left[ \Div \left( \mathbf{F} - \dot{Q}_{\mathbf{u}}/\rho \right) + \frac{\partial}{\partial t} (\Div\mathbf{u}) \right] \,\mbox{.}
 \end{align}
 
-\subsubsection*{Manufactured Solution Procedure}
-
-For the flow to remain isothermal the ideal gas law must be obeyed identically. Since a transport equation is solved for density, the mixture fraction must be obtained from the EOS.  Hence, in this problem $Z$ plays the role usually played by temperature in a typical fire problem.  For the manufactured solution, the basic FDS algorithm is modified as follows.  Given $u_i^n$, $\rho^n$, $Z^n$, and $H^n$ at time $t^n$:
-\begin{enumerate}
-\item \label{item_rho_mms} Update the density equation (\ref{eqn_mms_continuity}) to obtain $\rho^{n+1}$.
-\item \label{item_Z_mms}   Obtain $Z^{n+1}$ from the equation of state (\ref{eqn_mms_eos}).
-\item \label{item_div_mms} Compute $(\Div \mathbf{u})^{n+1}$ from (\ref{eqn_mms_div}).
-\item \label{item_pois_mms} Solve the Poisson equation (\ref{eqn_poisson_mms}) for $H^{n+1}$.
-\item \label{item_mom_mms} Update momentum (\ref{eqn_mms_u_eqn}) using the pressure field from Step \ref{item_pois_mms} to obtain $u_i^{n+1}$.
-\end{enumerate}
-This procedure represents a single stage in the RK2 time integration scheme.
+%For the flow to remain isothermal the ideal gas law must be obeyed identically. Since a transport equation is solved for density, the mixture fraction must be obtained from the EOS.  Hence, in this problem $Z$ plays the role usually played by temperature in a typical fire problem.  For the manufactured solution, the basic FDS algorithm is modified as follows.  Given $u_i^n$, $\rho^n$, $Z^n$, and $H^n$ at time $t^n$:
+%\begin{enumerate}
+%\item \label{item_rho_mms} Update the density equation (\ref{eqn_mms_continuity}) to obtain $\rho^{n+1}$.
+%\item \label{item_Z_mms}   Obtain $Z^{n+1}$ from the equation of state (\ref{eqn_mms_eos}).
+%\item \label{item_div_mms} Compute $(\Div \mathbf{u})^{n+1}$ from (\ref{eqn_mms_div}).
+%\item \label{item_pois_mms} Solve the Poisson equation (\ref{eqn_poisson_mms}) for $H^{n+1}$.
+%\item \label{item_mom_mms} Update momentum (\ref{eqn_mms_u_eqn}) using the pressure field from Step \ref{item_pois_mms} to obtain $u_i^{n+1}$.
+%\end{enumerate}
+%This procedure represents a single stage in the RK2 time integration scheme.
 
 Simulations were performed for $N = \{32, 64, 128, 256, 512\}$, where $N$ is the number of cells in each direction, using an adaptive time step satisfying both convective and diffusive CFL numbers of 0.5.  The time step criterion and the simulation parameters in Table \ref{tab_shunn_params} were chosen to match Shunn et al.~\cite{Shunn:2012}. The density equation (\ref{eqn_mms_continuity}) is solved using the CHARM flux limiter. Qualitative results for the $256^2$ case are shown in Fig.~\ref{fig_mms_evo}.  These images may be compared to the images presented in \cite{Shunn:2012}.  In Fig.~\ref{fig_mms_convergence}, we plot the L2 error at time $t = 1$ s as a function of grid spacing, $\Delta x = L/N$, confirming second-order accuracy of the solutions for density, mixture fraction, and velocity.  As shown in Fig.~\ref{fig_mms_convergence}, schemes such as ours, where the pressure is set to zero at the beginning of each stage of the integration (in other words, no pressure gradient term shows up in the force on the RHS of the Poisson equation), are known to be first-order accurate for pressure \cite{Armfield:2002}. This is not a severe limitation of the algorithm since the hyrdrodynamic pressure does not factor into the equation of state for low-Mach flows.
 
