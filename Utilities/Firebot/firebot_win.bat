@@ -302,16 +302,22 @@ echo             debug mode
 cd %svnroot%\Verification\scripts
 call Run_SMV_cases %size% 0 1 1> %OUTDIR%\stage4a.txt 2>&1
 
-call :find_errors "error" %OUTDIR%\stage4a.txt "Stage 4a_1"
-call :find_errors "forrtl: severe" %OUTDIR%\stage4a.txt "Stage 4a_2"
+call :find_errors "error" %OUTDIR%\stage4a.txt "Stage 4a"
+call :find_errors "forrtl: severe" %OUTDIR%\stage4a.txt "Stage 4a"
+call :find_errors "Run aborted" %OUTDIR%\stage4a.txt "Stage 4a"
+call :find_errors "STOP: Numerical" %OUTDIR%\stage4a.txt "Stage 4a"
+call :find_errors "Segmentation " %OUTDIR%\stage4a.txt "Stage 4a"
 
 echo             release mode
 
 cd %svnroot%\Verification\
 call Run_FDS_cases %size% 0 0 1> %OUTDIR%\stage4b.txt 2>&1
 
-call :find_errors "error" %OUTDIR%\stage4b.txt "Stage 4b_1"
-call :find_errors "forrtl: severe" %OUTDIR%\stage4b.txt "Stage 4b_2"
+call :find_errors "error" %OUTDIR%\stage4b.txt "Stage 4b"
+call :find_errors "forrtl: severe" %OUTDIR%\stage4b.txt "Stage 4b"
+call :find_errors "Run aborted" %OUTDIR%\stage4b.txt "Stage 4b"
+call :find_errors "STOP: Numerical" %OUTDIR%\stage4b.txt "Stage 4b"
+call :find_errors "Segmentation " %OUTDIR%\stage4b.txt "Stage 4b"
 
 call :GET_TIME
 set RUNVV_end=%current_time% 
