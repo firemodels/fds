@@ -362,25 +362,14 @@ CASE(.TRUE.) PREDICTOR_STEP
 
    ! Extract predicted temperature at next time step from Equation of State
 
-   ISOTHERMAL_IF_1: IF (ISOTHERMAL) THEN
-      DO K=1,KBAR
-         DO J=1,JBAR
-            DO I=1,IBAR
-               IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-               RHOS(I,J,K) = PBAR_S(K,PRESSURE_ZONE(I,J,K))/(RSUM(I,J,K)*TMP(I,J,K))
-            ENDDO
+   DO K=1,KBAR
+      DO J=1,JBAR
+         DO I=1,IBAR
+            IF (SOLID(CELL_INDEX(I,J,K))) CYCLE               
+            TMP(I,J,K) = PBAR_S(K,PRESSURE_ZONE(I,J,K))/(RSUM(I,J,K)*RHOS(I,J,K))
          ENDDO
       ENDDO
-   ELSE ISOTHERMAL_IF_1
-      DO K=1,KBAR
-         DO J=1,JBAR
-            DO I=1,IBAR
-               IF (SOLID(CELL_INDEX(I,J,K))) CYCLE               
-               TMP(I,J,K) = PBAR_S(K,PRESSURE_ZONE(I,J,K))/(RSUM(I,J,K)*RHOS(I,J,K))
-            ENDDO
-         ENDDO
-      ENDDO
-   ENDIF ISOTHERMAL_IF_1
+   ENDDO
 
    TMP = MAX(TMPMIN,MIN(TMPMAX,TMP))
 
@@ -521,25 +510,14 @@ CASE(.FALSE.) PREDICTOR_STEP
 
    ! Extract predicted temperature at next time step from Equation of State
 
-   ISOTHERMAL_IF_2: IF (ISOTHERMAL) THEN
-      DO K=1,KBAR
-         DO J=1,JBAR
-            DO I=1,IBAR
-               IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-               RHO(I,J,K) = PBAR(K,PRESSURE_ZONE(I,J,K))/(RSUM(I,J,K)*TMP(I,J,K))
-            ENDDO
+   DO K=1,KBAR
+      DO J=1,JBAR
+         DO I=1,IBAR
+            IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
+            TMP(I,J,K) = PBAR(K,PRESSURE_ZONE(I,J,K))/(RSUM(I,J,K)*RHO(I,J,K))
          ENDDO
       ENDDO
-   ELSE ISOTHERMAL_IF_2
-      DO K=1,KBAR
-         DO J=1,JBAR
-            DO I=1,IBAR
-               IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-               TMP(I,J,K) = PBAR(K,PRESSURE_ZONE(I,J,K))/(RSUM(I,J,K)*RHO(I,J,K))
-            ENDDO
-         ENDDO
-      ENDDO
-   ENDIF ISOTHERMAL_IF_2
+   ENDDO
 
    TMP = MAX(TMPMIN,MIN(TMPMAX,TMP))
 
