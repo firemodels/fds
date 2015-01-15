@@ -365,7 +365,7 @@ MODULE EVAC
   ! I_FED_FILE_FORMAT: -1 Mesh, Corr, Door, and Exit data on the FED file
   ! I_FED_FILE_FORMAT: -2 Mesh and Corr data on the FED file
   ! I_FED_FILE_FORMAT: -3 Mesh, Corr, and Devc data on the FED file
-  CHARACTER(100) :: MESSAGE
+  CHARACTER(MESSAGE_LENGTH) :: MESSAGE
   REAL(FB) :: EVAC_Z_MIN, EVAC_Z_MAX
 
   ! Main evacuation mesh information that is read before READ_MESH in read.f90.
