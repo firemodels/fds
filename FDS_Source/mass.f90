@@ -639,6 +639,26 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
 
 ENDDO SPECIES_LOOP
 
+IF (CHECK_REALIZABILITY) THEN
+   IF (MINVAL(ZZP)<0._EB) THEN
+      WRITE(LU_ERR,*) 'MINVAL(ZZP)=',MINVAL(ZZP)
+      WRITE(LU_ERR,*) 'PREDICTOR=',PREDICTOR
+      DO N=1,N_TRACKED_SPECIES
+         DO K=1,KBAR
+            DO J=1,JBAR
+               DO I=1,IBAR
+                  IF (ZZP(I,J,K,N)<0._EB) THEN
+                     WRITE(LU_ERR,*) 'I,J,K=',I,J,K
+                     WRITE(LU_ERR,*) 'ZZP,ZZP_0=',ZZP(I,J,K,N),RHO_ZZ__0(I,J,K,N)
+                  ENDIF
+               ENDDO
+            ENDDO
+         ENDDO
+      ENDDO
+      CALL SHUTDOWN('STOP: Negative mass density')
+   ENDIF
+ENDIF
+
 END SUBROUTINE WEIGHTED_AVERAGE_FLUX_CORRECTION
 
 
