@@ -1,5 +1,12 @@
 @echo off
 
+set rundebug=%1
+if "%rundebug%" == "1" (
+  set DEBUG=_db
+) else (
+  set DEBUG=
+)
+
 set BASEDIR="%CD%"
 cd ..
 set SVNROOT="%CD%"
@@ -12,11 +19,7 @@ set TIME_FILE="%BASEDIR%\fds_case_times.txt"
 
 :: default FDS location
 
-set FDSEXE=%SVNROOT%\FDS_Compilation\intel_win_64\fds_win_64.exe
-
-::*** uncomment following line to define a custom FDS location - (Do not commit un-commented)
-
-:: set FDSEXE=C:\PROJECTS\FDS_DEVEL\6.0a\fds_win_64
+set FDSEXE=%SVNROOT%\FDS_Compilation\mpi_intel_win_64%DEBUG%\fds_mpi_win_64%DEBUG%.exe
 
 if not exist %FDSEXE%  (
   echo "***error: The program, %FDSEXE% , was not found.  Verification test runs aborted."
