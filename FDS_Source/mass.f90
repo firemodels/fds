@@ -639,12 +639,15 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
 
             ZZP(I,J,K,N) = RHO_ZZ__0(I,J,K,N) - DT_LOC*RHS
 
-            IF (ZZP(I,J,K,N)<0._EB) REPEAT_CYCLE = .TRUE.
+            IF (ZZP(I,J,K,N)<0._EB) THEN
+               REPEAT_CYCLE = .TRUE.
+               IF (ITER==MAX_ITER) ZZP(I,J,K,N) = 0._EB
+            ENDIF
 
          ENDDO
       ENDDO
    ENDDO
-
+   
    IF (.NOT.REPEAT_CYCLE) EXIT ITER_LOOP
 
    ENDDO ITER_LOOP
@@ -660,7 +663,7 @@ IF (CHECK_REALIZABILITY) THEN
             DO J=1,JBAR
                DO I=1,IBAR
                   IF (ZZP(I,J,K,N)<0._EB) THEN
-                     WRITE(LU_ERR,*) 'I,J,K=',I,J,K
+                     WRITE(LU_ERR,*) 'I,J,K,N=',I,J,K,N
                      WRITE(LU_ERR,*) 'ZZP,ZZP_0=',ZZP(I,J,K,N),RHO_ZZ__0(I,J,K,N)
                   ENDIF
                ENDDO
