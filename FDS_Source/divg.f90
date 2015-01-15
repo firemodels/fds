@@ -202,7 +202,7 @@ SPECIES_GT_1_IF: IF (N_TRACKED_SPECIES>1) THEN
 
    ENDDO DIFFUSIVE_FLUX_LOOP
 
-! Ensure RHO_D terms sum to zero over all species.  Gather error into largest mass fraction present.
+   ! Ensure RHO_D terms sum to zero over all species.  Gather error into largest mass fraction present.
 
    DO K=0,KBAR
       DO J=0,JBAR
@@ -215,7 +215,7 @@ SPECIES_GT_1_IF: IF (N_TRACKED_SPECIES>1) THEN
       ENDDO
    ENDDO
 
-! Diffusive heat flux
+   ! Diffusive heat flux
 
    SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
 
