@@ -163,6 +163,43 @@ SPECIES_GT_1_IF: IF (N_TRACKED_SPECIES>1) THEN
 
       IF (TENSOR_DIFFUSIVITY .AND. LES) CALL TENSOR_DIFFUSIVITY_MODEL(NM,N)
 
+      ! Correct rho*D del Z at boundaries
+
+      !$OMP PARALLEL DO SCHEDULE(GUIDED) &
+      !$OMP& PRIVATE(WC, IIG, JJG, KKG, IOR, RHO_D, RHO_D_DZDN)
+      WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
+         WC => WALL(IW)
+         IF (WC%BOUNDARY_TYPE==NULL_BOUNDARY .OR. &
+             WC%BOUNDARY_TYPE==OPEN_BOUNDARY .OR. &
+             WC%BOUNDARY_TYPE==INTERPOLATED_BOUNDARY) CYCLE WALL_LOOP
+         IIG = WC%ONE_D%IIG
+         JJG = WC%ONE_D%JJG
+         KKG = WC%ONE_D%KKG
+         IOR = WC%ONE_D%IOR
+         RHO_D_DZDN = 2._EB*WC%RHODW(N)*(ZZP(IIG,JJG,KKG,N)-WC%ZZ_F(N))*WC%RDN
+         SELECT CASE(IOR)
+            CASE( 1) 
+               !$OMP ATOMIC WRITE
+               RHO_D_DZDX(IIG-1,JJG,KKG,N) =  RHO_D_DZDN
+            CASE(-1) 
+               !$OMP ATOMIC WRITE
+               RHO_D_DZDX(IIG,JJG,KKG,N)   = -RHO_D_DZDN
+            CASE( 2) 
+               !$OMP ATOMIC WRITE
+               RHO_D_DZDY(IIG,JJG-1,KKG,N) =  RHO_D_DZDN
+            CASE(-2) 
+               !$OMP ATOMIC WRITE
+               RHO_D_DZDY(IIG,JJG,KKG,N)   = -RHO_D_DZDN
+            CASE( 3) 
+               !$OMP ATOMIC WRITE
+               RHO_D_DZDZ(IIG,JJG,KKG-1,N) =  RHO_D_DZDN
+            CASE(-3) 
+               !$OMP ATOMIC WRITE
+               RHO_D_DZDZ(IIG,JJG,KKG,N)   = -RHO_D_DZDN
+         END SELECT
+      ENDDO WALL_LOOP
+      !$OMP END PARALLEL DO
+
    ENDDO DIFFUSIVE_FLUX_LOOP
 
    ! Compute diffusive flux for Species 1
@@ -204,54 +241,41 @@ SPECIES_GT_1_IF: IF (N_TRACKED_SPECIES>1) THEN
       ENDDO
       !$OMP END PARALLEL DO
 
-      ! Correct rho*D del Z and del dot h_n*rho*D del Z_n at boundaries and store rho*D at boundaries
+      ! Correct h_n*rho*D del Z_n at boundaries
 
       !$OMP PARALLEL DO SCHEDULE(GUIDED) &
       !$OMP& PRIVATE(WC, IIG, JJG, KKG, IOR, RHO_D, H_S, RHO_D_DZDN)
-      WALL_LOOP2: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
+      WALL_LOOP_2: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
          WC => WALL(IW)
          IF (WC%BOUNDARY_TYPE==NULL_BOUNDARY .OR. &
              WC%BOUNDARY_TYPE==OPEN_BOUNDARY .OR. &
-             WC%BOUNDARY_TYPE==INTERPOLATED_BOUNDARY) CYCLE WALL_LOOP2
+             WC%BOUNDARY_TYPE==INTERPOLATED_BOUNDARY) CYCLE WALL_LOOP_2
          IIG = WC%ONE_D%IIG
          JJG = WC%ONE_D%JJG
          KKG = WC%ONE_D%KKG
          IOR = WC%ONE_D%IOR
          CALL GET_SENSIBLE_ENTHALPY_Z(N,WC%ONE_D%TMP_F,H_S)
-         RHO_D_DZDN = 2._EB*WC%RHODW(N)*(ZZP(IIG,JJG,KKG,N)-WC%ZZ_F(N))*WC%RDN
          SELECT CASE(IOR)
             CASE( 1) 
                !$OMP ATOMIC WRITE
-               RHO_D_DZDX(IIG-1,JJG,KKG,N) =  RHO_D_DZDN
-               !$OMP ATOMIC WRITE
-               H_RHO_D_DZDX(IIG-1,JJG,KKG) =  H_S*RHO_D_DZDN
+               H_RHO_D_DZDX(IIG-1,JJG,KKG) = H_S*RHO_D_DZDX(IIG-1,JJG,KKG,N)
             CASE(-1) 
                !$OMP ATOMIC WRITE
-               RHO_D_DZDX(IIG,JJG,KKG,N)   = -RHO_D_DZDN
-               !$OMP ATOMIC WRITE
-               H_RHO_D_DZDX(IIG,JJG,KKG)   = -H_S*RHO_D_DZDN
+               H_RHO_D_DZDX(IIG,JJG,KKG)   = H_S*RHO_D_DZDX(IIG,JJG,KKG,N)
             CASE( 2) 
                !$OMP ATOMIC WRITE
-               RHO_D_DZDY(IIG,JJG-1,KKG,N) =  RHO_D_DZDN
-               !$OMP ATOMIC WRITE
-               H_RHO_D_DZDY(IIG,JJG-1,KKG) =  H_S*RHO_D_DZDN
+               H_RHO_D_DZDY(IIG,JJG-1,KKG) = H_S*RHO_D_DZDY(IIG,JJG-1,KKG,N)
             CASE(-2) 
                !$OMP ATOMIC WRITE
-               RHO_D_DZDY(IIG,JJG,KKG,N)   = -RHO_D_DZDN
-               !$OMP ATOMIC WRITE
-               H_RHO_D_DZDY(IIG,JJG,KKG)   = -H_S*RHO_D_DZDN
+               H_RHO_D_DZDY(IIG,JJG,KKG)   = H_S*RHO_D_DZDY(IIG,JJG,KKG,N)
             CASE( 3) 
                !$OMP ATOMIC WRITE
-               RHO_D_DZDZ(IIG,JJG,KKG-1,N) =  RHO_D_DZDN
-               !$OMP ATOMIC WRITE
-               H_RHO_D_DZDZ(IIG,JJG,KKG-1) =  H_S*RHO_D_DZDN
+               H_RHO_D_DZDZ(IIG,JJG,KKG-1) = H_S*RHO_D_DZDZ(IIG,JJG,KKG-1,N)
             CASE(-3) 
                !$OMP ATOMIC WRITE
-               RHO_D_DZDZ(IIG,JJG,KKG,N)   = -RHO_D_DZDN
-               !$OMP ATOMIC WRITE
-               H_RHO_D_DZDZ(IIG,JJG,KKG)   = -H_S*RHO_D_DZDN
+               H_RHO_D_DZDZ(IIG,JJG,KKG)   = H_S*RHO_D_DZDZ(IIG,JJG,KKG,N)
          END SELECT
-      ENDDO WALL_LOOP2
+      ENDDO WALL_LOOP_2
       !$OMP END PARALLEL DO
 
       CYLINDER: SELECT CASE(CYLINDRICAL)
