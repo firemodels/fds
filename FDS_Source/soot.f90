@@ -29,20 +29,24 @@ SUBROUTINE SETTLING_VELOCITY(NM,N)
 
 USE PHYSICAL_FUNCTIONS, ONLY: GET_VISCOSITY
 USE GLOBAL_CONSTANTS, ONLY: PREDICTOR,GVEC
-REAL(EB) :: ZZ_GET(1:N_TRACKED_SPECIES),TMP_G,MU_G,KN,GRAV_FAC,KN_FAC
+REAL(EB) :: ZZ_GET(1:N_TRACKED_SPECIES),TMP_G,MU_G,KN,GRAV_FAC,KN_FAC,RHS,RHS_FAC
 INTEGER, INTENT(IN) :: NM,N
 INTEGER :: I,J,K
 REAL(EB), POINTER, DIMENSION(:,:,:) :: WW_GRAV=>NULL(),RHOP=>NULL()
-REAL(EB), POINTER, DIMENSION(:,:,:,:) :: ZZP=>NULL()
+REAL(EB), POINTER, DIMENSION(:,:,:,:) :: ZZP=>NULL(),ZZP2=>NULL()
 
 CALL POINT_TO_MESH(NM)
 
 IF (PREDICTOR) THEN
    RHOP => RHO
    ZZP => ZZ
+   ZZP2 => ZZS
+   RHS_FAC = 1._EB
 ELSE
    RHOP => RHOS
    ZZP => ZZS
+   ZZP2 => ZZ
+   RHS_FAC = 0.5_EB
 ENDIF
 
 
@@ -68,11 +72,11 @@ DO K=1,KBAR
    DO J=1,JBAR
       DO I=1,IBAR
          IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-         ! Calculate DEL_RHO_D_DEL_Z including WW_GRAV effects         
-         DEL_RHO_D_DEL_Z(I,J,K,N) = DEL_RHO_D_DEL_Z(I,J,K,N) &
-                                  +GVEC(1)*( FX(I,J,K,N)*WW_GRAV(I,J,K) - FZ(I-1,J,K,N)*WW_GRAV(I-1,J,K) )*RDX(I)*R(I-1)*RRN(I) &   
-                                  +GVEC(2)*( FY(I,J,K,N)*WW_GRAV(I,J,K) - FY(I,J-1,K,N)*WW_GRAV(I,J-1,K) )*RDY(J) &       
-                                  +GVEC(3)*( FZ(I,J,K,N)*WW_GRAV(I,J,K) - FZ(I,J,K-1,N)*WW_GRAV(I,J,K-1) )*RDZ(K)
+         ! Calculate including WW_GRAV effects
+         RHS = GVEC(1)*( FX(I,J,K,N)*WW_GRAV(I,J,K) - FX(I-1,J,K,N)*WW_GRAV(I-1,J,K) )*RDX(I)*R(I-1)*RRN(I) &   
+             + GVEC(2)*( FY(I,J,K,N)*WW_GRAV(I,J,K) - FY(I,J-1,K,N)*WW_GRAV(I,J-1,K) )*RDY(J)               &       
+             + GVEC(3)*( FZ(I,J,K,N)*WW_GRAV(I,J,K) - FZ(I,J,K-1,N)*WW_GRAV(I,J,K-1) )*RDZ(K)
+         ZZP2(I,J,K,N) = ZZP2(I,J,K,N) - DT*RHS*RHS_FAC 
       ENDDO
    ENDDO
 ENDDO
