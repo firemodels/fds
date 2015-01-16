@@ -247,37 +247,28 @@ CASE(.TRUE.) PREDICTOR_STEP
 
    WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
       WC=>WALL(IW)
-      IF (WC%BOUNDARY_TYPE==NULL_BOUNDARY) CYCLE WALL_LOOP
+      IF (WC%BOUNDARY_TYPE/=INTERPOLATED_BOUNDARY) CYCLE WALL_LOOP
 
       IIG = WC%ONE_D%IIG 
       JJG = WC%ONE_D%JJG
       KKG = WC%ONE_D%KKG
       IOR = WC%ONE_D%IOR
 
-      BOUNDARY_SELECT: SELECT CASE(WC%BOUNDARY_TYPE)
-         CASE(INTERPOLATED_BOUNDARY,SOLID_BOUNDARY)
-            SELECT CASE(WC%BOUNDARY_TYPE)
-               CASE(SOLID_BOUNDARY)
-                  IF (PREDICTOR) UN = -SIGN(1._EB,REAL(IOR,EB))*WC%ONE_D%UW
-                  IF (CORRECTOR) UN = -SIGN(1._EB,REAL(IOR,EB))*WC%ONE_D%UWS
-               CASE(INTERPOLATED_BOUNDARY)
-                  UN = UVW_SAVE(IW)
-            END SELECT
-            SELECT CASE(IOR)
-               CASE( 1)
-                  UU(IIG-1,JJG,KKG) = UN
-               CASE(-1)
-                  UU(IIG,JJG,KKG)   = UN
-               CASE( 2)
-                  VV(IIG,JJG-1,KKG) = UN
-               CASE(-2)
-                  VV(IIG,JJG,KKG)   = UN
-               CASE( 3)
-                  WW(IIG,JJG,KKG-1) = UN
-               CASE(-3)
-                  WW(IIG,JJG,KKG)   = UN
-            END SELECT
-      END SELECT BOUNDARY_SELECT
+      UN = UVW_SAVE(IW)
+      SELECT CASE(IOR)
+         CASE( 1)
+            UU(IIG-1,JJG,KKG) = UN
+         CASE(-1)
+            UU(IIG,JJG,KKG)   = UN
+         CASE( 2)
+            VV(IIG,JJG-1,KKG) = UN
+         CASE(-2)
+            VV(IIG,JJG,KKG)   = UN
+         CASE( 3)
+            WW(IIG,JJG,KKG-1) = UN
+         CASE(-3)
+            WW(IIG,JJG,KKG)   = UN
+      END SELECT
    ENDDO WALL_LOOP
 
    ! Predictor step for mass density
@@ -385,37 +376,28 @@ CASE(.FALSE.) PREDICTOR_STEP
 
    WALL_LOOP_2: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
       WC=>WALL(IW)
-      IF (WC%BOUNDARY_TYPE==NULL_BOUNDARY) CYCLE WALL_LOOP_2
+      IF (WC%BOUNDARY_TYPE/=INTERPOLATED_BOUNDARY) CYCLE WALL_LOOP_2
 
       IIG = WC%ONE_D%IIG 
       JJG = WC%ONE_D%JJG
       KKG = WC%ONE_D%KKG
       IOR = WC%ONE_D%IOR
-
-      BOUNDARY_SELECT_2: SELECT CASE(WC%BOUNDARY_TYPE)
-         CASE(INTERPOLATED_BOUNDARY,SOLID_BOUNDARY)
-            SELECT CASE(WC%BOUNDARY_TYPE)
-               CASE(SOLID_BOUNDARY)
-                  IF (PREDICTOR) UN = -SIGN(1._EB,REAL(IOR,EB))*WC%ONE_D%UW
-                  IF (CORRECTOR) UN = -SIGN(1._EB,REAL(IOR,EB))*WC%ONE_D%UWS
-               CASE(INTERPOLATED_BOUNDARY)
-                  UN = UVW_SAVE(IW)
-            END SELECT
-            SELECT CASE(IOR)
-               CASE( 1)
-                  UU(IIG-1,JJG,KKG) = UN
-               CASE(-1)
-                  UU(IIG,JJG,KKG)   = UN
-               CASE( 2)
-                  VV(IIG,JJG-1,KKG) = UN
-               CASE(-2)
-                  VV(IIG,JJG,KKG)   = UN
-               CASE( 3)
-                  WW(IIG,JJG,KKG-1) = UN
-               CASE(-3)
-                  WW(IIG,JJG,KKG)   = UN
-            END SELECT
-      END SELECT BOUNDARY_SELECT_2
+      
+      UN = UVW_SAVE(IW)
+      SELECT CASE(IOR)
+         CASE( 1)
+            UU(IIG-1,JJG,KKG) = UN
+         CASE(-1)
+            UU(IIG,JJG,KKG)   = UN
+         CASE( 2)
+            VV(IIG,JJG-1,KKG) = UN
+         CASE(-2)
+            VV(IIG,JJG,KKG)   = UN
+         CASE( 3)
+            WW(IIG,JJG,KKG-1) = UN
+         CASE(-3)
+            WW(IIG,JJG,KKG)   = UN
+      END SELECT
    ENDDO WALL_LOOP_2
 
    ! Diffusive fluxes
