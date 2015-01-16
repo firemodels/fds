@@ -589,33 +589,33 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
 
             RHO_ZZ_GAMMA = RHO_ZZ__0(I,J,K,N)*GAMMA
 
-            IF ((FX(I,J,K,N)-JX(I,J,K,N))>0._EB) THEN
+            IF ((FX(I,J,K,N)*UU(I,J,K)-JX(I,J,K,N))>0._EB) THEN
                JX(I,J,K,N) = 0._EB
                FX(I,J,K,N)  = RHO_ZZ_GAMMA
                IOB(I+1,J,K) = 1 ! right neighbor is tagged for correction, etc.
             ENDIF
-            IF ((FY(I,J,K,N)-JY(I,J,K,N))>0._EB) THEN
+            IF ((FY(I,J,K,N)*VV(I,J,K)-JY(I,J,K,N))>0._EB) THEN
                JY(I,J,K,N) = 0._EB
                FY(I,J,K,N)  = RHO_ZZ_GAMMA
                IOB(I,J+1,K) = 1
             ENDIF
-            IF ((FZ(I,J,K,N)-JZ(I,J,K,N))>0._EB) THEN
+            IF ((FZ(I,J,K,N)*WW(I,J,K)-JZ(I,J,K,N))>0._EB) THEN
                JZ(I,J,K,N) = 0._EB
                FZ(I,J,K,N)  = RHO_ZZ_GAMMA
                IOB(I,J,K+1) = 1
             ENDIF
 
-            IF ((FX(I-1,J,K,N)-JX(I-1,J,K,N))<0._EB) THEN
+            IF ((FX(I-1,J,K,N)*UU(I-1,J,K)-JX(I-1,J,K,N))<0._EB) THEN
                JX(I-1,J,K,N) = 0._EB
                FX(I-1,J,K,N) = RHO_ZZ_GAMMA
                IOB(I-1,J,K) = 1
             ENDIF
-            IF ((FY(I,J-1,K,N)-JY(I,J-1,K,N))<0._EB) THEN
+            IF ((FY(I,J-1,K,N)*VV(I,J-1,K)-JY(I,J-1,K,N))<0._EB) THEN
                JY(I,J-1,K,N) = 0._EB
                FY(I,J-1,K,N) = RHO_ZZ_GAMMA
                IOB(I,J-1,K) = 1
             ENDIF
-            IF ((FZ(I,J,K-1,N)-JZ(I,J,K-1,N))<0._EB) THEN
+            IF ((FZ(I,J,K-1,N)*WW(I,J,K-1)-JZ(I,J,K-1,N))<0._EB) THEN
                JZ(I,J,K-1,N) = 0._EB
                FZ(I,J,K-1,N) = RHO_ZZ_GAMMA
                IOB(I,J,K-1) = 1
@@ -653,26 +653,6 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
    ENDDO ITER_LOOP
 
 ENDDO SPECIES_LOOP
-
-IF (CHECK_REALIZABILITY) THEN
-   IF (MINVAL(ZZP)<0._EB) THEN
-      WRITE(LU_ERR,*) 'MINVAL(ZZP)=',MINVAL(ZZP)
-      WRITE(LU_ERR,*) 'PREDICTOR=',PREDICTOR
-      DO N=1,N_TRACKED_SPECIES
-         DO K=1,KBAR
-            DO J=1,JBAR
-               DO I=1,IBAR
-                  IF (ZZP(I,J,K,N)<0._EB) THEN
-                     WRITE(LU_ERR,*) 'I,J,K,N=',I,J,K,N
-                     WRITE(LU_ERR,*) 'ZZP,ZZP_0=',ZZP(I,J,K,N),RHO_ZZ__0(I,J,K,N)
-                  ENDIF
-               ENDDO
-            ENDDO
-         ENDDO
-      ENDDO
-      CALL SHUTDOWN('STOP: Negative mass density')
-   ENDIF
-ENDIF
 
 END SUBROUTINE WEIGHTED_AVERAGE_FLUX_CORRECTION
 
