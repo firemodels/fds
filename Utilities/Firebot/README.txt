@@ -18,9 +18,11 @@ More details on the Firebot build stages can be found in the FDS Configuration M
 = Running Firebot Manually =
 ============================
 
-1. cd to the ~/firebot directory of firebot's account
-2. Do an 'svn update'
-3. Run firebot using the command ./firebot_linux_wrapper.sh or ./firebot_mac_wrapper.sh
+1. su - firebot
+2. cd ~/firebot
+3. cd FDS-SMV
+4. svn update
+5. ./firebot_linux_wrapper.sh (or ./firebot_mac_wrapper.sh)
 
 ======================
 = Installing Firebot =
