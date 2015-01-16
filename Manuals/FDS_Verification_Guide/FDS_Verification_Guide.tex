@@ -1695,7 +1695,7 @@ through multiple meshes and its mass is conserved. An obstruction is created tha
 
 \begin{figure}[h]
 \centering
-\includegraphics[width=3in]{SCRIPT_FIGURES/simple_duct_mass}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/simple_duct_mass}
 \caption[The \textct{simple\_duct} test case]{The mass of CO$_2$ contained in a simple room connected with a recirculating duct.}
 \label{simple_duct}
 \end{figure}
@@ -1724,14 +1724,13 @@ Propane is injected into a 4~m cube with 1~m$^2$ vents on all six faces.  The ma
 
  Air is injected into one of two cubic chambers separated by a solid partition.  The mass flux of air is 1~kg/(m$^2\cdot$s) through a vent that is 0.04~m$^2$ in area. After 25~s, the mass of air introduced should be 1~kg. The accumulation of air in the chamber is shown in Fig.~\ref{species_conservation}.
 
- \subsubsection{Case 3: Gases Released by Solid Phase Reactions within a Solid Obstruction}
+\subsubsection{Case 3: Gases Released by Solid Phase Reactions within a Solid Obstruction}
 
  A 0.2~m solid cube undergoes a reaction that releases four different gases into a sealed unit cube. The solid has a density of 100~kg/m$^3$. The inert gases have different yields, all summing to one, meaning that the solid cube ought to be vaporized creating a total mass of 0.8~kg. The accumulation of all the gases in the chamber is shown in Fig.~\ref{species_conservation}. Note that in this case, when the solid cube vaporizes, its volume is filled with the background species, nitrogen. The total mass of the newly created nitrogen is 0.0093~kg.
 
- \subsubsection{Case 4: Gases Released by Solid Phase Reactions at the Boundary of the Domain}
+\subsubsection{Case 4: Gases Released by Solid Phase Reactions at the Boundary of the Domain}
 
  This case is similar to Case~3. A 0.2~m by 0.2~m solid surface undergoes a reaction that releases four different gases into a sealed unit cube. The solid has a density of 100~kg/m$^3$ and thickness of 0.1~m. The inert gases have different yields, all summing to one, meaning that the solid surface ought to be vaporized creating a total mass of 0.4~kg. The accumulation of all the gases in the chamber is shown in Fig.~\ref{species_conservation}.
-
 
 \begin{figure}[h]
 \begin{tabular*}{\textwidth}{lr}
@@ -1744,6 +1743,17 @@ Propane is injected into a 4~m cube with 1~m$^2$ vents on all six faces.  The ma
 \label{species_conservation}
 \end{figure}
 
+\clearpage
+
+\subsection{Realizability of Species Mass Fractions (\texorpdfstring{\textct{realizable\_mass\_fractions}}{realizable\_mass\_fractions})}
+
+In order for species mass fractions to be physically realizable they must all be positive (semi-definite) and sum to unity, $Y_\alpha\ge0$ and $\sum_\alpha Y_\alpha=1$.  In this test case, a simple methane burner is used to test the realizability of mass fractions.  A device is placed near the base of the center of the flame to measure the local mass fractions.  In Fig.~\ref{fig:realizable_mass_fractions} we plot the time history of the mass fractions for Fuel, Air, and Products along with the sum (dotted line).  This sum should remain perfectly one at all times.
+\begin{figure}[h]
+\centering
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/realizable_mass_fractions}
+\caption[The \textct{realizable\_mass\_fractions} test case]{Results of the \textct{realizable\_mass\_fractions} test case.  The sum of the mass fractions (dotted line) should remain perfectly one at all times.}
+\label{fig:realizable_mass_fractions}
+\end{figure}
 
 \clearpage
 
