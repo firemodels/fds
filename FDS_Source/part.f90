@@ -2015,13 +2015,21 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
 
          ZZ_GET(1:N_TRACKED_SPECIES) = ZZ(II,JJ,KK,1:N_TRACKED_SPECIES)
          CALL GET_MASS_FRACTION_ALL(ZZ_GET,Y_ALL)
-         IF (Y_ALL(Y_INDEX) >=1._EB) Y_ALL = SPECIES_MIXTURE(1)%MASS_FRACTION
          MW_GAS = 0._EB
-         DO NS=1,N_SPECIES
-            IF (NS==Y_INDEX) CYCLE
-            MW_GAS = MW_GAS + Y_ALL(NS)/SPECIES(NS)%MW
-         ENDDO
-         MW_GAS = (1._EB-Y_ALL(Y_INDEX))/MW_GAS
+         IF (ABS(Y_ALL(Y_INDEX)-1._EB) > TWO_EPSILON_EB) THEN
+            DO NS=1,N_SPECIES
+               IF (NS==Y_INDEX) CYCLE
+               MW_GAS = MW_GAS + Y_ALL(NS)/SPECIES(NS)%MW
+            ENDDO
+            IF (MW_GAS<=TWO_EPSILON_EB) THEN
+               MW_GAS=SPECIES_MIXTURE(1)%MW
+            ELSE
+               MW_GAS = (1._EB-Y_ALL(Y_INDEX))/MW_GAS
+            ENDIF
+         ELSE
+            MW_GAS=SPECIES_MIXTURE(1)%MW
+         ENDIF
+
          MW_RATIO = MW_GAS/MW_DROP
       
          ! Initialize PARTICLE thermophysical data
