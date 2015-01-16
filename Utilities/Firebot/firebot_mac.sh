@@ -16,12 +16,16 @@
 #  = Input variables =
 #  ===================
 
+DEBUG=
 REVERT=1
 while getopts 'n' OPTION
 do
 case $OPTION  in
   n)
   REVERT=0
+  ;;
+  n)
+  DEBUG=1
   ;;
 esac
 done
@@ -48,7 +52,11 @@ WARNING_LOG=$FIREBOT_DIR/output/warnings
 
 # Load mailing list for status report
 source $FIREBOT_DIR/firebot_email_list.sh
-mailToFDS=$mailToFDS_verbose
+if [[ "$DEBUG" == "1" ]] ; then
+   mailToFDS=$mailToFDS_debug
+else
+   mailToFDS=$mailToFDS_verbose
+fi
 
 #  ====================
 #  = End user warning =

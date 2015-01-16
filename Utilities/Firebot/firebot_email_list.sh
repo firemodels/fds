@@ -9,3 +9,6 @@ mailToFDS="mcgratta@gmail.com, randy.mcdermott@gmail.com, gforney@gmail.com, Cra
 # Verbose mailing list for Validationbot, Macbot, etc.
 mailToFDS_verbose="mcgratta@gmail.com, randy.mcdermott@gmail.com, drjfloyd@gmail.com, gforney@gmail.com, CraigWeinschenk@gmail.com"
 
+# mailing list when debugging firebot
+mailToFDS_debug="gforney@gmail.com"
+
