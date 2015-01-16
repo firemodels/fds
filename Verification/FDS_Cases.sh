@@ -117,6 +117,7 @@ $QFDS -d Flowfields species_conservation_2.fds
 $QFDS -d Flowfields species_conservation_3.fds
 $QFDS -d Flowfields species_conservation_4.fds
 $QFDS -d Flowfields hot_layer_360.fds
+$QFDS -d Flowfields realizable_mass_fractions.fds
 
 $QFDS -d Heat_Transfer adiabatic_net_flux.fds
 $QFDS -d Heat_Transfer convective_cooling.fds
