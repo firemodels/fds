@@ -16,7 +16,22 @@
 #  = Input variables =
 #  ===================
 
-FIREBOT_USERNAME="firebot"
+REVERT=1
+while getopts 'n' OPTION
+do
+case $OPTION  in
+  n)
+  REVERT=0
+  ;;
+esac
+done
+shift $(($OPTIND-1))
+
+if [[ "$REVERT" == "1" ]] ; then
+   FIREBOT_USERNAME="firebot"
+else
+   FIREBOT_USERNAME=`whoami`
+fi
 
 # Change to home directory
 cd
@@ -40,16 +55,18 @@ mailToFDS=$mailToFDS_verbose
 #  ====================
 
 # Warn if running as user other than firebot
-if [[ `whoami` == "$FIREBOT_USERNAME" ]];
-   then
-      # Continue along
-      :
-   else
-      echo "Warning: You are running the Firebot script as an end user."
-      echo "This script can modify and erase your repository."
-      echo "If you wish to continue, edit the script and remove this warning."
-      echo "Terminating script."
-      exit
+if [[ "$REVERT" == "1" ]] ; then
+   if [[ `whoami` == "$FIREBOT_USERNAME" ]];
+      then
+         # Continue along
+         :
+      else
+         echo "Warning: You are running the Firebot script as an end user."
+         echo "This script can modify and erase your repository."
+         echo "If you wish to continue, edit the script and remove this warning."
+         echo "Terminating script."
+         exit
+   fi
 fi
 
 #  =============================================
@@ -126,7 +143,9 @@ update_and_compile_cfast()
       cd $CFAST_SVNROOT/CFAST
       
       # Clean unversioned and modified files
-      svn revert -Rq *
+      if [[ "$REVERT" == "1" ]] ; then
+         svn revert -Rq *
+      fi
       svn status --no-ignore | grep '^[I?]' | cut -c 9- | while IFS= read -r f; do rm -rf "$f"; done
       
       # Update to latest SVN revision
@@ -177,7 +196,9 @@ clean_svn_repo()
    then
       # Revert and clean up temporary unversioned and modified versioned repository files
       cd $FDS_SVNROOT
-      svn revert -Rq *
+      if [[ "$REVERT" == "1" ]] ; then
+         svn revert -Rq *
+      fi
       svn status --no-ignore | grep '^[I?]' | cut -c 9- | while IFS= read -r f; do rm -rf "$f"; done
    # If not, create FDS repository and checkout
    else
