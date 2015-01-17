@@ -1,5 +1,7 @@
 @echo off
 
+set DEBUG=%1
+
 :: -------------------------------------------------------------
 ::                         set environment
 :: -------------------------------------------------------------
@@ -58,6 +60,11 @@ set /p starttime=<%OUTDIR%\starttime.txt
 
 call "%svnroot%\Utilities\Scripts\setup_intel_compilers.bat" 1> Nul 2>&1
 call %svnroot%\Utilities\Firebot\firebot_email_list.bat
+if "%DEBUG%" == "debug" (
+   set mailToList=%mailToFDSDebug%
+) else (
+   set mailToList=%mailToFDS%
+)
 
 :: -------------------------------------------------------------
 ::                           stage 0
@@ -280,11 +287,15 @@ echo             debug mode
 cd %svnroot%\Verification\
 call Run_FDS_cases 1 1> %OUTDIR%\stage4a.txt 2>&1
 
+set haveerrors_now=0
 call :find_errors "error" %OUTDIR%\stage4a.txt "Stage 4a"
 call :find_errors "forrtl: severe" %OUTDIR%\stage4a.txt "Stage 4a"
 call :find_errors "Run aborted" %OUTDIR%\stage4a.txt "Stage 4a"
 call :find_errors "STOP: Numerical" %OUTDIR%\stage4a.txt "Stage 4a"
 call :find_errors "Segmentation " %OUTDIR%\stage4a.txt "Stage 4a"
+if %haveerrors_now% NEQ 0 (
+   call :output_abort_message
+)
 
 echo             release mode
 
@@ -399,13 +410,13 @@ if exist %emailexe% (
   )
   if %havewarnings% == 0 (
     if %haveerrors% == 0 (
-      call %email% %mailToFDS% "firebot build success on %COMPUTERNAME%! %revision%" %infofile%
+      call %email% %mailToList% "firebot build success on %COMPUTERNAME%! %revision%" %infofile%
     ) else (
       echo "start: %startdate% %starttime% " > %infofile%
       echo " stop: %stopdate% %stoptime% " >> %infofile%
       echo. >> %infofile%
       type %errorlogpc% >> %infofile%
-      call %email% %mailToFDS% "firebot build failure on %COMPUTERNAME%! %revision%" %infofile%
+      call %email% %mailToList% "firebot build failure on %COMPUTERNAME%! %revision%" %infofile%
     )
   ) else (
     if %haveerrors% == 0 (
@@ -413,7 +424,7 @@ if exist %emailexe% (
       echo " stop: %stopdate% %stoptime% " >> %infofile%
       echo. >> %infofile%
       type %warninglogpc% >> %infofile%
-      %email% %mailToFDS% "firebot build success with warnings on %COMPUTERNAME% %revision%" %infofile%
+      %email% %mailToList% "firebot build success with warnings on %COMPUTERNAME% %revision%" %infofile%
     ) else (
       echo "start: %startdate% %starttime% " > %infofile%
       echo " stop: %stopdate% %stoptime% " >> %infofile%
@@ -421,7 +432,7 @@ if exist %emailexe% (
       type %errorlogpc% >> %infofile%
       echo. >> %infofile%
       type %warninglogpc% >> %infofile%
-      call %email% %mailToFDS% "firebot build failure on %COMPUTERNAME%! %revision%" %infofile%
+      call %email% %mailToList% "firebot build failure on %COMPUTERNAME%! %revision%" %infofile%
     )
   )
 )
@@ -436,7 +447,7 @@ exit
 :: -------------------------------------------------------------
   echo "***Fatal error: firebot build failure on %COMPUTERNAME% %revision%"
   if %havemail% == 1 (
-    call %email% %mailToFDS% "firebot build failure on %COMPUTERNAME% %revision%" %errorlog%
+    call %email% %mailToList% "firebot build failure on %COMPUTERNAME% %revision%" %errorlog%
   )
 exit /b
 
@@ -532,6 +543,7 @@ if %nerrors% GTR 0 (
   echo. >> %errorlog%
   type %OUTDIR%\stage_error.txt >> %errorlog%
   set haveerrors=1
+  set haveerrors_now=1
 )
 exit /b
 
