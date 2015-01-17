@@ -2,6 +2,6 @@
 if not exist firebot_win_running.txt (
   echo 1 > firebot_win_running.txt
   svn update
-  call firebot_win.bat
+  call firebot_win.bat debug
   erase firebot_win_running.txt
 )
