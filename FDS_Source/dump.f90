@@ -7313,7 +7313,7 @@ DO K=KMIN,KMAX
    DO J=JMIN,JMAX
       DO I=IMIN,IMAX
          WRITE(LU_MMS,'(E22.15,A,E22.15,A,E22.15,A,E22.15,A,E22.15)') &
-            RHO(I,J,K),',',ZZ(I,J,K,1),',',U(I,J,K),',',W(I,J,K),',',H(I,J,K)
+            RHO(I,J,K),',',ZZ(I,J,K,2),',',U(I,J,K),',',W(I,J,K),',',H(I,J,K)
       ENDDO
    ENDDO
 ENDDO
