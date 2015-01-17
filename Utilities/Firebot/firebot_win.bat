@@ -104,7 +104,7 @@ if %nothaveCC% == 1 (
 )
 
 if NOT exist %emailexe% (
-  echo ***warning: email client not found.   
+  echo ***Warning: email client not found.   
   echo             firebot messages will only be sent to the console.
 ) else (
   echo             found mailsend
@@ -431,7 +431,9 @@ cd %CURDIR%
 pause
 exit
 
+:: -------------------------------------------------------------
 :output_abort_message
+:: -------------------------------------------------------------
   echo "***Fatal error: firebot build failure on %COMPUTERNAME% %revision%"
   if %havemail% == 1 (
     call %email% %mailToFDS% "firebot build failure on %COMPUTERNAME% %revision%" %errorlog%
@@ -484,7 +486,7 @@ set file=%1
 set outputfile=%2
 
 if NOT exist %file% (
-  echo ***fatal error: problem building %file%. Aborting firebot
+  echo ***Fatal error: problem building %file%. Aborting firebot
   type %outputfile% >> %errorlog%
   call :output_abort_message
   exit /b 1
