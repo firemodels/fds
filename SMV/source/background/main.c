@@ -15,6 +15,7 @@
 #include "string_util.h"
 #include "background.h"
 #include "datadefs.h"
+#include "MALLOC.h"
 
 #ifdef pp_LINUX
 #define pp_LINUXOSX
@@ -66,6 +67,7 @@ int main(int argc, char **argv){
   int argstart=-1;
   float delay_time=0.0;
   int cpu_usage, cpu_usage_max=25;
+  int mem_usage, mem_usage_max=75;
 #ifdef pp_LINUX  
   char command_buffer[1024];
   char user_path[1024];
@@ -146,6 +148,15 @@ int main(int argc, char **argv){
             }
             break;
 #endif
+          case 'm':
+            i++;
+            if(i<argc){
+              arg=argv[i];
+              sscanf(arg,"%i",&mem_usage_max);
+              if(mem_usage_max<25)mem_usage_max=25;
+              if(mem_usage_max>90)mem_usage_max=90;
+            }
+            break;
           case 'u':
             i++;
             if(i<argc){
@@ -217,13 +228,14 @@ int main(int argc, char **argv){
 #ifdef WIN32
   GetSystemTimesAddress();
   cpu_usage=cpuusage();
+  mem_usage=memusage();
   Sleep(200);
   cpu_usage=cpuusage();
-  while(cpu_usage>cpu_usage_max){
-    Sleep(2000);
+  mem_usage=memusage();
+  while(cpu_usage>cpu_usage_max||mem_usage>mem_usage_max){
+    Sleep(1000);
     cpu_usage=cpuusage();
-    Sleep(200);
-    cpu_usage=cpuusage();
+    mem_usage=memusage();
   }
   command=argv[argstart];
   _spawnvp(_P_NOWAIT,command, argv+argstart);
@@ -232,12 +244,15 @@ int main(int argc, char **argv){
   strcpy(command_buffer,"");
   if(hostinfo==NULL){
     cpu_usage=cpuusage();
+    mem_usage=memusage();
     Sleep(200);
     cpu_usage=cpuusage();
+    mem_usage=memusage();
     host=NULL;
-    while(cpu_usage>cpu_usage_max){
-      cpu_usage=cpuusage();
+    while(cpu_usage>cpu_usage_max||mem_usage>mem_usage_max){
       Sleep(1000);
+      cpu_usage=cpuusage();
+      mem_usage=memusage();
     }
   }
   else{
@@ -307,6 +322,9 @@ void usage(char *prog){
   printf("  -h        - display this message\n");
 #ifdef pp_LINUX  
   printf("  -hosts hostfiles - file containing a list of host names to run jobs on\n");
+#endif
+  printf("  -m max    - wait to run prog until memory usage is less than max (25-100%s)\n",pp);
+#ifdef pp_LINUX  
   printf("  -p path   - specify directory path to change to after ssh'ing to remote host\n");
 #endif  
   printf("  -u max    - wait to run prog until cpu usage is less than max (25-100%s)\n",pp);

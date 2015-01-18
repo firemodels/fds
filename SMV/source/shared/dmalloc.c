@@ -22,6 +22,27 @@ char dmalloc_revision[]="$Revision$";
 static blockinfo *GetBlockInfo(bbyte *pb);
 #endif
 
+#ifdef WIN32
+
+// return memory usage between 0% and 100%
+
+int memusage(void){
+  MEMORYSTATUS stat;
+  int load;
+
+  GlobalMemoryStatus(&stat);    
+  load=stat.dwMemoryLoad;
+  return load;
+}
+#else
+
+// return memory usage between 0% and 100%
+
+int memusage(void){
+  return 0;
+}
+#endif
+
 /* ------------------ _memorystatus ------------------------ */
 
 #ifdef pp_memstatus

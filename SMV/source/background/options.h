@@ -39,7 +39,7 @@
 #define pp_release
 
 #ifdef pp_release
-#define PROGVERSION "1.0"
+#define PROGVERSION "1.1"
 #endif
 
 #ifdef CPP
