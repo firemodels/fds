@@ -1,5 +1,9 @@
 @echo off
 
+:: $Date$ 
+:: $Revision$
+:: $Author$
+
 set rundebug=%1
 if "%rundebug%" == "1" (
   set DEBUG=_db
@@ -71,8 +75,6 @@ exit /b
 echo "FDS test cases end" >> %TIME_FILE%
 date /t >> %TIME_FILE%
 time /t >> %TIME_FILE%
-
-erase FDS_Cases.bat
 
 :eof2
 
