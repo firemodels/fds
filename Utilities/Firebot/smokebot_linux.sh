@@ -19,6 +19,7 @@ RUNDEBUG="1"
 OPENMP=
 RUN_OPENMP=
 TESTFLAG=
+RUNFDSCASES=
 
 WEBHOSTNAME=blaze.nist.gov
 if [ "$SMOKEBOT_HOSTNAME" != "" ] ; then
@@ -173,6 +174,7 @@ run_auto()
     echo $THIS_FDSSVN>$SVN_FDSFILE
     echo -e "FDS source has changed. $LAST_FDSSVN->$THIS_FDSSVN($THIS_FDSAUTHOR)" >> $MESSAGE_FILE
     cat $SVN_FDSLOG >> $MESSAGE_FILE
+    RUNFDSCASES=1
   fi
   echo -e "Smokebot run initiated." >> $MESSAGE_FILE
   cat $MESSAGE_FILE | mail -s "smokebot run initiated" $mailTo > /dev/null
@@ -427,9 +429,9 @@ check_compile_fds_mpi_db()
    fi
 }
 
-#  =================================================
-#  = Stage 3 - Run verification cases (debug mode) =
-#  =================================================
+#  ============================================================
+#  = Stage 3a - Run Smokeview verification cases (debug mode) =
+#  ============================================================
 
 wait_verification_cases_debug_end()
 {
@@ -438,7 +440,7 @@ wait_verification_cases_debug_end()
    then
      while [[ `ps -u $USER -f | fgrep .fds | grep -v grep` != '' ]]; do
         JOBS_REMAINING=`ps -u $USER -f | fgrep .fds | grep -v grep | wc -l`
-        echo "Waiting for ${JOBS_REMAINING} verification cases to complete." >> $OUTPUT_DIR/stage3
+        echo "Waiting for ${JOBS_REMAINING} verification cases to complete." >> $OUTPUT_DIR/stage3a
         TIME_LIMIT_STAGE="3"
         check_time_limit
         sleep 30
@@ -446,7 +448,7 @@ wait_verification_cases_debug_end()
    else
      while [[ `qstat -a | grep $(whoami) | grep $JOBPREFIX` != '' ]]; do
         JOBS_REMAINING=`qstat -a | grep $(whoami) | grep $JOBPREFIX | wc -l`
-        echo "Waiting for ${JOBS_REMAINING} verification cases to complete." >> $OUTPUT_DIR/stage3
+        echo "Waiting for ${JOBS_REMAINING} verification cases to complete." >> $OUTPUT_DIR/stage3a
         TIME_LIMIT_STAGE="3"
         check_time_limit
         sleep 30
@@ -476,8 +478,8 @@ run_verification_cases_debug()
    cd $FDS_SVNROOT/Verification/scripts
 
    # Submit SMV verification cases and wait for them to start
-   echo 'Running SMV verification cases:' >> $OUTPUT_DIR/stage3 2>&1
-   ./Run_SMV_Cases.sh $USEINSTALL2 -m 2 -d -q $SMOKEBOT_QUEUE -j $JOBPREFIX >> $OUTPUT_DIR/stage3 2>&1
+   echo 'Running SMV verification cases:' >> $OUTPUT_DIR/stage3a 2>&1
+   ./Run_SMV_Cases.sh $USEINSTALL2 -m 2 -d -q $SMOKEBOT_QUEUE -j $JOBPREFIX >> $OUTPUT_DIR/stage3a 2>&1
 
    # Wait for SMV verification cases to end
    wait_verification_cases_debug_end
@@ -489,31 +491,122 @@ check_verification_cases_debug()
    # Scan and report any errors in FDS verification cases
    cd $FDS_SVNROOT/Verification
 
-   if [[ `grep -rIi 'Run aborted' $OUTPUT_DIR/stage3` == "" ]] && \
+   if [[ `grep -rIi 'Run aborted' $OUTPUT_DIR/stage3a` == "" ]] && \
       [[ `grep -rIi 'Segmentation' Visualization/* WUI/* Immersed_Boundary_Method/*` == "" ]] && \
       [[ `grep -rI 'ERROR:' Visualization/* WUI/* Immersed_Boundary_Method/*` == "" ]] && \
       [[ `grep -rIi 'STOP: Numerical' Visualization/* WUI/* Immersed_Boundary_Method/*` == "" ]] && \
       [[ `grep -rIi -A 20 'forrtl' Visualization/* WUI/* Immersed_Boundary_Method/*` == "" ]]
    then
-      stage3_success=true
+      stage3a_success=true
    else
-      grep -rIi 'Run aborted' $OUTPUT_DIR/stage3 > $OUTPUT_DIR/stage3_errors
-      grep -rIi 'Segmentation' Visualization/* WUI/* Immersed_Boundary_Method/* >> $OUTPUT_DIR/stage3_errors
-      grep -rI 'ERROR:' Visualization/* WUI/* Immersed_Boundary_Method/* >> $OUTPUT_DIR/stage3_errors
-      grep -rIi 'STOP: Numerical' -rIi Visualization/* WUI/* Immersed_Boundary_Method/* >> $OUTPUT_DIR/stage3_errors
-      grep -rIi -A 20 'forrtl' Visualization/* WUI/* Immersed_Boundary_Method/* >> $OUTPUT_DIR/stage3_errors
+      grep -rIi 'Run aborted' $OUTPUT_DIR/stage3a > $OUTPUT_DIR/stage3a_errors
+      grep -rIi 'Segmentation' Visualization/* WUI/* Immersed_Boundary_Method/* >> $OUTPUT_DIR/stage3a_errors
+      grep -rI 'ERROR:' Visualization/* WUI/* Immersed_Boundary_Method/* >> $OUTPUT_DIR/stage3a_errors
+      grep -rIi 'STOP: Numerical' -rIi Visualization/* WUI/* Immersed_Boundary_Method/* >> $OUTPUT_DIR/stage3a_errors
+      grep -rIi -A 20 'forrtl' Visualization/* WUI/* Immersed_Boundary_Method/* >> $OUTPUT_DIR/stage3a_errors
       
-      echo "Errors from Stage 3 - Run verification cases (debug mode):" >> $ERROR_LOG
-      cat $OUTPUT_DIR/stage3_errors >> $ERROR_LOG
+      echo "Errors from Stage 3a - Run verification cases (debug mode):" >> $ERROR_LOG
+      cat $OUTPUT_DIR/stage3a_errors >> $ERROR_LOG
       echo "" >> $ERROR_LOG
       THIS_FDS_FAILED=1
    fi
-   if [[ `grep 'Warning' -rI $OUTPUT_DIR/stage3` == "" ]] 
+   if [[ `grep 'Warning' -rI $OUTPUT_DIR/stage3a` == "" ]] 
    then
       no_warnings=true
    else
-      echo "Stage 3 warnings:" >> $WARNING_LOG
-      grep 'Warning' -rI $OUTPUT_DIR/stage3 >> $WARNING_LOG
+      echo "Stage 3a warnings:" >> $WARNING_LOG
+      grep 'Warning' -rI $OUTPUT_DIR/stage3a >> $WARNING_LOG
+      echo "" >> $WARNING_LOG
+   fi
+}
+
+#  ======================================================
+#  = Stage 3b - Run FDS verification cases (debug mode) =
+#  ======================================================
+
+wait_fds_verification_cases_debug_end()
+{
+   # Scans qstat and waits for verification cases to end
+   if [[ "$SMOKEBOT_QUEUE" == "none" ]]
+   then
+     while [[ `ps -u $USER -f | fgrep .fds | grep -v grep` != '' ]]; do
+        JOBS_REMAINING=`ps -u $USER -f | fgrep .fds | grep -v grep | wc -l`
+        echo "Waiting for ${JOBS_REMAINING} verification cases to complete." >> $OUTPUT_DIR/stage3b
+        TIME_LIMIT_STAGE="3"
+        check_time_limit
+        sleep 30
+     done
+   else
+     while [[ `qstat -a | grep $(whoami) | grep $JOBPREFIX` != '' ]]; do
+        JOBS_REMAINING=`qstat -a | grep $(whoami) | grep $JOBPREFIX | wc -l`
+        echo "Waiting for ${JOBS_REMAINING} verification cases to complete." >> $OUTPUT_DIR/stage3b
+        TIME_LIMIT_STAGE="3"
+        check_time_limit
+        sleep 30
+     done
+   fi
+}
+
+run_fds_verification_cases_debug()
+{
+   #  ======================
+   #  = Remove .stop files =
+   #  ======================
+
+   # Remove all .stop and .err files from Verification directories (recursively)
+   cd $FDS_SVNROOT/Verification
+   find . -name '*.stop' -exec rm -f {} \;
+   find . -name '*.err' -exec rm -f {} \;
+   find . -name '*.out' -exec rm -f {} \;
+   find . -name '*.smv' -exec rm -f {} \;
+   find . -name '*.smv' -exec rm -f {} \;
+   find . -name '*.smv' -exec rm -f {} \;
+
+   #  =====================
+   #  = Run all FDS cases =
+   #  =====================
+
+   cd $FDS_SVNROOT/Verification
+
+   # Submit FDS verification cases and wait for them to start
+   echo 'Running FDS verification cases:' >> $OUTPUT_DIR/stage3b 2>&1
+   ./Run_FDS_Cases.sh -m 2 -d -q $SMOKEBOT_QUEUE -j $JOBPREFIX >> $OUTPUT_DIR/stage3b 2>&1
+
+   # Wait for FDS verification cases to end
+   wait_fds_verification_cases_debug_end
+
+}
+
+check_fds_verification_cases_debug()
+{
+   # Scan and report any errors in FDS verification cases
+   cd $FDS_SVNROOT/Verification
+
+   if [[ `grep -rIi 'Run aborted' $OUTPUT_DIR/stage3b` == "" ]] && \
+      [[ `grep -rIi 'Segmentation' Visualization/* WUI/* Immersed_Boundary_Method/*` == "" ]] && \
+      [[ `grep -rI 'ERROR:' Visualization/* WUI/* Immersed_Boundary_Method/*` == "" ]] && \
+      [[ `grep -rIi 'STOP: Numerical' Visualization/* WUI/* Immersed_Boundary_Method/*` == "" ]] && \
+      [[ `grep -rIi -A 20 'forrtl' Visualization/* WUI/* Immersed_Boundary_Method/*` == "" ]]
+   then
+      stage3b_success=true
+   else
+      grep -rIi 'Run aborted' $OUTPUT_DIR/stage3b > $OUTPUT_DIR/stage3b_errors
+      grep -rIi 'Segmentation' Visualization/* WUI/* Immersed_Boundary_Method/* >> $OUTPUT_DIR/stage3b_errors
+      grep -rI 'ERROR:' Visualization/* WUI/* Immersed_Boundary_Method/* >> $OUTPUT_DIR/stage3b_errors
+      grep -rIi 'STOP: Numerical' -rIi Visualization/* WUI/* Immersed_Boundary_Method/* >> $OUTPUT_DIR/stage3b_errors
+      grep -rIi -A 20 'forrtl' Visualization/* WUI/* Immersed_Boundary_Method/* >> $OUTPUT_DIR/stage3b_errors
+      
+      echo "Errors from Stage 3b - Run verification cases (debug mode):" >> $ERROR_LOG
+      cat $OUTPUT_DIR/stage3b_errors >> $ERROR_LOG
+      echo "" >> $ERROR_LOG
+      THIS_FDS_FAILED=1
+   fi
+   if [[ `grep 'Warning' -rI $OUTPUT_DIR/stage3b` == "" ]] 
+   then
+      no_warnings=true
+   else
+      echo "Stage 3b warnings:" >> $WARNING_LOG
+      grep 'Warning' -rI $OUTPUT_DIR/stage3b >> $WARNING_LOG
       echo "" >> $WARNING_LOG
    fi
 }
@@ -1198,6 +1291,10 @@ RUNCASES_beg=`GET_TIME`
 if [[ $stage2a_success && $stage2b_success && "$RUNDEBUG" == "1" ]] ; then
    run_verification_cases_debug
    check_verification_cases_debug
+   if [ "$RUNFDSCASES" == "1" ] ; then
+     run_fds_verification_cases_debug
+     check_fds_verification_cases_debug
+   fi
 fi
 
 ### Stage 5 ###
