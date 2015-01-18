@@ -29,7 +29,7 @@ if exist %stopfile% (
    erase %stopfile%
 )
 if "%rundebug%" == "1" (
-   echo 5 > %stopfile%
+   echo 2 > %stopfile%
 )
 
 %FDS% %in%  2> %out%

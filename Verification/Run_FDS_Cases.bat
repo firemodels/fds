@@ -34,7 +34,7 @@ call :getfilename %FDSEXE%
 set FDSBASE=%file%
 
 set BACKGROUNDEXE=%SVNROOT%\Utilities\background\intel_win_32\background.exe
-set FDS=%BACKGROUNDEXE% -u 75 -d 10 %FDSEXE%
+set FDS=%BACKGROUNDEXE% -u 60 -m 70 -d 5 %FDSEXE%
 set QFDS=call %SVNROOT%\Utilities\Scripts\runfds.bat
 
 echo.
