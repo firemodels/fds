@@ -247,6 +247,12 @@ ifort -o fds2ascii_win_64.exe /nologo ..\..\Data_processing\fds2ascii.f90  1>> %
 call :does_file_exist fds2ascii_win_64.exe %OUTDIR%\stage3.txt|| exit /b 1
 
 if %haveCC% == 1 (
+  echo             background
+  cd %svnroot%\Utilities\background\intel_win_32
+  erase *.obj *.mod *.exe 1>> %OUTDIR%\stage3.txt 2>&1
+  make -f ..\Makefile intel_win_32 1>> %OUTDIR%\stage3.txt 2>&1
+  call :does_file_exist background.exe %OUTDIR%\stage3.txt
+
   echo             smokediff
   cd %svnroot%\Utilities\smokediff\intel_win_64
   erase *.obj *.mod *.exe 1>> %OUTDIR%\stage3.txt 2>&1
