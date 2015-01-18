@@ -1,5 +1,9 @@
 @echo off
 
+:: $Date$ 
+:: $Revision$
+:: $Author$
+
 :: set number of openmp threads
 
 set OMP_NUM_THREADS=1
@@ -28,6 +32,6 @@ if "%rundebug%" == "1" (
    echo 5 > %stopfile%
 )
 
-%FDS% %in%  > %out%
+%FDS% %in%  2> %out%
 
 cd %BASEDIR%

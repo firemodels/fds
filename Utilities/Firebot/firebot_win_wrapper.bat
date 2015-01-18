@@ -1,7 +1,18 @@
 @echo off
-if not exist firebot_win_running.txt (
-  echo 1 > firebot_win_running.txt
+
+:: $Date$ 
+:: $Revision$
+:: $Author$
+
+set curdir=%CD%
+set running=firebot_win_running.status
+if not exist %running% (
   svn update
+  echo 1 > %running%
   call firebot_win.bat debug
-  erase firebot_win_running.txt
+  cd %curdir%
+  erase %running%
+) else (
+  echo firebot_win is already running
+  echo erase the file %running% if this is not the case
 )
