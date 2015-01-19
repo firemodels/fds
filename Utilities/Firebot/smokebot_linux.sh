@@ -174,7 +174,7 @@ run_auto()
     echo $THIS_FDSSVN>$SVN_FDSFILE
     echo -e "FDS source has changed. $LAST_FDSSVN->$THIS_FDSSVN($THIS_FDSAUTHOR)" >> $MESSAGE_FILE
     cat $SVN_FDSLOG >> $MESSAGE_FILE
-    RUNFDSCASES=1
+#    RUNFDSCASES=1
   fi
   echo -e "Smokebot run initiated." >> $MESSAGE_FILE
   cat $MESSAGE_FILE | mail -s "smokebot run initiated" $mailTo > /dev/null
