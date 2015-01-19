@@ -37,14 +37,17 @@ set svnroot=%userprofile%\%fdsbasename%
 set cfastroot=%userprofile%\%cfastbasename%
 set email=%svnroot%\SMV\scripts\email.bat
 
-set errorlog=%OUTDIR%\stage_errors.txt
-set errorlogpc=%OUTDIR%\stage_errors_pc.txt
-set warninglog=%OUTDIR%\stage_warnings.txt
-set warninglogpc=%OUTDIR%\stage_warnings_pc.txt
-set errorwarninglog=%OUTDIR%\stage_errorswarnings.txt
-set infofile=%OUTDIR%\stage_info.txt
-set revisionfile=%OUTDIR%\revision.txt
+set errorlog=%OUTDIR%\firebot_errors.txt
+set errorlogpc=%OUTDIR%\firebot_errors_pc.txt
+set warninglog=%OUTDIR%\firebot_warnings.txt
+set warninglogpc=%OUTDIR%\firebot_warnings_pc.txt
+set errorwarninglog=%OUTDIR%\firebot_errorswarnings.txt
+set infofile=%OUTDIR%\firebot_info.txt
+set revisionfile=%OUTDIR%\fds-smv_revision.txt
 set stagestatus=%OUTDIR%\stage_status.log
+set counta=%OUTDIR%\firebot_count0a.txt
+set countb=%OUTDIR%\firebot_count0b.txt
+set scratchfile=%OUTDIR%\firebot_scratch.txt
 
 set fromsummarydir=%svnroot%\Manuals\SMV_Summary
 set tosummarydir="%SMOKEBOT_SUMMARY_DIR%"
@@ -92,9 +95,9 @@ call :GET_TIME
 set PRELIM_beg=%current_time% 
 
 
-ifort 1> %OUTDIR%\stage0a.txt 2>&1
-type %OUTDIR%\stage0a.txt | find /i /c "not recognized" > %OUTDIR%\stage_count0a.txt
-set /p nothaveFORTRAN=<%OUTDIR%\stage_count0a.txt
+ifort 1> %scratchfile% 2>&1
+type %scratchfile% | find /i /c "not recognized" > %counta%
+set /p nothaveFORTRAN=<%counta%
 if %nothaveFORTRAN% == 1 (
   echo "***Fatal error: Fortran compiler not present"
   echo "***Fatal error: Fortran compiler not present" > %errorlog%
@@ -104,9 +107,9 @@ if %nothaveFORTRAN% == 1 (
 )
 echo             found Fortran
 
-icl 1> %OUTDIR%\stage0b.txt 2>&1
-type %OUTDIR%\stage0b.txt | find /i /c "not recognized" > %OUTDIR%\stage_count0b.txt
-set /p nothaveCC=<%OUTDIR%\stage_count0b.txt
+icl 1> %scratchfile% 2>&1
+type %scratchfile% | find /i /c "not recognized" > %countb%
+set /p nothaveCC=<%countb%
 if %nothaveCC% == 1 (
   set haveCC=0
   echo "***Warning: C/C++ compiler not found - using installed Smokeview to generate images"
@@ -271,6 +274,8 @@ if %haveCC% == 1 (
   make -f ..\Makefile intel_win_64 1>> %OUTDIR%\stage3.txt 2>&1
   call :does_file_exist wind2fds_win_64.exe %OUTDIR%\stage3.txt|| exit /b 1
 ) else (
+  call :is_file_installed background|| exit /b 1
+  echo             background not built, using installed version
   call :is_file_installed smokediff|| exit /b 1
   echo             smokediff not built, using installed version
   call :is_file_installed smokezip|| exit /b 1
@@ -299,7 +304,7 @@ call Run_FDS_cases 1 1> %OUTDIR%\stage4a.txt 2>&1
 
 set haveerrors_now=0
 
-echo "" > %OUTDIR%\stage_error.txt
+echo. > %OUTDIR%\stage_error.txt
 
 call Check_FDS_cases 
 
@@ -322,7 +327,7 @@ call Run_FDS_cases 0 1> %OUTDIR%\stage4b.txt 2>&1
 
 set haveerrors_now=0
 
-echo "" > %OUTDIR%\stage_error.txt
+echo. > %OUTDIR%\stage_error.txt
 
 call Check_FDS_cases 
 
@@ -437,13 +442,13 @@ if exist %emailexe% (
   )
   if %havewarnings% == 0 (
     if %haveerrors% == 0 (
-      call %email% %mailToList% "firebot build success on %COMPUTERNAME%! %revision%" %infofile%
+      call %email% %mailToList% "firebot success on %COMPUTERNAME%! %revision%" %infofile%
     ) else (
       echo "start: %startdate% %starttime% " > %infofile%
       echo " stop: %stopdate% %stoptime% " >> %infofile%
       echo. >> %infofile%
       type %errorlogpc% >> %infofile%
-      call %email% %mailToList% "firebot build failure on %COMPUTERNAME%! %revision%" %infofile%
+      call %email% %mailToList% "firebot failure on %COMPUTERNAME%! %revision%" %infofile%
     )
   ) else (
     if %haveerrors% == 0 (
@@ -451,7 +456,7 @@ if exist %emailexe% (
       echo " stop: %stopdate% %stoptime% " >> %infofile%
       echo. >> %infofile%
       type %warninglogpc% >> %infofile%
-      %email% %mailToList% "firebot build success with warnings on %COMPUTERNAME% %revision%" %infofile%
+      %email% %mailToList% "firebot success with warnings on %COMPUTERNAME% %revision%" %infofile%
     ) else (
       echo "start: %startdate% %starttime% " > %infofile%
       echo " stop: %stopdate% %stoptime% " >> %infofile%
@@ -459,7 +464,7 @@ if exist %emailexe% (
       type %errorlogpc% >> %infofile%
       echo. >> %infofile%
       type %warninglogpc% >> %infofile%
-      call %email% %mailToList% "firebot build failure on %COMPUTERNAME%! %revision%" %infofile%
+      call %email% %mailToList% "firebot failure on %COMPUTERNAME%! %revision%" %infofile%
     )
   )
 )
@@ -475,11 +480,11 @@ goto :eof
       set filename=%%~nxa
    )    
 
-  echo ***Fatal error: firebot build failure on %COMPUTERNAME% %revision%, error log: %filename%
+  echo ***Fatal error: firebot failure on %COMPUTERNAME% %revision%, error log: %filename%
   sed "s/$/\r/" < %errorlog% > %errorlogpc%
   if exist %emailexe% (
     echo sending email to %mailToList%
-    call %email% %mailToList% "firebot build failure on %COMPUTERNAME% %revision%" %errorlogpc%
+    call %email% %mailToList% "firebot failure on %COMPUTERNAME% %revision%" %errorlogpc%
   )
 exit /b
 
