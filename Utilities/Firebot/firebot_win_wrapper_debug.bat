@@ -9,7 +9,7 @@ set running=firebot_win_running.status
 if not exist %running% (
   svn update
   echo 1 > %running%
-  call firebot_win.bat
+  call firebot_win.bat debug
   cd %curdir%
   erase %running%
 ) else (
