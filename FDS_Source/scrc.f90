@@ -448,20 +448,23 @@ INTEGER :: TYPE_LAYER      = NSCARC_LAYER_ONE             !< Type of layers (for
 
 INTEGER, PARAMETER :: N_TIMERS_SCARC=18                   !< Number of timers for ScaRC
 !>
-INTEGER :: NMESHES_MIN, NMESHES_MAX                       !< Range of meshes which must be processed for MYID
 INTEGER :: NLEVEL, NLEVEL_MAX, NLEVEL_MIN                 !< Total, minimum and maximum number of multigrid levels
 INTEGER :: NMASTER, NC_COARSE0                            !< Settings for global coarse solver
 INTEGER :: NREQ_SCARC, N_EXCHANGES, TAG_SCARC             !< Variables for data exchange
 INTEGER :: SNODE, RNODE                                   !< Process identifier for data exchange
 INTEGER :: STATUS2_SCARC(MPI_STATUS_SIZE)                 !< Status array for data excange
+REAL(EB):: SP_GLOBAL                                      !< Global scalar product
 !>
-INTEGER,  ALLOCATABLE, DIMENSION (:)  :: NC_GLOBAL        !< Global number of cells (over all meshes)
+INTEGER,  ALLOCATABLE, DIMENSION (:)  :: NC_GLOBAL        !< Global cell number (over all meshes) over levels
+INTEGER,  ALLOCATABLE, DIMENSION (:,:):: NC_GROUP         !< Group cell numbers (related to a process group) over levels
 INTEGER,  ALLOCATABLE, DIMENSION (:)  :: NC_LOCAL         !< Local number of cells (related to single meshes)
 INTEGER,  ALLOCATABLE, DIMENSION (:)  :: NC_COARSE        !< Global number of cells for coarse solver
 INTEGER,  ALLOCATABLE, DIMENSION (:)  :: REQ_SCARC        !< Request array for data exchange
 INTEGER,  ALLOCATABLE, DIMENSION (:)  :: COUNTS_SCARC     !< Counter array for data exchange
 INTEGER,  ALLOCATABLE, DIMENSION (:)  :: DISPLS_SCARC     !< Displacement array for data exchange
+INTEGER,  ALLOCATABLE, DIMENSION (:)  :: GROUP_ID         !< Displacement array for data exchange
 REAL(EB), ALLOCATABLE, DIMENSION (:)  :: SP_LOCAL         !< Local scalar procucts
+REAL(EB), ALLOCATABLE, DIMENSION (:)  :: SP_GROUP         !< Scalar procuct of process group
 REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: TUSED_SCARC      !< Time measurement array
 
  
@@ -765,7 +768,6 @@ CALL SCARC_INPUT_PARSER                  !< parse input parameters (correspondin
 !> ------------------------------------------------------------------------------------------------
 CALL SCARC_SETUP_DIMENSION               !< define dimension of underlying problem
 CALL SCARC_SETUP_DEBUGGING               !< open debug file if requested
-CALL SCARC_SETUP_PROCESSES               !< determine set of meshes which must be processed on MYID
 CALL SCARC_SETUP_LEVELS                  !< define number of necessary grid levels 
 CALL SCARC_SETUP_STRUCTURES              !< allocate requested ScaRC-types for all necessary grid levels
 CALL SCARC_SETUP_MESHES                  !< set mesh information
@@ -1084,37 +1086,17 @@ SUBROUTINE SCARC_SETUP_DEBUGGING
 INTEGER:: NM
 
 IF (TYPE_DEBUG>NSCARC_DEBUG_NONE) THEN
-   IF (USE_MPI) THEN
-      DO NM=1,NMESHES
-         IF (PROCESS(NM)/=MYID) CYCLE
-         WRITE (SCARC_FN, '(A,A,i3.3)') TRIM(CHID),'.scarc',MYID+1
-         LU_SCARC = GET_FILE_NUMBER()
-         OPEN (LU_SCARC, FILE=SCARC_FN)
-      ENDDO
-   ELSE
+   DO NM=1,NMESHES
+      IF (PROCESS(NM)/=MYID) CYCLE
       WRITE (SCARC_FN, '(A,A,i3.3)') TRIM(CHID),'.scarc',MYID+1
       LU_SCARC = GET_FILE_NUMBER()
       OPEN (LU_SCARC, FILE=SCARC_FN)
-   ENDIF
+   ENDDO
 ENDIF
 
 END SUBROUTINE SCARC_SETUP_DEBUGGING
 
 
-!> ------------------------------------------------------------------------------------------------
-!> Serial or parallel version ? Decide which meshes must be processed
-!> ------------------------------------------------------------------------------------------------
-SUBROUTINE SCARC_SETUP_PROCESSES
-IF (USE_MPI) THEN
-   NMESHES_MIN = MYID+1
-   NMESHES_MAX = MYID+1
-ELSE
-   NMESHES_MIN = 1
-   NMESHES_MAX = NMESHES
-ENDIF
-END SUBROUTINE SCARC_SETUP_PROCESSES
-
- 
 !> ------------------------------------------------------------------------------------------------
 !> Determine number of grid levels  (1 for CG/BICG-method, NLEVEL for MG-method)
 !> Note: NLEVEL_MIN corresponds to finest grid resolution, NLEVEL_MAX to coarsest resolution
@@ -1235,7 +1217,9 @@ CALL CHKMEMERR ('SCARC_SETUP', 'SCARC', IERR)
 !> ------------------------------------------------------------------------------------------------
 !> Allocate local OSCARC, MESHES and PRECON structures for single meshes
 !> ------------------------------------------------------------------------------------------------
-MESHES_LOOP: DO NM = NMESHES_MIN, NMESHES_MAX
+MESHES_LOOP: DO NM = 1, NMESHES
+
+   IF (PROCESS(NM) /= MYID) CYCLE
 
    S => SCARC(NM)
 
@@ -1269,7 +1253,9 @@ TYPE (SCARC_LEVEL_TYPE), POINTER :: SL
 
 IERR=0
 
-LEVEL_MESHES_LOOP: DO NM = NMESHES_MIN, NMESHES_MAX
+LEVEL_MESHES_LOOP: DO NM = 1, NMESHES
+
+   IF (PROCESS(NM) /= MYID) CYCLE
 
    M => MESHES(NM)
    S => SCARC(NM)
@@ -1484,7 +1470,9 @@ TAG_SCARC   = 99
 !> ------------------------------------------------------------------------------------------------
 !> Allocate basic WALL and FACE types on mesh NM for all requested grid levels
 !> ------------------------------------------------------------------------------------------------
-MESHES_LOOP: DO NM = NMESHES_MIN, NMESHES_MAX
+MESHES_LOOP: DO NM = 1, NMESHES
+
+   IF (PROCESS(NM) /= MYID) CYCLE
    
    M => MESHES(NM)
    S => SCARC(NM)
@@ -1555,7 +1543,9 @@ ENDDO MESHES_LOOP
 !> ------------------------------------------------------------------------------------------------
 !> Initialize level structures on neighboring meshes
 !> ------------------------------------------------------------------------------------------------
-LEVEL_MESHES_LOOP: DO NM = NMESHES_MIN, NMESHES_MAX
+LEVEL_MESHES_LOOP: DO NM = 1, NMESHES
+
+   IF (PROCESS(NM) /= MYID) CYCLE
    
    M => MESHES(NM)
    S => SCARC(NM)
@@ -1672,7 +1662,10 @@ CALL SCARC_EXCHANGE (NSCARC_EXCHANGE_BASIC , NLEVEL_MIN)
 !>
 !> Allocate send and receive buffers (real and integer) in correct lengths
 !>
-DO NM = NMESHES_MIN, NMESHES_MAX
+DO NM = 1, NMESHES
+
+   IF (PROCESS(NM) /= MYID) CYCLE
+
    S => SCARC(NM)
    DO INBR = 1, S%NUM_NEIGHBORS
 
@@ -1816,7 +1809,9 @@ TYPE (SCARC_LEVEL_TYPE) , POINTER :: OSLF, OSLC
 IERR=0
 
 
-MESHES_LOOP: DO NM = NMESHES_MIN, NMESHES_MAX
+MESHES_LOOP: DO NM = 1, NMESHES
+
+   IF (PROCESS(NM) /= MYID) CYCLE
 
    M => MESHES(NM)
    S => SCARC(NM)
@@ -2172,11 +2167,11 @@ ENDDO MESHES_LOOP
 IF (TYPE_METHOD == NSCARC_METHOD_MULTIGRID .AND. TYPE_MULTIGRID == NSCARC_MULTIGRID_GEOMETRIC) THEN
    DO NL=NLEVEL_MIN, NLEVEL_MAX
       CALL SCARC_DEBUG_QUANTITY (NSCARC_DEBUG_WALLINFO , NL, 'SETUP_WALL', 'WALL')
-      CALL SCARC_DEBUG_QUANTITY (NSCARC_DEBUG_FACEINFO , NL, 'SETUP_WALL', 'FACE')
+      !CALL SCARC_DEBUG_QUANTITY (NSCARC_DEBUG_FACEINFO , NL, 'SETUP_WALL', 'FACE')
    ENDDO
 ELSE
    CALL SCARC_DEBUG_QUANTITY (NSCARC_DEBUG_WALLINFO , NLEVEL_MIN, 'SETUP_WALL', 'WALL')
-   CALL SCARC_DEBUG_QUANTITY (NSCARC_DEBUG_FACEINFO , NLEVEL_MIN, 'SETUP_WALL', 'FACE')
+   !CALL SCARC_DEBUG_QUANTITY (NSCARC_DEBUG_FACEINFO , NLEVEL_MIN, 'SETUP_WALL', 'FACE')
 ENDIF
 
 
@@ -2185,7 +2180,8 @@ IF (TYPE_DEBUG>NSCARC_DEBUG_NONE      .AND. &
     TYPE_LATEX  > NSCARC_LATEX_ALL)   THEN
 !>   TYPE_LATEX  == NSCARC_LATEX_ALL)   THEN
    MLATEX = 98
-   DO NM = NMESHES_MIN, NMESHES_MAX
+   DO NM = 1, NMESHES
+      IF (PROCESS(NM) /= MYID) CYCLE
       CLATEX = "tables/wall  .tex"
       WRITE(CLATEX(12:13),'(i2.2)') NM
       OPEN (MLATEX, FILE=CLATEX)
@@ -3137,6 +3133,10 @@ ALLOCATE(NC_GLOBAL(NLEVEL_MIN:NLEVEL_MAX), STAT=IERR)
 CALL CHKMEMERR ('SCARC_SETUP', 'NC_GLOBAL', IERR)
 NC_GLOBAL = 0
 
+ALLOCATE(NC_GROUP(N_MPI_PROCESSES, NLEVEL_MIN:NLEVEL_MAX), STAT=IERR)
+CALL CHKMEMERR ('SCARC_SETUP', 'NC_GROUP', IERR)
+NC_GROUP = 0
+
 ALLOCATE(NC_LOCAL(NMESHES), STAT=IERR)
 CALL CHKMEMERR ('SCARC_SETUP', 'NC_LOCAL', IERR)
 NC_LOCAL = 0
@@ -3145,26 +3145,28 @@ ALLOCATE(SP_LOCAL(NMESHES), STAT=IERR)
 CALL CHKMEMERR ('SCARC_SETUP_GLOBAL', 'SP_LOCAL', IERR)
 SP_LOCAL = 0.0_EB
 
+ALLOCATE(SP_GROUP(N_MPI_PROCESSES), STAT=IERR)
+CALL CHKMEMERR ('SCARC_SETUP_GLOBAL', 'SP_GROUP', IERR)
+SP_GROUP = 0.0_EB
+
 !> Compute global number of cells for all levels
 IREFINE=0
 LEVEL_LOOP: DO NL = NLEVEL_MIN, NLEVEL_MAX
 
-   MESHES_LOOP: DO NM = NMESHES_MIN, NMESHES_MAX
+   NC_GLOBAL(NL)  = 0
+   NC_GROUP(:,NL) = 0
+
+   DO NM = 1, NMESHES
+      IF (PROCESS(NM) /= MYID) CYCLE
       NC_LOCAL(NM)=SCARC(NM)%LEVEL(NL)%NC
-   ENDDO MESHES_LOOP
+      NC_GROUP(MYID+1,NL) = NC_GROUP(MYID+1,NL) + NC_LOCAL(NM)
+   ENDDO 
 
    !! Determine global number of cells for all levels 
-   IF (NMESHES>1) THEN
-      IF (USE_MPI) THEN
-         CALL MPI_ALLREDUCE(NC_LOCAL(MYID+1),NC_GLOBAL(NL),1,MPI_INTEGER,MPI_SUM,MPI_COMM_WORLD,IERR)
-      ELSE
-         NC_GLOBAL(NL)=0
-         DO NM=1,NMESHES
-            NC_GLOBAL(NL) = NC_GLOBAL(NL) + NC_LOCAL(NM)
-         ENDDO
-      ENDIF
+   IF (N_MPI_PROCESSES > 1) THEN
+      CALL MPI_ALLREDUCE(NC_GROUP(MYID+1,NL),NC_GLOBAL(NL),1,MPI_INTEGER,MPI_SUM,MPI_COMM_WORLD,IERR)
    ELSE
-      NC_GLOBAL(NL) = NC_LOCAL(1)
+      NC_GLOBAL(NL) = NC_GROUP(1,NL)
    ENDIF
 
 ENDDO LEVEL_LOOP
@@ -3184,13 +3186,16 @@ IF (NMESHES < 0) THEN
 
    LEVEL_LOOP: DO NL = NLEVEL_MIN+1, NLEVEL_MAX
    
-      MESHES_LOOP: DO NM=NMESHES_MIN,NMESHES_MAX
+      MESHES_LOOP: DO NM=1, NMESHES
+
+         IF (PROCESS(NM) /= MYID) CYCLE
+
          OMESHES_LOOP: DO NOM=1,NMESHES
    
             OS  => SCARC(NM)%OSCARC(NOM)
             OSO => SCARC(NOM)%OSCARC(NM)
    
-            IF (USE_MPI) THEN
+            IF (N_MPI_PROCESSES > 1) THEN
                CALL MPI_SEND(OS%I_MIN_R,1,MPI_INTEGER,PROCESS(NOM),1,MPI_COMM_WORLD,IERR)
                CALL MPI_SEND(OS%I_MAX_R,1,MPI_INTEGER,PROCESS(NOM),1,MPI_COMM_WORLD,IERR)
                CALL MPI_SEND(OS%J_MIN_R,1,MPI_INTEGER,PROCESS(NOM),1,MPI_COMM_WORLD,IERR)
@@ -3212,11 +3217,13 @@ IF (NMESHES < 0) THEN
       ENDDO MESHES_LOOP
    
       MESHES_LOOP2: DO NM=1,NMESHES
-         OMESHES_LOOP2: DO NOM=NMESHES_MIN,NMESHES_MAX
+         OMESHES_LOOP2: DO NOM=1, NMESHES
+
+            IF (PROCESS(NOM) /= MYID) CYCLE
    
             OSO => SCARC(NOM)%OSCARC(NM)
    
-            IF (USE_MPI) THEN
+            IF (N_MPI_PROCESSES > 1) THEN
                CALL MPI_RECV(OSO%I_MIN_S,1,MPI_INTEGER,PROCESS(NM),1,MPI_COMM_WORLD,STATUS2_SCARC,IERR)
                CALL MPI_RECV(OSO%I_MAX_S,1,MPI_INTEGER,PROCESS(NM),1,MPI_COMM_WORLD,STATUS2_SCARC,IERR)
                CALL MPI_RECV(OSO%J_MIN_S,1,MPI_INTEGER,PROCESS(NM),1,MPI_COMM_WORLD,STATUS2_SCARC,IERR)
@@ -3255,7 +3262,9 @@ SELECT CASE (TYPE_MULTIGRID)
 END SELECT
 
 
-MESHES_LOOP: DO NM = NMESHES_MIN, NMESHES_MAX
+MESHES_LOOP: DO NM = 1, NMESHES
+
+   IF (PROCESS(NM) /= MYID) CYCLE
 
 !WRITE(*,*) 'ALLOCATING MATRIX FOR MESH ',NM
    SELECT_SOLVER: SELECT CASE (TYPE_METHOD)
@@ -3655,7 +3664,9 @@ SELECT_TYPE: SELECT CASE (NTYPE)
 
       !WRITE(LU_SCARC,*) 'MATRIX_STENCIL:'
 
-      STENCIL_MESHES_LOOP: DO NM = NMESHES_MIN, NMESHES_MAX
+      STENCIL_MESHES_LOOP: DO NM = 1, NMESHES
+ 
+         IF (PROCESS(NM) /= MYID) CYCLE
 
          S => SCARC(NM)
          SLF => S%LEVEL(NL)
@@ -3688,7 +3699,9 @@ SELECT_TYPE: SELECT CASE (NTYPE)
    !! --------------------------------------------------------------------------------------------
    CASE (NSCARC_MATRIX_SYSTEM)
 
-      SYSTEM_MESHES_LOOP: DO NM = NMESHES_MIN, NMESHES_MAX
+      SYSTEM_MESHES_LOOP: DO NM = 1, NMESHES
+
+         IF (PROCESS(NM) /= MYID) CYCLE
          
          S => SCARC(NM)
          SLF => S%LEVEL(NL)
@@ -3754,7 +3767,9 @@ SELECT_TYPE: SELECT CASE (NTYPE)
    !! --------------------------------------------------------------------------------------------
    CASE (NSCARC_MATRIX_PROLONGATION)
    
-      PROLONGATION_MESHES_LOOP: DO NM = NMESHES_MIN, NMESHES_MAX
+      PROLONGATION_MESHES_LOOP: DO NM = 1, NMESHES
+
+         IF (PROCESS(NM) /= MYID) CYCLE
          
          S => SCARC(NM)
          SLF => S%LEVEL(NL)
@@ -3999,7 +4014,9 @@ SELECT_TYPE: SELECT CASE (NTYPE)
  !! --------------------------------------------------------------------------------------------
    CASE (NSCARC_MATRIX_GMG)
    
-      GMG_MESHES_LOOP: DO NM = NMESHES_MIN, NMESHES_MAX
+      GMG_MESHES_LOOP: DO NM = 1, NMESHES
+
+         IF (PROCESS(NM) /= MYID) CYCLE
          
          S => SCARC(NM)
          SLF => S%LEVEL(NL)
@@ -4287,7 +4304,10 @@ INTEGER :: NM, NL
 
 IERR = 0
 
-MESHES_LOOP: DO NM = NMESHES_MIN, NMESHES_MAX
+MESHES_LOOP: DO NM = 1, NMESHES
+
+   IF (PROCESS(NM) /= MYID) CYCLE
+
    LEVEL_LOOP: DO NL = NLEVEL_MIN, NLEVEL_MAX
 
       SL => SCARC(NM)%LEVEL(NL)
@@ -4426,7 +4446,9 @@ SELECT CASE (NTYPE)
    !! --------------------------------------------------------------------------------------------------
    CASE (NSCARC_SIZE_MATRIX)
 
-      LEVEL_SYSTEM_MESHES_LOOP: DO NM = NMESHES_MIN, NMESHES_MAX
+      LEVEL_SYSTEM_MESHES_LOOP: DO NM = 1, NMESHES
+
+         IF (PROCESS(NM) /= MYID) CYCLE
       
          SLF => SCARC(NM)%LEVEL(NL)
       
@@ -4469,7 +4491,9 @@ SELECT CASE (NTYPE)
       
       
       !< Determine extended sizes for extended prolongation and restriction matrix
-      LEVEL_SYSTEM_MESHES_LOOP2: DO NM = NMESHES_MIN, NMESHES_MAX
+      LEVEL_SYSTEM_MESHES_LOOP2: DO NM = 1, NMESHES
+
+         IF (PROCESS(NM) /= MYID) CYCLE
       
          SLF => SCARC(NM)%LEVEL(NL)
          SLF%NAE = SLF%NA
@@ -4501,7 +4525,9 @@ SELECT CASE (NTYPE)
    CASE (NSCARC_SIZE_TRANSFER)
 
 
-      TRANSFER_MESHES_LOOP: DO NM = NMESHES_MIN, NMESHES_MAX
+      TRANSFER_MESHES_LOOP: DO NM = 1, NMESHES
+
+         IF (PROCESS(NM) /= MYID) CYCLE
       
          SLF => SCARC(NM)%LEVEL(NL)
          SLC => SCARC(NM)%LEVEL(NL+1)
@@ -4645,7 +4671,9 @@ SELECT CASE (NTYPE)
       IF (NMESHES > 1)  CALL SCARC_EXCHANGE (NSCARC_EXCHANGE_TRANSFER_SIZE, NL)
       
       !< Determine extended sizes for extended prolongation and restriction matrix
-      TRANSFER_MESHES_LOOP2: DO NM = NMESHES_MIN, NMESHES_MAX
+      TRANSFER_MESHES_LOOP2: DO NM = 1, NMESHES
+
+         IF (PROCESS(NM) /= MYID) CYCLE
       
          SLF => SCARC(NM)%LEVEL(NL)
 
@@ -4697,7 +4725,9 @@ SELECT CASE (NTYPE)
       ENDDO TRANSFER_MESHES_LOOP2
 
       !< Determine extended sizes for extended prolongation and restriction matrix
-      TRANSFER_MESHES_LOOP3: DO NM = NMESHES_MIN, NMESHES_MAX
+      TRANSFER_MESHES_LOOP3: DO NM = 1, NMESHES
+
+         IF (PROCESS(NM) /= MYID) CYCLE
       
          SLF => SCARC(NM)%LEVEL(NL)
          SLC => SCARC(NM)%LEVEL(NL+1)
@@ -4771,7 +4801,9 @@ LEVEL_LOOP: DO NL = NLEVEL_MIN, NLEVEL_MAX-1
    !! ---------------------------------------------------------------------------------------------
    !IF (NL == NLEVEL_MIN) THEN
 
-   DO NM = NMESHES_MIN, NMESHES_MAX
+   DO NM = 1, NMESHES
+
+      IF (PROCESS(NM) /= MYID) CYCLE
 
       SLF => SCARC(NM)%LEVEL(NL)                       
 
@@ -4864,7 +4896,9 @@ LEVEL_LOOP: DO NL = NLEVEL_MIN, NLEVEL_MAX-1
    !!  NCCE : number of extended cells in coarse grid 
    !!  NCW  : number of wall cells in coarse grid
    !! --------------------------------------------------------------------------------------------
-   DO NM = NMESHES_MIN, NMESHES_MAX
+   DO NM = 1, NMESHES
+
+      IF (PROCESS(NM) /= MYID) CYCLE
 
       SLF => SCARC(NM)%LEVEL(NL)            
 
@@ -4966,7 +5000,8 @@ LEVEL_LOOP: DO NL = NLEVEL_MIN, NLEVEL_MAX-1
    !CALL SCARC_LATEX_GRID(NSCARC_LATEX_STAGGERED,NL)
    !CALL SCARC_LATEX_GRID(NSCARC_LATEX_EQUAL,NL)
    !CALL SCARC_LATEX_GRID(NSCARC_LATEX_NUMBER,NL)
-   !DO NM = NMESHES_MIN, NMESHES_MAX
+   !DO NM = 1, NMESHES
+   !   IF (PROCESS(NM) /= MYID) CYCLE
    !   SLF => SCARC(NM)%LEVEL(NL)            
    !   CALL SCARC_LATEX_MATRIX2(SLF%A, SLF%A_ROW, SLF%A_COL, SLF%NC  , SLF%NC  , NM, NL, 'A')
    !   CALL SCARC_LATEX_MATRIX2(SLF%R, SLF%R_ROW, SLF%R_COL, SLF%NCCE, SLF%NCE , NM, NL, 'R')
@@ -4983,7 +5018,9 @@ LEVEL_LOOP: DO NL = NLEVEL_MIN, NLEVEL_MAX-1
    !! Compute coarse grid matrix by multiplication with restriction and prolongation matrix:
    !!  A_coarse := R * A_fine * P
    !! -----------------------------------------------------------------------------------------
-   DO NM = NMESHES_MIN, NMESHES_MAX
+   DO NM = 1, NMESHES
+
+      IF (PROCESS(NM) /= MYID) CYCLE
 
       SLF => SCARC(NM)%LEVEL(NL)               !< Pointer to fine level
       SLC => SCARC(NM)%LEVEL(NL+1)             !< Pointer to coarse level
@@ -5055,7 +5092,8 @@ LEVEL_LOOP: DO NL = NLEVEL_MIN, NLEVEL_MAX-1
 ENDDO LEVEL_LOOP
 
 !DO NL = NLEVEL_MIN, NLEVEL_MAX
-!>  DO NM = NMESHES_MIN, NMESHES_MAX
+!>  DO NM = 1, NMESHES
+!>     IF (PROCESS(NM) /= MYID) CYCLE
 !>     SLF => SCARC(NM)%LEVEL(NL)  
 !>     DEALLOCATE(SLF%MEASURE)
 !>     DEALLOCATE(SLF%CELLTYPE)
@@ -5210,7 +5248,9 @@ SCARC_ROUTINE = 'SCARC_SETUP_SUBDIVISION'
 IOR_LAST    = 0
 NEIGHBORS   = 0
          
-MESHES_LOOP1: DO NM = NMESHES_MIN, NMESHES_MAX
+MESHES_LOOP1: DO NM = 1, NMESHES
+
+   IF (PROCESS(NM) /= MYID) CYCLE
    
    SLC => SCARC(NM)%LEVEL(NL+1)
 
@@ -5273,7 +5313,9 @@ TYPE (SCARC_LEVEL_TYPE), POINTER :: OSLC
 !> Get corresponding adjacent and ghost cell
 !> -------------------------------------------------------------------------
 IF (TYPE_COARSENING < NSCARC_COARSENING_GMG) THEN
-MESHES_LOOP: DO NM = NMESHES_MIN, NMESHES_MAX
+MESHES_LOOP: DO NM = 1, NMESHES
+
+   IF (PROCESS(NM) /= MYID) CYCLE
 
    SLC => SCARC(NM)%LEVEL(NL+1)
 
@@ -5320,7 +5362,9 @@ CALL SCARC_DEBUG_QUANTITY (NSCARC_DEBUG_WALLINFO , NL+1, 'SETUP_WALLINFO_AMG', '
 
 CALL SCARC_EXCHANGE (NSCARC_EXCHANGE_MESHINFO, NL+1)
 
-MESHES_LOOP2: DO NM = NMESHES_MIN, NMESHES_MAX
+MESHES_LOOP2: DO NM = 1, NMESHES
+
+   IF (PROCESS(NM) /= MYID) CYCLE
 
    OTHER_MESHES_LOOP: DO NOM = 1, NMESHES
 
@@ -5679,7 +5723,9 @@ TYPE (SCARC_LEVEL_TYPE), POINTER :: SL
 !< Only dummy (NTYPE really used ?)
 IC = NTYPE
 
-STRENGTH_MESHES_LOOP: DO NM = NMESHES_MIN, NMESHES_MAX
+STRENGTH_MESHES_LOOP: DO NM = 1, NMESHES
+
+   IF (PROCESS(NM) /= MYID) CYCLE
       
    !WRITE(LU_SCARC,*) 'SETUP_STRENGTH_MATRIX: ============== '
 
@@ -5849,7 +5895,9 @@ SELECT CASE (NTYPE)
    !! ---------------------------------------------------------------------------------------------
    CASE (NSCARC_COARSENING_RS3)
 
-      RS3_MESH_LOOP: DO NM = NMESHES_MIN, NMESHES_MAX
+      RS3_MESH_LOOP: DO NM = 1, NMESHES
+
+         IF (PROCESS(NM) /= MYID) CYCLE
       
          SL => SCARC(NM)%LEVEL(NL)            
 
@@ -6143,7 +6191,8 @@ CALL SCARC_DEBUG_QUANTITY(NSCARC_DEBUG_CELLTYPE, NL, 'SETUP_COLORING', 'CELLTYPE
       CALL SCARC_DEBUG_QUANTITY(NSCARC_DEBUG_CELLTYPE, NL, 'SETUP_COLORING', 'CELLTYPE AFTER LAST EXCHANGE')
 
     !< Third pass: identify fine cells along boundary and get their coarse neighbors
-      RS3_MESH_LOOP2: DO NM = NMESHES_MIN, NMESHES_MAX
+      RS3_MESH_LOOP2: DO NM = 1, NMESHES
+         IF (PROCESS(NM) /= MYID) CYCLE
          DO IC = 1, SL%NC
             SL%GRAPH(IC) = -1
          ENDDO
@@ -6156,7 +6205,9 @@ CALL SCARC_DEBUG_QUANTITY(NSCARC_DEBUG_CELLTYPE, NL, 'SETUP_COLORING', 'CELLTYPE
    CASE (NSCARC_COARSENING_FALGOUT)
 
       FCELL = ZCELL
-      FALGOUT_MESHES_LOOP1: DO NM = NMESHES_MIN, NMESHES_MAX
+      FALGOUT_MESHES_LOOP1: DO NM = 1, NMESHES
+        
+         IF (PROCESS(NM) /= MYID) CYCLE
 
          SL => SCARC(NM)%LEVEL(NL)
 
@@ -6181,8 +6232,9 @@ CALL SCARC_DEBUG_QUANTITY(NSCARC_DEBUG_CELLTYPE, NL, 'SETUP_COLORING', 'CELLTYPE
       ENDIF
 
       CALL SCARC_DEBUG_QUANTITY(NSCARC_DEBUG_MEASURE, NL, 'SETUP_FALGOUT', 'FIRST MEASURE PRINTOUT ')
-      FALGOUT_INIT_LOOP: DO NM = NMESHES_MIN, NMESHES_MAX
+      FALGOUT_INIT_LOOP: DO NM = 1, NMESHES
 
+         IF (PROCESS(NM) /= MYID) CYCLE
          !< reset CELLTYPE for cells with neighbors in other meshes
          FALGOUT_INTERNAL_CELL_LOOP1: DO IC = 1, SL%NC
             BNEIGHBOR = .FALSE.
@@ -6250,7 +6302,9 @@ CALL SCARC_DEBUG_QUANTITY(NSCARC_DEBUG_CELLTYPE, NL, 'SETUP_COLORING', 'CELLTYPE
       CALL SCARC_DEBUG_QUANTITY(NSCARC_DEBUG_MEASURE, NL, 'SETUP_FALGOUT', 'MEASURE AFTER FALGOUT-INIT ')
 
       !< Coloring loop until all cells are coarse or fine
-      FALGOUT_COLORING_LOOP: DO NM = NMESHES_MIN, NMESHES_MAX
+      FALGOUT_COLORING_LOOP: DO NM = 1, NMESHES
+
+         IF (PROCESS(NM) /= MYID) CYCLE
 
          ICYCLE = 0
          FALGOUT_GRAPH_LOOP: DO WHILE (BCYCLE)
@@ -6331,7 +6385,7 @@ CALL SCARC_DEBUG_QUANTITY(NSCARC_DEBUG_CELLTYPE, NL, 'SETUP_COLORING', 'CELLTYPE
       CALL SCARC_DEBUG_QUANTITY(NSCARC_DEBUG_MEASURE, NL, 'SETUP_FALGOUT', 'BEFORE MPI_ALLREDUCE ')
 
             !< Get global number of relevant graph entries (was ist im seriellen Fall??)
-            IF (NMESHES>1 .AND. USE_MPI) THEN
+            IF (NMESHES>1 .AND. N_MPI_PROCESSES>1) THEN
                CALL MPI_ALLREDUCE (IGRAPH, IGRAPH_GLOBAL, 1, MPI_INTEGER, MPI_SUM, MPI_COMM_WORLD, IERR)
             ENDIF
             !WRITE(LU_SCARC,*) 'AFTER MPI_ALLREDUCE: IGRAPH=',IGRAPH,': IGRAPH_GLOBAL=',IGRAPH_GLOBAL
@@ -6649,7 +6703,9 @@ SELECT CASE (NTYPE)
    CASE (NSCARC_COARSENING_RS3)
 
       MEASURE_TYPE = 1
-      RS3_LOOP: DO NM = NMESHES_MIN, NMESHES_MAX
+      RS3_LOOP: DO NM = 1, NMESHES
+
+         IF (PROCESS(NM) /= MYID) CYCLE
       
          SL => SCARC(NM)%LEVEL(NL)
          REMAINING_CELLS = SL%NC
@@ -6713,7 +6769,9 @@ CALL SCARC_DEBUG_QUANTITY(NSCARC_DEBUG_CELLTYPE, NL, 'SETUP_CELLTYPE', 'RS3_CELL
    !! ---------------------------------------------------------------------------------------------
    CASE (NSCARC_COARSENING_FALGOUT)
 
-      FALGOUT_LOOP: DO NM = NMESHES_MIN, NMESHES_MAX
+      FALGOUT_LOOP: DO NM = 1, NMESHES
+
+         IF (PROCESS(NM) /= MYID) CYCLE
 
          !WRITE(LU_SCARC,*) 'A'
          !< copy column pointers for matrix
@@ -6942,7 +7000,9 @@ CALL SCARC_DEBUG_QUANTITY(NSCARC_DEBUG_CELLTYPE, NL, 'SETUP_CELLTYPE', 'RS3_CELL
 
          CASE (NSCARC_DIMENSION_TWO)
 
-            GMG_LOOP: DO NM = NMESHES_MIN, NMESHES_MAX
+            GMG_LOOP: DO NM = 1, NMESHES
+
+               IF (PROCESS(NM) /= MYID) CYCLE
 
                SLF => SCARC(NM)%LEVEL(NL)
                SLC => SCARC(NM)%LEVEL(NL+1)
@@ -7032,7 +7092,9 @@ CALL SCARC_DEBUG_QUANTITY(NSCARC_DEBUG_CELLTYPE, NL, 'SETUP_CELLTYPE', 'GMG_COAR
 
          CASE (NSCARC_DIMENSION_TWO)
 
-            GMG3_LOOP: DO NM = NMESHES_MIN, NMESHES_MAX
+            GMG3_LOOP: DO NM = 1, NMESHES
+
+               IF (PROCESS(NM) /= MYID) CYCLE
 
                SLF => SCARC(NM)%LEVEL(NL)
                SLC => SCARC(NM)%LEVEL(NL+1)
@@ -7132,8 +7194,10 @@ CALL SCARC_DEBUG_QUANTITY(NSCARC_DEBUG_CELLTYPE, NL, 'SETUP_CELLTYPE', 'GMG3_COA
    !! ---------------------------------------------------------------------------------------------
    CASE (NSCARC_COARSENING_BDRY)
 
-      BDRY_LOOP: DO NM = NMESHES_MIN, NMESHES_MAX
+      BDRY_LOOP: DO NM = 1, NMESHES
       
+         IF (PROCESS(NM) /= MYID) CYCLE
+
          SL => SCARC(NM)%LEVEL(NL)
       
          !< First define coarse cells on boundary layer(adjacent to neighboring meshes)
@@ -7300,7 +7364,8 @@ SELECT_INTERPOLATION: SELECT CASE (TYPE_INTERPOL)
    !! ------------------------------------------------------------------------------------------
    CASE (NSCARC_INTERPOL_STANDARD)
 
-      MESHES_LOOP_STANDARD: DO NM = NMESHES_MIN, NMESHES_MAX
+      MESHES_LOOP_STANDARD: DO NM = 1, NMESHES
+         IF (PROCESS(NM) /= MYID) CYCLE
          WRITE(*,*) 'Standard interpolatiion not yet implemented'
       ENDDO MESHES_LOOP_STANDARD
       stop
@@ -7316,7 +7381,9 @@ SELECT_INTERPOLATION: SELECT CASE (TYPE_INTERPOL)
       ENDIF
          SCAL = 2.0_EB
 
-      MESHES_LOOP_GMG: DO NM = NMESHES_MIN, NMESHES_MAX
+      MESHES_LOOP_GMG: DO NM = 1, NMESHES
+
+         IF (PROCESS(NM) /= MYID) CYCLE
       
          SL => SCARC(NM)%LEVEL(NL)
          
@@ -7358,7 +7425,9 @@ SELECT_INTERPOLATION: SELECT CASE (TYPE_INTERPOL)
       CALL SCARC_DEBUG_QUANTITY (NSCARC_DEBUG_MATRIX, NL, 'SETUP_PROLONGATION', 'Matrix structure ')
       CALL SCARC_DEBUG_QUANTITY (NSCARC_DEBUG_CELLTYPE, NL, 'SETUP_PROLONGATION','CELLTYPE INIT')
 
-      MESHES_LOOP_CLASSICAL: DO NM = NMESHES_MIN, NMESHES_MAX
+      MESHES_LOOP_CLASSICAL: DO NM = 1, NMESHES
+
+         IF (PROCESS(NM) /= MYID) CYCLE
 
          SL => SCARC(NM)%LEVEL(NL)
          
@@ -7476,8 +7545,9 @@ SELECT_INTERPOLATION: SELECT CASE (TYPE_INTERPOL)
       CALL SCARC_DEBUG_QUANTITY (NSCARC_DEBUG_MATRIX, NL, 'SETUP_PROLONGATION', 'TYPE2: Matrix structure ')
       CALL SCARC_DEBUG_QUANTITY (NSCARC_DEBUG_CELLTYPE, NL, 'SETUP_PROLONGATION','TYPE2: CELLTYPE INIT')
 
-      MESHES_LOOP_CLASSICAL2: DO NM = NMESHES_MIN, NMESHES_MAX
+      MESHES_LOOP_CLASSICAL2: DO NM = 1, NMESHES
 
+         IF (PROCESS(NM) /= MYID) CYCLE
          SL => SCARC(NM)%LEVEL(NL)
          
          !< Build Interpolation
@@ -7635,7 +7705,9 @@ SELECT_INTERPOLATION: SELECT CASE (TYPE_INTERPOL)
    CASE (NSCARC_INTERPOL_DIRECT)
 
       !WRITE(LU_SCARC,*) 'DIRECT'
-      MESHES_LOOP_DIRECT: DO NM = NMESHES_MIN, NMESHES_MAX
+      MESHES_LOOP_DIRECT: DO NM = 1, NMESHES
+
+         IF (PROCESS(NM) /= MYID) CYCLE
       
          SL => SCARC(NM)%LEVEL(NL)
          CALL SCARC_DEBUG_QUANTITY (NSCARC_DEBUG_CELLTYPE, NL, 'SETUP_PROLONGATION','CELLTYPE INIT')
@@ -7819,7 +7891,9 @@ SELECT_INTERPOLATION: SELECT CASE (TYPE_INTERPOL)
  !! ---------------------------------------------------------------------------------------------
    CASE (NSCARC_INTERPOL_DIRECT_BDRY)
 
-      MESHES_LOOP_DIRECT_BDRY: DO NM = NMESHES_MIN, NMESHES_MAX
+      MESHES_LOOP_DIRECT_BDRY: DO NM = 1, NMESHES
+
+         IF (PROCESS(NM) /= MYID) CYCLE
       
          SL => SCARC(NM)%LEVEL(NL)
          CALL SCARC_DEBUG_QUANTITY (NSCARC_DEBUG_CELLTYPE, NL, 'SETUP_PROLONGATION','CELLTYPE INIT')
@@ -8051,7 +8125,8 @@ SELECT_INTERPOLATION: SELECT CASE (TYPE_INTERPOL)
    !! ---------------------------------------------------------------------------------------------
    CASE (NSCARC_INTERPOL_MULTIPASS)
 
-      MESHES_LOOP_MULTIPASS: DO NM = NMESHES_MIN, NMESHES_MAX
+      MESHES_LOOP_MULTIPASS: DO NM = 1, NMESHES
+         IF (PROCESS(NM) /= MYID) CYCLE
          WRITE(*,*) 'Multipass interpolation not yet implemented'
       ENDDO MESHES_LOOP_MULTIPASS
       stop
@@ -8185,7 +8260,9 @@ LOGICAL :: BSQUARE = .TRUE.
 REAL(EB) :: R_VALUE, RA_VALUE, RAP_VALUE
 TYPE (SCARC_LEVEL_TYPE) , POINTER :: SLF, SLC
 
-MESHES_LOOP_SYSTEM_AMG: DO NM = NMESHES_MIN, NMESHES_MAX
+MESHES_LOOP_SYSTEM_AMG: DO NM = 1, NMESHES
+
+   IF (PROCESS(NM) /= MYID) CYCLE
 
    SLF => SCARC(NM)%LEVEL(NL)
    SLC => SCARC(NM)%LEVEL(NL+1)
@@ -8572,7 +8649,8 @@ SELECT CASE (TYPE_INTERPOL)
                                0.0625_EB, 0.1250_EB, 0.0625_EB /), &
                    SHAPE(WEIGHTS3X3))
 
-      MESHES_LOOP_GMG: DO NM = NMESHES_MIN, NMESHES_MAX
+      MESHES_LOOP_GMG: DO NM = 1, NMESHES
+         IF (PROCESS(NM) /= MYID) CYCLE
          SL => SCARC(NM)%LEVEL(NL)
          IP = 1
          ICC = 1
@@ -8664,7 +8742,8 @@ SELECT CASE (TYPE_INTERPOL)
                                0.0625_EB, 0.1250_EB, 0.0625_EB /), &
                    SHAPE(WEIGHTS3X3))
 
-      MESHES_LOOP_GMG3: DO NM = NMESHES_MIN, NMESHES_MAX
+      MESHES_LOOP_GMG3: DO NM = 1, NMESHES
+         IF (PROCESS(NM) /= MYID) CYCLE
          SL => SCARC(NM)%LEVEL(NL)
          IP = 1
          ICC = 1
@@ -8741,7 +8820,8 @@ CALL SCARC_DEBUG_QUANTITY(NSCARC_DEBUG_CELLTYPE, NL, 'SETUP_CELLTYPES', 'CELLTYP
  !! ------------------------------------------------------------------------------------------
    CASE (NSCARC_INTERPOL_CLASSICAL2)
 
-      MESHES_LOOP_CLASSICAL2: DO NM = NMESHES_MIN, NMESHES_MAX
+      MESHES_LOOP_CLASSICAL2: DO NM = 1, NMESHES
+         IF (PROCESS(NM) /= MYID) CYCLE
          SL => SCARC(NM)%LEVEL(NL)
          CALL SCARC_MATRIX_TRANSPOSE(SL%P, SL%P_ROW, SL%P_COL, SL%R, SL%R_ROW, SL%R_COL, &
                                      SL%NCE, SL%NCCE)
@@ -8753,8 +8833,9 @@ CALL SCARC_DEBUG_QUANTITY(NSCARC_DEBUG_CELLTYPE, NL, 'SETUP_CELLTYPES', 'CELLTYP
  !! ------------------------------------------------------------------------------------------
    CASE DEFAULT
   
-      MESHES_LOOP: DO NM = NMESHES_MIN, NMESHES_MAX
-      
+      MESHES_LOOP: DO NM = 1, NMESHES
+
+         IF (PROCESS(NM) /= MYID) CYCLE
          SL => SCARC(NM)%LEVEL(NL)
          
          IC2 = 1
@@ -8845,7 +8926,9 @@ SELECT CASE (TYPE_INTERPOL)
  !! ------------------------------------------------------------------------------------------
    CASE (NSCARC_INTERPOL_GMG, NSCARC_INTERPOL_GMG3)
 
-      MESHES_LOOP: DO NM = NMESHES_MIN, NMESHES_MAX
+      MESHES_LOOP: DO NM = 1, NMESHES
+
+         IF (PROCESS(NM) /= MYID) CYCLE
       
          ICC0= 0
          OTHER_MESHES_LOOP: DO NOM = 1, NMESHES
@@ -8922,7 +9005,9 @@ SELECT CASE (TYPE_COARSENING)
  !! ---------------------------------------------------------------------------------
    CASE (NSCARC_COARSENING_GMG, NSCARC_INTERPOL_GMG3)
 
-      MESHES_GMG: DO NM = NMESHES_MIN, NMESHES_MAX
+      MESHES_GMG: DO NM = 1, NMESHES
+
+         IF (PROCESS(NM) /= MYID) CYCLE
       
          SLF => SCARC(NM)%LEVEL(NL)             !< pointer to fine level
          SLC => SCARC(NM)%LEVEL(NL+1)           !< pointer to coarse level
@@ -9011,7 +9096,8 @@ SELECT CASE (TYPE_COARSENING)
  !! ---------------------------------------------------------------------------------
    CASE DEFAULT
 
-      MESHES_LOOP: DO NM = NMESHES_MIN, NMESHES_MAX
+      MESHES_LOOP: DO NM = 1, NMESHES
+         IF (PROCESS(NM) /= MYID) CYCLE
       
          SLF => SCARC(NM)%LEVEL(NL)             !< pointer to fine level
          SLC => SCARC(NM)%LEVEL(NL+1)           !< pointer to coarse level
@@ -9286,7 +9372,8 @@ REAL(EB), POINTER, DIMENSION(:) :: V
 INTEGER :: NM, IC
 TYPE (SCARC_LEVEL_TYPE) , POINTER :: SL
 
-DO NM = NMESHES_MIN, NMESHES_MAX
+DO NM = 1, NMESHES
+   IF (PROCESS(NM) /= MYID) CYCLE
    SL => SCARC(NM)%LEVEL(NL)
    CALL POINT_TO_VECTOR(NVECTOR, NM, NL, V)
    DO IC = 1, SL%NC
@@ -9326,7 +9413,8 @@ CALL SCARC_DEBUG_LEVEL (NVECTOR2, 'SCARC_MATVEC_PRODUCT', 'V2 AFTER', NL)
 !> Note: - matrix already contains subdiagonal values from neighbor along internal boundaries
 !>       - if vector1 contains neighboring values, then correct values of global matvec are achieved
 !> ------------------------------------------------------------------------------------------------
-DO NM = NMESHES_MIN, NMESHES_MAX
+DO NM = 1, NMESHES
+   IF (PROCESS(NM) /= MYID) CYCLE
 
    CALL POINT_TO_VECTOR (NVECTOR1, NM, NL, V1)
    CALL POINT_TO_VECTOR (NVECTOR2, NM, NL, V2)
@@ -9376,12 +9464,15 @@ INTEGER, INTENT(IN):: NVECTOR1, NVECTOR2, NL
 REAL(EB), DIMENSION(:)    , POINTER ::  V1, V2
 INTEGER , POINTER :: NC
 INTEGER  :: NM, IERR, NL0, IC
-REAL(EB) :: SP_GLOBAL
 !>MKL code
 !REAL(EB) :: DDOT
 !EXTERNAL :: DDOT
 
-DO NM = NMESHES_MIN, NMESHES_MAX
+SP_LOCAL = 0.0_EB
+SP_GROUP = 0.0_EB
+
+DO NM = 1, NMESHES
+   IF (PROCESS(NM) /= MYID) CYCLE
 
    CALL POINT_TO_VECTOR (NVECTOR1, NM, NL, V1)
    CALL POINT_TO_VECTOR (NVECTOR2, NM, NL, V2)
@@ -9398,6 +9489,7 @@ DO NM = NMESHES_MIN, NMESHES_MAX
       DO IC = 1, NC
          SP_LOCAL(NM) = SP_LOCAL(NM) + V1(IC) * V2(IC)
       ENDDO
+      SP_GROUP(MYID+1) = SP_GROUP(MYID+1) + SP_LOCAL(NM)
    !ENDIF
 
 ENDDO
@@ -9409,12 +9501,10 @@ ENDDO
 IERR = 0
 NL0  = NL
 SP_GLOBAL   = 0.0_EB
-IF (NMESHES>1 .AND. USE_MPI) THEN
-   CALL MPI_ALLREDUCE (SP_LOCAL(MYID+1), SP_GLOBAL, 1, MPI_DOUBLE_PRECISION, MPI_SUM, MPI_COMM_WORLD, IERR)
+IF (N_MPI_PROCESSES>1) THEN
+   CALL MPI_ALLREDUCE (SP_GROUP(MYID+1), SP_GLOBAL, 1, MPI_DOUBLE_PRECISION, MPI_SUM, MPI_COMM_WORLD, IERR)
 ELSE
-   DO NM=1,NMESHES
-      SP_GLOBAL = SP_GLOBAL + SP_LOCAL(NM)
-   ENDDO
+   SP_GLOBAL = SP_GROUP(1)
 ENDIF
 
 SCARC_SCALAR_PRODUCT = SP_GLOBAL
@@ -9431,11 +9521,14 @@ INTEGER, INTENT(IN):: NVECTOR1, NL
 REAL(EB), DIMENSION(:), POINTER ::  V
 INTEGER , POINTER :: NC
 INTEGER  :: NM, IERR, IC
-REAL(EB) :: SP_GLOBAL  
 REAL(EB) :: DDOT
 EXTERNAL :: DDOT
 
-DO NM = NMESHES_MIN, NMESHES_MAX
+SP_LOCAL = 0.0_EB
+SP_GROUP = 0.0_EB
+
+DO NM = 1, NMESHES
+   IF (PROCESS(NM) /= MYID) CYCLE
 
    CALL POINT_TO_VECTOR (NVECTOR1, NM, NL, V)
    NC => SCARC(NM)%LEVEL(NL)%NC
@@ -9450,6 +9543,7 @@ DO NM = NMESHES_MIN, NMESHES_MAX
       ENDDO
 
    !ENDIF
+   SP_GROUP(MYID+1) = SP_GROUP(MYID+1) + SP_LOCAL(NM)
 
 ENDDO
 
@@ -9459,13 +9553,12 @@ ENDDO
 !> ------------------------------------------------------------------------------------------------
 IERR = 0
 SP_GLOBAL = 0.0_EB
-IF (NMESHES>1 .AND. USE_MPI) THEN
-   CALL MPI_ALLREDUCE (SP_LOCAL(MYID+1), SP_GLOBAL, 1, MPI_DOUBLE_PRECISION, MPI_SUM, MPI_COMM_WORLD, IERR)
+IF (N_MPI_PROCESSES>1) THEN
+   CALL MPI_ALLREDUCE (SP_GROUP(MYID+1), SP_GLOBAL, 1, MPI_DOUBLE_PRECISION, MPI_SUM, MPI_COMM_WORLD, IERR)
 ELSE
-   DO NM=1,NMESHES
-      SP_GLOBAL = SP_GLOBAL + SP_LOCAL(NM)
-   ENDDO
+   SP_GLOBAL = SP_GROUP(1)
 ENDIF
+
 SP_GLOBAL = SQRT (SP_GLOBAL/REAL(NC_GLOBAL(NL), EB))   
 
 SCARC_L2NORM = SP_GLOBAL
@@ -9487,7 +9580,9 @@ INTEGER  :: NM
 !INTEGER , POINTER :: NC
 !EXTERNAL :: DAXPBY
 
-DO NM = NMESHES_MIN, NMESHES_MAX
+DO NM = 1, NMESHES
+
+   IF (PROCESS(NM) /= MYID) CYCLE
 
    CALL POINT_TO_VECTOR(NVECTOR1, NM, NL, V1)
    CALL POINT_TO_VECTOR(NVECTOR2, NM, NL, V2)
@@ -9570,7 +9665,9 @@ INTEGER  :: NM
 !INTEGER , POINTER :: NC
 !EXTERNAL :: DCOPY, DSCAL
 
-DO NM = NMESHES_MIN, NMESHES_MAX
+DO NM = 1, NMESHES
+
+   IF (PROCESS(NM) /= MYID) CYCLE
 
    CALL POINT_TO_VECTOR(NVECTOR1, NM, NL, V1)
    CALL POINT_TO_VECTOR(NVECTOR2, NM, NL, V2)
@@ -9596,7 +9693,8 @@ INTEGER , INTENT(IN):: NVECTOR, NL
 REAL(EB), DIMENSION(:)    , POINTER ::  VC
 INTEGER  :: NM
 
-DO NM = NMESHES_MIN, NMESHES_MAX
+DO NM = 1, NMESHES
+   IF (PROCESS(NM) /= MYID) CYCLE
    CALL POINT_TO_VECTOR(NVECTOR, NM, NL, VC)
    VC =  0.0_EB
 ENDDO
@@ -9612,7 +9710,8 @@ REAL(EB), INTENT(IN):: SCAL
 REAL(EB), DIMENSION(:)    , POINTER ::  VC
 INTEGER  :: NM
 
-DO NM = NMESHES_MIN, NMESHES_MAX
+DO NM = 1, NMESHES
+   IF (PROCESS(NM) /= MYID) CYCLE
    CALL POINT_TO_VECTOR(NVECTOR, NM, NL, VC)
    VC =  SCAL
 ENDDO
@@ -9661,8 +9760,11 @@ SELECT CASE (NPRECON)
  !! ----------------------------------------------------------------------------------------
    CASE (NSCARC_PRECON_JACOBI)
 
-      DO NM = NMESHES_MIN, NMESHES_MAX
+      DO NM = 1, NMESHES
 
+         IF (PROCESS(NM) /= MYID) CYCLE
+
+         IF (PROCESS(NM) /= MYID) CYCLE
          CALL POINT_TO_VECTOR(NVECTOR2, NM, NL, V2)
    
          NC     => SCARC(NM)%LEVEL(NL)%NC
@@ -9681,7 +9783,9 @@ SELECT CASE (NPRECON)
  !! ----------------------------------------------------------------------------------------
    CASE (NSCARC_PRECON_SSOR)
    
-      DO NM = NMESHES_MIN, NMESHES_MAX
+      DO NM = 1, NMESHES
+
+         IF (PROCESS(NM) /= MYID) CYCLE
       
          CALL POINT_TO_VECTOR(NVECTOR2, NM, NL, V2)
    
@@ -9723,8 +9827,9 @@ SELECT CASE (NPRECON)
  !! ----------------------------------------------------------------------------------------
    CASE (NSCARC_PRECON_FFT)
       
-      DO NM = NMESHES_MIN, NMESHES_MAX
+      DO NM = 1, NMESHES
       
+         IF (PROCESS(NM) /= MYID) CYCLE
          CALL POINT_TO_VECTOR(NVECTOR1, NM, NL, V1)
          CALL POINT_TO_VECTOR(NVECTOR2, NM, NL, V2)
    
@@ -10167,8 +10272,9 @@ SELECT CASE (TYPE_SCOPE)
       CALL SCARC_VECTOR_COPY(MG%X, MG%F, 1.0_EB, NLEVEL_MIN)
 END SELECT
 
-!CALL SCARC_DEBUG_LEVEL (MG%X, 'SCARC_METHOD_MULTIGRID', 'X FINAL', NLEVEL_MIN)
-!CALL SCARC_DEBUG_LEVEL (MG%F, 'SCARC_METHOD_MULTIGRID', 'F FINAL', NLEVEL_MIN)
+CALL SCARC_DEBUG_LEVEL (MG%D, 'SCARC_METHOD_MULTIGRID', 'D FINAL', NLEVEL_MIN)
+CALL SCARC_DEBUG_LEVEL (MG%X, 'SCARC_METHOD_MULTIGRID', 'X FINAL', NLEVEL_MIN)
+CALL SCARC_DEBUG_LEVEL (MG%F, 'SCARC_METHOD_MULTIGRID', 'F FINAL', NLEVEL_MIN)
 CALL SCARC_RESET_PARENT(PARENT)
 
 TUSED_SCARC(NSCARC_TIME_MULTIGRID,:)=TUSED_SCARC(NSCARC_TIME_MULTIGRID,:)+SECOND()-TNOW_MULTIGRID
@@ -10191,7 +10297,8 @@ SELECT CASE (NSCOPE)
  !! ---------------------------------------------------------------------------------------------
    CASE (NSCARC_CYCLE_SETUP)
 
-      DO NM = NMESHES_MIN, NMESHES_MAX
+      DO NM = 1, NMESHES
+         IF (PROCESS(NM) /= MYID) CYCLE
          SCARC(NM)%CYCLE_COUNT(2,NL)=1
          DO NL0 = NLEVEL_MIN+1, NLEVEL_MAX - 1
             IF (TYPE_CYCLE==NSCARC_CYCLE_F) THEN
@@ -10209,7 +10316,8 @@ SELECT CASE (NSCOPE)
  !! ---------------------------------------------------------------------------------------------
    CASE (NSCARC_CYCLE_RESET)
 
-      DO NM = NMESHES_MIN, NMESHES_MAX
+      DO NM = 1, NMESHES
+         IF (PROCESS(NM) /= MYID) CYCLE
          DO NL0 = NLEVEL_MIN, NLEVEL_MAX
             SCARC(NM)%CYCLE_COUNT(1,NL0)=SCARC(NM)%CYCLE_COUNT(2,NL0)
          ENDDO
@@ -10221,7 +10329,8 @@ SELECT CASE (NSCOPE)
  !! ---------------------------------------------------------------------------------------------
    CASE (NSCARC_CYCLE_PROCEED)
 
-      DO NM = NMESHES_MIN, NMESHES_MAX
+      DO NM = 1, NMESHES
+         IF (PROCESS(NM) /= MYID) CYCLE
 
          SCARC(NM)%CYCLE_COUNT(1,NL)=SCARC(NM)%CYCLE_COUNT(1,NL)-1
 
@@ -10367,14 +10476,15 @@ SM => SCARC(NMASTER)
 !> ------------------------------------------------------------------------------------------------
 !> Parallel version
 !> ------------------------------------------------------------------------------------------------
-IF (USE_MPI) THEN
+IF (N_MPI_PROCESSES > 1) THEN
 
    DO NM = 1, NMESHES
       SM%COUNTS1(NM-1) = NC_COARSE(NM)
       SM%DISPLS1(NM-1) = SM%OFFSET(NM)
    ENDDO
 
-   DO NM = NMESHES_MIN, NMESHES_MAX
+   DO NM = 1, NMESHES
+      IF (PROCESS(NM) /= MYID) CYCLE
    
       SL => SCARC(NM)%LEVEL(NLEVEL_MAX)
       IOFFSET = SM%OFFSET(NM)
@@ -10394,7 +10504,8 @@ IF (USE_MPI) THEN
  !!               SM%X_COARSE, NC_COARSE0, IERR)
    !ENDIF
    
-   DO NM = NMESHES_MIN, NMESHES_MAX
+   DO NM = 1, NMESHES
+      IF (PROCESS(NM) /= MYID) CYCLE
    
       SL => SCARC(NM)%LEVEL(NLEVEL_MAX)
       IOFFSET = SM%OFFSET(NM)
@@ -10413,7 +10524,8 @@ IF (USE_MPI) THEN
 !> ------------------------------------------------------------------------------------------------
 ELSE
 
-   DO NM = NMESHES_MIN, NMESHES_MAX
+   DO NM = 1, NMESHES
+      IF (PROCESS(NM) /= MYID) CYCLE
    
       SL => SCARC(NM)%LEVEL(NLEVEL_MAX)
       IOFFSET = SM%OFFSET(NM)
@@ -10430,7 +10542,8 @@ ELSE
  !!               SM%X_COARSE, NC_COARSE0, IERR)
    !ENDIF
    
-   DO NM = NMESHES_MIN, NMESHES_MAX
+   DO NM = 1, NMESHES
+      IF (PROCESS(NM) /= MYID) CYCLE
    
       SL => SCARC(NM)%LEVEL(NLEVEL_MAX)
       IOFFSET = SM%OFFSET(NM)
@@ -10646,7 +10759,8 @@ SELECT_METHOD: SELECT CASE (TYPE_METHOD)
  !! In case of a Krylov method initialize auxiliary arrays
    CASE (NSCARC_METHOD_KRYLOV)
 
-      DO NM = NMESHES_MIN, NMESHES_MAX
+      DO NM = 1, NMESHES
+         IF (PROCESS(NM) /= MYID) CYCLE
          SL => SCARC(NM)%LEVEL(NL)
          DO IC = SL%NC+1, SL%NCE
             SL%D(IC) = 0.0_EB
@@ -10657,7 +10771,8 @@ SELECT_METHOD: SELECT CASE (TYPE_METHOD)
       ENDDO
 
       IF (TYPE_KRYLOV == NSCARC_KRYLOV_BICG) THEN
-         DO NM = NMESHES_MIN, NMESHES_MAX
+         DO NM = 1, NMESHES
+            IF (PROCESS(NM) /= MYID) CYCLE
             SL => SCARC(NM)%LEVEL(NL)
             DO IC = SL%NC+1, SL%NCE
                SL%Z(IC) = 0.0_EB
@@ -10668,7 +10783,8 @@ SELECT_METHOD: SELECT CASE (TYPE_METHOD)
  !! In case of a multigrid method with coarse grid solution by CG, clear CG-vectors on max level
    CASE (NSCARC_METHOD_MULTIGRID)
       
-      DO NM = NMESHES_MIN, NMESHES_MAX
+      DO NM = 1, NMESHES
+         IF (PROCESS(NM) /= MYID) CYCLE
          SL => SCARC(NM)%LEVEL(NL)
          DO IC = SL%NC+1, SL%NCE
             SL%D = 0.0_EB
@@ -10691,7 +10807,8 @@ IF (TYPE_SCOPE == NSCARC_SCOPE_MAIN) THEN
       !< -------------- 2D --------------
       CASE (NSCARC_DIMENSION_TWO)
    
-         DO NM = NMESHES_MIN, NMESHES_MAX
+         DO NM = 1, NMESHES
+            IF (PROCESS(NM) /= MYID) CYCLE
    
             M  => MESHES(NM)
             SL => SCARC(NM)%LEVEL(NL)
@@ -10757,7 +10874,8 @@ IF (TYPE_SCOPE == NSCARC_SCOPE_MAIN) THEN
       !< -------------- 3D --------------
       CASE (NSCARC_DIMENSION_THREE)
       
-         DO NM = NMESHES_MIN, NMESHES_MAX
+         DO NM = 1, NMESHES
+            IF (PROCESS(NM) /= MYID) CYCLE
    
             M  => MESHES(NM)
             SL => SCARC(NM)%LEVEL(NL)
@@ -10861,7 +10979,8 @@ IF (TYPE_SCOPE == NSCARC_SCOPE_MAIN) THEN
    END SELECT SELECT_DIMENSION
 
 ELSE IF (TYPE_SCOPE == NSCARC_SCOPE_COARSE) THEN
-   DO NM = NMESHES_MIN, NMESHES_MAX
+   DO NM = 1, NMESHES
+      IF (PROCESS(NM) /= MYID) CYCLE
       SCARC(NM)%LEVEL(NLEVEL_MAX)%X = 0.0_EB
    ENDDO
 ENDIF
@@ -10878,7 +10997,8 @@ REAL(EB), INTENT(IN) :: RES
 CHARACTER(*), INTENT(IN) :: CROUTINE
 INTEGER:: NM
 
-DO NM = NMESHES_MIN, NMESHES_MAX
+DO NM = 1, NMESHES
+   IF (PROCESS(NM) /= MYID) CYCLE
    IF (TYPE_DEBUG>NSCARC_DEBUG_NONE) WRITE(LU_SCARC,1000) TRIM(CROUTINE), NM, NL, ITE,  RES
    IF (TYPE_DEBUG>NSCARC_DEBUG_NONE.AND.MYID==0) write(*,1000) TRIM(CROUTINE), NM, NL, ITE,  RES
 ENDDO
@@ -10995,7 +11115,8 @@ SELECT_MULTIGRID: SELECT CASE (TYPE_MULTIGRID)
  !! ------------------------- Geometric multigrid -------------------------------------------
    CASE (NSCARC_MULTIGRID_GEOMETRIC)
 
-      DO NM = NMESHES_MIN, NMESHES_MAX
+      DO NM = 1, NMESHES
+         IF (PROCESS(NM) /= MYID) CYCLE
    
          NX_CO => SCARC(NM)%LEVEL(NL_CO)%NX
          NY_CO => SCARC(NM)%LEVEL(NL_CO)%NY
@@ -11077,7 +11198,8 @@ SELECT_MULTIGRID: SELECT CASE (TYPE_MULTIGRID)
  !! ------------------------- Algebraic multigrid -------------------------------------------
    CASE (NSCARC_MULTIGRID_ALGEBRAIC)
 
-      DO NM = NMESHES_MIN, NMESHES_MAX
+      DO NM = 1, NMESHES
+         IF (PROCESS(NM) /= MYID) CYCLE
 
          CALL POINT_TO_VECTOR(NVECTOR_FI, NM, NL_FI, DC_FI)
          CALL POINT_TO_VECTOR(NVECTOR_CO, NM, NL_CO, FC_CO)
@@ -11130,7 +11252,8 @@ SELECT_MULTIGRID: SELECT CASE (TYPE_MULTIGRID)
  !! ------------------------- Geometric multigrid -------------------------------------------
    CASE (NSCARC_MULTIGRID_GEOMETRIC)
 
-      DO NM = NMESHES_MIN, NMESHES_MAX
+      DO NM = 1, NMESHES
+      IF (PROCESS(NM) /= MYID) CYCLE
    
          NX_CO => SCARC(NM)%LEVEL(NL_CO)%NX
          NY_CO => SCARC(NM)%LEVEL(NL_CO)%NY
@@ -11211,7 +11334,8 @@ SELECT_MULTIGRID: SELECT CASE (TYPE_MULTIGRID)
 SCAL = 1.0_EB
 IF (TYPE_COARSENING >= NSCARC_COARSENING_GMG) SCAL=2.0_EB
 
-      DO NM = NMESHES_MIN, NMESHES_MAX
+      DO NM = 1, NMESHES
+         IF (PROCESS(NM) /= MYID) CYCLE
 
          CALL POINT_TO_VECTOR(NVECTOR_CO, NM, NL_CO, XC_CO)
          CALL POINT_TO_VECTOR(NVECTOR_FI, NM, NL_FI, DC_FI)
@@ -11255,7 +11379,8 @@ REAL(EB), POINTER, DIMENSION(:,:,:) :: HP
 TYPE (MESH_TYPE), POINTER :: M
 TYPE (SCARC_LEVEL_TYPE), POINTER :: SL
 
-DO NM = NMESHES_MIN, NMESHES_MAX
+DO NM = 1, NMESHES
+   IF (PROCESS(NM) /= MYID) CYCLE
 
    M  => MESHES(NM)
    SL => SCARC(NM)%LEVEL(NL)
@@ -11291,9 +11416,10 @@ TYPE (MESH_TYPE), POINTER :: M
 TYPE (SCARC_LEVEL_TYPE), POINTER :: SL
 
 
-DO NM = NMESHES_MIN, NMESHES_MAX
+DO NM = 1, NMESHES
 
- !! point to correct pressure vector on mesh 'NM'
+   IF (PROCESS(NM) /= MYID) CYCLE
+   !! point to correct pressure vector on mesh 'NM'
    M  => MESHES(NM)
    SL => SCARC(NM)%LEVEL(NL)
 
@@ -11395,7 +11521,9 @@ TYPE (OSCARC_TYPE)        , POINTER ::  OS
 TYPE (SCARC_LEVEL_TYPE), POINTER ::  OSL
 
 IERR=0
-RECEIVE_MESH_LOOP: DO NM = NMESHES_MIN, NMESHES_MAX
+RECEIVE_MESH_LOOP: DO NM = 1, NMESHES
+
+   IF (PROCESS(NM) /= MYID) CYCLE
    RECEIVE_OMESH_LOOP: DO NOM = 1, NMESHES
     
       SNODE = PROCESS(NOM)
@@ -11522,7 +11650,9 @@ IERR = 0
 !> ------------------------------------------------------------------------------------------------
 !> Collect data for sending corresponding to requested exchange type
 !> ------------------------------------------------------------------------------------------------
-MESH_PACK_LOOP: DO NM = NMESHES_MIN, NMESHES_MAX
+MESH_PACK_LOOP: DO NM = 1, NMESHES
+
+   IF (PROCESS(NM) /= MYID) CYCLE
 
    IF (PROCESS(NM)/=MYID)  CYCLE MESH_PACK_LOOP
 
@@ -12033,12 +12163,13 @@ ENDDO MESH_PACK_LOOP
 !> ------------------------------------------------------------------------------------------------
 !> Information from Mesh NM is received by Mesh NOM  (NOM receiver, NM sender)
 !> ------------------------------------------------------------------------------------------------
-IF (USE_MPI.AND.NREQ_SCARC/=0) CALL MPI_WAITALL(NREQ_SCARC,REQ_SCARC(1:NREQ_SCARC),MPI_STATUSES_IGNORE,IERR)
+IF (N_MPI_PROCESSES>1.AND.NREQ_SCARC/=0) CALL MPI_WAITALL(NREQ_SCARC,REQ_SCARC(1:NREQ_SCARC),MPI_STATUSES_IGNORE,IERR)
 
 !> ------------------------------------------------------------------------------------------------
 !> Extract communication data from corresponding RECEIVE-buffers
 !> ------------------------------------------------------------------------------------------------
-MESH_UNPACK_LOOP: DO NM = NMESHES_MIN, NMESHES_MAX
+MESH_UNPACK_LOOP: DO NM = 1, NMESHES
+   IF (PROCESS(NM) /= MYID) CYCLE
    OMESH_UNPACK_LOOP: DO NOM=1,NMESHES
     
       SNODE  = PROCESS(NM)
@@ -12480,7 +12611,8 @@ SELECT CASE (NTYPE)
 
       
       IF (NL > NLEVEL_MIN) RETURN
-      DO NM = NMESHES_MIN, NMESHES_MAX
+      DO NM = 1, NMESHES
+         IF (PROCESS(NM) /= MYID) CYCLE
          WRITE(LU_SCARC,1000) CROUTINE, CNAME, NM, NL
          SL => SCARC(NM)%LEVEL(NL)
          WRITE(LU_SCARC,*) 'NA =',SL%NA
@@ -12505,7 +12637,8 @@ SELECT CASE (NTYPE)
  !! ------------------------------------------------------------------------------------------------
    CASE (NSCARC_DEBUG_MATRIXE)
 
-      DO NM = NMESHES_MIN, NMESHES_MAX
+      DO NM = 1, NMESHES
+         IF (PROCESS(NM) /= MYID) CYCLE
          WRITE(LU_SCARC,1000) CROUTINE, CNAME, NM, NL
          SL => SCARC(NM)%LEVEL(NL)
          WRITE(LU_SCARC,*) 'PRINTING EXTENDED MATRIX, NCE=',SL%NCE
@@ -12529,7 +12662,8 @@ SELECT CASE (NTYPE)
  !! ------------------------------------------------------------------------------------------------
    CASE (NSCARC_DEBUG_PROLONGATION)
 
-      DO NM = NMESHES_MIN, NMESHES_MAX
+      DO NM = 1, NMESHES
+         IF (PROCESS(NM) /= MYID) CYCLE
          SL => SCARC(NM)%LEVEL(NL)
          WRITE(LU_SCARC,1000) CROUTINE, CNAME, NM, NL
          WRITE(LU_SCARC,*) '============= P_ROW:', NM
@@ -12565,7 +12699,8 @@ SELECT CASE (NTYPE)
  !! ------------------------------------------------------------------------------------------------
    CASE (NSCARC_DEBUG_RESTRICTION)
 
-      DO NM = NMESHES_MIN, NMESHES_MAX
+      DO NM = 1, NMESHES
+         IF (PROCESS(NM) /= MYID) CYCLE
          SL  => SCARC(NM)%LEVEL(NL)
          WRITE(LU_SCARC,1000) CROUTINE, CNAME, NM, NL
          WRITE(LU_SCARC,*) '============= R_ROW:', NM, SL%NCCE
@@ -12602,7 +12737,8 @@ SELECT CASE (NTYPE)
  !! ------------------------------------------------------------------------------------------------
    CASE (NSCARC_DEBUG_FACEINFO)
 
-      DO NM = NMESHES_MIN, NMESHES_MAX
+      DO NM = 1, NMESHES
+         IF (PROCESS(NM) /= MYID) CYCLE
          WRITE(LU_SCARC,1000) CROUTINE, CNAME, NM, NL
          SL => SCARC(NM)%LEVEL(NL)
          M  => MESHES(NM)
@@ -12645,53 +12781,53 @@ SELECT CASE (NTYPE)
                   WRITE(LU_SCARC,*)
                   WRITE(LU_SCARC,'(a,i4,a)') '------OSL(',NOM,')%ICG_TO_IWG:'
                   DO IW = 1, OSL%NCG
-                     WRITE(LU_SCARC,'(16i4)') OSL%ICG_TO_IWG(IW)
+                     WRITE(LU_SCARC,'(32i4)') OSL%ICG_TO_IWG(IW)
                   ENDDO
                   WRITE(LU_SCARC,*)
                   WRITE(LU_SCARC,'(a,i4,a)') '------OSL(',NOM,')%ICG_TO_ICW:'
                   DO IW = 1, OSL%NCG
-                     WRITE(LU_SCARC,'(16i4)') OSL%ICG_TO_ICW(IW)
+                     WRITE(LU_SCARC,'(32i4)') OSL%ICG_TO_ICW(IW)
                   ENDDO
                   WRITE(LU_SCARC,*)
                   WRITE(LU_SCARC,'(a,i4,a)') '------OSL(',NOM,')%ICG_TO_ICO:'
                   DO IW = 1, OSL%NCG
-                     WRITE(LU_SCARC,'(16i4)') OSL%ICG_TO_ICO(IW)
+                     WRITE(LU_SCARC,'(32i4)') OSL%ICG_TO_ICO(IW)
                   ENDDO
                   WRITE(LU_SCARC,*)
                   WRITE(LU_SCARC,'(a,i4,a)') '------OSL(',NOM,')%ICG_TO_ICE:'
                   DO IW = 1, OSL%NCG
-                     WRITE(LU_SCARC,'(16i4)') OSL%ICG_TO_ICE(IW)
+                     WRITE(LU_SCARC,'(32i4)') OSL%ICG_TO_ICE(IW)
                   ENDDO
                   WRITE(LU_SCARC,*)
                   WRITE(LU_SCARC,'(a,i4,a)') '------OSL(',NOM,')%ICG_TO_ICN:'
                   DO IW = 1, OSL%NCG
-                     WRITE(LU_SCARC,'(16i4)') OSL%ICG_TO_ICN(IW)
+                     WRITE(LU_SCARC,'(32i4)') OSL%ICG_TO_ICN(IW)
                   ENDDO
                   WRITE(LU_SCARC,*)
                   WRITE(LU_SCARC,'(a,i4,a)') '------OSL(',NOM,')%IWL_TO_IWG:'
                   DO IW = 1, OSL%NWL
-                     WRITE(LU_SCARC,'(16i4)') OSL%IWL_TO_IWG(IW)
+                     WRITE(LU_SCARC,'(32i4)') OSL%IWL_TO_IWG(IW)
                   ENDDO
                   WRITE(LU_SCARC,*)
                   WRITE(LU_SCARC,'(a,i4,a)') '------OSL(',NOM,')%IWL_TO_ICW:'
                   DO IW = 1, OSL%NWL
-                     WRITE(LU_SCARC,'(16i4)') OSL%IWL_TO_ICW(IW)
+                     WRITE(LU_SCARC,'(32i4)') OSL%IWL_TO_ICW(IW)
                   ENDDO
                   WRITE(LU_SCARC,*)
                   WRITE(LU_SCARC,'(a,i4,a)') '------OSL(',NOM,')%IWL_TO_ICO:'
                   DO IW = 1, OSL%NWL
-                     WRITE(LU_SCARC,'(16i4)') OSL%IWL_TO_ICO(IW)
+                     WRITE(LU_SCARC,'(32i4)') OSL%IWL_TO_ICO(IW)
                   ENDDO
                   WRITE(LU_SCARC,*)
                   WRITE(LU_SCARC,'(a,i4,a)') '------OSL(',NOM,')%IWL_TO_ICN:'
                   DO IW = 1, OSL%NWL
-                     WRITE(LU_SCARC,'(16i4)') OSL%IWL_TO_ICN(IW, 1:OSL%NCPL)
+                     WRITE(LU_SCARC,'(32i4)') OSL%IWL_TO_ICN(IW, 1:OSL%NCPL)
                   ENDDO
                   WRITE(LU_SCARC,*)
-                  WRITE(LU_SCARC,'(a,i4,a)') '------OSL(',NOM,')%IWL_TO_ICG:'
-                  DO IW = 1, OSL%NWL
-                     WRITE(LU_SCARC,'(16i4)') OSL%IWL_TO_ICG(IW, 1:OSL%NCPL)
-                  ENDDO
+                  !WRITE(LU_SCARC,'(a,i4,a)') '------OSL(',NOM,')%IWL_TO_ICG:'
+                  !DO IW = 1, OSL%NWL
+                  !   WRITE(LU_SCARC,'(32i4)') OSL%IWL_TO_ICG(IW, 1:OSL%NCPL)
+                  !ENDDO
                ENDDO
             ENDIF
          ENDDO
@@ -12704,7 +12840,8 @@ SELECT CASE (NTYPE)
 
 !WRITE(LU_SCARC,*) ': NL=',NL, ': CNAME=',CNAME,': CROUTINE=',CROUTINE
       !IF (TYPE_MULTIGRID == NSCARC_MULTIGRID_ALGEBRAIC) THEN
-      DO NM = NMESHES_MIN, NMESHES_MAX
+      DO NM = 1, NMESHES
+         IF (PROCESS(NM) /= MYID) CYCLE
          WRITE(LU_SCARC,1000) CROUTINE, CNAME, NM, NL
          SL => SCARC(NM)%LEVEL(NL)
          M  => MESHES(NM)
@@ -12850,7 +12987,8 @@ SELECT CASE (NTYPE)
  !! ------------------------------------------------------------------------------------------------
    CASE (NSCARC_DEBUG_BCINDEX)
 
-      DO NM = NMESHES_MIN, NMESHES_MAX
+      DO NM = 1, NMESHES
+         IF (PROCESS(NM) /= MYID) CYCLE
          WRITE(LU_SCARC,1000) CROUTINE, CNAME, NM, NL
          SL => SCARC(NM)%LEVEL(NL)
          WRITE(LU_SCARC, '(8i4)') (SL%WALL(J)%BTYPE, J=1,SL%NW)
@@ -12861,7 +12999,8 @@ SELECT CASE (NTYPE)
  !! ------------------------------------------------------------------------------------------------
    CASE (NSCARC_DEBUG_ACELL)
 
-      DO NM = NMESHES_MIN, NMESHES_MAX
+      DO NM = 1, NMESHES
+         IF (PROCESS(NM) /= MYID) CYCLE
          WRITE(LU_SCARC,1000) CROUTINE, CNAME, NM, NL
          SL  => SCARC(NM)%LEVEL(NL)
          WRITE(LU_SCARC, '(8i8)') (SL%WALL(IW)%ICW, IW=1,SL%NW)
@@ -12872,7 +13011,8 @@ SELECT CASE (NTYPE)
  !! ------------------------------------------------------------------------------------------------
    CASE (NSCARC_DEBUG_GCELL)
 
-      DO NM = NMESHES_MIN, NMESHES_MAX
+      DO NM = 1, NMESHES
+         IF (PROCESS(NM) /= MYID) CYCLE
          WRITE(LU_SCARC,1000) CROUTINE, CNAME, NM, NL
          SL  => SCARC(NM)%LEVEL(NL)
          WRITE(LU_SCARC,*) '-------- GHOST,  NGE=',SL%NCG
@@ -12891,7 +13031,8 @@ SELECT CASE (NTYPE)
  !! ------------------------------------------------------------------------------------------------
    CASE (NSCARC_DEBUG_NCELL)
 
-      DO NM = NMESHES_MIN, NMESHES_MAX
+      DO NM = 1, NMESHES
+         IF (PROCESS(NM) /= MYID) CYCLE
          WRITE(LU_SCARC,1000) CROUTINE, CNAME, NM, NL
          SL  => SCARC(NM)%LEVEL(NL)
          WRITE(LU_SCARC,*) '-------- NOM, NCE= ', SL%NCE
@@ -12910,7 +13051,8 @@ SELECT CASE (NTYPE)
  !! ------------------------------------------------------------------------------------------------
    CASE (NSCARC_DEBUG_SUBDIVISION)
 
-      DO NM = NMESHES_MIN, NMESHES_MAX
+      DO NM = 1, NMESHES
+         IF (PROCESS(NM) /= MYID) CYCLE
          WRITE(LU_SCARC,1000) CROUTINE, CNAME, NM, NL
          SL  => SCARC(NM)%LEVEL(NL)
          WRITE(LU_SCARC,*) 'SUBDIVISION IOR= 1 '
@@ -12933,7 +13075,8 @@ SELECT CASE (NTYPE)
    CASE (NSCARC_DEBUG_MEASURE)
 
       WRITE(LU_SCARC,1000) CROUTINE, CNAME, 1, NL
-      DO NM = NMESHES_MIN, NMESHES_MAX
+      DO NM = 1, NMESHES
+         IF (PROCESS(NM) /= MYID) CYCLE
          SL  => SCARC(NM)%LEVEL(NL)
          IF (NL == 1) THEN
             DO K = SL%NZ, 1, -1
@@ -12951,7 +13094,8 @@ SELECT CASE (NTYPE)
  !! ------------------------------------------------------------------------------------------------
    CASE (NSCARC_DEBUG_CELLTYPE)
 
-      DO NM = NMESHES_MIN, NMESHES_MAX
+      DO NM = 1, NMESHES
+         IF (PROCESS(NM) /= MYID) CYCLE
         WRITE(LU_SCARC,1000) CROUTINE, CNAME, NM, NL
         SL  => SCARC(NM)%LEVEL(NL)
         IF (NL == 1) THEN
@@ -12964,7 +13108,8 @@ SELECT CASE (NTYPE)
            WRITE(LU_SCARC, '(4i6)') (SL%CELLTYPE(IC), IC=1, SL%NC)
         ENDIF
       ENDDO
-      DO NM = NMESHES_MIN, NMESHES_MAX
+      DO NM = 1, NMESHES
+         IF (PROCESS(NM) /= MYID) CYCLE
          SL  => SCARC(NM)%LEVEL(NL)
          DO NOM = 1, NMESHES
             IF (NOM == NM) CYCLE 
@@ -12985,7 +13130,8 @@ SELECT CASE (NTYPE)
 
       IF (TYPE_DEBUG>NSCARC_DEBUG_NONE) THEN
        IF (NMESHES == 4 .OR. NMESHES==1) THEN                !< only temporarily
-         DO NM = NMESHES_MIN, NMESHES_MAX
+         DO NM = 1, NMESHES
+            IF (PROCESS(NM) /= MYID) CYCLE
            WRITE(LU_SCARC,1000) CROUTINE, CNAME, NM, NL
            SL  => SCARC(NM)%LEVEL(NL)
            IF (NL == 1) THEN
@@ -13027,7 +13173,8 @@ SELECT CASE (NTYPE)
       IF (TYPE_DEBUG>NSCARC_DEBUG_NONE) THEN
       WRITE(LU_SCARC,1000) CROUTINE, CNAME, 1, NL
       IF (NMESHES == 1.OR.NL>100) THEN                !< only temporarily
-      DO NM = NMESHES_MIN, NMESHES_MAX
+      DO NM = 1, NMESHES
+         IF (PROCESS(NM) /= MYID) CYCLE
          SL  => SCARC(NM)%LEVEL(NL)
          IF (NL == 1) THEN
             DO K = SL%NZ, 1, -1
@@ -13045,7 +13192,8 @@ SELECT CASE (NTYPE)
  !! ------------------------------------------------------------------------------------------------
    CASE (NSCARC_DEBUG_COARSE)
 
-      DO NM = NMESHES_MIN, NMESHES_MAX
+      DO NM = 1, NMESHES
+         IF (PROCESS(NM) /= MYID) CYCLE
          WRITE(LU_SCARC,1000) CROUTINE, CNAME, NM, NL
          SL  => SCARC(NM)%LEVEL(NL)
          DO K = SL%NZ,1,-1
@@ -13083,8 +13231,8 @@ TYPE (MESH_TYPE), POINTER :: M
  
 IF (TYPE_DEBUG < NSCARC_DEBUG_LESS) RETURN
 
-!DO NM = NMESHES_MIN, NMESHES_MAX
-DO NM = NMESHES_MIN, NMESHES_MIN
+DO NM = 1, NMESHES
+   IF (PROCESS(NM) /= MYID) CYCLE
    
    M  => MESHES(NM)
    CALL POINT_TO_VECTOR (NVECTOR, NM, NLEVEL_MIN, VC)
@@ -13154,7 +13302,9 @@ TYPE (SCARC_LEVEL_TYPE), POINTER :: SL
 IF (TYPE_DEBUG < NSCARC_DEBUG_LESS) RETURN
 
          
-DO NM = NMESHES_MIN, NMESHES_MAX
+DO NM = 1, NMESHES
+
+   IF (PROCESS(NM) /= MYID) CYCLE
 
    SL => SCARC(NM)%LEVEL(NL)
    CALL POINT_TO_VECTOR (NVECTOR, NM, NL, VC)
@@ -13198,7 +13348,7 @@ CHARACTER(60) :: FN_DUMP
 INTEGER :: LU_DUMP, IC, NM
 TYPE (SCARC_LEVEL_TYPE), POINTER :: SL
 
-DO NM = NMESHES_MIN, NMESHES_MAX
+DO NM = 1, NMESHES
    SL => SCARC(NM)%LEVEL(NL)
    CALL POINT_TO_VECTOR (NVECTOR, NM, NL, VC)
    WRITE (FN_DUMP, '(A,A,A,i3.3,A,i3.3,A,I3.3)') &
@@ -13227,8 +13377,9 @@ TYPE (SCARC_LEVEL_TYPE), POINTER :: SL
  
 IF (TYPE_DEBUG < NSCARC_DEBUG_INFO0) RETURN
 
-DO NM = NMESHES_MIN, NMESHES_MAX
+DO NM = 1, NMESHES
 
+   IF (PROCESS(NM) /= MYID) CYCLE
    SL => SCARC(NM)%LEVEL(NL)
    CALL POINT_TO_VECTOR (NVECTOR, NM, NL, VC)
 
@@ -13389,7 +13540,8 @@ SELECT CASE(NTYPE)
  !! ---------------------------------------------------------------------------------------------
    CASE(NSCARC_LATEX_STAGGERED)
 
-      DO NM = NMESHES_MIN, NMESHES_MAX
+      DO NM = 1, NMESHES
+         IF (PROCESS(NM) /= MYID) CYCLE
       
          WRITE (CLATEX, '(A,A,A,i2.2,A,i2.2,A)') 'latex/',TRIM(CHID),'_mesh',NM,'_level',NL+1,'_s.tex'
          MLATEX=GET_FILE_NUMBER()
@@ -13460,7 +13612,8 @@ SELECT CASE(NTYPE)
  !! ---------------------------------------------------------------------------------------------
    CASE(NSCARC_LATEX_EQUAL)
 
-      DO NM = NMESHES_MIN, NMESHES_MAX
+      DO NM = 1, NMESHES
+         IF (PROCESS(NM) /= MYID) CYCLE
       
          WRITE (CLATEX, '(A,A,A,i2.2,A,i2.2,A)') 'latex/',TRIM(CHID),'_mesh',NM,'_level',NL+1,'_e.tex'
          MLATEX=GET_FILE_NUMBER()
@@ -13525,7 +13678,8 @@ SELECT CASE(NTYPE)
  !! ---------------------------------------------------------------------------------------------
    CASE(NSCARC_LATEX_NUMBER)
 
-      DO NM = NMESHES_MIN, NMESHES_MAX
+      DO NM = 1, NMESHES
+         IF (PROCESS(NM) /= MYID) CYCLE
       
          IF (NL == NLEVEL_MIN) THEN
             WRITE (CLATEX, '(A,A,A,i2.2,A,i2.2,A)') 'latex/',TRIM(CHID),'_mesh',NM,'_level',NL,'_n.tex'
@@ -13923,9 +14077,9 @@ COUNTS_SCARC_TIMERS = COUNTS_SCARC*N_TIMERS_SCARC
 DISPLS_SCARC_TIMERS = DISPLS_SCARC*N_TIMERS_SCARC
 
 BUFFER = TUSED_SCARC
-IF (USE_MPI) CALL MPI_GATHERV(TUSED_SCARC(1,DISPLS_SCARC(MYID)+1),COUNTS_SCARC_TIMERS(MYID),&
-                              MPI_DOUBLE_PRECISION,TUSED_SCARC, COUNTS_SCARC_TIMERS,DISPLS_SCARC_TIMERS,&
-                              MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,IERR)
+IF (N_MPI_PROCESSES>1) CALL MPI_GATHERV(TUSED_SCARC(1,DISPLS_SCARC(MYID)+1),COUNTS_SCARC_TIMERS(MYID),&
+                                        MPI_DOUBLE_PRECISION,TUSED_SCARC, COUNTS_SCARC_TIMERS,DISPLS_SCARC_TIMERS,&
+                                        MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,IERR)
 
 !> Printout subroutine timings
 !> outdated version, must be revised (not used at the moment)
