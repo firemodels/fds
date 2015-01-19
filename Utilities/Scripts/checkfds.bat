@@ -20,5 +20,6 @@ grep -H -i -A 5 -B 5 "forrtl"          %err2file% >> %OUTDIR%\stage_error.txt
 grep -H -i -A 5 -B 5 "Run aborted"     %err2file% >> %OUTDIR%\stage_error.txt
 grep -H -i -A 5 -B 5 "STOP: Numerical" %err2file% >> %OUTDIR%\stage_error.txt
 grep -H -i -A 5 -B 5 "Segmentation"    %err2file% >> %OUTDIR%\stage_error.txt
+echo. >> %OUTDIR%\stage_error.txt
 
 cd %BASEDIR%

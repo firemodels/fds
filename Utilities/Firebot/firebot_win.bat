@@ -303,7 +303,7 @@ echo "" > %OUTDIR%\stage_error.txt
 
 call Check_FDS_cases 
 
-type %OUTDIR%\stage_error.txt | find /v /c "kdkwokwdokwd"> %OUTDIR%\stage_nerror.txt
+type %OUTDIR%\stage_error.txt | find /v /c "  "> %OUTDIR%\stage_nerror.txt
 set /p nerrors=<%OUTDIR%\stage_nerror.txt
 if %nerrors% GTR 0 (
    echo %stage% errors >> %errorlog%
@@ -326,7 +326,7 @@ echo "" > %OUTDIR%\stage_error.txt
 
 call Check_FDS_cases 
 
-type %OUTDIR%\stage_error.txt | find /v /c "kdkwokwdokwd"> %OUTDIR%\stage_nerror.txt
+type %OUTDIR%\stage_error.txt | find /v /c "  "> %OUTDIR%\stage_nerror.txt
 set /p nerrors=<%OUTDIR%\stage_nerror.txt
 if %nerrors% GTR 0 (
    echo %stage% errors >> %errorlog%
@@ -547,7 +547,7 @@ set stage=%3
 grep -v "commands for target" %search_file% > %OUTDIR%\stage_warning0.txt
 grep -v "mpif.h" %OUTDIR%\stage_warning0.txt > %OUTDIR%\stage_warning1.txt
 grep -i -A 5 -B 5 %search_string% %OUTDIR%\stage_warning1.txt > %OUTDIR%\stage_warning.txt
-type %OUTDIR%\stage_warning.txt | find /v /c "kdkwokwdokwd"> %OUTDIR%\stage_nwarning.txt
+type %OUTDIR%\stage_warning.txt | find /v /c "  "> %OUTDIR%\stage_nwarning.txt
 set /p nwarnings=<%OUTDIR%\stage_nwarning.txt
 if %nwarnings% GTR 0 (
   echo %stage% warnings >> %warninglog%
@@ -568,7 +568,7 @@ set stage=%3
 grep -v "commands for target" %search_file% > %OUTDIR%\stage_error0.txt
 grep -v "mpif.h" %OUTDIR%\stage_error0.txt > %OUTDIR%\stage_error1.txt
 grep -i -A 5 -B 5 %search_string% %OUTDIR%\stage_error1.txt > %OUTDIR%\stage_error.txt
-type %OUTDIR%\stage_error.txt | find /v /c "kdkwokwdokwd"> %OUTDIR%\stage_nerror.txt
+type %OUTDIR%\stage_error.txt | find /v /c "  "> %OUTDIR%\stage_nerror.txt
 set /p nerrors=<%OUTDIR%\stage_nerror.txt
 if %nerrors% GTR 0 (
   echo %stage% errors >> %errorlog%
@@ -601,7 +601,7 @@ type %guideout% | find "! LaTeX Error:" >> %OUTDIR%\stage_error.txt
 type %guideout% | find "Fatal error" >> %OUTDIR%\stage_error.txt
 type %guideout% | find "Error:" >> %OUTDIR%\stage_error.txt
 
-type %OUTDIR%\stage_error.txt | find /v /c "JDIJWIDJIQ"> %OUTDIR%\stage_nerrors.txt
+type %OUTDIR%\stage_error.txt | find /v /c "  "> %OUTDIR%\stage_nerrors.txt
 set /p nerrors=<%OUTDIR%\stage_nerrors.txt
 if %nerrors% GTR 0 (
   echo Errors from Stage 6 - Build %guide% >> %errorlog%
