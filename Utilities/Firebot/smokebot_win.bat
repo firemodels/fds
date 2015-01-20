@@ -1,8 +1,4 @@
 @echo off
-set reduced=%1
-if [%reduced%] == [] (
-  set reduced=0
-)
 
 :: -------------------------------------------------------------
 ::                         set environment
@@ -40,6 +36,8 @@ set email=%svnroot%\SMV\scripts\email.bat
 
 set errorlog=%OUTDIR%\stage_errors.txt
 set warninglog=%OUTDIR%\stage_warnings.txt
+set errorlogpc=%OUTDIR%\stage_errors_pc.txt
+set warninglogpc=%OUTDIR%\stage_warnings_pc.txt
 set errorwarninglog=%OUTDIR%\stage_errorswarnings.txt
 set infofile=%OUTDIR%\stage_info.txt
 set revisionfile=%OUTDIR%\revision.txt
@@ -157,49 +155,42 @@ set DIFF_PRELIM=%duration%
 call :GET_TIME
 set BUILDFDS_beg=%current_time% 
 echo Stage 1 - Building FDS
-if %reduced% == 1 goto skip_fds_debug
 
-echo             serial debug
+:: echo             serial debug
 
-cd %svnroot%\FDS_Compilation\intel_win_%size%_db
-erase *.obj *.mod *.exe 1> %OUTDIR%\stage1a.txt 2>&1
-make VPATH="../../FDS_Source" -f ..\makefile intel_win_%size%_db 1>> %OUTDIR%\stage1a.txt 2>&1
+:: cd %svnroot%\FDS_Compilation\intel_win_%size%_db
+:: erase *.obj *.mod *.exe 1> %OUTDIR%\stage1a.txt 2>&1
+:: make VPATH="../../FDS_Source" -f ..\makefile intel_win_%size%_db 1>> %OUTDIR%\stage1a.txt 2>&1
 
-call :does_file_exist fds_win_%size%_db.exe %OUTDIR%\stage1a.txt|| exit /b 1
-call :find_fds_warnings "warning" %OUTDIR%\stage1a.txt "Stage 1a"
+:: call :does_file_exist fds_win_%size%_db.exe %OUTDIR%\stage1a.txt|| exit /b 1
+:: call :find_fds_warnings "warning" %OUTDIR%\stage1a.txt "Stage 1a"
 
-:: echo             parallel debug
+echo             parallel debug
 
-:: cd %svnroot%\FDS_Compilation\mpi_intel_win_%size%_db
-:: erase *.obj *.mod *.exe 1> %OUTDIR%\stage1b.txt 2>&1
-:: make VPATH="../../FDS_Source" -f ..\makefile mpi_intel_win_%size%_db 1>> %OUTDIR%\stage1b.txt 2>&1
+cd %svnroot%\FDS_Compilation\mpi_intel_win_%size%_db
+erase *.obj *.mod *.exe 1> %OUTDIR%\stage1b.txt 2>&1
+make VPATH="../../FDS_Source" -f ..\makefile mpi_intel_win_%size%_db 1>> %OUTDIR%\stage1b.txt 2>&1
 
-:: call :does_file_exist fds_mpi_win_%size%_db.exe %OUTDIR%\stage1b.txt|| exit /b 1
-:: call :find_fds_warnings "warning" %OUTDIR%\stage1b.txt "Stage 1b"
+call :does_file_exist fds_mpi_win_%size%_db.exe %OUTDIR%\stage1b.txt|| exit /b 1
+call :find_fds_warnings "warning" %OUTDIR%\stage1b.txt "Stage 1b"
 
-:skip_fds_debug
+:: echo             serial release
 
-echo             serial release
+:: cd %svnroot%\FDS_Compilation\intel_win_%size%
+:: erase *.obj *.mod *.exe 1> %OUTDIR%\stage1c.txt 2>&1
+:: make VPATH="../../FDS_Source" -f ..\makefile intel_win_%size% 1>> %OUTDIR%\stage1c.txt 2>&1
 
-cd %svnroot%\FDS_Compilation\intel_win_%size%
-erase *.obj *.mod *.exe 1> %OUTDIR%\stage1c.txt 2>&1
-make VPATH="../../FDS_Source" -f ..\makefile intel_win_%size% 1>> %OUTDIR%\stage1c.txt 2>&1
+:: call :does_file_exist fds_win_%size%.exe %OUTDIR%\stage1c.txt|| exit /b 1
+:: call :find_fds_warnings "warning" %OUTDIR%\stage1c.txt "Stage 1c"
 
-call :does_file_exist fds_win_%size%.exe %OUTDIR%\stage1c.txt|| exit /b 1
-call :find_fds_warnings "warning" %OUTDIR%\stage1c.txt "Stage 1c"
+echo             parallel release
 
-if %reduced% == 1 goto skip_fds_parallel
+cd %svnroot%\FDS_Compilation\mpi_intel_win_%size%
+erase *.obj *.mod *.exe 1> %OUTDIR%\stage1d.txt 2>&1
+make VPATH="../../FDS_Source" -f ..\makefile mpi_intel_win_%size%  1>> %OUTDIR%\stage1d.txt 2>&1
 
-:: echo             parallel release
-
-:: cd %svnroot%\FDS_Compilation\mpi_intel_win_%size%
-:: erase *.obj *.mod *.exe 1> %OUTDIR%\stage1d.txt 2>&1
-:: make VPATH="../../FDS_Source" -f ..\makefile mpi_intel_win_%size%  1>> %OUTDIR%\stage1d.txt 2>&1
-
-:: call :does_file_exist fds_mpi_win_%size%.exe %OUTDIR%\stage1d.txt|| exit /b 1
-:: call :find_fds_warnings "warning" %OUTDIR%\stage1d.txt "Stage 1d"
-
-:skip_fds_parallel
+call :does_file_exist fds_mpi_win_%size%.exe %OUTDIR%\stage1d.txt|| exit /b 1
+call :find_fds_warnings "warning" %OUTDIR%\stage1d.txt "Stage 1d"
 
 call :GET_TIME
 set BUILDFDS_end=%current_time%
@@ -214,8 +205,6 @@ call :GET_TIME
 set BUILDSMVUTIL_beg=%current_time% 
 echo Stage 2 - Building Smokeview
 
-if %reduced% == 1 goto skip_smokeview_debug
-
 echo             debug
 
 cd %svnroot%\SMV\Build\intel_win_%size%
@@ -224,8 +213,6 @@ make -f ..\Makefile intel_win_%size%_db 1>> %OUTDIR%\stage2a.txt 2>&1
 
 call :does_file_exist smokeview_win_%size%_db.exe %OUTDIR%\stage2a.txt|| exit /b 1
 call :find_smokeview_warnings "warning" %OUTDIR%\stage2a.txt "Stage 2a"
-
-:skip_smokeview_debug
 
 echo             release
 
@@ -242,15 +229,11 @@ call :find_smokeview_warnings "warning" %OUTDIR%\stage2b.txt "Stage 2b"
 
 echo Stage 3 - Building FDS/Smokeview utilities
 
-if %reduced% == 1 goto skip_fds2ascii
-
 echo             fds2ascii
 cd %svnroot%\Utilities\fds2ascii\intel_win_%size%
 erase *.obj *.mod *.exe 1> %OUTDIR%\stage3c.txt 2>&1
 ifort -o fds2ascii_win_%size%.exe /nologo ..\..\Data_processing\fds2ascii.f90  1>> %OUTDIR%\stage3.txt 2>&1
 call :does_file_exist fds2ascii_win_%size%.exe %OUTDIR%\stage3.txt|| exit /b 1
-
-:skip_fds2ascii
 
 if %haveCC% == 1 (
   echo             smokediff
@@ -297,16 +280,40 @@ echo             debug mode
 cd %svnroot%\Verification\scripts
 call Run_SMV_cases %size% 0 1 1> %OUTDIR%\stage4a.txt 2>&1
 
-call :find_smokeview_warnings "error" %OUTDIR%\stage4a.txt "Stage 4a_1"
-call :find_smokeview_warnings "forrtl: severe" %OUTDIR%\stage4a.txt "Stage 4a_2"
+cd %svnroot%\Verification\scripts
+call Check_SMV_cases 
+
+type %OUTDIR%\stage_error.txt | find /v /c "  "> %OUTDIR%\stage_nerror.txt
+set /p nerrors=<%OUTDIR%\stage_nerror.txt
+if %nerrors% GTR 0 (
+   echo Debug FDS case errors >> %errorlog%
+   echo. >> %errorlog%
+   type %OUTDIR%\stage_error.txt >> %errorlog%
+   set haveerrors=1
+   set haveerrors_now=1
+   call :output_abort_message
+   exit /b 1
+)
 
 echo             release mode
 
 cd %svnroot%\Verification\scripts
 call Run_SMV_cases %size% 0 0 1> %OUTDIR%\stage4b.txt 2>&1
 
-call :find_smokeview_warnings "error" %OUTDIR%\stage4b.txt "Stage 4b_1"
-call :find_smokeview_warnings "forrtl: severe" %OUTDIR%\stage4b.txt "Stage 4b_2"
+cd %svnroot%\Verification\scripts
+call Check_SMV_cases 
+
+type %OUTDIR%\stage_error.txt | find /v /c "  "> %OUTDIR%\stage_nerror.txt
+set /p nerrors=<%OUTDIR%\stage_nerror.txt
+if %nerrors% GTR 0 (
+   echo Release FDS case errors >> %errorlog%
+   echo. >> %errorlog%
+   type %OUTDIR%\stage_error.txt >> %errorlog%
+   set haveerrors=1
+   set haveerrors_now=1
+   call :output_abort_message
+   exit /b 1
+)
 
 call :GET_TIME
 set RUNVV_end=%current_time% 
@@ -393,31 +400,37 @@ if NOT exist %tosummarydir% goto skip_copyfiles
 cd %CURDIR%
 
 if exist %emailexe% (
+  if %havewarnings% NEQ 0 (
+     sed "s/$/\r/" < %warninglog% > %warninglogpc%
+  )
+  if %haveerrors% NEQ 0 (
+     sed "s/$/\r/" < %errorlog% > %errorlogpc%
+  )
   if %havewarnings% == 0 (
     if %haveerrors% == 0 (
-      call %email% %mailToSMV% "smokebot build success on %COMPUTERNAME%! %revision%" %infofile%
+      call %email% %mailToSMV% "smokebot success on %COMPUTERNAME%! %revision%" %infofile%
     ) else (
       echo "start: %startdate% %starttime% " > %infofile%
       echo " stop: %stopdate% %stoptime% " >> %infofile%
       echo. >> %infofile%
-      type %errorlog% >> %infofile%
-      call %email% %mailToSMV% "smokebot build failure on %COMPUTERNAME%! %revision%" %infofile%
+      type %errorlogpc% >> %infofile%
+      call %email% %mailToSMV% "smokebot failure on %COMPUTERNAME%! %revision%" %infofile%
     )
   ) else (
     if %haveerrors% == 0 (
       echo "start: %startdate% %starttime% " > %infofile%
       echo " stop: %stopdate% %stoptime% " >> %infofile%
       echo. >> %infofile%
-      type %warninglog% >> %infofile%
-      %email% %mailToSMV% "smokebot build success with warnings on %COMPUTERNAME% %revision%" %infofile%
+      type %warninglogpc% >> %infofile%
+      %email% %mailToSMV% "smokebot success with warnings on %COMPUTERNAME% %revision%" %infofile%
     ) else (
       echo "start: %startdate% %starttime% " > %infofile%
       echo " stop: %stopdate% %stoptime% " >> %infofile%
       echo. >> %infofile%
-      type %errorlog% >> %infofile%
+      type %errorlogpc% >> %infofile%
       echo. >> %infofile%
-      type %warninglog% >> %infofile%
-      call %email% %mailToSMV% "smokebot build failure on %COMPUTERNAME%! %revision%" %infofile%
+      type %warninglogpc% >> %infofile%
+      call %email% %mailToSMV% "smokebot failure on %COMPUTERNAME%! %revision%" %infofile%
     )
   )
 )
@@ -428,9 +441,9 @@ pause
 exit
 
 :output_abort_message
-  echo "***Fatal error: smokebot build failure on %COMPUTERNAME% %revision%"
-  if %havemail% == 1 (
-    call %email% %mailToSMV% "smokebot build failure on %COMPUTERNAME% %revision%" %errorlog%
+  echo "***Fatal error: smokebot failure on %COMPUTERNAME% %revision%"
+  if exist %emailexe% (
+    call %email% %mailToSMV% "smokebot failure on %COMPUTERNAME% %revision%" %errorlog%
   )
 exit /b
 

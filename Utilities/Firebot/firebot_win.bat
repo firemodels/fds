@@ -44,7 +44,7 @@ set warninglogpc=%OUTDIR%\firebot_warnings_pc.txt
 set errorwarninglog=%OUTDIR%\firebot_errorswarnings.txt
 set infofile=%OUTDIR%\firebot_info.txt
 set revisionfile=%OUTDIR%\fds-smv_revision.txt
-set stagestatus=%OUTDIR%\stage_status.log
+set stagestatus=%OUTDIR%\firebot_status.log
 set counta=%OUTDIR%\firebot_count0a.txt
 set countb=%OUTDIR%\firebot_count0b.txt
 set scratchfile=%OUTDIR%\firebot_scratch.txt
@@ -311,7 +311,7 @@ call Check_FDS_cases
 type %OUTDIR%\stage_error.txt | find /v /c "  "> %OUTDIR%\stage_nerror.txt
 set /p nerrors=<%OUTDIR%\stage_nerror.txt
 if %nerrors% GTR 0 (
-   echo Debug FDS case (Stage 4a) errors >> %errorlog%
+   echo "Debug FDS case (Stage 4a) errors" >> %errorlog%
    echo. >> %errorlog%
    type %OUTDIR%\stage_error.txt >> %errorlog%
    set haveerrors=1
@@ -334,7 +334,7 @@ call Check_FDS_cases
 type %OUTDIR%\stage_error.txt | find /v /c "  "> %OUTDIR%\stage_nerror.txt
 set /p nerrors=<%OUTDIR%\stage_nerror.txt
 if %nerrors% GTR 0 (
-   echo Release FDS case (Stage 4b) errors >> %errorlog%
+   echo "Release FDS case (Stage 4b) errors" >> %errorlog%
    echo. >> %errorlog%
    type %OUTDIR%\stage_error.txt >> %errorlog%
    call :output_abort_message
@@ -522,12 +522,8 @@ exit /b 0
     echo "***Fatal error: %program% not present" > %errorlog%
     echo "firebot run aborted"
     call :output_abort_message
-    erase %OUTDIR%\stage_exist.txt
-    erase %OUTDIR%\stage_count.txt
     exit /b 1
   )
-  erase %OUTDIR%\stage_exist.txt
-  erase %OUTDIR%\stage_count.txt
   exit /b 0
 
 :: -------------------------------------------------------------
@@ -564,10 +560,6 @@ if %nwarnings% GTR 0 (
   type %OUTDIR%\stage_warning.txt >> %warninglog%
   set havewarnings=1
 )
-erase %OUTDIR%\stage_warning0.txt
-erase %OUTDIR%\stage_warning1.txt
-erase %OUTDIR%\stage_warning.txt
-erase %OUTDIR%\stage_nwarning.txt
 exit /b
 
 :: -------------------------------------------------------------
@@ -590,10 +582,6 @@ if %nerrors% GTR 0 (
   set haveerrors=1
   set haveerrors_now=1
 )
-erase %OUTDIR%\stage_error0.txt
-erase %OUTDIR%\stage_error1.txt
-erase %OUTDIR%\stage_error.txt
-erase %OUTDIR%\stage_nerror.txt
 exit /b
 
 :: -------------------------------------------------------------
@@ -636,10 +624,6 @@ if %nwarnings% GTR 0 (
   type %OUTDIR%\stage_warning.txt >> %warninglog%
   set havewarnings=1
 )
-erase %OUTDIR%\stage_error.txt
-erase %OUTDIR%\stage_nerrors.txt
-erase %OUTDIR%\stage_warning.txt
-erase %OUTDIR%\stage_nwarnings.txt
 copy %guide%.pdf %fromsummarydir%\manuals
 copy %guide%.pdf %tosummarydir%\manuals
 
