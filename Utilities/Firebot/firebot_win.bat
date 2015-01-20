@@ -177,7 +177,7 @@ echo Stage 1 - Building FDS
 ::make VPATH="../../FDS_Source" -f ..\makefile intel_win_64_db 1>> %OUTDIR%\stage1a.txt 2>&1
 
 ::call :does_file_exist fds_win_64_db.exe %OUTDIR%\stage1a.txt|| exit /b 1
-::call :find_warnings "warning" %OUTDIR%\stage1a.txt "Stage 1a"
+::call :find_warnings "warning" %OUTDIR%\stage1a.txt "FDS serial debug compilation (Stage 1a)"
 
 echo             parallel debug
 
@@ -186,7 +186,7 @@ erase *.obj *.mod *.exe *.pdb 1> %OUTDIR%\stage1b.txt 2>&1
 make VPATH="../../FDS_Source" -f ..\makefile mpi_intel_win_64_db 1>> %OUTDIR%\stage1b.txt 2>&1
 
 call :does_file_exist fds_mpi_win_64_db.exe %OUTDIR%\stage1b.txt|| exit /b 1
-call :find_warnings "warning" %OUTDIR%\stage1b.txt "Stage 1b"
+call :find_warnings "warning" %OUTDIR%\stage1b.txt "FDS parallel debug compilation (Stage 1b)"
 
 ::echo             serial release
 
@@ -195,7 +195,7 @@ call :find_warnings "warning" %OUTDIR%\stage1b.txt "Stage 1b"
 ::make VPATH="../../FDS_Source" -f ..\makefile intel_win_64 1>> %OUTDIR%\stage1c.txt 2>&1
 
 ::call :does_file_exist fds_win_64.exe %OUTDIR%\stage1c.txt|| exit /b 1
-::call :find_warnings "warning" %OUTDIR%\stage1c.txt "Stage 1c"
+::call :find_warnings "warning" %OUTDIR%\stage1c.txt "FDS serial release compilation (Stage 1c)"
 
 echo             parallel release
 
@@ -204,7 +204,7 @@ erase *.obj *.mod *.exe *.pdb 1> %OUTDIR%\stage1d.txt 2>&1
 make VPATH="../../FDS_Source" -f ..\makefile mpi_intel_win_64  1>> %OUTDIR%\stage1d.txt 2>&1
 
 call :does_file_exist fds_mpi_win_64.exe %OUTDIR%\stage1d.txt|| exit /b 1
-call :find_warnings "warning" %OUTDIR%\stage1d.txt "Stage 1d"
+call :find_warnings "warning" %OUTDIR%\stage1d.txt "FDS parallel release compilation (Stage 1d)"
 
 call :GET_TIME
 set BUILDFDS_end=%current_time%
@@ -226,7 +226,7 @@ erase *.obj *.mod *.exe smokeview_win_64_db.exe 1> %OUTDIR%\stage2a.txt 2>&1
 make -f ..\Makefile intel_win_64_db 1>> %OUTDIR%\stage2a.txt 2>&1
 
 call :does_file_exist smokeview_win_64_db.exe %OUTDIR%\stage2a.txt|| exit /b 1
-call :find_warnings "warning" %OUTDIR%\stage2a.txt "Stage 2a"
+call :find_warnings "warning" %OUTDIR%\stage2a.txt "Smokeview debug compilation (Stage 2a)"
 
 echo             release
 
@@ -235,7 +235,7 @@ erase *.obj *.mod smokeview_win_64.exe 1> %OUTDIR%\stage2b.txt 2>&1
 make -f ..\Makefile intel_win_64 1>> %OUTDIR%\stage2b.txt 2>&1
 
 call :does_file_exist smokeview_win_64.exe %OUTDIR%\stage2b.txt|| aexit /b 1
-call :find_warnings "warning" %OUTDIR%\stage2b.txt "Stage 2b"
+call :find_warnings "warning" %OUTDIR%\stage2b.txt "Smokeview release compilation (Stage 2b)"
 
 :: -------------------------------------------------------------
 ::                           stage 3
@@ -311,7 +311,7 @@ call Check_FDS_cases
 type %OUTDIR%\stage_error.txt | find /v /c "  "> %OUTDIR%\stage_nerror.txt
 set /p nerrors=<%OUTDIR%\stage_nerror.txt
 if %nerrors% GTR 0 (
-   echo %stage% errors >> %errorlog%
+   echo Debug FDS case (Stage 4a) errors >> %errorlog%
    echo. >> %errorlog%
    type %OUTDIR%\stage_error.txt >> %errorlog%
    set haveerrors=1
@@ -334,7 +334,7 @@ call Check_FDS_cases
 type %OUTDIR%\stage_error.txt | find /v /c "  "> %OUTDIR%\stage_nerror.txt
 set /p nerrors=<%OUTDIR%\stage_nerror.txt
 if %nerrors% GTR 0 (
-   echo %stage% errors >> %errorlog%
+   echo Release FDS case (Stage 4b) errors >> %errorlog%
    echo. >> %errorlog%
    type %OUTDIR%\stage_error.txt >> %errorlog%
    call :output_abort_message
@@ -356,7 +356,7 @@ echo Stage 5 - Making Smokeview pictures
 cd %svnroot%\Verification\
 call MAKE_FDS_pictures 64 1> %OUTDIR%\stage5.txt 2>&1
 
-call :find_errors "error" %OUTDIR%\stage5.txt "Stage 5"
+call :find_errors "error" %OUTDIR%\stage5.txt "Image generation (Stage 5)"
 
 call :GET_TIME
 set MAKEPICS_end=%current_time% 
@@ -522,8 +522,12 @@ exit /b 0
     echo "***Fatal error: %program% not present" > %errorlog%
     echo "firebot run aborted"
     call :output_abort_message
+    erase %OUTDIR%\stage_exist.txt
+    erase %OUTDIR%\stage_count.txt
     exit /b 1
   )
+  erase %OUTDIR%\stage_exist.txt
+  erase %OUTDIR%\stage_count.txt
   exit /b 0
 
 :: -------------------------------------------------------------
@@ -560,6 +564,10 @@ if %nwarnings% GTR 0 (
   type %OUTDIR%\stage_warning.txt >> %warninglog%
   set havewarnings=1
 )
+erase %OUTDIR%\stage_warning0.txt
+erase %OUTDIR%\stage_warning1.txt
+erase %OUTDIR%\stage_warning.txt
+erase %OUTDIR%\stage_nwarning.txt
 exit /b
 
 :: -------------------------------------------------------------
@@ -582,6 +590,10 @@ if %nerrors% GTR 0 (
   set haveerrors=1
   set haveerrors_now=1
 )
+erase %OUTDIR%\stage_error0.txt
+erase %OUTDIR%\stage_error1.txt
+erase %OUTDIR%\stage_error.txt
+erase %OUTDIR%\stage_nerror.txt
 exit /b
 
 :: -------------------------------------------------------------
@@ -624,7 +636,10 @@ if %nwarnings% GTR 0 (
   type %OUTDIR%\stage_warning.txt >> %warninglog%
   set havewarnings=1
 )
-
+erase %OUTDIR%\stage_error.txt
+erase %OUTDIR%\stage_nerrors.txt
+erase %OUTDIR%\stage_warning.txt
+erase %OUTDIR%\stage_nwarnings.txt
 copy %guide%.pdf %fromsummarydir%\manuals
 copy %guide%.pdf %tosummarydir%\manuals
 
