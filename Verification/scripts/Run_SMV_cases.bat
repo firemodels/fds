@@ -4,6 +4,8 @@ set size=%1
 set runonlygeom=%2
 set rundebug=%3
 
+set mpi=mpi_
+
 set svn_drive=c:
 if "%rundebug%" == "1" (
 set DEBUG=_db
@@ -51,13 +53,12 @@ if "%size%" == "" (
   set CFASTEXE=cfast6
   set WIND2FDSEXE=wind2fds
 ) else (
-  set FDSBASE=fds_win_%size%%DEBUG%.exe
-  set FDSEXE=%SVNROOT%\FDS_Compilation\intel_win_%size%%DEBUG%\fds_win_%size%%DEBUG%.exe
+  set FDSBASE=fds_%mpi%win_%size%%DEBUG%.exe
+  set FDSEXE=%SVNROOT%\FDS_Compilation\%mpi%intel_win_%size%%DEBUG%\fds_%mpi%win_%size%%DEBUG%.exe
   set CFASTEXE=%CFAST%\CFAST\intel_win_%size%\cfast6_win_%size%.exe
   set WIND2FDSEXE=%SVNROOT%\Utilities\wind2fds\intel_win_%size%\wind2fds_win_%size%.exe
 )
 
-set WFDSEXE=%FIRELOCAL%\bin\wfds6_9977_win_64.exe
 set BACKGROUNDEXE=%SVNROOT%\Utilities\background\intel_win_32\background.exe
 
 :: Run jobs in background (or not)
@@ -74,7 +75,6 @@ call :is_file_installed %FDSEXE%|| exit /b 1
 call :is_file_installed %WIND2FDSEXE%|| exit /b 1
 
 set FDS=%bg%%FDSEXE%
-set WFDS=%bg%%WFDSEXE%
 set CFAST=%bg%%CFASTEXE%
 
 set SH2BAT=%SVNROOT%\Utilities\Data_Processing\sh2bat
