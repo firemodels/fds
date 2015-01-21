@@ -5,7 +5,7 @@
 :: $Author$
 
 set curdir=%CD%
-set running=smokebot_win_running.status
+set running=bot_running
 if not exist %running% (
   svn update
   echo 1 > %running%
@@ -13,6 +13,6 @@ if not exist %running% (
   cd %curdir%
   erase %running%
 ) else (
-  echo smokebot_win is already running
-  echo erase the file %running% if this is not the case
+  echo A bot is already running.
+  echo Erase the file %running% if this is not the case
 )
