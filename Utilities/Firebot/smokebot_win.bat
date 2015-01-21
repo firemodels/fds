@@ -33,7 +33,8 @@ set errorlog=%OUTDIR%\stage_errors.txt
 set warninglog=%OUTDIR%\stage_warnings.txt
 set errorwarninglog=%OUTDIR%\stage_errorswarnings.txt
 set infofile=%OUTDIR%\stage_info.txt
-set revisionfile=%OUTDIR%\revision.txt
+set revisionfilestring=%OUTDIR%\revision.txt
+set revisionfilenum=%OUTDIR%\revision_num.txt
 set stagestatus=%OUTDIR%\stage_status.log
 
 set fromsummarydir=%svnroot%\Manuals\SMV_Summary
@@ -112,6 +113,15 @@ echo             found pdflatex
 call :is_file_installed grep|| exit /b 1
 echo             found grep
 
+call :is_file_installed sed|| exit /b 1
+echo             found sed
+
+call :is_file_installed svn|| exit /b 1
+echo             found svn
+
+call :is_file_installed svnversion|| exit /b 1
+echo             found svnversion
+
 :: update cfast repository
 
 echo             updating cfast repository
@@ -125,11 +135,14 @@ echo             updating FDS/Smokeview repository
 cd %svnroot%
 svn update 1>> %OUTDIR%\stage0.txt 2>&1
 
-svn info | find /i "Revision" > %revisionfile%
-set /p revision=<%revisionfile%
+svn info | find /i "Revision" > %revisionfilestring%
+set /p revisionstring=<%revisionfilestring%
 
-set errorlogpc=%HISTORYDIR%\errors_%revision%.txt
-set warninglogpc=%HISTORYDIR%\warnings_%revision%.txt
+svnversion > %revisionfilenum%
+set /p revisionnum=<%revisionfilenum%
+
+set errorlogpc=%HISTORYDIR%\errors_%revisionnum%.txt
+set warninglogpc=%HISTORYDIR%\warnings_%revisionnum%.txt
 
 :: build cfast
 
@@ -403,13 +416,13 @@ sed "s/$/\r/" < %errorlog% > %errorlogpc%
 if exist %emailexe% (
   if %havewarnings% == 0 (
     if %haveerrors% == 0 (
-      call %email% %mailToSMV% "smokebot success on %COMPUTERNAME%! %revision%" %infofile%
+      call %email% %mailToSMV% "smokebot success on %COMPUTERNAME%! %revisionstring%" %infofile%
     ) else (
       echo "start: %startdate% %starttime% " > %infofile%
       echo " stop: %stopdate% %stoptime% " >> %infofile%
       echo. >> %infofile%
       type %errorlogpc% >> %infofile%
-      call %email% %mailToSMV% "smokebot failure on %COMPUTERNAME%! %revision%" %infofile%
+      call %email% %mailToSMV% "smokebot failure on %COMPUTERNAME%! %revisionstring%" %infofile%
     )
   ) else (
     if %haveerrors% == 0 (
@@ -417,7 +430,7 @@ if exist %emailexe% (
       echo " stop: %stopdate% %stoptime% " >> %infofile%
       echo. >> %infofile%
       type %warninglogpc% >> %infofile%
-      %email% %mailToSMV% "smokebot success with warnings on %COMPUTERNAME% %revision%" %infofile%
+      %email% %mailToSMV% "smokebot success with warnings on %COMPUTERNAME% %revisionstring%" %infofile%
     ) else (
       echo "start: %startdate% %starttime% " > %infofile%
       echo " stop: %stopdate% %stoptime% " >> %infofile%
@@ -425,7 +438,7 @@ if exist %emailexe% (
       type %errorlogpc% >> %infofile%
       echo. >> %infofile%
       type %warninglogpc% >> %infofile%
-      call %email% %mailToSMV% "smokebot failure on %COMPUTERNAME%! %revision%" %infofile%
+      call %email% %mailToSMV% "smokebot failure on %COMPUTERNAME%! %revisionstring%" %infofile%
     )
   )
 )
@@ -434,9 +447,9 @@ echo smokebot_win completed
 goto :eof
 
 :output_abort_message
-  echo "***Fatal error: smokebot failure on %COMPUTERNAME% %revision%"
+  echo "***Fatal error: smokebot failure on %COMPUTERNAME% %revisionstring%"
   if exist %emailexe% (
-    call %email% %mailToSMV% "smokebot failure on %COMPUTERNAME% %revision%" %errorlog%
+    call %email% %mailToSMV% "smokebot failure on %COMPUTERNAME% %revisionstring%" %errorlog%
   )
 exit /b
 
