@@ -18,8 +18,10 @@ set cfastbasename=cfast
 set CURDIR=%CD%
 
 if not exist output mkdir output
+if not exist history mkdir history
 
 set OUTDIR=%CURDIR%\output
+set HISTORYDIR=%CURDIR%\history
 
 erase %OUTDIR%\*.txt 1> Nul 2>&1
 
@@ -29,8 +31,6 @@ set email=%svnroot%\SMV\scripts\email.bat
 
 set errorlog=%OUTDIR%\stage_errors.txt
 set warninglog=%OUTDIR%\stage_warnings.txt
-set errorlogpc=%OUTDIR%\stage_errors_pc.txt
-set warninglogpc=%OUTDIR%\stage_warnings_pc.txt
 set errorwarninglog=%OUTDIR%\stage_errorswarnings.txt
 set infofile=%OUTDIR%\stage_info.txt
 set revisionfile=%OUTDIR%\revision.txt
@@ -127,6 +127,8 @@ svn update 1>> %OUTDIR%\stage0.txt 2>&1
 
 svn info | find /i "Revision" > %revisionfile%
 set /p revision=<%revisionfile%
+set errorlogpc=%HISTORYDIR%\errors_%revision%.txt
+set warninglogpc=%HISTORYDIR%\warnings_%revision%.txt
 
 :: build cfast
 
