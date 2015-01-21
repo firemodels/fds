@@ -2801,8 +2801,8 @@ PARABOLIC_IF: IF (CHECK_VN) THEN
    MU_MAX = 0._EB
    DO K=1,KBAR
       DO J=1,JBAR
-         IILOOP_OpenMP: DO I=1,IBAR
-            IF (SOLID(CELL_INDEX(I,J,K))) CYCLE IILOOP_OpenMP
+         I_LOOP: DO I=1,IBAR
+            IF (SOLID(CELL_INDEX(I,J,K))) CYCLE I_LOOP
             MU_TMP = MAX(D_Z_MAX(I,J,K),MAX(RPR,RSC)*MU(I,J,K)/RHOP(I,J,K))
             IF (MU_TMP>=MU_MAX) THEN
                MU_MAX = MU_TMP
@@ -2810,7 +2810,7 @@ PARABOLIC_IF: IF (CHECK_VN) THEN
                J_VN=J
                K_VN=K
             ENDIF
-         ENDDO IILOOP_OpenMP
+         ENDDO I_LOOP
       ENDDO
    ENDDO
    
