@@ -5575,12 +5575,17 @@ READ_SURF_LOOP: DO N=0,N_SURF
             ENDDO
          ENDDO
       ENDIF
-      IF (SUM(SF%MASS_FRACTION) > 1._EB) THEN
-         WRITE (MESSAGE,'(A,A,A)') 'ERROR: Problem with SURF: ',TRIM(SF%ID),'. SUM(MASS_FRACTION) > 1'
+      IF (SUM(SF%MASS_FRACTION) > TWO_EPSILON_EB) THEN
+         IF (SUM(SF%MASS_FRACTION) > 1._EB) THEN
+            WRITE (MESSAGE,'(A,A,A)') 'ERROR: Problem with SURF: ',TRIM(SF%ID),'. SUM(MASS_FRACTION) > 1'
             CALL SHUTDOWN(MESSAGE) ; RETURN
-      ELSE
-         IF (SF%MASS_FRACTION(1)<TWO_EPSILON_EB .AND. SUM(SF%MASS_FRACTION(2:N_TRACKED_SPECIES)) > 0._EB) &
-             SF%MASS_FRACTION(1) = 1._EB - SUM(SF%MASS_FRACTION(2:N_TRACKED_SPECIES))
+         ENDIF
+         IF (SF%MASS_FRACTION(1) > 0._EB) THEN
+            WRITE (MESSAGE,'(A,A,A)') 'ERROR: Problem with SURF: ',TRIM(SF%ID), &
+                                      '. Cannot use background species with MASS_FRACTION.'
+            CALL SHUTDOWN(MESSAGE) ; RETURN
+         ENDIF
+         SF%MASS_FRACTION(1) = 1._EB - SUM(SF%MASS_FRACTION(2:N_TRACKED_SPECIES))
       ENDIF
    ENDIF
 
