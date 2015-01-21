@@ -9221,10 +9221,9 @@ INIT_LOOP: DO N=1,N_INIT_READ+N_INIT_RESERVED
                   IF (IN%MASS_FRACTION(1) <=TWO_EPSILON_EB) THEN
                      IN%MASS_FRACTION(1) = 1._EB-SUM(IN%MASS_FRACTION(2:N_TRACKED_SPECIES))
                   ELSE
-                     IF (SUM(IN%MASS_FRACTION) < 1._EB) THEN
-                        WRITE(MESSAGE,'(A,I3,A,A)') 'ERROR: Problem with INIT number ',N,'. Sum of specified mass fractions < 1'
-                        CALL SHUTDOWN(MESSAGE) ; RETURN
-                     ENDIF
+                     WRITE(MESSAGE,'(A,I3,A,A)') 'ERROR: Problem with INIT number ',N,&
+                                                 '. Cannot specify background species for MASS_FRACTION'
+                     CALL SHUTDOWN(MESSAGE) ; RETURN
                   ENDIF
                   ZZ_GET(1:N_TRACKED_SPECIES) = IN%MASS_FRACTION(1:N_TRACKED_SPECIES)
                   CALL GET_SPECIFIC_GAS_CONSTANT(ZZ_GET,RR_SUM)
