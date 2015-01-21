@@ -308,7 +308,7 @@ echo. > %OUTDIR%\stage_error.txt
 
 call Check_FDS_cases 
 
-type %OUTDIR%\stage_error.txt | find /v /c "  "> %OUTDIR%\stage_nerror.txt
+grep -v " " %OUTDIR%\stage_error.txt | wc -l > %OUTDIR%\stage_nerror.txt
 set /p nerrors=<%OUTDIR%\stage_nerror.txt
 if %nerrors% GTR 0 (
    echo Stage 4a, Debug FDS case errors >> %errorlog%
@@ -331,7 +331,7 @@ echo. > %OUTDIR%\stage_error.txt
 
 call Check_FDS_cases 
 
-type %OUTDIR%\stage_error.txt | find /v /c "  "> %OUTDIR%\stage_nerror.txt
+grep -v " " %OUTDIR%\stage_error.txt | wc -l > %OUTDIR%\stage_nerror.txt
 set /p nerrors=<%OUTDIR%\stage_nerror.txt
 if %nerrors% GTR 0 (
    echo Stage 4b, Release FDS case errors >> %errorlog%
