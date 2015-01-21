@@ -43,7 +43,8 @@ set errorlog=%OUTDIR%\firebot_errors.txt
 set warninglog=%OUTDIR%\firebot_warnings.txt
 set errorwarninglog=%OUTDIR%\firebot_errorswarnings.txt
 set infofile=%OUTDIR%\firebot_info.txt
-set revisionfile=%OUTDIR%\fds-smv_revision.txt
+set revisionfilestring=%OUTDIR%\revision_string.txt
+set revisionfilenum=%OUTDIR%\revision_num.txt
 set stagestatus=%OUTDIR%\firebot_status.log
 set counta=%OUTDIR%\firebot_count0a.txt
 set countb=%OUTDIR%\firebot_count0b.txt
@@ -133,6 +134,12 @@ echo             found grep
 call :is_file_installed sed|| exit /b 1
 echo             found sed
 
+call :is_file_installed svn|| exit /b 1
+echo             found svn
+
+call :is_file_installed svnversion|| exit /b 1
+echo             found svnversion
+
 :: update cfast repository
 
 echo             updating cfast repository
@@ -146,11 +153,14 @@ echo             updating FDS/Smokeview repository
 cd %svnroot%
 svn update 1>> %OUTDIR%\stage0.txt 2>&1
 
-svn info | find /i "Revision" > %revisionfile%
-set /p revision=<%revisionfile%
+svn info | find /i "Revision" > %revisionfilestring%
+set /p revisionstring=<%revisionfilestring%
 
-set errorlogpc=%HISTORYDIR%\errors_%revision%.txt
-set warninglogpc=%HISTORYDIR%\warnings_%revision%.txt
+svnversion > %revisionfilenum%
+set /p revisionnum=<%revisionfilenum%
+
+set errorlogpc=%HISTORYDIR%\errors_%revisionnum%.txt
+set warninglogpc=%HISTORYDIR%\warnings_%revisionnum%.txt
 
 :: build cfast
 
@@ -442,13 +452,13 @@ sed "s/$/\r/" < %errorlog% > %errorlogpc%
 if exist %emailexe% (
   if %havewarnings% == 0 (
     if %haveerrors% == 0 (
-      call %email% %mailToList% "firebot success on %COMPUTERNAME%! %revision%" %infofile%
+      call %email% %mailToList% "firebot success on %COMPUTERNAME%! %revisionstring%" %infofile%
     ) else (
       echo "start: %startdate% %starttime% " > %infofile%
       echo " stop: %stopdate% %stoptime% " >> %infofile%
       echo. >> %infofile%
       type %errorlogpc% >> %infofile%
-      call %email% %mailToList% "firebot failure on %COMPUTERNAME%! %revision%" %infofile%
+      call %email% %mailToList% "firebot failure on %COMPUTERNAME%! %revisionstring%" %infofile%
     )
   ) else (
     if %haveerrors% == 0 (
@@ -456,7 +466,7 @@ if exist %emailexe% (
       echo " stop: %stopdate% %stoptime% " >> %infofile%
       echo. >> %infofile%
       type %warninglogpc% >> %infofile%
-      %email% %mailToList% "firebot success with warnings on %COMPUTERNAME% %revision%" %infofile%
+      %email% %mailToList% "firebot success with warnings on %COMPUTERNAME% %revisionstring%" %infofile%
     ) else (
       echo "start: %startdate% %starttime% " > %infofile%
       echo " stop: %stopdate% %stoptime% " >> %infofile%
@@ -464,7 +474,7 @@ if exist %emailexe% (
       type %errorlogpc% >> %infofile%
       echo. >> %infofile%
       type %warninglogpc% >> %infofile%
-      call %email% %mailToList% "firebot failure on %COMPUTERNAME%! %revision%" %infofile%
+      call %email% %mailToList% "firebot failure on %COMPUTERNAME%! %revisionstring%" %infofile%
     )
   )
 )
@@ -479,11 +489,11 @@ goto :eof
       set filename=%%~nxa
    )    
 
-  echo ***Fatal error: firebot failure on %COMPUTERNAME% %revision%, error log: %filename%
+  echo ***Fatal error: firebot failure on %COMPUTERNAME% %revisionstring%, error log: %filename%
   sed "s/$/\r/" < %errorlog% > %errorlogpc%
   if exist %emailexe% (
     echo sending email to %mailToList%
-    call %email% %mailToList% "firebot failure on %COMPUTERNAME% %revision%" %errorlogpc%
+    call %email% %mailToList% "firebot failure on %COMPUTERNAME% %revisionstring%" %errorlogpc%
   )
 exit /b
 
