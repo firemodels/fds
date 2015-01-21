@@ -277,7 +277,7 @@ cd %svnroot%\Verification\scripts
 echo. > %OUTDIR%\stage_error.txt
 call Check_SMV_cases 
 
-type %OUTDIR%\stage_error.txt | find /v /c "  "> %OUTDIR%\stage_nerror.txt
+grep -v " " %OUTDIR%\stage_error.txt | wc -l > %OUTDIR%\stage_nerror.txt
 set /p nerrors=<%OUTDIR%\stage_nerror.txt
 if %nerrors% GTR 0 (
    echo Debug FDS case errors >> %errorlog%
@@ -298,7 +298,7 @@ cd %svnroot%\Verification\scripts
 echo. > %OUTDIR%\stage_error.txt
 call Check_SMV_cases 
 
-type %OUTDIR%\stage_error.txt | find /v /c "  "> %OUTDIR%\stage_nerror.txt
+grep -v " " %OUTDIR%\stage_error.txt | wc -l > %OUTDIR%\stage_nerror.txt
 set /p nerrors=<%OUTDIR%\stage_nerror.txt
 if %nerrors% GTR 0 (
    echo Release FDS case errors >> %errorlog%
