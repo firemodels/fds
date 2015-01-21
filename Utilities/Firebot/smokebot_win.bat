@@ -19,9 +19,11 @@ set CURDIR=%CD%
 
 if not exist output mkdir output
 if not exist history mkdir history
+if not exist timings mkdir timings
 
 set OUTDIR=%CURDIR%\output
 set HISTORYDIR=%CURDIR%\history
+set TIMINGSDIR=%CURDIR%\timings
 
 erase %OUTDIR%\*.txt 1> Nul 2>&1
 
@@ -119,9 +121,6 @@ echo             found sed
 call :is_file_installed svn|| exit /b 1
 echo             found svn
 
-call :is_file_installed svnversion|| exit /b 1
-echo             found svnversion
-
 :: update cfast repository
 
 echo             updating cfast repository
@@ -135,14 +134,16 @@ echo             updating FDS/Smokeview repository
 cd %svnroot%
 svn update 1>> %OUTDIR%\stage0.txt 2>&1
 
-svn info | find /i "Revision" > %revisionfilestring%
+svn info | grep Revision > %revisionfilestring%
 set /p revisionstring=<%revisionfilestring%
 
-svnversion > %revisionfilenum%
+svn info | grep Revision | cut -d " " -f 2 > %revisionfilenum%
 set /p revisionnum=<%revisionfilenum%
 
 set errorlogpc=%HISTORYDIR%\errors_%revisionnum%.txt
 set warninglogpc=%HISTORYDIR%\warnings_%revisionnum%.txt
+
+set timingslogfile=%TIMINGSDIR%\timings_%revisionnum%.txt
 
 :: build cfast
 
@@ -397,6 +398,8 @@ echo .    run cases: %DIFF_RUNVV% >> %infofile%
 echo .make pictures: %DIFF_MAKEPICS% >> %infofile%
 echo .        total: %DIFF_TIME% >> %infofile%
 echo . ----------------------------- >> %infofile%
+
+copy %infofile% %timingslogfile%
 
 if NOT exist %tosummarydir% goto skip_copyfiles
   echo summary   (local): file://%userprofile%/FDS-SMV/Manuals/SMV_Summary/index.html >> %infofile%
