@@ -127,6 +127,7 @@ svn update 1>> %OUTDIR%\stage0.txt 2>&1
 
 svn info | find /i "Revision" > %revisionfile%
 set /p revision=<%revisionfile%
+
 set errorlogpc=%HISTORYDIR%\errors_%revision%.txt
 set warninglogpc=%HISTORYDIR%\warnings_%revision%.txt
 
@@ -396,13 +397,10 @@ if NOT exist %tosummarydir% goto skip_copyfiles
 
 cd %CURDIR%
 
+sed "s/$/\r/" < %warninglog% > %warninglogpc%
+sed "s/$/\r/" < %errorlog% > %errorlogpc%
+
 if exist %emailexe% (
-  if %havewarnings% NEQ 0 (
-     sed "s/$/\r/" < %warninglog% > %warninglogpc%
-  )
-  if %haveerrors% NEQ 0 (
-     sed "s/$/\r/" < %errorlog% > %errorlogpc%
-  )
   if %havewarnings% == 0 (
     if %haveerrors% == 0 (
       call %email% %mailToSMV% "smokebot success on %COMPUTERNAME%! %revision%" %infofile%
@@ -433,9 +431,7 @@ if exist %emailexe% (
 )
 
 echo smokebot_win completed
-cd %CURDIR%
-pause
-exit
+goto :eof
 
 :output_abort_message
   echo "***Fatal error: smokebot failure on %COMPUTERNAME% %revision%"
@@ -585,5 +581,3 @@ exit /b
 
 :eof
 cd %CURDIR%
-pause
-exit
