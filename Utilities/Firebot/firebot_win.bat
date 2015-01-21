@@ -436,13 +436,10 @@ if NOT exist %tosummarydir% goto skip_copyfiles
 
 cd %CURDIR%
 
+sed "s/$/\r/" < %warninglog% > %warninglogpc%
+sed "s/$/\r/" < %errorlog% > %errorlogpc%
+
 if exist %emailexe% (
-  if %havewarnings% NEQ 0 (
-     sed "s/$/\r/" < %warninglog% > %warninglogpc%
-  )
-  if %haveerrors% NEQ 0 (
-     sed "s/$/\r/" < %errorlog% > %errorlogpc%
-  )
   if %havewarnings% == 0 (
     if %haveerrors% == 0 (
       call %email% %mailToList% "firebot success on %COMPUTERNAME%! %revision%" %infofile%
@@ -473,7 +470,6 @@ if exist %emailexe% (
 )
 
 echo firebot_win completed
-cd %CURDIR%
 goto :eof
 
 :: -------------------------------------------------------------
@@ -634,5 +630,3 @@ exit /b
 
 :eof
 cd %CURDIR%
-pause
-exit
