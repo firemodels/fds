@@ -1,4 +1,5 @@
 #!/bin/bash
+#!/bin/bash
 
 $QFDS -p 4 -d Adaptive_Mesh_Refinement random_meshes.fds
 
@@ -332,6 +333,7 @@ $QFDS -d Species reactionrate_lumped_two_air.fds
 $QFDS -d Species reactionrate_series_reaction.fds
 $QFDS -d Species pvc_combustion.fds
 $QFDS -d Species soot_gravitational_settling.fds
+$QFDS -d Species soot_gravitational_settling_2.fds
 
 $QFDS -d Sprinklers_and_Sprays activate_sprinklers.fds
 $QFDS -d Sprinklers_and_Sprays bucket_test.fds
