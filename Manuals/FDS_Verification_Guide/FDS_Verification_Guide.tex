@@ -2890,7 +2890,7 @@ Figure~\ref{fig:deposition_mass} shows the time evolution of soot in the gas pha
 
 \subsection{Gravitational Settling of Aerosols (\texorpdfstring\textct{soot\_gravitational\_settling}{soot\_gravitational\_settling})}
 
-The calculations described in this section check the conservation of mass for the gravitational settling algorithm. The gravitational settling algorithm involves both the settling of soot particles in the gas phase and the accumulation of soot on the condensed phase. For this example, the initial soot concentration in a 1~m$^3$ box is set as 100~mg/m$^3$ via the \textct{INIT} line, and the soot deposits to the bottom of the box via gravitational settling only. By default, if a species is defined as an aerosol by setting \textct{AEROSOL=.TRUE.} on the \textct{SPEC} line, then all of the aerosol deposition mechanisms (gravitational, thermophoretic, and turbulent) will act upon that species. For this example, gravitational deposition is enabled and the other deposition mechanisms are disabled by using the following inputs on the \textct{MISC} line:
+The calculations described in this section check the conservation of mass for the gravitational settling algorithm. The gravitational settling algorithm involves both the settling of soot particles in the gas phase and the accumulation of soot on the condensed phase. In both examples the initial soot concentration in a 1~m$^3$ box is set as 100~mg/m$^3$. The soot deposits to the bottom of the box via gravitational settling only. By default, if a species is defined as an aerosol by setting \textct{AEROSOL=.TRUE.} on the \textct{SPEC} line, then all of the aerosol deposition mechanisms (gravitational, thermophoretic, and turbulent) will act upon that species. For these two examples, gravitational deposition is enabled and the other deposition mechanisms are disabled by using the following inputs on the \textct{MISC} line:
 
 \begin{lstlisting}
 &MISC GRAVITATIONAL_DEPOSITION  = .TRUE.
@@ -2898,16 +2898,16 @@ The calculations described in this section check the conservation of mass for th
       TURBULENT_DEPOSITION      = .FALSE. /
 \end{lstlisting}
 
-\noindent In this example, the initial gas-phase soot concentration is specified, and the only active deposition mechanism (i.e., soot removal term) is gravitational deposition. A simple HVAC setup (one supply vent and one exhaust vent) is used to stir the air and create well-mixed conditions. The transient gas-phase soot concentration for a well-mixed compartment can then be represented as
+\noindent In the first test case, a simple HVAC setup (one supply vent and one exhaust vent) is used to stir the air and create well-mixed conditions (i.e. this case does not test the gravitational settling in the gas but only the conservation of mass). The transient gas-phase soot concentration for a well-mixed compartment can then be represented as
 \be
 \frac{\d C}{\d t} = -\frac{A}{V} (u_{\rm g} C)
 \label{eq:gravitational_settling}
 \ee
-where $C$ is the soot concentration (mg/m$^3$), $A/V$ is the surface area to volume ratio (\si{1/m}), and $u_{\rm g}$ is the gravitational settling velocity (m/s). Equation~\ref{eq:gravitational_settling} has an analytical solution for the dynamic gas-phase soot concentration of the form
+where $C$ is the soot concentration (mg/m$^3$), $A/V$ is the floor surface area to volume ratio (\si{1/m}), and $u_{\rm g}$ is the gravitational settling velocity (m/s). Equation~\ref{eq:gravitational_settling} has an analytic solution for the dynamic gas-phase soot concentration of the form
 \be
 C(t) = C_0 \exp \left[-\frac{A}{V}(u_{\rm g} t)\right]
 \ee
-where $C_0$ is the initial gas-phase soot concentration (100~mg/m$^3$). In this example, the relevant surface area is the area of the lower surface where the soot deposits, and thus the surface area to volume ratio ($A/V$) is equal to \SI{1}{1/m}. For a soot particle with a diameter of 1~$\mu$m, the gravitational settling velocity is equal to 6.3477$\times 10^{-5}$~m/s. The governing equations for the gravitational settling velocity are discussed in more detail in the FDS Technical Reference Guide~\cite{FDS_Math_Guide}. Figure~\ref{fig:soot_gravitational_settling} shows a comparison of the analytical and simulated results for the time evolution of the gas-phase soot concentration.
+where $C_0$ is the initial gas-phase soot concentration (100~mg/m$^3$). In this example, the relevant surface area is the area of the lower surface where the soot deposits, and thus the surface area to volume ratio ($A/V$) is equal to \SI{1}{1/m}. For a soot particle with a diameter of 5~$\mu$m, the gravitational settling velocity is equal to 1.41~mm/s. The governing equations for the gravitational settling velocity are discussed in more detail in the FDS Technical Reference Guide~\cite{FDS_Math_Guide}. Figure~\ref{fig:soot_gravitational_settling} shows a comparison of the analytic and simulated results for the time evolution of the gas-phase soot concentration for the first test case.
 
 \begin{figure}[ht]
 \begin{center}
@@ -2919,6 +2919,17 @@ where $C_0$ is the initial gas-phase soot concentration (100~mg/m$^3$). In this 
 \label{fig:soot_gravitational_settling}
 \end{figure}
 
+The second test case removes the HVAC system. This case tests the gravitational settling in the gas phase. Over a period of 100 s, the soot in the compartment will fall 14.1 cm. Soot within 14.1 cm of the bottom will deposit on the floor. Therefore, the expected results are a linear decrease in soot mass such that after 100~s, 14.1~\% of the soot mass has been removed. Figure~\ref{fig:soot_gravitational_settling_2} shows a comparison of the analytic and simulated results for the time evolution of the gas-phase soot concentration for the second test case.
+
+\begin{figure}[ht]
+\begin{center}
+\begin{tabular}{c}
+\includegraphics[width=3.1in]{SCRIPT_FIGURES/soot_gravitational_settling_2}
+\end{tabular}
+\end{center}
+\caption[Soot concentration for \textct{soot\_gravitational\_settling\_2} case]{Time evolution of soot concentration for the \textct{soot\_gravitational\_settling\_2} case.}
+\label{fig:soot_gravitational_settling_2}
+\end{figure}
 
 \chapter{Heat Conduction}
 
