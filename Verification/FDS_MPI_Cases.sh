@@ -18,7 +18,7 @@ $QFDS -p 5 -d Pressure_Solver hallways.fds
 $QFDS -p 8 -d Pressure_Solver scarc2d_bicg_8mesh.fds
 $QFDS -p 8 -d Pressure_Solver scarc2d_fft_8mesh.fds
 $QFDS -p 8 -d Pressure_Solver scarc2d_cg_8mesh.fds
-#$QFDS -p 8 -d Pressure_Solver scarc2d_gmg_8mesh.fds
+$QFDS -p 8 -d Pressure_Solver scarc2d_gmg_8mesh.fds
 
 $QFDS -p 4 -d Scalar_Analytical_Solution shunn3_4mesh_32.fds
 $QFDS -p 4 -d Scalar_Analytical_Solution shunn3_4mesh_64.fds
