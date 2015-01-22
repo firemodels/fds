@@ -203,7 +203,7 @@ REAL(EB), INTENT(IN) :: T
 REAL(EB) :: TNOW,ZZ_GET(1:N_TRACKED_SPECIES),RHS,UN,Q_Z,XHAT,ZHAT
 INTEGER :: I,J,K,N,IW,IOR,IIG,JJG,KKG
 REAL(EB), POINTER, DIMENSION(:,:,:,:) :: RHO_ZZ__0=>NULL(),JX=>NULL(),JY=>NULL(),JZ=>NULL()
-REAL(EB), POINTER, DIMENSION(:,:,:) :: UU=>NULL(),VV=>NULL(),WW=>NULL(),RHO__0=>NULL(),U_GRAV=>NULL(),V_GRAV=>NULL(),W_GRAV=>NULL()
+REAL(EB), POINTER, DIMENSION(:,:,:) :: UU=>NULL(),VV=>NULL(),WW=>NULL(),RHO__0=>NULL()
 TYPE(WALL_TYPE), POINTER :: WC=>NULL()
 
 IF (EVACUATION_ONLY(NM)) RETURN
@@ -222,12 +222,6 @@ UU=>WORK1
 VV=>WORK2
 WW=>WORK3
 RHO__0=>WORK4
-U_GRAV=>WORK7
-V_GRAV=>WORK8
-W_GRAV=>WORK9
-U_GRAV = 0._EB
-V_GRAV = 0._EB
-W_GRAV = 0._EB
 RHO_ZZ__0=>SCALAR_WORK1
 
 PREDICTOR_STEP: SELECT CASE (PREDICTOR)
@@ -243,6 +237,7 @@ CASE(.TRUE.) PREDICTOR_STEP
       JX=FDX
       JY=FDY
       JZ=FDZ
+      IF (ANY(SPECIES_MIXTURE%DEPOSITING) .AND. GRAVITATIONAL_DEPOSITION) CALL SETTLING_VELOCITY(NM)
    ENDIF
 
    ! Correct boundary velocity at wall cells
@@ -280,26 +275,14 @@ CASE(.TRUE.) PREDICTOR_STEP
    ! Predictor step for mass density
 
    DO N=1,N_TRACKED_SPECIES
-      IF (ANY(SPECIES_MIXTURE%DEPOSITING) .AND. GRAVITATIONAL_DEPOSITION) THEN
-         IF (SPECIES_MIXTURE(N)%DEPOSITING) THEN
-            CALL SETTLING_VELOCITY(NM,N)       
-         ELSE
-            U_GRAV = 0._EB
-            V_GRAV = 0._EB
-            W_GRAV = 0._EB    
-         ENDIF
-      ENDIF
       DO K=1,KBAR
          DO J=1,JBAR
             DO I=1,IBAR
                IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
 
-               RHS = ((FX(I,J,K,N)*(UU(I,J,K)-U_GRAV(I,J,K))-JX(I,J,K,N))*R(I)                          &
-                     -(FX(I-1,J,K,N)*(UU(I-1,J,K)-U_GRAV(I-1,J,K))-JX(I-1,J,K,N))*R(I-1))*RDX(I)*RRN(I) &
-                   + ((FY(I,J,K,N)*(VV(I,J,K)-V_GRAV(I,J,K))-JY(I,J,K,N))                               &
-                     -(FY(I,J-1,K,N)*(VV(I,J-1,K)-V_GRAV(I,J-1,K))-JY(I,J-1,K,N))       )*RDY(J)        &
-                   + ((FZ(I,J,K,N)*(WW(I,J,K)-W_GRAV(I,J,K))-JZ(I,J,K,N))                               &
-                     -(FZ(I,J,K-1,N)*(WW(I,J,K-1)-W_GRAV(I,J,K-1))-JZ(I,J,K-1,N))       )*RDZ(K)
+               RHS = ((FX(I,J,K,N)*UU(I,J,K)-JX(I,J,K,N))*R(I) -(FX(I-1,J,K,N)*UU(I-1,J,K)-JX(I-1,J,K,N))*R(I-1))*RDX(I)*RRN(I) &
+                   + ((FY(I,J,K,N)*VV(I,J,K)-JY(I,J,K,N))      -(FY(I,J-1,K,N)*VV(I,J-1,K)-JY(I,J-1,K,N))       )*RDY(J)        &
+                   + ((FZ(I,J,K,N)*WW(I,J,K)-JZ(I,J,K,N))      -(FZ(I,J,K-1,N)*WW(I,J,K-1)-JZ(I,J,K-1,N))       )*RDZ(K)
 
                RHO_ZZ__0(I,J,K,N) = RHO(I,J,K)*ZZ(I,J,K,N)
 
@@ -328,7 +311,7 @@ CASE(.TRUE.) PREDICTOR_STEP
 
    ! Correct fluxes for positivity
 
-   CALL WEIGHTED_AVERAGE_FLUX_CORRECTION(NM)
+   CALL WEIGHTED_AVERAGE_FLUX_CORRECTION
 
    ! Get rho = sum(rho*Y_alpha)
 
@@ -428,29 +411,19 @@ CASE(.FALSE.) PREDICTOR_STEP
    JY=FDY
    JZ=FDZ
 
-   ! Compute species mass density at the next time step
-
+   IF (ANY(SPECIES_MIXTURE%DEPOSITING) .AND. GRAVITATIONAL_DEPOSITION) CALL SETTLING_VELOCITY(NM)
+   
+   ! Compute species mass density at the next time step   
+   
    DO N=1,N_TRACKED_SPECIES
-      IF (ANY(SPECIES_MIXTURE%DEPOSITING) .AND. GRAVITATIONAL_DEPOSITION) THEN
-         IF (SPECIES_MIXTURE(N)%DEPOSITING) THEN
-            CALL SETTLING_VELOCITY(NM,N)       
-         ELSE
-            U_GRAV = 0._EB
-            V_GRAV = 0._EB
-            W_GRAV = 0._EB    
-         ENDIF
-      ENDIF
       DO K=1,KBAR
          DO J=1,JBAR
             DO I=1,IBAR
                IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
 
-               RHS = ((FX(I,J,K,N)*(UU(I,J,K)-U_GRAV(I,J,K))-JX(I,J,K,N))*R(I)                          &
-                     -(FX(I-1,J,K,N)*(UU(I-1,J,K)-U_GRAV(I-1,J,K))-JX(I-1,J,K,N))*R(I-1))*RDX(I)*RRN(I) &
-                   + ((FY(I,J,K,N)*(VV(I,J,K)-V_GRAV(I,J,K))-JY(I,J,K,N))                               &
-                     -(FY(I,J-1,K,N)*(VV(I,J-1,K)-V_GRAV(I,J-1,K))-JY(I,J-1,K,N))       )*RDY(J)        &
-                   + ((FZ(I,J,K,N)*(WW(I,J,K)-W_GRAV(I,J,K))-JZ(I,J,K,N))                               &
-                     -(FZ(I,J,K-1,N)*(WW(I,J,K-1)-W_GRAV(I,J,K-1))-JZ(I,J,K-1,N))       )*RDZ(K)
+               RHS = ((FX(I,J,K,N)*UU(I,J,K)-JX(I,J,K,N))*R(I) -(FX(I-1,J,K,N)*UU(I-1,J,K)-JX(I-1,J,K,N))*R(I-1))*RDX(I)*RRN(I) &
+                   + ((FY(I,J,K,N)*VV(I,J,K)-JY(I,J,K,N))      -(FY(I,J-1,K,N)*VV(I,J-1,K)-JY(I,J-1,K,N))       )*RDY(J)        &
+                   + ((FZ(I,J,K,N)*WW(I,J,K)-JZ(I,J,K,N))      -(FZ(I,J,K-1,N)*WW(I,J,K-1)-JZ(I,J,K-1,N))       )*RDZ(K)
 
                RHO_ZZ__0(I,J,K,N) = .5_EB*(RHO(I,J,K)*ZZ(I,J,K,N) + RHOS(I,J,K)*ZZS(I,J,K,N))
 
@@ -458,7 +431,6 @@ CASE(.FALSE.) PREDICTOR_STEP
             ENDDO
          ENDDO
       ENDDO
-      IF (SPECIES_MIXTURE(N)%DEPOSITING .AND. GRAVITATIONAL_DEPOSITION) CALL SETTLING_VELOCITY(NM,N) 
    ENDDO
 
    ! Manufactured solution
@@ -480,7 +452,7 @@ CASE(.FALSE.) PREDICTOR_STEP
 
    ! Correct fluxes for positivity
 
-   CALL WEIGHTED_AVERAGE_FLUX_CORRECTION(NM)
+   CALL WEIGHTED_AVERAGE_FLUX_CORRECTION
 
    ! Get rho = sum(rho*Y_alpha)
 
@@ -542,15 +514,12 @@ TUSED(3,NM)=TUSED(3,NM)+SECOND()-TNOW
 END SUBROUTINE DENSITY
 
 
-SUBROUTINE WEIGHTED_AVERAGE_FLUX_CORRECTION(NM)
+SUBROUTINE WEIGHTED_AVERAGE_FLUX_CORRECTION
 
 USE COMP_FUNCTIONS, ONLY: SHUTDOWN
-USE SOOT_ROUTINES, ONLY: SETTLING_VELOCITY
-INTEGER, INTENT(IN) :: NM
 INTEGER :: I,J,K,N,ITER
 REAL(EB) :: SVDT,GAMMA,RHO_ZZ_GAMMA,RHS,DT_LOC
-REAL(EB), POINTER, DIMENSION(:,:,:) :: UU=>NULL(),VV=>NULL(),WW=>NULL(),RHOP=>NULL(),RHO__0=>NULL(), &
-                                       U_GRAV=>NULL(),V_GRAV=>NULL(),W_GRAV=>NULL()
+REAL(EB), POINTER, DIMENSION(:,:,:) :: UU=>NULL(),VV=>NULL(),WW=>NULL(),RHOP=>NULL(),RHO__0=>NULL()
 REAL(EB), POINTER, DIMENSION(:,:,:,:) :: ZZP=>NULL(),RHO_ZZ__0=>NULL(),JX=>NULL(),JY=>NULL(),JZ=>NULL()
 INTEGER, POINTER, DIMENSION(:,:,:) :: IOB=>NULL()
 INTEGER, PARAMETER :: MAX_ITER=3
@@ -574,25 +543,9 @@ IOB=>IWORK1
 JX=>SCALAR_SAVE1
 JY=>SCALAR_SAVE2
 JZ=>SCALAR_SAVE3
-U_GRAV=>WORK7
-V_GRAV=>WORK7
-W_GRAV=>WORK7
-U_GRAV = 0._EB
-V_GRAV = 0._EB
-W_GRAV = 0._EB
 
 SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
-
-   IF (ANY(SPECIES_MIXTURE%DEPOSITING) .AND. GRAVITATIONAL_DEPOSITION) THEN
-      IF (SPECIES_MIXTURE(N)%DEPOSITING) THEN
-         CALL SETTLING_VELOCITY(NM,N)       
-      ELSE
-         U_GRAV = 0._EB
-         V_GRAV = 0._EB
-         W_GRAV = 0._EB    
-      ENDIF  
-   ENDIF
-   
+ 
    ITER_LOOP: DO ITER=1,MAX_ITER
 
    REPEAT_CYCLE = .FALSE.
@@ -609,9 +562,9 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
             
             IOB(I,J,K)=1 ! cell is tagged for correction
 
-            SVDT = DT_LOC * ( ( MAX(0._EB,UU(I,J,K)-U_GRAV(I,J,K)) - MIN(0._EB,UU(I-1,J,K)-U_GRAV(I-1,J,K)) )*RDX(I) &
-                            + ( MAX(0._EB,VV(I,J,K)-V_GRAV(I,J,K)) - MIN(0._EB,VV(I,J-1,K)-V_GRAV(I,J-1,K)) )*RDY(J) &
-                            + ( MAX(0._EB,WW(I,J,K)-W_GRAV(I,J,K)) - MIN(0._EB,WW(I,J,K-1)-W_GRAV(I,J,K-1)) )*RDZ(K) )
+            SVDT = DT_LOC * ( ( MAX(0._EB,UU(I,J,K)) - MIN(0._EB,UU(I-1,J,K)) )*RDX(I) &
+                            + ( MAX(0._EB,VV(I,J,K)) - MIN(0._EB,VV(I,J-1,K)) )*RDY(J) &
+                            + ( MAX(0._EB,WW(I,J,K)) - MIN(0._EB,WW(I,J,K-1)) )*RDZ(K) )
 
             IF (SVDT>TWO_EPSILON_EB) THEN
                GAMMA = (1._EB-EXP(-SVDT))/(SVDT)
@@ -621,33 +574,33 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
 
             RHO_ZZ_GAMMA = RHO_ZZ__0(I,J,K,N)*GAMMA
 
-            IF ((FX(I,J,K,N)*(UU(I,J,K)-U_GRAV(I,J,K))-JX(I,J,K,N))>0._EB) THEN
+            IF ((FX(I,J,K,N)*UU(I,J,K)-JX(I,J,K,N))>0._EB) THEN
                JX(I,J,K,N) = 0._EB
                FX(I,J,K,N)  = RHO_ZZ_GAMMA
                IOB(I+1,J,K) = 1 ! right neighbor is tagged for correction, etc.
             ENDIF
-            IF ((FY(I,J,K,N)*(VV(I,J,K)-V_GRAV(I,J,K))-JY(I,J,K,N))>0._EB) THEN
+            IF ((FY(I,J,K,N)*VV(I,J,K)-JY(I,J,K,N))>0._EB) THEN
                JY(I,J,K,N) = 0._EB
                FY(I,J,K,N)  = RHO_ZZ_GAMMA
                IOB(I,J+1,K) = 1
             ENDIF
-            IF ((FZ(I,J,K,N)*(WW(I,J,K)-W_GRAV(I,J,K))-JZ(I,J,K,N))>0._EB) THEN
+            IF ((FZ(I,J,K,N)*WW(I,J,K)-JZ(I,J,K,N))>0._EB) THEN
                JZ(I,J,K,N) = 0._EB
                FZ(I,J,K,N)  = RHO_ZZ_GAMMA
                IOB(I,J,K+1) = 1
             ENDIF
 
-            IF ((FX(I-1,J,K,N)*(UU(I-1,J,K)-U_GRAV(I-1,J,K))-JX(I-1,J,K,N))<0._EB) THEN
+            IF ((FX(I-1,J,K,N)*UU(I-1,J,K)-JX(I-1,J,K,N))<0._EB) THEN
                JX(I-1,J,K,N) = 0._EB
                FX(I-1,J,K,N) = RHO_ZZ_GAMMA
                IOB(I-1,J,K) = 1
             ENDIF
-            IF ((FY(I,J-1,K,N)*(VV(I,J-1,K)-V_GRAV(I,J-1,K))-JY(I,J-1,K,N))<0._EB) THEN
+            IF ((FY(I,J-1,K,N)*VV(I,J-1,K)-JY(I,J-1,K,N))<0._EB) THEN
                JY(I,J-1,K,N) = 0._EB
                FY(I,J-1,K,N) = RHO_ZZ_GAMMA
                IOB(I,J-1,K) = 1
             ENDIF
-            IF ((FZ(I,J,K-1,N)*(WW(I,J,K-1)-W_GRAV(I,J,K-1))-JZ(I,J,K-1,N))<0._EB) THEN
+            IF ((FZ(I,J,K-1,N)*WW(I,J,K-1)-JZ(I,J,K-1,N))<0._EB) THEN
                JZ(I,J,K-1,N) = 0._EB
                FZ(I,J,K-1,N) = RHO_ZZ_GAMMA
                IOB(I,J,K-1) = 1
@@ -665,12 +618,10 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
             IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
             IF (IOB(I,J,K)/=1) CYCLE
 
-            RHS = ((FX(I,J,K,N)*(UU(I,J,K)-U_GRAV(I,J,K))-JX(I,J,K,N))*R(I)                          &
-                  -(FX(I-1,J,K,N)*(UU(I-1,J,K)-U_GRAV(I-1,J,K))-JX(I-1,J,K,N))*R(I-1))*RDX(I)*RRN(I) &
-                  + ((FY(I,J,K,N)*(VV(I,J,K)-V_GRAV(I,J,K))-JY(I,J,K,N))                               &
-                  -(FY(I,J-1,K,N)*(VV(I,J-1,K)-V_GRAV(I,J-1,K))-JY(I,J-1,K,N))       )*RDY(J)        &
-                  + ((FZ(I,J,K,N)*(WW(I,J,K)-W_GRAV(I,J,K))-JZ(I,J,K,N))                               &
-                  -(FZ(I,J,K-1,N)*(WW(I,J,K-1)-W_GRAV(I,J,K-1))-JZ(I,J,K-1,N))       )*RDZ(K)
+            
+            RHS = ((FX(I,J,K,N)*UU(I,J,K)-JX(I,J,K,N))*R(I) -(FX(I-1,J,K,N)*UU(I-1,J,K)-JX(I-1,J,K,N))*R(I-1))*RDX(I)*RRN(I) &
+                + ((FY(I,J,K,N)*VV(I,J,K)-JY(I,J,K,N))      -(FY(I,J-1,K,N)*VV(I,J-1,K)-JY(I,J-1,K,N))       )*RDY(J)        &
+                + ((FZ(I,J,K,N)*WW(I,J,K)-JZ(I,J,K,N))      -(FZ(I,J,K-1,N)*WW(I,J,K-1)-JZ(I,J,K-1,N))       )*RDZ(K)
             
             ZZP(I,J,K,N) = RHO_ZZ__0(I,J,K,N) - DT_LOC*RHS
 
