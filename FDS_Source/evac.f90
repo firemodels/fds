@@ -11318,6 +11318,7 @@ CONTAINS
       END IF If_Strs_Mesh2
 
       EVEL = SQRT(UBAR**2 + VBAR**2)  ! (UBAR,VBAR) is an unit vector
+!gf      write(0,*)"UBAR=",UBAR," VBAR=",VBAR," EVEL=",EVEL
       IF (EVEL >= TWO_EPSILON_EB) THEN
          UBAR = UBAR/EVEL ; VBAR = VBAR/EVEL
       ELSE
@@ -11326,6 +11327,7 @@ CONTAINS
             UBAR = HR%UBAR ; VBAR = HR%VBAR
          END IF
       END IF
+!gf      write(0,*)"after"
       IF (L_DEAD .OR. L_FALLEN_DOWN) THEN
          UBAR = 0.0_EB; VBAR = 0.0_EB
       END IF
