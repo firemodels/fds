@@ -160,13 +160,14 @@ svn update  1> %OUTDIR%\stage0.txt 2>&1
 
 :: update FDS/Smokeview repository
 
-cd %svnroot%
 if "%fdsbasename%" == "FDS-SMVclean" (
    echo             reverting %fdsbasename% repository
-   svn revert 1>> %OUTDIR%\stage0.txt 2>&1
+   cd %svnroot%
+   call :svn_revert 1>> %OUTDIR%\stage0.txt 2>&1
 )
 
 echo             updating %fdsbasename% repository
+cd %svnroot%
 svn update 1>> %OUTDIR%\stage0.txt 2>&1
 
 svn info | grep Revision > %revisionfilestring%
@@ -610,6 +611,28 @@ if %nerrors% GTR 0 (
   type %OUTDIR%\stage_error.txt >> %errorlog%
   set haveerrors=1
   set haveerrors_now=1
+)
+exit /b
+
+:: -------------------------------------------------------------
+:svn_revert
+:: -------------------------------------------------------------
+svn cleanup .
+svn revert -R .
+For /f "tokens=1,2" %%A in ('svn status --no-ignore') Do (
+     If [%%A]==[?] ( Call :UniDelete %%B
+     ) Else If [%%A]==[I] Call :UniDelete %%B
+   )
+exit /b
+
+:: -------------------------------------------------------------
+:UniDelete delete file/dir
+:: -------------------------------------------------------------
+if "%1"=="%~nx0" exit /b
+IF EXIST "%1\*" ( 
+    RD /S /Q "%1"
+) Else (
+    If EXIST "%1" DEL /S /F /Q "%1"
 )
 exit /b
 
