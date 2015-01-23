@@ -477,14 +477,21 @@ wait_verification_cases_release_end()
    done
 }
 
+wait_verification_cases_debug_end()
+{
+   # Scans processes and waits for verification cases to end
+   while [[ `ps x | grep intel_osx_64 | wc -l` -gt 1 ]]; do
+      JOBS_RUNNING=`ps x | grep intel_osx_64 | wc -l`
+      echo "${JOBS_RUNNING} verification cases currently running." >> $FIREBOT_DIR/output/stage3
+      TIME_LIMIT_STAGE="5"
+      check_time_limit
+      sleep 60
+   done
+}
+
 run_verification_cases_release()
 {
-   # Manually run one random MPI FDS verification case in the background
-#   fdsmpi=$SVNROOT/FDS_Compilation/mpi_intel_osx_64/fds_mpi_intel_osx_64
-#   read np basename casename <<< $(cat FDS_MPI_Cases.sh | grep RUNFDSMPI | awk 'BEGIN { srand() } rand() >= 0.5 { print; exit }' | cut -d ' ' -f 2,3,4)
-#   mpirun -np $np $fdsmpi $basename/$casename.fds &
-
-   # Run serial FDS verification cases
+   # Run FDS verification cases
    cd $FDS_SVNROOT/Verification
    echo 'Running FDS verification cases:' > $FIREBOT_DIR/output/stage5
    ./Run_FDS_Cases.sh -q none >> $FIREBOT_DIR/output/stage5 2>&1
@@ -497,6 +504,48 @@ run_verification_cases_release()
 
    # Wait for all verification cases to end
    wait_verification_cases_release_end
+}
+
+run_verification_cases_debug()
+{
+   # Run FDS verification cases
+   cd $FDS_SVNROOT/Verification
+   echo 'Running FDS verification cases:' > $FIREBOT_DIR/output/stage3
+   ./Run_FDS_Cases.sh -d -m 1 -q none >> $FIREBOT_DIR/output/stage3 2>&1
+   echo "" >> $FIREBOT_DIR/output/stage3 2>&1
+
+   # Run SMV verification cases
+   cd $FDS_SVNROOT/Verification/scripts
+   echo 'Running SMV verification cases:' >> $FIREBOT_DIR/output/stage3 2>&1
+   ./Run_SMV_Cases.sh -d -m 1 -q none >> $FIREBOT_DIR/output/stage3 2>&1
+
+   # Wait for all verification cases to end
+   wait_verification_cases_debug_end
+}
+
+check_verification_cases_debug()
+{
+   # Scan and report any errors in FDS verification cases
+   cd $FDS_SVNROOT/Verification
+
+   if [[ `grep 'Run aborted' -rI ${FIREBOT_DIR}/output/stage3` == "" ]] && \
+      [[ `grep Segmentation -rI *` == "" ]] && \
+      [[ `grep ERROR: -rI *` == "" ]] && \
+      [[ `grep 'STOP: Numerical' -rI *` == "" ]] && \
+      [[ `grep -A 20 forrtl -rI *` == "" ]]
+   then
+      stage3_success=true
+   else
+      grep 'Run aborted' -rI $FIREBOT_DIR/output/stage3 > $FIREBOT_DIR/output/stage3_errors
+      grep Segmentation -rI * >> $FIREBOT_DIR/output/stage3_errors
+      grep ERROR: -rI * >> $FIREBOT_DIR/output/stage3_errors
+      grep 'STOP: Numerical' -rI * >> $FIREBOT_DIR/output/stage3_errors
+      grep -A 20 forrtl -rI * >> $FIREBOT_DIR/output/stage3_errors
+      
+      echo "Errors from Stage 5 - Run verification cases (release mode):" >> $ERROR_LOG
+      cat $FIREBOT_DIR/output/stage3_errors >> $ERROR_LOG
+      echo "" >> $ERROR_LOG
+   fi
 }
 
 check_verification_cases_release()
@@ -618,6 +667,12 @@ check_compile_fds_db
 ### Stage 2b ###
 compile_fds_mpi_db
 check_compile_fds_mpi_db
+
+### Stage 3 ###
+if [[ $stage2a_success && $stage2b_success ]] ; then
+  run_verification_cases_debug
+  check_verification_cases_debug
+fi
 
 ### Stage 4a ###
 compile_fds
