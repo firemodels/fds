@@ -5,7 +5,7 @@
 :: $Author$
 
 set curdir=%CD%
-set running=bot_running
+set running=bot.running
 if not exist %running% (
   svn update
   echo 1 > %running%
