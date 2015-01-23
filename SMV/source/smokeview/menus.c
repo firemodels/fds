@@ -4185,6 +4185,9 @@ void BlockageMenu(int value){
       }
       change_state=1;
       break;
+    case visCADOpaque:
+      viscadopaque = 1 - viscadopaque;
+      break;
     case visBLOCKAddOutline:
       if(outline_state!=OUTLINE_ADDED){
         outline_state=OUTLINE_ADDED;
@@ -4249,6 +4252,7 @@ void BlockageMenu(int value){
   }
 
   switch (value){
+   case visCADOpaque:
    case visBLOCKOutlineColor:
      break;
    case visBLOCKAsInputOutline:
@@ -5067,6 +5071,14 @@ updatemenu=0;
   }
   else{
     glutAddMenuEntry(_("   Outline Added"),visBLOCKAddOutline);
+  }
+  if(ncadgeom>0){
+    if(viscadopaque==1){
+      glutAddMenuEntry(_("   *Cad surface drawn opaque"),visCADOpaque);
+    }
+    else{
+      glutAddMenuEntry(_("   Cad surface drawn opaque"),visCADOpaque);
+    }
   }
   if(visBlocks==visBLOCKHide){
     glutAddMenuEntry(_("   *Hidden"),visBLOCKHide);

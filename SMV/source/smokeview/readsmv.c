@@ -10023,6 +10023,11 @@ int readini2(char *inifile, int localfile){
       sscanf(buffer,"%i ",&visTransparentBlockage);
       continue;
       }
+    if(match(buffer,"SHOWCADOPAQUE")==1){
+      fgets(buffer,255,stream);
+      sscanf(buffer,"%i",&viscadopaque);
+      continue;
+      }
     if(match(buffer,"VECTORPOINTSIZE")==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%f ",&vectorpointsize);
@@ -11722,6 +11727,8 @@ void writeini(int flag,char *filename){
   fprintf(fileout," %i\n",sb_atstart);
   fprintf(fileout,"SHOWTRANSPARENT\n");
   fprintf(fileout," %i\n",visTransparentBlockage);
+  fprintf(fileout,"SHOWCADOPAQUE\n");
+  fprintf(fileout," %i\n",viscadopaque);
   fprintf(fileout,"SHOWVENTS\n");
   fprintf(fileout," %i %i %i\n",visVents,visVentLines,visVentSolid);
   fprintf(fileout,"SHOWTRANSPARENTVENTS\n");

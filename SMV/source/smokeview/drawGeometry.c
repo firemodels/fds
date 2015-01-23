@@ -1842,10 +1842,8 @@ void drawcad2geom(const cadgeom *cd, int trans_flag){
         colorindex++;
       }
       else{
-        if((thiscolor[3]<1.0&&trans_flag!=DRAW_TRANSPARENT)||
-           (thiscolor[3]>=1.0&&trans_flag==DRAW_TRANSPARENT)){
-           continue;
-        }
+        if((viscadopaque==0&&thiscolor[3]<1.0)&&trans_flag!=DRAW_TRANSPARENT)continue;
+        if((viscadopaque==1||thiscolor[3]>=1.0)&&trans_flag==DRAW_TRANSPARENT)continue;
         glColor4fv(thiscolor);
       }
       lastcolor=thiscolor;
