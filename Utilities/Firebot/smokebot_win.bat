@@ -136,7 +136,7 @@ echo             found svn
 
 :: update cfast repository
 
-echo             updating cfast repository
+echo             updating %cfastbasename% repository
 cd %cfastroot%
 svn update  1> %OUTDIR%\stage0.txt 2>&1
 
@@ -144,11 +144,11 @@ svn update  1> %OUTDIR%\stage0.txt 2>&1
 
 cd %svnroot%
 if "%fdsbasename%" == "FDS-SMVclean" (
-   echo             reverting FDS/Smokeview repository
+   echo             reverting %fdsbasename% repository
    svn revert 1>> %OUTDIR%\stage0.txt 2>&1
 )
 
-echo             updating FDS/Smokeview repository
+echo             updating %fdsbasename% repository
 svn update 1>> %OUTDIR%\stage0.txt 2>&1
 
 svn info | grep Revision > %revisionfilestring%
