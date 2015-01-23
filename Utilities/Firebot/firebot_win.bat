@@ -18,8 +18,21 @@ set OMP_NUM_THREADS=1
 ::                         set repository names
 :: -------------------------------------------------------------
 
-set fdsbasename=FDS-SMV
+set fdsbasename=FDS-SMVclean
+set svnroot=%userprofile%\%fdsbasename%
+if NOT exist %svnroot% (
+  echo ***Fatal error: The repository %fdsbasename% does not exist.
+  echo Aborting firebot
+  exit /b 1
+)
+
 set cfastbasename=cfast
+set cfastroot=%userprofile%\%cfastbasename%
+if NOT exist %cfastroot% (
+  echo ***Fatal error: the repository %cfastbasename% does not exist.
+  echo Aborting firebot
+  exit /b 1
+)
 
 :: -------------------------------------------------------------
 ::                         setup environment
@@ -147,9 +160,13 @@ svn update  1> %OUTDIR%\stage0.txt 2>&1
 
 :: update FDS/Smokeview repository
 
-echo             updating FDS/Smokeview repository
-
 cd %svnroot%
+if "%svnroot%" == "FDS-SMVclean" (
+   echo             reverting FDS/Smokeview repository
+   svn revert 1>> %OUTDIR%\stage0.txt 2>&1
+)
+
+echo             updating FDS/Smokeview repository
 svn update 1>> %OUTDIR%\stage0.txt 2>&1
 
 svn info | grep Revision > %revisionfilestring%
