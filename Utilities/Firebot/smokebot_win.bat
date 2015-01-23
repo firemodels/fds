@@ -143,7 +143,7 @@ svn update  1> %OUTDIR%\stage0.txt 2>&1
 :: update FDS/Smokeview repository
 
 cd %svnroot%
-if "%svnroot%" == "FDS-SMVclean" (
+if "%fdsbasename%" == "FDS-SMVclean" (
    echo             reverting FDS/Smokeview repository
    svn revert 1>> %OUTDIR%\stage0.txt 2>&1
 )
