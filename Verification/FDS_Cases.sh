@@ -1,5 +1,4 @@
 #!/bin/bash
-#!/bin/bash
 
 $QFDS -p 4 -d Adaptive_Mesh_Refinement random_meshes.fds
 
