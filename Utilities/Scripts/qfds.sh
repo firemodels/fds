@@ -18,6 +18,7 @@ then
   echo " -b     - use debug version of FDS"
   echo " -d dir - specify directory where the case is found [default: .]"
   echo " -e exe - full path of FDS used to run case"
+  echo " -E     - redirect stderr to a file if the 'none' queue is used"
   echo " -f repository root - name and location of repository where FDS is located"
   echo "    [default: ~/FDS-SMV]"
   echo " -l node1+node2+...+noden - specify which nodes to run job on"
@@ -77,10 +78,11 @@ use_repository=1
 strip_extension=0
 REPORT_BINDINGS="--report-bindings"
 nodelist=
+erroptionfile=
 
 # read in parameters from command line
 
-while getopts 'bcd:e:f:j:l:m:n:o:p:q:rstw:v' OPTION
+while getopts 'bcd:Ee:f:j:l:m:n:o:p:q:rstw:v' OPTION
 do
 case $OPTION  in
   b)
@@ -95,6 +97,9 @@ case $OPTION  in
   e)
    exe="$OPTARG"
    use_repository=0
+   ;;
+  E)
+   errfileoption=1
    ;;
   f)
    FDSROOT="$OPTARG"
@@ -294,6 +299,9 @@ if [ "$queue" == "terminal" ] ; then
 fi
 
 if [ "$queue" == "none" ]; then
+  if [ "$errfileoption" == "1" ]; then
+     errfileoption=" 2> $outerr"
+  fi
   if [ "$BACKGROUND" == "" ]; then
     BACKGROUND=background
   fi
@@ -354,7 +362,7 @@ cd $fulldir
 echo Start time: \`date\`
 echo Running $infile on \`hostname\`
 echo Directory: \`pwd\`
-$MPIRUN $exe $in
+$MPIRUN $exe $in $errfileoption
 EOF
 
 # if requested, output script file to screen
