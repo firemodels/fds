@@ -9,6 +9,7 @@ IB=
 nthreads=1
 resource_manager=
 walltime=
+errfileoption=
 
 if [ "$FDSNETWORK" == "infiniband" ] ; then
   IB=ib
@@ -21,6 +22,7 @@ echo "Runs FDS verification suite"
 echo ""
 echo "Options"
 echo "-d - use debug version of FDS"
+echo "-E - redirect stderr to a file if the 'none' queue is used"
 echo "-h - display this message"
 echo "-m max_iterations - stop FDS runs after a specifed number of iterations (delayed stop)"
 echo "     example: an option of 10 would cause FDS to stop after 10 iterations"
@@ -40,11 +42,14 @@ exit
 
 export SVNROOT=`pwd`/..
 
-while getopts 'c:dhm:o:q:r:sw:' OPTION
+while getopts 'c:dEhm:o:q:r:sw:' OPTION
 do
 case $OPTION in
   d)
    DEBUG=_db
+   ;;
+  E)
+   errfileoption="-E"
    ;;
   h)
    usage;
@@ -102,7 +107,7 @@ fi
 
 export BASEDIR=`pwd`
 
-export QFDS="$QFDSSH $walltime -n $nthreads -e $FDSMPI $queue" 
+export QFDS="$QFDSSH $walltime $errfileoption -n $nthreads -e $FDSMPI $queue" 
     ./FDS_Cases.sh
 
 echo FDS cases submitted

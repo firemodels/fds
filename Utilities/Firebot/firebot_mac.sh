@@ -355,13 +355,13 @@ run_verification_cases_debug()
    # Run FDS verification cases
    cd $FDS_SVNROOT/Verification
    echo 'Running FDS verification cases:' > $FIREBOT_DIR/output/stage3
-   ./Run_FDS_Cases.sh -d -m 1 -q none >> $FIREBOT_DIR/output/stage3 2>&1
+   ./Run_FDS_Cases.sh -E -d -m 1 -q none >> $FIREBOT_DIR/output/stage3 2>&1
    echo "" >> $FIREBOT_DIR/output/stage3 2>&1
 
    # Run SMV verification cases
    cd $FDS_SVNROOT/Verification/scripts
    echo 'Running SMV verification cases:' >> $FIREBOT_DIR/output/stage3 2>&1
-   ./Run_SMV_Cases.sh -d -m 1 -q none >> $FIREBOT_DIR/output/stage3 2>&1
+   ./Run_SMV_Cases.sh -E -d -m 1 -q none >> $FIREBOT_DIR/output/stage3 2>&1
 
    # Wait for all verification cases to end
    wait_verification_cases_debug_end
@@ -544,13 +544,13 @@ run_verification_cases_release()
    # Run FDS verification cases
    cd $FDS_SVNROOT/Verification
    echo 'Running FDS verification cases:' > $FIREBOT_DIR/output/stage5
-   ./Run_FDS_Cases.sh -q none >> $FIREBOT_DIR/output/stage5 2>&1
+   ./Run_FDS_Cases.sh -E -q none >> $FIREBOT_DIR/output/stage5 2>&1
    echo "" >> $FIREBOT_DIR/output/stage5 2>&1
 
    # Run SMV verification cases
    cd $FDS_SVNROOT/Verification/scripts
    echo 'Running SMV verification cases:' >> $FIREBOT_DIR/output/stage5 2>&1
-   ./Run_SMV_Cases.sh -q none >> $FIREBOT_DIR/output/stage5 2>&1
+   ./Run_SMV_Cases.sh -E -q none >> $FIREBOT_DIR/output/stage5 2>&1
 
    # Wait for all verification cases to end
    wait_verification_cases_release_end
