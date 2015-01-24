@@ -233,6 +233,11 @@ call :GET_TIME
 set BUILDSMVUTIL_beg=%current_time% 
 echo Stage 2 - Building Smokeview
 
+echo             libs
+
+cd %svnroot%\SMV\Build\LIBS\lib_win_intel_64
+call makelibs2 1>> %OUTDIR%\stage2a.txt 2>&1
+
 echo             debug
 
 cd %svnroot%\SMV\Build\intel_win_64
