@@ -377,6 +377,7 @@ typedef struct {
   float normals[3];
   int colorindex;
   float colors[4];
+  float time_show;
   cadlook *cadlookq;
 } cadquad;
 

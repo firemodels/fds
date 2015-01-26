@@ -1580,6 +1580,7 @@ void readcad2geom(cadgeom *cd){
     rrgb[0]/=255.0;
     rrgb[1]/=255.0;
     rrgb[2]/=255.0;
+    if(rrgb[0]<0.0||rrgb[1]<0.0||rrgb[2]<0.0)rrgb[3]=1.0;
 
     if(fgets(buffer,255,stream)==NULL)return;
     trim(buffer);
@@ -1654,17 +1655,19 @@ void readcad2geom(cadgeom *cd){
     cadquad *quadi;
     cadlook *cl;
     float *xyzpoints;
+    float time_show;
 
     if(fgets(buffer,255,stream)==NULL)break;
     iquad++;
     quadi = cd->quad + i;
     xyzpoints = quadi->xyzpoints;
     normal = quadi->normals;
-    sscanf(buffer,"%f %f %f %f %f %f %f %f %f %f %f %f %i",
+    time_show=0.0;
+    sscanf(buffer,"%f %f %f %f %f %f %f %f %f %f %f %f %i %f",
       xyzpoints,xyzpoints+1,xyzpoints+2,
       xyzpoints+3,xyzpoints+4,xyzpoints+5,
       xyzpoints+6,xyzpoints+7,xyzpoints+8,
-      xyzpoints+9,xyzpoints+10,xyzpoints+11,&look_index
+      xyzpoints+9,xyzpoints+10,xyzpoints+11,&look_index,&time_show
       );
     if(look_index<0||look_index>cd->ncadlookinfo-1)look_index=0;
     quadi->cadlookq=cd->cadlookinfo+look_index;
@@ -1673,6 +1676,7 @@ void readcad2geom(cadgeom *cd){
     quadi->colors[1]=cl->rgb[1];
     quadi->colors[2]=cl->rgb[2];
     quadi->colors[3]=1.0;
+    quadi->time_show=time_show;
     calcQuadNormal(xyzpoints, normal);
   }
   if(iquad<nquads){
@@ -1828,11 +1832,19 @@ void drawcad2geom(const cadgeom *cd, int trans_flag){
     xyzpoint = quadi->xyzpoints;
     texti = &quadi->cadlookq->textureinfo;
 
+    if(global_times!=NULL){
+      float timeval;
+
+      timeval=global_times[itimes];
+      if(quadi->time_show>=0.0&&timeval<quadi->time_show)continue;
+      if(quadi->time_show <0.0&&timeval>-quadi->time_show)continue;
+    }
     if(visCadTextures==1&&texti->loaded==1)continue;
+
 
     thiscolor=quadi->cadlookq->rgb;
     if(thiscolor!=lastcolor){
-      if(thiscolor[0]<0.0){
+      if(thiscolor[0]<0.0||thiscolor[1]<0.0||thiscolor[2]<0.0){
         GLfloat *colorptr;
         int colorindex2;
 
