@@ -16,7 +16,7 @@ if NOT exist %svnroot% (
   exit /b 1
 )
 
-set cfastbasename=cfast
+set cfastbasename=cfastclean
 set cfastroot=%userprofile%\%cfastbasename%
 if NOT exist %cfastroot% (
   echo ***Fatal error: the repository %cfastbasename% does not exist.
@@ -40,8 +40,6 @@ set TIMINGSDIR=%CURDIR%\timings
 
 erase %OUTDIR%\*.txt 1> Nul 2>&1
 
-set svnroot=%userprofile%\%fdsbasename%
-set cfastroot=%userprofile%\%cfastbasename%
 set email=%svnroot%\SMV\scripts\email.bat
 
 set errorlog=%OUTDIR%\stage_errors.txt
@@ -134,13 +132,24 @@ echo             found sed
 call :is_file_installed svn|| exit /b 1
 echo             found svn
 
+echo. 1> %OUTDIR%\stage0.txt 2>&1
+
+:: revert cfast repository
+
+cd %cfastroot%
+if "%cfastbasename%" == "cfastclean" (
+   echo             reverting %cfastbasename% repository
+   cd %cfastroot%
+   call :svn_revert 1>> %OUTDIR%\stage0.txt 2>&1
+)
+
 :: update cfast repository
 
 echo             updating %cfastbasename% repository
 cd %cfastroot%
-svn update  1> %OUTDIR%\stage0.txt 2>&1
+svn update  1>> %OUTDIR%\stage0.txt 2>&1
 
-:: update FDS/Smokeview repository
+:: revert FDS/Smokeview repository
 
 cd %svnroot%
 if "%fdsbasename%" == "FDS-SMVclean" (
@@ -148,6 +157,8 @@ if "%fdsbasename%" == "FDS-SMVclean" (
    cd %svnroot%
    call :svn_revert 1>> %OUTDIR%\stage0.txt 2>&1
 )
+
+:: update FDS/Smokeview repository
 
 echo             updating %fdsbasename% repository
 svn update 1>> %OUTDIR%\stage0.txt 2>&1
