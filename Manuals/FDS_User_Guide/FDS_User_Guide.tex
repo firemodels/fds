@@ -475,13 +475,15 @@ This chapter describes the procedure to run an FDS calculation. The primary requ
 
 \section{Starting an FDS Calculation}
 
-FDS can be run from the command prompt, or with a third-party Graphical User Interface (GUI). In the discussion to follow, it is assumed that FDS is being run from the command prompt. FDS can be run on a single computer, using one or more cores, or it can be run on multiple computers. The executable names are similar under the different supported operating systems (Windows, Linux, and Mac OS~X) and sizes (32~and~64~bits). The single computer executable is called {\ct fds}\ (with an {\ct .exe}\ file extension on Windows).  The multiple computer executable is called {\ct fds\_mpi} (again with an {\ct .exe}\ file extension for Windows). The letters {\ct mpi} in the filename denote Message Passing Interface, which will be discussed below.  Batch files (Windows) or aliases (Linux or Mac OS~X) may be defined to distinguish executables if you wish to install multiple versions of FDS.
+FDS can be run from the command prompt, or with a third-party Graphical User Interface (GUI). In the discussion to follow, it is assumed that FDS is being run from the command prompt. FDS can be run on a single computer, using one or more cores, or it can be run on multiple computers. Starting with FDS version~6.2.0, for each supported operating system (Windows, Linux, OS-X) there is a single executable file called {\ct fds} (with an {\ct .exe}\ file extension on Windows). Previous releases of FDS contained two executables, one which ran on a single processor and one which ran on multiple processors. Starting with 6.2.0, these two executables have been combined into one, and it can run either in serial or parallel mode.
+
+There are two ways that FDS can be run in parallel, i.e. exploit multiple cores on a single computer or distributed over multiple computers on a network or compute cluster. The first way is OpenMP (Open Multi-Processing)~\cite{Chapman:OpenMP} which allows a single computer to run a single FDS simulation on multiple cores. The use of OpenMP does not require the computational domain to be broken up into multiple meshes, and it will still work with cases that have multiple meshes defined. The second way to run FDS in parallel is by way of MPI (Message Passing Interface). Here, the computational domain must be divided into multiple meshes and typically each mesh is assigned its own {\em process}. These processes can be limited to a single computer, or they can be distributed over a network.
+
+MPI and OpenMP can also be used together. For example, 4 MPI processes can be assigned to 4 different computers, and each MPI process can be supported by, say, 8 OpenMP threads, assuming each computer has 8 cores. Most of the speed up is achieved by the MPI. For a reasonably fast network, you can expect 4 MPI processes to speed up the computation time by a factor of about 0.9 times 4. The OpenMP can provide an extra factor of about 2, regardless of the number of cores used beyond about 4.
 
 \subsection{Single Computer (OpenMP Version)}
 
 Sample input files are provided with the program for new users who are encouraged to first run an example calculation before attempting to write an input file. Input files are typically given names that help identify the particular case, followed by the {\ct .fds} file extension. Suppose you want to run an input file called {\ct job\_name.fds}. You can start FDS from a command prompt in Windows, Mac OS~X, Linux, or Unix as described in the following sections.
-
-FDS uses OpenMP (Open Multi-Processing)~\cite{Chapman:OpenMP} to allow a single computer to run a single FDS simulation on one or more cores. The use of OpenMP does not require the computational domain to be broken up into multiple meshes, and it will still work with cases that have multiple meshes defined.
 
 By default, FDS uses approximately half of the available cores\footnote{To determine the number of cores used by OpenMP, just type {\ct fds} at the command prompt.} on a single computer. To change the number of cores that are available for a given FDS simulation, you can set an environment variable called {\ct OMP\_NUM\_THREADS}. For example, to specify 4 available cores on a Windows machine, type the following at the command prompt:
 \begin{lstlisting}
@@ -2720,15 +2722,15 @@ layers for other surfaces.
 
 \label{info:INTERNAL_HEAT_SOURCE}
 
-The condensed phase heat conduction equation has a source term that describes the internal sources and sinks of energy. 
-There are three types of sources that contribute to this term: 
-heats of reaction for the pyrolysis (see Section~\ref{info:solid_pyrolysis}), 
-internal absorption and emission of radiation (see Section~\ref{info:liquid_fuels}), and the source specified by the user. 
+The condensed phase heat conduction equation has a source term that describes the internal sources and sinks of energy.
+There are three types of sources that contribute to this term:
+heats of reaction for the pyrolysis (see Section~\ref{info:solid_pyrolysis}),
+internal absorption and emission of radiation (see Section~\ref{info:liquid_fuels}), and the source specified by the user.
 An example of the case where specified heat source could be needed is the heating of electrical cables due to internal current.
 
-You can specify the internal source term for each layer of the surface using {\ct INTERNAL\_HEAT\_SOURCE} on the {\ct SURF} line. 
+You can specify the internal source term for each layer of the surface using {\ct INTERNAL\_HEAT\_SOURCE} on the {\ct SURF} line.
 Its units are {\si kW/m$^3$} and the default value is zero.
-In the example below, the cylindrical surface describing a cable consists of an outer plastic layer and inner core of metal. 
+In the example below, the cylindrical surface describing a cable consists of an outer plastic layer and inner core of metal.
 The metal core is heated with a power of 300 {\si kW/m$^3$}.
 \begin{lstlisting}
 &SURF ID                     = 'Cable'
@@ -4066,7 +4068,7 @@ for two reasons. First, the leakage area rarely corresponds neatly to the area o
 flow speeds through the hole can be large and cause numerical instabilities.
 
 A better way to handle leakage is by exploiting the HVAC model. The compartment surface that is leaking can be thought of as a large HVAC vent that connects via a very small duct to the outside. This allows the leakage to be removed over a large area in the domain (just as it would be in reality) while correctly capturing the actual area of the leakage path. There are two approaches to this.  The first approach is by exploiting only pressure zones.  A pressure zone is a user-specified volume within the computational domain that is
-entirely surrounded by solid obstructions. For example, the interior of a closed room can be, and should be, declared a pressure zone. In this approach surfaces within a pressure zone are denoted as leaking and those surfaces can be considered an HVAC vent that connects to the outside via a tiny duct whose area is the leakage area. This leakage approach will prevent a compartment from seeing large pressure changes as fires grow and decay, but it cannot account for effects like exterior wind or the stack effect. The second approach is intended for leaks with well defined locations (a cracked open door where the crack size is subgrid) or for leaks where the stack effect is important. It uses the local pressure (which includes the zone pressure), which allows for leakage to vary in magnitude. 
+entirely surrounded by solid obstructions. For example, the interior of a closed room can be, and should be, declared a pressure zone. In this approach surfaces within a pressure zone are denoted as leaking and those surfaces can be considered an HVAC vent that connects to the outside via a tiny duct whose area is the leakage area. This leakage approach will prevent a compartment from seeing large pressure changes as fires grow and decay, but it cannot account for effects like exterior wind or the stack effect. The second approach is intended for leaks with well defined locations (a cracked open door where the crack size is subgrid) or for leaks where the stack effect is important. It uses the local pressure (which includes the zone pressure), which allows for leakage to vary in magnitude.
 
 \subsubsection{Pressure Zone Leakage}
 \label{info:zone_leakage}
@@ -4113,7 +4115,7 @@ Unlike the zone leakage approach, this approach has the option to preserve the e
 
 This approach also has the option of changing the flow loss by specifying {\ct LOSS} on the {\ct HVAC} input.  The default is {\ct LOSS=1}; the same as for pressure zone leakage.
 
-Note, for this approach it is not required that one have pressure zones defined; however, it is recommended to do so if different pressure zones do in fact exist in the model. 
+Note, for this approach it is not required that one have pressure zones defined; however, it is recommended to do so if different pressure zones do in fact exist in the model.
 
 \subsubsection{Example Case: door\_crack}
 
@@ -7215,7 +7217,7 @@ Liquid droplets (as opposed to solid particles) ``stick'' to solid surfaces unle
 
 Each of the output quantities mentioned above has a variant in which the quantity is summed by species rather than particle type. For example, the quantity {\ct 'AMPUA\_Z'} along with a specified {\ct SPEC\_ID} rather than a {\ct PART\_ID} will sum the given output quantity over all particle classes with the given {\ct SPEC\_ID}.
 
-As an example of how to use these kinds of output quantities, the test case {\ct bucket\_test} describes a single sprinkler mounted 10~cm below a 5~m ceiling. Water flows for 30~s at a constant rate of 180~L/min (ramped up and down in 1~s).  The simulation continues for another 10~s to allow water drops time to reach the floor. The total mass of water discharged is
+As an example of how to use these kinds of output quantities, the test case {\ct bucket\_test\_1} describes a single sprinkler mounted 10~cm below a 5~m ceiling. Water flows for 30~s at a constant rate of 180~L/min (ramped up and down in 1~s).  The simulation continues for another 10~s to allow water drops time to reach the floor. The total mass of water discharged is
 \be
   \mathrm{ 180 \; \frac{L}{min} \times 1 \; \frac{kg}{L} \times \frac{1}{60} \; \frac{min}{s} \times 30 \; s = 90 \; kg }
 \ee
@@ -7223,22 +7225,38 @@ In the simulation, the quantity {\ct 'AMPUA'} with {\ct STATISTICS='SURFACE INTE
 
 \begin{figure}[ht]
 \centering
-\includegraphics[scale=0.55]{SCRIPT_FIGURES/bucket_test}
-\caption[Results of the {\ct bucket\_test} case]{Accumulated water collected at the floor in the {\ct bucket\_test} case.}
+\includegraphics[width=3in]{SCRIPT_FIGURES/bucket_test}
+\caption[Results of the {\ct bucket\_test\_1} case]{Accumulated water collected at the floor in the {\ct bucket\_test\_1} case.}
 \label{bucket_test_fig}
 \end{figure}
 
 
-\subsection{Droplet and Particle Densities and Fluxes in the Gas Phase}
-
-Away from solid surfaces, {\ct 'MPUV'} is the \underline{M}ass \underline{P}er \underline{U}nit \underline{V}olume of particles or droplets of type ({\ct PART\_ID}) in units of kg/m$^3$.  {\ct 'MPUV\_Z'} provides the same information integrated over all droplets of a single species, ({\ct SPEC\_ID}).  {\ct 'PARTICLE FLUX X'},  {\ct 'PARTICLE FLUX Y'}, and {\ct 'PARTICLE FLUX Z'} produce {\em only} slice and Plot3D files
-of the mass flux of droplets in the $x$, $y$, and $z$ directions, respectively, in units of kg/m$^2$/s.
+\subsection{Solid Particles on Solid Surfaces}
 
 If you want to monitor the accumulation of solid particles that have fallen on a solid surface, use a device as follows:
 \begin{lstlisting}
 &DEVC ID=..., XB=..., QUANTITY='MPUV', PART_ID='rods', STATISTICS='VOLUME INTEGRAL' /
 \end{lstlisting}
 The volume over which to integrate, {\ct XB}, should be at least one grid cell thick above the surface.
+
+
+\subsection{Droplet and Particle Densities and Fluxes in the Gas Phase}
+
+Away from solid surfaces, {\ct 'MPUV'} is the \underline{M}ass \underline{P}er \underline{U}nit \underline{V}olume of particles or droplets of type ({\ct PART\_ID}) in units of kg/m$^3$.  {\ct 'MPUV\_Z'} provides the same information integrated over all droplets of a single species, ({\ct SPEC\_ID}).  
+
+The quantities {\ct 'PARTICLE FLUX X'},  {\ct 'PARTICLE FLUX Y'}, and {\ct 'PARTICLE FLUX Z'} produce slice and Plot3D colored contours of the mass flux of particles in the $x$, $y$, and $z$ directions, respectively, in units of kg/m$^2$/s. You can also apply these quantities to a device. For example, in the case called {\ct bucket\_test\_4.fds}, the input line
+\begin{lstlisting}
+&DEVC XB=..., ID='flux', QUANTITY='PARTICLE FLUX Z', STATISTICS='AREA INTEGRAL'  /
+\end{lstlisting}
+records the integrated mass flux of {\em all} particles passing through the given horizontal plane. Figure~\ref{bucket_test_4_fig} presents the results of this simple test case in which water spraying at a rate of 0.0005~kg/s for 55~s passes through a measurement plane and onto the floor. The total water accumulated is 0.0275~kg.
+
+\begin{figure}[ht]
+\includegraphics[width=3in]{SCRIPT_FIGURES/bucket_test_4b}
+\includegraphics[width=3in]{SCRIPT_FIGURES/bucket_test_4}
+\caption[Results of the {\ct bucket\_test\_4} case]{Mass flux and accumulated water collected at the floor in the {\ct bucket\_test\_4} case.}
+\label{bucket_test_4_fig}
+\end{figure}
+
 
 \subsection{Coloring Particles and Droplets in Smokeview}
 
@@ -8093,22 +8111,15 @@ In combustion, knowing if/when/where chemical reactions have been extinguished i
 \section{Extracting Numbers from the Output Data Files}
 \label{info:fds2ascii}
 
-Often it is desired to present results of calculations in some form other
-than those offered by Smokeview. In this case, there is a short
-Fortran 90 program called {\ct fds2ascii.f90}, with a PC compiled version
-called {\ct fds2ascii.exe}. To run the program, just type
+Often it is desired to present results of calculations in some form other than those offered by Smokeview. In this case, there is a short Fortran 90 program called {\ct fds2ascii.f90}, with a PC compiled version called {\ct fds2ascii.exe}. To run the program, just type:
 \begin{lstlisting}
 fds2ascii
 \end{lstlisting}
-at the command prompt. You will be asked a series of questions
-about which type of output file to process, what time interval to
-time average the data, and so forth. A single file is produced
-with the name {\ct CHID\_fds2ascii.csv}. A typical command line session looks like this:
-
+at the command prompt. You will be asked a series of questions about which type of output file to process, what time interval to time average the data, and so forth. A single file is produced with the name {\ct CHID\_fds2ascii.csv}. A typical command line session looks like this:
 \begin{lstlisting}
 >> fds2ascii
   Enter Job ID string (CHID):
-bucket_test
+bucket_test_1
   What type of file to parse?
   PL3D file? Enter 1
   SLCF file? Enter 2
@@ -8131,16 +8142,10 @@ y
  Enter boundary file index for variable 1
 1
  Enter output file name:
-bucket_test_fds2ascii.csv
-  Writing to file...      bucket_test_fds2ascii.csv
+bucket_test_1_fds2ascii.csv
+  Writing to file...      bucket_test_1_fds2ascii.csv
 \end{lstlisting}
- \noindent
-These commands tell {\ct fds2ascii} that you want to convert (binary)
-boundary file data into a text file. You want to sample
-every data point within the specified volume, you want only those surfaces that point
-upwards (+3 orientation), you only want 1 variable (only one is listed anyway and its index is
-1 -- that is just the number used to list the available files). The data will be time-averaged, and it will
-be output to a file listed at the end of the session.
+These commands tell {\ct fds2ascii} that you want to convert (binary) boundary file data into a text file. You want to sample every data point within the specified volume, you want only those surfaces that point upwards (+3 orientation), you only want 1 variable (only one is listed anyway and its index is 1 -- that is just the number used to list the available files). The data will be time-averaged, and it will be output to a file listed at the end of the session.
 
 
 
@@ -8364,7 +8369,7 @@ be found in Volume~1 of the FDS Technical Reference Guide~\cite{FDS_Math_Guide}.
 {\ct STRAIN RATE Z}                             & $\partial v/\partial x + \partial u/\partial y$   & 1/s            & D,I,P,S      \\ \hline
 {\ct SUBGRID KINETIC ENERGY}                    & Section~\ref{info:meshquality}                    & \si{m^2/s^2}   & D,S          \\ \hline
 {\ct SUM LUMPED MASS FRACTIONS}                 & $\sum_i Z_i$ (should be 1)                        &                & D,S          \\ \hline
-{\ct SUM PRIMITIVE MASS FRACTIONS}              & $\sum_\alpha Y_\alpha$ (should be 1)              &                & D,S          \\ \hline             
+{\ct SUM PRIMITIVE MASS FRACTIONS}              & $\sum_\alpha Y_\alpha$ (should be 1)              &                & D,S          \\ \hline
 {\ct TURBULENCE RESOLUTION}                     & Section~\ref{info:meshquality}                    &                & D,S          \\ \hline
 {\ct VELOCITY ERROR}                            & Section \ref{info:PRES}                           &                & B            \\ \hline
 {\ct VORTICITY X}                               & $\partial w/\partial y - \partial v/\partial z$   & 1/s            & D,I,P,S      \\ \hline
