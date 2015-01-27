@@ -335,9 +335,10 @@ $QFDS -d Species soot_gravitational_settling.fds
 $QFDS -d Species soot_gravitational_settling_2.fds
 
 $QFDS -d Sprinklers_and_Sprays activate_sprinklers.fds
-$QFDS -d Sprinklers_and_Sprays bucket_test.fds
+$QFDS -d Sprinklers_and_Sprays bucket_test_1.fds
 $QFDS -d Sprinklers_and_Sprays bucket_test_2.fds
 $QFDS -d Sprinklers_and_Sprays bucket_test_3.fds
+$QFDS -d Sprinklers_and_Sprays bucket_test_4.fds
 $QFDS -d Sprinklers_and_Sprays cascade.fds
 $QFDS -d Sprinklers_and_Sprays droplet_distributions.fds
 $QFDS -d Sprinklers_and_Sprays flow_rate.fds
