@@ -21,15 +21,15 @@ set OMP_NUM_THREADS=1
 set fdsbasename=FDS-SMVclean
 set svnroot=%userprofile%\%fdsbasename%
 if NOT exist %svnroot% (
-  echo ***Fatal error: The repository %fdsbasename% does not exist.
+  echo ***Fatal error: The svn repository %fdsbasename% does not exist.
   echo Aborting firebot
   exit /b 1
 )
 
-set cfastbasename=cfast
+set cfastbasename=cfastclean
 set cfastroot=%userprofile%\%cfastbasename%
 if NOT exist %cfastroot% (
-  echo ***Fatal error: the repository %cfastbasename% does not exist.
+  echo ***Fatal error: the svn repository %cfastbasename% does not exist.
   echo Aborting firebot
   exit /b 1
 )
@@ -50,8 +50,6 @@ set TIMINGSDIR=%CURDIR%\timings
 
 erase %OUTDIR%\*.txt 1> Nul 2>&1
 
-set svnroot=%userprofile%\%fdsbasename%
-set cfastroot=%userprofile%\%cfastbasename%
 set email=%svnroot%\SMV\scripts\email.bat
 
 set errorlog=%OUTDIR%\firebot_errors.txt
@@ -152,19 +150,31 @@ echo             found sed
 call :is_file_installed svn|| exit /b 1
 echo             found svn
 
+:: revert cfast repository
+
+echo. 1>> %OUTDIR%\stage0.txt 2>&1
+
+if "%cfastbasename%" == "cfastclean" (
+   echo             reverting %cfastbasename% repository
+   cd %cfastroot%
+   call :svn_revert 1>> %OUTDIR%\stage0.txt 2>&1
+)
+
 :: update cfast repository
 
 echo             updating %cfastbasename% repository
 cd %cfastroot%
-svn update  1> %OUTDIR%\stage0.txt 2>&1
+svn update  1>> %OUTDIR%\stage0.txt 2>&1
 
-:: update FDS/Smokeview repository
+:: revert FDS/Smokeview repository
 
 if "%fdsbasename%" == "FDS-SMVclean" (
    echo             reverting %fdsbasename% repository
    cd %svnroot%
    call :svn_revert 1>> %OUTDIR%\stage0.txt 2>&1
 )
+
+:: update FDS/Smokeview repository
 
 echo             updating %fdsbasename% repository
 cd %svnroot%
