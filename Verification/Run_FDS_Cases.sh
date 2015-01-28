@@ -10,6 +10,7 @@ nthreads=1
 resource_manager=
 walltime=
 errfileoption=
+RUNOPTION=
 
 if [ "$FDSNETWORK" == "infiniband" ] ; then
   IB=ib
@@ -26,6 +27,7 @@ echo "-E - redirect stderr to a file if the 'none' queue is used"
 echo "-h - display this message"
 echo "-m max_iterations - stop FDS runs after a specifed number of iterations (delayed stop)"
 echo "     example: an option of 10 would cause FDS to stop after 10 iterations"
+echo "-M - run only cases that use multiple processes"
 echo "-o nthreads - run FDS with a specified number of threads [default: $nthreads]"
 echo "-q queue_name - run cases using the queue queue_name"
 echo "     default: batch"
@@ -34,6 +36,7 @@ echo "-r resource_manager - run cases using the resource manager"
 echo "     default: PBS"
 echo "     other options: SLURM"
 echo "-s - stop FDS runs"
+echo "-S - run only cases that use one process"
 echo "-w time - walltime request for a batch job"
 echo "     default: empty"
 echo "     format for PBS: hh:mm:ss, format for SLURM: dd-hh:mm:ss"
@@ -42,7 +45,7 @@ exit
 
 export SVNROOT=`pwd`/..
 
-while getopts 'c:dEhm:o:q:r:sw:' OPTION
+while getopts 'c:dEhMm:o:q:r:Ssw:' OPTION
 do
 case $OPTION in
   d)
@@ -57,6 +60,9 @@ case $OPTION in
   m)
    export STOPFDSMAXITER="$OPTARG"
    ;;
+  M)
+   RUNOPTION="-M"
+   ;;
   o)
    nthreads="$OPTARG"
    ;;
@@ -68,6 +74,9 @@ case $OPTION in
    ;;
   s)
    export STOPFDS=1
+   ;;
+  S)
+   RUNOPTION="-S"
    ;;
   w)
    walltime="-w $OPTARG"
@@ -94,7 +103,7 @@ fi
 export BACKGROUND=$SVNROOT/Utilities/background/intel_$PLATFORM2/background
 export FDS=$SVNROOT/FDS_Compilation/${OPENMP}intel_$PLATFORM$DEBUG/fds_${OPENMP}intel_$PLATFORM$DEBUG
 export FDSMPI=$SVNROOT/FDS_Compilation/mpi_intel_$PLATFORM$IB$DEBUG/fds_mpi_intel_$PLATFORM$IB$DEBUG
-export QFDSSH=$SVNROOT/Utilities/Scripts/qfds.sh
+export QFDSSH="$SVNROOT/Utilities/Scripts/qfds.sh $RUNOPTION"
 
 if [ "$resource_manager" == "SLURM" ]; then
    export RESOURCE_MANAGER="SLURM"

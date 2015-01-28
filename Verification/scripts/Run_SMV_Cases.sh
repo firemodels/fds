@@ -16,6 +16,7 @@ JOBPREFIX=
 RUN_MPI=0
 STOPFDS=
 errfileoption=
+RUNOPTION=
 
 function usage {
 echo "Run_SMV_Cases.sh [-d -h -m max_iterations -o nthreads -p -q queue_name -s ]"
@@ -28,6 +29,7 @@ echo "-g - run only geometry cases"
 echo "-h - display this message"
 echo "-m max_iterations - stop FDS runs after a specifed number of iterations (delayed stop)"
 echo "     example: an option of 10 would cause FDS to stop after 10 iterations"
+echo "-M - run only cases using multiple processes"
 echo "-o nthreads - run OpenMP version of FDS with a specified number of threads [default: $nthreads]"
 echo "-p size - platform size"
 echo "     default: 64"
@@ -36,6 +38,7 @@ echo "-q queue_name - run cases using the queue queue_name"
 echo "     default: batch"
 echo "     other options: batch, fire60s, fire70s, vis"
 echo "-s - stop FDS runs"
+echo "-S - run only cases using a single process"
 echo "-u - use installed versions of utilities background and wind2fds"
 exit
 }
@@ -62,7 +65,7 @@ cd $CURDIR/..
 
 
 use_installed="0"
-while getopts 'dEghj:m:o:p:q:su' OPTION
+while getopts 'dEghj:Mm:o:p:q:Ssu' OPTION
 do
 case $OPTION in
   d)
@@ -83,6 +86,9 @@ case $OPTION in
   m)
    export STOPFDSMAXITER="$OPTARG"
    ;;
+  M)
+   RUNOPTION="-M"
+   ;;
   j)
    JOBPREFIX="$OPTARG"
    ;;
@@ -99,6 +105,9 @@ case $OPTION in
   s)
    stop_cases=true
    export STOPFDS=-s
+   ;;
+  S)
+   RUNOPTION="-S"
    ;;
   u)
    use_installed="1"
@@ -142,7 +151,7 @@ export FDSEXE=$SVNROOT/FDS_Compilation/mpi_intel_$PLATFORM$IB$DEBUG/fds_mpi_inte
 export FDS=$FDSEXE
 export FDSMPI=$SVNROOT/FDS_Compilation/mpi_intel_$PLATFORM$IB$DEBUG/fds_mpi_intel_$PLATFORM$IB$DEBUG
 export CFAST=~/cfast/CFAST/intel_$PLATFORM/cfast6_$PLATFORM
-QFDSSH="$SVNROOT/Utilities/Scripts/qfds.sh $errfileoption"
+QFDSSH="$SVNROOT/Utilities/Scripts/qfds.sh $RUNOPTION $errfileoption"
 
 SMVUGDIR=$SVNROOT/Manuals/SMV_User_Guide/SCRIPT_FIGURES
 SMVVGDIR=$SVNROOT/Manuals/SMV_Verification_Guide/SCRIPT_FIGURES
