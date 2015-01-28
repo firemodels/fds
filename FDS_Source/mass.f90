@@ -200,10 +200,10 @@ USE MANUFACTURED_SOLUTIONS, ONLY: VD2D_MMS_Z_OF_RHO,VD2D_MMS_Z_SRC,UF_MMS,WF_MMS
 USE SOOT_ROUTINES, ONLY: SETTLING_VELOCITY
 INTEGER, INTENT(IN) :: NM
 REAL(EB), INTENT(IN) :: T
-REAL(EB) :: TNOW,ZZ_GET(1:N_TRACKED_SPECIES),UN,Q_Z,XHAT,ZHAT,FW(1:N_TRACKED_SPECIES),JDIFF,RHS_SUM
-INTEGER :: I,J,K,N,IW,IOR,IIG,JJG,KKG,N_MAX
-REAL(EB), POINTER, DIMENSION(:,:,:,:) :: RHS=>NULL(),JX=>NULL(),JY=>NULL(),JZ=>NULL()
-REAL(EB), POINTER, DIMENSION(:,:,:) :: UU=>NULL(),VV=>NULL(),WW=>NULL(),RHO__0=>NULL()
+REAL(EB) :: TNOW,ZZ_GET(1:N_TRACKED_SPECIES),RHS,UN,Q_Z,XHAT,ZHAT
+INTEGER :: I,J,K,N,IW,IOR,IIG,JJG,KKG
+REAL(EB), POINTER, DIMENSION(:,:,:,:) :: RHO_ZZ__0=>NULL(),DEL_RHO_D_DEL_Z__0=>NULL()
+REAL(EB), POINTER, DIMENSION(:,:,:) :: UU=>NULL(),VV=>NULL(),WW=>NULL()
 TYPE(WALL_TYPE), POINTER :: WC=>NULL()
 
 IF (EVACUATION_ONLY(NM)) RETURN
@@ -221,22 +221,15 @@ CALL POINT_TO_MESH(NM)
 UU=>WORK1
 VV=>WORK2
 WW=>WORK3
-RHO__0=>WORK4
-RHS=>SCALAR_WORK1
+RHO_ZZ__0=>SCALAR_WORK1
+DEL_RHO_D_DEL_Z__0=>SCALAR_WORK4
 
 PREDICTOR_STEP: SELECT CASE (PREDICTOR)
 
 CASE(.TRUE.) PREDICTOR_STEP
 
-   ! Diffusive fluxes
-
-   JX=>SCALAR_SAVE1
-   JY=>SCALAR_SAVE2
-   JZ=>SCALAR_SAVE3
    IF (.NOT.CHANGE_TIME_STEP(NM)) THEN
-      JX=FDX
-      JY=FDY
-      JZ=FDZ
+      DEL_RHO_D_DEL_Z__0 = DEL_RHO_D_DEL_Z
       IF (ANY(SPECIES_MIXTURE%DEPOSITING) .AND. GRAVITATIONAL_DEPOSITION) CALL SETTLING_VELOCITY(NM)
    ENDIF
 
@@ -279,97 +272,22 @@ CASE(.TRUE.) PREDICTOR_STEP
          DO J=1,JBAR
             DO I=1,IBAR
                IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-               RHS(I,J,K,N) = &
-                     ((FX(I,J,K,N)*UU(I,J,K)-JX(I,J,K,N))*R(I) -(FX(I-1,J,K,N)*UU(I-1,J,K)-JX(I-1,J,K,N))*R(I-1))*RDX(I)*RRN(I) &
-                   + ((FY(I,J,K,N)*VV(I,J,K)-JY(I,J,K,N))      -(FY(I,J-1,K,N)*VV(I,J-1,K)-JY(I,J-1,K,N))       )*RDY(J)        &
-                   + ((FZ(I,J,K,N)*WW(I,J,K)-JZ(I,J,K,N))      -(FZ(I,J,K-1,N)*WW(I,J,K-1)-JZ(I,J,K-1,N))       )*RDZ(K)
 
+               RHS = - DEL_RHO_D_DEL_Z__0(I,J,K,N) &
+                   + (FX(I,J,K,N)*UU(I,J,K)*R(I) - FX(I-1,J,K,N)*UU(I-1,J,K)*R(I-1))*RDX(I)*RRN(I) &
+                   + (FY(I,J,K,N)*VV(I,J,K)      - FY(I,J-1,K,N)*VV(I,J-1,K)       )*RDY(J)        &
+                   + (FZ(I,J,K,N)*WW(I,J,K)      - FZ(I,J,K-1,N)*WW(I,J,K-1)       )*RDZ(K)
+
+               RHO_ZZ__0(I,J,K,N) = RHO(I,J,K)*ZZ(I,J,K,N)
+
+               ZZS(I,J,K,N) = RHO_ZZ__0(I,J,K,N) - DT*RHS
             ENDDO
          ENDDO
       ENDDO
    ENDDO
-
-   THIN_WALL_CORRECTION: DO IW=N_EXTERNAL_WALL_CELLS+1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
-
-      WC=>WALL(IW)
-      IF (WC%BOUNDARY_TYPE/=SOLID_BOUNDARY) CYCLE THIN_WALL_CORRECTION
-
-      IIG = WC%ONE_D%IIG 
-      JJG = WC%ONE_D%JJG
-      KKG = WC%ONE_D%KKG
-      IOR = WC%ONE_D%IOR      
-      
-      SELECT CASE  (IOR)
-         CASE( 1)
-            IF (SOLID(CELL_INDEX(IIG-1,JJG,KKG))) CYCLE THIN_WALL_CORRECTION
-            FW = WC%RHO_F*WC%ZZ_F
-            N_MAX = MAXLOC(ZZ(IIG,JJG,KKG,:),1)
-            RHS_SUM = SUM(RHS(IIG,JJG,KKG,:)) 
-            RHS(IIG,JJG,KKG,:) = RHS(IIG,JJG,KKG,:) + FX(IIG-1,JJG,KKG,:)*UU(IIG-1,JJG,KKG)*R(IIG-1)*RDX(IIG)*RRN(IIG) &
-                                                    + FW(:)*WC%ONE_D%UW*R(IIG-1)*RDX(IIG)*RRN(IIG)
-            RHS(IIG,JJG,KKG,N_MAX) = RHS(IIG,JJG,KKG,N_MAX) + (RHS_SUM - SUM(RHS(IIG,JJG,KKG,:)))
-         CASE(-1)
-            IF (SOLID(CELL_INDEX(IIG+1,JJG,KKG))) CYCLE THIN_WALL_CORRECTION
-            FW = WC%RHO_F*WC%ZZ_F
-            N_MAX = MAXLOC(ZZ(IIG,JJG,KKG,:),1)
-            RHS_SUM = SUM(RHS(IIG,JJG,KKG,:)) 
-            RHS(IIG,JJG,KKG,:) = RHS(IIG,JJG,KKG,:) - FX(IIG,JJG,KKG,:)*UU(IIG,JJG,KKG)*R(IIG)*RDX(IIG)*RRN(IIG) &
-                                                    + FW(:)*WC%ONE_D%UW*R(IIG)*RDX(IIG)*RRN(IIG)
-            RHS(IIG,JJG,KKG,N_MAX) = RHS(IIG,JJG,KKG,N_MAX) + (RHS_SUM - SUM(RHS(IIG,JJG,KKG,:)))
-         CASE( 2)
-            IF (SOLID(CELL_INDEX(IIG,JJG-1,KKG))) CYCLE THIN_WALL_CORRECTION
-            FW = WC%RHO_F*WC%ZZ_F
-            N_MAX = MAXLOC(ZZ(IIG,JJG,KKG,:),1)
-            RHS_SUM = SUM(RHS(IIG,JJG,KKG,:)) 
-            RHS(IIG,JJG,KKG,:) = RHS(IIG,JJG,KKG,:) + FY(IIG,JJG-1,KKG,:)*VV(IIG,JJG-1,KKG)*RDY(JJG) &
-                                                    + FW(:)*WC%ONE_D%UW*RDY(JJG)
-            RHS(IIG,JJG,KKG,N_MAX) = RHS(IIG,JJG,KKG,N_MAX) + (RHS_SUM - SUM(RHS(IIG,JJG,KKG,:)))
-         CASE(-2)
-            IF (SOLID(CELL_INDEX(IIG,JJG+1,KKG))) CYCLE THIN_WALL_CORRECTION
-            FW = WC%RHO_F*WC%ZZ_F
-            N_MAX = MAXLOC(ZZ(IIG,JJG,KKG,:),1)
-            RHS_SUM = SUM(RHS(IIG,JJG,KKG,:)) 
-            RHS(IIG,JJG,KKG,:) = RHS(IIG,JJG,KKG,:) - FY(IIG,JJG,KKG,:)*VV(IIG,JJG,KKG)*RDY(JJG) &
-                                                    + FW(:)*WC%ONE_D%UW*RDY(JJG)
-            RHS(IIG,JJG,KKG,N_MAX) = RHS(IIG,JJG,KKG,N_MAX) + (RHS_SUM - SUM(RHS(IIG,JJG,KKG,:)))
-         CASE( 3)
-            IF (SOLID(CELL_INDEX(IIG,JJG,KKG-1))) CYCLE THIN_WALL_CORRECTION
-            FW = WC%RHO_F*WC%ZZ_F
-            N_MAX = MAXLOC(ZZ(IIG,JJG,KKG,:),1)
-            RHS_SUM = SUM(RHS(IIG,JJG,KKG,:)) 
-            RHS(IIG,JJG,KKG,:) = RHS(IIG,JJG,KKG,:) + FZ(IIG,JJG,KKG-1,:)*WW(IIG,JJG,KKG-1)*RDZ(KKG) &
-                                                    + FW(:)*WC%ONE_D%UW*RDZ(KKG)
-            RHS(IIG,JJG,KKG,N_MAX) = RHS(IIG,JJG,KKG,N_MAX) + (RHS_SUM - SUM(RHS(IIG,JJG,KKG,:)))
-        CASE(-3)
-            IF (SOLID(CELL_INDEX(IIG,JJG,KKG+1))) CYCLE THIN_WALL_CORRECTION
-            FW = WC%RHO_F*WC%ZZ_F
-            N_MAX = MAXLOC(ZZ(IIG,JJG,KKG,:),1)
-            RHS_SUM = SUM(RHS(IIG,JJG,KKG,:)) 
-            RHS(IIG,JJG,KKG,:) = RHS(IIG,JJG,KKG,:) - FZ(IIG,JJG,KKG,:)*WW(IIG,JJG,KKG)*RDZ(KKG) &
-                                                    + FW(:)*WC%ONE_D%UW*RDZ(KKG)
-            RHS(IIG,JJG,KKG,N_MAX) = RHS(IIG,JJG,KKG,N_MAX) + (RHS_SUM - SUM(RHS(IIG,JJG,KKG,:)))
-      END SELECT              
-   ENDDO THIN_WALL_CORRECTION
-   
-   DO N=1,N_TRACKED_SPECIES
-      DO K=1,KBAR
-         DO J=1,JBAR
-            DO I=1,IBAR
-               IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-
-               ZZS(I,J,K,N) = RHO(I,J,K)*ZZ(I,J,K,N) - DT*RHS(I,J,K,N)
-
-            ENDDO
-         ENDDO
-      ENDDO
-   ENDDO
-
-   ! Correct fluxes for positivity
-
-   CALL WEIGHTED_AVERAGE_FLUX_CORRECTION
 
    ! Manufactured solution
-   
+
    IF (PERIODIC_TEST==7) THEN
       DO K=1,KBAR
          DO J=1,JBAR
@@ -384,6 +302,10 @@ CASE(.TRUE.) PREDICTOR_STEP
          ENDDO
       ENDDO
    ENDIF
+
+   ! Correct fluxes for positivity
+
+   CALL WEIGHTED_AVERAGE_FLUX_CORRECTION
 
    ! Get rho = sum(rho*Y_alpha)
 
@@ -474,103 +396,26 @@ CASE(.FALSE.) PREDICTOR_STEP
       END SELECT
    ENDDO WALL_LOOP_2
 
-   ! Diffusive fluxes
-
-   JX=>SCALAR_SAVE1
-   JY=>SCALAR_SAVE2
-   JZ=>SCALAR_SAVE3
-   JX=FDX
-   JY=FDY
-   JZ=FDZ
+   DEL_RHO_D_DEL_Z__0 = DEL_RHO_D_DEL_Z
 
    IF (ANY(SPECIES_MIXTURE%DEPOSITING) .AND. GRAVITATIONAL_DEPOSITION) CALL SETTLING_VELOCITY(NM)
    
    ! Compute species mass density at the next time step   
-
+   
    DO N=1,N_TRACKED_SPECIES
       DO K=1,KBAR
          DO J=1,JBAR
             DO I=1,IBAR
                IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
 
-               RHS(I,J,K,N) = &
-                     ((FX(I,J,K,N)*UU(I,J,K)-JX(I,J,K,N))*R(I) -(FX(I-1,J,K,N)*UU(I-1,J,K)-JX(I-1,J,K,N))*R(I-1))*RDX(I)*RRN(I) &
-                   + ((FY(I,J,K,N)*VV(I,J,K)-JY(I,J,K,N))      -(FY(I,J-1,K,N)*VV(I,J-1,K)-JY(I,J-1,K,N))       )*RDY(J)        &
-                   + ((FZ(I,J,K,N)*WW(I,J,K)-JZ(I,J,K,N))      -(FZ(I,J,K-1,N)*WW(I,J,K-1)-JZ(I,J,K-1,N))       )*RDZ(K)
+               RHS = - DEL_RHO_D_DEL_Z__0(I,J,K,N) &
+                   + (FX(I,J,K,N)*UU(I,J,K)*R(I) - FX(I-1,J,K,N)*UU(I-1,J,K)*R(I-1))*RDX(I)*RRN(I) &
+                   + (FY(I,J,K,N)*VV(I,J,K)      - FY(I,J-1,K,N)*VV(I,J-1,K)       )*RDY(J)        &
+                   + (FZ(I,J,K,N)*WW(I,J,K)      - FZ(I,J,K-1,N)*WW(I,J,K-1)       )*RDZ(K)
 
-            ENDDO
-         ENDDO
-      ENDDO
-   ENDDO
+               RHO_ZZ__0(I,J,K,N) = .5_EB*(RHO(I,J,K)*ZZ(I,J,K,N) + RHOS(I,J,K)*ZZS(I,J,K,N))
 
-   THIN_WALL_CORRECTION_2: DO IW=N_EXTERNAL_WALL_CELLS+1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
-
-      WC=>WALL(IW)
-      IF (WC%BOUNDARY_TYPE/=SOLID_BOUNDARY) CYCLE THIN_WALL_CORRECTION_2
-
-      IIG = WC%ONE_D%IIG 
-      JJG = WC%ONE_D%JJG
-      KKG = WC%ONE_D%KKG
-      IOR = WC%ONE_D%IOR      
-      
-      SELECT CASE  (IOR)
-         CASE( 1)
-            IF (SOLID(CELL_INDEX(IIG-1,JJG,KKG))) CYCLE THIN_WALL_CORRECTION_2
-            FW = WC%RHO_F*WC%ZZ_F
-            N_MAX = MAXLOC(ZZ(IIG,JJG,KKG,:),1)
-            RHS_SUM = SUM(RHS(IIG,JJG,KKG,:))             
-            RHS(IIG,JJG,KKG,:) = RHS(IIG,JJG,KKG,:) + FX(IIG-1,JJG,KKG,:)*UU(IIG-1,JJG,KKG)*R(IIG-1)*RDX(IIG)*RRN(IIG) &
-                                                    + FW(:)*WC%ONE_D%UWS*R(IIG-1)*RDX(IIG)*RRN(IIG)
-            RHS(IIG,JJG,KKG,N_MAX) = RHS(IIG,JJG,KKG,N_MAX) + (RHS_SUM - SUM(RHS(IIG,JJG,KKG,:)))
-         CASE(-1)
-            IF (SOLID(CELL_INDEX(IIG+1,JJG,KKG))) CYCLE THIN_WALL_CORRECTION_2
-            FW = WC%RHO_F*WC%ZZ_F
-            N_MAX = MAXLOC(ZZ(IIG,JJG,KKG,:),1)
-            RHS_SUM = SUM(RHS(IIG,JJG,KKG,:))             
-            RHS(IIG,JJG,KKG,:) = RHS(IIG,JJG,KKG,:) - FX(IIG,JJG,KKG,:)*UU(IIG,JJG,KKG)*R(IIG)*RDX(IIG)*RRN(IIG) &
-                                                    + FW(:)*WC%ONE_D%UWS*R(IIG)*RDX(IIG)*RRN(IIG)
-            RHS(IIG,JJG,KKG,N_MAX) = RHS(IIG,JJG,KKG,N_MAX) + (RHS_SUM - SUM(RHS(IIG,JJG,KKG,:)))
-         CASE( 2)
-            IF (SOLID(CELL_INDEX(IIG,JJG-1,KKG))) CYCLE THIN_WALL_CORRECTION_2
-            FW = WC%RHO_F*WC%ZZ_F
-            N_MAX = MAXLOC(ZZ(IIG,JJG,KKG,:),1)
-            RHS_SUM = SUM(RHS(IIG,JJG,KKG,:))             
-            RHS(IIG,JJG,KKG,:) = RHS(IIG,JJG,KKG,:) + FY(IIG,JJG-1,KKG,:)*VV(IIG,JJG-1,KKG)*RDY(JJG) &
-                                                    + FW(:)*WC%ONE_D%UWS*RDY(JJG)
-            RHS(IIG,JJG,KKG,N_MAX) = RHS(IIG,JJG,KKG,N_MAX) + (RHS_SUM - SUM(RHS(IIG,JJG,KKG,:)))
-         CASE(-2)
-            IF (SOLID(CELL_INDEX(IIG,JJG+1,KKG))) CYCLE THIN_WALL_CORRECTION_2
-            FW = WC%RHO_F*WC%ZZ_F
-            N_MAX = MAXLOC(ZZ(IIG,JJG,KKG,:),1)
-            RHS_SUM = SUM(RHS(IIG,JJG,KKG,:))             
-            RHS(IIG,JJG,KKG,:) = RHS(IIG,JJG,KKG,:) - FY(IIG,JJG,KKG,:)*VV(IIG,JJG,KKG)*RDY(JJG) &
-                                                    + FW(:)*WC%ONE_D%UWS*RDY(JJG)
-            RHS(IIG,JJG,KKG,N_MAX) = RHS(IIG,JJG,KKG,N_MAX) + (RHS_SUM - SUM(RHS(IIG,JJG,KKG,:)))
-         CASE( 3)
-            IF (SOLID(CELL_INDEX(IIG,JJG,KKG-1))) CYCLE THIN_WALL_CORRECTION_2
-            FW = WC%RHO_F*WC%ZZ_F
-            N_MAX = MAXLOC(ZZ(IIG,JJG,KKG,:),1)
-            RHS_SUM = SUM(RHS(IIG,JJG,KKG,:))             
-            RHS(IIG,JJG,KKG,:) = RHS(IIG,JJG,KKG,:) + FZ(IIG,JJG,KKG-1,:)*WW(IIG,JJG,KKG-1)*RDZ(KKG) &
-                                                    + FW(:)*WC%ONE_D%UWS*RDZ(KKG)
-            RHS(IIG,JJG,KKG,N_MAX) = RHS(IIG,JJG,KKG,N_MAX) + (RHS_SUM - SUM(RHS(IIG,JJG,KKG,:)))
-         CASE(-3)
-            IF (SOLID(CELL_INDEX(IIG,JJG,KKG+1))) CYCLE THIN_WALL_CORRECTION_2
-            FW = WC%RHO_F*WC%ZZ_F
-            N_MAX = MAXLOC(ZZ(IIG,JJG,KKG,:),1)
-            RHS_SUM = SUM(RHS(IIG,JJG,KKG,:))             
-            RHS(IIG,JJG,KKG,:) = RHS(IIG,JJG,KKG,:) - FZ(IIG,JJG,KKG,:)*WW(IIG,JJG,KKG)*RDZ(KKG) &
-                                                    + FW(:)*WC%ONE_D%UWS*RDZ(KKG)
-            RHS(IIG,JJG,KKG,N_MAX) = RHS(IIG,JJG,KKG,N_MAX) + (RHS_SUM - SUM(RHS(IIG,JJG,KKG,:)))
-      END SELECT          
-   ENDDO THIN_WALL_CORRECTION_2   
-
-   DO N=1,N_TRACKED_SPECIES
-      DO K=1,KBAR
-         DO J=1,JBAR
-            DO I=1,IBAR
-               IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-               ZZ(I,J,K,N) = .5_EB*(RHO(I,J,K)*ZZ(I,J,K,N) + RHOS(I,J,K)*ZZS(I,J,K,N)) - .5_EB*DT*RHS(I,J,K,N)
+               ZZ(I,J,K,N) = .5_EB*(RHO(I,J,K)*ZZ(I,J,K,N) + RHOS(I,J,K)*ZZS(I,J,K,N)) - .5_EB*DT*RHS
             ENDDO
          ENDDO
       ENDDO
@@ -661,12 +506,12 @@ SUBROUTINE WEIGHTED_AVERAGE_FLUX_CORRECTION
 
 USE COMP_FUNCTIONS, ONLY: SHUTDOWN
 INTEGER :: I,J,K,N,ITER
-REAL(EB) :: SVDT,GAMMA,RHO_ZZ_GAMMA,DT_LOC
-REAL(EB), POINTER, DIMENSION(:,:,:) :: UU=>NULL(),VV=>NULL(),WW=>NULL(),RHOP=>NULL(),RHO__0=>NULL()
-REAL(EB), POINTER, DIMENSION(:,:,:,:) :: ZZP=>NULL(),RHS=>NULL(),JX=>NULL(),JY=>NULL(),JZ=>NULL()
+REAL(EB) :: SVDT,GAMMA,RHO_ZZ_GAMMA,RHS,DT_LOC
+REAL(EB), POINTER, DIMENSION(:,:,:) :: UU=>NULL(),VV=>NULL(),WW=>NULL()
+REAL(EB), POINTER, DIMENSION(:,:,:,:) :: ZZP=>NULL(),RHO_ZZ__0=>NULL(),DEL_RHO_D_DEL_Z__0=>NULL()
 INTEGER, POINTER, DIMENSION(:,:,:) :: IOB=>NULL()
 INTEGER, PARAMETER :: MAX_ITER=3
-LOGICAL :: REPEAT_CYCLE,CELL_FOUND
+LOGICAL :: REPEAT_CYCLE
 
 IF (PREDICTOR) THEN
    ZZP=>ZZS
@@ -680,12 +525,9 @@ ENDIF
 UU=>WORK1
 VV=>WORK2
 WW=>WORK3
-RHO__0=>WORK4
+RHO_ZZ__0=>SCALAR_WORK1
+DEL_RHO_D_DEL_Z__0=>SCALAR_WORK4
 IOB=>IWORK1
-RHS=>SCALAR_WORK1
-JX=>SCALAR_SAVE1
-JY=>SCALAR_SAVE2
-JZ=>SCALAR_SAVE3
 
 SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
  
@@ -702,9 +544,8 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
          DO I=1,IBAR
             IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
             IF (ZZP(I,J,K,N)>=0._EB) CYCLE
-            IF (IOB(I,J,K)==0) ZZP(I,J,K,N) = ZZP(I,J,K,N) + DT_LOC*DT*RHS(I,J,K,N)
-            IOB(I,J,K) = 1
-            CELL_FOUND = .FALSE.
+            
+            IOB(I,J,K)=1 ! cell is tagged for correction
 
             SVDT = DT_LOC * ( ( MAX(0._EB,UU(I,J,K)) - MIN(0._EB,UU(I-1,J,K)) )*RDX(I) &
                             + ( MAX(0._EB,VV(I,J,K)) - MIN(0._EB,VV(I,J-1,K)) )*RDY(J) &
@@ -716,92 +557,52 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
                GAMMA = 1._EB
             ENDIF
 
-            RHO_ZZ_GAMMA = ZZP(I,J,K,N)*GAMMA
-            
-            IF ((FX(I,J,K,N)*UU(I,J,K)-JX(I,J,K,N))>0._EB .AND. &
-                (WALL_INDEX(CELL_INDEX(I,J,K),1)>0 .EQV. SOLID(CELL_INDEX(I+1,J,K))) ) THEN
-               IF (IOB(I+1,J,K)==0) ZZP(I+1,J,K,N) = ZZP(I+1,J,K,N) + DT_LOC*DT*RHS(I+1,J,K,N)
-               RHS(I  ,J,K,N) = RHS(I  ,J,K,N) - ((FX(I,J,K,N)-RHO_ZZ_GAMMA)*UU(I,J,K)-JX(I,J,K,N))*R(I)*RDX(I  )*RRN(I)
-               RHS(I+1,J,K,N) = RHS(I+1,J,K,N) + ((FX(I,J,K,N)-RHO_ZZ_GAMMA)*UU(I,J,K)-JX(I,J,K,N))*R(I)*RDX(I+1)*RRN(I+1)
-               JX(I,J,K,N) = 0._EB
+            RHO_ZZ_GAMMA = RHO_ZZ__0(I,J,K,N)*GAMMA
+
+            IF (FX(I,J,K,N)*UU(I,J,K)>0._EB) THEN
                FX(I,J,K,N)  = RHO_ZZ_GAMMA
-               CELL_FOUND = .TRUE.
-               IOB(I+1,J,K) = 1               
+               IOB(I+1,J,K) = 1 ! right neighbor is tagged for correction, etc.
             ENDIF
-            IF ((FY(I,J,K,N)*VV(I,J,K)-JY(I,J,K,N))>0._EB .AND. &
-                (WALL_INDEX(CELL_INDEX(I,J,K),2)>0 .EQV. SOLID(CELL_INDEX(I,J+1,K))) ) THEN
-               IF (IOB(I,J+1,K)==0) ZZP(I,J+1,K,N) = ZZP(I,J+1,K,N) + DT_LOC*DT*RHS(I,J+1,K,N)            
-               RHS(I,J  ,K,N) = RHS(I,J  ,K,N) - ((FY(I,J,K,N)-RHO_ZZ_GAMMA)*VV(I,J,K)-JY(I,J,K,N))*RDY(J)
-               RHS(I,J+1,K,N) = RHS(I,J+1,K,N) + ((FY(I,J,K,N)-RHO_ZZ_GAMMA)*VV(I,J,K)-JY(I,J,K,N))*RDY(J+1)
-               JY(I,J,K,N) = 0._EB
+            IF (FY(I,J,K,N)*VV(I,J,K)>0._EB) THEN
                FY(I,J,K,N)  = RHO_ZZ_GAMMA
-               CELL_FOUND = .TRUE.
-               IOB(I,J+1,K) = 1               
+               IOB(I,J+1,K) = 1
             ENDIF
-            IF ((FZ(I,J,K,N)*WW(I,J,K)-JZ(I,J,K,N))>0._EB .AND. &
-                (WALL_INDEX(CELL_INDEX(I,J,K),3)>0 .EQV. SOLID(CELL_INDEX(I,J,K+1))) ) THEN
-               IF (IOB(I,J,K+1)==0) ZZP(I,J,K+1,N) = ZZP(I,J,K+1,N) + DT_LOC*DT*RHS(I,J,K+1,N)            
-               RHS(I,J,K  ,N) = RHS(I,J,K  ,N) - ((FZ(I,J,K,N)-RHO_ZZ_GAMMA)*WW(I,J,K)-JZ(I,J,K,N))*RDZ(K)
-               RHS(I,J+1,K,N) = RHS(I,J,K+1,N) + ((FZ(I,J,K,N)-RHO_ZZ_GAMMA)*WW(I,J,K)-JZ(I,J,K,N))*RDZ(K+1)
-               JZ(I,J,K,N) = 0._EB
+            IF (FZ(I,J,K,N)*WW(I,J,K)>0._EB) THEN
                FZ(I,J,K,N)  = RHO_ZZ_GAMMA
-               CELL_FOUND = .TRUE.
-               IOB(I,J,K+1) = 1               
+               IOB(I,J,K+1) = 1
             ENDIF
 
-            IF ((FX(I-1,J,K,N)*UU(I-1,J,K)-JX(I-1,J,K,N))<0._EB .AND. &
-                (WALL_INDEX(CELL_INDEX(I,J,K),-1)>0 .EQV. SOLID(CELL_INDEX(I-1,J,K))) ) THEN
-               IF (IOB(I-1,J,K)==0) ZZP(I-1,J,K,N) = ZZP(I-1,J,K,N) + DT_LOC*DT*RHS(I-1,J,K,N)
-               RHS(I  ,J,K,N) = RHS(I  ,J,K,N) + ((FX(I-1,J,K,N)-RHO_ZZ_GAMMA)*UU(I-1,J,K)-JX(I-1,J,K,N))*R(I-1)*RDX(I  )*RRN(I)
-               RHS(I-1,J,K,N) = RHS(I-1,J,K,N) - ((FX(I-1,J,K,N)-RHO_ZZ_GAMMA)*UU(I-1,J,K)-JX(I-1,J,K,N))*R(I-1)*RDX(I-1)*RRN(I-1)
-               JX(I-1,J,K,N) = 0._EB
+            IF (FX(I-1,J,K,N)*UU(I-1,J,K)<0._EB) THEN
                FX(I-1,J,K,N) = RHO_ZZ_GAMMA
-               CELL_FOUND = .TRUE.
-               IOB(I-1,J,K) = 1               
+               IOB(I-1,J,K) = 1
             ENDIF
-            IF ((FY(I,J-1,K,N)*VV(I,J-1,K)-JY(I,J-1,K,N))<0._EB .AND. &
-                (WALL_INDEX(CELL_INDEX(I,J,K),-2)>0 .EQV. SOLID(CELL_INDEX(I,J-1,K))) ) THEN
-               IF (IOB(I,J-1,K)==0) ZZP(I,J-1,K,N) = ZZP(I,J-1,K,N) + DT_LOC*DT*RHS(I,J-1,K,N)            
-               RHS(I,J  ,K,N) = RHS(I,J  ,K,N) + ((FY(I,J-1,K,N)-RHO_ZZ_GAMMA)*VV(I,J-1,K)-JY(I,J-1,K,N))*RDY(J)
-               RHS(I,J-1,K,N) = RHS(I,J-1,K,N) - ((FY(I,J-1,K,N)-RHO_ZZ_GAMMA)*VV(I,J-1,K)-JY(I,J-1,K,N))*RDY(J-1)
-               JY(I,J-1,K,N) = 0._EB
+            IF (FY(I,J-1,K,N)*VV(I,J-1,K)<0._EB) THEN
                FY(I,J-1,K,N) = RHO_ZZ_GAMMA
-               CELL_FOUND = .TRUE.
-               IOB(I,J-1,K) = 1               
+               IOB(I,J-1,K) = 1
             ENDIF
-            IF ((FZ(I,J,K-1,N)*WW(I,J,K-1)-JZ(I,J,K-1,N))<0._EB .AND. &
-                (WALL_INDEX(CELL_INDEX(I,J,K),-3)>0 .EQV. SOLID(CELL_INDEX(I,J,K-1))) ) THEN
-               IF (IOB(I,J,K-1)==0) ZZP(I,J,K-1,N) = ZZP(I,J,K-1,N) + DT_LOC*DT*RHS(I,J,K-1,N)            
-               RHS(I,J,K  ,N) = RHS(I,J,K  ,N) + ((FZ(I,J,K-1,N)-RHO_ZZ_GAMMA)*WW(I,J,K-1)-JZ(I,J,K-1,N))*RDZ(K)
-               RHS(I,J,K-1,N) = RHS(I,J,K-1,N) - ((FZ(I,J,K-1,N)-RHO_ZZ_GAMMA)*WW(I,J,K-1)-JZ(I,J,K-1,N))*RDZ(K-1)
-               JZ(I,J,K-1,N) = 0._EB
+            IF (FZ(I,J,K-1,N)*WW(I,J,K-1)<0._EB) THEN
                FZ(I,J,K-1,N) = RHO_ZZ_GAMMA
-               CELL_FOUND = .TRUE.
-               IOB(I,J,K-1) = 1               
+               IOB(I,J,K-1) = 1
             ENDIF
 
-            IF (.NOT. CELL_FOUND) THEN
-               IOB(I,J,K) = 0
-               ZZP(I,J,K,N) = ZZP(I,J,K,N) - DT_LOC*DT*RHS(I,J,K,N)
-            ENDIF 
          ENDDO
       ENDDO
    ENDDO
-   
-   
+
    ! Only update cells tagged for correction
 
    DO K=1,KBAR
       DO J=1,JBAR
          DO I=1,IBAR
             IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-            IF (IOB(I,J,K)/=1) THEN
-               IF (ITER<MAX_ITER) CYCLE
-               IF (ZZP(I,J,K,N)<0._EB) ZZP(I,J,K,N) = 0._EB
-               CYCLE
-            ENDIF
+            IF (IOB(I,J,K)/=1) CYCLE
 
-            ZZP(I,J,K,N) = ZZP(I,J,K,N) - DT_LOC*RHS(I,J,K,N)
+            RHS = - DEL_RHO_D_DEL_Z__0(I,J,K,N) &
+                   + (FX(I,J,K,N)*UU(I,J,K)*R(I) - FX(I-1,J,K,N)*UU(I-1,J,K)*R(I-1))*RDX(I)*RRN(I) &
+                   + (FY(I,J,K,N)*VV(I,J,K)      - FY(I,J-1,K,N)*VV(I,J-1,K)       )*RDY(J)        &
+                   + (FZ(I,J,K,N)*WW(I,J,K)      - FZ(I,J,K-1,N)*WW(I,J,K-1)       )*RDZ(K)
+            
+            ZZP(I,J,K,N) = RHO_ZZ__0(I,J,K,N) - DT_LOC*RHS
 
             IF (ZZP(I,J,K,N)<0._EB) THEN
                REPEAT_CYCLE = .TRUE.
@@ -817,7 +618,7 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
    ENDDO ITER_LOOP
 
 ENDDO SPECIES_LOOP
-   
+
 END SUBROUTINE WEIGHTED_AVERAGE_FLUX_CORRECTION
 
 
