@@ -510,6 +510,8 @@ run_verification_cases_debug()
    # Run FDS with delayed stop files (with 1 OpenMP thread and 1 iteration)
    echo 'Running FDS verification cases:' >> $FIREBOT_DIR/output/stage3
    ./Run_FDS_Cases.sh -o 1 -d -m 1 -q $QUEUE >> $FIREBOT_DIR/output/stage3 2>&1
+#   ./Run_FDS_Cases.sh -S -o 1 -d -m 1 -q $QUEUE >> $FIREBOT_DIR/output/stage3 2>&1
+#   ./Run_FDS_Cases.sh -M -o 1 -d -m 1 -q $QUEUE >> $FIREBOT_DIR/output/stage3 2>&1
    echo "" >> $FIREBOT_DIR/output/stage3 2>&1
 
    # Start running all SMV verification cases in delayed stop debug mode
@@ -517,6 +519,8 @@ run_verification_cases_debug()
    # Run FDS with delayed stop files (with 1 OpenMP thread and 1 iteration)
    echo 'Running SMV verification cases:' >> $FIREBOT_DIR/output/stage3 2>&1
    ./Run_SMV_Cases.sh -o 1 -d -m 1 -q $QUEUE >> $FIREBOT_DIR/output/stage3 2>&1
+#   ./Run_SMV_Cases.sh -S -o 1 -d -m 1 -q $QUEUE >> $FIREBOT_DIR/output/stage3 2>&1
+#   ./Run_SMV_Cases.sh -M -o 1 -d -m 1 -q $QUEUE >> $FIREBOT_DIR/output/stage3 2>&1
    echo "" >> $FIREBOT_DIR/output/stage3 2>&1
 
    # Wait for all verification cases to end
@@ -806,6 +810,8 @@ run_verification_cases_release()
    # Run FDS with 1 OpenMP thread
    echo 'Running FDS verification cases:' >> $FIREBOT_DIR/output/stage5
    ./Run_FDS_Cases.sh -o 1 -q $QUEUE >> $FIREBOT_DIR/output/stage5 2>&1
+#   ./Run_FDS_Cases.sh -S -o 1 -q $QUEUE >> $FIREBOT_DIR/output/stage5 2>&1
+#   ./Run_FDS_Cases.sh -M -o 1 -q $QUEUE >> $FIREBOT_DIR/output/stage5 2>&1
    echo "" >> $FIREBOT_DIR/output/stage5 2>&1
 
    # Start running all SMV verification cases
@@ -813,6 +819,8 @@ run_verification_cases_release()
    # Run FDS with 1 OpenMP thread
    echo 'Running SMV verification cases:' >> $FIREBOT_DIR/output/stage5 2>&1
    ./Run_SMV_Cases.sh -o 1 -q $QUEUE >> $FIREBOT_DIR/output/stage5 2>&1
+#   ./Run_SMV_Cases.sh -S -o 1 -q $QUEUE >> $FIREBOT_DIR/output/stage5 2>&1
+#   ./Run_SMV_Cases.sh -M -o 1 -q $QUEUE >> $FIREBOT_DIR/output/stage5 2>&1
    echo "" >> $FIREBOT_DIR/output/stage5 2>&1
 
    # Wait for all verification cases to end
