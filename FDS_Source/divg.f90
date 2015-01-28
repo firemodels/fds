@@ -37,11 +37,11 @@ REAL(EB), POINTER, DIMENSION(:,:) :: PBAR_P
 REAL(EB) :: DELKDELT,VC,VC1,DTDX,DTDY,DTDZ,TNOW, &
             DZDX,DZDY,DZDZ,RDT,RHO_D_DZDN,TSI,TIME_RAMP_FACTOR,ZONE_VOLUME,DELTA_P,PRES_RAMP_FACTOR,&
             TMP_G,DIV_DIFF_HEAT_FLUX,H_S,ZZZ(1:4),DU,DU_P,DU_M,UN,PROFILE_FACTOR, &
-            XHAT,ZHAT,TT,Q_Z,D_Z_TEMP,D_Z_N(0:5000)
+            XHAT,ZHAT,TT,Q_Z,D_Z_TEMP,D_Z_N(0:5000),RHO_D_DZDN_GET(1:N_TRACKED_SPECIES),JCOR
 REAL(EB), ALLOCATABLE, DIMENSION(:) :: ZZ_GET
 TYPE(SURFACE_TYPE), POINTER :: SF
 TYPE(SPECIES_MIXTURE_TYPE), POINTER :: SM
-INTEGER :: IW,N,IOR,II,JJ,KK,IIG,JJG,KKG,I,J,K,IPZ,IOPZ
+INTEGER :: IW,N,IOR,II,JJ,KK,IIG,JJG,KKG,I,J,K,IPZ,IOPZ,N_ZZ_MAX
 TYPE(VENTS_TYPE), POINTER :: VT=>NULL()
 TYPE(WALL_TYPE), POINTER :: WC=>NULL()
  
@@ -90,9 +90,9 @@ CALL PREDICT_NORMAL_VELOCITY
 
 ! Compute species-related finite difference terms
 
-RHO_D_DZDX => FDX
-RHO_D_DZDY => FDY
-RHO_D_DZDZ => FDZ
+RHO_D_DZDX => SCALAR_WORK1
+RHO_D_DZDY => SCALAR_WORK2
+RHO_D_DZDZ => SCALAR_WORK3
 SELECT CASE(PREDICTOR)
    CASE(.TRUE.)  
       ZZP => ZZS 
@@ -163,10 +163,8 @@ SPECIES_GT_1_IF: IF (N_TRACKED_SPECIES>1) THEN
 
       IF (TENSOR_DIFFUSIVITY .AND. LES) CALL TENSOR_DIFFUSIVITY_MODEL(NM,N)
 
-      ! Correct rho*D del Z at boundaries
+      ! Zero rho*D_n grad Z_n at boundaries
 
-      !$OMP PARALLEL DO SCHEDULE(GUIDED) &
-      !$OMP& PRIVATE(WC, IIG, JJG, KKG, IOR, RHO_D, RHO_D_DZDN)
       WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
          WC => WALL(IW)
          IF (WC%BOUNDARY_TYPE==NULL_BOUNDARY .OR. &
@@ -176,29 +174,21 @@ SPECIES_GT_1_IF: IF (N_TRACKED_SPECIES>1) THEN
          JJG = WC%ONE_D%JJG
          KKG = WC%ONE_D%KKG
          IOR = WC%ONE_D%IOR
-         RHO_D_DZDN = 2._EB*WC%RHODW(N)*(ZZP(IIG,JJG,KKG,N)-WC%ZZ_F(N))*WC%RDN
          SELECT CASE(IOR)
             CASE( 1) 
-               !$OMP ATOMIC WRITE
-               RHO_D_DZDX(IIG-1,JJG,KKG,N) =  RHO_D_DZDN
+               RHO_D_DZDX(IIG-1,JJG,KKG,N) = 0._EB
             CASE(-1) 
-               !$OMP ATOMIC WRITE
-               RHO_D_DZDX(IIG,JJG,KKG,N)   = -RHO_D_DZDN
+               RHO_D_DZDX(IIG,JJG,KKG,N)   = 0._EB
             CASE( 2) 
-               !$OMP ATOMIC WRITE
-               RHO_D_DZDY(IIG,JJG-1,KKG,N) =  RHO_D_DZDN
+               RHO_D_DZDY(IIG,JJG-1,KKG,N) = 0._EB
             CASE(-2) 
-               !$OMP ATOMIC WRITE
-               RHO_D_DZDY(IIG,JJG,KKG,N)   = -RHO_D_DZDN
+               RHO_D_DZDY(IIG,JJG,KKG,N)   = 0._EB
             CASE( 3) 
-               !$OMP ATOMIC WRITE
-               RHO_D_DZDZ(IIG,JJG,KKG-1,N) =  RHO_D_DZDN
+               RHO_D_DZDZ(IIG,JJG,KKG-1,N) = 0._EB
             CASE(-3) 
-               !$OMP ATOMIC WRITE
-               RHO_D_DZDZ(IIG,JJG,KKG,N)   = -RHO_D_DZDN
+               RHO_D_DZDZ(IIG,JJG,KKG,N)   = 0._EB
          END SELECT
       ENDDO WALL_LOOP
-      !$OMP END PARALLEL DO
 
    ENDDO DIFFUSIVE_FLUX_LOOP
 
@@ -219,7 +209,7 @@ SPECIES_GT_1_IF: IF (N_TRACKED_SPECIES>1) THEN
 
    SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
 
-      ! Compute del dot h_n*rho*D del Z_n (part of del dot qdot")
+      ! Compute div h_n*rho*D del Z_n (part of div qdot")
 
       H_RHO_D_DZDX => WORK5
       H_RHO_D_DZDY => WORK6
@@ -248,10 +238,38 @@ SPECIES_GT_1_IF: IF (N_TRACKED_SPECIES>1) THEN
       ENDDO
       !$OMP END PARALLEL DO
 
-      ! Correct h_n*rho*D del Z_n at boundaries
+      !$OMP PARALLEL DO PRIVATE(DIV_DIFF_HEAT_FLUX) SCHEDULE(STATIC)
+      DO K=1,KBAR
+         DO J=1,JBAR
+            DO I=1,IBAR
 
-      !$OMP PARALLEL DO SCHEDULE(GUIDED) &
-      !$OMP& PRIVATE(WC, IIG, JJG, KKG, IOR, RHO_D, H_S, RHO_D_DZDN)
+               DIV_DIFF_HEAT_FLUX = (R(I)*H_RHO_D_DZDX(I,J,K)-R(I-1)*H_RHO_D_DZDX(I-1,J,K))*RDX(I)*RRN(I) + &
+                                    (     H_RHO_D_DZDY(I,J,K)-       H_RHO_D_DZDY(I,J-1,K))*RDY(J)        + &
+                                    (     H_RHO_D_DZDZ(I,J,K)-       H_RHO_D_DZDZ(I,J,K-1))*RDZ(K)
+
+               DP(I,J,K) = DP(I,J,K) + DIV_DIFF_HEAT_FLUX
+
+            ENDDO
+         ENDDO
+      ENDDO
+      !$OMP END PARALLEL DO
+         
+      ! Compute div rho*D grad Z_n
+
+      !$OMP PARALLEL DO SCHEDULE(STATIC)
+      DO K=1,KBAR
+         DO J=1,JBAR
+            DO I=1,IBAR
+               DEL_RHO_D_DEL_Z(I,J,K,N) = (R(I)*RHO_D_DZDX(I,J,K,N)-R(I-1)*RHO_D_DZDX(I-1,J,K,N))*RDX(I)*RRN(I) + &
+                                          (     RHO_D_DZDY(I,J,K,N)-       RHO_D_DZDY(I,J-1,K,N))*RDY(J)        + &
+                                          (     RHO_D_DZDZ(I,J,K,N)-       RHO_D_DZDZ(I,J,K-1,N))*RDZ(K)
+            ENDDO
+         ENDDO
+      ENDDO
+      !$OMP END PARALLEL DO
+
+      ! Correct rho*D_n grad Z_n and h_n*rho*D_n grad Z_n at boundaries
+
       WALL_LOOP_2: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
          WC => WALL(IW)
          IF (WC%BOUNDARY_TYPE==NULL_BOUNDARY .OR. &
@@ -261,85 +279,34 @@ SPECIES_GT_1_IF: IF (N_TRACKED_SPECIES>1) THEN
          JJG = WC%ONE_D%JJG
          KKG = WC%ONE_D%KKG
          IOR = WC%ONE_D%IOR
+
+         N_ZZ_MAX = MAXLOC(WC%ZZ_F(:),1)
+         RHO_D_DZDN = 2._EB*WC%RHODW(N)*(ZZP(IIG,JJG,KKG,N)-WC%ZZ_F(N))*WC%RDN
+         IF (N==N_ZZ_MAX) THEN
+            RHO_D_DZDN_GET = 2._EB*WC%RHODW(:)*(ZZP(IIG,JJG,KKG,:)-WC%ZZ_F(:))*WC%RDN
+            RHO_D_DZDN = -(SUM(RHO_D_DZDN_GET(:))-RHO_D_DZDN)
+         ENDIF
          CALL GET_SENSIBLE_ENTHALPY_Z(N,WC%ONE_D%TMP_F,H_S)
+
          SELECT CASE(IOR)
             CASE( 1) 
-               !$OMP ATOMIC WRITE
-               H_RHO_D_DZDX(IIG-1,JJG,KKG) = H_S*RHO_D_DZDX(IIG-1,JJG,KKG,N)
+               JCOR = RHO_D_DZDN*RDX(IIG)*RRN(IIG)*R(IIG-1)
             CASE(-1) 
-               !$OMP ATOMIC WRITE
-               H_RHO_D_DZDX(IIG,JJG,KKG)   = H_S*RHO_D_DZDX(IIG,JJG,KKG,N)
+               JCOR = RHO_D_DZDN*RDX(IIG)*RRN(IIG)*R(IIG)
             CASE( 2) 
-               !$OMP ATOMIC WRITE
-               H_RHO_D_DZDY(IIG,JJG-1,KKG) = H_S*RHO_D_DZDY(IIG,JJG-1,KKG,N)
+               JCOR = RHO_D_DZDN*RDY(JJG)
             CASE(-2) 
-               !$OMP ATOMIC WRITE
-               H_RHO_D_DZDY(IIG,JJG,KKG)   = H_S*RHO_D_DZDY(IIG,JJG,KKG,N)
+               JCOR = RHO_D_DZDN*RDY(JJG)
             CASE( 3) 
-               !$OMP ATOMIC WRITE
-               H_RHO_D_DZDZ(IIG,JJG,KKG-1) = H_S*RHO_D_DZDZ(IIG,JJG,KKG-1,N)
+               JCOR = RHO_D_DZDN*RDZ(KKG)
             CASE(-3) 
-               !$OMP ATOMIC WRITE
-               H_RHO_D_DZDZ(IIG,JJG,KKG)   = H_S*RHO_D_DZDZ(IIG,JJG,KKG,N)
+               JCOR = RHO_D_DZDN*RDZ(KKG)
          END SELECT
+
+         DEL_RHO_D_DEL_Z(IIG,JJG,KKG,N) = DEL_RHO_D_DEL_Z(IIG,JJG,KKG,N) - JCOR
+         DP(IIG,JJG,KKG) = DP(IIG,JJG,KKG) - H_S*JCOR
+
       ENDDO WALL_LOOP_2
-      !$OMP END PARALLEL DO
-
-      CYLINDER: SELECT CASE(CYLINDRICAL)
-         CASE(.FALSE.) CYLINDER  ! 3D or 2D Cartesian Coords
-            !$OMP PARALLEL DO PRIVATE(DIV_DIFF_HEAT_FLUX) SCHEDULE(STATIC)
-            DO K=1,KBAR
-               DO J=1,JBAR
-                  DO I=1,IBAR
-
-                     DIV_DIFF_HEAT_FLUX = (H_RHO_D_DZDX(I,J,K)-H_RHO_D_DZDX(I-1,J,K))*RDX(I) + &
-                                          (H_RHO_D_DZDY(I,J,K)-H_RHO_D_DZDY(I,J-1,K))*RDY(J) + &
-                                          (H_RHO_D_DZDZ(I,J,K)-H_RHO_D_DZDZ(I,J,K-1))*RDZ(K)
-
-                     DP(I,J,K) = DP(I,J,K) + DIV_DIFF_HEAT_FLUX
-
-                  ENDDO
-               ENDDO
-            ENDDO
-            !$OMP END PARALLEL DO
-         CASE(.TRUE.) CYLINDER  ! 2D Cylindrical Coords
-            J = 1
-            DO K=1,KBAR
-               DO I=1,IBAR
-
-                  DIV_DIFF_HEAT_FLUX = (R(I)*H_RHO_D_DZDX(I,J,K)-R(I-1)*H_RHO_D_DZDX(I-1,J,K))*RDX(I)*RRN(I) + &
-                                       (     H_RHO_D_DZDZ(I,J,K)-       H_RHO_D_DZDZ(I,J,K-1))*RDZ(K)
-
-                  DP(I,J,K) = DP(I,J,K) + DIV_DIFF_HEAT_FLUX
-
-               ENDDO
-            ENDDO
-      END SELECT CYLINDER
-
-      ! Compute del dot rho*D del Z_n
-
-      CYLINDER2: SELECT CASE(CYLINDRICAL)
-         CASE(.FALSE.) CYLINDER2  ! 3D or 2D Cartesian Coords
-            !$OMP PARALLEL DO SCHEDULE(STATIC)
-            DO K=1,KBAR
-               DO J=1,JBAR
-                  DO I=1,IBAR
-                     DEL_RHO_D_DEL_Z(I,J,K,N) = (RHO_D_DZDX(I,J,K,N)-RHO_D_DZDX(I-1,J,K,N))*RDX(I) + &
-                                                (RHO_D_DZDY(I,J,K,N)-RHO_D_DZDY(I,J-1,K,N))*RDY(J) + &
-                                                (RHO_D_DZDZ(I,J,K,N)-RHO_D_DZDZ(I,J,K-1,N))*RDZ(K)
-                  ENDDO
-               ENDDO
-            ENDDO
-            !$OMP END PARALLEL DO
-         CASE(.TRUE.) CYLINDER2  ! 2D Cylindrical Coords
-            J=1
-            DO K=1,KBAR
-               DO I=1,IBAR
-                  DEL_RHO_D_DEL_Z(I,J,K,N) = (R(I)*RHO_D_DZDX(I,J,K,N)-R(I-1)*RHO_D_DZDX(I-1,J,K,N))*RDX(I)*RRN(I) + &
-                                             (     RHO_D_DZDZ(I,J,K,N)-       RHO_D_DZDZ(I,J,K-1,N))*RDZ(K)
-               ENDDO
-            ENDDO
-      END SELECT CYLINDER2
 
    ENDDO SPECIES_LOOP
 
