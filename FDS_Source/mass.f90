@@ -303,10 +303,6 @@ CASE(.TRUE.) PREDICTOR_STEP
       ENDDO
    ENDIF
 
-   ! Correct fluxes for positivity
-
-   CALL WEIGHTED_AVERAGE_FLUX_CORRECTION
-
    ! Get rho = sum(rho*Y_alpha)
 
    DO K=1,KBAR
@@ -317,6 +313,10 @@ CASE(.TRUE.) PREDICTOR_STEP
          ENDDO
       ENDDO
    ENDDO
+
+   ! Check mass density for positivity
+
+   CALL CHECK_MASS_DENSITY
 
    ! Extract mass fraction from RHO * ZZ
 
@@ -421,10 +421,6 @@ CASE(.FALSE.) PREDICTOR_STEP
       ENDDO
    ENDDO
 
-   ! Correct fluxes for positivity
-
-   CALL WEIGHTED_AVERAGE_FLUX_CORRECTION
-
    ! Manufactured solution
 
    IF (PERIODIC_TEST==7) THEN
@@ -452,6 +448,10 @@ CASE(.FALSE.) PREDICTOR_STEP
          ENDDO
       ENDDO
    ENDDO
+
+   ! Check mass density for positivity
+
+   CALL CHECK_MASS_DENSITY
 
    ! Extract Y_n from rho*Y_n
 
@@ -502,124 +502,159 @@ TUSED(3,NM)=TUSED(3,NM)+SECOND()-TNOW
 END SUBROUTINE DENSITY
 
 
-SUBROUTINE WEIGHTED_AVERAGE_FLUX_CORRECTION
+SUBROUTINE CHECK_MASS_DENSITY
 
-USE COMP_FUNCTIONS, ONLY: SHUTDOWN
-INTEGER :: I,J,K,N,ITER
-REAL(EB) :: SVDT,GAMMA,RHO_ZZ_GAMMA,RHS,DT_LOC
-REAL(EB), POINTER, DIMENSION(:,:,:) :: UU=>NULL(),VV=>NULL(),WW=>NULL()
-REAL(EB), POINTER, DIMENSION(:,:,:,:) :: ZZP=>NULL(),RHO_ZZ__0=>NULL(),DEL_RHO_D_DEL_Z__0=>NULL()
-INTEGER, POINTER, DIMENSION(:,:,:) :: IOB=>NULL()
-INTEGER, PARAMETER :: MAX_ITER=3
-LOGICAL :: REPEAT_CYCLE
+! Redistribute mass from cells below or above the density cut-off limits
+! Do not apply OpenMP to this routine
+
+USE GLOBAL_CONSTANTS, ONLY : PREDICTOR,RHOMIN,RHOMAX
+REAL(EB) :: MASS_N(-3:3),CONST,MASS_C,ZZ_CUT,RHO_CUT,VC(-3:3),SIGN_FACTOR,SUM_MASS_N,VC1(-3:3)
+INTEGER  :: IC,I,J,K,N
+REAL(EB), POINTER, DIMENSION(:,:,:) :: DELTA_RHO=>NULL(),DELTA_ZZ=>NULL(),RHOP=>NULL()
+REAL(EB), POINTER, DIMENSION(:,:,:,:) :: ZZP=>NULL()
+REAL(EB), PARAMETER :: ZZ_MIN=0._EB, ZZ_MAX=HUGE(1._EB)
+
+DELTA_RHO => WORK1
+DELTA_RHO =  0._EB
 
 IF (PREDICTOR) THEN
    ZZP=>ZZS
    RHOP=>RHOS
-   DT_LOC=DT
 ELSE
    ZZP=>ZZ
    RHOP=>RHO
-   DT_LOC=.5_EB*DT
 ENDIF
-UU=>WORK1
-VV=>WORK2
-WW=>WORK3
-RHO_ZZ__0=>SCALAR_WORK1
-DEL_RHO_D_DEL_Z__0=>SCALAR_WORK4
-IOB=>IWORK1
+
+! Correct density
+
+DO K=1,KBAR
+   DO J=1,JBAR
+      VC1( 0)  = DY(J)  *DZ(K)
+      VC1(-1)  = VC1( 0)
+      VC1( 1)  = VC1( 0)
+      VC1(-2)  = DY(J-1)*DZ(K)
+      VC1( 2)  = DY(J+1)*DZ(K)
+      VC1(-3)  = DY(J)  *DZ(K-1)
+      VC1( 3)  = DY(J)  *DZ(K+1)
+      DO I=1,IBAR
+
+         IF (RHOP(I,J,K)>=RHOMIN .AND. RHOP(I,J,K)<=RHOMAX) CYCLE
+         IC = CELL_INDEX(I,J,K)
+         IF (SOLID(IC)) CYCLE
+         IF (RHOP(I,J,K)<RHOMIN) THEN
+            RHO_CUT = RHOMIN
+            SIGN_FACTOR = 1._EB
+         ELSE
+            RHO_CUT = RHOMAX
+            SIGN_FACTOR = -1._EB
+         ENDIF
+         MASS_N = 0._EB
+         VC( 0)  = DX(I)  * VC1( 0)
+         VC(-1)  = DX(I-1)* VC1(-1)
+         VC( 1)  = DX(I+1)* VC1( 1)
+         VC(-2)  = DX(I)  * VC1(-2)
+         VC( 2)  = DX(I)  * VC1( 2)
+         VC(-3)  = DX(I)  * VC1(-3)
+         VC( 3)  = DX(I)  * VC1( 3)
+
+         MASS_C = ABS(RHO_CUT-RHOP(I,J,K))*VC(0)
+         IF (WALL_INDEX(IC,-1)==0) MASS_N(-1) = ABS(MIN(RHOMAX,MAX(RHOMIN,RHOP(I-1,J,K)))-RHO_CUT)*VC(-1)
+         IF (WALL_INDEX(IC, 1)==0) MASS_N( 1) = ABS(MIN(RHOMAX,MAX(RHOMIN,RHOP(I+1,J,K)))-RHO_CUT)*VC( 1)
+         IF (WALL_INDEX(IC,-2)==0) MASS_N(-2) = ABS(MIN(RHOMAX,MAX(RHOMIN,RHOP(I,J-1,K)))-RHO_CUT)*VC(-2)
+         IF (WALL_INDEX(IC, 2)==0) MASS_N( 2) = ABS(MIN(RHOMAX,MAX(RHOMIN,RHOP(I,J+1,K)))-RHO_CUT)*VC( 2)
+         IF (WALL_INDEX(IC,-3)==0) MASS_N(-3) = ABS(MIN(RHOMAX,MAX(RHOMIN,RHOP(I,J,K-1)))-RHO_CUT)*VC(-3)
+         IF (WALL_INDEX(IC, 3)==0) MASS_N( 3) = ABS(MIN(RHOMAX,MAX(RHOMIN,RHOP(I,J,K+1)))-RHO_CUT)*VC( 3)
+         SUM_MASS_N = SUM(MASS_N)
+         IF (SUM_MASS_N<=TWO_EPSILON_EB) CYCLE
+         CONST = SIGN_FACTOR*MIN(1._EB,MASS_C/SUM_MASS_N)
+         DELTA_RHO(I,J,K)   = DELTA_RHO(I,J,K)   + CONST*SUM_MASS_N/VC( 0)
+         DELTA_RHO(I-1,J,K) = DELTA_RHO(I-1,J,K) - CONST*MASS_N(-1)/VC(-1)
+         DELTA_RHO(I+1,J,K) = DELTA_RHO(I+1,J,K) - CONST*MASS_N( 1)/VC( 1)
+         DELTA_RHO(I,J-1,K) = DELTA_RHO(I,J-1,K) - CONST*MASS_N(-2)/VC(-2)
+         DELTA_RHO(I,J+1,K) = DELTA_RHO(I,J+1,K) - CONST*MASS_N( 2)/VC( 2)
+         DELTA_RHO(I,J,K-1) = DELTA_RHO(I,J,K-1) - CONST*MASS_N(-3)/VC(-3)
+         DELTA_RHO(I,J,K+1) = DELTA_RHO(I,J,K+1) - CONST*MASS_N( 3)/VC( 3)
+      ENDDO
+   ENDDO
+ENDDO
+
+RHOP(1:IBAR,1:JBAR,1:KBAR) = MIN(RHOMAX,MAX(RHOMIN,RHOP(1:IBAR,1:JBAR,1:KBAR)+DELTA_RHO(1:IBAR,1:JBAR,1:KBAR)))
+
+! Correct species mass density
 
 SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
- 
-   ITER_LOOP: DO ITER=1,MAX_ITER
 
-   REPEAT_CYCLE = .FALSE.
+DELTA_ZZ => WORK2
+DELTA_ZZ = 0._EB
 
-   IOB=0 ! integer tag for out of bounds (0=in bounds, 1=out of bounds)
+DO K=1,KBAR
+   DO J=1,JBAR
+      VC1( 0)  = DY(J)  *DZ(K)
+      VC1(-1)  = VC1( 0)
+      VC1( 1)  = VC1( 0)
+      VC1(-2)  = DY(J-1)*DZ(K)
+      VC1( 2)  = DY(J+1)*DZ(K)
+      VC1(-3)  = DY(J)  *DZ(K-1)
+      VC1( 3)  = DY(J)  *DZ(K+1)
+      DO I=1,IBAR
 
-   ! Compute new fluxes
+         IF (ZZP(I,J,K,N)>=ZZ_MIN .AND. ZZP(I,J,K,N)<=ZZ_MAX) CYCLE
+         IC = CELL_INDEX(I,J,K)
+         IF (SOLID(IC)) CYCLE
+         IF (ZZP(I,J,K,N)<ZZ_MIN) THEN
+            ZZ_CUT = ZZ_MIN
+            SIGN_FACTOR = 1._EB
+         ELSE
+            ZZ_CUT = ZZ_MAX
+            SIGN_FACTOR = -1._EB
+         ENDIF
+         MASS_N = 0._EB
+         VC( 0)  = DX(I)  * VC1( 0)
+         VC(-1)  = DX(I-1)* VC1(-1)
+         VC( 1)  = DX(I+1)* VC1( 1)
+         VC(-2)  = DX(I)  * VC1(-2)
+         VC( 2)  = DX(I)  * VC1( 2)
+         VC(-3)  = DX(I)  * VC1(-3)
+         VC( 3)  = DX(I)  * VC1( 3)
 
-   DO K=1,KBAR
-      DO J=1,JBAR
-         DO I=1,IBAR
-            IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-            IF (ZZP(I,J,K,N)>=0._EB) CYCLE
-            
-            IOB(I,J,K)=1 ! cell is tagged for correction
-
-            SVDT = DT_LOC * ( ( MAX(0._EB,UU(I,J,K)) - MIN(0._EB,UU(I-1,J,K)) )*RDX(I) &
-                            + ( MAX(0._EB,VV(I,J,K)) - MIN(0._EB,VV(I,J-1,K)) )*RDY(J) &
-                            + ( MAX(0._EB,WW(I,J,K)) - MIN(0._EB,WW(I,J,K-1)) )*RDZ(K) )
-
-            IF (SVDT>TWO_EPSILON_EB) THEN
-               GAMMA = (1._EB-EXP(-SVDT))/(SVDT)
-            ELSE
-               GAMMA = 1._EB
-            ENDIF
-
-            RHO_ZZ_GAMMA = RHO_ZZ__0(I,J,K,N)*GAMMA
-
-            IF (FX(I,J,K,N)*UU(I,J,K)>0._EB) THEN
-               FX(I,J,K,N)  = RHO_ZZ_GAMMA
-               IOB(I+1,J,K) = 1 ! right neighbor is tagged for correction, etc.
-            ENDIF
-            IF (FY(I,J,K,N)*VV(I,J,K)>0._EB) THEN
-               FY(I,J,K,N)  = RHO_ZZ_GAMMA
-               IOB(I,J+1,K) = 1
-            ENDIF
-            IF (FZ(I,J,K,N)*WW(I,J,K)>0._EB) THEN
-               FZ(I,J,K,N)  = RHO_ZZ_GAMMA
-               IOB(I,J,K+1) = 1
-            ENDIF
-
-            IF (FX(I-1,J,K,N)*UU(I-1,J,K)<0._EB) THEN
-               FX(I-1,J,K,N) = RHO_ZZ_GAMMA
-               IOB(I-1,J,K) = 1
-            ENDIF
-            IF (FY(I,J-1,K,N)*VV(I,J-1,K)<0._EB) THEN
-               FY(I,J-1,K,N) = RHO_ZZ_GAMMA
-               IOB(I,J-1,K) = 1
-            ENDIF
-            IF (FZ(I,J,K-1,N)*WW(I,J,K-1)<0._EB) THEN
-               FZ(I,J,K-1,N) = RHO_ZZ_GAMMA
-               IOB(I,J,K-1) = 1
-            ENDIF
-
-         ENDDO
+         MASS_C = ABS(ZZ_CUT-ZZP(I,J,K,N))*VC(0)
+         IF (WALL_INDEX(IC,-1)==0) MASS_N(-1) = ABS(MIN(ZZ_MAX,MAX(ZZ_MIN,ZZP(I-1,J,K,N)))-ZZ_CUT)*VC(-1)
+         IF (WALL_INDEX(IC, 1)==0) MASS_N( 1) = ABS(MIN(ZZ_MAX,MAX(ZZ_MIN,ZZP(I+1,J,K,N)))-ZZ_CUT)*VC( 1)
+         IF (WALL_INDEX(IC,-2)==0) MASS_N(-2) = ABS(MIN(ZZ_MAX,MAX(ZZ_MIN,ZZP(I,J-1,K,N)))-ZZ_CUT)*VC(-2)
+         IF (WALL_INDEX(IC, 2)==0) MASS_N( 2) = ABS(MIN(ZZ_MAX,MAX(ZZ_MIN,ZZP(I,J+1,K,N)))-ZZ_CUT)*VC( 2)
+         IF (WALL_INDEX(IC,-3)==0) MASS_N(-3) = ABS(MIN(ZZ_MAX,MAX(ZZ_MIN,ZZP(I,J,K-1,N)))-ZZ_CUT)*VC(-3)
+         IF (WALL_INDEX(IC, 3)==0) MASS_N( 3) = ABS(MIN(ZZ_MAX,MAX(ZZ_MIN,ZZP(I,J,K+1,N)))-ZZ_CUT)*VC( 3)
+         SUM_MASS_N = SUM(MASS_N)
+         IF (SUM_MASS_N<=TWO_EPSILON_EB) CYCLE
+         CONST = SIGN_FACTOR*MIN(1._EB,MASS_C/SUM_MASS_N)
+         DELTA_ZZ(I,J,K)   = DELTA_ZZ(I,J,K)   + CONST*SUM_MASS_N/VC( 0)
+         DELTA_ZZ(I-1,J,K) = DELTA_ZZ(I-1,J,K) - CONST*MASS_N(-1)/VC(-1)
+         DELTA_ZZ(I+1,J,K) = DELTA_ZZ(I+1,J,K) - CONST*MASS_N( 1)/VC( 1)
+         DELTA_ZZ(I,J-1,K) = DELTA_ZZ(I,J-1,K) - CONST*MASS_N(-2)/VC(-2)
+         DELTA_ZZ(I,J+1,K) = DELTA_ZZ(I,J+1,K) - CONST*MASS_N( 2)/VC( 2)
+         DELTA_ZZ(I,J,K-1) = DELTA_ZZ(I,J,K-1) - CONST*MASS_N(-3)/VC(-3)
+         DELTA_ZZ(I,J,K+1) = DELTA_ZZ(I,J,K+1) - CONST*MASS_N( 3)/VC( 3)
       ENDDO
    ENDDO
+ENDDO
 
-   ! Only update cells tagged for correction
-
-   DO K=1,KBAR
-      DO J=1,JBAR
-         DO I=1,IBAR
-            IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-            IF (IOB(I,J,K)/=1) CYCLE
-
-            RHS = - DEL_RHO_D_DEL_Z__0(I,J,K,N) &
-                   + (FX(I,J,K,N)*UU(I,J,K)*R(I) - FX(I-1,J,K,N)*UU(I-1,J,K)*R(I-1))*RDX(I)*RRN(I) &
-                   + (FY(I,J,K,N)*VV(I,J,K)      - FY(I,J-1,K,N)*VV(I,J-1,K)       )*RDY(J)        &
-                   + (FZ(I,J,K,N)*WW(I,J,K)      - FZ(I,J,K-1,N)*WW(I,J,K-1)       )*RDZ(K)
-            
-            ZZP(I,J,K,N) = RHO_ZZ__0(I,J,K,N) - DT_LOC*RHS
-
-            IF (ZZP(I,J,K,N)<0._EB) THEN
-               REPEAT_CYCLE = .TRUE.
-               IF (ITER==MAX_ITER) ZZP(I,J,K,N) = 0._EB
-            ENDIF
-
-         ENDDO
-      ENDDO
-   ENDDO
-   
-   IF (.NOT.REPEAT_CYCLE) EXIT ITER_LOOP
-
-   ENDDO ITER_LOOP
+ZZP(1:IBAR,1:JBAR,1:KBAR,N) = MIN(ZZ_MAX,MAX(ZZ_MIN,ZZP(1:IBAR,1:JBAR,1:KBAR,N)+DELTA_ZZ(1:IBAR,1:JBAR,1:KBAR)))
 
 ENDDO SPECIES_LOOP
 
-END SUBROUTINE WEIGHTED_AVERAGE_FLUX_CORRECTION
+! Absorb error in most abundant species
+
+DO K=1,KBAR
+   DO J=1,JBAR
+      DO I=1,IBAR
+         IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
+         N=MAXLOC(ZZP(I,J,K,:),1)
+         ZZP(I,J,K,N) = RHOP(I,J,K) - ( SUM(ZZP(I,J,K,:)) - ZZP(I,J,K,N) )
+      ENDDO
+   ENDDO
+ENDDO
+
+END SUBROUTINE CHECK_MASS_DENSITY
 
 
 REAL(EB) FUNCTION SCALAR_FACE_VALUE(A,U,LIMITER)
