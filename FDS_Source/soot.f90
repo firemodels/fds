@@ -25,15 +25,15 @@ SUBROUTINE SETTLING_VELOCITY(NM)
 ! Routine related to gravitational sedimentation in gas phase.
 ! If gravitational deposition is enabled, transport depositing
 ! aerosol via WW minus settling velocity. K. Overholt
-!WW_GRAV = g m_p B, assume CHI_D=1.  B=mobility, m_p = particle mass
+! WW_GRAV = g m_p B, assume CHI_D=1., B=mobility, m_p = particle mass
 
 USE PHYSICAL_FUNCTIONS, ONLY: GET_VISCOSITY
 USE GLOBAL_CONSTANTS, ONLY: PREDICTOR,GVEC,SOLID_BOUNDARY
-REAL(EB) :: ZZ_GET(1:N_TRACKED_SPECIES),TMP_G,MU_G,KN,GRAV_FAC,KN_FAC,GRAV_VEL
+REAL(EB) :: ZZ_GET(1:N_TRACKED_SPECIES),TMP_G,MU_G,KN,GRAV_FAC,KN_FAC,GRAV_VEL,RHS
 INTEGER, INTENT(IN) :: NM
-INTEGER :: I,J,K,N,IW
+INTEGER :: I,J,K,N,IW,IIG,JJG,KKG,IOR
 REAL(EB), POINTER, DIMENSION(:,:,:) :: U_GRAV=>NULL(),V_GRAV=>NULL(),W_GRAV=>NULL(),RHOP=>NULL()
-REAL(EB), POINTER, DIMENSION(:,:,:,:) :: ZZP=>NULL(),JX=>NULL(),JY=>NULL(),JZ=>NULL()
+REAL(EB), POINTER, DIMENSION(:,:,:,:) :: ZZP=>NULL()
 TYPE(WALL_TYPE), POINTER :: WC=>NULL()
 
 CALL POINT_TO_MESH(NM)
@@ -46,10 +46,6 @@ ELSE
    ZZP  => ZZS
 ENDIF
 
-JX => SCALAR_SAVE1
-JY => SCALAR_SAVE2
-JZ => SCALAR_SAVE3
-
 U_GRAV => WORK7
 V_GRAV => WORK8
 W_GRAV => WORK9
@@ -57,51 +53,65 @@ U_GRAV = 0._EB
 V_GRAV = 0._EB
 W_GRAV = 0._EB
 
-
 SPEC_LOOP: DO N=1,N_TRACKED_SPECIES   
-   IF (.NOT. SPECIES_MIXTURE(N)%DEPOSITING) CYCLE SPEC_LOOP
+   IF (.NOT.SPECIES_MIXTURE(N)%DEPOSITING) CYCLE SPEC_LOOP
 
    GRAV_FAC = SPECIES_MIXTURE(N)%MEAN_DIAMETER**2*SPECIES_MIXTURE(N)%DENSITY_SOLID/18._EB
    KN_FAC = SQRT(2._EB*PI)/SPECIES_MIXTURE(N)%MEAN_DIAMETER
-   DO K=1,KBM1
+   DO K=1,KBAR
       DO J=1,JBAR
-         I_LOOP: DO I=1,IBAR
-            IF (SOLID(CELL_INDEX(I,J,K))) CYCLE I_LOOP
+         DO I=1,IBAR
+            IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
             TMP_G = TMP(I,J,K)
             ZZ_GET(1:N_TRACKED_SPECIES) = ZZP(I,J,K,1:N_TRACKED_SPECIES)
             CALL GET_VISCOSITY(ZZ_GET,MU_G,TMP_G)
             KN = KN_FAC*MU_G/SQRT(PBAR(K,PRESSURE_ZONE(I,J,K))*RHOP(I,J,K))
             GRAV_VEL = GRAV_FAC*CUNNINGHAM(KN)/MU_G
-            U_GRAV(I,J,K) = -GVEC(1)*GRAV_VEL
-            V_GRAV(I,J,K) = -GVEC(2)*GRAV_VEL
-            W_GRAV(I,J,K) = -GVEC(3)*GRAV_VEL
-         ENDDO I_LOOP
+            U_GRAV(I,J,K) = GVEC(1)*GRAV_VEL
+            V_GRAV(I,J,K) = GVEC(2)*GRAV_VEL
+            W_GRAV(I,J,K) = GVEC(3)*GRAV_VEL
+         ENDDO
       ENDDO
    ENDDO
 
    ! Wall removal handled by wall BC
+
    WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
       WC=>WALL(IW)
       IF (WC%BOUNDARY_TYPE/=SOLID_BOUNDARY .OR. WC%ONE_D%UW < 0._EB) CYCLE WALL_LOOP
-      SELECT CASE(WC%ONE_D%IOR)
+      IIG = WC%ONE_D%IIG
+      JJG = WC%ONE_D%JJG
+      KKG = WC%ONE_D%KKG
+      IOR = WC%ONE_D%IOR
+      SELECT CASE(IOR)
          CASE (-1)
-            U_GRAV(WC%ONE_D%IIG,WC%ONE_D%JJG,WC%ONE_D%KKG)   = 0._EB
+            U_GRAV(IIG,JJG,KKG)   = 0._EB
          CASE ( 1)
-            U_GRAV(WC%ONE_D%IIG-1,WC%ONE_D%JJG,WC%ONE_D%KKG) = 0._EB
+            U_GRAV(IIG-1,JJG,KKG) = 0._EB
          CASE (-2)
-            V_GRAV(WC%ONE_D%IIG,WC%ONE_D%JJG,WC%ONE_D%KKG)   = 0._EB
+            V_GRAV(IIG,JJG,KKG)   = 0._EB
          CASE ( 2)
-            V_GRAV(WC%ONE_D%IIG,WC%ONE_D%JJG-1,WC%ONE_D%KKG) = 0._EB
+            V_GRAV(IIG,JJG-1,KKG) = 0._EB
          CASE (-3)
-            W_GRAV(WC%ONE_D%IIG,WC%ONE_D%JJG,WC%ONE_D%KKG)   = 0._EB
+            W_GRAV(IIG,JJG,KKG)   = 0._EB
          CASE ( 3)   
-            W_GRAV(WC%ONE_D%IIG,WC%ONE_D%JJG,WC%ONE_D%KKG-1) = 0._EB
+            W_GRAV(IIG,JJG,KKG-1) = 0._EB
       END SELECT
    ENDDO WALL_LOOP
-   
-   JX(:,:,:,N) = JX(:,:,:,N) + FX(:,:,:,N)*U_GRAV(:,:,:)
-   JY(:,:,:,N) = JY(:,:,:,N) + FY(:,:,:,N)*V_GRAV(:,:,:)
-   JZ(:,:,:,N) = JZ(:,:,:,N) + FZ(:,:,:,N)*W_GRAV(:,:,:)
+
+   DO K=1,KBAR
+      DO J=1,JBAR
+         DO I=1,IBAR
+            IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
+
+            RHS = ( R(I)*FX(I,J,K,N)*U_GRAV(I,J,K) - R(I-1)*FX(I-1,J,K,N)*U_GRAV(I-1,J,K) )*RDX(I)*RRN(I) &
+                + (      FY(I,J,K,N)*V_GRAV(I,J,K) -        FY(I,J-1,K,N)*V_GRAV(I,J-1,K) )*RDY(J)        &
+                + (      FZ(I,J,K,N)*W_GRAV(I,J,K) -        FZ(I,J,K-1,N)*W_GRAV(I,J,K-1) )*RDZ(K)
+
+            DEL_RHO_D_DEL_Z(I,J,K,N) = DEL_RHO_D_DEL_Z(I,J,K,N) - RHS
+         ENDDO
+      ENDDO
+   ENDDO
 
 ENDDO SPEC_LOOP
    
