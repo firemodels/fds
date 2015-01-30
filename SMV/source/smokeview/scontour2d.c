@@ -150,7 +150,7 @@ void initcontours(contour **ci_ptr, float **rgbptr, int ncontours,float constval
   dval = 0.0;
 
   if(nlevels>1){
-    dval = (level_max-level_min)/(int)(nlevels-1);
+    dval = (level_max-level_min)/(float)(nlevels);
   }
 
   NewMemory((void **)&cont,ncontours*sizeof(contour));

@@ -5400,6 +5400,7 @@ int readsmv(char *file, char *file2){
       meshi->xyz_bar0[ZZZ]=zbar0;
       meshi->xyz_bar[ZZZ] =zbar;
       meshi->zcen =(zbar+zbar0)/2.0;
+      initBoxClipInfo(&(meshi->box_clipinfo),xbar0,xbar,ybar0,ybar,zbar0,zbar);
       if(ntrnx==0){
         for(nn=0;nn<=meshi->ibar;nn++){
           meshi->xplt[nn]=xbar0+(float)nn*(xbar-xbar0)/(float)meshi->ibar;

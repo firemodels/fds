@@ -672,6 +672,8 @@ typedef struct _mesh {
   float vent_offset[3];
   int select_min, select_max;
 
+  clipdata box_clipinfo;
+
   unsigned char *merge_color,*merge_alpha;
 
   char *label;
