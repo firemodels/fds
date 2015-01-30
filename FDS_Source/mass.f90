@@ -229,8 +229,10 @@ PREDICTOR_STEP: SELECT CASE (PREDICTOR)
 CASE(.TRUE.) PREDICTOR_STEP
 
    IF (.NOT.CHANGE_TIME_STEP(NM)) THEN
-      DEL_RHO_D_DEL_Z__0 = DEL_RHO_D_DEL_Z
+      ! This IF is required because DEL_RHO_D_DEL_Z is updated to the next time level in divg within
+      ! the CHANGE_TIME_STEP loop in main while we are determining the appropriate stable DT.
       IF (ANY(SPECIES_MIXTURE%DEPOSITING) .AND. GRAVITATIONAL_DEPOSITION) CALL SETTLING_VELOCITY(NM)
+      DEL_RHO_D_DEL_Z__0 = DEL_RHO_D_DEL_Z
    ENDIF
 
    ! Correct boundary velocity at wall cells
@@ -396,8 +398,6 @@ CASE(.FALSE.) PREDICTOR_STEP
       END SELECT
    ENDDO WALL_LOOP_2
 
-   DEL_RHO_D_DEL_Z__0 = DEL_RHO_D_DEL_Z
-
    IF (ANY(SPECIES_MIXTURE%DEPOSITING) .AND. GRAVITATIONAL_DEPOSITION) CALL SETTLING_VELOCITY(NM)
    
    ! Compute species mass density at the next time step   
@@ -408,7 +408,7 @@ CASE(.FALSE.) PREDICTOR_STEP
             DO I=1,IBAR
                IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
 
-               RHS = - DEL_RHO_D_DEL_Z__0(I,J,K,N) &
+               RHS = - DEL_RHO_D_DEL_Z(I,J,K,N) &
                    + (FX(I,J,K,N)*UU(I,J,K)*R(I) - FX(I-1,J,K,N)*UU(I-1,J,K)*R(I-1))*RDX(I)*RRN(I) &
                    + (FY(I,J,K,N)*VV(I,J,K)      - FY(I,J-1,K,N)*VV(I,J-1,K)       )*RDY(J)        &
                    + (FZ(I,J,K,N)*WW(I,J,K)      - FZ(I,J,K-1,N)*WW(I,J,K-1)       )*RDZ(K)
