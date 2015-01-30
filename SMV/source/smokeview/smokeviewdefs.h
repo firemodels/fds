@@ -287,6 +287,9 @@ void _Sniff_Errors(char *whereat);
 #define STEPPED_CONTOURS 1
 #define LINE_CONTOURS 2
 
+#define SLICE_LINE_CONTOUR 0
+#define SLICE_SOLID_CONTOUR 1
+
 #define BLOCK_regular 0
 #define BLOCK_texture 1
 #define BLOCK_outline 2

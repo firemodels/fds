@@ -9838,7 +9838,7 @@ int readini2(char *inifile, int localfile){
     }
     if(match(buffer,"VECTORLINEWIDTH")==1){
       fgets(buffer,255,stream);
-      sscanf(buffer,"%f ",&vectorlinewidth);
+      sscanf(buffer,"%f %f",&vectorlinewidth,&slice_line_contour_width);
       continue;
     }
     if(match(buffer,"STREAKLINEWIDTH")==1){
@@ -11311,7 +11311,7 @@ void writeini(int flag,char *filename){
   fprintf(fileout,"VECTORPOINTSIZE\n");
   fprintf(fileout," %f\n",vectorpointsize);
   fprintf(fileout,"VECTORLINEWIDTH\n");
-  fprintf(fileout," %f\n",vectorlinewidth);
+  fprintf(fileout," %f %f\n",vectorlinewidth,slice_line_contour_width);
   fprintf(fileout,"VECLENGTH\n");
   fprintf(fileout," %i %f 1.0\n",4,vecfactor);
   fprintf(fileout,"VECCONTOURS\n");

@@ -1634,9 +1634,7 @@ void updateplotslice_mesh(mesh *mesh_in, int slicedir){
     freecontour(plot3dcontour1ptr);
     initcontour(plot3dcontour1ptr,rgb_plot3d_contour,nrgb);
     setcontourslice(plot3dcontour1ptr,1,xplt[plotx]);
-    getcontours(yplt,zplt,jbar+1,kbar+1, 
-      yzcolorfbase, iblank_yz,p3levels[plotn-1],DONT_GET_AREAS,DATA_FORTRAN,
-      plot3dcontour1ptr);
+    getcontours(yplt,zplt,jbar+1,kbar+1,yzcolorfbase, iblank_yz,p3levels[plotn-1],DONT_GET_AREAS,DATA_FORTRAN,plot3dcontour1ptr);
     FREEMEMORY(iblank_yz);
   }
   else if(ploty>=0&&slicedir==2){
@@ -1683,9 +1681,7 @@ void updateplotslice_mesh(mesh *mesh_in, int slicedir){
     freecontour(plot3dcontour2ptr);
     initcontour(plot3dcontour2ptr,rgb_plot3d_contour,nrgb);
     setcontourslice(plot3dcontour2ptr,2,yplt[ploty]);
-    getcontours(xplt,zplt,ibar+1,kbar+1, 
-      xzcolorfbase, iblank_xz,p3levels[plotn-1],DONT_GET_AREAS,DATA_FORTRAN,
-      plot3dcontour2ptr);
+    getcontours(xplt,zplt,ibar+1,kbar+1,xzcolorfbase, iblank_xz,p3levels[plotn-1],DONT_GET_AREAS,DATA_FORTRAN,plot3dcontour2ptr);
     FREEMEMORY(iblank_xz);
   }
   else if(plotz>=0&&slicedir==3){
@@ -1732,9 +1728,7 @@ void updateplotslice_mesh(mesh *mesh_in, int slicedir){
     freecontour(plot3dcontour3ptr);
     initcontour(plot3dcontour3ptr,rgb_plot3d_contour,nrgb);
     setcontourslice(plot3dcontour3ptr,3,zplt[plotz]);
-    getcontours(xplt,yplt,ibar+1,jbar+1, 
-      xycolorfbase, iblank_xy,p3levels[plotn-1],DONT_GET_AREAS,DATA_FORTRAN,
-      plot3dcontour3ptr);
+    getcontours(xplt,yplt,ibar+1,jbar+1,xycolorfbase, iblank_xy,p3levels[plotn-1],DONT_GET_AREAS,DATA_FORTRAN,plot3dcontour3ptr);
     FREEMEMORY(iblank_xy);
   }
 }

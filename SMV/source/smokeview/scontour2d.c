@@ -108,6 +108,37 @@ int contourline_list[81][5]={
   {2,5,7},{0},{0}
 };
 
+/*  ------------------ initlinecontours ------------------------ */
+
+void initlinecontours(contour **ci_ptr, float **rgbptr, int ncontours,float constval, int idir, float level_min, float level_max, int nlevels){
+  int i;
+
+  contour *cont;
+  float dval;
+
+  dval = 0.0;
+
+  if(nlevels>1){
+    dval = (level_max-level_min)/(int)(nlevels-1);
+  }
+
+  NewMemory((void **)&cont,ncontours*sizeof(contour));
+  *ci_ptr=cont;
+  for(i=0;i<ncontours;i++){
+    contour *ci;
+    int j;
+
+    ci = cont+i;
+    initcontour(ci,rgbptr,nlevels);
+    ci->xyzval=constval;
+    ci->idir=idir;
+    for(j=0;j<nlevels;j++){
+      ci->levels[j]=level_min+j*dval;
+    }
+  }
+
+}
+
 /*  ------------------ initcontours ------------------------ */
 
 void initcontours(contour **ci_ptr, float **rgbptr, int ncontours,float constval, int idir, float level_min, float level_max, int nlevels){
@@ -132,8 +163,8 @@ void initcontours(contour **ci_ptr, float **rgbptr, int ncontours,float constval
     initcontour(ci,rgbptr,nlevels);
     ci->xyzval=constval;
     ci->idir=idir;
-    for(j=0;j<nlevels;j++){
-      ci->levels[j]=level_min+i*dval;
+    for(j=0;j<nlevels+1;j++){
+      ci->levels[j]=level_min+j*dval;
     }
   }
 
@@ -146,7 +177,7 @@ void initcontour(contour *ci, float **rgbptr, int nlevels){
 
   ci->nlevels=nlevels;
   ci->rgbptr=rgbptr;
-  NewMemory((void **)&ci->levels,nlevels*sizeof(float));
+  NewMemory((void **)&ci->levels,(nlevels+1)*sizeof(float));
   NewMemory((void **)&ci->areas,nlevels*sizeof(float));
   NewMemory((void **)&ci->nnodes,nlevels*sizeof(int));
   NewMemory((void **)&ci->npolys,nlevels*sizeof(int));

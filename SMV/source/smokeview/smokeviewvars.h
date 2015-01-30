@@ -23,6 +23,8 @@
 #include "smokeheaders.h"
 #include "threader.h"
 
+SVEXTERN float SVDECL(slice_line_contour_width,1.0);
+SVEXTERN int SVDECL(slice_contour_type,0);
 SVEXTERN int SVDECL(viscadopaque,0);
 SVEXTERN int SVDECL(structured_isopen,1), SVDECL(unstructured_isopen,0);
 SVEXTERN float SVDECL(patchout_tmin,1.0), SVDECL(patchout_tmax,-1.0);

@@ -204,6 +204,7 @@ GLUI_Panel *PANEL_outputpatchdata=NULL;
 GLUI_Spinner *SPINNER_labels_transparency_data2=NULL;
 GLUI_Spinner *SPINNER_transparent_level=NULL;
 GLUI_Spinner *SPINNER_line_contour_num=NULL;
+GLUI_Spinner *SPINNER_line_contour_width=NULL;
 GLUI_Spinner *SPINNER_line_contour_min=NULL;
 GLUI_Spinner *SPINNER_line_contour_max=NULL;
 GLUI_Spinner *SPINNER_timebounds=NULL;
@@ -283,6 +284,7 @@ GLUI_Checkbox *CHECKBOX_use_tload_skip=NULL;
 GLUI_Checkbox *CHECKBOX_research_mode=NULL;
 
 
+GLUI_RadioGroup *RADIO_contour_type=NULL;
 GLUI_RadioGroup *RADIO_zone_setmin=NULL, *RADIO_zone_setmax=NULL;
 GLUI_RadioGroup *RADIO_bf=NULL, *RADIO_p3=NULL,*RADIO_slice=NULL;
 GLUI_RadioGroup *RADIO_part5=NULL;
@@ -883,6 +885,12 @@ extern "C" void glui_bounds_setup(int main_window){
     slice_line_contour_num=1;
     SPINNER_line_contour_num=glui_bounds->add_spinner_to_panel(PANEL_line_contour,_("Number of contours"),GLUI_SPINNER_INT,
       &slice_line_contour_num,LINE_CONTOUR_VALUE,Slice_CB);
+    SPINNER_line_contour_width=glui_bounds->add_spinner_to_panel(PANEL_line_contour,_("contour width"),GLUI_SPINNER_FLOAT,&slice_line_contour_width);
+    SPINNER_line_contour_width->set_float_limits(1.0,10.0);
+      RADIO_contour_type = glui_bounds->add_radiogroup_to_panel(PANEL_line_contour,&slice_contour_type);
+    glui_bounds->add_radiobutton_to_group(RADIO_contour_type,"line");
+    glui_bounds->add_radiobutton_to_group(RADIO_contour_type,"stepped");
+
     BUTTON_update_line_contour=glui_bounds->add_button_to_panel(PANEL_line_contour,_("Update contours"),UPDATE_LINE_CONTOUR_VALUE,Slice_CB);
     glui_bounds->add_checkbox_to_panel(PANEL_line_contour,_("Show contours"),&vis_slice_contours);
 

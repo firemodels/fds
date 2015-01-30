@@ -2847,26 +2847,51 @@ void update_slice_contours(int slice_type_index, float line_min, float line_max,
 
     freecontours(sd->line_contours,sd->nline_contours);
     sd->nline_contours=sd->ntimes;
-    initcontours(&sd->line_contours,sd->rgb_slice_ptr,sd->nline_contours,constval,sd->idir,line_min,line_max,nline_values);
+    if(slice_contour_type==SLICE_LINE_CONTOUR){
+      initlinecontours(&sd->line_contours,sd->rgb_slice_ptr,sd->nline_contours,constval,sd->idir,line_min,line_max,nline_values);
+    }
+    else{
+      initcontours(&sd->line_contours,sd->rgb_slice_ptr,sd->nline_contours,constval,sd->idir,line_min,line_max,nline_values-1);
+    }
     for(i=0;i<sd->nline_contours;i++){
       float *vals;
       contour *ci;
 
       vals = sd->qslicedata + i*sd->nsliceii;
       ci = sd->line_contours+i;
-      switch (sd->idir){
-        case 1:
-        getlinecontours(yplt,zplt,ny,nz,vals,NULL,line_min, line_max,ci);
-        break;
-        case 2:
-        getlinecontours(xplt,zplt,nx,nz,vals,NULL,line_min,line_max,ci);
-        break;
-        case 3:
-        getlinecontours(xplt,yplt,nx,ny,vals,NULL,line_min,line_max,ci);
-        break;
-        default:
-          ASSERT(FFALSE);
+      if(slice_contour_type==SLICE_LINE_CONTOUR){
+        printf("updating line contour: %i of %i\n",i+1,sd->nline_contours);
+        switch (sd->idir){
+          case 1:
+            getlinecontours(yplt,zplt,ny,nz,vals,NULL,line_min, line_max,ci);
+            break;
+          case 2:
+            getlinecontours(xplt,zplt,nx,nz,vals,NULL,line_min,line_max,ci);
           break;
+          case 3:
+            getlinecontours(xplt,yplt,nx,ny,vals,NULL,line_min,line_max,ci);
+          break;
+          default:
+            ASSERT(FFALSE);
+            break;
+        }
+      }
+      else{
+        printf("updating stepped contour: %i of %i\n",i+1,sd->nline_contours);
+        switch (sd->idir){
+          case 1:
+            getcontours(yplt,zplt,jbar+1,kbar+1,vals,NULL,ci->levels,DONT_GET_AREAS,DATA_FORTRAN,ci);
+            break;
+          case 2:
+            getcontours(xplt,zplt,ibar+1,kbar+1,vals,NULL,ci->levels,DONT_GET_AREAS,DATA_FORTRAN,ci);
+            break;
+          case 3:
+            getcontours(xplt,yplt,ibar+1,jbar+1,vals,NULL,ci->levels,DONT_GET_AREAS,DATA_FORTRAN,ci);
+            break;
+          default:
+            ASSERT(FFALSE);
+            break;
+        }
       }
     }
   }
@@ -3248,8 +3273,14 @@ void drawslice_frame(){
 
       if(sd->qslicedata!=NULL)sd->qsliceframe = sd->qslicedata + sd->itime*sd->nsliceii;
       if(vis_slice_contours==1&&sd->line_contours!=NULL){
-        DrawLineContours(sd->line_contours+sd->itime, 3.0);
-        SNIFF_ERRORS("after DrawLineContours");
+        if(slice_contour_type==SLICE_LINE_CONTOUR){
+          DrawLineContours(sd->line_contours+sd->itime, slice_line_contour_width);
+          SNIFF_ERRORS("after DrawLineContours");
+        }
+        else{
+          DrawContours(sd->line_contours+sd->itime);
+          SNIFF_ERRORS("after DrawContours");
+        }
         continue;
       }
       switch (sd->slicetype){

@@ -50,6 +50,7 @@ void getlinecontours(const  float *xgrid, const float *ygrid, int nx, int ny,
                  const float *vals, const char *iblank, const float level_min, const float level_max,
                  const contour *ci);
 void initcontour(contour *ci, float **rgbptr, int nlevels);
+void initlinecontours(contour **ci_ptr, float **rgbptr, int ncontours, float constval, int idir, float level_min, float level_max, int nlevels);
 void initcontours(contour **ci_ptr, float **rgbptr, int ncontours, float constval, int idir, float level_min, float level_max, int nlevels);
 void freecontour(contour *ci);
 void freecontours(contour *contours,int ncontours);
