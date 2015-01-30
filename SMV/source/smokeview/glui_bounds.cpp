@@ -889,7 +889,9 @@ extern "C" void glui_bounds_setup(int main_window){
     SPINNER_line_contour_width->set_float_limits(1.0,10.0);
       RADIO_contour_type = glui_bounds->add_radiogroup_to_panel(PANEL_line_contour,&slice_contour_type);
     glui_bounds->add_radiobutton_to_group(RADIO_contour_type,"line");
+#ifdef _DEBUG
     glui_bounds->add_radiobutton_to_group(RADIO_contour_type,"stepped");
+#endif
 
     BUTTON_update_line_contour=glui_bounds->add_button_to_panel(PANEL_line_contour,_("Update contours"),UPDATE_LINE_CONTOUR_VALUE,Slice_CB);
     glui_bounds->add_checkbox_to_panel(PANEL_line_contour,_("Show contours"),&vis_slice_contours);
