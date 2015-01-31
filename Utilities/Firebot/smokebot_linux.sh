@@ -446,8 +446,8 @@ wait_verification_cases_debug_end()
         sleep 30
      done
    else
-     while [[ `qstat -a | grep $(whoami) | grep $JOBPREFIX` != '' ]]; do
-        JOBS_REMAINING=`qstat -a | grep $(whoami) | grep $JOBPREFIX | wc -l`
+     while [[ `qstat -a | awk '{print $2 $4}' | grep $(whoami) | grep $JOBPREFIX` != '' ]]; do
+        JOBS_REMAINING=`qstat -a | awk '{print $2 $4}' | grep $(whoami) | grep $JOBPREFIX | wc -l`
         echo "Waiting for ${JOBS_REMAINING} verification cases to complete." >> $OUTPUT_DIR/stage3a
         TIME_LIMIT_STAGE="3"
         check_time_limit
@@ -539,8 +539,8 @@ wait_fds_verification_cases_debug_end()
         sleep 30
      done
    else
-     while [[ `qstat -a | grep $(whoami) | grep $JOBPREFIX` != '' ]]; do
-        JOBS_REMAINING=`qstat -a | grep $(whoami) | grep $JOBPREFIX | wc -l`
+     while [[ `qstat -a | awk '{print $2 $4}' | grep $(whoami) | grep $JOBPREFIX` != '' ]]; do
+        JOBS_REMAINING=`qstat -a | awk '{print $2 $4}' | grep $(whoami) | grep $JOBPREFIX | wc -l`
         echo "Waiting for ${JOBS_REMAINING} verification cases to complete." >> $OUTPUT_DIR/stage3b
         TIME_LIMIT_STAGE="3"
         check_time_limit
@@ -792,8 +792,8 @@ wait_verification_cases_release_end()
         sleep 60
      done
    else
-     while [[ `qstat -a | grep $(whoami) | grep $JOBPREFIX` != '' ]]; do
-        JOBS_REMAINING=`qstat -a | grep $(whoami) | grep $JOBPREFIX | wc -l`
+     while [[ `qstat -a | awk '{print $2 $4}' | grep $(whoami) | grep $JOBPREFIX` != '' ]]; do
+        JOBS_REMAINING=`qstat -a | awk '{print $2 $4}' | grep $(whoami) | grep $JOBPREFIX | wc -l`
         echo "Waiting for ${JOBS_REMAINING} verification cases to complete." >> $OUTPUT_DIR/stage5
         TIME_LIMIT_STAGE="5"
         check_time_limit
