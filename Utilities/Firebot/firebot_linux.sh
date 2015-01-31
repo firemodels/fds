@@ -30,17 +30,8 @@ ulimit -s unlimited
 FIREBOT_DIR="$FIREBOT_HOME_DIR/firebot"
 FDS_SVNROOT="$FIREBOT_HOME_DIR/FDS-SMV"
 CFAST_SVNROOT="$FIREBOT_HOME_DIR/cfast"
-
 OUTPUT_DIR="$FIREBOT_HOME_DIR/output"
-if [ ! -e "$OUTPUT_DIR" ] ; then
-   mkdir $OUTPUT_DIR
-fi
-
 HISTORY_DIR="$FIREBOT_HOME_DIR/history"
-if [ ! -e "$HISTORY_DIR" ] ; then
-   mkdir $HISTORY_DIR
-fi
-
 TIME_LOG=$OUTPUT_DIR/timings
 ERROR_LOG=$OUTPUT_DIR/errors
 WARNING_LOG=$OUTPUT_DIR/warnings
@@ -157,6 +148,16 @@ elif [ $FIREBOT_MODE == "validation" ] ; then
    TIME_LIMIT_EMAIL_NOTIFICATION="sent"
 fi
 
+MKDIR ()
+{
+  DIR=$1
+  if [ ! -d $DIR ]
+  then
+    echo Creating directory $DIR
+    mkdir $DIR
+  fi
+}
+
 check_time_limit()
 {
    if [ "$TIME_LIMIT_EMAIL_NOTIFICATION" == "sent" ]
@@ -188,7 +189,10 @@ set_files_world_readable()
 clean_firebot_metafiles()
 {
    cd $FIREBOT_DIR
-   rm $OUTPUT_DIR/* > /dev/null
+   MKDIR guides
+   MKDIR $HISTORY_DIR
+   MKDIR $OUTPUT_DIR
+   rm -f $OUTPUT_DIR/* > /dev/null
 }
 
 delete_unversioned_files()
