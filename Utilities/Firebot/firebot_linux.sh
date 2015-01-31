@@ -467,8 +467,8 @@ generate_validation_set_list()
 wait_cases_debug_start()
 {
    # Scans qstat and waits for cases to start
-   while [[ `qstat | grep $(whoami) | awk '{print $5}' | grep Q` != '' ]]; do
-      JOBS_REMAINING=`qstat | grep $(whoami) | awk '{print $5}' | grep Q | wc -l`
+   while [[ `qstat | awk '{print $3 $5}' | grep $(whoami) | grep Q` != '' ]]; do
+      JOBS_REMAINING=`qstat | awk '{print $3 $5}' | grep $(whoami) | grep Q | wc -l`
       echo "Waiting for ${JOBS_REMAINING} ${1} cases to start." >> $FIREBOT_DIR/output/stage3
       TIME_LIMIT_STAGE="3"
       check_time_limit
@@ -479,8 +479,8 @@ wait_cases_debug_start()
 wait_cases_debug_end()
 {
    # Scans qstat and waits for cases to end
-   while [[ `qstat | grep $(whoami)` != '' ]]; do
-      JOBS_REMAINING=`qstat | grep $(whoami) | wc -l`
+   while [[ `qstat | awk '{print $3}' | grep $(whoami)` != '' ]]; do
+      JOBS_REMAINING=`qstat | awk '{print $3}' | grep $(whoami) | wc -l`
       echo "Waiting for ${JOBS_REMAINING} ${1} cases to complete." >> $FIREBOT_DIR/output/stage3
       TIME_LIMIT_STAGE="3"
       check_time_limit
@@ -790,8 +790,8 @@ check_cases_release()
 wait_cases_release_end()
 {
    # Scans qstat and waits for cases to end
-   while [[ `qstat | grep $(whoami)` != '' ]]; do
-      JOBS_REMAINING=`qstat | grep $(whoami) | wc -l`
+   while [[ `qstat | awk '{print $3}' | grep $(whoami) ` != '' ]]; do
+      JOBS_REMAINING=`qstat | awk '{print $3}' | grep $(whoami) | wc -l`
       echo "Waiting for ${JOBS_REMAINING} ${1} cases to complete." >> $FIREBOT_DIR/output/stage5
       TIME_LIMIT_STAGE="5"
       check_time_limit
