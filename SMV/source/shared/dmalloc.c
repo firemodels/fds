@@ -101,7 +101,7 @@ mallocflag _NewMemory(void **ppv, size_t size, char *varname, char *file, int li
   LOCK_MEM;
   returnval=_NewMemoryNOTHREAD(ppv, size);
   if(returnval!=1){
-    fprintf(stderr,"*** Error: memory allocation request failed.\n");
+    fprintf(stderr,"*** Error: memory allocation request of size %llu failed\n",(unsigned long long)size);
     if(varname!=NULL){
       fprintf(stderr,"             variable: %s\n",varname);
       fprintf(stderr,"                 size: %u\n",(unsigned int)size);
@@ -247,7 +247,7 @@ mallocflag _ResizeMemory(void **ppv, size_t sizeNew,  char *varname, char *file,
   LOCK_MEM;
   returnval=_ResizeMemoryNOTHREAD(ppv, sizeNew);
   if(returnval!=1){
-    fprintf(stderr,"*** Error: memory allocation request failed.\n");
+    fprintf(stderr,"*** Error: memory allocation request of size %llu failed\n",(unsigned long long)sizeNew);
     if(varname!=NULL){
       fprintf(stderr,"             variable: %s\n",varname);
       fprintf(stderr,"                 size: %u\n",(unsigned int)sizeNew);
@@ -381,7 +381,7 @@ mallocflag __NewMemory(void **ppv, size_t size, char *varname, char *file, int l
     strcat(pbi->varname,"\0");
   }
   if(return_code!=1){
-    fprintf(stderr,"*** Error: memory allocation request failed.\n");
+    fprintf(stderr,"*** Error: memory allocation request of size %llu failed\n",(unsigned long long)size);
     if(varname!=NULL){
       fprintf(stderr,"             variable: %s\n",varname);
       fprintf(stderr,"                 size: %u\n",(unsigned int)size);
@@ -421,7 +421,7 @@ mallocflag __ResizeMemory(void **ppv, size_t size, char *varname, char *file, in
     strcat(pbi->varname,"\0");
   }
   if(return_code!=1){
-    fprintf(stderr,"*** Error: memory allocation request failed.\n");
+    fprintf(stderr,"*** Error: memory allocation request of size %llu failed\n",(unsigned long long)size);
     if(varname!=NULL){
       fprintf(stderr,"             variable: %s\n",varname);
       fprintf(stderr,"                 size: %u\n",(unsigned int)size);
