@@ -3398,18 +3398,19 @@ void drawvslice_frame(void){
     if(w!=NULL&&w->compression_type==0){
       w->qslice = w->qslicedata + w->itime*w->nsliceii;
     }
+
     if(vd->slicetype==SLICE_TERRAIN){
       drawvvolslice_terrain(vd);
     }
     else if(vd->slicetype==SLICE_CENTER){
         drawvvolslice_cellcenter(vd);
     }
-    else if(vd->volslice==1&&vis_gslice_data==1){
-      drawvgslice_data(vd);
-      SNIFF_ERRORS("after drawvgslice_data");
-    }
     else{
       drawvvolslice(vd);
+    }
+    if(vd->volslice==1&&vis_gslice_data==1){
+      drawvgslice_data(vd);
+      SNIFF_ERRORS("after drawvgslice_data");
     }
   }
 }
