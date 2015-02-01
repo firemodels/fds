@@ -119,7 +119,7 @@ SUMMARY=$SVNROOT/Manuals/SMV_Summary
 is_file_installed $SMV
 is_file_installed $SMOKEZIP
 is_file_installed $SMOKEDIFF
-#is_file_installed $BACKGROUND
+is_file_installed $BACKGROUND
 is_file_installed $WIND2FDS
 
 cd $SMVUG/SCRIPT_FIGURES
