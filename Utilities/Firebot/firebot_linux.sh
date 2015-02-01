@@ -729,6 +729,12 @@ compile_smv_utilities()
    ./makelibs.sh >> $OUTPUT_DIR/stage5pre 2>&1
    echo "" >> $OUTPUT_DIR/stage5pre 2>&1
 
+   # background:
+   cd $FDS_SVNROOT/Utilities/background/intel_linux_32
+   echo 'Compiling background:' >> $OUTPUT_DIR/stage5pre 2>&1
+   ./make_background.sh >> $OUTPUT_DIR/stage5pre 2>&1
+   echo "" >> $OUTPUT_DIR/stage5pre 2>&1
+
    # smokezip:
    cd $FDS_SVNROOT/Utilities/smokezip/intel_linux_64
    echo 'Compiling smokezip:' >> $OUTPUT_DIR/stage5pre 2>&1
