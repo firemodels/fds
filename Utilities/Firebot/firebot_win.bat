@@ -328,7 +328,7 @@ if %haveCC% == 1 (
   call :is_file_installed smokezip|| exit /b 1
   echo             smokezip not built, using installed version
   call :is_file_installed wind2fds|| exit /b 1
-  echo             wind2fds not built, using installed version
+  echo             wind2fds not built, using installed
 )
 
 call :GET_TIME
@@ -347,13 +347,20 @@ echo Stage 4 - Running verification cases
 echo             debug mode
 
 cd %svnroot%\Verification\
-call Run_FDS_cases 1 1> %OUTDIR%\stage4a.txt 2>&1
+call Run_FDS_cases 1 1 1> %OUTDIR%\stage4a.txt 2>&1
+
+cd %svnroot%\Verification\scripts
+call Run_SMV_cases 64 0 1 1>> %OUTDIR%\stage4a.txt 2>&1
 
 set haveerrors_now=0
 
 echo. > %OUTDIR%\stage_error.txt
 
+cd %svnroot%\Verification\
 call Check_FDS_cases 
+
+cd %svnroot%\Verification\scripts
+call Check_SMV_cases 
 
 grep -v " " %OUTDIR%\stage_error.txt | wc -l > %OUTDIR%\stage_nerror.txt
 set /p nerrors=<%OUTDIR%\stage_nerror.txt
@@ -370,13 +377,20 @@ if %nerrors% GTR 0 (
 echo             release mode
 
 cd %svnroot%\Verification\
-call Run_FDS_cases 0 1> %OUTDIR%\stage4b.txt 2>&1
+call Run_FDS_cases 0 1 1> %OUTDIR%\stage4b.txt 2>&1
+
+cd %svnroot%\Verification\scripts
+call Run_SMV_cases 64 0 0 1> %OUTDIR%\stage4b.txt 2>&1
 
 set haveerrors_now=0
 
 echo. > %OUTDIR%\stage_error.txt
 
-call Check_FDS_cases 
+cd %svnroot%\Verification\
+call Check_FDS_cases
+
+cd %svnroot%\Verification\scripts
+call Check_SMV_cases 
 
 grep -v " " %OUTDIR%\stage_error.txt | wc -l > %OUTDIR%\stage_nerror.txt
 set /p nerrors=<%OUTDIR%\stage_nerror.txt
