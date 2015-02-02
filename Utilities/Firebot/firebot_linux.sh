@@ -942,7 +942,7 @@ check_smv_pictures_db()
    then
       stage6b_success=true
    else
-      cp $OUTPUT_DIR/stage6b $OUTPUT_DIR/stage6b_errors
+      grep -I -E -A 5 -B 5 "Segmentation|Error" $OUTPUT_DIR/stage6b > $OUTPUT_DIR/stage6b_errors
 
       echo "Errors from Stage 6b - Make SMV pictures (debug mode):" >> $ERROR_LOG
       cat $OUTPUT_DIR/stage6b_errors >> $ERROR_LOG
@@ -1018,7 +1018,7 @@ check_smv_pictures()
    then
       stage6d_success=true
    else
-      cp $OUTPUT_DIR/stage6d $OUTPUT_DIR/stage6d_errors
+      grep -I -E -A 5 -B 5 "Segmentation|Error" $OUTPUT_DIR/stage6d >  $OUTPUT_DIR/stage6d_errors
 
       echo "Errors from Stage 6d - Make SMV pictures (release mode):" >> $ERROR_LOG
       cat $OUTPUT_DIR/stage6d >> $ERROR_LOG
@@ -1057,7 +1057,7 @@ check_fds_pictures()
    then
       stage6e_success=true
    else
-      cp $OUTPUT_DIR/stage6e $OUTPUT_DIR/stage6e_errors
+      grep -I -E -A 5 -B 5 "Segmentation|Error" $OUTPUT_DIR/stage6e > $OUTPUT_DIR/stage6e_errors
       
       echo "Errors from Stage 6e - Make FDS pictures:" >> $ERROR_LOG
       cat $OUTPUT_DIR/stage6e_errors >> $ERROR_LOG
