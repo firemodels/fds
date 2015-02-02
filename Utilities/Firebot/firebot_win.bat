@@ -345,10 +345,12 @@ set RUNVV_beg=%current_time%
 
 echo Stage 4 - Running verification cases
 echo             debug mode
+echo                FDS cases
 
 cd %svnroot%\Verification\
-call Run_FDS_cases 1 1 1> %OUTDIR%\stage4a.txt 2>&1
+call Run_FDS_cases 1 1> %OUTDIR%\stage4a.txt 2>&1
 
+echo                Smokeview cases
 cd %svnroot%\Verification\scripts
 call Run_SMV_cases 64 0 1 1>> %OUTDIR%\stage4a.txt 2>&1
 
@@ -375,10 +377,12 @@ if %nerrors% GTR 0 (
 )
 
 echo             release mode
+echo                FDS cases
 
 cd %svnroot%\Verification\
-call Run_FDS_cases 0 1 1> %OUTDIR%\stage4b.txt 2>&1
+call Run_FDS_cases 0 1> %OUTDIR%\stage4b.txt 2>&1
 
+echo                Smokeview cases
 cd %svnroot%\Verification\scripts
 call Run_SMV_cases 64 0 0 1> %OUTDIR%\stage4b.txt 2>&1
 

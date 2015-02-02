@@ -159,7 +159,7 @@ Timeout /t 30 >nul
 goto loop1
 
 :finished
-echo "FDS/CFAST cases completed"
+echo                Smokeview cases completed
 goto eof
 
 :: -----------------------------------------

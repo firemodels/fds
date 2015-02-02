@@ -5,7 +5,6 @@
 :: $Author$
 
 set rundebug=%1
-set dontloop=%2
 if "%rundebug%" == "1" (
   set DEBUG=_db
 ) else (
@@ -56,7 +55,6 @@ call FDS_Cases.bat
 
 :: loop until all FDS cases have finished
 
-if %dontloop% ==1 goto finished
 :loop1
 tasklist | find /i /c "%FDSBASE%" > temp.out
 set /p numexe=<temp.out
@@ -66,7 +64,8 @@ Timeout /t 30 >nul
 goto loop1
 
 :finished
-echo "FDS cases completed"
+echo                FDS cases completed
+
 goto eof
 
 :getfilename
