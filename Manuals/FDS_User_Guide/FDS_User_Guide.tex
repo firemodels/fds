@@ -6160,7 +6160,7 @@ By default, the {\ct DEVC} output is written to a file every {\ct DT\_DEVC} seco
 
 A useful option for the {\ct DEVC} line is to add {\ct RELATIVE=.TRUE.}, which will indicate that only the change in the initial value of the {\ct QUANTITY} is to be output. This can be useful for verification and validation studies.
 
-You can change the values of the output by multiplying by {\ct CONVERSION\_FACTOR} and changing the character string {\ct UNITS}.
+You can change the values of the output {\ct QUANTITY} by multiplying by {\ct CONVERSION\_FACTOR} and changing the character string {\ct UNITS}.  You can also change the scaling of the coordinates by applying a {\ct COORD\_FACTOR}.  This is handy for plotting nondimensional distance, for example.
 
 If you do not want the {\ct DEVC} {\ct QUANTITY} to be included in the output file, set {\ct OUTPUT=.FALSE.} on the {\ct DEVC} line. Sometimes, devices are just used as clocks or control devices. In these cases, you might want to prevent its output from cluttering the output file. If the {\ct DEVC} {\ct QUANTITY='TIME'}, then {\ct OUTPUT} is set to {\ct .FALSE.} automatically.
 
@@ -8564,6 +8564,7 @@ properties be specified as well. Simply prescribing as many properties as possib
 \endhead
 {\ct BYPASS\_FLOWRATE}      & Real            & Section~\ref{info:aspiration_detector}                          & kg/s  & 0             \\ \hline
 {\ct CONVERSION\_FACTOR}    & Real            & Section~\ref{info:out:DEVC}                                     &       & 1             \\ \hline
+{\ct COORD\_FACTOR}         & Real            & Section~\ref{info:out:DEVC}                                     &       & 1             \\ \hline
 {\ct CTRL\_ID}              & Character       & Section~\ref{info:RAMPDEVC}                                     &       &               \\ \hline
 {\ct DELAY}                 & Real            & Section~\ref{info:aspiration_detector}                          & s     & 0             \\ \hline
 {\ct DEPTH}                 & Real            & Section~\ref{info:material_components}                          & m     & 0             \\ \hline
@@ -8595,8 +8596,8 @@ properties be specified as well. Simply prescribing as many properties as possib
 {\ct RELATIVE}              & Logical         & Section~\ref{info:out:DEVC}                                     &       & {\ct .FALSE.} \\ \hline
 {\ct ROTATION}              & Real            & Section~\ref{info:DEVC}                                         & deg.  & 0             \\ \hline
 {\ct SETPOINT}              & Real            & Section~\ref{info:basic_control}                                &       &               \\ \hline
-{\ct STATISTICS}            & Character       & Section~\ref{info:statistics}                                &       &               \\ \hline
-{\ct STATISTICS\_DT}        & Real            & Section~\ref{info:rmscovcorr}                                &       &               \\ \hline
+{\ct STATISTICS}            & Character       & Section~\ref{info:statistics}                                   &       &               \\ \hline
+{\ct STATISTICS\_DT}        & Real            & Section~\ref{info:rmscovcorr}                                   &       &               \\ \hline
 {\ct SMOOTHING\_FACTOR}     & Real            & Section~\ref{info:basic_control}                                &       & 0             \\ \hline
 {\ct SPEC\_ID}              & Character       & Section~\ref{info:outputquantities}                             &       &               \\ \hline
 {\ct SURF\_ID}              & Character       & Section~\ref{info:statistics}                                   &       &               \\ \hline
