@@ -1727,13 +1727,18 @@ CALL MPI_BARRIER(MPI_COMM_WORLD, IERR)
 ! for a M3%EXT_BACK_WALL_CELL_INDEX that matches M%WALL(IW)%BACK_INDEX. When found, reassign the M%WALL(IW)%BACK_INDEX to I, the 
 ! index of the short list of BACK_WALL cells.
 
-DO NM=1,NMESHES
-   IF (PROCESS(NM)/=MYID .OR. EVACUATION_ONLY(NM)) CYCLE
+MESH_LOOP_1: DO NM=1,NMESHES
+   IF (PROCESS(NM)/=MYID .OR. EVACUATION_ONLY(NM)) CYCLE MESH_LOOP_1
    M => MESHES(NM)
-   DO NOM=1,NMESHES
-      IF (EVACUATION_ONLY(NOM)) CYCLE
+   MESH_LOOP_2: DO NOM=1,NMESHES
+      IF (NM==NOM .OR. EVACUATION_ONLY(NOM)) CYCLE MESH_LOOP_2
       M3 => M%OMESH(NOM)
       IF (M3%N_EXT_BACK_WALL_CELLS>0) THEN
+         IF (M3%N_BACK_WALL_CELLS/=M3%N_EXT_BACK_WALL_CELLS) THEN
+            WRITE(0,'(A,I2,A,I2)') 'ERROR: Mismatch of back wall cells between MESH ',NM,', and MESH ',NOM
+            STOP_STATUS = SETUP_STOP
+            EXIT MESH_LOOP_1
+         ENDIF
          ALLOCATE(M3%REAL_SEND_PKG6(M3%N_BACK_WALL_CELLS*2))
          ALLOCATE(M3%REAL_RECV_PKG6(M3%N_EXT_BACK_WALL_CELLS*2))
          ALLOCATE(M3%BACK_WALL(M3%N_EXT_BACK_WALL_CELLS))
@@ -1750,13 +1755,16 @@ DO NM=1,NMESHES
             IF (.NOT.FOUND) THEN
                WRITE(0,'(A,I2,A,I2)') 'ERROR: Misalignment of obstruction between MESH ',NM,', and MESH ',NOM
                STOP_STATUS = SETUP_STOP
-               EXIT WALL_LOOP
+               EXIT MESH_LOOP_1
             ENDIF
          ENDDO WALL_LOOP
       ENDIF
-   ENDDO
-ENDDO
-CALL MPI_BARRIER(MPI_COMM_WORLD, IERR)
+   ENDDO MESH_LOOP_2
+ENDDO MESH_LOOP_1
+
+! Check to see if any process has an error. If so, stop the run.
+
+CALL STOP_CHECK(1)
 
 ! Set up persistent SEND and RECV calls for BACK_WALL info
 
