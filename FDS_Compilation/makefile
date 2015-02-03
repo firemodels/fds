@@ -87,7 +87,7 @@ intel_win_64 : obj = fds_win_64
 intel_win_64 : setup_win $(objwin_serial)
 	$(FCOMPL) -o $(obj) $(FFLAGS) $(FOPENMPFLAGS) /F1000000000 $(objwin_serial)
 
-intel_win_64_dv : FFLAGS = /O2 /traceback
+intel_win_64_dv : FFLAGS = /O1 /traceback
 intel_win_64_dv : FCOMPL = ifort
 intel_win_64_dv : FOPENMPFLAGS = /Qopenmp
 intel_win_64_dv : obj = fds_win_64_dv
@@ -142,7 +142,7 @@ intel_linux_64 : obj = fds_intel_linux_64
 intel_linux_64 : setup $(obj_serial)
 	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_serial)
 
-intel_linux_64_dv : FFLAGS = -m64 -O2 -traceback
+intel_linux_64_dv : FFLAGS = -m64 -O1 -traceback
 intel_linux_64_dv : LFLAGS = -static-intel
 intel_linux_64_dv : FCOMPL = ifort
 intel_linux_64_dv : FOPENMPFLAGS = -openmp -openmp-link static -liomp5
@@ -256,7 +256,7 @@ mpi_intel_osx_64_db : obj = fds_mpi_intel_osx_64_db
 mpi_intel_osx_64_db : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi)
 
-intel_osx_64_dv : FFLAGS = -m64 -O2 -traceback -stand:f08
+intel_osx_64_dv : FFLAGS = -m64 -O1 -traceback -stand:f08
 intel_osx_64_dv : LFLAGS = -static-intel
 intel_osx_64_dv : FOPENMPFLAGS = -openmp -openmp-link static
 intel_osx_64_dv : FCOMPL = ifort
