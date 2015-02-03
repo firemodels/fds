@@ -7167,31 +7167,40 @@ MESH_LOOP: DO NM=1,NMESHES
                      CYCLE I_MULT_LOOP
                ENDIF
 
-               ! Include obstructions within half a grid cell of the computational boundary
+               ! Look for obstructions that are within a half grid cell of the current mesh. If the obstruction is thin and has the
+               ! THICKEN attribute, look for it within an entire grid cell.
 
-               IF (XB2>=XS-0.5_EB*DX(0)    .AND. XB2<XS) THEN
+               IF ( (XB2>=XS-0.5_EB*DX(0)   .AND. XB2<XS) .OR. (THICKEN .AND. 0.5_EB*(XB1+XB2)>=XS-DX(0)    .AND. XB2<XS) ) THEN
                   XB1 = XS
                   XB2 = XS
+                  THICKEN = .FALSE.
                ENDIF
-               IF (XB1< XF+0.5_EB*DX(IBP1) .AND. XB1>XF) THEN
+               IF ( (XB1<XF+0.5_EB*DX(IBP1) .AND. XB1>XF) .OR. (THICKEN .AND. 0.5_EB*(XB1+XB2)< XF+DX(IBP1) .AND. XB1>XF) ) THEN
                   XB1 = XF
                   XB2 = XF
+                  THICKEN = .FALSE.
                ENDIF
-               IF (XB4>=YS-0.5_EB*DY(0)    .AND. XB4<YS) THEN
+               IF ( (XB4>=YS-0.5_EB*DY(0)   .AND. XB4<YS) .OR. (THICKEN .AND. 0.5_EB*(XB3+XB4)>=YS-DY(0)    .AND. XB4<YS) ) THEN
                   XB3 = YS
                   XB4 = YS
+                  THICKEN = .FALSE.
                ENDIF
-               IF (XB3< YF+0.5_EB*DY(JBP1) .AND. XB3>YF) THEN
+               IF ( (XB3<YF+0.5_EB*DY(JBP1) .AND. XB3>YF) .OR. (THICKEN .AND. 0.5_EB*(XB3+XB4)< YF+DY(JBP1) .AND. XB3>YF) ) THEN
                   XB3 = YF
                   XB4 = YF
+                  THICKEN = .FALSE.
                ENDIF
-               IF (XB6>=ZS-0.5_EB*DZ(0)    .AND. XB6<ZS .AND. .NOT.EVACUATION_ONLY(NM)) THEN
+               IF ( (XB6>=ZS-0.5_EB*DZ(0)   .AND. XB6<ZS) .OR. (THICKEN .AND. 0.5_EB*(XB5+XB5)>=ZS-DZ(0)    .AND. XB6<ZS) .AND. &
+                  .NOT.EVACUATION_ONLY(NM)) THEN
                   XB5 = ZS
                   XB6 = ZS
+                  THICKEN = .FALSE.
                ENDIF
-               IF (XB5< ZF+0.5_EB*DZ(KBP1) .AND. XB5>ZF .AND. .NOT.EVACUATION_ONLY(NM)) THEN
+               IF ( (XB5<ZF+0.5_EB*DZ(KBP1) .AND. XB5>ZF) .OR. (THICKEN .AND. 0.5_EB*(XB5+XB6)< ZF+DZ(KBP1) .AND. XB5>ZF) .AND. &
+                  .NOT.EVACUATION_ONLY(NM)) THEN
                   XB5 = ZF
                   XB6 = ZF
+                  THICKEN = .FALSE.
                ENDIF
 
                ! Throw out obstructions that are not within computational domain
@@ -7229,6 +7238,9 @@ MESH_LOOP: DO NM=1,NMESHES
                   XB5   = ZS
                   XB6   = ZF
                ENDIF
+
+               ! Determine the indices of the obstruction according to cell edges, not centers.
+
                OB%I1 = NINT( GINV(XB1-XS,1,NM)*RDXI   )
                OB%I2 = NINT( GINV(XB2-XS,1,NM)*RDXI   )
                OB%J1 = NINT( GINV(XB3-YS,2,NM)*RDETA  )
@@ -7286,7 +7298,7 @@ MESH_LOOP: DO NM=1,NMESHES
 
                IF (OB%I1==OB%I2 .OR. OB%J1==OB%J2 .OR. OB%K1==OB%K2) OB%THIN = .TRUE.
 
-               ! Check to see if obstacle is completely embedded in another
+               ! Check to see if obstruction is completely embedded in another
 
                EMBEDDED = .FALSE.
                EMBED_LOOP: DO NNN=1,N-1
