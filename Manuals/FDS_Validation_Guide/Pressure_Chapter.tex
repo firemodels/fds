@@ -4,6 +4,12 @@
 
 In FDS, the pressure is decomposed into a temporally-varying background pressure plus a temporally and spatially-varying perturbation that drives the flow. The former can be thought of as the ``over-pressure'' which increases if heat is introduced into a closed compartment. In real buildings, leakage and ventilation affect the compartment ``over-pressure'' along with the fire.
 
+\section{FM/FPRF Datacenter Experiments}
+
+Measurements made during flow mapping in the FM datacenter mockup included two pairs of differential pressure transmitters. One pair measured the pressure difference between the subfloor (SF) and the cold aisle (CA).  The other pair measured the pressure difference between the hot aisle (HA)and the ceiling plenum (CP). A comparison of measured and predicted pressures is shown in the table below.
+
+\IfFileExists{SCRIPT_FIGURES/FM_FPRF_Datacenter/pressure.tex}{\input{SCRIPT_FIGURES/FM_FPRF_Datacenter/pressure.tex}}{\typeout{Error: Missing file SCRIPT_FIGURES/FM_FPRF_Datacenter/pressure.tex}}
+
 \section{NIST/NRC Experiments}
 
 Comparisons between measured and predicted pressures for the NIST/NRC series are shown on the following pages. For those tests in which the door to the compartment was open, the over-pressures were only a few Pascals, whereas when the door was closed, the over-pressures were several hundred Pascals. The pressure within the compartment was measured at a single point, near the floor. For the simulations of the closed door tests, the compartment is assumed to leak via a small uniform flow distributed over the walls and ceiling. The flow rate is calculated based on the assumption that the leakage rate is proportional to the measured leakage area times the square root of compartment over-pressure.

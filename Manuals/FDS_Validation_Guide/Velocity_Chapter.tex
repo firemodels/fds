@@ -88,6 +88,24 @@ On the following page there are seven plots comparing the predicted and measured
 
 \clearpage
 
+\section{FM/FPRF Datacenter Experiments}
+
+On the following page there are eight plots comparing the predicted and measured velocities for the high and low fan speed flow mapping tests in the FM/FPRF datacenter mockup. For each test there are plots for u-velocity, v-velocity, w-velocity and total velocity. Error bars are the measured and predicted RMS values. The dotted lines represent the measurement error. Measurement error was not a simple percentage of the measured value but rather was a propagation of fan flow error (the primary FDS input), sonic anemometer intrinsic error, and an estimate of the error based on the accuracy of placing the anemometer (determined from attempts to make repeat measurements after removing and replacing the probe).
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/FM_FPRF_Datacenter/FM_Datacenter_Veltest_Low_u.pdf} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/FM_FPRF_Datacenter/FM_Datacenter_Veltest_Low_v.pdf} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/FM_FPRF_Datacenter/FM_Datacenter_Veltest_Low_w.pdf} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/FM_FPRF_Datacenter/FM_Datacenter_Veltest_Low_vel.pdf} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/FM_FPRF_Datacenter/FM_Datacenter_Veltest_High_u.pdf} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/FM_FPRF_Datacenter/FM_Datacenter_Veltest_High_v.pdf} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/FM_FPRF_Datacenter/FM_Datacenter_Veltest_High_w.pdf} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/FM_FPRF_Datacenter/FM_Datacenter_Veltest_High_vel.pdf}
+\end{tabular*}
+\label{FM_Datacenter_Flow_Mapping}
+\end{figure}
+
 \section{McCaffrey's Plume Correlation}
 
 The following plots show the results of simulations of McCaffrey's five fires at three grid resolutions, $D^*/\dx=[5,10,20]$ (note this resolution index is used to label the legend entries). The mesh cells are cubic and the spacing is uniform (no stretching).
