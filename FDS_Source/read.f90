@@ -7190,13 +7190,13 @@ MESH_LOOP: DO NM=1,NMESHES
                   XB4 = YF
                   THICKEN = .FALSE.
                ENDIF
-               IF ( (XB6>=ZS-0.5_EB*DZ(0)   .AND. XB6<ZS) .OR. (THICKEN .AND. 0.5_EB*(XB5+XB5)>=ZS-DZ(0)    .AND. XB6<ZS) .AND. &
+               IF ( ((XB6>=ZS-0.5_EB*DZ(0)   .AND. XB6<ZS) .OR. (THICKEN .AND. 0.5_EB*(XB5+XB6)>=ZS-DZ(0)    .AND. XB6<ZS)) .AND. &
                   .NOT.EVACUATION_ONLY(NM)) THEN
                   XB5 = ZS
                   XB6 = ZS
                   THICKEN = .FALSE.
                ENDIF
-               IF ( (XB5<ZF+0.5_EB*DZ(KBP1) .AND. XB5>ZF) .OR. (THICKEN .AND. 0.5_EB*(XB5+XB6)< ZF+DZ(KBP1) .AND. XB5>ZF) .AND. &
+               IF ( ((XB5<ZF+0.5_EB*DZ(KBP1) .AND. XB5>ZF) .OR. (THICKEN .AND. 0.5_EB*(XB5+XB6)< ZF+DZ(KBP1) .AND. XB5>ZF)) .AND. &
                   .NOT.EVACUATION_ONLY(NM)) THEN
                   XB5 = ZF
                   XB6 = ZF
