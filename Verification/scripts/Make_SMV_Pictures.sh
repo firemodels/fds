@@ -171,12 +171,12 @@ if [ "$RUN_SMV" == "1" ] ; then
 
 # precompute FED slices
 
-  source $STARTX
+  source $STARTX 2>/dev/null
   $QFDS -f -d Visualization plume5c
   $QFDS -f -d Visualization plume5cdelta
   $QFDS -f -d Visualization thouse5
   $QFDS -f -d Visualization thouse5delta
-  source $STOPX
+  source $STOPX 2>/dev/null
 
 # difference plume5c and thouse5
 
