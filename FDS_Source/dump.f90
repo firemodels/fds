@@ -1384,6 +1384,11 @@ ENDIF
 WRITE(LU_SMV,'(/A)') 'ALBEDO'
 WRITE(LU_SMV,'(F13.5)') SMOKE_ALBEDO
 
+! Write out GVEC
+
+WRITE(LU_SMV,'(/A)') 'GVEC'
+WRITE(LU_SMV,'(3F13.5)') GVEC(1),GVEC(2),GVEC(3)
+
 ! Write out info about surfaces
 
 WRITE(LU_SMV,'(/A)') 'SURFDEF'
