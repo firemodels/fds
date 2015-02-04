@@ -73,9 +73,9 @@ copy %in_for_bundle%\*.po %out_bin%\.
 
 CALL :COPY %in_for_bundle%\fds_openmp.bat %out_bin%\fds_openmp.bat
 
-CALL :COPY %fdsdir%\fds_win_%platform%.exe         %out_bin%\fds%release_version%.exe
+:: CALL :COPY %fdsdir%\fds_win_%platform%.exe         %out_bin%\fds%release_version%.exe
 
-CALL :COPY  %fdsmpidir%\fds_mpi_win_%platform%.exe  %out_bin%\fds_mpi.exe
+CALL :COPY  %fdsmpidir%\fds_mpi_win_%platform%.exe  %out_bin%\fds.exe
 CALL :COPY  %in_testmpi%\test_mpi.exe  %out_bin%\test_mpi.exe
 
 CALL :COPY  %in_smv%\smokeview_win_%platform%.exe   %out_bin%\smokeview.exe
