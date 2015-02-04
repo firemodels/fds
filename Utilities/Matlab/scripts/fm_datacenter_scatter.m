@@ -1,5 +1,5 @@
-% $Id: soot.f90 21501 2015-01-22 16:01:49Z drjfloyd@gmail.com $
-% $Revision: 21501 $
+% $Id$
+% $Revision$
 
 % Generate fds summary data for scatterplots
 
