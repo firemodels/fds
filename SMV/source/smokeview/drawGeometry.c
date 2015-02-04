@@ -2270,7 +2270,7 @@ void obst_or_vent2faces(const mesh *meshi,blockagedata *bc,
        faceptr->normal[1]=(float)-1.0;
        if(facetype==VENT_face&&vi!=NULL&&vi->dummy==0)offset[YYY] = -meshi->vent_offset[YYY];
        faceptr->jmax=faceptr->jmin;
-       if(xminmax2[0]==xminmax2[1]||zminmax2[0]==zminmax2[1])faceptr->thinface=1;
+       if(faceptr->imin==faceptr->imax||faceptr->kmin==faceptr->kmax)faceptr->thinface=1;
        xtex = xx;
        ytex = zz;
        xtex2 = xx2;
@@ -2282,7 +2282,7 @@ void obst_or_vent2faces(const mesh *meshi,blockagedata *bc,
        faceptr->normal[0]=(float)1.0;
        if(facetype==VENT_face&&vi!=NULL&&vi->dummy==0)offset[XXX] = meshi->vent_offset[XXX];
        faceptr->imin=faceptr->imax;
-       if(yminmax2[0]==yminmax2[1]||zminmax2[0]==zminmax2[1])faceptr->thinface=1;
+       if(faceptr->jmin==faceptr->jmax||faceptr->kmin==faceptr->kmax)faceptr->thinface=1;
        xtex = yy;
        ytex = zz;
        xtex2 = yy2;
@@ -2294,7 +2294,7 @@ void obst_or_vent2faces(const mesh *meshi,blockagedata *bc,
        faceptr->normal[1]=(float)1.0;
        if(facetype==VENT_face&&vi!=NULL&&vi->dummy==0)offset[YYY] = meshi->vent_offset[YYY];
        faceptr->jmin=faceptr->jmax;
-       if(xminmax2[0]==xminmax2[1]||zminmax2[0]==zminmax2[1])faceptr->thinface=1;
+       if(faceptr->imin==faceptr->imax||faceptr->kmin==faceptr->kmax)faceptr->thinface=1;
        xtex = xx;
        ytex = zz;
        xtex2 = xx2;
@@ -2310,7 +2310,7 @@ void obst_or_vent2faces(const mesh *meshi,blockagedata *bc,
        ytex2 = zz2;
        faceptr->normal[0]=(float)-1.0;
        faceptr->imax=faceptr->imin;
-       if(yminmax2[0]==yminmax2[1]||zminmax2[0]==zminmax2[1])faceptr->thinface=1;
+       if(faceptr->jmin==faceptr->jmax||faceptr->kmin==faceptr->kmax)faceptr->thinface=1;
        xstart = &ybar0;
        ystart = &zbar0;
        break;
@@ -2322,7 +2322,7 @@ void obst_or_vent2faces(const mesh *meshi,blockagedata *bc,
        ytex2 = yy2;
        faceptr->normal[2]=(float)-1.0;
        faceptr->kmax=faceptr->kmin;
-       if(xminmax2[0]==xminmax2[1]||yminmax2[0]==yminmax2[1])faceptr->thinface=1;
+       if(faceptr->imin==faceptr->imax||faceptr->jmin==faceptr->jmax)faceptr->thinface=1;
        xstart = &xbar0;
        ystart = &ybar0;
        break;
@@ -2334,7 +2334,7 @@ void obst_or_vent2faces(const mesh *meshi,blockagedata *bc,
        ytex2 = yy2;
        faceptr->normal[2]=(float)1.0;
        faceptr->kmin=faceptr->kmax;
-       if(xminmax2[0]==xminmax2[1]||yminmax2[0]==yminmax2[1])faceptr->thinface=1;
+       if(faceptr->imin==faceptr->imax||faceptr->jmin==faceptr->jmax)faceptr->thinface=1;
        xstart = &xbar0;
        ystart = &ybar0;
        break;
