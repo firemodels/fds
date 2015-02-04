@@ -35,6 +35,7 @@ setenv fdsmpidir mpi_intel$FDSOS
 setenv fdsmpi fds_mpi_intel$FDSOS
 setenv fdsmpiout fds$MAJOR\_mpi$FDSOS
 setenv fdsmpiout fds_mpi
+setenv fdsmpiout fds$OUT
 
 setenv fds2asciidir intel$FDSOS
 setenv fds2ascii fds2ascii$FDSOS
@@ -108,8 +109,8 @@ scp -q $fdshost\:$wind2fdsroot/$wind2fdsdir/$wind2fds $bundledir/bin/$wind2fdsou
 
 # FDS 
 
-echo copying $fds from $fdsdir on $fdshost
-scp -q $fdshost\:$fdsroot/$fdsdir/$fds $bundledir/bin/$fdsout
+# echo copying $fds from $fdsdir on $fdshost
+# scp -q $fdshost\:$fdsroot/$fdsdir/$fds $bundledir/bin/$fdsout
 
 echo copying $fdsmpi from $fdsdir on $fdshost
 scp -q $fdshost\:$fdsroot/$fdsmpidir/$fdsmpi $bundledir/bin/$fdsmpiout
