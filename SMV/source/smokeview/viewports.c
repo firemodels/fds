@@ -969,7 +969,20 @@ void Scene_viewport(int quad, int view_mode, GLint screen_left, GLint screen_dow
     glTranslatef(xcen,ycen,zcen);
 
     // rotate scene
-    
+#ifdef XXX    
+    {
+      float u[3], v[3], axis[3], angle;
+
+      u[0]=0.0;
+      u[1]=0.0;
+      u[2]=1.0;
+      v[0]=cos(DEG2RAD*0.0);
+      v[1]=0.0;
+      v[2]=sin(DEG2RAD*85.0);
+      rotateu2v(u,v,axis,&angle);
+      glRotatef(angle,axis[0],axis[1],axis[2]);
+    }
+#endif
     if(rotation_type==ROTATION_3AXIS){
       glMultMatrixf(quat_rotation);
     }
