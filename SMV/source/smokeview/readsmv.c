@@ -8639,6 +8639,11 @@ int readini2(char *inifile, int localfile){
         continue;
       }
     }
+    if(match(buffer,"VERTICALAXIS")==1){
+      fgets(buffer,255,stream);
+      sscanf(buffer," %f %f %f ",vertical_axis_angles,vertical_axis_angles+1,vertical_axis_angles+2);
+      continue;
+    }
     if(match(buffer,"GEOMDIAGS")==1){
       fgets(buffer,255,stream);
       sscanf(buffer," %i %i",&structured_isopen,&unstructured_isopen);
@@ -12022,6 +12027,8 @@ void writeini(int flag,char *filename){
   fprintf(fileout," %i\n",visVZone);
   fprintf(fileout,"SHOWHAZARDCOLORS\n");
   fprintf(fileout," %i\n",sethazardcolor);
+  fprintf(fileout,"VERTICALAXIS\n");
+  fprintf(fileout," %f %f %f\n",vertical_axis_angles[0],vertical_axis_angles[1],vertical_axis_angles[2]);
   if(
     ((INI_fds_filein!=NULL&&fds_filein!=NULL&&strcmp(INI_fds_filein,fds_filein)==0)||
     flag==LOCAL_INI)){

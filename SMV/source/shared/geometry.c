@@ -198,7 +198,7 @@ void angleaxis2quat(float angle, float *axis, float *quat){
   }
 }
 
-/* ------------------ mult_quat ------------------------ */
+/* ------------------ quat2rot------------------ */
 
 void quat2rot(float quat[4],float rot[16]){
   float w, x, y, z,sum;

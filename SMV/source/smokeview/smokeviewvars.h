@@ -316,7 +316,13 @@ SVEXTERN float xtemp;
 
 SVEXTERN char TITLEBASE[1024];
 
-SVEXTERN float set_view_xyz[3];
+SVEXTERN float set_view_xyz[3],user_zaxis[3];
+#ifdef INMAIN
+  SVEXTERN float vertical_axis_angles[3]={90.000000, 0.000000, 0.000000};
+#else
+  SVEXTERN float vertical_axis_angles[3];
+#endif
+
 SVEXTERN char INIfile[1024];
 SVEXTERN char WRITEINIfile[1024];
 

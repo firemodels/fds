@@ -46,6 +46,7 @@ char glui_motion_revision[]="$Revision$";
 #define WINDOWSIZE_LIST 17
 #define SNAPSCENE 21
 #define SET_VIEW_XYZ 22
+#define SET_VERTICAL_AXIS 25
 #define GSLICE_TRANSLATE 24
 #define GSLICE_NORMAL 27
 
@@ -79,10 +80,13 @@ GLUI_Panel *PANEL_reset1=NULL;
 GLUI_Panel *PANEL_reset2=NULL;
 GLUI_Panel *PANEL_scale=NULL;
 GLUI_Panel *PANEL_reset=NULL;
+GLUI_Panel *PANEL_specify=NULL;
+GLUI_Panel *PANEL_specify_axis=NULL;
 
+GLUI_Rollout *ROLLOUT_rotation_type=NULL;
+GLUI_Rollout *ROLLOUT_orientation=NULL;
 GLUI_Rollout *ROLLOUT_motion=NULL;
 GLUI_Rollout *ROLLOUT_scene_clip=NULL;
-GLUI_Rollout *ROLLOUT_specify=NULL;
 GLUI_Rollout *ROLLOUT_projection=NULL;
 GLUI_Rollout *ROLLOUT_render=NULL;
 GLUI_Rollout *ROLLOUT_viewpoints=NULL;
@@ -100,6 +104,7 @@ GLUI_Spinner *SPINNER_gslice_normal_elev=NULL;
 GLUI_Spinner *SPINNER_set_view_x=NULL;
 GLUI_Spinner *SPINNER_set_view_y=NULL;
 GLUI_Spinner *SPINNER_set_view_z=NULL;
+GLUI_Spinner *SPINNER_vertical_axis_angles[3];
 GLUI_Spinner *SPINNER_zoom=NULL,*SPINNER_aperture=NULL;
 GLUI_Spinner *SPINNER_window_width=NULL, *SPINNER_window_height=NULL;
 GLUI_Spinner *SPINNER_scalex=NULL;
@@ -197,7 +202,7 @@ extern "C" void update_rotation_type(int val){
 
 extern "C" void update_glui_set_view_xyz(float *xyz){
   if(xyz==NULL)return;
-  if(SPINNER_set_view_x==NULL||SPINNER_set_view_y==NULL||SPINNER_set_view_z!=NULL)return;
+  if(SPINNER_set_view_x==NULL||SPINNER_set_view_y==NULL||SPINNER_set_view_z==NULL)return;
   
   DENORMALIZE_XYZ(set_view_xyz,xyz);
 
@@ -338,7 +343,8 @@ extern "C" void glui_motion_setup(int main_window){
   ROTATE_eye_z->set_speed(180.0/(float)screenWidth);
   ROTATE_eye_z->disable();
  
-  PANEL_radiorotate=glui_motion->add_panel_to_panel(ROLLOUT_motion,"Rotation type:");
+  ROLLOUT_rotation_type = glui_motion->add_rollout_to_panel(ROLLOUT_motion,_("Rotation properties"),false);
+  PANEL_radiorotate=glui_motion->add_panel_to_panel(ROLLOUT_rotation_type,"Rotation type:",GLUI_PANEL_NONE);
   RADIO_rotation_type=glui_motion->add_radiogroup_to_panel(PANEL_radiorotate,&rotation_type,0,rotation_type_CB);
   RADIOBUTTON_1c=glui_motion->add_radiobutton_to_group(RADIO_rotation_type,"2 axis");
   RADIOBUTTON_1d=glui_motion->add_radiobutton_to_group(RADIO_rotation_type,"eye centered");
@@ -349,7 +355,7 @@ extern "C" void glui_motion_setup(int main_window){
   rotation_index=&camera_current->rotation_index;
   *rotation_index=glui_rotation_index_ini;
 
-  LIST_mesh2 = glui_motion->add_listbox_to_panel(ROLLOUT_motion,_("Rotate about:"),rotation_index,MESH_LIST,Motion_CB);
+  LIST_mesh2 = glui_motion->add_listbox_to_panel(ROLLOUT_rotation_type,_("Rotate about:"),rotation_index,MESH_LIST,Motion_CB);
   LIST_mesh2->add_item(-1,_("user specified center"));
   for(i=0;i<nmeshes;i++){
     mesh *meshi;
@@ -360,11 +366,11 @@ extern "C" void glui_motion_setup(int main_window){
   LIST_mesh2->add_item(nmeshes,_("world center"));
   LIST_mesh2->set_int_val(*rotation_index);
 
-  CHECKBOX_show_rotation_center=glui_motion->add_checkbox_to_panel(ROLLOUT_motion,"Show rotation center",&show_rotation_center);
+  CHECKBOX_show_rotation_center=glui_motion->add_checkbox_to_panel(ROLLOUT_rotation_type,"Show rotation center",&show_rotation_center);
   xcenCUSTOMsmv = DENORMALIZE_X(xcenCUSTOM);
   ycenCUSTOMsmv = DENORMALIZE_Y(ycenCUSTOM);
   zcenCUSTOMsmv = DENORMALIZE_Z(zcenCUSTOM);
-  PANEL_user_center=glui_motion->add_panel_to_panel(ROLLOUT_motion,"rotation center (user specified)");
+  PANEL_user_center=glui_motion->add_panel_to_panel(ROLLOUT_rotation_type,"rotation center (user specified)");
   SPINNER_xcenCUSTOM=glui_motion->add_spinner_to_panel(PANEL_user_center,"x:",GLUI_SPINNER_FLOAT,&xcenCUSTOMsmv,CUSTOM_ROTATION_X,Motion_CB);
   SPINNER_ycenCUSTOM=glui_motion->add_spinner_to_panel(PANEL_user_center,"y:",GLUI_SPINNER_FLOAT,&ycenCUSTOMsmv,CUSTOM_ROTATION_Y,Motion_CB);
   SPINNER_zcenCUSTOM=glui_motion->add_spinner_to_panel(PANEL_user_center,"z:",GLUI_SPINNER_FLOAT,&zcenCUSTOMsmv,CUSTOM_ROTATION_Z,Motion_CB);
@@ -374,7 +380,7 @@ extern "C" void glui_motion_setup(int main_window){
 
   Motion_CB(MESH_LIST);
 
-  PANEL_anglebuttons = glui_motion->add_panel_to_panel(ROLLOUT_motion,"",GLUI_PANEL_NONE);
+  PANEL_anglebuttons = glui_motion->add_panel_to_panel(ROLLOUT_rotation_type,"",GLUI_PANEL_NONE);
   BUTTON_90_z=glui_motion->add_button_to_panel(PANEL_anglebuttons,"90 deg",EYE_ROTATE_90,Motion_CB);
   BUTTON_90_z->disable();
   BUTTON_90_z->set_alignment(GLUI_ALIGN_LEFT);
@@ -385,11 +391,22 @@ extern "C" void glui_motion_setup(int main_window){
 
 
 #ifdef pp_BETA
-  ROLLOUT_specify = glui_motion->add_rollout_to_panel(ROLLOUT_motion,_("Specify eye location"));
+  ROLLOUT_orientation=glui_motion->add_rollout_to_panel(ROLLOUT_motion,_("Specify Orientation"),false);
+  PANEL_specify = glui_motion->add_panel_to_panel(ROLLOUT_orientation,_("eye"));
 
-  SPINNER_set_view_x=glui_motion->add_spinner_to_panel(ROLLOUT_specify,"x:",GLUI_SPINNER_FLOAT,set_view_xyz,SET_VIEW_XYZ,Motion_CB);
-  SPINNER_set_view_y=glui_motion->add_spinner_to_panel(ROLLOUT_specify,"y:",GLUI_SPINNER_FLOAT,set_view_xyz+1,SET_VIEW_XYZ,Motion_CB);
-  SPINNER_set_view_z=glui_motion->add_spinner_to_panel(ROLLOUT_specify,"z:",GLUI_SPINNER_FLOAT,set_view_xyz+2,SET_VIEW_XYZ,Motion_CB);
+  SPINNER_set_view_x=glui_motion->add_spinner_to_panel(PANEL_specify,"x:",GLUI_SPINNER_FLOAT,set_view_xyz,SET_VIEW_XYZ,Motion_CB);
+  SPINNER_set_view_y=glui_motion->add_spinner_to_panel(PANEL_specify,"y:",GLUI_SPINNER_FLOAT,set_view_xyz+1,SET_VIEW_XYZ,Motion_CB);
+  SPINNER_set_view_z=glui_motion->add_spinner_to_panel(PANEL_specify,"z:",GLUI_SPINNER_FLOAT,set_view_xyz+2,SET_VIEW_XYZ,Motion_CB);
+
+  PANEL_specify_axis = glui_motion->add_panel_to_panel(ROLLOUT_orientation,_("Vertical axis"));
+
+  SPINNER_vertical_axis_angles[0] = glui_motion->add_spinner_to_panel(PANEL_specify_axis,"latitude:",GLUI_SPINNER_FLOAT,vertical_axis_angles,SET_VERTICAL_AXIS,Motion_CB);
+  SPINNER_vertical_axis_angles[1] = glui_motion->add_spinner_to_panel(PANEL_specify_axis,"longitude:",GLUI_SPINNER_FLOAT,vertical_axis_angles+1,SET_VERTICAL_AXIS,Motion_CB);
+  SPINNER_vertical_axis_angles[2] = glui_motion->add_spinner_to_panel(PANEL_specify_axis,"angle:",GLUI_SPINNER_FLOAT,vertical_axis_angles+2,SET_VERTICAL_AXIS,Motion_CB);
+  SPINNER_vertical_axis_angles[0]->set_float_limits(-90.0,90.0);
+  SPINNER_vertical_axis_angles[1]->set_float_limits(-180.0,180.0);
+  SPINNER_vertical_axis_angles[2]->set_float_limits(-180.0,180.0);
+  Motion_CB(SET_VERTICAL_AXIS);
 #endif
 
   PANEL_gslice = glui_motion->add_rollout(_("General slice motion"),false);
@@ -654,6 +671,7 @@ extern "C" void update_translate(void){
     ROTATE_2axis->set_y(az_elev[1]);
     ROTATE_eye_z->set_x(camera_current->azimuth);
   }
+  update_glui_set_view_xyz(camera_current->eye);
 }
 
 /* ------------------ update_rotation_index ------------------------ */
@@ -1058,6 +1076,8 @@ extern "C" void Motion_CB(int var){
       camera_current->zoom=zoom;
       if(SPINNER_zoom!=NULL)SPINNER_zoom->set_float_val(zoom);
       break;
+    case SET_VERTICAL_AXIS:
+      break;
     case SET_VIEW_XYZ:
     case TRANSLATE_XY:
     case GLUI_Z:
@@ -1095,6 +1115,17 @@ extern "C" void Motion_CB(int var){
   }
 
   switch (var){
+    case SET_VERTICAL_AXIS:
+      {
+        float *latitude, *longitude;
+
+        latitude=vertical_axis_angles;
+        longitude=vertical_axis_angles+1;
+        user_zaxis[0]=cos(DEG2RAD*(*longitude))*cos(DEG2RAD*(*latitude));
+        user_zaxis[1]=sin(DEG2RAD*(*longitude))*cos(DEG2RAD*(*latitude));
+        user_zaxis[2]=sin(DEG2RAD*(*latitude));
+      }
+    break;
     case SET_VIEW_XYZ:
       NORMALIZE_XYZ(eye_xyz,set_view_xyz);
       eye_xyz0[0]=eye_xyz[0];
@@ -1107,21 +1138,21 @@ extern "C" void Motion_CB(int var){
       if(glui_move_mode==EYE_ROTATE){
         eye_xyz0[0]=eye_xyz[0];
         eye_xyz0[1]=eye_xyz[1];
-        update_translate();
       }
       if(TRANSLATE_xy!=NULL){
         TRANSLATE_xy->set_x(d_eye_xyz[0]);
         TRANSLATE_xy->set_y(d_eye_xyz[1]);
       }
       glui_move_mode=TRANSLATE_XY;
+      update_translate();
       break;
     case GLUI_Z:
       if(glui_move_mode==EYE_ROTATE){
         eye_xyz0[0]=eye_xyz[0];
         eye_xyz0[1]=eye_xyz[1];
-        update_translate();
       }
       glui_move_mode=GLUI_Z;
+      update_translate();
       break;
     case APERTURE:
     case ZOOM:
