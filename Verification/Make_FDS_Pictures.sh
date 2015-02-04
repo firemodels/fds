@@ -4,7 +4,7 @@
 # FDS Verification Cases on a Linux or OS X machine
 
 function usage {
-echo "Make_SMV_Pictures.sh [-d -h -r -s size -X ]"
+echo "Make_FDS_Pictures.sh [-d -h -r -s size -X ]"
 echo "Generates Smokeview figures from FDS verification suite"
 echo ""
 echo "Options"
@@ -81,11 +81,11 @@ rm -f $SVNROOT/Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/*.png
 rm -f $SVNROOT/Manuals/FDS_Verificaiton_Guide/SCRIPT_FIGURES/*.png
 
 if [ "$START_X" == "yes" ]; then
-  source $SVNROOT/Utilities/Scripts/startXserver.sh
+  source $SVNROOT/Utilities/Scripts/startXserver.sh 2>/dev/null
 fi
 ./FDS_Pictures.sh
 if [ "$START_X" == "yes" ]; then
-  source $SVNROOT/Utilities/Scripts/stopXserver.sh
+  source $SVNROOT/Utilities/Scripts/stopXserver.sh 2>/dev/null
 fi
 
 echo FDS pictures created.
