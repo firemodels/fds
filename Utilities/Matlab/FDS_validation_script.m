@@ -37,6 +37,7 @@ sippola_aerosol_deposition
 layer_height
 Hamins_CH4_Average
 combine_csiro
+fm_datacenter_scatter
 
 % Dataplot and scatplot options
 
@@ -83,5 +84,6 @@ purdue_flames
 christifire
 pressure_coefficient
 VTT_Sprays
+fm_datacenter_veltest
 
 display('validation scripts completed successfully!')
