@@ -259,6 +259,26 @@ void normalize_quat(float x[4]){
   }
 }
 
+/* ------------------ xyz2azelev ------------------------ */
+
+void xyz2azelev(float *xyz,float *azimuth, float *elevation){
+  float norm3;
+
+  // x = ||xyz||cos(az)*cos(elev)
+  // y = ||xyz||sin(az)*cos(elev)
+  // z = ||xyz||sin(elev)
+  // elev=asin(z/||xyz||)
+  // az=atan(y/x)
+  norm3=NORM3(xyz);
+  if(norm3>0.00001&&ABS(xyz[2]/norm3)<=1.0){
+    *elevation=RAD2DEG*asin(xyz[2]/norm3);
+  }
+  else{
+    *elevation=0.0;
+  }
+  *azimuth=RAD2DEG*atan2(xyz[1],xyz[0]);
+}
+
 /* ------------------ normalize_vec3 ------------------------ */
 
 void normalize_vec3(float *xyz){

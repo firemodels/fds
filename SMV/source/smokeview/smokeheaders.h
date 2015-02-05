@@ -6,6 +6,8 @@
 #ifndef SMOKEHEADERS_H_DEFINED
 #define SMOKEHEADERS_H_DEFINED
 
+EXTERNCPP void drawaxis(void);
+EXTERNCPP void xyz2azelev(float *xyz,float *azimuth, float *elevation);
 EXTERNCPP void get_geom_dialog_state(void);
 EXTERNCPP void update_device_orientation(void);
 EXTERNCPP void update_glui_devices(void);

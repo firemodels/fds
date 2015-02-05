@@ -975,9 +975,9 @@ void Scene_viewport(int quad, int view_mode, GLint screen_left, GLint screen_dow
       u[0]=0.0;
       u[1]=0.0;
       u[2]=1.0;
-      rotateu2v(u,user_zaxis,axis,&angle);
-      glRotatef(vertical_axis_angles[2],user_zaxis[0],user_zaxis[1],user_zaxis[2]);
+      rotateu2v(user_zaxis,u,axis,&angle);//xx
       glRotatef(RAD2DEG*angle,axis[0],axis[1],axis[2]);
+      glRotatef(zaxis_angles[2],u[0],u[1],u[2]);
     }
     if(rotation_type==ROTATION_3AXIS){
       glMultMatrixf(quat_rotation);

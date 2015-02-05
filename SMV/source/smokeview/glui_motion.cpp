@@ -46,7 +46,8 @@ char glui_motion_revision[]="$Revision$";
 #define WINDOWSIZE_LIST 17
 #define SNAPSCENE 21
 #define SET_VIEW_XYZ 22
-#define SET_VERTICAL_AXIS 25
+#define CHANGE_ZAXIS 25
+#define USE_GVEC 28
 #define GSLICE_TRANSLATE 24
 #define GSLICE_NORMAL 27
 
@@ -81,7 +82,7 @@ GLUI_Panel *PANEL_reset2=NULL;
 GLUI_Panel *PANEL_scale=NULL;
 GLUI_Panel *PANEL_reset=NULL;
 GLUI_Panel *PANEL_specify=NULL;
-GLUI_Panel *PANEL_specify_axis=NULL;
+GLUI_Panel *PANEL_change_zaxis=NULL;
 
 GLUI_Rollout *ROLLOUT_rotation_type=NULL;
 GLUI_Rollout *ROLLOUT_orientation=NULL;
@@ -104,7 +105,7 @@ GLUI_Spinner *SPINNER_gslice_normal_elev=NULL;
 GLUI_Spinner *SPINNER_set_view_x=NULL;
 GLUI_Spinner *SPINNER_set_view_y=NULL;
 GLUI_Spinner *SPINNER_set_view_z=NULL;
-GLUI_Spinner *SPINNER_vertical_axis_angles[3];
+GLUI_Spinner *SPINNER_zaxis_angles[3];
 GLUI_Spinner *SPINNER_zoom=NULL,*SPINNER_aperture=NULL;
 GLUI_Spinner *SPINNER_window_width=NULL, *SPINNER_window_height=NULL;
 GLUI_Spinner *SPINNER_scalex=NULL;
@@ -121,6 +122,8 @@ GLUI_Checkbox *CHECKBOX_clip_rendered_scene=NULL;
 GLUI_Checkbox *CHECKBOX_general_rotation=NULL;
 GLUI_Checkbox *CHECKBOX_blockpath=NULL,*CHECKBOX_cursor_blockpath=NULL;
 GLUI_Checkbox *CHECKBOX_gslice_data=NULL;
+GLUI_Checkbox *CHECKBOX_use_gvec=NULL;
+GLUI_Checkbox *CHECKBOX_showaxis=NULL;
 
 GLUI_Translation *ROTATE_2axis=NULL,*ROTATE_eye_z=NULL;
 GLUI_Translation *TRANSLATE_z=NULL,*TRANSLATE_xy=NULL;
@@ -157,6 +160,19 @@ GLUI_Listbox *LIST_render_skip=NULL;
 
 void Render_CB(int var);
 void enable_disable_views(void);
+
+/* ------------------ update_zaxis_angles ------------------------ */
+
+void update_zaxis_angles(void){
+  SPINNER_zaxis_angles[0]->set_float_val(zaxis_angles[0]);
+  SPINNER_zaxis_angles[1]->set_float_val(zaxis_angles[1]);
+}
+
+/* ------------------ update_gvec ------------------------ */
+
+void update_gvec(void){
+  CHECKBOX_use_gvec->set_int_val(use_gvec);
+}
 
 /* ------------------ update_nrender_rows ------------------------ */
 
@@ -398,15 +414,28 @@ extern "C" void glui_motion_setup(int main_window){
   SPINNER_set_view_y=glui_motion->add_spinner_to_panel(PANEL_specify,"y:",GLUI_SPINNER_FLOAT,set_view_xyz+1,SET_VIEW_XYZ,Motion_CB);
   SPINNER_set_view_z=glui_motion->add_spinner_to_panel(PANEL_specify,"z:",GLUI_SPINNER_FLOAT,set_view_xyz+2,SET_VIEW_XYZ,Motion_CB);
 
-  PANEL_specify_axis = glui_motion->add_panel_to_panel(ROLLOUT_orientation,_("Vertical axis"));
+  PANEL_change_zaxis = glui_motion->add_panel_to_panel(ROLLOUT_orientation,_("Vertical axis"));
 
-  SPINNER_vertical_axis_angles[0] = glui_motion->add_spinner_to_panel(PANEL_specify_axis,"latitude:",GLUI_SPINNER_FLOAT,vertical_axis_angles,SET_VERTICAL_AXIS,Motion_CB);
-  SPINNER_vertical_axis_angles[1] = glui_motion->add_spinner_to_panel(PANEL_specify_axis,"longitude:",GLUI_SPINNER_FLOAT,vertical_axis_angles+1,SET_VERTICAL_AXIS,Motion_CB);
-  SPINNER_vertical_axis_angles[2] = glui_motion->add_spinner_to_panel(PANEL_specify_axis,"angle:",GLUI_SPINNER_FLOAT,vertical_axis_angles+2,SET_VERTICAL_AXIS,Motion_CB);
-  SPINNER_vertical_axis_angles[0]->set_float_limits(-90.0,90.0);
-  SPINNER_vertical_axis_angles[1]->set_float_limits(-180.0,180.0);
-  SPINNER_vertical_axis_angles[2]->set_float_limits(-180.0,180.0);
-  Motion_CB(SET_VERTICAL_AXIS);
+  if(have_gvec==1&&changed_zaxis==0){
+    float vv[3];
+
+    vv[0]=-gvec[0];
+    vv[1]=-gvec[1];
+    vv[2]=-gvec[2];
+    xyz2azelev(vv,zaxis_angles,zaxis_angles+1);
+  }
+  SPINNER_zaxis_angles[0] = glui_motion->add_spinner_to_panel(PANEL_change_zaxis,"azimuth:",GLUI_SPINNER_FLOAT,zaxis_angles,CHANGE_ZAXIS,Motion_CB);
+  SPINNER_zaxis_angles[1] = glui_motion->add_spinner_to_panel(PANEL_change_zaxis,"elevation:",GLUI_SPINNER_FLOAT,zaxis_angles+1,CHANGE_ZAXIS,Motion_CB);
+  SPINNER_zaxis_angles[2] = glui_motion->add_spinner_to_panel(PANEL_change_zaxis,"angle (about axis):",GLUI_SPINNER_FLOAT,zaxis_angles+2,CHANGE_ZAXIS,Motion_CB);
+  SPINNER_zaxis_angles[0]->set_float_limits(-180.0,180.0);
+  SPINNER_zaxis_angles[1]->set_float_limits(-90.0,90.0);
+  SPINNER_zaxis_angles[2]->set_float_limits(-180.0,180.0);
+  if(have_gvec==1){
+    CHECKBOX_use_gvec = glui_motion->add_checkbox_to_panel(PANEL_change_zaxis,"Use gravity vector (GVEC)",&use_gvec,USE_GVEC,Motion_CB);
+  }
+  CHECKBOX_showaxis = glui_motion->add_checkbox_to_panel(PANEL_change_zaxis,"Show axis",&showaxis);
+  Motion_CB(CHANGE_ZAXIS);
+  changed_zaxis=0;
 #endif
 
   PANEL_gslice = glui_motion->add_rollout(_("General slice motion"),false);
@@ -1076,8 +1105,8 @@ extern "C" void Motion_CB(int var){
       camera_current->zoom=zoom;
       if(SPINNER_zoom!=NULL)SPINNER_zoom->set_float_val(zoom);
       break;
-    case SET_VERTICAL_AXIS:
-      break;
+    case CHANGE_ZAXIS:
+    case USE_GVEC:
     case SET_VIEW_XYZ:
     case TRANSLATE_XY:
     case GLUI_Z:
@@ -1115,17 +1144,41 @@ extern "C" void Motion_CB(int var){
   }
 
   switch (var){
-    case SET_VERTICAL_AXIS:
-      {
-        float *latitude, *longitude;
+    case USE_GVEC:
+      if(use_gvec==1){
+        float vv[3];
 
-        latitude=vertical_axis_angles;
-        longitude=vertical_axis_angles+1;
-        user_zaxis[0]=cos(DEG2RAD*(*longitude))*cos(DEG2RAD*(*latitude));
-        user_zaxis[1]=sin(DEG2RAD*(*longitude))*cos(DEG2RAD*(*latitude));
-        user_zaxis[2]=sin(DEG2RAD*(*latitude));
+        vv[0]=-gvec[0];
+        vv[1]=-gvec[1];
+        vv[2]=-gvec[2];
+        xyz2azelev(vv,zaxis_angles,zaxis_angles+1);
+        update_zaxis_angles();
+        {
+          float *elev, *az;
+
+          az=zaxis_angles;
+          elev=zaxis_angles+1;
+          user_zaxis[0]=cos(DEG2RAD*(*az))*cos(DEG2RAD*(*elev));
+          user_zaxis[1]=sin(DEG2RAD*(*az))*cos(DEG2RAD*(*elev));
+          user_zaxis[2]=sin(DEG2RAD*(*elev));
+        }
+        glutPostRedisplay();
       }
-    break;
+      break;
+    case CHANGE_ZAXIS:
+      {
+        float *elev, *az;
+
+        az=zaxis_angles;
+        elev=zaxis_angles+1;
+        user_zaxis[0]=cos(DEG2RAD*(*az))*cos(DEG2RAD*(*elev));
+        user_zaxis[1]=sin(DEG2RAD*(*az))*cos(DEG2RAD*(*elev));
+        user_zaxis[2]=sin(DEG2RAD*(*elev));
+        changed_zaxis=1;
+        use_gvec=0;
+        update_gvec();
+      }
+      break;
     case SET_VIEW_XYZ:
       NORMALIZE_XYZ(eye_xyz,set_view_xyz);
       eye_xyz0[0]=eye_xyz[0];

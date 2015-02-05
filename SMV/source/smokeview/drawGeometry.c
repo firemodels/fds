@@ -5148,6 +5148,26 @@ int get_tick_dir(float *mm){
   return iminangle;
 }
 
+
+/* ------------------ drawaxis ------------------------ */
+
+void drawaxis(void){
+  glLineWidth(linewidth);
+  glBegin(GL_LINES);
+  glColor3f(0.0,0.0,1.0);
+  glVertex3f(xbar/2.0,ybar/2.0,zbar/2.0);
+  glVertex3f(xbar/2.0,ybar/2.0,zbar/2.0+0.5);
+  
+  glColor3f(0.0,1.0,0.0);
+  glVertex3f(xbar/2.0,ybar/2.0,zbar/2.0);
+  glVertex3f(xbar/2.0,ybar/2.0+0.5,zbar/2.0);
+  
+  glColor3f(1.0,0.0,0.0);
+  glVertex3f(xbar/2.0,ybar/2.0,zbar/2.0);
+  glVertex3f(xbar/2.0+0.5,ybar/2.0,zbar/2.0);
+  glEnd();
+}
+
 /* ------------------ drawticks ------------------------ */
 
 void drawticks(void){

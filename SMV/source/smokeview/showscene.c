@@ -231,6 +231,14 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
       SNIFF_ERRORS("after drawticks");
     }
 
+    /* ++++++++++++++++++++++++ draw ticks +++++++++++++++++++++++++ */
+
+    if(showaxis==1){
+      UNCLIP;
+      drawaxis();
+      SNIFF_ERRORS("after drawaxis");
+    }
+
     /* draw the box framing the simulation (corners at (0,0,0) (xbar,ybar,zbar) */
 
 

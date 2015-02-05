@@ -2676,6 +2676,12 @@ int readsmv(char *file, char *file2){
     */
 
 
+    if(match(buffer,"GVEC") == 1){
+      fgets(buffer,255,stream);
+      sscanf(buffer,"%f %f %f",gvec,gvec+1,gvec+2);
+      have_gvec=1;
+      continue;
+    }
     if(match(buffer,"CSVF") == 1){
       int nfiles;
       char *file_ptr,*type_ptr;
@@ -8639,9 +8645,10 @@ int readini2(char *inifile, int localfile){
         continue;
       }
     }
-    if(match(buffer,"VERTICALAXIS")==1){
+    if(match(buffer,"ZAXISANGLES")==1){
       fgets(buffer,255,stream);
-      sscanf(buffer," %f %f %f ",vertical_axis_angles,vertical_axis_angles+1,vertical_axis_angles+2);
+      sscanf(buffer," %f %f %f ",zaxis_angles,zaxis_angles+1,zaxis_angles+2);
+      changed_zaxis=1;
       continue;
     }
     if(match(buffer,"GEOMDIAGS")==1){
@@ -12027,8 +12034,10 @@ void writeini(int flag,char *filename){
   fprintf(fileout," %i\n",visVZone);
   fprintf(fileout,"SHOWHAZARDCOLORS\n");
   fprintf(fileout," %i\n",sethazardcolor);
-  fprintf(fileout,"VERTICALAXIS\n");
-  fprintf(fileout," %f %f %f\n",vertical_axis_angles[0],vertical_axis_angles[1],vertical_axis_angles[2]);
+  if(changed_zaxis==1){
+    fprintf(fileout,"ZAXISANGLES\n");
+    fprintf(fileout," %f %f %f\n",zaxis_angles[0],zaxis_angles[1],zaxis_angles[2]);
+  }
   if(
     ((INI_fds_filein!=NULL&&fds_filein!=NULL&&strcmp(INI_fds_filein,fds_filein)==0)||
     flag==LOCAL_INI)){
