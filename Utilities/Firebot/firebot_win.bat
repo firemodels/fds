@@ -64,7 +64,6 @@ set countb=%OUTDIR%\firebot_count0b.txt
 set scratchfile=%OUTDIR%\firebot_scratch.txt
 
 set fromsummarydir=%svnroot%\Manuals\SMV_Summary
-set tosummarydir="%SMOKEBOT_SUMMARY_DIR%"
 
 set haveerrors=0
 set havewarnings=0
@@ -489,16 +488,6 @@ echo . ----------------------------- >> %infofile%
 
 copy %infofile% %timingslogfile%
 
-if NOT exist %tosummarydir% goto skip_copyfiles
-  echo summary   (local): file://%userprofile%/FDS-SMV/Manuals/SMV_Summary/index.html >> %infofile%
-  echo summary (windows): https://googledrive.com/host/0B-W-dkXwdHWNUElBbWpYQTBUejQ/index.html >> %infofile%
-  echo summary   (linux): https://googledrive.com/host/0B-W-dkXwdHWNN3N2eG92X2taRFk/index.html >> %infofile%
-  copy %fromsummarydir%\index*.html %tosummarydir%  1> Nul 2>&1
-  copy %fromsummarydir%\images\*.png %tosummarydir%\images 1> Nul 2>&1
-  copy %fromsummarydir%\images2\*.png %tosummarydir%\images2 1> Nul 2>&1
-:skip_copyfiles
-  
-
 cd %CURDIR%
 
 sed "s/$/\r/" < %warninglog% > %warninglogpc%
@@ -711,7 +700,6 @@ if %nwarnings% GTR 0 (
   set havewarnings=1
 )
 copy %guide%.pdf %fromsummarydir%\manuals
-copy %guide%.pdf %tosummarydir%\manuals
 
 exit /b
 
