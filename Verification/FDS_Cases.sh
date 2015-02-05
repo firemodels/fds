@@ -2,7 +2,7 @@
 
 $QFDS -p 4 -d Adaptive_Mesh_Refinement random_meshes.fds
 
-$QFDS -p 3 -d Evacuation evac_smv_testcase1.fds
+#$QFDS -p 3 -d Evacuation evac_smv_testcase1.fds
 
 $QFDS -p 8 -d Fires circular_burner.fds
 
@@ -74,8 +74,8 @@ $QFDS -d Energy_Budget energy_budget_dns_100.fds
 $QFDS -d Energy_Budget energy_budget_tmix.fds
 $QFDS -d Energy_Budget energy_budget_solid.fds
 
-$QFDS -d Evacuation evac_smv_testcase0.fds
-$QFDS -d Evacuation evac_smv_testcase2.fds
+#$QFDS -d Evacuation evac_smv_testcase0.fds
+#$QFDS -d Evacuation evac_smv_testcase2.fds
 
 $QFDS -d Extinction extinction.fds
 
