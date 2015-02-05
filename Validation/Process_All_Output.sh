@@ -28,7 +28,7 @@ $VDIR/Hamins_CH4/FDS_Output_Files/Process_Output.csh
 $VDIR/Harrison_Spill_Plumes/FDS_Output_Files/Process_Output.csh
 $VDIR/Heskestad_Flame_Height/FDS_Output_Files/Process_Output.csh
 $VDIR/LEMTA_Spray/FDS_Output_Files/Process_Output.csh
-$VDIR/LLNL_Enclosure/FDS_Output_Files/Process_Output.csh
+#$VDIR/LLNL_Enclosure/FDS_Output_Files/Process_Output.csh
 $VDIR/McCaffrey_Plume/FDS_Output_Files/Process_Output.csh
 $VDIR/Moody_Chart/FDS_Output_Files/Process_Output.csh
 $VDIR/NBS_Multi-Room/FDS_Output_Files/Process_Output.csh
