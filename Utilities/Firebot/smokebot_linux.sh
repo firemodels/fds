@@ -67,6 +67,18 @@ esac
 done
 shift $(($OPTIND-1))
 
+if [[ `whoami` == "$SMOKEBOT_USERNAME" ]];
+   then
+      # Continue along
+      :
+   else
+      echo "Warning: You are running the Smokebot script as an end user."
+      echo "This script will definitely modify and/or erase your repository."
+      echo "If you wish to continue, run Firebot with the -y option at your own risk."
+      echo "Terminating script."
+      exit
+fi
+
 DB=_db
 IB=
 if [ "$FDSNETWORK" == "infiniband" ] ; then
@@ -82,7 +94,7 @@ then
 fi
 export platform
 
-SMOKEBOT_USERNAME="`whoami`"
+SMOKEBOT_USERNAME="smokebot"
 
 cd
 SMOKEBOT_HOME_DIR="`pwd`"
@@ -252,6 +264,13 @@ clean_smokebot_history()
    rm -f output/* > /dev/null
 }
 
+delete_unversioned_files()
+{
+   # Delete all unversioned SVN files
+   svn status --no-ignore | grep '^[I?]' | cut -c 9- | while IFS= read -r f; do rm -rf "$f"; done
+}
+
+
 #  ========================
 #  ========================
 #  = Smokebot Build Stages =
@@ -272,7 +291,9 @@ update_and_compile_cfast()
    then
       echo "Updating and compiling CFAST:" > $OUTPUT_DIR/stage0_cfast
       cd $CFAST_SVNROOT/CFAST
-      
+      svn revert -Rq *
+      delete_unversioned_files
+
       # Update to latest SVN revision
       svn update >> $OUTPUT_DIR/stage0_cfast 2>&1
       
@@ -314,6 +335,9 @@ clean_svn_repo()
    # Check to see if FDS repository exists
    if [ -e "$FDS_SVNROOT" ]
    then
+      cd $FDS_SVNROOT
+      svn revert -Rq *
+      delete_unversioned_files
    # If not, create FDS repository and checkout
      dummy=true
    else
