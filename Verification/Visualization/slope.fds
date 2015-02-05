@@ -1,4 +1,4 @@
-&HEAD CHID='slope',TITLE='plume in long hall with sloped floor SVN $Revision: 20795 $' /
+&HEAD CHID='slope',TITLE='plume in long hall with sloped floor SVN $Revision$' /
 
 &MESH IJK=48,16,16, XB=0.0,4.8,0.0,1.6,0.0,1.6 /
 
