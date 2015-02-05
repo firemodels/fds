@@ -433,8 +433,11 @@ extern "C" void glui_motion_setup(int main_window){
   SPINNER_zaxis_angles[2]->set_float_limits(-180.0,180.0);
   if(have_gvec==1){
     CHECKBOX_gvec_down = glui_motion->add_checkbox_to_panel(PANEL_change_zaxis,"Gravity vector down",&gvec_down,USE_GVEC,Motion_CB);
+    CHECKBOX_showgravity = glui_motion->add_checkbox_to_panel(PANEL_change_zaxis,"Show gravity, axis vectors",&showgravity);
   }
-  CHECKBOX_showgravity = glui_motion->add_checkbox_to_panel(PANEL_change_zaxis,"Show gravity, axis vectors",&showgravity);
+  else{
+    CHECKBOX_showgravity = glui_motion->add_checkbox_to_panel(PANEL_change_zaxis,"Show axis vectors",&showgravity);
+  }
   Motion_CB(CHANGE_ZAXIS);
   changed_zaxis=0;
 #endif

@@ -2683,8 +2683,10 @@ int readsmv(char *file, char *file2){
       gvecunit[1]=gvec[1];
       gvecunit[2]=gvec[2];
       NORMALIZE3(gvecunit);
-      have_gvec=1;
-      update_have_gvec=1;
+      if(NORM3(gvec)>0.0){
+        have_gvec=1;
+        update_have_gvec=1;
+      }
       continue;
     }
     if(match(buffer,"CSVF") == 1){
