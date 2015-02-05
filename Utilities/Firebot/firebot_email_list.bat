@@ -6,6 +6,6 @@ set mailToSMV="gforney@gmail.com"
 :: Mailing lists for Firebot status report
 set mailToFDS="mcgratta@gmail.com, randy.mcdermott@gmail.com, gforney@gmail.com, drjfloyd@gmail.com"
 
-set mailToFDSAll="mcgratta@gmail.com, randy.mcdermott@gmail.com, gforney@gmail.com, CraigWeinschenk@gmail.com, drjfloyd@gmail.com, Topi.Sikanen@gmail.com, shostikk@gmail.com, ben.trettel@gmail.com, kiliansusan@gmail.com, ruddymell@gmail.com"
+set mailToFDSAll="mcgratta@gmail.com, randy.mcdermott@gmail.com, gforney@gmail.com, CraigWeinschenk@gmail.com, drjfloyd@gmail.com"
 
 set mailToFDSDebug="gforney@gmail.com"
