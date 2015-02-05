@@ -2679,7 +2679,12 @@ int readsmv(char *file, char *file2){
     if(match(buffer,"GVEC") == 1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%f %f %f",gvec,gvec+1,gvec+2);
+      gvecunit[0]=gvec[0];
+      gvecunit[1]=gvec[1];
+      gvecunit[2]=gvec[2];
+      NORMALIZE3(gvecunit);
       have_gvec=1;
+      update_have_gvec=1;
       continue;
     }
     if(match(buffer,"CSVF") == 1){

@@ -122,8 +122,8 @@ GLUI_Checkbox *CHECKBOX_clip_rendered_scene=NULL;
 GLUI_Checkbox *CHECKBOX_general_rotation=NULL;
 GLUI_Checkbox *CHECKBOX_blockpath=NULL,*CHECKBOX_cursor_blockpath=NULL;
 GLUI_Checkbox *CHECKBOX_gslice_data=NULL;
-GLUI_Checkbox *CHECKBOX_use_gvec=NULL;
-GLUI_Checkbox *CHECKBOX_showaxis=NULL;
+GLUI_Checkbox *CHECKBOX_gvec_down=NULL;
+GLUI_Checkbox *CHECKBOX_showgravity=NULL;
 
 GLUI_Translation *ROTATE_2axis=NULL,*ROTATE_eye_z=NULL;
 GLUI_Translation *TRANSLATE_z=NULL,*TRANSLATE_xy=NULL;
@@ -170,8 +170,9 @@ void update_zaxis_angles(void){
 
 /* ------------------ update_gvec ------------------------ */
 
-void update_gvec(void){
-  CHECKBOX_use_gvec->set_int_val(use_gvec);
+void update_gvec_down(int gvec_down_local){
+  gvec_down = gvec_down_local;
+  if(CHECKBOX_gvec_down!=NULL)CHECKBOX_gvec_down->set_int_val(gvec_down);
 }
 
 /* ------------------ update_nrender_rows ------------------------ */
@@ -414,7 +415,7 @@ extern "C" void glui_motion_setup(int main_window){
   SPINNER_set_view_y=glui_motion->add_spinner_to_panel(PANEL_specify,"y:",GLUI_SPINNER_FLOAT,set_view_xyz+1,SET_VIEW_XYZ,Motion_CB);
   SPINNER_set_view_z=glui_motion->add_spinner_to_panel(PANEL_specify,"z:",GLUI_SPINNER_FLOAT,set_view_xyz+2,SET_VIEW_XYZ,Motion_CB);
 
-  PANEL_change_zaxis = glui_motion->add_panel_to_panel(ROLLOUT_orientation,_("Vertical axis"));
+  PANEL_change_zaxis = glui_motion->add_panel_to_panel(ROLLOUT_orientation,_("z axis"));
 
   if(have_gvec==1&&changed_zaxis==0){
     float vv[3];
@@ -426,14 +427,14 @@ extern "C" void glui_motion_setup(int main_window){
   }
   SPINNER_zaxis_angles[0] = glui_motion->add_spinner_to_panel(PANEL_change_zaxis,"azimuth:",GLUI_SPINNER_FLOAT,zaxis_angles,CHANGE_ZAXIS,Motion_CB);
   SPINNER_zaxis_angles[1] = glui_motion->add_spinner_to_panel(PANEL_change_zaxis,"elevation:",GLUI_SPINNER_FLOAT,zaxis_angles+1,CHANGE_ZAXIS,Motion_CB);
-  SPINNER_zaxis_angles[2] = glui_motion->add_spinner_to_panel(PANEL_change_zaxis,"angle (about axis):",GLUI_SPINNER_FLOAT,zaxis_angles+2,CHANGE_ZAXIS,Motion_CB);
+  SPINNER_zaxis_angles[2] = glui_motion->add_spinner_to_panel(PANEL_change_zaxis,"angle (about z axis):",GLUI_SPINNER_FLOAT,zaxis_angles+2,CHANGE_ZAXIS,Motion_CB);
   SPINNER_zaxis_angles[0]->set_float_limits(-180.0,180.0);
   SPINNER_zaxis_angles[1]->set_float_limits(-90.0,90.0);
   SPINNER_zaxis_angles[2]->set_float_limits(-180.0,180.0);
   if(have_gvec==1){
-    CHECKBOX_use_gvec = glui_motion->add_checkbox_to_panel(PANEL_change_zaxis,"Use gravity vector (GVEC)",&use_gvec,USE_GVEC,Motion_CB);
+    CHECKBOX_gvec_down = glui_motion->add_checkbox_to_panel(PANEL_change_zaxis,"Gravity vector down",&gvec_down,USE_GVEC,Motion_CB);
   }
-  CHECKBOX_showaxis = glui_motion->add_checkbox_to_panel(PANEL_change_zaxis,"Show axis",&showaxis);
+  CHECKBOX_showgravity = glui_motion->add_checkbox_to_panel(PANEL_change_zaxis,"Show gravity, axis vectors",&showgravity);
   Motion_CB(CHANGE_ZAXIS);
   changed_zaxis=0;
 #endif
@@ -959,7 +960,7 @@ extern "C" void Motion_CB(int var){
         az_elev = camera_current->az_elev;
         az_elev[0] = ROTATE_2axis->get_x();
         az_elev[1] = -ROTATE_2axis->get_y();
-        PRINTF("x=%f y=%f\n",az_elev[0],az_elev[1]);
+        if(gvec_down==1)update_gvec_down(0);
       }
       break;
     case WINDOWSIZE_LIST:
@@ -1145,7 +1146,7 @@ extern "C" void Motion_CB(int var){
 
   switch (var){
     case USE_GVEC:
-      if(use_gvec==1){
+      if(gvec_down==1){
         float vv[3];
 
         vv[0]=-gvec[0];
@@ -1161,6 +1162,8 @@ extern "C" void Motion_CB(int var){
           user_zaxis[0]=cos(DEG2RAD*(*az))*cos(DEG2RAD*(*elev));
           user_zaxis[1]=sin(DEG2RAD*(*az))*cos(DEG2RAD*(*elev));
           user_zaxis[2]=sin(DEG2RAD*(*elev));
+          LIST_viewpoints->set_int_val(EXTERNAL_LIST_ID);
+          Viewpoint_CB(LIST_VIEW);
         }
         glutPostRedisplay();
       }
@@ -1175,8 +1178,7 @@ extern "C" void Motion_CB(int var){
         user_zaxis[1]=sin(DEG2RAD*(*az))*cos(DEG2RAD*(*elev));
         user_zaxis[2]=sin(DEG2RAD*(*elev));
         changed_zaxis=1;
-        use_gvec=0;
-        update_gvec();
+        update_gvec_down(0);
       }
       break;
     case SET_VIEW_XYZ:

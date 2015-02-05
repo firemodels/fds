@@ -25,10 +25,12 @@
 
 #ifdef INMAIN
 SVEXTERN float gvec[3]={0.0,0.0,-9.8};
+SVEXTERN float gvecunit[3]={0.0,0.0,-1.0};
 #else
 SVEXTERN float gvec[3];
+SVEXTERN float gvecunit[3];
 #endif
-SVEXTERN int SVDECL(use_gvec,1),SVDECL(have_gvec,0),SVDECL(changed_zaxis,0),SVDECL(showaxis,0);
+SVEXTERN int SVDECL(update_have_gvec,0),SVDECL(gvec_down,1),SVDECL(have_gvec,0),SVDECL(changed_zaxis,0),SVDECL(showgravity,0);
 SVEXTERN float SVDECL(slice_line_contour_width,1.0);
 SVEXTERN int SVDECL(slice_contour_type,0);
 SVEXTERN int SVDECL(viscadopaque,0);

@@ -69,7 +69,7 @@ void Init(void){
     char name_external[32];
     strcpy(name_external,"external");
     init_camera(camera_external,name_external);
-    camera_external->view_id=1;
+    camera_external->view_id=EXTERNAL_LIST_ID;
   }
   if(camera_ini->defined==1){
     copy_camera(camera_current,camera_ini);

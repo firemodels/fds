@@ -5165,6 +5165,11 @@ void drawaxis(void){
   glColor3f(1.0,0.0,0.0);
   glVertex3f(xbar/2.0,ybar/2.0,zbar/2.0);
   glVertex3f(xbar/2.0+0.5,ybar/2.0,zbar/2.0);
+
+  glColor3fv(foregroundcolor);
+  glVertex3f(xbar/2.0,ybar/2.0,zbar/2.0);
+  glVertex3f(xbar/2.0+gvecunit[0],ybar/2.0+gvecunit[1],zbar/2.0+gvecunit[2]);
+
   glEnd();
 }
 

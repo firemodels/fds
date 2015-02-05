@@ -233,7 +233,7 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
 
     /* ++++++++++++++++++++++++ draw ticks +++++++++++++++++++++++++ */
 
-    if(showaxis==1){
+    if(showgravity==1){
       UNCLIP;
       drawaxis();
       SNIFF_ERRORS("after drawaxis");

@@ -1240,6 +1240,9 @@ void motion_CB(int xm, int ym){
   if(rotation_type==ROTATION_3AXIS&&(key_state == KEY_NONE||key_state == KEY_SHIFT)){
     update_mouseinfo(MOUSE_MOTION,xm,ym);
   }
+  if((rotation_type==ROTATION_2AXIS||rotation_type==ROTATION_3AXIS)&&gvec_down==1&&key_state == KEY_NONE){
+    update_gvec_down(0);
+  }
   Move_Scene(xm,ym);
 }
 
@@ -2911,6 +2914,10 @@ void Display_CB(void){
         break;
     }
   }
+  if(update_have_gvec==1){
+    update_have_gvec=0;
+    update_gvec_down(1);
+  }  
   if(update_smokecolorbar==1){
     update_smokecolorbar=0;
     SmokeColorBarMenu(fire_colorbar_index);
