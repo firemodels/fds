@@ -3,7 +3,7 @@
 
 % Generate fds summary data for scatterplots
 
-[exp_data] = csvread('../../Validation/FM_FPRF_Datacenter/Experimental_data/fm_exp.csv',1);
+[exp_data] = csvread('../../Validation/FM_FPRF_Datacenter/Experimental_Data/fm_exp.csv',1);
 
 % Low flow test
 [fds_data] = csvread('../../Validation/FM_FPRF_Datacenter/FDS_Output_Files/FM_Datacenter_Veltest_Low_devc.csv',13);
