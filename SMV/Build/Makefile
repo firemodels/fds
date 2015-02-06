@@ -91,7 +91,7 @@ SMV_LIBS_64 = $(WIN_LIBDIR_64)\glui.lib $(WIN_LIBDIR_64)\glut32.lib $(WIN_LIBDIR
 
 intel_win_64_db : INC = -I ../../source/include -I ../../source/shared -I ../../source/smokeview -I ../../source/glew
 intel_win_64_db : FFLAGS    = /Od /iface:stdref /fpp /nologo /debug:full /extend_source:132 /warn:unused /warn:nointerfaces /Qtrapuv /fp:strict /fp:except /traceback /check:all /stand:f08
-intel_win_64_db : CFLAGS    = /Od -Wall /ZI -D WIN32 -D pp_INTEL -D _CONSOLE -D X64 -D GLEW_STATIC -D PTW32_STATIC_LIB $(SMV_TESTFLAG)
+intel_win_64_db : CFLAGS    = /Od /Wall /debug:full /W4 /ZI -D WIN32 -D pp_INTEL -D _CONSOLE -D X64 -D GLEW_STATIC -D PTW32_STATIC_LIB $(SMV_TESTFLAG)
 intel_win_64_db : LFLAGS    = /F32768000 /DEBUG
 intel_win_64_db : CC        = icl
 intel_win_64_db : CPP       = icl
