@@ -11,6 +11,7 @@
 #  = Input variables =
 #  ===================
 
+SMOKEBOT_USERNAME="smokebot"
 SMOKEBOT_QUEUE=smokebot
 MAKEMOVIES=
 RUNAUTO=
@@ -93,8 +94,6 @@ then
   platform2="OSX"
 fi
 export platform
-
-SMOKEBOT_USERNAME="smokebot"
 
 cd
 SMOKEBOT_HOME_DIR="`pwd`"
