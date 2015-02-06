@@ -147,16 +147,18 @@ TIME_LIMIT_EMAIL_NOTIFICATION="unsent"
 
 run_auto()
 {
+  SVN_STATUSDIR=~/.smokebot
   SMV_SOURCE=$FDS_SVNROOT/SMV/source
-  SVN_SMVFILE=$FDS_SVNROOT/smv_revision
-  SVN_SMVLOG=$FDS_SVNROOT/smv_log
+  SVN_SMVFILE=$SVN_STATUSDIR/smv_revision
+  SVN_SMVLOG=$SVN_STATUSDIR/smv_log
 
   FDS_SOURCE=$FDS_SVNROOT/FDS_Source
-  SVN_FDSFILE=$FDS_SVNROOT/fds_revision
-  SVN_FDSLOG=$FDS_SVNROOT/FDS_log
+  SVN_FDSFILE=$SVN_STATUSDIR/fds_revision
+  SVN_FDSLOG=$SVN_STATUSDIR/FDS_log
 
-  MESSAGE_FILE=$FDS_SVNROOT/message
+  MESSAGE_FILE=$SVN_STATUSDIR/message
 
+  MKDIR $SVN_STATUSDIR
   cd $SMV_SOURCE
   svn update > /dev/null
   THIS_SMVSVN=`svn info | tail -3 | head -1 | awk '{print $4}'`
