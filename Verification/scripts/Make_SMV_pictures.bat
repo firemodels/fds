@@ -58,19 +58,19 @@ cd %smvug%\SCRIPT_FIGURES
 echo.
 echo erasing Smokeview User guide scripted figures and info files
 
-erase *.png
-erase *.help
-erase smokeview.version
-erase smokediff.version
-erase smokezip.version
-erase background.version
-erase wind2fds.version
+erase *.png 1> Nul 2>&1
+erase *.help 1> Nul 2>&1
+erase smokeview.version 1> Nul 2>&1
+erase smokediff.version 1> Nul 2>&1
+erase smokezip.version 1> Nul 2>&1
+erase background.version 1> Nul 2>&1
+erase wind2fds.version 1> Nul 2>&1
 
-erase smokeview.help
-erase smokediff.help
-erase smokezip.help
-erase background.help
-erase wind2fds.help
+erase smokeview.help 1> Nul 2>&1
+erase smokediff.help 1> Nul 2>&1
+erase smokezip.help 1> Nul 2>&1
+erase background.help 1> Nul 2>&1
+erase wind2fds.help 1> Nul 2>&1
 
 echo.
 echo Creating Smokeview User guide info files

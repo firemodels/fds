@@ -415,10 +415,15 @@ set DIFF_RUNVV=%duration%
 
 call :GET_TIME
 set MAKEPICS_beg=%current_time% 
-echo Stage 5 - Making Smokeview pictures
+echo Stage 5 - Making pictures
+echo             FDS verification cases
 
 cd %svnroot%\Verification\
 call MAKE_FDS_pictures 64 1> %OUTDIR%\stage5.txt 2>&1
+
+echo             Smokeview verification cases
+cd %svnroot%\Verification\scripts
+call MAKE_SMV_pictures 64 0 1>> %OUTDIR%\stage5.txt 2>&1
 
 call :find_errors "error" %OUTDIR%\stage5.txt "Stage 5, Smokeview image generation"
 
