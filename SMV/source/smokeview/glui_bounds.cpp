@@ -1394,6 +1394,9 @@ extern "C" void PLOT3D_CB(int var){
    }
    updateglui();
    break;
+  case VALMIN:
+  case VALMAX:
+    break;
   default:
     ASSERT(FFALSE);
     break;
