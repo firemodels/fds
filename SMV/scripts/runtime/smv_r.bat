@@ -1,2 +1,2 @@
 @echo off
-%USERPROFILE%\fds-smv\smv\build\intel_win_64\smokeview_win_64.exe %*
+%USERPROFILE%\FDS-SMV\SMV\Build\intel_win_64\smokeview_win_64.exe %*
