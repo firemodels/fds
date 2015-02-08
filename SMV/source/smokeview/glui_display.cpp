@@ -500,7 +500,12 @@ extern "C" void glui_labels_setup(int main_window){
 
   PANEL_extreme = glui_labels->add_panel_to_panel(ROLLOUT_scene,"",GLUI_PANEL_NONE);
 
-  PANEL_extreme2 = glui_labels->add_panel_to_panel(PANEL_extreme,"Highlight extreme data");
+  if(use_data_extremes==1){
+    PANEL_extreme2 = glui_labels->add_panel_to_panel(PANEL_extreme,"Highlight extreme data");
+  }
+  else{
+    PANEL_extreme2 = glui_labels->add_panel_to_panel(PANEL_extreme,"Highlight extreme data (not supported with OpenGL 1.x)");
+  }
 
   PANEL_extreme_min = glui_labels->add_panel_to_panel(PANEL_extreme2,"",GLUI_PANEL_NONE);
   CHECKBOX_show_extreme_mindata=glui_labels->add_checkbox_to_panel(PANEL_extreme_min,_("Color below min"),&show_extreme_mindata,COLORBAR_EXTREME,Extreme_CB);
@@ -524,6 +529,13 @@ extern "C" void glui_labels_setup(int main_window){
   SPINNER_up_red->set_int_limits(0,255);
   SPINNER_up_green->set_int_limits(0,255);
   SPINNER_up_blue->set_int_limits(0,255);
+
+  if (use_data_extremes == 0){
+    PANEL_extreme2->disable();
+    CHECKBOX_show_extreme_maxdata->set_int_val(0);
+    CHECKBOX_show_extreme_mindata->set_int_val(0);
+    Extreme_CB(COLORBAR_EXTREME_RGB);
+  }
   colorbar_global2local();
 
   // -------------- Show/Hide Loaded files -------------------

@@ -413,6 +413,7 @@ int get_opengl_version(char *version_label){
     if(version_label2[i]=='.')version_label2[i]=' ';
   }
   sscanf(version_label2,"%i %i %i",&major,&minor,&subminor);
+  if (major == 1)use_data_extremes = 0;
   return 100*major+10*minor+subminor;
 }
 

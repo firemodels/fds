@@ -31,6 +31,12 @@ void getBoundaryColors(float *t, int nt, unsigned char *it,
   int itt;
   float local_tmin, local_tmax, tmin2, tmax2;
   int local_skip;
+  int extreme_data_offset=1, colorbar_offset=0;
+
+  if (use_data_extremes == 0){
+    extreme_data_offset = 0;
+    colorbar_offset=2;
+  }
 
   tmin2 = *t;
   tmax2 = *t;
@@ -59,7 +65,7 @@ void getBoundaryColors(float *t, int nt, unsigned char *it,
 
   range = local_tmax - local_tmin;
   factor = 0.0f;
-  if(range!=0.0f)factor = (ndatalevel-2)/range;
+  if(range!=0.0f)factor = (ndatalevel-2*extreme_data_offset)/range;
   for(n=0;n<nt;n++){
     float val;
 
@@ -74,12 +80,9 @@ void getBoundaryColors(float *t, int nt, unsigned char *it,
       *extreme_max=1;
     }
     else{
-      itt=1+(int)(factor*(val-local_tmin));
+      itt=extreme_data_offset+(int)(factor*(val-local_tmin));
     }
-    if(itt<0)itt=0;
-    if(itt>ndatalevel-1)itt=ndatalevel-1;
-    *it=itt;
-    it++;
+    *it++ = CLAMP(itt, colorbar_offset, ndatalevel - 1 - colorbar_offset);
     t++;
   }
   frexp10(local_tmax, &expmax);
@@ -127,6 +130,12 @@ void getBoundaryColors2(float *t, int nt, unsigned char *it,
   int itt;
   float local_tmin, local_tmax, tmin2, tmax2;
   int local_skip;
+  int extreme_data_offset=1, colorbar_offset=0;
+
+  if (use_data_extremes == 0){
+    extreme_data_offset = 0;
+    colorbar_offset=2;
+  }
 
   tmin2 = *t;
   tmax2 = *t;
@@ -153,7 +162,7 @@ void getBoundaryColors2(float *t, int nt, unsigned char *it,
   range = local_tmax - local_tmin;
   factor = 0.0f;
   if(range!=0.0f){
-    factor = (ndatalevel-2)/range;
+    factor = (ndatalevel-2*extreme_data_offset)/range;
   }
   for(n=0;n<nt;n++){
     float val;
@@ -168,12 +177,9 @@ void getBoundaryColors2(float *t, int nt, unsigned char *it,
       itt=ndatalevel-1;
     }
     else{
-      itt=1+(int)(0.5+(factor*(*t-local_tmin)));
+      itt=extreme_data_offset+(int)(0.5+(factor*(*t-local_tmin)));
     }
-    if(itt<0)itt=0;
-    if(itt>ndatalevel-1)itt=ndatalevel-1;
-    *it=itt;
-    it++;
+    *it++ = CLAMP(itt, colorbar_offset, ndatalevel - 1 - colorbar_offset);
     t++;
   }
 }
@@ -185,16 +191,25 @@ void remap_patchdata(patchdata *patchi,float valmin, float valmax, int *extreme_
   mesh *meshi;
   unsigned char *cpatchval;
   int npqq_local;
+  int upper, lower;
+  int extreme_data_offset=1, colorbar_offset=0;
+
+  if (use_data_extremes == 0){
+    extreme_data_offset = 0;
+    colorbar_offset=2;
+  }
 
   meshi = meshinfo + patchi->blocknumber;
   cpatchval = meshi->cpatchval;
   npqq_local = meshi->npatch_times*meshi->npatchsize;
+  upper = 255 - extreme_data_offset;
+  lower = extreme_data_offset;
   for(i=0;i<npqq_local;i++){
     float val;
     int ival;
 
     ival = cpatchval[i];
-    val = (patchi->local_valmin*(254-ival)+patchi->local_valmax*(ival-1))/253.0;
+    val = (patchi->local_valmin*(upper-ival)+patchi->local_valmax*(ival-lower))/(float)(upper-lower);
 
     if(val<valmin){
       ival=0;
@@ -205,7 +220,7 @@ void remap_patchdata(patchdata *patchi,float valmin, float valmax, int *extreme_
       *extreme_max=1;
     }
     else{
-      ival=1+253*(val-valmin)/(valmax-valmin);
+      ival=extreme_data_offset+(254-extreme_data_offset)*(val-valmin)/(valmax-valmin);
     }
     cpatchval[i]=ival;
   }
@@ -263,6 +278,12 @@ void getBoundaryColors3(patchdata *patchi, float *t, int nt, unsigned char *it,
   int expmin, expmax;
   int itt;
   float new_tmin, new_tmax, tmin2, tmax2;
+  int extreme_data_offset=1, colorbar_offset=0;
+
+  if (use_data_extremes == 0){
+    extreme_data_offset = 0;
+    colorbar_offset=2;
+  }
 
   update_patch_bounds(patchi);
 
@@ -298,7 +319,7 @@ void getBoundaryColors3(patchdata *patchi, float *t, int nt, unsigned char *it,
   CheckMemory;
   range = new_tmax - new_tmin;
   factor = 0.0f;
-  if(range!=0.0f)factor = 253/range;
+  if(range!=0.0f)factor = (float)(255-2*extreme_data_offset)/range;
   for(n=0;n<nt;n++){
     float val;
 
@@ -313,12 +334,9 @@ void getBoundaryColors3(patchdata *patchi, float *t, int nt, unsigned char *it,
       *extreme_max=1;
     }
     else{
-      itt=1+(int)(factor*(val-new_tmin));
+      itt=extreme_data_offset+(int)(factor*(val-new_tmin));
     }
-    if(itt<0)itt=0;
-    if(itt>255)itt=255;
-    *it=itt;
-    it++;
+    *it++=CLAMP(itt,colorbar_offset,255-colorbar_offset);
     t++;
   }
   CheckMemory;
@@ -484,6 +502,12 @@ void getPart5Colors(partdata *parti, int nlevel){
   // float *diameter_data;
   float *length_data, *azimuth_data, *elevation_data;
   float *u_vel_data, *v_vel_data, *w_vel_data;
+  int extreme_data_offset=1, colorbar_offset=0;
+
+  if (use_data_extremes == 0){
+    extreme_data_offset = 0;
+    colorbar_offset=2;
+  }
 
   datacopy = parti->data5;
   for(i=0;i<parti->ntimes;i++){
@@ -534,11 +558,9 @@ void getPart5Colors(partdata *parti, int nlevel){
               irval=255;
             }
             else{
-              irval = 1+253*(val-valmin)/dval;
+              irval = extreme_data_offset+(float)(255-2*extreme_data_offset)*(val-valmin)/dval;
             }
-            if(irval<0)irval=0;
-            if(irval>255)irval=255;
-            *irvals++=irval;
+            *irvals++=CLAMP(irval,colorbar_offset,255-colorbar_offset);
           }
         }
       }
@@ -706,6 +728,12 @@ void getPartColors(const float *t, int local_skip, int nt,
   const unsigned char *isprinkcopy;
   const float *tcopy;
   unsigned char *itcopy;
+  int extreme_data_offset=1, colorbar_offset=0;
+
+  if (use_data_extremes == 0){
+    extreme_data_offset = 0;
+    colorbar_offset=2;
+  }
 
   isprinkcopy=isprink;
   itcopy = it;
@@ -770,7 +798,7 @@ void getPartColors(const float *t, int local_skip, int nt,
   range = local_tmax - local_tmin;
   factor=0.0f;
   if(range!=0.0f){
-    factor = 253./range;
+    factor = (float)(255-2*extreme_data_offset)/range;
   }
   for(n=local_skip;n<nt;n++){
     if((particle_type==1&&*isprink==0)||(*isprink==1&&droplet_type==1)){
@@ -784,13 +812,9 @@ void getPartColors(const float *t, int local_skip, int nt,
         itt=255;
       }
       else{
-        itt=1+(int)(factor*(*t-local_tmin));
+        itt=extreme_data_offset+(int)(factor*(*t-local_tmin));
       }
-      if(itt<0)itt=0;
-      if(itt>255){
-        itt=255;
-      }
-      *it = itt;
+      *it = CLAMP(itt,colorbar_offset,255-colorbar_offset);
     }
     if(droplet_type==0&&*isprink==1){
       *it=rgb_blue;
@@ -861,13 +885,19 @@ void getZoneColors(const float *t, int nt, unsigned char *it,
   float local_tmin, local_tmax;
   float range;
   float tval;
+  int extreme_data_offset=1, colorbar_offset=0;
+
+  if (use_data_extremes == 0){
+    extreme_data_offset = 0;
+    colorbar_offset=2;
+  }
 
   local_tmin = ttmin;
   local_tmax = ttmax;
 
   dt = local_tmax - local_tmin;
   factor=0.0f;
-  if(dt!=0.0f)factor = (nlevel_full-2)/dt;
+  if(dt!=0.0f)factor = (nlevel_full-2*extreme_data_offset)/dt;
   for(n=0;n<nt;n++){
     float val;
 
@@ -879,12 +909,9 @@ void getZoneColors(const float *t, int nt, unsigned char *it,
       itt=nlevel_full-1;
     }
     else{
-      itt=1+(int)(factor*(val-local_tmin));
+      itt=extreme_data_offset+(int)(factor*(val-local_tmin));
     }
-    if(itt<0)itt=0;
-    if(itt>nlevel_full-1)itt=nlevel_full-1;
-    *it=itt;
-    it++;
+    *it++=CLAMP(itt,colorbar_offset,nlevel_full-1-colorbar_offset);
     t++;
   }
 
@@ -944,6 +971,12 @@ void getPlot3DColors(int plot3dvar, int settmin, float *ttmin, int settmax, floa
   char *iblank;
   int i;
   int ntotal;
+  int extreme_data_offset=1, colorbar_offset=0;
+
+  if (use_data_extremes == 0){
+    extreme_data_offset = 0;
+    colorbar_offset=2;
+  }
 
   tmin2=*ttmin;
   tmax2=*ttmax;
@@ -1002,7 +1035,7 @@ void getPlot3DColors(int plot3dvar, int settmin, float *ttmin, int settmax, floa
   tminorig=local_tmin;
   tmaxorig=local_tmax;
   if(range!=0.0f){
-    factor = (float)(ndatalevel-2)/range;
+    factor = (float)(ndatalevel-2*extreme_data_offset)/range;
   }
   else{
     factor = 0.0f;
@@ -1030,11 +1063,9 @@ void getPlot3DColors(int plot3dvar, int settmin, float *ttmin, int settmax, floa
           *extreme_max=1;
         }
         else{
-          itt=1+(int)(factor*(val-local_tmin));
+          itt=extreme_data_offset+(int)(factor*(val-local_tmin));
         }
-        if(itt<0)itt=0;
-        if(itt>ndatalevel-1)itt=ndatalevel-1;
-        *iq++=itt;
+        *iq++=CLAMP(itt,colorbar_offset,ndatalevel-1-colorbar_offset);
         q++;
       }
     }
@@ -1116,12 +1147,18 @@ void getSliceColors(const float *t, int nt, unsigned char *it,
   float range;
   int expmax,expmin;
   int itt;
+  int extreme_data_offset=1, colorbar_offset=0;
+
+  if (use_data_extremes == 0){
+    extreme_data_offset = 0;
+    colorbar_offset=2;
+  }
 
   range = local_tmax-local_tmin;
   *extreme_min=0;
   *extreme_max=0;
   if(range!=0.0f){
-    factor = (float)(ndatalevel-2)/range;
+    factor = (float)(ndatalevel-2*extreme_data_offset)/range;
   }
    else{
      factor = 0.0f;
@@ -1140,12 +1177,9 @@ void getSliceColors(const float *t, int nt, unsigned char *it,
       *extreme_max=1;
     }
     else{
-      itt=1+(int)(factor*(val-local_tmin));
+      itt=extreme_data_offset+(int)(factor*(val-local_tmin));
     }
-    if(itt<0)itt=0;
-    if(itt>ndatalevel-1)itt=ndatalevel-1;
-    *it=itt;
-    it++;
+    *it++ = CLAMP(itt, colorbar_offset, ndatalevel - 1 - colorbar_offset);
     t++;
   }
 

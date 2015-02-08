@@ -398,7 +398,7 @@ void remapcolorbar(colorbardata *cbi){
     colorbar[2]=rgb_below_min[2];
   }
   if(show_extreme_maxdata==1){
-    colorbar[3*255]=rgb_above_max[0];
+    colorbar[0+3*255]=rgb_above_max[0];
     colorbar[1+3*255]=rgb_above_max[1];
     colorbar[2+3*255]=rgb_above_max[2];
   }

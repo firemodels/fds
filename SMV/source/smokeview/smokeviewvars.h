@@ -23,6 +23,7 @@
 #include "smokeheaders.h"
 #include "threader.h"
 
+SVEXTERN int SVDECL(use_data_extremes, 1);
 #ifdef INMAIN
 SVEXTERN float gvec[3]={0.0,0.0,-9.8};
 SVEXTERN float gvecunit[3]={0.0,0.0,-1.0};
