@@ -413,6 +413,12 @@ set DIFF_RUNVV=%duration%
 ::                           stage 5
 :: -------------------------------------------------------------
 
+if exist %emailexe% (
+  echo "making pictures on %COMPUTERNAME% %revisionstring%" > %infofile%
+  echo "  start time: %TIME_beg%" >> %infofile%
+  echo "current time: %RUNVV_end%" >> %infofile%
+  call %email% %mailToFDSDebug% "making pictures on %COMPUTERNAME% %revisionstring%" %infofile%
+)
 call :GET_TIME
 set MAKEPICS_beg=%current_time% 
 echo Stage 5 - Making pictures
