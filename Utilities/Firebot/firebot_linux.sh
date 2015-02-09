@@ -43,6 +43,7 @@ fi
 
 # Load mailing list for status report
 source $FIREBOT_DIR/firebot_email_list.sh
+mailToFDS="$mailToFDS $mailFromFDS"
 
 function usage {
 echo "firebot.sh [ -q queue_name -r revision_number -s -u svn_username -v max_validation_processes -y ]"
