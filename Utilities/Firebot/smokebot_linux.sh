@@ -1199,7 +1199,7 @@ save_build_status()
 email_build_status()
 {
    if [[ "$THIS_FDS_FAILED" == "1" ]] ; then
-     mailTo=$mailToFDS
+     mailTo="$mailToFDS $mailFromSMV"
    fi
    echo $THIS_FDS_FAILED>$FDS_STATUS_FILE
    stop_time=`date`
