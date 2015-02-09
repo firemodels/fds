@@ -95,7 +95,7 @@ case $OPTION in
    MAX_VALIDATION_PROCESSES="$OPTARG"
    LAUNCH_MORE_CASES=1
    # Set Validationbot email list
-   mailToFDS=$mailToFDS_verbose
+   mailToFDS="$mailToFDS_verbose $mailFromFDS"
    ;;
   y)
    RUN_AS_ANOTHER_USER=true
