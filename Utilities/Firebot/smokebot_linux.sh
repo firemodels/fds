@@ -126,6 +126,7 @@ mailTo=$mailToSMV
 if [[ "$LAST_FDS_FAILED" == "1" ]] ; then
   mailTo=$mailToFDS
 fi
+mailTo="$mailTo $mailFromSMV"
 
 JOBPREFIX=SB_
 
