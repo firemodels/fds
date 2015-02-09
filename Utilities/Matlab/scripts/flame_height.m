@@ -4,11 +4,13 @@
 %
 % replaces old flame_height.f90
 %
-% integrates HRRPUL(z) from *_line.csv file to determine L_f/D (normalized
-% flame height)
+% integrates HRRPUL(z) from *_line.csv file to determine L_f/D (normalized flame height)
 
 %close all
 %clear all
+
+% confirm heat release rate
+check_hrr
 
 addpath('../../Validation/Heskestad_Flame_Height/FDS_Output_Files/');
 
@@ -58,7 +60,7 @@ for i=1:16 % hrr loop
             L(j) = z(k-1)+dz*(f*Qdot(i)-hrr(k-1))/(hrr(k)-hrr(k-1));
         else
             L(j) = dz*f*Qdot(i)/hrr(k);
-		end
+        end
         
     end % resolution loop
     
