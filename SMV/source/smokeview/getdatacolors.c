@@ -36,6 +36,7 @@ void getBoundaryColors(float *t, int nt, unsigned char *it,
   if (use_data_extremes == 0){
     extreme_data_offset = 0;
     colorbar_offset=2;
+    colorbar_offset = 0; // test
   }
 
   tmin2 = *t;
