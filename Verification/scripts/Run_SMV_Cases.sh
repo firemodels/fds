@@ -197,13 +197,13 @@ fi
 
 is_file_installed $BACKGROUND
 
-if [ "$RUN_SMV" == "1" ] ; then
-  cd $SVNROOT/Verification
-  scripts/SMV_Cases.sh
-fi
 if [ "$RUN_GEOM" == "1" ] ; then
   cd $SVNROOT/Verification
   scripts/SMV_geom_Cases.sh
+fi
+if [ "$RUN_SMV" == "1" ] ; then
+  cd $SVNROOT/Verification
+  scripts/SMV_Cases.sh
 fi
 if [ "$RUN_MPI" == "1" ] ; then
   cd $SVNROOT/Verification
