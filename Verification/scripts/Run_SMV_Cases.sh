@@ -36,7 +36,8 @@ echo "     default: 64"
 echo "     other options: 32"
 echo "-q queue_name - run cases using the queue queue_name"
 echo "     default: batch"
-echo "     other options: batch, fire60s, fire70s, vis"
+echo "     other options: vis"
+echo "-r - run only regular smokeview cases"
 echo "-s - stop FDS runs"
 echo "-S - run only cases using a single process"
 echo "-u - use installed versions of utilities background and wind2fds"
@@ -65,7 +66,7 @@ cd $CURDIR/..
 
 
 use_installed="0"
-while getopts 'dEghj:Mm:o:p:q:Ssu' OPTION
+while getopts 'dEghj:Mm:o:p:q:rSsu' OPTION
 do
 case $OPTION in
   d)
@@ -101,6 +102,11 @@ case $OPTION in
    ;;
   q)
    queue="$OPTARG"
+   ;;
+  r)
+   RUN_SMV=1
+   RUN_MPI=0
+   RUN_GEOM=0
    ;;
   s)
    stop_cases=true
@@ -197,13 +203,13 @@ fi
 
 is_file_installed $BACKGROUND
 
-if [ "$RUN_GEOM" == "1" ] ; then
-  cd $SVNROOT/Verification
-  scripts/SMV_geom_Cases.sh
-fi
 if [ "$RUN_SMV" == "1" ] ; then
   cd $SVNROOT/Verification
   scripts/SMV_Cases.sh
+fi
+if [ "$RUN_GEOM" == "1" ] ; then
+  cd $SVNROOT/Verification
+  scripts/SMV_geom_Cases.sh
 fi
 if [ "$RUN_MPI" == "1" ] ; then
   cd $SVNROOT/Verification
