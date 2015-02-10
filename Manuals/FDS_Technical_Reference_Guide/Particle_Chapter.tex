@@ -274,23 +274,28 @@ where $A$ is the surface area of the particle and $\dx \, \dy \, \dz$ is the vol
 The net radiative heat flux onto the surface of the particle is
 \be \dq_{\rm r,p}'' = \epsilon \left( \frac{U_{ijk}}{4} - \sigma T_{\rm p}^4 \right) \ee
 
-\subsection{Porous Media (Screens, Metal Meshes, and Similar Materials)}
+\subsection{Porous Media (Filters, Screens, Metal Meshes, and Similar Materials)}
 
-Catwalk grating, expanded metal mesh, window screens, and similar thin porous materials are commonly found in buildings.  For a typical calculation, the dimensions of the holes in the porous material and the material surrounding them are going to be much smaller than the grid size.  There is, therefore, no easy way to model these materials using solid obstructions. Lagrangian particles can; however, be used to represent both the drag and the mass of these materials. Lagrangian particles arranged in a plane can represent a window screen, for example. By modifying the particle drag law, the particles can impose drag appropriate for a thin porous material.  The pressure drop across a screen of thickness $l$ is given by~\cite{Bartzanas:1}:
+Filters, pebble beds, screens, grating ,and similar flow obstructions can all be considered
+as type of porous media. In general, material forming the porous media will have dimensions will below that of the grid size (e.g. 100 micron diameter filter fibers on a multi-cm grid).  There is, therefore, no easy way to model these materials using solid obstructions. Lagrangian particles can; however, be used to represent both the drag and the mass of these materials. By placing particles in a plane or volume and assigning the particles a porous media drag law, the effects of the porous media can be modeled. The pressure drop over a length $\Delta x$ through porous media is given by \cite{VafaiTien:1981}:
 \be
-   \frac {\Delta p}{l} =  \frac{\mu}{K} u + \rho \frac{Y}{\sqrt{K}} \, u^2
+   \frac {\Delta p}{\Delta x} =  \frac{\mu}{K} u + \rho \frac{Y}{\sqrt{K}} \, u^2
 \ee
-where $K$ is a permeability constant, $Y$ is an inertial constant, $u$ is the velocity normal to the screen, $\rho$ is the density, and $\mu$ is the viscosity of the gas.  $K$ and $Y$ are functions of the screen porosity (free area/total area), $\phi$:
+where $K$ is a permeability constant, $Y$ is an inertial constant, $u$ is the velocity normal to the screen, $\rho$ is the density, and $\mu$ is the viscosity of the gas. In the case of a non-isotropic media, the constants $K$ and $Y$ will vary with the flow direction.
+The force vector $\bof_{\rm b}$ in Eq.~(\ref{momentum}) represents the momentum transferred from the screen to the gas:
+\be
+   \bof_{\rm b} = \left( \frac{\mu}{K} + \rho \frac{Y}{\sqrt{K}} |\bu| \right) \bu
+\ee
+
+For the special case of screens, gratings, and similar thin porous materials the permeability and inertial constants have been experimentally correlated to screen porosity.  $K$ and $Y$ are functions of the screen porosity (free area/total area), $\phi$:\cite{Bartzanas:1}:
 \be
    K = 3.44 \times 10^{-9} \; \phi^{1.6} \; \; \hbox{m}^2 \quad ; \quad Y = 0.043 \, \phi^{2.13}
 \ee
-The force vector $\bof_{\rm b}$ in Eq.~(\ref{momentum}) represents the momentum transferred from the screen to the gas:
+For a screen the force vector must account for the actual screen thickness, $l$, being less than that of the grid cell:
 \be
    \bof_{\rm b} = l \; \left( \frac{\mu}{K} + \rho \frac{Y}{\sqrt{K}} |\bu| \right) \left( \frac{u}{\dx} , \frac{v}{\dy} , \frac{w}{\dz} \right)
 \ee
 This force term essentially spreads the pressure drop over the width of a grid cell.
-
-
 
 
 \section{Turbulent Dispersion}
