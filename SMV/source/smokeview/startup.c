@@ -1246,7 +1246,6 @@ void initvars(void){
 
   direction_color_ptr=getcolorptr(direction_color);
   arg_iblank=0;
-  use_iblank=1;
   show_slice_terrain=0;
 
   shooter_uvw[0]=0.0;

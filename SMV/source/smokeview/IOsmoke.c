@@ -354,7 +354,7 @@ void drawsmoke_frame(void){
 /* ------------------ readsmoke3d ------------------------ */
 
 void readsmoke3d(int ifile,int flag, int *errorcode){
-  smoke3ddata *smoke3di,*smoke3dj;
+  smoke3ddata *smoke3di;
   FILE *SMOKE3DFILE;
   int error;
   int ncomp_smoke_total;
@@ -404,6 +404,8 @@ void readsmoke3d(int ifile,int flag, int *errorcode){
 
     hrrpuv_loaded=0;
     for(j=0;j<nsmoke3dinfo;j++){
+      smoke3ddata *smoke3dj;
+
       smoke3dj = smoke3dinfo + j;
       if(smoke3dj->loaded==1){
         Read3DSmoke3DFile=1;
@@ -411,6 +413,27 @@ void readsmoke3d(int ifile,int flag, int *errorcode){
           hrrpuv_loaded=1;
         }
         break;
+      }
+    }
+    if (meshi->iblank_smoke3d != NULL){
+      int free_iblank_smoke3d;
+
+      free_iblank_smoke3d = 1;
+      for (j = 0; j < nsmoke3dinfo; j++){
+        smoke3ddata *smoke3dj;
+        mesh *meshj;
+
+        smoke3dj = smoke3dinfo + j;
+        meshj = meshinfo + smoke3dj->blocknumber;
+        if (smoke3dj != smoke3di && smoke3dj->loaded == 1 && meshj == meshi){
+          free_iblank_smoke3d = 0;
+          break;
+        }
+      }
+      if (free_iblank_smoke3d == 1){
+        FREEMEMORY(meshi->iblank_smoke3d);
+        meshi->iblank_smoke3d_defined = 0;
+        update_makeiblank_smoke3d=1;
       }
     }
     update_makeiblank_smoke3d=1;
@@ -575,7 +598,7 @@ void readsmoke3d(int ifile,int flag, int *errorcode){
   }
 
   Read3DSmoke3DFile=1;
-  makeiblank_smoke3d();
+  update_makeiblank_smoke3d=1;
   plotstate=getplotstate(DYNAMIC_PLOTS);
   Update_Times();
 #ifdef pp_CULL
@@ -4817,32 +4840,20 @@ unsigned char adjustalpha(unsigned char alpha, float factor){
 /* ------------------ makeiblanksmoke3d ------------------------ */
 
 void makeiblank_smoke3d(void){
-  smoke3ddata *smoke3di;
-  mesh *smokemesh;
-  int ibar, jbar, kbar, ijksize;
-  unsigned char *iblank_smoke3d;
-  blockagedata *bc;
-  int ii;
-  int i, j, k;
+  int i, ii;
   int ic;
-  int nx, ny, nxy;
-  int ijk;
-  float *xplt, *yplt, *zplt;
-  float x, y, z;
-  float dx, dy, dz;
 
+  printf("initializing 3D smoke/hrrpuv blanking array - ");
   update_makeiblank_smoke3d=0;
-  for(i=0;i<nmeshes;i++){
-    smokemesh = meshinfo + i;
-    smokemesh->smokeloaded=0;
-  }
   for(i=0;i<nsmoke3dinfo;i++){
+    smoke3ddata *smoke3di;
+    mesh *smokemesh;
+    int nx, ny, nxy;
+    int ibar, jbar, kbar;
+    int ijksize;
+
     smoke3di = smoke3dinfo + i;
     smokemesh = meshinfo + smoke3di->blocknumber;
-
-    if(smoke3di->loaded==1){
-      smokemesh->smokeloaded=1;
-    }
 
     ibar = smokemesh->ibar;
     jbar = smokemesh->jbar;
@@ -4853,7 +4864,9 @@ void makeiblank_smoke3d(void){
     nxy = nx*ny;
 
     if(use_iblank==1&&smoke3di->loaded==1&&smokemesh->iblank_smoke3d==NULL){
-      NewMemory( (void **)&iblank_smoke3d,ijksize*sizeof(unsigned char));
+      unsigned char *iblank_smoke3d;
+
+      NewMemory((void **)&iblank_smoke3d, ijksize*sizeof(unsigned char));
       smokemesh->iblank_smoke3d=iblank_smoke3d;
     }
   }
@@ -4862,10 +4875,20 @@ void makeiblank_smoke3d(void){
 #define LOWERMESHES 1
 
   for(ic=nmeshes-1;ic>=0;ic--){
+    mesh *smokemesh;
+    unsigned char *iblank_smoke3d;
+    float *xplt, *yplt, *zplt;
+    float dx, dy, dz;
+    int nx, ny, nxy;
+    int ibar, jbar, kbar;
+    int ijksize;
+    int j, k;
+
     smokemesh = meshinfo + ic;
-    if(smokemesh->smokeloaded==0)continue;
     iblank_smoke3d = smokemesh->iblank_smoke3d;
+   // if(iblank_smoke3d==NULL||smokemesh->iblank_smoke3d_defined==1)continue;
     if(iblank_smoke3d==NULL)continue;
+    smokemesh->iblank_smoke3d_defined = 1;
 
     xplt=smokemesh->xplt;
     yplt=smokemesh->yplt;
@@ -4889,113 +4912,125 @@ void makeiblank_smoke3d(void){
     iblank_smoke3d=smokemesh->iblank_smoke3d;
 
     for(i=0;i<=smokemesh->ibar;i++){
-    for(j=0;j<=smokemesh->jbar;j++){
-    for(k=0;k<=smokemesh->kbar;k++){
-      ijk = IJKNODE(i,j,k);
-      x = xplt[i];
-      y = yplt[j];
-      z = zplt[k];
-      if(inmesh_smoke(x,y,z,ic-1,LOWERMESHES)>=0)iblank_smoke3d[ijk]=SOLID;
-    }
-    }
+      for(j=0;j<=smokemesh->jbar;j++){
+        for(k=0;k<=smokemesh->kbar;k++){
+          float x, y, z;
+          int ijk;
+
+          ijk = IJKNODE(i, j, k);
+          x = xplt[i];
+          y = yplt[j];
+          z = zplt[k];
+          if(inmesh_smoke(x,y,z,ic-1,LOWERMESHES)>=0)iblank_smoke3d[ijk]=SOLID;
+        }
+      }
     }
 
     for(ii=0;ii<smokemesh->nbptrs;ii++){
-      bc=smokemesh->blockageinfoptrs[ii];
+      blockagedata *bc;
+
+      bc = smokemesh->blockageinfoptrs[ii];
       if(bc->invisible==1||bc->hidden==1||bc->nshowtime!=0)continue;
       for(i=bc->ijk[IMIN];i<=bc->ijk[IMAX];i++){
-      for(j=bc->ijk[JMIN];j<=bc->ijk[JMAX];j++){
-      for(k=bc->ijk[KMIN];k<=bc->ijk[KMAX];k++){
-        ijk = IJKNODE(i,j,k);
-        iblank_smoke3d[ijk]=SOLID;
-      }
-      }
+        for(j=bc->ijk[JMIN];j<=bc->ijk[JMAX];j++){
+          for(k=bc->ijk[KMIN];k<=bc->ijk[KMAX];k++){
+            int ijk;
+
+            ijk = IJKNODE(i, j, k);
+            iblank_smoke3d[ijk]=SOLID;
+          }
+        }
       }
     }
 
     for(j=0;j<=jbar;j++){
-    for(k=0;k<=kbar;k++){
-      ijk = IJKNODE(0,j,k);
-      x = xplt[0];
-      y = yplt[j];
-      z = zplt[k];
-      if(inmesh_smoke(x-dx,y,z,ic,ALLMESHES)<0){
-        iblank_smoke3d[ijk]=SOLID;
-      }
-      else{
-        iblank_smoke3d[ijk]=GAS;
-      }
+      for(k=0;k<=kbar;k++){
+        float x, y, z;
+        int ijk;
 
-      ijk = IJKNODE(ibar,j,k);
-      x = xplt[ibar];
-      y = yplt[j];
-      z = zplt[k];
-      if(inmesh_smoke(x+dx,y,z,ic,ALLMESHES)<0){
-        iblank_smoke3d[ijk]=SOLID;
-      }
-      else{
-        iblank_smoke3d[ijk]=GAS;
-      }
+        ijk = IJKNODE(0, j, k);
+        x = xplt[0];
+        y = yplt[j];
+        z = zplt[k];
+        if(inmesh_smoke(x-dx,y,z,ic,ALLMESHES)<0){
+          iblank_smoke3d[ijk]=SOLID;
+        }
+        else{
+          iblank_smoke3d[ijk]=GAS;
+        }
 
-    }
-    }
-
-    for(i=0;i<=ibar;i++){
-    for(k=0;k<=kbar;k++){
-      ijk = IJKNODE(i,0,k);
-      x = xplt[i];
-      y = yplt[0];
-      z = zplt[k];
-      if(inmesh_smoke(x,y-dy,z,ic,ALLMESHES)<0){
-        iblank_smoke3d[ijk]=SOLID;
+        ijk = IJKNODE(ibar,j,k);
+        x = xplt[ibar];
+        y = yplt[j];
+        z = zplt[k];
+        if(inmesh_smoke(x+dx,y,z,ic,ALLMESHES)<0){
+          iblank_smoke3d[ijk]=SOLID;
+        }
+        else{
+          iblank_smoke3d[ijk]=GAS;
+        }
       }
-      else{
-        iblank_smoke3d[ijk]=GAS;
-      }
-
-
-
-      ijk = IJKNODE(i,jbar,k);
-      x = xplt[i];
-      y = yplt[jbar];
-      z = zplt[k];
-      if(inmesh_smoke(x,y+dy,z,ic,ALLMESHES)<0){
-        iblank_smoke3d[ijk]=SOLID;
-      }
-      else{
-        iblank_smoke3d[ijk]=GAS;
-      }
-    }
     }
 
     for(i=0;i<=ibar;i++){
-    for(j=0;j<=jbar;j++){
-      ijk = IJKNODE(i,j,0);
-      x = xplt[i];
-      y = yplt[j];
-      z = zplt[0];
-      if(inmesh_smoke(x,y,z-dz,ic,ALLMESHES)<0){
-        iblank_smoke3d[ijk]=SOLID;
-      }
-      else{
-        iblank_smoke3d[ijk]=GAS;
-      }
+      for(k=0;k<=kbar;k++){
+        float x, y, z;
+        int ijk;
 
+        ijk = IJKNODE(i, 0, k);
+        x = xplt[i];
+        y = yplt[0];
+        z = zplt[k];
+        if(inmesh_smoke(x,y-dy,z,ic,ALLMESHES)<0){
+          iblank_smoke3d[ijk]=SOLID;
+        }
+        else{
+          iblank_smoke3d[ijk]=GAS;
+        }
 
-      ijk = IJKNODE(i,j,kbar);
-      x = xplt[i];
-      y = yplt[j];
-      z = zplt[kbar];
-      if(inmesh_smoke(x,y,z+dz,ic,ALLMESHES)<0){
-        iblank_smoke3d[ijk]=SOLID;
-      }
-      else{
-        iblank_smoke3d[ijk]=GAS;
+        ijk = IJKNODE(i,jbar,k);
+        x = xplt[i];
+        y = yplt[jbar];
+        z = zplt[k];
+        if(inmesh_smoke(x,y+dy,z,ic,ALLMESHES)<0){
+          iblank_smoke3d[ijk]=SOLID;
+        }
+        else{
+          iblank_smoke3d[ijk]=GAS;
+        }
       }
     }
+
+    for(i=0;i<=ibar;i++){
+      for(j=0;j<=jbar;j++){
+        float x, y, z;
+        int ijk;
+
+        ijk = IJKNODE(i, j, 0);
+        x = xplt[i];
+        y = yplt[j];
+        z = zplt[0];
+        if(inmesh_smoke(x,y,z-dz,ic,ALLMESHES)<0){
+          iblank_smoke3d[ijk]=SOLID;
+        }
+        else{
+          iblank_smoke3d[ijk]=GAS;
+        }
+
+        ijk = IJKNODE(i,j,kbar);
+        x = xplt[i];
+        y = yplt[j];
+        z = zplt[kbar];
+        if(inmesh_smoke(x,y,z+dz,ic,ALLMESHES)<0){
+          iblank_smoke3d[ijk]=SOLID;
+        }
+        else{
+          iblank_smoke3d[ijk]=GAS;
+        }
+      }
     }
-   
   }
+  printf("complete\n");
 }
 
 /* ------------------ inmesh_smoke ------------------------ */
@@ -5012,22 +5047,14 @@ void makeiblank_smoke3d(void){
   }
   for(i=0;i<n;i++){
     mesh *meshi;
-    float xmin, ymin, zmin;
-    float xmax, ymax, zmax;
 
     meshi = meshinfo + i;
     if(flag==ALLMESHES&&i==nm)continue;
-    if(meshi->smokeloaded==0)continue;
+    if (meshi->iblank_smoke3d == NULL)continue;
 
-    xmin=meshi->xplt[0];
-    ymin=meshi->yplt[0];
-    zmin=meshi->zplt[0];
-    xmax=meshi->xplt[meshi->ibar];
-    ymax=meshi->yplt[meshi->jbar];
-    zmax=meshi->zplt[meshi->kbar];
-
-    if(x<xmin||y<ymin||z<zmin)continue;
-    if(x>xmax||y>ymax||z>zmax)continue;
+    if(x<meshi->xplt[0]||x>meshi->xplt[meshi->ibar])continue;
+    if(y<meshi->yplt[0]||y>meshi->yplt[meshi->jbar])continue;
+    if(z<meshi->zplt[0]||z>meshi->zplt[meshi->kbar])continue;
     return i;
   }
   return -1;

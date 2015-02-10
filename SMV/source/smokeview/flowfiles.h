@@ -537,7 +537,6 @@ typedef struct _mesh {
   float cellsize;
   int ncvents,nvents,ndummyvents;
   int nbptrs;
-  int smokeloaded;
   int is_bottom;
 
   int *cutcells, ncutcells;
@@ -583,6 +582,7 @@ typedef struct _mesh {
   float *block_zdist;
   int zdist_flag;
   unsigned char *iblank_smoke3d;
+  int iblank_smoke3d_defined;
   blockagedata **blockageinfoptrs;
   int *obst_bysize;
   ventdata *ventinfo;

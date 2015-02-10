@@ -1088,7 +1088,7 @@ SVEXTERN int SVDECL(have_extreme_mindata,0), SVDECL(have_extreme_maxdata,0);
 SVEXTERN int SVDECL(show_extreme_mindata,0), SVDECL(show_extreme_maxdata,0);
 SVEXTERN int SVDECL(show_extreme_mindata_save,0), SVDECL(show_extreme_maxdata_save,0);
 
-SVEXTERN int use_iblank,arg_iblank;
+SVEXTERN int SVDECL(use_iblank,1),arg_iblank;
 
 SVEXTERN int script_index, ini_index;
 SVEXTERN char script_inifile_suffix[1024], vol_prefix[1024];

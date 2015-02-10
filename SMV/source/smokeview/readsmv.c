@@ -8171,7 +8171,6 @@ void initmesh(mesh *meshi){
   meshi->meshrgb_ptr=NULL;
   meshi->showsmoothtimelist=NULL;
   meshi->cellsize=0.0;
-  meshi->smokeloaded=0;
   meshi->smokedir=1;
   meshi->merge_alpha=NULL;
   meshi->merge_color=NULL;
@@ -8212,6 +8211,7 @@ void initmesh(mesh *meshi){
   meshi->c_iblank_xz=NULL; 
   meshi->c_iblank_yz=NULL;
   meshi->iblank_smoke3d=NULL;
+  meshi->iblank_smoke3d_defined = 0;
   meshi->animatedsurfaces=NULL;
   meshi->blockagesurface=NULL;
   meshi->blockagesurfaces=NULL;
