@@ -938,7 +938,7 @@ END SUBROUTINE VOLUME_INIT_PARTICLE
 
 SUBROUTINE MAKE_PARTICLE
 
-REAL(EB) :: X1,X2,AREA,LENGTH,SCALE_FACTOR,RADIUS
+REAL(EB) :: X1,X2,AREA,LENGTH,SCALE_FACTOR,RADIUS,MPUA,LP_VOLUME
 INTEGER :: N
 TYPE (ONE_D_M_AND_E_XFER_TYPE), POINTER :: ONE_D=>NULL()
 
@@ -952,83 +952,120 @@ IF (LPC%SOLID_PARTICLE) THEN
 
    LP%MASS = 0._EB
 
-   SCREEN_LPC: IF (LPC%DRAG_LAW==SCREEN_DRAG) THEN
+   SELECT CASE (LPC%DRAG_LAW)
+   
+      CASE(SCREEN_DRAG)
 
-      ! Compute special cross-sectional area of screen particle
+         ! Compute special cross-sectional area of screen particle
 
-      AREA = (ABS(ORIENTATION_VECTOR(1,LPC%ORIENTATION_INDEX))*DY(ONE_D%JJG)*DZ(ONE_D%KKG) + &
-              ABS(ORIENTATION_VECTOR(2,LPC%ORIENTATION_INDEX))*DX(ONE_D%IIG)*DZ(ONE_D%KKG) + &
-              ABS(ORIENTATION_VECTOR(3,LPC%ORIENTATION_INDEX))*DX(ONE_D%IIG)*DY(ONE_D%JJG)) * &
-              LAGRANGIAN_PARTICLE_CLASS(LP%CLASS_INDEX)%FREE_AREA_FRACTION
-      SELECT CASE (SF%GEOMETRY)
-         CASE (SURF_CARTESIAN)
-            LP%ONE_D%AREA = AREA
-            IF (SF%THERMALLY_THICK) THEN
-               DO N=1,SF%N_LAYERS
-                  LP%MASS = LP%MASS + AREA*SF%LAYER_THICKNESS(N)*SF%LAYER_DENSITY(N)
-               END DO
-            ENDIF 
-         CASE (SURF_CYLINDRICAL)
-            LP%ONE_D%AREA = AREA*PI            
-            IF (SF%THERMALLY_THICK) THEN
-               X1 = SUM(SF%LAYER_THICKNESS)
-               LENGTH = AREA / (2._EB*X1)
-               DO N=SF%N_LAYERS,1,-1
-                  X2 = X1 - SF%LAYER_THICKNESS(N)
-                  LP%MASS = LP%MASS + LENGTH*SF%LAYER_DENSITY(N)*PI*(X1**2-X2**2)
-                  X1 = X2
-               END DO      
-            ENDIF
-         CASE (SURF_SPHERICAL)
-            LP%ONE_D%AREA = AREA*4._EB
-            IF (SF%THERMALLY_THICK) THEN
-               X1 = SUM(SF%LAYER_THICKNESS)               
-               LP%PWT = AREA/(PI*X1**2)
-               DO N=SF%N_LAYERS,1,-1
-                  X2 = X1 - SF%LAYER_THICKNESS(N)
-                  LP%MASS = LP%MASS + SF%LAYER_DENSITY(N)*FOTHPI*(X1**3-X2**3)
-                  X1 = X2
-               END DO                     
-            ELSE
-               LP%PWT = AREA/(PI*SF%THICKNESS**2)               
-            ENDIF            
-      END SELECT
-            
-   ELSE SCREEN_LPC
-
-      IF (.NOT.LPC%MONODISPERSE) THEN
-         CALL PARTICLE_SIZE_WEIGHT(RADIUS,LP%PWT)
-         SCALE_FACTOR = RADIUS/SF%THICKNESS
-         ONE_D%X(:) = ONE_D%X(:)*SCALE_FACTOR
-         ONE_D%LAYER_THICKNESS(:) = ONE_D%LAYER_THICKNESS(:)*SCALE_FACTOR
-      ELSE
-         SCALE_FACTOR = 1._EB
-      ENDIF
-
-      IF (SF%THERMALLY_THICK) THEN
+         AREA = (ABS(ORIENTATION_VECTOR(1,LPC%ORIENTATION_INDEX))*DY(ONE_D%JJG)*DZ(ONE_D%KKG) + &
+                 ABS(ORIENTATION_VECTOR(2,LPC%ORIENTATION_INDEX))*DX(ONE_D%IIG)*DZ(ONE_D%KKG) + &
+                 ABS(ORIENTATION_VECTOR(3,LPC%ORIENTATION_INDEX))*DX(ONE_D%IIG)*DY(ONE_D%JJG)) * &
+                 LAGRANGIAN_PARTICLE_CLASS(LP%CLASS_INDEX)%FREE_AREA_FRACTION
          SELECT CASE (SF%GEOMETRY)
             CASE (SURF_CARTESIAN)
-               DO N=1,SF%N_LAYERS
-                  LP%MASS = LP%MASS + 2._EB*SF%LENGTH*SF%WIDTH*SF%LAYER_THICKNESS(N)*SCALE_FACTOR*SF%LAYER_DENSITY(N)
-               ENDDO
+               LP%ONE_D%AREA = AREA
+               IF (SF%THERMALLY_THICK) THEN
+                  DO N=1,SF%N_LAYERS
+                     LP%MASS = LP%MASS + AREA*SF%LAYER_THICKNESS(N)*SF%LAYER_DENSITY(N)
+                  END DO
+               ENDIF 
             CASE (SURF_CYLINDRICAL)
-               X1 = SUM(SF%LAYER_THICKNESS)*SCALE_FACTOR
-               DO N=SF%N_LAYERS,1,-1
-                  X2 = X1 - SF%LAYER_THICKNESS(N)*SCALE_FACTOR
-                  LP%MASS = LP%MASS + SF%LENGTH*SF%LAYER_DENSITY(N)*PI*(X1**2-X2**2)
-                  X1 = X2
-               ENDDO      
+               LP%ONE_D%AREA = AREA*PI            
+               IF (SF%THERMALLY_THICK) THEN
+                  X1 = SUM(SF%LAYER_THICKNESS)
+                  LENGTH = AREA / (2._EB*X1)
+                  DO N=SF%N_LAYERS,1,-1
+                     X2 = X1 - SF%LAYER_THICKNESS(N)
+                     LP%MASS = LP%MASS + LENGTH*SF%LAYER_DENSITY(N)*PI*(X1**2-X2**2)
+                     X1 = X2
+                  END DO      
+               ENDIF
             CASE (SURF_SPHERICAL)
-               X1 = SUM(SF%LAYER_THICKNESS)*SCALE_FACTOR
-               DO N=SF%N_LAYERS,1,-1
-                  X2 = X1 - SF%LAYER_THICKNESS(N)*SCALE_FACTOR
-                  LP%MASS = LP%MASS + SF%LAYER_DENSITY(N)*FOTHPI*(X1**3-X2**3)
-                  X1 = X2
-               ENDDO      
+               LP%ONE_D%AREA = AREA*4._EB
+               IF (SF%THERMALLY_THICK) THEN
+                  X1 = SUM(SF%LAYER_THICKNESS)               
+                  LP%PWT = AREA/(PI*X1**2)
+                  DO N=SF%N_LAYERS,1,-1
+                     X2 = X1 - SF%LAYER_THICKNESS(N)
+                     LP%MASS = LP%MASS + SF%LAYER_DENSITY(N)*FOTHPI*(X1**3-X2**3)
+                     X1 = X2
+                  END DO                     
+               ELSE
+                  LP%PWT = AREA/(PI*SF%THICKNESS**2)               
+               ENDIF            
          END SELECT
-      ENDIF
+      CASE (POROUS_DRAG)
+         MPUA = 0._EB
+         LP_VOLUME = LPC%POROUS_VOLUME_FRACTION*DX(II)*DY(JJ)*DZ(KK)
+         SELECT CASE (SF%GEOMETRY)
+            CASE (SURF_CARTESIAN)
+               LP%ONE_D%AREA = LP_VOLUME/SF%THICKNESS            
+               IF (SF%THERMALLY_THICK) THEN
+                  DO N=1,SF%N_LAYERS
+                     LP%MASS = LP%MASS + AREA*SF%LAYER_THICKNESS(N)*SF%LAYER_DENSITY(N)
+                  END DO
+                  LP%MASS = LP%MASS*LP%ONE_D%AREA
+               ENDIF
+            CASE (SURF_CYLINDRICAL)
+               LP%ONE_D%AREA = 2._EB*LP_VOLUME/SF%THICKNESS
+               IF (SF%THERMALLY_THICK) THEN
+                  X1 = SUM(SF%LAYER_THICKNESS)
+                  LENGTH = LP_VOLUME/(PI*X1**2)
+                  DO N=SF%N_LAYERS,1,-1
+                     X2 = X1 - SF%LAYER_THICKNESS(N)
+                     LP%MASS = LP%MASS + LENGTH*SF%LAYER_DENSITY(N)*PI*(X1**2-X2**2)
+                     X1 = X2
+                  END DO    
+               ENDIF
+            CASE (SURF_SPHERICAL)
+               LP%ONE_D%AREA = 3._EB*LP_VOLUME/SF%THICKNESS
+               LP%PWT = AREA/(4._EB*PI*SF%THICKNESS**2)               
+               IF (SF%THERMALLY_THICK) THEN
+                  X1 = SUM(SF%LAYER_THICKNESS)               
+                  DO N=SF%N_LAYERS,1,-1
+                     X2 = X1 - SF%LAYER_THICKNESS(N)
+                     LP%MASS = LP%MASS + SF%LAYER_DENSITY(N)*FOTHPI*(X1**3-X2**3)
+                     X1 = X2
+                  END DO                     
+               ENDIF            
+         END SELECT         
 
-   ENDIF SCREEN_LPC   
+      CASE DEFAULT
+            
+         IF (.NOT.LPC%MONODISPERSE) THEN
+            CALL PARTICLE_SIZE_WEIGHT(RADIUS,LP%PWT)
+            SCALE_FACTOR = RADIUS/SF%THICKNESS
+            ONE_D%X(:) = ONE_D%X(:)*SCALE_FACTOR
+            ONE_D%LAYER_THICKNESS(:) = ONE_D%LAYER_THICKNESS(:)*SCALE_FACTOR
+         ELSE
+            SCALE_FACTOR = 1._EB
+         ENDIF
+
+         IF (SF%THERMALLY_THICK) THEN
+            SELECT CASE (SF%GEOMETRY)
+               CASE (SURF_CARTESIAN)
+                  DO N=1,SF%N_LAYERS
+                     LP%MASS = LP%MASS + 2._EB*SF%LENGTH*SF%WIDTH*SF%LAYER_THICKNESS(N)*SCALE_FACTOR*SF%LAYER_DENSITY(N)
+                  ENDDO
+               CASE (SURF_CYLINDRICAL)
+                  X1 = SUM(SF%LAYER_THICKNESS)*SCALE_FACTOR
+                  DO N=SF%N_LAYERS,1,-1
+                     X2 = X1 - SF%LAYER_THICKNESS(N)*SCALE_FACTOR
+                     LP%MASS = LP%MASS + SF%LENGTH*SF%LAYER_DENSITY(N)*PI*(X1**2-X2**2)
+                     X1 = X2
+                  ENDDO      
+               CASE (SURF_SPHERICAL)
+                  X1 = SUM(SF%LAYER_THICKNESS)*SCALE_FACTOR
+                  DO N=SF%N_LAYERS,1,-1
+                     X2 = X1 - SF%LAYER_THICKNESS(N)*SCALE_FACTOR
+                     LP%MASS = LP%MASS + SF%LAYER_DENSITY(N)*FOTHPI*(X1**3-X2**3)
+                     X1 = X2
+                  ENDDO      
+            END SELECT
+         ENDIF
+
+   END SELECT   
 
 ELSEIF (LPC%LIQUID_DROPLET) THEN
 
@@ -1564,7 +1601,7 @@ USE MATH_FUNCTIONS, ONLY : AFILL2, RANDOM_CHOICE, BOX_MULLER
 REAL(EB) UBAR,VBAR,WBAR,RVC,UREL,VREL,WREL,QREL,RHO_G,TMP_G,MU_AIR, &
          U_OLD,V_OLD,W_OLD,ZZ_GET(1:N_TRACKED_SPECIES),WAKE_VEL,DROP_DEN,DROP_VOL_FRAC,RE_WAKE,&
          WE_G,T_BU_BAG,T_BU_STRIP,FP_MASS,HALF_DT2,BETA,OBDT,ALPHA,OPA,DTOPA,BDTOA,MPOM,ALBO,SFAC,BREAKUP_RADIUS(0:NDC),&
-         DD,DD_X,DD_Y,DD_Z,DW_X,DW_Y,DW_Z,K_SCREEN,Y_SCREEN,C_DRAG,A_DRAG,HAB,PARACOR,QREL2,X_WGT,Y_WGT,Z_WGT
+         DD,DD_X,DD_Y,DD_Z,DW_X,DW_Y,DW_Z,K_TERM(3),Y_TERM(3),C_DRAG,A_DRAG,HAB,PARACOR,QREL2,X_WGT,Y_WGT,Z_WGT
 INTEGER IIX,JJY,KKZ
 
 ZZ_GET = 0._EB
@@ -1635,9 +1672,9 @@ DRAG_LAW_SELECT: SELECT CASE (LPC%DRAG_LAW)
 
    CASE (USER_DRAG)
 
-      C_DRAG = LPC%DRAG_COEFFICIENT
+      C_DRAG = LPC%DRAG_COEFFICIENT(1)
 
-   CASE (SCREEN_DRAG)  ! Calculate this elsewhere
+   CASE (SCREEN_DRAG, POROUS_DRAG)  ! Calculate this elsewhere
 
    CASE DEFAULT
 
@@ -1709,7 +1746,7 @@ END SELECT DRAG_LAW_SELECT
 
 ! Calculate the cross-sectional area of the droplet or particle
 
-IF (LPC%DRAG_LAW/=SCREEN_DRAG) THEN
+IF (LPC%DRAG_LAW/=SCREEN_DRAG .AND. LPC%DRAG_LAW/=POROUS_DRAG) THEN
    IF (LPC%LIQUID_DROPLET) THEN
       A_DRAG = PI*R_D**2
    ELSE
@@ -1800,25 +1837,27 @@ ELSE PARTICLE_NON_STATIC_IF ! Drag calculation for stationary, airborne particle
             TMP_G  = MAX(TMPMIN,TMP(IIG,JJG,KKG))
             ZZ_GET(1:N_TRACKED_SPECIES) = ZZ(IIG,JJG,KKG,1:N_TRACKED_SPECIES)
             CALL GET_VISCOSITY(ZZ_GET,MU_AIR,TMP_G)
-            K_SCREEN = 3.44E-9_EB*LPC%FREE_AREA_FRACTION**1.6_EB
-            Y_SCREEN = 4.30E-2_EB*LPC%FREE_AREA_FRACTION**2.13_EB
-            Y_SCREEN = Y_SCREEN * RHO_G /SQRT(K_SCREEN)*QREL
-            K_SCREEN = MU_AIR/K_SCREEN
+            Y_TERM = LPC%DRAG_COEFFICIENT * RHO_G /SQRT(LPC%PERMEABILITY)*QREL*ABS(ORIENTATION_VECTOR(1:3,LPC%ORIENTATION_INDEX))
+            K_TERM = MU_AIR/LPC%PERMEABILITY*ABS(ORIENTATION_VECTOR(1:3,LPC%ORIENTATION_INDEX))
             SFAC = 2._EB*MAXVAL(LP%ONE_D%X(0:SF%N_CELLS_MAX))*RVC/RHO_G
-            A_DRAG = DY(JJG)*DZ(KKG)
-            C_DRAG = (K_SCREEN+Y_SCREEN)*ABS(ORIENTATION_VECTOR(1,LPC%ORIENTATION_INDEX))*UBAR
-            LP%ACCEL_X = -C_DRAG*SFAC*A_DRAG            
-            A_DRAG = DX(IIG)*DZ(KKG)
-            C_DRAG = (K_SCREEN+Y_SCREEN)*ABS(ORIENTATION_VECTOR(2,LPC%ORIENTATION_INDEX))*VBAR
-            LP%ACCEL_Y = -C_DRAG*SFAC*A_DRAG
-            A_DRAG = DX(IIG)*DY(JJG)
-            C_DRAG = (K_SCREEN+Y_SCREEN)*ABS(ORIENTATION_VECTOR(3,LPC%ORIENTATION_INDEX))*WBAR
-            LP%ACCEL_Z = -C_DRAG*SFAC*A_DRAG
+            LP%ACCEL_X = -(K_TERM(1)+Y_TERM(1))*UBAR*DY(JJG)*DZ(KKG)*SFAC     
+            LP%ACCEL_Y = -(K_TERM(2)+Y_TERM(2))*VBAR*DX(IIG)*DZ(KKG)*SFAC
+            LP%ACCEL_Z = -(K_TERM(3)+Y_TERM(3))*WBAR*DX(IIG)*DY(JJG)*SFAC
          ELSE
             LP%ACCEL_X = 0._EB 
             LP%ACCEL_Y = 0._EB
             LP%ACCEL_Z = 0._EB
          ENDIF
+      CASE (POROUS_DRAG)
+         TMP_G  = MAX(TMPMIN,TMP(IIG,JJG,KKG))
+         ZZ_GET(1:N_TRACKED_SPECIES) = ZZ(IIG,JJG,KKG,1:N_TRACKED_SPECIES)
+         CALL GET_VISCOSITY(ZZ_GET,MU_AIR,TMP_G)
+         Y_TERM = LPC%DRAG_COEFFICIENT * RHO_G /SQRT(LPC%PERMEABILITY)*QREL
+         K_TERM = MU_AIR/LPC%PERMEABILITY
+         SFAC = 2._EB*RHO_G
+         LP%ACCEL_X = -(K_TERM(1)+Y_TERM(1))*UBAR*SFAC
+         LP%ACCEL_Y = -(K_TERM(2)+Y_TERM(2))*VBAR*SFAC
+         LP%ACCEL_Z = -(K_TERM(3)+Y_TERM(3))*WBAR*SFAC
    END SELECT
 ENDIF PARTICLE_NON_STATIC_IF
 
