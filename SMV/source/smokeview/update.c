@@ -1538,7 +1538,7 @@ int getplotstate(int choice){
   int i;
 
   update_loaded_lists();
-  switch (choice){
+  switch(choice){
     case STATIC_PLOTS:
     case STATIC_PLOTS_NORECURSE:
       stept = 0;
@@ -1740,7 +1740,7 @@ void Update_Clipbounds(int set_i0, int *i0, int set_i1, int *i1, int imax){
 void Update_Clip(int slicedir){
   stepclip_xmin=0; stepclip_ymin=0; stepclip_zmin=0; 
   stepclip_xmax=0; stepclip_ymax=0; stepclip_zmax=0;
-  switch (slicedir){
+  switch(slicedir){
   case 1:
     clipinfo.clip_xmin = 1 - clipinfo.clip_xmin;
     if(clipinfo.clip_xmin==1)PRINTF("clip x on\n");

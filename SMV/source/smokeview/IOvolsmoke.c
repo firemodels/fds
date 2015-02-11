@@ -421,7 +421,7 @@ void get_cum_smokecolor(float *cum_smokecolor, float *xyzvert, float dstep, mesh
         }
       }
     }
-    switch (iwall_min){
+    switch(iwall_min){
       case -1:
         vert_end[0] = boxmin[0];
         vert_end[1] = CLAMP(xyzvert[1] + t_intersect_min*dy,boxmin[1],boxmax[1]);
@@ -590,7 +590,7 @@ void compute_all_smokecolors(void){
 
       xyz = xyzarray;
       if(iwall==0||meshi->drawsides[iwall+3]==0)continue;
-      switch (iwall){
+      switch(iwall){
         case 1:
         case -1:
           if(iwall<0){
@@ -724,7 +724,7 @@ void drawsmoke3dVOLdebug(void){
     vr = &(meshi->volrenderinfo);
 
     if(iwall==0||meshi->drawsides[iwall+3]==0)continue;
-    switch (iwall){
+    switch(iwall){
       case 1:
       case -1:
         if(iwall<0){
@@ -803,7 +803,7 @@ void drawsmoke3dVOLdebug(void){
     vr = &(meshi->volrenderinfo);
 
     if(iwall==0||meshi->drawsides[iwall+3]==0)continue;
-    switch (iwall){
+    switch(iwall){
       case 1:
       case -1:
         if(iwall<0){
@@ -904,7 +904,7 @@ void drawsmoke3dVOL(void){
     if(vr->firedataptr==NULL&&vr->smokedataptr==NULL)continue;
 
     glBegin(GL_TRIANGLES);
-    switch (iwall){
+    switch(iwall){
       case 1:
       case -1:
         if(iwall<0){
@@ -1322,7 +1322,7 @@ int mesh_connect(mesh *mesh_from, int val, mesh *mesh_to){
   float *eps;
 
   eps = mesh_from->boxeps;
-  switch (val){
+  switch(val){
     case MLEFT:
     case MRIGHT:
       if(mesh_from->jbar!=mesh_to->jbar)return 0;
@@ -1353,7 +1353,7 @@ int mesh_connect(mesh *mesh_from, int val, mesh *mesh_to){
     default:
       break;
   }
-  switch (val){
+  switch(val){
     case MLEFT:
       if( ABS(mesh_from->x1-mesh_to->x0)<eps[0] )return 1;
       break;
@@ -1522,7 +1522,7 @@ void drawsmoke3dGPUVOL(void){
     }
     glBegin(GL_TRIANGLES);
 
-    switch (iwall){
+    switch(iwall){
       case 1:
       case -1:
         if(inside==0&&iwall>0||inside!=0&&iwall<0){

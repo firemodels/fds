@@ -475,7 +475,7 @@ void TOUR_CB(int var){
     thistour=selected_tour;
   }
 
-  switch (var){
+  switch(var){
   case TOUR_USECURRENT:
     break;
   case TOUR_NEXT:
@@ -772,7 +772,7 @@ void TOUR_CB(int var){
       TOUR_CB(TOUR_LIST);
       return;
     }
-    switch (selectedtour_index){
+    switch(selectedtour_index){
     case -3:
       TOURMENU(-3); // show all tours
       set_glui_keyframe();

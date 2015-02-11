@@ -136,7 +136,7 @@ void RenderFrame(int view_mode){
       }
     }
     strcpy(suffix,"");
-    switch (view_mode){
+    switch(view_mode){
     case VIEW_LEFT:
       if(showstereo==STEREO_LR){
         strcat(suffix,"_L");
@@ -221,7 +221,7 @@ void RenderFrame(int view_mode){
       strcpy(suffix,timelabelptr);
       strcat(suffix,"s");
     }
-    switch (view_mode){
+    switch(view_mode){
     case VIEW_CENTER:
       if(RenderTime==0)seqnum++;
       break;
@@ -251,7 +251,7 @@ void RenderFrame(int view_mode){
 
   // filename extension
 
-  switch (renderfiletype){
+  switch(renderfiletype){
   case 0:
     renderfile_ext=ext_png;
     break;
@@ -315,7 +315,7 @@ int mergescreenbuffers(int nscreen_rows, GLubyte **screenbuffers){
   int irow;
 
   nscreen_cols=nscreen_rows;
-  switch (renderfiletype){
+  switch(renderfiletype){
   case PNG:
     ext=ext_png;
     break;
@@ -349,7 +349,7 @@ int mergescreenbuffers(int nscreen_rows, GLubyte **screenbuffers){
   }
   RENDERfile = fopen(renderfile, "wb");
   PRINTF("Rendering to: %s .",renderfile);
-  if (RENDERfile == NULL) {
+  if(RENDERfile == NULL){
     fprintf(stderr,"*** Error: unable to write to %s",renderfile);
     FREEMEMORY(renderfile);
     return 1;
@@ -361,7 +361,7 @@ int mergescreenbuffers(int nscreen_rows, GLubyte **screenbuffers){
     int icol;
 
     for(icol=0;icol<nscreen_cols;icol++){
-      for (i = (nscreen_rows-irow)*screenHeight-1 ; i>=(nscreen_rows-irow-1)*screenHeight; i--) {
+      for (i = (nscreen_rows-irow)*screenHeight-1 ; i>=(nscreen_rows-irow-1)*screenHeight; i--){
         for(j=icol*screenWidth;j<(icol+1)*screenWidth;j++){
           r=*p++; g=*p++; b=*p++;
           rgb_local = (r<<16)|(g<<8)|b;
@@ -375,7 +375,7 @@ int mergescreenbuffers(int nscreen_rows, GLubyte **screenbuffers){
 
   /* output the image */
 
-  switch (renderfiletype){
+  switch(renderfiletype){
   case PNG:
     gdImagePng(RENDERimage,RENDERfile);
     break;
@@ -430,12 +430,12 @@ int SVimage2file(char *directory, char *RENDERfilename, int rendertype, int woff
   else{
     renderfile=get_filename(directory,RENDERfilename,1);
   }
-  if (renderfile == NULL) {
+  if(renderfile == NULL){
     fprintf(stderr,"*** Error: Unable to write to %s\n",RENDERfilename);
     return 1;
   }
   RENDERfile = fopen(renderfile, "wb");
-  if (RENDERfile == NULL) {
+  if(RENDERfile == NULL){
     fprintf(stderr,"*** Error: Unable to write to %s\n",renderfile);
     return 1;
   }
@@ -458,7 +458,7 @@ int SVimage2file(char *directory, char *RENDERfilename, int rendertype, int woff
 
   RENDERimage = gdImageCreateTrueColor(width2,height2);
 
-  for (i = height2-1 ; i>=0; i--) {
+  for (i = height2-1 ; i>=0; i--){
     for(j=0;j<width2;j++){
       r=*p++; g=*p++; b=*p++;
       rgb_local = (r<<16)|(g<<8)|b;
@@ -501,7 +501,7 @@ int SVimage2file(char *directory, char *RENDERfilename, int rendertype, int woff
 
   /* output the gif image */
 
-  switch (rendertype){
+  switch(rendertype){
   case PNG:
     gdImagePng(RENDERimage,RENDERfile);
     break;
@@ -615,7 +615,7 @@ unsigned char *readjpeg(const char *filename,int *width, int *height, int skip_l
   int jump;
 
   file = fopen(filename, "rb");
-  if (file == NULL)return NULL;
+  if(file == NULL)return NULL;
   image = gdImageCreateFromJpeg(file);
   fclose(file);
   if(image==NULL)return NULL;
@@ -659,7 +659,7 @@ unsigned char *readpng(const char *filename,int *width, int *height){
   unsigned int intrgb;
 
   file = fopen(filename, "rb");
-  if (file == NULL)return NULL;
+  if(file == NULL)return NULL;
   image = gdImageCreateFromPng(file);
   fclose(file);
   *width=gdImageSX(image);

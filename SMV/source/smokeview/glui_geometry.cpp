@@ -384,7 +384,7 @@ extern "C" void glui_geometry_setup(int main_window){
 
 extern "C" void Volume_CB(int var){
   int i;
-  switch (var){
+  switch(var){
     case VOL_BOXTRANSLATE:
       box_bounds[0]=box_bounds2[0]+box_translate[0];
       box_bounds[1]=box_bounds2[1]+box_translate[0];
@@ -443,7 +443,7 @@ extern "C" void show_glui_geometry(void){
 /* ------------------ Blockedit_DLG_CB ------------------------ */
 
 void Blockedit_DLG_CB(int var){
-  switch (var){
+  switch(var){
   case SAVE_SETTINGS:
     updatemenu=1;
     writeini(LOCAL_INI,NULL);
@@ -512,7 +512,7 @@ extern "C" void update_blockvals(int flag){
       strcat(dialog_label,bchighlight->label);
       STATIC_label->set_text(dialog_label);
 
-      switch (wall_case){
+      switch(wall_case){
       case WALL_1:
         temp=bchighlight->surf_index[UP_Z];
         for(i=0;i<6;i++){
@@ -556,12 +556,12 @@ extern "C" void update_blockvals(int flag){
 
 extern "C" void OBJECT_CB(int var){
   int i,temp;
-  switch (var){
+  switch(var){
     case VISAXISLABELS:
       updatemenu=1;
       break;
     case UPDATE_LIST:
-      switch (wall_case){
+      switch(wall_case){
       case WALL_1:
         temp=surface_indices_bak[UP_Z];
         if(nsurfinfo>0){
@@ -613,7 +613,7 @@ extern "C" void OBJECT_CB(int var){
       if(bchighlight!=NULL){
         bchighlight->walltype=wall_case;
       }
-      switch (wall_case){
+      switch(wall_case){
       case WALL_6:
         for(i=0;i<6;i++){
           LIST_surface[i]->enable();

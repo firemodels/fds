@@ -1079,7 +1079,7 @@ extern "C" void glui_bounds_setup(int main_window){
 /* ------------------ compress_onoff ------------------------ */
 
 extern "C" void compress_onoff(int flag){
-  switch (flag){
+  switch(flag){
     case OFF:
       if(BUTTON_compress!=NULL)BUTTON_compress->disable();
       if(CHECKBOX_overwrite_all!=NULL)CHECKBOX_overwrite_all->disable();
@@ -1213,7 +1213,7 @@ void boundmenu(GLUI_Rollout **bound_rollout,GLUI_Rollout **chop_rollout, GLUI_Pa
 extern "C" void PLOT3D_CB(int var){
   int i;
 
-  switch (var){
+  switch(var){
   case UNLOAD_QDATA:
     if(cache_qdata==0){
      PANEL_isosurface->disable();
@@ -1260,7 +1260,7 @@ extern "C" void PLOT3D_CB(int var){
     break;
   case SETCHOPMINVAL:
     updatechopcolors();
-    switch (setp3chopmin_temp){
+    switch(setp3chopmin_temp){
       case 0:
         EDIT_p3_chopmin->disable();
         break;
@@ -1274,7 +1274,7 @@ extern "C" void PLOT3D_CB(int var){
     break;
   case SETCHOPMAXVAL:
     updatechopcolors();
-    switch (setp3chopmax_temp){
+    switch(setp3chopmax_temp){
       case 0:
         EDIT_p3_chopmax->disable();
         break;
@@ -1351,7 +1351,7 @@ extern "C" void PLOT3D_CB(int var){
    PLOT3D_CB(SETVALMAX);
    break;
   case SETVALMIN:
-   switch (setp3min_temp){
+   switch(setp3min_temp){
     case PERCENTILE_MIN:
     case GLOBAL_MIN:
       EDIT_p3_min->disable();
@@ -1366,7 +1366,7 @@ extern "C" void PLOT3D_CB(int var){
    }
    break;
   case SETVALMAX:
-     switch (setp3max_temp){
+     switch(setp3max_temp){
       case PERCENTILE_MIN:
       case GLOBAL_MIN:
         EDIT_p3_max->disable();
@@ -1483,7 +1483,7 @@ extern "C" void updateplot3dlistindex(void){
 }
 
 void Iso_CB(int var){
-  switch (var) {
+  switch(var){
   case FRAMELOADING:
     isoframestep_global=isoframeskip_global+1;
     isozipstep=isozipskip+1;
@@ -1501,7 +1501,7 @@ void Iso_CB(int var){
   }
 }
 void Smoke3D_CB(int var){
-  switch (var) {
+  switch(var){
   case FRAMELOADING:
     smoke3dframestep=smoke3dframeskip+1;
     smoke3dzipstep=smoke3dzipskip+1;
@@ -1554,7 +1554,7 @@ extern "C"  void glui_script_disable(void){
     int len,i;
     int set_renderlabel;
 
-    switch (var){
+    switch(var){
     case SCRIPT_STEP_NOW:
       keyboard('^',FROM_SMOKEVIEW);
       break;
@@ -1737,7 +1737,7 @@ extern "C"  void glui_script_disable(void){
 void Bound_CB(int var){
   int i;
 
-  switch (var) {
+  switch(var){
   case SHOWPATCH_BOTH:
     updatefacelists=1;
     updatehiddenfaces=1;
@@ -1767,7 +1767,7 @@ void Bound_CB(int var){
   case SETCHOPMINVAL:
     updatechopcolors();
     local2globalpatchbounds(patchlabellist[list_patch_index]);
-    switch (setpatchchopmin){
+    switch(setpatchchopmin){
       case 0:
       EDIT_patch_chopmin->disable();
       break;
@@ -1783,7 +1783,7 @@ void Bound_CB(int var){
   case SETCHOPMAXVAL:
     updatechopcolors();
     local2globalpatchbounds(patchlabellist[list_patch_index]);
-    switch (setpatchchopmax){
+    switch(setpatchchopmax){
       case 0:
         EDIT_patch_chopmax->disable();
         break;
@@ -1836,7 +1836,7 @@ void Bound_CB(int var){
     if(CHECKBOX_patch_setchopmin!=NULL)CHECKBOX_patch_setchopmin->set_int_val(setpatchchopmin);
     if(CHECKBOX_patch_setchopmax!=NULL)CHECKBOX_patch_setchopmax->set_int_val(setpatchchopmax);
 
-    switch (setpatchchopmin){
+    switch(setpatchchopmin){
       case 0:
         EDIT_patch_chopmin->disable();
         break;
@@ -1847,7 +1847,7 @@ void Bound_CB(int var){
         ASSERT(FFALSE);
         break;
     }
-    switch (setpatchchopmax){
+    switch(setpatchchopmax){
       case 0:
         EDIT_patch_chopmax->disable();
         break;
@@ -1863,7 +1863,7 @@ void Bound_CB(int var){
     update_hidepatchsurface();
     break;
   case SETVALMIN:
-    switch (setpatchmin){
+    switch(setpatchmin){
     case PERCENTILE_MIN:
     case GLOBAL_MIN:
       EDIT_patch_min->disable();
@@ -1878,7 +1878,7 @@ void Bound_CB(int var){
     Bound_CB(FILEUPDATE);
     break;
   case SETVALMAX:
-    switch (setpatchmax){
+    switch(setpatchmax){
     case PERCENTILE_MAX:
     case GLOBAL_MAX:
       EDIT_patch_max->disable();
@@ -2026,7 +2026,7 @@ void PART_CB(int var){
 
   prop_new = part5propinfo + ipart5prop;
   prop_old = part5propinfo + ipart5prop_old;
-  switch (var){
+  switch(var){
   case VALMIN:
     if(setpartmax==SET_MAX)prop_new->user_max=partmax;
     break;
@@ -2115,7 +2115,7 @@ void PART_CB(int var){
     prop_new->setchopmin=setpartchopmin;
     prop_new->chopmin=partchopmin;
     updatechopcolors();
-    switch (setpartchopmin){
+    switch(setpartchopmin){
       case 0:
       EDIT_part_chopmin->disable();
       break;
@@ -2131,7 +2131,7 @@ void PART_CB(int var){
     prop_new->setchopmax=setpartchopmax;
     prop_new->chopmax=partchopmax;
     updatechopcolors();
-    switch (setpartchopmax){
+    switch(setpartchopmax){
       case 0:
       EDIT_part_chopmax->disable();
       break;
@@ -2160,7 +2160,7 @@ void PART_CB(int var){
       if(prop_old!=NULL)prop_old->user_min=partmin;
     }
     setpartmin_old=setpartmin;
-    switch (setpartmin){
+    switch(setpartmin){
     case PERCENTILE_MIN:
       if(prop_new!=NULL)partmin=prop_new->percentile_min;
       if(EDIT_part_min!=NULL)EDIT_part_min->disable();
@@ -2185,7 +2185,7 @@ void PART_CB(int var){
       if(prop_old!=NULL)prop_old->user_max=partmax;
     }
     setpartmax_old=setpartmax;
-    switch (setpartmax){
+    switch(setpartmax){
     case PERCENTILE_MAX:
       if(prop_new!=NULL)partmax=prop_new->percentile_max;
       if(EDIT_part_max!=NULL)EDIT_part_max->disable();
@@ -2229,7 +2229,7 @@ void PART_CB(int var){
 void Time_CB(int var){
 
   updatemenu=1;
-  switch (var){
+  switch(var){
   case SET_TIME:
     settimeval(glui_time);
     break;
@@ -2296,7 +2296,7 @@ extern "C" void Slice_CB(int var){
     updatemenu=1;
     return;
   }
-  switch (var){
+  switch(var){
     case SLICE_VECTORSKIP:
       if(SPINNER_plot3dvectorskip!=NULL)SPINNER_plot3dvectorskip->set_int_val(vectorskip);
       break;
@@ -2458,7 +2458,7 @@ extern "C" void Slice_CB(int var){
   case SETCHOPMINVAL:
     updatechopcolors();
     SETslicemin(setslicemin,slicemin,setslicechopmin,slicechopmin);
-    switch (setslicechopmin){
+    switch(setslicechopmin){
       case 0:
         EDIT_slice_chopmin->disable();
         break;
@@ -2473,7 +2473,7 @@ extern "C" void Slice_CB(int var){
   case SETCHOPMAXVAL:
     updatechopcolors();
     SETslicemax(setslicemax,slicemax,setslicechopmax,slicechopmax);
-    switch (setslicechopmax){
+    switch(setslicechopmax){
       case 0:
       EDIT_slice_chopmax->disable();
       break;
@@ -2496,7 +2496,7 @@ extern "C" void Slice_CB(int var){
     updatechopcolors();
     break;
   case SETVALMIN:
-    switch (setslicemin){
+    switch(setslicemin){
     case PERCENTILE_MIN:
     case GLOBAL_MIN:
       if(EDIT_slice_min!=NULL)EDIT_slice_min->disable();
@@ -2512,7 +2512,7 @@ extern "C" void Slice_CB(int var){
     SETslicemin(setslicemin,slicemin,setslicechopmin,slicechopmin);
     break;
   case SETVALMAX:
-    switch (setslicemax){
+    switch(setslicemax){
       case PERCENTILE_MAX:
       case GLOBAL_MAX:
         if(EDIT_slice_max!=NULL)EDIT_slice_max->disable();
@@ -2558,7 +2558,7 @@ extern "C" void Slice_CB(int var){
     }
     setslicebounds(list_slice_index);
     if(EDIT_slice_min!=NULL)EDIT_slice_min->set_float_val(slicemin);
-    switch (setslicemin){
+    switch(setslicemin){
     case PERCENTILE_MIN:
     case GLOBAL_MIN:
       if(EDIT_slice_min!=NULL)EDIT_slice_min->disable();
@@ -2571,7 +2571,7 @@ extern "C" void Slice_CB(int var){
       break;
     }
     if(EDIT_slice_max!=NULL)EDIT_slice_max->set_float_val(slicemax);
-    switch (setslicemax){
+    switch(setslicemax){
     case PERCENTILE_MIN:
     case GLOBAL_MAX:
       if(EDIT_slice_max!=NULL)EDIT_slice_max->disable();
@@ -2695,7 +2695,7 @@ extern "C" void updateglui(void){
 /* ------------------ Bounds_DLG_CB ------------------------ */
 
 void Bounds_DLG_CB(int var){
-  switch (var){
+  switch(var){
   case CLOSE:
     glui_bounds->hide();
     showbounds_dialog=0;

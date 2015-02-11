@@ -33,10 +33,9 @@ void getBoundaryColors(float *t, int nt, unsigned char *it,
   int local_skip;
   int extreme_data_offset=1, colorbar_offset=0;
 
-  if (use_data_extremes == 0){
+  if(use_data_extremes == 0){
     extreme_data_offset = 0;
-    colorbar_offset=2;
-    colorbar_offset = 0; // test
+    colorbar_offset = 2;
   }
 
   tmin2 = *t;
@@ -133,7 +132,7 @@ void getBoundaryColors2(float *t, int nt, unsigned char *it,
   int local_skip;
   int extreme_data_offset=1, colorbar_offset=0;
 
-  if (use_data_extremes == 0){
+  if(use_data_extremes == 0){
     extreme_data_offset = 0;
     colorbar_offset=2;
   }
@@ -195,7 +194,7 @@ void remap_patchdata(patchdata *patchi,float valmin, float valmax, int *extreme_
   int upper, lower;
   int extreme_data_offset=1, colorbar_offset=0;
 
-  if (use_data_extremes == 0){
+  if(use_data_extremes == 0){
     extreme_data_offset = 0;
     colorbar_offset=2;
   }
@@ -281,7 +280,7 @@ void getBoundaryColors3(patchdata *patchi, float *t, int nt, unsigned char *it,
   float new_tmin, new_tmax, tmin2, tmax2;
   int extreme_data_offset=1, colorbar_offset=0;
 
-  if (use_data_extremes == 0){
+  if(use_data_extremes == 0){
     extreme_data_offset = 0;
     colorbar_offset=2;
   }
@@ -505,7 +504,7 @@ void getPart5Colors(partdata *parti, int nlevel){
   float *u_vel_data, *v_vel_data, *w_vel_data;
   int extreme_data_offset=1, colorbar_offset=0;
 
-  if (use_data_extremes == 0){
+  if(use_data_extremes == 0){
     extreme_data_offset = 0;
     colorbar_offset=2;
   }
@@ -731,7 +730,7 @@ void getPartColors(const float *t, int local_skip, int nt,
   unsigned char *itcopy;
   int extreme_data_offset=1, colorbar_offset=0;
 
-  if (use_data_extremes == 0){
+  if(use_data_extremes == 0){
     extreme_data_offset = 0;
     colorbar_offset=2;
   }
@@ -888,7 +887,7 @@ void getZoneColors(const float *t, int nt, unsigned char *it,
   float tval;
   int extreme_data_offset=1, colorbar_offset=0;
 
-  if (use_data_extremes == 0){
+  if(use_data_extremes == 0){
     extreme_data_offset = 0;
     colorbar_offset=2;
   }
@@ -974,7 +973,7 @@ void getPlot3DColors(int plot3dvar, int settmin, float *ttmin, int settmax, floa
   int ntotal;
   int extreme_data_offset=1, colorbar_offset=0;
 
-  if (use_data_extremes == 0){
+  if(use_data_extremes == 0){
     extreme_data_offset = 0;
     colorbar_offset=2;
   }
@@ -1150,7 +1149,7 @@ void getSliceColors(const float *t, int nt, unsigned char *it,
   int itt;
   int extreme_data_offset=1, colorbar_offset=0;
 
-  if (use_data_extremes == 0){
+  if(use_data_extremes == 0){
     extreme_data_offset = 0;
     colorbar_offset=2;
   }
@@ -1316,7 +1315,7 @@ void getIsoLabels(float local_tmin, float local_tmax, int nlevel,
 void initcadcolors(void){
   int n, i1, i2, i;
   float xx, f1, f2, sum;
-  switch (setbw){
+  switch(setbw){
    case 0:
     for(n=0;n<nrgb_cad;n++){
       xx = (float)n/(float)nrgb_cad * (float)(nrgb-1);
@@ -1475,7 +1474,7 @@ void Update_Smokecolormap(int option){
   alpha = colorbarinfo[colorbartype].alpha;
   fire_cb = colorbarinfo[fire_colorbar_index].colorbar;
 
-  switch (firecolormap_type){
+  switch(firecolormap_type){
     case FIRECOLORMAP_DIRECT:
       for(n=0;n<icut;n++){
         rgb_colormap[4*n]=smoke_albedo;
@@ -2056,7 +2055,7 @@ void colorconvert(int flag){
   colordata *colorptr;
   extern colordata *firstcolor;
 
-  switch (flag){
+  switch(flag){
    case TO_BW:
     for(colorptr=firstcolor;colorptr!=NULL;colorptr=colorptr->nextcolor){
       colorptr->color[0]=colorptr->bw_color[0];

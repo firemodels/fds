@@ -133,7 +133,7 @@ void camera2quat(camera *ca, float *quat, float *rotation){
 
 void ResetView(int option){
   in_external=0;
-  switch (option){
+  switch(option){
     int rotation_type_save;
     int projection_type_save;
 

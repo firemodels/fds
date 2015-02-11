@@ -73,7 +73,7 @@ void drawtrees(void){
     glPushMatrix();
     glTranslatef(treei->xyz[0],treei->xyz[1],treei->xyz[2]);
     
-    switch (state){
+    switch(state){
       case 0:
         glColor4fv(trunccolor);
         drawdisk(treei->trunk_diam,treei->base_height,trunccolor);

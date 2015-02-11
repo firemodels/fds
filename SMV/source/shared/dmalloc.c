@@ -284,7 +284,7 @@ mallocflag _ResizeMemoryNOTHREAD(void **ppv, size_t sizeNew){
     if(sizeNew<sizeOld){
       memset((*ppold)+sizeNew,memGarbage,sizeOld-sizeNew);
     }
-    else if (sizeNew > sizeOld){
+    else if(sizeNew > sizeOld){
       void *pbForceNew;
 
       if(_NewMemoryNOTHREAD((void **)&pbForceNew, sizeNew)){

@@ -26,7 +26,7 @@ int getStringWidth(char *string){
   int length=0;
 
   if(string==NULL)return 0;
-  switch (fontindex){
+  switch(fontindex){
     case SMALL_FONT:
       length = strlen(string);
       length *= (288.0/235.0)*glutBitmapWidth(GLUT_BITMAP_HELVETICA_10, 'a');
@@ -234,7 +234,7 @@ int SUB_portortho(int quad,
 
   int irow, icol;
 
-  switch (quad){
+  switch(quad){
   case 0:            
     port_pixel_width = p->width;
     port_pixel_height = p->height;
@@ -313,7 +313,7 @@ int SUB_portortho2(int quad,
   portx_right = p->left + p->width;
   portx_down = p->down;
   portx_top = p->down + p->height;
-  switch (quad){
+  switch(quad){
   case 0:            
     port_pixel_width = p->width;
     port_pixel_height = p->height;
@@ -388,7 +388,7 @@ int SUB_portfrustum(int quad,
 
   int irow, icol;
 
-  switch (quad){
+  switch(quad){
   case 0:
     port_pixel_width = p->width;
     port_pixel_height = p->height;

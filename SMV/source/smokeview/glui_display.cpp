@@ -530,7 +530,7 @@ extern "C" void glui_labels_setup(int main_window){
   SPINNER_up_green->set_int_limits(0,255);
   SPINNER_up_blue->set_int_limits(0,255);
 
-  if (use_data_extremes == 0){
+  if(use_data_extremes == 0){
     PANEL_extreme2->disable();
     CHECKBOX_show_extreme_maxdata->set_int_val(0);
     CHECKBOX_show_extreme_mindata->set_int_val(0);
@@ -903,7 +903,7 @@ void Text_Labels_CB(int var){
   len=sizeof(GLUI_String);
 
   gl=&LABEL_local;
-  switch (var){
+  switch(var){
     case LB_VISLABELS:
       updatemenu=1;
       break;
@@ -1022,7 +1022,7 @@ void Text_Labels_CB(int var){
 
 extern "C" void Labels_CB(int var){
   updatemenu=1;
-  switch (var){
+  switch(var){
     case FLIP:
       colorbarflip = 1 - colorbarflip;
       ColorBarMenu(COLORBAR_FLIP);
@@ -1198,9 +1198,9 @@ extern "C" void update_transparency(void){
 
 extern "C" void FileShow_CB(int var){
   updatemenu=1;
-  switch (var){
+  switch(var){
     case  FILESHOW_plot3d:
-      switch (showhide_option){
+      switch(showhide_option){
         case 0:
         case 1:
           Plot3DShowMenu(SHOWALL_PLOT3D);
@@ -1214,7 +1214,7 @@ extern "C" void FileShow_CB(int var){
       }
       break;
     case FILESHOW_evac:
-      switch (showhide_option){
+      switch(showhide_option){
         case 0:
           EvacShowMenu(SHOWALL_EVAC);
           break;
@@ -1236,7 +1236,7 @@ extern "C" void FileShow_CB(int var){
       }
       break;
     case  FILESHOW_particle:
-      switch (showhide_option){
+      switch(showhide_option){
         case 0:
           ParticleShowMenu(SHOWALL_PARTICLE);
           break;
@@ -1258,7 +1258,7 @@ extern "C" void FileShow_CB(int var){
       }
       break;
     case  FILESHOW_slice:
-      switch (showhide_option){
+      switch(showhide_option){
         case 0:
           ShowHideSliceMenu(SHOWALL_SLICE);
           break;
@@ -1280,7 +1280,7 @@ extern "C" void FileShow_CB(int var){
       }
       break;
     case  FILESHOW_vslice:
-      switch (showhide_option){
+      switch(showhide_option){
         case 0:
           ShowVSliceMenu(SHOWALL_VSLICE);
           break;
@@ -1302,7 +1302,7 @@ extern "C" void FileShow_CB(int var){
       }
       break;
     case  FILESHOW_boundary:
-      switch (showhide_option){
+      switch(showhide_option){
         case 0:
           ShowPatchMenu(SHOWALL_BOUNDARY);
           break;
@@ -1324,7 +1324,7 @@ extern "C" void FileShow_CB(int var){
       }
       break;
     case  FILESHOW_3dsmoke:
-      switch (showhide_option){
+      switch(showhide_option){
         case 0:
           Smoke3DShowMenu(SHOWALL_SMOKE3D);
           break;
@@ -1346,7 +1346,7 @@ extern "C" void FileShow_CB(int var){
         }
       break;
     case  FILESHOW_isosurface:
-      switch (showhide_option){
+      switch(showhide_option){
         case 0:
           IsoShowMenu(SHOWALL_ISO);
           break;
@@ -1379,7 +1379,7 @@ extern "C" void Extreme_CB(int var){
   unsigned char *rgb_nodes;
   int i;
 
-  switch (var){
+  switch(var){
     case COLORBAR_EXTREME:
       if(show_extreme_mindata==1){
         if(SPINNER_down_red!=NULL)SPINNER_down_red->enable();

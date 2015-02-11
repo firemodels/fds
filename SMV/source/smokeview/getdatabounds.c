@@ -244,7 +244,7 @@ void adjustpart5bounds(partdata *parti){
 
     propi = part5propinfo + i;
 
-    switch (propi->setvalmin){
+    switch(propi->setvalmin){
     case PERCENTILE_MIN:
       propi->valmin=propi->percentile_min;
       break;
@@ -258,7 +258,7 @@ void adjustpart5bounds(partdata *parti){
       ASSERT(FFALSE);
       break;
     }
-    switch (propi->setvalmax){
+    switch(propi->setvalmax){
     case PERCENTILE_MAX:
       propi->valmax=propi->percentile_max;
       break;

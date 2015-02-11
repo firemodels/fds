@@ -408,7 +408,7 @@ void DrawCircVentsExactSolid(int option){
         setClipPlanes(&circleclip,CLIP_ON_DENORMAL);
       }
       glTranslatef(x0,yy0,z0);
-      switch (cvi->dir){
+      switch(cvi->dir){
         case DOWN_X:
           glTranslatef(-delta,0.0,0.0);
           glRotatef(-90.0,0.0,1.0,0.0);
@@ -514,7 +514,7 @@ void DrawCircVentsExactOutline(int option){
         setClipPlanes(&circleclip,CLIP_ON_DENORMAL);
       }
       glTranslatef(x0,yy0,z0);
-      switch (cvi->dir){
+      switch(cvi->dir){
         case DOWN_X:
           glTranslatef(-delta,0.0,0.0);
           glRotatef(-90.0,0.0,1.0,0.0);
@@ -819,7 +819,7 @@ void SetCVentDirs(void){
         boxmax[dir-1]+=0.1;
       }
 
-      switch (dir){
+      switch(dir){
         int ventdir;
 
       case 1:
@@ -989,7 +989,7 @@ void SetCVentDirs(void){
 
       cvi=meshi->cventinfo+iv;
 
-      switch (cvi->dir){
+      switch(cvi->dir){
         case UP_X:
         case DOWN_X:
           nx = cvi->jmax - cvi->jmin;
@@ -1133,7 +1133,7 @@ void SetVentDirs(void){
       if(vi->kmin==vi->kmax)dir=3;
       orien=0;
 
-      switch (dir){
+      switch(dir){
       case 1:
         vi->dir2=1;
         offset=ventoffset_factor*(xplttemp[1]-xplttemp[0]);
@@ -2160,7 +2160,7 @@ void obst_or_vent2faces(const mesh *meshi,blockagedata *bc,
     if(t_width==0.0)t_width=1.0;
     if(t_height==0.0)t_height=1.0;
     if(bc!=NULL){
-      switch (bc->useblockcolor){
+      switch(bc->useblockcolor){
       case 1:
         faceptr->color=bc->color;
         faceptr->transparent=bc->transparent;
@@ -2265,7 +2265,7 @@ void obst_or_vent2faces(const mesh *meshi,blockagedata *bc,
     offset[XXX]=(float)0.0;
     offset[YYY]=(float)0.0;
     offset[ZZZ]=(float)0.0;
-    switch (faceptr->dir) {
+    switch(faceptr->dir){
      case DOWN_Y: 
        faceptr->normal[1]=(float)-1.0;
        if(facetype==VENT_face&&vi!=NULL&&vi->dummy==0)offset[YYY] = -meshi->vent_offset[YYY];
@@ -2401,7 +2401,7 @@ void obst_or_vent2faces(const mesh *meshi,blockagedata *bc,
       xe_texture[0]=(*xstart+SCALE2FDS(xtex2[bfi[0]]));
       ye_texture[0]=(*ystart+SCALE2FDS(ytex2[bfi[0]]));
 
-      switch (faceptr->dir){
+      switch(faceptr->dir){
         case DOWN_X:
         case UP_X:
           xe_texture[0] -= faceptr->texture_origin[1];
@@ -2797,7 +2797,7 @@ void UpdateFacelists(void){
         }
       }
       if(j>=exteriorsurface_offset){
-        switch (j-exteriorsurface_offset){
+        switch(j-exteriorsurface_offset){
          case DOWN_Z:
            if(visFloor==0){
              continue;
@@ -2851,7 +2851,7 @@ void UpdateFacelists(void){
         }
       }
 
-      switch (facej->type){
+      switch(facej->type){
        case BLOCK_regular:
         if(facej->show_bothsides==0)meshi->face_normals_single[n_normals_single++]=facej;
         if(facej->show_bothsides==1)meshi->face_normals_double[n_normals_double++]=facej;
@@ -3212,7 +3212,7 @@ void draw_faces(){
           if(visNormalEditColors==1)new_color=facei->color;
           if(highlight_block==facei->blockageindex&&highlight_mesh==facei->meshindex){
             new_color=highlight_color;
-            switch (xyz_dir){
+            switch(xyz_dir){
              case XDIR:
               if(facei->dir==UP_X)new_color=up_color;
               if(facei->dir==DOWN_X)new_color=down_color;
@@ -3453,7 +3453,7 @@ void draw_transparent_faces(){
         if(visNormalEditColors==1)new_color=facei->color;
         if(highlight_block==facei->blockageindex&&highlight_mesh==facei->meshindex){
           new_color=highlight_color;
-          switch (xyz_dir){
+          switch(xyz_dir){
            case XDIR:
             if(facei->dir==UP_X)new_color=up_color;
             if(facei->dir==DOWN_X)new_color=down_color;
@@ -4506,7 +4506,7 @@ void draw_demo(int nlat, int nlong){
 
   if(nlat<=0||nlong<=0)return;
   if(update_demo==1)init_demo(0.4,nlat,nlong);
-  switch (demo_mode){
+  switch(demo_mode){
     case 0:
       glPointSize(6.0);
       glColor3f(0.0,0.0,1.0);
@@ -4713,7 +4713,7 @@ void draw_user_ticks(void){
     show_tick_x=0;
     show_tick_y=0;
     show_tick_z=0;
-    switch (user_tick_option){
+    switch(user_tick_option){
       case -1:
         tick_origin[0] = user_tick_origin[0];
         tick_origin[1] = user_tick_origin[1];
@@ -5111,7 +5111,7 @@ int get_tick_dir(float *mm){
     norm[0]=0.0;
     norm[1]=0.0;
     norm[2]=0.0;
-    switch (ii){
+    switch(ii){
     case 1:
       if(i<0)norm[1]=-1.0;
       if(i>0)norm[1]=1.0;
@@ -5444,7 +5444,7 @@ void draw_facesOLD(){
           if(visNormalEditColors==1)new_color=facei->color;
           if(highlight_block==facei->blockageindex&&highlight_mesh==facei->meshindex){
             new_color=highlight_color;
-            switch (xyz_dir){
+            switch(xyz_dir){
              case XDIR:
               if(facei->dir==UP_X)new_color=up_color;
               if(facei->dir==DOWN_X)new_color=down_color;
@@ -5516,7 +5516,7 @@ void draw_facesOLD(){
           if(visNormalEditColors==1)new_color=facei->color;
           if(highlight_block==facei->blockageindex&&highlight_mesh==facei->meshindex){
             new_color=highlight_color;
-            switch (xyz_dir){
+            switch(xyz_dir){
              case XDIR:
               if(facei->dir==UP_X)new_color=up_color;
               if(facei->dir==DOWN_X)new_color=down_color;

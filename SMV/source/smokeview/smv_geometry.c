@@ -904,7 +904,7 @@ void getvolsmokedir(float *mm){
       norm[0]=0.0;
       norm[1]=0.0;
       norm[2]=0.0;
-      switch (ii){
+      switch(ii){
       case 1:
         if(i<0){
           norm[0]=-1.0;
@@ -1108,7 +1108,7 @@ void getsmokedir(float *mm){
       norm[0]=0.0;
       norm[1]=0.0;
       norm[2]=0.0;
-      switch (ii){
+      switch(ii){
       case 1:
         if(i<0)norm[0]=-1.0;
         if(i>0)norm[0]=1.0;

@@ -236,7 +236,7 @@ void SHOOTER_CB(int var){
   if(shooter_firstframe==1){
     reset_itimes0();
   }
-  switch (var){
+  switch(var){
     case SHOOTER_LOADPLOT3D:
       PRINTF("Loading PLOT3D data at time: %f\n",plot3dtimelist[shooter_itime]);
       Plot3DListMenu(shooter_itime);

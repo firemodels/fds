@@ -2044,13 +2044,13 @@ void drawPart(const partdata *parti){
   if(parti->version==0){
     if(visSmokePart!=0){
       if(particle_type==0){
-        for (n = 0; n < nsmokepoints; n++) {
+        for (n = 0; n < nsmokepoints; n++){
           glColor4fv(rgb[itpoint[n]]);
           glVertex3f(xplts[xpoints[n]],yplts[ypoints[n]],zplts[zpoints[n]]);
         }
       }
       else{
-        for (n = 0; n < nsmokepoints; n++) {
+        for (n = 0; n < nsmokepoints; n++){
           rgb_ismoke = rgb_smoke + 4*itpoint[n];
           if(rgb_ismoke[3]>0.5){
             glColor4fv(rgb_ismoke);
@@ -2062,12 +2062,12 @@ void drawPart(const partdata *parti){
     if(visSprinkPart==1){
       if(droplet_type==0){
         glColor4fv(rgb[rgb_blue]);
-        for (n = nsmokepoints; n < nsmokepoints+nsprpoints; n++) {
+        for (n = nsmokepoints; n < nsmokepoints+nsprpoints; n++){
           glVertex3f(xplts[xpoints[n]],yplts[ypoints[n]],zplts[zpoints[n]]);
         }
       }
       else{
-        for (n = nsmokepoints; n < nsmokepoints+nsprpoints; n++) {
+        for (n = nsmokepoints; n < nsmokepoints+nsprpoints; n++){
           glColor4fv(rgb_full[itpoint[n]]);
           glVertex3f(xplts[xpoints[n]],yplts[ypoints[n]],zplts[zpoints[n]]);
         }

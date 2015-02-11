@@ -22,7 +22,7 @@ void printInfoLog(GLhandleARB obj);
 
 /* ------------------ setZoneSmokeShaders ------------------------ */
 
-int setZoneSmokeShaders() {
+int setZoneSmokeShaders(){
   GLhandleARB vert_shader, frag_shader;
   GLint error_code;
     
@@ -132,7 +132,7 @@ int setZoneSmokeShaders() {
   glGetObjectParameterivARB(p_zonesmoke,GL_OBJECT_LINK_STATUS_ARB,&error_code);
 #ifdef _DEBUG
   PRINTF("  Zone Smoke shader completion code:");
-  switch (error_code){
+  switch(error_code){
   case GL_INVALID_VALUE:
     PRINTF(" INVALID VALUE\n");
     break;
@@ -225,7 +225,7 @@ int set3DSliceShaders(void){
   glGetObjectParameterivARB(p_3dslice,GL_OBJECT_LINK_STATUS_ARB,&error_code);
 #ifdef _DEBUG
   PRINTF("  3D Slice shader completion code:");
-  switch (error_code){
+  switch(error_code){
   case GL_INVALID_VALUE:
     PRINTF(" INVALID VALUE\n");
     break;
@@ -262,7 +262,7 @@ int set3DSliceShaders(void){
 
 /* ------------------ setVolSmokeShaders ------------------------ */
 
-int setVolSmokeShaders() {
+int setVolSmokeShaders(){
   GLhandleARB vert_shader, frag_shader;
   GLint error_code;
 
@@ -460,7 +460,7 @@ int setVolSmokeShaders() {
   glGetObjectParameterivARB(p_volsmoke,GL_OBJECT_LINK_STATUS_ARB,&error_code);
 #ifdef _DEBUG
   PRINTF("  Volume Smoke shader completion code:");
-  switch (error_code){
+  switch(error_code){
   case GL_INVALID_VALUE:
     PRINTF(" INVALID VALUE\n");
     break;
@@ -516,7 +516,7 @@ int setVolSmokeShaders() {
 
 /* ------------------ setSmokeShaders ------------------------ */
 
-int setSmokeShaders() {
+int setSmokeShaders(){
   GLhandleARB vert_shader, frag_shader;
   GLint error_code;
 
@@ -600,7 +600,7 @@ int setSmokeShaders() {
   glGetObjectParameterivARB(p_smoke,GL_OBJECT_LINK_STATUS_ARB,&error_code);
 #ifdef _DEBUG
   PRINTF("  Smoke shader completion code:");
-  switch (error_code){
+  switch(error_code){
   case GL_INVALID_VALUE:
     PRINTF(" INVALID VALUE\n");
     break;
@@ -682,7 +682,7 @@ int init_shaders(void){
     return 1;
   }
 
-  if (GLEW_ARB_vertex_shader && GLEW_ARB_fragment_shader){
+  if(GLEW_ARB_vertex_shader && GLEW_ARB_fragment_shader){
     if(setSmokeShaders()==1){
 #ifdef _DEBUG
   		PRINTF("   GPU smoke shader successfully compiled, linked and loaded.\n");
@@ -746,7 +746,7 @@ int init_shaders(void){
 /* ------------------ createDepthTexture ------------------------ */
 
 void createDepthTexture( void ){
-  if ( depthtexture_id!=0 ){
+  if( depthtexture_id!=0 ){
 		glDeleteTextures( 1, &depthtexture_id );
 		depthtexture_id = 0;
 	}
@@ -768,7 +768,7 @@ void createDepthTexture( void ){
 /* ------------------ getDepthTexture ------------------------ */
 
 void getDepthTexture( void ){
-  if ( depthtexture_id==0 ) createDepthTexture();
+  if( depthtexture_id==0 ) createDepthTexture();
   glActiveTexture(GL_TEXTURE4);
   glBindTexture(GL_TEXTURE_2D, depthtexture_id);
   glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0,0, 0, 0, screenWidth, screenHeight);
@@ -784,7 +784,7 @@ void printInfoLog(GLhandleARB obj){
   char *infoLog;
 
 	glGetObjectParameterivARB(obj, GL_OBJECT_INFO_LOG_LENGTH_ARB,&infologLength);
-  if (infologLength > 0){
+  if(infologLength > 0){
     NewMemory((void **)&infoLog,infologLength);
     glGetInfoLogARB(obj, infologLength, &charsWritten, infoLog);
     PRINTF("%s\n",infoLog);

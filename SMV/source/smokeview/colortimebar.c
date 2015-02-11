@@ -408,7 +408,7 @@ void remapcolorbar(colorbardata *cbi){
 /* ------------------ remap_colorbartype ------------------------ */
 
 void remap_colorbartype(int cb_oldtype, char *cb_newname){
-  switch (cb_oldtype){
+  switch(cb_oldtype){
     case 0:
       strcpy(cb_newname,"Rainbow");
       break;

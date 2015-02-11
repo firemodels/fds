@@ -2045,7 +2045,7 @@ void update_mesh_coords(void){
 
     zvi = zventinfo + n;
 
-    switch (zvi->dir){
+    switch(zvi->dir){
     case 1:
     case 3:
       zvi->x1 = NORMALIZE_X(zvi->x1);
@@ -2178,7 +2178,7 @@ int compare_meshes( const void *arg1, const void *arg2 ){
     if(xyzmaxi[2]<=xyzminj[2])dir=3;
     if(xyzmaxj[2]<=xyzmini[2])dir=-3;
   }
-  switch (dir) {
+  switch(dir){
     case 0:
       returnval=0;
       break;
@@ -3971,7 +3971,7 @@ int readsmv(char *file, char *file2){
         dxyz[0] =  0.0;
         dxyz[1] =  0.0;
         dxyz[2] =  0.0;
-        switch (ticki->dir){
+        switch(ticki->dir){
         case 1:
         case -1:
           dxyz[0]=1.0;
@@ -5273,7 +5273,7 @@ int readsmv(char *file, char *file2){
         zvi->z1=roomi->z0+bottom;
         zvi->z2=roomi->z0+top;
         zvi->face=face;
-        switch (face){
+        switch(face){
         case 1:
           zvi->yy=roomi->y0;
           zvi->x1=roomi->x0+ventoffset;
@@ -5329,7 +5329,7 @@ int readsmv(char *file, char *file2){
         else{
           zvi->zz=roomi->z1;
         }
-        switch (hvent_type){
+        switch(hvent_type){
         case 1:
         case 2:
           zvi->x1=xcen-ventside/2.0;
@@ -5753,7 +5753,7 @@ typedef struct {
             bc->transparent=1;
           }
           if(colorindex==0||colorindex==7){
-            switch (colorindex){
+            switch(colorindex){
             case 0:
               s_color[0]=1.0;
               s_color[1]=1.0;
@@ -6089,7 +6089,7 @@ typedef struct {
           vi->zmin=meshi->xyz_bar0[ZZZ]+meshi->offset[ZZZ];
           vi->zmax=meshi->xyz_bar[ZZZ] +meshi->offset[ZZZ];
           s_num[0]=-1;
-          switch (nn-nvents){
+          switch(nn-nvents){
           case DOWN_Y:
           case DOWN_Y+6:
             vi->ymax=vi->ymin;
@@ -6197,7 +6197,7 @@ typedef struct {
           vi->dir=nn-nvents;
           if(vi->dir>5)vi->dir-=6;
           vi->dir2=0;
-          switch (nn-nvents){
+          switch(nn-nvents){
           case DOWN_Y:
           case DOWN_Y+6:
             jv2=jv1;
@@ -9350,7 +9350,7 @@ int readini2(char *inifile, int localfile){
           propi->setvalmax=ivmax;
           propi->valmin=vmin;
           propi->valmax=vmax;
-          switch (ivmin){
+          switch(ivmin){
             case PERCENTILE_MIN:
               propi->percentile_min=vmin;
               break;
@@ -9364,7 +9364,7 @@ int readini2(char *inifile, int localfile){
               ASSERT(FFALSE);
               break;
           }
-          switch (ivmax){
+          switch(ivmax){
             case PERCENTILE_MAX:
               propi->percentile_max=vmax;
               break;
@@ -11046,7 +11046,7 @@ typedef struct {
         }
         ticki->length=sqrt(length);
         VECEQCONS(dxyz,0.0);
-        switch (ticki->dir){
+        switch(ticki->dir){
         case 1:
         case -1:
           dxyz[0]=1.0;
@@ -11212,7 +11212,7 @@ void writeini(int flag,char *filename){
 
     char *outfilename=NULL;
 
-    switch (flag) {
+    switch(flag){
     case GLOBAL_INI:
       fileout=fopen(INIfile,"w");
       outfilename=INIfile;

@@ -354,7 +354,7 @@ void readfed(int file_index, int flag, int file_type, int *errorcode){
   ny = meshi->jbar+1;
   nxy = nx*ny;
 
-  switch (fed_slice->idir){
+  switch(fed_slice->idir){
     case 1:
       xgrid = meshi->yplt;
       ygrid = meshi->zplt;
@@ -415,7 +415,7 @@ void readfed(int file_index, int flag, int file_type, int *errorcode){
     float total,fareas[4];
 
     NewMemory((void **)&iblank,nxdata*nydata*sizeof(char));
-    switch (fed_slice->idir){
+    switch(fed_slice->idir){
       case 1:
         for(j=0;j<nxdata-1;j++){
           for(k=0;k<nydata-1;k++){
@@ -1194,7 +1194,7 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
 
     sd->sliceoffset=0.0;
 
-    switch (sd->idir) {
+    switch(sd->idir){
      case 1:
       offset=sliceoffset_factor*(xplt_local[1]-xplt_local[0]);
       if(inblockage(meshi,xslicemid-offset,yslicemid,zslicemid)==1){
@@ -2830,7 +2830,7 @@ void update_slice_contours(int slice_type_index, float line_min, float line_max,
     ny = jbar + 1;
     nz = kbar + 1;
 
-    switch (sd->idir){
+    switch(sd->idir){
       case 1:
       constval = xplt[sd->is1]+offset_slice*sd->sliceoffset;
       break;
@@ -2861,7 +2861,7 @@ void update_slice_contours(int slice_type_index, float line_min, float line_max,
       ci = sd->line_contours+i;
       if(slice_contour_type==SLICE_LINE_CONTOUR){
         printf("updating line contour: %i of %i\n",i+1,sd->nline_contours);
-        switch (sd->idir){
+        switch(sd->idir){
           case 1:
             getlinecontours(yplt,zplt,ny,nz,vals,NULL,line_min, line_max,ci);
             break;
@@ -2878,7 +2878,7 @@ void update_slice_contours(int slice_type_index, float line_min, float line_max,
       }
       else{
         printf("updating stepped contour: %i of %i\n",i+1,sd->nline_contours);
-        switch (sd->idir){
+        switch(sd->idir){
           case 1:
             getcontours(yplt,zplt,jbar+1,kbar+1,vals,NULL,ci->levels,DONT_GET_AREAS,DATA_FORTRAN,ci);
             break;
@@ -3283,7 +3283,7 @@ void drawslice_frame(){
         }
         continue;
       }
-      switch (sd->slicetype){
+      switch(sd->slicetype){
         case SLICE_NODE:
           if(usetexturebar!=0){
             drawvolslice_texture(sd);
@@ -5929,7 +5929,7 @@ void output_Slicedata(void){
     fileout = fopen(datafile,"a");
     if(fileout==NULL)continue;
     if(global_times!=NULL)fprintf(fileout,"%f\n",global_times[itimes]);
-    switch (sd->idir){
+    switch(sd->idir){
       case 1:
         fprintf(fileout,"%i,%i\n",sd->ks2+1-sd->ks1,sd->js2+1-sd->js1);
         for(row=sd->ks1; row<=sd->ks2; row++){
@@ -6016,7 +6016,7 @@ void init_Slicedata(void){
       zplt[sd->ks1],zplt[sd->ks2]);
 
 
-    switch (sd->idir){
+    switch(sd->idir){
     case 1:
       fprintf(fileout,"%i\n",sd->ks2+1-sd->ks1);
       for(k=sd->ks1;k<=sd->ks2;k++){

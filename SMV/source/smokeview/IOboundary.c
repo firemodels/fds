@@ -504,7 +504,7 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
     dzz = 0.0;
     ig_factor=0.03;
     
-    switch (meshi->patchdir[n]){
+    switch(meshi->patchdir[n]){
     case -1:
       meshi->patch_surfindex[n]=0;
       dxx = -meshi->xplt[1]*ig_factor;
@@ -826,7 +826,7 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
   }
 
   meshi->patchval = NULL;
-  switch (loadpatchbysteps){
+  switch(loadpatchbysteps){
   case 0:
     while(meshi->patchval==NULL&&mxpatch_frames>100){
       mxpatch_frames-=50;
@@ -935,7 +935,7 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
           nsize=meshi->patchrow[n]*meshi->patchcol[n];
           ASSERT((iblock!=-1&&meshblock!=NULL)||(iblock==-1&&meshblock==NULL));
           if(iblock!=-1&&meshblock!=NULL){
-            switch (loadpatchbysteps){
+            switch(loadpatchbysteps){
             case 0:
             case 1:
               for(j=0;j<nsize;j++){
@@ -978,7 +978,7 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
     if(error!=0)break;
     if(settmax_b!=0&&*meshi->patch_timesi>tmax_b)break;
 
-    switch (loadpatchbysteps){
+    switch(loadpatchbysteps){
       case 0:
       case 1:
         if(!(settmin_b!=0&&*meshi->patch_timesi<tmin_b)){
@@ -1223,7 +1223,7 @@ int nodeinvent(const mesh *meshi, int i,int j,int k, int dir,int option){
 
     vi = meshi->ventinfo+ii;
     if(vi->hideboundary==1){
-      switch (dir){
+      switch(dir){
       case 1:
         if(vi->imin==i&&i==vi->imax&&
            vi->jmin <j&&j <vi->jmax&&
@@ -1271,7 +1271,7 @@ void nodein_extvent(int ipatch, int *patchblank, const mesh *meshi,
     vi = meshi->ventinfo+ii;
     if(vi->hideboundary==1&&option==0)continue;
     if(vi->dir2!=dir)continue;
-    switch (dir){
+    switch(dir){
       int i, j, k;
 
     case 1:
@@ -1348,7 +1348,7 @@ void nodein_extvent(int ipatch, int *patchblank, const mesh *meshi,
       break;
     }
   }
-  switch (dir){
+  switch(dir){
     int i, j, k;
 
   case 1:
@@ -1635,7 +1635,7 @@ void drawpatch_texture(const mesh *meshi){
       cpatchval_iframe_copy = cpatchval_iframe + blockstart[n];
       if(hidepatchsurface==0){
         glPushMatrix();
-        switch (meshi->patchdir[n]){
+        switch(meshi->patchdir[n]){
           case 1:
             glTranslatef(dboundx,0.0,0.0);
             break;
@@ -1726,7 +1726,7 @@ void drawpatch_texture(const mesh *meshi){
       cpatchval_iframe_copy = cpatchval_iframe + blockstart[n];
       if(hidepatchsurface==0){
         glPushMatrix();
-        switch (meshi->patchdir[n]){
+        switch(meshi->patchdir[n]){
           case -1:
             glTranslatef(-dboundx,0.0,0.0);
             break;
@@ -2575,7 +2575,7 @@ void drawpatch(const mesh *meshi){
       cpatchval_iframe_copy = cpatchval_iframe + blockstart[n];
       if(hidepatchsurface==0){
         glPushMatrix();
-        switch (meshi->patchdir[n]){
+        switch(meshi->patchdir[n]){
           case 1:
             glTranslatef(dboundx,0.0,0.0);
             break;
@@ -2698,7 +2698,7 @@ void drawpatch(const mesh *meshi){
       cpatchval_iframe_copy = cpatchval_iframe + blockstart[n];
       if(hidepatchsurface==0){
         glPushMatrix();
-        switch (meshi->patchdir[n]){
+        switch(meshi->patchdir[n]){
           case -1:
             glTranslatef(-dboundx,0.0,0.0);
             break;
@@ -2956,7 +2956,7 @@ void drawpatch_cellcenter(const mesh *meshi){
       cpatchval_iframe_copy = cpatchval_iframe + blockstart[n];
       if(hidepatchsurface==0){
         glPushMatrix();
-        switch (meshi->patchdir[n]){
+        switch(meshi->patchdir[n]){
           case 1:
             glTranslatef(dboundx,0.0,0.0);
             break;
@@ -3046,7 +3046,7 @@ void drawpatch_cellcenter(const mesh *meshi){
       cpatchval_iframe_copy = cpatchval_iframe + blockstart[n];
       if(hidepatchsurface==0){
         glPushMatrix();
-        switch (meshi->patchdir[n]){
+        switch(meshi->patchdir[n]){
           case -1:
             glTranslatef(-dboundx,0.0,0.0);
             break;

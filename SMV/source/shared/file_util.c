@@ -432,7 +432,7 @@ int file_exists(char *filename){
 
 /* ------------------ get_filelist ------------------------ */
 
-void free_filelist(filelistdata *filelist, int *nfilelist) {
+void free_filelist(filelistdata *filelist, int *nfilelist){
   int i;
 
   for(i=0;i<*nfilelist;i++){
@@ -444,13 +444,13 @@ void free_filelist(filelistdata *filelist, int *nfilelist) {
 
   /* ------------------ get_filelist ------------------------ */
 
-int get_nfilelist(const char *path, char *key) {
+int get_nfilelist(const char *path, char *key){
   struct dirent *entry;
   DIR *dp;
   int maxfiles=0;
  
   dp = opendir(path);
-  if (dp == NULL) {
+  if(dp == NULL){
     perror("opendir");
     return 0;
   }
@@ -466,7 +466,7 @@ int get_nfilelist(const char *path, char *key) {
 
  /* ------------------ get_filelist ------------------------ */
 
-int get_filelist(const char *path, char *key, int maxfiles, filelistdata **filelist) {
+int get_filelist(const char *path, char *key, int maxfiles, filelistdata **filelist){
   struct dirent *entry;
   DIR *dp;
   int nfiles=0;
@@ -476,7 +476,7 @@ int get_filelist(const char *path, char *key, int maxfiles, filelistdata **filel
   // DT_REG - is a regular file
  
   dp = opendir(path);
-  if (dp == NULL) {
+  if(dp == NULL){
     perror("opendir");
     *filelist=NULL;
     return 0;

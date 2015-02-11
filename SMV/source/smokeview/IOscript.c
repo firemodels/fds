@@ -488,7 +488,7 @@ int compile_script(char *scriptfile){
     init_scripti(scripti,keyword_index,buffer);
 
     scriptEOF=0;
-    switch (keyword_index){
+    switch(keyword_index){
       case SCRIPT_UNLOADALL:
       case SCRIPT_LOADPARTICLES:
       case SCRIPT_CBARFLIP:
@@ -1154,7 +1154,7 @@ void script_showplot3ddata(scriptdata *scripti){
   showhide = scripti->ival4;
   val = scripti->fval;
 
-  switch (dir){
+  switch(dir){
     case 1:
       visx_all=showhide;
       iplotx_all=get_index(val,1,plotx_all,nplotx_all);
@@ -1417,7 +1417,7 @@ void script_settourview(scriptdata *scripti){
   show_tourlocus=scripti->ival3;
   tour_global_tension_flag=1;
   tour_global_tension=scripti->fval;
-  switch (scripti->ival2){
+  switch(scripti->ival2){
     case 0:
       viewtourfrompath=0;
       keyframe_snap=0;
@@ -1596,7 +1596,7 @@ int run_script(void){
     PRINTF("script:  %s\n",scripti->cval2);
   }
   PRINTF("\n");
-  switch (scripti->command){
+  switch(scripti->command){
     case SCRIPT_UNLOADALL:
       LoadUnloadMenu(UNLOADALL);
       break;

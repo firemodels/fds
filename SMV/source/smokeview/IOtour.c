@@ -312,7 +312,7 @@ void drawtours(void){
   //show_tourlocus=1;
   //tourlocus_type=2;
   if(show_tourlocus==1){
-    switch (tourlocus_type){
+    switch(tourlocus_type){
       case 0:
         antialias(ON);
         glBegin(GL_LINES);

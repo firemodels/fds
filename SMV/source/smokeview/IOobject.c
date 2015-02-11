@@ -480,7 +480,7 @@ void draw_devices_val(void){
         glBlendFunc(GL_ONE,GL_ZERO);
         doit=1;
       }
-      switch (show_smokesensors){
+      switch(show_smokesensors){
         case 1:
           sprintf(label,"%i",devicei->visval);
           break;
@@ -1275,7 +1275,7 @@ void draw_SVOBJECT(sv_object *object_dev, int iframe_local, propdata *prop, int 
       argptr=(toki-1)->varptr;
     }
 
-    switch (toki->command){
+    switch(toki->command){
     case SV_ADD:
       {
         float val1, val2, val_result;
@@ -5180,7 +5180,7 @@ char *parse_device_frame(char *buffer, FILE *stream, int *eof, sv_object_frame *
     tokendata *toki;
 
     toki = frame->command_list[i];
-    switch (toki->command){
+    switch(toki->command){
       int j,if_level;
 
       case SV_IF:
@@ -6972,7 +6972,7 @@ void parse_object_string(char *string,char **tokens, int *ntokens){
   last_in_token=0;
   len=strlen(string);
   for(i=0;i<=len;i++){
-    switch (*c) {
+    switch(*c){
       case '"':
         in_quote=1-in_quote;
         in_token=1;

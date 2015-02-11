@@ -101,7 +101,7 @@ void CCsmoke3dtofile(char *file, float *smoke_time, float *dx, int *type, float 
   }
 
   nchars_in=nxyz;
-  switch (*type){
+  switch(*type){
   case SOOT:
     /*xtype = 9.5;*/          // from john widmann
     xtype = 7.6;          

@@ -192,7 +192,7 @@ void Open_CB(int var){
   char *open_filter_ptr;
 
 
-  switch (var){
+  switch(var){
     case OPEN_UP:
       strcat(gluiopen_path_dir,dirseparator);
       strcat(gluiopen_path_dir,"..");
@@ -288,7 +288,7 @@ void Device_CB(int var){
   int i;
 
   updatemenu=1;
-  switch (var){
+  switch(var){
   case DEVICE_show_orientation:
     updatemenu=1;
     break;

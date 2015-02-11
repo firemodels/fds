@@ -97,7 +97,7 @@ void OpenSMVFile(char *filebuffer,int filebufferlength,int *openfile){
 /* ------------------ TrainerViewMenu ------------------------ */
 
 void TrainerViewMenu(int value){
-  switch (value) {
+  switch(value){
   case MENU_TRAINER_smoke:   // realistic
     HideAllSlices();
     trainerload=1;
@@ -212,7 +212,7 @@ void IsoVariableMenu(int value){
 void LabelMenu(int value){
   updatemenu=1;  
   glutPostRedisplay();
-  switch (value){
+  switch(value){
    case 0:
     visColorbarLabels=1-visColorbarLabels;
     break;
@@ -385,7 +385,7 @@ void ColorBarMenu(int value){
   updatemenu=1;
   glutPostRedisplay();
   if(value<0){
-    switch (value){
+    switch(value){
     case COLORBAR_FLIP:
       colorbarflip=1-colorbarflip;
       update_colorbarflip();
@@ -472,7 +472,7 @@ void Smoke3DShowMenu(int value){
   updatemenu=1;  
   glutPostRedisplay();
   if(value<0){
-    switch (value){
+    switch(value){
     case SHOW_ALL:
       plotstate=DYNAMIC_PLOTS;
       for(i=0;i<nsmoke3dinfo;i++){
@@ -516,7 +516,7 @@ void IsoShowMenu(int value){
   nisolevels=loaded_isomesh->nisolevels;
   showlevels=loaded_isomesh->showlevels;
 
-  switch (value){
+  switch(value){
    case  4:
     smoothtrinormal=1-smoothtrinormal;
     break;
@@ -734,7 +734,7 @@ void ShowHideSliceMenu(int value){
   updatemenu=1;  
   glutPostRedisplay();
   if(value<0){
-    switch (value){
+    switch(value){
     case SHOW_ALL:
       for(i=0;i<nsliceinfo;i++){
         sliceinfo[i].display=1;
@@ -804,7 +804,7 @@ void ShowMultiSliceMenu(int value){
 
   updatemenu=1;  
   glutPostRedisplay();
-  switch (value){
+  switch(value){
   case SHOW_ALL:
   case HIDE_ALL:
     ShowHideSliceMenu(value);
@@ -855,7 +855,7 @@ void ShowMultiSliceMenu(int value){
 void ShowHideMenu(int value){
   updatemenu=1;  
   glutPostRedisplay();
-  switch (value){
+  switch(value){
 #ifdef _DEBUG
   case 16:
     PrintMemoryInfo;
@@ -921,7 +921,7 @@ void ViewpointMenu(int value){
   if(value==999)return;
   updatemenu=1;  
   glutPostRedisplay();
-  switch (value){
+  switch(value){
   case TOGGLE_TITLE_SAFE:
     if(titlesafe_offset==0){
       titlesafe_offset=titlesafe_offsetBASE;
@@ -941,7 +941,7 @@ void ViewpointMenu(int value){
 
 void DialogMenu(int value){
   glutPostRedisplay();
-  switch (value){
+  switch(value){
   case DIALOG_SHOOTER:
     showshooter_dialog=1-showshooter_dialog;
     if(showshooter_dialog==1)show_glui_shooter();
@@ -1170,7 +1170,7 @@ void FontMenu(int value){
   if(opengldefined==1){
     glutPostRedisplay();
   }
-  switch (value){
+  switch(value){
   case SMALL_FONT:
     fontindex=SMALL_FONT;
     large_font=GLUT_BITMAP_HELVETICA_12;
@@ -1267,7 +1267,7 @@ void ResetMenu(int value){
   char view_label[256];
 
   if(value==MENU_DUMMY)return;
-  switch (value){
+  switch(value){
   case MENU_SIZEPRESERVING:
     projection_type = 1 - projection_type;
     Motion_CB(PROJECTION);
@@ -1353,7 +1353,7 @@ void RenderMenu(int value){
     update_nrender_rows();
     return;
   }
-  switch (value){
+  switch(value){
   case Render320:
     render_multi_menu=0;
     render_option=value;
@@ -1467,7 +1467,7 @@ void EvacShowMenu(int value){
     return;
   }
   if(plotstate==DYNAMIC_PLOTS){
-    switch (value){
+    switch(value){
     case 3:
       visEvac=1;
       for(i=0;i<npartinfo;i++){
@@ -1490,7 +1490,7 @@ void EvacShowMenu(int value){
     }
   }
   else{
-    switch (value){
+    switch(value){
     case 3:
       visEvac=1;
       for(i=0;i<npartinfo;i++){
@@ -1529,7 +1529,7 @@ void ParticleShowMenu(int value){
     return;
   }
   if(plotstate==DYNAMIC_PLOTS){
-    switch (value){
+    switch(value){
       case 1:
         if(visSmokePart==2){
           visSmokePart=0;
@@ -1588,7 +1588,7 @@ void ParticleShowMenu(int value){
   else{
   //  visSmokePart=0; 
   //  visSprinkPart=0;
-    switch (value){
+    switch(value){
       case 1: 
         visSmokePart = 2; 
         break;
@@ -1640,7 +1640,7 @@ void FrameRateMenu(int value){
   realtime_flag=0;
   frameinterval=1;
   if(value > 0){
-    switch (value){
+    switch(value){
     case 2001:
       if(nglobal_times>0){
         if(global_times!=NULL)frameinterval=1000.*(global_times[nglobal_times-1]-global_times[0])/nglobal_times;
@@ -1681,7 +1681,7 @@ void FrameRateMenu(int value){
 
 void IsoSurfaceTypeMenu(int value){
   if(ReadPlot3dFile==1){
-    switch (value){
+    switch(value){
     case 0:
       p3dsurfacesmooth=1;
       p3dsurfacetype=1;
@@ -1736,7 +1736,7 @@ void LevelMenu(int value){
 /* ------------------ HelpMenu ------------------------ */
 
 void HelpMenu(int value){
-  switch (value){
+  switch(value){
     case -1:
 #ifdef pp_OSX
       system("open http://code.google.com/p/fds-smv/issues/");
@@ -1820,7 +1820,7 @@ void TextureShowMenu(int value){
     if(texture_flag==0)showall_textures=1;
   }
   else{
-    switch (value){
+    switch(value){
     case MENU_TEXTURE_SHOWALL:
       for(i=0;i<ntextures;i++){
         texti = textureinfo + i;
@@ -1874,7 +1874,7 @@ void Plot3DShowMenu(int value){
   int i;
 
   meshi=current_mesh;
-  switch (value){
+  switch(value){
     case 1:
       visz_all=1-visz_all;
       break;
@@ -1885,7 +1885,7 @@ void Plot3DShowMenu(int value){
       visx_all=1-visx_all;
       break;
     case 4:
-      switch (contour_type){
+      switch(contour_type){
         case SHADED_CONTOURS:
           contour_type=STEPPED_CONTOURS;
           break;
@@ -1946,7 +1946,7 @@ void Plot3DShowMenu(int value){
 /* ------------------ GridSliceMenu ------------------------ */
 
 void GridSliceMenu(int value){
-  switch (value){
+  switch(value){
   case GRID_xy:
     visz_all=1-visz_all;
     if(visz_all==1&&visGrid==0)visGrid=1;
@@ -1973,7 +1973,7 @@ void GridSliceMenu(int value){
   case 999:
     break;
   case GRID_grid:
-    switch (visGrid){
+    switch(visGrid){
       case GridProbe:
         visGrid=noGridProbe;
         break;
@@ -1992,7 +1992,7 @@ void GridSliceMenu(int value){
     }
     break;
   case GRID_probe:
-    switch (visGrid){
+    switch(visGrid){
       case GridProbe:
         visGrid=GridnoProbe;
         break;
@@ -2023,7 +2023,7 @@ void GridSliceMenu(int value){
 
 void CompressMenu(int value){
   if(value==999)return;
-  switch (value){
+  switch(value){
   case 1:
     erase_all=1;
     overwrite_all=0;
@@ -2074,7 +2074,7 @@ void IniSubMenu(int value){
 /* ------------------ SmokeviewiniMenu ------------------------ */
 
 void SmokeviewiniMenu(int value){
-  switch (value){
+  switch(value){
   case 1:
     readini(NULL);
     UpdateRGBColors(COLORBAR_INDEX_NONE);
@@ -2126,7 +2126,7 @@ void ScriptMenu(int value){
   if(value==999)return;
   updatemenu=1;
   glutPostRedisplay();
-  switch (value){
+  switch(value){
     case SCRIPT_FILE_LOADING:
       defer_file_loading = 1 - defer_file_loading;
       update_defer();
@@ -2233,7 +2233,7 @@ void ReloadMenu(int value){
 
   updatemenu=1;
   periodic_value=value;
-  switch (value){
+  switch(value){
   case STOP_RENDERING:
     periodic_reloads=0;
     break;
@@ -2445,7 +2445,7 @@ void TourMenu(int value){
   touring=0;
   updatemenu=1;
   glutPostRedisplay();
-  switch (value){
+  switch(value){
   case MENU_TOUR_EDIT:
     DialogMenu(DIALOG_TOUR);
     break;
@@ -3989,7 +3989,7 @@ void ShowPatchMenu(int value){
 void VentMenu(int value){
 
   if(value==-1)return;
-  switch (value){
+  switch(value){
   case SHOW_ALL_VENTS: // show all vents
     visVents=1;
     visOpenVents=1;
@@ -4062,7 +4062,7 @@ void VentMenu(int value){
 #define GEOMETRY_TETRA_HIDE 11
 void ImmersedMenu(int value){
   updatemenu=1;
-  switch (value){
+  switch(value){
 
     case GEOMETRY_EXTERIOR:
       show_geometry_exterior=1-show_geometry_exterior;
@@ -4171,7 +4171,7 @@ void BlockageMenu(int value){
 
   if(solid_state<0)solid_state=visBlocks;
   if(outline_state<0)outline_state=OUTLINE_NONE;
-  switch (value){
+  switch(value){
     case visBLOCKOutlineColor:
       outline_color_flag = 1 - outline_color_flag;
       updatefaces=1;
@@ -4222,7 +4222,7 @@ void BlockageMenu(int value){
       break;
   }
   if(change_state==1){
-    switch (outline_state){
+    switch(outline_state){
       case OUTLINE_NONE:
         value=solid_state;
         break;
@@ -4230,7 +4230,7 @@ void BlockageMenu(int value){
         value=visBLOCKOutline;
         break;
       case OUTLINE_ADDED:
-        switch (solid_state){
+        switch(solid_state){
           case visBLOCKAsInput:
             value=visBLOCKAsInputOutline;
           break;
@@ -4251,7 +4251,7 @@ void BlockageMenu(int value){
     }
   }
 
-  switch (value){
+  switch(value){
    case visCADOpaque:
    case visBLOCKOutlineColor:
      break;
@@ -4331,7 +4331,7 @@ void RotateTypeMenu(int value){
 void TitleMenu(int value){
   updatemenu=1;  
   glutPostRedisplay();
-  switch (value){
+  switch(value){
   case 0:
     visTitle = 1 - visTitle;
     break;
@@ -4430,7 +4430,7 @@ void ShowObjectsMenu(int value){
 /* ------------------ ZoneShowMenu ------------------------ */
 
 void ZoneShowMenu(int value){
-  switch (value){
+  switch(value){
   case 999:
     return;
   case 1:
@@ -4510,7 +4510,7 @@ void ZoneShowMenu(int value){
 
 void GeometryMenu(int value){
 
-  switch (value){
+  switch(value){
   case 14:
     show_triangle_count=1-show_triangle_count;
     break;
@@ -5778,7 +5778,7 @@ updatemenu=0;
 
   CREATEMENU(rotatetypemenu,RotateTypeMenu);
   glutAddMenuEntry("Scene centered:",999);
-  switch (rotation_type){
+  switch(rotation_type){
   case EYE_CENTERED:
     glutAddMenuEntry("  2 axis",ROTATION_2AXIS);
     glutAddMenuEntry("  Level (1 axis)",ROTATION_1AXIS);
@@ -5815,7 +5815,7 @@ updatemenu=0;
     glutAddMenuEntry(_("Layers"),999);
     if(ReadZoneFile==1){
       glutAddMenuEntry(_("  2D smoke colored by:"),999);
-      switch (sethazardcolor){
+      switch(sethazardcolor){
         case 0:
           glutAddMenuEntry(_("    *Temperature"),6);
           glutAddMenuEntry(_("    hazard"),5);
@@ -5839,7 +5839,7 @@ updatemenu=0;
         if(visVZone==1)glutAddMenuEntry(_("    *vertically"),2);
         if(visVZone==0)glutAddMenuEntry(_("    vertically"),2);
         }
-      switch (sethazardcolor){
+      switch(sethazardcolor){
         case 0:
         case 1:
           glutAddMenuEntry(_("  3D smoke"),7);
@@ -6971,7 +6971,7 @@ updatemenu=0;
     vslicedata *vd;
 
     vd = vsliceinfo+i;
-    switch (vd->vec_type){
+    switch(vd->vec_type){
     case 0:
       nvslice0++;
       if(vd->loaded==1)nvsliceloaded0++;
@@ -7275,7 +7275,7 @@ updatemenu=0;
 
   if(showfontmenu==1){
     CREATEMENU(fontmenu,FontMenu);
-    switch (fontindex){
+    switch(fontindex){
     case SMALL_FONT:
       glutAddMenuEntry(_("*Normal"),SMALL_FONT);
       glutAddMenuEntry(_("Large"),LARGE_FONT);
@@ -7614,7 +7614,7 @@ updatemenu=0;
   /* --------------------------------mouse help menu -------------------------- */
 
   CREATEMENU(mousehelpmenu,HelpMenu);
-  switch (rotation_type){
+  switch(rotation_type){
     case ROTATION_2AXIS:
       glutAddMenuEntry(_("horizontal/vertical: rotate about z, x axis"),1);
       break;
@@ -7632,7 +7632,7 @@ updatemenu=0;
       ASSERT(FFALSE);
       break;
   }
-  switch (rotation_type){
+  switch(rotation_type){
     case EYE_CENTERED:
       break;
     case ROTATION_2AXIS:
@@ -8385,7 +8385,7 @@ updatemenu=0;
           for(i=0;i<nsmoke3dinfo;i++){
             smoke3di=smoke3dinfo + i;
             if(smoke3di->loaded==0)continue;
-            switch (smoke3di->type){
+            switch(smoke3di->type){
             case 1:
               nsootloaded++;
               break;

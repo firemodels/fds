@@ -368,7 +368,7 @@ void drawTargets(void){
   if(global_times!=NULL)time_val = global_times[itimes];
   for(j=0;j<ntarginfo;j++){
     if(targinfo[j].loaded==0||targinfo[j].display==0)continue;
-    switch (targinfo[j].type){
+    switch(targinfo[j].type){
      case 1:
      for(i=0;i<ntargets;i++){
        if(gettargetposition(i,time_val,&xtarget,&ytarget,&ztarget)==1){

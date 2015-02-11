@@ -205,7 +205,7 @@ void CLIP_CB(int var){
   int i;
 
   glutPostRedisplay();
-  switch (var){
+  switch(var){
   case CLIP_MESH:
     if(clip_mesh==0){
       set_clip_controls(DEFAULT_VALS);

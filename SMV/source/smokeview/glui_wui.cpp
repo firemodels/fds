@@ -193,7 +193,7 @@ extern "C" void show_glui_wui(void){
 extern "C" void WUI_CB(int var){
   int fire_line_type;
 
-  switch (var){
+  switch(var){
     case TERRAIN_MIN:
     case TERRAIN_MAX:
       break;

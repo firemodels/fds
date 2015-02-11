@@ -131,7 +131,7 @@ extern "C" void show_glui_stereo(void){
 
 void STEREO_CB(int var){
 
-  switch (var){
+  switch(var){
   case STEREO_GREEN:
    // right_blue=1.0-right_green;
    // SPINNER_right_blue2->set_float_val(right_blue);

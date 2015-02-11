@@ -33,7 +33,7 @@ unsigned int rle(unsigned char *buffer_in, int nchars_in, unsigned char *buffer_
     else{
       nrepeats=1;
     }
-    switch (nrepeats){
+    switch(nrepeats){
     case 1:
     case 2:
     case 3:

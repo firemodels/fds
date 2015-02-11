@@ -415,7 +415,7 @@ void readsmoke3d(int ifile,int flag, int *errorcode){
         break;
       }
     }
-    if (meshi->iblank_smoke3d != NULL){
+    if(meshi->iblank_smoke3d != NULL){
       int free_iblank_smoke3d;
 
       free_iblank_smoke3d = 1;
@@ -425,12 +425,12 @@ void readsmoke3d(int ifile,int flag, int *errorcode){
 
         smoke3dj = smoke3dinfo + j;
         meshj = meshinfo + smoke3dj->blocknumber;
-        if (smoke3dj != smoke3di && smoke3dj->loaded == 1 && meshj == meshi){
+        if(smoke3dj != smoke3di && smoke3dj->loaded == 1 && meshj == meshi){
           free_iblank_smoke3d = 0;
           break;
         }
       }
-      if (free_iblank_smoke3d == 1){
+      if(free_iblank_smoke3d == 1){
         FREEMEMORY(meshi->iblank_smoke3d);
         meshi->iblank_smoke3d_defined = 0;
         update_makeiblank_smoke3d=1;
@@ -649,7 +649,7 @@ void setsmokecolorflags(void){
     smoke3di->soot_index=-1;
     if(smoke3di->loaded==0)continue;
 
-    switch (smoke3di->type){
+    switch(smoke3di->type){
     case 1:
       smoke3di->soot_color=smoke3di->smokeframe_in;
       smoke3di->soot_index=i;
@@ -681,7 +681,7 @@ void setsmokecolorflags(void){
       if(smoke3di->ks1!=smoke3dj->ks1)continue;
       if(smoke3di->ks2!=smoke3dj->ks2)continue;
 
-      switch (smoke3dj->type){
+      switch(smoke3dj->type){
       case 1:
         smoke3di->soot_color=smoke3dj->smokeframe_in;
         smoke3di->soot_index=j;
@@ -979,7 +979,7 @@ void mergesmoke3dcolors(smoke3ddata *smoke3dset){
     smoke3di->d_display=0;
     if(smoke3di->loaded==0||smoke3di->display==0)continue;
     smoke_soot=NULL;
-    switch (smoke3di->type){
+    switch(smoke3di->type){
     case 1:
       smoke3di->d_display=1;
       break;
@@ -1169,7 +1169,7 @@ void drawsmoke3d(smoke3ddata *smoke3di){
   light_in=smoke3di->lightframe_in;
   alphaf_out=smoke3di->smokeframe_out;
 
-  switch (demo_mode){
+  switch(demo_mode){
   case 0:
     is1 = smoke3di->is1;
     is2 = smoke3di->is2;
@@ -1217,7 +1217,7 @@ void drawsmoke3d(smoke3ddata *smoke3di){
   if(cullfaces==1)glDisable(GL_CULL_FACE);
 
   transparenton();
-  switch (ssmokedir){
+  switch(ssmokedir){
  
     // +++++++++++++++++++++++++++++++++++ DIR 1 +++++++++++++++++++++++++++++++++++++++
 
@@ -3017,7 +3017,7 @@ void drawsmoke3dGPU(smoke3ddata *smoke3di){
   glUniform1f(GPU_fire_alpha,smoke3di->fire_alpha);
 
   transparenton();
-  switch (ssmokedir){
+  switch(ssmokedir){
   // +++++++++++++++++++++++++++++++++++ DIR 1 +++++++++++++++++++++++++++++++++++++++
 
 
@@ -4161,7 +4161,7 @@ void drawsmoke3dCULL(void){
       ny = js2 + 1 - js1;
       nxy = nx*ny;
 
-      switch (meshi->smokedir){
+      switch(meshi->smokedir){
         case 1:
         case -1:
           aspectratio=meshi->dx;
@@ -4222,7 +4222,7 @@ void drawsmoke3dCULL(void){
     }
 
     if(is_fire_or_soot(smoke3di)==0)continue;
-    switch (meshi->smokedir){
+    switch(meshi->smokedir){
 
   // +++++++++++++++++++++++++++++++++++ DIR 1 +++++++++++++++++++++++++++++++++++++++
 
@@ -5050,7 +5050,7 @@ void makeiblank_smoke3d(void){
 
     meshi = meshinfo + i;
     if(flag==ALLMESHES&&i==nm)continue;
-    if (meshi->iblank_smoke3d == NULL)continue;
+    if(meshi->iblank_smoke3d == NULL)continue;
 
     if(x<meshi->xplt[0]||x>meshi->xplt[meshi->ibar])continue;
     if(y<meshi->yplt[0]||y>meshi->yplt[meshi->jbar])continue;
@@ -5164,7 +5164,7 @@ void initcullplane(int cullflag){
             cp->norm[0]=0.0;
             cp->norm[1]=0.0;
             cp->norm[2]=0.0;
-            switch (meshi->smokedir) {
+            switch(meshi->smokedir){
               int ii, jj, kk;
 
               case 1:

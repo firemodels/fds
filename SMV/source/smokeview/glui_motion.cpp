@@ -626,7 +626,7 @@ void enable_disable_views(void){
     }
   }
 
-  switch (ival){
+  switch(ival){
     case -1:
     case 0:
     case 1:
@@ -783,7 +783,7 @@ extern "C" void showhide_translate(int var){
   eye_xyz0[2]=eye_xyz[2];
   d_eye_xyz[0]=0.0;
   d_eye_xyz[1]=0.0;
-  switch (var){
+  switch(var){
   case ROTATION_3AXIS:
     if(PANEL_translate!=NULL)PANEL_translate->enable();
     if(ROTATE_2axis!=NULL)ROTATE_2axis->disable();
@@ -926,7 +926,7 @@ extern "C" void Motion_CB(int var){
     updatemenu=1;
   }
 
-  switch (var){
+  switch(var){
 
     case EYE_ROTATE:
       *azimuth=motion_dir[0];
@@ -967,7 +967,7 @@ extern "C" void Motion_CB(int var){
       }
       break;
     case WINDOWSIZE_LIST:
-      switch (windowsize_pointer){
+      switch(windowsize_pointer){
         case 0:
         case 1:
           break;
@@ -1147,7 +1147,7 @@ extern "C" void Motion_CB(int var){
     eye_xyz[1] = eye_xyz0[1] + dy;
   }
 
-  switch (var){
+  switch(var){
     case USE_GVEC:
       if(gvec_down==1){
         float vv[3];
@@ -1264,7 +1264,7 @@ extern "C" void show_glui_motion(void){
 /* ------------------ Motion_DLG_CB ------------------------ */
 
 void Motion_DLG_CB(int var){
-  switch (var){
+  switch(var){
   case 1:
     if(glui_motion!=NULL)glui_motion->hide();
     showmotion_dialog=0;
@@ -1319,7 +1319,7 @@ void Viewpoint_CB(int var){
   camera *prev, *next;
   int view_id;
 
-  switch (var){
+  switch(var){
   case RESTORE_EXTERIOR_VIEW:
   case RESTORE_INTERIOR_VIEW:
   case RESTORE_SAVED_VIEW:
@@ -1439,7 +1439,7 @@ void Viewpoint_CB(int var){
     cex=&camera_list_first;
     cex=cex->next;
     cex=cex->next;
-    switch (ival){
+    switch(ival){
     case -1:
     case 0:
     case 1:
@@ -1533,7 +1533,7 @@ extern "C" void rotation_type_CB(int var){
 
 void Render_CB(int var){
   updatemenu=1;
-  switch (var){
+  switch(var){
     case RENDER_LABEL:
       break;
     case RENDER_TYPE:

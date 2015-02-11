@@ -362,7 +362,7 @@ void getzonesmokedir(float *mm){
       norm[0]=0.0;
       norm[1]=0.0;
       norm[2]=0.0;
-      switch (ii){
+      switch(ii){
       case 1:
         if(i<0){
           norm[0]=-1.0;
@@ -859,7 +859,7 @@ void drawroomgeom(void){
       z2=zvi->z2;
       yy=zvi->yy;
       glBegin(GL_LINE_LOOP);
-      switch (idir){
+      switch(idir){
       case 1:
       case 3:
         glVertex3f(x1,yy,z1);
@@ -991,7 +991,7 @@ void drawventdata(void){
         vcolor1=rgb_full[zvi->itempdata[j]];
         vcolor2=rgb_full[zvi->itempdata[j+1]];
         vcolor2=vcolor1;
-        switch (idir){
+        switch(idir){
         case 4:
         case 2:
           if(dy1*dy2>=0.0){
@@ -1064,7 +1064,7 @@ void drawventdata(void){
         dy1 = factor*zvi->area_fraction*zvi->vdata[j];
         vcolor1=rgb_full[zvi->itempdata[j]];
         glColor3fv(vcolor1);
-        switch (idir){
+        switch(idir){
         case 1:
           glVertex3f(x1,yy,    yelev[j]);
           glVertex3f(x1,yy-dy1,yelev[j]);
@@ -1238,7 +1238,7 @@ void drawzonesmokeGPU(roomdata *roomi){
     glUniform1i(GPUzone_zonedir,iwall);
     glBegin(GL_TRIANGLES);
 
-    switch (iwall){
+    switch(iwall){
       case 1:
       case -1:
         dy = roomi->dy/(NCOLS_GPU-1);
@@ -1368,7 +1368,7 @@ void drawzonesmoke(roomdata *roomi){
     if(iwall==0)continue;
     if(roomi->drawsides[iwall+3]==0)continue;
 
-    switch (iwall){
+    switch(iwall){
       case 1:
       case -1:
         dy = roomi->dy/(NCOLS-1);

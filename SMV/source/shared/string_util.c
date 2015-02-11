@@ -185,7 +185,7 @@ int randint(int min, int max){
   */
   int return_val;
 
-  if (min>max){
+  if(min>max){
     return_val = max+((min-max+1)*(float)rand()/((float)RAND_MAX+1.0));
   }
   else{
@@ -202,7 +202,7 @@ char *randstr(char* str, int length){
   */
     int i;
 
-    if (str==NULL||length<=0)return NULL;
+    if(str==NULL||length<=0)return NULL;
 
     for (i=0;i<length;i++){
       str[i]=(char)randint(65,90);
@@ -312,7 +312,7 @@ int STRCMP(const char *s1, const char *s2){
       \brief same as the standard function, strcmp, but ignores case
   */
   while (toupper(*s1) == toupper(*s2++)){
-		if (*s1++ == 0)return (0);
+		if(*s1++ == 0)return (0);
   }
   return (toupper(*(const unsigned char *)s1) - toupper(*(const unsigned char *)(s2 - 1)));
 }
@@ -649,14 +649,14 @@ int match_wild(char *pTameText, char *pWildText){
     t = *pTameText;
     w = *pWildText;
 
-    if (!t || t == cAltTerminator){
-      if (!w || w == cAltTerminator)break;    // "x" matches "x"
-      else if (w == '*'){
+    if(!t || t == cAltTerminator){
+      if(!w || w == cAltTerminator)break;    // "x" matches "x"
+      else if(w == '*'){
         pWildText++;
         continue;                             // "x*" matches "x" or "xy"
       }
-      else if (pAfterLastTame){
-        if (!(*pAfterLastTame) || *pAfterLastTame == cAltTerminator){
+      else if(pAfterLastTame){
+        if(!(*pAfterLastTame) || *pAfterLastTame == cAltTerminator){
           bMatch = 0;
           break;
         }
@@ -668,24 +668,24 @@ int match_wild(char *pTameText, char *pWildText){
       break;                                  // "x" doesn't match "xy"
     }
     else{
-      if (!bCaseSensitive){
+      if(!bCaseSensitive){
   //   convert characters to lowercase
-        if (t >= 'A' && t <= 'Z')t += ('a' - 'A');
-        if (w >= 'A' && w <= 'Z')w += ('a' - 'A');
+        if(t >= 'A' && t <= 'Z')t += ('a' - 'A');
+        if(w >= 'A' && w <= 'Z')w += ('a' - 'A');
       }
-      if (t != w){
-        if (w == '*'){
+      if(t != w){
+        if(w == '*'){
           pAfterLastWild = ++pWildText;
           pAfterLastTame = pTameText;
           continue;                           // "*y" matches "xy"
         }
-        else if (pAfterLastWild){
+        else if(pAfterLastWild){
           pWildText = pAfterLastWild;
           w = *pWildText;
-          if (!w || w == cAltTerminator)break;// "*" matches "x"
+          if(!w || w == cAltTerminator)break;// "*" matches "x"
           else{
-            if (!bCaseSensitive && w >= 'A' && w <= 'Z')w += ('a' - 'A');
-            if (t == w)pWildText++;
+            if(!bCaseSensitive && w >= 'A' && w <= 'Z')w += ('a' - 'A');
+            if(t == w)pWildText++;
           }
           pTameText++;
           continue;                           // "*sip*" matches "mississippi"

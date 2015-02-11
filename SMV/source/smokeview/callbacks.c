@@ -36,7 +36,7 @@ int get_index(float x, int dir, float *plotxyz, int nplotxyz){
   int return_index=0;
   float min_val,vali;
 
-  switch (dir){
+  switch(dir){
     case 1:
       x=NORMALIZE_X(x);
       break;
@@ -234,7 +234,7 @@ void next_zindex(int inc,int flag){
 
 void WindowStatus(int state){
   PRINTF("state=%i\n",state);
-  switch (state){
+  switch(state){
   case GLUT_HIDDEN:
   case GLUT_FULLY_COVERED:
     break;
@@ -355,7 +355,7 @@ void mouse_edit_blockage(int button, int state, int x, int y){
     glEnable(GL_BLEND);
     glEnable(GL_LIGHTING);
 
-    switch (sd->dir){
+    switch(sd->dir){
       case DOWN_X:
       case UP_X:
         xyz_dir=0;
@@ -372,7 +372,7 @@ void mouse_edit_blockage(int button, int state, int x, int y){
         ASSERT(FFALSE);
         break;
     }
-    switch (sd->dir){
+    switch(sd->dir){
       case DOWN_X:
       case DOWN_Y:
       case DOWN_Z:
@@ -656,7 +656,7 @@ void update_mouseinfo(int flag, int xm, int ym){
 
   maxWH = MAX(screenWidth,screenHeight);
   xymax = 0.3*(float)MIN(screenWidth,screenHeight)/(float)maxWH;
-  switch (flag){
+  switch(flag){
     case MOUSE_DOWN:
       mi->current[0]=xm;
       mi->current[1]=ym;
@@ -865,7 +865,7 @@ void mouse_CB(int button, int state, int xm, int ym){
       canrestorelastview=1;
       enable_reset_saved_view();
     }
-    switch (button){
+    switch(button){
       case GLUT_MIDDLE_BUTTON:
         state=GLUT_ACTIVE_CTRL;
         break;
@@ -876,7 +876,7 @@ void mouse_CB(int button, int state, int xm, int ym){
         state=glutGetModifiers();
         break;
     }
-    switch (state){
+    switch(state){
       case GLUT_ACTIVE_CTRL:
         key_state = KEY_CTRL;
         eye_xyz0[0]=eye_xyz[0];
@@ -977,7 +977,7 @@ void Drag_Tour_Node(int xm, int ym){
   }
   dxm = xm - start_xyz0[0];
   dym = ym - start_xyz0[1];
-  switch (key_state){
+  switch(key_state){
     case KEY_NONE:
     case KEY_ALT:
     case KEY_SHIFT:
@@ -1031,7 +1031,7 @@ void Move_Gen_Slice(int xm, int ym){
 
   dxm = xm - start_xyz0[0];
   dym = ym - start_xyz0[1];
-  switch (key_state){
+  switch(key_state){
     case KEY_NONE:
       {
         float daz, delev;
@@ -1097,9 +1097,9 @@ void Move_Scene(int xm, int ym){
 
   dxm = xm - start_xyz0[0];
   dym = ym - start_xyz0[1];
-  switch (key_state){
+  switch(key_state){
     case KEY_NONE:
-      switch (rotation_type){
+      switch(rotation_type){
         case ROTATION_3AXIS:
         break;
         case ROTATION_2AXIS:
@@ -1309,7 +1309,7 @@ void keyboard(unsigned char key, int flag){
     keystate = 6&glutGetModifiers();
     if(scriptoutstream!=NULL&&key!='t'&&key!='r'&&key!='R'&&key!=' '&&key!='-'){
       fprintf(scriptoutstream,"KEYBOARD\n");
-      switch (keystate){
+      switch(keystate){
         case GLUT_ACTIVE_ALT:
           fprintf(scriptoutstream," ALT %c\n",key);
           break;
@@ -1328,7 +1328,7 @@ void keyboard(unsigned char key, int flag){
   glutPostRedisplay();
   key2 = (char)key;
 
-  switch (key2){
+  switch(key2){
     case 'a':
       if(showtour_dialog==1&&edittour==1){
         add_delete_keyframe(ADD_KEYFRAME);
@@ -1398,7 +1398,7 @@ void keyboard(unsigned char key, int flag){
       }
       break;
     case 'c':
-      switch (keystate){
+      switch(keystate){
       case GLUT_ACTIVE_ALT:
         DialogMenu(DIALOG_CLIP); // clip dialog
         break;
@@ -1418,7 +1418,7 @@ void keyboard(unsigned char key, int flag){
       }
       break;
     case 'C':
-      switch (keystate){
+      switch(keystate){
         case GLUT_ACTIVE_ALT:
           DialogMenu(DIALOG_COLORBAR); // colorbar dialog
           break;
@@ -1449,7 +1449,7 @@ void keyboard(unsigned char key, int flag){
         add_delete_keyframe(DELETE_KEYFRAME);
         break;
       }
-      switch (keystate){
+      switch(keystate){
       case GLUT_ACTIVE_ALT:
         DialogMenu(DIALOG_DISPLAY); // display dialog
         break;
@@ -1467,7 +1467,7 @@ void keyboard(unsigned char key, int flag){
       break;
     case 'e':
     case 'E':
-      switch (keystate){
+      switch(keystate){
       case GLUT_ACTIVE_ALT:
         DialogMenu(DIALOG_VIEW_GEOM); // edit geometry
         break;
@@ -1481,7 +1481,7 @@ void keyboard(unsigned char key, int flag){
       }
       break;
     case 'f':
-      switch (keystate){
+      switch(keystate){
       case GLUT_ACTIVE_ALT:
         DialogMenu(DIALOG_BOUNDS); // file/bounds dialog
         break;
@@ -1498,12 +1498,12 @@ void keyboard(unsigned char key, int flag){
       glutPostRedisplay();
       break;
     case 'g':
-      switch (keystate){
+      switch(keystate){
       case GLUT_ACTIVE_ALT:
       case GLUT_ACTIVE_CTRL:
       default:
         if(ntotal_blockages>0||isZoneFireModel==0){
-          switch (visGrid){
+          switch(visGrid){
             case noGridnoProbe:
               visGrid=GridnoProbe;
               break;
@@ -1617,7 +1617,7 @@ void keyboard(unsigned char key, int flag){
       break;
     case 'm':
     case 'M':
-      switch (keystate){
+      switch(keystate){
       case GLUT_ACTIVE_ALT:
         DialogMenu(DIALOG_MOTION); // motion dialog
         break;
@@ -1643,7 +1643,7 @@ void keyboard(unsigned char key, int flag){
       break;
 #endif
     case 'O':
-      switch (visBlocks){
+      switch(visBlocks){
         case visBLOCKAsInput:
         case visBLOCKAsInputOutline:
           BlockageMenu(visBLOCKHide);
@@ -1657,7 +1657,7 @@ void keyboard(unsigned char key, int flag){
       break;
     case 'o':
       if(keystate==GLUT_ACTIVE_ALT){
-        switch (visBlocks){
+        switch(visBlocks){
           case visBLOCKAsInput:
             BlockageMenu(visBLOCKHide);
             BlockageMenu(visBLOCKAsInput);
@@ -1846,7 +1846,7 @@ void keyboard(unsigned char key, int flag){
       }
       break;
     case 's':
-      switch (keystate){
+      switch(keystate){
       case GLUT_ACTIVE_ALT:
         DialogMenu(DIALOG_3DSMOKE); // 3d smoke dialog
         break;
@@ -1871,7 +1871,7 @@ void keyboard(unsigned char key, int flag){
       Update_Glui_Stereo();
       break;
     case 't':
-      switch (keystate){
+      switch(keystate){
       case GLUT_ACTIVE_ALT:
         DialogMenu(DIALOG_TOUR); // tour dialog
         break;
@@ -1896,7 +1896,7 @@ void keyboard(unsigned char key, int flag){
       break;
     case 'u':
     case 'U':
-      switch (keystate){
+      switch(keystate){
         case GLUT_ACTIVE_ALT:
           skip_slice_in_embedded_mesh = 1 - skip_slice_in_embedded_mesh;
           break;
@@ -1906,7 +1906,7 @@ void keyboard(unsigned char key, int flag){
       }
       break;
     case 'v':
-      switch (keystate){
+      switch(keystate){
         case GLUT_ACTIVE_ALT:
           projection_type = 1 - projection_type;
           Motion_CB(PROJECTION);
@@ -1929,7 +1929,7 @@ void keyboard(unsigned char key, int flag){
       }
       break;
     case 'w':
-      switch (keystate){
+      switch(keystate){
         case GLUT_ACTIVE_ALT:
           DialogMenu(DIALOG_WUI); // WUI dialog
           break;
@@ -2085,7 +2085,7 @@ void keyboard(unsigned char key, int flag){
 
     return;
   }
-  switch (iplot_state){
+  switch(iplot_state){
     case 1:
       next_xindex(skip_global*FlowDir,0);
       break;
@@ -2124,7 +2124,7 @@ void handle_rotation_type(int flag){
   camera_current->rotation_type=rotation_type;
   az_elev = camera_current->az_elev;
   updatemenu=1;
-  switch (rotation_type){
+  switch(rotation_type){
   case ROTATION_3AXIS:
       if(trainer_mode==0)PRINTF("Scene centered (3 axis rotation)\n");
       if(showtrainer_dialog==0&&flag==ROTATION_2AXIS&&rotation_type_old==EYE_CENTERED){
@@ -2207,7 +2207,7 @@ void specialkeyboard_CB(int key, int x, int y){
 
   glutPostRedisplay();
 
-  switch (cursorPlot3D){
+  switch(cursorPlot3D){
     case 0:
       if(rotation_type==EYE_CENTERED){
         keymode=EYE_MODE;
@@ -2229,7 +2229,7 @@ void specialkeyboard_CB(int key, int x, int y){
       break;
   }
 
-  switch (keymode){
+  switch(keymode){
     case P3_MODE:
       handle_plot3d_keys(key);
       stept=0;
@@ -2246,7 +2246,7 @@ void specialkeyboard_CB(int key, int x, int y){
 /* ------------------ handle_plot3d_keys ------------------------ */
 
 void handle_plot3d_keys(int  key){
-  switch (key){
+  switch(key){
   case GLUT_KEY_LEFT:
     visx_all=1;
     next_xindex(-1,0);
@@ -2278,7 +2278,7 @@ void handle_plot3d_keys(int  key){
     iplot_state=3;
     break;
   case GLUT_KEY_HOME:
-    switch (iplot_state){
+    switch(iplot_state){
       case 0:
       case 1:
         next_xindex(0,-1);
@@ -2295,7 +2295,7 @@ void handle_plot3d_keys(int  key){
     }
     break;
   case GLUT_KEY_END:
-    switch (iplot_state){
+    switch(iplot_state){
       case 0:
       case 1:
         next_xindex(0,1);
@@ -2353,7 +2353,7 @@ void handle_move_keys(int  key){
   INC_ANGLE = 5*INC_ANGLE0;
 
   state=glutGetModifiers();
-  switch (state){
+  switch(state){
   case GLUT_ACTIVE_CTRL:
     key_state = KEY_CTRL;
     break;
@@ -2367,9 +2367,9 @@ void handle_move_keys(int  key){
     key_state = KEY_NONE;
     break;
   }
-  switch (key){
+  switch(key){
     case GLUT_KEY_RIGHT:
-      switch (key_state){
+      switch(key_state){
         case KEY_ALT:
           dx = INC_XY*(cos_azimuth);
           dy = INC_XY*(sin_azimuth);
@@ -2398,7 +2398,7 @@ void handle_move_keys(int  key){
       }
       break;
     case GLUT_KEY_LEFT:
-      switch (key_state){
+      switch(key_state){
         case KEY_ALT:
           dx = INC_XY*(cos_azimuth);
           dy = INC_XY*(sin_azimuth);
@@ -2896,7 +2896,7 @@ void Display_CB(void){
   renderdoublenow=0;
   DoScript();
   if(update_glui_dialogs!=0){
-    switch (update_glui_dialogs){
+    switch(update_glui_dialogs){
       case 1:
         update_glui_dialogs=2;
         break;

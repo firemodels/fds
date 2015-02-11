@@ -1368,7 +1368,7 @@ int get_plot3d_index(mesh *meshi, int dir, float val){
   int i, ivalmin, nvals;
   float *xyz;
 
-  switch (dir){
+  switch(dir){
     case 1:
       xyz = meshi->xplt_orig;
       nvals = meshi->ibar;
@@ -1739,7 +1739,7 @@ void updateshowstep(int val, int slicedir){
 
   if(ReadPlot3dFile==0&&visGrid==0&&ReadVolSlice==0)return;
   current_mesh->slicedir=slicedir;
-  switch (slicedir){
+  switch(slicedir){
   case 1:
     if(visx_all!=val)updatemenu=1;
     break;

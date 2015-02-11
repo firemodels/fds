@@ -236,7 +236,7 @@ extern "C" void update_smoke3dflags(void){
 /* ------------------ Update_Smoke_Type ------------------------ */
 
 void Update_Smoke_Type(void){
-  switch (smoke_render_option){
+  switch(smoke_render_option){
     case RENDER_SLICE:
       if(PANEL_slices!=NULL)PANEL_slices->open();
       if(PANEL_volume!=NULL)PANEL_volume->close();
@@ -590,7 +590,7 @@ extern "C" void Smoke3d_CB(int var){
   char *vol_prefixptr;
 
   updatemenu=1;
-  switch (var){
+  switch(var){
   float temp_min, temp_max;
 
   case VOL_UNLOAD_ALL:

@@ -242,7 +242,7 @@ void COLORBAR_CB(int var){
   unsigned char *rgb_nodes;
   int i;
 
-  switch (var){
+  switch(var){
   case COLORBAR_COLORINDEX:
     if(colorbartype>=ndefaultcolorbars&&colorbartype<ncolorbars){
       cbi = colorbarinfo + colorbartype;

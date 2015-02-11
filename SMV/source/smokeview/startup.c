@@ -223,7 +223,7 @@ int setup_case(int argc, char **argv){
     input_file=smv_filename;
     return_code=readsmv(input_file,iso_filename);
   }
-  switch (return_code){
+  switch(return_code){
     case 1:
       fprintf(stderr,"*** Error: Smokeview file, %s, not found\n",input_file);
       return 1;
@@ -413,7 +413,7 @@ int get_opengl_version(char *version_label){
     if(version_label2[i]=='.')version_label2[i]=' ';
   }
   sscanf(version_label2,"%i %i %i",&major,&minor,&subminor);
-  if (major == 1)use_data_extremes = 0;
+  if(major == 1)use_data_extremes = 0;
   return 100*major+10*minor+subminor;
 }
 

@@ -266,7 +266,7 @@ void ROTATE_CB(int var){
     LIST_trainerpath->set_int_val(-1);
     TRAINER_CB(TRAINERPATH);
   }
-  switch (var){
+  switch(var){
   case TRAINER_AZ_ELEV:
     *az = TRANSLATE_az_elev->get_x();
     *elev = -TRANSLATE_az_elev->get_y();
@@ -289,7 +289,7 @@ void ROTATE_CB(int var){
 
 void TRAINER_CB(int var){
 
-  switch (var){
+  switch(var){
     int i;
 
   case TRAINER_PAUSE:
@@ -335,7 +335,7 @@ void TRAINER_CB(int var){
     if(trainer_viewpoints!=1){
       LIST_viewpoint->set_int_val(-1);
     }
-    switch (trainer_path){
+    switch(trainer_path){
     case -1:
       if(trainer_path_old!=-1){
         trainer_pause=0;
