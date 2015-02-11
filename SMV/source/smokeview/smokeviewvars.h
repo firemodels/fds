@@ -24,6 +24,8 @@
 #include "threader.h"
 
 SVEXTERN int SVDECL(use_data_extremes, 1);
+SVEXTERN int SVDECL(extreme_data_offset,1), SVDECL(colorbar_offset,0);
+
 #ifdef INMAIN
 SVEXTERN float gvec[3]={0.0,0.0,-9.8};
 SVEXTERN float gvecunit[3]={0.0,0.0,-1.0};

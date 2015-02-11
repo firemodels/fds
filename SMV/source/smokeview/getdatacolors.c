@@ -31,12 +31,6 @@ void getBoundaryColors(float *t, int nt, unsigned char *it,
   int itt;
   float local_tmin, local_tmax, tmin2, tmax2;
   int local_skip;
-  int extreme_data_offset=1, colorbar_offset=0;
-
-  if(use_data_extremes == 0){
-    extreme_data_offset = 0;
-    colorbar_offset = 2;
-  }
 
   tmin2 = *t;
   tmax2 = *t;
@@ -130,12 +124,6 @@ void getBoundaryColors2(float *t, int nt, unsigned char *it,
   int itt;
   float local_tmin, local_tmax, tmin2, tmax2;
   int local_skip;
-  int extreme_data_offset=1, colorbar_offset=0;
-
-  if(use_data_extremes == 0){
-    extreme_data_offset = 0;
-    colorbar_offset=2;
-  }
 
   tmin2 = *t;
   tmax2 = *t;
@@ -192,12 +180,6 @@ void remap_patchdata(patchdata *patchi,float valmin, float valmax, int *extreme_
   unsigned char *cpatchval;
   int npqq_local;
   int upper, lower;
-  int extreme_data_offset=1, colorbar_offset=0;
-
-  if(use_data_extremes == 0){
-    extreme_data_offset = 0;
-    colorbar_offset=2;
-  }
 
   meshi = meshinfo + patchi->blocknumber;
   cpatchval = meshi->cpatchval;
@@ -278,12 +260,6 @@ void getBoundaryColors3(patchdata *patchi, float *t, int nt, unsigned char *it,
   int expmin, expmax;
   int itt;
   float new_tmin, new_tmax, tmin2, tmax2;
-  int extreme_data_offset=1, colorbar_offset=0;
-
-  if(use_data_extremes == 0){
-    extreme_data_offset = 0;
-    colorbar_offset=2;
-  }
 
   update_patch_bounds(patchi);
 
@@ -502,12 +478,6 @@ void getPart5Colors(partdata *parti, int nlevel){
   // float *diameter_data;
   float *length_data, *azimuth_data, *elevation_data;
   float *u_vel_data, *v_vel_data, *w_vel_data;
-  int extreme_data_offset=1, colorbar_offset=0;
-
-  if(use_data_extremes == 0){
-    extreme_data_offset = 0;
-    colorbar_offset=2;
-  }
 
   datacopy = parti->data5;
   for(i=0;i<parti->ntimes;i++){
@@ -728,12 +698,6 @@ void getPartColors(const float *t, int local_skip, int nt,
   const unsigned char *isprinkcopy;
   const float *tcopy;
   unsigned char *itcopy;
-  int extreme_data_offset=1, colorbar_offset=0;
-
-  if(use_data_extremes == 0){
-    extreme_data_offset = 0;
-    colorbar_offset=2;
-  }
 
   isprinkcopy=isprink;
   itcopy = it;
@@ -885,12 +849,6 @@ void getZoneColors(const float *t, int nt, unsigned char *it,
   float local_tmin, local_tmax;
   float range;
   float tval;
-  int extreme_data_offset=1, colorbar_offset=0;
-
-  if(use_data_extremes == 0){
-    extreme_data_offset = 0;
-    colorbar_offset=2;
-  }
 
   local_tmin = ttmin;
   local_tmax = ttmax;
@@ -971,12 +929,6 @@ void getPlot3DColors(int plot3dvar, int settmin, float *ttmin, int settmax, floa
   char *iblank;
   int i;
   int ntotal;
-  int extreme_data_offset=1, colorbar_offset=0;
-
-  if(use_data_extremes == 0){
-    extreme_data_offset = 0;
-    colorbar_offset=2;
-  }
 
   tmin2=*ttmin;
   tmax2=*ttmax;
@@ -1147,12 +1099,6 @@ void getSliceColors(const float *t, int nt, unsigned char *it,
   float range;
   int expmax,expmin;
   int itt;
-  int extreme_data_offset=1, colorbar_offset=0;
-
-  if(use_data_extremes == 0){
-    extreme_data_offset = 0;
-    colorbar_offset=2;
-  }
 
   range = local_tmax-local_tmin;
   *extreme_min=0;

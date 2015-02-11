@@ -414,7 +414,11 @@ int get_opengl_version(char *version_label){
   }
   sscanf(version_label2,"%i %i %i",&major,&minor,&subminor);
   if(major == 1)use_data_extremes = 0;
-  return 100*major+10*minor+subminor;
+  if(use_data_extremes == 0){
+    extreme_data_offset = 0;
+    colorbar_offset = 2;
+  }
+  return 100*major + 10*minor + subminor;
 }
 
 /* ------------------ InitOpenGL ------------------------ */
