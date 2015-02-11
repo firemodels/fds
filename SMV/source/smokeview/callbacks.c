@@ -524,6 +524,7 @@ void checktimebound(void){
 
       sd=sliceinfo+i;
       sd->itime=sd->ntimes-1;
+      if(sd->volslice==1)sd->itime--;
     }
     for(i=0;i<nmeshes;i++){
       mesh *meshi;

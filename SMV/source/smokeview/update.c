@@ -132,13 +132,6 @@ void Update_Framenumber(int changetime){
         sd = sliceinfo+i;
         if(sd->timeslist==NULL)continue;
         sd->itime=sd->timeslist[itimes];
-        //xxx hack
-        // do not display last frame of a 3D slice file
-        // prevents a smokeview crash
-        if(sd->volslice==1){
-          if(sd->itime==sd->ntimes-1)sd->itime--;
-          if(sd->itime<0)sd->itime=0;
-        }
         if(sd->is_fed==1)showfed=1;
       }
       if(showfed==1){
