@@ -1,23 +1,4 @@
 !
-! Timo Korhonen, VTT Technical Research Centre of Finland
-! File modifications started: September 2013
-! Base FDS source code version: SVN 16844
-! This evac.f90 version is for the CROWBAR project
-!
-! Time stamp line, time [s]:
-!   0; t; n_agents; ID_camera;
-! Agent line, length [mm], veloccty [mm/s]:
-!   1;i_agent;x_i;y_i;z_i;h_i;vx_i;vy_i;vz_i;
-!
-! Now: Some preprocessor to change the CSV format so that csv column separators
-!      ("," or ";") are replaced by spaces and the decimal separator is full 
-!      stop "." (not a comma "," as, for example, in Finnish language.
-!
-! READ (LU_EVAC_CB,IOSTAT=IOS) CB_LINE_TYPE, CB_TIME, CB_N_AGENTS, CB_ID_CAMERA
-! READ (LU_EVAC_CB,*) CB_LINE_TYPE, CB_I_AGENT(I),&
-!       CB_XYZ_AGENT(I,1),CB_XYZ_AGENT(I,2),CB_XYZ_AGENT(I,3),CB_H_AGENT(I),&
-!       CB_V_AGENT(I,1),CB_V_AGENT(I,2),CB_V_AGENT(I,3)
-!
 ! This module contains the FDS+Evac human movement algorithm and
 ! related subprograms.  Some of the types are defined in the
 ! type.f90 module file.  The statistic (cumulative distributions) are in
@@ -15766,17 +15747,17 @@ CONTAINS
     REAL(EB) :: Y_MF_INT
 
     soot_dens = 0._EB ; fed_indx = 0._EB ; gas_temp = 0._EB ; rad_flux = 0._EB
-      ! Mass fraction array ==> soot density (mg/m3)
-      ! Next is for soot (mg/m3)
-      ZZ_GET(1:N_TRACKED_SPECIES) = MESHES(nom)%ZZ(I,J,K,1:N_TRACKED_SPECIES)
-      IF (SOOT_INDEX > 0) THEN
-         CALL GET_MASS_FRACTION(ZZ_GET,SOOT_INDEX,Y_MF_INT)
-         soot_dens = Y_MF_INT*MESHES(nom)%RHO(I,J,K)*1.E6_EB
-      ELSE
-         soot_dens = 0._EB
-      ENDIF
-      ! Calculate Purser's fractional effective dose (FED)
-      fed_indx = FED(ZZ_GET,MESHES(nom)%RSUM(I,J,K),FED_ACTIVITY)
+    ! Mass fraction array ==> soot density (mg/m3)
+    ! Next is for soot (mg/m3)
+    ZZ_GET(1:N_TRACKED_SPECIES) = MESHES(nom)%ZZ(I,J,K,1:N_TRACKED_SPECIES)
+    IF (SOOT_INDEX > 0) THEN
+       CALL GET_MASS_FRACTION(ZZ_GET,SOOT_INDEX,Y_MF_INT)
+       soot_dens = Y_MF_INT*MESHES(nom)%RHO(I,J,K)*1.E6_EB
+    ELSE
+       soot_dens = 0._EB
+    ENDIF
+    ! Calculate Purser's fractional effective dose (FED)
+    fed_indx = FED(ZZ_GET,MESHES(nom)%RSUM(I,J,K),FED_ACTIVITY)
     ! Gas temperature, ind=5, C
     gas_temp  = MESHES(nom)%TMP(I,J,K)
     ! Rad flux, ind=18, kW/m2 (no -sigma*Tamb^4 term)
