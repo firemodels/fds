@@ -23,7 +23,7 @@
 
 #ifdef pp_release
 #ifdef pp_OFFICIAL_RELEASE
-#define PROGVERSION "6.1.13"
+#define PROGVERSION "6.1.14"
 #else
 #define PROGVERSION "Unofficial release"
 #endif
