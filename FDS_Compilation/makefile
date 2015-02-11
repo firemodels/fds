@@ -387,6 +387,13 @@ aix_mpi : $(obj_mpi)
 
 #*** GNU Compilers ***
 
+gnu_win_64 : FFLAGS = -O2
+gnu_win_64 : FCOMPL = gfortran
+gnu_win_64 : FOPENMPFLAGS = -fopenmp
+gnu_win_64 : obj = fds_gnu_win_64
+gnu_win_64 : $(obj_serial)
+	$(FCOMPL) $(FFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_serial)
+
 gnu_linux : FFLAGS = -O2
 gnu_linux : FCOMPL = gfortran
 gnu_linux : FOPENMPFLAGS = -fopenmp
