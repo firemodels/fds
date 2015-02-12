@@ -1302,12 +1302,12 @@ LEVEL_MESHES_LOOP: DO NM = 1, NMESHES
 
    ENDIF
 
-   WRITE(LU_SCARC,*) 'XS_MIN =',S%XS_MIN
-   WRITE(LU_SCARC,*) 'XF_MAX =',S%XF_MAX
-   WRITE(LU_SCARC,*) 'YS_MIN =',S%YS_MIN
-   WRITE(LU_SCARC,*) 'YF_MAX =',S%YF_MAX
-   WRITE(LU_SCARC,*) 'ZS_MIN =',S%ZS_MIN
-   WRITE(LU_SCARC,*) 'ZF_MAX =',S%ZF_MAX
+   !WRITE(LU_SCARC,*) 'XS_MIN =',S%XS_MIN
+   !WRITE(LU_SCARC,*) 'XF_MAX =',S%XF_MAX
+   !WRITE(LU_SCARC,*) 'YS_MIN =',S%YS_MIN
+   !WRITE(LU_SCARC,*) 'YF_MAX =',S%YF_MAX
+   !WRITE(LU_SCARC,*) 'ZS_MIN =',S%ZS_MIN
+   !WRITE(LU_SCARC,*) 'ZF_MAX =',S%ZF_MAX
 
    LEVEL_LEVEL_LOOP: DO NL = NLEVEL_MIN, NLEVEL_MAX
    
@@ -1965,16 +1965,16 @@ MESHES_LOOP: DO NM = 1, NMESHES
             OSLF%NCG = NCPL                                 !< initialize counter for local ghost cells
             SLF%NCPL_MAX  = MAX(SLF%NCPL_MAX, NCPL)         !< get max NCPL ever used on this mesh
 
-            WRITE(LU_SCARC,'(11(a,i6))') & 'NM=',MYID+1,&
-                  ' A: IWG=',IWG,': NOM=',NOM,': OSLF%NWL=', OSLF%NWL, ': SLF%NCO=', SLF%NCO, &
-                  ': SLF%NCE=',SLF%NCE,': IWL=',IWL, ': IOR0=',IOR0,': NCPL=',OSLF%NCPL
+            !WRITE(LU_SCARC,'(11(a,i6))') & 'NM=',MYID+1,&
+            !      ' A: IWG=',IWG,': NOM=',NOM,': OSLF%NWL=', OSLF%NWL, ': SLF%NCO=', SLF%NCO, &
+            !      ': SLF%NCE=',SLF%NCE,': IWL=',IWL, ': IOR0=',IOR0,': NCPL=',OSLF%NCPL
          ELSE                                               !< already known neighbor ???
             OSLF%NWL = OSLF%NWL + 1                         !< increase own counter for local wall cells
             OSLF%NCG = OSLF%NCG + NCPL                      !< increase counter for local ghost cells
 
-            WRITE(LU_SCARC,'(11(a,i6))') & 'NM=',MYID+1,&
-                  ' B: IWG=',IWG,': NOM=',NOM,': OSLF%NWL=', OSLF%NWL, ': SLF%NCO=', SLF%NCO, &
-                  ': SLF%NCE=',SLF%NCE,': IWL=',IWL, ': IOR0=',IOR0,': NCPL=',OSLF%NCPL
+            !WRITE(LU_SCARC,'(11(a,i6))') & 'NM=',MYID+1,&
+            !      ' B: IWG=',IWG,': NOM=',NOM,': OSLF%NWL=', OSLF%NWL, ': SLF%NCO=', SLF%NCO, &
+            !      ': SLF%NCE=',SLF%NCE,': IWL=',IWL, ': IOR0=',IOR0,': NCPL=',OSLF%NCPL
          ENDIF
       ENDIF
 
@@ -10017,7 +10017,7 @@ CALL SCARC_DEBUG_LEVEL (CG%W, 'SCARC_METHOD_CG', 'W LOOP', NL)
    CG%RES = SCARC_L2NORM (CG%W, NL)                                       !<  RES := ||W||
    ISTATE = SCARC_CONVERGENCE_STATE (CG, ITE, NL)                         !<  RES < TOL ??
    IF (ISTATE /= NSCARC_STATE_PROCEED) EXIT CG_LOOP
-IF (TYPE_DEBUG>NSCARC_DEBUG_INFO0.AND.MYID==0) &
+IF (TYPE_DEBUG>NSCARC_DEBUG_INFO1.AND.MYID==0) &
    WRITE(*,'(a,i3,a,e14.5)') ' CG  -Iteration  =',ITE,': Residuum=',SCARC_RESIDUAL
 
    CALL SCARC_VECTOR_COPY     (CG%W, CG%G, 1.0_EB, NL)                    !<  G := W
@@ -10284,7 +10284,7 @@ CALL SCARC_DEBUG_LEVEL (MG%D, 'SCARC_METHOD_MG', 'D after prol', NL)
 
    MG%RES = SCARC_L2NORM (MG%D, NL)                                              !< RES := ||D||
    ISTATE = SCARC_CONVERGENCE_STATE(MG, ITE, NL)                                 !< convergence ?
-IF (TYPE_DEBUG>NSCARC_DEBUG_NONE.AND.MYID==0) &
+IF (TYPE_DEBUG>NSCARC_DEBUG_INFO1.AND.MYID==0) &
    WRITE(0,'(a,i3,a,e14.5,a,e14.5)') ' MG  -Iteration  =',ITE,': Residuum=',SCARC_RESIDUAL
    IF (ISTATE /= NSCARC_STATE_PROCEED) EXIT MULTIGRID_LOOP
  
@@ -11034,8 +11034,8 @@ INTEGER:: NM
 
 DO NM = 1, NMESHES
    IF (PROCESS(NM) /= MYID) CYCLE
-   IF (TYPE_DEBUG>NSCARC_DEBUG_NONE) WRITE(LU_SCARC,1000) TRIM(CROUTINE), NM, NL, ITE,  RES
-   IF (TYPE_DEBUG>NSCARC_DEBUG_NONE.AND.MYID==0) write(*,1000) TRIM(CROUTINE), NM, NL, ITE,  RES
+   IF (TYPE_DEBUG>NSCARC_DEBUG_INFO1) WRITE(LU_SCARC,1000) TRIM(CROUTINE), NM, NL, ITE,  RES
+   IF (TYPE_DEBUG>NSCARC_DEBUG_INFO1.AND.MYID==0) write(*,1000) TRIM(CROUTINE), NM, NL, ITE,  RES
 ENDDO
 
 1000 FORMAT (5X,A30,': mesh', i4,': level=',i4,': #ite= ',i4,': res =',e25.16)
@@ -11111,17 +11111,8 @@ ELSE IF (TYPE_DEBUG>NSCARC_DEBUG_MEDIUM) THEN
    WRITE(LU_SCARC,2000) SCOPE%CROUTINE, ITERATIONS, CAPPA 
    IF (MYID==0) WRITE(*,2000) SCOPE%CROUTINE, ITERATIONS, CAPPA 
 ENDIF
-IF (TYPE_DEBUG>NSCARC_DEBUG_NONE) THEN
-   WRITE(LU_SCARC,3000)
-   IF (MYID==0) WRITE(*,3000)
-ENDIF
-IF (TYPE_DEBUG == NSCARC_DEBUG_MUCH.AND.TYPE_SCOPE == NSCARC_SCOPE_MAIN) THEN
-   WRITE(LU_SCARC,3000)
-   IF (MYID==0) WRITE(*,3000)
-ENDIF
 
 2000 FORMAT (5X,A30,': iterations: ',i6,':  convergence rate =',e14.6)
-3000 FORMAT ('==========================================================================')
 END SUBROUTINE SCARC_CONVERGENCE_RATE
 
  
