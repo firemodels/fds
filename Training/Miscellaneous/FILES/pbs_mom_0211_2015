@@ -1,0 +1,110 @@
+#!/bin/sh
+#
+# pbs_mom	This script will start and stop the PBS Mom
+#
+# chkconfig: 345 95 5
+# description: TORQUE/PBS is a versatile batch system for SMPs and clusters
+#
+ulimit -n 32768
+ulimit -l unlimited
+
+# Source the library functions
+. /etc/rc.d/init.d/functions
+
+# NOTE: customize these variables as needed
+SBIN_PATH=/usr/local/torque/sbin
+PBS_DAEMON="$SBIN_PATH/pbs_mom"
+PBS_HOME=/var/spool/torque
+
+if [ -f /etc/sysconfig/pbs_mom ];then
+    . /etc/sysconfig/pbs_mom
+fi
+
+if [ -z "$previous" ];then
+   # being run manually, don't disturb jobs
+   args="$args -p"
+else
+   args="$args -q"
+fi
+
+pidof_pbs_mom() {
+   pid="-1"
+   if [ -f $PBS_HOME/mom_priv/mom.lock ];then
+   	pid=`cat $PBS_HOME/mom_priv/mom.lock`
+   fi
+   echo $pid
+}
+
+kill_pbs_mom() {
+   pid=`pidof_pbs_mom`
+
+   if [ $pid -le 1 ];then
+      return -1;
+   fi
+   retval=1
+   while kill -0 $pid 2>/dev/null;do
+      $SBIN_PATH/momctl -s
+      retval=$?
+      sleep 1
+   done
+   return $retval
+}
+	
+# how were we called
+case "$1" in
+	start)
+		echo -n "Starting TORQUE Mom: "
+		# check if pbs_mom is already running
+		status pbs_mom 2>&1 > /dev/null
+		RET=$?
+		[ $RET -eq 0 ] && echo -n "pbs_mom already running" && success && echo && exit 0
+
+                # ulimit -c unlimited  # Uncomment this to preserve core files
+		daemon $PBS_DAEMON $args -d $PBS_HOME -H `hostname`
+		RET=$?
+		touch /var/lock/subsys/pbs_mom
+   		echo
+		;;
+	purge)
+		[ -f /var/lock/subsys/pbs_mom ] && $0 stop
+		echo -n "Starting TORQUE Mom with purge: "
+		daemon $PBS_DAEMON -r
+		RET=$?
+		[ $RET -eq 0 ] &&  touch /var/lock/subsys/pbs_mom
+   		echo
+		;;
+	stop)
+		echo -n "Shutting down TORQUE Mom: "
+		# check if pbs_mom is running
+		status pbs_mom 2>&1 > /dev/null
+		RET=$?
+		[ ! $RET -eq 0 ] && echo -n "pbs_mom already stopped" && success && echo && exit 0
+
+		kill_pbs_mom
+		RET=$?
+		[ $RET -eq 0 ] && success "shutdown" || failure "shutdown"
+		echo
+		rm -f /var/lock/subsys/pbs_mom
+		;;
+	status)
+		status pbs_mom
+		RET=$?
+		;;
+	restart)
+		$0 stop
+		sleep 1
+		$0 start
+		;;
+	reload)
+	        echo -n "Re-reading TORQUE Mom config file: "
+		kill -HUP `pidof_pbs_mom`
+		RET=$?
+		[ $RET -eq 0 ] && success "HUP" || failure "HUP"
+		echo
+	        ;;
+	*)
+		echo "Usage: pbs_mom {start|stop|restart|reload|status|purge}"
+		exit 1
+esac
+exit $RET
+
