@@ -16,5 +16,19 @@ library
 
 6. run MAKEINSTALL.sh as root if the install directory is owned by root
 
-II.  Examine .bashrc and change compiler and openmpi location if necessary
+
+II.  Build FDS (Fire Dynamics Simulator)
+
+1. Examine .bashrc and change compiler and openmpi location if necessary
+
+2. cd to ~/FDS-SMV/FDS_Compilation/mpi_intel_linux_64ib
+
+3. execute the script make_fds.sh
+
+
+III. cd back to ~/FDS-SMV/Training/Miscellaneous
+
+1. run the command: ~/FDS-SMV/Utilities/Scripts/qfds.sh -p 120 -n 6 test_mpi_120.fds
+
+2. check the q to see if the job is running
 
