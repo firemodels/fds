@@ -53,6 +53,8 @@ erase %OUTDIR%\*.txt 1> Nul 2>&1
 set email=%svnroot%\SMV\scripts\email.bat
 
 set errorlog=%OUTDIR%\firebot_errors.txt
+set timefile=%OUTDIR%\time.txt
+set datefile=%OUTDIR%\date.txt
 set warninglog=%OUTDIR%\firebot_warnings.txt
 set errorwarninglog=%OUTDIR%\firebot_errorswarnings.txt
 set infofile=%OUTDIR%\firebot_info.txt
@@ -73,10 +75,9 @@ set emailexe=%userprofile%\bin\mailsend.exe
 set gettimeexe=%svnroot%\Utilities\get_time\intel_win_64\get_time.exe
 set runbatchexe=%svnroot%\SMV\source\runbatch\intel_win_64\runbatch.exe
 
-date /t > %OUTDIR%\starttime.txt
-set /p startdate=<%OUTDIR%\starttime.txt
-time /t > %OUTDIR%\starttime.txt
-set /p starttime=<%OUTDIR%\starttime.txt
+call :get_datetime
+starttime=%current_ttime%
+startdate=%current_ddate%
 
 call "%svnroot%\Utilities\Scripts\setup_intel_compilers.bat" 1> Nul 2>&1
 call %svnroot%\Utilities\Firebot\firebot_email_list.bat
@@ -414,9 +415,11 @@ set DIFF_RUNVV=%duration%
 :: -------------------------------------------------------------
 
 if exist %emailexe% (
+  call :get_datetime
+
   echo "making pictures on %COMPUTERNAME% %revisionstring%" > %infofile%
-  echo "  start time: %TIME_beg%" >> %infofile%
-  echo "current time: %RUNVV_end%" >> %infofile%
+  echo "  start time: %startdate% %starttime%" >> %infofile%
+  echo "current time: %current_ddate% %current_ttime%" >> %infofile%
   call %email% %mailToFDSDebug% "making pictures on %COMPUTERNAME% %revisionstring%" %infofile%
 )
 call :GET_TIME
@@ -482,10 +485,10 @@ set DIFF_TIME=%duration%
 ::                           wrap up
 :: -------------------------------------------------------------
 
-date /t > %OUTDIR%\stoptime.txt
-set /p stopdate=<%OUTDIR%\stoptime.txt
-time /t > %OUTDIR%\stoptime.txt
-set /p stoptime=<%OUTDIR%\stoptime.txt
+call :get_datetime
+stoptime=%current_ttime%
+stopdate=%current_ddate%
+
 
 echo. > %infofile%
 echo . ----------------------------- >> %infofile%
@@ -553,11 +556,21 @@ goto :eof
 exit /b
 
 :: -------------------------------------------------------------
+:GET_DATETIME
+:: -------------------------------------------------------------
+
+time /t > %timefile%
+set /p current_ttime=<%timefile%
+date /t > %datefile%
+set /p current_ddate=<%datefile%
+exit /b 0
+
+:: -------------------------------------------------------------
 :GET_TIME
 :: -------------------------------------------------------------
 
-%gettimeexe% > time.txt
-set /p current_time=<time.txt
+%gettimeexe% > %timefile%
+set /p current_time=<%timefile%
 exit /b 0
 
 :: -------------------------------------------------------------
