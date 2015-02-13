@@ -295,7 +295,7 @@ DO I=1,NUMBER_INITIAL_ITERATIONS
       CALL WALL_BC(T_BEGIN,NM)
       IF (RADIATION) CALL COMPUTE_RADIATION(T_BEGIN,NM)
    ENDDO
-   IF (RADIATION) CALL MESH_EXCHANGE(2) ! Exchange radiation intensity at interpolated boundaries
+   CALL MESH_EXCHANGE(2) ! Exchange radiation intensity at interpolated boundaries
 ENDDO
 
 ! Compute divergence just in case the flow field is not initialized to ambient
@@ -936,7 +936,7 @@ MAIN_LOOP: DO
    CALL POST_RECEIVES(6) 
    CALL MESH_EXCHANGE(6)
 
-   IF (EXCHANGE_RADIATION) CALL MESH_EXCHANGE(2)
+   CALL MESH_EXCHANGE(2)
 
    ! Force normal components of velocity to match at interpolated boundaries
 
@@ -1977,6 +1977,18 @@ TYPE (LAGRANGIAN_PARTICLE_TYPE), POINTER :: LP
 TYPE (LAGRANGIAN_PARTICLE_CLASS_TYPE), POINTER :: LPC
 
 TNOW = SECOND()
+
+IF (CODE==2) THEN ! Check the need for the radiation exchange 
+   IF (ANY(EVACUATION_ONLY) .AND. N_MPI_PROCESSES>1 .AND. RADIATION) THEN
+      ! Set barrier for fire processes, because evacuation process has a barrier in every ICYC
+      IF (.NOT.EXCHANGE_RADIATION .AND. MYID/=EVAC_PROCESS) THEN
+         CALL MPI_BARRIER(MPI_COMM_WORLD,IERR)
+         RETURN
+      END IF
+   ELSE ! No evacuation or just one process or no radiation
+      IF (.NOT.EXCHANGE_RADIATION .OR. .NOT.RADIATION) RETURN
+   END IF
+END IF
 
 SENDING_MESH_LOOP: DO NM=1,NMESHES
 
