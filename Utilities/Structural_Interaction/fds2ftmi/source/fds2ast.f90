@@ -1,15 +1,13 @@
 SUBROUTINE FDS2AST (CHID,NOMASTER,C_S,TBEG,TEND,TINT,COUNTER,VARIABLE,N)
 
 ! Program to read the Adiabatic Surface Temperature from bndf files for a specific 
-! location, based on fds2ascii (part of FDS package described bellow)
+! location, based on fds2ascii (part of FDS package)
 ! This program is part of a Coupling Procedure between fire and structural models
 !                                                                       - SILVA, JC
 
-! Program to convert various FDS output files to ASCII
-
-! $Id$  
-! $Revision$
-! $Date$
+! $Id: fds2ast.f90 19937 2014-07-15 20:55:19Z arquitetojulio@gmail.com $  
+! $Revision: 19937 $
+! $Date: 2014-07-15 16:55:19 -0400 (Tue, 15 Jul 2014) $
  
 IMPLICIT NONE
 

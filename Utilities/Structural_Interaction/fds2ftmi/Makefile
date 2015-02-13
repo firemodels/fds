@@ -1,8 +1,7 @@
-SOURCE_DIR = ../..
 FILTERC =
 FILTERF =
 
-VPATH = ../
+VPATH = ../source
 bin = .
 
 # Definition of the object variables
@@ -70,7 +69,7 @@ intel_linux_64 : $(obj)
 # ------------- debug Linux 64 ---------
 #  64 bit linux
 
-intel_linux_64_db : FFLAGS    = -m64 -check -warn unused -O0 -auto -WB -traceback -g -fpe0 -fltconsistency -vec_report0 -stand:f03
+intel_linux_64_db : FFLAGS    = -m64 -check -warn unused -O0 -auto -WB -traceback -g -fltconsistency -stand:f08
 intel_linux_64_db : FC        = ifort
 intel_linux_64_db : exe       = fds2ftmi_linux_64_db
 
