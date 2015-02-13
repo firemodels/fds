@@ -4089,7 +4089,7 @@ DEVICE_LOOP: DO N=1,N_DEVC
                                  STAT_VALUE = STAT_VALUE + VALUE*VOL*RHO(I,J,K)
                            CASE('AREA INTEGRAL')
                               IF (VALUE <= DV%QUANTITY_RANGE(2) .AND. VALUE >=DV%QUANTITY_RANGE(1)) THEN
-                                 SELECT CASE (ABS(DV%IOR))
+                                 SELECT CASE (ABS(DV%IOR_ASSUMED))
                                     CASE(1)
                                        STAT_VALUE = STAT_VALUE + RC(I)*DY(J)*DZ(K)*VALUE
                                     CASE(2)
@@ -4881,7 +4881,7 @@ SELECT CASE(IND)
                IP = I
                JP = J
                KP = K
-               SELECT CASE(ABS(DV%IOR))
+               SELECT CASE(ABS(DV%IOR_ASSUMED))
                   CASE(1)
                      IP   = I+1
                      VEL  = U(I,J,K)
