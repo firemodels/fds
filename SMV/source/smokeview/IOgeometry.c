@@ -1649,7 +1649,7 @@ void draw_geomtestclip(void){
     }
 
     if(npolys>10){
-      printf("***error: nface=%i should not be bigger than 10\n",npolys);
+      PRINTF("***error: nface=%i should not be bigger than 10\n",npolys);
     }
     initBoxClipInfo(&box_clipinfo,*xmin,*xmax,*ymin,*ymax,*zmin,*zmax);
     if(box_state[0]!=-1)box_clipinfo.clip_xmin=0;
@@ -1832,8 +1832,8 @@ void draw_geomtestoutline(void){
 
     FORTgetverts(box_bounds, v1, v2, v3, v4, verts, &nverts, faces, face_id, which_poly, &nfaces, &npolys, b_state);
     FORTgettetravol(box_bounds,v1,v2,v3,v4,&vsolid,areas,cent_solid);
-    printf("volume=%f\n",vsolid);
-    printf("centroid (solid)=%f %f %f\n",cent_solid[0],cent_solid[1],cent_solid[2]);
+    PRINTF("volume=%f\n",vsolid);
+    PRINTF("centroid (solid)=%f %f %f\n",cent_solid[0],cent_solid[1],cent_solid[2]);
     {
       float vcell,vgas,cent_cell[3],cent_gas[3],*cc,*cs,*cg;
 
@@ -1858,10 +1858,10 @@ void draw_geomtestoutline(void){
         cg[0]=-1.0;
         cg[0]=-1.0;
       }
-      printf("centroid (gas)  =%f %f %f\n",cg[0],cg[1],cg[2]);
+      PRINTF("centroid (gas)  =%f %f %f\n",cg[0],cg[1],cg[2]);
     }
     if(npolys>10){
-      printf("***error: nface=%i should not be bigger than 10\n",npolys);
+      PRINTF("***error: nface=%i should not be bigger than 10\n",npolys);
     }
     if(nverts>0){
       int j;
@@ -1878,7 +1878,7 @@ void draw_geomtestoutline(void){
         glColor3fv(green);
         glVertex3fv(tetra_xyz);
         FORTtest_in_tetra(tetra_xyz,&in_tetra,tetra_state);
-        printf("in tetra:%i tetra state: %i %i %i %i\n",in_tetra,tetra_state[0],tetra_state[1],tetra_state[2],tetra_state[3]);
+        PRINTF("in tetra:%i tetra state: %i %i %i %i\n",in_tetra,tetra_state[0],tetra_state[1],tetra_state[2],tetra_state[3]);
       }
       glColor3fv(foregroundcolor);
       for(j=0;j<nfaces;j++){

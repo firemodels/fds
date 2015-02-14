@@ -4843,7 +4843,7 @@ void makeiblank_smoke3d(void){
   int i, ii;
   int ic;
 
-  printf("initializing 3D smoke/hrrpuv blanking array - ");
+  PRINTF("initializing 3D smoke/hrrpuv blanking array - ");
   update_makeiblank_smoke3d=0;
   for(i=0;i<nsmoke3dinfo;i++){
     smoke3ddata *smoke3di;
@@ -5030,7 +5030,7 @@ void makeiblank_smoke3d(void){
       }
     }
   }
-  printf("complete\n");
+  PRINTF("complete\n");
 }
 
 /* ------------------ inmesh_smoke ------------------------ */

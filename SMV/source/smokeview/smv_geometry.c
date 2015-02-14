@@ -760,10 +760,10 @@ void get_screen_mapping(float *xyz0, float *screen_perm){
   maxvals[2] = MAXABS3(screen_perm+6);
 
 #ifdef _DEBUG
-  printf("%f %f %f\n",screen_perm[0],screen_perm[1],screen_perm[2]);
-  printf("%f %f %f\n",screen_perm[3],screen_perm[4],screen_perm[5]);
-  printf("%f %f %f\n",screen_perm[6],screen_perm[7],screen_perm[8]);
-  printf("\n");
+  PRINTF("%f %f %f\n",screen_perm[0],screen_perm[1],screen_perm[2]);
+  PRINTF("%f %f %f\n",screen_perm[3],screen_perm[4],screen_perm[5]);
+  PRINTF("%f %f %f\n",screen_perm[6],screen_perm[7],screen_perm[8]);
+  PRINTF("\n");
 #endif
  
   if(maxvals[0]<MIN(maxvals[1],maxvals[2])){
@@ -809,10 +809,10 @@ void get_screen_mapping(float *xyz0, float *screen_perm){
     SETSCREEN(2,0,1,screen_perm+6);
   }
 #ifdef _DEBUG
-  printf("%f %f %f\n",screen_perm[0],screen_perm[1],screen_perm[2]);
-  printf("%f %f %f\n",screen_perm[3],screen_perm[4],screen_perm[5]);
-  printf("%f %f %f\n",screen_perm[6],screen_perm[7],screen_perm[8]);
-  printf("\n");
+  PRINTF("%f %f %f\n",screen_perm[0],screen_perm[1],screen_perm[2]);
+  PRINTF("%f %f %f\n",screen_perm[3],screen_perm[4],screen_perm[5]);
+  PRINTF("%f %f %f\n",screen_perm[6],screen_perm[7],screen_perm[8]);
+  PRINTF("\n");
 #endif
 }
 

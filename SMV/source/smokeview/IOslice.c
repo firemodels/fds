@@ -2860,7 +2860,7 @@ void update_slice_contours(int slice_type_index, float line_min, float line_max,
       vals = sd->qslicedata + i*sd->nsliceii;
       ci = sd->line_contours+i;
       if(slice_contour_type==SLICE_LINE_CONTOUR){
-        printf("updating line contour: %i of %i\n",i+1,sd->nline_contours);
+        PRINTF("updating line contour: %i of %i\n",i+1,sd->nline_contours);
         switch(sd->idir){
           case 1:
             getlinecontours(yplt,zplt,ny,nz,vals,NULL,line_min, line_max,ci);
@@ -2877,7 +2877,7 @@ void update_slice_contours(int slice_type_index, float line_min, float line_max,
         }
       }
       else{
-        printf("updating stepped contour: %i of %i\n",i+1,sd->nline_contours);
+        PRINTF("updating stepped contour: %i of %i\n",i+1,sd->nline_contours);
         switch(sd->idir){
           case 1:
             getcontours(yplt,zplt,jbar+1,kbar+1,vals,NULL,ci->levels,DONT_GET_AREAS,DATA_FORTRAN,ci);

@@ -498,7 +498,7 @@ void readiso_orig(const char *file, int ifile, int flag, int *errorcode){
             isoverti = asurface->iso_vertices+ivert;
             tcolor = asurface->tmin + tvertices_i[ivert]*tcolorfactor;
             colorindex = (unsigned char)CLAMP((tcolor-ib->tmin)*tcolorfactor2,0,255);
-           // printf("color= %f %i %i\n",tcolor,(int)colorindex,(int)tvertices_i[ivert]);
+           // PRINTF("color= %f %i %i\n",tcolor,(int)colorindex,(int)tvertices_i[ivert]);
             isoverti->color = rgb_iso+4*colorindex;
             isoverti->ctexturecolor=colorindex;
           }
