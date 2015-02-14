@@ -23,25 +23,19 @@ set TIME_FILE="%BASEDIR%\fds_case_times.txt"
 
 :: default FDS location
 
-set FDSEXE=%SVNROOT%\FDS_Compilation\mpi_intel_win_64%DEBUG%\fds_mpi_win_64%DEBUG%.exe
-
-if not exist %FDSEXE%  (
-  echo "***error: The program, %FDSEXE% , was not found.  Verification test runs aborted."
-  goto eof2
-)
-
-call :getfilename %FDSEXE% 
-set FDSBASE=%file%
-
 set BACKGROUNDEXE=%SVNROOT%\Utilities\background\intel_win_32\background.exe
+set FDSBASE=fds_mpi_win_64%DEBUG%.exe
+set FDSEXE=%SVNROOT%\FDS_Compilation\mpi_intel_win_64%DEBUG%\%FDSBASE%
+
+call :is_file_installed %BACKGROUNDEXE%|| exit /b 1
+call :is_file_installed %FDSEXE%|| exit /b 1
+
 set FDS=%BACKGROUNDEXE% -u 60 -m 70 -d 5 %FDSEXE%
 set QFDS=call %SVNROOT%\Utilities\Scripts\runfds.bat
 
 echo.
 echo Creating FDS case list from FDS_Cases.sh
 ..\Utilities\Data_processing\sh2bat FDS_Cases.sh FDS_Cases.bat
-echo Creating FDS_MPI case list from FDS_MPI_Cases.sh
-..\Utilities\Data_processing\sh2bat FDS_MPI_Cases.sh FDS_MPI_Cases.bat
 
 echo.
 echo Running FDS cases
@@ -53,24 +47,22 @@ time /t >> %TIME_FILE%
 
 call FDS_Cases.bat
 
-:: loop until all FDS cases have finished
-
-:loop1
-tasklist | find /i /c "%FDSBASE%" > temp.out
-set /p numexe=<temp.out
-echo Number of cases running - %numexe%
-if %numexe% == 0 goto finished
-Timeout /t 30 >nul 
-goto loop1
-
-:finished
-echo                FDS cases completed
-
 goto eof
 
-:getfilename
-set file=%~nx1
-exit /b
+:: -----------------------------------------
+:is_file_installed
+:: -----------------------------------------
+  set program=%1
+  %program% -help 1> %SCRIPT_DIR%\exist.txt 2>&1
+  type %SCRIPT_DIR%\exist.txt | find /i /c "not recognized" > %SCRIPT_DIR%\count.txt
+  set /p nothave=<%SCRIPT_DIR%\count.txt
+  if %nothave% GTR 0 (
+    echo "***Fatal error: %program% not present"
+    echo "Verification suite aborted"
+    exit /b 1
+  )
+  exit /b 0
+
 
 :eof
 echo "FDS test cases end" >> %TIME_FILE%
