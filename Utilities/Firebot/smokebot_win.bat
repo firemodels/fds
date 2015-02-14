@@ -328,7 +328,9 @@ echo Stage 4 - Running verification cases
 echo             debug mode
 
 cd %svnroot%\Verification\scripts
-call Run_SMV_cases 64 0 1 1> %OUTDIR%\stage4a.txt 2>&1
+call Run_SMV_cases 1 0 1> %OUTDIR%\stage4a.txt 2>&1
+
+call :wait_until_finished
 
 cd %svnroot%\Verification\scripts
 echo. > %OUTDIR%\stage_error.txt
@@ -349,11 +351,13 @@ if %nerrors% GTR 0 (
 echo             release mode
 
 cd %svnroot%\Verification\scripts
-call Run_SMV_cases 64 0 0 1> %OUTDIR%\stage4b.txt 2>&1
+call Run_SMV_cases 0 0 1> %OUTDIR%\stage4b.txt 2>&1
 
 cd %svnroot%\Verification\scripts
 echo. > %OUTDIR%\stage_error.txt
 call Check_SMV_cases 
+
+call :wait_until_finished
 
 grep -v " " %OUTDIR%\stage_error.txt | wc -l > %OUTDIR%\stage_nerror.txt
 set /p nerrors=<%OUTDIR%\stage_nerror.txt
@@ -494,6 +498,21 @@ goto :eof
   if exist %emailexe% (
     call %email% %mailToSMV% "smokebot failure on %COMPUTERNAME% %revisionstring%" %errorlog%
   )
+exit /b
+
+:: -------------------------------------------------------------
+:wait_until_finished
+:: -------------------------------------------------------------
+:loop1
+:: FDSBASE defined in Run_SMV_Cases and Run_FDS_Cases (the same in each)
+tasklist | find /i /c "%FDSBASE%" > temp.out
+set /p numexe=<temp.out
+echo Number of cases running - %numexe%
+if %numexe% == 0 goto finished
+Timeout /t 30 >nul 
+goto loop1
+
+:finished
 exit /b
 
 :: -------------------------------------------------------------

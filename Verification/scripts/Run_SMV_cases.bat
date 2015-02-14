@@ -1,10 +1,7 @@
 @echo off
 
-set size=%1
+set rundebug=%1
 set runonlygeom=%2
-set rundebug=%3
-
-set mpi=mpi_
 
 set svn_drive=c:
 if "%rundebug%" == "1" (
@@ -45,19 +42,10 @@ set RUNCFAST_E=call %SVNROOT%\Verification\scripts\erase_stop.bat
 
 :: VVVVVVVVVVVV set parameters VVVVVVVVVVVVVVVVVVVVVV
 
-:: Choose FDS version (size is "" or 64)
-
-if "%size%" == "" (
-  set FDSBASE=fds.exe
-  set FDSEXE=%FDSBASE%
-  set CFASTEXE=cfast6
-  set WIND2FDSEXE=wind2fds
-) else (
-  set FDSBASE=fds_%mpi%win_%size%%DEBUG%.exe
-  set FDSEXE=%SVNROOT%\FDS_Compilation\%mpi%intel_win_%size%%DEBUG%\fds_%mpi%win_%size%%DEBUG%.exe
-  set CFASTEXE=%CFAST%\CFAST\intel_win_%size%\cfast6_win_%size%.exe
-  set WIND2FDSEXE=%SVNROOT%\Utilities\wind2fds\intel_win_%size%\wind2fds_win_%size%.exe
-)
+set FDSBASE=fds_mpi_win_64%DEBUG%.exe
+set FDSEXE=%SVNROOT%\FDS_Compilation\mpi_intel_win_64%DEBUG%\%FDSBASE%
+set CFASTEXE=%CFAST%\CFAST\intel_win_64\cfast6_win_64.exe
+set WIND2FDSEXE=%SVNROOT%\Utilities\wind2fds\intel_win_64\wind2fds_win_64.exe
 
 set BACKGROUNDEXE=%SVNROOT%\Utilities\background\intel_win_32\background.exe
 
@@ -150,16 +138,6 @@ echo "smokeview test cases end" >> %TIME_FILE%
 date /t >> %TIME_FILE%
 time /t >> %TIME_FILE%
 
-:loop1
-tasklist | find /i /c "%FDSBASE%" > temp.out
-set /p numexe=<temp.out
-echo Number of cases running - %numexe%
-if %numexe% == 0 goto finished
-Timeout /t 30 >nul 
-goto loop1
-
-:finished
-echo                Smokeview cases completed
 goto eof
 
 :: -----------------------------------------
