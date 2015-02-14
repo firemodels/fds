@@ -76,8 +76,8 @@ set gettimeexe=%svnroot%\Utilities\get_time\intel_win_64\get_time.exe
 set runbatchexe=%svnroot%\SMV\source\runbatch\intel_win_64\runbatch.exe
 
 call :get_datetime
-starttime=%current_ttime%
-startdate=%current_ddate%
+set starttime=%current_ttime%
+set startdate=%current_ddate%
 
 call "%svnroot%\Utilities\Scripts\setup_intel_compilers.bat" 1> Nul 2>&1
 call %svnroot%\Utilities\Firebot\firebot_email_list.bat
@@ -486,8 +486,8 @@ set DIFF_TIME=%duration%
 :: -------------------------------------------------------------
 
 call :get_datetime
-stoptime=%current_ttime%
-stopdate=%current_ddate%
+set stoptime=%current_ttime%
+set stopdate=%current_ddate%
 
 
 echo. > %infofile%
