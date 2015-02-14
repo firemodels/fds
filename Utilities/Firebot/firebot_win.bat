@@ -75,9 +75,7 @@ set emailexe=%userprofile%\bin\mailsend.exe
 set gettimeexe=%svnroot%\Utilities\get_time\intel_win_64\get_time.exe
 set runbatchexe=%svnroot%\SMV\source\runbatch\intel_win_64\runbatch.exe
 
-call :get_datetime
-set starttime=%current_ttime%
-set startdate=%current_ddate%
+call :get_datetime startdate starttime
 
 call "%svnroot%\Utilities\Scripts\setup_intel_compilers.bat" 1> Nul 2>&1
 call %svnroot%\Utilities\Firebot\firebot_email_list.bat
@@ -102,12 +100,8 @@ echo. > %stagestatus%
 call :is_file_installed %gettimeexe%|| exit /b 1
 echo             found get_time
 
-call :GET_TIME
-set TIME_beg=%current_time%
-
-call :GET_TIME
-set PRELIM_beg=%current_time% 
-
+call :get_time TIME_beg
+call :get_time PRELIM_beg
 
 ifort 1> %scratchfile% 2>&1
 type %scratchfile% | find /i /c "not recognized" > %counta%
@@ -199,17 +193,15 @@ erase *.obj *.mod *.exe 1>> %OUTDIR%\stage0.txt 2>&1
 make VPATH="../Source:../Include" INCLUDE="../Include" -f ..\makefile intel_win_64 1>> %OUTDIR%\stage0.txt 2>&1
 call :does_file_exist cfast6_win_64.exe %OUTDIR%\stage0.txt|| exit /b 1
 
-call :GET_TIME
-set PRELIM_end=%current_time%
-call :GET_DURATION PRELIM %PRELIM_beg% %PRELIM_end%
-set DIFF_PRELIM=%duration%
+call :get_time PRELIM_end
+call :get_duration PRELIM DIFF_PRELIM %PRELIM_end% %PRELIM_beg%
 
 :: -------------------------------------------------------------
 ::                           stage 1
 :: -------------------------------------------------------------
 
-call :GET_TIME
-set BUILDFDS_beg=%current_time% 
+call :get_time BUILDFDS_beg
+
 echo Stage 1 - Building FDS
 
 ::echo             serial debug
@@ -248,17 +240,15 @@ make VPATH="../../FDS_Source" -f ..\makefile mpi_intel_win_64  1>> %OUTDIR%\stag
 call :does_file_exist fds_mpi_win_64.exe %OUTDIR%\stage1d.txt|| exit /b 1
 call :find_warnings "warning" %OUTDIR%\stage1d.txt "Stage 1d, FDS parallel release compilation"
 
-call :GET_TIME
-set BUILDFDS_end=%current_time%
-call :GET_DURATION BUILDFDS %BUILDFDS_beg% %BUILDFDS_end%
-set DIFF_BUILDFDS=%duration%
+call :get_time BUILDFDS_end
+call :get_duration BUILDFDS DIFF_BUILDFDS %BUILDFDS_end% %BUILDFDS_beg%
 
 :: -------------------------------------------------------------
 ::                           stage 2
 :: -------------------------------------------------------------
 
-call :GET_TIME
-set BUILDSMVUTIL_beg=%current_time% 
+call :get_time BUILDSMVUTIL_beg
+
 echo Stage 2 - Building Smokeview
 
 echo             libs
@@ -331,17 +321,14 @@ if %haveCC% == 1 (
   echo             wind2fds not built, using installed
 )
 
-call :GET_TIME
-set BUILDSMVUTIL_end=%current_time% 
-call :GET_DURATION BUILDSMVUTIL %BUILDSMVUTIL_beg% %BUILDSMVUTIL_end%
-set DIFF_BUILDSMVUTIL=%duration%
+call :get_time BUILDSMVUTIL_end=%current_time% 
+call :get_duration BUILDSMVUTIL DIFF_BUILDSMVUTIL %BUILDSMVUTIL_end% %BUILDSMVUTIL_beg%
 
 :: -------------------------------------------------------------
 ::                           stage 4
 :: -------------------------------------------------------------
 
-call :GET_TIME
-set RUNVV_beg=%current_time% 
+call :get_time RUNVV_beg
 
 echo Stage 4 - Running verification cases
 echo             debug mode
@@ -405,25 +392,23 @@ if %nerrors% GTR 0 (
    call :output_abort_message
    exit /b 1
 )
-call :GET_TIME
-set RUNVV_end=%current_time% 
-call :GET_DURATION RUNVV %RUNVV_beg% %RUNVV_end%
-set DIFF_RUNVV=%duration%
+call :get_time RUNVV_end
+call :get_duration RUNVV DIFF_RUNVV %RUNVV_end% %RUNVV_beg%
 
 :: -------------------------------------------------------------
 ::                           stage 5
 :: -------------------------------------------------------------
 
 if exist %emailexe% (
-  call :get_datetime
+  call :get_datetime current_ddate current_ttime
 
   echo "making pictures on %COMPUTERNAME% %revisionstring%" > %infofile%
   echo "  start time: %startdate% %starttime%" >> %infofile%
   echo "current time: %current_ddate% %current_ttime%" >> %infofile%
   call %email% %mailToFDSDebug% "making pictures on %COMPUTERNAME% %revisionstring%" %infofile%
 )
-call :GET_TIME
-set MAKEPICS_beg=%current_time% 
+call :get_time MAKEPICS_beg
+
 echo Stage 5 - Making pictures
 echo             FDS verification cases
 
@@ -436,17 +421,15 @@ call MAKE_SMV_pictures 64 0 1>> %OUTDIR%\stage5.txt 2>&1
 
 call :find_errors "error" %OUTDIR%\stage5.txt "Stage 5, Smokeview image generation"
 
-call :GET_TIME
-set MAKEPICS_end=%current_time% 
-call :GET_DURATION MAKEPICS %MAKEPICS_beg% %MAKEPICS_end%
-set DIFF_MAKEPICS=%duration%
+call :get_time MAKEPICS_end
+call :get_duration MAKEPICS DIFF_MAKEPICS %MAKEPICS_end% %MAKEPICS_beg%
 
 :: -------------------------------------------------------------
 ::                           stage 6
 :: -------------------------------------------------------------
 
-call :GET_TIME
-set MAKEGUIDES_beg=%current_time% 
+call :get_time MAKEGUIDES_beg
+
 echo Stage 6 - Building guides
 
 :: don't build FDS guides until a "matlab" stage is added
@@ -471,24 +454,17 @@ call :build_guide SMV_Verification_Guide %svnroot%\Manuals\SMV_Verification_Guid
 echo             Smokeview User
 call :build_guide SMV_User_Guide %svnroot%\Manuals\SMV_User_Guide 1>> %OUTDIR%\stage6.txt 2>&1
 
-call :GET_TIME
-set MAKEGUIDES_end=%current_time%
-call :GET_DURATION MAKEGUIDES %MAKEGUIDES_beg% %MAKEGUIDES_end%
-set DIFF_MAKEGUIDES=%duration%
+call :get_time MAKEGUIDES_end
+call :get_duration MAKEGUIDES DIFF_MAKEGUIDES %MAKEGUIDES_end% %MAKEGUIDES_beg%
 
-call :GET_TIME
-set TIME_end=%current_time% 
-call :GET_DURATION TOTALTIME %TIME_beg% %TIME_end%
-set DIFF_TIME=%duration%
+call :get_time TIME_end
+call :get_duration TOTALTIME DIFF_TIME %TIME_end% %TIME_beg%
 
 :: -------------------------------------------------------------
 ::                           wrap up
 :: -------------------------------------------------------------
 
-call :get_datetime
-set stoptime=%current_ttime%
-set stopdate=%current_ddate%
-
+call :get_datetime stopdate stoptime
 
 echo. > %infofile%
 echo . ----------------------------- >> %infofile%
@@ -556,34 +532,50 @@ goto :eof
 exit /b
 
 :: -------------------------------------------------------------
-:GET_DATETIME
+:get_datetime
 :: -------------------------------------------------------------
+
+set arg1=%1
+set arg2=%2
+
+date /t > %datefile%
+set /p %arg1%=<%datefile%
 
 time /t > %timefile%
-set /p current_ttime=<%timefile%
-date /t > %datefile%
-set /p current_ddate=<%datefile%
+set /p %arg2%=<%timefile%
+
 exit /b 0
 
 :: -------------------------------------------------------------
-:GET_TIME
+:get_time
 :: -------------------------------------------------------------
+
+set arg1=%1
 
 %gettimeexe% > %timefile%
-set /p current_time=<%timefile%
+set /p %arg1%=<%timefile%
 exit /b 0
 
 :: -------------------------------------------------------------
-:GET_DURATION
+:get_duration
 :: -------------------------------------------------------------
-set /a difftime=%3 - %2
-set /a diff_h= %difftime%/3600
-set /a diff_m= (%difftime% %% 3600 )/60
-set /a diff_s= %difftime% %% 60
-if %difftime% GEQ 3600 set duration= %diff_h%h %diff_m%m %diff_s%s
-if %difftime% LSS 3600 if %difftime% GEQ 60 set duration= %diff_m%m %diff_s%s
-if %difftime% LSS 3600 if %difftime% LSS 60 set duration= %diff_s%s
-echo %1: %duration% >> %stagestatus%
+
+:: compute difftime=time2 - time1
+
+set label=%1
+set difftime=%2
+set time2=%3
+set time1=%4
+
+set /a diff=%time2% - %time1%
+set /a diff_h= %diff%/3600
+set /a diff_m= (%diff% %% 3600 )/60
+set /a diff_s= %diff% %% 60
+if %diff% GEQ 3600 set duration= %diff_h%h %diff_m%m %diff_s%s
+if %diff% LSS 3600 if %diff% GEQ 60 set duration= %diff_m%m %diff_s%s
+if %diff% LSS 3600 if %diff% LSS 60 set duration= %diff_s%s
+echo %label%: %duration% >> %stagestatus%
+set %difftime%=%duration%
 exit /b 0
 
 :: -------------------------------------------------------------
