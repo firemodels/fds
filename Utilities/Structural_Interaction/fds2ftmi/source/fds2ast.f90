@@ -5,9 +5,9 @@ SUBROUTINE FDS2AST (CHID,NOMASTER,C_S,TBEG,TEND,TINT,COUNTER,VARIABLE,N)
 ! This program is part of a Coupling Procedure between fire and structural models
 !                                                                       - SILVA, JC
 
-! $Id: fds2ast.f90 19937 2014-07-15 20:55:19Z arquitetojulio@gmail.com $  
-! $Revision: 19937 $
-! $Date: 2014-07-15 16:55:19 -0400 (Tue, 15 Jul 2014) $
+! $Id$  
+! $Revision$
+! $Date$
  
 IMPLICIT NONE
 
