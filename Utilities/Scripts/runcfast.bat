@@ -9,10 +9,5 @@ set out=%infile%.err
 set stopfile=%infile%.stop
 
 cd %fulldir%
-echo **********************
 echo %in% started
-echo **********************
 %CFAST% %in%  
-echo **********************
-echo %in% completed
-echo **********************
