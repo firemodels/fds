@@ -53,9 +53,9 @@ goto eof
 :is_file_installed
 :: -----------------------------------------
   set program=%1
-  %program% -help 1> %SCRIPT_DIR%\exist.txt 2>&1
-  type %SCRIPT_DIR%\exist.txt | find /i /c "not recognized" > %SCRIPT_DIR%\count.txt
-  set /p nothave=<%SCRIPT_DIR%\count.txt
+  %program% -help 1> %BASEDIR%\exist.txt 2>&1
+  type %BASEDIR%\exist.txt | find /i /c "not recognized" > %BASEDIR%\count.txt
+  set /p nothave=<%BASEDIR%\count.txt
   if %nothave% GTR 0 (
     echo "***Fatal error: %program% not present"
     echo "Verification suite aborted"
