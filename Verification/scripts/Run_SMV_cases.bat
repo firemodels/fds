@@ -20,9 +20,6 @@ set SVNROOT=%CD%
 cd %SVNROOT%\..\cfast\
 set CFAST=%CD%
 
-cd %SVNROOT%\..\FIRE-LOCAL
-set FIRELOCAL=%CD%
-
 set TIME_FILE=%SCRIPT_DIR%\smv_case_times.txt
 
 set RUNFDS_R=call %SVNROOT%\Utilities\Scripts\runfds.bat
