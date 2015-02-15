@@ -207,15 +207,6 @@ call :get_time BUILDFDS_beg
 
 echo Stage 1 - Building FDS
 
-::echo             serial debug
-
-::cd %svnroot%\FDS_Compilation\intel_win_64_db
-::erase *.obj *.mod *.exe 1> %OUTDIR%\stage1a.txt 2>&1
-::make VPATH="../../FDS_Source" -f ..\makefile intel_win_64_db 1>> %OUTDIR%\stage1a.txt 2>&1
-
-::call :does_file_exist fds_win_64_db.exe %OUTDIR%\stage1a.txt|| exit /b 1
-::call :find_warnings "warning" %OUTDIR%\stage1a.txt "Stage 1a, FDS serial debug compilation"
-
 echo             parallel debug
 
 cd %svnroot%\FDS_Compilation\mpi_intel_win_64_db
@@ -224,15 +215,6 @@ make VPATH="../../FDS_Source" -f ..\makefile mpi_intel_win_64_db 1>> %OUTDIR%\st
 
 call :does_file_exist fds_mpi_win_64_db.exe %OUTDIR%\stage1b.txt|| exit /b 1
 call :find_warnings "warning" %OUTDIR%\stage1b.txt "Stage 1b, FDS parallel debug compilation"
-
-::echo             serial release
-
-::cd %svnroot%\FDS_Compilation\intel_win_64
-::erase *.obj *.mod *.exe 1> %OUTDIR%\stage1c.txt 2>&1
-::make VPATH="../../FDS_Source" -f ..\makefile intel_win_64 1>> %OUTDIR%\stage1c.txt 2>&1
-
-::call :does_file_exist fds_win_64.exe %OUTDIR%\stage1c.txt|| exit /b 1
-::call :find_warnings "warning" %OUTDIR%\stage1c.txt "Stage 1c, FDS serial release compilation"
 
 echo             parallel release
 
@@ -337,69 +319,53 @@ echo Stage 4 - Running verification cases
 echo             debug mode
 echo                FDS cases
 
+:: run cases
+
 cd %svnroot%\Verification\
 call Run_FDS_cases %debug% 1> %OUTDIR%\stage4a.txt 2>&1
-
 echo                Smokeview cases
 cd %svnroot%\Verification\scripts
 call Run_SMV_cases %debug% 0 1>> %OUTDIR%\stage4a.txt 2>&1
-
 call :wait_until_finished
 
+:: check cases
+
 set haveerrors_now=0
-
 echo. > %OUTDIR%\stage_error.txt
-
 cd %svnroot%\Verification\
 call Check_FDS_cases 
-
 cd %svnroot%\Verification\scripts
 call Check_SMV_cases 
 
-grep -v " " %OUTDIR%\stage_error.txt | wc -l > %OUTDIR%\stage_nerror.txt
-set /p nerrors=<%OUTDIR%\stage_nerror.txt
-if %nerrors% GTR 0 (
-   echo Stage 4a, Debug FDS case errors >> %errorlog%
-   echo. >> %errorlog%
-   type %OUTDIR%\stage_error.txt >> %errorlog%
-   set haveerrors=1
-   set haveerrors_now=1
-   call :output_abort_message
-   exit /b 1
-)
+:: report errors
+
+call :report_errors Stage 4a, "Debug FDS case errors"|| exit /b 1
 
 echo             release mode
 echo                FDS cases
 
+:: run cases
+
 cd %svnroot%\Verification\
 call Run_FDS_cases %release% 1> %OUTDIR%\stage4b.txt 2>&1
-
 echo                Smokeview cases
 cd %svnroot%\Verification\scripts
 call Run_SMV_cases %release%  1> %OUTDIR%\stage4b.txt 2>&1
-
 call :wait_until_finished
 
+:: check cases
+
 set haveerrors_now=0
-
 echo. > %OUTDIR%\stage_error.txt
-
 cd %svnroot%\Verification\
 call Check_FDS_cases
-
 cd %svnroot%\Verification\scripts
 call Check_SMV_cases 
 
+:: report errors
 
-grep -v " " %OUTDIR%\stage_error.txt | wc -l > %OUTDIR%\stage_nerror.txt
-set /p nerrors=<%OUTDIR%\stage_nerror.txt
-if %nerrors% GTR 0 (
-   echo Stage 4b, Release FDS case errors >> %errorlog%
-   echo. >> %errorlog%
-   type %OUTDIR%\stage_error.txt >> %errorlog%
-   call :output_abort_message
-   exit /b 1
-)
+call :report_errors Stage 4b, "Release FDS case errors"|| exit /b 1
+
 call :get_time RUNVV_end
 call :get_duration RUNVV DIFF_RUNVV %RUNVV_end% %RUNVV_beg%
 
@@ -523,6 +489,23 @@ if exist %emailexe% (
 
 echo firebot_win completed
 goto :eof
+
+:: -------------------------------------------------------------
+:report_errors
+:: -------------------------------------------------------------
+set stage_label=%1
+grep -v " " %OUTDIR%\stage_error.txt | wc -l > %OUTDIR%\stage_nerror.txt
+set /p nerrors=<%OUTDIR%\stage_nerror.txt
+if %nerrors% GTR 0 (
+   echo %stage_label% >> %errorlog%
+   echo. >> %errorlog%
+   type %OUTDIR%\stage_error.txt >> %errorlog%
+   set haveerrors=1
+   set haveerrors_now=1
+   call :output_abort_message
+   exit /b 1
+)
+exit /b 0
 
 :: -------------------------------------------------------------
 :wait_until_finished

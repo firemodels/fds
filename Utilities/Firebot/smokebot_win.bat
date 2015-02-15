@@ -1,4 +1,4 @@
-@echo off
+@echo   off
 
 ::  set number of OpenMP threads
 
@@ -329,49 +329,39 @@ set RUNVV_beg=%current_time%
 echo Stage 4 - Running verification cases
 echo             debug mode
 
+:: run the cases
+
 cd %svnroot%\Verification\scripts
 call Run_SMV_cases %debug% 1> %OUTDIR%\stage4a.txt 2>&1
-
 call :wait_until_finished
+
+:: check the cases
 
 cd %svnroot%\Verification\scripts
 echo. > %OUTDIR%\stage_error.txt
 call Check_SMV_cases 
 
-grep -v " " %OUTDIR%\stage_error.txt | wc -l > %OUTDIR%\stage_nerror.txt
-set /p nerrors=<%OUTDIR%\stage_nerror.txt
-if %nerrors% GTR 0 (
-   echo Debug FDS case errors >> %errorlog%
-   echo. >> %errorlog%
-   type %OUTDIR%\stage_error.txt >> %errorlog%
-   set haveerrors=1
-   set haveerrors_now=1
-   call :output_abort_message
-   exit /b 1
-)
+:: report errors
+
+call :report_errors Stage 4a, "Debug FDS case errors"|| exit /b 1
 
 echo             release mode
 
+:: run the cases
+
 cd %svnroot%\Verification\scripts
 call Run_SMV_cases %release% 1> %OUTDIR%\stage4b.txt 2>&1
+call :wait_until_finished
+
+:: check the cases
 
 cd %svnroot%\Verification\scripts
 echo. > %OUTDIR%\stage_error.txt
 call Check_SMV_cases 
 
-call :wait_until_finished
+:: report errors
 
-grep -v " " %OUTDIR%\stage_error.txt | wc -l > %OUTDIR%\stage_nerror.txt
-set /p nerrors=<%OUTDIR%\stage_nerror.txt
-if %nerrors% GTR 0 (
-   echo Release FDS case errors >> %errorlog%
-   echo. >> %errorlog%
-   type %OUTDIR%\stage_error.txt >> %errorlog%
-   set haveerrors=1
-   set haveerrors_now=1
-   call :output_abort_message
-   exit /b 1
-)
+call :report_errors Stage 4b, "Release FDS case errors"|| exit /b 1
 
 call :GET_TIME
 set RUNVV_end=%current_time% 
@@ -501,6 +491,23 @@ goto :eof
     call %email% %mailToSMV% "smokebot failure on %COMPUTERNAME% %revisionstring%" %errorlog%
   )
 exit /b
+
+:: -------------------------------------------------------------
+:report_errors
+:: -------------------------------------------------------------
+set stage_label=%1
+grep -v " " %OUTDIR%\stage_error.txt | wc -l > %OUTDIR%\stage_nerror.txt
+set /p nerrors=<%OUTDIR%\stage_nerror.txt
+if %nerrors% GTR 0 (
+   echo %stage_label% >> %errorlog%
+   echo. >> %errorlog%
+   type %OUTDIR%\stage_error.txt >> %errorlog%
+   set haveerrors=1
+   set haveerrors_now=1
+   call :output_abort_message
+   exit /b 1
+)
+exit /b 0
 
 :: -------------------------------------------------------------
 :wait_until_finished
