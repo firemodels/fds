@@ -52,9 +52,12 @@ erase %OUTDIR%\*.txt 1> Nul 2>&1
 
 set email=%svnroot%\SMV\scripts\email.bat
 
+set release=0
+set debug=1
 set errorlog=%OUTDIR%\firebot_errors.txt
 set timefile=%OUTDIR%\time.txt
 set datefile=%OUTDIR%\date.txt
+set waitfile=%OUTDIR%\wait.txt
 set warninglog=%OUTDIR%\firebot_warnings.txt
 set errorwarninglog=%OUTDIR%\firebot_errorswarnings.txt
 set infofile=%OUTDIR%\firebot_info.txt
@@ -335,11 +338,11 @@ echo             debug mode
 echo                FDS cases
 
 cd %svnroot%\Verification\
-call Run_FDS_cases 1 1> %OUTDIR%\stage4a.txt 2>&1
+call Run_FDS_cases %debug% 1> %OUTDIR%\stage4a.txt 2>&1
 
 echo                Smokeview cases
 cd %svnroot%\Verification\scripts
-call Run_SMV_cases 1 0 1>> %OUTDIR%\stage4a.txt 2>&1
+call Run_SMV_cases %debug% 0 1>> %OUTDIR%\stage4a.txt 2>&1
 
 call :wait_until_finished
 
@@ -369,11 +372,13 @@ echo             release mode
 echo                FDS cases
 
 cd %svnroot%\Verification\
-call Run_FDS_cases 0 1> %OUTDIR%\stage4b.txt 2>&1
+call Run_FDS_cases %release% 1> %OUTDIR%\stage4b.txt 2>&1
 
 echo                Smokeview cases
 cd %svnroot%\Verification\scripts
-call Run_SMV_cases 0 0 1> %OUTDIR%\stage4b.txt 2>&1
+call Run_SMV_cases %release%  1> %OUTDIR%\stage4b.txt 2>&1
+
+call :wait_until_finished
 
 set haveerrors_now=0
 
@@ -385,7 +390,6 @@ call Check_FDS_cases
 cd %svnroot%\Verification\scripts
 call Check_SMV_cases 
 
-call :wait_until_finished
 
 grep -v " " %OUTDIR%\stage_error.txt | wc -l > %OUTDIR%\stage_nerror.txt
 set /p nerrors=<%OUTDIR%\stage_nerror.txt
@@ -525,8 +529,8 @@ goto :eof
 :: -------------------------------------------------------------
 :loop1
 :: FDSBASE defined in Run_SMV_Cases and Run_FDS_Cases (the same in each)
-tasklist | find /i /c "%FDSBASE%" > temp.out
-set /p numexe=<temp.out
+tasklist | find /i /c "%FDSBASE%" > %waitfile%
+set /p numexe=<%waitfile%
 echo Number of cases running - %numexe%
 if %numexe% == 0 goto finished
 Timeout /t 30 >nul 
