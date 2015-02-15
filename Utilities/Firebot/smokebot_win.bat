@@ -42,6 +42,8 @@ erase %OUTDIR%\*.txt 1> Nul 2>&1
 
 set email=%svnroot%\SMV\scripts\email.bat
 
+set debug=1
+set release=0
 set errorlog=%OUTDIR%\stage_errors.txt
 set warninglog=%OUTDIR%\stage_warnings.txt
 set errorwarninglog=%OUTDIR%\stage_errorswarnings.txt
@@ -328,7 +330,7 @@ echo Stage 4 - Running verification cases
 echo             debug mode
 
 cd %svnroot%\Verification\scripts
-call Run_SMV_cases 1 0 1> %OUTDIR%\stage4a.txt 2>&1
+call Run_SMV_cases %debug% 1> %OUTDIR%\stage4a.txt 2>&1
 
 call :wait_until_finished
 
@@ -351,7 +353,7 @@ if %nerrors% GTR 0 (
 echo             release mode
 
 cd %svnroot%\Verification\scripts
-call Run_SMV_cases 0 0 1> %OUTDIR%\stage4b.txt 2>&1
+call Run_SMV_cases %release% 1> %OUTDIR%\stage4b.txt 2>&1
 
 cd %svnroot%\Verification\scripts
 echo. > %OUTDIR%\stage_error.txt
