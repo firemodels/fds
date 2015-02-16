@@ -36,7 +36,6 @@ end
 if strcmp(Stats_Output, 'Verification')
     fid = fopen(Statistics_Tex_Output, 'wt');
     % Generate table header information in .tex file
-    fprintf(fid, '%s\n', '\tiny');
     fprintf(fid, '%s\n', '\begin{longtable}[c]{|l|c|c|c|c|c|c|}');
     fprintf(fid, '%s\n', '\hline');
     fprintf(fid, '%s\n', 'Case Name & Expected & Predicted & Type of Error & Error & Error     & Within    \\');
