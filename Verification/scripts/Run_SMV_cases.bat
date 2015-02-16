@@ -23,17 +23,14 @@ set CFAST=%CD%
 set TIME_FILE=%SCRIPT_DIR%\smv_case_times.txt
 
 set RUNFDS_R=call %SVNROOT%\Utilities\Scripts\runfds.bat
-set RUNWFDS_R=call %SVNROOT%\Utilities\Scripts\runwfds.bat
 set RUNTFDS_R=call %SVNROOT%\Utilities\Scripts\runfds.bat
 set RUNCFAST_R=call %SVNROOT%\Utilities\Scripts\runcfast.bat
 
 set RUNFDS_M=call %SVNROOT%\Verification\scripts\make_stop.bat
-set RUNWFDS_M=call %SVNROOT%\Verification\scripts\make_stop.bat
 set RUNTFDS_M=call %SVNROOT%\Verification\scripts\make_stop.bat
 set RUNCFAST_M=call %SVNROOT%\Verification\scripts\make_stop.bat
 
 set RUNFDS_E=call %SVNROOT%\Verification\scripts\erase_stop.bat
-set RUNWFDS_E=call %SVNROOT%\Verification\scripts\erase_stop.bat
 set RUNTFDS_E=call %SVNROOT%\Verification\scripts\erase_stop.bat
 set RUNCFAST_E=call %SVNROOT%\Verification\scripts\erase_stop.bat
 
@@ -48,7 +45,7 @@ set BACKGROUNDEXE=%SVNROOT%\Utilities\background\intel_win_32\background.exe
 
 :: Run jobs in background (or not)
 
-set "bg=%BACKGROUNDEXE% -u 85 -d 5 "
+set "bg=%BACKGROUNDEXE% -u 60 -m 70 -d 5 "
 :: set bg=
 
 :: ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -67,7 +64,6 @@ call :is_file_installed %sh2bat%|| exit /b 1
 
 echo.
 echo FDS=%FDS%
-echo WFDS=%WFDS%
 echo CFAST=%CFAST%
 echo.
 

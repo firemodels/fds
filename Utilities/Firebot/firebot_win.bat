@@ -323,9 +323,6 @@ echo                FDS cases
 
 cd %svnroot%\Verification\
 call Run_FDS_cases %debug% 1> %OUTDIR%\stage4a.txt 2>&1
-echo                Smokeview cases
-cd %svnroot%\Verification\scripts
-call Run_SMV_cases %debug% 0 1>> %OUTDIR%\stage4a.txt 2>&1
 call :wait_until_finished
 
 :: check cases
@@ -334,8 +331,6 @@ set haveerrors_now=0
 echo. > %OUTDIR%\stage_error.txt
 cd %svnroot%\Verification\
 call Check_FDS_cases 
-cd %svnroot%\Verification\scripts
-call Check_SMV_cases 
 
 :: report errors
 
@@ -348,9 +343,6 @@ echo                FDS cases
 
 cd %svnroot%\Verification\
 call Run_FDS_cases %release% 1> %OUTDIR%\stage4b.txt 2>&1
-echo                Smokeview cases
-cd %svnroot%\Verification\scripts
-call Run_SMV_cases %release%  1> %OUTDIR%\stage4b.txt 2>&1
 call :wait_until_finished
 
 :: check cases
@@ -359,8 +351,6 @@ set haveerrors_now=0
 echo. > %OUTDIR%\stage_error.txt
 cd %svnroot%\Verification\
 call Check_FDS_cases
-cd %svnroot%\Verification\scripts
-call Check_SMV_cases 
 
 :: report errors
 
