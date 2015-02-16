@@ -16,7 +16,7 @@ if "%rundebug%" == "1" (
 set BASEDIR="%CD%"
 cd ..
 set SVNROOT="%CD%"
-set %BASEDIR%\scripts
+cd %BASEDIR%\scripts
 set SCRIPT_DIR="%CD%"
 cd %SVNROOT%\..\cfast\
 set CFAST=%CD%
