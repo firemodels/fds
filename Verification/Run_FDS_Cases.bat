@@ -98,7 +98,6 @@ cd %BASEDIR%
 call FDS_Cases.bat
 call %SCRIPT_DIR%\SMV_Cases.bat
 call %SCRIPT_DIR%\SMV_geom_Cases.bat
-call :wait_until_finished
 
 echo.
 echo Running FDS cases
@@ -116,6 +115,7 @@ cd %BASEDIR%
 call FDS_Cases.bat
 call %SCRIPT_DIR%\SMV_Cases.bat
 call %SCRIPT_DIR%\SMV_geom_Cases.bat
+call :wait_until_finished
 
 goto eof
 
