@@ -1,4 +1,4 @@
 @echo off
 call %SVNROOT%\Utilities\Scripts\getopts.bat %*
 
-echo 5 > %dir%\%infile%.stop
+echo 2 > %dir%\%infile%.stop
