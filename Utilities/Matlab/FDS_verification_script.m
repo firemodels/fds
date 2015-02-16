@@ -91,5 +91,6 @@ openmp_timing_benchmarks
 rms_cov_corr
 backward_facing_step
 hot_layer_collapse
+radiating_polygon
 
 display('verification scripts completed successfully!')
