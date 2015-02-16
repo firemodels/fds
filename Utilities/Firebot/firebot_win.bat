@@ -317,7 +317,6 @@ call :get_time RUNVV_beg
 
 echo Stage 4 - Running verification cases
 echo             debug mode
-echo                FDS cases
 
 :: run cases
 
@@ -336,7 +335,6 @@ call Check_FDS_cases
 call :report_errors Stage 4a, "Debug FDS case errors"|| exit /b 1
 
 echo             release mode
-echo                FDS cases
 
 :: run cases
 
