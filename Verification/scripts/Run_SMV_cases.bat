@@ -125,6 +125,7 @@ if "%runonlygeom%" == "1" (
   call %SCRIPT_DIR%\SMV_Cases.bat
   call %SCRIPT_DIR%\SMV_geom_Cases.bat
 )
+call :wait_until_finished
 
 cd %BASEDIR%
 echo "smokeview test cases end" >> %TIME_FILE%
@@ -132,6 +133,21 @@ date /t >> %TIME_FILE%
 time /t >> %TIME_FILE%
 
 goto eof
+
+:: -------------------------------------------------------------
+:wait_until_finished
+:: -------------------------------------------------------------
+:loop1
+:: FDSBASE defined in Run_SMV_Cases and Run_FDS_Cases (the same in each)
+tasklist | find /i /c "%FDSBASE%" > %waitfile%
+set /p numexe=<%waitfile%
+echo Number of cases running - %numexe%
+if %numexe% == 0 goto finished
+Timeout /t 30 >nul 
+goto loop1
+
+:finished
+exit /b
 
 :: -----------------------------------------
 :is_file_installed
