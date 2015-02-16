@@ -323,7 +323,6 @@ echo                FDS cases
 
 cd %svnroot%\Verification\
 call Run_FDS_cases %debug% 1> %OUTDIR%\stage4a.txt 2>&1
-call :wait_until_finished
 
 :: check cases
 
@@ -343,7 +342,6 @@ echo                FDS cases
 
 cd %svnroot%\Verification\
 call Run_FDS_cases %release% 1> %OUTDIR%\stage4b.txt 2>&1
-call :wait_until_finished
 
 :: check cases
 
@@ -496,21 +494,6 @@ if %nerrors% GTR 0 (
    exit /b 1
 )
 exit /b 0
-
-:: -------------------------------------------------------------
-:wait_until_finished
-:: -------------------------------------------------------------
-:loop1
-:: FDSBASE defined in Run_SMV_Cases and Run_FDS_Cases (the same in each)
-tasklist | find /i /c "%FDSBASE%" > %waitfile%
-set /p numexe=<%waitfile%
-echo Number of cases running - %numexe%
-if %numexe% == 0 goto finished
-Timeout /t 30 >nul 
-goto loop1
-
-:finished
-exit /b
 
 :: -------------------------------------------------------------
 :output_abort_message
