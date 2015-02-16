@@ -545,7 +545,7 @@ that is, comments within the source code itself.  Plus, they must compile the co
 In this chapter we present test cases aimed at exercising the advective, pressure, and viscous terms, as well as the time integration for non-reacting flows.
 
 
-\section{2D Analytical Solution to Navier-Stokes (\texorpdfstring{\textct{ns2d}}{ns2d})}
+\section{Analytical Solution to the Navier-Stokes Equation (\texorpdfstring{\textct{ns2d}}{ns2d})}
 \label{ns2d}
 
 In this section we present an analytical solution that is useful for confirming the convergence rates of the truncation errors in the discretization of the terms in
@@ -633,575 +633,7 @@ the corresponding location in space and time.  The figure confirms that the adve
 
 \clearpage
 
-
-\section{2D Vortex Simulation (\texorpdfstring{\textct{vort2d}}{vort2d})}
-\label{two_dimensional_vortex}
-
-\textbf{Max Gould, NIST SURF student}\\
-\textbf{Ragini Acharya, United Technologies Research Center}\\
-
-\noindent In this section we present another case that demonstrates the second-order accuracy of the FDS transport algorithm. We consider the analytically stable flow field consisting of a single vortex advected by a uniform flow, a test case developed by CERFACS\footnote{Centre Europ\'een de Recherche et de Formation Avanc\'ee en Calcul Scientifique} \cite{cerfacs_test}. Maintaining the geometry of the vortex over time provides a good measure of the order of accuracy of the transport scheme.
-
-\begin{figure}[h!]
-   \centering
-   \setlength{\unitlength}{0.0008in}
-   \begin{picture}(7300,3420)
-      \put(1030,50){$L = 0.3112$ m}
-      \put(130,850){$U_{0} = 35$ m/s}
-      \put(0,250){\framebox(3112,3112)}
-      \put(1056,1306){\dashbox{100}(1000,1000)}
-      \put(1056,1306){\line(3,-1){3194}}
-      \put(1056,2306){\line(3,1){3194}}
-      \put(100,672){\vector(1,0){450}}
-      \put(100,1394){\vector(1,0){450}}
-      \put(100,2216){\vector(1,0){450}}
-      \put(100,2938){\vector(1,0){450}}
-      \put(2562,672){\vector(1,0){450}}
-      \put(2562,1394){\vector(1,0){450}}
-      \put(2562,2216){\vector(1,0){450}}
-      \put(2562,2938){\vector(1,0){450}}
-      \put(1556,1806){\circle{550}}
-      \put(1281,1806){\vector(0,-1){50}}
-      \put(1831,1806){\vector(0,1){50}}
-      \put(3450,-250){
-         \scalebox{.498}{\includegraphics{SCRIPT_FIGURES/vort2d_diagram}}
-      }
-   \end{picture}
-   \caption[Vector field of a two-dimensional vortex]{Vector field of a two-dimensional vortex in a constant flow field.}
-   \label{fig_vort2d_diagram}
-\end{figure}
-
-\noindent The vortex is initially defined as the gradient of the potential field,
-\begin{equation}
-\label{eqn_vort2d}
-\Psi_{0} (x,z) = \Gamma \ \exp \left[ - \frac{x^{2} + z^{2}}{2 \ R_{c}^{2}} \right],
-\end{equation}
-where $\Gamma$ determines its intensity and $R_c$ its characteristic size. The velocity components are determined by taking the gradient of the potential field superimposed on the constant flow field of velocity $U_0$ in the positive $x$ direction,
-\begin{eqnarray}
-\label{eqn_uvel}
-u (x,z) &\equiv& U_{0} + \frac{\partial}{\partial z} \Psi_{0} = U_{0} - \frac{\Gamma \ z}{R_{c}^{2}} \exp \left[ - \frac{x^{2} + z^{2}}{2 \ R_{c}^{2}} \right], \\
-w (x,z) &\equiv& - \frac{\partial}{\partial x} \Psi_{0} = \frac{\Gamma \ x}{R_{c}^{2}} \exp \left[ - \frac{x^{2} + z^{2}}{2 \ R_{c}^{2}} \right],
-\end{eqnarray}
-where $u$ and $w$ refer to velocity in the $x$ and $z$-directions, respectively. For our purposes we need only analyze one component of the velocity field. We will focus our attention on the $u$-component of velocity.
-
-We define the computational domain as a two-dimensional square region, $L=0.3112$~m on a side, with periodic boundary conditions. The domain is discretized for a range of square, two-dimensional meshes of $40^{2}$, $80^{2}$, $160^{2}$, and $320^{2}$ grid cells. For the purposes of this test, we set the flow parameters as
-\[
-\begin{array}{lll}
-U_{0} &&= 35 \ \mathrm{m/s} \\
-R_{c} &= L / 20 &= 0.01556 \ \mathrm{m} \\
-\Gamma &= 0.04 \ U_{0} \ R_{c} \ \sqrt{e} &= 0.0359157
-\end{array}
-\]
-The constant flow field and periodic boundary conditions cause the vortex to repeatedly pass through the computational domain. The ``pass-through'' time, $t_{f}$, is defined as the time period required for the stable vortex to return to its original position,
-\begin{equation*}
-t_{f} = L / U_{0} \simeq 8.8914 \times 10^{-3} \ \mathrm{s}.
-\end{equation*}
-To ensure that the numerical solution converges to the analytical solution, we set the time step, $\dt$, so that the Courant-Friedrichs-Lewy (CFL) number is 0.5.
-
-
-\begin{figure}[h]
-   \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-      \includegraphics[width=3.2in]{SCRIPT_FIGURES/vort2d_80_uzgraph} &
-      \includegraphics[width=3.2in]{SCRIPT_FIGURES/vort2d_160_uzgraph}
-   \end{tabular*}
-   \caption[Velocity in the \textct{vort2d} test case]{$u$-velocity along the $z$-axis at $x=0$ plotted for each of the vortex's first four loops through the computational domain. (Left) $80^{2}$ grid cell model. (Right) $160^{2}$ grid cell model.}
-   \label{fig_vort2d_axisvelocity}
-\end{figure}
-
-A plot of $u$-velocity values just along the $z$-axis provides a simple characterization of the vortex geometry. The extent to which this geometry changes over time provides a qualitative measure of the accuracy of the transport algorithm. Figure \ref{fig_vort2d_axisvelocity} displays these plots for two different grid resolutions. Each line represents a plot taken for a different number of flow-through times such that the red lines represent the vortex after it has undergone the most passes through the computational domain while the green lines represent the vortex in the initial phase. The broken black line represents the analytical solution. As the vortex undergoes more passes through the computational domain, its velocity profile diverges further and further from the analytical profile. While divergence still occurs on the finer mesh, the extent to which it diverges after the same number of flow-through times is significantly smaller.
-
-\begin{figure}[h!]
-   \centering
-    \includegraphics[width=3.2in]{SCRIPT_FIGURES/vort2d_error}
-    \caption[Convergence study for the \textct{vort2d} test case]{RMS error between simulated and analytical $u$-velocity values along the $z$-axis plotted for each grid resolution at each of three subsequent passes of the vortex through the computational domain.}
-    \label{fig_vort2d_error}
-\end{figure}
-
-The rate with which the simulated profiles converge to the analytical one defines the order of accuracy of the numerical scheme. In Fig.~\ref{fig_vort2d_error} we plot the rms error of the numerical solution as a function of the grid resolution. The three colored curves represent the rms error at three different pass-through times. The broken and solid black lines represent the plot gradient corresponding to first and second order error respectively. While the error increases with each flow-through time, the gradients of the lines are roughly parallel to the solid black line, indicating second-order accuracy of the numerical scheme.
-
-To analyze the stability of the vortex at times other than discrete multiples of the pass-through time, consider the time-dependent potential field and its corresponding $u$-velocity component:
-\begin{equation}
-\label{eqn_vort2d_timedep}
-\Psi (x,z,t) = \Psi_{0} \exp \left[\frac{2 \ U_{0} \ x \ t - U_{0}^{2} \ t^{2}}{2 \ R_{c}^{2}} \right],
-\end{equation}
-\begin{equation}
-\label{eqn_uvel_timedep}
-u (x,z,t) = U_{0} - \Psi_{0} \ \frac{z}{R_{c}^{2}} \exp \left[\frac{2 \ U_{0} \ x \ t - U_{0}^{2} \ t^{2}}{2 \ R_{c}^{2}} \right].
-\end{equation}
-In Fig.~\ref{fig_vort2d_pointvelocity}, we show the $u$-velocity at a single point, on the lower left fringe of the vortex, for two different mesh resolutions, $80^{2}$ and $160^{2}$. A mesh resolution of $320^{2}$ grid cells produces a plot (not shown) that is, to the eye, a perfect match out to four pass-through times.
-
-\begin{figure}[h!]
-   \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-      \includegraphics[width=3.2in]{SCRIPT_FIGURES/vort2d_80_upgraph} &
-      \includegraphics[width=3.2in]{SCRIPT_FIGURES/vort2d_160_upgraph}
-   \end{tabular*}
-   \caption[Time history of velocity at a point showing qualitative convergence]{Simulated and analytical values of $u$-velocity at a point plotted as a function of time over a time period equal to four times the flow-through time. (Left) $80^{2}$ grid cell model. (Right) $160^{2}$ grid cell model.}
-   \label{fig_vort2d_pointvelocity}
-\end{figure}
-
-
-
-
-\clearpage
-
-
-\section{Decaying Isotropic Turbulence}
-\label{decaying_isotropic_turbulence}
-
-In this section we present a canonical flow for LES which tests whether the subgrid stress model has been coded properly. In some cases the difference between verification and validation is not so clear.  Once a model is well-established and validated it may actually be used as a form of verification.  Granted, such a test is not as strong a verification as the convergence study shown in Section \ref{ns2d}.  Nevertheless, these tests are often quite useful in discovering problems within the code.  The case we examine in this section, decaying isotropic turbulence, is highly sensitive to errors in the advective and diffusive terms because the underlying physics is inherently three-dimensional and getting the problem right depends strongly on a delicate balance between vorticity dynamics and dissipation.  An even more subtle yet extremely powerful verification test is also presented in this section when we set both the molecular and turbulent viscosities to zero and confirm that the integrated kinetic energy within the domain remains constant.   In the absence of any form of viscosity, experience has shown that the slightest error in the advective terms or the pressure projection will cause the code to go unstable.  This verification is therefore stronger than one might initially expect.
-
-In this section we test the FDS model against the low Reynolds number (Re) data of Comte-Bellot and Corrsin (CBC) \cite{CBC}. Viscous effects are important in this data set for a well-resolved LES, testing the model's Re dependence.  Following \cite{SdBK}, we use a periodic box of side $L = 9 \times 2\pi$ cm ($\approx 0.566$ m) and $\nu = 1.5 \times 10^{-5}$ $\mbox{m}^2/\mbox{s}$ for the kinematic viscosity. The non-dimensional times for this data set are: $x/M = 42$ (initial condition), $98$, and $171$, where $M$ is the characteristic mesh spacing of the CBC wind tunnel and $x$ is the downstream location of the data station. Considering the mean velocity in the CBC wind tunnel experiment, these correspond to dimensional times of $t = 0.00$ s, $0.28$ s, and $0.66$ s in our simulations.
-
-The initial condition for the FDS simulation is generated by superimposing Fourier modes with random phases such that the spectrum matches that of the initial CBC data.  An iterative procedure is employed where the field is allowed to decay for small time increments subject to Navier-Stokes physics, each wavenumber is then injected with energy to again match the initial filtered CBC spectrum.  The specific filter used here is discussed in \cite{McDermott:2005b}.
-
-To provide the reader with a qualitative sense of the flow, Fig.~\ref{fig_cbc_smv} shows the initial and final states of the velocity field in the 3D periodic domain.  The flow is unforced and so if viscosity is present the total energy decays with time due to viscous dissipation.
-
-\subsection{Constant Smagorinsky (\texorpdfstring{\textct{csmag}}{csmag})}
-
-Because the viscous scales are unresolved, a subgrid stress model is required. Here the stress is closed using the gradient diffusion hypothesis and the eddy viscosity is modeled by the constant coefficient Smagorinsky model with the coefficient taken to be $C_{\rm s} = 0.2$ (see the Technical Reference Guide for further details).
-
-The decay curves for two grid resolutions are shown on the left in Fig.~\ref{fig_cbc_energy}.  For an LES code such as FDS which uses a physically-based subgrid model, an important verification test is to run this periodic isotropic turbulence simulation in the absence of both molecular and turbulent viscosity.  For so-called ``energy-conserving'' explicit numerics the integrated energy will remain nearly constant in time.  This is demonstrated by the dash-dot line in the top-left plot in Fig.~\ref{fig_cbc_energy}.  The deviations from identical energy conservation (to machine precision) are due solely to the time discretization (the spatial terms are conservative as discussed in \cite{Morinishi}) and converge to zero as the time step goes to the zero.  Note that strict energy conservation requires implicit time integration \cite{Ham,McDermott:2007b} and, as shown by the dashed curve on the same plot where only molecular viscosity is present in the simulation, this cost is unwarranted given that the molecular dissipation rate clearly overshadows the relatively insignificant amount of numerical dissipation caused by the explicit method.  The FDS result using the Smagorinsky eddy viscosity (the black solid line) matches the CBC data (red open circles) well for the $32^3$ case (top-left).  However, the FDS results are slightly too dissipative in the $64^3$ case (bottom-left).  This is due to a well-known limitation of the constant coefficient Smagorinsky model: namely, that the eddy viscosity does not converge to zero at the appropriate rate as the filter width (here equivalent to the grid spacing) is decreased.
-\begin{figure}[t]
-   \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/csmag_64_000} } &
-      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/csmag_64_689} }
-   \end{tabular*}
-   \caption[Initial and final states for isotropic turbulence]{Initial and final states of velocity magnitude for the isotropic turbulence field.}
-   \label{fig_cbc_smv}
-\end{figure}
-
-To the right of each decay curve plotted in Fig.~\ref{fig_cbc_energy} is the corresponding spectral data comparison.  The three black solid lines are the CBC spectral data for the points in time corresponding to dimensional times of $t = 0.00$ s, $0.28$ s, and $0.66$ s in our simulations.  As described above, the initial FDS velocity field (represented by the black dots) is specified to match the CBC data up to the grid Nyquist limit.  From there the spectral energy decays rapidly as discussed in \cite{McDermott:2005b}.  For each of the spectral plots on the right, the results of interest are the values of the red and blue dots and how well these match up with the corresponding CBC data.  For the $32^3$ case (top-right) the results are remarkably good.  Interestingly, the results for the more highly resolved $64^3$ case are not as good.  This is because the viscous scales are rather well-resolved at the later times in the experiment and, as mentioned, the constant coefficient Smagorinsky model is too dissipative under such conditions. (The choice of the model constant also affects these results---better agreement with the $64^3$ case could be achieved with a lower value of $C_{\rm s}$, but the agreement in the $32^3$ case would then be worse.)
-
-\begin{figure}[t]
-   \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/csmag_32_decay} } &
-      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/csmag_32_spectra} } \\
-      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/csmag_64_decay} } &
-      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/csmag_64_spectra} }
-   \end{tabular*}
-   \caption[Integrated and spectral energy decay for CBC experiment using constant Smagorinsky]{\label{fig_cbc_energy} \small (Left) Time histories of integrated kinetic energy corresponding to the grid resolutions on the right side of the figure.  In the $32^3$ case (top), the CBC data (open circles) are obtained by applying a filter to the CBC energy spectra at the Nyquist limit for an $N=32$ grid.  Similarly, for the $64^3$ case (bottom), the CBC data are obtained from filtered spectra for an $N=64$ grid. (Right) Energy spectra for the $32^3$ case (top) and the $64^3$ case (bottom).  The solid black lines are the spectral data of Comte-Bellot and Corrsin at three different points in time corresponding to downstream positions in the turbulent wind tunnel.  The initial condition for the velocity field (spectra shown as black dots) in the FDS simulation is prescribed such that the energy spectrum matches the initial CBC data.  The FDS energy spectra corresponding to the subsequent CBC data are shown by the red and blue dots. The vertical dashed line represents the wavenumber of the grid Nyquist limit. }
-\end{figure}
-
-Overall, the agreement between the FDS simulations and the CBC data is satisfactory and any discrepancies can be explained by limitations of the model.  Therefore, as a verification the results here are positive in that nothing points to coding errors.
-
-
-
-
-\clearpage
-
-\subsection{Dynamic Smagorinsky (\texorpdfstring{\textct{dsmag}}{dsmag})}
-\label{dynamic_smagorinsky_model}
-
-In the previous section, all calculations were performed with a constant and uniform Smagorinsky coefficient, $C_{\rm s} = 0.2$.  For the canonical case of homogeneous decaying isotropic turbulence -- \emph{at sufficiently high Reynolds number} -- this model is sufficient.  However, we noticed that even for the isotropic turbulence problem when the grid Reynolds number is low (i.e., the flow is well-resolved) the constant coefficient model tends to over predict the dissipation of kinetic energy (see Fig.~\ref{fig_cbc_energy}).  This is because the eddy viscosity does not converge to zero at the proper rate; so long as strain is present in the flow (the magnitude of the strain rate tensor is nonzero), the eddy viscosity will be nonzero.  This violates a guiding principle in LES development: that the method should converge to a DNS if the flow field is sufficiently resolved.
-
-The dynamic procedure for calculating the model coefficient (set \textct{TURBULENCE\_MODEL=`DYNAMIC \\ \ct SMAGORINSKY'} on \textct{MISC}) alleviates this problem.  The basis of the model is that the coefficient should be the same for two different filter scales within the inertial subrange.  Details of the procedure are explained in the following references \cite{Germano:1991,PinoMartin:2000,Moin:1991,Lund:1997,FDS_Math_Guide}.  Here we present results for the implementation of the dynamic model in FDS.  In Fig.~\ref{fig_c_smag} we show contours of the Smagorinsky coefficient $C_{\rm s}(\mathbf{x},t)$ at a time midway through a $64^3$ simulation of the CBC experiment.  Notice that the coefficient ranges from 0.00 to roughly 0.30 within the domain with the average value falling around 0.17.
-
-\begin{figure}[t]
-\centering
-\includegraphics[height=3.00in]{SCRIPT_FIGURES/dsmag_64_300}
-\caption[Dynamic Smagorinsky coefficient]{Smagorinsky coefficient for a $64^3$ simulation of the CBC experiment.}
-\label{fig_c_smag}
-\end{figure}
-
-Next, in Fig.~\ref{fig_dynsmag_cbc}, we show results for the dynamic model analogous to Fig.~\ref{fig_cbc_energy}.  For the $32^3$ case the result is not dramatically different than the constant coefficient model.  In fact, one might argue that the $32^3$ constant coefficient results are slightly better.  But there are several reasons why we should not stop here and conclude that the constant coefficient model is superior.  First, as pointed out in Pope Exercise 13.34 \cite{Pope:2000}, $38^3$ is required to resolve 80 \% of the total kinetic energy (for this flow) and thus put the cutoff wavenumber within the inertial subrange of turbulent length scales.  Pope recommends that simulations which are under-resolved by this criterion should be termed ``very large-eddy simulations''---weather forecasting is a typical example.  For a $32^3$ LES, the test filter width in the dynamic model falls at a resolution of $16^3$, clearly outside the inertial range.  A tacit assumption underlying the original interpretation of the dynamic model is that both the grid filter scale and the test filter scale should fall within the inertial range, since this is the range in which the scales of turbulent motion (in theory) exhibit fractal-like, scale similarity (recently the procedure has been derived from other arguments \cite{Pope:2004}).  With this in mind, it is perhaps not surprising that the dynamic model does not perform optimally for the low resolution case.  In the higher resolution $64^3$ case, however, the dynamic model does perform better than the constant coefficient model---and this is the desired result: we want better performance at higher resolution.  As can be seen from the energy spectra (lower right), the energy near the grid Nyquist limit is more accurately retained by the dynamic model.  This equates to better flow structure with fewer grid cells.  Thus, for practical calculations of engineering interest the small computational overhead of computing the coefficient may be recuperated by a reduction in cell count.
-
-\begin{figure}[h]
-   \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/dsmag_32_decay} } &
-      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/dsmag_32_spectra} } \\
-      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/dsmag_64_decay} } &
-      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/dsmag_64_spectra} }
-   \end{tabular*}
-   \caption[Integrated and spectral energy decay for CBC experiment using dynamic Smagorinsky]{\label{fig_dynsmag_cbc} Dynamic Smagorinsky model results (analogous to Fig.~\ref{fig_cbc_energy}) for integrated kinetic energy (left) and spectra (right).}
-\end{figure}
-
-\clearpage
-
-\subsection{Deardorff (\texorpdfstring{\textct{deardorff}}{deardorff})}
-\label{Deardorff_model}
-
-In this section we present the results for the FDS implantation of the Deardorff isotropic eddy viscosity model, $\nu_t = C_\nu \,\sqrt{k_{sgs}} \Delta$, where $C_\nu = 0.1$ \cite{Pope:2000,Deardorff:1980}.  Instead of transporting the subgrid kinetic energy, in FDS $k_{sgs}$ is estimated with an algebraic closure based on scale similarity \cite{Bardina:1980}.  As may be seen in Fig.~\ref{fig_deardorff_cbc}, for this case the Deardorff model is comparable to dynamic Smagorinsky.  Deardorff is cheaper computationally, however, and tends to perform better for low resolution fire plume dynamics than the dynamic model. For these reasons, Deardorff is the default turbulence model in FDS.
-
-\begin{figure}[h]
-   \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/deardorff_32_decay} } &
-      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/deardorff_32_spectra} } \\
-      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/deardorff_64_decay} } &
-      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/deardorff_64_spectra} }
-   \end{tabular*}
-   \caption[Integrated and spectral energy decay for CBC experiment using Deardorff's model]{\label{fig_deardorff_cbc} Deardorff model results (analogous to Fig.~\ref{fig_cbc_energy}) for integrated kinetic energy (left) and spectra (right).}
-\end{figure}
-
-\clearpage
-
-\subsection{Vreman (\texorpdfstring{\textct{vreman}}{vreman})}
-\label{Vreman_model}
-
-The Vreman eddy viscosity model \cite{Vreman:2004} is an efficient alternative to the dynamic Smagorinsky model (DSM).  In short, the spatial fields for the velocity components are expanded in Taylor series and test filtered analytically, avoiding the expensive test filtering operations required in DSM.  The resulting model is superior to the constant coefficient Smagorinsky model (CSM) because, unlike CSM, with Vreman's model the subgrid dissipation automatically vanishes if the flow is fully resolved by the grid.
-
-\begin{figure}[h]
-   \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/vreman_32_decay} } &
-      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/vreman_32_spectra} } \\
-      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/vreman_64_decay} } &
-      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/vreman_64_spectra} }
-   \end{tabular*}
-   \caption[Integrated and spectral energy decay for CBC experiment using Vreman's model]{\label{fig_vreman_cbc} Vreman model results (analogous to Fig.~\ref{fig_cbc_energy}) for integrated kinetic energy (left) and spectra (right).}
-\end{figure}
-
-\clearpage
-
-\subsection{Renormalization Group (\texorpdfstring{\textct{rng}}{rng})}
-\label{RNG_model}
-
-Renormalization group (RNG) theory \cite{Yakhot:1989} may be used to derive an effective eddy viscosity, $\mu_{\si{eff}} = \mu + \mu_t$, given by the cubic expression:
-\begin{equation}
-\label{eq:rng}
-\mu_{\si{eff}} = \mu\left[1 + H\left( \frac{\mu_s^2 \mu_{\si{eff}}}{\mu^3} - C \right)\right]^{1/3}
-\end{equation}
-Here, $\mu_s$ is the Smagorinsky eddy viscosity (with $C_s=0.2$) and $H(x)$ is the Heaviside function ($H(x)=x$ if $x>0$, $H(x)=0$ if $x\le0$).  The cutoff constant is tuned to match the high wavenumber modes in the CBC experiment for the $64^3$ case, $C=10$.
-
-\begin{figure}[h]
-   \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/rng_32_decay} } &
-      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/rng_32_spectra} } \\
-      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/rng_64_decay} } &
-      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/rng_64_spectra} }
-   \end{tabular*}
-   \caption[Integrated and spectral energy decay for CBC experiment using RNG model]{\label{fig_rng_cbc} RNG model results (analogous to Fig.~\ref{fig_cbc_energy}) for integrated kinetic energy (left) and spectra (right).}
-\end{figure}
-
-\clearpage
-
-
-\section{Jet Centerline Velocity Decay (\texorpdfstring{\textct{jet}}{jet})}
-
-\textbf{Gregor J\"ager, BFT Cognos GmbH, Germany}\\
-
-\noindent The \textct{jet\_} series in the Validation/Turbulent\_Jet directory tests the ability of subgrid stress closure (turbulence model) to correctly capture the transition from laminar to turbulent flow and subsequent momentum decay for an incompressible jet.
-
-The FDS solution is compared with experimental observations from K\"ummel \cite{Kummel:2007}. In the initial region of the jet, $x<x_0$, the velocity $u$ is constant near the axis and is equal to the velocity at the nozzle orifice ($u_0$). For a rectangular nozzle orifice of height $h = 0.8$ and width $b = 0.8$, the initial length is calculated by
-\begin{equation}
-x_0 = \frac{h}{m}
-\end{equation}
-where the mixed number $m$ is between 0.12 and 0.20.
-
-In the transition region, viscous mixing spreads over the entire jet flow and the flow velocity along the axis decreases. The mean flow velocity at the jet centerline $u_{max}(x)$ is calculated by
-\begin{equation}
-u_{max}(x) =    \frac{x_0}{x}\sqrt{\frac{b}{h}} = \frac{1}{mx} \sqrt{bh}
-\end{equation}
-
-Four turbulence models are tested: (1) Constant Smagorinsky (csmag), (2) Dynamic Smagorinsky (dsmag), (3) Deardorff (FDS default), and (4) Vreman.  The results are plotted in Fig.~\ref{fig_jet_decay}. For each model, two grid resolutions are run, corresponding to $h/\delta x = 8$ (colored dotted lines) and $h/\delta x=16$ (colored solid lines).
-\begin{figure}[h]
-\centering
-\includegraphics[width=\textwidth]{SCRIPT_FIGURES/jet_decay}
-\caption[Jet centerline velocity decay]{Centerline velocity decay for a high Reynolds number jet (Re$_h = 1 \times 10^5$) with a square orifice of side $h$.  FDS results (colored lines) are shown for various turbulence models at two grid resolutions.  For comparison, analytical results (black lines) are shown for two values of the mixing number $m$.}
-\label{fig_jet_decay}
-\end{figure}
-
-\clearpage
-
-\section{Wall Flows}
-\label{fds_wall_flows1}
-
-Wall flows have long been a challenge for large-eddy simulation (LES) \cite{Baggett:1997,Baggett:1998,Cabot:1995,Pope:2000,Sagaut:2001}.  In spite of their promise and sophistication, practical LES codes are resigned to \emph{model} the wall shear stress as opposed to \emph{resolving} the dynamically important length scales near the wall. FDS uses a log law velocity profile \cite{Pope:2000} for modeling turbulent flow near a wall.
-
-\subsection{The FDS Moody Chart (\texorpdfstring{\textct{poiseuille}}{poiseuille}, \texorpdfstring{\textct{moody}}{smoothwall}, and \texorpdfstring{\textct{z0}}{z0})}
-\label{fds_moody_chart}
-
-At a minimum, a wall model should accurately reproduce the mean wall stress for flow in a straight square duct.  We verify that this is true for FDS by reproducing the Moody chart, a plot of friction factor versus Reynolds number for pipe flow \cite{Moody:1944}.
-
-Details of the FDS formulation are given in the Technical Guide \cite{FDS_Math_Guide}.  Here we provide only the salient components of the model necessary for treatment of constant density channel flow. The filtered continuity and momentum equations are:
-\begin{equation}
-\label{eqn_cont}
-\frac{\partial \bar{u}_i}{\partial x_i} = 0 \,\mbox{,}
-\end{equation}
-\begin{equation}
-\label{eqn_mom1}
-\frac{\partial \bar{u}_i}{\partial t} + \frac{\partial \bar{u}_i \bar{u}_j}{\partial x_j} = -\frac{1}{\rho} \left[ \frac{\d p}{\d x_i} + \frac{\partial \tilde{p}}{\partial x_i} + \frac{\partial \bar{\tau}_{ij}}{\partial x_j} + \frac{\partial \tau_{ij}^{r}}{\partial x_j} \right]\,\mbox{,}
-\end{equation}
-where $\tau_{ij}^{r}$ is the deviatoric part of the residual stress tensor.  In this work we specify a constant pressure drop $\d p/\d x$ in the streamwise direction to drive the flow.  The hydrodynamic pressure $\tilde{p}$ is obtained from a Poisson equation which enforces (\ref{eqn_cont}). Details of the model used for the viscous stress at the wall, e.g., $\bar{\tau}_{xz}|_{z=0}$, are provided in the FDS Technical Reference Guide~\cite{FDS_Tech_Guide}.
-
-\subsubsection{Laminar Results}
-\label{laminar}
-
-As verification of the no-slip boundary condition and further verification of the momentum solver in FDS, we perform a simple 2D laminar (Poiseuille) flow calculation of
-flow through a straight channel.
-The height of the channel is $H=1$ m and the length of the channel is $L=8$ m.
-The number of grid cells in the streamwise direction $x$ is $N_x = 8$.  The number of cells in the wall-normal direction $z$ is varied $N_z = \{8,16,32,64\}$.
-The fluid density is $\rho = 1.2$ kg m$^{-3}$ and the viscosity is $0.025$ kg m$^{-1}$ s$^{-1}$.
-The mean pressure drop is prescribed to be $\d p/ \d x = -1$ Pa m$^{-1}$ resulting in Re$_H \approx 160$.  The (Moody) friction factor $f$, which satisfies
-\begin{equation}
-\label{eqn_moodyf}
-\Delta p = f \frac{L}{H} \frac{1}{2} \rho \bar{u}^2 \,\mbox{,}
-\end{equation}
-is determined from the steady-state mean velocity $\bar{u}$ which is output by FDS for the specified pressure drop.  The exact friction factor for this flow is $f_{exact} = 24/\mbox{Re}_H$.  The friction factor error $|f-f_{exact}|$ is plotted for a range of grid spacings $\delta z = H/N_z$ in Fig.~\ref{fig_poiseuille_convergence} demonstrating second-order convergence of the laminar velocity field.
-\begin{figure}
-\centering
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/poiseuille_convergence}
-\caption[Convergence for laminar (Poiseuille) flow in a 2D channel]{FDS exhibits second-order convergence for laminar (Poiseuille) flow in a 2D channel.}
-\label{fig_poiseuille_convergence}
-\end{figure}
-
-\subsubsection{Turbulent Results}
-\label{turbulent}
-
-\paragraph{Smooth Walls}
-
-To verify the wall model for turbulent flow we perform 3D LES of a square duct with periodic boundaries in the streamwise direction and a constant and uniform mean pressure gradient driving the flow.  The problem set up is nearly identical to the laminar cases of the previous section except here we perform 3D calculations and maintain cubic cells as we refine the grid: we hold the ratio 8:1:1 between $N_x$\,:\,$N_y$\,:\,$N_z$ for all cases.  The cases shown below are identified by their grid resolution in the $z$ direction.  The velocity field is initially at rest and develops in time to a mean steady state driven by the specified mean pressure gradient.  The presence of a steady state is the result of a balance between the streamwise pressure drop and the integrated stress from the wall model.  FDS outputs the planar average velocity in the streamwise direction and once a steady state is reached this value is used to compute the Reynolds number and the friction factor.  Table \ref{tab_zplus} provides a case matrix: nine cases for three values of specified pressure drop and three grid resolutions.  The nominal Reynolds number (obtained post-run) is listed along with the friction factor from the most refined FDS case and the friction factor computed (iteratively) from the Colebrook equation,
-\begin{equation}
-\label{eqn_colebrook}
-\frac{1}{\sqrt{f}} = -2.0 \log_{10} \left( \frac{s/H}{3.7} + \frac{2.51}{\mbox{Re}_H\sqrt{f}} \right) \,\mbox{,}
-\end{equation}
-which is a fit to the turbulent range of the Moody chart (for example, see Ref.~\cite{MYO}).  The parameter $s/H$ is the relative
-roughness where $H$ is the hydraulic diameter of the pipe or channel and Re$_H$ is the Reynolds number based on $H$.
-To provide a qualitative picture of the flow field, Fig.~\ref{fig_channel_flow_setup} shows contours of streamwise velocity
-for the case $\d p/\d x = -1$ Pa m$^{-1}$ and $N_z=32$.
-
-\begin{figure}
-\centering
-\includegraphics[width=4.5in]{FIGURES/channel_flow_setup}
-\caption[LES of square duct flow]{LES of square duct flow with smooth walls and periodic streamwise boundaries.  For this image $N_z=32$ and the mean pressure drop is $\d p/ \d x = -1$ Pa m$^{-1}$ resulting in Re$_H = 7.5\times 10^5$ and a friction factor of $f=0.0128$.}
-\label{fig_channel_flow_setup}
-\end{figure}
-
-\begin{table}
-\centering
-\caption[Case matrix for Moody chart]{Case matrix and friction factor results for turbulent channel flow with smooth walls. The height of the first grid cell $\delta z$ is given in viscous units $z^+$ for each case.  Additionally, the table gives the nominal Reynolds number Re$_H$ and the FDS friction factor results compared to the Colebrook equation (\ref{eqn_colebrook}).}
-\begin{tabular}{|*{9}{l|}}
-\hline
-$\d p/\d x$   & \multicolumn{3}{c|}{$z^+$} &  Re$_H$  & $f$ FDS  & $f$ Colebrook & Rel. error \\
-\hline (Pa/m)           & $N_z=8$          & $N_z=16$          & $N_z=32$          &                   & $(N_z=32)$ & Eq. (\ref{eqn_colebrook}) & \% \\
-\hline\hline -0.01      & 190              & 95                & 47                & $5.9\times 10^4$  & 0.0212     & 0.0202   & 4.8                 \\
-\hline -1.    & $1.9\times 10^3$ & 950               & 470               & $7.5\times 10^5$  & 0.0128     & 0.0122   & 4.6                 \\
-\hline -100.  & $1.9\times 10^4$ & $9.5\times 10^3$  & $4.7\times 10^3$  & $9.8\times 10^6$  & 0.0077     & 0.0081   & 6.0                 \\
-\hline
-\end{tabular}
-\label{tab_zplus}
-\end{table}
-
-\paragraph{Rough Walls}
-
-With the same grid set up as described above the smooth walls, a series of cases labeled as \textct{z0}\footnote{The atmospheric community typically uses $z_0$ to denote the roughness height. However, we also use $s$ interchangeably with $z_0$ to conform to the notation used in Pope \cite{Pope:2000}.} in the repository \cite{FDS-SMV_repository} were run at various roughness heights, grid resolutions, and Reynolds numbers. The results are presented together with the smooth wall cases in Fig.~\ref{fig_fds_moody_chart}. The laminar cases provide accurate results for two different Reynolds numbers. Both the smooth wall and rough wall treatments behave well over the range tested.
-
-\begin{figure}[!htb]
-\centering
-\includegraphics[width=4.5in]{SCRIPT_FIGURES/fds_moody_chart}
-\caption[FDS Moody chart]{The FDS Moody chart: friction factor, $f$, versus Reynolds number, Re$_H$, based on duct height. The solid line for $\mbox{Re} < 2000$ is the analytical result for 2D Poiseuille flow, $f=24/\mbox{Re}$. The solid lines for $\mbox{Re}>2000$ (from the Colebrook equation (\ref{eqn_colebrook})) are Relative roughness $s/H$ shown on the right axis.}
-\label{fig_fds_moody_chart}
-\end{figure}
-
-
-\subsection{Blasius boundary layer (\texorpdfstring{\textct{blasius}}{blasius})}
-
-\textbf{Hyun-Wook Park and Jung-il Choi, Yonsei University, Seoul, South Korea}\\
-
-\noindent Consider a steady flow over a semi-infinite flat plate aligned with the flow with free stream velocity, $u_0$. The Prandtl boundary layer equations~\cite{Panton:1} are:
-\begin{equation}
-\label{eqn_BL_momentum}
-u \frac{\partial u}{\partial x} + w \frac{\partial u}{\partial z} = \nu \frac{\partial^2 u}{\partial z^2} \,\mbox{,}
-\end{equation}
-\begin{equation}
-\label{eqn_BL_continuity}
-\frac{\partial u}{\partial x}+\frac{\partial w}{\partial z} = 0 \,\mbox{.}
-\end{equation}
-Paul Richard Heinrich Blasius found a solution to Eqs.~(\ref{eqn_BL_momentum}) and (\ref{eqn_BL_continuity}) by introducing a similarity variable:
-\begin{equation}
-\label{eta}
-\eta\equiv\frac{z}{\sqrt{\nu x/u_0}} \,\mbox{.}
-\end{equation}
-Substituting $\eta$ and the stream function ($u = \partial \psi/\partial z$, $w = -\partial \psi/\partial x$) into Eq.~(\ref{eqn_BL_momentum}) yields the following ODEs:
-\begin{eqnarray}
-\label{BL_ODE}
-\frac{1}{2}f f^{''}+f^{'''}&=&0 \\
-u&=&u_0 f^{'} \\
-w&=&\frac{1}{2}\sqrt{\frac{\nu \,u_0}{x}}(\eta f^{'}-f)
-\end{eqnarray}
-The solution of Eq.~(\ref{BL_ODE}) is the Blasius solution~\cite{Panton:1}.
-
-The physical domain of the present verification case is a rectangle with length $L=0.15$ m in the streamwise direction and $H=0.3$ m in the wall-normal direction. The grid spacing is uniform ($\delta x = L/N_x$, $\delta z =H/N_z$) in each direction, and $N_x = 1.5 \, N_z$ with $N_z = \{16, 32, 64\}$ for each test series. The Boundary conditions for the inlet and outlet boundaries are \textct{OPEN} with the dynamic pressure set to zero at the inlet boundary. On the top boundary, the gradient of $w$ in the $z$ direction is zero combined with a free-slip condition that combines to yield an irrotational field. The boundary condition along the bottom of the domain is free-slip upstream of the plate ($x<0.5$ m) and no-slip on the plate. The initial velocity is $1$ m/s and $u_0$ is taken as the value of $u$ at the top boundary since boundary conditions at $z=\infty$ cannot be directly applied. The case is run with constant properties: $\rho=1.2$ \si{kg/m^3}, $\mu = 0.001$ kg/m/s.
-
-Figure~\ref{blasius} (left) shows a comparison of the streamwise velocity from FDS with the Blasius solution. The FDS solution (lines) converges to Blasius (open circles) as the mesh resolution is increased. Figure~\ref{blasius} (right) shows the root mean square (RMS) error, $\varepsilon$, in $u$ (streamwise component) at $x=0.1$ m ($0.05$~m from the leading edge of the plate) for the dimensional Blasius solution. The error is defined by
-\begin{equation}
-\label{error_l2norm_bl}
-\varepsilon \equiv \sqrt{ \frac{1}{N_z} \sum_{k=1}^{N_z} \left[ u_{k} - u_{{\rm B},k} \right]^2 }
-\end{equation}
-where $k$ is the $z$ index. The value $u_k$ represents the FDS result for $u$ at the staggered grid storage location for cell $k$, $u_{{\rm B},k}$ is the dimensional Blasius solution at the corresponding location. The slight departure from second-order accuracy is likely due to numerical issues in representing the singularity in the Blasius solution at the leading edge of the plate as well as errors in the boundary conditions due to truncation of the domain.
-\begin{figure}[!htb]
-   \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-      \includegraphics[width=3.2in]{SCRIPT_FIGURES/blasius_profile} &
-      \includegraphics[width=3.2in]{SCRIPT_FIGURES/blasius_convergence}
-   \end{tabular*}
-   \caption[Blasius profile and convergence]{(Left) Comparison of theoretical and numerical results for the Blasius velocity profile ($u$ component). (Right) Error between FDS and Blasius solution for $u(z)$ plotted for each grid resolution.}
-   \label{blasius}
-\end{figure}
-
-
-
-\subsection{Near-Wall Grid Resolution (\texorpdfstring{\textct{yplus}}{yplus})}
-
-\textbf{Abbas Jaber, NIST SURF student}\\
-
-\noindent The distance from the wall measured in viscous units is called $y^+$. In order to verify that $y^+$ is calculated correctly within FDS, we analyze an example of Poiseuille flow in a square channel with periodic boundaries. The pressure gradient in the $x$-direction, the dynamic viscosity, and the dimensions of the channel are known. This allows us to easily determine the expected values of wall shear stress,
-\begin{equation}
-\label{wall stress}
-\tau_w = - \delta \frac{\d p}{\d x},
-\end{equation}
-where $p$ is pressure and $\delta$ is half the height of the channel. This, in turn, allows for determining the friction velocity,
-\begin{equation}
-\label{friction velocity}
-u_{\tau} \equiv \sqrt{{\frac{\tau_w}{\rho}}}.
-\end{equation}
-From here we calculate the exact value of $y^+$ for the given flow,
-\begin{equation}
-\label{eqn_yplus}
-y^+ \equiv \frac{y}{\delta_{\nu}} = \frac{u_{\tau}y}{\nu}.
-\end{equation}
-
-In FDS, $\tau_w$ is obtained only from the wall model. The resolution of the wall-normal streamwise velocity gradient increases with  mesh resolution; the value of $y^+$ decreases accordingly. In this verification case, a wall device is used to output $y^+$ for different mesh resolutions in the $z$-direction. $y^+$ is output for a given $\delta z$, height of a cell, $\delta z$ = [1/8, 1/16, 1/32]. Then, the device values obtained are compared with the exact value of $y^+$ for a given mesh resolution (Fig.~\ref{fig_yplus}). An FDS wall device outputs the mid-cell value of the first cell next to the wall, hence, the $z$ value ($y$ in Eq.~(\ref{eqn_yplus})) used to determine the exact $y^+$ varies with $\delta z$ $(z = \delta z/2)$.
-
-\begin{figure}[!htb]
-\centering
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/yplus}
-\caption[Near-wall grid resolution]{Verification of FDS $y^+$ output for $\delta z=[1/8, 1/16, 1/32]$.}
-\label{fig_yplus}
-\end{figure}
-
-
-
-\subsection{Heated Channel Flow (\texorpdfstring{\textct{heated\_channel}}{heated\_channel})}
-
-\textbf{Kiyoung Moon and Jung-il Choi, Yonsei University, Seoul, South Korea}\\
-
-\noindent The simulation of turbulent channel flow (Re$_{\tau}=180$) with a heat source was performed to verify the log law near-wall model for heat transfer \cite{FDS_Tech_Guide}. The model was developed based on the law of wall for temperature and empirical equations \cite{Kader:1981}. These cases are located in the Verification/Turbulence subdirectory.
-
-The height of the channel is $H=2$ m, the width is $W=6$ m, and the length is $L=12$ m. There are 64 cells in the streamwise direction ($\delta x = 0.1875$ m) and 32 cells in the spanwise ($\delta y=0.1875$ m) and wall-normal directions ($\delta z=0.0625$ m).  The midpoint of the first cell in viscous units is $z^+ = 5$, which is a very highly resolved LES. For this reason, the dynamic Smagorinsky SGS model is used for the residual stress. Additionally, these cases were run in ``research mode'' (\textct{RESEARCH\_MODE=.TRUE.} on \textct{MISC}), which accounts for both molecular the turbulent transport coefficients, a must for distinguishing between fluids with different molecular Prandtl or Schmidt numbers (here the Re is so low that molecular effects may dominate locally).  The flow is maintained by a mean pressure gradient ($8.748 \times 10^{-6}$ Pa/m) in the streamwise direction. A constant volumetric heat source (0.5 W/m$^3$) is imposed on the fluid. The boundary conditions for momentum equations are no-slip at top and bottom walls and periodic for the streamwise and spanwise directions. The boundary condition for the energy equation is constant temperature ($T_w = 20 \,\mbox{\si{\degree C}} $) at the wall. To evaluate the effects of Prandtl number (Pr) and compare the DNS study \cite{Kim:1987} with FDS, the specific heat ($c_p = 1$ \si{kJ/(kg.K)}) and viscosity ($\mu = 1.8216 \times 10^{-5}$ \si{kg/(m.s)}) are fixed and the conductivity, $k$, of the fluid (air) is adjusted to:
-\begin{center}
-\begin{tabular}{ll}
-Pr & $k$ (\si{W/(m.K)}) \\
-\hline
-0.10 & $1.82 \times 10^{-1}$ \\
-0.71 & $2.59 \times 10^{-2}$ \\
-1.00 & $1.82 \times 10^{-2}$ \\
-2.00 & $9.11 \times 10^{-3}$
-\end{tabular}
-\end{center}
-
-In Figure \ref{fig_heated_channel}, FDS results are compared to DNS data for mean streamwise velocity, $u^+ = \langle u \rangle/u_\tau$, and mean temperature, $T^+ = (\langle T \rangle - T_w)/T_\tau$. The temperature scale is given by
-\begin{equation}
-\label{eqn_friction_temperature}
-T_{\tau} \equiv \frac{\langle \dot{q}_w^{''} \rangle}{{\rho}{c_p}{u_{\tau}}} \,\mbox{,}
-\end{equation}
-where $\langle \dot{q}_w^{''} \rangle$, $\rho$, and $c_p$ are the mean heat flux at the wall, density, and specific heat, respectively.  Fully developed, statistically stationary flow is achieved after approximately 20 flow through times.  Statistics are gathered between 40 and 60 flow through times.
-
-As seen in the left side of Fig.~\ref{fig_heated_channel}, the velocity profile shows good agreement with the DNS result. The near-wall temperature profile for each Pr is shown on the right side of Fig.~\ref{fig_heated_channel}. In the log region ($y^+ >30$), FDS overestimates the centerline mean temperature compared to the DNS results at high Pr, but the mean wall heat flux is correct, as indicated by the accurate result of the first off-wall grid value (in the viscous region). The inaccuracy of the temperature profile in the log region points to a need for improvement in the subgrid-scale (SGS) scalar transport model.
-\begin{figure}[!htb]
-   \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-      \includegraphics[width=3.2in]{SCRIPT_FIGURES/heated_channel_uplus} &
-      \includegraphics[width=3.2in]{SCRIPT_FIGURES/heated_channel_Tplus}
-   \end{tabular*}
-   \caption[Mean velocity and temperature profiles for heated channel flow]{\label{fig_heated_channel} Comparison of FDS (lines with squares) with DNS (circles) for heated channel flow. (Left) Wall-normal velocity profile compared to DNS of Moser et al.~\cite{Moser:1999}. (Right) Wall-normal mean profiles of temperature for molecular Prandtl numbers (Pr) = 0.10, 0.71, and 2.0, compared to DNS of Kim and Moin~\cite{Kim:1987}.}
-\end{figure}
-
-
-
-\subsection{Flow Over a Backward Facing Step (\texorpdfstring{\textct{backward\_facing\_step}}{backward\_facing\_step})}
-\label{sec:backward_facing_step}
-
-\textbf{Benjamin A.~Toms, NIST SURF student}\\
-
-\noindent Large-eddy simulation (LES) of turbulent flow over a backward facing step is studied using the Fire Dynamics Simulator (FDS).  A set of cases is designed to test the influence of grid resolution, inlet turbulence, wall boundary treatments, and eddy viscosity models.  The computational results are validated with experimental data.  A grid resolution of $h/ \delta z=10$ adequately modeled the flow, although a doubling of resolution resulted in the realization of smaller scale kinematic features.  The inlet turbulence conditions are determined to be the most significant contributor to downstream flow evolution.  Reattachment length is found to be strongly dependent on the magnitude of the inlet RMS velocity.  The choice of eddy viscosity model is found to have negligible influence, while the no-slip condition and an LES log-law-based wall function performed similarly for the given flow.
-
-FDS has recently been applied to urban canopy modeling \cite{Moon:2014} and wind engineering.  As such, it is important to study geometrically complex flows, including the appropriate specification of boundary conditions and resultant downstream flow evolution. Le et al.~\cite{Le:1997} first modeled flow over a backward facing step using DNS with a Reynolds number of 5,100.  To verify the results, Jovic and Driver (J\&D) \cite{JD:1994} supplemented the DNS simulation with an identically proportioned wind tunnel experiment.  Together, the data sets from these two studies have provided the baseline for analysis of recent simulations of flow over a backward facing step.
-
-Sarwar et al.~\cite{Sarwar:2013} used FDS to compare SGS eddy viscosity models. The constant Smagorinsky model performed the best, although the dynamic Smagorinsky and Deardorff models, nearly equivalent in accuracy, were found to perform better than the Vreman model.  To avoid explicit specification of inlet turbulence conditions, Sarwar et al.~created an extremely long inlet section to allow turbulence to develop.  One of the goals of the present study is to show that synthetic turbulent inflow boundary conditions can be successfully used to greatly reduce the size of the inlet domain and hence the calculation cost.
-
-\subsubsection*{Computational Domain}
-
-A schematic view of the computational domain is provided in Fig.~\ref{fig:computational_domain}. The dimensions of the channel are based on step height $h$ = .0098 m.  The length of channel is $24h$. The width of channel is $4h$. The height of the inlet section is $5h$, and the height of channel post-step is $6h$. The expansion ratio is thus 1.2.  The inlet is split into three sub-inlets to permit localized variation of inlet turbulence.  The simulation uses a step-height Reynolds number of 5,100 based on a free-stream velocity of $U_0$ = 7.2 m/s. Fig.~\ref{fig:vel_slice} presents an example of instantaneous contours of velocity magnitude.
-
-Virtual measurement devices are placed throughout the channel to collect data relating to flow characteristics such as velocity, turbulence RMS velocity, and friction velocity.  These virtual measurement devices are placed into lines---four vertical and one horizontal---with a device in the volumetric center of each grid cell.  A vertical line device is placed within the inlet region at a location of $x=-3h$, and three line devices are placed in the post-step region at locations of $4h$, $6h$, and $10h$. The post-step vertical line devices are placed accordingly to sample the recirculation, reattachment, and recovery regions.  A horizontal line device is used to sample data directly adjacent to the bottom wall of the channel in the post-step region ($0h$ to $20h$).
-
-\begin{figure}[!htb]
-    \centering
-    \includegraphics[width=\textwidth]{FIGURES/backward_facing_step_computational_domain}
-    \caption[Schematic of the channel computational domain]{Schematic of the channel computational domain.  Virtual measurement devices are denoted by dotted green lines.}
-    \label{fig:computational_domain}
-\end{figure}
-
-\begin{figure}[!htb]
-    \centering
-    \includegraphics[width=\textwidth]{FIGURES/backward_facing_step_vel_slice}
-    \caption[Instantaneous contours of velocity magnitude]{Instantaneous contours of velocity magnitude.}
-    \label{fig:vel_slice}
-\end{figure}
-
-\subsubsection*{Boundary Conditions}
-
-The inlet $\overline{u}(z)$ profile is established using experimental data provided by J\&D \cite{JD:1994}, while $\overline{v}(z)$, $\overline{w}(z)$, and inlet free-stream turbulence are set to zero.  Turbulent eddies are injected using the Synthetic Eddy Method of Jarrin \cite{Jarrin:2008}.  Eddies are injected at random locations in the bottom two inlets, advected with the flow over a distance equal to the maximum eddy length scale and recycled at the inlet.  The inlet maximum eddy length scale is 0.03 m, the number of eddies is 100, and the RMS velocity is set to 0.5 m/s for the middle inlet and 1.0 m/s for the bottom inlet to match the J\&D inlet data at $x/h=-3$ as closely as possible.
-
-The boundary conditions for velocity and pressure on the top of the domain are ``mirror'', that is, zero gradient.  The spanwise boundaries are periodic.  The outlet boundary is ``open'', see the FDS Tech Guide \cite{FDS_Tech_Guide}.
-
-\subsubsection*{Results}
-
-Fig.~\ref{fig:friction_pressure_coefficients} shows the longitudinal profiles of the friction coefficient (left) and the pressure coefficient (right).  The $x/h$ location where $C_f$ crosses zero is the reattachment length, a key validation metric for this flow.  The values of the reattachment length for the three grid resolutions studied where 9.9, 6.0, and 5.3, for the $h/\delta x=5$, $10$, and $20$ resolutions, respectively.  The experimental value is approximately 6 \cite{JD:1994}.  Thus, the $h/\delta x=20$ case under-predicts the reattachment length for the given inlet conditions.
-
-Fig.~\ref{fig:flow_profiles} shows the inlet ($x/h=-3$) and downstream mean and covariance profiles.
-
-\begin{figure}[!htb]
-    \centering
-    \includegraphics[scale=.49]{SCRIPT_FIGURES/backward_facing_step_Cf}
-    \includegraphics[scale=.49]{SCRIPT_FIGURES/backward_facing_step_Cp}
-    \caption[Friction coefficient and pressure coefficient]{Longitudinal profiles of (left) friction coefficient and (right) pressure coefficient.}
-    \label{fig:friction_pressure_coefficients}
-\end{figure}
-
-\begin{figure}[!htb]
-    \centering
-    \includegraphics[scale=.47]{SCRIPT_FIGURES/backward_facing_step_U}
-    \includegraphics[scale=.47]{SCRIPT_FIGURES/backward_facing_step_W}\\
-    \includegraphics[scale=.47]{SCRIPT_FIGURES/backward_facing_step_uu}
-    \includegraphics[scale=.47]{SCRIPT_FIGURES/backward_facing_step_ww}\\
-    \includegraphics[scale=.47]{SCRIPT_FIGURES/backward_facing_step_uw}
-    \caption[Flow profiles]{Flow profiles for various grid resolutions.  Symbols: --$\mathlarger{\mathlarger{\star}}$--, $h/\delta z$=5; --$\Box$--, $h/\delta z$=10; --$\Diamond$--, $h/\delta z$=20; $\mathlarger{\mathlarger{\boldsymbol\circ}}$, J\&D experimental data.}
-    \label{fig:flow_profiles}
-\end{figure}
-
-
-
-\subsection{Ribbed Square Duct Flow (\texorpdfstring{\textct{ribbed\_channel}}{ribbed\_channel})}
-\label{sec:ribbed_channel}
-
-In this test case, we compare FDS results with particle-image velocimetry (PIV) data from Casara and Arts \cite{Casara:1} for flow in a square duct with a ribbed obstruction.  The rib height is $h = 0.1$ m and the duct height is $D = 0.3$ m.  The distance between ribs in the periodic duct (the ``pitch'') is $10 \, h$.  The length of our domain is therefore 1 m.  The Reynolds number based on $D$ is nominally 40,000 (this is discussed more later). The FDS mesh is uniform in each direction.  We test grid resolutions of $h/\delta x = \{2,4,8,16\}$.
-
-A side view image of mean velocity vectors in the 3D flow is shown in Fig.~\ref{fig_ribbed_channel_image} for the $h/\delta x = 8$ case.  The primary goal of this calculation is to predict the mean recirculation patterns on the windward and leeward side of the rib.  To measure the FDS results, a line of devices (represented by the green dots in the figure) is placed near the floor of the duct.  Where the mean $u$ velocity component changes sign indicates a reattachment location.  Results for the mean streamwise velocity near the surface are shown in the upper-left plot of Fig.~\ref{fig_ribbed_channel}.  The independent axis on the plots ranges from 0 m to 1 m, representing the center to center distance between ribs.  Note that the image is offset and ranges from -0.4 m to 0.6 m.  As can be seen from the plot, the $h/\delta x = 8$ resolution (green sideways triangles) slightly overpredicts the reattachment length, with the zero crossing near $x/h = 4.5$ (note that the correspondence with the vectors in the image).  The finest resolution, $h/\delta x=16$, is sufficient to accurately capture the reattachment zone.
-
-Despite the fact that the coarser cases do not perfectly capture the reattachment region, it is remarkable that with $h/\delta x = 2$ we achieve any recirculation at all.  The wiggles in the solution are due to numerical dispersion error.
-
-The mean streamwise velocity profile at the rib centerline is shown in the upper-right plot of Fig.~\ref{fig_ribbed_channel}.  Here we point out that the setup for this case is basically copied from Loh\'asz et al.~\cite{Lohasz:1}.  Their method of forcing, however, is ambiguous.  Using the FDS \textct{MEAN\_FORCING} feature, we set our bulk velocity to 1 m/s (\textct{U0 = 1.0} on \textct{MISC}) in order to match the mean profile for the finest grid resolution.  All other cases use the same forcing.
-
-The bottom-left and -right plots in Fig.~\ref{fig_ribbed_channel} show the RMS velocity along the duct floor and the center profile above the rib, respectively. As can be seen, the $h/\delta x = 16$ case provides accurate results.  This resolution for this problem corresponds to wall $y^+$ values around 30.
-
-\begin{figure}[!htb]
-\centering
-\includegraphics[width=.8\textwidth]{SCRIPT_FIGURES/ribbed_channel_80_s1000}
-\caption[The {\ct ribbed\_channel} test case]{Mean velocity vectors colored by velocity magnitude (red is 2 m/s) for the ribbed square duct case with $h/\delta x = 8$.}
-\label{fig_ribbed_channel_image}
-\end{figure}
-
-\begin{figure}[!htb]
-   \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-      \includegraphics[width=3.2in]{SCRIPT_FIGURES/ribbed_channel_u_strm} &
-      \includegraphics[width=3.2in]{SCRIPT_FIGURES/ribbed_channel_u_prof} \\
-      \includegraphics[width=3.2in]{SCRIPT_FIGURES/ribbed_channel_urms_strm} &
-      \includegraphics[width=3.2in]{SCRIPT_FIGURES/ribbed_channel_urms_prof} \\
-   \end{tabular*}
-   \caption[Mean and RMS velocity profiles for ribbed square duct flow]{\label{fig_ribbed_channel} Mean and RMS velocity profiles for ribbed square duct flow. Comparison with PIV data from Casara and Arts \cite{Casara:1,Lohasz:1}.}
-\end{figure}
-
-
-
-\section{Analytical Solutions to the Continuity Equation}
+\section{Analytical Solution to the Continuity Equation}
 
 Analytical solutions for primitive flow variables (density, velocity, pressure, etc.) are useful in the development and testing of numerical schemes for CFD.  For example, an analytical solution to the 2D incompressible Navier-Stokes (NS) equations is presented in Section \ref{ns2d} and is used to verify the spatial and temporal accuracy of momentum equation.  However, to our knowledge, there are no similar (i.e., time dependent and periodic in space) analytical solutions for the compressible NS equations, which could be used for verification of both compressible and variable-density low-Mach flow solvers.
 
@@ -1390,6 +822,7 @@ An example of the solution to (\ref{eqn_stat2d_soln}) is shown in Fig.~\ref{fig_
 \end{figure}
 
 
+\clearpage
 
 \section{Scalar Transport (\texorpdfstring\textct{move\_slug}{move\_slug})}
 
@@ -1410,7 +843,7 @@ The black lines indicate the mesh interfaces.  To the right of the initial condi
 The lower left image shows the final result for the Superbee limiter.  By comparison with a first-order scheme (lower right),
 this test case confirms that relatively low levels of diffusion are incurred at both periodic and interpolated boundaries in FDS.
 
-\begin{figure}[!htb]
+\begin{figure}[p]
    \begin{tabular}{rl}
       \includegraphics[width=3in]{SCRIPT_FIGURES/move_slug_FL2_t0} &
       \includegraphics[width=3in]{SCRIPT_FIGURES/move_slug_FL2_tm} \\
@@ -1422,28 +855,27 @@ this test case confirms that relatively low levels of diffusion are incurred at 
 \end{figure}
 
 
+\clearpage
 
 \section{Variable-Density Manufactured Solution (\texorpdfstring\textct{shunn3}{shunn3})}
 
-To demonstrate second-order accuracy of the FDS time-marching algorithm, here we present numerical results for the manufactured solution proposed by Shunn et al.~\cite{Shunn:2012}. The parameters for this problem are given in Table \ref{tab_shunn_params}.  In the 2D sinusoidal solution given below, $Z$ is the mixture fraction, $\rho$ is the density, $u$ and $v$ are velocity components, and $\tilde{p}$ is the hydrodynamic pressure.  The solution translates diagonally across the domain with velocity $[u_f, v_f]$.  The translated positions are define by $\hat{x} \equiv x- u_f t$ and $\hat{y} \equiv y - v_f t$. The solution is spatially periodic on a square domain extending from $-1$ m to 1 m ($L=2$ m) on each side and has a time period of 1 s.
-%
-\begin{table}
-\small
+To demonstrate second-order accuracy of the FDS time-marching algorithm, here we present numerical results for the manufactured solution proposed by Shunn et al.~\cite{Shunn:2012}. The parameters for this problem are given in Table~\ref{tab_shunn_params}.  In the 2D sinusoidal solution given below, $Z$ is the mixture fraction, $\rho$ is the density, $u$ and $v$ are velocity components, and $\tilde{p}$ is the hydrodynamic pressure.  The solution translates diagonally across the domain with velocity $[u_f, v_f]$.  The translated positions are define by $\hat{x} \equiv x- u_f t$ and $\hat{y} \equiv y - v_f t$. The solution is spatially periodic on a square domain extending from $-1$ m to 1 m ($L=2$ m) on each side and has a time period of 1 s.
+
+\begin{table}[!hbt]
 \centering
-\caption[Parameters for manufactured solution]{\label{tab_shunn_params} Parameters for Shunn et al.~\cite{Shunn:2012} manufactured solution.}
+\caption[Parameters for manufactured solution]{Parameters for Shunn et al.~\cite{Shunn:2012} manufactured solution.}
+\label{tab_shunn_params} 
 \begin{tabular*}{.5\textwidth}{l@{\extracolsep{1.5cm}}ll}
-%\hline
 Parameter & Value & Units\\
 \hline
 $\rho_0$  & 5 & \si{kg/m^3} \\
 $\rho_1$  & 1 & \si{kg/m^3}\\
 $k=\omega$ & 2 & \si{1/m}, \si{1/s}\\
 $u_f = v_f$ & 0.5 & \si{m/s} \\
-$\rho D = \mu$ & 0.001 & \si{kg/(m.s)}\\
-%\hline
+$\rho D = \mu$ & 0.001 & \si{kg/(m.s)}
 \end{tabular*}
 \end{table}
-%
+
 \begin{align}
 \label{eqn_mms_z} Z(x,y,t) &= \frac{1 + \sin(\pi k \hat{x}) \sin(\pi k \hat{y}) \cos(\pi \omega t)}{(1 + \frac{\rho_0}{\rho_1}) + (1 - \frac{\rho_0}{\rho_1}) \sin(\pi k \hat{x}) \sin(\pi k \hat{y}) \cos(\pi \omega t)} \\
 \label{eqn_mms_rho} \rho(x,y,t) &= \left( \frac{Z(x,y,t)}{\rho_1} + \frac{1-Z(x,y,t)}{\rho_0} \right)^{-1} \\
@@ -1614,6 +1046,7 @@ Simulations were performed for $N = \{32, 64, 128, 256, 512\}$, where $N$ is the
 \end{figure}
 
 
+\clearpage
 
 \section{Collapse of a Hot Layer in a Micro-gravity Environment (\texorpdfstring\textct{hot\_layer\_360}{hot\_layer\_360})}
 \label{sec:baum_hot_layer}
@@ -1628,14 +1061,11 @@ For the present problem the governing equations are
 \rho C_p \left( \frac{\partial T}{\partial t} + v \frac{\partial T}{\partial y} \right) = \frac{\partial}{\partial y} \left( k \frac{\partial T}{\partial y} \right) \\
 \rho T = \rho_0 T_0
 \end{gather}
-Here, $\rho(y,t)$ is the mass density, $C_p$ is the heat capacity (assumed constant), and $k$ is the thermal conductivity of the gas, which we assume obeys $\rho k = \rho_0 k_0$.
-
-The initial conditions are
+Here, $\rho(y,t)$ is the mass density, $C_p$ is the heat capacity (assumed constant), and $k$ is the thermal conductivity of the gas, which we assume obeys $\rho k = \rho_0 k_0$. The initial conditions are
 \begin{align}
 v(y,0) &= 0 \\
 T(y,0) &= \left\{ \begin{array}{ll} T_h & \mbox{for} \quad 0 < y \le d \\ T_0 & \mbox{for} \quad y > d \end{array} \right.
 \end{align}
-
 The boundary conditions are
 \begin{align}
 v(0,t) &= 0 \\
@@ -1644,9 +1074,7 @@ T(y,t) &\rightarrow T_0 \;\mbox{as}\; y\rightarrow\infty
 \end{align}
 Note that no boundary condition can be imposed on $v$ far from the boundary.  In FDS, an {\ct OPEN} boundary is applied.
 
-\paragraph{Solution}
-
-Introducing the dimensionless coordinate $\lambda$ and dimensionless time $\tau$, the dimensionless physical coordinate $Y(\lambda,\tau)$, velocity $V(\lambda,\tau)$, and temperature $\theta(\lambda,\tau)$ are related to dimensional quanities as follows:
+Introducing the dimensionless coordinate $\lambda$ and dimensionless time $\tau$, the dimensionless physical coordinate $Y(\lambda,\tau)$, velocity $V(\lambda,\tau)$, and temperature $\theta(\lambda,\tau)$ are related to dimensional quantities as follows:
 \begin{align}
 t &= \rho_0 C_p d^2/k_0 \, \tau  \\
 y &= d \, Y(\lambda,\tau) \\
@@ -1663,8 +1091,7 @@ U(\lambda,\tau,T_h,T_0) = -\erfc(\lambda/(2\sqrt{\tau})) + \mbox{$\frac{1}{2}$}(
 G(\lambda,\tau,a) = 1/\sqrt{\pi\tau} \, ( -\exp(-(a+\lambda)^2/(4\tau)) + \exp(-a^2/(4\tau)) ) \\
 V(\lambda,\tau,T_h,T_0) = (T_h-T_0)/T_0 \, ( -G(\lambda,\tau,0) + \mbox{$\frac{1}{2}$}(G(\lambda,\tau,T_0/T_h) + G(\lambda,\tau,-T_0/T_h)) )
 \end{gather}
-
-Fig.~\ref{fig_hot_layer} shows the analytical solution (solid lines) plotted together with the FDS (DNS) numerical results (open symbols).  The plots on the left are of temperature profiles at several times (different colors demarcate different nondimensional times $\tau$).  The plots on the right are velocity.  As can be seen, the agreement is excellent.
+Figure~\ref{fig_hot_layer} shows the analytical solution (solid lines) plotted together with the FDS (DNS) numerical results (open symbols).  The plots on the left are of temperature profiles at several times (different colors demarcate different nondimensional times $\tau$).  The plots on the right are velocity.  As can be seen, the agreement is excellent.
 
 \begin{figure}[!htb]
 \centering
@@ -1672,8 +1099,582 @@ Fig.~\ref{fig_hot_layer} shows the analytical solution (solid lines) plotted tog
 \includegraphics[width=.49\textwidth]{SCRIPT_FIGURES/hot_layer_vel_1}
 \includegraphics[width=.49\textwidth]{SCRIPT_FIGURES/hot_layer_temp_2}
 \includegraphics[width=.49\textwidth]{SCRIPT_FIGURES/hot_layer_vel_2}
-\caption[Baum hot layer solution]{\label{fig_hot_layer} Hot layer solution. Lines are the analytical solution.  Symbols are the FDS results.}
+\caption[The {\ct hot\_layer\_collapse} test case]{Hot layer solution. Lines are the analytical solution.  Symbols are the FDS results.}
+\label{fig_hot_layer} 
 \end{figure}
+
+
+\clearpage
+
+
+\section{2D Vortex Simulation (\texorpdfstring{\textct{vort2d}}{vort2d})}
+\label{two_dimensional_vortex}
+
+\textbf{Max Gould, NIST SURF student}\\
+\textbf{Ragini Acharya, United Technologies Research Center}\\
+
+\noindent In this section we present another case that demonstrates the second-order accuracy of the FDS transport algorithm. We consider the analytically stable flow field consisting of a single vortex advected by a uniform flow, a test case developed by CERFACS\footnote{Centre Europ\'een de Recherche et de Formation Avanc\'ee en Calcul Scientifique} \cite{cerfacs_test}. Maintaining the geometry of the vortex over time provides a good measure of the order of accuracy of the transport scheme.
+
+\begin{figure}[h!]
+   \centering
+   \setlength{\unitlength}{0.0008in}
+   \begin{picture}(7300,3420)
+      \put(1030,50){$L = 0.3112$ m}
+      \put(130,850){$U_{0} = 35$ m/s}
+      \put(0,250){\framebox(3112,3112)}
+      \put(1056,1306){\dashbox{100}(1000,1000)}
+      \put(1056,1306){\line(3,-1){3194}}
+      \put(1056,2306){\line(3,1){3194}}
+      \put(100,672){\vector(1,0){450}}
+      \put(100,1394){\vector(1,0){450}}
+      \put(100,2216){\vector(1,0){450}}
+      \put(100,2938){\vector(1,0){450}}
+      \put(2562,672){\vector(1,0){450}}
+      \put(2562,1394){\vector(1,0){450}}
+      \put(2562,2216){\vector(1,0){450}}
+      \put(2562,2938){\vector(1,0){450}}
+      \put(1556,1806){\circle{550}}
+      \put(1281,1806){\vector(0,-1){50}}
+      \put(1831,1806){\vector(0,1){50}}
+      \put(3450,-250){
+         \scalebox{.498}{\includegraphics{SCRIPT_FIGURES/vort2d_diagram}}
+      }
+   \end{picture}
+   \caption[Vector field of a two-dimensional vortex]{Vector field of a two-dimensional vortex in a constant flow field.}
+   \label{fig_vort2d_diagram}
+\end{figure}
+
+\noindent The vortex is initially defined as the gradient of the potential field,
+\begin{equation}
+\label{eqn_vort2d}
+\Psi_{0} (x,z) = \Gamma \ \exp \left[ - \frac{x^{2} + z^{2}}{2 \ R_{c}^{2}} \right],
+\end{equation}
+where $\Gamma$ determines its intensity and $R_c$ its characteristic size. The velocity components are determined by taking the gradient of the potential field superimposed on the constant flow field of velocity $U_0$ in the positive $x$ direction,
+\begin{eqnarray}
+\label{eqn_uvel}
+u (x,z) &\equiv& U_{0} + \frac{\partial}{\partial z} \Psi_{0} = U_{0} - \frac{\Gamma \ z}{R_{c}^{2}} \exp \left[ - \frac{x^{2} + z^{2}}{2 \ R_{c}^{2}} \right], \\
+w (x,z) &\equiv& - \frac{\partial}{\partial x} \Psi_{0} = \frac{\Gamma \ x}{R_{c}^{2}} \exp \left[ - \frac{x^{2} + z^{2}}{2 \ R_{c}^{2}} \right],
+\end{eqnarray}
+where $u$ and $w$ refer to velocity in the $x$ and $z$-directions, respectively. For our purposes we need only analyze one component of the velocity field. We will focus our attention on the $u$-component of velocity.
+
+We define the computational domain as a two-dimensional square region, $L=0.3112$~m on a side, with periodic boundary conditions. The domain is discretized for a range of square, two-dimensional meshes of $40^{2}$, $80^{2}$, $160^{2}$, and $320^{2}$ grid cells. For the purposes of this test, we set the flow parameters as
+\[
+\begin{array}{lll}
+U_{0} &&= 35 \ \mathrm{m/s} \\
+R_{c} &= L / 20 &= 0.01556 \ \mathrm{m} \\
+\Gamma &= 0.04 \ U_{0} \ R_{c} \ \sqrt{e} &= 0.0359157
+\end{array}
+\]
+The constant flow field and periodic boundary conditions cause the vortex to repeatedly pass through the computational domain. The ``pass-through'' time, $t_{f}$, is defined as the time period required for the stable vortex to return to its original position,
+\begin{equation*}
+t_{f} = L / U_{0} \simeq 8.8914 \times 10^{-3} \ \mathrm{s}.
+\end{equation*}
+To ensure that the numerical solution converges to the analytical solution, we set the time step, $\dt$, so that the Courant-Friedrichs-Lewy (CFL) number is 0.5.
+
+
+\begin{figure}[h]
+   \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+      \includegraphics[width=3.2in]{SCRIPT_FIGURES/vort2d_80_uzgraph} &
+      \includegraphics[width=3.2in]{SCRIPT_FIGURES/vort2d_160_uzgraph}
+   \end{tabular*}
+   \caption[Velocity in the \textct{vort2d} test case]{$u$-velocity along the $z$-axis at $x=0$ plotted for each of the vortex's first four loops through the computational domain. (Left) $80^{2}$ grid cell model. (Right) $160^{2}$ grid cell model.}
+   \label{fig_vort2d_axisvelocity}
+\end{figure}
+
+A plot of $u$-velocity values just along the $z$-axis provides a simple characterization of the vortex geometry. The extent to which this geometry changes over time provides a qualitative measure of the accuracy of the transport algorithm. Figure \ref{fig_vort2d_axisvelocity} displays these plots for two different grid resolutions. Each line represents a plot taken for a different number of flow-through times such that the red lines represent the vortex after it has undergone the most passes through the computational domain while the green lines represent the vortex in the initial phase. The broken black line represents the analytical solution. As the vortex undergoes more passes through the computational domain, its velocity profile diverges further and further from the analytical profile. While divergence still occurs on the finer mesh, the extent to which it diverges after the same number of flow-through times is significantly smaller.
+
+\begin{figure}[h!]
+   \centering
+    \includegraphics[width=3.2in]{SCRIPT_FIGURES/vort2d_error}
+    \caption[Convergence study for the \textct{vort2d} test case]{RMS error between simulated and analytical $u$-velocity values along the $z$-axis plotted for each grid resolution at each of three subsequent passes of the vortex through the computational domain.}
+    \label{fig_vort2d_error}
+\end{figure}
+
+The rate with which the simulated profiles converge to the analytical one defines the order of accuracy of the numerical scheme. In Fig.~\ref{fig_vort2d_error} we plot the rms error of the numerical solution as a function of the grid resolution. The three colored curves represent the rms error at three different pass-through times. The broken and solid black lines represent the plot gradient corresponding to first and second order error respectively. While the error increases with each flow-through time, the gradients of the lines are roughly parallel to the solid black line, indicating second-order accuracy of the numerical scheme.
+
+To analyze the stability of the vortex at times other than discrete multiples of the pass-through time, consider the time-dependent potential field and its corresponding $u$-velocity component:
+\begin{equation}
+\label{eqn_vort2d_timedep}
+\Psi (x,z,t) = \Psi_{0} \exp \left[\frac{2 \ U_{0} \ x \ t - U_{0}^{2} \ t^{2}}{2 \ R_{c}^{2}} \right],
+\end{equation}
+\begin{equation}
+\label{eqn_uvel_timedep}
+u (x,z,t) = U_{0} - \Psi_{0} \ \frac{z}{R_{c}^{2}} \exp \left[\frac{2 \ U_{0} \ x \ t - U_{0}^{2} \ t^{2}}{2 \ R_{c}^{2}} \right].
+\end{equation}
+In Fig.~\ref{fig_vort2d_pointvelocity}, we show the $u$-velocity at a single point, on the lower left fringe of the vortex, for two different mesh resolutions, $80^{2}$ and $160^{2}$. A mesh resolution of $320^{2}$ grid cells produces a plot (not shown) that is, to the eye, a perfect match out to four pass-through times.
+
+\begin{figure}[h!]
+   \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+      \includegraphics[width=3.2in]{SCRIPT_FIGURES/vort2d_80_upgraph} &
+      \includegraphics[width=3.2in]{SCRIPT_FIGURES/vort2d_160_upgraph}
+   \end{tabular*}
+   \caption[Time history of velocity at a point showing qualitative convergence]{Simulated and analytical values of $u$-velocity at a point plotted as a function of time over a time period equal to four times the flow-through time. (Left) $80^{2}$ grid cell model. (Right) $160^{2}$ grid cell model.}
+   \label{fig_vort2d_pointvelocity}
+\end{figure}
+
+
+
+
+\chapter{Turbulence}
+
+
+\section{Decaying Isotropic Turbulence}
+\label{decaying_isotropic_turbulence}
+
+In this section we present a canonical flow for LES which tests whether the subgrid stress model has been coded properly. In some cases the difference between verification and validation is not so clear.  Once a model is well-established and validated it may actually be used as a form of verification.  Granted, such a test is not as strong a verification as the convergence study shown in Section \ref{ns2d}.  Nevertheless, these tests are often quite useful in discovering problems within the code.  The case we examine in this section, decaying isotropic turbulence, is highly sensitive to errors in the advective and diffusive terms because the underlying physics is inherently three-dimensional and getting the problem right depends strongly on a delicate balance between vorticity dynamics and dissipation.  An even more subtle yet extremely powerful verification test is also presented in this section when we set both the molecular and turbulent viscosities to zero and confirm that the integrated kinetic energy within the domain remains constant.   In the absence of any form of viscosity, experience has shown that the slightest error in the advective terms or the pressure projection will cause the code to go unstable.  This verification is therefore stronger than one might initially expect.
+
+In this section we test the FDS model against the low Reynolds number (Re) data of Comte-Bellot and Corrsin (CBC) \cite{CBC}. Viscous effects are important in this data set for a well-resolved LES, testing the model's Re dependence.  Following \cite{SdBK}, we use a periodic box of side $L = 9 \times 2\pi$ cm ($\approx 0.566$ m) and $\nu = 1.5 \times 10^{-5}$ $\mbox{m}^2/\mbox{s}$ for the kinematic viscosity. The non-dimensional times for this data set are: $x/M = 42$ (initial condition), $98$, and $171$, where $M$ is the characteristic mesh spacing of the CBC wind tunnel and $x$ is the downstream location of the data station. Considering the mean velocity in the CBC wind tunnel experiment, these correspond to dimensional times of $t = 0.00$ s, $0.28$ s, and $0.66$ s in our simulations.
+
+The initial condition for the FDS simulation is generated by superimposing Fourier modes with random phases such that the spectrum matches that of the initial CBC data.  An iterative procedure is employed where the field is allowed to decay for small time increments subject to Navier-Stokes physics, each wavenumber is then injected with energy to again match the initial filtered CBC spectrum.  The specific filter used here is discussed in \cite{McDermott:2005b}.
+
+To provide the reader with a qualitative sense of the flow, Fig.~\ref{fig_cbc_smv} shows the initial and final states of the velocity field in the 3D periodic domain.  The flow is unforced and so if viscosity is present the total energy decays with time due to viscous dissipation.
+
+\subsection{Constant Smagorinsky (\texorpdfstring{\textct{csmag}}{csmag})}
+
+Because the viscous scales are unresolved, a subgrid stress model is required. Here the stress is closed using the gradient diffusion hypothesis and the eddy viscosity is modeled by the constant coefficient Smagorinsky model with the coefficient taken to be $C_{\rm s} = 0.2$ (see the Technical Reference Guide for further details).
+
+The decay curves for two grid resolutions are shown on the left in Fig.~\ref{fig_cbc_energy}.  For an LES code such as FDS which uses a physically-based subgrid model, an important verification test is to run this periodic isotropic turbulence simulation in the absence of both molecular and turbulent viscosity.  For so-called ``energy-conserving'' explicit numerics the integrated energy will remain nearly constant in time.  This is demonstrated by the dash-dot line in the top-left plot in Fig.~\ref{fig_cbc_energy}.  The deviations from identical energy conservation (to machine precision) are due solely to the time discretization (the spatial terms are conservative as discussed in \cite{Morinishi}) and converge to zero as the time step goes to the zero.  Note that strict energy conservation requires implicit time integration \cite{Ham,McDermott:2007b} and, as shown by the dashed curve on the same plot where only molecular viscosity is present in the simulation, this cost is unwarranted given that the molecular dissipation rate clearly overshadows the relatively insignificant amount of numerical dissipation caused by the explicit method.  The FDS result using the Smagorinsky eddy viscosity (the black solid line) matches the CBC data (red open circles) well for the $32^3$ case (top-left).  However, the FDS results are slightly too dissipative in the $64^3$ case (bottom-left).  This is due to a well-known limitation of the constant coefficient Smagorinsky model: namely, that the eddy viscosity does not converge to zero at the appropriate rate as the filter width (here equivalent to the grid spacing) is decreased.
+\begin{figure}[t]
+   \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/csmag_64_000} } &
+      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/csmag_64_689} }
+   \end{tabular*}
+   \caption[Initial and final states for isotropic turbulence]{Initial and final states of velocity magnitude for the isotropic turbulence field.}
+   \label{fig_cbc_smv}
+\end{figure}
+
+To the right of each decay curve plotted in Fig.~\ref{fig_cbc_energy} is the corresponding spectral data comparison.  The three black solid lines are the CBC spectral data for the points in time corresponding to dimensional times of $t = 0.00$ s, $0.28$ s, and $0.66$ s in our simulations.  As described above, the initial FDS velocity field (represented by the black dots) is specified to match the CBC data up to the grid Nyquist limit.  From there the spectral energy decays rapidly as discussed in \cite{McDermott:2005b}.  For each of the spectral plots on the right, the results of interest are the values of the red and blue dots and how well these match up with the corresponding CBC data.  For the $32^3$ case (top-right) the results are remarkably good.  Interestingly, the results for the more highly resolved $64^3$ case are not as good.  This is because the viscous scales are rather well-resolved at the later times in the experiment and, as mentioned, the constant coefficient Smagorinsky model is too dissipative under such conditions. (The choice of the model constant also affects these results---better agreement with the $64^3$ case could be achieved with a lower value of $C_{\rm s}$, but the agreement in the $32^3$ case would then be worse.)
+
+\begin{figure}[t]
+   \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/csmag_32_decay} } &
+      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/csmag_32_spectra} } \\
+      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/csmag_64_decay} } &
+      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/csmag_64_spectra} }
+   \end{tabular*}
+   \caption[Integrated and spectral energy decay for CBC experiment using constant Smagorinsky]{\label{fig_cbc_energy} \small (Left) Time histories of integrated kinetic energy corresponding to the grid resolutions on the right side of the figure.  In the $32^3$ case (top), the CBC data (open circles) are obtained by applying a filter to the CBC energy spectra at the Nyquist limit for an $N=32$ grid.  Similarly, for the $64^3$ case (bottom), the CBC data are obtained from filtered spectra for an $N=64$ grid. (Right) Energy spectra for the $32^3$ case (top) and the $64^3$ case (bottom).  The solid black lines are the spectral data of Comte-Bellot and Corrsin at three different points in time corresponding to downstream positions in the turbulent wind tunnel.  The initial condition for the velocity field (spectra shown as black dots) in the FDS simulation is prescribed such that the energy spectrum matches the initial CBC data.  The FDS energy spectra corresponding to the subsequent CBC data are shown by the red and blue dots. The vertical dashed line represents the wavenumber of the grid Nyquist limit. }
+\end{figure}
+
+Overall, the agreement between the FDS simulations and the CBC data is satisfactory and any discrepancies can be explained by limitations of the model.  Therefore, as a verification the results here are positive in that nothing points to coding errors.
+
+
+
+
+\clearpage
+
+\subsection{Dynamic Smagorinsky (\texorpdfstring{\textct{dsmag}}{dsmag})}
+\label{dynamic_smagorinsky_model}
+
+In the previous section, all calculations were performed with a constant and uniform Smagorinsky coefficient, $C_{\rm s} = 0.2$.  For the canonical case of homogeneous decaying isotropic turbulence -- \emph{at sufficiently high Reynolds number} -- this model is sufficient.  However, we noticed that even for the isotropic turbulence problem when the grid Reynolds number is low (i.e., the flow is well-resolved) the constant coefficient model tends to over predict the dissipation of kinetic energy (see Fig.~\ref{fig_cbc_energy}).  This is because the eddy viscosity does not converge to zero at the proper rate; so long as strain is present in the flow (the magnitude of the strain rate tensor is nonzero), the eddy viscosity will be nonzero.  This violates a guiding principle in LES development: that the method should converge to a DNS if the flow field is sufficiently resolved.
+
+The dynamic procedure for calculating the model coefficient (set \textct{TURBULENCE\_MODEL=`DYNAMIC \\ \ct SMAGORINSKY'} on \textct{MISC}) alleviates this problem.  The basis of the model is that the coefficient should be the same for two different filter scales within the inertial subrange.  Details of the procedure are explained in the following references \cite{Germano:1991,PinoMartin:2000,Moin:1991,Lund:1997,FDS_Math_Guide}.  Here we present results for the implementation of the dynamic model in FDS.  In Fig.~\ref{fig_c_smag} we show contours of the Smagorinsky coefficient $C_{\rm s}(\mathbf{x},t)$ at a time midway through a $64^3$ simulation of the CBC experiment.  Notice that the coefficient ranges from 0.00 to roughly 0.30 within the domain with the average value falling around 0.17.
+
+\begin{figure}[t]
+\centering
+\includegraphics[height=3.00in]{SCRIPT_FIGURES/dsmag_64_300}
+\caption[Dynamic Smagorinsky coefficient]{Smagorinsky coefficient for a $64^3$ simulation of the CBC experiment.}
+\label{fig_c_smag}
+\end{figure}
+
+Next, in Fig.~\ref{fig_dynsmag_cbc}, we show results for the dynamic model analogous to Fig.~\ref{fig_cbc_energy}.  For the $32^3$ case the result is not dramatically different than the constant coefficient model.  In fact, one might argue that the $32^3$ constant coefficient results are slightly better.  But there are several reasons why we should not stop here and conclude that the constant coefficient model is superior.  First, as pointed out in Pope Exercise 13.34 \cite{Pope:2000}, $38^3$ is required to resolve 80 \% of the total kinetic energy (for this flow) and thus put the cutoff wavenumber within the inertial subrange of turbulent length scales.  Pope recommends that simulations which are under-resolved by this criterion should be termed ``very large-eddy simulations''---weather forecasting is a typical example.  For a $32^3$ LES, the test filter width in the dynamic model falls at a resolution of $16^3$, clearly outside the inertial range.  A tacit assumption underlying the original interpretation of the dynamic model is that both the grid filter scale and the test filter scale should fall within the inertial range, since this is the range in which the scales of turbulent motion (in theory) exhibit fractal-like, scale similarity (recently the procedure has been derived from other arguments \cite{Pope:2004}).  With this in mind, it is perhaps not surprising that the dynamic model does not perform optimally for the low resolution case.  In the higher resolution $64^3$ case, however, the dynamic model does perform better than the constant coefficient model---and this is the desired result: we want better performance at higher resolution.  As can be seen from the energy spectra (lower right), the energy near the grid Nyquist limit is more accurately retained by the dynamic model.  This equates to better flow structure with fewer grid cells.  Thus, for practical calculations of engineering interest the small computational overhead of computing the coefficient may be recuperated by a reduction in cell count.
+
+\begin{figure}[h]
+   \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/dsmag_32_decay} } &
+      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/dsmag_32_spectra} } \\
+      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/dsmag_64_decay} } &
+      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/dsmag_64_spectra} }
+   \end{tabular*}
+   \caption[Integrated and spectral energy decay for CBC experiment using dynamic Smagorinsky]{\label{fig_dynsmag_cbc} Dynamic Smagorinsky model results (analogous to Fig.~\ref{fig_cbc_energy}) for integrated kinetic energy (left) and spectra (right).}
+\end{figure}
+
+\clearpage
+
+\subsection{Deardorff (\texorpdfstring{\textct{deardorff}}{deardorff})}
+\label{Deardorff_model}
+
+In this section we present the results for the FDS implantation of the Deardorff isotropic eddy viscosity model, $\nu_t = C_\nu \,\sqrt{k_{sgs}} \Delta$, where $C_\nu = 0.1$ \cite{Pope:2000,Deardorff:1980}.  Instead of transporting the subgrid kinetic energy, in FDS $k_{sgs}$ is estimated with an algebraic closure based on scale similarity \cite{Bardina:1980}.  As may be seen in Fig.~\ref{fig_deardorff_cbc}, for this case the Deardorff model is comparable to dynamic Smagorinsky.  Deardorff is cheaper computationally, however, and tends to perform better for low resolution fire plume dynamics than the dynamic model. For these reasons, Deardorff is the default turbulence model in FDS.
+
+\begin{figure}[h]
+   \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/deardorff_32_decay} } &
+      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/deardorff_32_spectra} } \\
+      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/deardorff_64_decay} } &
+      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/deardorff_64_spectra} }
+   \end{tabular*}
+   \caption[Integrated and spectral energy decay for CBC experiment using Deardorff's model]{\label{fig_deardorff_cbc} Deardorff model results (analogous to Fig.~\ref{fig_cbc_energy}) for integrated kinetic energy (left) and spectra (right).}
+\end{figure}
+
+\clearpage
+
+\subsection{Vreman (\texorpdfstring{\textct{vreman}}{vreman})}
+\label{Vreman_model}
+
+The Vreman eddy viscosity model \cite{Vreman:2004} is an efficient alternative to the dynamic Smagorinsky model (DSM).  In short, the spatial fields for the velocity components are expanded in Taylor series and test filtered analytically, avoiding the expensive test filtering operations required in DSM.  The resulting model is superior to the constant coefficient Smagorinsky model (CSM) because, unlike CSM, with Vreman's model the subgrid dissipation automatically vanishes if the flow is fully resolved by the grid.
+
+\begin{figure}[h]
+   \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/vreman_32_decay} } &
+      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/vreman_32_spectra} } \\
+      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/vreman_64_decay} } &
+      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/vreman_64_spectra} }
+   \end{tabular*}
+   \caption[Integrated and spectral energy decay for CBC experiment using Vreman's model]{\label{fig_vreman_cbc} Vreman model results (analogous to Fig.~\ref{fig_cbc_energy}) for integrated kinetic energy (left) and spectra (right).}
+\end{figure}
+
+\clearpage
+
+\subsection{Renormalization Group (\texorpdfstring{\textct{rng}}{rng})}
+\label{RNG_model}
+
+Renormalization group (RNG) theory \cite{Yakhot:1989} may be used to derive an effective eddy viscosity, $\mu_{\si{eff}} = \mu + \mu_t$, given by the cubic expression:
+\begin{equation}
+\label{eq:rng}
+\mu_{\si{eff}} = \mu\left[1 + H\left( \frac{\mu_s^2 \mu_{\si{eff}}}{\mu^3} - C \right)\right]^{1/3}
+\end{equation}
+Here, $\mu_s$ is the Smagorinsky eddy viscosity (with $C_s=0.2$) and $H(x)$ is the Heaviside function ($H(x)=x$ if $x>0$, $H(x)=0$ if $x\le0$).  The cutoff constant is tuned to match the high wavenumber modes in the CBC experiment for the $64^3$ case, $C=10$.
+
+\begin{figure}[h]
+   \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/rng_32_decay} } &
+      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/rng_32_spectra} } \\
+      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/rng_64_decay} } &
+      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/rng_64_spectra} }
+   \end{tabular*}
+   \caption[Integrated and spectral energy decay for CBC experiment using RNG model]{\label{fig_rng_cbc} RNG model results (analogous to Fig.~\ref{fig_cbc_energy}) for integrated kinetic energy (left) and spectra (right).}
+\end{figure}
+
+\clearpage
+
+
+\section{Jet Centerline Velocity Decay (\texorpdfstring{\textct{jet}}{jet})}
+
+\textbf{Gregor J\"ager, BFT Cognos GmbH, Germany}\\
+
+\noindent The \textct{jet\_} series in the Validation/Turbulent\_Jet directory tests the ability of subgrid stress closure (turbulence model) to correctly capture the transition from laminar to turbulent flow and subsequent momentum decay for an incompressible jet.
+
+The FDS solution is compared with experimental observations from K\"ummel \cite{Kummel:2007}. In the initial region of the jet, $x<x_0$, the velocity $u$ is constant near the axis and is equal to the velocity at the nozzle orifice ($u_0$). For a rectangular nozzle orifice of height $h = 0.8$ and width $b = 0.8$, the initial length is calculated by
+\begin{equation}
+x_0 = \frac{h}{m}
+\end{equation}
+where the mixed number $m$ is between 0.12 and 0.20.
+
+In the transition region, viscous mixing spreads over the entire jet flow and the flow velocity along the axis decreases. The mean flow velocity at the jet centerline $u_{max}(x)$ is calculated by
+\begin{equation}
+u_{max}(x) =    \frac{x_0}{x}\sqrt{\frac{b}{h}} = \frac{1}{mx} \sqrt{bh}
+\end{equation}
+
+Four turbulence models are tested: (1) Constant Smagorinsky (csmag), (2) Dynamic Smagorinsky (dsmag), (3) Deardorff (FDS default), and (4) Vreman.  The results are plotted in Fig.~\ref{fig_jet_decay}. For each model, two grid resolutions are run, corresponding to $h/\delta x = 8$ (colored dotted lines) and $h/\delta x=16$ (colored solid lines).
+\begin{figure}[h]
+\centering
+\includegraphics[width=\textwidth]{SCRIPT_FIGURES/jet_decay}
+\caption[Jet centerline velocity decay]{Centerline velocity decay for a high Reynolds number jet (Re$_h = 1 \times 10^5$) with a square orifice of side $h$.  FDS results (colored lines) are shown for various turbulence models at two grid resolutions.  For comparison, analytical results (black lines) are shown for two values of the mixing number $m$.}
+\label{fig_jet_decay}
+\end{figure}
+
+
+
+\chapter{Boundary Effects}
+
+Wall flows have long been a challenge for large-eddy simulation (LES) \cite{Baggett:1997,Baggett:1998,Cabot:1995,Pope:2000,Sagaut:2001}.  In spite of their promise and sophistication, practical LES codes are resigned to \emph{model} the wall shear stress as opposed to \emph{resolving} the dynamically important length scales near the wall. FDS uses a log law velocity profile \cite{Pope:2000} for modeling turbulent flow near a wall.
+
+\section{The FDS Moody Chart (\texorpdfstring{\textct{poiseuille}}{poiseuille}, \texorpdfstring{\textct{moody}}{smoothwall}, and \texorpdfstring{\textct{z0}}{z0})}
+\label{fds_moody_chart}
+
+At a minimum, a wall model should accurately reproduce the mean wall stress for flow in a straight square duct.  We verify that this is true for FDS by reproducing the Moody chart, a plot of friction factor versus Reynolds number for pipe flow \cite{Moody:1944}.
+
+Details of the FDS formulation are given in the Technical Guide \cite{FDS_Math_Guide}.  Here we provide only the salient components of the model necessary for treatment of constant density channel flow. The filtered continuity and momentum equations are:
+\begin{equation}
+\label{eqn_cont}
+\frac{\partial \bar{u}_i}{\partial x_i} = 0 \,\mbox{,}
+\end{equation}
+\begin{equation}
+\label{eqn_mom1}
+\frac{\partial \bar{u}_i}{\partial t} + \frac{\partial \bar{u}_i \bar{u}_j}{\partial x_j} = -\frac{1}{\rho} \left[ \frac{\d p}{\d x_i} + \frac{\partial \tilde{p}}{\partial x_i} + \frac{\partial \bar{\tau}_{ij}}{\partial x_j} + \frac{\partial \tau_{ij}^{r}}{\partial x_j} \right]\,\mbox{,}
+\end{equation}
+where $\tau_{ij}^{r}$ is the deviatoric part of the residual stress tensor.  In this work we specify a constant pressure drop $\d p/\d x$ in the streamwise direction to drive the flow.  The hydrodynamic pressure $\tilde{p}$ is obtained from a Poisson equation which enforces (\ref{eqn_cont}). Details of the model used for the viscous stress at the wall, e.g., $\bar{\tau}_{xz}|_{z=0}$, are provided in the FDS Technical Reference Guide~\cite{FDS_Tech_Guide}.
+
+\subsection{Laminar Results}
+\label{laminar}
+
+As verification of the no-slip boundary condition and further verification of the momentum solver in FDS, we perform a simple 2D laminar (Poiseuille) flow calculation of
+flow through a straight channel.
+The height of the channel is $H=1$ m and the length of the channel is $L=8$ m.
+The number of grid cells in the streamwise direction $x$ is $N_x = 8$.  The number of cells in the wall-normal direction $z$ is varied $N_z = \{8,16,32,64\}$.
+The fluid density is $\rho = 1.2$ kg m$^{-3}$ and the viscosity is $0.025$ kg m$^{-1}$ s$^{-1}$.
+The mean pressure drop is prescribed to be $\d p/ \d x = -1$ Pa m$^{-1}$ resulting in Re$_H \approx 160$.  The (Moody) friction factor $f$, which satisfies
+\begin{equation}
+\label{eqn_moodyf}
+\Delta p = f \frac{L}{H} \frac{1}{2} \rho \bar{u}^2 \,\mbox{,}
+\end{equation}
+is determined from the steady-state mean velocity $\bar{u}$ which is output by FDS for the specified pressure drop.  The exact friction factor for this flow is $f_{exact} = 24/\mbox{Re}_H$.  The friction factor error $|f-f_{exact}|$ is plotted for a range of grid spacings $\delta z = H/N_z$ in Fig.~\ref{fig_poiseuille_convergence} demonstrating second-order convergence of the laminar velocity field.
+\begin{figure}
+\centering
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/poiseuille_convergence}
+\caption[Convergence for laminar (Poiseuille) flow in a 2D channel]{FDS exhibits second-order convergence for laminar (Poiseuille) flow in a 2D channel.}
+\label{fig_poiseuille_convergence}
+\end{figure}
+
+\subsection{Turbulent Results}
+\label{turbulent}
+
+\paragraph{Smooth Walls}
+
+To verify the wall model for turbulent flow we perform 3D LES of a square duct with periodic boundaries in the streamwise direction and a constant and uniform mean pressure gradient driving the flow.  The problem set up is nearly identical to the laminar cases of the previous section except here we perform 3D calculations and maintain cubic cells as we refine the grid: we hold the ratio 8:1:1 between $N_x$\,:\,$N_y$\,:\,$N_z$ for all cases.  The cases shown below are identified by their grid resolution in the $z$ direction.  The velocity field is initially at rest and develops in time to a mean steady state driven by the specified mean pressure gradient.  The presence of a steady state is the result of a balance between the streamwise pressure drop and the integrated stress from the wall model.  FDS outputs the planar average velocity in the streamwise direction and once a steady state is reached this value is used to compute the Reynolds number and the friction factor.  Table \ref{tab_zplus} provides a case matrix: nine cases for three values of specified pressure drop and three grid resolutions.  The nominal Reynolds number (obtained post-run) is listed along with the friction factor from the most refined FDS case and the friction factor computed (iteratively) from the Colebrook equation,
+\begin{equation}
+\label{eqn_colebrook}
+\frac{1}{\sqrt{f}} = -2.0 \log_{10} \left( \frac{s/H}{3.7} + \frac{2.51}{\mbox{Re}_H\sqrt{f}} \right) \,\mbox{,}
+\end{equation}
+which is a fit to the turbulent range of the Moody chart (for example, see Ref.~\cite{MYO}).  The parameter $s/H$ is the relative
+roughness where $H$ is the hydraulic diameter of the pipe or channel and Re$_H$ is the Reynolds number based on $H$.
+To provide a qualitative picture of the flow field, Fig.~\ref{fig_channel_flow_setup} shows contours of streamwise velocity
+for the case $\d p/\d x = -1$ Pa m$^{-1}$ and $N_z=32$.
+
+\begin{figure}
+\centering
+\includegraphics[width=4.5in]{FIGURES/channel_flow_setup}
+\caption[LES of square duct flow]{LES of square duct flow with smooth walls and periodic streamwise boundaries.  For this image $N_z=32$ and the mean pressure drop is $\d p/ \d x = -1$ Pa m$^{-1}$ resulting in Re$_H = 7.5\times 10^5$ and a friction factor of $f=0.0128$.}
+\label{fig_channel_flow_setup}
+\end{figure}
+
+\begin{table}
+\centering
+\caption[Case matrix for Moody chart]{Case matrix and friction factor results for turbulent channel flow with smooth walls. The height of the first grid cell $\delta z$ is given in viscous units $z^+$ for each case.  Additionally, the table gives the nominal Reynolds number Re$_H$ and the FDS friction factor results compared to the Colebrook equation (\ref{eqn_colebrook}).}
+\begin{tabular}{|*{9}{l|}}
+\hline
+$\d p/\d x$   & \multicolumn{3}{c|}{$z^+$} &  Re$_H$  & $f$ FDS  & $f$ Colebrook & Rel. error \\
+\hline (Pa/m)           & $N_z=8$          & $N_z=16$          & $N_z=32$          &                   & $(N_z=32)$ & Eq. (\ref{eqn_colebrook}) & \% \\
+\hline\hline -0.01      & 190              & 95                & 47                & $5.9\times 10^4$  & 0.0212     & 0.0202   & 4.8                 \\
+\hline -1.    & $1.9\times 10^3$ & 950               & 470               & $7.5\times 10^5$  & 0.0128     & 0.0122   & 4.6                 \\
+\hline -100.  & $1.9\times 10^4$ & $9.5\times 10^3$  & $4.7\times 10^3$  & $9.8\times 10^6$  & 0.0077     & 0.0081   & 6.0                 \\
+\hline
+\end{tabular}
+\label{tab_zplus}
+\end{table}
+
+\paragraph{Rough Walls}
+
+With the same grid set up as described above the smooth walls, a series of cases labeled as \textct{z0}\footnote{The atmospheric community typically uses $z_0$ to denote the roughness height. However, we also use $s$ interchangeably with $z_0$ to conform to the notation used in Pope \cite{Pope:2000}.} in the repository \cite{FDS-SMV_repository} were run at various roughness heights, grid resolutions, and Reynolds numbers. The results are presented together with the smooth wall cases in Fig.~\ref{fig_fds_moody_chart}. The laminar cases provide accurate results for two different Reynolds numbers. Both the smooth wall and rough wall treatments behave well over the range tested.
+
+\begin{figure}[!htb]
+\centering
+\includegraphics[width=4.5in]{SCRIPT_FIGURES/fds_moody_chart}
+\caption[FDS Moody chart]{The FDS Moody chart: friction factor, $f$, versus Reynolds number, Re$_H$, based on duct height. The solid line for $\mbox{Re} < 2000$ is the analytical result for 2D Poiseuille flow, $f=24/\mbox{Re}$. The solid lines for $\mbox{Re}>2000$ (from the Colebrook equation (\ref{eqn_colebrook})) are Relative roughness $s/H$ shown on the right axis.}
+\label{fig_fds_moody_chart}
+\end{figure}
+
+
+
+\section{Blasius boundary layer (\texorpdfstring{\textct{blasius}}{blasius})}
+
+\textbf{Hyun-Wook Park and Jung-il Choi, Yonsei University, Seoul, South Korea}\\
+
+\noindent Consider a steady flow over a semi-infinite flat plate aligned with the flow with free stream velocity, $u_0$. The Prandtl boundary layer equations~\cite{Panton:1} are:
+\begin{equation}
+\label{eqn_BL_momentum}
+u \frac{\partial u}{\partial x} + w \frac{\partial u}{\partial z} = \nu \frac{\partial^2 u}{\partial z^2} \,\mbox{,}
+\end{equation}
+\begin{equation}
+\label{eqn_BL_continuity}
+\frac{\partial u}{\partial x}+\frac{\partial w}{\partial z} = 0 \,\mbox{.}
+\end{equation}
+Paul Richard Heinrich Blasius found a solution to Eqs.~(\ref{eqn_BL_momentum}) and (\ref{eqn_BL_continuity}) by introducing a similarity variable:
+\begin{equation}
+\label{eta}
+\eta\equiv\frac{z}{\sqrt{\nu x/u_0}} \,\mbox{.}
+\end{equation}
+Substituting $\eta$ and the stream function ($u = \partial \psi/\partial z$, $w = -\partial \psi/\partial x$) into Eq.~(\ref{eqn_BL_momentum}) yields the following ODEs:
+\begin{eqnarray}
+\label{BL_ODE}
+\frac{1}{2}f f^{''}+f^{'''}&=&0 \\
+u&=&u_0 f^{'} \\
+w&=&\frac{1}{2}\sqrt{\frac{\nu \,u_0}{x}}(\eta f^{'}-f)
+\end{eqnarray}
+The solution of Eq.~(\ref{BL_ODE}) is the Blasius solution~\cite{Panton:1}.
+
+The physical domain of the present verification case is a rectangle with length $L=0.15$ m in the streamwise direction and $H=0.3$ m in the wall-normal direction. The grid spacing is uniform ($\delta x = L/N_x$, $\delta z =H/N_z$) in each direction, and $N_x = 1.5 \, N_z$ with $N_z = \{16, 32, 64\}$ for each test series. The Boundary conditions for the inlet and outlet boundaries are \textct{OPEN} with the dynamic pressure set to zero at the inlet boundary. On the top boundary, the gradient of $w$ in the $z$ direction is zero combined with a free-slip condition that combines to yield an irrotational field. The boundary condition along the bottom of the domain is free-slip upstream of the plate ($x<0.5$ m) and no-slip on the plate. The initial velocity is $1$ m/s and $u_0$ is taken as the value of $u$ at the top boundary since boundary conditions at $z=\infty$ cannot be directly applied. The case is run with constant properties: $\rho=1.2$ \si{kg/m^3}, $\mu = 0.001$ kg/m/s.
+
+Figure~\ref{blasius} (left) shows a comparison of the streamwise velocity from FDS with the Blasius solution. The FDS solution (lines) converges to Blasius (open circles) as the mesh resolution is increased. Figure~\ref{blasius} (right) shows the root mean square (RMS) error, $\varepsilon$, in $u$ (streamwise component) at $x=0.1$ m ($0.05$~m from the leading edge of the plate) for the dimensional Blasius solution. The error is defined by
+\begin{equation}
+\label{error_l2norm_bl}
+\varepsilon \equiv \sqrt{ \frac{1}{N_z} \sum_{k=1}^{N_z} \left[ u_{k} - u_{{\rm B},k} \right]^2 }
+\end{equation}
+where $k$ is the $z$ index. The value $u_k$ represents the FDS result for $u$ at the staggered grid storage location for cell $k$, $u_{{\rm B},k}$ is the dimensional Blasius solution at the corresponding location. The slight departure from second-order accuracy is likely due to numerical issues in representing the singularity in the Blasius solution at the leading edge of the plate as well as errors in the boundary conditions due to truncation of the domain.
+\begin{figure}[!htb]
+   \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+      \includegraphics[width=3.2in]{SCRIPT_FIGURES/blasius_profile} &
+      \includegraphics[width=3.2in]{SCRIPT_FIGURES/blasius_convergence}
+   \end{tabular*}
+   \caption[Blasius profile and convergence]{(Left) Comparison of theoretical and numerical results for the Blasius velocity profile ($u$ component). (Right) Error between FDS and Blasius solution for $u(z)$ plotted for each grid resolution.}
+   \label{blasius}
+\end{figure}
+
+
+
+\section{Near-Wall Grid Resolution (\texorpdfstring{\textct{yplus}}{yplus})}
+
+\textbf{Abbas Jaber, NIST SURF student}\\
+
+\noindent The distance from the wall measured in viscous units is called $y^+$. In order to verify that $y^+$ is calculated correctly within FDS, we analyze an example of Poiseuille flow in a square channel with periodic boundaries. The pressure gradient in the $x$-direction, the dynamic viscosity, and the dimensions of the channel are known. This allows us to easily determine the expected values of wall shear stress,
+\begin{equation}
+\label{wall stress}
+\tau_w = - \delta \frac{\d p}{\d x},
+\end{equation}
+where $p$ is pressure and $\delta$ is half the height of the channel. This, in turn, allows for determining the friction velocity,
+\begin{equation}
+\label{friction velocity}
+u_{\tau} \equiv \sqrt{{\frac{\tau_w}{\rho}}}.
+\end{equation}
+From here we calculate the exact value of $y^+$ for the given flow,
+\begin{equation}
+\label{eqn_yplus}
+y^+ \equiv \frac{y}{\delta_{\nu}} = \frac{u_{\tau}y}{\nu}.
+\end{equation}
+
+In FDS, $\tau_w$ is obtained only from the wall model. The resolution of the wall-normal streamwise velocity gradient increases with  mesh resolution; the value of $y^+$ decreases accordingly. In this verification case, a wall device is used to output $y^+$ for different mesh resolutions in the $z$-direction. $y^+$ is output for a given $\delta z$, height of a cell, $\delta z$ = [1/8, 1/16, 1/32]. Then, the device values obtained are compared with the exact value of $y^+$ for a given mesh resolution (Fig.~\ref{fig_yplus}). An FDS wall device outputs the mid-cell value of the first cell next to the wall, hence, the $z$ value ($y$ in Eq.~(\ref{eqn_yplus})) used to determine the exact $y^+$ varies with $\delta z$ $(z = \delta z/2)$.
+
+\begin{figure}[!htb]
+\centering
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/yplus}
+\caption[Near-wall grid resolution]{Verification of FDS $y^+$ output for $\delta z=[1/8, 1/16, 1/32]$.}
+\label{fig_yplus}
+\end{figure}
+
+
+
+\section{Heated Channel Flow (\texorpdfstring{\textct{heated\_channel}}{heated\_channel})}
+
+\textbf{Kiyoung Moon and Jung-il Choi, Yonsei University, Seoul, South Korea}\\
+
+\noindent The simulation of turbulent channel flow (Re$_{\tau}=180$) with a heat source was performed to verify the log law near-wall model for heat transfer \cite{FDS_Tech_Guide}. The model was developed based on the law of wall for temperature and empirical equations \cite{Kader:1981}. These cases are located in the Verification/Turbulence subdirectory.
+
+The height of the channel is $H=2$ m, the width is $W=6$ m, and the length is $L=12$ m. There are 64 cells in the streamwise direction ($\delta x = 0.1875$ m) and 32 cells in the spanwise ($\delta y=0.1875$ m) and wall-normal directions ($\delta z=0.0625$ m).  The midpoint of the first cell in viscous units is $z^+ = 5$, which is a very highly resolved LES. For this reason, the dynamic Smagorinsky SGS model is used for the residual stress. Additionally, these cases were run in ``research mode'' (\textct{RESEARCH\_MODE=.TRUE.} on \textct{MISC}), which accounts for both molecular the turbulent transport coefficients, a must for distinguishing between fluids with different molecular Prandtl or Schmidt numbers (here the Re is so low that molecular effects may dominate locally).  The flow is maintained by a mean pressure gradient ($8.748 \times 10^{-6}$ Pa/m) in the streamwise direction. A constant volumetric heat source (0.5 W/m$^3$) is imposed on the fluid. The boundary conditions for momentum equations are no-slip at top and bottom walls and periodic for the streamwise and spanwise directions. The boundary condition for the energy equation is constant temperature ($T_w = 20 \,\mbox{\si{\degree C}} $) at the wall. To evaluate the effects of Prandtl number (Pr) and compare the DNS study \cite{Kim:1987} with FDS, the specific heat ($c_p = 1$ \si{kJ/(kg.K)}) and viscosity ($\mu = 1.8216 \times 10^{-5}$ \si{kg/(m.s)}) are fixed and the conductivity, $k$, of the fluid (air) is adjusted to:
+\begin{center}
+\begin{tabular}{ll}
+Pr & $k$ (\si{W/(m.K)}) \\
+\hline
+0.10 & $1.82 \times 10^{-1}$ \\
+0.71 & $2.59 \times 10^{-2}$ \\
+1.00 & $1.82 \times 10^{-2}$ \\
+2.00 & $9.11 \times 10^{-3}$
+\end{tabular}
+\end{center}
+
+In Figure \ref{fig_heated_channel}, FDS results are compared to DNS data for mean streamwise velocity, $u^+ = \langle u \rangle/u_\tau$, and mean temperature, $T^+ = (\langle T \rangle - T_w)/T_\tau$. The temperature scale is given by
+\begin{equation}
+\label{eqn_friction_temperature}
+T_{\tau} \equiv \frac{\langle \dot{q}_w^{''} \rangle}{{\rho}{c_p}{u_{\tau}}} \,\mbox{,}
+\end{equation}
+where $\langle \dot{q}_w^{''} \rangle$, $\rho$, and $c_p$ are the mean heat flux at the wall, density, and specific heat, respectively.  Fully developed, statistically stationary flow is achieved after approximately 20 flow through times.  Statistics are gathered between 40 and 60 flow through times.
+
+As seen in the left side of Fig.~\ref{fig_heated_channel}, the velocity profile shows good agreement with the DNS result. The near-wall temperature profile for each Pr is shown on the right side of Fig.~\ref{fig_heated_channel}. In the log region ($y^+ >30$), FDS overestimates the centerline mean temperature compared to the DNS results at high Pr, but the mean wall heat flux is correct, as indicated by the accurate result of the first off-wall grid value (in the viscous region). The inaccuracy of the temperature profile in the log region points to a need for improvement in the subgrid-scale (SGS) scalar transport model.
+\begin{figure}[!htb]
+   \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+      \includegraphics[width=3.2in]{SCRIPT_FIGURES/heated_channel_uplus} &
+      \includegraphics[width=3.2in]{SCRIPT_FIGURES/heated_channel_Tplus}
+   \end{tabular*}
+   \caption[Mean velocity and temperature profiles for heated channel flow]{\label{fig_heated_channel} Comparison of FDS (lines with squares) with DNS (circles) for heated channel flow. (Left) Wall-normal velocity profile compared to DNS of Moser et al.~\cite{Moser:1999}. (Right) Wall-normal mean profiles of temperature for molecular Prandtl numbers (Pr) = 0.10, 0.71, and 2.0, compared to DNS of Kim and Moin~\cite{Kim:1987}.}
+\end{figure}
+
+
+
+\section{Flow Over a Backward Facing Step (\texorpdfstring{\textct{backward\_facing\_step}}{backward\_facing\_step})}
+\label{sec:backward_facing_step}
+
+\textbf{Benjamin A.~Toms, NIST SURF student}\\
+
+\noindent Large-eddy simulation (LES) of turbulent flow over a backward facing step is studied using the Fire Dynamics Simulator (FDS).  A set of cases is designed to test the influence of grid resolution, inlet turbulence, wall boundary treatments, and eddy viscosity models.  The computational results are validated with experimental data.  A grid resolution of $h/ \delta z=10$ adequately modeled the flow, although a doubling of resolution resulted in the realization of smaller scale kinematic features.  The inlet turbulence conditions are determined to be the most significant contributor to downstream flow evolution.  Reattachment length is found to be strongly dependent on the magnitude of the inlet RMS velocity.  The choice of eddy viscosity model is found to have negligible influence, while the no-slip condition and an LES log-law-based wall function performed similarly for the given flow.
+
+FDS has recently been applied to urban canopy modeling \cite{Moon:2014} and wind engineering.  As such, it is important to study geometrically complex flows, including the appropriate specification of boundary conditions and resultant downstream flow evolution. Le et al.~\cite{Le:1997} first modeled flow over a backward facing step using DNS with a Reynolds number of 5,100.  To verify the results, Jovic and Driver (J\&D) \cite{JD:1994} supplemented the DNS simulation with an identically proportioned wind tunnel experiment.  Together, the data sets from these two studies have provided the baseline for analysis of recent simulations of flow over a backward facing step.
+
+Sarwar et al.~\cite{Sarwar:2013} used FDS to compare SGS eddy viscosity models. The constant Smagorinsky model performed the best, although the dynamic Smagorinsky and Deardorff models, nearly equivalent in accuracy, were found to perform better than the Vreman model.  To avoid explicit specification of inlet turbulence conditions, Sarwar et al.~created an extremely long inlet section to allow turbulence to develop.  One of the goals of the present study is to show that synthetic turbulent inflow boundary conditions can be successfully used to greatly reduce the size of the inlet domain and hence the calculation cost.
+
+\subsubsection*{Computational Domain}
+
+A schematic view of the computational domain is provided in Fig.~\ref{fig:computational_domain}. The dimensions of the channel are based on step height $h$ = .0098 m.  The length of channel is $24h$. The width of channel is $4h$. The height of the inlet section is $5h$, and the height of channel post-step is $6h$. The expansion ratio is thus 1.2.  The inlet is split into three sub-inlets to permit localized variation of inlet turbulence.  The simulation uses a step-height Reynolds number of 5,100 based on a free-stream velocity of $U_0$ = 7.2 m/s. Fig.~\ref{fig:vel_slice} presents an example of instantaneous contours of velocity magnitude.
+
+Virtual measurement devices are placed throughout the channel to collect data relating to flow characteristics such as velocity, turbulence RMS velocity, and friction velocity.  These virtual measurement devices are placed into lines---four vertical and one horizontal---with a device in the volumetric center of each grid cell.  A vertical line device is placed within the inlet region at a location of $x=-3h$, and three line devices are placed in the post-step region at locations of $4h$, $6h$, and $10h$. The post-step vertical line devices are placed accordingly to sample the recirculation, reattachment, and recovery regions.  A horizontal line device is used to sample data directly adjacent to the bottom wall of the channel in the post-step region ($0h$ to $20h$).
+
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[width=\textwidth]{FIGURES/backward_facing_step_computational_domain}
+    \caption[Schematic of the channel computational domain]{Schematic of the channel computational domain.  Virtual measurement devices are denoted by dotted green lines.}
+    \label{fig:computational_domain}
+\end{figure}
+
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[width=\textwidth]{FIGURES/backward_facing_step_vel_slice}
+    \caption[Instantaneous contours of velocity magnitude]{Instantaneous contours of velocity magnitude.}
+    \label{fig:vel_slice}
+\end{figure}
+
+\subsubsection*{Boundary Conditions}
+
+The inlet $\overline{u}(z)$ profile is established using experimental data provided by J\&D \cite{JD:1994}, while $\overline{v}(z)$, $\overline{w}(z)$, and inlet free-stream turbulence are set to zero.  Turbulent eddies are injected using the Synthetic Eddy Method of Jarrin \cite{Jarrin:2008}.  Eddies are injected at random locations in the bottom two inlets, advected with the flow over a distance equal to the maximum eddy length scale and recycled at the inlet.  The inlet maximum eddy length scale is 0.03 m, the number of eddies is 100, and the RMS velocity is set to 0.5 m/s for the middle inlet and 1.0 m/s for the bottom inlet to match the J\&D inlet data at $x/h=-3$ as closely as possible.
+
+The boundary conditions for velocity and pressure on the top of the domain are ``mirror'', that is, zero gradient.  The spanwise boundaries are periodic.  The outlet boundary is ``open'', see the FDS Tech Guide \cite{FDS_Tech_Guide}.
+
+\subsubsection*{Results}
+
+Fig.~\ref{fig:friction_pressure_coefficients} shows the longitudinal profiles of the friction coefficient (left) and the pressure coefficient (right).  The $x/h$ location where $C_f$ crosses zero is the reattachment length, a key validation metric for this flow.  The values of the reattachment length for the three grid resolutions studied where 9.9, 6.0, and 5.3, for the $h/\delta x=5$, $10$, and $20$ resolutions, respectively.  The experimental value is approximately 6 \cite{JD:1994}.  Thus, the $h/\delta x=20$ case under-predicts the reattachment length for the given inlet conditions.
+
+Fig.~\ref{fig:flow_profiles} shows the inlet ($x/h=-3$) and downstream mean and covariance profiles.
+
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[scale=.49]{SCRIPT_FIGURES/backward_facing_step_Cf}
+    \includegraphics[scale=.49]{SCRIPT_FIGURES/backward_facing_step_Cp}
+    \caption[Friction coefficient and pressure coefficient]{Longitudinal profiles of (left) friction coefficient and (right) pressure coefficient.}
+    \label{fig:friction_pressure_coefficients}
+\end{figure}
+
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[scale=.47]{SCRIPT_FIGURES/backward_facing_step_U}
+    \includegraphics[scale=.47]{SCRIPT_FIGURES/backward_facing_step_W}\\
+    \includegraphics[scale=.47]{SCRIPT_FIGURES/backward_facing_step_uu}
+    \includegraphics[scale=.47]{SCRIPT_FIGURES/backward_facing_step_ww}\\
+    \includegraphics[scale=.47]{SCRIPT_FIGURES/backward_facing_step_uw}
+    \caption[Flow profiles]{Flow profiles for various grid resolutions.  Symbols: --$\mathlarger{\mathlarger{\star}}$--, $h/\delta z$=5; --$\Box$--, $h/\delta z$=10; --$\Diamond$--, $h/\delta z$=20; $\mathlarger{\mathlarger{\boldsymbol\circ}}$, J\&D experimental data.}
+    \label{fig:flow_profiles}
+\end{figure}
+
+
+
+\section{Ribbed Square Duct Flow (\texorpdfstring{\textct{ribbed\_channel}}{ribbed\_channel})}
+\label{sec:ribbed_channel}
+
+In this test case, we compare FDS results with particle-image velocimetry (PIV) data from Casara and Arts \cite{Casara:1} for flow in a square duct with a ribbed obstruction.  The rib height is $h = 0.1$ m and the duct height is $D = 0.3$ m.  The distance between ribs in the periodic duct (the ``pitch'') is $10 \, h$.  The length of our domain is therefore 1 m.  The Reynolds number based on $D$ is nominally 40,000 (this is discussed more later). The FDS mesh is uniform in each direction.  We test grid resolutions of $h/\delta x = \{2,4,8,16\}$.
+
+A side view image of mean velocity vectors in the 3D flow is shown in Fig.~\ref{fig_ribbed_channel_image} for the $h/\delta x = 8$ case.  The primary goal of this calculation is to predict the mean recirculation patterns on the windward and leeward side of the rib.  To measure the FDS results, a line of devices (represented by the green dots in the figure) is placed near the floor of the duct.  Where the mean $u$ velocity component changes sign indicates a reattachment location.  Results for the mean streamwise velocity near the surface are shown in the upper-left plot of Fig.~\ref{fig_ribbed_channel}.  The independent axis on the plots ranges from 0 m to 1 m, representing the center to center distance between ribs.  Note that the image is offset and ranges from -0.4 m to 0.6 m.  As can be seen from the plot, the $h/\delta x = 8$ resolution (green sideways triangles) slightly overpredicts the reattachment length, with the zero crossing near $x/h = 4.5$ (note that the correspondence with the vectors in the image).  The finest resolution, $h/\delta x=16$, is sufficient to accurately capture the reattachment zone.
+
+Despite the fact that the coarser cases do not perfectly capture the reattachment region, it is remarkable that with $h/\delta x = 2$ we achieve any recirculation at all.  The wiggles in the solution are due to numerical dispersion error.
+
+The mean streamwise velocity profile at the rib centerline is shown in the upper-right plot of Fig.~\ref{fig_ribbed_channel}.  Here we point out that the setup for this case is basically copied from Loh\'asz et al.~\cite{Lohasz:1}.  Their method of forcing, however, is ambiguous.  Using the FDS \textct{MEAN\_FORCING} feature, we set our bulk velocity to 1 m/s (\textct{U0 = 1.0} on \textct{MISC}) in order to match the mean profile for the finest grid resolution.  All other cases use the same forcing.
+
+The bottom-left and -right plots in Fig.~\ref{fig_ribbed_channel} show the RMS velocity along the duct floor and the center profile above the rib, respectively. As can be seen, the $h/\delta x = 16$ case provides accurate results.  This resolution for this problem corresponds to wall $y^+$ values around 30.
+
+\begin{figure}[!htb]
+\centering
+\includegraphics[width=.8\textwidth]{SCRIPT_FIGURES/ribbed_channel_80_s1000}
+\caption[The {\ct ribbed\_channel} test case]{Mean velocity vectors colored by velocity magnitude (red is 2 m/s) for the ribbed square duct case with $h/\delta x = 8$.}
+\label{fig_ribbed_channel_image}
+\end{figure}
+
+\begin{figure}[!htb]
+   \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+      \includegraphics[width=3.2in]{SCRIPT_FIGURES/ribbed_channel_u_strm} &
+      \includegraphics[width=3.2in]{SCRIPT_FIGURES/ribbed_channel_u_prof} \\
+      \includegraphics[width=3.2in]{SCRIPT_FIGURES/ribbed_channel_urms_strm} &
+      \includegraphics[width=3.2in]{SCRIPT_FIGURES/ribbed_channel_urms_prof} \\
+   \end{tabular*}
+   \caption[Mean and RMS velocity profiles for ribbed square duct flow]{\label{fig_ribbed_channel} Mean and RMS velocity profiles for ribbed square duct flow. Comparison with PIV data from Casara and Arts \cite{Casara:1,Lohasz:1}.}
+\end{figure}
+
+
+
+\chapter{Mass and Energy Conservation}
 
 
 \section{Mass Conservation}
@@ -1880,11 +1881,11 @@ This case tests the ability of FDS to properly conserve the total of the solid p
 
 
 
-\section{Checking for Coding Errors}
+\chapter{Checking for Coding Errors}
 
-This section presents a number of cases that are designed to check whether or not various algorithms have been programmed properly. A good way to do this is to simulate simple flows, particularly ones with symmetric features. Errors in coding are easily identified in such cases.
+This chapter presents a number of cases that are designed to check whether or not various algorithms have been programmed properly. A good way to do this is to simulate simple flows, particularly ones with symmetric features. Errors in coding are easily identified in such cases.
 
-\subsection{Finite difference errors (\texorpdfstring{\textct{symmetry\_test}}{symmetry\_test})}
+\section{Finite difference errors (\texorpdfstring{\textct{symmetry\_test}}{symmetry\_test})}
 
 These examples are very simple tests to determine if there are coding errors in the basic flow solver. A closed box, 1~m on a side, has 6 injection vents, one centered on each face. Air is pumped into the box at a steady rate. Anything that might lead to an asymmetry in the flow field is turned off, for example, gravity, atmospheric stratification, natural convection, and random noise. One case is performed on a single mesh; the other on multiple meshes. The cases are not identifical. The resulting flow fields are shown at the left in Fig.~\ref{symmetry_test}. On the right are plots of the three components of velocity at equidistant corners of the enclosure. Ideally, there should be two equal and opposite time histories of the three components. Even the slightest error in coding will throw this off almost immediately.
 \begin{figure}[!htb]
@@ -1898,7 +1899,7 @@ These examples are very simple tests to determine if there are coding errors in 
 \label{symmetry_test}
 \end{figure}
 
-\subsection{Axial symmetry (\texorpdfstring{\textct{cyl\_test}}{cyl\_test})}
+\section{Axial symmetry (\texorpdfstring{\textct{cyl\_test}}{cyl\_test})}
 
 FDS has an option to perform an axially-symmetric calculation, which can be useful for simulating a laminar diffusion flame, like a bunsen burner or candle. When invoking this option, the user still specifies three coordinates, $x$, $y$, and $z$, but it is understood that $x$ is the radial coordinate, $r$, and $z$ is the vertical coordinate. The coordinate, $y$, is used only by Smokeview to draw the domain, and it should not influence the calculation at all. However, since FDS is primarily a three-dimensional, cartesian code, there is a possibility that a coding error might cause the specification of the $y$ dimension to have an effect on the result. Figure~\ref{cyl_test} displays results of two sets of axially-symmetric simulations. On the left is an LES simulation in which the lateral size of the cells, $\delta y$, is 2~mm and 2~cm. The two curves ought to lie exactly upon each other, which is indicated by a single red curve. On the right is a DNS simulation of a laminar diffusion flame, with $\delta y$ equal to 2~mm and 4~mm.
 \begin{figure}[h!]
@@ -1910,7 +1911,7 @@ FDS has an option to perform an axially-symmetric calculation, which can be usef
 \label{cyl_test}
 \end{figure}
 
-\subsection{Velocity boundary condition implementation (\texorpdfstring{\textct{velocity\_bc\_test}}{velocity\_bc\_test})}
+\section{Velocity boundary condition implementation (\texorpdfstring{\textct{velocity\_bc\_test}}{velocity\_bc\_test})}
 
 In this example, a simple jet is created by pushing air through a square duct. The obstructions forming the duct are built three different ways. The first way is to build the duct with thin (zero cell thick) plates. The second is to carve the duct out of a solid block. The third way is to build the duct out of one cell thick plates. The three approaches are illustrated in Fig.~\ref{velocity_bc_test_image}. Ideally, the three jets ought to be exactly the same, but subtle differences in the pressure solution and the random generation of noise lead to three unique flow patterns that are only the same in a time-averaged sense. To test this, the centerline pressure and velocity are recorded for a 2~m/s jet emanating from a 0.8~m square duct that is 5~m long. The grid resolution is fairly crude (0.2~m) because the purpose of this exercise is to show that the steady-state velocity and pressure profiles are essentially the same. Figure~\ref{velocity_bc_test} displays the profiles. The curves ought to overlap each other. Errors in the implementation of the velocity boundary conditions are likely to throw the three cases out of alignment.
 
@@ -1931,7 +1932,7 @@ In this example, a simple jet is created by pushing air through a square duct. T
 \end{figure}
 
 
-\subsection{Checking the divergence constraint (\texorpdfstring{\textct{divergence\_test}}{divergence\_test})}
+\section{Checking the divergence constraint (\texorpdfstring{\textct{divergence\_test}}{divergence\_test})}
 
 Because of the low Mach number approximation, an initially divergence free flow field ought to remain divergence free if there are no heat sources or sinks. In this example, air is pushed through a 1~m cube at a speed of 1~m/s. The air is extracted at the same rate, and there should be no pressure rise and the flow should remain divergence free. There are also a few obstructions that are created and removed during the simulation to check that this does not cause any errors. Figure~\ref{divergence_test} displays the minimum and maximum divergence as a function of time. These ought to remain below approximately $1 \times 10^{-10}$~s$^{-1}$ in absolute value.
 \begin{figure}[!htb]
@@ -1941,7 +1942,7 @@ Because of the low Mach number approximation, an initially divergence free flow 
 \label{divergence_test}
 \end{figure}
 
-\subsection{Multi-mesh Pressure and Temperature Lapse (\texorpdfstring{\textct{lapse\_rate}}{lapse\_rate})}
+\section{Multi-mesh Pressure and Temperature Lapse (\texorpdfstring{\textct{lapse\_rate}}{lapse\_rate})}
 
 A 10 m x 10 m x 40 m volume is initialized with {\ct LAPSE\_RATE=-0.01}.  The volume is divided vertically into four equal meshes with each mesh having a 10 cm grid resolution.  There should be a smooth drop in both temperature and pressure that matches the analytic values.
 
@@ -1955,7 +1956,7 @@ A 10 m x 10 m x 40 m volume is initialized with {\ct LAPSE\_RATE=-0.01}.  The vo
 \end{figure}
 
 
-\subsection{Randomly Overlapping Meshes (\texorpdfstring{\textct{random\_meshes}}{random\_meshes})}
+\section{Randomly Overlapping Meshes (\texorpdfstring{\textct{random\_meshes}}{random\_meshes})}
 
 In most FDS simulations, multiple meshes are positioned adjacent to each other to allow two-way communication. However, in some instances, meshes need to overlap, and this case verifies the functionality of meshes that overlap in a variety of ways. It is a 2-D case that runs fast and is easy to visualize. There are five overlapping meshes shown at left in Fig.~\ref{random_meshes}. Air is blown in at the bottom and exhausted via an open vent at the top. The volume flow rate is fixed at 0.012~m$^3$/s, and the plot at right in Fig.~\ref{random_meshes} verifies that the simulation matches to within a few percent. The case uses the default normal velocity tolerance at solid and interpolated boundaries; thus, there is some error expected in the volume flow due to the solution of the Poisson equation. As a further check that the mesh allocations are being properly handled, there is a fine mesh embedded within the coarse, and the case is run with four MPI processes rather than five.
 
@@ -1967,6 +1968,8 @@ In most FDS simulations, multiple meshes are positioned adjacent to each other t
 \caption[The \textct{random\_meshes} test case]{Five overlapping meshes (left) and the net volume flow through the domain (right).}
 \label{random_meshes}
 \end{figure}
+
+
 
 
 
@@ -2039,7 +2042,7 @@ where $h$ is the distance from the center of the polygon to the center point of 
 
 \begin{figure}[!htb]
 \centering
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/radiating_polygon_square} 
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/radiating_polygon_square}
 \caption[The {\ct radiating\_polygon} test case]{Incident heat flux from a hot square plate as a function of distance to the center of the plate.}
 \label{radiating_polygon_figure}
 \end{figure}
@@ -2070,8 +2073,8 @@ the wall heat fluxes are given in the table below.
 In-depth absorption of thermal radiation in a solid is computed using a two-flux model.  In this example, the accuracy of the two-flux model is tested in the computation of the emissive flux from a homogeneous layer of material (thickness $L=$~0.1~m) at 1273.15~K temperature, surrounded by an ambient temperature of 1~K. The absorption coefficient $\kappa$ is varied to cover a range [0.01, 10] of optical depth $\tau = \kappa L$.
 
 The exact solutions for radiative flux are the analytical solutions of plane layer emission~\cite{Zeldovich:1}
-\be 
-   S(\tau) = S_b\left[1-2E_3(\tau)\right] 
+\be
+   S(\tau) = S_b\left[1-2E_3(\tau)\right]
 \ee
 where $S_b = \sigma T^4$ is the black-body heat flux from the radiating plane and $E_3(\tau)$ is the exponential integral function (order 3) of optical depth, $\tau$. The exact solutions and FDS results are shown in the table below.
 
@@ -4113,7 +4116,7 @@ where $A_{\hbox{\scriptsize leak}}=0.002$~m$^2$ and $\rho$ is the density at the
 \centering
 \includegraphics[width=3.5in]{SCRIPT_FIGURES/leak_test}
 \caption[The \textct{leak\_test} case]{Pressure difference between two compartments with leakage connected by a fan.}
-\label{leak_test} 
+\label{leak_test}
 \end{figure}
 
 \subsection{Multiple zone leakage (\texorpdfstring\textct{leak\_test\_2}{leak\_test\_2})}
