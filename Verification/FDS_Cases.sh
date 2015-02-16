@@ -254,6 +254,9 @@ $QFDS -d Radiation plate_view_factor_cart_100.fds
 $QFDS -d Radiation plate_view_factor_cyl_30.fds
 $QFDS -d Radiation plate_view_factor_cyl_60.fds
 $QFDS -d Radiation plate_view_factor_cyl_100.fds
+$QFDS -d Radiation radiating_polygon_square_20.fds
+$QFDS -d Radiation radiating_polygon_square_40.fds
+$QFDS -d Radiation radiating_polygon_square_80.fds
 $QFDS -d Radiation radiation_box_100_1000.fds
 $QFDS -d Radiation radiation_box_100__100.fds
 $QFDS -d Radiation radiation_box_100_2000.fds
