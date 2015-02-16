@@ -16,7 +16,7 @@ if "%rundebug%" == "1" (
 set BASEDIR="%CD%"
 cd ..
 set SVNROOT="%CD%"
-set %BASEDIR%\scriptdir
+set %BASEDIR%\scripts
 set SCRIPT_DIR="%CD%"
 cd %SVNROOT%\..\cfast\
 set CFAST=%CD%
@@ -98,6 +98,7 @@ cd %BASEDIR%
 call FDS_Cases.bat
 call %SCRIPT_DIR%\SMV_Cases.bat
 call %SCRIPT_DIR%\SMV_geom_Cases.bat
+call :wait_until_finished
 
 echo.
 echo Running FDS cases
@@ -117,6 +118,21 @@ call %SCRIPT_DIR%\SMV_Cases.bat
 call %SCRIPT_DIR%\SMV_geom_Cases.bat
 
 goto eof
+
+:: -------------------------------------------------------------
+:wait_until_finished
+:: -------------------------------------------------------------
+:loop1
+:: FDSBASE defined in Run_SMV_Cases and Run_FDS_Cases (the same in each)
+tasklist | find /i /c "%FDSBASE%" > %waitfile%
+set /p numexe=<%waitfile%
+echo Number of cases running - %numexe%
+if %numexe% == 0 goto finished
+Timeout /t 30 >nul 
+goto loop1
+
+:finished
+exit /b
 
 :: -----------------------------------------
 :is_file_installed
