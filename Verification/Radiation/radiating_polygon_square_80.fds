@@ -16,6 +16,7 @@
       TAU_T = 0.0 /
 
 &SURF ID='COLD'
+      DEFAULT = .TRUE.
       HEAT_TRANSFER_COEFFICIENT = 0.
       EMISSIVITY = 1.
       TMP_FRONT = -273.
