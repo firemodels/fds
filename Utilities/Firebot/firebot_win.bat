@@ -72,7 +72,7 @@ set fromsummarydir=%svnroot%\Manuals\SMV_Summary
 
 set haveerrors=0
 set havewarnings=0
-set haveCC=1
+set have_icc=1
 
 set emailexe=%userprofile%\bin\mailsend.exe
 set gettimeexe=%svnroot%\Utilities\get_time\intel_win_64\get_time.exe
@@ -108,8 +108,9 @@ call :get_time PRELIM_beg
 
 ifort 1> %scratchfile% 2>&1
 type %scratchfile% | find /i /c "not recognized" > %counta%
-set /p nothaveFORTRAN=<%counta%
-if %nothaveFORTRAN% == 1 (
+set /p nothave_ifort=<%counta%
+set have_ifort=1
+if %nothave_ifort% == 1 (
   echo "***Fatal error: Fortran compiler not present"
   echo "***Fatal error: Fortran compiler not present" > %errorlog%
   echo "firebot run aborted"
@@ -120,9 +121,9 @@ echo             found Fortran
 
 icl 1> %scratchfile% 2>&1
 type %scratchfile% | find /i /c "not recognized" > %countb%
-set /p nothaveCC=<%countb%
-if %nothaveCC% == 1 (
-  set haveCC=0
+set /p nothave_icc=<%countb%
+if %nothave_icc% == 1 (
+  set have_icc=0
   echo "***Warning: C/C++ compiler not found - using installed Smokeview to generate images"
 ) else (
   echo             found C/C++
@@ -193,7 +194,7 @@ set timingslogfile=%TIMINGSDIR%\timings_%revisionnum%.txt
 echo             building cfast
 cd %cfastroot%\CFAST\intel_win_64
 erase *.obj *.mod *.exe 1>> %OUTDIR%\stage0.txt 2>&1
-make VPATH="../Source:../Include" INCLUDE="../Include" -f ..\makefile intel_win_64 1>> %OUTDIR%\stage0.txt 2>&1
+make VPATH="../Source" ..\makefile intel_win_64 1>> %OUTDIR%\stage0.txt 2>&1
 call :does_file_exist cfast6_win_64.exe %OUTDIR%\stage0.txt|| exit /b 1
 
 call :get_time PRELIM_end
@@ -271,7 +272,7 @@ erase *.obj *.mod *.exe 1> %OUTDIR%\stage3c.txt 2>&1
 ifort -o fds2ascii_win_64.exe /nologo ..\..\Data_processing\fds2ascii.f90  1>> %OUTDIR%\stage3.txt 2>&1
 call :does_file_exist fds2ascii_win_64.exe %OUTDIR%\stage3.txt|| exit /b 1
 
-if %haveCC% == 1 (
+if %have_icc% == 1 (
   echo             background
   cd %svnroot%\Utilities\background\intel_win_32
   erase *.obj *.mod *.exe 1>> %OUTDIR%\stage3.txt 2>&1
