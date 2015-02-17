@@ -1457,8 +1457,8 @@ archive_compiler_version
 ### Stage 2a ###
 compile_fds_db
 check_compile_fds_db
-inspect_fds_db
-check_inspect_fds_db
+#inspect_fds_db
+#check_inspect_fds_db
 
 ### Stage 2b ###
 compile_fds_mpi_db
