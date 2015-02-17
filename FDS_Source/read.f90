@@ -6621,7 +6621,10 @@ READ_LOOP: DO
 ENDDO READ_LOOP
 23 REWIND(LU_INPUT) ; INPUT_FILE_LINE_NUMBER = 0
 
-IF (SCARC_METHOD /= 'null') PRES_METHOD = 'SCARC'
+IF (SCARC_METHOD /= 'null') THEN
+   PRES_METHOD = 'SCARC'
+   ITERATE_PRESSURE = .FALSE.
+ENDIF
 
 ! Determine how many pressure iterations to perform per half time step.
 
