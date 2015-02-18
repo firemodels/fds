@@ -267,8 +267,9 @@ echo Stage 3 - Building FDS/Smokeview utilities
 echo             fds2ascii
 cd %svnroot%\Utilities\fds2ascii\intel_win_64
 erase *.obj *.mod *.exe 1> Nul 2>&1
-ifort -o fds2ascii_win_64.exe /nologo ..\..\Data_processing\fds2ascii.f90  1> %OUTDIR%\makelog.txt 2>&1
-call :does_file_exist fds2ascii_win_64.exe %OUTDIR%\makelog.txt|| exit /b 1
+ifort -o fds2ascii_win_64.exe /nologo ..\..\Data_processing\fds2ascii.f90  1> %OUTDIR%\makefds2ascii.log 2>&1
+call :does_file_exist fds2ascii_win_64.exe %OUTDIR%\makefds2ascii.log|| exit /b 1
+call :find_warnings "warning" %OUTDIR%\makefds2ascii.log "Stage 3, Building FDS/Smokeview utilities"
 
 if %have_icc% == 1 (
   echo             background
