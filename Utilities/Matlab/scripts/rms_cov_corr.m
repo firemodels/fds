@@ -8,10 +8,9 @@ clear all
 addpath('../../Verification/Controls');
 
 % load experimental data and FDS prediction
-M = importdata('rms_cov_corr_devc.csv',',',2);
-fds_data = M.data;
+fds_data = csvread('rms_cov_corr_devc.csv',2);
 
-startrow=100/0.02+1;
+startrow=500/0.02+1;
 endrow=size(fds_data,1);
 
 umean=mean(fds_data(startrow:endrow,2));
@@ -39,12 +38,12 @@ urms_fds=fds_data(endrow,4);
 uwcov_fds=fds_data(endrow,5);
 uwcorr_fds=fds_data(endrow,6);
 
-xcalc(1)=60;
+xcalc(1)=0;
 xcalc(2)=1000;
 ycalc(1)=urms;
 ycalc(2)=urms;
-maxval=max(fds_data(:,4));
-maxval=ceil(maxval*10)/10;
+
+maxval=ceil(2*urms*100)/100;
 
 h=plot(xcalc,ycalc,'r-',fds_data(:,1),fds_data(:,4),'k-','LineWidth',1.5);
 hold on
@@ -82,8 +81,8 @@ clear h
 
 ycalc(1)=uwcov;
 ycalc(2)=uwcov;
-maxval=max(fds_data(:,5));
-maxval=ceil(maxval*10)/10;
+
+maxval=ceil(2*uwcov*100)/100;
 
 h=plot(xcalc,ycalc,'r-',fds_data(:,1),fds_data(:,5),'k-','LineWidth',1.5);
 hold on
@@ -119,8 +118,8 @@ clear h
 
 ycalc(1)=uwcorr;
 ycalc(2)=uwcorr;
-maxval= max(fds_data(:,6));
-maxval=ceil(maxval*10)/10;
+
+maxval=ceil(2*uwcorr*100)/100;
 
 h=plot(xcalc,ycalc,'r-',fds_data(:,1),fds_data(:,6),'k-','LineWidth',1.5);
 hold on
