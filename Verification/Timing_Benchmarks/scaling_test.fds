@@ -1,8 +1,8 @@
 &HEAD CHID='scaling_test', TITLE='General purpose input file to test FDS timings, SVN $Revision$' /
 
-&MULT ID='mesh multiplier', DX=1.0, DY=1.0, DZ=1.0, I_LOWER=-1, I_UPPER=0, J_LOWER=-1, J_UPPER=0, K_LOWER=0, K_UPPER=1 /
+&MULT ID='mesh multiplier', DX=1.0, DY=1.0, DZ=1.0, I_LOWER=-1, I_UPPER=7, J_LOWER=-1, J_UPPER=6, K_LOWER=0, K_UPPER=3 /
 
-&MESH IJK=100,100,100, XB=0.0,1.0,0.0,1.0,0.0,1.0, MULT_ID='mesh multiplier' /
+&MESH IJK=50,50,50, XB=0.0,1.0,0.0,1.0,0.0,1.0, MULT_ID='mesh multiplier' /
 
 &TIME T_END=10.0 /
 
@@ -14,6 +14,8 @@
 &VENT MB='YMAX', SURF_ID='OPEN' /
 &VENT PBZ=0.0,   SURF_ID='HOT' /
 &VENT MB='ZMAX', SURF_ID='OPEN' /
+
+&DUMP NFRAMES=10 /
 
 &SLCF PBY=0.0, QUANTITY='TEMPERATURE', VECTOR=.TRUE. /
 
