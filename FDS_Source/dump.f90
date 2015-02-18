@@ -4210,103 +4210,26 @@ DEVICE_LOOP: DO N=1,N_DEVC
          ELSE
             SELECT CASE (DV%STATISTICS)            
                CASE('RMS')
-                  IF (T>DV%T) THEN
-                     DV%T = DV%T + DV%DT
-                     IF (DV%T > DV%TIME_MAX_VALUE) THEN
-                        DO N_T=1,99
-                           IF (DV%TIME_ARRAY(N_T)>0._EB) EXIT
-                        END DO   
-                        DV%TIME_MAX_VALUE = DV%TIME_MAX_VALUE + DV%STATISTICS_DT
-                     ELSE
-                        N_T = 1
-                     ENDIF
-                     DV%AVERAGE_ARRAY(N_T:99)=DV%AVERAGE_ARRAY(N_T+1:100)
-                     DV%AVERAGE_ARRAY(100)=0._EB
-                     DV%RMS_ARRAY(N_T:99)=DV%RMS_ARRAY(N_T+1:100)
-                     DV%RMS_ARRAY(100)=0._EB
-                     DV%TIME_ARRAY(N_T:99)=DV%TIME_ARRAY(N_T+1:100)
-                     DV%TIME_ARRAY(100)=TWO_EPSILON_EB
-                  ENDIF
-                  WGT = 1._EB/(SUM(DV%TIME_ARRAY)+DT)
-                  DV%AVERAGE_ARRAY(100) = DV%AVERAGE_ARRAY(100)+VALUE*DT
-                  DV%AVERAGE_VALUE = SUM(DV%AVERAGE_ARRAY)*WGT
-                  DV%RMS_ARRAY(100) = DV%RMS_ARRAY(100)+(VALUE-DV%AVERAGE_VALUE)**2*DT
-                  DV%RMS_VALUE = SUM(DV%RMS_ARRAY)*WGT
-                  DV%VALUE = SQRT(DV%RMS_VALUE)
-                  DV%TIME_ARRAY(100) = DV%TIME_ARRAY(100)+DT
+                  DV%AVERAGE_VALUE = DV%AVERAGE_VALUE + DT*VALUE
+                  WGT = 1._EB/(T - DV%STATISTICS_START + DT)
+                  DV%RMS_VALUE = DV%RMS_VALUE+(VALUE-DV%AVERAGE_VALUE*WGT)**2*DT
+                  DV%VALUE = SQRT(DV%RMS_VALUE*WGT)
                   DV%TIME_INTERVAL = 1._EB
                CASE('COV')
-                  IF (T>DV%T) THEN
-                     DV%T = DV%T + DV%DT
-                     IF (DV%T > DV%TIME_MAX_VALUE) THEN
-                        DO N_T=1,99
-                           IF (DV%TIME_ARRAY(N_T)>0._EB) EXIT
-                        END DO   
-                        DV%TIME_MAX_VALUE = DV%TIME_MAX_VALUE + DV%STATISTICS_DT
-                     ELSE
-                        N_T = 1
-                     ENDIF
-                     DV%AVERAGE_ARRAY(N_T:99)=DV%AVERAGE_ARRAY(N_T+1:100)
-                     DV%AVERAGE_ARRAY(100)=0._EB
-                     DV%AVERAGE2_ARRAY(N_T:99)=DV%AVERAGE2_ARRAY(N_T+1:100)
-                     DV%AVERAGE2_ARRAY(100)=0._EB
-                     DV%COV_ARRAY(N_T:99)=DV%COV_ARRAY(N_T+1:100)
-                     DV%COV_ARRAY(100)=0._EB
-                     DV%TIME_ARRAY(N_T:99)=DV%TIME_ARRAY(N_T+1:100)
-                     DV%TIME_ARRAY(100)=TWO_EPSILON_EB
-                  ENDIF
-                  WGT = 1._EB/(SUM(DV%TIME_ARRAY)+DT)
-                  DV%AVERAGE_ARRAY(100) = DV%AVERAGE_ARRAY(100)+VALUE*DT
-                  DV%AVERAGE_VALUE = SUM(DV%AVERAGE_ARRAY)*WGT
-                  DV%AVERAGE2_ARRAY(100) = DV%AVERAGE2_ARRAY(100)+VALUE2*DT
-                  DV%AVERAGE_VALUE2 = SUM(DV%AVERAGE2_ARRAY)*WGT
-                  DV%COV_ARRAY(100) = DV%COV_ARRAY(100)+(VALUE-DV%AVERAGE_VALUE)*(VALUE2-DV%AVERAGE_VALUE2)*DT
-                  DV%COV_VALUE = SUM(DV%COV_ARRAY)*WGT
-                  DV%VALUE = DV%COV_VALUE 
-                  DV%TIME_ARRAY(100) = DV%TIME_ARRAY(100)+DT                  
+                  DV%AVERAGE_VALUE = DV%AVERAGE_VALUE + DT*VALUE
+                  DV%AVERAGE_VALUE2 = DV%AVERAGE_VALUE2 + DT*VALUE2                 
+                  WGT = 1._EB/(T - DV%STATISTICS_START + DT)
+                  DV%COV_VALUE = DV%COV_VALUE+(VALUE-DV%AVERAGE_VALUE*WGT)*(VALUE2-DV%AVERAGE_VALUE2*WGT)*DT
+                  DV%VALUE = DV%COV_VALUE*WGT
                   DV%TIME_INTERVAL = 1._EB
                CASE('CORRCOEF')
-                  IF (T>DV%T) THEN
-                     DV%T = DV%T + DV%DT
-                     IF (DV%T > DV%TIME_MAX_VALUE) THEN
-                        DO N_T=1,99
-                           IF (DV%TIME_ARRAY(N_T)>0._EB) EXIT
-                        END DO   
-                        DV%TIME_MAX_VALUE = DV%TIME_MAX_VALUE + DV%STATISTICS_DT
-                     ELSE
-                        N_T = 1
-                     ENDIF
-                     DV%AVERAGE_ARRAY(N_T:99)=DV%AVERAGE_ARRAY(N_T+1:100)
-                     DV%AVERAGE_ARRAY(100)=0._EB
-                     DV%AVERAGE2_ARRAY(N_T:99)=DV%AVERAGE2_ARRAY(N_T+1:100)
-                     DV%AVERAGE2_ARRAY(100)=0._EB
-                     DV%COV_ARRAY(N_T:99)=DV%COV_ARRAY(N_T+1:100)
-                     DV%COV_ARRAY(100)=0._EB
-                     DV%RMS_ARRAY(N_T:99)=DV%RMS_ARRAY(N_T+1:100)
-                     DV%RMS_ARRAY(100)=0._EB
-                     DV%RMS2_ARRAY(N_T:99)=DV%RMS2_ARRAY(N_T+1:100)
-                     DV%RMS2_ARRAY(100)=0._EB                     
-                     DV%TIME_ARRAY(N_T:99)=DV%TIME_ARRAY(N_T+1:100)
-                     DV%TIME_ARRAY(100)=TWO_EPSILON_EB
-                  ENDIF
-                  WGT = 1._EB/(SUM(DV%TIME_ARRAY)+DT)
-                  DV%AVERAGE_ARRAY(100) = DV%AVERAGE_ARRAY(100)+VALUE*DT
-                  DV%AVERAGE_VALUE = SUM(DV%AVERAGE_ARRAY)*WGT
-                  DV%AVERAGE2_ARRAY(100) = DV%AVERAGE2_ARRAY(100)+VALUE2*DT
-                  DV%AVERAGE_VALUE2 = SUM(DV%AVERAGE2_ARRAY)*WGT
-                  DV%COV_ARRAY(100) = DV%COV_ARRAY(100)+(VALUE-DV%AVERAGE_VALUE)*(VALUE2-DV%AVERAGE_VALUE2)*DT
-                  DV%COV_VALUE = SUM(DV%COV_ARRAY)*WGT
-                  DV%RMS_ARRAY(100) = DV%RMS_ARRAY(100)+(VALUE-DV%AVERAGE_VALUE)**2*DT
-                  DV%RMS_VALUE = SUM(DV%RMS_ARRAY)*WGT
-                  DV%RMS2_ARRAY(100) = DV%RMS2_ARRAY(100)+(VALUE2-DV%AVERAGE_VALUE2)**2*DT
-                  DV%RMS_VALUE2 = SUM(DV%RMS2_ARRAY)*WGT
-                  DEV2 = SQRT(DV%RMS_VALUE*DV%RMS_VALUE2)
-                  IF (DEV2>TWO_EPSILON_EB) THEN
-                     DV%VALUE = DV%COV_VALUE/DEV2
-                  ELSE
-                     DV%VALUE = 0._EB
-                  ENDIF 
-                  DV%TIME_ARRAY(100) = DV%TIME_ARRAY(100)+DT                  
+                  DV%AVERAGE_VALUE = DV%AVERAGE_VALUE + DT*VALUE
+                  DV%AVERAGE_VALUE2 = DV%AVERAGE_VALUE2 + DT*VALUE2                 
+                  WGT = 1._EB/(T - DV%STATISTICS_START + DT)
+                  DV%COV_VALUE = DV%COV_VALUE+(VALUE-DV%AVERAGE_VALUE*WGT)*(VALUE2-DV%AVERAGE_VALUE2*WGT)*DT
+                  DV%RMS_VALUE = DV%RMS_VALUE+(VALUE-DV%AVERAGE_VALUE*WGT)**2*DT
+                  DV%RMS_VALUE2 = DV%RMS_VALUE2+(VALUE2-DV%AVERAGE_VALUE2*WGT)**2*DT
+                  DV%VALUE = DV%COV_VALUE/SQRT(DV%RMS_VALUE*DV%RMS_VALUE2)  
                   DV%TIME_INTERVAL = 1._EB
            END SELECT
          ENDIF
