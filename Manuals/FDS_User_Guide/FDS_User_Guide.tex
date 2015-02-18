@@ -7817,7 +7817,7 @@ Note that the spatial and time integrals can not be used simultaneously.
 \subsection{Statistical Outputs}
 \label{info:rmscovcorr}
 
-Statistical quantities can also be generated for either point or line devices.  Note that these are quantities only have significant meaning if the flow is steady-state.  These quantities are estimated using a logarithmic averaging process.  The weighting coefficient for the averaging is determined by the desired time interval for the device (the time interval which will dominate the average value).  For a point device this time interval is set with the parameter {\ct STATISTICS\_DT} on the {\ct DEVC} line.  For a line device is is determined by {\ct DT\_DEVC\_LINE} on the {\ct DUMP} line.
+Statistical quantities can also be generated for either point or line devices.  Note that these are quantities only have significant meaning if the flow is steady-state.  These quantities are estimated using a logarithmic averaging process.  The weighting coefficient for the averaging is determined by the desired time interval for the device.  For a point device this time interval is starts at {\ct STATISTICS\_START} on the {\ct DEVC} line and continues until {\ct T\_END}.  For a line device is is determined by {\ct DT\_DEVC\_LINE} on the {\ct DUMP} line.
 
 \subsubsection{Root Mean Square}
 \label{info:rms}
@@ -8615,7 +8615,7 @@ properties be specified as well. Simply prescribing as many properties as possib
 {\ct ROTATION}              & Real            & Section~\ref{info:DEVC}                                         & deg.  & 0             \\ \hline
 {\ct SETPOINT}              & Real            & Section~\ref{info:basic_control}                                &       &               \\ \hline
 {\ct STATISTICS}            & Character       & Section~\ref{info:statistics}                                   &       &               \\ \hline
-{\ct STATISTICS\_DT}        & Real            & Section~\ref{info:rmscovcorr}                                   &       &               \\ \hline
+{\ct STATISTICS\_START}     & Real            & Section~\ref{info:rmscovcorr}                                   & s     & {\ct T\_BEGIN}\\ \hline
 {\ct SMOOTHING\_FACTOR}     & Real            & Section~\ref{info:basic_control}                                &       & 0             \\ \hline
 {\ct SPEC\_ID}              & Character       & Section~\ref{info:outputquantities}                             &       &               \\ \hline
 {\ct SURF\_ID}              & Character       & Section~\ref{info:statistics}                                   &       &               \\ \hline
