@@ -48,7 +48,7 @@ set OUTDIR=%CURDIR%\output
 set HISTORYDIR=%CURDIR%\history
 set TIMINGSDIR=%CURDIR%\timings
 
-erase %OUTDIR%\*.txt 1> Nul 2>&1
+erase %OUTDIR%\*.txt %OUTDIR%\*.log 1> Nul 2>&1
 
 set email=%svnroot%\SMV\scripts\email.bat
 
@@ -194,8 +194,9 @@ set timingslogfile=%TIMINGSDIR%\timings_%revisionnum%.txt
 echo             building cfast
 cd %cfastroot%\CFAST\intel_win_64
 erase *.obj *.mod *.exe 1> Nul 2>&1
-make VPATH="../Source" -f ..\makefile intel_win_64 1> %OUTDIR%\makelog.txt 2>&1
-call :does_file_exist cfast6_win_64.exe %OUTDIR%\makelog.txt|| exit /b 1
+make VPATH="../Source" -f ..\makefile intel_win_64 1> %OUTDIR%\makecfast.log 2>&1
+call :does_file_exist cfast6_win_64.exe %OUTDIR%\makecfast.log|| exit /b 1
+call :find_warnings "warning" %OUTDIR%\makecfast.log "Stage 0, cfast compilation"
 
 call :get_time PRELIM_end
 call :get_duration PRELIM DIFF_PRELIM %PRELIM_end% %PRELIM_beg%
@@ -212,19 +213,17 @@ echo             parallel debug
 
 cd %svnroot%\FDS_Compilation\mpi_intel_win_64_db
 erase *.obj *.mod *.exe *.pdb 1> Nul 2>&1
-make VPATH="../../FDS_Source" -f ..\makefile mpi_intel_win_64_db 1> %OUTDIR%\makelog.txt 2>&1
-
-call :does_file_exist fds_mpi_win_64_db.exe %OUTDIR%\makelog.txt|| exit /b 1
-call :find_warnings "warning" %OUTDIR%\stage1b.txt "Stage 1b, FDS parallel debug compilation"
+make VPATH="../../FDS_Source" -f ..\makefile mpi_intel_win_64_db 1> %OUTDIR%\makefdsd.log 2>&1
+call :does_file_exist fds_mpi_win_64_db.exe %OUTDIR%\makefdsd.log|| exit /b 1
+call :find_warnings "warning" %OUTDIR%\makefdsd.log "Stage 1b, FDS parallel debug compilation"
 
 echo             parallel release
 
 cd %svnroot%\FDS_Compilation\mpi_intel_win_64
 erase *.obj *.mod *.exe *.pdb 1> Nul 2>&1
-make VPATH="../../FDS_Source" -f ..\makefile mpi_intel_win_64  1> %OUTDIR%\makelog.txt 2>&1
-
-call :does_file_exist fds_mpi_win_64.exe %OUTDIR%\makelog.txt|| exit /b 1
-call :find_warnings "warning" %OUTDIR%\stage1d.txt "Stage 1d, FDS parallel release compilation"
+make VPATH="../../FDS_Source" -f ..\makefile mpi_intel_win_64  1> %OUTDIR%\makefdsr.log 2>&1
+call :does_file_exist fds_mpi_win_64.exe %OUTDIR%\makefdsr.log|| exit /b 1
+call :find_warnings "warning" %OUTDIR%\makefdsr.log "Stage 1d, FDS parallel release compilation"
 
 call :get_time BUILDFDS_end
 call :get_duration BUILDFDS DIFF_BUILDFDS %BUILDFDS_end% %BUILDFDS_beg%
@@ -246,19 +245,18 @@ echo             debug
 
 cd %svnroot%\SMV\Build\intel_win_64
 erase *.obj *.mod *.exe smokeview_win_64_db.exe 1> Nul 2>&1
-make -f ..\Makefile intel_win_64_db 1> %OUTDIR%\makelog.txt 2>&1
-
-call :does_file_exist smokeview_win_64_db.exe %OUTDIR%\makelog.txt|| exit /b 1
-call :find_warnings "warning" %OUTDIR%\stage2a.txt "Stage 2a, Smokeview debug compilation"
+make -f ..\Makefile intel_win_64_db 1> %OUTDIR%\makesmvd.log 2>&1
+call :does_file_exist smokeview_win_64_db.exe %OUTDIR%\makesmvd.log|| exit /b 1
+call :find_warnings "warning" %OUTDIR%\makesmvd.log "Stage 2a, Smokeview debug compilation"
 
 echo             release
 
 cd %svnroot%\SMV\Build\intel_win_64
 erase *.obj *.mod smokeview_win_64.exe 1> Nul 2>&1
-make -f ..\Makefile intel_win_64 1> %OUTDIR%\makelog.txt 2>&1
+make -f ..\Makefile intel_win_64 1> %OUTDIR%\makesmvr.log 2>&1
 
-call :does_file_exist smokeview_win_64.exe %OUTDIR%\makelog.txt|| aexit /b 1
-call :find_warnings "warning" %OUTDIR%\stage2b.txt "Stage 2b, Smokeview release compilation"
+call :does_file_exist smokeview_win_64.exe %OUTDIR%\makesmvr.log|| aexit /b 1
+call :find_warnings "warning" %OUTDIR%\makesmvr.log "Stage 2b, Smokeview release compilation"
 
 :: -------------------------------------------------------------
 ::                           stage 3
@@ -276,26 +274,30 @@ if %have_icc% == 1 (
   echo             background
   cd %svnroot%\Utilities\background\intel_win_32
   erase *.obj *.mod *.exe 1> Nul 2>&1
-  make -f ..\Makefile intel_win_32 1> %OUTDIR%\makelog.txt 2>&1
-  call :does_file_exist background.exe %OUTDIR%\makelog.txt
+  make -f ..\Makefile intel_win_32 1> %OUTDIR%\makebackground.log 2>&1
+  call :does_file_exist background.exe %OUTDIR%\makebackground.log
+  call :find_warnings "warning" %OUTDIR%\makebackground.log "Stage 3, Building FDS/Smokeview utilities"
 
   echo             smokediff
   cd %svnroot%\Utilities\smokediff\intel_win_64
   erase *.obj *.mod *.exe 1> Nul 2>&1
-  make -f ..\Makefile intel_win_64 1> %OUTDIR%\makelog.txt 2>&1
-  call :does_file_exist smokediff_win_64.exe %OUTDIR%\makelog.txt
+  make -f ..\Makefile intel_win_64 1> %OUTDIR%\makesmokediff.log 2>&1
+  call :does_file_exist smokediff_win_64.exe %OUTDIR%\makesmokediff.log
+  call :find_warnings "warning" %OUTDIR%\makesmokediff.log "Stage 3, Building FDS/Smokeview utilities"
 
   echo             smokezip
   cd %svnroot%\Utilities\smokezip\intel_win_64
   erase *.obj *.mod *.exe 1> Nul 2>&1
-  make -f ..\Makefile intel_win_64 1> %OUTDIR%\makelog.txt 2>&1
-  call :does_file_exist smokezip_win_64.exe %OUTDIR%\makelog.txt|| exit /b 1
+  make -f ..\Makefile intel_win_64 1> %OUTDIR%\makesmokezip.log 2>&1
+  call :does_file_exist smokezip_win_64.exe %OUTDIR%\makesmokezip.log|| exit /b 1
+  call :find_warnings "warning" %OUTDIR%\makesmokezip.log "Stage 3, Building FDS/Smokeview utilities"
 
   echo             wind2fds
   cd %svnroot%\Utilities\wind2fds\intel_win_64
   erase *.obj *.mod *.exe 1> Nul 2>&1
-  make -f ..\Makefile intel_win_64 1> %OUTDIR%\makelog.txt 2>&1
-  call :does_file_exist wind2fds_win_64.exe %OUTDIR%\makelog.txt|| exit /b 1
+  make -f ..\Makefile intel_win_64 1> %OUTDIR%\makewind2fds.log 2>&1
+  call :does_file_exist wind2fds_win_64.exe %OUTDIR%\makewind2fds.log|| exit /b 1
+  call :find_warnings "warning" %OUTDIR%\makewind2fds.log "Stage 3, Building FDS/Smokeview utilities"
 ) else (
   call :is_file_installed background|| exit /b 1
   echo             background not built, using installed version
