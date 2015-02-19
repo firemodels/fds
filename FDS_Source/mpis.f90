@@ -285,6 +285,13 @@ USE PRECISION_PARAMETERS, ONLY : DPC, EB
                      mpi_send_char0   , mpi_send_char1
   end interface mpi_send
 
+  interface mpi_bsend
+    module procedure mpi_bsend_int0    , mpi_bsend_int1,     &
+                     mpi_bsend_real0   , mpi_bsend_real1,    &
+                     mpi_bsend_logical0, mpi_bsend_logical1, &
+                     mpi_bsend_char0   , mpi_bsend_char1
+  end interface mpi_bsend
+
   interface mpi_isend
     module procedure mpi_isend_int0    , mpi_isend_int1,     &
                      mpi_isend_real0   , mpi_isend_real1,    &
@@ -1241,6 +1248,98 @@ subroutine mpi_send_char1( data, n, datatype, iproc, itag, comm, ierror )
   dummy = n + datatype + iproc + itag + comm + ierror
 end subroutine
 
+subroutine mpi_bsend_int0( data, n, datatype, iproc, itag, comm, ierror )
+  implicit none
+  integer:: n
+  integer:: comm
+  integer:: data
+  integer:: datatype
+  integer:: ierror
+  integer:: iproc
+  integer:: itag
+  dummy = data + n + datatype + iproc + itag + comm + ierror
+end subroutine
+subroutine mpi_bsend_int1( data, n, datatype, iproc, itag, comm, ierror )
+  implicit none
+  integer:: n
+  integer:: comm
+  integer, dimension(:):: data
+  integer:: datatype
+  integer:: ierror
+  integer:: iproc
+  integer:: itag
+  dummy = data(1) + n + datatype + iproc + itag + comm + ierror
+end subroutine
+subroutine mpi_bsend_real0( data, n, datatype, iproc, itag, comm, ierror )
+  implicit none
+  integer:: n
+  integer:: comm
+  real(eb):: data
+  integer:: datatype
+  integer:: ierror
+  integer:: iproc
+  integer:: itag
+  dummy = data + n + datatype + iproc + itag + comm + ierror
+end subroutine
+subroutine mpi_bsend_real1( data, n, datatype, iproc, itag, comm, ierror )
+  implicit none
+  integer:: n
+  integer:: comm
+  real(eb), dimension(:):: data
+  integer:: datatype
+  integer:: ierror
+  integer:: iproc
+  integer:: itag
+  dummy = data(1) + n + datatype + iproc + itag + comm + ierror
+end subroutine
+subroutine mpi_bsend_logical0( data, n, datatype, iproc, itag, comm, ierror )
+  implicit none
+  integer:: n
+  integer:: comm
+  logical:: data
+  integer:: datatype
+  integer:: ierror
+  integer:: iproc
+  integer:: itag
+  dummyl = data
+  dummy = n + datatype + iproc + itag + comm + ierror
+end subroutine
+subroutine mpi_bsend_logical1( data, n, datatype, iproc, itag, comm, ierror )
+  implicit none
+  integer:: n
+  integer:: comm
+  logical, dimension(:):: data
+  integer:: datatype
+  integer:: ierror
+  integer:: iproc
+  integer:: itag
+  dummyl = data(1)
+  dummy = n + datatype + iproc + itag + comm + ierror
+end subroutine
+subroutine mpi_bsend_char0( data, n, datatype, iproc, itag, comm, ierror )
+  implicit none
+  integer:: n
+  integer:: comm
+  character:: data
+  integer:: datatype
+  integer:: ierror
+  integer:: iproc
+  integer:: itag
+  dummyc = data
+  dummy = n + datatype + iproc + itag + comm + ierror
+end subroutine
+subroutine mpi_bsend_char1( data, n, datatype, iproc, itag, comm, ierror )
+  implicit none
+  integer:: n
+  integer:: comm
+  character, dimension(:):: data
+  integer:: datatype
+  integer:: ierror
+  integer:: iproc
+  integer:: itag
+  dummyc = data(1)
+  dummy = n + datatype + iproc + itag + comm + ierror
+end subroutine
 
 subroutine mpi_irecv_int0 ( data, n, datatype, iproc, itag, comm, irequest, ierror )
   implicit none
