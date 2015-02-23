@@ -25,6 +25,7 @@ then
   echo " -m m - reserve m processes per node [default: 1]"
   echo " -M   - run only if number of process is greater than 1"
   echo " -n n - number of MPI processes per node [default: 1]"
+  echo " -N   - do not use socket or report binding options"
   echo " -o o - number of OpenMP threads per process [default: 1]"
   echo " -p p - number of MPI processes [default: 1] "
   echo " -q q - name of queue. [default: batch]"
@@ -83,10 +84,11 @@ nodelist=
 erroptionfile=
 RUN_SINGLE=1
 RUN_MULTI=1
+nosocket=
 
 # read in parameters from command line
 
-while getopts 'bcd:Ee:f:j:l:Mm:n:o:p:q:rsStw:v' OPTION
+while getopts 'bcd:Ee:f:j:l:Mm:Nn:o:p:q:rsStw:v' OPTION
 do
 case $OPTION  in
   b)
@@ -120,6 +122,9 @@ case $OPTION  in
   M)
    RUN_MULTI=1
    RUN_SINGLE=0 
+   ;;
+  N)
+   nosocket="1"
    ;;
   n)
    nmpi_processes_per_node="$OPTARG"
@@ -243,6 +248,10 @@ fi
 # the "none" queue does not use the queing system, so blank out SOCKET_OPTIONS and REPORT_BINDINGS
 
 if [ "$queue" == "none" ]; then
+ SOCKET_OPTION=
+ REPORT_BINDINGS=
+fi
+if [ "$nosocket" == "1" ]; then
  SOCKET_OPTION=
  REPORT_BINDINGS=
 fi
@@ -391,7 +400,6 @@ EOF
 
 if [ "$showinput" == "1" ] ; then
   cat $scriptfile
-  echo QSUB=$QSUB
   exit
 fi
 
