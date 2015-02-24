@@ -464,7 +464,7 @@ if exist %emailexe% (
       echo " stop: %stopdate% %stoptime% " >> %infofile%
       echo. >> %infofile%
       type %warninglogpc% >> %infofile%
-      %email% %mailToList% "firebot success with warnings on %COMPUTERNAME% %revisionstring%" %infofile%
+      call %email% %mailToList% "firebot success with warnings on %COMPUTERNAME% %revisionstring%" %infofile%
     ) else (
       echo "start: %startdate% %starttime% " > %infofile%
       echo " stop: %stopdate% %stoptime% " >> %infofile%
