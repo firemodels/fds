@@ -4,7 +4,7 @@
 :: $Revision$
 :: $Author$
 
-set DEBUG=%1
+set DEBUGOPT=%1
 
 :: -------------------------------------------------------------
 ::                         set environment
@@ -82,7 +82,7 @@ call :get_datetime startdate starttime
 
 call "%svnroot%\Utilities\Scripts\setup_intel_compilers.bat" 1> Nul 2>&1
 call %svnroot%\Utilities\Firebot\firebot_email_list.bat
-if "%DEBUG%" == "debug" (
+if "%DEBUGOPT%" == "debug" (
    set mailToList=%mailToFDSDebug%
 ) else (
    set mailToList=%mailToFDS%
