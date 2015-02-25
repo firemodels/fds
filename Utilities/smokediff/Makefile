@@ -37,8 +37,18 @@ no_target:
 # ------------- Win 64 ----------------
 #  64 bit windows
 
-intel_win_64 : CFLAGS    = -O2 /nologo -D X64 -D WIN32
-intel_win_64 : FFLAGS    = -O2 /nologo -fpp -D pp_cvf -D X64 /iface:stdref
+intel_win_64_db : FFLAGS    = /Od /iface:stdref /fpp /nologo /debug:full /extend_source:132 /warn:unused /warn:nointerfaces /Qtrapuv /fp:strict /fp:except /traceback /check:all /stand:f08
+intel_win_64_db : CFLAGS    = /Od /Wall /debug:full /W4 /ZI -D WIN32 -D pp_INTEL -D _CONSOLE -D X64 -D GLEW_STATIC -D PTW32_STATIC_LIB $(SMV_TESTFLAG)
+intel_win_64_db : CC        = icl
+intel_win_64_db : CPP       = icl
+intel_win_64_db : FC        = ifort
+intel_win_64_db : exe       = smokediff_win_64_db.exe
+
+intel_win_64_db : $(objwin)
+	$(CPP) -o $(bin)/$(exe) $(objwin)
+
+intel_win_64 : CFLAGS    = /O2 /nologo -D X64 -D WIN32
+intel_win_64 : FFLAGS    = /O2 -fpp -D WIN32 /nologo /iface:stdref
 intel_win_64 : CC        = icl
 intel_win_64 : CPP       = icl
 intel_win_64 : FC        = ifort

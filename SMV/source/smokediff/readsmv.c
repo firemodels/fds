@@ -20,10 +20,10 @@ int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
   int igrid,ipdim;
   int islice,iplot3d,iboundary;
   char buffer[255];
-  mesh *meshinfo;
-  slice *sliceinfo;
-  boundary *boundaryinfo;
-  plot3d *plot3dinfo;
+  mesh *meshinfo=NULL;
+  slice *sliceinfo=NULL;
+  boundary *boundaryinfo=NULL;
+  plot3d *plot3dinfo=NULL;
   int nmeshes, nsliceinfo, nplot3dinfo, nboundary_files;
   int itrnx, itrny, itrnz;
 
@@ -82,9 +82,9 @@ int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
 
   if(nmeshes>0&&nmeshes==ipdim){
     NewMemory((void **)&meshinfo,nmeshes*sizeof(mesh));
-    smvcase->meshinfo=meshinfo;
-    smvcase->nmeshes=nmeshes;
   }
+  smvcase->meshinfo = meshinfo;
+  smvcase->nmeshes = nmeshes;
 
   // allocate memory for slice file info
 
@@ -93,13 +93,13 @@ int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
     int i;
 
     NewMemory((void **)&sliceinfo,nsliceinfo*sizeof(slice));
-    smvcase->nsliceinfo=nsliceinfo;
-    smvcase->sliceinfo=sliceinfo;
     for(i=0;i<nsliceinfo;i++){
       slicei = sliceinfo + i;
       slicei->file=NULL;
     }
   }
+  smvcase->sliceinfo=sliceinfo;
+  smvcase->nsliceinfo = nsliceinfo;
 
   // allocate memory for boundary file info
 
@@ -108,21 +108,21 @@ int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
     int i;
 
     NewMemory((void **)&boundaryinfo,nboundary_files*sizeof(boundary));
-    smvcase->nboundary_files=nboundary_files;
-    smvcase->boundaryinfo=boundaryinfo;
     for(i=0;i<nboundary_files;i++){
       boundaryi = boundaryinfo + i;
       boundaryi->file=NULL;
     }
   }
+  smvcase->boundaryinfo = boundaryinfo;
+  smvcase->nboundary_files = nboundary_files;
 
   // allocate memory for plot3d file info
 
   if(nplot3dinfo>0){
     NewMemory((void **)&plot3dinfo,nplot3dinfo*sizeof(plot3d));
-    smvcase->nplot3dinfo=nplot3dinfo;
-    smvcase->plot3dinfo=plot3dinfo;
   }
+  smvcase->nplot3dinfo = nplot3dinfo;
+  smvcase->plot3dinfo = plot3dinfo;
 
   islice=0;
   iplot3d=0;

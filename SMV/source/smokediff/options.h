@@ -100,7 +100,6 @@
 
 #ifdef WIN32
 #define pp_noappend
-#define pp_cvf
 #endif
 
 // used to access fortran routines from C
