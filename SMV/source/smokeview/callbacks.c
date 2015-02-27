@@ -1503,7 +1503,7 @@ void keyboard(unsigned char key, int flag){
       case GLUT_ACTIVE_ALT:
       case GLUT_ACTIVE_CTRL:
       default:
-        if(ntotal_blockages>0||isZoneFireModel==0){
+        if(ntotal_blockages>0||isZoneFireModel==0||(isZoneFireModel==1&&ntrnx>0)){
           switch(visGrid){
             case noGridnoProbe:
               visGrid=GridnoProbe;
