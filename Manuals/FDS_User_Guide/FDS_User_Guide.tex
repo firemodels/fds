@@ -4576,7 +4576,7 @@ If the gas species is not included in Table~\ref{tab:gasspecies}, then you must 
 
 \subsubsection{Conductivity}
 
-Conductivity can be specified in one of two ways.  First, it can be explicitly defined using {\ct CONDUCTIVITY} (\si{W/(m.K)}) with optional temperature dependence specified using {\ct CONDUCTIVITY\_RAMP}.  Second, it can be computed by FDS using {\ct MW}, {\ct PR} on {\ct MISC}, and the Lennard-Jones potential parameters $\sigma$ ({\ct SIGMALJ}) and $\epsilon/k$ ({\ct EPSILONKLJ}).  If no inputs are specified, FDS will compute the conductivity using {\ct MW} and the Lennard-Jones parameters for air.
+Conductivity can be specified in one of two ways.  First, it can be explicitly defined using {\ct CONDUCTIVITY} (\si{W/(m.K)}) with optional temperature dependence specified using {\ct RAMP\_K}.  Second, it can be computed by FDS using {\ct MW}, {\ct PR} on {\ct MISC}, and the Lennard-Jones potential parameters $\sigma$ ({\ct SIGMALJ}) and $\epsilon/k$ ({\ct EPSILONKLJ}).  If no inputs are specified, FDS will compute the conductivity using {\ct MW} and the Lennard-Jones parameters for air.
 
 \subsubsection{Diffusivity}
 
