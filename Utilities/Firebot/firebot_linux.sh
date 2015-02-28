@@ -43,7 +43,6 @@ fi
 
 # Load mailing list for status report
 source $FIREBOT_DIR/firebot_email_list.sh
-mailToFDS="$mailToFDS $mailFromFDS"
 
 function usage {
 echo "firebot.sh [ -q queue_name -r revision_number -s -u svn_username -v max_validation_processes -y ]"
@@ -96,7 +95,7 @@ case $OPTION in
    MAX_VALIDATION_PROCESSES="$OPTARG"
    LAUNCH_MORE_CASES=1
    # Set Validationbot email list
-   mailToFDS="$mailToFDS_verbose $mailFromFDS"
+   mailToFDS="$mailToFDS_verbose"
    ;;
   y)
    RUN_AS_ANOTHER_USER=true
