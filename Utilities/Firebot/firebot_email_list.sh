@@ -1,11 +1,5 @@
 #!/bin/bash
 
-# From address for firebot email reports
-mailFromFDS="-- -f gforney@nist.gov"
-
-# From address for smokebot email reports
-mailFromSMV="-- -f gforney@nist.gov"
-
 # Mailing list for Smokebot status report
 mailToSMV="gforney@gmail.com"
 

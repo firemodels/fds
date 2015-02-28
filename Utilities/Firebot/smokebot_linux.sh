@@ -126,7 +126,6 @@ mailTo=$mailToSMV
 if [[ "$LAST_FDS_FAILED" == "1" ]] ; then
   mailTo=$mailToFDS
 fi
-mailTo="$mailTo $mailFromSMV"
 
 JOBPREFIX=SB_
 
@@ -1199,7 +1198,7 @@ save_build_status()
 email_build_status()
 {
    if [[ "$THIS_FDS_FAILED" == "1" ]] ; then
-     mailTo="$mailToFDS $mailFromSMV"
+     mailTo="$mailToFDS"
    fi
    echo $THIS_FDS_FAILED>$FDS_STATUS_FILE
    stop_time=`date`
