@@ -27,6 +27,12 @@ USE SOOT_ROUTINES, ONLY: CALC_DEPOSITION,SURFACE_OXIDATION
 REAL(EB) :: TNOW
 REAL(EB), INTENT(IN) :: T
 INTEGER, INTENT(IN) :: NM
+INTEGER :: IIG,JJG,KKG,IW
+TYPE(ONE_D_M_AND_E_XFER_TYPE), POINTER :: ONE_D
+TYPE(WALL_TYPE), POINTER :: WC
+REAL(EB), POINTER, DIMENSION(:,:,:) :: RHOP
+REAL(EB), POINTER, DIMENSION(:,:,:,:) :: ZZP
+REAL(EB), POINTER :: UWP
 
 IF (EVACUATION_ONLY(NM)) RETURN
 
@@ -42,6 +48,42 @@ CALL SPECIES_BC(T,NM)
 CALL DENSITY_BC
 IF (HVAC_SOLVE .AND. .NOT.INITIALIZATION_PHASE) CALL HVAC_BC
 IF (N_FACE>0 .AND. .NOT.INITIALIZATION_PHASE)   CALL GEOM_BC
+
+! After all the boundary conditions have been applied, check the special case where gases are drawn into a solid boundary. 
+! In this case, set temperature, species, and density to the near gas cell values.
+
+IF (PREDICTOR) THEN
+   RHOP => RHOS
+   ZZP  => ZZS
+ELSE
+   RHOP => RHO
+   ZZP  => ZZ
+ENDIF
+
+WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
+
+   WC=>WALL(IW)
+
+   WC%TMP_F_GAS = WC%ONE_D%TMP_F  ! Unless otherwise indicated, the two wall temperatures are the same.
+
+   IF (WC%BOUNDARY_TYPE/=SOLID_BOUNDARY) CYCLE WALL_LOOP
+
+   IF (PREDICTOR) THEN
+      UWP => WC%ONE_D%UWS
+   ELSE
+      UWP => WC%ONE_D%UW
+   ENDIF
+
+   IF (UWP<=0._EB) CYCLE WALL_LOOP  ! The lines below only apply to solid surface that draw gases in.
+
+   IIG = WC%ONE_D%IIG
+   JJG = WC%ONE_D%JJG
+   KKG = WC%ONE_D%KKG
+   WC%TMP_F_GAS = TMP(IIG,JJG,KKG)
+   WC%ZZ_F(1:N_TRACKED_SPECIES) = ZZP(IIG,JJG,KKG,1:N_TRACKED_SPECIES)
+   WC%RHO_F = RHOP(IIG,JJG,KKG)
+
+ENDDO WALL_LOOP
 
 TUSED(6,NM)=TUSED(6,NM)+SECOND()-TNOW
 END SUBROUTINE WALL_BC
