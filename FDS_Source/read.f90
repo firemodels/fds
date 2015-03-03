@@ -7317,8 +7317,6 @@ MESH_LOOP: DO NM=1,NMESHES
                   CYCLE I_MULT_LOOP
                ENDIF
 
-               IF (OB%I1==OB%I2 .OR. OB%J1==OB%J2 .OR. OB%K1==OB%K2) OB%THIN = .TRUE.
-
                ! Check to see if obstruction is completely embedded in another
 
                EMBEDDED = .FALSE.
@@ -7401,24 +7399,6 @@ MESH_LOOP: DO NM=1,NMESHES
                   IF (NNN==0) CYCLE FACE_LOOP
                   IF (SURFACE(OB%SURF_INDEX(NNN))%BURN_AWAY) OB%CONSUMABLE = .TRUE.
                ENDDO FACE_LOOP
-
-               ! If OBST is THIN disallow velocity bc
-
-               IF (OB%THIN) THEN
-                  FACE_LOOP_2: DO NNN=-3,3
-                     IF (NNN==0) CYCLE FACE_LOOP_2
-                     IF (ABS(NNN)==1 .AND. (OB%J1==OB%J2 .OR. OB%K1==OB%K2)) CYCLE FACE_LOOP_2
-                     IF (ABS(NNN)==2 .AND. (OB%I1==OB%I2 .OR. OB%K1==OB%K2)) CYCLE FACE_LOOP_2
-                     IF (ABS(NNN)==3 .AND. (OB%I1==OB%I2 .OR. OB%J1==OB%J2)) CYCLE FACE_LOOP_2
-                     IF (ABS(SURFACE(OB%SURF_INDEX(NNN))%VEL)             >TWO_EPSILON_EB .OR. &
-                         ABS(SURFACE(OB%SURF_INDEX(NNN))%VOLUME_FLOW)     >TWO_EPSILON_EB .OR. &
-                         ABS(SURFACE(OB%SURF_INDEX(NNN))%MASS_FLUX_TOTAL) >TWO_EPSILON_EB) THEN
-                        WRITE(MESSAGE,'(A,A,A)') 'ERROR: SURF_ID ',TRIM(SURFACE(OB%SURF_INDEX(NNN))%ID), &
-                           ' cannot attach velocity boundary to thin obstruction'
-                        CALL SHUTDOWN(MESSAGE) ; RETURN
-                     ENDIF
-                  ENDDO FACE_LOOP_2
-               ENDIF
 
                ! Calculate the increase or decrease in the obstruction volume over the user-specified
 

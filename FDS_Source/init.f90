@@ -855,6 +855,8 @@ INTEGER, POINTER :: IBP1, JBP1, KBP1,IBAR, JBAR, KBAR, N_EDGES
 INTEGER, ALLOCATABLE, DIMENSION(:) :: IW_EXPORT
 REAL(EB),POINTER :: XS,XF,YS,YF,ZS,ZF
 TYPE (WALL_TYPE), POINTER :: WC
+TYPE (MESH_TYPE), POINTER :: OM
+LOGICAL :: SOLID_CELL
 
 IERR = 0
 M => MESHES(NM)
@@ -900,6 +902,32 @@ IF (N_ZONE > 0) THEN
       ENDDO
    ENDDO N_ZONE_LOOP
 ENDIF
+
+! Loop through all wall cells and check if the boundary conditions are appropriate
+
+WALL_LOOP_0: DO IW=1,M%N_EXTERNAL_WALL_CELLS+M%N_INTERNAL_WALL_CELLS
+
+   WC => M%WALL(IW)
+   SF => SURFACE(WC%SURF_INDEX)
+
+   IF (M%WALL(IW)%NOM>0) THEN
+      OM => MESHES(M%WALL(IW)%NOM)
+      IC = OM%CELL_INDEX(WC%NOM_IB(1),WC%NOM_IB(2),WC%NOM_IB(3))
+      SOLID_CELL = OM%SOLID(IC)
+   ELSE
+      IC =  M%CELL_INDEX(WC%ONE_D%II,WC%ONE_D%JJ,WC%ONE_D%KK)
+      SOLID_CELL = M%SOLID(IC)
+   ENDIF
+
+   IF (.NOT.SOLID_CELL) THEN
+      IF (ABS(WC%UW0)>TWO_EPSILON_EB .OR. ANY(SF%LEAK_PATH>=0) .OR.  SF%PYROLYSIS_MODEL/=PYROLYSIS_NONE) THEN
+         WRITE(LU_ERR,'(A,A,A)') 'ERROR: SURF ',TRIM(SF%ID),' cannot be applied to a thin obstruction'
+         STOP_STATUS = SETUP_STOP
+         RETURN
+      ENDIF
+   ENDIF
+
+ENDDO WALL_LOOP_0
 
 ! Determine back wall index for exposed surfaces. Only assign BACK_INDEX to wall cells that are not attached 
 ! to the exterior boundary of the computational domain.
