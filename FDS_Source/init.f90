@@ -921,7 +921,8 @@ WALL_LOOP_0: DO IW=1,M%N_EXTERNAL_WALL_CELLS+M%N_INTERNAL_WALL_CELLS
 
    IF (.NOT.SOLID_CELL) THEN
       IF (ABS(WC%UW0)>TWO_EPSILON_EB .OR. ANY(SF%LEAK_PATH>=0) .OR.  SF%PYROLYSIS_MODEL/=PYROLYSIS_NONE) THEN
-         WRITE(LU_ERR,'(A,A,A)') 'ERROR: SURF ',TRIM(SF%ID),' cannot be applied to a thin obstruction'
+         WRITE(LU_ERR,'(A,A,A,I4)') 'ERROR: SURF ',TRIM(SF%ID),' cannot be applied to a thin obstruction, OBST #',&
+                                    M%OBSTRUCTION(WC%OBST_INDEX)%ORDINAL
          STOP_STATUS = SETUP_STOP
          RETURN
       ENDIF
