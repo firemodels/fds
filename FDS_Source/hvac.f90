@@ -2001,7 +2001,7 @@ VENT_CUSTOM_AMBIENT: DO NN=1,N_DUCTNODES
             ENDIF      
             DN%RHO   =  DN%P_OLD/(TMPA*RSUM0)            
          ELSE
-            DN%P      = P_INF
+            DN%P_OLD      = P_INF
             DN%RHO   =  DN%P/(DN%TMP*RSUM0)            
          ENDIF   
          CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET,DN%CP,DN%TMP)      
