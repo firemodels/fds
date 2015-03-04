@@ -240,12 +240,12 @@ ENDDO
 
 ! Initialize unstructured geometry
 
-!IF (N_FACE>0) THEN
+IF (N_FACE>0) THEN
    DO NM=1,NMESHES
       IF (PROCESS(NM)/=MYID) CYCLE
       CALL INIT_IBM(0._EB,NM)
    ENDDO
-!ENDIF
+ENDIF
 
 ! Initialize the flow field with random noise to eliminate false symmetries
 
@@ -1050,12 +1050,12 @@ IF (PRES_METHOD == 'SCARC') CALL SCARC_TIMINGS
 
 ! Finish unstructured geometry
 
-!IF (N_FACE>0) THEN
+IF (N_FACE>0) THEN
    DO NM=1,NMESHES
       IF (PROCESS(NM)/=MYID) CYCLE
       CALL INIT_IBM(T(NM),NM)
    ENDDO
-!ENDIF
+ENDIF
 
 CALL END_FDS
 
