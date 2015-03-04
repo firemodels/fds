@@ -1334,6 +1334,11 @@ XMU = 0._EB         ! No Helmholtz equation
 ! LBC = 3, derivative of solution is specified at XS (Neumann) and XF (Neumann).
 !
 ! LBC = 4, derivative of solution is specified at XS (Neumann) and solution is specified at XF (Dirichlet).
+!
+! LBC = 5, the solution is unspecified at r = RS = 0 and the solution is specified at r = RF.
+!
+! LBC = 6, if the solution is unspecified at r = RS = 0 and the derivative of the solution with respect to r is specified
+!          at r = RF.
 
 LBC = FISHPAK_BC_NEUMANN_NEUMANN
 MBC = FISHPAK_BC_NEUMANN_NEUMANN
