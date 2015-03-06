@@ -29,7 +29,6 @@ ulimit -s unlimited
 # Additional definitions
 FIREBOT_DIR="$FIREBOT_HOME_DIR/firebot"
 FDS_SVNROOT="$FIREBOT_HOME_DIR/FDS-SMV"
-CFAST_SVNROOT="$FIREBOT_HOME_DIR/cfast"
 OUTPUT_DIR="$FIREBOT_DIR/output"
 HISTORY_DIR="$FIREBOT_DIR/history"
 TIME_LOG=$OUTPUT_DIR/timings
@@ -206,60 +205,6 @@ delete_unversioned_files()
 #  = Firebot Build Stages =
 #  ========================
 #  ========================
-
-#  ===================================
-#  = Stage 0 - External dependencies =
-#  ===================================
-
-update_and_compile_cfast()
-{
-   cd $FIREBOT_HOME_DIR
-
-   # Check to see if CFAST repository exists
-   if [ -e "$CFAST_SVNROOT" ]
-   # If yes, then update the CFAST repository and compile CFAST
-   then
-      echo "Updating and compiling CFAST:" >> $OUTPUT_DIR/stage0_cfast
-      
-      # Clean unversioned and modified files
-      cd $CFAST_SVNROOT/CFAST
-      svn revert -Rq *
-      delete_unversioned_files
-      
-      # Update to latest SVN revision
-      svn update >> $OUTPUT_DIR/stage0_cfast 2>&1
-      
-      # Build CFAST
-      cd $CFAST_SVNROOT/CFAST/intel_linux_64
-      make -f ../makefile clean &> /dev/null
-      ./make_cfast.sh >> $OUTPUT_DIR/stage0_cfast 2>&1
-   # If no, then checkout the CFAST repository and compile CFAST
-   else
-      echo "Downloading and compiling CFAST:" >> $OUTPUT_DIR/stage0_cfast
-      mkdir -p $CFAST_SVNROOT
-      cd $CFAST_SVNROOT
-
-      # Checkout latest CFAST SVN revision
-      svn co http://cfast.googlecode.com/svn/trunk/cfast/trunk/CFAST CFAST >> $OUTPUT_DIR/stage0_cfast 2>&1
-      
-      # Build CFAST
-      cd $CFAST_SVNROOT/CFAST/intel_linux_64
-      make -f ../makefile clean &> /dev/null
-      ./make_cfast.sh >> $OUTPUT_DIR/stage0_cfast 2>&1
-   fi
-  
-   # Check for errors in CFAST compilation
-   cd $CFAST_SVNROOT/CFAST/intel_linux_64
-   if [ -e "cfast6_linux_64" ]
-   then
-      stage0_success=true
-   else
-      echo "Errors from Stage 0 - CFAST:" >> $ERROR_LOG
-      echo "CFAST failed to compile" >> $ERROR_LOG
-      cat $OUTPUT_DIR/stage0_cfast >> $ERROR_LOG
-      echo "" >> $ERROR_LOG
-   fi
-}
 
 #  ============================
 #  = Stage 1 - SVN operations =
@@ -529,15 +474,6 @@ run_verification_cases_debug()
 #   ./Run_FDS_Cases.sh -M -o 1 -d -m 1 -q $QUEUE >> $OUTPUT_DIR/stage3 2>&1
    echo "" >> $OUTPUT_DIR/stage3 2>&1
 
-   # Start running all SMV verification cases in delayed stop debug mode
-   cd $FDS_SVNROOT/Verification/scripts
-   # Run FDS with delayed stop files (with 1 OpenMP thread and 1 iteration)
-   echo 'Running SMV verification cases:' >> $OUTPUT_DIR/stage3 2>&1
-   ./Run_SMV_Cases.sh -o 1 -d -m 1 -q $QUEUE >> $OUTPUT_DIR/stage3 2>&1
-#   ./Run_SMV_Cases.sh -S -o 1 -d -m 1 -q $QUEUE >> $OUTPUT_DIR/stage3 2>&1
-#   ./Run_SMV_Cases.sh -M -o 1 -d -m 1 -q $QUEUE >> $OUTPUT_DIR/stage3 2>&1
-   echo "" >> $OUTPUT_DIR/stage3 2>&1
-
    # Wait for all verification cases to end
    wait_cases_debug_end 'verification'
 
@@ -728,46 +664,12 @@ compile_smv_utilities()
    echo 'Building Smokeview libraries:' >> $OUTPUT_DIR/stage5pre 2>&1
    ./makelibs.sh >> $OUTPUT_DIR/stage5pre 2>&1
    echo "" >> $OUTPUT_DIR/stage5pre 2>&1
-
-   # background:
-   cd $FDS_SVNROOT/Utilities/background/intel_linux_32
-   echo 'Compiling background:' >> $OUTPUT_DIR/stage5pre 2>&1
-   ./make_background.sh >> $OUTPUT_DIR/stage5pre 2>&1
-   echo "" >> $OUTPUT_DIR/stage5pre 2>&1
-
-   # smokezip:
-   cd $FDS_SVNROOT/Utilities/smokezip/intel_linux_64
-   echo 'Compiling smokezip:' >> $OUTPUT_DIR/stage5pre 2>&1
-   ./make_zip.sh >> $OUTPUT_DIR/stage5pre 2>&1
-   echo "" >> $OUTPUT_DIR/stage5pre 2>&1
-   
-   # smokediff:
-   cd $FDS_SVNROOT/Utilities/smokediff/intel_linux_64
-   echo 'Compiling smokediff:' >> $OUTPUT_DIR/stage5pre 2>&1
-   ./make_diff.sh >> $OUTPUT_DIR/stage5pre 2>&1
-   echo "" >> $OUTPUT_DIR/stage5pre 2>&1
-
-   # wind2fds:
-   cd $FDS_SVNROOT/Utilities/wind2fds/intel_linux_64
-   echo 'Compiling wind2fds:' >> $OUTPUT_DIR/stage5pre 2>&1
-   ./make_wind.sh >> $OUTPUT_DIR/stage5pre 2>&1
-   echo "" >> $OUTPUT_DIR/stage5pre 2>&1
 }
 
 check_smv_utilities()
 {
-   # Check for errors in SMV utilities compilation
-   cd $FDS_SVNROOT
-   if [ -e "$FDS_SVNROOT/Utilities/smokezip/intel_linux_64/smokezip_linux_64" ]  && \
-      [ -e "$FDS_SVNROOT/Utilities/smokediff/intel_linux_64/smokediff_linux_64" ]  && \
-      [ -e "$FDS_SVNROOT/Utilities/wind2fds/intel_linux_64/wind2fds_linux_64" ]
-   then
-      stage5pre_success=true
-   else
-      echo "Errors from Stage 5pre - Compile SMV utilities:" >> $ERROR_LOG
-      cat $OUTPUT_DIR/stage5pre >> $ERROR_LOG
-      echo "" >> $ERROR_LOG
-   fi
+   # nothing to check
+   stage5pre_success=true
 }
 
 #  =================================================================
@@ -833,15 +735,6 @@ run_verification_cases_release()
    ./Run_FDS_Cases.sh -o 1 -q $QUEUE >> $OUTPUT_DIR/stage5 2>&1
 #   ./Run_FDS_Cases.sh -S -o 1 -q $QUEUE >> $OUTPUT_DIR/stage5 2>&1
 #   ./Run_FDS_Cases.sh -M -o 1 -q $QUEUE >> $OUTPUT_DIR/stage5 2>&1
-   echo "" >> $OUTPUT_DIR/stage5 2>&1
-
-   # Start running all SMV verification cases
-   cd $FDS_SVNROOT/Verification/scripts
-   # Run FDS with 1 OpenMP thread
-   echo 'Running SMV verification cases:' >> $OUTPUT_DIR/stage5 2>&1
-   ./Run_SMV_Cases.sh -o 1 -q $QUEUE >> $OUTPUT_DIR/stage5 2>&1
-#   ./Run_SMV_Cases.sh -S -o 1 -q $QUEUE >> $OUTPUT_DIR/stage5 2>&1
-#   ./Run_SMV_Cases.sh -M -o 1 -q $QUEUE >> $OUTPUT_DIR/stage5 2>&1
    echo "" >> $OUTPUT_DIR/stage5 2>&1
 
    # Wait for all verification cases to end
@@ -923,45 +816,6 @@ check_compile_smv_db()
    fi
 }
 
-#  =============================================
-#  = Stage 6b - Make SMV pictures (debug mode) =
-#  =============================================
-
-make_smv_pictures_db()
-{
-   # Run Make SMV Pictures script (debug mode)
-   cd $FDS_SVNROOT/Verification/scripts
-   ./Make_SMV_Pictures.sh -d 2>&1 | grep -v FreeFontPath &> $OUTPUT_DIR/stage6b
-}
-
-check_smv_pictures_db()
-{
-   # Scan for and report any errors in make SMV pictures process
-   cd $FIREBOT_DIR
-   if [[ `grep -I -E "Segmentation|Error" $OUTPUT_DIR/stage6b` == "" ]]
-   then
-      stage6b_success=true
-   else
-      grep -I -E -A 5 -B 5 "Segmentation|Error" $OUTPUT_DIR/stage6b > $OUTPUT_DIR/stage6b_errors
-
-      echo "Errors from Stage 6b - Make SMV pictures (debug mode):" >> $ERROR_LOG
-      cat $OUTPUT_DIR/stage6b_errors >> $ERROR_LOG
-      echo "" >> $ERROR_LOG
-   fi
-
-   # Scan for and report any warnings in make SMV pictures process
-   cd $FIREBOT_DIR
-   if [[ `grep -I -E "Warning" $OUTPUT_DIR/stage6b` == "" ]]
-   then
-      # Continue along
-      :
-   else
-      echo "Warnings from Stage 6b - Make SMV pictures (debug mode):" >> $WARNING_LOG
-      grep -I -E "Warning" $OUTPUT_DIR/stage6b >> $WARNING_LOG
-      echo "" >> $WARNING_LOG
-   fi
-}
-
 #  ==================================
 #  = Stage 6c - Compile SMV release =
 #  ==================================
@@ -995,45 +849,6 @@ check_compile_smv()
    else
       echo "Warnings from Stage 6c - Compile SMV release:" >> $WARNING_LOG
       grep -A 5 -E 'warning|remark' ${FIREBOT_DIR}/output/stage6c | grep -v 'feupdateenv is not implemented' | grep -v 'lcilkrts linked' >> $WARNING_LOG
-      echo "" >> $WARNING_LOG
-   fi
-}
-
-#  ===============================================
-#  = Stage 6d - Make SMV pictures (release mode) =
-#  ===============================================
-
-make_smv_pictures()
-{
-   # Run Make SMV Pictures script (release mode)
-   cd $FDS_SVNROOT/Verification/scripts
-   ./Make_SMV_Pictures.sh 2>&1 | grep -v FreeFontPath &> $OUTPUT_DIR/stage6d
-}
-
-check_smv_pictures()
-{
-   # Scan for and report any errors in make SMV pictures process
-   cd $FIREBOT_DIR
-   if [[ `grep -I -E "Segmentation|Error" $OUTPUT_DIR/stage6d` == "" ]]
-   then
-      stage6d_success=true
-   else
-      grep -I -E -A 5 -B 5 "Segmentation|Error" $OUTPUT_DIR/stage6d >  $OUTPUT_DIR/stage6d_errors
-
-      echo "Errors from Stage 6d - Make SMV pictures (release mode):" >> $ERROR_LOG
-      cat $OUTPUT_DIR/stage6d >> $ERROR_LOG
-      echo "" >> $ERROR_LOG
-   fi
-
-   # Scan for and report any warnings in make SMV pictures process
-   cd $FIREBOT_DIR
-   if [[ `grep -I -E "Warning" $OUTPUT_DIR/stage6d` == "" ]]
-   then
-      # Continue along
-      :
-   else
-      echo "Warnings from Stage 6d - Make SMV pictures (release mode):" >> $WARNING_LOG
-      grep -I -E "Warning" $OUTPUT_DIR/stage6d >> $WARNING_LOG
       echo "" >> $WARNING_LOG
    fi
 }
@@ -1324,39 +1139,6 @@ make_fds_configuration_management_plan()
    check_guide $OUTPUT_DIR/stage8_fds_configuration_management_plan $FDS_SVNROOT/Manuals/FDS_Configuration_Management_Plan/FDS_Configuration_Management_Plan.pdf 'FDS Configuration Management Plan'
 }
 
-make_smv_user_guide()
-{
-   cd $FDS_SVNROOT/Manuals/SMV_User_Guide
-
-   # Build SMV User Guide
-   ./make_guide.sh &> $OUTPUT_DIR/stage8_smv_user_guide
-
-   # Check guide for completion and copy to website if successful
-   check_guide $OUTPUT_DIR/stage8_smv_user_guide $FDS_SVNROOT/Manuals/SMV_User_Guide/SMV_User_Guide.pdf 'SMV User Guide'
-}
-
-make_smv_technical_guide()
-{
-   cd $FDS_SVNROOT/Manuals/SMV_Technical_Reference_Guide
-
-   # Build SMV Technical Guide
-   ./make_guide.sh &> $OUTPUT_DIR/stage8_smv_technical_guide
-
-   # Check guide for completion and copy to website if successful
-   check_guide $OUTPUT_DIR/stage8_smv_technical_guide $FDS_SVNROOT/Manuals/SMV_Technical_Reference_Guide/SMV_Technical_Reference_Guide.pdf 'SMV Technical Reference Guide'
-}
-
-make_smv_verification_guide()
-{
-   cd $FDS_SVNROOT/Manuals/SMV_Verification_Guide
-
-   # Build SMV Verification Guide
-   ./make_guide.sh &> $OUTPUT_DIR/stage8_smv_verification_guide
-
-   # Check guide for completion and copy to website if successful
-   check_guide $OUTPUT_DIR/stage8_smv_verification_guide $FDS_SVNROOT/Manuals/SMV_Verification_Guide/SMV_Verification_Guide.pdf 'SMV Verification Guide'
-}
-
 #  =====================================================
 #  = Build status reporting - email and save functions =
 #  =====================================================
@@ -1521,23 +1303,9 @@ if [ $FIREBOT_MODE == "verification" ] ; then
    compile_smv_db
    check_compile_smv_db
 
-   ### Stage 6b ###
-   # Depends on successful SMV debug compile
-   if [[ $stage6a_success ]] ; then
-      make_smv_pictures_db
-      check_smv_pictures_db
-   fi
-
    ### Stage 6c ###
    compile_smv
    check_compile_smv
-
-   ### Stage 6d ###
-   # Depends on successful SMV compile
-   if [[ $stage6c_success ]] ; then
-      make_smv_pictures
-      check_smv_pictures
-   fi
 
    ### Stage 6e ###
    # Depends on successful SMV compile
@@ -1568,9 +1336,6 @@ if [ $FIREBOT_MODE == "verification" ] ; then
    make_fds_verification_guide
    make_fds_technical_guide
    make_fds_validation_guide
-   make_smv_user_guide
-   make_smv_technical_guide
-   make_smv_verification_guide
    make_fds_configuration_management_plan
 fi
 
