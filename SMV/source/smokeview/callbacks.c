@@ -387,7 +387,7 @@ void mouse_edit_blockage(int button, int state, int x, int y){
         ASSERT(FFALSE);
         break;
     }
-    update_blockvals(SELECT_BLOCKS);
+    Update_Blockvals(SELECT_BLOCKS);
   }
 }
 
@@ -848,7 +848,10 @@ void mouse_CB(int button, int state, int xm, int ym){
     /* edit blockages */
 
     if(button==GLUT_LEFT_BUTTON){
-      if(blockageSelect==1)mouse_edit_blockage(button,state,xm,ym);
+      if(blockageSelect == 1){
+        get_geom_dialog_state();
+        if(structured_isopen == 1 && unstructured_isopen == 0)mouse_edit_blockage(button, state, xm, ym);
+      }
       if(edittour==1&&blockageSelect==0)mouse_edit_tour(button,state,xm,ym);
       if(select_avatar==1)mouse_select_avatar(button,state,xm,ym);
       if(select_device==1)mouse_select_device(button,state,xm,ym);
@@ -907,8 +910,9 @@ void mouse_CB(int button, int state, int xm, int ym){
     mouse_down_xy0[1]=ym;
   }
   glutPostRedisplay();
-  if(blockageSelect==1){
-    Display_CB();
+  if(blockageSelect == 1){
+    get_geom_dialog_state();
+    if(structured_isopen == 1 && unstructured_isopen == 0)Display_CB();
   }
 }
 

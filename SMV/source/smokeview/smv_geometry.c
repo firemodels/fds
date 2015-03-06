@@ -148,7 +148,7 @@ void drawfilled2tetra(float *v1, float *v2, float *v3, float *v4,
      if(rgb0color!=NULL)glColor3ubv(rgb0color);
     VECDIFF3(diff1,v1,v2);
     VECDIFF3(diff2,v4,v2);
-    CROSS(cross,diff1,diff2);
+    CROSS(cross,diff2,diff1);
     glNormal3f(cross[0],cross[1],cross[2]);
     glVertex3fv(v1);
     glVertex3fv(v2);
@@ -156,7 +156,7 @@ void drawfilled2tetra(float *v1, float *v2, float *v3, float *v4,
 
     VECDIFF3(diff1,v1,v4);
     VECDIFF3(diff2,v2,v4);
-    CROSS(cross,diff1,diff2);
+    CROSS(cross,diff2,diff1);
     glNormal3f(cross[0],cross[1],cross[2]);
     glVertex3fv(v1);
     glVertex3fv(v4);
@@ -167,7 +167,7 @@ void drawfilled2tetra(float *v1, float *v2, float *v3, float *v4,
     if(rgb1color!=NULL)glColor3ubv(rgb1color);
     VECDIFF3(diff1,v2,v3);
     VECDIFF3(diff2,v4,v3);
-    CROSS(cross,diff1,diff2);
+    CROSS(cross,diff2,diff1);
     glNormal3f(cross[0],cross[1],cross[2]);
     glVertex3fv(v2);
     glVertex3fv(v3);
@@ -175,7 +175,7 @@ void drawfilled2tetra(float *v1, float *v2, float *v3, float *v4,
 
     VECDIFF3(diff1,v2,v4);
     VECDIFF3(diff2,v3,v4);
-    CROSS(cross,diff1,diff2);
+    CROSS(cross,diff2,diff1);
     glNormal3f(cross[0],cross[1],cross[2]);
     glVertex3fv(v2);
     glVertex3fv(v4);
@@ -186,7 +186,7 @@ void drawfilled2tetra(float *v1, float *v2, float *v3, float *v4,
     if(rgb2color!=NULL)glColor3ubv(rgb2color);
     VECDIFF3(diff1,v4,v1);
     VECDIFF3(diff2,v3,v4);
-    CROSS(cross,diff1,diff2);
+    CROSS(cross,diff2,diff1);
     glNormal3f(cross[0],cross[1],cross[2]);
     glVertex3fv(v1);
     glVertex3fv(v4);
@@ -194,7 +194,7 @@ void drawfilled2tetra(float *v1, float *v2, float *v3, float *v4,
 
     VECDIFF3(diff1,v1,v3);
     VECDIFF3(diff2,v4,v3);
-    CROSS(cross,diff1,diff2);
+    CROSS(cross,diff2,diff1);
     glNormal3f(cross[0],cross[1],cross[2]);
     glVertex3fv(v1);
     glVertex3fv(v3);
@@ -205,7 +205,7 @@ void drawfilled2tetra(float *v1, float *v2, float *v3, float *v4,
     if(rgb3color!=NULL)glColor3ubv(rgb3color);
     VECDIFF3(diff1,v1,v3);
     VECDIFF3(diff2,v2,v3);
-    CROSS(cross,diff1,diff2);
+    CROSS(cross,diff2,diff1);
     glNormal3f(cross[0],cross[1],cross[2]);
     glVertex3fv(v1);
     glVertex3fv(v3);
@@ -213,7 +213,7 @@ void drawfilled2tetra(float *v1, float *v2, float *v3, float *v4,
 
     VECDIFF3(diff1,v1,v2);
     VECDIFF3(diff2,v3,v2);
-    CROSS(cross,diff1,diff2);
+    CROSS(cross,diff2,diff1);
     glNormal3f(cross[0],cross[1],cross[2]);
     glVertex3fv(v1);
     glVertex3fv(v2);

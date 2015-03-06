@@ -27,6 +27,7 @@ extern "C" void Volume_CB(int var);
 #define RADIO_WALL 32
 #define SAVE_SETTINGS 33
 #define VISAXISLABELS 34
+#define SHOW_TETRA 35
 
 GLUI_Panel *PANEL_geom_surface=NULL;
 GLUI_Panel *PANEL_geom_interior=NULL;
@@ -78,6 +79,7 @@ GLUI_Rollout *ROLLOUT_structured=NULL;
 GLUI_Rollout *ROLLOUT_unstructured=NULL;
 
 GLUI_Spinner *SPINNER_face_factor=NULL;
+GLUI_Spinner *SPINNER_tetra_line_thickness=NULL;
 
 GLUI_StaticText *STATIC_blockage_index=NULL;
 GLUI_StaticText *STATIC_mesh_index=NULL;
@@ -299,8 +301,12 @@ extern "C" void glui_geometry_setup(int main_window){
   // -------------- Cube/Tetra intersection test -------------------
 
   ROLLOUT_geomtest = glui_geometry->add_rollout_to_panel(ROLLOUT_unstructured,"Cube/Tetra intersection test",false);
-  glui_geometry->add_checkbox_to_panel(ROLLOUT_geomtest,"show",&show_geomtest);
-  PANEL_geom1=glui_geometry->add_panel_to_panel(ROLLOUT_geomtest,"box bounding planes");
+  glui_geometry->add_checkbox_to_panel(ROLLOUT_geomtest, "show intersection region", &show_geomtest, SHOW_TETRA, Volume_CB);
+  glui_geometry->add_checkbox_to_panel(ROLLOUT_geomtest,"show area labels", &show_tetratest_labels);
+  SPINNER_tetra_line_thickness=glui_geometry->add_spinner_to_panel(ROLLOUT_geomtest,"line thickness",GLUI_SPINNER_FLOAT,&tetra_line_thickness);
+  SPINNER_tetra_line_thickness->set_float_limits(1.0, 10.0);
+
+  PANEL_geom1 = glui_geometry->add_panel_to_panel(ROLLOUT_geomtest,"box bounding planes");
 
   PANEL_geom1d=glui_geometry->add_panel_to_panel(PANEL_geom1,"",GLUI_PANEL_NONE);
   PANEL_geom1a=glui_geometry->add_panel_to_panel(PANEL_geom1d,"",GLUI_PANEL_NONE);
@@ -385,6 +391,12 @@ extern "C" void glui_geometry_setup(int main_window){
 extern "C" void Volume_CB(int var){
   int i;
   switch(var){
+    case SHOW_TETRA:
+      if(show_geomtest==1){
+        BlockageMenu(visBLOCKHide);
+        VentMenu(HIDE_ALL_VENTS);
+      }
+      break;
     case VOL_BOXTRANSLATE:
       box_bounds[0]=box_bounds2[0]+box_translate[0];
       box_bounds[1]=box_bounds2[1]+box_translate[0];
@@ -436,8 +448,8 @@ extern "C" void hide_glui_geometry(void){
 extern "C" void show_glui_geometry(void){
   showedit_dialog=1;
   blockageSelect=1;
-  update_blockvals(NOT_SELECT_BLOCKS);
-  glui_geometry->show();
+  Update_Blockvals(NOT_SELECT_BLOCKS);
+  if(glui_geometry!=NULL)glui_geometry->show();
 }
 
 /* ------------------ Blockedit_DLG_CB ------------------------ */
@@ -459,9 +471,9 @@ void Blockedit_DLG_CB(int var){
 
 }
 
-/* ------------------ update_blockvals ------------------------ */
+/* ------------------ Update_Blockvals ------------------------ */
 
-extern "C" void update_blockvals(int flag){
+extern "C" void Update_Blockvals(int flag){
   float xmin, xmax, ymin, ymax, zmin, zmax;
   int imin, jmin, kmin;
   int i;
@@ -673,7 +685,7 @@ extern "C" void OBJECT_CB(int var){
         else{
           blocklocation=BLOCKlocation_grid;
         }
-        update_blockvals(NOT_SELECT_BLOCKS);
+        Update_Blockvals(NOT_SELECT_BLOCKS);
         break;
     default:
       ASSERT(FFALSE);

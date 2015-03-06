@@ -1789,8 +1789,8 @@ void draw_geomtestclip(void){
 
 void draw_geomtestoutline(void){
   float *xmin, *xmax, *ymin, *ymax, *zmin, *zmax;
-  unsigned char cubecolor[4]={0,255,255,255};
-  unsigned char tetracoloroutline[4]={255,0,255,255};
+  unsigned char cubecolor[4]={0,0,0,255};
+  unsigned char tetracoloroutline[4]={0,0,0,255};
   float *v1, *v2, *v3, *v4;
   float areas[6],cent_solid[3];
   int nverts;
@@ -1821,8 +1821,11 @@ void draw_geomtestoutline(void){
   output3Text(foregroundcolor, v2[0]+EPS, v2[1]-EPS, v2[2]-EPS, "v2");
   output3Text(foregroundcolor, v3[0], v3[1]+EPS, v3[2]-EPS, "v3");
   output3Text(foregroundcolor, v4[0], v4[1], v4[2]+EPS, "v4");
-  glLineWidth(gridlinewidth);
+  
+  antialias(ON);
+  glLineWidth(tetra_line_thickness);
   drawtetra_outline(v1,v2,v3,v4,tetracoloroutline);
+  antialias(OFF);
 
   glPopMatrix();
   // tetrahedron
@@ -1900,7 +1903,7 @@ void draw_geomtestoutline(void){
   glPushMatrix();
   glTranslatef(*xmin,*ymin,*zmin);
   glScalef(ABS(*xmax-*xmin),ABS(*ymax-*ymin),ABS(*zmax-*zmin));
-  {
+  if(show_tetratest_labels==1){
     char label[30];
 
     sprintf(label,"xmin area=%f",areas[0]);
@@ -1927,8 +1930,12 @@ void draw_geomtestoutline(void){
     trimzeros(label);
     output3Text(foregroundcolor, 0.5, 0.5, 1.0+EPS, label);
   }
-  glLineWidth(gridlinewidth);
+
+  antialias(ON);
+  glLineWidth(tetra_line_thickness);
   drawcubec_outline(1.0,cubecolor);
+  antialias(OFF);
+
   glPopMatrix();
   glPopMatrix();
 

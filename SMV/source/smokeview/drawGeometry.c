@@ -5256,8 +5256,11 @@ void drawBlockages(int mode, int trans_flag){
   if(trans_flag!=DRAW_TRANSPARENT&&blocklocation!=BLOCKlocation_cad){
     if(mode==SELECTOBJECT){
       if(blockageSelect==1){
-        drawselect_faces();
-        return;
+        get_geom_dialog_state();
+        if(structured_isopen == 1 && unstructured_isopen == 0){
+          drawselect_faces();
+          return;
+        }
       }
     }
     else{

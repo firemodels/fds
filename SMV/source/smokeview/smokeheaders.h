@@ -584,8 +584,7 @@ EXTERNCPP unsigned char *readpicture(char *filename, int *width, int *height, in
 EXTERNCPP unsigned char *readjpeg(const char *filename,int *width, int *height, int skip);
 EXTERNCPP unsigned char *readpng(const char *filename,int *width, int *height);
 
-EXTERNCPP void update_whichface(int which_face);
-EXTERNCPP void update_blockvals(int flag);
+EXTERNCPP void Update_Blockvals(int flag);
 
 EXTERNCPP void create_vol_tourlist(void);
 EXTERNCPP void delete_vol_tourlist(void);

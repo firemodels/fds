@@ -8621,7 +8621,8 @@ int readini2(char *inifile, int localfile){
 
         v=tetrabox_vis;
         fgets(buffer,255,stream);
-        sscanf(buffer,"%i %i %i %i %i %i ",&show_geomtest,v,v+1,v+2,v+3,v+4);
+        sscanf(buffer, "%i %i %f", &show_geomtest, &show_tetratest_labels, &tetra_line_thickness);
+        sscanf(buffer, "%i %i %i %i %i ", v, v + 1, v + 2, v + 3, v + 4);
         fgets(buffer,255,stream);
         sscanf(buffer,"%i %i %i %i %i ",v+5,v+6,v+7,v+8,v+9);
         ONEORZERO(show_geomtest);
@@ -11571,7 +11572,8 @@ void writeini(int flag,char *filename){
 
     fprintf(fileout,"CUBETETRATEST\n");
     v=tetrabox_vis;
-    fprintf(fileout,"%i %i %i %i %i %i\n",show_geomtest,v[0],v[1],v[2],v[3],v[4]);
+    fprintf(fileout, "%i %i %f\n", show_geomtest, show_tetratest_labels, tetra_line_thickness);
+    fprintf(fileout, "%i %i %i %i %i\n", v[0], v[1], v[2], v[3], v[4]);
     fprintf(fileout,"%i %i %i %i %i\n",v[5],v[6],v[7],v[8],v[9]);
     b1=box_bounds2;
     b2=tetra_vertices;
