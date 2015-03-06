@@ -7799,7 +7799,7 @@ The addition of a {\ct +} or {\ct -} to the {\ct QUANTITY} names yields the inte
 \subsubsection{Volume, Mass, and Heat Flow at a Wall}
 \label{info:wallflows}
 
-The quantities {\ct 'VOLUME FLOW'}, {\ct 'MASS FLOW'}, and {\ct 'HEAT FLOW'} cannot be applied at a solid boundary.  Instead, use the wall equivalents {\ct 'VOLUME FLOW WALL'}, {\ct 'MASS FLOW WALL'}, and {\ct 'HEAT FLOW WALL'}.  These quantities require an {\ct IOR} for the surface (positive points into the domain).  Note that, in order to be a more useful diagnostic for global energy balances, the heat flow at the wall is defined using the sensible enthalpy of the mixture (composition taken at the wall) and is not relative to ambient conditions:
+The quantities {\ct 'VOLUME FLOW'}, {\ct 'MASS FLOW'}, and {\ct 'HEAT FLOW'} cannot be applied at a solid boundary.  Instead, use the wall equivalents {\ct 'VOLUME FLOW WALL'}, {\ct 'MASS FLOW WALL'}, and {\ct 'HEAT FLOW WALL'}.  These quantities require an {\ct IOR} for the surface (positive points into the domain).  If you want the mass flow of a particular gas species, include the {\ct SPEC\_ID} of that gas species. Note that, in order to be a more useful diagnostic for global energy balances, the heat flow at the wall is defined using the sensible enthalpy of the mixture (composition taken at the wall) and is not relative to ambient conditions:
 \begin{align}
 \dot{q}_{\si{w}} &= \int \rho h_s(T) \, \bu \cdot \d \mathbf{S}
 \end{align}

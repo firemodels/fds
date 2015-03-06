@@ -5694,7 +5694,15 @@ SOLID_PHASE_SELECT: SELECT CASE(INDX)
                   CASE(50,51,52) ! VOLUME FLOW WALL (+,-)
                      SOLID_PHASE_OUTPUT = SOLID_PHASE_OUTPUT + UN*WC%AW
                   CASE(53,54,55) ! MASS FLOW WALL (+,-)
-                     SOLID_PHASE_OUTPUT = SOLID_PHASE_OUTPUT + WC%RHO_F*UN*WC%AW
+                     IF (Z_INDEX > 0) THEN
+                        Y_SPECIES = WC%ZZ_F(Z_INDEX)
+                     ELSEIF (Y_INDEX > 0) THEN
+                        ZZ_GET(1:N_TRACKED_SPECIES) = WC%ZZ_F(1:N_TRACKED_SPECIES)
+                        CALL GET_MASS_FRACTION(ZZ_GET,Y_INDEX,Y_SPECIES)
+                     ELSE
+                        Y_SPECIES = 1._EB
+                     ENDIF
+                     SOLID_PHASE_OUTPUT = SOLID_PHASE_OUTPUT + Y_SPECIES*WC%RHO_F*UN*WC%AW
                   CASE(56,57,58) ! HEAT FLOW WALL (+,-)
                      ZZ_GET(1:N_TRACKED_SPECIES) = WC%ZZ_F(1:N_TRACKED_SPECIES)
                      CALL GET_SENSIBLE_ENTHALPY(ZZ_GET,H_S,WC%ONE_D%TMP_F)
