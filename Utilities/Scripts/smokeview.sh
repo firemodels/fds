@@ -3,6 +3,7 @@
 RUNSCRIPT=
 ssffile=
 SMV=smokeview
+SMVDIR=$(dirname "$0")
 
 while getopts 'd:' OPTION
 do
@@ -37,6 +38,6 @@ fi
 
 
 echo $SMV $RUNSCRIPT $in
-source startXserver.sh
+source $SMVDIR/startXserver.sh
 $SMV $RUNSCRIPT $in
-source stopXserver.sh
+source $SMVDIR/stopXserver.sh
