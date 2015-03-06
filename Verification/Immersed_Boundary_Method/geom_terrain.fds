@@ -1,4 +1,4 @@
-&HEAD CHID='geom_terrain2' /
+&HEAD CHID='geom_terrain' /
 
 &TIME T_END=0.0/
 &MESH IJK=20,20,20,XB=-1.0,1.0,-1.0,1.0,-1.0,1.0 /
@@ -16,10 +16,7 @@
 &VENT XB=-1.0, 1.0, 1.0, 1.0,-1.0,1.0,SURF_ID='OPEN' /
 &VENT XB=-1.0, 1.0,-1.0, 1.0, 1.0,1.0,SURF_ID='OPEN' /
 
-&SURF ID='surf1', RGB=255,0,0,
-      TEXTURE_MAP='nistleft.jpg'
-      TEXTURE_WIDTH=0.6
-      TEXTURE_HEIGHT=0.2,COLOR='BLUE' /
+&SURF ID='surf1',RGB=255,0,0 /
 &MATL ID='matl1', DENSITY=1000., CONDUCTIVITY=1., SPECIFIC_HEAT=1.,RGB=64,128,255/
 
 
