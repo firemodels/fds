@@ -26,14 +26,6 @@ if NOT exist %svnroot% (
   exit /b 1
 )
 
-set cfastbasename=cfastclean
-set cfastroot=%userprofile%\%cfastbasename%
-if NOT exist %cfastroot% (
-  echo ***Fatal error: the svn repository %cfastbasename% does not exist.
-  echo Aborting firebot
-  exit /b 1
-)
-
 :: -------------------------------------------------------------
 ::                         setup environment
 :: -------------------------------------------------------------
@@ -148,21 +140,7 @@ echo             found sed
 call :is_file_installed svn|| exit /b 1
 echo             found svn
 
-:: revert cfast repository
-
 echo. 1>> %OUTDIR%\stage0.txt 2>&1
-
-if "%cfastbasename%" == "cfastclean" (
-   echo             reverting %cfastbasename% repository
-   cd %cfastroot%
-   call :svn_revert 1> Nul 2>&1
-)
-
-:: update cfast repository
-
-echo             updating %cfastbasename% repository
-cd %cfastroot%
-svn update  1>> %OUTDIR%\stage0.txt 2>&1
 
 :: revert FDS/Smokeview repository
 
@@ -188,15 +166,6 @@ set errorlogpc=%HISTORYDIR%\errors_%revisionnum%.txt
 set warninglogpc=%HISTORYDIR%\warnings_%revisionnum%.txt
 
 set timingslogfile=%TIMINGSDIR%\timings_%revisionnum%.txt
-
-:: build cfast
-
-echo             building cfast
-cd %cfastroot%\CFAST\intel_win_64
-erase *.obj *.mod *.exe 1> Nul 2>&1
-make VPATH="../Source" -f ..\makefile intel_win_64 1> %OUTDIR%\makecfast.log 2>&1
-call :does_file_exist cfast6_win_64.exe %OUTDIR%\makecfast.log|| exit /b 1
-call :find_warnings "warning" %OUTDIR%\makecfast.log "Stage 0, cfast compilation"
 
 call :get_time PRELIM_end
 call :get_duration PRELIM DIFF_PRELIM %PRELIM_end% %PRELIM_beg%
@@ -262,7 +231,7 @@ call :find_warnings "warning" %OUTDIR%\makesmvr.log "Stage 2b, Smokeview release
 ::                           stage 3
 :: -------------------------------------------------------------
 
-echo Stage 3 - Building FDS/Smokeview utilities
+echo Stage 3 - Building Utilities
 
 echo             fds2ascii
 cd %svnroot%\Utilities\fds2ascii\intel_win_64
@@ -278,36 +247,9 @@ if %have_icc% == 1 (
   make -f ..\Makefile intel_win_32 1> %OUTDIR%\makebackground.log 2>&1
   call :does_file_exist background.exe %OUTDIR%\makebackground.log
   call :find_warnings "warning" %OUTDIR%\makebackground.log "Stage 3, Building FDS/Smokeview utilities"
-
-  echo             smokediff
-  cd %svnroot%\Utilities\smokediff\intel_win_64
-  erase *.obj *.mod *.exe 1> Nul 2>&1
-  make -f ..\Makefile intel_win_64 1> %OUTDIR%\makesmokediff.log 2>&1
-  call :does_file_exist smokediff_win_64.exe %OUTDIR%\makesmokediff.log
-  call :find_warnings "warning" %OUTDIR%\makesmokediff.log "Stage 3, Building FDS/Smokeview utilities"
-
-  echo             smokezip
-  cd %svnroot%\Utilities\smokezip\intel_win_64
-  erase *.obj *.mod *.exe 1> Nul 2>&1
-  make -f ..\Makefile intel_win_64 1> %OUTDIR%\makesmokezip.log 2>&1
-  call :does_file_exist smokezip_win_64.exe %OUTDIR%\makesmokezip.log|| exit /b 1
-  call :find_warnings "warning" %OUTDIR%\makesmokezip.log "Stage 3, Building FDS/Smokeview utilities"
-
-  echo             wind2fds
-  cd %svnroot%\Utilities\wind2fds\intel_win_64
-  erase *.obj *.mod *.exe 1> Nul 2>&1
-  make -f ..\Makefile intel_win_64 1> %OUTDIR%\makewind2fds.log 2>&1
-  call :does_file_exist wind2fds_win_64.exe %OUTDIR%\makewind2fds.log|| exit /b 1
-  call :find_warnings "warning" %OUTDIR%\makewind2fds.log "Stage 3, Building FDS/Smokeview utilities"
 ) else (
   call :is_file_installed background|| exit /b 1
   echo             background not built, using installed version
-  call :is_file_installed smokediff|| exit /b 1
-  echo             smokediff not built, using installed version
-  call :is_file_installed smokezip|| exit /b 1
-  echo             smokezip not built, using installed version
-  call :is_file_installed wind2fds|| exit /b 1
-  echo             wind2fds not built, using installed
 )
 
 call :get_time BUILDSMVUTIL_end=%current_time% 
@@ -379,12 +321,6 @@ echo             FDS verification cases
 cd %svnroot%\Verification\
 call MAKE_FDS_pictures 64 1> %OUTDIR%\stage5.txt 2>&1
 
-echo             Smokeview verification cases
-cd %svnroot%\Verification\scripts
-call MAKE_SMV_pictures 64 0 1>> %OUTDIR%\stage5.txt 2>&1
-
-call :find_errors "error" %OUTDIR%\stage5.txt "Stage 5, Smokeview image generation"
-
 call :get_time MAKEPICS_end
 call :get_duration MAKEPICS DIFF_MAKEPICS %MAKEPICS_end% %MAKEPICS_beg%
 
@@ -394,7 +330,7 @@ call :get_duration MAKEPICS DIFF_MAKEPICS %MAKEPICS_end% %MAKEPICS_beg%
 
 call :get_time MAKEGUIDES_beg
 
-echo Stage 6 - Building guides
+:: echo Stage 6 - Building guides
 
 :: don't build FDS guides until a "matlab" stage is added
 ::echo             FDS Technical Reference
@@ -408,15 +344,6 @@ echo Stage 6 - Building guides
 
 ::echo             FDS Validation
 ::call :build_guide FDS_Validation_Guide %svnroot%\Manuals\FDS_Validation_Guide 1>> %OUTDIR%\stage6.txt 2>&1
-
-echo             Smokeview Technical Reference
-call :build_guide SMV_Technical_Reference_Guide %svnroot%\Manuals\SMV_Technical_Reference_Guide 1>> %OUTDIR%\stage6.txt 2>&1
-
-echo             Smokeview Verification
-call :build_guide SMV_Verification_Guide %svnroot%\Manuals\SMV_Verification_Guide 1>> %OUTDIR%\stage6.txt 2>&1
-
-echo             Smokeview User
-call :build_guide SMV_User_Guide %svnroot%\Manuals\SMV_User_Guide 1>> %OUTDIR%\stage6.txt 2>&1
 
 call :get_time MAKEGUIDES_end
 call :get_duration MAKEGUIDES DIFF_MAKEGUIDES %MAKEGUIDES_end% %MAKEGUIDES_beg%
