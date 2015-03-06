@@ -49,7 +49,6 @@ FIREBOT_HOME_DIR="`pwd`"
 SVN_REVISION=$1
 FIREBOT_DIR="/Users/$FIREBOT_USERNAME/firebot"
 FDS_SVNROOT="/Users/$FIREBOT_USERNAME/FDS-SMV"
-CFAST_SVNROOT="/Users/$FIREBOT_USERNAME/cfast"
 TIME_LOG=$FIREBOT_DIR/output/timings
 ERROR_LOG=$FIREBOT_DIR/output/errors
 WARNING_LOG=$FIREBOT_DIR/output/warnings
@@ -139,63 +138,6 @@ clean_firebot_history()
 #  ========================
 #  ========================
 
-#  ===================================
-#  = Stage 0 - External dependencies =
-#  ===================================
-
-update_and_compile_cfast()
-{
-   cd $FIREBOT_HOME_DIR
-
-   # Check to see if CFAST repository exists
-   if [ -e "$CFAST_SVNROOT" ]
-   # If yes, then update the CFAST repository and compile CFAST
-   then
-      echo "Updating and compiling CFAST:" > $FIREBOT_DIR/output/stage1_cfast
-      cd $CFAST_SVNROOT/CFAST
-      
-      # Clean unversioned and modified files
-      if [[ "$REVERT" == "1" ]] ; then
-         svn revert -Rq *
-      fi
-      svn status --no-ignore | grep '^[I?]' | cut -c 9- | while IFS= read -r f; do rm -rf "$f"; done
-      
-      # Update to latest SVN revision
-      svn update >> $FIREBOT_DIR/output/stage1_cfast 2>&1
-      
-      # Build CFAST
-      cd $CFAST_SVNROOT/CFAST/intel_osx_64
-      make -f ../makefile clean &> /dev/null
-      ./make_cfast.sh >> $FIREBOT_DIR/output/stage1_cfast 2>&1
-   # If no, then checkout the CFAST repository and compile CFAST
-   else
-      echo "Downloading and compiling CFAST:" > $FIREBOT_DIR/output/stage1_cfast
-      mkdir -p $CFAST_SVNROOT
-      cd $CFAST_SVNROOT
-
-      # Checkout latest CFAST SVN revision
-      svn co http://cfast.googlecode.com/svn/trunk/cfast/trunk/CFAST CFAST >> $FIREBOT_DIR/output/stage1_cfast 2>&1
-      
-      # Build CFAST
-      cd $CFAST_SVNROOT/CFAST/intel_osx_64
-      make -f ../makefile clean &> /dev/null
-      ./make_cfast.sh >> $FIREBOT_DIR/output/stage1_cfast 2>&1
-   fi
-
-   # Check for errors in CFAST compilation
-   cd $CFAST_SVNROOT/CFAST/intel_osx_64
-   if [ -e "cfast6_osx_64" ]
-   then
-      stage0_success=true
-   else
-      echo "Errors from Stage 0 - CFAST:" >> $ERROR_LOG
-      echo "CFAST failed to compile" >> $ERROR_LOG
-      cat $FIREBOT_DIR/output/stage0_cfast >> $ERROR_LOG
-      echo "" >> $ERROR_LOG
-   fi
-
-}
-
 #  ============================
 #  = Stage 1 - SVN operations =
 #  ============================
@@ -250,13 +192,6 @@ check_svn_checkout()
    else
       stage1_success=true
    fi
-}
-
-compile_background()
-{
-   cd $FDS_SVNROOT/Utilities/background/intel_osx_32
-   echo 'Compiling background:' >> $FIREBOT_DIR/output/stage1_background 2>&1
-   ./make_background.sh >> $FIREBOT_DIR/output/stage1_background 2>&1
 }
 
 #  ================================
@@ -357,11 +292,6 @@ run_verification_cases_debug()
    echo 'Running FDS verification cases:' > $FIREBOT_DIR/output/stage3
    ./Run_FDS_Cases.sh -E -d -m 1 -q none >> $FIREBOT_DIR/output/stage3 2>&1
    echo "" >> $FIREBOT_DIR/output/stage3 2>&1
-
-   # Run SMV verification cases
-   cd $FDS_SVNROOT/Verification/scripts
-   echo 'Running SMV verification cases:' >> $FIREBOT_DIR/output/stage3 2>&1
-   ./Run_SMV_Cases.sh -E -d -m 1 -q none >> $FIREBOT_DIR/output/stage3 2>&1
 
    # Wait for all verification cases to end
    wait_verification_cases_debug_end
@@ -481,28 +411,10 @@ compile_smv_utilities()
    ./makelibs.sh >> $FIREBOT_DIR/output/stage5pre 2>&1
    echo "" >> $FIREBOT_DIR/output/stage5pre 2>&1
 
-   # smokezip:
-   cd $FDS_SVNROOT/Utilities/smokezip/intel_osx_64
-   echo 'Compiling smokezip:' >> $FIREBOT_DIR/output/stage5pre 2>&1
-   ./make_zip.sh >> $FIREBOT_DIR/output/stage5pre 2>&1
-   echo "" >> $FIREBOT_DIR/output/stage5pre 2>&1
-   
-   # smokediff:
-   cd $FDS_SVNROOT/Utilities/smokediff/intel_osx_64
-   echo 'Compiling smokediff:' >> $FIREBOT_DIR/output/stage5pre 2>&1
-   ./make_diff.sh >> $FIREBOT_DIR/output/stage5pre 2>&1
-   echo "" >> $FIREBOT_DIR/output/stage5pre 2>&1
-   
    # background:
    cd $FDS_SVNROOT/Utilities/background/intel_osx_32
    echo 'Compiling background:' >> $FIREBOT_DIR/output/stage5pre 2>&1
    ./make_background.sh >> $FIREBOT_DIR/output/stage5pre 2>&1
-   echo "" >> $FIREBOT_DIR/output/stage5pre 2>&1
-
-   # wind2fds:
-   cd $FDS_SVNROOT/Utilities/wind2fds/intel_osx_64
-   echo 'Compiling wind2fds:' >> $FIREBOT_DIR/output/stage5pre 2>&1
-   ./make_wind.sh >> $FIREBOT_DIR/output/stage5pre 2>&1
    echo "" >> $FIREBOT_DIR/output/stage5pre 2>&1
 }
 
@@ -510,10 +422,7 @@ check_smv_utilities()
 {
    # Check for errors in SMV utilities compilation
    cd $FDS_SVNROOT
-   if [ -e "$FDS_SVNROOT/Utilities/smokezip/intel_osx_64/smokezip_osx_64" ]  && \
-      [ -e "$FDS_SVNROOT/Utilities/smokediff/intel_osx_64/smokediff_osx_64" ]  && \
-      [ -e "$FDS_SVNROOT/Utilities/wind2fds/intel_osx_64/wind2fds_osx_64" ]  && \
-      [ -e "$FDS_SVNROOT/Utilities/background/intel_osx_32/background" ]
+   if [ -e "$FDS_SVNROOT/Utilities/background/intel_osx_32/background" ]
    then
       stage5pre_success=true
    else
@@ -546,11 +455,6 @@ run_verification_cases_release()
    echo 'Running FDS verification cases:' > $FIREBOT_DIR/output/stage5
    ./Run_FDS_Cases.sh -E -q none >> $FIREBOT_DIR/output/stage5 2>&1
    echo "" >> $FIREBOT_DIR/output/stage5 2>&1
-
-   # Run SMV verification cases
-   cd $FDS_SVNROOT/Verification/scripts
-   echo 'Running SMV verification cases:' >> $FIREBOT_DIR/output/stage5 2>&1
-   ./Run_SMV_Cases.sh -E -q none >> $FIREBOT_DIR/output/stage5 2>&1
 
    # Wait for all verification cases to end
    wait_verification_cases_release_end
@@ -666,7 +570,6 @@ update_and_compile_cfast
 clean_svn_repo
 do_svn_checkout
 check_svn_checkout
-compile_background
 
 ### Stage 2a ###
 compile_fds_db
