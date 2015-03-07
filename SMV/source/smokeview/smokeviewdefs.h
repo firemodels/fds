@@ -428,8 +428,8 @@ void _Sniff_Errors(char *whereat);
 #define MAXSMOKERGB 1024
 #define StepOn 10000
 #define RenderCancel 999
-#define RENDERONCE_SINGLE 998
-#define RENDERONCE_MULTIPLE 978
+#define RENDER_CURRENT_SINGLE 998
+#define RENDER_CURRENT_MULTIPLE 978
 #define RenderJPEG 997
 #define RenderPNG 996
 #define Render320 995

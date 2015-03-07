@@ -1378,12 +1378,12 @@ void RenderMenu(int value){
     renderH=0;
     render_size_index=value;
     break;
-  case RENDERONCE_SINGLE:
+  case RENDER_CURRENT_SINGLE:
     render_from_menu=1;
     keyboard('r',FROM_SMOKEVIEW);
      break;
-  case RENDERONCE_MULTIPLE:
-    if(nrender_rows==1)RenderMenu(RENDERONCE_SINGLE);
+  case RENDER_CURRENT_MULTIPLE:
+    if(nrender_rows==1)RenderMenu(RENDER_CURRENT_SINGLE);
     render_from_menu=1;
     if(render_multi_menu==1)render_multi_state=1;
     render_multi_state=nrender_rows;
@@ -7137,12 +7137,12 @@ updatemenu=0;
     strcat(renderwindow3,rendertemp);
 
     CREATEMENU(startrenderingmenu,RenderMenu);
-    glutAddMenuEntry(_("  One frame (single part)"),RENDERONCE_SINGLE);
+    glutAddMenuEntry(_("  One frame (single part)"),RENDER_CURRENT_SINGLE);
     if(render_current==1){
       char menulabel[1024];
 
       sprintf(menulabel,"  One frame (%i x %i parts)",nrender_rows,nrender_rows);
-      glutAddMenuEntry(menulabel,RENDERONCE_MULTIPLE);
+      glutAddMenuEntry(menulabel,RENDER_CURRENT_MULTIPLE);
     }
     if(RenderTime==1||touring==1){
       glutAddMenuEntry(_("  All frames"),1);

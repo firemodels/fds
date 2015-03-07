@@ -523,9 +523,9 @@ extern "C" void glui_motion_setup(int main_window){
   SPINNER_nrender_rows=glui_motion->add_spinner_to_panel(ROLLOUT_render,"Resolution multiplier:",GLUI_SPINNER_INT,&nrender_rows,RENDER_MULTIPLIER,Render_CB);
   SPINNER_nrender_rows->set_int_limits(2,10);
 
-  render_skip_index=RENDERONCE_SINGLE; 
-  LIST_render_skip = glui_motion->add_listbox_to_panel(ROLLOUT_render,_("Which frames:"),&render_skip_index,RENDER_SKIP,Render_CB);
-  LIST_render_skip->add_item(RENDERONCE_SINGLE,_("One"));
+  render_skip_index=RENDER_CURRENT_SINGLE; 
+  LIST_render_skip = glui_motion->add_listbox_to_panel(ROLLOUT_render,_("Which frame(s):"),&render_skip_index,RENDER_SKIP,Render_CB);
+  LIST_render_skip->add_item(RENDER_CURRENT_SINGLE,_("Current"));
   LIST_render_skip->add_item(1,_("All"));
   LIST_render_skip->add_item(2,_("Every 2nd"));
   LIST_render_skip->add_item(3,_("Every 3rd"));
@@ -1550,17 +1550,14 @@ void Render_CB(int var){
         RenderMenu(render_skip_index);
       }
       else{
-        int skip_val;
-
-        skip_val = SPINNER_nrender_rows->get_int_val();
-        if(skip_val==1){
-          render_skip_index = RENDERONCE_SINGLE;
+        if(nrender_rows==1){
+          RenderMenu(RENDER_CURRENT_SINGLE);
         }
         else{
-          render_skip_index = RENDERONCE_MULTIPLE;
+          RenderMenu(RENDER_CURRENT_MULTIPLE);
         }
-        LIST_render_skip->set_int_val(render_skip_index);
-        RenderMenu(render_skip_index);
+        // change render skip to render one frame (there is no RENDER_CURRENT_MULTIPLE in the list)
+        LIST_render_skip->set_int_val(RENDER_CURRENT_SINGLE);
       }
       break;
     case RENDER_STOP:
@@ -1576,7 +1573,7 @@ void Render_CB(int var){
 
 extern "C" void update_glui_render(void){
   if(RenderTime==1&&RenderTimeOld==0){
-    if(LIST_render_skip!=NULL&&render_skip_index==RENDERONCE_SINGLE){
+    if(LIST_render_skip!=NULL&&render_skip_index==RENDER_CURRENT_SINGLE){
       render_skip_index=1;
       LIST_render_skip->set_int_val(render_skip_index);
     }
