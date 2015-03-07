@@ -40,13 +40,16 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
   if(loadfiles_at_startup&&update_load_startup==1){
     load_startup_smoke();
   }
-  if(updategluiview>0){
+  if(update_startup_view==1){
     camera *ca;
 
     ca = get_camera(label_startup_view);
-    if(ca!=NULL)startup_view_ini = ca->view_id;
-    reset_glui_view(startup_view_ini);
-    updategluiview--;
+    if(ca != NULL){
+      ResetMenu(ca->view_id);
+    }
+    update_rotation_center=0;
+    update_rotation_center_ini=0;
+    update_startup_view=0;
   }
   if(menusmooth==1&&smoothing_blocks==0&&updatesmoothblocks==1){
     smooth_blockages();

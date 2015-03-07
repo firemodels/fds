@@ -250,7 +250,7 @@ SVEXTERN int SVDECL(ngeominfo,0);
 SVEXTERN int SVDECL(patchembedded,0);
 SVEXTERN int npartframes_max;
 SVEXTERN int force_isometric;
-SVEXTERN int SVDECL(updategluiview,2);
+SVEXTERN int SVDECL(update_startup_view,0);
 SVEXTERN int render_multi,render_multi_state,render_multi_menu,render_from_menu;
 SVEXTERN int SVDECL(usetexturebar,1);
 SVEXTERN int show_smokelighting;
