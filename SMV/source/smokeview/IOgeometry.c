@@ -1817,10 +1817,13 @@ void draw_geomtestoutline(void){
   glPushMatrix();
   glScalef(SCALE2SMV(1.0),SCALE2SMV(1.0),SCALE2SMV(1.0));
   glTranslatef(-xbar0,-ybar0,-zbar0);
-  output3Text(foregroundcolor, v1[0]-EPS, v1[1]-EPS, v1[2]-EPS, "v1");
-  output3Text(foregroundcolor, v2[0]+EPS, v2[1]-EPS, v2[2]-EPS, "v2");
-  output3Text(foregroundcolor, v3[0], v3[1]+EPS, v3[2]-EPS, "v3");
-  output3Text(foregroundcolor, v4[0], v4[1], v4[2]+EPS, "v4");
+  
+  if(show_tetratest_labels == 1){
+    output3Text(foregroundcolor, v1[0] - EPS, v1[1] - EPS, v1[2] - EPS, "v1");
+    output3Text(foregroundcolor, v2[0] + EPS, v2[1] - EPS, v2[2] - EPS, "v2");
+    output3Text(foregroundcolor, v3[0], v3[1] + EPS, v3[2] - EPS, "v3");
+    output3Text(foregroundcolor, v4[0], v4[1], v4[2] + EPS, "v4");
+  }
   
   antialias(ON);
   glLineWidth(tetra_line_thickness);
@@ -1872,7 +1875,7 @@ void draw_geomtestoutline(void){
       glPushMatrix();
       glScalef(SCALE2SMV(1.0),SCALE2SMV(1.0),SCALE2SMV(1.0));
       glTranslatef(-xbar0,-ybar0,-zbar0);
-      glPointSize(10.0);
+      glPointSize(tetra_point_size);
       glBegin(GL_POINTS);
       if(show_test_in_tetra==1){
         float green[4]={0.0,1.0,0.0,1.0};

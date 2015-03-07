@@ -80,6 +80,7 @@ GLUI_Rollout *ROLLOUT_unstructured=NULL;
 
 GLUI_Spinner *SPINNER_face_factor=NULL;
 GLUI_Spinner *SPINNER_tetra_line_thickness=NULL;
+GLUI_Spinner *SPINNER_tetra_point_size = NULL;
 
 GLUI_StaticText *STATIC_blockage_index=NULL;
 GLUI_StaticText *STATIC_mesh_index=NULL;
@@ -304,7 +305,9 @@ extern "C" void glui_geometry_setup(int main_window){
   glui_geometry->add_checkbox_to_panel(ROLLOUT_geomtest, "show intersection region", &show_geomtest, SHOW_TETRA, Volume_CB);
   glui_geometry->add_checkbox_to_panel(ROLLOUT_geomtest,"show area labels", &show_tetratest_labels);
   SPINNER_tetra_line_thickness=glui_geometry->add_spinner_to_panel(ROLLOUT_geomtest,"line thickness",GLUI_SPINNER_FLOAT,&tetra_line_thickness);
-  SPINNER_tetra_line_thickness->set_float_limits(1.0, 10.0);
+//  SPINNER_tetra_line_thickness->set_float_limits(1.0, 10.0);
+  SPINNER_tetra_point_size = glui_geometry->add_spinner_to_panel(ROLLOUT_geomtest, "point size", GLUI_SPINNER_FLOAT, &tetra_point_size);
+//  SPINNER_tetra_point_size->set_float_limits(1.0, 20.0);
 
   PANEL_geom1 = glui_geometry->add_panel_to_panel(ROLLOUT_geomtest,"box bounding planes");
 
