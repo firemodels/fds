@@ -1550,7 +1550,15 @@ void Render_CB(int var){
         RenderMenu(render_skip_index);
       }
       else{
-        render_skip_index = RENDERONCE_SINGLE;
+        int skip_val;
+
+        skip_val = SPINNER_nrender_rows->get_int_val();
+        if(skip_val==1){
+          render_skip_index = RENDERONCE_SINGLE;
+        }
+        else{
+          render_skip_index = RENDERONCE_MULTIPLE;
+        }
         LIST_render_skip->set_int_val(render_skip_index);
         RenderMenu(render_skip_index);
       }

@@ -7137,7 +7137,7 @@ updatemenu=0;
     strcat(renderwindow3,rendertemp);
 
     CREATEMENU(startrenderingmenu,RenderMenu);
-    glutAddMenuEntry(_("  One Frame (single part)"),RENDERONCE_SINGLE);
+    glutAddMenuEntry(_("  One frame (single part)"),RENDERONCE_SINGLE);
     if(render_current==1){
       char menulabel[1024];
 
