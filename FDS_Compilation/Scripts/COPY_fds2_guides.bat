@@ -24,8 +24,5 @@ pscp %login%:%fromdir%/FDS_Verification_Guide.pdf  .
 pscp %login%:%fromdir%/FDS_Technical_Reference_Guide.pdf  .
 pscp %login%:%fromdir%/FDS_Validation_Guide.pdf .
 pscp %login%:%fromdir%/FDS_Configuration_Management_Plan.pdf .
-pscp %login%:%fromdir%/SMV_Technical_Reference_Guide.pdf .
-pscp %login%:%fromdir%/SMV_User_Guide.pdf .
-pscp %login%:%fromdir%/SMV_Verification_Guide.pdf .
 
 pause
