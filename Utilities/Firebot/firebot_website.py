@@ -106,7 +106,7 @@ print """<li><a href="manuals/FDS_User_Guide.pdf">FDS User Guide</a></li>
          <br>
          <li><a href="correlation_guide/Correlation_Guide.pdf">Correlation Guide</a></li>"""
 
-print "<p>Smokeview Manuals: <i>(last updated " + time.ctime(os.path.getmtime("/var/www/html/smokebot/manuals/SMV_User_Guide.pdf")) + ")</i><br><br>"
+print "<p>Smokeview Manuals: <i>(last updated " + time.ctime(os.path.getmtime("/var/www/html/smokebot/manuals/SMV_User_Guide.pdf")) + ")</i><br>"
 
 print """<li><a href="../smokebot/manuals/SMV_User_Guide.pdf">SMV User Guide</a></li>
          <li><a href="../smokebot/manuals/SMV_Technical_Reference_Guide.pdf">SMV Technical Reference Guide</a></li>
