@@ -96,7 +96,7 @@ To view a detailed error log, mouse over a fail or warning status.<br>
 
 print "<br><hr align='left'><br>"
 
-print "FDS-SMV Manuals: <i>(last updated " + time.ctime(os.path.getmtime("/var/www/html/firebot/manuals/FDS_User_Guide.pdf")) + ")</i><br><br>"
+print "FDS Manuals: <i>(last updated " + time.ctime(os.path.getmtime("/var/www/html/firebot/manuals/FDS_User_Guide.pdf")) + ")</i><br><br>"
 
 print """<li><a href="manuals/FDS_User_Guide.pdf">FDS User Guide</a></li>
          <li><a href="manuals/FDS_Technical_Reference_Guide.pdf">FDS Technical Reference Guide</a></li>
@@ -104,11 +104,13 @@ print """<li><a href="manuals/FDS_User_Guide.pdf">FDS User Guide</a></li>
          <li><a href="manuals/FDS_Validation_Guide.pdf">FDS Validation Guide</a></li>
          <li><a href="manuals/FDS_Configuration_Management_Plan.pdf">FDS Configuration Management Plan</a></li>
          <br>
-         <li><a href="manuals/SMV_User_Guide.pdf">SMV User Guide</a></li>
-         <li><a href="manuals/SMV_Technical_Reference_Guide.pdf">SMV Technical Reference Guide</a></li>
-         <li><a href="manuals/SMV_Verification_Guide.pdf">SMV Verification Guide</a></li>
-         <br>
          <li><a href="correlation_guide/Correlation_Guide.pdf">Correlation Guide</a></li>"""
+
+print "Smokeview Manuals: <i>(last updated " + time.ctime(os.path.getmtime("/var/www/html/smokebot/manuals/SMV_User_Guide.pdf")) + ")</i><br><br>"
+
+print """<li><a href="../smokebot/manuals/SMV_User_Guide.pdf">SMV User Guide</a></li>
+         <li><a href="../smokebot/manuals/SMV_Technical_Reference_Guide.pdf">SMV Technical Reference Guide</a></li>
+         <li><a href="../smokebot/manuals/SMV_Verification_Guide.pdf">SMV Verification Guide</a></li>"""
 print "<br><hr align='left'><br>"
 
 # Initialize list of history files
