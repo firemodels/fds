@@ -4,7 +4,7 @@ echo.
 echo ---downloading guides
 echo.
 
-set fromdir=/var/www/html/firebot/manuals
+set fromdir=/var/www/html/smokebot/manuals
 set login=%username%@blaze.nist.gov
 
 cd "%userprofile%
