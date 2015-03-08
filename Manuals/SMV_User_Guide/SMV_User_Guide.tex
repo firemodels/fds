@@ -977,6 +977,59 @@ of a townhouse kitchen fire.
 
 \chapter{Visualizing Data Quantitatively}
 
+\section{Coloring data}Smokeview uses a 1D texture map for coloring data occurring in
+slice, boundary and Plot3D files. 1D texture maps or colorbars may
+be selected using the Data coloring dialog box illustrated in Fig. \ref{figDatacoloring}.
+This dialog box is used to control how data is colored.
+One may select the mapping used to associate data with color (a colorbar).
+One may also select the colors used to color extreme data, data with values greater
+the maximum or smaller than the minimum (smallest and greatest colorbar data labels).
+When the colorbar is selected with the mouse a portion of it changes color to black.
+Data in the scene with the same values are also colored black.
+The width of the selection region (default 5 pixels) may be selected with this dialog box.
+Other data coloring properties such as transparency, order of the colorbar may also be selected.
+
+\begin{figure}[\figoptions]
+\centerline{\includegraphics[width=2.8472222in]{FIGURES/figDatacoloring}
+} \caption [Dialog Box for selecting colormaps.] {Dialog
+box for selecting colormaps.  The colormap may then be
+shaded continuously, stepped or as a series of lines.  The
+colormap may also be converted to shaded of gray.  Colors for
+extreme data (data outside of specified bounds) may be specified.}
+\label{figDatacoloring}
+\end{figure}
+
+Fig. \ref{fignewslice} illustrates how interpolating color within the colorbar
+improves the visualization.
+Colors are crisper and sharper, more
+accurately representing the underlying data. This is most
+noticeable when selecting the colorbar with the mouse.
+This causes a portion of the colorbar to turn black and the
+corresponding region in the scene to also turn black.  The
+black color is accurate to the pixel so this feature may be used
+to highlight regions of interest. The improved accuracy is a
+result of the way color interpolations are performed.  Colors
+are interpolated within the colorbar using a 1D texture map.  Color interpolations with
+the former method occurred within the color cube.
+
+Note, due to the way that transparent objects are drawn (from back to front),
+3D Smoke/Fire and transparent slices may not display
+properly when shown at the same time.
+
+\begin{figure}[\figoptions]
+\begin{center}
+\begin{tabular}{ccc}
+\includegraphics[height=3.5in]{../SMV_Verification_Guide/SCRIPT_FIGURES/plume5c_notexturebar}&
+\includegraphics[height=3.5in]{../SMV_Verification_Guide/SCRIPT_FIGURES/plume5c_texturebar}\\
+colors interpolated using a 3D color cube&colors interpolated using a 1D texture color bar\\
+\end{tabular}
+\caption [Slice file snapshots illustrating old and new method for
+coloring data.] {Slice file snapshots illustrating old and new
+method for coloring data.}
+\label{fignewslice}%
+\end{center}
+\end{figure}
+
 \section{2D Shaded Contours and Vector Slices - Slice Files}
 \label{section:slices}
 \subsection{Axis aligned slices}
@@ -1066,37 +1119,6 @@ to obtain:
 &SLCF PBY=1.50,QUANTITY='TEMPERATURE',VECTOR=.TRUE. /
 \end{lstlisting}
 
-\paragraph{Data coloring}Smokeview uses a 1D texture map for coloring data occurring in
-slice, boundary and Plot3D files. This is illustrated in Fig.
-\ref{fignewslice}.  The colors are now crisper and sharper, more
-accurately representing the underlying data. This is most
-noticeable when selecting the colorbar with the mouse. As before
-this causes a portion of the colorbar to turn black and the
-corresponding region in the scene to also turn black.  Now the
-black color is accurate to the pixel so this feature could be used
-to highlight regions of interest. The improved accuracy is a
-result of the way color interpolations are performed.  Colors
-are interpolated within the colorbar using a 1D texture map.  Color interpolations with
-the former method occurred within the color cube.
-
-Note, due to the way that transparent objects are drawn (from back to front),
-3D Smoke/Fire and transparent slices may not display
-properly when shown at the same time.
-
-\begin{figure}[\figoptions]
-\begin{center}
-\begin{tabular}{ccc}
-\includegraphics[width=3.5in]{../SMV_Verification_Guide/SCRIPT_FIGURES/plume5c_notexturebar}&
-\includegraphics[width=3.5in]{../SMV_Verification_Guide/SCRIPT_FIGURES/plume5c_texturebar}\\
-colors interpolated using a 3D color cube&colors interpolated using a 1D texture color bar\\
-\end{tabular}
-\caption [Slice file snapshots illustrating old and new method for
-coloring data.] {Slice file snapshots illustrating old and new
-method for coloring data.}
-\label{fignewslice}%
-\end{center}
-\end{figure}
-
 \subsection{3D slices}
 The user may visualize a 3D region of data using slice files.
 To specify a cube of data from 1.0 to 2.0 in each
@@ -1124,16 +1146,6 @@ the {\tt X}\ and {\tt Y}\ axis respectively.
 General slices may also be oriented using the General slice motion
 region of the {\em Motion/View/Render}\ dialog box as illustrated
 in Fig. \ref{figGSLICE}.
-
-\begin{figure}[\figoptions]
-\centerline{
-\includegraphics[width=2.3333in]{FIGURES/figGSLICE}
-} \caption[{\em Motion/View/Render}\ dialog box - General slice
-regions.]{{\em Motion/View/Render}\ dialog box - Control the
-location and orientation of a general 3D slice within a 3D slice
-file.} \label{figGSLICE}
-\end{figure}
-
 
 \begin{figure}[\figoptions]
 \begin{center}
@@ -1175,6 +1187,15 @@ These images were generated using
 input file. }
 \label{figvgslice}%
 \end{center}
+\end{figure}
+
+\begin{figure}[\figoptions]
+\centerline{
+\includegraphics[width=2.3333in]{FIGURES/figGSLICE}
+} \caption[{\em Motion/View/Render}\ dialog box - General slice
+regions.]{{\em Motion/View/Render}\ dialog box - Control the
+location and orientation of a general 3D slice within a 3D slice
+file.} \label{figGSLICE}
 \end{figure}
 
 \subsection{Fractional effective dose (FED) slices}
@@ -1673,7 +1694,7 @@ applied.  The \frameit{Update}\ and \frameit{Reload}\ buttons are
 pressed to make the new bounds take effect.
 
 \begin{figure}[\figoptions]
-\centerline{\includegraphics[width=2.52083333in]{FIGURES/figBOUND2}
+\centerline{\includegraphics[width=2.52083333in]{FIGURES/figBOUNDslice}
 } \caption[{\em File/Bounds}\ dialog box showing slice and
 boundary file options.] {{\em File/Bounds}\ dialog box showing
 slice and boundary file options. Select a variable and a bound
@@ -1813,25 +1834,8 @@ properties.} \label{figProperties}
 \end{figure}
 The {\em Display}\ dialog box, illustrated in Fig.
 \ref{figProperties}, allows one to set various options to control
-the display or {\em look}\ of the Smokeview scene.  It may be
-invoked by selecting the {\em Dialogs$>$Display}\ menu item. This
-dialog box also allows one to show or hide loaded data files.
-
-\begin{figure}[\figoptions]
-\centerline{\includegraphics[width=2.8472222in]{FIGURES/figDatacoloring}
-} \caption [Dialog Box for setting selecting colormaps.] {Dialog
-box for setting selecting colormaps.  The colormap may then be
-shaded continuously, stepped or as a series of lines.  The
-colormap may also be converted to shaded of gray.  Colors for
-extreme data (data outside of specified bounds) may be specified.}
-\label{figDatacoloring}
-\end{figure}
-
-The {\em Display}\ dialog box, illustrated in Fig.
-\ref{figProperties}, allows one to set various options to control
-the display or {\em look}\ of the Smokeview scene.  It may be
-invoked by selecting the {\em Dialogs$>$Display}\ menu item. This
-dialog box also allows one to show or hide loaded data files.
+the scene display such as toggling the visiblity of the colorbar, timebar, title {\em etc.}.  The  dialog box may be
+invoked by selecting the {\em Dialogs$>$Display}\ menu item.
 
 \subsection{Setting window parameters}
 Controls in the {\em Window Properties} region of the {\em Motion/View/Render}\ dialog box as illustrated in Fig. \ref{figMOTIONwindow},
@@ -4198,7 +4202,7 @@ a long list of FDS cases. Background runs a case whenever the CPU load is below 
 \label{ch:smokezip}
 
 \begin{figure}[\figoptions]
-\centerline{\includegraphics[width=1.6736in]{FIGURES/figBOUND1} }
+\centerline{\includegraphics[width=1.6736in]{FIGURES/figBOUNDcompress} }
 \caption[{\em Compress Files}\ and {\em Autoload}\ dialog box.] {{\em File/Bounds}\ dialog
 box showing compression and autoload options.  3D smoke,  boundary and slice
 files may be compressed using Smokezip.  All currently loaded
