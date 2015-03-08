@@ -102,9 +102,10 @@ print """<li><a href="manuals/FDS_User_Guide.pdf">FDS User Guide</a></li>
          <li><a href="manuals/FDS_Technical_Reference_Guide.pdf">FDS Technical Reference Guide</a></li>
          <li><a href="manuals/FDS_Verification_Guide.pdf">FDS Verification Guide</a></li>
          <li><a href="manuals/FDS_Validation_Guide.pdf">FDS Validation Guide</a></li>
-         <li><a href="manuals/FDS_Configuration_Management_Plan.pdf">FDS Configuration Management Plan</a></li>
-         <br>
-         <li><a href="correlation_guide/Correlation_Guide.pdf">Correlation Guide</a></li>"""
+         <li><a href="manuals/FDS_Configuration_Management_Plan.pdf">FDS Configuration Management Plan</a></li>"""
+
+print "<p>Correlation Guide: <i>(last updated " + time.ctime(os.path.getmtime("/var/www/html/firebot/correlation_guide/Correlation_Guide.pdf")) + ")</i><br>"
+print """<li><a href="correlation_guide/Correlation_Guide.pdf">Correlation Guide</a></li>"""
 
 print "<p>Smokeview Manuals: <i>(last updated " + time.ctime(os.path.getmtime("/var/www/html/smokebot/manuals/SMV_User_Guide.pdf")) + ")</i><br>"
 
