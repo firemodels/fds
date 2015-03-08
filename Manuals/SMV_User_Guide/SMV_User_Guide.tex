@@ -757,6 +757,17 @@ by using controls in the {\em Motion/View/Render}\ dialog box.
 This dialog box, illustrated in Fig. \ref{figMOTIONmotion}, is opened
 using the {\em Dialogs$>$Motion/View/Render}\ menu item.
 
+\begin{figure}[\figoptions]
+\centerline{
+\begin{tabular}{cc}
+\includegraphics[width=2.4027777in]{FIGURES/figMOTION}
+\end{tabular}
+} \caption[{\em Scene motion}\ panel in the {\em Motion/View/Render}\ dialog box.]{{\em Scene motion}\ pane in the {\em Motion/View/Render}\ dialog box. - This panel allows one to translate and rotate the scene, select the rotation type
+and select the rotation center (scene center, any mesh center or user specified center).
+This pane is invoked by selecting the {\em
+Dialogs$>$Motion/View/Render} menu item and selecting the {\em Scene motion} panel. } \label{figMOTIONmotion}
+\end{figure}
+
 Clicking the left mouse button and dragging horizontally,
 vertically or a combination of both results in scene rotation or
 translation depending upon whether the CTRL or ALT modifier keys
@@ -782,30 +793,21 @@ movement has no effect.
 
 \elist
 
-\begin{figure}[\figoptions]
-\centerline{
-\begin{tabular}{cc}
-\includegraphics[width=2.4027777in]{FIGURES/figMOTION}
-\end{tabular}
-} \caption[{\em Scene motion}\ panel in the {\em Motion/View/Render}\ dialog box.]{{\em Scene motion}\ pane in the {\em Motion/View/Render}\ dialog box. - This panel allows one to translate and rotate the scene, select the rotation type
-and select the rotation center (scene center, any mesh center or user specified center).
-This pane is invoked by selecting the {\em
-Dialogs$>$Motion/View/Render} menu item and selecting the {\em Scene motion} panel. } \label{figMOTIONmotion}
-\end{figure}
-
 
 The {\em Motion/View/Render}\ dialog box may also be used to move the
 scene. Buttons in the {\em Motion}\
 region of the dialog box allow one to translate or rotate the scene. The
 \frameit{Horizontal} button is used to translate the scene
 horizontally within a horizontal plane (left/right or in/out within the scene).  The
-\frameit{Vertical}\ button allows one to translate the scene vertically.
+\frameit{Vertical}\ button allows one to translate the scene vertically. 
+Scene translation and rotations may also be specified by using contros to set x, y, z
+coordinates and azimuth, elevation rotation angles in the within the {\em Specify Orientation} panel.
 
 The \frameit{Rotate about}\ selection list allows one to change the center of rotation.
 Rotation center choices are: the scene center, denoted as {\em world center}\ in this list, the center of each mesh and a center specified by the user.
 Changing the rotation center is useful for cases where the portion of the scene being viewed is far away from the currently used rotation center.
 To allow for easier changes, the rotation center may be made visible (drawn as a small black sphere) by selecting the {\em Show user center}\ checkbox.  The rotation center may be changed by using the
-{\em x, y, z}\ spinners below this checkbox..
+{\em x, y, z}\ spinners below this checkbox.
 
 \subsection{First Person View}
 \label{section:eyeview}
