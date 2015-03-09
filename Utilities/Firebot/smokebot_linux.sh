@@ -1254,7 +1254,7 @@ email_build_status()
 #        mutt -a $SMV_VG_GUIDE -a $SMV_UG_GUIDE -s "smokebot build success on ${hostname}! Revision ${SVN_REVISION}." $mailTo < $TIME_LOG > /dev/null
       fi
       touch $UPDATE_GUIDES
-      chmod 644 $UPDATE_GUIDES
+      chmod 664 $UPDATE_GUIDES
    fi
 }
 
