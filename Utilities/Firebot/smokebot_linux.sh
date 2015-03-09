@@ -110,8 +110,8 @@ STAGE_STATUS=$OUTPUT_DIR/stage_status
 SMV_VG_GUIDE=$FDS_SVNROOT/Manuals/SMV_Verification_Guide/SMV_Verification_Guide.pdf
 SMV_UG_GUIDE=$FDS_SVNROOT/Manuals/SMV_User_Guide/SMV_User_Guide.pdf
 GEOM_NOTES=$FDS_SVNROOT/Manuals/FDS_User_Guide/geom_notes.pdf
-GUIDE_DIR=$OUTPUT_DIR/Newest_Smokeview_Guides
-UPDATE_GUIDES=$GUIDE_DIR/update_guides
+NEWGUIDE_DIR=$OUTPUT_DIR/Newest_Smokeview_Guides
+UPDATE_GUIDES=$NEWGUIDE_DIR/update_guides
 
 THIS_FDS_AUTHOR=
 THIS_FDS_FAILED=0
@@ -265,7 +265,8 @@ clean_smokebot_history()
    MKDIR history
    MKDIR output
    rm -rf output/* > /dev/null
-   MKDIR $GUIDE_DIR
+   MKDIR $NEWGUIDE_DIR
+   chmod 775 $NEWGUIDE_DIR
 }
 
 delete_unversioned_files()
@@ -1123,8 +1124,8 @@ check_guide()
       if [ -d $SMV_Summary/manuals ] ; then
         cp $2 $SMV_Summary/manuals/.
       fi
-      cp $2 $GUIDE_DIR/.
-      chmod 664 $GUIDE_DIR/$2
+      cp $2 $NEWGUIDE_DIR/.
+      chmod 664 $NEWGUIDE_DIR/$2
    else
       echo "Errors from Stage 8 - Build FDS-SMV Guides:" >> $ERROR_LOG
       echo $3 >> $ERROR_LOG
