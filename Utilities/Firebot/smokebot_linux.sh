@@ -110,7 +110,8 @@ STAGE_STATUS=$OUTPUT_DIR/stage_status
 SMV_VG_GUIDE=$FDS_SVNROOT/Manuals/SMV_Verification_Guide/SMV_Verification_Guide.pdf
 SMV_UG_GUIDE=$FDS_SVNROOT/Manuals/SMV_User_Guide/SMV_User_Guide.pdf
 GEOM_NOTES=$FDS_SVNROOT/Manuals/FDS_User_Guide/geom_notes.pdf
-UPDATE_GUIDES=$OUTPUT_DIR/update_guides
+GUIDE_DIR=$OUTPUT_DIR/Newest_Smokeview_Guides
+UPDATE_GUIDES=$GUIDE_DIR/update_guides
 
 THIS_FDS_AUTHOR=
 THIS_FDS_FAILED=0
@@ -263,7 +264,8 @@ clean_smokebot_history()
    MKDIR guides
    MKDIR history
    MKDIR output
-   rm -f output/* > /dev/null
+   rm -rf output/* > /dev/null
+   MKDIR $GUIDE_DIR
 }
 
 delete_unversioned_files()
@@ -1122,6 +1124,7 @@ check_guide()
         cp $2 $SMV_Summary/manuals/.
       fi
       cp $2 $GUIDE_DIR/.
+      chmod 664 $GUIDE_DIR/$2
    else
       echo "Errors from Stage 8 - Build FDS-SMV Guides:" >> $ERROR_LOG
       echo $3 >> $ERROR_LOG
@@ -1251,6 +1254,7 @@ email_build_status()
 #        mutt -a $SMV_VG_GUIDE -a $SMV_UG_GUIDE -s "smokebot build success on ${hostname}! Revision ${SVN_REVISION}." $mailTo < $TIME_LOG > /dev/null
       fi
       touch $UPDATE_GUIDES
+      chmod 644 $UPDATE_GUIDES
    fi
 }
 
