@@ -1,7 +1,6 @@
 @echo off
 
 set rundebug=%1
-set runonlygeom=%2
 
 set svn_drive=c:
 if "%rundebug%" == "1" (
@@ -94,37 +93,27 @@ echo | %FDSEXE% 2> "%smvug%\SCRIPT_FIGURES\fds.version"
 
 if "%rundebug%" == "1" (
   SET QFDS=%RUNFDS_M%
-  SET RUNWFDS=%RUNWFDS_M%
   SET RUNTFDS=%RUNTFDS_M%
   SET RUNCFAST=%RUNCFAST_M%
 ) else (
   SET QFDS=%RUNFDS_E%
-  SET RUNWFDS=%RUNWFDS_E%
   SET RUNTFDS=%RUNTFDS_E%
   SET RUNCFAST=%RUNCFAST_E%
 )
 
 :: create or erase stop files
 
-if "%runonlygeom%" == "1" (
-  call %SCRIPT_DIR%\SMV_geom_Cases.bat
-) else (
-  call %SCRIPT_DIR%\SMV_Cases.bat
-  call %SCRIPT_DIR%\SMV_geom_Cases.bat
-)
+call %SCRIPT_DIR%\SMV_Cases.bat
+call %SCRIPT_DIR%\SMV_geom_Cases.bat
 
 :: run cases
 
 SET QFDS=%RUNFDS_R%
-SET RUNWFDS=%RUNWFDS_R%
 SET RUNTFDS=%RUNTFDS_R%
 SET RUNCFAST=%RUNCFAST_R%
-if "%runonlygeom%" == "1" (
-  call %SCRIPT_DIR%\SMV_geom_Cases.bat
-) else (
-  call %SCRIPT_DIR%\SMV_Cases.bat
-  call %SCRIPT_DIR%\SMV_geom_Cases.bat
-)
+
+call %SCRIPT_DIR%\SMV_Cases.bat
+call %SCRIPT_DIR%\SMV_geom_Cases.bat
 call :wait_until_finished
 
 cd %BASEDIR%
