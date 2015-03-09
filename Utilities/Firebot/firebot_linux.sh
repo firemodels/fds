@@ -34,8 +34,8 @@ HISTORY_DIR="$FIREBOT_DIR/history"
 TIME_LOG=$OUTPUT_DIR/timings
 ERROR_LOG=$OUTPUT_DIR/errors
 WARNING_LOG=$OUTPUT_DIR/warnings
-GUIDE_DIR=$OUTPUT_DIR/Newest_FDS_Guides
-UPDATE_GUIDES=$GUIDE_DIR/update_guides
+NEWGUIDE_DIR=$OUTPUT_DIR/Newest_FDS_Guides
+UPDATE_GUIDES=$NEWGUIDE_DIR/update_guides
 DB=_db
 IB=
 if [ "$FDSNETWORK" == "infiniband" ] ; then
@@ -194,7 +194,8 @@ clean_firebot_metafiles()
    MKDIR $HISTORY_DIR
    MKDIR $OUTPUT_DIR
    rm -rf $OUTPUT_DIR/* > /dev/null
-   MKDIR $GUIDE_DIR
+   MKDIR $NEWGUIDE_DIR
+   chmod 775 $NEWGUIDE_DIR
 }
 
 delete_unversioned_files()
@@ -1084,8 +1085,8 @@ check_guide()
       # Guide built successfully; there were no errors/warnings
       # Copy guide to Firebot's local website
       cp $2 /var/www/html/firebot/manuals/
-      cp $2 $GUIDE_DIR/.
-      chmod 664 $GUIDE_DIR/$2
+      cp $2 $NEWGUIDE_DIR/.
+      chmod 664 $NEWGUIDE_DIR/$2
    fi
 }
 
