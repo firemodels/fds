@@ -110,6 +110,7 @@ STAGE_STATUS=$OUTPUT_DIR/stage_status
 SMV_VG_GUIDE=$FDS_SVNROOT/Manuals/SMV_Verification_Guide/SMV_Verification_Guide.pdf
 SMV_UG_GUIDE=$FDS_SVNROOT/Manuals/SMV_User_Guide/SMV_User_Guide.pdf
 GEOM_NOTES=$FDS_SVNROOT/Manuals/FDS_User_Guide/geom_notes.pdf
+UPDATE_GUIDES=$OUTPUT_DIR/update_guides
 
 THIS_FDS_AUTHOR=
 THIS_FDS_FAILED=0
@@ -1249,6 +1250,7 @@ email_build_status()
         mail -s "smokebot build success on ${hostname}! Revision ${SVN_REVISION}." $mailTo < $TIME_LOG > /dev/null
 #        mutt -a $SMV_VG_GUIDE -a $SMV_UG_GUIDE -s "smokebot build success on ${hostname}! Revision ${SVN_REVISION}." $mailTo < $TIME_LOG > /dev/null
       fi
+      touch $UPDATE_GUIDES
    fi
 }
 
