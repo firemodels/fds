@@ -197,15 +197,6 @@ call :GET_TIME
 set BUILDFDS_beg=%current_time% 
 echo Stage 1 - Building FDS
 
-:: echo             serial debug
-
-:: cd %svnroot%\FDS_Compilation\intel_win_64_db
-:: erase *.obj *.mod *.exe 1> %OUTDIR%\stage1a.txt 2>&1
-:: make VPATH="../../FDS_Source" -f ..\makefile intel_win_64_db 1>> %OUTDIR%\stage1a.txt 2>&1
-
-:: call :does_file_exist fds_win_64_db.exe %OUTDIR%\stage1a.txt|| exit /b 1
-:: call :find_fds_warnings "warning" %OUTDIR%\stage1a.txt "Stage 1a"
-
 echo             parallel debug
 
 cd %svnroot%\FDS_Compilation\mpi_intel_win_64_db
@@ -214,15 +205,6 @@ make VPATH="../../FDS_Source" -f ..\makefile mpi_intel_win_64_db 1>> %OUTDIR%\st
 
 call :does_file_exist fds_mpi_win_64_db.exe %OUTDIR%\stage1b.txt|| exit /b 1
 call :find_fds_warnings "warning" %OUTDIR%\stage1b.txt "Stage 1b"
-
-:: echo             serial release
-
-:: cd %svnroot%\FDS_Compilation\intel_win_64
-:: erase *.obj *.mod *.exe 1> %OUTDIR%\stage1c.txt 2>&1
-:: make VPATH="../../FDS_Source" -f ..\makefile intel_win_64 1>> %OUTDIR%\stage1c.txt 2>&1
-
-:: call :does_file_exist fds_win_64.exe %OUTDIR%\stage1c.txt|| exit /b 1
-:: call :find_fds_warnings "warning" %OUTDIR%\stage1c.txt "Stage 1c"
 
 echo             parallel release
 
@@ -306,6 +288,8 @@ if %haveCC% == 1 (
   make -f ..\Makefile intel_win_64 1>> %OUTDIR%\stage3.txt 2>&1
   call :does_file_exist wind2fds_win_64.exe %OUTDIR%\stage3.txt|| exit /b 1
 ) else (
+  call :is_file_installed background|| exit /b 1
+  echo             background not built, using installed version
   call :is_file_installed smokediff|| exit /b 1
   echo             smokediff not built, using installed version
   call :is_file_installed smokezip|| exit /b 1
