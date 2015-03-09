@@ -6,6 +6,8 @@
 #ifndef SMOKEHEADERS_H_DEFINED
 #define SMOKEHEADERS_H_DEFINED
 
+EXTERNCPP void update_Display(void);
+EXTERNCPP void update_ShowScene(void);
 EXTERNCPP void update_gvec_down(int gvec_down_local);
 EXTERNCPP void drawaxis(void);
 EXTERNCPP void xyz2azelev(float *xyz,float *azimuth, float *elevation);
@@ -403,7 +405,7 @@ EXTERNCPP void increment_shooter_data(shootpointdata *pold, shootpointdata *pnew
 EXTERNCPP void draw_shooter(void);
 EXTERNCPP int get_trainee_location(void);
 EXTERNCPP void set_trainer_controls(void);
-EXTERNCPP void load_startup_smoke(void);
+EXTERNCPP void load_Files(void);
 EXTERNCPP void get_startup_vslice(int seq_id);
 EXTERNCPP void get_startup_slice(int seq_id);
 EXTERNCPP void get_startup_part(int seq_id);

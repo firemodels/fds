@@ -9195,7 +9195,7 @@ int readini2(char *inifile, int localfile){
         sscanf(buffer,"%i",&seq_id);
         get_startup_plot3d(seq_id);
       }
-      update_load_startup=1;
+      update_load_Files=1;
       continue;
     }
     if(match(buffer,"VSLICEAUTO")==1){
@@ -9209,7 +9209,7 @@ int readini2(char *inifile, int localfile){
         sscanf(buffer,"%i",&seq_id);
         get_startup_vslice(seq_id);
       }
-      update_load_startup=1;
+      update_load_Files=1;
       continue;
     }
     if(match(buffer,"SLICEAUTO")==1){
@@ -9223,7 +9223,7 @@ int readini2(char *inifile, int localfile){
         sscanf(buffer,"%i",&seq_id);
         get_startup_slice(seq_id);
       }
-      update_load_startup=1;
+      update_load_Files=1;
       continue;
     }
     if(match(buffer,"MSLICEAUTO")==1){
@@ -9244,7 +9244,7 @@ int readini2(char *inifile, int localfile){
           mslicei->autoload=1;
         }
       }
-      update_load_startup=1;
+      update_load_Files=1;
       continue;
     }
     if(match(buffer,"PARTAUTO")==1){
@@ -9258,7 +9258,7 @@ int readini2(char *inifile, int localfile){
         sscanf(buffer,"%i",&seq_id);
         get_startup_part(seq_id);
       }
-      update_load_startup=1;
+      update_load_Files=1;
       continue;
     }
     if(match(buffer,"ISOAUTO")==1){
@@ -9272,7 +9272,7 @@ int readini2(char *inifile, int localfile){
         sscanf(buffer,"%i",&seq_id);
         get_startup_iso(seq_id);
       }
-      update_load_startup=1;
+      update_load_Files=1;
       continue;
     }
     if(match(buffer,"S3DAUTO")==1){
@@ -9286,7 +9286,7 @@ int readini2(char *inifile, int localfile){
         sscanf(buffer,"%i",&seq_id);
         get_startup_smoke(seq_id);
       }
-      update_load_startup=1;
+      update_load_Files=1;
       continue;
     }
     if(match(buffer,"PATCHAUTO")==1){
@@ -9300,7 +9300,7 @@ int readini2(char *inifile, int localfile){
         sscanf(buffer,"%i",&seq_id);
         get_startup_patch(seq_id);
       }
-      update_load_startup=1;
+      update_load_Files=1;
       continue;
     }
     if(match(buffer,"LOADFILESATSTARTUP")==1){

@@ -1003,9 +1003,9 @@ void InitOpenGL(void){
     }
   }
 
- /* ------------------ load_startup_smoke3d ------------------------ */
+ /* ------------------ load_Files ------------------------ */
 
-  void load_startup_smoke(void){
+  void load_Files(void){
     int i;
     int errorcode;
 
@@ -1087,7 +1087,7 @@ void InitOpenGL(void){
     force_redisplay=1;
     Update_Framenumber(0);
     updatemenu=1;
-    update_load_startup=0;
+    update_load_Files=0;
     hide_glui_alert();
     TrainerViewMenu(trainerview);
   }
@@ -1807,7 +1807,6 @@ void initvars(void){
   smoketest=0,show_smoketest=0;
   showall_textures=0;
 
-  update_load_startup=0;
   do_threshold=0;
   updateindexcolors=0;
   show_path_knots=0;

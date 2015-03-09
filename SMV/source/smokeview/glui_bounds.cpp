@@ -1936,7 +1936,7 @@ void Bound_CB(int var){
     Bounds_DLG_CB(SAVE_SETTINGS);
     break;
   case LOAD_FILES:
-      load_startup_smoke();
+      load_Files();
     break;
   default:
     ASSERT(FFALSE);

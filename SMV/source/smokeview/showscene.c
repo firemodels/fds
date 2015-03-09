@@ -32,75 +32,7 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
 
 /* ++++++++++++++++++++++++ update variables as needed +++++++++++++++++++++++++ */
 
-  if(compute_fed==1)DefineAllFEDs();
-  if(restart_time==1){
-    restart_time=0;
-    reset_itimes0();
-  }
-  if(loadfiles_at_startup&&update_load_startup==1){
-    load_startup_smoke();
-  }
-  if(update_startup_view==1){
-    camera *ca;
-
-    ca = get_camera(label_startup_view);
-    if(ca != NULL){
-      ResetMenu(ca->view_id);
-    }
-    update_rotation_center=0;
-    update_rotation_center_ini=0;
-    update_startup_view=0;
-  }
-  if(menusmooth==1&&smoothing_blocks==0&&updatesmoothblocks==1){
-    smooth_blockages();
-  }
-  if(update_tourlist==1){
-    Update_Tourlist();
-  }
-  if(update_gslice==1){
-    update_gslice_parms();
-  }
-#define MESH_LIST 4
-  if(update_rotation_center==1){
-    camera_current->rotation_index=glui_rotation_index;
-    Motion_CB(MESH_LIST);
-    update_rotation_center=0;
-  }
-  if(update_rotation_center_ini==1){
-    camera_current->rotation_index=glui_rotation_index_ini;
-    Motion_CB(MESH_LIST);
-    update_rotation_center_ini=0;
-  }
-  if(camera_current->dirty==1){
-    update_camera(camera_current);
-  }
-  if(updateclipvals==1){
-    clip2cam(camera_current);
-    update_clip_all();
-    updateclipvals=0;
-  }
-  if(update_selectedtour_index==1){
-    update_tourindex();
-  }
-  if(trainer_mode==1&&fontindex!=LARGE_FONT)FontMenu(LARGE_FONT);
-  if(updateindexcolors==1){
-    UpdateIndexColors();
-  }
-  if(force_isometric==1){
-    force_isometric=0;
-    projection_type=1;
-    camera_current->projection_type=projection_type;
-    ZoomMenu(UPDATE_PROJECTION);
-  }
-  if(convert_ini==1){
-    writeini(SCRIPT_INI,ini_to);
-    exit(0);
-  }
-
-  Update_Show();
-  if(global_times!=NULL&&updateUpdateFrameRateMenu==1)FrameRateMenu(frameratevalue);
-  if(updatefaces==1)UpdateFaces();
-  if(updatefacelists==1)UpdateFacelists();
+  update_ShowScene();
   if(showstereo==STEREO_NONE||showstereo==STEREO_TIME)ClearBuffers(mode);
 
 /* ++++++++++++++++++++++++ setup viewports +++++++++++++++++++++++++ */

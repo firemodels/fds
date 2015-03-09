@@ -17,8 +17,6 @@ char callbacks_revision[]="$Revision$";
 #include "smokeviewvars.h"
 #include "IOvolsmoke.h"
 
-#define TERRAIN_FIRE_LINE_UPDATE 39
-
 #undef pp_GPU_CULL_STATE
 #ifdef pp_GPU
 #define pp_GPU_CULL_STATE
@@ -2868,31 +2866,6 @@ void DoScript(void){
   }
 }
 
-/* ------------------ update_smoothblockage_info ------------------------ */
-
-void update_smoothblockage_info(void){
-  int i;
-
-  for(i=0;i<nmeshes;i++){
-    smoothblockage *sb;
-    mesh *meshi;
-
-    meshi = meshinfo+i;
-    meshi->nsmoothblockagecolors=0;
-    meshi->smoothblockagecolors=NULL;
-    meshi->blockagesurfaces=NULL;
-
-    if(meshi->smoothblockages_list!=NULL){
-      sb=meshi->smoothblockages_list;
-      if(sb!=NULL){
-        meshi->nsmoothblockagecolors=sb->nsmoothblockagecolors;
-        meshi->smoothblockagecolors=sb->smoothblockagecolors;
-        meshi->blockagesurfaces=sb->smoothblockagesurfaces;
-      }
-    }
-  }
-}
-
 /* ------------------ Display ------------------------ */
 
 void Display_CB(void){
@@ -2900,89 +2873,7 @@ void Display_CB(void){
 
   renderdoublenow=0;
   DoScript();
-  if(update_glui_dialogs!=0){
-    switch(update_glui_dialogs){
-      case 1:
-        update_glui_dialogs=2;
-        break;
-      case 2:
-        Update_Glui_Dialogs();
-        update_glui_dialogs=0;
-        update_glui_dialogs=3;
-        break;
-      case 3:
-        Show_Glui_Dialogs();
-        update_glui_dialogs=0;
-        break;
-      default:
-        ASSERT(FFALSE);
-        break;
-    }
-  }
-  if(update_have_gvec==1){
-    update_have_gvec=0;
-    update_gvec_down(1);
-  }  
-  if(update_smokecolorbar==1){
-    update_smokecolorbar=0;
-    SmokeColorBarMenu(fire_colorbar_index);
-  }
-  if(update_colorbartype==1){
-    colorbardata *cb;
-
-    cb = getcolorbar(colorbarname);
-    if(cb!=NULL){
-      colorbartype=cb-colorbarinfo;
-      current_colorbar=cb;
-      if(colorbartype!=colorbartype_default){
-        colorbartype_ini=colorbartype;
-      }
-    }
-    update_colorbartype=0;
-  }
-  if(update_fire_line==1){
-    WUI_CB(TERRAIN_FIRE_LINE_UPDATE);
-    update_fire_line=0;
-  }
-  if(updatezoommenu==1||first_display>0){
-    if(first_display>0)first_display--;
-    updatezoommenu=0;
-    ZoomMenu(zoomindex);
-  }
-  if(update_makeiblank_smoke3d==1){
-    makeiblank_smoke3d();
-  }
-#ifdef pp_CULL
-  if(update_initcull==1)initcull(cullsmoke);
-#endif
-  if(update_streaks==1&&ReadPartFile==1){
-    void ParticleStreakShowMenu(int var);
-
-    ParticleStreakShowMenu(streak_index);
-    update_streaks=0;
-  }
-  if(update_screensize==1){
-    update_screensize=0;
-    update_windowsizelist();
-    ResizeWindow(screenWidthINI,screenHeightINI);
-  }
-  if(updatemenu==1&&usemenu==1&&menustatus==GLUT_MENU_NOT_IN_USE){
-    glutDetachMenu(GLUT_RIGHT_BUTTON);
-    InitMenus(LOAD);
-    glutAttachMenu(GLUT_RIGHT_BUTTON);
-    updatemenu=0;
-  }
-  if(update_fire_colorbar_index==1){
-    SmokeColorBarMenu(fire_colorbar_index_ini);
-    update_fire_colorbar_index=0;
-  }
-  if(showtime==0&&ntotal_smooth_blockages>0){
-    update_smoothblockage_info();
-  }
-  if(update_colorbar_select_index==1&&colorbar_select_index>=0&&colorbar_select_index<=255){
-    update_colorbar_select_index=0;
-    UpdateRGBColors(colorbar_select_index);
-  }
+  update_Display();
   glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
   if(showstereo==STEREO_NONE){
     dostereo=0;

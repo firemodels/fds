@@ -1116,7 +1116,7 @@ SVEXTERN int SVDECL(ncolorbars,0);
 SVEXTERN int ndefaultcolorbars;
 SVEXTERN colorbardata SVDECL(*colorbarinfo,NULL),SVDECL(*current_colorbar,NULL);
 
-SVEXTERN int update_load_startup;
+SVEXTERN int SVDECL(update_load_Files, 0);
 SVEXTERN int do_threshold;
 SVEXTERN int ntotal_blockages;
 SVEXTERN int updateindexcolors;
