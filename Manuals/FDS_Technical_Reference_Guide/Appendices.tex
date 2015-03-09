@@ -1308,14 +1308,14 @@ This equation can be written in compact form as follows:
 \begin{align}
     \frac{\d \mathbf{u}_\text{r}}{\d t} = -K_{\rm p} \mathbf{u}_\text{r} |\mathbf{u}_\text{r}| + \mathbf{g} \quad ; \quad K_{\rm p} \equiv \frac{1}{2} \rho C_\text{d} A_\text{p} \left(\frac{1}{m_{\rm p}} + \frac{1}{M_{\rm p}} \right) \,.
 \end{align}
-This is the drag equation, which has no solution in terms of elementary functions. Our solution approach first finds a solution neglecting gravity and then adds in a series for the gravity terms. $\mathbf{u}_\text{r} \equiv \mathbf{u}_\text{d} + \mathbf{u}_\text{g}$ is the decomposition of $\mathbf{u}_\text{r}$. The velocities $\mathbf{u}_\text{r}$ and $\mathbf{u}_\text{d}$ both have the same initial condition, $\mathbf{u}_\text{r}(0) \equiv \mathbf{u}_{\rm p}(0) - \mathbf{U}_{\rm p}(0)$. And $\mathbf{u}_\text{d}$ satisfies the drag equation without gravity, specifically
+This is the drag equation, which has no solution in terms of elementary functions. Our solution approach first finds a solution neglecting gravity and then adds in a series for the gravity terms. $\mathbf{u}_\text{r} \equiv \mathbf{u}_\text{d} + \mathbf{u}_\text{g}$ is the decomposition of $\mathbf{u}_\text{r}$. The velocities $\mathbf{u}_\text{r}$ and $\mathbf{u}_\text{d}$ both have the same initial condition, $\mathbf{u}_\text{d}(0) = \mathbf{u}_\text{r}(0) \equiv \mathbf{u}(0) - \mathbf{U}(0)$. And $\mathbf{u}_\text{d}$ satisfies the drag equation without gravity, specifically
 \begin{align}
     \frac{\d \mathbf{u}_\text{d}}{\d t} = -K_{\rm p} \mathbf{u}_\text{d} |\mathbf{u}_\text{d}|
 \end{align}
 The solution subject to these initial conditions is
 \begin{align}
     \label{ud_exact}
-    \mathbf{u}_\text{d}(0) = \frac{\mathbf{u}(0) - \mathbf{U}(0)}{1 + \beta_{\rm p} t} \quad ; \quad \beta_{\rm p} \equiv K_{\rm p} |\mathbf{u}_{\text{r}}(0)|
+    \mathbf{u}_\text{d}(t) = \frac{\mathbf{u}(0) - \mathbf{U}(0)}{1 + \beta_{\rm p} t} \quad ; \quad \beta_{\rm p} \equiv K_{\rm p} |\mathbf{u}_{\text{r}}(0)|
 \end{align}
 We can decompose $\mathbf{u}_\text{r}$ to find a series solution for $\mathbf{u}_\text{g}$. The function $\mathbf{u}_\text{g}$ can be written $\mathbf{u_g} = \mathbf{u}_\text{r} - \mathbf{u}_\text{d}$.  So the differential equation for $\mathbf{u}_\text{g}$ is
 \begin{align}
@@ -1393,7 +1393,7 @@ Eq.\ (\ref{mom_U_p}) can be substituted into Eq.\ (\ref{ur_short}) to get the so
 Integrating Eq.~(\ref{mom_u_p_full}) leads to an equation for the particle positions,
 \begin{eqnarray}
     \label{mom_x_p_full}
-    \mathbf{x}(t) = \mathbf{x}_{p}(0) + \left(\frac{\mathbf{u}(0) + \alpha_{\rm p} \mathbf{U}(0)}{1 + \alpha_{\rm p}}\right) t &-& \frac{\alpha_{\rm p} (\mathbf{u}(0) - \mathbf{U}(0))}{\beta_{\rm p} (1 + \alpha_{\rm p})} \text{ln}(\beta_{\rm p} t + 1) \nonumber \\[.1in]
+    \mathbf{x}(t) = \mathbf{x}(0) + \left(\frac{\mathbf{u}(0) + \alpha_{\rm p} \mathbf{U}(0)}{1 + \alpha_{\rm p}}\right) t &-& \frac{\alpha_{\rm p} (\mathbf{u}(0) - \mathbf{U}(0))}{\beta_{\rm p} (1 + \alpha_{\rm p})} \text{ln}(\beta_{\rm p} t + 1) \nonumber \\[.1in]
     &+& \frac{\mathbf{g} t^2}{2} - \frac{\alpha_{\rm p} \beta_{\rm p} t^3}{6 (1 + \alpha_{\rm p})} \left[\mathbf{u}_{\text{r}}(0) \left(\frac{\mathbf{u}_{\text{r}}(0) \cdot \mathbf{g}}{|\mathbf{u}_{\text{r}}(0)|^2}\right) + \mathbf{g}\right] + \mathit{O}(t^4)
 \end{eqnarray}
 
