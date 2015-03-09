@@ -34,6 +34,7 @@ HISTORY_DIR="$FIREBOT_DIR/history"
 TIME_LOG=$OUTPUT_DIR/timings
 ERROR_LOG=$OUTPUT_DIR/errors
 WARNING_LOG=$OUTPUT_DIR/warnings
+UPDATE_GUIDES=$OUTPUT_DIR/update_guides
 DB=_db
 IB=
 if [ "$FDSNETWORK" == "infiniband" ] ; then
@@ -1209,6 +1210,7 @@ email_build_status()
       echo "Nightly Manuals (private):  http://blaze.nist.gov/firebot" >> $TIME_LOG
       echo "-------------------------------" >> $TIME_LOG
       mail -s "[${1}@$hostname] ${2} success! Revision ${SVN_REVISION} passed all build tests." $mailToFDS < $TIME_LOG > /dev/null
+      touch $UPDATE_GUIDES
    fi
 }
 
