@@ -11,17 +11,19 @@ set OMP_NUM_THREADS=1
 set fdsbasename=FDS-SMVclean
 set svnroot=%userprofile%\%fdsbasename%
 if NOT exist %svnroot% (
-  echo ***Fatal error: The repository %fdsbasename% does not exist.
-  echo Aborting firebot
-  exit /b 1
+  cd %userprofile%
+  echo %fdsbasename% repository does not exist - creating.
+  svn co http://fds-smv.googlecode.com/svn/trunk/FDS/trunk %fdsbasename%
+  echo %fdsbasename% repository creation complete.
 )
 
 set cfastbasename=cfastclean
 set cfastroot=%userprofile%\%cfastbasename%
 if NOT exist %cfastroot% (
-  echo ***Fatal error: the repository %cfastbasename% does not exist.
-  echo Aborting firebot
-  exit /b 1
+  cd %userprofile%
+  echo %cfastbasename% repository does not exist - creating.
+  svn co http://cfast.googlecode.com/svn/trunk/cfast/trunk %cfastbasename%
+  echo %cfastbasename% repository creation complete.
 )
 
 :: -------------------------------------------------------------
