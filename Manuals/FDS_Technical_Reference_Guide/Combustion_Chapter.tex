@@ -238,18 +238,18 @@ The bold solid line in Fig.~\ref{fig_reaction_time_scale} is mathematically repr
 The mathematical details of the submodels are as follows:
 \begin{align}
 \label{eq:tau_diff} \tau_{\rm d} &= \frac{\Delta^2}{D_{\si{F}}} \\
-\label{eq:tau_sgs}  \tau_{\rm u} &= \frac{\mbox{Sc}_t \, \Delta}{\sqrt{k_{\rm sgs}}} \\
+\label{eq:tau_sgs}  \tau_{\rm u} &= \frac{\Delta}{\sqrt{(2/3)k_{\rm sgs}}} \\
 \label{eqn_tau_grav}\tau_{\rm g} &= \sqrt{ 2\Delta/g }
 \end{align}
 where $D_{\si{F}}$ is the diffusivity of the fuel species. Note that $k_{\rm sgs}$ is the unclosed subgrid kinetic energy per unit mass which by default is taken from the model for the turbulent viscosity (see Section \ref{section:turbulent_viscosity}). The acceleration time scale $\tau_{\rm g}$ is the time required to travel a distance $\Delta$ starting from rest under a constant acceleration, $g=\SI{9.81}{m/s^2}$.
 
 
-\subsection{Partially-Stirred Batch Reactor Model}
+\subsection{Turbulent Batch Reactor (TBR) Model}
 \label{sec:batchreactormodel}
 
 Modeling chemical reactions in turbulent flow is mathematically challenging because the length and time scales associated with the reactions may be orders of magnitude below what can be spatially and temporally resolved by the simulation.  When the fuel and oxidizer are initially unmixed (diffusion flame) and the kinetics are fast compared with mixing, the simple Eddy Dissipation Concept (EDC) model \cite{Magnussen:1,Poinsot:TNC} is sufficient.  However, for more complex reactions---such as carbon monoxide and soot formation---where reaction and mixing time scales may overlap, we require a more generalized approach.
 
-To this end, we have developed a simple mixing environment method to close the mean chemical source term, $\dot{m}^{\prime\prime\prime}_{\alpha}$, in Eq.~(\ref{species}).  For pure diffusion flames our method is similar to EDC, but the method is not limited to diffusion flames.  Each computational cell is thought of as a partially stirred batch reactor. At the start of a time step, each cell has an initial concentration of species (reactants, products, inerts) that exist with some degree of mixing. By default, each cell is completely unmixed at the start of a time step (corresponding to a diffusion flame). Generally, the rate of mixing is dominated by turbulence. The mixing time, $\tau_{\rm mix}$, was discussed in Section \ref{sec:reac_time_scale}. Once mixed, species can react based on specified kinetic parameters---reactions may be infinitely fast or governed by an Arrhenius rate law (Section \ref{Reaction_Rate_Model}).
+To this end, we have developed a simple mixing environment method to close the mean chemical source term, $\dot{m}^{\prime\prime\prime}_{\alpha}$, in Eq.~(\ref{species}).  For pure diffusion flames our method is similar to EDC, but the method is not limited to diffusion flames.  Each computational cell is thought of as a turbulent batch reactor (TBR). At the start of a time step, each cell has an initial concentration of species (reactants, products, inerts) that exist with some degree of mixing. By default, each cell is completely unmixed at the start of a time step (corresponding to a diffusion flame). Generally, the rate of mixing is dominated by turbulence. The mixing time, $\tau_{\rm mix}$, was discussed in Section \ref{sec:reac_time_scale}. Once mixed, species can react based on specified kinetic parameters---reactions may be infinitely fast or governed by an Arrhenius rate law (Section \ref{Reaction_Rate_Model}).
 
 At the start of the integration of the reactor model, the species transport equations have been solved and we know the mean cell concentrations of all reactants in our chemical system.  In this section, for simplicity we will work in terms of primitive species mass fractions.
 
