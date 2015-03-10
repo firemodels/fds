@@ -1258,7 +1258,7 @@ SELECT CASE(TASK_NUMBER)
                INTEGER_SEND_BUFFER(4,NOM) = MESHES(NM)%OMESH(NOM)%J_MAX_R
                INTEGER_SEND_BUFFER(5,NOM) = MESHES(NM)%OMESH(NOM)%K_MIN_R
                INTEGER_SEND_BUFFER(6,NOM) = MESHES(NM)%OMESH(NOM)%K_MAX_R
-               INTEGER_SEND_BUFFER(7,NOM) = MESHES(NM)%OMESH(NOM)%NIC_S
+               INTEGER_SEND_BUFFER(7,NOM) = MESHES(NM)%OMESH(NOM)%NIC_R
                CALL MPI_BSEND(INTEGER_SEND_BUFFER(1,NOM),7,MPI_INTEGER,PROCESS(NOM),NM,MPI_COMM_WORLD,IERR)
             ELSE
                MESHES(NOM)%OMESH(NM)%I_MIN_S = MESHES(NM)%OMESH(NOM)%I_MIN_R
@@ -1267,7 +1267,7 @@ SELECT CASE(TASK_NUMBER)
                MESHES(NOM)%OMESH(NM)%J_MAX_S = MESHES(NM)%OMESH(NOM)%J_MAX_R
                MESHES(NOM)%OMESH(NM)%K_MIN_S = MESHES(NM)%OMESH(NOM)%K_MIN_R
                MESHES(NOM)%OMESH(NM)%K_MAX_S = MESHES(NM)%OMESH(NOM)%K_MAX_R
-               MESHES(NOM)%OMESH(NM)%NIC_R   = MESHES(NM)%OMESH(NOM)%NIC_S
+               MESHES(NOM)%OMESH(NM)%NIC_S   = MESHES(NM)%OMESH(NOM)%NIC_R
             ENDIF
          ENDDO
       ENDDO
@@ -1287,7 +1287,7 @@ SELECT CASE(TASK_NUMBER)
                MESHES(NOM)%OMESH(NM)%J_MAX_S = INTEGER_RECV_BUFFER(4,NM)
                MESHES(NOM)%OMESH(NM)%K_MIN_S = INTEGER_RECV_BUFFER(5,NM)
                MESHES(NOM)%OMESH(NM)%K_MAX_S = INTEGER_RECV_BUFFER(6,NM)
-               MESHES(NOM)%OMESH(NM)%NIC_R   = INTEGER_RECV_BUFFER(7,NM)
+               MESHES(NOM)%OMESH(NM)%NIC_S   = INTEGER_RECV_BUFFER(7,NM)
             ENDIF
          ENDDO
       ENDDO
@@ -1583,12 +1583,12 @@ OTHER_MESH_LOOP: DO NOM=1,NMESHES
    JMAX=M2%JBP1
    KMIN=0 
    KMAX=M2%KBP1
-   M%OMESH(NOM)%NIC_S = 0
+   M%OMESH(NOM)%NIC_R = 0
    FOUND = .FALSE.
 
    SEARCH_LOOP: DO IW=1,M%N_EXTERNAL_WALL_CELLS
       IF (M%WALL(IW)%NOM/=NOM) CYCLE SEARCH_LOOP
-      M%OMESH(NOM)%NIC_S = M%OMESH(NOM)%NIC_S + 1
+      M%OMESH(NOM)%NIC_R = M%OMESH(NOM)%NIC_R + 1
       FOUND = .TRUE.
       IOR = M%WALL(IW)%ONE_D%IOR
       SELECT CASE(IOR)
@@ -1859,14 +1859,14 @@ MESH_LOOP: DO NM=1,NMESHES
          KMAX = M3%K_MAX_R
          IJK_SIZE = (IMAX-IMIN+1)*(JMAX-JMIN+1)*(KMAX-KMIN+1)
    
-         IF (M3%NIC_S>0) THEN
+         IF (M3%NIC_R>0) THEN
             NRA = NUMBER_RADIATION_ANGLES
             NSB = NUMBER_SPECTRAL_BANDS         
             ALLOCATE(M3%REAL_RECV_PKG1(IJK_SIZE*(4+N_TRACKED_SPECIES)))
             ALLOCATE(M3%REAL_RECV_PKG2(IJK_SIZE*(4          )))
             ALLOCATE(M3%REAL_RECV_PKG3(IJK_SIZE*(4+N_TRACKED_SPECIES)))
             ALLOCATE(M3%REAL_RECV_PKG4(IJK_SIZE*(4          )))
-            ALLOCATE(M3%REAL_RECV_PKG5((NRA*NSB+1)*M3%NIC_S+3))
+            ALLOCATE(M3%REAL_RECV_PKG5((NRA*NSB+1)*M3%NIC_R+3))
             ALLOCATE(M3%REAL_RECV_PKG7(IJK_SIZE*(4          )))
          ENDIF
     
@@ -1875,7 +1875,7 @@ MESH_LOOP: DO NM=1,NMESHES
    
          ! Set up persistent receive requests
     
-         IF (M3%NIC_S>0) THEN
+         IF (M3%NIC_R>0) THEN
    
             N_REQ1 = N_REQ1 + 1
             CALL MPI_RECV_INIT(M3%REAL_RECV_PKG1(1),SIZE(M3%REAL_RECV_PKG1),MPI_DOUBLE_PRECISION,SNODE,NOM,MPI_COMM_WORLD,&
@@ -2061,14 +2061,14 @@ SENDING_MESH_LOOP: DO NM=1,NMESHES
             CALL MPI_ISEND(M%WALL_INDEX(0,-3),SIZE(M%WALL_INDEX),MPI_INTEGER,SNODE,NM,MPI_COMM_WORLD,REQ(N_REQ),IERR)
          ENDIF
 
-         IF (M3%NIC_R>0 .AND. RNODE/=SNODE) THEN
+         IF (M3%NIC_S>0 .AND. RNODE/=SNODE) THEN
             NRA = NUMBER_RADIATION_ANGLES
             NSB = NUMBER_SPECTRAL_BANDS             
             ALLOCATE(M3%REAL_SEND_PKG1(IJK_SIZE*(4+N_TRACKED_SPECIES)))
             ALLOCATE(M3%REAL_SEND_PKG2(IJK_SIZE*(4          )))
             ALLOCATE(M3%REAL_SEND_PKG3(IJK_SIZE*(4+N_TRACKED_SPECIES)))
             ALLOCATE(M3%REAL_SEND_PKG4(IJK_SIZE*(4          )))
-            ALLOCATE(M3%REAL_SEND_PKG5((NRA*NSB+1)*M3%NIC_R+3))
+            ALLOCATE(M3%REAL_SEND_PKG5((NRA*NSB+1)*M3%NIC_S+3))
             ALLOCATE(M3%REAL_SEND_PKG7(IJK_SIZE*(4          )))
          ENDIF
  
@@ -2081,7 +2081,7 @@ SENDING_MESH_LOOP: DO NM=1,NMESHES
  
          ! Initialize persistent send requests
 
-         IF (M3%NIC_R>0 .AND. RNODE/=SNODE) THEN
+         IF (M3%NIC_S>0 .AND. RNODE/=SNODE) THEN
 
             N_REQ1 = N_REQ1 + 1
             CALL MPI_SEND_INIT(M3%REAL_SEND_PKG1(1),SIZE(M3%REAL_SEND_PKG1),MPI_DOUBLE_PRECISION,SNODE,NM,MPI_COMM_WORLD,&
@@ -2154,7 +2154,7 @@ SENDING_MESH_LOOP: DO NM=1,NMESHES
 
       ! Exchange of density and species mass fractions following the PREDICTOR update
 
-      IF (CODE==1 .AND. M3%NIC_R>0) THEN
+      IF (CODE==1 .AND. M3%NIC_S>0) THEN
          IF (RNODE/=SNODE) THEN
             LL = 0
             DO KK=KMIN,KMAX
@@ -2182,7 +2182,7 @@ SENDING_MESH_LOOP: DO NM=1,NMESHES
 
       ! Exchange velocity/pressure info for ITERATE_PRESSURE
 
-      IF (CODE==5 .AND. M3%NIC_R>0) THEN
+      IF (CODE==5 .AND. M3%NIC_S>0) THEN
          IF (PREDICTOR) HP => M%H
          IF (CORRECTOR) HP => M%HS
          IF (RNODE/=SNODE) THEN
@@ -2211,7 +2211,7 @@ SENDING_MESH_LOOP: DO NM=1,NMESHES
 
       ! Send pressure information at the end of the PREDICTOR stage of the time step
  
-      IF (CODE==3 .AND. M3%NIC_R>0) THEN
+      IF (CODE==3 .AND. M3%NIC_S>0) THEN
          IF (RNODE/=SNODE) THEN
             LL = 0
             DO KK=KMIN,KMAX
@@ -2236,7 +2236,7 @@ SENDING_MESH_LOOP: DO NM=1,NMESHES
 
       ! Exchange density and mass fraction following CORRECTOR update
  
-      IF (CODE==4 .AND. M3%NIC_R>0) THEN
+      IF (CODE==4 .AND. M3%NIC_S>0) THEN
          IF (RNODE/=SNODE) THEN
             LL = 0
             DO KK=KMIN,KMAX
@@ -2298,7 +2298,7 @@ SENDING_MESH_LOOP: DO NM=1,NMESHES
 
       ! Exchange pressure and velocities following CORRECTOR stage of time step
  
-      IF (CODE==6 .AND. M3%NIC_R>0) THEN
+      IF (CODE==6 .AND. M3%NIC_S>0) THEN
          IF (RNODE/=SNODE) THEN
             LL = 0
             DO KK=KMIN,KMAX
@@ -2323,7 +2323,7 @@ SENDING_MESH_LOOP: DO NM=1,NMESHES
 
       ! Send out radiation info
 
-      SEND_RADIATION: IF (CODE==2 .AND. M3%NIC_R>0) THEN
+      SEND_RADIATION: IF (CODE==2 .AND. M3%NIC_S>0) THEN
          NRA = NUMBER_RADIATION_ANGLES
          NSB = NUMBER_SPECTRAL_BANDS         
          IF (RNODE/=SNODE) THEN
@@ -2533,7 +2533,7 @@ IF (SNODE/=MYID) CYCLE SEND_MESH_LOOP
  
       ! Unpack densities and species mass fractions following PREDICTOR exchange
 
-      IF (CODE==1 .AND. M2%NIC_S>0 .AND. RNODE/=SNODE) THEN
+      IF (CODE==1 .AND. M2%NIC_R>0 .AND. RNODE/=SNODE) THEN
          LL = 0
          DO KK=KMIN,KMAX
             DO JJ=JMIN,JMAX
@@ -2551,7 +2551,7 @@ IF (SNODE/=MYID) CYCLE SEND_MESH_LOOP
    
       ! Unpack densities and species mass fractions following PREDICTOR exchange
    
-      IF (CODE==5 .AND. M2%NIC_S>0 .AND. RNODE/=SNODE) THEN
+      IF (CODE==5 .AND. M2%NIC_R>0 .AND. RNODE/=SNODE) THEN
          LL = 0
          IF (PREDICTOR) HP => M2%H
          IF (CORRECTOR) HP => M2%HS
@@ -2570,7 +2570,7 @@ IF (SNODE/=MYID) CYCLE SEND_MESH_LOOP
    
       ! Unpack pressure following PREDICTOR stage of time step
     
-      IF (CODE==3 .AND. M2%NIC_S>0 .AND. RNODE/=SNODE) THEN
+      IF (CODE==3 .AND. M2%NIC_R>0 .AND. RNODE/=SNODE) THEN
          LL = 0
          DO KK=KMIN,KMAX
             DO JJ=JMIN,JMAX
@@ -2587,7 +2587,7 @@ IF (SNODE/=MYID) CYCLE SEND_MESH_LOOP
    
       ! Unpack density and species mass fractions following CORRECTOR update
    
-      IF (CODE==4 .AND. M2%NIC_S>0 .AND. RNODE/=SNODE) THEN
+      IF (CODE==4 .AND. M2%NIC_R>0 .AND. RNODE/=SNODE) THEN
          LL = 0
          DO KK=KMIN,KMAX
             DO JJ=JMIN,JMAX
@@ -2605,7 +2605,7 @@ IF (SNODE/=MYID) CYCLE SEND_MESH_LOOP
    
       ! Unpack pressure and velocities at the end of the CORRECTOR stage of the time step
     
-      IF (CODE==6 .AND. M2%NIC_S>0 .AND. RNODE/=SNODE) THEN
+      IF (CODE==6 .AND. M2%NIC_R>0 .AND. RNODE/=SNODE) THEN
          LL = 0
          DO KK=KMIN,KMAX
             DO JJ=JMIN,JMAX
@@ -2622,7 +2622,7 @@ IF (SNODE/=MYID) CYCLE SEND_MESH_LOOP
    
       ! Unpack radiation information at the end of the CORRECTOR stage of the time step
    
-      RECEIVE_RADIATION: IF (CODE==2 .AND. M2%NIC_S>0 .AND. RNODE/=SNODE) THEN
+      RECEIVE_RADIATION: IF (CODE==2 .AND. M2%NIC_R>0 .AND. RNODE/=SNODE) THEN
          NRA = NUMBER_RADIATION_ANGLES
          NSB = NUMBER_SPECTRAL_BANDS
          ANG_INC_COUNTER = NINT(M2%REAL_RECV_PKG5(1))
