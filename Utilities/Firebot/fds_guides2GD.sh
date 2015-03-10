@@ -1,7 +1,10 @@
 #!/bin/bash
 
 CURDIR=`pwd`
-PARENT_ID=0B_wB1pJL2bFQfmlYRUhYMk85R25DQ2k3RVAyNGQtV2ItaGZPNHA3d1hkdUtCeFVyNDNyREk
+# directory containing guides on google drive : FDS-SMV Newest Manuals
+PARENT_ID=0B_wB1pJL2bFQUlJwMmNfaHlqME0
+
+# directory containing guides within firebot account
 FROMDIR=~firebot/firebot/output
 BASEDIR=Newest_Guides
 UPDATE_GUIDES=$FROMDIR/$BASEDIR/update_guides
