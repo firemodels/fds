@@ -1218,7 +1218,7 @@ email_build_status()
       echo "Stop Time: $stop_time " >> $TIME_LOG
       echo "-------------------------------" >> $TIME_LOG
       echo "Nightly Manuals (private):  http://blaze.nist.gov/firebot" >> $TIME_LOG
-      echo "Nightly Manuals  (public):  https://drive.google.com/folderview?id=0B_wB1pJL2bFQUlJwMmNfaHlqME0&usp=sharing" >> $TIME_LOG
+      echo "Nightly Manuals  (public):  http://goo.gl/n1Q3WH" >> $TIME_LOG
       echo "-------------------------------" >> $TIME_LOG
       mail -s "[${1}@$hostname] ${2} success! Revision ${SVN_REVISION} passed all build tests." $mailToFDS < $TIME_LOG > /dev/null
    fi
