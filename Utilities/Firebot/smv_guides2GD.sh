@@ -1,7 +1,7 @@
 #!/bin/bash
 
 CURDIR=`pwd`
-PARENT_ID=0B-W-dkXwdHWNfjRyMjFWSzVBRDV3YWpmUzNyZ0pvMmRfVGhoTzdkTEFjdzN3RENWcmQ2UUk
+PARENT_ID=0B-W-dkXwdHWNTmVvQUpZNnVVQVk
 FROMDIR=~smokebot/smokebot/output
 BASEDIR=Newest_Smokeview_Guides
 UPDATE_GUIDES=$FROMDIR/$BASEDIR/update_guides
