@@ -111,7 +111,7 @@ SMV_VG_GUIDE=$FDS_SVNROOT/Manuals/SMV_Verification_Guide/SMV_Verification_Guide.
 SMV_UG_GUIDE=$FDS_SVNROOT/Manuals/SMV_User_Guide/SMV_User_Guide.pdf
 GEOM_NOTES=$FDS_SVNROOT/Manuals/FDS_User_Guide/geom_notes.pdf
 NEWGUIDE_DIR=$OUTPUT_DIR/Newest_Guides
-UPDATE_GUIDES=$NEWGUIDE_DIR/update_guides
+UPLOADGUIDES=./smv_guides2GD.sh
 
 THIS_FDS_AUTHOR=
 THIS_FDS_FAILED=0
@@ -1248,15 +1248,12 @@ email_build_status()
 
    # No errors or warnings
    else
-      # Send empty email with success message
-      if [ "$MUTT_MISSING" == "1" ] ; then
-        mail -s "smokebot build success on ${hostname}! Revision ${SVN_REVISION}." $mailTo < $TIME_LOG > /dev/null
-      else
-        mail -s "smokebot build success on ${hostname}! Revision ${SVN_REVISION}." $mailTo < $TIME_LOG > /dev/null
-#        mutt -a $SMV_VG_GUIDE -a $SMV_UG_GUIDE -s "smokebot build success on ${hostname}! Revision ${SVN_REVISION}." $mailTo < $TIME_LOG > /dev/null
-      fi
-      touch $UPDATE_GUIDES
-      chmod 664 $UPDATE_GUIDES
+# upload guides to a google drive directory
+      cd $SMOKEBOT_DIR
+      $UPLOADGUIDES  > /dev/null
+
+      # Send success message with links to nightly manuals
+      mail -s "smokebot build success on ${hostname}! Revision ${SVN_REVISION}." $mailTo < $TIME_LOG > /dev/null
    fi
 }
 

@@ -1,5 +1,6 @@
 #!/bin/bash
 
+GDRIVE=~/bin/gdrive
 CURDIR=`pwd`
 # directory containing guides on google drive : FDS-SMV Newest Manuals
 PARENT_ID=0B_wB1pJL2bFQUlJwMmNfaHlqME0
@@ -18,7 +19,7 @@ UPLOAD ()
   drive upload -p $PARENT_ID -f /tmp/$FILEnew
 }
 
-if [ -e $UPDATE_GUIDES ] ; then
+if [ -e $GDRIVE ] ; then
   cd $FROMDIR/$BASEDIR
   rm -f $UPDATE_GUIDES
   UPLOAD FDS_Configuration_Management_Plan
