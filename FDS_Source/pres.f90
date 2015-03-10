@@ -680,7 +680,7 @@ CHECK_WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
    ! If the grid cells in the current mesh are smaller than those of the other mesh, do not include in error tolerance
 
    IF (WC%BOUNDARY_TYPE==INTERPOLATED_BOUNDARY) THEN
-      IF (OM%NIC_S>OM%NIC_R) CYCLE CHECK_WALL_LOOP
+      IF (OM%NIC_R>OM%NIC_S) CYCLE CHECK_WALL_LOOP
    ENDIF
 
    ! Save maximum velocity error
