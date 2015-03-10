@@ -1215,7 +1215,7 @@ email_build_status()
    echo ".make pictures: $DIFF_MAKEPICTURES" >> $TIME_LOG
    echo ".        total: $DIFF_SCRIPT_TIME" >> $TIME_LOG
    echo ".      results: http://$WEBHOSTNAME/VV/SMV2" >> $TIME_LOG
-   echo ".      results: https://drive.google.com/folderview?id=0B-W-dkXwdHWNfjRyMjFWSzVBRDV3YWpmUzNyZ0pvMmRfVGhoTzdkTEFjdzN3RENWcmQ2UUk&usp=sharing" >> $TIME_LOG
+   echo ".      results: https://drive.google.com/folderview?id=0B-W-dkXwdHWNTmVvQUpZNnVVQVk&usp=sharing" >> $TIME_LOG
   if [[ $THIS_SMVSVN != $LAST_SMVSVN ]] ; then
     cat $SVN_SMVLOG >> $TIME_LOG
   fi

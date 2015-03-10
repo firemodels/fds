@@ -1,7 +1,7 @@
 #!/bin/bash
 
 CURDIR=`pwd`
-PARENT_ID=0B-W-dkXwdHWNeU41UkZiNV93Mmc
+PARENT_ID=0B-W-dkXwdHWNc2dqX1laOEpXRkU
 FROMDIR=~firebot/firebot/output
 BASEDIR=Newest_FDS_Guides
 UPDATE_GUIDES=$FROMDIR/$BASEDIR/update_guides
