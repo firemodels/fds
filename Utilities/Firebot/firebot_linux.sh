@@ -35,7 +35,8 @@ TIME_LOG=$OUTPUT_DIR/timings
 ERROR_LOG=$OUTPUT_DIR/errors
 WARNING_LOG=$OUTPUT_DIR/warnings
 NEWGUIDE_DIR=$OUTPUT_DIR/Newest_Guides
-UPDATE_GUIDES=$NEWGUIDE_DIR/update_guides
+UPLOADGUIDES=./fds_guides2GD.sh
+
 DB=_db
 IB=
 if [ "$FDSNETWORK" == "infiniband" ] ; then
@@ -1201,6 +1202,10 @@ email_build_status()
 
    # No errors or warnings
    else
+#  upload guides to a google drive directory
+      cd $FIREBOT_DIR
+      $UPLOADGUIDES
+
       # Send success message with links to nightly manuals
       stop_time=`date`
       echo "-------------------------------" >> $TIME_LOG
@@ -1216,8 +1221,6 @@ email_build_status()
       echo "Nightly Manuals  (public):  https://drive.google.com/folderview?id=0B_wB1pJL2bFQUlJwMmNfaHlqME0&usp=sharing" >> $TIME_LOG
       echo "-------------------------------" >> $TIME_LOG
       mail -s "[${1}@$hostname] ${2} success! Revision ${SVN_REVISION} passed all build tests." $mailToFDS < $TIME_LOG > /dev/null
-      touch $UPDATE_GUIDES
-      chmod 664 $UPDATE_GUIDES
    fi
 }
 
