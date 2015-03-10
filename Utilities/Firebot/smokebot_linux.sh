@@ -999,6 +999,7 @@ check_compile_smv()
       stage6c_success=true
    else
       echo "Errors from Stage 6c - Compile SMV release:" >> $ERROR_LOG
+      echo "The program smokeview_${platform}_64 does not exist."
       cat $OUTPUT_DIR/stage6c >> $ERROR_LOG
       echo "" >> $ERROR_LOG
    fi
