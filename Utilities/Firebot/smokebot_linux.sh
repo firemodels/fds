@@ -38,7 +38,7 @@ else
   USEINSTALL2=
 fi
 
-while getopts 'abmo:q:s' OPTION
+while getopts 'abmo:q:st' OPTION
 do
 case $OPTION in
   a)
