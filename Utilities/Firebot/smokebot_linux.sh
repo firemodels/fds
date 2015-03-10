@@ -1215,8 +1215,6 @@ email_build_status()
    echo ".    run cases: $DIFF_RUNCASES" >> $TIME_LOG
    echo ".make pictures: $DIFF_MAKEPICTURES" >> $TIME_LOG
    echo ".        total: $DIFF_SCRIPT_TIME" >> $TIME_LOG
-   echo ".      results: http://$WEBHOSTNAME/VV/SMV2" >> $TIME_LOG
-   echo ".      results: https://drive.google.com/folderview?id=0B_wB1pJL2bFQUlJwMmNfaHlqME0&usp=sharing" >> $TIME_LOG
   if [[ $THIS_SMVSVN != $LAST_SMVSVN ]] ; then
     cat $SVN_SMVLOG >> $TIME_LOG
   fi
@@ -1252,6 +1250,10 @@ email_build_status()
 # upload guides to a google drive directory
       cd $SMOKEBOT_DIR
       $UPLOADGUIDES  > /dev/null
+
+      echo "Nightly Manuals (private): http://$WEBHOSTNAME/VV/SMV2" >> $TIME_LOG
+      echo "Nightly Manuals  (public):  http://goo.gl/n1Q3WH" >> $TIME_LOG
+      echo "-------------------------------" >> $TIME_LOG
 
       # Send success message with links to nightly manuals
       mail -s "smokebot build success on ${hostname}! Revision ${SVN_REVISION}." $mailTo < $TIME_LOG > /dev/null
