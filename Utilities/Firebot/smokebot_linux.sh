@@ -110,7 +110,7 @@ STAGE_STATUS=$OUTPUT_DIR/stage_status
 SMV_VG_GUIDE=$FDS_SVNROOT/Manuals/SMV_Verification_Guide/SMV_Verification_Guide.pdf
 SMV_UG_GUIDE=$FDS_SVNROOT/Manuals/SMV_User_Guide/SMV_User_Guide.pdf
 GEOM_NOTES=$FDS_SVNROOT/Manuals/FDS_User_Guide/geom_notes.pdf
-NEWGUIDE_DIR=$OUTPUT_DIR/Newest_Smokeview_Guides
+NEWGUIDE_DIR=$OUTPUT_DIR/Newest_Guides
 UPDATE_GUIDES=$NEWGUIDE_DIR/update_guides
 
 THIS_FDS_AUTHOR=
