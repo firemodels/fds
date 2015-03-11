@@ -97,7 +97,7 @@ void drawTimeBar(float xleft, float xright, float ybot, float ytop){
 /* ------------------ newcolorbar ------------------------ */
 
 colorbardata *newcolorbar(char *name, unsigned char *table, int ntable){
-  colorbardata *cb_to, *newcolorbar;
+  colorbardata *newcolorbar;
   int i;
   unsigned char *rgb_node;
 
