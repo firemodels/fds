@@ -94,6 +94,41 @@ void drawTimeBar(float xleft, float xright, float ybot, float ytop){
   glEnd();
 }
 
+/* ------------------ newcolorbar ------------------------ */
+
+colorbardata *newcolorbar(char *name, unsigned char *table, int ntable){
+  colorbardata *cb_to, *newcolorbar;
+  int i;
+  unsigned char *rgb_node;
+
+  ncolorbars++;
+  CheckMemory;
+  ResizeMemory((void **)&colorbarinfo, ncolorbars*sizeof(colorbardata));
+  CheckMemory;
+
+  // new colorbar
+
+  newcolorbar = colorbarinfo+ncolorbars-1;
+
+  strcpy(newcolorbar->label, name);
+  newcolorbar->label_ptr = newcolorbar->label;
+  newcolorbar->nnodes = ntable;
+  newcolorbar->nodehilight = 0;
+  rgb_node = newcolorbar->rgb_node;
+  for(i = 0; i<ntable; i++){
+    int ii;
+
+    ii = i*255/(ntable-1);
+    newcolorbar->index_node[ii];
+    *rgb_node++ = *table++;
+    *rgb_node++ = *table++;
+    *rgb_node++ = *table++;
+  }
+
+  remapcolorbar(newcolorbar);
+  return newcolorbar;
+}
+
 /* ------------------ addcolorbar ------------------------ */
 
 void addcolorbar(int icolorbar){
