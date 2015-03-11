@@ -566,6 +566,11 @@ check_cases_debug()
       cat $OUTPUT_DIR/stage3_errors >> $ERROR_LOG
       echo "" >> $ERROR_LOG
 
+# copy casename.err to casename.err_stage3 for any cases that had errors
+      awk -F'[-:]' '{ print "cp " $1 " " $1"_stage3"}'  < $OUTPUT_DIR/stage3_errors | sort -u > $OUTPUT_DIR/stage3_filelist
+      cd $FDS_SVNROOT/Verification
+      source $OUTPUT_DIR/stage3_filelist
+
       # If errors encountered in validation mode, then email status and exit
       if [ $FIREBOT_MODE == "validation" ] ; then
          email_build_status 'Validationbot' 'Validation'
