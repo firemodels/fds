@@ -762,10 +762,8 @@ using the {\em Dialogs$>$Motion/View/Render}\ menu item.
 \begin{tabular}{cc}
 \includegraphics[width=2.4027777in]{FIGURES/figMOTION}
 \end{tabular}
-} \caption[{\em Scene motion}\ panel in the {\em Motion/View/Render}\ dialog box.]{{\em Scene motion}\ pane in the {\em Motion/View/Render}\ dialog box. - This panel allows one to translate and rotate the scene, select the rotation type
-and select the rotation center (scene center, any mesh center or user specified center).
-This pane is invoked by selecting the {\em
-Dialogs$>$Motion/View/Render} menu item and selecting the {\em Scene motion} panel. } \label{figMOTIONmotion}
+} \caption[Dialog box for controlling scene motion.]{Dialog box for controlling scene motion. To rotate the scene, select the rotation type
+then select and move the mouse in the  rotation control.  One may also select where to rotate about (scene center, any mesh center or user specified center). To translate the scene, select and move the mouse in the horizontal or vertical control.} \label{figMOTIONmotion}
 \end{figure}
 
 Clicking the left mouse button and dragging horizontally,
@@ -993,10 +991,10 @@ Other data coloring properties such as transparency, order of the colorbar may a
 
 \begin{figure}[\figoptions]
 \centerline{\includegraphics[width=2.8472222in]{FIGURES/figDatacoloring}
-} \caption [Dialog Box for selecting colormaps.] {Dialog
-box for selecting colormaps.  The colormap may be
-shaded continuously, stepped or as a series of lines.  The
-colormap may also be converted to shades of gray.  Colors for
+} \caption [Dialog Box for selecting colorbars.] {Dialog
+box for selecting colorbars.  The selected colorbar may be modified by 
+shading it continuously, stepped or as a series of discrete lines.  The
+colorbar may also be converted to shades of gray.  Colors for
 extreme data (data outside of specified bounds) may be specified.}
 \label{figDatacoloring}
 \end{figure}
@@ -1025,9 +1023,7 @@ properly when shown at the same time.
 \includegraphics[height=3.5in]{../SMV_Verification_Guide/SCRIPT_FIGURES/plume5c_texturebar}\\
 colors interpolated using a 3D color cube&colors interpolated using a 1D texture color bar\\
 \end{tabular}
-\caption [Slice file snapshots illustrating old and new method for
-coloring data.] {Slice file snapshots illustrating old and new
-method for coloring data.}
+\caption [Slice file snapshots illustrating two methods for mapping data to color.] {Slice file snapshots illustrating two methods for mapping data to color.}
 \label{fignewslice}%
 \end{center}
 \end{figure}
@@ -1194,10 +1190,7 @@ input file. }
 \begin{figure}[\figoptions]
 \centerline{
 \includegraphics[width=2.3333in]{FIGURES/figGSLICE}
-} \caption[{\em Motion/View/Render}\ dialog box - General slice
-regions.]{{\em Motion/View/Render}\ dialog box - Control the
-location and orientation of a general 3D slice within a 3D slice
-file.} \label{figGSLICE}
+} \caption[Dialog box for controlling the orientation of a 3D slice file.]{Dialog box for controlling the orientation of a 3D slice file.} \label{figGSLICE}
 \end{figure}
 
 \subsection{Fractional effective dose (FED) slices}
@@ -1489,9 +1482,8 @@ The following {\tt \&DEVC}\ lines give an example of defining device flow vector
 \includegraphics[width=1.875
 in]{FIGURES/figDEVICES}
 \end{center}
-\caption[{\em Devices}\ dialog box.]{{\em Devices}\ dialog box.
-This dialog box allows the user to display data values stored in
-FDS spreadsheet files.} \label{figDEVICES}
+\caption{A dialog box for displaying device data values stored in
+FDS formatted spreadsheet files.} \label{figDEVICES}
 \end{figure}
 
 
@@ -1675,8 +1667,8 @@ displaying several data files simultaneously.
 \begin{figure}[\figoptions]
 \centerline{
 \includegraphics[width=2.520833333in]{FIGURES/figBOUNDSplot3d}
-} \caption[{\em File/Bounds}\ dialog box showing Plot3D file
-options.] {{\em File/Bounds}\ dialog box showing Plot3D file
+} \caption[Dialog box for setting Plot3D file
+options.] {Dialog box for setting Plot3D file
 options. Select a variable and bound type, then enter a lower
 and/or upper bound. Data may be excluded from the plot by
 selecting a {\em Truncate data}\ bound. Select the type of contour
@@ -1697,15 +1689,15 @@ pressed to make the new bounds take effect.
 
 \begin{figure}[\figoptions]
 \centerline{\includegraphics[width=2.52083333in]{FIGURES/figBOUNDslice}
-} \caption[{\em File/Bounds}\ dialog box showing slice and
-boundary file options.] {{\em File/Bounds}\ dialog box showing
-slice and boundary file options. Select a variable and a bound
-type {\em checkbox/radio button}, then enter a lower and/or upper
-bound. In the slice portion, data may be excluded from the plot by
-selecting a {\em Truncate}\ bound. In the boundary portion,
-ignited materials may be highlighted if a wall temperature
-boundary file has been saved.
- Press {\em Reload...}\ or {\em Update}\ for the new bounds to take
+} \caption[Dialog box for setting slice file
+options.] 
+{Dialog box for setting slice file
+options.
+Select a variable and a bound
+type using variable {\em radio button} and {\em checkbox/radio button}, then enter a lower and/or upper
+bound. Data may be excluded from the plot by
+selecting a {\em Truncate}\ bound.
+ Press {\em Reload...}\ for the new bounds to take
 effect.} \label{figBOUNDSslice}
 \end{figure}
 
@@ -1867,9 +1859,8 @@ the width and height spinners to construct a window with a custom size.
 \begin{tabular}{cc}
 \includegraphics[width=2.4027777in]{FIGURES/figMOTION3}
 \end{tabular}
-} \caption[{\em Window properties}\ panel in the {\em Motion/View/Render}\ dialog box.]{{\em Window properties}\ panel in the {\em Motion/View/Render}\ dialog box.
- This panel allows one to set the window size, projection type (perspective or size preserving) and zoom level.  This panel is invoked by selecting the {\em
-Dialogs$>$Motion/View/Render} menu item and selecting the {\em Window properties} panel.  } \label{figMOTIONwindow}
+} \caption[Dialog box for specifying window properties.]{Dialog box for specifying window properties.
+ The Windows portion of the {\em Motion/View/Render}\ dialog box allows one to set the window size, projection type (perspective or size preserving) and zoom level.} \label{figMOTIONwindow}
 \end{figure}
 
 \subsection{Scaling Scenes}
@@ -1883,11 +1874,10 @@ when objects hidden by {\em closer} objects.
 \begin{tabular}{cc}
 \includegraphics[width=2.4027777in]{FIGURES/figMOTION6}
 \end{tabular}
-} \caption[{\em Scaling/Depth params}\ panel in the {\em Motion/View/Render}\ dialog box.]{{\em Scaling/Depth params}\ panel in the {\em Motion/View/Render}\ dialog box.
-This panel allows one to specify scaling parameters for x, y and z dimensions and
+} \caption[Dialog box for setting scaling and depth parameters.]{Dialog box for setting scaling and depth parameters.
+The Scaling/Depth portion of the {\em Motion/View/Render}\ dialog box allows one to specify scaling parameters for x, y and z scene dimensions and
 to specify the near and far depth planes.
-This panel is invoked by selecting the {\em
-Dialogs$>$Motion/View/Render} menu item and selecting the {\em Scaling/Depth params} panel. } \label{figMOTIONscale}
+} \label{figMOTIONscale}
 \end{figure}
 
 \subsection{Stereo}
@@ -1986,14 +1976,14 @@ glasses are required to see the 3D stereo effect. }
 The {\em Render}\ portion of the Motion/View dialog box,
 as illustrated in Fig. \ref{figMOTIONrender}, is used to convert a {\em Smokeview scene}\ to one or more image files.  Image file formats may be either PNG or JPEG. One frame is rendered for each time step in a time dependent files unless a skipping parameter is specified.
 A skipping interval may be selected to generate fewer images using the {\em Where frames} control.  One frame is rendered for static files.  Higher resolution images may be generated by selecting a multiplier factor using the {\em Resolution multiplier} control. For example, a factor of 3 generates an image with 3 times the original scene resolution.  Unwanted portions of a scene may be removed or clipped before it is rendered by specifying a clipping region. A clipping region is specified in terms of left, right, bottom and top pixel locations.
-.
+
 \begin{figure}[\figoptions]
-\centerline{
-\begin{tabular}{cc}
+\begin{center}
 \includegraphics[width=2.4027777in]{FIGURES/figMOTION4}
-\end{tabular}
-} \caption[{\em Render}\ pane in the {\em Motion/View/Render}\ dialog box.]{{\em Render}\ panel in the {\em Motion/View/Render}\ dialog box. This panel allows one to create images of the smokeview scene. One may also clip or crop the rendered image. This pane is invoked by selecting the {\em
-Dialogs$>$Motion/View/Render} menu item and selecting the {\em Render} panel.  } \label{figMOTIONrender}
+\caption[Dialog box for creating images of the smokeview scene.]
+{Dialog box for creating images of the smokeview scene. The Render portion of the {\em Motion/View/Render} dialog box allows one to create images of the smokeview scene. One may also clip or crop the rendered image.} 
+\end{center}
+\label{figMOTIONrender}
 \end{figure}
 
 \section{Setting Viewpoints}
@@ -2016,8 +2006,7 @@ viewpoint that should be active when Smokeview starts up.
 \begin{tabular}{cc}
 \includegraphics[width=2.4027777in]{FIGURES/figMOTION5}
 \end{tabular}
-} \caption[{\em Viewpoints}\ panel in the {\em Motion/View/Render}\ dialog box.]{{\em Viewpoints}\ panel in the {\em Motion/View/Render}\ dialog box. This panel allows one to define viewpoints.  This panel is invoked by selecting the {\em
-Dialogs$>$Motion/View/Render} menu item and selecting the {\em Viewpoints} panel. } \label{figMOTIONviewpoints}
+} \caption[Dialog box for specifying scene viewpoints.]{Dialog box for specifying scene viewpoints. The viewpoint portion of the  {\em Motion/View/Render}\ dialog box allows one to define and control viewpoints. } \label{figMOTIONviewpoints}
 \end{figure}
 
 
@@ -3085,8 +3074,7 @@ keyword defined in the FDS input data file.
 \includegraphics[width=3.15972222in]{FIGURES/figSCRIPT}
 } \caption[{\em Script}\ dialog box.]{{\em Script}\ dialog box.
 The {\em Script}\ dialog box allows one to setup and run Smokeview
-scripts. The {\em Script}\ dialog box is invoked by selecting the
-{\em Dialogs$>$File/Bounds} menu item. } \label{figSCRIPT}
+scripts. } \label{figSCRIPT}
 \end{figure}
 
 The recorder is turned on using the
@@ -3706,7 +3694,7 @@ of the color at that node.} \label{figCOLORBAR_EXAMPLES}
 \includegraphics[width=2.4305555in]{FIGURES/figCOLORBAR_EDITOR}
 \end{center}
 \caption[{\em Colorbar Editor}\ dialog box.]{ {\em Colorbar
-Editor}\ dialog box.} \label{figCOLORBAR}
+Editor}\ dialog box. One may create or edit existing colorbars by specifying a sequence of red/green/blue coordinates.  } \label{figCOLORBAR}
 \end{figure}
 
 \section{Using the Colorbar Editor}
