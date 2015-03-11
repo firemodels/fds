@@ -2303,6 +2303,12 @@ PROCESS_VENT: IF (WC%VENT_INDEX>0) THEN
             Y2 = M%Y(VT%J2)
             Z1 = M%Z(VT%K1)
             Z2 = M%Z(VT%K2)
+            IF (VT%RADIUS>0._EB) THEN
+               Y1 = VT%Y0-VT%RADIUS
+               Y2 = VT%Y0+VT%RADIUS
+               Z1 = VT%Z0-VT%RADIUS
+               Z2 = VT%Z0+VT%RADIUS
+            ENDIF
             PY = 4._EB*(M%YC(J)-Y1)*(Y2-M%YC(J))/(Y2-Y1)**2
             PZ = 4._EB*(M%ZC(K)-Z1)*(Z2-M%ZC(K))/(Z2-Z1)**2
             WC%UW0 = WC%UW0*PY*PZ
@@ -2311,6 +2317,12 @@ PROCESS_VENT: IF (WC%VENT_INDEX>0) THEN
             X2 = M%X(VT%I2)
             Z1 = M%Z(VT%K1)
             Z2 = M%Z(VT%K2)
+            IF (VT%RADIUS>0._EB) THEN
+               X1 = VT%X0-VT%RADIUS
+               X2 = VT%X0+VT%RADIUS
+               Z1 = VT%Z0-VT%RADIUS
+               Z2 = VT%Z0+VT%RADIUS
+            ENDIF
             PX = 4._EB*(M%XC(I)-X1)*(X2-M%XC(I))/(X2-X1)**2
             PZ = 4._EB*(M%ZC(K)-Z1)*(Z2-M%ZC(K))/(Z2-Z1)**2
             WC%UW0 = WC%UW0*PX*PZ
@@ -2320,6 +2332,12 @@ PROCESS_VENT: IF (WC%VENT_INDEX>0) THEN
             IF (CYLINDRICAL .AND. ABS(X1)<=TWO_EPSILON_EB) X1 = -X2
             Y1 = M%Y(VT%J1)
             Y2 = M%Y(VT%J2)
+            IF (VT%RADIUS>0._EB) THEN
+               X1 = VT%X0-VT%RADIUS
+               X2 = VT%X0+VT%RADIUS
+               Y1 = VT%Y0-VT%RADIUS
+               Y2 = VT%Y0+VT%RADIUS
+            ENDIF
             PX = 4._EB*(M%XC(I)-X1)*(X2-M%XC(I))/(X2-X1)**2
             PY = 4._EB*(M%YC(J)-Y1)*(Y2-M%YC(J))/(Y2-Y1)**2
             IF (CYLINDRICAL) THEN
