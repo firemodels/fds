@@ -1579,9 +1579,11 @@ void Render_CB(int var){
       movie = trim_front(movie_name);
       strcpy(moviefile, movie);
       strcat(moviefile, ".mp4");
+#ifdef WIN32
       if(file_exists(moviefile) == 1){
         unlink(moviefile);
       }
+#endif
 
       strcpy(command_line, "ffmpeg -r ");
       sprintf(command_line, "ffmpeg -r %i -i %s", movie_framerate, fdsprefix);
