@@ -11,6 +11,9 @@ void _Sniff_Errors(char *whereat);
 #define SNIFF_ERRORS(f)
 #endif
 
+#define PNG 0
+#define JPEG 1
+
 #define EXTERNAL_LIST_ID 1
 
 #define TEXTURE_SPHERICAL 0

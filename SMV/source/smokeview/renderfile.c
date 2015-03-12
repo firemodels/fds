@@ -17,9 +17,6 @@ char renderfile_revision[]="$Revision$";
 #include GLUT_H
 #include "gd.h"
 
-#define PNG 0
-#define JPEG 1
-
 /* ------------------ Render ------------------------ */
 
 void Render(int view_mode){

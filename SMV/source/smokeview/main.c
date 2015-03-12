@@ -40,6 +40,11 @@ int main(int argc, char **argv){
   }
   init_texturedir();
   smokezippath=get_smokezippath(smokeview_bindir);
+#ifdef WIN32
+  have_ffmpeg = have_prog("ffmpeg -version>Nul");
+#else
+  have_ffmpeg = have_prog("ffmpeg -version>/dev/null");
+#endif
   display_version_info();
   setup_glut(argc,argv_sv);
   return_code=setup_case(argc,argv_sv);

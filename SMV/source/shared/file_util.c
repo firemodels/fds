@@ -139,6 +139,13 @@ void copy_file(char *destfile, char *sourcefile, int mode){
   fclose(streamout);
 }
 
+/* ------------------ have_prog ------------------------ */
+
+int have_prog(char *prog){
+  if(system(prog) == 0)return 1;
+  return 0;
+}
+
 /* ------------------ get_smokezippath ------------------------ */
 
 char *get_smokezippath(char *progdir){

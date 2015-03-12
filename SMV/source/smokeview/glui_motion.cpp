@@ -50,6 +50,7 @@ char glui_motion_revision[]="$Revision$";
 #define USE_GVEC 28
 #define GSLICE_TRANSLATE 24
 #define GSLICE_NORMAL 27
+#define MAKE_MOVIE 28
 
 #define RENDER_TYPE 0
 #define RENDER_RESOLUTION 1
@@ -91,6 +92,8 @@ GLUI_Rollout *ROLLOUT_scene_clip=NULL;
 GLUI_Rollout *ROLLOUT_projection=NULL;
 GLUI_Rollout *ROLLOUT_render=NULL;
 GLUI_Rollout *ROLLOUT_viewpoints=NULL;
+GLUI_Rollout *ROLLOUT_make_movie = NULL;
+
 
 GLUI_Spinner *SPINNER_nrender_rows=NULL;
 GLUI_Spinner *SPINNER_clip_left=NULL;
@@ -116,6 +119,7 @@ GLUI_Spinner *SPINNER_farclip=NULL;
 GLUI_Spinner *SPINNER_xcenCUSTOM=NULL;
 GLUI_Spinner *SPINNER_ycenCUSTOM=NULL;
 GLUI_Spinner *SPINNER_zcenCUSTOM=NULL;
+GLUI_Spinner *SPINNER_framerate = NULL;
 
 GLUI_Checkbox *CHECKBOX_show_rotation_center=NULL;
 GLUI_Checkbox *CHECKBOX_clip_rendered_scene=NULL;
@@ -149,8 +153,10 @@ GLUI_Button *BUTTON_render_stop=NULL ;
 GLUI_Button *BUTTON_motion_1=NULL;
 GLUI_Button *BUTTON_motion_2=NULL;
 GLUI_Button *BUTTON_window_update=NULL;
+GLUI_Button *BUTTON_make_movie = NULL;
 
 GLUI_EditText *EDIT_view_label=NULL;
+GLUI_EditText *EDIT_movie_name = NULL;
 
 GLUI_Listbox *LIST_viewpoints=NULL;
 GLUI_Listbox *LIST_windowsize=NULL;
@@ -552,7 +558,16 @@ extern "C" void glui_motion_setup(int main_window){
 
   BUTTON_render_start=glui_motion->add_button_to_panel(ROLLOUT_render,_("Start rendering"),RENDER_START,Render_CB);
   BUTTON_render_stop=glui_motion->add_button_to_panel(ROLLOUT_render,_("Stop"),RENDER_STOP,Render_CB);
-  
+
+  if(have_ffmpeg == 1){
+    ROLLOUT_make_movie = glui_motion->add_rollout_to_panel(ROLLOUT_render, "Make movie");
+    SPINNER_framerate = glui_motion->add_spinner_to_panel(ROLLOUT_make_movie, "frame rate", GLUI_SPINNER_INT, &movie_framerate);
+    SPINNER_framerate->set_int_limits(1, 100);
+    EDIT_movie_name = glui_motion->add_edittext_to_panel(ROLLOUT_make_movie, "name:", GLUI_EDITTEXT_TEXT, movie_name);
+    EDIT_movie_name->set_w(200);
+    BUTTON_make_movie = glui_motion->add_button_to_panel(ROLLOUT_make_movie, "Make movie", MAKE_MOVIE, Render_CB);
+  }
+
   ROLLOUT_viewpoints = glui_motion->add_rollout(_("Viewpoints"),false);
   LIST_viewpoints = glui_motion->add_listbox_to_panel(ROLLOUT_viewpoints,_("Select:"),&i_view_list,LIST_VIEW,Viewpoint_CB);
   LIST_viewpoints->set_alignment(GLUI_ALIGN_CENTER);
@@ -1532,8 +1547,52 @@ extern "C" void rotation_type_CB(int var){
 /* ------------------ Render_CB ------------------------ */
 
 void Render_CB(int var){
+  char command_line[1024], *movie;
+  char *ext;
+  char frame0[1024];
+  char moviefile[1024];
+
   updatemenu=1;
   switch(var){
+    case MAKE_MOVIE:
+      switch(renderfiletype){
+        case PNG:
+          ext = ext_png;
+          break;
+        case JPEG:
+          ext = ext_jpg;
+          break;
+        default:
+          renderfiletype = 0;
+          ext = ext_png;
+          break;
+        }
+
+      strcpy(frame0, fdsprefix);
+      strcat(frame0, "_0001");
+      strcat(frame0, ext);
+      if(file_exists(frame0) == 0){
+        Render_CB(RENDER_START);
+      }
+
+      trim(movie_name);
+      movie = trim_front(movie_name);
+      strcpy(moviefile, movie);
+      strcat(moviefile, ".mp4");
+      if(file_exists(moviefile) == 1){
+        unlink(moviefile);
+      }
+
+      strcpy(command_line, "ffmpeg -r ");
+      sprintf(command_line, "ffmpeg -r %i -i %s", movie_framerate, fdsprefix);
+      strcat(command_line, "_%04d");
+      strcat(command_line, ext);
+      strcat(command_line, " ");
+      strcat(command_line, movie);
+      strcat(command_line, ".mp4");
+      printf("movie command=%s\n", command_line);
+      system(command_line);
+      break;
     case RENDER_LABEL:
       break;
     case RENDER_TYPE:
