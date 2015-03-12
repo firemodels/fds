@@ -5027,8 +5027,9 @@ PROC_MATL_LOOP: DO N=1,N_MATL
    DO NR=1,ML%N_REACTIONS
       DO NS=1,MAX_SPECIES
 
-         IF (TRIM(ML%SPEC_ID(NS,NR))/='null' .NEQV. ML%NU_SPEC(NS,NR)>TWO_EPSILON_EB) THEN
-            WRITE(MESSAGE,'(A,A,A)') 'ERROR: MATL ',TRIM(MATL_NAME(N)),' requires both a SPEC_ID and NU_SPEC'
+         IF (TRIM(ML%SPEC_ID(NS,NR))=='null' .AND. ML%NU_SPEC(NS,NR)>TWO_EPSILON_EB) THEN
+            WRITE(MESSAGE,'(A,A,A,I2,A,I2)') 'ERROR: MATL ',TRIM(MATL_NAME(N)),' requires a SPEC_ID for the',&
+                 NS, 'th yield of reaction', NR
             CALL SHUTDOWN(MESSAGE) ; RETURN
          ENDIF
          IF (TRIM(ML%SPEC_ID(NS,NR))=='null') EXIT
