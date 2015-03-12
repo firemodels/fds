@@ -10,6 +10,9 @@ extern "C" char glui_motion_revision[];
 char glui_motion_revision[]="$Revision$";
 
 #include <stdio.h>
+#ifndef WIN32
+#include <unistd.h>
+#endif
 #include <string.h>
 #include GLUT_H
 #include <math.h>
@@ -1575,17 +1578,18 @@ void Render_CB(int var){
         Render_CB(RENDER_START);
       }
 
+// erase movie file if it exists
+
       trim(movie_name);
       movie = trim_front(movie_name);
       strcpy(moviefile, movie);
       strcat(moviefile, ".mp4");
-#ifdef WIN32
       if(file_exists(moviefile) == 1){
         unlink(moviefile);
       }
-#endif
 
-      strcpy(command_line, "ffmpeg -r ");
+// form command line to make movie
+
       sprintf(command_line, "ffmpeg -r %i -i %s", movie_framerate, fdsprefix);
       strcat(command_line, "_%04d");
       strcat(command_line, ext);
