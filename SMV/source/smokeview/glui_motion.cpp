@@ -54,6 +54,7 @@ char glui_motion_revision[]="$Revision$";
 #define GSLICE_TRANSLATE 24
 #define GSLICE_NORMAL 27
 #define MAKE_MOVIE 28
+#define PLAY_MOVIE 29
 
 #define RENDER_TYPE 0
 #define RENDER_RESOLUTION 1
@@ -157,6 +158,7 @@ GLUI_Button *BUTTON_motion_1=NULL;
 GLUI_Button *BUTTON_motion_2=NULL;
 GLUI_Button *BUTTON_window_update=NULL;
 GLUI_Button *BUTTON_make_movie = NULL;
+GLUI_Button *BUTTON_play_movie = NULL;
 
 GLUI_EditText *EDIT_view_label=NULL;
 GLUI_EditText *EDIT_movie_name = NULL;
@@ -562,13 +564,16 @@ extern "C" void glui_motion_setup(int main_window){
   BUTTON_render_start=glui_motion->add_button_to_panel(ROLLOUT_render,_("Start rendering"),RENDER_START,Render_CB);
   BUTTON_render_stop=glui_motion->add_button_to_panel(ROLLOUT_render,_("Stop"),RENDER_STOP,Render_CB);
 
-  if(have_ffmpeg == 1){
+  if(have_ffmpeg==1){
     ROLLOUT_make_movie = glui_motion->add_rollout_to_panel(ROLLOUT_render, "Make movie");
     SPINNER_framerate = glui_motion->add_spinner_to_panel(ROLLOUT_make_movie, "frame rate", GLUI_SPINNER_INT, &movie_framerate);
     SPINNER_framerate->set_int_limits(1, 100);
     EDIT_movie_name = glui_motion->add_edittext_to_panel(ROLLOUT_make_movie, "name:", GLUI_EDITTEXT_TEXT, movie_name);
     EDIT_movie_name->set_w(200);
     BUTTON_make_movie = glui_motion->add_button_to_panel(ROLLOUT_make_movie, "Make movie", MAKE_MOVIE, Render_CB);
+    if(have_ffplay==1){
+      BUTTON_play_movie = glui_motion->add_button_to_panel(ROLLOUT_make_movie, "Play movie", PLAY_MOVIE, Render_CB);
+    }
   }
 
   ROLLOUT_viewpoints = glui_motion->add_rollout(_("Viewpoints"),false);
@@ -1557,6 +1562,17 @@ void Render_CB(int var){
 
   updatemenu=1;
   switch(var){
+    case PLAY_MOVIE:
+      trim(movie_name);
+      movie = trim_front(movie_name);
+      strcpy(moviefile, movie);
+      strcat(moviefile, ".mp4");
+      if(file_exists(moviefile)==1){
+        strcpy(command_line, "ffplay ");
+        strcat(command_line,moviefile);
+        system(command_line);
+      }
+      break;
     case MAKE_MOVIE:
       switch(renderfiletype){
         case PNG:
