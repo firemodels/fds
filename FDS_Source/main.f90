@@ -1294,7 +1294,67 @@ SELECT CASE(TASK_NUMBER)
 
       DEALLOCATE(INTEGER_SEND_BUFFER)
       DEALLOCATE(INTEGER_RECV_BUFFER)
-      
+
+      CALL MPI_BARRIER(MPI_COMM_WORLD,IERR)
+
+      ! Exchange IIO_S, etc., the indices of interpolated cells
+
+      DO NM=1,NMESHES
+         IF (EVACUATION_ONLY(NM)) CYCLE
+         DO NOM=1,NMESHES
+            IF (PROCESS(NOM)/=MYID) CYCLE
+            IF (EVACUATION_ONLY(NOM)) CYCLE
+            IF (MESHES(NOM)%OMESH(NM)%NIC_S>0) THEN
+               ALLOCATE(MESHES(NOM)%OMESH(NM)%IIO_S(MESHES(NOM)%OMESH(NM)%NIC_S))
+               ALLOCATE(MESHES(NOM)%OMESH(NM)%JJO_S(MESHES(NOM)%OMESH(NM)%NIC_S))
+               ALLOCATE(MESHES(NOM)%OMESH(NM)%KKO_S(MESHES(NOM)%OMESH(NM)%NIC_S))
+               ALLOCATE(MESHES(NOM)%OMESH(NM)%IOR_S(MESHES(NOM)%OMESH(NM)%NIC_S))
+            ENDIF
+         ENDDO
+      ENDDO
+
+      N_REQ = 0
+
+      DO NM=1,NMESHES
+         IF (EVACUATION_ONLY(NM)) CYCLE
+         DO NOM=1,NMESHES
+            IF (PROCESS(NOM)/=MYID) CYCLE
+            IF (EVACUATION_ONLY(NOM)) CYCLE
+            M2 => MESHES(NOM)%OMESH(NM)
+            IF (N_MPI_PROCESSES>1 .AND. NM/=NOM .AND. PROCESS(NM)/=MYID .AND. M2%NIC_S>0) THEN
+               CALL MPI_IRECV(M2%IIO_S(1),M2%NIC_S,MPI_INTEGER,PROCESS(NM),NM,MPI_COMM_WORLD,REQ(N_REQ+1),IERR)
+               CALL MPI_IRECV(M2%JJO_S(1),M2%NIC_S,MPI_INTEGER,PROCESS(NM),NM,MPI_COMM_WORLD,REQ(N_REQ+2),IERR)
+               CALL MPI_IRECV(M2%KKO_S(1),M2%NIC_S,MPI_INTEGER,PROCESS(NM),NM,MPI_COMM_WORLD,REQ(N_REQ+3),IERR)
+               CALL MPI_IRECV(M2%IOR_S(1),M2%NIC_S,MPI_INTEGER,PROCESS(NM),NM,MPI_COMM_WORLD,REQ(N_REQ+4),IERR)
+               N_REQ = N_REQ + 4
+            ENDIF
+         ENDDO
+      ENDDO
+
+      DO NM=1,NMESHES
+         IF (PROCESS(NM)/=MYID) CYCLE
+         IF (EVACUATION_ONLY(NM)) CYCLE
+         DO NOM=1,NMESHES
+            IF (EVACUATION_ONLY(NOM)) CYCLE
+            M3 => MESHES(NM)%OMESH(NOM)
+            IF (M3%NIC_R<1) CYCLE
+            IF (PROCESS(NOM)/=MYID) THEN
+               CALL MPI_ISEND(M3%IIO_R(1),M3%NIC_R,MPI_INTEGER,PROCESS(NOM),NM,MPI_COMM_WORLD,REQ(N_REQ+1),IERR)
+               CALL MPI_ISEND(M3%JJO_R(1),M3%NIC_R,MPI_INTEGER,PROCESS(NOM),NM,MPI_COMM_WORLD,REQ(N_REQ+2),IERR)
+               CALL MPI_ISEND(M3%KKO_R(1),M3%NIC_R,MPI_INTEGER,PROCESS(NOM),NM,MPI_COMM_WORLD,REQ(N_REQ+3),IERR)
+               CALL MPI_ISEND(M3%IOR_R(1),M3%NIC_R,MPI_INTEGER,PROCESS(NOM),NM,MPI_COMM_WORLD,REQ(N_REQ+4),IERR)
+               N_REQ = N_REQ + 4
+            ELSE
+               MESHES(NOM)%OMESH(NM)%IIO_S = M3%IIO_R
+               MESHES(NOM)%OMESH(NM)%JJO_S = M3%JJO_R
+               MESHES(NOM)%OMESH(NM)%KKO_S = M3%KKO_R
+               MESHES(NOM)%OMESH(NM)%IOR_S = M3%IOR_R
+            ENDIF
+         ENDDO
+      ENDDO
+
+      CALL MPI_WAITALL(N_REQ,REQ(1:N_REQ),MPI_STATUSES_IGNORE,IERR)
+
 END SELECT
 
 CALL MPI_BARRIER(MPI_COMM_WORLD,IERR)
@@ -1527,16 +1587,18 @@ SUBROUTINE INITIALIZE_MESH_EXCHANGE(NM)
  
 ! Create arrays by which info is to exchanged across meshes
  
-INTEGER IMIN,IMAX,JMIN,JMAX,KMIN,KMAX,NOM,IOR,IW,N,N_STORAGE_SLOTS
+INTEGER :: IMIN,IMAX,JMIN,JMAX,KMIN,KMAX,NOM,IOR,IW,N,N_STORAGE_SLOTS,IIO,JJO,KKO,NIC_R, &
+           IIO_MIN,IIO_MAX,JJO_MIN,JJO_MAX,KKO_MIN,KKO_MAX
 INTEGER, INTENT(IN) :: NM
 TYPE (MESH_TYPE), POINTER :: M2,M
 TYPE (LAGRANGIAN_PARTICLE_CLASS_TYPE), POINTER :: LPC
-LOGICAL FOUND
+LOGICAL :: FOUND
  
 M=>MESHES(NM)
-NOT_EVACUATION_MESH_IF: IF (.NOT.EVACUATION_ONLY(NM)) THEN
-ALLOCATE(MESHES(NM)%OMESH(NMESHES))
 
+NOT_EVACUATION_MESH_IF: IF (.NOT.EVACUATION_ONLY(NM)) THEN
+
+ALLOCATE(MESHES(NM)%OMESH(NMESHES))
 ALLOCATE(M%OMESH(NM)%IJKW(15,M%N_EXTERNAL_WALL_CELLS))
 
 DO IW=1,M%N_EXTERNAL_WALL_CELLS
@@ -1588,24 +1650,55 @@ OTHER_MESH_LOOP: DO NOM=1,NMESHES
 
    SEARCH_LOOP: DO IW=1,M%N_EXTERNAL_WALL_CELLS
       IF (M%WALL(IW)%NOM/=NOM) CYCLE SEARCH_LOOP
-      M%OMESH(NOM)%NIC_R = M%OMESH(NOM)%NIC_R + 1
+      IIO_MIN = M%WALL(IW)%NOM_IB(1)
+      JJO_MIN = M%WALL(IW)%NOM_IB(2)
+      KKO_MIN = M%WALL(IW)%NOM_IB(3)
+      IIO_MAX = M%WALL(IW)%NOM_IB(4)
+      JJO_MAX = M%WALL(IW)%NOM_IB(5)
+      KKO_MAX = M%WALL(IW)%NOM_IB(6)
+      M%OMESH(NOM)%NIC_R = M%OMESH(NOM)%NIC_R + (IIO_MAX-IIO_MIN+1)*(JJO_MAX-JJO_MIN+1)*(KKO_MAX-KKO_MIN+1)
       FOUND = .TRUE.
       IOR = M%WALL(IW)%ONE_D%IOR
       SELECT CASE(IOR)
          CASE( 1) 
-            IMIN=MAX(IMIN,M%WALL(IW)%NOM_IB(1)-1)
+            IMIN=MAX(IMIN,IIO_MIN-1)
          CASE(-1) 
-            IMAX=MIN(IMAX,M%WALL(IW)%NOM_IB(4)+1)
+            IMAX=MIN(IMAX,IIO_MAX+1)
          CASE( 2) 
-            JMIN=MAX(JMIN,M%WALL(IW)%NOM_IB(2)-1)
+            JMIN=MAX(JMIN,JJO_MIN-1)
          CASE(-2) 
-            JMAX=MIN(JMAX,M%WALL(IW)%NOM_IB(5)+1)
+            JMAX=MIN(JMAX,JJO_MAX+1)
          CASE( 3) 
-            KMIN=MAX(KMIN,M%WALL(IW)%NOM_IB(3)-1)
+            KMIN=MAX(KMIN,KKO_MIN-1)
          CASE(-3) 
-            KMAX=MIN(KMAX,M%WALL(IW)%NOM_IB(6)+1)
+            KMAX=MIN(KMAX,KKO_MAX+1)
       END SELECT
    ENDDO SEARCH_LOOP
+
+   ! Allocate arrays to hold indices of arrays for MPI exchanges
+
+   IF (M%OMESH(NOM)%NIC_R>0) THEN
+      ALLOCATE(M%OMESH(NOM)%IIO_R(M%OMESH(NOM)%NIC_R))
+      ALLOCATE(M%OMESH(NOM)%JJO_R(M%OMESH(NOM)%NIC_R))
+      ALLOCATE(M%OMESH(NOM)%KKO_R(M%OMESH(NOM)%NIC_R))
+      ALLOCATE(M%OMESH(NOM)%IOR_R(M%OMESH(NOM)%NIC_R))
+      NIC_R = 0
+      INDEX_LOOP: DO IW=1,M%N_EXTERNAL_WALL_CELLS
+         IF (M%WALL(IW)%NOM/=NOM) CYCLE INDEX_LOOP
+         DO KKO=M%WALL(IW)%NOM_IB(3),M%WALL(IW)%NOM_IB(6)
+            DO JJO=M%WALL(IW)%NOM_IB(2),M%WALL(IW)%NOM_IB(5)
+               DO IIO=M%WALL(IW)%NOM_IB(1),M%WALL(IW)%NOM_IB(4)
+                  NIC_R = NIC_R + 1
+                  IOR = M%WALL(IW)%ONE_D%IOR
+                  M%OMESH(NOM)%IIO_R(NIC_R) = IIO
+                  M%OMESH(NOM)%JJO_R(NIC_R) = JJO
+                  M%OMESH(NOM)%KKO_R(NIC_R) = KKO
+                  M%OMESH(NOM)%IOR_R(NIC_R) = IOR
+               ENDDO
+            ENDDO
+         ENDDO
+      ENDDO INDEX_LOOP
+   ENDIF
 
    ! For PERIODIC boundaries with 1 or 2 meshes, we must revert to allocating whole copies of OMESH
 
@@ -1867,7 +1960,7 @@ MESH_LOOP: DO NM=1,NMESHES
             ALLOCATE(M3%REAL_RECV_PKG3(IJK_SIZE*(4+N_TRACKED_SPECIES)))
             ALLOCATE(M3%REAL_RECV_PKG4(IJK_SIZE*(4          )))
             ALLOCATE(M3%REAL_RECV_PKG5((NRA*NSB+1)*M3%NIC_R+3))
-            ALLOCATE(M3%REAL_RECV_PKG7(IJK_SIZE*(4          )))
+            ALLOCATE(M3%REAL_RECV_PKG7(M3%NIC_R*3))
          ENDIF
     
          N_REQ = MIN(N_REQ+1,SIZE(REQ))
@@ -2069,7 +2162,7 @@ SENDING_MESH_LOOP: DO NM=1,NMESHES
             ALLOCATE(M3%REAL_SEND_PKG3(IJK_SIZE*(4+N_TRACKED_SPECIES)))
             ALLOCATE(M3%REAL_SEND_PKG4(IJK_SIZE*(4          )))
             ALLOCATE(M3%REAL_SEND_PKG5((NRA*NSB+1)*M3%NIC_S+3))
-            ALLOCATE(M3%REAL_SEND_PKG7(IJK_SIZE*(4          )))
+            ALLOCATE(M3%REAL_SEND_PKG7(M3%NIC_S*3))
          ENDIF
  
          IF (RNODE/=SNODE) THEN
@@ -2186,18 +2279,28 @@ SENDING_MESH_LOOP: DO NM=1,NMESHES
          IF (PREDICTOR) HP => M%H
          IF (CORRECTOR) HP => M%HS
          IF (RNODE/=SNODE) THEN
-            LL = 0
-            DO KK=KMIN,KMAX
-               DO JJ=JMIN,JMAX
-                  DO II=IMIN,IMAX
-                     M3%REAL_SEND_PKG7(LL+1) = M%FVX(II,JJ,KK)
-                     M3%REAL_SEND_PKG7(LL+2) = M%FVY(II,JJ,KK)
-                     M3%REAL_SEND_PKG7(LL+3) = M%FVZ(II,JJ,KK)
-                     M3%REAL_SEND_PKG7(LL+4) = HP(II,JJ,KK)
-                     LL = LL+4
-                  ENDDO
-               ENDDO
-            ENDDO
+            PACK_REAL_SEND_PKG7: DO LL=1,M3%NIC_S
+               SELECT CASE(M3%IOR_S(LL))
+                  CASE(-1) ; M3%REAL_SEND_PKG7(3*LL-2) = M%FVX(M3%IIO_S(LL)-1,M3%JJO_S(LL)  ,M3%KKO_S(LL)  )
+                             M3%REAL_SEND_PKG7(3*LL-1) =    HP(M3%IIO_S(LL)-1,M3%JJO_S(LL)  ,M3%KKO_S(LL)  )
+                             M3%REAL_SEND_PKG7(3*LL  ) =    HP(M3%IIO_S(LL)  ,M3%JJO_S(LL)  ,M3%KKO_S(LL)  )
+                  CASE( 1) ; M3%REAL_SEND_PKG7(3*LL-2) = M%FVX(M3%IIO_S(LL)  ,M3%JJO_S(LL)  ,M3%KKO_S(LL)  )
+                             M3%REAL_SEND_PKG7(3*LL-1) =    HP(M3%IIO_S(LL)  ,M3%JJO_S(LL)  ,M3%KKO_S(LL)  )
+                             M3%REAL_SEND_PKG7(3*LL  ) =    HP(M3%IIO_S(LL)+1,M3%JJO_S(LL)  ,M3%KKO_S(LL)  )
+                  CASE(-2) ; M3%REAL_SEND_PKG7(3*LL-2) = M%FVY(M3%IIO_S(LL)  ,M3%JJO_S(LL)-1,M3%KKO_S(LL)  )
+                             M3%REAL_SEND_PKG7(3*LL-1) =    HP(M3%IIO_S(LL)  ,M3%JJO_S(LL)-1,M3%KKO_S(LL)  )
+                             M3%REAL_SEND_PKG7(3*LL  ) =    HP(M3%IIO_S(LL)  ,M3%JJO_S(LL)  ,M3%KKO_S(LL)  )
+                  CASE( 2) ; M3%REAL_SEND_PKG7(3*LL-2) = M%FVY(M3%IIO_S(LL)  ,M3%JJO_S(LL)  ,M3%KKO_S(LL)  )
+                             M3%REAL_SEND_PKG7(3*LL-1) =    HP(M3%IIO_S(LL)  ,M3%JJO_S(LL)  ,M3%KKO_S(LL)  )
+                             M3%REAL_SEND_PKG7(3*LL  ) =    HP(M3%IIO_S(LL)  ,M3%JJO_S(LL)+1,M3%KKO_S(LL)  )
+                  CASE(-3) ; M3%REAL_SEND_PKG7(3*LL-2) = M%FVZ(M3%IIO_S(LL)  ,M3%JJO_S(LL)  ,M3%KKO_S(LL)-1)
+                             M3%REAL_SEND_PKG7(3*LL-1) =    HP(M3%IIO_S(LL)  ,M3%JJO_S(LL)  ,M3%KKO_S(LL)-1)
+                             M3%REAL_SEND_PKG7(3*LL  ) =    HP(M3%IIO_S(LL)  ,M3%JJO_S(LL)  ,M3%KKO_S(LL)  )
+                  CASE( 3) ; M3%REAL_SEND_PKG7(3*LL-2) = M%FVZ(M3%IIO_S(LL)  ,M3%JJO_S(LL)  ,M3%KKO_S(LL)  )
+                             M3%REAL_SEND_PKG7(3*LL-1) =    HP(M3%IIO_S(LL)  ,M3%JJO_S(LL)  ,M3%KKO_S(LL)  )
+                             M3%REAL_SEND_PKG7(3*LL  ) =    HP(M3%IIO_S(LL)  ,M3%JJO_S(LL)  ,M3%KKO_S(LL)+1)
+               END SELECT
+            ENDDO PACK_REAL_SEND_PKG7
          ELSE
             M2=>MESHES(NOM)%OMESH(NM)
             IF (PREDICTOR) HP2 => M2%H
@@ -2552,20 +2655,30 @@ IF (SNODE/=MYID) CYCLE SEND_MESH_LOOP
       ! Unpack densities and species mass fractions following PREDICTOR exchange
    
       IF (CODE==5 .AND. M2%NIC_R>0 .AND. RNODE/=SNODE) THEN
-         LL = 0
          IF (PREDICTOR) HP => M2%H
          IF (CORRECTOR) HP => M2%HS
-         DO KK=KMIN,KMAX
-            DO JJ=JMIN,JMAX
-               DO II=IMIN,IMAX
-                  M2%FVX(II,JJ,KK) = M2%REAL_RECV_PKG7(LL+1)
-                  M2%FVY(II,JJ,KK) = M2%REAL_RECV_PKG7(LL+2)
-                  M2%FVZ(II,JJ,KK) = M2%REAL_RECV_PKG7(LL+3)
-                  HP(II,JJ,KK)     = M2%REAL_RECV_PKG7(LL+4)
-                  LL = LL+4
-               ENDDO
-            ENDDO
-         ENDDO
+         UNPACK_REAL_RECV_PKG7: DO LL=1,M2%NIC_R
+            SELECT CASE(M2%IOR_R(LL))
+               CASE(-1) ; M2%FVX(M2%IIO_R(LL)-1,M2%JJO_R(LL)  ,M2%KKO_R(LL)  ) = M2%REAL_RECV_PKG7(3*LL-2)
+                              HP(M2%IIO_R(LL)-1,M2%JJO_R(LL)  ,M2%KKO_R(LL)  ) = M2%REAL_RECV_PKG7(3*LL-1)
+                              HP(M2%IIO_R(LL)  ,M2%JJO_R(LL)  ,M2%KKO_R(LL)  ) = M2%REAL_RECV_PKG7(3*LL  )
+               CASE( 1) ; M2%FVX(M2%IIO_R(LL)  ,M2%JJO_R(LL)  ,M2%KKO_R(LL)  ) = M2%REAL_RECV_PKG7(3*LL-2)
+                              HP(M2%IIO_R(LL)  ,M2%JJO_R(LL)  ,M2%KKO_R(LL)  ) = M2%REAL_RECV_PKG7(3*LL-1)
+                              HP(M2%IIO_R(LL)+1,M2%JJO_R(LL)  ,M2%KKO_R(LL)  ) = M2%REAL_RECV_PKG7(3*LL  )
+               CASE(-2) ; M2%FVY(M2%IIO_R(LL)  ,M2%JJO_R(LL)-1,M2%KKO_R(LL)  ) = M2%REAL_RECV_PKG7(3*LL-2)
+                              HP(M2%IIO_R(LL)  ,M2%JJO_R(LL)-1,M2%KKO_R(LL)  ) = M2%REAL_RECV_PKG7(3*LL-1)
+                              HP(M2%IIO_R(LL)  ,M2%JJO_R(LL)  ,M2%KKO_R(LL)  ) = M2%REAL_RECV_PKG7(3*LL  )
+               CASE( 2) ; M2%FVY(M2%IIO_R(LL)  ,M2%JJO_R(LL)  ,M2%KKO_R(LL)  ) = M2%REAL_RECV_PKG7(3*LL-2)
+                              HP(M2%IIO_R(LL)  ,M2%JJO_R(LL)  ,M2%KKO_R(LL)  ) = M2%REAL_RECV_PKG7(3*LL-1)
+                              HP(M2%IIO_R(LL)  ,M2%JJO_R(LL)+1,M2%KKO_R(LL)  ) = M2%REAL_RECV_PKG7(3*LL  )
+               CASE(-3) ; M2%FVZ(M2%IIO_R(LL)  ,M2%JJO_R(LL)  ,M2%KKO_R(LL)-1) = M2%REAL_RECV_PKG7(3*LL-2)
+                              HP(M2%IIO_R(LL)  ,M2%JJO_R(LL)  ,M2%KKO_R(LL)-1) = M2%REAL_RECV_PKG7(3*LL-1)
+                              HP(M2%IIO_R(LL)  ,M2%JJO_R(LL)  ,M2%KKO_R(LL)  ) = M2%REAL_RECV_PKG7(3*LL  )
+               CASE( 3) ; M2%FVZ(M2%IIO_R(LL)  ,M2%JJO_R(LL)  ,M2%KKO_R(LL)  ) = M2%REAL_RECV_PKG7(3*LL-2)
+                              HP(M2%IIO_R(LL)  ,M2%JJO_R(LL)  ,M2%KKO_R(LL)  ) = M2%REAL_RECV_PKG7(3*LL-1)
+                              HP(M2%IIO_R(LL)  ,M2%JJO_R(LL)  ,M2%KKO_R(LL)+1) = M2%REAL_RECV_PKG7(3*LL  )
+            END SELECT
+         ENDDO UNPACK_REAL_RECV_PKG7
       ENDIF
    
       ! Unpack pressure following PREDICTOR stage of time step
@@ -2643,7 +2756,7 @@ IF (SNODE/=MYID) CYCLE SEND_MESH_LOOP
 
       ! Unpack back wall information at the end of the CORRECTOR stage of the time step
 
-      RECEIVE_BACK_WALL: IF ( CODE==6 .AND. SNODE/=RNODE) THEN
+      RECEIVE_BACK_WALL: IF (CODE==6 .AND. SNODE/=RNODE) THEN
          LL = 0
          DO II=1,M2%N_EXT_BACK_WALL_CELLS
             M2%BACK_WALL(II)%QRADIN  = M2%REAL_RECV_PKG6(LL+1)
