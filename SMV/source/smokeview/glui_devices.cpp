@@ -81,6 +81,13 @@ GLUI_Checkbox *CHECKBOX_device_orientation=NULL;
 
 void Device_CB(int var);
 
+/* ------------------ update_device_size ------------------------ */
+
+extern "C" void update_device_size(void){
+  if(sensorrelsize<sensorrelsizeMIN)sensorrelsize = sensorrelsizeMIN;
+  if(SPINNER_sensorrelsize!=NULL)SPINNER_sensorrelsize->set_float_val(sensorrelsize);
+}
+
 /* ------------------ update_device_orientation ------------------------ */
 
 extern "C" void update_device_orientation(void){

@@ -784,7 +784,7 @@ SVEXTERN int SVDECL(render_clip_top,0);
 SVEXTERN int SVDECL(clip_rendered_scene,0);
 
 SVEXTERN float sprinklerabssize, sensorabssize, heatabssize;
-SVEXTERN float sensorrelsize,sensorrelsizeMIN;
+SVEXTERN float SVDECL(sensorrelsize,1.0),SVDECL(sensorrelsizeMIN,0.0);
 SVEXTERN float SVDECL(vector_baseheight,1.0);
 SVEXTERN float SVDECL(vector_basediameter,0.1);
 SVEXTERN float SVDECL(vector_headheight,0.2);

@@ -1583,8 +1583,6 @@ void initvars(void){
   plot3dpointsize=4.0;
   plot3dlinewidth=2.0;
   sprinklerabssize=0.076f, sensorabssize=0.038f, heatabssize=0.076f;
-  sensorrelsize=1.0;
-  sensorrelsizeMIN=0.0;
 
   linewidth=2.0, ventlinewidth=2.0, highlight_linewidth=4.0;
   solidlinewidth=linewidth;

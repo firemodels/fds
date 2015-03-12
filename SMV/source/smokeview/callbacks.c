@@ -1596,6 +1596,16 @@ void keyboard(unsigned char key, int flag){
         return;
       }
       break;
+    case 'j':
+    case 'J':
+      if(keystate==GLUT_ACTIVE_ALT){
+        sensorrelsize /= 1.5;
+      }
+      else{
+        sensorrelsize *= 1.5;
+      }
+      update_device_size();
+      break;
     case 'k':
     case 'K':
       visTimeLabels = 1 - visTimeLabels;

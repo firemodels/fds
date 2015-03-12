@@ -6,6 +6,7 @@
 #ifndef SMOKEHEADERS_H_DEFINED
 #define SMOKEHEADERS_H_DEFINED
 
+EXTERNCPP void update_device_size(void);
 EXTERNCPP void update_Display(void);
 EXTERNCPP void update_ShowScene(void);
 EXTERNCPP void update_gvec_down(int gvec_down_local);
