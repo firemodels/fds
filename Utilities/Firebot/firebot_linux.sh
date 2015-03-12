@@ -1278,16 +1278,6 @@ elif [[ $stage2a_success && $stage2b_success && $FIREBOT_MODE == "validation" ]]
    check_cases_debug $FDS_SVNROOT/Validation 'validation'
 fi
 
-### Wrap up and report results ###
-set_files_world_readable
-if [ $FIREBOT_MODE == "verification" ] ; then
-   save_build_status
-   email_build_status 'Firebot' 'Build'
-elif [ $FIREBOT_MODE == "validation" ] ; then
-   email_build_status 'Validationbot' 'Validation'
-fi
-exit
-
 clean_debug_stage
 
 ### Stage 4a ###
