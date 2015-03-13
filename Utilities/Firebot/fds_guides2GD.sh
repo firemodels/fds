@@ -8,20 +8,18 @@ PARENT_ID=0B_wB1pJL2bFQUlJwMmNfaHlqME0
 # directory containing guides within firebot account
 FROMDIR=~firebot/firebot/output
 BASEDIR=Newest_Guides
-UPDATE_GUIDES=$FROMDIR/$BASEDIR/update_guides
 
 UPLOAD ()
 {
   FILE=$1
   FILEnew=${FILE}_new.pdf
   cp $FILE.pdf /tmp/$FILEnew
-  drive list  | grep $FILEnew | awk '{ system("drive delete -i " $1)} '
-  drive upload -p $PARENT_ID -f /tmp/$FILEnew
+  $GDRIVE list  | grep $FILEnew | awk '{ system("drive delete -i " $1)} '
+  $GDRIVE upload -p $PARENT_ID -f /tmp/$FILEnew
 }
 
 if [ -e $GDRIVE ] ; then
   cd $FROMDIR/$BASEDIR
-  rm -f $UPDATE_GUIDES
   UPLOAD FDS_Configuration_Management_Plan
   UPLOAD FDS_Technical_Reference_Guide
   UPLOAD FDS_User_Guide
