@@ -1,0 +1,49 @@
+/batch
+resume
+/output,ansys_output,dat
+ALLSEL,ALL
+ESEL,S,TYPE,,1  
+NSLE,S  
+EPLOT
+/VIEW,1,-1  
+/ANG,1  
+/REP,FAST   
+/USER,  1   
+/DIST,  1,  0.513157400885  
+/ANG,   1,   90.0000000000  
+/DIST,  1,  0.547509249641  
+/FOC,   1,   1.00500000000    ,   1.12403714665    ,  0.481110930887
+/FOC,   1,   1.00500000000    ,   1.10925439691    ,  0.466328181147
+/SHOW,'simple_panel_hot_ansys','grph',' '
+/DEVICE,VECTOR,0
+/GFILE,800, 
+!
+/PLOPTS,INFO,3  
+/PLOPTS,LEG1,0  
+/PLOPTS,LEG2,1  
+/PLOPTS,LEG3,1  
+/PLOPTS,FRAME,0 
+/PLOPTS,TITLE,1 
+/PLOPTS,MINM,0  
+/PLOPTS,FILE,1 
+/PLOPTS,LOGO,1  
+/PLOPTS,WINS,1  
+/PLOPTS,WP,0
+/PLOPTS,DATE,2  
+/TRIAD,OFF 
+! /DEV,FONT,LEGEND,MENU 
+/dev,font,1,Arial,400,0,-27,0,0,,,  
+/CONT,1,10,410, ,490 
+/UDOC,1,CNTR,RIGH 
+!*  
+
+!*
+/POST1  
+SET,LAST 
+/EFACET,1   
+PLNSOL, TEMP,, 0
+!*  
+!*  
+/SHOW,CLOSE 
+finish 
+
