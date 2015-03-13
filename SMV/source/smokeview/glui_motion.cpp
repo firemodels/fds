@@ -53,7 +53,6 @@ char glui_motion_revision[]="$Revision$";
 #define USE_GVEC 28
 #define GSLICE_TRANSLATE 24
 #define GSLICE_NORMAL 27
-#define MAKE_MOVIE 28
 #define PLAY_MOVIE 29
 
 #define RENDER_TYPE 0
@@ -546,7 +545,7 @@ extern "C" void glui_motion_setup(int main_window){
   LIST_render_skip->add_item(20,_("Every 20th"));
 
 
-  ROLLOUT_scene_clip = glui_motion->add_rollout_to_panel(ROLLOUT_render,"Clip rendered scene");
+  ROLLOUT_scene_clip = glui_motion->add_rollout_to_panel(ROLLOUT_render,"Clip rendered scene",false);
   SPINNER_clip_left=glui_motion->add_spinner_to_panel(ROLLOUT_scene_clip,"left:",GLUI_SPINNER_INT,&render_clip_left);
   SPINNER_clip_left->set_int_limits(0,screenWidth);
 
@@ -565,7 +564,7 @@ extern "C" void glui_motion_setup(int main_window){
   BUTTON_render_stop=glui_motion->add_button_to_panel(ROLLOUT_render,_("Stop"),RENDER_STOP,Render_CB);
 
   if(have_ffmpeg==1){
-    ROLLOUT_make_movie = glui_motion->add_rollout_to_panel(ROLLOUT_render, "Make movie");
+    ROLLOUT_make_movie = glui_motion->add_rollout_to_panel(ROLLOUT_render, "Make movie",false);
     SPINNER_framerate = glui_motion->add_spinner_to_panel(ROLLOUT_make_movie, "frame rate", GLUI_SPINNER_INT, &movie_framerate);
     SPINNER_framerate->set_int_limits(1, 100);
     EDIT_movie_name = glui_motion->add_edittext_to_panel(ROLLOUT_make_movie, "name:", GLUI_EDITTEXT_TEXT, movie_name);
@@ -1574,6 +1573,10 @@ void Render_CB(int var){
       }
       break;
     case MAKE_MOVIE:
+      if(have_ffmpeg == 0){
+        PRINTF("***error: The movie generating program ffmpeg is not available\n");
+        break;
+      }
       switch(renderfiletype){
         case PNG:
           ext = ext_png;
@@ -1606,7 +1609,7 @@ void Render_CB(int var){
 
 // form command line to make movie
 
-      sprintf(command_line, "ffmpeg -r %i -i %s", movie_framerate, fdsprefix);
+      sprintf(command_line, "ffmpeg -r %i -i %s", movie_framerate, movie_prefix);
       strcat(command_line, "_%04d");
       strcat(command_line, ext);
       strcat(command_line, " ");

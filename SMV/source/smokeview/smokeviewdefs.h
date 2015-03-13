@@ -11,6 +11,8 @@ void _Sniff_Errors(char *whereat);
 #define SNIFF_ERRORS(f)
 #endif
 
+#define MAKE_MOVIE 28
+
 #define PNG 0
 #define JPEG 1
 
@@ -161,6 +163,7 @@ void _Sniff_Errors(char *whereat);
 #define SCRIPT_CBARFLIP 111
 #define SCRIPT_CBARNORMAL 112
 #define SCRIPT_RENDERSTART 113
+#define SCRIPT_MAKEMOVIE 114
 
 #define SCRIPT_LOADFILE 201
 #define SCRIPT_LOADVFILE 202

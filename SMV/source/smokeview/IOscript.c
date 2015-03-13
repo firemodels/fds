@@ -50,6 +50,11 @@ void update_menu(void);
 //  skip (int) start_frame (int)
 // file name base (char) (or blank to use smokeview default)
 
+// MAKEMOVIE
+//  movie_name (char)
+//  frame_prefix (char)
+//  framerate (float)
+
 // ---------- loading, unloading files -----------
 //
 //  Use LOADFILE to load a particular file.  Smokeview will figure
@@ -367,6 +372,7 @@ int get_script_keyword_index(char *keyword){
   if(match_upper(keyword,"LOADVOLSMOKEFRAME") == 1)return SCRIPT_LOADVOLSMOKEFRAME;
   if(match_upper(keyword,"LOADVFILE") == 1)return SCRIPT_LOADVFILE;
   if(match_upper(keyword,"LOADVSLICE") == 1)return SCRIPT_LOADVSLICE;
+  if(match_upper(keyword,"MAKEMOVIE") == 1)return SCRIPT_MAKEMOVIE;
   if(match_upper(keyword,"PARTCLASSCOLOR") == 1)return SCRIPT_PARTCLASSCOLOR;
   if(match_upper(keyword,"PARTCLASSTYPE") == 1)return SCRIPT_PARTCLASSTYPE;
   if(match_upper(keyword,"PLOT3DPROPS") == 1)return SCRIPT_PLOT3DPROPS;
@@ -583,6 +589,18 @@ int compile_script(char *scriptfile){
         SETcval2;
         break;
 
+      case SCRIPT_MAKEMOVIE:
+        SETcval;
+        SETcval2;
+        if(fgets(buffer2,255,stream)==NULL){
+          scriptEOF=1;
+          break;
+        }
+        script_error_check(keyword,buffer2);
+        cleanbuffer(buffer,buffer2);
+        sscanf(buffer,"%f",&scripti->fval); 
+        break;
+
       case SCRIPT_LOADINIFILE:
         {
         int len;
@@ -762,6 +780,26 @@ void script_volsmokerenderall(scriptdata *scripti){
   skip_render_frames=1;
   scripti->ival=skip_local;
   RenderMenu(skip_local);
+}
+
+/* ------------------ run_makemovie ------------------------ */
+
+void script_makemovie(scriptdata *scripti){
+  char movie_name_save[1024], movie_prefix_save[1024];
+  float movie_framerate_save;
+
+  strcpy(movie_name_save, movie_name);
+  strcpy(movie_prefix_save, movie_prefix);
+  movie_framerate_save = movie_framerate;
+
+  strcpy(movie_name, scripti->cval);
+  strcpy(movie_prefix,scripti->cval2);
+  movie_framerate=scripti->fval;
+  RenderMenu(MAKE_MOVIE);
+
+  strcpy(movie_name, movie_name_save);
+  strcpy(movie_prefix, movie_prefix_save);
+  movie_framerate = movie_framerate_save;
 }
 
 /* ------------------ script_loadparticles ------------------------ */
@@ -1675,6 +1713,9 @@ int run_script(void){
       break;
     case SCRIPT_VOLSMOKERENDERALL:
       script_volsmokerenderall(scripti);
+      break;
+    case SCRIPT_MAKEMOVIE:
+      script_makemovie(scripti);
       break;
     case SCRIPT_LOADFILE:
       script_loadfile(scripti);

@@ -23,7 +23,7 @@
 #include "smokeheaders.h"
 #include "threader.h"
 
-SVEXTERN char movie_name[1024];
+SVEXTERN char movie_name[1024], movie_prefix[1024];
 SVEXTERN int SVDECL(movie_framerate, 10), SVDECL(have_ffmpeg, 0), SVDECL(have_ffplay, 0);
 SVEXTERN int SVDECL(show_tetratest_labels, 1);
 SVEXTERN float SVDECL(tetra_line_thickness, 1.0);
