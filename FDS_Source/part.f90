@@ -1128,8 +1128,6 @@ INTEGER, INTENT(IN) :: NM
 INTEGER :: NOM
 REAL(EB) :: TNOW
 
-! Return if this is an evacuation mesh
-
 IF (EVACUATION_ONLY(NM)) RETURN  
 
 ! Zero out the number of the PARTICLEs in the "orphanage"; that is, the place to hold PARTICLEs transferring from mesh to mesh
@@ -1155,7 +1153,7 @@ CALL POINT_TO_MESH(NM)
 
 ! Zero out the contribution by lagrangian particles to divergence
 
-IF (N_LP_ARRAY_INDICES>0 .AND. .NOT.EVACUATION_ONLY(NM) .AND. CORRECTOR) THEN
+IF (N_LP_ARRAY_INDICES>0 .AND. CORRECTOR) THEN
    D_LAGRANGIAN = 0._EB
    CALC_D_LAGRANGIAN=.FALSE.
 ENDIF
