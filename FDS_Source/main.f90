@@ -1955,9 +1955,9 @@ MESH_LOOP: DO NM=1,NMESHES
          IF (M3%NIC_R>0) THEN
             NRA = NUMBER_RADIATION_ANGLES
             NSB = NUMBER_SPECTRAL_BANDS         
-            ALLOCATE(M3%REAL_RECV_PKG1(IJK_SIZE*(4+N_TRACKED_SPECIES)))
+            ALLOCATE(M3%REAL_RECV_PKG1(M3%NIC_R*2*(4+N_TRACKED_SPECIES)))
             ALLOCATE(M3%REAL_RECV_PKG2(IJK_SIZE*(4          )))
-            ALLOCATE(M3%REAL_RECV_PKG3(IJK_SIZE*(4+N_TRACKED_SPECIES)))
+            ALLOCATE(M3%REAL_RECV_PKG3(M3%NIC_R*2*(4+N_TRACKED_SPECIES)))
             ALLOCATE(M3%REAL_RECV_PKG4(IJK_SIZE*(4          )))
             ALLOCATE(M3%REAL_RECV_PKG5((NRA*NSB+1)*M3%NIC_R+3))
             ALLOCATE(M3%REAL_RECV_PKG7(M3%NIC_R*3))
@@ -2087,7 +2087,7 @@ SUBROUTINE MESH_EXCHANGE(CODE)
 REAL(EB) :: TNOW
 INTEGER, INTENT(IN) :: CODE
 INTEGER :: NM,II,JJ,KK,LL,N,RNODE,SNODE,IMIN,IMAX,JMIN,JMAX,KMIN,KMAX,IJK_SIZE,N_STORAGE_SLOTS,N_NEW_STORAGE_SLOTS
-INTEGER :: NN1,NN2,NRA,NSB,IPC,CNT,IBC,STORAGE_INDEX_SAVE,ANG_INC_COUNTER,ANG_INC
+INTEGER :: NN1,NN2,NRA,NSB,IPC,CNT,IBC,STORAGE_INDEX_SAVE,ANG_INC_COUNTER,ANG_INC,II1,II2,JJ1,JJ2,KK1,KK2,NQT2,NN
 REAL(EB), POINTER, DIMENSION(:,:,:) :: HP,HP2
 TYPE (LAGRANGIAN_PARTICLE_TYPE), POINTER :: LP
 TYPE (LAGRANGIAN_PARTICLE_CLASS_TYPE), POINTER :: LPC
@@ -2157,9 +2157,9 @@ SENDING_MESH_LOOP: DO NM=1,NMESHES
          IF (M3%NIC_S>0 .AND. RNODE/=SNODE) THEN
             NRA = NUMBER_RADIATION_ANGLES
             NSB = NUMBER_SPECTRAL_BANDS             
-            ALLOCATE(M3%REAL_SEND_PKG1(IJK_SIZE*(4+N_TRACKED_SPECIES)))
+            ALLOCATE(M3%REAL_SEND_PKG1(M3%NIC_S*2*(4+N_TRACKED_SPECIES)))
             ALLOCATE(M3%REAL_SEND_PKG2(IJK_SIZE*(4          )))
-            ALLOCATE(M3%REAL_SEND_PKG3(IJK_SIZE*(4+N_TRACKED_SPECIES)))
+            ALLOCATE(M3%REAL_SEND_PKG3(M3%NIC_S*2*(4+N_TRACKED_SPECIES)))
             ALLOCATE(M3%REAL_SEND_PKG4(IJK_SIZE*(4          )))
             ALLOCATE(M3%REAL_SEND_PKG5((NRA*NSB+1)*M3%NIC_S+3))
             ALLOCATE(M3%REAL_SEND_PKG7(M3%NIC_S*3))
@@ -2249,19 +2249,32 @@ SENDING_MESH_LOOP: DO NM=1,NMESHES
 
       IF (CODE==1 .AND. M3%NIC_S>0) THEN
          IF (RNODE/=SNODE) THEN
-            LL = 0
-            DO KK=KMIN,KMAX
-               DO JJ=JMIN,JMAX
-                  DO II=IMIN,IMAX
-                     M3%REAL_SEND_PKG1(LL+1) = M%RHOS(II,JJ,KK)
-                     M3%REAL_SEND_PKG1(LL+2) = M%MU(II,JJ,KK)
-                     M3%REAL_SEND_PKG1(LL+3) = M%KRES(II,JJ,KK)
-                     M3%REAL_SEND_PKG1(LL+4) = M%D(II,JJ,KK)
-                     M3%REAL_SEND_PKG1(LL+5:LL+4+N_TRACKED_SPECIES) = M%ZZS(II,JJ,KK,1:N_TRACKED_SPECIES)
-                     LL = LL+4+N_TRACKED_SPECIES
-                  ENDDO
+            NQT2 = 2*(4+N_TRACKED_SPECIES)
+            PACK_REAL_SEND_PKG1: DO LL=1,M3%NIC_S
+               II1 = M3%IIO_S(LL) ; II2 = II1
+               JJ1 = M3%JJO_S(LL) ; JJ2 = JJ1
+               KK1 = M3%KKO_S(LL) ; KK2 = KK1
+               SELECT CASE(M3%IOR_S(LL))
+                  CASE(-1) ; II1=M3%IIO_S(LL)   ; II2=II1+1 
+                  CASE( 1) ; II1=M3%IIO_S(LL)-1 ; II2=II1+1 
+                  CASE(-2) ; JJ1=M3%JJO_S(LL)   ; JJ2=JJ1+1 
+                  CASE( 2) ; JJ1=M3%JJO_S(LL)-1 ; JJ2=JJ1+1 
+                  CASE(-3) ; KK1=M3%KKO_S(LL)   ; KK2=KK1+1 
+                  CASE( 3) ; KK1=M3%KKO_S(LL)-1 ; KK2=KK1+1 
+               END SELECT
+               M3%REAL_SEND_PKG1(NQT2*(LL-1)+1) = M%RHOS(II1,JJ1,KK1)
+               M3%REAL_SEND_PKG1(NQT2*(LL-1)+2) = M%RHOS(II2,JJ2,KK2)
+               M3%REAL_SEND_PKG1(NQT2*(LL-1)+3) =   M%MU(II1,JJ1,KK1)
+               M3%REAL_SEND_PKG1(NQT2*(LL-1)+4) =   M%MU(II2,JJ2,KK2)
+               M3%REAL_SEND_PKG1(NQT2*(LL-1)+5) = M%KRES(II1,JJ1,KK1)
+               M3%REAL_SEND_PKG1(NQT2*(LL-1)+6) = M%KRES(II2,JJ2,KK2)
+               M3%REAL_SEND_PKG1(NQT2*(LL-1)+7) =    M%D(II1,JJ1,KK1)
+               M3%REAL_SEND_PKG1(NQT2*(LL-1)+8) =    M%D(II2,JJ2,KK2)
+               DO NN=1,N_TRACKED_SPECIES
+                  M3%REAL_SEND_PKG1(NQT2*(LL-1)+8+2*NN-1) = M%ZZS(II1,JJ1,KK1,NN)
+                  M3%REAL_SEND_PKG1(NQT2*(LL-1)+8+2*NN  ) = M%ZZS(II2,JJ2,KK2,NN)
                ENDDO
-            ENDDO
+            ENDDO PACK_REAL_SEND_PKG1
          ELSE
             M2=>MESHES(NOM)%OMESH(NM)
             M2%RHOS(IMIN:IMAX,JMIN:JMAX,KMIN:KMAX)= M%RHOS(IMIN:IMAX,JMIN:JMAX,KMIN:KMAX)
@@ -2341,19 +2354,32 @@ SENDING_MESH_LOOP: DO NM=1,NMESHES
  
       IF (CODE==4 .AND. M3%NIC_S>0) THEN
          IF (RNODE/=SNODE) THEN
-            LL = 0
-            DO KK=KMIN,KMAX
-               DO JJ=JMIN,JMAX
-                  DO II=IMIN,IMAX
-                     M3%REAL_SEND_PKG3(LL+1) = M%RHO(II,JJ,KK)
-                     M3%REAL_SEND_PKG3(LL+2) = M%MU(II,JJ,KK)
-                     M3%REAL_SEND_PKG3(LL+3) = M%KRES(II,JJ,KK)
-                     M3%REAL_SEND_PKG3(LL+4) = M%DS(II,JJ,KK)
-                     M3%REAL_SEND_PKG3(LL+5:LL+4+N_TRACKED_SPECIES) = M%ZZ(II,JJ,KK,1:N_TRACKED_SPECIES)
-                     LL = LL+4+N_TRACKED_SPECIES
-                  ENDDO
+            NQT2 = 2*(4+N_TRACKED_SPECIES)
+            PACK_REAL_SEND_PKG3: DO LL=1,M3%NIC_S
+               II1 = M3%IIO_S(LL) ; II2 = II1
+               JJ1 = M3%JJO_S(LL) ; JJ2 = JJ1
+               KK1 = M3%KKO_S(LL) ; KK2 = KK1
+               SELECT CASE(M3%IOR_S(LL))
+                  CASE(-1) ; II1=M3%IIO_S(LL)   ; II2=II1+1
+                  CASE( 1) ; II1=M3%IIO_S(LL)-1 ; II2=II1+1
+                  CASE(-2) ; JJ1=M3%JJO_S(LL)   ; JJ2=JJ1+1
+                  CASE( 2) ; JJ1=M3%JJO_S(LL)-1 ; JJ2=JJ1+1
+                  CASE(-3) ; KK1=M3%KKO_S(LL)   ; KK2=KK1+1
+                  CASE( 3) ; KK1=M3%KKO_S(LL)-1 ; KK2=KK1+1
+               END SELECT
+               M3%REAL_SEND_PKG3(NQT2*(LL-1)+1) =  M%RHO(II1,JJ1,KK1)
+               M3%REAL_SEND_PKG3(NQT2*(LL-1)+2) =  M%RHO(II2,JJ2,KK2)
+               M3%REAL_SEND_PKG3(NQT2*(LL-1)+3) =   M%MU(II1,JJ1,KK1)
+               M3%REAL_SEND_PKG3(NQT2*(LL-1)+4) =   M%MU(II2,JJ2,KK2)
+               M3%REAL_SEND_PKG3(NQT2*(LL-1)+5) = M%KRES(II1,JJ1,KK1)
+               M3%REAL_SEND_PKG3(NQT2*(LL-1)+6) = M%KRES(II2,JJ2,KK2)
+               M3%REAL_SEND_PKG3(NQT2*(LL-1)+7) =   M%DS(II1,JJ1,KK1)
+               M3%REAL_SEND_PKG3(NQT2*(LL-1)+8) =   M%DS(II2,JJ2,KK2)
+               DO NN=1,N_TRACKED_SPECIES
+                  M3%REAL_SEND_PKG3(NQT2*(LL-1)+8+2*NN-1) = M%ZZ(II1,JJ1,KK1,NN)
+                  M3%REAL_SEND_PKG3(NQT2*(LL-1)+8+2*NN  ) = M%ZZ(II2,JJ2,KK2,NN)
                ENDDO
-            ENDDO
+            ENDDO PACK_REAL_SEND_PKG3
          ELSE
             M2=>MESHES(NOM)%OMESH(NM)
             M2%RHO(IMIN:IMAX,JMIN:JMAX,KMIN:KMAX) = M%RHO(IMIN:IMAX,JMIN:JMAX,KMIN:KMAX)
@@ -2637,19 +2663,32 @@ IF (SNODE/=MYID) CYCLE SEND_MESH_LOOP
       ! Unpack densities and species mass fractions following PREDICTOR exchange
 
       IF (CODE==1 .AND. M2%NIC_R>0 .AND. RNODE/=SNODE) THEN
-         LL = 0
-         DO KK=KMIN,KMAX
-            DO JJ=JMIN,JMAX
-               DO II=IMIN,IMAX
-                  M2%RHOS(II,JJ,KK)  = M2%REAL_RECV_PKG1(LL+1)
-                  M2%MU(II,JJ,KK)    = M2%REAL_RECV_PKG1(LL+2)
-                  M2%KRES(II,JJ,KK)  = M2%REAL_RECV_PKG1(LL+3)
-                  M2%D(II,JJ,KK)     = M2%REAL_RECV_PKG1(LL+4)
-                  M2%ZZS(II,JJ,KK,1:N_TRACKED_SPECIES)= M2%REAL_RECV_PKG1(LL+5:LL+4+N_TRACKED_SPECIES)
-                  LL = LL+4+N_TRACKED_SPECIES
+            NQT2 = 2*(4+N_TRACKED_SPECIES)
+            UNPACK_REAL_RECV_PKG1: DO LL=1,M2%NIC_R
+               II1 = M2%IIO_R(LL) ; II2 = II1
+               JJ1 = M2%JJO_R(LL) ; JJ2 = JJ1
+               KK1 = M2%KKO_R(LL) ; KK2 = KK1
+               SELECT CASE(M2%IOR_R(LL))
+                  CASE(-1) ; II1=M2%IIO_R(LL)   ; II2=II1+1
+                  CASE( 1) ; II1=M2%IIO_R(LL)-1 ; II2=II1+1
+                  CASE(-2) ; JJ1=M2%JJO_R(LL)   ; JJ2=JJ1+1
+                  CASE( 2) ; JJ1=M2%JJO_R(LL)-1 ; JJ2=JJ1+1
+                  CASE(-3) ; KK1=M2%KKO_R(LL)   ; KK2=KK1+1
+                  CASE( 3) ; KK1=M2%KKO_R(LL)-1 ; KK2=KK1+1
+               END SELECT
+               M2%RHOS(II1,JJ1,KK1) = M2%REAL_RECV_PKG1(NQT2*(LL-1)+1)
+               M2%RHOS(II2,JJ2,KK2) = M2%REAL_RECV_PKG1(NQT2*(LL-1)+2)
+                 M2%MU(II1,JJ1,KK1) = M2%REAL_RECV_PKG1(NQT2*(LL-1)+3)
+                 M2%MU(II2,JJ2,KK2) = M2%REAL_RECV_PKG1(NQT2*(LL-1)+4)
+               M2%KRES(II1,JJ1,KK1) = M2%REAL_RECV_PKG1(NQT2*(LL-1)+5)
+               M2%KRES(II2,JJ2,KK2) = M2%REAL_RECV_PKG1(NQT2*(LL-1)+6)
+                  M2%D(II1,JJ1,KK1) = M2%REAL_RECV_PKG1(NQT2*(LL-1)+7)
+                  M2%D(II2,JJ2,KK2) = M2%REAL_RECV_PKG1(NQT2*(LL-1)+8)
+               DO NN=1,N_TRACKED_SPECIES
+                  M2%ZZS(II1,JJ1,KK1,NN) = M2%REAL_RECV_PKG1(NQT2*(LL-1)+8+2*NN-1)
+                  M2%ZZS(II2,JJ2,KK2,NN) = M2%REAL_RECV_PKG1(NQT2*(LL-1)+8+2*NN  )
                ENDDO
-            ENDDO
-         ENDDO
+            ENDDO UNPACK_REAL_RECV_PKG1
       ENDIF 
    
       ! Unpack densities and species mass fractions following PREDICTOR exchange
@@ -2701,19 +2740,32 @@ IF (SNODE/=MYID) CYCLE SEND_MESH_LOOP
       ! Unpack density and species mass fractions following CORRECTOR update
    
       IF (CODE==4 .AND. M2%NIC_R>0 .AND. RNODE/=SNODE) THEN
-         LL = 0
-         DO KK=KMIN,KMAX
-            DO JJ=JMIN,JMAX
-               DO II=IMIN,IMAX
-                  M2%RHO(II,JJ,KK) = M2%REAL_RECV_PKG3(LL+1)
-                  M2%MU(II,JJ,KK)  = M2%REAL_RECV_PKG3(LL+2)
-                  M2%KRES(II,JJ,KK)= M2%REAL_RECV_PKG3(LL+3)
-                  M2%DS(II,JJ,KK)  = M2%REAL_RECV_PKG3(LL+4)
-                  M2%ZZ(II,JJ,KK,1:N_TRACKED_SPECIES)= M2%REAL_RECV_PKG3(LL+5:LL+4+N_TRACKED_SPECIES)
-                  LL = LL+4+N_TRACKED_SPECIES
-               ENDDO
+         NQT2 = 2*(4+N_TRACKED_SPECIES)
+         UNPACK_REAL_RECV_PKG3: DO LL=1,M2%NIC_R
+            II1 = M2%IIO_R(LL) ; II2 = II1
+            JJ1 = M2%JJO_R(LL) ; JJ2 = JJ1
+            KK1 = M2%KKO_R(LL) ; KK2 = KK1
+            SELECT CASE(M2%IOR_R(LL))
+               CASE(-1) ; II1=M2%IIO_R(LL)   ; II2=II1+1
+               CASE( 1) ; II1=M2%IIO_R(LL)-1 ; II2=II1+1
+               CASE(-2) ; JJ1=M2%JJO_R(LL)   ; JJ2=JJ1+1
+               CASE( 2) ; JJ1=M2%JJO_R(LL)-1 ; JJ2=JJ1+1
+               CASE(-3) ; KK1=M2%KKO_R(LL)   ; KK2=KK1+1
+               CASE( 3) ; KK1=M2%KKO_R(LL)-1 ; KK2=KK1+1
+            END SELECT
+             M2%RHO(II1,JJ1,KK1) = M2%REAL_RECV_PKG3(NQT2*(LL-1)+1)
+             M2%RHO(II2,JJ2,KK2) = M2%REAL_RECV_PKG3(NQT2*(LL-1)+2)
+              M2%MU(II1,JJ1,KK1) = M2%REAL_RECV_PKG3(NQT2*(LL-1)+3)
+              M2%MU(II2,JJ2,KK2) = M2%REAL_RECV_PKG3(NQT2*(LL-1)+4)
+            M2%KRES(II1,JJ1,KK1) = M2%REAL_RECV_PKG3(NQT2*(LL-1)+5)
+            M2%KRES(II2,JJ2,KK2) = M2%REAL_RECV_PKG3(NQT2*(LL-1)+6)
+              M2%DS(II1,JJ1,KK1) = M2%REAL_RECV_PKG3(NQT2*(LL-1)+7)
+              M2%DS(II2,JJ2,KK2) = M2%REAL_RECV_PKG3(NQT2*(LL-1)+8)
+            DO NN=1,N_TRACKED_SPECIES
+               M2%ZZ(II1,JJ1,KK1,NN) = M2%REAL_RECV_PKG3(NQT2*(LL-1)+8+2*NN-1)
+               M2%ZZ(II2,JJ2,KK2,NN) = M2%REAL_RECV_PKG3(NQT2*(LL-1)+8+2*NN)
             ENDDO
-         ENDDO
+         ENDDO UNPACK_REAL_RECV_PKG3
       ENDIF
    
       ! Unpack pressure and velocities at the end of the CORRECTOR stage of the time step
