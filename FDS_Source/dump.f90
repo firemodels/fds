@@ -90,43 +90,42 @@ INTEGER :: NFIELDS, I1, I2, I2_NOW, K, N_END
 
 TNOW = SECOND()
 
-EVACUATION_DUMP: IF (ANY(EVACUATION_GRID) .AND. EVACUATION_ONLY(NM)) THEN
+EVACUATION_DUMP: IF (EVACUATION_ONLY(NM)) THEN
 
+   IF (.NOT.EVACUATION_GRID(NM)) RETURN
    ! Dump the EVAC flowfieds for all EVAC meshes
 
    L_READ_EFF = BTEST(I_EVAC,2) ! Is the EFF file read in or (re)calculated?
-   IF (EVACUATION_GRID(NM) .AND. ABS(ICYC)==EVAC_TIME_ITERATIONS) THEN
+   IF (ABS(ICYC)==EVAC_TIME_ITERATIONS) THEN
       TTMP = EVAC_DT_FLOWFIELD*EMESH_NFIELDS(EMESH_INDEX(NM))*EVAC_TIME_ITERATIONS/&
            MAX(1,MAXVAL(EMESH_NFIELDS))
    ELSE
       TTMP = EVAC_DT_FLOWFIELD*EVAC_TIME_ITERATIONS
    END IF
-   IF (EVACUATION_GRID(NM)) THEN
-      IF (L_READ_EFF) THEN
-         NFIELDS = EMESH_NFIELDS(EMESH_INDEX(NM))
-         K = MESHES(NM)%KBAR
-         N_END = N_EXITS - N_CO_EXITS + N_DOORS
-         DO I1 = 1, NFIELDS
-            LOOP_EXITS: DO I2 = 1, N_END
-               IF (EMESH_EXITS(I2)%MAINMESH == NM .AND. EMESH_EXITS(I2)%I_DOORS_EMESH == I1) THEN
-                  I2_NOW = I2
-                  EXIT LOOP_EXITS
-               END IF
-            END DO LOOP_EXITS
-            MESHES(NM)%U(:,:,K)    = EMESH_EXITS(I2_NOW)%U_EVAC(:,:)
-            MESHES(NM)%V(:,:,K)    = EMESH_EXITS(I2_NOW)%V_EVAC(:,:)
-            MESHES(NM)%U(:,:,0)    = MESHES(NM)%U(:,:,K)
-            MESHES(NM)%V(:,:,0)    = MESHES(NM)%V(:,:,K)
-            MESHES(NM)%U(:,:,K+1)  = MESHES(NM)%U(:,:,K)
-            MESHES(NM)%V(:,:,K+1)  = MESHES(NM)%V(:,:,K)
-            MESHES(NM)%KRES(:,:,:) = 0.5_EB*SQRT(MESHES(NM)%U(:,:,:)**2 + MESHES(NM)%V(:,:,:)**2)
-            MESHES(NM)%W(:,:,:)    = 0.0_EB
-            TTMP = (NFIELDS - I1 + 1)*EVAC_DT_FLOWFIELD
-           CALL DUMP_SLCF(T-TTMP,NM,0)
-         END DO
-      ELSE
+   IF (L_READ_EFF) THEN
+      NFIELDS = EMESH_NFIELDS(EMESH_INDEX(NM))
+      K = MESHES(NM)%KBAR
+      N_END = N_EXITS - N_CO_EXITS + N_DOORS
+      DO I1 = 1, NFIELDS
+         LOOP_EXITS: DO I2 = 1, N_END
+            IF (EMESH_EXITS(I2)%MAINMESH == NM .AND. EMESH_EXITS(I2)%I_DOORS_EMESH == I1) THEN
+               I2_NOW = I2
+               EXIT LOOP_EXITS
+            END IF
+         END DO LOOP_EXITS
+         MESHES(NM)%U(:,:,K)    = EMESH_EXITS(I2_NOW)%U_EVAC(:,:)
+         MESHES(NM)%V(:,:,K)    = EMESH_EXITS(I2_NOW)%V_EVAC(:,:)
+         MESHES(NM)%U(:,:,0)    = MESHES(NM)%U(:,:,K)
+         MESHES(NM)%V(:,:,0)    = MESHES(NM)%V(:,:,K)
+         MESHES(NM)%U(:,:,K+1)  = MESHES(NM)%U(:,:,K)
+         MESHES(NM)%V(:,:,K+1)  = MESHES(NM)%V(:,:,K)
+         MESHES(NM)%KRES(:,:,:) = 0.5_EB*SQRT(MESHES(NM)%U(:,:,:)**2 + MESHES(NM)%V(:,:,:)**2)
+         MESHES(NM)%W(:,:,:)    = 0.0_EB
+         TTMP = (NFIELDS - I1 + 1)*EVAC_DT_FLOWFIELD
          CALL DUMP_SLCF(T-TTMP,NM,0)
-      END IF
+      END DO
+   ELSE
+      CALL DUMP_SLCF(T-TTMP,NM,0)
    END IF
 
 ELSE
@@ -1153,7 +1152,7 @@ ENDDO BOUNDARY_FILES
  
 ! Initialize particle dump file
  
-PARTICLE_IF: IF ( (PARTICLE_FILE .AND. .NOT.EVACUATION_ONLY(NM)).OR. (EVACUATION_ONLY(NM).AND.EVACUATION_GRID(NM)) ) THEN
+PARTICLE_IF: IF ( (PARTICLE_FILE .AND. .NOT.EVACUATION_ONLY(NM)).OR. (EVACUATION_GRID(NM)) ) THEN
  
    APPEND_PARTICLE_FILE: IF (APPEND) THEN
 
@@ -4356,7 +4355,6 @@ ENDDO DEVICE_LOOP
 ! Write the initial states of the evacuation devices (exit,door,entr)
 
 EVAC_ONLY6: IF (EVACUATION_GRID(NM)) THEN
-!  EVAC_ONLY6: IF (EVACUATION_GRID(NM) .AND. T==T_BEGIN) THEN
    I=0  ! Counter for evacuation devices, doors+exits+entrys (evss do not change states)
    DO N=1,N_DOORS
       IF (.NOT.EVAC_DOORS(N)%SHOW) CYCLE
@@ -6880,7 +6878,7 @@ INTEGER, INTENT(IN) :: NM
 INTEGER :: N
 LOGICAL :: EX
 
-IF ( (PARTICLE_FILE.AND..NOT.EVACUATION_ONLY(NM)) .OR. (EVACUATION_ONLY(NM).AND.EVACUATION_GRID(NM)) ) THEN
+IF ( (PARTICLE_FILE.AND..NOT.EVACUATION_ONLY(NM)) .OR. (EVACUATION_GRID(NM)) ) THEN
    FLUSH(LU_PART(NM))
 ENDIF
 

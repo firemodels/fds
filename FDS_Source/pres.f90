@@ -474,7 +474,7 @@ ENDDO
 
 ! Optional check of the accuracy of the pressure solver
 
-IF (CHECK_POISSON .AND. .NOT.EVACUATION_ONLY(NM)) THEN
+IF (CHECK_POISSON) THEN
    POIS_ERR = 0._EB
    DO K=1,KBAR
       DO J=1,JBAR
