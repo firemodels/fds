@@ -1209,7 +1209,7 @@ email_build_status()
    else
 #  upload guides to a google drive directory
       cd $FIREBOT_DIR
-      $UPLOADGUIDES
+      $UPLOADGUIDES > /dev/null
 
       # Send success message with links to nightly manuals
       stop_time=`date`
