@@ -1,0 +1,34 @@
+*GET,JNAME,ACTIVE,,JOBNAME
+*GET,NUM,ACTIVE,,SET,NSET,,
+
+/POST26 
+FILE,JNAME,'rth','.' 
+!*  
+NSOL,2,45,TEMP,,0.75_0.75, 
+STORE,MERGE 
+NSOL,3,35,TEMP,,0.75_0.50, 
+STORE,MERGE 
+NSOL,4,25,TEMP,,0.75_0.25, 
+STORE,MERGE 
+! Save time history variables to file 
+*DEL,TEMP_MATRIX
+*DIM,TEMP_MATRIX,TABLE,NUM,6
+VGET,TEMP_MATRIX(1,0),1 
+VGET,TEMP_MATRIX(1,1),2
+VGET,TEMP_MATRIX(1,2),3
+VGET,TEMP_MATRIX(1,3),4
+*cfopen,EXPNAME,'csv','.'
+*VWRITE,'Time','T1','T2','T3'
+%C,%C,%C,%C
+*VWRITE,TEMP_MATRIX(1,0),TEMP_MATRIX(1,1),TEMP_MATRIX(1,2),TEMP_MATRIX(1,3)
+%G,%G,%G,%G
+*cfclose
+*cfopen,'simple_panel_hot_ast','csv','.'
+*VWRITE,'Time','AST1','AST2','AST3'
+%C,%C,%C,%C
+*VWRITE,A424(1,0),A424(1,1),A414(1,1),A404(1,1)
+%G,%G,%G,%G
+*cfclose
+! End of time history save  
+
+

@@ -1,0 +1,65 @@
+&HEAD CHID='h_profile', TITLE='FTMI Verification model'  / 
+
+&MESH IJK=12,12,60, XB=0.10,0.70,0.2,0.8,0.0,3.0 / 
+
+&TIME T_END=30.0 / 
+&DUMP NFRAMES=30 /
+
+&MISC BNDF_DEFAULT=.FALSE./
+
+&REAC ID='METHANE'/
+
+&MISC SURF_DEFAULT='CONCRETE' / 
+
+&MATL ID ='STEEL',
+      SPECIFIC_HEAT = 0.44
+      DENSITY = 7850.
+      EMISSIVITY= 0.8
+      CONDUCTIVITY = 54. /
+
+&SURF ID   	='STEEL_WEB'
+      COLOR	='GRAY'
+      MATL_ID	='STEEL'
+      THICKNESS	= 0.0125
+      BACKING	='EXPOSED' /
+
+&SURF ID    ='STEEL_FLANGES'
+      COLOR ='GRAY'
+      MATL_ID     ='STEEL'
+      THICKNESS   = 0.016
+      BACKING     ='EXPOSED' /
+
+&MATL ID            = 'CONCRETE'                                                                    
+      FYI           = 'EUROCODE 4'                                                    
+      SPECIFIC_HEAT = 1.0   
+      EMISSIVITY =0.8                                                                       
+      DENSITY       = 2300.                                                                         
+      CONDUCTIVITY  = 1.6 /
+
+&SURF ID   	='CONCRETE'
+      COLOR	='GRAY'
+      MATL_ID	='CONCRETE'
+      THICKNESS	= 0.05 /
+
+&SURF ID    ='HOT'
+      COLOR ='RED'
+      EMISSIVITY  = 0.8
+      THICKNESS   = 1.0
+      TMP_FRONT   = 1000.0 /
+
+&OBST ID='0_0', SURF_ID='STEEL_FLANGES', XB=0.20,0.50,0.30,0.35,0.00,3.00, BNDF_OBST=.TRUE. /
+&OBST ID='0_1', SURF_ID='STEEL_FLANGES', XB=0.20,0.50,0.65,0.70,0.00,3.00, BNDF_OBST=.TRUE. /
+&OBST ID='0_2', SURF_ID='STEEL_WEB', XB=0.30,0.40,0.35,0.65,0.00,3.00, BNDF_OBST=.TRUE. /
+
+&VENT  MB=XMIN, SURF_ID='OPEN'/
+&VENT  MB=XMAX, SURF_ID='HOT'/
+&VENT  MB=YMIN, SURF_ID='OPEN'/
+&VENT  MB=YMAX, SURF_ID='OPEN'/
+&VENT  MB=ZMAX, SURF_ID='OPEN'/
+&VENT  MB=ZMIN, SURF_ID='CONCRETE'/
+
+&BNDF QUANTITY='ADIABATIC SURFACE TEMPERATURE' /
+&BNDF QUANTITY='HEAT TRANSFER COEFFICIENT' /
+
+&TAIL /
+

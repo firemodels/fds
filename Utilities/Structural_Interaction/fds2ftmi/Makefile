@@ -43,6 +43,7 @@ intel_win_32 : setup_win $(objwin)
 intel_win_64 : FFLAGS    = -O3 /fp:source /CB
 intel_win_64 : FC        = ifort
 intel_win_64 : obj       = fds2ftmi_win_64
+
 intel_win_64 : setup_win $(objwin)
 	$(FC) -o $(obj) $(FFLAGS) $(objwin)
 

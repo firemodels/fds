@@ -1,4 +1,4 @@
-SUBROUTINE FDS2AST (CHID,NOMASTER,C_S,TBEG,TEND,TINT,COUNTER,VARIABLE,N)
+SUBROUTINE FDS2AST (CHID,NOMASTER,C_S,TBEG,TEND,TINT,COUNTER,VARIABLE,N,N_AVERAGE)
 
 ! Program to read the Adiabatic Surface Temperature from bndf files for a specific 
 ! location, based on fds2ascii (part of FDS package)
@@ -46,7 +46,6 @@ LOGICAL :: EXISTS
 INTEGER :: BATCHMODE
 !CHARACTER(256) :: BUFFER
 !INTEGER :: ERROR_STATUS
-!CHARACTER(256) :: ARG
 
 INTEGER COUNTER
 INTEGER V,SIZE,VCOUNT(7),P,POND,VARIABLE,WARNING,IN,VAR
@@ -57,7 +56,8 @@ REAL, ALLOCATABLE, DIMENSION(:,:) :: M_AST
 REAL, ALLOCATABLE, DIMENSION(:) :: V_TIME,TAST
 CHARACTER(8) OUTFILE
 CHARACTER(30) VARIABLE_KIND
-!REAL MED
+REAL MED
+INTEGER N_AVERAGE
 
 !REAL(FB) :: tb_init,te_init,te_nmeshes,tb_nmeshes,te_fds2ast,tb_fds2ast
 
@@ -1140,21 +1140,25 @@ END IF
 !****************
 !CALL CPU_TIME (te_fds2ast)
 !WRITE (50,*) 'Time of FDS2AST was ', te_fds2ast-tb_fds2ast, ' seconds'
-    DO I=1,V
+DO I=1,V
     WRITE (100+VAR,'(E12.5)', ADVANCE='NO') V_TIME(I)
     WRITE (100+VAR,'(E12.5)', ADVANCE='YES') TAST(I)
-    ENDDO
+ENDDO
 !**********************
-!*** Set an average value for a steady simulation (last 50 results)
-!    MED=0.0
-!    DO I=0,49
-!      MED=MED+TAST(V-I)
-!    ENDDO
-!    MED=MED/(49+1)
-!    WRITE (100+VAR,'(E12.5)', ADVANCE='NO') V_TIME(V)+TINT
-!    WRITE (100+VAR,'(E12.5)', ADVANCE='YES') MED          
-!    WRITE (100+VAR,'(E12.5)', ADVANCE='NO') 18000.0
-!    WRITE (100+VAR,'(E12.5)', ADVANCE='YES') MED      
+!*** Set an average value for a steady simulation (last N_AVERAGE results)
+IF (N_AVERAGE==0) THEN
+  CONTINUE
+ELSE
+    MED=0.0
+    DO I=0,N_AVERAGE-1
+      MED=MED+TAST(V-I)
+    ENDDO
+    MED=MED/(N_AVERAGE)
+    WRITE (100+VAR,'(E12.5)', ADVANCE='NO') V_TIME(V)+TINT
+    WRITE (100+VAR,'(E12.5)', ADVANCE='YES') MED          
+    WRITE (100+VAR,'(E12.5)', ADVANCE='NO') 18000.0
+    WRITE (100+VAR,'(E12.5)', ADVANCE='YES') MED      
+ENDIF    
 !**********************
     IF (VARIABLE_KIND==' ADIABATIC SURFACE TEMPERATURE') THEN
       WRITE (6,'(A, F8.3)') 'Cell_Size  ',C_SIZE

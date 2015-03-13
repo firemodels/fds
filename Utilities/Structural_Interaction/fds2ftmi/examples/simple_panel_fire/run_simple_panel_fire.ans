@@ -1,0 +1,15 @@
+/batch
+!
+/filname,simple_panel_fire_ansys,0
+resume
+/prep7
+save
+/input,simple_panel_fire_to_ansys,dat
+/output,ansys_output,dat
+/solu
+solve
+*set,EXPNAME,'simple_panel_fire_ts'
+/input,export_data_fire,ans
+save
+finish
+!

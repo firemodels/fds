@@ -1,0 +1,10 @@
+/batch
+!
+/filname,simple_panel_hot_ansys,0
+/input,simple_panel_hot,ans
+save
+/output,ansys_output,dat
+/prep7
+/input,../../scripts/ansys2ftmi,geom
+finish
+!
