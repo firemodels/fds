@@ -396,6 +396,7 @@ EXTERNCPP void update_trainer_moves(void);
 EXTERNCPP mesh *getmesh(float *xyz);
 EXTERNCPP mesh *getmesh_nofail(float *xyz);
 
+EXTERNCPP void Render_CB(int var);
 EXTERNCPP sv_object *get_object(char *label);
 EXTERNCPP void get_labels(char *buffer, int type, char **label1, char **label2, char prop_buffer[255]);
 EXTERNCPP void snap_scene(void);

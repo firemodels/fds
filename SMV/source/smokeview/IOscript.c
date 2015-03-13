@@ -783,7 +783,6 @@ void script_volsmokerenderall(scriptdata *scripti){
 }
 
 /* ------------------ run_makemovie ------------------------ */
-
 void script_makemovie(scriptdata *scripti){
   char movie_name_save[1024], movie_prefix_save[1024];
   float movie_framerate_save;
@@ -795,7 +794,7 @@ void script_makemovie(scriptdata *scripti){
   strcpy(movie_name, scripti->cval);
   strcpy(movie_prefix,scripti->cval2);
   movie_framerate=scripti->fval;
-  RenderMenu(MAKE_MOVIE);
+  Render_CB(MAKE_MOVIE);
 
   strcpy(movie_name, movie_name_save);
   strcpy(movie_prefix, movie_prefix_save);

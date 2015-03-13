@@ -168,7 +168,6 @@ GLUI_Listbox *LIST_mesh2=NULL;
 GLUI_Listbox *LIST_render_size=NULL;
 GLUI_Listbox *LIST_render_skip=NULL;
 
-void Render_CB(int var);
 void enable_disable_views(void);
 
 /* ------------------ update_zaxis_angles ------------------------ */
@@ -1574,7 +1573,7 @@ void Render_CB(int var){
       break;
     case MAKE_MOVIE:
       if(have_ffmpeg == 0){
-        PRINTF("***error: The movie generating program ffmpeg is not available\n");
+        PRINTF("*** Error: The movie generating program ffmpeg is not available\n");
         break;
       }
       switch(renderfiletype){
@@ -1590,7 +1589,7 @@ void Render_CB(int var){
           break;
         }
 
-      strcpy(frame0, fdsprefix);
+      strcpy(frame0, movie_prefix);
       strcat(frame0, "_0001");
       strcat(frame0, ext);
       if(file_exists(frame0) == 0){
