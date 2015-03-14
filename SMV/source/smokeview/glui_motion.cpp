@@ -54,6 +54,7 @@ char glui_motion_revision[]="$Revision$";
 #define GSLICE_TRANSLATE 24
 #define GSLICE_NORMAL 27
 #define PLAY_MOVIE 29
+#define MOVIE_NAME 30
 
 #define RENDER_TYPE 0
 #define RENDER_RESOLUTION 1
@@ -169,6 +170,53 @@ GLUI_Listbox *LIST_render_size=NULL;
 GLUI_Listbox *LIST_render_skip=NULL;
 
 void enable_disable_views(void);
+
+/* ------------------ update_render_start_button ------------------------ */
+
+void update_render_start_button(void){
+  int is_enabled;
+
+  is_enabled = BUTTON_render_start->enabled;
+  if(render_state == ON&&is_enabled == 1){
+    BUTTON_render_start->disable();
+  }
+  else if(render_state == OFF&&is_enabled == 0&&update_makemovie==0){
+    BUTTON_render_start->enable();
+  }
+}
+
+/* ------------------ enable_disable_playmovie ------------------------ */
+
+void enable_disable_playmovie(void){
+  char moviefile[1024];
+  
+  if(does_movie_exist(movie_name, moviefile) == 1){
+    if(BUTTON_play_movie != NULL)BUTTON_play_movie->enable();
+  }
+  else{
+    if(BUTTON_play_movie != NULL)BUTTON_play_movie->disable();
+  }
+}
+
+/* ------------------ enable_disable_makemovie ------------------------ */
+
+void enable_disable_makemovie(int onoff){
+  if(onoff == ON){
+    if(BUTTON_make_movie != NULL)BUTTON_make_movie->enable();
+    if(BUTTON_play_movie != NULL)BUTTON_play_movie->enable();
+  }
+  else{
+    if(BUTTON_make_movie != NULL)BUTTON_make_movie->enable();
+    if(BUTTON_play_movie != NULL)BUTTON_play_movie->disable();
+  }
+}
+
+/* ------------------ update_render_type ------------------------ */
+
+void update_render_type(int type){
+  renderfiletype = type;
+  RADIO_render_type->set_int_val(renderfiletype);
+}
 
 /* ------------------ update_zaxis_angles ------------------------ */
 
@@ -510,7 +558,6 @@ extern "C" void glui_motion_setup(int main_window){
   BUTTON_window_update=glui_motion->add_button_to_panel(ROLLOUT_projection,_("Apply"),WINDOW_RESIZE,Motion_CB);
 
   ROLLOUT_render = glui_motion->add_rollout(_("Render"),false);
-
   PANEL_file_type=glui_motion->add_panel_to_panel(ROLLOUT_render,"file type:",true);
   RADIO_render_type=glui_motion->add_radiogroup_to_panel(PANEL_file_type,&renderfiletype,RENDER_TYPE,Render_CB);
   glui_motion->add_radiobutton_to_group(RADIO_render_type,"PNG");
@@ -563,14 +610,15 @@ extern "C" void glui_motion_setup(int main_window){
   BUTTON_render_stop=glui_motion->add_button_to_panel(ROLLOUT_render,_("Stop"),RENDER_STOP,Render_CB);
 
   if(have_ffmpeg==1){
-    ROLLOUT_make_movie = glui_motion->add_rollout_to_panel(ROLLOUT_render, "Make movie",false);
+    ROLLOUT_make_movie = glui_motion->add_rollout_to_panel(ROLLOUT_render, "Movie",false);
     SPINNER_framerate = glui_motion->add_spinner_to_panel(ROLLOUT_make_movie, "frame rate", GLUI_SPINNER_INT, &movie_framerate);
     SPINNER_framerate->set_int_limits(1, 100);
-    EDIT_movie_name = glui_motion->add_edittext_to_panel(ROLLOUT_make_movie, "name:", GLUI_EDITTEXT_TEXT, movie_name);
+    EDIT_movie_name = glui_motion->add_edittext_to_panel(ROLLOUT_make_movie, "name:", GLUI_EDITTEXT_TEXT, movie_name, MOVIE_NAME, Render_CB);
     EDIT_movie_name->set_w(200);
-    BUTTON_make_movie = glui_motion->add_button_to_panel(ROLLOUT_make_movie, "Make movie", MAKE_MOVIE, Render_CB);
+    BUTTON_make_movie = glui_motion->add_button_to_panel(ROLLOUT_make_movie, "Make", MAKE_MOVIE, Render_CB);
     if(have_ffplay==1){
-      BUTTON_play_movie = glui_motion->add_button_to_panel(ROLLOUT_make_movie, "Play movie", PLAY_MOVIE, Render_CB);
+      BUTTON_play_movie = glui_motion->add_button_to_panel(ROLLOUT_make_movie, "Play", PLAY_MOVIE, Render_CB);
+      enable_disable_playmovie();
     }
   }
 
@@ -1553,69 +1601,22 @@ extern "C" void rotation_type_CB(int var){
 /* ------------------ Render_CB ------------------------ */
 
 void Render_CB(int var){
-  char command_line[1024], *movie;
-  char *ext;
-  char frame0[1024];
-  char moviefile[1024];
 
   updatemenu=1;
   switch(var){
+    case MOVIE_NAME:
+      enable_disable_playmovie();
+      break;
     case PLAY_MOVIE:
-      trim(movie_name);
-      movie = trim_front(movie_name);
-      strcpy(moviefile, movie);
-      strcat(moviefile, ".mp4");
-      if(file_exists(moviefile)==1){
-        strcpy(command_line, "ffplay ");
-        strcat(command_line,moviefile);
-        system(command_line);
-      }
+      PlayMovie();
       break;
     case MAKE_MOVIE:
       if(have_ffmpeg == 0){
         PRINTF("*** Error: The movie generating program ffmpeg is not available\n");
         break;
       }
-      switch(renderfiletype){
-        case PNG:
-          ext = ext_png;
-          break;
-        case JPEG:
-          ext = ext_jpg;
-          break;
-        default:
-          renderfiletype = 0;
-          ext = ext_png;
-          break;
-        }
-
-      strcpy(frame0, movie_prefix);
-      strcat(frame0, "_0001");
-      strcat(frame0, ext);
-      if(file_exists(frame0) == 0){
-        Render_CB(RENDER_START);
-      }
-
-// erase movie file if it exists
-
-      trim(movie_name);
-      movie = trim_front(movie_name);
-      strcpy(moviefile, movie);
-      strcat(moviefile, ".mp4");
-      if(file_exists(moviefile) == 1){
-        unlink(moviefile);
-      }
-
-// form command line to make movie
-
-      sprintf(command_line, "ffmpeg -r %i -i %s", movie_framerate, movie_prefix);
-      strcat(command_line, "_%04d");
-      strcat(command_line, ext);
-      strcat(command_line, " ");
-      strcat(command_line, movie);
-      strcat(command_line, ".mp4");
-      printf("movie command=%s\n", command_line);
-      system(command_line);
+      enable_disable_makemovie(OFF);
+      update_makemovie = 1;
       break;
     case RENDER_LABEL:
       break;

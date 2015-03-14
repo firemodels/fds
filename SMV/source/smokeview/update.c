@@ -1891,6 +1891,8 @@ void update_smoothblockage_info(void){
 /* ------------------ update_ShowScene ------------------------ */
 
 void update_ShowScene(void){
+  update_render_start_button();
+  if(update_makemovie == 1)MakeMovie();
   if(compute_fed == 1)DefineAllFEDs();
   if(restart_time == 1){
     restart_time = 0;

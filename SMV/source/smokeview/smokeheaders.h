@@ -6,6 +6,13 @@
 #ifndef SMOKEHEADERS_H_DEFINED
 #define SMOKEHEADERS_H_DEFINED
 
+EXTERNCPP void enable_disable_playmovie(void);
+EXTERNCPP int does_movie_exist(char *movie_name, char *moviefile);
+EXTERNCPP void update_render_start_button(void);
+EXTERNCPP void enable_disable_makemovie(int onoff);
+EXTERNCPP void MakeMovie(void);
+EXTERNCPP void PlayMovie(void);
+EXTERNCPP void update_render_type(int type);
 EXTERNCPP void update_device_size(void);
 EXTERNCPP void update_Display(void);
 EXTERNCPP void update_ShowScene(void);

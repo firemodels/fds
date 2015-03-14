@@ -2519,7 +2519,7 @@ void UpdateFrame(float thisinterval, int *changetime, int *redisplay){
   float totalcpu;
   float elapsed_time;
 
-  if(showtime==1&&((stept==1&&(float)thisinterval>frameinterval)||render_state==1||timebar_drag==1)){       /* ready for a new frame */
+  if(showtime==1&&((stept==1&&(float)thisinterval>frameinterval)||render_state==RENDER_ON||timebar_drag==1)){       /* ready for a new frame */
     cputimes[cpuframe]=thistime/1000.;
     
     oldcpuframe=cpuframe-10;
@@ -2539,7 +2539,7 @@ void UpdateFrame(float thisinterval, int *changetime, int *redisplay){
     lasttime = thistime;
     if(nglobal_times>0){
       *changetime=1;
-      if(stept ==1 && plotstate == DYNAMIC_PLOTS && timebar_drag==0 && render_state==0){
+      if(stept ==1 && plotstate == DYNAMIC_PLOTS && timebar_drag==0 && render_state==RENDER_OFF){
         /*  skip frames here if displaying in real time and frame rate is too slow*/
         if(global_times!=NULL&&realtime_flag!=0&&FlowDir>0){
           elapsed_time = (float)thistime/1000.0 - reset_time;
@@ -2562,7 +2562,7 @@ void UpdateFrame(float thisinterval, int *changetime, int *redisplay){
           }
         }
       }
-      if(stept==1&&timebar_drag==0&&render_state==1){
+      if(stept==1&&timebar_drag==0&&render_state==RENDER_ON){
         itimes+=RenderSkip*FlowDir;
       }
 
@@ -2844,7 +2844,7 @@ void DoScript(void){
         current_script_command->exit=0;
       }
     }
-    if(render_state==0){  // don't advance command if Smokeview is executing a RENDERALL command
+    if(render_state==RENDER_OFF){  // don't advance command if Smokeview is executing a RENDERALL command
       current_script_command++;
       script_render_flag=run_script();
       if(runscript==2&&noexit==0&&current_script_command==NULL){
@@ -2945,7 +2945,7 @@ void Display_CB(void){
     }
   }
   if(touring == 1 ){
-    if(render_state==1){
+    if(render_state==RENDER_ON){
       if(nglobal_times>0)angle_global += 2.0*PI/((float)nglobal_times/(float)RenderSkip);
       if(nglobal_times==0)angle_global += 2.0*PI/((float)maxtourframes/(float)RenderSkip);
     }

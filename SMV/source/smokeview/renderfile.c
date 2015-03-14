@@ -17,6 +17,101 @@ char renderfile_revision[]="$Revision$";
 #include GLUT_H
 #include "gd.h"
 
+/* ------------------ does_movie_exist ------------------------ */
+
+#define RENDER_TYPE 0
+#define RENDER_START 3
+
+int does_movie_exist(char *mov_name, char *moviefile){
+  char *movie;
+
+  if(mov_name == NULL || strlen(mov_name) < 1)return 0;
+  trim(mov_name);
+  movie = trim_front(mov_name);
+  strcpy(moviefile, movie);
+  strcat(moviefile, ".mp4");
+  if(file_exists(moviefile) == 1)return 1;
+  return 0;
+}
+
+/* ------------------ PlayMovie ------------------------ */
+
+void PlayMovie(void){
+  char command_line[1024], moviefile[1024];
+
+  if(does_movie_exist(movie_name,moviefile)==1){
+    strcpy(command_line, "ffplay ");
+    strcat(command_line,moviefile);
+    system(command_line);
+  }
+  else{
+    PRINTF("*** Error: the movie file, %s, does not exist\n", moviefile);
+  }
+}  
+
+/* ------------------ MakeMovie ------------------------ */
+
+void MakeMovie(void){
+  char command_line[1024], *movie;
+  char frame0[1024];
+  char moviefile[1024], moviefile_path[1024];
+  int renderfiletype_save;
+
+  if(render_state == ON)return;
+  
+  // make movies from jpegs
+
+  renderfiletype_save = renderfiletype;
+  update_render_type(JPEG);
+
+// see if we need to render frames
+
+  strcpy(frame0, movie_prefix);
+  strcat(frame0, "_0001");
+  strcat(frame0, ".jpg");
+  if(file_exists(frame0) == 0){
+    Render_CB(RENDER_START);
+    return;
+  }
+
+// construct full pathname of movie and delete if it exists
+
+  trim(movie_name);
+  movie = trim_front(movie_name);
+  strcpy(moviefile, movie);
+  strcat(moviefile, ".mp4");
+
+  strcpy(moviefile_path, "");
+  if(script_dir_path != NULL&&strlen(script_dir_path) > 0){
+    if(strlen(script_dir_path) != 2 || script_dir_path[0] != '.' || script_dir_path[1] != dirseparator[0]){
+      strcat(moviefile_path, script_dir_path);
+      strcat(moviefile_path, dirseparator);
+    }
+  }
+  strcat(moviefile_path, moviefile);
+  if(file_exists(moviefile_path) == 1){
+    unlink(moviefile_path);
+  }
+
+  // form movie making command line
+
+  sprintf(command_line, "ffmpeg -r %i -i %s", movie_framerate, movie_prefix);
+  strcat(command_line, "_%04d");
+  strcat(command_line, ".jpg");
+  strcat(command_line, " ");
+  strcat(command_line, moviefile_path);
+  printf("movie command=%s\n", command_line);
+  system(command_line);
+
+  // restore image type and enable movie making button
+
+  update_render_type(renderfiletype_save);
+  enable_disable_makemovie(ON);
+  enable_disable_playmovie();
+  update_makemovie = 0;
+}
+
+
 /* ------------------ Render ------------------------ */
 
 void Render(int view_mode){
@@ -34,7 +129,7 @@ void Render(int view_mode){
       current_script_command->remove_frame=itimes;
     }
   }
-  if(RenderOnceNow==0&&RenderOnceNowR==0&&RenderOnceNowL==0&&render_state==1&&render_multi==0){
+  if(RenderOnceNow==0&&RenderOnceNowR==0&&RenderOnceNowL==0&&render_state==RENDER_ON&&render_multi==0){
     if(plotstate==DYNAMIC_PLOTS && nglobal_times>0){
      if(itimes>=0&&itimes<nglobal_times&&
        ((render_frame[itimes] == 0&&showstereo==STEREO_NONE)||(render_frame[itimes]<2&&showstereo!=STEREO_NONE))
