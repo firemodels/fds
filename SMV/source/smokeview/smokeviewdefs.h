@@ -537,14 +537,18 @@ void _Sniff_Errors(char *whereat);
 #define DIALOG_DEVICE 28
 #define DIALOG_DISPLAY 22
 #define DIALOG_HIDEALL -2
-#define DIALOG_MOTION 15
-#define DIALOG_VIEW_GEOM 16
+#define DIALOG_MOTION 29
+#define DIALOG_VIEW 30
+#define DIALOG_RENDER 31
+#define DIALOG_GEOMETRY 16
 #define DIALOG_SHOOTER 27
 #define DIALOG_SMOKEZIP 24
 #define DIALOG_STEREO 19
 #define DIALOG_TOUR 21
 #define DIALOG_TRAINER 25
 #define DIALOG_WUI 26
+#define DIALOG_SCRIPT 32
+#define DIALOG_UNLOAD_ALL -2
 
 #define UNLOAD_ALL -1
 #define UNLOAD_LAST -2

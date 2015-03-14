@@ -74,7 +74,6 @@ GLUI_Panel *PANEL_user_center=NULL;
 GLUI_Panel *PANEL_rotate=NULL, *PANEL_translate=NULL,*PANEL_close=NULL;
 GLUI_Panel *PANEL_file_suffix=NULL, *PANEL_file_type=NULL;
 GLUI_Panel *PANEL_radiorotate=NULL;
-GLUI_Panel *PANEL_gslice=NULL;
 GLUI_Panel *PANEL_gslice_center=NULL;
 GLUI_Panel *PANEL_gslice_normal=NULL;
 GLUI_Panel *PANEL_gslice_show=NULL;
@@ -84,12 +83,12 @@ GLUI_Panel *PANEL_translate2=NULL,*PANEL_translate3=NULL;
 GLUI_Panel *PANEL_anglebuttons=NULL;
 GLUI_Panel *PANEL_reset1=NULL;
 GLUI_Panel *PANEL_reset2=NULL;
-GLUI_Panel *PANEL_scale=NULL;
+GLUI_Rollout *ROLLOUT_scale=NULL;
 GLUI_Panel *PANEL_reset=NULL;
 GLUI_Panel *PANEL_specify=NULL;
 GLUI_Panel *PANEL_change_zaxis=NULL;
 
-GLUI_Rollout *ROLLOUT_rotation_type=NULL;
+GLUI_Rollout *ROLLOUT_rotation_type = NULL;
 GLUI_Rollout *ROLLOUT_orientation=NULL;
 GLUI_Rollout *ROLLOUT_motion=NULL;
 GLUI_Rollout *ROLLOUT_scene_clip=NULL;
@@ -97,6 +96,7 @@ GLUI_Rollout *ROLLOUT_projection=NULL;
 GLUI_Rollout *ROLLOUT_render=NULL;
 GLUI_Rollout *ROLLOUT_viewpoints=NULL;
 GLUI_Rollout *ROLLOUT_make_movie = NULL;
+GLUI_Rollout *ROLLOUT_gslice = NULL;
 
 
 GLUI_Spinner *SPINNER_nrender_rows=NULL;
@@ -499,14 +499,14 @@ extern "C" void glui_motion_setup(int main_window){
   changed_zaxis=0;
 #endif
 
-  PANEL_gslice = glui_motion->add_rollout(_("General slice motion"),false);
+  ROLLOUT_gslice = glui_motion->add_rollout(_("Slice motion"),false);
   if(gslice_xyz[0]<-1000000.0&&gslice_xyz[1]<-1000000.0&&gslice_xyz[2]<-1000000.0){
     gslice_xyz[0]=(xbar0+DENORMALIZE_X(xbar))/2.0;
     gslice_xyz[1]=(ybar0+DENORMALIZE_Y(ybar))/2.0;
     gslice_xyz[2]=(zbar0+DENORMALIZE_Z(zbar))/2.0;
   }
 
-  PANEL_gslice_center = glui_motion->add_panel_to_panel(PANEL_gslice,_("rotation center"),true);
+  PANEL_gslice_center = glui_motion->add_panel_to_panel(ROLLOUT_gslice,_("rotation center"),true);
   SPINNER_gslice_center_x=glui_motion->add_spinner_to_panel(PANEL_gslice_center,"x:",GLUI_SPINNER_FLOAT,gslice_xyz,GSLICE_TRANSLATE,Gslice_CB);
   SPINNER_gslice_center_y=glui_motion->add_spinner_to_panel(PANEL_gslice_center,"y:",GLUI_SPINNER_FLOAT,gslice_xyz+1,GSLICE_TRANSLATE,Gslice_CB);
   SPINNER_gslice_center_z=glui_motion->add_spinner_to_panel(PANEL_gslice_center,"z:",GLUI_SPINNER_FLOAT,gslice_xyz+2,GSLICE_TRANSLATE,Gslice_CB);
@@ -515,12 +515,12 @@ extern "C" void glui_motion_setup(int main_window){
   SPINNER_gslice_center_z->set_float_limits(zbar0,DENORMALIZE_Z(zbar),GLUI_LIMIT_CLAMP);
   Gslice_CB(GSLICE_TRANSLATE);
   
-  PANEL_gslice_normal = glui_motion->add_panel_to_panel(PANEL_gslice,_("normal"),true);
+  PANEL_gslice_normal = glui_motion->add_panel_to_panel(ROLLOUT_gslice,_("normal"),true);
   SPINNER_gslice_normal_az=glui_motion->add_spinner_to_panel(PANEL_gslice_normal,"az:",GLUI_SPINNER_FLOAT,gslice_normal_azelev,GSLICE_NORMAL,Gslice_CB);
   SPINNER_gslice_normal_elev=glui_motion->add_spinner_to_panel(PANEL_gslice_normal,"elev:",GLUI_SPINNER_FLOAT,gslice_normal_azelev+1,GSLICE_NORMAL,Gslice_CB);
   Gslice_CB(GSLICE_NORMAL);
 
-  PANEL_gslice_show = glui_motion->add_panel_to_panel(PANEL_gslice,_("show"),true);
+  PANEL_gslice_show = glui_motion->add_panel_to_panel(ROLLOUT_gslice,_("show"),true);
   CHECKBOX_gslice_data=glui_motion->add_checkbox_to_panel(PANEL_gslice_show,"data",&vis_gslice_data);
   glui_motion->add_checkbox_to_panel(PANEL_gslice_show,"triangle outline",&show_gslice_triangles);
   glui_motion->add_checkbox_to_panel(PANEL_gslice_show,"triangulation",&show_gslice_triangulation);
@@ -643,20 +643,20 @@ extern "C" void glui_motion_setup(int main_window){
   BUTTON_add_view=glui_motion->add_button_to_panel(PANEL_reset2,_("Add"),ADD_VIEW,Viewpoint_CB);
   EDIT_view_label=glui_motion->add_edittext_to_panel(PANEL_reset2,_("Edit:"),GLUI_EDITTEXT_TEXT,camera_label,LABEL_VIEW,Viewpoint_CB);
 
-  PANEL_scale = glui_motion->add_rollout(_("Scaling/Depth params"),false);
-  SPINNER_scalex=glui_motion->add_spinner_to_panel(PANEL_scale,_("Scale x"),GLUI_SPINNER_FLOAT,mscale);
+  ROLLOUT_scale = glui_motion->add_rollout(_("Scaling/Depth params"),false);
+  SPINNER_scalex=glui_motion->add_spinner_to_panel(ROLLOUT_scale,_("Scale x"),GLUI_SPINNER_FLOAT,mscale);
   SPINNER_scalex->set_float_limits(0.01,100.0,GLUI_LIMIT_CLAMP);
 
-  SPINNER_scaley=glui_motion->add_spinner_to_panel(PANEL_scale,_("Scale y"),GLUI_SPINNER_FLOAT,mscale+1);
+  SPINNER_scaley=glui_motion->add_spinner_to_panel(ROLLOUT_scale,_("Scale y"),GLUI_SPINNER_FLOAT,mscale+1);
   SPINNER_scaley->set_float_limits(0.01,100.0,GLUI_LIMIT_CLAMP);
 
-  SPINNER_scalez=glui_motion->add_spinner_to_panel(PANEL_scale,_("Scale z"),GLUI_SPINNER_FLOAT,mscale+2);
+  SPINNER_scalez=glui_motion->add_spinner_to_panel(ROLLOUT_scale,_("Scale z"),GLUI_SPINNER_FLOAT,mscale+2);
   SPINNER_scalez->set_float_limits(0.01,100.0,GLUI_LIMIT_CLAMP);
 
-  SPINNER_nearclip=glui_motion->add_spinner_to_panel(PANEL_scale,_("Near depth"),GLUI_SPINNER_FLOAT,&nearclip);
+  SPINNER_nearclip=glui_motion->add_spinner_to_panel(ROLLOUT_scale,_("Near depth"),GLUI_SPINNER_FLOAT,&nearclip);
   SPINNER_nearclip->set_float_limits(0.001,10.0,GLUI_LIMIT_CLAMP);
 
-  SPINNER_farclip=glui_motion->add_spinner_to_panel(PANEL_scale,_("Far depth"),GLUI_SPINNER_FLOAT,&farclip);
+  SPINNER_farclip=glui_motion->add_spinner_to_panel(ROLLOUT_scale,_("Far depth"),GLUI_SPINNER_FLOAT,&farclip);
   SPINNER_farclip->set_float_limits(0.001,10.0,GLUI_LIMIT_CLAMP);
 
   CHECKBOX_cursor_blockpath=glui_motion->add_checkbox(_("Map cursor keys for Plot3D use"),&cursorPlot3D,CURSOR,Motion_CB);
@@ -1313,20 +1313,55 @@ extern "C" void update_meshlist1(int val){
 
 /* ------------------ hide_glui_motion ------------------------ */
 
-extern "C" void hide_glui_motion(void){
+extern "C" void hide_glui_motion(int  menu_id){
   if(glui_motion!=NULL)glui_motion->hide();
   showmotion_dialog_save=showmotion_dialog;
   showmotion_dialog=0;
+  showview_dialog = 0;
+  showrender_dialog = 0;
 }
 
 /* ------------------ show_glui_motion_setup ------------------------ */
 
-extern "C" void show_glui_motion(void){
+extern "C" void show_glui_motion(int menu_id){
   showmotion_dialog=1;
-  if(glui_motion!=NULL){
-    glui_motion->show();
-    ROLLOUT_viewpoints->open();
-    ROLLOUT_motion->close();
+  glui_motion->show();
+  if(glui_motion != NULL){
+    showmotion_dialog=0;
+    showview_dialog=0;
+    showrender_dialog=0;
+    switch(menu_id){
+    case DIALOG_MOTION:
+      showmotion_dialog=1;
+      ROLLOUT_motion->open();
+      ROLLOUT_gslice->close();
+      ROLLOUT_projection->close();
+      ROLLOUT_render->close();
+      ROLLOUT_viewpoints->close();
+      ROLLOUT_scale->close();
+      break;
+    case DIALOG_VIEW:
+      showview_dialog=1;
+      ROLLOUT_motion->close();
+      ROLLOUT_gslice->close();
+      ROLLOUT_projection->close();
+      ROLLOUT_render->close();
+      ROLLOUT_viewpoints->open();
+      ROLLOUT_scale->close();
+      break;
+    case DIALOG_RENDER:
+      showrender_dialog=1;
+      ROLLOUT_motion->close();
+      ROLLOUT_gslice->close();
+      ROLLOUT_projection->close();
+      ROLLOUT_render->open();
+      ROLLOUT_viewpoints->close();
+      ROLLOUT_scale->close();
+      break;
+    default:
+      ASSERT(FFALSE);
+      break;
+    }
   }
 }
 

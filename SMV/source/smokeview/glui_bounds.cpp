@@ -939,7 +939,7 @@ extern "C" void glui_bounds_setup(int main_window){
 
 #ifdef pp_COMPRESS
   if(smokezippath!=NULL&&(npatchinfo>0||nsmoke3dinfo>0||nsliceinfo>0)){
-    ROLLOUT_compress=glui_bounds->add_rollout(_("Compress files (Smokezip)"),false);
+    ROLLOUT_compress=glui_bounds->add_rollout(_("Compress files"),false);
     CHECKBOX_erase_all=glui_bounds->add_checkbox_to_panel(ROLLOUT_compress,_("Erase compressed files"),
       &erase_all,ERASE,Bound_CB);
     CHECKBOX_overwrite_all=glui_bounds->add_checkbox_to_panel(ROLLOUT_compress,_("Overwrite compressed files"),
@@ -2715,35 +2715,74 @@ void Bounds_DLG_CB(int var){
 
 /* ------------------ show_glui ------------------------ */
 
-extern "C" void show_glui_bounds(void){
+extern "C" void show_glui_bounds(int menu_id){
   int islice, ipatch;
-  showbounds_dialog=1;
-  if(nsliceinfo>0){
-    islice=RADIO_slice->get_int_val();
-    setslicebounds(islice);
-    Slice_CB(SETVALMIN);
-    Slice_CB(SETVALMAX);
-    Slice_CB(VALMIN);
-    Slice_CB(VALMAX);
-  }
-  if(npatchinfo>0){
-    ipatch=RADIO_bf->get_int_val();
-    global2localpatchbounds(patchlabellist[ipatch]);
-    Bound_CB(SETVALMIN);
-    Bound_CB(SETVALMAX);
-  }
-  if(npartinfo>0&&npartinfo!=nevac){
-    PART_CB(SETVALMIN);
-    PART_CB(SETVALMAX);
-  }
-  if(nplot3dinfo>0){
-    PLOT3D_CB(SETVALMIN);
-    PLOT3D_CB(SETVALMAX);
-  }
+    if(ROLLOUT_boundary!=NULL)ROLLOUT_boundary->close();
+    if(ROLLOUT_plot3d != NULL)ROLLOUT_plot3d->close();
+    if(ROLLOUT_evac != NULL)ROLLOUT_evac->close();
+    if(ROLLOUT_part != NULL)ROLLOUT_part->close();
+    if(ROLLOUT_slice != NULL)ROLLOUT_slice->close();
+    if(ROLLOUT_bound != NULL)ROLLOUT_bound->close();
+    if(ROLLOUT_iso != NULL)ROLLOUT_iso->close();
+    if(ROLLOUT_volsmoke3d != NULL)ROLLOUT_volsmoke3d->close();
+    if(ROLLOUT_time != NULL)ROLLOUT_time->close();
+    if(ROLLOUT_colorbar != NULL)ROLLOUT_colorbar->close();
+    if(ROLLOUT_outputpatchdata != NULL)ROLLOUT_outputpatchdata->close();
+    
+  showbounds_dialog=0;
+  showscript_dialog=0;
+  showzip_dialog=0;
+  show3dsmoke_dialog=0;
+  if(menu_id==DIALOG_BOUNDS){
+    showbounds_dialog=1;
+    if(nsliceinfo>0){
+      islice=RADIO_slice->get_int_val();
+      setslicebounds(islice);
+      Slice_CB(SETVALMIN);
+      Slice_CB(SETVALMAX);
+      Slice_CB(VALMIN);
+      Slice_CB(VALMAX);
+    }
+    if(npatchinfo>0){
+      ipatch=RADIO_bf->get_int_val();
+      global2localpatchbounds(patchlabellist[ipatch]);
+      Bound_CB(SETVALMIN);
+      Bound_CB(SETVALMAX);
+    }
+    if(npartinfo>0&&npartinfo!=nevac){
+      PART_CB(SETVALMIN);
+      PART_CB(SETVALMAX);
+    }
+    if(nplot3dinfo>0){
+      PLOT3D_CB(SETVALMIN);
+      PLOT3D_CB(SETVALMAX);
+    }
 
-  if(nsliceinfo>0||npatchinfo>0)updateglui();
+    if(nsliceinfo>0||npatchinfo>0)updateglui();
 
-  updatechar();
+    updatechar();
+    if(ROLLOUT_script!=NULL)ROLLOUT_script->close();
+    if(ROLLOUT_compress != NULL)ROLLOUT_compress->close();
+    if(ROLLOUT_smoke3d != NULL)ROLLOUT_smoke3d->close();
+  }
+  else if(menu_id==DIALOG_SCRIPT){
+    showscript_dialog=1;
+    if(ROLLOUT_script!=NULL)ROLLOUT_script->open();
+    if(ROLLOUT_compress != NULL)ROLLOUT_compress->close();
+    if(ROLLOUT_smoke3d != NULL)ROLLOUT_smoke3d->close();
+  }
+  else if(menu_id == DIALOG_SMOKEZIP){
+    showzip_dialog=1;
+    if(ROLLOUT_script!=NULL)ROLLOUT_script->close();
+    if(ROLLOUT_compress != NULL)ROLLOUT_compress->open();
+    if(ROLLOUT_smoke3d != NULL)ROLLOUT_smoke3d->close();
+  }
+  else if(menu_id == DIALOG_3DSMOKE){
+    show3dsmoke_dialog=1;
+    if(ROLLOUT_script!=NULL)ROLLOUT_script->close();
+    if(ROLLOUT_compress != NULL)ROLLOUT_compress->close();
+    if(ROLLOUT_smoke3d != NULL)ROLLOUT_smoke3d->open();
+  }
   glui_bounds->show();
 }
 
@@ -2772,6 +2811,8 @@ extern "C" void hide_glui_bounds(void){
   if(glui_bounds!=NULL)glui_bounds->hide();
   showbounds_dialog_save=showbounds_dialog;
   showbounds_dialog=0;
+  showscript_dialog=0;
+  showzip_dialog=0;
 }
 
 /* ------------------ update_vector_widgets ------------------------ */

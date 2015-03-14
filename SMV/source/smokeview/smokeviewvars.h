@@ -627,6 +627,8 @@ SVEXTERN int parttype;
 SVEXTERN int allexterior,showexterior;
 SVEXTERN int allinterior;
 SVEXTERN int SVDECL(showbounds_dialog,0),SVDECL(showmotion_dialog,0),SVDECL(showedit_dialog,0), SVDECL(showclip_dialog,0);
+SVEXTERN int SVDECL(showview_dialog, 0), SVDECL(showrender_dialog, 0);
+SVEXTERN int SVDECL(showscript_dialog, 0);
 SVEXTERN int SVDECL(showstereo_dialog,0), SVDECL(showdisplay_dialog,0), SVDECL(showcolorbar_dialog,0);
 SVEXTERN int SVDECL(showwui_dialog,0), SVDECL(showdevice_dialog,0),SVDECL(show3dsmoke_dialog,0);
 SVEXTERN int SVDECL(showtour_dialog,0),SVDECL(showalert_dialog,0),SVDECL(showtrainer_dialog,0);
@@ -957,7 +959,7 @@ SVEXTERN float xtimeleft, xtimeright;
 SVEXTERN int showstereo, showstereoOLD, show_parallax, showstereo_frame;
 
 SVEXTERN int SVDECL(show_hrrcutoff,1), SVDECL(show_hrrcutoff_active,0),SVDECL(hrrpuv_loaded,0);
-SVEXTERN int SVDECL(showgluivol3dsmoke,0),SVDECL(showgluizip,0);
+SVEXTERN int SVDECL(showgluivol3dsmoke,0),SVDECL(showzip_dialog,0);
 SVEXTERN int trainerview;
 SVEXTERN int stereoactive;
 SVEXTERN int apertureindex;

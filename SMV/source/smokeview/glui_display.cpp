@@ -346,7 +346,7 @@ extern "C" void glui_labels_rename(void){
 
   ROLLOUT_user_tick->set_name("User tick settings");
 
-  PANEL_tick1->set_name(_("Display settings"));
+  PANEL_tick1->set_name(_("Display"));
 
   CHECKBOX_vis_user_ticks->set_name(_("User ticks"));
   SPINNER_subtick->set_name(_("sub-intervals")); 

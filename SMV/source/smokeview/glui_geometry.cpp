@@ -464,7 +464,7 @@ void Blockedit_DLG_CB(int var){
     writeini(LOCAL_INI,NULL);
     break;
   case CLOSE_WINDOW: 
-    DialogMenu(DIALOG_VIEW_GEOM);
+    DialogMenu(DIALOG_GEOMETRY);
     smooth_blockages();
     break;
   default:

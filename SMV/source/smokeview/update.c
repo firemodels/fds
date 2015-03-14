@@ -1800,7 +1800,7 @@ void Update_Glui_Names(void){
   hide_glui_display();
   update_glui_labels=1;
   
-  hide_glui_motion();
+  hide_glui_motion(DIALOG_MOTION);
   update_glui_motion=1;
 
   hide_glui_shooter();
@@ -1850,8 +1850,8 @@ void Update_Glui_Dialogs(void){
 void Show_Glui_Dialogs(void){
   if(showcolorbar_dialog_save==1)show_glui_colorbar();
 
-  if(showbounds_dialog_save==1)show_glui_bounds();
-  if(showmotion_dialog_save==1)show_glui_motion();
+  if(showbounds_dialog_save==1)show_glui_bounds(DIALOG_BOUNDS);
+  if(showmotion_dialog_save==1)show_glui_motion(DIALOG_MOTION);
   if(showedit_dialog_save==1)show_glui_geometry();
   if(showclip_dialog_save==1)show_glui_clip();
   if(showstereo_dialog_save==1)show_glui_stereo();

@@ -1472,7 +1472,7 @@ void keyboard(unsigned char key, int flag){
     case 'E':
       switch(keystate){
       case GLUT_ACTIVE_ALT:
-        DialogMenu(DIALOG_VIEW_GEOM); // edit geometry
+        DialogMenu(DIALOG_GEOMETRY); // edit geometry
         break;
       case GLUT_ACTIVE_CTRL:
       default:

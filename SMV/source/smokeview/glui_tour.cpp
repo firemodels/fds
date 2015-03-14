@@ -150,7 +150,7 @@ extern "C" void glui_tour_setup(int main_window){
     glui_tour->close();
     glui_tour=NULL;
   }
-  glui_tour = GLUI_Master.create_glui(_("Edit tours"),0,0,0);
+  glui_tour = GLUI_Master.create_glui(_("Tours"),0,0,0);
   if(showtour_dialog==0)glui_tour->hide();
 
 
