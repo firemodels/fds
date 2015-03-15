@@ -464,8 +464,7 @@ extern "C" void glui_motion_setup(int main_window){
   //glui_motion->add_column(false);
 
 
-#ifdef pp_BETA
-  ROLLOUT_orientation=glui_motion->add_rollout_to_panel(ROLLOUT_motion,_("Specify Orientation"),false);
+  ROLLOUT_orientation=glui_motion->add_rollout_to_panel(ROLLOUT_motion,_("Specify Orientation"),true);
   PANEL_specify = glui_motion->add_panel_to_panel(ROLLOUT_orientation,_("eye"));
 
   SPINNER_set_view_x=glui_motion->add_spinner_to_panel(PANEL_specify,"x:",GLUI_SPINNER_FLOAT,set_view_xyz,SET_VIEW_XYZ,Motion_CB);
@@ -496,8 +495,8 @@ extern "C" void glui_motion_setup(int main_window){
     CHECKBOX_showgravity = glui_motion->add_checkbox_to_panel(PANEL_change_zaxis,"Show axis vectors",&showgravity);
   }
   Motion_CB(CHANGE_ZAXIS);
+  ROLLOUT_orientation->close();
   changed_zaxis=0;
-#endif
 
   ROLLOUT_gslice = glui_motion->add_rollout(_("Slice motion"),false);
   if(gslice_xyz[0]<-1000000.0&&gslice_xyz[1]<-1000000.0&&gslice_xyz[2]<-1000000.0){
