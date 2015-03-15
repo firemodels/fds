@@ -1373,6 +1373,14 @@ void RenderMenu(int value){
     return;
   }
   switch(value){
+  case RenderCustom:
+    render_multi_menu = 0;
+    render_option = value;
+    render_multi_state = 0;
+    renderW = script_render_width;
+    renderH = script_render_height;
+    render_size_index = value;
+    break;
   case Render320:
     render_multi_menu=0;
     render_option=value;

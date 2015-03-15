@@ -39,6 +39,12 @@ void update_menu(void);
 // RENDERONCE
 // file name base (char) (or blank to use smokeview default)
 
+// RENDERTYPE
+//  jpg or png  (char)
+
+// RENDERSIZE
+// width height (int)
+
 // RENDERDOUBLEONCE
 // file name base (char) (or blank to use smokeview default)
 
@@ -379,6 +385,8 @@ int get_script_keyword_index(char *keyword){
   if(match_upper(keyword,"RENDERALL") == 1)return SCRIPT_RENDERALL;
   if(match_upper(keyword,"RENDERCLIP") == 1)return SCRIPT_RENDERCLIP;
   if(match_upper(keyword,"RENDERDIR") == 1)return SCRIPT_RENDERDIR;
+  if(match_upper(keyword,"RENDERTYPE") == 1)return SCRIPT_RENDERTYPE;
+  if(match_upper(keyword,"RENDERSIZE") == 1)return SCRIPT_RENDERSIZE;
   if(match_upper(keyword,"RENDERDOUBLEONCE") == 1)return SCRIPT_RENDERDOUBLEONCE;
   if(match_upper(keyword,"RENDERONCE") == 1)return SCRIPT_RENDERONCE;
   if(match_upper(keyword,"RENDERSTART") == 1)return SCRIPT_RENDERSTART;
@@ -500,7 +508,19 @@ int compile_script(char *scriptfile){
       case SCRIPT_CBARFLIP:
       case SCRIPT_CBARNORMAL:
         break;
-
+      case SCRIPT_RENDERSIZE:
+        SETcval;
+        sscanf(buffer2, "%i %i", &scripti->ival, &scripti->ival2);
+        break;
+      case SCRIPT_RENDERTYPE:
+        SETcval;
+        if(STRCMP(scripti->cval, "PNG") == 0){
+          scripti->ival == PNG;
+        }
+        else{
+          scripti->ival == JPEG;
+        }
+        break;
       case SCRIPT_RENDERDIR:
         {
         int len;
@@ -784,21 +804,10 @@ void script_volsmokerenderall(scriptdata *scripti){
 
 /* ------------------ run_makemovie ------------------------ */
 void script_makemovie(scriptdata *scripti){
-  char movie_name_save[1024], movie_prefix_save[1024];
-  float movie_framerate_save;
-
-  strcpy(movie_name_save, movie_name);
-  strcpy(movie_prefix_save, movie_prefix);
-  movie_framerate_save = movie_framerate;
-
   strcpy(movie_name, scripti->cval);
   strcpy(movie_prefix,scripti->cval2);
   movie_framerate=scripti->fval;
   Render_CB(MAKE_MOVIE);
-
-  strcpy(movie_name, movie_name_save);
-  strcpy(movie_prefix, movie_prefix_save);
-  movie_framerate = movie_framerate_save;
 }
 
 /* ------------------ script_loadparticles ------------------------ */
@@ -1636,6 +1645,19 @@ int run_script(void){
   switch(scripti->command){
     case SCRIPT_UNLOADALL:
       LoadUnloadMenu(UNLOADALL);
+      break;
+    case SCRIPT_RENDERSIZE:
+      script_render_width = scripti->ival;
+      script_render_height = scripti->ival2;
+      RenderMenu(RenderCustom);
+      break;
+    case SCRIPT_RENDERTYPE:
+      if(STRCMP(scripti->cval, "JPG")==0){
+        update_render_type(JPEG);
+      }
+      else{
+        update_render_type(PNG);
+      }
       break;
     case SCRIPT_RENDERDIR:
       if(scripti->cval!=NULL&&strlen(scripti->cval)>0){

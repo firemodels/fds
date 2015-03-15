@@ -526,36 +526,25 @@ extern "C" void glui_motion_setup(int main_window){
   glui_motion->add_checkbox_to_panel(PANEL_gslice_show,"triangulation",&show_gslice_triangulation);
   glui_motion->add_checkbox_to_panel(PANEL_gslice_show,"plane normal",&show_gslice_normal);
   
-  ROLLOUT_projection = glui_motion->add_rollout(_("Window properties"),false);
-  RADIO_projection=glui_motion->add_radiogroup_to_panel(ROLLOUT_projection,&projection_type,PROJECTION,Motion_CB);
-  RADIOBUTTON_1a=glui_motion->add_radiobutton_to_group(RADIO_projection,_("Perspective"));
-  RADIOBUTTON_1b=glui_motion->add_radiobutton_to_group(RADIO_projection,_("Size preserving"));
-  SPINNER_zoom=glui_motion->add_spinner_to_panel(ROLLOUT_projection,_("Zoom"),GLUI_SPINNER_FLOAT,&zoom,ZOOM,Motion_CB);
-  SPINNER_zoom->set_float_limits(0.10,10.0,GLUI_LIMIT_CLAMP);
-  aperture_glui=zoom2aperture(zoom);
-  SPINNER_aperture=glui_motion->add_spinner_to_panel(ROLLOUT_projection,_("aperture"),GLUI_SPINNER_FLOAT,&aperture_glui,
-    APERTURE,Motion_CB);
-  glui_motion->add_separator_to_panel(ROLLOUT_projection);
-  
-  LIST_windowsize = glui_motion->add_listbox_to_panel(ROLLOUT_projection,_("Size:"),&windowsize_pointer,WINDOWSIZE_LIST,Motion_CB);
-  LIST_windowsize->add_item(0,_("Custom"));
-  LIST_windowsize->add_item(1,"-");
-  LIST_windowsize->add_item(2, "320x240");
-  LIST_windowsize->add_item(3, "640x480");
-  LIST_windowsize->add_item(7, "720x480");
-  if(max_screenWidth>=800&&max_screenHeight>=480)LIST_windowsize->add_item(4, "800x640");
-  if(max_screenWidth>=1024&&max_screenHeight>=768)  LIST_windowsize->add_item(5,"1024x768");
-  if(max_screenWidth>=1280&&max_screenHeight>=720)  LIST_windowsize->add_item(9,"1280x720");
-  if(max_screenWidth>=1280&&max_screenHeight>=1024)  LIST_windowsize->add_item(6,"1280x1024");
-  if(max_screenWidth>=1440&&max_screenHeight>=1024)  LIST_windowsize->add_item(10,"1440x1080");
-  if(max_screenWidth>=1920&&max_screenHeight>=1080)  LIST_windowsize->add_item(8,"1920x1080");
-  update_windowsizelist();
+  ROLLOUT_viewpoints = glui_motion->add_rollout(_("Viewpoints"), false); 
+  LIST_viewpoints = glui_motion->add_listbox_to_panel(ROLLOUT_viewpoints, _("Select:"), &i_view_list, LIST_VIEW, Viewpoint_CB);
+  LIST_viewpoints->set_alignment(GLUI_ALIGN_CENTER);
 
-  SPINNER_window_width = glui_motion->add_spinner_to_panel(ROLLOUT_projection,_("width"),GLUI_SPINNER_INT,&glui_screenWidth);
-  SPINNER_window_width->set_int_limits(100,max_screenWidth);
-  SPINNER_window_height = glui_motion->add_spinner_to_panel(ROLLOUT_projection,_("height"),GLUI_SPINNER_INT,&glui_screenHeight);
-  SPINNER_window_height->set_int_limits(100,max_screenHeight);
-  BUTTON_window_update=glui_motion->add_button_to_panel(ROLLOUT_projection,_("Apply"),WINDOW_RESIZE,Motion_CB);
+  PANEL_reset = glui_motion->add_panel_to_panel(ROLLOUT_viewpoints, "", false);
+
+  PANEL_reset1 = glui_motion->add_panel_to_panel(PANEL_reset, "", false);
+
+  BUTTON_delete_view = glui_motion->add_button_to_panel(PANEL_reset1, _("Delete"), DELETE_VIEW, Viewpoint_CB);
+  delete_view_is_disabled = 0;
+  BUTTON_startup = glui_motion->add_button_to_panel(PANEL_reset1, _("Apply at startup"), STARTUP, Viewpoint_CB);
+  BUTTON_cycle_views = glui_motion->add_button_to_panel(PANEL_reset1, _("Cycle"), CYCLEVIEWS, Viewpoint_CB);
+
+  glui_motion->add_column_to_panel(PANEL_reset, true);
+  PANEL_reset2 = glui_motion->add_panel_to_panel(PANEL_reset, "", false);
+
+  BUTTON_replace_view = glui_motion->add_button_to_panel(PANEL_reset2, _("Replace"), REPLACE_VIEW, Viewpoint_CB);
+  BUTTON_add_view = glui_motion->add_button_to_panel(PANEL_reset2, _("Add"), ADD_VIEW, Viewpoint_CB);
+  EDIT_view_label = glui_motion->add_edittext_to_panel(PANEL_reset2, _("Edit:"), GLUI_EDITTEXT_TEXT, camera_label, LABEL_VIEW, Viewpoint_CB);
 
   ROLLOUT_render = glui_motion->add_rollout(_("Render"),false);
   PANEL_file_type=glui_motion->add_panel_to_panel(ROLLOUT_render,"file type:",true);
@@ -622,26 +611,36 @@ extern "C" void glui_motion_setup(int main_window){
     }
   }
 
-  ROLLOUT_viewpoints = glui_motion->add_rollout(_("Viewpoints"),false);
-  LIST_viewpoints = glui_motion->add_listbox_to_panel(ROLLOUT_viewpoints,_("Select:"),&i_view_list,LIST_VIEW,Viewpoint_CB);
-  LIST_viewpoints->set_alignment(GLUI_ALIGN_CENTER);
+  ROLLOUT_projection = glui_motion->add_rollout(_("Window properties"), false);
+  RADIO_projection = glui_motion->add_radiogroup_to_panel(ROLLOUT_projection, &projection_type, PROJECTION, Motion_CB);
+  RADIOBUTTON_1a = glui_motion->add_radiobutton_to_group(RADIO_projection, _("Perspective"));
+  RADIOBUTTON_1b = glui_motion->add_radiobutton_to_group(RADIO_projection, _("Size preserving"));
+  SPINNER_zoom = glui_motion->add_spinner_to_panel(ROLLOUT_projection, _("Zoom"), GLUI_SPINNER_FLOAT, &zoom, ZOOM, Motion_CB);
+  SPINNER_zoom->set_float_limits(0.10, 10.0, GLUI_LIMIT_CLAMP);
+  aperture_glui = zoom2aperture(zoom);
+  SPINNER_aperture = glui_motion->add_spinner_to_panel(ROLLOUT_projection, _("aperture"), GLUI_SPINNER_FLOAT, &aperture_glui,
+    APERTURE, Motion_CB);
+  glui_motion->add_separator_to_panel(ROLLOUT_projection);
 
-  PANEL_reset = glui_motion->add_panel_to_panel(ROLLOUT_viewpoints,"",false);
+  LIST_windowsize = glui_motion->add_listbox_to_panel(ROLLOUT_projection, _("Size:"), &windowsize_pointer, WINDOWSIZE_LIST, Motion_CB);
+  LIST_windowsize->add_item(0, _("Custom"));
+  LIST_windowsize->add_item(1, "-");
+  LIST_windowsize->add_item(2, "320x240");
+  LIST_windowsize->add_item(3, "640x480");
+  LIST_windowsize->add_item(7, "720x480");
+  if(max_screenWidth >= 800 && max_screenHeight >= 480)LIST_windowsize->add_item(4, "800x640");
+  if(max_screenWidth >= 1024 && max_screenHeight >= 768)  LIST_windowsize->add_item(5, "1024x768");
+  if(max_screenWidth >= 1280 && max_screenHeight >= 720)  LIST_windowsize->add_item(9, "1280x720");
+  if(max_screenWidth >= 1280 && max_screenHeight >= 1024)  LIST_windowsize->add_item(6, "1280x1024");
+  if(max_screenWidth >= 1440 && max_screenHeight >= 1024)  LIST_windowsize->add_item(10, "1440x1080");
+  if(max_screenWidth >= 1920 && max_screenHeight >= 1080)  LIST_windowsize->add_item(8, "1920x1080");
+  update_windowsizelist();
 
-
-  PANEL_reset1 = glui_motion->add_panel_to_panel(PANEL_reset,"",false);
-
-  BUTTON_delete_view=glui_motion->add_button_to_panel(PANEL_reset1,_("Delete"),DELETE_VIEW,Viewpoint_CB);
-  delete_view_is_disabled=0;
-  BUTTON_startup=glui_motion->add_button_to_panel(PANEL_reset1,_("Apply at startup"),STARTUP,Viewpoint_CB);
-  BUTTON_cycle_views=glui_motion->add_button_to_panel(PANEL_reset1,_("Cycle"),CYCLEVIEWS,Viewpoint_CB);
-
-  glui_motion->add_column_to_panel(PANEL_reset,true);
-  PANEL_reset2 = glui_motion->add_panel_to_panel(PANEL_reset,"",false);
-
-  BUTTON_replace_view=glui_motion->add_button_to_panel(PANEL_reset2,_("Replace"),REPLACE_VIEW,Viewpoint_CB);
-  BUTTON_add_view=glui_motion->add_button_to_panel(PANEL_reset2,_("Add"),ADD_VIEW,Viewpoint_CB);
-  EDIT_view_label=glui_motion->add_edittext_to_panel(PANEL_reset2,_("Edit:"),GLUI_EDITTEXT_TEXT,camera_label,LABEL_VIEW,Viewpoint_CB);
+  SPINNER_window_width = glui_motion->add_spinner_to_panel(ROLLOUT_projection, _("width"), GLUI_SPINNER_INT, &glui_screenWidth);
+  SPINNER_window_width->set_int_limits(100, max_screenWidth);
+  SPINNER_window_height = glui_motion->add_spinner_to_panel(ROLLOUT_projection, _("height"), GLUI_SPINNER_INT, &glui_screenHeight);
+  SPINNER_window_height->set_int_limits(100, max_screenHeight);
+  BUTTON_window_update = glui_motion->add_button_to_panel(ROLLOUT_projection, _("Apply"), WINDOW_RESIZE, Motion_CB);
 
   ROLLOUT_scale = glui_motion->add_rollout(_("Scaling/Depth params"),false);
   SPINNER_scalex=glui_motion->add_spinner_to_panel(ROLLOUT_scale,_("Scale x"),GLUI_SPINNER_FLOAT,mscale);

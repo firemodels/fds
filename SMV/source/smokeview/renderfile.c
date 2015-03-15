@@ -69,7 +69,7 @@ void MakeMovie(void){
   strcpy(frame0, movie_prefix);
   strcat(frame0, "_0001");
   strcat(frame0, ".jpg");
-  if(file_exists(frame0) == 0){
+  if(runscript==0&&file_exists(frame0) == 0){
     Render_CB(RENDER_START);
     return;
   }

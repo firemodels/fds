@@ -164,6 +164,8 @@ void _Sniff_Errors(char *whereat);
 #define SCRIPT_CBARNORMAL 112
 #define SCRIPT_RENDERSTART 113
 #define SCRIPT_MAKEMOVIE 114
+#define SCRIPT_RENDERTYPE 115
+#define SCRIPT_RENDERSIZE 116
 
 #define SCRIPT_LOADFILE 201
 #define SCRIPT_LOADVFILE 202
@@ -441,6 +443,7 @@ void _Sniff_Errors(char *whereat);
 #define Render320 995
 #define Render640 994
 #define RenderWindow 993
+#define RenderCustom 992
 #define LABELLEN 30
 #define RenderLABELframenumber 980
 #define RenderLABELtime 979
