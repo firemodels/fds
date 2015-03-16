@@ -4,6 +4,14 @@ ALLSEL,ALL
 ESEL,S,TYPE,,1  
 NSLE,S  
 EPLOT
+/VIEW,1,,,-1
+/ANG,1  
+/VIEW,1,-1  
+/ANG,1  
+/USER,  1   
+/DIST,  1,  0.547509249641  
+/ANG,   1,   90.0000000000  
+/FOC,   1,   1.00500000000    ,  0.903576344524    ,  0.500000000000
 /SHOW,'simple_panel_fire_ansys','grph',' '
 /DEVICE,VECTOR,0
 /GFILE,800, 
