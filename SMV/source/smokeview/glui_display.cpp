@@ -9,7 +9,6 @@
 extern "C" char glui_display_revision[];
 char glui_display_revision[]="$Revision$";
 
-extern "C" void FileShow_CB(int var);
 extern "C" void ShowHideMenu(int val);
 extern "C" void colorbar_global2local(void);
 
@@ -21,8 +20,6 @@ void Text_Labels_CB(int var);
 #include <math.h>
 
 #include "smokeviewvars.h"
-
-int nevacloaded,nplot3dloaded,nsmoke3dloaded,nisoloaded,nsliceloaded,nvsliceloaded,npartloaded,npatchloaded;
 
 GLUI *glui_labels=NULL;
 
@@ -132,12 +129,11 @@ GLUI_Panel *PANEL_tick1a;
 GLUI_Panel *PANEL_tick1b;
 GLUI_Panel *PANEL_tick2;
 GLUI_Panel *PANEL_transparency=NULL;
-GLUI_Panel *PANEL_showhide=NULL;
 GLUI_Panel *PANEL_font2d=NULL;
 GLUI_Panel *PANEL_font3d=NULL;
 
 GLUI_RadioGroup *RADIO2_plot3d_display=NULL;
-GLUI_RadioGroup *RADIO_fontsize=NULL,*RADIO_showhide=NULL;
+GLUI_RadioGroup *RADIO_fontsize = NULL;
 GLUI_RadioButton *RADIOBUTTON_label_1a=NULL;
 GLUI_RadioButton *RADIOBUTTON_label_1b=NULL;
 GLUI_RadioButton *RADIOBUTTON_label_1c=NULL;
@@ -148,14 +144,6 @@ GLUI_Button *BUTTON_LB_label_update=NULL;
 GLUI_Button *BUTTON_LB_label_add=NULL;
 GLUI_Button *BUTTON_LB_label_delete=NULL;
 GLUI_Button *BUTTON_LB_label_set=NULL;
-GLUI_Button *BUTTON_EVAC=NULL;
-GLUI_Button *BUTTON_PART=NULL;
-GLUI_Button *BUTTON_SLICE=NULL;
-GLUI_Button *BUTTON_VSLICE=NULL;
-GLUI_Button *BUTTON_PLOT3D=NULL;
-GLUI_Button *BUTTON_3DSMOKE=NULL;
-GLUI_Button *BUTTON_BOUNDARY=NULL;
-GLUI_Button *BUTTON_ISO=NULL;
 GLUI_Button *BUTTON_label_1=NULL;
 GLUI_Button *BUTTON_label_2=NULL;
 GLUI_Button *BUTTON_label_3=NULL;
@@ -197,14 +185,6 @@ GLUI_Button *BUTTON_label_4=NULL;
 #define LABELS_usertick 28
 #define LABELS_usertick2 29
 
-#define FILESHOW_particle    10
-#define FILESHOW_slice       11
-#define FILESHOW_vslice      12
-#define FILESHOW_boundary    13
-#define FILESHOW_3dsmoke     14
-#define FILESHOW_isosurface  15
-#define FILESHOW_evac 19
-#define FILESHOW_plot3d 16
 #define LABELS_HMS 18
 #define SAVE_SETTINGS 99
 
@@ -296,6 +276,7 @@ extern "C" void glui_update_fontindex(void){
     }
   }
 }
+
 /* ------------------ glui_labels_rename ------------------------ */
 
 extern "C" void glui_labels_rename(void){
@@ -357,10 +338,6 @@ extern "C" void glui_labels_rename(void){
   SPINNER_tick_xmin->set_name(_("Min"));
   SPINNER_tick_xmax->set_name(_("Max"));
   SPINNER_tick_dx0->set_name(_("Step"));
-
-  if((npartinfo>0)||nsliceinfo>0||nvsliceinfo>0||nisoinfo>0||npatchinfo||nsmoke3dinfo>0||nplot3dinfo>0){
-    PANEL_showhide->set_name(_("Show/Hide Loaded Files"));
-  }
 
 //    glui_labels->add_radiobutton_to_group(RADIO_showhide,_("Show"));
 //    glui_labels->add_radiobutton_to_group(RADIO_showhide,_("Show Only"));
@@ -538,31 +515,6 @@ extern "C" void glui_labels_setup(int main_window){
   }
   colorbar_global2local();
 
-  // -------------- Show/Hide Loaded files -------------------
-
-  if((npartinfo>0)||nsliceinfo>0||nvsliceinfo>0||nisoinfo>0||npatchinfo||nsmoke3dinfo>0||nplot3dinfo>0){
-    PANEL_showhide = glui_labels->add_rollout("Show/Hide Loaded Files",false);
-
-    RADIO_showhide = glui_labels->add_radiogroup_to_panel(PANEL_showhide,&showhide_option);
-    glui_labels->add_radiobutton_to_group(RADIO_showhide,_("Show"));
-    glui_labels->add_radiobutton_to_group(RADIO_showhide,_("Show Only"));
-    glui_labels->add_radiobutton_to_group(RADIO_showhide,_("Hide"));
-
-    glui_labels->add_column_to_panel(PANEL_showhide,false);
-
-    if(nevac>0){}
-    if(npartinfo>0&&nevac!=npartinfo)BUTTON_PART=glui_labels->add_button_to_panel(PANEL_showhide,"Particle",FILESHOW_particle,FileShow_CB);
-    if(nevac>0)BUTTON_EVAC=glui_labels->add_button_to_panel(PANEL_showhide,"Evacuation",FILESHOW_evac,FileShow_CB);
-    if(nsliceinfo>0)BUTTON_SLICE=glui_labels->add_button_to_panel(PANEL_showhide,"Slice",FILESHOW_slice,FileShow_CB);
-    if(nvsliceinfo>0)BUTTON_VSLICE=glui_labels->add_button_to_panel(PANEL_showhide,"Vector",FILESHOW_vslice,FileShow_CB);
-    if(nisoinfo>0)BUTTON_ISO=glui_labels->add_button_to_panel(PANEL_showhide,"Isosurface",FILESHOW_isosurface,FileShow_CB);
-    if(npatchinfo>0)BUTTON_BOUNDARY=glui_labels->add_button_to_panel(PANEL_showhide,"Boundary",FILESHOW_boundary,FileShow_CB);
-    if(nsmoke3dinfo>0)BUTTON_3DSMOKE=glui_labels->add_button_to_panel(PANEL_showhide,"3D smoke",FILESHOW_3dsmoke,FileShow_CB);
-    if(nplot3dinfo>0)BUTTON_PLOT3D=glui_labels->add_button_to_panel(PANEL_showhide,"Plot3D",FILESHOW_plot3d,FileShow_CB);
-
-    update_showhidebuttons();
-  }
-
   // -------------- Fonts -------------------
 
   ROLLOUT_font = glui_labels->add_rollout("Fonts",false);
@@ -722,158 +674,6 @@ extern "C" void glui_labels_setup(int main_window){
   BUTTON_label_4=glui_labels->add_button_to_panel(PANEL_label2,_("Close"),LABELS_close,Labels_CB);
 
   glui_labels->set_main_gfx_window( main_window );
-}
-
-/* ------------------ update_fileload  ------------------------ */
-
-extern "C" void update_fileload(void){
-  int i;
-  partdata *parti;
-  slicedata *slicei;
-  isodata *isoi;
-  patchdata *patchi;
-  smoke3ddata *smoke3di;
-  plot3ddata *plot3di;
-  vslicedata *vslicei;
-
-  npartloaded=0;
-  nevacloaded=0;
-  for(i=0;i<npartinfo;i++){
-    parti = partinfo+i;
-    if(parti->loaded==1&&parti->evac==0){
-      npartloaded++;
-    }
-    if(parti->loaded==1&&parti->evac==1){
-      nevacloaded++;
-    }
-  }
-
-  nsliceloaded=0;
-  for(i=0;i<nsliceinfo;i++){
-    slicei = sliceinfo+i;
-    if(slicei->loaded==1){
-      nsliceloaded++;
-    }
-  }
-
-  nvsliceloaded=0;
-  for(i=0;i<nvsliceinfo;i++){
-    vslicei = vsliceinfo+i;
-    if(vslicei->loaded==1){
-      nvsliceloaded++;
-    }
-  }
-
-  nisoloaded=0;
-  for(i=0;i<nisoinfo;i++){
-    isoi = isoinfo+i;
-    if(isoi->loaded==1){
-      nisoloaded++;
-    }
-  }
-
-  npatchloaded=0;
-  for(i=0;i<npatchinfo;i++){
-    patchi = patchinfo+i;
-    if(patchi->loaded==1){
-      npatchloaded++;
-    }
-  }
-
-  nsmoke3dloaded=0;
-  for(i=0;i<nsmoke3dinfo;i++){
-    smoke3di = smoke3dinfo+i;
-    if(smoke3di->loaded==1){
-      nsmoke3dloaded++;
-    }
-  }
-
-  nplot3dloaded=0;
-  for(i=0;i<nplot3dinfo;i++){
-    plot3di = plot3dinfo+i;
-    if(plot3di->loaded==1){
-      nplot3dloaded++;
-    }
-  }
-}
-
-/* ------------------ update_showhidebuttons ------------------------ */
-
-extern "C" void update_showhidebuttons(void){
-
-  update_fileload();
-  if(CHECKBOX_label_3!=NULL){
-    CHECKBOX_label_3->set_int_val(hide_overlaps);
-  }
-  if(BUTTON_PART!=NULL){
-    if(npartloaded==0){
-      BUTTON_PART->disable();
-    }
-    else{
-      BUTTON_PART->enable();
-    }
-  }
-  
-  if(BUTTON_SLICE!=NULL){
-    if(nsliceloaded==0){
-      BUTTON_SLICE->disable();
-    }
-    else{
-      BUTTON_SLICE->enable();
-    }
-  }
-
-  if(BUTTON_VSLICE!=NULL){
-    if(nvsliceloaded==0){
-      BUTTON_VSLICE->disable();
-    }
-    else{
-      BUTTON_VSLICE->enable();
-    }
-  }
-
-  if(BUTTON_ISO!=NULL){
-    if(nisoloaded==0){
-      BUTTON_ISO->disable();
-    }
-    else{
-      BUTTON_ISO->enable();
-    }
-  }
-
-  if(BUTTON_BOUNDARY!=NULL){
-    if(npatchloaded==0){
-      BUTTON_BOUNDARY->disable();
-    }
-    else{
-      BUTTON_BOUNDARY->enable();
-    }
-  }
-
-  if(BUTTON_3DSMOKE!=NULL){
-    if(nsmoke3dloaded==0){
-      BUTTON_3DSMOKE->disable();
-    }
-    else{
-      BUTTON_3DSMOKE->enable();
-    }
-  }
-
-  if(BUTTON_PLOT3D!=NULL){
-    if(nplot3dloaded==0){
-      BUTTON_PLOT3D->disable();
-    }
-    else{
-      BUTTON_PLOT3D->enable();
-    }
-  }
-
-  if(nplot3dloaded==0&&nsmoke3dloaded==0&&nisoloaded==0&&nsliceloaded==0&&npartloaded==0&&npatchloaded==0){
-    if(RADIO_showhide!=NULL)RADIO_showhide->disable();
-  }
-  else{
-    if(RADIO_showhide!=NULL)RADIO_showhide->enable();
-  }
 }
 
 /* ------------------ hide_glui_display ------------------------ */
@@ -1192,184 +992,6 @@ extern "C" void update_axislabels_smooth(void){
 
 extern "C" void update_transparency(void){
   CHECKBOX_transparentflag->set_int_val(use_transparency_data);
-}
-
-/* ------------------ FileShow_CB ------------------------ */
-
-extern "C" void FileShow_CB(int var){
-  updatemenu=1;
-  switch(var){
-    case  FILESHOW_plot3d:
-      switch(showhide_option){
-        case 0:
-        case 1:
-          Plot3DShowMenu(SHOWALL_PLOT3D);
-          break;
-        case 2:
-          Plot3DShowMenu(HIDEALL_PLOT3D);
-          break;
-        default:
-          ASSERT(FFALSE);
-          break;
-      }
-      break;
-    case FILESHOW_evac:
-      switch(showhide_option){
-        case 0:
-          EvacShowMenu(SHOWALL_EVAC);
-          break;
-        case 1:
-          EvacShowMenu(SHOWALL_EVAC);
-          if(npartloaded!=0)ParticleShowMenu(HIDEALL_PARTICLE);
-          if(nsmoke3dloaded!=0)Smoke3DShowMenu(HIDEALL_SMOKE3D);
-          if(nisoloaded!=0)IsoShowMenu(HIDEALL_ISO);
-          if(nsliceloaded!=0)ShowHideSliceMenu(HIDEALL_SLICE);
-          if(nvsliceloaded!=0)ShowVSliceMenu(HIDEALL_VSLICE);
-          if(npatchloaded!=0)ShowPatchMenu(HIDEALL_BOUNDARY);
-          break;
-        case 2:
-          EvacShowMenu(HIDEALL_EVAC);
-          break;
-        default:
-          ASSERT(FFALSE);
-          break;
-      }
-      break;
-    case  FILESHOW_particle:
-      switch(showhide_option){
-        case 0:
-          ParticleShowMenu(SHOWALL_PARTICLE);
-          break;
-        case 1:
-          ParticleShowMenu(SHOWALL_PARTICLE);
-          if(nevacloaded!=0)EvacShowMenu(HIDEALL_EVAC);
-          if(nsmoke3dloaded!=0)Smoke3DShowMenu(HIDEALL_SMOKE3D);
-          if(nisoloaded!=0)IsoShowMenu(HIDEALL_ISO);
-          if(nsliceloaded!=0)ShowHideSliceMenu(HIDEALL_SLICE);
-          if(nvsliceloaded!=0)ShowVSliceMenu(HIDEALL_VSLICE);
-          if(npatchloaded!=0)ShowPatchMenu(HIDEALL_BOUNDARY);
-          break;
-        case 2:
-          ParticleShowMenu(HIDEALL_PARTICLE);
-          break;
-        default:
-          ASSERT(FFALSE);
-          break;
-      }
-      break;
-    case  FILESHOW_slice:
-      switch(showhide_option){
-        case 0:
-          ShowHideSliceMenu(SHOWALL_SLICE);
-          break;
-        case 1:
-          ShowHideSliceMenu(SHOWALL_SLICE);
-          if(nevacloaded!=0)EvacShowMenu(HIDEALL_EVAC);
-          if(nvsliceloaded!=0)ShowVSliceMenu(HIDEALL_VSLICE);
-          if(npatchloaded!=0)ShowPatchMenu(HIDEALL_BOUNDARY);
-          if(nsmoke3dloaded!=0)Smoke3DShowMenu(HIDEALL_SMOKE3D);
-          if(nisoloaded!=0)IsoShowMenu(HIDEALL_ISO);
-          if(npartloaded!=0)ParticleShowMenu(HIDEALL_PARTICLE);
-          break;
-        case 2:
-          ShowHideSliceMenu(HIDEALL_SLICE);
-          break;
-        default:
-          ASSERT(FFALSE);
-          break;
-      }
-      break;
-    case  FILESHOW_vslice:
-      switch(showhide_option){
-        case 0:
-          ShowVSliceMenu(SHOWALL_VSLICE);
-          break;
-        case 1:
-          ShowVSliceMenu(SHOWALL_VSLICE);
-          if(nevacloaded!=0)EvacShowMenu(HIDEALL_EVAC);
-          if(npatchloaded!=0)ShowPatchMenu(HIDEALL_BOUNDARY);
-          if(nsmoke3dloaded!=0)Smoke3DShowMenu(HIDEALL_SMOKE3D);
-          if(nisoloaded!=0)IsoShowMenu(HIDEALL_ISO);
-          if(npartloaded!=0)ParticleShowMenu(HIDEALL_PARTICLE);
-          if(nsliceloaded!=0)ShowHideSliceMenu(HIDEALL_SLICE);
-          break;
-        case 2:
-          ShowHideSliceMenu(HIDEALL_SLICE);
-          break;
-        default:
-          ASSERT(FFALSE);
-          break;
-      }
-      break;
-    case  FILESHOW_boundary:
-      switch(showhide_option){
-        case 0:
-          ShowPatchMenu(SHOWALL_BOUNDARY);
-          break;
-        case 1:
-          ShowPatchMenu(SHOWALL_BOUNDARY);
-          if(nevacloaded!=0)EvacShowMenu(HIDEALL_EVAC);
-          if(nsmoke3dloaded!=0)Smoke3DShowMenu(HIDEALL_SMOKE3D);
-          if(npartloaded!=0)ParticleShowMenu(HIDEALL_PARTICLE);
-          if(nvsliceloaded!=0)ShowVSliceMenu(HIDEALL_VSLICE);
-          if(nsliceloaded!=0)ShowHideSliceMenu(HIDEALL_SLICE);
-          if(nisoloaded!=0)IsoShowMenu(HIDEALL_ISO);
-          break;
-        case 2:
-          ShowPatchMenu(HIDEALL_BOUNDARY);
-          break;
-        default:
-          ASSERT(FFALSE);
-          break;
-      }
-      break;
-    case  FILESHOW_3dsmoke:
-      switch(showhide_option){
-        case 0:
-          Smoke3DShowMenu(SHOWALL_SMOKE3D);
-          break;
-        case 1:
-          Smoke3DShowMenu(SHOWALL_SMOKE3D);
-          if(nevacloaded!=0)EvacShowMenu(HIDEALL_EVAC);
-          if(npatchloaded!=0)ShowPatchMenu(HIDEALL_BOUNDARY);
-          if(npartloaded!=0)ParticleShowMenu(HIDEALL_PARTICLE);
-          if(nvsliceloaded!=0)ShowVSliceMenu(HIDEALL_VSLICE);
-          if(nsliceloaded!=0)ShowHideSliceMenu(HIDEALL_SLICE);
-          if(nisoloaded!=0)IsoShowMenu(HIDEALL_ISO);
-          break;
-        case 2:
-          Smoke3DShowMenu(HIDEALL_SMOKE3D);
-          break;
-        default:
-          ASSERT(FFALSE);
-          break;
-        }
-      break;
-    case  FILESHOW_isosurface:
-      switch(showhide_option){
-        case 0:
-          IsoShowMenu(SHOWALL_ISO);
-          break;
-        case 1:
-          IsoShowMenu(SHOWALL_ISO);
-          if(nevacloaded!=0)EvacShowMenu(HIDEALL_EVAC);
-          if(nsmoke3dloaded!=0)Smoke3DShowMenu(HIDEALL_SMOKE3D);
-          if(npatchloaded!=0)ShowPatchMenu(HIDEALL_BOUNDARY);
-          if(npartloaded!=0)ParticleShowMenu(HIDEALL_PARTICLE);
-          if(nvsliceloaded!=0)ShowVSliceMenu(HIDEALL_VSLICE);
-          if(nsliceloaded!=0)ShowHideSliceMenu(HIDEALL_SLICE);
-          break;
-        case 2:
-          IsoShowMenu(HIDEALL_ISO);
-          break;
-        default:
-          ASSERT(FFALSE);
-          break;
-      }
-      break;
-    default:
-      break;
-  }
 }
 
 /* ------------------ Extreme_CB ------------------------ */
