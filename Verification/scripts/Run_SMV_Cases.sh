@@ -156,7 +156,7 @@ export GEOM=$SVNROOT/SMV/source/geomtest/intel_$PLATFORM/geomtest
 export FDSEXE=$SVNROOT/FDS_Compilation/mpi_intel_$PLATFORM$IB$DEBUG/fds_mpi_intel_$PLATFORM$IB$DEBUG
 export FDS=$FDSEXE
 export FDSMPI=$SVNROOT/FDS_Compilation/mpi_intel_$PLATFORM$IB$DEBUG/fds_mpi_intel_$PLATFORM$IB$DEBUG
-export CFAST=~/cfast/CFAST/intel_$PLATFORM/cfast6_$PLATFORM
+export CFAST=~/cfast/CFAST/intel_$PLATFORM/cfast7_$PLATFORM
 QFDSSH="$SVNROOT/Utilities/Scripts/qfds.sh $RUNOPTION $errfileoption"
 
 SMVUGDIR=$SVNROOT/Manuals/SMV_User_Guide/SCRIPT_FIGURES
