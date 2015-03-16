@@ -14,7 +14,7 @@ UPLOAD ()
   FILE=$1
   FILEnew=${FILE}_new.pdf
   cp $FILE.pdf /tmp/$FILEnew
-  $GDRIVE list  | grep $FILEnew | awk '{ system("drive delete -i " $1)} '
+  $GDRIVE list  | grep $FILEnew | awk '{ system("~/bin/gdrive delete -i " $1)} '
   $GDRIVE upload -p $PARENT_ID -f /tmp/$FILEnew
 }
 
