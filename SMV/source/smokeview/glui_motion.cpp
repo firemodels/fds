@@ -64,9 +64,17 @@ char glui_motion_revision[]="$Revision$";
 #define RENDER_LABEL 5
 #define RENDER_MULTIPLIER 6
 
+#define SCENE_ROLLOUT 0
+#define SLICE_ROLLOUT 1
+#define VIEWPOINTS_ROLLOUT 2
+#define WINDOW_ROLLOUT 3
+#define SCALING_ROLLOUT 4
+#define RENDER_ROLLOUT 5
+
 void Motion_DLG_CB(int var);
 void Viewpoint_CB(int var);
 void Gslice_CB(int var);
+void Motion_Rollout_CB(int var);
 
 GLUI *glui_motion=NULL;
 
@@ -393,7 +401,7 @@ extern "C" void glui_motion_setup(int main_window){
   if(showmotion_dialog==0)glui_motion->hide();
 
   PANEL_motion = glui_motion->add_panel("Motion",true);
-  ROLLOUT_motion = glui_motion->add_rollout_to_panel(PANEL_motion,_("Scene"));
+  ROLLOUT_motion = glui_motion->add_rollout_to_panel(PANEL_motion, _("Scene"),true, SCENE_ROLLOUT, Motion_Rollout_CB);
 
   PANEL_translate2 = glui_motion->add_panel_to_panel(ROLLOUT_motion,"Translate");
   d_eye_xyz[0]=0.0;
@@ -501,7 +509,7 @@ extern "C" void glui_motion_setup(int main_window){
   ROLLOUT_orientation->close();
   changed_zaxis=0;
 
-  ROLLOUT_gslice = glui_motion->add_rollout_to_panel(PANEL_motion,"Slice",false);
+  ROLLOUT_gslice = glui_motion->add_rollout_to_panel(PANEL_motion,"Slice",false,SLICE_ROLLOUT,Motion_Rollout_CB);
   if(gslice_xyz[0]<-1000000.0&&gslice_xyz[1]<-1000000.0&&gslice_xyz[2]<-1000000.0){
     gslice_xyz[0]=(xbar0+DENORMALIZE_X(xbar))/2.0;
     gslice_xyz[1]=(ybar0+DENORMALIZE_Y(ybar))/2.0;
@@ -529,7 +537,7 @@ extern "C" void glui_motion_setup(int main_window){
   glui_motion->add_checkbox_to_panel(PANEL_gslice_show,"plane normal",&show_gslice_normal);
   
   PANEL_viewA = glui_motion->add_panel(_("View"), true);
-  ROLLOUT_viewpoints = glui_motion->add_rollout_to_panel(PANEL_viewA,_("Viewpoints"), false);
+  ROLLOUT_viewpoints = glui_motion->add_rollout_to_panel(PANEL_viewA,_("Viewpoints"), false,VIEWPOINTS_ROLLOUT,Motion_Rollout_CB);
   LIST_viewpoints = glui_motion->add_listbox_to_panel(ROLLOUT_viewpoints, _("Select:"), &i_view_list, LIST_VIEW, Viewpoint_CB);
   LIST_viewpoints->set_alignment(GLUI_ALIGN_CENTER);
 
@@ -549,7 +557,7 @@ extern "C" void glui_motion_setup(int main_window){
   BUTTON_add_view = glui_motion->add_button_to_panel(PANEL_reset2, _("Add"), ADD_VIEW, Viewpoint_CB);
   EDIT_view_label = glui_motion->add_edittext_to_panel(PANEL_reset2, _("Edit:"), GLUI_EDITTEXT_TEXT, camera_label, LABEL_VIEW, Viewpoint_CB);
 
-  ROLLOUT_projection = glui_motion->add_rollout_to_panel(PANEL_viewA,_("Window properties"), false);
+  ROLLOUT_projection = glui_motion->add_rollout_to_panel(PANEL_viewA,_("Window properties"), false,WINDOW_ROLLOUT,Motion_Rollout_CB);
   RADIO_projection = glui_motion->add_radiogroup_to_panel(ROLLOUT_projection, &projection_type, PROJECTION, Motion_CB);
   RADIOBUTTON_1a = glui_motion->add_radiobutton_to_group(RADIO_projection, _("Perspective"));
   RADIOBUTTON_1b = glui_motion->add_radiobutton_to_group(RADIO_projection, _("Size preserving"));
@@ -580,7 +588,7 @@ extern "C" void glui_motion_setup(int main_window){
   SPINNER_window_height->set_int_limits(100, max_screenHeight);
   BUTTON_window_update = glui_motion->add_button_to_panel(ROLLOUT_projection, _("Apply"), WINDOW_RESIZE, Motion_CB);
 
-  ROLLOUT_scale = glui_motion->add_rollout_to_panel(PANEL_viewA,_("Scaling/Depth"),false);
+  ROLLOUT_scale = glui_motion->add_rollout_to_panel(PANEL_viewA,_("Scaling/Depth"),false,SCALING_ROLLOUT,Motion_Rollout_CB);
   SPINNER_scalex=glui_motion->add_spinner_to_panel(ROLLOUT_scale,_("Scale x"),GLUI_SPINNER_FLOAT,mscale);
   SPINNER_scalex->set_float_limits(0.01,100.0,GLUI_LIMIT_CLAMP);
 
@@ -596,7 +604,7 @@ extern "C" void glui_motion_setup(int main_window){
   SPINNER_farclip=glui_motion->add_spinner_to_panel(ROLLOUT_scale,_("Far depth"),GLUI_SPINNER_FLOAT,&farclip);
   SPINNER_farclip->set_float_limits(0.001,10.0,GLUI_LIMIT_CLAMP);
 
-  ROLLOUT_render = glui_motion->add_rollout(_("Render"), false);
+  ROLLOUT_render = glui_motion->add_rollout(_("Render"), false,RENDER_ROLLOUT,Motion_Rollout_CB);
   PANEL_file_type = glui_motion->add_panel_to_panel(ROLLOUT_render, "file type:", true);
   RADIO_render_type = glui_motion->add_radiogroup_to_panel(PANEL_file_type, &renderfiletype, RENDER_TYPE, Render_CB);
   glui_motion->add_radiobutton_to_group(RADIO_render_type, "PNG");
@@ -957,7 +965,26 @@ void Gslice_CB(int var){
   }
 }
 
-/* ------------------ Motion_CB ------------------------ */
+/* ------------------ Motion_Rollout_CB ------------------------ */
+
+void Motion_Rollout_CB(int var){
+  switch(var){
+  case SCENE_ROLLOUT:
+    break;
+  case SLICE_ROLLOUT:
+    break;
+  case VIEWPOINTS_ROLLOUT:
+    break;
+  case WINDOW_ROLLOUT:
+    break;
+  case SCALING_ROLLOUT:
+    break;
+  case RENDER_ROLLOUT:
+    break;
+  }
+}
+
+  /* ------------------ Motion_CB ------------------------ */
 
 extern "C" void Motion_CB(int var){
   float dx, dy;
