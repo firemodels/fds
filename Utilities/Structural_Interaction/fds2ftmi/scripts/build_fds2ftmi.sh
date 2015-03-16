@@ -264,7 +264,7 @@ python generate_plots.py
 cd $FDS2FTMI_DIR
 export TEXINPUTS=$TEXINPUTS:.:../../../Manuals/LaTeX_Style_Files/
 pdflatex fds2ftmi_user_guide.tex
-bibtex fds2ftmi_user_guide.tex
+bibtex fds2ftmi_user_guide
 pdflatex fds2ftmi_user_guide.tex
 
 exit
