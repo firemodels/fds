@@ -47,6 +47,10 @@ void    GLUI_Rollout::open( void )
 
   glui->refresh();
 
+#ifndef pp_GLUI_ORIG  
+  execute_callback();
+#endif
+
   restore_window(orig);
 }
 

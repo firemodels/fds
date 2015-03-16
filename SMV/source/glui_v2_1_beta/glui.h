@@ -1080,8 +1080,13 @@ public:
   GLUI_Panel     *add_panel_to_panel( GLUI_Panel *panel, char *name, 
 				      int type=GLUI_PANEL_EMBOSSED );
 
+#ifdef pp_GLUI_ORIG				      
   GLUI_Rollout   *add_rollout( char *name, int open=true );
   GLUI_Rollout   *add_rollout_to_panel( GLUI_Panel *panel, char *name, int open=true );
+#else
+  GLUI_Rollout   *add_rollout(char *name, int open = true, int id = -1, GLUI_Update_CB callback = NULL);
+  GLUI_Rollout   *add_rollout_to_panel(GLUI_Panel *panel, char *name, int open = true, int id = -1, GLUI_Update_CB callback = NULL);
+#endif
 
   void            set_main_gfx_window( int window_id );
   int             get_glut_window_id( void ) { return glut_window_id; };

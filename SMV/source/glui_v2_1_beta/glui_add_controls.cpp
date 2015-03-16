@@ -633,15 +633,31 @@ GLUI_Translation
 
 /********************************** GLUI::add_rollout() **************/
 
+#ifdef pp_GLUI_ORIG
 GLUI_Rollout   *GLUI::add_rollout( char *name, int open )
 {
   return add_rollout_to_panel( main_panel, name, open );
 }
+#else
+GLUI_Rollout   *GLUI::add_rollout( char *name, int open,
+  int id,
+  GLUI_Update_CB callback)
+{
+  return add_rollout_to_panel( main_panel, name, open, id, callback );
+}
+#endif
 
 
 /****************************** GLUI::add_rollout_to_panel() *********/
 
+#ifdef pp_GLUI_ORIG
 GLUI_Rollout *GLUI::add_rollout_to_panel(GLUI_Panel *panel,char *name,int open)
+#else
+GLUI_Rollout *GLUI::add_rollout_to_panel(GLUI_Panel *panel, char *name, int open, 
+  int id,
+  GLUI_Update_CB callback
+  )
+#endif
 {
   GLUI_Rollout     *rollout;
   
@@ -649,7 +665,12 @@ GLUI_Rollout *GLUI::add_rollout_to_panel(GLUI_Panel *panel,char *name,int open)
 
   if ( rollout ) {
     rollout->set_name( name );
+#ifdef pp_GLUI_ORIG
     rollout->user_id    = -1;
+#else
+    rollout->user_id = id;
+    rollout->callback = callback;
+#endif    
     rollout->int_val    = GLUI_PANEL_EMBOSSED;
 		
     if ( NOT open ) {
