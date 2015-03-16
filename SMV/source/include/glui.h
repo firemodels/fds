@@ -20,7 +20,11 @@
 #ifndef _GLUI_H_
 #define _GLUI_H_
 
+#ifdef pp_OSX
+#include <GLUT/glut.h>
+#else
 #include <GL/glut.h>
+#endif
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -44,10 +48,10 @@ class RGBc {
 public:
   Byte r, g, b;
     
-  void set(Byte rr,Byte gg,Byte bb) {this->r=rr;this->g=gg;this->b=bb;};
+  void set(Byte r,Byte g,Byte b) {this->r=r;this->g=g;this->b=b;};
     
   RGBc( void ) {};
-  RGBc( Byte rr, Byte gg, Byte bb ) { set( rr, gg, bb ); };
+  RGBc( Byte r, Byte g, Byte b ) { set( r, g, b ); };
 };
 #define _RGBC_
 #endif
@@ -725,7 +729,7 @@ public:
 
   virtual void update_size( void )     { };
   virtual void idle( void )            { };
-  virtual int  mouse_over( int sstate, int x, int y ) { return false; };
+  virtual int  mouse_over( int state, int x, int y ) { return false; };
   
   virtual void enable( void ); 
   virtual void disable( void );
@@ -1076,8 +1080,13 @@ public:
   GLUI_Panel     *add_panel_to_panel( GLUI_Panel *panel, char *name, 
 				      int type=GLUI_PANEL_EMBOSSED );
 
+#ifdef pp_GLUI_ORIG				      
   GLUI_Rollout   *add_rollout( char *name, int open=true );
   GLUI_Rollout   *add_rollout_to_panel( GLUI_Panel *panel, char *name, int open=true );
+#else
+  GLUI_Rollout   *add_rollout(char *name, int open = true, int id = -1, GLUI_Update_CB callback = NULL);
+  GLUI_Rollout   *add_rollout_to_panel(GLUI_Panel *panel, char *name, int open = true, int id = -1, GLUI_Update_CB callback = NULL);
+#endif
 
   void            set_main_gfx_window( int window_id );
   int             get_glut_window_id( void ) { return glut_window_id; };

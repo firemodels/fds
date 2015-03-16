@@ -20,7 +20,11 @@
 #ifndef _GLUI_H_
 #define _GLUI_H_
 
+#ifdef pp_OSX
+#include <GLUT/glut.h>
+#else
 #include <GL/glut.h>
+#endif
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -295,8 +299,8 @@ public:
     parent_node= child_head = child_tail = next_sibling = prev_sibling = NULL;
   }; 
 
-  friend struct GLUI_Rollout;
-  friend struct GLUI_Main;
+  friend class GLUI_Rollout;
+  friend class GLUI_Main;
 };
 
 
@@ -559,11 +563,11 @@ protected:
 
   /********** Friend classes *************/
 
-  friend struct GLUI_Control;
-  friend struct GLUI_Rotation;
-  friend struct GLUI_Translation;
-  friend struct GLUI;
-  friend struct GLUI_Master_Object;
+  friend class GLUI_Control;
+  friend class GLUI_Rotation;
+  friend class GLUI_Translation;
+  friend class GLUI;
+  friend class GLUI_Master_Object;
 
 
   /********** Misc functions *************/
@@ -1076,8 +1080,13 @@ public:
   GLUI_Panel     *add_panel_to_panel( GLUI_Panel *panel, char *name, 
 				      int type=GLUI_PANEL_EMBOSSED );
 
+#ifdef pp_GLUI_ORIG				      
   GLUI_Rollout   *add_rollout( char *name, int open=true );
   GLUI_Rollout   *add_rollout_to_panel( GLUI_Panel *panel, char *name, int open=true );
+#else
+  GLUI_Rollout   *add_rollout(char *name, int open = true, int id = -1, GLUI_Update_CB callback = NULL);
+  GLUI_Rollout   *add_rollout_to_panel(GLUI_Panel *panel, char *name, int open = true, int id = -1, GLUI_Update_CB callback = NULL);
+#endif
 
   void            set_main_gfx_window( int window_id );
   int             get_glut_window_id( void ) { return glut_window_id; };
