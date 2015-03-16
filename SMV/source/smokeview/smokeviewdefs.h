@@ -550,6 +550,7 @@ void _Sniff_Errors(char *whereat);
 #define DIALOG_TOUR 21
 #define DIALOG_TRAINER 25
 #define DIALOG_WUI 26
+#define DIALOG_FILES 33
 #define DIALOG_SCRIPT 32
 #define DIALOG_UNLOAD_ALL -2
 

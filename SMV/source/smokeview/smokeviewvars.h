@@ -628,6 +628,7 @@ SVEXTERN int parttype;
 SVEXTERN int allexterior,showexterior;
 SVEXTERN int allinterior;
 SVEXTERN int SVDECL(showbounds_dialog,0),SVDECL(showmotion_dialog,0),SVDECL(showedit_dialog,0), SVDECL(showclip_dialog,0);
+SVEXTERN int SVDECL(showfiles_dialog, 0);
 SVEXTERN int SVDECL(showview_dialog, 0), SVDECL(showrender_dialog, 0);
 SVEXTERN int SVDECL(showscript_dialog, 0);
 SVEXTERN int SVDECL(showstereo_dialog,0), SVDECL(showdisplay_dialog,0), SVDECL(showcolorbar_dialog,0);

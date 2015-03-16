@@ -964,6 +964,7 @@ void DialogMenu(int value){
     break;
   case DIALOG_3DSMOKE:
     show3dsmoke_dialog = 1 - show3dsmoke_dialog;
+    showfiles_dialog = 0;
     showbounds_dialog = 0;
     showscript_dialog = 0;
     showzip_dialog = 0;
@@ -973,6 +974,7 @@ void DialogMenu(int value){
     break;
   case DIALOG_BOUNDS:
     show3dsmoke_dialog = 0;
+    showfiles_dialog = 0;
     showbounds_dialog = 1 - showbounds_dialog;
     showscript_dialog = 0;
     showzip_dialog = 0;
@@ -980,8 +982,19 @@ void DialogMenu(int value){
     if(showbounds_dialog == 1)show_glui_bounds(DIALOG_BOUNDS);
     if(showbounds_dialog == 0)hide_glui_bounds();
     break;
+  case DIALOG_FILES:
+    show3dsmoke_dialog = 0;
+    showfiles_dialog = 1 - showfiles_dialog;
+    showbounds_dialog = 0;
+    showscript_dialog = 0;
+    showzip_dialog = 0;
+
+    if(showfiles_dialog == 1)show_glui_bounds(DIALOG_FILES);
+    if(showfiles_dialog == 0)hide_glui_bounds();
+    break;
   case DIALOG_SCRIPT:
     show3dsmoke_dialog = 0;
+    showfiles_dialog = 0;
     showbounds_dialog = 0;
     showscript_dialog = 1 - showscript_dialog;
     showzip_dialog = 0;
@@ -991,6 +1004,7 @@ void DialogMenu(int value){
     break;
   case DIALOG_SMOKEZIP:
     show3dsmoke_dialog = 0;
+    showfiles_dialog = 0;
     showbounds_dialog = 0;
     showscript_dialog = 0;
     showzip_dialog = 1 - showzip_dialog;
@@ -7253,11 +7267,11 @@ updatemenu=0;
 
   CREATEMENU(dialogmenu,DialogMenu);
 
+  if(showbounds_dialog == 1)glutAddMenuEntry(_("*Bounds...  ALT+f"), DIALOG_BOUNDS);
+  if(showbounds_dialog == 0)glutAddMenuEntry(_("Bounds...  ALT+f"), DIALOG_BOUNDS);
+
   if(showdisplay_dialog == 1)glutAddMenuEntry(_("*Display...  ALT+d"), DIALOG_DISPLAY);
   if(showdisplay_dialog == 0)glutAddMenuEntry(_("Display...  ALT+d"), DIALOG_DISPLAY);
-
-  if(showbounds_dialog == 1)glutAddMenuEntry(_("*File bounds...  ALT+f"), DIALOG_BOUNDS);
-  if(showbounds_dialog == 0)glutAddMenuEntry(_("File bounds...  ALT+f"), DIALOG_BOUNDS);
 
   if(showmotion_dialog==1)glutAddMenuEntry(_("*Motion...  ALT+m"),DIALOG_MOTION);
   if(showmotion_dialog==0)glutAddMenuEntry(_("Motion...  ALT+m"),DIALOG_MOTION);
@@ -7288,7 +7302,10 @@ updatemenu=0;
     if(showdevice_dialog==1)glutAddMenuEntry(_("*Devices/Objects..."),DIALOG_DEVICE);
     if(showdevice_dialog==0)glutAddMenuEntry(_("Devices/Objects..."),DIALOG_DEVICE);
   }
-  if(isZoneFireModel==0){
+  if(showfiles_dialog == 1)glutAddMenuEntry(_("*Files...  ALT+f"), DIALOG_FILES);
+  if(showfiles_dialog == 0)glutAddMenuEntry(_("Files...  ALT+f"), DIALOG_FILES);
+
+  if(isZoneFireModel == 0){
     if(showedit_dialog==1)glutAddMenuEntry(_("*Geometry...  ALT+e"),DIALOG_GEOMETRY);
     if(showedit_dialog==0)glutAddMenuEntry(_("Geometry...  ALT+e"),DIALOG_GEOMETRY);
   }
