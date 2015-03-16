@@ -313,13 +313,13 @@ update_and_compile_cfast()
    fi
     # Build CFAST
     cd $CFAST_SVNROOT/CFAST/intel_${platform}_64
-    rm -f cfast6_${platform}_64
+    rm -f cfast7_${platform}_64
     make --makefile ../makefile clean &> /dev/null
     ./make_cfast.sh >> $OUTPUT_DIR/stage0_cfast 2>&1
 
    # Check for errors in CFAST compilation
    cd $CFAST_SVNROOT/CFAST/intel_${platform}_64
-   if [ -e "cfast6_${platform}_64" ]
+   if [ -e "cfast7_${platform}_64" ]
    then
       stage0_success=true
    else
