@@ -1707,6 +1707,22 @@ subroutine mpi_init ( ierror )
 end subroutine
 
 
+subroutine mpi_buffer_attach( buff, icount, ierror)
+  integer buff(*),icount,ierror
+  dummy = buff(1)
+  errorcode = ierror
+  dummy = icount
+end subroutine
+
+
+subroutine mpi_buffer_detach( buff, icount, ierror)
+  integer buff(*),icount,ierror
+  dummy = buff(1)
+  errorcode = ierror
+  dummy = icount
+end subroutine
+
+
 subroutine mpi_init_thread (required,provided,ierror)
   integer, intent(in) :: required
   integer ierror,provided
