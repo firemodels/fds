@@ -180,6 +180,8 @@ GLUI_Listbox *LIST_render_size=NULL;
 GLUI_Listbox *LIST_render_skip=NULL;
 
 void enable_disable_views(void);
+procdata motionprocinfo[6];
+int nmotionprocinfo = 0;
 
 /* ------------------ update_render_start_button ------------------------ */
 
@@ -402,6 +404,7 @@ extern "C" void glui_motion_setup(int main_window){
 
   PANEL_motion = glui_motion->add_panel("Motion",true);
   ROLLOUT_motion = glui_motion->add_rollout_to_panel(PANEL_motion, _("Scene"),true, SCENE_ROLLOUT, Motion_Rollout_CB);
+  ADDPROCINFO(motionprocinfo,nmotionprocinfo,ROLLOUT_motion,SCENE_ROLLOUT);
 
   PANEL_translate2 = glui_motion->add_panel_to_panel(ROLLOUT_motion,"Translate");
   d_eye_xyz[0]=0.0;
@@ -510,6 +513,7 @@ extern "C" void glui_motion_setup(int main_window){
   changed_zaxis=0;
 
   ROLLOUT_gslice = glui_motion->add_rollout_to_panel(PANEL_motion,"Slice",false,SLICE_ROLLOUT,Motion_Rollout_CB);
+  ADDPROCINFO(motionprocinfo,nmotionprocinfo,ROLLOUT_gslice,SLICE_ROLLOUT);
   if(gslice_xyz[0]<-1000000.0&&gslice_xyz[1]<-1000000.0&&gslice_xyz[2]<-1000000.0){
     gslice_xyz[0]=(xbar0+DENORMALIZE_X(xbar))/2.0;
     gslice_xyz[1]=(ybar0+DENORMALIZE_Y(ybar))/2.0;
@@ -538,6 +542,8 @@ extern "C" void glui_motion_setup(int main_window){
   
   PANEL_viewA = glui_motion->add_panel(_("View"), true);
   ROLLOUT_viewpoints = glui_motion->add_rollout_to_panel(PANEL_viewA,_("Viewpoints"), false,VIEWPOINTS_ROLLOUT,Motion_Rollout_CB);
+  ADDPROCINFO(motionprocinfo,nmotionprocinfo,ROLLOUT_viewpoints,VIEWPOINTS_ROLLOUT);
+
   LIST_viewpoints = glui_motion->add_listbox_to_panel(ROLLOUT_viewpoints, _("Select:"), &i_view_list, LIST_VIEW, Viewpoint_CB);
   LIST_viewpoints->set_alignment(GLUI_ALIGN_CENTER);
 
@@ -558,6 +564,7 @@ extern "C" void glui_motion_setup(int main_window){
   EDIT_view_label = glui_motion->add_edittext_to_panel(PANEL_reset2, _("Edit:"), GLUI_EDITTEXT_TEXT, camera_label, LABEL_VIEW, Viewpoint_CB);
 
   ROLLOUT_projection = glui_motion->add_rollout_to_panel(PANEL_viewA,_("Window properties"), false,WINDOW_ROLLOUT,Motion_Rollout_CB);
+  ADDPROCINFO(motionprocinfo,nmotionprocinfo,ROLLOUT_projection,WINDOW_ROLLOUT);
   RADIO_projection = glui_motion->add_radiogroup_to_panel(ROLLOUT_projection, &projection_type, PROJECTION, Motion_CB);
   RADIOBUTTON_1a = glui_motion->add_radiobutton_to_group(RADIO_projection, _("Perspective"));
   RADIOBUTTON_1b = glui_motion->add_radiobutton_to_group(RADIO_projection, _("Size preserving"));
@@ -589,6 +596,7 @@ extern "C" void glui_motion_setup(int main_window){
   BUTTON_window_update = glui_motion->add_button_to_panel(ROLLOUT_projection, _("Apply"), WINDOW_RESIZE, Motion_CB);
 
   ROLLOUT_scale = glui_motion->add_rollout_to_panel(PANEL_viewA,_("Scaling/Depth"),false,SCALING_ROLLOUT,Motion_Rollout_CB);
+  ADDPROCINFO(motionprocinfo,nmotionprocinfo,ROLLOUT_scale,SCALING_ROLLOUT);
   SPINNER_scalex=glui_motion->add_spinner_to_panel(ROLLOUT_scale,_("Scale x"),GLUI_SPINNER_FLOAT,mscale);
   SPINNER_scalex->set_float_limits(0.01,100.0,GLUI_LIMIT_CLAMP);
 
@@ -605,6 +613,7 @@ extern "C" void glui_motion_setup(int main_window){
   SPINNER_farclip->set_float_limits(0.001,10.0,GLUI_LIMIT_CLAMP);
 
   ROLLOUT_render = glui_motion->add_rollout(_("Render"), false,RENDER_ROLLOUT,Motion_Rollout_CB);
+  ADDPROCINFO(motionprocinfo,nmotionprocinfo,ROLLOUT_render,RENDER_ROLLOUT);
   PANEL_file_type = glui_motion->add_panel_to_panel(ROLLOUT_render, "file type:", true);
   RADIO_render_type = glui_motion->add_radiogroup_to_panel(PANEL_file_type, &renderfiletype, RENDER_TYPE, Render_CB);
   glui_motion->add_radiobutton_to_group(RADIO_render_type, "PNG");
@@ -965,23 +974,28 @@ void Gslice_CB(int var){
   }
 }
 
+/* ------------------ toggle_rollout ------------------------ */
+
+extern "C" void toggle_rollout(procdata *procinfo, int nprocinfo, int motion_id){
+  int i;
+
+  for(i=0;i<nprocinfo;i++){
+    procdata *mi;
+
+    mi = procinfo + i;
+    if(mi->rollout_id==motion_id){
+      mi->rollout->open();
+    }
+    else{
+      mi->rollout->close();
+    }
+  }
+}
+
 /* ------------------ Motion_Rollout_CB ------------------------ */
 
 void Motion_Rollout_CB(int var){
-  switch(var){
-  case SCENE_ROLLOUT:
-    break;
-  case SLICE_ROLLOUT:
-    break;
-  case VIEWPOINTS_ROLLOUT:
-    break;
-  case WINDOW_ROLLOUT:
-    break;
-  case SCALING_ROLLOUT:
-    break;
-  case RENDER_ROLLOUT:
-    break;
-  }
+  toggle_rollout(motionprocinfo, nmotionprocinfo, var);
 }
 
   /* ------------------ Motion_CB ------------------------ */

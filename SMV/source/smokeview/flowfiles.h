@@ -20,6 +20,13 @@ typedef struct {
   char lang_name[32];
 } langlistdata;
 
+/* --------------------------  procdata ------------------------------------ */
+#ifdef CPP
+typedef struct {
+  GLUI_Rollout *rollout;
+  int rollout_id;
+} procdata;
+#endif
 /* --------------------------  csvdata ------------------------------------ */
 
 typedef struct {

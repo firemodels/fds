@@ -345,6 +345,37 @@ GLUI_StaticText *STATIC_part_cmax_unit=NULL;
 GLUI_StaticText *STATIC_plot3d_cmin_unit=NULL;
 GLUI_StaticText *STATIC_plot3d_cmax_unit=NULL;
 
+#define ZONE_ROLLOUT 0
+#define SMOKE3D_ROLLOUT 1
+#define BOUNDARY_ROLLOUT 2
+#define ISO_ROLLOUT 3
+#define PART_ROLLOUT 4
+#define EVAC_ROLLOUT 5
+#define PLOT3D_ROLLOUT 6
+#define SLICE_ROLLOUT 7
+
+#define LOAD_ROLLOUT 0
+#define SHOWHIDE_ROLLOUT 1
+#define COMPRESS_ROLLOUT 2
+#define SCRIPT_ROLLOUT 3
+#define FILEBOUNDS_ROLLOUT 4
+#define TIME_ROLLOUT 5
+
+procdata boundprocinfo[8], fileprocinfo[6];
+int nboundprocinfo = 0, nfileprocinfo = 0;
+
+/* ------------------ Bound_Rollout_CB ------------------------ */
+
+void Bound_Rollout_CB(int var){
+  toggle_rollout(boundprocinfo, nboundprocinfo, var);
+}
+
+/* ------------------ File_Rollout_CB ------------------------ */
+
+void File_Rollout_CB(int var){
+  toggle_rollout(fileprocinfo, nfileprocinfo, var);
+}
+
 /* ------------------ update_glui_zonebounds ------------------------ */
 
 extern "C" void update_glui_zonebounds(void){
@@ -526,7 +557,9 @@ extern "C" void glui_bounds_setup(int main_window){
 
   PANEL_files = glui_bounds->add_panel("Files", true);
 
-  ROLLOUT_AUTOLOAD = glui_bounds->add_rollout_to_panel(PANEL_files,_("Load"), false);
+  ROLLOUT_AUTOLOAD = glui_bounds->add_rollout_to_panel(PANEL_files,_("Load"), false, LOAD_ROLLOUT, File_Rollout_CB);
+  ADDPROCINFO(fileprocinfo, nfileprocinfo, ROLLOUT_AUTOLOAD, LOAD_ROLLOUT);
+  
   glui_bounds->add_checkbox_to_panel(ROLLOUT_AUTOLOAD, _("Auto load at startup"),
     &loadfiles_at_startup, STARTUP, Bound_CB);
   glui_bounds->add_button_to_panel(ROLLOUT_AUTOLOAD, _("Save auto load file list"), SAVE_FILE_LIST, Bound_CB);
@@ -535,8 +568,9 @@ extern "C" void glui_bounds_setup(int main_window){
   // -------------- Show/Hide Loaded files -------------------
 
   if((npartinfo > 0) || nsliceinfo > 0 || nvsliceinfo > 0 || nisoinfo > 0 || npatchinfo || nsmoke3dinfo > 0 || nplot3dinfo > 0){
-    ROLLOUT_showhide = glui_bounds->add_rollout_to_panel(PANEL_files,"Show/Hide", false);
-
+    ROLLOUT_showhide = glui_bounds->add_rollout_to_panel(PANEL_files,"Show/Hide", false, SHOWHIDE_ROLLOUT, File_Rollout_CB);
+    ADDPROCINFO(fileprocinfo, nfileprocinfo, ROLLOUT_showhide, SHOWHIDE_ROLLOUT);
+  
     RADIO_showhide = glui_bounds->add_radiogroup_to_panel(ROLLOUT_showhide, &showhide_option);
     glui_bounds->add_radiobutton_to_group(RADIO_showhide, _("Show"));
     glui_bounds->add_radiobutton_to_group(RADIO_showhide, _("Show Only"));
@@ -560,7 +594,9 @@ extern "C" void glui_bounds_setup(int main_window){
 
 #ifdef pp_COMPRESS
   if(smokezippath != NULL && (npatchinfo > 0 || nsmoke3dinfo > 0 || nsliceinfo > 0)){
-    ROLLOUT_compress = glui_bounds->add_rollout_to_panel(PANEL_files,_("Compress"), false);
+    ROLLOUT_compress = glui_bounds->add_rollout_to_panel(PANEL_files,_("Compress"), false, COMPRESS_ROLLOUT, File_Rollout_CB);
+    ADDPROCINFO(fileprocinfo, nfileprocinfo, ROLLOUT_compress, COMPRESS_ROLLOUT);
+  
     CHECKBOX_erase_all = glui_bounds->add_checkbox_to_panel(ROLLOUT_compress, _("Erase compressed files"),
       &erase_all, ERASE, Bound_CB);
     CHECKBOX_overwrite_all = glui_bounds->add_checkbox_to_panel(ROLLOUT_compress, _("Overwrite compressed files"),
@@ -591,8 +627,9 @@ extern "C" void glui_bounds_setup(int main_window){
   }
 #endif
 
-  ROLLOUT_script = glui_bounds->add_rollout_to_panel(PANEL_files,"Scripts/Config", false);
-
+  ROLLOUT_script = glui_bounds->add_rollout_to_panel(PANEL_files,"Scripts/Config", false, SCRIPT_ROLLOUT, File_Rollout_CB);
+  ADDPROCINFO(fileprocinfo, nfileprocinfo, ROLLOUT_script, SCRIPT_ROLLOUT);
+  
   PANEL_script1 = glui_bounds->add_panel_to_panel(ROLLOUT_script, _("Script files"), false);
   PANEL_record = glui_bounds->add_panel_to_panel(PANEL_script1, _("Record"), true);
 
@@ -673,12 +710,14 @@ extern "C" void glui_bounds_setup(int main_window){
 
 
   PANEL_bounds = glui_bounds->add_panel("Bounds",true);
-  ROLLOUT_filebounds = glui_bounds->add_rollout_to_panel(PANEL_bounds,"Data", false);
+  ROLLOUT_filebounds = glui_bounds->add_rollout_to_panel(PANEL_bounds,"Data", false, FILEBOUNDS_ROLLOUT, File_Rollout_CB);
+  ADDPROCINFO(fileprocinfo, nfileprocinfo, ROLLOUT_filebounds, FILEBOUNDS_ROLLOUT);
   
   /*  zone (cfast) */
 
   if(nzoneinfo>0){
-    ROLLOUT_zone_bound = glui_bounds->add_rollout_to_panel(ROLLOUT_filebounds,"Upper layer temperature",false);
+    ROLLOUT_zone_bound = glui_bounds->add_rollout_to_panel(ROLLOUT_filebounds,"Upper layer temperature",false,ZONE_ROLLOUT,Bound_Rollout_CB);
+    ADDPROCINFO(boundprocinfo, nboundprocinfo, ROLLOUT_zone_bound, ZONE_ROLLOUT);
 
     PANEL_zone_a = glui_bounds->add_panel_to_panel(ROLLOUT_zone_bound,"",GLUI_PANEL_NONE);
 
@@ -715,14 +754,16 @@ extern "C" void glui_bounds_setup(int main_window){
   /*  3d smoke   */
 
   if(nsmoke3dinfo>0||nvolrenderinfo>0){
-    ROLLOUT_smoke3d = glui_bounds->add_rollout_to_panel(ROLLOUT_filebounds,"3D smoke",false);
+    ROLLOUT_smoke3d = glui_bounds->add_rollout_to_panel(ROLLOUT_filebounds,"3D smoke",false,SMOKE3D_ROLLOUT,Bound_Rollout_CB);
+    ADDPROCINFO(boundprocinfo, nboundprocinfo, ROLLOUT_smoke3d, SMOKE3D_ROLLOUT);
   }
 
   /*  Boundary File Bounds   */
 
   if(npatchinfo>0){
     glui_active=1;
-    ROLLOUT_bound = glui_bounds->add_rollout_to_panel(ROLLOUT_filebounds,"Boundary",false);
+    ROLLOUT_bound = glui_bounds->add_rollout_to_panel(ROLLOUT_filebounds,"Boundary",false,BOUNDARY_ROLLOUT,Bound_Rollout_CB);
+    ADDPROCINFO(boundprocinfo, nboundprocinfo, ROLLOUT_bound, BOUNDARY_ROLLOUT);
 
     RADIO_bf = glui_bounds->add_radiogroup_to_panel(ROLLOUT_bound,&list_patch_index,FILETYPEINDEX,Bound_CB);
     nradio=0;
@@ -812,7 +853,8 @@ extern "C" void glui_bounds_setup(int main_window){
   /*  Iso File Load Bounds   */
 
   if(nisoinfo>0){
-    ROLLOUT_iso = glui_bounds->add_rollout_to_panel(ROLLOUT_filebounds,"Isosurface",false);
+    ROLLOUT_iso = glui_bounds->add_rollout_to_panel(ROLLOUT_filebounds,"Isosurface",false,ISO_ROLLOUT,Bound_Rollout_CB);
+    ADDPROCINFO(boundprocinfo, nboundprocinfo, ROLLOUT_iso, ISO_ROLLOUT);
     
     SPINNER_isopointsize=glui_bounds->add_spinner_to_panel(ROLLOUT_iso,_("Point size"),GLUI_SPINNER_FLOAT,&isopointsize);
     SPINNER_isopointsize->set_float_limits(1.0,10.0);
@@ -843,7 +885,9 @@ extern "C" void glui_bounds_setup(int main_window){
 
   if(npartinfo>0&&nevac!=npartinfo){
     glui_active=1;
-    ROLLOUT_part = glui_bounds->add_rollout_to_panel(ROLLOUT_filebounds,"Particle",false);
+    ROLLOUT_part = glui_bounds->add_rollout_to_panel(ROLLOUT_filebounds,"Particle",false,PART_ROLLOUT,Bound_Rollout_CB);
+    ADDPROCINFO(boundprocinfo, nboundprocinfo, ROLLOUT_part, PART_ROLLOUT);
+    
     if(npart5prop>0){
       ipart5prop=0;
       ipart5prop_old=0;
@@ -912,7 +956,9 @@ extern "C" void glui_bounds_setup(int main_window){
 
   if(nevac>0){
     glui_active=1;
-    ROLLOUT_evac = glui_bounds->add_rollout_to_panel(ROLLOUT_filebounds,"Evacuation",false);
+    ROLLOUT_evac = glui_bounds->add_rollout_to_panel(ROLLOUT_filebounds,"Evacuation",false,EVAC_ROLLOUT,Bound_Rollout_CB);
+    ADDPROCINFO(boundprocinfo, nboundprocinfo, ROLLOUT_evac, EVAC_ROLLOUT);
+    
     glui_bounds->add_checkbox_to_panel(ROLLOUT_evac,_("Select avatar"),&select_avatar);
     CHECKBOX_show_evac_slices=glui_bounds->add_checkbox_to_panel(ROLLOUT_evac,"Show slice menus",&show_evac_slices,SHOW_EVAC_SLICES,Slice_CB);
     PANEL_evac_direction=glui_bounds->add_panel_to_panel(ROLLOUT_evac,_("Direction vectors"));
@@ -926,7 +972,8 @@ extern "C" void glui_bounds_setup(int main_window){
 
   if(nplot3dinfo>0){
     glui_active=1;
-    ROLLOUT_plot3d = glui_bounds->add_rollout_to_panel(ROLLOUT_filebounds,"Plot3D",false);
+    ROLLOUT_plot3d = glui_bounds->add_rollout_to_panel(ROLLOUT_filebounds,"Plot3D",false,PLOT3D_ROLLOUT,Bound_Rollout_CB);
+    ADDPROCINFO(boundprocinfo, nboundprocinfo, ROLLOUT_plot3d, PLOT3D_ROLLOUT);
 
     RADIO_p3 = glui_bounds->add_radiogroup_to_panel(ROLLOUT_plot3d,&list_p3_index,FILETYPEINDEX,PLOT3D_CB);
     for(i=0;i<mxplot3dvars;i++){
@@ -993,7 +1040,8 @@ extern "C" void glui_bounds_setup(int main_window){
     int index;
 
     glui_active=1;
-    ROLLOUT_slice = glui_bounds->add_rollout_to_panel(ROLLOUT_filebounds,"Slice",false);
+    ROLLOUT_slice = glui_bounds->add_rollout_to_panel(ROLLOUT_filebounds,"Slice",false,SLICE_ROLLOUT,Bound_Rollout_CB);
+    ADDPROCINFO(boundprocinfo, nboundprocinfo, ROLLOUT_slice, SLICE_ROLLOUT);
 
     RADIO_slice = glui_bounds->add_radiogroup_to_panel(ROLLOUT_slice,&list_slice_index,FILETYPEINDEX,Slice_CB);
 
@@ -1083,7 +1131,9 @@ extern "C" void glui_bounds_setup(int main_window){
     Slice_CB(FILETYPEINDEX);
   }
 
-  ROLLOUT_time = glui_bounds->add_rollout_to_panel(PANEL_bounds,"Time", false);
+  ROLLOUT_time = glui_bounds->add_rollout_to_panel(PANEL_bounds,"Time", false, TIME_ROLLOUT, File_Rollout_CB);
+  ADDPROCINFO(fileprocinfo, nfileprocinfo, ROLLOUT_time, TIME_ROLLOUT);
+
   PANEL_time1a = glui_bounds->add_panel_to_panel(ROLLOUT_time,"",false);
   SPINNER_timebounds=glui_bounds->add_spinner_to_panel(PANEL_time1a,_("Time:"),GLUI_SPINNER_FLOAT,&glui_time);
   glui_bounds->add_column_to_panel(PANEL_time1a,false);

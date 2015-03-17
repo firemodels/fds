@@ -156,7 +156,23 @@ GLUI_Rollout *PANEL_volume=NULL;
 GLUI_StaticText *TEXT_smokealpha=NULL;
 GLUI_StaticText *TEXT_smokedepth=NULL;
 
+
 extern "C" void UnLoadVolSmoke3DMenu(int var);
+
+#define VOLRENDER_ROLLOUT 0
+#define SLICERENDER_ROLLOUT 1
+
+procdata smokeprocinfo[2];
+int nsmokeprocinfo = 0;
+
+/* ------------------ Smoke_Rollout_CB ------------------------ */
+
+void Smoke_Rollout_CB(int var){
+  if(var == VOLRENDER_ROLLOUT)smoke_render_option = 1;
+    if(var==SLICERENDER_ROLLOUT)smoke_render_option=0;
+    Smoke3d_CB(SMOKE_OPTIONS);
+    toggle_rollout(smokeprocinfo, nsmokeprocinfo, var);
+}
 
 /* ------------------ delete_vol_tourlsit ------------------------ */
 
@@ -413,86 +429,17 @@ extern "C" void glui_3dsmoke_setup(int main_window){
 
   glui_3dsmoke->add_column_to_panel(PANEL_overall,false);
 
-  if(nsmoke3dinfo>0&&nvolrenderinfo>0){
-    RADIO_render = glui_3dsmoke->add_radiogroup_to_panel(PANEL_overall,&smoke_render_option,SMOKE_OPTIONS,Smoke3d_CB);
-    glui_3dsmoke->add_radiobutton_to_group(RADIO_render,_("Slice render settings"));
-    glui_3dsmoke->add_radiobutton_to_group(RADIO_render,_("Volume render settings"));
-  }
-  else{
+  if(nsmoke3dinfo<=0||nvolrenderinfo<=0){
     smoke_render_option=RENDER_SLICE;
     if(nsmoke3dinfo>0)smoke_render_option=RENDER_SLICE;
     if(nvolrenderinfo>0)smoke_render_option=RENDER_VOLUME;
   }
 
-  // volume render dialog
-  
-  if(nvolrenderinfo>0){
-    PANEL_volume = glui_3dsmoke->add_rollout_to_panel(PANEL_overall,_("Volume render settings"),false);
-    if(have_volcompressed==1){
-      RADIO_loadvol = glui_3dsmoke->add_radiogroup_to_panel(PANEL_volume,&glui_load_volcompressed,LOAD_COMPRESSED_DATA,Smoke3d_CB);
-        glui_3dsmoke->add_radiobutton_to_group(RADIO_loadvol,_("Load full data"));
-        glui_3dsmoke->add_radiobutton_to_group(RADIO_loadvol,_("Load compressed data"));
-    }
-    glui_3dsmoke->add_checkbox_to_panel(PANEL_volume,_("Load data in background"),&use_multi_threading);
-    CHECKBOX_compress_volsmoke=glui_3dsmoke->add_checkbox_to_panel(PANEL_volume,_("Compress data while loading"),&glui_compress_volsmoke);
-    if(have_volcompressed==1){
-      Smoke3d_CB(LOAD_COMPRESSED_DATA);
-    }
-    glui_3dsmoke->add_checkbox_to_panel(PANEL_volume,_("Display data as b/w"),&volbw);
-    glui_3dsmoke->add_checkbox_to_panel(PANEL_volume,_("Show data while moving scene"),&show_volsmoke_moving);
-    glui_3dsmoke->add_checkbox_to_panel(PANEL_volume,_("Load data only at render times"),&load_at_rendertimes);
-
-    SPINNER_fire_opacity_factor=glui_3dsmoke->add_spinner_to_panel(PANEL_volume,_("Fire opacity multiplier"),GLUI_SPINNER_FLOAT,&fire_opacity_factor);
-    SPINNER_fire_opacity_factor->set_float_limits(1.0,10.0);
-    SPINNER_mass_extinct=glui_3dsmoke->add_spinner_to_panel(PANEL_volume,_("Mass extinction coeff"),GLUI_SPINNER_FLOAT,&mass_extinct);
-    SPINNER_mass_extinct->set_float_limits(100.0,100000.0);
-    glui_3dsmoke->add_checkbox_to_panel(PANEL_volume,_("Freeze"),&freeze_volsmoke);
-#ifdef _DEBUG
-    CHECKBOX_usevolrender=glui_3dsmoke->add_checkbox_to_panel(PANEL_volume,_("Show"),&usevolrender,VOL_SMOKE,Smoke3d_CB);
-    glui_3dsmoke->add_checkbox_to_panel(PANEL_volume,"block smoke",&block_volsmoke);
-    glui_3dsmoke->add_checkbox_to_panel(PANEL_volume,"debug",&smoke3dVoldebug);
-#endif
-    CHECKBOX_combine_meshes=glui_3dsmoke->add_checkbox_to_panel(PANEL_volume,_("Combine meshes"),&combine_meshes,COMBINE_MESHES,Smoke3d_CB);
-    SPINNER_nongpu_vol_factor=glui_3dsmoke->add_spinner_to_panel(PANEL_volume,_("non-gpu grid multiplier"),GLUI_SPINNER_FLOAT,&nongpu_vol_factor,NONGPU_VOL_FACTOR,Smoke3d_CB);
-    SPINNER_nongpu_vol_factor->set_float_limits(1.0,10.0);
-    SPINNER_gpu_vol_factor=glui_3dsmoke->add_spinner_to_panel(PANEL_volume,_("gpu grid multiplier"),GLUI_SPINNER_FLOAT,&gpu_vol_factor,GPU_VOL_FACTOR,Smoke3d_CB);
-    SPINNER_gpu_vol_factor->set_float_limits(1.0,10.0);
-
-    PANEL_generate_images = glui_3dsmoke->add_rollout_to_panel(PANEL_volume,_("Generate images"),false);
-
-    SPINNER_startframe=glui_3dsmoke->add_spinner_to_panel(PANEL_generate_images,_("start frame"),GLUI_SPINNER_INT,&startframe0,START_FRAME,Smoke3d_CB);
-    SPINNER_skipframe=glui_3dsmoke->add_spinner_to_panel(PANEL_generate_images,_("skip frame"),GLUI_SPINNER_INT,&skipframe0,SKIP_FRAME,Smoke3d_CB);
-    Smoke3d_CB(START_FRAME);
-    Smoke3d_CB(SKIP_FRAME);
-    if(ntours>0){
-      selectedtour_index=-1;
-      selectedtour_index_old=-1;
-      LISTBOX_VOL_tour=glui_3dsmoke->add_listbox_to_panel(PANEL_generate_images,"Tour:",&selectedtour_index,VOL_TOUR_LIST,Smoke3d_CB);
-
-      LISTBOX_VOL_tour->add_item(-1,"Manual");
-      LISTBOX_VOL_tour->add_item(-999,"-");
-      for(i=0;i<ntours;i++){
-        tourdata *touri;
-
-        touri = tourinfo + i;
-        LISTBOX_VOL_tour->add_item(i,touri->label);
-      }
-      LISTBOX_VOL_tour->set_int_val(selectedtour_index);
-    }
-
-    strcpy(vol_prefix,fdsprefix);
-    EDIT_vol_prefix=glui_3dsmoke->add_edittext_to_panel(PANEL_generate_images,"image prefix:",GLUI_EDITTEXT_TEXT,vol_prefix,VOL_PREFIX,Smoke3d_CB);
-    EDIT_vol_prefix->set_w(200);
-
-    BUTTON_startrender=glui_3dsmoke->add_button_to_panel(PANEL_generate_images,_("Generate images"),GENERATE_IMAGES,Smoke3d_CB);
-    BUTTON_cancelrender=glui_3dsmoke->add_button_to_panel(PANEL_generate_images,_("Cancel"),CANCEL_GENERATE_IMAGES,Smoke3d_CB);
-    BUTTON_volunload=glui_3dsmoke->add_button_to_panel(PANEL_generate_images,_("Unload"),VOL_UNLOAD_ALL,Smoke3d_CB);
-  }
-
   // slice render dialog
   
   if(nsmoke3dinfo>0){
-    PANEL_slices = glui_3dsmoke->add_rollout_to_panel(PANEL_overall,_("Slice render settings"),false);
+    PANEL_slices = glui_3dsmoke->add_rollout_to_panel(PANEL_overall,_("Slice render settings"),false, SLICERENDER_ROLLOUT, Smoke_Rollout_CB);
+    ADDPROCINFO(smokeprocinfo, nsmokeprocinfo, PANEL_slices, SLICERENDER_ROLLOUT);
     PANEL_slices->set_alignment(GLUI_ALIGN_LEFT);
  
 #ifdef pp_GPU
@@ -556,6 +503,74 @@ extern "C" void glui_3dsmoke_setup(int main_window){
     glui_3dsmoke->add_radiobutton_to_group(RADIO_alpha,_("adjust off-center"));
     glui_3dsmoke->add_radiobutton_to_group(RADIO_alpha,_("zero at boundaries"));
     glui_3dsmoke->add_radiobutton_to_group(RADIO_alpha,_("both"));
+  }
+
+
+  // volume render dialog
+
+  if(nvolrenderinfo > 0){
+    PANEL_volume = glui_3dsmoke->add_rollout_to_panel(PANEL_overall, _("Volume render settings"), false, VOLRENDER_ROLLOUT, Smoke_Rollout_CB);
+    ADDPROCINFO(smokeprocinfo, nsmokeprocinfo, PANEL_volume, VOLRENDER_ROLLOUT);
+
+    if(have_volcompressed == 1){
+      RADIO_loadvol = glui_3dsmoke->add_radiogroup_to_panel(PANEL_volume, &glui_load_volcompressed, LOAD_COMPRESSED_DATA, Smoke3d_CB);
+      glui_3dsmoke->add_radiobutton_to_group(RADIO_loadvol, _("Load full data"));
+      glui_3dsmoke->add_radiobutton_to_group(RADIO_loadvol, _("Load compressed data"));
+    }
+    glui_3dsmoke->add_checkbox_to_panel(PANEL_volume, _("Load data in background"), &use_multi_threading);
+    CHECKBOX_compress_volsmoke = glui_3dsmoke->add_checkbox_to_panel(PANEL_volume, _("Compress data while loading"), &glui_compress_volsmoke);
+    if(have_volcompressed == 1){
+      Smoke3d_CB(LOAD_COMPRESSED_DATA);
+    }
+    glui_3dsmoke->add_checkbox_to_panel(PANEL_volume, _("Display data as b/w"), &volbw);
+    glui_3dsmoke->add_checkbox_to_panel(PANEL_volume, _("Show data while moving scene"), &show_volsmoke_moving);
+    glui_3dsmoke->add_checkbox_to_panel(PANEL_volume, _("Load data only at render times"), &load_at_rendertimes);
+
+    SPINNER_fire_opacity_factor = glui_3dsmoke->add_spinner_to_panel(PANEL_volume, _("Fire opacity multiplier"), GLUI_SPINNER_FLOAT, &fire_opacity_factor);
+    SPINNER_fire_opacity_factor->set_float_limits(1.0, 10.0);
+    SPINNER_mass_extinct = glui_3dsmoke->add_spinner_to_panel(PANEL_volume, _("Mass extinction coeff"), GLUI_SPINNER_FLOAT, &mass_extinct);
+    SPINNER_mass_extinct->set_float_limits(100.0, 100000.0);
+    glui_3dsmoke->add_checkbox_to_panel(PANEL_volume, _("Freeze"), &freeze_volsmoke);
+#ifdef _DEBUG
+    CHECKBOX_usevolrender = glui_3dsmoke->add_checkbox_to_panel(PANEL_volume, _("Show"), &usevolrender, VOL_SMOKE, Smoke3d_CB);
+    glui_3dsmoke->add_checkbox_to_panel(PANEL_volume, "block smoke", &block_volsmoke);
+    glui_3dsmoke->add_checkbox_to_panel(PANEL_volume, "debug", &smoke3dVoldebug);
+#endif
+    CHECKBOX_combine_meshes = glui_3dsmoke->add_checkbox_to_panel(PANEL_volume, _("Combine meshes"), &combine_meshes, COMBINE_MESHES, Smoke3d_CB);
+    SPINNER_nongpu_vol_factor = glui_3dsmoke->add_spinner_to_panel(PANEL_volume, _("non-gpu grid multiplier"), GLUI_SPINNER_FLOAT, &nongpu_vol_factor, NONGPU_VOL_FACTOR, Smoke3d_CB);
+    SPINNER_nongpu_vol_factor->set_float_limits(1.0, 10.0);
+    SPINNER_gpu_vol_factor = glui_3dsmoke->add_spinner_to_panel(PANEL_volume, _("gpu grid multiplier"), GLUI_SPINNER_FLOAT, &gpu_vol_factor, GPU_VOL_FACTOR, Smoke3d_CB);
+    SPINNER_gpu_vol_factor->set_float_limits(1.0, 10.0);
+
+    PANEL_generate_images = glui_3dsmoke->add_rollout_to_panel(PANEL_volume, _("Generate images"), false);
+
+    SPINNER_startframe = glui_3dsmoke->add_spinner_to_panel(PANEL_generate_images, _("start frame"), GLUI_SPINNER_INT, &startframe0, START_FRAME, Smoke3d_CB);
+    SPINNER_skipframe = glui_3dsmoke->add_spinner_to_panel(PANEL_generate_images, _("skip frame"), GLUI_SPINNER_INT, &skipframe0, SKIP_FRAME, Smoke3d_CB);
+    Smoke3d_CB(START_FRAME);
+    Smoke3d_CB(SKIP_FRAME);
+    if(ntours > 0){
+      selectedtour_index = -1;
+      selectedtour_index_old = -1;
+      LISTBOX_VOL_tour = glui_3dsmoke->add_listbox_to_panel(PANEL_generate_images, "Tour:", &selectedtour_index, VOL_TOUR_LIST, Smoke3d_CB);
+
+      LISTBOX_VOL_tour->add_item(-1, "Manual");
+      LISTBOX_VOL_tour->add_item(-999, "-");
+      for(i = 0; i < ntours; i++){
+        tourdata *touri;
+
+        touri = tourinfo + i;
+        LISTBOX_VOL_tour->add_item(i, touri->label);
+      }
+      LISTBOX_VOL_tour->set_int_val(selectedtour_index);
+    }
+
+    strcpy(vol_prefix, fdsprefix);
+    EDIT_vol_prefix = glui_3dsmoke->add_edittext_to_panel(PANEL_generate_images, "image prefix:", GLUI_EDITTEXT_TEXT, vol_prefix, VOL_PREFIX, Smoke3d_CB);
+    EDIT_vol_prefix->set_w(200);
+
+    BUTTON_startrender = glui_3dsmoke->add_button_to_panel(PANEL_generate_images, _("Generate images"), GENERATE_IMAGES, Smoke3d_CB);
+    BUTTON_cancelrender = glui_3dsmoke->add_button_to_panel(PANEL_generate_images, _("Cancel"), CANCEL_GENERATE_IMAGES, Smoke3d_CB);
+    BUTTON_volunload = glui_3dsmoke->add_button_to_panel(PANEL_generate_images, _("Unload"), VOL_UNLOAD_ALL, Smoke3d_CB);
   }
 
   Update_Smoke_Type();

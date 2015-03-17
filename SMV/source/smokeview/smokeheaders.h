@@ -6,6 +6,9 @@
 #ifndef SMOKEHEADERS_H_DEFINED
 #define SMOKEHEADERS_H_DEFINED
 
+#ifdef CPP
+EXTERNCPP void toggle_rollout(procdata *procinfo, int nprocinfo, int motion_id);
+#endif
 EXTERNCPP void enable_disable_playmovie(void);
 EXTERNCPP int does_movie_exist(char *movie_name, char *moviefile);
 EXTERNCPP void update_render_start_button(void);
