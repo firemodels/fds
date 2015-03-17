@@ -1708,7 +1708,7 @@ end subroutine
 
 
 subroutine mpi_buffer_attach( buff, icount, ierror)
-  integer buff(*),icount,ierror
+  integer buff(*),icount,ierror,errorcode
   dummy = buff(1)
   errorcode = ierror
   dummy = icount
@@ -1716,7 +1716,7 @@ end subroutine
 
 
 subroutine mpi_buffer_detach( buff, icount, ierror)
-  integer buff(*),icount,ierror
+  integer buff(*),icount,ierror,errorcode
   dummy = buff(1)
   errorcode = ierror
   dummy = icount
