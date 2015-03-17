@@ -372,7 +372,7 @@ extern "C" void glui_labels_setup(int main_window){
     glui_labels->close();
     glui_labels=NULL;
   }
-  glui_labels = GLUI_Master.create_glui("Display settings",0,0,0);
+  glui_labels = GLUI_Master.create_glui("Display",0,0,0);
   if(showdisplay_dialog==0)glui_labels->hide();
 
   // -------------- General Settings -------------------
@@ -413,6 +413,7 @@ extern "C" void glui_labels_setup(int main_window){
 #endif
   CHECKBOX_labels_labels=glui_labels->add_checkbox_to_panel(PANEL_gen1,_("Text labels"),&visLabels,LABELS_label,Labels_CB);
   CHECKBOX_labels_meshlabel=glui_labels->add_checkbox_to_panel(PANEL_gen1,_("Mesh label"),&visBlocklabel,LABELS_meshlabel,Labels_CB);
+  glui_labels->add_checkbox_to_panel(PANEL_gen1, _("Toggle dialogs"), &toggle_dialogs);
 
   PANEL_gen2=glui_labels->add_panel_to_panel(ROLLOUT_general,"",GLUI_PANEL_NONE);
 
@@ -706,9 +707,50 @@ extern "C" void hide_glui_display(void){
 
 /* ------------------ show_glui_display ------------------------ */
 
-extern "C" void show_glui_display(void){
-  showdisplay_dialog=1;
+extern "C" void show_glui_display(int menu_id){
   if(glui_labels!=NULL)glui_labels->show();
+  showdisplay_dialog = 0;
+  showfonts_dialog = 0;
+  showticks_dialog = 0;
+  showlabels_dialog = 0;
+  switch(menu_id){
+  case DIALOG_DISPLAY:
+    showdisplay_dialog = 1;
+    ROLLOUT_general->open();
+    if(toggle_dialogs==1){
+      ROLLOUT_font->close();
+      ROLLOUT_user_tick->close();
+      ROLLOUT_user_labels->close();
+    }
+    break;
+  case DIALOG_FONTS:
+    showfonts_dialog = 1;
+    ROLLOUT_font->open();
+    if(toggle_dialogs==1){
+      ROLLOUT_general->close();
+      ROLLOUT_user_tick->close();
+      ROLLOUT_user_labels->close();
+    }
+    break;
+  case DIALOG_TICKS:
+    showticks_dialog = 1;
+    ROLLOUT_user_tick->open();
+    if(toggle_dialogs==1){
+      ROLLOUT_general->close();
+      ROLLOUT_font->close();
+      ROLLOUT_user_labels->close();
+    }
+    break;
+  case DIALOG_LABELS:
+    showlabels_dialog = 1;
+    ROLLOUT_user_labels->open();
+    if(toggle_dialogs==1){
+      ROLLOUT_general->close();
+      ROLLOUT_font->close();
+      ROLLOUT_user_tick->close();
+    }
+    break;
+  }
 }
 
 /* ------------------ Text_labels_CB ------------------------ */

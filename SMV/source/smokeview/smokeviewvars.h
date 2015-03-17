@@ -23,6 +23,7 @@
 #include "smokeheaders.h"
 #include "threader.h"
 
+SVEXTERN int SVDECL(toggle_dialogs, 1);
 SVEXTERN int SVDECL(script_render_width, 320), SVDECL(script_render_height, 240);
 SVEXTERN int SVDECL(update_makemovie, 0);
 SVEXTERN char movie_name[1024], movie_prefix[1024];
@@ -627,10 +628,15 @@ SVEXTERN int p3dsurfacetype;
 SVEXTERN int parttype;
 SVEXTERN int allexterior,showexterior;
 SVEXTERN int allinterior;
+SVEXTERN int SVDECL(showload_dialog, 0);
 SVEXTERN int SVDECL(showbounds_dialog,0),SVDECL(showmotion_dialog,0),SVDECL(showedit_dialog,0), SVDECL(showclip_dialog,0);
+SVEXTERN int SVDECL(showtime_dialog, 0);
 SVEXTERN int SVDECL(showfiles_dialog, 0);
+SVEXTERN int SVDECL(showfonts_dialog, 0);
+SVEXTERN int SVDECL(showticks_dialog, 0);
+SVEXTERN int SVDECL(showlabels_dialog, 0);
 SVEXTERN int SVDECL(showview_dialog, 0), SVDECL(showrender_dialog, 0);
-SVEXTERN int SVDECL(showscript_dialog, 0);
+SVEXTERN int SVDECL(showscript_dialog, 0),SVDECL(showconfig_dialog,0);
 SVEXTERN int SVDECL(showstereo_dialog,0), SVDECL(showdisplay_dialog,0), SVDECL(showcolorbar_dialog,0);
 SVEXTERN int SVDECL(showwui_dialog,0), SVDECL(showdevice_dialog,0),SVDECL(show3dsmoke_dialog,0);
 SVEXTERN int SVDECL(showtour_dialog,0),SVDECL(showalert_dialog,0),SVDECL(showtrainer_dialog,0);

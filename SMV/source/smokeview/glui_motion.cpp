@@ -180,8 +180,15 @@ GLUI_Listbox *LIST_render_size=NULL;
 GLUI_Listbox *LIST_render_skip=NULL;
 
 void enable_disable_views(void);
+
 procdata motionprocinfo[6];
 int nmotionprocinfo = 0;
+
+/* ------------------ Motion_Rollout_CB ------------------------ */
+
+void Motion_Rollout_CB(int var){
+  toggle_rollout(motionprocinfo, nmotionprocinfo, var);
+}
 
 /* ------------------ update_render_start_button ------------------------ */
 
@@ -595,7 +602,7 @@ extern "C" void glui_motion_setup(int main_window){
   SPINNER_window_height->set_int_limits(100, max_screenHeight);
   BUTTON_window_update = glui_motion->add_button_to_panel(ROLLOUT_projection, _("Apply"), WINDOW_RESIZE, Motion_CB);
 
-  ROLLOUT_scale = glui_motion->add_rollout_to_panel(PANEL_viewA,_("Scaling/Depth"),false,SCALING_ROLLOUT,Motion_Rollout_CB);
+  ROLLOUT_scale = glui_motion->add_rollout_to_panel(PANEL_viewA,_("Scaling"),false,SCALING_ROLLOUT,Motion_Rollout_CB);
   ADDPROCINFO(motionprocinfo,nmotionprocinfo,ROLLOUT_scale,SCALING_ROLLOUT);
   SPINNER_scalex=glui_motion->add_spinner_to_panel(ROLLOUT_scale,_("Scale x"),GLUI_SPINNER_FLOAT,mscale);
   SPINNER_scalex->set_float_limits(0.01,100.0,GLUI_LIMIT_CLAMP);
@@ -987,15 +994,9 @@ extern "C" void toggle_rollout(procdata *procinfo, int nprocinfo, int motion_id)
       mi->rollout->open();
     }
     else{
-      mi->rollout->close();
+      if(toggle_dialogs==1)mi->rollout->close();
     }
   }
-}
-
-/* ------------------ Motion_Rollout_CB ------------------------ */
-
-void Motion_Rollout_CB(int var){
-  toggle_rollout(motionprocinfo, nmotionprocinfo, var);
 }
 
   /* ------------------ Motion_CB ------------------------ */

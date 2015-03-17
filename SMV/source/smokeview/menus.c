@@ -954,7 +954,7 @@ void DialogMenu(int value){
     break;
   case DIALOG_DISPLAY:
     showdisplay_dialog=1-showdisplay_dialog;
-    if(showdisplay_dialog==1)show_glui_display();
+    if(showdisplay_dialog==1)show_glui_display(DIALOG_DISPLAY);
     if(showdisplay_dialog==0)hide_glui_display();
     break;
   case DIALOG_DEVICE:
@@ -964,6 +964,7 @@ void DialogMenu(int value){
     break;
   case DIALOG_3DSMOKE:
     show3dsmoke_dialog = 1 - show3dsmoke_dialog;
+    showload_dialog = 0;
     showfiles_dialog = 0;
     showbounds_dialog = 0;
     showscript_dialog = 0;
@@ -972,43 +973,38 @@ void DialogMenu(int value){
     if(show3dsmoke_dialog == 1)show_glui_bounds(DIALOG_3DSMOKE);
     if(show3dsmoke_dialog == 0)hide_glui_bounds();
     break;
+  case DIALOG_TIME:
+    showtime_dialog = 1-showtime_dialog;
+    if(showtime_dialog==1)show_glui_bounds(DIALOG_TIME);
+    if(showtime_dialog==0)hide_glui_bounds();
+    break;
   case DIALOG_BOUNDS:
-    show3dsmoke_dialog = 0;
-    showfiles_dialog = 0;
     showbounds_dialog = 1 - showbounds_dialog;
-    showscript_dialog = 0;
-    showzip_dialog = 0;
-
     if(showbounds_dialog == 1)show_glui_bounds(DIALOG_BOUNDS);
     if(showbounds_dialog == 0)hide_glui_bounds();
     break;
-  case DIALOG_FILES:
-    show3dsmoke_dialog = 0;
+  case DIALOG_SHOWFILES:
     showfiles_dialog = 1 - showfiles_dialog;
-    showbounds_dialog = 0;
-    showscript_dialog = 0;
-    showzip_dialog = 0;
-
-    if(showfiles_dialog == 1)show_glui_bounds(DIALOG_FILES);
+    if(showfiles_dialog == 1)show_glui_bounds(DIALOG_SHOWFILES);
     if(showfiles_dialog == 0)hide_glui_bounds();
     break;
   case DIALOG_SCRIPT:
-    show3dsmoke_dialog = 0;
-    showfiles_dialog = 0;
-    showbounds_dialog = 0;
     showscript_dialog = 1 - showscript_dialog;
-    showzip_dialog = 0;
-
     if(showscript_dialog == 1)show_glui_bounds(DIALOG_SCRIPT);
     if(showscript_dialog == 0)hide_glui_bounds();
     break;
+  case DIALOG_CONFIG:
+    showconfig_dialog = 1-showconfig_dialog;
+    if(showconfig_dialog==1)show_glui_bounds(DIALOG_CONFIG);
+    if(showconfig_dialog==0)hide_glui_bounds();
+    break;
+  case DIALOG_AUTOLOAD:
+    showload_dialog = 1-showload_dialog;
+    if(showload_dialog==1)show_glui_bounds(DIALOG_AUTOLOAD);
+    if(showload_dialog==0)hide_glui_bounds();
+    break;
   case DIALOG_SMOKEZIP:
-    show3dsmoke_dialog = 0;
-    showfiles_dialog = 0;
-    showbounds_dialog = 0;
-    showscript_dialog = 0;
     showzip_dialog = 1 - showzip_dialog;
-    
     if(showzip_dialog == 1)show_glui_bounds(DIALOG_SMOKEZIP);
     if(showzip_dialog == 0)hide_glui_bounds();
     break;
@@ -1055,6 +1051,18 @@ void DialogMenu(int value){
     if(showcolorbar_dialog==0){
       hide_glui_colorbar();
     }
+    break;
+  case DIALOG_TICKS:
+    showticks_dialog = 1-showticks_dialog;
+    if(showticks_dialog==1)show_glui_display(DIALOG_TICKS);
+    break;
+  case DIALOG_FONTS:
+    showfonts_dialog = 1-showfonts_dialog;
+    if(showfonts_dialog==1)show_glui_display(DIALOG_FONTS);
+    break;
+  case DIALOG_LABELS:
+    showlabels_dialog = 1-showlabels_dialog;
+    if(showlabels_dialog==1)show_glui_display(DIALOG_LABELS);
     break;
   case DIALOG_GEOMETRY:
     showedit_dialog=1-showedit_dialog;
@@ -4660,7 +4668,8 @@ void InitMenus(int unload){
   int npatchloaded;
   int nplot3dloaded;
   int nisoloaded;
-  
+
+static int filesdialogmenu = 0, viewdialogmenu = 0, datadialogmenu = 0, windowdialogmenu=0;
 static int labelmenu=0, colorbarmenu=0, colorbarsmenu=0, colorbarshademenu, smokecolorbarmenu=0, showhidemenu=0;
 static int optionmenu=0, rotatetypemenu=0;
 static int resetmenu=0, frameratemenu=0, rendermenu=0, smokeviewinimenu=0, inisubmenu=0, resolutionmultipliermenu=0;
@@ -6899,8 +6908,8 @@ updatemenu=0;
       glutAddMenuEntry(_("Save"),SAVE_VIEWPOINT);
       glutAddMenuEntry(_("Set as Startup"),MENU_STARTUPVIEW);
       glutAddSubMenu(_("Zoom"),zoommenu); //xx
-      if(projection_type==1)glutAddMenuEntry(_("Switch to perspective view       ALT+v"),MENU_SIZEPRESERVING);
-      if(projection_type==0)glutAddMenuEntry(_("Switch to size preserving view   ALT+v"),MENU_SIZEPRESERVING);
+      if(projection_type==1)glutAddMenuEntry(_("Switch to perspective view       ALT v"),MENU_SIZEPRESERVING);
+      if(projection_type==0)glutAddMenuEntry(_("Switch to size preserving view   ALT v"),MENU_SIZEPRESERVING);
       glutAddMenuEntry("-",MENU_DUMMY);
     }
     for(ca=camera_list_first.next;ca->next!=NULL;ca=ca->next){
@@ -7263,73 +7272,105 @@ updatemenu=0;
     update_glui_render();
   }
 
-   /* --------------------------------dialog menu -------------------------- */
+  /* --------------------------------filesdialog menu -------------------------- */
+
+  CREATEMENU(filesdialogmenu, DialogMenu);
+  if(showload_dialog==1)glutAddMenuEntry(_("*Auto load..."), DIALOG_AUTOLOAD);
+  if(showload_dialog==0)glutAddMenuEntry(_("Auto load..."), DIALOG_AUTOLOAD);
+#ifdef pp_COMPRESS
+  if(smokezippath!=NULL&&(npatchinfo>0||nsmoke3dinfo>0||nsliceinfo>0)){
+    if(showzip_dialog==1)glutAddMenuEntry(_("*Compress...  ALT z"), DIALOG_SMOKEZIP);
+    if(showzip_dialog==0)glutAddMenuEntry(_("Compress...  ALT z"), DIALOG_SMOKEZIP);
+  }
+#endif
+  if(showconfig_dialog==1)glutAddMenuEntry(_("*Config..."), DIALOG_CONFIG);
+  if(showconfig_dialog==0)glutAddMenuEntry(_("Config..."), DIALOG_CONFIG);
+
+  if(showrender_dialog==1)glutAddMenuEntry(_("*Render..."), DIALOG_RENDER);
+  if(showrender_dialog==0)glutAddMenuEntry(_("Render..."), DIALOG_RENDER);
+
+  if(showconfig_dialog==1)glutAddMenuEntry(_("*Scripts..."), DIALOG_SCRIPT);
+  if(showconfig_dialog==0)glutAddMenuEntry(_("Scripts..."), DIALOG_SCRIPT);
+
+  /* --------------------------------viewdialog menu -------------------------- */
+
+  CREATEMENU(viewdialogmenu, DialogMenu);
+  if(showclip_dialog==1)glutAddMenuEntry(_("*Clipping...  ALT c"), DIALOG_CLIP);
+  if(showclip_dialog==0)glutAddMenuEntry(_("Clipping...  ALT c"), DIALOG_CLIP);
+  if(showcolorbar_dialog==1)glutAddMenuEntry(_("*Colorbar...  ALT C"), DIALOG_COLORBAR);
+  if(showcolorbar_dialog==0)glutAddMenuEntry(_("Colorbar...  ALT C"), DIALOG_COLORBAR);
+  if(isZoneFireModel==0){
+    if(showedit_dialog==1)glutAddMenuEntry(_("*Geometry...  ALT e"), DIALOG_GEOMETRY);
+    if(showedit_dialog==0)glutAddMenuEntry(_("Geometry...  ALT e"), DIALOG_GEOMETRY);
+  }
+  if(showstereo_dialog==1)glutAddMenuEntry(_("*Stereo..."), DIALOG_STEREO);
+  if(showstereo_dialog==0)glutAddMenuEntry(_("Stereo..."), DIALOG_STEREO);
+
+  if(showtour_dialog==1)glutAddMenuEntry(_("*Tours...  ALT t"), DIALOG_TOUR);
+  if(showtour_dialog==0)glutAddMenuEntry(_("Tours...  ALT t"), DIALOG_TOUR);
+
+  if(trainer_active==1){
+    if(showtrainer_dialog==1)glutAddMenuEntry(_("*Trainer..."), DIALOG_TRAINER);
+    if(showtrainer_dialog==0)glutAddMenuEntry(_("Trainer..."), DIALOG_TRAINER);
+  }
+
+  /* --------------------------------datadialog menu -------------------------- */
+
+  CREATEMENU(datadialogmenu, DialogMenu);
+  if(nsmoke3dinfo > 0||nvolrenderinfo > 0){
+    if(show3dsmoke_dialog==1)glutAddMenuEntry(_("*3D smoke...  ALT s"), DIALOG_3DSMOKE);
+    if(show3dsmoke_dialog==0)glutAddMenuEntry(_("3D smoke...  ALT s"), DIALOG_3DSMOKE);
+  }
+  if(nterraininfo>0){
+    if(showwui_dialog==1)glutAddMenuEntry(_("*WUI display... ALT w"), DIALOG_WUI);
+    if(showwui_dialog==0)glutAddMenuEntry(_("WUI display... ALT w..."), DIALOG_WUI);
+  }
+  if(ndeviceinfo>0){
+    if(showdevice_dialog==1)glutAddMenuEntry(_("*Devices/Objects..."), DIALOG_DEVICE);
+    if(showdevice_dialog==0)glutAddMenuEntry(_("Devices/Objects..."), DIALOG_DEVICE);
+  }
+  if(showfiles_dialog==1)glutAddMenuEntry(_("*Show/Hide..."), DIALOG_SHOWFILES);
+  if(showfiles_dialog==0)glutAddMenuEntry(_("Show/Hide..."), DIALOG_SHOWFILES);
+  if(showshooter_dialog==1)glutAddMenuEntry(_("*Particle tracking..."), DIALOG_SHOOTER);
+  if(showshooter_dialog==0)glutAddMenuEntry(_("Particle tracking..."), DIALOG_SHOOTER);
+  if(showtime_dialog==1)glutAddMenuEntry(_("*Time..."), DIALOG_TIME);
+  if(showtime_dialog==0)glutAddMenuEntry(_("Time..."), DIALOG_TIME);
+
+  /* --------------------------------window menu -------------------------- */
+
+  CREATEMENU(windowdialogmenu, DialogMenu);
+  if(showfonts_dialog == 1)glutAddMenuEntry(_("*Fonts..."), DIALOG_FONTS);
+  if(showfonts_dialog == 0)glutAddMenuEntry(_("Fonts..."), DIALOG_FONTS);
+  if(showticks_dialog == 1)glutAddMenuEntry(_("*User ticks..."), DIALOG_TICKS);
+  if(showticks_dialog == 0)glutAddMenuEntry(_("User ticks..."), DIALOG_TICKS);
+  if(showlabels_dialog == 1)glutAddMenuEntry(_("*Labels..."), DIALOG_LABELS);
+  if(showlabels_dialog == 0)glutAddMenuEntry(_("Labels..."), DIALOG_LABELS);
+
+  /* --------------------------------dialog menu -------------------------- */
 
   CREATEMENU(dialogmenu,DialogMenu);
 
-  if(showbounds_dialog == 1)glutAddMenuEntry(_("*Bounds...  ALT+f"), DIALOG_BOUNDS);
-  if(showbounds_dialog == 0)glutAddMenuEntry(_("Bounds...  ALT+f"), DIALOG_BOUNDS);
+  if(showbounds_dialog == 1)glutAddMenuEntry(_("*Bounds..."), DIALOG_BOUNDS);
+  if(showbounds_dialog == 0)glutAddMenuEntry(_("Bounds..."), DIALOG_BOUNDS);
 
-  if(showdisplay_dialog == 1)glutAddMenuEntry(_("*Display...  ALT+d"), DIALOG_DISPLAY);
-  if(showdisplay_dialog == 0)glutAddMenuEntry(_("Display...  ALT+d"), DIALOG_DISPLAY);
+  if(showdisplay_dialog == 1)glutAddMenuEntry(_("*Display...  ALT d"), DIALOG_DISPLAY);
+  if(showdisplay_dialog == 0)glutAddMenuEntry(_("Display...  ALT d"), DIALOG_DISPLAY);
 
-  if(showmotion_dialog==1)glutAddMenuEntry(_("*Motion...  ALT+m"),DIALOG_MOTION);
-  if(showmotion_dialog==0)glutAddMenuEntry(_("Motion...  ALT+m"),DIALOG_MOTION);
+  if(showmotion_dialog==1)glutAddMenuEntry(_("*Motion...  ALT m"),DIALOG_MOTION);
+  if(showmotion_dialog==0)glutAddMenuEntry(_("Motion...  ALT m"),DIALOG_MOTION);
 
-  if(showview_dialog==1)glutAddMenuEntry(_("*Viewpoints...  ALT+m"),DIALOG_VIEW);
-  if(showview_dialog==0)glutAddMenuEntry(_("Viewpoints...  ALT+m"),DIALOG_VIEW);
+  if(showview_dialog==1)glutAddMenuEntry(_("*Viewpoints..."),DIALOG_VIEW);
+  if(showview_dialog==0)glutAddMenuEntry(_("Viewpoints..."),DIALOG_VIEW);
 
   glutAddMenuEntry("-",-1);
-  if(nsmoke3dinfo > 0 || nvolrenderinfo > 0){
-    if(show3dsmoke_dialog == 1)glutAddMenuEntry(_("*3D smoke...  ALT+s"), DIALOG_3DSMOKE);
-    if(show3dsmoke_dialog == 0)glutAddMenuEntry(_("3D smoke...  ALT+s"), DIALOG_3DSMOKE);
-  }
-  if(nterraininfo>0){
-    if(showwui_dialog==1)glutAddMenuEntry(_("*WUI display... ALT+w"),DIALOG_WUI);
-    if(showwui_dialog==0)glutAddMenuEntry(_("WUI display... ALT+w..."),DIALOG_WUI);
-  }
-  if(showclip_dialog==1)glutAddMenuEntry(_("*Clip geometry...  ALT+c"),DIALOG_CLIP);
-  if(showclip_dialog==0)glutAddMenuEntry(_("Clip geometry...  ALT+c"),DIALOG_CLIP);
-#ifdef pp_COMPRESS
-  if(smokezippath!=NULL&&(npatchinfo>0||nsmoke3dinfo>0||nsliceinfo>0)){
-    if(showzip_dialog==1)glutAddMenuEntry(_("*Compress files...  ALT+z"),DIALOG_SMOKEZIP);
-    if(showzip_dialog==0)glutAddMenuEntry(_("Compress files...  ALT+z"),DIALOG_SMOKEZIP);
-  }
-#endif
-  if(showcolorbar_dialog==1)glutAddMenuEntry(_("*Customize colorbar...  ALT+C"),DIALOG_COLORBAR);
-  if(showcolorbar_dialog==0)glutAddMenuEntry(_("Customize colorbar...  ALT+C"),DIALOG_COLORBAR);
-  if(ndeviceinfo>0){
-    if(showdevice_dialog==1)glutAddMenuEntry(_("*Devices/Objects..."),DIALOG_DEVICE);
-    if(showdevice_dialog==0)glutAddMenuEntry(_("Devices/Objects..."),DIALOG_DEVICE);
-  }
-  if(showfiles_dialog == 1)glutAddMenuEntry(_("*Files...  ALT+f"), DIALOG_FILES);
-  if(showfiles_dialog == 0)glutAddMenuEntry(_("Files...  ALT+f"), DIALOG_FILES);
 
-  if(isZoneFireModel == 0){
-    if(showedit_dialog==1)glutAddMenuEntry(_("*Geometry...  ALT+e"),DIALOG_GEOMETRY);
-    if(showedit_dialog==0)glutAddMenuEntry(_("Geometry...  ALT+e"),DIALOG_GEOMETRY);
-  }
-  if(showshooter_dialog==1)glutAddMenuEntry(_("*Particle tracking..."),DIALOG_SHOOTER);
-  if(showshooter_dialog==0)glutAddMenuEntry(_("Particle tracking..."),DIALOG_SHOOTER);
+  glutAddSubMenu(_("Data"), datadialogmenu);
+  glutAddSubMenu(_("Files"), filesdialogmenu);
+  glutAddSubMenu(_("View"), viewdialogmenu);
+  glutAddSubMenu(_("Window"), windowdialogmenu);
 
-  if(showrender_dialog == 1)glutAddMenuEntry(_("*Render...  ALT+m"), DIALOG_RENDER);
-  if(showrender_dialog == 0)glutAddMenuEntry(_("Render...  ALT+m"), DIALOG_RENDER);
-
-  if(showscript_dialog == 1)glutAddMenuEntry(_("*Scripts/Config...  ALT+f"), DIALOG_SCRIPT);
-  if(showscript_dialog == 0)glutAddMenuEntry(_("Scripts/Config...  ALT+f"), DIALOG_SCRIPT);
-
-  if(showstereo_dialog == 1)glutAddMenuEntry(_("*Stereo..."), DIALOG_STEREO);
-  if(showstereo_dialog==0)glutAddMenuEntry(_("Stereo..."),DIALOG_STEREO);
-
-  if(showtour_dialog==1)glutAddMenuEntry(_("*Tours...  ALT+t"),DIALOG_TOUR);
-  if(showtour_dialog==0)glutAddMenuEntry(_("Tours...  ALT+t"),DIALOG_TOUR);
-
-  if(trainer_active==1){
-    if(showtrainer_dialog==1)glutAddMenuEntry(_("*Trainer..."),DIALOG_TRAINER);
-    if(showtrainer_dialog==0)glutAddMenuEntry(_("Trainer..."),DIALOG_TRAINER);
-  }
   glutAddMenuEntry("-",-1);
-  glutAddMenuEntry(_("Close all dialogs  ALT+x"),DIALOG_UNLOAD_ALL);
+  glutAddMenuEntry(_("Close all dialogs  ALT x"),DIALOG_UNLOAD_ALL);
 
   /* -------------------------------- font menu -------------------------- */
 
@@ -7645,18 +7686,18 @@ updatemenu=0;
   glutAddMenuEntry(_("  q: display blockages as specified by user or as used by FDS"),7);
   if(ntotal_blockages>0){
     glutAddMenuEntry(_("  O: toggle blockage view (normal <--> outline)"),7);
-    glutAddMenuEntry(_("  ALT+o: cycle between all blockage view types"),7);
+    glutAddMenuEntry(_("  ALT o: cycle between all blockage view types"),7);
   }
   glutAddMenuEntry(_("  W: toggle clipping - use Options/Clip menu to specify clipping planes"),7);
   glutAddMenuEntry(_("  -: decrement time step, 2D contour planes, 3D contour levels"),2);
   glutAddMenuEntry(_("  space bar: increment time step, 2D contour planes, 3D contour levels"),2);
   glutAddMenuEntry("",1);
-  glutAddMenuEntry(_("  ALT+v: toggle projection  method (between perspective and size preserving)"),2);
+  glutAddMenuEntry(_("  ALT v: toggle projection  method (between perspective and size preserving)"),2);
   if(n_embedded_meshes>0){
-    glutAddMenuEntry(_("  ALT+u: toggle coarse slice display in embedded mesh"),2);
+    glutAddMenuEntry(_("  ALT u: toggle coarse slice display in embedded mesh"),2);
   }
   if(cellcenter_slice_active==1){
-    glutAddMenuEntry(_("  ALT+y: if current slice is cell centered, toggle interpolation on/off"),2);
+    glutAddMenuEntry(_("  ALT y: if current slice is cell centered, toggle interpolation on/off"),2);
   }
   if(caseini_filename!=NULL&&strlen(caseini_filename)>0){
     char inilabel[512];

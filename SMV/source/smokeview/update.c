@@ -1856,7 +1856,7 @@ void Show_Glui_Dialogs(void){
   if(showclip_dialog_save==1)show_glui_clip();
   if(showstereo_dialog_save==1)show_glui_stereo();
   if(showtour_dialog_save==1)show_glui_tour();
-  if(showdisplay_dialog_save==1)show_glui_display();
+  if(showdisplay_dialog_save==1)show_glui_display(DIALOG_DISPLAY);
   if(showwui_dialog_save==1)show_glui_wui();
   if(showdevice_dialog_save==1)show_glui_device();
   if(show3dsmoke_dialog_save==1)show_glui_3dsmoke();

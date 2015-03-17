@@ -175,7 +175,7 @@ extern "C" void glui_colorbar_setup(int main_window){
     glui_colorbar->close();
     glui_colorbar=NULL;
   }
-  glui_colorbar = GLUI_Master.create_glui(_("Customize colorbar"),0,0,0);
+  glui_colorbar = GLUI_Master.create_glui(_("Customize Colorbar"),0,0,0);
   if(showcolorbar_dialog==0)glui_colorbar->hide();
 
   PANEL_cb2R2 = glui_colorbar->add_panel("",GLUI_PANEL_NONE);

@@ -186,8 +186,9 @@ GLUI_Button *BUTTON_ISO = NULL;
 GLUI_Rollout *PANEL_memcheck=NULL;
 #endif
 GLUI_Rollout *ROLLOUT_script=NULL;
-GLUI_Rollout *ROLLOUT_boundary=NULL;
-GLUI_Rollout *ROLLOUT_AUTOLOAD=NULL;
+GLUI_Rollout *ROLLOUT_config = NULL;
+GLUI_Rollout *ROLLOUT_boundary = NULL;
+GLUI_Rollout *ROLLOUT_autoload=NULL;
 GLUI_Rollout *ROLLOUT_compress=NULL;
 GLUI_Rollout *ROLLOUT_plot3d=NULL,*ROLLOUT_evac=NULL,*ROLLOUT_part=NULL,*ROLLOUT_slice=NULL,*ROLLOUT_bound=NULL,*ROLLOUT_iso=NULL;
 GLUI_Rollout *ROLLOUT_smoke3d=NULL,*ROLLOUT_volsmoke3d=NULL;
@@ -214,7 +215,6 @@ GLUI_Panel *PANEL_script1=NULL;
 GLUI_Panel *PANEL_script1a=NULL;
 GLUI_Panel *PANEL_script1b=NULL;
 GLUI_Panel *PANEL_script1c=NULL;
-GLUI_Panel *PANEL_script2=NULL;
 GLUI_Panel *PANEL_script2a=NULL;
 GLUI_Panel *PANEL_script2b=NULL;
 GLUI_Panel *PANEL_script3=NULL;
@@ -358,10 +358,11 @@ GLUI_StaticText *STATIC_plot3d_cmax_unit=NULL;
 #define SHOWHIDE_ROLLOUT 1
 #define COMPRESS_ROLLOUT 2
 #define SCRIPT_ROLLOUT 3
-#define FILEBOUNDS_ROLLOUT 4
-#define TIME_ROLLOUT 5
+#define CONFIG_ROLLOUT 4
+#define FILEBOUNDS_ROLLOUT 5
+#define TIME_ROLLOUT 6
 
-procdata boundprocinfo[8], fileprocinfo[6];
+procdata boundprocinfo[8], fileprocinfo[7];
 int nboundprocinfo = 0, nfileprocinfo = 0;
 
 /* ------------------ Bound_Rollout_CB ------------------------ */
@@ -552,22 +553,22 @@ extern "C" void glui_bounds_setup(int main_window){
     glui_bounds=NULL;
   }
   overwrite_all=0;
-  glui_bounds = GLUI_Master.create_glui( "File/Bounds Settings",0,0,0 );
+  glui_bounds = GLUI_Master.create_glui( "Files/Bounds",0,0,0 );
   if(showbounds_dialog==0)glui_bounds->hide();
 
   PANEL_files = glui_bounds->add_panel("Files", true);
 
-  ROLLOUT_AUTOLOAD = glui_bounds->add_rollout_to_panel(PANEL_files,_("Load"), false, LOAD_ROLLOUT, File_Rollout_CB);
-  ADDPROCINFO(fileprocinfo, nfileprocinfo, ROLLOUT_AUTOLOAD, LOAD_ROLLOUT);
+  ROLLOUT_autoload = glui_bounds->add_rollout_to_panel(PANEL_files,_("Auto load"), false, LOAD_ROLLOUT, File_Rollout_CB);
+  ADDPROCINFO(fileprocinfo, nfileprocinfo, ROLLOUT_autoload, LOAD_ROLLOUT);
   
-  glui_bounds->add_checkbox_to_panel(ROLLOUT_AUTOLOAD, _("Auto load at startup"),
+  glui_bounds->add_checkbox_to_panel(ROLLOUT_autoload, _("Auto load at startup"),
     &loadfiles_at_startup, STARTUP, Bound_CB);
-  glui_bounds->add_button_to_panel(ROLLOUT_AUTOLOAD, _("Save auto load file list"), SAVE_FILE_LIST, Bound_CB);
-  glui_bounds->add_button_to_panel(ROLLOUT_AUTOLOAD, _("Auto load now"), LOAD_FILES, Bound_CB);
+  glui_bounds->add_button_to_panel(ROLLOUT_autoload, _("Save auto load file list"), SAVE_FILE_LIST, Bound_CB);
+  glui_bounds->add_button_to_panel(ROLLOUT_autoload, _("Auto load now"), LOAD_FILES, Bound_CB);
 
   // -------------- Show/Hide Loaded files -------------------
 
-  if((npartinfo > 0) || nsliceinfo > 0 || nvsliceinfo > 0 || nisoinfo > 0 || npatchinfo || nsmoke3dinfo > 0 || nplot3dinfo > 0){
+  if(npartinfo > 0 || nsliceinfo > 0 || nvsliceinfo > 0 || nisoinfo > 0 || npatchinfo || nsmoke3dinfo > 0 || nplot3dinfo > 0){
     ROLLOUT_showhide = glui_bounds->add_rollout_to_panel(PANEL_files,"Show/Hide", false, SHOWHIDE_ROLLOUT, File_Rollout_CB);
     ADDPROCINFO(fileprocinfo, nfileprocinfo, ROLLOUT_showhide, SHOWHIDE_ROLLOUT);
   
@@ -627,9 +628,9 @@ extern "C" void glui_bounds_setup(int main_window){
   }
 #endif
 
-  ROLLOUT_script = glui_bounds->add_rollout_to_panel(PANEL_files,"Scripts/Config", false, SCRIPT_ROLLOUT, File_Rollout_CB);
+  ROLLOUT_script = glui_bounds->add_rollout_to_panel(PANEL_files,"Scripts", false, SCRIPT_ROLLOUT, File_Rollout_CB);
   ADDPROCINFO(fileprocinfo, nfileprocinfo, ROLLOUT_script, SCRIPT_ROLLOUT);
-  
+
   PANEL_script1 = glui_bounds->add_panel_to_panel(ROLLOUT_script, _("Script files"), false);
   PANEL_record = glui_bounds->add_panel_to_panel(PANEL_script1, _("Record"), true);
 
@@ -670,9 +671,10 @@ extern "C" void glui_bounds_setup(int main_window){
     Script_CB(SCRIPT_LIST);
   }
 
-  PANEL_script2 = glui_bounds->add_panel_to_panel(ROLLOUT_script, _("Config"), true);
+  ROLLOUT_config = glui_bounds->add_rollout_to_panel(PANEL_files, "Config", false, CONFIG_ROLLOUT, File_Rollout_CB);
+  ADDPROCINFO(fileprocinfo, nfileprocinfo, ROLLOUT_config, CONFIG_ROLLOUT);
 
-  PANEL_script2a = glui_bounds->add_panel_to_panel(PANEL_script2, "", false);
+  PANEL_script2a = glui_bounds->add_panel_to_panel(ROLLOUT_config, "", false);
   EDIT_ini = glui_bounds->add_edittext_to_panel(PANEL_script2a, "suffix:", GLUI_EDITTEXT_TEXT, script_inifile_suffix, SCRIPT_EDIT_INI, Script_CB);
   glui_bounds->add_column_to_panel(PANEL_script2a, false);
   BUTTON_script_setsuffix = glui_bounds->add_button_to_panel(PANEL_script2a, _("Set"), SCRIPT_SETSUFFIX, Script_CB);
@@ -680,7 +682,7 @@ extern "C" void glui_bounds_setup(int main_window){
   BUTTON_script_saveini = glui_bounds->add_button_to_panel(PANEL_script2a, _("Save:"), SCRIPT_SAVEINI, Script_CB);
   Script_CB(SCRIPT_EDIT_INI);
 
-  PANEL_script2b = glui_bounds->add_panel_to_panel(PANEL_script2, "", false);
+  PANEL_script2b = glui_bounds->add_panel_to_panel(ROLLOUT_config, "", false);
   ini_index = -2;
   LIST_ini_list = glui_bounds->add_listbox_to_panel(PANEL_script2b, _("Select:"), &ini_index);
   {
@@ -2822,23 +2824,27 @@ void Bounds_DLG_CB(int var){
 
 extern "C" void show_glui_bounds(int menu_id){
   int islice, ipatch;
-    if(ROLLOUT_boundary!=NULL)ROLLOUT_boundary->close();
-    if(ROLLOUT_plot3d != NULL)ROLLOUT_plot3d->close();
-    if(ROLLOUT_evac != NULL)ROLLOUT_evac->close();
-    if(ROLLOUT_part != NULL)ROLLOUT_part->close();
-    if(ROLLOUT_slice != NULL)ROLLOUT_slice->close();
-    if(ROLLOUT_bound != NULL)ROLLOUT_bound->close();
-    if(ROLLOUT_iso != NULL)ROLLOUT_iso->close();
-    if(ROLLOUT_volsmoke3d != NULL)ROLLOUT_volsmoke3d->close();
-    if(ROLLOUT_time != NULL)ROLLOUT_time->close();
-    if(ROLLOUT_colorbar != NULL)ROLLOUT_colorbar->close();
-    if(ROLLOUT_outputpatchdata != NULL)ROLLOUT_outputpatchdata->close();
+    if(toggle_dialogs==1){
+      if(ROLLOUT_boundary!=NULL)ROLLOUT_boundary->close();
+      if(ROLLOUT_plot3d != NULL)ROLLOUT_plot3d->close();
+      if(ROLLOUT_evac != NULL)ROLLOUT_evac->close();
+      if(ROLLOUT_part != NULL)ROLLOUT_part->close();
+      if(ROLLOUT_slice != NULL)ROLLOUT_slice->close();
+      if(ROLLOUT_bound != NULL)ROLLOUT_bound->close();
+      if(ROLLOUT_iso != NULL)ROLLOUT_iso->close();
+      if(ROLLOUT_volsmoke3d != NULL)ROLLOUT_volsmoke3d->close();
+      if(ROLLOUT_time != NULL)ROLLOUT_time->close();
+      if(ROLLOUT_colorbar != NULL)ROLLOUT_colorbar->close();
+      if(ROLLOUT_outputpatchdata != NULL)ROLLOUT_outputpatchdata->close();
+    }
     
   showbounds_dialog=0;
   showscript_dialog=0;
-  showzip_dialog=0;
+  showconfig_dialog = 0;
+  showzip_dialog = 0;
   show3dsmoke_dialog=0;
   showfiles_dialog = 0;
+  showload_dialog = 0;
   if(menu_id==DIALOG_BOUNDS){
     showbounds_dialog=1;
     if(nsliceinfo>0){
@@ -2867,43 +2873,107 @@ extern "C" void show_glui_bounds(int menu_id){
     if(nsliceinfo>0||npatchinfo>0)updateglui();
 
     updatechar();
-    if(ROLLOUT_filebounds != NULL)ROLLOUT_filebounds->open();
-    if(ROLLOUT_showhide != NULL)ROLLOUT_showhide->close();
-    if(ROLLOUT_script != NULL)ROLLOUT_script->close();
-    if(ROLLOUT_compress != NULL)ROLLOUT_compress->close();
-    if(ROLLOUT_smoke3d != NULL)ROLLOUT_smoke3d->close();
+    if(ROLLOUT_filebounds!=NULL)ROLLOUT_filebounds->open();
+    if(toggle_dialogs==1){
+      if(ROLLOUT_time!=NULL)ROLLOUT_time->close();
+      if(ROLLOUT_autoload!=NULL)ROLLOUT_autoload->close();
+      if(ROLLOUT_showhide != NULL)ROLLOUT_showhide->close();
+      if(ROLLOUT_script != NULL)ROLLOUT_script->close();
+      if(ROLLOUT_config!=NULL)ROLLOUT_config->close();
+      if(ROLLOUT_compress!=NULL)ROLLOUT_compress->close();
+      if(ROLLOUT_smoke3d != NULL)ROLLOUT_smoke3d->close();
+    }
   }
-  else if(menu_id == DIALOG_FILES){
+  else if(menu_id == DIALOG_SHOWFILES){
     showfiles_dialog = 1;
-    if(ROLLOUT_filebounds != NULL)ROLLOUT_filebounds->close();
     if(ROLLOUT_showhide != NULL)ROLLOUT_showhide->open();
-    if(ROLLOUT_script != NULL)ROLLOUT_script->close();
-    if(ROLLOUT_compress != NULL)ROLLOUT_compress->close();
-    if(ROLLOUT_smoke3d != NULL)ROLLOUT_smoke3d->close();
+    if(toggle_dialogs==1){
+      if(ROLLOUT_time!=NULL)ROLLOUT_time->close();
+      if(ROLLOUT_autoload!=NULL)ROLLOUT_autoload->close();
+      if(ROLLOUT_filebounds!=NULL)ROLLOUT_filebounds->close();
+      if(ROLLOUT_script != NULL)ROLLOUT_script->close();
+      if(ROLLOUT_config!=NULL)ROLLOUT_config->close();
+      if(ROLLOUT_compress!=NULL)ROLLOUT_compress->close();
+      if(ROLLOUT_smoke3d != NULL)ROLLOUT_smoke3d->close();
+    }
   }
-  else if(menu_id == DIALOG_SCRIPT){
+  else if(menu_id==DIALOG_CONFIG){
+    showconfig_dialog = 1;
+    if(ROLLOUT_config!=NULL)ROLLOUT_config->open();
+    if(toggle_dialogs==1){
+      if(ROLLOUT_time!=NULL)ROLLOUT_time->close();
+      if(ROLLOUT_autoload!=NULL)ROLLOUT_autoload->close();
+      if(ROLLOUT_filebounds!=NULL)ROLLOUT_filebounds->close();
+      if(ROLLOUT_showhide!=NULL)ROLLOUT_showhide->close();
+      if(ROLLOUT_script!=NULL)ROLLOUT_script->close();
+      if(ROLLOUT_compress!=NULL)ROLLOUT_compress->close();
+      if(ROLLOUT_smoke3d!=NULL)ROLLOUT_smoke3d->close();
+    }
+  }
+  else if(menu_id==DIALOG_AUTOLOAD){
+    showload_dialog = 1;
+    if(ROLLOUT_autoload!=NULL)ROLLOUT_autoload->open();
+    if(toggle_dialogs==1){
+      if(ROLLOUT_time!=NULL)ROLLOUT_time->close();
+      if(ROLLOUT_filebounds!=NULL)ROLLOUT_filebounds->close();
+      if(ROLLOUT_showhide!=NULL)ROLLOUT_showhide->close();
+      if(ROLLOUT_script!=NULL)ROLLOUT_script->close();
+      if(ROLLOUT_config!=NULL)ROLLOUT_config->close();
+      if(ROLLOUT_compress!=NULL)ROLLOUT_compress->close();
+      if(ROLLOUT_smoke3d!=NULL)ROLLOUT_smoke3d->close();
+    }
+  }
+  else if(menu_id==DIALOG_TIME){
+    showtime_dialog = 1;
+    if(ROLLOUT_time!=NULL)ROLLOUT_time->open();
+    if(toggle_dialogs==1){
+      if(ROLLOUT_autoload!=NULL)ROLLOUT_autoload->close();
+      if(ROLLOUT_filebounds!=NULL)ROLLOUT_filebounds->close();
+      if(ROLLOUT_showhide!=NULL)ROLLOUT_showhide->close();
+      if(ROLLOUT_script!=NULL)ROLLOUT_script->close();
+      if(ROLLOUT_config!=NULL)ROLLOUT_config->close();
+      if(ROLLOUT_compress!=NULL)ROLLOUT_compress->close();
+      if(ROLLOUT_smoke3d!=NULL)ROLLOUT_smoke3d->close();
+    }
+  }
+  else if(menu_id==DIALOG_SCRIPT){
     showscript_dialog=1;
-    if(ROLLOUT_filebounds != NULL)ROLLOUT_filebounds->close();
-    if(ROLLOUT_showhide != NULL)ROLLOUT_showhide->close();
     if(ROLLOUT_script != NULL)ROLLOUT_script->open();
-    if(ROLLOUT_compress != NULL)ROLLOUT_compress->close();
-    if(ROLLOUT_smoke3d != NULL)ROLLOUT_smoke3d->close();
+    if(toggle_dialogs==1){
+      if(ROLLOUT_time!=NULL)ROLLOUT_time->close();
+      if(ROLLOUT_autoload!=NULL)ROLLOUT_autoload->close();
+      if(ROLLOUT_filebounds!=NULL)ROLLOUT_filebounds->close();
+      if(ROLLOUT_showhide != NULL)ROLLOUT_showhide->close();
+      if(ROLLOUT_config!=NULL)ROLLOUT_config->close();
+      if(ROLLOUT_compress!=NULL)ROLLOUT_compress->close();
+      if(ROLLOUT_smoke3d != NULL)ROLLOUT_smoke3d->close();
+    }
   }
   else if(menu_id == DIALOG_SMOKEZIP){
     showzip_dialog=1;
-    if(ROLLOUT_filebounds != NULL)ROLLOUT_filebounds->close();
-    if(ROLLOUT_showhide != NULL)ROLLOUT_showhide->close();
-    if(ROLLOUT_script != NULL)ROLLOUT_script->close();
-    if(ROLLOUT_compress != NULL)ROLLOUT_compress->open();
-    if(ROLLOUT_smoke3d != NULL)ROLLOUT_smoke3d->close();
+    if(ROLLOUT_compress!=NULL)ROLLOUT_compress->open();
+    if(toggle_dialogs==1){
+      if(ROLLOUT_time!=NULL)ROLLOUT_time->close();
+      if(ROLLOUT_autoload!=NULL)ROLLOUT_autoload->close();
+      if(ROLLOUT_filebounds!=NULL)ROLLOUT_filebounds->close();
+      if(ROLLOUT_showhide != NULL)ROLLOUT_showhide->close();
+      if(ROLLOUT_script != NULL)ROLLOUT_script->close();
+      if(ROLLOUT_config!=NULL)ROLLOUT_config->close();
+      if(ROLLOUT_smoke3d != NULL)ROLLOUT_smoke3d->close();
+    }
   }
   else if(menu_id == DIALOG_3DSMOKE){
     show3dsmoke_dialog=1;
-    if(ROLLOUT_filebounds != NULL)ROLLOUT_filebounds->open();
-    if(ROLLOUT_showhide != NULL)ROLLOUT_showhide->close();
-    if(ROLLOUT_script != NULL)ROLLOUT_script->close();
-    if(ROLLOUT_compress != NULL)ROLLOUT_compress->close();
-    if(ROLLOUT_smoke3d != NULL)ROLLOUT_smoke3d->open();
+    if(ROLLOUT_filebounds!=NULL)ROLLOUT_filebounds->open();
+    if(toggle_dialogs==1){
+      if(ROLLOUT_time!=NULL)ROLLOUT_time->close();
+      if(ROLLOUT_autoload!=NULL)ROLLOUT_autoload->close();
+      if(ROLLOUT_showhide != NULL)ROLLOUT_showhide->close();
+      if(ROLLOUT_script != NULL)ROLLOUT_script->close();
+      if(ROLLOUT_config!=NULL)ROLLOUT_config->close();
+      if(ROLLOUT_compress!=NULL)ROLLOUT_compress->close();
+      if(ROLLOUT_smoke3d != NULL)ROLLOUT_smoke3d->open();
+    }
   }
   glui_bounds->show();
 }
