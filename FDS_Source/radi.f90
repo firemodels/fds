@@ -624,7 +624,7 @@ INTEGER  :: N, NN,IIG,JJG,KKG,I,J,K,IW,II,JJ,KK,IOR,IC,IWUP,IWDOWN, &
             ISTART, IEND, ISTEP, JSTART, JEND, JSTEP, &
             KSTART, KEND, KSTEP, NSTART, NEND, NSTEP, &
             I_UIID, N_UPDATES, IBND, TYY, NOM, SURF_INDEX,ARRAY_INDEX,NRA, N_PART, &
-            IMIN, JMIN, KMIN, IMAX, JMAX, KMAX, N_SLICE, M_IJK, IJK
+            IMIN, JMIN, KMIN, IMAX, JMAX, KMAX, N_SLICE, M_IJK, IJK, LL
 INTEGER, ALLOCATABLE :: IJK_SLICE(:,:)
 REAL(EB) :: XID,YJD,ZKD,KAPPA_PART,DLF,DLA(3),KAPPA_1,ZZ_GET_BACKGROUND(0)
 REAL(EB), ALLOCATABLE, DIMENSION(:) :: ZZ_GET
@@ -969,8 +969,15 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                         !$OMP ATOMIC WRITE
                         IL(II,JJ,KK) = WALL(IW)%ONE_D%ILW(N,IBND)
                      CASE (INTERPOLATED_BOUNDARY) 
-                        !$OMP ATOMIC WRITE
-                        IL(II,JJ,KK) = WALL(IW)%ONE_D%ILW(N,IBND)
+                        ! IL_R holds the intensities from mesh NOM in the ghost cells of mesh NM.
+                        ! IL(II,JJ,KK) is the average of the intensities from the other mesh.
+                        NOM = WALL(IW)%NOM
+                        M2 => OMESH(NOM)
+                        IL(II,JJ,KK) = 0._EB
+                        DO LL=WALL(IW)%NIC_MIN,WALL(IW)%NIC_MAX
+                           IL(II,JJ,KK) = IL(II,JJ,KK) + M2%IL_R(LL,N,IBND)
+                        ENDDO
+                        IL(II,JJ,KK) = IL(II,JJ,KK)/REAL(WALL(IW)%NIC_MAX-WALL(IW)%NIC_MIN+1,EB)
                      CASE DEFAULT ! solid wall
                         !$OMP CRITICAL
                         WALL(IW)%ONE_D%ILW(N,IBND) = OUTRAD_W(IW) + RPI*(1._EB-WALL(IW)%ONE_D%EMISSIVITY)*INRAD_W(IW)
@@ -1217,18 +1224,16 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                UIID(:,:,:,ANGLE_INC_COUNTER) = UIID(:,:,:,ANGLE_INC_COUNTER) + WEIGH_CYL*RSA(N)*IL
             ENDIF
  
-            ! Interpolate boundary intensities onto other meshes
+            ! Interpolate boundary intensities onto other meshes.
+            ! IL_S is an array holding the intensities IL of cells just outside of mesh NOM.
  
             INTERPOLATION_LOOP: DO NOM=1,NMESHES
                IF (NM==NOM) CYCLE INTERPOLATION_LOOP
                IF (EVACUATION_ONLY(NOM)) CYCLE INTERPOLATION_LOOP
                M2=>OMESH(NOM)
                IF (M2%NIC_S==0) CYCLE INTERPOLATION_LOOP
-               OTHER_WALL_LOOP: DO IW=1,MESHES(NOM)%N_EXTERNAL_WALL_CELLS
-                  IF (M2%IJKW(9,IW)/=NM .OR. M2%BOUNDARY_TYPE(IW)/=INTERPOLATED_BOUNDARY) CYCLE OTHER_WALL_LOOP
-                  IOR = M2%IJKW(4,IW)
-                  IF (DLN(IOR,N)<=0._EB) CYCLE OTHER_WALL_LOOP
-                  M2%WALL_ILW(IW)%ILW(N,IBND)=IL(M2%IJKW(10,IW),M2%IJKW(11,IW),M2%IJKW(12,IW))
+               OTHER_WALL_LOOP: DO LL=1,M2%NIC_S
+                  M2%IL_S(LL,N,IBND) = IL(M2%IIO_S(LL),M2%JJO_S(LL),M2%KKO_S(LL))
                ENDDO OTHER_WALL_LOOP
             ENDDO INTERPOLATION_LOOP
 
