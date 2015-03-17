@@ -16,6 +16,7 @@ USE PART
 USE VEGE
 USE VELO
 USE RAD
+USE RADCONS, ONLY : DLN
 USE OUTPUT_DATA
 USE MEMORY_FUNCTIONS
 USE HVAC_ROUTINES
@@ -48,7 +49,7 @@ CHARACTER(255), PARAMETER :: maindate='$Date$'
 
 
 LOGICAL  :: EX=.FALSE.,DIAGNOSTICS,EXCHANGE_EVACUATION=.FALSE.,FIRST_PASS,CALL_UPDATE_CONTROLS,CTRL_STOP_STATUS,FOUND
-INTEGER  :: LO10,NM,IZERO,REVISION_NUMBER,IOS,CNT
+INTEGER  :: LO10,NM,IZERO,REVISION_NUMBER,IOS,CNT,ANG_INC_COUNTER
 CHARACTER(255) :: REVISION_DATE
 REAL(EB) :: T_MAX,T_MIN
 REAL(EB), ALLOCATABLE, DIMENSION(:) ::  T,TC_GLB,TC_LOC,DT_SYNC,DT_NEXT_SYNC,TI_LOC,TI_GLB, &
@@ -172,7 +173,6 @@ DO NM=1,NMESHES
    IF (PROCESS(NM)==MYID) CALL INITIALIZE_MESH_VARIABLES_1(NM)
 ENDDO
 
-
 CALL STOP_CHECK(1)
  
 ! Allocate and initialize OMESH arrays to hold "other mesh" data for a given mesh
@@ -180,7 +180,7 @@ CALL STOP_CHECK(1)
 N_COMMUNICATIONS = 0
 
 DO NM=1,NMESHES
-   IF (PROCESS(NM)==MYID) CALL INITIALIZE_MESH_EXCHANGE(NM)
+   IF (PROCESS(NM)==MYID) CALL INITIALIZE_MESH_EXCHANGE_1(NM)
 ENDDO
 CALL MPI_BARRIER(MPI_COMM_WORLD, IERR)
  
@@ -191,6 +191,13 @@ CALL MPI_INITIALIZATION_CHORES(3)
 ! Exchange information related to size of OMESH arrays
 
 CALL MPI_INITIALIZATION_CHORES(4)
+
+! Allocate and initialize OMESH arrays to hold "other mesh" data for a given mesh
+
+DO NM=1,NMESHES
+   IF (PROCESS(NM)==MYID) CALL INITIALIZE_MESH_EXCHANGE_2(NM)
+ENDDO
+CALL MPI_BARRIER(MPI_COMM_WORLD, IERR)
 
 ! Exchange CELL_COUNT, the dimension of various arrays related to obstructions
 
@@ -292,7 +299,9 @@ DO I=1,NUMBER_INITIAL_ITERATIONS
       CALL WALL_BC(T_BEGIN,NM)
       IF (RADIATION) CALL COMPUTE_RADIATION(T_BEGIN,NM)
    ENDDO
-   CALL MESH_EXCHANGE(2) ! Exchange radiation intensity at interpolated boundaries
+   DO ANG_INC_COUNTER=1,ANGLE_INCREMENT
+      CALL MESH_EXCHANGE(2) ! Exchange radiation intensity at interpolated boundaries
+   ENDDO
 ENDDO
 
 ! Compute divergence just in case the flow field is not initialized to ambient
@@ -928,12 +937,17 @@ MAIN_LOOP: DO
 
    CALL MESH_EXCHANGE(7)
 
-   ! Exchange velocity, pressure, particles, radiation at interpolated boundaries
+   ! Exchange velocity, pressure, particles at interpolated boundaries
 
    CALL POST_RECEIVES(6) 
    CALL MESH_EXCHANGE(6)
 
-   CALL MESH_EXCHANGE(2)
+   ! Exchange radiation at interpolated boundaries
+
+   DO ANG_INC_COUNTER=1,ANGLE_INCREMENT
+      CALL MESH_EXCHANGE(2)
+      IF (ICYC>1) EXIT
+   ENDDO
 
    ! Force normal components of velocity to match at interpolated boundaries
 
@@ -1583,7 +1597,7 @@ TUSED(2,:)=TUSED(2,:) + SECOND() - TNOW
 END SUBROUTINE EXCHANGE_DIVERGENCE_INFO
 
 
-SUBROUTINE INITIALIZE_MESH_EXCHANGE(NM)
+SUBROUTINE INITIALIZE_MESH_EXCHANGE_1(NM)
  
 ! Create arrays by which info is to exchanged across meshes
  
@@ -1656,7 +1670,9 @@ OTHER_MESH_LOOP: DO NOM=1,NMESHES
       IIO_MAX = M%WALL(IW)%NOM_IB(4)
       JJO_MAX = M%WALL(IW)%NOM_IB(5)
       KKO_MAX = M%WALL(IW)%NOM_IB(6)
+      M%WALL(IW)%NIC_MIN = M%OMESH(NOM)%NIC_R + 1
       M%OMESH(NOM)%NIC_R = M%OMESH(NOM)%NIC_R + (IIO_MAX-IIO_MIN+1)*(JJO_MAX-JJO_MIN+1)*(KKO_MAX-KKO_MIN+1)
+      M%WALL(IW)%NIC_MAX = M%OMESH(NOM)%NIC_R
       FOUND = .TRUE.
       IOR = M%WALL(IW)%ONE_D%IOR
       SELECT CASE(IOR)
@@ -1776,11 +1792,6 @@ OTHER_MESH_LOOP: DO NOM=1,NMESHES
    IF (.NOT.ALLOCATED(M%OMESH(NOM)%IJKW)) ALLOCATE(M%OMESH(NOM)%IJKW(15,M2%N_EXTERNAL_WALL_CELLS))
    IF (.NOT.ALLOCATED(M%OMESH(NOM)%BOUNDARY_TYPE)) ALLOCATE(M%OMESH(NOM)%BOUNDARY_TYPE(0:M2%N_EXTERNAL_WALL_CELLS))
    M%OMESH(NOM)%BOUNDARY_TYPE(0)=0
-   ALLOCATE(M%OMESH(NOM)%WALL_ILW(0:M2%N_EXTERNAL_WALL_CELLS))  
-   DO IW=0,M2%N_EXTERNAL_WALL_CELLS
-      ALLOCATE(M%OMESH(NOM)%WALL_ILW(IW)%ILW(1:NUMBER_RADIATION_ANGLES,1:NUMBER_SPECTRAL_BANDS))     
-      M%OMESH(NOM)%WALL_ILW(IW)%ILW = SIGMA*TMPA4*RPI      
-   ENDDO
 
    ! Particle and PARTICLE Orphan Arrays
  
@@ -1807,7 +1818,32 @@ OTHER_MESH_LOOP: DO NOM=1,NMESHES
 
 ENDDO OTHER_MESH_LOOP
 
-END SUBROUTINE INITIALIZE_MESH_EXCHANGE
+END SUBROUTINE INITIALIZE_MESH_EXCHANGE_1
+
+
+SUBROUTINE INITIALIZE_MESH_EXCHANGE_2(NM)
+
+! Create arrays by which info is to exchanged across meshes. In this routine, allocate arrays that involve NIC_R and NIC_S arrays.
+
+INTEGER :: NOM
+INTEGER, INTENT(IN) :: NM
+TYPE (MESH_TYPE), POINTER :: M
+
+IF (EVACUATION_ONLY(NM)) RETURN
+
+M=>MESHES(NM)
+
+! Allocate arrays to send (IL_S) and receive (IL_R) the radiation intensity (IL) at interpolated boundaries.
+! MESHES(NM)%OMESH(NOM)%IL_S are the intensities in mesh NM that are just outside the boundary of mesh NOM. IL_S is populated
+! in radi.f90 and then sent to MESHES(NOM)%OMESH(NM)%IL_R in MESH_EXCHANGE. IL_R holds the intensities until they are 
+! transferred to the ghost cells of MESHES(NOM)%IL in radi.f90. The IL_S and IL_R arrays are indexed by NIC_S and NIC_R.
+
+DO NOM=1,NMESHES
+   IF (M%OMESH(NOM)%NIC_S>0) ALLOCATE(M%OMESH(NOM)%IL_S(M%OMESH(NOM)%NIC_S,NUMBER_RADIATION_ANGLES,NUMBER_SPECTRAL_BANDS))
+   IF (M%OMESH(NOM)%NIC_R>0) ALLOCATE(M%OMESH(NOM)%IL_R(M%OMESH(NOM)%NIC_R,NUMBER_RADIATION_ANGLES,NUMBER_SPECTRAL_BANDS))
+ENDDO
+
+END SUBROUTINE INITIALIZE_MESH_EXCHANGE_2
 
 
 SUBROUTINE INITIALIZE_BACK_WALL_EXCHANGE
@@ -1896,7 +1932,7 @@ SUBROUTINE POST_RECEIVES(CODE)
 ! Set up receive buffers for MPI calls.
 
 INTEGER, INTENT(IN) :: CODE
-INTEGER :: RNODE,SNODE,NRA,NSB,IMIN,IMAX,JMIN,JMAX,KMIN,KMAX,IJK_SIZE,N,N_STORAGE_SLOTS
+INTEGER :: RNODE,SNODE,IJK_SIZE,N,N_STORAGE_SLOTS,NRA,NRA_MAX,LL,AIC
 REAL(EB) :: TNOW
 TYPE (LAGRANGIAN_PARTICLE_CLASS_TYPE), POINTER :: LPC
 
@@ -1944,22 +1980,32 @@ MESH_LOOP: DO NM=1,NMESHES
          N_REQ = MIN(N_REQ+1,SIZE(REQ))
          CALL MPI_IRECV(M4%WALL_INDEX(0,-3),SIZE(M4%WALL_INDEX),MPI_INTEGER,SNODE,NOM,MPI_COMM_WORLD,REQ(N_REQ),IERR)
     
-         IMIN = M3%I_MIN_R
-         IMAX = M3%I_MAX_R
-         JMIN = M3%J_MIN_R
-         JMAX = M3%J_MAX_R
-         KMIN = M3%K_MIN_R
-         KMAX = M3%K_MAX_R
-         IJK_SIZE = (IMAX-IMIN+1)*(JMAX-JMIN+1)*(KMAX-KMIN+1)
+         IJK_SIZE = (M3%I_MAX_R-M3%I_MIN_R+1)*(M3%J_MAX_R-M3%J_MIN_R+1)*(M3%K_MAX_R-M3%K_MIN_R+1)
    
          IF (M3%NIC_R>0) THEN
-            NRA = NUMBER_RADIATION_ANGLES
-            NSB = NUMBER_SPECTRAL_BANDS         
+
+            ! Determine the maximum number of radiation angles that are to be received
+
+            NRA_MAX = 0
+            IF (RADIATION) THEN
+               DO AIC=1,ANGLE_INCREMENT
+                  DO LL=1,M3%NIC_R
+                     NRA = 0
+                     DO N=NUMBER_RADIATION_ANGLES-AIC+1,1,-ANGLE_INCREMENT
+                        IF (DLN(M3%IOR_R(LL),N)>0._EB) NRA = NRA + 1
+                     ENDDO
+                     NRA_MAX = MAX(NRA_MAX,NRA)
+                  ENDDO
+               ENDDO
+            ENDIF
+
+            ! Allocate the 1-D arrays that hold the big mesh variables that are to be received
+
             ALLOCATE(M3%REAL_RECV_PKG1(M3%NIC_R*2*(4+N_TRACKED_SPECIES)))
-            ALLOCATE(M3%REAL_RECV_PKG2(IJK_SIZE*(4          )))
+            ALLOCATE(M3%REAL_RECV_PKG2(IJK_SIZE*4))
             ALLOCATE(M3%REAL_RECV_PKG3(M3%NIC_R*2*(4+N_TRACKED_SPECIES)))
-            ALLOCATE(M3%REAL_RECV_PKG4(IJK_SIZE*(4          )))
-            ALLOCATE(M3%REAL_RECV_PKG5((NRA*NSB+1)*M3%NIC_R+3))
+            ALLOCATE(M3%REAL_RECV_PKG4(IJK_SIZE*4))
+            ALLOCATE(M3%REAL_RECV_PKG5(NRA_MAX*NUMBER_SPECTRAL_BANDS*M3%NIC_R))
             ALLOCATE(M3%REAL_RECV_PKG7(M3%NIC_R*3))
          ENDIF
     
@@ -2000,9 +2046,11 @@ MESH_LOOP: DO NM=1,NMESHES
             CALL MPI_RECV_INIT(M3%BOUNDARY_TYPE(0),SIZE(M3%BOUNDARY_TYPE),MPI_INTEGER,SNODE,NOM,MPI_COMM_WORLD,&
                                REQ8(N_REQ8),IERR)
    
-            N_REQ9 = N_REQ9 + 1
-            CALL MPI_RECV_INIT(M3%REAL_RECV_PKG5(1),SIZE(M3%REAL_RECV_PKG5),MPI_DOUBLE_PRECISION,SNODE,NOM,MPI_COMM_WORLD,&
-                               REQ9(N_REQ9),IERR)
+            IF (RADIATION) THEN
+               N_REQ9 = N_REQ9 + 1
+               CALL MPI_RECV_INIT(M3%REAL_RECV_PKG5(1),SIZE(M3%REAL_RECV_PKG5),MPI_DOUBLE_PRECISION,SNODE,NOM,MPI_COMM_WORLD,&
+                                  REQ9(N_REQ9),IERR)
+            ENDIF
    
          ENDIF
    
@@ -2086,25 +2134,26 @@ SUBROUTINE MESH_EXCHANGE(CODE)
  
 REAL(EB) :: TNOW
 INTEGER, INTENT(IN) :: CODE
-INTEGER :: NM,II,JJ,KK,LL,N,RNODE,SNODE,IMIN,IMAX,JMIN,JMAX,KMIN,KMAX,IJK_SIZE,N_STORAGE_SLOTS,N_NEW_STORAGE_SLOTS
-INTEGER :: NN1,NN2,NRA,NSB,IPC,CNT,IBC,STORAGE_INDEX_SAVE,ANG_INC_COUNTER,ANG_INC,II1,II2,JJ1,JJ2,KK1,KK2,NQT2,NN
+INTEGER :: NM,II,JJ,KK,LL,LLL,N,RNODE,SNODE,IMIN,IMAX,JMIN,JMAX,KMIN,KMAX,IJK_SIZE,N_STORAGE_SLOTS,N_NEW_STORAGE_SLOTS
+INTEGER :: NN1,NN2,IPC,CNT,IBC,STORAGE_INDEX_SAVE,II1,II2,JJ1,JJ2,KK1,KK2,NQT2,NN,IOR,NRA,NRA_MAX,AIC
 REAL(EB), POINTER, DIMENSION(:,:,:) :: HP,HP2
 TYPE (LAGRANGIAN_PARTICLE_TYPE), POINTER :: LP
 TYPE (LAGRANGIAN_PARTICLE_CLASS_TYPE), POINTER :: LPC
 
 TNOW = SECOND()
 
-IF (CODE==2) THEN ! Check the need for the radiation exchange 
+! Special circumstances when doing the radiation exchange (CODE=2)
+
+IF (CODE==2) THEN
    IF (ANY(EVACUATION_ONLY) .AND. N_MPI_PROCESSES>1 .AND. RADIATION) THEN
-      ! Set barrier for fire processes, because evacuation process has a barrier in every ICYC
       IF (.NOT.EXCHANGE_RADIATION .AND. MYID/=EVAC_PROCESS) THEN
          CALL MPI_BARRIER(MPI_COMM_WORLD,IERR)
          RETURN
-      END IF
-   ELSE ! No evacuation or just one process or no radiation
+      ENDIF
+   ELSE
       IF (.NOT.EXCHANGE_RADIATION .OR. .NOT.RADIATION) RETURN
-   END IF
-END IF
+   ENDIF
+ENDIF
 
 SENDING_MESH_LOOP: DO NM=1,NMESHES
 
@@ -2155,14 +2204,31 @@ SENDING_MESH_LOOP: DO NM=1,NMESHES
          ENDIF
 
          IF (M3%NIC_S>0 .AND. RNODE/=SNODE) THEN
-            NRA = NUMBER_RADIATION_ANGLES
-            NSB = NUMBER_SPECTRAL_BANDS             
+
+            ! Determine the maximum number of radiation angles that are to be sent
+
+            NRA_MAX = 0
+            IF (RADIATION) THEN
+               DO AIC=1,ANGLE_INCREMENT
+                  DO LL=1,M3%NIC_S
+                     NRA = 0
+                     DO N=NUMBER_RADIATION_ANGLES-AIC+1,1,-ANGLE_INCREMENT
+                        IF (DLN(M3%IOR_S(LL),N)>0._EB) NRA = NRA + 1
+                     ENDDO
+                     NRA_MAX = MAX(NRA_MAX,NRA)
+                  ENDDO
+               ENDDO
+            ENDIF
+
+            ! Allocate 1-D arrays to hold major mesh variables that are to be sent to neighboring meshes
+
             ALLOCATE(M3%REAL_SEND_PKG1(M3%NIC_S*2*(4+N_TRACKED_SPECIES)))
-            ALLOCATE(M3%REAL_SEND_PKG2(IJK_SIZE*(4          )))
+            ALLOCATE(M3%REAL_SEND_PKG2(IJK_SIZE*4))
             ALLOCATE(M3%REAL_SEND_PKG3(M3%NIC_S*2*(4+N_TRACKED_SPECIES)))
-            ALLOCATE(M3%REAL_SEND_PKG4(IJK_SIZE*(4          )))
-            ALLOCATE(M3%REAL_SEND_PKG5((NRA*NSB+1)*M3%NIC_S+3))
+            ALLOCATE(M3%REAL_SEND_PKG4(IJK_SIZE*4))
+            ALLOCATE(M3%REAL_SEND_PKG5(NRA_MAX*NUMBER_SPECTRAL_BANDS*M3%NIC_S))
             ALLOCATE(M3%REAL_SEND_PKG7(M3%NIC_S*3))
+
          ENDIF
  
          IF (RNODE/=SNODE) THEN
@@ -2206,9 +2272,11 @@ SENDING_MESH_LOOP: DO NM=1,NMESHES
             CALL MPI_SEND_INIT(M5%BOUNDARY_TYPE(0),SIZE(M5%BOUNDARY_TYPE),MPI_INTEGER,SNODE,NM,MPI_COMM_WORLD,&
                                REQ8(N_REQ8),IERR)
 
-            N_REQ9 = N_REQ9 + 1
-            CALL MPI_SEND_INIT(M3%REAL_SEND_PKG5(1),SIZE(M3%REAL_SEND_PKG5),MPI_DOUBLE_PRECISION,SNODE,NM,MPI_COMM_WORLD,&
-                               REQ9(N_REQ9),IERR)
+            IF (RADIATION) THEN
+               N_REQ9 = N_REQ9 + 1
+               CALL MPI_SEND_INIT(M3%REAL_SEND_PKG5(1),SIZE(M3%REAL_SEND_PKG5),MPI_DOUBLE_PRECISION,SNODE,NM,MPI_COMM_WORLD,&
+                                  REQ9(N_REQ9),IERR)
+            ENDIF
 
          ENDIF
 
@@ -2453,36 +2521,22 @@ SENDING_MESH_LOOP: DO NM=1,NMESHES
       ! Send out radiation info
 
       SEND_RADIATION: IF (CODE==2 .AND. M3%NIC_S>0) THEN
-         NRA = NUMBER_RADIATION_ANGLES
-         NSB = NUMBER_SPECTRAL_BANDS         
          IF (RNODE/=SNODE) THEN
-            IF (ICYC==1 .OR. INITIALIZATION_PHASE) THEN
-               ANG_INC_COUNTER = 1
-               ANG_INC = 1
-            ELSE
-               ANG_INC_COUNTER = M%ANGLE_INC_COUNTER
-               ANG_INC = ANGLE_INCREMENT
-            ENDIF
-            M3%REAL_SEND_PKG5(1) = REAL(ANG_INC_COUNTER,EB)
-            M3%REAL_SEND_PKG5(2) = REAL(ANG_INC,EB)
-            LL = 2
-            PACK_REAL_SEND_PKG5: DO IW=1,M4%N_EXTERNAL_WALL_CELLS
-               IF (M3%IJKW(9,IW)/=NM) CYCLE PACK_REAL_SEND_PKG5
-               LL  = LL +1
-               M3%REAL_SEND_PKG5(LL) = REAL(IW,EB)
-               DO NN2=1,NSB
-                  DO NN1=NRA-ANG_INC_COUNTER+1,1,-ANG_INC
-                     LL = LL + 1
-                     M3%REAL_SEND_PKG5(LL) = M3%WALL_ILW(IW)%ILW(NN1,NN2)
+            IF (ICYC>1) ANG_INC_COUNTER = M%ANGLE_INC_COUNTER
+            LLL = 0
+            PACK_REAL_SEND_PKG5: DO LL=1,M3%NIC_S
+               IOR = M3%IOR_S(LL)
+               DO NN2=1,NUMBER_SPECTRAL_BANDS
+                  DO NN1=NUMBER_RADIATION_ANGLES-ANG_INC_COUNTER+1,1,-ANGLE_INCREMENT
+                     IF (DLN(IOR,NN1)<=0._EB) CYCLE
+                     LLL = LLL + 1
+                     M3%REAL_SEND_PKG5(LLL) = M3%IL_S(LL,NN1,NN2)
                   ENDDO
                ENDDO
             ENDDO PACK_REAL_SEND_PKG5
-            M3%REAL_SEND_PKG5(LL+1) = -999.0_EB
          ELSE
-            DO IW=1,M4%N_EXTERNAL_WALL_CELLS
-               IF (M4%WALL(IW)%NOM==NM .AND. M4%WALL(IW)%BOUNDARY_TYPE==INTERPOLATED_BOUNDARY) &
-                  M4%WALL(IW)%ONE_D%ILW(1:NRA,1:NSB) = M3%WALL_ILW(IW)%ILW(1:NRA,1:NSB)
-            ENDDO
+            M2=>MESHES(NOM)%OMESH(NM)
+            M2%IL_R = M3%IL_S
          ENDIF
       ENDIF SEND_RADIATION
  
@@ -2647,19 +2701,6 @@ IF (SNODE/=MYID) CYCLE SEND_MESH_LOOP
       KMIN = M2%K_MIN_R
       KMAX = M2%K_MAX_R
      
-      ! Receive information before the time stepping starts needed for radiation exchange
- 
-      IF (CODE==0 .AND. RADIATION) THEN
-         NRA = NUMBER_RADIATION_ANGLES
-         NSB = NUMBER_SPECTRAL_BANDS
-         DO IW=1,M%N_EXTERNAL_WALL_CELLS
-            IF (M2%IJKW(9,IW)==NOM) THEN
-               IF (.NOT.ALLOCATED(M2%WALL_ILW(IW)%ILW)) ALLOCATE(M2%WALL_ILW(IW)%ILW(NRA,NSB))
-               M2%WALL_ILW(IW)%ILW = SIGMA*TMPA4*RPI
-            ENDIF
-         ENDDO
-      ENDIF 
- 
       ! Unpack densities and species mass fractions following PREDICTOR exchange
 
       IF (CODE==1 .AND. M2%NIC_R>0 .AND. RNODE/=SNODE) THEN
@@ -2788,19 +2829,15 @@ IF (SNODE/=MYID) CYCLE SEND_MESH_LOOP
       ! Unpack radiation information at the end of the CORRECTOR stage of the time step
    
       RECEIVE_RADIATION: IF (CODE==2 .AND. M2%NIC_R>0 .AND. RNODE/=SNODE) THEN
-         NRA = NUMBER_RADIATION_ANGLES
-         NSB = NUMBER_SPECTRAL_BANDS
-         ANG_INC_COUNTER = NINT(M2%REAL_RECV_PKG5(1))
-         ANG_INC = NINT(M2%REAL_RECV_PKG5(2))
-         LL = 2
-         UNPACK_REAL_RECV_PKG5: DO 
-            LL  = LL + 1
-            IW = NINT(M2%REAL_RECV_PKG5(LL))
-            IF (IW==-999) EXIT UNPACK_REAL_RECV_PKG5
-            DO NN2=1,NSB
-               DO NN1=NRA-ANG_INC_COUNTER+1,1,-ANG_INC
-                  LL = LL + 1
-                  IF (M4%WALL(IW)%BOUNDARY_TYPE==INTERPOLATED_BOUNDARY) M4%WALL(IW)%ONE_D%ILW(NN1,NN2) = M2%REAL_RECV_PKG5(LL)
+         IF (ICYC>1) ANG_INC_COUNTER = M4%ANGLE_INC_COUNTER
+         LLL = 0
+         UNPACK_REAL_RECV_PKG5: DO LL=1,M2%NIC_R
+            IOR = M2%IOR_R(LL)
+            DO NN2=1,NUMBER_SPECTRAL_BANDS
+               DO NN1=NUMBER_RADIATION_ANGLES-ANG_INC_COUNTER+1,1,-ANGLE_INCREMENT
+                  IF (DLN(IOR,NN1)<=0._EB) CYCLE
+                  LLL = LLL + 1
+                  M2%IL_R(LL,NN1,NN2) = M2%REAL_RECV_PKG5(LLL)
                ENDDO
             ENDDO
          ENDDO UNPACK_REAL_RECV_PKG5
