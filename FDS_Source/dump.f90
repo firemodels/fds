@@ -3195,8 +3195,15 @@ CHARACTER(LABEL_LENGTH) :: DATE
 IF (ICYC==1) WRITE(LU_OUTPUT,100)
 CALL GET_DATE(DATE)
 
-WRITE(LU_ERR,'(1X,A,I7,A,F10.2,A)')  'Time Step:',ICYC,',    Simulation Time:',T(1),' s'
-
+IF (T(1) <=0.0001) THEN
+   WRITE(LU_ERR,'(1X,A,I7,A,F10.5,A)')  'Time Step:',ICYC,',    Simulation Time:',T(1),' s'
+ELSEIF (T(1)>0.0001 .AND. T(1) <=0.001) THEN
+   WRITE(LU_ERR,'(1X,A,I7,A,F10.4,A)')  'Time Step:',ICYC,',    Simulation Time:',T(1),' s'
+ELSEIF (T(1)>0.001 .AND. T(1) <=0.01) THEN
+   WRITE(LU_ERR,'(1X,A,I7,A,F10.3,A)')  'Time Step:',ICYC,',    Simulation Time:',T(1),' s'
+ELSE
+   WRITE(LU_ERR,'(1X,A,I7,A,F10.2,A)')  'Time Step:',ICYC,',    Simulation Time:',T(1),' s'
+ENDIF
 WRITE(LU_OUTPUT,'(7X,A,I7,3X,A)') 'Time Step ',ICYC,TRIM(DATE)
 IF (ITERATE_PRESSURE) THEN
    NM = MAXLOC(VELOCITY_ERROR_MAX,1)
@@ -3220,7 +3227,15 @@ DO NM=1,NMESHES
    IF (T_ACCUM(NM)<60._EB) WRITE(LU_OUTPUT,110) T_PER_STEP(NM),T_ACCUM(NM)
    IF (T_ACCUM(NM)>=60._EB .AND. T_ACCUM(NM)<3600._EB) WRITE(LU_OUTPUT,112) T_PER_STEP(NM),T_ACCUM(NM)/60._EB
    IF (T_ACCUM(NM)>=3600._EB)  WRITE(LU_OUTPUT,113) T_PER_STEP(NM),T_ACCUM(NM)/3600._EB
-   WRITE(LU_OUTPUT,111) M%DT,T(NM), M%CFL,M%ICFL,M%JCFL,M%KCFL, M%DIVMX,M%IMX,M%JMX,M%KMX, M%DIVMN,M%IMN,M%JMN,M%KMN
+   IF (T(NM) <=0.0001) THEN
+      WRITE(LU_OUTPUT,150) M%DT,T(NM), M%CFL,M%ICFL,M%JCFL,M%KCFL, M%DIVMX,M%IMX,M%JMX,M%KMX, M%DIVMN,M%IMN,M%JMN,M%KMN
+   ELSEIF (T(NM)>0.0001 .AND. T(NM) <=0.001) THEN
+      WRITE(LU_OUTPUT,151) M%DT,T(NM), M%CFL,M%ICFL,M%JCFL,M%KCFL, M%DIVMX,M%IMX,M%JMX,M%KMX, M%DIVMN,M%IMN,M%JMN,M%KMN
+   ELSEIF (T(NM)>0.001 .AND. T(NM) <=0.01) THEN
+      WRITE(LU_OUTPUT,152) M%DT,T(NM), M%CFL,M%ICFL,M%JCFL,M%KCFL, M%DIVMX,M%IMX,M%JMX,M%KMX, M%DIVMN,M%IMN,M%JMN,M%KMN
+   ELSE
+      WRITE(LU_OUTPUT,153) M%DT,T(NM), M%CFL,M%ICFL,M%JCFL,M%KCFL, M%DIVMX,M%IMX,M%JMX,M%KMX, M%DIVMN,M%IMN,M%JMN,M%KMN
+   ENDIF
    IF (ABS(M%RESMAX)>1.E-8_EB)  WRITE(LU_OUTPUT,133) M%RESMAX,M%IRM,M%JRM,M%KRM
    IF (ABS(M%POIS_PTB)>1.E-10_EB)  WRITE(LU_OUTPUT,'(A,E9.2)') '       Poisson Pert. : ',M%POIS_PTB
    IF (CHECK_POISSON) WRITE(LU_OUTPUT,'(A,E9.2)') '       Poisson Error : ',M%POIS_ERR
@@ -3236,7 +3251,19 @@ WRITE(LU_OUTPUT,*)
 110 FORMAT(6X,' CPU/step:  ',E12.3,' s, Total CPU:  ',F10.2,' s')
 112 FORMAT(6X,' CPU/step:  ',E12.3,' s, Total CPU:  ',F10.2,' min')
 113 FORMAT(6X,' CPU/step:  ',E12.3,' s, Total CPU:  ',F10.2,' hr')
-111 FORMAT(6X,' Time step: ',E12.3,' s, Total time: ',F10.2,' s'/ &
+150 FORMAT(6X,' Time step: ',E12.3,' s, Total time: ',F10.5,' s'/ &
+        6X,' Max CFL number: ',E9.2,' at (',I3,',',I3,',',I3,')'/ &
+        6X,' Max divergence: ',E9.2,' at (',I3,',',I3,',',I3,')'/ &
+        6X,' Min divergence: ',E9.2,' at (',I3,',',I3,',',I3,')')
+151 FORMAT(6X,' Time step: ',E12.3,' s, Total time: ',F10.4,' s'/ &
+        6X,' Max CFL number: ',E9.2,' at (',I3,',',I3,',',I3,')'/ &
+        6X,' Max divergence: ',E9.2,' at (',I3,',',I3,',',I3,')'/ &
+        6X,' Min divergence: ',E9.2,' at (',I3,',',I3,',',I3,')')
+152 FORMAT(6X,' Time step: ',E12.3,' s, Total time: ',F10.3,' s'/ &
+        6X,' Max CFL number: ',E9.2,' at (',I3,',',I3,',',I3,')'/ &
+        6X,' Max divergence: ',E9.2,' at (',I3,',',I3,',',I3,')'/ &
+        6X,' Min divergence: ',E9.2,' at (',I3,',',I3,',',I3,')')
+153 FORMAT(6X,' Time step: ',E12.3,' s, Total time: ',F10.2,' s'/ &
         6X,' Max CFL number: ',E9.2,' at (',I3,',',I3,',',I3,')'/ &
         6X,' Max divergence: ',E9.2,' at (',I3,',',I3,',',I3,')'/ &
         6X,' Min divergence: ',E9.2,' at (',I3,',',I3,',',I3,')')
