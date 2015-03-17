@@ -107,11 +107,11 @@ GLUI_Checkbox *CHECKBOX_labels_flip=NULL;
 GLUI_Checkbox *CHECKBOX_labels_shade=NULL;
 GLUI_Checkbox *CHECKBOX_labels_transparent_override=NULL;
 
-GLUI_Rollout *ROLLOUT_scene=NULL;
+GLUI_Rollout *ROLLOUT_coloring=NULL;
 GLUI_Rollout *ROLLOUT_font=NULL;
 GLUI_Rollout *ROLLOUT_user_labels=NULL;
 GLUI_Rollout *ROLLOUT_user_tick=NULL;
-GLUI_Rollout *ROLLOUT_label1=NULL;
+GLUI_Rollout *ROLLOUT_general=NULL;
 
 GLUI_Panel *PANEL_extreme=NULL,*PANEL_cb8=NULL,*PANEL_cb7=NULL;
 GLUI_Panel *PANEL_extreme_min=NULL, *PANEL_extreme_max=NULL;
@@ -202,7 +202,20 @@ extern "C" void Extreme_CB(int var);
 
 int cb_up_rgb[3],cb_down_rgb[3];
 
+#define GENERAL_ROLLOUT 0
+#define COLORING_ROLLOUT 1
+#define FONTS_ROLLOUT 2
+#define TICKS_ROLLOUT 3
+#define LABELS_ROLLOUT 4
 
+procdata displayprocinfo[5];
+int ndisplayprocinfo = 0;
+
+/* ------------------ Display_Rollout_CB ------------------------ */
+
+void Display_Rollout_CB(int var){
+  toggle_rollout(displayprocinfo, ndisplayprocinfo, var);
+}
 /* ------------------ glui_labels_rename ------------------------ */
 
 extern "C" void update_glui_label_text(void){
@@ -281,7 +294,7 @@ extern "C" void glui_update_fontindex(void){
 
 extern "C" void glui_labels_rename(void){
 
-  ROLLOUT_label1->set_name(_("General Settings"));
+  ROLLOUT_general->set_name(_("General Settings"));
   CHECKBOX_labels_colorbar->set_name(_("Colorbar"));
   CHECKBOX_labels_timebar->set_name(_("Time bar"));
   CHECKBOX_labels_timelabel->set_name(_("Time label"));
@@ -364,8 +377,10 @@ extern "C" void glui_labels_setup(int main_window){
 
   // -------------- General Settings -------------------
 
-  ROLLOUT_label1 = glui_labels->add_rollout(_("General"),true);
-  PANEL_gen1=glui_labels->add_panel_to_panel(ROLLOUT_label1,"",GLUI_PANEL_NONE);
+  ROLLOUT_general = glui_labels->add_rollout(_("General"),true,GENERAL_ROLLOUT,Display_Rollout_CB);
+  ADDPROCINFO(displayprocinfo, ndisplayprocinfo, ROLLOUT_general, GENERAL_ROLLOUT);
+
+  PANEL_gen1=glui_labels->add_panel_to_panel(ROLLOUT_general,"",GLUI_PANEL_NONE);
   CHECKBOX_labels_colorbar=glui_labels->add_checkbox_to_panel(PANEL_gen1,_("Colorbar"),&visColorbarLabels,LABELS_label,Labels_CB);
   CHECKBOX_labels_timebar=glui_labels->add_checkbox_to_panel(PANEL_gen1,_("Time bar"),&visTimeLabels,LABELS_label,Labels_CB);
   CHECKBOX_labels_timelabel=glui_labels->add_checkbox_to_panel(PANEL_gen1,_("Time label"),&visTimelabel,LABELS_label,Labels_CB);
@@ -399,15 +414,15 @@ extern "C" void glui_labels_setup(int main_window){
   CHECKBOX_labels_labels=glui_labels->add_checkbox_to_panel(PANEL_gen1,_("Text labels"),&visLabels,LABELS_label,Labels_CB);
   CHECKBOX_labels_meshlabel=glui_labels->add_checkbox_to_panel(PANEL_gen1,_("Mesh label"),&visBlocklabel,LABELS_meshlabel,Labels_CB);
 
-  PANEL_gen2=glui_labels->add_panel_to_panel(ROLLOUT_label1,"",GLUI_PANEL_NONE);
+  PANEL_gen2=glui_labels->add_panel_to_panel(ROLLOUT_general,"",GLUI_PANEL_NONE);
 
   BUTTON_label_1=glui_labels->add_button_to_panel(PANEL_gen2,_("Show all"),LABELS_showall,Labels_CB);
   glui_labels->add_column_to_panel(PANEL_gen2,false);
   BUTTON_label_2=glui_labels->add_button_to_panel(PANEL_gen2,_("Hide all"),LABELS_hideall,Labels_CB);
 
-  glui_labels->add_separator_to_panel(ROLLOUT_label1);
+  glui_labels->add_separator_to_panel(ROLLOUT_general);
 
-  PANEL_gen3=glui_labels->add_panel_to_panel(ROLLOUT_label1,"",GLUI_PANEL_NONE);
+  PANEL_gen3=glui_labels->add_panel_to_panel(ROLLOUT_general,"",GLUI_PANEL_NONE);
 
   CHECKBOX_labels_flip=glui_labels->add_checkbox_to_panel(PANEL_gen3,_("Flip background"),&background_flip,LABELS_flip,Labels_CB);
   CHECKBOX_labels_hms=glui_labels->add_checkbox_to_panel(PANEL_gen3,_("hms time label"),&vishmsTimelabel,LABELS_HMS,Labels_CB);
@@ -433,13 +448,14 @@ extern "C" void glui_labels_setup(int main_window){
 
   // -------------- Data coloring -------------------
 
-  ROLLOUT_scene = glui_labels->add_rollout("Data coloring",false);
+  ROLLOUT_coloring = glui_labels->add_rollout("Data coloring",false,COLORING_ROLLOUT,Display_Rollout_CB);
+  ADDPROCINFO(displayprocinfo, ndisplayprocinfo, ROLLOUT_coloring,COLORING_ROLLOUT);
 
   if(ncolorbars>0){
     int i;
 
     selectedcolorbar_index2=-1;
-    LIST_colorbar2=glui_labels->add_listbox_to_panel(ROLLOUT_scene,_("Colorbar:"),&selectedcolorbar_index2,COLORBAR_LIST2,Slice_CB);
+    LIST_colorbar2=glui_labels->add_listbox_to_panel(ROLLOUT_coloring,_("Colorbar:"),&selectedcolorbar_index2,COLORBAR_LIST2,Slice_CB);
 
     for(i=0;i<ncolorbars;i++){
       colorbardata *cbi;
@@ -451,7 +467,7 @@ extern "C" void glui_labels_setup(int main_window){
     LIST_colorbar2->set_int_val(colorbartype);
   }
 
-  PANEL_cb11=glui_labels->add_panel_to_panel(ROLLOUT_scene,"",GLUI_PANEL_NONE);
+  PANEL_cb11=glui_labels->add_panel_to_panel(ROLLOUT_coloring,"",GLUI_PANEL_NONE);
 
   PANEL_contours = glui_labels->add_panel_to_panel(PANEL_cb11,_("Colorbar type:"));
   RADIO2_plot3d_display=glui_labels->add_radiogroup_to_panel(PANEL_contours,&contour_type,UPDATEPLOT,PLOT3D_CB);
@@ -475,7 +491,7 @@ extern "C" void glui_labels_setup(int main_window){
   SPINNER_labels_transparency_data->set_float_limits(0.0,1.0,GLUI_LIMIT_CLAMP);
 
 
-  PANEL_extreme = glui_labels->add_panel_to_panel(ROLLOUT_scene,"",GLUI_PANEL_NONE);
+  PANEL_extreme = glui_labels->add_panel_to_panel(ROLLOUT_coloring,"",GLUI_PANEL_NONE);
 
   if(use_data_extremes==1){
     PANEL_extreme2 = glui_labels->add_panel_to_panel(PANEL_extreme,"Highlight extreme data");
@@ -517,7 +533,9 @@ extern "C" void glui_labels_setup(int main_window){
 
   // -------------- Fonts -------------------
 
-  ROLLOUT_font = glui_labels->add_rollout("Fonts",false);
+  ROLLOUT_font = glui_labels->add_rollout("Fonts",false,FONTS_ROLLOUT,Display_Rollout_CB);
+  ADDPROCINFO(displayprocinfo, ndisplayprocinfo, ROLLOUT_font, FONTS_ROLLOUT);
+
   RADIO_fontsize = glui_labels->add_radiogroup_to_panel(ROLLOUT_font,&fontindex,LABELS_fontsize,Labels_CB);
   RADIOBUTTON_label_1a=glui_labels->add_radiobutton_to_group(RADIO_fontsize,_("small"));
   RADIOBUTTON_label_1b=glui_labels->add_radiobutton_to_group(RADIO_fontsize,_("large"));
@@ -540,8 +558,8 @@ extern "C" void glui_labels_setup(int main_window){
 
   // -------------- User tick settings -------------------
 
-  ROLLOUT_user_tick = glui_labels->add_rollout("User ticks",false);
-
+  ROLLOUT_user_tick = glui_labels->add_rollout("User ticks",false,TICKS_ROLLOUT,Display_Rollout_CB);
+  ADDPROCINFO(displayprocinfo, ndisplayprocinfo, ROLLOUT_user_tick, TICKS_ROLLOUT);
 
   PANEL_tick1 = glui_labels->add_panel_to_panel(ROLLOUT_user_tick,_("Display"),true);
   PANEL_tick1a = glui_labels->add_panel_to_panel(PANEL_tick1,"",false);
@@ -588,7 +606,8 @@ extern "C" void glui_labels_setup(int main_window){
 
   gl=&LABEL_local;
   init_status=LABEL_Init(gl);
-  ROLLOUT_user_labels = glui_labels->add_rollout("Labels",false);
+  ROLLOUT_user_labels = glui_labels->add_rollout("Labels",false,LABELS_ROLLOUT,Display_Rollout_CB);
+  ADDPROCINFO(displayprocinfo, ndisplayprocinfo, ROLLOUT_user_labels, LABELS_ROLLOUT);
 
   PANEL_LB_panel1 = glui_labels->add_panel_to_panel(ROLLOUT_user_labels,"",GLUI_PANEL_NONE);
 
