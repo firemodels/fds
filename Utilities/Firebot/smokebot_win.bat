@@ -184,7 +184,7 @@ echo             building cfast
 cd %cfastroot%\CFAST\intel_win_64
 erase *.obj *.mod *.exe 1>> %OUTDIR%\stage0.txt 2>&1
 make VPATH="../Source:../Include" INCLUDE="../Include" -f ..\makefile intel_win_64 1>> %OUTDIR%\stage0.txt 2>&1
-call :does_file_exist cfast6_win_64.exe %OUTDIR%\stage0.txt|| exit /b 1
+call :does_file_exist cfast7_win_64.exe %OUTDIR%\stage0.txt|| exit /b 1
 
 call :GET_TIME
 set PRELIM_end=%current_time%

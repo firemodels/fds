@@ -37,7 +37,7 @@ set RUNCFAST_E=call %SVNROOT%\Verification\scripts\erase_stop.bat
 
 set FDSBASE=fds_mpi_win_64%DEBUG%.exe
 set FDSEXE=%SVNROOT%\FDS_Compilation\mpi_intel_win_64%DEBUG%\%FDSBASE%
-set CFASTEXE=%CFAST%\CFAST\intel_win_64\cfast6_win_64.exe
+set CFASTEXE=%CFAST%\CFAST\intel_win_64\cfast7_win_64.exe
 set WIND2FDSEXE=%SVNROOT%\Utilities\wind2fds\intel_win_64\wind2fds_win_64.exe
 
 set BACKGROUNDEXE=%SVNROOT%\Utilities\background\intel_win_32\background.exe
