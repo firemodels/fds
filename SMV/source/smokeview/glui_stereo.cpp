@@ -115,7 +115,6 @@ extern "C" void glui_stereo_setup(int main_window){
 
 extern "C" void hide_glui_stereo(void){
   if(glui_stereo!=NULL)glui_stereo->hide();
-  showstereo_dialog_save=showstereo_dialog;
   showstereo_dialog=0;
   updatemenu=1;
 }

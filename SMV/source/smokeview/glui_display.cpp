@@ -700,7 +700,6 @@ extern "C" void glui_labels_setup(int main_window){
 
 extern "C" void hide_glui_display(void){
   if(glui_labels!=NULL)glui_labels->hide();
-  showdisplay_dialog_save=showdisplay_dialog;
   showdisplay_dialog=0;
   updatemenu=1;
 }

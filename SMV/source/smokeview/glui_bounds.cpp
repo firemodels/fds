@@ -3001,7 +3001,6 @@ extern "C" void update_overwrite(void){
 
 extern "C" void hide_glui_bounds(void){
   if(glui_bounds!=NULL)glui_bounds->hide();
-  showbounds_dialog_save=showbounds_dialog;
   showbounds_dialog=0;
   showscript_dialog=0;
   showzip_dialog=0;

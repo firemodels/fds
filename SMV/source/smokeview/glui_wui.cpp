@@ -176,7 +176,6 @@ extern "C" void glui_wui_setup(int main_window){
 
 extern "C" void hide_glui_wui(void){
   if(glui_wui!=NULL)glui_wui->hide();
-  showwui_dialog_save=showwui_dialog;
   showwui_dialog=0;
   updatemenu=1;
 }

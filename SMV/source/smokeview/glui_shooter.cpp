@@ -112,7 +112,6 @@ void Shooter_Rollout_CB(int var){
 extern "C" void hide_glui_shooter(void){
   if(glui_shooter!=NULL){
     glui_shooter->hide();
-    showshooter_dialog_save=showshooter_dialog;
     showshooter_dialog=0;
     updatemenu=1;
   }

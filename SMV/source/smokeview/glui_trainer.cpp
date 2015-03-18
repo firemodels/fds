@@ -75,7 +75,6 @@ extern "C" void show_glui_alert(void){
 /* ------------------ hide_glui_alert ------------------------ */
 
 extern "C" void hide_glui_alert(void){
-  showalert_dialog_save=showalert_dialog;
   showalert_dialog=0;
   if(glui_alert!=NULL)glui_alert->hide();
 }

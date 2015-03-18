@@ -110,7 +110,6 @@ extern "C" void update_colorbar_label(void){
 /* ------------------ hide_glui_colorbar ------------------------ */
 
 extern "C" void hide_glui_colorbar(void){
-  showcolorbar_dialog_save=showcolorbar_dialog;
   viscolorbarpath=0;
   showcolorbar_dialog=0;
   if(show_extreme_mindata_save==1){

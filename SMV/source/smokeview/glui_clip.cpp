@@ -169,7 +169,6 @@ extern "C" void glui_clip_setup(int main_window){
 
 extern "C" void hide_glui_clip(void){
   if(glui_clip!=NULL)glui_clip->hide();
-  showclip_dialog_save=showclip_dialog;
   showclip_dialog=0;
   updatemenu=1;
 }

@@ -1776,93 +1776,6 @@ void Update_Clip(int slicedir){
   }
 }
 
-/* ------------------ update_glui_names ------------------------ */
-
-void Update_Glui_Names(void){
-  update_glui_dialogs=1;
-
-  hide_glui_colorbar();
-  update_glui_colorbar=1;
-
-  hide_glui_bounds();
-  hide_glui_3dsmoke();
-  update_glui_bounds=1;
-
-  hide_glui_geometry();
-  update_glui_geometry=1;
-  
-  hide_glui_clip();
-  update_glui_clip=1;
-
-  hide_glui_device();
-  update_glui_device=1;
-
-  hide_glui_display();
-  update_glui_labels=1;
-  
-  hide_glui_motion(DIALOG_MOTION);
-  update_glui_motion=1;
-
-  hide_glui_shooter();
-  update_glui_shooter=1;
-  
-  hide_glui_tour();
-  update_glui_tour=1;
-  
-  hide_glui_trainer();
-  update_glui_trainer=1;
-
-  hide_glui_alert();
-  update_glui_alert=1;
-  
-  hide_glui_stereo();
-  update_glui_stereo=1;
-
-  hide_glui_wui();
-  update_glui_wui=1;
-}
-
-/* ------------------ update_glui_dialogs ------------------------ */
-
-void Update_Glui_Dialogs(void){
-  if(update_glui_colorbar==1)glui_colorbar_setup(mainwindow_id);
-  if(update_glui_bounds==1){
-    glui_bounds_setup(mainwindow_id);
-    glui_3dsmoke_setup(mainwindow_id);
-  }
-  if(update_glui_geometry==1)glui_geometry_setup(mainwindow_id);
-  if(update_glui_clip==1)glui_clip_setup(mainwindow_id);
-  if(update_glui_device==1)glui_device_setup(mainwindow_id);
-  if(update_glui_labels==1)glui_labels_setup(mainwindow_id);
-  if(update_glui_motion==1)glui_motion_setup(mainwindow_id);
-  if(update_glui_shooter==1)glui_shooter_setup(mainwindow_id);
-  if(update_glui_tour==1){
-    glui_tour_setup(mainwindow_id);
-  }
-  if(update_glui_trainer==1)glui_trainer_setup(mainwindow_id);
-  if(update_glui_alert==1)glui_alert_setup(mainwindow_id);
-  if(update_glui_stereo==1)glui_stereo_setup(mainwindow_id);
-  if(update_glui_wui==1)glui_wui_setup(mainwindow_id);
-}
-
-/* ------------------ Show_Glui_Dialogs ------------------------ */
-
-void Show_Glui_Dialogs(void){
-  if(showcolorbar_dialog_save==1)show_glui_colorbar();
-
-  if(showbounds_dialog_save==1)show_glui_bounds(DIALOG_BOUNDS);
-  if(showmotion_dialog_save==1)show_glui_motion(DIALOG_MOTION);
-  if(showedit_dialog_save==1)show_glui_geometry();
-  if(showclip_dialog_save==1)show_glui_clip();
-  if(showstereo_dialog_save==1)show_glui_stereo();
-  if(showtour_dialog_save==1)show_glui_tour();
-  if(showdisplay_dialog_save==1)show_glui_display(DIALOG_DISPLAY);
-  if(showwui_dialog_save==1)show_glui_wui();
-  if(showdevice_dialog_save==1)show_glui_device();
-  if(show3dsmoke_dialog_save==1)show_glui_3dsmoke();
-  if(showtrainer_dialog_save==1)show_glui_trainer();
-}
-
 /* ------------------ update_smoothblockage_info ------------------------ */
 
 void update_smoothblockage_info(void){
@@ -1968,25 +1881,6 @@ void update_ShowScene(void){
 
 void update_Display(void){
 
-  if(update_glui_dialogs != 0){
-    switch(update_glui_dialogs){
-    case 1:
-      update_glui_dialogs = 2;
-      break;
-    case 2:
-      Update_Glui_Dialogs();
-      update_glui_dialogs = 0;
-      update_glui_dialogs = 3;
-      break;
-    case 3:
-      Show_Glui_Dialogs();
-      update_glui_dialogs = 0;
-      break;
-    default:
-      ASSERT(FFALSE);
-      break;
-    }
-  }
   if(update_have_gvec == 1){
     update_have_gvec = 0;
     update_gvec_down(1);

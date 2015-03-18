@@ -642,11 +642,6 @@ SVEXTERN int SVDECL(showwui_dialog,0), SVDECL(showdevice_dialog,0),SVDECL(show3d
 SVEXTERN int SVDECL(showtour_dialog,0),SVDECL(showalert_dialog,0),SVDECL(showtrainer_dialog,0);
 SVEXTERN int SVDECL(showtours,0);
 
-SVEXTERN int SVDECL(showbounds_dialog_save,0),SVDECL(showmotion_dialog_save,0),SVDECL(showedit_dialog_save,0), SVDECL(showclip_dialog_save,0);
-SVEXTERN int SVDECL(showstereo_dialog_save,0), SVDECL(showtour_dialog_save,0), SVDECL(showdisplay_dialog_save,0), SVDECL(showcolorbar_dialog_save,0);
-SVEXTERN int SVDECL(showwui_dialog_save,0), SVDECL(showdevice_dialog_save,0),SVDECL(show3dsmoke_dialog_save,0);
-SVEXTERN int SVDECL(showalert_dialog_save,0),SVDECL(showtrainer_dialog_save,0);
-
 SVEXTERN int SVDECL(showshooter_dialog,0);
 SVEXTERN int SVDECL(showshooter_dialog_save,0);
 SVEXTERN float shooter_xyz[3], shooter_dxyz[3], shooter_uvw[3], SVDECL(shooterpointsize,4.0);

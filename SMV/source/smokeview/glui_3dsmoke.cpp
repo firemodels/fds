@@ -585,7 +585,6 @@ extern "C" void glui_3dsmoke_setup(int main_window){
 
 extern "C" void hide_glui_3dsmoke(void){
   if(glui_3dsmoke!=NULL)glui_3dsmoke->hide();
-  show3dsmoke_dialog_save=show3dsmoke_dialog;
   show3dsmoke_dialog=0;
   updatemenu=1;
 }

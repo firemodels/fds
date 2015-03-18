@@ -1359,7 +1359,6 @@ extern "C" void update_meshlist1(int val){
 
 extern "C" void hide_glui_motion(int  menu_id){
   if(glui_motion!=NULL)glui_motion->hide();
-  showmotion_dialog_save=showmotion_dialog;
   showmotion_dialog=0;
   showview_dialog = 0;
   showrender_dialog = 0;

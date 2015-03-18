@@ -440,7 +440,6 @@ extern "C" void Volume_CB(int var){
 extern "C" void hide_glui_geometry(void){
   blockageSelect=0;
   if(glui_geometry!=NULL)glui_geometry->hide();
-  showedit_dialog_save=showedit_dialog;
   showedit_dialog=0;
   updatemenu=1;
   editwindow_status=CLOSE_WINDOW;

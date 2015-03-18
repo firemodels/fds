@@ -179,7 +179,6 @@ extern "C" void glui_device_setup(int main_window){
 
 extern "C" void hide_glui_device(void){
   if(glui_device!=NULL)glui_device->hide();
-  showdevice_dialog_save=showdevice_dialog;
   showdevice_dialog=0;
   updatemenu=1;
 }

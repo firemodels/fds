@@ -1178,29 +1178,6 @@ void ApertureMenu(int value){
   aperture=apertures[apertureindex];
 }
 
-/* ------------------ LanguageMenu ------------------------ */
-#ifdef pp_LANG
-void LanguageMenu(int value){
-  updatemenu=1;
-  if(opengldefined==1){
-    glutPostRedisplay();
-  }
-  if(value==-1){
-    strcpy(startup_lang_code,"en");
-  }
-  else{
-    langlistdata *langi;
-
-    if(value>=0&&value<nlanglistinfo){
-      langi = langlistinfo + value;
-
-      strcpy(startup_lang_code,langi->lang_code);
-    }
-  }
-  init_translate(smokeview_bindir,startup_lang_code);
-  Update_Glui_Names();
-}
-#endif
 /* ------------------ FontMenu ------------------------ */
 
 void FontMenu(int value){
@@ -7424,74 +7401,6 @@ updatemenu=0;
     glutAddMenuEntry(_("Reset"),-1);
   }
 
-/* --------------------------------languagemenu -------------------------- */
-
-#ifdef pp_LANG
-#define FONTFILL(IBEG,IEND) \
-    for(i=IBEG;i<=IEND;i++){\
-      fonttest[i-IBEG]=i;\
-    };\
-    fonttest[IEND+1-IBEG]=0;\
-    strcat(menulabel,"***");\
-    strcat(menulabel,fonttest);\
-    strcat(menulabel,"***");\
-    glutAddMenuEntry(menulabel,MENU_DUMMY)
-
-  if(show_lang_menu==1&&nlanglistinfo>0){
-    char fonttest[256];
-    char menulabel[1024];
-
-    CREATEMENU(fonttestmenu,LanguageMenu);
-    strcpy(menulabel,"   1-32: ");
-    FONTFILL(1,32);
-    strcpy(menulabel,"  33-64: ");
-    FONTFILL(33,64);
-    strcpy(menulabel,"  65-96: ");
-    FONTFILL(65,96);
-    strcpy(menulabel," 97-128: ");
-    FONTFILL(97,128);
-    strcpy(menulabel,"129-160: ");
-    FONTFILL(129,160);
-    strcpy(menulabel,"161-192: ");
-    FONTFILL(161,192);
-    strcpy(menulabel,"193-224: ");
-    FONTFILL(193,224);
-    strcpy(menulabel,"225-255: ");
-    FONTFILL(225,255);
-
-    CREATEMENU(languagemenu,LanguageMenu);
-    strcpy(menulabel,"");
-    if(strcmp(startup_lang_code,"en")==0){
-      strcat(menulabel,"*");
-    }
-    strcat(menulabel,_("English"));
-    strcat(menulabel," (en)");
-    glutAddMenuEntry(menulabel,-1);
-    for(i=0;i<nlanglistinfo;i++){
-      langlistdata *langi;
-
-      langi = langlistinfo + i;
-      strcpy(menulabel,"");
-      if(strcmp(langi->lang_code,startup_lang_code)==0){
-        strcat(menulabel,"*");
-      }
-      if(strcmp(langi->lang_name,langi->lang_code)==0){
-        strcat(menulabel,_("Language code: "));
-        strcat(menulabel,langi->lang_code);
-      }
-      else{
-        strcat(menulabel,langi->lang_name);
-        strcat(menulabel," (");
-        strcat(menulabel,langi->lang_code);
-        strcat(menulabel,")");
-      }
-      glutAddMenuEntry(menulabel,i);
-    }
-#ifdef pp_BETA
-    glutAddSubMenu("Font Test",fonttestmenu);
-#endif
-  }
-#endif
 /* --------------------------------option menu -------------------------- */
 
   CREATEMENU(optionmenu,OptionMenu);
