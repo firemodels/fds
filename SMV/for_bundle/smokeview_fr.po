@@ -1696,7 +1696,7 @@ msgid "Snap"
 msgstr "Plaquer"
 
 msgid "snap scene to closest 45 degree orientation"
-msgstr "Plaquer la scene sur la plus proche orientation a 45°"
+msgstr "Plaquer la scene sur la plus proche orientation a 45 degree"
 
 msgid "Solid"
 msgstr "Afficher le remplissage"
@@ -1831,7 +1831,7 @@ msgid "Targets"
 msgstr "Cibles"
 
 msgid "temp threshold (C"
-msgstr "seuil de temperature (°C"
+msgstr "seuil de temperature (C"
 
 msgid "Temperature"
 msgstr "Temperature"
