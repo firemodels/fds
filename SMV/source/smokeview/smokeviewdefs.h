@@ -553,7 +553,6 @@ void _Sniff_Errors(char *whereat);
 #define DIALOG_SHOWFILES 33
 #define DIALOG_SCRIPT 32
 #define DIALOG_CONFIG 34
-#define DIALOG_UNLOAD_ALL -2
 #define DIALOG_FONTS 35
 #define DIALOG_TICKS 36
 #define DIALOG_LABELS 37
