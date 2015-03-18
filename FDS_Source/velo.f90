@@ -143,13 +143,25 @@ SELECT_TURB: SELECT CASE (TURB_MODEL_TMP)
 
       DO IW=1,N_EXTERNAL_WALL_CELLS
          WC=>WALL(IW)
-         IF (WC%BOUNDARY_TYPE/=INTERPOLATED_BOUNDARY) CYCLE
-         II = WC%ONE_D%II
-         JJ = WC%ONE_D%JJ
-         KK = WC%ONE_D%KK
-         UP(II,JJ,KK) = U_GHOST(IW)
-         VP(II,JJ,KK) = V_GHOST(IW)
-         WP(II,JJ,KK) = W_GHOST(IW)
+         SELECT CASE(WC%BOUNDARY_TYPE)
+            CASE(INTERPOLATED_BOUNDARY)
+               II = WC%ONE_D%II
+               JJ = WC%ONE_D%JJ
+               KK = WC%ONE_D%KK
+               UP(II,JJ,KK) = U_GHOST(IW)
+               VP(II,JJ,KK) = V_GHOST(IW)
+               WP(II,JJ,KK) = W_GHOST(IW)
+            CASE(OPEN_BOUNDARY)
+               II = WC%ONE_D%II
+               JJ = WC%ONE_D%JJ
+               KK = WC%ONE_D%KK
+               IIG = WC%ONE_D%IIG
+               JJG = WC%ONE_D%JJG
+               KKG = WC%ONE_D%KKG
+               UP(II,JJ,KK) = UP(IIG,JJG,KKG)
+               VP(II,JJ,KK) = VP(IIG,JJG,KKG)
+               WP(II,JJ,KK) = WP(IIG,JJG,KKG)
+         END SELECT
       ENDDO
 
       ! fill edge and corner ghost cells
