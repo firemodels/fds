@@ -709,36 +709,22 @@ extern "C" void show_glui_display(int menu_id){
   if(glui_labels!=NULL)glui_labels->show();
   switch(menu_id){
   case DIALOG_DISPLAY:
-    ROLLOUT_general->open();
-    if(toggle_dialogs==1){
-      ROLLOUT_font->close();
-      ROLLOUT_user_tick->close();
-      ROLLOUT_user_labels->close();
-    }
+    Display_Rollout_CB(GENERAL_ROLLOUT);
     break;
   case DIALOG_FONTS:
-    ROLLOUT_font->open();
-    if(toggle_dialogs==1){
-      ROLLOUT_general->close();
-      ROLLOUT_user_tick->close();
-      ROLLOUT_user_labels->close();
-    }
+    Display_Rollout_CB(FONTS_ROLLOUT);
     break;
   case DIALOG_TICKS:
-    ROLLOUT_user_tick->open();
-    if(toggle_dialogs==1){
-      ROLLOUT_general->close();
-      ROLLOUT_font->close();
-      ROLLOUT_user_labels->close();
-    }
+    Display_Rollout_CB(TICKS_ROLLOUT);
+    break;
+  case DIALOG_COLORING:
+    Display_Rollout_CB(COLORING_ROLLOUT);
     break;
   case DIALOG_LABELS:
-    ROLLOUT_user_labels->open();
-    if(toggle_dialogs==1){
-      ROLLOUT_general->close();
-      ROLLOUT_font->close();
-      ROLLOUT_user_tick->close();
-    }
+    Display_Rollout_CB(LABELS_ROLLOUT);
+    break;
+  default:
+    ASSERT(0);
     break;
   }
 }

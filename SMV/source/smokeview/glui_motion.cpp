@@ -521,6 +521,7 @@ extern "C" void glui_motion_setup(int main_window){
 
   ROLLOUT_gslice = glui_motion->add_rollout_to_panel(PANEL_motion,"Slice",false,SLICE_ROLLOUT,Motion_Rollout_CB);
   ADDPROCINFO(motionprocinfo,nmotionprocinfo,ROLLOUT_gslice,SLICE_ROLLOUT);
+
   if(gslice_xyz[0]<-1000000.0&&gslice_xyz[1]<-1000000.0&&gslice_xyz[2]<-1000000.0){
     gslice_xyz[0]=(xbar0+DENORMALIZE_X(xbar))/2.0;
     gslice_xyz[1]=(ybar0+DENORMALIZE_Y(ybar))/2.0;
@@ -572,6 +573,7 @@ extern "C" void glui_motion_setup(int main_window){
 
   ROLLOUT_projection = glui_motion->add_rollout_to_panel(PANEL_viewA,_("Window properties"), false,WINDOW_ROLLOUT,Motion_Rollout_CB);
   ADDPROCINFO(motionprocinfo,nmotionprocinfo,ROLLOUT_projection,WINDOW_ROLLOUT);
+
   RADIO_projection = glui_motion->add_radiogroup_to_panel(ROLLOUT_projection, &projection_type, PROJECTION, Motion_CB);
   RADIOBUTTON_1a = glui_motion->add_radiobutton_to_group(RADIO_projection, _("Perspective"));
   RADIOBUTTON_1b = glui_motion->add_radiobutton_to_group(RADIO_projection, _("Size preserving"));
@@ -604,6 +606,7 @@ extern "C" void glui_motion_setup(int main_window){
 
   ROLLOUT_scale = glui_motion->add_rollout_to_panel(PANEL_viewA,_("Scaling"),false,SCALING_ROLLOUT,Motion_Rollout_CB);
   ADDPROCINFO(motionprocinfo,nmotionprocinfo,ROLLOUT_scale,SCALING_ROLLOUT);
+
   SPINNER_scalex=glui_motion->add_spinner_to_panel(ROLLOUT_scale,_("Scale x"),GLUI_SPINNER_FLOAT,mscale);
   SPINNER_scalex->set_float_limits(0.01,100.0,GLUI_LIMIT_CLAMP);
 
@@ -621,6 +624,7 @@ extern "C" void glui_motion_setup(int main_window){
 
   ROLLOUT_render = glui_motion->add_rollout(_("Render"), false,RENDER_ROLLOUT,Motion_Rollout_CB);
   ADDPROCINFO(motionprocinfo,nmotionprocinfo,ROLLOUT_render,RENDER_ROLLOUT);
+
   PANEL_file_type = glui_motion->add_panel_to_panel(ROLLOUT_render, "file type:", true);
   RADIO_render_type = glui_motion->add_radiogroup_to_panel(PANEL_file_type, &renderfiletype, RENDER_TYPE, Render_CB);
   glui_motion->add_radiobutton_to_group(RADIO_render_type, "PNG");
@@ -1357,7 +1361,7 @@ extern "C" void update_meshlist1(int val){
 
 /* ------------------ hide_glui_motion ------------------------ */
 
-extern "C" void hide_glui_motion(int  menu_id){
+extern "C" void hide_glui_motion(void){
   if(glui_motion!=NULL)glui_motion->hide();
 }
 
@@ -1367,29 +1371,20 @@ extern "C" void show_glui_motion(int menu_id){
   glui_motion->show();
   if(glui_motion != NULL){
     switch(menu_id){
-    case DIALOG_MOTION:
-      ROLLOUT_motion->open();
-      ROLLOUT_gslice->close();
-      ROLLOUT_projection->close();
-      ROLLOUT_render->close();
-      ROLLOUT_viewpoints->close();
-      ROLLOUT_scale->close();
-      break;
     case DIALOG_VIEW:
-      ROLLOUT_motion->close();
-      ROLLOUT_gslice->close();
-      ROLLOUT_projection->close();
-      ROLLOUT_render->close();
-      ROLLOUT_viewpoints->open();
-      ROLLOUT_scale->close();
+      Motion_Rollout_CB(VIEWPOINTS_ROLLOUT);
+      break;
+    case DIALOG_MOTION:
+      Motion_Rollout_CB(SCENE_ROLLOUT);
       break;
     case DIALOG_RENDER:
-      ROLLOUT_motion->close();
-      ROLLOUT_gslice->close();
-      ROLLOUT_projection->close();
-      ROLLOUT_render->open();
-      ROLLOUT_viewpoints->close();
-      ROLLOUT_scale->close();
+      Motion_Rollout_CB(RENDER_ROLLOUT);
+      break;
+    case DIALOG_WINDOW:
+      Motion_Rollout_CB(WINDOW_ROLLOUT);
+      break;
+    case DIALOG_SCALING:
+      Motion_Rollout_CB(SCALING_ROLLOUT);
       break;
     default:
       ASSERT(FFALSE);

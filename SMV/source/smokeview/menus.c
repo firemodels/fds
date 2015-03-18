@@ -948,44 +948,32 @@ void DialogMenu(int value){
   case DIALOG_TRAINER:
     show_glui_trainer();
     break;
-  case DIALOG_DISPLAY:
-    show_glui_display(DIALOG_DISPLAY);
-    break;
   case DIALOG_DEVICE:
     show_glui_device();
     break;
   case DIALOG_3DSMOKE:
-    show_glui_bounds(DIALOG_3DSMOKE);
-    break;
-  case DIALOG_TIME:
-    show_glui_bounds(DIALOG_TIME);
-    break;
-  case DIALOG_BOUNDS:
-    show_glui_bounds(DIALOG_BOUNDS);
-    break;
-  case DIALOG_SHOWFILES:
-    show_glui_bounds(DIALOG_SHOWFILES);
-    break;
-  case DIALOG_SCRIPT:
-    show_glui_bounds(DIALOG_SCRIPT);
-    break;
-  case DIALOG_CONFIG:
-    show_glui_bounds(DIALOG_CONFIG);
-    break;
   case DIALOG_AUTOLOAD:
-    show_glui_bounds(DIALOG_AUTOLOAD);
-    break;
+  case DIALOG_BOUNDS:
+  case DIALOG_CONFIG:
+  case DIALOG_SCRIPT:
+  case DIALOG_SHOWFILES:
   case DIALOG_SMOKEZIP:
-    show_glui_bounds(DIALOG_SMOKEZIP);
+  case DIALOG_TIME:
+    show_glui_bounds(value);
     break;
   case DIALOG_MOTION:
-    show_glui_motion(DIALOG_MOTION);
-    break;
-  case DIALOG_VIEW:
-    show_glui_motion(DIALOG_VIEW);
-    break;
   case DIALOG_RENDER:
-    show_glui_motion(DIALOG_RENDER);
+  case DIALOG_SCALING:
+  case DIALOG_VIEW:
+  case DIALOG_WINDOW:
+    show_glui_motion(value);
+    break;
+  case DIALOG_TICKS:
+  case DIALOG_COLORING:
+  case DIALOG_FONTS:
+  case DIALOG_LABELS:
+  case DIALOG_DISPLAY:
+    show_glui_display(value);
     break;
   case DIALOG_TOUR:
    show_glui_tour();
@@ -1007,15 +995,6 @@ void DialogMenu(int value){
     if(showcolorbar_dialog==0){
       hide_glui_colorbar();
     }
-    break;
-  case DIALOG_TICKS:
-    show_glui_display(DIALOG_TICKS);
-    break;
-  case DIALOG_FONTS:
-    show_glui_display(DIALOG_FONTS);
-    break;
-  case DIALOG_LABELS:
-    show_glui_display(DIALOG_LABELS);
     break;
   case DIALOG_GEOMETRY:
     showedit_dialog=1-showedit_dialog;
@@ -1042,7 +1021,7 @@ void DialogMenu(int value){
     hide_glui_shooter();
     hide_glui_display();
     hide_glui_bounds();
-    hide_glui_motion(DIALOG_MOTION);
+    hide_glui_motion();
     hide_glui_tour();
     hide_glui_clip();
     hide_glui_wui();
@@ -7194,7 +7173,7 @@ updatemenu=0;
     glutAddMenuEntry(_("Compress data files...  ALT z"), DIALOG_SMOKEZIP);
   }
 #endif
-  glutAddMenuEntry(_("Save/load config files..."), DIALOG_CONFIG);
+  glutAddMenuEntry(_("Save/load configuration files..."), DIALOG_CONFIG);
   if(have_ffmpeg==1){
     glutAddMenuEntry(_("Render images/movies..."), DIALOG_RENDER);
   }
@@ -7206,13 +7185,13 @@ updatemenu=0;
   /* --------------------------------viewdialog menu -------------------------- */
 
   CREATEMENU(viewdialogmenu, DialogMenu);
-  glutAddMenuEntry(_("Scene clipping...  ALT c"), DIALOG_CLIP);
-  glutAddMenuEntry(_("Colorbar editing...  ALT C"), DIALOG_COLORBAR);
+  glutAddMenuEntry(_("Clip scene...  ALT c"), DIALOG_CLIP);
+  glutAddMenuEntry(_("Create/edit tours...  ALT t"), DIALOG_TOUR);
+  glutAddMenuEntry(_("Edit colorbar...  ALT C"), DIALOG_COLORBAR);
   if(isZoneFireModel==0){
-    glutAddMenuEntry(_("Geometry examination...  ALT e"), DIALOG_GEOMETRY);
+    glutAddMenuEntry(_("Examine geometry...  ALT e"), DIALOG_GEOMETRY);
   }
   glutAddMenuEntry(_("Stereo settings..."), DIALOG_STEREO);
-  glutAddMenuEntry(_("Tour editing...  ALT t"), DIALOG_TOUR);
   if(trainer_active==1){
     glutAddMenuEntry(_("Trainer..."), DIALOG_TRAINER);
   }
@@ -7223,15 +7202,16 @@ updatemenu=0;
   if(nsmoke3dinfo > 0||nvolrenderinfo > 0){
     glutAddMenuEntry(_("3D smoke...  ALT s"), DIALOG_3DSMOKE);
   }
-  if(nterraininfo>0){
-    glutAddMenuEntry(_("WUI display... ALT w..."), DIALOG_WUI);
-  }
+  glutAddMenuEntry(_("Coloring..."), DIALOG_COLORING);
   if(ndeviceinfo>0){
     glutAddMenuEntry(_("Devices/Objects..."), DIALOG_DEVICE);
   }
   glutAddMenuEntry(_("Show/Hide..."), DIALOG_SHOWFILES);
   glutAddMenuEntry(_("Particle tracking..."), DIALOG_SHOOTER);
-  glutAddMenuEntry(_("Time..."), DIALOG_TIME);
+  glutAddMenuEntry(_("Time bounds..."), DIALOG_TIME);
+  if(nterraininfo>0){
+    glutAddMenuEntry(_("WUI display... ALT w..."), DIALOG_WUI);
+  }
 
   /* --------------------------------window menu -------------------------- */
 
@@ -7239,12 +7219,14 @@ updatemenu=0;
   glutAddMenuEntry(_("Fonts..."), DIALOG_FONTS);
   glutAddMenuEntry(_("User ticks..."), DIALOG_TICKS);
   glutAddMenuEntry(_("Labels..."), DIALOG_LABELS);
+  glutAddMenuEntry(_("Properties..."), DIALOG_WINDOW);
+  glutAddMenuEntry(_("Scaling..."), DIALOG_SCALING);
 
   /* --------------------------------dialog menu -------------------------- */
 
   CREATEMENU(dialogmenu,DialogMenu);
 
-  glutAddMenuEntry(_("Bounds..."), DIALOG_BOUNDS);
+  glutAddMenuEntry(_("Data bounds..."), DIALOG_BOUNDS);
   glutAddMenuEntry(_("Display...  ALT d"), DIALOG_DISPLAY);
   glutAddMenuEntry(_("Motion...  ALT m"),DIALOG_MOTION);
   glutAddMenuEntry(_("Viewpoints..."),DIALOG_VIEW);

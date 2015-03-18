@@ -80,7 +80,7 @@ EXTERNCPP void hide_glui_trainer(void);
 EXTERNCPP void show_glui_colorbar(void);
 EXTERNCPP void hide_glui_colorbar(void);
 EXTERNCPP void show_glui_motion(int menu_id);
-EXTERNCPP void hide_glui_motion(int menu_id);
+EXTERNCPP void hide_glui_motion(void);
 EXTERNCPP void show_glui_clip(void);
 
 EXTERNCPP void hide_glui_clip(void);
@@ -96,8 +96,6 @@ EXTERNCPP void hide_glui_tour(void);
 EXTERNCPP void hide_glui_trainer(void);
 EXTERNCPP void show_glui_stereo(void);
 EXTERNCPP void hide_glui_stereo(void);
-EXTERNCPP void show_glui_3dsmoke(void);
-EXTERNCPP void hide_glui_3dsmoke(void);
 
 EXTERNCPP void enable_boundary_glui(void);
 EXTERNCPP void disable_boundary_glui(void);

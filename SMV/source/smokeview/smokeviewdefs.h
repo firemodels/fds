@@ -558,6 +558,9 @@ void _Sniff_Errors(char *whereat);
 #define DIALOG_LABELS 37
 #define DIALOG_AUTOLOAD 38
 #define DIALOG_TIME 39
+#define DIALOG_COLORING 40
+#define DIALOG_SCALING 41
+#define DIALOG_WINDOW 42
 
 #define UNLOAD_ALL -1
 #define UNLOAD_LAST -2
