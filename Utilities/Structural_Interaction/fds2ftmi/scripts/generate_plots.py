@@ -13,7 +13,7 @@ from matplotlib import rcParams
 from scipy import integrate
 
 # Getting SVN number 
-SVN='21970'
+SVN='22018'
 
 # Help to find the fonts properly!
 # You can find the list of fonts installed on the system with:
