@@ -20,7 +20,8 @@ PUBLIC :: INIT_TURB_ARRAYS, VARDEN_DYNSMAG, WANNIER_FLOW, &
           GET_REV_turb, WALL_MODEL, COMPRESSION_WAVE, VELTAN2D,VELTAN3D, &
           SYNTHETIC_TURBULENCE, SYNTHETIC_EDDY_SETUP, TEST_FILTER, EX2G3D, TENSOR_DIFFUSIVITY_MODEL, &
           TWOD_VORTEX_CERFACS, HEAT_FLUX_MODEL, ABL_HEAT_FLUX_MODEL, RNG_EDDY_VISCOSITY, &
-          NS_ANALYTICAL_SOLUTION, NS_U_EXACT, NS_V_EXACT, NS_H_EXACT, SANDIA_DAT, SPECTRAL_OUTPUT, SANDIA_OUT
+          NS_ANALYTICAL_SOLUTION, NS_U_EXACT, NS_V_EXACT, NS_H_EXACT, SANDIA_DAT, SPECTRAL_OUTPUT, SANDIA_OUT, &
+          FILL_EDGES
  
 CONTAINS
 
@@ -791,6 +792,111 @@ A(:,JBP1,:) = MIN(A_MAX,MAX(A_MIN,2._EB*A(:,JBAR,:)-A(:,JBM1,:)))
 A(:,:,KBP1) = MIN(A_MAX,MAX(A_MIN,2._EB*A(:,:,KBAR)-A(:,:,KBM1)))
 
 END SUBROUTINE EX2G3D
+
+
+SUBROUTINE FILL_EDGES(A)
+
+! Extrapolate A to egdes and corners of 3D arrays
+
+REAL(EB), INTENT(INOUT) :: A(0:IBP1,0:JBP1,0:KBP1)
+INTEGER :: I,J,K
+
+!    ---------------------
+!    |         |         |
+!    |    A    |    C    |
+!    |         |         |
+!    |---------x----------
+!    |         |         |
+!    |    O    |    B    |
+!    |         |         |
+!    ---------------------
+!
+!  For the edge above (x pointing out of the screen) O is the unknown.
+!  It is obtained from a 2nd-order extrapolation.  First, A and B are
+!  averaged to point x, then O = 2*(.5*(A+B)) - C = (A+B) - C.
+!
+!  Note that for edges of an interpolated mesh, the values A and B
+!  are obtained from a mesh exchange and populated as wall ghost cell
+!  values in U_GHOST(IW), for example.
+
+! x edges
+
+J=0; K=0
+DO I=1,IBAR
+   A(I,J,K) = ( A(I,J+1,K) + A(I,J,K+1) ) - A(I,J+1,K+1)
+ENDDO
+
+J=0; K=KBP1
+DO I=1,IBAR
+   A(I,J,K) = ( A(I,J+1,K) + A(I,J,K-1) ) - A(I,J+1,K-1)
+ENDDO
+
+J=JBP1; K=0
+DO I=1,IBAR
+   A(I,J,K) = ( A(I,J-1,K) + A(I,J,K+1) ) - A(I,J-1,K+1)
+ENDDO
+
+J=JBP1; K=KBP1
+DO I=1,IBAR
+   A(I,J,K) = ( A(I,J-1,K) + A(I,J,K-1) ) - A(I,J-1,K-1)
+ENDDO
+
+! y edges
+
+I=0; K=0
+DO J=1,JBAR
+   A(I,J,K) = ( A(I+1,J,K) + A(I,J,K+1) ) - A(I+1,J,K+1)
+ENDDO
+
+I=0; K=KBP1
+DO J=1,JBAR
+   A(I,J,K) = ( A(I+1,J,K) + A(I,J,K-1) ) - A(I+1,J,K-1)
+ENDDO
+
+I=IBP1; K=0
+DO J=1,JBAR
+   A(I,J,K) = ( A(I-1,J,K) + A(I,J,K+1) ) - A(I-1,J,K+1)
+ENDDO
+
+I=IBP1; K=KBP1
+DO J=1,JBAR
+   A(I,J,K) = ( A(I-1,J,K) + A(I,J,K-1) ) - A(I-1,J,K-1)
+ENDDO
+
+! z edges
+
+I=0; J=0
+DO K=1,KBAR
+   A(I,J,K) = ( A(I+1,J,K) + A(I,J+1,K) ) - A(I+1,J+1,K)
+ENDDO
+
+I=0; J=JBP1
+DO K=1,KBAR
+   A(I,J,K) = ( A(I+1,J,K) + A(I,J-1,K) ) - A(I+1,J-1,K)
+ENDDO
+
+I=IBP1; J=0
+DO K=1,KBAR
+   A(I,J,K) = ( A(I-1,J,K) + A(I,J+1,K) ) - A(I-1,J+1,K)
+ENDDO
+
+I=IBP1; J=JBP1
+DO K=1,KBAR
+   A(I,J,K) = ( A(I-1,J,K) + A(I,J-1,K) ) - A(I-1,J-1,K)
+ENDDO
+
+! Corners
+
+A(0,0,0) = 2._EB*A(1,1,1) - A(2,2,2)
+A(IBP1,0,0) = 2._EB*A(IBP1-1,1,1) - A(IBP1-2,2,2)
+A(0,JBP1,0) = 2._EB*A(1,JBP1-1,1) - A(2,JBP1-2,2)
+A(0,0,KBP1) = 2._EB*A(1,1,KBP1-1) - A(2,2,KBP1-2)
+A(IBP1,JBP1,0) = 2._EB*A(IBP1-1,JBP1-1,1) - A(IBP1-2,JBP1-2,2)
+A(IBP1,0,KBP1) = 2._EB*A(IBP1-1,1,KBP1-1) - A(IBP1-2,2,KBP1-2)
+A(0,JBP1,KBP1) = 2._EB*A(1,JBP1-1,KBP1-1) - A(2,JBP1-2,KBP1-2)
+A(IBP1,JBP1,KBP1) = 2._EB*A(IBP1-1,JBP1-1,KBP1-1) - A(IBP1-2,JBP1-2,KBP1-2)
+
+END SUBROUTINE FILL_EDGES
 
 
 SUBROUTINE TEST_FILTER(HAT,ORIG)
