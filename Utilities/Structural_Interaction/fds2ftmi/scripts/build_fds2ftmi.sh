@@ -10,10 +10,16 @@ WARNING_LOG=$OUTPUT_DIR/warnings
 
 # Clean outputs
 cd $FIREBOT_DIR
-rm -rf output/
+rm -rf output
 
 # Create output dir
 mkdir output
+
+# Clean previous results
+cd $FDS2FTMI_DIR/examples/simple_panel_hot
+rm *.csv 
+cd $FDS2FTMI_DIR/examples/h_profile
+rm *.csv 
 
 function usage {
 echo "firebot.sh [ -q queue_name -r revision_number -s -u svn_username -v max_validation_processes -y ]"
@@ -46,10 +52,14 @@ shift $(($OPTIND-1))
 if [[ $SVN_REVISION = "" ]]; then
    cd $FDS_SVNROOT/FDS_Source
    svn update >> $OUTPUT_DIR/stage1 2>&1
+   cd $FDS2FTMI_DIR/source
+   svn update >> $OUTPUT_DIR/stage1_ftmi 2>&1
 else
    cd $FDS_SVNROOT/FDS_Source
    svn update -r $SVN_REVISION >> $OUTPUT_DIR/stage1 2>&1
-   echo "At revision ${SVN_REVISION}." >> $OUTPUT_DIR/stage1 2>&1
+   cd $FDS2FTMI_DIR/source
+   svn update -r $SVN_REVISION >> $OUTPUT_DIR/stage1_ftmi 2>&1
+   echo "At revision ${SVN_REVISION}." 
 fi
 
 SVN_REVISION=`tail -n 1 $OUTPUT_DIR/stage1 | sed "s/[^0-9]//g"`
