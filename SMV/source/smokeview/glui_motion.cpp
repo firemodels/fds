@@ -407,7 +407,7 @@ extern "C" void glui_motion_setup(int main_window){
     glui_motion=NULL;
   }
   glui_motion = GLUI_Master.create_glui(_("Motion/View/Render"),0,0,0);
-  if(showmotion_dialog==0)glui_motion->hide();
+  glui_motion->hide();
 
   PANEL_motion = glui_motion->add_panel("Motion",true);
   ROLLOUT_motion = glui_motion->add_rollout_to_panel(PANEL_motion, _("Scene"),true, SCENE_ROLLOUT, Motion_Rollout_CB);
@@ -1359,23 +1359,15 @@ extern "C" void update_meshlist1(int val){
 
 extern "C" void hide_glui_motion(int  menu_id){
   if(glui_motion!=NULL)glui_motion->hide();
-  showmotion_dialog=0;
-  showview_dialog = 0;
-  showrender_dialog = 0;
 }
 
 /* ------------------ show_glui_motion_setup ------------------------ */
 
 extern "C" void show_glui_motion(int menu_id){
-  showmotion_dialog=1;
   glui_motion->show();
   if(glui_motion != NULL){
-    showmotion_dialog=0;
-    showview_dialog=0;
-    showrender_dialog=0;
     switch(menu_id){
     case DIALOG_MOTION:
-      showmotion_dialog=1;
       ROLLOUT_motion->open();
       ROLLOUT_gslice->close();
       ROLLOUT_projection->close();
@@ -1384,7 +1376,6 @@ extern "C" void show_glui_motion(int menu_id){
       ROLLOUT_scale->close();
       break;
     case DIALOG_VIEW:
-      showview_dialog=1;
       ROLLOUT_motion->close();
       ROLLOUT_gslice->close();
       ROLLOUT_projection->close();
@@ -1393,7 +1384,6 @@ extern "C" void show_glui_motion(int menu_id){
       ROLLOUT_scale->close();
       break;
     case DIALOG_RENDER:
-      showrender_dialog=1;
       ROLLOUT_motion->close();
       ROLLOUT_gslice->close();
       ROLLOUT_projection->close();
@@ -1414,7 +1404,6 @@ void Motion_DLG_CB(int var){
   switch(var){
   case 1:
     if(glui_motion!=NULL)glui_motion->hide();
-    showmotion_dialog=0;
     updatemenu=1;
     break;
   case SAVE_SETTINGS:

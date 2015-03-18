@@ -110,6 +110,12 @@ GLUI_Listbox *LISTBOX_avatar=NULL;
 procdata toursprocinfo[3];
 int ntoursprocinfo = 0;
 
+/* ------------------ is_tour_open ------------------------ */
+
+int is_tour_open(void){
+  return 0;
+}
+
 /* ------------------ Shooter_Rollout_CB ------------------------ */
 
 void Tours_Rollout_CB(int var){
@@ -165,7 +171,7 @@ extern "C" void glui_tour_setup(int main_window){
     glui_tour=NULL;
   }
   glui_tour = GLUI_Master.create_glui(_("Tours"),0,0,0);
-  if(showtour_dialog==0)glui_tour->hide();
+  glui_tour->hide();
 
 
   ROLLOUT_tour = glui_tour->add_rollout("Tours",true,TOURS_TOURS_ROLLOUT, Tours_Rollout_CB);

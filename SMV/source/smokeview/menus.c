@@ -943,102 +943,61 @@ void DialogMenu(int value){
   glutPostRedisplay();
   switch(value){
   case DIALOG_SHOOTER:
-    showshooter_dialog=1-showshooter_dialog;
-    if(showshooter_dialog==1)show_glui_shooter();
-    if(showshooter_dialog==0)hide_glui_shooter();
+    show_glui_shooter();
     break;
   case DIALOG_TRAINER:
-    showtrainer_dialog=1-showtrainer_dialog;
-    if(showtrainer_dialog==1)show_glui_trainer();
-    if(showtrainer_dialog==0)hide_glui_trainer();
+    show_glui_trainer();
     break;
   case DIALOG_DISPLAY:
-    showdisplay_dialog=1-showdisplay_dialog;
-    if(showdisplay_dialog==1)show_glui_display(DIALOG_DISPLAY);
-    if(showdisplay_dialog==0)hide_glui_display();
+    show_glui_display(DIALOG_DISPLAY);
     break;
   case DIALOG_DEVICE:
-    showdevice_dialog=1-showdevice_dialog;
-    if(showdevice_dialog==1)show_glui_device();
-    if(showdevice_dialog==0)hide_glui_device();
+    show_glui_device();
     break;
   case DIALOG_3DSMOKE:
-    show3dsmoke_dialog = 1 - show3dsmoke_dialog;
-    showload_dialog = 0;
-    showfiles_dialog = 0;
-    showscript_dialog = 0;
-    showzip_dialog = 0;
-    
-    if(show3dsmoke_dialog == 1)show_glui_bounds(DIALOG_3DSMOKE);
-    if(show3dsmoke_dialog == 0)hide_glui_bounds();
+    show_glui_bounds(DIALOG_3DSMOKE);
     break;
   case DIALOG_TIME:
-    showtime_dialog = 1-showtime_dialog;
-    if(showtime_dialog==1)show_glui_bounds(DIALOG_TIME);
-    if(showtime_dialog==0)hide_glui_bounds();
+    show_glui_bounds(DIALOG_TIME);
     break;
   case DIALOG_BOUNDS:
     show_glui_bounds(DIALOG_BOUNDS);
     break;
   case DIALOG_SHOWFILES:
-    showfiles_dialog = 1 - showfiles_dialog;
-    if(showfiles_dialog == 1)show_glui_bounds(DIALOG_SHOWFILES);
-    if(showfiles_dialog == 0)hide_glui_bounds();
+    show_glui_bounds(DIALOG_SHOWFILES);
     break;
   case DIALOG_SCRIPT:
-    showscript_dialog = 1 - showscript_dialog;
-    if(showscript_dialog == 1)show_glui_bounds(DIALOG_SCRIPT);
-    if(showscript_dialog == 0)hide_glui_bounds();
+    show_glui_bounds(DIALOG_SCRIPT);
     break;
   case DIALOG_CONFIG:
-    showconfig_dialog = 1-showconfig_dialog;
-    if(showconfig_dialog==1)show_glui_bounds(DIALOG_CONFIG);
-    if(showconfig_dialog==0)hide_glui_bounds();
+    show_glui_bounds(DIALOG_CONFIG);
     break;
   case DIALOG_AUTOLOAD:
-    showload_dialog = 1-showload_dialog;
-    if(showload_dialog==1)show_glui_bounds(DIALOG_AUTOLOAD);
-    if(showload_dialog==0)hide_glui_bounds();
+    show_glui_bounds(DIALOG_AUTOLOAD);
     break;
   case DIALOG_SMOKEZIP:
-    showzip_dialog = 1 - showzip_dialog;
-    if(showzip_dialog == 1)show_glui_bounds(DIALOG_SMOKEZIP);
-    if(showzip_dialog == 0)hide_glui_bounds();
+    show_glui_bounds(DIALOG_SMOKEZIP);
     break;
   case DIALOG_MOTION:
-    showmotion_dialog = 1 - showmotion_dialog;
-    if(showmotion_dialog == 1)show_glui_motion(DIALOG_MOTION);
-    if(showmotion_dialog == 0)hide_glui_motion(DIALOG_MOTION);
+    show_glui_motion(DIALOG_MOTION);
     break;
   case DIALOG_VIEW:
-    showview_dialog = 1 - showview_dialog;
-    if(showview_dialog == 1)show_glui_motion(DIALOG_VIEW);
-    if(showview_dialog == 0)hide_glui_motion(DIALOG_VIEW);
+    show_glui_motion(DIALOG_VIEW);
     break;
   case DIALOG_RENDER:
-    showrender_dialog=1-showrender_dialog;
-    if(showrender_dialog == 1)show_glui_motion(DIALOG_RENDER);
-    if(showrender_dialog == 0)hide_glui_motion(DIALOG_RENDER);
+    show_glui_motion(DIALOG_RENDER);
     break;
   case DIALOG_TOUR:
-   showtour_dialog=1-showtour_dialog;
-   if(showtour_dialog==1)show_glui_tour();
-   if(showtour_dialog==0)hide_glui_tour();
+   show_glui_tour();
    break;
   case DIALOG_CLIP:
-    showclip_dialog=1-showclip_dialog;
-    if(showclip_dialog==1)show_glui_clip();
-    if(showclip_dialog==0)hide_glui_clip();
+    show_glui_clip();
     break;
   case DIALOG_STEREO:
-    showstereo_dialog=1-showstereo_dialog;
-    if(showstereo_dialog==1)show_glui_stereo();
-    if(showstereo_dialog==0)hide_glui_stereo();
+    show_glui_stereo();
     break;
   case DIALOG_WUI:
-    showwui_dialog=1-showwui_dialog;
-    if(showwui_dialog==1)show_glui_wui();
-    if(showwui_dialog==0)hide_glui_wui();
+    show_glui_wui();
     break;
   case DIALOG_COLORBAR:
     showcolorbar_dialog=1-showcolorbar_dialog;
@@ -1050,16 +1009,13 @@ void DialogMenu(int value){
     }
     break;
   case DIALOG_TICKS:
-    showticks_dialog = 1-showticks_dialog;
-    if(showticks_dialog==1)show_glui_display(DIALOG_TICKS);
+    show_glui_display(DIALOG_TICKS);
     break;
   case DIALOG_FONTS:
-    showfonts_dialog = 1-showfonts_dialog;
-    if(showfonts_dialog==1)show_glui_display(DIALOG_FONTS);
+    show_glui_display(DIALOG_FONTS);
     break;
   case DIALOG_LABELS:
-    showlabels_dialog = 1-showlabels_dialog;
-    if(showlabels_dialog==1)show_glui_display(DIALOG_LABELS);
+    show_glui_display(DIALOG_LABELS);
     break;
   case DIALOG_GEOMETRY:
     showedit_dialog=1-showedit_dialog;
@@ -1082,31 +1038,18 @@ void DialogMenu(int value){
 
     break;
   case DIALOG_HIDEALL:
-    showshooter_dialog = 0;
+    showcolorbar_dialog = 0;
     hide_glui_shooter();
-    showdisplay_dialog=0;
     hide_glui_display();
-    showbounds_dialog=0;
-    show3dsmoke_dialog=0;
-    showgluivol3dsmoke=0;
-    showzip_dialog=0;
     hide_glui_bounds();
-    showmotion_dialog=0;
     hide_glui_motion(DIALOG_MOTION);
-    showtour_dialog=0;
     hide_glui_tour();
-    showclip_dialog=0;
     hide_glui_clip();
-    showwui_dialog=0;
     hide_glui_wui();
-    showstereo_dialog=0;
     hide_glui_stereo();
-    showcolorbar_dialog=0;
     hide_glui_colorbar();
     if(showedit_dialog==1)DialogMenu(DIALOG_GEOMETRY);
-    showtrainer_dialog=0;
     hide_glui_trainer();
-    showdevice_dialog=0;
     hide_glui_device();
     break;
   default:
@@ -1245,7 +1188,6 @@ void OptionMenu(int value){
   if(value==2){
     trainer_mode=1;
     if(showtrainer_dialog==0){
-      showtrainer_dialog=1;
       show_glui_trainer();
     }
     FontMenu(LARGE_FONT);
@@ -2474,7 +2416,6 @@ void TourMenu(int value){
     break;
   case MENU_TOUR_NEW:
     add_new_tour();
-    showtour_dialog=0;
     DialogMenu(DIALOG_TOUR);
     break;
   case -13:               
@@ -2508,13 +2449,11 @@ void TourMenu(int value){
     if(scriptoutstream!=NULL){
       fprintf(scriptoutstream,"UNLOADTOUR\n");
     }
-    showtour_dialog=1;
     DialogMenu(DIALOG_TOUR);
     break;
   case -4:
     edittour=1-edittour;
     if(edittour==1&&showtour_dialog==0){
-      showtour_dialog=1;
       show_glui_tour();
     }
     break;
@@ -4655,7 +4594,7 @@ static int showhideslicemenu=0,showvslicemenu=0;
 static int plot3dshowmenu=0, staticvariablemenu=0, helpmenu=0, webhelpmenu=0, keyboardhelpmenu=0, mousehelpmenu=0;
 static int vectorskipmenu=0,unitsmenu=0;
 static int isosurfacemenu=0, isovariablemenu=0, levelmenu=0;
-static int fontmenu=0, aperturemenu=0,dialogmenu=0,zoommenu=0,languagemenu=0,fonttestmenu=0;
+static int fontmenu=0, aperturemenu=0,dialogmenu=0,zoommenu=0,languagemenu=0;
 static int gridslicemenu=0, blockagemenu=0, immersedmenu=0, loadpatchmenu=0, ventmenu=0, circularventmenu=0;
 static int loadisomenu=0, isosurfacetypemenu=0;
 static int geometrymenu=0, loadunloadmenu=0, reloadmenu=0, aboutmenu=0, disclaimermenu=0, terrain_showmenu=0;

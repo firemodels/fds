@@ -68,14 +68,12 @@ extern "C" void update_glui_viewlist(void){
 /* ------------------ show_glui_alert ------------------------ */
 
 extern "C" void show_glui_alert(void){
-  showalert_dialog=1;
   if(glui_alert!=NULL)glui_alert->show();
 }
 
 /* ------------------ hide_glui_alert ------------------------ */
 
 extern "C" void hide_glui_alert(void){
-  showalert_dialog=0;
   if(glui_alert!=NULL)glui_alert->hide();
 }
 
@@ -105,7 +103,6 @@ extern "C" void hide_glui_trainer(void){
 /* ------------------ show_glui_trainer ------------------------ */
 
 extern "C" void show_glui_trainer(void){
-  showtrainer_dialog=1;
   if(glui_trainer!=NULL){
     glui_trainer->show();
     showtrainer_dialog=1;

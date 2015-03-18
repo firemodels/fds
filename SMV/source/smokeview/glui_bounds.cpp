@@ -554,7 +554,7 @@ extern "C" void glui_bounds_setup(int main_window){
   }
   overwrite_all=0;
   glui_bounds = GLUI_Master.create_glui( "Files/Bounds",0,0,0 );
-  if(showbounds_dialog==0)glui_bounds->hide();
+  glui_bounds->hide();
 
   PANEL_files = glui_bounds->add_panel("Files", true);
 
@@ -2805,7 +2805,6 @@ void Bounds_DLG_CB(int var){
   switch(var){
   case CLOSE:
     glui_bounds->hide();
-    showbounds_dialog=0;
     updatemenu=1;
     break;
   case SAVE_SETTINGS:
@@ -2838,15 +2837,7 @@ extern "C" void show_glui_bounds(int menu_id){
       if(ROLLOUT_outputpatchdata != NULL)ROLLOUT_outputpatchdata->close();
     }
     
-  showbounds_dialog=0;
-  showscript_dialog=0;
-  showconfig_dialog = 0;
-  showzip_dialog = 0;
-  show3dsmoke_dialog=0;
-  showfiles_dialog = 0;
-  showload_dialog = 0;
   if(menu_id==DIALOG_BOUNDS){
-    showbounds_dialog=1;
     if(nsliceinfo>0){
       islice=RADIO_slice->get_int_val();
       setslicebounds(islice);
@@ -2885,7 +2876,6 @@ extern "C" void show_glui_bounds(int menu_id){
     }
   }
   else if(menu_id == DIALOG_SHOWFILES){
-    showfiles_dialog = 1;
     if(ROLLOUT_showhide != NULL)ROLLOUT_showhide->open();
     if(toggle_dialogs==1){
       if(ROLLOUT_time!=NULL)ROLLOUT_time->close();
@@ -2898,7 +2888,6 @@ extern "C" void show_glui_bounds(int menu_id){
     }
   }
   else if(menu_id==DIALOG_CONFIG){
-    showconfig_dialog = 1;
     if(ROLLOUT_config!=NULL)ROLLOUT_config->open();
     if(toggle_dialogs==1){
       if(ROLLOUT_time!=NULL)ROLLOUT_time->close();
@@ -2911,7 +2900,6 @@ extern "C" void show_glui_bounds(int menu_id){
     }
   }
   else if(menu_id==DIALOG_AUTOLOAD){
-    showload_dialog = 1;
     if(ROLLOUT_autoload!=NULL)ROLLOUT_autoload->open();
     if(toggle_dialogs==1){
       if(ROLLOUT_time!=NULL)ROLLOUT_time->close();
@@ -2924,7 +2912,6 @@ extern "C" void show_glui_bounds(int menu_id){
     }
   }
   else if(menu_id==DIALOG_TIME){
-    showtime_dialog = 1;
     if(ROLLOUT_time!=NULL)ROLLOUT_time->open();
     if(toggle_dialogs==1){
       if(ROLLOUT_autoload!=NULL)ROLLOUT_autoload->close();
@@ -2937,7 +2924,6 @@ extern "C" void show_glui_bounds(int menu_id){
     }
   }
   else if(menu_id==DIALOG_SCRIPT){
-    showscript_dialog=1;
     if(ROLLOUT_script != NULL)ROLLOUT_script->open();
     if(toggle_dialogs==1){
       if(ROLLOUT_time!=NULL)ROLLOUT_time->close();
@@ -2950,7 +2936,6 @@ extern "C" void show_glui_bounds(int menu_id){
     }
   }
   else if(menu_id == DIALOG_SMOKEZIP){
-    showzip_dialog=1;
     if(ROLLOUT_compress!=NULL)ROLLOUT_compress->open();
     if(toggle_dialogs==1){
       if(ROLLOUT_time!=NULL)ROLLOUT_time->close();
@@ -2963,7 +2948,6 @@ extern "C" void show_glui_bounds(int menu_id){
     }
   }
   else if(menu_id == DIALOG_3DSMOKE){
-    show3dsmoke_dialog=1;
     if(ROLLOUT_filebounds!=NULL)ROLLOUT_filebounds->open();
     if(toggle_dialogs==1){
       if(ROLLOUT_time!=NULL)ROLLOUT_time->close();
@@ -3001,9 +2985,6 @@ extern "C" void update_overwrite(void){
 
 extern "C" void hide_glui_bounds(void){
   if(glui_bounds!=NULL)glui_bounds->hide();
-  showbounds_dialog=0;
-  showscript_dialog=0;
-  showzip_dialog=0;
 }
 
 /* ------------------ update_vector_widgets ------------------------ */

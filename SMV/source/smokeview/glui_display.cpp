@@ -373,7 +373,7 @@ extern "C" void glui_labels_setup(int main_window){
     glui_labels=NULL;
   }
   glui_labels = GLUI_Master.create_glui("Display",0,0,0);
-  if(showdisplay_dialog==0)glui_labels->hide();
+  glui_labels->hide();
 
   // -------------- General Settings -------------------
 
@@ -700,7 +700,6 @@ extern "C" void glui_labels_setup(int main_window){
 
 extern "C" void hide_glui_display(void){
   if(glui_labels!=NULL)glui_labels->hide();
-  showdisplay_dialog=0;
   updatemenu=1;
 }
 
@@ -708,13 +707,8 @@ extern "C" void hide_glui_display(void){
 
 extern "C" void show_glui_display(int menu_id){
   if(glui_labels!=NULL)glui_labels->show();
-  showdisplay_dialog = 0;
-  showfonts_dialog = 0;
-  showticks_dialog = 0;
-  showlabels_dialog = 0;
   switch(menu_id){
   case DIALOG_DISPLAY:
-    showdisplay_dialog = 1;
     ROLLOUT_general->open();
     if(toggle_dialogs==1){
       ROLLOUT_font->close();
@@ -723,7 +717,6 @@ extern "C" void show_glui_display(int menu_id){
     }
     break;
   case DIALOG_FONTS:
-    showfonts_dialog = 1;
     ROLLOUT_font->open();
     if(toggle_dialogs==1){
       ROLLOUT_general->close();
@@ -732,7 +725,6 @@ extern "C" void show_glui_display(int menu_id){
     }
     break;
   case DIALOG_TICKS:
-    showticks_dialog = 1;
     ROLLOUT_user_tick->open();
     if(toggle_dialogs==1){
       ROLLOUT_general->close();
@@ -741,7 +733,6 @@ extern "C" void show_glui_display(int menu_id){
     }
     break;
   case DIALOG_LABELS:
-    showlabels_dialog = 1;
     ROLLOUT_user_labels->open();
     if(toggle_dialogs==1){
       ROLLOUT_general->close();

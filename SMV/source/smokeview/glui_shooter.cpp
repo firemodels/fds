@@ -112,7 +112,6 @@ void Shooter_Rollout_CB(int var){
 extern "C" void hide_glui_shooter(void){
   if(glui_shooter!=NULL){
     glui_shooter->hide();
-    showshooter_dialog=0;
     updatemenu=1;
   }
 }
@@ -122,7 +121,6 @@ extern "C" void hide_glui_shooter(void){
 extern "C" void show_glui_shooter(void){
   if(glui_shooter!=NULL){
     glui_shooter->show();
-    showshooter_dialog=1;
     updatemenu=1;
   }
 }
@@ -137,7 +135,7 @@ extern "C" void glui_shooter_setup(int main_window){
     glui_shooter=NULL;
   }
   glui_shooter = GLUI_Master.create_glui(_("Particle tracking"),0,0,0 );
-  if(showshooter_dialog==0)glui_shooter->hide();
+  glui_shooter->hide();
 
   ROLLOUT_shooter_frame = glui_shooter->add_rollout(_("Starting locations/velocities"), true, START_SHOOTER_ROLLOUT, Shooter_Rollout_CB);
   ADDPROCINFO(shooterprocinfo, nshooterprocinfo, ROLLOUT_shooter_frame, START_SHOOTER_ROLLOUT);

@@ -112,7 +112,7 @@ extern "C" void glui_device_setup(int main_window){
     glui_device=NULL;
   }
   glui_device = GLUI_Master.create_glui("Device/Objects",0,0,0);
-  if(showdevice_dialog==0)glui_device->hide();
+  glui_device->hide();
 
   if(ndeviceinfo>0){
     int i;
@@ -179,14 +179,12 @@ extern "C" void glui_device_setup(int main_window){
 
 extern "C" void hide_glui_device(void){
   if(glui_device!=NULL)glui_device->hide();
-  showdevice_dialog=0;
   updatemenu=1;
 }
 
 /* ------------------ show_glui_device ------------------------ */
 
 extern "C" void show_glui_device(void){
-  showdevice_dialog=1;
   if(glui_device!=NULL)glui_device->show();
 }
 
