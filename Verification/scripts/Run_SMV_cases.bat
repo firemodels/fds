@@ -16,7 +16,7 @@ set BASEDIR=%CD%
 cd %BASEDIR%\..\
 set SVNROOT=%CD%
 
-cd %SVNROOT%\..\cfast\
+cd %SVNROOT%\..\cfastclean\
 set CFAST=%CD%
 
 set TIME_FILE=%SCRIPT_DIR%\smv_case_times.txt
