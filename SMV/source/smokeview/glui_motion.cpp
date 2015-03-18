@@ -1709,7 +1709,7 @@ void Render_CB(int var){
     case RENDER_SKIP:
       break;
     case RENDER_START:
-      if(RenderTime==1||touring==1){
+      if((render_skip_index != RENDER_CURRENT_SINGLE)&&(RenderTime == 1 || touring == 1)){
         RenderMenu(render_skip_index);
       }
       else{
