@@ -2118,6 +2118,12 @@ EDGE_LOOP: DO IE=1,N_EDGES
                            WT1 = MAX(0._EB,MIN(1._EB,(Y_PLUS-Y_WERNER_WENGLE)/(Y_PLUS+TWO_EPSILON_EB)))
                            WT2 = 1._EB-WT1
                            SLIP_COEF = WT1*SLIP_COEF-WT2
+                        CASE(4)
+                           IF ( ABS(0.5_EB*(WCM%ONE_D%UWS+WCP%ONE_D%UWS))>ABS(VEL_GAS-VEL_T) ) THEN
+                              SLIP_COEF = -1._EB
+                           ELSE
+                              SLIP_COEF = 0.5_EB*(SLIP_COEF-1._EB)
+                           ENDIF
                      END SELECT
                      VEL_GHOST = VEL_T + SLIP_COEF*(VEL_GAS-VEL_T)
                      DUIDXJ(ICD_SGN) = I_SGN*(VEL_GAS-VEL_GHOST)/DXX(ICD)
