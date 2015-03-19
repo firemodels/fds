@@ -19,8 +19,6 @@ char menu_revision[]="$Revision$";
 #include "smokeviewvars.h"
 #include "IOvolsmoke.h"
 
-/* dummy change to bump revision number to 5.1.5 */
-
 #ifdef WIN32
 #include <direct.h>
 #endif
@@ -39,6 +37,10 @@ char menu_revision[]="$Revision$";
 #define MENU_SHOWHIDE_SENSOR 9
 #define MENU_SHOWHIDE_SENSOR_NORM 14
 #define MENU_SHOWHIDE_OFFSET 12  
+
+#define MENU_UNITS_RESET -1
+#define MENU_UNITS_SHOWALL -3
+#define MENU_UNITS_HMS -2
 
 #define GRID_yz 1
 #define GRID_xz 2
@@ -1145,17 +1147,17 @@ void UnitsMenu(int value){
   unitclass = value/1000;
   unit_index = value - unitclass*1000;
   unitclasses[unitclass].unit_index=unit_index;
-  if(value==-1){
+  if(value==MENU_UNITS_RESET){
     for(i=0;i<nunitclasses;i++){
       unitclasses[i].unit_index=0;
     }
   }
-  else if(value==-2){
+  else if(value==MENU_UNITS_HMS){
     vishmsTimelabel = 1 - vishmsTimelabel;
     set_labels_controls();
 
   }
-  else if(value==-3){
+  else if(value==MENU_UNITS_SHOWALL){
     show_all_units = 1 - show_all_units;
   }
   updatemenu=1;  
@@ -7336,13 +7338,13 @@ updatemenu=0;
         glutAddSubMenu(uci->unitclass,uci->submenuid);
       }
     }
-    if(vishmsTimelabel==0)glutAddMenuEntry(_("time (h:m:s)"),-2);
-    if(vishmsTimelabel==1)glutAddMenuEntry(_("*time (h:m:s)"),-2);
+    if(vishmsTimelabel==0)glutAddMenuEntry(_("time (h:m:s)"), MENU_UNITS_HMS);
+    if(vishmsTimelabel==1)glutAddMenuEntry(_("*time (h:m:s)"), MENU_UNITS_HMS);
 #ifdef pp_BETA
-    if(show_all_units==1)glutAddMenuEntry("*show all units",-3);
-    if(show_all_units==0)glutAddMenuEntry("show all units",-3);
+    if(show_all_units==1)glutAddMenuEntry("*show all units", MENU_UNITS_SHOWALL);
+    if(show_all_units==0)glutAddMenuEntry("show all units", MENU_UNITS_SHOWALL);
 #endif
-    glutAddMenuEntry(_("Reset"),-1);
+    glutAddMenuEntry(_("Reset"), MENU_UNITS_RESET);
   }
 
 /* --------------------------------option menu -------------------------- */
