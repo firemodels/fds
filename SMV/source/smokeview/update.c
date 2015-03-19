@@ -266,12 +266,12 @@ void Update_Show(void){
   smoke3dflag=0;
   showtours=0;
   showterrain=0;
-  visTimeSmoke=1; visTimeSlice=1; visTimePatch=1; visTimeZone=1; visTimeIso=1;
+  visTimeParticles=1; visTimeSlice=1; visTimePatch=1; visTimeZone=1; visTimeIso=1;
 
   RenderTime=0;
   if(global_times!=NULL){
-    if(settmin_p==1&&global_times[itimes]<tmin_p)visTimeSmoke=0;
-    if(settmax_p==1&&global_times[itimes]>tmax_p)visTimeSmoke=0;
+    if(settmin_p==1&&global_times[itimes]<tmin_p)visTimeParticles=0;
+    if(settmax_p==1&&global_times[itimes]>tmax_p)visTimeParticles=0;
 
     if(settmin_s==1&&global_times[itimes]<tmin_s)visTimeSlice=0;
     if(settmax_s==1&&global_times[itimes]>tmax_s)visTimeSlice=0;
@@ -497,7 +497,7 @@ void Update_Show(void){
     }
   }
   partflag=0;
-  if(visSmoke==1&&visTimeSmoke==1){
+  if(visParticles==1&&visTimeParticles==1){
     for(i=0;i<npartinfo;i++){
       partdata *parti;
 

@@ -32,6 +32,14 @@ char menu_revision[]="$Revision$";
 #define MENU_SIZEPRESERVING -105
 #define MENU_DUMMY -999
 
+#define MENU_SHOWHIDE_TARGET 2
+#define MENU_SHOWHIDE_EVAC 13
+#define MENU_SHOWHIDE_PRINT 16
+#define MENU_SHOWHIDE_PARTICLES 1
+#define MENU_SHOWHIDE_SENSOR 9
+#define MENU_SHOWHIDE_SENSOR_NORM 14
+#define MENU_SHOWHIDE_OFFSET 12  
+
 #define GRID_yz 1
 #define GRID_xz 2
 #define GRID_xy 3
@@ -211,7 +219,7 @@ void IsoVariableMenu(int value){
 
 void LabelMenu(int value){
   updatemenu=1;  
-  if(value == MENU_LABEL_none)return;
+  if(value == MENU_DUMMY)return;
   glutPostRedisplay();
   switch(value){
   case MENU_LABEL_colorbar:
@@ -854,11 +862,12 @@ void ShowMultiSliceMenu(int value){
 /* ------------------ ShowHideMenu ------------------------ */
 
 void ShowHideMenu(int value){
+  if(value==MENU_DUMMY)return;
   updatemenu=1;  
   glutPostRedisplay();
   switch(value){
 #ifdef _DEBUG
-  case 16:
+  case MENU_SHOWHIDE_PRINT:
     PrintMemoryInfo;
     break;
 #endif
@@ -867,7 +876,7 @@ void ShowHideMenu(int value){
    UpdateRGBColors(COLORBAR_INDEX_NONE);
    set_labels_controls();
    break;
-  case 13:
+  case MENU_SHOWHIDE_EVAC:
     if(plotstate==DYNAMIC_PLOTS){
       visEvac=1-visEvac;
     }
@@ -877,32 +886,26 @@ void ShowHideMenu(int value){
     }
     Update_Times();
     break;
-  case 1:
+  case MENU_SHOWHIDE_PARTICLES:
     if(plotstate==DYNAMIC_PLOTS){
-      visSmoke=1-visSmoke;
+      visParticles=1-visParticles;
     }
     else{
       plotstate=DYNAMIC_PLOTS;
-      visSmoke=1;
+      visParticles=1;
     }
     Update_Times();
     break;
-  case 2:
+    case MENU_SHOWHIDE_TARGET:
     visTarg=1-visTarg;
     break;
-  case 9:
+  case MENU_SHOWHIDE_SENSOR:
     visSensor=1-visSensor;
     break;
-  case 14:
+  case MENU_SHOWHIDE_SENSOR_NORM:
     visSensorNorm=1-visSensorNorm;
     break;
-  case 10:
-    visHeat=1-visHeat;
-    break;
-  case 11:
-    visSprink=1-visSprink;
-    break;
-  case 12:
+  case MENU_SHOWHIDE_OFFSET:
     if(titlesafe_offset==0){
       titlesafe_offset=titlesafe_offsetBASE;
     }
@@ -919,7 +922,7 @@ void ShowHideMenu(int value){
 /* ------------------ ViewpointMenu ------------------------ */
 
 void ViewpointMenu(int value){
-  if(value==999)return;
+  if(value==MENU_DUMMY)return;
   updatemenu=1;  
   glutPostRedisplay();
   switch(value){
@@ -1042,7 +1045,7 @@ void DialogMenu(int value){
 /* ------------------ ZoomMenu ------------------------ */
 
 void ZoomMenu(int value){
-  if(value==999)return;
+  if(value==MENU_DUMMY)return;
   updatemenu=1;  
   if(opengldefined==1){
     glutPostRedisplay();
@@ -1162,7 +1165,7 @@ void UnitsMenu(int value){
 /* ------------------ OptionMenu ------------------------ */
 
 void OptionMenu(int value){
-  if(value==999)return;
+  if(value==MENU_DUMMY)return;
   updatemenu=1;  
   glutPostRedisplay();
   if(value==2){
@@ -1400,7 +1403,7 @@ void EvacShowMenu(int value){
   int i;
 
   if(nevac==0)return;
-  if(value==999)return;
+  if(value==MENU_DUMMY)return;
   if(value<0){
     value = -value;
     value--;
@@ -1462,7 +1465,7 @@ void ParticleShowMenu(int value){
   int i;
 
   if(npartinfo==0)return;
-  if(value==999)return;
+  if(value==MENU_DUMMY)return;
   if(value<0){
     value = -value;
     value--;
@@ -1524,10 +1527,10 @@ void ParticleShowMenu(int value){
     }
     */
     if(visSprinkPart==1||visSmokePart!=0){
-      visSmoke=1;
+      visParticles=1;
     }
     else{
-      visSmoke=0;
+      visParticles=0;
     }
   }
   else{
@@ -1568,7 +1571,7 @@ void ParticleShowMenu(int value){
     }
     */
     if(visSmokePart!=0||visSprinkPart==1){
-      visSmoke=1;
+      visParticles=1;
     }
   }
   updatemenu=1;  
@@ -1714,7 +1717,7 @@ void HelpMenu(int value){
       ShellExecute(NULL, "open", "http://fire.nist.gov/fds/", NULL, NULL, SW_SHOWNORMAL);
 #endif
       break;
-    case 999:
+    case MENU_DUMMY:
       break;
     default:
       ASSERT(FFALSE);
@@ -1915,7 +1918,7 @@ void GridSliceMenu(int value){
     visy_all=0;
     visz_all=0;
     break;
-  case 999:
+  case MENU_DUMMY:
     break;
   case GRID_grid:
     switch(visGrid){
@@ -1967,7 +1970,7 @@ void GridSliceMenu(int value){
 /* ------------------ CompressMenu ------------------------ */
 
 void CompressMenu(int value){
-  if(value==999)return;
+  if(value==MENU_DUMMY)return;
   switch(value){
   case 1:
     erase_all=1;
@@ -2033,7 +2036,7 @@ void SmokeviewiniMenu(int value){
   case 4:
     init_object_defs();
     break;
-  case 999:
+  case MENU_DUMMY:
     break;
   default:
     ASSERT(FFALSE);
@@ -2068,7 +2071,7 @@ void ScriptMenu(int value){
   scriptfiledata *scriptfile;
   char newscriptfilename[1024];
 
-  if(value==999)return;
+  if(value==MENU_DUMMY)return;
   updatemenu=1;
   glutPostRedisplay();
   switch(value){
@@ -2206,7 +2209,7 @@ void LoadUnloadMenu(int value){
   int i;
   int ii;
 
-  if(value==999)return;
+  if(value==MENU_DUMMY)return;
   glutSetCursor(GLUT_CURSOR_WAIT);
   if(value==UNLOADALL){
    // leaving code here commented in case I later decide to unload terrain files
@@ -2322,7 +2325,7 @@ void LoadUnloadMenu(int value){
     }
     UNLOCK_COMPRESS
   //  plotstate=DYNAMIC_PLOTS;
-  //  visSmoke=1;
+  //  visParticles=1;
     updatemenu=1;  
     glutPostRedisplay();
   }
@@ -3105,7 +3108,7 @@ void UnloadMultiSliceMenu(int value){
 void ShowVolSmoke3DMenu(int value){
   int i;
 
-  if(value==999)return;
+  if(value==MENU_DUMMY)return;
   updatemenu=1;
   glutSetCursor(GLUT_CURSOR_WAIT);
   if(value>=0){
@@ -3158,7 +3161,7 @@ void ShowVolSmoke3DMenu(int value){
 void UnLoadVolSmoke3DMenu(int value){
   int i;
 
-  if(value==999)return;
+  if(value==MENU_DUMMY)return;
   read_vol_mesh=VOL_UNLOAD;
   updatemenu=1;
   if(value<0){
@@ -3197,7 +3200,7 @@ void UnLoadVolSmoke3DMenu(int value){
 /* ------------------ LoadVolSmoke3DMenu ------------------------ */
 
 void LoadVolSmoke3DMenu(int value){
-  if(value==999)return;
+  if(value==MENU_DUMMY)return;
   updatemenu=1;
   glutSetCursor(GLUT_CURSOR_WAIT);
   if(value>=0){
@@ -3272,7 +3275,7 @@ void UnLoadSmoke3DMenu(int value){
   int i;
   smoke3ddata *smoke3di;
 
-  if(value==999)return;
+  if(value==MENU_DUMMY)return;
   updatemenu=1;
   if(value<0){
     value= -value;
@@ -4094,7 +4097,7 @@ void ImmersedMenu(int value){
         showtrioutline=0;
       }
       break;
-    case 999:
+    case MENU_DUMMY:
       break;
     default:
       ASSERT(FFALSE);
@@ -4260,7 +4263,7 @@ void BlockageMenu(int value){
 /* ------------------ RotateTypeMenu ------------------------ */
 
 void RotateTypeMenu(int value){
-  if(value==999)return;
+  if(value==MENU_DUMMY)return;
   rotation_type = value;
   update_rotation_type(rotation_type);
   rotation_type_CB(rotation_type);
@@ -4373,7 +4376,7 @@ void ShowObjectsMenu(int value){
 
 void ZoneShowMenu(int value){
   switch(value){
-  case 999:
+  case MENU_DUMMY:
     return;
   case 1:
     visVZone=0;
@@ -4561,6 +4564,7 @@ void InitMenus(int unload){
   int npatchloaded;
   int nplot3dloaded;
   int nisoloaded;
+  int showhide_data = 0;
 
 static int filesdialogmenu = 0, viewdialogmenu = 0, datadialogmenu = 0, windowdialogmenu=0;
 static int labelmenu=0, colorbarmenu=0, colorbarsmenu=0, colorbarshademenu, smokecolorbarmenu=0, showhidemenu=0;
@@ -4889,8 +4893,8 @@ updatemenu=0;
 /* --------------------------------embedded menu -------------------------- */
 
   CREATEMENU(immersedmenu,ImmersedMenu);
-  glutAddMenuEntry(_("View Method:"),999);
-  glutAddMenuEntry("Surface",999);
+  glutAddMenuEntry(_("View Method:"),MENU_DUMMY);
+  glutAddMenuEntry("Surface",MENU_DUMMY);
   if(showtrisurface==1&&showtrioutline==1){
     glutAddMenuEntry(_("   *Solid and outline"),GEOMETRY_SOLIDOUTLINE);
   }
@@ -4916,7 +4920,7 @@ updatemenu=0;
     glutAddMenuEntry(_("   Hide"),GEOMETRY_HIDE);
   }
   if(have_volume==1){
-    glutAddMenuEntry("Interior",999);
+    glutAddMenuEntry("Interior",MENU_DUMMY);
     if(show_geometry_interior_solid==1)glutAddMenuEntry(_("   *solid"),GEOMETRY_INTERIOR_SOLID);
     if(show_geometry_interior_solid==0)glutAddMenuEntry(_("   solid"),GEOMETRY_INTERIOR_SOLID);
     if(show_geometry_interior_outline==1)glutAddMenuEntry(_("   *outline"),GEOMETRY_INTERIOR_OUTLINE);
@@ -4966,7 +4970,7 @@ updatemenu=0;
     }
     glutAddMenuEntry(_("Smooth blockages now"),SMOOTH_BLOCKAGES);
   }
-  glutAddMenuEntry(_("View Method:"),999);
+  glutAddMenuEntry(_("View Method:"),MENU_DUMMY);
   if(visBlocks==visBLOCKAsInput||visBlocks==visBLOCKAsInputOutline){
     glutAddMenuEntry(_("   *Defined in input file"),visBLOCKAsInput);
   }
@@ -5029,8 +5033,8 @@ updatemenu=0;
   else{
     glutAddMenuEntry(_("   Hidden"),visBLOCKHide);
   }
-  glutAddMenuEntry("-",999);
-  glutAddMenuEntry(_(" Outline color:"),999);
+  glutAddMenuEntry("-",MENU_DUMMY);
+  glutAddMenuEntry(_(" Outline color:"),MENU_DUMMY);
   if(outline_color_flag==1){
     glutAddMenuEntry(_("   use blockage"),visBLOCKOutlineColor);
     glutAddMenuEntry(_("   *use foreground"),visBLOCKOutlineColor);
@@ -5051,8 +5055,8 @@ updatemenu=0;
     if(nblockprop>0){
       char propmenulabel[255];
 
-      glutAddMenuEntry("-",999);
-      glutAddMenuEntry(_("Show/Hide blockage types:"),999);
+      glutAddMenuEntry("-",MENU_DUMMY);
+      glutAddMenuEntry(_("Show/Hide blockage types:"),MENU_DUMMY);
       for(i=0;i<npropinfo;i++){
         propdata *propi;
 
@@ -5066,8 +5070,8 @@ updatemenu=0;
       }
     }
   }
-  glutAddMenuEntry("-",999);
-  glutAddMenuEntry(_("Locations:"),999);
+  glutAddMenuEntry("-",MENU_DUMMY);
+  glutAddMenuEntry(_("Locations:"),MENU_DUMMY);
   if(blocklocation==BLOCKlocation_grid){
     glutAddMenuEntry(_("   *Actual"),BLOCKlocation_grid);
   }
@@ -5343,7 +5347,7 @@ updatemenu=0;
   else{
     glutAddMenuEntry(_("show grid location"),GRID_probe); 
   }
-  glutAddMenuEntry("-",999);
+  glutAddMenuEntry("-",MENU_DUMMY);
   if(visz_all==1){
     glutAddMenuEntry(_("*xy plane"),GRID_xy);
   }
@@ -5668,7 +5672,7 @@ updatemenu=0;
   if(visTimebar==0)glutAddMenuEntry(_("Time bar"),MENU_LABEL_timebar);
   if(visTitle == 1)glutAddMenuEntry(_("*Title"), MENU_LABEL_title);
   if(visTitle == 0)glutAddMenuEntry(_("Title"), MENU_LABEL_title);
-  glutAddMenuEntry("-", MENU_LABEL_none);
+  glutAddMenuEntry("-", MENU_DUMMY);
 
   if(visaxislabels == 1)glutAddMenuEntry(_("*Axis"), MENU_LABEL_axis);
   if(visaxislabels == 0)glutAddMenuEntry(_("Axis"), MENU_LABEL_axis);
@@ -5715,14 +5719,14 @@ updatemenu=0;
   if(gversion == 1)glutAddMenuEntry(_("*Version info"), MENU_LABEL_gversion);
   if(gversion == 0)glutAddMenuEntry(_("Version info"), MENU_LABEL_gversion);
 
-  glutAddMenuEntry("-", MENU_LABEL_none);
+  glutAddMenuEntry("-", MENU_DUMMY);
   glutAddMenuEntry(_("Show all"), MENU_LABEL_ShowAll);
   glutAddMenuEntry(_("Hide all"), MENU_LABEL_HideAll);
 
 /* --------------------------------rotate type menu -------------------------- */
 
   CREATEMENU(rotatetypemenu,RotateTypeMenu);
-  glutAddMenuEntry("Scene centered:",999);
+  glutAddMenuEntry("Scene centered:",MENU_DUMMY);
   switch(rotation_type){
   case EYE_CENTERED:
     glutAddMenuEntry("  2 axis",ROTATION_2AXIS);
@@ -5757,9 +5761,9 @@ updatemenu=0;
 
   if(nzoneinfo>0){
     CREATEMENU(zoneshowmenu,ZoneShowMenu);
-    glutAddMenuEntry(_("Layers"),999);
+    glutAddMenuEntry(_("Layers"),MENU_DUMMY);
     if(ReadZoneFile==1){
-      glutAddMenuEntry(_("  2D smoke colored by:"),999);
+      glutAddMenuEntry(_("  2D smoke colored by:"),MENU_DUMMY);
       switch(sethazardcolor){
         case 0:
           glutAddMenuEntry(_("    *Temperature"),6);
@@ -5778,7 +5782,7 @@ updatemenu=0;
           break;
       }
       if(sethazardcolor!=2){
-        glutAddMenuEntry(_("  2D smoke drawn:"),999);
+        glutAddMenuEntry(_("  2D smoke drawn:"),MENU_DUMMY);
         if(visHZone==1)glutAddMenuEntry(_("    *horizontally"),1);
         if(visHZone==0)glutAddMenuEntry(_("    horizontally"),1);
         if(visVZone==1)glutAddMenuEntry(_("    *vertically"),2);
@@ -6128,7 +6132,7 @@ updatemenu=0;
       STRCAT(menulabel,parti->menulabel);
       glutAddMenuEntry(menulabel,-1-i);
     }
-    glutAddMenuEntry("-",999);
+    glutAddMenuEntry("-",MENU_DUMMY);
     if(plotstate==DYNAMIC_PLOTS&&visSmokePart!=0){
       if(visSmokePart==2)glutAddMenuEntry(_("*Particles"),1);
       if(visSmokePart==1)glutAddMenuEntry(_("#Particles"),1);
@@ -6157,7 +6161,7 @@ updatemenu=0;
       if(visSprinkPart==1&&visSmokePart!=0)showall=1;
       if(staticframe0==1&&visStaticSmoke==0)showall=0;
     }
-    glutAddMenuEntry("-",999);
+    glutAddMenuEntry("-",MENU_DUMMY);
     if(showall==1){
       glutAddMenuEntry(_("*Show all"),3);
     }
@@ -6200,7 +6204,7 @@ updatemenu=0;
       STRCAT(menulabel,parti->menulabel);
       glutAddMenuEntry(menulabel,-1-i);
     }
-    glutAddMenuEntry("-",999);
+    glutAddMenuEntry("-",MENU_DUMMY);
     glutAddMenuEntry(_("Show all"),3);
     if(plotstate==DYNAMIC_PLOTS){
       glutAddMenuEntry(_("Hide all"),4);
@@ -6342,7 +6346,7 @@ updatemenu=0;
       if(iso2!=NULL){
         char menulabel[1024];
 
-        glutAddMenuEntry("-",999);
+        glutAddMenuEntry("-",MENU_DUMMY);
         STRCPY(menulabel,_("Show all"));
         STRCPY(menulabel," ");
         STRCAT(menulabel,iso2->surface_label.longlabel);
@@ -6356,7 +6360,7 @@ updatemenu=0;
         STRCAT(menulabel,_("isosurfaces"));
         glutAddMenuEntry(menulabel,HIDEALL_ISO);
       }
-      glutAddMenuEntry("-",999);
+      glutAddMenuEntry("-",MENU_DUMMY);
       if((visAIso&1)==1)glutAddMenuEntry(_("*Solid"),1);
       if((visAIso&1)!=1)glutAddMenuEntry(_("Solid"),1);
       if((visAIso&2)==2)glutAddMenuEntry(_("*Outline"),2);
@@ -6739,7 +6743,7 @@ updatemenu=0;
       strcpy(vlabel,_("3D smoke (volume rendered)"));
       strcat(vlabel,_(" - Hide all"));
       glutAddMenuEntry(vlabel,HIDE_ALL);
-      glutAddMenuEntry("-",999);
+      glutAddMenuEntry("-",MENU_DUMMY);
     }
     for(i=0;i<nmeshes;i++){
       mesh *meshi;
@@ -6829,13 +6833,30 @@ updatemenu=0;
 
   /* --------------------------------showhide menu -------------------------- */
 
+  showhide_data = 0;
   CREATEMENU(showhidemenu,ShowHideMenu);
+  glutAddSubMenu(_("Data coloring"), colorbarmenu);
   if(ntotal_blockages>0||isZoneFireModel==0){
     glutAddSubMenu(_("Geometry"),geometrymenu);
   }
   glutAddSubMenu(_("Labels"),labelmenu);
-  glutAddSubMenu(_("Data coloring"),colorbarmenu);
-  glutAddSubMenu(_("Viewpoints"),resetmenu);
+  glutAddSubMenu(_("Viewpoints"), resetmenu);
+  glutAddMenuEntry("-", MENU_DUMMY);
+  if(Read3DSmoke3DFile==1&&nsmoke3dloaded>0){
+    showhide_data = 1;
+    glutAddSubMenu(_("3D smoke"), smoke3dshowmenu);
+  }
+  if(nvolsmoke3dloaded>0){
+    char vlabel[256];
+
+    showhide_data = 1;
+    strcpy(vlabel, _("3D smoke (volume rendered)"));
+    glutAddSubMenu(vlabel, showvolsmoke3dmenu);
+  }
+  if(npatchloaded>0){
+    showhide_data = 1;
+    glutAddSubMenu(_("Boundaries"), showpatchmenu);
+  }
   {
     int human_present=0;
     int particle_present=0;
@@ -6843,7 +6864,8 @@ updatemenu=0;
     if(npart5loaded>0){
       int ii;
 
-      for(ii=0;ii<npartinfo;ii++){
+      showhide_data = 1;
+      for(ii = 0; ii<npartinfo; ii++){
         partdata *parti;
 
         parti = partinfo + ii;
@@ -6859,32 +6881,32 @@ updatemenu=0;
       }
     }
   }
-  if(nevac>0&&navatar_types>0){
-   // glutAddSubMenu(_("Use Avatar:"),avatarevacmenu);
-  }
-
   if(npart4loaded>0){
+    showhide_data = 1;
     if(havesprinkpart!=0||staticframe0!=0||npartloaded>1){
       glutAddSubMenu(_("Particles"),particleshowmenu);
     }
     else{
-      if(ReadPartFile==1&&showsmoke==1)glutAddMenuEntry(_("*Particles"),1);
-      if(ReadPartFile==1&&showsmoke==0)glutAddMenuEntry(_("Particles"),1);
+      if(ReadPartFile==1&&showsmoke==1)glutAddMenuEntry(_("*Particles"),MENU_SHOWHIDE_PARTICLES);
+      if(ReadPartFile==1&&showsmoke==0)glutAddMenuEntry(_("Particles"),MENU_SHOWHIDE_PARTICLES);
     }
   }
   if(partinfo!=NULL&&partinfo[0].version==1){
   }
   else{
+    showhide_data = 1;
     if(nevacloaded>1){
       glutAddSubMenu(_("Evacuation"),evacshowmenu);
     }
     else{
-      if(ReadEvacFile==1&&showevac==1)glutAddMenuEntry(_("*Evacuation"),13);
-      if(ReadEvacFile==1&&showevac==0)glutAddMenuEntry(_("Evacuation"),13);
+      if(ReadEvacFile==1&&showevac==1)glutAddMenuEntry(_("*Evacuation"),MENU_SHOWHIDE_EVAC);
+      if(ReadEvacFile==1&&showevac==0)glutAddMenuEntry(_("Evacuation"),MENU_SHOWHIDE_EVAC);
     }
   }
+
   if(ReadIsoFile==1){
     int niso_loaded=0;
+
     for(i=0;i<nisoinfo;i++){
       isodata *isoi;
 
@@ -6893,20 +6915,16 @@ updatemenu=0;
     }
 
     if(niso_loaded>1){
-     glutAddSubMenu(_("Animated surfaces"),isoshowmenu);
+     glutAddSubMenu(_("Isosurfaces"),isoshowmenu);
     }
     else{
-     glutAddSubMenu(_("Animated surface"),isoshowmenu);
+     glutAddSubMenu(_("Isosurfaces"),isoshowmenu);
     }
+    showhide_data = 1;
   }
-  if(Read3DSmoke3DFile==1&&nsmoke3dloaded>0){
-      glutAddSubMenu(_("3D smoke"),smoke3dshowmenu);
-  }
-  if(nvolsmoke3dloaded>0){
-    char vlabel[256];
-
-    strcpy(vlabel,_("3D smoke (volume rendered)"));
-    glutAddSubMenu(vlabel,showvolsmoke3dmenu);
+  if(ReadPlot3dFile==1){
+    showhide_data = 1;
+    glutAddSubMenu(_("Plot3d"), plot3dshowmenu);
   }
 
   nvslice0=0, nvslice1=0, nvslice2=0;
@@ -6935,31 +6953,30 @@ updatemenu=0;
     }
   }
   if(nvsliceloaded0+nvsliceloaded1+nvsliceloaded2>0){
-    glutAddSubMenu(_("Animated Vector Slices"),showvslicemenu);
+    showhide_data = 1;
+    glutAddSubMenu(_("Slices (vector)"), showvslicemenu);
   }
-
   if(nsliceloaded>0){
-    glutAddSubMenu(_("Animated Slices"),showhideslicemenu);
+    showhide_data = 1;
+    glutAddSubMenu(_("Slices (vector)"), showhideslicemenu);
     if(nmultisliceinfo<nsliceinfo){
-      glutAddSubMenu(_("Animated Multi-Slices"),showmultislicemenu);
+      glutAddSubMenu(_("Multi-Slices (vector)"),showmultislicemenu);
     }
   }
 
-  if(ReadPlot3dFile==1){
-    glutAddSubMenu(_("Plot3d"),plot3dshowmenu);
+  if(nzoneinfo>0&&(ReadZoneFile==1||nzvents>0)){
+    showhide_data = 1;
+    glutAddSubMenu(_("Zone"), zoneshowmenu);
   }
-  if(npatchloaded>0){
-    glutAddSubMenu(_("Boundaries"),showpatchmenu);
-  }
-  if(nzoneinfo>0&&(ReadZoneFile==1||nzvents>0))glutAddSubMenu(_("Zone"),zoneshowmenu);
   if(ReadTargFile==1){
-    if(showtarget==1)glutAddMenuEntry(_("*Targets"),2);
-    if(showtarget==0)glutAddMenuEntry(_("Targets"),2);
+    showhide_data = 1;
+    if(showtarget==1)glutAddMenuEntry(_("*Targets"), MENU_SHOWHIDE_TARGET);
+    if(showtarget==0)glutAddMenuEntry(_("Targets"), MENU_SHOWHIDE_TARGET);
   }
   if(nobject_defs>0){
     int num_activedevices=0;
 
-    for(i=0;i<nobject_defs;i++){
+    for(i = 0; i<nobject_defs; i++){
       sv_object *obj_typei;
 
       obj_typei = object_defs[i];
@@ -6986,42 +7003,45 @@ updatemenu=0;
             strcat(obj_menu,"*");
           }
           strcat(obj_menu,obj_typei->label);
-          glutAddMenuEntry(obj_menu,i);
+          showhide_data = 1;
+          glutAddMenuEntry(obj_menu, i);
         }
       }
     }
   }
   if(ntc_total>0){
+    showhide_data = 1;
     if(isZoneFireModel==1){
-      if(visSensor==1)glutAddMenuEntry(_("*Targets"),9);
-      if(visSensor==0)glutAddMenuEntry(_("Targets"),9);
+      if(visSensor==1)glutAddMenuEntry(_("*Targets"), MENU_SHOWHIDE_SENSOR);
+      if(visSensor==0)glutAddMenuEntry(_("Targets"), MENU_SHOWHIDE_SENSOR);
       if(hasSensorNorm==1){
-        if(visSensorNorm==1)glutAddMenuEntry(_("*Target orientation"),14);
-        if(visSensorNorm==0)glutAddMenuEntry(_("Target orientation"),14);
+        if(visSensorNorm==1)glutAddMenuEntry(_("*Target orientation"), MENU_SHOWHIDE_SENSOR_NORM);
+        if(visSensorNorm==0)glutAddMenuEntry(_("Target orientation"), MENU_SHOWHIDE_SENSOR_NORM);
       }
     }
     else{
-      if(visSensor==1)glutAddMenuEntry(_("*Thermocouples"),9);
-      if(visSensor==0)glutAddMenuEntry(_("Thermocouples"),9);
+      if(visSensor==1)glutAddMenuEntry(_("*Thermocouples"), MENU_SHOWHIDE_SENSOR);
+      if(visSensor==0)glutAddMenuEntry(_("Thermocouples"), MENU_SHOWHIDE_SENSOR);
       if(hasSensorNorm==1){
-        if(visSensorNorm==1)glutAddMenuEntry(_("*Thermocouple norms"),14);
-        if(visSensorNorm==0)glutAddMenuEntry(_("Thermocouple norms"),14);
+        if(visSensorNorm==1)glutAddMenuEntry(_("*Thermocouple norms"), MENU_SHOWHIDE_SENSOR_NORM);
+        if(visSensorNorm==0)glutAddMenuEntry(_("Thermocouple norms"), MENU_SHOWHIDE_SENSOR_NORM);
       }
     }
   }
-  if(titlesafe_offset==0)glutAddMenuEntry(_("Offset window"),12);
-  if(titlesafe_offset!=0)glutAddMenuEntry(_("*Offset window"),12);
+  if(showhide_data==1)glutAddMenuEntry("-", MENU_DUMMY);
+  if(background_flip==1){
+    glutAddMenuEntry(_("*Flip background"), MENU_SHOWHIDE_FLIP);
+  }
+  else{
+    glutAddMenuEntry(_("Flip background"), MENU_SHOWHIDE_FLIP);
+  }
+  if(titlesafe_offset==0)glutAddMenuEntry(_("Offset window"), MENU_SHOWHIDE_OFFSET);
+  if(titlesafe_offset!=0)glutAddMenuEntry(_("*Offset window"),MENU_SHOWHIDE_OFFSET);
   if(ntextures_loaded_used>0){
     glutAddSubMenu(_("Textures"),textureshowmenu);
   }
-  if(background_flip==1){
-    glutAddMenuEntry(_("*Flip background"),15);
-  }
-  else{
-    glutAddMenuEntry(_("Flip background"),15);
-  }
 #ifdef _DEBUG
-  glutAddMenuEntry("Show Memory block info",16);
+  glutAddMenuEntry("Show Memory block info",MENU_SHOWHIDE_PRINT);
 #endif
 
 
@@ -8256,7 +8276,7 @@ updatemenu=0;
         strcpy(vlabel,_("3D smoke (volume rendered)"));
         strcat(vlabel,_(" - All meshes"));
         glutAddMenuEntry(vlabel,LOAD_ALL);
-        glutAddMenuEntry("-",999);
+        glutAddMenuEntry("-",MENU_DUMMY);
       }
       for(i=0;i<nmeshes;i++){
         mesh *meshi;
@@ -8305,7 +8325,7 @@ updatemenu=0;
           if(nsootloaded>1) glutAddMenuEntry(_("SOOT MASS FRACTION - all meshes"),-1);
           if(nhrrloaded>1)  glutAddMenuEntry(_("HRRPUV - all meshes"),-2);
           if(nwaterloaded>1)glutAddMenuEntry(_("water - all meshes"),-3);
-          if(nsootloaded>1||nhrrloaded>1||nwaterloaded>1)glutAddMenuEntry("-",999);
+          if(nsootloaded>1||nhrrloaded>1||nwaterloaded>1)glutAddMenuEntry("-",MENU_DUMMY);
         }
         for(i=0;i<nsmoke3dinfo;i++){
           smoke3di=smoke3dinfo+i;
@@ -8811,7 +8831,7 @@ updatemenu=0;
 #ifdef pp_COMPRESS
   if(smokezippath!=NULL&&(npatchinfo>0||nsmoke3dinfo>0||nsliceinfo>0)){
     CREATEMENU(compressmenu,CompressMenu);
-    glutAddMenuEntry(_("Compression options"),999);  // -c
+    glutAddMenuEntry(_("Compression options"),MENU_DUMMY);  // -c
     if(overwrite_all==1){
       glutAddMenuEntry(_("  *Overwrite compressed files"),2);  // -f
     }
@@ -8824,7 +8844,7 @@ updatemenu=0;
     else{
       glutAddMenuEntry(_("  Compress only autoloaded files"),4);  // -f
     }
-    glutAddMenuEntry("-",999);  // -c
+    glutAddMenuEntry("-",MENU_DUMMY);  // -c
     glutAddMenuEntry(_("Compress now"),3);
     glutAddMenuEntry(_("Erase compressed files"),1);  // -c
   }
@@ -8893,7 +8913,7 @@ updatemenu=0;
     }
 
     if(ndeviceinfo>0){
-      glutAddMenuEntry("-",999);
+      glutAddMenuEntry("-",MENU_DUMMY);
       glutAddMenuEntry(_("Read .svo files"),4);
     }
 
@@ -9097,7 +9117,7 @@ updatemenu=0;
         glutAddSubMenu(loadmenulabel,zonemenu);
       }
       if(glui_active==1){      
-        glutAddMenuEntry("-",999);
+        glutAddMenuEntry("-",MENU_DUMMY);
       }
       glutAddSubMenu(_("Configuration files"),smokeviewinimenu);
       glutAddSubMenu(_("Scripts"),scriptmenu);

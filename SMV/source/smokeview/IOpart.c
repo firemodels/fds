@@ -1023,7 +1023,7 @@ void readpart5(char *file, int ifile, int flag, int *errorcode){
     ReadEvacFile=1;
   }
   if(parti->evac==0){
-    visSmoke=1;
+    visParticles=1;
   }
   else{
     visEvac=1;
@@ -1051,7 +1051,7 @@ void readpart5(char *file, int ifile, int flag, int *errorcode){
   PrintMemoryInfo;
 #endif
   if(parti->evac==0){
-    visSmoke=1;
+    visParticles=1;
     ReadPartFile=1;
   }
   else{
@@ -1428,7 +1428,7 @@ void readpart(char *file, int ifile, int flag, int *errorcode){
     ReadEvacFile=1;
   }
   if(partinfo[ifile].evac==0){
-    visSmoke=1;
+    visParticles=1;
   }
   else{
     visEvac=1;
