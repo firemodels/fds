@@ -4573,7 +4573,7 @@ static int showhideslicemenu=0,showvslicemenu=0;
 static int plot3dshowmenu=0, staticvariablemenu=0, helpmenu=0, webhelpmenu=0, keyboardhelpmenu=0, mousehelpmenu=0;
 static int vectorskipmenu=0,unitsmenu=0;
 static int isosurfacemenu=0, isovariablemenu=0, levelmenu=0;
-static int fontmenu=0, aperturemenu=0,dialogmenu=0,zoommenu=0,languagemenu=0;
+static int fontmenu=0, aperturemenu=0,dialogmenu=0,zoommenu=0;
 static int gridslicemenu=0, blockagemenu=0, immersedmenu=0, loadpatchmenu=0, ventmenu=0, circularventmenu=0;
 static int loadisomenu=0, isosurfacetypemenu=0;
 static int geometrymenu=0, loadunloadmenu=0, reloadmenu=0, aboutmenu=0, disclaimermenu=0, terrain_showmenu=0;
@@ -7332,9 +7332,6 @@ updatemenu=0;
   glutAddSubMenu(_("Tours"),tourmenu);
   if(showfontmenu==1)glutAddSubMenu(_("Font"),fontmenu);
   if(trainer_active==1)glutAddMenuEntry(_("Trainer menu"),2);
-#ifdef pp_LANG
-  if(show_lang_menu==1&&nlanglistinfo>0)glutAddSubMenu(_("Language"),languagemenu);
-#endif
 
 /* -------------------------------- about menu -------------------------- */
 
