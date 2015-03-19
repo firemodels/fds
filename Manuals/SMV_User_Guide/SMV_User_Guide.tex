@@ -493,9 +493,8 @@ colorbar and slide the mouse to highlight data values in the
 scene. These options may be found under the {\em Options/Shades}
 menu.
 
-The user may click in the time bar and slide the mouse to
-change the simulation time displayed. One use for the time
-bar and color bar selection modes might be to determine
+The user may click in the timebar and slide the mouse to
+change the simulation time displayed. One use for the timebar and colorbar selection modes might be to determine
 when smoke of a particular temperature enters a room.
 
 \subsubsection{Data Filtering} The {\em File/Bounds Settings...}\
@@ -1021,7 +1020,7 @@ properly when shown at the same time.
 \begin{tabular}{ccc}
 \includegraphics[height=3.5in]{../SMV_Verification_Guide/SCRIPT_FIGURES/plume5c_notexturebar}&
 \includegraphics[height=3.5in]{../SMV_Verification_Guide/SCRIPT_FIGURES/plume5c_texturebar}\\
-colors interpolated using a 3D color cube&colors interpolated using a 1D texture color bar\\
+colors interpolated using a 3D color cube&colors interpolated using a 1D texture colorbar\\
 \end{tabular}
 \caption [Slice file snapshots illustrating two methods for mapping data to color.] {Slice file snapshots illustrating two methods for mapping data to color.}
 \label{fignewslice}%
@@ -3129,7 +3128,7 @@ the FDS$-$SMV repository.
 \item After opening the case in Smokeview,
 select the {\em Load/Unload$>$Script Options$>$Start Recording}\ menu item.
 \item Load a slice file (doesn't matter which one).
-\item Move the time bar to 10 s and
+\item Move the timebar to 10 s and
 then press the `r' key.  Repeat for 20 s, 30 s, and 40 s
 \item Unload the slice file. (Not necessary, this step
 just makes the script action more obvious.)
@@ -3460,14 +3459,14 @@ Usage:
  EXIT
 \end{lstlisting}
 
-\hitem{CBARFLIP} Display the color bar in the opposite orientation from which it was defined.
+\hitem{CBARFLIP} Display the colorbar in the opposite orientation from which it was defined.
 Usage:
 \begin{lstlisting}
  CBARFLIP
 \end{lstlisting}
 
 \hitem{CBARNORMAL}
-Usage: Display the color bar in the same orientation as it was defined.
+Usage: Display the colorbar in the same orientation as it was defined.
 \begin{lstlisting}
  CBARNORMAL
 \end{lstlisting}
@@ -4663,7 +4662,7 @@ The option menu allows one to specify display units, rotation method, maximum fr
 \begin{itemize}
 \item The {\em Eye Centered}\ method allows one to rotate the scene relative to the observer's point of view or {\em eye}.
 Eye centered views make it easier to move around within the scene as in modern
-computer games. 
+computer games.
 
 \item The {\em World Centered}\ rotation method allows one to rotate the scene relative to the scene's center.
 
@@ -4686,7 +4685,7 @@ reports. This is how figures were generated in this report.
 
 \hitem{Render}
 The {\em Render}\ menu allows one to create PNG or JPEG image files
-of the currently displayed scene. 
+of the currently displayed scene.
 
 The {\em Render}\ menus allow one to specify an
 integer indicating the number of frames
@@ -4815,7 +4814,7 @@ capturing.
 
 \kitem{j,J}Increase size of smokeview objects (use ALT j to decrease size).
 
-\kitem{k,K}Toggle time bar visibility.
+\kitem{k,K}Toggle timebar visibility.
 
 \kitem{L}Unload most recently loaded slice file.
 
@@ -5210,7 +5209,7 @@ the character string after the {\tt ``:''} are ignored.
 %frac r1 g1 b1 r2 g2 b2    // frac - portion of colorbar used by segment
 %...
 %...
-%label for second color bar
+%label for second colorbar
 %frac r1 g1 b1 r2 g2 b2
 %...
 %...
@@ -5225,8 +5224,8 @@ the character string after the {\tt ``:''} are ignored.
 %segment. Smokeview normalizes the {\tt fracs's} so that their
 %total sums to 1.0.
 %
-%The following example defines two colorbars.  The first color bar
-%is the so called {\em rainbow}\ color bar because it traverses the
+%The following example defines two colorbars.  The first colorbar
+%is the so called {\em rainbow}\ colorbar because it traverses the
 %entire spectrum.  The second colorbar discontinuous and is useful
 %for highlighting important data values, for example a zero
 %velocity or an ignition temperature.
@@ -5796,7 +5795,7 @@ the ceiling (upper bounding surface) should be drawn (1) or not drawn (0).
 
 
 \hitem{SHOWCOLORBARS}Specifies whether
-the color bars should be drawn (1) or not drawn (0).
+the colorbars should be drawn (1) or not drawn (0).
 (default: 1)
 
 \hitem{SHOWEXTREMEDATA}Specifies whether data exceeding the maximum colorbar
