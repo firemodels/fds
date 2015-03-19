@@ -3204,20 +3204,6 @@ extern "C" void FileShow_CB(int var){
   }
 }
 
-/* ------------------ glui_labels_rename ------------------------ */
-
-extern "C" void glui_bounds_rename(void){
-
-  if((npartinfo > 0) || nsliceinfo > 0 || nvsliceinfo > 0 || nisoinfo > 0 || npatchinfo || nsmoke3dinfo > 0 || nplot3dinfo > 0){
-    ROLLOUT_showhide->set_name(_("Show/Hide Loaded Files"));
-  }
-
-  //    glui_labels->add_radiobutton_to_group(RADIO_showhide,_("Show"));
-  //    glui_labels->add_radiobutton_to_group(RADIO_showhide,_("Show Only"));
-  //    glui_labels->add_radiobutton_to_group(RADIO_showhide,_("Hide"));
-
-}
-
 /* ------------------ update_fileload  ------------------------ */
 
 extern "C" void update_fileload(void){

@@ -80,31 +80,6 @@ extern "C" void Update_Glui_Wui(void){
   }
 }
 
-/* ------------------ glui_wui_rename ------------------------ */
-
-extern "C" void glui_wui_rename(void){
-  if(nterraininfo>0){
-    PANEL_terrain_color=glui_wui->add_panel_to_panel(PANEL_terrain,_("3D surface color"));
-    STATIC_wui_1=glui_wui->add_statictext_to_panel(PANEL_terrain_color,_("                  Min"));
-    SPINNER_red_min=glui_wui->add_spinner_to_panel(PANEL_terrain_color,_("red"),GLUI_SPINNER_INT,terrain_rgba_zmin,TERRAIN_COLORS,WUI_CB);
-    SPINNER_green_min=glui_wui->add_spinner_to_panel(PANEL_terrain_color,_("green"),GLUI_SPINNER_INT,terrain_rgba_zmin+1,TERRAIN_COLORS,WUI_CB);
-    SPINNER_blue_min=glui_wui->add_spinner_to_panel(PANEL_terrain_color,_("blue"),GLUI_SPINNER_INT,terrain_rgba_zmin+2,TERRAIN_COLORS,WUI_CB);
-    STATIC_wui_2=glui_wui->add_statictext_to_panel(PANEL_terrain_color,_("                  Max"));
-    PANEL_terrain_type=glui_wui->add_panel_to_panel(PANEL_terrain_hidden1,_("Surface view"));
-    RADIOBUTTON_wui_1a=glui_wui->add_radiobutton_to_group(RADIO_terrain_type,_("3D surface"));
-    RADIOBUTTON_wui_1b=glui_wui->add_radiobutton_to_group(RADIO_terrain_type,_("2D stepped"));
-    RADIOBUTTON_wui_1c=glui_wui->add_radiobutton_to_group(RADIO_terrain_type,_("2D lines"));
-    RADIOBUTTON_texture=glui_wui->add_radiobutton_to_group(RADIO_terrain_type,_("Image"));
-    RADIOBUTTON_wui_1d=glui_wui->add_radiobutton_to_group(RADIO_terrain_type,_("Hidden"));
-    PANEL_fire_line=glui_wui->add_panel_to_panel(PANEL_terrain_hidden1,_("Fire line"));
-    SPINNER_fire_line_min=glui_wui->add_spinner_to_panel(PANEL_fire_line,"chop below:",GLUI_SPINNER_FLOAT,&fire_line_min,TERRAIN_MIN,WUI_CB);
-    SPINNER_fire_line_max=glui_wui->add_spinner_to_panel(PANEL_fire_line,"color red above:",GLUI_SPINNER_FLOAT,&fire_line_max,TERRAIN_MAX,WUI_CB);
-    SPINNER_vertical_factor=glui_wui->add_spinner_to_panel(PANEL_terrain_hidden1,"vertical exaggeration",GLUI_SPINNER_FLOAT,&vertical_factor,TERRAIN_VERT,WUI_CB);
-    BUTTON_wui_1=glui_wui->add_button("Save settings",SAVE_SETTINGS,WUI_CB);
-    BUTTON_wui_2=glui_wui->add_button("Close",WUI_CLOSE,WUI_CB);
-  }
-}
-
 /* ------------------ glui_wui_setup ------------------------ */
 
 extern "C" void glui_wui_setup(int main_window){

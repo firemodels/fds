@@ -216,7 +216,7 @@ int ndisplayprocinfo = 0;
 void Display_Rollout_CB(int var){
   toggle_rollout(displayprocinfo, ndisplayprocinfo, var);
 }
-/* ------------------ glui_labels_rename ------------------------ */
+/* ------------------ update_glui_label_text ------------------------ */
 
 extern "C" void update_glui_label_text(void){
   if(LABEL_Get_Nuserlabels()>0){
@@ -267,7 +267,7 @@ extern "C" void update_glui_label_text(void){
   }
 }
 
-  /* ------------------ glui_labels_rename ------------------------ */
+  /* ------------------ glui_update_fontindex ------------------------ */
 
 extern "C" void glui_update_fontindex(void){
   if(RADIO_fontsize!=NULL){
@@ -289,77 +289,6 @@ extern "C" void glui_update_fontindex(void){
     }
   }
 }
-
-/* ------------------ glui_labels_rename ------------------------ */
-
-extern "C" void glui_labels_rename(void){
-
-  ROLLOUT_general->set_name(_("General Settings"));
-  CHECKBOX_labels_colorbar->set_name(_("Colorbar"));
-  CHECKBOX_labels_timebar->set_name(_("Time bar"));
-  CHECKBOX_labels_timelabel->set_name(_("Time label"));
-  CHECKBOX_labels_framelabel->set_name(_("Frame label"));
-  CHECKBOX_labels_hrrlabel->set_name(_("HRR label"));
-  CHECKBOX_labels_hrrcutoff->set_name(_("HRRPUV cutoff"));
-  CHECKBOX_labels_ticks->set_name(_("FDS ticks"));
-  if(ntotal_blockages>0||isZoneFireModel==0){
-    CHECKBOX_labels_gridloc->set_name(_("Grid loc"));
-  }
-  if(nsliceinfo>0)CHECKBOX_labels_average->set_name(_("Average"));
-
-  CHECKBOX_labels_title->set_name(_("Title"));
-  CHECKBOX_labels_axis->set_name(_("Axis"));
-  CHECKBOX_labels_framerate->set_name(_("Frame rate"));
-#ifdef pp_memstatus
-  CHECKBOX_labels_availmemory->set_name(_("Memory load"));
-#endif
-  CHECKBOX_labels_labels->set_name(_("Text labels"));
-  CHECKBOX_labels_meshlabel->set_name(_("Mesh label"));
-  
-  CHECKBOX_label_1->set_name(_("Fast blockage drawing"));
-  CHECKBOX_label_2->set_name(_("Sort transparent faces"));
-  CHECKBOX_label_3->set_name(_("Hide overlaps"));
-  BUTTON_label_1->set_name(_("Show all"));
-  BUTTON_label_2->set_name(_("Hide all"));
-
-  CHECKBOX_labels_flip->set_name(_("Flip background"));
-  CHECKBOX_labels_shade->set_name(_("Shades of grey"));
-
-  if(nface_transparent>0){
-    PANEL_transparency->set_name(_("Geometry transparency"));
-    CHECKBOX_labels_transparent_override->set_name(_("Use level:"));
-  }
-
-
-  CHECKBOX_labels_hms->set_name(_("hms time label"));
-
-  RADIOBUTTON_label_1a->set_name(_("small"));
-  RADIOBUTTON_label_1b->set_name(_("large"));
-  RADIOBUTTON_label_1c->set_name(_("scaled"));
-
-
-  ROLLOUT_user_tick->set_name("User tick settings");
-
-  PANEL_tick1->set_name(_("Display"));
-
-  CHECKBOX_visUSERticks->set_name(_("User ticks"));
-  SPINNER_subtick->set_name(_("sub-intervals")); 
-  CHECKBOX_tick_auto->set_name(_("Auto place (2D)"));
-
-  PANEL_tick2->set_name(_("Parameters"));
-  SPINNER_tick_x0->set_name(_("origin"));
-  SPINNER_tick_xmin->set_name(_("Min"));
-  SPINNER_tick_xmax->set_name(_("Max"));
-  SPINNER_tick_dx0->set_name(_("Step"));
-
-//    glui_labels->add_radiobutton_to_group(RADIO_showhide,_("Show"));
-//    glui_labels->add_radiobutton_to_group(RADIO_showhide,_("Show Only"));
-//    glui_labels->add_radiobutton_to_group(RADIO_showhide,_("Hide"));
-
-  BUTTON_label_3->set_name(_("Save settings"));
-  BUTTON_label_4->set_name(_("Close"));
-}
-
 
 /* ------------------ glui_labels_setup ------------------------ */
 
@@ -383,9 +312,9 @@ extern "C" void glui_labels_setup(int main_window){
   PANEL_gen1=glui_labels->add_panel_to_panel(ROLLOUT_general,"",GLUI_PANEL_NONE);
   CHECKBOX_labels_colorbar=glui_labels->add_checkbox_to_panel(PANEL_gen1,_("Colorbar"),&visColorbar,LABELS_label,Labels_CB);
   CHECKBOX_labels_timebar=glui_labels->add_checkbox_to_panel(PANEL_gen1,_("Time bar"),&visTimebar,LABELS_label,Labels_CB);
-  CHECKBOX_labels_timelabel=glui_labels->add_checkbox_to_panel(PANEL_gen1,_("Time label"),&visTimelabel,LABELS_label,Labels_CB);
-  CHECKBOX_labels_framelabel=glui_labels->add_checkbox_to_panel(PANEL_gen1,_("Frame label"),&visFramelabel,FRAME_label,Labels_CB);
-  CHECKBOX_labels_hrrlabel=glui_labels->add_checkbox_to_panel(PANEL_gen1,_("HRR label"),&visHRRlabel,HRR_label,Labels_CB);
+  CHECKBOX_labels_timelabel=glui_labels->add_checkbox_to_panel(PANEL_gen1,_("Time"),&visTimelabel,LABELS_label,Labels_CB);
+  CHECKBOX_labels_framelabel=glui_labels->add_checkbox_to_panel(PANEL_gen1,_("Frame"),&visFramelabel,FRAME_label,Labels_CB);
+  CHECKBOX_labels_hrrlabel=glui_labels->add_checkbox_to_panel(PANEL_gen1,_("HRR"),&visHRRlabel,HRR_label,Labels_CB);
   CHECKBOX_labels_hrrcutoff=glui_labels->add_checkbox_to_panel(PANEL_gen1,_("HRRPUV cutoff"),&show_hrrcutoff,HRRPUVCUTOFF_label,Labels_CB);
   CHECKBOX_labels_ticks=glui_labels->add_checkbox_to_panel(PANEL_gen1,_("FDS ticks"),&visFDSticks,LABELS_label,Labels_CB);
   if(ntickinfo>0){
@@ -412,7 +341,7 @@ extern "C" void glui_labels_setup(int main_window){
   CHECKBOX_labels_availmemory=glui_labels->add_checkbox_to_panel(PANEL_gen1,_("Memory load"),&visAvailmemory,LABELS_label,Labels_CB);
 #endif
   CHECKBOX_labels_labels=glui_labels->add_checkbox_to_panel(PANEL_gen1,_("Text labels"),&visLabels,LABELS_label,Labels_CB);
-  CHECKBOX_labels_meshlabel=glui_labels->add_checkbox_to_panel(PANEL_gen1,_("Mesh label"),&visMeshlabel,LABELS_meshlabel,Labels_CB);
+  CHECKBOX_labels_meshlabel=glui_labels->add_checkbox_to_panel(PANEL_gen1,_("Mesh"),&visMeshlabel,LABELS_meshlabel,Labels_CB);
   glui_labels->add_checkbox_to_panel(PANEL_gen1, _("Toggle dialogs"), &toggle_dialogs);
 
   PANEL_gen2=glui_labels->add_panel_to_panel(ROLLOUT_general,"",GLUI_PANEL_NONE);
@@ -426,7 +355,7 @@ extern "C" void glui_labels_setup(int main_window){
   PANEL_gen3=glui_labels->add_panel_to_panel(ROLLOUT_general,"",GLUI_PANEL_NONE);
 
   CHECKBOX_labels_flip=glui_labels->add_checkbox_to_panel(PANEL_gen3,_("Flip background"),&background_flip,LABELS_flip,Labels_CB);
-  CHECKBOX_labels_hms=glui_labels->add_checkbox_to_panel(PANEL_gen3,_("hms time label"),&vishmsTimelabel,LABELS_HMS,Labels_CB);
+  CHECKBOX_labels_hms=glui_labels->add_checkbox_to_panel(PANEL_gen3,_("hms time"),&vishmsTimelabel,LABELS_HMS,Labels_CB);
   SPINNER_linewidth=glui_labels->add_spinner_to_panel(PANEL_gen3,"blockage line width",GLUI_SPINNER_FLOAT,&linewidth);
   SPINNER_linewidth->set_float_limits(1.0,10.0,GLUI_LIMIT_CLAMP);
   SPINNER_gridlinewidth=glui_labels->add_spinner_to_panel(PANEL_gen3,"grid line width",GLUI_SPINNER_FLOAT,&gridlinewidth);
