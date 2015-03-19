@@ -2457,8 +2457,8 @@ extern "C" void Slice_CB(int var){
       if(research_mode==1){
         axislabels_smooth_save=axislabels_smooth;
         axislabels_smooth=0;
-        visColorbarLabels_save=visColorbarLabels;
-        visColorbarLabels=1;
+        visColorbar_save=visColorbar;
+        visColorbar=1;
         
         setslicemin_save=setslicemin;
         slicemin_save=slicemin;
@@ -2473,7 +2473,7 @@ extern "C" void Slice_CB(int var){
       }
       else{
         axislabels_smooth=axislabels_smooth_save;
-        visColorbarLabels=visColorbarLabels_save;
+        visColorbar=visColorbar_save;
 
         setslicemin=setslicemin_save;
         Slice_CB(SETVALMIN);

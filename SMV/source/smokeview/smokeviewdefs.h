@@ -517,10 +517,28 @@ void _Sniff_Errors(char *whereat);
 #define VOL_UNLOAD -2
 #define VOL_READNONE -3
 
+#define MENU_LABEL_colorbar 0
+#define MENU_LABEL_timebar 1
+#define MENU_LABEL_title 2
+#define MENU_LABEL_framerate 3
+#define MENU_LABEL_axis 6
+#define MENU_LABEL_textlabels 7
+#define MENU_LABEL_timelabel 8
+#define MENU_LABEL_meshlabel 10
+#define MENU_LABEL_memload 11
+#define MENU_LABEL_memusage 19
+#define MENU_LABEL_fdsticks 12
+#define MENU_LABEL_hmslabel 13
+#define MENU_LABEL_grid 14
+#define MENU_LABEL_sliceaverage 15
+#define MENU_LABEL_hrrcutoff 17
+#define MENU_LABEL_userticks 18
+#define MENU_LABEL_gversion 20
 #define MENU_LABEL_ShowAll 4
 #define MENU_LABEL_HideAll 5
-#define MENU_LABEL_framerate 9
+#define MENU_LABEL_framelabel 9
 #define MENU_LABEL_hrr 16
+#define MENU_LABEL_none 999
 
 #define MENU_TRAINER_smoke 1
 #define MENU_TRAINER_temp 2

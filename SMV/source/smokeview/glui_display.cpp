@@ -69,8 +69,8 @@ GLUI_Spinner *SPINNER_scaled_font2d_thickness=NULL;
 
 GLUI_Checkbox *CHECKBOX_labels_meshlabel=NULL;
 GLUI_Checkbox *CHECKBOX_labels_version=NULL;
-GLUI_Checkbox *CHECKBOX_vis_user_ticks=NULL;
-GLUI_Checkbox *CHECKBOX_vis_user_ticks2=NULL;
+GLUI_Checkbox *CHECKBOX_visUSERticks=NULL;
+GLUI_Checkbox *CHECKBOX_visUSERticks2=NULL;
 GLUI_Checkbox *CHECKBOX_show_extreme_mindata=NULL;
 GLUI_Checkbox *CHECKBOX_show_extreme_maxdata=NULL;
 GLUI_Checkbox *CHECKBOX_colorbarflip=NULL;
@@ -342,7 +342,7 @@ extern "C" void glui_labels_rename(void){
 
   PANEL_tick1->set_name(_("Display"));
 
-  CHECKBOX_vis_user_ticks->set_name(_("User ticks"));
+  CHECKBOX_visUSERticks->set_name(_("User ticks"));
   SPINNER_subtick->set_name(_("sub-intervals")); 
   CHECKBOX_tick_auto->set_name(_("Auto place (2D)"));
 
@@ -381,22 +381,22 @@ extern "C" void glui_labels_setup(int main_window){
   ADDPROCINFO(displayprocinfo, ndisplayprocinfo, ROLLOUT_general, GENERAL_ROLLOUT);
 
   PANEL_gen1=glui_labels->add_panel_to_panel(ROLLOUT_general,"",GLUI_PANEL_NONE);
-  CHECKBOX_labels_colorbar=glui_labels->add_checkbox_to_panel(PANEL_gen1,_("Colorbar"),&visColorbarLabels,LABELS_label,Labels_CB);
-  CHECKBOX_labels_timebar=glui_labels->add_checkbox_to_panel(PANEL_gen1,_("Time bar"),&visTimeLabels,LABELS_label,Labels_CB);
+  CHECKBOX_labels_colorbar=glui_labels->add_checkbox_to_panel(PANEL_gen1,_("Colorbar"),&visColorbar,LABELS_label,Labels_CB);
+  CHECKBOX_labels_timebar=glui_labels->add_checkbox_to_panel(PANEL_gen1,_("Time bar"),&visTimebar,LABELS_label,Labels_CB);
   CHECKBOX_labels_timelabel=glui_labels->add_checkbox_to_panel(PANEL_gen1,_("Time label"),&visTimelabel,LABELS_label,Labels_CB);
   CHECKBOX_labels_framelabel=glui_labels->add_checkbox_to_panel(PANEL_gen1,_("Frame label"),&visFramelabel,FRAME_label,Labels_CB);
   CHECKBOX_labels_hrrlabel=glui_labels->add_checkbox_to_panel(PANEL_gen1,_("HRR label"),&visHRRlabel,HRR_label,Labels_CB);
   CHECKBOX_labels_hrrcutoff=glui_labels->add_checkbox_to_panel(PANEL_gen1,_("HRRPUV cutoff"),&show_hrrcutoff,HRRPUVCUTOFF_label,Labels_CB);
-  CHECKBOX_labels_ticks=glui_labels->add_checkbox_to_panel(PANEL_gen1,_("FDS ticks"),&visTicks,LABELS_label,Labels_CB);
+  CHECKBOX_labels_ticks=glui_labels->add_checkbox_to_panel(PANEL_gen1,_("FDS ticks"),&visFDSticks,LABELS_label,Labels_CB);
   if(ntickinfo>0){
     CHECKBOX_labels_ticks->enable();
   }
   else{
     CHECKBOX_labels_ticks->disable();
-    visTicks=0;
-    CHECKBOX_labels_ticks->set_int_val(visTicks);
+    visFDSticks=0;
+    CHECKBOX_labels_ticks->set_int_val(visFDSticks);
   }
-  CHECKBOX_vis_user_ticks2=glui_labels->add_checkbox_to_panel(PANEL_gen1,_("User ticks"),&vis_user_ticks,LABELS_usertick2,Labels_CB);
+  CHECKBOX_visUSERticks2=glui_labels->add_checkbox_to_panel(PANEL_gen1,_("User ticks"),&visUSERticks,LABELS_usertick2,Labels_CB);
   CHECKBOX_labels_version=glui_labels->add_checkbox_to_panel(PANEL_gen1,_("Version info"),&gversion,LABELS_version,Labels_CB);
 
   glui_labels->add_column_to_panel(PANEL_gen1,false);
@@ -412,7 +412,7 @@ extern "C" void glui_labels_setup(int main_window){
   CHECKBOX_labels_availmemory=glui_labels->add_checkbox_to_panel(PANEL_gen1,_("Memory load"),&visAvailmemory,LABELS_label,Labels_CB);
 #endif
   CHECKBOX_labels_labels=glui_labels->add_checkbox_to_panel(PANEL_gen1,_("Text labels"),&visLabels,LABELS_label,Labels_CB);
-  CHECKBOX_labels_meshlabel=glui_labels->add_checkbox_to_panel(PANEL_gen1,_("Mesh label"),&visBlocklabel,LABELS_meshlabel,Labels_CB);
+  CHECKBOX_labels_meshlabel=glui_labels->add_checkbox_to_panel(PANEL_gen1,_("Mesh label"),&visMeshlabel,LABELS_meshlabel,Labels_CB);
   glui_labels->add_checkbox_to_panel(PANEL_gen1, _("Toggle dialogs"), &toggle_dialogs);
 
   PANEL_gen2=glui_labels->add_panel_to_panel(ROLLOUT_general,"",GLUI_PANEL_NONE);
@@ -565,7 +565,7 @@ extern "C" void glui_labels_setup(int main_window){
   PANEL_tick1 = glui_labels->add_panel_to_panel(ROLLOUT_user_tick,_("Display"),true);
   PANEL_tick1a = glui_labels->add_panel_to_panel(PANEL_tick1,"",false);
 
-  CHECKBOX_vis_user_ticks=glui_labels->add_checkbox_to_panel(PANEL_tick1a,_("Show user ticks"),&vis_user_ticks,LABELS_usertick,Labels_CB);
+  CHECKBOX_visUSERticks=glui_labels->add_checkbox_to_panel(PANEL_tick1a,_("Show user ticks"),&visUSERticks,LABELS_usertick,Labels_CB);
   glui_labels->add_column_to_panel(PANEL_tick1a,false);
   SPINNER_subtick=glui_labels->add_spinner_to_panel(PANEL_tick1a,_("sub-intervals"),GLUI_SPINNER_INT,&user_tick_sub); 
   SPINNER_subtick->set_int_limits(1,10,GLUI_LIMIT_CLAMP);
@@ -901,11 +901,11 @@ extern "C" void Labels_CB(int var){
   case HRRPUVCUTOFF_label:
     break;
   case LABELS_usertick:
-    CHECKBOX_vis_user_ticks2->set_int_val(vis_user_ticks);
+    CHECKBOX_visUSERticks2->set_int_val(visUSERticks);
     break;
   case LABELS_usertick2:
-    CHECKBOX_vis_user_ticks->set_int_val(vis_user_ticks);
-    if(vis_user_ticks==1)ROLLOUT_user_tick->open();
+    CHECKBOX_visUSERticks->set_int_val(visUSERticks);
+    if(visUSERticks==1)ROLLOUT_user_tick->open();
     break;
   case SAVE_SETTINGS:
     writeini(LOCAL_INI,NULL);
@@ -961,15 +961,15 @@ extern "C" void Labels_CB(int var){
 extern "C" void set_labels_controls(){
 
   if(CHECKBOX_LB_visLabels!=NULL)CHECKBOX_LB_visLabels->set_int_val(visLabels);
-  if(CHECKBOX_vis_user_ticks!=NULL)CHECKBOX_vis_user_ticks->set_int_val(vis_user_ticks);
+  if(CHECKBOX_visUSERticks!=NULL)CHECKBOX_visUSERticks->set_int_val(visUSERticks);
   if(CHECKBOX_labels_hrrlabel!=NULL)CHECKBOX_labels_hrrlabel->set_int_val(visHRRlabel);
   if(CHECKBOX_labels_hrrcutoff!=NULL)CHECKBOX_labels_hrrcutoff->set_int_val(show_hrrcutoff);
   if(CHECKBOX_labels_title!=NULL)CHECKBOX_labels_title->set_int_val(visTitle);
-  if(CHECKBOX_labels_colorbar!=NULL)CHECKBOX_labels_colorbar->set_int_val(visColorbarLabels);
-  if(CHECKBOX_labels_timebar!=NULL)CHECKBOX_labels_timebar->set_int_val(visTimeLabels);
-  if(CHECKBOX_labels_timelabel!=NULL)CHECKBOX_labels_timelabel->set_int_val(visTimeLabels);
+  if(CHECKBOX_labels_colorbar!=NULL)CHECKBOX_labels_colorbar->set_int_val(visColorbar);
+  if(CHECKBOX_labels_timebar!=NULL)CHECKBOX_labels_timebar->set_int_val(visTimebar);
+  if(CHECKBOX_labels_timelabel!=NULL)CHECKBOX_labels_timelabel->set_int_val(visTimelabel);
   if(CHECKBOX_labels_framelabel!=NULL)CHECKBOX_labels_framelabel->set_int_val(visFramelabel);
-  if(CHECKBOX_labels_ticks!=NULL)CHECKBOX_labels_ticks->set_int_val(visTicks);
+  if(CHECKBOX_labels_ticks!=NULL)CHECKBOX_labels_ticks->set_int_val(visFDSticks);
   if(CHECKBOX_labels_axis!=NULL)CHECKBOX_labels_axis->set_int_val(visaxislabels);
   if(CHECKBOX_labels_framerate!=NULL)CHECKBOX_labels_framerate->set_int_val(visFramerate);
   if(CHECKBOX_labels_average!=NULL)CHECKBOX_labels_average->set_int_val(vis_slice_average);
@@ -984,8 +984,8 @@ extern "C" void set_labels_controls(){
   if(CHECKBOX_labels_hms!=NULL)CHECKBOX_labels_hms->set_int_val(vishmsTimelabel);
   if(CHECKBOX_labels_gridloc!=NULL)CHECKBOX_labels_gridloc->set_int_val(visgridloc);
   if(CHECKBOX_labels_version!=NULL)CHECKBOX_labels_version->set_int_val(gversion);
-  if(CHECKBOX_labels_meshlabel!=NULL)CHECKBOX_labels_meshlabel->set_int_val(visBlocklabel);
-  if(CHECKBOX_vis_user_ticks2!=NULL)CHECKBOX_vis_user_ticks2->set_int_val(vis_user_ticks);
+  if(CHECKBOX_labels_meshlabel!=NULL)CHECKBOX_labels_meshlabel->set_int_val(visMeshlabel);
+  if(CHECKBOX_visUSERticks2!=NULL)CHECKBOX_visUSERticks2->set_int_val(visUSERticks);
 }
 
 

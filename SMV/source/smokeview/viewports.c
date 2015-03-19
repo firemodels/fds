@@ -84,7 +84,7 @@ void Get_VP_info(void){
   // INFO viewport dimensions
 
   doit=0;
-  if(visBlocklabel==1){
+  if(visMeshlabel==1){
     ninfo_lines++;
     doit=1;  
   }
@@ -127,7 +127,7 @@ void Get_VP_info(void){
 
   doit=0;
   if(
-    (visTimeLabels==1&&showtime==1)||
+    (visTimebar==1&&showtime==1)||
     (showtime==1&&(visFramerate==1||(vis_slice_average==1&&show_slice_average&&slice_average_flag==1))||
     (hrrpuv_loaded==1&&show_hrrcutoff==1&&current_mesh!=NULL)
     )
@@ -156,7 +156,7 @@ void Get_VP_info(void){
   // colorbar viewport dimensions
 
   doit=1;
-  if(visColorbarLabels==0||numColorbars==0||(showtime==0&&showplot3d==0))doit=0;
+  if(visColorbar==0||numColorbars==0||(showtime==0&&showplot3d==0))doit=0;
   VP_colorbar.left = screenWidth-colorbar_delta - numColorbars*(colorbar_label_width+2*h_space)-titlesafe_offset;
   VP_colorbar.down = MAX(VP_timebar.height,VP_info.height)+titlesafe_offset;
   VP_colorbar.doit = doit;
@@ -624,7 +624,7 @@ void INFO_viewport(int quad, GLint screen_left, GLint screen_down){
       info_lines++;
     }
   }
-  if(visBlocklabel==1){
+  if(visMeshlabel==1){
     char meshlabel[255];
 
     if(mesh_xyz==NULL){
@@ -663,7 +663,7 @@ void TIMEBAR_viewport(int quad, GLint screen_left, GLint screen_down){
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
 
-  if( visTimeLabels==1&&showtime==1){
+  if( visTimebar==1&&showtime==1){
     if(visTimelabel==1){
       outputText(VP_timebar.left,v_space, timelabel);
     }

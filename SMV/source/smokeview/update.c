@@ -623,7 +623,7 @@ void Update_Show(void){
   /* note: animated iso-contours do not need a color bar,
            so we don't test for isosurface files */
   drawColorLabel=0;
-  if((showtime==1||showplot3d==1)&&visColorbarLabels==1)drawColorLabel=1;
+  if((showtime==1||showplot3d==1)&&visColorbar==1)drawColorLabel=1;
   if(drawColorLabel==1&&olddrawColorLabel==0)updatemenu=1;
   if(drawColorLabel==0&&olddrawColorLabel==1)updatemenu=1;
   olddrawColorLabel=drawColorLabel;

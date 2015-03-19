@@ -1794,7 +1794,7 @@ void initvars(void){
   smoothing_blocks=0;
   blocksneedsmoothing=0;
 
-  vis_user_ticks=0;
+  visUSERticks=0;
   user_tick_show_x=1;
   user_tick_show_y=1;
   user_tick_show_z=1;
@@ -1823,7 +1823,7 @@ void initvars(void){
   update_selectedtour_index=0;
   viewtourfrompath=0,viewalltours=0,viewanytours=0,edittour=0;
   tour_usecurrent=0;
-  visTicks=0;
+  visFDSticks=0;
   visCadTextures=1;
   visTerrainTexture=1;
   nselectblocks=0;

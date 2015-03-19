@@ -858,7 +858,7 @@ void mouse_CB(int button, int state, int xm, int ym){
     if( showtime==1 || showplot3d==1){
       if(colorbar_click(xm,ym)==1)return;
     }
-    if(visTimeLabels==1&&showtime==1){
+    if(visTimebar==1&&showtime==1){
       if(timebar_click(xm,ym)==1)return;
     }
     copy_camera(camera_last,camera_current);
@@ -1608,9 +1608,9 @@ void keyboard(unsigned char key, int flag){
       break;
     case 'k':
     case 'K':
-      visTimeLabels = 1 - visTimeLabels;
-      if(visTimeLabels==0)PRINTF("Time bar hidden\n");
-      if(visTimeLabels==1)PRINTF("Time bar visible\n");
+      visTimebar = 1 - visTimebar;
+      if(visTimebar==0)PRINTF("Time bar hidden\n");
+      if(visTimebar==1)PRINTF("Time bar visible\n");
       break;
 #ifdef _DEBUG 
     case 'l':

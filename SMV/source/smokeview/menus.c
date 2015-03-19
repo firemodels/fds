@@ -211,24 +211,25 @@ void IsoVariableMenu(int value){
 
 void LabelMenu(int value){
   updatemenu=1;  
+  if(value == MENU_LABEL_none)return;
   glutPostRedisplay();
   switch(value){
-   case 0:
-    visColorbarLabels=1-visColorbarLabels;
+  case MENU_LABEL_colorbar:
+    visColorbar=1-visColorbar;
     break;
-   case 1:
-    visTimeLabels=1-visTimeLabels;
+  case MENU_LABEL_timebar:
+    visTimebar=1-visTimebar;
     break;
-   case 2:
+  case MENU_LABEL_title:
     visTitle=1-visTitle;
     break;
-   case 3:
+  case MENU_LABEL_framerate:
     visFramerate = 1 - visFramerate;
     break;
    case MENU_LABEL_ShowAll:
-    vis_user_ticks=1;
-    visColorbarLabels=1;
-    visTimeLabels=1;
+    visUSERticks=1;
+    visColorbar=1;
+    visTimebar=1;
     visTitle=1;
     visFramerate=1;
 #ifdef pp_memstatus
@@ -238,9 +239,9 @@ void LabelMenu(int value){
     visTimelabel=1;
     visFramelabel=1;
     visLabels=1;
-    visBlocklabel=1;
+    visMeshlabel=1;
     vis_slice_average=1;
-    if(ntickinfo>0)visTicks=1;
+    if(ntickinfo>0)visFDSticks=1;
     visgridloc=1;
     visHRRlabel=1;
     show_hrrcutoff=1;
@@ -255,16 +256,16 @@ void LabelMenu(int value){
     gversion=1;
     break;
    case MENU_LABEL_HideAll:
-    vis_user_ticks=0;
-    visColorbarLabels=0;
-    visTimeLabels=0;
+    visUSERticks=0;
+    visColorbar=0;
+    visTimebar=0;
     visTitle=0;
     visFramerate=0;
     visaxislabels=0;
     visLabels=0;
     visTimelabel=0;
     visFramelabel=0;
-    visBlocklabel=0;
+    visMeshlabel=0;
     visHRRlabel=0;
     show_hrrcutoff=0;
     if(hrrinfo!=NULL){
@@ -274,7 +275,7 @@ void LabelMenu(int value){
       }
       hrrinfo->display=0;
     }
-    if(ntickinfo>0)visTicks=0;
+    if(ntickinfo>0)visFDSticks=0;
     visgridloc=0;
     vis_slice_average=0;
     gversion=0;
@@ -282,20 +283,20 @@ void LabelMenu(int value){
     visAvailmemory=0;
 #endif
     break;
-   case 6:
+   case MENU_LABEL_axis:
     visaxislabels = 1 - visaxislabels;
     update_visaxislabels();
     break;
-   case 7:
+   case MENU_LABEL_textlabels:
      visLabels = 1 - visLabels;
      break;
-   case 8:
+   case MENU_LABEL_timelabel:
      visTimelabel=1-visTimelabel;
-     if(visTimelabel==1)visTimeLabels=1;
+     if(visTimelabel==1)visTimebar=1;
      break;
-   case MENU_LABEL_framerate:
+   case MENU_LABEL_framelabel:
      visFramelabel=1-visFramelabel;
-     if(visFramelabel==1)visTimeLabels=1;
+     if(visFramelabel==1)visTimebar=1;
      if(visFramelabel==1){
        visHRRlabel=0;
        if(hrrinfo!=NULL){
@@ -304,49 +305,49 @@ void LabelMenu(int value){
        }
      }
      break;
-   case 10:
-     visBlocklabel=1-visBlocklabel;
+   case MENU_LABEL_meshlabel:
+     visMeshlabel=1-visMeshlabel;
      break;
 #ifdef pp_memstatus
-   case 11:
+   case MENU_LABEL_memload:
      visAvailmemory = 1 - visAvailmemory;
      break;
 #endif
 #ifdef pp_MEMDEBUG
-   case 19:
+   case MENU_LABEL_memusage:
      visUsagememory = 1 - visUsagememory;
 #ifdef pp_memstatus
      if(visUsagememory==1)visAvailmemory=0;
 #endif
      break;
 #endif
-   case 12:
-     visTicks=1-visTicks;
+   case MENU_LABEL_fdsticks:
+     visFDSticks=1-visFDSticks;
      break;
-   case 13:
+   case MENU_LABEL_hmslabel:
      vishmsTimelabel = 1 - vishmsTimelabel;
      break;
-   case 14:
+   case MENU_LABEL_grid:
      visgridloc = 1 - visgridloc;
      break;
-   case 15:
+   case MENU_LABEL_sliceaverage:
      vis_slice_average = 1 - vis_slice_average;
      break;
    case MENU_LABEL_hrr:
      visHRRlabel=1-visHRRlabel;
-     if(visHRRlabel==1)visTimeLabels=1;
+     if(visHRRlabel==1)visTimebar=1;
      if(hrrinfo!=NULL){
        hrrinfo->display=visHRRlabel;
        Update_Times();
      }
      break;
-   case 17:
+   case MENU_LABEL_hrrcutoff:
      show_hrrcutoff=1-show_hrrcutoff;
      break;
-   case 18:
-     vis_user_ticks = 1 - vis_user_ticks;
+   case MENU_LABEL_userticks:
+     visUSERticks = 1 - visUSERticks;
      break;
-   case 20:
+   case MENU_LABEL_gversion:
      gversion=1-gversion;
      break;
    default:
@@ -5660,61 +5661,63 @@ updatemenu=0;
 
 /* --------------------------------label menu -------------------------- */
 
-  CREATEMENU(labelmenu,LabelMenu);
-  if(visColorbarLabels==1)glutAddMenuEntry(_("*Colorbar"),0);
-  if(visColorbarLabels==0)glutAddMenuEntry(_("Colorbar"),0);
-  if(visTimeLabels==1)glutAddMenuEntry(_("*Time bar"),1);
-  if(visTimeLabels==0)glutAddMenuEntry(_("Time bar"),1);
-  if(ntickinfo>0){
-    if(visTicks==0)glutAddMenuEntry(_("FDS generated ticks"),12);
-    if(visTicks==1)glutAddMenuEntry(_("*FDS generated ticks"),12);
-  }
-  if(vis_user_ticks==1)glutAddMenuEntry(_("*User settable ticks"),18);
-  if(vis_user_ticks==0)glutAddMenuEntry(_("User settable ticks"),18);
+  CREATEMENU(labelmenu, LabelMenu);
+  if(visColorbar==1)glutAddMenuEntry(_("*Colorbar"),MENU_LABEL_colorbar);
+  if(visColorbar==0)glutAddMenuEntry(_("Colorbar"),MENU_LABEL_colorbar);
+  if(visTimebar==1)glutAddMenuEntry(_("*Time bar"),MENU_LABEL_timebar);
+  if(visTimebar==0)glutAddMenuEntry(_("Time bar"),MENU_LABEL_timebar);
+  if(visTitle == 1)glutAddMenuEntry(_("*Title"), MENU_LABEL_title);
+  if(visTitle == 0)glutAddMenuEntry(_("Title"), MENU_LABEL_title);
+  glutAddMenuEntry("-", MENU_LABEL_none);
 
-  if(visTitle==1)glutAddMenuEntry(_("*Title"),2);
-  if(visTitle==0)glutAddMenuEntry(_("Title"),2);
-  if(visaxislabels==1)glutAddMenuEntry(_("*Axis"),6);
-  if(visaxislabels==0)glutAddMenuEntry(_("Axis"),6);
-  if(visFramerate==1)glutAddMenuEntry(_("*Frame rate"),3);
-  if(visFramerate==0)glutAddMenuEntry(_("Frame rate"),3);
-  if(visTimelabel==1)glutAddMenuEntry(_("*Time label"),8);
-  if(visTimelabel==0)glutAddMenuEntry(_("Time label"),8);
-  if(visFramelabel==1)glutAddMenuEntry(_("*Frame label"),9);
-  if(visFramelabel==0)glutAddMenuEntry(_("Frame label"),9);
-  if(hrrinfo!=NULL){
-    if(visHRRlabel==1)glutAddMenuEntry(_("*HRR label"),16);
-    if(visHRRlabel==0)glutAddMenuEntry(_("HRR label"),16);
+  if(visaxislabels == 1)glutAddMenuEntry(_("*Axis"), MENU_LABEL_axis);
+  if(visaxislabels == 0)glutAddMenuEntry(_("Axis"), MENU_LABEL_axis);
+  if(ntickinfo>0){
+    if(visFDSticks == 0)glutAddMenuEntry(_("FDS generated ticks"), MENU_LABEL_fdsticks);
+    if(visFDSticks == 1)glutAddMenuEntry(_("*FDS generated ticks"), MENU_LABEL_fdsticks);
   }
-  if(show_hrrcutoff_active==1){
-    if(show_hrrcutoff==1)glutAddMenuEntry(_("*HRRPUV cutoff"),17);
-    if(show_hrrcutoff==0)glutAddMenuEntry(_("HRRPUV cutoff"),17);
+  if(visFramelabel == 1)glutAddMenuEntry(_("*Frame label"), MENU_LABEL_framelabel);
+  if(visFramelabel == 0)glutAddMenuEntry(_("Frame label"), MENU_LABEL_framelabel);
+  if(visFramerate == 1)glutAddMenuEntry(_("*Frame rate"), MENU_LABEL_framerate);
+  if(visFramerate == 0)glutAddMenuEntry(_("Frame rate"), MENU_LABEL_framerate);
+  if(ntotal_blockages > 0 || isZoneFireModel == 0){
+    if(visgridloc == 1)glutAddMenuEntry(_("*Grid locations"), MENU_LABEL_grid);
+    if(visgridloc == 0)glutAddMenuEntry(_("Grid locations"), MENU_LABEL_grid);
   }
-  if(vis_slice_average==1)glutAddMenuEntry(_("*Slice average"),15);
-  if(vis_slice_average==0)glutAddMenuEntry(_("Slice average"),15);
-  if(visBlocklabel==1)glutAddMenuEntry(_("*Mesh label"),10);
-  if(visBlocklabel==0)glutAddMenuEntry(_("Mesh label"),10);
+  if(show_hrrcutoff_active == 1){
+    if(show_hrrcutoff == 1)glutAddMenuEntry(_("*HRRPUV cutoff"), MENU_LABEL_hrrcutoff);
+    if(show_hrrcutoff == 0)glutAddMenuEntry(_("HRRPUV cutoff"), MENU_LABEL_hrrcutoff);
+  }
+  if(hrrinfo != NULL){
+    if(visHRRlabel == 1)glutAddMenuEntry(_("*HRR label"), MENU_LABEL_hrr);
+    if(visHRRlabel == 0)glutAddMenuEntry(_("HRR label"), MENU_LABEL_hrr);
+  }
 #ifdef pp_memstatus
-  if(visAvailmemory==1)glutAddMenuEntry(_("*Memory load"),11);
-  if(visAvailmemory==0)glutAddMenuEntry(_("Memory load"),11);
+  if(visAvailmemory == 1)glutAddMenuEntry(_("*Memory load"), MENU_LABEL_memload);
+  if(visAvailmemory == 0)glutAddMenuEntry(_("Memory load"), MENU_LABEL_memload);
 #endif
 #ifdef pp_MEMDEBUG
-  if(visUsagememory==1)glutAddMenuEntry(_("*Memory usage"),19);
-  if(visUsagememory==0)glutAddMenuEntry(_("Memory usage"),19);
+  if(visUsagememory == 1)glutAddMenuEntry(_("*Memory usage"), MENU_LABEL_memusage);
+  if(visUsagememory == 0)glutAddMenuEntry(_("Memory usage"), MENU_LABEL_memusage);
 #endif
-  if(LABEL_Get_Nuserlabels()>0){
-    if(visLabels==1)glutAddMenuEntry(_("*Text labels"),7);
-    if(visLabels==0)glutAddMenuEntry(_("Text labels"),7);
+  if(visMeshlabel == 1)glutAddMenuEntry(_("*Mesh label"), MENU_LABEL_meshlabel);
+  if(visMeshlabel == 0)glutAddMenuEntry(_("Mesh label"), MENU_LABEL_meshlabel);
+  if(vis_slice_average == 1)glutAddMenuEntry(_("*Slice average"), MENU_LABEL_sliceaverage);
+  if(vis_slice_average == 0)glutAddMenuEntry(_("Slice average"), MENU_LABEL_sliceaverage);
+  if(LABEL_Get_Nuserlabels() > 0){
+    if(visLabels == 1)glutAddMenuEntry(_("*Text labels"), MENU_LABEL_textlabels);
+    if(visLabels == 0)glutAddMenuEntry(_("Text labels"), MENU_LABEL_textlabels);
   }
-  if(ntotal_blockages>0||isZoneFireModel==0){
-    if(visgridloc==1)glutAddMenuEntry(_("*Grid locations"),14);
-    if(visgridloc==0)glutAddMenuEntry(_("Grid locations"),14);
-  }
-  if(gversion==1)glutAddMenuEntry(_("*Version info"),20);
-  if(gversion==0)glutAddMenuEntry(_("Version info"),20);
+  if(visTimelabel == 1)glutAddMenuEntry(_("*Time label"), MENU_LABEL_timelabel);
+  if(visTimelabel == 0)glutAddMenuEntry(_("Time label"), MENU_LABEL_timelabel);
+  if(visUSERticks == 1)glutAddMenuEntry(_("*User settable ticks"), MENU_LABEL_userticks);
+  if(visUSERticks == 0)glutAddMenuEntry(_("User settable ticks"), MENU_LABEL_userticks);
+  if(gversion == 1)glutAddMenuEntry(_("*Version info"), MENU_LABEL_gversion);
+  if(gversion == 0)glutAddMenuEntry(_("Version info"), MENU_LABEL_gversion);
 
-  glutAddMenuEntry(_("Show all"),4);
-  glutAddMenuEntry(_("Hide all"),5);
+  glutAddMenuEntry("-", MENU_LABEL_none);
+  glutAddMenuEntry(_("Show all"), MENU_LABEL_ShowAll);
+  glutAddMenuEntry(_("Hide all"), MENU_LABEL_HideAll);
 
 /* --------------------------------rotate type menu -------------------------- */
 

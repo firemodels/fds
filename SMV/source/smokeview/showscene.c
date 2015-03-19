@@ -165,7 +165,7 @@ void ShowScene2(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
 
  /* ++++++++++++++++++++++++ draw user ticks +++++++++++++++++++++++++ */
 
-    if(vis_user_ticks==1){
+    if(visUSERticks==1){
       antialias(ON);
       UNCLIP;
       draw_user_ticks();
@@ -175,7 +175,7 @@ void ShowScene2(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
 
  /* ++++++++++++++++++++++++ draw ticks +++++++++++++++++++++++++ */
 
-    if(visTicks==1&&ntickinfo>0){
+    if(visFDSticks==1&&ntickinfo>0){
       UNCLIP;
       drawticks();
       SNIFF_ERRORS("after drawticks");

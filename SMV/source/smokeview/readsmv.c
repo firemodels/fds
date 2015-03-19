@@ -10195,12 +10195,12 @@ int readini2(char *inifile, int localfile){
     }
     if(match(buffer,"SHOWTICKS")==1){
       fgets(buffer,255,stream);
-      sscanf(buffer,"%i",&visTicks);
+      sscanf(buffer,"%i",&visFDSticks);
       continue;
       }
     if(match(buffer,"USERTICKS")==1){
       fgets(buffer,255,stream);
-      sscanf(buffer,"%i %i %i %i %i %i",&vis_user_ticks,&auto_user_tick_placement,&user_tick_sub,
+      sscanf(buffer,"%i %i %i %i %i %i",&visUSERticks,&auto_user_tick_placement,&user_tick_sub,
         &user_tick_show_x,&user_tick_show_y,&user_tick_show_z);
       fgets(buffer,255,stream);
       sscanf(buffer,"%f %f %f",user_tick_origin,user_tick_origin+1,user_tick_origin+2);
@@ -10303,7 +10303,7 @@ int readini2(char *inifile, int localfile){
 #endif
     if(match(buffer,"SHOWBLOCKLABEL")==1){
       fgets(buffer,255,stream);
-      sscanf(buffer,"%i",&visBlocklabel);
+      sscanf(buffer,"%i",&visMeshlabel);
       continue;
     }
     if(match(buffer,"SHOWVZONE")==1){
@@ -10392,12 +10392,12 @@ int readini2(char *inifile, int localfile){
     }
     if(match(buffer,"SHOWTIMEBAR")==1){
       fgets(buffer,255,stream);
-      sscanf(buffer,"%i",&visTimeLabels);
+      sscanf(buffer,"%i",&visTimebar);
       continue;
     }
     if(match(buffer,"SHOWCOLORBARS")==1){
       fgets(buffer,255,stream);
-      sscanf(buffer,"%i",&visColorbarLabels);
+      sscanf(buffer,"%i",&visColorbar);
       continue;
     }
     if(match(buffer,"EYEVIEW")==1){
@@ -11740,7 +11740,7 @@ void writeini(int flag,char *filename){
   fprintf(fileout,"GVERSION\n");
   fprintf(fileout," %i\n",gversion);
   fprintf(fileout,"SHOWCOLORBARS\n");
-  fprintf(fileout," %i\n",visColorbarLabels);
+  fprintf(fileout," %i\n",visColorbar);
   fprintf(fileout,"SHOWBLOCKS\n");
   fprintf(fileout," %i\n",visBlocks);
   fprintf(fileout,"SHOWNORMALWHENSMOOTH\n");
@@ -11760,7 +11760,7 @@ void writeini(int flag,char *filename){
   fprintf(fileout,"SHOWSENSORS\n");
   fprintf(fileout," %i %i\n",visSensor,visSensorNorm);
   fprintf(fileout,"SHOWTIMEBAR\n");
-  fprintf(fileout," %i\n",visTimeLabels);
+  fprintf(fileout," %i\n",visTimebar);
   fprintf(fileout,"SHOWTIMELABEL\n");
   fprintf(fileout," %i\n",visTimelabel);
   fprintf(fileout,"SHOWFRAMELABEL\n");
@@ -11784,7 +11784,7 @@ void writeini(int flag,char *filename){
   fprintf(fileout,"SHOWTRIANGLECOUNT\n");
   fprintf(fileout," %i\n",show_triangle_count);
   fprintf(fileout,"SHOWBLOCKLABEL\n");
-  fprintf(fileout," %i\n",visBlocklabel);
+  fprintf(fileout," %i\n",visMeshlabel);
   fprintf(fileout,"SHOWAXISLABELS\n");
   fprintf(fileout," %i\n",visaxislabels);
   fprintf(fileout,"SHOWFRAME\n");
@@ -11853,10 +11853,10 @@ void writeini(int flag,char *filename){
   fprintf(fileout,"SKIPEMBEDSLICE\n");
   fprintf(fileout," %i\n",skip_slice_in_embedded_mesh);
   fprintf(fileout,"SHOWTICKS\n");
-  fprintf(fileout," %i\n",visTicks);
+  fprintf(fileout," %i\n",visFDSticks);
   if(flag==LOCAL_INI){
     fprintf(fileout,"USERTICKS\n");
-    fprintf(fileout," %i %i %i %i %i %i\n",vis_user_ticks,auto_user_tick_placement,user_tick_sub,
+    fprintf(fileout," %i %i %i %i %i %i\n",visUSERticks,auto_user_tick_placement,user_tick_sub,
       user_tick_show_x,user_tick_show_y,user_tick_show_z);
     fprintf(fileout," %f %f %f\n",user_tick_origin[0],user_tick_origin[1],user_tick_origin[2]);
     fprintf(fileout," %f %f %f\n",user_tick_min[0],user_tick_min[1],user_tick_min[2]);
