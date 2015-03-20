@@ -515,10 +515,10 @@ int compile_script(char *scriptfile){
       case SCRIPT_RENDERTYPE:
         SETcval;
         if(STRCMP(scripti->cval, "PNG") == 0){
-          scripti->ival == PNG;
+          scripti->ival = PNG;
         }
         else{
-          scripti->ival == JPEG;
+          scripti->ival = JPEG;
         }
         break;
       case SCRIPT_RENDERDIR:
