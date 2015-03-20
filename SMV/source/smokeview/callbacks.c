@@ -969,7 +969,6 @@ void Timebar_Drag(int xm, int ym){
 /* ------------------ Drag_Tour_Node ------------------------ */
 
 void Drag_Tour_Node(int xm, int ym){
-  int dxm, dym;
   float screen_perm[9];
 
   if(showtour_dialog==1&&edittour==1&&selected_frame!=NULL){
@@ -978,8 +977,6 @@ void Drag_Tour_Node(int xm, int ym){
   else{
     return;
   }
-  dxm = xm - start_xyz0[0];
-  dym = ym - start_xyz0[1];
   switch(key_state){
     case KEY_NONE:
     case KEY_ALT:

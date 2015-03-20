@@ -39,15 +39,12 @@ void DrawCircVentsApproxSolid(int option){
 
     for(j=0;j<meshi->ncvents;j++){
       cventdata *cvi;
-      unsigned char *blank;
       int ii, jj, kk;
-      int nx;
       float xx, yy, zz;
       float xx2, yy2, zz2;
       float dx;
 
       cvi = meshi->cventinfo + j;
-      blank = cvi->blank;
       glColor3fv(cvi->color);
       if(cvi->dir==UP_X||cvi->dir==UP_Y||cvi->dir==UP_Z){
         dx=0.001;
@@ -59,7 +56,6 @@ void DrawCircVentsApproxSolid(int option){
         case UP_X:
         case DOWN_X:
           xx=xplt[cvi->imin]+dx;;
-          nx = cvi->jmax-cvi->jmin+2;
           for(kk=cvi->kmin;kk<cvi->kmax;kk++){
             zz = zplt[kk];
             zz2 = zplt[kk+1];
@@ -93,7 +89,6 @@ void DrawCircVentsApproxSolid(int option){
         case UP_Y:
         case DOWN_Y:
           yy=yplt[cvi->jmin]+dx;;
-          nx = cvi->imax-cvi->imin+2;
           for(kk=cvi->kmin;kk<cvi->kmax;kk++){
             zz = zplt[kk];
             zz2 = zplt[kk+1];
@@ -127,7 +122,6 @@ void DrawCircVentsApproxSolid(int option){
         case UP_Z:
         case DOWN_Z:
           zz=zplt[cvi->kmin]+dx;;
-          nx = cvi->imax-cvi->imin+2;
           for(jj=cvi->jmin;jj<cvi->jmax;jj++){
             yy = yplt[jj];
             yy2 = yplt[jj+1];
@@ -188,10 +182,7 @@ void DrawCircVentsApproxOutline(int option){
 
     for(j=0;j<meshi->ncvents;j++){
       cventdata *cvi;
-      unsigned char *blank;
       int ii, jj, kk;
-      int iii, jjj, kkk;
-      int nx;
       float xx0, yy0, zz0;
       float xx, yy, zz;
       float xx2, yy2, zz2;
@@ -200,7 +191,6 @@ void DrawCircVentsApproxOutline(int option){
       int in_circle;
 
       cvi = meshi->cventinfo + j;
-      blank = cvi->blank;
       glColor3fv(cvi->color);
       if(cvi->dir==UP_X||cvi->dir==UP_Y||cvi->dir==UP_Z){
         dx=0.001;
@@ -212,15 +202,12 @@ void DrawCircVentsApproxOutline(int option){
         case UP_X:
         case DOWN_X:
           xx=xplt[cvi->imin]+dx;;
-          nx = cvi->jmax-cvi->jmin+2;
           for(kk=cvi->kmin;kk<cvi->kmax;kk++){
-            kkk = kk-cvi->kmin;
             zz0 = zplt[MAX(kk-1,cvi->kmin)];
             zz = zplt[kk];
             zz2 = zplt[kk+1];
             zz3 = zplt[MIN(kk+2,cvi->kmax)];
             for(jj=cvi->jmin;jj<cvi->jmax;jj++){
-              jjj=jj-cvi->jmin;
               yy0 = yplt[MAX(jj-1,cvi->jmin)];
               yy = yplt[jj];
               yy2 = yplt[jj+1];
@@ -257,19 +244,16 @@ void DrawCircVentsApproxOutline(int option){
         case UP_Y:
         case DOWN_Y:
           yy=yplt[cvi->jmin]+dx;;
-          nx = cvi->imax-cvi->imin+2;
           for(kk=cvi->kmin;kk<cvi->kmax;kk++){
             zz0 = zplt[MAX(kk-1,cvi->kmin)];
             zz = zplt[kk];
             zz2 = zplt[kk+1];
             zz3 = zplt[MIN(kk+2,cvi->kmax)];
-            kkk=kk-cvi->kmin;
             for(ii=cvi->imin;ii<cvi->imax;ii++){
               xx0 = xplt[MAX(ii-1,cvi->imin)];
               xx = xplt[ii];
               xx2 = xplt[ii+1];
               xx3 = xplt[MIN(ii+2,cvi->imax)];
-              iii=ii-cvi->imin;
 
               INCIRCLE((xx+xx2)/2.0,yy,(zz+zz2)/2.0,in_circle);
               if(in_circle==NO)continue;
@@ -303,19 +287,16 @@ void DrawCircVentsApproxOutline(int option){
         case UP_Z:
         case DOWN_Z:
           zz=zplt[cvi->kmin]+dx;;
-          nx = cvi->imax-cvi->imin+2;
           for(jj=cvi->jmin;jj<cvi->jmax;jj++){
             yy0 = yplt[MAX(jj-1,cvi->jmin)];
             yy = yplt[jj];
             yy2 = yplt[jj+1];
             yy3 = yplt[MIN(jj+2,cvi->jmax)];
-            jjj = jj-cvi->jmin;
             for(ii=cvi->imin;ii<cvi->imax;ii++){
               xx0 = xplt[MAX(ii-1,cvi->imin)];
               xx = xplt[ii];
               xx2 = xplt[ii+1];
               xx3 = xplt[MIN(ii+2,cvi->imax)];
-              iii=ii-cvi->imin;
 
               INCIRCLE((xx+xx2)/2.0,(yy+yy2)/2.0,zz,in_circle);
               if(in_circle==NO)continue;
@@ -776,8 +757,7 @@ void SetCVentDirs(void){
   Init_Circle(90,&cvent_circ);
   for(ii=0;ii<nmeshes;ii++){
     mesh *meshi;
-    float *xplttemp,*yplttemp,*zplttemp;
-    int ibar, jbar, kbar;
+    int ibar, jbar;
     char *c_iblank;
     int iv;
  
@@ -785,11 +765,7 @@ void SetCVentDirs(void){
 
     ibar = meshi->ibar;
     jbar = meshi->jbar;
-    kbar = meshi->kbar;
     c_iblank = meshi->c_iblank_cell;
-    xplttemp=meshi->xplt;
-    yplttemp=meshi->yplt;
-    zplttemp=meshi->zplt;
 
     for(iv=0;iv<meshi->ncvents;iv++){
       cventdata *cvi;
@@ -2719,16 +2695,16 @@ void UpdateFacelists(void){
     }
 
     if(local_showpatch==1&&loadpatch==1){
-      int j;
+      int jj;
 
-      for(j=0;j<meshi->nbptrs;j++){
+      for(jj=0;jj<meshi->nbptrs;jj++){
         blockagedata *bc;
         facedata *facej;
         int k;
 
-        bc=meshi->blockageinfoptrs[j];
+        bc=meshi->blockageinfoptrs[jj];
         if(bc->prop!=NULL&&bc->prop->blockvis==0)continue;
-        facej = meshi->faceinfo + 6*j;
+        facej = meshi->faceinfo + 6*jj;
         for(k=0;k<6;k++){
           int patch_dir[6]={2,1,3,0,4,5};
 

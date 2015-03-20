@@ -255,7 +255,6 @@ void readiso_orig(const char *file, int ifile, int flag, int *errorcode){
   int error;
   float factor, offset[3];
   float *iso_colors;
-  int n_iso_colors;
   
   mesh *meshi;
   isodata *ib;
@@ -302,11 +301,9 @@ void readiso_orig(const char *file, int ifile, int flag, int *errorcode){
 
   if(iso_ambient_ini==NULL||n_iso_ambient_ini==0){
     iso_colors=iso_ambient;
-    n_iso_colors=n_iso_ambient;
   }
   else{
     iso_colors=iso_ambient_ini;
-    n_iso_colors=n_iso_ambient_ini;
   }
 
   getisosizes(file, ib->dataflag, &isostream, &nisopoints, &nisotriangles, 
@@ -801,9 +798,6 @@ void drawiso_geom(int tranflag){
 void drawiso_orig(int tranflag){
   int i;
   isosurface *asurface;
-  float *iso_colors;
-  int n_iso_colors;
-  int *showlevels, nisolevels;
   isodata *isoi=NULL;
   int iso_lighting;
   mesh *meshi;
@@ -817,18 +811,6 @@ void drawiso_orig(int tranflag){
   }
 
   iso_lighting=1;
-
-  showlevels=meshi->showlevels;
-  nisolevels=meshi->nisolevels;
-
-  if(iso_ambient_ini==NULL||n_iso_ambient_ini==0){
-    iso_colors=iso_ambient;
-    n_iso_colors=n_iso_ambient;
-  }
-  else{
-    iso_colors=iso_ambient_ini;
-    n_iso_colors=n_iso_ambient_ini;
-  }
 
   if((visAIso&1)==1){
     isotri **iso_list_start;
@@ -1667,10 +1649,8 @@ void Update_Isotris(int flag){
   float *colorptr;
   isosurface *asurface;
   int ntris;
-  isodata *loaded_iso;
 
   if(loaded_isomesh==NULL||loaded_isomesh->isofilenum==-1)return;
-  loaded_iso=isoinfo + loaded_isomesh->isofilenum;
  
   if(iso_trans_list==NULL||iso_opaques_list==NULL){
     int iitime;

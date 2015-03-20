@@ -1392,7 +1392,6 @@ void Update_Smokecolormap(int option){
   int n;
   float transparent_level_local=1.0;
   unsigned char *alpha;
-  colorbardata *cbi;
   float *fire_cb;
   float val, valmin, valmax, valcut;
   int icut;
@@ -1414,8 +1413,6 @@ void Update_Smokecolormap(int option){
   icut = CLAMP(icut,2,(MAXSMOKERGB-3));
   
   if(use_transparency_data==1)transparent_level_local=transparent_level;
-
-  cbi = colorbarinfo + colorbartype;
 
   alpha = colorbarinfo[colorbartype].alpha;
   fire_cb = colorbarinfo[fire_colorbar_index].colorbar;

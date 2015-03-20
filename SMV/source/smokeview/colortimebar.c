@@ -119,7 +119,7 @@ colorbardata *newcolorbar(char *name, unsigned char *table, int ntable){
     int ii;
 
     ii = i*255/(ntable-1);
-    newcolorbar->index_node[ii];
+    newcolorbar->index_node[i]=ii;
     *rgb_node++ = *table++;
     *rgb_node++ = *table++;
     *rgb_node++ = *table++;

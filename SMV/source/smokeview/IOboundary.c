@@ -586,11 +586,11 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
         }
       }
       else{
-        int ii;
+        int iii;
         int k;
 
         // an external wall so set blank to 0 then set to one where there are dummy vents
-        ii=0;
+        iii=0;
         for(k=k1;k<=k2;k++){
           int j;
 
@@ -619,7 +619,7 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
             *xyzpatch_ignitecopy++ = xplttemp[i1]+dxx;
             *xyzpatch_ignitecopy++ = yplttemp[j]+dy_factor;
             *xyzpatch_ignitecopy++ = zplttemp[k]+dz_factor;
-            patchblankcopy[ii++]=SOLID;
+            patchblankcopy[iii++]=SOLID;
           }
         }
         nodein_extvent(n,patchblankcopy,meshi,i1,i2,j1,j2,k1,k2,wallcenter);
@@ -676,11 +676,11 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
         }
       }
       else{
-        int ii;
+        int iii;
         int k;
 
         // an external wall so set blank to 0 then zero out where there are vents
-        ii=0;
+        iii=0;
         for(k=k1;k<=k2;k++){
           int i;
 
@@ -709,7 +709,7 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
             *xyzpatch_ignitecopy++ = xplttemp[i]+dx_factor;
             *xyzpatch_ignitecopy++ = yplttemp[j1]+dyy;
             *xyzpatch_ignitecopy++ = zplttemp[k]+dz_factor;
-            patchblankcopy[ii++]=SOLID;
+            patchblankcopy[iii++]=SOLID;
           }
         }
         nodein_extvent(n,patchblankcopy,meshi,i1,i2,j1,j2,k1,k2,wallcenter);
@@ -766,12 +766,12 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
         }
       }
       else{
-        int ii;
+        int iii;
         int j;
 
       // an external wall so set blank to 0 then zero out where there are vents
 
-        ii=0;
+        iii=0;
         for(j=j1;j<=j2;j++){
           int i;
 
@@ -800,7 +800,7 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
             *xyzpatch_ignitecopy++ = xplttemp[i]+dx_factor;
             *xyzpatch_ignitecopy++ = yplttemp[j]+dy_factor;
             *xyzpatch_ignitecopy++ = zplttemp[k1]+dzz;
-            patchblankcopy[ii++]=SOLID;
+            patchblankcopy[iii++]=SOLID;
           }
         }
         nodein_extvent(n,patchblankcopy,meshi,i1,i2,j1,j2,k1,k2,wallcenter);

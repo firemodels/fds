@@ -1045,7 +1045,7 @@ void read_geom0(geomdata *geomi, int load_flag, int type, int *errorcode){
   for(i=-1;i<ntimes_local;i++){
     float times_local[2];
     geomlistdata *geomlisti;
-    int nverts, ntris, nvolus;
+    int nverts, ntris;
 
     geomlisti = geomi->geomlistinfo+i;
     geomlisti->points=NULL;
@@ -1059,7 +1059,6 @@ void read_geom0(geomdata *geomi, int load_flag, int type, int *errorcode){
       geomi->times[i]=times_local[0];
     }
     FORTREADBR(nvertfacesvolus,2,stream);
-    nvolus=0;
     nverts=nvertfacesvolus[0];
     ntris=nvertfacesvolus[1];
     if(i>=0){
@@ -1260,7 +1259,6 @@ void read_geom2(geomdata *geomi, int load_flag, int type, int *errorcode){
       int ii;
       int *ijk;
       int *matl_ind=NULL;
-      int offset=0;
 
       NewMemory((void **)&volumes,nvolus*sizeof(tetrahedron));
       geomlisti->volumes=volumes;
@@ -1276,7 +1274,6 @@ void read_geom2(geomdata *geomi, int load_flag, int type, int *errorcode){
       FREEMEMORY(ijk);
       NewMemory((void **)&matl_ind,nvolus*sizeof(int));
       FORTREADBR(matl_ind,nvolus,stream);
-      if(type==GEOM_ISO)offset=nsurfinfo;
       for(ii=0;ii<nvolus;ii++){
         matldata *matli;
         int index;

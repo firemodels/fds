@@ -1116,9 +1116,7 @@ void readpart(char *file, int ifile, int flag, int *errorcode){
   FILE *sizefile;
   int readpartsize=1;
   int partpointstepold, partframestepold;
-  int npartframes2, npartpoints2;
   size_t return_code;
-  int ibar,jbar,kbar;
   int nb,nv;
   float xbox, ybox, zbox;
   partdata *parti;
@@ -1138,9 +1136,6 @@ void readpart(char *file, int ifile, int flag, int *errorcode){
   if(parti->loaded==0&&flag==UNLOAD)return;
 
 
-  ibar=meshi->ibar;
-  jbar=meshi->jbar;
-  kbar=meshi->kbar;
   nb=meshi->nbptrs;
   nv=meshi->nvents;
 
@@ -1227,8 +1222,6 @@ void readpart(char *file, int ifile, int flag, int *errorcode){
     FORTget_file_unit(&file_unit,&file_unit);
     FORTgetsizes(&file_unit,file,&nb,&nv,&nspr,&mxframepoints,&staticframe0,&error,lenfile);
   }
-  npartpoints2=npartpoints;
-  npartframes2=npartframes;
   if(staticframe0==1)first_frame_index=1;
   if(error!=0){
     fprintf(stderr,"*** Error: problem reading %s\n",file);
@@ -1572,7 +1565,6 @@ void drawPart5(const partdata *parti){
           if(iavatar_evac!=-1)avatar_type=iavatar_evac;
           for(j=0;j<datacopy->npoints;j++){
             float az_angle;
-            float *rgbobject;
             float *colorptr;
 
             if(vis[j]==1){
@@ -1590,8 +1582,6 @@ void drawPart5(const partdata *parti){
                  
               az_angle=angle[j];
               glRotatef(az_angle,0.0,0.0,1.0);
-
-              rgbobject = datacopy->partclassbase->rgb;
 
               get_evacpart_color(&colorptr,datacopy,show_default,j,itype);
               
@@ -1910,11 +1900,8 @@ void drawPart5(const partdata *parti){
       // draw the dot at the end of the streak line
     }
     else{
-      unsigned char *color;
 
       // draw the streak line
-
-      color=datacopy->irvals+itype*datacopy->npoints;
 
       for(j=0;j<datacopy->npoints;j++){
         int tagval;
@@ -1936,7 +1923,6 @@ void drawPart5(const partdata *parti){
           sxx = datapast->sx;
           syy = datapast->sy;
           szz = datapast->sz;
-          color=datapast->irvals+itype*datapast->npoints;
 
           get_evacpart_color(&colorptr,datacopy,show_default,jj,itype);
           glColor4fv(colorptr);
