@@ -1837,6 +1837,13 @@ SELECT CASE (SPEC_ID_USE)
       ENDIF
       H = (1._EB-Y_O2_INFTY)*147389.82301_EB+Y_O2_INFTY*190302.3147857_EB !J/kg
       CP = (1._EB-Y_O2_INFTY)*CP+Y_O2_INFTY*CP2 !J/kg/K
+   CASE('AMMONIA')
+      CP = -6.31106E-15_EB*TE**5 + 0.0000000000396185_EB*TE**4 - 0.0000000937489_EB*TE**3 + 0.0000948298_EB*TE**2 - 0.010753_EB*TE &
+           + 32.9874_EB !J/mol/K
+      CP = CP / 17.03052_EB * 1000._EB !J/kg/K
+      H = 1102861.88512_EB! J/kg
+      G_F = 7.85447E-18_EB*TE**6 - 0.0000000000000546054_EB*TE**5 + 0.000000000151562_EB*TE**4 - 0.000000216831_EB*TE**3 &
+          + 0.000173512_EB*TE**2 + 0.0394498_EB*TE - 39.0864_EB
    CASE('ARGON') ! Ar (JANAF)
       CP = 20.786_EB / 0.03948_EB !J/kg/K
       H = 120683.65150_EB !J/kg  
@@ -1884,6 +1891,12 @@ SELECT CASE (SPEC_ID_USE)
       ENDIF
       G_F = 1.60737E-06_EB*TE**2 - 9.02786E-02_EB*TE - 1.11443E+02_EB !kJ/mol
       H = 303895.99177_EB !J/kg
+   CASE('CHLORINE')
+      CP =  -2.03525E-20_EB*TE**6 + 0.0000000000000004346_EB*TE**5 - 0.0000000000036236_EB*TE**4 + 0.0000000146948_EB*TE**3 &
+            - 0.0000297539_EB*TE**2 + 0.0289254_EB*TE + 27.1782_EB !J/mol/K
+      CP = CP / 70.906_EB*1000._EB !J/kg/K
+      G_F = 0._EB ! kJ/mol
+      H = 248797.08091_EB !J/kg/K
    CASE('DODECANE') !C12H26
       ! Vargaftik, N. B.    MOSKVA: IZDATELSTVO NAUKA 1972 , p. 284 (1972)
       ! DICTIONARY OF THERMOPHYSICAL PROPERTIES OF GASES AND LIQUIDS
@@ -2234,7 +2247,16 @@ SELECT CASE (SPEC_ID)
       T_REF = 186.15_EB !K
       T_MELT = 186.15_EB !K
       T_BOIL = 330._EB !K   
-      DENSITY = 846._EB !kg/m^3      
+      DENSITY = 846._EB !kg/m^3     
+   CASE('AMMONIA')
+      T = MIN(298.15_EB,MAX(200._EB,REAL(I_TMP,EB)))
+      CP = 0.0286941_EB*T**2 - 8.6568_EB*T + 4903.55_EB
+      H_L = -842175.03230_EB !J/kg
+      H_V = 1374003.847211_EB !J/kg
+      T_REF = 239.8_EB !K
+      T_MELT = 194.95_EB !K
+      T_BOIL = 239.8_EB !K
+      DENSITY = 730._EB !kg/m^3
    CASE('ARGON')
       CP = 1110._EB !J/kg/K
       H_L = -93018._EB !J/kg
@@ -2272,6 +2294,15 @@ SELECT CASE (SPEC_ID)
       T_MELT = 67.95_EB !K
       T_BOIL = 81.63_EB !K 
       DENSITY = 788.6_EB !kg/m^3   
+   CASE('CHLORINE')
+      T = MIN(230._EB,MAX(180._EB,REAL(I_TMP,EB)))
+      CP = -0.0025_EB*T**2+0.747857_EB*T+891.314_EB !J/kg
+      H_L = -162688.2985_EB !J/kg
+      H_V = 287790._EB !J/kg
+      T_REF = 238.55_EB !K
+      T_MELT = 172.17_EB !K
+      T_BOIL = 238.55_EB !K
+      DENSITY = 1565.5_EB !kg/m^3
    CASE('DODECANE')
       T = MIN(480._EB,MAX(270._EB,REAL(I_TMP,EB)))
       CP = 8.26087E-03_EB*T**2-2.17962E+00_EB*T+2.12506E+03_EB !J/kg/K
@@ -2609,6 +2640,11 @@ SELECT CASE(GAS_NAME)
       MW = MW_AIR
       FORMULA = 'Air'
       H_F = 0._EB !Computed in read.f90
+   CASE('AMMONIA')             
+      SIGMA = 2.900_EB 
+      EPSOK = 558.3_EB  
+      FORMULA = 'NH3'
+      H_F = -45.94_EB !Computed in read.f90
    CASE('ARGON')
       SIGMA = 3.42_EB
       EPSOK = 124.0_EB
@@ -2638,6 +2674,11 @@ SELECT CASE(GAS_NAME)
       FORMULA = 'CO'
       H_F = -110.523_EB
       IF (RADCAL_NAME=='null') RADCAL_NAME='CARBON MONOXIDE'
+   CASE('CHLORINE')
+      SIGMA = 4.217_EB
+      EPSOK = 316.0_EB
+      FORMULA = 'Cl2'
+      H_F = 0._EB
    CASE('DODECANE') ! N-Heptane as surrogate
       SIGMA = 4.701_EB
       EPSOK = 205.78_EB
@@ -2861,6 +2902,8 @@ SELECT CASE(GAS_NAME)
       RETURN
    CASE('AIR')             
       RETURN
+   CASE('AMMONIA')             
+      RETURN
    CASE('ARGON')
       RETURN
    CASE('BENZENE') 
@@ -2872,6 +2915,8 @@ SELECT CASE(GAS_NAME)
    CASE('CARBON DIOXIDE')  
       RETURN
    CASE('CARBON MONOXIDE') 
+      RETURN
+   CASE('CHLORINE') 
       RETURN
    CASE('DODECANE')
       RETURN
