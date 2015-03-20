@@ -254,7 +254,7 @@ USE PRECISION_PARAMETERS, ONLY : DPC, EB
   interface mpi_allreduce
     module procedure mpi_allreduce_int0    , mpi_allreduce_int1,   &
                      mpi_allreduce_real0   , mpi_allreduce_real1,  &
-                     mpi_allreduce_logical0, mpi_allreduce_logical1
+                     mpi_allreduce_logical0, mpi_allreduce_logical1, mpi_allreduce_logical2
   end interface mpi_allreduce
 
   interface mpi_recv_init
@@ -799,6 +799,17 @@ subroutine mpi_allreduce_int1 ( data1, data2, n, datatype, operation, comm, ierr
   integer:: operation
   dummy = data1(1) + data2 + n + datatype + operation + comm + ierror
 end subroutine
+subroutine mpi_allreduce_int2 ( data1, data2, n, datatype, operation, comm, ierror )
+  implicit none
+  integer:: n
+  integer:: comm
+  integer, dimension(:,:) :: data1
+  integer:: data2
+  integer:: datatype
+  integer:: ierror
+  integer:: operation
+  dummy = data1(1,1) + data2 + n + datatype + operation + comm + ierror
+end subroutine
 subroutine mpi_allreduce_real0( data1, data2, n, datatype, operation, comm, ierror )
   implicit none
   integer:: n
@@ -847,7 +858,19 @@ subroutine mpi_allreduce_logical1( data1, data2, n, datatype, operation, comm, i
   dummyl = data2
   dummy = n + datatype + operation + comm + ierror
 end subroutine
-
+subroutine mpi_allreduce_logical2( data1, data2, n, datatype, operation, comm, ierror )
+  implicit none
+  integer:: n
+  integer:: comm
+  logical :: data2
+  integer :: data1
+  integer:: datatype
+  integer:: ierror
+  integer:: operation
+  dummy  = data1
+  dummyl = data2
+  dummy = n + datatype + operation + comm + ierror
+end subroutine
 
 subroutine mpi_recv_init_int0( data, n, datatype, iproc, itag, comm, irequest, ierror )
   implicit none
