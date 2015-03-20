@@ -46,7 +46,6 @@ void _Sniff_Errors(char *whereat);
 
 #define CLIP_ON_DENORMAL 2
 #define CLIP_ON 1
-#define CLIP_OFF 0
 
 #define RENDER_ON 1
 #define RENDER_OFF 0
@@ -579,7 +578,6 @@ void _Sniff_Errors(char *whereat);
 #define DIALOG_SCALING 41
 #define DIALOG_WINDOW 42
 
-#define UNLOAD_ALL -1
 #define UNLOAD_LAST -2
 
 #define UPDATE_PROJECTION -2

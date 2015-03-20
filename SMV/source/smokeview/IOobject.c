@@ -707,7 +707,6 @@ void output_device_val(devicedata *devicei){
 
 #ifdef pp_PILOT
 void draw_pilot(void){
-  devicedata *devicei;
   int i;
 
   if(showtime==1&&itimes>=0&&itimes<nglobal_times&&vispilot==1&&nvdeviceinfo>0){
@@ -725,7 +724,7 @@ void draw_pilot(void){
     for(i=0;i<nvdeviceinfo;i++){
       vdevicedata *vdevi;
       float *xyz;
-      int j,k;
+      int k;
       float angledir[8]={0.0,45.0,90.0,135.0,180.0,225.0,270.0,315.0};
       pilotdata *piloti;
 
@@ -5706,7 +5705,6 @@ void setup_device_data(void){
   int *valids=NULL;
   int i;
   char **devcunits=NULL, **devclabels=NULL;
-  devicedata **devices=NULL;
   int is_dup;
 
   if(ndeviceinfo==0)return;
@@ -6006,7 +6004,6 @@ void setup_device_data(void){
   FREEMEMORY(valids);
   FREEMEMORY(devcunits);
   FREEMEMORY(devclabels)
-  FREEMEMORY(devices);
 }
 
 /* ----------------------- read_object_defs ----------------------------- */

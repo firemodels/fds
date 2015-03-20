@@ -161,9 +161,7 @@ void MainMenu(int value){
 /* ------------------ StaticVariableMenu ------------------------ */
 
 void StaticVariableMenu(int value){
-  mesh *meshi;
 
-  meshi=current_mesh;
   plotn=value;
   plotstate=STATIC_PLOTS;
   visGrid=0;
@@ -192,8 +190,6 @@ void StaticVariableMenu(int value){
 /* ------------------ IsoVariableMenu ------------------------ */
 
 void IsoVariableMenu(int value){
-  mesh *meshi;
-  meshi=current_mesh;
   if(ReadPlot3dFile==1){
     plotn=value;
     if(visx_all==1){
@@ -664,15 +660,14 @@ void IsoShowMenu(int value){
 /* ------------------ ShowVSliceMenu ------------------------ */
 
 void ShowVSliceMenu(int value){
-  vslicedata *vd;
-  slicedata *sd;
   int i;
+  vslicedata *vd;
 
   updatemenu=1;  
   glutPostRedisplay();
   if(value==SHOW_ALL){
     for(i=0;i<nvsliceinfo;i++){
-      vd = vsliceinfo + i;
+      vd = vsliceinfo+i;
       if(vd->loaded==0)continue;
       vd->display=1;
     }
@@ -682,7 +677,7 @@ void ShowVSliceMenu(int value){
   }
   if(value==HIDE_ALL){
     for(i=0;i<nvsliceinfo;i++){
-      vd = vsliceinfo + i;
+      vd = vsliceinfo+i;
       if(vd->loaded==0)continue;
       vd->display=0;
     }
@@ -712,25 +707,32 @@ void ShowVSliceMenu(int value){
       vd->display = 1 - vd->display;
     }
     if(vd->iu!=-1){
-      sd=sliceinfo+vd->iu;
+      slicedata *sd;
+
+      sd = sliceinfo+vd->iu;
       sd->vloaded=vd->display;
     }
     if(vd->iv!=-1){
-      sd=sliceinfo+vd->iv;
+      slicedata *sd;
+
+      sd = sliceinfo+vd->iv;
       sd->vloaded=vd->display;
     }
     if(vd->iw!=-1){
-      sd=sliceinfo+vd->iw;
+      slicedata *sd;
+
+      sd = sliceinfo+vd->iw;
       sd->vloaded=vd->display;
     }
     if(vd->ival!=-1){
-      sd=sliceinfo+vd->ival;
+      slicedata *sd;
+
+      sd = sliceinfo+vd->ival;
       sd->vloaded=vd->display;
     }
   }
   else{
     islicetype = sliceinfo[vd->ival].type;
-    sd=sliceinfo+vd->ival;
     vd->display=1;
   }
   plotstate=getplotstate(DYNAMIC_PLOTS);
@@ -1820,10 +1822,8 @@ void TextureShowMenu(int value){
 /* ------------------ Plot3DShowMenu ------------------------ */
 
 void Plot3DShowMenu(int value){
-  mesh *meshi;
   int i;
 
-  meshi=current_mesh;
   switch(value){
     case 1:
       visz_all=1-visz_all;
@@ -6675,20 +6675,7 @@ updatemenu=0;
     else{
       glutAddMenuEntry(_("Edit..."),MENU_TOUR_EDIT);
     }
-    if(ntours>0){
-      int use_manual=1;
-      
-      glutAddMenuEntry("-",MENU_DUMMY);
-      for(i=0;i<ntours;i++){
-        tourdata *touri;
-
-        touri = tourinfo + i;
-        if(touri->display==1){
-          use_manual=0;
-          break;
-        }
-      }
-    }
+    if(ntours>0)glutAddMenuEntry("-",MENU_DUMMY);
     for(i=0;i<ntours;i++){
       tourdata *touri;
       int glui_avatar_index_local;

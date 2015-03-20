@@ -1179,7 +1179,9 @@ void readpart(char *file, int ifile, int flag, int *errorcode){
 
   if(colorlabelpart!=NULL){
     PRINTF("freeing colorlabelpart\n");
-    for(n=0;n<MAXRGB;n++){FREEMEMORY(colorlabelpart[n]);}
+    for(n=0;n<MAXRGB;n++){
+      FREEMEMORY(colorlabelpart[n]);
+    }
     FREEMEMORY(colorlabelpart);
   }
 

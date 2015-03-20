@@ -3415,14 +3415,14 @@ void drawonlythreshold(const mesh *meshi){
 int getpatchfacedir(mesh *meshi, int i1, int i2, int j1, int j2, int k1, int k2, 
                     int *blockonpatch, mesh **meshonpatch){
   int i;
-  blockagedata *bc;
-  mesh *meshblock;
   int imesh;
 
   *meshonpatch=NULL;
   if(i1==i2){
-    for(i=0;i<meshi->nbptrs;i++){
-      bc=meshi->blockageinfoptrs[i];
+    for(i = 0; i<meshi->nbptrs; i++){
+      blockagedata *bc;
+
+      bc = meshi->blockageinfoptrs[i];
       if(j1==bc->ijk[JMIN]&&j2==bc->ijk[JMAX]&&
          k1==bc->ijk[KMIN]&&k2==bc->ijk[KMAX]){
         if(i1==bc->ijk[IMIN]){
@@ -3439,17 +3439,12 @@ int getpatchfacedir(mesh *meshi, int i1, int i2, int j1, int j2, int k1, int k2,
         if(i1==bc->ijk[IMAX])return(1);
       }
     }
-    for(imesh=0;imesh<nmeshes;imesh++){
-      meshblock = meshinfo + imesh;
-      if(meshblock==meshi)continue;
-      for(i=0;i<meshblock->nbptrs;i++){
-        bc=meshblock->blockageinfoptrs[i];
-      }
-    }
   }
   else if(j1==j2){
     for(i=0;i<meshi->nbptrs;i++){
-      bc=meshi->blockageinfoptrs[i];
+      blockagedata *bc;
+
+      bc = meshi->blockageinfoptrs[i];
       if(i1==bc->ijk[IMIN]&&i2==bc->ijk[IMAX]&&
          k1==bc->ijk[KMIN]&&k2==bc->ijk[KMAX]){
         if(j1==bc->ijk[JMIN]){
@@ -3469,7 +3464,9 @@ int getpatchfacedir(mesh *meshi, int i1, int i2, int j1, int j2, int k1, int k2,
   }
   else if(k1==k2){
     for(i=0;i<meshi->nbptrs;i++){
-      bc=meshi->blockageinfoptrs[i];
+      blockagedata *bc;
+
+      bc = meshi->blockageinfoptrs[i];
       if(i1==bc->ijk[IMIN]&&i2==bc->ijk[IMAX]&&
          j1==bc->ijk[JMIN]&&j2==bc->ijk[JMAX]){
         if(k1==bc->ijk[KMIN]){
@@ -3634,10 +3631,11 @@ void updatepatchtypes(void){
 /* ------------------ getpatchindex ------------------------ */
 
 int getpatchindex(const patchdata *patchi){
-  patchdata *patchi2;
   int j;
 
   for(j=0;j<npatchtypes;j++){
+    patchdata *patchi2;
+
     patchi2 = patchinfo+patchtypes[j];
     if(strcmp(patchi->label.shortlabel,patchi2->label.shortlabel)==0)return patchtypes[j];
   }
@@ -3647,10 +3645,11 @@ int getpatchindex(const patchdata *patchi){
 /* ------------------ getpatchtype ------------------------ */
 
 int getpatchtype(const patchdata *patchi){
-  patchdata *patchi2;
   int j;
 
   for(j=0;j<npatchtypes;j++){
+    patchdata *patchi2;
+
     patchi2 = patchinfo+patchtypes[j];
     if(strcmp(patchi->label.shortlabel,patchi2->label.shortlabel)==0)return j;
   }

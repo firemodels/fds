@@ -5,7 +5,10 @@
 #ifndef LINT_H_DEFINED
 #define LINT_H_DEFINED
 
-/*lint -e438 */
+/*lint -e10 */
+/*lint -e40 */
+/*lint -e516 */
+/*lint -e718 */
 /*lint -e459 */
 /*lint -e506 */
 /*lint -e509 */
