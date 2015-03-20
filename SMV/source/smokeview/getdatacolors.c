@@ -1972,7 +1972,8 @@ float *getcolorptr(const float *color){
     firstcolor->nextcolor=NULL;
     return firstcolor->color;
   }
-  for(colorptr=firstcolor;colorptr!=NULL;colorptr=colorptr->nextcolor){
+  oldlastcolor = firstcolor;
+  for(colorptr = firstcolor; colorptr!=NULL; colorptr = colorptr->nextcolor){
     oldlastcolor=colorptr;
     if(ABS(colorptr->color[0]-color[0])>0.0001)continue;
     if(ABS(colorptr->color[1]-color[1])>0.0001)continue;

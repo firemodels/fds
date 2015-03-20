@@ -294,7 +294,6 @@ extern "C" void glui_update_fontindex(void){
 
 extern "C" void glui_labels_setup(int main_window){
   labeldata *gl;
-  int init_status=0;
 
   update_glui_labels=0;
   if(glui_labels!=NULL){
@@ -535,7 +534,6 @@ extern "C" void glui_labels_setup(int main_window){
   // -------------- User labels -------------------
 
   gl=&LABEL_local;
-  init_status=LABEL_Init(gl);
   ROLLOUT_user_labels = glui_labels->add_rollout("Labels",false,LABELS_ROLLOUT,Display_Rollout_CB);
   ADDPROCINFO(displayprocinfo, ndisplayprocinfo, ROLLOUT_user_labels, LABELS_ROLLOUT);
 
@@ -664,9 +662,6 @@ void Text_Labels_CB(int var){
   labeldata *thislabel,*gl,*new_label;
   int count;
   char name[300];
-  int len;
-
-  len=sizeof(GLUI_String);
 
   gl=&LABEL_local;
   switch(var){

@@ -19,6 +19,8 @@ char update_revision[]="$Revision$";
 #include "smokeviewvars.h"
 #include "compress.h"
 
+void ParticleStreakShowMenu(int var);
+
 /* ------------------ compare_float ------------------------ */
 
 int compare_float( const void *arg1, const void *arg2 ){
@@ -1918,8 +1920,6 @@ void update_Display(void){
   if(update_initcull == 1)initcull(cullsmoke);
 #endif
   if(update_streaks == 1 && ReadPartFile == 1){
-    void ParticleStreakShowMenu(int var);
-
     ParticleStreakShowMenu(streak_index);
     update_streaks = 0;
   }

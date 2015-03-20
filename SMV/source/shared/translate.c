@@ -198,7 +198,9 @@ char *translate(char *string){
 
   // find leading non-alpha characters
 
-  for(i=0;i<len;i++){
+  string_in = string;
+  string_before = tr_string_before;
+  for(i = 0; i<len; i++){
     char C,D;
     char c;
 
@@ -222,6 +224,7 @@ char *translate(char *string){
 
   // find trailing non-alpha characters
 
+  string_after = string+len;
   for(i=len-1;i>=nchars_before;i--){
     char c;
 

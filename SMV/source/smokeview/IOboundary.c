@@ -3415,7 +3415,6 @@ void drawonlythreshold(const mesh *meshi){
 int getpatchfacedir(mesh *meshi, int i1, int i2, int j1, int j2, int k1, int k2, 
                     int *blockonpatch, mesh **meshonpatch){
   int i;
-  int imesh;
 
   *meshonpatch=NULL;
   if(i1==i2){

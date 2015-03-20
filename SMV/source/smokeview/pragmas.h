@@ -29,10 +29,14 @@
 #pragma warning (disable:4267)		/* conversion from size_t to int */
 #pragma warning (disable:4018)		/* signed/unsigned mismatch */
 #pragma warning (disable:4100)		/* unreferenced formal parameter */
+#pragma warning (disable:4127)		/* conditional expression is constant */
 #pragma warning (disable:4505)		/* unreferenced local function */
 #pragma warning (disable:4701)		/* potentially unitialized local variable */
 #pragma warning (disable:4389)		/* signed/unsigned mismatch */
 #pragma warning (disable:4189)		/* local variable set but not referenced */
 #pragma warning (disable:4206)		/* translation unit empty */
+#pragma warning (disable:4310)
+#pragma warning (disable:4005)
+#pragma warning (disable:4245)
 #endif
 #endif

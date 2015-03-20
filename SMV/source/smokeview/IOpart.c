@@ -2095,12 +2095,12 @@ void drawStaticPart(const partdata *parti){
   
   /* define the data locations to look at */
 
+  if(parti->version!=0)return;
   ipframe=0;
-  if(parti->version==0){
-    xpoints = parti->xparts + parti->bframe[ipframe];
-    ypoints = parti->yparts + parti->bframe[ipframe];
-    zpoints = parti->zparts + parti->bframe[ipframe];
-  }
+  xpoints = parti->xparts + parti->bframe[ipframe];
+  ypoints = parti->yparts + parti->bframe[ipframe];
+  zpoints = parti->zparts + parti->bframe[ipframe];
+
   /* isprinkframe = isprink + bframe[ipframe];*/
 
   nsprpoints = parti->sprframe[ipframe];
@@ -2110,14 +2110,10 @@ void drawStaticPart(const partdata *parti){
 
   glColor4fv(static_color);
   glBegin(GL_POINTS);
-  if(parti->version==0){
-    for(n=0;n<nsmokepoints+nsprpoints;n++){
-      glVertex3f(xplts[xpoints[n]],yplts[ypoints[n]],zplts[zpoints[n]]);
-    }
+  for(n=0;n<nsmokepoints+nsprpoints;n++){
+    glVertex3f(xplts[xpoints[n]],yplts[ypoints[n]],zplts[zpoints[n]]);
   }
-
   glEnd();
-
 }
 
 /* ------------------ tagscompare ------------------------ */

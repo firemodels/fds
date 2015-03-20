@@ -12,6 +12,7 @@ char histogram_revision[]="$Revision$";
 #include <stdlib.h>
 #include <math.h>
 #include "histogram.h"
+#include "pragmas.h"
 
 #ifdef pp_CHECK
 #include "MALLOC.h"
