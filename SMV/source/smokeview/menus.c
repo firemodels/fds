@@ -1800,12 +1800,12 @@ void TextureShowMenu(int value){
     for(i=0;i<ngeominfo;i++){
       geomdata *geomi;
       surfdata *surf;
-      texturedata *texti=NULL;
+      texturedata *textii=NULL;
 
       geomi = geominfo + i;
       surf = geomi->surf;
-      if(surf!=NULL)texti=surf->textureinfo;
-      if(texti!=NULL&&texti->display==1){
+      if(surf!=NULL)textii=surf->textureinfo;
+      if(textii!=NULL&&textii->display==1){
         visGeomTextures=1;
         break;
       }
@@ -5650,7 +5650,7 @@ updatemenu=0;
     glutAddSubMenu(_("Terrain"),terrain_showmenu);
   }
  glutAddSubMenu(_("Surfaces"),ventmenu);
- if(ntotal_blockages>0||isZoneFireModel==0){
+ if(ntotal_blockages>0||isZoneFireModel==1){
     glutAddSubMenu(_("Grid"),gridslicemenu);
   }
   if(isZoneFireModel==0){
@@ -5686,7 +5686,7 @@ updatemenu=0;
   if(visFramelabel == 0)glutAddMenuEntry(_("Frame"), MENU_LABEL_framelabel);
   if(visFramerate == 1)glutAddMenuEntry(_("*Frame rate"), MENU_LABEL_framerate);
   if(visFramerate == 0)glutAddMenuEntry(_("Frame rate"), MENU_LABEL_framerate);
-  if(ntotal_blockages > 0 || isZoneFireModel == 0){
+  if(ntotal_blockages > 0 || isZoneFireModel == 1){
     if(visgridloc == 1)glutAddMenuEntry(_("*Grid locations"), MENU_LABEL_grid);
     if(visgridloc == 0)glutAddMenuEntry(_("Grid locations"), MENU_LABEL_grid);
   }
@@ -7489,7 +7489,7 @@ updatemenu=0;
   glutAddMenuEntry(_("Misc"),1);
   glutAddMenuEntry(_("  r: render the current scene to an image file"),7);
   glutAddMenuEntry(_("  R:   (same as r but at twice the resolution)"),7);
-  if(ntotal_blockages>0||isZoneFireModel==0){
+  if(ntotal_blockages>0||isZoneFireModel==1){
     glutAddMenuEntry(_("  g: toggle grid visibility"),2);
   }
   glutAddMenuEntry(_("  e: toggle between view rotation types: scene centered 2 axis, 1 axis, 3 axis and eye centered"),7);

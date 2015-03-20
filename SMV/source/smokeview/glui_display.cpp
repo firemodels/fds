@@ -309,13 +309,33 @@ extern "C" void glui_labels_setup(int main_window){
   ADDPROCINFO(displayprocinfo, ndisplayprocinfo, ROLLOUT_general, GENERAL_ROLLOUT);
 
   PANEL_gen1=glui_labels->add_panel_to_panel(ROLLOUT_general,"",GLUI_PANEL_NONE);
-  CHECKBOX_labels_colorbar=glui_labels->add_checkbox_to_panel(PANEL_gen1,_("Colorbar"),&visColorbar,LABELS_label,Labels_CB);
-  CHECKBOX_labels_timebar=glui_labels->add_checkbox_to_panel(PANEL_gen1,_("Time bar"),&visTimebar,LABELS_label,Labels_CB);
-  CHECKBOX_labels_timelabel=glui_labels->add_checkbox_to_panel(PANEL_gen1,_("Time"),&visTimelabel,LABELS_label,Labels_CB);
-  CHECKBOX_labels_framelabel=glui_labels->add_checkbox_to_panel(PANEL_gen1,_("Frame"),&visFramelabel,FRAME_label,Labels_CB);
-  CHECKBOX_labels_hrrlabel=glui_labels->add_checkbox_to_panel(PANEL_gen1,_("HRR"),&visHRRlabel,HRR_label,Labels_CB);
-  CHECKBOX_labels_hrrcutoff=glui_labels->add_checkbox_to_panel(PANEL_gen1,_("HRRPUV cutoff"),&show_hrrcutoff,HRRPUVCUTOFF_label,Labels_CB);
-  CHECKBOX_labels_ticks=glui_labels->add_checkbox_to_panel(PANEL_gen1,_("FDS ticks"),&visFDSticks,LABELS_label,Labels_CB);
+
+  if(nsliceinfo>0)CHECKBOX_labels_average = glui_labels->add_checkbox_to_panel(PANEL_gen1, _("Average"), &vis_slice_average, LABELS_label, Labels_CB);
+  CHECKBOX_labels_axis = glui_labels->add_checkbox_to_panel(PANEL_gen1, _("Axis"), &visaxislabels, LABELS_label, Labels_CB);
+  CHECKBOX_labels_colorbar = glui_labels->add_checkbox_to_panel(PANEL_gen1, _("Colorbar"), &visColorbar, LABELS_label, Labels_CB);
+  CHECKBOX_labels_framelabel = glui_labels->add_checkbox_to_panel(PANEL_gen1, _("Frame label"), &visFramelabel, FRAME_label, Labels_CB);
+  CHECKBOX_labels_framerate = glui_labels->add_checkbox_to_panel(PANEL_gen1, _("Frame rate"), &visFramerate, LABELS_label, Labels_CB);
+  if(ntotal_blockages>0||isZoneFireModel==1){
+    CHECKBOX_labels_gridloc = glui_labels->add_checkbox_to_panel(PANEL_gen1, _("Grid location"), &visgridloc, LABELS_label, Labels_CB);
+  }
+  CHECKBOX_labels_hrrlabel = glui_labels->add_checkbox_to_panel(PANEL_gen1, _("HRR"), &visHRRlabel, HRR_label, Labels_CB);
+  CHECKBOX_labels_hrrcutoff = glui_labels->add_checkbox_to_panel(PANEL_gen1, _("HRRPUV cutoff"), &show_hrrcutoff, HRRPUVCUTOFF_label, Labels_CB);
+#ifdef pp_memstatus
+  CHECKBOX_labels_availmemory = glui_labels->add_checkbox_to_panel(PANEL_gen1, _("Memory load"), &visAvailmemory, LABELS_label, Labels_CB);
+#endif
+
+  glui_labels->add_column_to_panel(PANEL_gen1, false);
+
+  CHECKBOX_labels_meshlabel = glui_labels->add_checkbox_to_panel(PANEL_gen1, _("Mesh"), &visMeshlabel, LABELS_meshlabel, Labels_CB);
+  CHECKBOX_labels_labels = glui_labels->add_checkbox_to_panel(PANEL_gen1, _("Text labels"), &visLabels, LABELS_label, Labels_CB);
+  CHECKBOX_labels_ticks = glui_labels->add_checkbox_to_panel(PANEL_gen1, _("Ticks (FDS)"), &visFDSticks, LABELS_label, Labels_CB);
+  CHECKBOX_visUSERticks2 = glui_labels->add_checkbox_to_panel(PANEL_gen1, _("Ticks (User)"), &visUSERticks, LABELS_usertick2, Labels_CB);
+  CHECKBOX_labels_timelabel = glui_labels->add_checkbox_to_panel(PANEL_gen1, _("Time label"), &visTimelabel, LABELS_label, Labels_CB);
+  CHECKBOX_labels_timebar = glui_labels->add_checkbox_to_panel(PANEL_gen1, _("Time bar"), &visTimebar, LABELS_label, Labels_CB);
+  CHECKBOX_labels_title = glui_labels->add_checkbox_to_panel(PANEL_gen1, _("Title"), &visTitle, LABELS_label, Labels_CB);
+  glui_labels->add_checkbox_to_panel(PANEL_gen1, _("Toggle dialogs"), &toggle_dialogs);
+  CHECKBOX_labels_version = glui_labels->add_checkbox_to_panel(PANEL_gen1, _("Version info"), &gversion, LABELS_version, Labels_CB);
+
   if(ntickinfo>0){
     CHECKBOX_labels_ticks->enable();
   }
@@ -324,24 +344,6 @@ extern "C" void glui_labels_setup(int main_window){
     visFDSticks=0;
     CHECKBOX_labels_ticks->set_int_val(visFDSticks);
   }
-  CHECKBOX_visUSERticks2=glui_labels->add_checkbox_to_panel(PANEL_gen1,_("User ticks"),&visUSERticks,LABELS_usertick2,Labels_CB);
-  CHECKBOX_labels_version=glui_labels->add_checkbox_to_panel(PANEL_gen1,_("Version info"),&gversion,LABELS_version,Labels_CB);
-
-  glui_labels->add_column_to_panel(PANEL_gen1,false);
-  if(ntotal_blockages>0||isZoneFireModel==0){
-    CHECKBOX_labels_gridloc=glui_labels->add_checkbox_to_panel(PANEL_gen1,_("Grid loc"),&visgridloc,LABELS_label,Labels_CB);
-  }
-  if(nsliceinfo>0)CHECKBOX_labels_average=glui_labels->add_checkbox_to_panel(PANEL_gen1,_("Average"),&vis_slice_average,LABELS_label,Labels_CB);
-
-  CHECKBOX_labels_title=glui_labels->add_checkbox_to_panel(PANEL_gen1,_("Title"),&visTitle,LABELS_label,Labels_CB);
-  CHECKBOX_labels_axis=glui_labels->add_checkbox_to_panel(PANEL_gen1,_("Axis"),&visaxislabels,LABELS_label,Labels_CB);
-  CHECKBOX_labels_framerate=glui_labels->add_checkbox_to_panel(PANEL_gen1,_("Frame rate"),&visFramerate,LABELS_label,Labels_CB);
-#ifdef pp_memstatus
-  CHECKBOX_labels_availmemory=glui_labels->add_checkbox_to_panel(PANEL_gen1,_("Memory load"),&visAvailmemory,LABELS_label,Labels_CB);
-#endif
-  CHECKBOX_labels_labels=glui_labels->add_checkbox_to_panel(PANEL_gen1,_("Text labels"),&visLabels,LABELS_label,Labels_CB);
-  CHECKBOX_labels_meshlabel=glui_labels->add_checkbox_to_panel(PANEL_gen1,_("Mesh"),&visMeshlabel,LABELS_meshlabel,Labels_CB);
-  glui_labels->add_checkbox_to_panel(PANEL_gen1, _("Toggle dialogs"), &toggle_dialogs);
 
   PANEL_gen2=glui_labels->add_panel_to_panel(ROLLOUT_general,"",GLUI_PANEL_NONE);
 
