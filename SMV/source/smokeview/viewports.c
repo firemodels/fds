@@ -747,7 +747,6 @@ void COLORBAR_viewport(int quad, GLint screen_left, GLint screen_down){
 
 void TITLE_viewport(int quad, GLint screen_left, GLint screen_down){
   float left, textdown;
-  int text_width;
 
   if(SUB_portortho2(quad,&VP_title,screen_left,screen_down)==0)return;
 
@@ -763,7 +762,6 @@ void TITLE_viewport(int quad, GLint screen_left, GLint screen_down){
     }
     else{
       outputText(left,textdown, TITLE);
-      text_width = getStringWidth(TITLE);
     }
   }
   else{

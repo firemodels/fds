@@ -29,7 +29,7 @@ void get_pt_smokecolor(float *smoke_tran, float **smoke_color, float dstep, floa
   float val001,val101,val011,val111;
   float val00,val01,val10,val11;
   float val0, val1;
-  int nx, ny, nz, nxy;
+  int nx, ny, nxy;
   float dx, dy, dz;
   float dxbar, dybar, dzbar;
   float *vv;
@@ -70,7 +70,6 @@ void get_pt_smokecolor(float *smoke_tran, float **smoke_color, float dstep, floa
 
   nx = ibar + 1;
   ny = jbar + 1;
-  nz = kbar + 1;
   nxy = nx*ny;
 
   GETINDEX(i,xyz[0],xplt[0],dxbar,ibar);
@@ -361,11 +360,9 @@ void get_cum_smokecolor(float *cum_smokecolor, float *xyzvert, float dstep, mesh
   float dx, dy, dz;
   float distseg, dxseg, dyseg, dzseg;
   float xyz[3];
-  float sootdensum;
   float *vert_beg, *vert_end;
   int iwall_min=0;
   float xyzvals[3];
-  int isteps;
   char *blank_local;
   float pt_smoketran, *pt_smokecolor;
   float tauhat,alphahat;
@@ -475,8 +472,6 @@ void get_cum_smokecolor(float *cum_smokecolor, float *xyzvert, float dstep, mesh
     nsteps=1;
   }
   dstep=SCALE2FDS(distseg/(float)nsteps);
-  sootdensum=0.0;
-  isteps=0;
   if(block_volsmoke==1){
     blank_local=meshi->c_iblank_cell;
   }
@@ -703,7 +698,6 @@ void drawsmoke3dVOLdebug(void){
   for(ii=0;ii<nvolfacelistinfo;ii++){
     volfacelistdata *vi;
     mesh *meshi;
-    volrenderdata *vr;
     float x[2], y[2], z[2];
     float *xplt, *yplt, *zplt;
     int ibar, jbar, kbar;
@@ -721,7 +715,6 @@ void drawsmoke3dVOLdebug(void){
     ibar = meshi->ibar;
     jbar = meshi->jbar;
     kbar = meshi->kbar;
-    vr = &(meshi->volrenderinfo);
 
     if(iwall==0||meshi->drawsides[iwall+3]==0)continue;
     switch(iwall){
@@ -782,7 +775,6 @@ void drawsmoke3dVOLdebug(void){
   for(ii=0;ii<nvolfacelistinfo;ii++){
     volfacelistdata *vi;
     mesh *meshi;
-    volrenderdata *vr;
     float x[2], y[2], z[2];
     float *xplt, *yplt, *zplt;
     int ibar, jbar, kbar;
@@ -800,7 +792,6 @@ void drawsmoke3dVOLdebug(void){
     ibar = meshi->ibar;
     jbar = meshi->jbar;
     kbar = meshi->kbar;
-    vr = &(meshi->volrenderinfo);
 
     if(iwall==0||meshi->drawsides[iwall+3]==0)continue;
     switch(iwall){
@@ -1599,14 +1590,14 @@ void drawsmoke3dGPUVOL(void){
 #define HEADER_SIZE 4
 #define TRAILER_SIZE 4
 #define FORTVOLSLICEREAD(var,size) FSEEK(SLICEFILE,HEADER_SIZE,SEEK_CUR);\
-                           returncode=fread(var,4,size,SLICEFILE);\
+                           fread(var,4,size,SLICEFILE);\
                            if(endianswitch==1)endian_switch(var,size);\
                            FSEEK(SLICEFILE,TRAILER_SIZE,SEEK_CUR)
 
 /* ------------------ get_volsmoke_nframes ------------------------ */
 
 int get_volsmoke_nframes(volrenderdata *vr){
-	slicedata *fireslice, *smokeslice;
+	slicedata *smokeslice;
   FILE *volstream=NULL;
   int framesize;
   LINT skip_local;
@@ -1618,7 +1609,6 @@ int get_volsmoke_nframes(volrenderdata *vr){
     volstream=fopen(vr->smokeslice->vol_file,"rb");
   }
   if(volstream==NULL){
-    fireslice=vr->fireslice;
     framesize = smokeslice->nslicei*smokeslice->nslicej*smokeslice->nslicek;
     framesize *= 4; // convert to bytes
     framesize += HEADER_SIZE + TRAILER_SIZE;
@@ -1658,7 +1648,7 @@ int get_volsmoke_nframes(volrenderdata *vr){
 float get_volsmoke_frame_time(volrenderdata *vr, int framenum){
 	slicedata *smokeslice;
   FILE *SLICEFILE;
-  int framesize,returncode;
+  int framesize;
   float time_local=0.0;
   int endianswitch=0;
   LINT skip_local;
@@ -1677,7 +1667,7 @@ float get_volsmoke_frame_time(volrenderdata *vr, int framenum){
   SLICEFILE=fopen(smokeslice->reg_file,"rb");
   if(SLICEFILE==NULL)return time_local;
 
-  returncode=FSEEK(SLICEFILE,skip_local,SEEK_SET); // skip from beginning of file
+  FSEEK(SLICEFILE,skip_local,SEEK_SET); // skip from beginning of file
 
   FORTVOLSLICEREAD(&time_local,1);
   fclose(SLICEFILE);
@@ -1759,7 +1749,7 @@ void free_volsmoke_frame(volrenderdata *vr, int framenum){
 void read_volsmoke_frame(volrenderdata *vr, int framenum, int *first){
 	slicedata *fireslice, *smokeslice;
   FILE *SLICEFILE;
-  int framesize,framesize2,returncode;
+  int framesize,framesize2;
   LINT skip_local;
   float time_local, *smokeframe_data, *fireframe_data;
   int endianswitch=0;
@@ -1821,7 +1811,7 @@ void read_volsmoke_frame(volrenderdata *vr, int framenum, int *first){
     SLICEFILE=fopen(smokeslice->reg_file,"rb");
     if(SLICEFILE==NULL)return;
 
-    returncode=FSEEK(SLICEFILE,skip_local,SEEK_SET); // skip from beginning of file
+    FSEEK(SLICEFILE,skip_local,SEEK_SET); // skip from beginning of file
 
     FORTVOLSLICEREAD(&time_local,1);
     if(global_times!=NULL&&global_times[itimes]>time_local)restart_time=1;
@@ -1894,7 +1884,7 @@ void read_volsmoke_frame(volrenderdata *vr, int framenum, int *first){
     if(volstream==NULL){
       SLICEFILE=fopen(fireslice->reg_file,"rb");
       if(SLICEFILE!=NULL){
-        returncode=FSEEK(SLICEFILE,skip_local,SEEK_SET); // skip from beginning of file
+        FSEEK(SLICEFILE,skip_local,SEEK_SET); // skip from beginning of file
 
         FORTVOLSLICEREAD(&time_local,1);
         vr->times[framenum]=time_local;

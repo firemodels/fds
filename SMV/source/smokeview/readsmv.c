@@ -363,7 +363,7 @@ void readsmv_dynamic(char *file){
   */
     if(match(buffer,"SHOW_OBST") == 1||match(buffer,"HIDE_OBST")==1){
       mesh *meshi;
-      int blocknumber,blocktemp,showobst,tempval;
+      int blocknumber,blocktemp,tempval;
       blockagedata *bc;
 
       do_pass2=1;
@@ -377,8 +377,6 @@ void readsmv_dynamic(char *file){
         sscanf(buffer,"%s %i",buffer2,&blocktemp);
         if(blocktemp>0&&blocktemp<=nmeshes)blocknumber = blocktemp-1;
       }
-      showobst=0;
-      if(match(buffer,"SHOW_OBST") == 1)showobst=1;
       meshi=meshinfo + blocknumber;
       fgets(buffer,255,stream);
       sscanf(buffer,"%i %f",&tempval,&time_local);
@@ -4498,10 +4496,10 @@ int readsmv(char *file, char *file2){
       }
 
       if(filename==NULL){
-        int n;
+        int nn;
 
-        for(n=0;n<4;n++){
-          if(readlabels(&zonei->label[n],stream)==2){
+        for(nn=0;nn<4;nn++){
+          if(readlabels(&zonei->label[nn],stream)==2){
             return 2;
           }
         }
@@ -8616,7 +8614,7 @@ int readini2(char *inifile, int localfile){
         continue;
       }
       if(match(buffer,"CUBETETRATEST")==1){
-        int *v,i;
+        int *v,ii;
         float *b1,*b2,*b3;
 
         v=tetrabox_vis;
@@ -8628,8 +8626,8 @@ int readini2(char *inifile, int localfile){
         sscanf(buffer," %i %i %i %i %i ",v+5,v+6,v+7,v+8,v+9);
         ONEORZERO(show_geomtest);
         ONEORZERO(show_tetratest_labels);
-        for(i=0;i<10;i++){
-          ONEORZERO(v[i]);
+        for(ii=0;ii<10;ii++){
+          ONEORZERO(v[ii]);
         }
         b1=box_bounds2;
         b2=tetra_vertices;
@@ -11096,11 +11094,11 @@ typedef struct {
       if(ntours>0){
         if(NewMemory( (void **)&tourinfo, ntours*sizeof(tourdata))==0)return 2;
         for(i=0;i<ntours;i++){
-          tourdata *touri;
+          tourdata *tourii;
 
-          touri=tourinfo+i;
-          touri->path_times=NULL;
-          touri->pathnodes=NULL;
+          tourii=tourinfo+i;
+          tourii->path_times=NULL;
+          tourii->pathnodes=NULL;
         }
       }
       ReallocTourMemory();
@@ -11174,11 +11172,11 @@ typedef struct {
         }
       }
       for(i=0;i<ntours;i++){
-        tourdata *touri;
+        tourdata *tourii;
 
-        touri=tourinfo+i;
-        touri->first_frame.next->prev=&touri->first_frame;
-        touri->last_frame.prev->next=&touri->last_frame;
+        tourii=tourinfo+i;
+        tourii->first_frame.next->prev=&touri->first_frame;
+        tourii->last_frame.prev->next=&touri->last_frame;
       }
       updatetourmenulabels();
       createtourpaths();

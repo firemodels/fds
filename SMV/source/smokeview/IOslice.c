@@ -25,7 +25,7 @@ char IOslice_revision[]="$Revision$";
 #define HEADER_SIZE 4
 #define TRAILER_SIZE 4
 #define FORTSLICEREAD(var,size) FSEEK(SLICEFILE,HEADER_SIZE,SEEK_CUR);\
-                           returncode=fread(var,4,size,SLICEFILE);\
+                           fread(var,4,size,SLICEFILE);\
                            if(endianswitch==1)endian_switch(var,size);\
                            FSEEK(SLICEFILE,TRAILER_SIZE,SEEK_CUR)
 
@@ -138,7 +138,6 @@ int Creadslice_frame(int frame_index_local,int sd_index,int flag){
   int headersize,framesize;
   int frame_size;
   long int skip_local;
-  int returncode;
   FILE *SLICEFILE;
   float *time_local,*slicevals;
   int error;
@@ -182,7 +181,7 @@ int Creadslice_frame(int frame_index_local,int sd_index,int flag){
     return -1;
   }
 
-  returncode=FSEEK(SLICEFILE,skip_local,SEEK_SET); // skip from beginning of file
+  FSEEK(SLICEFILE,skip_local,SEEK_SET); // skip from beginning of file
 
   if(frame_index_local==first_frame_index){
     if(NewMemory((void **)&sd->qslicedata,2*frame_size*sizeof(float))==0||
@@ -934,7 +933,6 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
   int error;
   float offset;
   int i;
-  int nx, ny, nxy;
   int ii;
   float qmin, qmax;
   int headersize, framesize;
@@ -1065,6 +1063,7 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
       PRINTF("After slice unload: \n");
       PrintMemoryInfo;
       CountMemoryBlocks(num_memblocks_unload,num_memblocks_load);
+      PRINTF("blocks unloaded=%i\n", num_memblocks_unload);
 #endif
       remove_slice_loadstack(slicefilenumber);
       return;
@@ -1249,10 +1248,6 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
         return;
       }
     }
-
-    nx = meshi->ibar + 1;
-    ny = meshi->jbar + 1;
-    nxy = nx*ny;
 
 #ifdef pp_MEMDEBUG
     if(sd->compression_type==0){
@@ -2056,7 +2051,6 @@ void getsliceparams(void){
   for(i=0;i<nsliceinfo;i++){
     slicedata *sd;
     int is1, is2, js1, js2, ks1, ks2;
-    int ni, nj, nk;
 
     sd = sliceinfo + i;
     is1=sd->is1;
@@ -2065,9 +2059,6 @@ void getsliceparams(void){
     js2=sd->js2;
     ks1=sd->ks1;
     ks2=sd->ks2;
-    ni=sd->nslicei;
-    nj=sd->nslicej;
-    nk=sd->nslicek;
     if(error==0){
       int iblock;
       mesh *meshi;
@@ -3630,7 +3621,7 @@ void init_slice3d_texture(mesh *meshi){
 void update_slice3d_texture(mesh *meshi, slicedata *slicei, float *valdata){
   GLint xoffset=0,yoffset=0,zoffset=0;
   GLsizei nx, ny, nz, nxy;
-  int slice_nx, slice_ny, slice_nz;
+  int slice_ny, slice_nz;
   int i, j, k;
   float *cbuffer;
   int *ijk_min, *ijk_max;
@@ -3642,7 +3633,6 @@ void update_slice3d_texture(mesh *meshi, slicedata *slicei, float *valdata){
   ijk_min = slicei->ijk_min;
   ijk_max = slicei->ijk_max;
   
-  slice_nx = ijk_max[0] - ijk_min[0] + 1;
   slice_ny = ijk_max[1] - ijk_min[1] + 1;
   slice_nz = ijk_max[2] - ijk_min[2] + 1;
 
@@ -3725,7 +3715,6 @@ void drawgslice_data(slicedata *slicei){
   databounds *sb;
   float valmin, valmax;
   float del;
-  float dval;
 
   if(slicei->loaded==0||slicei->display==0||slicei->volslice==0)return;
 
@@ -3745,7 +3734,6 @@ void drawgslice_data(slicedata *slicei){
   sb=slicebounds+islicetype;
   valmin = sb->levels256[0]*sb->fscale;
   valmax = sb->levels256[255]*sb->fscale;
-  dval = (valmax-valmin)/255.0;
   
   gslicedata=slicei->qsliceframe;
   gslice_valmin=valmin;
@@ -3779,7 +3767,6 @@ void drawvgslice_data(vslicedata *vslicei){
   databounds *sb;
   float valmin, valmax;
   float del;
-  float dval;
   slicedata *slicei;
 
   slicei = sliceinfo + vslicei->ival;
@@ -3802,7 +3789,6 @@ void drawvgslice_data(vslicedata *vslicei){
   sb=slicebounds+islicetype;
   valmin = sb->levels256[0]*sb->fscale;
   valmax = sb->levels256[255]*sb->fscale;
-  dval = (valmax-valmin)/255.0;
 
   gslicedata=slicei->qsliceframe;
   gslice_valmin=valmin;
@@ -4327,7 +4313,6 @@ void drawvolslice_cellcenter(const slicedata *sd){
   float *xplt, *yplt, *zplt;
   int plotx, ploty, plotz;
   int ibar,jbar;
-  int nx,ny,nxy;
   char *iblank_cell, *iblank_embed;
   int incx=0, incy=0, incz=0;
 
@@ -4365,10 +4350,6 @@ void drawvolslice_cellcenter(const slicedata *sd){
   iblank_cell = meshi->c_iblank_cell;
   iblank_embed = meshi->c_iblank_embed;
   
-  nx = ibar + 1;
-  ny = jbar + 1;
-  nxy = nx*ny;
-
   if(cullfaces==1)glDisable(GL_CULL_FACE);
 
   if(use_transparency_data==1)transparenton();
@@ -4504,13 +4485,11 @@ void drawvolslice_cellcenter(const slicedata *sd){
         for(k=sd->ks1; k<sd->ks2; k++){
           float val;
           int index_cell;
-          int i33;
           float z1, z3;
 
           if(show_slice_in_obst==0&&iblank_cell[IJKCELL(i,ploty-1,k)]!=GAS)continue;
           if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[IJKCELL(i,ploty,k)]==EMBED_YES)continue;
           index_cell = (i+incx-sd->is1)*sd->nslicej*sd->nslicek + (ploty+1-incy-sd->js1)*sd->nslicek + k+1 - sd->ks1;
-          i33 = 4*sd->iqsliceframe[index_cell];
           z1 = zplt[k];
           z3 = zplt[k+1];
        /*
@@ -4580,13 +4559,11 @@ void drawvolslice_cellcenter(const slicedata *sd){
         for(j=sd->js1; j<sd->js2; j++){
           float val;
           int index_cell;
-          int i33;
           float yy1, y3;
 
           index_cell = (i+1-sd->is1)*sd->nslicej*sd->nslicek + (j+incy-sd->js1)*sd->nslicek + plotz + 1 -incz- sd->ks1;
           if(show_slice_in_obst==0&&iblank_cell[IJKCELL(i,j,plotz-1)]!=GAS)continue;
           if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[IJKCELL(i,j,plotz)]==EMBED_YES)continue;
-          i33 = 4*sd->iqsliceframe[index_cell];
           yy1 = yplt[j];
           y3 = yplt[j+1];
        /*
@@ -5101,8 +5078,6 @@ void drawvvolslice_cellcenter(const vslicedata *vd){
   mesh *meshi;
   float *xplttemp,*yplttemp,*zplttemp;
   int plotx, ploty, plotz;
-  char *iblank;
-  int nx, ny, nxy;
 
   sd = sliceinfo + vd->ival;
   meshi=meshinfo+sd->blocknumber;
@@ -5119,11 +5094,6 @@ void drawvvolslice_cellcenter(const vslicedata *vd){
     ploty = sd->js1;
     plotz = sd->ks1;
   }
-
-  iblank = meshi->c_iblank_node;
-  nx = meshi->ibar+1;
-  ny = meshi->jbar+1;
-  nxy = nx*ny;
 
   vrange = velocity_range;
   if(vrange<=0.0)vrange=1.0;
@@ -6609,7 +6579,7 @@ float get_texture_index(float *xyz){
   float dxbar, dybar, dzbar;
   int ibar, jbar, kbar;
   int nx, ny, nz;
-  int slice_nx, slice_ny, slice_nz;
+  int slice_ny, slice_nz;
   float dx, dy, dz;
   float val000,val100,val010,val110;
   float val001,val101,val011,val111;
@@ -6640,7 +6610,6 @@ float get_texture_index(float *xyz){
   nx = ibar + 1;
   ny = jbar + 1;
   nz = kbar + 1;
-  slice_nx = gslice->ijk_max[0] - gslice->ijk_min[0] + 1;
   slice_ny = gslice->ijk_max[1] - gslice->ijk_min[1] + 1;
   slice_nz = gslice->ijk_max[2] - gslice->ijk_min[2] + 1;
 
@@ -6695,7 +6664,7 @@ float get_3dslice_val(slicedata *sd, float *xyz){
   float dxbar, dybar, dzbar;
   int ibar, jbar, kbar;
   int nx, ny, nz;
-  int slice_nx, slice_ny, slice_nz;
+  int slice_ny, slice_nz;
   float dx, dy, dz;
   float val000,val100,val010,val110;
   float val001,val101,val011,val111;
@@ -6721,7 +6690,6 @@ float get_3dslice_val(slicedata *sd, float *xyz){
   nx = ibar + 1;
   ny = jbar + 1;
   nz = kbar + 1;
-  slice_nx = sd->ijk_max[0] - sd->ijk_min[0] + 1;
   slice_ny = sd->ijk_max[1] - sd->ijk_min[1] + 1;
   slice_nz = sd->ijk_max[2] - sd->ijk_min[2] + 1;
 

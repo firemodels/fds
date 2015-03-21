@@ -838,18 +838,14 @@ void draw_devices(void){
       arrow_color_float[2] = (float)arrow_color[2]/255.0;
       arrow_color_float[3] = (float)arrow_color[3]/255.0;
       if(velocity_type==1){
-        float xyz1[3], xyz2[3], dxyz[3], vec0[3]={0.0,0.0,0.0},zvec[3]={0.0,0.0,1.0};
-        float axis[3], angle, speed;
+        float dxyz[3], vec0[3]={0.0,0.0,0.0},zvec[3]={0.0,0.0,1.0};
+        float axis[3], speed;
         int state=0;
 
         for(j=0;j<3;j++){
           dxyz[j] = 0.5*SCALE2FDS(vel[j])/max_dev_vel;
         }
         speed = sqrt(dxyz[0]*dxyz[0]+dxyz[1]*dxyz[1]+dxyz[2]*dxyz[2]);
-        for(j=0;j<3;j++){
-          xyz1[j] = xyz[j] - dxyz[j];
-          xyz2[j] = xyz[j] + dxyz[j];
-        }
 
         rotateu2v(zvec, dxyz, axis, &angle);
         glPushMatrix();
@@ -881,14 +877,10 @@ void draw_devices(void){
         glPopMatrix();
       }
       if(velocity_type==2){
-        float dd,d1=0.0, d2, height, vv;
+        float vv;
         float anglemin, anglemax, rmin, rmax;
 
         vv=SCALE2FDS(vel[0])/max_dev_vel;
-        height=SCALE2FDS(2.0*dvel)/max_dev_vel;
-        dd=2.0*vv*tan(DEG2RAD*dangle);
-        d1=dd*(vv+dvel)/vv;
-        d2=dd*(MAX(vv-dvel,0.0))/vv;
         glPushMatrix();
         glTranslatef(xyz[0],xyz[1],xyz[2]);
         glRotatef(-angle,0.0,0.0,1.0);
@@ -1039,16 +1031,7 @@ void draw_devices(void){
 
           type=devicei->type2;
           if(type>=0&&type<ndevicetypes)vistype=devicetypes[type]->type2vis;
-          if(vistype==1){
-            float valcolor[3],*valcolorptr=NULL;
-            unsigned char color[3], *colorptr;
-
-            colorptr=get_device_color(devicei,color,device_valmin,device_valmax);
-            valcolor[0]=color[0];
-            valcolor[1]=color[1];
-            valcolor[2]=color[2];
-            draw_SVOBJECT(devicei->object,state,prop,0,valcolorptr,0);
-          }
+          if(vistype==1)draw_SVOBJECT(devicei->object,state,prop,0,NULL,0);
         }
         else{
           draw_SVOBJECT(devicei->object,state,prop,0,NULL,0);
@@ -2533,11 +2516,9 @@ void drawcircle(float diameter,unsigned char *rgbcolor, circdata *circinfo){
 
 void drawarc(float angle, float diameter,unsigned char *rgbcolor){
   int i, iarc;
-  int ncirc;
   float *xcirc, *ycirc;
 
   if(object_circ.ncirc==0)Init_Circle(CIRCLE_SEGS,&object_circ);
-  ncirc = object_circ.ncirc;
   xcirc = object_circ.xcirc;
   ycirc = object_circ.ycirc;
   
@@ -5796,15 +5777,15 @@ void setup_device_data(void){
     }
   }
   if(is_dup==1){
-    int i;
+    int ii;
 
     fprintf(stderr,"*** Warning: Duplicate device labels: ");
-    for(i=0;i<ndeviceinfo;i++){
+    for(ii=0;ii<ndeviceinfo;ii++){
       devicedata *devi;
 
-      devi = deviceinfo + i;
+      devi = deviceinfo + ii;
       if(devi->label==NULL||STRCMP(devi->label,"null")==0)continue;
-      if(is_dup_device_label(i,BEFORE)==0&&is_dup_device_label(i,AFTER)==1){
+      if(is_dup_device_label(ii,BEFORE)==0&&is_dup_device_label(ii,AFTER)==1){
         fprintf(stderr," %s,",devi->label);
       }
     }
@@ -6957,13 +6938,12 @@ void normalize(float *xyz, int n){
 /* ------------------ parse_object_string ------------------------ */
 
 void parse_object_string(char *string,char **tokens, int *ntokens){
-  int i, len, in_quote, ntok, in_token, last_in_token,ntok2=0;
+  int i, len, in_quote, in_token, last_in_token,ntok2=0;
   char *c;
   char *tokens_head[BUFFER_SIZE], *tokens_tail[BUFFER_SIZE];
   int in_head=1,nhead=0,ntail=0;
   
   c=string;
-  ntok=0;
   in_quote=0;
   in_token=0;
   last_in_token=0;

@@ -4848,7 +4848,6 @@ void makeiblank_smoke3d(void){
   for(i=0;i<nsmoke3dinfo;i++){
     smoke3ddata *smoke3di;
     mesh *smokemesh;
-    int nx, ny, nxy;
     int ibar, jbar, kbar;
     int ijksize;
 
@@ -4859,9 +4858,6 @@ void makeiblank_smoke3d(void){
     jbar = smokemesh->jbar;
     kbar = smokemesh->kbar;
     ijksize=(ibar+1)*(jbar+1)*(kbar+1);
-    nx = ibar + 1;
-    ny = jbar + 1;
-    nxy = nx*ny;
 
     if(use_iblank==1&&smoke3di->loaded==1&&smokemesh->iblank_smoke3d==NULL){
       unsigned char *iblank_smoke3d;

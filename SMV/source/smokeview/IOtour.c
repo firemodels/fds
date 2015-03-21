@@ -609,13 +609,17 @@ void createtourpaths(void){
         keyj->d_xyz_view[2]=0.0;
       }
       else{
+#ifdef xxx
         float del1, del2;
+#endif
         float sfactor, dfactor;
 
+#ifdef xxx
         del1 = thiskey->nodeval.time - lastkey->nodeval.time;
         del2 = nextkey->nodeval.time - thiskey->nodeval.time;
-        //sfactor = 2*del2/(del1 + del2);
-        //dfactor = 2*del1/(del1 + del2);
+        sfactor = 2*del2/(del1 + del2);
+        dfactor = 2*del1/(del1 + del2);
+#endif
         sfactor = 1.0;
         dfactor = 1.0;
 
@@ -820,7 +824,7 @@ void createtourpaths(void){
     for(j=0;j<view_ntimes;j++){
       pathdata *pj;
       float *eye, *xyz_view, *tour_view;
-      float f1, f2, dt;
+      float f1, dt;
       float view_local[3];
       float vtime;
 
@@ -834,7 +838,6 @@ void createtourpaths(void){
       f1 = (vtime - kf1->nodeval.time)/dt;
       if(f1<0.0)f1=0.0;
       if(f1>1.0)f1=1.0;
-      f2 = 1 - f1;
       pj->time=vtime2;
       touri->path_times[j]=vtime2;
 
