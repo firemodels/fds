@@ -1099,7 +1099,20 @@ PREDICT_NORMALS: IF (PREDICTOR) THEN
             KK               = WC%ONE_D%KK
             DELTA_P          = PBAR_P(KK,SF%DUCT_PATH(1)) - PBAR_P(KK,SF%DUCT_PATH(2))
             PRES_RAMP_FACTOR = SIGN(1._EB,SF%MAX_PRESSURE-DELTA_P)*SQRT(ABS((DELTA_P-SF%MAX_PRESSURE)/SF%MAX_PRESSURE))
-            WC%ONE_D%UWS = TIME_RAMP_FACTOR*WC%UW0
+            SELECT CASE(IOR) 
+               CASE( 1)
+                  WC%ONE_D%UWS =-U0 + TIME_RAMP_FACTOR*(WC%UW0+U0)
+               CASE(-1)
+                  WC%ONE_D%UWS = U0 + TIME_RAMP_FACTOR*(WC%UW0-U0)
+               CASE( 2)
+                  WC%ONE_D%UWS =-V0 + TIME_RAMP_FACTOR*(WC%UW0+V0)
+               CASE(-2)
+                  WC%ONE_D%UWS = V0 + TIME_RAMP_FACTOR*(WC%UW0-V0)
+               CASE( 3)
+                  WC%ONE_D%UWS =-W0 + TIME_RAMP_FACTOR*(WC%UW0+W0)
+               CASE(-3)
+                  WC%ONE_D%UWS = W0 + TIME_RAMP_FACTOR*(WC%UW0-W0)
+            END SELECT
             ! Special Cases
             NEUMANN_IF: IF (SF%SPECIFIED_NORMAL_GRADIENT) THEN
                IIG = WC%ONE_D%IIG
