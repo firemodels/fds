@@ -1365,7 +1365,7 @@ A situation that occurs often in atmospheric flows is that initial and boundary 
 
 In FDS, you may invoke the most rudimentary of data assimilation techniques, a method called \emph{nudging}.  In brief, we add a mean forcing term to the momentum equation to nudge the solution toward a desired result.  Currently, FDS can only affect the mean flow velocities.  To turn on this capability, set the logical {\ct MEAN\_FORCING(1:3)=.TRUE.} on {\ct MISC}.  When this is set, FDS will drive the mean velocity toward the value of {\ct U0}, {\ct V0}, or {\ct W0} (also set on {\ct MISC}).  For example, to point the wind in the northeast direction (assuming that the positive $x$ axis points eastward) at 10~m/s use
 \begin{lstlisting}
-&MISC MEAN_FORCING(1:2)=.TRUE.,.TRUE., U0=7.07, V0=7.07, DT_MEAN_FORCING=10. /
+&MISC MEAN_FORCING(1:2)=.TRUE.,.TRUE., U0=7.07, V0=7.07, DT_MEAN_FORCING=.1 /
 \end{lstlisting}
 Note that you must also specify a time scale for relaxation, {\ct DT\_MEAN\_FORCING}. For an outdoor flow, all other boundaries (except the ground) should be set to {\ct OPEN}. You may omit a region of the flow domain from forcing using the {\ct HOLE} feature.  If a {\ct HOLE} is used with {\ct MEAN_FORCING} it is advisable to also set {\ct PROJECTION=.TRUE.} on {\ct MISC}; otherwise the combination of {\ct U0} in the bulk region and zero velocity in the {\ct HOLE} region creates an initial divergence error that will take some time to wash out of the domain.
 
