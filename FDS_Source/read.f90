@@ -7985,7 +7985,6 @@ READ_HOLE_LOOP: DO N=1,N_HOLE_O
    RGB      = -1
    TRANSPARENCY = 1._EB
    EVACUATION   = .FALSE.
-   MEAN_FORCING = .FALSE.
    XB       = -9.E30_EB
 
    ! Read the HOLE line
