@@ -872,6 +872,8 @@ MEAN_FORCING_X: IF (MEAN_FORCING(1)) THEN
                   IC2 = CELL_INDEX(I+1,J,K)
                   IF (SOLID(IC1)) CYCLE
                   IF (SOLID(IC2)) CYCLE
+                  IF (.NOT.MEAN_FORCING_CELL(I,J,K)  ) CYCLE
+                  IF (.NOT.MEAN_FORCING_CELL(I+1,J,K)) CYCLE
                   VC = DXN(I)*DY(J)*DZ(K)
                   INTEGRAL = INTEGRAL + UU(I,J,K)*VC
                   SUM_VOLUME = SUM_VOLUME + VC
@@ -884,8 +886,16 @@ MEAN_FORCING_X: IF (MEAN_FORCING(1)) THEN
             UMEAN = 0._EB
          ENDIF
          UBAR = U0*EVALUATE_RAMP(T-T_BEGIN,DUMMY,I_RAMP_U0)
-         DU_FORCING = RFAC_FORCING(1)*(UBAR-UMEAN)/DT
-         FVX = FVX - DU_FORCING
+         DU_FORCING = (UBAR-UMEAN)/DT_MEAN_FORCING
+         DO K=1,KBAR
+            DO J=1,JBAR
+               DO I=0,IBAR
+                  IF (.NOT.MEAN_FORCING_CELL(I,J,K)  ) CYCLE
+                  IF (.NOT.MEAN_FORCING_CELL(I+1,J,K)) CYCLE
+                  FVX(I,J,K) = FVX(I,J,K) - DU_FORCING
+               ENDDO
+            ENDDO
+         ENDDO
       CASE(1:) SELECT_RAMP_U
          K_LOOP_U: DO K=1,KBAR
             INTEGRAL = 0._EB
@@ -908,7 +918,7 @@ MEAN_FORCING_X: IF (MEAN_FORCING(1)) THEN
                UMEAN = 0._EB
             ENDIF
             UBAR = U0*EVALUATE_RAMP(T-T_BEGIN,DUMMY,I_RAMP_U0)*EVALUATE_RAMP(ZC(K),DUMMY,I_RAMP_U0_Z)
-            DU_FORCING = RFAC_FORCING(1)*(UBAR-UMEAN)/DT
+            DU_FORCING = (UBAR-UMEAN)/DT_MEAN_FORCING
             FVX(:,:,K) = FVX(:,:,K) - DU_FORCING
          ENDDO K_LOOP_U
    END SELECT SELECT_RAMP_U
@@ -926,6 +936,8 @@ MEAN_FORCING_Y: IF (MEAN_FORCING(2)) THEN
                   IC2 = CELL_INDEX(I,J+1,K)
                   IF (SOLID(IC1)) CYCLE
                   IF (SOLID(IC2)) CYCLE
+                  IF (.NOT.MEAN_FORCING_CELL(I,J,K)  ) CYCLE
+                  IF (.NOT.MEAN_FORCING_CELL(I,J+1,K)) CYCLE
                   VC = DX(I)*DYN(J)*DZ(K)
                   INTEGRAL = INTEGRAL + VV(I,J,K)*VC
                   SUM_VOLUME = SUM_VOLUME + VC
@@ -938,8 +950,16 @@ MEAN_FORCING_Y: IF (MEAN_FORCING(2)) THEN
             VMEAN = 0._EB
          ENDIF
          VBAR = V0*EVALUATE_RAMP(T-T_BEGIN,DUMMY,I_RAMP_V0)
-         DV_FORCING = RFAC_FORCING(2)*(VBAR-VMEAN)/DT
-         FVY = FVY - DV_FORCING
+         DV_FORCING = (VBAR-VMEAN)/DT_MEAN_FORCING
+         DO K=1,KBAR
+            DO J=0,JBAR
+               DO I=1,IBAR
+                  IF (.NOT.MEAN_FORCING_CELL(I,J,K)  ) CYCLE
+                  IF (.NOT.MEAN_FORCING_CELL(I,J+1,K)) CYCLE
+                  FVY(I,J,K) = FVY(I,J,K) - DV_FORCING
+               ENDDO
+            ENDDO
+         ENDDO
       CASE(1:) SELECT_RAMP_V
          K_LOOP_V: DO K=1,KBAR
             INTEGRAL = 0._EB
@@ -961,7 +981,7 @@ MEAN_FORCING_Y: IF (MEAN_FORCING(2)) THEN
                VMEAN = 0._EB
             ENDIF
             VBAR = V0*EVALUATE_RAMP(T-T_BEGIN,DUMMY,I_RAMP_V0)*EVALUATE_RAMP(ZC(K),DUMMY,I_RAMP_V0_Z)
-            DV_FORCING = RFAC_FORCING(2)*(VBAR-VMEAN)/DT
+            DV_FORCING = (VBAR-VMEAN)/DT_MEAN_FORCING
             FVY(:,:,K) = FVY(:,:,K) - DV_FORCING
          ENDDO K_LOOP_V
    END SELECT SELECT_RAMP_V
@@ -979,6 +999,8 @@ MEAN_FORCING_Z: IF (MEAN_FORCING(3)) THEN
                   IC2 = CELL_INDEX(I,J,K+1)
                   IF (SOLID(IC1)) CYCLE
                   IF (SOLID(IC2)) CYCLE
+                  IF (.NOT.MEAN_FORCING_CELL(I,J,K)  ) CYCLE
+                  IF (.NOT.MEAN_FORCING_CELL(I,J,K+1)) CYCLE
                   VC = DX(I)*DY(J)*DZN(K)
                   INTEGRAL = INTEGRAL + WW(I,J,K)*VC
                   SUM_VOLUME = SUM_VOLUME + VC
@@ -990,9 +1012,17 @@ MEAN_FORCING_Z: IF (MEAN_FORCING(3)) THEN
          ELSE
             WMEAN = 0._EB
          ENDIF
-         WBAR = W0-EVALUATE_RAMP(T-T_BEGIN,DUMMY,I_RAMP_W0)
-         DW_FORCING = RFAC_FORCING(3)*(WBAR-WMEAN)/DT
-         FVZ = FVZ - DW_FORCING
+         WBAR = W0*EVALUATE_RAMP(T-T_BEGIN,DUMMY,I_RAMP_W0)
+         DW_FORCING = (WBAR-WMEAN)/DT_MEAN_FORCING
+         DO K=0,KBAR
+            DO J=1,JBAR
+               DO I=1,IBAR
+                  IF (.NOT.MEAN_FORCING_CELL(I,J,K)  ) CYCLE
+                  IF (.NOT.MEAN_FORCING_CELL(I,J,K+1)) CYCLE
+                  FVZ(I,J,K) = FVZ(I,J,K) - DW_FORCING
+               ENDDO
+            ENDDO
+         ENDDO
       CASE(1:)
          K_LOOP_W: DO K=0,KBAR
             INTEGRAL = 0._EB
@@ -1013,8 +1043,8 @@ MEAN_FORCING_Z: IF (MEAN_FORCING(3)) THEN
             ELSE
                WMEAN = 0._EB
             ENDIF
-            WBAR = W0-EVALUATE_RAMP(T-T_BEGIN,DUMMY,I_RAMP_W0)*EVALUATE_RAMP(Z(K),DUMMY,I_RAMP_W0_Z)
-            DW_FORCING = RFAC_FORCING(3)*(WBAR-WMEAN)/DT
+            WBAR = W0*EVALUATE_RAMP(T-T_BEGIN,DUMMY,I_RAMP_W0)*EVALUATE_RAMP(Z(K),DUMMY,I_RAMP_W0_Z)
+            DW_FORCING = (WBAR-WMEAN)/DT_MEAN_FORCING
             FVZ = FVZ - DW_FORCING
          ENDDO K_LOOP_W
    END SELECT SELECT_RAMP_W
