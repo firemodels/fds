@@ -348,15 +348,6 @@ M%FRHO  = 0._EB
 M%U     = U0
 M%V     = V0
 M%W     = W0
-DO K=0,M%KBAR
-   DO J=0,M%JBAR
-      DO I=0,M%IBAR
-         IF ( M%SOLID(M%CELL_INDEX(I,J,K)) .OR. M%SOLID(M%CELL_INDEX(I+1,J,K)) ) M%U(I,J,K)=0._EB
-         IF ( M%SOLID(M%CELL_INDEX(I,J,K)) .OR. M%SOLID(M%CELL_INDEX(I,J+1,K)) ) M%V(I,J,K)=0._EB
-         IF ( M%SOLID(M%CELL_INDEX(I,J,K)) .OR. M%SOLID(M%CELL_INDEX(I,J,K+1)) ) M%W(I,J,K)=0._EB
-      ENDDO
-   ENDDO
-ENDDO
 IF (ANY(MEAN_FORCING)) THEN
    DO K=0,M%KBAR
       DO J=0,M%JBAR
