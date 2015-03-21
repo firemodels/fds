@@ -7211,9 +7211,6 @@ updatemenu=0;
   /* --------------------------------datadialog menu -------------------------- */
 
   CREATEMENU(datadialogmenu, DialogMenu);
-  if(nsmoke3dinfo > 0||nvolrenderinfo > 0){
-    glutAddMenuEntry(_("3D smoke...  ALT s"), DIALOG_3DSMOKE);
-  }
   glutAddMenuEntry(_("Coloring..."), DIALOG_COLORING);
   if(ndeviceinfo>0){
     glutAddMenuEntry(_("Devices/Objects..."), DIALOG_DEVICE);
