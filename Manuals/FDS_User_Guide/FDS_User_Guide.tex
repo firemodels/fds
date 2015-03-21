@@ -1365,9 +1365,9 @@ A situation that occurs often in atmospheric flows is that initial and boundary 
 
 In FDS, you may invoke the most rudimentary of data assimilation techniques, a method called \emph{nudging}.  In brief, we add a mean forcing term to the momentum equation to nudge the solution toward a desired result.  Currently, FDS can only affect the mean flow velocities.  To turn on this capability, set the logical {\ct MEAN\_FORCING(1:3)=.TRUE.} on {\ct MISC}.  When this is set, FDS will drive the mean velocity toward the value of {\ct U0}, {\ct V0}, or {\ct W0} (also set on {\ct MISC}).  For example, to point the wind in the northeast direction (assuming that the positive $x$ axis points eastward) at 10~m/s use
 \begin{lstlisting}
-&MISC MEAN_FORCING(1:2)=.TRUE.,.TRUE., U0=7.07, V0=7.07 /
+&MISC MEAN_FORCING(1:2)=.TRUE.,.TRUE., U0=7.07, V0=7.07, DT_MEAN_FORCING=10. /
 \end{lstlisting}
-For an outdoor flow, all other boundaries (except the ground) should be set to {\ct OPEN}.
+Note that you must also specify a time scale for relaxation, {\ct DT\_MEAN\_FORCING}. For an outdoor flow, all other boundaries (except the ground) should be set to {\ct OPEN}. You may omit a region of the flow domain from forcing using the {\ct HOLE} feature.
 
 \subsection{Special Topic: Specified Force Field}
 \label{info:force_vector}
@@ -9011,6 +9011,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct CONSTANT\_SPECIFIC\_HEAT\_RATIO}           & Logical       & Section~\ref{info:Enthalpy}                           &               & {\ct .FALSE.}     \\ \hline
 {\ct DNS}                                       & Logical       & Section~\ref{info:MISC_Basics}                        &               & {\ct .FALSE.}     \\ \hline
 {\ct DRIFT\_FLUX}                               & Logical       & Section~\ref{info:deposition}                         &               & {\ct .TRUE.}      \\ \hline
+{\ct DT\_MEAN\_FORCING}                         & Real          & Section~\ref{info:mean_forcing}                       & s             & 1.E10             \\ \hline
 {\ct EVACUATION\_DRILL}                         & Logical       & Reference~\cite{FDS_Evac_Users_Guide}                 &               & {\ct .FALSE.}     \\ \hline
 {\ct EVACUATION\_MC\_MODE}                      & Logical       & Reference~\cite{FDS_Evac_Users_Guide}                 &               & {\ct .FALSE.}     \\ \hline
 {\ct EVAC\_PRESSURE\_ITERATIONS}                & Integer       & Reference~\cite{FDS_Evac_Users_Guide}                 &               & 50                \\ \hline
@@ -9058,7 +9059,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 %{\ct RESEARCH\_MODE}                            & Logical       & $\rho D_\alpha + mu_t/\mbox{Sc}_t$                    &               & {\ct .FALSE.}     \\ \hline
 {\ct RESTART}                                   & Logical       & Section~\ref{info:restart}                            &               & {\ct .FALSE.}     \\ \hline
 {\ct RESTART\_CHID}                             & Character     & Section~\ref{info:restart}                            &               & {\ct CHID}        \\ \hline
-%{\ct RFAC\_FORCING(3)}                          & Real          & Section~\ref{info:mean_forcing}                       &               & 0.5               \\ \hline
 {\ct RICHARDSON\_ERROR\_TOLERANCE}              & Real          & Section~\ref{info:REAC}                               &               & 1.0 E-3           \\ \hline
 {\ct RUN\_AVG\_FAC}                             & Real          & Section~\ref{radiative_part_props}                    &               & 0.5               \\ \hline
 {\ct SC}                                        & Real          & Section~\ref{info:LES}                                &               & 0.5               \\ \hline
