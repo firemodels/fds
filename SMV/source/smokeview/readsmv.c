@@ -11203,7 +11203,296 @@ typedef struct {
 
 }
 
-/* ------------------ writeini ------------------------ */
+/* ------------------ output_viewponts ------------------------ */
+
+void output_viewpoints(FILE *fileout){
+  float *eye, *az_elev, *mat;
+  camera *ca;
+
+  for(ca = camera_list_first.next; ca->next != NULL; ca = ca->next){
+    if(strcmp(ca->name, "internal") == 0)continue;
+    if(strcmp(ca->name, "external") == 0)continue;
+
+    if(ca->quat_defined == 1){
+      fprintf(fileout, "VIEWPOINT6\n");
+    }
+    else{
+      fprintf(fileout, "VIEWPOINT5\n");
+    }
+    eye = ca->eye;
+    az_elev = ca->az_elev;
+    mat = modelview_identity;
+
+    fprintf(fileout, " %i %i %i\n", ca->rotation_type, ca->rotation_index, ca->view_id);
+    fprintf(fileout, " %f %f %f %f %i\n", eye[0], eye[1], eye[2], zoom, zoomindex);
+    fprintf(fileout, " %f %f %f %i\n", ca->view_angle, ca->azimuth, ca->elevation, ca->projection_type);
+    fprintf(fileout, " %f %f %f\n", ca->xcen, ca->ycen, ca->zcen);
+
+    fprintf(fileout, " %f %f\n", az_elev[0], az_elev[1]);
+    if(ca->quat_defined == 1){
+      fprintf(fileout, " 1 %f %f %f %f\n", ca->quaternion[0], ca->quaternion[1], ca->quaternion[2], ca->quaternion[3]);
+    }
+    else{
+      fprintf(fileout, " %f %f %f %f\n", mat[0], mat[1], mat[2], mat[3]);
+      fprintf(fileout, " %f %f %f %f\n", mat[4], mat[5], mat[6], mat[7]);
+      fprintf(fileout, " %f %f %f %f\n", mat[8], mat[9], mat[10], mat[11]);
+      fprintf(fileout, " %f %f %f %f\n", mat[12], mat[13], mat[14], mat[15]);
+    }
+    fprintf(fileout, " %i %i %i %i %i %i %i\n",
+      ca->clip_mode,
+      ca->clip_xmin, ca->clip_ymin, ca->clip_zmin,
+      ca->clip_xmax, ca->clip_ymax, ca->clip_zmax);
+    fprintf(fileout, " %f %f %f %f %f %f\n",
+      ca->xmin, ca->ymin, ca->zmin,
+      ca->xmax, ca->ymax, ca->zmax);
+    fprintf(fileout, " %s\n", ca->name);
+  }
+}
+  
+  /* ------------------ writeini_local ------------------------ */
+
+void writeini_local(FILE *fileout){
+  int i;
+  int ndevice_vis = 0;
+  sv_object *obj_typei;
+  labeldata *thislabel;
+  int startup_count;
+  scriptfiledata *scriptfile;
+
+  fprintf(fileout, "\n ------------ local ini settings ------------\n\n");
+
+  fprintf(fileout, "AVATAREVAC\n");
+  fprintf(fileout, " %i\n", iavatar_evac);
+  fprintf(fileout, "DEVICEVECTORDIMENSIONS\n");
+  fprintf(fileout, "%f %f %f %f\n", vector_baseheight, vector_basediameter, vector_headheight, vector_headdiameter);
+  fprintf(fileout, "DEVICEBOUNDS\n");
+  fprintf(fileout, " %f %f\n", device_valmin, device_valmax);
+  fprintf(fileout, "DEVICEORIENTATION\n");
+  fprintf(fileout, " %i %f\n", show_device_orientation, orientation_scale);
+  fprintf(fileout, "GRIDPARMS\n");
+  fprintf(fileout, " %i %i %i\n", visx_all, visy_all, visz_all);
+  fprintf(fileout, " %i %i %i\n", iplotx_all, iploty_all, iplotz_all);
+  fprintf(fileout, "GSLICEPARMS\n");
+  fprintf(fileout, " %i %i %i %i\n", vis_gslice_data, show_gslice_triangles, show_gslice_triangulation, show_gslice_normal);
+  fprintf(fileout, " %f %f %f\n", gslice_xyz[0], gslice_xyz[1], gslice_xyz[2]);
+  fprintf(fileout, " %f %f\n", gslice_normal_azelev[0], gslice_normal_azelev[1]);
+  for(thislabel = label_first_ptr->next; thislabel->next != NULL; thislabel = thislabel->next){
+    labeldata *labeli;
+    float *xyz, *rgbtemp, *tstart_stop;
+    int *useforegroundcolor, *show_always;
+
+    labeli = thislabel;
+    if(labeli->labeltype == TYPE_SMV)continue;
+    xyz = labeli->xyz;
+    rgbtemp = labeli->frgb;
+    tstart_stop = labeli->tstart_stop;
+    useforegroundcolor = &labeli->useforegroundcolor;
+    show_always = &labeli->show_always;
+
+    fprintf(fileout, "LABEL\n");
+    fprintf(fileout, " %f %f %f %f %f %f %f %f %i %i\n",
+      xyz[0], xyz[1], xyz[2],
+      rgbtemp[0], rgbtemp[1], rgbtemp[2],
+      tstart_stop[0], tstart_stop[1],
+      *useforegroundcolor, *show_always);
+    fprintf(fileout, " %s\n", labeli->name);
+  }
+  fprintf(fileout, "LOADFILESATSTARTUP\n");
+  fprintf(fileout, " %i\n", loadfiles_at_startup);
+  fprintf(fileout, "MSCALE\n");
+  fprintf(fileout, " %f %f %f\n", mscale[0], mscale[1], mscale[2]);
+  put_startup_smoke3d(fileout);
+  if(npart5prop > 0){
+    fprintf(fileout, "PART5PROPDISP\n");
+    for(i = 0; i < npart5prop; i++){
+      part5prop *propi;
+      int j;
+
+      propi = part5propinfo + i;
+      fprintf(fileout, " ");
+      for(j = 0; j < npartclassinfo; j++){
+        fprintf(fileout, " %i ", propi->class_vis[j]);
+      }
+      fprintf(fileout, "\n");
+    }
+    fprintf(fileout, "PART5COLOR\n");
+    for(i = 0; i < npart5prop; i++){
+      part5prop *propi;
+
+      propi = part5propinfo + i;
+      if(propi->display == 1){
+        fprintf(fileout, " %i\n", i);
+        break;
+      }
+    }
+
+  }
+
+  if(npartclassinfo > 0){
+    int j;
+
+    fprintf(fileout, "PART5CLASSVIS\n");
+    fprintf(fileout, " %i\n", npartclassinfo);
+    for(j = 0; j<npartclassinfo; j++){
+      part5class *partclassj;
+
+      partclassj = partclassinfo + j;
+      fprintf(fileout, " %i\n", partclassj->vis_type);
+    }
+  }
+
+  if(npropinfo>0){
+    fprintf(fileout, "PROPINDEX\n");
+    fprintf(fileout, " %i\n", npropinfo);
+    for(i = 0; i < npropinfo; i++){
+      propdata *propi;
+      int offset;
+      int jj;
+
+      propi = propinfo + i;
+      offset = -1;
+      for(jj = 0; jj < propi->nsmokeview_ids; jj++){
+        if(strcmp(propi->smokeview_id, propi->smokeview_ids[jj]) == 0){
+          offset = jj;
+          break;
+        }
+      }
+      fprintf(fileout, " %i %i\n", i, offset);
+    }
+  }
+
+  for(scriptfile = first_scriptfile.next; scriptfile->next != NULL; scriptfile = scriptfile->next){
+    char *file;
+
+    file = scriptfile->file;
+    if(file != NULL){
+      fprintf(fileout, "SCRIPTFILE\n");
+      fprintf(fileout, " %s\n", file);
+    }
+  }
+
+  fprintf(fileout, "SHOOTER\n");
+  fprintf(fileout, " %f %f %f\n", shooter_xyz[0], shooter_xyz[1], shooter_xyz[2]);
+  fprintf(fileout, " %f %f %f\n", shooter_dxyz[0], shooter_dxyz[1], shooter_dxyz[2]);
+  fprintf(fileout, " %f %f %f\n", shooter_uvw[0], shooter_uvw[1], shooter_uvw[2]);
+  fprintf(fileout, " %f %f %f\n", shooter_velmag, shooter_veldir, shooterpointsize);
+  fprintf(fileout, " %i %i %i %i %i\n", shooter_fps, shooter_vel_type, shooter_nparts, visShooter, shooter_cont_update);
+  fprintf(fileout, " %f %f\n", shooter_duration, shooter_v_inf);
+
+  for(i = 0; i < nobject_defs; i++){
+    obj_typei = object_defs[i];
+    if(obj_typei->used == 1 && obj_typei->visible == 1){
+      ndevice_vis++;
+    }
+  }
+  fprintf(fileout, "SHOWDEVICES\n");
+  fprintf(fileout, " %i\n", ndevice_vis);
+  for(i = 0; i < nobject_defs; i++){
+    obj_typei = object_defs[i];
+    if(obj_typei->used == 1 && obj_typei->visible == 1){
+      fprintf(fileout, " %s\n", obj_typei->label);
+    }
+  }
+  fprintf(fileout, "SHOWDEVICEVALS\n");
+  fprintf(fileout, " %i %i %i %i %i %i\n", showdeviceval, showvdeviceval, devicetypes_index, colordeviceval, vectortype, vispilot);
+  for(i = ntickinfo_smv; i < ntickinfo; i++){
+    float *begt;
+    float *endt;
+    float *rgbtemp;
+    tickdata *ticki;
+
+    ticki = tickinfo + i;
+    begt = ticki->begin;
+    endt = ticki->end;
+    rgbtemp = ticki->rgb;
+
+    fprintf(fileout, "TICKS\n");
+    fprintf(fileout, " %f %f %f %f %f %f %i\n", begt[0], begt[1], begt[2], endt[0], endt[1], endt[2], ticki->nbars);
+    fprintf(fileout, " %f %i %f %f %f %f\n", ticki->dlength, ticki->dir, rgbtemp[0], rgbtemp[1], rgbtemp[2], ticki->width);
+  }
+
+  fprintf(fileout, "TOURINDEX\n");
+  fprintf(fileout, " %i\n", selectedtour_index);
+  startup_count = 0;
+  for(i = 0; i < ntours; i++){
+    tourdata *touri;
+
+    touri = tourinfo + i;
+    if(touri->startup == 1)startup_count++;
+  }
+  if(startup_count < ntours){
+    fprintf(fileout, "TOURS\n");
+    fprintf(fileout, " %i\n", ntours - startup_count);
+    for(i = 0; i < ntours; i++){
+      tourdata *touri;
+      keyframe *framei;
+
+      touri = tourinfo + i;
+      if(touri->startup == 1)continue;
+
+      trim(touri->label);
+      fprintf(fileout, " %s\n", touri->label);
+      fprintf(fileout, " %i %i %f %i %i\n",
+        touri->nkeyframes, touri->global_tension_flag, touri->global_tension, touri->glui_avatar_index, touri->display);
+      for(framei = &touri->first_frame; framei != &touri->last_frame; framei = framei->next){
+        char buffer[1024];
+        int uselocalspeed = 0;
+
+        if(framei == &touri->first_frame)continue;
+        sprintf(buffer, "%f %f %f %f ",
+          framei->noncon_time,
+          DENORMALIZE_X(framei->nodeval.eye[0]),
+          DENORMALIZE_Y(framei->nodeval.eye[1]),
+          DENORMALIZE_Z(framei->nodeval.eye[2]));
+        trimmzeros(buffer);
+        fprintf(fileout, " %s %i ", buffer, framei->viewtype);
+        if(framei->viewtype == REL_VIEW){
+          sprintf(buffer, "%f %f %f %f %f %f %f ",
+            framei->az_path, framei->nodeval.elev_path, framei->bank,
+            framei->tension, framei->bias, framei->continuity,
+            framei->nodeval.zoom);
+        }
+        else{
+          sprintf(buffer, "%f %f %f %f %f %f %f ",
+            DENORMALIZE_X(framei->nodeval.xyz_view_abs[0]),
+            DENORMALIZE_Y(framei->nodeval.xyz_view_abs[1]),
+            DENORMALIZE_Z(framei->nodeval.xyz_view_abs[2]),
+            framei->tension, framei->bias, framei->continuity,
+            framei->nodeval.zoom);
+        }
+        trimmzeros(buffer);
+        fprintf(fileout, " %s %i\n", buffer, uselocalspeed);
+      }
+    }
+  }
+
+
+  fprintf(fileout, "USERTICKS\n");
+  fprintf(fileout, " %i %i %i %i %i %i\n", visUSERticks, auto_user_tick_placement, user_tick_sub,
+    user_tick_show_x, user_tick_show_y, user_tick_show_z);
+  fprintf(fileout, " %f %f %f\n", user_tick_origin[0], user_tick_origin[1], user_tick_origin[2]);
+  fprintf(fileout, " %f %f %f\n", user_tick_min[0], user_tick_min[1], user_tick_min[2]);
+  fprintf(fileout, " %f %f %f\n", user_tick_max[0], user_tick_max[1], user_tick_max[2]);
+  fprintf(fileout, " %f %f %f\n", user_tick_step[0], user_tick_step[1], user_tick_step[2]);
+  fprintf(fileout, " %i %i %i\n", user_tick_show_x, user_tick_show_y, user_tick_show_z);
+  fprintf(fileout, "XYZCLIP\n");
+  fprintf(fileout, " %i\n", clip_mode);
+  fprintf(fileout, " %i %f %i %f\n", clipinfo.clip_xmin, clipinfo.xmin, clipinfo.clip_xmax, clipinfo.xmax);
+  fprintf(fileout, " %i %f %i %f\n", clipinfo.clip_ymin, clipinfo.ymin, clipinfo.clip_ymax, clipinfo.ymax);
+  fprintf(fileout, " %i %f %i %f\n", clipinfo.clip_zmin, clipinfo.zmin, clipinfo.clip_zmax, clipinfo.zmax);
+
+
+
+
+
+
+
+
+
+
+}
+
+  /* ------------------ writeini ------------------------ */
 
 void writeini(int flag,char *filename){
   FILE *fileout=NULL;
@@ -11247,9 +11536,19 @@ void writeini(int flag,char *filename){
 
 
   fprintf(fileout,"# NIST Smokeview configuration file, Release %s\n\n",__DATE__);
-  fprintf(fileout,"COLORS\n");
-  fprintf(fileout,"------\n\n");
-  fprintf(fileout,"COLORBAR\n");
+  fprintf(fileout, "\n ------------ global ini settings ------------\n\n");
+
+  fprintf(fileout,"   *** COLOR/LIGHTING ***\n\n");
+  
+  fprintf(fileout, "AMBIENTLIGHT\n");
+  fprintf(fileout, " %f %f %f\n", ambientlight[0], ambientlight[1], ambientlight[2]);
+  fprintf(fileout, "BACKGROUNDCOLOR\n");
+  fprintf(fileout, " %f %f %f\n", backgroundbasecolor[0], backgroundbasecolor[1], backgroundbasecolor[2]);
+  fprintf(fileout, "BLOCKCOLOR\n");
+  fprintf(fileout, " %f %f %f\n", block_ambient2[0], block_ambient2[1], block_ambient2[2]);
+  fprintf(fileout, "BOUNDCOLOR\n");
+  fprintf(fileout, " %f %f %f\n", boundcolor[0], boundcolor[1], boundcolor[2]);
+  fprintf(fileout, "COLORBAR\n");
   fprintf(fileout," %i %i %i\n",nrgb,usetexturebar,colorbar_select_index);
   for(i=0;i<nrgb;i++){
     fprintf(fileout," %f %f %f\n",rgb[i][0],rgb[i][1],rgb[i][2]);
@@ -11264,6 +11563,20 @@ void writeini(int flag,char *filename){
   fprintf(fileout," %f %f %f :magenta\n",rgb2[5][0],rgb2[5][1],rgb2[5][2]);
   fprintf(fileout," %f %f %f :cyan   \n",rgb2[6][0],rgb2[6][1],rgb2[6][2]);
   fprintf(fileout," %f %f %f :black  \n",rgb2[7][0],rgb2[7][1],rgb2[7][2]);
+  fprintf(fileout, "COLORBAR_FLIP\n");
+  fprintf(fileout, " %i\n", colorbarflip);
+  fprintf(fileout, "DIFFUSELIGHT\n");
+  fprintf(fileout, " %f %f %f\n", diffuselight[0], diffuselight[1], diffuselight[2]);
+  fprintf(fileout, "DIRECTIONCOLOR\n");
+  fprintf(fileout, " %f %f %f\n", direction_color[0], direction_color[1], direction_color[2]);
+  fprintf(fileout, "FLIP\n");
+  fprintf(fileout, " %i\n", background_flip);
+  fprintf(fileout, "FOREGROUNDCOLOR\n");
+  fprintf(fileout, " %f %f %f\n", foregroundbasecolor[0], foregroundbasecolor[1], foregroundbasecolor[2]);
+  fprintf(fileout, "HEATOFFCOLOR\n");
+  fprintf(fileout, " %f %f %f\n", heatoffcolor[0], heatoffcolor[1], heatoffcolor[2]);
+  fprintf(fileout, "HEATONCOLOR\n");
+  fprintf(fileout, " %f %f %f\n", heatoncolor[0], heatoncolor[1], heatoncolor[2]);
   {
     float *iso_colors_temp;
     int n_iso_colors_temp;
@@ -11285,83 +11598,77 @@ void writeini(int flag,char *filename){
       fprintf(fileout," %f %f %f\n",iso_colors_temp[4*i],iso_colors_temp[4*i+1],iso_colors_temp[4*i+2]);
     }
   }
-  fprintf(fileout,"VENTCOLOR\n");
+  fprintf(fileout, "SENSORCOLOR\n");
+  fprintf(fileout, " %f %f %f\n", sensorcolor[0], sensorcolor[1], sensorcolor[2]);
+  fprintf(fileout, "SENSORNORMCOLOR\n");
+  fprintf(fileout, " %f %f %f\n", sensornormcolor[0], sensornormcolor[1], sensornormcolor[2]);
+  fprintf(fileout, "SETBW\n");
+  fprintf(fileout, " %i\n", setbw);
+  fprintf(fileout, "SPRINKOFFCOLOR\n");
+  fprintf(fileout, " %f %f %f\n", sprinkoffcolor[0], sprinkoffcolor[1], sprinkoffcolor[2]);
+  fprintf(fileout, "SPRINKONCOLOR\n");
+  fprintf(fileout, " %f %f %f\n", sprinkoncolor[0], sprinkoncolor[1], sprinkoncolor[2]);
+  fprintf(fileout, "STATICPARTCOLOR\n");
+  fprintf(fileout, " %f %f %f\n", static_color[0], static_color[1], static_color[2]);
+  fprintf(fileout, "TIMEBARCOLOR\n");
+  fprintf(fileout, " %f %f %f\n", timebarcolor[0], timebarcolor[1], timebarcolor[2]);
+  fprintf(fileout, "VENTCOLOR\n");
   fprintf(fileout," %f %f %f\n",ventcolor[0],ventcolor[1],ventcolor[2]);
-  fprintf(fileout,"SENSORCOLOR\n");
-  fprintf(fileout," %f %f %f\n",sensorcolor[0],sensorcolor[1],sensorcolor[2]);
-  fprintf(fileout,"SENSORNORMCOLOR\n");
-  fprintf(fileout," %f %f %f\n",sensornormcolor[0],sensornormcolor[1],sensornormcolor[2]);
-  fprintf(fileout,"HEATONCOLOR\n");
-  fprintf(fileout," %f %f %f\n",heatoncolor[0],heatoncolor[1],heatoncolor[2]);
-  fprintf(fileout,"HEATOFFCOLOR\n");
-  fprintf(fileout," %f %f %f\n",heatoffcolor[0],heatoffcolor[1],heatoffcolor[2]);
-  fprintf(fileout,"SPRINKONCOLOR\n");
-  fprintf(fileout," %f %f %f\n",sprinkoncolor[0],sprinkoncolor[1],sprinkoncolor[2]);
-  fprintf(fileout,"SPRINKOFFCOLOR\n");
-  fprintf(fileout," %f %f %f\n",sprinkoffcolor[0],sprinkoffcolor[1],sprinkoffcolor[2]);
-  fprintf(fileout,"BLOCKCOLOR\n");
-  fprintf(fileout," %f %f %f\n",block_ambient2[0],block_ambient2[1],block_ambient2[2]);
-  fprintf(fileout,"BOUNDCOLOR\n");
-  fprintf(fileout," %f %f %f\n",boundcolor[0],boundcolor[1],boundcolor[2]);
-  fprintf(fileout,"STATICPARTCOLOR\n");
-  fprintf(fileout," %f %f %f\n",static_color[0],static_color[1],static_color[2]);
-  fprintf(fileout,"BACKGROUNDCOLOR\n");
-  fprintf(fileout," %f %f %f\n",backgroundbasecolor[0],backgroundbasecolor[1],backgroundbasecolor[2]);
-  fprintf(fileout,"FOREGROUNDCOLOR\n");
-  fprintf(fileout," %f %f %f\n",foregroundbasecolor[0],foregroundbasecolor[1],foregroundbasecolor[2]);
+
+
 /*  extern GLfloat iso_ambient[4], iso_specular[4], iso_shininess;*/
 
-  fprintf(fileout,"FLIP\n");
-  fprintf(fileout," %i\n",background_flip);
-  fprintf(fileout,"TIMEBARCOLOR\n");
-  fprintf(fileout," %f %f %f\n",timebarcolor[0],timebarcolor[1],timebarcolor[2]);
-  fprintf(fileout,"SETBW\n");
-  fprintf(fileout," %i\n",setbw);
-  fprintf(fileout,"COLORBAR_FLIP\n");
-  fprintf(fileout," %i\n",colorbarflip);
 
-  fprintf(fileout,"\n LIGHTING\n");
-  fprintf(fileout,"--------\n\n");
-  fprintf(fileout,"AMBIENTLIGHT\n");
-  fprintf(fileout," %f %f %f\n",ambientlight[0],ambientlight[1],ambientlight[2]);
-  fprintf(fileout,"DIFFUSELIGHT\n");
-  fprintf(fileout," %f %f %f\n",diffuselight[0],diffuselight[1],diffuselight[2]);
 
-  fprintf(fileout,"\n SIZES\n");
-  fprintf(fileout,"-----------\n\n");
-  fprintf(fileout,"VECTORPOINTSIZE\n");
+  fprintf(fileout, "\n   *** SIZES/OFFSETS ***\n\n");
+  
+  fprintf(fileout, "GRIDLINEWIDTH\n");
+  fprintf(fileout, " %f\n", gridlinewidth);
+  fprintf(fileout, "ISOLINEWIDTH\n");
+  fprintf(fileout, " %f\n", isolinewidth);
+  fprintf(fileout, "ISOPOINTSIZE\n");
+  fprintf(fileout, " %f\n", isopointsize);
+  fprintf(fileout, "LINEWIDTH\n");
+  fprintf(fileout, " %f\n", linewidth);
+  fprintf(fileout, "PARTPOINTSIZE\n");
+  fprintf(fileout, " %f\n", partpointsize);
+  fprintf(fileout, "PLOT3DLINEWIDTH\n");
+  fprintf(fileout, " %f\n", plot3dlinewidth);
+  fprintf(fileout, "PLOT3DPOINTSIZE\n");
+  fprintf(fileout, " %f\n", plot3dpointsize);
+  fprintf(fileout, "RENDEROPTION\n");
+  fprintf(fileout, " %i %i\n", render_option, nrender_rows);
+  fprintf(fileout, "SENSORABSSIZE\n");
+  fprintf(fileout, " %f\n", sensorabssize);
+  fprintf(fileout, "SENSORRELSIZE\n");
+  fprintf(fileout, " %f\n", sensorrelsize);
+  fprintf(fileout, "SLICEOFFSET\n");
+  fprintf(fileout, " %f\n", sliceoffset_factor);
+  fprintf(fileout, "SMOOTHLINES\n");
+  fprintf(fileout, " %i\n", antialiasflag);
+  fprintf(fileout, "SPHERESEGS\n");
+  fprintf(fileout, " %i\n", device_sphere_segments);
+  fprintf(fileout, "SPRINKLERABSSIZE\n");
+  fprintf(fileout, " %f\n", sprinklerabssize);
+  fprintf(fileout, "STREAKLINEWIDTH\n");
+  fprintf(fileout, " %f\n", streaklinewidth);
+  fprintf(fileout, "USENEWDRAWFACE\n");
+  fprintf(fileout, " %i\n", use_new_drawface);
+  fprintf(fileout, "VECCONTOURS\n");
+  fprintf(fileout, " %i\n", show_slices_and_vectors);
+  fprintf(fileout, "VECLENGTH\n");
+  fprintf(fileout, " %i %f 1.0\n", 4, vecfactor);
+  fprintf(fileout, "VECTORLINEWIDTH\n");
+  fprintf(fileout, " %f %f\n", vectorlinewidth, slice_line_contour_width);
+  fprintf(fileout, "VECTORPOINTSIZE\n");
   fprintf(fileout," %f\n",vectorpointsize);
-  fprintf(fileout,"VECTORLINEWIDTH\n");
-  fprintf(fileout," %f %f\n",vectorlinewidth,slice_line_contour_width);
-  fprintf(fileout,"VECLENGTH\n");
-  fprintf(fileout," %i %f 1.0\n",4,vecfactor);
-  fprintf(fileout,"VECCONTOURS\n");
-  fprintf(fileout," %i\n",show_slices_and_vectors);
-  fprintf(fileout,"VECTORPOINTSIZE\n");
-  fprintf(fileout," %f\n",vectorpointsize);
-  fprintf(fileout,"PARTPOINTSIZE\n");
-  fprintf(fileout," %f\n",partpointsize);
-  fprintf(fileout,"STREAKLINEWIDTH\n");
-  fprintf(fileout," %f\n",streaklinewidth);
-  fprintf(fileout,"ISOPOINTSIZE\n");
-  fprintf(fileout," %f\n",isopointsize);
-  fprintf(fileout,"ISOLINEWIDTH\n");
-  fprintf(fileout," %f\n",isolinewidth);
-  fprintf(fileout,"PLOT3DPOINTSIZE\n");
-  fprintf(fileout," %f\n",plot3dpointsize);
-  fprintf(fileout,"GRIDLINEWIDTH\n");
-  fprintf(fileout," %f\n",gridlinewidth);
-  fprintf(fileout,"PLOT3DLINEWIDTH\n");
-  fprintf(fileout," %f\n",plot3dlinewidth);
-  fprintf(fileout,"SENSORABSSIZE\n");
-  fprintf(fileout," %f\n",sensorabssize);
-  fprintf(fileout,"SENSORRELSIZE\n");
-  fprintf(fileout," %f\n",sensorrelsize);
-  fprintf(fileout,"SPRINKLERABSSIZE\n");
-  fprintf(fileout," %f\n",sprinklerabssize);
-  fprintf(fileout,"SPHERESEGS\n");
-  fprintf(fileout," %i\n",device_sphere_segments);
-  if(use_graphics==1&&
+  fprintf(fileout, "VENTLINEWIDTH\n");
+  fprintf(fileout, " %f\n", ventlinewidth);
+  fprintf(fileout, "VENTOFFSET\n");
+  fprintf(fileout, " %f\n", ventoffset_factor);
+  fprintf(fileout, "WINDOWOFFSET\n");
+  fprintf(fileout, " %i\n", titlesafe_offsetBASE);
+  if(use_graphics == 1 &&
      (screenWidth == glutGet(GLUT_SCREEN_WIDTH)||screenHeight == glutGet(GLUT_SCREEN_HEIGHT))
     ){
     fprintf(fileout,"WINDOWWIDTH\n");
@@ -11375,350 +11682,242 @@ void writeini(int flag,char *filename){
     fprintf(fileout,"WINDOWHEIGHT\n");
     fprintf(fileout," %i\n",screenHeight);
   }
-  fprintf(fileout,"WINDOWOFFSET\n");
-  fprintf(fileout," %i\n",titlesafe_offsetBASE);
-  fprintf(fileout,"RENDEROPTION\n");
-  fprintf(fileout," %i %i\n",render_option,nrender_rows);
-  fprintf(fileout,"\n LINES\n");
-  fprintf(fileout,"-----------\n\n");
-  fprintf(fileout,"LINEWIDTH\n");
-  fprintf(fileout," %f\n",linewidth);
-  fprintf(fileout,"VENTLINEWIDTH\n");
-  fprintf(fileout," %f\n",ventlinewidth);
-  fprintf(fileout,"SMOOTHLINES\n");
-  fprintf(fileout," %i\n",antialiasflag);
-  fprintf(fileout,"USENEWDRAWFACE\n");
-  fprintf(fileout," %i\n",use_new_drawface);
 
-  fprintf(fileout,"\nOFFSETS\n");
-  fprintf(fileout,"-------\n\n");
-  fprintf(fileout,"VENTOFFSET\n");
-  fprintf(fileout," %f\n",ventoffset_factor);
-  fprintf(fileout,"SLICEOFFSET\n");
-  fprintf(fileout," %f\n",sliceoffset_factor);
-
-  fprintf(fileout,"\nTIME MIN/MAX\n");
-  fprintf(fileout,"------------\n");
-  fprintf(fileout,"(0/1 min max skip (1=set, 0=unset)\n\n");
-  fprintf(fileout,"TLOAD\n");
-  fprintf(fileout," %i %f %i %f %i %i\n",use_tload_begin,tload_begin,use_tload_end,tload_end,use_tload_skip,tload_skip);
-
-  fprintf(fileout,"\nVALUE MIN/MAX\n");
-  fprintf(fileout,"-------------\n");
-  fprintf(fileout,"(0/1 min 0/1 max (1=set, 0=unset)\n\n");
-  if(npart5prop>0){
-    for(i=0;i<npart5prop;i++){
-      part5prop *propi;
-
-      propi = part5propinfo + i;
-      fprintf(fileout,"V5_PARTICLES\n");
-      fprintf(fileout," %i %f %i %f %s\n",
-        propi->setvalmin,propi->valmin,propi->setvalmax,propi->valmax,propi->label->shortlabel);
-    }
-  }
-  fprintf(fileout,"V_PARTICLES\n");
-  fprintf(fileout," %i %f %i %f\n",setpartmin,partmin,setpartmax,partmax);
-  fprintf(fileout,"C_PARTICLES\n");
-  fprintf(fileout," %i %f %i %f\n",setpartchopmin,partchopmin,setpartchopmax,partchopmax);
-  for(i=0;i<npart5prop;i++){
-    part5prop *propi;
-
-    propi = part5propinfo + i;
-    fprintf(fileout,"C_PARTICLES\n");
-    fprintf(fileout," %i %f %i %f %s\n",propi->setchopmin,propi->chopmin,propi->setchopmax,propi->chopmax,propi->label->shortlabel);
-  }
-  if(nslice2>0){
-    for(i=0;i<nslice2;i++){
-      fprintf(fileout,"V_SLICE\n");
-      fprintf(fileout," %i %f %i %f %s : %f %f %i\n",
-        slicebounds[i].setvalmin,slicebounds[i].valmin,
-        slicebounds[i].setvalmax,slicebounds[i].valmax,
-        slicebounds[i].label->shortlabel
-        ,slicebounds[i].line_contour_min,slicebounds[i].line_contour_max,slicebounds[i].line_contour_num
-        );
-    }
-    for(i=0;i<nslice2;i++){
-      fprintf(fileout,"C_SLICE\n");
-      fprintf(fileout," %i %f %i %f %s\n",
-        slicebounds[i].setchopmin,slicebounds[i].chopmin,
-        slicebounds[i].setchopmax,slicebounds[i].chopmax,
-        slicebounds[i].label->shortlabel
-        );
-    }
-  }
-  fprintf(fileout,"SLICEDATAOUT\n");
-  fprintf(fileout," %i \n",output_slicedata);
-  if(niso_bounds>0){
-    for(i=0;i<niso_bounds;i++){
-      fprintf(fileout,"V_ISO\n");
-      fprintf(fileout," %i %f %i %f %s\n",
-        isobounds[i].setvalmin,isobounds[i].valmin,
-        isobounds[i].setvalmax,isobounds[i].valmax,
-        isobounds[i].label->shortlabel
-        );
-    }
-    for(i=0;i<niso_bounds;i++){
-      fprintf(fileout,"C_ISO\n");
-      fprintf(fileout," %i %f %i %f %s\n",
-        isobounds[i].setchopmin,isobounds[i].chopmin,
-        isobounds[i].setchopmax,isobounds[i].chopmax,
-        isobounds[i].label->shortlabel
-        );
-    }
-  }
-  for(i=0;i<npatchinfo;i++){
-    patchdata *patchi;
-
-    patchi = patchinfo + i;
-    if(patchi->firstshort==1){
-      fprintf(fileout,"V_BOUNDARY\n");
-      fprintf(fileout," %i %f %i %f %s\n",
-        patchi->setvalmin,patchi->valmin,
-        patchi->setvalmax,patchi->valmax,
-        patchi->label.shortlabel
-        );
-    }
-  }
-  fprintf(fileout,"PATCHDATAOUT\n");
-  fprintf(fileout," %i %f %f %f %f %f %f %f %f\n",output_patchdata,
-    patchout_tmin,patchout_tmax,
-    patchout_xmin,patchout_xmax,
-    patchout_ymin,patchout_ymax,
-    patchout_zmin,patchout_zmax
-    );
-  fprintf(fileout,"CACHE_BOUNDARYDATA\n");
-  fprintf(fileout," %i \n",cache_boundarydata);
-  for(i=0;i<npatch2;i++){
+  fprintf(fileout,"\n *** TIME/DATA BOUNDS ***\n");
+  fprintf(fileout,  "  (0/1 min max skip (1=set, 0=unset)\n\n");
+  
+  for(i = 0; i < npatch2; i++){
     int ii;
     patchdata *patchi;
 
     ii = patchlabellist_index[i];
     patchi = patchinfo + ii;
-    fprintf(fileout,"C_BOUNDARY\n");
-    fprintf(fileout," %i %f %i %f %s\n",
-      patchi->setchopmin,patchi->chopmin,
-      patchi->setchopmax,patchi->chopmax,
+    fprintf(fileout, "C_BOUNDARY\n");
+    fprintf(fileout, " %i %f %i %f %s\n",
+      patchi->setchopmin, patchi->chopmin,
+      patchi->setchopmax, patchi->chopmax,
       patchi->label.shortlabel
       );
   }
-  if(nzoneinfo>0){
-    fprintf(fileout,"V_ZONE\n");
-    fprintf(fileout," %i %f %i %f\n",setzonemin,zoneusermin,setzonemax,zoneusermax);
+  if(niso_bounds > 0){
+    for(i = 0; i < niso_bounds; i++){
+      fprintf(fileout, "C_ISO\n");
+      fprintf(fileout, " %i %f %i %f %s\n",
+        isobounds[i].setchopmin, isobounds[i].chopmin,
+        isobounds[i].setchopmax, isobounds[i].chopmax,
+        isobounds[i].label->shortlabel
+        );
+    }
   }
+  fprintf(fileout, "C_PARTICLES\n");
+  fprintf(fileout, " %i %f %i %f\n", setpartchopmin, partchopmin, setpartchopmax, partchopmax);
+  for(i = 0; i < npart5prop; i++){
+    part5prop *propi;
 
-  fprintf(fileout,"V_PLOT3D\n");
+    propi = part5propinfo + i;
+    fprintf(fileout, "C_PARTICLES\n");
+    fprintf(fileout, " %i %f %i %f %s\n", propi->setchopmin, propi->chopmin, propi->setchopmax, propi->chopmax, propi->label->shortlabel);
+  }
   {
     int n3d;
 
     n3d = 5;
-    if(n3d<numplot3dvars)n3d=numplot3dvars;
-    if(n3d>mxplot3dvars)n3d=mxplot3dvars;
-    fprintf(fileout," %i\n",n3d);
-    for(i=0;i<n3d;i++){
-      fprintf(fileout," %i %i %f %i %f\n",i+1,setp3min[i],p3min[i],setp3max[i],p3max[i]);
-    }
-    fprintf(fileout,"C_PLOT3D\n");
+    if(n3d<numplot3dvars)n3d = numplot3dvars;
+    if(n3d>mxplot3dvars)n3d = mxplot3dvars;
+    fprintf(fileout, "C_PLOT3D\n");
     n3d = 5;
-    if(n3d<numplot3dvars)n3d=numplot3dvars;
-    if(n3d>mxplot3dvars)n3d=mxplot3dvars;
-    fprintf(fileout," %i\n",n3d);
-    for(i=0;i<n3d;i++){
-      fprintf(fileout," %i %i %f %i %f\n",i+1,setp3chopmin[i],p3chopmin[i],setp3chopmax[i],p3chopmax[i]);
+    if(n3d<numplot3dvars)n3d = numplot3dvars;
+    if(n3d>mxplot3dvars)n3d = mxplot3dvars;
+    fprintf(fileout, " %i\n", n3d);
+    for(i = 0; i<n3d; i++){
+      fprintf(fileout, " %i %i %f %i %f\n", i + 1, setp3chopmin[i], p3chopmin[i], setp3chopmax[i], p3chopmax[i]);
     }
   }
+  if(nslice2 > 0){
+    for(i = 0; i < nslice2; i++){
+      fprintf(fileout, "C_SLICE\n");
+      fprintf(fileout, " %i %f %i %f %s\n",
+        slicebounds[i].setchopmin, slicebounds[i].chopmin,
+        slicebounds[i].setchopmax, slicebounds[i].chopmax,
+        slicebounds[i].label->shortlabel
+        );
+    }
+  }
+  fprintf(fileout, "CACHE_BOUNDARYDATA\n");
+  fprintf(fileout, " %i \n", cache_boundarydata);
+  fprintf(fileout, "CACHE_QDATA\n");
+  fprintf(fileout, " %i\n", cache_qdata);
+  fprintf(fileout, "PATCHDATAOUT\n");
+  fprintf(fileout, " %i %f %f %f %f %f %f %f %f\n", output_patchdata,
+    patchout_tmin, patchout_tmax,
+    patchout_xmin, patchout_xmax,
+    patchout_ymin, patchout_ymax,
+    patchout_zmin, patchout_zmax
+    );
+  fprintf(fileout, "PERCENTILELEVEL\n");
+  fprintf(fileout, " %f\n", percentile_level);
+  fprintf(fileout, "SLICEDATAOUT\n");
+  fprintf(fileout, " %i \n", output_slicedata);
+  fprintf(fileout, "TIMEOFFSET\n");
+  fprintf(fileout, " %f\n", timeoffset);
+  fprintf(fileout, "TLOAD\n");
+  fprintf(fileout, " %i %f %i %f %i %i\n", use_tload_begin, tload_begin, use_tload_end, tload_end, use_tload_skip, tload_skip);
+  for(i = 0; i < npatchinfo; i++){
+    patchdata *patchi;
 
-  fprintf(fileout,"CACHE_QDATA\n");
-  fprintf(fileout," %i\n",cache_qdata);
+    patchi = patchinfo + i;
+    if(patchi->firstshort == 1){
+      fprintf(fileout, "V_BOUNDARY\n");
+      fprintf(fileout, " %i %f %i %f %s\n",
+        patchi->setvalmin, patchi->valmin,
+        patchi->setvalmax, patchi->valmax,
+        patchi->label.shortlabel
+        );
+    }
+  }
+  if(niso_bounds > 0){
+    for(i = 0; i < niso_bounds; i++){
+      fprintf(fileout, "V_ISO\n");
+      fprintf(fileout, " %i %f %i %f %s\n",
+        isobounds[i].setvalmin, isobounds[i].valmin,
+        isobounds[i].setvalmax, isobounds[i].valmax,
+        isobounds[i].label->shortlabel
+        );
+    }
+  }
+  fprintf(fileout, "V_PARTICLES\n");
+  fprintf(fileout, " %i %f %i %f\n", setpartmin, partmin, setpartmax, partmax);
+  if(npart5prop > 0){
+    for(i = 0; i < npart5prop; i++){
+      part5prop *propi;
 
-  fprintf(fileout,"V_TARGET\n");
-  fprintf(fileout," %i %f %i %f\n",settargetmin,targetmin,settargetmax,targetmax);
-  fprintf(fileout,"PERCENTILELEVEL\n");
-  fprintf(fileout," %f\n",percentile_level);
-
-
-  fprintf(fileout,"\nDATA LOADING\n");
-  fprintf(fileout,"------------\n\n");
-  fprintf(fileout,"FED\n");
-  fprintf(fileout," %i\n",regenerate_fed);
-  fprintf(fileout,"FEDCOLORBAR\n");
-  fprintf(fileout," %s\n",default_fed_colorbar);
-  fprintf(fileout,"SHOWFEDAREA\n");
-  fprintf(fileout," %i\n",show_fed_area);
-  fprintf(fileout,"NOPART\n");
-  fprintf(fileout," %i\n",nopart);
-  fprintf(fileout,"PARTPOINTSTEP\n");
-  fprintf(fileout," %i\n",partpointstep);
-  fprintf(fileout,"SLICEAVERAGE\n");
-  fprintf(fileout," %i %f %i\n",slice_average_flag,slice_average_interval,vis_slice_average);
-  fprintf(fileout,"SMOKE3DZIPSTEP\n");
-  fprintf(fileout," %i\n",smoke3dzipstep);
-  fprintf(fileout,"ISOZIPSTEP\n");
-  fprintf(fileout," %i\n",isozipstep);
-  fprintf(fileout,"SLICEZIPSTEP\n");
-  fprintf(fileout," %i\n",slicezipstep);
-  fprintf(fileout,"BOUNDZIPSTEP\n");
-  fprintf(fileout," %i\n",boundzipstep);
-  fprintf(fileout,"SHOWTRACERSALWAYS\n");
-  fprintf(fileout," %i\n",show_tracers_always);
-  fprintf(fileout,"SHOWEVACSLICES\n");
-  fprintf(fileout," %i %i %i\n",show_evac_slices,constant_evac_coloring,show_evac_colorbar);
-  fprintf(fileout,"DIRECTIONCOLOR\n");
-  fprintf(fileout," %f %f %f\n",direction_color[0],direction_color[1],direction_color[2]);
-  fprintf(fileout,"USER_ROTATE\n");
-  fprintf(fileout,"%i %i %f %f %f\n",glui_rotation_index,show_rotation_center,xcenCUSTOM,ycenCUSTOM,zcenCUSTOM);
+      propi = part5propinfo + i;
+      fprintf(fileout, "V5_PARTICLES\n");
+      fprintf(fileout, " %i %f %i %f %s\n",
+        propi->setvalmin, propi->valmin, propi->setvalmax, propi->valmax, propi->label->shortlabel);
+    }
+  }
   {
-    int *v;
-    float *b1,*b2,*b3;
+    int n3d;
 
-    fprintf(fileout,"CUBETETRATEST\n");
-    v=tetrabox_vis;
-    fprintf(fileout," %i %i %f %f\n", show_geomtest, show_tetratest_labels, tetra_line_thickness, tetra_point_size);
-    fprintf(fileout," %i %i %i %i %i\n",v[0],v[1],v[2],v[3],v[4]);
-    fprintf(fileout," %i %i %i %i %i\n",v[5],v[6],v[7],v[8],v[9]);
-    b1=box_bounds2;
-    b2=tetra_vertices;
-    b3=box_translate;
-    fprintf(fileout," %f %f %f %f %f %f\n",b1[0],b1[1],b1[2],b1[3],b1[4],b1[5]);
-    fprintf(fileout," %f %f %f %f %f %f\n",b2[0],b2[1],b2[2],b2[3],b2[4],b2[5]);
-    fprintf(fileout," %f %f %f %f %f %f\n",b2[6],b2[7],b2[8],b2[9],b2[10],b2[11]);
-    fprintf(fileout," %f %f %f\n",b3[0],b3[1],b3[2]);
-  }
-
- 
-  if(flag==LOCAL_INI){
-    fprintf(fileout,"AVATAREVAC\n");
-    fprintf(fileout," %i\n",iavatar_evac);
-    fprintf(fileout,"GRIDPARMS\n");
-    fprintf(fileout," %i %i %i\n",visx_all, visy_all, visz_all);
-    fprintf(fileout," %i %i %i\n",iplotx_all, iploty_all, iplotz_all);
-    fprintf(fileout,"GSLICEPARMS\n");
-    fprintf(fileout," %i %i %i %i\n",vis_gslice_data, show_gslice_triangles, show_gslice_triangulation, show_gslice_normal);
-    fprintf(fileout," %f %f %f\n",gslice_xyz[0],gslice_xyz[1],gslice_xyz[2]);
-    fprintf(fileout," %f %f\n",gslice_normal_azelev[0],gslice_normal_azelev[1]);
-  }
- 
-  if(flag==LOCAL_INI){
-    {
-      int ndevice_vis=0;
-      sv_object *obj_typei;
-
-      for(i=0;i<nobject_defs;i++){
-        obj_typei = object_defs[i];
-        if(obj_typei->used==1&&obj_typei->visible==1){
-          ndevice_vis++;
-        }
-      }
-      fprintf(fileout,"SHOWDEVICES\n");
-      fprintf(fileout," %i\n",ndevice_vis);
-      for(i=0;i<nobject_defs;i++){
-        obj_typei = object_defs[i];
-        if(obj_typei->used==1&&obj_typei->visible==1){
-          fprintf(fileout," %s\n",obj_typei->label);
-        }
-      }
-    }
-
-    fprintf(fileout,"SHOWDEVICEVALS\n");
-    fprintf(fileout," %i %i %i %i %i %i\n",showdeviceval,showvdeviceval,devicetypes_index,colordeviceval,vectortype,vispilot);
-    fprintf(fileout,"DEVICEVECTORDIMENSIONS\n");
-    fprintf(fileout,"%f %f %f %f\n",vector_baseheight,vector_basediameter,vector_headheight,vector_headdiameter);
-    fprintf(fileout,"DEVICEBOUNDS\n");
-    fprintf(fileout," %f %f\n",device_valmin,device_valmax);
-    fprintf(fileout,"DEVICEORIENTATION\n");
-    fprintf(fileout," %i %f\n",show_device_orientation,orientation_scale);
-
-    put_startup_smoke3d(fileout);
-    fprintf(fileout,"LOADFILESATSTARTUP\n");
-    fprintf(fileout," %i\n",loadfiles_at_startup);
-    if(npart5prop>0){
-      fprintf(fileout,"PART5PROPDISP\n");
-      for(i=0;i<npart5prop;i++){
-        part5prop *propi;
-        int j;
-
-        propi = part5propinfo + i;
-        fprintf(fileout," ");
-        for(j=0;j<npartclassinfo;j++){
-          fprintf(fileout," %i ",propi->class_vis[j]);
-        }
-        fprintf(fileout,"\n");
-      }
-      fprintf(fileout,"PART5COLOR\n");
-      for(i=0;i<npart5prop;i++){
-        part5prop *propi;
-
-        propi = part5propinfo + i;
-        if(propi->display==1){
-          fprintf(fileout," %i\n",i);
-          break;
-        }
-      }
-
+    n3d = 5;
+    if(n3d<numplot3dvars)n3d = numplot3dvars;
+    if(n3d>mxplot3dvars)n3d = mxplot3dvars;
+    fprintf(fileout, "V_PLOT3D\n");
+    fprintf(fileout, " %i\n", n3d);
+    for(i = 0; i < n3d; i++){
+      fprintf(fileout, " %i %i %f %i %f\n", i + 1, setp3min[i], p3min[i], setp3max[i], p3max[i]);
     }
   }
-  if(flag==LOCAL_INI&&npartclassinfo>0){
-    int j;
-
-    fprintf(fileout,"PART5CLASSVIS\n");
-    fprintf(fileout," %i\n",npartclassinfo);
-    for(j=0;j<npartclassinfo;j++){
-      part5class *partclassj;
-
-      partclassj = partclassinfo + j;
-      fprintf(fileout," %i\n",partclassj->vis_type);
+  if(nslice2 > 0){
+    for(i = 0; i < nslice2; i++){
+      fprintf(fileout, "V_SLICE\n");
+      fprintf(fileout, " %i %f %i %f %s : %f %f %i\n",
+        slicebounds[i].setvalmin, slicebounds[i].valmin,
+        slicebounds[i].setvalmax, slicebounds[i].valmax,
+        slicebounds[i].label->shortlabel
+        , slicebounds[i].line_contour_min, slicebounds[i].line_contour_max, slicebounds[i].line_contour_num
+        );
     }
   }
-  if(flag==LOCAL_INI&&npropinfo>0){
-    fprintf(fileout,"PROPINDEX\n");
-    fprintf(fileout," %i\n",npropinfo);
-    for(i=0;i<npropinfo;i++){
-      propdata *propi;
-      int offset;
-      int jj;
-
-      propi = propinfo + i;
-      offset=-1;
-      for(jj=0;jj<propi->nsmokeview_ids;jj++){
-        if(strcmp(propi->smokeview_id,propi->smokeview_ids[jj])==0){
-          offset=jj;
-          break;
-        }
-      }
-      fprintf(fileout," %i %i\n",i,offset);
-    }
+  fprintf(fileout, "V_TARGET\n");
+  fprintf(fileout, " %i %f %i %f\n", settargetmin, targetmin, settargetmax, targetmax);
+  if(nzoneinfo>0){
+    fprintf(fileout, "V_ZONE\n");
+    fprintf(fileout, " %i %f %i %f\n", setzonemin, zoneusermin, setzonemax, zoneusermax);
   }
+  fprintf(fileout, "VIEWTIMES\n");
+  fprintf(fileout, " %f %f %i\n", view_tstart, view_tstop, view_ntimes);
 
-  fprintf(fileout,"\nCONTOURS\n");
-  fprintf(fileout,"--------\n\n");
+  fprintf(fileout, "\n *** DATA LOADING ***\n\n");
+  
+  fprintf(fileout, "BOUNDZIPSTEP\n");
+  fprintf(fileout, " %i\n", boundzipstep);
+  fprintf(fileout, "FED\n");
+  fprintf(fileout," %i\n",regenerate_fed);
+  fprintf(fileout, "FEDCOLORBAR\n");
+  fprintf(fileout, " %s\n", default_fed_colorbar);
+  fprintf(fileout, "ISOZIPSTEP\n");
+  fprintf(fileout, " %i\n", isozipstep);
+  fprintf(fileout, "NOPART\n");
+  fprintf(fileout, " %i\n", nopart);
+  fprintf(fileout, "PARTPOINTSTEP\n");
+  fprintf(fileout, " %i\n", partpointstep);
+  fprintf(fileout, "SHOWFEDAREA\n");
+  fprintf(fileout, " %i\n", show_fed_area);
+  fprintf(fileout, "SLICEAVERAGE\n");
+  fprintf(fileout, " %i %f %i\n", slice_average_flag, slice_average_interval, vis_slice_average);
+  fprintf(fileout, "SLICEZIPSTEP\n");
+  fprintf(fileout, " %i\n", slicezipstep);
+  fprintf(fileout, "SMOKE3DZIPSTEP\n");
+  fprintf(fileout, " %i\n", smoke3dzipstep);
+  fprintf(fileout, "USER_ROTATE\n");
+  fprintf(fileout, "%i %i %f %f %f\n", glui_rotation_index, show_rotation_center, xcenCUSTOM, ycenCUSTOM, zcenCUSTOM);
+
+
+  fprintf(fileout, "\n *** CONTOURS *** \n\n");
+
   fprintf(fileout,"CONTOURTYPE\n");
   fprintf(fileout," %i\n",contour_type);
-  fprintf(fileout,"P3VIEW\n");
+  for(i = 0; i < nmeshes; i++){
+    mesh *meshi;
+
+    meshi = meshinfo + i;
+    if(meshi->mesh_offset_ptr != NULL){
+      fprintf(fileout, "MESHOFFSET\n");
+      fprintf(fileout, " %i\n", i);
+    }
+  }
+  fprintf(fileout, "P3DSURFACETYPE\n");
+  fprintf(fileout, " %i\n", p3dsurfacetype);
+  fprintf(fileout, "P3DSURFACESMOOTH\n");
+  fprintf(fileout, " %i\n", p3dsurfacesmooth);
+  fprintf(fileout, "P3VIEW\n");
   for(i=0;i<nmeshes;i++){
     mesh *meshi;
 
     meshi = meshinfo + i;
     fprintf(fileout," %i %i %i %i %i %i \n",visx_all,meshi->plotx,visy_all,meshi->ploty,visz_all,meshi->plotz);
   }
-  for(i=0;i<nmeshes;i++){
-    mesh *meshi;
+  fprintf(fileout, "SURFINC\n");
+  fprintf(fileout, " %i\n", surfincrement);
+  fprintf(fileout, "TRANSPARENT\n");
+  fprintf(fileout, " %i %f\n", use_transparency_data, transparent_level);
 
-    meshi = meshinfo + i;
-    if(meshi->mesh_offset_ptr!=NULL){
-      fprintf(fileout,"MESHOFFSET\n");
-      fprintf(fileout," %i\n",i);
-    }
-  }
-  fprintf(fileout,"TRANSPARENT\n");
-  fprintf(fileout," %i %f\n",use_transparency_data,transparent_level);
-  fprintf(fileout,"SURFINC\n");
-  fprintf(fileout," %i\n",surfincrement);
-  fprintf(fileout,"P3DSURFACETYPE\n");
-  fprintf(fileout," %i\n",p3dsurfacetype);
-  fprintf(fileout,"P3DSURFACESMOOTH\n");
-  fprintf(fileout," %i\n",p3dsurfacesmooth);
 
-  fprintf(fileout,"\nVISIBILITY\n");
-  fprintf(fileout,"----------\n\n");
+  fprintf(fileout,"\n *** VISIBILITY ***\n\n");
+
+  get_geom_dialog_state();
+  fprintf(fileout, "APERTURE\n");
+  fprintf(fileout, " %i\n", apertureindex);
+  fprintf(fileout, "AXISSMOOTH\n");
+  fprintf(fileout, " %i\n", axislabels_smooth);
+  fprintf(fileout, "BLOCKLOCATION\n");
+  fprintf(fileout, " %i\n", blocklocation);
+  fprintf(fileout, "BOUNDARYTWOSIDE\n");
+  fprintf(fileout, " %i\n", showpatch_both);
+  fprintf(fileout, "CLIP\n");
+  fprintf(fileout, " %f %f\n", nearclip, farclip);
+  fprintf(fileout, "CULLFACES\n");
+  fprintf(fileout, " %i\n", cullfaces);
+  fprintf(fileout, "EYEVIEW\n");
+  fprintf(fileout, " %i\n", rotation_type);
+  fprintf(fileout, "EYEX\n");
+  fprintf(fileout, " %f\n", eyexfactor);
+  fprintf(fileout, "EYEY\n");
+  fprintf(fileout, " %f\n", eyeyfactor);
+  fprintf(fileout, "EYEZ\n");
+  fprintf(fileout, " %f\n", eyezfactor);
+  fprintf(fileout, "FONTSIZE\n");
+  fprintf(fileout, " %i\n", fontindex);
+  fprintf(fileout, "FRAMERATEVALUE\n");
+  fprintf(fileout, " %i\n", frameratevalue);
+  fprintf(fileout, "GEOMDIAGS\n");
+  fprintf(fileout, " %i %i\n", structured_isopen, unstructured_isopen);
+  fprintf(fileout, "GVERSION\n");
+  fprintf(fileout, " %i\n", gversion);
+  fprintf(fileout, "ISOTRAN2\n");
+  fprintf(fileout, " %i\n", transparent_state);
   if(nmeshes>1){
     fprintf(fileout,"MESHVIS\n");
     fprintf(fileout," %i\n",nmeshes);
@@ -11730,191 +11929,201 @@ void writeini(int flag,char *filename){
       fprintf(fileout," %i\n",meshi->blockvis);
     }
   }
-  get_geom_dialog_state();
-  fprintf(fileout,"GEOMDIAGS\n");
-  fprintf(fileout," %i %i\n",structured_isopen,unstructured_isopen);
-  fprintf(fileout,"SHOWTITLE\n");
-  fprintf(fileout," %i\n",visTitle);
-  fprintf(fileout,"GVERSION\n");
-  fprintf(fileout," %i\n",gversion);
-  fprintf(fileout,"SHOWCOLORBARS\n");
-  fprintf(fileout," %i\n",visColorbar);
-  fprintf(fileout,"SHOWBLOCKS\n");
-  fprintf(fileout," %i\n",visBlocks);
-  fprintf(fileout,"SHOWNORMALWHENSMOOTH\n");
-  fprintf(fileout," %i\n",visSmoothAsNormal);
-  fprintf(fileout,"SMOOTHBLOCKSOLID\n");
-  fprintf(fileout," %i\n",smooth_block_solid);
-  fprintf(fileout,"SBATSTART\n");
-  fprintf(fileout," %i\n",sb_atstart);
-  fprintf(fileout,"SHOWTRANSPARENT\n");
-  fprintf(fileout," %i\n",visTransparentBlockage);
-  fprintf(fileout,"SHOWCADOPAQUE\n");
-  fprintf(fileout," %i\n",viscadopaque);
-  fprintf(fileout,"SHOWVENTS\n");
-  fprintf(fileout," %i %i %i\n",visVents,visVentLines,visVentSolid);
-  fprintf(fileout,"SHOWTRANSPARENTVENTS\n");
-  fprintf(fileout," %i\n",show_transparent_vents);
-  fprintf(fileout,"SHOWSENSORS\n");
-  fprintf(fileout," %i %i\n",visSensor,visSensorNorm);
-  fprintf(fileout,"SHOWTIMEBAR\n");
-  fprintf(fileout," %i\n",visTimebar);
-  fprintf(fileout,"SHOWTIMELABEL\n");
-  fprintf(fileout," %i\n",visTimelabel);
-  fprintf(fileout,"SHOWFRAMELABEL\n");
-  fprintf(fileout," %i\n",visFramelabel);
-  fprintf(fileout,"SHOWFRAMELABEL\n");
-  fprintf(fileout," %i\n",visFramelabel);
-  fprintf(fileout,"SHOWFLOOR\n");
-  fprintf(fileout," %i\n",visFloor);
-  fprintf(fileout,"SHOWWALLS\n");
-  fprintf(fileout," %i\n",visWalls);
-  fprintf(fileout,"SHOWCEILING\n");
-  fprintf(fileout," %i\n",visCeiling);
-  fprintf(fileout,"SHOWSMOKEPART\n");
-  fprintf(fileout," %i\n",visSmokePart);
-  fprintf(fileout,"SHOWSPRINKPART\n");
-  fprintf(fileout," %i\n",visSprinkPart);
+  fprintf(fileout, "OFFSETSLICE\n");
+  fprintf(fileout, " %i\n", offset_slice);
+  fprintf(fileout, "OUTLINEMODE\n");
+  fprintf(fileout, " %i %i\n", highlight_flag, outline_color_flag);
+  fprintf(fileout, "PROJECTION\n");
+  fprintf(fileout, " %i\n", projection_type);
+  fprintf(fileout, "SBATSTART\n");
+  fprintf(fileout, " %i\n", sb_atstart);
+  fprintf(fileout, "SCALEDFONT\n");
+  fprintf(fileout, " %i %f %i\n", scaled_font2d_height, scaled_font2d_height2width, scaled_font2d_thickness);
+  fprintf(fileout, " %i %f %i\n", scaled_font3d_height, scaled_font3d_height2width, scaled_font3d_thickness);
+  fprintf(fileout, "SHOWALLTEXTURES\n");
+  fprintf(fileout, " %i\n", showall_textures);
+  fprintf(fileout, "SHOWAXISLABELS\n");
+  fprintf(fileout, " %i\n", visaxislabels);
+  fprintf(fileout, "SHOWBLOCKLABEL\n");
+  fprintf(fileout, " %i\n", visMeshlabel);
+  fprintf(fileout, "SHOWBLOCKS\n");
+  fprintf(fileout, " %i\n", visBlocks);
+  fprintf(fileout, "SHOWCADANDGRID\n");
+  fprintf(fileout, " %i\n", show_cad_and_grid);
+  fprintf(fileout, "SHOWCADOPAQUE\n");
+  fprintf(fileout, " %i\n", viscadopaque);
+  fprintf(fileout, "SHOWCEILING\n");
+  fprintf(fileout, " %i\n", visCeiling);
+  fprintf(fileout, "SHOWCOLORBARS\n");
+  fprintf(fileout, " %i\n", visColorbar);
+  fprintf(fileout, "SHOWCVENTS\n");
+  fprintf(fileout, " %i %i\n", visCircularVents, circle_outline);
+  fprintf(fileout, "SHOWDUMMYVENTS\n");
+  fprintf(fileout, " %i\n", visDummyVents);
+  fprintf(fileout, "SHOWEVACSLICES\n");
+  fprintf(fileout, " %i %i %i\n", show_evac_slices, constant_evac_coloring, show_evac_colorbar);
+  fprintf(fileout, "SHOWFLOOR\n");
+  fprintf(fileout, " %i\n", visFloor);
+  fprintf(fileout, "SHOWFRAME\n");
+  fprintf(fileout, " %i\n", visFrame);
+  fprintf(fileout, "SHOWFRAMELABEL\n");
+  fprintf(fileout, " %i\n", visFramelabel);
+  fprintf(fileout, "SHOWFRAMERATE\n");
+  fprintf(fileout, " %i\n", visFramerate);
+  fprintf(fileout, "SHOWGRID\n");
+  fprintf(fileout, " %i\n", visGrid);
+  fprintf(fileout, "SHOWGRIDLOC\n");
+  fprintf(fileout, " %i\n", visgridloc);
+  fprintf(fileout, "SHOWHAZARDCOLORS\n");
+  fprintf(fileout, " %i\n", sethazardcolor);
+  fprintf(fileout, "SHOWHZONE\n");
+  fprintf(fileout, " %i\n", visHZone);
+  fprintf(fileout, "SHOWHMSTIMELABEL\n");
+  fprintf(fileout, " %i\n", vishmsTimelabel);
+  fprintf(fileout, "SHOWHRRCUTOFF\n");
+  fprintf(fileout, " %i\n", show_hrrcutoff);
+  fprintf(fileout, "SHOWISO\n");
+  fprintf(fileout, " %i\n", visAIso);
+  fprintf(fileout, "SHOWISONORMALS\n");
+  fprintf(fileout, " %i\n", showtrinormal);
+  fprintf(fileout, "SHOWLABELS\n");
+  fprintf(fileout, " %i\n", visLabels);
 #ifdef pp_memstatus
-  fprintf(fileout,"SHOWMEMLOAD\n");
-  fprintf(fileout," %i\n",visAvailmemory);
+  fprintf(fileout, "SHOWMEMLOAD\n");
+  fprintf(fileout, " %i\n", visAvailmemory);
 #endif
-  fprintf(fileout,"SHOWTRIANGLECOUNT\n");
-  fprintf(fileout," %i\n",show_triangle_count);
-  fprintf(fileout,"SHOWBLOCKLABEL\n");
-  fprintf(fileout," %i\n",visMeshlabel);
-  fprintf(fileout,"SHOWAXISLABELS\n");
-  fprintf(fileout," %i\n",visaxislabels);
-  fprintf(fileout,"SHOWFRAME\n");
-  fprintf(fileout," %i\n",visFrame);
-  fprintf(fileout,"SHOWALLTEXTURES\n");
-  fprintf(fileout," %i\n",showall_textures);
-  fprintf(fileout,"SHOWTHRESHOLD\n");
-  fprintf(fileout," %i %i %f\n",vis_threshold,vis_onlythreshold,temp_threshold);
-  fprintf(fileout,"SHOWHRRCUTOFF\n");
-  fprintf(fileout," %i\n",show_hrrcutoff);
-  fprintf(fileout,"TWOSIDEDVENTS\n");
-  fprintf(fileout," %i %i\n",show_bothsides_int,show_bothsides_ext);
-  fprintf(fileout,"TRAINERVIEW\n");
-  fprintf(fileout," %i\n",trainerview);
-  fprintf(fileout,"SHOWTERRAIN\n");
-  fprintf(fileout," %i\n",visTerrainType);
-  fprintf(fileout,"TERRAINPARMS\n");
-  fprintf(fileout," %i %i %i\n",terrain_rgba_zmin[0],terrain_rgba_zmin[1],terrain_rgba_zmin[2]);
-  fprintf(fileout," %i %i %i\n",terrain_rgba_zmax[0],terrain_rgba_zmax[1],terrain_rgba_zmax[2]);
-  fprintf(fileout," %f\n",vertical_factor);
-  fprintf(fileout,"OFFSETSLICE\n");
-  fprintf(fileout," %i\n",offset_slice);
-  fprintf(fileout,"SHOWTETRAS\n");
-  fprintf(fileout," %i %i\n",show_geometry_interior_solid,show_geometry_interior_outline);
-  fprintf(fileout,"SHOWTRIANGLES\n");
-  fprintf(fileout," %i %i %i %i %i %i\n",showtrisurface,showtrioutline,showtripoints,showtrinormal,showpointnormal,smoothtrinormal);
-  fprintf(fileout,"SHOWSTREAK\n");
-  fprintf(fileout," %i %i %i %i\n",streak5show,streak5step,showstreakhead,streak_index);
-  fprintf(fileout,"ISOTRAN2\n");
-  fprintf(fileout," %i\n",transparent_state);
-  fprintf(fileout,"SHOWISO\n");
-  fprintf(fileout," %i\n",visAIso);
-  fprintf(fileout,"SHOWISONORMALS\n");
-  fprintf(fileout," %i\n",showtrinormal);
-  fprintf(fileout,"SMOKESENSORS\n");
-  fprintf(fileout," %i %i\n",show_smokesensors,test_smokesensors);
-  fprintf(fileout,"VOLSMOKE\n");
-  fprintf(fileout," %i %i %i %i %i\n",
-        glui_compress_volsmoke,use_multi_threading,load_at_rendertimes,volbw,show_volsmoke_moving);
-  fprintf(fileout," %f %f %f %f %f %f %f\n",
-        temperature_min,temperature_cutoff,temperature_max,fire_opacity_factor,mass_extinct,gpu_vol_factor,nongpu_vol_factor
-        );
-  fprintf(fileout,"BOUNDARYTWOSIDE\n");
-  fprintf(fileout," %i\n",showpatch_both);
-
-  fprintf(fileout,"\nMISC\n");
-  fprintf(fileout,"----\n\n");
-  if(trainer_mode==1){
-    fprintf(fileout,"TRAINERMODE\n");
-    fprintf(fileout," %i\n",trainer_mode);
-  }
+  fprintf(fileout, "SHOWNORMALWHENSMOOTH\n");
+  fprintf(fileout, " %i\n", visSmoothAsNormal);
+  fprintf(fileout, "SHOWOPENVENTS\n");
+  fprintf(fileout, " %i %i\n", visOpenVents, visOpenVentsAsOutline);
+  fprintf(fileout, "SHOWOTHERVENTS\n");
+  fprintf(fileout, " %i\n", visOtherVents);
+  fprintf(fileout, "SHOWSENSORS\n");
+  fprintf(fileout, " %i %i\n", visSensor, visSensorNorm);
+  fprintf(fileout, "SHOWSLICEINOBST\n");
+  fprintf(fileout, " %i\n", show_slice_in_obst);
+  fprintf(fileout, "SHOWSMOKEPART\n");
+  fprintf(fileout, " %i\n", visSmokePart);
+  fprintf(fileout, "SHOWSPRINKPART\n");
+  fprintf(fileout, " %i\n", visSprinkPart);
+  fprintf(fileout, "SHOWSTREAK\n");
+  fprintf(fileout, " %i %i %i %i\n", streak5show, streak5step, showstreakhead, streak_index);
+  fprintf(fileout, "SHOWSZONE\n");
+  fprintf(fileout, " %i\n", visSZone);
+  fprintf(fileout, "SHOWTERRAIN\n");
+  fprintf(fileout, " %i\n", visTerrainType);
+  fprintf(fileout, "SHOWTETRAS\n");
+  fprintf(fileout, " %i %i\n", show_geometry_interior_solid, show_geometry_interior_outline);
+  fprintf(fileout, "SHOWTHRESHOLD\n");
+  fprintf(fileout, " %i %i %f\n", vis_threshold, vis_onlythreshold, temp_threshold);
+  fprintf(fileout, "SHOWTICKS\n");
+  fprintf(fileout, " %i\n", visFDSticks);
+  fprintf(fileout, "SHOWTIMEBAR\n");
+  fprintf(fileout, " %i\n", visTimebar);
+  fprintf(fileout, "SHOWTIMELABEL\n");
+  fprintf(fileout, " %i\n", visTimelabel);
+  fprintf(fileout, "SHOWTITLE\n");
+  fprintf(fileout, " %i\n", visTitle);
+  fprintf(fileout, "SHOWTRACERSALWAYS\n");
+  fprintf(fileout, " %i\n", show_tracers_always);
+  fprintf(fileout, "SHOWTRIANGLES\n");
+  fprintf(fileout, " %i %i %i %i %i %i\n", showtrisurface, showtrioutline, showtripoints, showtrinormal, showpointnormal, smoothtrinormal);
+  fprintf(fileout, "SHOWTRANSPARENT\n");
+  fprintf(fileout, " %i\n", visTransparentBlockage);
+  fprintf(fileout, "SHOWTRANSPARENTVENTS\n");
+  fprintf(fileout, " %i\n", show_transparent_vents);
+  fprintf(fileout, "SHOWTRIANGLECOUNT\n");
+  fprintf(fileout, " %i\n", show_triangle_count);
+  fprintf(fileout, "SHOWVENTS\n");
+  fprintf(fileout, " %i %i %i\n", visVents, visVentLines, visVentSolid);
+  fprintf(fileout, "SHOWVZONE\n");
+  fprintf(fileout, " %i\n", visVZone);
+  fprintf(fileout, "SHOWWALLS\n");
+  fprintf(fileout, " %i\n", visWalls);
+  fprintf(fileout, "SHOWZONEFIRE\n");
+  fprintf(fileout, " %i\n", viszonefire);
+  fprintf(fileout, "SKIPEMBEDSLICE\n");
+  fprintf(fileout, " %i\n", skip_slice_in_embedded_mesh);
+  fprintf(fileout, "SMOKESENSORS\n");
+  fprintf(fileout, " %i %i\n", show_smokesensors, test_smokesensors);
+  fprintf(fileout, "SMOOTHBLOCKSOLID\n");
+  fprintf(fileout, " %i\n", smooth_block_solid);
 #ifdef pp_LANG
-  fprintf(fileout,"STARTUPLANG\n");
-  fprintf(fileout," %s\n",startup_lang_code);
+  fprintf(fileout, "STARTUPLANG\n");
+  fprintf(fileout, " %s\n", startup_lang_code);
 #endif
-  fprintf(fileout,"SHOWOPENVENTS\n");
-  fprintf(fileout," %i %i\n",visOpenVents,visOpenVentsAsOutline);
-  fprintf(fileout,"SHOWDUMMYVENTS\n");
-  fprintf(fileout," %i\n",visDummyVents);
-  fprintf(fileout,"SHOWOTHERVENTS\n");
-  fprintf(fileout," %i\n",visOtherVents);
-  fprintf(fileout,"SHOWCVENTS\n");
-  fprintf(fileout," %i %i\n",visCircularVents,circle_outline);
-  fprintf(fileout,"SHOWSLICEINOBST\n");
-  fprintf(fileout," %i\n",show_slice_in_obst);
-  fprintf(fileout,"SKIPEMBEDSLICE\n");
-  fprintf(fileout," %i\n",skip_slice_in_embedded_mesh);
-  fprintf(fileout,"SHOWTICKS\n");
-  fprintf(fileout," %i\n",visFDSticks);
-  if(flag==LOCAL_INI){
-    fprintf(fileout,"USERTICKS\n");
-    fprintf(fileout," %i %i %i %i %i %i\n",visUSERticks,auto_user_tick_placement,user_tick_sub,
-      user_tick_show_x,user_tick_show_y,user_tick_show_z);
-    fprintf(fileout," %f %f %f\n",user_tick_origin[0],user_tick_origin[1],user_tick_origin[2]);
-    fprintf(fileout," %f %f %f\n",user_tick_min[0],user_tick_min[1],user_tick_min[2]);
-    fprintf(fileout," %f %f %f\n",user_tick_max[0],user_tick_max[1],user_tick_max[2]);
-    fprintf(fileout," %f %f %f\n",user_tick_step[0],user_tick_step[1],user_tick_step[2]);
-    fprintf(fileout," %i %i %i\n",user_tick_show_x,user_tick_show_y,user_tick_show_z);
+  fprintf(fileout, "STEREO\n");
+  fprintf(fileout, " %i\n", showstereo);
+  fprintf(fileout, "TERRAINPARMS\n");
+  fprintf(fileout, " %i %i %i\n", terrain_rgba_zmin[0], terrain_rgba_zmin[1], terrain_rgba_zmin[2]);
+  fprintf(fileout, " %i %i %i\n", terrain_rgba_zmax[0], terrain_rgba_zmax[1], terrain_rgba_zmax[2]);
+  fprintf(fileout, " %f\n", vertical_factor);
+  fprintf(fileout, "TITLESAFE\n");
+  fprintf(fileout, " %i\n", titlesafe_offset);
+  if(trainer_mode == 1){
+    fprintf(fileout, "TRAINERMODE\n");
+    fprintf(fileout, " %i\n", trainer_mode);
   }
-  if(flag==LOCAL_INI){
-    fprintf(fileout,"SHOOTER\n");
-    fprintf(fileout," %f %f %f\n",shooter_xyz[0],shooter_xyz[1],shooter_xyz[2]);
-    fprintf(fileout," %f %f %f\n",shooter_dxyz[0],shooter_dxyz[1],shooter_dxyz[2]);
-    fprintf(fileout," %f %f %f\n",shooter_uvw[0],shooter_uvw[1],shooter_uvw[2]);
-    fprintf(fileout," %f %f %f\n",   shooter_velmag, shooter_veldir, shooterpointsize);
-    fprintf(fileout," %i %i %i %i %i\n",shooter_fps,shooter_vel_type,shooter_nparts,visShooter,shooter_cont_update);
-    fprintf(fileout," %f %f\n",shooter_duration,shooter_v_inf);
-  }
-  fprintf(fileout,"SHOWLABELS\n");
-  fprintf(fileout," %i\n",visLabels);
-  fprintf(fileout,"SHOWFRAMERATE\n");
-  fprintf(fileout," %i\n",visFramerate);
-  fprintf(fileout,"FRAMERATEVALUE\n");
-  fprintf(fileout," %i\n",frameratevalue);
-  fprintf(fileout,"VECTORSKIP\n");
-  fprintf(fileout," %i\n",vectorskip);
-  fprintf(fileout,"AXISSMOOTH\n");
-  fprintf(fileout," %i\n",axislabels_smooth);
-  fprintf(fileout,"BLOCKLOCATION\n");
-  fprintf(fileout," %i\n",blocklocation);
-  fprintf(fileout,"SHOWCADANDGRID\n");
-  fprintf(fileout," %i\n",show_cad_and_grid);
-  fprintf(fileout,"OUTLINEMODE\n");
-  fprintf(fileout," %i %i\n",highlight_flag,outline_color_flag);
-  fprintf(fileout,"TITLESAFE\n");
-  fprintf(fileout," %i\n",titlesafe_offset);
-  fprintf(fileout,"FONTSIZE\n");
-  fprintf(fileout," %i\n",fontindex);
-  fprintf(fileout,"SCALEDFONT\n");
-  fprintf(fileout," %i %f %i\n",scaled_font2d_height,scaled_font2d_height2width,scaled_font2d_thickness);
-  fprintf(fileout," %i %f %i\n",scaled_font3d_height,scaled_font3d_height2width,scaled_font3d_thickness);
-  fprintf(fileout,"ZOOM\n");
-  fprintf(fileout," %i %f\n",zoomindex,zoom);
-  fprintf(fileout,"APERTURE\n");
-  fprintf(fileout," %i\n",apertureindex);
-  fprintf(fileout,"RENDERFILETYPE\n");
-  fprintf(fileout," %i\n",renderfiletype);
-  fprintf(fileout,"RENDERFILELABEL\n");
-  fprintf(fileout," %i\n",renderfilelabel);
-  fprintf(fileout,"SHOWGRID\n");
-  fprintf(fileout," %i\n",visGrid);
-  fprintf(fileout,"SHOWGRIDLOC\n");
-  fprintf(fileout," %i\n",visgridloc);
-  fprintf(fileout,"CELLCENTERTEXT\n");
-  fprintf(fileout," %i\n",cell_center_text);
-  fprintf(fileout,"PIXELSKIP\n");
-  fprintf(fileout," %i\n",pixel_skip);
-  fprintf(fileout,"PROJECTION\n");
-  fprintf(fileout," %i\n",projection_type);
-  fprintf(fileout,"STEREO\n");
-  fprintf(fileout," %i\n",showstereo);
+  fprintf(fileout, "TRAINERVIEW\n");
+  fprintf(fileout, " %i\n", trainerview);
+  fprintf(fileout, "TWOSIDEDVENTS\n");
+  fprintf(fileout, " %i %i\n", show_bothsides_int, show_bothsides_ext);
+  fprintf(fileout, "VECTORSKIP\n");
+  fprintf(fileout, " %i\n", vectorskip);
+  fprintf(fileout, "VOLSMOKE\n");
+  fprintf(fileout, " %i %i %i %i %i\n",
+    glui_compress_volsmoke, use_multi_threading, load_at_rendertimes, volbw, show_volsmoke_moving);
+  fprintf(fileout, " %f %f %f %f %f %f %f\n",
+    temperature_min, temperature_cutoff, temperature_max, fire_opacity_factor, mass_extinct, gpu_vol_factor, nongpu_vol_factor
+    );
+  fprintf(fileout, "ZOOM\n");
+  fprintf(fileout, " %i %f\n", zoomindex, zoom);
 
+  fprintf(fileout,"\n *** MISC ***\n\n");
+
+  fprintf(fileout, "CELLCENTERTEXT\n");
+  fprintf(fileout, " %i\n", cell_center_text);
+  {
+    int *v;
+    float *b1, *b2, *b3;
+
+    fprintf(fileout, "CUBETETRATEST\n");
+    v = tetrabox_vis;
+    fprintf(fileout, " %i %i %f %f\n", show_geomtest, show_tetratest_labels, tetra_line_thickness, tetra_point_size);
+    fprintf(fileout, " %i %i %i %i %i\n", v[0], v[1], v[2], v[3], v[4]);
+    fprintf(fileout, " %i %i %i %i %i\n", v[5], v[6], v[7], v[8], v[9]);
+    b1 = box_bounds2;
+    b2 = tetra_vertices;
+    b3 = box_translate;
+    fprintf(fileout, " %f %f %f %f %f %f\n", b1[0], b1[1], b1[2], b1[3], b1[4], b1[5]);
+    fprintf(fileout, " %f %f %f %f %f %f\n", b2[0], b2[1], b2[2], b2[3], b2[4], b2[5]);
+    fprintf(fileout, " %f %f %f %f %f %f\n", b2[6], b2[7], b2[8], b2[9], b2[10], b2[11]);
+    fprintf(fileout, " %f %f %f\n", b3[0], b3[1], b3[2]);
+  }
+  if(fds_filein != NULL&&strlen(fds_filein) > 0){
+    fprintf(fileout, "INPUT_FILE\n");
+    fprintf(fileout, " %s\n", fds_filein);
+  }
+  {
+    char *label;
+
+    label = get_camera_label(startup_view_ini);
+    if(label != NULL){
+      fprintf(fileout, "LABELSTARTUPVIEW\n");
+      fprintf(fileout, " %s\n", label);
+    }
+  }
+  fprintf(fileout, "PIXELSKIP\n");
+  fprintf(fileout, " %i\n", pixel_skip);
+  fprintf(fileout, "PIXELSKIP\n");
+  fprintf(fileout, " %i\n", pixel_skip);
+  fprintf(fileout, "RENDERCLIP\n");
+  fprintf(fileout, "%i %i %i %i %i\n",
+    clip_rendered_scene, render_clip_left, render_clip_right, render_clip_bottom, render_clip_top);
+  fprintf(fileout, "RENDERFILELABEL\n");
+  fprintf(fileout, " %i\n", renderfilelabel);
+  fprintf(fileout, "RENDERFILETYPE\n");
+  fprintf(fileout," %i\n",renderfiletype);
   if(nskyboxinfo>0){
     int iskybox;
     skyboxdata *skyi;
@@ -11936,180 +12145,77 @@ void writeini(int flag,char *filename){
       }
     }
   }
-
-  fprintf(fileout,"UNITCLASSES\n");
-  fprintf(fileout," %i\n",nunitclasses);
-  for(i=0;i<nunitclasses;i++){
-    fprintf(fileout," %i\n",unitclasses[i].unit_index);
+  fprintf(fileout, "UNITCLASSES\n");
+  fprintf(fileout, " %i\n", nunitclasses);
+  for(i = 0; i<nunitclasses; i++){
+    fprintf(fileout, " %i\n", unitclasses[i].unit_index);
   }
-  if(flag==LOCAL_INI){
-    fprintf(fileout,"MSCALE\n");
-    fprintf(fileout," %f %f %f\n",mscale[0],mscale[1],mscale[2]);
-  }
-  fprintf(fileout,"RENDERCLIP\n");
-  fprintf(fileout,"%i %i %i %i %i\n",
-        clip_rendered_scene,render_clip_left,render_clip_right,render_clip_bottom,render_clip_top);
-  fprintf(fileout,"CLIP\n");
-  fprintf(fileout," %f %f\n",nearclip,farclip);
-
-  if(flag==LOCAL_INI){
-    labeldata *thislabel;
-
-    fprintf(fileout,"XYZCLIP\n");
-    fprintf(fileout," %i\n",clip_mode);
-    fprintf(fileout," %i %f %i %f\n",clipinfo.clip_xmin, clipinfo.xmin, clipinfo.clip_xmax, clipinfo.xmax);
-    fprintf(fileout," %i %f %i %f\n",clipinfo.clip_ymin, clipinfo.ymin, clipinfo.clip_ymax, clipinfo.ymax);
-    fprintf(fileout," %i %f %i %f\n",clipinfo.clip_zmin, clipinfo.zmin, clipinfo.clip_zmax, clipinfo.zmax);
-
-    for(thislabel=label_first_ptr->next;thislabel->next!=NULL;thislabel=thislabel->next){
-      labeldata *labeli;
-      float *xyz, *rgbtemp, *tstart_stop;
-      int *useforegroundcolor,*show_always;
-
-      labeli = thislabel;
-      if(labeli->labeltype==TYPE_SMV)continue;
-      xyz = labeli->xyz;
-      rgbtemp = labeli->frgb;
-      tstart_stop = labeli->tstart_stop;
-      useforegroundcolor=&labeli->useforegroundcolor;
-      show_always=&labeli->show_always;
-
-      fprintf(fileout,"LABEL\n");
-      fprintf(fileout," %f %f %f %f %f %f %f %f %i %i\n",
-        xyz[0],xyz[1],xyz[2],
-        rgbtemp[0],rgbtemp[1],rgbtemp[2],
-        tstart_stop[0],tstart_stop[1],
-        *useforegroundcolor,*show_always);
-      fprintf(fileout," %s\n",labeli->name);
-    }
-
-    for(i=ntickinfo_smv;i<ntickinfo;i++){
-      float *begt;
-      float *endt;
-      float *rgbtemp;
-      tickdata *ticki;
-
-      ticki = tickinfo + i;
-      begt = ticki->begin;
-      endt = ticki->end;
-      rgbtemp = ticki->rgb;
-
-      fprintf(fileout,"TICKS\n");
-      fprintf(fileout," %f %f %f %f %f %f %i\n",begt[0],begt[1],begt[2],endt[0],endt[1],endt[2],ticki->nbars);
-      fprintf(fileout," %f %i %f %f %f %f\n",ticki->dlength,ticki->dir,rgbtemp[0],rgbtemp[1],rgbtemp[2],ticki->width);
-    }
-    
-  }
-  if(fds_filein!=NULL&&strlen(fds_filein)>0){
-    fprintf(fileout,"INPUT_FILE\n");
-    fprintf(fileout," %s\n",fds_filein);
+  if(changed_zaxis == 1){
+    fprintf(fileout, "ZAXISANGLES\n");
+    fprintf(fileout, " %f %f %f\n", zaxis_angles[0], zaxis_angles[1], zaxis_angles[2]);
   }
 
-  fprintf(fileout,"EYEX\n");
-  fprintf(fileout," %f\n",eyexfactor);
-  fprintf(fileout,"EYEY\n");
-  fprintf(fileout," %f\n",eyeyfactor);
-  fprintf(fileout,"EYEZ\n");
-  fprintf(fileout," %f\n",eyezfactor);
-  fprintf(fileout,"EYEVIEW\n");
-  fprintf(fileout," %i\n",rotation_type);
+  fprintf(fileout,"\n *** 3D SMOKE INFO ***\n\n");
+
+  fprintf(fileout,"ADJUSTALPHA\n");
+  fprintf(fileout," %i\n",adjustalphaflag);
   {
-    char *label;
+    colorbardata *cb;
+    char percen[2];
 
-    label = get_camera_label(startup_view_ini);
-    if(label!=NULL){
-      fprintf(fileout,"LABELSTARTUPVIEW\n");
-      fprintf(fileout," %s\n",label);
+    cb = colorbarinfo + colorbartype;
+    strcpy(percen, "%");
+    fprintf(fileout, "COLORBARTYPE\n");
+    fprintf(fileout, " %i %s %s \n", colorbartype, percen, cb->label);
+  }
+  {
+    int mmin[3], mmax[3];
+    for(i = 0; i < 3; i++){
+      mmin[i] = rgb_below_min[i];
+      mmax[i] = rgb_above_max[i];
     }
+    fprintf(fileout, "EXTREMECOLORS\n");
+    fprintf(fileout, " %i %i %i %i %i %i\n",
+      mmin[0], mmin[1], mmin[2],
+      mmax[0], mmax[1], mmax[2]);
   }
-  fprintf(fileout,"VIEWTIMES\n");
-  fprintf(fileout," %f %f %i\n",view_tstart,view_tstop,view_ntimes);
-  fprintf(fileout,"TIMEOFFSET\n");
-  fprintf(fileout," %f\n",timeoffset);
-  fprintf(fileout,"SHOWHMSTIMELABEL\n");
-  fprintf(fileout," %i\n",vishmsTimelabel);
+  fprintf(fileout, "FIRECOLOR\n");
+  fprintf(fileout, " %i %i %i\n", fire_red, fire_green, fire_blue);
+  fprintf(fileout, "FIRECOLORMAP\n");
+  fprintf(fileout, " %i %i\n", firecolormap_type, fire_colorbar_index);
+  fprintf(fileout, "FIREDEPTH\n");
+  fprintf(fileout, " %f\n", fire_halfdepth);
+  if(ncolorbars > ndefaultcolorbars){
+    colorbardata *cbi;
+    unsigned char *rrgb;
+    int n;
 
-  fprintf(fileout,"CULLFACES\n");
-  fprintf(fileout," %i\n",cullfaces);
-  fprintf(fileout,"\nZone\n");
-  fprintf(fileout,"----\n\n");
-  fprintf(fileout,"SHOWZONEFIRE\n");
-  fprintf(fileout," %i\n",viszonefire);
-  fprintf(fileout,"SHOWSZONE\n");
-  fprintf(fileout," %i\n",visSZone);
-  fprintf(fileout,"SHOWHZONE\n");
-  fprintf(fileout," %i\n",visHZone);
-  fprintf(fileout,"SHOWVZONE\n");
-  fprintf(fileout," %i\n",visVZone);
-  fprintf(fileout,"SHOWHAZARDCOLORS\n");
-  fprintf(fileout," %i\n",sethazardcolor);
-  if(changed_zaxis==1){
-    fprintf(fileout,"ZAXISANGLES\n");
-    fprintf(fileout," %f %f %f\n",zaxis_angles[0],zaxis_angles[1],zaxis_angles[2]);
-  }
-  if(
-    ((INI_fds_filein!=NULL&&fds_filein!=NULL&&strcmp(INI_fds_filein,fds_filein)==0)||
-    flag==LOCAL_INI)){
-    {
-      float *eye, *az_elev, *mat;
-      camera *ca;
-
-      for(ca=camera_list_first.next;ca->next!=NULL;ca=ca->next){
-        if(strcmp(ca->name,"internal")==0)continue;
-        if(strcmp(ca->name,"external")==0)continue;
-
-        if(ca->quat_defined==1){
-          fprintf(fileout,"VIEWPOINT6\n");
-        }
-        else{
-          fprintf(fileout,"VIEWPOINT5\n");
-        }
-        eye = ca->eye;
-        az_elev = ca->az_elev;
-        mat = modelview_identity;
-
-        fprintf(fileout," %i %i %i\n",ca->rotation_type,ca->rotation_index,ca->view_id);
-        fprintf(fileout," %f %f %f %f %i\n",eye[0],eye[1],eye[2],zoom,zoomindex);
-        fprintf(fileout," %f %f %f %i\n",ca->view_angle,ca->azimuth,ca->elevation,ca->projection_type);
-        fprintf(fileout," %f %f %f\n",ca->xcen,ca->ycen,ca->zcen);
-
-        fprintf(fileout," %f %f\n",az_elev[0],az_elev[1]);
-        if(ca->quat_defined==1){
-          fprintf(fileout," 1 %f %f %f %f\n",ca->quaternion[0],ca->quaternion[1],ca->quaternion[2],ca->quaternion[3]);
-        }
-        else{
-          fprintf(fileout," %f %f %f %f\n",mat[0],mat[1],mat[2],mat[3]);
-          fprintf(fileout," %f %f %f %f\n",mat[4],mat[5],mat[6],mat[7]);
-          fprintf(fileout," %f %f %f %f\n",mat[8],mat[9],mat[10],mat[11]);
-          fprintf(fileout," %f %f %f %f\n",mat[12],mat[13],mat[14],mat[15]);
-        }
-        fprintf(fileout," %i %i %i %i %i %i %i\n",
-            ca->clip_mode,
-            ca->clip_xmin,ca->clip_ymin,ca->clip_zmin,
-            ca->clip_xmax,ca->clip_ymax,ca->clip_zmax);
-        fprintf(fileout," %f %f %f %f %f %f\n",
-            ca->xmin,ca->ymin,ca->zmin,
-            ca->xmax,ca->ymax,ca->zmax);
-        fprintf(fileout," %s\n",ca->name);
+    fprintf(fileout, "GCOLORBAR\n");
+    fprintf(fileout, " %i\n", ncolorbars - ndefaultcolorbars);
+    for(n = ndefaultcolorbars; n < ncolorbars; n++){
+      cbi = colorbarinfo + n;
+      fprintf(fileout, " %s\n", cbi->label);
+      fprintf(fileout, " %i %i\n", cbi->nnodes, cbi->nodehilight);
+      for(i = 0; i < cbi->nnodes; i++){
+        rrgb = cbi->rgb_node + 3 * i;
+        fprintf(fileout, " %i %i %i %i\n", cbi->index_node[i], (int)rrgb[0], (int)rrgb[1], (int)rrgb[2]);
       }
     }
   }
+  fprintf(fileout, "SHOWEXTREMEDATA\n");
+  {
+    int show_extremedata = 0;
 
-  fprintf(fileout,"\n3D SMOKE INFO\n");
-  fprintf(fileout,"-------------\n\n");
-  fprintf(fileout,"ADJUSTALPHA\n");
-  fprintf(fileout," %i\n",adjustalphaflag);
-#ifdef pp_GPU
-  fprintf(fileout,"USEGPU\n");
-  fprintf(fileout," %i\n",usegpu);
-#endif
-  fprintf(fileout,"SMOKECULL\n");
+    if(show_extreme_mindata == 1 || show_extreme_maxdata == 1)show_extremedata = 1;
+    fprintf(fileout, " %i %i %i\n", show_extremedata, show_extreme_mindata, show_extreme_maxdata);
+  }
+  fprintf(fileout, "SMOKECULL\n");
 #ifdef pp_CULL
   fprintf(fileout," %i\n",cullsmoke);
 #else
   fprintf(fileout," %i\n",smokecullflag);
 #endif
-  fprintf(fileout,"SMOKESKIP\n");
+  fprintf(fileout, "SMOKESKIP\n");
   fprintf(fileout," %i\n",smokeskipm1);
   fprintf(fileout,"SMOKEALBEDO\n");
   fprintf(fileout," %f\n",smoke_albedo);
@@ -12120,192 +12226,70 @@ void writeini(int flag,char *filename){
   fprintf(fileout,"SMOKETHICK\n");
   fprintf(fileout," %i\n",smoke3d_thick);
 #endif
-  fprintf(fileout,"FIRECOLOR\n");
-  fprintf(fileout," %i %i %i\n",fire_red,fire_green,fire_blue);
-  fprintf(fileout,"FIREDEPTH\n");
-  fprintf(fileout," %f\n",fire_halfdepth);
+#ifdef pp_GPU
+  fprintf(fileout, "USEGPU\n");
+  fprintf(fileout, " %i\n", usegpu);
+#endif
+  fprintf(fileout, "VOLSMOKE\n");
+  fprintf(fileout, " %i %i %i %i %i\n",
+    glui_compress_volsmoke, use_multi_threading, load_at_rendertimes, volbw, show_volsmoke_moving);
+  fprintf(fileout, " %f %f %f %f %f\n",
+    temperature_min, temperature_cutoff, temperature_max, fire_opacity_factor, mass_extinct);
 
-  fprintf(fileout,"VOLSMOKE\n");
-  fprintf(fileout," %i %i %i %i %i\n",
-    glui_compress_volsmoke,use_multi_threading,load_at_rendertimes,volbw,show_volsmoke_moving);
-  fprintf(fileout," %f %f %f %f %f\n",
-    temperature_min,temperature_cutoff,temperature_max,fire_opacity_factor,mass_extinct);
-  fprintf(fileout,"FIRECOLORMAP\n");
-  fprintf(fileout," %i %i\n",firecolormap_type,fire_colorbar_index);
-  fprintf(fileout,"SHOWEXTREMEDATA\n");
-  {
-    int show_extremedata=0;
+  fprintf(fileout,"\n *** TOUR INFO ***\n\n");
 
-    if(show_extreme_mindata==1||show_extreme_maxdata==1)show_extremedata=1;
-    fprintf(fileout," %i %i %i\n",show_extremedata,show_extreme_mindata,show_extreme_maxdata);
-  }
+  fprintf(fileout, "SHOWTOURROUTE\n");
+  fprintf(fileout, " %i\n", edittour);
+  fprintf(fileout, "SHOWPATHNODES\n");
+  fprintf(fileout, " %i\n", show_path_knots);
   {
-    int mmin[3],mmax[3];
-    for(i=0;i<3;i++){
-      mmin[i]=rgb_below_min[i];
-      mmax[i]=rgb_above_max[i];
-    }
-    fprintf(fileout,"EXTREMECOLORS\n");
-    fprintf(fileout," %i %i %i %i %i %i\n",
-     mmin[0],mmin[1],mmin[2],
-     mmax[0],mmax[1],mmax[2]);
-  }
-  if(ncolorbars>ndefaultcolorbars){
-	  colorbardata *cbi;
-	  unsigned char *rrgb;
-	  int n;
-
-    fprintf(fileout,"GCOLORBAR\n");
-    fprintf(fileout," %i\n",ncolorbars-ndefaultcolorbars);
-    for(n=ndefaultcolorbars;n<ncolorbars;n++){
-      cbi = colorbarinfo + n;
-      fprintf(fileout," %s\n",cbi->label);
-      fprintf(fileout," %i %i\n",cbi->nnodes,cbi->nodehilight);
-      for(i=0;i<cbi->nnodes;i++){
-        rrgb = cbi->rgb_node+3*i;
-        fprintf(fileout," %i %i %i %i\n",cbi->index_node[i],(int)rrgb[0],(int)rrgb[1],(int)rrgb[2]);
-      }
-    }
-  }
-  {
-    colorbardata *cb;
-    char percen[2];
-
-    cb = colorbarinfo + colorbartype;
-    strcpy(percen,"%");
-    fprintf(fileout,"COLORBARTYPE\n");
-    fprintf(fileout," %i %s %s \n",colorbartype,percen,cb->label);
-  }
-  fprintf(fileout,"\nTOUR INFO\n");
-  fprintf(fileout,"---------\n\n");
-  fprintf(fileout,"VIEWTOURFROMPATH\n");
-  fprintf(fileout," %i\n",viewtourfrompath);
-  fprintf(fileout,"VIEWALLTOURS\n");
-  fprintf(fileout," %i\n",viewalltours);
-  fprintf(fileout,"SHOWTOURROUTE\n");
-  fprintf(fileout," %i\n",edittour);
-  fprintf(fileout,"SHOWPATHNODES\n");
-  fprintf(fileout," %i\n",show_path_knots);
-  fprintf(fileout,"TOURCONSTANTVEL\n");
-  fprintf(fileout," %i\n",tour_constant_vel);
-//  fprintf(fileout,"TOUR_AVATAR\n");
-//  fprintf(fileout," %i %f %f %f %f\n",
-//    tourlocus_type,
-//    tourcol_avatar[0],tourcol_avatar[1],tourcol_avatar[2],
-//    tourrad_avatar);
-  {
-    keyframe *framei;
     float *col;
-    int startup_count=0;
-    int uselocalspeed=0;
+    int startup_count = 0;
+    int uselocalspeed = 0;
 
-    fprintf(fileout,"TOURCOLORS\n");
-    col=tourcol_selectedpathline;
-    fprintf(fileout," %f %f %f   :selected path line\n",col[0],col[1],col[2]);
-    col=tourcol_selectedpathlineknots;
-    fprintf(fileout," %f %f %f   :selected path line knots\n",col[0],col[1],col[2]);
-    col=tourcol_selectedknot;
-    fprintf(fileout," %f %f %f   :selected knot\n",col[0],col[1],col[2]);
-    col=tourcol_pathline;
-    fprintf(fileout," %f %f %f   :path line\n",col[0],col[1],col[2]);
-    col=tourcol_pathknots;
-    fprintf(fileout," %f %f %f   :path knots\n",col[0],col[1],col[2]);
-    col=tourcol_text;
-    fprintf(fileout," %f %f %f   :text\n",col[0],col[1],col[2]);
-    col=tourcol_avatar;
-    fprintf(fileout," %f %f %f   :avatar\n",col[0],col[1],col[2]);
+    fprintf(fileout, "TOURCOLORS\n");
+    col = tourcol_selectedpathline;
+    fprintf(fileout, " %f %f %f   :selected path line\n", col[0], col[1], col[2]);
+    col = tourcol_selectedpathlineknots;
+    fprintf(fileout, " %f %f %f   :selected path line knots\n", col[0], col[1], col[2]);
+    col = tourcol_selectedknot;
+    fprintf(fileout, " %f %f %f   :selected knot\n", col[0], col[1], col[2]);
+    col = tourcol_pathline;
+    fprintf(fileout, " %f %f %f   :path line\n", col[0], col[1], col[2]);
+    col = tourcol_pathknots;
+    fprintf(fileout, " %f %f %f   :path knots\n", col[0], col[1], col[2]);
+    col = tourcol_text;
+    fprintf(fileout, " %f %f %f   :text\n", col[0], col[1], col[2]);
+    col = tourcol_avatar;
+    fprintf(fileout, " %f %f %f   :avatar\n", col[0], col[1], col[2]);
 
-    if(flag==LOCAL_INI){
-      fprintf(fileout,"TOURINDEX\n");
-      fprintf(fileout," %i\n",selectedtour_index);
-      startup_count=0;
-      for(i=0;i<ntours;i++){
-        tourdata *touri;
 
-        touri = tourinfo + i;
-        if(touri->startup==1)startup_count++;
-      }
-      if(startup_count<ntours){
-        fprintf(fileout,"TOURS\n");
-        fprintf(fileout," %i\n",ntours-startup_count);
-        for(i=0;i<ntours;i++){
-          tourdata *touri;
-
-          touri = tourinfo + i;
-          if(touri->startup==1)continue;
-
-          trim(touri->label);
-          fprintf(fileout," %s\n",touri->label);
-          fprintf(fileout," %i %i %f %i %i\n",
-            touri->nkeyframes,touri->global_tension_flag,touri->global_tension,touri->glui_avatar_index,touri->display);
-          for(framei=&touri->first_frame;framei!=&touri->last_frame;framei=framei->next){
-            char buffer[1024];
-
-            if(framei==&touri->first_frame)continue;
-            sprintf(buffer,"%f %f %f %f ",
-              framei->noncon_time,
-              DENORMALIZE_X(framei->nodeval.eye[0]),
-              DENORMALIZE_Y(framei->nodeval.eye[1]),
-              DENORMALIZE_Z(framei->nodeval.eye[2]));
-            trimmzeros(buffer);
-            fprintf(fileout," %s %i ",buffer,framei->viewtype);
-            if(framei->viewtype==REL_VIEW){
-              sprintf(buffer,"%f %f %f %f %f %f %f ",
-                framei->az_path,framei->nodeval.elev_path,framei->bank,
-                framei->tension, framei->bias, framei->continuity,
-                framei->nodeval.zoom);
-            }
-            else{
-              sprintf(buffer,"%f %f %f %f %f %f %f ",
-                DENORMALIZE_X(framei->nodeval.xyz_view_abs[0]),
-                DENORMALIZE_Y(framei->nodeval.xyz_view_abs[1]),
-                DENORMALIZE_Z(framei->nodeval.xyz_view_abs[2]),
-                framei->tension, framei->bias, framei->continuity,
-                framei->nodeval.zoom);
-            }
-            trimmzeros(buffer);
-            fprintf(fileout," %s %i\n",buffer,uselocalspeed);
-          }
-        }
-      }
-    }
   }
-  
-  if(flag==LOCAL_INI){
-    scriptfiledata *scriptfile;
+  fprintf(fileout, "TOURCONSTANTVEL\n");
+  fprintf(fileout, " %i\n", tour_constant_vel);
+  fprintf(fileout, "VIEWALLTOURS\n");
+  fprintf(fileout, " %i\n", viewalltours);
+  fprintf(fileout, "VIEWTOURFROMPATH\n");
+  fprintf(fileout," %i\n",viewtourfrompath);
 
-    for(scriptfile=first_scriptfile.next;scriptfile->next!=NULL;scriptfile=scriptfile->next){
-      char *file;
 
-      file=scriptfile->file;
-      if(file!=NULL){
-        fprintf(fileout,"SCRIPTFILE\n");
-        fprintf(fileout," %s\n",file);
-      }
-    }
-  }
+  if(flag == LOCAL_INI)writeini_local(fileout);
+  if(
+    ((INI_fds_filein != NULL&&fds_filein != NULL&&strcmp(INI_fds_filein, fds_filein) == 0) ||
+    flag == LOCAL_INI))output_viewpoints(fileout);
+
   {
     int svn_num;
     char version[256];
 
     getPROGversion(version);
     svn_num=getmaxrevision();    // get svn revision number
-    fprintf(fileout,"\n\n# Development Environment\n");
-    fprintf(fileout,"# -----------------------\n\n");
+    fprintf(fileout,"\n\n");
+    fprintf(fileout,"# FDS/Smokeview Environment\n");
+    fprintf(fileout,"# -------------------------\n\n");
     fprintf(fileout,"# Smokeview Version: %s\n",version);
     fprintf(fileout,"# Smokeview Revision Number: %i\n",svn_num);
-    fprintf(fileout,"# Smokeview Compile Date: %s\n",__DATE__);
-    if(use_graphics==1){
-      char version_label[256];
-      char *glversion=NULL;
-
-      glversion=(char *)glGetString(GL_VERSION);
-      if(glversion!=NULL){
-        strcpy(version_label,"OpenGL Version: "); 
-        strcat(version_label,glversion);
-        fprintf(fileout,"# %s\n",version_label);
-      }
-    }
+    fprintf(fileout,"# Smokeview Build Date: %s\n",__DATE__);
     if(revision_fds>0){
       fprintf(fileout,"# FDS Revision Number: %i\n",revision_fds);
     }
@@ -12342,13 +12326,25 @@ void writeini(int flag,char *filename){
       glGetIntegerv(GL_BLUE_BITS,&nblue); 
       glGetIntegerv(GL_DEPTH_BITS,&ndepth);
       glGetIntegerv(GL_ALPHA_BITS,&nalpha);
-      fprintf(fileout,"\n\n# Graphics Environment\n");
+      fprintf(fileout, "\n\n");
+      fprintf(fileout,"# Graphics Environment\n");
       fprintf(fileout,"# --------------------\n\n");
-      fprintf(fileout,"#   Red bits:%i\n",nred);
-      fprintf(fileout,"# Green bits:%i\n",ngreen);
-      fprintf(fileout,"#  Blue bits:%i\n",nblue);
-      fprintf(fileout,"# Alpha bits:%i\n",nalpha);
-      fprintf(fileout,"# Depth bits:%i\n\n",ndepth);
+      if(use_graphics == 1){
+        char version_label[256];
+        char *glversion = NULL;
+
+        glversion = (char *)glGetString(GL_VERSION);
+        if(glversion != NULL){
+          strcpy(version_label, "OpenGL Version: ");
+          strcat(version_label, glversion);
+          fprintf(fileout, "# %s\n", version_label);
+        }
+      }
+      fprintf(fileout, "#       Red bits:%i\n", nred);
+      fprintf(fileout,"#     Green bits:%i\n",ngreen);
+      fprintf(fileout,"#      Blue bits:%i\n",nblue);
+      fprintf(fileout,"#     Alpha bits:%i\n",nalpha);
+      fprintf(fileout,"#     Depth bits:%i\n\n",ndepth);
     }
   }
 
