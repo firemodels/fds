@@ -3,36 +3,36 @@
 # To include validation data sets to be run automatically by Validationbot,
 # be sure to include the data set in ~/FDS-SMV/Validation/Process_All_Output.sh
 
-cd Beyler_Hood; mkdir Current_Results; ./Run_All.sh; cd ..
-cd BRE_Spray; mkdir Current_Results; ./Run_All.sh; cd ..
-cd Bryant_Doorway; mkdir Current_Results; ./Run_All.sh; cd ..
-cd CAROLFIRE; mkdir Current_Results; ./Run_All.sh; cd ..
-cd CHRISTIFIRE; mkdir Current_Results; ./Run_All.sh; cd ..
-cd Cup_Burner; mkdir Current_Results; ./Run_All.sh; cd ..
-cd FAA_Polymers; mkdir Current_Results; ./Run_All.sh; cd ..
-cd Fleury_Heat_Flux; mkdir Current_Results; ./Run_All.sh; cd ..
-cd FM_Parallel_Panels; mkdir Current_Results; ./Run_All.sh; cd ..
-cd Hamins_CH4; mkdir Current_Results; ./Run_All.sh; cd ..
-cd Heskestad_Flame_Height; mkdir Current_Results; ./Run_All.sh; cd ..
-cd LEMTA_Spray; mkdir Current_Results; ./Run_All.sh; cd ..
-cd LLNL_Enclosure; mkdir Current_Results; ./Run_All.sh; cd ..
-cd Moody_Chart; mkdir Current_Results; ./Run_All.sh; cd ..
-cd NIST_He_2009; mkdir Current_Results; ./Run_All.sh; cd ..
-cd NIST_Smoke_Alarms; mkdir Current_Results; ./Run_All.sh; cd ..
-cd NIST_NRC; mkdir Current_Results; ./Run_All.sh; cd ..
-cd NRCC_Facade; mkdir Current_Results; ./Run_All.sh; cd ..
-cd NRL_HAI; mkdir Current_Results; ./Run_All.sh; cd ..
-cd Pool_Fires; mkdir Current_Results; ./Run_All.sh; cd ..
-cd PRISME; mkdir Current_Results; ./Run_All.sh; cd ..
-cd Restivo_Experiment; mkdir Current_Results; ./Run_All.sh; cd ..
-cd Sippola_Aerosol_Deposition; mkdir Current_Results; ./Run_All.sh; cd ..
-cd SP_AST; mkdir Current_Results; ./Run_All.sh; cd ..
-cd Steckler_Compartment; mkdir Current_Results; ./Run_All.sh; cd ..
-cd UL_Commodity; mkdir Current_Results; ./Run_All.sh; cd ..
-cd UL_NIST_Vents; mkdir Current_Results; ./Run_All.sh; cd ..
-cd Ulster_SBI; mkdir Current_Results; ./Run_All.sh; cd ..
-cd USCG_HAI; mkdir Current_Results; ./Run_All.sh; cd ..
-cd Vettori_Flat_Ceiling; mkdir Current_Results; ./Run_All.sh; cd ..
-cd Vettori_Sloped_Ceiling; mkdir Current_Results; ./Run_All.sh; cd ..
-cd VTT_Sprays; mkdir Current_Results; ./Run_All.sh; cd ..
-cd WTC; mkdir Current_Results; ./Run_All.sh; cd ..
+cd Beyler_Hood; ./Run_All.sh -y; cd ..
+cd BRE_Spray; ./Run_All.sh -y; cd ..
+cd Bryant_Doorway; ./Run_All.sh -y; cd ..
+cd CAROLFIRE; ./Run_All.sh -y; cd ..
+cd CHRISTIFIRE; ./Run_All.sh -y; cd ..
+cd Cup_Burner; ./Run_All.sh -y; cd ..
+cd FAA_Polymers; ./Run_All.sh -y; cd ..
+cd Fleury_Heat_Flux; ./Run_All.sh -y; cd ..
+cd FM_Parallel_Panels; ./Run_All.sh -y; cd ..
+cd Hamins_CH4; ./Run_All.sh -y; cd ..
+cd Heskestad_Flame_Height; ./Run_All.sh -y; cd ..
+cd LEMTA_Spray; ./Run_All.sh -y; cd ..
+cd LLNL_Enclosure; ./Run_All.sh -y; cd ..
+cd Moody_Chart; ./Run_All.sh -y; cd ..
+cd NIST_He_2009; ./Run_All.sh -y; cd ..
+cd NIST_Smoke_Alarms; ./Run_All.sh -y; cd ..
+cd NIST_NRC; ./Run_All.sh -y; cd ..
+cd NRCC_Facade; ./Run_All.sh -y; cd ..
+cd NRL_HAI; ./Run_All.sh -y; cd ..
+cd Pool_Fires; ./Run_All.sh -y; cd ..
+cd PRISME; ./Run_All.sh -y; cd ..
+cd Restivo_Experiment; ./Run_All.sh -y; cd ..
+cd Sippola_Aerosol_Deposition; ./Run_All.sh -y; cd ..
+cd SP_AST; ./Run_All.sh -y; cd ..
+cd Steckler_Compartment; ./Run_All.sh -y; cd ..
+cd UL_Commodity; ./Run_All.sh -y; cd ..
+cd UL_NIST_Vents; ./Run_All.sh -y; cd ..
+cd Ulster_SBI; ./Run_All.sh -y; cd ..
+cd USCG_HAI; ./Run_All.sh -y; cd ..
+cd Vettori_Flat_Ceiling; ./Run_All.sh -y; cd ..
+cd Vettori_Sloped_Ceiling; ./Run_All.sh -y; cd ..
+cd VTT_Sprays; ./Run_All.sh -y; cd ..
+cd WTC; ./Run_All.sh -y; cd ..
