@@ -3,22 +3,22 @@
 # To include validation data sets to be run automatically by Validationbot,
 # be sure to include the data set in ~/FDS-SMV/Validation/Process_All_Output.sh
 
-cd Arup_Tunnel; mkdir Current_Results; ./Run_All.sh; cd ..
-cd ATF_Corridors; mkdir Current_Results; ./Run_All.sh; cd ..
-cd Backward_Facing_Step; mkdir Current_Results; ./Run_All.sh; cd ..
-cd CSIRO_Grassland_Fires; mkdir Current_Results; ./Run_All.sh; cd ..
-cd FAA_Cargo_Compartments; mkdir Current_Results; ./Run_All.sh; cd ..
-cd FM_SNL; mkdir Current_Results; ./Run_All.sh; cd ..
-cd Harrison_Spill_Plumes; mkdir Current_Results; ./Run_All.sh; cd ..
-cd McCaffrey_Plume; mkdir Current_Results; ./Run_All.sh; cd ..
-cd NBS_Multi-Room; mkdir Current_Results; ./Run_All.sh; cd ..
-cd NIST_Douglas_Firs; mkdir Current_Results; ./Run_All.sh; cd ..
-cd NIST_FSE_2008; mkdir Current_Results; ./Run_All.sh; cd ..
-cd NIST_RSE_1994; mkdir Current_Results; ./Run_All.sh; cd ..
-cd Purdue_Flames; mkdir Current_Results; ./Run_All.sh; cd ..
-cd Sandia_Plumes; mkdir Current_Results; ./Run_All.sh; cd ..
-cd Smyth_Slot_Burner; mkdir Current_Results; ./Run_All.sh; cd ..
-cd Turbulent_Jet; mkdir Current_Results; ./Run_All.sh; cd ..
-cd UL_NFPRF; mkdir Current_Results; ./Run_All.sh; cd ..
-cd USN_Hangars; mkdir Current_Results; ./Run_All.sh; cd ..
-cd VTT; mkdir Current_Results; ./Run_All.sh; cd ..
+cd Arup_Tunnel;  ./Run_All.sh -y; cd ..
+cd ATF_Corridors;  ./Run_All.sh -y; cd ..
+cd Backward_Facing_Step;  ./Run_All.sh -y; cd ..
+cd CSIRO_Grassland_Fires;  ./Run_All.sh -y; cd ..
+cd FAA_Cargo_Compartments;  ./Run_All.sh -y; cd ..
+cd FM_SNL;  ./Run_All.sh -y; cd ..
+cd Harrison_Spill_Plumes;  ./Run_All.sh -y; cd ..
+cd McCaffrey_Plume;  ./Run_All.sh -y; cd ..
+cd NBS_Multi-Room;  ./Run_All.sh -y; cd ..
+cd NIST_Douglas_Firs;  ./Run_All.sh -y; cd ..
+cd NIST_FSE_2008;  ./Run_All.sh -y; cd ..
+cd NIST_RSE_1994;  ./Run_All.sh -y; cd ..
+cd Purdue_Flames;  ./Run_All.sh -y; cd ..
+cd Sandia_Plumes;  ./Run_All.sh -y; cd ..
+cd Smyth_Slot_Burner;  ./Run_All.sh -y; cd ..
+cd Turbulent_Jet;  ./Run_All.sh -y; cd ..
+cd UL_NFPRF;  ./Run_All.sh -y; cd ..
+cd USN_Hangars;  ./Run_All.sh -y; cd ..
+cd VTT;  ./Run_All.sh -y; cd ..
