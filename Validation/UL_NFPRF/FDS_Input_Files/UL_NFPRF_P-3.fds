@@ -123,9 +123,7 @@ Commodity
 &SURF ID                    = 'PALLET'
       MATL_ID               = 'YELLOW PINE'
       COLOR                 = 'BROWN'
-      THICKNESS             = 0.012
-      IGNITION_TEMPERATURE  = 390.
-      HRRPUA                = 165. /
+      THICKNESS             = 0.012 /
 
 &SURF ID='IGNITOR', HRRPUA=1000., TAU_Q=60., COLOR='RED' /
 

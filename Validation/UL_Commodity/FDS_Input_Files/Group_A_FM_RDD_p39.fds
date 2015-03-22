@@ -77,10 +77,7 @@
 &SURF ID                    = 'PALLET'
       MATL_ID               = 'YELLOW PINE'
       COLOR                 = 'BROWN' 
-      THICKNESS             = 0.012
-      IGNITION_TEMPERATURE  = 390.
-      FREE_SLIP             = .TRUE.
-      HRRPUA                = 165. /
+      THICKNESS             = 0.012 /
 
 &SURF ID                    = 'FLOOR'
       MATL_ID               = 'CONCRETE'
