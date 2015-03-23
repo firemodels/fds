@@ -12244,8 +12244,6 @@ void writeini(int flag,char *filename){
   fprintf(fileout, " %i\n", show_path_knots);
   {
     float *col;
-    int startup_count = 0;
-    int uselocalspeed = 0;
 
     fprintf(fileout, "TOURCOLORS\n");
     col = tourcol_selectedpathline;
