@@ -2,7 +2,7 @@
 DIR=$1
 curdir=`pwd`
 svnnumdata=/tmp/svnnumdata.$$
-cat ~/FDS-SMV/Validation/$DIR/FDS_Output_Files/${DIR}*svn.txt > $svnnumdata 2> /dev/null
+cat ~/FDS-SMV/Validation/$DIR/FDS_Output_Files/*svn.txt > $svnnumdata 2> /dev/null
 svnnum=`tail -1 $svnnumdata`
 if [ "$svnnum" != "" ] ; then
   cd ~/FDS-SMV/FDS_Source
