@@ -11465,8 +11465,6 @@ void writeini_local(FILE *fileout){
       }
     }
   }
-
-
   fprintf(fileout, "USERTICKS\n");
   fprintf(fileout, " %i %i %i %i %i %i\n", visUSERticks, auto_user_tick_placement, user_tick_sub,
     user_tick_show_x, user_tick_show_y, user_tick_show_z);
@@ -11480,16 +11478,6 @@ void writeini_local(FILE *fileout){
   fprintf(fileout, " %i %f %i %f\n", clipinfo.clip_xmin, clipinfo.xmin, clipinfo.clip_xmax, clipinfo.xmax);
   fprintf(fileout, " %i %f %i %f\n", clipinfo.clip_ymin, clipinfo.ymin, clipinfo.clip_ymax, clipinfo.ymax);
   fprintf(fileout, " %i %f %i %f\n", clipinfo.clip_zmin, clipinfo.zmin, clipinfo.clip_zmax, clipinfo.zmax);
-
-
-
-
-
-
-
-
-
-
 }
 
   /* ------------------ writeini ------------------------ */
@@ -11636,8 +11624,6 @@ void writeini(int flag,char *filename){
   fprintf(fileout, " %f\n", plot3dlinewidth);
   fprintf(fileout, "PLOT3DPOINTSIZE\n");
   fprintf(fileout, " %f\n", plot3dpointsize);
-  fprintf(fileout, "RENDEROPTION\n");
-  fprintf(fileout, " %i %i\n", render_option, nrender_rows);
   fprintf(fileout, "SENSORABSSIZE\n");
   fprintf(fileout, " %f\n", sensorabssize);
   fprintf(fileout, "SENSORRELSIZE\n");
@@ -11756,8 +11742,6 @@ void writeini(int flag,char *filename){
     );
   fprintf(fileout, "PERCENTILELEVEL\n");
   fprintf(fileout, " %f\n", percentile_level);
-  fprintf(fileout, "SLICEDATAOUT\n");
-  fprintf(fileout, " %i \n", output_slicedata);
   fprintf(fileout, "TIMEOFFSET\n");
   fprintf(fileout, " %f\n", timeoffset);
   fprintf(fileout, "TLOAD\n");
@@ -11826,8 +11810,6 @@ void writeini(int flag,char *filename){
     fprintf(fileout, "V_ZONE\n");
     fprintf(fileout, " %i %f %i %f\n", setzonemin, zoneusermin, setzonemax, zoneusermax);
   }
-  fprintf(fileout, "VIEWTIMES\n");
-  fprintf(fileout, " %f %f %i\n", view_tstart, view_tstop, view_ntimes);
 
   fprintf(fileout, "\n *** DATA LOADING ***\n\n");
   
@@ -11847,6 +11829,8 @@ void writeini(int flag,char *filename){
   fprintf(fileout, " %i\n", show_fed_area);
   fprintf(fileout, "SLICEAVERAGE\n");
   fprintf(fileout, " %i %f %i\n", slice_average_flag, slice_average_interval, vis_slice_average);
+  fprintf(fileout, "SLICEDATAOUT\n");
+  fprintf(fileout, " %i \n", output_slicedata);
   fprintf(fileout, "SLICEZIPSTEP\n");
   fprintf(fileout, " %i\n", slicezipstep);
   fprintf(fileout, "SMOKE3DZIPSTEP\n");
@@ -11854,38 +11838,7 @@ void writeini(int flag,char *filename){
   fprintf(fileout, "USER_ROTATE\n");
   fprintf(fileout, "%i %i %f %f %f\n", glui_rotation_index, show_rotation_center, xcenCUSTOM, ycenCUSTOM, zcenCUSTOM);
 
-
-  fprintf(fileout, "\n *** CONTOURS *** \n\n");
-
-  fprintf(fileout,"CONTOURTYPE\n");
-  fprintf(fileout," %i\n",contour_type);
-  for(i = 0; i < nmeshes; i++){
-    mesh *meshi;
-
-    meshi = meshinfo + i;
-    if(meshi->mesh_offset_ptr != NULL){
-      fprintf(fileout, "MESHOFFSET\n");
-      fprintf(fileout, " %i\n", i);
-    }
-  }
-  fprintf(fileout, "P3DSURFACETYPE\n");
-  fprintf(fileout, " %i\n", p3dsurfacetype);
-  fprintf(fileout, "P3DSURFACESMOOTH\n");
-  fprintf(fileout, " %i\n", p3dsurfacesmooth);
-  fprintf(fileout, "P3VIEW\n");
-  for(i=0;i<nmeshes;i++){
-    mesh *meshi;
-
-    meshi = meshinfo + i;
-    fprintf(fileout," %i %i %i %i %i %i \n",visx_all,meshi->plotx,visy_all,meshi->ploty,visz_all,meshi->plotz);
-  }
-  fprintf(fileout, "SURFINC\n");
-  fprintf(fileout, " %i\n", surfincrement);
-  fprintf(fileout, "TRANSPARENT\n");
-  fprintf(fileout, " %i %f\n", use_transparency_data, transparent_level);
-
-
-  fprintf(fileout,"\n *** VISIBILITY ***\n\n");
+  fprintf(fileout,"\n *** VIEW PARAMETERS ***\n\n");
 
   get_geom_dialog_state();
   fprintf(fileout, "APERTURE\n");
@@ -11898,6 +11851,8 @@ void writeini(int flag,char *filename){
   fprintf(fileout, " %i\n", showpatch_both);
   fprintf(fileout, "CLIP\n");
   fprintf(fileout, " %f %f\n", nearclip, farclip);
+  fprintf(fileout, "CONTOURTYPE\n");
+  fprintf(fileout, " %i\n", contour_type);
   fprintf(fileout, "CULLFACES\n");
   fprintf(fileout, " %i\n", cullfaces);
   fprintf(fileout, "EYEVIEW\n");
@@ -11918,6 +11873,15 @@ void writeini(int flag,char *filename){
   fprintf(fileout, " %i\n", gversion);
   fprintf(fileout, "ISOTRAN2\n");
   fprintf(fileout, " %i\n", transparent_state);
+  for(i = 0; i < nmeshes; i++){
+    mesh *meshi;
+
+    meshi = meshinfo + i;
+    if(meshi->mesh_offset_ptr != NULL){
+      fprintf(fileout, "MESHOFFSET\n");
+      fprintf(fileout, " %i\n", i);
+    }
+  }
   if(nmeshes>1){
     fprintf(fileout,"MESHVIS\n");
     fprintf(fileout," %i\n",nmeshes);
@@ -11933,6 +11897,17 @@ void writeini(int flag,char *filename){
   fprintf(fileout, " %i\n", offset_slice);
   fprintf(fileout, "OUTLINEMODE\n");
   fprintf(fileout, " %i %i\n", highlight_flag, outline_color_flag);
+  fprintf(fileout, "P3DSURFACETYPE\n");
+  fprintf(fileout, " %i\n", p3dsurfacetype);
+  fprintf(fileout, "P3DSURFACESMOOTH\n");
+  fprintf(fileout, " %i\n", p3dsurfacesmooth);
+  fprintf(fileout, "P3VIEW\n");
+  for(i = 0; i < nmeshes; i++){
+    mesh *meshi;
+
+    meshi = meshinfo + i;
+    fprintf(fileout, " %i %i %i %i %i %i \n", visx_all, meshi->plotx, visy_all, meshi->ploty, visz_all, meshi->plotz);
+  }
   fprintf(fileout, "PROJECTION\n");
   fprintf(fileout, " %i\n", projection_type);
   fprintf(fileout, "SBATSTART\n");
@@ -11974,10 +11949,6 @@ void writeini(int flag,char *filename){
   fprintf(fileout, " %i\n", visGrid);
   fprintf(fileout, "SHOWGRIDLOC\n");
   fprintf(fileout, " %i\n", visgridloc);
-  fprintf(fileout, "SHOWHAZARDCOLORS\n");
-  fprintf(fileout, " %i\n", sethazardcolor);
-  fprintf(fileout, "SHOWHZONE\n");
-  fprintf(fileout, " %i\n", visHZone);
   fprintf(fileout, "SHOWHMSTIMELABEL\n");
   fprintf(fileout, " %i\n", vishmsTimelabel);
   fprintf(fileout, "SHOWHRRCUTOFF\n");
@@ -12008,8 +11979,6 @@ void writeini(int flag,char *filename){
   fprintf(fileout, " %i\n", visSprinkPart);
   fprintf(fileout, "SHOWSTREAK\n");
   fprintf(fileout, " %i %i %i %i\n", streak5show, streak5step, showstreakhead, streak_index);
-  fprintf(fileout, "SHOWSZONE\n");
-  fprintf(fileout, " %i\n", visSZone);
   fprintf(fileout, "SHOWTERRAIN\n");
   fprintf(fileout, " %i\n", visTerrainType);
   fprintf(fileout, "SHOWTETRAS\n");
@@ -12036,12 +12005,8 @@ void writeini(int flag,char *filename){
   fprintf(fileout, " %i\n", show_triangle_count);
   fprintf(fileout, "SHOWVENTS\n");
   fprintf(fileout, " %i %i %i\n", visVents, visVentLines, visVentSolid);
-  fprintf(fileout, "SHOWVZONE\n");
-  fprintf(fileout, " %i\n", visVZone);
   fprintf(fileout, "SHOWWALLS\n");
   fprintf(fileout, " %i\n", visWalls);
-  fprintf(fileout, "SHOWZONEFIRE\n");
-  fprintf(fileout, " %i\n", viszonefire);
   fprintf(fileout, "SKIPEMBEDSLICE\n");
   fprintf(fileout, " %i\n", skip_slice_in_embedded_mesh);
   fprintf(fileout, "SMOKESENSORS\n");
@@ -12054,6 +12019,8 @@ void writeini(int flag,char *filename){
 #endif
   fprintf(fileout, "STEREO\n");
   fprintf(fileout, " %i\n", showstereo);
+  fprintf(fileout, "SURFINC\n");
+  fprintf(fileout, " %i\n", surfincrement);
   fprintf(fileout, "TERRAINPARMS\n");
   fprintf(fileout, " %i %i %i\n", terrain_rgba_zmin[0], terrain_rgba_zmin[1], terrain_rgba_zmin[2]);
   fprintf(fileout, " %i %i %i\n", terrain_rgba_zmax[0], terrain_rgba_zmax[1], terrain_rgba_zmax[2]);
@@ -12066,6 +12033,8 @@ void writeini(int flag,char *filename){
   }
   fprintf(fileout, "TRAINERVIEW\n");
   fprintf(fileout, " %i\n", trainerview);
+  fprintf(fileout, "TRANSPARENT\n");
+  fprintf(fileout, " %i %f\n", use_transparency_data, transparent_level);
   fprintf(fileout, "TWOSIDEDVENTS\n");
   fprintf(fileout, " %i %i\n", show_bothsides_int, show_bothsides_ext);
   fprintf(fileout, "VECTORSKIP\n");
@@ -12145,6 +12114,8 @@ void writeini(int flag,char *filename){
       }
     }
   }
+  fprintf(fileout, "RENDEROPTION\n");
+  fprintf(fileout, " %i %i\n", render_option, nrender_rows);
   fprintf(fileout, "UNITCLASSES\n");
   fprintf(fileout, " %i\n", nunitclasses);
   for(i = 0; i<nunitclasses; i++){
@@ -12236,12 +12207,25 @@ void writeini(int flag,char *filename){
   fprintf(fileout, " %f %f %f %f %f\n",
     temperature_min, temperature_cutoff, temperature_max, fire_opacity_factor, mass_extinct);
 
+  fprintf(fileout, "\n *** ZONE FIRE PARAMETRES ***\n\n");
+
+  fprintf(fileout, "SHOWHAZARDCOLORS\n");
+  fprintf(fileout, " %i\n", sethazardcolor);
+  fprintf(fileout, "SHOWHZONE\n");
+  fprintf(fileout, " %i\n", visHZone);
+  fprintf(fileout, "SHOWSZONE\n");
+  fprintf(fileout, " %i\n", visSZone);
+  fprintf(fileout, "SHOWVZONE\n");
+  fprintf(fileout, " %i\n", visVZone);
+  fprintf(fileout, "SHOWZONEFIRE\n");
+  fprintf(fileout, " %i\n", viszonefire);
+
   fprintf(fileout,"\n *** TOUR INFO ***\n\n");
 
-  fprintf(fileout, "SHOWTOURROUTE\n");
-  fprintf(fileout, " %i\n", edittour);
   fprintf(fileout, "SHOWPATHNODES\n");
   fprintf(fileout, " %i\n", show_path_knots);
+  fprintf(fileout, "SHOWTOURROUTE\n");
+  fprintf(fileout, " %i\n", edittour);
   {
     float *col;
 
@@ -12267,6 +12251,8 @@ void writeini(int flag,char *filename){
   fprintf(fileout, " %i\n", tour_constant_vel);
   fprintf(fileout, "VIEWALLTOURS\n");
   fprintf(fileout, " %i\n", viewalltours);
+  fprintf(fileout, "VIEWTIMES\n");
+  fprintf(fileout, " %f %f %i\n", view_tstart, view_tstop, view_ntimes);
   fprintf(fileout, "VIEWTOURFROMPATH\n");
   fprintf(fileout," %i\n",viewtourfrompath);
 
