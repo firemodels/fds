@@ -52,6 +52,7 @@
 \newcommand{\elist}{\end{list}}
 \newcommand{\loadmenu}{\fbox{\ct Load/Unload}}
 \newcommand{\hitem}[1]{\item[{\bf #1} \hfill]}
+\newcommand{\hitemNULL}[1]{}
 \newcommand{\hhitem}[2]{\item[{\bf #1}\ ({\em #2}) \hfill]}
 
 
@@ -5165,7 +5166,7 @@ value
 \end{lstlisting}
 
 
-\subsection{Color parameters}
+\subsection{Color and lighting}
 All colors are specified using a 3-tuple: r g b
 where r, g and b are the red, green and blue components of the color respectively.
 Each color component is a floating point number ranging
@@ -5295,17 +5296,11 @@ the character string after the {\tt ``:''} are ignored.
 %\label{figcolorbars}%
 %\end{figure}
 
-\hitem{COLORBAND} The data is displayed using 256 levels.
-The colorbar consists of one color for each level.
-The COLORBAND parameter specifies the width of the
-{\em black}\ region on the colorbar highlighted
-when selected by the left mouse button.
-Currently the colorband width may be either 1 level or 10. (default: 10)
-
-\hitem{COLORBARFLIP} Specifies whether the colorbar is flipped (1) or not flipped (0)
+\hitem{COLORBAR\_FLIP} Specifies whether the colorbar is flipped (1) or not flipped (0)
 (default: {\tt 0}).
 \hitem{DIFFUSELIGHT} Sets the color for specifying diffuse light (default: {\tt 0.5 0.5
 0.5}).
+\hitemNULL{DIRECTIONCOLOR}
 \hitem{FLIP} Specifies whether to flip (1) or not to flip (0) the foreground and background
 colors.  By default the background color is black and the foreground color
 is white.  Setting FLIP to 1 has the effect of having a white background and black foreground.
@@ -5361,10 +5356,11 @@ displayed in frame 0).
 (default: {\tt 1.0 0.0 1.0})
 \elist
 
-\subsection{Size parameters}
+\subsection{Size}
 The parameters described in this section allow one to customize
 the size of various Smokeview scene elements. \blist
 
+\hitemNULL{GRIDLINEWIDTH}
 \hitem{ISOLINEWIDTH}Defines the width in pixels
 of lines used to draw animated iso-surfaces in outline mode.
 (default: $2.0$)
@@ -5393,6 +5389,8 @@ of Plot3D iso-surface particles.
 by Smokeview using the same units as used to specify the grid coordinates.
 (default: $0.038$)
 
+\hitemNULL{SENSORRELSIZE}
+
 \hitem{SLICEOFFSET}Defines an offset
 distance\footnote{distance is relative to the maximum grid cell width}
 animated slices are drawn from adjacent solid surfaces.
@@ -5401,6 +5399,8 @@ animated slices are drawn from adjacent solid surfaces.
 \hitem{SMOOTHLINES}Specifies whether lines should be drawn (1) or not drawn (0) using
 anti-aliasing  (default: {\tt 1}).
 
+\hitemNULL{SPHERESEGS}
+
 \hitem{SPRINKLERABSSIZE}Defines the sprinkler size drawn
 by Smokeview using the same units as used to specify the grid coordinates.
 (default: $0.076$)
@@ -5408,10 +5408,14 @@ by Smokeview using the same units as used to specify the grid coordinates.
 \hitem{STREAKLINEWIDTH}Defines the width of a streak line.
 (default: $1.0$)
 
-\hitem{VECTORLENGTH}Defines the length of Plot3D vectors. A vector
+\hitemNULL{VECCONTOURS}
+
+\hitem{VECLENGTH}Defines the length of Plot3D vectors. A vector
 length of $1.0$ fills one grid cell.  Vector lengths may also be
 changed from within Smokeview by depressing the ``{\tt a}'' key.
 (default: $4.0$)
+
+\hitemNULL{VECTORLINEWIDTH}
 
 \hitem{VECTORPOINTSIZE}Defines the size in pixels of the point
 that is drawn at the end of a Plot3D vector. (default: $3.0$)
@@ -5435,7 +5439,7 @@ Smokeview scene for use when capturing images to video.
 (default: 45)
 \elist
 
-\subsection{Time, Chop and value bound parameters}
+\subsection{Time and data bounds}
 This section describes parameters used by Smokeview to 1) modify
 the time intervals used to load data (keywords beginning with T\_
 ), 2) eliminate or chop data from being displayed (beginning with
@@ -5457,6 +5461,8 @@ contains data bound entries for each variable in the Plot3D data
 file.  If a Plot3D {\em speed}\ variable was constructed by
 Smokeview then the {\tt V\_PLOT3D} keyword will contain six
 entries instead of five. \blist
+
+\hitemNULL{C\_BOUNDARY}
 
 \hitem{C\_PARTICLES} Defines the minimum and maximum values used
 to discard particle data in a visualization. To drop particle data
@@ -5491,43 +5497,19 @@ below 70\degC\ and above 200\degC\ use:
 C_SLICE 1 70. 1 200.
 \end{lstlisting}
 
-\hitem{T\_BOUNDARY}Defines the minimum and maximum times
-used to include boundary frames in a visualization. To load
-boundary data between 20 and 150 seconds use:
-\begin{lstlisting}
-T_BOUNDARY
-1 20. 1 150.
-\end{lstlisting}
+\hitemNULL{CACHE\_BOUNDARYDATA}
 
-(default: {\tt 0 1.0 0 0.0})
+\hitemNULL{CACHE\_QDATA}
 
-\hitem{T\_ISO} Defines the minimum and maximum times used
-to include isosurface frames in a visualization.  To load
-isosurface data between 20 and 150 seconds use:
+\hitemNULL{PATCHDATAOUT}
 
-\begin{lstlisting}
-T_ISO
-1 20. 1 150.
-\end{lstlisting}
+\hitemNULL{PERCENTILELEVEL}
 
+\hitemNULL{SLICEDATAOUT}
 
-\hitem{T\_PARTICLES}Defines the minimum and maximum
-times used to include particles in a visualization.
-To load particle data between 20 and 150 seconds use:
-\begin{lstlisting}
-T_PARTICLES
-1 20. 1 150.
-\end{lstlisting}
+\hitemNULL{TIMEOFFSET}
 
-\hitem{T\_SLICE}Defines the minimum and maximum times used
-to include slice frames in a visualization. To load slice
-data between 20 and 150 seconds use:
-\begin{lstlisting}
-T_SLICE
-1 20. 1 150.
-\end{lstlisting}
-
-(default: {\tt 0 1.0 0 0.0})
+\hitemNULL{TLOAD}
 
 \hitem{V\_BOUNDARY}Defines the minimum and maximum
 data bounds used to convert boundary data values to color indices.
@@ -5622,99 +5604,58 @@ displayed when showing the slice file.
 These suffixes are added automatically when the {\em File/Bounds}\
 dialog box is used to set data bounds.
 
+\hitem{V\_TARGET}
 
 \elist
 
-\subsection{Data loading parameters}
+\subsection{Data loading}
 \label{SECTDATALOADING} The keywords in this section may be used
 to reduce the memory required to visualize FDS data. Keywords
 exist for limiting particles and frames. Other keywords exist for
 compressing particle data and skipping particles and frames.
-\blist \hitem{BOUNDFRAMESTEP}Defines the number of intervals or
-steps between loaded boundary file frames. (default: 1)
+\blist
 
-\hitem{EVACFRAMESTEP}Specifies the
-interval or steps between loaded evacuation frames.  An evacuation frame
-consists of all the {\em people}\ loaded at one particular time step.
-For example, if {\tt EVACFRAMESTEP} is set to 3 then every 3rd evacuation frame
-is read in.
-(default: 1)
+\hitem{BOUNDZIPSTEP} Defines the number of intervals or steps between
+boundary file frames when
+compressed by Smokezip. (default: 1)
 
-\hitem{ISOFRAMESTEP} Defines the number of intervals or steps between
-loaded isosurface file frames
-(default: 1)
+\hitemNULL{FED}
+
+\hitemNULL{FEDCOLORBAR}
 
 \hitem{ISOZIPSTEP} Defines the number of intervals or steps between
 isosurface file frames when
 compressed by Smokezip. (default: 1)
-
-\hitem{MAXFRAMES}Specifies the
-maximum number of particle frames that can be read in.
-(default: {\tt 501})
-
-\hitem{MAXPOINTS}Specifies the
-maximum number of particle points that can be read in from a particle file.
-(default: {\tt 5000000})
 
 \hitem{NOPART}Indicates that a particle file should not (1) or
 should (0) be loaded when Smokeview starts up. This option is used
 when one wants to look at other files besides the particle file.
 (default: 1)
 
-\hitem{PARTFRAMESTEP}Specifies the interval or steps between
-loaded particle frames.  A particle frame is all the particles
-loaded at one particular time step. For example, if {\tt
-PARTFRAMESTEP} is set to 3 then every 3rd particle frame is read
-in. This and the {\tt PARTPOINTSTEP} options may be used together
-to dramatically reduce the memory required to view particle
-files.  These options should be used when displaying Smokeview
-files on computers with limited memory. (default: 1)
-
-\hitem{PARTPOINTCOMPRESS}Specifies how Smokeview stores particle
-data. Each particle is represented using three position
-coordinates and one data value.  Using full precision ({\tt
-PARTPOINTCOMPRESS} value of 0), Smokeview uses four bytes per
-position coordinate and one byte for the data value or 13 bytes to
-represent each particle point. If this keyword is set to 1 then
-Smokeview uses one byte per position coordinate and one byte for
-the data value or 4 bytes per particle point.  Finally if this
-keyword has value 2 then 2 bytes are used to store each position
-coordinate and one byte for the data value or 7 bytes per particle
-point.  The recommended value is 2.  Using 0 results in almost
-twice the memory usage without any extra precision in positioning
-particles. Using 1, though using less memory than the ``{\tt 2}''
-option, results in granularity effects when displaying particles
-which the user may find annoying. (default: 2)
-
 \hitem{PARTPOINTSTEP}Specifies the
 interval or steps between loaded particle points.
 For example, if {\tt PARTPOINTSTEP} is set to 5 then every 5th particle or
 only 20 per cent of the particle file is read in.  (default: {\tt 1})
 
-\hitem{SCRIPTFILE} Specifies the name of a script file either created by
-hand or created automatically
-by Smokeview using the script recorder.
+\hitemNULL{SHOWFEDAREA}
 
-\hitem{SLICEFRAMESTEP}Specifies the number of
-intervals or steps between loaded slice file frames.  (default: 1)
+\hitemNULL{SLICEAVERAGE}
+
+\hitem{SLICEDATAOUT}When set to 1 will output data corresponding
+to any loaded slice files whenever the scene is rendered.
 
 \hitem{SLICEZIPSTEP}  Specifies the number of intervals or steps between
 slice frames when compressed
 by Smokezip.  (default: 1)
 
-\hitem{SMOKE3DFRAMESTEP}Specifies the number of
-interval or steps between loaded 3D smoke file frames.  (default: 1)
+\hitem{SMOKE3DZIPSTEP}
 
-\hitem{SMOKE3DZIPSTEPxxx}
-
-\hitem{SLICEDATAOUT}When set to 1 will output data corresponding
-to any loaded slice files whenever the scene is rendered.
-
+\hitemNULL{USER\_ROTATE}
 \elist
 
 
 
-\subsection{Viewing parameters}
+\subsection{View}
 The keywords in this section define how a scene is viewed.
 Keywords exist for showing or hiding various scene elements
 and for modifying how various scene elements appear.
@@ -5738,9 +5679,13 @@ grid (5), drawn at locations as specified in the FDS input file
 third party tools that have been developed to help process obstruction data for FDS. See
 the FDS/Smokeview website, \hhref{http://fire.nist.gov/fds/}, for details.}.   (default: 5)
 
+\hitemNULL{BOUNDARYTWOSIDE}
+
 \hitem{CLIP} Specifies the near and far clipping plane
 locations.  Dimensions are relative to the longest side of
 an FDS scene. (default: 0.001 3.000)
+
+\hitemNULL{CONTOURTYPE}
 
 \hitem{COLORBAND} Specifies the width in pixels of the black colorband created when the
 colorbar is selected by the mouse.  (default: 1)
@@ -6083,12 +6028,14 @@ amount. (default: 0 1.0)
 
 \elist
 
-\subsection{Tour Parameters}
-\blist
+%\subsection{Miscellaneous}
 
-\hitem{GLOBALTENSION}Specifies whether the tour spline tension
-parameter found in the dialog box should (1) or should not (0) be
-used for ALL tour key frames. (default: 1)
+%\subsection{3D Smoke}
+
+%\subsection{Zone fire}
+
+\subsection{Tour}
+\blist
 
 \hitem{SHOWPATHNODES} Specifies whether the path nodes should (1) or should not (0)
 be drawn.  This is a debugging parameter, not normally used.  (default: 0)
@@ -6149,10 +6096,12 @@ should not (0) traverse the path with a constant velocity.
 \hitem{VIEWALLTOURS}Specifies whether all (1) tours should be
 drawn. (default: 0)
 
-\hitem{VIEWTOURFROM}Specifies whether the scene should (1) or
-should not (0) be observed from the selected tour.
 \hitem{VIEWTIMES}Specifies the tour start time, tour stop time and
 number of points to specify a tour. (default: 0.0 100.0 1000)
+
+\hitem{VIEWTOURFROM}Specifies whether the scene should (1) or
+should not (0) be observed from the selected tour.
+
 \elist
 
 \subsection{Realistic Smoke Parameters}
@@ -6205,6 +6154,13 @@ in terms of hazard or drawn in terms of a standard color scale (0).  (default: 0
 
 \elist
 
+\subsection{Local Parameters}
+
+\blist
+\hitem{SCRIPTFILE} Specifies the name of a script file either created by
+hand or created automatically
+by Smokeview using the script recorder.
+\elist
 
 \section{Smokeview Parameter Input File (.smv file)}
 \label{sectionsmv} The FDS software outputs simulation results
