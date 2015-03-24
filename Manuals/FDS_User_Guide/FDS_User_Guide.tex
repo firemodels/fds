@@ -1367,7 +1367,7 @@ In FDS, you may invoke the most rudimentary of data assimilation techniques, a m
 \begin{lstlisting}
 &MISC MEAN_FORCING(1:2)=.TRUE.,.TRUE., U0=7.07, V0=7.07, DT_MEAN_FORCING=.1 /
 \end{lstlisting}
-Note that you must also specify a time scale for relaxation, {\ct DT\_MEAN\_FORCING}. For an outdoor flow, all other boundaries (except the ground) should be set to {\ct OPEN}. You may omit a region of the flow domain from forcing using the {\ct HOLE} feature.  If a {\ct HOLE} is used with {\ct MEAN_FORCING} it is advisable to also set {\ct PROJECTION=.TRUE.} on {\ct MISC}; otherwise the combination of {\ct U0} in the bulk region and zero velocity in the {\ct HOLE} region creates an initial divergence error that will take some time to wash out of the domain.
+Note that you must also specify a time scale for relaxation, {\ct DT\_MEAN\_FORCING}. For an outdoor flow, all other boundaries (except the ground) should be set to {\ct OPEN}. You may omit a region of the flow domain from forcing using the {\ct HOLE} feature.  If a {\ct HOLE} is used with {\ct MEAN\_FORCING} it is advisable to also set {\ct PROJECTION=.TRUE.} on {\ct MISC}; otherwise the combination of {\ct U0} in the bulk region and zero velocity in the {\ct HOLE} region creates an initial divergence error that will take some time to wash out of the domain.
 
 \subsection{Special Topic: Specified Force Field}
 \label{info:force_vector}
