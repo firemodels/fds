@@ -8,8 +8,6 @@ This example tests the combination of water and fuel droplets in the same simula
 
 &REAC FUEL='N-HEPTANE'
       FYI='Heptane, C_7 H_16'
-      C=7.
-      H=16.
       CO_YIELD=0.006
       SOOT_YIELD=0.015 /
 
@@ -20,7 +18,7 @@ This example tests the combination of water and fuel droplets in the same simula
 
 &PART ID='heptane drops', SPEC_ID='N-HEPTANE',
       QUANTITIES(1:2)='PARTICLE DIAMETER','PARTICLE TEMPERATURE',
-      DIAMETER=100., HEAT_OF_COMBUSTION=45000., SAMPLING_FACTOR=1/
+      DIAMETER=100., SAMPLING_FACTOR=1/
 
 &PROP ID='K-11', QUANTITY='SPRINKLER LINK TEMPERATURE', RTI=148., C_FACTOR=0.7, ACTIVATION_TEMPERATURE=74., OFFSET=0.10, 
       PART_ID='water drops', FLOW_RATE=189.3, PARTICLE_VELOCITY=10., SPRAY_ANGLE=30.,80., SMOKEVIEW_ID='sprinkler_upright'    /
