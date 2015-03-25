@@ -31,8 +31,6 @@ $QFDS $DEBUG -d $INDIR $QUEUE Beyler_Hood_propane_287_lr.fds
 $QFDS $DEBUG -d $INDIR $QUEUE Beyler_Hood_propane_303_lr.fds
 $QFDS $DEBUG -d $INDIR $QUEUE Beyler_Hood_propane_307_lr.fds
 $QFDS $DEBUG -d $INDIR $QUEUE Beyler_Hood_propane_318_lr.fds
-$QFDS $DEBUG -d $INDIR $QUEUE Beyler_Hood_propane_318_mr.fds
-$QFDS $DEBUG -d $INDIR $QUEUE Beyler_Hood_propane_318_hr.fds
 $QFDS $DEBUG -d $INDIR $QUEUE Beyler_Hood_propane_322_lr.fds
 $QFDS $DEBUG -d $INDIR $QUEUE Beyler_Hood_propane_334_lr.fds
 $QFDS $DEBUG -d $INDIR $QUEUE Beyler_Hood_propane_355_lr.fds
@@ -40,8 +38,6 @@ $QFDS $DEBUG -d $INDIR $QUEUE Beyler_Hood_propane_359_lr.fds
 $QFDS $DEBUG -d $INDIR $QUEUE Beyler_Hood_propane_371_lr.fds
 $QFDS $DEBUG -d $INDIR $QUEUE Beyler_Hood_propane_389_lr.fds
 $QFDS $DEBUG -d $INDIR $QUEUE Beyler_Hood_propane_389_lr.fds
-$QFDS $DEBUG -d $INDIR $QUEUE Beyler_Hood_propane_389_mr.fds
-$QFDS $DEBUG -d $INDIR $QUEUE Beyler_Hood_propane_389_hr.fds
 $QFDS $DEBUG -d $INDIR $QUEUE Beyler_Hood_propane_429_lr.fds
 $QFDS $DEBUG -d $INDIR $QUEUE Beyler_Hood_propane_433_lr.fds
 $QFDS $DEBUG -d $INDIR $QUEUE Beyler_Hood_propane_445_lr.fds
