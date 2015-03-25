@@ -64,12 +64,14 @@ char glui_motion_revision[]="$Revision$";
 #define RENDER_LABEL 5
 #define RENDER_MULTIPLIER 6
 
-#define SCENE_ROLLOUT 0
-#define SLICE_ROLLOUT 1
-#define VIEWPOINTS_ROLLOUT 2
-#define WINDOW_ROLLOUT 3
-#define SCALING_ROLLOUT 4
-#define RENDER_ROLLOUT 5
+#define SLICE_ROLLOUT 0
+#define VIEWPOINTS_ROLLOUT 1
+#define WINDOW_ROLLOUT 2
+#define SCALING_ROLLOUT 3
+#define RENDER_ROLLOUT 4
+#define TRANSLATEROTATE_ROLLOUT 5  
+#define ROTATION_ROLLOUT 6  
+#define ORIENTATION_ROLLOUT 7
 
 void Motion_DLG_CB(int var);
 void Viewpoint_CB(int var);
@@ -100,13 +102,13 @@ GLUI_Panel *PANEL_change_zaxis=NULL;
 
 GLUI_Rollout *ROLLOUT_rotation_type = NULL;
 GLUI_Rollout *ROLLOUT_orientation=NULL;
-GLUI_Rollout *ROLLOUT_motion=NULL;
 GLUI_Rollout *ROLLOUT_scene_clip=NULL;
 GLUI_Rollout *ROLLOUT_projection=NULL;
 GLUI_Rollout *ROLLOUT_render=NULL;
 GLUI_Rollout *ROLLOUT_viewpoints=NULL;
 GLUI_Rollout *ROLLOUT_make_movie = NULL;
 GLUI_Rollout *ROLLOUT_gslice = NULL;
+GLUI_Rollout *ROLLOUT_translaterotate=NULL;
 
 
 GLUI_Spinner *SPINNER_nrender_rows=NULL;
@@ -181,7 +183,7 @@ GLUI_Listbox *LIST_render_skip=NULL;
 
 void enable_disable_views(void);
 
-procdata motionprocinfo[6];
+procdata motionprocinfo[8];
 int nmotionprocinfo = 0;
 
 /* ------------------ Motion_Rollout_CB ------------------------ */
@@ -410,10 +412,11 @@ extern "C" void glui_motion_setup(int main_window){
   glui_motion->hide();
 
   PANEL_motion = glui_motion->add_panel("Motion",true);
-  ROLLOUT_motion = glui_motion->add_rollout_to_panel(PANEL_motion, _("Scene"),true, SCENE_ROLLOUT, Motion_Rollout_CB);
-  ADDPROCINFO(motionprocinfo,nmotionprocinfo,ROLLOUT_motion,SCENE_ROLLOUT);
 
-  PANEL_translate2 = glui_motion->add_panel_to_panel(ROLLOUT_motion,"Translate");
+  ROLLOUT_translaterotate=glui_motion->add_rollout_to_panel(PANEL_motion, _("Translate/Rotate"), true, TRANSLATEROTATE_ROLLOUT, Motion_Rollout_CB);
+  ADDPROCINFO(motionprocinfo, nmotionprocinfo, ROLLOUT_translaterotate, TRANSLATEROTATE_ROLLOUT);
+
+  PANEL_translate2 = glui_motion->add_panel_to_panel(ROLLOUT_translaterotate,"Translate");
   d_eye_xyz[0]=0.0;
   d_eye_xyz[1]=0.0;
   d_eye_xyz[2]=0.0;
@@ -429,7 +432,7 @@ extern "C" void glui_motion_setup(int main_window){
   TRANSLATE_z=glui_motion->add_translation_to_panel(PANEL_translate2,_("Vertical"),GLUI_TRANSLATION_Y,eye_xyz+2,GLUI_Z,Motion_CB);
   TRANSLATE_z->set_speed(TRANSLATE_SPEED);
 
-  PANEL_rotate = glui_motion->add_panel_to_panel(ROLLOUT_motion,"Rotate");
+  PANEL_rotate = glui_motion->add_panel_to_panel(ROLLOUT_translaterotate,"Rotate");
 
   ROTATE_2axis=glui_motion->add_translation_to_panel(PANEL_rotate,_("2 axis"),GLUI_TRANSLATION_XY,motion_ab,ROTATE_2AXIS,Motion_CB);
   glui_motion->add_column_to_panel(PANEL_rotate,false);
@@ -438,15 +441,16 @@ extern "C" void glui_motion_setup(int main_window){
   ROTATE_eye_z->set_speed(180.0/(float)screenWidth);
   ROTATE_eye_z->disable();
  
-  ROLLOUT_rotation_type = glui_motion->add_rollout_to_panel(ROLLOUT_motion,_("Rotation properties"),false);
-  PANEL_radiorotate=glui_motion->add_panel_to_panel(ROLLOUT_rotation_type,"Rotation type:",GLUI_PANEL_NONE);
+  ROLLOUT_rotation_type = glui_motion->add_rollout_to_panel(PANEL_motion,_("Specify Rotation"),false,ROTATION_ROLLOUT,Motion_Rollout_CB);
+  ADDPROCINFO(motionprocinfo, nmotionprocinfo, ROLLOUT_rotation_type, ROTATION_ROLLOUT);
+
+  PANEL_radiorotate = glui_motion->add_panel_to_panel(ROLLOUT_rotation_type, "Rotation type:", GLUI_PANEL_NONE);
   RADIO_rotation_type=glui_motion->add_radiogroup_to_panel(PANEL_radiorotate,&rotation_type,0,rotation_type_CB);
   RADIOBUTTON_1c=glui_motion->add_radiobutton_to_group(RADIO_rotation_type,"2 axis");
   RADIOBUTTON_1d=glui_motion->add_radiobutton_to_group(RADIO_rotation_type,"eye centered");
   RADIOBUTTON_1e=glui_motion->add_radiobutton_to_group(RADIO_rotation_type,"level (1 axis)");
   RADIOBUTTON_1e=glui_motion->add_radiobutton_to_group(RADIO_rotation_type,"3 axis");
   rotation_type_CB(rotation_type);
-
   rotation_index=&camera_current->rotation_index;
   *rotation_index=glui_rotation_index_ini;
 
@@ -485,8 +489,10 @@ extern "C" void glui_motion_setup(int main_window){
   //glui_motion->add_column(false);
 
 
-  ROLLOUT_orientation=glui_motion->add_rollout_to_panel(ROLLOUT_motion,_("Specify Orientation"),true);
-  PANEL_specify = glui_motion->add_panel_to_panel(ROLLOUT_orientation,_("eye"));
+  ROLLOUT_orientation=glui_motion->add_rollout_to_panel(PANEL_motion,_("Specify Orientation"),false,ORIENTATION_ROLLOUT,Motion_Rollout_CB);
+  ADDPROCINFO(motionprocinfo, nmotionprocinfo, ROLLOUT_orientation, ORIENTATION_ROLLOUT);
+
+  PANEL_specify = glui_motion->add_panel_to_panel(ROLLOUT_orientation, _("eye"));
 
   SPINNER_set_view_x=glui_motion->add_spinner_to_panel(PANEL_specify,"x:",GLUI_SPINNER_FLOAT,set_view_xyz,SET_VIEW_XYZ,Motion_CB);
   SPINNER_set_view_y=glui_motion->add_spinner_to_panel(PANEL_specify,"y:",GLUI_SPINNER_FLOAT,set_view_xyz+1,SET_VIEW_XYZ,Motion_CB);
@@ -519,7 +525,7 @@ extern "C" void glui_motion_setup(int main_window){
   ROLLOUT_orientation->close();
   changed_zaxis=0;
 
-  ROLLOUT_gslice = glui_motion->add_rollout_to_panel(PANEL_motion,"Slice",false,SLICE_ROLLOUT,Motion_Rollout_CB);
+  ROLLOUT_gslice = glui_motion->add_rollout_to_panel(PANEL_motion,"Slice motion",false,SLICE_ROLLOUT,Motion_Rollout_CB);
   ADDPROCINFO(motionprocinfo,nmotionprocinfo,ROLLOUT_gslice,SLICE_ROLLOUT);
 
   if(gslice_xyz[0]<-1000000.0&&gslice_xyz[1]<-1000000.0&&gslice_xyz[2]<-1000000.0){
@@ -1375,7 +1381,7 @@ extern "C" void show_glui_motion(int menu_id){
       Motion_Rollout_CB(VIEWPOINTS_ROLLOUT);
       break;
     case DIALOG_MOTION:
-      Motion_Rollout_CB(SCENE_ROLLOUT);
+      Motion_Rollout_CB(TRANSLATEROTATE_ROLLOUT);
       break;
     case DIALOG_RENDER:
       Motion_Rollout_CB(RENDER_ROLLOUT);

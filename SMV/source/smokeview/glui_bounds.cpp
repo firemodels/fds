@@ -196,19 +196,19 @@ GLUI_Rollout *ROLLOUT_time=NULL,*ROLLOUT_colorbar=NULL;
 GLUI_Rollout *ROLLOUT_outputpatchdata=NULL;
 GLUI_Rollout *ROLLOUT_filebounds = NULL;
 GLUI_Rollout *ROLLOUT_showhide = NULL;
+GLUI_Rollout *ROLLOUT_slice_average = NULL;
+GLUI_Rollout *ROLLOUT_slice_vector = NULL;
+GLUI_Rollout *ROLLOUT_line_contour = NULL;
+GLUI_Rollout *ROLLOUT_vector = NULL;
+GLUI_Rollout *ROLLOUT_isosurface = NULL;
 
 GLUI_Panel *PANEL_files = NULL;
 GLUI_Panel *PANEL_bounds = NULL;
-GLUI_Panel *PANEL_slice_average = NULL;
 GLUI_Panel *PANEL_zone_a=NULL, *PANEL_zone_b=NULL;
 GLUI_Panel *PANEL_evac_direction=NULL;
 GLUI_Panel *PANEL_pan1=NULL;
 GLUI_Panel *PANEL_pan2=NULL;
 GLUI_Panel *PANEL_pan3=NULL;
-GLUI_Panel *PANEL_isosurface=NULL;
-GLUI_Panel *PANEL_vector=NULL;
-GLUI_Panel *PANEL_slice_vector=NULL;
-GLUI_Panel *PANEL_line_contour=NULL;
 GLUI_Panel *PANEL_run=NULL;
 GLUI_Panel *PANEL_record=NULL;
 GLUI_Panel *PANEL_script1=NULL;
@@ -354,6 +354,13 @@ GLUI_StaticText *STATIC_plot3d_cmax_unit=NULL;
 #define PLOT3D_ROLLOUT 6
 #define SLICE_ROLLOUT 7
 
+#define SLICE_AVERAGE_ROLLOUT 0
+#define SLICE_VECTOR_ROLLOUT 1
+#define LINE_CONTOUR_ROLLOUT 2
+
+#define VECTOR_ROLLOUT 0
+#define ISOSURFACE_ROLLOUT 1
+
 #define LOAD_ROLLOUT 0
 #define SHOWHIDE_ROLLOUT 1
 #define COMPRESS_ROLLOUT 2
@@ -362,8 +369,20 @@ GLUI_StaticText *STATIC_plot3d_cmax_unit=NULL;
 #define FILEBOUNDS_ROLLOUT 5
 #define TIME_ROLLOUT 6
 
-procdata boundprocinfo[8], fileprocinfo[7];
-int nboundprocinfo = 0, nfileprocinfo = 0;
+procdata boundprocinfo[8], fileprocinfo[7], sliceprocinfo[3], plot3dprocinfo[2];
+int nboundprocinfo = 0, nfileprocinfo = 0, nsliceprocinfo=0, nplot3dprocinfo=0;
+
+/* ------------------ Plot3d_Rollout_CB ------------------------ */
+
+void Plot3d_Rollout_CB(int var){
+  toggle_rollout(plot3dprocinfo, nplot3dprocinfo, var);
+}
+
+/* ------------------ Slice_Rollout_CB ------------------------ */
+
+void Slice_Rollout_CB(int var){
+  toggle_rollout(sliceprocinfo, nsliceprocinfo, var);
+}
 
 /* ------------------ Bound_Rollout_CB ------------------------ */
 
@@ -984,19 +1003,23 @@ extern "C" void glui_bounds_setup(int main_window){
     CHECKBOX_cache_qdata=glui_bounds->add_checkbox_to_panel(ROLLOUT_plot3d,_("Cache PLOT3D PLOT3D data"),&cache_qdata,UNLOAD_QDATA,PLOT3D_CB);
 
     PANEL_pan3 = glui_bounds->add_panel_to_panel(ROLLOUT_plot3d,"",GLUI_PANEL_NONE);
-    PANEL_vector = glui_bounds->add_panel_to_panel(PANEL_pan3,_("Vector"));
-    glui_bounds->add_checkbox_to_panel(PANEL_vector,_("Show vectors"),&visVector,UPDATEPLOT,PLOT3D_CB);
-    SPINNER_plot3d_vectorpointsize=glui_bounds->add_spinner_to_panel(PANEL_vector,_("Point size"),GLUI_SPINNER_FLOAT,&vectorpointsize,UPDATE_VECTOR,PLOT3D_CB);
+    ROLLOUT_vector = glui_bounds->add_rollout_to_panel(PANEL_pan3,_("Vector"),false,VECTOR_ROLLOUT,Plot3d_Rollout_CB);
+    ADDPROCINFO(plot3dprocinfo, nplot3dprocinfo, ROLLOUT_vector, VECTOR_ROLLOUT);
+    
+    glui_bounds->add_checkbox_to_panel(ROLLOUT_vector,_("Show vectors"),&visVector,UPDATEPLOT,PLOT3D_CB);
+    SPINNER_plot3d_vectorpointsize=glui_bounds->add_spinner_to_panel(ROLLOUT_vector,_("Point size"),GLUI_SPINNER_FLOAT,&vectorpointsize,UPDATE_VECTOR,PLOT3D_CB);
     SPINNER_plot3d_vectorpointsize->set_float_limits(1.0,10.0);
-    SPINNER_plot3d_vectorlinewidth=glui_bounds->add_spinner_to_panel(PANEL_vector,_("Vector width"),GLUI_SPINNER_FLOAT,&vectorlinewidth,UPDATE_VECTOR,PLOT3D_CB);
+    SPINNER_plot3d_vectorlinewidth=glui_bounds->add_spinner_to_panel(ROLLOUT_vector,_("Vector width"),GLUI_SPINNER_FLOAT,&vectorlinewidth,UPDATE_VECTOR,PLOT3D_CB);
     SPINNER_plot3d_vectorlinewidth->set_float_limits(1.0,10.0);
-    SPINNER_plot3d_vectorlinelength=glui_bounds->add_spinner_to_panel(PANEL_vector,_("Vector length"),GLUI_SPINNER_FLOAT,&vecfactor,UPDATE_VECTOR,PLOT3D_CB);
+    SPINNER_plot3d_vectorlinelength=glui_bounds->add_spinner_to_panel(ROLLOUT_vector,_("Vector length"),GLUI_SPINNER_FLOAT,&vecfactor,UPDATE_VECTOR,PLOT3D_CB);
     SPINNER_plot3d_vectorlinelength->set_float_limits(0.0,20.0);
-    SPINNER_plot3dvectorskip=glui_bounds->add_spinner_to_panel(PANEL_vector,_("Vector skip"),GLUI_SPINNER_INT,&vectorskip,PLOT3D_VECTORSKIP,PLOT3D_CB);
+    SPINNER_plot3dvectorskip=glui_bounds->add_spinner_to_panel(ROLLOUT_vector,_("Vector skip"),GLUI_SPINNER_INT,&vectorskip,PLOT3D_VECTORSKIP,PLOT3D_CB);
     SPINNER_plot3dvectorskip->set_int_limits(1,4);
 
-    PANEL_isosurface = glui_bounds->add_panel_to_panel(ROLLOUT_plot3d,"Isosurface");
-    PANEL_pan1 = glui_bounds->add_panel_to_panel(PANEL_isosurface,"",GLUI_PANEL_NONE);
+    ROLLOUT_isosurface = glui_bounds->add_rollout_to_panel(ROLLOUT_plot3d,"Isosurface",false,ISOSURFACE_ROLLOUT,Plot3d_Rollout_CB);
+    ADDPROCINFO(plot3dprocinfo, nplot3dprocinfo, ROLLOUT_isosurface, ISOSURFACE_ROLLOUT);
+    
+    PANEL_pan1 = glui_bounds->add_panel_to_panel(ROLLOUT_isosurface,"",GLUI_PANEL_NONE);
 
     glui_bounds->add_checkbox_to_panel(PANEL_pan1,"Show isosurface",&visiso,PLOTISO,PLOT3D_CB);
     SPINNER_plot3dpointsize=glui_bounds->add_spinner_to_panel(PANEL_pan1,_("Point size"),GLUI_SPINNER_FLOAT,
@@ -1006,8 +1029,8 @@ extern "C" void glui_bounds_setup(int main_window){
     SPINNER_plot3dlinewidth=glui_bounds->add_spinner_to_panel(PANEL_pan1,_("Line width"),GLUI_SPINNER_FLOAT,
       &plot3dlinewidth);
     SPINNER_plot3dlinewidth->set_float_limits(1.0,10.0);
-//    glui_bounds->add_column_to_panel(PANEL_isosurface);
-    PANEL_pan2 = glui_bounds->add_panel_to_panel(PANEL_isosurface,"",GLUI_PANEL_NONE);
+//    glui_bounds->add_column_to_panel(ROLLOUT_isosurface);
+    PANEL_pan2 = glui_bounds->add_panel_to_panel(ROLLOUT_isosurface,"",GLUI_PANEL_NONE);
     RADIO_plot3d_isotype=glui_bounds->add_radiogroup_to_panel(PANEL_pan2,&p3dsurfacetype,PLOTISOTYPE,PLOT3D_CB);
     RADIOBUTTON_plot3d_iso_hidden=glui_bounds->add_radiobutton_to_group(RADIO_plot3d_isotype,_("Hidden"));
     glui_bounds->add_radiobutton_to_group(RADIO_plot3d_isotype,_("Solid"));
@@ -1078,49 +1101,54 @@ extern "C" void glui_bounds_setup(int main_window){
     SPINNER_transparent_level=glui_bounds->add_spinner_to_panel(ROLLOUT_slice,_("Transparent level"),GLUI_SPINNER_FLOAT,&transparent_level,TRANSPARENTLEVEL,Slice_CB);
     SPINNER_transparent_level->set_float_limits(0.0,1.0);
 
-    PANEL_slice_average=glui_bounds->add_panel_to_panel(ROLLOUT_slice,_("Average"));
-    CHECKBOX_average_slice=glui_bounds->add_checkbox_to_panel(PANEL_slice_average,_("Average slice data"),&slice_average_flag);
-    SPINNER_sliceaverage=glui_bounds->add_spinner_to_panel(PANEL_slice_average,_("Time interval"),GLUI_SPINNER_FLOAT,&slice_average_interval);
+    ROLLOUT_slice_average=glui_bounds->add_rollout_to_panel(ROLLOUT_slice,_("Average"),false,SLICE_AVERAGE_ROLLOUT,Slice_Rollout_CB);
+    ADDPROCINFO(sliceprocinfo, nsliceprocinfo, ROLLOUT_slice_average, SLICE_AVERAGE_ROLLOUT);
+
+    CHECKBOX_average_slice=glui_bounds->add_checkbox_to_panel(ROLLOUT_slice_average,_("Average slice data"),&slice_average_flag);
+    SPINNER_sliceaverage=glui_bounds->add_spinner_to_panel(ROLLOUT_slice_average,_("Time interval"),GLUI_SPINNER_FLOAT,&slice_average_interval);
     {
       float tttmax=120.0;
 
       if(view_tstop>tttmax)tttmax=view_tstop;
       SPINNER_sliceaverage->set_float_limits(0.0,tttmax);
     }
-    glui_bounds->add_button_to_panel(PANEL_slice_average,"Reload",FILERELOAD,Slice_CB);
+    glui_bounds->add_button_to_panel(ROLLOUT_slice_average,"Reload",FILERELOAD,Slice_CB);
 
-    PANEL_slice_vector=glui_bounds->add_panel_to_panel(ROLLOUT_slice,_("Vector"));
-    SPINNER_vectorpointsize=glui_bounds->add_spinner_to_panel(PANEL_slice_vector,_("Point size"),GLUI_SPINNER_FLOAT,
+    ROLLOUT_slice_vector = glui_bounds->add_rollout_to_panel(ROLLOUT_slice, _("Vector"), false, SLICE_VECTOR_ROLLOUT, Slice_Rollout_CB);
+    ADDPROCINFO(sliceprocinfo, nsliceprocinfo, ROLLOUT_slice_vector, SLICE_VECTOR_ROLLOUT);
+
+    SPINNER_vectorpointsize = glui_bounds->add_spinner_to_panel(ROLLOUT_slice_vector, _("Point size"), GLUI_SPINNER_FLOAT,
       &vectorpointsize,UPDATE_VECTOR,Slice_CB);
     SPINNER_vectorpointsize->set_float_limits(1.0,10.0);
-    SPINNER_vectorlinewidth=glui_bounds->add_spinner_to_panel(PANEL_slice_vector,_("Vector width"),GLUI_SPINNER_FLOAT,&vectorlinewidth,UPDATE_VECTOR,Slice_CB);
+    SPINNER_vectorlinewidth=glui_bounds->add_spinner_to_panel(ROLLOUT_slice_vector,_("Vector width"),GLUI_SPINNER_FLOAT,&vectorlinewidth,UPDATE_VECTOR,Slice_CB);
     SPINNER_vectorlinewidth->set_float_limits(1.0,10.0);
-    SPINNER_vectorlinelength=glui_bounds->add_spinner_to_panel(PANEL_slice_vector,_("Vector length"),GLUI_SPINNER_FLOAT,&vecfactor,UPDATE_VECTOR,Slice_CB);
+    SPINNER_vectorlinelength=glui_bounds->add_spinner_to_panel(ROLLOUT_slice_vector,_("Vector length"),GLUI_SPINNER_FLOAT,&vecfactor,UPDATE_VECTOR,Slice_CB);
     SPINNER_vectorlinelength->set_float_limits(0.0,20.0);
-    SPINNER_slicevectorskip=glui_bounds->add_spinner_to_panel(PANEL_slice_vector,_("Vector skip"),GLUI_SPINNER_INT,&vectorskip,SLICE_VECTORSKIP,Slice_CB);
+    SPINNER_slicevectorskip=glui_bounds->add_spinner_to_panel(ROLLOUT_slice_vector,_("Vector skip"),GLUI_SPINNER_INT,&vectorskip,SLICE_VECTORSKIP,Slice_CB);
     SPINNER_slicevectorskip->set_int_limits(1,4);
-    CHECKBOX_show_slices_and_vectors=glui_bounds->add_checkbox_to_panel(PANEL_slice_vector,_("Show contours"),&show_slices_and_vectors);
+    CHECKBOX_show_slices_and_vectors=glui_bounds->add_checkbox_to_panel(ROLLOUT_slice_vector,_("Show contours"),&show_slices_and_vectors);
+    ROLLOUT_line_contour = glui_bounds->add_rollout_to_panel(ROLLOUT_slice, _("Line Contours"), false, LINE_CONTOUR_ROLLOUT, Slice_Rollout_CB);
+    ADDPROCINFO(sliceprocinfo, nsliceprocinfo, ROLLOUT_line_contour, LINE_CONTOUR_ROLLOUT);
 
-    PANEL_line_contour = glui_bounds->add_panel_to_panel(ROLLOUT_slice,_("Line Contours"));
-    slice_line_contour_min=0.0;
+    slice_line_contour_min = 0.0;
     slice_line_contour_max=1.0;
-    SPINNER_line_contour_min=glui_bounds->add_spinner_to_panel(PANEL_line_contour,_("Min"),GLUI_SPINNER_FLOAT,
+    SPINNER_line_contour_min=glui_bounds->add_spinner_to_panel(ROLLOUT_line_contour,_("Min"),GLUI_SPINNER_FLOAT,
       &slice_line_contour_min,LINE_CONTOUR_VALUE,Slice_CB);
-    SPINNER_line_contour_max=glui_bounds->add_spinner_to_panel(PANEL_line_contour,_("Max"),GLUI_SPINNER_FLOAT,
+    SPINNER_line_contour_max=glui_bounds->add_spinner_to_panel(ROLLOUT_line_contour,_("Max"),GLUI_SPINNER_FLOAT,
       &slice_line_contour_max,LINE_CONTOUR_VALUE,Slice_CB);
     slice_line_contour_num=1;
-    SPINNER_line_contour_num=glui_bounds->add_spinner_to_panel(PANEL_line_contour,_("Number of contours"),GLUI_SPINNER_INT,
+    SPINNER_line_contour_num=glui_bounds->add_spinner_to_panel(ROLLOUT_line_contour,_("Number of contours"),GLUI_SPINNER_INT,
       &slice_line_contour_num,LINE_CONTOUR_VALUE,Slice_CB);
-    SPINNER_line_contour_width=glui_bounds->add_spinner_to_panel(PANEL_line_contour,_("contour width"),GLUI_SPINNER_FLOAT,&slice_line_contour_width);
+    SPINNER_line_contour_width=glui_bounds->add_spinner_to_panel(ROLLOUT_line_contour,_("contour width"),GLUI_SPINNER_FLOAT,&slice_line_contour_width);
     SPINNER_line_contour_width->set_float_limits(1.0,10.0);
-      RADIO_contour_type = glui_bounds->add_radiogroup_to_panel(PANEL_line_contour,&slice_contour_type);
+      RADIO_contour_type = glui_bounds->add_radiogroup_to_panel(ROLLOUT_line_contour,&slice_contour_type);
     glui_bounds->add_radiobutton_to_group(RADIO_contour_type,"line");
 #ifdef _DEBUG
     glui_bounds->add_radiobutton_to_group(RADIO_contour_type,"stepped");
 #endif
 
-    BUTTON_update_line_contour=glui_bounds->add_button_to_panel(PANEL_line_contour,_("Update contours"),UPDATE_LINE_CONTOUR_VALUE,Slice_CB);
-    glui_bounds->add_checkbox_to_panel(PANEL_line_contour,_("Show contours"),&vis_slice_contours);
+    BUTTON_update_line_contour=glui_bounds->add_button_to_panel(ROLLOUT_line_contour,_("Update contours"),UPDATE_LINE_CONTOUR_VALUE,Slice_CB);
+    glui_bounds->add_checkbox_to_panel(ROLLOUT_line_contour,_("Show contours"),&vis_slice_contours);
 
     if(n_embedded_meshes>0){
       CHECKBOX_skip_subslice=glui_bounds->add_checkbox_to_panel(ROLLOUT_slice,_("Skip coarse sub-slice"),&skip_slice_in_embedded_mesh);
@@ -1323,7 +1351,7 @@ extern "C" void PLOT3D_CB(int var){
   switch(var){
   case UNLOAD_QDATA:
     if(cache_qdata==0){
-     PANEL_isosurface->disable();
+     ROLLOUT_isosurface->disable();
     }
     else{
       int enable_isosurface;
@@ -1342,8 +1370,8 @@ extern "C" void PLOT3D_CB(int var){
           break;
         }
       }
-      if(enable_isosurface==1)PANEL_isosurface->enable();
-      if(enable_isosurface==0)PANEL_isosurface->disable();
+      if(enable_isosurface==1)ROLLOUT_isosurface->enable();
+      if(enable_isosurface==0)ROLLOUT_isosurface->disable();
     }
     break;
   case PLOT3D_VECTORSKIP:
