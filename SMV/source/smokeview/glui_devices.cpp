@@ -118,7 +118,7 @@ extern "C" void glui_device_setup(int main_window){
     int i;
 
     PANEL_objects = glui_device->add_panel("Devices/Objects",false);
-    if(ndevicetypes>0){
+    if(get_num_activedevices()>0||isZoneFireModel==1){ 
 
       PANEL_smvobjects = glui_device->add_panel_to_panel(PANEL_objects,"Objects",true);
       SPINNER_sensorrelsize=glui_device->add_spinner_to_panel(PANEL_smvobjects,_("Scale"),GLUI_SPINNER_FLOAT,&sensorrelsize,DEVICE_sensorsize,Device_CB);

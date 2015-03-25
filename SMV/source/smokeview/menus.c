@@ -55,6 +55,7 @@ char menu_revision[]="$Revision$";
 #define OBJECT_SELECT -3
 #define OBJECT_OUTLINE -4
 #define OBJECT_ORIENTATION -5
+#define OBJECT_MISSING -6
 
 void add_scriptlist(char *file, int id);
 void update_glui_render(void);
@@ -4341,6 +4342,10 @@ void ShowObjectsMenu(int value){
     objecti = object_defs[value];
     objecti->visible = 1 - objecti->visible;
   }
+  else if(value == OBJECT_MISSING){
+    updatemenu = 1;
+    show_missing_objects = 1 - show_missing_objects;
+  }
   else if(value==OBJECT_SHOWALL){
     for(i=0;i<nobject_defs;i++){
       objecti = object_defs[i];
@@ -4362,7 +4367,7 @@ void ShowObjectsMenu(int value){
   else if(value==OBJECT_ORIENTATION){
     show_device_orientation=1-show_device_orientation;
     update_device_orientation();
-}
+  }
   else if(value==MENU_DUMMY){
   }
   else{
@@ -4553,6 +4558,39 @@ void MENU_vslice(int vec_type){
     }
     if(sd->vec_comp==0||showallslicevectors==1)glutAddMenuEntry(menulabel,i);
   }
+}
+
+/* ------------------ get_total_active_devices ------------------------ */
+
+int get_num_activedevices(void){
+  int num_activedevices = 0;
+
+  if(nobject_defs > 0){
+    int i;
+    
+    for(i = 0; i < nobject_defs; i++){
+      sv_object *obj_typei;
+
+      obj_typei = object_defs[i];
+      if(obj_typei->used_by_device == 1)num_activedevices++;
+    }
+  }
+  return num_activedevices;
+}
+
+/* ------------------ get_total_vents ------------------------ */
+
+int get_total_vents(void){
+  int ntotal_vents = 0;
+  int i;
+
+  for(i = 0; i < nmeshes; i++){
+    mesh *meshi;
+
+    meshi = meshinfo + i;
+    ntotal_vents += meshi->nvents;
+  }
+  return ntotal_vents;
 }
 
 /* ------------------ InitMenus ------------------------ */
@@ -5398,59 +5436,50 @@ updatemenu=0;
 /* --------------------------------vent menu -------------------------- */
 
   CREATEMENU(ventmenu,VentMenu);
-  {
-    int ntotal_vents=0;
 
-    for(i=0;i<nmeshes;i++){
-      mesh *meshi;
-
-      meshi=meshinfo+i;
-      ntotal_vents+=meshi->nvents;
+  if(get_total_vents()>0){
+    if(nopenvents>0){
+      if(visOpenVents==1)glutAddMenuEntry(_("*Open"),14);
+      if(visOpenVents==0)glutAddMenuEntry(_("Open"),14);
     }
-    if(ntotal_vents>0){
-      if(nopenvents>0){
-        if(visOpenVents==1)glutAddMenuEntry(_("*Open"),14);
-        if(visOpenVents==0)glutAddMenuEntry(_("Open"),14);
-      }
-      if(ndummyvents>0){
-        if(visDummyVents==1)glutAddMenuEntry(_("*Exterior"),16);
-        if(visDummyVents==0)glutAddMenuEntry(_("Exterior"),16);
-      }
-      if(ncvents>0){
-        if(visCircularVents!=VENT_HIDE)glutAddSubMenu(_("*Circular"),circularventmenu);
-        if(visCircularVents==VENT_HIDE)glutAddSubMenu(_("Circular"),circularventmenu);
-      }
-      if(ntotal_vents>nopenvents+ndummyvents){
-        if(visOtherVents==1)glutAddMenuEntry(_("*Other"),21);
-        if(visOtherVents==0)glutAddMenuEntry(_("Other"),21);
-      }
-      if(visOpenVents==1&&visDummyVents==1&&visOtherVents==1){
-        glutAddMenuEntry(_("*Show all"),SHOW_ALL_VENTS);
-      }
-      else{
-        glutAddMenuEntry(_("Show all"),SHOW_ALL_VENTS);
-      }
-      if(visOpenVents==0&&visDummyVents==0&&visOtherVents==0){
-        glutAddMenuEntry(_("*Hide all"),HIDE_ALL_VENTS);
-      }
-      else{
-        glutAddMenuEntry(_("Hide all"),HIDE_ALL_VENTS);
-      }
-      glutAddMenuEntry("-",-1);
-      if(nopenvents_nonoutline>0){
-        if(visOpenVentsAsOutline==1)glutAddMenuEntry(_("*Open vents as outlines"),15);
-        if(visOpenVentsAsOutline==0)glutAddMenuEntry(_("Open vents as outlines"),15);
-      }
-      if(have_vents_int==1){
-        if(show_bothsides_int==1)glutAddMenuEntry(_("*Two sided (interior)"),18);
-        if(show_bothsides_int==0)glutAddMenuEntry(_("Two sided (interior)"),18);
-      }
-      if(show_bothsides_ext==1)glutAddMenuEntry(_("*Two sided (exterior)"),19);
-      if(show_bothsides_ext==0)glutAddMenuEntry(_("Two sided (exterior)"),19);
-      if(nvent_transparent>0){
-        if(show_transparent_vents==1)glutAddMenuEntry(_("*Transparent"),20);
-        if(show_transparent_vents==0)glutAddMenuEntry(_("Transparent"),20);
-      }
+    if(ndummyvents>0){
+      if(visDummyVents==1)glutAddMenuEntry(_("*Exterior"),16);
+      if(visDummyVents==0)glutAddMenuEntry(_("Exterior"),16);
+    }
+    if(ncvents>0){
+      if(visCircularVents!=VENT_HIDE)glutAddSubMenu(_("*Circular"),circularventmenu);
+      if(visCircularVents==VENT_HIDE)glutAddSubMenu(_("Circular"),circularventmenu);
+    }
+    if(get_total_vents()>nopenvents+ndummyvents){
+      if(visOtherVents==1)glutAddMenuEntry(_("*Other"),21);
+      if(visOtherVents==0)glutAddMenuEntry(_("Other"),21);
+    }
+    if(visOpenVents==1&&visDummyVents==1&&visOtherVents==1){
+      glutAddMenuEntry(_("*Show all"),SHOW_ALL_VENTS);
+    }
+    else{
+      glutAddMenuEntry(_("Show all"),SHOW_ALL_VENTS);
+    }
+    if(visOpenVents==0&&visDummyVents==0&&visOtherVents==0){
+      glutAddMenuEntry(_("*Hide all"),HIDE_ALL_VENTS);
+    }
+    else{
+      glutAddMenuEntry(_("Hide all"),HIDE_ALL_VENTS);
+    }
+    glutAddMenuEntry("-",-1);
+    if(nopenvents_nonoutline>0){
+      if(visOpenVentsAsOutline==1)glutAddMenuEntry(_("*Open vents as outlines"),15);
+      if(visOpenVentsAsOutline==0)glutAddMenuEntry(_("Open vents as outlines"),15);
+    }
+    if(have_vents_int==1){
+      if(show_bothsides_int==1)glutAddMenuEntry(_("*Two sided (interior)"),18);
+      if(show_bothsides_int==0)glutAddMenuEntry(_("Two sided (interior)"),18);
+    }
+    if(show_bothsides_ext==1)glutAddMenuEntry(_("*Two sided (exterior)"),19);
+    if(show_bothsides_ext==0)glutAddMenuEntry(_("Two sided (exterior)"),19);
+    if(nvent_transparent>0){
+      if(show_transparent_vents==1)glutAddMenuEntry(_("*Transparent"),20);
+      if(show_transparent_vents==0)glutAddMenuEntry(_("Transparent"),20);
     }
   }
   
@@ -5599,6 +5628,11 @@ updatemenu=0;
         glutAddMenuEntry(obj_menu,i);
       }
     }
+    if(have_missing_objects == 1&&isZoneFireModel==0){
+      glutAddMenuEntry("-", MENU_DUMMY);
+      if(show_missing_objects==1)glutAddMenuEntry("*undefined",OBJECT_MISSING);
+      if(show_missing_objects == 0)glutAddMenuEntry("undefined",OBJECT_MISSING);
+    }
     glutAddMenuEntry("-",MENU_DUMMY);
     if(ndeviceinfo>0){
       if(select_device==1){
@@ -5628,18 +5662,8 @@ updatemenu=0;
   CREATEMENU(geometrymenu,GeometryMenu);
   if(ntotal_blockages>0)glutAddSubMenu(_("Obstacles"),blockagemenu);
   if(ngeominfo>0)glutAddSubMenu(_("Immersed Solids"),immersedmenu);
-  if(nobject_defs>0||ncvents>0){
-    int num_activedevices=0;
-
-    for(i=0;i<nobject_defs;i++){
-      sv_object *obj_typei;
-
-      obj_typei = object_defs[i];
-      if(obj_typei->used_by_device==1)num_activedevices++;
-    }
-    if(num_activedevices>0||ncvents>0){
-      glutAddSubMenu(_("Objects"),showobjectsmenu);
-    }
+  if(get_num_activedevices()>0||ncvents>0){
+    glutAddSubMenu(_("Objects"),showobjectsmenu);
   }
     //shaded 17 0
     //stepped 18 1
@@ -5649,8 +5673,8 @@ updatemenu=0;
   if(nterraininfo>0){
     glutAddSubMenu(_("Terrain"),terrain_showmenu);
   }
- glutAddSubMenu(_("Surfaces"),ventmenu);
- if(ntotal_blockages>0||isZoneFireModel==1){
+  if(get_total_vents()>0)glutAddSubMenu(_("Surfaces"), ventmenu);
+  if(ntotal_blockages>0 || isZoneFireModel == 1){
     glutAddSubMenu(_("Grid"),gridslicemenu);
   }
   if(isZoneFireModel==0){
@@ -6825,9 +6849,7 @@ updatemenu=0;
   showhide_data = 0;
   CREATEMENU(showhidemenu,ShowHideMenu);
   glutAddSubMenu(_("Data coloring"), colorbarmenu);
-  if(ntotal_blockages>0||isZoneFireModel==0){
-    glutAddSubMenu(_("Geometry"),geometrymenu);
-  }
+  glutAddSubMenu(_("Geometry"),geometrymenu);
   glutAddSubMenu(_("Labels"),labelmenu);
   glutAddSubMenu(_("Viewpoints"), resetmenu);
   glutAddMenuEntry("-", MENU_DUMMY);
@@ -7212,7 +7234,7 @@ updatemenu=0;
 
   CREATEMENU(datadialogmenu, DialogMenu);
   glutAddMenuEntry(_("Coloring..."), DIALOG_COLORING);
-  if(ndeviceinfo>0){
+  if(ndeviceinfo>0&&get_num_activedevices()>0){
     glutAddMenuEntry(_("Devices/Objects..."), DIALOG_DEVICE);
   }
   glutAddMenuEntry(_("Show/Hide..."), DIALOG_SHOWFILES);

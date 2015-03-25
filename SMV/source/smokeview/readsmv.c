@@ -967,6 +967,7 @@ void parse_device_keyword(FILE *stream, devicedata *devicei){
   if(devicei->object==missing_device&&tok3!=NULL){
     devicei->object = get_SVOBJECT_type(tok3,missing_device);
   }
+  if(devicei->object == missing_device)have_missing_objects = 1;
   devicei->params=NULL;
   devicei->times=NULL;
   devicei->vals=NULL;
@@ -8677,7 +8678,13 @@ int readini2(char *inifile, int localfile){
       update_glui_devices();
       continue;
     }
-    if(match(buffer,"DEVICEVECTORDIMENSIONS")==1){
+    if(match(buffer, "SHOWMISSINGOBJECTS") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, " %i",&show_missing_objects);
+      ONEORZERO(show_missing_objects);
+      continue;
+    }
+    if(match(buffer, "DEVICEVECTORDIMENSIONS") == 1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%f %f %f %f",&vector_baseheight,&vector_basediameter,&vector_headheight,&vector_headdiameter);
       continue;
@@ -11395,6 +11402,8 @@ void writeini_local(FILE *fileout){
   }
   fprintf(fileout, "SHOWDEVICEVALS\n");
   fprintf(fileout, " %i %i %i %i %i %i\n", showdeviceval, showvdeviceval, devicetypes_index, colordeviceval, vectortype, vispilot);
+  fprintf(fileout, "SHOWMISSINGOBJECTS\n");
+  fprintf(fileout, " %i\n", show_missing_objects);
   for(i = ntickinfo_smv; i < ntickinfo; i++){
     float *begt;
     float *endt;

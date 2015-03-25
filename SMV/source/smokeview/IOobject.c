@@ -1106,6 +1106,7 @@ void draw_SVOBJECT(sv_object *object_dev, int iframe_local, propdata *prop, int 
     object=object_dev;
   }
   if(object->visible==0&&vis_override==0)return;
+  if(object == missing_device&&show_missing_objects == 0)return;
   if(iframe_local>object->nframes-1||iframe_local<0)iframe_local=0;
   framei=object->obj_frames[iframe_local];
   frame0=object->obj_frames[0];
@@ -5404,6 +5405,7 @@ void setup_tree_devices(void){
 void setup_zone_devs(void){
   int i;
 
+  show_missing_objects = 0;
   for(i=0;i<nzoneinfo;i++){
     FILE *stream;
     char *file;

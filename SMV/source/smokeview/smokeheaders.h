@@ -6,6 +6,7 @@
 #ifndef SMOKEHEADERS_H_DEFINED
 #define SMOKEHEADERS_H_DEFINED
 
+EXTERNCPP int get_num_activedevices(void);
 #ifdef CPP
 EXTERNCPP void toggle_rollout(procdata *procinfo, int nprocinfo, int motion_id);
 #endif

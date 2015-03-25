@@ -23,6 +23,7 @@
 #include "smokeheaders.h"
 #include "threader.h"
 
+SVEXTERN int SVDECL(show_missing_objects, 1),SVDECL(have_missing_objects,0);
 SVEXTERN int SVDECL(toggle_dialogs, 1);
 SVEXTERN int SVDECL(script_render_width, 320), SVDECL(script_render_height, 240);
 SVEXTERN int SVDECL(update_makemovie, 0);
