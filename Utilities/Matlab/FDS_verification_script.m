@@ -89,7 +89,6 @@ synthetic_eddy_method
 shunn_mms_error
 openmp_timing_benchmarks
 rms_cov_corr
-backward_facing_step
 hot_layer_collapse
 radiating_polygon
 
