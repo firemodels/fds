@@ -54,32 +54,38 @@ void PlayMovie(void){
 void MakeMovie(void){
   char command_line[1024], *movie;
   char frame0[1024];
-  char moviefile[1024], moviefile_path[1024];
+  char moviefile[1024], moviefile_path[1024],overwrite_flag[3],image_ext[10], movie_frames[1024];
   int renderfiletype_save;
 
   if(render_state == ON)return;
   
-  // make movies from jpegs
-
-  renderfiletype_save = renderfiletype;
-  update_render_type(JPEG);
-
 // see if we need to render frames
+
+  
+  if(renderfiletype==JPEG){
+    strcpy(image_ext, ".jpg");
+  }
+  else{
+    strcpy(image_ext, ".png");
+  }
+
+
+// if first frame doesn't exist then generate images
 
   strcpy(frame0, movie_prefix);
   strcat(frame0, "_0001");
-  strcat(frame0, ".jpg");
-  if(runscript==0&&file_exists(frame0) == 0){
+  strcat(frame0, image_ext);
+  if(runscript==0&&file_exists(frame0)==0){
     Render_CB(RENDER_START);
     return;
   }
 
-// construct full pathname of movie and delete if it exists
+// construct full pathname of movie
 
   trim(movie_name);
   movie = trim_front(movie_name);
   strcpy(moviefile, movie);
-  strcat(moviefile, ".mp4");
+  strcat(moviefile, movie_ext);
 
   strcpy(moviefile_path, "");
   if(script_dir_path != NULL&&strlen(script_dir_path) > 0){
@@ -89,23 +95,32 @@ void MakeMovie(void){
     }
   }
   strcat(moviefile_path, moviefile);
-  if(file_exists(moviefile_path) == 1){
-    unlink(moviefile_path);
-  }
 
-  // form movie making command line
+// add -y option if overwriting movie file
 
-  sprintf(command_line, "ffmpeg -r %i -i %s", movie_framerate, movie_prefix);
-  strcat(command_line, "_%04d");
-  strcat(command_line, ".jpg");
+  strcpy(overwrite_flag, "");
+  if(overwrite_movie==1)strcpy(overwrite_flag, "-y ");
+
+// construct name of frames used to make movie
+
+  strcpy(movie_frames, movie_prefix);
+  strcat(movie_frames,"_%04d");
+  strcat(movie_frames, image_ext);
+
+  // form command line for making movie
+
+  sprintf(command_line, "ffmpeg %s -r %i -i ", overwrite_flag,movie_framerate);
+  strcat(command_line, movie_frames);
   strcat(command_line, " ");
   strcat(command_line, moviefile_path);
+
+// make movie
+
   printf("movie command=%s\n", command_line);
   system(command_line);
 
-  // restore image type and enable movie making button
+  // enable movie making button
 
-  update_render_type(renderfiletype_save);
   enable_disable_makemovie(ON);
   enable_disable_playmovie();
   update_makemovie = 0;

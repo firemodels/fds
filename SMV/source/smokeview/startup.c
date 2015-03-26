@@ -1119,6 +1119,7 @@ void init_texturedir(void){
 void initvars(void){
   int i;
 
+  strcpy(movie_ext, ".avi");
   for(i=0;i<10;i++){
     tetrabox_vis[i]=1;
   }

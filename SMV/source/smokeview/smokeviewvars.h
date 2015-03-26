@@ -23,12 +23,13 @@
 #include "smokeheaders.h"
 #include "threader.h"
 
+SVEXTERN int SVDECL(update_makemovie, 0);
+SVEXTERN char movie_name[1024], movie_prefix[1024], movie_ext[10];
+SVEXTERN int SVDECL(movie_framerate, 10), SVDECL(have_ffmpeg, 0), SVDECL(have_ffplay, 0), SVDECL(overwrite_movie, 1);
+
 SVEXTERN int SVDECL(show_missing_objects, 1),SVDECL(have_missing_objects,0);
 SVEXTERN int SVDECL(toggle_dialogs, 1);
 SVEXTERN int SVDECL(script_render_width, 320), SVDECL(script_render_height, 240);
-SVEXTERN int SVDECL(update_makemovie, 0);
-SVEXTERN char movie_name[1024], movie_prefix[1024];
-SVEXTERN int SVDECL(movie_framerate, 10), SVDECL(have_ffmpeg, 0), SVDECL(have_ffplay, 0);
 SVEXTERN int SVDECL(show_tetratest_labels, 1);
 SVEXTERN float SVDECL(tetra_line_thickness, 1.0);
 SVEXTERN float SVDECL(tetra_point_size, 1.0);
