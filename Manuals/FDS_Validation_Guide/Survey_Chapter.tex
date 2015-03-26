@@ -85,6 +85,10 @@ A  different  approach  to  wind  was  taken  by  Wang  and Joulain~\cite{Wang:I
 
 Chang and Meroney~\cite{ChangJWE2003} compared the results of FDS with the commercial CFD package FLUENT in simulating the transport of pollutants  from steady  point sources  in an  idealized urban environment. FLUENT employs a variety of RANS (Reynolds Averaged Navier-Stokes) closure methods,  whereas FDS employs large eddy simulation (LES).  The results of the numerical models were compared with wind tunnel measurements within a 1:50 scale physical model of an urban street ``canyon.''
 
+FDS has recently been applied to urban canopy modeling~\cite{Moon:2014} and wind engineering. Le~et~al.~\cite{Le:1997} modeled flow over a backward facing step using DNS with a Reynolds number of 5,100.  To verify the results, Jovic and Driver~\cite{JD:1994} supplemented the DNS simulation with an identically proportioned wind tunnel experiment.  Together, the data sets from these two studies have provided the baseline for analysis of recent simulations of flow over a backward facing step that are documented in this guide.
+
+Sarwar~et~al.~\cite{Sarwar:2013} used FDS to compare SGS eddy viscosity models. The constant Smagorinsky model performed the best, although the dynamic Smagorinsky and Deardorff models, nearly equivalent in accuracy, were found to perform better than the Vreman model.  To avoid explicit specification of inlet turbulence conditions, the authors created an extremely long inlet section to allow turbulence to develop.  
+
 
 \subsection{Atmospheric Dispersion}
 
@@ -97,7 +101,7 @@ Mouilleau and Champassith~\cite{JLP:2009} performed a validation study to assess
 \subsection{Growing Fires}
 \label{growingfires}
 
-Floyd~\cite{Floyd:5,Floyd:6} compared FDS predictions with measurements from fire tests at the Heiss-Dampf Reaktor (HDR) facility in Germany. The structure was originally the containment building for a nuclear power reactor. The cylindrical structure was 20~m in diameter and 50~m in height topped by a hemispherical dome 10~m in radius.  The building was divided into eight levels. The total volume of the building was approximately 11,000~m$^3$. From 1984 to 1991, four fire test series were performed within the HDR facility. The T51 test series consisted of eleven propane gas tests and three wood crib tests. 
+Floyd~\cite{Floyd:5,Floyd:6} compared FDS predictions with measurements from fire tests at the Heiss-Dampf Reaktor (HDR) facility in Germany. The structure was originally the containment building for a nuclear power reactor. The cylindrical structure was 20~m in diameter and 50~m in height topped by a hemispherical dome 10~m in radius.  The building was divided into eight levels. The total volume of the building was approximately 11,000~m$^3$. From 1984 to 1991, four fire test series were performed within the HDR facility. The T51 test series consisted of eleven propane gas tests and three wood crib tests.
 
 FDS predictions of fire growth and smoke movement in large spaces were performed by Kashef~\cite{Kashef:1}. The experiments were conducted at the National Research Council Canada. The tests were performed in a compartment with dimensions of 9~m by 6~m by 5.5~m with 32 exhaust inlets and a single supply fan. A burner generated fires ranging in size from 15~kW to 1000~kW.
 
@@ -111,7 +115,7 @@ For example, FDS (or its core algorithms) have been used at a grid resolution of
 
 FDS flame spread predictions were compared to experiments over a 5~m slab of PMMA performed by Factory Mutual Research Corporation (FMRC)~\cite{Ma:2,Ma:3}.
 
-A  charring model  was  implemented in  FDS  by Hostikka  and McGrattan~\cite{Hostikka:2}. The model was a simplification of work done at NIST by Ritchie et al.~\cite{Ritchie:1}. The charring model was first used to predict the burning rate of a small wooden sample in the cone calorimeter. Full-scale room tests with wood paneling were modeled, but the results were grid-dependent. This was likely a consequence of the gas phase spatial resolution, rather than the solid phase. 
+A  charring model  was  implemented in  FDS  by Hostikka  and McGrattan~\cite{Hostikka:2}. The model was a simplification of work done at NIST by Ritchie et al.~\cite{Ritchie:1}. The charring model was first used to predict the burning rate of a small wooden sample in the cone calorimeter. Full-scale room tests with wood paneling were modeled, but the results were grid-dependent. This was likely a consequence of the gas phase spatial resolution, rather than the solid phase.
 
 Kwon et al.~\cite{Kwon:Fire_Technology_2007} performed three simulations to evaluate the capability of FDS, version 4, in predicting upward flame spread. The FDS predictions were compared with empirical correlations and experimental data for upward flame spread on a 5~m PMMA panel. A simplified flame spread model was also applied to assess the simulation results.
 
@@ -263,11 +267,11 @@ ASTM E 1355 states that a model may be evaluated by comparing it with ``Document
 Often the term ``reconstruction'' is applied to this type of simulation, because the model is used to reconstruct events based on evidence collected during and after the fire. Some of the more notable studies performed at NIST include:
 \begin{itemize}
 \item McGrattan, Bouldin, and Forney simulated the fires within the World Trade Center towers and Building 7 on September 11, 2001~\cite{NIST_NCSTAR_1-5F}.
-\item Grosshandler et al.~investigated the fire that occurred at the Station Nightclub in Rhode Island in February, 2003~\cite{Grosshandler:Station}. 
-\item Madrzykowski and Vettori examined a fire in a townhouse in Washington, D.C., where two fire fighters were killed and one severely injured in 1999~\cite{Madrzykowski:1}. 
-\item Vettori, Madrzykowski, and Walton simulated a fire in a Houston restaurant that killed two fire fighters in 2000~\cite{Texas}. 
-\item Madrzykowski, Forney and Walton simulated a fire that killed three children and three fire fighters in a two story duplex house in Iowa in 1999~\cite{Iowa}. 
-\item Madrzykowski and Walton investigated the fire in the Cook County (Chicago) Administration Building in October, 2003, that killed six people trapped in a stairwell~\cite{Cook_County}. 
+\item Grosshandler et al.~investigated the fire that occurred at the Station Nightclub in Rhode Island in February, 2003~\cite{Grosshandler:Station}.
+\item Madrzykowski and Vettori examined a fire in a townhouse in Washington, D.C., where two fire fighters were killed and one severely injured in 1999~\cite{Madrzykowski:1}.
+\item Vettori, Madrzykowski, and Walton simulated a fire in a Houston restaurant that killed two fire fighters in 2000~\cite{Texas}.
+\item Madrzykowski, Forney and Walton simulated a fire that killed three children and three fire fighters in a two story duplex house in Iowa in 1999~\cite{Iowa}.
+\item Madrzykowski and Walton investigated the fire in the Cook County (Chicago) Administration Building in October, 2003, that killed six people trapped in a stairwell~\cite{Cook_County}.
 \item Bryner~et~al.~simulated a fire in a large furniture store that occurred in June, 2007, killing nine fire fighters~\cite{Bryner:Charleston}.
 \end{itemize}
 Outside of NIST, FDS has been used to investigate many actual fires, but very few of these studies are documented in the literature. Exceptions
