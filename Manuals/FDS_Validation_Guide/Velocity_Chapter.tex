@@ -65,6 +65,44 @@ upper-most probe.
 
 \clearpage
 
+\section{Backward Facing Step}
+
+A snapshot the instantaneous velocity contours of the flow over a backward facing step is shown in Fig.~\ref{fig:vel_slice}. The dimensions of the tunnel are given in Fig.~\ref{tunnel_drawing}. Virtual measurement devices are placed throughout the channel to collect data relating to flow characteristics such as velocity, turbulence RMS velocity, and friction velocity.  These virtual measurement devices are placed into lines, four vertical and one horizontal, with a device in the volumetric center of each grid cell.  A vertical line device is placed within the inlet region at a location of $x=-3h$, and three line devices are placed in the post-step region at locations of $4h$, $6h$, and $10h$. The post-step vertical line devices are placed accordingly to sample the recirculation, reattachment, and recovery regions.  A horizontal line device is used to sample data directly adjacent to the bottom wall of the channel in the post-step region ($0h$ to $20h$).
+
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[width=\textwidth]{FIGURES/Backward_Facing_Step/backward_facing_step_vel_slice}
+    \caption[Instantaneous contours of velocity magnitude]{Instantaneous contours of velocity magnitude.}
+    \label{fig:vel_slice}
+\end{figure}
+
+The profile of the inlet streamwise velocity component, $\overline{u}(z)$, is specified using experimental data provided by Jovic and Driver~\cite{JD:1994}, while the transverse components, $\overline{v}(z)$ and $\overline{w}(z)$, are set to zero.  Turbulent eddies are injected using the Synthetic Eddy Method of Jarrin~\cite{Jarrin:2008}.  Eddies are injected at random locations in the bottom two inlets, advected with the flow over a distance equal to the maximum eddy length scale and recycled at the inlet.  The inlet maximum eddy length scale is 0.03~m, the number of eddies is 100, and the RMS velocity is set to 0.5~m/s for the middle inlet and 1.0~m/s for the bottom inlet to match the measured inlet data at $x/h=-3$ as closely as possible.
+
+The boundary conditions for velocity and pressure on the top of the domain are ``mirror'', that is, zero gradient.  The spanwise boundaries are periodic.  The outlet boundary is ``open''.
+
+Figure~\ref{fig:friction_pressure_coefficients} shows the longitudinal profiles of the friction coefficient (left) and the pressure coefficient (right).  The $x/h$ location where $C_f$ crosses zero is the reattachment length, a key validation metric for this flow. The measured value is approximately 6. Figure~\ref{fig:flow_profiles} shows the inlet ($x/h=-3$) and downstream mean and covariance profiles.
+
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[scale=.49]{SCRIPT_FIGURES/Backward_Facing_Step/backward_facing_step_Cf}
+    \includegraphics[scale=.49]{SCRIPT_FIGURES/Backward_Facing_Step/backward_facing_step_Cp}
+    \caption[Friction coefficient and pressure coefficient]{Longitudinal profiles of (left) friction coefficient and (right) pressure coefficient.}
+    \label{fig:friction_pressure_coefficients}
+\end{figure}
+
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[scale=.47]{SCRIPT_FIGURES/Backward_Facing_Step/backward_facing_step_U}
+    \includegraphics[scale=.47]{SCRIPT_FIGURES/Backward_Facing_Step/backward_facing_step_W}\\
+    \includegraphics[scale=.47]{SCRIPT_FIGURES/Backward_Facing_Step/backward_facing_step_uu}
+    \includegraphics[scale=.47]{SCRIPT_FIGURES/Backward_Facing_Step/backward_facing_step_ww}\\
+    \includegraphics[scale=.47]{SCRIPT_FIGURES/Backward_Facing_Step/backward_facing_step_uw}
+    \caption[Flow profiles]{Flow profiles for various grid resolutions.  Symbols: --$\mathlarger{\mathlarger{\star}}$--, $h/\delta z$=5; --$\Box$--, $h/\delta z$=10; --$\Diamond$--, $h/\delta z$=20; $\mathlarger{\mathlarger{\boldsymbol\circ}}$, J\&D experimental data.}
+    \label{fig:flow_profiles}
+\end{figure}
+
+
+\clearpage
 
 \section{Bryant Doorway Experiments}
 
