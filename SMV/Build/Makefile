@@ -87,6 +87,20 @@ WIN_LIBS = user32.lib gdi32.lib comdlg32.lib shell32.lib
 WIN_LIBDIR_64 = $(LIB_DIR)/lib_win_intel_64
 SMV_LIBS_64 = $(WIN_LIBDIR_64)\glui.lib $(WIN_LIBDIR_64)\glut32.lib $(WIN_LIBDIR_64)\gd.lib $(WIN_LIBDIR_64)\jpeg.lib $(WIN_LIBDIR_64)\png.lib $(WIN_LIBDIR_64)\zlib.lib $(WIN_LIBDIR_64)\pthreads.lib
 
+# ------------- ms_win_64 ----------------
+
+ms_win_64 : INC = -I ../../source/include -I ../../source/shared -I ../../source/smokeview -I ../../source/glew
+ms_win_64 : FFLAGS    = -O2 /iface:stdref /fpp
+ms_win_64 : CFLAGS    = -O1 -D WIN32 -D _CONSOLE -D X64 -D GLEW_STATIC -D PTW32_STATIC_LIB $(SMV_TESTFLAG)
+ms_win_64 : LFLAGS    = /F32768000 
+ms_win_64 : CC        = cl
+ms_win_64 : CPP       = cl
+ms_win_64 : FC        = ifort
+ms_win_64 : exe       = smokeview_win_$(SMV_TESTSTRING)64
+
+ms_win_64 : $(objwin)
+	$(CPP) -o $(bin)/$(exe) $(LFLAGS) $(objwin) $(WIN_LIBS) $(SMV_LIBS_64)
+
 # ------------- intel_win_64_db ----------------
 
 intel_win_64_db : INC = -I ../../source/include -I ../../source/shared -I ../../source/smokeview -I ../../source/glew
