@@ -73,9 +73,9 @@ char *get_moviefile_path(char *moviefile_path){
 /* ------------------ MakeMovie ------------------------ */
 
 void MakeMovie(void){
-  char command_line[1024], *movie;
+  char command_line[1024];
   char frame0[1024];
-  char moviefile[1024], moviefile_path[1024],overwrite_flag[10],image_ext[10], movie_frames[1024];
+  char moviefile_path[1024],overwrite_flag[10],image_ext[10], movie_frames[1024];
   int make_movie_now=1;
 
 // wait to make movie until after images are rendered
