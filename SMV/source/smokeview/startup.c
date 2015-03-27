@@ -1119,7 +1119,15 @@ void init_texturedir(void){
 void initvars(void){
   int i;
 
-  strcpy(movie_ext, ".avi");
+  if(moviefiletype==WMV){
+    strcpy(movie_ext, ".wmv");
+  }
+  else if(moviefiletype==MP4){
+    strcpy(movie_ext, ".mp4");
+  }
+  else{
+    strcpy(movie_ext, ".avi");
+  }
   for(i=0;i<10;i++){
     tetrabox_vis[i]=1;
   }

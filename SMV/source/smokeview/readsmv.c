@@ -9955,7 +9955,7 @@ int readini2(char *inifile, int localfile){
     }
     if(match(buffer,"RENDERFILETYPE")==1){
       fgets(buffer,255,stream);
-      sscanf(buffer,"%i ",&renderfiletype);
+      sscanf(buffer,"%i %i",&renderfiletype,&moviefiletype);
       continue;
     }
     if(match(buffer,"RENDERFILELABEL")==1){
@@ -12101,7 +12101,7 @@ void writeini(int flag,char *filename){
   fprintf(fileout, "RENDERFILELABEL\n");
   fprintf(fileout, " %i\n", renderfilelabel);
   fprintf(fileout, "RENDERFILETYPE\n");
-  fprintf(fileout," %i\n",renderfiletype);
+  fprintf(fileout," %i %i\n",renderfiletype,moviefiletype);
   if(nskyboxinfo>0){
     int iskybox;
     skyboxdata *skyi;

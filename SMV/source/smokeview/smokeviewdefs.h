@@ -16,6 +16,10 @@ void _Sniff_Errors(char *whereat);
 #define PNG 0
 #define JPEG 1
 
+#define AVI 0
+#define MP4 1
+#define WMV 2
+
 #define EXTERNAL_LIST_ID 1
 
 #define TEXTURE_SPHERICAL 0

@@ -63,6 +63,7 @@ char glui_motion_revision[]="$Revision$";
 #define RENDER_STOP 4
 #define RENDER_LABEL 5
 #define RENDER_MULTIPLIER 6
+#define MOVIE_TYPE 7
 
 #define SLICE_ROLLOUT 0
 #define VIEWPOINTS_ROLLOUT 1
@@ -80,6 +81,7 @@ void Motion_Rollout_CB(int var);
 
 GLUI *glui_motion=NULL;
 
+GLUI_Panel *PANEL_movie_type = NULL;
 GLUI_Panel *PANEL_motion = NULL;
 GLUI_Panel *PANEL_viewA = NULL;
 GLUI_Panel *PANEL_user_center = NULL;
@@ -152,6 +154,7 @@ GLUI_Translation *TRANSLATE_z=NULL,*TRANSLATE_xy=NULL;
 GLUI_RadioGroup *RADIO_projection=NULL,*RADIO_rotation_type=NULL;
 GLUI_RadioGroup *RADIO_render_type=NULL;
 GLUI_RadioGroup *RADIO_render_label=NULL;
+GLUI_RadioGroup *RADIO_movie_type = NULL;
 
 GLUI_RadioButton *RADIOBUTTON_1a=NULL;
 GLUI_RadioButton *RADIOBUTTON_1b=NULL;
@@ -689,10 +692,15 @@ extern "C" void glui_motion_setup(int main_window){
   if(have_ffmpeg == 1){
     ROLLOUT_make_movie = glui_motion->add_rollout_to_panel(ROLLOUT_render, "Movie", false);
     CHECKBOX_overwrite_movie = glui_motion->add_checkbox_to_panel(ROLLOUT_make_movie, "overwrite movie", &overwrite_movie);
+    EDIT_movie_name = glui_motion->add_edittext_to_panel(ROLLOUT_make_movie, "movie prefix:", GLUI_EDITTEXT_TEXT, movie_name, MOVIE_NAME, Render_CB);
+    EDIT_movie_name->set_w(200);
+    PANEL_movie_type = glui_motion->add_panel_to_panel(ROLLOUT_make_movie, "movie type:", true);
+    RADIO_movie_type = glui_motion->add_radiogroup_to_panel(PANEL_movie_type, &moviefiletype, MOVIE_TYPE, Render_CB);
+    glui_motion->add_radiobutton_to_group(RADIO_movie_type, "avi");
+    glui_motion->add_radiobutton_to_group(RADIO_movie_type, "mp4");
+    glui_motion->add_radiobutton_to_group(RADIO_movie_type, "wmv");
     SPINNER_framerate = glui_motion->add_spinner_to_panel(ROLLOUT_make_movie, "frame rate", GLUI_SPINNER_INT, &movie_framerate);
     SPINNER_framerate->set_int_limits(1, 100);
-    EDIT_movie_name = glui_motion->add_edittext_to_panel(ROLLOUT_make_movie, "name:", GLUI_EDITTEXT_TEXT, movie_name, MOVIE_NAME, Render_CB);
-    EDIT_movie_name->set_w(200);
     BUTTON_make_movie = glui_motion->add_button_to_panel(ROLLOUT_make_movie, "Make", MAKE_MOVIE, Render_CB);
     if(have_ffplay == 1){
       BUTTON_play_movie = glui_motion->add_button_to_panel(ROLLOUT_make_movie, "Play", PLAY_MOVIE, Render_CB);
@@ -1694,6 +1702,17 @@ void Render_CB(int var){
     case RENDER_LABEL:
       break;
     case RENDER_TYPE:
+      break;
+    case MOVIE_TYPE:
+      if(moviefiletype==WMV){
+        strcpy(movie_ext, ".wmv");
+      }
+      else if(moviefiletype==MP4){
+        strcpy(movie_ext, ".mp4");
+      }
+      else{
+        strcpy(movie_ext, ".avi");
+      }
       break;
     case RENDER_MULTIPLIER:
       break;
