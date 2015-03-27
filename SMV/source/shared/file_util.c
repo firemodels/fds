@@ -428,12 +428,11 @@ int file_exists(char *filename){
 #else
   STRUCTSTAT statbuffer;
 
-  if(filename==NULL)return 0;
-  if(STAT(filename,&statbuffer)==0){
-    return 1;
+  if(filename==NULL||STAT(filename,&statbuffer)!=0){
+    return 0;
   }
   else{
-    return 0;
+    return 1;
   }
 #endif
 }
