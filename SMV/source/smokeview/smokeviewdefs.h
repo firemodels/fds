@@ -581,6 +581,7 @@ void _Sniff_Errors(char *whereat);
 #define DIALOG_COLORING 40
 #define DIALOG_SCALING 41
 #define DIALOG_WINDOW 42
+#define DIALOG_MOVIE 43
 
 #define UNLOAD_LAST -2
 

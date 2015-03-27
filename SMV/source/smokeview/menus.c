@@ -7208,11 +7208,9 @@ updatemenu=0;
   }
 #endif
   glutAddMenuEntry(_("Save/load configuration files..."), DIALOG_CONFIG);
+  glutAddMenuEntry(_("Render images..."), DIALOG_RENDER);
   if(have_ffmpeg==1){
-    glutAddMenuEntry(_("Render images/movies..."), DIALOG_RENDER);
-  }
-  else{
-    glutAddMenuEntry(_("Render images..."), DIALOG_RENDER);
+    glutAddMenuEntry(_("Make movies..."), DIALOG_MOVIE);
   }
   glutAddMenuEntry(_("Record/run scripts..."), DIALOG_SCRIPT);
 

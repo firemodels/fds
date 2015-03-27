@@ -73,6 +73,7 @@ char glui_motion_revision[]="$Revision$";
 #define TRANSLATEROTATE_ROLLOUT 5  
 #define ROTATION_ROLLOUT 6  
 #define ORIENTATION_ROLLOUT 7
+#define MOVIE_ROLLOUT 8
 
 void Motion_DLG_CB(int var);
 void Viewpoint_CB(int var);
@@ -188,7 +189,7 @@ GLUI_Listbox *LIST_render_skip=NULL;
 
 void enable_disable_views(void);
 
-procdata motionprocinfo[8];
+procdata motionprocinfo[9];
 int nmotionprocinfo = 0;
 
 /* ------------------ Motion_Rollout_CB ------------------------ */
@@ -690,7 +691,9 @@ extern "C" void glui_motion_setup(int main_window){
   BUTTON_render_stop = glui_motion->add_button_to_panel(ROLLOUT_render, _("Stop"), RENDER_STOP, Render_CB);
 
   if(have_ffmpeg == 1){
-    ROLLOUT_make_movie = glui_motion->add_rollout_to_panel(ROLLOUT_render, "Movie", false);
+    ROLLOUT_make_movie = glui_motion->add_rollout("Movie", false, MOVIE_ROLLOUT,Motion_Rollout_CB);
+    ADDPROCINFO(motionprocinfo, nmotionprocinfo, ROLLOUT_make_movie, MOVIE_ROLLOUT);
+
     CHECKBOX_overwrite_movie = glui_motion->add_checkbox_to_panel(ROLLOUT_make_movie, "overwrite movie", &overwrite_movie);
     EDIT_movie_name = glui_motion->add_edittext_to_panel(ROLLOUT_make_movie, "movie prefix:", GLUI_EDITTEXT_TEXT, movie_name, MOVIE_NAME, Render_CB);
     EDIT_movie_name->set_w(200);
@@ -1398,6 +1401,9 @@ extern "C" void show_glui_motion(int menu_id){
       break;
     case DIALOG_RENDER:
       Motion_Rollout_CB(RENDER_ROLLOUT);
+      break;
+    case DIALOG_MOVIE:
+      Motion_Rollout_CB(MOVIE_ROLLOUT);
       break;
     case DIALOG_WINDOW:
       Motion_Rollout_CB(WINDOW_ROLLOUT);
