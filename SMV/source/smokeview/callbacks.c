@@ -1381,20 +1381,28 @@ void keyboard(unsigned char key, int flag){
       break;
     case 'b':
     case 'B':
-      showall_boundary=1-showall_boundary;
-      if(showall_boundary==1){
-        ShowPatchMenu(SHOWALL_BOUNDARY);
-        if(key2=='B'){
-          VentMenu(HIDE_ALL_VENTS);
-          BlockageMenu(visBLOCKHide);
+      switch(keystate){
+      case GLUT_ACTIVE_ALT:
+        DialogMenu(DIALOG_BOUNDS); // clip dialog
+        break;
+      case GLUT_ACTIVE_CTRL:
+      default:
+        showall_boundary = 1-showall_boundary;
+        if(showall_boundary==1){
+          ShowPatchMenu(SHOWALL_BOUNDARY);
+          if(key2=='B'){
+            VentMenu(HIDE_ALL_VENTS);
+            BlockageMenu(visBLOCKHide);
+          }
+          }
+        else{
+          ShowPatchMenu(HIDEALL_BOUNDARY);
+          if(key2=='B'){
+            VentMenu(SHOW_ALL_VENTS);
+            BlockageMenu(visBLOCKAsInput);
+          }
         }
-      }
-      else{
-        ShowPatchMenu(HIDEALL_BOUNDARY);
-        if(key2=='B'){
-          VentMenu(SHOW_ALL_VENTS);
-          BlockageMenu(visBLOCKAsInput);
-        }
+        break;
       }
       break;
     case 'c':
@@ -1500,6 +1508,8 @@ void keyboard(unsigned char key, int flag){
     case 'g':
       switch(keystate){
       case GLUT_ACTIVE_ALT:
+        DialogMenu(DIALOG_VIEW);
+        break;
       case GLUT_ACTIVE_CTRL:
       default:
         if(ntotal_blockages>0||isZoneFireModel==0||(isZoneFireModel==1&&ntrnx>0)){

@@ -7219,7 +7219,6 @@ updatemenu=0;
   /* --------------------------------viewdialog menu -------------------------- */
 
   CREATEMENU(viewdialogmenu, DialogMenu);
-  glutAddMenuEntry(_("Clip scene...  ALT c"), DIALOG_CLIP);
   glutAddMenuEntry(_("Create/edit tours...  ALT t"), DIALOG_TOUR);
   glutAddMenuEntry(_("Edit colorbar...  ALT C"), DIALOG_COLORBAR);
   if(isZoneFireModel==0){
@@ -7257,10 +7256,11 @@ updatemenu=0;
 
   CREATEMENU(dialogmenu,DialogMenu);
 
-  glutAddMenuEntry(_("Data bounds..."), DIALOG_BOUNDS);
+  glutAddMenuEntry(_("Clip scene...  ALT c"), DIALOG_CLIP);
+  glutAddMenuEntry(_("Data bounds... ALT b"), DIALOG_BOUNDS);
   glutAddMenuEntry(_("Display...  ALT d"), DIALOG_DISPLAY);
   glutAddMenuEntry(_("Motion...  ALT m"),DIALOG_MOTION);
-  glutAddMenuEntry(_("Viewpoints..."),DIALOG_VIEW);
+  glutAddMenuEntry(_("Viewpoints... ALT g"),DIALOG_VIEW);
 
   glutAddMenuEntry("-",-1);
 
