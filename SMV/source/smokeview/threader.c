@@ -60,8 +60,43 @@ void *mt_update_smooth_blockages(void *arg){
   }
   pthread_exit(NULL);
   return NULL;
+}
+#endif
 
-   }
+/* ------------------ system ------------------------ */
+
+#ifdef pp_THREAD
+void *mt_psystem(void *arg){
+  char command_line[1024], moviefile_path[1024];
+
+  if(file_exists(get_moviefile_path(moviefile_path))==1){
+#ifdef WIN32
+    strcpy(command_line, "ffplay ");
+#else
+    strcpy(command_line, "ffserver ");
+#endif
+    strcat(command_line, moviefile_path);
+#ifdef WIN32
+    strcat(command_line, " 2>Nul ");
+#else
+    strcat(command_line, " 2>/dev/null ");
+#endif
+    play_movie_now = 0;
+    update_playmovie = 1;
+    system(command_line);
+    play_movie_now = 1;
+    update_playmovie = 1;
+  }
+  pthread_exit(NULL);
+  return NULL;
+}
+void psystem(char *commandline){
+  pthread_create(&system_thread_id, NULL, mt_psystem, NULL);
+}
+#else
+void psytem(char *commandline){
+  system(commandline)
+}
 #endif
 
 /* ------------------ smooth_blockages ------------------------ */

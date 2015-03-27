@@ -216,7 +216,7 @@ void update_render_start_button(void){
 void enable_disable_playmovie(void){
   char moviefile_path[1024];
  
-  if(file_exists(get_moviefile_path(moviefile_path)) == 1){
+  if(file_exists(get_moviefile_path(moviefile_path)) == 1&&play_movie_now==1){
     if(BUTTON_play_movie != NULL)BUTTON_play_movie->enable();
   }
   else{

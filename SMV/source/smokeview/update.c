@@ -1806,6 +1806,10 @@ void update_smoothblockage_info(void){
 /* ------------------ update_ShowScene ------------------------ */
 
 void update_ShowScene(void){
+  if(update_playmovie==1){
+    enable_disable_playmovie();
+    update_playmovie = 0;
+  }
   update_render_start_button();
   if(update_makemovie == 1)MakeMovie();
   if(compute_fed == 1)DefineAllFEDs();
