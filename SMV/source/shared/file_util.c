@@ -428,6 +428,7 @@ int file_exists(char *filename){
 #else
   STRUCTSTAT statbuffer;
 
+  if(filename==NULL)return 0;
   if(STAT(filename,&statbuffer)==0){
     return 1;
   }

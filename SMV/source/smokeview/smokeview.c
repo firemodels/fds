@@ -306,7 +306,7 @@ void parse_commandline(int argc, char **argv){
   NewMemory((void **)&fdsprefix,(unsigned int)len_memory);
   STRCPY(fdsprefix,argi);
   strcpy(movie_name, fdsprefix);
-  strcpy(movie_prefix, fdsprefix);
+  strcpy(render_file_base, fdsprefix);
   FREEMEMORY(trainer_filename);
   FREEMEMORY(test_filename);
   FREEMEMORY(smoothblockage_filename);
@@ -329,7 +329,7 @@ void parse_commandline(int argc, char **argv){
         c_ext[0]=0;
         STRCPY(fdsprefix,argi);
         strcpy(movie_name, fdsprefix);
-        strcpy(movie_prefix, fdsprefix);
+        strcpy(render_file_base, fdsprefix);
         FREEMEMORY(trainer_filename);
         NewMemory((void **)&trainer_filename,(unsigned int)(len_casename+7));
         STRCPY(trainer_filename,argi);

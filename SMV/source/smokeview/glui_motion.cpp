@@ -144,6 +144,7 @@ GLUI_Checkbox *CHECKBOX_blockpath=NULL,*CHECKBOX_cursor_blockpath=NULL;
 GLUI_Checkbox *CHECKBOX_gslice_data=NULL;
 GLUI_Checkbox *CHECKBOX_gvec_down=NULL;
 GLUI_Checkbox *CHECKBOX_showgravity=NULL;
+GLUI_Checkbox *CHECKBOX_overwrite_movie = NULL;
 
 GLUI_Translation *ROTATE_2axis=NULL,*ROTATE_eye_z=NULL;
 GLUI_Translation *TRANSLATE_z=NULL,*TRANSLATE_xy=NULL;
@@ -174,6 +175,7 @@ GLUI_Button *BUTTON_play_movie = NULL;
 
 GLUI_EditText *EDIT_view_label=NULL;
 GLUI_EditText *EDIT_movie_name = NULL;
+GLUI_EditText *EDIT_render_file_base = NULL;
 
 GLUI_Listbox *LIST_viewpoints=NULL;
 GLUI_Listbox *LIST_windowsize=NULL;
@@ -209,9 +211,9 @@ void update_render_start_button(void){
 /* ------------------ enable_disable_playmovie ------------------------ */
 
 void enable_disable_playmovie(void){
-  char moviefile[1024];
-  
-  if(does_movie_exist(movie_name, moviefile) == 1){
+  char moviefile_path[1024];
+ 
+  if(file_exists(get_moviefile_path(moviefile_path)) == 1){
     if(BUTTON_play_movie != NULL)BUTTON_play_movie->enable();
   }
   else{
@@ -631,17 +633,20 @@ extern "C" void glui_motion_setup(int main_window){
   ROLLOUT_render = glui_motion->add_rollout(_("Render"), false,RENDER_ROLLOUT,Motion_Rollout_CB);
   ADDPROCINFO(motionprocinfo,nmotionprocinfo,ROLLOUT_render,RENDER_ROLLOUT);
 
-  PANEL_file_type = glui_motion->add_panel_to_panel(ROLLOUT_render, "file type:", true);
-  RADIO_render_type = glui_motion->add_radiogroup_to_panel(PANEL_file_type, &renderfiletype, RENDER_TYPE, Render_CB);
-  glui_motion->add_radiobutton_to_group(RADIO_render_type, "PNG");
-  glui_motion->add_radiobutton_to_group(RADIO_render_type, "JPEG");
+  EDIT_render_file_base = glui_motion->add_edittext_to_panel(ROLLOUT_render, "file prefix:", GLUI_EDITTEXT_TEXT, render_file_base);
+  EDIT_render_file_base->set_w(200);
 
   PANEL_file_suffix = glui_motion->add_panel_to_panel(ROLLOUT_render, "file suffix:", true);
   RADIO_render_label = glui_motion->add_radiogroup_to_panel(PANEL_file_suffix, &renderfilelabel, RENDER_LABEL, Render_CB);
   RADIOBUTTON_1f = glui_motion->add_radiobutton_to_group(RADIO_render_label, "frame number");
   RADIOBUTTON_1g = glui_motion->add_radiobutton_to_group(RADIO_render_label, "time (s)");
-  update_glui_filelabel(renderfilelabel);
 
+  PANEL_file_type = glui_motion->add_panel_to_panel(ROLLOUT_render, "file type:", true);
+  RADIO_render_type = glui_motion->add_radiogroup_to_panel(PANEL_file_type, &renderfiletype, RENDER_TYPE, Render_CB);
+  glui_motion->add_radiobutton_to_group(RADIO_render_type, "png");
+  glui_motion->add_radiobutton_to_group(RADIO_render_type, "jpg");
+
+  update_glui_filelabel(renderfilelabel);
 
   render_size_index = RenderWindow;
   LIST_render_size = glui_motion->add_listbox_to_panel(ROLLOUT_render, _("Resolution:"), &render_size_index, RENDER_RESOLUTION, Render_CB);
@@ -663,7 +668,6 @@ extern "C" void glui_motion_setup(int main_window){
   LIST_render_skip->add_item(10, _("Every 10th"));
   LIST_render_skip->add_item(20, _("Every 20th"));
 
-
   ROLLOUT_scene_clip = glui_motion->add_rollout_to_panel(ROLLOUT_render, "Clip rendered scene", false);
   SPINNER_clip_left = glui_motion->add_spinner_to_panel(ROLLOUT_scene_clip, "left:", GLUI_SPINNER_INT, &render_clip_left);
   SPINNER_clip_left->set_int_limits(0, screenWidth);
@@ -684,6 +688,7 @@ extern "C" void glui_motion_setup(int main_window){
 
   if(have_ffmpeg == 1){
     ROLLOUT_make_movie = glui_motion->add_rollout_to_panel(ROLLOUT_render, "Movie", false);
+    CHECKBOX_overwrite_movie = glui_motion->add_checkbox_to_panel(ROLLOUT_make_movie, "overwrite movie", &overwrite_movie);
     SPINNER_framerate = glui_motion->add_spinner_to_panel(ROLLOUT_make_movie, "frame rate", GLUI_SPINNER_INT, &movie_framerate);
     SPINNER_framerate->set_int_limits(1, 100);
     EDIT_movie_name = glui_motion->add_edittext_to_panel(ROLLOUT_make_movie, "name:", GLUI_EDITTEXT_TEXT, movie_name, MOVIE_NAME, Render_CB);

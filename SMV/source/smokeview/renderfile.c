@@ -37,31 +37,51 @@ int does_movie_exist(char *mov_name, char *moviefile){
 /* ------------------ PlayMovie ------------------------ */
 
 void PlayMovie(void){
-  char command_line[1024], moviefile[1024];
-
-  if(does_movie_exist(movie_name,moviefile)==1){
+  char command_line[1024], moviefile_path[1024];
+  
+  if(file_exists(get_moviefile_path(moviefile_path)) == 1){
     strcpy(command_line, "ffplay ");
-    strcat(command_line,moviefile);
+    strcat(command_line,moviefile_path);
     system(command_line);
   }
   else{
-    PRINTF("*** Error: the movie file, %s, does not exist\n", moviefile);
+    PRINTF("*** Error: the movie file, %s, does not exist\n", moviefile_path);
   }
 }  
+
+/* ------------------ get_moviefile_path ------------------------ */
+
+char *get_moviefile_path(char *moviefile_path){
+  char moviefile[1024], *movie;
+
+  trim(movie_name);
+  movie = trim_front(movie_name);
+  strcpy(moviefile, movie);
+  strcat(moviefile, movie_ext);
+  strcpy(moviefile_path, "");
+
+  // if a script is running  prepend path defined in script
+
+  if(script_dir_path != NULL&&strlen(script_dir_path) > 0){
+    strcat(moviefile_path, script_dir_path);
+    strcat(moviefile_path, dirseparator);
+  }
+  strcat(moviefile_path, moviefile);
+  return moviefile_path;
+}
 
 /* ------------------ MakeMovie ------------------------ */
 
 void MakeMovie(void){
   char command_line[1024], *movie;
   char frame0[1024];
-  char moviefile[1024], moviefile_path[1024],overwrite_flag[3],image_ext[10], movie_frames[1024];
-  int renderfiletype_save;
+  char moviefile[1024], moviefile_path[1024],overwrite_flag[10],image_ext[10], movie_frames[1024];
+  int make_movie_now=1;
+
+// wait to make movie until after images are rendered
 
   if(render_state == ON)return;
-  
-// see if we need to render frames
 
-  
   if(renderfiletype==JPEG){
     strcpy(image_ext, ".jpg");
   }
@@ -69,10 +89,9 @@ void MakeMovie(void){
     strcpy(image_ext, ".png");
   }
 
+// if the first frame doesn't exist then generate images
 
-// if first frame doesn't exist then generate images
-
-  strcpy(frame0, movie_prefix);
+  strcpy(frame0, render_file_base);
   strcat(frame0, "_0001");
   strcat(frame0, image_ext);
   if(runscript==0&&file_exists(frame0)==0){
@@ -82,50 +101,48 @@ void MakeMovie(void){
 
 // construct full pathname of movie
 
-  trim(movie_name);
-  movie = trim_front(movie_name);
-  strcpy(moviefile, movie);
-  strcat(moviefile, movie_ext);
-
-  strcpy(moviefile_path, "");
-  if(script_dir_path != NULL&&strlen(script_dir_path) > 0){
-    if(strlen(script_dir_path) != 2 || script_dir_path[0] != '.' || script_dir_path[1] != dirseparator[0]){
-      strcat(moviefile_path, script_dir_path);
-      strcat(moviefile_path, dirseparator);
-    }
-  }
-  strcat(moviefile_path, moviefile);
+  get_moviefile_path(moviefile_path);
 
 // add -y option if overwriting movie file
 
-  strcpy(overwrite_flag, "");
-  if(overwrite_movie==1)strcpy(overwrite_flag, "-y ");
+  if(overwrite_movie == 1){
+    strcpy(overwrite_flag, "-y ");
+  }
+  else{
+    strcpy(overwrite_flag, "");
+    if(file_exists(moviefile_path) == 1&&script_dir_path==NULL){
+       PRINTF("*** Warning: The movie file %s exists.  Set movie overwrite checkbox in movie dialog box.\n",moviefile_path);
+       make_movie_now=0;
+    }
+  }
 
+
+  if(make_movie_now==1){  
 // construct name of frames used to make movie
 
-  strcpy(movie_frames, movie_prefix);
-  strcat(movie_frames,"_%04d");
-  strcat(movie_frames, image_ext);
+    strcpy(movie_frames, render_file_base);
+    strcat(movie_frames,"_%04d");
+    strcat(movie_frames, image_ext);
 
   // form command line for making movie
 
-  sprintf(command_line, "ffmpeg %s -r %i -i ", overwrite_flag,movie_framerate);
-  strcat(command_line, movie_frames);
-  strcat(command_line, " ");
-  strcat(command_line, moviefile_path);
+    sprintf(command_line, "ffmpeg %s -r %i -i ", overwrite_flag,movie_framerate);
+    strcat(command_line, movie_frames);
+    strcat(command_line, " ");
+    strcat(command_line, moviefile_path);
 
 // make movie
 
-  printf("movie command=%s\n", command_line);
-  system(command_line);
+    system(command_line);
+  }
 
-  // enable movie making button
+// enable movie making button
 
   enable_disable_makemovie(ON);
   enable_disable_playmovie();
+
   update_makemovie = 0;
 }
-
 
 /* ------------------ Render ------------------------ */
 
@@ -216,7 +233,7 @@ void RenderFrame(int view_mode){
   // filename base
 
   if(current_script_command==NULL){
-    strcpy(renderfile_name,fdsprefix);
+    strcpy(renderfile_name,render_file_base);
   }
   else{
     char suffix[20];

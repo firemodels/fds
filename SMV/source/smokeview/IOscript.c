@@ -805,7 +805,7 @@ void script_volsmokerenderall(scriptdata *scripti){
 /* ------------------ run_makemovie ------------------------ */
 void script_makemovie(scriptdata *scripti){
   strcpy(movie_name, scripti->cval);
-  strcpy(movie_prefix,scripti->cval2);
+  strcpy(render_file_base,scripti->cval2);
   movie_framerate=scripti->fval;
   Render_CB(MAKE_MOVIE);
 }

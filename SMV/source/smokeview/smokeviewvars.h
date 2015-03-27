@@ -24,7 +24,7 @@
 #include "threader.h"
 
 SVEXTERN int SVDECL(update_makemovie, 0);
-SVEXTERN char movie_name[1024], movie_prefix[1024], movie_ext[10];
+SVEXTERN char movie_name[1024], movie_ext[10], render_file_base[1024];
 SVEXTERN int SVDECL(movie_framerate, 10), SVDECL(have_ffmpeg, 0), SVDECL(have_ffplay, 0), SVDECL(overwrite_movie, 1);
 
 SVEXTERN int SVDECL(show_missing_objects, 1),SVDECL(have_missing_objects,0);
