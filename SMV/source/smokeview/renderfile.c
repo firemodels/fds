@@ -41,11 +41,7 @@ void PlayMovie(void){
   
   if(play_movie_now==0)return;
   if(file_exists(get_moviefile_path(moviefile_path)) == 1){
-#ifdef WIN32
     strcpy(command_line, "ffplay ");
-#else
-    strcpy(command_line, "ffserver ");
-#endif
     strcat(command_line,moviefile_path);
     psystem(command_line);
   }

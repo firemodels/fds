@@ -972,6 +972,7 @@ void DialogMenu(int value){
     break;
   case DIALOG_MOTION:
   case DIALOG_RENDER:
+  case DIALOG_MOVIE:
   case DIALOG_SCALING:
   case DIALOG_VIEW:
   case DIALOG_WINDOW:

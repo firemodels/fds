@@ -70,11 +70,7 @@ void *mt_psystem(void *arg){
   char command_line[1024], moviefile_path[1024];
 
   if(file_exists(get_moviefile_path(moviefile_path))==1){
-#ifdef WIN32
     strcpy(command_line, "ffplay ");
-#else
-    strcpy(command_line, "ffserver ");
-#endif
     strcat(command_line, moviefile_path);
 #ifdef WIN32
     strcat(command_line, " 2>Nul ");
