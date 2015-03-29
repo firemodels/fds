@@ -52,6 +52,9 @@ void update_menu(void);
 //  skip (int)
 // file name base (char) (or blank to use smokeview default)
 
+// MOVIETYPE
+//  jpg, png or wmv  (char)
+
 // VOLSMOKERENDERALL 
 //  skip (int) start_frame (int)
 // file name base (char) (or blank to use smokeview default)
@@ -386,7 +389,8 @@ int get_script_keyword_index(char *keyword){
   if(match_upper(keyword,"RENDERCLIP") == 1)return SCRIPT_RENDERCLIP;
   if(match_upper(keyword,"RENDERDIR") == 1)return SCRIPT_RENDERDIR;
   if(match_upper(keyword,"RENDERTYPE") == 1)return SCRIPT_RENDERTYPE;
-  if(match_upper(keyword,"RENDERSIZE") == 1)return SCRIPT_RENDERSIZE;
+  if(match_upper(keyword,"MOVIETYPE") == 1)return SCRIPT_MOVIETYPE;
+  if(match_upper(keyword, "RENDERSIZE") == 1)return SCRIPT_RENDERSIZE;
   if(match_upper(keyword,"RENDERDOUBLEONCE") == 1)return SCRIPT_RENDERDOUBLEONCE;
   if(match_upper(keyword,"RENDERONCE") == 1)return SCRIPT_RENDERONCE;
   if(match_upper(keyword,"RENDERSTART") == 1)return SCRIPT_RENDERSTART;
@@ -519,6 +523,18 @@ int compile_script(char *scriptfile){
         }
         else{
           scripti->ival = JPEG;
+        }
+        break;
+      case SCRIPT_MOVIETYPE:
+        SETcval;
+        if(STRCMP(scripti->cval, "WMV") == 0){
+          scripti->ival = WMV;
+        }
+        if(STRCMP(scripti->cval, "MP4") == 0){
+          scripti->ival = MP4;
+        }
+        else{
+          scripti->ival = AVI;
         }
         break;
       case SCRIPT_RENDERDIR:
@@ -1657,6 +1673,17 @@ int run_script(void){
       }
       else{
         update_render_type(PNG);
+      }
+      break;
+    case SCRIPT_MOVIETYPE:
+      if(STRCMP(scripti->cval, "WMV") == 0){
+        update_movie_type(WMV);
+      }
+      if(STRCMP(scripti->cval, "MP4") == 0){
+        update_movie_type(MP4);
+      }
+      else{
+        update_movie_type(AVI);
       }
       break;
     case SCRIPT_RENDERDIR:

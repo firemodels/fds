@@ -238,6 +238,13 @@ void enable_disable_makemovie(int onoff){
   }
 }
 
+/* ------------------ update_movie_type ------------------------ */
+
+void update_movie_type(int type){
+  moviefiletype = type;
+  RADIO_movie_type->set_int_val(moviefiletype);
+}
+
 /* ------------------ update_render_type ------------------------ */
 
 void update_render_type(int type){

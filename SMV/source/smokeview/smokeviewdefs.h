@@ -169,6 +169,7 @@ void _Sniff_Errors(char *whereat);
 #define SCRIPT_MAKEMOVIE 114
 #define SCRIPT_RENDERTYPE 115
 #define SCRIPT_RENDERSIZE 116
+#define SCRIPT_MOVIETYPE 117
 
 #define SCRIPT_LOADFILE 201
 #define SCRIPT_LOADVFILE 202
