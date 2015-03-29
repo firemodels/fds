@@ -9,11 +9,16 @@ RENDERALL
 thouse5_tslice
 RENDERDIR
  ../../Manuals/SMV_Summary/movies
+MAKEMOVIE
+ thouse5_tslice
+ frames/thouse5_tslice
+ 60
 SETTIMEVAL
  20.0
 RENDERONCE
  thouse5_tslice_20
 UNLOADALL
+
 RENDERDIR
  frames
 LOADINI
@@ -27,6 +32,10 @@ RENDERALL
 thouse5_smoke3d
 RENDERDIR
  ../../Manuals/SMV_Summary/movies
+MAKEMOVIE
+ thouse5_smoke3d
+ frames/thouse5_smoke3d
+ 60
 SETTIMEVAL
  20.0
 RENDERONCE
