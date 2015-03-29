@@ -183,7 +183,7 @@ GLUI_Button *BUTTON_BOUNDARY = NULL;
 GLUI_Button *BUTTON_ISO = NULL;
 
 #ifdef pp_MEMDEBUG
-GLUI_Rollout *PANEL_memcheck=NULL;
+GLUI_Rollout *ROLLOUT_memcheck=NULL;
 #endif
 GLUI_Rollout *ROLLOUT_script=NULL;
 GLUI_Rollout *ROLLOUT_config = NULL;
@@ -368,8 +368,9 @@ GLUI_StaticText *STATIC_plot3d_cmax_unit=NULL;
 #define CONFIG_ROLLOUT 4
 #define FILEBOUNDS_ROLLOUT 5
 #define TIME_ROLLOUT 6
+#define MEMCHECK_ROLLOUT 7
 
-procdata boundprocinfo[8], fileprocinfo[7], sliceprocinfo[3], plot3dprocinfo[2];
+procdata boundprocinfo[8], fileprocinfo[8], sliceprocinfo[3], plot3dprocinfo[2];
 int nboundprocinfo = 0, nfileprocinfo = 0, nsliceprocinfo=0, nplot3dprocinfo=0;
 
 /* ------------------ Plot3d_Rollout_CB ------------------------ */
@@ -1193,9 +1194,11 @@ extern "C" void glui_bounds_setup(int main_window){
   Time_CB(TBOUNDS_USE);
   
 #ifdef pp_MEMDEBUG
-  PANEL_memcheck = glui_bounds->add_rollout(_("Memory Check"),false);
-  list_memcheck_index=0;
-  RADIO_memcheck = glui_bounds->add_radiogroup_to_panel(PANEL_memcheck,&list_memcheck_index,MEMCHECK,Memcheck_CB);
+  ROLLOUT_memcheck = glui_bounds->add_rollout(_("Memory check"),false,MEMCHECK_ROLLOUT,File_Rollout_CB);
+  ADDPROCINFO(fileprocinfo, nfileprocinfo, ROLLOUT_memcheck, MEMCHECK_ROLLOUT);
+
+  list_memcheck_index = 0;
+  RADIO_memcheck = glui_bounds->add_radiogroup_to_panel(ROLLOUT_memcheck,&list_memcheck_index,MEMCHECK,Memcheck_CB);
   glui_bounds->add_radiobutton_to_group(RADIO_memcheck,"Unlimited");
   glui_bounds->add_radiobutton_to_group(RADIO_memcheck,"1 GB");
   glui_bounds->add_radiobutton_to_group(RADIO_memcheck,"2 GB");
