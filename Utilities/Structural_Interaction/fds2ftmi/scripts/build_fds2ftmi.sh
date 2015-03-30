@@ -22,8 +22,8 @@ cd $FDS2FTMI_DIR/examples/h_profile
 rm *.csv 
 
 function usage {
-echo "firebot.sh [ -q queue_name -r revision_number -s -u svn_username -v max_validation_processes -y ]"
-echo "Runs Firebot V&V testing script"
+echo "build_fds2ftmi.sh [ -q queue_name -r revision_number -s -u svn_username -v max_validation_processes -y ]"
+echo "Runs fds2ftmi testing script to run verification cases and build the user guide"
 echo ""
 echo "Options"
 echo "-r - revision_number - run cases using a specific SVN revision number"
@@ -221,22 +221,32 @@ run_ansys_license_test()
 
 scan_ansys_license_test()
 {
-   # Check for failed license
    if [[ `grep "ERROR - ANSYS license not available." $OUTPUT_DIR/stage7_ansys_license` == "" ]]
    then
       # Continue along
       :
    else
-      TIME_LIMIT_STAGE="7"
-      check_time_limit
       # Wait 5 minutes until retry
       sleep 300
+      echo "ANSYS license not found!"
+      echo "Sleeping for 5 minutes..."
+      wait_ansys_lic=$(($wait_ansys_lic + 1 ))    
       check_ansys_license_server
    fi
 }
 
 check_ansys_license_server()
 {
+   rm $OUTPUT_DIR/stage7_ansys_license
+   echo $wait_ansys_lic
+   if [ $wait_ansys_lic == 6 ]; then
+      echo "ANSYS license error!"
+      echo "Exiting..."
+      exit
+   else
+      # Continue along
+      :
+   fi
    run_ansys_license_test
    scan_ansys_license_test
 }
@@ -254,6 +264,7 @@ compile_fds2ftmi
 check_compile_fds2ftmi
 
 # Check Ansys license status
+wait_ansys_lic=0
 run_ansys_license_test
 scan_ansys_license_test
 
@@ -276,5 +287,15 @@ export TEXINPUTS=$TEXINPUTS:.:../../../Manuals/LaTeX_Style_Files/
 pdflatex fds2ftmi_user_guide.tex
 bibtex fds2ftmi_user_guide
 pdflatex fds2ftmi_user_guide.tex
+
+# Revert the FDS revision number on User Guide
+cd $FDS2FTMI_DIR
+rm fds2ftmi_user_guide.tex
+svn up -r $SVN_REVISION fds2ftmi_user_guide.tex
+
+# Revert the FDS revision number on python scripts
+cd $FIREBOT_DIR
+rm generate_plots.py
+svn up -r $SVN_REVISION generate_plots.py
 
 exit
