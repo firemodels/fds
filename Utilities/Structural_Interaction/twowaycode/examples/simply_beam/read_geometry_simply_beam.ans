@@ -1,0 +1,9 @@
+/batch
+!
+/filname,simply_beam_ansys,0
+/input,simply_beam_step1,ans
+/output,ansys_output,dat
+/prep7
+/input,../../scripts/ansys2fds_and_ibm_shell,geom
+finish
+!
