@@ -137,6 +137,9 @@ echo             found grep
 call :is_file_installed sed|| exit /b 1
 echo             found sed
 
+call :is_file_installed cut|| exit /b 1
+echo             found cut
+
 call :is_file_installed svn|| exit /b 1
 echo             found svn
 
