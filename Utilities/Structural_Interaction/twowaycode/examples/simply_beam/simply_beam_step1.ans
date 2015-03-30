@@ -1,0 +1,136 @@
+/PREP7
+K,    1,  1.500000,      0.000000,      1.000000
+K,    2,  1.500000,     0.5000000E-01,  1.000000
+K,    3,  1.500000,    -0.5000000E-01,  1.000000
+K,    4,  1.500000,    -0.5000000E-01,  1.148000
+K,    5,  1.500000,      0.000000,      1.148000
+K,    6,  1.500000,     0.5000000E-01,  1.148000
+K,    7, -1.500000,      0.000000,      1.000000
+K,    8, -1.500000,     0.5000000E-01,  1.000000
+K,    9, -1.500000,    -0.5000000E-01,  1.000000
+K,   10, -1.500000,    -0.5000000E-01,  1.148000
+K,   11, -1.500000,      0.000000,      1.148000
+K,   12, -1.500000,     0.5000000E-01,  1.148000
+!*
+A,      1,      2,      8,      7
+A,      3,      1,      7,      9
+A,      5,      6,     12,     11
+A,     11,     10,      4,      5
+A,      1,      5,     11,      7
+!*
+LESIZE, 2, , ,60, , , , ,1
+LESIZE, 4, , ,60, , , , ,1
+LESIZE, 7, , ,60, , , , ,1
+LESIZE, 9, , ,60, , , , ,1
+LESIZE,11, , ,60, , , , ,1
+LESIZE,13, , ,60, , , , ,1
+!*
+LESIZE, 1, , ,2, , , , ,1
+LESIZE, 3, , ,2, , , , ,1
+LESIZE, 5, , ,2, , , , ,1
+LESIZE, 6, , ,2, , , , ,1
+LESIZE, 8, , ,2, , , , ,1
+LESIZE,10, , ,2, , , , ,1
+LESIZE,12, , ,2, , , , ,1
+LESIZE,14, , ,2, , , , ,1
+!*
+LESIZE,15, , ,5, , , , ,1
+LESIZE,16, , ,5, , , , ,1
+!*
+ET,1,SHELL131
+!*  
+KEYOPT,1,2,0
+KEYOPT,1,3,1
+KEYOPT,1,4,2,   
+KEYOPT,1,6,0
+!*  
+TOFFST,273  
+MPTEMP,,,,,,,,  
+MPTEMP,1,0  
+MPDATA,KXX,1,,54
+MPTEMP,,,,,,,,  
+MPTEMP,1,0  
+MPDATA,C,1,,425 
+MPTEMP,,,,,,,,  
+MPTEMP,1,0  
+MPDATA,DENS,1,,7850 
+MPTEMP,,,,,,,,  
+MPTEMP,1,0  
+MPDATA,EMIS,1,,0.8  
+!*
+sect,1,shell,,flange
+secdata, 0.005,1,0.0,3  
+secdata, 0.005,1,0.0,3  
+secoffset,MID   
+seccontrol,,,, , , ,
+sect,2,shell,,web   
+secdata, .004,1,0.0,3   
+secdata, 0.004,1,0.0,3  
+secoffset,MID   
+seccontrol,,,, , , ,
+sect,2,shell,,web   
+secdata, .004,1,0.0,3   
+secdata, 0.004,1,0.0,3  
+secoffset,MID   
+seccontrol,,,, , , ,
+!*
+TYPE,   1   
+MAT,       1
+REAL,   
+ESYS,       0   
+SECNUM,  1
+!*
+TSHAP,LINE  
+!*
+MSHAPE,0,2D 
+MSHKEY,1
+!*  
+FLST,5,4,5,ORDE,2   
+FITEM,5,1   
+FITEM,5,-4  
+CM,_Y,AREA  
+ASEL, , , ,P51X 
+CM,_Y1,AREA 
+CHKMSH,'AREA'   
+CMSEL,S,_Y  
+!*  
+AMESH,_Y1   
+!*  
+CMDELE,_Y   
+CMDELE,_Y1  
+CMDELE,_Y2  
+!*  
+TYPE,   1   
+MAT,       1
+REAL,   
+ESYS,       0   
+SECNUM,  2
+!*
+CM,_Y,AREA  
+ASEL, , , ,       5 
+CM,_Y1,AREA 
+CHKMSH,'AREA'   
+CMSEL,S,_Y  
+!*  
+AMESH,_Y1   
+!*  
+CMDELE,_Y   
+CMDELE,_Y1  
+CMDELE,_Y2  
+!*  
+!*  
+ANTYPE,4
+!*  
+TRNOPT,FULL 
+LUMPM,0 
+!*  
+DELTIM,2,0,0   
+OUTRES,ERASE
+OUTRES,ALL,5
+KBC,0   
+TIME,600
+!*
+TUNIF,20,   
+TREF,20,
+!*
+save
