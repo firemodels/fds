@@ -64,12 +64,12 @@ SVN_REVISION=`tail -n 1 $OUTPUT_DIR/stage1 | sed "s/[^0-9]//g"`
 echo $SVN_REVISION
 
 # Print the FDS revision number on User Guide
-#cd $TWOWAY_DIR
-#sed -i "s:.*SVN Repository Revision.*:SVN Repository Revision ${SVN_REVISION}:" fds2ftmi_user_guide.tex
+cd $TWOWAY_DIR
+sed -i "s:.*SVN Repository Revision.*:SVN Repository Revision ${SVN_REVISION}:" fds2ftmi_user_guide.tex
 
 # Print the FDS revision number on python scripts
-#cd $FIREBOT_DIR
-#sed -i "s:.*SVN=.*:SVN='${SVN_REVISION}':" generate_plots.py
+cd $FIREBOT_DIR
+sed -i "s:.*SVN=.*:SVN='${SVN_REVISION}':" generate_plots.py
 
 compile_fds_db()
 {
