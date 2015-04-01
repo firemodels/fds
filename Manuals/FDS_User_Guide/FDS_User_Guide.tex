@@ -4556,7 +4556,7 @@ If the gas species is not included in Table~\ref{tab:gasspecies}, then you must 
 
 \subsubsection{Conductivity}
 
-Conductivity can be specified in one of two ways.  First, it can be explicitly defined using {\ct CONDUCTIVITY} (\si{W/(m.K)}) with optional temperature dependence specified using {\ct RAMP\_K}.  Second, it can be computed by FDS using {\ct MW}, {\ct PR} on {\ct MISC}, and the Lennard-Jones potential parameters $\sigma$ ({\ct SIGMALJ}) and $\epsilon/k$ ({\ct EPSILONKLJ}).  If no inputs are specified, FDS will compute the conductivity using {\ct MW} and the Lennard-Jones parameters for air.
+Conductivity can be specified in one of two ways.  First, it can be explicitly defined using {\ct CONDUCTIVITY} (\si{W/(m.K)}) with optional temperature dependence specified using {\ct RAMP\_K}.  Second, it can be computed by FDS using {\ct MW}, {\ct PR\_GAS} on {\ct SPEC} (default value is {\ct PR} on {\ct MISC}), and the Lennard-Jones potential parameters $\sigma$ ({\ct SIGMALJ}) and $\epsilon/k$ ({\ct EPSILONKLJ}).  If no inputs are specified, FDS will compute the conductivity using {\ct MW} and the Lennard-Jones parameters for air.
 
 \subsubsection{Diffusivity}
 
@@ -8334,6 +8334,7 @@ be found in Volume~1 of the FDS Technical Reference Guide~\cite{FDS_Math_Guide}.
 {\ct CELL U}                                    & $(u_{i,j,k}+u_{i-1,j,k})/2$                       & m/s            & D,I,S        \\ \hline
 {\ct CELL V}                                    & $(v_{i,j,k}+v_{i,j-1,k})/2$                       & m/s            & D,I,S        \\ \hline
 {\ct CELL W}                                    & $(w_{i,j,k}+w_{i,j,k-1})/2$                       & m/s            & D,I,S        \\ \hline
+{\ct DIFFUSIVITY}$^{*}$                         & Species diffusivity                        & m$^2$/s        & D,I,S        \\ \hline
 {\ct EMISSIVITY}                                & Surface emissivity (usually constant)             &                & B,D          \\ \hline
 {\ct EXTINCTION}                                & Section \ref{info:extinct_out}                    &                & D,S          \\ \hline
 %{\ct FLAME TEMPERATURE}                         & Section \ref{info:finite}                         & $^\circ$C      & D,I,P,S      \\ \hline
@@ -9536,6 +9537,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct MEAN\_DIAMETER}                & Real        & Section~\ref{info:deposition}           & m                 & 1.E-6         \\ \hline
 {\ct MELTING\_TEMPERATURE}          & Real        & Section~\ref{thermal_part_props}        & $^\circ$C         &               \\ \hline
 {\ct MW}                            & Real        & Section~\ref{gas_species_props}         & g/mol             & 29.           \\ \hline
+{\ct PR\_GAS}                       & Real        & Section~\ref{gas_species_props}         &                   & {\ct PR}      \\ \hline
 {\ct PRIMITIVE}                     & Logical     & Section~\ref{gas_species_props}         &                   &               \\ \hline
 {\ct RADCAL\_ID}                    & Character   & Section~\ref{info:SPEC_advanced}        &                   &               \\ \hline
 {\ct RAMP\_CP}                      & Character   & Section~\ref{gas_species_props}         &                   &               \\ \hline
