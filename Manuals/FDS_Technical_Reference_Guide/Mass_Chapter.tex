@@ -54,27 +54,21 @@ It can then be shown that for $\Gamma \ne 0$ the pressure stratification becomes
 
 \section{Mass and Species Transport}
 
-The density and species transport equations are solved using the same basic predictor-corrector scheme. Advection terms are written in flux divergence (conservative) form. In the predictor step, the density in cell $ijk$ at time level $n+1$ is estimated based on information at the $n$th level
-\be
-    \label{eqn_density_fl}
-    \frac{\rho_{ijk}^{*}-\rho_{ijk}^n}{\dt}
-    + \nabla\!\cdot(\overline{\rho}^{\rm FL} \mathbf{u})_{ijk}^n = 0
-\ee
-The quantity $\overline{\rho}^{\rm FL}$ indicates a \emph{flux limiter} applied to the cell face value, as discussed below in Section \ref{sec_flux_limiters}. Following the prediction of the velocity and background pressure at time level $n+1$, the density is corrected via
-\be \frac{\rho_{ijk}^{n+1}-\ha\left(\rho_{ijk}^n
-     +\rho_{ijk}^{*}\right)} {\ha \dt}
-    + \nabla\!\cdot(\overline{\rho}^{\rm FL} \mathbf{u})_{ijk}^{*}
-    = 0 \ee
-The species conservation equations are differenced the same way, with the addition of the diffusion term (including turbulent diffusion\footnote{In DNS mode, the molecular diffusivity is based on mixture-averaged binary Fickian diffusion.  In LES mode, by default, the diffusivity is taken from the molecular and turbulent viscosities divided by the turbulent Schmidt number.  That is, to save cost we approximate the molecular plus turbulent diffusivity by $(\mu + \mu_t)/\mbox{Sc}_t$.  Optionally, in LES mode, by setting \textct{RESEARCH\_MODE=.TRUE.} on \textct{MISC}, the molecular and turbulent transport coefficients are treated separately, $\rho D_\alpha + \mu_t/\mbox{Sc}_t$ (at added cost).  The same applies for the thermal diffusivity.}):
+The species transport equations are solved using a predictor-corrector scheme. Advection terms are written in flux divergence (conservative) form. In the predictor step, the mass density in cell $ijk$ at time level $n+1$ is estimated based on information at the $n$th level:
 \be  \frac{(\rho Z_\alpha)_{ijk}^{*}-(\rho Z_\alpha)_{ijk}^n}{\dt}
   + \nabla\!\cdot(\overline{\rho Z_\alpha}^{\rm FL} \mathbf{u})_{ijk}^n
-  = \nabla\!\cdot (\rho D_\alpha \nabla Z_\alpha)_{ijk}^n \ee
-at the predictor step, and
+  = \nabla\!\cdot (\rho D_\alpha \nabla Z_\alpha)_{ijk}^n
+\ee
+The quantity $\overline{\rho Z_\alpha}^{\rm FL}$ indicates a \emph{flux limiter} applied to the cell face value, as discussed below in Section \ref{sec_flux_limiters}.
+
+In DNS mode, the molecular diffusivity is based on mixture-averaged binary Fickian diffusion.  In LES mode (default) the diffusivity is taken from the molecular and turbulent viscosities divided by the turbulent Schmidt number.  That is, to save cost we approximate the molecular plus turbulent diffusivity by $(\mu + \mu_t)/\mbox{Sc}_t$.   The turbulent Schmidt number is constant with default value $\mbox{Sc}_t = 0.5$.  The model for the turbulent viscosity $\mu_t$ is discussed in Section \ref{section:turbulent_viscosity}.  Optionally, in LES mode, by setting \textct{RESEARCH\_MODE=.TRUE.} on \textct{MISC}, the molecular and turbulent transport coefficients are treated separately, $\rho D_\alpha + \mu_t/\mbox{Sc}_t$ (at added cost).  The same applies for the thermal diffusivity.
+
+The corrector step is as follows:
 \be \frac{(\rho Z_\alpha)_{ijk}^{**}-\ha\left[(\rho Z_\alpha)_{ijk}^n
     +(\rho Z_\alpha)_{ijk}^{*}\right]} {\ha \dt}
     + \nabla\!\cdot(\overline{\rho Z_\alpha}^{\rm FL} \mathbf{u})_{ijk}^*
-    = \nabla\!\cdot (\rho D_\alpha \nabla Z_\alpha)_{ijk}^{*} \ee
-at the corrector step. The model for the turbulent viscosity $\mu_t$ is discussed in Section \ref{section:turbulent_viscosity}.  The turbulent Schmidt number is constant with default value $\mbox{Sc}_t = 0.5$.
+    = \nabla\!\cdot (\rho D_\alpha \nabla Z_\alpha)_{ijk}^{*}
+\ee
 
 Mass source terms due to chemistry, evaporation, or pyrolysis are time split and applied after the corrector step (see Section \ref{sec_time_splitting}).  If no source terms are present, then $(\rho Z_\alpha)_{ijk}^{n+1} = (\rho Z_\alpha)_{ijk}^{**}$.
 
@@ -88,12 +82,12 @@ For uniform flow velocity, a fundamental property of the exact solution to the e
 
 FDS employs two second-order TVD schemes as options for scalar transport: Superbee and CHARM.  Superbee \cite{Roe:1986} is recommended for LES because it more accurately preserves the scalar variance for coarse grid solutions that are not expected to be smooth.  Due to the gradient steepening applied in Superbee, however, the convergence degrades at small grid spacing for smooth solutions (the method will revert to a stair-step pattern instead of the exact solution).  CHARM \cite{Zhou:1995}, though slightly more dissipative than Superbee, is convergent, and is therefore the better choice for DNS calculations where the flame front is well resolved.
 
-To illustrate how flux limiters are applied to the scalar transport equations, below we discretize Eq.~(\ref{eqn_density_fl}) in one dimension:
-\be  \frac{\rho_{i}^* - \rho_{i}^n}{\dt}
-    + \frac{\overline{\rho}^{\rm FL}_{i+\frac{1}{2}} u_{i+\frac{1}{2}} - \overline{\rho}^{\rm FL}_{i-\frac{1}{2}} u_{i-\frac{1}{2}}}{\dx} = 0
+To illustrate how flux limiters are applied to the scalar transport equations, below we discretize the advection terms in Eq.~(\ref{species}) in one dimension:
+\be  \frac{(\rho Z)_{i}^* - (\rho Z)_{i}^n}{\dt}
+    + \frac{\overline{\rho Z}^{\rm FL}_{i+\frac{1}{2}} u_{i+\frac{1}{2}} - \overline{\rho Z}^{\rm FL}_{i-\frac{1}{2}} u_{i-\frac{1}{2}}}{\dx} = ...
 \ee
 Note that the $\pm\ha$ suffixes indicates a face value for a particular cell $i$. A flux-limited scalar value (density in this case) premultiplies the staggered, face-centered velocity to form the scalar advective flux.  Recall that these velocity values are primitive variables in the calculation---they are \emph{not} interpolated.
-Consider face $i+\frac{1}{2}$ between cells $i$ and $i+1$ and let $\phi$ denote a general scalar variable, like $\rho$ or $\rho Z_\alpha$.  The local (loc) and upstream (up) data variations are
+Consider face $i+\frac{1}{2}$ between cells $i$ and $i+1$ and let $\phi$ denote a general scalar variable, like $\rho Z_\alpha$.  The local (loc) and upstream (up) data variations are
 \begin{align}
 \delta \phi_{\rm loc} &= \phi_{i+1}-\phi_i \\
 \delta \phi_{\rm up}  &= \left\{ \begin{array}{ll} \phi_i-\phi_{i-1} & \mbox{if} \quad u_i>0 \\ \phi_{i+2}-\phi_{i+1} & \mbox{if} \quad u_i<0 \end{array} \right.
