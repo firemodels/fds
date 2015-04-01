@@ -181,6 +181,10 @@ OUTPUT_QUANTITY(23)%NAME = 'KINETIC ENERGY'
 OUTPUT_QUANTITY(23)%UNITS = 'm2/s2'                     
 OUTPUT_QUANTITY(23)%SHORT_NAME = 'ke'
 
+OUTPUT_QUANTITY(23)%NAME = 'KINETIC ENERGY'                
+OUTPUT_QUANTITY(23)%UNITS = 'm2/s2'                     
+OUTPUT_QUANTITY(23)%SHORT_NAME = 'ke'
+
 ! Strain and Vorticity
  
 OUTPUT_QUANTITY(24)%NAME = 'STRAIN RATE X'           
@@ -236,6 +240,10 @@ OUTPUT_QUANTITY(35)%SHORT_NAME = 'MW'
 OUTPUT_QUANTITY(36)%NAME = 'POTENTIAL TEMPERATURE'
 OUTPUT_QUANTITY(36)%UNITS = 'K'
 OUTPUT_QUANTITY(36)%SHORT_NAME = 'theta'
+
+OUTPUT_QUANTITY(37)%NAME = 'DIFFUSIVITY'
+OUTPUT_QUANTITY(37)%UNITS = 'm^2/s'
+OUTPUT_QUANTITY(37)%SHORT_NAME = 'D'
 
 ! Time and benchmarking stats
 
@@ -2593,14 +2601,14 @@ END SELECT
 END SUBROUTINE JANAF_TABLE_LIQUID
 
 
-SUBROUTINE GAS_PROPS(GAS_NAME,SIGMA,EPSOK,MW,FORMULA,LISTED,ATOM_COUNTS,H_F,RADCAL_NAME)
+SUBROUTINE GAS_PROPS(GAS_NAME,SIGMA,EPSOK,PR_GAS,MW,FORMULA,LISTED,ATOM_COUNTS,H_F,RADCAL_NAME)
 
 ! Molecular weight (g/mol) and Lennard-Jones properties
 ! Brodkey, R. and Hershey, H. Transport Phenomena: A Unified Approach. McGraw-Hill. 1988
 ! Heat of Formation (H_F) has units of kJ/mol (see NIST Webbook)
 ! Some species (O,H,OH,HO2,H2O2) LJ parameters were taken from Jasper and Miller, Combustion and Flame, Vol. 161, 2014.
-USE GLOBAL_CONSTANTS, ONLY: MW_AIR 
-REAL(EB) :: SIGMA,EPSOK,MW,SIGMAIN,EPSOKIN,MWIN,ATOM_COUNTS(118),H_F,H_FIN
+USE GLOBAL_CONSTANTS, ONLY: MW_AIR, PR 
+REAL(EB) :: SIGMA,EPSOK,MW,SIGMAIN,EPSOKIN,MWIN,ATOM_COUNTS(118),H_F,H_FIN,PR_GAS
 CHARACTER(LABEL_LENGTH) :: GAS_NAME,RADCAL_NAME
 CHARACTER(100) :: FORMULA,FORMULAIN
 LOGICAL, INTENT(OUT) :: LISTED
@@ -2614,18 +2622,20 @@ MW = -1._EB
 H_FIN = H_F
 LISTED  = .TRUE.
 ATOM_COUNTS = 0._EB
- 
+PR_GAS = PR
 SELECT CASE(GAS_NAME)
    CASE('ACETONE') ! THE PROPERTIES OF GASES AND LIQUIDS 5th ed.
       SIGMA = 4.6_EB
       EPSOK = 560.2
       FORMULA = "C3H6O"
       H_F= -218.5_EB ! NIST webbook
+      PR_GAS = 0.87_EB ! Faghri&Zhang Transport Phenomena in Multiphase Systems
       IF (RADCAL_NAME=='null') RADCAL_NAME='MMA'      
    CASE('ACETYLENE')
       SIGMA = 4.033_EB
       EPSOK = 231.8_EB 
       FORMULA = 'C2H2'
+      PR_GAS = 0.78 ! airliquide.com      
       H_F = 226.731_EB  
       IF (RADCAL_NAME=='null') RADCAL_NAME='PROPYLENE'
    CASE('ACROLEIN') !Isopropanol as surrogate             
@@ -2639,27 +2649,32 @@ SELECT CASE(GAS_NAME)
       EPSOK = 78.6_EB  
       MW = MW_AIR
       FORMULA = 'Air'
+      PR_GAS = 0.71 ! JPCRD 19(5)   
       H_F = 0._EB !Computed in read.f90
    CASE('AMMONIA')             
       SIGMA = 2.900_EB 
       EPSOK = 558.3_EB  
       FORMULA = 'NH3'
+      PR_GAS = 0.87 ! Bergman, Lavine, Icropera, Dewitt Fundamentals of Heat and Mass Trasnfer 2011
       H_F = -45.94_EB !Computed in read.f90
    CASE('ARGON')
       SIGMA = 3.42_EB
       EPSOK = 124.0_EB
       FORMULA = 'Ar'
+      PR_GAS = 0.67 ! Hardy, Hylton, McKnight, ORNL Correlations for Thermal Flowmeters
       H_F = 0._EB
    CASE('BENZENE') !THE PROPERTIES OF GASES AND LIQUIDS 5th ed.
       SIGMA = 5.349_EB
       EPSOK = 412.3
       FORMULA = 'C6H6'
+      PR_GAS = 1.5 ! Martinez, Termodinamica basica y aplicada, 1992
       H_F = 82.9_EB ! NIST webbook 
       IF (RADCAL_NAME=='null') RADCAL_NAME='TOLUENE'      
    CASE('BUTANE')
       SIGMA = 4.687_EB
       EPSOK = 531.4_EB 
       FORMULA = 'C4H10'
+      PR_GAS = 0.83 ! airliquide.com
       H_F = -125.6_EB
       IF (RADCAL_NAME=='null') RADCAL_NAME='PROPANE'
    CASE('CARBON DIOXIDE')  
@@ -2667,17 +2682,20 @@ SELECT CASE(GAS_NAME)
       EPSOK = 195.2_EB  
       FORMULA = 'CO2'
       H_F = -393.513_EB
+      PR_GAS = 0.75_EB ! JPCRD 19(5)
       IF (RADCAL_NAME=='null') RADCAL_NAME='CARBON DIOXIDE'
    CASE('CARBON MONOXIDE') 
       SIGMA = 3.690_EB 
       EPSOK = 91.7_EB  
       FORMULA = 'CO'
       H_F = -110.523_EB
+      PR_GAS = 0.73_EB ! JPCRD 19(5)      
       IF (RADCAL_NAME=='null') RADCAL_NAME='CARBON MONOXIDE'
    CASE('CHLORINE')
       SIGMA = 4.217_EB
       EPSOK = 316.0_EB
       FORMULA = 'Cl2'
+      PR_GAS = 0.75 ! airliquide.com
       H_F = 0._EB
    CASE('DODECANE') ! N-Heptane as surrogate
       SIGMA = 4.701_EB
@@ -2689,18 +2707,21 @@ SELECT CASE(GAS_NAME)
       SIGMA = 4.443_EB
       EPSOK = 215.7_EB 
       FORMULA = 'C2H6'
+      PR_GAS = 0.84_EB ! Faghri&Zhang Transport Phenomena in Multiphase Systems
       H_F = -84._EB  
       IF (RADCAL_NAME=='null') RADCAL_NAME='ETHANE'
    CASE('ETHANOL')
       SIGMA = 4.530_EB
       EPSOK = 362.6_EB
       FORMULA='C2H5OH'
+      PR_GAS = 0.84_EB ! Faghri&Zhang Transport Phenomena in Multiphase Systems
       H_F = -234._EB  
       IF (RADCAL_NAME=='null') RADCAL_NAME='METHANOL'
    CASE('ETHYLENE')        
       SIGMA = 4.163_EB 
       EPSOK = 224.7_EB 
       FORMULA = 'C2H4'
+      PR_GAS = 0.83 ! airliquide.com      
       H_F = 52.47_EB
       IF (RADCAL_NAME=='null') RADCAL_NAME='ETHYLENE'
    CASE('FORMALDEHYDE')!Methanol as surrogate        
@@ -2713,11 +2734,13 @@ SELECT CASE(GAS_NAME)
       SIGMA = 2.551_EB 
       EPSOK = 10.22_EB 
       FORMULA = 'He'
+      PR_GAS = 0.68 ! Bergman, Lavine, Icropera, Dewitt Fundamentals of Heat and Mass Trasnfer 2011
       H_F = 0._EB
    CASE('HYDROGEN')        
       SIGMA = 2.827_EB 
       EPSOK = 59.7_EB
       FORMULA = 'H2'
+      PR_GAS = 0.69 ! Bergman, Lavine, Icropera, Dewitt Fundamentals of Heat and Mass Trasnfer 2011
       H_F = 0._EB
    CASE('HYDROGEN ATOM')        
       SIGMA = 2.31_EB 
@@ -2728,11 +2751,13 @@ SELECT CASE(GAS_NAME)
       SIGMA = 3.353_EB
       EPSOK = 449._EB
       FORMULA = 'HBr'
+      PR_GAS = 0.69 ! airliquide.com
       H_F = -36.44_EB  
    CASE('HYDROGEN CHLORIDE')   
       SIGMA = 3.339_EB
       EPSOK = 344.7_EB
       FORMULA = 'HCl'
+      PR_GAS = 0.75 ! airliquide.com
       H_F = -92.31_EB  
    CASE('HYDROGEN CYANIDE')   
       SIGMA = 3.63_EB
@@ -2743,6 +2768,7 @@ SELECT CASE(GAS_NAME)
       SIGMA = 3.148_EB
       EPSOK = 330._EB
       FORMULA = 'HF'
+      PR_GAS = 0.71 ! airliquide.com
       H_F = -272.55_EB
    CASE('HYDROGEN PEROXIDE')   
       SIGMA = 3.02_EB
@@ -2769,6 +2795,7 @@ SELECT CASE(GAS_NAME)
       SIGMA = 3.758_EB 
       EPSOK = 148.6_EB  
       FORMULA = 'CH4'
+      PR_GAS = 0.70_EB ! JPCRD 19(5)
       H_F = -74.873_EB
       IF (RADCAL_NAME=='null') RADCAL_NAME='METHANE'
    CASE('METHANOL')
@@ -2776,6 +2803,7 @@ SELECT CASE(GAS_NAME)
       EPSOK = 481.8_EB
       FORMULA = 'CH3OH'
       H_F = -205._EB  
+      PR_GAS = 9.5_EB ! Faghri&Zhang Transport Phenomena in Multiphase Systems
       IF (RADCAL_NAME=='null') RADCAL_NAME='METHANOL'
    CASE('N-DECANE')
       SIGMA = 5.233_EB
@@ -2788,44 +2816,52 @@ SELECT CASE(GAS_NAME)
       EPSOK = 205.78_EB
       FORMULA = 'C7H16'
       H_F = -187.8_EB
+      PR_GAS = 0.83 ! Martinez, Termodinamica basica y aplicada, 1992 
       IF (RADCAL_NAME=='null') RADCAL_NAME='N-HEPTANE'
    CASE('N-HEXANE')
       SIGMA = 5.949_EB
       EPSOK = 399.3_EB 
       FORMULA = 'C6H14'
       H_F = -167.1_EB  
+      PR_GAS = 0.79 ! Martinez, Termodinamica basica y aplicada, 1992       
       IF (RADCAL_NAME=='null') RADCAL_NAME='N-HEPTANE'
    CASE('N-OCTANE')
       SIGMA = 4.892_EB
       EPSOK = 231.16_EB
       FORMULA = 'C8H18'
       H_F = -208.7_EB
+      PR_GAS = 0.64 ! Martinez, Termodinamica basica y aplicada, 1992 
       IF (RADCAL_NAME=='null') RADCAL_NAME='N-HEPTANE'
    CASE('NITRIC OXIDE')        
       SIGMA = 3.492_EB 
       EPSOK = 116.7_EB  
       FORMULA = 'NO'
       H_F = 90.29_EB
+      PR_GAS = 0.74_EB ! JPCRD 19(5)      
    CASE('NITROGEN')        
       SIGMA = 3.798_EB 
       EPSOK = 71.4_EB
       H_F = 0._EB  
       FORMULA = 'N2'
+      PR_GAS = 0.71_EB ! JPCRD 19(5)
    CASE('NITROGEN DIOXIDE') !Paul, P. DRFM, SAND98-8203
       SIGMA = 3.922_EB 
       EPSOK = 204.88_EB  
       FORMULA = 'NO2'
+      PR_GAS = 6.1 ! Martinez, Termodinamica basica y aplicada, 1992      
       H_F = 33.10_EB      
    CASE('NITROUS OXIDE')
       SIGMA = 3.828_EB 
       EPSOK = 232.4_EB  
       FORMULA = 'N2O'
+      PR_GAS = 0.74_EB ! JPCRD 19(5)
       H_F = 82.05_EB
    CASE('OXYGEN')
       SIGMA = 3.467_EB 
       EPSOK = 106.7_EB
       FORMULA ='O2'
       H_F = 0._EB
+      PR_GAS = 0.71_EB ! JPCRD 19(5)
    CASE('OXYGEN ATOM')
       SIGMA = 2.66_EB 
       EPSOK = 92.1_EB
@@ -2835,12 +2871,14 @@ SELECT CASE(GAS_NAME)
       SIGMA = 5.118_EB
       EPSOK = 237.1_EB
       FORMULA = 'C3H8' 
+      PR_GAS = 0.80 ! airliquide.com
       H_F = -104.7_EB 
       IF (RADCAL_NAME=='null') RADCAL_NAME='PROPANE'
    CASE('PROPYLENE')
       SIGMA = 4.678_EB
       EPSOK = 298.9_EB 
       FORMULA = 'C3H6'
+      PR_GAS = 0.82 ! airliquide.com
       H_F = 20.41_EB  
       IF (RADCAL_NAME=='null') RADCAL_NAME='PROPYLENE'
    CASE('SOOT')        
@@ -2854,11 +2892,13 @@ SELECT CASE(GAS_NAME)
       SIGMA = 4.112_EB
       EPSOK = 335.4_EB 
       FORMULA = 'SO2'
+      PR_GAS = 0.91 ! airliquide.com
       H_F = -296.84_EB             
    CASE('SULFUR HEXAFLUORIDE')
       SIGMA = 5.128_EB
       EPSOK = 222.1_EB 
       FORMULA = 'SF6'
+      PR_GAS = 0.77_EB ! JPCRD 19(5)
       H_F = -1220.47_EB       
    CASE('TOLUENE')   
       SIGMA = 5.698_EB
@@ -2871,6 +2911,7 @@ SELECT CASE(GAS_NAME)
       EPSOK = 809.1_EB  
       FORMULA = 'H2O'
       H_F = -241.826_EB
+      PR_GAS = 1.0 ! Bergman, Lavine, Icropera, Dewitt Fundamentals of Heat and Mass Trasnfer 2011
       IF (RADCAL_NAME=='null') RADCAL_NAME='WATER VAPOR'
    CASE DEFAULT            
       SIGMA = 3.711_EB 
@@ -3041,7 +3082,7 @@ END SUBROUTINE FED_PROPS
 
 SUBROUTINE CALC_GAS_PROPS(J,N,D_TMP,MU_TMP,K_TMP,CP_TMP,H_TMP,FUEL,G_F_TMP)
 USE TYPES, ONLY:SPECIES_TYPE,SPECIES,SPECIES_MIXTURE_TYPE,SPECIES_MIXTURE
-USE GLOBAL_CONSTANTS, ONLY: PR
+USE GLOBAL_CONSTANTS, ONLY: R0
 INTEGER,INTENT(IN) :: J,N
 INTEGER :: I(1)
 REAL(EB), INTENT(OUT) :: D_TMP,MU_TMP,K_TMP,CP_TMP,H_TMP,G_F_TMP
@@ -3070,19 +3111,20 @@ IF (SS%MU_USER>=0._EB) MU_TMP = SS%MU_USER/SS%MW
 CALL JANAF_TABLE(J,CP_TMP,H_TMP,SS%PROP_ID,SS%RCON,FUEL,G_F_TMP)
 IF (SS%SPECIFIC_HEAT > 0._EB) CP_TMP = SS%SPECIFIC_HEAT
 IF (SS%REFERENCE_ENTHALPY > -2E20_EB) H_TMP = SS%REFERENCE_ENTHALPY - SS%SPECIFIC_HEAT * SS%REFERENCE_TEMPERATURE
-K_TMP = MU_TMP*CP_TMP/PR
+K_TMP = MU_TMP*CP_TMP/SS%PR_GAS
 IF (SS%K_USER>=0._EB) K_TMP = SS%K_USER/SS%MW
 
 END SUBROUTINE CALC_GAS_PROPS
 
-SUBROUTINE CALC_MIX_PROPS(J,D_TMP,MU_TMP,K_TMP,CP_TMP,H_TMP,EPSK,SIG,D_USER,MU_USER,K_USER,MW,CP_USER,REF_USER,REF_TMP_USER)
+SUBROUTINE CALC_MIX_PROPS(J,D_TMP,MU_TMP,K_TMP,CP_TMP,H_TMP,EPSK,SIG,D_USER,MU_USER,K_USER,MW,CP_USER,REF_USER, &
+                          REF_TMP_USER,PR_USER)
 USE TYPES, ONLY:SPECIES_TYPE,SPECIES,SPECIES_MIXTURE_TYPE,SPECIES_MIXTURE
 USE GLOBAL_CONSTANTS, ONLY: PR
 INTEGER,INTENT(IN) :: J
 INTEGER :: I(1)
-REAL(EB), INTENT(IN) :: EPSK,SIG,D_USER,MU_USER,K_USER,MW,CP_USER,REF_USER,REF_TMP_USER
+REAL(EB), INTENT(IN) :: EPSK,SIG,D_USER,MU_USER,K_USER,MW,CP_USER,REF_USER,REF_TMP_USER,PR_USER
 REAL(EB), INTENT(INOUT) :: D_TMP,MU_TMP,K_TMP,CP_TMP,H_TMP
-REAL(EB) :: SIGMA2,EPSIJ,AMW,TSTAR,OMEGA,TMP
+REAL(EB) :: SIGMA2,EPSIJ,AMW,TSTAR,OMEGA,TMP,PR_TMP
 TYPE(SPECIES_TYPE),POINTER :: SS0=>NULL()
 
 I = MAXLOC(SPECIES_MIXTURE(1)%VOLUME_FRACTION)
@@ -3105,8 +3147,10 @@ ENDIF
 IF (D_USER>=0._EB) D_TMP = D_USER
 IF (MU_USER>=0._EB) MU_TMP = MU_USER/MW
 IF (CP_USER > 0._EB) CP_TMP = CP_USER
+PR_TMP = PR
+IF (PR_USER > 0._EB) PR_TMP = PR_USER
 IF (REF_USER > 0._EB) H_TMP = REF_USER - CP_TMP * REF_TMP_USER
-IF (SIG > 0._EB .AND. EPSK > 0._EB) K_TMP = MU_TMP*CP_TMP/PR
+IF (SIG > 0._EB .AND. EPSK > 0._EB) K_TMP = MU_TMP*CP_TMP/PR_TMP
 IF (K_USER>=0._EB) K_TMP = K_USER/MW
 
 END SUBROUTINE CALC_MIX_PROPS
