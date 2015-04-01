@@ -568,7 +568,8 @@ check_cases_debug()
       echo "" >> $ERROR_LOG
 
 # copy casename.err to casename.err_stage3 for any cases that had errors
-      awk -F'[-:]' '{ print "cp " $1 " /tmp/"$1"_stage3"}'  < $OUTPUT_DIR/stage3_errors | sort -u > $OUTPUT_DIR/stage3_filelist
+      echo "#/bin/bash" > $OUTPUT_DIR/stage3_filelist
+      grep err $OUTPUT_DIR/stage3_errors | awk -F'[-:]' '{ print "cp " $1 " /tmp/."}'  | sort -u >> $OUTPUT_DIR/stage3_filelist
       cd $FDS_SVNROOT/Verification
       source $OUTPUT_DIR/stage3_filelist
 
