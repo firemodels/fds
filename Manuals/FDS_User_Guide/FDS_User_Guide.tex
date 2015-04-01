@@ -572,22 +572,22 @@ To run the MPI version of FDS, you need to have administrator privileges on the 
 \item Open up a command prompt by right-clicking on the command prompt icon and choosing ``Run as administrator''. Type the following command:
 
     {\ct mpiexec -hosts 2 <my\_machine> 1 <other\_machine> 1 test\_mpi}
-    
+
     If this command returns a ``Hello World'' message from your machine and the other machine on your network, proceed to the next step. If this command fails, check that you can ``see'' the other machine by pinging it, and check that the other machine can ``see'' your machine as well.
-    
+
 \item Share (with both read and write privilege) a working directory on your machine. Do not put this directory within the Program Files path. Share the working directory with everybody so that all other machines can see it. Note how this directory is defined on the other machines. Sometimes it is {\ct \textbackslash\textbackslash<my\_machine>\textbackslash<my\_shared\_directory>\textbackslash} and sometimes it is defined via the numerical IP address, like {\ct \textbackslash\textbackslash129.6.129.87\textbackslash<my\_shared\_directory>\textbackslash}. The definition depends on the way your domain name server (DNS) works. In any case, do not leave blank spaces within any directory or file names. We have found that blanks create all sorts of trouble. Unless you are a DOS/Windows expert, avoid them.
-    
+
 \item Within the command prompt, {\ct cd} to the working directory. Find or create within the working directory a relatively small, simple, two mesh FDS input file. At the command prompt, type:
 
    {\ct mpiexec -hosts 2 m1 1 m2 1 -wdir \textbackslash\textbackslash...\textbackslash... fds job\_name.fds}
-   
-   where {\ct m1} and {\ct m2} are the names of two computers on your network. 
+
+   where {\ct m1} and {\ct m2} are the names of two computers on your network.
 
 \item If successful, you should see the usual FDS printout indicating the processes being assigned to the machines. If unsuccessful, try running the case on your own machine:
 
    {\ct mpiexec -hosts 1 m1 2 -wdir \textbackslash\textbackslash...\textbackslash... fds job\_name.fds}
-   
-   If this is not successful, check with your network administrator or monitor the FDS help forums for advice. 
+
+   If this is not successful, check with your network administrator or monitor the FDS help forums for advice.
 \end{enumerate}
 
 
@@ -1409,57 +1409,12 @@ This feature is typically used together with periodic boundaries.  To specify a 
 \subsection{Special Topic: Stopping and Restarting Calculations}
 \label{info:restart}
 
-An important {\ct MISC} parameter is called {\ct RESTART}. Normally, a simulation consists of a sequence of events
-starting from ambient conditions. However, there are occasions
-when you might want to stop a calculation, make a few
-limited adjustments, and then
-restart the calculation from that point in time. To do this,
-first bring the calculation to a halt gracefully by creating a file
-called {\ct CHID.stop}
-in the directory where the output files are located. Remember that
-FDS is case-sensitive. The file name must be exactly the same as
-the {\ct CHID} and `stop' should be lower case. FDS checks for the
-existence of this file at each time step, and if it finds it, gracefully
-shuts down the calculation after first creating a final Plot3D
-file and a file (or files in the case of a multiple mesh job)
-called {\ct CHID.restart} (or {\ct CHID\_nn.restart}).
-To restart a job, the file(s) {\ct CHID.restart} should exist in
-the working directory, and
-the phrase {\ct RESTART=.TRUE.} needs to be added
-to the {\ct MISC} line of the input data file.
-For example, suppose that the job
-whose {\ct CHID} is ``plume'' is halted by creating a
-dummy file called {\ct plume.stop} in the directory where
-all the output files are being created. To restart this job from where it
-left off, add {\ct RESTART=.TRUE.} to the {\ct MISC} line
-of the input file {\ct plume.fds}, or whatever you have chosen to
-name the input file. The existence of a restart file with the same
-{\ct CHID} as the original job tells FDS
-to continue saving the new data in the same files as the old.  If {\ct RESTART\_CHID} is also specified on the
-{\ct MISC} line, then FDS will look for old output files tagged with this string instead of using the specified
-{\ct CHID} on the {\ct HEAD} line. In this case, the new output files will be tagged with {\ct CHID}, and the
-old output files will not be altered. When running the restarted job, the diagnostic output of the restarted job is appended to output files from the original job.
+An important {\ct MISC} parameter is called {\ct RESTART}. Normally, a simulation consists of a sequence of events starting from ambient conditions. However, there are occasions when you might want to stop a calculation, make a few limited adjustments, and then restart the calculation from that point in time. To do this, first bring the calculation to a halt gracefully by creating a file called {\ct CHID.stop} in the directory where the output files are located. Remember that FDS is case-sensitive. The file name must be exactly the same as the {\ct CHID} and `stop' should be lower case. FDS checks for the existence of this file at each time step, and if it finds it, gracefully shuts down the calculation after first creating a final Plot3D file and a file (or files in the case of a multiple mesh job) called {\ct CHID.restart} (or {\ct CHID\_nn.restart}). To restart a job, the file(s) {\ct CHID.restart} should exist in the working directory, and the phrase {\ct RESTART=.TRUE.} needs to be added to the {\ct MISC} line of the input data file. For example, suppose that the job whose {\ct CHID} is ``plume'' is halted by creating a dummy file called {\ct plume.stop} in the directory where all the output files are being created. To restart this job from where it left off, add {\ct RESTART=.TRUE.} to the {\ct MISC} line of the input file {\ct plume.fds}, or whatever you have chosen to name the input file. The existence of a restart file with the same {\ct CHID} as the original job tells FDS to continue saving the new data in the same files as the old\footnote{By default, when a job is restarted, the spreadsheet output files will be appended at the time the job was restarted, not the time the job was stopped. If you want the output files to be appended without clipping off any existing data, even though some duplicate output will be left over, then set {\ct CLIP\_RESTART\_FILES} to {\ct .FALSE.} on the {\ct DUMP} line.}.  If {\ct RESTART\_CHID} is also specified on the {\ct MISC} line, then FDS will look for old output files tagged with this string instead of using the specified {\ct CHID} on the {\ct HEAD} line. In this case, the new output files will be tagged with {\ct CHID}, and the old output files will not be altered. When running the restarted job, the diagnostic output of the restarted job is appended to output files from the original job.
 
-There may be times when you want to save restart files periodically
-during a run as insurance against power outages or system crashes.
-If this is the case, at the start of the original run
-set {\ct DT\_RESTART=50.} on the {\ct DUMP} line to save restart files
-every 50~s, for example.
-The default for {\ct DT\_RESTART} is 1000000, meaning no restart files are
-created unless you gracefully stop a job by
-creating a dummy file called {\ct CHID.stop}.
+There may be times when you want to save restart files periodically during a run as insurance against power outages or system crashes. If this is the case, at the start of the original run set {\ct DT\_RESTART=50.} on the {\ct DUMP} line to save restart files every 50~s, for example. The default for {\ct DT\_RESTART} is 1000000, meaning no restart files are created unless you gracefully stop a job by creating a dummy file called {\ct CHID.stop}.
+It is also possible to use the new control function feature (see Section~\ref{info:CTRL}) to stop a calculation or dump a restart file when the computation reaches some measurable condition such as a first sprinkler activation.
 
-It is also possible to use the new control function feature (see Section~\ref{info:CTRL})
-to stop a calculation or dump a restart file when the computation reaches
-some measurable condition such as a first sprinkler activation.
-
-Between job stops and restarts, major changes cannot be made in the calculation
-like adding or removing vents and obstructions. The changes are limited to those parameters that do
-not instantly alter the existing flow field. Since the restart
-capability has been used infrequently by the developers, it should be considered
-a fragile construct. Examine the output
-to ensure that no sudden or unexpected events occur during the stop and
-restart.
+Between job stops and restarts, major changes cannot be made in the calculation like adding or removing vents and obstructions. The changes are limited to those parameters that do not instantly alter the existing flow field. Since the restart capability has been used infrequently by the developers, it should be considered a fragile construct. Examine the output to ensure that no sudden or unexpected events occur during the stop and restart.
 
 
 \subsection{Special Topic: Initializing a 3D Velocity Field}
@@ -8675,6 +8630,7 @@ properties be specified as well. Simply prescribing as many properties as possib
 \multicolumn{5}{|c|}{{\ct DUMP} (Output Parameters)} \\
 \hline \hline
 \endhead
+{\ct CLIP\_RESTART\_FILES}          & Logical      & Section~\ref{info:restart}             &           & {\ct .TRUE.}                   \\ \hline
 {\ct COLUMN\_DUMP\_LIMIT}           & Logical      & Section~\ref{info:out:DEVC}            &           & {\ct .FALSE.}                  \\ \hline
 {\ct CTRL\_COLUMN\_LIMIT}           & Integer      & Section~\ref{info:out:DEVC}            &           & 254                            \\ \hline
 %{\ct CUT\_CELL\_DATA\_FILE}        & Character    & Section~\ref{??}                       &           &                                \\ \hline
