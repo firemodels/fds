@@ -152,7 +152,7 @@ SELECT_TURB: SELECT CASE (TURB_MODEL)
                UP(II,JJ,KK) = U_GHOST(IW)
                VP(II,JJ,KK) = V_GHOST(IW)
                WP(II,JJ,KK) = W_GHOST(IW)
-            CASE(OPEN_BOUNDARY)
+            CASE(OPEN_BOUNDARY,MIRROR_BOUNDARY)
                II = WC%ONE_D%II
                JJ = WC%ONE_D%JJ
                KK = WC%ONE_D%KK
