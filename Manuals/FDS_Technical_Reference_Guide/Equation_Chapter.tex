@@ -49,7 +49,9 @@ The governing equations are approximated using second-order accurate finite diff
 \section{Mass and Species Transport}
 \label{sec_lumped_species}
 
-The most basic description of the chemistry of fire is a reaction of a hydrocarbon fuel with oxygen that produces carbon dioxide and water vapor. Because fire is a relatively inefficient combustion process involving multiple fuel gases that contain more than just carbon and hydrogen atoms, the number of gas species to keep track of in the simulation is almost limitless. However, to make the simulations tractable, we limit the number of fuels to one, usually, and the number of reactions to just one or two. We also leave open the possibility that the reaction may not proceed for lack of sufficient oxygen in the incoming air stream, as when a fire in a closed compartment extinguishes itself. Even with this simplified approach to the chemistry, we still need to track at least six gas species (Fuel, O$_2$, CO$_2$, H$_2$O, CO, N$_2$) plus soot particulate. If we assume a single-step reaction, we do not need to solve explicitly seven transport equations. In fact, we only need to solve two -- one for the fuel and one for the products. The air is everything that is neither fuel nor products. Whereas the fuel is a single gas species, the air and products are what are often referred to as ``lumped species''. A lumped species represents a mixture of gas species that transport together (i.e., the lumped species has a single set of transport properties) and react together, and from the point of view of the numerical model, a lumped species can be treated as a single species. In fact, the mass transport equations make no distinction between a single or lumped species. For example, air is a lumped species that consists of nitrogen, oxygen, and trace amounts of water vapor and carbon dioxide. We use the symbols $Z_A$, $Z_F$, and $Z_P$ to denote the mass fractions of air, fuel and products ($Z_A=1 - Z_F - Z_P$).  The lumped species mass fractions are linearly related to the primitive species mass fractions, $Y_\alpha$; thus, conversion from one to the other is a simple matter of performing a matrix multiplication.  For example, the complete combustion of methane:
+The most basic description of the chemistry of fire is a reaction of a hydrocarbon fuel with oxygen that produces carbon dioxide and water vapor. Because fire is a relatively inefficient combustion process involving multiple fuel gases that contain more than just carbon and hydrogen atoms, the number of gas species to keep track of in the simulation is almost limitless. However, to make the simulations tractable, we limit the number of fuels to one, usually, and the number of reactions to just one or two. We also leave open the possibility that the reaction may not proceed for lack of sufficient oxygen in the incoming air stream, as when a fire in a closed compartment extinguishes itself. Even with this simplified approach to the chemistry, we still need to track at least six gas species (Fuel, O$_2$, CO$_2$, H$_2$O, CO, N$_2$) plus soot particulate. If we assume a single-step reaction, we do not need to solve explicitly seven transport equations. In fact, we only need to solve two -- one for the fuel and one for the products. The air is everything that is neither fuel nor products. However, to ensure realizability of species mass fractions, our strategy is to solve a transport equation for each species mass density and then to obtain the mixture mass density by summation of the species densities.
+
+Whereas the fuel is usually a single gas species, the air and products are what are often referred to as ``lumped species''. A lumped species represents a mixture of gas species that transport together (i.e., the lumped species has a single set of transport properties) and react together, and from the point of view of the numerical model, a lumped species can be treated as a single species. In fact, the mass transport equations make no distinction between a single or lumped species. For example, air is a lumped species that consists of nitrogen, oxygen, and trace amounts of water vapor and carbon dioxide. We use the symbols $Z_A$, $Z_F$, and $Z_P$ to denote the mass fractions of air, fuel and products.  The lumped species mass fractions are linearly related to the primitive species mass fractions, $Y_\alpha$; thus, conversion from one to the other is a simple matter of performing a matrix multiplication.  For example, the complete combustion of methane:
 \be \mathrm{CH_4 + 2 \, \left( O_2 + 3.76 \, N_2 \right)  \rightarrow CO_2 +2 \, H_2O + 7.52 \, N_2} \ee
 is expressed as
 \be \hbox{Fuel} + 2 \, \hbox{Air} \rightarrow \hbox{Products} \ee
@@ -66,24 +68,29 @@ and the primitive species can be recovered from the lumped species via
  \ee
 Notice that the columns of the matrix are the mass fractions of the primitive species within a given lumped species.
 
-The lumped species approach does not change the basic mass transport equations. The equation for total mass is written:
-\be \dod{\rho}{t} + \nabla\!\cdot (\rho \bu)  =  \dm_{\rm b}'''  \label{mass} \ee
+The transport equation for each of the lumped species has the same form as the transport equation for a single species:
+\be \dod{ }{t}(\rho Z_\alpha) + \nabla\!\cdot (\rho Z_\alpha \bu) = \nabla\!\cdot (\rho D_\alpha \nabla Z_\alpha) + \dm_\alpha''' + \dm_{\rm b,\alpha}''' \label{species} \ee
 Note that the source term on the right hand side represents the addition of mass from evaporating droplets or other subgrid-scale
 particles that represent sprinkler and fuel sprays, vegetation, and any other type of small, unresolvable object. These
 objects are assumed to occupy no volume; thus they are seen by the governing equations as point sources of mass, momentum, and energy. It is important to
 note, however, that the evaporated mass species must be one for which an explicit transport equation is solved. For example, water vapor is a product of
 combustion, but it is also formed by evaporating sprinkler droplets. In cases such as these, there needs to be an explicit transport equation for water
-vapor to distinguish between that which is formed by combustion and that which is evaporated from the droplets.
+vapor to distinguish between that which is formed by combustion and that which is evaporated from the droplets. Here $\dm_{\rm b,\alpha}'''$ is the production rate of species $\alpha$ by evaporating droplets or particles.
 
-The transport equation for each of the lumped species minus one (usually air) has the same form as the transport equation for a single species:
-\be \dod{ }{t}(\rho Z_\alpha) + \nabla\!\cdot (\rho Z_\alpha \bu) = \nabla\!\cdot (\rho D_\alpha \nabla Z_\alpha) + \dm_\alpha''' + \dm_{\rm b,\alpha}''' \label{species} \ee
-Here $\dm_{\rm b}'''=\sum_\alpha \dm_{\rm b,\alpha}'''$ is the production rate of species by evaporating droplets or particles.
-Summing these equations over all species yields the original mass conservation equation because
-$\sum Z_\alpha=1$ and $\sum \dm_\alpha''' = 0$ and $\sum \dm_{\rm b,\alpha}'''=\dm_{\rm b}'''$, by definition, and because it is assumed
-that $\sum \rho D_\alpha \nabla Z_\alpha = 0$. This last assertion is not true, in general.
-However, transport equations are solved for total
-mass and all but one of the species, implying that the diffusion coefficient of the implicit species is
-chosen so that the sum of all the diffusive fluxes is zero.
+The mass density is obtained from $\rho = \sum (\rho Z)_\alpha$.  The summation of Eq.~(\ref{species}) over all $N_s$ species gives
+\be \dod{\rho}{t} + \nabla\!\cdot (\rho \bu)  =  \dm_{\rm b}'''  \label{mass} \ee
+because $\sum Z_\alpha=1$ and $\sum \dm_\alpha''' = 0$ and $\sum \dm_{\rm b,\alpha}'''=\dm_{\rm b}'''$, by definition, and because it is assumed that $\sum \rho D_\alpha \nabla Z_\alpha = 0$. This last assertion is not true, in general.  The diffusive flux for the most abundant local species is corrected to enforce the constraint.
+
+
+
+
+\paragraph{Enforcing Realizability}
+
+Realizability of species mass fractions requires $Y_\alpha \ge 0$ for all $\alpha$ and $\sum Y_\alpha = 1$.  Note that this is more restrictive than the boundedness constraint, which simply requires $0 \le Y_\alpha \le 1$.
+
+If $(\rho Y)_\alpha$ obeys boundedness, $(\rho Y)_\alpha \ge 0$, and we solve $N_s$ species equations obtaining the density via $\rho = \sum_{\alpha=1}^{N_s} (\rho Y)_\alpha$, then mass fractions obtained by $Y_\alpha = (\rho Y)_\alpha/\rho$ are \emph{guaranteed to be realizable} (for $\rho>0$).  Thus, we have reduced the realizability problem to the ``easier'' problem of boundedness for $(\rho Y)_\alpha$. Details of the scalar boundedness correction are discussed in Appendix \ref{app_boundedness}.
+
+With this approach we must take care to ensure $\sum \rho D_\alpha \nabla Z_\alpha = 0$.  Our strategy is to absorb any errors in diffusive transport into the most abundant species \emph{locally}.  That is, for a given cell face we set $\rho D_m \nabla Z_m = -\sum_{\alpha\ne m} \rho D_\alpha \nabla Z_\alpha$, where $m$ is the most abundant species adjacent to that face.  Note that since FDS is typically used as an LES code mass transport by molecular diffusion may be two or three orders of magnitude less than turbulent transport, which uses the same turbulent diffusion coefficient for all species. Therefore, the errors in summation of the diffusive fluxes tend to be small.
 
 \section{Low Mach Number Approximation}
 
@@ -112,17 +119,17 @@ Eq.~(\ref{energy}) is not solved explicitly. Instead, the velocity divergence is
 The hydrodynamics solver guarantees that Eq.~(\ref{eqn_simplediv1}) is satisfied.  It follows that Eq.~(\ref{energy}) is also satisfied (energy is conserved).
 
 Expanding the material derivatives on the right hand side of Eq.~(\ref{eqn_simplediv1}) produces a fairly complicated expression for
-the divergence that includes the source and diffusion terms from the mass, species and energy conservation equations. Its importance to the overall algorithm is that it can be computed using only the thermodynamic variables $\rho$, $Z_\alpha$, and $\bp$. As will be shown below, the way to advance the flow velocity in time is to first estimate the thermodynamic variables at the next time step, compute the divergence, and then solve an equation for the pressure that will guarantee that the divergence of the updated velocity is identical to that computed solely from the thermodynamic variables.
+the divergence that includes the source and diffusion terms from the mass, species, and energy conservation equations. Its importance to the overall algorithm is that it can be computed using only the thermodynamic variables $\rho$, $Z_\alpha$, and $\bp$. As will be shown below, the way to advance the flow velocity in time is to first estimate the thermodynamic variables at the next time step, compute the divergence, and then solve an equation for the pressure that will guarantee that the divergence of the updated velocity is identical to that computed solely from the thermodynamic variables.
 
 
 
 \section{Momentum Transport}
 
-Noting the vector identity $(\bu \cdot \nabla) \bu = \nabla|\bu|^2/2 - \bu\times\bo $ and defining the stagnation energy per unit mass, $\cH \equiv |\bu|^2/2 + \tp/\rho$, the momentum equation can be written (see Chapter \ref{momentum_chapter} for a detailed derivation)
+Noting the vector identity $(\bu \cdot \nabla) \bu = \nabla|\bu|^2/2 - \bu\times\bo $, and defining the stagnation energy per unit mass, $\cH \equiv |\bu|^2/2 + \tp/\rho$, the momentum equation can be written (see Chapter \ref{momentum_chapter} for a detailed derivation)
 \be
    \dod{\bu}{t} - \bu\times\bo + \nabla \cH - \tp \, \nabla \left( 1/\rho\right) = \frac{1}{\rho} \Big[ (\rho-\rho_0) \bg + \bof_{\rm b} + \nabla\!\cdot \btau \Big] \label{momeqnoncon}
 \ee
-The term, $\bof_\text{b}$, represents the drag force exerted by the subgrid-scale particles and droplets. The viscous stress, $\btau$, is closed via gradient diffusion with the turbulent viscosity obtained from the Deardorff eddy viscosity model \cite{Deardorff:1980,Pope:2000}. It is convenient to write Eq.~(\ref{momeqnoncon}) in the form:
+The term $\bof_\text{b}$ represents the drag force exerted by the subgrid-scale particles and droplets. The viscous stress, $\btau$, is closed via gradient diffusion with the turbulent viscosity obtained from the Deardorff eddy viscosity model \cite{Deardorff:1980,Pope:2000}. It is convenient to write Eq.~(\ref{momeqnoncon}) in the form:
 \be 
    \dod{\bu}{t} + \bF + \nabla \cH = 0  
 \ee
@@ -191,7 +198,7 @@ Water droplets can absorb and scatter thermal radiation. This is important in sc
 \label{sec:solution_procedure}
 
 In a given grid cell at the $n$th time step, we have the density, $\rho^n$, lumped species mass fractions, $Z_\alpha^n$, velocity
-vector, $\bu^n$, and the fluctuating stagnation energy per unit mass\footnote{Throughout this document $\cH$ may also be referred to simply as the perturbation pressure.}, $\cH^n$.
+vector, $\bu^n$, and the Bernoulli integral, $\cH^n$.
 In addition, for each compartment in the computational domain, we have a background pressure, $\bp^n$. The temperature is
 found from the equation of state. These variables are advanced in time using an explicit second-order predictor/corrector scheme.
 The basic procedure is as follows:
@@ -199,10 +206,11 @@ The basic procedure is as follows:
 \paragraph{Predictor}
 
 \begin{enumerate}
-\item Estimate $\rho$, $Z_\alpha$, and $\bp$ at the next time step with an explicit Euler step. For
-example, the density is estimated by
-\be \frac{\rho^*-\rho^n}{\dt} + \nabla\!\cdot \rho^n \bu^n = 0 \ee
-The asterisk denotes a first order accurate estimate at the next time step.  Note that the source term is time-split, as discussed below.
+\item Estimate $\rho$, $Z_\alpha$, and $\bp$ at the next time step with an explicit Euler step. The species mass density is estimated by
+\be \frac{(\rho Z)_\alpha^*- \rho^n Z_\alpha^n}{\dt} + \nabla\!\cdot \rho^n \, Z_\alpha^n \, \bu^n = \nabla\!\cdot (\rho^n D_\alpha^n \nabla Z_\alpha^n) \ee
+The asterisk denotes a first order accurate estimate at the next time step.  Note that only transport is updated at this point; the source term is time-split, as discussed below.
+
+\item Compute the density from $\rho^* = \sum_\alpha (\rho Z_\alpha)^*$ and mass fractions from $Z_\alpha^* = (\rho Z)_\alpha^*/\rho^*$.
 
 \item Compute the temperature, $T^*$, from the equation of state.
 
@@ -218,10 +226,9 @@ The asterisk denotes a first order accurate estimate at the next time step.  Not
 Note that this procedure guarantees that the divergence of the estimated velocity field, $\nabla\!\cdot \bu^*$, is identically
 equal to the divergence that is derived from the estimated thermodynamic quantities, $(\nabla\!\cdot \bu)^*$, in Step \ref{step_pred_div}.
 
-\item Check that the time step, $\dt$, satisfies the CFL stability condition\footnote{In DNS mode, the Von Neumann condition is also checked.}:
-\be \dt \; \max\left( \frac{|u|}{\dx}, \frac{|v|}{\dy}, \frac{|w|}{\dz} \right) < 1 \quad \ee
+\item Check that the time step, $\dt$, satisfies the stability condition (see Sec.~\ref{stability}).
 If the time step is too large, it is reduced so that it satisfies
-the CFL and the procedure returns to the beginning of the time step.
+the stability constraint and the procedure returns to the beginning of the time step.
 If the stability criterion is satisfied, the procedure continues to the corrector step.
 \end{enumerate}
 
@@ -229,18 +236,21 @@ If the stability criterion is satisfied, the procedure continues to the correcto
 
 \begin{enumerate}
 
-\item Correct the density at the next time step.
+\item Correct the transported species mass densities at the next time step.
 \be
-\frac{\rho^{**} - \ha \left(\rho^n + \rho^* \right)}{\dt/2} +  \nabla\!\cdot \rho^* \bu^* = 0
+\frac{(\rho Z_\alpha)^{**} - \ha \left(\rho^n Z_\alpha^n + \rho^* Z_\alpha^* \right)}{\dt/2} +  \nabla\!\cdot \rho^* Z_\alpha^* \bu^* =
+\nabla\!\cdot (\rho^* D_\alpha^* \nabla Z_\alpha^*)
 \ee
 
-The lumped species mass fractions and background pressure are corrected in a similar way.
+The background pressure is corrected similarly.  The double asterisk $(\;)^{**}$ indicates a value that has been corrected for transport but has not yet been updated from chemistry or bulk mass source terms.
+
+\item Compute the density $\rho^{**} = \sum_\alpha (\rho Z_\alpha)^{**}$ and mass fractions $Z_\alpha^{**} = (\rho Z_\alpha)^{**}/\rho^{**}$.
 
 \item Compute the temperature, $T^{**}$, from the equation of state.
 
 \item \emph{Time splitting for mass source terms}. After the corrector step for the transport scheme, source terms are applied to the scalars (for both chemical reactions and Lagrangian particles).  The source terms are evaluated using the results from the corrected scalar transport scheme.  For example,
 \be
-\frac{(\rho Y_\alpha)_{ijk}^{n+1}-(\rho Y_\alpha)_{ijk}^{**}}{\dt} =  \dm_{\alpha,ijk}'''(\mathbf{Y}^{**},T^{**})
+\frac{(\rho Z_\alpha)_{ijk}^{n+1}-(\rho Z_\alpha)_{ijk}^{**}}{\dt} =  \dm_{\alpha,ijk}'''(\mathbf{Z}^{**},T^{**})
 \ee
 
 \item With the updated density and composition, compute the final temperature, $T^{n+1}$, from the equation of state.

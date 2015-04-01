@@ -39,7 +39,7 @@ In fire scenarios, $\eta$ is usually on the order of one millimeter.  DNS is the
 
 \subsection{The LES Momentum Equation}
 
-For length scales ranging in size from meters to kilometers, the affordable grid resolution for most LES fire calculations ranges from centimeters to meters.  The goal of the LES is to evolve the cell mean values of mass, momentum, and energy explicitly, while accounting for the effects that subgrid transport and chemistry have on the mean fields.  To this end, we apply the box filter to the DNS equations to obtain the filtered equations.  As an example, consider the momentum equation.  Applying Eq.~(\ref{eqn_box_filter}) to Eq.~(\ref{eqn_dns_conservative}) results in
+For domain sizes ranging from meters to kilometers, the affordable grid resolution for most LES fire calculations ranges from centimeters to meters.  The goal of the LES is to evolve the cell mean values of mass, momentum, and energy explicitly, while accounting for the effects that subgrid transport and chemistry have on the mean fields.  To this end, we apply the box filter to the DNS equations to obtain the filtered equations.  As an example, consider the momentum equation.  Applying Eq.~(\ref{eqn_box_filter}) to Eq.~(\ref{eqn_dns_conservative}) results in
 \begin{equation}
 \label{eqn_LES_1}
 \frac{\partial \overline{\rho u_i}}{\partial t} + \frac{\partial}{\partial x_j} (\overline{\rho u_i u_j}) = -\frac{\partial \overline{p}}{\partial x_i} - \frac{\partial \overline{\tau}_{ij}}{\partial x_j} + \overline{\rho} g_i + \bar{f}_{{\rm d},i} + \overline{\dot{m}_{\rm b}^\ppp u_{{\rm b},i}}
@@ -137,19 +137,19 @@ where $C_{\rm s}=0.2$ is a constant and $\Delta = (\delta x \, \delta y \, \delt
 
 For the dynamic Smagorinsky model~\cite{Germano:1,Moin:1991}, the coefficient $C_{\rm s}$ in Eq.~(\ref{constant_coef_LES}) is no longer taken as a constant, but rather computed based on local flow conditions.
 
-\subsection{Deardorff's Model}
+\subsection{Deardorff's Model (Default)}
 \label{sec:deardorff}
 
-By default, FDS uses a variation of Deardorff's model~\cite{Deardorff:1}:
+By default, FDS uses a variation of Deardorff's model~\cite{Deardorff:1980}:
 \be
   \mu_{\rm t} = \rho \, C_\nu \, \Delta \, \sqrt{ k_{\rm sgs} } \quad ; \quad
-  k_{\rm sgs} = \ha \left( (\overline{u}-\hat{u})^2 + (\overline{v}-\hat{v})^2 + (\overline{w}-\hat{w})^2 \right)  \label{Deardorff_LES}
+  k_{\rm sgs} = \ha \left( (\bar{u}-\hat{\bar{u}})^2 + (\bar{v}-\hat{\bar{v}})^2 + (\bar{w}-\hat{\bar{w}})^2 \right)  \label{Deardorff_LES}
 \ee
-where $\overline{u}$ is the average value of $u$ at the grid cell center and $\hat{u}$ is a weighted average of $u$ over the adjacent cells:
+where $\bar{u}$ is the average value of $u$ at the grid cell center (representing the LES filtered velocity at length scale $\Delta$) and $\hat{\bar{u}}$ is a weighted average of $u$ over the adjacent cells (representing a test-filtered field at length scale $2\Delta$):
 \be
-   \overline{u}_{ijk} = \frac{u_{ijk}+u_{i-1,jk}}{2} \quad ; \quad \hat{u}_{ijk} = \frac{\overline{u}_{ijk}}{2} + \frac{\overline{u}_{i-1,jk} + \overline{u}_{i+1,jk} }{4}
+   \bar{u}_{ijk} = \frac{u_{ijk}+u_{i-1,jk}}{2} \quad ; \quad \hat{\bar{u}}_{ijk} = \frac{\bar{u}_{ijk}}{2} + \frac{\bar{u}_{i-1,jk} + \bar{u}_{i+1,jk} }{4}
 \ee
-The terms $\hat{v}$ and $\hat{w}$ are defined similarly.  The model constant is set to the literature value $C_\nu=0.1$ \cite{Pope:2000}.
+The terms $\hat{\bar{v}}$ and $\hat{\bar{w}}$ are defined similarly.  The model constant is set to the literature value $C_\nu=0.1$ \cite{Pope:2000}.  The algebraic form of subgrid kinetic energy is based on the ideas presented in the scale-similarity model of Bardina et al.~\cite{Bardina:1980}. (Note that Deardorff \cite{Deardorff:1980} solved a transport equation for $k_{\rm sgs}$.)
 
 \subsection{Vreman's Model}
 \label{sec:vreman}
@@ -227,20 +227,20 @@ and material diffusivity are approximated from kinetic theory because the temper
 dependence of each is important in combustion scenarios.
 The viscosity of the species $\alpha$ is given by
 \be \mu_\alpha = \frac{26.69\times 10^{-7} (W_\alpha \, T)^\ha}{\sigma_\alpha^2 \, \Omega_v}
-\quad [=] \quad \frac{\hbox{kg}}{\hbox{m s}} \ee
+\quad [=] \quad \si{kg/(m.s)} \ee
 where $\sigma_\alpha$ is the Lennard-Jones
 hard-sphere diameter ($\text{\AA}$) and $\Omega_v$ is the
 collision integral, an empirical function of the
 temperature $T$. The thermal conductivity of species $\alpha$ is given by
-\be k_\alpha = \frac{\mu_\alpha \, c_{p,\alpha}}{\PR}  \quad [=] \quad \frac{\hbox{W}}{\hbox{m K}}  \ee
-where the Prandtl number $\PR$ is 0.7.
+\be k_\alpha = \frac{\mu_\alpha \, c_{p,\alpha}}{\PR}  \quad [=] \quad \si{W/(m.K)} \ee
+Note that the default value of the Prandtl number $\PR$ is 0.7.  However, this is an input property that can be set by the user.
 The viscosity and thermal conductivity of a gas mixture are given by
 \be \mu_{\hbox{\tiny DNS}} = \sum_\alpha \; Y_\alpha \; \mu_\alpha  \quad ; \quad
 k_{\hbox{\tiny DNS}} = \sum_\alpha \; Y_\alpha \; k_\alpha  \ee
 The binary diffusion coefficient of species $\alpha$
 diffusing into species $\beta$ is given by
 \be D_{\alpha \beta} = \frac{2.66\times 10^{-7} \, T^{3/2} }{W_{\alpha \beta}^\ha \, \sigma_{\alpha \beta}^2 \, \Omega_D }
-\quad [=] \quad \frac{\hbox{m$^2$}}{\hbox{s}} \ee
+\quad [=] \quad \si{m^2/s} \ee
 where $W_{\alpha \beta}=2(1/W_\alpha+1/W_\beta)^{-1}$, $\sigma_{\alpha \beta}=(\sigma_\alpha+\sigma_\beta)/2$, and
 $\Omega_D$ is the diffusion collision integral, an empirical
 function of the temperature, $T$~\cite{Poling:1}.
@@ -588,7 +588,7 @@ given in Eq.~(\ref{eqn_divfromeos}).
 
 \subsection{Open Boundary Conditions}
 
-An open boundary is where fluid is allowed to flow into or out of the computational domain depending on the local pressure gradient. The boundary condition for the pressure depends on whether the local flow is incoming or outgoing. In either case, it is assumed that the quantity, $\cH = \tilde{p}/\rho + q^2/2$, remains constant along a streamline. It is also assumed that the pressure perturbation at the boundary is a user-specified input, $\tilde{p}_{\rm ext}$, that is zero by default. The Poisson solver for the quantity, $\cH$, requires a Dirichlet condition at an open boundary; that is, its value is specified at the border of the computational domain. As an example, consider the boundary, $x=x_{\min}$. The boundary value of $\cH$ is given by the following expressions depending on the direction of the flow across the external cell face:
+An open boundary is where fluid is allowed to flow into or out of the computational domain depending on the local pressure gradient. The boundary condition for the pressure depends on whether the local flow is incoming or outgoing. In either case, it is assumed that the quantity, $\cH = \tilde{p}/\rho + |\mathbf{u}|^2/2$, remains constant along a streamline. It is also assumed that the pressure perturbation at the boundary is a user-specified input, $\tilde{p}_{\rm ext}$, that is zero by default. The Poisson solver for the quantity, $\cH$, requires a Dirichlet condition at an open boundary; that is, its value is specified at the border of the computational domain. As an example, consider the boundary, $x=x_{\min}$. The boundary value of $\cH$ is given by the following expressions depending on the direction of the flow across the external cell face:
 \be \cH_{\ha,jk} = \left\{ \begin{array}{ll} \displaystyle
           \displaystyle \frac{\tp_{\rm ext}}{\rho_{1,jk}} + \ha \left( \bar{u}_{1.jk}^2 + \bar{v}_{1,jk}^2 + \bar{w}_{1,jk}^2 \right)  & {\rm outgoing} \\ [0.2in]
           \displaystyle \frac{\tp_{\rm ext}}{\rho_\infty} + \ha \left( u_\infty^2 + v_\infty^2 + w_\infty^2 \right)  & {\rm incoming}
