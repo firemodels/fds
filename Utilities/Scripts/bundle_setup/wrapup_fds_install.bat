@@ -162,12 +162,13 @@ setx -m OMP_NUM_THREADS %nthreads% > Nul
 
 :: ----------- setting up firewall for mpi version of FDS
 
-:: remove smpd
+:: remove smpd and hydra
 
 smpd -remove 1>> Nul 2>&1
+hydra_service -remove 1>> Nul 2>&1
 
-copy "%CD%\bin"\smpd2.exe "%CD%\bin"\smpd.exe>Nul
-erase "%CD%\bin"\smpd2.exe >Nul
+copy "%CD%\bin"\hydra_service2.exe "%CD%\bin"\hydra_service.exe>Nul
+erase "%CD%\bin"\hydra_service2.exe >Nul
 
 set firewall_setup="%CD%\setup_fds_firewall.bat"
 echo.
