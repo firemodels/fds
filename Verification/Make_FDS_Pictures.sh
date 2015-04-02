@@ -78,7 +78,7 @@ rm -f $SVNROOT/Manuals/FDS_Configuration_Management_Plan/SCRIPT_FIGURES/*.png
 rm -f $SVNROOT/Manuals/FDS_Technical_Reference_Guide/SCRIPT_FIGURES/*.png
 rm -f $SVNROOT/Manuals/FDS_User_Guide/SCRIPT_FIGURES/*.png
 rm -f $SVNROOT/Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/*.png
-rm -f $SVNROOT/Manuals/FDS_Verificaiton_Guide/SCRIPT_FIGURES/*.png
+rm -f $SVNROOT/Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/*.png
 
 if [ "$START_X" == "yes" ]; then
   source $SVNROOT/Utilities/Scripts/startXserver.sh 2>/dev/null
