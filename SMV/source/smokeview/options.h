@@ -32,6 +32,7 @@
 //VVVVVVVVVVVVVVVVVVVVVVVVVVVVV  turn on options available on all platforms VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
 
 #define pp_GPU
+#define pp_ffmpeg
 
 #ifdef pp_GPU
 #define pp_CULL
@@ -53,7 +54,6 @@
 #define pp_SETTIME
 #define pp_PILOT
 #define pp_GEOMTEST
-#define pp_ffmpeg
 //#define pp_GPUDEPTH
 #endif
 
@@ -69,9 +69,6 @@
 #define pp_memstatus
 #define pp_COMPRESS
 #define pp_noappend
-#ifndef pp_ffmpeg
-#define pp_ffmpeg
-#endif
 #include "pragmas.h"
 #endif
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
