@@ -18,7 +18,7 @@ set in_background=%svn_root%\Utilities\background
 set in_smv=%svn_root%\SMV\Build\intel_win_%platform%
 set in_for_bundle=%svn_root%\SMV\for_bundle
 set in_sh2bat=%svn_root%\Utilities\Data_Processing
-set in_impi=%userprofile%\FIRE-LOCAL\LIBS\RUNTIME\WINDOWS
+set in_impi=%userprofile%\FIRE-LOCAL\LIBS\RUNTIME\WINDOWS_HYDRA
 
 set uploads=%svn_root%\Utilities\uploads
 set basedir=%uploads%\%basename%
@@ -73,8 +73,6 @@ copy %in_for_bundle%\*.po %out_bin%\.
 
 CALL :COPY %in_for_bundle%\fds_openmp.bat %out_bin%\fds_openmp.bat
 
-:: CALL :COPY %fdsdir%\fds_win_%platform%.exe         %out_bin%\fds%release_version%.exe
-
 CALL :COPY  %fdsmpidir%\fds_mpi_win_%platform%.exe  %out_bin%\fds.exe
 CALL :COPY  %in_testmpi%\test_mpi.exe  %out_bin%\test_mpi.exe
 
@@ -90,9 +88,10 @@ CALL :COPY  %in_fds2ascii%\intel_win_%platform%\fds2ascii_win_%platform%.exe    
 
 CALL :COPY  %in_background%\intel_win_32\background.exe %out_bin%\background.exe
 
-CALL :COPY %in_impi%\impi.dll         %out_bin%\impi.dll
-CALL :COPY %in_impi%\mpiexec.smpd.exe %out_bin%\mpiexec.exe
-CALL :COPY %in_impi%\smpd.exe         %out_bin%\smpd2.exe
+CALL :COPY %in_impi%\impi.dll          %out_bin%\impi.dll
+CALL :COPY %in_impi%\mpiexec.hydra.exe %out_bin%\mpiexec.exe
+CALL :COPY %in_impi%\pmi_proxy.exe     %out_bin%\pmi_proxy.exe
+CALL :COPY %in_impi%\hydra_service.exe %out_bin%\hydra_service2.exe
 
 CALL :COPY  %in_sh2bat%\sh2bat.exe %out_bin%\sh2bat.exe
 
