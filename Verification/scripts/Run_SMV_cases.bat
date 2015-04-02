@@ -20,6 +20,7 @@ cd %SVNROOT%\..\cfastclean\
 set CFAST=%CD%
 
 set TIME_FILE=%SCRIPT_DIR%\smv_case_times.txt
+set WAIT_FILE=%SCRIPT_DIR%\wait.txt
 
 set RUNFDS_R=call %SVNROOT%\Utilities\Scripts\runfds.bat
 set RUNTFDS_R=call %SVNROOT%\Utilities\Scripts\runfds.bat
@@ -44,7 +45,7 @@ set BACKGROUNDEXE=%SVNROOT%\Utilities\background\intel_win_32\background.exe
 
 :: Run jobs in background (or not)
 
-set "bg=%BACKGROUNDEXE% -u 60 -m 70 -d 5 "
+set "bg=%BACKGROUNDEXE% -u 60 -m 70 -d 1 "
 :: set bg=
 
 :: ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -126,10 +127,11 @@ goto eof
 :: -------------------------------------------------------------
 :wait_until_finished
 :: -------------------------------------------------------------
+Timeout /t 30 >nul 
 :loop1
 :: FDSBASE defined in Run_SMV_Cases and Run_FDS_Cases (the same in each)
-tasklist | find /i /c "%FDSBASE%" > %waitfile%
-set /p numexe=<%waitfile%
+tasklist | grep -ic %FDSBASE% > %WAIT_FILE%
+set /p numexe=<%WAIT_FILE%
 echo Number of cases running - %numexe%
 if %numexe% == 0 goto finished
 Timeout /t 30 >nul 
