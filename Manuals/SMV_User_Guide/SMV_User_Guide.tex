@@ -121,7 +121,7 @@ Volume I: User's Guide\\
 
 %\flushright{\today \\
 \begin{flushright}
-September  2014 \\
+April 2015 \\
 Smokeview Version \smvversion \\
 \emph{SVN Repository}~$Revision$
 \end{flushright}
@@ -3931,10 +3931,15 @@ or as specified in the input file.
 
 
 \chapter{Making Movies} \label{section:movie} A movie may be made
-of a Smokeview animation by converting the visualized scene into a
-series of image files, one image for each time step and then
-combining the individual images into one movie file. More
-specifically:
+by converting the visualized scene into a
+series of still images, one image for each time step and then
+combining the individual images into one movie file. The images may be combined using a commerical program such as
+Antechinus Media Editor
+(\hhref{http://www.c-point.com}),
+Apple Quicktime Pro (\hhref{http://www.quicktime.com}),
+ or
+Adobe Premiere Pro (\hhref{http://www.adobe.com}) or the public domain program ffmpeg (\hhref{https://www.ffmpeg.org}).  Smokeview will add a Movie Making dialog panel if ffmpeg is installed .
+The steps to making a movie are:
 
 \begin{enumerate}
 \item Set up Smokeview by orienting the scene and loading the
@@ -3952,22 +3957,25 @@ sequence.  Widgets exist for selecting the image type, the number of
 frames to skip between images and for creating the image sequence.
 One may also select a clipping region making the final image size smaller.
 
-\item Use a program such as the Antechinus Media Editor
-(\hhref{http://www.c-point.com}),
-Apple Quicktime Pro (\hhref{http://www.quicktime.com}),
+\item Use a program such as the Antechinus Media Editor,
+Apple Quicktime Pro
  or
-Adobe Premiere Pro (\hhref{http://www.adobe.com}),
+Adobe Premiere Pro,
 to assemble the
 JPEGS or PNGS rendered in the previous step into a movie
-file.
+file. If ffmpeg is installed use the Movie dialog illustrated in Figure \ref{figRENDER}.
+
 \end{enumerate}
 
 \begin{figure}[\figoptions]
-\centerline{
-\includegraphics[width=1.986111in]{FIGURES/figRENDER}
-}
-\caption[Render dialog box.]{Render dialog box. This dialog box allows one to specify
-options for rendering an image sequence of the displayed scene.}
+\begin{center}
+\begin{tabular}{cc}
+\includegraphics[width=1.7916666in]{FIGURES/figRENDER}&
+\includegraphics[width=1.7916666in]{FIGURES/figMOVIE}
+\end{tabular}
+\end{center}
+\caption[Render and Movie dialog box.]{Render and Movie dialog box. These dialog boxes allow one to specify
+options for rendering an image sequence of the displayed scene and to combine these images into a movie.  The Movie dialog box is available if the program ffmpeg is installed.}
 \label{figRENDER}
 \end{figure}
 
