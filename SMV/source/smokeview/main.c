@@ -15,7 +15,7 @@ char main_revision[]="$Revision$";
 #include "string_util.h"
 #include "smokeviewvars.h"
 
-// dummy change to update version to 6.2.1
+//dummy change to update version to 6.2.1
 // dummy change  to force revision update
 
 /* ------------------ main ------------------------ */
