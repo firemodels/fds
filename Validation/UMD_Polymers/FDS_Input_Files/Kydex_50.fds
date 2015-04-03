@@ -1,0 +1,106 @@
+&HEAD CHID='Kydex_50', TITLE='Kydex Gasification at 50 kW/m2'/
+
+&MESH IJK=3,3,4, XB=-0.15,0.15,-0.15,0.15,0.0,0.4 / 
+
+&MISC Y_O2_INFTY=0.0001, SOLID_PHASE_ONLY=.TRUE., TMPA=87. /
+
+&TIME T_END=800, WALL_INCREMENT=1, DT=0.1 /
+
+&REAC FUEL ='GAS', C=1., H=4., SOOT_YIELD=0. /
+
+&RAMP ID='k_KYDEX', T=27., F=0.193 /
+&RAMP ID='k_KYDEX', T=457., F=0.0683 /
+
+&RAMP ID='cp_KYDEX', T=27., F=1.155 /
+&RAMP ID='cp_KYDEX', T=457., F=3.7049 /
+
+&RAMP ID='k_KYDEX_int', T=27., F=0.559 /
+&RAMP ID='k_KYDEX_int', T=457., F=0.5719 /
+
+&RAMP ID='cp_KYDEX_int', T=27., F=1.168 /
+&RAMP ID='cp_KYDEX_int', T=457., F=2.4623 /
+
+&RAMP ID='k_KYDEX_char', T=27., F=0.3133 /
+&RAMP ID='k_KYDEX_char', T=457., F=0.45803 /
+
+&RAMP ID='cp_KYDEX_char', T=27., F=1.17868 /
+&RAMP ID='cp_KYDEX_char', T=457., F=1.21979 /
+
+&MATL ID='KYDEX'
+      ABSORPTION_COEFFICIENT=2135.
+      N_REACTIONS=1
+      A(1) = 6.03E10
+      E(1) = 1.41E5
+      EMISSIVITY=0.95
+      DENSITY= 1350.
+      SPEC_ID='GAS'
+      NU_SPEC= 0.55
+      MATL_ID='KYDEX_int'
+      NU_MATL=0.45
+      CONDUCTIVITY_RAMP ='k_KYDEX'
+      SPECIFIC_HEAT_RAMP = 'cp_KYDEX'
+      HEAT_OF_REACTION = 180. /
+
+&MATL ID='KYDEX_int'
+      ABSORPTION_COEFFICIENT=3000.
+      N_REACTIONS=1
+      A(1) = 1.36E10
+      E(1) = 1.74E5
+      EMISSIVITY=0.95
+      DENSITY= 100.
+      SPEC_ID='GAS'
+      NU_SPEC= 0.69
+      MATL_ID='KYDEX_char'
+      NU_MATL=0.31
+      CONDUCTIVITY_RAMP ='k_KYDEX_int'
+      SPECIFIC_HEAT_RAMP = 'cp_KYDEX_int'
+      HEAT_OF_REACTION = 125. /
+
+&MATL ID='KYDEX_char'
+      ABSORPTION_COEFFICIENT=10000.
+      EMISSIVITY=0.86
+      DENSITY=100.
+      CONDUCTIVITY_RAMP = 'k_KYDEX_char'
+      SPECIFIC_HEAT_RAMP = 'cp_KYDEX_char' /
+
+&SURF ID='top'
+      COLOR='BLACK'
+      MATL_ID ='KYDEX'
+      THICKNESS= 0.0061
+      EXTERNAL_FLUX=49.62
+      RAMP_EF= 'external'
+      TMP_BACK=37., TMP_INNER=37.
+      HEAT_TRANSFER_COEFFICIENT=5. /
+
+&RAMP ID='external', T=0., F=1. /
+&RAMP ID='external', T=20., F=1.0135 /
+&RAMP ID='external', T=40., F=1.027/
+&RAMP ID='external', T=60., F=1.0405 /
+&RAMP ID='external', T=80., F=1.054 /
+&RAMP ID='external', T=100., F=1.067 /
+&RAMP ID='external', T=120., F=1.081 /
+&RAMP ID='external', T=140., F=1.094 /
+&RAMP ID='external', T=160., F=1.108 /
+&RAMP ID='external', T=180., F=1.121 /
+&RAMP ID='external', T=200., F=1.135 /
+&RAMP ID='external', T=220., F=1.148 /
+&RAMP ID='external', T=240., F=1.162 /
+&RAMP ID='external', T=260., F=1.175 /
+&RAMP ID='external', T=280., F=1.189 /
+&RAMP ID='external', T=300., F=1.202 /
+&RAMP ID='external', T=800., F=1.202 /
+
+&VENT XB=-.05,0.05,-.05,0.05,0.0,0.0, SURF_ID='top' /
+
+&VENT MB='XMIN', SURF_ID='OPEN' /
+&VENT MB='XMAX', SURF_ID='OPEN' /
+&VENT MB='YMIN', SURF_ID='OPEN' /
+&VENT MB='YMAX', SURF_ID='OPEN' /
+&VENT MB='ZMAX', SURF_ID='OPEN' /
+
+&DUMP DT_DEVC=10. /
+&DEVC ID='MLR', XYZ=0.0,0.0,0.0, QUANTITY='BURNING RATE', IOR=3 /
+
+&TAIL / 
+
+

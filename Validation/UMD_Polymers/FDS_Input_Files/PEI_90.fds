@@ -1,0 +1,106 @@
+&HEAD CHID='PEI_90', TITLE='PEI Gasification at 90 kW/m2' /
+
+&MESH IJK=3,3,4, XB=-0.15,0.15,-0.15,0.15,0.0,0.4 / 
+
+&MISC Y_O2_INFTY=0.0001, SOLID_PHASE_ONLY=.TRUE., TMPA = 127. /
+
+&TIME T_END=500, WALL_INCREMENT=1, DT=0.1 /
+
+&REAC FUEL ='GAS', C=1., H=4., SOOT_YIELD=0. /
+
+&MATL ID='PEI'
+      ABSORPTION_COEFFICIENT=1745.
+      N_REACTIONS=1
+      A(1) = 1
+      E(1) = 0
+      EMISSIVITY=0.95
+      DENSITY= 1285.
+      SPEC_ID='GAS'
+      NU_SPEC= 0.000001
+      MATL_ID='PEI_melt'
+      NU_MATL=0.999999
+      CONDUCTIVITY_RAMP ='k_PEI'
+      SPECIFIC_HEAT_RAMP = 'cp_PEI'
+      HEAT_OF_REACTION = 1. /
+
+&MATL ID='PEI_melt'
+      ABSORPTION_COEFFICIENT=128500.
+      N_REACTIONS=1
+      A(1) = 7.66E27
+      E(1) = 4.65E5
+      EMISSIVITY=0.95
+      DENSITY= 1285.
+      SPEC_ID='GAS'
+      NU_SPEC= 0.35
+      MATL_ID='PEI_int'
+      NU_MATL=0.65
+      CONDUCTIVITY_RAMP ='k_PEI_melt'
+      SPECIFIC_HEAT_RAMP = 'cp_PEI_melt'
+      HEAT_OF_REACTION = -80. /
+
+&MATL ID='PEI_int'
+      ABSORPTION_COEFFICIENT=8000.
+      N_REACTIONS=1
+      A(1) = 6.5E2
+      E(1) = 8.8E4
+      EMISSIVITY=0.95
+      DENSITY= 80.
+      SPEC_ID='GAS'
+      NU_SPEC= 0.23
+      MATL_ID='PEI_char'
+      NU_MATL=0.77
+      CONDUCTIVITY_RAMP ='k_PEI_int'
+      SPECIFIC_HEAT_RAMP = 'cp_PEI_int'
+      HEAT_OF_REACTION = -5. /
+
+&MATL ID='PEI_char'
+      ABSORPTION_COEFFICIENT=80000.
+      EMISSIVITY=0.86
+      DENSITY=80.
+      CONDUCTIVITY_RAMP = 'k_PEI_char'
+      SPECIFIC_HEAT_RAMP = 'cp_PEI_char' /
+
+&RAMP ID='k_PEI', T=27., F=0.28 /
+&RAMP ID='k_PEI', T=457., F=0.108 /
+
+&RAMP ID='cp_PEI', T=27., F=1.1943 /
+&RAMP ID='cp_PEI', T=457., F=2.9573 /
+
+&RAMP ID='k_PEI_melt', T=27., F=0.221 /
+&RAMP ID='k_PEI_melt', T=457., F=0.0791 /
+
+&RAMP ID='cp_PEI_melt', T=27., F=2.0525 /
+&RAMP ID='cp_PEI_melt', T=457., F=2.29975 /
+
+&RAMP ID='k_PEI_int', T=27., F=0.507 /
+&RAMP ID='k_PEI_int', T=457., F=0.5887 /
+
+&RAMP ID='cp_PEI_int', T=27., F=1.68240 /
+&RAMP ID='cp_PEI_int', T=457., F=1.81484 /
+
+&RAMP ID='k_PEI_char', T=27., F=0.4952 /
+&RAMP ID='k_PEI_char', T=457., F=0.55298 /
+
+&RAMP ID='cp_PEI_char', T=27., F=1.31224 /
+&RAMP ID='cp_PEI_char', T=457., F=1.32978 /
+
+&SURF ID='top'
+      COLOR='BLACK'
+      MATL_ID ='PEI'
+      THICKNESS= 0.0066
+      EXTERNAL_FLUX=90.
+      TMP_BACK=37., TMP_INNER=42.
+      HEAT_TRANSFER_COEFFICIENT=5. /
+
+&VENT XB=-.05,0.05,-.05,0.05,0.0,0.0, SURF_ID='top' /
+
+&VENT MB='XMIN', SURF_ID='OPEN' /
+&VENT MB='XMAX', SURF_ID='OPEN' /
+&VENT MB='YMIN', SURF_ID='OPEN' /
+&VENT MB='YMAX', SURF_ID='OPEN' /
+&VENT MB='ZMAX', SURF_ID='OPEN' /
+
+&DUMP DT_DEVC=10. /
+&DEVC ID='MLR', XYZ=0.0,0.0,0.0, QUANTITY='BURNING RATE', IOR=3 /
+
+&TAIL / 
