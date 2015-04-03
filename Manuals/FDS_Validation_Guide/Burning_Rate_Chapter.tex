@@ -413,6 +413,205 @@ Combustion Efficiency   &               &          1                        & As
 \label{HRR_PBTGF}
 \end{figure}
 
+\clearpage
+
+\section{UMD Polymers}
+
+This section contains a description of seven polymers analyzed by J.~Li for his doctoral thesis at the University of Maryland~\cite{Li:Thesis}. In addition to the thesis itself, details of the measurement techniques can be found in Refs.~\cite{Li:IJHMT,Li:CF,Linteris:2,Li:PDS_2014,Li:PDS_2015}.
+
+In the experiments, samples of seven different polymers were exposed to several different heat flux levels in the controlled atmosphere pyrolysis apparatus (CAPA) developed at the University of Maryland. This apparatus is similar to a cone calorimeter, but with a nitrogen environment. Thus, it is similar in function to the Gasification Apparatus. In each experiment, a roughly 6~mm sample was placed upon a wire mesh with no insulated backing. The top side of the sample was exposed to a specified heat flux, while the bottom remained exposed to ambient conditions. The mass loss rate of the sample was measured, and in the sections to follow the measured values are compared to FDS predictions. The seven polymers are organized into groups with one, two, or three degradation steps.
+
+\subsection{One-Step Degradation: ABS, HIPS, and PMMA}
+
+These three polymers are assumed to pyrolyze according to the following single step process:
+\begin{equation}
+   \hbox{Polymer}  \to \hbox{Char} + \hbox{Gas}
+\end{equation}
+The properties of the virgin polymer, the char, and the reaction kinetics are listed in Table~\ref{Properties_ABS_HIPS_PMMA}.
+
+\begin{table}[h!]
+\caption[Properties of ABS, HIPS, and PMMA]{Properties of ABS, HIPS, and PMMA~\cite{Li:Thesis}.}
+\centering
+\begin{tabular*}{\textwidth}{|l|@{\extracolsep\fill}c@{\extracolsep\fill}|c|c|c|}
+\hline
+Property                    & Units         & ABS                     & HIPS                    & PMMA                     \\ \hline \hline
+Polymer Density             & kg/m$^3$      & 1050                    & 1060                    & 1160                     \\ \hline
+                            &               &                         &                         & $0.45-0.00038 \, T, \; T<378$~K      \\ 
+\raisebox{1.5ex}[0pt]{Polymer Cond.}        & \raisebox{1.5ex}[0pt]{W/m/K}         & \raisebox{1.5ex}[0pt]{$0.30-0.00028 \, T$}  & \raisebox{1.5ex}[0pt]{$0.10+0.0001  \, T$} & $0.27-0.00024 \, T, \; T\ge 378$~K  \\ \hline
+Polymer Spec.~Heat          & kJ/kg/K       & $1.58+0.0013  \, T$     & $0.59+0.0034  \, T$     & $0.60+0.0036  \, T$      \\ \hline
+Polymer Emissivity          &               & 0.95                    & 0.95                    & 0.95                     \\ \hline
+Polymer Abs.~Coef.          & m$^{-1}$      & 1800                    & 2250                    & 2240                     \\ \hline
+Char Density                & kg/m$^3$      & 80                      & Same as Polymer         & Same as Polymer          \\ \hline
+Char Conductivity           & W/m/K         & $0.13-0.00054 \, T$     & Same as Polymer         & Same as Polymer          \\ \hline
+Char Specific Heat          & kJ/kg/K       & $0.82+0.00011 \, T$     & Same as Polymer         & Same as Polymer          \\ \hline
+Char Emissivity             &               & 0.86                    & Same as Polymer         & Same as Polymer          \\ \hline
+Char Abs.~Coef.             & m$^{-1}$      & 2500                    & Opaque                  & Same as Polymer          \\ \hline
+Pre-Exp.~Factor             & s$^{-1}$      & $1.00\times 10^{14}$    & $1.70\times 10^{20}$    & $8.60\times 10^{12}$     \\ \hline
+Activation Energy           & kJ/kmol       & $2.19\times 10^5$       & $3.01\times 10^5$       & $1.88\times 10^5$        \\ \hline
+Heat of Reaction            & kJ/kg         & 460                     & 689                     & 846                      \\ \hline
+Heat of Combustion          & kJ/kg         & 28750                   & 29900                   & 24450                    \\ \hline
+Residue Fraction            &               & 0.023                   & 0.043                   & 0.015                    \\ \hline
+\end{tabular*}
+\label{Properties_ABS_HIPS_PMMA}
+\end{table}
+
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/UMD_Polymers/ABS_30} &
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/UMD_Polymers/ABS_50} \\
+\multicolumn{2}{c}{\includegraphics[height=2.1in]{SCRIPT_FIGURES/UMD_Polymers/ABS_70}} \\
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/UMD_Polymers/HIPS_30} &
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/UMD_Polymers/HIPS_50} \\
+\multicolumn{2}{c}{\includegraphics[height=2.1in]{SCRIPT_FIGURES/UMD_Polymers/HIPS_70}}
+\end{tabular*}
+\caption[Mass loss rate of ABS and HIPS]
+{Comparison of predicted and measured mass loss rates for ABS and HIPS.}
+\label{ABS_HIPS}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/UMD_Polymers/PMMA_20} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/UMD_Polymers/PMMA_40} \\
+\multicolumn{2}{c}{\includegraphics[height=2.2in]{SCRIPT_FIGURES/UMD_Polymers/PMMA_60}} 
+\end{tabular*}
+\caption[Mass loss rate of PMMA]
+{Comparison of predicted and measured mass loss rates for PMMA.}
+\label{PMMA}
+\end{figure}
+
+\clearpage
+
+\subsection{Two-Step Degradation: Kydex}
+
+This polymer is assumed to pyrolyze according to the following two step process:
+\begin{eqnarray}
+   \hbox{Polymer}       &\to& \hbox{Intermediate} + \hbox{Gas}  \label{reac1of2} \\
+   \hbox{Intermediate}  &\to& \hbox{Char} + \hbox{Gas} \label{reac2of2}
+\end{eqnarray}
+The properties of the polymer and the reaction kinetics are listed in Table~\ref{Properties_Kydex} and the mass loss rate comparisons are shown on the following page.
+
+\begin{table}[!h]
+\caption[Properties of Kydex]{Properties of Kydex~\cite{Li:Thesis}.}
+\centering
+\begin{tabular}{|l|c|c|}
+\hline
+Property                                 & Units         & Kydex                    \\ \hline \hline
+Polymer Density                          & kg/m$^3$      & 1350                     \\ \hline
+Polymer Cond.                            & W/m/K         & $0.28-0.00029 \, T$      \\ \hline
+Polymer Spec.~Heat                       & kJ/kg/K       & $-0.62+0.00593  \, T$    \\ \hline
+Polymer, Int. Emissivity                 &               & 0.95                     \\ \hline
+Polymer Abs.~Coef.                       & m$^{-1}$      & 2135                     \\ \hline
+Int.~Density                             & kg/m$^3$      & Same as Char             \\ \hline
+Int.~Cond.                               & W/m/K         & $0.55+0.00003 \, T$      \\ \hline
+Int.~Spec.~Heat                          & kJ/kg/K       & $0.27+0.00301  \, T$     \\ \hline
+Int.~Abs.~Coef.                          & m$^{-1}$      & 3000                     \\ \hline
+Char Density                             & kg/m$^3$      & 80                       \\ \hline
+Char Conductivity                        & W/m/K         & $0.21+0.00034 \, T$      \\ \hline
+Char Specific Heat                       & kJ/kg/K       & $1.15+0.00010 \, T$      \\ \hline
+Char Emissivity                          &               & 0.86                     \\ \hline
+Char Abs.~Coef.                          & m$^{-1}$      & 10000                    \\ \hline
+Reac.~\ref{reac1of2} Pre-Exp.~Factor     & s$^{-1}$      & $6.03\times 10^{10}$     \\ \hline
+Reac.~\ref{reac1of2} Act.~Energy         & kJ/kmol       & $1.41\times 10^5$        \\ \hline
+Reac.~\ref{reac1of2} Heat of Reac.       & kJ/kg         & 180                      \\ \hline
+Reac.~\ref{reac1of2} Residue Frac.       &               & 0.45                     \\ \hline
+Reac.~\ref{reac2of2} Pre-Exp.~Factor     & s$^{-1}$      & $1.36\times 10^{10}$     \\ \hline
+Reac.~\ref{reac2of2} Act.~Energy         & kJ/kmol       & $1.74\times 10^5$        \\ \hline
+Reac.~\ref{reac2of2} Heat of Reac.       & kJ/kg         & 125                      \\ \hline
+Reac.~\ref{reac2of2} Residue Frac.       &               & 0.31                     \\ \hline
+Gas Heat of Combustion                   & kJ/kg         & 12650                    \\ \hline
+\end{tabular}
+\label{Properties_Kydex}
+\end{table}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/UMD_Polymers/Kydex_30} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/UMD_Polymers/Kydex_50} \\
+\multicolumn{2}{c}{\includegraphics[height=2.2in]{SCRIPT_FIGURES/UMD_Polymers/Kydex_70}}
+\end{tabular*}
+\caption[Mass loss rate of Kydex]
+{Comparison of predicted and measured mass loss rates for Kydex.}
+\label{PMMA}
+\end{figure}
+
+\clearpage
+
+\subsection{Three-Step Degradation: PEI, PET, and POM}
+
+These three polymers are assumed to pyrolyze following the three-step process:
+\begin{eqnarray}
+   \hbox{Polymer}       &\to& \hbox{Melt}  \label{reac1of3} \\
+   \hbox{Melt}          &\to& \hbox{Intermediate} + \hbox{Gas}  \label{reac2of3} \\
+   \hbox{Intermediate}  &\to& \hbox{Char} + \hbox{Gas} \label{reac3of3}
+\end{eqnarray}
+The property data is listed in Table~\ref{Properties_PEI_PET_POM} and the mass loss rate comparisons are shown on the subsequent pages.
+
+\begin{table}[!h]
+\caption[Properties of PEI, PET, and POM]{Properties of PEI, PET, and POM~\cite{Li:Thesis}.}
+\centering
+\begin{tabular}{|l|c|c|c|c|}
+\hline
+Property                                 & Units         & PEI                     & PET                     & POM                      \\ \hline \hline
+Polymer, Melt Density                    & kg/m$^3$      & 1285                    & 1385                    & 1424                     \\ \hline
+Polymer Cond.                            & W/m/K         & $0.40-0.00040 \, T$     & $0.34-0.00046  \, T$    & $0.25+0.00002 \, T$      \\ \hline
+Polymer Spec.~Heat                       & kJ/kg/K       & $-0.04+0.00410  \, T$   & $-0.28+0.00465  \, T$   & $-1.86+0.0099  \, T$     \\ \hline
+Polymer, Melt, Int. Emiss.               &               & 0.95                    & 0.95                    & 0.95                     \\ \hline
+Polymer Abs.~Coef.                       & m$^{-1}$      & 1745                    & 1940                    & 3050                     \\ \hline
+Melt Cond.                               & W/m/K         & $0.32-0.00033 \, T$     & $0.33-0.00002 \, T$     & $0.21+0.00001 \, T$      \\ \hline
+Melt Spec.~Heat                          & kJ/kg/K       & $1.88+0.00057  \, T$    & $2.05-0.00021 \, T$     & $1.65+0.00120  \, T$     \\ \hline
+Melt Abs.~Coef.                          & m$^{-1}$      & 128500                  & Same as Polymer         & Same as Polymer          \\ \hline
+Int.~Density                             & kg/m$^3$      & Same as Char            & 730                     & Same as Polymer          \\ \hline
+Int.~Cond.                               & W/m/K         & $0.45+0.00019 \, T$     & $0.47+0.00014  \, T$    & $0.19-0.00006 \, T$      \\ \hline
+Int.~Spec.~Heat                          & kJ/kg/K       & $1.59+0.00031  \, T$    & $1.43-0.00005  \, T$    & Same as Melt             \\ \hline
+Int.~Abs.~Coef.                          & m$^{-1}$      & 8000                    & 1025                    & Same as Polymer          \\ \hline
+Char Density                             & kg/m$^3$      & 80                      & 80                      & Same as Int.             \\ \hline
+Char Conductivity                        & W/m/K         & $0.45+0.00013 \, T$     & $0.34+0.00046  \, T$    & Same as Polymer          \\ \hline
+Char Specific Heat                       & kJ/kg/K       & $1.30+0.00004 \, T$     & $0.82+0.00011 \, T$     & Same as Int.             \\ \hline
+Char Emissivity                          &               & 0.86                    & 0.86                    & Same as Polymer          \\ \hline
+Char Abs.~Coef.                          & m$^{-1}$      & Same as Int.            & 8000                    & Same as Polymer          \\ \hline
+Reac.~\ref{reac1of3} Pre-Exp.~Factor     & s$^{-1}$      & 1                       & $1.50\times 10^{36}$    & $2.69\times 10^{42}$     \\ \hline
+Reac.~\ref{reac1of3} Act.~Energy         & kJ/kmol       & 0                       & $3.80\times 10^5$       & $3.82\times 10^5$        \\ \hline
+Reac.~\ref{reac1of3} Heat of Reac.       & kJ/kg         & 1                       & 30                      & 192                      \\ \hline
+Reac.~\ref{reac1of3} Residue Frac.       &               & 1                       & 1                       & 1                        \\ \hline
+Reac.~\ref{reac2of3} Pre-Exp.~Factor     & s$^{-1}$      & $7.66\times 10^{27}$    & $1.60\times 10^{15}$    & $3.84\times 10^{14}$     \\ \hline
+Reac.~\ref{reac2of3} Act.~Energy         & kJ/kmol       & $4.65\times 10^5$       & $2.35\times 10^5$       & $2.00\times 10^5$        \\ \hline
+Reac.~\ref{reac2of3} Heat of Reac.       & kJ/kg         & -80                     & 220                     & 1192                     \\ \hline
+Reac.~\ref{reac2of3} Residue Frac.       &               & 0.65                    & 0.18                    & 0.4                      \\ \hline
+Reac.~\ref{reac3of3} Pre-Exp.~Factor     & s$^{-1}$      & $6.50\times 10^{2}$     & $3.53\times 10^{4}$     & $4.76\times 10^{44}$     \\ \hline
+Reac.~\ref{reac3of3} Act.~Energy         & kJ/kmol       & $0.88\times 10^5$       & $0.96\times 10^5$       & $5.90\times 10^5$        \\ \hline
+Reac.~\ref{reac3of3} Heat of Reac.       & kJ/kg         & -5                      & 250                     & 1352                     \\ \hline
+Reac.~\ref{reac3of3} Residue Frac.       &               & 0.77                    & 0.72                    & 0.018                    \\ \hline
+Gas Heat of Combustion                   & kJ/kg         & 18050                   & 15950                   & 14350                    \\ \hline
+\end{tabular}
+\label{Properties_PEI_PET_POM}
+\end{table}
+
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/UMD_Polymers/PEI_50} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/UMD_Polymers/PEI_70} \\
+\multicolumn{2}{c}{\includegraphics[height=2.2in]{SCRIPT_FIGURES/UMD_Polymers/PEI_90}} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/UMD_Polymers/PET_50} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/UMD_Polymers/PET_70} 
+\end{tabular*}
+\caption[Mass loss rate of PEI and PET]
+{Comparison of predicted and measured mass loss rates for PEI and PET.}
+\label{PEI_PET}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/UMD_Polymers/POM_30} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/UMD_Polymers/POM_50} \\
+\multicolumn{2}{c}{\includegraphics[height=2.2in]{SCRIPT_FIGURES/UMD_Polymers/POM_70}}
+\end{tabular*}
+\caption[Mass loss rate of POM]
+{Comparison of predicted and measured mass loss rates for POM.}
+\label{POM}
+\end{figure}
 
 \clearpage
 

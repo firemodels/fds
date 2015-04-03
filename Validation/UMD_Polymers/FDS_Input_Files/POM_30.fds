@@ -1,0 +1,94 @@
+&HEAD CHID='POM_30', TITLE='POM Gasification at 30 kW/m2' /
+
+&MESH IJK=3,3,4, XB=-0.15,0.15,-0.15,0.15,0.0,0.4 / 
+
+&MISC Y_O2_INFTY=0.0001, SOLID_PHASE_ONLY=.TRUE., TMPA = 57. /
+
+&TIME T_END=2500, WALL_INCREMENT=1, DT=0.1 /
+
+&REAC FUEL ='CB GAS', C=1., H=4., SOOT_YIELD=0. /
+
+&MATL ID='POM'
+      ABSORPTION_COEFFICIENT=3050.
+      N_REACTIONS=1
+      A(1) = 2.69E42
+      E(1) = 3.82E5
+      EMISSIVITY=0.95
+      DENSITY= 1424.
+      SPEC_ID='CB GAS'
+      NU_SPEC= 0.000001
+      MATL_ID='POM_melt'
+      NU_MATL= 0.999999
+      CONDUCTIVITY_RAMP ='k_POM'
+      SPECIFIC_HEAT_RAMP = 'cp_POM'
+      HEAT_OF_REACTION = 192.1 /
+
+&MATL ID='POM_melt'
+      ABSORPTION_COEFFICIENT=3050.
+      N_REACTIONS=1
+      A(1) = 3.84E14
+      E(1) = 2.00E5
+      EMISSIVITY=0.95
+      DENSITY= 1424.
+      SPEC_ID='CB GAS'
+      NU_SPEC= 0.6
+      MATL_ID='POM_int'
+      NU_MATL=0.4
+      CONDUCTIVITY_RAMP ='k_POM_melt'
+      SPECIFIC_HEAT_RAMP = 'cp_POM_melt'
+      HEAT_OF_REACTION = 1192. /
+
+&MATL ID='POM_int'
+      ABSORPTION_COEFFICIENT=3050.
+      N_REACTIONS=1
+      A(1) = 4.76E44
+      E(1) = 5.90E5
+      EMISSIVITY=0.95
+      DENSITY= 1424.
+      SPEC_ID='CB GAS'
+      NU_SPEC= 0.982
+      MATL_ID='POM_char'
+      NU_MATL=0.018
+      CONDUCTIVITY_RAMP ='k_POM_melt'
+      SPECIFIC_HEAT_RAMP = 'cp_POM_melt'
+      HEAT_OF_REACTION = 1352. /
+
+&MATL ID='POM_char'
+      ABSORPTION_COEFFICIENT=3050.
+      EMISSIVITY=0.95
+      DENSITY=1424
+      CONDUCTIVITY_RAMP ='k_POM_melt'
+      SPECIFIC_HEAT_RAMP = 'cp_POM_melt' /
+
+&RAMP ID='k_POM', T= 27., F=0.255 /
+&RAMP ID='k_POM', T=257., F=0.259 /
+
+&RAMP ID='k_POM_melt', T=127., F=0.213 /
+&RAMP ID='k_POM_melt', T=597., F=0.217 /
+
+&RAMP ID='cp_POM', T= 27., F=1.13 /
+&RAMP ID='cp_POM', T=257., F=3.43 /
+
+&RAMP ID='cp_POM_melt', T=127., F=2.11 /
+&RAMP ID='cp_POM_melt', T=597., F=2.65 /
+
+&SURF ID='top'
+      COLOR='BLACK'
+      MATL_ID ='POM'
+      THICKNESS= 0.0066
+      EXTERNAL_FLUX=30.
+      TMP_BACK=37., TMP_INNER=32.
+      HEAT_TRANSFER_COEFFICIENT=5. /
+
+&VENT XB=-.05,0.05,-.05,0.05,0.0,0.0, SURF_ID='top' /
+
+&VENT MB='XMIN', SURF_ID='OPEN' /
+&VENT MB='XMAX', SURF_ID='OPEN' /
+&VENT MB='YMIN', SURF_ID='OPEN' /
+&VENT MB='YMAX', SURF_ID='OPEN' /
+&VENT MB='ZMAX', SURF_ID='OPEN' /
+
+&DUMP DT_DEVC=10. /
+&DEVC ID='MLR', XYZ=0.0,0.0,0.0, QUANTITY='BURNING RATE', IOR=3 /
+
+&TAIL / 

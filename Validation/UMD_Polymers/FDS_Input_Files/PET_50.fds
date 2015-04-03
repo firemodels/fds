@@ -1,0 +1,106 @@
+&HEAD CHID='PET_50', TITLE='PET Gasification at 50 kW/m2'/
+
+&MESH IJK=3,3,4, XB=-0.15,0.15,-0.15,0.15,0.0,0.4 / 
+
+&MISC Y_O2_INFTY=0.000001, SOLID_PHASE_ONLY=.TRUE., TMPA=87. /
+
+&TIME T_END=800, WALL_INCREMENT=1, DT=0.05 /
+
+&REAC FUEL ='GAS', C=1., H=4., SOOT_YIELD=0. /
+
+&RAMP ID='k_PET', T= 27., F=0.206 /
+&RAMP ID='k_PET', T=457., F=0.009 /
+
+&RAMP ID='cp_PET', T= 27., F=1.12 /
+&RAMP ID='cp_PET', T=457., F=3.12 /
+
+&RAMP ID='k_PET_melt', T= 27., F=0.324 /
+&RAMP ID='k_PET_melt', T=457., F=0.315 /
+
+&RAMP ID='cp_PET_melt', T= 27., F=1.99 /
+&RAMP ID='cp_PET_melt', T=457., F=1.90 /
+
+&RAMP ID='k_PET_int', T= 27., F=0.51 /
+&RAMP ID='k_PET_int', T=457., F=0.57 /
+
+&RAMP ID='cp_PET_int', T= 27., F=1.42 /
+&RAMP ID='cp_PET_int', T=457., F=1.40 /
+
+&RAMP ID='k_PET_char', T= 27., F=0.475 /
+&RAMP ID='k_PET_char', T=457., F=0.672 /
+
+&RAMP ID='cp_PET_char', T= 27., F=0.854 /
+&RAMP ID='cp_PET_char', T=457., F=0.902 /
+
+&MATL ID='PET'
+      ABSORPTION_COEFFICIENT=1940.
+      N_REACTIONS=1
+      A(1) = 1.5E36
+      E(1) = 3.8E5
+      EMISSIVITY=0.95
+      DENSITY= 1385.
+      SPEC_ID='GAS'
+      NU_SPEC= 0.000001
+      MATL_ID='PET_melt'
+      NU_MATL=0.999999
+      CONDUCTIVITY_RAMP ='k_PET'
+      SPECIFIC_HEAT_RAMP = 'cp_PET'
+      HEAT_OF_REACTION = 30.3 /
+
+&MATL ID='PET_melt'
+      ABSORPTION_COEFFICIENT=1940.
+      N_REACTIONS=1
+      A(1) = 1.60E15
+      E(1) = 2.35E5
+      EMISSIVITY=0.95
+      DENSITY= 1385.
+      SPEC_ID='GAS'
+      NU_SPEC= 0.82
+      MATL_ID='PET_int'
+      NU_MATL=0.18
+      CONDUCTIVITY_RAMP ='k_PET_melt'
+      SPECIFIC_HEAT_RAMP = 'cp_PET_melt'
+      HEAT_OF_REACTION = 220. /
+
+&MATL ID='PET_int'
+      ABSORPTION_COEFFICIENT=1025.
+      N_REACTIONS=1
+      A(1) = 3.53E04
+      E(1) = 9.60E4
+      EMISSIVITY=0.95
+      DENSITY= 730.
+      SPEC_ID='GAS'
+      NU_SPEC= 0.28
+      MATL_ID='PET_char'
+      NU_MATL=0.72
+      CONDUCTIVITY_RAMP ='k_PET_int'
+      SPECIFIC_HEAT_RAMP = 'cp_PET_int'
+      HEAT_OF_REACTION = 250. /
+
+&MATL ID='PET_char'
+      ABSORPTION_COEFFICIENT=8000.
+      EMISSIVITY=0.86
+      DENSITY=80
+      CONDUCTIVITY_RAMP = 'k_PET_char'
+      SPECIFIC_HEAT_RAMP = 'cp_PET_char' /
+
+&SURF ID='top'
+      COLOR='BLACK'
+      MATL_ID ='PET'
+      THICKNESS= 0.0067
+      EXTERNAL_FLUX=50.
+      TMP_BACK=37., TMP_INNER=37.
+      HEAT_TRANSFER_COEFFICIENT=5. /
+
+&VENT XB=-.05,0.05,-.05,0.05,0.0,0.0, SURF_ID='top' /
+
+&VENT MB='XMIN', SURF_ID='OPEN' /
+&VENT MB='XMAX', SURF_ID='OPEN' /
+&VENT MB='YMIN', SURF_ID='OPEN' /
+&VENT MB='YMAX', SURF_ID='OPEN' /
+&VENT MB='ZMAX', SURF_ID='OPEN' /
+
+&DUMP DT_DEVC=10. /
+&DEVC ID='MLR', XYZ=0.0,0.0,0.0, QUANTITY='BURNING RATE', IOR=3 /
+
+&TAIL / 
