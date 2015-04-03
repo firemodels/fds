@@ -1756,7 +1756,6 @@ IF (CORRECTOR) THEN
    UVW_GHOST = -1.E6_EB
 ENDIF
 
-
 ! Set OME_E and TAU_E to very negative number
 
 TAU_E = -1.E6_EB
@@ -1927,6 +1926,65 @@ EDGE_LOOP: DO IE=1,N_EDGES
 
          IF (BOUNDARY_TYPE_M==NULL_BOUNDARY .AND. BOUNDARY_TYPE_P==NULL_BOUNDARY) CYCLE ORIENTATION_LOOP
 
+         ! Test IRROTATIONAL_OPEN_BOUNDARY
+
+         !DUDY = RDYN(J)*(UU(I,J+1,K)-UU(I,J,K))
+         !DVDX = RDXN(I)*(VV(I+1,J,K)-VV(I,J,K))
+         !DUDZ = RDZN(K)*(UU(I,J,K+1)-UU(I,J,K))
+         !DWDX = RDXN(I)*(WW(I+1,J,K)-WW(I,J,K))
+         !DVDZ = RDZN(K)*(VV(I,J,K+1)-VV(I,J,K))
+         !DWDY = RDYN(J)*(WW(I,J+1,K)-WW(I,J,K))
+         !OMX(I,J,K) = DWDY - DVDZ
+         !OMY(I,J,K) = DUDZ - DWDX
+         !OMZ(I,J,K) = DVDX - DUDY
+
+         IRROT_OPEN_IF: IF (IRROTATIONAL_OPEN_BOUNDARY) THEN
+            IRROT_BC_IF: IF (WALL(IWM)%BOUNDARY_TYPE==OPEN_BOUNDARY .OR. WALL(IWP)%BOUNDARY_TYPE==OPEN_BOUNDARY) THEN
+               IRROT_IEC_SELECT: SELECT CASE(IEC)
+                  CASE(1)
+                     IF (JJ==0    .AND. IOR== 2) THEN
+                        WW(II,JJ,KK)   = WW(II,JJ+1,KK) + DYN(JJ)*RDZN(KK)*(VV(II,JJ,KK)-VV(II,JJ,KK+1))
+                     ENDIF
+                     IF (JJ==JBAR .AND. IOR==-2) THEN
+                        WW(II,JJ+1,KK) = WW(II,JJ,KK)   + DYN(JJ)*RDZN(KK)*(VV(II,JJ,KK+1)-VV(II,JJ,KK))
+                     ENDIF
+                     IF (KK==0    .AND. IOR== 3) THEN
+                        VV(II,JJ,KK)   = VV(II,JJ,KK+1) + DZN(KK)*RDYN(JJ)*(WW(II,JJ,KK)-WW(II,JJ+1,KK))
+                     ENDIF
+                     IF (KK==KBAR .AND. IOR==-3) THEN
+                        VV(II,JJ,KK+1) = VV(II,JJ,KK)   + DZN(KK)*RDYN(JJ)*(WW(II,JJ+1,KK)-WW(II,JJ,KK))
+                     ENDIF
+                  CASE(2)
+                     IF (II==0    .AND. IOR== 1) THEN
+                        WW(II,JJ,KK)   = WW(II+1,JJ,KK) + DXN(II)*RDZN(KK)*(UU(II,JJ,KK)-UU(II,JJ,KK+1))
+                     ENDIF
+                     IF (II==IBAR .AND. IOR==-1) THEN
+                        WW(II+1,JJ,KK) = WW(II,JJ,KK)   + DXN(II)*RDZN(KK)*(UU(II,JJ,KK+1)-UU(II,JJ,KK))
+                     ENDIF
+                     IF (KK==0    .AND. IOR== 3) THEN
+                        UU(II,JJ,KK)   = UU(II,JJ,KK+1) + DZN(KK)*RDXN(II)*(WW(II,JJ,KK)-WW(II+1,JJ,KK))
+                     ENDIF
+                     IF (KK==KBAR .AND. IOR==-3) THEN
+                        UU(II,JJ,KK+1) = UU(II,JJ,KK)   + DZN(KK)*RDXN(II)*(WW(II+1,JJ,KK)-WW(II,JJ,KK))
+                     ENDIF
+                  CASE(3)
+                     IF (II==0    .AND. IOR== 1) THEN
+                        VV(II,JJ,KK)   = VV(II+1,JJ,KK) + DXN(II)*RDYN(JJ)*(UU(II,JJ,KK)-UU(II,JJ+1,KK))
+                     ENDIF
+                     IF (II==IBAR .AND. IOR==-1) THEN
+                        VV(II+1,JJ,KK) = VV(II,JJ,KK)   + DXN(II)*RDYN(JJ)*(UU(II,JJ+1,KK)-UU(II,JJ,KK))
+                     ENDIF
+                     IF (JJ==0    .AND. IOR== 2) THEN
+                        UU(II,JJ,KK)   = UU(II,JJ+1,KK) + DYN(JJ)*RDXN(II)*(VV(II,JJ,KK)-VV(II+1,JJ,KK))
+                     ENDIF
+                     IF (JJ==JBAR .AND. IOR==-2) THEN
+                        UU(II,JJ+1,KK) = UU(II,JJ,KK)   + DYN(JJ)*RDXN(II)*(VV(II+1,JJ,KK)-VV(II,JJ,KK))
+                     ENDIF
+               END SELECT IRROT_IEC_SELECT
+               CYCLE EDGE_LOOP
+            ENDIF IRROT_BC_IF
+         ENDIF IRROT_OPEN_IF
+
          ! At OPEN boundaries, set the external velocity component equal to the internal and exit the EDGE loop.
          ! Note that this is done only for edges with OPEN boundaries on each side.
 
@@ -1949,7 +2007,7 @@ EDGE_LOOP: DO IE=1,N_EDGES
                   IF (JJ==JBAR .AND. IOR==-2) UU(II,JBP1,KK) = UU(II,JBAR,KK)
             END SELECT
             CYCLE EDGE_LOOP
-         ENDIF   
+         ENDIF
 
          ! Define the appropriate gas and ghost velocity
    
