@@ -1703,7 +1703,7 @@ USE TURBULENCE, ONLY: WALL_MODEL,WANNIER_FLOW
 REAL(EB), INTENT(IN) :: T
 REAL(EB) :: MUA,TSI,WGT,TNOW,RAMP_T,OMW,MU_WALL,RHO_WALL,SLIP_COEF,VEL_T, &
             UUP(2),UUM(2),DXX(2),MU_DUIDXJ(-2:2),DUIDXJ(-2:2),PROFILE_FACTOR,VEL_GAS,VEL_GHOST, &
-            MU_DUIDXJ_USE(2),DUIDXJ_USE(2),VEL_EDDY,U_TAU,Y_PLUS,WT1,WT2
+            MU_DUIDXJ_USE(2),DUIDXJ_USE(2),VEL_EDDY,U_TAU,Y_PLUS,WT1,WT2,TWOUN
 INTEGER :: I,J,K,NOM(2),IIO(2),JJO(2),KKO(2),IE,II,JJ,KK,IEC,IOR,IWM,IWP,ICMM,ICMP,ICPM,ICPP,IC,ICD,ICDO,IVL,I_SGN,IS, &
            VELOCITY_BC_INDEX,IIGM,JJGM,KKGM,IIGP,JJGP,KKGP,SURF_INDEXM,SURF_INDEXP,ITMP,ICD_SGN,ICDO_SGN, &
            BOUNDARY_TYPE_M,BOUNDARY_TYPE_P,IS2,IWPI,IWMI
@@ -1926,64 +1926,70 @@ EDGE_LOOP: DO IE=1,N_EDGES
 
          IF (BOUNDARY_TYPE_M==NULL_BOUNDARY .AND. BOUNDARY_TYPE_P==NULL_BOUNDARY) CYCLE ORIENTATION_LOOP
 
-         ! Test IRROTATIONAL_OPEN_BOUNDARY
+         ! Test NEW_OPEN_BOUNDARY
 
-         !DUDY = RDYN(J)*(UU(I,J+1,K)-UU(I,J,K))
-         !DVDX = RDXN(I)*(VV(I+1,J,K)-VV(I,J,K))
-         !DUDZ = RDZN(K)*(UU(I,J,K+1)-UU(I,J,K))
-         !DWDX = RDXN(I)*(WW(I+1,J,K)-WW(I,J,K))
-         !DVDZ = RDZN(K)*(VV(I,J,K+1)-VV(I,J,K))
-         !DWDY = RDYN(J)*(WW(I,J+1,K)-WW(I,J,K))
-         !OMX(I,J,K) = DWDY - DVDZ
-         !OMY(I,J,K) = DUDZ - DWDX
-         !OMZ(I,J,K) = DVDX - DUDY
-
-         IRROT_OPEN_IF: IF (IRROTATIONAL_OPEN_BOUNDARY) THEN
-            IRROT_BC_IF: IF (WALL(IWM)%BOUNDARY_TYPE==OPEN_BOUNDARY .OR. WALL(IWP)%BOUNDARY_TYPE==OPEN_BOUNDARY) THEN
-               IRROT_IEC_SELECT: SELECT CASE(IEC)
+         NEW_OPEN_IF: IF (NEW_OPEN_BOUNDARY) THEN
+            IF (WALL(IWM)%BOUNDARY_TYPE==OPEN_BOUNDARY .AND. WALL(IWP)%BOUNDARY_TYPE==OPEN_BOUNDARY) THEN
+               ! first, compute velocity component normal to the boundary
+               SELECT CASE(IEC)
                   CASE(1)
-                     IF (JJ==0    .AND. IOR== 2) THEN
-                        WW(II,JJ,KK)   = WW(II,JJ+1,KK) + DYN(JJ)*RDZN(KK)*(VV(II,JJ,KK)-VV(II,JJ,KK+1))
-                     ENDIF
-                     IF (JJ==JBAR .AND. IOR==-2) THEN
-                        WW(II,JJ+1,KK) = WW(II,JJ,KK)   + DYN(JJ)*RDZN(KK)*(VV(II,JJ,KK+1)-VV(II,JJ,KK))
-                     ENDIF
-                     IF (KK==0    .AND. IOR== 3) THEN
-                        VV(II,JJ,KK)   = VV(II,JJ,KK+1) + DZN(KK)*RDYN(JJ)*(WW(II,JJ,KK)-WW(II,JJ+1,KK))
-                     ENDIF
-                     IF (KK==KBAR .AND. IOR==-3) THEN
-                        VV(II,JJ,KK+1) = VV(II,JJ,KK)   + DZN(KK)*RDYN(JJ)*(WW(II,JJ+1,KK)-WW(II,JJ,KK))
-                     ENDIF
+                     IF (JJ==0    .AND. IOR== 2) TWOUN = VV(II,JJ,KK)+VV(II,JJ,KK+1)
+                     IF (JJ==JBAR .AND. IOR==-2) TWOUN = VV(II,JJ,KK)+VV(II,JJ,KK+1)
+                     IF (KK==0    .AND. IOR== 3) TWOUN = WW(II,JJ,KK)+WW(II,JJ+1,KK)
+                     IF (KK==KBAR .AND. IOR==-3) TWOUN = WW(II,JJ,KK)+WW(II,JJ+1,KK)
                   CASE(2)
-                     IF (II==0    .AND. IOR== 1) THEN
-                        WW(II,JJ,KK)   = WW(II+1,JJ,KK) + DXN(II)*RDZN(KK)*(UU(II,JJ,KK)-UU(II,JJ,KK+1))
-                     ENDIF
-                     IF (II==IBAR .AND. IOR==-1) THEN
-                        WW(II+1,JJ,KK) = WW(II,JJ,KK)   + DXN(II)*RDZN(KK)*(UU(II,JJ,KK+1)-UU(II,JJ,KK))
-                     ENDIF
-                     IF (KK==0    .AND. IOR== 3) THEN
-                        UU(II,JJ,KK)   = UU(II,JJ,KK+1) + DZN(KK)*RDXN(II)*(WW(II,JJ,KK)-WW(II+1,JJ,KK))
-                     ENDIF
-                     IF (KK==KBAR .AND. IOR==-3) THEN
-                        UU(II,JJ,KK+1) = UU(II,JJ,KK)   + DZN(KK)*RDXN(II)*(WW(II+1,JJ,KK)-WW(II,JJ,KK))
-                     ENDIF
+                     IF (II==0    .AND. IOR== 1) TWOUN = UU(II,JJ,KK)+UU(II,JJ,KK+1)
+                     IF (II==IBAR .AND. IOR==-1) TWOUN = UU(II,JJ,KK)+UU(II,JJ,KK+1)
+                     IF (KK==0    .AND. IOR== 3) TWOUN = WW(II,JJ,KK)+WW(II+1,JJ,KK)
+                     IF (KK==KBAR .AND. IOR==-3) TWOUN = WW(II,JJ,KK)+WW(II+1,JJ,KK)
                   CASE(3)
-                     IF (II==0    .AND. IOR== 1) THEN
-                        VV(II,JJ,KK)   = VV(II+1,JJ,KK) + DXN(II)*RDYN(JJ)*(UU(II,JJ,KK)-UU(II,JJ+1,KK))
-                     ENDIF
-                     IF (II==IBAR .AND. IOR==-1) THEN
-                        VV(II+1,JJ,KK) = VV(II,JJ,KK)   + DXN(II)*RDYN(JJ)*(UU(II,JJ+1,KK)-UU(II,JJ,KK))
-                     ENDIF
-                     IF (JJ==0    .AND. IOR== 2) THEN
-                        UU(II,JJ,KK)   = UU(II,JJ+1,KK) + DYN(JJ)*RDXN(II)*(VV(II,JJ,KK)-VV(II+1,JJ,KK))
-                     ENDIF
-                     IF (JJ==JBAR .AND. IOR==-2) THEN
-                        UU(II,JJ+1,KK) = UU(II,JJ,KK)   + DYN(JJ)*RDXN(II)*(VV(II+1,JJ,KK)-VV(II,JJ,KK))
-                     ENDIF
-               END SELECT IRROT_IEC_SELECT
+                     IF (II==0    .AND. IOR== 1) TWOUN = UU(II,JJ,KK)+UU(II,JJ+1,KK)
+                     IF (II==IBAR .AND. IOR==-1) TWOUN = UU(II,JJ,KK)+UU(II,JJ+1,KK)
+                     IF (JJ==0    .AND. IOR== 2) TWOUN = VV(II,JJ,KK)+VV(II+1,JJ,KK)
+                     IF (JJ==JBAR .AND. IOR==-2) TWOUN = VV(II,JJ,KK)+VV(II+1,JJ,KK)
+               END SELECT
+               ! if flow is out of the domain, use zero gradient (Neumann)
+               FLOW_DIRECTION_IF: IF ( REAL(IOR,EB)*TWOUN < 0._EB ) THEN
+                  SELECT CASE(IEC)
+                     CASE(1)
+                        IF (JJ==0    .AND. IOR== 2) WW(II,0,KK)    = WW(II,1,KK)
+                        IF (JJ==JBAR .AND. IOR==-2) WW(II,JBP1,KK) = WW(II,JBAR,KK)
+                        IF (KK==0    .AND. IOR== 3) VV(II,JJ,0)    = VV(II,JJ,1)
+                        IF (KK==KBAR .AND. IOR==-3) VV(II,JJ,KBP1) = VV(II,JJ,KBAR)
+                     CASE(2)
+                        IF (II==0    .AND. IOR== 1) WW(0,JJ,KK)    = WW(1,JJ,KK)
+                        IF (II==IBAR .AND. IOR==-1) WW(IBP1,JJ,KK) = WW(IBAR,JJ,KK)
+                        IF (KK==0    .AND. IOR== 3) UU(II,JJ,0)    = UU(II,JJ,1)
+                        IF (KK==KBAR .AND. IOR==-3) UU(II,JJ,KBP1) = UU(II,JJ,KBAR)
+                     CASE(3)
+                        IF (II==0    .AND. IOR== 1) VV(0,JJ,KK)    = VV(1,JJ,KK)
+                        IF (II==IBAR .AND. IOR==-1) VV(IBP1,JJ,KK) = VV(IBAR,JJ,KK)
+                        IF (JJ==0    .AND. IOR== 2) UU(II,0,KK)    = UU(II,1,KK)
+                        IF (JJ==JBAR .AND. IOR==-2) UU(II,JBP1,KK) = UU(II,JBAR,KK)
+                  END SELECT
+               ELSE FLOW_DIRECTION_IF
+               ! if flow is into the domain, use prescribed far-field (Dirichlet)
+                  SELECT CASE(IEC)
+                     CASE(1)
+                        IF (JJ==0    .AND. IOR== 2) WW(II,0,KK)    = W0
+                        IF (JJ==JBAR .AND. IOR==-2) WW(II,JBP1,KK) = W0
+                        IF (KK==0    .AND. IOR== 3) VV(II,JJ,0)    = V0
+                        IF (KK==KBAR .AND. IOR==-3) VV(II,JJ,KBP1) = V0
+                     CASE(2)
+                        IF (II==0    .AND. IOR== 1) WW(0,JJ,KK)    = W0
+                        IF (II==IBAR .AND. IOR==-1) WW(IBP1,JJ,KK) = W0
+                        IF (KK==0    .AND. IOR== 3) UU(II,JJ,0)    = U0
+                        IF (KK==KBAR .AND. IOR==-3) UU(II,JJ,KBP1) = U0
+                     CASE(3)
+                        IF (II==0    .AND. IOR== 1) VV(0,JJ,KK)    = V0
+                        IF (II==IBAR .AND. IOR==-1) VV(IBP1,JJ,KK) = V0
+                        IF (JJ==0    .AND. IOR== 2) UU(II,0,KK)    = U0
+                        IF (JJ==JBAR .AND. IOR==-2) UU(II,JBP1,KK) = U0
+                  END SELECT
+               ENDIF FLOW_DIRECTION_IF
                CYCLE EDGE_LOOP
-            ENDIF IRROT_BC_IF
-         ENDIF IRROT_OPEN_IF
+            ENDIF
+         ENDIF NEW_OPEN_IF
 
          ! At OPEN boundaries, set the external velocity component equal to the internal and exit the EDGE loop.
          ! Note that this is done only for edges with OPEN boundaries on each side.
