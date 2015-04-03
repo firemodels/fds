@@ -474,13 +474,13 @@ Sample input files are included as part of the standard installation. A good cas
 
 \section{Starting an FDS Calculation}
 
-FDS can be run on a single computer, using one or more cores, or it can be run on multiple computers. Starting with FDS version~6.2.0, for each supported operating system (Windows, Linux, Mac~OS~X) there is a single executable file called {\ct fds} (with an {\ct .exe}\ file extension on Windows). Previous releases of FDS contained two executables, one that ran on a single processor and one that ran on multiple processors. Starting with 6.2.0, these two executables have been combined into one, and it can run either in serial or parallel mode.
+FDS can be run on a single computer, using one or more cores, or it can be run on multiple computers. Starting with FDS version~6.2.0, for each supported operating system (Windows, Linux, Mac~OS~X) there is a single executable file called {\ct fds} (with an {\ct .exe}\ file extension on Windows). Previous releases of FDS contained two executables, one that ran on a single processor and one that ran on multiple processors. Starting with FDS~6.2.0, these two executables have been combined into one, and it can run either in serial or parallel mode.
 
-There are two ways that FDS can be run in parallel; that is, exploit multiple cores on a single computer or multiple processors/cores distributed over multiple computers on a network or compute cluster. The first way is OpenMP (Open Multi-Processing)~\cite{Chapman:OpenMP} which allows a single computer to run a single mesh FDS simulation on multiple cores. The use of OpenMP does not require the computational domain to be broken up into multiple meshes, and it will still work with cases that have multiple meshes defined. The second way to run FDS in parallel is by way of MPI (Message Passing Interface). Here, the computational domain must be divided into multiple meshes and typically each mesh is assigned its own {\em process}. These processes can be limited to a single computer, or they can be distributed over a network.
+There are two ways that FDS can be run in parallel; that is, exploit multiple cores on a single computer or multiple processors/cores distributed over multiple computers on a network or compute cluster. The first way is OpenMP (Open Multi-Processing)~\cite{Chapman:OpenMP} which allows a single computer to run a single or multiple mesh FDS simulation on multiple cores. The use of OpenMP does not require the computational domain to be broken up into multiple meshes, and it will still work with cases that have multiple meshes defined. The second way to run FDS in parallel is by way of MPI (Message Passing Interface). Here, the computational domain must be divided into multiple meshes and typically each mesh is assigned its own {\em process}. These processes can be limited to a single computer, or they can be distributed over a network.
 
-MPI and OpenMP can also be used together. For example, 4 MPI processes can be assigned to 4 different computers, and each MPI process can be supported by, say, 8 OpenMP threads, assuming each computer has 8 cores. Most of the speed up is achieved by the MPI. For a reasonably fast network, you can expect 4 MPI processes to speed up the computation time by a factor of about 0.9 times 4. The OpenMP can provide an extra factor of about 2, regardless of the number of cores used beyond about 4.
+MPI and OpenMP can also be used together. For example, 4 MPI processes can be assigned to 4 different computers, and each MPI process can be supported by, say, 8 OpenMP threads, assuming each computer has 8 cores. Most of the speed up is achieved by the MPI. For a reasonably fast network, you can expect 4 MPI processes to speed up the computation time by a factor of about 0.9 times 4. The OpenMP can provide an extra factor up to about 2, regardless of the number of cores used beyond about 4.
 
-\subsection{Single Mesh Simulation with OpenMP Parallel Processing}
+\subsection{Single or Multiple Mesh Simulation with OpenMP Parallel Processing}
 \label{single_mesh}
 
 If your simulation involves only one mesh, you can only run it on one computer, but you can exploit its multiple processors or cores using OpenMP. When you install FDS, it will query your computer to determine the number of available cores. By default, FDS will use approximately half of the available cores\footnote{To determine the number of cores used by OpenMP, just type {\ct fds} at the command prompt.} on a single computer. To change the number of cores that are available for a given FDS simulation, you can set an environment variable called {\ct OMP\_NUM\_THREADS}. The way to do this depends on the operating system and will be explained below.
@@ -1038,64 +1038,22 @@ the number of which depends on the desired resolution of the flow dynamics.
 \subsection{Basics}
 \label{info:MESH_Basics}
 
-A mesh is a single right parallelepiped, i.e., a box.
-The coordinate system within a mesh conforms to the right hand rule.
-The origin point of a mesh is defined by the first, third
-and fifth values of the real number sextuplet, {\ct XB}, and the opposite
-corner is defined by the second, fourth and sixth values.
-For example,
+A mesh is a single right parallelepiped, i.e., a box. The coordinate system within a mesh conforms to the right hand rule. The origin point of a mesh is defined by the first, third and fifth values of the real number sextuplet, {\ct XB}, and the opposite corner is defined by the second, fourth and sixth values. For example,
 \begin{lstlisting}
 &MESH IJK=10,20,30, XB=0.0,1.0,0.0,2.0,0.0,3.0 /
 \end{lstlisting}
-defines a mesh that spans the volume starting at the origin and extending 1~m in the positive
-$x$ direction, 2~m in the positive $y$ direction, and 3~m in the positive $z$ direction.
-The mesh is subdivided into uniform cells via the parameter
-{\ct IJK}. In this example, the mesh is divided into 10~cm cubes. It is best if the mesh cells resemble cubes; that is, the
-length, width and height of the cells ought to be roughly the same.
-If it is desired that the mesh cells in a particular direction not be uniform in size,
-then the namelist groups {\ct TRNX}, {\ct TRNY} and/or {\ct TRNZ} may be used to alter the
-uniformity of the mesh (See Section~\ref{info:TRNX}).
+defines a mesh that spans the volume starting at the origin and extending 1~m in the positive $x$ direction, 2~m in the positive $y$ direction, and 3~m in the positive $z$ direction. The mesh is subdivided into uniform cells via the parameter {\ct IJK}. In this example, the mesh is divided into 10~cm cubes. It is best if the mesh cells resemble cubes; that is, the length, width and height of the cells ought to be roughly the same. If it is desired that the mesh cells in a particular direction not be uniform in size, then the namelist groups {\ct TRNX}, {\ct TRNY} and/or {\ct TRNZ} may be used to alter the uniformity of the mesh (See Section~\ref{info:TRNX}).
 
-Any obstructions or vents that extend beyond the boundary of the mesh
-are cut off at the boundary. There is no penalty for defining objects
-outside of the mesh, and these objects will not appear in Smokeview.
+Any obstructions or vents that extend beyond the boundary of the mesh are cut off at the boundary. There is no penalty for defining objects outside of the mesh, and these objects will not appear in Smokeview.
 
+The pressure solver in FDS employs Fast Fourier Transforms (FFTs) in the $y$ and $z$ directions, and this algorithm works most efficiently if the number of cells in these directions (the {\ct J} and {\ct K} of {\ct IJK}) can be factored into low primes, like 2, 3, and 5. The number of cells in the $x$ direction (the {\ct I} in {\ct IJK}) is not affected by this restriction because the pressure solver does not use an FFT in the $x$ direction. However, since the pressure solver uses less than 10~\% of the total CPU time, the gains in using low prime dimensions are usually negligible. Experiment with different mesh dimensions to ensure that those that are ultimately used do not unduly slow down the calculation.
 
-Because an important part of the calculation uses a Poisson solver based on
-Fast Fourier Transforms (FFTs) in the $y$ and $z$ directions, the second and third dimensions
-of the mesh should each be of the form $2^l \, 3^m \, 5^n$, where
-$l$, $m$ and $n$ are integers. For example,
-$64=2^6$, $72=2^33^2$ and $108=2^23^3$ are good mesh cell divisions, but 37, 99 and 109 are not.
-The first number of mesh cell divisions (the {\ct I} in {\ct IJK}) does not use FFTs and need not be given as a
-product of small numbers. However, you should experiment with different values of
-divisions to ensure that those that are ultimately used do not unduly slow down the calculation.
-
-Here is a list of numbers between 1 and 1024 that can be factored
-down to 2's, 3's and 5's:
-\begin{lstlisting}[basicstyle=\scriptsize\ttfamily]
-   2     3     4     5     6     8     9    10    12    15    16    18    20    24    25
-  27    30    32    36    40    45    48    50    54    60    64    72    75    80    81
-  90    96   100   108   120   125   128   135   144   150   160   162   180   192   200
- 216   225   240   243   250   256   270   288   300   320   324   360   375   384   400
- 405   432   450   480   486   500   512   540   576   600   625   640   648   675   720
- 729   750   768   800   810   864   900   960   972  1000  1024
-\end{lstlisting}
 
 
 \subsection{Two-Dimensional and Axially-Symmetric Calculations}
 \label{info:2D}
 
-The governing equations solved in FDS are written in terms of a
-three dimensional Cartesian coordinate system. However,
-a two dimensional Cartesian or two dimensional cylindrical
-(axially-symmetric) calculation can be performed by setting the {\ct J} in the {\ct IJK} triplet
-to 1 on the {\ct MESH} line. For axial symmetry, add {\ct CYLINDRICAL=.TRUE.} to the
-{\ct MESH} line, and the coordinate $x$ is then interpreted as the radial coordinate $r$.
-No boundary conditions should be set at the planes $y=\hbox{\ct YMIN=XB(3)}$ or
-$y=\hbox{\ct YMAX=XB(4)}$, nor at $r=\hbox{\ct XMIN=XB(1)}$ in an axially-symmetric
-calculation in which $r=\hbox{\ct XB(1)=0}$. For better visualizations, the difference between
-{\ct XB(4)} and {\ct XB(3)} should be small so that the Smokeview rendering appears to be in 2-D.
-An example of an axially-symmetric helium plume is given in Section~\ref{baroclinic_torque}.
+The governing equations solved in FDS are written in terms of a three dimensional Cartesian coordinate system. However, a two dimensional Cartesian or two dimensional cylindrical (axially-symmetric) calculation can be performed by setting the {\ct J} in the {\ct IJK} triplet to 1 on the {\ct MESH} line. For axial symmetry, add {\ct CYLINDRICAL=.TRUE.} to the {\ct MESH} line, and the coordinate $x$ is then interpreted as the radial coordinate $r$. No boundary conditions should be set at the planes $y=\hbox{\ct YMIN=XB(3)}$ or $y=\hbox{\ct YMAX=XB(4)}$, nor at $r=\hbox{\ct XMIN=XB(1)}$ in an axially-symmetric calculation in which $r=\hbox{\ct XB(1)=0}$. For better visualizations, the difference between {\ct XB(4)} and {\ct XB(3)} should be small so that the Smokeview rendering appears to be in 2-D. An example of an axially-symmetric helium plume is given in Section~\ref{baroclinic_torque}.
 
 
 \subsection{Multiple Meshes}
@@ -1107,18 +1065,7 @@ An example of an axially-symmetric helium plume is given in Section~\ref{barocli
 \label{fig:domain}
 \end{figure}
 
-The term ``multiple meshes'' means that the computational domain consists of
-more than one computational mesh, usually connected although this is not
-required. If more than one mesh is used, there should be a
-{\ct MESH} line for each. The order in which these
-lines are entered in the input file matters. In general, the meshes should be entered
-from finest to coarsest. FDS assumes that a mesh listed first in the input file has
-precedence over a mesh listed second if the two meshes overlap.
-Meshes can overlap, abut, or not touch at all. In the last case, essentially two separate
-calculations are performed with no communication at all between them. Obstructions and vents are entered
-in terms of the overall coordinate system and need not apply to any one particular mesh.
-Each mesh checks the coordinates of all the geometric
-entities and decides whether or not they are to be included.
+The term ``multiple meshes'' means that the computational domain consists of more than one computational mesh, usually connected although this is not required. If more than one mesh is used, there should be a {\ct MESH} line for each. The order in which these lines are entered in the input file matters. In general, the meshes should be entered from finest to coarsest. FDS assumes that a mesh listed first in the input file has precedence over a mesh listed second if the two meshes overlap. Meshes can overlap, abut, or not touch at all. In the last case, essentially two separate calculations are performed with no communication at all between them. Obstructions and vents are entered in terms of the overall coordinate system and need not apply to any one particular mesh. Each mesh checks the coordinates of all the geometric entities and decides whether or not they are to be included.
 
 To run FDS in parallel using MPI (Message Passing Interface), you {\bf must} break up the computational domain into multiple meshes so that the workload can be divided among the computers. In general, it is better to run multiple mesh cases with the MPI version of FDS if you have the computers available, but be aware that two computers will not necessarily finish the job in half the time as one. For the MPI version to work well, there has to be a comparable number of cells in each mesh, or otherwise most of the computers will sit idle waiting for the one with the largest mesh to finish processing each time step. You can use multiple meshes even when running the non-MPI version of FDS, in which case one CPU will serially process each mesh, one by one. Why do this? For one, if you set {\ct SYNCHRONIZE=.FALSE.} on the {\ct TIME} line, then in each mesh, the governing equations will be solved with a time step based on the flow speed within that particular mesh. Because each mesh can have different time steps, this technique can save CPU time by requiring relatively coarse meshes to be updated only when necessary. Coarse meshes are best used in regions where temporal and spatial gradients of key quantities are small or unimportant. Be aware, however, that unsynchronized time steps are more likely to lead to numerical instabilities.
 
