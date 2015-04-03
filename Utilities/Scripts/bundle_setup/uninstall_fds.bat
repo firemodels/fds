@@ -20,8 +20,8 @@ rmdir /q /s "%ALLUSERSPROFILE%\Start Menu\Programs\FDS6"
 
 echo.
 echo *** Removing hydra_service
-hydra_service -remove
+hydra_service -remove >Nul 2>Nul
 
 echo.
 echo *** Removing smpd
-smpd -remove
+smpd -remove >Nul 2>Nul
