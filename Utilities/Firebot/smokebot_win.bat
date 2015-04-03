@@ -308,6 +308,12 @@ set BUILDSMVUTIL_end=%current_time%
 call :GET_DURATION BUILDSMVUTIL %BUILDSMVUTIL_beg% %BUILDSMVUTIL_end%
 set DIFF_BUILDSMVUTIL=%duration%
 
+call :GET_TIME
+set PRELIM_end=%current_time% 
+call :GET_DURATION PRELIM %PRELIM_beg% %PRELIM_end%
+set DIFF_PRELIM=%duration%
+
+
 :: -------------------------------------------------------------
 ::                           stage 4
 :: -------------------------------------------------------------
@@ -413,14 +419,15 @@ time /t > %OUTDIR%\stoptime.txt
 set /p stoptime=<%OUTDIR%\stoptime.txt
 
 echo. > %infofile%
-echo . ----------------------------- >> %infofile%
-echo .         host: %COMPUTERNAME% >> %infofile%
+echo . -----------------------------         >> %infofile%
+echo .         host: %COMPUTERNAME%          >> %infofile%
 echo .        start: %startdate% %starttime% >> %infofile%
-echo .         stop: %stopdate% %stoptime%  >> %infofile%
-echo .    run cases: %DIFF_RUNVV% >> %infofile%
-echo .make pictures: %DIFF_MAKEPICS% >> %infofile%
-echo .        total: %DIFF_TIME% >> %infofile%
-echo . ----------------------------- >> %infofile%
+echo .         stop: %stopdate% %stoptime%   >> %infofile%
+echo .  preliminary: %DIFF_PRELIM%           >> %infofile%
+echo .    run cases: %DIFF_RUNVV%            >> %infofile%
+echo .make pictures: %DIFF_MAKEPICS%         >> %infofile%
+echo .        total: %DIFF_TIME%             >> %infofile%
+echo . -----------------------------         >> %infofile%
 
 copy %infofile% %timingslogfile%
 
