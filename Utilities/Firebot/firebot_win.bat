@@ -95,8 +95,8 @@ echo. > %stagestatus%
 call :is_file_installed %gettimeexe%|| exit /b 1
 echo             found get_time
 
-call :get_time TIME_beg
-call :get_time PRELIM_beg
+call :GET_TIME TIME_beg
+call :GET_TIME PRELIM_beg
 
 ifort 1> %scratchfile% 2>&1
 type %scratchfile% | find /i /c "not recognized" > %counta%
@@ -170,14 +170,9 @@ set warninglogpc=%HISTORYDIR%\warnings_%revisionnum%.txt
 
 set timingslogfile=%TIMINGSDIR%\timings_%revisionnum%.txt
 
-call :get_time PRELIM_end
-call :get_duration PRELIM DIFF_PRELIM %PRELIM_end% %PRELIM_beg%
-
 :: -------------------------------------------------------------
 ::                           stage 1
 :: -------------------------------------------------------------
-
-call :get_time BUILDFDS_beg
 
 echo Stage 1 - Building FDS
 
@@ -197,14 +192,9 @@ make VPATH="../../FDS_Source" -f ..\makefile mpi_intel_win_64  1> %OUTDIR%\makef
 call :does_file_exist fds_mpi_win_64.exe %OUTDIR%\makefdsr.log|| exit /b 1
 call :find_warnings "warning" %OUTDIR%\makefdsr.log "Stage 1d, FDS parallel release compilation"
 
-call :get_time BUILDFDS_end
-call :get_duration BUILDFDS DIFF_BUILDFDS %BUILDFDS_end% %BUILDFDS_beg%
-
 :: -------------------------------------------------------------
 ::                           stage 2
 :: -------------------------------------------------------------
-
-call :get_time BUILDSMVUTIL_beg
 
 echo Stage 2 - Building Smokeview
 
@@ -255,14 +245,13 @@ if %have_icc% == 1 (
   echo             background not built, using installed version
 )
 
-call :get_time BUILDSMVUTIL_end=%current_time% 
-call :get_duration BUILDSMVUTIL DIFF_BUILDSMVUTIL %BUILDSMVUTIL_end% %BUILDSMVUTIL_beg%
+call :GET_DURATION PRELIM %PRELIM_beg%
 
 :: -------------------------------------------------------------
 ::                           stage 4
 :: -------------------------------------------------------------
 
-call :get_time RUNVV_beg
+call :GET_TIME RUNVV_beg
 
 echo Stage 4 - Running verification cases
 echo             debug mode
@@ -301,8 +290,7 @@ call Check_FDS_cases
 
 call :report_errors Stage 4b, "Release FDS case errors"|| exit /b 1
 
-call :get_time RUNVV_end
-call :get_duration RUNVV DIFF_RUNVV %RUNVV_end% %RUNVV_beg%
+call :GET_DURATION RUNVV %RUNVV_beg%
 
 :: -------------------------------------------------------------
 ::                           stage 5
@@ -316,7 +304,7 @@ if exist %emailexe% (
   echo "current time: %current_ddate% %current_ttime%" >> %infofile%
   call %email% %mailToFDSDebug% "making pictures on %COMPUTERNAME% %revisionstring%" %infofile%
 )
-call :get_time MAKEPICS_beg
+call :GET_TIME MAKEPICS_beg
 
 echo Stage 5 - Making pictures
 echo             FDS verification cases
@@ -324,14 +312,13 @@ echo             FDS verification cases
 cd %svnroot%\Verification\
 call MAKE_FDS_pictures 64 1> %OUTDIR%\stage5.txt 2>&1
 
-call :get_time MAKEPICS_end
-call :get_duration MAKEPICS DIFF_MAKEPICS %MAKEPICS_end% %MAKEPICS_beg%
+call :GET_DURATION MAKEPICS %MAKEPICS_beg%
 
 :: -------------------------------------------------------------
 ::                           stage 6
 :: -------------------------------------------------------------
 
-call :get_time MAKEGUIDES_beg
+call :GET_TIME MAKEGUIDES_beg
 
 :: echo Stage 6 - Building guides
 
@@ -348,11 +335,8 @@ call :get_time MAKEGUIDES_beg
 ::echo             FDS Validation
 ::call :build_guide FDS_Validation_Guide %svnroot%\Manuals\FDS_Validation_Guide 1>> %OUTDIR%\stage6.txt 2>&1
 
-call :get_time MAKEGUIDES_end
-call :get_duration MAKEGUIDES DIFF_MAKEGUIDES %MAKEGUIDES_end% %MAKEGUIDES_beg%
-
-call :get_time TIME_end
-call :get_duration TOTALTIME DIFF_TIME %TIME_end% %TIME_beg%
+call :GET_DURATION MAKEGUIDES %MAKEGUIDES_beg%
+call :GET_DURATION TOTALTIME %TIME_beg%
 
 :: -------------------------------------------------------------
 ::                           wrap up
@@ -361,14 +345,16 @@ call :get_duration TOTALTIME DIFF_TIME %TIME_end% %TIME_beg%
 call :get_datetime stopdate stoptime
 
 echo. > %infofile%
-echo . ----------------------------- >> %infofile%
-echo .         host: %COMPUTERNAME% >> %infofile%
+echo . -----------------------------         >> %infofile%
+echo .         host: %COMPUTERNAME%          >> %infofile%
 echo .        start: %startdate% %starttime% >> %infofile%
-echo .         stop: %stopdate% %stoptime%  >> %infofile%
-echo .    run cases: %DIFF_RUNVV% >> %infofile%
-echo .make pictures: %DIFF_MAKEPICS% >> %infofile%
-echo .        total: %DIFF_TIME% >> %infofile%
-echo . ----------------------------- >> %infofile%
+echo .         stop: %stopdate% %stoptime%   >> %infofile%
+echo .        setup: %DIFF_PRELIM%           >> %infofile%
+echo .    run cases: %DIFF_RUNVV%            >> %infofile%
+echo .make pictures: %DIFF_MAKEPICS%         >> %infofile%
+echo .  make guides: %DIFF_MAKEGUIDES%       >> %infofile%
+echo .        total: %DIFF_TOTALTIME%        >> %infofile%
+echo . -----------------------------         >> %infofile%
 
 copy %infofile% %timingslogfile%
 
@@ -458,25 +444,16 @@ set /p %arg2%=<%timefile%
 exit /b 0
 
 :: -------------------------------------------------------------
-:get_time
-:: -------------------------------------------------------------
-
-set arg1=%1
-
-%gettimeexe% > %timefile%
-set /p %arg1%=<%timefile%
-exit /b 0
-
-:: -------------------------------------------------------------
-:get_duration
+:GET_DURATION
 :: -------------------------------------------------------------
 
 :: compute difftime=time2 - time1
 
 set label=%1
-set difftime=%2
-set time2=%3
-set time1=%4
+set time1=%2
+
+set difftime=DIFF_%label%
+call :GET_TIME time2
 
 set /a diff=%time2% - %time1%
 set /a diff_h= %diff%/3600
@@ -487,6 +464,16 @@ if %diff% LSS 3600 if %diff% GEQ 60 set duration= %diff_m%m %diff_s%s
 if %diff% LSS 3600 if %diff% LSS 60 set duration= %diff_s%s
 echo %label%: %duration% >> %stagestatus%
 set %difftime%=%duration%
+exit /b 0
+
+:: -------------------------------------------------------------
+:GET_TIME
+:: -------------------------------------------------------------
+
+set arg1=%1
+
+%gettimeexe% > %timefile%
+set /p %arg1%=<%timefile%
 exit /b 0
 
 :: -------------------------------------------------------------
