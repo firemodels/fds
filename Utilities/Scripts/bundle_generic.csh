@@ -62,7 +62,6 @@ set fullmanifest=$uploaddir/$bundledir/bin/$manifest
 set makeinstaller=$fds_smvroot/Utilities/Scripts/make_installer.sh
 
 set fds_cases=$fds_smvroot/Verification/FDS_Cases.sh
-set fdsmpi_cases=$fds_smvroot/Verification/FDS_MPI_Cases.sh
 set smv_cases=$fds_smvroot/Verification/scripts/SMV_Cases.sh
 set copyfdscase=$fds_smvroot/Utilities/Scripts/copyfdscase.sh
 set copycfastcase=$fds_smvroot/Utilities/Scripts/copycfastcase.sh
@@ -219,7 +218,6 @@ setenv RUNCFAST $copycfastcase
 echo Copying example files to bundle directory
 $fds_cases
 $smv_cases
-$fdsmpi_cases
 rm -rf $OUTDIR/Immersed_Boundary_Method
 
 echo >> $fullmanifest
