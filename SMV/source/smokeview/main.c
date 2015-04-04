@@ -45,8 +45,8 @@ int main(int argc, char **argv){
   have_ffmpeg = have_prog("ffmpeg -version> Nul 2>Nul");
   have_ffplay = have_prog("ffplay -version> Nul 2>Nul");
 #else
-  have_ffmpeg = have_prog("ffmpeg -version>/dev/null");
-  have_ffplay = have_prog("ffplay -version>/dev/null");
+  have_ffmpeg = have_prog("ffmpeg -version >/dev/null 2>/dev/null");
+  have_ffplay = have_prog("ffplay -version >/dev/null 2>/dev/null");
 #endif
 #endif
   display_version_info();
