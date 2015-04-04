@@ -39,6 +39,7 @@ if not exist timings mkdir timings
 set OUTDIR=%CURDIR%\output
 set HISTORYDIR=%CURDIR%\history
 set TIMINGSDIR=%CURDIR%\timings
+set timefile=%OUTDIR%\time.txt
 
 erase %OUTDIR%\*.txt 1> Nul 2>&1
 
