@@ -365,7 +365,7 @@ cat << BASH > \$BASHFDS
 
 # MPI location
 
-MPIDIST=\$mpipath
+MPIDIST=\\\$1
 
 # unalias application names used by FDS
 
@@ -433,7 +433,7 @@ cat << EOF >> $INSTALLER
   grep -v bashrc_fds ~/.bash_profile | grep -v "#FDS" > \$BASHSTARTUP
   echo "#FDS " >> \$BASHSTARTUP
   echo "#FDS Setting the environment for FDS and Smokeview. "   >> \$BASHSTARTUP
-  echo "source ~/.bashrc_fds" >> \$BASHSTARTUP
+  echo "source ~/.bashrc_fds \$mpipath" >> \$BASHSTARTUP
   cp \$BASHSTARTUP ~/.bash_profile
   rm \$BASHSTARTUP
 EOF
@@ -448,7 +448,7 @@ cat << EOF >> $INSTALLER
   grep -v bashrc_fds ~/.bashrc | grep -v "#FDS" > \$BASHSTARTUP
   echo "#FDS " >> \$BASHSTARTUP
   echo "#FDS Setting the environment for FDS and Smokeview. "   >> \$BASHSTARTUP
-  echo "source ~/.bashrc_fds" >> \$BASHSTARTUP
+  echo "source ~/.bashrc_fds \$mpipath" >> \$BASHSTARTUP
   cp \$BASHSTARTUP ~/.bashrc
   rm \$BASHSTARTUP
 EOF
