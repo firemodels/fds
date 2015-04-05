@@ -31,4 +31,6 @@ echo Converting the FDS release notes from wiki to html format
 plink %svn_logon%  %scriptdir%/ssh_command2.csh %linux_hostname% %scriptdir% CONV_fds_release.sh
 
 pscp %svn_logon%:%bundlesetup%/release_notes.htm FDS_Release_Notes.htm
+pscp %svn_logon%:%bundlesetup%/fds_linux.html README_LINUX.html
+pscp %svn_logon%:%bundlesetup%/fds_osx.html   README_OSX.html
 pause
