@@ -443,7 +443,7 @@ FDS requires a fast CPU\footnote{Central Processing Unit} and a substantial amou
 
 Most computers purchased within the past few years are adequate for running Smokeview with the caveat that additional memory (RAM) should be purchased to bring the memory size up to at least 2~GB. This is so the computer can display results without ``swapping'' to disk. For Smokeview it is also important to obtain a fast graphics card for the PC used to display the results of the FDS computations.
 
-For Multi-Mesh calculations, the MPI version of FDS will operate over standard 100~Mb/s networks. A gigabit (1000~Mb/s) network will further reduce network communication times improving data transfer rates between nodes.
+The MPI version of FDS requires shared disk access to each computer where cases will be run.  On Windows systems this involves a domain network with the ability to share folders.  On a Linux or Mac~OS~X system this involves NFS cross mounted files systems with ssh keys setup for passwordless login. For Multi-Mesh calculations, the MPI version of FDS can operate over standard 100~Mb/s networks. A gigabit (1000~Mb/s) network will further reduce network communication times improving data transfer rates between instances of MPI FDS running the parallel cases.
 
 
 \section{Computer Operating System (OS) and Software Requirements}
