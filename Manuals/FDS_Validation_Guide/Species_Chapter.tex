@@ -811,46 +811,75 @@ FDS will compute a balanced reaction assuming complete combustion and the heat o
 \section{Helium Release in a Reduced Scale Garage Geometry}
 \label{Species Concentration}
 
-FDS simulations were performed to predict the helium release and dispersion in a reduced scale garage geometry.
-The figures below show the comparison between FDS predictions and experimental data for eighteen tests with different release locations,
-leak configurations, and release durations as noted in the experimental description.
+FDS simulations were performed to predict the helium release and dispersion in a reduced scale garage geometry. The figures on the following pages show the comparison between the FDS predictions and the measured values for the eighteen experiments. Table~\ref{NIST_He_2009_Parameters} lists the experimental parameters, including the release duration, release location (21~cm off the floor at the center of the compartment, 21~cm off the floor and 5~cm from the center of the rear wall, and 2.5~cm below the ceiling at the center of the compartment), and the leak area (single small vent, 2.4~cm by 2.4~cm, at the center of the front wall, single large vent, 3.05~cm by 3.05~cm, at the center of the front wall, and a pair of vents, 2.15~cm by 2.15~cm, centered on the front wall, 2.5~cm from the floor and ceiling, respectively). The seven sensors were located 37.5~cm from the front and side walls, at heights of 9~cm, 19~cm, 28~cm, 37~cm, 47~cm, 56~cm, and 65~cm off the floor. In the figures on the following pages, the highest concentrations correspond to the highest measurement locations.
 
-\begin{figure}[h]
+\begin{table}[h]
+\centering
+\caption[Test parameters of the NIST\_He\_2009 experiments]{Test parameters of the NIST\_He\_2009 experiments.}
+\begin{tabular}{|c|c|c|c|}
+\hline
+Test         &  Release          &  Release          &  Leak                         \\
+Label        &  Duration (h)     &  Location         &  Configuration                \\ \hline \hline
+3600-LC-SSV  &  1                &  Lower Center     &  Single Small Vent            \\ \hline
+3600-LC-SLV  &  1                &  Lower Center     &  Single Large Vent            \\ \hline
+3600-LC-ULV  &  1                &  Lower Center     &  Dual Vents                   \\ \hline
+3600-LR-SSV  &  1                &  Lower Rear       &  Single Small Vent            \\ \hline
+3600-LR-SLV  &  1                &  Lower Rear       &  Single Large Vent            \\ \hline
+3600-LR-ULV  &  1                &  Lower Rear       &  Dual Vents                   \\ \hline
+3600-UC-SSV  &  1                &  Upper Center     &  Single Small Vent            \\ \hline
+3600-UC-SLV  &  1                &  Upper Center     &  Single Large Vent            \\ \hline
+3600-UC-ULV  &  1                &  Upper Center     &  Dual Vents                   \\ \hline
+14400-LC-SSV &  4                &  Lower Center     &  Single Small Vent            \\ \hline
+14400-LC-SLV &  4                &  Lower Center     &  Single Large Vent            \\ \hline
+14400-LC-ULV &  4                &  Lower Center     &  Dual Vents                   \\ \hline
+14400-LR-SSV &  4                &  Lower Rear       &  Single Small Vent            \\ \hline
+14400-LR-SLV &  4                &  Lower Rear       &  Single Large Vent            \\ \hline
+14400-LR-ULV &  4                &  Lower Rear       &  Dual Vents                   \\ \hline
+14400-UC-SSV &  4                &  Upper Center     &  Single Small Vent            \\ \hline
+14400-UC-SLV &  4                &  Upper Center     &  Single Large Vent            \\ \hline
+14400-UC-ULV &  4                &  Upper Center     &  Dual Vents                   \\ \hline
+\end{tabular}
+\label{NIST_He_2009_Parameters}
+\end{table}
+
+\newpage
+
+\begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/NIST_He_2009/NIST_He_3600_LC_SLV} &
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/NIST_He_2009/NIST_He_3600_LC_SSV} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/NIST_He_2009/NIST_He_3600_LC_SSV} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/NIST_He_2009/NIST_He_3600_LC_SLV} \\
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/NIST_He_2009/NIST_He_3600_LC_ULV} &
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/NIST_He_2009/NIST_He_3600_LR_SLV} \\
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/NIST_He_2009/NIST_He_3600_LR_SSV} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/NIST_He_2009/NIST_He_3600_LR_SSV} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/NIST_He_2009/NIST_He_3600_LR_SLV} &
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/NIST_He_2009/NIST_He_3600_LR_ULV}
 \end{tabular*}
-\caption[Species concentrations in NIST helium release experiments]{Species concentrations in NIST helium release experiments.}
+\caption[Results of the NIST\_He\_2009 experiments]{Comparison of measured (solid lines) and predicted (dashed lines) helium concentrations in the NIST\_He\_2009 experiments.}
 \label{NIST_Hydrogen_Species_1}
 \end{figure}
 
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/NIST_He_2009/NIST_He_3600_UC_SLV} &
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/NIST_He_2009/NIST_He_3600_UC_SSV} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/NIST_He_2009/NIST_He_3600_UC_SSV} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/NIST_He_2009/NIST_He_3600_UC_SLV} \\
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/NIST_He_2009/NIST_He_3600_UC_ULV} &
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/NIST_He_2009/NIST_He_14400_LC_SLV} \\
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/NIST_He_2009/NIST_He_14400_LC_SSV} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/NIST_He_2009/NIST_He_14400_LC_SSV} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/NIST_He_2009/NIST_He_14400_LC_SLV} &
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/NIST_He_2009/NIST_He_14400_LC_ULV}
 \end{tabular*}
-\caption[Species concentrations in NIST helium release experiments]{Species concentrations in NIST helium release experiments.}
+\caption[Results of the NIST\_He\_2009 experiments]{Comparison of measured (solid lines) and predicted (dashed lines) helium concentrations in the NIST\_He\_2009 experiments.}
 \label{NIST_Hydrogen_Species_2}
 \end{figure}
 
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/NIST_He_2009/NIST_He_14400_LR_SLV} &
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/NIST_He_2009/NIST_He_14400_LR_SSV} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/NIST_He_2009/NIST_He_14400_LR_SSV} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/NIST_He_2009/NIST_He_14400_LR_SLV} \\
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/NIST_He_2009/NIST_He_14400_LR_ULV} &
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/NIST_He_2009/NIST_He_14400_UC_SLV} \\
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/NIST_He_2009/NIST_He_14400_UC_SSV} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/NIST_He_2009/NIST_He_14400_UC_SSV} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/NIST_He_2009/NIST_He_14400_UC_SLV} &
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/NIST_He_2009/NIST_He_14400_UC_ULV}
 \end{tabular*}
-\caption[Species concentrations in NIST helium release experiments]{Species concentrations in NIST helium release experiments.}
+\caption[Results of the NIST\_He\_2009 experiments]{Comparison of measured (solid lines) and predicted (dashed lines) helium concentrations in the NIST\_He\_2009 experiments.}
 \label{NIST_Hydrogen_Species_3}
 \end{figure}
 
