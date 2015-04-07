@@ -812,7 +812,7 @@ Note that $z_0 \Rightarrow x_0$ for $i=1$ and $z_0 \Rightarrow y_0$ for $i=2$.  
 
 An example of the solution to (\ref{eqn_stat2d_soln}) is shown in Fig.~\ref{fig_compression_wave}.  In this case we set $c_1 = 2$ and $c_2 = 3$ to create an asymmetry in the flow.  The periodicity in time depends on the choices of $c_1$ and $c_2$; it is possible that no periodicity exists. We have not found a case that generates a singularity. The analytical time series of the density at the position $(x,y) = (3\pi/2, 3\pi/2)$ is shown as the solid black line. FDS is run with the CHARM flux limiter scheme (as this is a DNS flow field).  The solution at successively finer grid resolutions is plotted and compared with the analytical solution, demonstrating convergence of the scheme.  On the right side of the figure we demonstrate second-order convergence of the central, Superbee, and CHARM limiter schemes in FDS.
 
-\begin{figure}[!htb]
+\begin{figure}[ht]
    \begin{tabular}{rl}
       \includegraphics[width=3.2in]{SCRIPT_FIGURES/compression_wave_time_series} &
       \includegraphics[width=3.2in]{SCRIPT_FIGURES/compression_wave_convergence}
@@ -904,7 +904,7 @@ The source terms (which are complex sinusoidal functions) may be obtained from \
 
 \subsubsection*{Manufactured Solution Procedure}
 
-Two species transport equations are solved.  The mixture fraction in the manufactured solution is set at component 2 while the background species is set to component 1:
+Two species transport equations are solved.  The mixture fraction in the manufactured solution is set as component 2 while the background species is set to component 1:
 \begin{align}
 \label{eqn_fds_species_1} \frac{\partial (\rho Z_1)}{\partial t} + \Div(\rho Z_1 \mathbf{u}) - \Div\left(\rho D \nabla Z_1\right) &= - \dot{Q}_Z \,\mbox{,}\\
 \label{eqn_fds_species_2} \frac{\partial (\rho Z_2)}{\partial t} + \Div(\rho Z_2 \mathbf{u}) - \Div\left(\rho D \nabla Z_1\right) &= + \dot{Q}_Z \,\mbox{.}
@@ -939,9 +939,9 @@ The Poisson equation for $H$ becomes
 %\end{enumerate}
 %This procedure represents a single stage in the RK2 time integration scheme.
 
-Simulations were performed for $N = \{32, 64, 128, 256, 512\}$, where $N$ is the number of cells in each direction, using an adaptive time step satisfying both convective and diffusive CFL numbers of 0.5.  The time step criterion and the simulation parameters in Table \ref{tab_shunn_params} were chosen to match Shunn et al.~\cite{Shunn:2012}. The density equation (\ref{eqn_mms_continuity}) is solved using the CHARM flux limiter. Qualitative results for the $256^2$ case are shown in Fig.~\ref{fig_mms_evo}.  These images may be compared to the images presented in \cite{Shunn:2012}.  In Fig.~\ref{fig_mms_convergence}, we plot the L2 error at time $t = 1$ s as a function of grid spacing, $\Delta x = L/N$, confirming second-order accuracy of the solutions for density, mixture fraction, and velocity.  As shown in Fig.~\ref{fig_mms_convergence}, schemes such as ours, where the pressure is set to zero at the beginning of each stage of the integration (in other words, no pressure gradient term shows up in the force on the RHS of the Poisson equation), are known to be first-order accurate for pressure \cite{Armfield:2002}. This is not a severe limitation of the algorithm since the hyrdrodynamic pressure does not factor into the equation of state for low-Mach flows.
+Simulations were performed for $N = \{32, 64, 128, 256, 512\}$, where $N$ is the number of cells in each direction, using an adaptive time step satisfying both convective and diffusive CFL numbers of 0.5.  The time step criterion and the simulation parameters in Table \ref{tab_shunn_params} were chosen to match Shunn et al.~\cite{Shunn:2012}. The species mass density equations, (\ref{eqn_fds_species_1}) and (\ref{eqn_fds_species_2}), are solved using the CHARM flux limiter. Qualitative results for the $256^2$ case are shown in Fig.~\ref{fig_mms_evo}.  These images may be compared to the images presented in \cite{Shunn:2012}.  In Fig.~\ref{fig_mms_convergence}, we plot the L2 error at time $t = 1$ s as a function of grid spacing, $\Delta x = L/N$, confirming second-order accuracy of the solutions for density, mixture fraction, and velocity.  As shown in Fig.~\ref{fig_mms_convergence}, schemes such as ours, where the pressure is set to zero at the beginning of each stage of the integration (in other words, no pressure gradient term shows up in the force on the RHS of the Poisson equation), are known to be first-order accurate for pressure \cite{Armfield:2002}. This is not a severe limitation of the algorithm since the hyrdrodynamic pressure does not factor into the equation of state for low-Mach flows.
 
-\begin{figure}[!htb]
+\begin{figure}[ht]
 \centering
 
 % density
@@ -1039,9 +1039,9 @@ Simulations were performed for $N = \{32, 64, 128, 256, 512\}$, where $N$ is the
 \label{fig_mms_evo}
 \end{figure}
 
-\begin{figure}[!htb]
+\begin{figure}[ht]
 \centering
-\includegraphics[width=.75\textwidth]{SCRIPT_FIGURES/shunn_mms_convergence}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/shunn_mms_convergence}
 \caption[Convergence of the manufactured solution]{\label{fig_mms_convergence} Convergence for the manufactured solution.  The L2 error at time $t = 1$ s is plotted as a function of grid spacing for $N=\{32,64,128,256,512\}$ points in each direction.  The grid spacing is $\Delta x = L/N$, where $L=2$ m.  Calculations were performed with an adaptive time step satisfying both convective and diffusive CFL (Von Neumann) limits of 0.5. These results confirm second-order accuracy of the flow solver for density, mixture fraction, and velocity. As is known for projection schemes like ours, the pressure solution (represented by $H$) is first-order accurate \cite{Armfield:2002}.}
 \end{figure}
 
@@ -1093,7 +1093,7 @@ V(\lambda,\tau,T_h,T_0) = (T_h-T_0)/T_0 \, ( -G(\lambda,\tau,0) + \mbox{$\frac{1
 \end{gather}
 Figure~\ref{fig_hot_layer} shows the analytical solution (solid lines) plotted together with the FDS (DNS) numerical results (open symbols).  The plots on the left are of temperature profiles at several times (different colors demarcate different nondimensional times $\tau$).  The plots on the right are velocity.  As can be seen, the agreement is excellent.
 
-\begin{figure}[!htb]
+\begin{figure}[ht]
 \centering
 \includegraphics[width=.49\textwidth]{SCRIPT_FIGURES/hot_layer_temp_1}
 \includegraphics[width=.49\textwidth]{SCRIPT_FIGURES/hot_layer_vel_1}
@@ -1367,7 +1367,7 @@ u_{max}(x) =    \frac{x_0}{x}\sqrt{\frac{b}{h}} = \frac{1}{mx} \sqrt{bh}
 Four turbulence models are tested: (1) Constant Smagorinsky (csmag), (2) Dynamic Smagorinsky (dsmag), (3) Deardorff (FDS default), and (4) Vreman.  The results are plotted in Fig.~\ref{fig_jet_decay}. For each model, two grid resolutions are run, corresponding to $h/\delta x = 8$ (colored dotted lines) and $h/\delta x=16$ (colored solid lines).
 \begin{figure}[h]
 \centering
-\includegraphics[width=\textwidth]{SCRIPT_FIGURES/jet_decay}
+\includegraphics[width=.8\textwidth]{SCRIPT_FIGURES/jet_decay}
 \caption[Jet centerline velocity decay]{Centerline velocity decay for a high Reynolds number jet (Re$_h = 1 \times 10^5$) with a square orifice of side $h$.  FDS results (colored lines) are shown for various turbulence models at two grid resolutions.  For comparison, analytical results (black lines) are shown for two values of the mixing number $m$.}
 \label{fig_jet_decay}
 \end{figure}
@@ -1378,7 +1378,7 @@ Four turbulence models are tested: (1) Constant Smagorinsky (csmag), (2) Dynamic
 
 Wall flows have long been a challenge for large-eddy simulation (LES) \cite{Baggett:1997,Baggett:1998,Cabot:1995,Pope:2000,Sagaut:2001}.  In spite of their promise and sophistication, practical LES codes are resigned to \emph{model} the wall shear stress as opposed to \emph{resolving} the dynamically important length scales near the wall. FDS uses a log law velocity profile \cite{Pope:2000} for modeling turbulent flow near a wall.
 
-\section{The FDS Moody Chart (\texorpdfstring{\textct{poiseuille}}{poiseuille}, \texorpdfstring{\textct{moody}}{smoothwall}, and \texorpdfstring{\textct{z0}}{z0})}
+\section{The FDS Moody Chart (\texorpdfstring{\textct{poiseuille}}{poiseuille}, \texorpdfstring{\textct{moody}}{smoothwall}, \texorpdfstring{\textct{z0}}{z0})}
 \label{fds_moody_chart}
 
 At a minimum, a wall model should accurately reproduce the mean wall stress for flow in a straight square duct.  We verify that this is true for FDS by reproducing the Moody chart, a plot of friction factor versus Reynolds number for pipe flow \cite{Moody:1944}.
@@ -1456,7 +1456,7 @@ $\d p/\d x$   & \multicolumn{3}{c|}{$z^+$} &  Re$_H$  & $f$ FDS  & $f$ Colebrook
 
 With the same grid set up as described above the smooth walls, a series of cases labeled as \textct{z0}\footnote{The atmospheric community typically uses $z_0$ to denote the roughness height. However, we also use $s$ interchangeably with $z_0$ to conform to the notation used in Pope \cite{Pope:2000}.} in the repository \cite{FDS-SMV_repository} were run at various roughness heights, grid resolutions, and Reynolds numbers. The results are presented together with the smooth wall cases in Fig.~\ref{fig_fds_moody_chart}. The laminar cases provide accurate results for two different Reynolds numbers. Both the smooth wall and rough wall treatments behave well over the range tested.
 
-\begin{figure}[!htb]
+\begin{figure}[ht]
 \centering
 \includegraphics[width=4.5in]{SCRIPT_FIGURES/fds_moody_chart}
 \caption[FDS Moody chart]{The FDS Moody chart: friction factor, $f$, versus Reynolds number, Re$_H$, based on duct height. The solid line for $\mbox{Re} < 2000$ is the analytical result for 2D Poiseuille flow, $f=24/\mbox{Re}$. The solid lines for $\mbox{Re}>2000$ (from the Colebrook equation (\ref{eqn_colebrook})) are Relative roughness $s/H$ shown on the right axis.}
@@ -1500,7 +1500,7 @@ Figure~\ref{blasius} (left) shows a comparison of the streamwise velocity from F
 \varepsilon \equiv \sqrt{ \frac{1}{N_z} \sum_{k=1}^{N_z} \left[ u_{k} - u_{{\rm B},k} \right]^2 }
 \end{equation}
 where $k$ is the $z$ index. The value $u_k$ represents the FDS result for $u$ at the staggered grid storage location for cell $k$, $u_{{\rm B},k}$ is the dimensional Blasius solution at the corresponding location. The slight departure from second-order accuracy is likely due to numerical issues in representing the singularity in the Blasius solution at the leading edge of the plate as well as errors in the boundary conditions due to truncation of the domain.
-\begin{figure}[!htb]
+\begin{figure}[ht]
    \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
       \includegraphics[width=3.2in]{SCRIPT_FIGURES/blasius_profile} &
       \includegraphics[width=3.2in]{SCRIPT_FIGURES/blasius_convergence}
@@ -1533,7 +1533,7 @@ y^+ \equiv \frac{y}{\delta_{\nu}} = \frac{u_{\tau}y}{\nu}.
 
 In FDS, $\tau_w$ is obtained only from the wall model. The resolution of the wall-normal streamwise velocity gradient increases with  mesh resolution; the value of $y^+$ decreases accordingly. In this verification case, a wall device is used to output $y^+$ for different mesh resolutions in the $z$-direction. $y^+$ is output for a given $\delta z$, height of a cell, $\delta z$ = [1/8, 1/16, 1/32]. Then, the device values obtained are compared with the exact value of $y^+$ for a given mesh resolution (Fig.~\ref{fig_yplus}). An FDS wall device outputs the mid-cell value of the first cell next to the wall, hence, the $z$ value ($y$ in Eq.~(\ref{eqn_yplus})) used to determine the exact $y^+$ varies with $\delta z$ $(z = \delta z/2)$.
 
-\begin{figure}[!htb]
+\begin{figure}[ht]
 \centering
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/yplus}
 \caption[Near-wall grid resolution]{Verification of FDS $y^+$ output for $\delta z=[1/8, 1/16, 1/32]$.}
@@ -1541,7 +1541,7 @@ In FDS, $\tau_w$ is obtained only from the wall model. The resolution of the wal
 \end{figure}
 
 
-
+\newpage
 \section{Heated Channel Flow (\texorpdfstring{\textct{heated\_channel}}{heated\_channel})}
 
 \textbf{Kiyoung Moon and Jung-il Choi, Yonsei University, Seoul, South Korea}\\
@@ -1568,7 +1568,7 @@ T_{\tau} \equiv \frac{\langle \dot{q}_w^{''} \rangle}{{\rho}{c_p}{u_{\tau}}} \,\
 where $\langle \dot{q}_w^{''} \rangle$, $\rho$, and $c_p$ are the mean heat flux at the wall, density, and specific heat, respectively.  Fully developed, statistically stationary flow is achieved after approximately 20 flow through times.  Statistics are gathered between 40 and 60 flow through times.
 
 As seen in the left side of Fig.~\ref{fig_heated_channel}, the velocity profile shows good agreement with the DNS result. The near-wall temperature profile for each Pr is shown on the right side of Fig.~\ref{fig_heated_channel}. In the log region ($y^+ >30$), FDS overestimates the centerline mean temperature compared to the DNS results at high Pr, but the mean wall heat flux is correct, as indicated by the accurate result of the first off-wall grid value (in the viscous region). The inaccuracy of the temperature profile in the log region points to a need for improvement in the subgrid-scale (SGS) scalar transport model.
-\begin{figure}[!htb]
+\begin{figure}[ht]
    \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
       \includegraphics[width=3.2in]{SCRIPT_FIGURES/heated_channel_uplus} &
       \includegraphics[width=3.2in]{SCRIPT_FIGURES/heated_channel_Tplus}
@@ -1592,14 +1592,14 @@ The mean streamwise velocity profile at the rib centerline is shown in the upper
 
 The bottom-left and -right plots in Fig.~\ref{fig_ribbed_channel} show the RMS velocity along the duct floor and the center profile above the rib, respectively. As can be seen, the $h/\delta x = 16$ case provides accurate results.  This resolution for this problem corresponds to wall $y^+$ values around 30.
 
-\begin{figure}[!htb]
+\begin{figure}[ht]
 \centering
 \includegraphics[width=.8\textwidth]{SCRIPT_FIGURES/ribbed_channel_80_s1000}
 \caption[The {\ct ribbed\_channel} test case]{Mean velocity vectors colored by velocity magnitude (red is 2 m/s) for the ribbed square duct case with $h/\delta x = 8$.}
 \label{fig_ribbed_channel_image}
 \end{figure}
 
-\begin{figure}[!htb]
+\begin{figure}[ht]
    \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
       \includegraphics[width=3.2in]{SCRIPT_FIGURES/ribbed_channel_u_strm} &
       \includegraphics[width=3.2in]{SCRIPT_FIGURES/ribbed_channel_u_prof} \\
@@ -1623,7 +1623,7 @@ This section describes tests of global mass conservation.
 In this example, a closed chamber with a simple recirculating duct is used to demonstrate that a gas such as carbon dioxide can be transported
 through multiple meshes and its mass is conserved. An obstruction is created that leaks 0.5~kg of CO$_2$ over a time span of 10~s.
 
-\begin{figure}[!htb]
+\begin{figure}[ht]
 \centering
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/simple_duct_mass}
 \caption[The \textct{simple\_duct} test case]{The mass of CO$_2$ contained in a simple room connected with a recirculating duct.}
@@ -1661,7 +1661,7 @@ Propane is injected into a 4~m cube with 1~m$^2$ vents on all six faces.  The ma
 
  This case is similar to Case~3. A 0.2~m by 0.2~m solid surface undergoes a reaction that releases four different gases into a sealed unit cube. The solid has a density of 100~kg/m$^3$ and thickness of 0.1~m. The inert gases have different yields, all summing to one, meaning that the solid surface ought to be vaporized creating a total mass of 0.4~kg. The accumulation of all the gases in the chamber is shown in Fig.~\ref{species_conservation}.
 
-\begin{figure}[!htb]
+\begin{figure}[ht]
 \begin{tabular*}{\textwidth}{lr}
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/species_conservation_1} &
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/species_conservation_2} \\
@@ -1676,7 +1676,7 @@ Propane is injected into a 4~m cube with 1~m$^2$ vents on all six faces.  The ma
 \subsection{Realizability of Species Mass Fractions (\texorpdfstring{\textct{realizable\_mass\_fractions}}{realizable\_mass\_fractions})}
 
 In order for species mass fractions to be physically realizable they must all be positive (semi-definite) and sum to unity, $Y_\alpha\ge0$ and $\sum_\alpha Y_\alpha=1$.  In this test case, a simple methane burner is used to test the realizability of mass fractions.  A device is placed near the base of the center of the flame to measure the local mass fractions.  In Fig.~\ref{fig:realizable_mass_fractions} we plot the time history of the mass fractions for Fuel, Air, and Products along with the sum (dotted line).  This sum should remain perfectly one at all times.
-\begin{figure}[!htb]
+\begin{figure}[ht]
 \centering
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/realizable_mass_fractions}
 \caption[The \textct{realizable\_mass\_fractions} test case]{Results of the \textct{realizable\_mass\_fractions} test case.  The sum of the mass fractions (dotted line) should remain perfectly one at all times.}
@@ -1702,16 +1702,16 @@ door or ceiling vent. The plot in Fig.~\ref{energy_budget_adiabatic_walls} shows
 
 Next, the same compartment with the same fire is now assumed to have cold (20~\si{\degree C}) walls, and the radiation is switched back on. After a few minutes of simulation, the net enthalpy outflow is approximately 470~kW and the heat losses to the wall (both radiative and convective) are approximately 730~kW. The plot is shown in Fig.~\ref{energy_budget_cold_walls}.
 
-\begin{figure}[!htb]
+\begin{figure}[ht]
 \centering
-\includegraphics[width=.9\textwidth]{SCRIPT_FIGURES/energy_budget_adiabatic_walls}
+\includegraphics[width=.8\textwidth]{SCRIPT_FIGURES/energy_budget_adiabatic_walls}
 \caption[The {\ct energy\_budget\_adiabatic\_walls} test case]{The energy budget for a simple compartment fire with adiabatic walls.}
 \label{energy_budget_adiabatic_walls}
 \end{figure}
 
-\begin{figure}[!htb]
+\begin{figure}[ht]
 \centering
-\includegraphics[width=.9\textwidth]{SCRIPT_FIGURES/energy_budget_cold_walls}
+\includegraphics[width=.8\textwidth]{SCRIPT_FIGURES/energy_budget_cold_walls}
 \caption[The {\ct energy\_budget\_cold\_walls} test case]{The energy budget for a simple compartment fire with cold walls.}
 \label{energy_budget_cold_walls}
 \end{figure}
@@ -1727,7 +1727,7 @@ check, the nitrogen is injected at two different rates such that in Case A the i
 50~s. The nitrogen is introduced into the domain via small spheres that do not generate or absorb heat. They do not occupy volume either. They just
 inject the nitrogen at a specified rate into the particular grid cell that each occupies.  Results are plotted in Fig.~\ref{isentropic}.
 
-\begin{figure}[!htb]
+\begin{figure}[ht]
 \begin{tabular*}{\textwidth}{lr}
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/isentropic_density} &
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/isentropic_pressure} \\
@@ -1762,7 +1762,7 @@ Adding in the work due to the pressure yields the change in total enthalpy:
    \Delta H = \Delta E + V \, \Delta P = 160.7 \; \hbox{kJ} + (1 \; \hbox{m}^3) \times ( \; 64.3 \; \hbox{kJ/m}^3) = 225 \; \hbox{kJ}
 \ee
 
-\begin{figure}[!htb]
+\begin{figure}[ht]
 \begin{tabular*}{\textwidth}{lr}
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/isentropic2_density} &
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/isentropic2_pressure} \\
@@ -1785,7 +1785,7 @@ Because of the large difference in specific heats, the average velocity of the g
 \be \int \nabla \cdot \bu \; \d V \equiv -A \, (U_1 + U_2 - U_3) = -A \, \frac{ (U_1-U_2) \, (c_{p,2}-c_{p,1}) }{ c_{p,1}+c_{p,2} } = -1.357 \times 10^{-8} \; \hbox{m}^3/\hbox{s} \label{div2} \ee
 The plot at right in Fig.~\ref{energy_budget_dns} shows the resulting and integrated divergence or net volume flow.
 
-\begin{figure}[!htb]
+\begin{figure}[ht]
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/energy_budget_dns_heat}
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/energy_budget_dns_div}
 \caption[The \textct{energy\_budget\_dns} test case]{(Left) Equality of convective and diffusive enthalpy flux at steady state. (Right) The integrated divergence or net volume flow.}
@@ -1810,7 +1810,7 @@ The enthalpy of the mixture at the outlet is $1 \times 1 \times (900+273.15) + 1
 
 This case tests the ability of FDS to properly conserve the total of the solid phase and the gas phase energy.  A 1 \si{m^3} box is filled with 1 kg of a gas with a specific heat of 1 \si{kJ/(kg.K)}, a molecular weight of 28 g/mol, and an initial temperature of 20 \si{\degree C}.  All the walls, except the floor, are adiabatic.  The floor is defined as a 1 mm thick layer of a material with a conductivity of 100 \si{W/(m.K)},  a specific heat of 1 \si{kJ/(kg.K)}, an initial temperature of 150 \si{\degree C}, and a density of 1,000 \si{kg/m^3}.  The initial enthalpy is $1 \times 1 \times (20+273.15) + 1 \times 1 \times (150+273.15)  =  716.3$ kJ.  At the end state, the gas will have risen in temperature, the solid will have decreased in temperature, and the pressure will have risen.  Since energy is conserved this occurs at a temperature of 96.3 \si{\degree C}.  The final enthalpy is $1 \times 1 \times (96.3+273.15) + 1 \times 1 \times (96.3+273.15) + 22670 / 1000  =  716.3$ kJ.
 
-\begin{figure}[!htb]
+\begin{figure}[ht]
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/energy_budget_solid_T}
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/energy_budget_solid_P}
 \caption[The \textct{energy\_budget\_solid} test case]{\label{fig_solid_energy} Outputs of temperature (left) and pressure (right) for the \textct{energy\_budget\_solid} case.  Circles represent the correct result.}
@@ -1825,7 +1825,7 @@ This chapter presents a number of cases that are designed to check whether or no
 \section{Finite difference errors (\texorpdfstring{\textct{symmetry\_test}}{symmetry\_test})}
 
 These examples are very simple tests to determine if there are coding errors in the basic flow solver. A closed box, 1~m on a side, has 6 injection vents, one centered on each face. Air is pumped into the box at a steady rate. Anything that might lead to an asymmetry in the flow field is turned off, for example, gravity, atmospheric stratification, natural convection, and random noise. One case is performed on a single mesh; the other on multiple meshes. The cases are not identifical. The resulting flow fields are shown at the left in Fig.~\ref{symmetry_test}. On the right are plots of the three components of velocity at equidistant corners of the enclosure. Ideally, there should be two equal and opposite time histories of the three components. Even the slightest error in coding will throw this off almost immediately.
-\begin{figure}[!htb]
+\begin{figure}[ht]
 \begin{tabular*}{\textwidth}{lr}
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/symmetry_test} &
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/symmetry_test_plot} \\
@@ -1852,14 +1852,14 @@ FDS has an option to perform an axially-symmetric calculation, which can be usef
 
 In this example, a simple jet is created by pushing air through a square duct. The obstructions forming the duct are built three different ways. The first way is to build the duct with thin (zero cell thick) plates. The second is to carve the duct out of a solid block. The third way is to build the duct out of one cell thick plates. The three approaches are illustrated in Fig.~\ref{velocity_bc_test_image}. Ideally, the three jets ought to be exactly the same, but subtle differences in the pressure solution and the random generation of noise lead to three unique flow patterns that are only the same in a time-averaged sense. To test this, the centerline pressure and velocity are recorded for a 2~m/s jet emanating from a 0.8~m square duct that is 5~m long. The grid resolution is fairly crude (0.2~m) because the purpose of this exercise is to show that the steady-state velocity and pressure profiles are essentially the same. Figure~\ref{velocity_bc_test} displays the profiles. The curves ought to overlap each other. Errors in the implementation of the velocity boundary conditions are likely to throw the three cases out of alignment.
 
-\begin{figure}[!htb]
+\begin{figure}[ht]
 \centering
 \includegraphics[width=\textwidth]{SCRIPT_FIGURES/velocity_bc_test}
 \caption[Images of the \textct{velocity\_bc\_test} test case]{Time-averaged contours of velocity for the \textct{velocity\_bc\_test} case.}
 \label{velocity_bc_test_image}
 \end{figure}
 
-\begin{figure}[!htb]
+\begin{figure}[ht]
 \begin{tabular*}{\textwidth}{lr}
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/velocity_bc_test_pres} &
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/velocity_bc_test_vel}
@@ -1872,7 +1872,7 @@ In this example, a simple jet is created by pushing air through a square duct. T
 \section{Checking the divergence constraint (\texorpdfstring{\textct{divergence\_test}}{divergence\_test})}
 
 Because of the low Mach number approximation, an initially divergence free flow field ought to remain divergence free if there are no heat sources or sinks. In this example, air is pushed through a 1~m cube at a speed of 1~m/s. The air is extracted at the same rate, and there should be no pressure rise and the flow should remain divergence free. There are also a few obstructions that are created and removed during the simulation to check that this does not cause any errors. Figure~\ref{divergence_test} displays the minimum and maximum divergence as a function of time. These ought to remain below approximately $1 \times 10^{-10}$~s$^{-1}$ in absolute value.
-\begin{figure}[!htb]
+\begin{figure}[ht]
 \centering
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/divergence_test}
 \caption[The \textct{divergence\_test} case]{Minimum and maximum divergence for the \textct{divergence\_test} case.}
@@ -1883,7 +1883,7 @@ Because of the low Mach number approximation, an initially divergence free flow 
 
 A 10 m x 10 m x 40 m volume is initialized with {\ct LAPSE\_RATE=-0.01}.  The volume is divided vertically into four equal meshes with each mesh having a 10 cm grid resolution.  There should be a smooth drop in both temperature and pressure that matches the analytic values.
 
-\begin{figure}[!htb]
+\begin{figure}[ht]
 \begin{tabular*}{\textwidth}{lr}
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/lapse_rate_T} &
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/lapse_rate_P}
@@ -1897,7 +1897,7 @@ A 10 m x 10 m x 40 m volume is initialized with {\ct LAPSE\_RATE=-0.01}.  The vo
 
 In most FDS simulations, multiple meshes are positioned adjacent to each other to allow two-way communication. However, in some instances, meshes need to overlap, and this case verifies the functionality of meshes that overlap in a variety of ways. It is a 2-D case that runs fast and is easy to visualize. There are five overlapping meshes shown at left in Fig.~\ref{random_meshes}. Air is blown in at the bottom and exhausted via an open vent at the top. The volume flow rate is fixed at 0.012~m$^3$/s, and the plot at right in Fig.~\ref{random_meshes} verifies that the simulation matches to within a few percent. The case uses the default normal velocity tolerance at solid and interpolated boundaries; thus, there is some error expected in the volume flow due to the solution of the Poisson equation. As a further check that the mesh allocations are being properly handled, there is a fine mesh embedded within the coarse, and the case is run with four MPI processes rather than five.
 
-\begin{figure}[!htb]
+\begin{figure}[ht]
 \begin{tabular*}{\textwidth}{lr}
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/random_meshes.png} &
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/random_meshes.pdf}
@@ -1927,9 +1927,9 @@ This verification case tests the computation of radiative heat flux from a hot p
 \end{tabular}
 \end{center}
 A comparison of exact values and FDS predictions at three different angular resolutions is shown in Fig.~\ref{fig_plate_view_factor}.
-\begin{figure}[!htb]
+\begin{figure}[ht]
 \centering
-\includegraphics[width=4.0in]{SCRIPT_FIGURES/plate_view_factor}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/plate_view_factor}
 \caption[The {\ct plate\_view\_factor} test case]{Convergence study showing increased accuracy of radiative transport equation with increasing number of angles.}
 \label{fig_plate_view_factor}
 \end{figure}
@@ -1940,7 +1940,7 @@ A comparison of exact values and FDS predictions at three different angular reso
 \label{radiation_in_a_box}
 
 This verification case tests the computation of three-dimensional configuration factor $\Phi$ inside a cube box with one hot wall and five cold (0~K) walls. An overview of the test geometry is shown in Fig.~\ref{fig_box_radiation}.
-\begin{figure}[!htb]
+\begin{figure}[ht]
 \centering
 \includegraphics[width=4.0in]{FIGURES/box}
 \caption{\label{fig_box_radiation} Radiation in a box geometry.}
@@ -1958,7 +1958,7 @@ The configuration factors are calculated at the diagonal of the cold wall opposi
 \end{center}
 Different variations of the case include the mesh resolution (20$^3$ and 100$^3$ cells) and the number of radiation angles (50, 100, 300, 1000, 2000). The exact and FDS results are shown in Fig.~\ref{fig_incident_heat_flux}.
 
-\begin{figure}[!htb]
+\begin{figure}[ht]
 \centering
 \begin{tabular*}{\textwidth}{lr}
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/radiation_box_20} &
@@ -1977,7 +1977,7 @@ This example is similar to the one presented in Section~\ref{radiation_in_a_box}
 \ee
 where $h$ is the distance from the center of the polygon to the center point of any of its sides, $r$ is the distance from the center to any vertex, and $l$ is the distance from the center to the target surface along a perpendicular line. Figure~\ref{radiating_polygon_figure} displays calculations performed with a range of grid and angular resolutions. Note that the number of angles used to solve the RTE is quadrupled when the number of grid cells in each coordinate direction is doubled.
 
-\begin{figure}[!htb]
+\begin{figure}[ht]
 \centering
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/radiating_polygon_square}
 \caption[The {\ct radiating\_polygon} test case]{Incident heat flux from a hot square plate as a function of distance to the center of the plate.}
@@ -2024,7 +2024,7 @@ where $S_b = \sigma T^4$ is the black-body heat flux from the radiating plane an
 
 This case tests the calculation of the radiation heat flux from a collection of hot objects. Within two completely open volumes that are 1~m on a side, hot spheres with a diameter of 1~cm and temperature of 500~\si{\degree C} are situated within a smaller volume that is 0.5~m on a side. One of the open volumes contains 10 spheres, the other contains 50,000. The simulation lasts for 10~s. In the first volume, the heat loss is just the sum of the areas of the spheres multiplied by $\sigma T^4$ (emissivity is specified as unity in this case). See the upper left plot in Fig.~\ref{hot_spheres_plot}. In the second volume, the region is densely packed and it is expected that the collection of spheres will radiate like a solid cube  that is 0.5~m on a side and whose temperature is 500~\si{\degree C}. This is just under 30~kW, as shown in the upper right of Fig.~\ref{hot_spheres_plot}. The plot in the lower left of Fig.~\ref{hot_spheres_plot} shows the incident heat flux to a gauge positioned at the center of the densely packed volume.  It is expected that this gauge would register a heat flux of $\sigma T^4=20.26$~kW/m$^2$. Finally, the plot in the lower right of Fig.~\ref{hot_spheres_plot} indicates the integrated intensity, $4 \sigma T^4=81.04$~kW/m$^2$.
 
-\begin{figure}[!htb]
+\begin{figure}[ht]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/hot_spheres_rad_loss_1} &
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/hot_spheres_rad_loss_2} \\
@@ -2049,7 +2049,7 @@ where $m$ and $c_p$ are the total mass and specific heat of the droplets, respec
 \ee
 By setting $T_0=0$~\si{\degree C}, $\Delta t =0.01$~s, $m =0.01$~kg, and $c_p =1.0$~kJ/(kg$\cdot$K), the final value of $\overline{T}_{\rm p}$ should equal $\dot{Q}_{\rm r}$. Figure~\ref{droplet_absorption_figures} shows comparisons of the predicted average droplet temperature and the expected value in Cartesian and cylindrical coordinate systems.
 
-\begin{figure}[!htb]
+\begin{figure}[ht]
 \noindent
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/droplet_absorption_cart} &
@@ -2066,7 +2066,7 @@ By setting $T_0=0$~\si{\degree C}, $\Delta t =0.01$~s, $m =0.01$~kg, and $c_p =1
 
 Tests similar to those in Section~\ref{droplet_absorption} are performed for solid particles with Cartesian (flat plate), cylindrical and spherical geometries. All the relevant properties are the same, along with a high thermal conductivity, 100~W/(m$\cdot$K), because solid particles are not assumed to be thermally-thin like liquid droplets. Figure~\ref{particle_absorption_figures} shows comparisons of the predicted and expected mass-averaged particle temperatures. By default, the radiation is expressed in terms of an integrated average over the entire particle surface, but there is an option to ``split'' the particles into multiple parts that absorb radiation impinging from different directions. In this case, the cylindrical and spherical particles are split in half along the $x$, $y$ and $z$ axes. The plate particles are split into two halves facing upwards and downwards, or into 5 randomly selected fragments to test for asymmetry bugs.
 
-\begin{figure}[!htb]
+\begin{figure}[h]
 \noindent
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/particle_absorption_cart_surf_cart} &
@@ -2086,7 +2086,7 @@ This case is a qualitative assessment of the attenuation of thermal radiation by
 
 This case also demonstrates the finite convergence rate of the radiation calculations with scattering media. As can be seen, the radiation field is not converged to its final value instantaneously because there are no internal iterations in the radiation solver. As a result, a slight increase of the heat flux is observed after 0.5 s, which is the third time step, i.e. the second call of the radiation solver. Further, smaller increase can be seen three steps later. In real applications with small time steps, the time lag of the radiation field is small.
 
-\begin{figure}[!htb]
+\begin{figure}[h]
 \centering
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/part_attenuation}
 \caption[Radiation attenuation by Lagrangian particles]{Attenuation of thermal radiation by four different classes of Lagrangian particles.}
@@ -2112,7 +2112,7 @@ t=\left.\frac{\ln(x+1) - \ln(1-x) + 2 \tan^{-1}(x)}{4 \, \beta \, T_{\rm s}^3}\r
   x=\frac{T_{\hbox{\tiny TC}}}{T_{\rm s}}
 \ee
 Figure~\ref{TC_heating_plot} displays the thermocouple response compared to the analytical solution.
-\begin{figure}[!htb]
+\begin{figure}[h]
 \centering
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/TC_heating}
 \caption[Transient thermocouple heating]{Increasing temperature of a thermocouple surrounded by walls at 600~\si{\degree C}.}
@@ -2134,7 +2134,7 @@ The thermocouple model in FDS uses the integrated intensity divided by 4, $U/4$,
    T_{\hbox{\tiny TC}} = \left( \frac{U}{4 \, \sigma} \right)^\frac{1}{4} - 273.15
 \ee
 This is essentially what is plotted in Fig.~\ref{TC_view_factor_plot}, compared to the ideal value as computed in Eq.~(\ref{ideal_TC}).
-\begin{figure}[!htb]
+\begin{figure}[ht]
 \centering
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/TC_view_factor}
 \caption[Radiation/thermocouple test case]{Temperature of a thermocouple equidistant from walls at temperatures of 20~\si{\degree C} and 500~\si{\degree C}.}
@@ -2147,7 +2147,7 @@ This is essentially what is plotted in Fig.~\ref{TC_view_factor_plot}, compared 
 \label{target_test}
 
 This case tests the functionality of particle ``targets;'' that is, massless Lagrangian particles that serve to record the heat flux at a given point with a given orientation. Essentially, the particle is an infinitesimally small heat flux gauge. Two unit cubes are set up, each with a top surface set to 1000~$^\circ$C. In one cube, a small solid obstruction is created with a device embedded in its top facing upwards. In the other cube, a plate-shaped particle is placed at the same location and given an upward facing orientation. The radiative heat flux to both the obstruction and the particle should be the same, as shown in Fig.~\ref{target_test_plot}.
-\begin{figure}[!htb]
+\begin{figure}[ht]
 \centering
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/target_test}
 \caption[The \textct{target\_test} case]{Heat flux from a hot plate to two different types of targets.}
@@ -2164,7 +2164,7 @@ A lead radiation shield with a thickness of 0.1~mm is placed between two infinit
    \dq_{12}'' = \frac{\sigma(T_{1}^{4}-T_{2}^{4})}{\frac{1}{\varepsilon_1}+\frac{1}{\varepsilon_2}+2 \left(\frac{1-\varepsilon_3}{\varepsilon_3} \right)} = 4.76 \; \hbox{kW/m}^2
 \ee
 where $T_{1}$ and $T_{2}$ are the hot and cold plate temperatures, respectively, and $\varepsilon_1$, $\varepsilon_2$, and $\varepsilon_3$ are the emissivity values for the hot plate, cold plate, and lead shield, respectively. When the shield is removed at 400~s, the heat flux should increase to 19.8~kW/m$^2$.  The predicted heat flux is given in Fig.~\ref{radiation_shield_plot}.
-\begin{figure}[!htb]
+\begin{figure}[ht]
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/radiation_shield_flux}
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/radiation_shield_temp}
 \caption[The \textct{radiation\_shield} test case]{(Left) Heat flux to a cold plate separated from a hot plate by a heat shield. At 400~s, the shield is removed. (Right) Temperature of the heat shield.}
@@ -2319,14 +2319,12 @@ The main difference between Arrhenius rate reactions and the mixing-controlled r
 The reaction rate input parameters are shown in the table below. $E$, $a_{\alpha}$, and $n_{\alpha}$ are set to zero, and $A$ is set such that ${k}_{i} = 1$. The resulting reaction rates simplify to a function of molecular weight and stoichiometric coefficients. Species evolutions results from the CO reaction in Eq.~(\ref{eq:1step_CO}) are shown in Fig.~\ref{fig:Arrhenius_0Order_1step}.
 \begin{table}[ht]
 \begin{center}
-\caption[Arrhenius values for a single step CO reaction]{Arrhenius values for a single step CO reaction.}
+\caption[Arrhenius values for a single step CO reaction]{Arrhenius values for a single step CO reaction; $\alpha$ = [$\mathrm{CO}$ $\mathrm{O_2}$ $\mathrm{CO_2}$].}
 \label{single_step_co}
 \begin{tabular}{|l|l|l|l|l|l|l|l|l|}
 \hline Reaction & $\nu_{\alpha}$ & E (kJ/kmol) & A (cm$^3$/mole/s) & $a_{\alpha}$ & $n_{\alpha}$  \\ \hline \hline
 \ref{eq:1step_CO} & [-1 -0.5 1] & 0 & 4.244e-6 & [0 0 0] & [0 0 0] \\ \hline
 \end{tabular}
-\vskip8pt
-$\alpha$ is defined as [$\mathrm{CO}$ $\mathrm{O_2}$ $\mathrm{CO_2}$].
 \end{center}
 \end{table}
 \begin{figure}[h!]
@@ -2338,14 +2336,12 @@ $\alpha$ is defined as [$\mathrm{CO}$ $\mathrm{O_2}$ $\mathrm{CO_2}$].
 The second finite rate test case is a one-step, second-order propane reaction, Eq.~(\ref{eq:1step_propane}). The table below shows the reaction rate input parameters. In this case, $a_{\alpha}=[1,1,0,0]$  for propane, oxygen, carbon monoxide, and water vapor respectively. This makes the reaction second-order as $\mathcal{O}=\sum a_{\alpha}$. Species evolutions for the one-step second-order reaction are shown in Fig.~\ref{fig:Arrhenius_2Order_1step}.
 \begin{table}[ht]
 \begin{center}
-\caption[Arrhenius values for a single step C$_3$H$_8$ reaction]{Arrhenius values for a single step C$_3$H$_8$ reaction.}
+\caption[Arrhenius values for a single step C$_3$H$_8$ reaction]{Arrhenius values for a single step C$_3$H$_8$ reaction; $\alpha$ = [$\mathrm{C_3H_8}$ $\mathrm{O_2}$ $\mathrm{CO_2}$ $\mathrm{H_2O}$].}
 \label{single_step_c3h8}
 \begin{tabular}{|l|l|l|l|l|l|l|l|l|}
 \hline Reaction & $\nu_{\alpha}$ & E (kJ/kmol) & A (cm$^3$/mole/s) & $a_{\alpha}$ & $n_{\alpha}$  \\ \hline \hline
 \ref{eq:1step_propane} & [-1 -5 3 4] & 0 & 4e5 & [1 1 0 0] & [0 0 0 0] \\ \hline
 \end{tabular}
-\vskip8pt
-$\alpha$ is defined as [$\mathrm{C_3H_8}$ $\mathrm{O_2}$ $\mathrm{CO_2}$ $\mathrm{H_2O}$].
 \end{center}
 \end{table}
 \begin{figure}[h!]
@@ -2367,15 +2363,13 @@ with the following reaction input parameters:
 
 \begin{table}[ht]
 \begin{center}
-\caption[Arrhenius values for a two-step C$_3$H$_8$ reaction]{Arrhenius values for a two-step C$_3$H$_8$ reaction.}
+\caption[Arrhenius values for a two-step C$_3$H$_8$ reaction]{Arrhenius values for a two-step C$_3$H$_8$ reaction; $\alpha$ = [$\mathrm{C_3H_8}$ $\mathrm{O_2}$ $\mathrm{CO}$ $\mathrm{H_2O}$ $\mathrm{CO_2}$].}
 \label{two_step_c3h8}
 \begin{tabular}{|l|l|l|l|l|l|l|l|l|}
 \hline Reaction & $\nu_{\alpha}$ & E (kJ/kmol) & A (cm$^3$/mole/s) & $a_{\alpha}$ & $n_{\alpha}$  \\ \hline \hline
 \ref{eq:2step_propane_a} & [-1 -3.5 3 4 0] & 0 & 5e2 & [0.1 1.65 0 0 0] & [0 0 0 0 0] \\ \hline
 \ref{eq:2step_propane_b} & [0 -0.5 -1 0 1] & 0 & 8e3 & [0 0.25 1 0.5 0] & [0 0 0 0 0] \\ \hline
 \end{tabular}
-\vskip8pt
-$\alpha$ is defined as [$\mathrm{C_3H_8}$ $\mathrm{O_2}$ $\mathrm{CO}$ $\mathrm{H_2O}$ $\mathrm{CO_2}$].
 \end{center}
 \end{table}
 
@@ -2393,7 +2387,7 @@ The species evolutions for the two-step 1.75 order reaction mechanism are shown 
 with the following reaction input parameters:
 \begin{table}[ht]
 \begin{center}
-\caption[Arrhenius values for a two-step reversible C$_3$H$_8$ reaction]{Arrhenius values for a two-step reverisble C$_3$H$_8$ reaction.}
+\caption[Arrhenius values for a two-step reversible C$_3$H$_8$ reaction]{Arrhenius values for a two-step reverisble C$_3$H$_8$ reaction; $\alpha$ = [$\mathrm{C_3H_8}$ $\mathrm{O_2}$ $\mathrm{CO}$ $\mathrm{H_2O}$ $\mathrm{CO_2}$].}
 \label{two_step_rev_c3h8}
 \begin{tabular}{|l|l|l|l|l|l|l|l|l|}
 \hline Reaction & $\nu_{\alpha}$ & E (kJ/kmol) & A (cm$^3$/mole/s) & $a_{\alpha}$ & $n_{\alpha}$  \\ \hline \hline
@@ -2401,8 +2395,6 @@ with the following reaction input parameters:
 \ref{eq:2step_propane_rev_b} & [0 -0.5 -1 0 1] & 0 & 8e3  & [0 0.25 1 0.5 0] & [0 0 0 0 0] \\ \hline
 \ref{eq:2step_propane_rev_c} & [0 0.5 1 0 -1]  & 0 & 4e-4 & [0 0 0 0 0 1]    & [0 0 0 0 0] \\ \hline
 \end{tabular}
-\vskip8pt
-$\alpha$ is defined as [$\mathrm{C_3H_8}$ $\mathrm{O_2}$ $\mathrm{CO}$ $\mathrm{H_2O}$ $\mathrm{CO_2}$].
 \end{center}
 \end{table}
 Equations (\ref{eq:2step_propane_rev_a})-(\ref{eq:2step_propane_rev_c}) includes the decomposition of $\mathrm{CO_2}$ into $\mathrm{CO}$ and $\mathrm{O_2}$ whereas the forward-only two-step mechanism, Eqs.~(\ref{eq:2step_propane_a})-(\ref{eq:2step_propane_b}), does not. This reverse reaction mechanism is represented by three separate reactions on the \textct{REAC} line in an FDS input file as indicated by rows $\mathrm{a}$, $\mathrm{b}$ and $\mathrm{c}$ in the preceding table. Species evolutions for the 2 step reverse reaction are shown in Fig.~\ref{fig:Arrhenius_175Order_2stepR}. In the forward CO step, (row $\mathrm{b}$ in the two prior tables), we see that water vapor contributes to the reaction rate based on its local concentration despite not being a participant in the reaction.
@@ -2426,7 +2418,7 @@ Note: the values of $E$ and $A$ used in these examples are not necessarily repre
 To couple verification of species mass fraction, compartment temperature, and compartment pressure, an equilibrium example problem was setup. In this case, we examine a sealed box filled with a stoichiometric mixture of fuel, oxygen, and nitrogen. The two-step reversible reaction mechanism, Eqs.~(\ref{eq:2step_propane_rev_a})-(\ref{eq:2step_propane_rev_c}), is used to drive the FDS simulation. The initial temperature is set to 350 \si{\degree C} to ensure the reaction occurs in a timely manner. The reaction rate parameters in the table below are based off values in literature from Westbrook and Dryer \cite{Westbrook:1}.
 \begin{table}[ht]
 \begin{center}
-\caption[Arrhenius values for a two-step reversible C$_3$H$_8$ reaction]{Arrhenius values for a two-step reverisble C$_3$H$_8$ reaction for equilibrium.}
+\caption[Arrhenius values for a two-step reversible C$_3$H$_8$ reaction]{Arrhenius values for a two-step reverisble C$_3$H$_8$ reaction for equilibrium; $\alpha$ = [$\mathrm{C_3H_8}$ $\mathrm{O_2}$ $\mathrm{CO}$ $\mathrm{H_2O}$ $\mathrm{CO_2}$].}
 \label{two_step_eq_rev_c3h8}
 \begin{tabular}{|l|l|l|l|l|l|l|l|l|}
 \hline Reaction & $\nu_{\alpha}$ & E (kJ/kmol) & A (cm$^3$/mole/s) & $a_{\alpha}$ & $n_{\alpha}$  \\ \hline \hline
@@ -2434,8 +2426,6 @@ To couple verification of species mass fraction, compartment temperature, and co
 \ref{eq:2step_propane_rev_b} & [0 -0.5 -1 0 1] & 167360 & 3.4e13 & [0 0.25 1 0.5 0] & [0 0 0 0 0] \\ \hline
 \ref{eq:2step_propane_rev_c} & [0 0.5 1 0 -1]  & 167360 & 8e8    & [0 0 0 0 0 1]    & [0 0 0 0 0] \\ \hline
 \end{tabular}
-\vskip8pt
-$\alpha$ is defined as [$\mathrm{C_3H_8}$ $\mathrm{O_2}$ $\mathrm{CO}$ $\mathrm{H_2O}$ $\mathrm{CO_2}$].
 \end{center}
 \end{table}
 Equilibrium values were determined using the NASA code Chemical Equilibrium with Applications (CEA)~\cite{Gordon:1994}. A constant volume, constant internal energy equilibrium calculation was performed where the equilibrium values were found by minimizing Helmholtz Energy. The equilibrium species were limited to $\mathrm{C_3H_8}$, $\mathrm{O_2}$, $\mathrm{CO}$, $\mathrm{H_2O}$, and $\mathrm{CO_2}$; the same species tracked in the FDS simulation.  The results are shown in Figs.~\ref{fig:Arrhenius_2Order_1stepb} and \ref{fig:Arrhenius_175Order_23stepb}.
@@ -3096,7 +3086,7 @@ The analytical and computed results are compared in Fig.~\ref{surf_mass_part_cha
 The readability of the figure is improved by setting the external heat fluxes for Meshes 1, 2, and 3 to 50 \si{kW/m^2}, 45 \si{kW/m^2}, and 40 \si{kW/m^2}, respectively.
 \begin{figure}[ht]
 \centering
-\includegraphics[width=4.5in]{SCRIPT_FIGURES/surf_mass_part_char_cyl_gas_advanced}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/surf_mass_part_char_cyl_gas_advanced}
 \caption[The \textct{surf\_mass\_part\_char\_cyl\_gas\_advanced} test cases]{Comparison of analytical and predicted mass change for a charring, cylindrical surface
 associated with particles in three variations.}
 \label{surf_mass_part_char_advanced}
@@ -3930,7 +3920,7 @@ where $K$ is the loss coefficient for the duct, $\rho$ is the gas density, and $
 
 \clearpage
 
-\section{Node Flow Losses (\texorpdfstring\textct{HVAC\_tee\_loss\_1}{HVAC\_tee\_loss\_1} and \texorpdfstring\textct{HVAC\_tee\_loss\_2}{HVAC\_tee\_loss\_2})}
+\section{Node Flow Losses (\texorpdfstring\textct{HVAC\_tee\_loss\_1}{HVAC\_tee\_loss\_1}, \texorpdfstring\textct{HVAC\_tee\_loss\_2}{HVAC\_tee\_loss\_2})}
 
 These two cases use the same geometry as in Section~\ref{HVAC_flow_loss}. However, instead of losses assigned to the ducts, the losses are assigned to the duct nodes.  In the first case, \textct{HVAC\_tee\_loss\_1}, the flow goes into the primary leg of the tee. The secondary branches are assigned loss coefficients of 15 and 3 and the discharge nodes are assigned losses of 1.  This gives total losses of 16 and 4. In the second case, \textct{ HVAC\_tee\_loss\_2}, the flow goes out the primary leg of the tee. Duct directions are reversed so the sign on velocity remains the same as in the first case.  The same flow losses are assigned.  It is expected that the duct velocities in both cases should be 3~m/s, 2~m/s, and 1~m/s.  FDS results are shown in Fig.~\ref{fig_HVAC_node}.
 
@@ -4089,7 +4079,7 @@ This case starts with the same input as \textct{leak\_test}.  A second leakage v
 
 \clearpage
 
-\section{ASHRAE Sample Problem 7\\(\texorpdfstring{\textct{ashrae\_7\_fixed\_flow}}{ashrae\_7\_fixed\_flow}, \texorpdfstring{\textct{ashrae\_7\_quadratic}}{ashrae\_7\_quadratic}, and \texorpdfstring{\textct{ ashrae\_7\_table}}{ashrae\_7\_table})}
+\section{ASHRAE Sample Problem 7\\(\texorpdfstring{\textct{ashrae\_7\_fixed\_flow}}{ashrae\_7\_fixed\_flow}, \texorpdfstring{\textct{ashrae\_7\_quadratic}}{ashrae\_7\_quadratic}, \texorpdfstring{\textct{ashrae\_7\_table}}{ashrae\_7\_table})}
 
 ASHRAE Sample Problem 7~\cite{ASHRAE} is a simple HVAC system that represents a metal working exhaust system for a machine shop where particulates from three pieces of equipment are removed by a dust collector.  The network, shown in Fig.~\ref{ASHRAE7}, consists of three inlets, two tees, the dust collector, and a fan.  The lengths, diameters, and friction losses for all the components are specified, as well as the fan flow rate. The pressure drops and flow rates can be computed by hand.  Also listed in Fig.~\ref{ASHRAE7} are the predicted pressure drops for a fan with a fixed flow rate, a fan with a quadratic fan curve (\textct{MAX\_FLOW=2.4094, MAX\_PRESSURE=3000.}) that includes the fixed flow state (i.e., the flow rate of 1.45~\si{m^3/s} and pressure drop of 1913.5~Pa from the fixed flow simulation sits on the quadratic curve), and a fan with a \textct{RAMP} to define the same quadratic fan curve at 500~Pa intervals. The hand calculations assume a constant density, whereas the FDS computation will have a slightly non-uniform density in the network due to pressure drops. It is expected that there will be small differences that will be more noticeable at higher pressure changes.  Additionally since specifying a fan curve via a table results in a piecewise linear approximation, it is expected that the user-defined fan curve results will vary slightly from the quadratic and fixed flow results.
 
@@ -4129,11 +4119,11 @@ Computation of the these quantities by their typical statistical definition woul
 \begin{figure}[h!]
 \centering
 \begin{tabular}{l}
-\includegraphics[width=4in]{SCRIPT_FIGURES/rms_cov_corr_rms}\\
-\includegraphics[width=4in]{SCRIPT_FIGURES/rms_cov_corr_cov} \\
-\includegraphics[width=4in]{SCRIPT_FIGURES/rms_cov_corr_corr}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/rms_cov_corr_rms}\\
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/rms_cov_corr_cov} \\
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/rms_cov_corr_corr}
 \end{tabular}
-\caption[Sample case \textct{rms\_cov\_corr}]{Output of the \textct{rms\_cov\_corr} test case.}
+\caption[Sample case \textct{rms\_cov\_corr}]{Output of the \textct{rms\_cov\_corr} test case.  By construction, the statistic matches the analytical result at time $t = \mbox{\ct T\_END}$.}
 \label{rms_cov_corr_plots}
 \end{figure}
 
