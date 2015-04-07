@@ -1929,7 +1929,7 @@ EDGE_LOOP: DO IE=1,N_EDGES
          ! Test NEW_OPEN_BOUNDARY
 
          NEW_OPEN_IF: IF (NEW_OPEN_BOUNDARY) THEN
-            IF (WALL(IWM)%BOUNDARY_TYPE==OPEN_BOUNDARY .AND. WALL(IWP)%BOUNDARY_TYPE==OPEN_BOUNDARY) THEN
+            IF (BOUNDARY_TYPE_M==OPEN_BOUNDARY .AND. BOUNDARY_TYPE_P==OPEN_BOUNDARY) THEN
                ! first, compute velocity component normal to the boundary
                SELECT CASE(IEC)
                   CASE(1)
