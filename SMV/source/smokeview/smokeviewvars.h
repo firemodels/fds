@@ -396,6 +396,9 @@ SVEXTERN float partlevels256[256];
 SVEXTERN float SVDECL(*zone_times,NULL), SVDECL(*zoneylay,NULL), SVDECL(*zonetl,NULL), SVDECL(*zonetu,NULL), SVDECL(*zonepr,NULL);
 SVEXTERN float SVDECL(*zoneqfire,NULL), SVDECL(*zonefheight,NULL), SVDECL(*zonefbase,NULL), SVDECL(*zonefdiam,NULL);
 SVEXTERN float SVDECL(*zoneodl,NULL), SVDECL(*zoneodu,NULL), SVDECL(*zonehvents,NULL), SVDECL(*zonevvents,NULL);
+#ifdef pp_ZONEVENT
+SVEXTERN float SVDECL(*zonehslabn, NULL), SVDECL(*zonehslabT, NULL), SVDECL(*zonehslabF, NULL), SVDECL(*zonehslabYB, NULL), SVDECL(*zonehslabYT, NULL);
+#endif
 SVEXTERN int SVDECL(zonecsv,0),SVDECL(nzvents,0),SVDECL(nzhvents,0),SVDECL(nzvvents,0);
 SVEXTERN float zone_maxventflow;
 SVEXTERN unsigned char SVDECL(*hazardcolor,NULL);

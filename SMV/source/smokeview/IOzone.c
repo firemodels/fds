@@ -72,12 +72,18 @@ void getzonedatacsv(int nzone_times_local, int nrooms_local, int nfires_local,
                     float *zone_times_local, float *zoneqfire_local, float *zonefheight_local, float *zonefbase_local, float *zonefdiam_local,
                     float *zonepr_local, float *zoneylay_local,  float *zonetl_local, float *zonetu_local,
                     float **zoneodlptr, float **zoneoduptr, float *zonehvents_local, float *zonevvents_local,
+#ifdef pp_ZONEVENT                    
+                    float *zonehslabn_local, float *zonehslabT_local, float *zonehslabF_local, float *zonehslabYB_local, float *zonehslabYT_local,
+#endif
                     int *error){
   int i,ii,iif, use_od=1, iihv, iivv;
   devicedata **zoneqfire_devs=NULL;
   devicedata **zonepr_devs=NULL, **zoneylay_devs=NULL, **zonetl_devs=NULL, **zonetu_devs=NULL, **zoneodl_devs=NULL, **zoneodu_devs=NULL;
   devicedata **zonefheight_devs=NULL, **zonefbase_devs=NULL, **zonefarea_devs=NULL;
   devicedata **zonehvents_devs=NULL, **zonevvents_devs=NULL;
+#ifdef pp_ZONEVENT  
+  devicedata **zonehslabn_devs = NULL, **zonehslabT_devs = NULL, **zonehslabF_devs = NULL, **zonehslabYB_devs = NULL, **zonehslabYT_devs = NULL;
+#endif  
   float *zoneodl_local, *zoneodu_local;
   float *times_local;
 
@@ -100,6 +106,13 @@ void getzonedatacsv(int nzone_times_local, int nrooms_local, int nfires_local,
 
   if(nzhvents>0){
     NewMemory((void **)&zonehvents_devs,nzhvents*sizeof(devicedata *));
+#ifdef pp_ZONEVENT    
+    NewMemory((void **)&zonehslabn_devs,  nzhvents*sizeof(devicedata *));
+    NewMemory((void **)&zonehslabT_devs,  10*nzhvents*sizeof(devicedata *));
+    NewMemory((void **)&zonehslabF_devs,  10*nzhvents*sizeof(devicedata *));
+    NewMemory((void **)&zonehslabYB_devs, 10*nzhvents*sizeof(devicedata *));
+    NewMemory((void **)&zonehslabYT_devs, 10*nzhvents*sizeof(devicedata *));
+#endif    
   }
 
   if(nzvvents>0){
@@ -211,6 +224,9 @@ void getzonedatacsv(int nzone_times_local, int nrooms_local, int nfires_local,
 
   for(i=0;i<nzhvents;i++){
     char label[100];
+#ifdef pp_ZONEVENT    
+    int j;
+#endif    
 
     sprintf(label,"HVENT_%i",i+1);
     zonehvents_devs[i]=getdevice(label,-1);
@@ -219,6 +235,29 @@ void getzonedatacsv(int nzone_times_local, int nrooms_local, int nfires_local,
       return;
     }
     zonehvents_devs[i]->in_zone_csv=1;
+
+#ifdef pp_ZONEVENT    
+    sprintf(label,"NSLAB_%i",i+1);
+    zonehslabn_devs[i]=getdevice(label,-1);
+    zonehslabn_devs[i]->in_zone_csv=1;
+    for(j=0;j<10;j++){
+      sprintf(label,"HSLABT_%i_%i",i+1,j+1);
+      zonehslabT_devs[10*i+j]=getdevice(label,-1);
+      zonehslabT_devs[10*i+j]->in_zone_csv=1;
+
+      sprintf(label,"HSLABF_%i_%i",i+1,j+1);
+      zonehslabF_devs[10*i+j]=getdevice(label,-1);
+      zonehslabF_devs[10*i+j]->in_zone_csv=1;
+
+      sprintf(label,"HSLABYB_%i_%i",i+1,j+1);
+      zonehslabYB_devs[10*i+j]=getdevice(label,-1);
+      zonehslabYB_devs[10*i+j]->in_zone_csv=1;
+
+      sprintf(label,"HSLABYT_%i_%i",i+1,j+1);
+      zonehslabYT_devs[10*i+j]=getdevice(label,-1);
+      zonehslabYT_devs[10*i+j]->in_zone_csv=1;
+    }
+#endif    
   }
 
   for(i=0;i<nzvvents;i++){
@@ -285,7 +324,20 @@ void getzonedatacsv(int nzone_times_local, int nrooms_local, int nfires_local,
       iif++;
     }
     for(j=0;j<nzhvents;j++){
+#ifdef pp_ZONEVENT    
+      int jj;
+#endif      
+
       zonehvents_local[iihv] = zonehvents_devs[j]->vals[i];
+#ifdef pp_ZONEVENT      
+      if(zonehslabn_devs[j]!=NULL)zonehslabn_local[iihv] = zonehslabn_devs[j]->vals[i];
+      for(jj = 0; jj<10; jj++){
+        if(zonehslabT_devs[10*j+jj]!=NULL)zonehslabT_local[10*iihv+jj] =  zonehslabT_devs[10*j+jj]->vals[i];
+        if(zonehslabF_devs[10*j+jj]!=NULL)zonehslabF_local[10*iihv+jj] =  zonehslabF_devs[10*j+jj]->vals[i];
+        if(zonehslabYB_devs[10*j+jj]!=NULL)zonehslabYB_local[10*iihv+jj] = zonehslabYB_devs[10*j+jj]->vals[i];
+        if(zonehslabYT_devs[10*j+jj]!=NULL)zonehslabYT_local[10*iihv+jj] = zonehslabYT_devs[10*j+jj]->vals[i];
+      }
+#endif      
       iihv++;
     }
     for(j=0;j<nzvvents;j++){
@@ -295,6 +347,14 @@ void getzonedatacsv(int nzone_times_local, int nrooms_local, int nfires_local,
   }
 
   FREEMEMORY(zonehvents_devs);
+#ifdef pp_ZONEVENT
+  FREEMEMORY(zonehvents_devs);
+  FREEMEMORY(zonehslabn_devs);
+  FREEMEMORY(zonehslabT_devs);
+  FREEMEMORY(zonehslabF_devs);
+  FREEMEMORY(zonehslabYB_devs);
+  FREEMEMORY(zonehslabYT_devs);
+#endif  
   FREEMEMORY(zonevvents_devs);
   FREEMEMORY(zoneqfire_devs);
   FREEMEMORY(zonepr_devs);
@@ -456,6 +516,13 @@ void readzone(int ifile, int flag, int *errorcode){
   FREEMEMORY(izonetu);
   FREEMEMORY(zoneodl);
   FREEMEMORY(zoneodu);
+#ifdef pp_ZONEVENT  
+  FREEMEMORY(zonehslabn);
+  FREEMEMORY(zonehslabT);
+  FREEMEMORY(zonehslabF);
+  FREEMEMORY(zonehslabYB);
+  FREEMEMORY(zonehslabYT);
+#endif  
 
   activezone=NULL;
   if(flag==UNLOAD){
@@ -536,8 +603,22 @@ void readzone(int ifile, int flag, int *errorcode){
       return;
     }
     FREEMEMORY(zonehvents); 
+#ifdef pp_ZONEVENT    
+    FREEMEMORY(zonehslabn);
+    FREEMEMORY(zonehslabT);
+    FREEMEMORY(zonehslabF);
+    FREEMEMORY(zonehslabYB);
+    FREEMEMORY(zonehslabYT);
+#endif    
     if(nzhvents>0){
       NewMemory((void **)&zonehvents,nzhvents*nzone_times*sizeof(float));
+#ifdef pp_ZONEVENT      
+      NewMemory((void **)&zonehslabn, nzone_times*nzhvents*sizeof(float));
+      NewMemory((void **)&zonehslabT, nzone_times*nzhvents*10*sizeof(float));
+      NewMemory((void **)&zonehslabYT, nzone_times*nzhvents*10*sizeof(float));
+      NewMemory((void **)&zonehslabF, nzone_times*nzhvents*10*sizeof(float));
+      NewMemory((void **)&zonehslabYB, nzone_times*nzhvents*10*sizeof(float));
+#endif      
     }
     FREEMEMORY(zonevvents); 
     if(nzvvents>0){
@@ -572,8 +653,15 @@ void readzone(int ifile, int flag, int *errorcode){
   }
   CheckMemory;
   if(zonei->csv==1){
+#ifdef pp_ZONEVENT
+    getzonedatacsv(nzone_times,nrooms,  nfires, zone_times,zoneqfire, zonefheight, zonefbase, zonefdiam,
+                   zonepr,zoneylay,zonetl,zonetu,&zoneodl,&zoneodu, zonehvents, zonevvents, 
+                   zonehslabn, zonehslabT, zonehslabF, zonehslabYB, zonehslabYT,
+                   &error);
+#else
     getzonedatacsv(nzone_times,nrooms,  nfires, zone_times,zoneqfire, zonefheight, zonefbase, zonefdiam,
                    zonepr,zoneylay,zonetl,zonetu,&zoneodl,&zoneodu, zonehvents, zonevvents, &error);
+#endif                   
   }
   else{
     FORTgetzonedata(file,&nzone_times,&nrooms, &nfires, zone_times,zoneqfire,zonepr,zoneylay,zonetl,zonetu,&error,zonefilelen);
