@@ -47,7 +47,7 @@ maxval=ceil(2*urms*100)/100;
 
 h=plot(xcalc,ycalc,'r-',fds_data(:,1),fds_data(:,4),'k-','LineWidth',1.5);
 hold on
-axis([0 1000 0 maxval])
+%axis([0 1000 0 maxval])
 plot_style
 set(gca,'Units',Plot_Units)
 set(gca,'FontName',Font_Name)
@@ -86,7 +86,7 @@ maxval=ceil(2*uwcov*100)/100;
 
 h=plot(xcalc,ycalc,'r-',fds_data(:,1),fds_data(:,5),'k-','LineWidth',1.5);
 hold on
-axis([0 1000 0 maxval])
+%axis([0 1000 0 maxval])
 plot_style
 set(gca,'Units',Plot_Units)
 set(gca,'FontName',Font_Name)
@@ -123,7 +123,7 @@ maxval=ceil(2*uwcorr*100)/100;
 
 h=plot(xcalc,ycalc,'r-',fds_data(:,1),fds_data(:,6),'k-','LineWidth',1.5);
 hold on
-axis([0 1000 0 maxval])
+%axis([0 1000 0 maxval])
 plot_style
 set(gca,'Units',Plot_Units)
 set(gca,'FontName',Font_Name)
