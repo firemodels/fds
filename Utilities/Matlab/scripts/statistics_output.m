@@ -36,14 +36,15 @@ end
 if strcmp(Stats_Output, 'Verification')
     fid = fopen(Statistics_Tex_Output, 'wt');
     % Generate table header information in .tex file
-    fprintf(fid, '%s\n', '\begin{longtable}[c]{|l|c|c|c|c|c|c|}');
+    fprintf(fid, '%s\n', '\scriptsize');
+    fprintf(fid, '%s\n', '\begin{longtable}[c]{@{\extracolsep{\fill}}|l|c|c|c|c|c|c|}');
     fprintf(fid, '%s\n', '\hline');
-    fprintf(fid, '%s\n', 'Case Name & Expected & Predicted & Type of Error & Error & Error     & Within    \\');
-    fprintf(fid, '%s\n', '          & Metric   & Metric    &               &       & Tolerance & Tolerance \\ \hline \hline');
+    fprintf(fid, '%s\n', 'Case Name & Expected & Predicted & Type of & Error & Error     & Within    \\');
+    fprintf(fid, '%s\n', '          & Value    & Value     & Error   &       & Tolerance & Tol.      \\ \hline \hline');
     fprintf(fid, '%s\n', '\endfirsthead');
     fprintf(fid, '%s\n', '\hline');
-    fprintf(fid, '%s\n', 'Case Name & Expected & Predicted & Type of Error & Error & Error     & Within    \\');
-    fprintf(fid, '%s\n', '          & Metric   & Metric    &               &       & Tolerance & Tolerance \\ \hline \hline');
+    fprintf(fid, '%s\n', 'Case Name & Expected & Predicted & Type of & Error & Error     & Within    \\');
+    fprintf(fid, '%s\n', '          & Value    & Value     & Error   &       & Tolerance & Tol.      \\ \hline \hline');
     fprintf(fid, '%s\n', '\endhead');
     fprintf(fid, '%s\n', '\hline');
     fprintf(fid, '%s\n', '\endfoot');
@@ -76,7 +77,7 @@ if strcmp(Stats_Output, 'Verification')
         fprintf(fid, '%s%s\n', within_tolerance, ' \\');
     end
     fprintf(fid,'%s\n','\end{longtable}');
-    fprintf(fid, '%s\n', '\normalsize');
+    fprintf(fid,'%s\n','\normalsize');
 end
 
 % Write statistics information to a LaTeX table for inclusion
