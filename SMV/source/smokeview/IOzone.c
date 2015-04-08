@@ -128,7 +128,6 @@ void getzonedatacsv(int nzone_times_local, int nrooms_local, int nfires_local,
   devicedata **zonehvents_devs=NULL, **zonevvents_devs=NULL;
 #ifdef pp_ZONEVENT  
   devicedata **zonehslabn_devs = NULL, **zonehslabT_devs = NULL, **zonehslabF_devs = NULL, **zonehslabYB_devs = NULL, **zonehslabYT_devs = NULL;
-  int have_slab_flow;
 #endif  
   float *zoneodl_local, *zoneodu_local;
   float *times_local;
@@ -288,7 +287,7 @@ void getzonedatacsv(int nzone_times_local, int nrooms_local, int nfires_local,
   }
 
 #ifdef pp_ZONEVENT
-  have_slab_flow = 0;
+  have_ventslab_flow = 0;
   for(i = 0; i < nzhvents; i++){
     char label[100];
     int islab;
@@ -296,7 +295,7 @@ void getzonedatacsv(int nzone_times_local, int nrooms_local, int nfires_local,
     sprintf(label, "NSLAB_%i", i + 1);
     zonehslabn_devs[i] = getdevice(label, -1);
     if(zonehslabn_devs[i] != NULL){
-      have_slab_flow = 1;
+      have_ventslab_flow = 1;
       break;
     }
     for(islab = 0; islab < MAXSLABS; islab++){
@@ -305,23 +304,23 @@ void getzonedatacsv(int nzone_times_local, int nrooms_local, int nfires_local,
       idev = MAXSLABS * i + islab;
       sprintf(label, "HSLABT_%i_%i", i + 1, islab + 1);
       zonehslabT_devs[idev] = getdevice(label, -1);
-      if(zonehslabT_devs[idev] != NULL)have_slab_flow = 1;
+      if(zonehslabT_devs[idev] != NULL)have_ventslab_flow = 1;
 
       sprintf(label, "HSLABF_%i_%i", i + 1, islab + 1);
       zonehslabF_devs[idev] = getdevice(label, -1);
-      if(zonehslabT_devs[idev] != NULL)have_slab_flow = 1;
+      if(zonehslabT_devs[idev] != NULL)have_ventslab_flow = 1;
 
       sprintf(label, "HSLABYB_%i_%i", i + 1, islab + 1);
       zonehslabYB_devs[idev] = getdevice(label, -1);
-      if(zonehslabT_devs[idev] != NULL)have_slab_flow = 1;
+      if(zonehslabT_devs[idev] != NULL)have_ventslab_flow = 1;
 
       sprintf(label, "HSLABYT_%i_%i", i + 1, islab + 1);
       zonehslabYT_devs[idev] = getdevice(label, -1);
-      if(zonehslabT_devs[idev] != NULL)have_slab_flow = 1;
+      if(zonehslabT_devs[idev] != NULL)have_ventslab_flow = 1;
     }
-    if(have_slab_flow == 1)break;
+    if(have_ventslab_flow == 1)break;
   }
-  if(have_slab_flow == 1){
+  if(have_ventslab_flow == 1){
     for(i = 0; i < nzhvents; i++){
       char label[100];
       int islab;
@@ -829,10 +828,10 @@ void fill_zonedata(int izone_index){
   hvent0 = zonehvents + izone_index*nzhvents;
 #ifdef pp_ZONEVENT
   zonehslabn0  = zonehslabn  + izone_index*nzhvents;
-  zonehslabT0  = zonehslabT +  izone_index*MAXSLABS*nzhvents;
-  zonehslabF0 = zonehslabF+izone_index*MAXSLABS*nzhvents;
-  zonehslabYB0 = zonehslabYB+izone_index*MAXSLABS*nzhvents;
-  zonehslabYT0 = zonehslabYT+izone_index*MAXSLABS*nzhvents;
+  zonehslabT0  = zonehslabT  + izone_index*MAXSLABS*nzhvents;
+  zonehslabF0  = zonehslabF  + izone_index*MAXSLABS*nzhvents;
+  zonehslabYB0 = zonehslabYB + izone_index*MAXSLABS*nzhvents;
+  zonehslabYT0 = zonehslabYT + izone_index*MAXSLABS*nzhvents;
 #endif
   if(zoneodl!=NULL)odl0 = zoneodl + izone_index*nrooms;
   if(zoneodu!=NULL)odu0 = zoneodu + izone_index*nrooms;
@@ -843,6 +842,7 @@ void fill_zonedata(int izone_index){
 
     zventi = zventinfo + ivent;
     zventi->area_fraction=CLAMP(hvent0[ivent]/zventi->area,0.0,1.0);
+
     zventi->nslab = zonehslabn0[ivent];
     for(islab = 0; islab<zventi->nslab; islab++){
       int iislab;
@@ -1087,7 +1087,7 @@ void drawroomgeom(void){
   }
 }
 
-/* ------------------ drawventdata ------------------------ */
+/* ------------------ getzoneventbounds ------------------------ */
 
 void getzoneventbounds(void){
   int i;
@@ -1127,9 +1127,13 @@ void getzoneventbounds(void){
   }
 }
 
-/* ------------------ drawventdata ------------------------ */
+/* ------------------ drawventdataORIG ------------------------ */
 
+#ifdef pp_ZONEVENT
+void drawventdataORIG(void){
+#else
 void drawventdata(void){
+#endif
   float factor;
   int i;
   int idir;
@@ -1283,6 +1287,92 @@ void drawventdata(void){
   if(cullfaces==1)glEnable(GL_CULL_FACE);
 
 }
+
+#ifdef pp_ZONEVENT
+/* ------------------ drawventslabdata ------------------------ */
+
+void drawventslabdata(void){
+  float factor;
+  int i;
+  int idir;
+  float x1, yy, dyy;
+
+  if(visVents==0)return;
+  if(visVentLines==0&&visVentSolid==0)return;
+
+  if(cullfaces==1)glDisable(GL_CULL_FACE);
+
+  for(i = 0; i<nzvents; i++){
+    zvent *zvi;
+    int j;
+    float yelev[20];
+    float *vcolor1, *vcolor2;
+
+    zvi = zventinfo+i;
+
+    if(zvi->vent_orien==VFLOW_VENT||zvi->vent_orien==HVAC_VENT)continue;
+    idir = zvi->dir;
+    x1 = (zvi->x1+zvi->x2)/2.0;
+    yy = zvi->yy;
+    if(visVentSolid==1){
+      float *slab_vel;
+      int islab;
+
+      slab_vel = zvi->slab_vel;
+      glBegin(GL_QUADS);
+      for(islab = 0; islab<zvi->nslab;islab++){
+        float slab_bot, slab_top, tslab, *tcolor;
+        int itslab;
+
+        slab_bot = NORMALIZE_Z(zvi->slab_bot[islab]);
+        slab_top = NORMALIZE_Z(zvi->slab_top[islab]);
+        tslab = zvi->slab_temp[islab];
+        itslab = getZoneColor(tslab-273.15, zonemin, zonemax, nrgb_full);
+        tcolor = rgb_full[itslab];
+        glColor3fv(tcolor);
+
+        dyy = -slab_vel[islab];
+        switch(idir){
+        case 4:
+        case 2:
+          glVertex3f(yy,     x1, slab_bot);
+          glVertex3f(yy+dyy, x1, slab_bot);
+
+          glVertex3f(yy+dyy, x1, slab_top);
+          glVertex3f(yy,     x1, slab_top);
+          break;
+        case 3:
+        case 1:
+          glVertex3f(x1,     yy, slab_bot);
+          glVertex3f(x1, yy+dyy, slab_bot);
+
+          glVertex3f(x1, yy+dyy, slab_top);
+          glVertex3f(x1,     yy, slab_top);
+          break;
+        default:
+          ASSERT(FFALSE);
+          break;
+        }
+      }
+      glEnd();
+    }
+    if(visVentLines==1){
+    }
+  }
+  if(cullfaces==1)glEnable(GL_CULL_FACE);
+}
+
+/* ------------------ drawventdata ------------------------ */
+
+void drawventdata(void){
+  if(have_ventslab_flow==1){
+    drawventslabdata();
+  }
+  else{
+    drawventdataORIG();
+  }
+}
+#endif
 
 /* ------------------ getzonethick ------------------------ */
 

@@ -723,6 +723,10 @@ EXTERNCPP void drawroomgeom(void);
 EXTERNCPP void drawfiredata(void);
 EXTERNCPP void drawroomdata(void);
 EXTERNCPP void drawventdata(void);
+#ifdef pp_ZONEVENT
+EXTERNCPP void drawventdataORIG(void);
+EXTERNCPP void drawventslabdata(void);
+#endif
 EXTERNCPP void ResetView(int option);
 EXTERNCPP void UpdateTimeLabels(void);
 EXTERNCPP void RenderFrame(int view_mode);

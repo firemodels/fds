@@ -1463,7 +1463,6 @@ void initvars(void){
   patchmin=1., patchmax=0.;
   targetmin=1.0, targetmax=0.0;
   partmin=1., partmax=0., slicemin=1., slicemax=0.;
-  zonemin=1.0, zonemax=0.0;
   speedmax=0.0;
   hrrpuv_max_smv=1200.0;
   FlowDir=1,ClipDir=1;

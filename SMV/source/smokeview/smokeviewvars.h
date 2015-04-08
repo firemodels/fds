@@ -397,6 +397,7 @@ SVEXTERN float SVDECL(*zone_times,NULL), SVDECL(*zoneylay,NULL), SVDECL(*zonetl,
 SVEXTERN float SVDECL(*zoneqfire,NULL), SVDECL(*zonefheight,NULL), SVDECL(*zonefbase,NULL), SVDECL(*zonefdiam,NULL);
 SVEXTERN float SVDECL(*zoneodl,NULL), SVDECL(*zoneodu,NULL), SVDECL(*zonehvents,NULL), SVDECL(*zonevvents,NULL);
 #ifdef pp_ZONEVENT
+SVEXTERN int SVDECL(have_ventslab_flow,0);
 SVEXTERN float SVDECL(*zonehslabT, NULL), SVDECL(*zonehslabF, NULL), SVDECL(*zonehslabYB, NULL), SVDECL(*zonehslabYT, NULL);
 SVEXTERN int SVDECL(*zonehslabn, NULL);
 #endif
@@ -617,7 +618,7 @@ SVEXTERN float targetmin, targetmax;
 SVEXTERN float partmin, partmax;
 SVEXTERN float slicemin, slicemax;
 SVEXTERN float slicemin_save, slicemax_save;
-SVEXTERN float zonemin, zonemax;
+SVEXTERN float SVDECL(zonemin,1.0), SVDECL(zonemax,0.0);
 SVEXTERN float speedmax;
 SVEXTERN int SVDECL(axislabels_smooth,1),SVDECL(axislabels_smooth_save,1);
 SVEXTERN propdata SVDECL(*prop_evacdefault,NULL);
