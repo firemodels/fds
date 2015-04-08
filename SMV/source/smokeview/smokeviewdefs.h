@@ -11,6 +11,10 @@ void _Sniff_Errors(char *whereat);
 #define SNIFF_ERRORS(f)
 #endif
 
+#ifdef pp_ZONEVENT
+#define MAXSLABS 10
+#endif
+
 #define MAKE_MOVIE 28
 
 #define PNG 0

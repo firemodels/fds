@@ -1365,6 +1365,10 @@ typedef struct {
   float g_dpmin, g_dpmax;
   roomdata *room1, *room2;
   float area, area_fraction;
+#ifdef pp_ZONEVENT
+  float slab_bot[MAXSLABS], slab_top[MAXSLABS], slab_vel[MAXSLABS], slab_temp[MAXSLABS];
+  int nslab;
+#endif
   float *color;
   float vdata[20];
   int itempdata[20];
