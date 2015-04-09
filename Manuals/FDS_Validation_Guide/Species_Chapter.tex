@@ -170,6 +170,8 @@ Results of the low speed (78 ACH) and high speed (265 ACH) tests for propylene a
 For the simulations of the NIST/NRC tests, the smoke yield is specified as one of the test parameters.
 The figures on the following pages contain comparisons of measured and predicted smoke concentration at one measuring station in the upper layer.
 
+\newpage
+
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_01_Smoke} &
@@ -288,7 +290,7 @@ average aerosol concentration in the duct test section (kg/m$^3$) and is given b
 Figure~\ref{Sippola_Aerosol_Deposition_Velocity} compares the measured and predicted aerosol deposition velocities,
 and Figure~\ref{Summary_Aerosol_Deposition_Velocity} shows a summary of the results.
 
-\begin{figure}[p]
+\begin{figure}[ht]
 \begin{center}
 \begin{tabular}{c}
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/Sippola_Aerosol_Deposition/Sippola_Aerosol_Ceiling_Deposition} \\
@@ -301,7 +303,7 @@ and Figure~\ref{Summary_Aerosol_Deposition_Velocity} shows a summary of the resu
 \label{Sippola_Aerosol_Deposition_Velocity}
 \end{figure}
 
-\begin{figure}[p]
+\begin{figure}[ht]
 \begin{center}
 \begin{tabular}{c}
 \includegraphics[width=4.0in]{SCRIPT_FIGURES/ScatterPlots/FDS_Aerosol_Deposition_Velocity} \\
@@ -320,13 +322,12 @@ and Figure~\ref{Summary_Aerosol_Deposition_Velocity} shows a summary of the resu
 
 Predicting the concentration of products of incomplete combustion is challenging because it requires information about the chemical composition of the fuel and the multiple reactions that convert fuel to products. FDS contains a fairly general framework by which users can specify the reaction mechanism, and the examples in the following subsections highlight some of the more commonly used schemes.
 
-\clearpage
 
 \subsection{Smyth Slot Burner Experiment}
 
 The two-step, CO production model in FDS was used to simulate a methane/air slot burner diffusion flame. Figures~\ref{Smyth_Slot_Burner_fuel_ox} through \ref{Smyth_Slot_Burner_co_co2} show predicted and measured concentrations of CH$_4$, O$_2$, CO,  and CO$_2$ at three elevations above the burner. Figure~\ref{Smyth_Slot_Burner_temp} shows predicted and measured temperatures at these same elevations. The reported uncertainty in the species concentration measurements ranges from 10~\% to 20~\%.
 
-\begin{figure}[h]
+\begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/Smyth_Slot_Burner/Smyth_Slot_Burner_11mm_Fuel} &
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/Smyth_Slot_Burner/Smyth_Slot_Burner_11mm_Oxygen} \\
@@ -438,7 +439,7 @@ FDS will compute a balanced reaction assuming complete combustion and the heat o
 
 \newpage
 
-\begin{figure}[h]
+\begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/NIST_FSE_2008/ISONG3_Carbon_Dioxide} &
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/NIST_FSE_2008/ISONG3_Carbon_Monoxide} \\
@@ -451,7 +452,7 @@ FDS will compute a balanced reaction assuming complete combustion and the heat o
 \label{NIST_FSE_1994_ISONG3}
 \end{figure}
 
-\begin{figure}[h]
+\begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/NIST_FSE_2008/ISOHept4_Carbon_Dioxide} &
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/NIST_FSE_2008/ISOHept4_Carbon_Monoxide} \\
@@ -464,7 +465,7 @@ FDS will compute a balanced reaction assuming complete combustion and the heat o
 \label{NIST_FSE_1994_ISOHept4}
 \end{figure}
 
-\begin{figure}[h]
+\begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/NIST_FSE_2008/ISOHept5_Carbon_Dioxide} &
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/NIST_FSE_2008/ISOHept5_Carbon_Monoxide} \\
@@ -477,7 +478,7 @@ FDS will compute a balanced reaction assuming complete combustion and the heat o
 \label{NIST_FSE_1994_ISOHept5}
 \end{figure}
 
-\begin{figure}[h]
+\begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/NIST_FSE_2008/ISOHept8_Carbon_Dioxide} &
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/NIST_FSE_2008/ISOHept8_Carbon_Monoxide} \\
@@ -490,7 +491,7 @@ FDS will compute a balanced reaction assuming complete combustion and the heat o
 \label{NIST_FSE_1994_ISOHept8}
 \end{figure}
 
-\begin{figure}[h]
+\begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/NIST_FSE_2008/ISOHept9_Carbon_Dioxide} &
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/NIST_FSE_2008/ISOHept9_Carbon_Monoxide} \\
@@ -503,7 +504,7 @@ FDS will compute a balanced reaction assuming complete combustion and the heat o
 \label{NIST_FSE_1994_ISOHept9}
 \end{figure}
 
-\begin{figure}[h]
+\begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/NIST_FSE_2008/ISONylon10_Carbon_Dioxide} &
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/NIST_FSE_2008/ISONylon10_Carbon_Monoxide} \\
@@ -516,7 +517,7 @@ FDS will compute a balanced reaction assuming complete combustion and the heat o
 \label{NIST_FSE_1994_ISONylon10}
 \end{figure}
 
-\begin{figure}[h]
+\begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/NIST_FSE_2008/ISOPP11_Carbon_Dioxide} &
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/NIST_FSE_2008/ISOPP11_Carbon_Monoxide} \\
@@ -529,7 +530,7 @@ FDS will compute a balanced reaction assuming complete combustion and the heat o
 \label{NIST_FSE_1994_ISOPropylene11}
 \end{figure}
 
-\begin{figure}[h]
+\begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/NIST_FSE_2008/ISOHeptD12_Carbon_Dioxide} &
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/NIST_FSE_2008/ISOHeptD12_Carbon_Monoxide} \\
@@ -542,7 +543,7 @@ FDS will compute a balanced reaction assuming complete combustion and the heat o
 \label{NIST_FSE_1994_ISOHeptD12}
 \end{figure}
 
-\begin{figure}[h]
+\begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/NIST_FSE_2008/ISOHeptD13_Carbon_Dioxide} &
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/NIST_FSE_2008/ISOHeptD13_Carbon_Monoxide} \\
@@ -555,7 +556,7 @@ FDS will compute a balanced reaction assuming complete combustion and the heat o
 \label{NIST_FSE_1994_ISOHeptD13}
 \end{figure}
 
-\begin{figure}[h]
+\begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/NIST_FSE_2008/ISOPropD14_Carbon_Dioxide} &
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/NIST_FSE_2008/ISOPropD14_Carbon_Monoxide} \\
@@ -568,7 +569,7 @@ FDS will compute a balanced reaction assuming complete combustion and the heat o
 \label{NIST_FSE_1994_ISOPropD14}
 \end{figure}
 
-\begin{figure}[h]
+\begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/NIST_FSE_2008/ISOProp15_Carbon_Dioxide} &
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/NIST_FSE_2008/ISOProp15_Carbon_Monoxide} \\
@@ -581,7 +582,7 @@ FDS will compute a balanced reaction assuming complete combustion and the heat o
 \label{NIST_FSE_1994_ISOProp15}
 \end{figure}
 
-\begin{figure}[h]
+\begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/NIST_FSE_2008/ISOStyrene16_Carbon_Dioxide} &
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/NIST_FSE_2008/ISOStyrene16_Carbon_Monoxide} \\
@@ -594,7 +595,7 @@ FDS will compute a balanced reaction assuming complete combustion and the heat o
 \label{NIST_FSE_1994_ISOStyrene16}
 \end{figure}
 
-\begin{figure}[h]
+\begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/NIST_FSE_2008/ISOStyrene17_Carbon_Dioxide} &
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/NIST_FSE_2008/ISOStyrene17_Carbon_Monoxide} \\
@@ -607,9 +608,8 @@ FDS will compute a balanced reaction assuming complete combustion and the heat o
 \label{NIST_FSE_1994_ISOStyrene17}
 \end{figure}
 
-\clearpage
 
-\begin{figure}[h]
+\begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/NIST_FSE_2008/ISOPP18_Carbon_Dioxide} &
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/NIST_FSE_2008/ISOPP18_Carbon_Monoxide} \\
@@ -622,7 +622,7 @@ FDS will compute a balanced reaction assuming complete combustion and the heat o
 \label{NIST_FSE_1994_ISOPP18}
 \end{figure}
 
-\begin{figure}[h]
+\begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/NIST_FSE_2008/ISOHept19_Carbon_Dioxide} &
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/NIST_FSE_2008/ISOHept19_Carbon_Monoxide} \\
@@ -635,7 +635,7 @@ FDS will compute a balanced reaction assuming complete combustion and the heat o
 \label{NIST_FSE_1994_ISOHept19}
 \end{figure}
 
-\begin{figure}[h]
+\begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/NIST_FSE_2008/ISOToluene20_Carbon_Dioxide} &
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/NIST_FSE_2008/ISOToluene20_Carbon_Monoxide} \\
@@ -648,7 +648,7 @@ FDS will compute a balanced reaction assuming complete combustion and the heat o
 \label{NIST_FSE_1994_ISOToluene20}
 \end{figure}
 
-\begin{figure}[h]
+\begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/NIST_FSE_2008/ISOStyrene21_Carbon_Dioxide} &
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/NIST_FSE_2008/ISOStyrene21_Carbon_Monoxide} \\
@@ -661,7 +661,7 @@ FDS will compute a balanced reaction assuming complete combustion and the heat o
 \label{NIST_FSE_1994_ISOStyrene21}
 \end{figure}
 
-\begin{figure}[h]
+\begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/NIST_FSE_2008/ISOHept22_Carbon_Dioxide} &
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/NIST_FSE_2008/ISOHept22_Carbon_Monoxide} \\
@@ -674,7 +674,7 @@ FDS will compute a balanced reaction assuming complete combustion and the heat o
 \label{NIST_FSE_1994_ISOHept22}
 \end{figure}
 
-\begin{figure}[h]
+\begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/NIST_FSE_2008/ISOHept23_Carbon_Dioxide} &
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/NIST_FSE_2008/ISOHept23_Carbon_Monoxide} \\
@@ -687,7 +687,7 @@ FDS will compute a balanced reaction assuming complete combustion and the heat o
 \label{NIST_FSE_1994_ISOHept23}
 \end{figure}
 
-\begin{figure}[h]
+\begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/NIST_FSE_2008/ISOHept24_Carbon_Dioxide} &
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/NIST_FSE_2008/ISOHept24_Carbon_Monoxide} \\
@@ -700,7 +700,7 @@ FDS will compute a balanced reaction assuming complete combustion and the heat o
 \label{NIST_FSE_1994_ISOHept24}
 \end{figure}
 
-\begin{figure}[h]
+\begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/NIST_FSE_2008/ISOHept25_Carbon_Dioxide} &
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/NIST_FSE_2008/ISOHept25_Carbon_Monoxide} \\
@@ -713,7 +713,7 @@ FDS will compute a balanced reaction assuming complete combustion and the heat o
 \label{NIST_FSE_1994_ISOHept25}
 \end{figure}
 
-\begin{figure}[h]
+\begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/NIST_FSE_2008/ISOHept26_Carbon_Dioxide} &
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/NIST_FSE_2008/ISOHept26_Carbon_Monoxide} \\
@@ -726,7 +726,7 @@ FDS will compute a balanced reaction assuming complete combustion and the heat o
 \label{NIST_FSE_1994_ISOHept26}
 \end{figure}
 
-\begin{figure}[h]
+\begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/NIST_FSE_2008/ISOHept27_Carbon_Dioxide} &
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/NIST_FSE_2008/ISOHept27_Carbon_Monoxide} \\
@@ -739,7 +739,7 @@ FDS will compute a balanced reaction assuming complete combustion and the heat o
 \label{NIST_FSE_1994_ISOHept27}
 \end{figure}
 
-\begin{figure}[h]
+\begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/NIST_FSE_2008/ISOHept28_Carbon_Dioxide} &
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/NIST_FSE_2008/ISOHept28_Carbon_Monoxide} \\
@@ -752,7 +752,7 @@ FDS will compute a balanced reaction assuming complete combustion and the heat o
 \label{NIST_FSE_1994_ISOHept28}
 \end{figure}
 
-\begin{figure}[h]
+\begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/NIST_FSE_2008/ISOToluene29_Carbon_Dioxide} &
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/NIST_FSE_2008/ISOToluene29_Carbon_Monoxide} \\
@@ -765,7 +765,7 @@ FDS will compute a balanced reaction assuming complete combustion and the heat o
 \label{NIST_FSE_1994_ISOToluene29}
 \end{figure}
 
-\begin{figure}[h]
+\begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/NIST_FSE_2008/ISOPropanol30_Carbon_Dioxide} &
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/NIST_FSE_2008/ISOPropanol30_Carbon_Monoxide} \\
@@ -778,7 +778,7 @@ FDS will compute a balanced reaction assuming complete combustion and the heat o
 \label{NIST_FSE_1994_ISOPropanol30}
 \end{figure}
 
-\begin{figure}[h]
+\begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/NIST_FSE_2008/ISONG32_Carbon_Dioxide} &
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/NIST_FSE_2008/ISONG32_Carbon_Monoxide} \\
