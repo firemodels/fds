@@ -947,7 +947,7 @@ void drawColorBars(void){
     (showsmoke==1&&parttype!=0)||showslice==1||
     (showvslice==1&&vslicecolorbarflag==1)||
     (showpatch==1&&wc_flag==0)||
-    (showzone==1&&sethazardcolor==0)||
+    (showzone==1&&zonecolortype==ZONETEMP_COLOR)||
     showplot3d==1){
     
     SNIFF_ERRORS("before colorbar");
@@ -1121,7 +1121,6 @@ void drawColorBars(void){
   leftsmoke=0;
   leftslice=0;
   leftpatch=0;
-  leftzone=0;
   leftiso=0;
   ileft=0;
   if(showiso_colorbar==1){
@@ -1141,6 +1140,7 @@ void drawColorBars(void){
   if(showpatch==1&&wc_flag==0){
     leftpatch=ileft;
   }
+  leftzone = ileft;
 
   // -------------- particle file top labels ------------
 
@@ -1315,7 +1315,7 @@ void drawColorBars(void){
     }
     glPopMatrix();
   }
-  if(showzone==1&&sethazardcolor==0){
+  if(showzone==1&&zonecolortype==ZONETEMP_COLOR){
     char unitlabel[256];
     int zoneunitclass, zoneunittype;
 
@@ -1329,10 +1329,7 @@ void drawColorBars(void){
       }
     }
     glPushMatrix();
-    glTranslatef(
-    colorbar_left_pos-colorbar_label_width,
-    colorbar_top_pos+v_space+colorbar_delta,
-    0.0);
+    glTranslatef(colorbar_left_pos-colorbar_label_width,colorbar_top_pos+v_space+colorbar_delta,0.0);
     glTranslatef(-leftzone*(colorbar_label_width+h_space),0.0,0.0);
     outputBarText(0.0,3*(VP_colorbar.text_height+v_space),foreground_color,"Zone");
     outputBarText(0.0,2*(VP_colorbar.text_height+v_space),foreground_color,"Temp");
@@ -1578,7 +1575,7 @@ void drawColorBars(void){
 
   // -------------- zone left labels ------------
 
-  if(showzone==1&&sethazardcolor==0){
+  if(showzone==1&&zonecolortype==ZONETEMP_COLOR){
     float tttval, tttmin, tttmax;
 
     iposition=-1;

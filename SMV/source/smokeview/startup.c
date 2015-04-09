@@ -1415,7 +1415,6 @@ void initvars(void){
   UpdateLIGHTS=1;
 
   windowsize_pointer=0;
-  sethazardcolor=0;
   fontindex=0;
 
   xbar=1.0, ybar=1.0, zbar=1.0;
@@ -1718,7 +1717,6 @@ void initvars(void){
   texture_origin[1]=0.0;
   texture_origin[2]=0.0;
 
-  visVentLines=0, visVentSolid=1;
   isZoneFireModel=0;
   nunitclasses=0,nunitclasses_default=0,nunitclasses_ini=0;
   callfrom_tourglui=0;

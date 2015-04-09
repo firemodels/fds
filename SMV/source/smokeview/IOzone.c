@@ -1149,7 +1149,6 @@ void drawventdata(void){
   float x1, yy;
 
   if(visVents==0)return;
-  if(visVentLines==0&&visVentSolid==0)return;
 
   if(cullfaces==1)glDisable(GL_CULL_FACE);
 
@@ -1181,117 +1180,82 @@ void drawventdata(void){
     idir=zvi->dir;
     x1=(zvi->x1+zvi->x2)/2.0;
     yy=zvi->yy;
-    if(visVentSolid==1){
-      glBegin(GL_QUADS);
-      for(j=0;j<19;j++){
-        float dy1,dy2;
+    glBegin(GL_QUADS);
+    for(j=0;j<19;j++){
+      float dy1,dy2;
 
-        dy1 = factor*zvi->area_fraction*zvi->vdata[j];
-        dy2 = factor*zvi->area_fraction*zvi->vdata[j+1];
-        if(idir==1||idir==4){
-          dy1=-dy1;
-          dy2=-dy2;
-        }
-        vcolor1=rgb_full[zvi->itempdata[j]];
-        vcolor2=rgb_full[zvi->itempdata[j+1]];
-        vcolor2=vcolor1;
-        switch(idir){
-        case 4:
-        case 2:
-          if(dy1*dy2>=0.0){
-            glColor3fv(vcolor1);
-            glVertex3f(yy,    x1,yelev[j]);
-            glVertex3f(yy+dy1,x1,yelev[j]);
-       
-            glColor3fv(vcolor2);
-            glVertex3f(yy+dy2,x1,yelev[j+1]);
-            glVertex3f(yy,    x1,yelev[j+1]);
-          }
-          else{
-            float dyy;
-
-            dyy =  yelev[j] - dy1*(yelev[j+1]-yelev[j])/(dy2-dy1);
-            glColor3fv(vcolor1);
-            glVertex3f(yy,    x1,yelev[j]);
-            glVertex3f(yy+dy1,x1,yelev[j]);
-            glVertex3f(yy,    x1,dyy);
-            glVertex3f(yy,x1,dyy);
-
-
-            glColor3fv(vcolor2);
-            glVertex3f(yy,    x1,dyy);
-            glVertex3f(yy,    x1,dyy);
-            glVertex3f(yy+dy2,x1,yelev[j+1]);
-            glVertex3f(yy,    x1,yelev[j+1]);
-          }
-          break;
-        case 3:
-        case 1:
-          if(dy1*dy2>=0.0){
-            glColor3fv(vcolor1);
-            glVertex3f(x1,yy,    yelev[j]);
-            glVertex3f(x1,yy+dy1,yelev[j]);
-
-            glColor3fv(vcolor2);
-            glVertex3f(x1,yy+dy2,yelev[j+1]);
-            glVertex3f(x1,yy,    yelev[j+1]);
-          }
-          else{
-            float dyy;
-
-            dyy =  yelev[j] - dy1*(yelev[j+1]-yelev[j])/(dy2-dy1);
-            glColor3fv(vcolor1);
-            glVertex3f(x1,yy,    yelev[j]);
-            glVertex3f(x1,yy+dy1,yelev[j]);
-            glVertex3f(x1,yy,dyy);
-            glVertex3f(x1,yy,dyy);
-
-            glColor3fv(vcolor2);
-            glVertex3f(x1,yy,dyy);
-            glVertex3f(x1,yy,dyy);
-            glVertex3f(x1,yy+dy2,yelev[j+1]);
-            glVertex3f(x1,yy,    yelev[j+1]);
-          }
-          break;
-        default:
-          ASSERT(FFALSE);
-          break;
-        }
+      dy1 = factor*zvi->area_fraction*zvi->vdata[j];
+      dy2 = factor*zvi->area_fraction*zvi->vdata[j+1];
+      if(idir==1||idir==4){
+        dy1=-dy1;
+        dy2=-dy2;
       }
-      glEnd();
-    }
-    if(visVentLines==1){
-      glBegin(GL_LINES);
-      for(j=0;j<20;j++){
-        float dy1;
-
-        dy1 = factor*zvi->area_fraction*zvi->vdata[j];
-        vcolor1=rgb_full[zvi->itempdata[j]];
-        glColor3fv(vcolor1);
-        switch(idir){
-        case 1:
-          glVertex3f(x1,yy,    yelev[j]);
-          glVertex3f(x1,yy-dy1,yelev[j]);
-          break;
-        case 2:
+      vcolor1=rgb_full[zvi->itempdata[j]];
+      vcolor2=rgb_full[zvi->itempdata[j+1]];
+      vcolor2=vcolor1;
+      switch(idir){
+      case 4:
+      case 2:
+        if(dy1*dy2>=0.0){
+          glColor3fv(vcolor1);
           glVertex3f(yy,    x1,yelev[j]);
           glVertex3f(yy+dy1,x1,yelev[j]);
-          break;
-        case 3:
+     
+          glColor3fv(vcolor2);
+          glVertex3f(yy+dy2,x1,yelev[j+1]);
+          glVertex3f(yy,    x1,yelev[j+1]);
+        }
+        else{
+          float dyy;
+
+          dyy =  yelev[j] - dy1*(yelev[j+1]-yelev[j])/(dy2-dy1);
+          glColor3fv(vcolor1);
+          glVertex3f(yy,    x1,yelev[j]);
+          glVertex3f(yy+dy1,x1,yelev[j]);
+          glVertex3f(yy,    x1,dyy);
+          glVertex3f(yy,x1,dyy);
+
+          glColor3fv(vcolor2);
+          glVertex3f(yy,    x1,dyy);
+          glVertex3f(yy,    x1,dyy);
+          glVertex3f(yy+dy2,x1,yelev[j+1]);
+          glVertex3f(yy,    x1,yelev[j+1]);
+        }
+        break;
+      case 3:
+      case 1:
+        if(dy1*dy2>=0.0){
+          glColor3fv(vcolor1);
           glVertex3f(x1,yy,    yelev[j]);
           glVertex3f(x1,yy+dy1,yelev[j]);
-          break;
-        case 4:
-          glVertex3f(yy,    x1,yelev[j]);
-          glVertex3f(yy-dy1,x1,yelev[j]);
-          break;
-        default:
-          ASSERT(FFALSE);
-          break;
+
+          glColor3fv(vcolor2);
+          glVertex3f(x1,yy+dy2,yelev[j+1]);
+          glVertex3f(x1,yy,    yelev[j+1]);
         }
+        else{
+          float dyy;
+
+          dyy =  yelev[j] - dy1*(yelev[j+1]-yelev[j])/(dy2-dy1);
+          glColor3fv(vcolor1);
+          glVertex3f(x1,yy,    yelev[j]);
+          glVertex3f(x1,yy+dy1,yelev[j]);
+          glVertex3f(x1,yy,dyy);
+          glVertex3f(x1,yy,dyy);
+
+          glColor3fv(vcolor2);
+          glVertex3f(x1,yy,dyy);
+          glVertex3f(x1,yy,dyy);
+          glVertex3f(x1,yy+dy2,yelev[j+1]);
+          glVertex3f(x1,yy,    yelev[j+1]);
+        }
+        break;
+      default:
+        ASSERT(FFALSE);
+        break;
       }
-      glEnd();
     }
+    glEnd();
   }
   if(cullfaces==1)glEnable(GL_CULL_FACE);
 
@@ -1307,7 +1271,6 @@ void drawventslabdata(void){
   float x1, yy, dyy;
 
   if(visVents==0)return;
-  if(visVentLines==0&&visVentSolid==0)return;
 
   if(cullfaces==1)glDisable(GL_CULL_FACE);
 
@@ -1316,6 +1279,8 @@ void drawventslabdata(void){
     int j;
     float yelev[20];
     float *vcolor1, *vcolor2;
+    float *slab_vel;
+    int islab;
 
     zvi = zventinfo+i;
 
@@ -1323,50 +1288,44 @@ void drawventslabdata(void){
     idir = zvi->dir;
     x1 = (zvi->x1+zvi->x2)/2.0;
     yy = zvi->yy;
-    if(visVentSolid==1){
-      float *slab_vel;
-      int islab;
 
-      slab_vel = zvi->slab_vel;
-      glBegin(GL_QUADS);
-      for(islab = 0; islab<zvi->nslab;islab++){
-        float slab_bot, slab_top, tslab, *tcolor;
-        int itslab;
+    slab_vel = zvi->slab_vel;
+    glBegin(GL_QUADS);
+    for(islab = 0; islab<zvi->nslab;islab++){
+      float slab_bot, slab_top, tslab, *tcolor;
+      int itslab;
 
-        slab_bot = NORMALIZE_Z(zvi->slab_bot[islab]);
-        slab_top = NORMALIZE_Z(zvi->slab_top[islab]);
-        tslab = zvi->slab_temp[islab];
-        itslab = getZoneColor(tslab-273.15, zonemin, zonemax, nrgb_full);
-        tcolor = rgb_full[itslab];
-        glColor3fv(tcolor);
+      slab_bot = NORMALIZE_Z(zvi->slab_bot[islab]);
+      slab_top = NORMALIZE_Z(zvi->slab_top[islab]);
+      tslab = zvi->slab_temp[islab];
+      itslab = getZoneColor(tslab-273.15, zonemin, zonemax, nrgb_full);
+      tcolor = rgb_full[itslab];
+      glColor3fv(tcolor);
 
-        dyy = -0.1*(slab_vel[islab]/maxslabflow);
-        switch(idir){
-        case 4:
-        case 2:
-          glVertex3f(yy,     x1, slab_bot);
-          glVertex3f(yy+dyy, x1, slab_bot);
+      dyy = -0.1*(slab_vel[islab]/maxslabflow);
+      switch(idir){
+      case 4:
+      case 2:
+        glVertex3f(yy,     x1, slab_bot);
+        glVertex3f(yy+dyy, x1, slab_bot);
 
-          glVertex3f(yy+dyy, x1, slab_top);
-          glVertex3f(yy,     x1, slab_top);
-          break;
-        case 3:
-        case 1:
-          glVertex3f(x1,     yy, slab_bot);
-          glVertex3f(x1, yy+dyy, slab_bot);
+        glVertex3f(yy+dyy, x1, slab_top);
+        glVertex3f(yy,     x1, slab_top);
+        break;
+      case 3:
+      case 1:
+        glVertex3f(x1,     yy, slab_bot);
+        glVertex3f(x1, yy+dyy, slab_bot);
 
-          glVertex3f(x1, yy+dyy, slab_top);
-          glVertex3f(x1,     yy, slab_top);
-          break;
-        default:
-          ASSERT(FFALSE);
-          break;
-        }
+        glVertex3f(x1, yy+dyy, slab_top);
+        glVertex3f(x1,     yy, slab_top);
+        break;
+      default:
+        ASSERT(FFALSE);
+        break;
       }
-      glEnd();
     }
-    if(visVentLines==1){
-    }
+    glEnd();
   }
   if(cullfaces==1)glEnable(GL_CULL_FACE);
 }
@@ -1863,7 +1822,7 @@ void drawroomdata(void){
   hazardcolorbase = hazardcolor + izone*nrooms;
   zoneylaybase = zoneylay + izone*nrooms;
 
-  if(sethazardcolor==1){
+  if(zonecolortype==ZONEHAZARD_COLOR){
     zonecolorbase=hazardcolorbase;
   }
   else{
@@ -1882,7 +1841,7 @@ void drawroomdata(void){
 
     ylay = *(zoneylaybase+i);
     color = *(zonecolorbase+i);
-    if(sethazardcolor==1){
+    if(zonecolortype==ZONEHAZARD_COLOR){
       colorv = rgbhazard[color];
     }
     else{
@@ -1896,7 +1855,7 @@ void drawroomdata(void){
     zroom = roomi->z1;
     dy = roomi->dy/2.;
 
-    if(sethazardcolor==2&&visSZone==1){
+    if(zonecolortype==ZONESMOKE_COLOR&&visSZone==1){
 #ifdef pp_GPU
       if(usegpu==1){
         drawzonesmokeGPU(roomi);

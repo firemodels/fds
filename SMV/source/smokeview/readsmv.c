@@ -9924,13 +9924,7 @@ int readini2(char *inifile, int localfile){
     }
     if(match(buffer,"SHOWVENTS")==1){
       fgets(buffer,255,stream);
-      sscanf(buffer,"%i %i %i ",&visVents,&visVentLines,&visVentSolid);
-      if(visVents==0){
-        visVentLines=0;
-        visVentSolid=0;
-      }
-      if(visVentSolid==1)visVentLines=0;
-      if(visVentLines==1)visVentSolid=0;
+      sscanf(buffer,"%i",&visVents);
       continue;
     }
     if(match(buffer,"SHOWTIMELABEL")==1){
@@ -10334,7 +10328,8 @@ int readini2(char *inifile, int localfile){
     }
     if(match(buffer,"SHOWHAZARDCOLORS")==1){
       fgets(buffer,255,stream);
-      sscanf(buffer,"%i",&sethazardcolor);
+      sscanf(buffer,"%i",&zonecolortype);
+      zonecolortype = CLAMP(zonecolortype,0,2);
       continue;
     }
     if(match(buffer,"SHOWSMOKEPART")==1){
@@ -12013,7 +12008,7 @@ void writeini(int flag,char *filename){
   fprintf(fileout, "SHOWTRIANGLECOUNT\n");
   fprintf(fileout, " %i\n", show_triangle_count);
   fprintf(fileout, "SHOWVENTS\n");
-  fprintf(fileout, " %i %i %i\n", visVents, visVentLines, visVentSolid);
+  fprintf(fileout, " %i\n", visVents);
   fprintf(fileout, "SHOWWALLS\n");
   fprintf(fileout, " %i\n", visWalls);
   fprintf(fileout, "SKIPEMBEDSLICE\n");
@@ -12219,7 +12214,7 @@ void writeini(int flag,char *filename){
   fprintf(fileout, "\n *** ZONE FIRE PARAMETRES ***\n\n");
 
   fprintf(fileout, "SHOWHAZARDCOLORS\n");
-  fprintf(fileout, " %i\n", sethazardcolor);
+  fprintf(fileout, " %i\n", zonecolortype);
   fprintf(fileout, "SHOWHZONE\n");
   fprintf(fileout, " %i\n", visHZone);
   fprintf(fileout, "SHOWSZONE\n");
