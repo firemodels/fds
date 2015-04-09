@@ -430,13 +430,13 @@ These three polymers are assumed to pyrolyze according to the following single s
 The properties of the virgin polymer, the char, and the reaction kinetics are listed in Table~\ref{Properties_ABS_HIPS_PMMA}.
 
 \begin{table}[h!]
-\caption[Properties of ABS, HIPS, and PMMA]{Properties of ABS, HIPS, and PMMA~\cite{Li:Thesis}.}
+\caption[Properties of ABS, HIPS, and PMMA]{Properties of ABS, HIPS, and PMMA. Note that the temperature dependence of the thermal conductivity is assumed to be linear, unlike some of those reported in Ref.~\cite{Li:Thesis}.}
 \centering
 \begin{tabular*}{\textwidth}{|l|@{\extracolsep\fill}c@{\extracolsep\fill}|c|c|c|}
 \hline
 Property                    & Units         & ABS                     & HIPS                    & PMMA                     \\ \hline \hline
 Polymer Density             & kg/m$^3$      & 1050                    & 1060                    & 1160                     \\ \hline
-                            &               &                         &                         & $0.45-0.00038 \, T, \; T<378$~K      \\ 
+                            &               &                         &                         & $0.45-0.00038 \, T, \; T<378$~K      \\
 \raisebox{1.5ex}[0pt]{Polymer Cond.}        & \raisebox{1.5ex}[0pt]{W/m/K}         & \raisebox{1.5ex}[0pt]{$0.30-0.00028 \, T$}  & \raisebox{1.5ex}[0pt]{$0.10+0.0001  \, T$} & $0.27-0.00024 \, T, \; T\ge 378$~K  \\ \hline
 Polymer Spec.~Heat          & kJ/kg/K       & $1.58+0.0013  \, T$     & $0.59+0.0034  \, T$     & $0.60+0.0036  \, T$      \\ \hline
 Polymer Emissivity          &               & 0.95                    & 0.95                    & 0.95                     \\ \hline
@@ -474,7 +474,7 @@ Residue Fraction            &               & 0.023                   & 0.043   
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/UMD_Polymers/PMMA_20} &
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/UMD_Polymers/PMMA_40} \\
-\multicolumn{2}{c}{\includegraphics[height=2.2in]{SCRIPT_FIGURES/UMD_Polymers/PMMA_60}} 
+\multicolumn{2}{c}{\includegraphics[height=2.2in]{SCRIPT_FIGURES/UMD_Polymers/PMMA_60}}
 \end{tabular*}
 \caption[Mass loss rate of PMMA]
 {Comparison of predicted and measured mass loss rates for PMMA.}
@@ -490,10 +490,10 @@ This polymer is assumed to pyrolyze according to the following two step process:
    \hbox{Polymer}       &\to& \hbox{Intermediate} + \hbox{Gas}  \label{reac1of2} \\
    \hbox{Intermediate}  &\to& \hbox{Char} + \hbox{Gas} \label{reac2of2}
 \end{eqnarray}
-The properties of the polymer and the reaction kinetics are listed in Table~\ref{Properties_Kydex} and the mass loss rate comparisons are shown on the following page.
+The properties of the polymer and the reaction kinetics are listed in Table~\ref{Properties_Kydex} and the mass loss rate comparisons are shown on the following page. Note that nominal exposing heat flux values of 30~kW/m$^2$, 50~kW/m$^2$, and 70~kW/m$^2$ were changed slightly in the simulations to account for the fact that the intumescing material surface moved closer to the heater during the course of the experiment~\cite{Li:PDS_2015}.
 
 \begin{table}[!h]
-\caption[Properties of Kydex]{Properties of Kydex~\cite{Li:Thesis}.}
+\caption[Properties of Kydex]{Properties of Kydex. Note that the temperature dependence of the thermal conductivity is assumed to be linear, unlike some of those reported in Ref.~\cite{Li:Thesis}.}
 \centering
 \begin{tabular}{|l|c|c|}
 \hline
@@ -549,7 +549,7 @@ These three polymers are assumed to pyrolyze following the three-step process:
 The property data is listed in Table~\ref{Properties_PEI_PET_POM} and the mass loss rate comparisons are shown on the subsequent pages.
 
 \begin{table}[!h]
-\caption[Properties of PEI, PET, and POM]{Properties of PEI, PET, and POM~\cite{Li:Thesis}.}
+\caption[Properties of PEI, PET, and POM]{Properties of PEI, PET, and POM. Note that the temperature dependence of the thermal conductivity is assumed to be linear, unlike some of those reported in Ref.~\cite{Li:Thesis}.}
 \centering
 \begin{tabular}{|l|c|c|c|c|}
 \hline
@@ -595,7 +595,7 @@ Gas Heat of Combustion                   & kJ/kg         & 18050                
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/UMD_Polymers/PEI_70} \\
 \multicolumn{2}{c}{\includegraphics[height=2.2in]{SCRIPT_FIGURES/UMD_Polymers/PEI_90}} \\
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/UMD_Polymers/PET_50} &
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/UMD_Polymers/PET_70} 
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/UMD_Polymers/PET_70}
 \end{tabular*}
 \caption[Mass loss rate of PEI and PET]
 {Comparison of predicted and measured mass loss rates for PEI and PET.}
