@@ -366,7 +366,9 @@ void getzonedatacsv(int nzone_times_local, int nrooms_local, int nfires_local,
   iivv=0;
   times_local = zonepr_devs[0]->times;
 
+#ifdef pp_ZONEVENT
   maxslabflow = 0.0;
+#endif
   for(i=0;i<nzone_times_local;i++){
     int j, ivent;
 
