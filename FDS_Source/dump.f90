@@ -1320,7 +1320,8 @@ WRITE(LU_SMV,'(F5.1,2X,A)') VERSION_NUMBER,TRIM(VERSION_STRING)
 
 OPEN(LU_SVN,FILE=FN_SVN,FORM='FORMATTED',STATUS='REPLACE')
 WRITE(LU_SVN,'(I5)') SVN_REVISION_NUMBER
-WRITE(LU_SVN,'(A)') REVISION_DATE
+! comment following line until firebot is compatible with this change
+!WRITE(LU_SVN,'(A)') REVISION_DATE
 CLOSE(LU_SVN)
 
 ! Indicate the "endian-ness" of the output files
