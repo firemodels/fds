@@ -366,6 +366,7 @@ void getzonedatacsv(int nzone_times_local, int nrooms_local, int nfires_local,
   iivv=0;
   times_local = zonepr_devs[0]->times;
 
+  maxslabflow = 0.0;
   for(i=0;i<nzone_times_local;i++){
     int j, ivent;
 
@@ -425,7 +426,13 @@ void getzonedatacsv(int nzone_times_local, int nrooms_local, int nfires_local,
         idev = MAXSLABS * ivent + islab;
         ival = MAXSLABS * iihv + islab;
         if(zonehslabT_devs[idev]!=NULL)zonehslabT_local[ival] =  zonehslabT_devs[idev]->vals[i];
-        if(zonehslabF_devs[idev]!=NULL)zonehslabF_local[ival] =  zonehslabF_devs[idev]->vals[i];
+        if(zonehslabF_devs[idev] != NULL){
+          float slabflow;
+
+          slabflow = zonehslabF_devs[idev]->vals[i];
+          maxslabflow = MAX(ABS(slabflow), maxslabflow);
+          zonehslabF_local[ival] = slabflow;
+        }
         if(zonehslabYB_devs[idev]!=NULL)zonehslabYB_local[ival] = zonehslabYB_devs[idev]->vals[i];
         if(zonehslabYT_devs[idev]!=NULL)zonehslabYT_local[ival] = zonehslabYT_devs[idev]->vals[i];
       }
@@ -1331,7 +1338,7 @@ void drawventslabdata(void){
         tcolor = rgb_full[itslab];
         glColor3fv(tcolor);
 
-        dyy = -slab_vel[islab];
+        dyy = -0.1*(slab_vel[islab]/maxslabflow);
         switch(idir){
         case 4:
         case 2:
