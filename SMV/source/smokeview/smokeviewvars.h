@@ -468,7 +468,6 @@ SVEXTERN float rgb_base[MAXRGB][4];
 SVEXTERN float bw_base[MAXRGB][4];
 SVEXTERN int nrgb2;
 SVEXTERN float rgb2[MAXRGB][3];
-SVEXTERN float rgbhazard[MAXRGB][4];
 SVEXTERN float inverse_modelview_setup[16];
 SVEXTERN float modelview_setup[16];
 SVEXTERN float modelview_rotate_last[16],modelview_rotate_save[16];
@@ -1325,7 +1324,7 @@ SVEXTERN int SVDECL(hidepatchsurface,0);
   {0.0f, 0.0f, 0.0f}  /* black */
   };
 
-  SVEXTERN float rgbhazardBASE[MAXRGB][4]={
+  SVEXTERN float rgbhazard[MAXRGB][4]={
   {0.0f, 0.0f, 1.0f,1.0}, /* blue */
   {0.0f, 1.0f, 0.0f,1.0}, /* green */
   {1.0f, 1.0f, 0.0f,1.0}, /* yellow */
@@ -1337,7 +1336,7 @@ SVEXTERN int SVDECL(hidepatchsurface,0);
   SVEXTERN float rgb_baseBASE[MAXRGB][4];
   SVEXTERN float bw_baseBASE[MAXRGB][4];
   SVEXTERN float rgb2BASE[MAXRGB][3];
-  SVEXTERN float rgbhazardBASE[MAXRGB][4];
+  SVEXTERN float rgbhazard[MAXRGB][4];
 #endif
 #endif
 

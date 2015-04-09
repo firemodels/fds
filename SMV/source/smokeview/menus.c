@@ -4386,55 +4386,44 @@ void ZoneShowMenu(int value){
   switch(value){
   case MENU_DUMMY:
     return;
-  case 1:
+  case MENU_ZONE_HORIZONTAL:
     if(zonecolortype==ZONESMOKE_COLOR)zonecolortype = ZONETEMP_COLOR;
     visVZone=0;
     visHZone=1;
     visZone=1;
     break;
-  case 2:
+  case MENU_ZONE_VERTICAL:
     if(zonecolortype==ZONESMOKE_COLOR)zonecolortype = ZONETEMP_COLOR;
     visVZone = 1;
     visHZone=0;
     visZone=1;
     break;
-  case 3:
-    visVZone=1; 
-    visHZone=1;
-    visZone=1;
-    break;
-  case 4:
+  case MENU_ZONE_LAYERHIDE:
     visVZone=0; 
     visHZone=0;
     visSZone=0;
     break;
-  case 5:
+  case MENU_ZONE_2DHAZARD:
     zonecolortype=ZONEHAZARD_COLOR;
     visSZone=0;
     if(visVZone==0&&visHZone==0)visVZone=1;
     visZone=1;
     break;
-  case 6:
+  case MENU_ZONE_2DTEMP:
     zonecolortype=ZONETEMP_COLOR;
     visSZone=0;
     if(visVZone==0&&visHZone==0)visVZone=1;
     visZone=1;
     break;
-  case 7:
+  case MENU_ZONE_3DSMOKE:
     zonecolortype=ZONESMOKE_COLOR;
     visSZone=1;
     visZone=1;
     break;
-  case 11:         //solid
-    visVents=1;
-    break;
-  case 13:         //hide
-    visVents=0;
-    break;
-  case 14:
+  case MENU_ZONE_VENTS:
     visVents=1-visVents;
     break;
-  case 15:
+  case MENU_ZONE_FIRES:
     viszonefire=1-viszonefire;
     break;
   default:
@@ -5770,62 +5759,63 @@ updatemenu=0;
   }
 
 /* --------------------------------zone show menu -------------------------- */
+
   if(nzoneinfo>0&&(ReadZoneFile==1||nzvents>0)){
     CREATEMENU(zoneshowmenu,ZoneShowMenu);
     glutAddMenuEntry(_("Layers"),MENU_DUMMY);
     glutAddMenuEntry(_("   Representation:"),MENU_DUMMY);
     if(visZone==1&&zonecolortype==ZONETEMP_COLOR){
-      glutAddMenuEntry(_("      *2D Temperature"),6);
-      glutAddMenuEntry(_("      2D hazard"),5);
+      glutAddMenuEntry(_("      *2D Temperature"), MENU_ZONE_2DTEMP);
+      glutAddMenuEntry(_("      2D hazard"), MENU_ZONE_2DHAZARD);
       glutAddMenuEntry(_("      3D smoke"), 7);
     }
     else if(visZone==1&&zonecolortype==ZONEHAZARD_COLOR){
-      glutAddMenuEntry(_("      2D Temperature"),6);
-      glutAddMenuEntry(_("      *2D hazard"),5);
-      glutAddMenuEntry(_("      3D smoke"), 7);
+      glutAddMenuEntry(_("      2D Temperature"), MENU_ZONE_2DTEMP);
+      glutAddMenuEntry(_("      *2D hazard"), MENU_ZONE_2DHAZARD);
+      glutAddMenuEntry(_("      3D smoke"), MENU_ZONE_3DSMOKE);
     }
     else{
-      glutAddMenuEntry(_("      2D Temperature"),6);
-      glutAddMenuEntry(_("      2D hazard"),5);
-      glutAddMenuEntry(_("      *3D smoke"), 7);
+      glutAddMenuEntry(_("      2D Temperature"), MENU_ZONE_2DTEMP);
+      glutAddMenuEntry(_("      2D hazard"), MENU_ZONE_2DHAZARD);
+      glutAddMenuEntry(_("      *3D smoke"), MENU_ZONE_3DSMOKE);
     }
     glutAddMenuEntry(_("   Orientation:"), MENU_DUMMY);
     if(visZone==1){
       if(zonecolortype==ZONESMOKE_COLOR){
-        glutAddMenuEntry(_("      Horizontal"),1);
-        glutAddMenuEntry(_("      Vertical"),2);
+        glutAddMenuEntry(_("      Horizontal"), MENU_ZONE_HORIZONTAL);
+        glutAddMenuEntry(_("      Vertical"), MENU_ZONE_VERTICAL);
       }
       else{
-        if(visHZone==1)glutAddMenuEntry(_("      *Horizontal"), 1);
-        if(visHZone==0)glutAddMenuEntry(_("      Horizontal"),1);
-        if(visVZone==1)glutAddMenuEntry(_("      *Vertical"),2);
-        if(visVZone==0)glutAddMenuEntry(_("      Vertical"),2);
+        if(visHZone==1)glutAddMenuEntry(_("      *Horizontal"), MENU_ZONE_HORIZONTAL);
+        if(visHZone==0)glutAddMenuEntry(_("      Horizontal"), MENU_ZONE_HORIZONTAL);
+        if(visVZone==1)glutAddMenuEntry(_("      *Vertical"), MENU_ZONE_VERTICAL);
+        if(visVZone==0)glutAddMenuEntry(_("      Vertical"), MENU_ZONE_VERTICAL);
       }
     }
     else{
-      glutAddMenuEntry(_("      Horizontal"),1);
-      glutAddMenuEntry(_("      Vertical"),2);
+      glutAddMenuEntry(_("      Horizontal"), MENU_ZONE_HORIZONTAL);
+      glutAddMenuEntry(_("      Vertical"), MENU_ZONE_VERTICAL);
     }
     if(visZone==0){
-      glutAddMenuEntry(_("   *Hide"),4);
+      glutAddMenuEntry(_("   *Hide"), MENU_ZONE_LAYERHIDE);
     }
     else{
-      glutAddMenuEntry(_("   Hide"),4);
+      glutAddMenuEntry(_("   Hide"), MENU_ZONE_LAYERHIDE);
     }
     if(nzvents>0){
       if(visVents==1){
-        glutAddMenuEntry(_("*Vents"),14);
+        glutAddMenuEntry(_("*Vents"), MENU_ZONE_VENTS);
       }
       else{
-        glutAddMenuEntry(_("Vents"),14);
+        glutAddMenuEntry(_("Vents"), MENU_ZONE_VENTS);
       }
     }
     if(nfires>0){
       if(viszonefire==1){
-        glutAddMenuEntry(_("*Fires"),15);
+        glutAddMenuEntry(_("*Fires"), MENU_ZONE_FIRES);
       }
       else{
-        glutAddMenuEntry(_("Fires"),15);
+        glutAddMenuEntry(_("Fires"), MENU_ZONE_FIRES);
       }
     }
   }

@@ -11,6 +11,15 @@ void _Sniff_Errors(char *whereat);
 #define SNIFF_ERRORS(f)
 #endif
 
+#define MENU_ZONE_2DTEMP 6
+#define MENU_ZONE_2DHAZARD 5
+#define MENU_ZONE_3DSMOKE 7
+#define MENU_ZONE_HORIZONTAL 1
+#define MENU_ZONE_VERTICAL 2
+#define MENU_ZONE_LAYERHIDE 4
+#define MENU_ZONE_VENTS 14
+#define MENU_ZONE_FIRES 15
+
 #define ZONETEMP_COLOR 0
 #define ZONEHAZARD_COLOR 1
 #define ZONESMOKE_COLOR 2
