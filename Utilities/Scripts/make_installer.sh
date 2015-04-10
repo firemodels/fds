@@ -365,7 +365,7 @@ cat << BASH > \$BASHFDS
 
 # MPI location
 
-MPIDIST=\\\$1
+export MPIDIST=\\\$1
 
 # unalias application names used by FDS
 
