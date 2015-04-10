@@ -3936,7 +3936,6 @@ void ShowPatchMenu(int value){
 /* ------------------ VentMenu ------------------------ */
 
 void VentMenu(int value){
-
   if(value==-1)return;
   switch(value){
   case SHOW_ALL_VENTS: // show all vents
@@ -3946,28 +3945,28 @@ void VentMenu(int value){
     visOtherVents=1;
     visCircularVents=VENT_CIRCLE;
     break;
-  case 14:
+  case MENU_VENT_OPEN:
     visOpenVents=1-visOpenVents;
     break;
-  case 15:
+  case MENU_VENT_OUTLINE:
     visOpenVentsAsOutline = 1 - visOpenVentsAsOutline;
     break;
-  case 16:
+  case MENU_VENT_EXTERIOR:
     visDummyVents = 1 - visDummyVents;
     break;
-   case 18:
+  case MENU_VENT_TWOINTERIOR:
      show_bothsides_int=1-show_bothsides_int;
      updatefaces=1;
      break;
-   case 19:
+  case MENU_VENT_TWOEXTERIOR:
      show_bothsides_ext = 1 - show_bothsides_ext;
      updatefaces=1;
      break;
-   case 20:
+  case MENU_VENT_TRANSPARENT:
      show_transparent_vents=1-show_transparent_vents;
      updatefaces=1;
      break;
-   case 21:
+  case MENU_VENT_OTHER:
      visOtherVents=1-visOtherVents;
      break;
    case HIDE_ALL_VENTS: // Hide all vents
@@ -3977,16 +3976,16 @@ void VentMenu(int value){
      visOtherVents=0;
      visCircularVents=VENT_HIDE;
      break;
-   case 23:
+   case MENU_VENT_CIRCLE:
      visCircularVents=VENT_CIRCLE;
      break;
-   case 24:
+   case MENU_VENT_RECTANGLE:
      visCircularVents=VENT_RECTANGLE;
      break;
-   case 25:
+   case MENU_VENT_CIRCLEHIDE:
      visCircularVents=VENT_HIDE;
      break;
-   case 26:
+   case MENU_VENT_CIRCLEOUTLINE:
      circle_outline=1-circle_outline;
      break;
   default:
@@ -5393,44 +5392,43 @@ updatemenu=0;
 
   CREATEMENU(circularventmenu,VentMenu);
   if(visCircularVents==VENT_CIRCLE){
-    glutAddMenuEntry(_("*As circle"),23);
-    glutAddMenuEntry(_("As rectangle"),24);
-    glutAddMenuEntry(_("Hide"),25);
+    glutAddMenuEntry(_("*As circle"), MENU_VENT_CIRCLE);
+    glutAddMenuEntry(_("As rectangle"), MENU_VENT_RECTANGLE);
+    glutAddMenuEntry(_("Hide"), MENU_VENT_CIRCLEHIDE);
   }
   if(visCircularVents==VENT_RECTANGLE){
-    glutAddMenuEntry(_("As circle"),23);
-    glutAddMenuEntry(_("*As rectangle"),24);
-    glutAddMenuEntry(_("Hide"),25);
+    glutAddMenuEntry(_("As circle"), MENU_VENT_CIRCLE);
+    glutAddMenuEntry(_("*As rectangle"), MENU_VENT_RECTANGLE);
+    glutAddMenuEntry(_("Hide"), MENU_VENT_CIRCLEHIDE);
   }
   if(visCircularVents==VENT_HIDE){
-    glutAddMenuEntry(_("As circle"),23);
-    glutAddMenuEntry(_("As rectangle"),24);
-    glutAddMenuEntry(_("*Hide"),25);
+    glutAddMenuEntry(_("As circle"), MENU_VENT_CIRCLE);
+    glutAddMenuEntry(_("As rectangle"), MENU_VENT_RECTANGLE);
+    glutAddMenuEntry(_("*Hide"), MENU_VENT_CIRCLEHIDE);
   }
   glutAddMenuEntry("-",-1);
-  if(circle_outline==1)glutAddMenuEntry("*Outline",26);
-  if(circle_outline==0)glutAddMenuEntry("Outline",26);
+  if(circle_outline == 1)glutAddMenuEntry("*Outline", MENU_VENT_CIRCLEOUTLINE);
+  if(circle_outline == 0)glutAddMenuEntry("Outline", MENU_VENT_CIRCLEOUTLINE);
   
 /* --------------------------------vent menu -------------------------- */
 
   CREATEMENU(ventmenu,VentMenu);
-
   if(get_total_vents()>0){
     if(nopenvents>0){
-      if(visOpenVents==1)glutAddMenuEntry(_("*Open"),14);
-      if(visOpenVents==0)glutAddMenuEntry(_("Open"),14);
+      if(visOpenVents == 1)glutAddMenuEntry(_("*Open"), MENU_VENT_OPEN);
+      if(visOpenVents == 0)glutAddMenuEntry(_("Open"), MENU_VENT_OPEN);
     }
     if(ndummyvents>0){
-      if(visDummyVents==1)glutAddMenuEntry(_("*Exterior"),16);
-      if(visDummyVents==0)glutAddMenuEntry(_("Exterior"),16);
+      if(visDummyVents == 1)glutAddMenuEntry(_("*Exterior"), MENU_VENT_EXTERIOR);
+      if(visDummyVents == 0)glutAddMenuEntry(_("Exterior"), MENU_VENT_EXTERIOR);
     }
     if(ncvents>0){
       if(visCircularVents!=VENT_HIDE)glutAddSubMenu(_("*Circular"),circularventmenu);
       if(visCircularVents==VENT_HIDE)glutAddSubMenu(_("Circular"),circularventmenu);
     }
     if(get_total_vents()>nopenvents+ndummyvents){
-      if(visOtherVents==1)glutAddMenuEntry(_("*Other"),21);
-      if(visOtherVents==0)glutAddMenuEntry(_("Other"),21);
+      if(visOtherVents == 1)glutAddMenuEntry(_("*Other"), MENU_VENT_OTHER);
+      if(visOtherVents == 0)glutAddMenuEntry(_("Other"), MENU_VENT_OTHER);
     }
     if(visOpenVents==1&&visDummyVents==1&&visOtherVents==1){
       glutAddMenuEntry(_("*Show all"),SHOW_ALL_VENTS);
@@ -5446,18 +5444,18 @@ updatemenu=0;
     }
     glutAddMenuEntry("-",-1);
     if(nopenvents_nonoutline>0){
-      if(visOpenVentsAsOutline==1)glutAddMenuEntry(_("*Open vents as outlines"),15);
-      if(visOpenVentsAsOutline==0)glutAddMenuEntry(_("Open vents as outlines"),15);
+      if(visOpenVentsAsOutline == 1)glutAddMenuEntry(_("*Open vents as outlines"), MENU_VENT_OUTLINE);
+      if(visOpenVentsAsOutline == 0)glutAddMenuEntry(_("Open vents as outlines"), MENU_VENT_OUTLINE);
     }
     if(have_vents_int==1){
-      if(show_bothsides_int==1)glutAddMenuEntry(_("*Two sided (interior)"),18);
-      if(show_bothsides_int==0)glutAddMenuEntry(_("Two sided (interior)"),18);
+      if(show_bothsides_int == 1)glutAddMenuEntry(_("*Two sided (interior)"), MENU_VENT_TWOINTERIOR);
+      if(show_bothsides_int == 0)glutAddMenuEntry(_("Two sided (interior)"), MENU_VENT_TWOINTERIOR);
     }
-    if(show_bothsides_ext==1)glutAddMenuEntry(_("*Two sided (exterior)"),19);
-    if(show_bothsides_ext==0)glutAddMenuEntry(_("Two sided (exterior)"),19);
+    if(show_bothsides_ext == 1)glutAddMenuEntry(_("*Two sided (exterior)"), MENU_VENT_TWOEXTERIOR);
+    if(show_bothsides_ext == 0)glutAddMenuEntry(_("Two sided (exterior)"), MENU_VENT_TWOEXTERIOR);
     if(nvent_transparent>0){
-      if(show_transparent_vents==1)glutAddMenuEntry(_("*Transparent"),20);
-      if(show_transparent_vents==0)glutAddMenuEntry(_("Transparent"),20);
+      if(show_transparent_vents == 1)glutAddMenuEntry(_("*Transparent"), MENU_VENT_TRANSPARENT);
+      if(show_transparent_vents == 0)glutAddMenuEntry(_("Transparent"), MENU_VENT_TRANSPARENT);
     }
   }
   
