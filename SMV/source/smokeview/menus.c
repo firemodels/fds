@@ -4421,7 +4421,7 @@ void ZoneShowMenu(int value){
     visZone=1;
     break;
   case MENU_ZONE_VENTS:
-    visVents=1-visVents;
+    visVentFlow=1-visVentFlow;
     break;
   case MENU_ZONE_FIRES:
     viszonefire=1-viszonefire;
@@ -4498,6 +4498,9 @@ void GeometryMenu(int value){
     visVents=0;
     visGrid=0;
     BlockageMenu(visBLOCKHide);
+    break;
+  case 15:
+    visVents=1-visVents;
     break;
   default:
     ASSERT(FFALSE);
@@ -5649,6 +5652,14 @@ updatemenu=0;
     glutAddSubMenu(_("Terrain"),terrain_showmenu);
   }
   if(get_total_vents()>0)glutAddSubMenu(_("Surfaces"), ventmenu);
+  if(nzvents > 0){
+    if(visVents == 1){
+      glutAddMenuEntry(_("*Vents"), 15);
+    }
+    else{
+      glutAddMenuEntry(_("Vents"), 15);
+    }
+  }
   if(ntotal_blockages>0 || isZoneFireModel == 1){
     glutAddSubMenu(_("Grid"),gridslicemenu);
   }
@@ -5803,11 +5814,11 @@ updatemenu=0;
       glutAddMenuEntry(_("   Hide"), MENU_ZONE_LAYERHIDE);
     }
     if(nzvents>0){
-      if(visVents==1){
-        glutAddMenuEntry(_("*Vents"), MENU_ZONE_VENTS);
+      if(visVentFlow==1){
+        glutAddMenuEntry(_("*Vent flow"), MENU_ZONE_VENTS);
       }
       else{
-        glutAddMenuEntry(_("Vents"), MENU_ZONE_VENTS);
+        glutAddMenuEntry(_("Vent flow"), MENU_ZONE_VENTS);
       }
     }
     if(nfires>0){

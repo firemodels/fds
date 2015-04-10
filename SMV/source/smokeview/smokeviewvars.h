@@ -752,7 +752,7 @@ SVEXTERN int visNormalEditColors;
 SVEXTERN int visWalls, visGrid, visCeiling, cursorPlot3D;
 SVEXTERN int SVDECL(visVZone,1), SVDECL(visHZone,0), SVDECL(viszonefire,1), SVDECL(visSZone,0);
 SVEXTERN int visSensor, visSensorNorm, hasSensorNorm;
-SVEXTERN int visVents;
+SVEXTERN int SVDECL(visVents,1),SVDECL(visVentFlow,1);
 SVEXTERN int partframestep, sliceframestep, boundframestep;
 SVEXTERN int partframeskip, sliceframeskip, boundframeskip;
 SVEXTERN int boundzipstep, boundzipskip;

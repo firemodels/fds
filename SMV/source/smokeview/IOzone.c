@@ -1148,7 +1148,7 @@ void drawventdata(void){
   int idir;
   float x1, yy;
 
-  if(visVents==0)return;
+  if(visVentFlow==0)return;
 
   if(cullfaces==1)glDisable(GL_CULL_FACE);
 
@@ -1270,7 +1270,7 @@ void drawventslabdata(void){
   int idir;
   float x1, yy, dyy;
 
-  if(visVents==0)return;
+  if(visVentFlow==0)return;
 
   if(cullfaces==1)glDisable(GL_CULL_FACE);
 
