@@ -14,6 +14,9 @@
 
 #define ONEORZERO(val) if(val!=0)val=1
 
+#define K2C(T) ((T)-273.15)
+#define C2K(T) ((T)+273.15)
+
 #define SCALE2FDS(x) ((x)*xyzmaxdiff)
 #define SCALE2SMV(x) ((x)/xyzmaxdiff)
 

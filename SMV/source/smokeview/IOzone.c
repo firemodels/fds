@@ -751,8 +751,8 @@ void readzone(int ifile, int flag, int *errorcode){
     ii=0;
     for(i=0;i<nzone_times;i++){
       for(j=0;j<nrooms;j++){
-        zonetu[ii]-=273.15;
-        zonetl[ii]-=273.15;
+        zonetu[ii] = K2C(zonetu[ii]);
+        zonetl[ii] = K2C(zonetl[ii]);
         ii++;
       }
     }
@@ -761,11 +761,11 @@ void readzone(int ifile, int flag, int *errorcode){
   ii = 0;
   for(i=0;i<nzone_times;i++){
     for(j=0;j<nrooms;j++){
-      if(zonetu[ii]>=773.0f-273.15){
-		    hazardcolor[ii]=RED;
+      if(zonetu[ii]>=500.0){
+        hazardcolor[ii]=RED;
       }
       else{
-		    if(zonetu[ii]>=323.0-273.15){
+        if(zonetu[ii]>=50.0){
           if(zoneylay[ii]>1.5){
             hazardcolor[ii]=YELLOW;
           }
@@ -773,7 +773,7 @@ void readzone(int ifile, int flag, int *errorcode){
             hazardcolor[ii]=PINK;
           }
         }
-		    else{
+        else{
           if(zoneylay[ii]>2.0){
             hazardcolor[ii]=BLUE;
           }
@@ -875,8 +875,8 @@ void fill_zonedata(int izone_index){
     roomi = roominfo + iroom;
     roomi->pfloor=pr0[iroom];
     roomi->ylay=ylay0[iroom];
-    roomi->tl=tl0[iroom]+273.15;
-    roomi->tu=tu0[iroom]+273.15;
+    roomi->tl=C2K(tl0[iroom]);
+    roomi->tu=C2K(tu0[iroom]);
     roomi->itl=getZoneColor(tl0[iroom],zonemin,zonemax,nrgb_full);
     roomi->itu=getZoneColor(tu0[iroom],zonemin,zonemax,nrgb_full);
     roomi->rho_L=(pref+pr0[iroom])/R/roomi->tl;
@@ -889,8 +889,8 @@ void fill_zonedata(int izone_index){
   roomi->ylay=99999.0;
   roomi->tl=tamb;
   roomi->tu=tamb;
-  roomi->itl=getZoneColor(tamb-273.15,zonemin,zonemax,nrgb_full);
-  roomi->itu=getZoneColor(tamb-273.15,zonemin,zonemax,nrgb_full);
+  roomi->itl=getZoneColor(K2C(tamb),zonemin,zonemax,nrgb_full);
+  roomi->itu=getZoneColor(K2C(tamb),zonemin,zonemax,nrgb_full);
   roomi->rho_L=(pref+pamb)/R/roomi->tl;
   roomi->rho_U=(pref+pamb)/R/roomi->tu;
   roomi->z0=0.0;
@@ -1298,7 +1298,7 @@ void drawventslabdata(void){
       slab_bot = NORMALIZE_Z(zvi->slab_bot[islab]);
       slab_top = NORMALIZE_Z(zvi->slab_top[islab]);
       tslab = zvi->slab_temp[islab];
-      itslab = getZoneColor(tslab-273.15, zonemin, zonemax, nrgb_full);
+      itslab = getZoneColor(K2C(tslab), zonemin, zonemax, nrgb_full);
       tcolor = rgb_full[itslab];
       glColor3fv(tcolor);
 
