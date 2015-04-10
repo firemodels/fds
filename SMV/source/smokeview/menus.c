@@ -5774,19 +5774,25 @@ updatemenu=0;
     glutAddMenuEntry(_("Layers"),MENU_DUMMY);
     glutAddMenuEntry(_("   Representation:"),MENU_DUMMY);
     if(visZone==1&&zonecolortype==ZONETEMP_COLOR){
-      glutAddMenuEntry(_("      *2D Temperature"), MENU_ZONE_2DTEMP);
-      glutAddMenuEntry(_("      2D hazard"), MENU_ZONE_2DHAZARD);
-      glutAddMenuEntry(_("      3D smoke"), 7);
+      glutAddMenuEntry(_("      *Temperature"), MENU_ZONE_2DTEMP);
+#ifdef pp_HAZARD
+      glutAddMenuEntry(_("      Hazard"), MENU_ZONE_2DHAZARD);
+#endif
+      glutAddMenuEntry(_("      Smoke"), 7);
     }
     else if(visZone==1&&zonecolortype==ZONEHAZARD_COLOR){
-      glutAddMenuEntry(_("      2D Temperature"), MENU_ZONE_2DTEMP);
-      glutAddMenuEntry(_("      *2D hazard"), MENU_ZONE_2DHAZARD);
-      glutAddMenuEntry(_("      3D smoke"), MENU_ZONE_3DSMOKE);
+      glutAddMenuEntry(_("      Temperature"), MENU_ZONE_2DTEMP);
+#ifdef pp_HAZARD
+      glutAddMenuEntry(_("      *Hazard"), MENU_ZONE_2DHAZARD);
+#endif
+      glutAddMenuEntry(_("      Smoke"), MENU_ZONE_3DSMOKE);
     }
     else{
-      glutAddMenuEntry(_("      2D Temperature"), MENU_ZONE_2DTEMP);
-      glutAddMenuEntry(_("      2D hazard"), MENU_ZONE_2DHAZARD);
-      glutAddMenuEntry(_("      *3D smoke"), MENU_ZONE_3DSMOKE);
+      glutAddMenuEntry(_("      Temperature"), MENU_ZONE_2DTEMP);
+#ifdef pp_HAZARD
+      glutAddMenuEntry(_("      Hazard"), MENU_ZONE_2DHAZARD);
+#endif
+      glutAddMenuEntry(_("      *Smoke"), MENU_ZONE_3DSMOKE);
     }
     glutAddMenuEntry(_("   Orientation:"), MENU_DUMMY);
     if(visZone==1){
