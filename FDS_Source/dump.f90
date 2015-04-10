@@ -1316,12 +1316,10 @@ ENDIF
 WRITE(LU_SMV,'(/A)') 'VERSION'
 WRITE(LU_SMV,'(F5.1,2X,A)') VERSION_NUMBER,TRIM(VERSION_STRING)
 
-! Write out the SVN number to a file
+! Write out the SVN number and revision date to a file
 
 OPEN(LU_SVN,FILE=FN_SVN,FORM='FORMATTED',STATUS='REPLACE')
-WRITE(LU_SVN,'(I5)') SVN_REVISION_NUMBER
-! comment following line until firebot is compatible with this change
-!WRITE(LU_SVN,'(A)') REVISION_DATE
+WRITE(LU_SVN,'(I5,1X,A)') SVN_REVISION_NUMBER, TRIM(REVISION_DATE)
 CLOSE(LU_SVN)
 
 ! Indicate the "endian-ness" of the output files
