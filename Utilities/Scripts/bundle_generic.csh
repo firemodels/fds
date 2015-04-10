@@ -143,7 +143,7 @@ echo  >> $fullmanifest
 echo Versions:>> $fullmanifest
 echo  >> $fullmanifest
 echo ------fds-------------------- >> $fullmanifest
-ssh -q $runhost " echo 0 | $fdsroot/$fdsdir/$fds" >>& $fullmanifest
+ssh -q $runhost " echo 0 | $fdsroot/$fdsmpidir/$fds" >>& $fullmanifest
 
 echo  >> $fullmanifest
 echo ------fds2ascii-------------------- >> $fullmanifest
