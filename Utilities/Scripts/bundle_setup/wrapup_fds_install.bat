@@ -73,6 +73,12 @@ echo @echo off > %tempfile%
 echo "%CD%\bin\fds" %%* >> %tempfile%
 copy %tempfile% "%SHORTCUTSDIR%\fds6.bat" > Nul
 
+:: *** fds_mpi
+
+echo @echo off > %tempfile%
+echo "%CD%\bin\fds" %%* >> %tempfile%
+copy %tempfile% "%SHORTCUTSDIR%\fds_mpi.bat" > Nul
+
 :: *** smokeview6
 
 echo @echo off > %tempfile%
@@ -108,6 +114,12 @@ echo *** Associating the .smv file extension with smokeview.exe
 
 ftype smvDoc="%CD%\bin\smokeview.exe" "%%1" >Nul
 assoc .smv=smvDoc>Nul
+
+:: ------------- remove old executables -------------
+echo.
+echo *** Removing old executables if they exist
+if exist fds6.exe erase fds6.exe
+if exist fds_mpi.exe erase fds_mpi.exe
 
 set FDSSTART=%ALLUSERSPROFILE%\Start Menu\Programs\FDS6
 
