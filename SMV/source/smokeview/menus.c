@@ -23,6 +23,46 @@ char menu_revision[]="$Revision$";
 #include <direct.h>
 #endif
 
+#define MENU_ISOSHOW_SHOWALL 99
+#define MENU_ISOSHOW_HIDEALL 98
+#define MENU_ISOSHOW_ALLSOLID 94
+#define MENU_ISOSHOW_ALLTRANSPARENT 95
+#define MENU_ISOSHOW_MINSOLID 96
+#define MENU_ISOSHOW_MAXSOLID 97
+
+#define MENU_ISOSHOW_SOLID 1
+#define MENU_ISOSHOW_OUTLINE 2
+#define MENU_ISOSHOW_POINTS 3
+#define MENU_ISOSHOW_SMOOTH 4
+#define MENU_ISOSHOW_NORMALS 5
+
+#define MENU_ZONE_2DTEMP 6
+#define MENU_ZONE_2DHAZARD 5
+#define MENU_ZONE_3DSMOKE 7
+#define MENU_ZONE_HORIZONTAL 1
+#define MENU_ZONE_VERTICAL 2
+#define MENU_ZONE_LAYERHIDE 4
+#define MENU_ZONE_VENTS 14
+#define MENU_ZONE_FIRES 15
+
+#define MENU_SHOWSLICE_INBLOCKAGE -11
+#define MENU_SHOWSLICE_SLICEANDVECTORS -15
+#define MENU_SHOWSLICE_TERRAIN -13
+#define MENU_SHOWSLICE_OFFSET -12
+#define MENU_SHOWSLICE_FEDAREA -14
+
+#define MENU_VENT_OPEN 14
+#define MENU_VENT_EXTERIOR 16
+#define MENU_VENT_OTHER 21
+#define MENU_VENT_OUTLINE 15
+#define MENU_VENT_TWOINTERIOR 18
+#define MENU_VENT_TWOEXTERIOR 19
+#define MENU_VENT_TRANSPARENT 20
+#define MENU_VENT_CIRCLE 23
+#define MENU_VENT_RECTANGLE 24
+#define MENU_VENT_CIRCLEHIDE 25
+#define MENU_VENT_CIRCLEOUTLINE 26
+
 #define MENU_TIMEVIEW -103
 #define SAVE_VIEWPOINT -101
 #define MENU_STARTUPVIEW -102
@@ -525,31 +565,25 @@ void IsoShowMenu(int value){
   showlevels=loaded_isomesh->showlevels;
 
   switch(value){
-   case  4:
+  case  MENU_ISOSHOW_SMOOTH:
     smoothtrinormal=1-smoothtrinormal;
     break;
-   case 5:
+  case MENU_ISOSHOW_NORMALS:
     showtrinormal = 1 - showtrinormal;
     break;
-   case 1:
-   case 2:
-   case 3:
-    if(value==1){
-      showtrisurface=1-showtrisurface;
-    }
-    if(value==2){
-      showtrioutline=1-showtrioutline;
-    }
-    if(value==3){
-      showtripoints=1-showtripoints;
-    }
+  case MENU_ISOSHOW_SOLID:
+  case MENU_ISOSHOW_OUTLINE:
+  case MENU_ISOSHOW_POINTS:
+    if(value == MENU_ISOSHOW_SOLID)showtrisurface=1-showtrisurface;
+    if(value == MENU_ISOSHOW_OUTLINE)showtrioutline = 1 - showtrioutline;
+    if(value == MENU_ISOSHOW_POINTS)showtripoints = 1 - showtripoints;
     visAIso=showtrisurface*1+showtrioutline*2+showtripoints*4;
     if(visAIso!=0){
       plotstate=DYNAMIC_PLOTS;
     }
     update_glui_isotype();
     break;
-   case 94:
+   case MENU_ISOSHOW_ALLSOLID:
     transparent_state=ALL_SOLID;
     if(loaded_isomesh==NULL)break;
     for(i=0;i<loaded_isomesh->nisolevels;i++){
@@ -560,7 +594,7 @@ void IsoShowMenu(int value){
     }
     use_transparency_data=0;
     break;
-   case 95:
+   case MENU_ISOSHOW_ALLTRANSPARENT:
     transparent_state=ALL_TRANSPARENT;
     if(loaded_isomesh==NULL)break;
     for(i=0;i<loaded_isomesh->nisolevels;i++){
@@ -571,7 +605,7 @@ void IsoShowMenu(int value){
     }
     use_transparency_data=1;
     break;
-   case 96:
+   case MENU_ISOSHOW_MINSOLID:
     transparent_state=MIN_SOLID;
     if(loaded_isomesh==NULL)break;
     for(i=0;i<loaded_isomesh->nisolevels;i++){
@@ -583,7 +617,7 @@ void IsoShowMenu(int value){
     surfinfo[nsurfinfo+1].transparent_level=1.0;
     use_transparency_data=1;
     break;
-   case 97:
+   case MENU_ISOSHOW_MAXSOLID:
     transparent_state=MAX_SOLID;
     if(loaded_isomesh==NULL)break;
     for(i=0;i<loaded_isomesh->nisolevels;i++){
@@ -595,7 +629,7 @@ void IsoShowMenu(int value){
     use_transparency_data=1;
     surfinfo[nsurfinfo+1+loaded_isomesh->nisolevels-1].transparent_level=1.0;
     break;
-   case 98:
+   case MENU_ISOSHOW_HIDEALL:
     showtrisurface=0;
     showtrioutline=0;
     showtripoints=0;
@@ -604,7 +638,7 @@ void IsoShowMenu(int value){
       showlevels[i]=0;
     }
     break;
-   case 99:
+   case MENU_ISOSHOW_SHOWALL:
     showtrisurface=1;
     showtrioutline=0;
     showtripoints=0;
@@ -664,7 +698,8 @@ void ShowVSliceMenu(int value){
   int i;
   vslicedata *vd;
 
-  updatemenu=1;  
+  if(value == MENU_DUMMY)return;
+  updatemenu = 1;
   glutPostRedisplay();
   if(value==SHOW_ALL){
     for(i=0;i<nvsliceinfo;i++){
@@ -686,15 +721,15 @@ void ShowVSliceMenu(int value){
     Update_Times();
     return;
   }
-  if(value==-11){
+  if(value == MENU_SHOWSLICE_INBLOCKAGE){
     show_slice_in_obst=1-show_slice_in_obst;
     return;
   }
-  if(value==-12){
+  if(value == MENU_SHOWSLICE_OFFSET){
     offset_slice=1-offset_slice;
     return;
   }
-  if(value==-15){
+  if(value == MENU_SHOWSLICE_SLICEANDVECTORS){
     show_slices_and_vectors=1-show_slices_and_vectors;
     return;
   }
@@ -745,6 +780,7 @@ void ShowVSliceMenu(int value){
 void ShowHideSliceMenu(int value){
   int i;
 
+  if(value == MENU_DUMMY)return;
   updatemenu=1;  
   glutPostRedisplay();
   if(value<0){
@@ -761,19 +797,19 @@ void ShowHideSliceMenu(int value){
       }
       show_all_slices=0;
       break;
-    case -11:
+    case MENU_SHOWSLICE_INBLOCKAGE:
       show_slice_in_obst=1-show_slice_in_obst;
       break;
-    case -12:
+    case MENU_SHOWSLICE_OFFSET:
       offset_slice=1-offset_slice;
       break;
-    case -13:
+    case MENU_SHOWSLICE_TERRAIN:
       planar_terrain_slice=1-planar_terrain_slice;
       break;
-    case -14:
+    case MENU_SHOWSLICE_FEDAREA:
       show_fed_area=1-show_fed_area;
       break;
-    case -15:
+    case MENU_SHOWSLICE_SLICEANDVECTORS:
       show_slices_and_vectors=1-show_slices_and_vectors;
       return;
       break;
@@ -6283,24 +6319,24 @@ updatemenu=0;
         glutAddMenuEntry(levellabel,100+i);
 
       }
-      if(showflag==1)glutAddMenuEntry(_("*Show all levels"),99);
-      if(showflag==0)glutAddMenuEntry(_("Show all levels"),99);
-      if(hideflag==1)glutAddMenuEntry(_("*Hide all levels"),98);
-      if(hideflag==0)glutAddMenuEntry(_("Hide all levels"),98);
+      if(showflag == 1)glutAddMenuEntry(_("*Show all levels"), MENU_ISOSHOW_SHOWALL);
+      if(showflag == 0)glutAddMenuEntry(_("Show all levels"), MENU_ISOSHOW_SHOWALL);
+      if(hideflag == 1)glutAddMenuEntry(_("*Hide all levels"), MENU_ISOSHOW_HIDEALL);
+      if(hideflag == 0)glutAddMenuEntry(_("Hide all levels"), MENU_ISOSHOW_HIDEALL);
       glutAddMenuEntry("---",93);
-      if(transparent_state==ALL_SOLID)glutAddMenuEntry(_("*All levels solid"),94);
-      if(transparent_state!=ALL_SOLID)glutAddMenuEntry(_("All levels solid"),94);
-      if(transparent_state==ALL_TRANSPARENT)glutAddMenuEntry(_("*All levels transparent"),95);
-      if(transparent_state!=ALL_TRANSPARENT)glutAddMenuEntry(_("All levels transparent"),95);
-      if(transparent_state==MIN_SOLID)glutAddMenuEntry(_("*Minimum level solid"),96);
-      if(transparent_state!=MIN_SOLID)glutAddMenuEntry(_("Minimum level solid"),96);
-      if(transparent_state==MAX_SOLID)glutAddMenuEntry(_("*Maximum level solid"),97);
-      if(transparent_state!=MAX_SOLID)glutAddMenuEntry(_("Maximum level solid"),97);
+      if(transparent_state == ALL_SOLID)glutAddMenuEntry(_("*All levels solid"), MENU_ISOSHOW_ALLSOLID);
+      if(transparent_state != ALL_SOLID)glutAddMenuEntry(_("All levels solid"), MENU_ISOSHOW_ALLSOLID);
+      if(transparent_state == ALL_TRANSPARENT)glutAddMenuEntry(_("*All levels transparent"), MENU_ISOSHOW_ALLTRANSPARENT);
+      if(transparent_state != ALL_TRANSPARENT)glutAddMenuEntry(_("All levels transparent"), MENU_ISOSHOW_ALLTRANSPARENT);
+      if(transparent_state == MIN_SOLID)glutAddMenuEntry(_("*Minimum level solid"), MENU_ISOSHOW_MINSOLID);
+      if(transparent_state != MIN_SOLID)glutAddMenuEntry(_("Minimum level solid"), MENU_ISOSHOW_MINSOLID);
+      if(transparent_state == MAX_SOLID)glutAddMenuEntry(_("*Maximum level solid"), MENU_ISOSHOW_MAXSOLID);
+      if(transparent_state != MAX_SOLID)glutAddMenuEntry(_("Maximum level solid"), MENU_ISOSHOW_MAXSOLID);
     }
     else{
-      glutAddMenuEntry(_("Show"),99);
-      if(visAIso==0)glutAddMenuEntry(_("*Hide"),98);
-      if(visAIso!=0)glutAddMenuEntry(_("Hide"),98);
+      glutAddMenuEntry(_("Show"), MENU_ISOSHOW_SHOWALL);
+      if(visAIso == 0)glutAddMenuEntry(_("*Hide"), MENU_ISOSHOW_HIDEALL);
+      if(visAIso != 0)glutAddMenuEntry(_("Hide"), MENU_ISOSHOW_HIDEALL);
     }
 
 /* --------------------------------iso show menu -------------------------- */
@@ -6350,12 +6386,12 @@ updatemenu=0;
         glutAddMenuEntry(menulabel,HIDEALL_ISO);
       }
       glutAddMenuEntry("-",MENU_DUMMY);
-      if((visAIso&1)==1)glutAddMenuEntry(_("*Solid"),1);
-      if((visAIso&1)!=1)glutAddMenuEntry(_("Solid"),1);
-      if((visAIso&2)==2)glutAddMenuEntry(_("*Outline"),2);
-      if((visAIso&2)!=2)glutAddMenuEntry(_("Outline"),2);
-      if((visAIso&4)==4)glutAddMenuEntry(_("*Points"),3);
-      if((visAIso&4)!=4)glutAddMenuEntry(_("Points"),3);
+      if((visAIso & 1) == 1)glutAddMenuEntry(_("*Solid"), MENU_ISOSHOW_SOLID);
+      if((visAIso & 1) != 1)glutAddMenuEntry(_("Solid"), MENU_ISOSHOW_SOLID);
+      if((visAIso & 2) == 2)glutAddMenuEntry(_("*Outline"), MENU_ISOSHOW_OUTLINE);
+      if((visAIso & 2) != 2)glutAddMenuEntry(_("Outline"), MENU_ISOSHOW_OUTLINE);
+      if((visAIso & 4) == 4)glutAddMenuEntry(_("*Points"), MENU_ISOSHOW_POINTS);
+      if((visAIso & 4) != 4)glutAddMenuEntry(_("Points"), MENU_ISOSHOW_POINTS);
       hmesh=meshinfo+highlight_mesh;
       if(hmesh->isofilenum!=-1){
         char levellabel[1024];
@@ -6366,11 +6402,11 @@ updatemenu=0;
         glutAddSubMenu(levellabel,isolevelmenu);
       }
       if(niso_compressed==0){
-        if(smoothtrinormal==1)glutAddMenuEntry(_("*Smooth"),4);
-        if(smoothtrinormal==0)glutAddMenuEntry(_("Smooth"),4);
+        if(smoothtrinormal == 1)glutAddMenuEntry(_("*Smooth"), MENU_ISOSHOW_SMOOTH);
+        if(smoothtrinormal == 0)glutAddMenuEntry(_("Smooth"), MENU_ISOSHOW_SMOOTH);
       }
-      if(showtrinormal==1)glutAddMenuEntry(_("*Show normals"),5);
-      if(showtrinormal==0)glutAddMenuEntry(_("Show normals"),5);
+      if(showtrinormal == 1)glutAddMenuEntry(_("*Show normals"), MENU_ISOSHOW_NORMALS);
+      if(showtrinormal == 0)glutAddMenuEntry(_("Show normals"), MENU_ISOSHOW_NORMALS);
     }
   }
 
@@ -6480,16 +6516,16 @@ updatemenu=0;
       }
       glutAddMenuEntry(menulabel,i);
     }
-    if(show_slice_in_obst==1)glutAddMenuEntry(_("*Show vector slice in blockage"),-11);
-    if(show_slice_in_obst==0)glutAddMenuEntry(_("Show vector slice in blockage"),-11);
-    if(show_slices_and_vectors==1)glutAddMenuEntry(_("*Show slices and vectors"),-15);
-    if(show_slices_and_vectors==0)glutAddMenuEntry(_("Show slices and vectors"),-15);
-    if(offset_slice==1)glutAddMenuEntry(_("*Offset vector slice"),-12);
-    if(offset_slice==0)glutAddMenuEntry(_("Offset vector slice"),-12);
+    if(show_slice_in_obst == 1)glutAddMenuEntry(_("*Show vector slice in blockage"), MENU_SHOWSLICE_INBLOCKAGE);
+    if(show_slice_in_obst == 0)glutAddMenuEntry(_("Show vector slice in blockage"), MENU_SHOWSLICE_INBLOCKAGE);
+    if(show_slices_and_vectors == 1)glutAddMenuEntry(_("*Show slices and vectors"), MENU_SHOWSLICE_SLICEANDVECTORS);
+    if(show_slices_and_vectors == 0)glutAddMenuEntry(_("Show slices and vectors"), MENU_SHOWSLICE_SLICEANDVECTORS);
+    if(offset_slice == 1)glutAddMenuEntry(_("*Offset vector slice"), MENU_SHOWSLICE_OFFSET);
+    if(offset_slice == 0)glutAddMenuEntry(_("Offset vector slice"), MENU_SHOWSLICE_OFFSET);
     if(vd_shown!=NULL&&nvsliceloaded0!=0){
       char menulabel[1024];
 
-      glutAddMenuEntry("",-10);
+      glutAddMenuEntry("",MENU_DUMMY);
       STRCPY(menulabel,_("Show all"));
       STRCAT(menulabel," ");
       STRCAT(menulabel,sliceinfo[vd_shown->ival].label.longlabel);
@@ -6530,13 +6566,13 @@ updatemenu=0;
       }
       glutAddMenuEntry(menulabel,i);
     }
-    if(show_slice_in_obst==1)glutAddMenuEntry(_("*Show multi slice in blockage"),-11);
-    if(show_slice_in_obst==0)glutAddMenuEntry(_("Show multi slice in blockage"),-11);
-    if(offset_slice==1)glutAddMenuEntry(_("*Offset slice"),-12);
-    if(offset_slice==0)glutAddMenuEntry(_("Offset slice"),-12);
+    if(show_slice_in_obst == 1)glutAddMenuEntry(_("*Show multi slice in blockage"), MENU_SHOWSLICE_INBLOCKAGE);
+    if(show_slice_in_obst == 0)glutAddMenuEntry(_("Show multi slice in blockage"), MENU_SHOWSLICE_INBLOCKAGE);
+    if(offset_slice == 1)glutAddMenuEntry(_("*Offset slice"), MENU_SHOWSLICE_OFFSET);
+    if(offset_slice == 0)glutAddMenuEntry(_("Offset slice"), MENU_SHOWSLICE_OFFSET);
     if(nfedinfo>0){
-      if(show_fed_area==1)glutAddMenuEntry("*Show FED areas",-14);
-      if(show_fed_area==0)glutAddMenuEntry("Show FED areas",-14);
+      if(show_fed_area == 1)glutAddMenuEntry("*Show FED areas", MENU_SHOWSLICE_FEDAREA);
+      if(show_fed_area == 0)glutAddMenuEntry("Show FED areas", MENU_SHOWSLICE_FEDAREA);
     }
   }
 
@@ -6569,25 +6605,25 @@ updatemenu=0;
       }
       glutAddMenuEntry(menulabel,i);
     }
-    glutAddMenuEntry("-",-10);
-    if(have_terrain_slice()==1){
-      if(planar_terrain_slice==1)glutAddMenuEntry(_("*Planar terrain slice"),-13);
-      if(planar_terrain_slice==0)glutAddMenuEntry(_("Planar terrain slice"),-13);
+    glutAddMenuEntry("-",MENU_DUMMY);
+    if(have_terrain_slice() == 1){
+      if(planar_terrain_slice == 1)glutAddMenuEntry(_("*Planar terrain slice"), MENU_SHOWSLICE_TERRAIN);
+      if(planar_terrain_slice == 0)glutAddMenuEntry(_("Planar terrain slice"), MENU_SHOWSLICE_TERRAIN);
     }
-    if(show_slice_in_obst==1)glutAddMenuEntry(_("*Show slice in blockage"),-11);
-    if(show_slice_in_obst==0)glutAddMenuEntry(_("Show slice in blockage"),-11);
-    if(offset_slice==1)glutAddMenuEntry(_("*Offset slice"),-12);
-    if(offset_slice==0)glutAddMenuEntry(_("Offset slice"),-12);
-    if(show_slices_and_vectors==1)glutAddMenuEntry(_("*Show slices and vectors"),-15);
-    if(show_slices_and_vectors==0)glutAddMenuEntry(_("Show slices and vectors"),-15);
+    if(show_slice_in_obst == 1)glutAddMenuEntry(_("*Show slice in blockage"), MENU_SHOWSLICE_INBLOCKAGE);
+    if(show_slice_in_obst == 0)glutAddMenuEntry(_("Show slice in blockage"), MENU_SHOWSLICE_INBLOCKAGE);
+    if(offset_slice == 1)glutAddMenuEntry(_("*Offset slice"), MENU_SHOWSLICE_OFFSET);
+    if(offset_slice == 0)glutAddMenuEntry(_("Offset slice"), MENU_SHOWSLICE_OFFSET);
+    if(show_slices_and_vectors == 1)glutAddMenuEntry(_("*Show slices and vectors"), MENU_SHOWSLICE_SLICEANDVECTORS);
+    if(show_slices_and_vectors == 0)glutAddMenuEntry(_("Show slices and vectors"), MENU_SHOWSLICE_SLICEANDVECTORS);
     if(nfedinfo>0){
-      if(show_fed_area==1)glutAddMenuEntry("*Show FED areas",-14);
-      if(show_fed_area==0)glutAddMenuEntry("Show FED areas",-14);
+      if(show_fed_area == 1)glutAddMenuEntry("*Show FED areas", MENU_SHOWSLICE_FEDAREA);
+      if(show_fed_area == 0)glutAddMenuEntry("Show FED areas", MENU_SHOWSLICE_FEDAREA);
     }
     if(nsliceloaded>0&&sd_shown!=NULL){
       char menulabel[1024];
 
-      glutAddMenuEntry("-",-10);
+      glutAddMenuEntry("-",MENU_DUMMY);
       STRCPY(menulabel,_("Show all"));
       STRCAT(menulabel," ");
       STRCAT(menulabel,sd_shown->label.longlabel);
