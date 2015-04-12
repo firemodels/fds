@@ -363,9 +363,9 @@ echo "Copy complete."
 cat << BASH > \$BASHFDS
 #/bin/bash
 
-# MPI location
+# use the environment variable MPIDIST to specify the location of the MPI distribution
 
-export MPIDIST=\\\$1
+export MPIDIST=\\\$mpipath
 
 # unalias application names used by FDS
 
@@ -433,7 +433,7 @@ cat << EOF >> $INSTALLER
   grep -v bashrc_fds ~/.bash_profile | grep -v "#FDS" > \$BASHSTARTUP
   echo "#FDS " >> \$BASHSTARTUP
   echo "#FDS Setting the environment for FDS and Smokeview. "   >> \$BASHSTARTUP
-  echo "source ~/.bashrc_fds \$mpipath" >> \$BASHSTARTUP
+  echo "source ~/.bashrc_fds" >> \$BASHSTARTUP
   cp \$BASHSTARTUP ~/.bash_profile
   rm \$BASHSTARTUP
 EOF
@@ -448,7 +448,7 @@ cat << EOF >> $INSTALLER
   grep -v bashrc_fds ~/.bashrc | grep -v "#FDS" > \$BASHSTARTUP
   echo "#FDS " >> \$BASHSTARTUP
   echo "#FDS Setting the environment for FDS and Smokeview. "   >> \$BASHSTARTUP
-  echo "source ~/.bashrc_fds \$mpipath" >> \$BASHSTARTUP
+  echo "source ~/.bashrc_fds" >> \$BASHSTARTUP
   cp \$BASHSTARTUP ~/.bashrc
   rm \$BASHSTARTUP
 EOF
