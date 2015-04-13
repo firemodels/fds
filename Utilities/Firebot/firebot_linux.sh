@@ -256,9 +256,10 @@ do_svn_checkout()
          sed -i "s/.*% dummy comment to force svn change.*/% dummy comment to force svn change - ${CURRENT_TIMESTAMP}/" $FDS_SVNROOT/Manuals/FDS_Verification_Guide/FDS_Verification_Guide.tex
          sed -i "s/.*% dummy comment to force svn change.*/% dummy comment to force svn change - ${CURRENT_TIMESTAMP}/" $FDS_SVNROOT/Manuals/FDS_Validation_Guide/FDS_Validation_Guide.tex
          sed -i "s/.*% dummy comment to force svn change.*/% dummy comment to force svn change - ${CURRENT_TIMESTAMP}/" $FDS_SVNROOT/Manuals/FDS_Configuration_Management_Plan/FDS_Configuration_Management_Plan.tex
+         sed -i "s/.*! dummy comment to force svn change.*/! dummy comment to force svn change - ${CURRENT_TIMESTAMP}/" $FDS_SVNROOT/FDS_Source/main.f90
 
          # Commit back results
-         svn commit -m 'Firebot: Bump SVN revision number of all guides' &> /dev/null
+         svn commit -m 'Firebot: Bump SVN revision of FDS guides and FDS source' &> /dev/null
       fi
       
       echo "Re-checking out latest revision." >> $OUTPUT_DIR/stage1 2>&1
