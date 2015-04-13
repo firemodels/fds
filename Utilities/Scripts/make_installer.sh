@@ -101,23 +101,6 @@ BACKUP_FILE()
 fi
 }
 
-#--- create a script that points to an installed executable
-
-MAKESHORTCUT()
-{
-  FDS_base=\$1
-  EXE=\$2
-  OUTFILE=\$3
-
-cat << SHORTCUTFILE > \$TEMPFILE
-#!/bin/bash 
-\$FDS_base/bin/\$EXE \\\$@
-SHORTCUTFILE
-
-cp \$TEMPFILE \$OUTFILE
-chmod +x \$OUTFILE
-}
-
 #--- convert a path to it absolute equivalent
 
 function ABSPATH() {
@@ -151,29 +134,32 @@ MKDIR()
   else
     if [ "\$CHECK" == "1" ] 
     then
-    while true; do
-        echo "The directory, \$DIR, already exists."
-        if [ "\$OVERRIDE" == "y" ]
-        then
-          yn="y"
-        else
-          read -p "Do you wish to overwrite it? (yes/no) " yn
-        fi
-        case \$yn in
-            [Yy]* ) break;;
-            [Nn]* ) echo "Installation cancelled";exit;;
-            * ) echo "Please answer yes or no.";;
-        esac
-    done
+      while true; do
+          echo "The directory, \$DIR, already exists."
+          if [ "\$OVERRIDE" == "y" ]
+            then
+              yn="y"
+          else
+              read -p "Do you wish to overwrite it? (yes/no) " yn
+          fi
+          case \$yn in
+              [Yy]* ) break;;
+              [Nn]* ) echo "Installation cancelled";exit;;
+              * ) echo "Please answer yes or no.";;
+          esac
+      done
+      rm -rf \$DIR>&/dev/null
+      mkdir -p \$DIR>&/dev/null
     fi
   fi
   if [ ! -d \$DIR ]
   then
+    echo "Creation of \$DIR failed.  Likely cause,"
     echo "\`whoami\` does not have permission to create \$DIR."
     echo "FDS installation aborted."
     exit 0
   else
-    echo The directory, "\$DIR, has been created."
+    echo The installation directory, "\$DIR, has been created."
   fi
   touch \$DIR/temp.\$\$>&/dev/null
   if ! [ -e \$DIR/temp.\$\$ ]
@@ -337,19 +323,6 @@ echo "Installation beginning"
  
 MKDIR \$FDS_root 1
 
-#--- make shortcuts
-
-SHORTCUTDIR=\`ABSPATH \$FDS_root/../shortcuts\`
-MKDIR \$SHORTCUTDIR 0
-
-TEMPFILE=/tmp/exetemp_\$\$
-echo Adding shortcuts to \$SHORTCUTDIR
-MAKESHORTCUT \$FDS_root fds \$SHORTCUTDIR/fds6
-MAKESHORTCUT \$FDS_root smokeview \$SHORTCUTDIR/smokeview6
-MAKESHORTCUT \$FDS_root smokediff \$SHORTCUTDIR/smokediff6
-MAKESHORTCUT \$FDS_root smokezip \$SHORTCUTDIR/smokezip6
-rm -f \$TEMPFILE
-
 #--- copy installation files into the FDS_root directory
 
 echo
@@ -363,9 +336,9 @@ echo "Copy complete."
 cat << BASH > \$BASHFDS
 #/bin/bash
 
-# use the environment variable MPIDIST to specify the location of the MPI distribution
+# MPI distribution location
 
-export MPIDIST=\\\$mpipath
+export MPIDIST=\$mpipath
 
 # unalias application names used by FDS
 
@@ -381,7 +354,6 @@ unalias smokediff6 >& /dev/null
 # FDS location
 
 FDSBINDIR=\`pwd\`/bin
-SHORTCUTDIR=\$SHORTCUTDIR
 
 if [[ "\\\$MPIDIST" != "" && ! -d \\\$MPIDIST ]]; then
   echo "*** Warning: the MPI distribution, \\\$MPIDIST, does not exist"
@@ -397,7 +369,7 @@ export MPIDIST FDSNETWORK
 # Update LD_LIBRARY_PATH and PATH
 
 LD_LIBRARY_PATH=\\\$FDSBINDIR/LIB64:\\\$LD_LIBRARY_PATH
-PATH=\\\$FDSBINDIR:\\\$SHORTCUTDIR:\\\$PATH
+PATH=\\\$FDSBINDIR:\\\$PATH
 if [ "\\\$MPIDIST" != "" ]; then
   LD_LIBRARY_PATH=\\\$MPIDIST/lib:\\\$LD_LIBRARY_PATH
   PATH=\\\$MPIDIST/bin:\\\$PATH
