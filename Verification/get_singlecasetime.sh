@@ -19,6 +19,6 @@ done
 shift $(($OPTIND-1))
 
 CASE=${1%.*}.out
-CPUTIME=`grep Total $DIR/$CASE 2>/dev/null| grep Elapsed | grep Wall | tail -1 | awk '{print $7}'`
+CPUTIME=`grep MAIN $DIR/$CASE 2>/dev/null| head -1 | awk '{print $2}'`
 echo $CPUTIME $DIR/$CASE 
 
