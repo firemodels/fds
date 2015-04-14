@@ -1,11 +1,10 @@
-Room fire test case, based on an actual test conducted for US ATF by the University of Maryland. 
-All material properties are completely fabricated.
+This is just a demonstration calculation. All material properties are completely fabricated.
 
-&HEAD CHID='room_fire', TITLE='ATF Room Fire Test, SVN $Revision$'  / 
+&HEAD CHID='room_fire', TITLE='Example room fire simulation'  / 
 
 &MESH IJK=52,54,24, XB=0.0,5.2,-0.8,4.6,0.0,2.4 / 
 
-&TIME T_END=300.0 / 
+&TIME T_END=180.0 / 
 
 &REAC FUEL       = 'POLYURETHANE'
       FYI        = 'C_6.3 H_7.1 N O_2.1, NFPA Handbook, Babrauskas'
@@ -25,8 +24,8 @@ All material properties are completely fabricated.
       N_REACTIONS           = 1
       NU_SPEC               = 1.
       SPEC_ID               = 'POLYURETHANE'
-      REFERENCE_TEMPERATURE = 320.
-      HEAT_OF_REACTION      = 3000.
+      REFERENCE_TEMPERATURE = 280.
+      HEAT_OF_REACTION      = 1000.
       HEAT_OF_COMBUSTION    = 15000. /
 
 &MATL ID                    = 'FOAM'
@@ -37,8 +36,8 @@ All material properties are completely fabricated.
       N_REACTIONS           = 1
       NU_SPEC               = 1.
       SPEC_ID               = 'POLYURETHANE'
-      REFERENCE_TEMPERATURE = 320.
-      HEAT_OF_REACTION      = 1500.
+      REFERENCE_TEMPERATURE = 300.
+      HEAT_OF_REACTION      = 800.
       HEAT_OF_COMBUSTION    = 30000. /
 
 &MATL ID            = 'GYPSUM PLASTER'
