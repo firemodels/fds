@@ -5325,7 +5325,7 @@ updatemenu=0;
     }
   }
 
-/* --------------------------------static slice menu -------------------------- */
+/* --------------------------------Plot3d Show menu -------------------------- */
   if(nplot3dinfo>0){
     CREATEMENU(staticslicemenu,Plot3DShowMenu);
     glutAddSubMenu(_("Solution variable"),staticvariablemenu);

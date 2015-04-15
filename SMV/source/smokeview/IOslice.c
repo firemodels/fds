@@ -2021,21 +2021,6 @@ void getsliceparams(void){
       nk = ks2 + 1 - ks1;
     }
     if(error==0){
-      mesh *meshslice;
-
-      meshslice = meshinfo + sd->blocknumber;
-      if(is1==is2&&is1==meshslice->ibar){
-        is1=meshslice->ibar-1;
-        is2=is1;
-      }
-      if(js1==js2&&js1==meshslice->jbar){
-        js1=meshslice->jbar-1;
-        js2=js1;
-      }
-      if(ks1==ks2&&ks1==meshslice->kbar){
-        ks1=meshslice->kbar-1;
-        ks2=ks1;
-      }
       sd->is1=is1;
       sd->is2=is2;
       sd->js1=js1;
