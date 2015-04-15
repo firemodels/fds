@@ -2562,7 +2562,7 @@ ENDDO GEOC_LOOP
 
 ! define geometry data structures whenever geometry changes
 
-   IF (GEOMETRY_CHANGE_STATE==1) CALL CONVERTGEOM(T)
+IF (GEOMETRY_CHANGE_STATE==1) CALL CONVERTGEOM(T)
 
 FACE_LOOP: DO N=1,N_FACE
 
