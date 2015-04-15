@@ -123,7 +123,7 @@ end
 
 Error = norm(T-Theta(lambda(I),tau(5),T_h,T_0))/max(T)/length(T);
 if Error>error_tolerance
-    display(['Matlab Warning: hot_layer_360.fds Temp_1 Error = ',Error])
+    display(['Matlab Warning: hot_layer_360.fds Temp_1 Error = ',num2str(Error)])
 end
 
 figure(2)
@@ -163,7 +163,7 @@ end
 
 Error = norm(W-V(lambda(I),tau(5),T_h,T_0))/max(abs(W))/length(W);
 if Error>error_tolerance
-    display(['Matlab Warning: hot_layer_360.fds Vel_1 Error = ',Error])
+    display(['Matlab Warning: hot_layer_360.fds Vel_1 Error = ',num2str(Error)])
 end
 
 % second set of Howard's plots
@@ -221,7 +221,7 @@ end
 
 Error = norm(T-Theta(lambda(I),tau(10),T_h,T_0))/max(T)/length(T);
 if Error>error_tolerance
-    display(['Matlab Warning: hot_layer_360.fds Temp_2 Error = ',Error])
+    display(['Matlab Warning: hot_layer_360.fds Temp_2 Error = ',num2str(Error)])
 end
 
 figure(4)
@@ -261,7 +261,7 @@ end
 
 Error = norm(W-V(lambda(I),tau(10),T_h,T_0))/max(abs(W))/length(W);
 if Error>error_tolerance
-    display(['Matlab Warning: hot_layer_360.fds Vel_2 Error = ',Error])
+    display(['Matlab Warning: hot_layer_360.fds Vel_2 Error = ',num2str(Error)])
 end
 
 
