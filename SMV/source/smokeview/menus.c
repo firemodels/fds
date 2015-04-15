@@ -5730,10 +5730,8 @@ updatemenu=0;
   if(visFramelabel == 0)glutAddMenuEntry(_("Frame"), MENU_LABEL_framelabel);
   if(visFramerate == 1)glutAddMenuEntry(_("*Frame rate"), MENU_LABEL_framerate);
   if(visFramerate == 0)glutAddMenuEntry(_("Frame rate"), MENU_LABEL_framerate);
-  if(ntotal_blockages > 0 || isZoneFireModel == 1){
-    if(visgridloc == 1)glutAddMenuEntry(_("*Grid locations"), MENU_LABEL_grid);
-    if(visgridloc == 0)glutAddMenuEntry(_("Grid locations"), MENU_LABEL_grid);
-  }
+  if(visgridloc == 1)glutAddMenuEntry(_("*Grid locations"), MENU_LABEL_grid);
+  if(visgridloc == 0)glutAddMenuEntry(_("Grid locations"), MENU_LABEL_grid);
   if(show_hrrcutoff_active == 1){
     if(show_hrrcutoff == 1)glutAddMenuEntry(_("*HRRPUV cutoff"), MENU_LABEL_hrrcutoff);
     if(show_hrrcutoff == 0)glutAddMenuEntry(_("HRRPUV cutoff"), MENU_LABEL_hrrcutoff);

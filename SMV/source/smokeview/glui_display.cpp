@@ -315,9 +315,7 @@ extern "C" void glui_labels_setup(int main_window){
   CHECKBOX_labels_colorbar = glui_labels->add_checkbox_to_panel(PANEL_gen1, _("Colorbar"), &visColorbar, LABELS_label, Labels_CB);
   CHECKBOX_labels_framelabel = glui_labels->add_checkbox_to_panel(PANEL_gen1, _("Frame label"), &visFramelabel, FRAME_label, Labels_CB);
   CHECKBOX_labels_framerate = glui_labels->add_checkbox_to_panel(PANEL_gen1, _("Frame rate"), &visFramerate, LABELS_label, Labels_CB);
-  if(ntotal_blockages>0||isZoneFireModel==1){
-    CHECKBOX_labels_gridloc = glui_labels->add_checkbox_to_panel(PANEL_gen1, _("Grid location"), &visgridloc, LABELS_label, Labels_CB);
-  }
+  CHECKBOX_labels_gridloc = glui_labels->add_checkbox_to_panel(PANEL_gen1, _("Grid location"), &visgridloc, LABELS_label, Labels_CB);
   CHECKBOX_labels_hrrlabel = glui_labels->add_checkbox_to_panel(PANEL_gen1, _("HRR"), &visHRRlabel, HRR_label, Labels_CB);
   CHECKBOX_labels_hrrcutoff = glui_labels->add_checkbox_to_panel(PANEL_gen1, _("HRRPUV cutoff"), &show_hrrcutoff, HRRPUVCUTOFF_label, Labels_CB);
 #ifdef pp_memstatus
