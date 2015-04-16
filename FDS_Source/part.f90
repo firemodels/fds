@@ -2094,7 +2094,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
 
          TMP_G  = TMP(II,JJ,KK)
          RHO_G  = RHO(II,JJ,KK)
-         MU_AIR = MU_Z(MIN(5000,NINT(TMP_G)),1)*SPECIES_MIXTURE(1)%MW
+         MU_AIR = MU_RMW_Z(MIN(5000,NINT(TMP_G)),1)*SPECIES_MIXTURE(1)%MW
          M_GAS  = RHO_G/RVC  
          M_VAP_MAX = (0.33_EB * M_GAS - MVAP_TOT(II,JJ,KK)) / WGT ! limit to avoid diveregence errors
          K_AIR  = CPOPR*MU_AIR

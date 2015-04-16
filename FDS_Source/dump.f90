@@ -2493,14 +2493,14 @@ DO N=1,N_TRACKED_SPECIES
    ENDDO
    ITMP = NINT(TMPA)
    WRITE(LU_OUTPUT,'(A)') ' '
-   WRITE(LU_OUTPUT,'(A,ES9.2)')  '   Viscosity (kg/m/s)   Ambient (293 K): ', MU_Z(ITMP,N)*SM%MW
-   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                  500 K: ', MU_Z( 500,N)*SM%MW
-   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                 1000 K: ', MU_Z(1000,N)*SM%MW
-   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                 1500 K: ', MU_Z(1500,N)*SM%MW
-   WRITE(LU_OUTPUT,'(A,ES9.2)')  '   Therm. Cond. (W/m/K) Ambient (293 K): ', K_Z(ITMP,N)*SM%MW
-   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                  500 K: ', K_Z( 500,N)*SM%MW
-   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                 1000 K: ', K_Z(1000,N)*SM%MW
-   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                 1500 K: ', K_Z(1500,N)*SM%MW
+   WRITE(LU_OUTPUT,'(A,ES9.2)')  '   Viscosity (kg/m/s)   Ambient (293 K): ', MU_RMW_Z(ITMP,N)*SM%MW
+   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                  500 K: ', MU_RMW_Z( 500,N)*SM%MW
+   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                 1000 K: ', MU_RMW_Z(1000,N)*SM%MW
+   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                 1500 K: ', MU_RMW_Z(1500,N)*SM%MW
+   WRITE(LU_OUTPUT,'(A,ES9.2)')  '   Therm. Cond. (W/m/K) Ambient (293 K): ', K_RMW_Z(ITMP,N)*SM%MW
+   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                  500 K: ', K_RMW_Z( 500,N)*SM%MW
+   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                 1000 K: ', K_RMW_Z(1000,N)*SM%MW
+   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                 1500 K: ', K_RMW_Z(1500,N)*SM%MW
    WRITE(LU_OUTPUT,'(A,ES9.2)')  '   Spec. Heat (J/kg/K)  Ambient (293 K): ', CP_Z(ITMP,N)
    WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                  500 K: ', CP_Z( 500,N)
    WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                 1000 K: ', CP_Z(1000,N)
@@ -4457,7 +4457,7 @@ REAL(EB) :: FLOW,HMFAC,H_TC,TMP_TC,RE_D,NUSSELT,AREA,VEL,K_G,MU_G,&
             Q_SUM,TMP_G,UU,VV,WW,VEL2,Y_MF_INT,PATHLENGTH,EXT_COEF,MASS_EXT_COEF,ZZ_FUEL,ZZ_OX,&
             VELSR,WATER_VOL_FRAC,RHS,DT_C,DT_E,T_RATIO,Y_E_LAG, H_G,H_G_SUM,CPBAR,CP,ZZ_GET(1:N_TRACKED_SPECIES),RCON,&
             EXPON,Y_SPECIES,MEC,Y_SPECIES2,Y_H2O,R_Y_H2O,R_DN,SGN,Y_ALL(N_SPECIES),H_S,D_Z_N(0:5000),&
-            DISSIPATION_RATE,S11,S22,S33,S12,S13,S23,DUDX,DUDY,DUDZ,DVDX,DVDY,DVDZ,DWDX,DWDY,DWDZ,ONTHDIV,SS,ETA,DELTA
+            DISSIPATION_RATE,S11,S22,S33,S12,S13,S23,DUDX,DUDY,DUDZ,DVDX,DVDY,DVDZ,DWDX,DWDY,DWDZ,ONTHDIV,SS,ETA,DELTA,R_DX2
 REAL(FB) :: TMPUP,TMPLOW,ZINT,RHO2,BBF
 INTEGER :: N,I,J,K,NN,IL,III,JJJ,KKK,Y_INDEX,Z_INDEX,PART_INDEX,IP,JP,KP,FLOW_INDEX,IW,FED_ACTIVITY,&
            IP1,JP1,KP1,IM1,JM1,KM1,IIM1,JJM1,KKM1,NR,NS
@@ -4711,10 +4711,17 @@ SELECT CASE(IND)
       GAS_PHASE_OUTPUT_RES = SCARC_CAPPA
 
    CASE(70)  ! CFL
-      GAS_PHASE_OUTPUT_RES = MESHES(1)%CFL  
+      GAS_PHASE_OUTPUT_RES = DT*(0.5_EB*MAX(ABS(U(II-1,JJ,KK)+U(II,JJ,KK))*RDX(II), &
+                                            ABS(V(II,JJ-1,KK)+V(II,JJ,KK))*RDY(JJ), &
+                                            ABS(W(II,JJ,KK-1)+W(II,JJ,KK))*RDZ(KK)) + ABS(D(II,JJ,KK)))
    CASE(71)  ! VN
-      GAS_PHASE_OUTPUT_RES = MESHES(1)%VN  
-      
+      IF (TWO_D) THEN
+         R_DX2 = RDX(II)**2 + RDZ(KK)**2
+      ELSE
+         R_DX2 = RDX(II)**2 + RDY(JJ)**2 + RDZ(KK)**2
+      ENDIF
+      GAS_PHASE_OUTPUT_RES = DT*2._EB*R_DX2*MAX(D_Z_MAX(II,JJ,KK),MAX(RPR,RSC)*MU(II,JJ,KK)/RHO(II,JJ,KK))
+
    CASE(80)  ! I
       GAS_PHASE_OUTPUT_RES = REAL(II,EB)
    CASE(81)  ! J
