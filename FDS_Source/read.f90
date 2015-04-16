@@ -1628,8 +1628,8 @@ LAPSE_RATE           = 0._EB
 THICKEN_OBSTRUCTIONS = .FALSE.
 CFL_MAX              = 1.0_EB       ! Stability bounds
 CFL_MIN              = 0.8_EB
-VN_MAX               = 0.5_EB
-VN_MIN               = 0.4_EB
+VN_MAX               = 0.95_EB
+VN_MIN               = 0.8_EB
 PARTICLE_CFL_MAX     = 1._EB
 PARTICLE_CFL_MIN     = 0.8_EB
 VEG_LEVEL_SET           = .FALSE.
@@ -1656,6 +1656,8 @@ IF (DNS) THEN
    CFL_VELOCITY_NORM = 1
    CFL_MAX = 0.5
    CFL_MIN = 0.4
+   VN_MAX  = 0.5
+   VN_MIN  = 0.4
    FLUX_LIMITER = CHARM_LIMITER
    IF (TURBULENCE_MODEL/='null') THEN
       WRITE(MESSAGE,'(A,A,A)')  'ERROR: TURBULENCE_MODEL, ',TRIM(TURBULENCE_MODEL),', is not appropriate for DNS.'
@@ -2952,13 +2954,13 @@ ALLOCATE(CP_AVG_Z(0:5000,1:N_TRACKED_SPECIES))
 CALL ChkMemErr('READ','CP_AVG_Z',IZERO)
 CP_AVG_Z = 0._EB
 
-ALLOCATE(K_Z(0:5000,1:N_TRACKED_SPECIES))
-CALL ChkMemErr('READ','K_Z',IZERO)
-K_Z = 0._EB
+ALLOCATE(K_RMW_Z(0:5000,1:N_TRACKED_SPECIES))
+CALL ChkMemErr('READ','K_RMW_Z',IZERO)
+K_RMW_Z = 0._EB
 
-ALLOCATE(MU_Z(0:5000,1:N_TRACKED_SPECIES))
-CALL ChkMemErr('READ','MU_Z',IZERO)
-MU_Z = 0._EB
+ALLOCATE(MU_RMW_Z(0:5000,1:N_TRACKED_SPECIES))
+CALL ChkMemErr('READ','MU_RMW_Z',IZERO)
+MU_RMW_Z = 0._EB
 
 ALLOCATE(CP_Z(0:5000,1:N_TRACKED_SPECIES))
 CALL ChkMemErr('READ','CP_Z',IZERO)
@@ -3067,14 +3069,14 @@ TABLE_LOOP: DO J=1,5000
          ENDIF
       ENDIF
       IF (MU_TMP_Z(N) > 0._EB) THEN
-         MU_Z(J,N) = MU_TMP_Z(N)
+         MU_RMW_Z(J,N) = MU_TMP_Z(N)
       ELSE
-         MU_Z(J,N) = SUM(Z2Y(:,N) * MU_TMP(:))
+         MU_RMW_Z(J,N) = SUM(Z2Y(:,N) * MU_TMP(:))
       ENDIF
       IF (K_TMP_Z(N) > 0._EB) THEN
-         K_Z(J,N)  = K_TMP_Z(N)         
+         K_RMW_Z(J,N)  = K_TMP_Z(N)         
       ELSE
-         K_Z(J,N)  = SUM(Z2Y(:,N) * K_TMP(:))
+         K_RMW_Z(J,N)  = SUM(Z2Y(:,N) * K_TMP(:))
       ENDIF
       IF (G_F_TMP_Z(N) > 0._EB) THEN
          G_F_Z(J,N) = G_F_TMP_Z(N)
