@@ -70,11 +70,11 @@ void getzonesizecsv(int *nzone_times_local, int *nroom, int *nfires_local, int *
 #define FREEZONEMEM \
   FREEMEMORY(zonehvents_devs); \
   FREEMEMORY(zonehvents_devs); \
-  FREEMEMORY(zonehslabn_devs); \
-  FREEMEMORY(zonehslabT_devs); \
-  FREEMEMORY(zonehslabF_devs); \
-  FREEMEMORY(zonehslabYB_devs); \
-  FREEMEMORY(zonehslabYT_devs); \
+  FREEMEMORY(zoneslab_n_devs); \
+  FREEMEMORY(zoneslab_T_devs); \
+  FREEMEMORY(zoneslab_F_devs); \
+  FREEMEMORY(zoneslab_YB_devs); \
+  FREEMEMORY(zoneslab_YT_devs); \
   FREEMEMORY(zonevvents_devs); \
   FREEMEMORY(zoneqfire_devs); \
   FREEMEMORY(zonepr_devs); \
@@ -111,6 +111,70 @@ void getzonesizecsv(int *nzone_times_local, int *nroom, int *nfires_local, int *
   FREEMEMORY(zonefbase_devs)
 #endif
 
+#ifdef pp_ZONEVENT
+/* ------------------ getzonedatacsv ------------------------ */
+
+#define GET_VENTSLAB(slabtype,ventbeg,ventend,have_ventslab_flow)\
+  have_ventslab_flow = 0;\
+  for(i = ventbeg; i < ventend; i++){\
+    char label[100];\
+    int islab;\
+\
+    sprintf(label, "%s_%i",#slabtype, i + 1);\
+    zoneslab_n_devs[i] = getdevice(label, -1);\
+    if(zoneslab_n_devs[i] != NULL){\
+      have_ventslab_flow = 1;\
+      break;\
+    }\
+    for(islab = 0; islab < MAXSLABS; islab++){\
+      int idev;\
+\
+      idev = MAXSLABS * i + islab;\
+      sprintf(label, "%s_%i_%i", #slabtype,i + 1, islab + 1);\
+      zoneslab_T_devs[idev] = getdevice(label, -1);\
+      if(zoneslab_T_devs[idev] != NULL)have_ventslab_flow = 1;\
+\
+      sprintf(label, "%sF_%i_%i",#slabtype, i + 1, islab + 1);\
+      zoneslab_F_devs[idev] = getdevice(label, -1);\
+      if(zoneslab_T_devs[idev] != NULL)have_ventslab_flow = 1;\
+\
+      sprintf(label, "%sYB_%i_%i",#slabtype, i + 1, islab + 1);\
+      zoneslab_YB_devs[idev] = getdevice(label, -1);\
+      if(zoneslab_T_devs[idev] != NULL)have_ventslab_flow = 1;\
+\
+      sprintf(label, "%sYT_%i_%i",#slabtype, i + 1, islab + 1);\
+      zoneslab_YT_devs[idev] = getdevice(label, -1);\
+      if(zoneslab_T_devs[idev] != NULL)have_ventslab_flow = 1;\
+    }\
+    if(have_ventslab_flow == 1)break;\
+  }\
+  if(have_ventslab_flow == 1){\
+    for(i = ventbeg; ventend < nzhvents; i++){\
+      char label[100];\
+      int islab;\
+\
+      sprintf(label, "%s_%i", #slabtype,i + 1);\
+      GETZONEDEV(zoneslab_n_devs[i]);\
+      for(islab = 0; islab < MAXSLABS; islab++){\
+        int idev;\
+\
+        idev = MAXSLABS * i + islab;\
+        sprintf(label, "%sT_%i_%i", #slabtype,i + 1, islab + 1);\
+        GETZONEDEV(zoneslab_T_devs[idev]);\
+\
+        sprintf(label, "%sF_%i_%i", #slabtype,i + 1, islab + 1);\
+        GETZONEDEV(zoneslab_F_devs[idev]);\
+\
+        sprintf(label, "%sYB_%i_%i",#slabtype, i + 1, islab + 1);\
+        GETZONEDEV(zoneslab_YB_devs[idev]);\
+\
+        sprintf(label, "%sYT_%i_%i",#slabtype, i + 1, islab + 1);\
+        GETZONEDEV(zoneslab_YT_devs[idev]);\
+      }\
+    }\
+  }
+#endif  
+
 /* ------------------ getzonedatacsv ------------------------ */
 
 void getzonedatacsv(int nzone_times_local, int nrooms_local, int nfires_local, 
@@ -118,7 +182,7 @@ void getzonedatacsv(int nzone_times_local, int nrooms_local, int nfires_local,
                     float *zonepr_local, float *zoneylay_local,  float *zonetl_local, float *zonetu_local,
                     float **zoneodlptr, float **zoneoduptr, float *zonehvents_local, float *zonevvents_local,
 #ifdef pp_ZONEVENT                    
-                    int *zonehslabn_local, float *zonehslabT_local, float *zonehslabF_local, float *zonehslabYB_local, float *zonehslabYT_local,
+                    int *zoneslab_n_local, float *zoneslab_T_local, float *zoneslab_F_local, float *zoneslab_YB_local, float *zoneslab_YT_local,
 #endif
                     int *error){
   int i,ii,iif, use_od=1, iihv, iivv;
@@ -127,7 +191,7 @@ void getzonedatacsv(int nzone_times_local, int nrooms_local, int nfires_local,
   devicedata **zonefheight_devs=NULL, **zonefbase_devs=NULL, **zonefarea_devs=NULL;
   devicedata **zonehvents_devs=NULL, **zonevvents_devs=NULL;
 #ifdef pp_ZONEVENT  
-  devicedata **zonehslabn_devs = NULL, **zonehslabT_devs = NULL, **zonehslabF_devs = NULL, **zonehslabYB_devs = NULL, **zonehslabYT_devs = NULL;
+  devicedata **zoneslab_n_devs = NULL, **zoneslab_T_devs = NULL, **zoneslab_F_devs = NULL, **zoneslab_YB_devs = NULL, **zoneslab_YT_devs = NULL;
 #endif  
   float *zoneodl_local, *zoneodu_local;
   float *times_local;
@@ -152,11 +216,11 @@ void getzonedatacsv(int nzone_times_local, int nrooms_local, int nfires_local,
   if(nzhvents>0){
     NewMemory((void **)&zonehvents_devs,nzhvents*sizeof(devicedata *));
 #ifdef pp_ZONEVENT    
-    NewMemory((void **)&zonehslabn_devs,  nzhvents*sizeof(devicedata *));
-    NewMemory((void **)&zonehslabT_devs,  MAXSLABS*nzhvents*sizeof(devicedata *));
-    NewMemory((void **)&zonehslabF_devs,  MAXSLABS*nzhvents*sizeof(devicedata *));
-    NewMemory((void **)&zonehslabYB_devs, MAXSLABS*nzhvents*sizeof(devicedata *));
-    NewMemory((void **)&zonehslabYT_devs, MAXSLABS*nzhvents*sizeof(devicedata *));
+    NewMemory((void **)&zoneslab_n_devs,  nzhvents*sizeof(devicedata *));
+    NewMemory((void **)&zoneslab_T_devs,  MAXSLABS*nzhvents*sizeof(devicedata *));
+    NewMemory((void **)&zoneslab_F_devs,  MAXSLABS*nzhvents*sizeof(devicedata *));
+    NewMemory((void **)&zoneslab_YB_devs, MAXSLABS*nzhvents*sizeof(devicedata *));
+    NewMemory((void **)&zoneslab_YT_devs, MAXSLABS*nzhvents*sizeof(devicedata *));
 #endif    
   }
 
@@ -287,64 +351,7 @@ void getzonedatacsv(int nzone_times_local, int nrooms_local, int nfires_local,
   }
 
 #ifdef pp_ZONEVENT
-  have_ventslab_flow = 0;
-  for(i = 0; i < nzhvents; i++){
-    char label[100];
-    int islab;
-
-    sprintf(label, "NSLAB_%i", i + 1);
-    zonehslabn_devs[i] = getdevice(label, -1);
-    if(zonehslabn_devs[i] != NULL){
-      have_ventslab_flow = 1;
-      break;
-    }
-    for(islab = 0; islab < MAXSLABS; islab++){
-      int idev;
-
-      idev = MAXSLABS * i + islab;
-      sprintf(label, "HSLABT_%i_%i", i + 1, islab + 1);
-      zonehslabT_devs[idev] = getdevice(label, -1);
-      if(zonehslabT_devs[idev] != NULL)have_ventslab_flow = 1;
-
-      sprintf(label, "HSLABF_%i_%i", i + 1, islab + 1);
-      zonehslabF_devs[idev] = getdevice(label, -1);
-      if(zonehslabT_devs[idev] != NULL)have_ventslab_flow = 1;
-
-      sprintf(label, "HSLABYB_%i_%i", i + 1, islab + 1);
-      zonehslabYB_devs[idev] = getdevice(label, -1);
-      if(zonehslabT_devs[idev] != NULL)have_ventslab_flow = 1;
-
-      sprintf(label, "HSLABYT_%i_%i", i + 1, islab + 1);
-      zonehslabYT_devs[idev] = getdevice(label, -1);
-      if(zonehslabT_devs[idev] != NULL)have_ventslab_flow = 1;
-    }
-    if(have_ventslab_flow == 1)break;
-  }
-  if(have_ventslab_flow == 1){
-    for(i = 0; i < nzhvents; i++){
-      char label[100];
-      int islab;
-
-      sprintf(label, "NSLAB_%i", i + 1);
-      GETZONEDEV(zonehslabn_devs[i]);
-      for(islab = 0; islab < MAXSLABS; islab++){
-        int idev;
-
-        idev = MAXSLABS * i + islab;
-        sprintf(label, "HSLABT_%i_%i", i + 1, islab + 1);
-        GETZONEDEV(zonehslabT_devs[idev]);
-
-        sprintf(label, "HSLABF_%i_%i", i + 1, islab + 1);
-        GETZONEDEV(zonehslabF_devs[idev]);
-
-        sprintf(label, "HSLABYB_%i_%i", i + 1, islab + 1);
-        GETZONEDEV(zonehslabYB_devs[idev]);
-
-        sprintf(label, "HSLABYT_%i_%i", i + 1, islab + 1);
-        GETZONEDEV(zonehslabYT_devs[idev]);
-      }
-    }
-  }
+  GET_VENTSLAB("HSLAB",0,nzhvents,have_hventslab_flow);
 #endif    
 
   for(i=0;i<nzvvents;i++){
@@ -421,22 +428,22 @@ void getzonedatacsv(int nzone_times_local, int nrooms_local, int nfires_local,
 
       zonehvents_local[iihv] = zonehvents_devs[ivent]->vals[i];
 #ifdef pp_ZONEVENT      
-      if(zonehslabn_devs[ivent]!=NULL)zonehslabn_local[iihv] = (int)(zonehslabn_devs[ivent]->vals[i]+0.1);
+      if(zoneslab_n_devs[ivent]!=NULL)zoneslab_n_local[iihv] = (int)(zoneslab_n_devs[ivent]->vals[i]+0.1);
       for(islab = 0; islab<MAXSLABS; islab++){
         int idev, ival;
 
         idev = MAXSLABS * ivent + islab;
         ival = MAXSLABS * iihv + islab;
-        if(zonehslabT_devs[idev]!=NULL)zonehslabT_local[ival] =  zonehslabT_devs[idev]->vals[i];
-        if(zonehslabF_devs[idev] != NULL){
+        if(zoneslab_T_devs[idev]!=NULL)zoneslab_T_local[ival] =  zoneslab_T_devs[idev]->vals[i];
+        if(zoneslab_F_devs[idev] != NULL){
           float slabflow;
 
-          slabflow = zonehslabF_devs[idev]->vals[i];
+          slabflow = zoneslab_F_devs[idev]->vals[i];
           maxslabflow = MAX(ABS(slabflow), maxslabflow);
-          zonehslabF_local[ival] = slabflow;
+          zoneslab_F_local[ival] = slabflow;
         }
-        if(zonehslabYB_devs[idev]!=NULL)zonehslabYB_local[ival] = zonehslabYB_devs[idev]->vals[i];
-        if(zonehslabYT_devs[idev]!=NULL)zonehslabYT_local[ival] = zonehslabYT_devs[idev]->vals[i];
+        if(zoneslab_YB_devs[idev]!=NULL)zoneslab_YB_local[ival] = zoneslab_YB_devs[idev]->vals[i];
+        if(zoneslab_YT_devs[idev]!=NULL)zoneslab_YT_local[ival] = zoneslab_YT_devs[idev]->vals[i];
       }
 #endif      
       iihv++;
@@ -597,11 +604,11 @@ void readzone(int ifile, int flag, int *errorcode){
   FREEMEMORY(zoneodl);
   FREEMEMORY(zoneodu);
 #ifdef pp_ZONEVENT  
-  FREEMEMORY(zonehslabn);
-  FREEMEMORY(zonehslabT);
-  FREEMEMORY(zonehslabF);
-  FREEMEMORY(zonehslabYB);
-  FREEMEMORY(zonehslabYT);
+  FREEMEMORY(zoneslab_n);
+  FREEMEMORY(zoneslab_T);
+  FREEMEMORY(zoneslab_F);
+  FREEMEMORY(zoneslab_YB);
+  FREEMEMORY(zoneslab_YT);
 #endif  
 
   activezone=NULL;
@@ -684,20 +691,20 @@ void readzone(int ifile, int flag, int *errorcode){
     }
     FREEMEMORY(zonehvents); 
 #ifdef pp_ZONEVENT    
-    FREEMEMORY(zonehslabn);
-    FREEMEMORY(zonehslabT);
-    FREEMEMORY(zonehslabF);
-    FREEMEMORY(zonehslabYB);
-    FREEMEMORY(zonehslabYT);
+    FREEMEMORY(zoneslab_n);
+    FREEMEMORY(zoneslab_T);
+    FREEMEMORY(zoneslab_F);
+    FREEMEMORY(zoneslab_YB);
+    FREEMEMORY(zoneslab_YT);
 #endif    
     if(nzhvents>0){
       NewMemory((void **)&zonehvents,nzhvents*nzone_times*sizeof(float));
 #ifdef pp_ZONEVENT      
-      NewMemory((void **)&zonehslabn, nzone_times*nzhvents*sizeof(int));
-      NewMemory((void **)&zonehslabT, nzone_times*nzhvents*MAXSLABS*sizeof(float));
-      NewMemory((void **)&zonehslabYT, nzone_times*nzhvents*MAXSLABS*sizeof(float));
-      NewMemory((void **)&zonehslabF, nzone_times*nzhvents*MAXSLABS*sizeof(float));
-      NewMemory((void **)&zonehslabYB, nzone_times*nzhvents*MAXSLABS*sizeof(float));
+      NewMemory((void **)&zoneslab_n, nzone_times*nzhvents*sizeof(int));
+      NewMemory((void **)&zoneslab_T, nzone_times*nzhvents*MAXSLABS*sizeof(float));
+      NewMemory((void **)&zoneslab_YT, nzone_times*nzhvents*MAXSLABS*sizeof(float));
+      NewMemory((void **)&zoneslab_F, nzone_times*nzhvents*MAXSLABS*sizeof(float));
+      NewMemory((void **)&zoneslab_YB, nzone_times*nzhvents*MAXSLABS*sizeof(float));
 #endif      
     }
     FREEMEMORY(zonevvents); 
@@ -736,7 +743,7 @@ void readzone(int ifile, int flag, int *errorcode){
 #ifdef pp_ZONEVENT
     getzonedatacsv(nzone_times,nrooms,  nfires, zone_times,zoneqfire, zonefheight, zonefbase, zonefdiam,
                    zonepr,zoneylay,zonetl,zonetu,&zoneodl,&zoneodu, zonehvents, zonevvents, 
-                   zonehslabn, zonehslabT, zonehslabF, zonehslabYB, zonehslabYT,
+                   zoneslab_n, zoneslab_T, zoneslab_F, zoneslab_YB, zoneslab_YT,
                    &error);
 #else
     getzonedatacsv(nzone_times,nrooms,  nfires, zone_times,zoneqfire, zonefheight, zonefbase, zonefdiam,
@@ -822,8 +829,8 @@ void fill_zonedata(int izone_index){
   int iroom,ivent;
   roomdata *roomi;
 #ifdef pp_ZONEVENT
-  int *zonehslabn0;
-  float *zonehslabT0, *zonehslabF0, *zonehslabYB0, *zonehslabYT0;
+  int *zoneslab_n0;
+  float *zoneslab_T0, *zoneslab_F0, *zoneslab_YB0, *zoneslab_YT0;
 #endif
 
   float CP=1004.0;
@@ -836,11 +843,11 @@ void fill_zonedata(int izone_index){
   tu0 = zonetu + izone_index*nrooms;
   hvent0 = zonehvents + izone_index*nzhvents;
 #ifdef pp_ZONEVENT
-  zonehslabn0  = zonehslabn  + izone_index*nzhvents;
-  zonehslabT0  = zonehslabT  + izone_index*MAXSLABS*nzhvents;
-  zonehslabF0  = zonehslabF  + izone_index*MAXSLABS*nzhvents;
-  zonehslabYB0 = zonehslabYB + izone_index*MAXSLABS*nzhvents;
-  zonehslabYT0 = zonehslabYT + izone_index*MAXSLABS*nzhvents;
+  zoneslab_n0  = zoneslab_n  + izone_index*nzhvents;
+  zoneslab_T0  = zoneslab_T  + izone_index*MAXSLABS*nzhvents;
+  zoneslab_F0  = zoneslab_F  + izone_index*MAXSLABS*nzhvents;
+  zoneslab_YB0 = zoneslab_YB + izone_index*MAXSLABS*nzhvents;
+  zoneslab_YT0 = zoneslab_YT + izone_index*MAXSLABS*nzhvents;
 #endif
   if(zoneodl!=NULL)odl0 = zoneodl + izone_index*nrooms;
   if(zoneodu!=NULL)odu0 = zoneodu + izone_index*nrooms;
@@ -852,15 +859,15 @@ void fill_zonedata(int izone_index){
     zventi = zventinfo + ivent;
     zventi->area_fraction=CLAMP(hvent0[ivent]/zventi->area,0.0,1.0);
 
-    zventi->nslab = zonehslabn0[ivent];
+    zventi->nslab = zoneslab_n0[ivent];
     for(islab = 0; islab<zventi->nslab; islab++){
       int iislab;
 
       iislab = MAXSLABS*ivent+islab;
-      zventi->slab_bot[islab] = zonehslabYB0[iislab];
-      zventi->slab_top[islab] = zonehslabYT0[iislab];
-      zventi->slab_vel[islab] =  zonehslabF0[iislab];
-      zventi->slab_temp[islab] = zonehslabT0[iislab];
+      zventi->slab_bot[islab] = zoneslab_YB0[iislab];
+      zventi->slab_top[islab] = zoneslab_YT0[iislab];
+      zventi->slab_vel[islab] =  zoneslab_F0[iislab];
+      zventi->slab_temp[islab] = zoneslab_T0[iislab];
     }
   }
 #else
@@ -1284,7 +1291,7 @@ void drawventslabdata(void){
 
     zvi = zventinfo+i;
 
-    if(zvi->vent_orien==VFLOW_VENT||zvi->vent_orien==HVAC_VENT)continue;
+    if(zvi->vent_orien==HVAC_VENT)continue;
     idir = zvi->dir;
     x1 = (zvi->x1+zvi->x2)/2.0;
     yy = zvi->yy;
@@ -1304,6 +1311,9 @@ void drawventslabdata(void){
 
       dyy = -0.1*(slab_vel[islab]/maxslabflow);
       switch(idir){
+      case 5:
+      case 6:
+        break;
       case 4:
       case 2:
         glVertex3f(yy,     x1, slab_bot);
@@ -1333,7 +1343,7 @@ void drawventslabdata(void){
 /* ------------------ drawventdata ------------------------ */
 
 void drawventdata(void){
-  if(have_ventslab_flow==1){
+  if(have_hventslab_flow==1){
     drawventslabdata();
   }
   else{
