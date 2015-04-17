@@ -1854,7 +1854,7 @@ ELSE PARTICLE_NON_STATIC_IF ! Drag calculation for stationary, airborne particle
          CALL GET_VISCOSITY(ZZ_GET,MU_AIR,TMP_G)
          Y_TERM = LPC%DRAG_COEFFICIENT * RHO_G /SQRT(LPC%PERMEABILITY)*QREL
          K_TERM = MU_AIR/LPC%PERMEABILITY
-         SFAC = 2._EB*RHO_G
+         SFAC = 1._EB/RHO_G
          LP%ACCEL_X = -(K_TERM(1)+Y_TERM(1))*UBAR*SFAC
          LP%ACCEL_Y = -(K_TERM(2)+Y_TERM(2))*VBAR*SFAC
          LP%ACCEL_Z = -(K_TERM(3)+Y_TERM(3))*WBAR*SFAC
