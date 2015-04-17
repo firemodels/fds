@@ -1670,6 +1670,16 @@ ELSE
    LES_FILTER_WIDTH = 'MEAN'
 ENDIF
 
+! Research mode
+
+IF (LES .AND. RESEARCH_MODE) THEN
+   CFL_VELOCITY_NORM = 1
+   FLUX_LIMITER = CHARM_LIMITER
+   HRRPUV_AVERAGE = 1.E20_EB
+   VN_MAX  = 0.5
+   VN_MIN  = 0.4
+ENDIF
+
 ! FDS 5 options (diagnostic timing purposes)
 
 IF (FDS5_OPTIONS) THEN
