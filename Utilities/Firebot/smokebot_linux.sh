@@ -99,9 +99,11 @@ cd
 SMOKEBOT_HOME_DIR="`pwd`"
 SMOKEBOT_DIR="$SMOKEBOT_HOME_DIR/smokebot"
 OUTPUT_DIR="$SMOKEBOT_DIR/output"
-export FDS_SVNROOT="$SMOKEBOT_HOME_DIR/FDS-SMV"
+FDS_SVNbase=FDS-SMVclean
+export FDS_SVNROOT="$SMOKEBOT_HOME_DIR/$FDS_SVNbase"
 export SMV_Summary="$FDS_SVNROOT/Manuals/SMV_Summary"
-CFAST_SVNROOT="$SMOKEBOT_HOME_DIR/cfast"
+cfastbase=cfastclean
+CFAST_SVNROOT="$SMOKEBOT_HOME_DIR/$cfastbase"
 ERROR_LOG=$OUTPUT_DIR/errors
 TIME_LOG=$OUTPUT_DIR/timings
 WARNING_LOG=$OUTPUT_DIR/warnings
@@ -295,7 +297,7 @@ update_and_compile_cfast()
    # If yes, then update the CFAST repository and compile CFAST
    then
       echo "Updating and compiling CFAST:" > $OUTPUT_DIR/stage0_cfast
-      cd $CFAST_SVNROOT/CFAST
+      cd $CFAST_SVNROOT
       svn revert -Rq *
       delete_unversioned_files
 
@@ -305,10 +307,9 @@ update_and_compile_cfast()
    # If no, then checkout the CFAST repository and compile CFAST
    else
       echo "Downloading and compiling CFAST:" > $OUTPUT_DIR/stage0_cfast
-      mkdir -p $CFAST_SVNROOT
-      cd $CFAST_SVNROOT
+      cd $SMV_HOME_DIR
 
-      svn co https://cfast.googlecode.com/svn/trunk/cfast/trunk/CFAST CFAST >> $OUTPUT_DIR/stage0_cfast 2>&1
+      svn co https://cfast.googlecode.com/svn/trunk/cfast/trunk $cfastbase >> $OUTPUT_DIR/stage0_cfast 2>&1
       
    fi
     # Build CFAST
@@ -348,7 +349,7 @@ clean_svn_repo()
    else
       echo "Downloading FDS repository:" >> $OUTPUT_DIR/stage1 2>&1
       cd $SMOKEBOT_HOME_DIR
-      svn co https://fds-smv.googlecode.com/svn/trunk/FDS/trunk/ FDS-SMV >> $OUTPUT_DIR/stage1 2>&1
+      svn co https://fds-smv.googlecode.com/svn/trunk/FDS/trunk/ $FDS_SMVbase >> $OUTPUT_DIR/stage1 2>&1
    fi
 }
 
