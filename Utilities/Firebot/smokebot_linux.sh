@@ -68,14 +68,13 @@ esac
 done
 shift $(($OPTIND-1))
 
-if [[ `whoami` == "$SMOKEBOT_USERNAME" ]];
+if [[ $FDS_SVNbase == "FDS-SMVclean" ]];
    then
       # Continue along
       :
    else
-      echo "Warning: You are running the Smokebot script as an end user."
-      echo "This script will definitely modify and/or erase your repository."
-      echo "If you wish to continue, run Firebot with the -y option at your own risk."
+      echo "Warning: You are running the Smokebot script with the"
+      echo "repo $FDS_SVNbase, not FDS-SMVclean."
       echo "Terminating script."
       exit
 fi
