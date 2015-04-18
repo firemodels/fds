@@ -11,6 +11,8 @@
 #  = Input variables =
 #  ===================
 
+FDS_SVNbase=FDS-SMVclean
+cfastbase=cfastclean
 SMOKEBOT_USERNAME="smokebot"
 SMOKEBOT_QUEUE=smokebot
 MAKEMOVIES=
@@ -68,7 +70,7 @@ esac
 done
 shift $(($OPTIND-1))
 
-if [[ $FDS_SVNbase == "FDS-SMVclean" ]];
+if [[ "$FDS_SVNbase" == "FDS-SMVclean" ]];
    then
       # Continue along
       :
@@ -101,7 +103,6 @@ OUTPUT_DIR="$SMOKEBOT_DIR/output"
 FDS_SVNbase=FDS-SMVclean
 export FDS_SVNROOT="$SMOKEBOT_HOME_DIR/$FDS_SVNbase"
 export SMV_Summary="$FDS_SVNROOT/Manuals/SMV_Summary"
-cfastbase=cfastclean
 CFAST_SVNROOT="$SMOKEBOT_HOME_DIR/$cfastbase"
 ERROR_LOG=$OUTPUT_DIR/errors
 TIME_LOG=$OUTPUT_DIR/timings
@@ -348,7 +349,7 @@ clean_svn_repo()
    else
       echo "Downloading FDS repository:" >> $OUTPUT_DIR/stage1 2>&1
       cd $SMOKEBOT_HOME_DIR
-      svn co https://fds-smv.googlecode.com/svn/trunk/FDS/trunk/ $FDS_SMVbase >> $OUTPUT_DIR/stage1 2>&1
+      svn co https://fds-smv.googlecode.com/svn/trunk/FDS/trunk/ $FDS_SVNbase >> $OUTPUT_DIR/stage1 2>&1
    fi
 }
 
