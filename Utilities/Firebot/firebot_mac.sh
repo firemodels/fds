@@ -550,9 +550,6 @@ start_time=`date`
 ### Clean up on start ###
 clean_firebot_history
 
-### Stage 0 ###
-update_and_compile_cfast
-
 ### Stage 1 ###
 clean_svn_repo
 do_svn_checkout
