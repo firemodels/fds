@@ -1,15 +1,11 @@
 #!/bin/bash
 
 DEBUG=
-REVERT=
 while getopts 'dn' OPTION
 do
 case $OPTION  in
   d)
   $DEBUG=-d
-  ;;
-  n)
-  REVERT=-n
   ;;
 esac
 done
@@ -20,5 +16,5 @@ if [ -e $running ] ; then
   exit
 fi
 touch $running
-~/firebot/firebot_mac.sh $DEBUG $REVERT "$@"
+~/firebot/firebot_mac.sh $DEBUG "$@"
 rm $running
