@@ -20,26 +20,18 @@
 #  = Input variables =
 #  ===================
 
+FDS_SVN_BASE=FDS-SMVclean
 DEBUG=
-REVERT=1
-while getopts 'n' OPTION
+FIREBOT_USERNAME=`whoami`
+while getopts 'd' OPTION
 do
 case $OPTION  in
-  n)
-  REVERT=0
-  ;;
-  n)
+  d)
   DEBUG=1
   ;;
 esac
 done
 shift $(($OPTIND-1))
-
-if [[ "$REVERT" == "1" ]] ; then
-   FIREBOT_USERNAME="firebot"
-else
-   FIREBOT_USERNAME=`whoami`
-fi
 
 # Change to home directory
 cd
@@ -48,7 +40,7 @@ FIREBOT_HOME_DIR="`pwd`"
 # Additional definitions
 SVN_REVISION=$1
 FIREBOT_DIR="/Users/$FIREBOT_USERNAME/firebot"
-FDS_SVNROOT="/Users/$FIREBOT_USERNAME/FDS-SMV"
+FDS_SVNROOT="/Users/$FIREBOT_USERNAME/$FDS_SVN_BASE"
 TIME_LOG=$FIREBOT_DIR/output/timings
 ERROR_LOG=$FIREBOT_DIR/output/errors
 WARNING_LOG=$FIREBOT_DIR/output/warnings
@@ -65,19 +57,16 @@ fi
 #  = End user warning =
 #  ====================
 
-# Warn if running as user other than firebot
-if [[ "$REVERT" == "1" ]] ; then
-   if [[ `whoami` == "$FIREBOT_USERNAME" ]];
-      then
-         # Continue along
-         :
-      else
-         echo "Warning: You are running the Firebot script as an end user."
-         echo "This script can modify and erase your repository."
-         echo "If you wish to continue, edit the script and remove this warning."
-         echo "Terminating script."
-         exit
-   fi
+# Warn if not using FDS-SMVclean
+
+if [[ "$FDS_SVN_BASE" == "FDS-SMVclean" ]];
+   then
+      # Continue along
+      :
+   else
+      echo "Warning: You are running the Firebot script with the repo $FDS_SVN_BASE not FDS-SMVclean"
+      echo "Terminating script."
+      exit
 fi
 
 #  =============================================
@@ -150,16 +139,14 @@ clean_svn_repo()
    then
       # Revert and clean up temporary unversioned and modified versioned repository files
       cd $FDS_SVNROOT
-      if [[ "$REVERT" == "1" ]] ; then
-         svn revert -Rq *
-      fi
+      svn revert -Rq *
       svn status --no-ignore | grep '^[I?]' | cut -c 9- | while IFS= read -r f; do rm -rf "$f"; done
    # If not, create FDS repository and checkout
    else
       echo "Downloading FDS repository:" >> $FIREBOT_DIR/output/stage1 2>&1
       mkdir -p $FDS_SVNROOT
       cd $FIREBOT_HOME_DIR
-      svn co http://fds-smv.googlecode.com/svn/trunk/FDS/trunk/ FDS-SMV >> $FIREBOT_DIR/output/stage1 2>&1
+      svn co http://fds-smv.googlecode.com/svn/trunk/FDS/trunk/ $FDS_SVN_BASE >> $FIREBOT_DIR/output/stage1 2>&1
    fi
 }
 
