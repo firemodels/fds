@@ -9,6 +9,8 @@ export VALIDATION_DIR=$SVNROOT/Validation
 
 # First, compile latest version of correlations.f90
 
+source $IFORT_COMPILER/bin/compilervars.sh intel64
+
 cd $SVNROOT/Utilities/Empirical_Correlations
 ifort correlations.f90 -o correlations
 
