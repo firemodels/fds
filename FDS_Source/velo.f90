@@ -2831,10 +2831,10 @@ SELECT_VELOCITY_NORM: SELECT CASE (CFL_VELOCITY_NORM)
       DO K=1,KBAR
          DO J=1,JBAR
             DO I=1,IBAR
-               UODX = ABS(UU(I-1,J,K)+UU(I,J,K))*RDX(I)
-               VODY = ABS(VV(I,J-1,K)+VV(I,J,K))*RDY(J)
-               WODZ = ABS(WW(I,J,K-1)+WW(I,J,K))*RDZ(K)
-               UVW  = 0.5_EB*MAX(UODX,VODY,WODZ) + ABS(DP(I,J,K))
+               UODX = MAXVAL(ABS(UU(I-1:I,J,K)))*RDX(I)
+               VODY = MAXVAL(ABS(VV(I,J-1:J,K)))*RDY(J)
+               WODZ = MAXVAL(ABS(WW(I,J,K-1:K)))*RDZ(K)
+               UVW  = MAX(UODX,VODY,WODZ) + ABS(DP(I,J,K))
                IF (UVW>=UVWMAX) THEN
                   UVWMAX = UVW
                   ICFL = I
