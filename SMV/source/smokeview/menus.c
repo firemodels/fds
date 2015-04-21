@@ -82,6 +82,11 @@ char menu_revision[]="$Revision$";
 #define MENU_UNITS_SHOWALL -3
 #define MENU_UNITS_HMS -2
 
+#define MENU_HELP_ISSUES -1
+#define MENU_HELP_DOWNLOADS -2
+#define MENU_HELP_DOCUMENTATION -3
+#define MENU_HELP_FDSWEB -4
+
 #define GRID_yz 1
 #define GRID_xz 2
 #define GRID_xy 3
@@ -1727,7 +1732,7 @@ void LevelMenu(int value){
 
 void HelpMenu(int value){
   switch(value){
-    case -1:
+    case MENU_HELP_ISSUES:
 #ifdef pp_OSX
       system("open http://code.google.com/p/fds-smv/issues/");
 #endif
@@ -1735,7 +1740,7 @@ void HelpMenu(int value){
       ShellExecute(NULL, "open", "http://code.google.com/p/fds-smv/issues/", NULL, NULL, SW_SHOWNORMAL);
 #endif
       break;
-    case -2:
+    case MENU_HELP_DOWNLOADS:
 #ifdef pp_OSX
       system("open http://code.google.com/p/fds-smv/downloads/");
 #endif
@@ -1743,7 +1748,7 @@ void HelpMenu(int value){
       ShellExecute(NULL, "open", "http://code.google.com/p/fds-smv/downloads/", NULL, NULL, SW_SHOWNORMAL);
 #endif
       break;
-    case -3:
+    case MENU_HELP_DOCUMENTATION:
 #ifdef pp_OSX
       system("open http://fire.nist.gov/fds/documentation.html");
 #endif
@@ -1751,7 +1756,7 @@ void HelpMenu(int value){
       ShellExecute(NULL, "open", "http://fire.nist.gov/fds/documentation.html", NULL, NULL, SW_SHOWNORMAL);
 #endif
       break;
-    case -4:
+    case MENU_HELP_FDSWEB:
 #ifdef pp_OSX
       system("open http://fire.nist.gov/fds/");
 #endif
@@ -7441,24 +7446,25 @@ updatemenu=0;
   /* --------------------------------web help menu -------------------------- */
 
   CREATEMENU(webhelpmenu,HelpMenu);
+
 #ifdef WIN32
-  glutAddMenuEntry(_("Obtain Documentation"),-3);
-  glutAddMenuEntry(_("Report problems"),-1);
-  glutAddMenuEntry(_("Download software updates"),-2);
-  glutAddMenuEntry(_("FDS/Smokeview website"),-4);
+  glutAddMenuEntry(_("Obtain Documentation"), MENU_HELP_DOCUMENTATION);
+  glutAddMenuEntry(_("Report problems"), MENU_HELP_ISSUES);
+  glutAddMenuEntry(_("Download software updates"), MENU_HELP_DOWNLOADS);
+  glutAddMenuEntry(_("FDS/Smokeview website"), MENU_HELP_FDSWEB);
 #endif
 #ifdef pp_OSX
-  glutAddMenuEntry(_("Obtain Documentation"),-3);
-  glutAddMenuEntry(_("Report problems"),-1);
-  glutAddMenuEntry(_("Download software updates"),-2);
-  glutAddMenuEntry(_("FDS/Smokeview website"),-4);
+  glutAddMenuEntry(_("Obtain Documentation"),MENU_HELP_DOCUMENTATION);
+  glutAddMenuEntry(_("Report problems"),MENU_HELP_ISSUES);
+  glutAddMenuEntry(_("Download software updates"),MENU_HELP_DOWNLOADS);
+  glutAddMenuEntry(_("FDS/Smokeview website"),MENU_HELP_FDSWEB);
 #endif
 #ifndef WIN32
 #ifndef PP_OSX
-  glutAddMenuEntry(_("Download documentation at  http://fire.nist.gov/fds/documentation.html"),1);
-  glutAddMenuEntry(_("Report a problem at http://code.google.com/p/fds-smv/issues/"),1);
-  glutAddMenuEntry(_("Check for updates at http://code.google.com/p/fds-smv/downloads/"),1);
-  glutAddMenuEntry(_("FDS/Smokeview website: http://fire.nist.gov/fds"),1);
+  glutAddMenuEntry(_("Download documentation at  http://fire.nist.gov/fds/documentation.html"),MENU_DUMMY);
+  glutAddMenuEntry(_("Report a problem at http://code.google.com/p/fds-smv/issues/"),MENU_DUMMY);
+  glutAddMenuEntry(_("Check for updates at http://code.google.com/p/fds-smv/downloads/"),MENU_DUMMY);
+  glutAddMenuEntry(_("FDS/Smokeview website: http://fire.nist.gov/fds"),MENU_DUMMY);
 #endif
 #endif
 
@@ -7466,92 +7472,95 @@ updatemenu=0;
 
   CREATEMENU(keyboardhelpmenu,HelpMenu);
   if(plotstate==DYNAMIC_PLOTS){
-    glutAddMenuEntry(_("Animation"),1);
-    glutAddMenuEntry(_("  t: set/unset single time step mode"),6);
-    glutAddMenuEntry(_("  0: reset animation to the initial time"),6);
-    glutAddMenuEntry(_("  T: toggle method for interpolating data color"),6);
+    glutAddMenuEntry(_("Animation"),MENU_DUMMY);
+    glutAddMenuEntry(_("  t: set/unset single time step mode"), MENU_DUMMY);
+    glutAddMenuEntry(_("  0: reset animation to the initial time"), MENU_DUMMY);
+    glutAddMenuEntry(_("  T: toggle method for interpolating data color"), MENU_DUMMY);
     if(cellcenter_slice_active==1){
-      glutAddMenuEntry(_("     (also, toggles cell center display on/off)"),6);
-    glutAddMenuEntry(_("  @: display FDS values in cell centered slices"),6);
+      glutAddMenuEntry(_("     (also, toggles cell center display on/off)"), MENU_DUMMY);
+      glutAddMenuEntry(_("  @: display FDS values in cell centered slices"), MENU_DUMMY);
     }
-    glutAddMenuEntry(_("  u: reload files"),6);
-    glutAddMenuEntry(_("  L: unload last slice file loaded"),6);
-    glutAddMenuEntry(_("  1-9: number of frames to skip"),6);
+    glutAddMenuEntry(_("  u: reload files"), MENU_DUMMY);
+    glutAddMenuEntry(_("  L: unload last slice file loaded"), MENU_DUMMY);
+    glutAddMenuEntry(_("  1-9: number of frames to skip"), MENU_DUMMY);
   }
   if(rotation_type==EYE_CENTERED){
-    glutAddMenuEntry(_("Motion"),1);
-    glutAddMenuEntry(_("   left/right cursor: rotate left/right"),1);
-    glutAddMenuEntry(_("      up/down cursor: move forward/backward"),1);
-    glutAddMenuEntry(_(" CTRL:up/down cursor: move forward/backward 5 times slower"),1);
-    glutAddMenuEntry(_(" SHIFT: left/right cursor: rotate 90 degrees"),1);
-    glutAddMenuEntry(_("    ALT:left/right cursor: slide left/right"),1);
-    glutAddMenuEntry(_("    ALT:   up/down cursor: slide up/down"),1);
-    glutAddMenuEntry(_("     INSERT/HOME/PageUP: tilt down/reset/tilt up"),1);
+    glutAddMenuEntry(_("Motion"), MENU_DUMMY);
+    glutAddMenuEntry(_("   left/right cursor: rotate left/right"), MENU_DUMMY);
+    glutAddMenuEntry(_("      up/down cursor: move forward/backward"), MENU_DUMMY);
+    glutAddMenuEntry(_(" CTRL:up/down cursor: move forward/backward 5 times slower"), MENU_DUMMY);
+    glutAddMenuEntry(_(" SHIFT: left/right cursor: rotate 90 degrees"), MENU_DUMMY);
+    glutAddMenuEntry(_("    ALT:left/right cursor: slide left/right"), MENU_DUMMY);
+    glutAddMenuEntry(_("    ALT:   up/down cursor: slide up/down"), MENU_DUMMY);
+    glutAddMenuEntry(_("     INSERT/HOME/PageUP: tilt down/reset/tilt up"), MENU_DUMMY);
   }
   if(plotstate==STATIC_PLOTS){
-    glutAddMenuEntry(_("Plot3D"),1);
-    glutAddMenuEntry(_("  x,y,z: toggle contour plot visibility along x, y and z axis"),3);
-    glutAddMenuEntry(_("  p: increment plot3d variable"),2);
-    glutAddMenuEntry(_("  P: toggle cursor key mappings"),2);
-    glutAddMenuEntry(_("  v: toggle flow vector visiblity"),3);
-    glutAddMenuEntry(_("  a: increase flow vector length by 1.5"),3);
-    glutAddMenuEntry(_("  ALT a: decrease flow vector length by 1.5"),3);
-    glutAddMenuEntry(_("  s: change interval between adjacent vectors"),3);
-    glutAddMenuEntry(_("  c: toggle between continuous and 2D stepped contours"),3);
-    glutAddMenuEntry(_("  i: toggle iso-surface visibility"),2);
+    glutAddMenuEntry(_("Plot3D"), MENU_DUMMY);
+    glutAddMenuEntry(_("  x,y,z: toggle contour plot visibility along x, y and z axis"), MENU_DUMMY);
+    glutAddMenuEntry(_("  p: increment plot3d variable"), MENU_DUMMY);
+    glutAddMenuEntry(_("  P: toggle cursor key mappings"), MENU_DUMMY);
+    glutAddMenuEntry(_("  v: toggle flow vector visiblity"), MENU_DUMMY);
+    glutAddMenuEntry(_("  a: increase flow vector length by 1.5"), MENU_DUMMY);
+    glutAddMenuEntry(_("  ALT a: decrease flow vector length by 1.5"), MENU_DUMMY);
+    glutAddMenuEntry(_("  s: change interval between adjacent vectors"), MENU_DUMMY);
+    glutAddMenuEntry(_("  c: toggle between continuous and 2D stepped contours"), MENU_DUMMY);
+    glutAddMenuEntry(_("  i: toggle iso-surface visibility"), MENU_DUMMY);
   }
-  glutAddMenuEntry(_("Misc"),1);
-  glutAddMenuEntry(_("  r: render the current scene to an image file"),7);
-  glutAddMenuEntry(_("  R:   (same as r but at twice the resolution)"),7);
+  glutAddMenuEntry(_("Misc"), MENU_DUMMY);
+  glutAddMenuEntry(_("  r: render the current scene to an image file"), MENU_DUMMY);
+  glutAddMenuEntry(_("  R:   (same as r but at twice the resolution)"), MENU_DUMMY);
   if(ntotal_blockages>0||isZoneFireModel==1){
-    glutAddMenuEntry(_("  g: toggle grid visibility"),2);
+    glutAddMenuEntry(_("  g: toggle grid visibility"), MENU_DUMMY);
   }
-  glutAddMenuEntry(_("  e: toggle between view rotation types: scene centered 2 axis, 1 axis, 3 axis and eye centered"),7);
-  glutAddMenuEntry(_("  q: display blockages as specified by user or as used by FDS"),7);
+  glutAddMenuEntry(_("  e: toggle between view rotation types: scene centered 2 axis, 1 axis, 3 axis and eye centered"), MENU_DUMMY);
+  glutAddMenuEntry(_("  q: display blockages as specified by user or as used by FDS"), MENU_DUMMY);
   if(ntotal_blockages>0){
-    glutAddMenuEntry(_("  O: toggle blockage view (normal <--> outline)"),7);
-    glutAddMenuEntry(_("  ALT o: cycle between all blockage view types"),7);
+    glutAddMenuEntry(_("  O: toggle blockage view (normal <--> outline)"), MENU_DUMMY);
+    glutAddMenuEntry(_("  ALT o: cycle between all blockage view types"), MENU_DUMMY);
   }
-  glutAddMenuEntry(_("  W: toggle clipping - use Options/Clip menu to specify clipping planes"),7);
-  glutAddMenuEntry(_("  -: decrement time step, 2D contour planes, 3D contour levels"),2);
-  glutAddMenuEntry(_("  space bar: increment time step, 2D contour planes, 3D contour levels"),2);
-  glutAddMenuEntry("",1);
-  glutAddMenuEntry(_("  ALT v: toggle projection  method (between perspective and size preserving)"),2);
+  if(ndeviceinfo>0&&get_num_activedevices()>0){
+    glutAddMenuEntry("  j/ALT j: increase/decrease object size", MENU_DUMMY);
+  }
+  glutAddMenuEntry(_("  W: toggle clipping - use Options/Clip menu to specify clipping planes"), MENU_DUMMY);
+  glutAddMenuEntry(_("  -: decrement time step, 2D contour planes, 3D contour levels"), MENU_DUMMY);
+  glutAddMenuEntry(_("  space bar: increment time step, 2D contour planes, 3D contour levels"), MENU_DUMMY);
+  glutAddMenuEntry("", MENU_DUMMY);
+  glutAddMenuEntry(_("  ALT v: toggle projection  method (between perspective and size preserving)"), MENU_DUMMY);
   if(n_embedded_meshes>0){
-    glutAddMenuEntry(_("  ALT u: toggle coarse slice display in embedded mesh"),2);
+    glutAddMenuEntry(_("  ALT u: toggle coarse slice display in embedded mesh"), MENU_DUMMY);
   }
   if(cellcenter_slice_active==1){
-    glutAddMenuEntry(_("  ALT y: if current slice is cell centered, toggle interpolation on/off"),2);
+    glutAddMenuEntry(_("  ALT y: if current slice is cell centered, toggle interpolation on/off"), MENU_DUMMY);
   }
   if(caseini_filename!=NULL&&strlen(caseini_filename)>0){
     char inilabel[512];
 
     sprintf(inilabel,_("  #: save settings to %s"),caseini_filename);
-    glutAddMenuEntry(inilabel,2);
+    glutAddMenuEntry(inilabel,MENU_DUMMY);
   }
   else{
-    glutAddMenuEntry(_("  #: save settings (create casename.ini file)"),2);
+    glutAddMenuEntry(_("  #: save settings (create casename.ini file)"), MENU_DUMMY);
   }
-  glutAddMenuEntry(_("  !: snap scene to closest 45 degree orientation"),2);
+  glutAddMenuEntry(_("  !: snap scene to closest 45 degree orientation"), MENU_DUMMY);
   glutAddMenuEntry(_("  ~: level the scene"),2);
-  glutAddMenuEntry(_("  &: toggle line anti-aliasing (draw lines smoothly)"),2);
+  glutAddMenuEntry(_("  &: toggle line anti-aliasing (draw lines smoothly)"), MENU_DUMMY);
 
   /* --------------------------------mouse help menu -------------------------- */
 
   CREATEMENU(mousehelpmenu,HelpMenu);
   switch(rotation_type){
     case ROTATION_2AXIS:
-      glutAddMenuEntry(_("horizontal/vertical: rotate about z, x axis"),1);
+      glutAddMenuEntry(_("horizontal/vertical: rotate about z, x axis"), MENU_DUMMY);
       break;
     case ROTATION_1AXIS:
-      glutAddMenuEntry(_("horizontal: rotate about z axis"),1);
+      glutAddMenuEntry(_("horizontal: rotate about z axis"), MENU_DUMMY);
       break;
     case ROTATION_3AXIS:
-      glutAddMenuEntry(_("horizontal/vertical: rotate about z, x axis (click near scene center)"),1);
-      glutAddMenuEntry(_("clock/counter clockwise: rotate about y axis (click near scene edge)"),1);
+      glutAddMenuEntry(_("horizontal/vertical: rotate about z, x axis (click near scene center)"), MENU_DUMMY);
+      glutAddMenuEntry(_("clock/counter clockwise: rotate about y axis (click near scene edge)"), MENU_DUMMY);
       break;
     case EYE_CENTERED:
-      glutAddMenuEntry(_("horizontal/vertical: rotate about user location"),1);
+      glutAddMenuEntry(_("horizontal/vertical: rotate about user location"), MENU_DUMMY);
       break;
     default:
       ASSERT(FFALSE);
@@ -7563,15 +7572,15 @@ updatemenu=0;
     case ROTATION_2AXIS:
     case ROTATION_1AXIS:
     case ROTATION_3AXIS:
-      glutAddMenuEntry(_("CTRL horizontal/vertical: translate along x, y axis"),1);
+      glutAddMenuEntry(_("CTRL horizontal/vertical: translate along x, y axis"), MENU_DUMMY);
       break;
     default:
       ASSERT(FFALSE);
       break;
   }
-  glutAddMenuEntry(    _("ALT vertical: translate along z axis"),1);
+  glutAddMenuEntry(_("ALT vertical: translate along z axis"), MENU_DUMMY);
   if(SHOW_gslice_data==1){
-    glutAddMenuEntry(_("double-click: rotate/translate 3D node-centered slice"),1);
+    glutAddMenuEntry(_("double-click: rotate/translate 3D node-centered slice"), MENU_DUMMY);
   }
 
   /* --------------------------------help menu -------------------------- */
