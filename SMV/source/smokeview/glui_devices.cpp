@@ -118,16 +118,16 @@ extern "C" void glui_device_setup(int main_window){
     int i;
 
     PANEL_objects = glui_device->add_panel("Devices/Objects",false);
-    if(get_num_activedevices()>0||isZoneFireModel==1){ 
 
-      PANEL_smvobjects = glui_device->add_panel_to_panel(PANEL_objects,"Objects",true);
-      SPINNER_sensorrelsize=glui_device->add_spinner_to_panel(PANEL_smvobjects,_("Scale"),GLUI_SPINNER_FLOAT,&sensorrelsize,DEVICE_sensorsize,Device_CB);
-      CHECKBOX_device_3=glui_device->add_checkbox_to_panel(PANEL_smvobjects,_("Outline"),&object_outlines);
-      CHECKBOX_device_orientation=glui_device->add_checkbox_to_panel(PANEL_smvobjects,_("Orientation"),&show_device_orientation,DEVICE_show_orientation,Device_CB);
-      SPINNER_orientation_scale=glui_device->add_spinner_to_panel(PANEL_smvobjects,_("Orientation scale"),GLUI_SPINNER_FLOAT,&orientation_scale);
-      SPINNER_orientation_scale->set_float_limits(0.1,10.0);
+    PANEL_smvobjects = glui_device->add_panel_to_panel(PANEL_objects,"Objects",true);
+    SPINNER_sensorrelsize=glui_device->add_spinner_to_panel(PANEL_smvobjects,_("Scale"),GLUI_SPINNER_FLOAT,&sensorrelsize,DEVICE_sensorsize,Device_CB);
+    CHECKBOX_device_3=glui_device->add_checkbox_to_panel(PANEL_smvobjects,_("Outline"),&object_outlines);
+    CHECKBOX_device_orientation=glui_device->add_checkbox_to_panel(PANEL_smvobjects,_("Orientation"),&show_device_orientation,DEVICE_show_orientation,Device_CB);
+    SPINNER_orientation_scale=glui_device->add_spinner_to_panel(PANEL_smvobjects,_("Orientation scale"),GLUI_SPINNER_FLOAT,&orientation_scale);
+    SPINNER_orientation_scale->set_float_limits(0.1,10.0);
 
-      PANEL_velocityvectors = glui_device->add_panel_to_panel(PANEL_objects,"Flow Vectors",true);
+    if(get_num_activedevices()>0||isZoneFireModel==1){
+      PANEL_velocityvectors = glui_device->add_panel_to_panel(PANEL_objects, "Flow Vectors", true);
       if(nvdeviceinfo==0)PANEL_velocityvectors->disable();
       CHECKBOX_device_1=glui_device->add_checkbox_to_panel(PANEL_velocityvectors,_("Show"),&showvdeviceval);
       PANEL_vector_type=glui_device->add_panel_to_panel(PANEL_velocityvectors,"type",true);
