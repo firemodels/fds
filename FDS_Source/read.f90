@@ -7742,7 +7742,7 @@ MESH_LOOP_3: DO NM=1,NMESHES
 
    DO N=1,N_OBST
       OB=>OBSTRUCTION(N)
-      IF (.NOT.OB%HIDDEN) CALL BLOCK_CELL(NM,OB%I1+1,OB%I2,OB%J1+1,OB%J2,OB%K1+1,OB%K2,1,N)
+      CALL BLOCK_CELL(NM,OB%I1+1,OB%I2,OB%J1+1,OB%J2,OB%K1+1,OB%K2,1,N)
    ENDDO
 
    ! Create arrays to hold cell indices
@@ -8255,27 +8255,11 @@ READ_HOLE_LOOP: DO N=1,N_HOLE_O
                      OB%DEVC_ID = DEVC_ID
                      OB%CTRL_ID = CTRL_ID
                      CALL SEARCH_CONTROLLER('HOLE',CTRL_ID,DEVC_ID,OB%DEVC_INDEX,OB%CTRL_INDEX,N)
-                     IF (DEVC_ID /='null') THEN
+                     IF (DEVC_ID/='null' .OR. CTRL_ID /='null') THEN
                         OB%REMOVABLE   = .TRUE.
                         OB%HOLE_FILLER = .TRUE.
-                        OB%CTRL_INDEX = -1
-                        IF (DEVICE(OB%DEVC_INDEX)%INITIAL_STATE) OB%HIDDEN = .TRUE.
-                        IF (OB%DEVC_INDEX_O > 0) THEN
-                           IF(.NOT. DEVICE(OB%DEVC_INDEX_O)%INITIAL_STATE) OB%HIDDEN = .TRUE.
-                        ELSEIF (OB%CTRL_INDEX_O > 0) THEN
-                           IF(.NOT. CONTROL(OB%CTRL_INDEX_O)%INITIAL_STATE) OB%HIDDEN = .TRUE.
-                        ENDIF
-                     ENDIF
-                     IF (CTRL_ID /='null') THEN
-                        OB%REMOVABLE   = .TRUE.
-                        OB%HOLE_FILLER = .TRUE.
-                        OB%DEVC_INDEX = -1
-                        IF (CONTROL(OB%CTRL_INDEX)%INITIAL_STATE) OB%HIDDEN = .TRUE.
-                        IF (OB%DEVC_INDEX_O > 0) THEN
-                           IF(.NOT. DEVICE(OB%DEVC_INDEX_O)%INITIAL_STATE) OB%HIDDEN = .TRUE.
-                        ELSEIF (OB%CTRL_INDEX_O > 0) THEN
-                           IF(.NOT. CONTROL(OB%CTRL_INDEX_O)%INITIAL_STATE) OB%HIDDEN = .TRUE.
-                        ENDIF
+                        IF (DEVC_ID/='null') OB%CTRL_INDEX = -1
+                        IF (CTRL_ID/='null') OB%DEVC_INDEX = -1
                      ENDIF
                      IF (OB%CONSUMABLE)    OB%REMOVABLE = .TRUE.
 
