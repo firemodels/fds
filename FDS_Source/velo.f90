@@ -2802,8 +2802,6 @@ USE PHYSICAL_FUNCTIONS, ONLY: GET_SPECIFIC_HEAT
 INTEGER, INTENT(IN) :: NM
 REAL(EB) :: UODX,VODY,WODZ,UVW,UVWMAX,R_DX2,MU_MAX,MUTRM,CP,ZZ_GET(1:N_TRACKED_SPECIES),PART_CFL,MU_TMP
 INTEGER  :: I,J,K,IW,IIG,JJG,KKG
-REAL(EB), POINTER, DIMENSION(:,:,:) :: UU=>NULL(),VV=>NULL(),WW=>NULL(),RHOP=>NULL(),DP=>NULL()
-REAL(EB), POINTER, DIMENSION(:,:,:,:) :: ZZP=>NULL()
 TYPE(WALL_TYPE), POINTER :: WC=>NULL()
 
 IF (EVACUATION_ONLY(NM)) THEN
@@ -2811,13 +2809,6 @@ IF (EVACUATION_ONLY(NM)) THEN
    RETURN
 ENDIF
 
-UU   => US
-VV   => VS
-WW   => WS
-RHOP => RHOS
-DP   => DS
-ZZP  => ZZS
- 
 CHANGE_TIME_STEP(NM) = .FALSE.
 UVWMAX = 0._EB
 VN     = 0._EB
@@ -2826,72 +2817,28 @@ R_DX2  = 1.E-9_EB
  
 ! Determine max CFL number from all grid cells
 
-SELECT_VELOCITY_NORM: SELECT CASE (CFL_VELOCITY_NORM)
-   CASE(0)
-      DO K=1,KBAR
-         DO J=1,JBAR
-            DO I=1,IBAR
-               UODX = MAXVAL(ABS(UU(I-1:I,J,K)))*RDX(I)
-               VODY = MAXVAL(ABS(VV(I,J-1:J,K)))*RDY(J)
-               WODZ = MAXVAL(ABS(WW(I,J,K-1:K)))*RDZ(K)
-               UVW  = MAX(UODX,VODY,WODZ) + ABS(DP(I,J,K))
-               IF (UVW>=UVWMAX) THEN
-                  UVWMAX = UVW
-                  ICFL = I
-                  JCFL = J
-                  KCFL = K
-               ENDIF
-            ENDDO
-         ENDDO
+DO K=1,KBAR
+   DO J=1,JBAR
+      DO I=1,IBAR
+         IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
+         UODX = MAXVAL(ABS(US(I-1:I,J,K)))*RDX(I)
+         VODY = MAXVAL(ABS(VS(I,J-1:J,K)))*RDY(J)
+         WODZ = MAXVAL(ABS(WS(I,J,K-1:K)))*RDZ(K)
+         SELECT CASE (CFL_VELOCITY_NORM)
+            CASE(0) ; UVW = MAX(UODX,VODY,WODZ) + ABS(DS(I,J,K))
+            CASE(1) ; UVW = UODX + VODY + WODZ  + ABS(DS(I,J,K))
+            CASE(2) ; UVW = SQRT(UODX**2+VODY**2+WODZ**2) + ABS(DS(I,J,K))
+            CASE(3) ; UVW = MAX(UODX,VODY,WODZ) 
+         END SELECT
+         IF (UVW>=UVWMAX) THEN
+            UVWMAX = UVW
+            ICFL = I
+            JCFL = J
+            KCFL = K
+         ENDIF
       ENDDO
-   CASE(1)
-      DO K=0,KBAR
-         DO J=0,JBAR
-            DO I=0,IBAR
-               UVW = ABS(UU(I,J,K)*RDXN(I)) + ABS(VV(I,J,K)*RDYN(J)) + ABS(WW(I,J,K)*RDZN(K))
-               UVW = UVW + ABS(DP(I,J,K))
-               IF (UVW>=UVWMAX) THEN
-                  UVWMAX = UVW
-                  ICFL=I
-                  JCFL=J
-                  KCFL=K
-               ENDIF
-            ENDDO
-         ENDDO
-      ENDDO
-   CASE(2)
-      DO K=0,KBAR
-         DO J=0,JBAR
-            DO I=0,IBAR
-               UVW = SQRT( (UU(I,J,K)*RDXN(I))**2 + (VV(I,J,K)*RDYN(J))**2 + (WW(I,J,K)*RDZN(K))**2 )
-               UVW = UVW + ABS(DP(I,J,K))
-               IF (UVW>=UVWMAX) THEN
-                  UVWMAX = UVW
-                  ICFL=I
-                  JCFL=J
-                  KCFL=K
-               ENDIF
-            ENDDO
-         ENDDO
-      ENDDO
-   CASE(3) ! same as case 0 without divergence
-      DO K=0,KBAR
-         DO J=0,JBAR
-            DO I=0,IBAR
-               UODX = ABS(UU(I,J,K))*RDXN(I)
-               VODY = ABS(VV(I,J,K))*RDYN(J)
-               WODZ = ABS(WW(I,J,K))*RDZN(K)
-               UVW  = MAX(UODX,VODY,WODZ)
-               IF (UVW>=UVWMAX) THEN
-                  UVWMAX = UVW
-                  ICFL = I
-                  JCFL = J
-                  KCFL = K
-               ENDIF
-            ENDDO
-         ENDDO
-      ENDDO
-END SELECT SELECT_VELOCITY_NORM
+   ENDDO
+ENDDO
 
 HEAT_TRANSFER_IF: IF (CHECK_HT) THEN
    WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
@@ -2900,7 +2847,7 @@ HEAT_TRANSFER_IF: IF (CHECK_HT) THEN
       IIG = WC%ONE_D%IIG
       JJG = WC%ONE_D%JJG
       KKG = WC%ONE_D%KKG
-      ZZ_GET(1:N_TRACKED_SPECIES) = ZZP(IIG,JJG,KKG,1:N_TRACKED_SPECIES)
+      ZZ_GET(1:N_TRACKED_SPECIES) = ZZS(IIG,JJG,KKG,1:N_TRACKED_SPECIES)
       CALL GET_SPECIFIC_HEAT(ZZ_GET,CP,TMP(IIG,JJG,KKG))
       UVW = ABS(WC%ONE_D%QCONF)/(WC%RHO_F*CP)
       IF (UVW>=UVWMAX) THEN
@@ -2924,7 +2871,7 @@ PARABOLIC_IF: IF (CHECK_VN) THEN
       DO J=1,JBAR
          I_LOOP: DO I=1,IBAR
             IF (SOLID(CELL_INDEX(I,J,K))) CYCLE I_LOOP
-            MU_TMP = MAX(D_Z_MAX(I,J,K),MAX(RPR,RSC)*MU(I,J,K)/RHOP(I,J,K))
+            MU_TMP = MAX(D_Z_MAX(I,J,K),MAX(RPR,RSC)*MU(I,J,K)/RHOS(I,J,K))
             IF (MU_TMP>=MU_MAX) THEN
                MU_MAX = MU_TMP
                I_VN=I
