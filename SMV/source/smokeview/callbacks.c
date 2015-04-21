@@ -1897,8 +1897,7 @@ void keyboard(unsigned char key, int flag){
         break;
       case GLUT_ACTIVE_CTRL:
       default:
-        stept++;
-        if(stept>1)stept=0;
+        stept=(stept+1)%2;
         if(stept==1){
           plotstate=getplotstate(DYNAMIC_PLOTS);
           if(plotstate==DYNAMIC_PLOTS){
@@ -1908,6 +1907,7 @@ void keyboard(unsigned char key, int flag){
             stept=0;
           }
         }
+        if(stept==0)itime_save = -1;
       }
       break;
     case 'T':

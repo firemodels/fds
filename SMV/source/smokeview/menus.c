@@ -7481,6 +7481,7 @@ updatemenu=0;
       glutAddMenuEntry(_("  @: display FDS values in cell centered slices"), MENU_DUMMY);
     }
     glutAddMenuEntry(_("  u: reload files"), MENU_DUMMY);
+    glutAddMenuEntry(_("  H: toggle  visibility of slice and vector slice files"), MENU_DUMMY);
     glutAddMenuEntry(_("  L: unload last slice file loaded"), MENU_DUMMY);
     glutAddMenuEntry(_("  1-9: number of frames to skip"), MENU_DUMMY);
   }
@@ -7500,8 +7501,7 @@ updatemenu=0;
     glutAddMenuEntry(_("  p: increment plot3d variable"), MENU_DUMMY);
     glutAddMenuEntry(_("  P: toggle cursor key mappings"), MENU_DUMMY);
     glutAddMenuEntry(_("  v: toggle flow vector visiblity"), MENU_DUMMY);
-    glutAddMenuEntry(_("  a: increase flow vector length by 1.5"), MENU_DUMMY);
-    glutAddMenuEntry(_("  ALT a: decrease flow vector length by 1.5"), MENU_DUMMY);
+    glutAddMenuEntry(_("  a/ALT a: increase/decrease flow vector length by 1.5"), MENU_DUMMY);
     glutAddMenuEntry(_("  s: change interval between adjacent vectors"), MENU_DUMMY);
     glutAddMenuEntry(_("  c: toggle between continuous and 2D stepped contours"), MENU_DUMMY);
     glutAddMenuEntry(_("  i: toggle iso-surface visibility"), MENU_DUMMY);
@@ -7513,7 +7513,7 @@ updatemenu=0;
     glutAddMenuEntry(_("  g: toggle grid visibility"), MENU_DUMMY);
   }
   glutAddMenuEntry(_("  e: toggle between view rotation types: scene centered 2 axis, 1 axis, 3 axis and eye centered"), MENU_DUMMY);
-  glutAddMenuEntry(_("  q: display blockages as specified by user or as used by FDS"), MENU_DUMMY);
+  glutAddMenuEntry(_("  q: display blockage locations as specified by user or by FDS"), MENU_DUMMY);
   if(ntotal_blockages>0){
     glutAddMenuEntry(_("  O: toggle blockage view (normal <--> outline)"), MENU_DUMMY);
     glutAddMenuEntry(_("  ALT o: cycle between all blockage view types"), MENU_DUMMY);
@@ -7521,9 +7521,9 @@ updatemenu=0;
   if(ndeviceinfo>0&&get_num_activedevices()>0){
     glutAddMenuEntry("  j/ALT j: increase/decrease object size", MENU_DUMMY);
   }
+  glutAddMenuEntry("  ALT r: toggle research mode (global min/max for coloring data, turn off axis label smoothing)", MENU_DUMMY);
   glutAddMenuEntry(_("  W: toggle clipping - use Options/Clip menu to specify clipping planes"), MENU_DUMMY);
-  glutAddMenuEntry(_("  -: decrement time step, 2D contour planes, 3D contour levels"), MENU_DUMMY);
-  glutAddMenuEntry(_("  space bar: increment time step, 2D contour planes, 3D contour levels"), MENU_DUMMY);
+  glutAddMenuEntry(_("  -/space bar: decrement/increment time step, 2D contour planes, 3D contour levels"), MENU_DUMMY);
   glutAddMenuEntry("", MENU_DUMMY);
   glutAddMenuEntry(_("  ALT v: toggle projection  method (between perspective and size preserving)"), MENU_DUMMY);
   if(n_embedded_meshes>0){
