@@ -2983,7 +2983,7 @@ ENDIF
 
 ! Initialize solid properties included in the WALL derived type variable
  
-IF (WC%BOUNDARY_TYPE/=NULL_BOUNDARY) THEN
+IF (WC%BOUNDARY_TYPE/=NULL_BOUNDARY .AND. WC%BOUNDARY_TYPE/=INTERPOLATED_BOUNDARY) THEN
    IF (IW<=N_EXTERNAL_WALL_CELLS .AND. THIN_OBSTRUCTION) WC%OBST_INDEX = 0  ! If a flat plate is removed from external wall.
    IF (OBST_INDEX_C(IC)>0) THEN
       WC%OBST_INDEX = OBST_INDEX_C(IC)
