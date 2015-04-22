@@ -13,7 +13,7 @@
       SCARC_SMOOTH               = 'SSOR'
       SCARC_SMOOTH_ITERATIONS    =   5     /
 
-&TIME T_END=1.0 /
+&TIME T_END=1.0, DT=0.002 /
 
 &SURF ID='INFLOW1',VEL=-2.0, RAMP_V='IN1' /
 &SURF ID='INFLOW2',VEL=-2.0, RAMP_V='IN2' /
