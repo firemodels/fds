@@ -2493,14 +2493,14 @@ DO N=1,N_TRACKED_SPECIES
    ENDDO
    ITMP = NINT(TMPA)
    WRITE(LU_OUTPUT,'(A)') ' '
-   WRITE(LU_OUTPUT,'(A,ES9.2)')  '   Viscosity (kg/m/s)   Ambient (293 K): ', MU_RMW_Z(ITMP,N)*SM%MW
-   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                  500 K: ', MU_RMW_Z( 500,N)*SM%MW
-   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                 1000 K: ', MU_RMW_Z(1000,N)*SM%MW
-   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                 1500 K: ', MU_RMW_Z(1500,N)*SM%MW
-   WRITE(LU_OUTPUT,'(A,ES9.2)')  '   Therm. Cond. (W/m/K) Ambient (293 K): ', K_RMW_Z(ITMP,N)*SM%MW
-   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                  500 K: ', K_RMW_Z( 500,N)*SM%MW
-   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                 1000 K: ', K_RMW_Z(1000,N)*SM%MW
-   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                 1500 K: ', K_RMW_Z(1500,N)*SM%MW
+   WRITE(LU_OUTPUT,'(A,ES9.2)')  '   Viscosity (kg/m/s)   Ambient (293 K): ', MU_RSQMW_Z(ITMP,N)/RSQ_MW_Z(N)
+   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                  500 K: ', MU_RSQMW_Z( 500,N)/RSQ_MW_Z(N)
+   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                 1000 K: ', MU_RSQMW_Z(1000,N)/RSQ_MW_Z(N)
+   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                 1500 K: ', MU_RSQMW_Z(1500,N)/RSQ_MW_Z(N)
+   WRITE(LU_OUTPUT,'(A,ES9.2)')  '   Therm. Cond. (W/m/K) Ambient (293 K): ', K_RSQMW_Z(ITMP,N)/RSQ_MW_Z(N)
+   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                  500 K: ', K_RSQMW_Z( 500,N)/RSQ_MW_Z(N)
+   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                 1000 K: ', K_RSQMW_Z(1000,N)/RSQ_MW_Z(N)
+   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                 1500 K: ', K_RSQMW_Z(1500,N)/RSQ_MW_Z(N)
    WRITE(LU_OUTPUT,'(A,ES9.2)')  '   Spec. Heat (J/kg/K)  Ambient (293 K): ', CP_Z(ITMP,N)
    WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                  500 K: ', CP_Z( 500,N)
    WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                 1000 K: ', CP_Z(1000,N)
@@ -4726,6 +4726,7 @@ SELECT CASE(IND)
          END SELECT
          GAS_PHASE_OUTPUT_RES = DT*UVW
       ENDIF
+      
    CASE(71)  ! VN
       IF (TWO_D) THEN
          R_DX2 = RDX(II)**2 + RDZ(KK)**2
@@ -4733,7 +4734,7 @@ SELECT CASE(IND)
          R_DX2 = RDX(II)**2 + RDY(JJ)**2 + RDZ(KK)**2
       ENDIF
       GAS_PHASE_OUTPUT_RES = DT*2._EB*R_DX2*MAX(D_Z_MAX(II,JJ,KK),MAX(RPR,RSC)*MU(II,JJ,KK)/RHO(II,JJ,KK))
-
+      
    CASE(80)  ! I
       GAS_PHASE_OUTPUT_RES = REAL(II,EB)
    CASE(81)  ! J
