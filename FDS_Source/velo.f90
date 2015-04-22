@@ -2206,7 +2206,7 @@ EDGE_LOOP: DO IE=1,N_EDGES
                   CASE (WALL_MODEL_BC) BOUNDARY_CONDITION
 
                      ITMP = MIN(5000,NINT(0.5_EB*(TMP(IIGM,JJGM,KKGM)+TMP(IIGP,JJGP,KKGP))))
-                     MU_WALL = MU_RMW_Z(ITMP,1)*SPECIES_MIXTURE(1)%MW
+                     MU_WALL = MU_RSQMW_Z(ITMP,1)/RSQ_MW_Z(1)
                      RHO_WALL = 0.5_EB*( RHOP(IIGM,JJGM,KKGM) + RHOP(IIGP,JJGP,KKGP) )
                      CALL WALL_MODEL(SLIP_COEF,U_TAU,Y_PLUS,VEL_GAS-VEL_T,MU_WALL/RHO_WALL,DXX(ICD),SF%ROUGHNESS)
                      SELECT CASE(SLIP_CONDITION)
@@ -2817,6 +2817,7 @@ R_DX2  = 1.E-9_EB
  
 ! Determine max CFL number from all grid cells
 
+
 DO K=1,KBAR
    DO J=1,JBAR
       DO I=1,IBAR
@@ -2829,7 +2830,7 @@ DO K=1,KBAR
             CASE(1) ; UVW = UODX + VODY + WODZ  + ABS(DS(I,J,K))
             CASE(2) ; UVW = SQRT(UODX**2+VODY**2+WODZ**2) + ABS(DS(I,J,K))
             CASE(3) ; UVW = MAX(UODX,VODY,WODZ) 
-         END SELECT
+         END SELECT         
          IF (UVW>=UVWMAX) THEN
             UVWMAX = UVW
             ICFL = I
