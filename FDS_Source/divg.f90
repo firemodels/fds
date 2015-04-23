@@ -1124,25 +1124,33 @@ PREDICT_NORMALS: IF (PREDICTOR) THEN
                   CYCLE WALL_LOOP3
                ENDIF
             ENDIF
+
             TIME_RAMP_FACTOR = EVALUATE_RAMP(TSI,SF%TAU(TIME_VELO),SF%RAMP_INDEX(TIME_VELO))
             KK               = WC%ONE_D%KK
             DELTA_P          = PBAR_P(KK,SF%DUCT_PATH(1)) - PBAR_P(KK,SF%DUCT_PATH(2))
             PRES_RAMP_FACTOR = SIGN(1._EB,SF%MAX_PRESSURE-DELTA_P)*SQRT(ABS((DELTA_P-SF%MAX_PRESSURE)/SF%MAX_PRESSURE))
-            SELECT CASE(IOR) 
-               CASE( 1)
-                  WC%ONE_D%UWS =-U0 + TIME_RAMP_FACTOR*(WC%UW0+U0)
-               CASE(-1)
-                  WC%ONE_D%UWS = U0 + TIME_RAMP_FACTOR*(WC%UW0-U0)
-               CASE( 2)
-                  WC%ONE_D%UWS =-V0 + TIME_RAMP_FACTOR*(WC%UW0+V0)
-               CASE(-2)
-                  WC%ONE_D%UWS = V0 + TIME_RAMP_FACTOR*(WC%UW0-V0)
-               CASE( 3)
-                  WC%ONE_D%UWS =-W0 + TIME_RAMP_FACTOR*(WC%UW0+W0)
-               CASE(-3)
-                  WC%ONE_D%UWS = W0 + TIME_RAMP_FACTOR*(WC%UW0-W0)
-            END SELECT
+
+            IF (ABS(WC%UW0)<TWO_EPSILON_EB) THEN
+               WC%ONE_D%UWS = 0._EB ! handle WC%UW0=0 on a solid wall, you do not want a time ramp from U0
+            ELSE
+               SELECT CASE(IOR) 
+                  CASE( 1)
+                     WC%ONE_D%UWS =-U0 + TIME_RAMP_FACTOR*(WC%UW0+U0)
+                  CASE(-1)
+                     WC%ONE_D%UWS = U0 + TIME_RAMP_FACTOR*(WC%UW0-U0)
+                  CASE( 2)
+                     WC%ONE_D%UWS =-V0 + TIME_RAMP_FACTOR*(WC%UW0+V0)
+                  CASE(-2)
+                     WC%ONE_D%UWS = V0 + TIME_RAMP_FACTOR*(WC%UW0-V0)
+                  CASE( 3)
+                     WC%ONE_D%UWS =-W0 + TIME_RAMP_FACTOR*(WC%UW0+W0)
+                  CASE(-3)
+                     WC%ONE_D%UWS = W0 + TIME_RAMP_FACTOR*(WC%UW0-W0)
+               END SELECT
+            ENDIF
+
             ! Special Cases
+        
             NEUMANN_IF: IF (SF%SPECIFIED_NORMAL_GRADIENT) THEN
                IIG = WC%ONE_D%IIG
                JJG = WC%ONE_D%JJG
@@ -1162,7 +1170,9 @@ PREDICT_NORMALS: IF (PREDICTOR) THEN
                      WC%ONE_D%UWS = (W(IIG,JJG,KKG-1) + SF%VEL_GRAD*WC%RDN)
                END SELECT
             ENDIF NEUMANN_IF
+            
             IF (ABS(SURFACE(WC%SURF_INDEX)%MASS_FLUX_TOTAL)>=TWO_EPSILON_EB) WC%ONE_D%UWS = WC%ONE_D%UWS*RHOA/WC%RHO_F
+            
             VENT_IF: IF (WC%VENT_INDEX>0) THEN 
                VT=>VENTS(WC%VENT_INDEX)
                IF (VT%N_EDDY>0) THEN ! Synthetic Eddy Method
@@ -1189,6 +1199,7 @@ PREDICT_NORMALS: IF (PREDICTOR) THEN
                         WC%ONE_D%UWS = WC%ONE_D%UWS + TIME_RAMP_FACTOR*VT%W_EDDY(II,JJ)*PROFILE_FACTOR
                   END SELECT
                ENDIF
+
                EVACUATION_BC_IF: IF (EVACUATION_ONLY(NM)) THEN
                   II = EVAC_TIME_ITERATIONS / MAXVAL(EMESH_NFIELDS)
                   IF ((ABS(ICYC)+1) > (WC%VENT_INDEX-1)*II .AND. (ABS(ICYC)+1) <= WC%VENT_INDEX*II) THEN
@@ -1199,6 +1210,7 @@ PREDICT_NORMALS: IF (PREDICTOR) THEN
                   END IF
                   WC%ONE_D%UWS = TIME_RAMP_FACTOR*WC%UW0
                END IF EVACUATION_BC_IF
+
                WANNIER_BC: IF (PERIODIC_TEST==5) THEN
                   II = WC%ONE_D%II
                   JJ = WC%ONE_D%JJ
