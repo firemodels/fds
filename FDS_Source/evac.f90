@@ -47,7 +47,7 @@ MODULE EVAC
        EMESH_INDEX, HUMAN_SMOKE_HEIGHT, EVAC_DELTA_SEE, EVAC_EMESH_STAIRS_TYPE, EMESH_STAIRS
   PUBLIC NO_EVAC_MESHES, INPUT_EVAC_GRIDS
   !
-  CHARACTER(255):: EVAC_VERSION = '2.5.0'
+  CHARACTER(255):: EVAC_VERSION = '2.5.1'
   CHARACTER(255) :: EVAC_COMPILE_DATE
   INTEGER :: EVAC_MODULE_REV
 
@@ -10756,13 +10756,13 @@ CONTAINS
                         ! A lonely soul
                         DO iii = 1, Human_Known_Doors(-HR%GROUP_ID)%N_nodes
                            IF (EVAC_DOORS(EVAC_NODE_LIST(INODE)%NODE_INDEX)%INODE == &
-                                Human_Known_Doors(-HR%GROUP_ID)%I_nodes(iii)) Is_Known_Door_tmp = .TRUE.
+                                ABS(Human_Known_Doors(-HR%GROUP_ID)%I_nodes(iii))) Is_Known_Door_tmp = .TRUE.
                         END DO
                      ELSE
                         ! A member of a group
                         DO iii = 1, Group_Known_Doors(HR%GROUP_ID)%N_nodes
                            IF (EVAC_DOORS(EVAC_NODE_LIST(INODE)%NODE_INDEX)%INODE == &
-                                Group_Known_Doors(HR%GROUP_ID)%I_nodes(iii)) Is_Known_Door_tmp = .TRUE.
+                                ABS(Group_Known_Doors(HR%GROUP_ID)%I_nodes(iii))) Is_Known_Door_tmp = .TRUE.
                         END DO
                      END IF
                   ELSE
@@ -10803,13 +10803,13 @@ CONTAINS
                         ! A lonely soul
                         DO iii = 1, Human_Known_Doors(-HR%GROUP_ID)%N_nodes
                            IF (EVAC_EXITS(EVAC_NODE_LIST(INODE)%NODE_INDEX)%INODE == &
-                                Human_Known_Doors(-HR%GROUP_ID)%I_nodes(iii)) Is_Known_Door_tmp = .TRUE.
+                                ABS(Human_Known_Doors(-HR%GROUP_ID)%I_nodes(iii))) Is_Known_Door_tmp = .TRUE.
                         END DO
                      ELSE
                         ! A member of a group
                         DO iii = 1, Group_Known_Doors(HR%GROUP_ID)%N_nodes
                            IF (EVAC_EXITS(EVAC_NODE_LIST(INODE)%NODE_INDEX)%INODE == &
-                                Group_Known_Doors(HR%GROUP_ID)%I_nodes(iii)) Is_Known_Door_tmp = .TRUE.
+                                ABS(Group_Known_Doors(HR%GROUP_ID)%I_nodes(iii))) Is_Known_Door_tmp = .TRUE.
                         END DO
                      END IF
                   ELSE
@@ -11527,7 +11527,7 @@ CONTAINS
             ELSE
                IN = EVAC_NODE_LIST(I)%NODE_INDEX
                DO ID = 1, HUMAN_KNOWN_DOORS(IG)%N_NODES
-                  IF (I == HUMAN_KNOWN_DOORS(IG)%I_NODES(ID)) THEN
+                  IF (I == ABS(HUMAN_KNOWN_DOORS(IG)%I_NODES(ID))) THEN
                      ISKNOWNDOOR = .TRUE.
                      EXIT
                   END IF
@@ -15795,7 +15795,7 @@ CONTAINS
     !
     ! Local variables
     REAL :: RN_REAL
-    REAL(EB) :: L2_min, max_fed, ave_K, L2_tmp, RN, max_fed2, ave_K2
+    REAL(EB) :: L2_min, max_fed, ave_K, L2_tmp, RN, max_fed2, ave_K2, L2_tmp2
     REAL(EB) :: x1_old, y1_old, Speed, X11, Y11, x_o, y_o, XBx, XBy
     REAL(EB) :: X1, Y1, X2, Y2, DOOR_WIDTH, X_XYZ, Y_XYZ
     INTEGER :: i_old_ffield, i_tmp, i_new_ffield, IEL, color_index, DOOR_IOR
@@ -15858,7 +15858,7 @@ CONTAINS
                 IF (EVAC_DOORS(i)%KNOWN_DOOR) Is_Known_Door(i) = .TRUE.
                 IF (imode == 0) CYCLE   ! Initialization call
                 DO i_tmp = 1, Human_Known_Doors(j1)%N_nodes
-                   IF (EVAC_DOORS(i)%INODE == Human_Known_Doors(j1)%I_nodes(i_tmp)) Is_Known_Door(i) = .TRUE.
+                   IF (EVAC_DOORS(i)%INODE == ABS(Human_Known_Doors(j1)%I_nodes(i_tmp))) Is_Known_Door(i) = .TRUE.
                 END DO
              END IF
           END DO
@@ -15868,7 +15868,7 @@ CONTAINS
                 IF (EVAC_EXITS(i)%KNOWN_DOOR) Is_Known_Door(N_DOORS+i) = .TRUE.
                 IF (imode == 0) CYCLE   ! Initialization call
                 DO i_tmp = 1, Human_Known_Doors(j1)%N_nodes
-                   IF (EVAC_EXITS(i)%INODE == Human_Known_Doors(j1)%I_nodes(i_tmp)) Is_Known_Door(N_DOORS+i) = .TRUE.
+                   IF (EVAC_EXITS(i)%INODE == ABS(Human_Known_Doors(j1)%I_nodes(i_tmp))) Is_Known_Door(N_DOORS+i) = .TRUE.
                 END DO
              END IF
           END DO
@@ -15884,7 +15884,7 @@ CONTAINS
                 IF (EVAC_DOORS(i)%KNOWN_DOOR) Is_Known_Door(i) = .TRUE.
                 IF (imode == 0) CYCLE   ! Initialization call
                 DO i_tmp = 1, Group_Known_Doors(j)%N_nodes
-                   IF (EVAC_DOORS(i)%INODE == Group_Known_Doors(j)%I_nodes(i_tmp)) Is_Known_Door(i) = .TRUE.
+                   IF (EVAC_DOORS(i)%INODE == ABS(Group_Known_Doors(j)%I_nodes(i_tmp))) Is_Known_Door(i) = .TRUE.
                 END DO
              END IF
           END DO
@@ -15894,7 +15894,7 @@ CONTAINS
                 IF (EVAC_EXITS(i)%KNOWN_DOOR) Is_Known_Door(N_DOORS+i) = .TRUE.
                 IF (imode == 0) CYCLE   ! Initialization call
                 DO i_tmp = 1, Group_Known_Doors(j)%N_nodes
-                   IF (EVAC_EXITS(i)%INODE == Group_Known_Doors(j)%I_nodes(i_tmp)) Is_Known_Door(N_DOORS+i) = .TRUE.
+                   IF (EVAC_EXITS(i)%INODE == ABS(Group_Known_Doors(j)%I_nodes(i_tmp))) Is_Known_Door(N_DOORS+i) = .TRUE.
                 END DO
              END IF
           END DO
@@ -16129,6 +16129,9 @@ CONTAINS
           PP_see_door = PP_see_door .OR. PP_see_doorXB
           FED_max_Door(i) = max_fed
           K_ave_Door(i) = ave_K
+          IF (FED_DOOR_CRIT < TWO_EPSILON_EB) THEN
+             K_ave_door(i) = MAX(K_ave_Door(i),0.5_EB*ABS(FED_DOOR_CRIT)) ! no divisions by zero
+          END IF
 
           ! Note: a DOOR is not counted as visible door, if it does not have an
           ! EXIT_SIGN, unless it is already been a target door for this agent/group.
@@ -16160,14 +16163,25 @@ CONTAINS
     ! it was not known door.  And if there are no known doors at all then the
     ! one that have already be chosen is better known that the others.
     ! Note: I_Target < 0: not visible, >0: visible
-    IF (imode == 1) THEN
-       DO i = 1, N_DOORS + N_EXITS
-          IF (ABS(HR%I_Target) == i .AND. Is_Visible_Door(i)) Is_Known_Door(i) = .TRUE.
-       END DO
-    END IF
 
     ! If the target door has been visible before, it is considered to be visible still.
     IF (HR%I_Target > 0) Is_Visible_Door(HR%I_Target) = .TRUE.
+
+    IF (imode == 1) THEN
+       DO i = 1, N_DOORS + N_EXITS
+          IF (ABS(HR%I_Target) == i .AND. Is_Visible_Door(i)) Is_Known_Door(i) = .TRUE.
+          IF (HR%GROUP_ID <= 0) THEN ! This does not work for groups yet
+             ! If the door is known to have too much smoke, set it unknown and not visible
+             ! If the door is known to have some smoke, set it unknown
+             Do_Known_doors0: DO ii=1,Human_Known_Doors(j1)%N_nodes
+                IF (ABS(Human_Known_Doors(j1)%I_nodes(ii)) == n_egrids+N_ENTRYS+i) THEN
+                   IF (Human_Known_Doors(j1)%I_nodes(ii) == 0) Is_Visible_Door(i) = .FALSE.
+                   IF (Human_Known_Doors(j1)%I_nodes(ii) <= 0) Is_Known_Door(i) = .FALSE.
+                END IF
+             END DO Do_Known_doors0
+          END IF
+       END DO
+    END IF
 
     ! If no visible nor known doors then the present target door is the only option so it 
     ! is set to be known.
@@ -16233,6 +16247,37 @@ CONTAINS
                    i_tmp = i
                 END IF
              END IF
+             IF (i == ABS(I_Old_Target)) THEN
+                IF (FED_DOOR_CRIT >= TWO_EPSILON_EB) THEN
+                   IF (j > 0) THEN
+                      L2_tmp = Group_List(j)%IntDose + FED_max_Door(i) * SQRT((x1_old-x_o)**2+(y1_old-y_o)**2)/Speed
+                   ELSE
+                      L2_tmp = HR%IntDose + FED_max_Door(i) * SQRT((x1_old-x_o)**2+(y1_old-y_o)**2)/Speed
+                   END IF
+                   L2_tmp2 = FED_max_Door(i) * SQRT((x1_old-x_o)**2 + (y1_old-y_o)**2)/Speed  ! no smoke criteria
+                ELSE
+                   ! Check that visibility > 0.5*distance to the door
+                   L2_tmp = SQRT((x1_old-x_o)**2+(y1_old-y_o)**2)*0.5_EB/(3.0_EB/K_ave_Door(i))
+                   L2_tmp2 = K_ave_Door(i)  ! no smoke criteria
+                END IF
+                L2_tmp  = FAC_DOOR_OLD2*L2_tmp 
+                L2_tmp2 = FAC_DOOR_OLD *L2_tmp2
+                IF (HR%GROUP_ID <= 0 .AND. L2_tmp2 >= ABS(FED_DOOR_CRIT)) THEN ! This is not working for groups yet
+                   ! The present (known) target door has some smoke, record this information for later use.
+                   ! If there is too much smoke => set i_nodes = 0 for this door, is not anymore known door
+                   ! If there is some smoke => set i_nodes = -ABS(i_nodes), i.e., the door node number is negative
+                   Do_Known_doors1: DO ii=1,Human_Known_Doors(j1)%N_nodes
+                      IF (ABS(Human_Known_Doors(j1)%I_nodes(ii)) == n_egrids+N_ENTRYS+ABS(I_Old_Target)) THEN
+                         IF (L2_tmp >= 1.0_EB) THEN
+                            Human_Known_Doors(j1)%I_nodes(ii) = 0 ! no door, too much smoke
+                         ELSE
+                            Human_Known_Doors(j1)%I_nodes(ii) = -(n_egrids+N_ENTRYS+ABS(I_Old_Target)) ! some smoke
+                         END IF
+                         EXIT Do_Known_doors1
+                      END IF
+                   END DO Do_Known_doors1
+                END IF
+             END IF
           END IF
        END DO
        IF (i_tmp > 0 ) THEN
@@ -16272,7 +16317,7 @@ CONTAINS
                    ! Now L1 norm for non-visible doors (21.9.2010)
                    L2_tmp = FED_max_Door(i)*(ABS(x1_old-x_o) + ABS(y1_old-y_o))/Speed
                 ELSE
-                   l2_tmp = K_ave_Door(i)
+                   L2_tmp = K_ave_Door(i)
                 END IF
                 IF (i_o == i_old_ffield) L2_tmp = FAC_DOOR_OLD*L2_tmp
                 ! T_tmp  = SQRT((x_o-x1_old)**2 + (y_o-y1_old)**2)
@@ -16321,7 +16366,7 @@ CONTAINS
                    IF (FED_DOOR_CRIT >= TWO_EPSILON_EB) THEN
                       L2_tmp = FED_max_Door(i)*SQRT((x1_old-x_o)**2 + (y1_old-y_o)**2)/Speed
                    ELSE
-                      l2_tmp = K_ave_Door(i)
+                      L2_tmp = K_ave_Door(i)
                    END IF
                    IF (i_o == i_old_ffield) L2_tmp = FAC_DOOR_OLD*L2_tmp
                    T_tmp  = SQRT((x_o-x1_old)**2 + (y_o-y1_old)**2)
@@ -16383,13 +16428,15 @@ CONTAINS
                       ELSE
                          ! Check that visibility > 0.5*distance to the door
                          IF (Is_Visible_Door(i)) THEN
-                            l2_tmp = SQRT((x1_old-x_o)**2+(y1_old-y_o)**2)*0.5_EB/(3.0_EB/K_ave_Door(i))
+                            L2_tmp = SQRT((x1_old-x_o)**2+(y1_old-y_o)**2)*0.5_EB/(3.0_EB/K_ave_Door(i))
                          ELSE
-                            l2_tmp = (ABS(x1_old-x_o)+ABS(y1_old-y_o))*0.5_EB/(3.0_EB/K_ave_Door(i))
+                            L2_tmp = (ABS(x1_old-x_o)+ABS(y1_old-y_o))*0.5_EB/(3.0_EB/K_ave_Door(i))
                          END IF
                       END IF
-                      IF (L2_tmp >= 1.0_EB) Is_Visible_Door(i) = .FALSE.  ! Too much smoke
-                      IF (L2_tmp >= 1.0_EB) Is_Known_Door(i)   = .FALSE.  ! Too much smoke
+                      IF (L2_tmp >= 1.0_EB) THEN
+                         Is_Visible_Door(i) = .FALSE.  ! Too much smoke
+                         Is_Known_Door(i)   = .FALSE.  ! Too much smoke
+                      END IF
                       IF (i_o == i_old_ffield) L2_tmp = FAC_DOOR_OLD2*L2_tmp
                       IF (L2_tmp < L2_min) THEN
                          L2_min = L2_tmp
