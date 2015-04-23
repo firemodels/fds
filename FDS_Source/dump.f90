@@ -3269,7 +3269,7 @@ WRITE(LU_OUTPUT,*)
         6X,' Max divergence: ',E9.2,' at (',I3,',',I3,',',I3,')'/ &
         6X,' Min divergence: ',E9.2,' at (',I3,',',I3,',',I3,')')
 133 FORMAT(6X,' Max div. error: ',E9.2,' at (',I3,',',I3,',',I3,')')
-230 FORMAT(6X,' Max VN number:  ',E9.2,' at (',I3,',',I3,',',I3,')')
+230 FORMAT(6X,' Max VN  number: ',E9.2,' at (',I3,',',I3,',',I3,')')
 119 FORMAT(6X,' Total Heat Release Rate:      ',F13.3,' kW')
 120 FORMAT(6X,' Radiation Loss to Boundaries: ',F13.3,' kW')
 421 FORMAT(6X,' Fire Resolution Index:        ',F12.3)
@@ -4603,7 +4603,7 @@ SELECT CASE(IND)
             ZZ_GET(1:N_TRACKED_SPECIES) = ZZ(II,JJ,KK,1:N_TRACKED_SPECIES)
             CALL GET_MOLECULAR_WEIGHT(ZZ_GET,MW)
             CALL GET_SPECIFIC_HEAT(ZZ_GET,CP,TMP(II,JJ,KK)) 
-            GAS_PHASE_OUTPUT_RES = MW*1.92E-6_EB*SQRT(TMP(II,JJ,KK))/4.186_EB*100._EB            
+            GAS_PHASE_OUTPUT_RES = MW*1.92E-6_EB*SQRT(TMP(II,JJ,KK))/4.186_EB/10._EB            
          ELSE
             CALL GET_CONDUCTIVITY(ZZ_GET,GAS_PHASE_OUTPUT_RES,TMP(II,JJ,KK))
          ENDIF
