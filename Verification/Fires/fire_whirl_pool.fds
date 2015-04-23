@@ -1,13 +1,5 @@
 &HEAD CHID='fire_whirl_pool', TITLE='UT Fire Whirl'  /
 
-!MULT ID='m1', DX=1,DY=1,DZ=1, I_UPPER=1,J_UPPER=1,K_UPPER=7/
-!MESH IJK=32,32,32, XB=-1,0,-1,0,0,1, MULT_ID='m1'/
-
-!MESH IJK=64,64,64, XB=-1,1,-1,1,0,2 /
-!MESH IJK=64,64,64, XB=-1,1,-1,1,2,4 /
-!MESH IJK=64,64,64, XB=-1,1,-1,1,4,6 /
-!MESH IJK=64,64,64, XB=-1,1,-1,1,6,8 /
-
 &MESH IJK=16,16,64, XB=-1,1,-1,1,0,8 /
 
 &TIME T_END=15./
