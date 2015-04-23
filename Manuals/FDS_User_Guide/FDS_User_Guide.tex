@@ -6463,7 +6463,7 @@ occur when the {\ct QUANTITY} value passes above, or below, the given {\ct SETPO
 The following parameters dictate how a device will control something:
 \begin{description}
 \item[{\ct SETPOINT}] The value of the device at which its state changes.  For a detection type of device (e.g., heat or smoke) this value is taken from the device's {\ct PROP} inputs and need not be specified on the {\ct DEVC} line.
-\item[{\ct TRIP\_DIRECTION}] A positive integer means the device will change state when its value increases past the setpoint and a negative integer means the device will change state when its value decreases past the setpoint.  The default value is +1.
+\item[{\ct TRIP\_DIRECTION}] A positive integer means the device will change from its {\ct INITIAL\_STATE} when the value of the device is greater than the {\ct SETPOINT} and be equal to the {\ct INITIAL\_STATE} when the value is less than the {\ct SETPOINT}. A negative integer has the opposite behavior. The device will change from its {\ct INITIAL\_STATE} when the value of the device is less than the {\ct SETPOINT} and be equal to the {\ct INITIAL\_STATE} when the value is greater than the {\ct SETPOINT}. The default value is +1.
 \item[{\ct LATCH}] If this logical value is set to {\ct .TRUE.} the device will only change state once. The default value is {\ct .TRUE.}.
 \item[{\ct INITIAL\_STATE}] This logical value is the initial state of the device. The default value is {\ct .FALSE.} For example, if an obstruction associated with the device is to disappear, set {\ct INITIAL\_STATE=.TRUE.}
 \end{description}
@@ -6639,7 +6639,7 @@ This relationship between a sprinkler and its pipes means that the sprinkler spr
 \subsection{Control Function: \texorpdfstring{{\tt DEADBAND}}{DEADBAND}}
 \label{info:DEADBAND}
 
-This control function behaves like an HVAC thermostat.  It can operate in one of two modes analogous to heating or cooling. The function is provided with an {\ct INPUT\_ID} which is the {\ct DEVC} whose value is used by the function, an upper and lower {\ct SETPOINT}, and the mode of operation by {\ct ON\_BOUND}.  If  {\ct ON\_BOUND='LOWER'}, the function changes state from its {\ct INITIAL\_VALUE} when the value of the {\ct INPUT\_ID} drops below the lower value in {\ct SETPOINT} and reverts when it increases past the upper value, i.e., like a heating system. The reverse will occur if {\ct ON\_BOUND='UPPER'}, i.e., a cooling system.
+This control function behaves like an HVAC thermostat.  It can operate in one of two modes analogous to heating or cooling. The function is provided with an {\ct INPUT\_ID} which is the {\ct DEVC} whose value is used by the function, an upper and lower {\ct SETPOINT}, and the mode of operation by {\ct ON\_BOUND}.  If  {\ct ON\_BOUND='LOWER'}, the function changes state from its {\ct INITIAL\_STATE} when the value of the {\ct INPUT\_ID} drops below the lower value in {\ct SETPOINT} and reverts when it increases past the upper value, i.e., like a heating system. The reverse will occur if {\ct ON\_BOUND='UPPER'}, i.e., a cooling system.
 
 For an HVAC system, the following lines of input would set up a simple thermostat:
 \begin{lstlisting}
