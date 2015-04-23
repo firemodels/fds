@@ -195,10 +195,10 @@ SPECIES_GT_1_IF: IF (N_TRACKED_SPECIES>1) THEN
    DO K=0,KBAR
       DO J=0,JBAR
          DO I=0,IBAR
-            N=MAXLOC(ZZP(I,J,K,:),1)
-            RHO_D_DZDX(I,J,K,N) = -(SUM(RHO_D_DZDX(I,J,K,:))-RHO_D_DZDX(I,J,K,N))
-            RHO_D_DZDY(I,J,K,N) = -(SUM(RHO_D_DZDY(I,J,K,:))-RHO_D_DZDY(I,J,K,N))
-            RHO_D_DZDZ(I,J,K,N) = -(SUM(RHO_D_DZDZ(I,J,K,:))-RHO_D_DZDZ(I,J,K,N))
+            N=MAXLOC(ZZP(I,J,K,1:N_TRACKED_SPECIES),1)
+            RHO_D_DZDX(I,J,K,N) = -(SUM(RHO_D_DZDX(I,J,K,1:N_TRACKED_SPECIES))-RHO_D_DZDX(I,J,K,N))
+            RHO_D_DZDY(I,J,K,N) = -(SUM(RHO_D_DZDY(I,J,K,1:N_TRACKED_SPECIES))-RHO_D_DZDY(I,J,K,N))
+            RHO_D_DZDZ(I,J,K,N) = -(SUM(RHO_D_DZDZ(I,J,K,1:N_TRACKED_SPECIES))-RHO_D_DZDZ(I,J,K,N))
          ENDDO
       ENDDO
    ENDDO
@@ -1601,6 +1601,7 @@ DIVMN  =  10000._EB
 IMX    = 0
 JMX    = 0
 KMX    = 0
+Q_MAX  = -10000._EB
  
 DO K=1,KBAR
    DO J=1,JBAR
@@ -1635,6 +1636,7 @@ DO K=1,KBAR
             JMN=J
             KMN=K
          ENDIF
+         Q_MAX = MAX(Q(I,J,K),Q_MAX)
       ENDDO LOOP1
    ENDDO
 ENDDO

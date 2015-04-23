@@ -3238,6 +3238,10 @@ DO NM=1,NMESHES
    IF (CHECK_POISSON) WRITE(LU_OUTPUT,'(A,E9.2)') '       Poisson Error : ',M%POIS_ERR
    IF (DNS .OR. CHECK_VN) WRITE(LU_OUTPUT,230) M%VN,M%I_VN,M%J_VN,M%K_VN
    IF (M%NLP>0) WRITE(LU_OUTPUT,141) M%NLP
+   IF (M%Q_MAX>TWO_EPSILON_EB) THEN
+      WRITE(LU_OUTPUT,'(7X,A,E9.2,A)') 'Max HRRPUV: ',M%Q_MAX/1000._EB,  ' kW/m^3'
+      WRITE(LU_OUTPUT,'(7X,A,E9.2,A)') 'Lim HRRPUV: ',M%Q_UPPER/1000._EB,' kW/m^3' 
+   ENDIF
    IF (ABS(Q_DOT(1,NM))>1._EB) WRITE(LU_OUTPUT,119) Q_DOT(1,NM)/1000._EB
    IF (ABS(Q_DOT(2,NM))>1._EB) WRITE(LU_OUTPUT,120) Q_DOT(2,NM)/1000._EB
 ENDDO
@@ -3265,7 +3269,7 @@ WRITE(LU_OUTPUT,*)
         6X,' Max divergence: ',E9.2,' at (',I3,',',I3,',',I3,')'/ &
         6X,' Min divergence: ',E9.2,' at (',I3,',',I3,',',I3,')')
 133 FORMAT(6X,' Max div. error: ',E9.2,' at (',I3,',',I3,',',I3,')')
-230 FORMAT(6X,' Max VN  number: ',E9.2,' at (',I3,',',I3,',',I3,')')
+230 FORMAT(6X,' Max VN number:  ',E9.2,' at (',I3,',',I3,',',I3,')')
 119 FORMAT(6X,' Total Heat Release Rate:      ',F13.3,' kW')
 120 FORMAT(6X,' Radiation Loss to Boundaries: ',F13.3,' kW')
 421 FORMAT(6X,' Fire Resolution Index:        ',F12.3)
