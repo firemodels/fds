@@ -3269,7 +3269,7 @@ WRITE(LU_OUTPUT,*)
         6X,' Max divergence: ',E9.2,' at (',I3,',',I3,',',I3,')'/ &
         6X,' Min divergence: ',E9.2,' at (',I3,',',I3,',',I3,')')
 133 FORMAT(6X,' Max div. error: ',E9.2,' at (',I3,',',I3,',',I3,')')
-230 FORMAT(6X,' Max VN  number: ',E9.2,' at (',I3,',',I3,',',I3,')')
+230 FORMAT(6X,' Max VN number:  ',E9.2,' at (',I3,',',I3,',',I3,')')
 119 FORMAT(6X,' Total Heat Release Rate:      ',F13.3,' kW')
 120 FORMAT(6X,' Radiation Loss to Boundaries: ',F13.3,' kW')
 421 FORMAT(6X,' Fire Resolution Index:        ',F12.3)
