@@ -1136,14 +1136,14 @@ void read_geom0(geomdata *geomi, int load_flag, int type, int *errorcode){
       geomlisti->ntriangles=ntris;
       FORTREADBR(ijk,3*ntris,stream);
       FORTREADBR(surf_ind,ntris,stream);
-      if(type==GEOM_ISO)offset=nsurfinfo-1;
+      if(type==GEOM_ISO)offset=nsurfinfo;
       for(ii=0;ii<ntris;ii++){
         surfdata *surfi;
 
         triangles[ii].points[0]=points+ijk[3*ii]-1;
         triangles[ii].points[1]=points+ijk[3*ii+1]-1;
         triangles[ii].points[2]=points+ijk[3*ii+2]-1;
-        surfi=surfinfo + surf_ind[ii]+offset;
+        surfi = surfinfo+CLAMP(surf_ind[ii]+offset, nsurfinfo+1, nsurfinfo+n_iso_ambient);
         triangles[ii].surf=surfi;
         triangles[ii].textureinfo=NULL;
       }
