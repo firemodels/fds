@@ -3219,6 +3219,7 @@ ENDIF
 WRITE(LU_OUTPUT,'(7X,A)') '---------------------------------------------------------------'
 
 DO NM=1,NMESHES
+   IF (EVACUATION_ONLY(NM)) CYCLE
    IF (NMESHES>1) WRITE(LU_OUTPUT,'(6X,A,I4,A,I7)') ' Mesh ',NM,', Cycle ',NTCYC(NM)
    M => MESHES(NM)
    IF (T_ACCUM(NM)<60._EB) WRITE(LU_OUTPUT,110) T_PER_STEP(NM),T_ACCUM(NM)
