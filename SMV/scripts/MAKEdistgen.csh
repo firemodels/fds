@@ -24,8 +24,9 @@ mkdir -p $DIR/bin
 mkdir -p $DIR/Documentation
 cp $FORBUNDLE/readme.html $DIR/Documentation/release_notes.html
 
-cp $FORBUNDLE/volrender.ssf $DIR/bin/.
 cp $FORBUNDLE/objects.svo $DIR/bin/.
+cp $FORBUNDLE/smokeview.ini $DIR/bin/.
+cp $FORBUNDLE/volrender.ssf $DIR/bin/.
 scp $HOST\:$BACKGROUNDDIR/background $DIR/bin/.
 scp $HOST\:$SMOKEDIFFDIR/smokediff_$platformsize $DIR/bin/smokediff
 scp $HOST\:$SMOKEVIEWDIR/smokeview_$platformsize $DIR/bin/smokeview
