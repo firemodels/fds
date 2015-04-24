@@ -1028,10 +1028,20 @@ void read_geom0(geomdata *geomi, int load_flag, int type, int *errorcode){
   if(geomi->geomlistinfo!=NULL){
     for(iframe=-1;iframe<geomi->ntimes;iframe++){
       geomlistdata *geomlisti;
+      int ipoint;
 
       geomlisti = geomi->geomlistinfo+iframe;
-      FREEMEMORY(geomlisti->points);
-      FREEMEMORY(geomlisti->triangles);
+      points = geomlisti->points;
+      for(ipoint = 0; ipoint<geomlisti->npoints; ipoint++){
+        point *pointi;
+        int itri;
+
+        pointi = points+ipoint;
+        FREEMEMORY(pointi->triangles);
+      }
+      FREEMEMORY(points);
+      triangles = geomlisti->triangles;
+      FREEMEMORY(triangles);
     }  
   }
   FREEMEMORY(geomi->times);

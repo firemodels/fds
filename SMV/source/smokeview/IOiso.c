@@ -174,7 +174,9 @@ void readiso_geom(const char *file, int ifile, int load_flag, int *errorcode){
   if(load_flag==UNLOAD){
     FREEMEMORY(meshi->iso_times);
     FREEMEMORY(meshi->showlevels);
-    meshi->isofilenum=-1;
+    FREEMEMORY(meshi->isolevels);
+    FREEMEMORY(geominfoptrs);
+    meshi->isofilenum = -1;
     return;
   }
 
