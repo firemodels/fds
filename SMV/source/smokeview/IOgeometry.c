@@ -1034,7 +1034,6 @@ void read_geom0(geomdata *geomi, int load_flag, int type, int *errorcode){
       points = geomlisti->points;
       for(ipoint = 0; ipoint<geomlisti->npoints; ipoint++){
         point *pointi;
-        int itri;
 
         pointi = points+ipoint;
         FREEMEMORY(pointi->triangles);
