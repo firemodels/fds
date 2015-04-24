@@ -75,11 +75,31 @@ float distxy(float *x, float *y){
 float get_angle(float d1, float d2, float d3){
   float angle_local;
   float arg;
+  float denom;
 
-  arg = (d2*d2+d3*d3-d1*d1)/(2.0*d2*d3);
-  if(arg<-1.0)arg=-1.0;
-  if(arg>1.0)arg=1.0;
-  angle_local = acos(arg)*RAD2DEG;
+
+//         v1
+//        /  \
+//       d3   d2
+//      /      \
+//    v2---d1---v3           
+
+//       d2^2 + d3^2 - d1^2
+// arg = ------------------
+//           2*d2*d3
+
+// d2==0.0 ==> d3==d1 ==> arg=0.0
+// d3==0.0 ==> d2==d1 ==> arg=0.0
+
+  
+  denom = 2.0*d2*d3;
+  if(ABS(denom) > 0.0){
+    arg = CLAMP((d2*d2 + d3*d3 - d1*d1) / denom,-1.0,1.0);
+    angle_local = acos(arg)*RAD2DEG;
+  }
+  else{
+    angle_local = acos(0.0)*RAD2DEG;
+  }
   return angle_local;
 }
 
@@ -777,6 +797,7 @@ void read_geom_header0(geomdata *geomi, int *ntimes_local){
   int *int_vals;
   float *float_vals;
   int nverts=0, ntris=0;
+  int icount;
 
   stream = fopen(geomi->file,"rb");
   if(stream==NULL){
@@ -827,8 +848,10 @@ void read_geom_header0(geomdata *geomi, int *ntimes_local){
   }
 
   nt=0;
+  icount=-1;
   for(;;){
     FORTREADBR(times_local,2,stream);
+    icount++;
     FORTREADBR(nvertfaces,2,stream);
     nverts=nvertfaces[0];
     ntris=nvertfaces[1];
@@ -846,6 +869,9 @@ void read_geom_header0(geomdata *geomi, int *ntimes_local){
       FSEEK(stream,4+ntris*4+4,SEEK_CUR);
     }
 
+    if(use_tload_begin == 1 && times_local[0] < tload_begin)continue;
+    if(use_tload_skip == 1 && tload_skip>1 && icount%tload_skip!=0)continue;
+    if(use_tload_end == 1 && times_local[0] > tload_end)break;
     nt++;
   }
   *ntimes_local=nt;
@@ -992,18 +1018,18 @@ void read_geom0(geomdata *geomi, int load_flag, int type, int *errorcode){
   int one=1, endianswitch=0;
   int returncode;
   int ntimes_local;
-  int i;
   point *points;
   triangle *triangles;
   int version;
   int nvertfacesvolus[3];
   int nfloat_vals, nint_vals;
+  int iframe, icount;
 
   if(geomi->geomlistinfo!=NULL){
-    for(i=-1;i<geomi->ntimes;i++){
+    for(iframe=-1;iframe<geomi->ntimes;iframe++){
       geomlistdata *geomlisti;
 
-      geomlisti = geomi->geomlistinfo+i;
+      geomlisti = geomi->geomlistinfo+iframe;
       FREEMEMORY(geomlisti->points);
       FREEMEMORY(geomlisti->triangles);
     }  
@@ -1042,33 +1068,50 @@ void read_geom0(geomdata *geomi, int load_flag, int type, int *errorcode){
   geomi->geomlistinfo=geomi->geomlistinfo_0+1;
   NewMemory((void **)&geomi->times,ntimes_local*sizeof(float));
 
-  for(i=-1;i<ntimes_local;i++){
+  icount=-1;
+  for(iframe=-1;iframe<ntimes_local;){
     float times_local[2];
     geomlistdata *geomlisti;
     int nverts, ntris;
+    int  skipframe;
 
-    geomlisti = geomi->geomlistinfo+i;
+    geomlisti = geomi->geomlistinfo+iframe;
     geomlisti->points=NULL;
     geomlisti->triangles=NULL;
     geomlisti->volumes=NULL;
     geomlisti->npoints=0;
     geomlisti->ntriangles=0;
     geomlisti->nvolus=0;
-    if(i>=0){
+    skipframe = 0;
+
+    if(iframe>=0){
       FORTREADBR(times_local,2,stream);
-      geomi->times[i]=times_local[0];
+      icount++;
+      if(use_tload_begin == 1 && times_local[0] < tload_begin)skipframe = 1;
+      if(use_tload_skip == 1 && tload_skip>1 && icount%tload_skip!=0)skipframe=1;
+      if(use_tload_end == 1 && times_local[0] > tload_end)skipframe = 1;
+      if(skipframe==0)geomi->times[iframe] = times_local[0];
     }
     FORTREADBR(nvertfacesvolus,2,stream);
     nverts=nvertfacesvolus[0];
     ntris=nvertfacesvolus[1];
-    if(i>=0){
+    if(skipframe==0&&iframe>=0){
       PRINTF("time=%.2f triangles: %i\n",times_local[0],ntris);
     }
-    if(nverts>0){
+    if(skipframe == 1){
+      if(nverts > 0){
+        FSEEK(stream, 4 + 3 * nverts * 4 + 4, SEEK_CUR);
+      }
+      if(ntris > 0){
+        FSEEK(stream, 4 + 3 * ntris * 4 + 4, SEEK_CUR);
+        FSEEK(stream, 4 + ntris * 4 + 4, SEEK_CUR);
+      }
+    }
+    if(skipframe==0&&nverts>0){
       int ii;
       float *xyz=NULL;
 
-      if(i<0)PRINTF("static geometry\n");
+      if(iframe<0)PRINTF("static geometry\n");
       NewMemory((void **)&xyz,3*nverts*sizeof(float));
       NewMemory((void **)&points,nverts*sizeof(point));
       geomlisti->points=points;
@@ -1081,7 +1124,7 @@ void read_geom0(geomdata *geomi, int load_flag, int type, int *errorcode){
       }
       FREEMEMORY(xyz);
     }
-    if(ntris>0){
+    if(skipframe==0&&ntris>0){
       int *surf_ind=NULL,*ijk=NULL;
       int ii;
       int offset=0;
@@ -1107,6 +1150,8 @@ void read_geom0(geomdata *geomi, int load_flag, int type, int *errorcode){
       FREEMEMORY(ijk);
       FREEMEMORY(surf_ind);
     }
+    if(skipframe == 0)iframe++;
+    if(use_tload_end == 1 && times_local[0] > tload_end)break;
   }
   geomi->loaded=1;
   geomi->display=1;
