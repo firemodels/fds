@@ -1075,7 +1075,7 @@ CONTAINS
          EVAC_DELTA_SEE     = 0.29_EB    ! Eye range (plus minus mid smoke level)
          HUMAN_SMOKE_HEIGHT   = 1.60_EB  ! Nose above floor level
          MAX_HUMANS_DIM = 10000 ! Maximum number of agents in an evacuation mesh
-         REWIND(LU_INPUT)
+         REWIND(LU_INPUT) ; INPUT_FILE_LINE_NUMBER = 0
          COUNT_PERS_LOOP: DO
             CALL CHECKREAD('PERS',LU_INPUT,IOS) 
             IF (IOS == 1) THEN
@@ -1084,11 +1084,11 @@ CONTAINS
             READ(LU_INPUT,NML=PERS,END=221,ERR=222,IOSTAT=IOS)
             NPC_PERS = NPC_PERS + 1
 222         IF (IOS > 0) THEN
-               WRITE(MESSAGE,'(A,I6)') 'ERROR: Problem with PERS line number ',NPC_PERS+1
+               WRITE(MESSAGE,'(A,I4,A,I6)') 'ERROR: Problem with PERS ',NPC_PERS+1,', line number',INPUT_FILE_LINE_NUMBER
                CALL SHUTDOWN(MESSAGE) ; RETURN
             END IF
          END DO COUNT_PERS_LOOP
-221      REWIND(LU_INPUT)
+221      REWIND(LU_INPUT) ; INPUT_FILE_LINE_NUMBER = 0
          IF (COLOR_METHOD == 3) EVAC_AVATAR_NCOLOR = NPC_PERS + 1
          COLOR_METHOD_TMP = COLOR_METHOD
          !
@@ -1108,11 +1108,11 @@ CONTAINS
             END IF
             !
 220         IF (IOS > 0) THEN
-               WRITE(MESSAGE,'(A,I6)') 'ERROR: Problem with EVAC line number ',NPC_EVAC+1
+               WRITE(MESSAGE,'(A,I4,A,I6)') 'ERROR: Problem with EVAC ',NPC_EVAC+1,', line number',INPUT_FILE_LINE_NUMBER
                CALL SHUTDOWN(MESSAGE) ; RETURN
             END IF
          END DO COUNT_EVAC_LOOP
-219      REWIND(LU_INPUT)
+219      REWIND(LU_INPUT) ; INPUT_FILE_LINE_NUMBER = 0
          !
          ! Determine total number of EXIT lines in the input file
          !
@@ -1133,11 +1133,11 @@ CONTAINS
             IF (COUNT_DENSITY) COUNT_ONLY=.TRUE.
             IF (COUNT_ONLY) N_CO_EXITS = N_CO_EXITS + 1
 224         IF (IOS > 0) THEN
-               WRITE(MESSAGE,'(A,I6)') 'ERROR: Problem with EXIT line number ',N_EXITS+1
+               WRITE(MESSAGE,'(A,I4,A,I6)') 'ERROR: Problem with EXIT ',N_EXITS+1,', line number',INPUT_FILE_LINE_NUMBER
                CALL SHUTDOWN(MESSAGE) ; RETURN
             END IF
          END DO COUNT_EXITS_LOOP
-223      REWIND(LU_INPUT)
+223      REWIND(LU_INPUT) ; INPUT_FILE_LINE_NUMBER = 0
          !
          ! Determine total number of DOOR lines in the input file
          !
@@ -1153,11 +1153,11 @@ CONTAINS
                EVAC_AVATAR_NCOLOR = EVAC_AVATAR_NCOLOR + 1
             END IF
 226         IF (IOS > 0) THEN
-               WRITE(MESSAGE,'(A,I6)') 'ERROR: Problem with DOOR line number ',N_DOORS + 1
+               WRITE(MESSAGE,'(A,I4,A,I6)') 'ERROR: Problem with DOOR ',N_DOORS + 1,', line number',INPUT_FILE_LINE_NUMBER
                CALL SHUTDOWN(MESSAGE) ; RETURN
             END IF
          END DO COUNT_DOORS_LOOP
-225      REWIND(LU_INPUT)
+225      REWIND(LU_INPUT) ; INPUT_FILE_LINE_NUMBER = 0
          !
          ! Determine total number of ENTR lines in the input file
          !
@@ -1175,11 +1175,11 @@ CONTAINS
                EVAC_AVATAR_NCOLOR = EVAC_AVATAR_NCOLOR + 1
             END IF
 228         IF (IOS > 0) THEN
-               WRITE(MESSAGE,'(A,I6)') 'ERROR: Problem with ENTR line number ',N_ENTRYS + 1
+               WRITE(MESSAGE,'(A,I4,A,I6)') 'ERROR: Problem with ENTR ',N_ENTRYS + 1,', line number',INPUT_FILE_LINE_NUMBER
                CALL SHUTDOWN(MESSAGE) ; RETURN
             END IF
          END DO COUNT_ENTRYS_LOOP
-227      REWIND(LU_INPUT)
+227      REWIND(LU_INPUT) ; INPUT_FILE_LINE_NUMBER = 0
          !
          ! Determine total number of CORR lines in the input file
          !
@@ -1192,11 +1192,11 @@ CONTAINS
             READ(LU_INPUT,NML=CORR,END=229,ERR=230,IOSTAT=IOS)
             N_CORRS = N_CORRS + 1
 230         IF (IOS > 0) THEN
-               WRITE(MESSAGE,'(A,I6)') 'ERROR: Problem with CORR line number ',N_CORRS + 1
+               WRITE(MESSAGE,'(A,I4,A,I6)') 'ERROR: Problem with CORR ',N_CORRS + 1,', line number',INPUT_FILE_LINE_NUMBER
                CALL SHUTDOWN(MESSAGE) ; RETURN
             END IF
          END DO COUNT_CORRS_LOOP
-229      REWIND(LU_INPUT)
+229      REWIND(LU_INPUT) ; INPUT_FILE_LINE_NUMBER = 0
          !
          ! Determine total number of EVHO lines in the input file
          !
@@ -1209,11 +1209,11 @@ CONTAINS
             READ(LU_INPUT,NML=EVHO,END=231,ERR=232,IOSTAT=IOS)
             N_HOLES = N_HOLES + 1
 232         IF (IOS > 0) THEN
-               WRITE(MESSAGE,'(A,I6)') 'ERROR: Problem with EVHO line number ',N_HOLES + 1
+               WRITE(MESSAGE,'(A,I4,A,I6)') 'ERROR: Problem with EVHO ',N_HOLES + 1,', line number',INPUT_FILE_LINE_NUMBER
                CALL SHUTDOWN(MESSAGE) ; RETURN
             END IF
          END DO COUNT_EVHO_LOOP
-231      REWIND(LU_INPUT)
+231      REWIND(LU_INPUT) ; INPUT_FILE_LINE_NUMBER = 0
          !
          ! Determine total number of EVSS lines in the input file
          !
@@ -1226,11 +1226,11 @@ CONTAINS
             READ(LU_INPUT,NML=EVSS,END=233,ERR=234,IOSTAT=IOS)
             N_SSTANDS = N_SSTANDS + 1
 234         IF (IOS > 0) THEN
-               WRITE(MESSAGE,'(A,I6)') 'ERROR: Problem with EVSS line number ',N_SSTANDS + 1
+               WRITE(MESSAGE,'(A,I4,A,I6)') 'ERROR: Problem with EVSS ',N_SSTANDS + 1,', line number',INPUT_FILE_LINE_NUMBER
                CALL SHUTDOWN(MESSAGE) ; RETURN
             END IF
          END DO COUNT_EVSS_LOOP
-233      REWIND(LU_INPUT)
+233      REWIND(LU_INPUT) ; INPUT_FILE_LINE_NUMBER = 0
          !
          ! Determine total number of STRS lines in the input file
          !
@@ -1243,11 +1243,11 @@ CONTAINS
             READ(LU_INPUT,NML=STRS,END=235,ERR=236,IOSTAT=IOS)
             N_STRS = N_STRS + 1
 236         IF (IOS > 0) THEN
-               WRITE(MESSAGE,'(A,I6)') 'ERROR: Problem with STRS line number ',N_STRS + 1
+               WRITE(MESSAGE,'(A,I4,A,I6)') 'ERROR: Problem with STRS ',N_STRS + 1,', line number',INPUT_FILE_LINE_NUMBER
                CALL SHUTDOWN(MESSAGE) ; RETURN
             END IF
          END DO COUNT_STRS_LOOP
-235      REWIND(LU_INPUT)
+235      REWIND(LU_INPUT) ; INPUT_FILE_LINE_NUMBER = 0
          !
          ! Determine total number of EDEV lines in the input file
          !
@@ -1260,11 +1260,11 @@ CONTAINS
             READ(LU_INPUT,NML=EDEV,END=237,ERR=238,IOSTAT=IOS)
             N_EDEV = N_EDEV + 1
 238         IF (IOS > 0) THEN
-               WRITE(MESSAGE,'(A,I6)') 'ERROR: Problem with EDEV line number ',N_EDEV + 1
+               WRITE(MESSAGE,'(A,I4,A,I6)') 'ERROR: Problem with EDEV ',N_EDEV + 1,', line number',INPUT_FILE_LINE_NUMBER
                CALL SHUTDOWN(MESSAGE) ; RETURN
             END IF
          END DO COUNT_EDEV_LOOP
-237      REWIND(LU_INPUT)
+237      REWIND(LU_INPUT) ; INPUT_FILE_LINE_NUMBER = 0
 
          SELECT CASE (COLOR_METHOD)
          CASE (-1)
