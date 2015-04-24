@@ -1136,7 +1136,7 @@ void read_geom0(geomdata *geomi, int load_flag, int type, int *errorcode){
       geomlisti->ntriangles=ntris;
       FORTREADBR(ijk,3*ntris,stream);
       FORTREADBR(surf_ind,ntris,stream);
-      if(type==GEOM_ISO)offset=nsurfinfo;
+      if(type==GEOM_ISO)offset=nsurfinfo-1;
       for(ii=0;ii<ntris;ii++){
         surfdata *surfi;
 
