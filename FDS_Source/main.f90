@@ -3553,20 +3553,17 @@ EVAC_TIME_STEP_LOOP: DO WHILE (T_EVAC < T_FIRE)
          IF (ICYC <= 1 .AND. .NOT.BTEST(I_EVAC, 2)) THEN
             IF (ICYC <= 0 .AND. EVACUATION_GRID(NM)) THEN
                II = EVAC_TIME_ITERATIONS / MAXVAL(EMESH_NFIELDS)
-               IF (MOD(ABS(ICYC)+1,II) == 0) DIAGNOSTICS = .TRUE.
-               IF (ABS(ICYC)+1 == EVAC_TIME_ITERATIONS) DIAGNOSTICS = .TRUE.
                IF ((ABS(ICYC)+1) <= EMESH_NFIELDS(EMESH_INDEX(NM))*II) THEN
                   ACTIVE_MESH(NM) = .TRUE.
                END IF
+               DIAGNOSTICS = .FALSE.
             END IF
             !
             IF (ICYC <= 0) T(NM) = T_EVAC + EVAC_DT_FLOWFIELD*EVAC_TIME_ITERATIONS - EVAC_DT
          ENDIF
          IF (ICYC <= 1 .AND. BTEST(I_EVAC, 2)) THEN
             IF (ICYC <= 0 .AND. EVACUATION_GRID(NM)) THEN
-               II = EVAC_TIME_ITERATIONS / MAXVAL(EMESH_NFIELDS)
-               IF (MOD(ABS(ICYC)+1,II) == 0) DIAGNOSTICS = .TRUE.
-               IF (ABS(ICYC)+1 == EVAC_TIME_ITERATIONS) DIAGNOSTICS = .TRUE.
+               DIAGNOSTICS = .FALSE.
             END IF
             IF (ICYC <= 0) T(NM) = T_EVAC + EVAC_DT_FLOWFIELD*EVAC_TIME_ITERATIONS - EVAC_DT
          ENDIF
@@ -3602,6 +3599,13 @@ EVAC_TIME_STEP_LOOP: DO WHILE (T_EVAC < T_FIRE)
    IF ((.NOT.USE_MPI .OR. N_MPI_PROCESSES==1) .OR. (N_MPI_PROCESSES>1 .AND. MYID==EVAC_PROCESS)) &
         CALL CLEAN_AFTER_EVACUATE(ICYC, I_EVAC)
 ENDDO EVAC_TIME_STEP_LOOP
+IF (ICYC < 1 .AND. MYID==0) THEN
+   ! Write the diagnostic information for the evacuation mesh initialization time steps
+   II = EVAC_TIME_ITERATIONS / MAXVAL(EMESH_NFIELDS)
+   IF (MOD(ABS(ICYC)+1,II) == 0 .OR. ABS(ICYC)+1 == EVAC_TIME_ITERATIONS) THEN
+      WRITE(LU_ERR,'(1X,A,I7,A,F10.3,A)')  'Time Step:',ICYC,',    Evacuation Initialization Time:',T_EVAC,' s'
+   END IF
+END IF
 
 END SUBROUTINE EVAC_MAIN_LOOP
 
