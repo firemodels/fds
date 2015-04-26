@@ -1018,29 +1018,25 @@ void read_geom0(geomdata *geomi, int load_flag, int type, int *errorcode){
   int one=1, endianswitch=0;
   int returncode;
   int ntimes_local;
-  point *points;
-  triangle *triangles;
   int version;
   int nvertfacesvolus[3];
   int nfloat_vals, nint_vals;
   int iframe, icount;
 
-  if(geomi->geomlistinfo!=NULL){
+  if(geomi->geomlistinfo_0!=NULL){
     for(iframe=-1;iframe<geomi->ntimes;iframe++){
       geomlistdata *geomlisti;
       int ipoint;
 
       geomlisti = geomi->geomlistinfo+iframe;
-      points = geomlisti->points;
       for(ipoint = 0; ipoint<geomlisti->npoints; ipoint++){
         point *pointi;
 
-        pointi = points+ipoint;
+        pointi = geomlisti->points+ipoint;
         FREEMEMORY(pointi->triangles);
       }
-      FREEMEMORY(points);
-      triangles = geomlisti->triangles;
-      FREEMEMORY(triangles);
+      FREEMEMORY(geomlisti->points);
+      FREEMEMORY(geomlisti->triangles);
     }  
   }
   FREEMEMORY(geomi->times);
@@ -1083,6 +1079,7 @@ void read_geom0(geomdata *geomi, int load_flag, int type, int *errorcode){
     geomlistdata *geomlisti;
     int nverts, ntris;
     int  skipframe;
+    point *points;
 
     geomlisti = geomi->geomlistinfo+iframe;
     geomlisti->points=NULL;
@@ -1137,6 +1134,7 @@ void read_geom0(geomdata *geomi, int load_flag, int type, int *errorcode){
       int *surf_ind=NULL,*ijk=NULL;
       int ii;
       int offset=0;
+      triangle *triangles;
 
       NewMemory((void **)&triangles,ntris*sizeof(triangle));
       NewMemory((void **)&ijk,3*ntris*sizeof(int));

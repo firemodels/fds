@@ -171,11 +171,11 @@ void readiso_geom(const char *file, int ifile, int load_flag, int *errorcode){
   unloadiso(meshi);
 
   read_geom(geomi,load_flag,GEOM_ISO,errorcode);
-  if(load_flag==UNLOAD){
-    FREEMEMORY(meshi->iso_times);
-    FREEMEMORY(meshi->showlevels);
-    FREEMEMORY(meshi->isolevels);
-    FREEMEMORY(geominfoptrs);
+  FREEMEMORY(meshi->iso_times);
+  FREEMEMORY(meshi->showlevels);
+  FREEMEMORY(meshi->isolevels);
+  FREEMEMORY(geominfoptrs);
+  if(load_flag == UNLOAD){
     meshi->isofilenum = -1;
     return;
   }
@@ -198,7 +198,6 @@ void readiso_geom(const char *file, int ifile, int load_flag, int *errorcode){
   }
 
   meshi->nisolevels=geomi->nfloat_vals;
-  FREEMEMORY(meshi->isolevels);
   if(
     NewMemory((void **)&meshi->showlevels,sizeof(int)*meshi->nisolevels)==0||
     NewMemory((void **)&meshi->isolevels,sizeof(int)*meshi->nisolevels)==0
@@ -220,7 +219,6 @@ void readiso_geom(const char *file, int ifile, int load_flag, int *errorcode){
   updatemenu=1;
   iisotype=getisotype(isoi);
 
-  FREEMEMORY(geominfoptrs);
   ngeominfoptrs=0;
   GetGeomInfoPtrs(&geominfoptrs,&ngeominfoptrs);
   update_triangles();
