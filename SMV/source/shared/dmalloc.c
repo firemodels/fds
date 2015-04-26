@@ -181,15 +181,21 @@ mallocflag _NewMemoryNOTHREAD(void **ppv, size_t size, int memory_id){
 /* ------------------ FreeAllMemory ------------------------ */
 
 void FreeAllMemory(int memory_id){
-  MMdata *thisptr;
+  MMdata *thisptr, *nextptr;
   int infoblocksize;
 
   LOCK_MEM;
   infoblocksize=(sizeof(MMdata)+3)/4;
   infoblocksize*=4;
 
-  for(thisptr = MMfirstptr->next; thisptr->next != NULL&&thisptr->marker==markerByte; thisptr = thisptr->next){
-    if(memory_id == 0 || thisptr->memory_id == memory_id)FreeMemoryNOTHREAD((char *)thisptr+infoblocksize);
+  thisptr = MMfirstptr->next;
+  for(;;){
+    // if the 'thisptr' memory block is freed then thisptr is no longer valid.
+    // so, nextptr (which is thisptr->next) must be defined before it is freed
+    nextptr = thisptr->next;
+    if(thisptr->next == NULL || thisptr->marker != markerByte)break;
+    if(memory_id == 0 || thisptr->memory_id == memory_id)FreeMemoryNOTHREAD((char *)thisptr + infoblocksize);
+    thisptr = nextptr;
   }
   UNLOCK_MEM;
 }
