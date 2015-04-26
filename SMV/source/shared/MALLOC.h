@@ -42,6 +42,7 @@ typedef char bbyte;
 typedef struct {
   unsigned char marker;
   void *prev, *next;
+  int memory_id;
 } MMdata;
 
 MMEXTERN MMdata MMfirst, MMlast;
@@ -68,11 +69,17 @@ MMEXTERN pthread_mutex_t mutexSLICE_BOUND,mutexPATCH_BOUND,mutexPART2ISO,mutexPR
 #endif
 
 #ifdef pp_MEMDEBUG
-#define NewMemory(f,g) __NewMemory((f),(g),(#f),__FILE__,__LINE__)
-#define ResizeMemory(f,g) __ResizeMemory((f),(g),(#f),__FILE__,__LINE__)
+#define NewMemory(f,g)           __NewMemory((f),(g),0,(#f),__FILE__,__LINE__)
+#define ResizeMemory(f,g)        __ResizeMemory((f),(g),0,(#f),__FILE__,__LINE__)
+
+#define NewMemoryMemID(f,g,h)    __NewMemory((f),(g),(h),(#f),__FILE__,__LINE__)
+#define ResizeMemoryMemID(f,g,h) __ResizeMemory((f),(g),(j),(#f),__FILE__,__LINE__)
 #else
-#define NewMemory(f,g) _NewMemory((f),(g),(#f),__FILE__,__LINE__)
-#define ResizeMemory(f,g) _ResizeMemory((f),(g),(#f),__FILE__,__LINE__)
+#define NewMemory(f,g)           _NewMemory((f),(g),0,(#f),__FILE__,__LINE__)
+#define ResizeMemory(f,g)        _ResizeMemory((f),(g),0,(#f),__FILE__,__LINE__)
+
+#define NewMemoryMemID(f,g,h)    _NewMemory((f),(g),(h),(#f),__FILE__,__LINE__)
+#define ResizeMemoryMemID(f,g,h) _ResizeMemory((f),(g),(h),(#f),__FILE__,__LINE__)
 #endif
 
 #define NEWMEMORY(f,g) NewMemory((void **)&(f),(g))
@@ -140,18 +147,18 @@ mallocflag CreateBlockInfo(bbyte *pbNew, size_t sizeNew);
 void FreeBlockInfo(bbyte *pb);
 void UpdateBlockInfo(bbyte *pbOld, bbyte *pbNew, size_t sizeNew);
 size_t sizeofBlock(bbyte *pv);
-MMEXTERN mallocflag __ResizeMemory(void **ppv, size_t sizeNew,char *varname, char *file, int linenumber);
-MMEXTERN mallocflag __NewMemory(void **ppv, size_t size, char *varname, char *file,int linenumber);
+MMEXTERN mallocflag __ResizeMemory(void **ppv, size_t sizeNew, int memory_id, char *varname, char *file, int linenumber);
+MMEXTERN mallocflag __NewMemory(void **ppv, size_t size, int memory_id, char *varname, char *file,int linenumber);
 #endif
-MMEXTERN mallocflag _ResizeMemory(void **ppv, size_t sizeNew, char *varname, char *file,int linenumber);
-MMEXTERN mallocflag _NewMemory(void **ppv, size_t size, char *varname, char *file,int linenumber);
+MMEXTERN mallocflag _ResizeMemory(void **ppv, size_t sizeNew, int memory_id, char *varname, char *file,int linenumber);
+MMEXTERN mallocflag _NewMemory(void **ppv, size_t size, int memory_id, char *varname, char *file,int linenumber);
 MMEXTERN void FreeMemory(void *pv);
-MMEXTERN mallocflag _ResizeMemoryNOTHREAD(void **ppv, size_t sizeNew);
-MMEXTERN mallocflag _NewMemoryNOTHREAD(void **ppv, size_t size);
+MMEXTERN mallocflag _ResizeMemoryNOTHREAD(void **ppv, size_t sizeNew, int memory_id);
+MMEXTERN mallocflag _NewMemoryNOTHREAD(void **ppv, size_t size, int memory_id);
 MMEXTERN void FreeMemoryNOTHREAD(void *pv);
 MMEXTERN int memusage(void);
 void initMALLOC(void);
-void FreeAllMemory(void);
+void FreeAllMemory(int memory_id);
 mallocflag _ValidPointer(void *pv, size_t size);
 
 #define FREEMEMORY(f) if((f)!=NULL){LOCK_MEM;FreeMemoryNOTHREAD((f));UNLOCK_MEM;(f)=NULL;}

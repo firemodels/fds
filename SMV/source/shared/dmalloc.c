@@ -95,11 +95,11 @@ void initMALLOC(void){
 
 /* ------------------ _NewMemory ------------------------ */
 
-mallocflag _NewMemory(void **ppv, size_t size, char *varname, char *file, int linenumber){
+mallocflag _NewMemory(void **ppv, size_t size, int memory_id, char *varname, char *file, int linenumber){
   mallocflag returnval;
 
   LOCK_MEM;
-  returnval=_NewMemoryNOTHREAD(ppv, size);
+  returnval=_NewMemoryNOTHREAD(ppv, size, memory_id);
   if(returnval!=1){
     fprintf(stderr,"*** Error: memory allocation request of size %llu failed\n",(unsigned long long)size);
     if(varname!=NULL){
@@ -117,7 +117,7 @@ mallocflag _NewMemory(void **ppv, size_t size, char *varname, char *file, int li
 
 /* ------------------ _NewMemoryNOTHREAD ------------------------ */
 
-mallocflag _NewMemoryNOTHREAD(void **ppv, size_t size){
+mallocflag _NewMemoryNOTHREAD(void **ppv, size_t size, int memory_id){
   void **ppb=(void **)ppv;
 #ifdef pp_MEMDEBUG
   char *c;
@@ -146,6 +146,7 @@ mallocflag _NewMemoryNOTHREAD(void **ppv, size_t size){
     prev_ptr->next=this_ptr;
     next_ptr->prev=this_ptr;
 
+    this_ptr->memory_id = memory_id;
     this_ptr->prev=prev_ptr;
     this_ptr->next=next_ptr;
     this_ptr->marker=markerByte;
@@ -179,19 +180,16 @@ mallocflag _NewMemoryNOTHREAD(void **ppv, size_t size){
 
 /* ------------------ FreeAllMemory ------------------------ */
 
-void FreeAllMemory(void){
-  MMdata *thisptr,*nextptr;
+void FreeAllMemory(int memory_id){
+  MMdata *thisptr;
   int infoblocksize;
 
   LOCK_MEM;
   infoblocksize=(sizeof(MMdata)+3)/4;
   infoblocksize*=4;
 
-  thisptr=MMfirstptr->next;
-  for(;;){
-    nextptr=thisptr->next;
-    if(nextptr==NULL||thisptr->marker!=markerByte)break;
-    FreeMemoryNOTHREAD((char *)thisptr+infoblocksize);
+  for(thisptr = MMfirstptr->next; thisptr->next != NULL&&thisptr->marker==markerByte; thisptr = thisptr->next){
+    if(memory_id == 0 || thisptr->memory_id == memory_id)FreeMemoryNOTHREAD((char *)thisptr+infoblocksize);
   }
   UNLOCK_MEM;
 }
@@ -239,13 +237,13 @@ void FreeMemoryNOTHREAD(void *pv){
   free((char *)pv-infoblocksize);
 }
 
-/* ------------------ ResizeMemory ------------------------ */
+/* ------------------ _ResizeMemory ------------------------ */
 
-mallocflag _ResizeMemory(void **ppv, size_t sizeNew,  char *varname, char *file, int linenumber){
+mallocflag _ResizeMemory(void **ppv, size_t sizeNew, int memory_id, char *varname, char *file, int linenumber){
   mallocflag returnval;
 
   LOCK_MEM;
-  returnval=_ResizeMemoryNOTHREAD(ppv, sizeNew);
+  returnval=_ResizeMemoryNOTHREAD(ppv, sizeNew, memory_id);
   if(returnval!=1){
     fprintf(stderr,"*** Error: memory allocation request of size %llu failed\n",(unsigned long long)sizeNew);
     if(varname!=NULL){
@@ -261,9 +259,9 @@ mallocflag _ResizeMemory(void **ppv, size_t sizeNew,  char *varname, char *file,
   return returnval;
 }
 
-/* ------------------ ResizeMemory ------------------------ */
+/* ------------------ _ResizeMemoryNOTHREAD ------------------------ */
 
-mallocflag _ResizeMemoryNOTHREAD(void **ppv, size_t sizeNew){
+mallocflag _ResizeMemoryNOTHREAD(void **ppv, size_t sizeNew, int memory_id){
   bbyte **ppold, *pbNew;
   int infoblocksize;
   MMdata *this_ptr, *prev_ptr, *next_ptr;
@@ -287,7 +285,7 @@ mallocflag _ResizeMemoryNOTHREAD(void **ppv, size_t sizeNew){
     else if(sizeNew > sizeOld){
       void *pbForceNew;
 
-      if(_NewMemoryNOTHREAD((void **)&pbForceNew, sizeNew)){
+      if(_NewMemoryNOTHREAD((void **)&pbForceNew, sizeNew, 0)){
         memcpy(pbForceNew, *ppold, sizeOld);
         FreeMemoryNOTHREAD(*ppold);
         *ppold = pbForceNew;
@@ -303,8 +301,11 @@ mallocflag _ResizeMemoryNOTHREAD(void **ppv, size_t sizeNew){
   if(pbNew != NULL){
     if(pbNew!=(char *)(*ppold)-infoblocksize){
       this_ptr=(MMdata *)pbNew;
+      
       prev_ptr->next=this_ptr;
       next_ptr->prev=this_ptr;
+      
+      this_ptr->memory_id = memory_id;
       this_ptr->next=next_ptr;
       this_ptr->prev=prev_ptr;
       this_ptr->marker=markerByte;
@@ -333,7 +334,9 @@ mallocflag _ResizeMemoryNOTHREAD(void **ppv, size_t sizeNew){
 #define fPtrLessEq(pLeft, pRight) ((pLeft) <= (pRight))
 #define fPtrGrtrEq(pLeft, pRight) ((pLeft) >= (pRight))
 
-mallocflag __NewMemory(void **ppv, size_t size, char *varname, char *file, int linenumber){
+/* ------------------ __NewMemory ------------------------ */
+
+mallocflag __NewMemory(void **ppv, size_t size, int memory_id, char *varname, char *file, int linenumber){
   void **ppb=(void **)ppv;
   blockinfo *pbi;
   int return_code;
@@ -347,7 +350,7 @@ mallocflag __NewMemory(void **ppv, size_t size, char *varname, char *file, int l
 #endif
 
   LOCK_MEM;
-  return_code=_NewMemoryNOTHREAD(ppb,size);
+  return_code=_NewMemoryNOTHREAD(ppb,size,memory_id);
   pbi=GetBlockInfo((bbyte *)*ppb);
   pbi->linenumber=linenumber;
 
@@ -395,15 +398,15 @@ mallocflag __NewMemory(void **ppv, size_t size, char *varname, char *file, int l
   return return_code;
 }
 
-/* ------------------ ResizeMemory ------------------------ */
+/* ------------------ __ResizeMemory ------------------------ */
 
-mallocflag __ResizeMemory(void **ppv, size_t size, char *varname, char *file, int linenumber){
+mallocflag __ResizeMemory(void **ppv, size_t size, int memory_id, char *varname, char *file, int linenumber){
   void **ppb=(void **)ppv;
   blockinfo *pbi;
   int return_code;
 
   LOCK_MEM;
-  return_code=_ResizeMemoryNOTHREAD(ppb,size);
+  return_code=_ResizeMemoryNOTHREAD(ppb,size,memory_id);
   pbi=GetBlockInfo((bbyte *)*ppb);
   pbi->linenumber=linenumber;
   if(strlen(file)<256){
