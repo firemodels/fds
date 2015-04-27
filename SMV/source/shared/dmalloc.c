@@ -210,13 +210,14 @@ void FreeAllMemory(int memory_id){
 
 void _PrintMemoryInfo(void){
   MMdata *thisptr;
-  int n=0,size=0;
+  int n = 0;
+  LINT size = 0;
 
   for(thisptr = MMfirstptr->next;thisptr->next!=NULL;thisptr=thisptr->next){
     size += thisptr->size;
     n++;
   }
-  PRINTF("nblocks=%i sizeblocks=%i\n", n, size);
+  PRINTF("nblocks=%i sizeblocks=%llu\n", n, size);
 }
 #endif
 
