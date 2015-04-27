@@ -36,6 +36,7 @@ void get_z_interp_factors(float *zplt, int nz, float z, int *k1, int *k2, float 
 /* ------------------ interp3dsliceindex ------------------------ */
 
 int interp3dsliceindex(unsigned char *data, float *zplt, int nz, int n0, float z){
+#ifdef deadcode
   int k1, k2;
   float dz;
   float val1, val2;
@@ -51,7 +52,13 @@ int interp3dsliceindex(unsigned char *data, float *zplt, int nz, int n0, float z
   val2 = data[n0+k2];
   z1 = zplt[k1];
   z2 = zplt[k2];
+  // following needs to be fixed for 3d terrain slices
   ival = CLAMP(((z-z1)*val2 + (z2-z)*val1)/dz,0,255);
+#else
+  int ival;
+#endif
+  // following works for 2d terrain slices
+  ival = data[n0];
   return ival;
 }
 
