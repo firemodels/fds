@@ -443,7 +443,7 @@ geom.o : gsmv.o func.o prec.o cons.o mesh.o
 scrc.o : prec.o cons.o mesh.o func.o pois.o
 irad.o : func.o prec.o cons.o type.o mesh.o
 ieva.o : func.o prec.o cons.o type.o mesh.o
-fire.o : func.o prec.o cons.o type.o mesh.o
+fire.o : func.o prec.o cons.o type.o mesh.o mass.o
 hvac.o : func.o prec.o cons.o type.o mesh.o ctrl.o
 wall.o : func.o prec.o cons.o type.o mesh.o hvac.o mass.o soot.o
 velo.o : func.o prec.o cons.o type.o mesh.o turb.o geom.o
@@ -477,7 +477,7 @@ geom.obj : func.obj prec.obj cons.obj mesh.obj
 scrc.obj : prec.obj cons.obj mesh.obj func.obj pois.obj
 irad.obj : func.obj prec.obj cons.obj type.obj mesh.obj
 ieva.obj : func.obj prec.obj cons.obj type.obj mesh.obj
-fire.obj : func.obj prec.obj cons.obj type.obj mesh.obj
+fire.obj : func.obj prec.obj cons.obj type.obj mesh.obj mass.obj
 hvac.obj : func.obj prec.obj cons.obj type.obj mesh.obj ctrl.obj
 wall.obj : func.obj prec.obj cons.obj type.obj mesh.obj hvac.obj mass.obj soot.obj
 velo.obj : func.obj prec.obj cons.obj type.obj mesh.obj turb.obj geom.obj
