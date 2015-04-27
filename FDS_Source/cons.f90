@@ -347,6 +347,7 @@ LOGICAL :: CUTCELLS ! if true call routine for generating cutcell list (for debu
 
 INTEGER :: N_DUCTNODES = 0, N_DUCTS = 0, N_FANS = 0, N_FILTERS = 0, N_AIRCOILS = 0,N_NETWORKS=0
 INTEGER , ALLOCATABLE, DIMENSION(:) :: DUCT_NE,DUCTNODE_NE
+REAL(EB) :: HVAC_PRES_RELAX=0.3_EB
 LOGICAL :: HVAC_SOLVE=.FALSE.
 
 ! Global array of orientation vectors
