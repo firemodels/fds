@@ -63,34 +63,36 @@ yc3 = -(.25-dy3/2):dy3:(.25-dy3/2);
 % return
 
 expdir = '../../Validation/UMD_Gas_Burner/Experimental_Data/';
-fdsdir = '../../Validation/UMD_Gas_Burner/Test3/';
+fdsdir = '../../Validation/UMD_Gas_Burner/Test2/';
 pltdir = '../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/UMD_Gas_Burner/';
 
 F1 = importdata([fdsdir,'methane_dx_1p25cm_devc.csv'],',',2);
 F2 = importdata([fdsdir,'methane_dx_p625cm_devc.csv'],',',2);
 F3 = importdata([fdsdir,'methane_dx_p3125cm_devc.csv'],',',2);
 
-% oxygen level
+% % oxygen level
 
-t = F1.data(:,1);
-X_O2 = F1.data(:,2);
+% % J1 = importdata([fdsdir,'methane_extinction_dx_1p25cm_devc.csv'],',',2);
 
-figure
-plot_style_paper
+% t = J1.data(:,1);
+% X_O2 = J1.data(:,2);
 
-H(1)=plot(t,X_O2,'k-');
+% figure
+% plot_style_paper
 
-xlabel('Time (s)')
-ylabel('O2 (vol frac)')
+% H(1)=plot(t,X_O2,'k-');
 
-print(gcf,'-dpdf',[pltdir,'umd_gas_burner_O2'])
+% xlabel('Time (s)')
+% ylabel('O2 (vol frac)')
 
-%return
+% print(gcf,'-dpdf',[pltdir,'umd_gas_burner_O2'])
+
+% return
 
 % check heat release rate
 
 HOC = 49674; % kJ/kg methane
-mf = 0.04;     % kg/m2/s methane
+mf = 0.04;   % kg/m2/s methane
 A  = 0.05*0.5; % m2
 G1 = importdata([fdsdir,'methane_dx_1p25cm_hrr.csv'],',',2);
 t = G1.data(:,1);
@@ -137,7 +139,7 @@ TG2_p125 = C2:C2+ND2-1;
 TC2_p125 = C2+ND2:C2+2*ND2-1;
 
 C3 = 3;
-ND3 = 51;
+ND3 = 160;
 TG3_p125 = C3:C3+ND3-1;
 TC3_p125 = C3+ND3:C3+2*ND3-1;
 
@@ -145,15 +147,12 @@ TC3_p125 = C3+ND3:C3+2*ND3-1;
 
 TG1 = mean(F1.data(t1range,TG1_p125),1);
 TC1 = mean(F1.data(t1range,TC1_p125),1);
-%y1 = -0.25:.01:0.25;
 
 TG2 = mean(F2.data(t2range,TG2_p125),1);
 TC2 = mean(F2.data(t2range,TC2_p125),1);
-%y2 = -0.25:.01:0.25;
 
 TG3 = mean(F3.data(t3range,TG3_p125),1);
 TC3 = mean(F3.data(t3range,TC3_p125),1);
-yc3 = -0.25:.01:0.25;
 
 H(2) = plot(yc1,TC1,'r-.','LineWidth',Line_Width); % dx = 1.25 cm
 H(3) = plot(yc2,TC2,'m--','LineWidth',Line_Width);  % dx = 0.625 cm
@@ -222,7 +221,7 @@ TG2_p250 = C2+3*ND2:C2+4*ND2-1;
 TC2_p250 = C2+4*ND2:C2+5*ND2-1;
 
 C3 = 3;
-ND3 = 51;
+ND3 = 160;
 TG3_p250 = C3+3*ND3:C3+4*ND3-1;
 TC3_p250 = C3+4*ND3:C3+5*ND3-1;
 
@@ -300,7 +299,7 @@ ND2 = 80;
 O22_p125 = C2+2*ND2:C2+3*ND2-1;
 
 C2 = 3;
-ND3 = 51;
+ND3 = 160;
 O23_p125 = C3+2*ND3:C3+3*ND3-1;
 
 % z = 0.125 m
@@ -374,7 +373,7 @@ ND2 = 80;
 O22_p250 = C2+5*ND2:C2+6*ND2-1;
 
 C2 = 3;
-ND3 = 51;
+ND3 = 160;
 O23_p250 = C3+5*ND3:C3+6*ND3-1;
 
 % z = 0.125 m
