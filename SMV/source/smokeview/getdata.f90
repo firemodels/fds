@@ -2,11 +2,6 @@
 ! $Revision$
 ! $Author$
 
-#ifdef WIN32
-#define pp_SHARED
-#endif
-
-
 !  WRITE(LU_GEOM) ONE
 !  WRITE(LU_GEOM) VERSION
 !  WRITE(LU_GEOM) STIME  ! first time step

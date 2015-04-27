@@ -2,9 +2,6 @@
 ! $Revision$
 ! $Author$
 
-#ifdef WIN32
-#define pp_SHARED
-#endif
 !  ------------------ getembeddatasize ------------------------ 
 
 subroutine getembeddatasize(filename,ntimes,nvars,error)

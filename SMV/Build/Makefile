@@ -101,10 +101,13 @@ ms_win_64 : exe       = smokeview_win_$(SMV_TESTSTRING)64
 ms_win_64 : $(objwin)
 	$(CPP) -o $(bin)/$(exe) $(LFLAGS) $(objwin) $(WIN_LIBS) $(SMV_LIBS_64)
 
+# note: use /fpscomp:general option to allow smokeview to read files being currently written to by FDS
+#       (instead of the non-standard SHARED keyword in a FORTRAN OPEN statement)
+
 # ------------- intel_win_64_db ----------------
 
 intel_win_64_db : INC = -I ../../source/include -I ../../source/shared -I ../../source/smokeview -I ../../source/glew
-intel_win_64_db : FFLAGS    = /Od /iface:stdref /fpp -D WIN32 /nologo /debug:full /extend_source:132 /warn:unused /warn:nointerfaces /Qtrapuv /fp:strict /fp:except /traceback /check:all /stand:f08
+intel_win_64_db : FFLAGS    = /Od /iface:stdref /fpp -D WIN32 /nologo /fpscomp:general /debug:full /extend_source:132 /warn:unused /warn:nointerfaces /Qtrapuv /fp:strict /fp:except /traceback /check:all /stand:f08
 intel_win_64_db : CFLAGS    = /Od /Wall /debug:full /W4 /ZI -D WIN32 -D pp_INTEL -D _CONSOLE -D X64 -D GLEW_STATIC -D PTW32_STATIC_LIB $(SMV_TESTFLAG)
 intel_win_64_db : LFLAGS    = /F32768000 /DEBUG
 intel_win_64_db : CC        = icl
@@ -118,7 +121,7 @@ intel_win_64_db : $(objwin)
 # ------------- intel_win_64 ----------------
 
 intel_win_64 : INC = -I ../../source/include -I ../../source/shared -I ../../source/smokeview -I ../../source/glew
-intel_win_64 : FFLAGS    = -O2 /iface:stdref /fpp -D WIN32
+intel_win_64 : FFLAGS    = -O2 /iface:stdref /fpp -D WIN32 /fpscomp:general 
 intel_win_64 : CFLAGS    = -O1 -D WIN32 -D pp_INTEL -D _CONSOLE -D X64 -D GLEW_STATIC -D PTW32_STATIC_LIB $(SMV_TESTFLAG)
 intel_win_64 : LFLAGS    = /F32768000 
 intel_win_64 : CC        = icl
