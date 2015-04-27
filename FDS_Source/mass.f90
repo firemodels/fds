@@ -202,7 +202,7 @@ INTEGER, INTENT(IN) :: NM
 REAL(EB), INTENT(IN) :: T
 REAL(EB) :: TNOW,ZZ_GET(1:N_TRACKED_SPECIES),RHS,UN,Q_Z,XHAT,ZHAT
 INTEGER :: I,J,K,N,IW,IOR,IIG,JJG,KKG
-REAL(EB), POINTER, DIMENSION(:,:,:,:) :: RHO_ZZ__0=>NULL(),DEL_RHO_D_DEL_Z__0=>NULL()
+REAL(EB), POINTER, DIMENSION(:,:,:,:) :: DEL_RHO_D_DEL_Z__0=>NULL()
 REAL(EB), POINTER, DIMENSION(:,:,:) :: UU=>NULL(),VV=>NULL(),WW=>NULL()
 TYPE(WALL_TYPE), POINTER :: WC=>NULL()
 
@@ -221,7 +221,6 @@ CALL POINT_TO_MESH(NM)
 UU=>WORK1
 VV=>WORK2
 WW=>WORK3
-RHO_ZZ__0=>SCALAR_WORK1
 DEL_RHO_D_DEL_Z__0=>SCALAR_WORK4
 
 PREDICTOR_STEP: SELECT CASE (PREDICTOR)
@@ -280,9 +279,7 @@ CASE(.TRUE.) PREDICTOR_STEP
                    + (FY(I,J,K,N)*VV(I,J,K)      - FY(I,J-1,K,N)*VV(I,J-1,K)       )*RDY(J)        &
                    + (FZ(I,J,K,N)*WW(I,J,K)      - FZ(I,J,K-1,N)*WW(I,J,K-1)       )*RDZ(K)
 
-               RHO_ZZ__0(I,J,K,N) = RHO(I,J,K)*ZZ(I,J,K,N)
-
-               ZZS(I,J,K,N) = RHO_ZZ__0(I,J,K,N) - DT*RHS
+               ZZS(I,J,K,N) = RHO(I,J,K)*ZZ(I,J,K,N) - DT*RHS
             ENDDO
          ENDDO
       ENDDO
@@ -326,7 +323,7 @@ CASE(.TRUE.) PREDICTOR_STEP
       DO J=1,JBAR
          DO I=1,IBAR
             IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-               ZZS(I,J,K,1:N_TRACKED_SPECIES) = ZZS(I,J,K,1:N_TRACKED_SPECIES)/RHOS(I,J,K)
+            ZZS(I,J,K,1:N_TRACKED_SPECIES) = ZZS(I,J,K,1:N_TRACKED_SPECIES)/RHOS(I,J,K)
          ENDDO
       ENDDO
    ENDDO
@@ -412,8 +409,6 @@ CASE(.FALSE.) PREDICTOR_STEP
                    + (FX(I,J,K,N)*UU(I,J,K)*R(I) - FX(I-1,J,K,N)*UU(I-1,J,K)*R(I-1))*RDX(I)*RRN(I) &
                    + (FY(I,J,K,N)*VV(I,J,K)      - FY(I,J-1,K,N)*VV(I,J-1,K)       )*RDY(J)        &
                    + (FZ(I,J,K,N)*WW(I,J,K)      - FZ(I,J,K-1,N)*WW(I,J,K-1)       )*RDZ(K)
-
-               RHO_ZZ__0(I,J,K,N) = .5_EB*(RHO(I,J,K)*ZZ(I,J,K,N) + RHOS(I,J,K)*ZZS(I,J,K,N))
 
                ZZ(I,J,K,N) = .5_EB*(RHO(I,J,K)*ZZ(I,J,K,N) + RHOS(I,J,K)*ZZS(I,J,K,N)) - .5_EB*DT*RHS
             ENDDO
@@ -777,7 +772,6 @@ ELSE
 ENDIF
 
 END FUNCTION MP5
-
 
 
 SUBROUTINE GET_REV_mass(MODULE_REV,MODULE_DATE)
