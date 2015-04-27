@@ -945,7 +945,7 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
   FILE_SIZE file_size=0;
   int local_starttime0=0, local_stoptime0=0;  
   float delta_time, delta_time0;
-#ifdef _DEBUG
+#ifdef pp_MEMDEBUG
   int num_memblocks_load,num_memblocks_unload;
 #endif
 #ifdef pp_memstatus
@@ -1063,7 +1063,7 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
       PRINTF("After slice unload: \n");
       PrintMemoryInfo;
 #endif
-#ifdef _DEBUG
+#ifdef pp_MEMDEBUG
       CountMemoryBlocks(num_memblocks_unload,num_memblocks_load);
       PRINTF("blocks unloaded=%i\n", num_memblocks_unload);
 #endif

@@ -170,6 +170,8 @@ void readiso_geom(const char *file, int ifile, int load_flag, int *errorcode){
   geomi = isoi->geominfo;
   unloadiso(meshi);
   FreeAllMemory(isoi->memory_id);
+  meshi->showlevels = NULL;
+  meshi->isolevels = NULL;
 
   read_geom(geomi,load_flag,GEOM_ISO,errorcode);
   FREEMEMORY(geominfoptrs);
