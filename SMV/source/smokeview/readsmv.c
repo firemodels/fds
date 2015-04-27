@@ -3451,6 +3451,7 @@ int readsmv(char *file, char *file2){
       geomi = geominfo + ngeominfo;
       geomi->ngeomobjinfo=0;
       geomi->geomobjinfo=NULL;
+      geomi->memory_id = ++nmemory_ids;
 
       trim(buffer);
       if(strlen(buffer)>4){
@@ -7018,6 +7019,7 @@ typedef struct {
       isoi->nlevels=0;
       isoi->levels=NULL;
       isoi->is_fed=0;
+      isoi->memory_id = ++nmemory_ids;
 
       isoi->normaltable=NULL;
       isoi->color_label.longlabel=NULL;
@@ -7025,6 +7027,8 @@ typedef struct {
       isoi->color_label.unit=NULL;
       isoi->geominfo=NULL;
       NewMemory((void **)&isoi->geominfo,sizeof(geomdata));
+      nmemory_ids++;
+      isoi->geominfo->memory_id=nmemory_ids;
       init_geom(isoi->geominfo);
 
       bufferptr=trim_string(buffer);
@@ -7330,9 +7334,7 @@ typedef struct {
   PRINTF("\n");
   PRINTF("%s",_("beginning wrap up "));
   PRINTF("\n");
-#ifdef _DEBUG
   PrintMemoryInfo;
-#endif
 
 /* 
    ************************************************************************
@@ -7552,9 +7554,7 @@ typedef struct {
 
   PRINTF("%s",_("wrap up completed"));
   PRINTF("\n\n");
-#ifdef _DEBUG
   PrintMemoryInfo;
-#endif
 
   return 0;
 }

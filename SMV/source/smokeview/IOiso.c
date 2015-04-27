@@ -169,11 +169,9 @@ void readiso_geom(const char *file, int ifile, int load_flag, int *errorcode){
   meshi = meshinfo + isoi->blocknumber;
   geomi = isoi->geominfo;
   unloadiso(meshi);
+  FreeAllMemory(isoi->memory_id);
 
   read_geom(geomi,load_flag,GEOM_ISO,errorcode);
-  FREEMEMORY(meshi->iso_times);
-  FREEMEMORY(meshi->showlevels);
-  FREEMEMORY(meshi->isolevels);
   FREEMEMORY(geominfoptrs);
   if(load_flag == UNLOAD){
     meshi->isofilenum = -1;
@@ -188,7 +186,7 @@ void readiso_geom(const char *file, int ifile, int load_flag, int *errorcode){
 
   meshi->isofilenum=ifile;
   meshi->niso_times=geomi->ntimes;
-  if(NewMemory((void **)&meshi->iso_times,sizeof(float)*meshi->niso_times)==0){
+  if(NewMemoryMemID((void **)&meshi->iso_times, sizeof(float)*meshi->niso_times, isoi->memory_id) == 0){
     readiso("",ifile,UNLOAD,&error);
     *errorcode=1;
     return;
@@ -199,8 +197,8 @@ void readiso_geom(const char *file, int ifile, int load_flag, int *errorcode){
 
   meshi->nisolevels=geomi->nfloat_vals;
   if(
-    NewMemory((void **)&meshi->showlevels,sizeof(int)*meshi->nisolevels)==0||
-    NewMemory((void **)&meshi->isolevels,sizeof(int)*meshi->nisolevels)==0
+    NewMemoryMemID((void **)&meshi->showlevels, sizeof(int)*meshi->nisolevels, isoi->memory_id) == 0 ||
+    NewMemoryMemID((void **)&meshi->isolevels, sizeof(int)*meshi->nisolevels, isoi->memory_id) == 0
     ){
     *errorcode=1;
     readiso("",ifile,UNLOAD,&error);
@@ -225,7 +223,7 @@ void readiso_geom(const char *file, int ifile, int load_flag, int *errorcode){
 
   Update_Times();
   get_faceinfo();
-#ifdef _DEBUG
+#ifdef MEMPRINT
   PRINTF("After iso load: \n");
   PrintMemoryInfo;
 #endif
@@ -667,7 +665,7 @@ void readiso_orig(const char *file, int ifile, int flag, int *errorcode){
   }
 
   Update_Times();
-#ifdef _DEBUG
+#ifdef pp_MEMPRINT
   PRINTF("After iso load: \n");
   PrintMemoryInfo;
 #endif

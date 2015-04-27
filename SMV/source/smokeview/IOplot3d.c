@@ -154,7 +154,7 @@ void readplot3d(char *file, int ifile, int flag, int *errorcode){
       numplot3dvars=0;
     }
     updatemenu=1;
-#ifdef _DEBUG
+#ifdef pp_MEMPRINT
     PRINTF("After plot3d unload: \n");
     PrintMemoryInfo;
 #endif
@@ -374,7 +374,7 @@ void readplot3d(char *file, int ifile, int flag, int *errorcode){
   STRCAT(FULLTITLE,", ");
   STRCAT(FULLTITLE,file);
   updateplot3dlistindex();
-#ifdef _DEBUG
+#ifdef pp_MEMPRINT
   PRINTF("After plot3d load: \n");
   PrintMemoryInfo;
 #endif

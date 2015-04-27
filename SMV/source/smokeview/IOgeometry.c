@@ -708,7 +708,7 @@ void update_triangles(void){
 
         pointi = geomlisti->points + i;
         if(pointi->ntriangles>0){
-          NewMemory((void **)&pointi->triangles,pointi->ntriangles*sizeof(triangle *));
+          NewMemoryMemID((void **)&pointi->triangles,pointi->ntriangles*sizeof(triangle *),geomi->memory_id);
         }
       }
       for(i=0;i<geomlisti->ntriangles;i++){
@@ -812,7 +812,7 @@ void read_geom_header0(geomdata *geomi, int *ntimes_local){
 
   FORTREAD(&nfloat_vals,1,stream);
   if(nfloat_vals>0){
-    NewMemory((void **)&float_vals,nfloat_vals*sizeof(float));
+    NewMemoryMemID((void **)&float_vals,nfloat_vals*sizeof(float),geomi->memory_id);
     FORTREAD(float_vals,nfloat_vals,stream);
     geomi->float_vals=float_vals;
     geomi->nfloat_vals=nfloat_vals;
@@ -822,7 +822,7 @@ void read_geom_header0(geomdata *geomi, int *ntimes_local){
 
   FORTREAD(&nint_vals,1,stream);
   if(nint_vals>0){
-    NewMemory((void **)&int_vals,nint_vals*sizeof(float));
+    NewMemoryMemID((void **)&int_vals,nint_vals*sizeof(float),geomi->memory_id);
     FORTREAD(int_vals,nint_vals,stream);
     geomi->int_vals=int_vals;
     geomi->nint_vals=nint_vals;
@@ -1023,27 +1023,8 @@ void read_geom0(geomdata *geomi, int load_flag, int type, int *errorcode){
   int nfloat_vals, nint_vals;
   int iframe, icount;
 
-  if(geomi->geomlistinfo_0!=NULL){
-    for(iframe=-1;iframe<geomi->ntimes;iframe++){
-      geomlistdata *geomlisti;
-      int ipoint;
-
-      geomlisti = geomi->geomlistinfo+iframe;
-      for(ipoint = 0; ipoint<geomlisti->npoints; ipoint++){
-        point *pointi;
-
-        pointi = geomlisti->points+ipoint;
-        FREEMEMORY(pointi->triangles);
-      }
-      FREEMEMORY(geomlisti->points);
-      FREEMEMORY(geomlisti->triangles);
-    }  
-  }
-  FREEMEMORY(geomi->times);
-  FREEMEMORY(geomi->geomlistinfo_0);
-  geomi->geomlistinfo=NULL;
-  FREEMEMORY(geomi->float_vals);
-  FREEMEMORY(geomi->int_vals);
+  FreeAllMemory(geomi->memory_id);
+  geomi->geomlistinfo = NULL;
   geomi->nfloat_vals=0;
   geomi->nint_vals=0;
 
@@ -1069,9 +1050,9 @@ void read_geom0(geomdata *geomi, int load_flag, int type, int *errorcode){
 
   geomi->ntimes=ntimes_local;
   geomi->itime=0;
-  NewMemory((void **)&geomi->geomlistinfo_0,(ntimes_local+1)*sizeof(geomlistdata));
+  NewMemoryMemID((void **)&geomi->geomlistinfo_0,(ntimes_local+1)*sizeof(geomlistdata),geomi->memory_id);
   geomi->geomlistinfo=geomi->geomlistinfo_0+1;
-  NewMemory((void **)&geomi->times,ntimes_local*sizeof(float));
+  NewMemoryMemID((void **)&geomi->times,ntimes_local*sizeof(float),geomi->memory_id);
 
   icount=-1;
   for(iframe=-1;iframe<ntimes_local;){
@@ -1119,7 +1100,7 @@ void read_geom0(geomdata *geomi, int load_flag, int type, int *errorcode){
 
       if(iframe<0)PRINTF("static geometry\n");
       NewMemory((void **)&xyz,3*nverts*sizeof(float));
-      NewMemory((void **)&points,nverts*sizeof(point));
+      NewMemoryMemID((void **)&points,nverts*sizeof(point),geomi->memory_id);
       geomlisti->points=points;
       geomlisti->npoints=nverts;
       FORTREADBR(xyz,3*nverts,stream);
@@ -1136,7 +1117,7 @@ void read_geom0(geomdata *geomi, int load_flag, int type, int *errorcode){
       int offset=0;
       triangle *triangles;
 
-      NewMemory((void **)&triangles,ntris*sizeof(triangle));
+      NewMemoryMemID((void **)&triangles,ntris*sizeof(triangle),geomi->memory_id);
       NewMemory((void **)&ijk,3*ntris*sizeof(int));
       NewMemory((void **)&surf_ind,ntris*sizeof(int));
       geomlisti->triangles=triangles;
@@ -1179,21 +1160,8 @@ void read_geom2(geomdata *geomi, int load_flag, int type, int *errorcode){
   int nvertfacesvolus[3];
   int nheaders[3], nfloat_vals, nint_vals, first_frame_static;
 
-  if(geomi->geomlistinfo!=NULL){
-    for(i=-1;i<geomi->ntimes;i++){
-      geomlistdata *geomlisti;
-
-      geomlisti = geomi->geomlistinfo+i;
-      FREEMEMORY(geomlisti->points);
-      FREEMEMORY(geomlisti->triangles);
-      FREEMEMORY(geomlisti->volumes);
-    }  
-  }
-  FREEMEMORY(geomi->times);
-  FREEMEMORY(geomi->geomlistinfo_0);
+  FreeAllMemory(geomi->memory_id);
   geomi->geomlistinfo=NULL;
-  FREEMEMORY(geomi->float_vals);
-  FREEMEMORY(geomi->int_vals);
   geomi->nfloat_vals=0;
   geomi->nint_vals=0;
 
@@ -1222,9 +1190,9 @@ void read_geom2(geomdata *geomi, int load_flag, int type, int *errorcode){
 
   geomi->ntimes=ntimes_local;
   geomi->itime=0;
-  NewMemory((void **)&geomi->geomlistinfo_0,(ntimes_local+1)*sizeof(geomlistdata));
+  NewMemoryMemID((void **)&geomi->geomlistinfo_0,(ntimes_local+1)*sizeof(geomlistdata),geomi->memory_id);
   geomi->geomlistinfo=geomi->geomlistinfo_0+1;
-  if(ntimes_local>0)NewMemory((void **)&geomi->times,ntimes_local*sizeof(float));
+  if(ntimes_local>0)NewMemoryMemID((void **)&geomi->times,ntimes_local*sizeof(float),geomi->memory_id);
 
   for(i=-1;i<ntimes_local;i++){
     float time_local;
@@ -1259,7 +1227,7 @@ void read_geom2(geomdata *geomi, int load_flag, int type, int *errorcode){
 
       if(i<0)PRINTF("static geometry\n");
       NewMemory((void **)&xyz,3*nverts*sizeof(float));
-      NewMemory((void **)&points,nverts*sizeof(point));
+      NewMemoryMemID((void **)&points,nverts*sizeof(point),geomi->memory_id);
       geomlisti->points=points;
       geomlisti->npoints=nverts;
       FORTREADBR(xyz,3*nverts,stream);
@@ -1276,7 +1244,7 @@ void read_geom2(geomdata *geomi, int load_flag, int type, int *errorcode){
       int ii;
       int offset=0;
 
-      NewMemory((void **)&triangles,ntris*sizeof(triangle));
+      NewMemoryMemID((void **)&triangles,ntris*sizeof(triangle),geomi->memory_id);
       NewMemory((void **)&ijk,3*ntris*sizeof(int));
       NewMemory((void **)&surf_ind,ntris*sizeof(int));
       NewMemory((void **)&texture_coords,6*ntris*sizeof(float));
@@ -1312,7 +1280,7 @@ void read_geom2(geomdata *geomi, int load_flag, int type, int *errorcode){
       int *ijk;
       int *matl_ind=NULL;
 
-      NewMemory((void **)&volumes,nvolus*sizeof(tetrahedron));
+      NewMemoryMemID((void **)&volumes,nvolus*sizeof(tetrahedron),geomi->memory_id);
       geomlisti->volumes=volumes;
       NewMemory((void **)&ijk,4*nvolus*sizeof(int));
       FORTREADBR(ijk,4*nvolus,stream);
@@ -1499,9 +1467,7 @@ void read_geom(geomdata *geomi, int load_flag, int type, int *errorcode){
 
   if(geomi->file==NULL)return;
   stream = fopen(geomi->file,"rb");
-  if(stream==NULL){
-    return;
-  }
+  if(stream==NULL)return;
   FSEEK(stream,4,SEEK_CUR);fread(&one,4,1,stream);FSEEK(stream,4,SEEK_CUR);
   if(one!=1)endianswitch=1;
   FORTREAD(&version,1,stream);

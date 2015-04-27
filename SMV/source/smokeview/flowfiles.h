@@ -86,6 +86,7 @@ typedef struct {
 
 typedef struct {
   char *file;
+  int memory_id;
   int loaded, display;
   struct _surfdata *surf;
   geomlistdata *geomlistinfo,*geomlistinfo_0;
@@ -484,6 +485,7 @@ typedef struct _isodata {
   int seq_id, autoload;
   char *reg_file, *size_file;
   short *normaltable;
+  int memory_id;
   int nnormaltable; 
   char *file,*tfile;
   int dataflag,geomflag;

@@ -619,7 +619,10 @@ void readsmoke3d(int ifile,int flag, int *errorcode){
     PRINTF(" %.1f MB downloaded in %.2f s (overhead: %.2f s)",
     (float)file_size/1000000.,delta_time,delta_time0-delta_time);
   }
+#ifdef pp_MEMPRINT
+  PRINTF("After 3D Smoke load: \n");
   PrintMemoryInfo;
+#endif
 }
 
 /* ------------------ setsmokecolorflags ------------------------ */

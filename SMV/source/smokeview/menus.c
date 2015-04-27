@@ -912,7 +912,7 @@ void ShowHideMenu(int value){
   updatemenu=1;  
   glutPostRedisplay();
   switch(value){
-#ifdef _DEBUG
+#ifdef pp_MEMPRINT
   case MENU_SHOWHIDE_PRINT:
     PrintMemoryInfo;
     break;
@@ -7053,7 +7053,7 @@ updatemenu=0;
   if(ntextures_loaded_used>0){
     glutAddSubMenu(_("Textures"),textureshowmenu);
   }
-#ifdef _DEBUG
+#ifdef pp_MEMPRINT
   glutAddMenuEntry("Show Memory block info",MENU_SHOWHIDE_PRINT);
 #endif
 

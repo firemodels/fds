@@ -1657,8 +1657,11 @@ void CCisosurface2file(char *isofile, float *t, float *data, char *iblank,
   int i;
   FILE *isostream=NULL;
 
+#ifdef pp_MEMPRINT
+  PRINTF("isosurface2file before\n");
   PrintMemoryInfo;
-  isostream=fopen(isofile,"ab");
+#endif
+  isostream = fopen(isofile, "ab");
   *error=-1;
   if(isostream==NULL)return;
   *error = 0;
@@ -1702,7 +1705,10 @@ void CCisosurface2file(char *isofile, float *t, float *data, char *iblank,
     freesurface(&surface);
   }
   fclose(isostream);
+#ifdef pp_MEMPRINT
+  PRINTF("isosurface2file after\n");
   PrintMemoryInfo;
+#endif
 }
 
 /* ------------------ CCisosurface2file ------------------------ */
@@ -1726,8 +1732,11 @@ void CCisosurfacet2file(char *isofile, float *t, float *data, int *data2flag, fl
   }
 
 
+#ifdef pp_MEMPRINT
+  PRINTF("isosurfacet2file before\n");
   PrintMemoryInfo;
-  isostream=fopen(isofile,"ab");
+#endif
+  isostream = fopen(isofile, "ab");
   *error=-1;
   if(isostream==NULL)return;
   *error = 0;
@@ -1773,7 +1782,10 @@ void CCisosurfacet2file(char *isofile, float *t, float *data, int *data2flag, fl
     freesurface(&surface);
   }
   fclose(isostream);
+#ifdef pp_MEMPRINT
+  PRINTF("isosurfacet2file after\n");
   PrintMemoryInfo;
+#endif
 }
 
 /* ------------------ get_tri_area ------------------------ */

@@ -917,7 +917,7 @@ void readvslice(int ivslice, int flag, int *errorcode){
   velocity_range = valmax - valmin;
   push_vslice_loadstack(ivslice);
   
-#ifdef _DEBUG
+#ifdef pp_MEMPRINT
   PRINTF("After vslice load: \n");
   PrintMemoryInfo;
 #endif
@@ -1059,9 +1059,11 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
       updateglui();
       update_unit_defs();
       Update_Times();
-#ifdef pp_MEMDEBUG
+#ifdef pp_MEMPRINT
       PRINTF("After slice unload: \n");
       PrintMemoryInfo;
+#endif
+#ifdef _DEBUG
       CountMemoryBlocks(num_memblocks_unload,num_memblocks_load);
       PRINTF("blocks unloaded=%i\n", num_memblocks_unload);
 #endif
@@ -1315,6 +1317,11 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
   CheckMemory;
   PRINTF("After slice file load: \n");
   CountMemoryBlocks(sd->num_memblocks,num_memblocks_load);
+#endif
+#ifdef pp_MEMPRINT
+#ifndef pp_MEMDEBUG
+  PRINTF("After slice file load: \n");
+#endif
   PrintMemoryInfo;
 #endif
   Idle_CB();

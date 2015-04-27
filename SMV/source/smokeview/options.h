@@ -57,6 +57,7 @@
 #define pp_ZONEVENT
 #define pp_HAZARD
 //#define pp_GPUDEPTH
+#define pp_MEMPRINT
 #endif
 
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

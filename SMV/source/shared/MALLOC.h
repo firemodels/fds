@@ -43,6 +43,10 @@ typedef struct {
   unsigned char marker;
   void *prev, *next;
   int memory_id;
+#ifdef pp_MEMPRINT
+  size_t size;
+#endif  
+  
 } MMdata;
 
 MMEXTERN MMdata MMfirst, MMlast;
@@ -97,13 +101,18 @@ void _memorystatus(unsigned int size,unsigned int *availmem, unsigned int *memus
 #define MEMSTATUS(f,g,h,i)
 #endif
 
+#ifdef pp_MEMPRINT
+void _PrintMemoryInfo(void);
+#define PrintMemoryInfo _PrintMemoryInfo()
+#else
+#define PrintMemoryInfo
+#endif
 #ifdef pp_MEMDEBUG
 void getMemusage(MMsize totalmemory,char *MEMlabel);
 void _CheckMemory(void);
 void _CheckMemoryNOTHREAD(void);
 void _CheckMemoryOn(void);
 void _CheckMemoryOff(void);
-void _PrintMemoryInfo(void);
 void _PrintAllMemoryInfo(void);
 int _CountMemoryBlocks(void);
 #define ValidPointer(pv,size) _ValidPointer(pv, size)
@@ -112,7 +121,6 @@ int _CountMemoryBlocks(void);
 #define CheckMemoryNOTHREAD _CheckMemoryNOTHREAD()
 #define CheckMemoryOn _CheckMemoryOn()
 #define CheckMemoryOff _CheckMemoryOff()
-#define PrintMemoryInfo _PrintMemoryInfo()
 #define PrintAllMemoryInfo _PrintAllMemoryInfo()
 #define CountMemoryBlocks(f,g)  f=_CountMemoryBlocks()-g
 char *_strcpy(char *s1, const char *s2);
@@ -125,7 +133,6 @@ char *_strcat(char *s1, const char *s2);
 #define CheckMemory
 #define CheckMemoryOn
 #define CheckMemoryOff
-#define PrintMemoryInfo
 #define PrintAllMemoryInfo
 #define STRCPY(f,g) strcpy((f),(g))
 #define STRCAT(f,g) strcat((f),(g))

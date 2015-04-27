@@ -146,6 +146,9 @@ mallocflag _NewMemoryNOTHREAD(void **ppv, size_t size, int memory_id){
     prev_ptr->next=this_ptr;
     next_ptr->prev=this_ptr;
 
+#ifdef pp_MEMPRINT
+    this_ptr->size = size;
+#endif
     this_ptr->memory_id = memory_id;
     this_ptr->prev=prev_ptr;
     this_ptr->next=next_ptr;
@@ -194,12 +197,28 @@ void FreeAllMemory(int memory_id){
     // so, nextptr (which is thisptr->next) must be defined before it is freed
     nextptr = thisptr->next;
     if(thisptr->next == NULL || thisptr->marker != markerByte)break;
-    if(memory_id == 0 || thisptr->memory_id == memory_id)FreeMemoryNOTHREAD((char *)thisptr + infoblocksize);
+    if(memory_id == 0 || thisptr->memory_id == memory_id){
+      FreeMemoryNOTHREAD((char *)thisptr + infoblocksize);
+    }
     thisptr = nextptr;
   }
   UNLOCK_MEM;
 }
 
+#ifdef pp_MEMPRINT
+/* ------------------ _PrintMemoryInfo ------------------------ */
+
+void _PrintMemoryInfo(void){
+  MMdata *thisptr;
+  int n=0,size=0;
+
+  for(thisptr = MMfirstptr->next;thisptr->next!=NULL;thisptr=thisptr->next){
+    size += thisptr->size;
+    n++;
+  }
+  PRINTF("nblocks=%i sizeblocks=%i\n", n, size);
+}
+#endif
 
 /* ------------------ FreeMemory ------------------------ */
 
@@ -311,6 +330,9 @@ mallocflag _ResizeMemoryNOTHREAD(void **ppv, size_t sizeNew, int memory_id){
       prev_ptr->next=this_ptr;
       next_ptr->prev=this_ptr;
       
+#ifdef pp_MEMPRINT
+      this_ptr->size = sizeNew;
+#endif
       this_ptr->memory_id = memory_id;
       this_ptr->next=next_ptr;
       this_ptr->prev=prev_ptr;
@@ -479,22 +501,7 @@ MMsize _GetTotalMemory(void){
   return MMtotalmemory;
 }
 
-/* ------------------ PrintMemoryInfo ------------------------ */
-
-void _PrintMemoryInfo(void){
-  blockinfo *pbi;
-  int n=0,size=0;
-
-  for (pbi = pbiHead; pbi != NULL; pbi = pbi->pbiNext)
-  {
-    n++;
-    size += pbi->size;
-  }
-  PRINTF("nblocks=%i sizeblocks=%i\n",n,size);
-}
-
-
-/* ------------------ PrintMemoryInfo ------------------------ */
+/* ------------------ PrintAllMemoryInfo ------------------------ */
 
 void _PrintAllMemoryInfo(void){
   blockinfo *pbi;

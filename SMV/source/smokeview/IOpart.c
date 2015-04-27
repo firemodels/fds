@@ -991,7 +991,7 @@ void readpart5(char *file, int ifile, int flag, int *errorcode){
     Update_Times();
     updatemenu=1;
     updatePart5extremes();
-#ifdef _DEBUG
+#ifdef pp_MEMPRINT
     PRINTF("After particle file unload: \n");
     PrintMemoryInfo;
 #endif
@@ -1012,7 +1012,7 @@ void readpart5(char *file, int ifile, int flag, int *errorcode){
   getpart5data(parti,partframestep,partpointstep, nf_all, &delta_time, &file_size);
   updateglui();
 
-#ifdef _DEBUG
+#ifdef pp_MEMPRINT
   PRINTF("After particle file load: \n");
   PrintMemoryInfo;
 #endif
@@ -1046,7 +1046,7 @@ void readpart5(char *file, int ifile, int flag, int *errorcode){
   }
   getPart5Colors(parti,nrgb);
   updateglui();
-#ifdef _DEBUG
+#ifdef pp_MEMPRINT
   PRINTF("After particle file load: \n");
   PrintMemoryInfo;
 #endif
@@ -1165,7 +1165,7 @@ void readpart(char *file, int ifile, int flag, int *errorcode){
   if(flag==UNLOAD){
     Update_Times();
     updatemenu=1;
-#ifdef _DEBUG
+#ifdef pp_MEMPRINT
     PRINTF("After particle file unload: \n");
     PrintMemoryInfo;
 #endif
@@ -1412,7 +1412,7 @@ void readpart(char *file, int ifile, int flag, int *errorcode){
   }
   updateglui();
 
-#ifdef _DEBUG
+#ifdef pp_MEMPRINT
   PRINTF("After particle file load: \n");
   PrintMemoryInfo;
 #endif
