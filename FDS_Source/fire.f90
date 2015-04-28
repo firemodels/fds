@@ -34,10 +34,6 @@ IF (INIT_HRRPUV) RETURN
 
 CALL POINT_TO_MESH(NM)
 
-! Transport unmixed fraction
-
-IF (TRANSPORT_UNMIXED_FRACTION) CALL TRANSPORT_ZETA
-
 ! Upper bounds on local HRR per unit volume
 
 Q_UPPER = HRRPUA_SHEET/CELL_SIZE + HRRPUV_AVERAGE
@@ -103,7 +99,7 @@ DO K=1,KBAR
             IF (ABS(Q(I,J,K)) > TWO_EPSILON_EB) Q_EXISTS = .TRUE.
             CALL GET_SPECIFIC_GAS_CONSTANT(ZZ_GET,RSUM(I,J,K)) 
             TMP(I,J,K) = PBAR(K,PRESSURE_ZONE(I,J,K))/(RSUM(I,J,K)*RHO(I,J,K))
-            ZZ(I,J,K,:) = ZZ_GET
+            ZZ(I,J,K,1:N_TRACKED_SPECIES) = ZZ_GET
             CP_IF: IF (.NOT.CONSTANT_SPECIFIC_HEAT_RATIO) THEN
                ! Divergence term
                CALL GET_SPECIFIC_HEAT(ZZ_GET,CP,TMP(I,J,K))
@@ -710,191 +706,6 @@ RN=> REACTION(NR)
 FLAME_SPEED = RN%FLAME_SPEED*(TMP/RN%FLAME_SPEED_TEMPERATURE)**RN%FLAME_SPEED_EXPONENT*EVALUATE_RAMP(EQ,0._EB,RN%RAMP_FS_INDEX)
 
 END FUNCTION FLAME_SPEED
-
-
-SUBROUTINE TRANSPORT_ZETA()
-USE MASS, ONLY: SCALAR_FACE_VALUE
-IMPLICIT NONE
-
-REAL(EB) :: UN,RHS,ZZZ(1:4)
-INTEGER :: I,J,K,II,JJ,KK,IIG,JJG,KKG,IOR,IW
-REAL(EB), POINTER, DIMENSION(:,:,:) :: UU=>NULL(),VV=>NULL(),WW=>NULL(),DEL_D_DEL_Z=>NULL(),GX=>NULL(),GY=>NULL(),GZ=>NULL(),&
-                                       ZETA=>NULL()
-TYPE (WALL_TYPE), POINTER :: WC=>NULL()
-
-UU=>WORK1
-VV=>WORK2
-WW=>WORK3
-DEL_D_DEL_Z=>WORK4
-GX=>WORK5
-GY=>WORK6
-GZ=>WORK7
-ZETA=>UNMIXED_FRACTION
-
-! First-order (Forward Euler) time update of unmixed fraction, zeta
-
-! Diffusion term
-
-DEL_D_DEL_Z = 0._EB
-
-! Advection term
-
-UU=U
-VV=V
-WW=W
-
-! Compute scalar face values
-
-!$OMP DO SCHEDULE(STATIC)
-DO K=1,KBAR
-   DO J=1,JBAR
-      DO I=1,IBM1
-         ZZZ(1:4) = ZETA(I-1:I+2,J,K)
-         GX(I,J,K) = SCALAR_FACE_VALUE(UU(I,J,K),ZZZ,FLUX_LIMITER)
-      ENDDO
-   ENDDO
-ENDDO
-!$OMP END DO NOWAIT
-
-!$OMP DO SCHEDULE(STATIC)
-DO K=1,KBAR
-   DO J=1,JBM1
-      DO I=1,IBAR
-         ZZZ(1:4) = ZETA(I,J-1:J+2,K)
-         GY(I,J,K) = SCALAR_FACE_VALUE(VV(I,J,K),ZZZ,FLUX_LIMITER)
-      ENDDO
-   ENDDO
-ENDDO
-!$OMP END DO NOWAIT
-
-!$OMP DO SCHEDULE(STATIC)
-DO K=1,KBM1
-   DO J=1,JBAR
-      DO I=1,IBAR
-         ZZZ(1:4) = ZETA(I,J,K-1:K+2)
-         GZ(I,J,K) = SCALAR_FACE_VALUE(WW(I,J,K),ZZZ,FLUX_LIMITER)
-      ENDDO
-   ENDDO
-ENDDO
-!$OMP END DO
-!$OMP END PARALLEL
-
-WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
-   WC=>WALL(IW)
-   IF (WC%BOUNDARY_TYPE==NULL_BOUNDARY) CYCLE WALL_LOOP
-
-   II  = WC%ONE_D%II 
-   JJ  = WC%ONE_D%JJ
-   KK  = WC%ONE_D%KK
-   IIG = WC%ONE_D%IIG 
-   JJG = WC%ONE_D%JJG
-   KKG = WC%ONE_D%KKG
-   IOR = WC%ONE_D%IOR
-
-   SELECT CASE(IOR)
-      CASE( 1); GX(IIG-1,JJG,KKG) = WC%ZETA_F
-      CASE(-1); GX(IIG,JJG,KKG)   = WC%ZETA_F
-      CASE( 2); GY(IIG,JJG-1,KKG) = WC%ZETA_F
-      CASE(-2); GY(IIG,JJG,KKG)   = WC%ZETA_F
-      CASE( 3); GZ(IIG,JJG,KKG-1) = WC%ZETA_F
-      CASE(-3); GZ(IIG,JJG,KKG)   = WC%ZETA_F
-   END SELECT
-
-   ! Overwrite first off-wall advective flux if flow is away from the wall and if the face is not also a wall cell
-
-   OFF_WALL_IF: IF (WC%BOUNDARY_TYPE/=INTERPOLATED_BOUNDARY .AND. WC%BOUNDARY_TYPE/=OPEN_BOUNDARY) THEN
-
-      OFF_WALL_SELECT: SELECT CASE(IOR)
-         CASE( 1) OFF_WALL_SELECT
-            !      ghost          FX/UU(II+1)
-            ! ///   II   ///  II+1  |  II+2  | ...
-            !                       ^ WALL_INDEX(II+1,+1)
-            IF ((UU(II+1,JJ,KK)>0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II+1,JJ,KK),+1)>0)) THEN
-               ZZZ(1:3) = (/WC%ZETA_F,ZETA(II+1:II+2,JJ,KK)/)
-               GX(II+1,JJ,KK) = SCALAR_FACE_VALUE(UU(II+1,JJ,KK),ZZZ,FLUX_LIMITER)
-            ENDIF
-         CASE(-1) OFF_WALL_SELECT
-            !            FX/UU(II-2)     ghost
-            ! ... |  II-2  |  II-1  ///   II   ///
-            !              ^ WALL_INDEX(II-1,-1)
-            IF ((UU(II-2,JJ,KK)<0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II-1,JJ,KK),-1)>0)) THEN
-               ZZZ(2:4) = (/ZETA(II-2:II-1,JJ,KK),WC%ZETA_F/)
-               GX(II-2,JJ,KK) = SCALAR_FACE_VALUE(UU(II-2,JJ,KK),ZZZ,FLUX_LIMITER)
-            ENDIF
-         CASE( 2) OFF_WALL_SELECT
-            IF ((VV(II,JJ+1,KK)>0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II,JJ+1,KK),+2)>0)) THEN
-               ZZZ(1:3) = (/WC%ZETA_F,ZETA(II,JJ+1:JJ+2,KK)/)
-               GY(II,JJ+1,KK) = SCALAR_FACE_VALUE(VV(II,JJ+1,KK),ZZZ,FLUX_LIMITER)
-            ENDIF
-         CASE(-2) OFF_WALL_SELECT
-            IF ((VV(II,JJ-2,KK)<0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II,JJ-1,KK),-2)>0)) THEN
-               ZZZ(2:4) = (/ZETA(II,JJ-2:JJ-1,KK),WC%ZETA_F/)
-               GY(II,JJ-2,KK) = SCALAR_FACE_VALUE(VV(II,JJ-2,KK),ZZZ,FLUX_LIMITER)
-            ENDIF
-         CASE( 3) OFF_WALL_SELECT
-            IF ((WW(II,JJ,KK+1)>0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II,JJ,KK+1),+3)>0)) THEN
-               ZZZ(1:3) = (/WC%ZETA_F,ZETA(II,JJ,KK+1:KK+2)/)
-               GZ(II,JJ,KK+1) = SCALAR_FACE_VALUE(WW(II,JJ,KK+1),ZZZ,FLUX_LIMITER)
-            ENDIF
-         CASE(-3) OFF_WALL_SELECT
-            IF ((WW(II,JJ,KK-2)<0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II,JJ,KK-1),-3)>0)) THEN
-               ZZZ(2:4) = (/ZETA(II,JJ,KK-2:KK-1),WC%ZETA_F/)
-               GZ(II,JJ,KK-2) = SCALAR_FACE_VALUE(WW(II,JJ,KK-2),ZZZ,FLUX_LIMITER)
-            ENDIF
-      END SELECT OFF_WALL_SELECT
-      
-   ENDIF OFF_WALL_IF
-
-ENDDO WALL_LOOP
-
-WALL_LOOP_2: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
-   WC=>WALL(IW)
-   IF (WC%BOUNDARY_TYPE/=INTERPOLATED_BOUNDARY) CYCLE WALL_LOOP_2
-
-   IIG = WC%ONE_D%IIG 
-   JJG = WC%ONE_D%JJG
-   KKG = WC%ONE_D%KKG
-   IOR = WC%ONE_D%IOR
-   
-   UN = UVW_SAVE(IW)
-   SELECT CASE(IOR)
-      CASE( 1)
-         UU(IIG-1,JJG,KKG) = UN
-      CASE(-1)
-         UU(IIG,JJG,KKG)   = UN
-      CASE( 2)
-         VV(IIG,JJG-1,KKG) = UN
-      CASE(-2)
-         VV(IIG,JJG,KKG)   = UN
-      CASE( 3)
-         WW(IIG,JJG,KKG-1) = UN
-      CASE(-3)
-         WW(IIG,JJG,KKG)   = UN
-   END SELECT
-ENDDO WALL_LOOP_2
-
-! Compute species mass density at the next time step   
-
-DO K=1,KBAR
-   DO J=1,JBAR
-      DO I=1,IBAR
-         IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-
-         RHS = - DEL_D_DEL_Z(I,J,K) &
-             + (GX(I,J,K)*UU(I,J,K)*R(I) - GX(I-1,J,K)*UU(I-1,J,K)*R(I-1))*RDX(I)*RRN(I) &
-             + (GY(I,J,K)*VV(I,J,K)      - GY(I,J-1,K)*VV(I,J-1,K)       )*RDY(J)        &
-             + (GZ(I,J,K)*WW(I,J,K)      - GZ(I,J,K-1)*WW(I,J,K-1)       )*RDZ(K)
-
-         ZETA(I,J,K) = ZETA(I,J,K) - DT*RHS 
-      ENDDO
-   ENDDO
-ENDDO
-
-! Clip for boundedness
-
-ZETA = MAX(0._EB,MIN(1._EB,ZETA))
-
-END SUBROUTINE TRANSPORT_ZETA
 
 
 SUBROUTINE GET_REV_fire(MODULE_REV,MODULE_DATE)
