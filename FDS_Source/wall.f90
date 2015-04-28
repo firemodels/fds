@@ -47,7 +47,6 @@ CALL SPECIES_BC(T,NM)
 CALL DENSITY_BC
 IF (HVAC_SOLVE .AND. .NOT.INITIALIZATION_PHASE) CALL HVAC_BC
 IF (N_FACE>0 .AND. .NOT.INITIALIZATION_PHASE)   CALL GEOM_BC
-IF (TRANSPORT_UNMIXED_FRACTION)                 CALL ZETA_BC
 
 ! After all the boundary conditions have been applied, check the special case where gases are drawn into a solid boundary. 
 ! In this case, set temperature, species, and density to the near gas cell values.
@@ -82,7 +81,7 @@ WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
    WC%TMP_F_GAS = TMP(IIG,JJG,KKG)
    WC%ZZ_F(1:N_TRACKED_SPECIES) = ZZP(IIG,JJG,KKG,1:N_TRACKED_SPECIES)
    WC%RHO_F = RHOP(IIG,JJG,KKG)
-   IF (TRANSPORT_UNMIXED_FRACTION) WC%ZETA_F = UNMIXED_FRACTION(IIG,JJG,KKG)
+   IF (TRANSPORT_UNMIXED_FRACTION) WC%ZZ_F(ZETA_INDEX) = ZZP(IIG,JJG,KKG,ZETA_INDEX)
 
 ENDDO WALL_LOOP
 
@@ -1228,179 +1227,6 @@ FACE_LOOP: DO N=1,N_FACE
 ENDDO FACE_LOOP
 
 END SUBROUTINE GEOM_BC
-
-
-SUBROUTINE ZETA_BC
-USE MASS, ONLY: SCALAR_FACE_VALUE
-IMPLICIT NONE
-
-INTEGER :: IW,II,JJ,KK,IIG,JJG,KKG,IOR,IIO,JJO,KKO
-REAL(EB) :: UN,ZZZ(1:4),ARO,Z_G,Z_G_2,Z_OTHER,Z_OTHER_2
-LOGICAL :: INFLOW
-REAL(EB), POINTER, DIMENSION(:,:,:) :: ZETA=>NULL()
-TYPE(WALL_TYPE), POINTER :: WC=>NULL()
-TYPE(SURFACE_TYPE), POINTER :: SF=>NULL()
-TYPE (OMESH_TYPE), POINTER :: OM=>NULL()
-TYPE(MESH_TYPE), POINTER :: MM=>NULL()
-REAL(EB), POINTER, DIMENSION(:,:,:) :: OM_ZP=>NULL()
-
-IF (PREDICTOR) RETURN
-
-ZETA=>UNMIXED_FRACTION
-
-! Loop through the wall cells, apply zeta boundary conditions
-
-WALL_CELL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
-
-   WC => WALL(IW)
-   SF => SURFACE(WC%SURF_INDEX)
-   II  = WC%ONE_D%II
-   JJ  = WC%ONE_D%JJ
-   KK  = WC%ONE_D%KK
-   IIG = WC%ONE_D%IIG
-   JJG = WC%ONE_D%JJG
-   KKG = WC%ONE_D%KKG
-   IOR = WC%ONE_D%IOR
-
-   WC%ZETA_F = INITIAL_UNMIXED_FRACTION
-
-   BOUNDARY_TYPE_SELECT: SELECT CASE(WC%BOUNDARY_TYPE)
-
-      CASE(SOLID_BOUNDARY)
-   
-         WC%ZETA_F = SF%ZETA_FRONT
-
-      CASE(OPEN_BOUNDARY)
-
-         INFLOW = .FALSE.
-         SELECT CASE(IOR)
-            CASE( 1); UN = U(II,JJ,KK)
-            CASE(-1); UN = -U(II-1,JJ,KK)
-            CASE( 2); UN = V(II,JJ,KK)
-            CASE(-2); UN = -V(II,JJ-1,KK)
-            CASE( 3); UN = W(II,JJ,KK)
-            CASE(-3); UN = -W(II,JJ,KK-1)
-         END SELECT
-         IF (UN>TWO_EPSILON_EB) INFLOW = .TRUE.
-
-         IF (.NOT.INFLOW) WC%ZETA_F=ZETA(IIG,JJG,KKG)
-         ZETA(II,JJ,KK) = WC%ZETA_F ! Ghost cell values
-
-      CASE(INTERPOLATED_BOUNDARY)
-
-         OM => OMESH(WC%NOM)
-         OM_ZP => OM%UNMIXED_FRACTION
-         MM => MESHES(WC%NOM)
-
-         ! Gather data from other mesh
-
-         Z_OTHER=0._EB
-
-         DO KKO=WC%NOM_IB(3),WC%NOM_IB(6)
-            DO JJO=WC%NOM_IB(2),WC%NOM_IB(5)
-               DO IIO=WC%NOM_IB(1),WC%NOM_IB(4)
-                  SELECT CASE(IOR)
-                     CASE( 1)
-                        ARO = MIN(1._EB , (MM%DY(JJO)*MM%DZ(KKO))/(DY(JJ)*DZ(KK)) )
-                     CASE(-1)
-                        ARO = MIN(1._EB , (MM%DY(JJO)*MM%DZ(KKO))/(DY(JJ)*DZ(KK)) )
-                     CASE( 2)
-                        ARO = MIN(1._EB , (MM%DX(IIO)*MM%DZ(KKO))/(DX(II)*DZ(KK)) )
-                     CASE(-2)
-                        ARO = MIN(1._EB , (MM%DX(IIO)*MM%DZ(KKO))/(DX(II)*DZ(KK)) )
-                     CASE( 3)
-                        ARO = MIN(1._EB , (MM%DX(IIO)*MM%DY(JJO))/(DX(II)*DY(JJ)) )
-                     CASE(-3)
-                        ARO = MIN(1._EB , (MM%DX(IIO)*MM%DY(JJO))/(DX(II)*DY(JJ)) )
-                  END SELECT
-                  Z_OTHER = Z_OTHER + ARO*OM_ZP(IIO,JJO,KKO)
-               ENDDO
-            ENDDO
-         ENDDO
-
-         ! Density
-
-         Z_G = ZETA(IIG,JJG,KKG)
-         Z_G_2 = Z_G ! first-order (default)
-         ZETA(II,JJ,KK) = Z_OTHER
-         Z_OTHER_2 = Z_OTHER
-         
-         IF (SECOND_ORDER_INTERPOLATED_BOUNDARY) THEN
-            ! currently assumes no refinement
-            IIO = WC%NOM_IB(1)
-            JJO = WC%NOM_IB(2)
-            KKO = WC%NOM_IB(3)
-         ENDIF
-
-         IOR_SELECT: SELECT CASE(IOR)
-            CASE( 1)
-               IF (SECOND_ORDER_INTERPOLATED_BOUNDARY) THEN
-                  ! here RHO_G and RHO_OTHER are being recomputed, at the moment just for code clarity
-                  Z_G = ZETA(IIG,JJG,KKG)
-                  Z_G_2 = ZETA(IIG+1,JJG,KKG)
-                  Z_OTHER = OM_ZP(IIO,JJO,KKO)
-                  Z_OTHER_2 = OM_ZP(IIO-1,JJO,KKO)
-               ENDIF 
-               ZZZ(1:4) = (/Z_OTHER_2,Z_OTHER,Z_G,Z_G_2/)
-               WC%ZETA_F = SCALAR_FACE_VALUE(U(II,JJ,KK),ZZZ,FLUX_LIMITER)
-            CASE(-1)
-               IF (SECOND_ORDER_INTERPOLATED_BOUNDARY) THEN
-                  Z_G = ZETA(IIG,JJG,KKG)
-                  Z_G_2 = ZETA(IIG-1,JJG,KKG)
-                  Z_OTHER = OM_ZP(IIO,JJO,KKO)
-                  Z_OTHER_2 = OM_ZP(IIO+1,JJO,KKO)
-               ENDIF
-               ZZZ(1:4) = (/Z_G_2,Z_G,Z_OTHER,Z_OTHER_2/)
-               WC%ZETA_F = SCALAR_FACE_VALUE(U(II-1,JJ,KK),ZZZ,FLUX_LIMITER)
-            CASE( 2)
-               IF (SECOND_ORDER_INTERPOLATED_BOUNDARY) THEN
-                  Z_G = ZETA(IIG,JJG,KKG)
-                  Z_G_2 = ZETA(IIG,JJG+1,KKG)
-                  Z_OTHER = OM_ZP(IIO,JJO,KKO)
-                  Z_OTHER_2 = OM_ZP(IIO,JJO-1,KKO)
-               ENDIF
-               ZZZ(1:4) = (/Z_OTHER_2,Z_OTHER,Z_G,Z_G_2/)
-               WC%ZETA_F = SCALAR_FACE_VALUE(V(II,JJ,KK),ZZZ,FLUX_LIMITER)
-            CASE(-2)
-               IF (SECOND_ORDER_INTERPOLATED_BOUNDARY) THEN
-                  Z_G = ZETA(IIG,JJG,KKG)
-                  Z_G_2 = ZETA(IIG,JJG-1,KKG)
-                  Z_OTHER = OM_ZP(IIO,JJO,KKO)
-                  Z_OTHER_2 = OM_ZP(IIO,JJO+1,KKO)
-               ENDIF
-               ZZZ(1:4) = (/Z_G_2,Z_G,Z_OTHER,Z_OTHER_2/)
-               WC%ZETA_F = SCALAR_FACE_VALUE(V(II,JJ-1,KK),ZZZ,FLUX_LIMITER)
-            CASE( 3)
-               IF (SECOND_ORDER_INTERPOLATED_BOUNDARY) THEN
-                  Z_G = ZETA(IIG,JJG,KKG)
-                  Z_G_2 = ZETA(IIG,JJG,KKG+1)
-                  Z_OTHER = OM_ZP(IIO,JJO,KKO)
-                  Z_OTHER_2 = OM_ZP(IIO,JJO,KKO-1)
-               ENDIF
-               ZZZ(1:4) = (/Z_OTHER_2,Z_OTHER,Z_G,Z_G_2/)
-               WC%ZETA_F = SCALAR_FACE_VALUE(W(II,JJ,KK),ZZZ,FLUX_LIMITER)
-            CASE(-3)
-               IF (SECOND_ORDER_INTERPOLATED_BOUNDARY) THEN
-                  Z_G = ZETA(IIG,JJG,KKG)
-                  Z_G_2 = ZETA(IIG,JJG,KKG-1)
-                  Z_OTHER = OM_ZP(IIO,JJO,KKO)
-                  Z_OTHER_2 = OM_ZP(IIO,JJO,KKO+1)
-               ENDIF
-               ZZZ(1:4) = (/Z_G_2,Z_G,Z_OTHER,Z_OTHER_2/)
-               WC%ZETA_F = SCALAR_FACE_VALUE(W(II,JJ,KK-1),ZZZ,FLUX_LIMITER)
-         END SELECT IOR_SELECT
-
-   END SELECT BOUNDARY_TYPE_SELECT
-
-   ! Only set ghost cell if it is not solid
-
-   IF (IW<=N_EXTERNAL_WALL_CELLS .AND. .NOT.SOLID(CELL_INDEX(II,JJ,KK)) .AND. .NOT.SOLID(CELL_INDEX(IIG,JJG,KKG))) &
-       ZETA(II,JJ,KK) = WC%ZETA_F
-
-ENDDO WALL_CELL_LOOP
-
-
-END SUBROUTINE ZETA_BC
 
 
 SUBROUTINE PYROLYSIS(NM,T,DT_BC,PARTICLE_INDEX,WALL_INDEX)
