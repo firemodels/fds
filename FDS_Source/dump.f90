@@ -3410,9 +3410,11 @@ B = 1._EB
 S => WORK2
 S = 0._EB
 
-DO K=0,KBP1
-   DO J=0,JBP1
-      DO I=0,IBP1
+! B's on surface of mesh are 1 so that ghost cells (values from neighboring meshes) may be used to generate isosurface
+
+DO K=1,KBAR
+   DO J=1,JBAR
+      DO I=1,IBAR
          IF (SOLID(CELL_INDEX(I,J,K))) B(I,J,K) = 0._EB
       ENDDO
    ENDDO
