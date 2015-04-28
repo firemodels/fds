@@ -25,6 +25,22 @@
 
 -->
 
+<li>6.2.3 (build 22537) - April 28, 2015</li>
+<ol>
+
+<li>usability: display show grid menu item for all case types (cases without blockages also)
+<li>fix: fix problems with terrain slice display for cases where terrain (and/or zbar0) does not start at 0.0 -
+(<a href="http://code.google.com/p/fds-smv/issues/detail?id=2419&can=1&sort=-id">Issue 2419</a>)
+<li>fix: fix FDS crashing that could occur if Smokeview use the compiler command line option, /fpscomp:general, to allow smokeview to read files being currently written to by FDS without crashing FDS (instead of using the non-standard OPEN parameter SHARED)
+<li>fix: fix debug display of memory block and block size info
+<li>fix: fix memory leaks in isosurface loading/unloading routines which were causing problems with isosurface display
+<li>fix: fix problem with shortcut Q used to toggle slice visibility
+<li>fix: fix display scaling portion of object dialog box - 
+(<a href="http://code.google.com/p/fds-smv/issues/detail?id=2384&can=1&sort=-id">Issue 2384</a>)
+<li>fix: fix problem with slice menu entries for slices at boundaries - 
+(<a href="http://code.google.com/p/fds-smv/issues/detail?id=2406&can=1&sort=-id">Issue 2406</a>)
+</ol>
+
 <li>6.2.2 (build 22325) - April 10, 2015</li>
 <ol>
 <li>enhancement: add option to visualize cfast generated vent flow
