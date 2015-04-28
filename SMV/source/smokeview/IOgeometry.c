@@ -1138,7 +1138,11 @@ void read_geom0(geomdata *geomi, int load_flag, int type, int *errorcode){
       FREEMEMORY(ijk);
       FREEMEMORY(surf_ind);
     }
-    if(skipframe == 0)iframe++;
+
+    if(skipframe == 0){
+      // add decimation code here
+      iframe++;
+    }
     if(use_tload_end == 1 && times_local[0] > tload_end)break;
   }
   geomi->loaded=1;
