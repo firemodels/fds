@@ -268,7 +268,7 @@ CASE(.TRUE.) PREDICTOR_STEP
 
    ! Predictor step for mass density
 
-   DO N=1,N_TRACKED_SPECIES
+   DO N=1,N_TOTAL_SCALARS
       DO K=1,KBAR
          DO J=1,JBAR
             DO I=1,IBAR
@@ -323,7 +323,7 @@ CASE(.TRUE.) PREDICTOR_STEP
       DO J=1,JBAR
          DO I=1,IBAR
             IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-            ZZS(I,J,K,1:N_TRACKED_SPECIES) = ZZS(I,J,K,1:N_TRACKED_SPECIES)/RHOS(I,J,K)
+            ZZS(I,J,K,1:N_TOTAL_SCALARS) = ZZS(I,J,K,1:N_TOTAL_SCALARS)/RHOS(I,J,K)
          ENDDO
       ENDDO
    ENDDO
@@ -399,7 +399,7 @@ CASE(.FALSE.) PREDICTOR_STEP
    
    ! Compute species mass density at the next time step   
    
-   DO N=1,N_TRACKED_SPECIES
+   DO N=1,N_TOTAL_SCALARS
       DO K=1,KBAR
          DO J=1,JBAR
             DO I=1,IBAR
@@ -454,7 +454,7 @@ CASE(.FALSE.) PREDICTOR_STEP
       DO J=1,JBAR
          DO I=1,IBAR
             IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-            ZZ(I,J,K,1:N_TRACKED_SPECIES) = ZZ(I,J,K,1:N_TRACKED_SPECIES)/RHO(I,J,K)
+            ZZ(I,J,K,1:N_TOTAL_SCALARS) = ZZ(I,J,K,1:N_TOTAL_SCALARS)/RHO(I,J,K)
          ENDDO
       ENDDO
    ENDDO
