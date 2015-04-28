@@ -1707,6 +1707,12 @@ void keyboard(unsigned char key, int flag){
       }
       else{
         highlight_flag++;
+        if(highlight_flag!=0&&visFrame==0){
+          visFrame = 1;
+          updatefacelists = 1;
+          updatemenu = 1;
+          glutPostRedisplay();
+        }
         if(highlight_flag>2&&noutlineinfo>0)highlight_flag=0;
         if(highlight_flag>1&&noutlineinfo==0)highlight_flag=0;
         PRINTF("outline mode=%i\n",highlight_flag);
