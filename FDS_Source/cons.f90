@@ -53,11 +53,15 @@ INTEGER :: MINT_SPECIES=20
 ! Species components of the lumped species
 
 INTEGER :: FUEL_INDEX=0,O2_INDEX=0,N2_INDEX=0,H2O_INDEX=0,CO2_INDEX=0,CO_INDEX=0,&
-           H2_INDEX=0,SOOT_INDEX=0,OTHER_INDEX=0,SM_FUEL_INDEX = 0                          ! Lumped Species Sub-species
+           H2_INDEX=0,SOOT_INDEX=0,OTHER_INDEX=0,SM_FUEL_INDEX=0                            ! Lumped Species Sub-species
 
 ! Species components used in FED calculations
 
 INTEGER :: HCN_INDEX=0,NO_INDEX=0,NO2_INDEX=0
+
+! Passive scalars
+
+INTEGER :: ZETA_INDEX=0
 
 ! Program Status Code
 
