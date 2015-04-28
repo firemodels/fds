@@ -643,8 +643,8 @@ DO K=1,KBAR
    DO J=1,JBAR
       DO I=1,IBAR
          IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-         N=MAXLOC(ZZP(I,J,K,:),1)
-         ZZP(I,J,K,N) = RHOP(I,J,K) - ( SUM(ZZP(I,J,K,:)) - ZZP(I,J,K,N) )
+         N=MAXLOC(ZZP(I,J,K,1:N_TRACKED_SPECIES),1)
+         ZZP(I,J,K,N) = RHOP(I,J,K) - ( SUM(ZZP(I,J,K,1:N_TRACKED_SPECIES)) - ZZP(I,J,K,N) )
       ENDDO
    ENDDO
 ENDDO
