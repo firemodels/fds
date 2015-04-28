@@ -16170,7 +16170,7 @@ CONTAINS
     IF (imode == 1) THEN
        DO i = 1, N_DOORS + N_EXITS
           IF (ABS(HR%I_Target) == i .AND. Is_Visible_Door(i)) Is_Known_Door(i) = .TRUE.
-          IF (HR%GROUP_ID <= 0) THEN ! This does not work for groups yet
+          IF (HR%GROUP_ID < 0) THEN ! This does not work for groups yet nor ENTR agents
              ! If the door is known to have too much smoke, set it unknown and not visible
              ! If the door is known to have some smoke, set it unknown
              Do_Known_doors0: DO ii=1,Human_Known_Doors(j1)%N_nodes
@@ -16262,7 +16262,7 @@ CONTAINS
                 END IF
                 L2_tmp  = FAC_DOOR_OLD2*L2_tmp 
                 L2_tmp2 = FAC_DOOR_OLD *L2_tmp2
-                IF (HR%GROUP_ID <= 0 .AND. L2_tmp2 >= ABS(FED_DOOR_CRIT)) THEN ! This is not working for groups yet
+                IF (HR%GROUP_ID < 0 .AND. L2_tmp2 >= ABS(FED_DOOR_CRIT)) THEN ! This is not working for groups yet nor entr agents
                    ! The present (known) target door has some smoke, record this information for later use.
                    ! If there is too much smoke => set i_nodes = 0 for this door, is not anymore known door
                    ! If there is some smoke => set i_nodes = -ABS(i_nodes), i.e., the door node number is negative
