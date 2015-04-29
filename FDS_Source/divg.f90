@@ -100,7 +100,7 @@ END SELECT
    
 ! Add species diffusion terms to divergence expression and compute diffusion term for species equations
 
-SPECIES_GT_1_IF: IF (N_TRACKED_SPECIES>1) THEN   
+SPECIES_GT_1_IF: IF (N_TOTAL_SCALARS>1) THEN   
    
    DEL_RHO_D_DEL_Z = 0._EB
    RHO_D => WORK4
@@ -115,24 +115,24 @@ SPECIES_GT_1_IF: IF (N_TRACKED_SPECIES>1) THEN
    ENDIF
    IF (CHECK_VN) D_Z_MAX = 0._EB
 
-   DIFFUSIVE_FLUX_LOOP: DO N=1,N_TRACKED_SPECIES
+   DIFFUSIVE_FLUX_LOOP: DO N=1,N_TOTAL_SCALARS
 
       IF (DNS .OR. RESEARCH_MODE) THEN
          RHO_D = 0._EB
          IF (WD_PROPS) THEN
             ALLOCATE(ZZ_GET(N_TRACKED_SPECIES))
-               DO K=1,KBAR
-                  DO J=1,JBAR
-                     DO I=1,IBAR
-                        ZZ_GET(1:N_TRACKED_SPECIES) = ZZP(I,J,K,1:N_TRACKED_SPECIES)
-                        CALL GET_MOLECULAR_WEIGHT(ZZ_GET,MW)                       
-                        RHO_D(I,J,K)=9.26E-7_EB*SQRT(TMP(I,J,K))*MW/SPECIES_MIXTURE(N)%MW
-                     ENDDO
+            DO K=1,KBAR
+               DO J=1,JBAR
+                  DO I=1,IBAR
+                     ZZ_GET(1:N_TRACKED_SPECIES) = ZZP(I,J,K,1:N_TRACKED_SPECIES)
+                     CALL GET_MOLECULAR_WEIGHT(ZZ_GET,MW)
+                     RHO_D(I,J,K)=9.26E-7_EB*SQRT(TMP(I,J,K))*MW/SPECIES_MIXTURE(N)%MW
                   ENDDO
-               ENDDO            
+               ENDDO
+            ENDDO
             DEALLOCATE(ZZ_GET)
          ELSE
-            D_Z_N = D_Z(:,N)      
+            D_Z_N = D_Z(:,N)
             DO K=1,KBAR
                DO J=1,JBAR
                   DO I=1,IBAR
@@ -219,7 +219,7 @@ SPECIES_GT_1_IF: IF (N_TRACKED_SPECIES>1) THEN
 
    ! Diffusive heat flux
 
-   SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
+   SPECIES_LOOP: DO N=1,N_TOTAL_SCALARS
 
       ! Compute div h_n*rho*D del Z_n (part of div qdot")
 
