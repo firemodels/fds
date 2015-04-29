@@ -10665,14 +10665,36 @@ int readini2(char *inifile, int localfile){
       sscanf(buffer,"%i",&n_iso_ambient_ini);
       if(n_iso_ambient_ini>0){
         FREEMEMORY(iso_ambient_ini);
-        if(NewMemory((void**)&iso_ambient_ini,n_iso_ambient_ini*4*sizeof(float))==0)return 2;
-        for(nn=0;nn<n_iso_ambient_ini;nn++){
+        FREEMEMORY(glui_iso_ambient_ini);
+        if(NewMemory((void**)&iso_ambient_ini, n_iso_ambient_ini * 4 * sizeof(float)) == 0)return 2;
+        if(NewMemory((void**)&glui_iso_ambient_ini, n_iso_ambient_ini * 4 * sizeof(int)) == 0)return 2;
+        for(nn = 0; nn<n_iso_ambient_ini; nn++){
+          float *iso;
+          int *glui_iso;
+
+          iso = iso_ambient_ini + 4*nn;
+          glui_iso = glui_iso_ambient_ini + 4*nn;
+
           fgets(buffer,255,stream);
-          sscanf(buffer,"%f %f %f",iso_ambient_ini+4*nn,iso_ambient_ini+4*nn+1,iso_ambient_ini+4*nn+2);
-          iso_ambient_ini[4*nn+3]=iso_transparency;
+          sscanf(buffer,"%f %f %f",iso,iso+1,iso+2);
+          iso[3] = iso_transparency;
+          
+               iso[0] = CLAMP(    iso[0], 0.0, 1.0);
+          glui_iso[0] = CLAMP(255*iso[0], 0, 255);
+          
+               iso[1] = CLAMP(    iso[1], 0.0, 1.0);
+          glui_iso[1] = CLAMP(255*iso[1], 0, 255);
+          
+               iso[2] = CLAMP(    iso[2], 0.0, 1.0);
+          glui_iso[2] = CLAMP(255*iso[2], 0, 255);
+          
+               iso[3] = CLAMP(    iso[3], 0.0, 1.0);
+          glui_iso[3] = CLAMP(255*iso[3], 0, 255);
         }
         iso_ambient_ini[3]=1.0;
+        glui_iso_ambient_ini[3]=255;
       }
+      n_iso_ambient_ini = MIN(n_iso_ambient_ini,MAX_ISO_COLORS);
       update_isocolors();
       continue;
     }

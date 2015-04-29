@@ -66,6 +66,7 @@ GLUI_Rollout *ROLLOUT_zone_bound=NULL;
 #define ISO_SURFACE 1
 #define ISO_OUTLINE 2
 #define ISO_POINTS 3
+#define ISO_COLORS 4
 #define SETVALMIN 1
 #define SETVALMAX 2
 #define VALMIN 3
@@ -191,6 +192,7 @@ GLUI_Rollout *ROLLOUT_boundary = NULL;
 GLUI_Rollout *ROLLOUT_autoload=NULL;
 GLUI_Rollout *ROLLOUT_compress=NULL;
 GLUI_Rollout *ROLLOUT_plot3d=NULL,*ROLLOUT_evac=NULL,*ROLLOUT_part=NULL,*ROLLOUT_slice=NULL,*ROLLOUT_bound=NULL,*ROLLOUT_iso=NULL;
+GLUI_Rollout *ROLLOUT_iso_colors = NULL;
 GLUI_Rollout *ROLLOUT_smoke3d=NULL,*ROLLOUT_volsmoke3d=NULL;
 GLUI_Rollout *ROLLOUT_time=NULL,*ROLLOUT_colorbar=NULL;
 GLUI_Rollout *ROLLOUT_outputpatchdata=NULL;
@@ -202,6 +204,7 @@ GLUI_Rollout *ROLLOUT_line_contour = NULL;
 GLUI_Rollout *ROLLOUT_vector = NULL;
 GLUI_Rollout *ROLLOUT_isosurface = NULL;
 
+GLUI_Panel *PANEL_iso_colors[MAX_ISO_COLORS];
 GLUI_Panel *PANEL_files = NULL;
 GLUI_Panel *PANEL_bounds = NULL;
 GLUI_Panel *PANEL_zone_a=NULL, *PANEL_zone_b=NULL;
@@ -226,7 +229,8 @@ GLUI_Panel *PANEL_time2b=NULL;
 GLUI_Panel *PANEL_time2c=NULL;
 GLUI_Panel *PANEL_outputpatchdata=NULL;
 
-GLUI_Spinner *SPINNER_labels_transparency_data2=NULL;
+GLUI_Spinner *SPINNER_iso_colors[3*MAX_ISO_COLORS];
+GLUI_Spinner *SPINNER_labels_transparency_data2 = NULL;
 GLUI_Spinner *SPINNER_transparent_level=NULL;
 GLUI_Spinner *SPINNER_line_contour_num=NULL;
 GLUI_Spinner *SPINNER_line_contour_width=NULL;
@@ -898,6 +902,25 @@ extern "C" void glui_bounds_setup(int main_window){
         _("transparency level"),GLUI_SPINNER_FLOAT,&transparent_level,TRANSPARENTLEVEL,Slice_CB);
     SPINNER_labels_transparency_data2->set_w(0);
     SPINNER_labels_transparency_data2->set_float_limits(0.0,1.0,GLUI_LIMIT_CLAMP);
+  }
+  if(n_iso_ambient_ini>0){
+    int ii;
+
+    ROLLOUT_iso_colors = glui_bounds->add_rollout_to_panel(ROLLOUT_iso, "Isosurface Colors", false);
+    for(ii=0;ii<n_iso_ambient_ini;ii++){
+      char redlabel[10];
+
+      sprintf(redlabel,"%i r:",ii+1);
+      PANEL_iso_colors[ii] = glui_bounds->add_panel_to_panel(ROLLOUT_iso_colors,"", false);
+      SPINNER_iso_colors[3*ii+0] = glui_bounds->add_spinner_to_panel(PANEL_iso_colors[ii], redlabel, GLUI_SPINNER_INT, glui_iso_ambient_ini + 4*ii+0, ISO_COLORS,Iso_CB);
+      glui_bounds->add_column_to_panel(PANEL_iso_colors[ii], false);
+      SPINNER_iso_colors[3*ii+1] = glui_bounds->add_spinner_to_panel(PANEL_iso_colors[ii], "g:", GLUI_SPINNER_INT, glui_iso_ambient_ini + 4*ii+1, ISO_COLORS, Iso_CB);
+      glui_bounds->add_column_to_panel(PANEL_iso_colors[ii], false);
+      SPINNER_iso_colors[3*ii+2] = glui_bounds->add_spinner_to_panel(PANEL_iso_colors[ii], "b:", GLUI_SPINNER_INT, glui_iso_ambient_ini + 4*ii+2, ISO_COLORS, Iso_CB);
+    }    
+    for(ii = 0; ii < 3*n_iso_ambient_ini; ii++){
+      SPINNER_iso_colors[ii]->set_int_limits(0, 255, GLUI_LIMIT_CLAMP);
+    }
   }
 
   /* Particle File Bounds  */
@@ -1621,7 +1644,15 @@ extern "C" void updateplot3dlistindex(void){
 }
 
 void Iso_CB(int var){
+  int i;
+
   switch(var){
+  case ISO_COLORS:
+    for(i = 0; i < 4*n_iso_ambient_ini;i++){
+      iso_ambient_ini[i]=(float)glui_iso_ambient_ini[i]/255.0;
+    }
+    update_isocolors();
+    break;
   case FRAMELOADING:
     isoframestep_global=isoframeskip_global+1;
     isozipstep=isozipskip+1;

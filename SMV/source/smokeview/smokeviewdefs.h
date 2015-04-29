@@ -11,6 +11,8 @@ void _Sniff_Errors(char *whereat);
 #define SNIFF_ERRORS(f)
 #endif
 
+#define MAX_ISO_COLORS 10
+
 #define ZONETEMP_COLOR 0
 #define ZONEHAZARD_COLOR 1
 #define ZONESMOKE_COLOR 2
