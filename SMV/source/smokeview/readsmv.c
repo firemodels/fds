@@ -10666,30 +10666,40 @@ int readini2(char *inifile, int localfile){
       if(n_iso_ambient_ini>0){
         FREEMEMORY(iso_ambient_ini);
         FREEMEMORY(glui_iso_ambient_ini);
-        if(NewMemory((void**)&iso_ambient_ini, n_iso_ambient_ini * 4 * sizeof(float)) == 0)return 2;
-        if(NewMemory((void**)&glui_iso_ambient_ini, n_iso_ambient_ini * 4 * sizeof(int)) == 0)return 2;
-        for(nn = 0; nn<n_iso_ambient_ini; nn++){
-          float *iso;
-          int *glui_iso;
+        if(NewMemory((void**)&iso_ambient_ini, MAX(MIN_ISO_COLORS,n_iso_ambient_ini) * 4 * sizeof(float)) == 0)return 2;
+        if(NewMemory((void**)&glui_iso_ambient_ini, MAX(MIN_ISO_COLORS,n_iso_ambient_ini) * 4 * sizeof(int)) == 0)return 2;
+        for(nn = 0; nn<MAX(MIN_ISO_COLORS,n_iso_ambient_ini); nn++){
+          float *isoi;
+          int *glui_isoi;
 
-          iso = iso_ambient_ini + 4*nn;
-          glui_iso = glui_iso_ambient_ini + 4*nn;
+          isoi = iso_ambient_ini + 4*nn;
+          glui_isoi = glui_iso_ambient_ini + 4*nn;
 
           fgets(buffer,255,stream);
-          sscanf(buffer,"%f %f %f",iso,iso+1,iso+2);
-          iso[3] = iso_transparency;
+          if(nn < n_iso_ambient_ini){
+            sscanf(buffer, "%f %f %f", isoi, isoi + 1, isoi + 2);
+          }
+          else{
+            float *iso;
+
+            iso = iso_ambient + 4 * nn;
+            isoi[0] = iso[0];
+            isoi[1] = iso[1];
+            isoi[2] = iso[2];
+          }
+          isoi[3] = iso_transparency;
           
-               iso[0] = CLAMP(    iso[0], 0.0, 1.0);
-          glui_iso[0] = CLAMP(255*iso[0], 0, 255);
+               isoi[0] = CLAMP(    isoi[0], 0.0, 1.0);
+          glui_isoi[0] = CLAMP(255*isoi[0], 0, 255);
           
-               iso[1] = CLAMP(    iso[1], 0.0, 1.0);
-          glui_iso[1] = CLAMP(255*iso[1], 0, 255);
+               isoi[1] = CLAMP(    isoi[1], 0.0, 1.0);
+          glui_isoi[1] = CLAMP(255*isoi[1], 0, 255);
           
-               iso[2] = CLAMP(    iso[2], 0.0, 1.0);
-          glui_iso[2] = CLAMP(255*iso[2], 0, 255);
+               isoi[2] = CLAMP(    isoi[2], 0.0, 1.0);
+          glui_isoi[2] = CLAMP(255*isoi[2], 0, 255);
           
-               iso[3] = CLAMP(    iso[3], 0.0, 1.0);
-          glui_iso[3] = CLAMP(255*iso[3], 0, 255);
+               isoi[3] = CLAMP(    isoi[3], 0.0, 1.0);
+          glui_isoi[3] = CLAMP(255*isoi[3], 0, 255);
         }
         iso_ambient_ini[3]=1.0;
         glui_iso_ambient_ini[3]=255;

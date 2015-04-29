@@ -2038,23 +2038,27 @@ void initvars(void){
 
   valindex=0;
 
-   iso_ambient[0] = 0.96;
-   iso_ambient[1] = 0.00;
-   iso_ambient[2] = 0.96;
-   iso_ambient[3] = 1.00;
-   iso_ambient[4] = 0.75;
-   iso_ambient[5] = 0.80;
-   iso_ambient[6] = 0.80;
-   iso_ambient[7] = 1.00;
-   iso_ambient[8] = 0.00;
-   iso_ambient[9] = 0.96;
+  n_iso_ambient = 3;
+  iso_ambient[0] = 0.96;
+  iso_ambient[1] = 0.00;
+  iso_ambient[2] = 0.96;
+  iso_ambient[3] = 1.00;
+  iso_ambient[4] = 0.75;
+  iso_ambient[5] = 0.80;
+  iso_ambient[6] = 0.80;
+  iso_ambient[7] = 1.00;
+  iso_ambient[8] = 0.00;
+  iso_ambient[9] = 0.96;
   iso_ambient[10] = 0.28;
   iso_ambient[11] = 1.0;
 
+  n_iso_ambient_ini = 3;
+  NewMemory((void **)&iso_ambient_ini, 4*n_iso_ambient_ini*sizeof(float));
+  for(i = 0; i < 4 * n_iso_ambient_ini; i++){
+    iso_ambient_ini[i] = iso_ambient[i];
+  }
 
   iso_transparency=0.8;
-  n_iso_ambient=3;
-  n_iso_ambient_ini=0;
   mouse_deltax=0.0, mouse_deltay=0.0;
 
   char_color[0]=0.0;
