@@ -10655,56 +10655,50 @@ int readini2(char *inifile, int localfile){
       continue;
     }
     if(match(buffer,"ISOCOLORS")==1){
-      int nn;
+      int nn,n_iso_colors=0;
 
       fgets(buffer,255,stream);
       sscanf(buffer,"%f %f",&iso_shininess,&iso_transparency);
       fgets(buffer,255,stream);
       sscanf(buffer,"%f %f %f",iso_specular,iso_specular+1,iso_specular+2);
       fgets(buffer,255,stream);
-      sscanf(buffer,"%i",&n_iso_ambient_ini);
-      if(n_iso_ambient_ini>0){
-        FREEMEMORY(iso_ambient_ini);
-        FREEMEMORY(glui_iso_ambient_ini);
-        if(NewMemory((void**)&iso_ambient_ini, MAX(MIN_ISO_COLORS,n_iso_ambient_ini) * 4 * sizeof(float)) == 0)return 2;
-        if(NewMemory((void**)&glui_iso_ambient_ini, MAX(MIN_ISO_COLORS,n_iso_ambient_ini) * 4 * sizeof(int)) == 0)return 2;
-        for(nn = 0; nn<MAX(MIN_ISO_COLORS,n_iso_ambient_ini); nn++){
-          float *isoi;
-          int *glui_isoi;
+      sscanf(buffer,"%i",&n_iso_colors);
+      n_iso_ambient_ini = CLAMP(n_iso_colors, MIN_ISO_COLORS, MAX_ISO_COLORS);
+      for(nn = 0; nn<n_iso_ambient_ini; nn++){
+        float *isoi;
+        int *glui_isoi;
 
-          isoi = iso_ambient_ini + 4*nn;
-          glui_isoi = glui_iso_ambient_ini + 4*nn;
+        isoi = iso_ambient_ini + 4*nn;
+        glui_isoi = glui_iso_ambient_ini + 4*nn;
 
-          fgets(buffer,255,stream);
-          if(nn < n_iso_ambient_ini){
-            sscanf(buffer, "%f %f %f", isoi, isoi + 1, isoi + 2);
-          }
-          else{
-            float *iso;
-
-            iso = iso_ambient + 4 * nn;
-            isoi[0] = iso[0];
-            isoi[1] = iso[1];
-            isoi[2] = iso[2];
-          }
-          isoi[3] = iso_transparency;
-          
-               isoi[0] = CLAMP(    isoi[0], 0.0, 1.0);
-          glui_isoi[0] = CLAMP(255*isoi[0], 0, 255);
-          
-               isoi[1] = CLAMP(    isoi[1], 0.0, 1.0);
-          glui_isoi[1] = CLAMP(255*isoi[1], 0, 255);
-          
-               isoi[2] = CLAMP(    isoi[2], 0.0, 1.0);
-          glui_isoi[2] = CLAMP(255*isoi[2], 0, 255);
-          
-               isoi[3] = CLAMP(    isoi[3], 0.0, 1.0);
-          glui_isoi[3] = CLAMP(255*isoi[3], 0, 255);
+        fgets(buffer,255,stream);
+        if(nn < n_iso_colors){
+          sscanf(buffer, "%f %f %f", isoi, isoi + 1, isoi + 2);
         }
-        iso_ambient_ini[3]=1.0;
-        glui_iso_ambient_ini[3]=255;
+        else{
+          float *iso;
+
+          iso = iso_ambient + 4 * nn;
+          isoi[0] = iso[0];
+          isoi[1] = iso[1];
+          isoi[2] = iso[2];
+        }
+        isoi[3] = iso_transparency;
+        
+             isoi[0] = CLAMP(    isoi[0], 0.0, 1.0);
+        glui_isoi[0] = CLAMP(255*isoi[0], 0, 255);
+        
+             isoi[1] = CLAMP(    isoi[1], 0.0, 1.0);
+        glui_isoi[1] = CLAMP(255*isoi[1], 0, 255);
+        
+             isoi[2] = CLAMP(    isoi[2], 0.0, 1.0);
+        glui_isoi[2] = CLAMP(255*isoi[2], 0, 255);
+        
+             isoi[3] = CLAMP(    isoi[3], 0.0, 1.0);
+        glui_isoi[3] = CLAMP(255*isoi[3], 0, 255);
       }
-      n_iso_ambient_ini = MIN(n_iso_ambient_ini,MAX_ISO_COLORS);
+      iso_ambient_ini[3]=1.0;
+      glui_iso_ambient_ini[3]=255;
       update_isocolors();
       continue;
     }

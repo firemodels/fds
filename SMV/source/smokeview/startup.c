@@ -2053,9 +2053,11 @@ void initvars(void){
   iso_ambient[11] = 1.0;
 
   n_iso_ambient_ini = 3;
-  NewMemory((void **)&iso_ambient_ini, 4*n_iso_ambient_ini*sizeof(float));
-  for(i = 0; i < 4 * n_iso_ambient_ini; i++){
+  NewMemory((void **)&iso_ambient_ini, 4*MAX_ISO_COLORS*sizeof(float));
+  NewMemory((void **)&glui_iso_ambient_ini, 4*MAX_ISO_COLORS*sizeof(int));
+  for(i = 0; i < 4*n_iso_ambient_ini; i++){
     iso_ambient_ini[i] = iso_ambient[i];
+    glui_iso_ambient_ini[i] = CLAMP(255*iso_ambient[i],0,255);
   }
 
   iso_transparency=0.8;
