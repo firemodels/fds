@@ -10655,33 +10655,25 @@ int readini2(char *inifile, int localfile){
       continue;
     }
     if(match(buffer,"ISOCOLORS")==1){
-      int nn,n_iso_colors=0;
+      int nn,n_iso_c=0;
 
       fgets(buffer,255,stream);
       sscanf(buffer,"%f %f",&iso_shininess,&iso_transparency);
       fgets(buffer,255,stream);
       sscanf(buffer,"%f %f %f",iso_specular,iso_specular+1,iso_specular+2);
       fgets(buffer,255,stream);
-      sscanf(buffer,"%i",&n_iso_colors);
-      n_iso_ambient_ini = CLAMP(n_iso_colors, MIN_ISO_COLORS, MAX_ISO_COLORS);
-      for(nn = 0; nn<n_iso_ambient_ini; nn++){
+      sscanf(buffer,"%i",&n_iso_c);
+      n_iso_colors = CLAMP(n_iso_c, MIN_ISO_COLORS, MAX_ISO_COLORS);
+      for(nn = 0; nn<n_iso_colors; nn++){
         float *isoi;
         int *glui_isoi;
 
-        isoi = iso_ambient_ini + 4*nn;
-        glui_isoi = glui_iso_ambient_ini + 4*nn;
+        isoi = iso_colors + 4*nn;
+        glui_isoi = glui_iso_colors + 4*nn;
 
         fgets(buffer,255,stream);
-        if(nn < n_iso_colors){
+        if(nn < n_iso_c){
           sscanf(buffer, "%f %f %f", isoi, isoi + 1, isoi + 2);
-        }
-        else{
-          float *iso;
-
-          iso = iso_ambient + 4 * nn;
-          isoi[0] = iso[0];
-          isoi[1] = iso[1];
-          isoi[2] = iso[2];
         }
         isoi[3] = iso_transparency;
         
@@ -10697,8 +10689,8 @@ int readini2(char *inifile, int localfile){
              isoi[3] = CLAMP(    isoi[3], 0.0, 1.0);
         glui_isoi[3] = CLAMP(255*isoi[3], 0, 255);
       }
-      iso_ambient_ini[3]=1.0;
-      glui_iso_ambient_ini[3]=255;
+      iso_colors[3]=1.0;
+      glui_iso_colors[3]=255;
       update_isocolors();
       continue;
     }
@@ -11600,26 +11592,12 @@ void writeini(int flag,char *filename){
   fprintf(fileout, " %f %f %f\n", heatoffcolor[0], heatoffcolor[1], heatoffcolor[2]);
   fprintf(fileout, "HEATONCOLOR\n");
   fprintf(fileout, " %f %f %f\n", heatoncolor[0], heatoncolor[1], heatoncolor[2]);
-  {
-    float *iso_colors_temp;
-    int n_iso_colors_temp;
-
-  
-    if(iso_ambient_ini!=NULL){
-      n_iso_colors_temp=n_iso_ambient_ini;
-      iso_colors_temp=iso_ambient_ini;
-    }
-    else{
-      n_iso_colors_temp=n_iso_ambient;
-      iso_colors_temp=iso_ambient;
-    }
-    fprintf(fileout,"ISOCOLORS\n");
-  	fprintf(fileout," %f %f : shininess, transparency\n",iso_shininess, iso_transparency);  
-  	fprintf(fileout," %f %f %f : specular\n",iso_specular[0],iso_specular[1],iso_specular[2]);
-    fprintf(fileout," %i\n",n_iso_colors_temp);
-    for(i=0;i<n_iso_colors_temp;i++){
-      fprintf(fileout," %f %f %f\n",iso_colors_temp[4*i],iso_colors_temp[4*i+1],iso_colors_temp[4*i+2]);
-    }
+  fprintf(fileout, "ISOCOLORS\n");
+	fprintf(fileout," %f %f : shininess, transparency\n",iso_shininess, iso_transparency);  
+	fprintf(fileout," %f %f %f : specular\n",iso_specular[0],iso_specular[1],iso_specular[2]);
+  fprintf(fileout," %i\n",n_iso_colors);
+  for(i=0;i<n_iso_colors;i++){
+    fprintf(fileout, " %f %f %f\n", iso_colors[4*i], iso_colors[4*i+1], iso_colors[4*i+2]);
   }
   fprintf(fileout, "SENSORCOLOR\n");
   fprintf(fileout, " %f %f %f\n", sensorcolor[0], sensorcolor[1], sensorcolor[2]);

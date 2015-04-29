@@ -902,22 +902,22 @@ extern "C" void glui_bounds_setup(int main_window){
         _("transparency level"),GLUI_SPINNER_FLOAT,&transparent_level,TRANSPARENTLEVEL,Slice_CB);
     SPINNER_labels_transparency_data2->set_w(0);
     SPINNER_labels_transparency_data2->set_float_limits(0.0,1.0,GLUI_LIMIT_CLAMP);
-    if(n_iso_ambient_ini > 0){
+    if(n_iso_colors > 0){
       int ii;
 
-      ROLLOUT_iso_colors = glui_bounds->add_rollout_to_panel(ROLLOUT_iso, "Isosurface Colors", false);
-      for(ii = 0; ii < n_iso_ambient_ini; ii++){
+      ROLLOUT_iso_colors = glui_bounds->add_rollout_to_panel(ROLLOUT_iso, "Colors", false);
+      for(ii = 0; ii < n_iso_colors; ii++){
         char redlabel[10];
 
         sprintf(redlabel, "%i r:", ii + 1);
         PANEL_iso_colors[ii] = glui_bounds->add_panel_to_panel(ROLLOUT_iso_colors, "", false);
-        SPINNER_iso_colors[3 * ii + 0] = glui_bounds->add_spinner_to_panel(PANEL_iso_colors[ii], redlabel, GLUI_SPINNER_INT, glui_iso_ambient_ini + 4 * ii + 0, ISO_COLORS, Iso_CB);
+        SPINNER_iso_colors[3 * ii + 0] = glui_bounds->add_spinner_to_panel(PANEL_iso_colors[ii], redlabel, GLUI_SPINNER_INT, glui_iso_colors + 4 * ii + 0, ISO_COLORS, Iso_CB);
         glui_bounds->add_column_to_panel(PANEL_iso_colors[ii], false);
-        SPINNER_iso_colors[3 * ii + 1] = glui_bounds->add_spinner_to_panel(PANEL_iso_colors[ii], "g:", GLUI_SPINNER_INT, glui_iso_ambient_ini + 4 * ii + 1, ISO_COLORS, Iso_CB);
+        SPINNER_iso_colors[3 * ii + 1] = glui_bounds->add_spinner_to_panel(PANEL_iso_colors[ii], "g:", GLUI_SPINNER_INT, glui_iso_colors + 4 * ii + 1, ISO_COLORS, Iso_CB);
         glui_bounds->add_column_to_panel(PANEL_iso_colors[ii], false);
-        SPINNER_iso_colors[3 * ii + 2] = glui_bounds->add_spinner_to_panel(PANEL_iso_colors[ii], "b:", GLUI_SPINNER_INT, glui_iso_ambient_ini + 4 * ii + 2, ISO_COLORS, Iso_CB);
+        SPINNER_iso_colors[3 * ii + 2] = glui_bounds->add_spinner_to_panel(PANEL_iso_colors[ii], "b:", GLUI_SPINNER_INT, glui_iso_colors + 4 * ii + 2, ISO_COLORS, Iso_CB);
       }
-      for(ii = 0; ii < 3 * n_iso_ambient_ini; ii++){
+      for(ii = 0; ii < 3 * n_iso_colors; ii++){
         SPINNER_iso_colors[ii]->set_int_limits(0, 255, GLUI_LIMIT_CLAMP);
       }
     }
@@ -1648,8 +1648,8 @@ void Iso_CB(int var){
 
   switch(var){
   case ISO_COLORS:
-    for(i = 0; i < n_iso_ambient_ini;i++){
-      iso_ambient_ini[i]=(float)glui_iso_ambient_ini[i]/255.0;
+    for(i = 0; i < n_iso_colors;i++){
+      iso_colors[i]=(float)glui_iso_colors[i]/255.0;
     }
     update_isocolors();
     break;
@@ -2557,7 +2557,7 @@ extern "C" void Slice_CB(int var){
       break;
     case SORT_SURFACES:
       sort_embedded_geometry=sort_iso_triangles;
-      for(i=nsurfinfo;i<nsurfinfo+n_iso_ambient+1;i++){
+      for(i=nsurfinfo;i<nsurfinfo+n_iso_colors+1;i++){
         surfdata *surfi;
 
         surfi = surfinfo + i;
@@ -2580,7 +2580,7 @@ extern "C" void Slice_CB(int var){
       UpdateRGBColors(colorbar_select_index);
       break;
     case TRANSPARENTLEVEL:
-      for(i=nsurfinfo;i<nsurfinfo+n_iso_ambient+1;i++){
+      for(i=nsurfinfo;i<nsurfinfo+n_iso_colors+1;i++){
         surfdata *surfi;
 
         surfi = surfinfo + i;

@@ -254,7 +254,6 @@ void readiso_orig(const char *file, int ifile, int flag, int *errorcode){
   int blocknumber;
   int error;
   float factor, offset[3];
-  float *iso_colors;
   
   mesh *meshi;
   isodata *ib;
@@ -298,13 +297,6 @@ void readiso_orig(const char *file, int ifile, int flag, int *errorcode){
   
   factor = (SCALE2SMV(meshi->xyzmaxdiff))/65535.0;
   NORMALIZE_XYZ(offset,meshi->xyz_bar0);
-
-  if(iso_ambient_ini==NULL||n_iso_ambient_ini==0){
-    iso_colors=iso_ambient;
-  }
-  else{
-    iso_colors=iso_ambient_ini;
-  }
 
   getisosizes(file, ib->dataflag, &isostream, &nisopoints, &nisotriangles, 
     &meshi->isolevels, &meshi->nisolevels, &meshi->niso_times, 
@@ -1862,16 +1854,8 @@ mesh *get_loaded_isomesh(void){
 
 void update_isocolors(void){
   int i;
-  float *iso_colors;
 
-  if(iso_ambient_ini==NULL){
-    iso_colors=iso_ambient;
-  }
-  else{
-    iso_colors=iso_ambient_ini;
-  }
-
-  for(i=nsurfinfo+1;i<nsurfinfo+n_iso_ambient+1;i++){
+  for(i=nsurfinfo+1;i<nsurfinfo+n_iso_colors+1;i++){
     surfdata *surfi;
     float *color;
 

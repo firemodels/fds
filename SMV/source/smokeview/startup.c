@@ -2038,26 +2038,34 @@ void initvars(void){
 
   valindex=0;
 
-  n_iso_ambient = 3;
-  iso_ambient[0] = 0.96;
-  iso_ambient[1] = 0.00;
-  iso_ambient[2] = 0.96;
-  iso_ambient[3] = 1.00;
-  iso_ambient[4] = 0.75;
-  iso_ambient[5] = 0.80;
-  iso_ambient[6] = 0.80;
-  iso_ambient[7] = 1.00;
-  iso_ambient[8] = 0.00;
-  iso_ambient[9] = 0.96;
-  iso_ambient[10] = 0.28;
-  iso_ambient[11] = 1.0;
+  NewMemory((void **)&iso_colors, 4*MAX_ISO_COLORS*sizeof(float));
+  NewMemory((void **)&glui_iso_colors, 4*MAX_ISO_COLORS*sizeof(int));
 
-  n_iso_ambient_ini = 3;
-  NewMemory((void **)&iso_ambient_ini, 4*MAX_ISO_COLORS*sizeof(float));
-  NewMemory((void **)&glui_iso_ambient_ini, 4*MAX_ISO_COLORS*sizeof(int));
-  for(i = 0; i < 4*n_iso_ambient_ini; i++){
-    iso_ambient_ini[i] = iso_ambient[i];
-    glui_iso_ambient_ini[i] = CLAMP(255*iso_ambient[i],0,255);
+  n_iso_colors = 3;
+  iso_colors[0] = 0.96;
+  iso_colors[1] = 0.00;
+  iso_colors[2] = 0.96;
+  iso_colors[3] = 1.00;
+  iso_colors[4] = 0.75;
+  iso_colors[5] = 0.80;
+  iso_colors[6] = 0.80;
+  iso_colors[7] = 1.00;
+  iso_colors[8] = 0.00;
+  iso_colors[9] = 0.96;
+  iso_colors[10] = 0.28;
+  iso_colors[11] = 1.0;
+  for(i=n_iso_colors;i<MAX_ISO_COLORS;i++){
+    int grey;
+
+    grey=1.0-(float)(i-n_iso_colors)/(float)(MAX_ISO_COLORS-1-n_iso_colors);
+    iso_colors[4*i+0]=grey;
+    iso_colors[4*i+1]=grey;
+    iso_colors[4*i+2]=grey;
+    iso_colors[4*i+3]=1.0;
+  }
+
+  for(i = 0; i < 4*MAX_ISO_COLORS; i++){
+    glui_iso_colors[i] = CLAMP(255*iso_colors[i],0,255);
   }
 
   iso_transparency=0.8;

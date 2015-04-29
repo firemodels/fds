@@ -453,12 +453,8 @@ SVEXTERN float rgb_part[4*MAXRGB];
 SVEXTERN float rgb_trans[4*MAXRGB];
 SVEXTERN float rgb_cad[MAXRGB][4];
 
-SVEXTERN float iso_ambient[12];
-SVEXTERN float iso_transparency;
-SVEXTERN int n_iso_ambient;
-SVEXTERN float SVDECL(*iso_ambient_ini,NULL);
-SVEXTERN int SVDECL(*glui_iso_ambient_ini, NULL);
-SVEXTERN int n_iso_ambient_ini;
+SVEXTERN float iso_transparency, SVDECL(*iso_colors,NULL);
+SVEXTERN int SVDECL(*glui_iso_colors, NULL), n_iso_colors;
 SVEXTERN float SVDECL(*rgb_ini,NULL);
 SVEXTERN float rgb[MAXRGB][4];
 SVEXTERN float mouse_deltax, mouse_deltay;
