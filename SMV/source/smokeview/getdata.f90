@@ -74,7 +74,7 @@ if(exists)then
   open(unit=lu20,file=trim(filename),form="unformatted",action="read")
 #endif
  else
-  write(6,*)'The boundary element file name, ',trim(filename),' does not exist'
+  write(6,*)' The boundary element file name, ',trim(filename),' does not exist'
   error=1
   return
 endif
@@ -88,7 +88,7 @@ valmax = -valmin
 do itime=1, ntimes
   read(lu20,iostat=finish)times(itime)
   if(redirect_flag.eq.0)write(6,10)times(itime)
-10 format("boundary element time=",f9.2)  
+10 format(" boundary element time=",f9.2)  
   if(finish.eq.0)read(lu20,iostat=finish)nvert_s, ntri_s, nvert_d, ntri_d
   nstatics(itime)=ntri_s
   if(finish.eq.0.and.ntri_s.gt.0)read(lu20,iostat=finish)(vals(nvars+i),i=1,ntri_s)
@@ -106,7 +106,7 @@ do itime=1, ntimes
   if(finish.ne.0)return
   nvars = nvars + ntri_s + ntri_d
 end do
-if(redirect_flag.eq.0)write(6,*)"nvars=",nvars,"valmin=",valmin," valmax=",valmax
+if(redirect_flag.eq.0)write(6,*)" nvars=",nvars,"valmin=",valmin," valmax=",valmax
 close(lu20)
 
 end subroutine getembeddata
@@ -142,7 +142,7 @@ if(exists)then
   open(unit=lu26,file=trim(zonefilename),form="unformatted",action="read")
 #endif
  else
-  write(6,*)'The zone file name, ',trim(zonefilename),' does not exist'
+  write(6,*)' The zone file name, ',trim(zonefilename),' does not exist'
   error=1
   return
 endif
@@ -456,13 +456,13 @@ do
     if(nframes+1.le.mxframes)bframe(nframes+1) = bframe(nframes) + sframe(nframes)
     if(npp2.eq.0)then
       if(redirect_flag.eq.0)write(6,10)stime
-10    format("particle time=",f9.2)
+10 format(" particle time=",f9.2)
      else
       if(redirect_flag.eq.0)then
-        write(6,*)"particle time=",stime,"particles",npp1,"droplets",npp2
+        write(6,*)" particle time=",stime,"particles",npp1,"droplets",npp2
         write(6,20)stime,npp2
       endif
-20    format("particle time=",f9.2," particles",i9," droplets",i9)      
+20 format(" particle time=",f9.2," particles",i9," droplets",i9)      
     endif
   endif
 
@@ -557,7 +557,7 @@ nframe=nxsp*nysp*nzsp
 do i = 1, ntimes
   write(file_unit)times(i)
   if(redirect_flag.eq.0)write(6,10)times(i)
-10 format("outputting slice time=",f10.2)
+10 format(" outputting slice time=",f10.2)
   ibeg=1+(i-1)*nframe
   iend=i*nframe
   write(file_unit)(qdata(ii),ii=ibeg,iend)
@@ -619,7 +619,7 @@ if(exists)then
   open(unit=lu11,file=trim(slicefilename),form="unformatted",action="read")
 #endif
  else
-  write(6,*)'the slice file ',trim(slicefilename),' does not exist'
+  write(6,*)' the slice file ',trim(slicefilename),' does not exist'
   nsteps = 0
   return
 endif
@@ -688,7 +688,7 @@ do
   nsteps = nsteps + 1
   times(nsteps) = time
   if(redirect_flag.eq.0)write(6,10)time
-10 format("slice time=",f9.2)  
+10 format(" slice time=",f9.2)  
   if(idir.eq.3)then
     istart = (nsteps-1)*nxsp*nysp
     do i = 1, nxsp
@@ -953,7 +953,7 @@ if(isotest.eq.0)then
     open(unit=u_in,file=qfilename,form="unformatted",action="read",iostat=error2)
 #endif
    else
-    write(6,*)'The file name, ',trim(qfilename),' does not exist'
+    write(6,*)' The file name, ',trim(qfilename),' does not exist'
     read(5,*)dummy
     stop
   endif
@@ -964,9 +964,9 @@ if(isotest.eq.0)then
     read(u_in,iostat=error)((((qq(i,j,k,n),i=1,nxpts),j=1,nypts),k=1,nzpts),n=1,5)
    else
     error = 1
-    write(6,*)"*** Fatal error in getplot3dq ***"
-    write(6,*)"Grid size found in plot3d file was:",nxpts,nypts,nzpts
-    write(6,*)"Was expecting:",nx,ny,nz
+    write(6,*)" *** Fatal error in getplot3dq ***"
+    write(6,*)" Grid size found in plot3d file was:",nxpts,nypts,nzpts
+    write(6,*)" Was expecting:",nx,ny,nz
     stop
   endif
   close(u_in)

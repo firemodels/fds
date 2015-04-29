@@ -27,7 +27,7 @@ if(exists)then
   open(unit=lu20,file=trim(filename),form="unformatted",action="read")
 #endif
  else
-  write(6,*)'The boundary element file name, ',trim(filename),' does not exist'
+  write(6,*)' The boundary element file name, ',trim(filename),' does not exist'
   error=1
   return
 endif
@@ -135,7 +135,7 @@ end do
 do
   read(lu20,iostat=error)time
   if(redirect_flag.eq.0)write(6,10)time
-10    format("sizing particle time=",f9.2)
+10 format(" sizing particle time=",f9.2)
   if(error.ne.0)go to 999
   do i = 1, nclasses
     read(lu20,iostat=error)numpoints(i)
@@ -214,7 +214,7 @@ if(exists)then
   open(unit=lu26,file=trim(zonefilename),form="unformatted",action="read")
 #endif
  else
-  write(6,*)'The zone file name, ',trim(zonefilename),' does not exist'
+  write(6,*)' The zone file name, ',trim(zonefilename),' does not exist'
   error=1
   return
 endif
@@ -285,7 +285,7 @@ if(exists)then
   open(unit=lu15,file=trim(patchfilename),form="unformatted",action="read")
 #endif
  else
-  write(6,*)'The boundary file name, ',trim(patchfilename),' does not exist'
+  write(6,*)' The boundary file name, ',trim(patchfilename),' does not exist'
   error=1
   return
 endif
@@ -374,7 +374,7 @@ if(exists)then
   open(unit=lu10,file=trim(partfilename),form="formatted",action="read")
 #endif
  else
-  write(6,*)'The particle file name, ',trim(partfilename),' does not exist'
+  write(6,*)' The particle file name, ',trim(partfilename),' does not exist'
   error=-1
 endif
 do i = 1, 5
@@ -422,7 +422,7 @@ if(exists)then
   open(unit=lu10,file=trim(partfilename),form="unformatted",action="read")
 #endif
  else
-  write(6,*)'The particle file name, ',trim(partfilename),' does not exist'
+  write(6,*)' The particle file name, ',trim(partfilename),' does not exist'
   error=-1
 endif
 read(lu10,iostat=error) xx,xx,yy,ii,mxframepoints
@@ -806,7 +806,7 @@ if(exists)then
   open(unit=lu15,file=trim(boundaryfilename),form="unformatted",action="read")
 #endif
  else
-  write(6,*)'The boundary file name, ',trim(boundaryfilename),' does not exist'
+  write(6,*)' The boundary file name, ',trim(boundaryfilename),' does not exist'
   error=1
   return
 endif
@@ -879,7 +879,7 @@ if(exists)then
   open(unit=lu15,file=boundaryfilename,form="unformatted",action="read")
 #endif
  else
-  write(6,*)'The boundary file name, ',boundaryfilename,' does not exist'
+  write(6,*)' The boundary file name, ',boundaryfilename,' does not exist'
   error=1
   return
 endif
