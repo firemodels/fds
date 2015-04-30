@@ -1210,7 +1210,7 @@ extern "C" void glui_bounds_setup(int main_window){
   SPINNER_tload_skip=glui_bounds->add_spinner_to_panel(PANEL_time2c,_("frame skip"),GLUI_SPINNER_INT,&tload_skip,TBOUNDS,Time_CB);
   glui_bounds->add_column_to_panel(PANEL_time2c,false);
   CHECKBOX_use_tload_skip=glui_bounds->add_checkbox_to_panel(PANEL_time2c,"",&use_tload_skip,TBOUNDS_USE,Time_CB);
-  SPINNER_tload_skip->set_int_limits(0,100);
+  SPINNER_tload_skip->set_int_limits(0,1000);
   
   BUTTON_RELOAD=glui_bounds->add_button_to_panel(PANEL_time2,_("Reload"),RELOAD_DATA,Time_CB);
 
