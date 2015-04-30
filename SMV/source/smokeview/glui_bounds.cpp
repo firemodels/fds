@@ -31,7 +31,7 @@ void SETslicemin(int setslicemin, float slicemin, int setslicechopmin, float sli
 void Bounds_DLG_CB(int var);
 void PART_CB(int var);
 void Bound_CB(int var);
-void Iso_CB(int var);
+extern "C" void Iso_CB(int var);
 void Smoke3D_CB(int var);
 void Time_CB(int var);
 void Script_CB(int var);
@@ -1643,13 +1643,24 @@ extern "C" void updateplot3dlistindex(void){
   updateglui();
 }
 
-void Iso_CB(int var){
+/* ------------------ Iso_CB ------------------------ */
+
+extern "C" void Iso_CB(int var){
   int i;
 
   switch(var){
   case ISO_COLORS:
-    for(i = 0; i < n_iso_colors;i++){
+    for(i = 0; i < 4*n_iso_colors;i++){
       iso_colors[i]=(float)glui_iso_colors[i]/255.0;
+    }
+    for(i = 0; i < MAX_ISO_COLORS; i++){
+      float graylevel;
+
+      graylevel = color2bw(iso_colors+4*i);
+      iso_colorsbw[4 * i + 0] = graylevel;
+      iso_colorsbw[4 * i + 1] = graylevel;
+      iso_colorsbw[4 * i + 2] = graylevel;
+      iso_colorsbw[4 * i + 3] = 1.0;
     }
     update_isocolors();
     break;
@@ -2513,6 +2524,7 @@ extern "C" void Slice_CB(int var){
       else{
         setbwdata = 0;
       }
+      Iso_CB(ISO_COLORS);
       set_labels_controls();
       break;
     case RESEARCH_MODE:

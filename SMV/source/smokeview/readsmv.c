@@ -10084,7 +10084,7 @@ int readini2(char *inifile, int localfile){
       }
     if(match(buffer,"SETBW")==1){
       fgets(buffer,255,stream);
-      sscanf(buffer,"%i ",&setbw);
+      sscanf(buffer,"%i %i",&setbw,&setbwdata);
       continue;
       }
     if(match(buffer,"FLIP")==1){
@@ -11604,7 +11604,7 @@ void writeini(int flag,char *filename){
   fprintf(fileout, "SENSORNORMCOLOR\n");
   fprintf(fileout, " %f %f %f\n", sensornormcolor[0], sensornormcolor[1], sensornormcolor[2]);
   fprintf(fileout, "SETBW\n");
-  fprintf(fileout, " %i\n", setbw);
+  fprintf(fileout, " %i %i\n", setbw,setbwdata);
   fprintf(fileout, "SPRINKOFFCOLOR\n");
   fprintf(fileout, " %f %f %f\n", sprinkoffcolor[0], sprinkoffcolor[1], sprinkoffcolor[2]);
   fprintf(fileout, "SPRINKONCOLOR\n");

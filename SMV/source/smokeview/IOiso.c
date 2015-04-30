@@ -1860,8 +1860,12 @@ void update_isocolors(void){
     float *color;
 
     surfi = surfinfo + i;
-    color=iso_colors+4*(i-(nsurfinfo+1));
-    surfi->color=getcolorptr(color);
+    if(setbwdata == 1){
+      surfi->color = iso_colorsbw + 4 * (i - (nsurfinfo + 1));
+    }
+    else{
+      surfi->color = iso_colors + 4 * (i - (nsurfinfo + 1));
+    }
     surfi->transparent_level=0.8;
     surfi->iso_level=i-nsurfinfo;
   }

@@ -108,6 +108,8 @@ void PropMenu(int value);
 void UnLoadVolSmoke3DMenu(int value);
 void LoadVolSmoke3DMenu(int value);
 void update_script_step(void);
+#define ISO_COLORS 4
+void Iso_CB(int var);
 
 #ifdef WIN32
 
@@ -471,6 +473,7 @@ void ColorBarMenu(int value){
       else{
         ColorBarMenu(colorbartype_save);
       }
+      Iso_CB(ISO_COLORS);
       break;
     case COLORBAR_TOGGLE_BW:
       setbw=1-setbw;
@@ -513,6 +516,7 @@ void ColorBarMenu(int value){
     else{
       setbwdata = 0;
     }
+    Iso_CB(ISO_COLORS);
     set_labels_controls();
   }
   if(value>-10){
