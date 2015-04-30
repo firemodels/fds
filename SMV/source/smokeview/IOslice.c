@@ -6262,7 +6262,7 @@ int getslicezlibdata(char *file,
     compindex[ns].offset=compindex[ns-1].offset+nncomp;
     compindex[ns-1].size=nncomp;
 
-    PRINTF("xxxslice time=%.2f\n",ttime);
+    PRINTF("slice time=%.2f\n",ttime);
     fread(cd,1,nncomp,stream);
     cd+=nncomp;
     if(ns>=nsliceframes||cd-compressed_data>=ncompressed)break;
