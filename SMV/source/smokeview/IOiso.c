@@ -1857,7 +1857,6 @@ void update_isocolors(void){
 
   for(i=nsurfinfo+1;i<nsurfinfo+n_iso_colors+1;i++){
     surfdata *surfi;
-    float *color;
 
     surfi = surfinfo + i;
     if(setbwdata == 1){
