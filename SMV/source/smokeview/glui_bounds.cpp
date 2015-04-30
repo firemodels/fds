@@ -2506,6 +2506,14 @@ extern "C" void Slice_CB(int var){
         colorlabelzone, zonescale, zonelevels256);
       break;
     case COLORBAR_LIST2:
+      if(selectedcolorbar_index2 == bw_colorbar_index){
+        setbwdata = 1;
+        ColorBarMenu(bw_colorbar_index);
+      }
+      else{
+        setbwdata = 0;
+      }
+      set_labels_controls();
       break;
     case RESEARCH_MODE:
       for(i=0;i<nsliceinfo;i++){

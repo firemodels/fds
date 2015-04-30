@@ -462,18 +462,21 @@ void ColorBarMenu(int value){
       update_extreme();
       UpdateRGBColors(COLORBAR_INDEX_NONE);
       break;
+    case COLORBAR_TOGGLE_BW_DATA:
+      setbwdata = 1 - setbwdata;
+      if(setbwdata==1){
+        colorbartype_save=colorbartype;
+        ColorBarMenu(bw_colorbar_index);
+      }
+      else{
+        ColorBarMenu(colorbartype_save);
+      }
+      break;
     case COLORBAR_TOGGLE_BW:
-     setbw=1-setbw;
-     if(setbw==1){
-       colorbartype_save=colorbartype;
-       ColorBarMenu(bw_colorbar_index);
-     }
-     else{
-       colorbartype=colorbartype_save;
-       ColorBarMenu(colorbartype);
-     }
-     UpdateRGBColors(COLORBAR_INDEX_NONE);
-     set_labels_controls();
+      setbw=1-setbw;
+      initrgb();
+      set_labels_controls();
+      break;
      break;
    case COLORBAR_TRANSPARENT:
      use_transparency_data=1-use_transparency_data;
@@ -504,12 +507,13 @@ void ColorBarMenu(int value){
     current_colorbar=colorbarinfo+colorbartype;
     update_colorbar_type();
     update_colorbar_list2();
-    if(value==bw_colorbar_index){
-      setbw=1;
+    if(colorbartype == bw_colorbar_index){
+      setbwdata = 1;
     }
     else{
-      setbw=0;
+      setbwdata = 0;
     }
+    set_labels_controls();
   }
   if(value>-10){
     UpdateRGBColors(COLORBAR_INDEX_NONE);
@@ -6431,13 +6435,24 @@ updatemenu=0;
     glutAddMenuEntry("*Lines",COLORBAR_LINES);
   }
   glutAddMenuEntry("-",MENU_DUMMY);
-  if(setbw==0){
-    glutAddMenuEntry(_("*Color/BW"),COLORBAR_TOGGLE_BW);
+  if(show_extreme_maxdata == 1){
+    glutAddMenuEntry(_("  *Highlight data above specified max"), COLORBAR_HIGHLIGHT_ABOVE);
   }
   else{
-    glutAddMenuEntry(_("Color/*BW"),COLORBAR_TOGGLE_BW);
+    glutAddMenuEntry(_("  Highlight data above specified max"), COLORBAR_HIGHLIGHT_ABOVE);
   }
-
+  if(show_extreme_mindata == 1){
+    glutAddMenuEntry(_("  *Highlight data below specified min"), COLORBAR_HIGHLIGHT_BELOW);
+  }
+  else{
+    glutAddMenuEntry(_("  Highlight data below specified min"), COLORBAR_HIGHLIGHT_BELOW);
+  }
+  if(colorbarflip == 1){
+    glutAddMenuEntry(_("  *Flip"), COLORBAR_FLIP);
+  }
+  else{
+    glutAddMenuEntry(_("  Flip"), COLORBAR_FLIP);
+  }
 
   CREATEMENU(colorbarsmenu,ColorBarMenu);
   {
@@ -6462,34 +6477,19 @@ updatemenu=0;
 /* -------------------------------- colorbarmenu -------------------------- */
 
   CREATEMENU(colorbarmenu,ColorBarMenu);
-  glutAddSubMenu(_("Colorbars"),colorbarsmenu);
-  glutAddMenuEntry(_("Variations:"),MENU_DUMMY);
-  if(show_extreme_maxdata==1){
-    glutAddMenuEntry(_("  *Highlight data above specified max"),COLORBAR_HIGHLIGHT_ABOVE);
-  }
-  else{
-    glutAddMenuEntry(_("  Highlight data above specified max"),COLORBAR_HIGHLIGHT_ABOVE);
-  }
-  if(show_extreme_mindata==1){
-    glutAddMenuEntry(_("  *Highlight data below specified min"),COLORBAR_HIGHLIGHT_BELOW);
-  }
-  else{
-    glutAddMenuEntry(_("  Highlight data below specified min"),COLORBAR_HIGHLIGHT_BELOW);
-  }
-  if(colorbarflip==1){
-    glutAddMenuEntry(_("  *Flip"),COLORBAR_FLIP);
-  }
-  else{
-    glutAddMenuEntry(_("  Flip"),COLORBAR_FLIP);
-  }
-  glutAddSubMenu(_("  Shade type:"),colorbarshademenu);
+  glutAddSubMenu(_("Colorbar"),colorbarsmenu);
+  glutAddSubMenu(_("Colorbar type"), colorbarshademenu);
   if(use_transparency_data==1){
     glutAddMenuEntry(_("  *Transparent (data)"),COLORBAR_TRANSPARENT);
   }
   else{
     glutAddMenuEntry(_("  Transparent (data)"),COLORBAR_TRANSPARENT);
   }
-  glutAddMenuEntry(_("  Reset"),COLORBAR_RESET);
+  if(setbwdata == 1)glutAddMenuEntry("*Black/White (data)", COLORBAR_TOGGLE_BW_DATA);
+  if(setbwdata == 0)glutAddMenuEntry("Black/White  (data)", COLORBAR_TOGGLE_BW_DATA);
+  if(setbw == 1)glutAddMenuEntry("*Black/White (geometry)", COLORBAR_TOGGLE_BW);
+  if(setbw == 0)glutAddMenuEntry("Black/White (geometry)", COLORBAR_TOGGLE_BW);
+  glutAddMenuEntry(_("  Reset"), COLORBAR_RESET);
 
 /* --------------------------------showVslice menu -------------------------- */
   if(nvsliceloaded==0){
@@ -6850,7 +6850,7 @@ updatemenu=0;
 
   showhide_data = 0;
   CREATEMENU(showhidemenu,ShowHideMenu);
-  glutAddSubMenu(_("Data coloring"), colorbarmenu);
+  glutAddSubMenu(_("Color"), colorbarmenu);
   glutAddSubMenu(_("Geometry"),geometrymenu);
   glutAddSubMenu(_("Labels"),labelmenu);
   glutAddSubMenu(_("Viewpoints"), resetmenu);

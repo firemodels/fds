@@ -105,6 +105,7 @@ GLUI_Checkbox *CHECKBOX_label_2=NULL;
 GLUI_Checkbox *CHECKBOX_label_3=NULL;
 GLUI_Checkbox *CHECKBOX_labels_flip=NULL;
 GLUI_Checkbox *CHECKBOX_labels_shade=NULL;
+GLUI_Checkbox *CHECKBOX_labels_shadedata=NULL;
 GLUI_Checkbox *CHECKBOX_labels_transparent_override=NULL;
 
 GLUI_Rollout *ROLLOUT_coloring=NULL;
@@ -184,6 +185,7 @@ GLUI_Button *BUTTON_label_4=NULL;
 #define LABELS_meshlabel 27
 #define LABELS_usertick 28
 #define LABELS_usertick2 29
+#define LABELS_shadedata 30
 
 #define LABELS_HMS 18
 #define SAVE_SETTINGS 99
@@ -377,7 +379,7 @@ extern "C" void glui_labels_setup(int main_window){
 
   // -------------- Data coloring -------------------
 
-  ROLLOUT_coloring = glui_labels->add_rollout("Data coloring",false,COLORING_ROLLOUT,Display_Rollout_CB);
+  ROLLOUT_coloring = glui_labels->add_rollout("Color",false,COLORING_ROLLOUT,Display_Rollout_CB);
   ADDPROCINFO(displayprocinfo, ndisplayprocinfo, ROLLOUT_coloring,COLORING_ROLLOUT);
 
   if(ncolorbars>0){
@@ -403,21 +405,22 @@ extern "C" void glui_labels_setup(int main_window){
   glui_labels->add_radiobutton_to_group(RADIO2_plot3d_display,_("Continuous"));
   glui_labels->add_radiobutton_to_group(RADIO2_plot3d_display,_("Stepped"));
   glui_labels->add_radiobutton_to_group(RADIO2_plot3d_display,_("Line"));
+  CHECKBOX_colorbarflip = glui_labels->add_checkbox_to_panel(PANEL_contours, _("flip"), &colorbarflip, FLIP, Labels_CB);
 
   SPINNER_colorband=glui_labels->add_spinner_to_panel(PANEL_cb11,"Selection width:",GLUI_SPINNER_INT,&colorband,COLORBAND,Slice_CB);
   SPINNER_colorband->set_int_limits(1,10);
 
   glui_labels->add_column_to_panel(PANEL_cb11,false);
 
-  CHECKBOX_labels_shade=glui_labels->add_checkbox_to_panel(PANEL_cb11,_("color -> grey"),&setbw,LABELS_shade,Labels_CB);
-  CHECKBOX_colorbarflip=glui_labels->add_checkbox_to_panel(PANEL_cb11,_("flip colorbar"),&colorbarflip,FLIP,Labels_CB);
-  CHECKBOX_axislabels_smooth=glui_labels->add_checkbox_to_panel(PANEL_cb11,_("Smooth colorbar labels"),&axislabels_smooth,COLORBAR_SMOOTH,Slice_CB);
-  CHECKBOX_transparentflag=glui_labels->add_checkbox_to_panel(PANEL_cb11,_("Use transparency"),
-    &use_transparency_data,DATA_transparent,Slice_CB);
-  SPINNER_labels_transparency_data=glui_labels->add_spinner_to_panel(PANEL_cb11,_("transparency level"),
-    GLUI_SPINNER_FLOAT,&transparent_level,TRANSPARENTLEVEL,Slice_CB);
+  CHECKBOX_labels_shade=glui_labels->add_checkbox_to_panel(PANEL_cb11,_("Black/White (geometry)"),&setbw,LABELS_shade,Labels_CB);
+  CHECKBOX_labels_shadedata=glui_labels->add_checkbox_to_panel(PANEL_cb11,_("Black/White (data)"),&setbwdata,LABELS_shadedata,Labels_CB);
+  CHECKBOX_transparentflag = glui_labels->add_checkbox_to_panel(PANEL_cb11, _("Transparent (data)"),
+    &use_transparency_data, DATA_transparent, Slice_CB);
+  SPINNER_labels_transparency_data = glui_labels->add_spinner_to_panel(PANEL_cb11, _("level"),
+    GLUI_SPINNER_FLOAT, &transparent_level, TRANSPARENTLEVEL, Slice_CB);
   SPINNER_labels_transparency_data->set_w(0);
-  SPINNER_labels_transparency_data->set_float_limits(0.0,1.0,GLUI_LIMIT_CLAMP);
+  SPINNER_labels_transparency_data->set_float_limits(0.0, 1.0, GLUI_LIMIT_CLAMP);
+  CHECKBOX_axislabels_smooth = glui_labels->add_checkbox_to_panel(PANEL_cb11, _("Smooth colorbar labels"), &axislabels_smooth, COLORBAR_SMOOTH, Slice_CB);
 
 
   PANEL_extreme = glui_labels->add_panel_to_panel(ROLLOUT_coloring,"",GLUI_PANEL_NONE);
@@ -845,8 +848,16 @@ extern "C" void Labels_CB(int var){
     ShowHideMenu(MENU_SHOWHIDE_FLIP);
     break;
   case LABELS_shade:
-    setbw = 1 - setbw;
-    ColorBarMenu(COLORBAR_TOGGLE_BW);
+    initrgb();
+    break;
+  case LABELS_shadedata:
+    if(setbwdata==1){
+      colorbartype_save=colorbartype;
+      ColorBarMenu(bw_colorbar_index);
+    }
+    else{
+      ColorBarMenu(colorbartype_save);
+    }
     break;
   case LABELS_close:
     hide_glui_display();
@@ -882,7 +893,7 @@ extern "C" void Labels_CB(int var){
 
 /* ------------------ set_labels_controls ------------------------ */
 
-extern "C" void set_labels_controls(){
+  extern "C" void set_labels_controls(){
 
   if(CHECKBOX_LB_visLabels!=NULL)CHECKBOX_LB_visLabels->set_int_val(visLabels);
   if(CHECKBOX_visUSERticks!=NULL)CHECKBOX_visUSERticks->set_int_val(visUSERticks);
@@ -904,7 +915,8 @@ extern "C" void set_labels_controls(){
 
   if(CHECKBOX_labels_flip!=NULL)CHECKBOX_labels_flip->set_int_val(background_flip);
   if(CHECKBOX_labels_shade!=NULL)CHECKBOX_labels_shade->set_int_val(setbw);
-  if(RADIO_fontsize!=NULL)RADIO_fontsize->set_int_val(fontindex);
+  if(CHECKBOX_labels_shadedata != NULL)CHECKBOX_labels_shadedata->set_int_val(setbwdata);
+  if(RADIO_fontsize != NULL)RADIO_fontsize->set_int_val(fontindex);
   if(CHECKBOX_labels_hms!=NULL)CHECKBOX_labels_hms->set_int_val(vishmsTimelabel);
   if(CHECKBOX_labels_gridloc!=NULL)CHECKBOX_labels_gridloc->set_int_val(visgridloc);
   if(CHECKBOX_labels_version!=NULL)CHECKBOX_labels_version->set_int_val(gversion);

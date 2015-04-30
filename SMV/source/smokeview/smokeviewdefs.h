@@ -499,6 +499,7 @@ void _Sniff_Errors(char *whereat);
 #define COLORBAR_HIGHLIGHT_ABOVE -20
 #define COLORBAR_TRANSPARENT -13
 #define COLORBAR_RESET -4
+#define COLORBAR_TOGGLE_BW_DATA -21
 
 #define LOAD 0
 #define UNLOAD 1
