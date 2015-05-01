@@ -155,6 +155,19 @@ void getisosizes(const char *isofile, int dataflag, FILE **isostreamptr, int *nv
   }
 }
 
+/* ------------------ readiso_geom_wrapup ------------------------ */
+
+void readiso_geom_wrapup(void){
+  update_readiso_geom_wrapup=UPDATE_ISO_OFF;
+  ngeominfoptrs = 0;
+  GetGeomInfoPtrs(&geominfoptrs, &ngeominfoptrs);
+  update_triangles();
+
+  Update_Times();
+  get_faceinfo();
+  Idle_CB();
+}
+
 /* ------------------ readiso_geom ------------------------ */
 
 void readiso_geom(const char *file, int ifile, int load_flag, int *errorcode){
@@ -219,17 +232,12 @@ void readiso_geom(const char *file, int ifile, int load_flag, int *errorcode){
   updatemenu=1;
   iisotype=getisotype(isoi);
 
-  ngeominfoptrs=0;
-  GetGeomInfoPtrs(&geominfoptrs,&ngeominfoptrs);
-  update_triangles();
-
-  Update_Times();
-  get_faceinfo();
+  if(update_readiso_geom_wrapup==UPDATE_ISO_OFF)update_readiso_geom_wrapup=UPDATE_ISO_ONE_NOW;
+  if(update_readiso_geom_wrapup==UPDATE_ISO_START_ALL)update_readiso_geom_wrapup=UPDATE_ISO_ALL_NOW;
 #ifdef MEMPRINT
   PRINTF("After iso load: \n");
   PrintMemoryInfo;
 #endif
-  Idle_CB();
 
   glutPostRedisplay();
   CheckMemory;
@@ -1855,18 +1863,18 @@ mesh *get_loaded_isomesh(void){
 void update_isocolors(void){
   int i;
 
-  for(i=nsurfinfo+1;i<nsurfinfo+n_iso_colors+1;i++){
+  for(i = 0; i < n_iso_colors; i++){
     surfdata *surfi;
 
-    surfi = surfinfo + i;
+    surfi = surfinfo + i + nsurfinfo + 1;
     if(setbwdata == 1){
-      surfi->color = iso_colorsbw + 4 * (i - (nsurfinfo + 1));
+      surfi->color = iso_colorsbw + 4*i;
     }
     else{
-      surfi->color = iso_colors + 4 * (i - (nsurfinfo + 1));
+      surfi->color = iso_colors + 4*i;
     }
-    surfi->transparent_level=0.8;
-    surfi->iso_level=i-nsurfinfo;
+    surfi->transparent_level = 0.8;
+    surfi->iso_level= i + 1;
   }
 }
 

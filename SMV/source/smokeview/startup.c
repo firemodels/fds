@@ -1037,14 +1037,19 @@ void InitOpenGL(void){
       if(parti->autoload==0&&parti->loaded==1)readpart(parti->file,i,UNLOAD,&errorcode);
       if(parti->autoload==1)readpart(parti->file,i,LOAD,&errorcode);
     }
-    for(i=0;i<nisoinfo;i++){
+    update_readiso_geom_wrapup == UPDATE_ISO_START_ALL;
+    for(i = 0; i<nisoinfo; i++){
       isodata *isoi;
 
       isoi = isoinfo + i;
       if(isoi->autoload==0&&isoi->autoload==1)readiso(isoi->file,i,UNLOAD,&errorcode);
-      if(isoi->autoload==1)readiso(isoi->file,i,LOAD,&errorcode);
+      if(isoi->autoload == 1){
+        readiso(isoi->file, i, LOAD, &errorcode);
+      }
     }
-    for(i=0;i<nvsliceinfo;i++){
+    if(update_readiso_geom_wrapup == UPDATE_ISO_ALL_NOW)readiso_geom_wrapup();
+    update_readiso_geom_wrapup = UPDATE_ISO_OFF;
+    for(i = 0; i<nvsliceinfo; i++){
       vslicedata *vslicei;
 
       vslicei = vsliceinfo + i;

@@ -11,6 +11,11 @@ void _Sniff_Errors(char *whereat);
 #define SNIFF_ERRORS(f)
 #endif
 
+#define UPDATE_ISO_OFF 0
+#define UPDATE_ISO_ONE_NOW 1
+#define UPDATE_ISO_ALL_NOW 2
+#define UPDATE_ISO_START_ALL -1
+
 #define MAX_ISO_COLORS 10
 #define MIN_ISO_COLORS 3
 

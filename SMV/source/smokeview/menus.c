@@ -2369,13 +2369,16 @@ void LoadUnloadMenu(int value){
         readpart(partinfo[i].file,i,LOAD,&errorcode);
       }
     }
-    for(i=0;i<nisoinfo;i++){
+    update_readiso_geom_wrapup = UPDATE_ISO_START_ALL;
+    for(i = 0; i<nisoinfo; i++){
       isodata *isoi;
 
       isoi = isoinfo + i;
       if(isoi->loaded==0)continue;
       readiso(isoi->file,i,LOAD,&errorcode);
     }
+    if(update_readiso_geom_wrapup == UPDATE_ISO_ALL_NOW)readiso_geom_wrapup();
+    update_readiso_geom_wrapup = UPDATE_ISO_OFF;
     UNLOCK_COMPRESS
   //  plotstate=DYNAMIC_PLOTS;
   //  visParticles=1;
@@ -3793,6 +3796,7 @@ void LoadIsoMenu(int value){
     }
     if(scriptoutstream==NULL||defer_file_loading==0){
       readiso(file,value,LOAD,&errorcode);
+      if(update_readiso_geom_wrapup == UPDATE_ISO_ONE_NOW)readiso_geom_wrapup();
     }
   }
   if(value==-1){
@@ -3810,11 +3814,14 @@ void LoadIsoMenu(int value){
       fprintf(scriptoutstream," %s\n",isoii->surface_label.longlabel);
     }
     if(scriptoutstream==NULL||defer_file_loading==0){
+      update_readiso_geom_wrapup = UPDATE_ISO_START_ALL;
       for(i=0;i<nisoinfo;i++){
         isoi = isoinfo + i;
         if(isoii->type!=isoi->type)continue;
         LoadIsoMenu(i);
       }
+      if(update_readiso_geom_wrapup == UPDATE_ISO_ALL_NOW)readiso_geom_wrapup();
+      update_readiso_geom_wrapup = UPDATE_ISO_OFF;
     }
     script_iso=0;
   }
