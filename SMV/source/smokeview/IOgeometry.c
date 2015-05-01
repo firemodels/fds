@@ -749,7 +749,7 @@ void update_triangles(void){
     }  
   }
 
-  // smooth normals
+  // smooth normals at mesh boundaries
 
   if(ngeominfoptrs>0){
     point **surface_points = NULL;
@@ -810,41 +810,45 @@ void update_triangles(void){
         for(iii = 0; iii<nsurface_points; iii++){
           int jjj;
           point *pointi;
-          float *xyzi;
-          float xyznorm[3];
+          float *xyzi, *normi;
+          float avgnorm[3];
 
           if(match_points[iii]>=0)continue;
           pointi = surface_points[iii];
           xyzi = pointi->xyz;
-          xyznorm[0] = pointi->point_norm[0];
-          xyznorm[1] = pointi->point_norm[1];
-          xyznorm[2] = pointi->point_norm[2];
+          normi = pointi->point_norm;
+          avgnorm[0] = normi[0];
+          avgnorm[1] = normi[1];
+          avgnorm[2] = normi[2];
           match_points[iii] = iii;
           for(jjj = iii+1; jjj<nsurface_points; jjj++){
             point *pointj;
-            float *xyzj;
+            float *xyzj, *normj;
 
             if(match_points[jjj]>=0)continue;
             pointj = surface_points[jjj];
             xyzj = pointj->xyz;
+            normj = pointj->point_norm;
 #define POINTEPS 0.001
             if(ABS(xyzi[0]-xyzj[0])<POINTEPS&&ABS(xyzi[1]-xyzj[1])<POINTEPS&&ABS(xyzi[2]-xyzj[2])<POINTEPS){
               match_points[jjj] = iii;
-              xyznorm[0] += pointj->point_norm[0];
-              xyznorm[1] += pointj->point_norm[1];
-              xyznorm[2] += pointj->point_norm[2];
+              avgnorm[0] += normj[0];
+              avgnorm[1] += normj[1];
+              avgnorm[2] += normj[2];
             }
           }
-          ReduceToUnit(xyznorm);
+          ReduceToUnit(avgnorm);
           for(jjj = iii; jjj<nsurface_points; jjj++){
-            point *pointj;
-            float *xyzj;
+            if(match_points[jjj] == match_points[iii]){
+              point *pointj;
+              float *normj;
 
-            if(match_points[jjj]!=match_points[iii])continue;
-            pointj = surface_points[jjj];
-            pointj->point_norm[0] = xyznorm[0];
-            pointj->point_norm[1] = xyznorm[1];
-            pointj->point_norm[2] = xyznorm[2];
+              pointj = surface_points[jjj];
+              normj = pointj->point_norm;
+              normj[0] = avgnorm[0];
+              normj[1] = avgnorm[1];
+              normj[2] = avgnorm[2];
+            }
           }
         }
       }

@@ -463,29 +463,46 @@ int on_mesh_boundary(float *xyz){
     jbar = meshi->jbar;
     kbar = meshi->kbar;
 
-    xplt = meshi->xplt;
-    yplt = meshi->yplt;
-    zplt = meshi->zplt;
+    xplt = meshi->xplt_orig;
+    yplt = meshi->yplt_orig;
+    zplt = meshi->zplt_orig;
 
     if(xyz[0]<xplt[0]-MESHEPS||xyz[0]>xplt[ibar]+MESHEPS)continue;
     if(xyz[1]<yplt[0]-MESHEPS||xyz[1]>yplt[jbar]+MESHEPS)continue;
     if(xyz[2]<zplt[0]-MESHEPS||xyz[2]>zplt[kbar]+MESHEPS)continue;
 
+    // pt on xmin face
+    
     if(ABS(xplt[0]-xyz[0])<=MESHEPS&&
       yplt[0]-MESHEPS<=xyz[1]&&xyz[1]<=yplt[jbar]+MESHEPS&&
       zplt[0]-MESHEPS<=xyz[2]&&xyz[2]<=zplt[kbar]+MESHEPS)return 1;
+
+    // pt on xmax face
+    
     if(ABS(xplt[ibar]-xyz[0])<=MESHEPS&&
       yplt[0]-MESHEPS<=xyz[1]&&xyz[1]<=yplt[jbar]+MESHEPS&&
       zplt[0]-MESHEPS<=xyz[2]&&xyz[2]<=zplt[kbar]+MESHEPS)return 1;
+
+    // pt on ymin face
+    
     if(ABS(yplt[0]-xyz[1])<=MESHEPS&&
       xplt[0]-MESHEPS<=xyz[0]&&xyz[0]<=xplt[ibar]+MESHEPS&&
       zplt[0]-MESHEPS<=xyz[2]&&xyz[2]<=zplt[kbar]+MESHEPS)return 1;
+
+    // pt on ymax face
+    
     if(ABS(yplt[jbar]-xyz[1])<=MESHEPS&&
       xplt[0]-MESHEPS<=xyz[0]&&xyz[0]<=xplt[ibar]+MESHEPS&&
       zplt[0]-MESHEPS<=xyz[2]&&xyz[2]<=zplt[kbar]+MESHEPS)return 1;
+
+    // pt on zmin face
+    
     if(ABS(zplt[0]-xyz[2])<=MESHEPS&&
       xplt[0]-MESHEPS<=xyz[0]&&xyz[0]<=xplt[ibar]+MESHEPS&&
       yplt[0]-MESHEPS<=xyz[1]&&xyz[1]<=yplt[jbar]+MESHEPS)return 1;
+
+    // pt on zmax face
+    
     if(ABS(zplt[kbar]-xyz[2])<=MESHEPS&&
       xplt[0]-MESHEPS<=xyz[0]&&xyz[0]<=xplt[ibar]+MESHEPS&&
       yplt[0]-MESHEPS<=xyz[1]&&xyz[1]<=yplt[jbar]+MESHEPS)return 1;
