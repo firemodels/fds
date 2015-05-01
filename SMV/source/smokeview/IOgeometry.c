@@ -661,10 +661,9 @@ void draw_geom(int flag, int geomtype){
 /* ------------------ update_triangles ------------------------ */
 
 void update_triangles(void){
-  int ii,j;
-   
+  int j, ii, ntimes;
+
   for(j=0;j<ngeominfoptrs;j++){
-    geomlistdata *geomlisti;
     geomdata *geomi;
     float *xyzptr[3];
     float *xyznorm;
@@ -674,8 +673,9 @@ void update_triangles(void){
     if(geomi->loaded==0||geomi->display==0)continue;
 
     for(ii=-1;ii<geomi->ntimes;ii++){
+      geomlistdata *geomlisti;
+
       geomlisti = geomi->geomlistinfo+ii;
-    
       for(i=0;i<geomlisti->ntriangles;i++){
         triangle *trianglei;
 
@@ -694,6 +694,7 @@ void update_triangles(void){
         pointi = geomlisti->points + i;
         pointi->ntriangles=0;
         pointi->itriangle=0;
+        pointi->on_mesh_boundary = 0;
       }
       for(i=0;i<geomlisti->ntriangles;i++){
         triangle *trianglei;
@@ -746,6 +747,110 @@ void update_triangles(void){
         ReduceToUnit(norm);
       }
     }  
+  }
+
+  // smooth normals
+
+  if(ngeominfoptrs>0){
+    point **surface_points = NULL;
+    int *match_points = NULL;
+
+    ntimes = geominfoptrs[0]->ntimes;
+    for(ii = -1; ii<ntimes; ii++){
+      int nsurface_points;
+
+  // identify and count points on mesh surfaces
+
+      nsurface_points = 0;
+      for(j = 0; j<ngeominfoptrs; j++){
+        geomlistdata *geomlisti;
+        int  i;
+
+        geomlisti = geominfoptrs[j]->geomlistinfo+ii;
+        for(i = 0; i<geomlisti->npoints; i++){
+          point *pointi;
+
+          pointi = geomlisti->points+i;
+          pointi->on_mesh_boundary = on_mesh_boundary(pointi->xyz);
+          if(pointi->on_mesh_boundary==1)nsurface_points++;
+        }
+      }
+
+  // copy surface points into an array 
+
+      if(nsurface_points>0){
+        int isurf,iii;
+
+        isurf = 0;
+        FREEMEMORY(surface_points);
+        FREEMEMORY(match_points);
+        NewMemory((void **)&surface_points, nsurface_points*sizeof(point *));
+        NewMemory((void **)&match_points, nsurface_points*sizeof(int));
+        for(j = 0; j<ngeominfoptrs; j++){
+          geomlistdata *geomlisti;
+          int  i;
+
+          geomlisti = geominfoptrs[j]->geomlistinfo+ii;
+          for(i = 0; i<geomlisti->npoints; i++){
+            point *pointi;
+
+            pointi = geomlisti->points+i;
+            if(pointi->on_mesh_boundary==1){
+              if(isurf<nsurface_points){
+                surface_points[isurf] = pointi;
+                match_points[isurf] = -1;
+                isurf++;
+              }
+            }
+          }
+        }
+
+        // average normals
+
+        for(iii = 0; iii<nsurface_points; iii++){
+          int jjj;
+          point *pointi;
+          float *xyzi;
+          float xyznorm[3];
+
+          if(match_points[iii]>=0)continue;
+          pointi = surface_points[iii];
+          xyzi = pointi->xyz;
+          xyznorm[0] = pointi->point_norm[0];
+          xyznorm[1] = pointi->point_norm[1];
+          xyznorm[2] = pointi->point_norm[2];
+          match_points[iii] = iii;
+          for(jjj = iii+1; jjj<nsurface_points; jjj++){
+            point *pointj;
+            float *xyzj;
+
+            if(match_points[jjj]>=0)continue;
+            pointj = surface_points[jjj];
+            xyzj = pointj->xyz;
+#define POINTEPS 0.001
+            if(ABS(xyzi[0]-xyzj[0])<POINTEPS&&ABS(xyzi[1]-xyzj[1])<POINTEPS&&ABS(xyzi[2]-xyzj[2])<POINTEPS){
+              match_points[jjj] = iii;
+              xyznorm[0] += pointj->point_norm[0];
+              xyznorm[1] += pointj->point_norm[1];
+              xyznorm[2] += pointj->point_norm[2];
+            }
+          }
+          ReduceToUnit(xyznorm);
+          for(jjj = iii; jjj<nsurface_points; jjj++){
+            point *pointj;
+            float *xyzj;
+
+            if(match_points[jjj]!=match_points[iii])continue;
+            pointj = surface_points[jjj];
+            pointj->point_norm[0] = xyznorm[0];
+            pointj->point_norm[1] = xyznorm[1];
+            pointj->point_norm[2] = xyznorm[2];
+          }
+        }
+      }
+    }
+    FREEMEMORY(surface_points);
+    FREEMEMORY(match_points);
   }
 
   box_bounds2[0]=DENORMALIZE_XX(0.25);

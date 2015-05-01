@@ -40,6 +40,7 @@ typedef struct {
 typedef struct {
   float xyz[3],point_norm[3],texture_xy[3];
   int itriangle,ntriangles,nused;
+  unsigned char on_mesh_boundary;
   struct _triangle **triangles;
 } point;
 

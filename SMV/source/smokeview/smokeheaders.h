@@ -408,6 +408,7 @@ EXTERNCPP void update_trainer_outline(void);
 EXTERNCPP void update_trainer_moves(void);
 EXTERNCPP mesh *getmesh(float *xyz);
 EXTERNCPP mesh *getmesh_nofail(float *xyz);
+EXTERNCPP int on_mesh_boundary(float *xyz);
 
 EXTERNCPP void Render_CB(int var);
 EXTERNCPP sv_object *get_object(char *label);
