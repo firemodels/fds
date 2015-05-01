@@ -1258,7 +1258,8 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
 #endif
   }  /* RESETBOUNDS */
 
- /* convert slice points into integers pointing to an rgb color table */
+ // convert slice data into color indices
+
   if(sd->compression_type==0){
     getslicedatabounds(sd,&qmin,&qmax);
   }
@@ -1362,66 +1363,39 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
   }
   push_slice_loadstack(slicefilenumber);
 
-    if(sd->volslice==1){
-      mesh *meshj;
+  if(sd->volslice==1){
+    mesh *meshj;
 
-      meshj = meshinfo + sd->blocknumber;
+    meshj = meshinfo + sd->blocknumber;
       
-      meshj->slice_min[0]=DENORMALIZE_X(sd->xyz_min[0]);
-      meshj->slice_min[1]=DENORMALIZE_Y(sd->xyz_min[1]);
-      meshj->slice_min[2]=DENORMALIZE_Z(sd->xyz_min[2]);
+    meshj->slice_min[0]=DENORMALIZE_X(sd->xyz_min[0]);
+    meshj->slice_min[1]=DENORMALIZE_Y(sd->xyz_min[1]);
+    meshj->slice_min[2]=DENORMALIZE_Z(sd->xyz_min[2]);
+
+    meshj->slice_max[0]=DENORMALIZE_X(sd->xyz_max[0]);
+    meshj->slice_max[1]=DENORMALIZE_Y(sd->xyz_max[1]);
+    meshj->slice_max[2]=DENORMALIZE_Z(sd->xyz_max[2]);
       
-      meshj->slice_max[0]=DENORMALIZE_X(sd->xyz_max[0]);
-      meshj->slice_max[1]=DENORMALIZE_Y(sd->xyz_max[1]);
-      meshj->slice_max[2]=DENORMALIZE_Z(sd->xyz_max[2]);
-      
-      vis_gslice_data=1;
+    vis_gslice_data=1;
 #ifdef pp_GPU
-      if(gpuactive==1){
-        init_slice3d_texture(meshj);
-      }
+    if(gpuactive==1){
+      init_slice3d_texture(meshj);
+    }
 #endif
-    }
-    else{
-      mesh *meshj;
+  }
+  else{
+    mesh *meshj;
 
-      meshj = meshinfo + sd->blocknumber;
-      meshj->slice_min[0]=1.0;
-      meshj->slice_min[1]=0.0;
-      meshj->slice_min[2]=1.0;
-      meshj->slice_max[0]=0.0;
-      meshj->slice_max[1]=1.0;
-      meshj->slice_max[2]=0.0;
-    }
-
+    meshj = meshinfo + sd->blocknumber;
+    meshj->slice_min[0]=1.0;
+    meshj->slice_min[1]=0.0;
+    meshj->slice_min[2]=1.0;
+    meshj->slice_max[0]=0.0;
+    meshj->slice_max[1]=1.0;
+    meshj->slice_max[2]=0.0;
+  }
   glutPostRedisplay();
 }
-/* ------------------ outputslicebounds ------------------------ */
-/*
-void outputslicebounds(void){
-  int i;
-  slicedata *sd;
-  databounds *db;
-
-  for(i=0;i<nslice;i++){
-    sd = sliceinfo +i;
-    PRINTF("i=%i %i %f %i %f \n",
-      i,sd->setvalmin,sd->valmin,
-        sd->setvalmax,sd->valmax);
-  }
-  PRINTF("\n");
-  for(i=0;i<nslice2;i++){
-    db = slicebounds +i;
-    PRINTF("i=%i %i %f %i %f \n",
-      i,db->setvalmin,db->valmin,
-        db->setvalmax,db->valmax);
-  }
-  PRINTF("slicefilenum=%i\n",slicefilenum);
-  PRINTF("list_slice_index=%i\n",list_slice_index);
-  PRINTF("setslicemin=%i slicemin=%f setslicemax=%i slicemax=%f\n",
-    setslicemin,slicemin,setslicemax,slicemax);
-}
-*/
 
 /* ------------------ updateslicefilenum ------------------------ */
 

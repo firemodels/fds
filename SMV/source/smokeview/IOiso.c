@@ -698,7 +698,15 @@ void readiso(const char *file, int ifile, int flag, int *errorcode){
   isodata *isoi;
 
   if(ifile>=0&&ifile<nisoinfo){
-    isoi = isoinfo + ifile;
+    mesh *meshi;
+
+    isoi = isoinfo+ifile; 
+    meshi = meshinfo+isoi->blocknumber;
+    if(flag==LOAD)PRINTF("\nloading isosurface for mesh: %s\n", meshi->label);
+    if(isoi->loaded==1){
+      if(flag==UNLOAD)PRINTF("\nunloading isosurface for mesh: %s\n", meshi->label);
+    }
+
     if(isoi->is_fed==1){
       readfed(ifile, flag, FED_ISO, errorcode);
     }

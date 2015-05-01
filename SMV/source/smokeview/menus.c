@@ -4670,7 +4670,7 @@ static int *loadsubmvslicemenu=NULL, nloadsubmvslicemenu=0;
 static int *loadsubplot3dmenu=NULL, nloadsubplot3dmenu=0;
 static int loadmultivslicemenu=0, unloadmultivslicemenu=0;
 static int unloadmultislicemenu=0, vslicemenu=0, staticslicemenu=0;
-static int evacmenu=0, particlemenu=0, particlesubmenu=0, showpatchmenu=0, zonemenu=0, isoshowmenu=0, isolevelmenu=0, smoke3dshowmenu=0;
+static int evacmenu=0, particlemenu=0, particlesubmenu=0, showpatchmenu=0, zonemenu=0, isoshowmenu=0, isoshowsubmenu=0, isolevelmenu=0, smoke3dshowmenu=0;
 static int particlepropshowmenu=0,humanpropshowmenu=0;
 static int *particlepropshowsubmenu=NULL;
 static int particlestreakshowmenu=0;
@@ -6364,7 +6364,7 @@ updatemenu=0;
       isodata *iso2;
       int ii;
 
-      CREATEMENU(isoshowmenu,IsoShowMenu);
+      CREATEMENU(isoshowsubmenu,IsoShowMenu);
       iso2=NULL;
       for(ii=0;ii<nisoinfo;ii++){
         isodata *isoi;
@@ -6373,9 +6373,7 @@ updatemenu=0;
         i = isoorderindex[ii];
         isoi = isoinfo + i;
         if(isoi->loaded==0)continue;
-        if(iso2==NULL&&isoi->type==iisotype){
-          iso2=isoi;
-        }
+        if(iso2==NULL&&isoi->type==iisotype)iso2=isoi;
         if(plotstate==DYNAMIC_PLOTS&&isoi->display==1&&isoi->type==iisotype){
           iso2=isoi;
           STRCPY(menulabel,"*");
@@ -6386,12 +6384,13 @@ updatemenu=0;
         }
         glutAddMenuEntry(menulabel,1000+i);
       }
+      CREATEMENU(isoshowmenu, IsoShowMenu);
       if(iso2!=NULL){
         char menulabel[1024];
 
-        glutAddMenuEntry("-",MENU_DUMMY);
-        STRCPY(menulabel,_("Show all"));
-        STRCPY(menulabel," ");
+        glutAddSubMenu(iso2->surface_label.longlabel, isoshowsubmenu);
+        STRCPY(menulabel, _("Show all"));
+        STRCAT(menulabel," ");
         STRCAT(menulabel,iso2->surface_label.longlabel);
         STRCAT(menulabel," ");
         STRCAT(menulabel,_("isosurfaces"));
