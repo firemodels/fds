@@ -83,7 +83,7 @@ ELSE
    ZZP  => ZZS
 ENDIF
 
-! Compute viscosity for DNS using primitive species/mixture fraction
+! Compute viscosity for DNS using primitive species
 
 !$OMP PARALLEL DO FIRSTPRIVATE(ZZ_GET) SCHEDULE(guided)
 DO K=1,KBAR
