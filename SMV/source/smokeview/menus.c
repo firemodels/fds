@@ -6401,8 +6401,8 @@ updatemenu=0;
         STRCAT(menulabel," ");
         STRCAT(menulabel,_("isosurfaces"));
         glutAddMenuEntry(menulabel,HIDEALL_ISO);
+        glutAddMenuEntry("-", MENU_DUMMY);
       }
-      glutAddMenuEntry("-",MENU_DUMMY);
       if((visAIso & 1) == 1)glutAddMenuEntry(_("*Solid"), MENU_ISOSHOW_SOLID);
       if((visAIso & 1) != 1)glutAddMenuEntry(_("Solid"), MENU_ISOSHOW_SOLID);
       if((visAIso & 2) == 2)glutAddMenuEntry(_("*Outline"), MENU_ISOSHOW_OUTLINE);
