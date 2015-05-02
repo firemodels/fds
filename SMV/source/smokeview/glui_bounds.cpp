@@ -230,7 +230,7 @@ GLUI_Panel *PANEL_time2c=NULL;
 GLUI_Panel *PANEL_outputpatchdata=NULL;
 
 GLUI_Spinner *SPINNER_iso_colors[3*MAX_ISO_COLORS];
-GLUI_Spinner *SPINNER_labels_transparency_data2 = NULL;
+GLUI_Spinner *SPINNER_iso_transparencies[MAX_ISO_COLORS];
 GLUI_Spinner *SPINNER_transparent_level=NULL;
 GLUI_Spinner *SPINNER_line_contour_num=NULL;
 GLUI_Spinner *SPINNER_line_contour_width=NULL;
@@ -898,10 +898,6 @@ extern "C" void glui_bounds_setup(int main_window){
     CHECKBOX_sort2=glui_bounds->add_checkbox_to_panel(ROLLOUT_iso,_("Sort transparent surfaces:"),&sort_iso_triangles,SORT_SURFACES,Slice_CB);
     CHECKBOX_smooth2=glui_bounds->add_checkbox_to_panel(ROLLOUT_iso,_("Smooth surfaces:"),&smoothtrinormal,SMOOTH_SURFACES,Slice_CB);
 #endif
-    SPINNER_labels_transparency_data2 = glui_bounds->add_spinner_to_panel(ROLLOUT_iso,
-        _("transparency level"),GLUI_SPINNER_FLOAT,&transparent_level,TRANSPARENTLEVEL,Slice_CB);
-    SPINNER_labels_transparency_data2->set_w(0);
-    SPINNER_labels_transparency_data2->set_float_limits(0.0,1.0,GLUI_LIMIT_CLAMP);
     if(n_iso_colors > 0){
       int ii;
 
@@ -909,16 +905,21 @@ extern "C" void glui_bounds_setup(int main_window){
       for(ii = 0; ii < n_iso_colors; ii++){
         char redlabel[10];
 
-        sprintf(redlabel, "%i r:", ii + 1);
+        sprintf(redlabel, "%i red:", ii + 1);
         PANEL_iso_colors[ii] = glui_bounds->add_panel_to_panel(ROLLOUT_iso_colors, "", false);
         SPINNER_iso_colors[3 * ii + 0] = glui_bounds->add_spinner_to_panel(PANEL_iso_colors[ii], redlabel, GLUI_SPINNER_INT, glui_iso_colors + 4 * ii + 0, ISO_COLORS, Iso_CB);
         glui_bounds->add_column_to_panel(PANEL_iso_colors[ii], false);
-        SPINNER_iso_colors[3 * ii + 1] = glui_bounds->add_spinner_to_panel(PANEL_iso_colors[ii], "g:", GLUI_SPINNER_INT, glui_iso_colors + 4 * ii + 1, ISO_COLORS, Iso_CB);
+        SPINNER_iso_colors[3 * ii + 1] = glui_bounds->add_spinner_to_panel(PANEL_iso_colors[ii], "green:", GLUI_SPINNER_INT, glui_iso_colors + 4 * ii + 1, ISO_COLORS, Iso_CB);
         glui_bounds->add_column_to_panel(PANEL_iso_colors[ii], false);
-        SPINNER_iso_colors[3 * ii + 2] = glui_bounds->add_spinner_to_panel(PANEL_iso_colors[ii], "b:", GLUI_SPINNER_INT, glui_iso_colors + 4 * ii + 2, ISO_COLORS, Iso_CB);
+        SPINNER_iso_colors[3 * ii + 2] = glui_bounds->add_spinner_to_panel(PANEL_iso_colors[ii], "blue:", GLUI_SPINNER_INT, glui_iso_colors + 4 * ii + 2, ISO_COLORS, Iso_CB);
+        glui_bounds->add_column_to_panel(PANEL_iso_colors[ii], false);
+        SPINNER_iso_transparencies[ii] = glui_bounds->add_spinner_to_panel(PANEL_iso_colors[ii], "alpha:", GLUI_SPINNER_INT, glui_iso_transparencies + ii, ISO_COLORS, Iso_CB);
       }
-      for(ii = 0; ii < 3 * n_iso_colors; ii++){
-        SPINNER_iso_colors[ii]->set_int_limits(0, 255, GLUI_LIMIT_CLAMP);
+      for(ii = 0; ii < n_iso_colors; ii++){
+        SPINNER_iso_colors[3*ii+0]->set_int_limits(0, 255, GLUI_LIMIT_CLAMP);
+        SPINNER_iso_colors[3*ii+1]->set_int_limits(0, 255, GLUI_LIMIT_CLAMP);
+        SPINNER_iso_colors[3*ii+2]->set_int_limits(0, 255, GLUI_LIMIT_CLAMP);
+        SPINNER_iso_transparencies[ii]->set_int_limits(1, 255, GLUI_LIMIT_CLAMP);
       }
     }
   }
@@ -1650,8 +1651,12 @@ extern "C" void Iso_CB(int var){
 
   switch(var){
   case ISO_COLORS:
-    for(i = 0; i < 4*n_iso_colors;i++){
-      iso_colors[i]=(float)glui_iso_colors[i]/255.0;
+    for(i = 0; i < n_iso_colors;i++){
+      iso_colors[4 * i + 0] = (float)glui_iso_colors[4 * i + 0] / 255.0;
+      iso_colors[4 * i + 1] = (float)glui_iso_colors[4 * i + 1] / 255.0;
+      iso_colors[4 * i + 2] = (float)glui_iso_colors[4 * i + 2] / 255.0;
+      iso_colors[4 * i + 3] = (float)glui_iso_colors[4 * i + 3] / 255.0;
+      iso_transparencies[i] = (float)glui_iso_transparencies[i] / 255.0;
     }
     for(i = 0; i < MAX_ISO_COLORS; i++){
       float graylevel;
@@ -2608,7 +2613,6 @@ extern "C" void Slice_CB(int var){
       }
       UpdateRGBColors(COLORBAR_INDEX_NONE);
       if(SPINNER_transparent_level!=NULL)SPINNER_transparent_level->set_float_val(transparent_level);
-      if(SPINNER_labels_transparency_data2!=NULL)SPINNER_labels_transparency_data2->set_float_val(transparent_level);
       break;
     case LINE_CONTOUR_VALUE:
       if(slice_line_contour_num<1){

@@ -1875,14 +1875,15 @@ void update_isocolors(void){
     surfdata *surfi;
 
     surfi = surfinfo + i + nsurfinfo + 1;
+    surfi->transparent_level = iso_transparencies[i];
     if(setbwdata == 1){
       surfi->color = iso_colorsbw + 4*i;
     }
     else{
       surfi->color = iso_colors + 4*i;
     }
-    surfi->transparent_level = 0.8;
     surfi->iso_level= i + 1;
   }
+  CheckMemory;
 }
 

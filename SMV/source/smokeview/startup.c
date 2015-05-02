@@ -2046,6 +2046,8 @@ void initvars(void){
   NewMemory((void **)&iso_colors, 4*MAX_ISO_COLORS*sizeof(float));
   NewMemory((void **)&iso_colorsbw, 4 * MAX_ISO_COLORS*sizeof(float));
   NewMemory((void **)&glui_iso_colors, 4 * MAX_ISO_COLORS*sizeof(int));
+  NewMemory((void **)&iso_transparencies, MAX_ISO_COLORS*sizeof(float));
+  NewMemory((void **)&glui_iso_transparencies, MAX_ISO_COLORS*sizeof(int));
 
   n_iso_colors = 3;
   iso_colors[0] = 0.96;
@@ -2082,7 +2084,10 @@ void initvars(void){
     glui_iso_colors[4*i+1] = CLAMP(255*iso_colors[4*i+1],0,255);
     glui_iso_colors[4*i+2] = CLAMP(255*iso_colors[4*i+2],0,255);
     glui_iso_colors[4*i+3] = CLAMP(255*iso_colors[4*i+3],0,255);
+    iso_transparencies[i] = transparent_level;
+    glui_iso_transparencies[i] = CLAMP(255 * iso_transparencies[i], 0, 255);
   }
+  CheckMemory;
 
   iso_transparency=0.8;
   mouse_deltax=0.0, mouse_deltay=0.0;
