@@ -2043,7 +2043,13 @@ void initvars(void){
 
   valindex=0;
 
-#define NDEFAULT_ISO_COLORS 3
+  NewMemory((void **)&iso_colors, 4*MAX_ISO_COLORS*sizeof(float));
+  NewMemory((void **)&iso_colorsbw, 4 * MAX_ISO_COLORS*sizeof(float));
+  NewMemory((void **)&glui_iso_colors, 4 * MAX_ISO_COLORS*sizeof(int));
+  NewMemory((void **)&iso_transparencies, MAX_ISO_COLORS*sizeof(float));
+  NewMemory((void **)&glui_iso_transparencies, MAX_ISO_COLORS*sizeof(int));
+
+  n_iso_colors = 3;
   iso_colors[0] = 0.96;
   iso_colors[1] = 0.00;
   iso_colors[2] = 0.96;
@@ -2056,10 +2062,10 @@ void initvars(void){
   iso_colors[9] = 0.96;
   iso_colors[10] = 0.28;
   iso_colors[11] = 1.0;
-  for(i = NDEFAULT_ISO_COLORS; i<MAX_ISO_COLORS; i++){
+  for(i=n_iso_colors;i<MAX_ISO_COLORS;i++){
     int grey;
 
-    grey = 1.0 - (float)(i - NDEFAULT_ISO_COLORS) / (float)(MAX_ISO_COLORS - NDEFAULT_ISO_COLORS-1);
+    grey=1.0-(float)(i-n_iso_colors)/(float)(MAX_ISO_COLORS-1-n_iso_colors);
     iso_colors[4*i+0]=grey;
     iso_colors[4*i+1]=grey;
     iso_colors[4*i+2]=grey;
@@ -2074,13 +2080,13 @@ void initvars(void){
     iso_colorsbw[4*i+1] = graylevel;
     iso_colorsbw[4*i+2] = graylevel;
     iso_colorsbw[4*i+3] = 1.0;
+    glui_iso_colors[4*i+0] = CLAMP(255*iso_colors[4*i+0],0,255);
+    glui_iso_colors[4*i+1] = CLAMP(255*iso_colors[4*i+1],0,255);
+    glui_iso_colors[4*i+2] = CLAMP(255*iso_colors[4*i+2],0,255);
+    glui_iso_colors[4*i+3] = CLAMP(255*iso_colors[4*i+3],0,255);
     iso_transparencies[i] = transparent_level;
+    glui_iso_transparencies[i] = CLAMP(255 * iso_transparencies[i], 0, 255);
   }
-  glui_iso_colors[0] = CLAMP(255 * iso_colors[0]+0.1, 0, 255);
-  glui_iso_colors[1] = CLAMP(255 * iso_colors[1]+0.1, 0, 255);
-  glui_iso_colors[2] = CLAMP(255 * iso_colors[2]+0.1, 0, 255);
-  glui_iso_colors[3] = CLAMP(255 * iso_colors[3]+0.1, 0, 255);
-  glui_iso_transparency = CLAMP(255 * iso_transparencies[0]+0.1, 0, 255);
   CheckMemory;
 
   iso_transparency=0.8;
