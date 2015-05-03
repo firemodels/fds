@@ -674,6 +674,8 @@ void update_triangles(void){
 
     for(ii=-1;ii<geomi->ntimes;ii++){
       geomlistdata *geomlisti;
+      int ntriangles;
+      triangle **triangles;
 
       geomlisti = geomi->geomlistinfo+ii;
       for(i=0;i<geomlisti->ntriangles;i++){
@@ -704,12 +706,30 @@ void update_triangles(void){
         trianglei->points[1]->ntriangles++;
         trianglei->points[2]->ntriangles++;
       }
-      for(i=0;i<geomlisti->npoints;i++){
+      
+      // count number of triangles
+      
+      ntriangles = 0;
+      for(i = 0; i<geomlisti->npoints; i++){
+        point *pointi;
+
+        pointi = geomlisti->points + i;
+        ntriangles += pointi->ntriangles;
+      }
+      
+      // allocate triangle pointers
+      
+      if(ntriangles>0)NewMemoryMemID((void **)&triangles, ntriangles*sizeof(triangle *), geomi->memory_id);
+      
+      // assign triangle pointers to points
+      
+      for(i = 0; i<geomlisti->npoints; i++){
         point *pointi;
 
         pointi = geomlisti->points + i;
         if(pointi->ntriangles>0){
-          NewMemoryMemID((void **)&pointi->triangles,pointi->ntriangles*sizeof(triangle *),geomi->memory_id);
+          pointi->triangles = triangles;
+          triangles += pointi->ntriangles;
         }
       }
       for(i=0;i<geomlisti->ntriangles;i++){
