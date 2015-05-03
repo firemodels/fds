@@ -2043,12 +2043,6 @@ void initvars(void){
 
   valindex=0;
 
-  NewMemory((void **)&iso_colors, 4*MAX_ISO_COLORS*sizeof(float));
-  NewMemory((void **)&iso_colorsbw, 4 * MAX_ISO_COLORS*sizeof(float));
-  NewMemory((void **)&glui_iso_colors, 4 * MAX_ISO_COLORS*sizeof(int));
-  NewMemory((void **)&iso_transparencies, MAX_ISO_COLORS*sizeof(float));
-  NewMemory((void **)&glui_iso_transparencies, MAX_ISO_COLORS*sizeof(int));
-
   n_iso_colors = 3;
   iso_colors[0] = 0.96;
   iso_colors[1] = 0.00;
