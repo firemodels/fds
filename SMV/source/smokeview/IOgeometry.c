@@ -1240,7 +1240,7 @@ void read_geom0(geomdata *geomi, int load_flag, int type, int *errorcode){
         triangles[ii].points[0]=points+ijk[3*ii]-1;
         triangles[ii].points[1]=points+ijk[3*ii+1]-1;
         triangles[ii].points[2]=points+ijk[3*ii+2]-1;
-        surfi = surfinfo+CLAMP(surf_ind[ii]+offset, nsurfinfo+1, nsurfinfo+n_iso_colors);
+        surfi = surfinfo+CLAMP(surf_ind[ii]+offset, nsurfinfo+1, nsurfinfo+MAX_ISO_COLORS);
         triangles[ii].surf=surfi;
         triangles[ii].textureinfo=NULL;
       }

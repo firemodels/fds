@@ -1871,7 +1871,7 @@ mesh *get_loaded_isomesh(void){
 void update_isocolors(void){
   int i;
 
-  for(i = 0; i < n_iso_colors; i++){
+  for(i = 0; i < MAX_ISO_COLORS; i++){
     surfdata *surfi;
 
     surfi = surfinfo + i + nsurfinfo + 1;
