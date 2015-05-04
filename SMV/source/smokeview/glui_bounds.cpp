@@ -898,11 +898,11 @@ extern "C" void glui_bounds_setup(int main_window){
     CHECKBOX_sort2=glui_bounds->add_checkbox_to_panel(ROLLOUT_iso,_("Sort transparent surfaces:"),&sort_iso_triangles,SORT_SURFACES,Slice_CB);
     CHECKBOX_smooth2=glui_bounds->add_checkbox_to_panel(ROLLOUT_iso,_("Smooth surfaces:"),&smoothtrinormal,SMOOTH_SURFACES,Slice_CB);
 #endif
-    if(n_iso_colors > 0){
+    {
       int ii;
 
       ROLLOUT_iso_colors = glui_bounds->add_rollout_to_panel(ROLLOUT_iso, "Colors", false);
-      for(ii = 0; ii < n_iso_colors; ii++){
+      for(ii = 0; ii < MAX_ISO_COLORS; ii++){
         char redlabel[10];
 
         sprintf(redlabel, "%i red:", ii + 1);
@@ -915,7 +915,7 @@ extern "C" void glui_bounds_setup(int main_window){
         glui_bounds->add_column_to_panel(PANEL_iso_colors[ii], false);
         SPINNER_iso_transparencies[ii] = glui_bounds->add_spinner_to_panel(PANEL_iso_colors[ii], "alpha:", GLUI_SPINNER_INT, glui_iso_transparencies + ii, ISO_COLORS, Iso_CB);
       }
-      for(ii = 0; ii < n_iso_colors; ii++){
+      for(ii = 0; ii < MAX_ISO_COLORS; ii++){
         SPINNER_iso_colors[3*ii+0]->set_int_limits(0, 255, GLUI_LIMIT_CLAMP);
         SPINNER_iso_colors[3*ii+1]->set_int_limits(0, 255, GLUI_LIMIT_CLAMP);
         SPINNER_iso_colors[3*ii+2]->set_int_limits(0, 255, GLUI_LIMIT_CLAMP);
@@ -1651,7 +1651,7 @@ extern "C" void Iso_CB(int var){
 
   switch(var){
   case ISO_COLORS:
-    for(i = 0; i < n_iso_colors;i++){
+    for(i = 0; i < MAX_ISO_COLORS;i++){
       iso_colors[4 * i + 0] = (float)glui_iso_colors[4 * i + 0] / 255.0;
       iso_colors[4 * i + 1] = (float)glui_iso_colors[4 * i + 1] / 255.0;
       iso_colors[4 * i + 2] = (float)glui_iso_colors[4 * i + 2] / 255.0;
@@ -2582,7 +2582,7 @@ extern "C" void Slice_CB(int var){
       break;
     case SORT_SURFACES:
       sort_embedded_geometry=sort_iso_triangles;
-      for(i=nsurfinfo;i<nsurfinfo+n_iso_colors+1;i++){
+      for(i=nsurfinfo;i<nsurfinfo+MAX_ISO_COLORS+1;i++){
         surfdata *surfi;
 
         surfi = surfinfo + i;
@@ -2605,7 +2605,7 @@ extern "C" void Slice_CB(int var){
       UpdateRGBColors(colorbar_select_index);
       break;
     case TRANSPARENTLEVEL:
-      for(i=nsurfinfo;i<nsurfinfo+n_iso_colors+1;i++){
+      for(i=nsurfinfo;i<nsurfinfo+MAX_ISO_COLORS+1;i++){
         surfdata *surfi;
 
         surfi = surfinfo + i;

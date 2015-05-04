@@ -2044,7 +2044,6 @@ void initvars(void){
   valindex=0;
 
 #define N_ISO_COLORS 10
-  n_iso_colors = 3;
   iso_colors[0] = 0.96;
   iso_colors[1] = 0.00;
   iso_colors[2] = 0.96;

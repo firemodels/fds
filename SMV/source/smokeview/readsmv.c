@@ -3251,7 +3251,7 @@ int readsmv(char *file, char *file2){
 
   FREEMEMORY(textureinfo);
   FREEMEMORY(surfinfo);
-  if(NewMemory((void **)&surfinfo,(nsurfinfo+10)*sizeof(surfdata))==0)return 2;
+  if(NewMemory((void **)&surfinfo,(nsurfinfo+MAX_ISO_COLORS+1)*sizeof(surfdata))==0)return 2;
 
   {
     matldata *matli;
@@ -7722,15 +7722,15 @@ void parsedatabase(char *file){
     if(nsurfinfo==0){
       FREEMEMORY(surfinfo);
       FREEMEMORY(textureinfo);
-      NewMemory((void **)&surfinfo,(nsurfids_shown+10)*sizeof(surfdata));
+      NewMemory((void **)&surfinfo,(nsurfids_shown+MAX_ISO_COLORS+1)*sizeof(surfdata));
       NewMemory((void **)&textureinfo,nsurfids_shown*sizeof(surfdata));
     }
     if(nsurfinfo>0){
       if(surfinfo==NULL){
-        NewMemory((void **)&surfinfo,(nsurfids_shown+nsurfinfo+10)*sizeof(surfdata));
+        NewMemory((void **)&surfinfo,(nsurfids_shown+nsurfinfo+MAX_ISO_COLORS+1)*sizeof(surfdata));
       }
       else{
-        ResizeMemory((void **)&surfinfo,(nsurfids_shown+nsurfinfo)*sizeof(surfdata));
+        ResizeMemory((void **)&surfinfo, (nsurfids_shown+nsurfinfo+MAX_ISO_COLORS+1)*sizeof(surfdata));
       }
       if(textureinfo==NULL){
         NewMemory((void **)&textureinfo,(nsurfids_shown+nsurfinfo)*sizeof(surfdata));
