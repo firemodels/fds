@@ -64,7 +64,9 @@ Q          = 0._EB
 D_REACTION = 0._EB
 Q_EXISTS   = .FALSE.
 
-IF (TRANSPORT_UNMIXED_FRACTION .AND. COMPUTE_ZETA_SOURCE_TERM) CALL ZETA_PRODUCTION
+IF (TRANSPORT_UNMIXED_FRACTION .AND. &
+    COMPUTE_ZETA_SOURCE_TERM   .AND. &
+    TRANSPORT_ZETA_SCHEME==1         ) CALL ZETA_PRODUCTION ! scheme 1: zeta production before mixing
 
 DO K=1,KBAR
    DO J=1,JBAR
@@ -115,6 +117,10 @@ DO K=1,KBAR
       ENDDO ILOOP
    ENDDO
 ENDDO
+
+IF (TRANSPORT_UNMIXED_FRACTION .AND. &
+    COMPUTE_ZETA_SOURCE_TERM   .AND. &
+    TRANSPORT_ZETA_SCHEME==2         ) CALL ZETA_PRODUCTION ! scheme 2: zeta production after mixing
 
 IF (.NOT.Q_EXISTS) RETURN
 
@@ -738,9 +744,10 @@ ZZ_B = MIN(1._EB,MAX(0._EB,ZZ_B))
 ! find burnt zone temperature
 CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_0,CPBAR_0,TMP_0)
 TMP_B = TMP_0
-DO IT=1,3
+DO IT=1,2
    CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_B,CPBAR_B,TMP_B)
    TMP_B = ( CPBAR_0*TMP_0 + (1._EB-RADIATIVE_FRACTION)*DZ_F*RN%HEAT_OF_COMBUSTION ) / CPBAR_B
+   !print *,TMP_B ! 2 iterations is sufficient
 ENDDO
 
 ! compute burnt zone density
@@ -937,7 +944,7 @@ DO K=1,KBAR
             ZETA_SOURCE_TERM(I,J,K) = 2._EB*MU(I,J,K)/SC*( DZDX**2 + DZDY**2 + DZDZ**2 ) / DENOM
          ELSE
             ! cell is pure, unmix
-            ZETA_SOURCE_TERM(I,J,K) = HUGE(1._EB)
+            ZETA_SOURCE_TERM(I,J,K) = (1._EB - ZZ(I,J,K,ZETA_INDEX))/DT
          ENDIF
 
          ZZ(I,J,K,ZETA_INDEX) = MIN( 1._EB, ZZ(I,J,K,ZETA_INDEX) + DT*ZETA_SOURCE_TERM(I,J,K) )
