@@ -31,7 +31,9 @@
 <li>usability: display show grid menu item for all case types (cases without blockages also)
 <li>fix: fix problems with terrain slice display for cases where terrain (and/or zbar0) does not start at 0.0 -
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=2419&can=1&sort=-id">Issue 2419</a>)
-<li>fix: fix FDS crashing that could occur if Smokeview use the compiler command line option, /fpscomp:general, to allow smokeview to read files being currently written to by FDS without crashing FDS (instead of using the non-standard OPEN parameter SHARED)
+<li>fix: fix FDS crashing that can occur when Smokeview reads files written to at the same time by FDS by  
+using the /fpscomp:general command line option to build Smokeview (rather than using the non-standard SHARED parameter on the OPEN statement) . - 
+(<a href="http://code.google.com/p/fds-smv/issues/detail?id=2415&can=1&sort=-id">Issue 2415</a>)
 <li>fix: fix debug display of memory block and block size info
 <li>fix: fix memory leaks in isosurface loading/unloading routines which were causing problems with isosurface display
 <li>fix: fix problem with shortcut Q used to toggle slice visibility
