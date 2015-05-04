@@ -10663,16 +10663,15 @@ int readini2(char *inifile, int localfile){
       sscanf(buffer,"%f %f %f",iso_specular,iso_specular+1,iso_specular+2);
       fgets(buffer,255,stream);
       sscanf(buffer,"%i",&n_iso_c);
-      n_iso_colors = CLAMP(n_iso_c, MIN_ISO_COLORS, MAX_ISO_COLORS);
-      for(nn = 0; nn<n_iso_colors; nn++){
+      for(nn = 0; nn<MAX_ISO_COLORS; nn++){
         float *isoi;
         int *glui_isoi;
 
         isoi = iso_colors + 4*nn;
         glui_isoi = glui_iso_colors + 4*nn;
 
-        fgets(buffer,255,stream);
         if(nn < n_iso_c){
+          fgets(buffer, 255, stream);
           sscanf(buffer, "%f %f %f", isoi, isoi + 1, isoi + 2);
         }
         isoi[3] = iso_transparency;
@@ -11595,8 +11594,8 @@ void writeini(int flag,char *filename){
   fprintf(fileout, "ISOCOLORS\n");
 	fprintf(fileout," %f %f : shininess, transparency\n",iso_shininess, iso_transparency);  
 	fprintf(fileout," %f %f %f : specular\n",iso_specular[0],iso_specular[1],iso_specular[2]);
-  fprintf(fileout," %i\n",n_iso_colors);
-  for(i=0;i<n_iso_colors;i++){
+  fprintf(fileout," %i\n",MAX_ISO_COLORS);
+  for(i=0;i<MAX_ISO_COLORS;i++){
     fprintf(fileout, " %f %f %f\n", iso_colors[4*i], iso_colors[4*i+1], iso_colors[4*i+2]);
   }
   fprintf(fileout, "SENSORCOLOR\n");

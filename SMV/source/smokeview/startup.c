@@ -2043,23 +2043,62 @@ void initvars(void){
 
   valindex=0;
 
+#define N_ISO_COLORS 10
   n_iso_colors = 3;
   iso_colors[0] = 0.96;
   iso_colors[1] = 0.00;
   iso_colors[2] = 0.96;
   iso_colors[3] = 1.00;
+
   iso_colors[4] = 0.75;
   iso_colors[5] = 0.80;
   iso_colors[6] = 0.80;
   iso_colors[7] = 1.00;
+
   iso_colors[8] = 0.00;
   iso_colors[9] = 0.96;
   iso_colors[10] = 0.28;
   iso_colors[11] = 1.0;
-  for(i=n_iso_colors;i<MAX_ISO_COLORS;i++){
+
+  iso_colors[12] = 0.00;
+  iso_colors[13] = 0.00;
+  iso_colors[14] = 1.00;
+  iso_colors[15] = 1.0;
+
+  iso_colors[16] = 0.00;
+  iso_colors[17] = 0.718750;
+  iso_colors[18] = 1.00;
+  iso_colors[19] = 1.0;
+  
+  iso_colors[20] = 0.00;
+  iso_colors[21] = 1.0;
+  iso_colors[22] = 0.5625;
+  iso_colors[23] = 1.0;
+  
+  iso_colors[24] = 0.17185;
+  iso_colors[25] = 1.0;
+  iso_colors[26] = 0.0;
+  iso_colors[27] = 1.0;
+  
+  iso_colors[28] = 0.890625;
+  iso_colors[29] = 1.0;
+  iso_colors[30] = 0.0;
+  iso_colors[31] = 1.0;
+  
+  iso_colors[32] = 1.0;
+  iso_colors[33] = 0.380952;
+  iso_colors[34] = 0.0;
+  iso_colors[35] = 1.0;
+  
+  iso_colors[36] = 1.0;
+  iso_colors[37] = 0.0;
+  iso_colors[38] = 0.0;
+  iso_colors[39] = 1.0;
+
+  for(i=N_ISO_COLORS;i<MAX_ISO_COLORS;i++){
     int grey;
 
-    grey=1.0-(float)(i-n_iso_colors)/(float)(MAX_ISO_COLORS-1-n_iso_colors);
+    grey=1.0-(float)(i-N_ISO_COLORS)/(float)(MAX_ISO_COLORS+1-N_ISO_COLORS);
     iso_colors[4*i+0]=grey;
     iso_colors[4*i+1]=grey;
     iso_colors[4*i+2]=grey;
