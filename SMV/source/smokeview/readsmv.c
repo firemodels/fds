@@ -10665,28 +10665,19 @@ int readini2(char *inifile, int localfile){
       sscanf(buffer,"%i",&n_iso_c);
       for(nn = 0; nn<MAX_ISO_COLORS; nn++){
         float *iso_color;
-        int *glui_isoi;
 
         iso_color = iso_colors + 4*nn;
-        glui_isoi = glui_iso_colors + 4*nn;
-
         if(nn < n_iso_c){
           fgets(buffer, 255, stream);
           sscanf(buffer, "%f %f %f %f", iso_color, iso_color + 1, iso_color + 2, iso_color + 3);
         }
-             iso_color[0] = CLAMP(    iso_color[0], 0.0, 1.0);
-        glui_isoi[0] = CLAMP(255*iso_color[0], 0, 255);
-        
-             iso_color[1] = CLAMP(    iso_color[1], 0.0, 1.0);
-        glui_isoi[1] = CLAMP(255*iso_color[1], 0, 255);
-        
-             iso_color[2] = CLAMP(    iso_color[2], 0.0, 1.0);
-        glui_isoi[2] = CLAMP(255*iso_color[2], 0, 255);
-        
-             iso_color[3] = CLAMP(    iso_color[3], 0.0, 1.0);
-        glui_isoi[3] = CLAMP(255*iso_color[3], 0, 255);
+        iso_color[0] = CLAMP(    iso_color[0], 0.0, 1.0);
+        iso_color[1] = CLAMP(    iso_color[1], 0.0, 1.0);
+        iso_color[2] = CLAMP(    iso_color[2], 0.0, 1.0);
+        iso_color[3] = CLAMP(    iso_color[3], 0.0, 1.0);
       }
       update_isocolors();
+      update_iso_colorlevel();
       continue;
     }
     if(match(buffer,"UNITCLASSES")==1){

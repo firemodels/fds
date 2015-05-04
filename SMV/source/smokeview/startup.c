@@ -2112,10 +2112,6 @@ void initvars(void){
     iso_colorsbw[4*i+1] = graylevel;
     iso_colorsbw[4*i+2] = graylevel;
     iso_colorsbw[4*i+3] = 1.0;
-    glui_iso_colors[4*i+0] = CLAMP(255*iso_colors[4*i+0]+0.1,0,255);
-    glui_iso_colors[4*i+1] = CLAMP(255*iso_colors[4*i+1]+0.1,0,255);
-    glui_iso_colors[4*i+2] = CLAMP(255*iso_colors[4*i+2]+0.1,0,255);
-    glui_iso_colors[4*i+3] = CLAMP(255*iso_colors[4*i+3]+0.1,0,255);
   }
   CheckMemory;
 

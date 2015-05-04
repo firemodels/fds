@@ -6,6 +6,7 @@
 #ifndef SMOKEHEADERS_H_DEFINED
 #define SMOKEHEADERS_H_DEFINED
 
+EXTERNCPP void update_iso_colorlevel(void);
 EXTERNCPP void readiso_geom_wrapup(void);
 EXTERNCPP void psystem(char *commandline);
 EXTERNCPP char *get_moviefile_path(char *moviefile_path);

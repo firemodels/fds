@@ -378,6 +378,13 @@ GLUI_StaticText *STATIC_plot3d_cmax_unit=NULL;
 procdata boundprocinfo[8], fileprocinfo[8], sliceprocinfo[3], plot3dprocinfo[2];
 int nboundprocinfo = 0, nfileprocinfo = 0, nsliceprocinfo=0, nplot3dprocinfo=0;
 
+/* ------------------ update_iso_colorlevel ------------------------ */
+
+extern "C" void update_iso_colorlevel(void){
+  Iso_CB(ISO_LEVEL);
+  Iso_CB(ISO_COLORS);
+}
+
 /* ------------------ Plot3d_Rollout_CB ------------------------ */
 
 void Plot3d_Rollout_CB(int var){
@@ -1650,10 +1657,10 @@ extern "C" void Iso_CB(int var){
     glui_iso_colors[2] = CLAMP(255*iso_color[2]+0.1, 0, 255);
     glui_iso_colors[3] = CLAMP(255*iso_color[3]+0.1, 1, 255);
 
-    SPINNER_iso_colors[0]->set_int_val(glui_iso_colors[0]);
-    SPINNER_iso_colors[1]->set_int_val(glui_iso_colors[1]);
-    SPINNER_iso_colors[2]->set_int_val(glui_iso_colors[2]);
-    SPINNER_iso_colors[3]->set_int_val(glui_iso_colors[3]);
+    if(SPINNER_iso_colors[0]!=NULL)SPINNER_iso_colors[0]->set_int_val(glui_iso_colors[0]);
+    if(SPINNER_iso_colors[1]!=NULL)SPINNER_iso_colors[1]->set_int_val(glui_iso_colors[1]);
+    if(SPINNER_iso_colors[2]!=NULL)SPINNER_iso_colors[2]->set_int_val(glui_iso_colors[2]);
+    if(SPINNER_iso_colors[3]!=NULL)SPINNER_iso_colors[3]->set_int_val(glui_iso_colors[3]);
     break;
   case ISO_COLORS:
     iso_color = iso_colors+4*(glui_iso_level-1);
