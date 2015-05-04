@@ -455,7 +455,8 @@ SVEXTERN float rgb_trans[4*MAXRGB];
 SVEXTERN float rgb_cad[MAXRGB][4];
 
 SVEXTERN float iso_transparency, iso_colors[4*MAX_ISO_COLORS], iso_colorsbw[4*MAX_ISO_COLORS];
-SVEXTERN int glui_iso_colors[4*MAX_ISO_COLORS];
+SVEXTERN int glui_iso_colors[4], SVDECL(glui_iso_level,1);
+
 SVEXTERN float SVDECL(*rgb_ini,NULL);
 SVEXTERN float rgb[MAXRGB][4];
 SVEXTERN float mouse_deltax, mouse_deltay;

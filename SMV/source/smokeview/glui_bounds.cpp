@@ -205,7 +205,7 @@ GLUI_Rollout *ROLLOUT_line_contour = NULL;
 GLUI_Rollout *ROLLOUT_vector = NULL;
 GLUI_Rollout *ROLLOUT_isosurface = NULL;
 
-GLUI_Panel *PANEL_iso_colors[MAX_ISO_COLORS];
+GLUI_Panel *PANEL_iso_color;
 GLUI_Panel *PANEL_files = NULL;
 GLUI_Panel *PANEL_bounds = NULL;
 GLUI_Panel *PANEL_zone_a=NULL, *PANEL_zone_b=NULL;
@@ -230,7 +230,8 @@ GLUI_Panel *PANEL_time2b=NULL;
 GLUI_Panel *PANEL_time2c=NULL;
 GLUI_Panel *PANEL_outputpatchdata=NULL;
 
-GLUI_Spinner *SPINNER_iso_colors[4*MAX_ISO_COLORS];
+GLUI_Spinner *SPINNER_iso_level = NULL;
+GLUI_Spinner *SPINNER_iso_colors[4];
 GLUI_Spinner *SPINNER_transparent_level=NULL;
 GLUI_Spinner *SPINNER_line_contour_num=NULL;
 GLUI_Spinner *SPINNER_line_contour_width=NULL;
@@ -898,31 +899,21 @@ extern "C" void glui_bounds_setup(int main_window){
     CHECKBOX_sort2=glui_bounds->add_checkbox_to_panel(ROLLOUT_iso,_("Sort transparent surfaces:"),&sort_iso_triangles,SORT_SURFACES,Slice_CB);
     CHECKBOX_smooth2=glui_bounds->add_checkbox_to_panel(ROLLOUT_iso,_("Smooth surfaces:"),&smoothtrinormal,SMOOTH_SURFACES,Slice_CB);
 #endif
-    {
-      int ii;
 
-      ROLLOUT_iso_colors = glui_bounds->add_rollout_to_panel(ROLLOUT_iso, "Colors", false);
-      for(ii = 0; ii < MAX_ISO_COLORS; ii++){
-        char redlabel[10];
+    PANEL_iso_color = glui_bounds->add_panel_to_panel(ROLLOUT_iso, "Colors", true);
+    SPINNER_iso_level = glui_bounds->add_spinner_to_panel(PANEL_iso_color, "level:", GLUI_SPINNER_INT, &glui_iso_level, ISO_LEVEL, Iso_CB);
+    SPINNER_iso_level->set_int_limits(1, MAX_ISO_COLORS);
+    SPINNER_iso_colors[0] = glui_bounds->add_spinner_to_panel(PANEL_iso_color,   "red:", GLUI_SPINNER_INT, glui_iso_colors + 0, ISO_COLORS, Iso_CB);
+    SPINNER_iso_colors[1] = glui_bounds->add_spinner_to_panel(PANEL_iso_color, "green:", GLUI_SPINNER_INT, glui_iso_colors + 1, ISO_COLORS, Iso_CB);
+    SPINNER_iso_colors[2] = glui_bounds->add_spinner_to_panel(PANEL_iso_color,  "blue:", GLUI_SPINNER_INT, glui_iso_colors + 2, ISO_COLORS, Iso_CB);
+    SPINNER_iso_colors[3] = glui_bounds->add_spinner_to_panel(PANEL_iso_color, "alpha:", GLUI_SPINNER_INT, glui_iso_colors + 3, ISO_COLORS, Iso_CB);
 
-        sprintf(redlabel, "%i red:", ii + 1);
-        PANEL_iso_colors[ii] = glui_bounds->add_panel_to_panel(ROLLOUT_iso_colors, "", false);
-        SPINNER_iso_colors[4 * ii + 0] = glui_bounds->add_spinner_to_panel(PANEL_iso_colors[ii], redlabel, GLUI_SPINNER_INT, glui_iso_colors + 4 * ii + 0, ISO_COLORS, Iso_CB);
-        glui_bounds->add_column_to_panel(PANEL_iso_colors[ii], false);
-        SPINNER_iso_colors[4 * ii + 1] = glui_bounds->add_spinner_to_panel(PANEL_iso_colors[ii], "green:", GLUI_SPINNER_INT, glui_iso_colors + 4 * ii + 1, ISO_COLORS, Iso_CB);
-        glui_bounds->add_column_to_panel(PANEL_iso_colors[ii], false);
-        SPINNER_iso_colors[4 * ii + 2] = glui_bounds->add_spinner_to_panel(PANEL_iso_colors[ii], "blue:", GLUI_SPINNER_INT, glui_iso_colors + 4 * ii + 2, ISO_COLORS, Iso_CB);
-        glui_bounds->add_column_to_panel(PANEL_iso_colors[ii], false);
-        SPINNER_iso_colors[4 * ii + 3] = glui_bounds->add_spinner_to_panel(PANEL_iso_colors[ii], "alpha:", GLUI_SPINNER_INT, glui_iso_colors + 4 * ii + 3, ISO_COLORS, Iso_CB);
-      }
-      for(ii = 0; ii < MAX_ISO_COLORS; ii++){
-        SPINNER_iso_colors[4*ii+0]->set_int_limits(0, 255, GLUI_LIMIT_CLAMP);
-        SPINNER_iso_colors[4*ii+1]->set_int_limits(0, 255, GLUI_LIMIT_CLAMP);
-        SPINNER_iso_colors[4*ii+2]->set_int_limits(0, 255, GLUI_LIMIT_CLAMP);
-        SPINNER_iso_colors[4*ii+3]->set_int_limits(1, 255, GLUI_LIMIT_CLAMP);
-      }
-      Iso_CB(ISO_LEVEL);
-    }
+    SPINNER_iso_colors[0]->set_int_limits(0, 255, GLUI_LIMIT_CLAMP);
+    SPINNER_iso_colors[1]->set_int_limits(0, 255, GLUI_LIMIT_CLAMP);
+    SPINNER_iso_colors[2]->set_int_limits(0, 255, GLUI_LIMIT_CLAMP);
+    SPINNER_iso_colors[3]->set_int_limits(1, 255, GLUI_LIMIT_CLAMP);
+    Iso_CB(ISO_LEVEL);
+    Iso_CB(ISO_COLORS);
   }
 
   /* Particle File Bounds  */
@@ -1649,30 +1640,28 @@ extern "C" void updateplot3dlistindex(void){
 
 extern "C" void Iso_CB(int var){
   int i;
+  float *iso_color;
 
   switch(var){
   case ISO_LEVEL:
-    for(i = 0; i<MAX_ISO_COLORS; i++){
-      float *iso_color;
+    iso_color = iso_colors+4*(glui_iso_level-1);
+    glui_iso_colors[0] = CLAMP(255*iso_color[0]+0.1, 0, 255);
+    glui_iso_colors[1] = CLAMP(255*iso_color[1]+0.1, 0, 255);
+    glui_iso_colors[2] = CLAMP(255*iso_color[2]+0.1, 0, 255);
+    glui_iso_colors[3] = CLAMP(255*iso_color[3]+0.1, 1, 255);
 
-      iso_color = iso_colors+4*i;
-      glui_iso_colors[4*i+0] = CLAMP(255*iso_color[0]+0.1, 0, 255);
-      glui_iso_colors[4*i+1] = CLAMP(255*iso_color[1]+0.1, 0, 255);
-      glui_iso_colors[4*i+2] = CLAMP(255*iso_color[2]+0.1, 0, 255);
-      glui_iso_colors[4*i+3] = CLAMP(255*iso_color[3]+0.1, 1, 255);
-      SPINNER_iso_colors[4 * i + 0]->set_int_val(glui_iso_colors[4*i+0]);
-      SPINNER_iso_colors[4 * i + 1]->set_int_val(glui_iso_colors[4*i+1]);
-      SPINNER_iso_colors[4 * i + 2]->set_int_val(glui_iso_colors[4*i+2]);
-      SPINNER_iso_colors[4 * i + 3]->set_int_val(glui_iso_colors[4*i+3]);
-    }
+    SPINNER_iso_colors[0]->set_int_val(glui_iso_colors[0]);
+    SPINNER_iso_colors[1]->set_int_val(glui_iso_colors[1]);
+    SPINNER_iso_colors[2]->set_int_val(glui_iso_colors[2]);
+    SPINNER_iso_colors[3]->set_int_val(glui_iso_colors[3]);
     break;
   case ISO_COLORS:
-    for(i = 0; i < MAX_ISO_COLORS;i++){
-      iso_colors[4 * i + 0] = (float)glui_iso_colors[4 * i + 0] / 255.0;
-      iso_colors[4 * i + 1] = (float)glui_iso_colors[4 * i + 1] / 255.0;
-      iso_colors[4 * i + 2] = (float)glui_iso_colors[4 * i + 2] / 255.0;
-      iso_colors[4 * i + 3] = (float)glui_iso_colors[4 * i + 3]/255.0;
-    }
+    iso_color = iso_colors+4*(glui_iso_level-1);
+    iso_color[0] = ((float)glui_iso_colors[0]+0.1)/255.0;
+    iso_color[1] = ((float)glui_iso_colors[1]+0.1)/255.0;
+    iso_color[2] = ((float)glui_iso_colors[2]+0.1)/255.0;
+    iso_color[3] = ((float)glui_iso_colors[3]+0.1)/255.0;
+
     for(i = 0; i < MAX_ISO_COLORS; i++){
       float graylevel;
 
