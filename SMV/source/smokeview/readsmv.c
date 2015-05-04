@@ -10664,32 +10664,28 @@ int readini2(char *inifile, int localfile){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i",&n_iso_c);
       for(nn = 0; nn<MAX_ISO_COLORS; nn++){
-        float *isoi;
+        float *iso_color;
         int *glui_isoi;
 
-        isoi = iso_colors + 4*nn;
+        iso_color = iso_colors + 4*nn;
         glui_isoi = glui_iso_colors + 4*nn;
 
         if(nn < n_iso_c){
           fgets(buffer, 255, stream);
-          sscanf(buffer, "%f %f %f", isoi, isoi + 1, isoi + 2);
+          sscanf(buffer, "%f %f %f %f", iso_color, iso_color + 1, iso_color + 2, iso_color + 3);
         }
-        isoi[3] = iso_transparency;
+             iso_color[0] = CLAMP(    iso_color[0], 0.0, 1.0);
+        glui_isoi[0] = CLAMP(255*iso_color[0], 0, 255);
         
-             isoi[0] = CLAMP(    isoi[0], 0.0, 1.0);
-        glui_isoi[0] = CLAMP(255*isoi[0], 0, 255);
+             iso_color[1] = CLAMP(    iso_color[1], 0.0, 1.0);
+        glui_isoi[1] = CLAMP(255*iso_color[1], 0, 255);
         
-             isoi[1] = CLAMP(    isoi[1], 0.0, 1.0);
-        glui_isoi[1] = CLAMP(255*isoi[1], 0, 255);
+             iso_color[2] = CLAMP(    iso_color[2], 0.0, 1.0);
+        glui_isoi[2] = CLAMP(255*iso_color[2], 0, 255);
         
-             isoi[2] = CLAMP(    isoi[2], 0.0, 1.0);
-        glui_isoi[2] = CLAMP(255*isoi[2], 0, 255);
-        
-             isoi[3] = CLAMP(    isoi[3], 0.0, 1.0);
-        glui_isoi[3] = CLAMP(255*isoi[3], 0, 255);
+             iso_color[3] = CLAMP(    iso_color[3], 0.0, 1.0);
+        glui_isoi[3] = CLAMP(255*iso_color[3], 0, 255);
       }
-      iso_colors[3]=1.0;
-      glui_iso_colors[3]=255;
       update_isocolors();
       continue;
     }
@@ -11596,7 +11592,7 @@ void writeini(int flag,char *filename){
 	fprintf(fileout," %f %f %f : specular\n",iso_specular[0],iso_specular[1],iso_specular[2]);
   fprintf(fileout," %i\n",MAX_ISO_COLORS);
   for(i=0;i<MAX_ISO_COLORS;i++){
-    fprintf(fileout, " %f %f %f\n", iso_colors[4*i], iso_colors[4*i+1], iso_colors[4*i+2]);
+    fprintf(fileout, " %f %f %f %f\n", iso_colors[4*i], iso_colors[4*i+1], iso_colors[4*i+2], iso_colors[4*i+3]);
   }
   fprintf(fileout, "SENSORCOLOR\n");
   fprintf(fileout, " %f %f %f\n", sensorcolor[0], sensorcolor[1], sensorcolor[2]);

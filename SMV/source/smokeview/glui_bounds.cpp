@@ -67,6 +67,7 @@ GLUI_Rollout *ROLLOUT_zone_bound=NULL;
 #define ISO_OUTLINE 2
 #define ISO_POINTS 3
 #define ISO_COLORS 4
+#define ISO_LEVEL 5
 #define SETVALMIN 1
 #define SETVALMAX 2
 #define VALMIN 3
@@ -229,8 +230,7 @@ GLUI_Panel *PANEL_time2b=NULL;
 GLUI_Panel *PANEL_time2c=NULL;
 GLUI_Panel *PANEL_outputpatchdata=NULL;
 
-GLUI_Spinner *SPINNER_iso_colors[3*MAX_ISO_COLORS];
-GLUI_Spinner *SPINNER_iso_transparencies[MAX_ISO_COLORS];
+GLUI_Spinner *SPINNER_iso_colors[4*MAX_ISO_COLORS];
 GLUI_Spinner *SPINNER_transparent_level=NULL;
 GLUI_Spinner *SPINNER_line_contour_num=NULL;
 GLUI_Spinner *SPINNER_line_contour_width=NULL;
@@ -907,20 +907,21 @@ extern "C" void glui_bounds_setup(int main_window){
 
         sprintf(redlabel, "%i red:", ii + 1);
         PANEL_iso_colors[ii] = glui_bounds->add_panel_to_panel(ROLLOUT_iso_colors, "", false);
-        SPINNER_iso_colors[3 * ii + 0] = glui_bounds->add_spinner_to_panel(PANEL_iso_colors[ii], redlabel, GLUI_SPINNER_INT, glui_iso_colors + 4 * ii + 0, ISO_COLORS, Iso_CB);
+        SPINNER_iso_colors[4 * ii + 0] = glui_bounds->add_spinner_to_panel(PANEL_iso_colors[ii], redlabel, GLUI_SPINNER_INT, glui_iso_colors + 4 * ii + 0, ISO_COLORS, Iso_CB);
         glui_bounds->add_column_to_panel(PANEL_iso_colors[ii], false);
-        SPINNER_iso_colors[3 * ii + 1] = glui_bounds->add_spinner_to_panel(PANEL_iso_colors[ii], "green:", GLUI_SPINNER_INT, glui_iso_colors + 4 * ii + 1, ISO_COLORS, Iso_CB);
+        SPINNER_iso_colors[4 * ii + 1] = glui_bounds->add_spinner_to_panel(PANEL_iso_colors[ii], "green:", GLUI_SPINNER_INT, glui_iso_colors + 4 * ii + 1, ISO_COLORS, Iso_CB);
         glui_bounds->add_column_to_panel(PANEL_iso_colors[ii], false);
-        SPINNER_iso_colors[3 * ii + 2] = glui_bounds->add_spinner_to_panel(PANEL_iso_colors[ii], "blue:", GLUI_SPINNER_INT, glui_iso_colors + 4 * ii + 2, ISO_COLORS, Iso_CB);
+        SPINNER_iso_colors[4 * ii + 2] = glui_bounds->add_spinner_to_panel(PANEL_iso_colors[ii], "blue:", GLUI_SPINNER_INT, glui_iso_colors + 4 * ii + 2, ISO_COLORS, Iso_CB);
         glui_bounds->add_column_to_panel(PANEL_iso_colors[ii], false);
-        SPINNER_iso_transparencies[ii] = glui_bounds->add_spinner_to_panel(PANEL_iso_colors[ii], "alpha:", GLUI_SPINNER_INT, glui_iso_transparencies + ii, ISO_COLORS, Iso_CB);
+        SPINNER_iso_colors[4 * ii + 3] = glui_bounds->add_spinner_to_panel(PANEL_iso_colors[ii], "alpha:", GLUI_SPINNER_INT, glui_iso_colors + 4 * ii + 3, ISO_COLORS, Iso_CB);
       }
       for(ii = 0; ii < MAX_ISO_COLORS; ii++){
-        SPINNER_iso_colors[3*ii+0]->set_int_limits(0, 255, GLUI_LIMIT_CLAMP);
-        SPINNER_iso_colors[3*ii+1]->set_int_limits(0, 255, GLUI_LIMIT_CLAMP);
-        SPINNER_iso_colors[3*ii+2]->set_int_limits(0, 255, GLUI_LIMIT_CLAMP);
-        SPINNER_iso_transparencies[ii]->set_int_limits(1, 255, GLUI_LIMIT_CLAMP);
+        SPINNER_iso_colors[4*ii+0]->set_int_limits(0, 255, GLUI_LIMIT_CLAMP);
+        SPINNER_iso_colors[4*ii+1]->set_int_limits(0, 255, GLUI_LIMIT_CLAMP);
+        SPINNER_iso_colors[4*ii+2]->set_int_limits(0, 255, GLUI_LIMIT_CLAMP);
+        SPINNER_iso_colors[4*ii+3]->set_int_limits(1, 255, GLUI_LIMIT_CLAMP);
       }
+      Iso_CB(ISO_LEVEL);
     }
   }
 
@@ -1650,13 +1651,27 @@ extern "C" void Iso_CB(int var){
   int i;
 
   switch(var){
+  case ISO_LEVEL:
+    for(i = 0; i<MAX_ISO_COLORS; i++){
+      float *iso_color;
+
+      iso_color = iso_colors+4*i;
+      glui_iso_colors[4*i+0] = CLAMP(255*iso_color[0]+0.1, 0, 255);
+      glui_iso_colors[4*i+1] = CLAMP(255*iso_color[1]+0.1, 0, 255);
+      glui_iso_colors[4*i+2] = CLAMP(255*iso_color[2]+0.1, 0, 255);
+      glui_iso_colors[4*i+3] = CLAMP(255*iso_color[3]+0.1, 1, 255);
+      SPINNER_iso_colors[4 * i + 0]->set_int_val(glui_iso_colors[4*i+0]);
+      SPINNER_iso_colors[4 * i + 1]->set_int_val(glui_iso_colors[4*i+1]);
+      SPINNER_iso_colors[4 * i + 2]->set_int_val(glui_iso_colors[4*i+2]);
+      SPINNER_iso_colors[4 * i + 3]->set_int_val(glui_iso_colors[4*i+3]);
+    }
+    break;
   case ISO_COLORS:
     for(i = 0; i < MAX_ISO_COLORS;i++){
       iso_colors[4 * i + 0] = (float)glui_iso_colors[4 * i + 0] / 255.0;
       iso_colors[4 * i + 1] = (float)glui_iso_colors[4 * i + 1] / 255.0;
       iso_colors[4 * i + 2] = (float)glui_iso_colors[4 * i + 2] / 255.0;
-      iso_colors[4 * i + 3] = (float)glui_iso_colors[4 * i + 3] / 255.0;
-      iso_transparencies[i] = (float)glui_iso_transparencies[i] / 255.0;
+      iso_colors[4 * i + 3] = (float)glui_iso_colors[4 * i + 3]/255.0;
     }
     for(i = 0; i < MAX_ISO_COLORS; i++){
       float graylevel;
@@ -1665,7 +1680,7 @@ extern "C" void Iso_CB(int var){
       iso_colorsbw[4 * i + 0] = graylevel;
       iso_colorsbw[4 * i + 1] = graylevel;
       iso_colorsbw[4 * i + 2] = graylevel;
-      iso_colorsbw[4 * i + 3] = 1.0;
+      iso_colorsbw[4 * i + 3] = iso_colors[4 * i + 3];
     }
     update_isocolors();
     break;
