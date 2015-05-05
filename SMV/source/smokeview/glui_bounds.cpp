@@ -190,7 +190,9 @@ GLUI_Button *BUTTON_ISO = NULL;
 #ifdef pp_MEMDEBUG
 GLUI_Rollout *ROLLOUT_memcheck=NULL;
 #endif
-GLUI_Rollout *ROLLOUT_script=NULL;
+GLUI_Rollout *ROLLOUT_iso_settings;
+GLUI_Rollout *ROLLOUT_iso_color;
+GLUI_Rollout *ROLLOUT_script = NULL;
 GLUI_Rollout *ROLLOUT_config = NULL;
 GLUI_Rollout *ROLLOUT_boundary = NULL;
 GLUI_Rollout *ROLLOUT_autoload=NULL;
@@ -208,7 +210,8 @@ GLUI_Rollout *ROLLOUT_line_contour = NULL;
 GLUI_Rollout *ROLLOUT_vector = NULL;
 GLUI_Rollout *ROLLOUT_isosurface = NULL;
 
-GLUI_Panel *PANEL_iso_color;
+GLUI_Panel *PANEL_iso_eachlevel;
+GLUI_Panel *PANEL_iso_alllevels;
 GLUI_Panel *PANEL_files = NULL;
 GLUI_Panel *PANEL_bounds = NULL;
 GLUI_Panel *PANEL_zone_a=NULL, *PANEL_zone_b=NULL;
@@ -363,6 +366,9 @@ GLUI_StaticText *STATIC_plot3d_cmax_unit=NULL;
 #define PLOT3D_ROLLOUT 6
 #define SLICE_ROLLOUT 7
 
+#define ISO_ROLLOUT_SETTINGS 0
+#define ISO_ROLLOUT_COLOR 1
+
 #define SLICE_AVERAGE_ROLLOUT 0
 #define SLICE_VECTOR_ROLLOUT 1
 #define LINE_CONTOUR_ROLLOUT 2
@@ -379,8 +385,8 @@ GLUI_StaticText *STATIC_plot3d_cmax_unit=NULL;
 #define TIME_ROLLOUT 6
 #define MEMCHECK_ROLLOUT 7
 
-procdata boundprocinfo[8], fileprocinfo[8], sliceprocinfo[3], plot3dprocinfo[2];
-int nboundprocinfo = 0, nfileprocinfo = 0, nsliceprocinfo=0, nplot3dprocinfo=0;
+procdata boundprocinfo[8], fileprocinfo[8], sliceprocinfo[3], plot3dprocinfo[2], isoprocinfo[2];
+int nboundprocinfo = 0, nfileprocinfo = 0, nsliceprocinfo=0, nplot3dprocinfo=0, nisoprocinfo=0;
 
 /* ------------------ update_iso_controls ------------------------ */
 
@@ -414,6 +420,12 @@ void Plot3d_Rollout_CB(int var){
 
 void Slice_Rollout_CB(int var){
   toggle_rollout(sliceprocinfo, nsliceprocinfo, var);
+}
+
+/* ------------------ Iso_Rollout_CB ------------------------ */
+
+void Iso_Rollout_CB(int var){
+  toggle_rollout(isoprocinfo, nisoprocinfo, var);
 }
 
 /* ------------------ Bound_Rollout_CB ------------------------ */
@@ -909,34 +921,42 @@ extern "C" void glui_bounds_setup(int main_window){
     ROLLOUT_iso = glui_bounds->add_rollout_to_panel(ROLLOUT_filebounds,"Isosurface",false,ISO_ROLLOUT,Bound_Rollout_CB);
     ADDPROCINFO(boundprocinfo, nboundprocinfo, ROLLOUT_iso, ISO_ROLLOUT);
     
-    SPINNER_isopointsize=glui_bounds->add_spinner_to_panel(ROLLOUT_iso,_("Point size"),GLUI_SPINNER_FLOAT,&isopointsize);
+    ROLLOUT_iso_settings = glui_bounds->add_rollout_to_panel(ROLLOUT_iso, "Settings", true,ISO_ROLLOUT_SETTINGS, Iso_Rollout_CB);
+    ADDPROCINFO(isoprocinfo, nisoprocinfo, ROLLOUT_iso_settings, ISO_ROLLOUT_SETTINGS);
+
+    SPINNER_isopointsize = glui_bounds->add_spinner_to_panel(ROLLOUT_iso_settings, _("Point size"), GLUI_SPINNER_FLOAT, &isopointsize);
     SPINNER_isopointsize->set_float_limits(1.0,10.0);
 
-    SPINNER_isolinewidth=glui_bounds->add_spinner_to_panel(ROLLOUT_iso,_("Line width"),GLUI_SPINNER_FLOAT,&isolinewidth);
+    SPINNER_isolinewidth=glui_bounds->add_spinner_to_panel(ROLLOUT_iso_settings,_("Line width"),GLUI_SPINNER_FLOAT,&isolinewidth);
     SPINNER_isolinewidth->set_float_limits(1.0,10.0);
 
     visAIso=showtrisurface*1+showtrioutline*2+showtripoints*4;
-    CHECKBOX_showtrisurface=glui_bounds->add_checkbox_to_panel(ROLLOUT_iso,_("Solid"),&showtrisurface,ISO_SURFACE,Iso_CB);
-    CHECKBOX_showtrioutline=glui_bounds->add_checkbox_to_panel(ROLLOUT_iso,_("Outline"),&showtrioutline,ISO_OUTLINE,Iso_CB);
-    CHECKBOX_showtripoints=glui_bounds->add_checkbox_to_panel(ROLLOUT_iso,_("Points"),&showtripoints,ISO_POINTS,Iso_CB);
+    CHECKBOX_showtrisurface=glui_bounds->add_checkbox_to_panel(ROLLOUT_iso_settings,_("Solid"),&showtrisurface,ISO_SURFACE,Iso_CB);
+    CHECKBOX_showtrioutline=glui_bounds->add_checkbox_to_panel(ROLLOUT_iso_settings,_("Outline"),&showtrioutline,ISO_OUTLINE,Iso_CB);
+    CHECKBOX_showtripoints=glui_bounds->add_checkbox_to_panel(ROLLOUT_iso_settings,_("Points"),&showtripoints,ISO_POINTS,Iso_CB);
 
 #ifdef pp_BETA 
-    CHECKBOX_sort2=glui_bounds->add_checkbox_to_panel(ROLLOUT_iso,_("Sort transparent surfaces:"),&sort_iso_triangles,SORT_SURFACES,Slice_CB);
+    CHECKBOX_sort2=glui_bounds->add_checkbox_to_panel(ROLLOUT_iso_settings,_("Sort transparent surfaces:"),&sort_iso_triangles,SORT_SURFACES,Slice_CB);
 #endif
-    CHECKBOX_smooth2 = glui_bounds->add_checkbox_to_panel(ROLLOUT_iso, _("Smooth isosurfaces"), &smoothtrinormal, SMOOTH_SURFACES, Slice_CB);
+    CHECKBOX_smooth2 = glui_bounds->add_checkbox_to_panel(ROLLOUT_iso_settings, _("Smooth isosurfaces"), &smoothtrinormal, SMOOTH_SURFACES, Slice_CB);
 
-    PANEL_iso_color = glui_bounds->add_panel_to_panel(ROLLOUT_iso, "Color", true);
-    CHECKBOX_transparentflag2=glui_bounds->add_checkbox_to_panel(PANEL_iso_color,_("Use transparency/alpha:"),&use_transparency_data,DATA_transparent,Slice_CB);
-    SPINNER_iso_transparency = glui_bounds->add_spinner_to_panel(PANEL_iso_color, "alpha", GLUI_SPINNER_INT, &glui_iso_transparency, ISO_TRANSPARENCY, Iso_CB);
-    BUTTON_updatebound=glui_bounds->add_button_to_panel(PANEL_iso_color,_("Set alpha all levels"),GLOBAL_ALPHA,Iso_CB);
-    glui_bounds->add_separator_to_panel(PANEL_iso_color);
+    ROLLOUT_iso_color = glui_bounds->add_rollout_to_panel(ROLLOUT_iso, "Color/transparency", false, ISO_ROLLOUT_COLOR, Iso_Rollout_CB);
+    ADDPROCINFO(isoprocinfo, nisoprocinfo, ROLLOUT_iso_color, ISO_ROLLOUT_COLOR);
 
-    SPINNER_iso_level = glui_bounds->add_spinner_to_panel(PANEL_iso_color, "level:", GLUI_SPINNER_INT, &glui_iso_level, ISO_LEVEL, Iso_CB);
+    CHECKBOX_transparentflag2=glui_bounds->add_checkbox_to_panel(ROLLOUT_iso_color,_("Use transparency"),&use_transparency_data,DATA_transparent,Slice_CB);
+
+    PANEL_iso_alllevels = glui_bounds->add_panel_to_panel(ROLLOUT_iso_color, "All levels", true);
+
+    SPINNER_iso_transparency = glui_bounds->add_spinner_to_panel(PANEL_iso_alllevels, "alpha", GLUI_SPINNER_INT, &glui_iso_transparency, ISO_TRANSPARENCY, Iso_CB);
+    BUTTON_updatebound = glui_bounds->add_button_to_panel(PANEL_iso_alllevels, _("Apply"), GLOBAL_ALPHA, Iso_CB);
+
+    PANEL_iso_eachlevel = glui_bounds->add_panel_to_panel(ROLLOUT_iso_color, "Each level", true);
+    SPINNER_iso_level = glui_bounds->add_spinner_to_panel(PANEL_iso_eachlevel, "level:", GLUI_SPINNER_INT, &glui_iso_level, ISO_LEVEL, Iso_CB);
     SPINNER_iso_level->set_int_limits(1, MAX_ISO_COLORS);
-    SPINNER_iso_colors[0] = glui_bounds->add_spinner_to_panel(PANEL_iso_color,   "red:", GLUI_SPINNER_INT, glui_iso_colors + 0, ISO_COLORS, Iso_CB);
-    SPINNER_iso_colors[1] = glui_bounds->add_spinner_to_panel(PANEL_iso_color, "green:", GLUI_SPINNER_INT, glui_iso_colors + 1, ISO_COLORS, Iso_CB);
-    SPINNER_iso_colors[2] = glui_bounds->add_spinner_to_panel(PANEL_iso_color,  "blue:", GLUI_SPINNER_INT, glui_iso_colors + 2, ISO_COLORS, Iso_CB);
-    SPINNER_iso_colors[3] = glui_bounds->add_spinner_to_panel(PANEL_iso_color, "alpha:", GLUI_SPINNER_INT, glui_iso_colors + 3, ISO_COLORS, Iso_CB);
+    SPINNER_iso_colors[0] = glui_bounds->add_spinner_to_panel(PANEL_iso_eachlevel, "red:", GLUI_SPINNER_INT, glui_iso_colors+0, ISO_COLORS, Iso_CB);
+    SPINNER_iso_colors[1] = glui_bounds->add_spinner_to_panel(PANEL_iso_eachlevel, "green:", GLUI_SPINNER_INT, glui_iso_colors+1, ISO_COLORS, Iso_CB);
+    SPINNER_iso_colors[2] = glui_bounds->add_spinner_to_panel(PANEL_iso_eachlevel, "blue:", GLUI_SPINNER_INT, glui_iso_colors+2, ISO_COLORS, Iso_CB);
+    SPINNER_iso_colors[3] = glui_bounds->add_spinner_to_panel(PANEL_iso_eachlevel, "alpha:", GLUI_SPINNER_INT, glui_iso_colors+3, ISO_COLORS, Iso_CB);
 
     SPINNER_iso_colors[0]->set_int_limits(0, 255, GLUI_LIMIT_CLAMP);
     SPINNER_iso_colors[1]->set_int_limits(0, 255, GLUI_LIMIT_CLAMP);
