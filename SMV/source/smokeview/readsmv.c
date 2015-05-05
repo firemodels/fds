@@ -11274,6 +11274,23 @@ void writeini_local(FILE *fileout){
 
   fprintf(fileout, "AVATAREVAC\n");
   fprintf(fileout, " %i\n", iavatar_evac);
+  {
+    int *v;
+    float *b1, *b2, *b3;
+
+    fprintf(fileout, "CUBETETRATEST\n");
+    v = tetrabox_vis;
+    fprintf(fileout, " %i %i %f %f\n", show_geomtest, show_tetratest_labels, tetra_line_thickness, tetra_point_size);
+    fprintf(fileout, " %i %i %i %i %i\n", v[0], v[1], v[2], v[3], v[4]);
+    fprintf(fileout, " %i %i %i %i %i\n", v[5], v[6], v[7], v[8], v[9]);
+    b1 = box_bounds2;
+    b2 = tetra_vertices;
+    b3 = box_translate;
+    fprintf(fileout, " %f %f %f %f %f %f\n", b1[0], b1[1], b1[2], b1[3], b1[4], b1[5]);
+    fprintf(fileout, " %f %f %f %f %f %f\n", b2[0], b2[1], b2[2], b2[3], b2[4], b2[5]);
+    fprintf(fileout, " %f %f %f %f %f %f\n", b2[6], b2[7], b2[8], b2[9], b2[10], b2[11]);
+    fprintf(fileout, " %f %f %f\n", b3[0], b3[1], b3[2]);
+  }
   fprintf(fileout, "DEVICEVECTORDIMENSIONS\n");
   fprintf(fileout, "%f %f %f %f\n", vector_baseheight, vector_basediameter, vector_headheight, vector_headdiameter);
   fprintf(fileout, "DEVICEBOUNDS\n");
@@ -11491,6 +11508,149 @@ void writeini_local(FILE *fileout){
   fprintf(fileout, " %i %f %i %f\n", clipinfo.clip_xmin, clipinfo.xmin, clipinfo.clip_xmax, clipinfo.xmax);
   fprintf(fileout, " %i %f %i %f\n", clipinfo.clip_ymin, clipinfo.ymin, clipinfo.clip_ymax, clipinfo.ymax);
   fprintf(fileout, " %i %f %i %f\n", clipinfo.clip_zmin, clipinfo.zmin, clipinfo.clip_zmax, clipinfo.zmax);
+
+  fprintf(fileout, "\n *** TIME/DATA BOUNDS ***\n");
+  fprintf(fileout, "  (0/1 min max skip (1=set, 0=unset)\n\n");
+
+  for(i = 0; i < npatch2; i++){
+    int ii;
+    patchdata *patchi;
+
+    ii = patchlabellist_index[i];
+    patchi = patchinfo + ii;
+    fprintf(fileout, "C_BOUNDARY\n");
+    fprintf(fileout, " %i %f %i %f %s\n",
+      patchi->setchopmin, patchi->chopmin,
+      patchi->setchopmax, patchi->chopmax,
+      patchi->label.shortlabel
+      );
+  }
+  if(niso_bounds > 0){
+    for(i = 0; i < niso_bounds; i++){
+      fprintf(fileout, "C_ISO\n");
+      fprintf(fileout, " %i %f %i %f %s\n",
+        isobounds[i].setchopmin, isobounds[i].chopmin,
+        isobounds[i].setchopmax, isobounds[i].chopmax,
+        isobounds[i].label->shortlabel
+        );
+    }
+  }
+  fprintf(fileout, "C_PARTICLES\n");
+  fprintf(fileout, " %i %f %i %f\n", setpartchopmin, partchopmin, setpartchopmax, partchopmax);
+  for(i = 0; i < npart5prop; i++){
+    part5prop *propi;
+
+    propi = part5propinfo + i;
+    fprintf(fileout, "C_PARTICLES\n");
+    fprintf(fileout, " %i %f %i %f %s\n", propi->setchopmin, propi->chopmin, propi->setchopmax, propi->chopmax, propi->label->shortlabel);
+  }
+  {
+    int n3d;
+
+    n3d = 5;
+    if(n3d<numplot3dvars)n3d = numplot3dvars;
+    if(n3d>mxplot3dvars)n3d = mxplot3dvars;
+    fprintf(fileout, "C_PLOT3D\n");
+    n3d = 5;
+    if(n3d<numplot3dvars)n3d = numplot3dvars;
+    if(n3d>mxplot3dvars)n3d = mxplot3dvars;
+    fprintf(fileout, " %i\n", n3d);
+    for(i = 0; i<n3d; i++){
+      fprintf(fileout, " %i %i %f %i %f\n", i + 1, setp3chopmin[i], p3chopmin[i], setp3chopmax[i], p3chopmax[i]);
+    }
+  }
+  if(nslice2 > 0){
+    for(i = 0; i < nslice2; i++){
+      fprintf(fileout, "C_SLICE\n");
+      fprintf(fileout, " %i %f %i %f %s\n",
+        slicebounds[i].setchopmin, slicebounds[i].chopmin,
+        slicebounds[i].setchopmax, slicebounds[i].chopmax,
+        slicebounds[i].label->shortlabel
+        );
+    }
+  }
+  fprintf(fileout, "CACHE_BOUNDARYDATA\n");
+  fprintf(fileout, " %i \n", cache_boundarydata);
+  fprintf(fileout, "CACHE_QDATA\n");
+  fprintf(fileout, " %i\n", cache_qdata);
+  fprintf(fileout, "PATCHDATAOUT\n");
+  fprintf(fileout, " %i %f %f %f %f %f %f %f %f\n", output_patchdata,
+    patchout_tmin, patchout_tmax,
+    patchout_xmin, patchout_xmax,
+    patchout_ymin, patchout_ymax,
+    patchout_zmin, patchout_zmax
+    );
+  fprintf(fileout, "PERCENTILELEVEL\n");
+  fprintf(fileout, " %f\n", percentile_level);
+  fprintf(fileout, "TIMEOFFSET\n");
+  fprintf(fileout, " %f\n", timeoffset);
+  fprintf(fileout, "TLOAD\n");
+  fprintf(fileout, " %i %f %i %f %i %i\n", use_tload_begin, tload_begin, use_tload_end, tload_end, use_tload_skip, tload_skip);
+  for(i = 0; i < npatchinfo; i++){
+    patchdata *patchi;
+
+    patchi = patchinfo + i;
+    if(patchi->firstshort == 1){
+      fprintf(fileout, "V_BOUNDARY\n");
+      fprintf(fileout, " %i %f %i %f %s\n",
+        patchi->setvalmin, patchi->valmin,
+        patchi->setvalmax, patchi->valmax,
+        patchi->label.shortlabel
+        );
+    }
+  }
+  if(niso_bounds > 0){
+    for(i = 0; i < niso_bounds; i++){
+      fprintf(fileout, "V_ISO\n");
+      fprintf(fileout, " %i %f %i %f %s\n",
+        isobounds[i].setvalmin, isobounds[i].valmin,
+        isobounds[i].setvalmax, isobounds[i].valmax,
+        isobounds[i].label->shortlabel
+        );
+    }
+  }
+  fprintf(fileout, "V_PARTICLES\n");
+  fprintf(fileout, " %i %f %i %f\n", setpartmin, partmin, setpartmax, partmax);
+  if(npart5prop > 0){
+    for(i = 0; i < npart5prop; i++){
+      part5prop *propi;
+
+      propi = part5propinfo + i;
+      fprintf(fileout, "V5_PARTICLES\n");
+      fprintf(fileout, " %i %f %i %f %s\n",
+        propi->setvalmin, propi->valmin, propi->setvalmax, propi->valmax, propi->label->shortlabel);
+    }
+  }
+  {
+    int n3d;
+
+    n3d = 5;
+    if(n3d<numplot3dvars)n3d = numplot3dvars;
+    if(n3d>mxplot3dvars)n3d = mxplot3dvars;
+    fprintf(fileout, "V_PLOT3D\n");
+    fprintf(fileout, " %i\n", n3d);
+    for(i = 0; i < n3d; i++){
+      fprintf(fileout, " %i %i %f %i %f\n", i + 1, setp3min[i], p3min[i], setp3max[i], p3max[i]);
+    }
+  }
+  if(nslice2 > 0){
+    for(i = 0; i < nslice2; i++){
+      fprintf(fileout, "V_SLICE\n");
+      fprintf(fileout, " %i %f %i %f %s : %f %f %i\n",
+        slicebounds[i].setvalmin, slicebounds[i].valmin,
+        slicebounds[i].setvalmax, slicebounds[i].valmax,
+        slicebounds[i].label->shortlabel
+        , slicebounds[i].line_contour_min, slicebounds[i].line_contour_max, slicebounds[i].line_contour_num
+        );
+    }
+  }
+  fprintf(fileout, "V_TARGET\n");
+  fprintf(fileout, " %i %f %i %f\n", settargetmin, targetmin, settargetmax, targetmax);
+  if(nzoneinfo > 0){
+    fprintf(fileout, "V_ZONE\n");
+    fprintf(fileout, " %i %f %i %f\n", setzonemin, zoneusermin, setzonemax, zoneusermax);
+  }
+
 }
 
   /* ------------------ writeini ------------------------ */
@@ -11666,148 +11826,6 @@ void writeini(int flag,char *filename){
     fprintf(fileout," %i\n",screenWidth);
     fprintf(fileout,"WINDOWHEIGHT\n");
     fprintf(fileout," %i\n",screenHeight);
-  }
-
-  fprintf(fileout,"\n *** TIME/DATA BOUNDS ***\n");
-  fprintf(fileout,  "  (0/1 min max skip (1=set, 0=unset)\n\n");
-  
-  for(i = 0; i < npatch2; i++){
-    int ii;
-    patchdata *patchi;
-
-    ii = patchlabellist_index[i];
-    patchi = patchinfo + ii;
-    fprintf(fileout, "C_BOUNDARY\n");
-    fprintf(fileout, " %i %f %i %f %s\n",
-      patchi->setchopmin, patchi->chopmin,
-      patchi->setchopmax, patchi->chopmax,
-      patchi->label.shortlabel
-      );
-  }
-  if(niso_bounds > 0){
-    for(i = 0; i < niso_bounds; i++){
-      fprintf(fileout, "C_ISO\n");
-      fprintf(fileout, " %i %f %i %f %s\n",
-        isobounds[i].setchopmin, isobounds[i].chopmin,
-        isobounds[i].setchopmax, isobounds[i].chopmax,
-        isobounds[i].label->shortlabel
-        );
-    }
-  }
-  fprintf(fileout, "C_PARTICLES\n");
-  fprintf(fileout, " %i %f %i %f\n", setpartchopmin, partchopmin, setpartchopmax, partchopmax);
-  for(i = 0; i < npart5prop; i++){
-    part5prop *propi;
-
-    propi = part5propinfo + i;
-    fprintf(fileout, "C_PARTICLES\n");
-    fprintf(fileout, " %i %f %i %f %s\n", propi->setchopmin, propi->chopmin, propi->setchopmax, propi->chopmax, propi->label->shortlabel);
-  }
-  {
-    int n3d;
-
-    n3d = 5;
-    if(n3d<numplot3dvars)n3d = numplot3dvars;
-    if(n3d>mxplot3dvars)n3d = mxplot3dvars;
-    fprintf(fileout, "C_PLOT3D\n");
-    n3d = 5;
-    if(n3d<numplot3dvars)n3d = numplot3dvars;
-    if(n3d>mxplot3dvars)n3d = mxplot3dvars;
-    fprintf(fileout, " %i\n", n3d);
-    for(i = 0; i<n3d; i++){
-      fprintf(fileout, " %i %i %f %i %f\n", i + 1, setp3chopmin[i], p3chopmin[i], setp3chopmax[i], p3chopmax[i]);
-    }
-  }
-  if(nslice2 > 0){
-    for(i = 0; i < nslice2; i++){
-      fprintf(fileout, "C_SLICE\n");
-      fprintf(fileout, " %i %f %i %f %s\n",
-        slicebounds[i].setchopmin, slicebounds[i].chopmin,
-        slicebounds[i].setchopmax, slicebounds[i].chopmax,
-        slicebounds[i].label->shortlabel
-        );
-    }
-  }
-  fprintf(fileout, "CACHE_BOUNDARYDATA\n");
-  fprintf(fileout, " %i \n", cache_boundarydata);
-  fprintf(fileout, "CACHE_QDATA\n");
-  fprintf(fileout, " %i\n", cache_qdata);
-  fprintf(fileout, "PATCHDATAOUT\n");
-  fprintf(fileout, " %i %f %f %f %f %f %f %f %f\n", output_patchdata,
-    patchout_tmin, patchout_tmax,
-    patchout_xmin, patchout_xmax,
-    patchout_ymin, patchout_ymax,
-    patchout_zmin, patchout_zmax
-    );
-  fprintf(fileout, "PERCENTILELEVEL\n");
-  fprintf(fileout, " %f\n", percentile_level);
-  fprintf(fileout, "TIMEOFFSET\n");
-  fprintf(fileout, " %f\n", timeoffset);
-  fprintf(fileout, "TLOAD\n");
-  fprintf(fileout, " %i %f %i %f %i %i\n", use_tload_begin, tload_begin, use_tload_end, tload_end, use_tload_skip, tload_skip);
-  for(i = 0; i < npatchinfo; i++){
-    patchdata *patchi;
-
-    patchi = patchinfo + i;
-    if(patchi->firstshort == 1){
-      fprintf(fileout, "V_BOUNDARY\n");
-      fprintf(fileout, " %i %f %i %f %s\n",
-        patchi->setvalmin, patchi->valmin,
-        patchi->setvalmax, patchi->valmax,
-        patchi->label.shortlabel
-        );
-    }
-  }
-  if(niso_bounds > 0){
-    for(i = 0; i < niso_bounds; i++){
-      fprintf(fileout, "V_ISO\n");
-      fprintf(fileout, " %i %f %i %f %s\n",
-        isobounds[i].setvalmin, isobounds[i].valmin,
-        isobounds[i].setvalmax, isobounds[i].valmax,
-        isobounds[i].label->shortlabel
-        );
-    }
-  }
-  fprintf(fileout, "V_PARTICLES\n");
-  fprintf(fileout, " %i %f %i %f\n", setpartmin, partmin, setpartmax, partmax);
-  if(npart5prop > 0){
-    for(i = 0; i < npart5prop; i++){
-      part5prop *propi;
-
-      propi = part5propinfo + i;
-      fprintf(fileout, "V5_PARTICLES\n");
-      fprintf(fileout, " %i %f %i %f %s\n",
-        propi->setvalmin, propi->valmin, propi->setvalmax, propi->valmax, propi->label->shortlabel);
-    }
-  }
-  {
-    int n3d;
-
-    n3d = 5;
-    if(n3d<numplot3dvars)n3d = numplot3dvars;
-    if(n3d>mxplot3dvars)n3d = mxplot3dvars;
-    fprintf(fileout, "V_PLOT3D\n");
-    fprintf(fileout, " %i\n", n3d);
-    for(i = 0; i < n3d; i++){
-      fprintf(fileout, " %i %i %f %i %f\n", i + 1, setp3min[i], p3min[i], setp3max[i], p3max[i]);
-    }
-  }
-  if(nslice2 > 0){
-    for(i = 0; i < nslice2; i++){
-      fprintf(fileout, "V_SLICE\n");
-      fprintf(fileout, " %i %f %i %f %s : %f %f %i\n",
-        slicebounds[i].setvalmin, slicebounds[i].valmin,
-        slicebounds[i].setvalmax, slicebounds[i].valmax,
-        slicebounds[i].label->shortlabel
-        , slicebounds[i].line_contour_min, slicebounds[i].line_contour_max, slicebounds[i].line_contour_num
-        );
-    }
-  }
-  fprintf(fileout, "V_TARGET\n");
-  fprintf(fileout, " %i %f %i %f\n", settargetmin, targetmin, settargetmax, targetmax);
-  if(nzoneinfo>0){
-    fprintf(fileout, "V_ZONE\n");
-    fprintf(fileout, " %i %f %i %f\n", setzonemin, zoneusermin, setzonemax, zoneusermax);
   }
 
   fprintf(fileout, "\n *** DATA LOADING ***\n\n");
@@ -12053,23 +12071,6 @@ void writeini(int flag,char *filename){
 
   fprintf(fileout, "CELLCENTERTEXT\n");
   fprintf(fileout, " %i\n", cell_center_text);
-  {
-    int *v;
-    float *b1, *b2, *b3;
-
-    fprintf(fileout, "CUBETETRATEST\n");
-    v = tetrabox_vis;
-    fprintf(fileout, " %i %i %f %f\n", show_geomtest, show_tetratest_labels, tetra_line_thickness, tetra_point_size);
-    fprintf(fileout, " %i %i %i %i %i\n", v[0], v[1], v[2], v[3], v[4]);
-    fprintf(fileout, " %i %i %i %i %i\n", v[5], v[6], v[7], v[8], v[9]);
-    b1 = box_bounds2;
-    b2 = tetra_vertices;
-    b3 = box_translate;
-    fprintf(fileout, " %f %f %f %f %f %f\n", b1[0], b1[1], b1[2], b1[3], b1[4], b1[5]);
-    fprintf(fileout, " %f %f %f %f %f %f\n", b2[0], b2[1], b2[2], b2[3], b2[4], b2[5]);
-    fprintf(fileout, " %f %f %f %f %f %f\n", b2[6], b2[7], b2[8], b2[9], b2[10], b2[11]);
-    fprintf(fileout, " %f %f %f\n", b3[0], b3[1], b3[2]);
-  }
   if(fds_filein != NULL&&strlen(fds_filein) > 0){
     fprintf(fileout, "INPUT_FILE\n");
     fprintf(fileout, " %s\n", fds_filein);
@@ -12083,8 +12084,6 @@ void writeini(int flag,char *filename){
       fprintf(fileout, " %s\n", label);
     }
   }
-  fprintf(fileout, "PIXELSKIP\n");
-  fprintf(fileout, " %i\n", pixel_skip);
   fprintf(fileout, "PIXELSKIP\n");
   fprintf(fileout, " %i\n", pixel_skip);
   fprintf(fileout, "RENDERCLIP\n");

@@ -68,6 +68,8 @@ GLUI_Rollout *ROLLOUT_zone_bound=NULL;
 #define ISO_POINTS 3
 #define ISO_COLORS 4
 #define ISO_LEVEL 5
+#define ISO_TRANSPARENCY 6
+#define GLOBAL_ALPHA 7
 #define SETVALMIN 1
 #define SETVALMAX 2
 #define VALMIN 3
@@ -161,7 +163,8 @@ GLUI_Rollout *ROLLOUT_zone_bound=NULL;
 
 GLUI *glui_bounds=NULL;
 
-GLUI_Button *BUTTON_updatebound=NULL;
+GLUI_Button *BUTTON_globalalpha = NULL;
+GLUI_Button *BUTTON_updatebound = NULL;
 GLUI_Button *BUTTON_reloadbound=NULL;
 GLUI_Button *BUTTON_compress=NULL;
 GLUI_Button *BUTTON_step=NULL;
@@ -232,7 +235,8 @@ GLUI_Panel *PANEL_outputpatchdata=NULL;
 
 GLUI_Spinner *SPINNER_iso_level = NULL;
 GLUI_Spinner *SPINNER_iso_colors[4];
-GLUI_Spinner *SPINNER_transparent_level=NULL;
+GLUI_Spinner *SPINNER_iso_transparency;
+GLUI_Spinner *SPINNER_transparent_level = NULL;
 GLUI_Spinner *SPINNER_line_contour_num=NULL;
 GLUI_Spinner *SPINNER_line_contour_width=NULL;
 GLUI_Spinner *SPINNER_line_contour_min=NULL;
@@ -377,6 +381,21 @@ GLUI_StaticText *STATIC_plot3d_cmax_unit=NULL;
 
 procdata boundprocinfo[8], fileprocinfo[8], sliceprocinfo[3], plot3dprocinfo[2];
 int nboundprocinfo = 0, nfileprocinfo = 0, nsliceprocinfo=0, nplot3dprocinfo=0;
+
+/* ------------------ update_iso_controls ------------------------ */
+
+void update_iso_controls(void){
+  if(use_transparency_data==1){
+    if(SPINNER_iso_colors[3] != NULL)SPINNER_iso_colors[3]->enable();
+    if(SPINNER_iso_transparency != NULL)SPINNER_iso_transparency->enable();
+    if(BUTTON_updatebound != NULL)BUTTON_updatebound->enable();
+  }
+  else{
+    if(SPINNER_iso_colors[3] != NULL)SPINNER_iso_colors[3]->disable();
+    if(SPINNER_iso_transparency != NULL)SPINNER_iso_transparency->disable();
+    if(BUTTON_updatebound != NULL)BUTTON_updatebound->disable();
+  }
+}
 
 /* ------------------ update_iso_colorlevel ------------------------ */
 
@@ -901,13 +920,17 @@ extern "C" void glui_bounds_setup(int main_window){
     CHECKBOX_showtrioutline=glui_bounds->add_checkbox_to_panel(ROLLOUT_iso,_("Outline"),&showtrioutline,ISO_OUTLINE,Iso_CB);
     CHECKBOX_showtripoints=glui_bounds->add_checkbox_to_panel(ROLLOUT_iso,_("Points"),&showtripoints,ISO_POINTS,Iso_CB);
 
-    CHECKBOX_transparentflag2=glui_bounds->add_checkbox_to_panel(ROLLOUT_iso,_("Use transparency:"),&use_transparency_data,DATA_transparent,Slice_CB);
 #ifdef pp_BETA 
     CHECKBOX_sort2=glui_bounds->add_checkbox_to_panel(ROLLOUT_iso,_("Sort transparent surfaces:"),&sort_iso_triangles,SORT_SURFACES,Slice_CB);
-    CHECKBOX_smooth2=glui_bounds->add_checkbox_to_panel(ROLLOUT_iso,_("Smooth surfaces:"),&smoothtrinormal,SMOOTH_SURFACES,Slice_CB);
 #endif
+    CHECKBOX_smooth2 = glui_bounds->add_checkbox_to_panel(ROLLOUT_iso, _("Smooth isosurfaces"), &smoothtrinormal, SMOOTH_SURFACES, Slice_CB);
 
-    PANEL_iso_color = glui_bounds->add_panel_to_panel(ROLLOUT_iso, "Colors", true);
+    PANEL_iso_color = glui_bounds->add_panel_to_panel(ROLLOUT_iso, "Color", true);
+    CHECKBOX_transparentflag2=glui_bounds->add_checkbox_to_panel(PANEL_iso_color,_("Use transparency/alpha:"),&use_transparency_data,DATA_transparent,Slice_CB);
+    SPINNER_iso_transparency = glui_bounds->add_spinner_to_panel(PANEL_iso_color, "alpha", GLUI_SPINNER_INT, &glui_iso_transparency, ISO_TRANSPARENCY, Iso_CB);
+    BUTTON_updatebound=glui_bounds->add_button_to_panel(PANEL_iso_color,_("Set alpha all levels"),GLOBAL_ALPHA,Iso_CB);
+    glui_bounds->add_separator_to_panel(PANEL_iso_color);
+
     SPINNER_iso_level = glui_bounds->add_spinner_to_panel(PANEL_iso_color, "level:", GLUI_SPINNER_INT, &glui_iso_level, ISO_LEVEL, Iso_CB);
     SPINNER_iso_level->set_int_limits(1, MAX_ISO_COLORS);
     SPINNER_iso_colors[0] = glui_bounds->add_spinner_to_panel(PANEL_iso_color,   "red:", GLUI_SPINNER_INT, glui_iso_colors + 0, ISO_COLORS, Iso_CB);
@@ -1661,6 +1684,15 @@ extern "C" void Iso_CB(int var){
     if(SPINNER_iso_colors[1]!=NULL)SPINNER_iso_colors[1]->set_int_val(glui_iso_colors[1]);
     if(SPINNER_iso_colors[2]!=NULL)SPINNER_iso_colors[2]->set_int_val(glui_iso_colors[2]);
     if(SPINNER_iso_colors[3]!=NULL)SPINNER_iso_colors[3]->set_int_val(glui_iso_colors[3]);
+    break;
+  case GLOBAL_ALPHA:
+    for(i = 0; i < MAX_ISO_COLORS; i++){
+      iso_colors[4 * i + 3] = iso_transparency;
+    }
+    if(SPINNER_iso_colors[3]!=NULL)SPINNER_iso_colors[3]->set_int_val(glui_iso_transparency);
+    break;
+  case ISO_TRANSPARENCY:
+    iso_transparency = ((float)glui_iso_transparency + 0.1) / 255.0;
     break;
   case ISO_COLORS:
     iso_color = iso_colors+4*(glui_iso_level-1);
@@ -2474,7 +2506,9 @@ extern "C" void Slice_CB(int var){
   updatemenu=1;
   if(var==DATA_transparent){
     if(CHECKBOX_transparentflag2!=NULL)CHECKBOX_transparentflag2->set_int_val(use_transparency_data);
+    update_transparency();
     updatechopcolors();
+    update_iso_controls();
     return;
   }
 
