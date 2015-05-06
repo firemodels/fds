@@ -10654,6 +10654,47 @@ int readini2(char *inifile, int localfile){
       camera_ini->defined=1;
       continue;
     }
+    if(match(buffer, "COLORTABLE")==1){
+      int nctableinfo;
+      colortabledata *ctableinfo = NULL;
+      
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i", &nctableinfo);
+      nctableinfo = MAX(nctableinfo, 0);
+      if(nctableinfo>0){
+        NewMemory((void **)&ctableinfo, nctableinfo*sizeof(colortabledata));
+        for(i = 0; i<nctableinfo; i++){
+          colortabledata *rgbi,*rgbdi;
+          char *labelptr,*percenptr,label[256];
+          int  colori[4];
+
+
+          rgbi = ctableinfo+i;
+          fgets(buffer, 255, stream);
+          percenptr = strchr(buffer, '%');
+          if(percenptr!=NULL){
+            labelptr = trim_front(percenptr+1);
+            trim(labelptr);
+            strcpy(rgbi->label, labelptr);
+            percenptr[0] = 0;
+          }
+          else{
+            sprintf(label, "Color %i", i+1);
+            strcpy(rgbi->label, label);
+          }
+          colori[3] = 255;
+          sscanf(buffer, "%i %i %i %i", colori, colori+1, colori+2, colori+3);
+          rgbi->color[0] = CLAMP(colori[0], 0, 255);
+          rgbi->color[1] = CLAMP(colori[1], 0, 255);
+          rgbi->color[2] = CLAMP(colori[2], 0, 255);
+          rgbi->color[3] = CLAMP(colori[3], 0, 255);
+        }
+        UpdateColorTable(ctableinfo,nctableinfo);
+        FREEMEMORY(ctableinfo);
+      }
+      continue;
+    }
+
     if(match(buffer,"ISOCOLORS")==1){
       int nn,n_iso_c=0;
 
@@ -11744,6 +11785,21 @@ void writeini(int flag,char *filename){
   fprintf(fileout," %i\n",MAX_ISO_COLORS);
   for(i=0;i<MAX_ISO_COLORS;i++){
     fprintf(fileout, " %f %f %f %f\n", iso_colors[4*i], iso_colors[4*i+1], iso_colors[4*i+2], iso_colors[4*i+3]);
+  }
+  if(ncolortableinfo>0){
+    char percen[2];
+
+    strcpy(percen,"%");
+    fprintf(fileout, "COLORTABLE\n");
+    fprintf(fileout, " %i \n", ncolortableinfo);
+
+    for(i = 0; i<ncolortableinfo; i++){
+      colortabledata *rgbi;
+
+      rgbi = colortableinfo+i;
+      fprintf(fileout, " %i %i %i %i %s %s\n",
+        rgbi->color[0], rgbi->color[1], rgbi->color[2], rgbi->color[3], percen, rgbi->label);
+    }
   }
   fprintf(fileout, "SENSORCOLOR\n");
   fprintf(fileout, " %f %f %f\n", sensorcolor[0], sensorcolor[1], sensorcolor[2]);

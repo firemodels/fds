@@ -6,6 +6,9 @@
 #ifndef SMOKEHEADERS_H_DEFINED
 #define SMOKEHEADERS_H_DEFINED
 
+EXTERNCPP void UpdateColorTableList(int ncolortableinfo_old);
+EXTERNCPP void UpdateColorTable(colortabledata *ctableinfo, int nctableinfo);
+EXTERNCPP colortabledata *get_colortable(char *label);
 EXTERNCPP void update_iso_colorlevel(void);
 EXTERNCPP void readiso_geom_wrapup(void);
 EXTERNCPP void psystem(char *commandline);

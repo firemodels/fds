@@ -70,6 +70,7 @@ GLUI_Rollout *ROLLOUT_zone_bound=NULL;
 #define ISO_LEVEL 5
 #define ISO_TRANSPARENCY 6
 #define GLOBAL_ALPHA 7
+#define COLORTABLE_LIST 8
 #define SETVALMIN 1
 #define SETVALMAX 2
 #define VALMIN 3
@@ -186,6 +187,8 @@ GLUI_Button *BUTTON_PLOT3D = NULL;
 GLUI_Button *BUTTON_3DSMOKE = NULL;
 GLUI_Button *BUTTON_BOUNDARY = NULL;
 GLUI_Button *BUTTON_ISO = NULL;
+
+GLUI_Listbox *LIST_colortable = NULL;
 
 #ifdef pp_MEMDEBUG
 GLUI_Rollout *ROLLOUT_memcheck=NULL;
@@ -604,6 +607,28 @@ extern "C" void PART_CB_INIT(void){
   PART_CB(FILETYPEINDEX);
 }
 
+/* ------------------ UpdateColorTableList ------------------------ */
+
+extern "C" void UpdateColorTableList(int ncolortableinfo_old){
+  int i;
+
+  if(LIST_colortable==NULL)return;
+  for(i = -1; i<ncolortableinfo_old; i++){
+    LIST_colortable->delete_item(i);
+  }
+  for(i = -1; i<ncolortableinfo; i++){
+    if(i==-1){
+      LIST_colortable->add_item(i, "Manual");
+    }
+    else{
+      colortabledata *cti;
+
+      cti = colortableinfo+i;
+      LIST_colortable->add_item(i, cti->label);
+    }
+  }
+}
+
 /* ------------------ glui_bounds_setup ------------------------ */
 
 extern "C" void glui_bounds_setup(int main_window){  
@@ -918,32 +943,32 @@ extern "C" void glui_bounds_setup(int main_window){
   /*  Iso File Load Bounds   */
 
   if(nisoinfo>0){
-    ROLLOUT_iso = glui_bounds->add_rollout_to_panel(ROLLOUT_filebounds,"Isosurface",false,ISO_ROLLOUT,Bound_Rollout_CB);
+    ROLLOUT_iso = glui_bounds->add_rollout_to_panel(ROLLOUT_filebounds, "Isosurface", false, ISO_ROLLOUT, Bound_Rollout_CB);
     ADDPROCINFO(boundprocinfo, nboundprocinfo, ROLLOUT_iso, ISO_ROLLOUT);
-    
-    ROLLOUT_iso_settings = glui_bounds->add_rollout_to_panel(ROLLOUT_iso, "Settings", true,ISO_ROLLOUT_SETTINGS, Iso_Rollout_CB);
+
+    ROLLOUT_iso_settings = glui_bounds->add_rollout_to_panel(ROLLOUT_iso, "Settings", true, ISO_ROLLOUT_SETTINGS, Iso_Rollout_CB);
     ADDPROCINFO(isoprocinfo, nisoprocinfo, ROLLOUT_iso_settings, ISO_ROLLOUT_SETTINGS);
 
     SPINNER_isopointsize = glui_bounds->add_spinner_to_panel(ROLLOUT_iso_settings, _("Point size"), GLUI_SPINNER_FLOAT, &isopointsize);
-    SPINNER_isopointsize->set_float_limits(1.0,10.0);
+    SPINNER_isopointsize->set_float_limits(1.0, 10.0);
 
-    SPINNER_isolinewidth=glui_bounds->add_spinner_to_panel(ROLLOUT_iso_settings,_("Line width"),GLUI_SPINNER_FLOAT,&isolinewidth);
-    SPINNER_isolinewidth->set_float_limits(1.0,10.0);
+    SPINNER_isolinewidth = glui_bounds->add_spinner_to_panel(ROLLOUT_iso_settings, _("Line width"), GLUI_SPINNER_FLOAT, &isolinewidth);
+    SPINNER_isolinewidth->set_float_limits(1.0, 10.0);
 
-    visAIso=showtrisurface*1+showtrioutline*2+showtripoints*4;
-    CHECKBOX_showtrisurface=glui_bounds->add_checkbox_to_panel(ROLLOUT_iso_settings,_("Solid"),&showtrisurface,ISO_SURFACE,Iso_CB);
-    CHECKBOX_showtrioutline=glui_bounds->add_checkbox_to_panel(ROLLOUT_iso_settings,_("Outline"),&showtrioutline,ISO_OUTLINE,Iso_CB);
-    CHECKBOX_showtripoints=glui_bounds->add_checkbox_to_panel(ROLLOUT_iso_settings,_("Points"),&showtripoints,ISO_POINTS,Iso_CB);
+    visAIso = showtrisurface*1+showtrioutline*2+showtripoints*4;
+    CHECKBOX_showtrisurface = glui_bounds->add_checkbox_to_panel(ROLLOUT_iso_settings, _("Solid"), &showtrisurface, ISO_SURFACE, Iso_CB);
+    CHECKBOX_showtrioutline = glui_bounds->add_checkbox_to_panel(ROLLOUT_iso_settings, _("Outline"), &showtrioutline, ISO_OUTLINE, Iso_CB);
+    CHECKBOX_showtripoints = glui_bounds->add_checkbox_to_panel(ROLLOUT_iso_settings, _("Points"), &showtripoints, ISO_POINTS, Iso_CB);
 
 #ifdef pp_BETA 
-    CHECKBOX_sort2=glui_bounds->add_checkbox_to_panel(ROLLOUT_iso_settings,_("Sort transparent surfaces:"),&sort_iso_triangles,SORT_SURFACES,Slice_CB);
+    CHECKBOX_sort2 = glui_bounds->add_checkbox_to_panel(ROLLOUT_iso_settings, _("Sort transparent surfaces:"), &sort_iso_triangles, SORT_SURFACES, Slice_CB);
 #endif
     CHECKBOX_smooth2 = glui_bounds->add_checkbox_to_panel(ROLLOUT_iso_settings, _("Smooth isosurfaces"), &smoothtrinormal, SMOOTH_SURFACES, Slice_CB);
 
     ROLLOUT_iso_color = glui_bounds->add_rollout_to_panel(ROLLOUT_iso, "Color/transparency", false, ISO_ROLLOUT_COLOR, Iso_Rollout_CB);
     ADDPROCINFO(isoprocinfo, nisoprocinfo, ROLLOUT_iso_color, ISO_ROLLOUT_COLOR);
 
-    CHECKBOX_transparentflag2=glui_bounds->add_checkbox_to_panel(ROLLOUT_iso_color,_("Use transparency"),&use_transparency_data,DATA_transparent,Slice_CB);
+    CHECKBOX_transparentflag2 = glui_bounds->add_checkbox_to_panel(ROLLOUT_iso_color, _("Use transparency"), &use_transparency_data, DATA_transparent, Slice_CB);
 
     PANEL_iso_alllevels = glui_bounds->add_panel_to_panel(ROLLOUT_iso_color, "All levels", true);
 
@@ -957,6 +982,9 @@ extern "C" void glui_bounds_setup(int main_window){
     SPINNER_iso_colors[1] = glui_bounds->add_spinner_to_panel(PANEL_iso_eachlevel, "green:", GLUI_SPINNER_INT, glui_iso_colors+1, ISO_COLORS, Iso_CB);
     SPINNER_iso_colors[2] = glui_bounds->add_spinner_to_panel(PANEL_iso_eachlevel, "blue:", GLUI_SPINNER_INT, glui_iso_colors+2, ISO_COLORS, Iso_CB);
     SPINNER_iso_colors[3] = glui_bounds->add_spinner_to_panel(PANEL_iso_eachlevel, "alpha:", GLUI_SPINNER_INT, glui_iso_colors+3, ISO_COLORS, Iso_CB);
+
+    LIST_colortable = glui_bounds->add_listbox_to_panel(PANEL_iso_eachlevel, _("Color:"), &i_colortable_list, COLORTABLE_LIST, Iso_CB);
+    UpdateColorTableList(-1);
 
     SPINNER_iso_colors[0]->set_int_limits(0, 255, GLUI_LIMIT_CLAMP);
     SPINNER_iso_colors[1]->set_int_limits(0, 255, GLUI_LIMIT_CLAMP);
@@ -1686,6 +1714,36 @@ extern "C" void updateplot3dlistindex(void){
   updateglui();
 }
 
+/* ------------------ get_colortable_index ------------------------ */
+
+int get_colortable_index(int *color){
+  int i;
+
+  if(colortableinfo==NULL)return -1;
+  for(i=0;i<ncolortableinfo;i++){
+    colortabledata *cti;
+
+    cti = colortableinfo + i;
+    if(color[0]==cti->color[0]&&color[1]==cti->color[1]&&color[2]==cti->color[2])return i;
+  }
+  return -1;
+}
+
+/* ------------------ get_colortable ------------------------ */
+
+colortabledata *get_colortable(char *label){
+  int i;
+
+  if(label==NULL||strlen(label)==0)return NULL;
+  for(i=0;i<ncolortableinfo;i++){
+    colortabledata *cti;
+
+    cti = colortableinfo + i;
+    if(strcmp(label,cti->label)==0)return cti;
+  }
+  return NULL;
+}
+
 /* ------------------ Iso_CB ------------------------ */
 
 extern "C" void Iso_CB(int var){
@@ -1693,6 +1751,23 @@ extern "C" void Iso_CB(int var){
   float *iso_color;
 
   switch(var){
+  case COLORTABLE_LIST:
+    if(i_colortable_list>=0){
+      colortabledata *cti;
+
+      cti = colortableinfo+i_colortable_list;
+      glui_iso_colors[0] = cti->color[0];
+      glui_iso_colors[1] = cti->color[1];
+      glui_iso_colors[2] = cti->color[2];
+      glui_iso_colors[3] = cti->color[3];
+      Iso_CB(ISO_COLORS);
+      if(SPINNER_iso_colors[0]!=NULL)SPINNER_iso_colors[0]->set_int_val(glui_iso_colors[0]);
+      if(SPINNER_iso_colors[1]!=NULL)SPINNER_iso_colors[1]->set_int_val(glui_iso_colors[1]);
+      if(SPINNER_iso_colors[2]!=NULL)SPINNER_iso_colors[2]->set_int_val(glui_iso_colors[2]);
+      if(SPINNER_iso_colors[3]!=NULL)SPINNER_iso_colors[3]->set_int_val(glui_iso_colors[3]);
+    }
+    break;
+
   case ISO_LEVEL:
     iso_color = iso_colors+4*(glui_iso_level-1);
     glui_iso_colors[0] = CLAMP(255*iso_color[0]+0.1, 0, 255);
@@ -1710,6 +1785,7 @@ extern "C" void Iso_CB(int var){
       iso_colors[4 * i + 3] = iso_transparency;
     }
     if(SPINNER_iso_colors[3]!=NULL)SPINNER_iso_colors[3]->set_int_val(glui_iso_transparency);
+    Iso_CB(ISO_COLORS);
     break;
   case ISO_TRANSPARENCY:
     iso_transparency = ((float)glui_iso_transparency + 0.1) / 255.0;
@@ -1731,6 +1807,10 @@ extern "C" void Iso_CB(int var){
       iso_colorsbw[4 * i + 3] = iso_colors[4 * i + 3];
     }
     update_isocolors();
+    if(LIST_colortable!=NULL){
+      i_colortable_list = CLAMP(get_colortable_index(glui_iso_colors), -1, ncolortableinfo-1);
+      LIST_colortable->set_int_val(i_colortable_list);
+    }
     break;
   case FRAMELOADING:
     isoframestep_global=isoframeskip_global+1;

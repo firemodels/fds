@@ -2111,6 +2111,27 @@ void initvars(void){
   }
   CheckMemory;
 
+  ncolortableinfo = 2;
+  if(ncolortableinfo>0){
+    colortabledata *cti;
+
+    NewMemory((void **)&colortableinfo, ncolortableinfo*sizeof(colortabledata));
+    
+    cti = colortableinfo+0;
+    cti->color[0] = 210;
+    cti->color[1] = 180;
+    cti->color[2] = 140;
+    cti->color[3] = 255;
+    strcpy(cti->label, "tan");
+
+    cti = colortableinfo+1;
+    cti->color[0] = 178;
+    cti->color[1] = 34;
+    cti->color[2] = 34;
+    cti->color[3] = 255;
+    strcpy(cti->label, "firebrick");
+  }
+
   mouse_deltax=0.0, mouse_deltay=0.0;
 
   char_color[0]=0.0;

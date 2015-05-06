@@ -194,6 +194,13 @@ typedef struct {
   float colorbar[3*256];
 } colorbardata;
 
+/* --------------------------  colortabledata ------------------------------------ */
+
+typedef struct {
+  char label[1024];
+  int color[4];
+} colortabledata;
+
 /* --------------------------  surfid ------------------------------------ */
 
 typedef struct {

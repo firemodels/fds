@@ -1728,6 +1728,34 @@ void Update_Clipbounds(int set_i0, int *i0, int set_i1, int *i1, int imax){
   }
 }
 
+/* ------------------ UpdateColorTable ------------------------ */
+
+void UpdateColorTable(colortabledata *ctableinfo, int nctableinfo){
+  int i, ncolortableinfo_old;
+
+  if(nctableinfo<=0)return;
+
+  ncolortableinfo_old=ncolortableinfo;
+  ResizeMemory((void **)&colortableinfo, (ncolortableinfo+nctableinfo)*sizeof(colortabledata));
+  for(i = 0; i<nctableinfo; i++){
+    colortabledata *newentryi, *fromi;
+
+    fromi = ctableinfo+i;
+    newentryi=get_colortable(fromi->label);
+    if(newentryi==NULL){
+      newentryi = colortableinfo + ncolortableinfo;
+      ncolortableinfo++;
+    }
+    newentryi->color[0] = fromi->color[0];
+    newentryi->color[1] = fromi->color[1];
+    newentryi->color[2] = fromi->color[2];
+    newentryi->color[3] = fromi->color[3];
+    strcpy(newentryi->label, fromi->label);
+  }
+  ResizeMemory((void **)&colortableinfo, ncolortableinfo*sizeof(colortabledata));
+  UpdateColorTableList(ncolortableinfo_old);
+}
+
 /* ------------------ updateclip ------------------------ */
 
 void Update_Clip(int slicedir){
