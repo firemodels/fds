@@ -1842,6 +1842,7 @@ void read_volsmoke_frame(volrenderdata *vr, int framenum, int *first){
     else{
       vr->smokedataptrs[framenum]=smokeframe_data;
     }
+    vr->smokedataptr = vr->smokedataptrs[framenum];
     CheckMemory;
     PRINTF("smoke");
     fclose(SLICEFILE);
@@ -1903,6 +1904,7 @@ void read_volsmoke_frame(volrenderdata *vr, int framenum, int *first){
         else{
           vr->firedataptrs[framenum]=fireframe_data;
         }
+        vr->firedataptr = vr->firedataptrs[framenum];
         PRINTF(", fire");
         fclose(SLICEFILE);
       }
@@ -1921,6 +1923,7 @@ void read_volsmoke_frame(volrenderdata *vr, int framenum, int *first){
       NewMemory((void **)&c_firedata_compressed,ncompressed);
       fread(c_firedata_compressed,1,ncompressed,volstream);
       vr->firedataptrs[framenum]=c_firedata_compressed;
+      vr->firedataptr = vr->firedataptrs[framenum];
 
       vr->times[framenum]=time_local;
       PRINTF(", fire");

@@ -66,8 +66,6 @@ void Update_Framenumber(int changetime){
         vr = &(meshi->volrenderinfo);
         fireslice=vr->fireslice;
         smokeslice=vr->smokeslice;
-        vr->smokedataptr=NULL;
-        vr->firedataptr=NULL;
         if(fireslice==NULL||smokeslice==NULL)continue;
         if(vr->loaded==0||vr->display==0)continue;
         vr->itime = vr->timeslist[itimes];
@@ -90,7 +88,7 @@ void Update_Framenumber(int changetime){
             vr->smokedataptr = vr->smokedata_view;
           }
           else{
-            vr->smokedataptr = vr->smokedataptrs[vr->itime];
+            if(runscript==0)vr->smokedataptr = vr->smokedataptrs[vr->itime];
           }
           CheckMemory;
         }
@@ -110,7 +108,7 @@ void Update_Framenumber(int changetime){
             CheckMemory;
           }
           else{
-            vr->firedataptr = vr->firedataptrs[vr->itime];
+            if(runscript==0)vr->firedataptr = vr->firedataptrs[vr->itime];
           }
           CheckMemory;
         }
