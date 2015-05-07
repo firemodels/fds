@@ -1142,7 +1142,7 @@ void read_all_geom(void){
 
 /* ------------------ read_geom0 ------------------------ */
 
-void read_geom0(geomdata *geomi, int load_flag, int type, int *errorcode){
+void read_geom0(geomdata *geomi, int load_flag, int type, int *frameread, int *errorcode){
   FILE *stream;
   int one=1, endianswitch=0;
   int returncode;
@@ -1203,10 +1203,12 @@ void read_geom0(geomdata *geomi, int load_flag, int type, int *errorcode){
     if(iframe>=0){
       FORTREADBR(times_local,2,stream);
       icount++;
-      if(use_tload_begin == 1 && times_local[0] < tload_begin)skipframe = 1;
-      if(use_tload_skip == 1 && tload_skip>1 && icount%tload_skip!=0)skipframe=1;
-      if(use_tload_end == 1 && times_local[0] > tload_end)skipframe = 1;
-      if(skipframe==0)geomi->times[iframe] = times_local[0];
+      if(frameread == NULL||*frameread != iframe){
+        if(use_tload_begin == 1 && times_local[0] < tload_begin)skipframe = 1;
+        if(use_tload_skip == 1 && tload_skip>1 && icount%tload_skip != 0)skipframe = 1;
+        if(use_tload_end == 1 && times_local[0] > tload_end)skipframe = 1;
+        if(skipframe == 0)geomi->times[iframe] = times_local[0];
+      }
     }
     FORTREADBR(nvertfacesvolus,2,stream);
     nverts=nvertfacesvolus[0];
@@ -1607,7 +1609,7 @@ void read_geom(geomdata *geomi, int load_flag, int type, int *errorcode){
   fclose(stream);
 
   if(version<=1){
-    read_geom0(geomi,load_flag,type,errorcode);
+    read_geom0(geomi,load_flag,type,NULL,errorcode);
   }
   else{
     read_geom2(geomi,load_flag,type,errorcode);
