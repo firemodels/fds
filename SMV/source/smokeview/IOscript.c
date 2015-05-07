@@ -1026,7 +1026,6 @@ void script_loadvolsmokeframe2(void){
 
 void script_loadisoframe(scriptdata *scripti, int flag){
   int framenum, index;
-  int first = 1;
   int i,count=0;
   int fileindex;
 
