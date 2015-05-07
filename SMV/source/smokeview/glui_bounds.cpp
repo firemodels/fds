@@ -607,25 +607,54 @@ extern "C" void PART_CB_INIT(void){
   PART_CB(FILETYPEINDEX);
 }
 
+
+/* ------------------ colortable_compare ------------------------ */
+
+int colortable_compare(const void *arg1, const void *arg2){
+  colortabledata *cti, *ctj;
+  int i, j;
+
+  i = *(int *)arg1;
+  j = *(int *)arg2;
+
+  cti = colortableinfo + i;
+  ctj = colortableinfo + j;
+
+  return(strcmp(cti->label, ctj->label));
+}
+
 /* ------------------ UpdateColorTableList ------------------------ */
 
 extern "C" void UpdateColorTableList(int ncolortableinfo_old){
-  int i;
+  int i, *order=NULL;
 
   if(LIST_colortable==NULL)return;
   for(i = -1; i<ncolortableinfo_old; i++){
     LIST_colortable->delete_item(i);
   }
+
+  if(ncolortableinfo>0){
+    NewMemory((void **)&order, ncolortableinfo*sizeof(int));
+    for(i = 0; i < ncolortableinfo; i++){
+      order[i] = i;
+    }
+    qsort((int *)order, (size_t)ncolortableinfo, sizeof(int), colortable_compare);
+  }
+
+
   for(i = -1; i<ncolortableinfo; i++){
     if(i==-1){
-      LIST_colortable->add_item(i, "Manual");
+      LIST_colortable->add_item(i, "Custom");
     }
     else{
       colortabledata *cti;
 
-      cti = colortableinfo+i;
+      cti = colortableinfo+order[i];
       LIST_colortable->add_item(i, cti->label);
     }
+  }
+  if(ncolortableinfo>0){
+    FREEMEMORY(order);
   }
 }
 
