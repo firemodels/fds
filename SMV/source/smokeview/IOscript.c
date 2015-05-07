@@ -59,6 +59,10 @@ void update_menu(void);
 //  skip (int) start_frame (int)
 // file name base (char) (or blank to use smokeview default)
 
+// ISORENDERALL 
+//  skip (int) start_frame (int) iso index (int)
+// file name base (char) (or blank to use smokeview default)
+
 // MAKEMOVIE
 //  movie_name (char)
 //  frame_prefix (char)
@@ -403,7 +407,8 @@ int get_script_keyword_index(char *keyword){
   if(match_upper(keyword,"UNLOADALL") == 1)return SCRIPT_UNLOADALL;
   if(match_upper(keyword,"UNLOADTOUR") == 1)return SCRIPT_UNLOADTOUR;
   if(match_upper(keyword,"VOLSMOKERENDERALL") == 1)return SCRIPT_VOLSMOKERENDERALL;
-  if(match_upper(keyword,"XSCENECLIP") == 1)return SCRIPT_XSCENECLIP;
+  if(match_upper(keyword, "ISORENDERALL")==1)return SCRIPT_ISORENDERALL;
+  if(match_upper(keyword, "XSCENECLIP")==1)return SCRIPT_XSCENECLIP;
   if(match_upper(keyword,"YSCENECLIP") == 1)return SCRIPT_YSCENECLIP;
   if(match_upper(keyword,"ZSCENECLIP") == 1)return SCRIPT_ZSCENECLIP;
 
@@ -614,15 +619,29 @@ int compile_script(char *scriptfile){
         cleanbuffer(buffer,buffer2);
         scripti->ival3=0;  // first frame
         scripti->ival=1;
-        sscanf(buffer,"%i %i",&scripti->ival,&scripti->ival3); 
-        if(scripti->ival<1)scripti->ival=1; // skip
-        if(scripti->ival>20)scripti->ival=20;
+        sscanf(buffer,"%i %i",&scripti->ival,&scripti->ival3);
+        scripti->ival=CLAMP(scripti->ival,1,20); // skip
         scripti->exit=0;
         scripti->first=1;
         scripti->remove_frame=-1;
         first_frame_index=scripti->ival3;
 
         SETcval2;
+        break;
+
+      case SCRIPT_ISORENDERALL:
+        SETcval;
+        cleanbuffer(buffer, buffer2);
+        scripti->ival3 = 0;  // first frame
+        scripti->ival = 1;
+        sscanf(buffer, "%i %i %i", &scripti->ival, &scripti->ival3, &scripti->ival4);
+        scripti->ival=CLAMP(scripti->ival,1,20); // skip
+        scripti->exit = 0;
+        scripti->first = 1;
+        scripti->remove_frame = -1;
+        first_frame_index = scripti->ival3;
+
+        SETcval2;  //render file base name
         break;
 
       case SCRIPT_MAKEMOVIE:
@@ -818,6 +837,34 @@ void script_volsmokerenderall(scriptdata *scripti){
   RenderMenu(skip_local);
 }
 
+/* ------------------ script_isorenderall ------------------------ */
+
+void script_isorenderall(scriptdata *scripti){
+  int skip_local;
+
+  if(nvolrenderinfo==0){
+    PRINTF("*** Error: there is no isosurface data to render\n");
+    ScriptMenu(SCRIPT_CANCEL);
+    return;
+  }
+  script_loadisoframe2();
+
+  if(script_startframe>0)scripti->ival3 = script_startframe;
+  if(startframe0>0)scripti->ival3 = startframe0;
+  // check first_frame_index
+  first_frame_index = scripti->ival3;
+  itimes = first_frame_index;
+
+  if(script_skipframe>0)scripti->ival = script_skipframe;
+  if(skipframe0>0)scripti->ival = skipframe0;
+  skip_local = MAX(1, scripti->ival);
+
+  PRINTF("script: Rendering every %i frame(s) starting at frame %i\n\n", skip_local, scripti->ival3);
+  skip_render_frames = 1;
+  scripti->ival = skip_local;
+  RenderMenu(skip_local);
+}
+
 /* ------------------ run_makemovie ------------------------ */
 void script_makemovie(scriptdata *scripti){
   strcpy(movie_name, scripti->cval);
@@ -973,6 +1020,63 @@ void script_loadvolsmokeframe2(void){
   scripti.ival=-1;
   scripti.ival2=itimes;
   script_loadvolsmokeframe(&scripti,0);
+}
+
+/* ------------------ script_loadisoframe ------------------------ */
+
+void script_loadisoframe(scriptdata *scripti, int flag){
+  int framenum, index;
+  int first = 1;
+  int i,count=0;
+  int fileindex;
+
+  index = scripti->ival;
+  framenum = scripti->ival2;
+  fileindex = scripti->ival4;
+  if(index>nmeshes-1)index = -1;
+  
+  update_readiso_geom_wrapup = UPDATE_ISO_START_ALL;
+  for(i = 0; i<nisoinfo; i++){
+    int errorcode;
+    isodata *isoi;
+    char *isotype;
+
+    isotype = scripti->cval2;
+
+    isoi = isoinfo + i;
+    if(isoi->id+1==fileindex){
+      readiso(isoi->file,i,LOAD,&framenum,&errorcode);
+      count++;
+    }
+  }
+  if(update_readiso_geom_wrapup == UPDATE_ISO_ALL_NOW)readiso_geom_wrapup();
+  update_readiso_geom_wrapup = UPDATE_ISO_OFF;
+  
+  plotstate = getplotstate(DYNAMIC_PLOTS);
+  stept = 1;
+  Update_Times();
+  force_redisplay = 1;
+  Update_Framenumber(framenum);
+  i = framenum;
+  itimes = i;
+  script_itime = i;
+  stept = 1;
+  force_redisplay = 1;
+  Update_Framenumber(0);
+  UpdateTimeLabels();
+  keyboard('r', FROM_SMOKEVIEW);
+  RenderOnceNow = 0;
+  if(flag==1)script_render = 1;// called when only rendering a single frame
+}
+
+/* ------------------ script_loadisoframe2 ------------------------ */
+
+void script_loadisoframe2(void){
+  scriptdata scripti;
+
+  scripti.ival = -1;
+  scripti.ival2 = itimes;
+  script_loadisoframe(&scripti, 0);
 }
 
 /* ------------------ script_load3dsmoke ------------------------ */
@@ -1765,6 +1869,9 @@ int run_script(void){
       break;
     case SCRIPT_VOLSMOKERENDERALL:
       script_volsmokerenderall(scripti);
+      break;
+    case SCRIPT_ISORENDERALL:
+      script_isorenderall(scripti);
       break;
     case SCRIPT_MAKEMOVIE:
       script_makemovie(scripti);

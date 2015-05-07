@@ -2275,6 +2275,7 @@ int readsmv(char *file, char *file2){
 
 /* read the .smv file */
 
+  int  iso_index = 0;
   int unit_start=20;
   devicedata *devicecopy;
   int do_pass4=0;
@@ -7008,6 +7009,8 @@ typedef struct {
         BREAK;
       }
 
+      isoi->id = iso_index%nmeshes;
+      iso_index++;
       isoi->tfile=NULL;
       isoi->seq_id=nn_iso;
       isoi->autoload=0;
