@@ -170,7 +170,7 @@ void readiso_geom_wrapup(void){
 
 /* ------------------ readiso_geom ------------------------ */
 
-void readiso_geom(const char *file, int ifile, int load_flag, int *errorcode){
+void readiso_geom(const char *file, int ifile, int load_flag, int *geom_frame_index, int *errorcode){
   isodata *isoi;
   geomdata *geomi;
   int ilevel,error;
@@ -186,7 +186,7 @@ void readiso_geom(const char *file, int ifile, int load_flag, int *errorcode){
   meshi->showlevels = NULL;
   meshi->isolevels = NULL;
 
-  read_geom(geomi,load_flag,GEOM_ISO,errorcode);
+  read_geom(geomi,load_flag,GEOM_ISO,geom_frame_index,errorcode);
   FREEMEMORY(geominfoptrs);
   if(load_flag == UNLOAD){
     meshi->isofilenum = -1;
@@ -202,7 +202,7 @@ void readiso_geom(const char *file, int ifile, int load_flag, int *errorcode){
   meshi->isofilenum=ifile;
   meshi->niso_times=geomi->ntimes;
   if(NewMemoryMemID((void **)&meshi->iso_times, sizeof(float)*meshi->niso_times, isoi->memory_id) == 0){
-    readiso("",ifile,UNLOAD,&error);
+    readiso("",ifile,UNLOAD,geom_frame_index,&error);
     *errorcode=1;
     return;
   }
@@ -216,7 +216,7 @@ void readiso_geom(const char *file, int ifile, int load_flag, int *errorcode){
     NewMemoryMemID((void **)&meshi->isolevels, sizeof(int)*meshi->nisolevels, isoi->memory_id) == 0
     ){
     *errorcode=1;
-    readiso("",ifile,UNLOAD,&error);
+    readiso("",ifile,UNLOAD,geom_frame_index,&error);
     return;
   }
   for(ilevel=0;ilevel<meshi->nisolevels;ilevel++){
@@ -313,18 +313,18 @@ void readiso_orig(const char *file, int ifile, int flag, int *errorcode){
   file_size=get_filesize(file);
 
   if(meshi->isolevels==NULL){
-    readiso("",ifile,UNLOAD,&error);
+    readiso("",ifile,UNLOAD,NULL,&error);
     *errorcode=1;
     return;
   }               
   if(NewMemory((void **)&meshi->iso_times,sizeof(float)*meshi->niso_times)==0){
-    readiso("",ifile,UNLOAD,&error);
+    readiso("",ifile,UNLOAD,NULL,&error);
     *errorcode=1;
     return;
   }
   if(NewMemory((void **)&meshi->showlevels,sizeof(int)*meshi->nisolevels)==0){
     *errorcode=1;
-    readiso("",ifile,UNLOAD,&error);
+    readiso("",ifile,UNLOAD,NULL,&error);
     return;
   }
   for(ilevel=0;ilevel<meshi->nisolevels;ilevel++){
@@ -347,12 +347,12 @@ void readiso_orig(const char *file, int ifile, int flag, int *errorcode){
   ASSERT(meshi->animatedsurfaces==NULL);
   if(NewMemory((void **)&meshi->animatedsurfaces,meshi->nisolevels*meshi->niso_times*sizeof(isosurface))==0){
     *errorcode=1;
-    readiso("",ifile,UNLOAD,&error);
+    readiso("",ifile,UNLOAD,NULL,&error);
     return;
   }
   if(ResizeMemory((void **)&meshi->iso_times,sizeof(float)*meshi->niso_times)==0){
     *errorcode=1;
-    readiso("",ifile,UNLOAD,&error);
+    readiso("",ifile,UNLOAD,NULL,&error);
     return;
   }
 
@@ -644,7 +644,7 @@ void readiso_orig(const char *file, int ifile, int flag, int *errorcode){
   fclose(isostream);
   if(*errorcode!=0){
     unloadiso(meshi);
-    readiso("",ifile,UNLOAD,&error);
+    readiso("",ifile,UNLOAD,NULL,&error);
     return;
     }
 
@@ -694,7 +694,7 @@ void readiso_orig(const char *file, int ifile, int flag, int *errorcode){
 
 /* ------------------ readiso ------------------------ */
 
-void readiso(const char *file, int ifile, int flag, int *errorcode){
+void readiso(const char *file, int ifile, int flag, int *geom_frame_index, int *errorcode){
   isodata *isoi;
 
   if(ifile>=0&&ifile<nisoinfo){
@@ -712,7 +712,7 @@ void readiso(const char *file, int ifile, int flag, int *errorcode){
     }
     else{
       if(isoi->geomflag==1){
-        readiso_geom(file,ifile,flag,errorcode);
+        readiso_geom(file,ifile,flag,geom_frame_index,errorcode);
       }
       else{
         readiso_orig(file,ifile,flag,errorcode);

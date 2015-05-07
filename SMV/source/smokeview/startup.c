@@ -1042,9 +1042,9 @@ void InitOpenGL(void){
       isodata *isoi;
 
       isoi = isoinfo + i;
-      if(isoi->autoload==0&&isoi->autoload==1)readiso(isoi->file,i,UNLOAD,&errorcode);
+      if(isoi->autoload==0&&isoi->autoload==1)readiso(isoi->file,i,UNLOAD,NULL,&errorcode);
       if(isoi->autoload == 1){
-        readiso(isoi->file, i, LOAD, &errorcode);
+        readiso(isoi->file, i, LOAD,NULL, &errorcode);
       }
     }
     if(update_readiso_geom_wrapup == UPDATE_ISO_ALL_NOW)readiso_geom_wrapup();

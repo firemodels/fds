@@ -825,7 +825,7 @@ EXTERNCPP void draw_geomdata(patchdata *patchi);
 EXTERNCPP void readplot3d(char *file, int ifile, int flag,int *errorcode);
 EXTERNCPP void read_geom_header(geomdata *geomi, int *ntimes_local);
 EXTERNCPP void read_all_geom(void);
-EXTERNCPP void read_geom(geomdata *geomi, int load_flag, int type, int *errorcode);
+EXTERNCPP void read_geom(geomdata *geomi, int load_flag, int type, int *geom_frame_index, int *errorcode);
 EXTERNCPP void init_geom(geomdata *geomi);
 EXTERNCPP void read_geomdata(int ifile, int load_flag, int *errorcode);
 EXTERNCPP void readpatch(int ifile, int flag, int *errorcode);
@@ -848,7 +848,7 @@ EXTERNCPP void readslice(char *file, int ifile, int flag, int *errorcode);
 EXTERNCPP void readtarget(const char *file, int ifile, int flag, int *errorcode);
 EXTERNCPP void update_smooth_blockages(void);
 EXTERNCPP void readtarget2(const char *file, int ifile, int flag, int *errorcode);
-EXTERNCPP void readiso(const char *file, int ifile, int flag, int *errorcode);
+EXTERNCPP void readiso(const char *file, int ifile, int flag, int *geom_frame_index, int *errorcode);
 
 EXTERNCPP void InitMenus(int unload);
 EXTERNCPP void smoothlabel(float *min, float *max, int n);

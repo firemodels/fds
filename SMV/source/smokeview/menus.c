@@ -2291,7 +2291,7 @@ void LoadUnloadMenu(int value){
       readpart("",i,UNLOAD,&errorcode);
     }
     for(i=0;i<nisoinfo;i++){
-      readiso("",i,UNLOAD,&errorcode);
+      readiso("",i,UNLOAD,NULL,&errorcode);
     }
     for(i=0;i<nzoneinfo;i++){
       readzone(i,UNLOAD,&errorcode);
@@ -2375,7 +2375,7 @@ void LoadUnloadMenu(int value){
 
       isoi = isoinfo + i;
       if(isoi->loaded==0)continue;
-      readiso(isoi->file,i,LOAD,&errorcode);
+      readiso(isoi->file,i,LOAD,NULL,&errorcode);
     }
     if(update_readiso_geom_wrapup == UPDATE_ISO_ALL_NOW)readiso_geom_wrapup();
     update_readiso_geom_wrapup = UPDATE_ISO_OFF;
@@ -2972,11 +2972,11 @@ void UnloadIsoMenu(int value){
   updatemenu=1;  
   glutPostRedisplay();
   if(value>=0){
-    readiso("",value,UNLOAD,&errorcode);
+    readiso("",value,UNLOAD,NULL,&errorcode);
   }
   else{
     for(i=0;i<nisoinfo;i++){
-      readiso("",i,UNLOAD,&errorcode);
+      readiso("",i,UNLOAD,NULL,&errorcode);
     }
   }
 }
@@ -3795,14 +3795,14 @@ void LoadIsoMenu(int value){
       fprintf(scriptoutstream," %s\n",file);
     }
     if(scriptoutstream==NULL||defer_file_loading==0){
-      readiso(file,value,LOAD,&errorcode);
+      readiso(file,value,LOAD,NULL,&errorcode);
       if(update_readiso_geom_wrapup == UPDATE_ISO_ONE_NOW)readiso_geom_wrapup();
     }
   }
   if(value==-1){
     for(i=0;i<nisoinfo;i++){
       isoii = isoinfo + i;
-      if(isoii->loaded==1)readiso("",i,UNLOAD,&errorcode);
+      if(isoii->loaded==1)readiso("",i,UNLOAD,NULL,&errorcode);
     }
   }
   if(value<=-10){

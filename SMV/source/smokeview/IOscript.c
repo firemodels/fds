@@ -885,7 +885,7 @@ void script_loadiso(scriptdata *scripti){
 
     isoi = isoinfo + i;
     if(STRCMP(isoi->surface_label.longlabel,scripti->cval)==0){
-      readiso(isoi->file,i,LOAD,&errorcode);
+      readiso(isoi->file,i,LOAD,NULL,&errorcode);
       if(scripti->cval != NULL&&strlen(scripti->cval)>0){
         FREEMEMORY(loaded_file);
         NewMemory((void **)&loaded_file,strlen(scripti->cval)+1);
@@ -1338,7 +1338,7 @@ void script_loadfile(scriptdata *scripti){
 
     isoi = isoinfo + i;
     if(strcmp(isoi->file,scripti->cval)==0){
-      readiso(isoi->file,i,LOAD,&errorcode);
+      readiso(isoi->file,i,LOAD,NULL,&errorcode);
       if(update_readiso_geom_wrapup == UPDATE_ISO_ONE_NOW)readiso_geom_wrapup();
       return;
     }
