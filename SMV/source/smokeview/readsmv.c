@@ -10664,7 +10664,7 @@ int readini2(char *inifile, int localfile){
       if(nctableinfo>0){
         NewMemory((void **)&ctableinfo, nctableinfo*sizeof(colortabledata));
         for(i = 0; i<nctableinfo; i++){
-          colortabledata *rgbi,*rgbdi;
+          colortabledata *rgbi;
           char *labelptr,*percenptr,label[256];
           int  colori[4];
 
