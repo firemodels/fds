@@ -1779,6 +1779,10 @@ extern "C" void Iso_CB(int var){
     if(SPINNER_iso_colors[1]!=NULL)SPINNER_iso_colors[1]->set_int_val(glui_iso_colors[1]);
     if(SPINNER_iso_colors[2]!=NULL)SPINNER_iso_colors[2]->set_int_val(glui_iso_colors[2]);
     if(SPINNER_iso_colors[3]!=NULL)SPINNER_iso_colors[3]->set_int_val(glui_iso_colors[3]);
+    if(LIST_colortable != NULL){
+      i_colortable_list = CLAMP(get_colortable_index(glui_iso_colors), -1, ncolortableinfo - 1);
+      LIST_colortable->set_int_val(i_colortable_list);
+    }
     break;
   case GLOBAL_ALPHA:
     for(i = 0; i < MAX_ISO_COLORS; i++){
