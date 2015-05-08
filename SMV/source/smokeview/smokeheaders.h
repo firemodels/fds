@@ -249,7 +249,6 @@ EXTERNCPP void update_colorbar_list(void);
 EXTERNCPP void update_colorbar_list2(void);
 EXTERNCPP void update_colorbarflip(void);
 
-EXTERNCPP void script_loadisoframe2(void);
 EXTERNCPP void script_loadvolsmokeframe2(void);
 EXTERNCPP void init_device(devicedata *devicei, float *xyz, float *xyzn, int state0,int nparams, float *params, char *labelptr);
 EXTERNCPP void init_device_plane(devicedata *devicei);

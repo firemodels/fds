@@ -60,7 +60,7 @@ void update_menu(void);
 // file name base (char) (or blank to use smokeview default)
 
 // ISORENDERALL 
-//  skip (int) start_frame (int) iso index (int)
+//  skip (int) start_frame (int) iso file index (int) ( index of &ISOF line in .fds input file)
 // file name base (char) (or blank to use smokeview default)
 
 // MAKEMOVIE
@@ -630,6 +630,10 @@ int compile_script(char *scriptfile){
         break;
 
       case SCRIPT_ISORENDERALL:
+        //  skip (int) start_frame (int) iso file index (int) ( index of &ISOF line in .fds input file)
+        //  skip == scripti->ival
+        //  start_frame == scripti->ival3
+        //  &ISOF index == scripti->ival4
         SETcval;
         cleanbuffer(buffer, buffer2);
         scripti->ival3 = 0;  // first frame
@@ -809,6 +813,60 @@ void script_renderall(scriptdata *scripti){
   RenderMenu(skip_local);
 }
 
+/* ------------------ script_loadvolsmokeframe ------------------------ */
+
+void script_loadvolsmokeframe(scriptdata *scripti, int flag){
+  int framenum, index;
+  int first = 1;
+  int i;
+
+  index = scripti->ival;
+  framenum = scripti->ival2;
+  if(index > nmeshes - 1)index = -1;
+  for(i = 0; i < nmeshes; i++){
+    if(index == i || index < 0){
+      mesh *meshi;
+      volrenderdata *vr;
+
+      meshi = meshinfo + i;
+      vr = &meshi->volrenderinfo;
+      free_volsmoke_frame(vr, framenum);
+      read_volsmoke_frame(vr, framenum, &first);
+      if(vr->times_defined == 0){
+        vr->times_defined = 1;
+        get_volsmoke_all_times(vr);
+      }
+      vr->loaded = 1;
+      vr->display = 1;
+    }
+  }
+  plotstate = getplotstate(DYNAMIC_PLOTS);
+  stept = 1;
+  Update_Times();
+  force_redisplay = 1;
+  Update_Framenumber(framenum);
+  i = framenum;
+  itimes = i;
+  script_itime = i;
+  stept = 1;
+  force_redisplay = 1;
+  Update_Framenumber(0);
+  UpdateTimeLabels();
+  keyboard('r', FROM_SMOKEVIEW);
+  RenderOnceNow = 0;
+  if(flag == 1)script_render = 1;// called when only rendering a single frame
+}
+
+/* ------------------ script_loadvolsmokeframe2 ------------------------ */
+
+void script_loadvolsmokeframe2(void){
+  scriptdata scripti;
+
+  scripti.ival = -1;
+  scripti.ival2 = itimes;
+  script_loadvolsmokeframe(&scripti, 0);
+}
+
 /* ------------------ script_volsmokerenderall ------------------------ */
 
 void script_volsmokerenderall(scriptdata *scripti){
@@ -837,17 +895,75 @@ void script_volsmokerenderall(scriptdata *scripti){
   RenderMenu(skip_local);
 }
 
+/* ------------------ script_loadisoframe ------------------------ */
+
+void script_loadisoframe(scriptdata *scripti, int flag){
+  int framenum, index;
+  int i, count = 0;
+  int fileindex;
+
+  index = scripti->ival;
+  framenum = scripti->ival2;
+  fileindex = scripti->ival4;
+  if(index > nmeshes - 1)index = -1;
+
+  update_readiso_geom_wrapup = UPDATE_ISO_START_ALL;
+  for(i = 0; i < nisoinfo; i++){
+    int errorcode;
+    isodata *isoi;
+    char *isotype;
+
+    isotype = scripti->cval2;
+
+    isoi = isoinfo + i;
+    if(isoi->isof_index + 1 == fileindex){
+      readiso(isoi->file, i, LOAD, &framenum, &errorcode);
+      count++;
+    }
+  }
+  if(update_readiso_geom_wrapup == UPDATE_ISO_ALL_NOW)readiso_geom_wrapup();
+  update_readiso_geom_wrapup = UPDATE_ISO_OFF;
+
+  plotstate = getplotstate(DYNAMIC_PLOTS);
+  stept = 1;
+  Update_Times();
+  force_redisplay = 1;
+  Update_Framenumber(framenum);
+  i = framenum;
+  itimes = i;
+  script_itime = i;
+  stept = 1;
+  force_redisplay = 1;
+  Update_Framenumber(0);
+  UpdateTimeLabels();
+  keyboard('r', FROM_SMOKEVIEW);
+  RenderOnceNow = 0;
+  if(flag == 1)script_render = 1;// called when only rendering a single frame
+}
+
+/* ------------------ script_loadisoframe2 ------------------------ */
+
+void script_loadisoframe2(scriptdata *scripti){
+  scripti->ival2 = itimes;
+  script_loadisoframe(scripti, 0);
+}
+
 /* ------------------ script_isorenderall ------------------------ */
 
 void script_isorenderall(scriptdata *scripti){
   int skip_local;
 
-  if(nvolrenderinfo==0){
+  //  skip (int) start_frame (int) iso file index (int) ( index of &ISOF line in .fds input file)
+  //  skip == scripti->ival
+  //  start_frame == scripti->ival3
+  //  &ISOF index == scripti->ival4
+
+  if(nisoinfo == 0){
     PRINTF("*** Error: there is no isosurface data to render\n");
     ScriptMenu(SCRIPT_CANCEL);
     return;
   }
-  script_loadisoframe2();
+  script_loadisoframe2(scripti);
 
   if(script_startframe>0)scripti->ival3 = script_startframe;
   if(startframe0>0)scripti->ival3 = startframe0;
@@ -966,116 +1082,6 @@ void script_loadvolsmoke(scriptdata *scripti){
     vr = &meshi->volrenderinfo;
     read_volsmoke_allframes(vr);
   }
-}
-
-/* ------------------ script_loadvolsmokeframe ------------------------ */
-
-void script_loadvolsmokeframe(scriptdata *scripti, int flag){
-  int framenum,index;
-  int first=1;
-  int i;
-
-  index = scripti->ival;
-  framenum = scripti->ival2;
-  if(index>nmeshes-1)index=-1;
-  for(i=0;i<nmeshes;i++){
-    if(index==i||index<0){
-      mesh *meshi;
-      volrenderdata *vr;
-
-      meshi = meshinfo + i;
-      vr = &meshi->volrenderinfo;
-      free_volsmoke_frame(vr,framenum);
-      read_volsmoke_frame(vr,framenum,&first);
-      if(vr->times_defined==0){
-        vr->times_defined=1;
-        get_volsmoke_all_times(vr);
-      }
-      vr->loaded=1;
-      vr->display=1;
-    }
-  }
-  plotstate=getplotstate(DYNAMIC_PLOTS);
-  stept=1;
-  Update_Times();
-  force_redisplay=1;
-  Update_Framenumber(framenum);
-  i = framenum;
-  itimes=i;
-  script_itime=i;
-  stept=1;
-  force_redisplay=1;
-  Update_Framenumber(0);
-  UpdateTimeLabels();
-  keyboard('r',FROM_SMOKEVIEW);
-  RenderOnceNow=0;
-  if(flag==1)script_render=1;// called when only rendering a single frame
-}
-
-/* ------------------ script_loadvolsmokeframe2 ------------------------ */
-
-void script_loadvolsmokeframe2(void){
-  scriptdata scripti;
-
-  scripti.ival=-1;
-  scripti.ival2=itimes;
-  script_loadvolsmokeframe(&scripti,0);
-}
-
-/* ------------------ script_loadisoframe ------------------------ */
-
-void script_loadisoframe(scriptdata *scripti, int flag){
-  int framenum, index;
-  int i,count=0;
-  int fileindex;
-
-  index = scripti->ival;
-  framenum = scripti->ival2;
-  fileindex = scripti->ival4;
-  if(index>nmeshes-1)index = -1;
-  
-  update_readiso_geom_wrapup = UPDATE_ISO_START_ALL;
-  for(i = 0; i<nisoinfo; i++){
-    int errorcode;
-    isodata *isoi;
-    char *isotype;
-
-    isotype = scripti->cval2;
-
-    isoi = isoinfo + i;
-    if(isoi->id+1==fileindex){
-      readiso(isoi->file,i,LOAD,&framenum,&errorcode);
-      count++;
-    }
-  }
-  if(update_readiso_geom_wrapup == UPDATE_ISO_ALL_NOW)readiso_geom_wrapup();
-  update_readiso_geom_wrapup = UPDATE_ISO_OFF;
-  
-  plotstate = getplotstate(DYNAMIC_PLOTS);
-  stept = 1;
-  Update_Times();
-  force_redisplay = 1;
-  Update_Framenumber(framenum);
-  i = framenum;
-  itimes = i;
-  script_itime = i;
-  stept = 1;
-  force_redisplay = 1;
-  Update_Framenumber(0);
-  UpdateTimeLabels();
-  keyboard('r', FROM_SMOKEVIEW);
-  RenderOnceNow = 0;
-  if(flag==1)script_render = 1;// called when only rendering a single frame
-}
-
-/* ------------------ script_loadisoframe2 ------------------------ */
-
-void script_loadisoframe2(void){
-  scriptdata scripti;
-
-  scripti.ival = -1;
-  scripti.ival2 = itimes;
-  script_loadisoframe(&scripti, 0);
 }
 
 /* ------------------ script_load3dsmoke ------------------------ */

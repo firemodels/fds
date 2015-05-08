@@ -491,10 +491,10 @@ typedef struct {
 
 typedef struct _isodata {
   int seq_id, autoload;
+  int isof_index;
   char *reg_file, *size_file;
   short *normaltable;
   int memory_id;
-  int id;
   int nnormaltable; 
   char *file,*tfile;
   int dataflag,geomflag;

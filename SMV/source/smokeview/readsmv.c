@@ -2275,7 +2275,6 @@ int readsmv(char *file, char *file2){
 
 /* read the .smv file */
 
-  int  iso_index = 0;
   int unit_start=20;
   devicedata *devicecopy;
   int do_pass4=0;
@@ -2283,6 +2282,7 @@ int readsmv(char *file, char *file2){
   int errorcode;
   int noGRIDpresent=1,startpass;
   slicedata *sliceinfo_copy=NULL;
+  int nisos_per_mesh;
 
   int nn_smoke3d=0,nn_patch=0,nn_iso=0,nn_part=0,nn_slice=0,nslicefiles=0,nvents;
 
@@ -3026,7 +3026,8 @@ int readsmv(char *file, char *file2){
    ************************************************************************
  */
 
- if(ncsvinfo>0){
+  nisos_per_mesh = nisoinfo / nmeshes;
+  if(ncsvinfo > 0){
    NewMemory((void **)&csvinfo,ncsvinfo*sizeof(csvdata));
    ncsvinfo=0;
  }
@@ -6982,8 +6983,10 @@ typedef struct {
       char *buffer3;
 
       isoi = isoinfo + iiso;
+      isoi->isof_index = nn_iso%nisos_per_mesh;
       nn_iso++;
-      if(match(buffer,"TISOF")==1)dataflag=1;
+
+      if(match(buffer, "TISOF") == 1)dataflag = 1;
       if(match(buffer,"ISOG")==1)geomflag=1;
       trim(buffer);
       len=strlen(buffer);
@@ -7009,8 +7012,6 @@ typedef struct {
         BREAK;
       }
 
-      isoi->id = iso_index%nmeshes;
-      iso_index++;
       isoi->tfile=NULL;
       isoi->seq_id=nn_iso;
       isoi->autoload=0;
