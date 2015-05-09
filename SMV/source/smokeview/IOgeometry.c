@@ -668,16 +668,25 @@ void update_triangles(void){
     float *xyzptr[3];
     float *xyznorm;
     int i;
+    int iend;
 
     geomi = geominfoptrs[j];
     if(geomi->loaded==0||geomi->display==0)continue;
 
-    for(ii=-1;ii<geomi->ntimes;ii++){
+    iend = geomi->ntimes;
+    if(geomi->currentframe != NULL)iend = 1;
+
+    for(ii=-1;ii<iend;ii++){
       geomlistdata *geomlisti;
       int ntriangles;
       triangle **triangles;
 
-      geomlisti = geomi->geomlistinfo+ii;
+      if(ii==-1||geomi->currentframe==NULL){
+        geomlisti = geomi->geomlistinfo + ii;
+      }
+      else{
+        geomlisti = geomi->currentframe;
+      }
       for(i=0;i<geomlisti->ntriangles;i++){
         triangle *trianglei;
 
@@ -914,7 +923,7 @@ void update_triangles(void){
 
 /* ------------------ read_geom_header0 ------------------------ */
 
-void read_geom_header0(geomdata *geomi, int *ntimes_local){
+void read_geom_header0(geomdata *geomi, int *geom_frame_index, int *ntimes_local){
   FILE *stream;
   int one=0,endianswitch=0;
   int nvertfaces[2];
@@ -998,9 +1007,11 @@ void read_geom_header0(geomdata *geomi, int *ntimes_local){
       FSEEK(stream,4+ntris*4+4,SEEK_CUR);
     }
 
-    if(use_tload_begin == 1 && times_local[0] < tload_begin)continue;
-    if(use_tload_skip == 1 && tload_skip>1 && icount%tload_skip!=0)continue;
-    if(use_tload_end == 1 && times_local[0] > tload_end)break;
+    if(geom_frame_index==NULL){
+      if(use_tload_begin == 1 && times_local[0] < tload_begin)continue;
+      if(use_tload_skip == 1 && tload_skip>1 && icount%tload_skip!=0)continue;
+      if(use_tload_end == 1 && times_local[0] > tload_end)break;
+    }
     nt++;
   }
   *ntimes_local=nt;
@@ -1070,7 +1081,7 @@ void read_geom_header2(geomdata *geomi, int *ntimes_local){
 
 /* ------------------ read_geom_header ------------------------ */
 
-void read_geom_header(geomdata *geomi, int *ntimes_local){
+void read_geom_header(geomdata *geomi, int *geom_frame_index, int *ntimes_local){
   FILE *stream;
   int version;
   int returncode;
@@ -1087,7 +1098,7 @@ void read_geom_header(geomdata *geomi, int *ntimes_local){
   fclose(stream);
 
   if(version<=1){
-    read_geom_header0(geomi, ntimes_local);
+    read_geom_header0(geomi, geom_frame_index, ntimes_local);
   }
   else{
     read_geom_header2(geomi, ntimes_local);
@@ -1154,6 +1165,7 @@ void read_geom0(geomdata *geomi, int load_flag, int type, int *geom_frame_index,
 
   FreeAllMemory(geomi->memory_id);
   geomi->geomlistinfo = NULL;
+  geomi->currentframe = NULL;
   geomi->nfloat_vals=0;
   geomi->nint_vals=0;
 
@@ -1163,7 +1175,7 @@ void read_geom0(geomdata *geomi, int load_flag, int type, int *geom_frame_index,
     return;
   }
 
-  read_geom_header(geomi,&ntimes_local);
+  read_geom_header(geomi,geom_frame_index,&ntimes_local);
   if(ntimes_local<0)return;
   stream = fopen(geomi->file,"rb");
   if(stream==NULL)return;
@@ -1210,15 +1222,9 @@ void read_geom0(geomdata *geomi, int load_flag, int type, int *geom_frame_index,
         if(skipframe == 0)geomi->times[iframe] = times_local[0];
       }
       else{
-        if(iframe<*geom_frame_index){
-          skipframe = 1;  // not to frame we want to read so skip frame
-        }
-        else if(iframe>*geom_frame_index){
-          break;          // past frame we want to read so break out of loop
-        }
-        else{
-          skipframe = 0;  // this is frame we want to read 
-        }
+        if(iframe!=*geom_frame_index)skipframe = 1;
+        geomi->times[iframe] = times_local[0];
+        if(skipframe == 0)geomi->currentframe = geomlisti;
       }
     }
     FORTREADBR(nvertfacesvolus,2,stream);
@@ -1227,14 +1233,11 @@ void read_geom0(geomdata *geomi, int load_flag, int type, int *geom_frame_index,
     if(skipframe==0&&iframe>=0){
       PRINTF("time=%.2f triangles: %i\n",times_local[0],ntris);
     }
-    if(skipframe == 1){
-      if(nverts > 0){
-        FSEEK(stream, 4 + 3 * nverts * 4 + 4, SEEK_CUR);
-      }
-      if(ntris > 0){
-        FSEEK(stream, 4 + 3 * ntris * 4 + 4, SEEK_CUR);
-        FSEEK(stream, 4 + ntris * 4 + 4, SEEK_CUR);
-      }
+    if(skipframe==1){
+      int file_offset = 0;
+      if(nverts>0)file_offset += 4+3*nverts*4+4;
+      if(ntris>0)file_offset += (4+3*ntris*4+4)+(4+ntris*4+4);
+      if(file_offset>0)FSEEK(stream, file_offset, SEEK_CUR);
     }
     if(skipframe==0&&nverts>0){
       int ii;
@@ -1281,13 +1284,13 @@ void read_geom0(geomdata *geomi, int load_flag, int type, int *geom_frame_index,
       FREEMEMORY(surf_ind);
     }
 
-    if(skipframe == 0){
+    if(skipframe==0||geom_frame_index!=NULL){
       // add decimation code here
       iframe++;
     }
-    if(use_tload_end == 1 && times_local[0] > tload_end)break;
+    if(geom_frame_index==NULL&&use_tload_end == 1 && times_local[0] > tload_end)break;
   }
-  geomi->loaded=1;
+  geomi->loaded = 1;
   geomi->display=1;
 }
 
@@ -1308,6 +1311,7 @@ void read_geom2(geomdata *geomi, int load_flag, int type, int *errorcode){
 
   FreeAllMemory(geomi->memory_id);
   geomi->geomlistinfo=NULL;
+  geomi->currentframe = NULL;
   geomi->nfloat_vals=0;
   geomi->nint_vals=0;
 
@@ -1317,7 +1321,7 @@ void read_geom2(geomdata *geomi, int load_flag, int type, int *errorcode){
     return;
   }
 
-  read_geom_header(geomi,&ntimes_local);
+  read_geom_header(geomi,NULL,&ntimes_local);
   if(ntimes_local<0)return;
   stream = fopen(geomi->file,"rb");
   if(stream==NULL)return;
@@ -1514,17 +1518,21 @@ int compare_faces(const void *arg1, const void *arg2){
 
 /* ------------------ classify_geom ------------------------ */
 
-void classify_geom(geomdata *geomi){
-  int ntimes,i;
+void classify_geom(geomdata *geomi,int *geom_frame_index){
+  int i, iend;
+
+  iend = geomi->ntimes;
+  if(geom_frame_index!=NULL)iend=1;
   
-  ntimes = geomi->ntimes;
-  for(i=-1;i<ntimes;i++){
+  for(i = -1; i<geomi->ntimes; i++){
     geomlistdata *geomlisti;
     int nverts, nvolus;
     int j;
     point *pointbase;
 
     geomlisti = geomi->geomlistinfo+i;
+    if(i!=-1&&geom_frame_index!=NULL)geomlisti = geomi->geomlistinfo+(*geom_frame_index);
+
     nverts=geomlisti->npoints;
     nvolus=geomlisti->nvolus;
     if(nverts==0||nvolus==0||geomlisti->points==NULL)continue;
@@ -1625,7 +1633,7 @@ void read_geom(geomdata *geomi, int load_flag, int type, int *geom_frame_index, 
   else{
     read_geom2(geomi,load_flag,type,errorcode);
   }
-  if(load_flag==LOAD)classify_geom(geomi);
+  if(load_flag==LOAD)classify_geom(geomi,geom_frame_index);
 }
 
 /* ------------------ read_geomdata ------------------------ */
@@ -2341,12 +2349,13 @@ void Sort_Embedded_Geometry(float *mm){
     geomdata *geomi;
 
     geomi = geominfoptrs[i];
-    for(itime=0;itime<2;itime++){ //xxx was itime<2 check this
+    for(itime=0;itime<2;itime++){
       if(itime==0){
         geomlisti = geomi->geomlistinfo-1;
       }
       else{
         geomlisti = geomi->geomlistinfo+geomi->itime;
+        if(geomi->currentframe!=NULL)geomlisti=geomi->currentframe;
       }
 
       count_all+=geomlisti->ntriangles;
@@ -2408,6 +2417,7 @@ void Sort_Embedded_Geometry(float *mm){
       }
       else{
         geomlisti = geomi->geomlistinfo+geomi->itime;
+        if(geomi->currentframe!=NULL)geomlisti = geomi->currentframe;
       }
 
       for(j=0;j<geomlisti->ntriangles;j++){
@@ -2443,6 +2453,7 @@ void init_geom(geomdata *geomi){
   geomi->geomlistinfo_0=NULL;
   geomi->surf=NULL;
   geomi->geomlistinfo=NULL;
+  geomi->currentframe = NULL;
   geomi->times=NULL;
   geomi->ntimes=0;
   geomi->times=NULL;

@@ -250,7 +250,8 @@ EXTERNCPP void update_colorbar_list2(void);
 EXTERNCPP void update_colorbarflip(void);
 
 EXTERNCPP void script_loadvolsmokeframe2(void);
-EXTERNCPP void init_device(devicedata *devicei, float *xyz, float *xyzn, int state0,int nparams, float *params, char *labelptr);
+EXTERNCPP void script_loadisoframe2(scriptdata *scripti);
+EXTERNCPP void init_device(devicedata *devicei, float *xyz, float *xyzn, int state0, int nparams, float *params, char *labelptr);
 EXTERNCPP void init_device_plane(devicedata *devicei);
 EXTERNCPP void draw_devices_val(void);
 EXTERNCPP void getsmokesensors(void);
@@ -823,7 +824,7 @@ EXTERNCPP void drawcad2geom_opaque(const cadgeom *cd,int trans_flag);
 EXTERNCPP void draw_geomdata(patchdata *patchi);
 
 EXTERNCPP void readplot3d(char *file, int ifile, int flag,int *errorcode);
-EXTERNCPP void read_geom_header(geomdata *geomi, int *ntimes_local);
+EXTERNCPP void read_geom_header(geomdata *geomi, int *geom_frame_index, int *ntimes_local);
 EXTERNCPP void read_all_geom(void);
 EXTERNCPP void read_geom(geomdata *geomi, int load_flag, int type, int *geom_frame_index, int *errorcode);
 EXTERNCPP void init_geom(geomdata *geomi);

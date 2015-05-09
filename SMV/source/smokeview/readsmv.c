@@ -7069,7 +7069,7 @@ typedef struct {
           isoi->geominfo->file=isoi->file;
           geomi = isoi->geominfo;
           geomi->file=isoi->file;
-          read_geom_header(geomi,&ntimes_local);
+          read_geom_header(geomi,NULL,&ntimes_local);
           isoi->nlevels=geomi->nfloat_vals;
           if(isoi->nlevels>0){
             NewMemory((void **)&levels,isoi->nlevels*sizeof(float));

@@ -90,7 +90,7 @@ typedef struct {
   int memory_id;
   int loaded, display;
   struct _surfdata *surf;
-  geomlistdata *geomlistinfo,*geomlistinfo_0;
+  geomlistdata *geomlistinfo,*geomlistinfo_0, *currentframe;
   float *float_vals;
   int *int_vals, nfloat_vals, nint_vals;
   float *times;

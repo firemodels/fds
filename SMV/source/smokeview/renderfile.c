@@ -148,7 +148,7 @@ void MakeMovie(void){
 /* ------------------ Render ------------------------ */
 
 void Render(int view_mode){
-  if(current_script_command!=NULL&&current_script_command->command==SCRIPT_VOLSMOKERENDERALL){
+  if(current_script_command!=NULL&&(current_script_command->command==SCRIPT_VOLSMOKERENDERALL||current_script_command->command==SCRIPT_ISORENDERALL)){
     if( (render_frame[itimes]>0&&showstereo==STEREO_NONE)||(render_frame[itimes]>1&&showstereo!=STEREO_NONE) ){
       if(itimes==0){
         current_script_command->remove_frame=itimes;
@@ -242,7 +242,8 @@ void RenderFrame(int view_mode){
     if(
       (current_script_command->command==SCRIPT_RENDERONCE||
        current_script_command->command==SCRIPT_RENDERALL||
-       current_script_command->command==SCRIPT_VOLSMOKERENDERALL
+       current_script_command->command==SCRIPT_VOLSMOKERENDERALL||
+       current_script_command->command==SCRIPT_ISORENDERALL
        )&&
        current_script_command->cval2!=NULL
        ){
@@ -298,7 +299,9 @@ void RenderFrame(int view_mode){
   if(use_scriptfile==0||
     (current_script_command!=NULL&&
     (current_script_command->command==SCRIPT_RENDERALL||
-     current_script_command->command==SCRIPT_VOLSMOKERENDERALL))){
+     current_script_command->command==SCRIPT_VOLSMOKERENDERALL||
+     current_script_command->command==SCRIPT_ISORENDERALL
+     ))){
     int image_num;
     char suffix[20];
 

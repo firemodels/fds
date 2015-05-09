@@ -1364,7 +1364,9 @@ void Update_Times(void){
 
   // reset render_frame array
 
-  if(current_script_command!=NULL&&current_script_command->command==SCRIPT_VOLSMOKERENDERALL){
+  if(current_script_command!=NULL&&
+    (current_script_command->command==SCRIPT_VOLSMOKERENDERALL||current_script_command->command==SCRIPT_ISORENDERALL)
+    ){
     if(current_script_command->first==1){
       int n;
 
@@ -1701,7 +1703,7 @@ int isearch(float *list, int nlist, float key, int guess){
 /* ------------------ reset_itimes0 ------------------------ */
 
 void reset_itimes0(void){
-  if(current_script_command==NULL||current_script_command->command!=SCRIPT_VOLSMOKERENDERALL){
+  if(current_script_command==NULL||current_script_command->command!=SCRIPT_VOLSMOKERENDERALL||current_script_command->command!=SCRIPT_ISORENDERALL){
     itimes=first_frame_index;
   }
 }

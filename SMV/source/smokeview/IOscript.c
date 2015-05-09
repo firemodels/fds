@@ -911,9 +911,6 @@ void script_loadisoframe(scriptdata *scripti, int flag){
   for(i = 0; i < nisoinfo; i++){
     int errorcode;
     isodata *isoi;
-    char *isotype;
-
-    isotype = scripti->cval2;
 
     isoi = isoinfo + i;
     if(isoi->isof_index + 1 == fileindex){

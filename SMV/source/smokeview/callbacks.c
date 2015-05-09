@@ -2857,6 +2857,16 @@ void DoScript(void){
         current_script_command->exit=0;
       }
     }
+    if(current_script_command->command==SCRIPT_ISORENDERALL){\
+      if(current_script_command->exit==0){
+        RenderState(RENDER_ON);
+      }
+      else{
+        RenderState(RENDER_OFF);
+        current_script_command->first=1;
+        current_script_command->exit=0;
+      }
+    }
     if(render_state==RENDER_OFF){  // don't advance command if Smokeview is executing a RENDERALL command
       current_script_command++;
       script_render_flag=run_script();
@@ -2876,7 +2886,15 @@ void DoScript(void){
         if(remove_frame>=0){
           unload_volsmoke_frame_allmeshes(remove_frame);
         }
-        glutPostRedisplay();
+      }
+      if(current_script_command->command==SCRIPT_ISORENDERALL){
+        int remove_frame;
+
+        script_loadisoframe2(current_script_command);
+        remove_frame = current_script_command->remove_frame;
+        if(remove_frame>=0){
+          //unload_volsmoke_frame_allmeshes(remove_frame);
+        }
       }
     }
     glutPostRedisplay();
