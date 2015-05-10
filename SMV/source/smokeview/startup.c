@@ -2043,6 +2043,9 @@ void initvars(void){
 
   valindex=0;
 
+  NewMemory((void **)&iso_colors, 4 * MAX_ISO_COLORS*sizeof(float));
+  NewMemory((void **)&iso_colorsbw, 4 * MAX_ISO_COLORS*sizeof(float));
+
 #define N_ISO_COLORS 10
   iso_colors[0] = 0.96;
   iso_colors[1] = 0.00;
@@ -2090,7 +2093,7 @@ void initvars(void){
     iso_colors[4 * i + 3] = iso_transparency;
   }
 
-  for(i=N_ISO_COLORS;i<MAX_ISO_COLORS;i++){
+  for(i = N_ISO_COLORS; i<MAX_ISO_COLORS; i++){
     int grey;
 
     grey=1.0-(float)(i-N_ISO_COLORS)/(float)(MAX_ISO_COLORS+1-N_ISO_COLORS);
