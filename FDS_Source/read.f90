@@ -10001,7 +10001,6 @@ READ_DEVC_LOOP: DO NN=1,N_DEVC_READ
       DV%ORDINAL           = NN
       DV%ORIENTATION_INDEX = ORIENTATION_INDEX
       DV%PROP_ID           = PROP_ID
-      DV%CTRL_ID           = CTRL_ID
       DV%DEVC_ID           = DEVC_ID
       DV%CTRL_ID           = CTRL_ID
       DV%SURF_ID           = SURF_ID
