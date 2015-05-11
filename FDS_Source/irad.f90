@@ -290,10 +290,12 @@ SUBROUTINE GET_REV_IRAD(MODULE_REV,MODULE_DATE)
 
 INTEGER, INTENT(INOUT) :: MODULE_REV
 CHARACTER(255),INTENT(INOUT) :: MODULE_DATE
+INTEGER :: IERR
 !------------------------------------------------------------------------------
 
 WRITE(MODULE_DATE,'(A)') IRADREV(INDEX(IRADREV,':')+2:LEN_TRIM(IRADREV)-2)
-READ (MODULE_DATE,'(I5)') MODULE_REV
+READ (MODULE_DATE,'(I5)',IOSTAT=IERR) MODULE_REV
+IF (IERR/=0) MODULE_REV = 0
 WRITE(MODULE_DATE,'(A)') IRADDATE
 
 !------------------------------------------------------------------------------
