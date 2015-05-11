@@ -16596,12 +16596,14 @@ CONTAINS
     ! Passed variables
     INTEGER,INTENT(INOUT) :: MODULE_REV
     CHARACTER(255),INTENT(INOUT) :: MODULE_DATE
+    INTEGER :: IERR
     !
     ! Local variables
     !
 
     WRITE(MODULE_DATE,'(A)') evacrev(INDEX(evacrev,':')+2:LEN_TRIM(evacrev)-2)
-    READ (MODULE_DATE,'(I5)') MODULE_REV
+    READ (MODULE_DATE,'(I5)',IOSTAT=IERR) MODULE_REV
+    IF (IERR/=0) MODULE_REV = 0
     WRITE(MODULE_DATE,'(A)') evacdate
 
   END SUBROUTINE GET_REV_EVAC
