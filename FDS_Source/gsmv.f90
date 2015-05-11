@@ -141,7 +141,7 @@ DATA ( (TETRA_PLANE2EDGE(I,J), I=0,2),J=0,3) /&
   /
 
 PUBLIC GET_TETRABOX_VOLUME, GET_VERTS, TETRAHEDRON_VOLUME, REMOVE_DUPLICATE_VERTS, GET_POLYHEDRON_VOLUME, TEST_IN_TETRA0,&
-       GET_REV_gsmv
+       DECIMATE, GET_REV_gsmv
 
 CONTAINS
 
@@ -1716,6 +1716,124 @@ DO I = 1, NX-1
 END DO
 
 END SUBROUTINE CLASSIFY_GEOM
+
+!  ------------------ DISTANCE3 ------------------------ 
+
+REAL(EB) FUNCTION DISTANCE3(V1,V2)
+REAL(EB), INTENT(IN), DIMENSION(3) :: V1, V2
+REAL(EB) :: DX, DY, DZ
+
+DX = V1(1)-V2(1)
+DY = V1(2)-V2(2)
+DZ = V1(3)-V2(3)
+DISTANCE3 = SQRT(DX*DX+DY*DY+DZ*DZ)
+END FUNCTION DISTANCE3
+
+!  ------------------ DECIMATE ------------------------ 
+
+SUBROUTINE DECIMATE(VERTS, NVERTS, FACES, NFACES, EPS)
+! preliminary routine to reduce the size of a geometry by 
+!  1) merging vertices that are "close" together
+!  2) eliminating redundent vertices
+!  2) eliminating "singular" triangles
+INTEGER, INTENT(INOUT) :: NVERTS, NFACES
+REAL(EB), INTENT(INOUT), DIMENSION(3*NVERTS), TARGET :: VERTS
+INTEGER, INTENT(INOUT), DIMENSION(3*NFACES), TARGET :: FACES
+REAL(EB), INTENT(IN) :: EPS
+
+INTEGER, DIMENSION(NVERTS) :: VERT_STATE
+INTEGER, DIMENSION(NFACES) :: FACES_STATE
+REAL(EB), POINTER, DIMENSION(:) :: V1, V2, V3, VERTFROM, VERTTO
+INTEGER, POINTER, DIMENSION(:) :: FACEI, FACEFROM, FACETO
+REAL(EB) :: D12, D13, D23
+INTEGER :: I, IFROM, ITO, ITER, MAX_ITER
+LOGICAL :: HAVE_SMALL
+
+HAVE_SMALL = .TRUE.
+MAX_ITER = 10
+ITER = 0
+DO WHILE (HAVE_SMALL.OR.ITER<MAX_ITER) ! iterate until no further changes are made (or 10 times whichever comes first)
+   HAVE_SMALL = .FALSE.
+   VERT_STATE(1:NVERTS) = 1
+   FACES_STATE(1:NFACES) = 1
+   ITER = ITER + 1
+
+! combine vertices that are close together
+   DO I = 1, NFACES
+      FACEI=>FACES(3*I-2:3*I)
+      V1=>VERTS(3*FACEI(1)-2:3*FACEI(1))
+      V2=>VERTS(3*FACEI(2)-2:3*FACEI(2))
+      V3=>VERTS(3*FACEI(3)-2:3*FACEI(3))
+      IF(VERT_STATE(FACEI(1)).NE.1.OR.VERT_STATE(FACEI(2)).NE.1.OR.VERT_STATE(FACEI(3)).NE.1)CYCLE
+      D12 = DISTANCE3(V1,V2)
+      D13 = DISTANCE3(V1,V3)
+      D23 = DISTANCE3(V2,V3)
+      IF(D12.GT.EPS.AND.D13.GT.EPS.AND.D23.GT.EPS)CYCLE ! do not combine verts
+   
+      HAVE_SMALL = .TRUE.
+      FACES_STATE(I) = 0
+      IF(D12.LT.EPS.AND.D13.GT.EPS.AND.D23.GT.EPS)THEN ! combine verts 1 and 2
+         VERT_STATE(FACEI(1)) = -1
+         VERT_STATE(FACEI(2)) = 0
+         V1 = (V1+V2)/2.0_EB
+         FACEI(2) = FACEI(1)
+      ELSE IF(D13.LT.EPS.AND.D12.GT.EPS.AND.D23.GT.EPS)THEN ! combine verts 1 and 3
+         VERT_STATE(FACEI(1)) = -1
+         VERT_STATE(FACEI(3)) = 0
+         V1 = (V1+V3)/2.0_EB
+         FACEI(3) = FACEI(1)
+      ELSE IF(D23.LT.EPS.AND.D12.GT.EPS.AND.D13.GT.EPS)THEN ! combine verts 2 and 3
+         VERT_STATE(FACEI(2)) = -1
+         VERT_STATE(FACEI(3)) = 0
+         V2 = (V2 + V3)/2.0_EB
+         FACEI(3) = FACEI(2)
+      ELSE  ! combine verts 1, 2 and 3
+         VERT_STATE(FACEI(1))=-1
+         VERT_STATE(FACEI(2))=0
+         VERT_STATE(FACEI(3))=0
+         V1 = (V1+V2+V3)/3.0_EB
+         FACEI(2) = FACEI(1)
+         FACEI(3) = FACEI(1)
+      ENDIF
+   END DO
+
+! construct new vertex mapping
+
+   ITO = 0
+   DO I = 1, NVERTS
+      IF(VERT_STATE(I).EQ.0)CYCLE
+      ITO = ITO + 1
+      VERT_STATE(I) = ITO
+   END DO
+
+! eliminate duplicate vertices
+
+   ITO = 0
+   DO IFROM = 1, NVERTS
+      VERTFROM=>VERTS(3*IFROM-2:3*IFROM)
+      IF(VERT_STATE(IFROM).EQ.0)CYCLE
+      ITO = ITO + 1
+      IF(ITO.EQ.IFROM)CYCLE
+      VERTTO=>VERTS(3*IFROM-2:3*IFROM)
+      VERTTO=VERTFROM
+   END DO
+   NVERTS = ITO
+
+   ! eliminate singular triangles (as a result of merged vertices)
+   ITO = 0
+   DO IFROM = 1, NFACES
+      FACEFROM=>FACES(3*IFROM-2:3*IFROM)
+      IF(FACEFROM(1).EQ.FACEFROM(2).OR.FACEFROM(1).EQ.FACEFROM(3).OR.FACEFROM(2).EQ.FACEFROM(3))CYCLE
+      ITO=ITO+1
+      FACETO=>FACES(3*ITO-2:3*ITO)
+      FACETO(1)=VERT_STATE(FACEFROM(1))
+      FACETO(2)=VERT_STATE(FACEFROM(2))
+      FACETO(3)=VERT_STATE(FACEFROM(3))
+   END DO   
+   NFACES = ITO
+END DO   
+
+END SUBROUTINE DECIMATE
 
 !  ------------------ GET_REV_gsmv ------------------------ 
 
