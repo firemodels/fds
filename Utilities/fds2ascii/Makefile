@@ -28,7 +28,7 @@ no_target:
 # ------------- Win 64 ----------------
 #  64 bit windows
 
-intel_win_64 : FFLAGS    = -O2 /nologo 
+intel_win_64 : FFLAGS    = -O2 /nologo /fpscomp:general
 intel_win_64 : FC        = ifort
 intel_win_64 : exe       = fds2ascii_win_64.exe
 
