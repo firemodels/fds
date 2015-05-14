@@ -24,6 +24,7 @@ mkdir -p $DIR/bin
 mkdir -p $DIR/Documentation
 cp $FORBUNDLE/readme.html $DIR/Documentation/release_notes.html
 
+cp -r $FORBUNDLE/textures $DIR/bin/.
 cp $FORBUNDLE/objects.svo $DIR/bin/.
 cp $FORBUNDLE/smokeview.ini $DIR/bin/.
 cp $FORBUNDLE/volrender.ssf $DIR/bin/.
