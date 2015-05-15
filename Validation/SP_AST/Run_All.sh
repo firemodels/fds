@@ -11,5 +11,7 @@ $QFDS $DEBUG $QUEUE -d $INDIR SP_AST_Test_3.fds
 $QFDS $DEBUG $QUEUE -d $INDIR SP_AST_Diesel_1p1.fds
 $QFDS $DEBUG $QUEUE -d $INDIR SP_AST_Diesel_1p9.fds
 $QFDS $DEBUG $QUEUE -d $INDIR SP_AST_Heptane_1p1.fds
+$QFDS $DEBUG $QUEUE -d $INDIR plate_thermometer_25.fds
+$QFDS $DEBUG $QUEUE -d $INDIR plate_thermometer_75.fds
 
 echo FDS cases submitted

@@ -1,0 +1,69 @@
+&HEAD CHID='plate_thermometer_25', TITLE='Simple simulation of a plate thermometer at a fixed heat flux' /
+
+&MESH IJK=3,3,4, XB=-0.15,0.15,-0.15,0.15,0.0,0.4 / 
+
+&TIME T_END=2100, WALL_INCREMENT=1, DT=0.1 /
+
+&MATL ID='INCONEL'
+      EMISSIVITY=0.85
+      DENSITY=8470.
+      CONDUCTIVITY_RAMP='k_inc'
+      SPECIFIC_HEAT_RAMP='c_inc' /
+
+&RAMP ID='k_inc', T= 20., F=14.9 /
+&RAMP ID='k_inc', T=100., F=15.9 /
+&RAMP ID='k_inc', T=200., F=17.3 /
+&RAMP ID='k_inc', T=300., F=19.0 /
+&RAMP ID='k_inc', T=400., F=20.5 /
+&RAMP ID='k_inc', T=500., F=22.1 /
+&RAMP ID='k_inc', T=600., F=23.9 /
+&RAMP ID='k_inc', T=700., F=25.7 /
+&RAMP ID='k_inc', T=800., F=27.5 /
+
+&RAMP ID='c_inc', T= 20., F=0.444 /
+&RAMP ID='c_inc', T=100., F=0.465 /
+&RAMP ID='c_inc', T=200., F=0.486 /
+&RAMP ID='c_inc', T=300., F=0.502 /
+&RAMP ID='c_inc', T=400., F=0.519 /
+&RAMP ID='c_inc', T=500., F=0.536 /
+&RAMP ID='c_inc', T=600., F=0.578 /
+&RAMP ID='c_inc', T=700., F=0.595 /
+&RAMP ID='c_inc', T=800., F=0.611 /
+&RAMP ID='c_inc', T=900., F=0.628 /
+
+&MATL ID='CERABLANKET'
+      DENSITY=128.
+      CONDUCTIVITY_RAMP='k_ins'
+      SPECIFIC_HEAT = 1.13 /
+
+&RAMP ID='k_ins', T=  20., F=0.06 /
+&RAMP ID='k_ins', T= 260., F=0.06 /
+&RAMP ID='k_ins', T= 400., F=0.10 /
+&RAMP ID='k_ins', T= 600., F=0.15 /
+&RAMP ID='k_ins', T= 800., F=0.20 /
+&RAMP ID='k_ins', T=1000., F=0.27 /
+
+&SURF ID = 'PLATE'
+      COLOR = 'BLACK'
+      MATL_ID = 'INCONEL','CERABLANKET'
+      THICKNESS = 0.00079,0.0254
+      EXTERNAL_FLUX=25.
+      EXTERNAL_FLUX_RAMP='flux'  /
+
+&RAMP ID='flux', T=   0., F=0. /
+&RAMP ID='flux', T=   1., F=1. /
+&RAMP ID='flux', T=1300., F=1. /
+&RAMP ID='flux', T=1305., F=0. /
+
+&VENT XB=-0.05, 0.05,-0.05, 0.05, 0.00, 0.00, SURF_ID='PLATE' /
+
+&VENT MB='XMIN', SURF_ID='OPEN' /
+&VENT MB='XMAX', SURF_ID='OPEN' /
+&VENT MB='YMIN', SURF_ID='OPEN' /
+&VENT MB='YMAX', SURF_ID='OPEN' /
+&VENT MB='ZMAX', SURF_ID='OPEN' /
+
+&DUMP DT_DEVC=10. /
+&DEVC ID='temp', XYZ=0.0,0.0,0.0, QUANTITY='WALL TEMPERATURE', IOR=3 /
+
+&TAIL / 
