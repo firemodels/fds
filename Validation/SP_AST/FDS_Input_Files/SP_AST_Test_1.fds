@@ -40,14 +40,12 @@
       COLOR='BLACK' /
 
 &SURF ID='PLATE FRONT' 
-      MATL_ID='STEEL','INSULATION'
-      BACKING='EXPOSED'
+      MATL_ID='INCONEL','INSULATION'
       THICKNESS=0.0007,0.01
       COLOR='BLACK' /
 
 &SURF ID='PLATE BACK' 
-      MATL_ID='INSULATION','STEEL'
-      BACKING='EXPOSED'
+      MATL_ID='INSULATION','INCONEL'
       THICKNESS=0.01,0.0007
       COLOR='PINK' /
 
@@ -58,8 +56,35 @@
       CONDUCTIVITY  = 54.      
       DENSITY       = 7833. /
 
+&MATL ID='INCONEL'
+      EMISSIVITY=0.85
+      DENSITY=8470.
+      CONDUCTIVITY_RAMP='k_inc'
+      SPECIFIC_HEAT_RAMP='c_inc' /
+
+&RAMP ID='k_inc', T= 20., F=14.9 /
+&RAMP ID='k_inc', T=100., F=15.9 /
+&RAMP ID='k_inc', T=200., F=17.3 /
+&RAMP ID='k_inc', T=300., F=19.0 /
+&RAMP ID='k_inc', T=400., F=20.5 /
+&RAMP ID='k_inc', T=500., F=22.1 /
+&RAMP ID='k_inc', T=600., F=23.9 /
+&RAMP ID='k_inc', T=700., F=25.7 /
+&RAMP ID='k_inc', T=800., F=27.5 /
+
+&RAMP ID='c_inc', T= 20., F=0.444 /
+&RAMP ID='c_inc', T=100., F=0.465 /
+&RAMP ID='c_inc', T=200., F=0.486 /
+&RAMP ID='c_inc', T=300., F=0.502 /
+&RAMP ID='c_inc', T=400., F=0.519 /
+&RAMP ID='c_inc', T=500., F=0.536 /
+&RAMP ID='c_inc', T=600., F=0.578 /
+&RAMP ID='c_inc', T=700., F=0.595 /
+&RAMP ID='c_inc', T=800., F=0.611 /
+&RAMP ID='c_inc', T=900., F=0.628 /
+
 &MATL ID            = 'INSULATION' 
-      DENSITY       = 200.
+      DENSITY       = 280.
       CONDUCTIVITY  = 0.1
       SPECIFIC_HEAT = 1. /
 
