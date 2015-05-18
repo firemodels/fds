@@ -1524,7 +1524,7 @@ void classify_geom(geomdata *geomi,int *geom_frame_index){
   iend = geomi->ntimes;
   if(geom_frame_index!=NULL)iend=1;
   
-  for(i = -1; i<geomi->ntimes; i++){
+  for(i = -1; i<iend; i++){
     geomlistdata *geomlisti;
     int nverts, nvolus;
     int j;
