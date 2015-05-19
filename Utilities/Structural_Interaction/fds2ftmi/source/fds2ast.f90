@@ -411,11 +411,11 @@ IN_LOOP: DO IN=VAR,VARIABLE*NMESHES,VARIABLE
 !WRITE (50,*) 'Time of internal loop was ', te_nmeshes-tb_nmeshes, ' seconds'
 !************************************
 ! Writing the vector time (V_TIME) and tast matrix - SILVA, JC
-IF (VAR.EQ.2) THEN
-    OPEN(100+VAR,FILE=TRIM(OUTFILE)//'H.dat',FORM='FORMATTED',STATUS='UNKNOWN')
-ELSE
-    OPEN(100+VAR,FILE=TRIM(OUTFILE)//'.dat',FORM='FORMATTED',STATUS='UNKNOWN')
-ENDIF
+!IF (VAR.EQ.2) THEN
+!    OPEN(100+VAR,FILE=TRIM(OUTFILE)//'H.dat',FORM='FORMATTED',STATUS='UNKNOWN')
+!ELSE
+!    OPEN(100+VAR,FILE=TRIM(OUTFILE)//'.dat',FORM='FORMATTED',STATUS='UNKNOWN')
+!ENDIF
 !
 !WRITE (6,'(F8.3,F8.3,F8.3,F8.3,F8.3,F8.3,F8.3)') C_SIZE,M_AST(1,1),M_AST(1,2),M_AST(1,3),M_AST(1,5), &
 !M_AST(1,6),M_AST(1,7)
@@ -1140,10 +1140,20 @@ END IF
 !****************
 !CALL CPU_TIME (te_fds2ast)
 !WRITE (50,*) 'Time of FDS2AST was ', te_fds2ast-tb_fds2ast, ' seconds'
-DO I=1,V
-    WRITE (100+VAR,'(E12.5)', ADVANCE='NO') V_TIME(I)
-    WRITE (100+VAR,'(E12.5)', ADVANCE='YES') TAST(I)
+!DO I=1,V
+!    WRITE (100+VAR,'(E12.5)', ADVANCE='NO') V_TIME(I)
+!    WRITE (100+VAR,'(E12.5)', ADVANCE='YES') TAST(I)
+!ENDDO
+DO I=1,V-1
+  IF (VAR.EQ.2) THEN
+    WRITE (70,'(A,A,A,I8,A,E12.5)') "*set,H", TRIM(OUTFILE), "(", I, ",0),", V_TIME(I)
+    WRITE (70,'(A,A,A,I8,A,E12.5)') "*set,H", TRIM(OUTFILE), "(", I, ",1),", TAST(I)
+  ELSE    
+    WRITE (70,'(A,A,A,I8,A,E12.5)') "*set,A", TRIM(OUTFILE), "(", I, ",0),", V_TIME(I)
+    WRITE (70,'(A,A,A,I8,A,E12.5)') "*set,A", TRIM(OUTFILE), "(", I, ",1),", TAST(I)
+  ENDIF
 ENDDO
+
 !**********************
 !*** Set an average value for a steady simulation (last N_AVERAGE results)
 IF (N_AVERAGE==0) THEN
@@ -1154,10 +1164,22 @@ ELSE
       MED=MED+TAST(V-I)
     ENDDO
     MED=MED/(N_AVERAGE)
-    WRITE (100+VAR,'(E12.5)', ADVANCE='NO') V_TIME(V)+TINT
-    WRITE (100+VAR,'(E12.5)', ADVANCE='YES') MED          
-    WRITE (100+VAR,'(E12.5)', ADVANCE='NO') 18000.0
-    WRITE (100+VAR,'(E12.5)', ADVANCE='YES') MED      
+    !WRITE (100+VAR,'(E12.5)', ADVANCE='NO') V_TIME(V)+TINT
+    !WRITE (100+VAR,'(E12.5)', ADVANCE='YES') MED          
+    !WRITE (100+VAR,'(E12.5)', ADVANCE='NO') 18000.0
+    !WRITE (100+VAR,'(E12.5)', ADVANCE='YES') MED     
+
+    IF (VAR.EQ.2) THEN
+      WRITE (70,'(A,A,A,I8,A,E12.5)') "*set,H", TRIM(OUTFILE), "(", V, ",0),", V_TIME(V)+TINT
+      WRITE (70,'(A,A,A,I8,A,E12.5)') "*set,H", TRIM(OUTFILE), "(", V, ",1),", MED
+      WRITE (70,'(A,A,A,I8,A,E12.5)') "*set,H", TRIM(OUTFILE), "(", V+1, ",0),", 18000.0
+      WRITE (70,'(A,A,A,I8,A,E12.5)') "*set,H", TRIM(OUTFILE), "(", V+1, ",1),", MED
+    ELSE    
+      WRITE (70,'(A,A,A,I8,A,E12.5)') "*set,A", TRIM(OUTFILE), "(", V, ",0),", V_TIME(V)+TINT
+      WRITE (70,'(A,A,A,I8,A,E12.5)') "*set,A", TRIM(OUTFILE), "(", V, ",1),", MED
+      WRITE (70,'(A,A,A,I8,A,E12.5)') "*set,A", TRIM(OUTFILE), "(", V+1, ",0),", 18000.0
+      WRITE (70,'(A,A,A,I8,A,E12.5)') "*set,A", TRIM(OUTFILE), "(", V+1, ",1),", MED
+    ENDIF
 ENDIF    
 !**********************
     IF (VARIABLE_KIND==' ADIABATIC SURFACE TEMPERATURE') THEN
@@ -1169,7 +1191,7 @@ ENDIF
     DEALLOCATE (V_TIME)
     DEALLOCATE (TAST)
     DEALLOCATE (M_AST)
-    CLOSE (100+VAR)
+    !CLOSE (100+VAR)
 100 CONTINUE
     ENDDO VARIABLE_NUMBER
 !$omp end do
