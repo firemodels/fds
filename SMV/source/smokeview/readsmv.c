@@ -10523,7 +10523,6 @@ int readini2(char *inifile, int localfile){
       continue;
     }
     if(match(buffer,"LIGHTMODELSEPARATESPECULARCOLOR")==1){
-      int temp;
       fgets(buffer,255,stream);
       sscanf(buffer,"%d",&lightmodel_separatespecularcolor);
       UpdateLIGHTS=1;
