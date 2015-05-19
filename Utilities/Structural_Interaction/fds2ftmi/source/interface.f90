@@ -5,7 +5,7 @@ PROGRAM interface
 IMPLICIT NONE
 
 CHARACTER(256) NODES,ELMS,INTFILE
-INTEGER NUMEL,NNODE,I,J,NO1,NO2,NO3,NO4,LINHAS,VARIABLE,TODO
+INTEGER NUMEL,NNODE,I,J,NO1,NO2,NO3,NO4,LINHAS,VARIABLE
 INTEGER SHELL,EL,LAYER,HIGHNODE,N_OR,ROUND,CODE,N_AVERAGE
 REAL SOMAX,SOMAY,SOMAZ,A(3),B(3),C(3)
 REAL, ALLOCATABLE, DIMENSION(:,:) :: NOS,NOMASTER,N
@@ -20,17 +20,6 @@ TBEG=0.0
 TEND=0.0
 SHELL=0
 ROUND=1
-!WRITE(6,*) ' What do you want to do?'
-!WRITE(6,*) ' (1) for extract variables at nodal points'
-!WRITE(6,*) ' (2) to perform INTERFACE between FDS and ANSYS'
-!READ(*,*) TODO
-!    IF (TODO.EQ.2 .OR. TODO.EQ.1) THEN
-!    CONTINUE
-!    ELSE
-!    WRITE(6,*) 'Wrong Answer!'
-!    STOP
-!    END IF
-TODO=2
 
 
 ! Open node file        
@@ -42,11 +31,6 @@ OPEN(1,FILE=TRIM(NODES)//'.dat',STATUS='OLD',FORM='FORMATTED')
 READ(1,*) NNODE,HIGHNODE
 ALLOCATE (NOS(NNODE,4))
 
-IF (TODO.EQ.1) THEN
-ALLOCATE (NOMASTER(NNODE,4))
-NOMASTER=0.D0
-GO TO 100
-END IF
 ! Open element file
 !WRITE(6,*) ' Enter element file ID :'
 !READ(*,'(a)') ELMS
@@ -79,7 +63,6 @@ N=0.D0
 !Normal Orientation (1) for outside the solid and (-1) for inside the solid
     N_OR=1
 !
-100 CONTINUE
 
 !********TRY TO GET INFORMATION THROUGH ARGUMENTS*********
 CALL GET_COMMAND_ARGUMENT(1,INPUT)
@@ -149,17 +132,6 @@ END IF
 READ_NODES: DO I=1,NNODE
             READ (1,*) NOS(I,1),NOS(I,2),NOS(I,3),NOS(I,4)
 ENDDO READ_NODES
-
-!IF (TODO.EQ.1) THEN
-!        DO I=1,NNODE
-!            NOMASTER(I,1)=NOS(I,1)
-!            NOMASTER(I,2)=NOS(I,2)
-!            NOMASTER(I,3)=NOS(I,3)
-!            NOMASTER(I,4)=NOS(I,4)
-!        END DO
-!        NUMEL=NNODE
-!        GO TO 200
-!END IF
 
 10  CONTINUE
 
@@ -250,18 +222,8 @@ DO I=1,NUMEL
    NOMASTER(I,3), ",", NOMASTER(I,4), ",,,,"
 !  N,"NODE NUMBER","COORD X","COORD Y","COORD Z",,,,
 ENDDO
-200 CONTINUE
 !***********************************
 !!WORKING!!
-!****** LOOP AT FDS2AST TO EXTRACT RESULTS FROM BNDF FILES *****
-PRINT *, 'LOOP_FDS2AST'
-!    IF (TODO.EQ.1) CALL FDS2AST (CHID,NOMASTER,C_SIZE,TBEG,TEND,TINT,NNODE,VARIABLE,N,N_AVERAGE)
-    IF (TODO.EQ.2) CALL FDS2AST (CHID,NOMASTER,C_SIZE,TBEG,TEND,TINT,NUMEL,VARIABLE,N,N_AVERAGE)
-!*******************
-!!WORKING!!
-IF (TODO.EQ.1) THEN
-    STOP
-END IF
 !**************** CREATE ELEMENT TYPE SURF152 ********************
 !IF (SHELL.NE.1) EL=5
    WRITE(70,'(A)') "!*"
@@ -331,17 +293,27 @@ PRINT *, 'LOOP_TABELAS'
 LOOP_TABELAS:DO I=1,NUMEL
     WRITE (INTFILE2,'(g8.0)') INT(NOMASTER(I,1))
     PRINT *, INTFILE2
-    LINHAS=INT((TEND-TBEG)/TINT)
+    IF (N_AVERAGE==0) THEN
+        LINHAS=INT((TEND-TBEG)/TINT)
+    ELSE
+        LINHAS=INT((TEND-TBEG)/TINT)+2
+    ENDIF
     WRITE(70,'(A, A, A, I8, A)') "*DIM,A", INTFILE2, ",TABLE,", LINHAS, ",1,1,TIME,TEMP," 
     WRITE(70,'(A)') "!*"
     IF (VARIABLE.EQ.2) WRITE(70,'(A, A, A, I8, A)') "*DIM,H", INTFILE2, ",TABLE,", LINHAS, ",1,1,TIME,," 
     IF (VARIABLE.EQ.2) WRITE(70,'(A)') "!*"
-    WRITE(70,'(A, A, A, A, A)') "*TREAD,A", INTFILE2, ",'", INTFILE2, "','dat',' ', ,"
-    WRITE(70,'(A)') "!*"
-    IF (VARIABLE.EQ.2) WRITE(70,'(A, A, A, A, A)') "*TREAD,H", INTFILE2, ",'", INTFILE2, "H','dat',' ', ,"
-    IF (VARIABLE.EQ.2) WRITE(70,'(A)') "!*"
+    !WRITE(70,'(A, A, A, A, A)') "*TREAD,A", INTFILE2, ",'", INTFILE2, "','dat',' ', ,"
+    !WRITE(70,'(A)') "!*"
+    !IF (VARIABLE.EQ.2) WRITE(70,'(A, A, A, A, A)') "*TREAD,H", INTFILE2, ",'", INTFILE2, "H','dat',' ', ,"
+    !IF (VARIABLE.EQ.2) WRITE(70,'(A)') "!*"
 ENDDO LOOP_TABELAS    
 !****************************
+!!WORKING!!
+!200 CONTINUE
+!****** LOOP AT FDS2AST TO EXTRACT RESULTS FROM BNDF FILES *****
+PRINT *, 'LOOP_FDS2AST'
+CALL FDS2AST (CHID,NOMASTER,C_SIZE,TBEG,TEND,TINT,NUMEL,VARIABLE,N,N_AVERAGE)
+!*******************
 !!WORKING!!
 !*********** APPLYING TABLES AS NODAL LOADS **********
     WRITE(70,'(A)') "/PREP7"
