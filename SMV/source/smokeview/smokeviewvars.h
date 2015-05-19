@@ -375,11 +375,17 @@ SVEXTERN GLfloat iso_shininess;
 
 SVEXTERN float block_ambient_orig[4];
 SVEXTERN float SVDECL(*block_ambient2,NULL);
+SVEXTERN float block_specular_orig[4];
+SVEXTERN float SVDECL(*block_specular2,NULL);
 SVEXTERN GLfloat SVDECL(block_shininess,100.0);
 
+SVEXTERN int SVDECL(light_enabled0, 1);
+SVEXTERN int SVDECL(light_enabled1, 1);
 SVEXTERN GLfloat light_position0[4];
 SVEXTERN GLfloat light_position1[4];
 
+SVEXTERN int SVDECL(lightmodel_localviewer,0);
+SVEXTERN int SVDECL(lightmodel_separatespecularcolor,0);
 SVEXTERN GLfloat ambientlight[4];
 SVEXTERN GLfloat diffuselight[4];
 
@@ -1115,6 +1121,7 @@ SVEXTERN float smoke_extinct,smoke_dens,smoke_pathlength;
 SVEXTERN int smoke_alpha;
 SVEXTERN int smoketest,show_smoketest;
 SVEXTERN int showall_textures;
+SVEXTERN int SVDECL(enable_texture_lighting,0);
 
 SVEXTERN int SVDECL(ncolorbars,0);
 SVEXTERN int ndefaultcolorbars;

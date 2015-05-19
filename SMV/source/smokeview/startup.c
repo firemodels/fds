@@ -115,6 +115,7 @@ void Init(void){
   UpdateRGBColors(COLORBAR_INDEX_NONE);
 
   block_ambient2[3] = 1.0;
+  block_specular2[3] = 1.0;
   mat_ambient2[3] = 1.0;
   mat_specular2[3] = 1.0;
 
@@ -268,7 +269,7 @@ int setup_case(int argc, char **argv){
   glui_stereo_setup(mainwindow_id);
   glui_3dsmoke_setup(mainwindow_id);
 
-  if(UpdateLIGHTS==1)updateLights(NULL,NULL);
+  if(UpdateLIGHTS==1)updateLights(light_position0,light_position1);
 
   glutReshapeWindow(screenWidth,screenHeight);
 
@@ -1225,6 +1226,12 @@ void initvars(void){
   block_ambient_orig[2] = 0.4;
   block_ambient_orig[3] = 1.0;
   block_ambient2=getcolorptr(block_ambient_orig);
+  
+  block_specular_orig[0] = 0.0;
+  block_specular_orig[1] = 0.0;
+  block_specular_orig[2] = 0.0;
+  block_specular_orig[3] = 1.0;
+  block_specular2=getcolorptr(block_specular_orig);
 
   for(i=0;i<256;i++){
     boundarylevels256[i]=(float)i/255.0;

@@ -1225,7 +1225,7 @@ void init_textures(void){
       }
       FREEMEMORY(floortex);
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
       texti->loaded=1;
@@ -1366,7 +1366,7 @@ void init_textures(void){
     FREEMEMORY(floortex);
     if(errorcode==0){
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
       tt->loaded=1;
@@ -9321,6 +9321,11 @@ int readini2(char *inifile, int localfile){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i",&showall_textures);
       continue;
+    }	
+    if(match(buffer,"ENABLETEXTURELIGHTING") == 1){
+      fgets(buffer,255,stream);
+      sscanf(buffer,"%i",&enable_texture_lighting);
+      continue;
     }
     if(match(buffer,"PIXELSKIP")==1){
       fgets(buffer,255,stream);
@@ -10178,6 +10183,24 @@ int readini2(char *inifile, int localfile){
       sscanf(buffer,"%i",&blocklocation);
       continue;
       }
+    if(match(buffer,"BLOCKSHININESS")==1){
+      fgets(buffer,255,stream);
+      sscanf(buffer,"%f",&block_shininess);
+      updatefaces=1;
+      updateindexcolors=1;
+      continue;
+      }
+    if(match(buffer,"BLOCKSPECULAR")==1){
+      float blockspec_temp[4];
+
+      fgets(buffer,255,stream);
+      sscanf(buffer,"%f %f %f",blockspec_temp,blockspec_temp+1,blockspec_temp+2);
+      blockspec_temp[3]=1.0;
+      block_specular2=getcolorptr(blockspec_temp);
+      updatefaces=1;
+      updateindexcolors=1;
+      continue;
+      }
     if(match(buffer,"SHOWOPENVENTS")==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i %i",&visOpenVents,&visOpenVentsAsOutline);
@@ -10465,6 +10488,45 @@ int readini2(char *inifile, int localfile){
     if(match(buffer,"WINDOWOFFSET")==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i",&titlesafe_offsetBASE);
+      continue;
+    }
+    if(match(buffer,"LIGHT0")==1){
+      fgets(buffer,255,stream);
+      sscanf(buffer,"%d",&light_enabled0);
+      UpdateLIGHTS=1;
+      continue;
+    }
+    if(match(buffer,"LIGHT1")==1){
+      fgets(buffer,255,stream);
+      sscanf(buffer,"%d",&light_enabled1);
+      UpdateLIGHTS=1;
+      continue;
+    }
+    if(match(buffer,"LIGHTPOS0")==1){
+      fgets(buffer,255,stream);
+      sscanf(buffer,"%f %f %f %f",light_position0,light_position0+1,light_position0+2,light_position0+3);
+      UpdateLIGHTS=1;
+      continue;
+    }
+    if(match(buffer,"LIGHTPOS1")==1){
+      fgets(buffer,255,stream);
+      sscanf(buffer,"%f %f %f %f",light_position1,light_position1+1,light_position1+2,light_position1+3);
+      UpdateLIGHTS=1;
+      continue;
+    }
+    if(match(buffer,"LIGHTMODELLOCALVIEWER")==1){
+      int temp;
+      fgets(buffer,255,stream);
+      sscanf(buffer,"%d",&temp);
+      lightmodel_localviewer = temp == 0? GL_FALSE : GL_TRUE;
+      UpdateLIGHTS=1;
+      continue;
+    }
+    if(match(buffer,"LIGHTMODELSEPARATESPECULARCOLOR")==1){
+      int temp;
+      fgets(buffer,255,stream);
+      sscanf(buffer,"%d",&lightmodel_separatespecularcolor);
+      UpdateLIGHTS=1;
       continue;
     }
     if(match(buffer,"AMBIENTLIGHT")==1){
@@ -11752,6 +11814,10 @@ void writeini(int flag,char *filename){
   fprintf(fileout, " %f %f %f\n", backgroundbasecolor[0], backgroundbasecolor[1], backgroundbasecolor[2]);
   fprintf(fileout, "BLOCKCOLOR\n");
   fprintf(fileout, " %f %f %f\n", block_ambient2[0], block_ambient2[1], block_ambient2[2]);
+  fprintf(fileout, "BLOCKSHININESS\n");
+  fprintf(fileout, " %f\n", block_shininess);
+  fprintf(fileout, "BLOCKSPECULAR\n");
+  fprintf(fileout, " %f %f %f\n", block_specular2[0], block_specular2[1], block_specular2[2]);
   fprintf(fileout, "BOUNDCOLOR\n");
   fprintf(fileout, " %f %f %f\n", boundcolor[0], boundcolor[1], boundcolor[2]);
   fprintf(fileout, "COLORBAR\n");
@@ -11805,6 +11871,18 @@ void writeini(int flag,char *filename){
         rgbi->color[0], rgbi->color[1], rgbi->color[2], rgbi->color[3], percen, rgbi->label);
     }
   }
+  fprintf(fileout, "LIGHT0\n");
+  fprintf(fileout, " %i\n", light_enabled0);  
+  fprintf(fileout, "LIGHT1\n");
+  fprintf(fileout, " %i\n", light_enabled1);
+  fprintf(fileout, "LIGHTMODELLOCALVIEWER\n");
+  fprintf(fileout, " %i\n", lightmodel_localviewer);
+  fprintf(fileout, "LIGHTMODELSEPARATESPECULARCOLOR\n");
+  fprintf(fileout, " %i\n", lightmodel_separatespecularcolor);
+  fprintf(fileout, "LIGHTPOS0\n");
+  fprintf(fileout, " %f %f %f %f\n", light_position0[0], light_position0[1], light_position0[2], light_position0[3]);
+  fprintf(fileout, "LIGHTPOS1\n");
+  fprintf(fileout, " %f %f %f %f\n", light_position1[0], light_position1[1], light_position1[2], light_position1[3]);
   fprintf(fileout, "SENSORCOLOR\n");
   fprintf(fileout, " %f %f %f\n", sensorcolor[0], sensorcolor[1], sensorcolor[2]);
   fprintf(fileout, "SENSORNORMCOLOR\n");
@@ -11932,6 +12010,8 @@ void writeini(int flag,char *filename){
   fprintf(fileout, " %i\n", contour_type);
   fprintf(fileout, "CULLFACES\n");
   fprintf(fileout, " %i\n", cullfaces);
+  fprintf(fileout, "ENABLETEXTURELIGHTING\n");
+  fprintf(fileout, " %i\n", enable_texture_lighting);
   fprintf(fileout, "EYEVIEW\n");
   fprintf(fileout, " %i\n", rotation_type);
   fprintf(fileout, "EYEX\n");

@@ -681,11 +681,13 @@ extern "C" void OBJECT_CB(int var){
           CHECKBOX_blockage->set_int_val(blockage_snapped);
         }
         blockage_as_input=1-blockage_snapped;
-        if(blockage_as_input==1){
-          blocklocation=BLOCKlocation_exact;
-        }
-        else{
-          blocklocation=BLOCKlocation_grid;
+        if(blocklocation!=BLOCKlocation_cad){
+          if(blockage_as_input==1){
+            blocklocation=BLOCKlocation_exact;
+          }
+          else{
+            blocklocation=BLOCKlocation_grid;
+          }
         }
         Update_Blockvals(NOT_SELECT_BLOCKS);
         break;

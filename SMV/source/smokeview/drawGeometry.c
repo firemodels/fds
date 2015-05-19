@@ -1523,6 +1523,7 @@ void readcad2geom(cadgeom *cd){
     float *shininess;
     float *t_origin;
     float *rrgb;
+    int *onesided;
 
     cdi = cd->cadlookinfo + i;
 
@@ -1531,6 +1532,7 @@ void readcad2geom(cadgeom *cd){
     if(fgets(buffer,255,stream)==NULL)return;
     rrgb=cdi->rgb;
     shininess=&cdi->shininess;
+    onesided=&cdi->onesided;
     cdi->texture_height=-1.0;
     cdi->texture_width=-1.0;
     t_origin = cdi->texture_origin;
@@ -1542,15 +1544,18 @@ void readcad2geom(cadgeom *cd){
     rrgb[2]=-255.0;
     rrgb[3]=1.0;
     *shininess=block_shininess;
+    *onesided=0;
     lenbuffer=strlen(buffer);
     for(ii=0;ii<lenbuffer;ii++){
       if(buffer[ii]==',')buffer[ii]=' ';
     }
-    sscanf(buffer,"%i %f %f %f %f %f %f %f %f %f %f",
+    
+    sscanf(buffer,"%i %f %f %f %f %f %f %f %f %f %f %i",
       &cdi->index,rrgb,rrgb+1,rrgb+2,
       &cdi->texture_width,&cdi->texture_height,
       rrgb+3,shininess,
-      t_origin,t_origin+1,t_origin+2
+      t_origin,t_origin+1,t_origin+2,
+      onesided
       );
       
     rrgb[0]/=255.0;
@@ -1598,7 +1603,7 @@ void readcad2geom(cadgeom *cd){
       }
       FREEMEMORY(floortex);
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
       texti->loaded=1;
@@ -1730,6 +1735,7 @@ void drawcadgeom(const cadgeom *cd){
 
   glEnable(GL_LIGHTING); 
   glMaterialfv(GL_FRONT_AND_BACK,GL_SHININESS,&block_shininess);
+  glMaterialfv(GL_FRONT_AND_BACK,GL_SPECULAR,block_specular2);
   glEnable(GL_COLOR_MATERIAL);
   glBegin(GL_QUADS);
   for(i=0;i<cd->nquads;i++){
@@ -1780,16 +1786,18 @@ void drawcadgeom(const cadgeom *cd){
 void drawcad2geom(const cadgeom *cd, int trans_flag){
   int ii;
   float *thiscolor,*lastcolor; 
+  int thisonesided, lastonesided;
   int colorindex;
   texturedata *lasttexture;
   float last_block_shininess;
 
+  lastonesided=-1;
   lastcolor=NULL;
   last_block_shininess=-1.0;
-  if(cullfaces==1)glDisable(GL_CULL_FACE);
 
   glEnable(GL_COLOR_MATERIAL);
   glColorMaterial(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE);
+  glMaterialfv(GL_FRONT_AND_BACK,GL_SPECULAR,block_specular2);
   glEnable(GL_LIGHTING); 
   if(trans_flag==DRAW_TRANSPARENT)transparenton();
   glBegin(GL_QUADS);
@@ -1839,6 +1847,19 @@ void drawcad2geom(const cadgeom *cd, int trans_flag){
 
     if(RectangleInFrustum(xyzpoint,xyzpoint+3,xyzpoint+6,xyzpoint+9)==0)continue;
 
+    thisonesided = quadi->cadlookq->onesided;
+    if(lastonesided!=thisonesided){
+      glEnd();
+      if(thisonesided){
+        glEnable(GL_CULL_FACE);
+      }
+      else{
+        glDisable(GL_CULL_FACE);
+      }
+      lastonesided=thisonesided;
+      glBegin(GL_QUADS);
+    }
+  
     this_block_shininess = quadi->cadlookq->shininess;
     if(last_block_shininess!=this_block_shininess){
       last_block_shininess=this_block_shininess;
@@ -1854,13 +1875,18 @@ void drawcad2geom(const cadgeom *cd, int trans_flag){
     glVertex3fv(xyzpoint+9);
   }
   glEnd();
+  
   if(visCadTextures==1){
-    glTexEnvf(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_REPLACE);
+    glMaterialfv(GL_FRONT_AND_BACK,GL_SHININESS,&block_shininess);
+    glTexEnvf(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,enable_texture_lighting? GL_MODULATE : GL_REPLACE);
     glEnable(GL_TEXTURE_2D);
+    glColor4ub(255, 255, 255, 255);
 
+    last_block_shininess=-1.0;
     lasttexture=NULL;
     glBegin(GL_QUADS);
     for(ii=0;ii<cd->nquads;ii++){
+      float this_block_shininess;
       float *xyzpoint;
       texturedata *texti;
       float *txypoint;
@@ -1876,17 +1902,35 @@ void drawcad2geom(const cadgeom *cd, int trans_flag){
       texti=&quadi->cadlookq->textureinfo;
       if(texti->loaded==0)continue;
 
+      if(RectangleInFrustum(xyzpoint,xyzpoint+3,xyzpoint+6,xyzpoint+9)==0)continue;
+      
       txypoint = quadi->txypoints;
       normal = quadi->normals;
-
-      if(lasttexture!=texti){
+      thisonesided = quadi->cadlookq->onesided;
+    
+      if(lasttexture!=texti || lastonesided!=thisonesided){
         glEnd();
-        glBindTexture(GL_TEXTURE_2D,texti->name);
+        if(lasttexture!=texti){
+          glBindTexture(GL_TEXTURE_2D,texti->name);
+          lasttexture=texti;
+        }
+        if(lastonesided!=thisonesided){
+          if(thisonesided){
+            glEnable(GL_CULL_FACE);
+          }
+          else{
+            glDisable(GL_CULL_FACE);
+          }
+          lastonesided=thisonesided;
+        }
         glBegin(GL_QUADS);
-        lasttexture=texti;
       }
-
-      if(RectangleInFrustum(xyzpoint,xyzpoint+3,xyzpoint+6,xyzpoint+9)==0)continue;
+      
+      this_block_shininess = quadi->cadlookq->shininess;
+      if(last_block_shininess!=this_block_shininess){
+        last_block_shininess=this_block_shininess;
+        glMaterialfv(GL_FRONT_AND_BACK,GL_SHININESS,&this_block_shininess);
+      }
 
       glNormal3fv(normal);
       glTexCoord2fv(txypoint);
@@ -1908,8 +1952,12 @@ void drawcad2geom(const cadgeom *cd, int trans_flag){
   glDisable(GL_LIGHTING);
   glDisable(GL_COLOR_MATERIAL);
   if(trans_flag==DRAW_TRANSPARENT)transparentoff();
-  if(cullfaces==1)glEnable(GL_CULL_FACE);
-
+  if(cullfaces==1){
+    glEnable(GL_CULL_FACE);
+  }
+  else{
+    glDisable(GL_CULL_FACE);
+  }
 }
 
 /* ------------------ updatefaces ------------------------ */
@@ -3090,6 +3138,7 @@ void draw_faces(){
     glEnable(GL_LIGHTING);
     glMaterialfv(GL_FRONT_AND_BACK,GL_SHININESS,&block_shininess);
     glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,block_ambient2);
+    glMaterialfv(GL_FRONT_AND_BACK,GL_SPECULAR,block_specular2);
     glEnable(GL_COLOR_MATERIAL);
     glBegin(GL_TRIANGLES);
     for(j=0;j<nmeshes;j++){
@@ -3158,6 +3207,7 @@ void draw_faces(){
     glEnable(GL_LIGHTING);
     glMaterialfv(GL_FRONT_AND_BACK,GL_SHININESS,&block_shininess);
     glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,block_ambient2);
+    glMaterialfv(GL_FRONT_AND_BACK,GL_SPECULAR,block_specular2);
     glEnable(GL_COLOR_MATERIAL);
     if(cullfaces==1)glDisable(GL_CULL_FACE);
     glBegin(GL_QUADS);
@@ -3283,10 +3333,13 @@ void draw_faces(){
   }
   if(nface_textures>0){
     int j;
-
     glEnable(GL_LIGHTING);
-    glTexEnvf(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_REPLACE);
+    glEnable(GL_COLOR_MATERIAL);
+    glTexEnvf(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,enable_texture_lighting? GL_MODULATE : GL_REPLACE);
+    glMaterialfv(GL_FRONT_AND_BACK,GL_SHININESS,&block_shininess);
+    glMaterialfv(GL_FRONT_AND_BACK,GL_SPECULAR,block_specular2);
     glEnable(GL_TEXTURE_2D);
+    glColor4ub(255, 255, 255, 255);
     for(j=0;j<nmeshes;j++){
       mesh *meshi;
       int i;
@@ -3336,7 +3389,8 @@ void draw_faces(){
       if(cullfaces==1)glEnable(GL_CULL_FACE);
 
 
-    }
+    }    
+    glDisable(GL_COLOR_MATERIAL);
     glDisable(GL_TEXTURE_2D);
     glDisable(GL_LIGHTING);
   }
@@ -5393,6 +5447,7 @@ void draw_facesOLD(){
     glEnable(GL_LIGHTING);
     glMaterialfv(GL_FRONT_AND_BACK,GL_SHININESS,&block_shininess);
     glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,block_ambient2);
+    glMaterialfv(GL_FRONT_AND_BACK,GL_SPECULAR,block_specular2);
     glEnable(GL_COLOR_MATERIAL);
     glBegin(GL_TRIANGLES);
     for(j=0;j<nmeshes;j++){
@@ -5465,6 +5520,7 @@ void draw_facesOLD(){
     glEnable(GL_LIGHTING);
     glMaterialfv(GL_FRONT_AND_BACK,GL_SHININESS,&block_shininess);
     glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,block_ambient2);
+    glMaterialfv(GL_FRONT_AND_BACK,GL_SPECULAR,block_specular2);
     glEnable(GL_COLOR_MATERIAL);
     if(cullfaces==1)glDisable(GL_CULL_FACE);
     glBegin(GL_QUADS);
@@ -5596,8 +5652,13 @@ void draw_facesOLD(){
     int j;
 
     glEnable(GL_LIGHTING);
-    glTexEnvf(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_REPLACE);
+    glEnable(GL_COLOR_MATERIAL);
+    glTexEnvf(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,enable_texture_lighting? GL_MODULATE : GL_REPLACE);
+    glColorMaterial(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE);
+    glMaterialfv(GL_FRONT_AND_BACK,GL_SHININESS,&block_shininess);
+    glMaterialfv(GL_FRONT_AND_BACK,GL_SPECULAR,block_specular2);
     glEnable(GL_TEXTURE_2D);
+    glColor4ub(255, 255, 255, 255);
     for(j=0;j<nmeshes;j++){
       mesh *meshi;
       int i;
@@ -5650,6 +5711,7 @@ void draw_facesOLD(){
     }
     glDisable(GL_TEXTURE_2D);
     glDisable(GL_LIGHTING);
+    glDisable(GL_COLOR_MATERIAL);
   }
   if(show_triangle_count==1)printf("obst/vent triangles: %i\n",n_geom_triangles);
 }

@@ -12,6 +12,7 @@ char smokeview_revision[]="$Revision$";
 #include <math.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include "glew.h"
 #include GLUT_H
 
 #include "smokeviewvars.h"
@@ -39,23 +40,47 @@ void _Sniff_Errors(char *whereat){
 
 void updateLights(float *pos1, float *pos2){
   int i;
-  GLfloat ambientlight2[4], diffuselight2[4];
+  GLfloat ambientlight2[4], diffuselight2[4];  
+  int lightCount;
+  float div;
+        
+  glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER, lightmodel_localviewer == 0? GL_FALSE : GL_TRUE);
+  glLightModeli(GL_LIGHT_MODEL_COLOR_CONTROL, lightmodel_separatespecularcolor == 0? GL_SINGLE_COLOR : GL_SEPARATE_SPECULAR_COLOR);
+  
+  lightCount = 0;
+  if(light_enabled0){
+    ++lightCount;
+  }
+  if(light_enabled1){
+    ++lightCount;
+  }
 
+  div = lightCount > 0? 1.0f/(float)lightCount : 1.0f;  
   for(i=0;i<3;i++){
-    ambientlight2[i]=ambientlight[i]/2.0;
-    diffuselight2[i]=diffuselight[i]/2.0;
+    ambientlight2[i]=ambientlight[i]*div;
+    diffuselight2[i]=diffuselight[i]*div;
   }
   ambientlight2[3]=1.0;
   diffuselight2[3]=1.0;
-  glLightfv(GL_LIGHT0,GL_DIFFUSE,diffuselight2);
-  glLightfv(GL_LIGHT0,GL_AMBIENT,ambientlight2);
-  if(pos1!=NULL)glLightfv(GL_LIGHT0,GL_POSITION,pos1);
-  glEnable(GL_LIGHT0);
+  if(light_enabled0){  
+    glLightfv(GL_LIGHT0,GL_DIFFUSE,diffuselight2);
+    glLightfv(GL_LIGHT0,GL_AMBIENT,ambientlight2);
+    if(pos1!=NULL)glLightfv(GL_LIGHT0,GL_POSITION,pos1);
+    glEnable(GL_LIGHT0);
+  }
+  else{
+    glDisable(GL_LIGHT0);
+  }
 
-  glLightfv(GL_LIGHT1,GL_DIFFUSE,diffuselight2);
-  glLightfv(GL_LIGHT1,GL_AMBIENT,ambientlight2);
-  if(pos2!=NULL)glLightfv(GL_LIGHT1,GL_POSITION,pos2);
-  glEnable(GL_LIGHT1);
+  if(light_enabled1){  
+    glLightfv(GL_LIGHT1,GL_DIFFUSE,diffuselight2);
+    glLightfv(GL_LIGHT1,GL_AMBIENT,ambientlight2);
+    if(pos2!=NULL)glLightfv(GL_LIGHT1,GL_POSITION,pos2);
+    glEnable(GL_LIGHT1);
+  }
+  else{
+    glDisable(GL_LIGHT1);
+  }
 
   UpdateLIGHTS=0;
 }

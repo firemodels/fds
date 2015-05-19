@@ -383,6 +383,7 @@ typedef struct {
   float texture_width, texture_height, texture_origin[3];
   float rgb[4], shininess;
   texturedata textureinfo;
+  int onesided;
 } cadlook;
 
 /* --------------------------  cadquad ------------------------------------ */
