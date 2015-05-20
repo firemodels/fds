@@ -1,7 +1,3 @@
-// $Date: 2015-01-30 00:04:11 -0500 (Fri, 30 Jan 2015) $ 
-// $Revision: 21559 $
-// $Author: gforney $
-
 #ifndef COUNTOURDEFS_H_DEFINED
 #define COUNTOURDEFS_H_DEFINED
 

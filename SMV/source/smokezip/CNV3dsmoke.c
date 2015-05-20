@@ -1,7 +1,3 @@
-// $Date: 2014-11-13 23:42:41 -0500 (Thu, 13 Nov 2014) $ 
-// $Revision: 20944 $
-// $Author: gforney $
-
 #include "options.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -12,9 +8,6 @@
 #include "lightsmoke.h"
 #include "file_util.h"
 #include "MALLOC.h"
-
-// svn revision character string
-char CNV3dsmoke_revision[]="$Revision: 20944 $";
 
 /* ------------------ convert_3dsmoke ------------------------ */
 

@@ -1,7 +1,3 @@
-// $Date: 2015-04-28 14:58:18 -0400 (Tue, 28 Apr 2015) $ 
-// $Revision: 22541 $
-// $Author: gforney $
-
 #ifndef OPTIONS_H_DEFINED
 #define OPTIONS_H_DEFINED
 // build Smokeview as a standard release unless the pp_BETA directive is defined

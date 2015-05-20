@@ -1,7 +1,3 @@
-// $Date: 2012-08-20 19:39:01 -0400 (Mon, 20 Aug 2012) $ 
-// $Revision: 12156 $
-// $Author: koverholt $
-
 #ifndef CSPHERE_H_DEFINED
 #define CSPHERE_H_DEFINED
 

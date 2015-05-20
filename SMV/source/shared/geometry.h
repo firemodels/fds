@@ -1,8 +1,3 @@
-// $Date: 2013-08-27 23:18:24 -0400 (Tue, 27 Aug 2013) $ 
-// $Revision: 16680 $
-// $Author: gforney $
-
-// svn revision character string
 #define GEOM_INTERIOR 0
 #define GEOM_EXTERIOR 1
 #define GEOM_COMPLEX 2

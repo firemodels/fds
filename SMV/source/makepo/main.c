@@ -1,7 +1,3 @@
-// $Date$ 
-// $Revision$
-// $Author$
-
 #include "options.h"
 #include <stdio.h>
 #include <string.h>

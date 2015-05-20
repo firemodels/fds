@@ -1,9 +1,3 @@
-// $Date: 2015-01-18 17:23:39 -0500 (Sun, 18 Jan 2015) $ 
-// $Revision: 21452 $
-// $Author: gforney $
-
-
- /* ------------------ options ------------------------ */
 #ifdef WIN32
 #ifdef _DEBUG
 #pragma float_control( precise, on)

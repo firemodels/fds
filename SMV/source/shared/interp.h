@@ -1,7 +1,3 @@
-// $Date: 2012-08-20 19:39:01 -0400 (Mon, 20 Aug 2012) $ 
-// $Revision: 12156 $
-// $Author: koverholt $
-
 #ifndef INTERP_H_DEFINED
 #define INTERP_H_DEFINED
 #define IJK(i,j,k) ((i)+(j)*nx+(k)*nxy)

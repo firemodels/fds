@@ -1,7 +1,3 @@
-// $Date: 2015-05-03 15:40:57 -0400 (Sun, 03 May 2015) $ 
-// $Revision: 22600 $
-// $Author: gforney $
-
 #include "options.h"
 #define INDMALLOC
 #include <stdlib.h>
@@ -14,9 +10,6 @@ static int checkmemoryflag=1;
 #ifdef WIN32
 #include <windows.h>
 #endif
-
-// svn revision character string
-char dmalloc_revision[]="$Revision: 22600 $";
 
 #ifdef pp_MEMDEBUG
 static blockinfo *GetBlockInfo(bbyte *pb);

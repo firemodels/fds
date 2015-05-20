@@ -1,7 +1,3 @@
-// $Date: 2014-11-13 00:12:07 -0500 (Thu, 13 Nov 2014) $ 
-// $Revision: 20925 $
-// $Author: gforney $
-
 #include "options.h"
 #include "zlib.h"
 #include <stdio.h>
@@ -10,9 +6,6 @@
 #include <math.h>
 #include "svzip.h"
 #include "MALLOC.h"
-
-// svn revision character string
-char readfiles_revision[]="$Revision: 20925 $";
 
 int readsmv(char *smvfile){
   

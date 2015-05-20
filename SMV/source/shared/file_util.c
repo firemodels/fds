@@ -1,10 +1,3 @@
-// $Date: 2015-03-26 22:48:19 -0400 (Thu, 26 Mar 2015) $ 
-// $Revision: 22135 $
-// $Author: gforney $
-
-// svn revision character string
-char file_util_revision[]="$Revision: 22135 $";
-
 #define IN_FILE
 
 #include "options.h"

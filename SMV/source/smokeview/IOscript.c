@@ -1,10 +1,3 @@
-// $Date: 2015-05-09 19:47:21 -0400 (Sat, 09 May 2015) $ 
-// $Revision: 22648 $
-// $Author: gforney $
-
-// svn revision character string
-char IOscript_revision[]="$Revision: 22648 $";
-
 #include "options.h"
 #include <stdio.h>  
 #include <stdlib.h>

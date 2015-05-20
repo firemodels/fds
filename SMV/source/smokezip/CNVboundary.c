@@ -1,7 +1,3 @@
-// $Date: 2014-11-13 17:12:08 -0500 (Thu, 13 Nov 2014) $ 
-// $Revision: 20938 $
-// $Author: gforney $
-
 #include "options.h"
 #include "zlib.h"
 #include <stdio.h>
@@ -12,11 +8,7 @@
 #include "svzip.h"
 #include "MALLOC.h"
 
-// svn revision character string
-char CNVboundary_revision[]="$Revision: 20938 $";
-
 pdfdata pdfmerge,pdfframe;
-
 
 #define FORTREAD(var,size) FSEEK(BOUNDARYFILE,4,SEEK_CUR);\
                            returncode=fread(var,4,size,BOUNDARYFILE);\

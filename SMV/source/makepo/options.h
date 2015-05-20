@@ -1,7 +1,3 @@
-// $Date$ 
-// $Revision$
-// $Author$
-
 #define PROGVERSION "1.0"
 
  /* ------------------ options ------------------------ */

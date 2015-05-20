@@ -1,10 +1,3 @@
-// $Date: 2015-04-09 15:22:21 -0400 (Thu, 09 Apr 2015) $ 
-// $Revision: 22304 $
-// $Author: gforney $
-
-// svn revision character string
-char colortimebar_revision[]="$Revision: 22304 $";
-
 #include "options.h"
 #include <stdio.h>
 #include <string.h>

@@ -1,10 +1,3 @@
-// $Date: 2014-02-26 11:37:20 -0500 (Wed, 26 Feb 2014) $ 
-// $Revision: 18492 $
-// $Author: gforney $
-
-// svn revision character string
-char csphere_revision[]="$Revision: 18492 $";
-
 #include "options.h"
 #include <stdio.h>  
 #include <stdlib.h>

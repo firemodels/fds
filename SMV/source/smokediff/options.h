@@ -1,7 +1,3 @@
-
-// $Date: 2015-02-27 08:58:40 -0500 (Fri, 27 Feb 2015) $ 
-// $Revision: 21824 $
-// $Author: gforney $
 #ifndef OPTIONS_H_DEFINED
 #define OPTIONS_H_DEFINED
 

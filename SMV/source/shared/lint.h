@@ -1,7 +1,3 @@
-// $Date: 2015-03-20 14:07:38 -0400 (Fri, 20 Mar 2015) $ 
-// $Revision: 22052 $
-// $Author: gforney $
-
 #ifndef LINT_H_DEFINED
 #define LINT_H_DEFINED
 

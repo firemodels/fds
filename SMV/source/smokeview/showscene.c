@@ -1,7 +1,3 @@
-// $Date: 2015-05-19 14:58:38 -0400 (Tue, 19 May 2015) $ 
-// $Revision: 22684 $
-// $Author: gforney $
-
 #include "options.h"
 #include <stdio.h>  
 #include <string.h>
@@ -10,9 +6,6 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include GLUT_H
-
-// svn revision character string
-char showscene_revision[]="$Revision: 22684 $";
 
 #include "update.h"
 #include "smokeviewvars.h"

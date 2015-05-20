@@ -1,7 +1,3 @@
-// $Date: 2014-03-12 15:49:06 -0400 (Wed, 12 Mar 2014) $ 
-// $Revision: 18667 $
-// $Author: gforney $
-
 #ifndef ISODEFS_H_DEFINED
 #define ISODEFS_H_DEFINED
 #define INCPOINTS 100000

@@ -1,10 +1,3 @@
-// $Date: 2015-01-13 15:36:53 -0500 (Tue, 13 Jan 2015) $ 
-// $Revision: 21371 $
-// $Author: gforney $
-
-// svn revision character string
-char unit_revision[]="$Revision: 21371 $";
-
 #include "options.h"
 #include <stdio.h>  
 #include <string.h>

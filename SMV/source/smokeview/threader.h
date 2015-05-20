@@ -1,7 +1,3 @@
-// $Date: 2015-03-27 14:56:09 -0400 (Fri, 27 Mar 2015) $ 
-// $Revision: 22144 $
-// $Author: gforney $
-
 #ifndef THREADER_H_DEFINED
 #define THREADER_H_DEFINED
 #ifndef CPP

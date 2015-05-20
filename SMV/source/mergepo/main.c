@@ -1,7 +1,3 @@
-// $Date: 2011-05-20 00:21:00 -0400 (Fri, 20 May 2011) $ 
-// $Revision: 8337 $
-// $Author: gforney $
-
 #define INMAIN
 
 #include "options.h"

@@ -1,10 +1,3 @@
-// $Date: 2015-03-24 22:21:29 -0400 (Tue, 24 Mar 2015) $ 
-// $Revision: 22113 $
-// $Author: gforney $
-
-// svn revision character string
-char IOobject_revision[]="$Revision: 22113 $";
-
 #include "options.h"
 #include <stdio.h>  
 #include <stdlib.h>

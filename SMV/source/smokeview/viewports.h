@@ -1,7 +1,3 @@
-// $Date: 2012-10-25 14:45:44 -0400 (Thu, 25 Oct 2012) $ 
-// $Revision: 13520 $
-// $Author: gforney $
-
 #ifndef VIEWPORTS_H_DEFINED
 #define VIEWPORTS_H_DEFINED
 

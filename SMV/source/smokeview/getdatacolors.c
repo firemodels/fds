@@ -1,10 +1,3 @@
-// $Date: 2015-03-20 15:56:52 -0400 (Fri, 20 Mar 2015) $ 
-// $Revision: 22055 $
-// $Author: gforney $
-
-// svn revision character string
-char getdatacolors_revision[]="$Revision: 22055 $";
-
 #include "options.h"
 #include "glew.h"
 #include <stdio.h>

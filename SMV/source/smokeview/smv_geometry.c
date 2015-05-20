@@ -1,10 +1,3 @@
-// $Date: 2015-05-01 19:51:23 -0400 (Fri, 01 May 2015) $ 
-// $Revision: 22581 $
-// $Author: gforney $
-
-// svn revision character string
-char smv_geometry_revision[]="$Revision: 22581 $";
-
 #include "options.h"
 #include <stdio.h>  
 #include <string.h>

@@ -1,7 +1,3 @@
-// $Date: 2015-03-11 22:52:26 -0400 (Wed, 11 Mar 2015) $ 
-// $Revision: 21950 $
-// $Author: gforney $
-
 #ifndef FILE_UTIL_H_DEFINED
 #define FILE_UTIL_H_DEFINED
 

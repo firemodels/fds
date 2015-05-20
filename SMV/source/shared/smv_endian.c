@@ -1,10 +1,3 @@
-// $Date: 2013-07-01 18:19:36 -0400 (Mon, 01 Jul 2013) $ 
-// $Revision: 16163 $
-// $Author: gforney $
-
-// svn revision character string
-char smv_endian_revision[]="$Revision: 16163 $";
-
 #include "options.h"
 #include "smv_endian.h"
 

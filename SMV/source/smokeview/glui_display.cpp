@@ -1,13 +1,5 @@
-// $Date: 2015-04-29 20:44:56 -0400 (Wed, 29 Apr 2015) $ 
-// $Revision: 22565 $
-// $Author: gforney $
-
 #define CPP
 #include "options.h"
-
-// svn revision character string2
-extern "C" char glui_display_revision[];
-char glui_display_revision[]="$Revision: 22565 $";
 
 extern "C" void ShowHideMenu(int val);
 extern "C" void colorbar_global2local(void);

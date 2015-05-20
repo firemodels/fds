@@ -1,7 +1,3 @@
-// $Date$ 
-// $Revision$
-// $Author$
-
 #define INMAIN
 #include "options.h"
 #include <stdio.h>
@@ -13,9 +9,6 @@
 #include "MALLOC.h"
 
 //dummy change to bump version number to  0.9
-
-// svn revision character string
-char main_revision[]="$Revision$";
 
 void usage(char *prog);
 void version(char *prog);

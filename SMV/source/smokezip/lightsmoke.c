@@ -1,7 +1,3 @@
-// $Date: 2012-08-20 19:39:01 -0400 (Mon, 20 Aug 2012) $ 
-// $Revision: 12156 $
-// $Author: koverholt $
-
 #include "options.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -9,8 +5,6 @@
 #include "svzip.h"
 #include "lightsmoke.h"
 #include "MALLOC.h"
-
-char lightsmoke_revision[]="$Revision: 12156 $";
 
 #define IJKRAD(i,j,k) ((i) + nx*(j) + nxy*(k))
 #define IJKRAD2(i,j,k) (((i)+1) + (nx+2)*((j)+1) + (nx+2)*(ny+2)*((k)+1))

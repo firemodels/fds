@@ -1,13 +1,5 @@
-// $Date: 2015-03-18 14:50:48 -0400 (Wed, 18 Mar 2015) $ 
-// $Revision: 22025 $
-// $Author: gforney $
-
 #define CPP
 #include "options.h"
-
-// svn revision character string
-extern "C" char glui_trainer_revision[];
-char glui_trainer_revision[]="$Revision: 22025 $";
 
 #include <stdio.h>
 #include <string.h>

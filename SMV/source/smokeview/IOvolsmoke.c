@@ -1,10 +1,3 @@
-// $Date: 2015-05-05 22:53:25 -0400 (Tue, 05 May 2015) $ 
-// $Revision: 22625 $
-// $Author: gforney $
-
-// svn revision character string
-char IOvolsmoke_revision[]="$Revision: 22625 $";
-
 #include "options.h"
 #include "glew.h"
 #include <stdio.h>  

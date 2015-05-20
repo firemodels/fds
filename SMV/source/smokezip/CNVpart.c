@@ -1,10 +1,5 @@
-// $Date: 2014-11-13 17:12:08 -0500 (Thu, 13 Nov 2014) $ 
-// $Revision: 20938 $
-// $Author: gforney $
-
 #include "options.h"
-// svn revision character string
-char CNVpart_revision[]="$Revision: 20938 $";
+
 #ifdef pp_PART
 #include "zlib.h"
 #include <stdio.h>

@@ -1,7 +1,3 @@
-// $Date: 2015-05-20 16:50:12 -0400 (Wed, 20 May 2015) $ 
-// $Revision: 22691 $
-// $Author: gforney $
-
 #define INMAIN
 #include "options.h"
 #include <stdio.h>
@@ -14,8 +10,6 @@
 #include "datadefs.h"
 
 // dummy change to bump version to 1.0
-
-char main_revision[]="$Revision: 22691 $";
 
 #define BUFFER_SIZE 10050
 
