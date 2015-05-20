@@ -1,7 +1,3 @@
-// $Date$ 
-// $Revision$
-// $Author$
-
 // convert the Linux/OSX script containing a list FDS cases 
 // to an equivalent Windows bat version 
 
