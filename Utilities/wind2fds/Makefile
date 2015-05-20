@@ -1,8 +1,8 @@
 SOURCE_DIR = ../../../SMV/source/
 BUILD_DIR = $(SOURCE_DIR)/../Build
 LIB_DIR = $(BUILD_DIR)/LIBS
-INC2_DIR = -I $(SOURCE_DIR)/include2  -I $(SOURCE_DIR)/shared -I $(SOURCE_DIR)/wind2fds 
-INC_DIR =  -I $(SOURCE_DIR)/include -I $(SOURCE_DIR)/shared -I $(SOURCE_DIR)/wind2fds 
+INC2_DIR = -I $(SOURCE_DIR)/include2 -I $(SOURCE_DIR)/shared -I $(SOURCE_DIR)/wind2fds 
+INC_DIR =  -I $(SOURCE_DIR)/include  -I $(SOURCE_DIR)/shared -I $(SOURCE_DIR)/wind2fds 
 FILTERC =
 FILTERF =
 
