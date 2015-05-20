@@ -1,6 +1,6 @@
-// $Date$ 
-// $Revision$
-// $Author$
+// $Date: 2014-11-17 22:45:31 -0500 (Mon, 17 Nov 2014) $ 
+// $Revision: 21005 $
+// $Author: gforney $
 
 #ifndef SMOKEFORTHEADERS_H_DEFINED
 #define SMOKEFORTHEADERS_H_DEFINED

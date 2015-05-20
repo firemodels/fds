@@ -1,6 +1,6 @@
-// $Date$ 
-// $Revision$
-// $Author$
+// $Date: 2012-09-13 12:38:42 -0400 (Thu, 13 Sep 2012) $ 
+// $Revision: 12611 $
+// $Author: gforney $
 
 #include "options.h"
 #ifdef pp_MEM2
@@ -19,7 +19,7 @@ static int checkmemoryflag=1;
 #endif
 
 // svn revision character string
-char dmalloc_revision[]="$Revision$";
+char dmalloc_revision[]="$Revision: 12611 $";
 
 #ifdef pp_memstatus
 #ifdef WIN32

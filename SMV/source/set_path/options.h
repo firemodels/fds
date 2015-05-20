@@ -1,6 +1,6 @@
-// $Date$ 
-// $Revision$
-// $Author$
+// $Date: 2014-07-15 14:09:25 -0400 (Tue, 15 Jul 2014) $ 
+// $Revision: 19931 $
+// $Author: gforney $
 
 #define _CRT_SECURE_NO_DEPRECATE
 #define _CRT_SECURE_NO_WARNING

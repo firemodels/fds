@@ -1,6 +1,6 @@
-// $Date$ 
-// $Revision$
-// $Author$
+// $Date: 2015-03-20 15:04:04 -0400 (Fri, 20 Mar 2015) $ 
+// $Revision: 22053 $
+// $Author: gforney $
 #ifndef PRAGMAS_H_DEFINED
 #define PRAGMAS_H_DEFINED
 #ifdef pp_INTEL

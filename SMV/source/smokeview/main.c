@@ -1,9 +1,9 @@
-// $Date$ 
-// $Revision$
-// $Author$
+// $Date: 2015-04-28 14:58:18 -0400 (Tue, 28 Apr 2015) $ 
+// $Revision: 22541 $
+// $Author: gforney $
 
 // svn revision character string
-char main_revision[]="$Revision$";
+char main_revision[]="$Revision: 22541 $";
 
 #define INMAIN
 #include "options.h"

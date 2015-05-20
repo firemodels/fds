@@ -1,6 +1,6 @@
-// $Date$ 
-// $Revision$
-// $Author$
+// $Date: 2012-08-20 19:39:01 -0400 (Mon, 20 Aug 2012) $ 
+// $Revision: 12156 $
+// $Author: koverholt $
 
 #include "options.h"
 #include <stdio.h>
@@ -15,7 +15,7 @@
 #include "ASSERT.h"
 
 // svn revision character string
-char utilities_revision[]="$Revision$";
+char utilities_revision[]="$Revision: 12156 $";
 
 /* ------------------ usage ------------------------ */
 

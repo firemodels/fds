@@ -1,6 +1,6 @@
-// $Date$ 
-// $Revision$
-// $Author$
+// $Date: 2014-04-24 18:22:30 -0400 (Thu, 24 Apr 2014) $ 
+// $Revision: 19049 $
+// $Author: gforney $
 
 #ifndef IOVOLSMOKE_H_DEFINED
 #define IOVOLSMOKE_H_DEFINED

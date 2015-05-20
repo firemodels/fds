@@ -1,6 +1,6 @@
-// $Date$ 
-// $Revision$
-// $Author$
+// $Date: 2014-11-13 23:42:41 -0500 (Thu, 13 Nov 2014) $ 
+// $Revision: 20944 $
+// $Author: gforney $
 
 #include "options.h"
 #include "zlib.h"
@@ -14,7 +14,7 @@
 #include "compress.h"
 
 // svn revision character string
-char CNVslice_revision[]="$Revision$";
+char CNVslice_revision[]="$Revision: 20944 $";
 
 void mt_update_slice_hist(void);
 

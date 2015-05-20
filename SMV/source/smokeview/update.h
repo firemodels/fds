@@ -1,6 +1,6 @@
-// $Date$ 
-// $Revision$
-// $Author$
+// $Date: 2015-03-18 13:18:01 -0400 (Wed, 18 Mar 2015) $ 
+// $Revision: 22023 $
+// $Author: gforney $
 #ifndef UPDATE_H_DEFINED
 #define UPDATE_H_DEFINED
 #ifdef IN_UPDATE

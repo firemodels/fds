@@ -1,13 +1,13 @@
-// $Date$ 
-// $Revision$
-// $Author$
+// $Date: 2015-03-18 13:18:01 -0400 (Wed, 18 Mar 2015) $ 
+// $Revision: 22023 $
+// $Author: gforney $
 
 #define CPP
 #include "options.h"
 
 // svn revision character string
 extern "C" char glui_colorbar_revision[];
-char glui_colorbar_revision[]="$Revision$";
+char glui_colorbar_revision[]="$Revision: 22023 $";
 
 #include <stdio.h>
 #include <string.h>

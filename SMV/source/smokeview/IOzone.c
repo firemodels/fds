@@ -1,9 +1,9 @@
-// $Date$ 
-// $Revision$
-// $Author$
+// $Date: 2015-04-16 22:07:09 -0400 (Thu, 16 Apr 2015) $ 
+// $Revision: 22416 $
+// $Author: gforney $
 
 // svn revision character string
-char IOzone_revision[]="$Revision$";
+char IOzone_revision[]="$Revision: 22416 $";
 
 #include "options.h"
 #include <stdio.h>  

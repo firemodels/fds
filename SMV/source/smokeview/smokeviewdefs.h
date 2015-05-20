@@ -1,6 +1,6 @@
-// $Date$ 
-// $Revision$
-// $Author$
+// $Date: 2015-05-07 14:55:34 -0400 (Thu, 07 May 2015) $ 
+// $Revision: 22638 $
+// $Author: gforney $
 
 #ifndef SMOKEVIEWDEFS_H_DEFINED
 #define SMOKEVIEWDEFS_H_DEFINED

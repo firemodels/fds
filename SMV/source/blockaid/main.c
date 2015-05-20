@@ -1,6 +1,6 @@
-// $Date$ 
-// $Revision$
-// $Author$
+// $Date: 2012-08-20 19:39:01 -0400 (Mon, 20 Aug 2012) $ 
+// $Revision: 12156 $
+// $Author: koverholt $
 
 #define INMAIN
 #include <stdio.h>
@@ -12,7 +12,7 @@
 #include "MALLOC.h"
 
 // svn revision character string
-char main_revision[]="$Revision$";
+char main_revision[]="$Revision: 12156 $";
 
 /* ------------------ main ------------------------ */
 

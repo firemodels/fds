@@ -1,6 +1,6 @@
-// $Date$ 
-// $Revision$
-// $Author$
+// $Date: 2015-02-24 22:18:52 -0500 (Tue, 24 Feb 2015) $ 
+// $Revision: 21816 $
+// $Author: gforney $
 
 #include "options.h"
 #include <stdio.h>
@@ -11,7 +11,7 @@
 #include "MALLOC.h"
 
 // svn revision character string
-char readsmv_revision[]="$Revision$";
+char readsmv_revision[]="$Revision: 21816 $";
 
 /* ------------------ readsmv ------------------------ */
 

@@ -1,6 +1,6 @@
-! $Date$ 
-! $Revision$
-! $Author$
+! $Date: 2015-04-29 15:16:22 -0400 (Wed, 29 Apr 2015) $ 
+! $Revision: 22563 $
+! $Author: gforney $
 
 !  ------------------ getembeddatasize ------------------------ 
 

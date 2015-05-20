@@ -1,9 +1,9 @@
-// $Date$ 
-// $Revision$
-// $Author$
+// $Date: 2015-04-27 17:03:53 -0400 (Mon, 27 Apr 2015) $ 
+// $Revision: 22530 $
+// $Author: gforney $
 
 // svn revision character string
-char interp_revision[]="$Revision$";
+char interp_revision[]="$Revision: 22530 $";
 
 #include "options.h"
 #include <stdio.h>

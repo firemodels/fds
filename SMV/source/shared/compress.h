@@ -1,6 +1,6 @@
-// $Date$ 
-// $Revision$
-// $Author$
+// $Date: 2014-02-14 22:53:03 -0500 (Fri, 14 Feb 2014) $ 
+// $Revision: 18397 $
+// $Author: gforney $
 
 #ifndef COMPRESS_H_DEFINED
 #define COMPRESS_H_DEFINED

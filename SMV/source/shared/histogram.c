@@ -1,11 +1,11 @@
-// $Date$ 
-// $Revision$
-// $Author$
+// $Date: 2015-03-20 15:04:04 -0400 (Fri, 20 Mar 2015) $ 
+// $Revision: 22053 $
+// $Author: gforney $
 
 #include "lint.h"
 
 // svn revision character string
-char histogram_revision[]="$Revision$";
+char histogram_revision[]="$Revision: 22053 $";
 
 #include <sys/stat.h>
 #include <stdio.h>

@@ -1,9 +1,9 @@
-// $Date$ 
-// $Revision$
-// $Author$
+// $Date: 2015-02-10 20:12:38 -0500 (Tue, 10 Feb 2015) $ 
+// $Revision: 21706 $
+// $Author: gforney $
 
 // svn revision character string
-char compress3dc_revision[]="$Revision$";
+char compress3dc_revision[]="$Revision: 21706 $";
 
 #include "options.h"
 #ifdef WIN32

@@ -1,9 +1,9 @@
-// $Date$ 
-// $Revision$
-// $Author$
+// $Date: 2015-05-01 10:48:00 -0400 (Fri, 01 May 2015) $ 
+// $Revision: 22577 $
+// $Author: gforney $
 
 // svn revision character string
-char IOslice_revision[]="$Revision$";
+char IOslice_revision[]="$Revision: 22577 $";
 
 #include "options.h"
 #include "glew.h"

@@ -1,6 +1,6 @@
-// $Date$ 
-// $Revision$
-// $Author$
+// $Date: 2014-11-13 17:12:08 -0500 (Thu, 13 Nov 2014) $ 
+// $Revision: 20938 $
+// $Author: gforney $
 
 #include "options.h"
 #include "zlib.h"
@@ -13,7 +13,7 @@
 #include "MALLOC.h"
 
 // svn revision character string
-char CNVplot3d_revision[]="$Revision$";
+char CNVplot3d_revision[]="$Revision: 20938 $";
 
 
 #define FORTgetplot3dq _F(getplot3dq)

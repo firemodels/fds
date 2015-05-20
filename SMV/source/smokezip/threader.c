@@ -1,6 +1,6 @@
-// $Date$ 
-// $Revision$
-// $Author$
+// $Date: 2013-03-23 11:35:21 -0400 (Sat, 23 Mar 2013) $ 
+// $Revision: 15241 $
+// $Author: gforney $
 #define INTHREADER
 #include "options.h"
 #include <stdlib.h>
@@ -10,7 +10,7 @@
 #include "svzip.h"
 
 // svn revision character string
-char threader_revision[]="$Revision$";
+char threader_revision[]="$Revision: 15241 $";
 
 
 /* ------------------ mt_compress_all ------------------------ */

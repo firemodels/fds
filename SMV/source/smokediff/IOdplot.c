@@ -1,6 +1,6 @@
-// $Date$ 
-// $Revision$
-// $Author$
+// $Date: 2014-06-11 22:12:11 -0400 (Wed, 11 Jun 2014) $ 
+// $Revision: 19605 $
+// $Author: gforney $
 
 #include "options.h"
 #include <stdio.h>
@@ -13,7 +13,7 @@
 #include "file_util.h"
 
 // svn revision character string
-char IOdplot_revision[]="$Revision$";
+char IOdplot_revision[]="$Revision: 19605 $";
 
 /* ------------------ setup_plot3d ------------------------ */
 

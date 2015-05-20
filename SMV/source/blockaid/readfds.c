@@ -1,6 +1,6 @@
-// $Date$ 
-// $Revision$
-// $Author$
+// $Date: 2012-09-13 12:38:42 -0400 (Thu, 13 Sep 2012) $ 
+// $Revision: 12611 $
+// $Author: gforney $
 
 #include "options.h"
 #include <stdio.h>
@@ -14,7 +14,7 @@
 
 // svn revision character string
 void init_boundbox0(void);
-char readfds_revision[]="$Revision$";
+char readfds_revision[]="$Revision: 12611 $";
 int compare( const void *arg1, const void *arg2 );
 int read_pass1(char *fdsfile, int recurse_level);
 void expand_shell(FILE *stream_out, char *buffer);

@@ -1,6 +1,6 @@
-// $Date$ 
-// $Revision$
-// $Author$
+// $Date: 2015-01-13 15:41:04 -0500 (Tue, 13 Jan 2015) $ 
+// $Revision: 21372 $
+// $Author: gforney $
 
 #ifndef HISTOGRAM_H_DEFINED
 #define HISTOGRAM_H_DEFINED

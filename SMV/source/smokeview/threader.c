@@ -1,9 +1,9 @@
-// $Date$ 
-// $Revision$
-// $Author$
+// $Date: 2015-03-27 21:13:06 -0400 (Fri, 27 Mar 2015) $ 
+// $Revision: 22149 $
+// $Author: gforney $
 
 // svn revision character string
-char threader_revision[]="$Revision$";
+char threader_revision[]="$Revision: 22149 $";
 
 #define INTHREADER
 #include "options.h"

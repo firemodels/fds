@@ -1,9 +1,9 @@
-// $Date$ 
-// $Revision$
-// $Author$
+// $Date: 2013-05-08 13:40:28 -0400 (Wed, 08 May 2013) $ 
+// $Revision: 15782 $
+// $Author: gforney $
 
 // svn revision character string
-char camera_revision[]="$Revision$";
+char camera_revision[]="$Revision: 15782 $";
 
 #include "options.h"
 #include <stdlib.h>

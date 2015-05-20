@@ -1,6 +1,6 @@
-// $Date$ 
-// $Revision$
-// $Author$
+// $Date: 2014-11-15 15:24:27 -0500 (Sat, 15 Nov 2014) $ 
+// $Revision: 20970 $
+// $Author: gforney $
 #ifndef OPTIONS_H_DEFINED
 #define OPTIONS_H_DEFINED
 
