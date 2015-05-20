@@ -112,7 +112,6 @@ typedef struct {
 //************************** headers ****************************************
 
 int getendian(void);
-int getmaxrevision(void);
 void version(void);
 void usage(void);
 int mesh_match(mesh *mesh1, mesh *mesh2);

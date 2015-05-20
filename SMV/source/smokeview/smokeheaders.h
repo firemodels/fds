@@ -748,7 +748,6 @@ EXTERNCPP void Visible(int state);
 EXTERNCPP void parse_commandline(int argc, char **argv);
 EXTERNCPP void usage(char **argv);
 EXTERNCPP void display_version_info(void);
-EXTERNCPP int getmaxrevision(void);
 EXTERNCPP void draw_demo(int nlat, int nlong);
 EXTERNCPP void draw_demo2(int option);
 EXTERNCPP void init_demo(float rad, int nlat, int nlong);

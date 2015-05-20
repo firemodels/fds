@@ -11,7 +11,6 @@
 #include <process.h>
 #include <windows.h>
 #endif
-#include "svn_revision.h"
 #include "string_util.h"
 #include "background.h"
 #include "datadefs.h"
@@ -303,14 +302,14 @@ int main(int argc, char **argv){
 
 void usage(char *prog){
   char prog_version[100];
-  int svn_num;
-  char pp[]="%";
+  char revision[100];
+  char pp[] = "%";
 
   getPROGversion(prog_version);  // get version (ie 5.x.z)
-  svn_num=getmaxrevision();    // get svn revision number
+  getRevision(revision);    // get svn revision number
 
   printf("\n");
-  printf("background %s(%i) - %s\n",prog_version,svn_num,__DATE__);
+  printf("background %s(%s) - %s\n",prog_version,revision,__DATE__);
   printf("  Runs a program in the background when resources are available\n\nUsage:\n\n");
   printf("  %s",prog);
   printf(" [-d delay time (s) -h -u max_usage -v] prog [arguments]\n\n");
@@ -642,22 +641,13 @@ unsigned char cpuusage(){
 
 void version(void){
     char smv_version[100];
-    int svn_num;
+    char revision[100];
 
     getPROGversion(smv_version);  // get Smokeview version (ie 5.x.z)
-    svn_num=getmaxrevision();    // get svn revision number
+    getRevision(revision);    // get svn revision number
     printf("\n");
     printf("background\n\n");
     printf("Version: %s\n",smv_version);
-    printf("SVN Revision Number: %i\n",svn_num);
+    printf("Revision: %s\n",revision);
     printf("Compile Date: %s\n",__DATE__);
-}
-
-/* ------------------ getmaxrev ------------------------ */
-
-int getmaxrevision(void){
-  int max_revision=0,rev;
-
-  MAXREV(main_revision);
-  return max_revision;
 }

@@ -15,7 +15,6 @@ char startup_revision[]="$Revision$";
 
 #include "smokeviewvars.h"
 #include "update.h"
-#include "svn_revision.h"
 
 /* ------------------ Init ------------------------ */
 
@@ -1295,7 +1294,7 @@ void initvars(void){
   avatar_colors=NULL;
   view_from_selected_avatar=0;
   revision_fds=-1;
-  revision_smv=getmaxrevision();
+  getRevision(revision_smv);
   force_isometric=0;
   cb_valmin=0.0;
   cb_valmax=100.0;
@@ -1925,10 +1924,8 @@ void initvars(void){
   {
     char version[100];
     char svn_version[100];
-    int svn_num;
 
-    svn_num=getmaxrevision();    // get svn revision number
-    sprintf(svn_version,"%i",svn_num); // convert svn revision number to a character string
+    getRevision(svn_version);    // get svn revision number
 
 // construct string of the form:
 //   5.x.y_#
@@ -2181,79 +2178,6 @@ void initvars(void){
       p3chopmax[iii]=0.0f;
     }
   }
-}
-
-/* ------------------ getmaxrevision ------------------------ */
-
-int getmaxrevision(void){
-  int max_revision=0,rev;
-
-  MAXREV(assert_revision);
-  MAXREV(callbacks_revision);
-  MAXREV(camera_revision);
-  MAXREV(colortimebar_revision);
-  MAXREV(compress3dc_revision);
-  MAXREV(compress_revision);
-  MAXREV(csphere_revision);
-  MAXREV(dmalloc_revision);
-  MAXREV(drawGeometry_revision);
-  MAXREV(file_util_revision);
-  MAXREV(geometry_revision);
-  MAXREV(getdatabounds_revision);
-  MAXREV(getdatacolors_revision);
-  MAXREV(glui_3dsmoke_revision);
-  MAXREV(glui_blockedit_revision);
-  MAXREV(glui_bounds_revision);
-  MAXREV(glui_clip_revision);
-  MAXREV(glui_colorbar_revision);
-  MAXREV(glui_devices_revision);
-  MAXREV(glui_display_revision);
-  MAXREV(glui_motion_revision);
-  MAXREV(glui_shooter_revision);
-  MAXREV(glui_stereo_revision);
-  MAXREV(glui_tour_revision);
-  MAXREV(glui_trainer_revision);
-  MAXREV(glui_wui_revision);
-  MAXREV(histogram_revision);
-  MAXREV(interp_revision);
-
-  MAXREV(IOboundary_revision);
-  MAXREV(IOgeometry_revision);
-  MAXREV(IOhrr_revision);
-  MAXREV(IOiso_revision);
-  MAXREV(IOobject_revision);
-  MAXREV(IOpart_revision);
-  MAXREV(IOplot3d_revision);
-  MAXREV(IOscript_revision);
-  MAXREV(IOshooter_revision);
-  MAXREV(IOslice_revision);
-  MAXREV(IOsmoke_revision);
-  MAXREV(IOtarget_revision);
-  MAXREV(IOtour_revision);
-  MAXREV(IOvolsmoke_revision);
-  MAXREV(IOwui_revision);
-  MAXREV(IOzone_revision);
-  MAXREV(isobox_revision);
-  MAXREV(main_revision);
-  MAXREV(menu_revision);
-  MAXREV(output_revision);
-  MAXREV(readsmv_revision);
-  MAXREV(renderfile_revision);
-  MAXREV(scontour2d_revision);
-  MAXREV(shaders_revision);
-  MAXREV(showscene_revision);
-  MAXREV(skybox_revision);
-  MAXREV(smokeview_revision);
-  MAXREV(smv_endian_revision);
-  MAXREV(smv_geometry_revision);
-  MAXREV(startup_revision);
-  MAXREV(string_util_revision);
-  MAXREV(threader_revision);
-  MAXREV(translate_revision);
-  MAXREV(unit_revision);
-  MAXREV(update_revision);
-  MAXREV(viewports_revision);
-  return max_revision;
 }
 
 /* ------------------ copy_args ------------------------ */

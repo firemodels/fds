@@ -12402,16 +12402,16 @@ void writeini(int flag,char *filename){
     flag == LOCAL_INI))output_viewpoints(fileout);
 
   {
-    int svn_num;
     char version[256];
+    char revision[256];
 
     getPROGversion(version);
-    svn_num=getmaxrevision();    // get svn revision number
+    getRevision(revision);    // get svn revision number
     fprintf(fileout,"\n\n");
     fprintf(fileout,"# FDS/Smokeview Environment\n");
     fprintf(fileout,"# -------------------------\n\n");
     fprintf(fileout,"# Smokeview Version: %s\n",version);
-    fprintf(fileout,"# Smokeview Revision Number: %i\n",svn_num);
+    fprintf(fileout,"# Smokeview Revision Number: %s\n",revision);
     fprintf(fileout,"# Smokeview Build Date: %s\n",__DATE__);
     if(revision_fds>0){
       fprintf(fileout,"# FDS Revision Number: %i\n",revision_fds);

@@ -648,18 +648,18 @@ void parse_commandline(int argc, char **argv){
 /* ------------------ version ------------------------ */
 
 void display_version_info(void){
-    int svn_num;
     char version[256];
+    char revision[256];
 
     getPROGversion(version);
-    svn_num=getmaxrevision();    // get svn revision number
+    getRevision(revision);    // get svn revision number
     PRINTF("\n");
     PRINTF("%s\n\n",TITLERELEASE);
     PRINTF("Version: %s\n",version);
 #ifdef BIT64
-    PRINTF("Smokeview (64 bit) Revision Number: %i\n",svn_num);
+    PRINTF("Smokeview (64 bit) Revision Number: %s\n",revision);
 #else
-    PRINTF("Smokeview (32 bit) Revision Number: %i\n",svn_num);
+    PRINTF("Smokeview (32 bit) Revision Number: %s\n",revision);
 #endif
 #ifdef WIN32
 #ifdef X64

@@ -132,25 +132,27 @@ int getrowcols(FILE *stream, int *nrows, int *ncols){
   return maxlinelength;
 }
 
-/* ------------------ getrevision ------------------------ */
+/* ------------------ getRevision ------------------------ */
 
-int getrevision(char *svn){
-  char svn_string[256];
-  char *svn_ptr;
-  int return_val;
+void getRevision(char *revision){
+  char rev[256], *beg=NULL, *end=NULL;
 
-  svn_ptr=svn_string;
-  svn=strchr(svn,':');
-  if(svn==NULL||strlen(svn)<=4)return 0;
-  
-  svn++;
-  strcpy(svn_ptr,svn);
-  svn_ptr=trim_front(svn_ptr);
-  svn_ptr[strlen(svn_ptr)-1]=0;
-  trim(svn_ptr);
-  sscanf(svn_ptr,"%i",&return_val);
-  return return_val;
+  strcpy(rev,"$Revision$");
+  beg = strchr(rev,':');
+  if(beg!=NULL){
+    beg=trim_front(beg+1);
+    end = strchr(beg,'$');
+  }
+  if(end==NULL){
+    strcpy(revision,"unknown");
+  }
+  else{
+    *end=0;
+    trim(beg);
+    strcpy(revision,beg);
+  }
 }
+
 
 /* ------------------ stripquotes ------------------------ */
 

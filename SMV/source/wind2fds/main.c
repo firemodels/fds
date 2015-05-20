@@ -7,7 +7,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "svn_revision.h"
 #include "datadefs.h"
 #include "string_util.h"
 #include "file_util.h"
@@ -20,9 +19,9 @@ char main_revision[]="$Revision$";
 
 void usage(char *prog);
 void version(char *prog);
-int getmaxrevision(void);
+void getRevision(char *revision);
 
-/* ------------------ gettokrns ------------------------ */
+/* ------------------ gettokens ------------------------ */
 
 int gettokens(char *tokens, char **tokenptrs){
   int ntokenptrs;
@@ -494,15 +493,15 @@ int main(int argc, char **argv){
 
 void usage(char *prog){
   char prog_version[100];
-  int svn_num;
+  char revision[100];
   char buffer[1024];
 
   getPROGversion(prog_version);  // get version (ie 5.x.z)
-  svn_num=getmaxrevision();    // get svn revision number
+  getRevision(revision);    // get svn revision number
 
   printf("\n");
-  printf("wind2fds %s(%i) - %s\n",prog_version,svn_num,__DATE__);
-  printf("  Convert spreadheets containing wind data to files compatible with Smokeview:\n\n");
+  printf("wind2fds %s(%s) - %s\n",prog_version,revision,__DATE__);
+  printf("  Convert spreadsheets containing wind data to files compatible with Smokeview:\n\n");
   printf("  %s",get_basefilename(buffer,prog));
   printf(" prog [-prefix label] [-offset x y z] datafile\n\n");
 
@@ -525,22 +524,13 @@ void usage(char *prog){
 
 void version(char *prog){
     char version_local[100];
-    int svn_num;
+    char revision[100];
 
     getPROGversion(version_local);  // get Smokeview version (ie 5.x.z)
-    svn_num=getmaxrevision();    // get svn revision number
+    getRevision(revision);    // get svn revision number
     printf("\n");
     printf("%s\n\n",prog);
     printf("Version: %s\n",version_local);
-    printf("SVN Revision Number: %i\n",svn_num);
+    printf("Revision: %s\n",revision);
     printf("Compile Date: %s\n",__DATE__);
-}
-
-/* ------------------ getmaxrev ------------------------ */
-
-int getmaxrevision(void){
-  int max_revision=0,rev;
-
-  MAXREV(main_revision);
-  return max_revision;
 }

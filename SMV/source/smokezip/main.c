@@ -540,13 +540,13 @@ void makesvd(char *in_dir, char *smvfile){
 void usage(char *prog){
   char smv_version[100];
   char buffer[1000];
-  int svn_num;
+  char revision[256];
 
   getPROGversion(smv_version);  // get Smokeview version (ie 5.x.z)
-  svn_num=getmaxrevision();    // get svn revision number
+  getRevision(revision);    // get svn revision number
 
   PRINTF("\n");
-  PRINTF("  smokezip %s(%i) - %s\n\n",smv_version,svn_num,__DATE__);
+  PRINTF("  smokezip %s(%s) - %s\n\n",smv_version,revision,__DATE__);
   PRINTF("  Compress FDS data files\n\n");
   PRINTF("  %s [options] casename\n\n",get_basefilename(buffer,prog));
   PRINTF("  casename - Smokeview .smv file for case to be compressed\n\n");

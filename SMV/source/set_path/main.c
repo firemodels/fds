@@ -10,7 +10,6 @@
 #include <windows.h>
 #include <ctype.h>
 #include "ASSERT.h"
-#include "svn_revision.h"
 #include "string_util.h"
 #include "datadefs.h"
 
@@ -396,27 +395,27 @@ int reg_path(int setget, int pathtype, char *path){
 /* ------------------ version ------------------------ */
 
 void version(void){
-    int svn_num;
-    char version[256];
+  char revision[256];
+  char version[256];
 
     getPROGversion(version);
 
-    svn_num=getmaxrevision();    // get svn revision number
+    getRevision(revision);    // get svn revision number
     printf("\n");
     printf("set_path %s - %s\n\n",version,__DATE__);
     printf("Version: %s\n",version);
-    printf("Revision Number: %i\n",svn_num);
+    printf("Revision: %s\n",revision);
     printf("Build Date: %s\n",__DATE__);
 }
 
 /* ------------------ usage ------------------------ */
 
 void usage(void){
-  int max_revision;
+  char revision[100];
 
-  max_revision = getmaxrevision();
+  getRevision(revision);
 
-  printf("set_path SVN:revision:%i\n",max_revision);
+  printf("set_path Revision:%s\n",revision);
   printf("  Modify or display the User or System path environmental variables.\n\n");
   printf("Usage:\n\n");
   printf("  set_path [-s][-u] [-a path_entry] [-r path_entry] [-d][-p][-v]\n\n");
@@ -433,13 +432,4 @@ void usage(void){
   printf("  -p - prompt user before making any changes (default when path entries are being removed)\n");
   printf("  -t - test, show but do not change Path variables\n");
   printf("  -v - show versioning information\n");
-}
-
-/* ------------------ getmaxrev ------------------------ */
-
-int getmaxrevision(void){
-  int max_revision=0,rev;
-
-  MAXREV(main_revision);
-  return max_revision;
 }

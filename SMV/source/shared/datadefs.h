@@ -240,8 +240,4 @@
 #define IJ2(i,j) ((nycell+1)*(i) + (j))
 #endif
 
-#ifndef MAXREV
-#define MAXREV(cval) rev=getrevision(cval);max_revision=MAX(rev,max_revision)
-#endif
-
 #endif

@@ -12,7 +12,6 @@
 #include "svzip.h"
 #include "MALLOC.h"
 #include "datadefs.h"
-#include "svn_revision.h"
 
 // svn revision character string
 char utilities_revision[]="$Revision$";
@@ -69,14 +68,14 @@ void Normal(unsigned short *v1, unsigned short *v2, unsigned short *v3, float *n
 
 void version(void){
     char smv_version[100];
-    int svn_num;
+    char revision[100];
 
     getPROGversion(smv_version);  // get Smokeview version (ie 5.x.z)
-    svn_num=getmaxrevision();    // get svn revision number
+    getRevision(revision);    // get svn revision number
     PRINTF("\n");
     PRINTF("Smokezip\n\n");
     PRINTF("Version: %s\n",smv_version);
-    PRINTF("SVN Revision Number: %i\n",svn_num);
+    PRINTF("Revision: %s\n",revision);
     PRINTF("Compile Date: %s\n",__DATE__);
 #ifdef X64
     PRINTF("Platform: WIN64\n");
@@ -103,31 +102,6 @@ void version(void){
     PRINTF("Platform: LINUX64\n");
 #endif
 
-}
-
-/* ------------------ getmaxrevision ------------------------ */
-
-int getmaxrevision(void){
-  int max_revision=0,rev;
-
-  MAXREV(assert_revision);
-  MAXREV(CNV3dsmoke_revision);
-  MAXREV(CNVboundary_revision);
-  MAXREV(CNVpart_revision);
-  MAXREV(CNVplot3d_revision);
-  MAXREV(CNVslice_revision);
-  MAXREV(csphere_revision);
-  MAXREV(dmalloc_revision);
-  MAXREV(histogram_revision); //
-  MAXREV(isobox_revision); //
-  MAXREV(lightsmoke_revision); //
-  MAXREV(main_revision);
-  MAXREV(readfiles_revision);
-  MAXREV(smv_endian_revision);
-  MAXREV(string_util_revision);
-  MAXREV(threader_revision);
-  MAXREV(utilities_revision);
-  return max_revision;
 }
 
 /* ------------------ atan3 ------------------------ */

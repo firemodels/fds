@@ -269,14 +269,14 @@ int main(int argc, char **argv){
 
 void usage(void){
   char smv_version[100];
-  int svn_num;
+  char revision[100];
 
   getPROGversion(smv_version);  // get Smokeview version (ie 5.x.z)
-  svn_num=getmaxrevision();    // get svn revision number
+  getRevision(revision);    // get svn revision number
 
   PRINTF("\n");
   PRINTF("  smokediff [options] smv_case1 smv_case2\n");
-  PRINTF("    version: %s (revision %i) - %s\n\n",smv_version,svn_num,__DATE__);
+  PRINTF("    version: %s (revision %s) - %s\n\n",smv_version,revision,__DATE__);
 
   PRINTF("  smokediff compares two FDS cases by subtracting data referenced in smv_case2 from\n");
   PRINTF("  corresponding data referenced in smv_case1 (smv_case1 - smv_case2).  Slice, PLOT3d\n");

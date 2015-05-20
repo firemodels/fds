@@ -7,7 +7,6 @@
 #define EXTERN extern
 #endif
 
-int getmaxrevision(void);
 void version(void);
 int getrevision(char *svn);
 char *hostlistfile;

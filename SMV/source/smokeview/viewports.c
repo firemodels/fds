@@ -779,9 +779,9 @@ void TITLE_viewport(int quad, GLint screen_left, GLint screen_down){
     }
     outputText(left,smv_top2,TITLE);
 #ifdef BIT64
-    sprintf(label,"Smokeview (64 bit) revision:%i",revision_smv);
+    sprintf(label,"Smokeview (64 bit) revision: %s",revision_smv);
 #else
-    sprintf(label,"Smokeview (32 bit) revision:%i",revision_smv);
+    sprintf(label,"Smokeview (32 bit) revision: %s",revision_smv);
 #endif
     outputText(left,smv_top,label);
     if(revision_fds>0){

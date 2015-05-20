@@ -9,7 +9,6 @@
 #include <string.h>
 #include <math.h>
 #include "svdiff.h"
-#include "svn_revision.h"
 #include "MALLOC.h"
 #include "datadefs.h"
 
@@ -40,14 +39,14 @@ int mesh_match(mesh *mesh1, mesh *mesh2){
 
 void version(void){
     char smv_version[100];
-    int svn_num;
+    char revision[100];
 
     getPROGversion(smv_version);  // get Smokeview version (ie 5.x.z)
-    svn_num=getmaxrevision();    // get svn revision number
+    getRevision(revision);    // get svn revision number
     PRINTF("\n");
     PRINTF("Smokediff\n\n");
     PRINTF("Version: %s\n",smv_version);
-    PRINTF("SVN Revision Number: %i\n",svn_num);
+    PRINTF("Revision: %s\n",revision);
     PRINTF("Compile Date: %s\n",__DATE__);
 #ifdef X64
     PRINTF("Platform: WIN64\n");
@@ -75,23 +74,6 @@ void version(void){
 #endif
 
 
-}
-
-/* ------------------ getmaxrev ------------------------ */
-
-int getmaxrevision(void){
-  int max_revision=0,rev;
-
-  MAXREV(main_revision);
-  MAXREV(utilities_revision);
-  MAXREV(readsmv_revision);
-  MAXREV(dmalloc_revision);
-  MAXREV(assert_revision);
-  MAXREV(IOdslice_revision);
-  MAXREV(IOdboundary_revision);
-  MAXREV(IOdplot_revision);
-  MAXREV(histogram_revision);
-  return max_revision;
 }
 
 /* ------------------ similar_grid ------------------------ */
