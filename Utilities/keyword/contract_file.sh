@@ -3,7 +3,7 @@
 # contract keywords Revision, RevisionDate and CompileDate in file
 
 if [ $# -lt 1 ]; then
-  echo usage: contract_file file
+  echo usage: contract_file bindir file
   echo        contract all occurrences of the keywords Revision, 
   echo        RevisionDate and CompileDate in file
   exit
