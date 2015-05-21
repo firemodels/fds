@@ -15,7 +15,7 @@ set newvalue=%~2
 set file=%3
 
 if NOT exist %file% (
-  exit 1 /b
+  goto eof
 )
 sed -e "s/$%keyword%:.*\$/$%keyword%: %newvalue% $/g" %file% | sed "s/$/\r/" > %temp%\temp.txt
 copy %temp%\temp.txt %file% 1> Nul 2>&1
